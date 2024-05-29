@@ -7,6 +7,7 @@
 # art-include: main/AthSimulation
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
+# art-memory: 2999
 # art-output: *.pool.root
 # art-output: log.*
 # art-output: Config*.pkl

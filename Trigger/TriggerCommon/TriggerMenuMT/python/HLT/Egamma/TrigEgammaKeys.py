@@ -10,13 +10,12 @@ __all__    = [ "getTrigEgammaKeys" ]
 
 
 from TrigEDMConfig.TriggerEDM import recordable
-from AthenaConfiguration.AllConfigFlags import initConfigFlags
-
+from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 
 class TrigEgammaKeysBase(object):
 
       """Base clas to configure TrigEgamma Container names. Containers will be record, collections not"""
-      def __init__(self, ion=False):
+      def __init__(self, flags: AthConfigFlags, ion=False):
 
 
         """Static class to collect all string manipulation in fast electron sequences """
@@ -56,7 +55,7 @@ class TrigEgammaKeysBase(object):
         #
         self.TrigTRTHTCountsContainer                   = recordable("HLT_TrigTRTHTCounts")
         self.egEventShape                               = recordable('HLT_HIEventShapeEG')
-        self._flags = initConfigFlags()
+        self._flags = flags       
 
 
 
@@ -72,8 +71,8 @@ class TrigEgammaKeysBase(object):
 
 class TrigEgammaKeys_LRT(TrigEgammaKeysBase):
     # This class contians modified base configuration class for LRT electron trigger chains
-    def __init__(self,ion):
-        TrigEgammaKeysBase.__init__(self,ion)
+    def __init__(self, flags: AthConfigFlags, ion):
+        TrigEgammaKeysBase.__init__(self, flags, ion)
         
         self.fastTrackingRoIContainer               = recordable("HLT_Roi_FastElectron_LRT")
         self.fastElectronContainer                  = recordable('HLT_FastElectrons_LRT')
@@ -93,8 +92,8 @@ class TrigEgammaKeys_LRT(TrigEgammaKeysBase):
 
 class TrigEgammaKeys_GSF(TrigEgammaKeysBase):
     # This class contians modified base configuration class for GSF electron trigger chains
-    def __init__(self, ion):
-        TrigEgammaKeysBase.__init__(self, ion)
+    def __init__(self, flags: AthConfigFlags, ion):
+        TrigEgammaKeysBase.__init__(self, flags, ion)
         self.precisionElectronEMClusterContainer    = recordable('HLT_TrigEMClusters_Electrons_GSF')
         
         # from HLT_IDTrack_Electron to HLT_IDTrack_Electron by refit alg
@@ -112,8 +111,8 @@ class TrigEgammaKeys_GSF(TrigEgammaKeysBase):
 
 class TrigEgammaKeys_LRTGSF(TrigEgammaKeysBase):
     # This class contians modified base configuration class for LRT_GSF electron trigger chains
-    def __init__(self, ion):
-        TrigEgammaKeysBase.__init__(self, ion)
+    def __init__(self, flags: AthConfigFlags, ion):
+        TrigEgammaKeysBase.__init__(self, flags, ion)
         self.precisionElectronEMClusterContainer    = recordable('HLT_TrigEMClusters_Electrons_LRTGSF')
         
         # from HLT_IDTrack_Electron to HLT_IDTrack_Electron by refit alg
@@ -133,15 +132,18 @@ class TrigEgammaKeys_LRTGSF(TrigEgammaKeysBase):
 #
 # Get keys from variant name
 #
-def getTrigEgammaKeys(name='', ion=False):
+from AthenaConfiguration.AccumulatorCache import AccumulatorCache
+
+@AccumulatorCache
+def getTrigEgammaKeys(flags: AthConfigFlags, name='', ion=False):
 
     _d = {
         # Dictionary that maps a string to a configuration setting for electron and photon chains
-        ''         : TrigEgammaKeysBase(ion),
-        '_noGSF'   : TrigEgammaKeysBase(ion),
-        '_LRT'     : TrigEgammaKeys_LRT(ion),
-        '_GSF'     : TrigEgammaKeys_GSF(ion),
-        '_LRTGSF'  : TrigEgammaKeys_LRTGSF(ion),
+        ''         : TrigEgammaKeysBase(flags, ion),
+        '_noGSF'   : TrigEgammaKeysBase(flags, ion),
+        '_LRT'     : TrigEgammaKeys_LRT(flags, ion),
+        '_GSF'     : TrigEgammaKeys_GSF(flags, ion),
+        '_LRTGSF'  : TrigEgammaKeys_LRTGSF(flags, ion),
         }
 
     if name in _d.keys():

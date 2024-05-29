@@ -17,8 +17,6 @@
 #include "TrkDetDescrUtils/GeometrySignature.h"
 // Fatras
 #include "ISF_FatrasInterfaces/IPhotonConversionTool.h"
-// Barcode
-#include "BarcodeEvent/PhysicsProcessCode.h"
 
 class TTree;
 
@@ -113,7 +111,7 @@ namespace iFatras {
       ServiceHandle<ISF::ITruthSvc>                m_truthRecordSvc;
       
       /** MCTruth process code for TruthIncidents created by this tool */
-      Barcode::PhysicsProcessCode                  m_processCode;
+      int                  m_processCode;
       
       /** Switch to use reference material */
       bool                                         m_referenceMaterial;

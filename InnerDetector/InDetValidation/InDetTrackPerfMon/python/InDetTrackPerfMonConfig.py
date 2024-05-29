@@ -13,21 +13,74 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.Logging import logging
 
 
+def JsonPlotsDefReadToolCfg( flags, name="JsonPlotsDefReadTool", **kwargs ):
+    '''
+    Tool to read the plots definitions from an input file in JSON format
+    '''
+    log = logging.getLogger( "JsonPlotsDefReadTool" )
+    acc = ComponentAccumulator()
+
+    ## Getting list of strings with plots definitions
+    from InDetTrackPerfMon.ConfigUtils import getPlotsDefList
+    plotsDefList = getPlotsDefList( flags )
+    log.debug( "Loading the following plot definitions:" )
+    for plotDef in plotsDefList : log.debug( "\t-> %s", plotDef )
+
+    kwargs.setdefault( "PlotsDefs", plotsDefList )
+
+    acc.setPrivateTools(
+        CompFactory.IDTPM.JsonPlotsDefReadTool( name, **kwargs ) )
+    return acc
+
+
+def PlotsDefReadToolCfg( flags, name="PlotsDefReadTool", **kwargs ):
+    '''
+    CA-based configuration for the Tool to read the plots definition
+    '''
+    log = logging.getLogger( "PlotsDefReadTool" )
+
+    if flags.PhysVal.IDTPM.plotsDefFormat == "JSON" :
+        return JsonPlotsDefReadToolCfg(
+            flags, name = "JsonPlotsDefReadTool" +
+                flags.PhysVal.IDTPM.currentTrkAna.anaTag, **kwargs )
+
+    log.error( "Non supported plots definition file type %s",
+               flags.PhysVal.IDTPM.plotsDefFormat )
+    return None
+
+
+def PlotsDefinitionSvcCfg( flags, name="PlotsDefSvc", **kwargs ):
+    '''
+    CA-based configuration for the PlotsDefinition Service
+    '''
+    acc = ComponentAccumulator()
+
+    if "PlotsDefReadTool" not in kwargs:
+        kwargs.setdefault( "PlotsDefReadTool", acc.popToolsAndMerge(
+            PlotsDefReadToolCfg( flags ) ) )
+
+    acc.addService(
+        CompFactory.PlotsDefinitionSvc( name, **kwargs ) )
+    return acc
+
+
 def TrackAnalysisDefinitionSvcCfg( flags, name="TrkAnaDefSvc", **kwargs ):
     '''
     CA-based configuration for the TrackAnalysisDefinition Service
     '''
     acc = ComponentAccumulator()
 
+    kwargs.setdefault( "DirName", flags.PhysVal.IDTPM.DirName )
+    kwargs.setdefault( "sortPlotsByChain", flags.PhysVal.IDTPM.sortPlotsByChain )
     kwargs.setdefault( "SubFolder", flags.PhysVal.IDTPM.currentTrkAna.SubFolder )
     kwargs.setdefault( "TrkAnaTag", flags.PhysVal.IDTPM.currentTrkAna.anaTag )
 
     kwargs.setdefault( "TestType", flags.PhysVal.IDTPM.currentTrkAna.TestType )
     kwargs.setdefault( "RefType",  flags.PhysVal.IDTPM.currentTrkAna.RefType )
 
-    ## TODO - to be uncommented in future MRs
-    #kwargs.setdefault( "TestTag", getTrkTag(flags.PhysVal.IDTPM.currentTrkAna.TestType))
-    #kwargs.setdefault( "RefTag",  getTrkTag(flags.PhysVal.IDTPM.currentTrkAna.RefType))
+    from InDetTrackPerfMon.ConfigUtils import getTag
+    kwargs.setdefault( "TestTag", getTag( flags, flags.PhysVal.IDTPM.currentTrkAna.TestType ) )
+    kwargs.setdefault( "RefTag",  getTag( flags, flags.PhysVal.IDTPM.currentTrkAna.RefType ) )
 
     kwargs.setdefault( "MatchingType", flags.PhysVal.IDTPM.currentTrkAna.MatchingType )
 
@@ -35,9 +88,9 @@ def TrackAnalysisDefinitionSvcCfg( flags, name="TrkAnaDefSvc", **kwargs ):
          ( "Trigger" in flags.PhysVal.IDTPM.currentTrkAna.RefType ) ):
         kwargs.setdefault( "ChainNames", flags.PhysVal.IDTPM.currentTrkAna.ChainNames )
 
-    kwargs.setdefault( "doTrackParameters", flags.PhysVal.IDTPM.currentTrkAna.doTrackParameters )
-    kwargs.setdefault( "doEfficiencies", flags.PhysVal.IDTPM.currentTrkAna.doEfficiencies )
-    kwargs.setdefault( "doOfflineElectrons", flags.PhysVal.IDTPM.currentTrkAna.doOfflineElectrons )
+    kwargs.setdefault( "plotTrackParameters", flags.PhysVal.IDTPM.currentTrkAna.plotTrackParameters )
+    kwargs.setdefault( "plotEfficiencies", flags.PhysVal.IDTPM.currentTrkAna.plotEfficiencies )
+    kwargs.setdefault( "plotOfflineElectrons", flags.PhysVal.IDTPM.currentTrkAna.plotOfflineElectrons )
 
     trkAnaSvc = CompFactory.TrackAnalysisDefinitionSvc( name, **kwargs )
     acc.addService( trkAnaSvc )
@@ -50,21 +103,22 @@ def InDetTrackPerfMonToolCfg( flags, name="InDetTrackPerfMonTool", **kwargs ):
     '''
     acc = ComponentAccumulator()
 
-    ## TODO - to be uncommented in future MRs
-    #acc.merge(HistogramDefinitionSvcCfg(flags, name="HistoDefSvc"+
-    #                                flags.PhysVal.IDTPM.currentTrkAna.anaTag))
-
     kwargs.setdefault( "OfflineTrkParticleContainerName",
                        flags.PhysVal.IDTPM.currentTrkAna.OfflineTrkKey )
     kwargs.setdefault( "TruthParticleContainerName",
                        flags.PhysVal.IDTPM.currentTrkAna.TruthPartKey )
 
-    kwargs.setdefault( "DirName", flags.PhysVal.IDTPM.DirName )
     kwargs.setdefault( "AnaTag", flags.PhysVal.IDTPM.currentTrkAna.anaTag )
 
+    ## TrackAnalysisDefinitionSvc
     acc.merge( TrackAnalysisDefinitionSvcCfg( flags,
                    name="TrkAnaDefSvc"+flags.PhysVal.IDTPM.currentTrkAna.anaTag ) )
 
+    ## PlotsDefinitionSvc
+    acc.merge( PlotsDefinitionSvcCfg( flags,
+                    name="PlotsDefSvc"+flags.PhysVal.IDTPM.currentTrkAna.anaTag ) )
+
+    ## now the sub-tools
     if "TrackQualitySelectionTool" not in kwargs:
         from InDetTrackPerfMon.InDetSelectionConfig import TrackQualitySelectionToolCfg
         kwargs.setdefault( "TrackQualitySelectionTool", acc.popToolsAndMerge(

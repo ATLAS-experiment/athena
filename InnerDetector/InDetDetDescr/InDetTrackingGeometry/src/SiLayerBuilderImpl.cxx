@@ -1105,8 +1105,8 @@ InDet::SiLayerBuilderImpl::cylindricalLayersImpl(const InDetDD::SiDetectorElemen
          std::map< const Trk::Surface*,Amg::Vector3D > uniqueSurfaceMap;
          auto usmIter = uniqueSurfaceMap.end();
          // ------- iterate
-         const auto *asurfIter = arraySurfaces.begin();
-         const auto *asurfIterEnd = arraySurfaces.end();
+         auto asurfIter = arraySurfaces.begin();
+         auto asurfIterEnd = arraySurfaces.end();
          for ( ; asurfIter != asurfIterEnd; ++asurfIter){
              if ( (*asurfIter) ) {
                 ++sumCheckBarrelModules;
@@ -1302,8 +1302,8 @@ void InDet::SiLayerBuilderImpl::registerSurfacesToLayer(
       return;
   }
 
-  const auto* laySurfIter = layerSurfaces.begin();
-  const auto *laySurfIterEnd = layerSurfaces.end();
+  auto laySurfIter = layerSurfaces.begin();
+  const auto laySurfIterEnd = layerSurfaces.end();
   // register the surfaces to the layer
   for (; laySurfIter != laySurfIterEnd; ++laySurfIter){
     if (*laySurfIter) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file TrkVKalVrtFitter/src/TrkVKalVrtFitterTestAlg.cxx
@@ -21,6 +21,7 @@
 #include "TestTools/FLOATassert.h"
 #include "GaudiKernel/SystemOfUnits.h"
 #include  "TrkVKalVrtFitter/IVKalState.h" //unique_ptr needs the deleter
+#include "AthContainers/ConstAccessor.h"
 
 #include <cassert>
 #include <cmath>
@@ -181,7 +182,8 @@ void dumpVertex (const xAOD::Vertex& v)
 {
   std::cout << "vvv\n";
   std::cout << v.x() << " " << v.y() << " " << v.z() << "\n";
-  if (v.isAvailable<short> ("vertexType")) {
+  static const SG::ConstAccessor<short> vertexTypeAcc ("vertexType");
+  if (vertexTypeAcc.isAvailable(v)) {
     std::cout << "vertexType " << v.vertexType() << "\n";
   }
   std::cout << "chi2/ndof " << v.chiSquared() << " " << v.numberDoF() << "\n";
@@ -192,7 +194,8 @@ void dumpVertex (const xAOD::Vertex& v)
   }
   std::cout << "\n";
 
-  if (v.isAvailable<std::vector<ElementLink<xAOD::TrackParticleContainer> > > ("trackParticleLinks")) {
+  static const SG::ConstAccessor<std::vector<ElementLink<xAOD::TrackParticleContainer> > > trackParticleLinksAcc ("trackParticleLinks");
+  if (trackParticleLinksAcc.isAvailable(v)) {
     std::cout << "tplinks ";
     for (const ElementLink< xAOD::TrackParticleContainer >& l : v.trackParticleLinks()) {
       std::cout << l.dataID() << "/" << l.index() << " ";
@@ -200,7 +203,8 @@ void dumpVertex (const xAOD::Vertex& v)
     std::cout << "\n";
   }
 
-  if (v.isAvailable<std::vector<float> > ("trackWeights")) {
+  static const SG::ConstAccessor<float> trackWeightsAcc ("trackWeights");
+  if (trackWeightsAcc.isAvailable(v)) {
     std::cout << "wt ";
     for (float f : v.trackWeights()) {
       std::cout << f << " ";
@@ -208,7 +212,8 @@ void dumpVertex (const xAOD::Vertex& v)
     std::cout << "\n";
   }
 
-  if (v.isAvailable<std::vector<ElementLink<xAOD::NeutralParticleContainer> > > ("neutralParticleLinks")) {
+  static const SG::ConstAccessor<std::vector<ElementLink<xAOD::NeutralParticleContainer> > > neutralParticleLinksAcc ("neutralParticleLinks");
+  if (neutralParticleLinksAcc.isAvailable(v)) {
     std::cout << "nplinks ";
     for (const ElementLink< xAOD::NeutralParticleContainer >& l : v.neutralParticleLinks()) {
       std::cout << l.dataID() << "/" << l.index() << " ";
@@ -216,7 +221,8 @@ void dumpVertex (const xAOD::Vertex& v)
     std::cout << "\n";
   }
 
-  if (v.isAvailable<std::vector<float> > ("neutralWeights")) {
+  static const SG::ConstAccessor<float> neutralWeightsAcc ("neutralWeights");
+  if (neutralWeightsAcc.isAvailable(v)) {
     std::cout << "wt ";
     for (float f : v.neutralWeights()) {
       std::cout << f << " ";

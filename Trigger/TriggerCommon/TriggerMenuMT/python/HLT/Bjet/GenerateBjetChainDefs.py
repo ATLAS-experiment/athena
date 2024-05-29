@@ -21,8 +21,9 @@ def generateChainConfigs(flags,  chainDict ):
     for subChainDict in listOfChainDicts:
 
         jet_cfg = JetChainConfiguration(chainDict)
-        jet_name = jet_cfg.jetName
+        jet_cfg.prepareDataDependencies(flags)
         jet = jet_cfg.assembleChain(flags)
+        jet_name = jet_cfg.jetName
 
         # don't setup btagging for legs that are jet-only
         # happens for bjet + normal jet chains

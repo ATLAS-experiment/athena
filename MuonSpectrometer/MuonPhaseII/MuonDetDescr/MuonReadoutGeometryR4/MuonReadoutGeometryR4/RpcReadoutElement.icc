@@ -32,7 +32,7 @@ namespace MuonGMR4 {
     inline int RpcReadoutElement::doubletR() const{ return m_doubletR; }
     inline int RpcReadoutElement::doubletPhi() const{ return m_doubletPhi; }
     inline unsigned int RpcReadoutElement::nGasGaps() const { return m_pars.nGasGaps; }
-    inline int RpcReadoutElement::nPhiPanels() const { return m_pars.nGapsInPhi; }
+    inline int RpcReadoutElement::nPhiPanels() const { return m_pars.nPanelsInPhi; }
     inline int RpcReadoutElement::doubletPhiMax() const {return std::max(nPhiPanels(), doubletPhi()); }
     inline unsigned int RpcReadoutElement::nEtaStrips() const { return (m_pars.etaDesign ? m_pars.etaDesign->numStrips(): 0u); }
     inline unsigned int RpcReadoutElement::nPhiStrips() const { return (m_pars.phiDesign ? m_pars.phiDesign->numStrips(): 0u); }
@@ -102,8 +102,7 @@ inline bool RpcReadoutElement::measuresPhi(const IdentifierHash& measHash) {
     return (stripedMask >> measPhiShift);
 }
 inline const StripLayer& RpcReadoutElement::sensorLayout(const IdentifierHash& measHash) const {
-    const IdentifierHash layHash = layerHash(measHash);
-    const unsigned int layIdx{static_cast<unsigned int>(layHash)};
+    const unsigned int layIdx{static_cast<unsigned int>(layerHash(measHash))};
     if (layIdx >= m_pars.layers.size() || !m_pars.layers[layIdx]) {
         ATH_MSG_FATAL("The sensorLayout does not exist for "<<idHelperSvc()->toStringDetEl(identify())
                       <<" gasGap "<<(gasGapNumber(measHash) +1)

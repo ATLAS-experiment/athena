@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AmbiguityResolutionAlg.h"
@@ -22,12 +22,15 @@
 namespace {
    std::size_t sourceLinkHash(const Acts::SourceLink& slink) {
       const ActsTrk::ATLASUncalibSourceLink &atlasSourceLink = slink.get<ActsTrk::ATLASUncalibSourceLink>();
-      return (*atlasSourceLink)->identifierHash();
+      const xAOD::UncalibratedMeasurement &uncalibMeas = ActsTrk::getUncalibratedMeasurement(atlasSourceLink);
+      return uncalibMeas.identifier();
    }
 
    bool sourceLinkEquality(const Acts::SourceLink& a, const Acts::SourceLink& b) {
-      return    (*a.get<ActsTrk::ATLASUncalibSourceLink>())->identifierHash()
-             == (*b.get<ActsTrk::ATLASUncalibSourceLink>())->identifierHash();
+      const xAOD::UncalibratedMeasurement &uncalibMeas_a = ActsTrk::getUncalibratedMeasurement(a.get<ActsTrk::ATLASUncalibSourceLink>());
+      const xAOD::UncalibratedMeasurement &uncalibMeas_b = ActsTrk::getUncalibratedMeasurement(b.get<ActsTrk::ATLASUncalibSourceLink>());
+
+      return uncalibMeas_a.identifier() == uncalibMeas_b.identifier();
    }
 }
 
@@ -52,6 +55,7 @@ namespace ActsTrk
      }
 
      ATH_CHECK(m_monTool.retrieve(EnableTool{not m_monTool.empty()}));
+     ATH_CHECK(m_trackingGeometryTool.retrieve());
      ATH_CHECK(m_tracksKey.initialize());
      ATH_CHECK(m_resolvedTracksKey.initialize());
      ATH_CHECK(m_resolvedTracksBackendHandles.initialize(ActsTrk::prefixFromTrackContainerName(m_resolvedTracksKey.key()))); //TODO choose prefix related to the output tracks name
@@ -82,7 +86,8 @@ namespace ActsTrk
        auto destProxy = solvedTracks.getTrack(solvedTracks.addTrack());
        destProxy.copyFrom(trackHandle->getTrack(state.trackTips.at(iTrack)));
     }
-    std::unique_ptr<ActsTrk::TrackContainer> outputTracks = m_resolvedTracksBackendHandles.moveToConst( std::move(solvedTracks), ctx);
+    std::unique_ptr<ActsTrk::TrackContainer> outputTracks = m_resolvedTracksBackendHandles.moveToConst(std::move(solvedTracks), 
+       m_trackingGeometryTool->getGeometryContext(ctx).context(), ctx);
     SG::WriteHandle<ActsTrk::TrackContainer> resolvedTrackHandle(m_resolvedTracksKey, ctx);
 
     if (resolvedTrackHandle.record( std::move(outputTracks)).isFailure()) {

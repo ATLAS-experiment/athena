@@ -9,6 +9,7 @@
 #include "xAODInDetMeasurement/ContainerAccessor.h"
 #include "xAODMeasurementBase/UncalibratedMeasurementContainer.h"
 #include "StoreGate/ReadDecorHandle.h"
+#include "AthContainers/ConstAccessor.h"
 
 namespace ActsTrk {
   SpacePointAnalysisAlg::SpacePointAnalysisAlg(const std::string& name, ISvcLocator *pSvcLocator)
@@ -63,8 +64,9 @@ namespace ActsTrk {
     using decoration_type = std::vector<const xAOD::UncalibratedMeasurement*>;
     SG::ReadDecorHandle< xAOD::SpacePointContainer,
 			 decoration_type > barePointersToClusters( m_clusterDecoration, ctx );
+    static const SG::ConstAccessor<decoration_type> measurementsAcc ("measurements");
     if ( not barePointersToClusters.isAvailable() and
-	 not inputSpacePointCollection->front()->isAvailable<decoration_type>("measurements") ) {
+	 not measurementsAcc.isAvailable (*inputSpacePointCollection->front()) ) {
       ATH_MSG_ERROR("Space Point Collection does not have decoration 'measurements', which should contain a vector of bare pointes to clusters");
       return StatusCode::FAILURE;
     }

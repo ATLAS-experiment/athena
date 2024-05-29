@@ -346,15 +346,14 @@ StatusCode ISF::SimKernel::execute()
 
   // -----------------------------------------------------------------------------------------------
   // Step 1: Initialize the particle stack and the TruthManager, ABORT if failure
-  StatusCode sc = m_particleBroker->initializeEvent( std::move(simParticles) );
-  if ( sc.isFailure() ){
-      ATH_MSG_FATAL( "Failed to initialize Particle Broker. Abort." );
-      return StatusCode::FAILURE;
-  }
-  if ( (m_truthRecordSvc->initializeTruthCollection()).isFailure() ){
-      ATH_MSG_FATAL( "Failed to initialize TruthService. Abort." );
-      return StatusCode::FAILURE;
-  }
+  ATH_CHECK ( m_particleBroker->initializeEvent( std::move(simParticles) ) );
+
+  const int largestGeneratedParticleBC =  (m_outputHardScatterTruth->empty()) ? HepMC::UNDEFINED_ID
+    : HepMC::maxGeneratedParticleBarcode(m_outputHardScatterTruth->at(0)); // TODO make this more robust
+  const int largestGeneratedVertexBC =  (m_outputHardScatterTruth->empty()) ? HepMC::UNDEFINED_ID
+    : HepMC::maxGeneratedVertexBarcode(m_outputHardScatterTruth->at(0)); // TODO make this more robust
+  // tell TruthService we're starting a new event
+  ATH_CHECK( m_truthRecordSvc->initializeTruthCollection(largestGeneratedParticleBC, largestGeneratedVertexBC) );
   // -----------------------------------------------------------------------------------------------
 
 

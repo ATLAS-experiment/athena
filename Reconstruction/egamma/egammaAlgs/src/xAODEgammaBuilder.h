@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EGAMMAALGS_XAODEGAMMABUILDER_H
@@ -112,10 +112,6 @@ private:
     StatusCode CallTool(const EventContext& ctx,
                         const ToolHandle<IegammaBaseTool>& tool,
                         DataVector<T> *container) const;
-
-    /** @brief Vector of tools for dressing electrons and photons **/
-    ToolHandleArray<IegammaBaseTool> m_egammaTools {this,
-        "egammaTools", {}, "Tools for dressing electrons and photons"};
 
     /** @brief Vector of tools for dressing ONLY electrons **/
     ToolHandleArray<IegammaBaseTool> m_electronTools {this,

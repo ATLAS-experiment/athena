@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- ////////////////////////////
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -12,6 +12,7 @@
 #include "AsgDataHandles/WriteDecorHandle.h"
 #include "TruthUtils/MagicNumbers.h"
 #include "TruthUtils/HepMCHelpers.h"
+#include "AthContainers/ConstAccessor.h"
 
 
 using std::string;
@@ -190,11 +191,12 @@ StatusCode JetQGTaggerVariableTool::decorate(const xAOD::JetContainer& jetCont) 
 
     if(isMC){
       const xAOD::Jet* tjet=nullptr;
-      if(jet->isAvailable< ElementLink<xAOD::JetContainer> >("GhostTruthAssociationLink") ){
+      static const SG::ConstAccessor< ElementLink<xAOD::JetContainer> > GhostTruthAssociationLinkAcc ("GhostTruthAssociationLink");
+      if(GhostTruthAssociationLinkAcc.isAvailable(*jet) ){
 	ATH_MSG_DEBUG("Accessing GhostTruthAssociationLink: is available");
-	if(jet->auxdata< ElementLink<xAOD::JetContainer> >("GhostTruthAssociationLink").isValid() ){
+        ElementLink<xAOD::JetContainer> truthlink = GhostTruthAssociationLinkAcc(*jet);
+	if(truthlink.isValid() ){
 	  ATH_MSG_DEBUG("Accessing GhostTruthAssociationLink: is valid");
-	  ElementLink<xAOD::JetContainer> truthlink = jet->auxdata< ElementLink<xAOD::JetContainer> >("GhostTruthAssociationLink");
 	  if(truthlink)
 	    tjet = * truthlink;
 	  else{

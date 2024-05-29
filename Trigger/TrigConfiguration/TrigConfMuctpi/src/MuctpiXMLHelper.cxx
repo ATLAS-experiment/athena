@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigConfMuctpi/MuctpiXMLHelper.h"
@@ -16,8 +16,9 @@ MuctpiXMLHelper::MuctpiXMLHelper() :
 void
 MuctpiXMLHelper::printAttributes(const ptree & tree) {
   
-   // initialize attributes ptree 
-   ptree attributes = tree.get_child("<xmlattr>", ptree());
+   // initialize attributes ptree
+   ptree tmp_ptree;
+   ptree attributes = tree.get_child("<xmlattr>", tmp_ptree);
   
    // iterate through elements
    for(const ptree::value_type & a: attributes) {
@@ -31,7 +32,8 @@ bool
 MuctpiXMLHelper::hasAttribute(const ptree & tree, const string & attr) {
 
    // initialize attributes ptree 
-   ptree attributes = tree.get_child("<xmlattr>", ptree());
+   ptree tmp_ptree;
+   ptree attributes = tree.get_child("<xmlattr>", tmp_ptree);
   
    if(attributes.empty()) return false;
   
@@ -49,7 +51,8 @@ string
 MuctpiXMLHelper::readAttribute(const ptree & tree, const string & attr) {
  
       // initialize attributes ptree 
-      ptree attributes = tree.get_child("<xmlattr>", ptree());
+      ptree tmp_ptree;
+      ptree attributes = tree.get_child("<xmlattr>", tmp_ptree);
   
       // iterate through children
       for(const ptree::value_type &a : attributes) {

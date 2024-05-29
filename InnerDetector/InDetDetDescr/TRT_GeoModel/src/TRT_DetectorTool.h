@@ -1,67 +1,63 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_GEOMODEL_TRTDETECTORTOOL_H
 #define TRT_GEOMODEL_TRTDETECTORTOOL_H
 
+#include "InDetGeoModelUtils/InDetDDAthenaComps.h"
+#include "TRT_ConditionsServices/ITRT_StrawStatusSummaryTool.h" //for Argon
+
 #include "GeoModelUtilities/GeoModelTool.h"
+#include "GeoModelInterfaces/IGeoDbTagSvc.h"
+#include "GeometryDBSvc/IGeometryDBSvc.h"
+
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ServiceHandle.h"
-#include "TRT_ConditionsServices/ITRT_StrawStatusSummaryTool.h" //for Argon
 #include "CxxUtils/checker_macros.h"
 #include <string>
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Please consult the README for more information about which options to set in your joboptions file. //
-////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-class IGeoDbTagSvc;
-class IGeometryDBSvc;
-
 namespace InDetDD {
   class TRT_DetectorManager;
-  class AthenaComps;
 }
 
 class TRT_DetectorTool final : public GeoModelTool {
 
 public:
+  // Standard Constructor
+  TRT_DetectorTool( const std::string& type, const std::string& name, const IInterface* parent );
 
-    // Standard Constructor
-    TRT_DetectorTool( const std::string& type, const std::string& name, const IInterface* parent );
+  // Standard Destructor
+  virtual ~TRT_DetectorTool() = default;
 
-    // Standard Destructor
-    virtual ~TRT_DetectorTool() override final;
+  virtual StatusCode create() override final;
+  virtual StatusCode clear() override final;
 
-    virtual StatusCode create() override final;
-    virtual StatusCode clear() override final;
+  // Register callback function on CondDB object
+  virtual StatusCode registerCallback ATLAS_NOT_THREAD_SAFE () override final;
 
-    // Register callback function on CondDB object
-    virtual StatusCode registerCallback ATLAS_NOT_THREAD_SAFE () override final;
+  // Callback function itself
+  virtual StatusCode align(IOVSVC_CALLBACK_ARGS) override final;
 
-    // Callback function itself
-    virtual StatusCode align(IOVSVC_CALLBACK_ARGS) override final;
+private:
+  Gaudi::Property<bool> m_useOldActiveGasMixture{this,"UseOldActiveGasMixture",false};
+  Gaudi::Property<bool> m_DC2CompatibleBarrelCoordinates{this,"DC2CompatibleBarrelCoordinates",false};
+  Gaudi::Property<int> m_overridedigversion{this,"OverrideDigVersion",-999};
+  Gaudi::Property<bool> m_alignable{this,"Alignable",true};
+  Gaudi::Property<bool> m_useDynamicAlignFolders{this,"useDynamicAlignFolders",false};
 
- private:
+  // Set to true to use argon. DEFAULT VALUE is true. Overridden by DOARGONMIXTURE switch
+  Gaudi::Property<bool> m_doArgonMixture{this,"DoXenonArgonMixture",true};
+  // Set to true to use krypton. DEFAULT VALUE is true. Overridden by DOKRYPTONMIXTURE switch
+  Gaudi::Property<bool> m_doKryptonMixture{this,"DoKryptonMixture",true};
 
-    bool m_useOldActiveGasMixture;
-    bool m_DC2CompatibleBarrelCoordinates;
-    bool m_initialLayout;
-    int m_overridedigversion;
-    bool m_alignable;
+  ServiceHandle< IGeoDbTagSvc > m_geoDbTagSvc{this,"GeoDbTagSvc","GeoDbTagSvc"};
+  ServiceHandle< IGeometryDBSvc > m_geometryDBSvc{this,"GeometryDBSvc","InDetGeometryDBSvc"};
+  ToolHandle<ITRT_StrawStatusSummaryTool> m_sumTool{"TRT_StrawStatusSummaryTool", this}; // added for Argon
 
-    ServiceHandle< IGeoDbTagSvc > m_geoDbTagSvc;
-    ServiceHandle< IGeometryDBSvc > m_geometryDBSvc;
-    ToolHandle<ITRT_StrawStatusSummaryTool> m_sumTool; // added for Argon
- 
-    bool m_doArgonMixture;
-    bool m_doKryptonMixture;
-    bool m_useDynamicAlignFolders;
- 
-    const InDetDD::TRT_DetectorManager * m_manager;
-    InDetDD::AthenaComps * m_athenaComps;
-
+  const InDetDD::TRT_DetectorManager* m_manager{nullptr};
+  InDetDD::AthenaComps m_athenaComps{"TRT_GeoModel"};
+  bool m_initialLayout{true};
 };
 
 #endif // TRT_GEOMODEL_TRTDETECTORTOOL_H

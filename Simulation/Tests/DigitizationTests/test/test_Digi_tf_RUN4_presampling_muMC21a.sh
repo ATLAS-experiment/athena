@@ -3,7 +3,7 @@
 # art-description: Run 4 pile-up presampling
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
-# art-memory: 4096
+# art-memory: 3999
 # art-include: 24.0/Athena
 # art-include: main/Athena
 # art-output: RUN4_presampling.muMC21a.RDO.pool.root

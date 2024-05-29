@@ -64,7 +64,7 @@ class TrigEgammaMatchingToolMT : public asg::AsgTool
         // access the feature from the container
         const xAOD::TrigRingerRings* getRingsFeature( const TrigCompositeUtils::Decision * ) const;
         // get the container key
-        std::string key( std::string ) const;
+        std::string key( const std::string& ) const;
 
     private:
         

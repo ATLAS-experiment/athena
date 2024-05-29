@@ -40,20 +40,23 @@ StatusCode MmReadoutElement::initElement() {
 #ifndef SIMULATIONBASE
     ATH_CHECK(planeSurfaceFactory(geoTransformHash(), m_pars.layerBounds->make_bounds(m_pars.halfShortWidth, 
                                                                                       m_pars.halfLongWidth, 
-                                                                                      m_pars.halfHeight)));
+                                                                                      m_pars.halfHeight,
+                                                                                      90.*Gaudi::Units::deg)));
 #endif
     for (unsigned int layer = 0; layer < m_pars.layers.size(); ++layer) {
       IdentifierHash layHash{layer};
-      if (m_pars.layers[layer].hash() != layHash) {
+      if (m_pars.layers[layer]->hash() != layHash) {
          ATH_MSG_FATAL("Layer "<<m_pars.layers[layer]<<" has a very strange hash. Expect "<<layer);
          return StatusCode::FAILURE;
       }
       ATH_CHECK(insertTransform<MmReadoutElement>(layHash));
 #ifndef SIMULATIONBASE
-      const StripDesign& design{m_pars.layers[layer].design()};
+      const StripDesign& design{m_pars.layers[layer]->design()};
+
       ATH_CHECK(planeSurfaceFactory(layHash, m_pars.layerBounds->make_bounds(design.shortHalfHeight(),
-                                                                                   design.longHalfHeight(),
-                                                                                   design.halfWidth())));
+                                                                             design.longHalfHeight(),
+                                                                             design.halfWidth(),
+                                                                             90.*Gaudi::Units::deg - design.stereoAngle())));
 #endif
     }
 #ifndef SIMULATIONBASE
@@ -63,18 +66,16 @@ StatusCode MmReadoutElement::initElement() {
 }
 
 Amg::Transform3D MmReadoutElement::fromGapToChamOrigin(const IdentifierHash& layHash) const {
-      const unsigned layIdx{static_cast<unsigned>(layHash)};
-      return m_pars.layers[layIdx].toOrigin();
+      return stripLayer(layHash).toOrigin();
 }
 
 
 Amg::Vector3D MmReadoutElement::stripPosition(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const {
    const IdentifierHash lHash = layerHash(measHash);
-   unsigned int layIdx = static_cast<unsigned int>(lHash);
-   if (layIdx < m_pars.layers.size()) {
-      return localToGlobalTrans(ctx, lHash) * m_pars.layers[layIdx].localStripPos(stripNumber(measHash));
+   if (static_cast<unsigned int>(lHash) < m_pars.layers.size()) {
+      return localToGlobalTrans(ctx, lHash) * stripLayer(lHash).localStripPos(stripNumber(measHash));
    }
-   ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The layer hash "<<layIdx
+   ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The layer hash "<<static_cast<unsigned int>(lHash)
                  <<" is out of range. Maximum range "<<m_pars.layers.size());
    return Amg::Vector3D::Zero();
 }
@@ -82,22 +83,20 @@ Amg::Vector3D MmReadoutElement::stripPosition(const ActsGeometryContext& ctx, co
 
 Amg::Vector3D MmReadoutElement::leftStripEdge(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const {
     const IdentifierHash lHash = layerHash(measHash);
-    unsigned int layIdx = static_cast<unsigned int>(lHash);
-    if (layIdx < m_pars.layers.size()) {
-       return localToGlobalTrans(ctx, lHash) * m_pars.layers[layIdx].localStripRightEdge(stripNumber(measHash));
+    if (static_cast<unsigned int>(lHash) < m_pars.layers.size()) {
+       return localToGlobalTrans(ctx, lHash) * stripLayer(lHash).localStripRightEdge(stripNumber(measHash));
     }
-    ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The layer hash "<<layIdx
+    ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The layer hash "<<static_cast<unsigned int>(lHash)
                  <<" is out of range. Maximum range "<<m_pars.layers.size());
     return Amg::Vector3D::Zero();
 }
 
 Amg::Vector3D MmReadoutElement::rightStripEdge(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const{
     const IdentifierHash lHash = layerHash(measHash);
-    unsigned int layIdx = static_cast<unsigned int>(lHash);
-    if (layIdx < m_pars.layers.size()) {
-       return localToGlobalTrans(ctx, lHash) * m_pars.layers[layIdx].localStripLeftEdge(stripNumber(measHash));
+    if (static_cast<unsigned int>(lHash) < m_pars.layers.size()) {
+       return localToGlobalTrans(ctx, lHash) * stripLayer(lHash).localStripLeftEdge(stripNumber(measHash));
     }
-    ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The layer hash "<<layIdx
+    ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The layer hash "<<static_cast<unsigned int>(lHash)
                  <<" is out of range. Maximum range "<<m_pars.layers.size());
     return Amg::Vector3D::Zero();
 }

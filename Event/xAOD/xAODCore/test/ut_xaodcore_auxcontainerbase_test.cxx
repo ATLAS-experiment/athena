@@ -19,6 +19,7 @@
 #include <sstream>
 #include <cassert>
 #include <memory>
+#include <memory_resource>
 
 #ifndef XAOD_STANDALONE
 #include "GaudiKernel/ThreadLocalContext.h"

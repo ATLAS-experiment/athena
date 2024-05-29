@@ -1,20 +1,13 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// TransportTool.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 #ifndef ISF_FATRASTOOLS_PROCESSSAMPLINGTOOL_H
 #define ISF_FATRASTOOLS_PROCESSSAMPLINGTOOL_H
 
 // Athena Base
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "GaudiKernel/ToolHandle.h"
-#include "AthenaKernel/IAtRndmGenSvc.h"
 #include "CxxUtils/checker_macros.h"
-#include "TrkExInterfaces/ITimedExtrapolator.h"
 
 // iFatras
 #include "ISF_FatrasInterfaces/IProcessSamplingTool.h"
@@ -23,91 +16,34 @@
 #include "TrkEventPrimitives/PdgToParticleHypothesis.h"
 #include "TrkParameters/TrackParameters.h"
 
-namespace ISF {
-  class ITruthSvc;
-}
-
-namespace iFatras 
+namespace iFatras
 {
-  class IHadronicInteractionProcessor;
-  class IPhotonConversionTool; 
-  class IParticleDecayHelper;
-  class IPhysicsValidationTool;
-    
-  /** @class ProcessSamplingTool 
-      
+  /** @class ProcessSamplingTool
+
       Fatras AlgTool to sample process and free path
-      
+
       @author Sharka Todorova Sarka.Todorova -at- cern.ch
-  */  
-  
-  class ATLAS_NOT_THREAD_SAFE ProcessSamplingTool : public extends<AthAlgTool, IProcessSamplingTool>  // deprecated: ATLASSIM-6020
+  */
+
+  class ProcessSamplingTool : public extends<AthAlgTool, IProcessSamplingTool>
   {
   public:
     /** Constructor */
     ProcessSamplingTool(const std::string&,const std::string&,const IInterface*);
-    
-    /** Destructor */
-    virtual ~ProcessSamplingTool ();
-    
-    /** AlgTool initialize method */
-    virtual StatusCode initialize();
-    
-    /** AlgTool finalize method */
 
-    virtual StatusCode finalize();
+    /** Destructor */
+    virtual ~ProcessSamplingTool () = default;
 
     /** Process pre-sampling : to be moved into material updators eventually */
-    Trk::PathLimit sampleProcess(double mom, double charge, Trk::ParticleHypothesis pHypothesis) const;
-    
-    /** Process simulation */
-    ISF::ISFParticleVector  interact(const ISF::ISFParticle* parent,
-				     Trk::ExCellCharged& eCell,
-				     const Trk::Material* mat) const;
-    ISF::ISFParticleVector  interact(const ISF::ISFParticle* parent,
-				     Trk::ExCellNeutral& eCell,
-				     const Trk::Material* mat) const;
+    Trk::PathLimit sampleProcess(CLHEP::HepRandomEngine *randomEngine, double mom, double charge, Trk::ParticleHypothesis pHypothesis) const;
+
   private:
-     /** templated Tool retrieval - gives unique handling & look and feel */
-     template <class T> StatusCode retrieveTool(ToolHandle<T>& thandle){
-       if (!thandle.empty() && thandle.retrieve().isFailure()){
-         ATH_MSG_FATAL( "[ fatras setup ] Cannot retrieve " << thandle << ". Abort.");
-         return StatusCode::FAILURE;
-       }
-       else {
-         ATH_MSG_DEBUG("[ fatras setup ] Successfully retrieved " << thandle);
-       }
-       return StatusCode::SUCCESS;
-     }
-      
     /*---------------------------------------------------------------------
      *  Private members
      *---------------------------------------------------------------------*/
-
-     /** Random Generator service  */
-     ServiceHandle<IAtRndmGenSvc>                 m_rndGenSvc;
-     CLHEP::HepRandomEngine*                      m_randomEngine;
-     std::string                                  m_randomEngineName;         //!< Name of the random number stream
-     
-     /** Truth record */
-     ServiceHandle<ISF::ITruthSvc>                m_truthRecordSvc;
-
-     /** hadronic interaction */
-     bool                                         m_hadInt;
-     ToolHandle<IHadronicInteractionProcessor>    m_hadIntProcessor;
-     
-     /** decay */
-     ToolHandle<IParticleDecayHelper>                 m_particleDecayer;
-
-      /** IPhotonConversionTool */
-     ToolHandle<iFatras::IPhotonConversionTool>   m_conversionTool;
-
-
-     /** validation */
-     bool                                         m_validationMode;
-     ToolHandle<IPhysicsValidationTool>           m_validationTool;
-
-  }; 
+    /** hadronic interaction */
+    BooleanProperty m_hadInt{this, "HadronicInteraction", true, ""};
+  };
 }
 
 #endif // FATRASTOOLS_PROCESSSSAMPLINGTOOL_H

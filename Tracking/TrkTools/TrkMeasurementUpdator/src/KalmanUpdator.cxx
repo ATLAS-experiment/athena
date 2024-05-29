@@ -250,8 +250,7 @@ std::unique_ptr<Trk::TrackParameters> Trk::KalmanUpdator::combineStates (const T
     }
 
     // compute fit quality
-    double  chiSquared = r.transpose()*R_inv*r;
-    fitQoS =  new FitQualityOnSurface(chiSquared, 5);
+    fitQoS =  new FitQualityOnSurface(Amg::chi2(R_inv, r), 5);
 
     // return cloned version of Track Parameters (MeasuredPerigee, MeasuredAtA...)
     auto comb =
@@ -421,8 +420,7 @@ Trk::KalmanUpdator::predictedStateFitQuality (const Trk::TrackParameters& one,
   Amg::VectorX r = two.parameters() - one.parameters();
   AmgSymMatrix(5) R = (covTrkOne + covTrkTwo).inverse();
   // chi2 calculation
-  double  chiSquared = r.transpose()*R*r;
-  return {chiSquared, 5};
+  return {Amg::chi2(R, r), 5};
 }
 
 std::vector<double> Trk::KalmanUpdator::initialErrors() const {

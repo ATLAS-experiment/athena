@@ -7,9 +7,9 @@ from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import getTrigEgammaKeys
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
 
-def precisionPhotonVDVCfg(name, InViewRoIs, ion=False):
+def precisionPhotonVDVCfg(flags, name, InViewRoIs, ion=False):
     acc = ComponentAccumulator()
-    TrigEgammaKeys = getTrigEgammaKeys(ion=ion)
+    TrigEgammaKeys = getTrigEgammaKeys(flags, ion=ion)
     caloClusters = TrigEgammaKeys.precisionPhotonCaloClusterContainer
     dataObjects = [( 'xAOD::CaloClusterContainer' , 'StoreGateSvc+%s' % caloClusters ),
                               ( 'EgammaRecContainer', 'StoreGateSvc+%s' % TrigEgammaKeys.precisionPhotonSuperClusterCollection),
@@ -45,7 +45,7 @@ def precisionPhotonRecoSequence(flags, RoIs, name = None, ion=False):
 
     log.debug('retrieve(precisionPhotonRecoSequence,None,RoIs = %s)',RoIs)
     
-    acc.merge(precisionPhotonVDVCfg(name+'VDV',RoIs,ion))
+    acc.merge(precisionPhotonVDVCfg(flags, name+'VDV',RoIs,ion))
 
     if ion:
         TrigTopoEgammaPhoton = TrigTopoEgammaPhotonCfg_HI(flags)

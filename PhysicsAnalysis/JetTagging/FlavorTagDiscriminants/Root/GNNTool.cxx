@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FlavorTagDiscriminants/GNNTool.h"
@@ -21,9 +21,14 @@ namespace FlavorTagDiscriminants {
 
   StatusCode GNNTool::initialize() {
 
-    ATH_MSG_INFO("Initialize bTagging Tool (GNN) from: " + m_nn_file);
-
-    m_gnn.reset(new GNN(m_nn_file, getOptions(m_props)));
+    auto opts = getOptions(m_props);
+    if (!m_nnsvc.empty()) {
+      ATH_CHECK(m_nnsvc.retrieve());
+      m_gnn = m_nnsvc->get(m_nn_file, opts);
+    } else {
+      ATH_MSG_INFO("Initialize bTagging Tool (GNN) from: " + m_nn_file);
+      m_gnn.reset(new GNN(m_nn_file, opts));
+    }
 
     return StatusCode::SUCCESS;
   }
@@ -34,7 +39,7 @@ namespace FlavorTagDiscriminants {
   void GNNTool::decorate(const xAOD::Jet& jet) const {
     m_gnn->decorate(jet, jet);
   }
-  void GNNTool::decorateWithDefaults(const xAOD::Jet& jet) const {
+  void GNNTool::decorateWithDefaults(const SG::AuxElement& jet) const {
     m_gnn->decorateWithDefaults(jet);
   }
 

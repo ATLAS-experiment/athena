@@ -57,23 +57,23 @@ namespace MuonGM {
     void RpcReadoutElement::setDoubletPhi(int doubletPhi) { m_dbPhi = doubletPhi; }
     double RpcReadoutElement::localStripSCoord(int doubletPhi, bool measphi, int strip) const {
         bool notintheribs = !inTheRibs();
-        if ((doubletPhi != m_dbPhi && m_nphistrippanels == 1 && notintheribs) ||
-            (m_nphistrippanels != 1 && (doubletPhi < 1 || doubletPhi > m_nphistrippanels))) {
-            THROW_EXCEPTION("doublet Z"<<doubletPhi<<" outside range 1-"<<m_nphistrippanels<<" with doubletZ: "<<m_dbPhi);
+        if ((doubletPhi != m_dbPhi && NphiStripPanels() == 1 && notintheribs) ||
+            (NphiStripPanels() != 1 && (doubletPhi < 1 || doubletPhi > NphiStripPanels()))) {
+            THROW_EXCEPTION("doublet Z"<<doubletPhi<<" outside range 1-"<<NphiStripPanels()<<" with doubletZ: "<<m_dbPhi);
         }
         if (strip < 1 || strip > Nstrips(measphi)) {
             THROW_EXCEPTION("strip "<<strip<<" outside range 1-"<<Nstrips(measphi)<<" for measphi="<<measphi);
         }
 
         double local_s = 0.;
-        const int dbphi = std::min(doubletPhi, m_nphistrippanels) - 1;
+        const int dbphi = std::min(doubletPhi, NphiStripPanels()) - 1;
         if (measphi)
             local_s = m_first_phistrip_s[dbphi] + (strip - 1) * StripPitch(measphi);
         else
             local_s = m_etastrip_s[dbphi];
 
 
-       ATH_MSG_VERBOSE("Ssize, ndvs, nstr/pan, spitch, 1st-strp " << m_Ssize << " " << m_nphistrippanels << " "
+       ATH_MSG_VERBOSE("Ssize, ndvs, nstr/pan, spitch, 1st-strp " << m_Ssize << " " << NphiStripPanels() << " "
                 << m_nphistripsperpanel << " " << m_phistrippitch << " " << m_first_phistrip_s[doubletPhi - 1] << std::endl
                << "localStripSCoord: local_s is " << local_s << " for doubletPhi: " << doubletPhi
                 << ", measuresPhi: " << measphi   << ", strip: " << strip);
@@ -135,11 +135,11 @@ namespace MuonGM {
         // if the station is mirrored, the Rpc is rotated by 180deg around its local x axis
         // numbering of phi strips must be reversed;
         // numbering of eta strips is unchanged;
-        // numbering of doubletPhi must be reversed if m_nphistrippanels>1
+        // numbering of doubletPhi must be reversed if NphiStripPanels()>1
         // numbering of doubletZ   is unchanged;
         if (isMirrored()) {
             if (measphi) lstrip = NphiStrips() - lstrip + 1;
-            if (m_nphistrippanels != 1) {
+            if (NphiStripPanels() != 1) {
                 ldoubletPhi = doubletPhi + 1;
                 if (ldoubletPhi > 2) ldoubletPhi = 1;
             }
@@ -295,7 +295,7 @@ namespace MuonGM {
                 ATH_MSG_DEBUG("setting distance to " << sdistToCenter);
             }
         }
-        if (m_nphistrippanels == 2) {
+        if (NphiStripPanels() == 2) {
             dist = getSsize() * 0.5 - std::abs(sdistToCenter);
         } else {
             // assumes readout is at smallest phi
@@ -383,9 +383,7 @@ namespace MuonGM {
         m_surfaceData = std::make_unique<SurfaceData>();
         for (int dbPhi = 1; dbPhi <= NphiStripPanels(); ++dbPhi) {
             for (int gasGap = 1; gasGap <= numberOfLayers(true); ++gasGap) {
-                const Amg::Translation3D xfp{localGasGapPos(dbPhi, gasGap)};
                 Amg::Transform3D trans3D = localToGlobalTransf(dbPhi, gasGap);
-
                 // surface()
                 Amg::RotationMatrix3D muonTRotation(trans3D.rotation());
                 if (isMirrored()) muonTRotation = muonTRotation * Amg::AngleAxis3D(180. * CLHEP::deg, Amg::Vector3D::UnitX());
@@ -427,8 +425,8 @@ namespace MuonGM {
 
       
         int doubletPhi = m_idHelper.doubletPhi(id);
-        if (doubletPhi != getDoubletPhi() && m_nphistrippanels == 1) { return false; }
-        if (doubletPhi < 1 || doubletPhi > m_nphistrippanels) {
+        if (doubletPhi != getDoubletPhi() && NphiStripPanels() == 1) { return false; }
+        if (doubletPhi < 1 || doubletPhi > NphiStripPanels()) {
             if (doubletPhi != 2 || !inTheRibs()) { return false; }
         }
         int gasgap = m_idHelper.gasGap(id);
@@ -444,7 +442,7 @@ namespace MuonGM {
 
     int RpcReadoutElement::surfaceHash(int dbPhi, int gasGap, bool measphi ) const {
         // if there is only one doublet phi we should always use one in the hash calculation
-        if (m_nphistrippanels == 1) dbPhi = 1;
+        if (NphiStripPanels() == 1) dbPhi = 1;
         if (dbPhi > NphiStripPanels() || gasGap > numberOfLayers(true)) {            
             ATH_MSG_WARNING(" surfaceHash: identifier out of range dbphi " << dbPhi << " max " << NphiStripPanels() << " ch dbphi "
                     << getDoubletPhi() << " gp " << gasGap << " max " << numberOfLayers());
@@ -454,7 +452,7 @@ namespace MuonGM {
     }
 
     int RpcReadoutElement::layerHash(int dbPhi, int gasGap) const {
-        if (m_nphistrippanels == 1) dbPhi = 1;
+        if (NphiStripPanels() == 1) dbPhi = 1;
 
         if (dbPhi > NphiStripPanels() || gasGap > numberOfLayers(true)) {
             ATH_MSG_WARNING(" layerHash: identifier out of range dbphi " << dbPhi << " max " << NphiStripPanels() << " ch dbphi "
@@ -465,7 +463,7 @@ namespace MuonGM {
     }
 
     const MuonStripDesign* RpcReadoutElement::getDesign(const Identifier& id) const {
-        unsigned int phipanel = std::min(m_nphistrippanels, m_idHelper.doubletPhi(id));
+        unsigned int phipanel = std::min(NphiStripPanels(), m_idHelper.doubletPhi(id));
         if (phipanel > m_phiDesigns.size()) {           
             ATH_MSG_WARNING(" bad identifier, no MuonStripDesign found ");
             return nullptr;

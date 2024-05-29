@@ -39,7 +39,7 @@ public:
                              const IInterface*);
 
   CaloCluster_OnTrackBuilder();
-  ~CaloCluster_OnTrackBuilder();
+  ~CaloCluster_OnTrackBuilder() = default;
 
   // standard Athena methods
   virtual StatusCode initialize() override final;

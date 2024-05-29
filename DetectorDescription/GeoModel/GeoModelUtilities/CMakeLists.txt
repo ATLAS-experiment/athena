@@ -4,7 +4,6 @@
 atlas_subdir( GeoModelUtilities )
 
 # External dependencies.
-find_package( Eigen ) # Needed by GeoModelKernel
 find_package( GeoModel COMPONENTS GeoGenericFunctions GeoModelKernel GeoModelHelpers )
 find_package( ROOT COMPONENTS Core )
 # The list of sources, and list of linked libraries depends on what project is
@@ -26,23 +25,23 @@ endif()
 atlas_add_library( GeoModelUtilities
    GeoModelUtilities/*.h ${sources}
    PUBLIC_HEADERS GeoModelUtilities
-   INCLUDE_DIRS ${EIGEN_INCLUDE_DIRS} ${GEOMODEL_INCLUDE_DIRS}
-   LINK_LIBRARIES GeoPrimitives ${EIGEN_LIBRARIES} ${GEOMODEL_LIBRARIES} ${libraries} )
+   INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
+   LINK_LIBRARIES ${GEOMODEL_LIBRARIES} ${libraries} GeoPrimitives  )
 
 atlas_add_test( GeoGetIds_test
                  SOURCES test/GeoGetIds_test.cxx
-                 INCLUDE_DIRS ${EIGEN_INCLUDE_DIRS} ${GEOMODEL_INCLUDE_DIRS}
-                 LINK_LIBRARIES ${EIGEN_LIBRARIES} ${GEOMODEL_LIBRARIES} GeoModelUtilities )
+                 INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
+                 LINK_LIBRARIES  ${GEOMODEL_LIBRARIES} GeoModelUtilities )
 
 atlas_add_test( GeoVisitVolumes_test
                 SOURCES test/GeoVisitVolumes_test.cxx
-                INCLUDE_DIRS ${EIGEN_INCLUDE_DIRS} ${GEOMODEL_INCLUDE_DIRS}
-                LINK_LIBRARIES ${EIGEN_LIBRARIES} ${GEOMODEL_LIBRARIES} GeoModelUtilities )
+                INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
+                LINK_LIBRARIES ${GEOMODEL_LIBRARIES} GeoModelUtilities )
 
 atlas_add_test( GeoAlignStore_test
                 SOURCES test/testAlignStore.cxx
-                INCLUDE_DIRS ${EIGEN_INCLUDE_DIRS} ${GEOMODEL_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
-                LINK_LIBRARIES ${EIGEN_LIBRARIES} ${GEOMODEL_LIBRARIES} ${ROOT_LIBRARIES} GeoModelUtilities
+                INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
+                LINK_LIBRARIES ${GEOMODEL_LIBRARIES} ${ROOT_LIBRARIES} GeoModelUtilities
                 PROPERTIES TIMEOUT 600
                 POST_EXEC_SCRIPT nopost.sh)
 # Code in this file makes heavy use of eigen and runs orders of magnitude

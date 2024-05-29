@@ -19,10 +19,10 @@ namespace {
 
 namespace xAOD {
 IdentifierHash MMCluster_v1::measurementHash() const {
-    return MuonGMR4::MmReadoutElement::createHash(channelNumber(), gasGap());
+    return MuonGMR4::MmReadoutElement::createHash(gasGap(), channelNumber());
 }
 IdentifierHash MMCluster_v1::layerHash() const {
-    return MuonGMR4::MmReadoutElement::createHash(0, gasGap());
+    return MuonGMR4::MmReadoutElement::createHash(gasGap(), 0);
 }
 IMPLEMENT_SETTER_GETTER(MMCluster_v1, uint16_t, time, setTime)
 IMPLEMENT_SETTER_GETTER(MMCluster_v1, uint32_t, charge, setCharge)

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FPGATrackSimInput/FPGATrackSimReadRawRandomHitsTool.h"
@@ -59,7 +59,7 @@ StatusCode FPGATrackSimReadRawRandomHitsTool::readData(FPGATrackSimEventInputHea
 
   // Truth Info
   FPGATrackSimOptionalEventInfo optional;
-  int mbc = 0; // to scale up barcodes!
+  unsigned long int mbc = 0; // to scale up barcodes!
 
   // --- Copy old data
   if (doReset)
@@ -68,14 +68,14 @@ StatusCode FPGATrackSimReadRawRandomHitsTool::readData(FPGATrackSimEventInputHea
     }
   else // not resetting, start by copying over truth information from old header
     {
-      for (auto truthtrack : header->optional().getTruthTracks())
+      for (const auto& truthtrack : header->optional().getTruthTracks())
         {
-	        if (truthtrack.getBarcode() > mbc) mbc = truthtrack.getBarcode();
+	  if (truthtrack.getBarcode() > mbc) mbc = truthtrack.getBarcode();
       	  optional.addTruthTrack(truthtrack);
         }
 
       // now we got the max bar code, copy the offline tracks
-      for (auto offlinetrack : header->optional().getOfflineTracks()) 
+      for (const auto& offlinetrack : header->optional().getOfflineTracks()) 
 	      { 
       	  optional.addOfflineTrack(offlinetrack);
       	}
@@ -98,15 +98,12 @@ StatusCode FPGATrackSimReadRawRandomHitsTool::readData(FPGATrackSimEventInputHea
   // copy Hits
   for (auto rawhit : m_eventHeader->hits())
     {
-      if (rawhit.getBarcode() >= 0)
-        {
-           FPGATrackSimMultiTruth origtruth = rawhit.getTruth();
-           FPGATrackSimMultiTruth mt;
-           FPGATrackSimMultiTruth::Barcode uniquecode(rawhit.getEventIndex(),rawhit.getBarcode()+mbc);
-           mt.maximize(uniquecode, rawhit.getBarcodePt());
-           rawhit.setBarcode(rawhit.getBarcode() + mbc);
-           rawhit.setTruth(mt);
-        }
+      FPGATrackSimMultiTruth origtruth = rawhit.getTruth();
+      FPGATrackSimMultiTruth mt;
+      FPGATrackSimMultiTruth::Barcode uniquecode(rawhit.getEventIndex(),rawhit.getBarcode()+mbc);
+      mt.maximize(uniquecode, rawhit.getBarcodePt());
+      rawhit.setBarcode(rawhit.getBarcode() + mbc);
+      rawhit.setTruth(mt);
       header->addHit(rawhit);
     }
 

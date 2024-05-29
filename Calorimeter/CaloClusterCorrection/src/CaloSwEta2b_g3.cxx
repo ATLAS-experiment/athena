@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -103,4 +103,11 @@ void CaloSwEta2b_g3::makeCorrection (const Context& myctx,
 
   // make correction to second sampling
   cluster->setEta(CaloSampling::EMB2, eta - deta);
+}
+
+
+const std::string& CaloSwEta2b_g3::toolType() const
+{
+  static const std::string typeName = "CaloSwEta_g3";
+  return typeName;
 }

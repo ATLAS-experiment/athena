@@ -72,7 +72,7 @@ namespace G4UA
             G4RunManager::GetRunManager()->GetCurrentEvent()->GetUserInformation());
         auto* track = a_step->GetTrack();
         if ( atlasG4EvtUserInfo &&
-             ( atlasG4EvtUserInfo->GetLastProcessedBarcode() != track->GetTrackID() ||
+             ( atlasG4EvtUserInfo->GetLastProcessedTrackID() != track->GetTrackID() ||
                atlasG4EvtUserInfo->GetLastProcessedStep() != track->GetCurrentStepNumber() ) )
         {
           // We haven't performed any calibration processing for this
@@ -86,7 +86,7 @@ namespace G4UA
           m_defaultSD->Hit( step_nc );
 
           // Update the step info
-          atlasG4EvtUserInfo->SetLastProcessedBarcode( track->GetTrackID() );
+          atlasG4EvtUserInfo->SetLastProcessedTrackID( track->GetTrackID() );
           atlasG4EvtUserInfo->SetLastProcessedStep( track->GetCurrentStepNumber() );
         }
       }

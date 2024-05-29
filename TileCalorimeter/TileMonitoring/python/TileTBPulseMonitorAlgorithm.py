@@ -39,9 +39,12 @@ def getPMT(partition, channel):
     return pmt
 
 
-def TileTBPulseMonitoringConfig(flags, timeRange=[-100, 100], fragIDs=[0x100, 0x101, 0x200, 0x201, 0x402], useDemoCabling=2018, **kwargs):
+def TileTBPulseMonitoringConfig(flags, timeRange=[-100, 100], fragIDs=[0x100, 0x101, 0x200, 0x201, 0x402], useDemoCabling=2018, useFELIX=False, **kwargs):
 
     ''' Function to configure TileTBPulseMonitorAlgorithm algorithm in the monitoring system.'''
+
+    suffix = "Flx" if useFELIX else ""
+    topPath = 'TestBeam/' + ('Felix' if useFELIX else 'Legacy')
 
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     result = ComponentAccumulator()
@@ -56,10 +59,10 @@ def TileTBPulseMonitoringConfig(flags, timeRange=[-100, 100], fragIDs=[0x100, 0x
     result.merge(TileInfoLoaderCfg(flags))
 
     from AthenaMonitoring import AthMonitorCfgHelper
-    helper = AthMonitorCfgHelper(flags, 'TileTBPulseMonitoring')
+    helper = AthMonitorCfgHelper(flags, f'TileTBPulse{suffix}Monitoring')
 
     from AthenaConfiguration.ComponentFactory import CompFactory
-    tileTBPulseMonAlg = helper.addAlgorithm(CompFactory.TileTBPulseMonitorAlgorithm, 'TileTBPulseMonAlg')
+    tileTBPulseMonAlg = helper.addAlgorithm(CompFactory.TileTBPulseMonitorAlgorithm, f'TileTBPulse{suffix}MonAlg')
 
     tileTBPulseMonAlg.TriggerChain = ''
 
@@ -79,14 +82,15 @@ def TileTBPulseMonitoringConfig(flags, timeRange=[-100, 100], fragIDs=[0x100, 0x
 
     tileTBPulseMonAlg.TileFragIDs = fragIDs
 
-    kwargs.setdefault('TileRawChannelContainer', flags.Tile.RawChannelContainer)
+    kwargs.setdefault('TileDigitsContainer', f'TileDigits{suffix}Cnt')
+    kwargs.setdefault('TileRawChannelContainer', flags.Tile.RawChannelContainer.replace('TileRawChannel', f'TileRawChannel{suffix}'))
     for k, v in kwargs.items():
         setattr(tileTBPulseMonAlg, k, v)
 
     run = str(flags.Input.RunNumbers[0])
 
     # Configure histogram with TileTBPulseMonAlg algorithm execution time
-    executeTimeGroup = helper.addGroup(tileTBPulseMonAlg, 'TileTBPulseMonExecuteTime', 'TestBeam')
+    executeTimeGroup = helper.addGroup(tileTBPulseMonAlg, 'TileTBPulseMonExecuteTime', topPath)
     executeTimeGroup.defineHistogram('TIME_execute', path='PulseShape', type='TH1F',
                                      title='Time for execute TileTBPulseMonAlg algorithm;time [#mus]',
                                      xbins=100, xmin=0, xmax=10000)
@@ -119,11 +123,11 @@ def TileTBPulseMonitoringConfig(flags, timeRange=[-100, 100], fragIDs=[0x100, 0x
         return pulseShapeArray
 
     addPulseShapeHistogramsArray(helper, modules, tileTBPulseMonAlg, name='TilePulseShape', title='Pulse shape',
-                                 path='TestBeam/PulseShape', xbins=abs(timeRange[1]), xmin=timeRange[0], xmax=timeRange[1],
+                                 path=f'{topPath}/PulseShape', xbins=abs(timeRange[1]), xmin=timeRange[0], xmax=timeRange[1],
                                  run=run, aliasPrefix='pulseShape_', useDemoCabling=useDemoCabling)
 
     addPulseShapeHistogramsArray(helper, modules, tileTBPulseMonAlg, name='TilePulseShapeProfile',
-                                 title='Pulse shape profile', path='TestBeam/PulseShape', type='TProfile',
+                                 title='Pulse shape profile', path=f'{topPath}/PulseShape', type='TProfile',
                                  xbins=abs(timeRange[1]), xmin=timeRange[0], xmax=timeRange[1],
                                  ybins=None, ymin=None, ymax=None, run=run, aliasPrefix='pulseShapeProfile_',
                                  useDemoCabling=useDemoCabling)

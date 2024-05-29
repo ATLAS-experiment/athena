@@ -82,6 +82,19 @@ class CommonServicesConfig (ConfigBlock) :
             sysDumper.histogramName = self.systematicsHistogram
 
 
+class IOStatsBlock(ConfigBlock):
+    """Print what branches are used in analysis"""
+
+    def __init__(self):
+        super(IOStatsBlock, self).__init__()
+        self.addOption("printOption", "Summary", type=str,
+                       info='option to pass the standard ROOT printing function. Can be "Summary", "ByEntries" or "ByBytes".')
+
+    def makeAlgs(self, config):
+        alg = config.createAlgorithm('CP::IOStatsAlg', 'IOStatsAlg')
+        alg.printOption = self.printOption
+
+
 class PileupReweightingBlock (ConfigBlock):
     """the ConfigBlock for pileup reweighting"""
 
@@ -399,6 +412,7 @@ class EventCutFlowBlock (ConfigBlock):
         else:
             # user provides nothing: get all available selections from EventInfo directly
             alg.selections = config.getSelectionCutFlow (self.containerName, self.selectionName)
+        alg.selections = [sel+',as_char' for sel in alg.selections]
         if self.selectionName:
             alg.preselection = self.selectionName + '_%SYS%'
         alg.eventInfo = config.readName (self.containerName)

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MCTRUTH_ATLASG4EVENTUSERINFO_H
@@ -11,48 +11,109 @@
 #include "G4ThreeVector.hh"
 #include "G4VUserEventInformation.hh"
 
+/** @class AtlasG4EventUserInfo
+
+ * @brief This class is attached to G4Event objects as
+ * UserInformation. It holds a pointer to the HepMC::GenEvent which
+ * was used to create the G4Event.
+ * NB As with VTrackInformation, the GenParticlePtr held by the
+ * AtlasG4EventUserInfo object can change during simulation (i.e. each
+ * time the track undergoes a non-destructive interaction).
+ */
 class AtlasG4EventUserInfo: public G4VUserEventInformation {
 public:
-        AtlasG4EventUserInfo(): G4VUserEventInformation(),m_nrOfPrimaryParticles(0),
-                        m_nrOfPrimaryVertices(0),m_theEvent(0),
-                        m_currentPrimary(0),m_currentlyTraced(0),
-                        m_last_processed_barcode(0),m_last_processed_step(0) {}
-        HepMC::GenEvent* GetHepMCEvent() ;
-        void SetHepMCEvent(HepMC::GenEvent*);
-        int GetNrOfPrimaryParticles() const;
-        void SetNrOfPrimaryParticles(int nr);
-        int GetNrOfPrimaryVertices() const;
-        void SetNrOfPrimaryVertices(int nr);
-        void SetVertexPosition(const G4ThreeVector&);
-        const G4ThreeVector GetVertexPosition() const;
-        void Print() const {}
+  AtlasG4EventUserInfo()
+    : G4VUserEventInformation()
+  {}
 
-        void SetCurrentPrimary(HepMC::ConstGenParticlePtr p) {m_currentPrimary=p;}
+  /**
+   * @brief return a pointer to the HepMC::GenEvent used to create the
+   * G4Event. (Never called. Remove?)
+   */
+  HepMC::GenEvent* GetHepMCEvent() ;
+  /**
+   * @brief set m_theEvent, the pointer to the HepMC::GenEvent used to
+   * create the G4Event. Only called in ISF::InputConverter::ISF_to_G4Event(...).
+   */
+  void SetHepMCEvent(HepMC::GenEvent*);
 
-        void SetCurrentlyTraced(HepMC::GenParticlePtr p) {m_currentlyTraced=p;}
+  /**
+   * @brief return a pointer to the HepMC::GenParticle used to create
+   * the current G4PrimaryParticle. (Used in G4VFastSimulationModel
+   * implementations and Sensitive Detectors which record
+   * CaloCalibrationHits.) TODO Rename
+   */
+  HepMC::ConstGenParticlePtr GetCurrentPrimaryGenParticle() const {return m_currentPrimaryGenParticle;}
+  /**
+   * @brief set m_currentPrimaryGenParticle, the pointer to the
+   * HepMC::GenParticle used to create the current
+   * G4PrimaryParticle. This pointer is updated each time there is a
+   * new G4PrimaryParticle. Called from
+   * (AthenaTrackingAction/TrackProcessorUserActionBase)::
+   * PreUserTrackingAction(...). TODO Rename
+   */
+  void SetCurrentPrimaryGenParticle(HepMC::ConstGenParticlePtr p) {m_currentPrimaryGenParticle = p;}
 
-        HepMC::ConstGenParticlePtr GetCurrentPrimary() const {return m_currentPrimary;}
+  /**
+   * @brief return a pointer to the GenParticle corresponding to the
+   * current G4Track (if there is one). TODO Rename
+   */
+  HepMC::GenParticlePtr GetCurrentlyTraced() {return m_currentlyTraced;}
+  HepMC::ConstGenParticlePtr GetCurrentlyTraced() const {return m_currentlyTraced;}
+  /**
+   * @brief set m_currentlyTraced, the pointer to the GenParticle
+   * corresponding to the current G4Track. This will be updated each
+   * time an interaction of the G4Track is recorded to the
+   * HepMC::GenEvent. TODO Rename
+   */
+  void SetCurrentlyTraced(HepMC::GenParticlePtr p) {m_currentlyTraced=p;}
 
-        HepMC::GenParticlePtr GetCurrentlyTraced() {return m_currentlyTraced;}
-        HepMC::ConstGenParticlePtr GetCurrentlyTraced() const {return m_currentlyTraced;}
+  /**
+   * @brief return the value of G4Track::GetTrackID() for the last
+   * G4Step processed by a CaloCalibrationHit Sensitive Detector. Used
+   * in CalibrationDefaultProcessing::UserSteppingAction(...) to
+   * ensure that unprocessed G4Steps are passed to the default
+   * CaloCalibrationHit sensitive detector. TODO Rename
+   */
+  int GetLastProcessedTrackID() const { return m_lastProcessedTrackID; }
+  /**
+   * @brief record the value of G4Track::GetTrackID() for the current
+   * G4Step. Should be called by all CaloCalibrationHit Sensitive
+   * Detectors after they process a G4Step. TODO Check this. TODO
+   * Rename
+   */
+  void SetLastProcessedTrackID(int trackID) { m_lastProcessedTrackID = trackID; }
 
-        int GetLastProcessedBarcode() const { return m_last_processed_barcode; }
-        void SetLastProcessedBarcode(int b) { m_last_processed_barcode = b; }
-        int GetLastProcessedStep() const { return m_last_processed_step; }
-        void SetLastProcessedStep(int s) { m_last_processed_step = s; }
+  /**
+   * @brief return the value of the G4Track::GetCurrentStepNumber()
+   * for the last G4Step processed by a CaloCalibrationHit Sensitive
+   * Detector. Used in
+   * CalibrationDefaultProcessing::UserSteppingAction(...) to ensure
+   * that unprocessed G4Steps are passed to the default
+   * CaloCalibrationHit sensitive detector.
+   */
+  int GetLastProcessedStep() const { return m_lastProcessedStep; }
+  /**
+   * @brief record value of the G4Track::GetCurrentStepNumber() for
+   * the current G4Step. Should be called by all CaloCalibrationHit
+   * Sensitive Detectors after they process a G4Step. TODO Check this
+   * is done.
+   */
+  void SetLastProcessedStep(int stepNumber) { m_lastProcessedStep = stepNumber; }
+
+  void Print() const {}
 
 private:
-        G4ThreeVector m_vertexPosition;
-        int m_nrOfPrimaryParticles;
-        int m_nrOfPrimaryVertices;
-        HepMC::GenEvent *m_theEvent;
-        HepMC::ConstGenParticlePtr m_currentPrimary;
-        HepMC::GenParticlePtr m_currentlyTraced;
-        // These two are used by calibration hits as event-level flags
-        // They correspond to the last barcode and step processed by an SD
-        // Both are needed, because a particle might have only one step
-        int m_last_processed_barcode;
-        int m_last_processed_step;
+  HepMC::GenEvent *m_theEvent{};
+  HepMC::ConstGenParticlePtr m_currentPrimaryGenParticle{};
+  HepMC::GenParticlePtr m_currentlyTraced{};
+  // These next two variables are used by the CaloCalibrationHit
+  // recording code as event-level flags They correspond to the Track
+  // ID and step number of the last G4Step processed by a
+  // CaloCalibrationHit SD Both are needed, because a particle might
+  // have only one step
+  int m_lastProcessedTrackID{0};
+  int m_lastProcessedStep{0};
 };
 
 #endif // MCTRUTH_ATLASG4EVENTUSERINFO_H

@@ -122,23 +122,37 @@ class LArRawSC  final{
     /** @return pedestal Overflow */
     bool pedOverflow() const { return m_pedOverflow; }
 
+
+    /** @brief Set identifier */
+    void setHardwareId(const HWIdentifier id);
+
+    /** @brief Set channel number */
+    void setChannel(const unsigned chan);
+
+    /** @brief Set source id */
+    void setSourceId(const unsigned sourceId);
+
     /** @brief Set energies .
         @param[in] samples  vector of energies
     */
-    void setEnergies( const std::vector < int >& energies);
+    void setEnergies( const std::vector < int >&& energies);
 
     /** @brief Set bcids.
         @param[in] samples  vector of bcids
     */
-    void setBCIds( const std::vector < unsigned short >& bcids);
+    void setBCIds( const std::vector < unsigned short >&& bcids);
 
     /** @brief Set energies*taus .
         @param[in] samples  vector of energies*taus
     */
-    void setTauEnergies( const std::vector < int >& tauEnergies);
+    void setTauEnergies( const std::vector < int >&& tauEnergies);
 
     /** @set true if passes the tau selection */
-    void setPassTauSelection( const std::vector < bool >& pass);
+    void setPassTauSelection( const std::vector < bool >&& pass);
+
+
+    /** @set saturation flags*/
+    void setSaturation( const std::vector < bool >&& satur);
 
     /** @set OFCa Overflow */
     void setOFCaOverflow(bool overflow){ m_ofcaOverflow=overflow; }

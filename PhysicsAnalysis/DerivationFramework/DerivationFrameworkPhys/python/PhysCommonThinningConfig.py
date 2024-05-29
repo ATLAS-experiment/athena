@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # PhysCommonThinningConfig
 # Contains the configuration for the thinning for PHYS(LITE)
@@ -6,7 +6,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def PhysCommonThinningCfg(ConfigFlags, StreamName = "StreamDAOD_PHYS", **kwargs):
+def PhysCommonThinningCfg(flags, StreamName = "StreamDAOD_PHYS", **kwargs):
     """Configure the common augmentation"""
     acc = ComponentAccumulator()
 
@@ -21,7 +21,7 @@ def PhysCommonThinningCfg(ConfigFlags, StreamName = "StreamDAOD_PHYS", **kwargs)
     if "TrackParticleThinningToolName" in kwargs:
         tp_thinning_expression = "InDetTrackParticles.DFCommonTightPrimary && abs(DFCommonInDetTrackZ0AtPV)*sin(InDetTrackParticles.theta) < 3.0*mm && InDetTrackParticles.pt > 10*GeV"
         acc.merge(TrackParticleThinningCfg(
-            ConfigFlags,
+            flags,
             name                    = kwargs['TrackParticleThinningToolName'],
             StreamName              = StreamName, 
             SelectionString         = tp_thinning_expression,
@@ -30,7 +30,7 @@ def PhysCommonThinningCfg(ConfigFlags, StreamName = "StreamDAOD_PHYS", **kwargs)
     # Include inner detector tracks associated with muons
     if "MuonTPThinningToolName" in kwargs:
         acc.merge(MuonTrackParticleThinningCfg(
-            ConfigFlags,
+            flags,
             name                    = kwargs['MuonTPThinningToolName'],
             StreamName              = StreamName,
             MuonKey                 = "Muons",
@@ -38,8 +38,8 @@ def PhysCommonThinningCfg(ConfigFlags, StreamName = "StreamDAOD_PHYS", **kwargs)
 
     # Tau-related containers: taus, tau tracks and associated ID tracks, neutral PFOs, secondary vertices
     if "TauJetThinningToolName" in kwargs:
-        tau_thinning_expression = "TauJets.pt >= 13*GeV"
-        acc.merge(TauThinningCfg(ConfigFlags,
+        tau_thinning_expression = f"TauJets.pt >= {flags.Tau.MinPtDAOD}"
+        acc.merge(TauThinningCfg(flags,
             name                 = kwargs['TauJetThinningToolName'],
             StreamName           = StreamName,
             Taus                 = "TauJets",
@@ -51,8 +51,7 @@ def PhysCommonThinningCfg(ConfigFlags, StreamName = "StreamDAOD_PHYS", **kwargs)
 
     if "TauJets_MuonRMThinningToolName" in kwargs:
         tau_murm_thinning_expression = tau_thinning_expression.replace('TauJets', 'TauJets_MuonRM')
-        tau_murm_thinning_expression += " && TauJets_MuonRM.ModifiedInAOD"
-        acc.merge(TauThinningCfg(ConfigFlags,
+        acc.merge(TauThinningCfg(flags,
             name                 = kwargs['TauJets_MuonRMThinningToolName'],
             StreamName           = StreamName,
             Taus                 = "TauJets_MuonRM",
@@ -64,7 +63,7 @@ def PhysCommonThinningCfg(ConfigFlags, StreamName = "StreamDAOD_PHYS", **kwargs)
 
     if "TauJets_EleRMThinningToolName" in kwargs:
         tau_erm_thinning_expression = tau_thinning_expression.replace('TauJets', 'TauJets_EleRM')
-        acc.merge(TauThinningCfg(ConfigFlags,
+        acc.merge(TauThinningCfg(flags,
             name                 = kwargs['TauJets_EleRMThinningToolName'],
             StreamName           = StreamName,
             Taus                 = "TauJets_EleRM",
@@ -77,7 +76,7 @@ def PhysCommonThinningCfg(ConfigFlags, StreamName = "StreamDAOD_PHYS", **kwargs)
     # ID tracks associated with high-pt di-tau
     if "DiTauTPThinningToolName" in kwargs:
         acc.merge(DiTauTrackParticleThinningCfg(
-            ConfigFlags,
+            flags,
             name                    = kwargs['DiTauTPThinningToolName'],
             StreamName              = StreamName,
             DiTauKey                = "DiTauJets",
@@ -86,7 +85,7 @@ def PhysCommonThinningCfg(ConfigFlags, StreamName = "StreamDAOD_PHYS", **kwargs)
     ## Low-pt di-tau thinning
     if "DiTauLowPtThinningToolName" in kwargs:
         acc.merge(GenericObjectThinningCfg(
-            ConfigFlags,
+            flags,
             name            = kwargs['DiTauLowPtThinningToolName'],
             StreamName      = StreamName,
             ContainerName   = "DiTauJetsLowPt",
@@ -95,7 +94,7 @@ def PhysCommonThinningCfg(ConfigFlags, StreamName = "StreamDAOD_PHYS", **kwargs)
     # ID tracks associated with low-pt ditau
     if "DiTauLowPtTPThinningToolName" in kwargs:
         acc.merge(DiTauTrackParticleThinningCfg(
-            ConfigFlags,
+            flags,
             name                    = kwargs['DiTauLowPtTPThinningToolName'],
             StreamName              = StreamName,
             DiTauKey                = "DiTauJetsLowPt",
@@ -105,7 +104,7 @@ def PhysCommonThinningCfg(ConfigFlags, StreamName = "StreamDAOD_PHYS", **kwargs)
     # keep calo clusters around electrons
     if "ElectronCaloClusterThinningToolName" in kwargs:
         acc.merge(CaloClusterThinningCfg(
-            ConfigFlags,
+            flags,
             name                  = kwargs['ElectronCaloClusterThinningToolName'],
             StreamName            = StreamName,
             SGKey                 = "AnalysisElectrons",
@@ -115,7 +114,7 @@ def PhysCommonThinningCfg(ConfigFlags, StreamName = "StreamDAOD_PHYS", **kwargs)
     # keep calo clusters around photons
     if "PhotonCaloClusterThinningToolName" in kwargs:
         acc.merge(CaloClusterThinningCfg(
-            ConfigFlags,
+            flags,
             name                  = kwargs['PhotonCaloClusterThinningToolName'],
             StreamName            = StreamName,
             SGKey                 = "AnalysisPhotons",

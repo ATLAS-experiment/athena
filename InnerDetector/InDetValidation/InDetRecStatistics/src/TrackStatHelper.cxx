@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -19,6 +19,7 @@
 #include "InDetRecStatistics/TrackStatHelper.h"
 #include "AtlasDetDescr/AtlasDetectorID.h"
 #include "AtlasHepMC/GenVertex.h"
+#include "AtlasHepMC/GenEvent.h"
 #include "CLHEP/Geometry/Point3D.h"
 #include "InDetIdentifier/PixelID.h"
 #include "InDetIdentifier/SCT_ID.h"
@@ -426,7 +427,7 @@ void InDet::TrackStatHelper::addEvent(const TrackCollection              * recTr
     bool matched = false;
     int nmatched = 0;
     
-    HepMcParticleLink hmpl2(particle,truth->second,HepMcParticleLink::IS_EVENTNUM); // FIXME truth->second is actually the position of the GenEvent in the McEventCollection!! See InDetRecStatisticsAlg::selectGenSignal(...) method (only client of TrackStatsHelper)
+    HepMcParticleLink hmpl2(particle,particle->parent_event()->event_number(),HepMcParticleLink::IS_EVENTNUM);
     recoToTruthMap::iterator rttIter=rttMap.find(hmpl2);
     if(rttIter != rttMap.end()){
       for(imap = rttMap.lower_bound(hmpl2); imap !=rttMap.upper_bound(hmpl2); ++imap){

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 ## @file TriggerUnixStandardSetup.py
 ## @brief py-module to configure the Athena AppMgr for trigger
@@ -54,7 +54,8 @@ def commonServicesCfg(flags):
         StackTrace = True,       # then produce full stacktrace using gdb
         DumpCoreFile = True,     # also produce core file (if allowed by ulimit -c)
         FatalHandler = 0,        # no extra fatal handler
-        TimeOut = 120e9) )       # timeout for stack trace generation changed to 120s (ATR-17112,ATR-25404)
+        TimeOut = 120e9),        # timeout for stack trace generation changed to 120s (ATR-17112,ATR-25404)
+                    create = True )    # always create the service
 
     # IOVSvc
     cfg.addService( CompFactory.IOVSvc(

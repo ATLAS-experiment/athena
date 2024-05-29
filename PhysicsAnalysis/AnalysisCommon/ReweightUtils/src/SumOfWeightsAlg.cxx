@@ -5,7 +5,6 @@
 // ReweightUtils includes
 #include "SumOfWeightsAlg.h"
 #include "ReweightUtils/WeightToolBase.h"
-#include "CxxUtils/starts_with.h"
 
 #include "TString.h"
 #include <string>
@@ -49,7 +48,7 @@ StatusCode SumOfWeightsAlg::initialize ATLAS_NOT_THREAD_SAFE () {
     }
     //strip the 'ToolSvc.' off the weight name
     std::string toolName = m_weightTools[itool]->name();
-    if(CxxUtils::starts_with (toolName, "ToolSvc.")) toolName.replace(0,8,"");
+    if(toolName.starts_with ("ToolSvc.")) toolName.replace(0,8,"");
     CutIdentifier cID = cutFlowSvc()->registerTopFilter( toolName,
                                                          toolName, // description (can be improved FIXME)
                                                          xAOD::CutBookkeeper::CutLogic::ALLEVENTSPROCESSED,

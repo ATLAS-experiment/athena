@@ -36,7 +36,7 @@ namespace{
 }
 std::pair<bool, std::unique_ptr<Trk::Volume>>
 Trk::VolumeIntersection::intersect(const Volume& volA,
-                                   const Volume& volB) const {
+                                   const Volume& volB) {
 
     // if combination of shifted polygons, calculable
     Trk::PolygonCache pgA = polygonXY(volA);
@@ -97,7 +97,7 @@ Trk::VolumeIntersection::intersect(const Volume& volA,
             auto spb = std::make_unique<Trk::SimplePolygonBrepVolumeBounds>(result.xyVertices, 0.5 * (result.maxZ - result.minZ));
             Amg::Transform3D transf = trf.inverse() *
                                       Amg::Translation3D(0., 0., 0.5 * (result.maxZ + result.minZ));
-            overlap = std::make_unique<Trk::Volume>(makeTransform(std::move(transf)), spb.release());
+            overlap = std::make_unique<Trk::Volume>(makeTransform(transf), spb.release());
         }
         return std::make_pair(true, std::move(overlap));
     }  // end shifted polygons
@@ -106,17 +106,15 @@ Trk::VolumeIntersection::intersect(const Volume& volA,
 }
 
 Trk::PolygonCache Trk::VolumeIntersection::intersectPgon(
-    Trk::PolygonCache& pgA, Trk::PolygonCache& pgB) const {
+    Trk::PolygonCache& pgA, Trk::PolygonCache& pgB) {
 
     // retrieve xy vertices (size+1)
     for (const Amg::Vector3D& vtx : pgA.vertices)
-        pgA.xyVertices.push_back(std::make_pair(vtx.x(), vtx.y()));
-    pgA.xyVertices.push_back(
-        std::make_pair(pgA.vertices.front().x(), pgA.vertices.front().y()));
+        pgA.xyVertices.emplace_back(vtx.x(), vtx.y());
+    pgA.xyVertices.emplace_back(pgA.vertices.front().x(), pgA.vertices.front().y());
     for (const Amg::Vector3D& vtx : pgB.vertices)
-        pgB.xyVertices.push_back(std::make_pair(vtx.x(), vtx.y()));
-    pgB.xyVertices.push_back(
-        std::make_pair(pgB.vertices.front().x(), pgB.vertices.front().y()));
+        pgB.xyVertices.emplace_back(vtx.x(), vtx.y());
+    pgB.xyVertices.emplace_back(pgB.vertices.front().x(), pgB.vertices.front().y());
     // find common
     for (const std::pair<double, double>& vtx : pgA.xyVertices) {
         pgA.commonVertices.push_back(inside(vtx, pgB.xyVertices));
@@ -126,14 +124,14 @@ Trk::PolygonCache Trk::VolumeIntersection::intersectPgon(
     }
     // edges
     for (int ia = 0; ia < pgA.nVtx; ia++) {
-        pgA.edges.push_back(std::make_pair(
+        pgA.edges.emplace_back(
             pgA.xyVertices[ia + 1].first - pgA.xyVertices[ia].first,
-            pgA.xyVertices[ia + 1].second - pgA.xyVertices[ia].second));
+            pgA.xyVertices[ia + 1].second - pgA.xyVertices[ia].second);
     }
     for (int ib = 0; ib < pgB.nVtx; ib++) {
-        pgB.edges.push_back(std::make_pair(
+        pgB.edges.emplace_back(
             pgB.xyVertices[ib + 1].first - pgB.xyVertices[ib].first,
-            pgB.xyVertices[ib + 1].second - pgB.xyVertices[ib].second));
+            pgB.xyVertices[ib + 1].second - pgB.xyVertices[ib].second);
     }
     // edge intersections
     std::vector<Trk::EdgeCross> edge_cross;
@@ -157,16 +155,15 @@ Trk::PolygonCache Trk::VolumeIntersection::intersectPgon(
                                    det(pgA.edges[ia], pgA.edges[ia], true)
                         : 0;
                 if (t0 > 0 && t0 < 1.)
-                    edge_cross.push_back(Trk::EdgeCross(
-                        std::make_pair(ia, ib), std::make_pair(t0, -1)));
+                    edge_cross.emplace_back(
+                        std::make_pair(ia, ib), std::make_pair(t0, -1));
                 if (t1 > 0 && t1 < 1.)
-                    edge_cross.push_back(Trk::EdgeCross(
-                        std::make_pair(ia, ib), std::make_pair(t1, -1)));
+                    edge_cross.emplace_back(
+                        std::make_pair(ia, ib), std::make_pair(t1, -1));
             } else if (rs != 0 && qps / rs > 0 && qps / rs < 1 &&
                        rpq / rs > 0 && rpq / rs < 1) {
-                edge_cross.push_back(
-                    Trk::EdgeCross(std::make_pair(ia, ib),
-                                   std::make_pair(qps / rs, rpq / rs)));
+                edge_cross.emplace_back(std::make_pair(ia, ib),
+                                   std::make_pair(qps / rs, rpq / rs));
             }
         }
     }
@@ -174,11 +171,11 @@ Trk::PolygonCache Trk::VolumeIntersection::intersectPgon(
     std::vector<Trk::EdgeCross> setVtx;
     for (int ia = 0; ia < pgA.nVtx; ia++) {
         if (pgA.commonVertices[ia])
-            setVtx.push_back(Trk::EdgeCross(std::make_pair(ia, -1),
-                                            std::make_pair(0., -1.)));
+            setVtx.emplace_back(std::make_pair(ia, -1),
+                                            std::make_pair(0., -1.));
         for (const Trk::EdgeCross& ie : edge_cross) {
             if (ie.edge_id.first == ia) {
-                if (setVtx.size() > 0 && setVtx.back().edge_id.first == ia &&
+                if (!setVtx.empty() && setVtx.back().edge_id.first == ia &&
                     setVtx.back().edge_pos.first > ie.edge_pos.first)
                     setVtx.insert(setVtx.end() - 1, ie);
                 else
@@ -231,7 +228,7 @@ Trk::PolygonCache Trk::VolumeIntersection::intersectPgon(
             Amg::Vector2D vdir{pgA.edges[vtx.edge_id.first].first,
                                pgA.edges[vtx.edge_id.first].second};
             Amg::Vector2D vint = vpos + vtx.edge_pos.first * vdir;
-            pgon.xyVertices.push_back(std::make_pair(vint.x(), vint.y()));
+            pgon.xyVertices.emplace_back(vint.x(), vint.y());
         }
     }
 
@@ -239,7 +236,7 @@ Trk::PolygonCache Trk::VolumeIntersection::intersectPgon(
 }
 
 Trk::PolygonCache Trk::VolumeIntersection::polygonXY(const Trk::Volume& vol,
-                                                     int swap) const {
+                                                     int swap) {
 
     const CuboidVolumeBounds* box =
         dynamic_cast<const Trk::CuboidVolumeBounds*>(&(vol.volumeBounds()));
@@ -389,7 +386,7 @@ Trk::PolygonCache Trk::VolumeIntersection::polygonXY(const Trk::Volume& vol,
 
 bool Trk::VolumeIntersection::inside(
     const std::pair<double, double>& vtx,
-    const std::vector<std::pair<double, double>>& pgon) const {
+    const std::vector<std::pair<double, double>>& pgon) {
 
     // GM code
     bool in = false;
@@ -407,7 +404,7 @@ bool Trk::VolumeIntersection::inside(
 
 double Trk::VolumeIntersection::det(const std::pair<double, double>& a,
                                     const std::pair<double, double>& b,
-                                    bool dot) const {
+                                    bool dot) {
 
     if (dot)
         return (a.first * b.first + a.second * b.second);
@@ -417,7 +414,7 @@ double Trk::VolumeIntersection::det(const std::pair<double, double>& a,
 
 std::pair<bool, std::unique_ptr<Trk::Volume>>
 Trk::VolumeIntersection::intersectApproximative(const Volume& volA,
-                                                const Volume& volB) const {
+                                                const Volume& volB) {
 
     // if combination of shifted polygons, calculable
     Trk::PolygonCache pgA = polygonXY(volA);
@@ -496,7 +493,7 @@ Trk::VolumeIntersection::intersectApproximative(const Volume& volA,
                                                                             0.5 * (result.maxZ - result.minZ));
             Amg::Transform3D transf = trf.inverse() *
                                       Amg::Translation3D(0., 0., 0.5 * (result.maxZ + result.minZ));
-            overlap = std::make_unique<Trk::Volume>(makeTransform(std::move(transf)), spb.release());
+            overlap = std::make_unique<Trk::Volume>(makeTransform(transf), spb.release());
         }
         return std::make_pair(true, std::move(overlap));
     }  // end shifted polygons

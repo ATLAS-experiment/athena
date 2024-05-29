@@ -15,6 +15,7 @@
 #include "TrkTrack/LinkToTrack.h"
 #include "TrkParticleBase/LinkToTrackParticleBase.h"
 #include "TrkParticleBase/TrackParticleBase.h"
+#include "EventPrimitives/EventPrimitivesCovarianceHelpers.h"
 #include "EventPrimitives/EventPrimitives.h"
 #include "TrkLinks/LinkToXAODTrackParticle.h" 
 //xAOD includes 
@@ -260,8 +261,7 @@ namespace Trk
 				deltaTrk[0] = delta_V[0]                 - ( firstStartingPoint.position() [0] - linPoint [0] );
 				deltaTrk[1] = delta_V[1]                 - ( firstStartingPoint.position() [1] - linPoint [1] );
 				deltaTrk[2] = delta_V[2]                 - ( firstStartingPoint.position() [2] - linPoint [2] );
-				double chi2FromConstraint ( ( deltaTrk.transpose() * firstStartingPoint.covariancePosition().inverse().eval() * deltaTrk ) [0] );
-				chi2New  += chi2FromConstraint;
+				chi2New += Amg::chi2(firstStartingPoint.covariancePosition().inverse().eval(), deltaTrk);
 			}
 
 			/* assign new linearization point (= new vertex position in global frame) */

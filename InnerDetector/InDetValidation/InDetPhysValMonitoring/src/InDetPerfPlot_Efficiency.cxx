@@ -107,7 +107,7 @@ InDetPerfPlot_Efficiency::fill(const xAOD::TruthParticle& truth, const bool isGo
   const auto pVal =  std::lower_bound(m_eta_bins.begin(), m_eta_bins.end(), std::abs(eta));
   const int bin = std::distance(m_eta_bins.begin(), pVal) - 1;
   fillHisto(m_efficiency_vs_truthMu_eta_bin[bin], truthMu, isGood, weight);
-  fillHisto(m_efficiency_vs_actualMu_eta_bin[bin], truthMu, isGood, weight);
+  fillHisto(m_efficiency_vs_actualMu_eta_bin[bin], actualMu, isGood, weight);
 
   fillHisto(m_efficiency_vs_eta, eta, isGood, weight);
   fillHisto(m_efficiency_vs_pt, pt, isGood, weight);

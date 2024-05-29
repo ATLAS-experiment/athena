@@ -67,6 +67,9 @@ class LArFlatFromFile: public AthAlgorithm
   Gaudi::Property<std::string> m_Folder{this, "Folder","","Folder to create"};
   Gaudi::Property<std::string> m_BlobName{this, "Blob","","Blob name"};
 
+  // Check input file completness?
+  Gaudi::Property<bool> m_checkCompletness{this, "checkInput", true, "Check if input file is complete"};
+
   bool m_forceStop{};
 }; 
 

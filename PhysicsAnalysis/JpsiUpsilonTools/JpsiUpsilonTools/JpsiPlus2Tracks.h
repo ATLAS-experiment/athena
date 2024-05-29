@@ -57,7 +57,7 @@ namespace Analysis {
         static double getInvariantMass(const std::vector<const xAOD::TrackParticle*> &trk, const std::vector<double>&);
         static bool   oppositeCharges(const xAOD::TrackParticle*, const xAOD::TrackParticle*);
 
-        bool  passCuts(xAOD::BPhysHelper &bHelper, const std::vector<double> &masses, const std::string &str) const;
+        bool  passCuts(xAOD::BPhysHelper &bHelper, std::span<const double> masses, std::string_view str) const;
         bool  vertexCuts(xAOD::BPhysHelper &bHelper) const;
         xAOD::Vertex* fit(const std::vector<const xAOD::TrackParticle*>&,
                           const xAOD::TrackParticleContainer*, const xAOD::TrackParticleContainer* GSL) const;

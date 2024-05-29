@@ -75,12 +75,17 @@ def EvoMon(old_calib, new_calib, mapping, old_iov, new_iov):
                    "Disk"  :{"bad":0, "ok":0} 
                   }
     
-    for mod in range(len(new_calib)):
+    # There are 2048 modules in the structure
+    for mod in range(2048):
 
         mod_str = mapping[str(mod)]
         mod_layer = ""
         print( "%-18s - %4i" % (mod_str, mod), end='\r')
         
+        # Skipping modules that have not been calibrated
+        if str(mod) not in new_calib:
+            continue
+               
         if mod_str.startswith("L0"): 
             mod_layer = "Blayer"
         elif mod_str.startswith("L1"): 
@@ -98,6 +103,8 @@ def EvoMon(old_calib, new_calib, mapping, old_iov, new_iov):
         fig = Figure(figsize=(13,10))
         axs = fig.add_subplot(1,1,1)
         status = "_OK"
+        
+        
         
         for fe in range(len(new_calib[str(mod)])):
             information["Total_FE"] += 1
@@ -276,8 +283,8 @@ if __name__ == "__main__":
                             Example: python -m PixelCalibAlgs.EvoMonitoring --new "path/to/file" --old "path/to/file" """)
     
     parser.add_argument('--new', default="FINAL_calibration_candidate.txt", help="New calibration file (output format from the Recovery.py)")
-    parser.add_argument('--old', default="PixelChargeCalibration-DATA-RUN2-UPD4-26.log", help="Old DB IOV calibration")
+    parser.add_argument('--old', default="PixelChargeCalibration-DATA-RUN2-UPD4-27.log", help="Old DB IOV calibration")
     
     args = parser.parse_args()
     setupRunEvo(args.new, args.old)
-    exit(0) 
+    exit(0)

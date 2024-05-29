@@ -1295,12 +1295,15 @@ def promote_keys(meta_dict, mode):
                 if 'eventTypes' in md and len(md['eventTypes']):
                     et = md['eventTypes'][0]
                     md['mc_event_number'] = et.get('mc_event_number', md['runNumbers'][0])
-                    md['mc_channel_number'] = et.get('mc_channel_number', 0)
+                    if 'mc_channel_number' in et:
+                        md['mc_channel_number'] = et.get('mc_channel_number', None)
                     md['eventTypes'] = et['type']
 
                     # For very old files
-                    md['GeoAtlas']       = et.get('GeoAtlas', 0) 
-                    md['IOVDbGlobalTag'] = et.get('IOVDbGlobalTag', 0)
+                    if 'GeoAtlas' in et:
+                        md['GeoAtlas']       = et.get('GeoAtlas', None)
+                    if 'IOVDbGlobalTag' in et:
+                        md['IOVDbGlobalTag'] = et.get('IOVDbGlobalTag', None)
 
                 if 'lumiBlockNumbers' in md[key]:
                     md['lumiBlockNumbers'] = md[key]['lumiBlockNumbers']

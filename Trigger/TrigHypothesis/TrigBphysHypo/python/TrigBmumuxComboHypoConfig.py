@@ -28,6 +28,8 @@ def BmumuxComboHypoCfg(flags, name):
         TrkZ0 = 50.,
         FitAttemptsWarningThreshold = 200,
         FitAttemptsBreakThreshold = 1000,
+        FastFit_2trk_chi2 = 50.,
+        FastFit_2mu1trk_chi2 = 60.,
         # dimuon properties
         Dimuon_rejectSameChargeTracks = True,
         Dimuon_massRange = (100., 5500.),
@@ -37,12 +39,14 @@ def BmumuxComboHypoCfg(flags, name):
         BplusToMuMuKaon_minKaonPt = 100.,
         BplusToMuMuKaon_massRange = (4500., 5900.),
         BplusToMuMuKaon_chi2 = 50.,
+        BplusToMuMuKaon_useFastFit = False,
         # B_c+ -> J/psi(-> mu+ mu-) pi+
         BcToMuMuPion = True,
         BcToMuMuPion_minPionPt = 2000.,
         BcToMuMuPion_dimuonMassRange = (2500., 4300.),
         BcToMuMuPion_massRange = (5500., 7300.),
         BcToMuMuPion_chi2 = 50.,
+        BcToMuMuPion_useFastFit = False,
         # B_s0 -> mu+ mu- phi(-> K+ K-)
         BsToMuMuPhi1020 = True,
         BsToMuMuPhi1020_rejectSameChargeTracks = True,
@@ -50,6 +54,7 @@ def BmumuxComboHypoCfg(flags, name):
         BsToMuMuPhi1020_massRange = (4800., 5800.),
         BsToMuMuPhi1020_phiMassRange = (940., 1100.),
         BsToMuMuPhi1020_chi2 = 60.,
+        BsToMuMuPhi1020_useFastFit = False,
         # B0 -> mu+ mu- K*0(-> K+ pi-)
         BdToMuMuKstar0 = True,
         BdToMuMuKstar0_rejectSameChargeTracks = True,
@@ -58,6 +63,7 @@ def BmumuxComboHypoCfg(flags, name):
         BdToMuMuKstar0_massRange = (4600., 5900.),
         BdToMuMuKstar0_KstarMassRange = (700., 1100.),
         BdToMuMuKstar0_chi2 = 60.,
+        BdToMuMuKstar0_useFastFit = True,
         # Lambda_b0 -> J/psi(-> mu+ mu-) p K-
         LambdaBToMuMuProtonKaon = True,
         LambdaBToMuMuProtonKaon_rejectSameChargeTracks = False,
@@ -67,6 +73,7 @@ def BmumuxComboHypoCfg(flags, name):
         LambdaBToMuMuProtonKaon_dimuonMassRange = (2500., 4300.),
         LambdaBToMuMuProtonKaon_massRange = (4800., 6400.),
         LambdaBToMuMuProtonKaon_chi2 = 60.,
+        LambdaBToMuMuProtonKaon_useFastFit = True,
         # B_c+ -> J/psi(-> mu+ mu-) D_s+(->phi(-> K+ K-) pi+)
         BcToDsMuMu = True,
         BcToDsMuMu_minKaonPt = 1000.,
@@ -76,6 +83,7 @@ def BmumuxComboHypoCfg(flags, name):
         BcToDsMuMu_phiMassRange = (940., 1100.),
         BcToDsMuMu_DsMassRange = (1750., 2100.),
         BcToDsMuMu_chi2 = 60.,
+        BcToDsMuMu_useFastFit = True,
         # B_c+ -> J/psi(-> mu+ mu-) D+(-> K- pi+ pi+)
         BcToDplusMuMu = True,
         BcToDplusMuMu_minKaonPt = 1000.,
@@ -84,6 +92,7 @@ def BmumuxComboHypoCfg(flags, name):
         BcToDplusMuMu_dimuonMassRange = (2500., 4300.),
         BcToDplusMuMu_DplusMassRange = (1750., 2000.),
         BcToDplusMuMu_chi2 = 60.,
+        BcToDplusMuMu_useFastFit = True,
         # B_c+ -> J/psi(-> mu+ mu-) D*+(-> D0(-> K- pi+) pi+)
         BcToDstarMuMu = True,
         BcToDstarMuMu_makeDstar = True,
@@ -129,5 +138,5 @@ def TrigBmumuxComboHypoToolFromDict(flags, chainDict):
     tool.isBmux = True if 'bBmux' in chainDict['topo'] else False
     monGroups = ['bphysMon:online']
     if any(group in monGroups for group in chainDict['monGroups']):
-        tool.MonTool = TrigBmumuxComboHypoToolMonitoring(flags, 'MonTool')    
+        tool.MonTool = TrigBmumuxComboHypoToolMonitoring(flags, 'MonTool')
     return tool

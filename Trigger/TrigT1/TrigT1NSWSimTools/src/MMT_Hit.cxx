@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "TrigT1NSWSimTools/MMT_Hit.h"
@@ -45,9 +45,10 @@ MMT_Hit::MMT_Hit(const hitData_entry &entry, const MuonGM::MuonDetectorManager* 
   if(m_strip > 8191 || m_strip<0){
     m_strip = 0;
   }
+  int istrip = (std::abs(m_station_eta)-1) * (64*8*10) + m_strip; //here needed the absolute index of the strip on the sector layer (m_strip is only up to 5119)
 
   // region represent the index of the mmfe8 in the plane
-  int region = int(float(m_strip)/(64*8));
+  int region = int(float(istrip)/(64*8));
   // map of mmfe8s layer,radius(MMFE8 index on sector)
   unsigned int mmfe8s[8][16];
   // loop on layers
@@ -61,6 +62,9 @@ MMT_Hit::MMT_Hit(const hitData_entry &entry, const MuonGM::MuonDetectorManager* 
       }
     }
   }
+  // re-assigning as seems not to work with new stand-alone run with RecoTf from HITS samples
+  m_MMFE_VMM = region; // index of the MMFE8 board on the layer
+  m_VMM_chip = int(1. *istrip /64.); // index of the VMM chip on the layer
   // art asic id
   if(!int(m_plane/2.)%2){
     if (mmfe8s[m_plane][region]==1){ //Right
@@ -97,7 +101,7 @@ MMT_Hit::MMT_Hit(const hitData_entry &entry, const MuonGM::MuonDetectorManager* 
     m_RZslope = m_R / m_Z;
 
     int eta = std::abs(m_station_eta)-1;
-    double base = par->ybases[m_plane][eta];
+    double base = par->getYbase(m_plane, eta);
     m_Y = base + m_strip*roP.stripPitch - roP.stripPitch/2.;
     m_YZslope = m_Y / m_Z;
 

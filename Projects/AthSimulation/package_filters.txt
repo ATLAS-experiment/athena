@@ -289,7 +289,6 @@
 + Reconstruction/RecEvent
 + Reconstruction/RecEventAthenaPool
 + Reconstruction/RecEventTPCnv
-+ Simulation/Barcode/BarcodeEvent
 + Simulation/Barcode/BarcodeInterfaces
 + Simulation/Barcode/BarcodeServices
 + Simulation/BeamEffects

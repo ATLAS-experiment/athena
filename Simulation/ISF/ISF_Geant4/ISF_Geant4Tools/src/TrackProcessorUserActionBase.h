@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_GEANT4TOOLS_TRACKPROCESSORUSERACTIONBASE_H
@@ -35,7 +35,7 @@ class TrackProcessorUserActionBase: public G4UserTrackingAction,
 {
 
 public:
-  TrackProcessorUserActionBase();
+  TrackProcessorUserActionBase() = default;
   virtual void BeginOfEventAction(const G4Event*) override final;
   virtual void EndOfEventAction(const G4Event*) override final;
 
@@ -47,7 +47,7 @@ public:
   ISF::ISFParticleContainer ReturnSecondaries(ISF::ISFParticle const* parent);
 
 protected:
-  AtlasG4EventUserInfo* m_atlasG4EvtUserInfo;   //!< event-global G4 UserInformation
+  AtlasG4EventUserInfo *m_atlasG4EvtUserInfo{};   //!< event-global G4 UserInformation
 
   ISF::ISFParticleContainer m_storedSecondaries;
 
@@ -64,17 +64,17 @@ private:
 
   /// Set the following information as the currently traced particle
   void setCurrentParticle(ISF::ISFParticle* baseISFParticle,
-                          HepMC::ConstGenParticlePtr truthPrimary,
+                          HepMC::ConstGenParticlePtr primaryGenParticle,
                           HepMC::GenParticlePtr truthCurrentlyTraced);
 
   /// Classify the particle represented by the given set of truth links
-  TrackClassification classify(HepMC::ConstGenParticlePtr primaryTruthParticle,
-                               HepMC::ConstGenParticlePtr generationZeroTruthParticle,
+  TrackClassification classify(HepMC::ConstGenParticlePtr primaryGenParticle,
+                               HepMC::ConstGenParticlePtr generationZeroGenParticle,
                                HepMC::ConstGenParticlePtr currentlyTracedHepPart,
                                int regenerationNumber) const;
 
   /// The most recent ISFParticle ancestor that triggers the currently processed G4Track
-  ISF::ISFParticle* m_curBaseISP;
+  ISF::ISFParticle* m_curBaseISP{};
 
 }; // class TrackProcessorUserActionBase
 

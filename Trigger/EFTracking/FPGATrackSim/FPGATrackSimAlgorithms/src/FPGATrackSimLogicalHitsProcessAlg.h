@@ -122,6 +122,19 @@ class FPGATrackSimLogicalHitsProcessAlg : public AthAlgorithm
         std::vector<FPGATrackSimHit>     m_hits_1st_miss, m_hits_2nd_miss;
         std::vector<FPGATrackSimTrack>   m_tracks_1st_guessedcheck, m_tracks_1st_nomiss, m_tracks_2nd_guessedcheck, m_tracks_2nd_nomiss;
 
+        // internal counters
+        double m_evt = 0; // number of events passing event selection, independent of truth
+        long m_nRoadsTot = 0; // total number of roads in those events
+        long m_nTracksTot = 0; // total number of tracks in those events
+        long m_nTracksChi2Tot = 0; // total number of tracks passing chi2 in those events
+        long m_nTracksChi2OLRTot = 0; // total number of tracks passing chi2 and OLR in those events
+
+        double m_evt_truth = 0; // number of events passing event selection and having a truth object
+        long m_nRoadsFound = 0; // total number of those events with at least one road
+        long m_nTracksFound = 0; // total number of those events with at least one track
+        long m_nTracksChi2Found = 0; // total number of those events with at least one track passing chi2
+        long m_nTracksChi2OLRFound = 0; // total number of those events with at least one track passing chi2 and OLR
+
 
         StatusCode readInputs(bool & done);
         StatusCode processInputs();

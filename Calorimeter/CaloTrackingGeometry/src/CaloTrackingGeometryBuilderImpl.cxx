@@ -125,8 +125,7 @@ Calo::CaloTrackingGeometryBuilderImpl::createTrackingGeometry(
     enclosedInnerSectorHalflength = innerDetectorBounds->halflengthZ();
     enclosedInnerSectorRadius = innerDetectorBounds->outerRadius();
 
-    keyDim.push_back(
-        RZPair(enclosedInnerSectorRadius, enclosedInnerSectorHalflength));
+    keyDim.emplace_back(enclosedInnerSectorRadius, enclosedInnerSectorHalflength);
   }
   // get the dimensions from the envelope service
   const RZPairVector& envelopeDefsIn =
@@ -249,8 +248,7 @@ Calo::CaloTrackingGeometryBuilderImpl::createTrackingGeometry(
         new Trk::TrackingVolume(idTr, idBounds, m_caloMaterial, dummyLayers,
                                 dummyVolumes, "Calo::GapVolumes::DummyID");
 
-    keyDim.push_back(
-        RZPair(enclosedInnerSectorRadius, enclosedInnerSectorHalflength));
+    keyDim.emplace_back(enclosedInnerSectorRadius, enclosedInnerSectorHalflength);
   }
 
   // BEAM PIPE
@@ -285,7 +283,7 @@ Calo::CaloTrackingGeometryBuilderImpl::createTrackingGeometry(
                     << i << ":" << bpCutouts[i].first << ","
                     << bpCutouts[i].second);
 
-  keyDim.push_back(RZPair(caloDefaultRadius, caloDefaultHalflengthZ));
+  keyDim.emplace_back(caloDefaultRadius, caloDefaultHalflengthZ);
 
   //////////// ---------------- BUILD FROM GEOMODEL ----------------------------
   ////////////////////////////////////
@@ -356,7 +354,7 @@ Calo::CaloTrackingGeometryBuilderImpl::createTrackingGeometry(
                                    ebBounds->halflengthZ()
                              : 3559.5;
 
-  keyDim.push_back(RZPair(rTileMin, zTileMin));
+  keyDim.emplace_back(rTileMin, zTileMin);
   for (unsigned int i = 0; i < keyDim.size(); i++) {
     ATH_MSG_VERBOSE("key dimensions:" << i << ":" << keyDim[i].first << ","
                                       << keyDim[i].second);
@@ -1433,9 +1431,9 @@ void Calo::CaloTrackingGeometryBuilderImpl::registerInLayerIndexCaloSampleMap(
 
   Trk::BinnedArraySpan<Trk::Layer const* const> layerObjects =
       confinedLayers->arrayObjects();
-  Trk::BinnedArraySpan<Trk::Layer const* const>::const_iterator layerObjIter =
+  Trk::BinnedArraySpan<Trk::Layer const* const>::iterator layerObjIter =
       layerObjects.begin();
-  Trk::BinnedArraySpan<Trk::Layer const* const>::const_iterator layerObjEnd =
+  Trk::BinnedArraySpan<Trk::Layer const* const>::iterator layerObjEnd =
       layerObjects.end();
 
   // now pick out the material layers (and skip the navigation ones)
@@ -1492,7 +1490,7 @@ Calo::CaloTrackingGeometryBuilderImpl::createBeamPipeVolumes(
   }
 
   RZPairVector dim;
-  dim.push_back(RZPair(bpCutouts[0].first, zmin));
+  dim.emplace_back(bpCutouts[0].first, zmin);
   float rOut = bpCutouts[0].first;
   for (const auto& bpCutout : bpCutouts) {
     if (bpCutout.second <= dim[0].second)
@@ -1504,7 +1502,7 @@ Calo::CaloTrackingGeometryBuilderImpl::createBeamPipeVolumes(
   }
 
   if (dim.back().second < zmax)
-    dim.push_back(RZPair(rOut, zmax));
+    dim.emplace_back(rOut, zmax);
 
   if (dim.size() == 2) {  // simple case
 

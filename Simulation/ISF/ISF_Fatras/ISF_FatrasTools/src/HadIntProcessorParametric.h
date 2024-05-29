@@ -21,9 +21,6 @@
 // ISF
 #include "ISF_Event/ISFParticleContainer.h"
 
-// Barcode
-#include "BarcodeEvent/PhysicsProcessCode.h"
-
 #ifndef MAXHADINTCHILDREN
 #define MAXHADINTCHILDREN 20
 #endif
@@ -116,7 +113,7 @@ namespace iFatras {
        /** Random Generator service */
        ServiceHandle<IAtRndmGenSvc>         m_rndGenSvc;
        /** MCTruth process code for TruthIncidents created by this tool */
-       Barcode::PhysicsProcessCode          m_processCode;
+       int          m_processCode;
 
        /** Random engine  */        
        CLHEP::HepRandomEngine*                     m_randomEngine;

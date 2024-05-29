@@ -7,7 +7,4 @@ Modules in this directory
   * Defines the ChainConfiguration object that interprets the chain dict and builds the chain
 * [TauMenuSequences](TauMenuSequences.py)
   * Defines the top-level sequences containing the input maker and hypothesis alg
-* [TauRecoSequences](TauRecoSequences.py)
-  * Assembles the sequences for each stage of reconstruction
-* [generateTau](generateTau.py)
-  * Prototype for NewJO chain configuration
+

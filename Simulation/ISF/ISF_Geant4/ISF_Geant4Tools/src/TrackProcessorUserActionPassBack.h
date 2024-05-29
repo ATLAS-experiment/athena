@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_GEANT4TOOLS_TRACKPROCESSORUSERACTIONPASSBACK_H
@@ -68,8 +68,8 @@ namespace G4UA{
                                 HepMC::GenParticlePtr truthParticle,
                                 AtlasDetDescr::AtlasRegion nextGeoID );
 
-      ISF::IParticleBroker                *m_particleBrokerQuick; //!< quickaccess avoiding gaudi ovehead
-      ISF::IGeoIDSvc                      *m_geoIDSvcQuick; //!< quickaccess avoiding gaudi ovehead
+      ISF::IParticleBroker *m_particleBrokerQuick{}; //!< quick access avoiding gaudi overhead
+      ISF::IGeoIDSvc *m_geoIDSvcQuick{}; //!< quick access avoiding gaudi overhead
 
     }; // class TrackProcessorUserActionPassBack
 

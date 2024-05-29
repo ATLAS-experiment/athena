@@ -38,7 +38,67 @@ def ActsTrackAnalysisAlgCfg(flags,
 
     acc.merge(helper.result())
     return acc
-    
+
+def ActsTrackParticleAnalysisAlgCfg(flags,
+                                    name: str = 'ActsTrackParticleAnalysisAlg',
+                                    **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+    kwargs.setdefault('MonitorTrackStateCounts',True)
+    kwargs.setdefault('TrackParticleLocation', 'ActsTrackParticles')
+
+    kwargs.setdefault('MonGroupName', kwargs['TrackParticleLocation'])
+
+    from AthenaMonitoring import AthMonitorCfgHelper
+    helper = AthMonitorCfgHelper(flags, 'TrackParticleAnalysisAlgCfg')
+    monitoringAlgorithm = helper.addAlgorithm(CompFactory.ActsTrk.TrackParticleAnalysisAlg, name, **kwargs)
+    monitoringGroup = helper.addGroup(monitoringAlgorithm, kwargs['MonGroupName'], '/'+name+'/')
+
+    monitoringGroup.defineHistogram('pt', title='TrackParticle pt;pt (MeV);Entries', type='TH1F', path=kwargs['MonGroupName'],
+                                    xbins=100, xmin=0, xmax=10e3)
+    monitoringGroup.defineHistogram('eta', title='TrackParticle eta;eta;Entries', type='TH1F', path=kwargs['MonGroupName'],
+                                    xbins=50, xmin=-4, xmax=4)
+
+    # hit counts
+    monitoringGroup.defineHistogram('pixelHits', title='Number of pixel hits;N;Entries', type='TH1I', path=kwargs['MonGroupName'],
+                                    xbins=50, xmin=-1, xmax=49)
+    monitoringGroup.defineHistogram('innermostHits', title='Number of innermost pixel hits;N;Entries', type='TH1I', path=kwargs['MonGroupName'],
+                                    xbins=6, xmin=-1, xmax=5)
+    monitoringGroup.defineHistogram('nextToInnermostHits', title='Number of next-to-innermost pixel hits;N;Entries', type='TH1I',
+                                    path=kwargs['MonGroupName'], xbins=6, xmin=-1, xmax=5)
+    monitoringGroup.defineHistogram('expectInnermostHit', title='Innermost pixel hit expected;N;Entries', type='TH1I', path=kwargs['MonGroupName'],
+                                    xbins=3, xmin=-1, xmax=2)
+    monitoringGroup.defineHistogram('expectNextToInnermostHit', title='Next-to-innermost pixel hit expected;N;Entries', type='TH1I',
+                                    path=kwargs['MonGroupName'],xbins=3, xmin=-1, xmax=2)
+
+    if kwargs['MonitorTrackStateCounts'] :
+        # have to add artifical dependency, because the ActsTracks are created by
+        # a special reader algorithm from the various component branches, but the
+        # element links pointing to the ActsTracks would not add this dependency
+        # by themselves.
+        if 'ExtraInputs' not in kwargs :
+            tracks_name = kwargs['TrackParticleLocation']
+            if tracks_name[-len('TrackParticles'):] == 'TrackParticles' :
+                kwargs.setdefault('ExtraInputs',{('ActsTrk::TrackContainer',tracks_name[:-len('TrackParticles')]+'Tracks')})
+
+        monitoringGroup.defineHistogram('States', title='Number of states on track;N;Entries', type='TH1I', path=kwargs['MonGroupName'],
+                                        xbins=50, xmin=0, xmax=50)
+        monitoringGroup.defineHistogram('Measurements', title='Number of measurements on track;N;Entries', type='TH1I', path=kwargs['MonGroupName'],
+                                        xbins=50, xmin=0, xmax=50)
+        monitoringGroup.defineHistogram('Parameters', title='Number of parameters on track;N;Entries', type='TH1I', path=kwargs['MonGroupName'],
+                                        xbins=50, xmin=0, xmax=50)
+        monitoringGroup.defineHistogram('Outliers', title='Number of outliers on track;N;Entries', type='TH1I', path=kwargs['MonGroupName'],
+                                        xbins=50, xmin=0, xmax=50)
+        monitoringGroup.defineHistogram('Holes', title='Number of holes on track;N;Entries', type='TH1I', path=kwargs['MonGroupName'],
+                                        xbins=50, xmin=0, xmax=50)
+        monitoringGroup.defineHistogram('SharedHits', title='Number of shared hits on track;N;Entries', type='TH1I', path=kwargs['MonGroupName'],
+                                        xbins=50, xmin=0, xmax=50)
+        monitoringGroup.defineHistogram('MaterialStates', title='Number of material states on track;N;Entries', type='TH1I', path=kwargs['MonGroupName'],
+                                        xbins=50, xmin=0, xmax=50)
+    acc.merge(helper.result())
+
+    acc.addEventAlgo( CompFactory.ActsTrk.TrackParticleAnalysisAlg(name, **kwargs) )
+    return acc
+
 def ActsHgtdClusterAnalysisAlgCfg(flags,
                                   name: str = "ActsHgtdClusterAnalysisAlg",
                                   **kwargs) -> ComponentAccumulator:

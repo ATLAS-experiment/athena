@@ -284,47 +284,90 @@ namespace MCTesting {
     std::cout << pGamma << std::endl;
     std::cout << "gamma barcode " << HepMC::barcode(pGamma) << std::endl;
 #endif
-
-    HepMcParticleLink gammaLink1(pGamma, 1,
+    const int event_position{0};
+    const int event_number{1};
+    // HepMcParticleLink built using a GenParticle pointer and the
+    // position of the GenEvent.
+    HepMcParticleLink gammaLink1a(pGamma, event_position,
+                                 HepMcParticleLink::IS_POSITION);
+    // A HepMcParticleLink built using the barcode and the position of
+    // the GenEvent.
+    HepMcParticleLink gammaLink1b(HepMC::barcode(pGamma), event_position,
+                                 HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_BARCODE);
+    // A HepMcParticleLink built using the id and the position of
+    // the GenEvent.
+    HepMcParticleLink gammaLink1c(HepMC::uniqueID(pGamma), event_position,
+                                 HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_ID);
+    // HepMcParticleLink built using a GenParticle pointer and the
+    // event_number of the GenEvent.
+    HepMcParticleLink gammaLink2a(pGamma, event_number,
                                  HepMcParticleLink::IS_EVENTNUM);
-    HepMcParticleLink gammaLink2(HepMC::uniqueID(pGamma), 0,
-                                 HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_ID);
-    HepMcParticleLink gammaLink3(HepMC::barcode(pGamma), 1,
+    // A HepMcParticleLink built using the barcode and the event_number of
+    // the GenEvent.
+    HepMcParticleLink gammaLink2b(HepMC::barcode(pGamma), event_number,
                                  HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE);
-    HepMcParticleLink gammaLink11(pGamma, 1,
-                                  HepMcParticleLink::IS_EVENTNUM);
-    HepMcParticleLink gammaLink12(HepMC::uniqueID(pGamma), 1,
-                                  HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_ID);
-    HepMcParticleLink gammaLink13(HepMC::barcode(pGamma), 1,
-                                  HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE);
+    // A HepMcParticleLink built using the id and the event_number of
+    // the GenEvent.
+    HepMcParticleLink gammaLink2c(HepMC::uniqueID(pGamma),event_number,
+                                 HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_ID);
+    // HepMcParticleLink built using a GenParticle pointer and using zero as the
+    // event_number of the GenEvent.
+    HepMcParticleLink gammaLink3a(pGamma, 0,
+                                 HepMcParticleLink::IS_EVENTNUM);
+    HepMcParticleLink gammaLink3a2(pGamma, 0,
+                                 HepMcParticleLink::IS_EVENTNUM);
+    // A HepMcParticleLink built using the barcode and using zero as
+    // event_number of the GenEvent.
+    HepMcParticleLink gammaLink3b(HepMC::barcode(pGamma), 0,
+                                 HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE);
+    // A HepMcParticleLink built using the id and using zero as the
+    // event_number of the GenEvent.
+    HepMcParticleLink gammaLink3c(HepMC::uniqueID(pGamma), 0,
+                                 HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_ID);
+    // A HepMcParticleLink built using the assignment operator
+    HepMcParticleLink gammaLink4a = gammaLink1a;
+    // A HepMcParticleLink built using the copy constructor
+    HepMcParticleLink gammaLink4b(gammaLink1a);
 
     std::stringstream out;
     out << "Testing HepMcParticleLink streamer "
-        << gammaLink1 << " --- " << gammaLink11 <<std::endl;
+        << gammaLink3a2 << " --- " << gammaLink2a <<std::endl;
 #ifdef HEPMC3
-    ASSERT_EQ(out.str(),"Testing HepMcParticleLink streamer Event index 1 (event number) , Unique ID 5 (id) , McEventCollection CollectionNotSet --- Event index 1 (event number) , Unique ID 5 (id) , McEventCollection CollectionNotSet\n");
+    ASSERT_EQ(out.str(),"Testing HepMcParticleLink streamer Event index 0 (event number) , Unique ID 5 (id) , McEventCollection TruthEvent --- Event index 1 (event number) , Unique ID 5 (id) , McEventCollection TruthEvent\n");
 #else
-    ASSERT_EQ(out.str(),"Testing HepMcParticleLink streamer Event index 1 (event number) , Unique ID 10005 (id) , McEventCollection CollectionNotSet --- Event index 1 (event number) , Unique ID 10005 (id) , McEventCollection CollectionNotSet\n");
+    ASSERT_EQ(out.str(),"Testing HepMcParticleLink streamer Event index 0 (event number) , Unique ID 10005 (id) , McEventCollection TruthEvent --- Event index 1 (event number) , Unique ID 10005 (id) , McEventCollection TruthEvent\n");
 #endif
+
+    ASSERT_EQ(*gammaLink1a, *gammaLink1b);
+    ASSERT_EQ(*gammaLink1b, *gammaLink1c);
+    ASSERT_EQ(*gammaLink1c, *gammaLink2a);
+    ASSERT_EQ(*gammaLink2a, *gammaLink2b);
+    ASSERT_EQ(*gammaLink2b, *gammaLink2c);
+    ASSERT_EQ(*gammaLink2c, *gammaLink3a);
+    ASSERT_EQ(*gammaLink3a, *gammaLink3b);
+    ASSERT_EQ(*gammaLink3b, *gammaLink3c);
+    ASSERT_EQ(*gammaLink4a, *gammaLink3c);
+    ASSERT_EQ(*gammaLink4b, *gammaLink2a);
+
+    ASSERT_EQ(gammaLink1a, gammaLink1b);
+    ASSERT_EQ(gammaLink1a, gammaLink1c);
+    ASSERT_EQ(gammaLink1a, gammaLink2a);
+    ASSERT_EQ(gammaLink1a, gammaLink2b);
+    ASSERT_EQ(gammaLink1a, gammaLink2c);
+    ASSERT_EQ(gammaLink1a, gammaLink4a);
+    ASSERT_EQ(gammaLink1a, gammaLink4b);
+    ASSERT_NE(gammaLink1a, gammaLink3a); // TODO Fix this?
+    ASSERT_NE(gammaLink1a, gammaLink3b); // TODO Fix this?
+    ASSERT_NE(gammaLink1a, gammaLink3c); // TODO Fix this?
 
 #ifdef GENP_DEBUG
-    std::cout << "link barcode " << gammaLink1.barcode() << std::endl;
-    std::cout << "link index " << gammaLink1.eventIndex() << std::endl;
-    std::cout << "link id " << gammaLink1.id() << std::endl;
-    std::cout << "link1 barcode " << gammaLink11.barcode() << std::endl;
-    std::cout << "link1 index " << gammaLink11.eventIndex() << std::endl;
-    std::cout << "link1 id " << gammaLink1.id() << std::endl;
+    std::cout << "link barcode " << gammaLink3a.barcode() << std::endl;
+    std::cout << "link index " << gammaLink3a.eventIndex() << std::endl;
+    std::cout << "link id " << gammaLink3a.id() << std::endl;
+    std::cout << "link1 barcode " << gammaLink2a.barcode() << std::endl;
+    std::cout << "link1 index " << gammaLink2a.eventIndex() << std::endl;
+    std::cout << "link1 id " << gammaLink3a.id() << std::endl;
 #endif
-    ASSERT_EQ(*gammaLink1, *gammaLink3);
-    ASSERT_EQ(gammaLink1, gammaLink3);
-    ASSERT_EQ(gammaLink1.barcode(), HepMC::barcode(pGamma));
-
-    ASSERT_EQ(gammaLink1, gammaLink3);
-    ASSERT_EQ(*gammaLink11, *gammaLink12);
-    ASSERT_EQ(gammaLink11, gammaLink12);
-    ASSERT_EQ(gammaLink11, gammaLink13);
-
-    ASSERT_EQ(*gammaLink1, *gammaLink11);
     std::cout << "*** HepMcParticleLink_test OK ***" <<std::endl;
   }
 

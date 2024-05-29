@@ -33,6 +33,7 @@ def FPGATrackSimMappingCfg(flags):
     mappingSvc.subrmap =  flags.Trigger.FPGATrackSim.mapsDir+"/eta0103phi0305.subrmap" # presumably also here we want to be able to change the slices definition file
     mappingSvc.pmap = flags.Trigger.FPGATrackSim.mapsDir+"/pmap"
     mappingSvc.modulemap = flags.Trigger.FPGATrackSim.mapsDir+"/moduleidmap"
+    mappingSvc.radiiFile = flags.Trigger.FPGATrackSim.mapsDir + "/eta0103phi0305_radii.txt"
     mappingSvc.NNmap = ""
     mappingSvc.layerOverride = []
     result.addService(mappingSvc, create=True, primary=True)
@@ -296,7 +297,7 @@ def FPGATrackSimLogicalHistProcessAlgCfg(inputFlags):
     theFPGATrackSimLogicalHistProcessAlg=CompFactory.FPGATrackSimLogicalHitsProcessAlg()
     theFPGATrackSimLogicalHistProcessAlg.HitFiltering = flags.Trigger.FPGATrackSim.ActiveConfig.hitFiltering
     theFPGATrackSimLogicalHistProcessAlg.writeOutputData = flags.Trigger.FPGATrackSim.ActiveConfig.writeOutputData
-    theFPGATrackSimLogicalHistProcessAlg.Clustering = True
+    theFPGATrackSimLogicalHistProcessAlg.Clustering = flags.Trigger.FPGATrackSim.clustering
     theFPGATrackSimLogicalHistProcessAlg.tracking = flags.Trigger.FPGATrackSim.tracking
     theFPGATrackSimLogicalHistProcessAlg.outputHitTxt = flags.Trigger.FPGATrackSim.ActiveConfig.outputHitTxt
     theFPGATrackSimLogicalHistProcessAlg.RunSecondStage = flags.Trigger.FPGATrackSim.ActiveConfig.secondStage

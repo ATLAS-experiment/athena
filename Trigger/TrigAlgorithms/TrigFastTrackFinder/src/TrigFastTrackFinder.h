@@ -277,7 +277,7 @@ protected:
   Gaudi::Property<bool> m_useEtaBinning {this, "UseEtaBinning",   true, "Split layers into eta bins"};
   Gaudi::Property<bool> m_doCloneRemoval{this,  "doCloneRemoval", true, "Remove tracks sharing too many hits"};
   Gaudi::Property<bool> m_doTrackRefit  {this, "doTrackRefit",    true, "Refit tracks after the combinatorial track following"};
-  
+  Gaudi::Property<bool> m_useTracklets  {this, "UseTracklets",    false, "Use tracklet seeds from ITk track seeding"};
 };
 
 

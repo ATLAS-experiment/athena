@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 ## @package PyJobTransforms.trfUtils
 # @brief Transform utility functions
@@ -106,7 +106,7 @@ def getAncestry(listMyOrphans = False):
 #  @param parent The parent process for which to return all the child PIDs
 #  @param listOrphans Parameter value to pass to getAncestry() if necessary
 #  @return @c children List of child PIDs
-def listChildren(psTree = None, parent = os.getpid(), listOrphans = False):
+def listChildren(psTree = None, parent = os.getpid(), listOrphans = False):  # noqa: B008 (PID is constant)
     '''Take a psTree dictionary and list all children'''
     if psTree is None:
         psTree = getAncestry(listMyOrphans = listOrphans)
@@ -873,7 +873,7 @@ class ParallelJobProcessor(object):
     def __init__(
         self,
         jobSubmission = None,
-        numberOfProcesses = multiprocessing.cpu_count(),
+        numberOfProcesses = multiprocessing.cpu_count(),  # noqa: B008 (cpu_count is constant)
         ):
         self.jobSubmission = jobSubmission
         self.numberOfProcesses = numberOfProcesses
@@ -1577,7 +1577,6 @@ def ValgrindCommand(
     defaultOptions                    = True,
     extraOptionsList                  = None,
     AthenaSerialisedConfigurationFile = "athenaConf.pkl",
-    isCAEnabled                       = False,
     returnFormat                      = "string"
     ):
 
@@ -1612,10 +1611,7 @@ def ValgrindCommand(
                 sfile = suppressionFile, path = pathEnvironmentVariable)
             )
     optionsList.append("$(which python)")
-    if not isCAEnabled:
-        optionsList.append("$(which athena.py)")
-    else:
-        optionsList.append("$(which CARunner.py)")
+    optionsList.append("$(which athena.py)")
     optionsList.append(AthenaSerialisedConfigurationFile)
     # Return the command in the requested format, string (by default) or list.
     if returnFormat is None or returnFormat == "string":
@@ -1647,7 +1643,6 @@ def VTuneCommand(
     defaultOptions                    = True,
     extraOptionsList                  = None,
     AthenaSerialisedConfigurationFile = "athenaConf.pkl",
-    isCAEnabled                       = False,
     returnFormat                      = "string"
     ):
 
@@ -1669,10 +1664,7 @@ def VTuneCommand(
     if not isCollectSpecified:
         optionsList.append("-collect=hotspots")
     optionsList.append("-- $(which python)")
-    if not isCAEnabled:
-        optionsList.append("$(which athena.py)")
-    else:
-        optionsList.append("$(which CARunner.py)")
+    optionsList.append("$(which athena.py)")
     optionsList.append(AthenaSerialisedConfigurationFile)
     # Return the command in the requested format, string (by default) or list.
     if returnFormat is None or returnFormat == "string":

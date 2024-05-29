@@ -12,6 +12,7 @@
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteDecorHandleKeyArray.h"
 #include "xAODTau/TauJetContainer.h"
+#include "xAODTracking/VertexContainer.h"
 
 #include <string>
 #include <vector>
@@ -32,6 +33,7 @@ namespace DerivationFramework {
 
     private:
       SG::ReadHandleKey<xAOD::TauJetContainer> m_tauContainerKey { this, "TauContainerName", "TauJets", "Input tau container key" };
+      SG::ReadHandleKey<xAOD::VertexContainer> m_vtxContainerKey { this, "VertexContainerName", "PrimaryVertices", "Input PV container key" };
       SG::WriteDecorHandleKeyArray<xAOD::TauJetContainer> m_decorKeys{ this, "DecorationKeys", {}, "List of decorations added to the tau"};
 
       ToolHandleArray<TauRecToolBase> m_tauIDTools { this, "TauIDTools", {}, "" };

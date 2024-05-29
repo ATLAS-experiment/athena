@@ -20,6 +20,7 @@ echo "Running for $RUN"
 export AtlasSetup=/cvmfs/atlas.cern.ch/repo/ATLASLocalRootBase/x86_64/AtlasSetup/current/AtlasSetup
 source $AtlasSetup/scripts/asetup.sh ${ATLAS_RELEASE:-24.0.25},Athena
 if [ -n "${DCSC_BUILD_DIR}" ]; then 
+    echo "Sourcing from ${DCSC_BUILD_DIR}"
     source ${DCSC_BUILD_DIR}/*/setup.sh
 fi
 

@@ -106,7 +106,7 @@ constexpr bool ActsTrk::MutableMultiTrajectory::hasColumn_impl(
 }
 
 template <typename T>
-void ActsTrk::MutableMultiTrajectory::addColumn_impl(const std::string& name) {
+void ActsTrk::MutableMultiTrajectory::addColumn_impl(std::string_view name) {
   // It is actually not clear if we would allow decorating RO MTJ, maybe we do
   if constexpr (ActsTrk::detail::accepted_decoration_types<T>::value) {
     m_decorations.emplace_back( ActsTrk::detail::decoration<T>( 
@@ -121,4 +121,3 @@ void ActsTrk::MutableMultiTrajectory::addColumn_impl(const std::string& name) {
     throw std::runtime_error("Can't add decoration of this type to MutableMultiTrajectory");
   }
 }
-

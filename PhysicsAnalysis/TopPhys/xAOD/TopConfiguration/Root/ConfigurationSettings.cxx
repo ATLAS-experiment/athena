@@ -854,11 +854,11 @@ namespace top {
       if (newstring.empty()) continue;
 
       // handle start of a (sub)selection (implies end of key-value section)
-      if (boost::algorithm::starts_with(newstring, "SELECTION ")) {
+      if (newstring.starts_with( "SELECTION ")) {
         selections.push_back({newstring.substr(10), false, {}});
         continue;
       }
-      if (boost::algorithm::starts_with(newstring, "SUB ")) {
+      if (newstring.starts_with( "SUB ")) {
         selections.push_back({newstring.substr(4), true, {}});
         continue;
       }
@@ -866,7 +866,7 @@ namespace top {
       if (!selections.empty()) {
         // read body of (sub)selection
         auto& sel = selections.back();
-        if (boost::algorithm::starts_with(newstring, ". ")) {
+        if (newstring.starts_with( ". ")) {
           // source another (sub)selection here
           auto subselName = newstring.substr(2);
           auto subselIt = std::find_if(selections.rbegin(), selections.rend(),

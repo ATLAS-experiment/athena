@@ -11,6 +11,9 @@ atlas_add_citest( DuplicateClass
    SCRIPT python -c 'import ROOT'
    PROPERTIES FAIL_REGULAR_EXPRESSION "class .* is already in" )
 
+atlas_add_citest( DuplicateComponent
+   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/DuplicateComponentsCheck.py )
+
 #################################################################################
 # Digitization/Simulation
 #################################################################################
@@ -246,10 +249,6 @@ atlas_add_citest( ACTS_Workflow_FastTracking
    SCRIPT ActsWorkflowFastTracking.sh
    LOG_IGNORE_PATTERN "ActsTrackFindingAlg.*ERROR Propagation reached the step count limit|ActsTrackFindingAlg.*ERROR Propagation failed: PropagatorError:3 Propagation reached the configured maximum number of steps with the initial parameters|ActsTrackFindingAlg.*ERROR CombinatorialKalmanFilter failed: CombinatorialKalmanFilterError:5 Propagation reaches max steps before track finding is finished with the initial parameters" )
  
-atlas_add_citest( Acts_Workflow_Conversion
-   SCRIPT ActsConversionWorkflow.sh
-   LOG_IGNORE_PATTERN "ActsTrackFindingAlg.*ERROR Propagation reached the step count limit|ActsTrackFindingAlg.*ERROR Propagation failed: PropagatorError:3 Propagation reached the configured maximum number of steps with the initial parameters|ActsTrackFindingAlg.*ERROR CombinatorialKalmanFilter failed: CombinatorialKalmanFilterError:5 Propagation reaches max steps before track finding is finished with the initial parameters" )
-
  atlas_add_citest( ACTS_Workflow_HeavyIons
    SCRIPT ActsWorkflowHeavyIons.sh
    LOG_IGNORE_PATTERN "ActsTrackFindingAlg.*ERROR Propagation reached the step count limit|ActsTrackFindingAlg.*ERROR Propagation failed: PropagatorError:3 Propagation reached the configured maximum number of steps with the initial parameters|ActsTrackFindingAlg.*ERROR CombinatorialKalmanFilter failed: CombinatorialKalmanFilterError:5 Propagation reaches max steps before track finding is finished with the initial parameters" )
@@ -301,9 +300,25 @@ atlas_add_citest( ACTS_ActsBenchmarkWithSpot
    PROPERTIES PROCESSOR 8
    LOG_IGNORE_PATTERN "ActsTrackFindingAlg.*ERROR Propagation reached the step count limit|ActsTrackFindingAlg.*ERROR Propagation failed: PropagatorError:3 Propagation reached the configured maximum number of steps with the initial parameters|ActsTrackFindingAlg.*ERROR CombinatorialKalmanFilter failed: CombinatorialKalmanFilterError:5 Propagation reaches max steps before track finding is finished with the initial parameters|ActsTrackFindingAlg.Acts.*ERROR.*SurfaceError:1" )
 
+atlas_add_citest( ACTS_ActsBenchmarkWithSpot_Cached
+   SCRIPT ActsBenchmarkWithSpotCached.sh 8 100
+   PROPERTIES PROCESSOR 8
+   LOG_IGNORE_PATTERN "ActsTrackFindingAlg.*ERROR Propagation reached the step count limit|ActsTrackFindingAlg.*ERROR Propagation failed: PropagatorError:3 Propagation reached the configured maximum number of steps with the initial parameters|ActsTrackFindingAlg.*ERROR CombinatorialKalmanFilter failed: CombinatorialKalmanFilterError:5 Propagation reaches max steps before track finding is finished with the initial parameters|ActsTrackFindingAlg.Acts.*ERROR.*SurfaceError:1" )
+
 atlas_add_citest( ACTS_ActsAnalogueClustering
   SCRIPT ActsAnalogueClustering.sh )
 
+atlas_add_citest( ACTS_CheckObjectCounts_Workflow
+  SCRIPT CheckCountTest.sh ActsCheckObjectCounts
+  LOG_IGNORE_PATTERN "ActsTrackFindingAlg.*ERROR Propagation reached the step count limit|ActsTrackFindingAlg.*ERROR Propagation failed: PropagatorError:3 Propagation reached the configured maximum number of steps with the initial parameters|ActsTrackFindingAlg.*ERROR CombinatorialKalmanFilter failed: CombinatorialKalmanFilterError:5 Propagation reaches max steps before track finding is finished with the initial parameters|ActsTrackFindingAlg.Acts.*ERROR.*SurfaceError:1" )
+
+#################################################################################
+#                 Muon Phase II CI tests
+#################################################################################
+atlas_add_citest( MuonR4_PatternRecognition
+         SCRIPT PatternRecognitionMuonR4.sh 1 100
+         PROPERTIES PROCESSOR 1
+)
 #################################################################################
 # Trigger
 #################################################################################

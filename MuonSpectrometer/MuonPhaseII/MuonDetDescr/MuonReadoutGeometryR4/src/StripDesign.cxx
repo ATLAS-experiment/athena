@@ -12,7 +12,7 @@ namespace {
 /// Helper macro to facilliate the ordering
 #define ORDER_PROP(PROP)                                            \
       {                                                             \
-        if (std::abs(PROP - other.PROP) > tolerance) {              \
+        if (std::abs(1.*PROP - 1.*other.PROP) > tolerance) {        \
             return PROP < other.PROP;                               \
         }                                                           \
       }
@@ -60,11 +60,10 @@ namespace MuonGMR4{
         if (std::abs(sAngle) < std::numeric_limits<float>::epsilon()) return;
         m_stereoAngle = sAngle;
         m_hasStereo = true;
-        Eigen::Rotation2D rot{sAngle};
-        m_stripDir = rot * m_stripDir;
-        m_stripNormal = rot * m_stripNormal;
-        m_stereoRotMat = Eigen::Rotation2D{-sAngle};
-        m_nominalRotMat = rot;
+        m_etaToStereo = Eigen::Rotation2D{sAngle};
+        m_stereoToEta = Eigen::Rotation2D{-sAngle};
+        m_stripDir = m_stereoToEta * m_stripDir;
+        m_stripNormal = m_stereoToEta * m_stripNormal;
     }
 
     void StripDesign::defineTrapezoid(double HalfShortY, double HalfLongY, double HalfHeight) {
@@ -81,6 +80,14 @@ namespace MuonGMR4{
         m_isFlipped = false;
 
     }
+    void StripDesign::defineDiamond(double HalfShortY, double HalfLongY, 
+                                        double HalfHeight, double yCutout) {
+        /// define a trapezoid region to preserve the functionality of intersect functions in StripDesign class
+        double HalfLongY_uncut = HalfLongY + yCutout * (HalfLongY - HalfShortY)/(2*HalfHeight - yCutout);
+        defineTrapezoid(HalfShortY, HalfLongY_uncut, HalfHeight);
+        m_yCutout = yCutout;
+        m_longHalfY = HalfLongY;
+    }
     void StripDesign::flipTrapezoid() {
         if (m_isFlipped) {
             ATH_MSG_WARNING("It's impossible to flip a trapezoid twice. Swap short and long lengths");
@@ -94,6 +101,7 @@ namespace MuonGMR4{
         m_topRight = Amg::Vector2D{m_longHalfY, m_halfX};
         resetDirCache();
     }
+
     void StripDesign::defineStripLayout(Amg::Vector2D&& posFirst,
                                         const double stripPitch,
                                         const double stripWidth,

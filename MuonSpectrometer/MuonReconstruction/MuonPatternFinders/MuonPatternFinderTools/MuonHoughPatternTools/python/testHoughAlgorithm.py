@@ -17,6 +17,14 @@ if __name__ == "__main__":
     flags = initConfigFlags()
     flags.Concurrency.NumThreads = 1
     flags.Concurrency.NumConcurrentEvents = 1
+
+    flags.Scheduler.CheckDependencies = True
+    flags.Scheduler.ShowDataDeps = True
+    flags.Scheduler.ShowDataFlow = True
+    flags.Scheduler.ShowControlFlow = True
+    flags.Scheduler.EnableVerboseViews = True
+    flags.Scheduler.AutoLoadUnmetDependencies = True
+
     
     flags.Output.ESDFileName = args.output
     flags.Input.Files = args.inputFile    
@@ -29,6 +37,9 @@ if __name__ == "__main__":
                                     MuonLayerScanTool=cfg.popToolsAndMerge(
                                                     MuonLayerHoughToolCfg(flags,
                                                                           DebugHough=False))))
+
+    from MuonHoughDataNtuple.MuonHoughDataNtuple import MakeMuonHoughDataNtuple
+    cfg.merge(MakeMuonHoughDataNtuple(flags))
     cfg.printConfig(withDetails=True, summariseProps=True)
     flags.dump()
    

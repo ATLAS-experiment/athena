@@ -756,7 +756,7 @@ namespace Muon {
         IdentifierHash hash{};
         if (idHelper.get_module_hash(id, hash) ||
             static_cast<unsigned int>(hash) >= idHelper.module_hash_max()){
-            ATH_MSG_WARNING("Failed to deduce module hash "<<toString(id));            
+            ATH_MSG_VERBOSE("Failed to deduce module hash "<<toString(id));            
         }
         return hash;
     }
@@ -764,7 +764,7 @@ namespace Muon {
         IdentifierHash hash{};
         if (idHelper.get_detectorElement_hash(id, hash) ||
             static_cast<unsigned int>(hash)>= idHelper.detectorElement_hash_max()) {
-            ATH_MSG_WARNING("Failed to deduce detector element hash "<<toString(id));
+            ATH_MSG_VERBOSE("Failed to deduce detector element hash "<<toString(id));
         }
         return hash;
     }
@@ -775,7 +775,7 @@ namespace Muon {
         else if (isMM(id)) return moduleHash(*m_mmIdHelper, id);
         else if (issTgc(id)) return moduleHash(*m_stgcIdHelper, id);
         else if (isCsc(id)) return moduleHash(*m_cscIdHelper, id);
-        ATH_MSG_WARNING("No muon Identifier "<<id);
+        ATH_MSG_WARNING("moduleHash(): No muon Identifier "<<id);
         return IdentifierHash{};
     }
     IdentifierHash MuonIdHelperSvc::detElementHash(const Identifier& id) const {
@@ -785,7 +785,7 @@ namespace Muon {
         else if (isMM(id)) return detElementHash(*m_mmIdHelper, id);
         else if (issTgc(id)) return detElementHash(*m_stgcIdHelper, id);
         else if (isCsc(id)) return detElementHash(*m_cscIdHelper, id);
-        ATH_MSG_WARNING("No muon Identifier "<<id);
+        ATH_MSG_WARNING("detElementHash(): No muon Identifier "<<id);
         return IdentifierHash{};
     }
 

@@ -391,4 +391,5 @@ def hancool_defects(runNumber, filePath="./", dbConnection="", isESn=True):
         secret_path=os.environ.get('COOLFLASK_SECRET', '/afs/cern.ch/user/a/atlasdqm/private/coolflask_secret/coolflask_secret.json')
         auth = json.loads(open(secret_path).read())
         logger.debug('Flask upload')
-        ddb.insert_multiple(defectlist, use_flask=True, flask_auth=auth)
+        ddb.insert_multiple(defectlist, use_flask=('sqlite' not in dbConnection),
+                            flask_auth=auth)

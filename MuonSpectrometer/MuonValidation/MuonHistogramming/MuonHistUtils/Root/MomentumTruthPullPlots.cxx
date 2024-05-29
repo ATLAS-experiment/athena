@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <utility>
 
 #include "MuonHistUtils/MomentumTruthPullPlots.h"
+#include "AthContainers/ConstAccessor.h"
 #ifndef XAOD_ANALYSIS
 #include "xAODTracking/TrackingPrimitives.h"
 #endif // not XAOD_ANALYSIS
@@ -68,12 +69,15 @@ void MomentumTruthPullPlots::initializePlots()
   float eloss = 0;
   if (muon.parameter(eloss,xAOD::Muon::MeasEnergyLoss)) {;}
   float pTruthMS = 0; //p truth at MS entry
-  if (truthMu.isAvailable<float>("MuonEntryLayer_px") &&
-      truthMu.isAvailable<float>("MuonEntryLayer_py") &&
-      truthMu.isAvailable<float>("MuonEntryLayer_pz") ) {
-    Amg::Vector3D pvecTruthMS{truthMu.auxdata<float>("MuonEntryLayer_px"),
-			 truthMu.auxdata<float>("MuonEntryLayer_py"),
-			 truthMu.auxdata<float>("MuonEntryLayer_pz")};
+  static const SG::ConstAccessor<float> entpxAcc ("MuonEntryLayer_px");
+  static const SG::ConstAccessor<float> entpyAcc ("MuonEntryLayer_py");
+  static const SG::ConstAccessor<float> entpzAcc ("MuonEntryLayer_pz");
+  if (entpxAcc.isAvailable(truthMu) &&
+      entpyAcc.isAvailable(truthMu) &&
+      entpzAcc.isAvailable(truthMu) ) {
+    Amg::Vector3D pvecTruthMS{entpxAcc(truthMu),
+                              entpyAcc(truthMu),
+                              entpzAcc(truthMu)};
     pTruthMS = pvecTruthMS.mag();
   }
 

@@ -125,6 +125,16 @@ StatusCode TrigGlobalEfficiencyCorrectionTool::initialize()
 	{
 		return StatusCode::FAILURE;
 	}
+	// List legs (if any) for which a dummy scale factor should be returned.
+	auto itr = m_legsPerTool.find(toolnameForDefaultScaleFactor());
+	if (itr != m_legsPerTool.end())
+	{
+		bool success = true;
+		for (ToolKey leg: parseListOfLegs(data, itr->second, success))
+		{
+			m_unsupportedLegs.insert(leg);
+		}
+	}
 	
 	ATH_MSG_DEBUG("Loading user-defined trigger combination"); 
 	bool useDefaultElectronTools = (m_suppliedElectronEfficiencyTools.size()==1) && (m_suppliedElectronScaleFactorTools.size()==1) && (m_legsPerTool.size()==0);
@@ -191,7 +201,8 @@ bool TrigGlobalEfficiencyCorrectionTool::enumerateTools(ImportData& data, ToolHa
 	for(unsigned index=0;index<suppliedTools.size();++index)
 	{
 		auto& handle = suppliedTools[index];
-		const std::string& name = handle.name(), altname = handle->name(); // athena: not always the same
+		const std::string& name = handle.name();
+		const std::string& altname = handle->name(); // athena: not always the same
 		flat_set<ToolKey> listOfLegs;
 		/// Find the legs associated to this tool ("ListOfLegsPerTool" property)
 		if(suppliedTools.size()!=1 || m_legsPerTool.size()!=0)
@@ -568,7 +579,7 @@ auto TrigGlobalEfficiencyCorrectionTool::listNonOrderedCSValues(const std::strin
 }
 
 template<class ParticleType>
-bool TrigGlobalEfficiencyCorrectionTool::getEgammaTriggerLegEfficiencies(const ParticleType* p, unsigned runNumber, std::size_t leg, std::size_t tag, Efficiencies& efficiencies)
+auto TrigGlobalEfficiencyCorrectionTool::getEgammaTriggerLegEfficiencies(const ParticleType* p, unsigned runNumber, std::size_t leg, std::size_t tag, Efficiencies& efficiencies) -> TLE_RESULT
 {
 	/// Common implementation for electrons and photons
 	auto ptype = []() { return std::is_same<ParticleType, xAOD::Electron>::value? "electron" : std::is_same<ParticleType, xAOD::Photon>::value? "photon" : "<unknown type>"; };
@@ -579,40 +590,52 @@ bool TrigGlobalEfficiencyCorrectionTool::getEgammaTriggerLegEfficiencies(const P
 	auto itrEff = GetEfficiencyToolIndex(p).find(ToolKey(leg, tag, runNumber));
 	if(itrSf==GetScaleFactorToolIndex(p).end() || itrEff==GetEfficiencyToolIndex(p).end())
 	{
+		if (m_unsupportedLegs.count(ToolKey(leg, 0u, runNumber))) 
+		{
+			efficiencies.data() = 0.5;
+			efficiencies.mc() = 0.5;
+			return TLE_UNAVAILABLE;
+		}
 		if(!tag) ATH_MSG_ERROR("Unable to find " << ptype() << " tools needed for trigger leg " << m_dictionary[leg] << " (run number = " << runNumber << ")");
 		else ATH_MSG_ERROR("Unable to find " << ptype() << " tools needed for trigger leg " << m_dictionary[leg] << " and selection tag " << m_dictionary[tag] 
 			<< " (run number = " << runNumber << ")");
-		return false;
+		return TLE_ERROR;
 	}
 	double sf;
 	bool success = checkAndRecord(GetScaleFactorTool(p, itrSf->second).getEfficiencyScaleFactor(*p, sf))
 		&& checkAndRecord(GetEfficiencyTool(p, itrEff->second).getEfficiencyScaleFactor(*p, efficiencies.mc()));
 	efficiencies.data() = sf * efficiencies.mc();
 	ATH_MSG_DEBUG("found for that " << ptype() << " eff(data) = " << efficiencies.data()<<" and eff(MC) = "<<efficiencies.mc());
-	return success;
+	return success? TLE_OK: TLE_ERROR;
 }
 
-bool TrigGlobalEfficiencyCorrectionTool::getTriggerLegEfficiencies(const xAOD::Electron* p, unsigned runNumber, std::size_t leg, std::size_t tag, Efficiencies& efficiencies)
+auto TrigGlobalEfficiencyCorrectionTool::getTriggerLegEfficiencies(const xAOD::Electron* p, unsigned runNumber, std::size_t leg, std::size_t tag, Efficiencies& efficiencies) -> TLE_RESULT
 {
 	return getEgammaTriggerLegEfficiencies(p, runNumber, leg, tag, efficiencies);
 }
 
-bool TrigGlobalEfficiencyCorrectionTool::getTriggerLegEfficiencies(const xAOD::Photon* p, unsigned runNumber, std::size_t leg, std::size_t tag, Efficiencies& efficiencies)
+auto TrigGlobalEfficiencyCorrectionTool::getTriggerLegEfficiencies(const xAOD::Photon* p, unsigned runNumber, std::size_t leg, std::size_t tag, Efficiencies& efficiencies) -> TLE_RESULT
 {
 	return getEgammaTriggerLegEfficiencies(p, runNumber, leg, tag, efficiencies);
 }
 
-bool TrigGlobalEfficiencyCorrectionTool::getTriggerLegEfficiencies(const xAOD::Muon* p, std::size_t leg, std::size_t tag, Efficiencies& efficiencies)
+auto TrigGlobalEfficiencyCorrectionTool::getTriggerLegEfficiencies(const xAOD::Muon* p, unsigned runNumber, std::size_t leg, std::size_t tag, Efficiencies& efficiencies) -> TLE_RESULT
 {
 	ATH_MSG_DEBUG("Retrieving efficiencies for muon " <<p << " (pt=" << p->pt() << ", eta=" << p->eta() 
 		<< ", tag='" << m_dictionary[tag] << "') for trigger leg " << m_dictionary[leg]);
+	if (m_unsupportedLegs.size() && m_unsupportedLegs.count(ToolKey(leg, 0u, runNumber)))
+	{
+		efficiencies.data() = 0.5;
+		efficiencies.mc() = 0.5;
+		return TLE_UNAVAILABLE;
+	}
 	auto itr = m_muonToolIndex.find(ToolKey(0, tag, 0));
 	if(itr==m_muonToolIndex.end())
 	{
 		if(!tag) ATH_MSG_ERROR("Unable to find muon tool");
 		else ATH_MSG_ERROR("Unable to find muon tool needed for selection tag " << m_dictionary[tag]);
 		m_cpCode = CP::CorrectionCode::Error;
-		return false;
+		return TLE_ERROR;
 	}
 	auto& tool = *m_suppliedMuonTools[itr->second];
 	auto& hltTrig = m_dictionary[leg ^ 0xB0DDD56fF8E3250D];
@@ -629,7 +652,7 @@ bool TrigGlobalEfficiencyCorrectionTool::getTriggerLegEfficiencies(const xAOD::M
 	bool success = checkAndRecord(tool.getTriggerEfficiency(*p, efficiencies.mc(), hltTrig, kFALSE))
 		&& checkAndRecord(tool.getTriggerEfficiency(*p, efficiencies.data(), hltTrig, kTRUE));
 	ATH_MSG_DEBUG("found for that muon eff(data) = " << efficiencies.data()<<" and eff(MC) = "<<efficiencies.mc());
-	return success;
+	return success? TLE_OK: TLE_ERROR;
 }
 
 bool TrigGlobalEfficiencyCorrectionTool::retrieveRunNumber(unsigned& runNumber)
@@ -1056,7 +1079,9 @@ CP::SystematicSet TrigGlobalEfficiencyCorrectionTool::recommendedSystematics() c
 StatusCode TrigGlobalEfficiencyCorrectionTool::applySystematicVariation(const CP::SystematicSet& systematic)
 {
   for (auto&& t: m_suppliedElectronEfficiencyTools) ANA_CHECK(t->applySystematicVariation(systematic));
+  for (auto&& t: m_suppliedElectronScaleFactorTools) ANA_CHECK(t->applySystematicVariation(systematic));
   for (auto&& t: m_suppliedPhotonEfficiencyTools) ANA_CHECK(t->applySystematicVariation(systematic));
+  for (auto&& t: m_suppliedPhotonScaleFactorTools) ANA_CHECK(t->applySystematicVariation(systematic));
   for (auto&& t: m_suppliedMuonTools) ANA_CHECK(t->applySystematicVariation(systematic));
 
   return StatusCode::SUCCESS;

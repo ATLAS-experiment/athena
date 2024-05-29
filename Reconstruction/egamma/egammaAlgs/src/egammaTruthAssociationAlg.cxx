@@ -59,8 +59,6 @@ egammaTruthAssociationAlg::egammaTruthAssociationAlg(const std::string& name,
   : AthReentrantAlgorithm(name, pSvcLocator)
 {}
 
-egammaTruthAssociationAlg::~egammaTruthAssociationAlg() = default;
-
 StatusCode
 egammaTruthAssociationAlg::initialize()
 {

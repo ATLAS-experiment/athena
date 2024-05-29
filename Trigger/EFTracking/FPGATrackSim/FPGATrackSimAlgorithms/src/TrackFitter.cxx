@@ -307,6 +307,9 @@ void TrackFitter::makeTrackCandidates(const FPGATrackSimRoad & road, const FPGAT
       track_cands[icomb].setTrackID(m_idbase + icomb);
       track_cands[icomb].setNLayers(m_pmap->getNLogiLayers());
 
+      // If this is an idealized coordinate fit; keep references to the idealized radii.
+      track_cands[icomb].setIdealRadii(m_rmap->getAvgRadii(0));
+
         std::vector<int> const & hit_indices = combs[icomb]; // size nLayers
         for (unsigned layer = 0; layer < m_pmap->getNLogiLayers(); layer++)
         {

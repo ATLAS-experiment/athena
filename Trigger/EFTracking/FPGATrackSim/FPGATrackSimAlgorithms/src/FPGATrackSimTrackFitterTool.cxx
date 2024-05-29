@@ -51,10 +51,13 @@ StatusCode FPGATrackSimTrackFitterTool::initialize()
     m.setLevel(msg().level());
     m_tfpobj = std::unique_ptr<TrackFitter>(new TrackFitter(nominalbank, bankvec, m_guessHits));
 
-    if(!m_do2ndStage)
+    if(!m_do2ndStage) {
       m_tfpobj->setPlaneMap(m_FPGATrackSimMapping->PlaneMap_1st());
-    else
+      m_tfpobj->setRegionMap(m_FPGATrackSimMapping->RegionMap_1st());
+    } else {
       m_tfpobj->setPlaneMap(m_FPGATrackSimMapping->PlaneMap_2nd());
+      m_tfpobj->setRegionMap(m_FPGATrackSimMapping->RegionMap_2nd());
+    }
 
     // set parameter object to TrackFitter
     m_tfpobj->setChi2DofRecoveryMin(m_chi2dof_recovery_min);

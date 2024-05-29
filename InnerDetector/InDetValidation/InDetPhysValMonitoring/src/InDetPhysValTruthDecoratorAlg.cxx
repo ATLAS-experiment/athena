@@ -14,7 +14,6 @@
 #include "xAODTruth/TruthVertex.h"
 #include "StoreGate/ReadDecorHandle.h"
 
-// #include "GeneratorUtils/PIDUtils.h"
 #include "TDatabasePDG.h"
 #include "TParticlePDG.h"
 #include "TrkParameters/TrackParameters.h" // Contains typedef to Trk::CurvilinearParameters

@@ -8,7 +8,7 @@ n_events=2
 export ATHENA_CORE_NUMBER=1
 Reco_tf.py --CA \
   --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateTracksFlags" \
-  --preExec 'from ActsConfig.ActsConfigFlags import PixelCalibrationStrategy; flags.Acts.PixelCalibrationStrategy=PixelCalibrationStrategy.AnalogueClustering' \
+  --preExec 'flags.Exec.FPE=-1;' 'from ActsConfig.ActsConfigFlags import PixelCalibrationStrategy; flags.Acts.PixelCalibrationStrategy=PixelCalibrationStrategy.AnalogueClustering' \
   --inputRDOFile ${input_rdo} \
   --outputAODFile test.AOD.pool.root  \
   --maxEvents ${n_events} \

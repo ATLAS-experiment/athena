@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // ReweightUtils includes
 #include "ReweightUtils/WeightToolBase.h"
 
 #include "xAODParticleEvent/CompositeParticle.h"
+#include "AthContainers/Decorator.h"
 
 // #include <TLorentzVector.h>
 
@@ -43,7 +44,8 @@ bool WeightToolBase::addDecoration(const xAOD::EventInfo* evtInfo, float weight)
     ATH_MSG_ERROR("Cannot decorate empty EventInfo in "<< this->name());
     return false;
   }
-  if (! evtInfo->isAvailable< float >( m_weightName ))
-    evtInfo->auxdecor< float > (m_weightName) = weight;
+  SG::Decorator< float > dec(m_weightName );
+  if (! dec.isAvailable( *evtInfo ) )
+    dec( *evtInfo ) = weight;
   return true;
 }

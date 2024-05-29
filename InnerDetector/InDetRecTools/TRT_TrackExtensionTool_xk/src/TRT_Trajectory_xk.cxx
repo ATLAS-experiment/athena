@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
@@ -1135,8 +1135,7 @@ std::ostream& InDet::TRT_Trajectory_xk::dump( std::ostream& out ) const
     double zl = m_elements[e].link(l).zlocal();
     double w  = m_elements[e].link(l).way   ();
     std::string ss;
-    if     (m_elements[e].status()< 0) ss ="         ";
-    else if(m_elements[e].status()==1) ss ="      +- ";
+    if     (m_elements[e].status()==1) ss ="      +- ";
     else if(m_elements[e].status()==2) ss ="      ++ ";
     else                               ss ="      -- ";
 

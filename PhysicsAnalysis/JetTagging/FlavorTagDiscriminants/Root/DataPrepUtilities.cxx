@@ -211,9 +211,9 @@ namespace FlavorTagDiscriminants {
         {"(GN1[^_]*|GN2[^_]*)"_r, "$1" + flip_name},
         {"(GN1[^_]*|GN2[^_]*)_(.*)"_r, "$1" + flip_name + "_$2"},
         {"(IP[23]D)_(.*)"_r, "$1Neg_$2"},
-        {"(rnnip|dips[^_]*)_(.*)"_r, "$1flip_$2"},
+        {"(rnnip|(?:dips|DIPS)[^_]*)_(.*)"_r, "$1flip_$2"},
         {"(JetFitter|SV1|JetFitterSecondaryVertex)_(.*)"_r, "$1Flip_$2"},
-        {"(rnnip|dips[^_]*)"_r, "$1flip"},
+        {"(rnnip|(?:dips|DIPS)[^_]*)"_r, "$1flip"},
         {"^(DL1|DL1r[^_]*|DL1rmu|DL1d[^_]*)$"_r, "$1" + flip_name},
         {"pt|abs_eta|eta"_r, "$&"},
         {"softMuon.*|smt.*"_r, "$&"}
@@ -245,7 +245,7 @@ namespace FlavorTagDiscriminants {
         rewriteFlipConfig(config, flip_converters);
       }
 
-      // build the standard inputs
+      // build the jet inputs
 
       // type and default value-finding regexes are hardcoded for now
       TypeRegexes type_regexes = {
@@ -285,8 +285,7 @@ namespace FlavorTagDiscriminants {
       std::vector<FTagInputConfig> input_config;
       for (auto& node: config.inputs){
         // allow the user to remape some of the inputs
-        remap_inputs(node.variables, remap_scalar,
-               node.defaults);
+        remap_inputs(node.variables, remap_scalar, node.defaults);
 
         std::vector<std::string> input_names;
         for (const auto& var: node.variables) {
@@ -299,12 +298,10 @@ namespace FlavorTagDiscriminants {
           throw std::logic_error(
             "We don't currently support multiple scalar input nodes");
         }
-        input_config = get_input_config(
-        input_names, type_regexes, default_flag_regexes);
+        input_config = get_input_config(input_names, type_regexes, default_flag_regexes);
       }
 
       // build the constituents inputs
-
       std::vector<std::pair<std::string, std::vector<std::string>>> constituent_names;
       for (auto& node: config.input_sequences) {
         remap_inputs(node.variables, remap_scalar,
@@ -363,7 +360,7 @@ namespace FlavorTagDiscriminants {
           deps.bTagInputs.insert(input.name);
           varsFromBTag.push_back(filler);
         } else {
-          varsFromJet.push_back(getter_utils::customGetterAndName(input.name));
+          varsFromJet.push_back(getter_utils::namedCustomJetGetter(input.name));
         }
         if (input.default_flag.size() > 0) {
           deps.bTagInputs.insert(input.default_flag);

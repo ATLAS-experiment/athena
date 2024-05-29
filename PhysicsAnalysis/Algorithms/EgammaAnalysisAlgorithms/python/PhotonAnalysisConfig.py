@@ -38,9 +38,6 @@ class PhotonCalibrationConfig (ConfigBlock) :
             info="whether to recompute the photon shower shape fudge "
             "corrections (sets up an instance of CP::PhotonShowerShapeFudgeAlg). "
             "The default is False, i.e. to use derivation variables.")
-        self.addOption ('ptSelectionOutput', False, type=bool,
-            info="whether or not to apply a minimum pT cut to "
-            "calibrated photons. The default is False.")
         self.addOption ('recalibratePhyslite', True, type=bool,
             info="whether to run the CP::EgammaCalibrationAndSmearingAlg on "
             "PHYSLITE derivations. The default is True.")
@@ -51,6 +48,33 @@ class PhotonCalibrationConfig (ConfigBlock) :
             info="whether to force the tool to use the configuration meant for "
             "full simulation samples. Only for testing purposes. "
             "The default is False.")
+        self.addOption ('splitCalibrationAndSmearing', False, type=bool,
+            info="EXPERIMENTAL: This splits the EgammaCalibrationAndSmearingTool "
+            " into two steps. The first step applies a baseline calibration that "
+            "is not affected by systematics. The second step then applies the "
+            "systematics dependent corrections.  The net effect is that the "
+            "slower first step only has to be run once, while the second is run "
+            "once per systematic. ATLASG-2358")
+
+
+    def makeCalibrationAndSmearingAlg (self, config, name) :
+        """Create the calibration and smearing algorithm
+        
+        Factoring this out into its own function, as we want to
+        instantiate it in multiple places"""
+        # Set up the calibration and smearing algorithm:
+        alg = config.createAlgorithm( 'CP::EgammaCalibrationAndSmearingAlg', name + self.postfix )
+        config.addPrivateTool( 'calibrationAndSmearingTool',
+                               'CP::EgammaCalibrationAndSmearingTool' )
+        alg.calibrationAndSmearingTool.ESModel = 'es2022_R22_PRE'
+        alg.calibrationAndSmearingTool.decorrelationModel = '1NP_v1'
+        alg.calibrationAndSmearingTool.useFastSim = (
+            0 if self.forceFullSimConfig
+            else int( config.dataType() is DataType.FastSim ))
+        alg.egammas = config.readName (self.containerName)
+        alg.egammasOut = config.copyName (self.containerName)
+        alg.preselection = config.getPreselection (self.containerName, '')
+        return alg
 
 
     def makeAlgs (self, config) :
@@ -129,21 +153,40 @@ class PhotonCalibrationConfig (ConfigBlock) :
         alg.photonsOut = config.copyName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')
 
-        # Do calibration
-        alg = config.createAlgorithm( 'CP::EgammaCalibrationAndSmearingAlg',
-                                      'PhotonCalibrationAndSmearingAlg' + postfix )
-        config.addPrivateTool( 'calibrationAndSmearingTool',
-                               'CP::EgammaCalibrationAndSmearingTool' )
-        alg.calibrationAndSmearingTool.ESModel = 'es2022_R22_PRE'
-        alg.calibrationAndSmearingTool.decorrelationModel = '1NP_v1'
-        alg.calibrationAndSmearingTool.useFastSim = (
-            0 if self.forceFullSimConfig
-            else int( config.dataType() is DataType.FastSim ))
-        alg.egammas = config.readName (self.containerName)
-        alg.egammasOut = config.copyName (self.containerName)
-        alg.preselection = config.getPreselection (self.containerName, '')
-        if config.isPhyslite() and not self.recalibratePhyslite :
-            alg.skipNominal = True
+        if not self.splitCalibrationAndSmearing :
+            # Set up the calibration and smearing algorithm:
+            alg = self.makeCalibrationAndSmearingAlg (config, 'PhotonCalibrationAndSmearingAlg')
+            if config.isPhyslite() and not self.recalibratePhyslite :
+                alg.skipNominal = True
+        else:
+            # This splits the EgammaCalibrationAndSmearingTool into two
+            # steps. The first step applies a baseline calibration that
+            # is not affected by systematics. The second step then
+            # applies the systematics dependent corrections.  The net
+            # effect is that the slower first step only has to be run
+            # once, while the second is run once per systematic.
+            #
+            # For now (22 May 24) this has to happen in the same job, as
+            # the output of the first step is not part of PHYSLITE, and
+            # even for the nominal the output of the first and second
+            # step are different.  In the future the plan is to put both
+            # the output of the first and second step into PHYSLITE,
+            # allowing to skip the first step when running on PHYSLITE.
+            #
+            # WARNING: All of this is experimental, see: ATLASG-2358
+
+            # Set up the calibration algorithm:
+            alg = self.makeCalibrationAndSmearingAlg (config, 'PhotonBaseCalibrationAlg')
+            # turn off systematics for the calibration step
+            alg.noToolSystematics = True
+            # turn off smearing for the calibration step
+            alg.calibrationAndSmearingTool.doSmearing = False
+
+            # Set up the smearing algorithm:
+            alg = self.makeCalibrationAndSmearingAlg (config, 'PhotonCalibrationSystematicsAlg')
+            # turn off scale corrections for the smearing step
+            alg.calibrationAndSmearingTool.doScaleCorrection = False
+            alg.calibrationAndSmearingTool.useMVACalibration = False
 
         if self.minPt > 0:
             # Set up the the pt selection
@@ -154,7 +197,7 @@ class PhotonCalibrationConfig (ConfigBlock) :
             alg.particles = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, '')
             config.addSelection (self.containerName, '', alg.selectionDecoration,
-                                preselection=self.ptSelectionOutput)
+                                preselection=True)
 
         # Set up the isolation correction algorithm.
         alg = config.createAlgorithm( 'CP::EgammaIsolationCorrectionAlg',
@@ -169,9 +212,14 @@ class PhotonCalibrationConfig (ConfigBlock) :
         alg.egammasOut = config.copyName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')
 
+        # Additional decorations
+        alg = config.createAlgorithm( 'CP::AsgEnergyDecoratorAlg', 'EnergyDecorator' + self.containerName + self.postfix )
+        alg.particles = config.readName (self.containerName)
+
         config.addOutputVar (self.containerName, 'pt', 'pt')
         config.addOutputVar (self.containerName, 'eta', 'eta', noSys=True)
         config.addOutputVar (self.containerName, 'phi', 'phi', noSys=True)
+        config.addOutputVar (self.containerName, 'e_%SYS%', 'e')
 
 
 
@@ -330,7 +378,6 @@ def makePhotonCalibrationConfig( seq, containerName,
                                  enableCleaning = None,
                                  cleaningAllowLate = None,
                                  recomputeIsEM = None,
-                                 ptSelectionOutput = None,
                                  forceFullSimConfig = None):
     """Create photon calibration analysis algorithms
 
@@ -347,8 +394,6 @@ def makePhotonCalibrationConfig( seq, containerName,
       enableCleaning -- Enable photon cleaning
       cleaningAllowLate -- Whether to ignore timing information in cleaning.
       recomputeIsEM -- Whether to rerun the cut-based selection. If not, use derivation flags
-      ptSelectionOutput -- Whether or not to apply pt selection when creating
-                           output containers.
       forceFullSimConfig -- imposes full-sim config for FastSim for testing
     """
 
@@ -358,7 +403,6 @@ def makePhotonCalibrationConfig( seq, containerName,
     config.setOptionValue ('enableCleaning', enableCleaning)
     config.setOptionValue ('cleaningAllowLate', cleaningAllowLate)
     config.setOptionValue ('recomputeIsEM', recomputeIsEM)
-    config.setOptionValue ('ptSelectionOutput', ptSelectionOutput)
     config.setOptionValue ('forceFullSimConfig', forceFullSimConfig)
     seq.append (config)
 

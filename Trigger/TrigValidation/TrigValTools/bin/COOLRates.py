@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #====================================================================================================================
 
@@ -258,7 +258,7 @@ def createTimeConverter(runLbRanges):
 #====================================================================================================================
 
 class QueryBundle():
-	def __init__(self,IoVStart,IoVEnd,payloadRequests,folderName,channelSelection=cool.ChannelSelection(),timeBased=False,payloadRequirements={},timeConverter={}):
+	def __init__(self,IoVStart,IoVEnd,payloadRequests,folderName,channelSelection=None,timeBased=False,payloadRequirements={},timeConverter={}):
 		self.IoVStart = IoVStart
 		self.IoVEnd = IoVEnd
 		for request in payloadRequests:
@@ -270,7 +270,7 @@ class QueryBundle():
 		self.folderName = folderName
 		self.timeBased=timeBased
 		self.timeConverter=timeConverter
-		self.channelSelection = channelSelection
+		self.channelSelection = channelSelection or cool.ChannelSelection()
 		
 #====================================================================================================================
 

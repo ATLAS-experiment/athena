@@ -37,6 +37,8 @@ class sTgcMeasurement_v1 : public UncalibratedMeasurement_v1 {
   }
   /** @brief Returns the hash of the measurement channel w.r.t ReadoutElement*/
   IdentifierHash measurementHash() const;
+  /** @brief Returns the hash of the associated gasGap layer */
+  IdentifierHash layerHash() const;
 
   /** @brief Which algorithm produced the Measurement object*/
   using Author = Muon::sTgcPrepData::Author;

@@ -1,6 +1,4 @@
-################################################################################
-# Package: ISF_Services
-################################################################################
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( ISF_Services )
@@ -24,7 +22,6 @@ atlas_add_library( ISF_Services
                    NO_PUBLIC_HEADERS
                    PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${GEANT4_INCLUDE_DIRS}  ${CLHEP_INCLUDE_DIRS} ${HEPPDT_INCLUDE_DIRS}
                    PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} ${GEANT4_LIBRARIES} AtlasHepMCLib ${CLHEP_LIBRARIES} ${HEPPDT_LIBRARIES} GaudiKernel BarcodeInterfacesLib CaloIdentifier CaloSimEvent AthenaBaseComps StoreGateLib SubDetectorEnvelopesLib AtlasDetDescr GeneratorObjects InDetSimEvent MuonSimEvent G4AtlasInterfaces MCTruth SimHelpers ISF_Event ISF_HepMC_Interfaces ISF_InterfacesLib TileSimEvent PmbCxxUtils TruthUtils )
-set_target_properties( ISF_Services PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 
 # Tests in the package:
 atlas_add_test( InputConverter_test
@@ -66,7 +63,7 @@ atlas_add_test( TruthSvc_test
                   ${GMOCK_INCLUDE_DIRS}
                   ${ROOT_INCLUDE_DIRS}
                   ${GEANT4_INCLUDE_DIRS}
-                  
+
                   ${CLHEP_INCLUDE_DIRS}
                   ${HEPPDT_INCLUDE_DIRS}
                 LINK_LIBRARIES
@@ -106,6 +103,13 @@ atlas_add_test( ISF_ServicesConfig_test
 # defined in the test binary.
 set_target_properties( ISF_Services_TruthSvc_test PROPERTIES ENABLE_EXPORTS True )
 
+# Turn on/off LTO for all targets in the package.
+set_target_properties(
+  ISF_Services
+  ISF_Services_InputConverter_test
+  ISF_Services_TruthSvc_test
+  PROPERTIES
+  INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
+
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
-

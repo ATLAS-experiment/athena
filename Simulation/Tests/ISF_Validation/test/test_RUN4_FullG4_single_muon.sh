@@ -5,6 +5,7 @@
 # art-include: main/Athena
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
+# art-memory: 3999
 # art-output: test_muons.HITS.pool.root
 
 Input="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EVNT/mc21_14TeV.900498.PG_single_muonpm_Pt100_etaFlatnp0_43.evgen.EVNT.e8481/EVNT.30802154._000010.pool.root.1"

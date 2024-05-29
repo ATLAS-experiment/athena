@@ -18,7 +18,7 @@ namespace Muon {
     MuonIntersectGeoData::MuonIntersectGeoData(MsgStream& log, const MuonGM::MuonDetectorManager* detMgr,
                                                const IMuonIdHelperSvc* idHelperSvc, const MdtCondDbData* dbData) :
         m_idHelperSvc{idHelperSvc}, m_detMgr{detMgr}, m_dbData{dbData} {
-       
+        m_geometry.resize(m_idHelperSvc->mdtIdHelper().detectorElement_hash_max());
         for (unsigned int n = 0; n < m_geometry.size(); ++n) {
             IdentifierHash id_hash{n};
             const MuonGM::MdtReadoutElement* mdt_ele = detMgr->getMdtReadoutElement(id_hash);

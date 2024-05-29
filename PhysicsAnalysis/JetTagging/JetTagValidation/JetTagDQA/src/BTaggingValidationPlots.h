@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETTAGDQA_BTagPLOTS_H
@@ -8,18 +8,16 @@
 #include "xAODBase/IParticle.h"
 #include "TrkValHistUtils/PlotBase.h"
 #include "AthenaBaseComps/AthMessaging.h"
-#include "CLHEP/Units/SystemOfUnits.h"
-#include "xAODBTagging/BTagging.h" 
-#include "xAODJet/JetContainer.h"
-#include "xAODTruth/TruthParticle.h"
-#include "xAODTruth/TruthParticleContainer.h"
-#include "xAODTruth/TruthVertex.h"
-#include "xAODJet/Jet.h"
-#include "xAODMuon/Muon.h"
-#include "xAODMuon/MuonContainer.h"
-#include "xAODEventInfo/EventInfo.h"
+#include "xAODBTagging/BTagging.h" //typedef
+#include "xAODJet/JetFwd.h" //lightweight typedef
+#include "xAODTracking/VertexFwd.h"//lightweight typedef
+#include "xAODEventInfo/EventInfo.h" //typedef
 
-#include "InDetTrackSystematicsTools/InDetTrackTruthOriginDefs.h"
+#include <string>
+#include <vector>
+#include <map>
+
+class TH1;
 
     
 namespace JetTagDQA{
@@ -36,10 +34,9 @@ namespace JetTagDQA{
       void fillMultiplicities(const unsigned int& nJets, const unsigned int& nTracks, const int& nPrimVtx, const unsigned int& nTracksPrimVtx, const unsigned int& nJetsWithMuon, const unsigned int& nJetsWithSV, std::map<std::string, int>& nJetsThatPassedWPCuts, const xAOD::EventInfo* event);
       void fillPVVariables(const double& PV_x, const double& PV_y, const double& PV_z, const xAOD::EventInfo* event);
       void fillOther(const xAOD::Jet* jet, const xAOD::BTagging* btag, bool& contains_muon, double& jet_Lxy, const int& truth_label, const xAOD::EventInfo* event); 
-      void fillTrackVariables(const xAOD::Jet* jet, const xAOD::BTagging* btag, const xAOD::Vertex *myVertex, std::map<const xAOD::TrackParticle*, int> track_truth_associations, const bool& contains_muon, const int& truth_label, int& num_HF_tracks_in_jet, const xAOD::EventInfo* event); 
+      void fillTrackVariables(const xAOD::Jet* jet, const xAOD::BTagging* btag, const xAOD::Vertex *myVertex, const std::map<const xAOD::TrackParticle*, int> & track_truth_associations, const bool& contains_muon, const int& truth_label, int& num_HF_tracks_in_jet, const xAOD::EventInfo* event); 
       void fillTrackVariables_for_largeRjet(const xAOD::Jet* jet, const xAOD::Vertex *myVertex, const int& truth_label, const xAOD::EventInfo* event); 
-      void fillSVVariables(const xAOD::BTagging* btag, std::map<const xAOD::TrackParticle*, int> track_truth_associations, const bool& contains_muon, const int& truth_label, const int& num_HF_tracks_in_jet, bool& contains_SV, const xAOD::EventInfo* event); 
-      //void fillVariables_from_jet(const xAOD::Jet* jet, const int& truth_label, const xAOD::EventInfo* event); 
+      void fillSVVariables(const xAOD::BTagging* btag, const std::map<const xAOD::TrackParticle*, int> & track_truth_associations, const bool& contains_muon, const int& truth_label, const int& num_HF_tracks_in_jet, bool& contains_SV, const xAOD::EventInfo* event); 
 
       void bookNJetsThatPassedWPCutsHistos();
       void initializeNJetsThatPassedWPCutsMap(std::map<std::string, int>& nJetsThatPassedWPCuts);
@@ -594,7 +591,7 @@ namespace JetTagDQA{
       void setTaggerNames(const std::string& dipsName, const std::string& DL1dv01Name, const std::string& GN2v01Name, const std::string& GN2Xv01Name);
 
       // jvt variables 
-      bool m_JVT_defined;
+      bool m_JVT_defined{};
       float m_JVT_cut = 0.0F;
       bool m_JVTLargerEta_defined;
       float m_JVTLargerEta_cut = 0.0F;

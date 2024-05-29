@@ -1,7 +1,7 @@
 //dear emacs, this is -*-c++-*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArLATOMEMappingAlg.h"
@@ -11,7 +11,6 @@
 
 #include "CaloIdentifier/CaloCell_SuperCell_ID.h"
 #include "LArIdentifier/LArOnline_SuperCellID.h"
-
 
 StatusCode LArLATOMEMappingAlg::initialize() {
 
@@ -70,20 +69,20 @@ StatusCode LArLATOMEMappingAlg::execute() {
        return StatusCode::FAILURE;
     }
 
-    latomeMap->m_sourceID.resize(nLatome);
     for (unsigned i=0;i<nLatome;++i) {
       const unsigned sid=pblobsourceId[i];
       ATH_MSG_DEBUG("Latome SID: "<<sid);
-      latomeMap->m_sourceID[i]=sid;
-      latomeMap->m_onlineID[i].resize(N_LATOME_CHANNELS);
+      std::pair<unsigned, std::vector<HWIdentifier> > entry{sid,{}};
+      entry.second.reserve(N_LATOME_CHANNELS);
       for (unsigned j=0;j<N_LATOME_CHANNELS ;++j) {
         const HWIdentifier hwid=HWIdentifier(Identifier32(pblobonlineId[i*N_LATOME_CHANNELS + j]));
         if (hwid.is_valid() && hwid != 0) {
-          latomeMap->m_onlineID[i][j]=hwid;
+          entry.second.push_back(hwid);
         } else {
-          latomeMap->m_onlineID[i][j]=latomeMap->m_hwidEmpty;
+          entry.second.push_back(latomeMap->m_hwidEmpty);
         }
       }
+      latomeMap->m_map.insert(std::move(entry));
     }//end loop over LATOME sourceIDs
     ATH_MSG_INFO("Done reading latome mapping");
     ATH_MSG_INFO("Found " << nLatome << " LATOMEs "); 

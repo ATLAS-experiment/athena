@@ -32,7 +32,6 @@ ex.concurrent_events = 4
 ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1_TriggerValidation_prescale"',
             'Trigger.doLVL1=True',
             'Trigger.writeBS=True']
-ex.args = '--CA'
 
 checkBS = Step.Step("CheckBS")
 checkBS.executable = 'trigbs_dumpHLTContentInBS_run3.py'

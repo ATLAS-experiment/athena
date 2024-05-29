@@ -17,7 +17,6 @@ ex.input = 'data'
 ex.threads = 1
 ex.flags = ['Trigger.triggerMenuSetup="MC_pp_run3_v1"',
             'Trigger.doLVL1=True']
-ex.args = '--CA'
 
 test = Test.Test()
 test.art_type = 'build'

@@ -67,13 +67,12 @@ def IDAlignMonGenericTracksAlgCfg(helper, alg, **kwargs):
     genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=101, xmin=-0.5, xmax= 100.5)
 
     varName = 'm_lb_event;LumiBlock'
-    title = 'Events per Lumiblock;Lumiblock;Events'
+    title = 'Lumiblock of the events;Lumiblock;Events'
     genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=1024, xmin=-0.5, xmax=1023.5)
 
-    ## Plots per lumiblock
-
+    # Plots per lumiblock
     varName = 'm_lb_track;NTracksPerLumiBlock'
-    title = 'Tracks per LumiBlock;Lumiblock;Tracks'
+    title = 'Tracks Per LumiBlock;Lumiblock;Tracks'
     genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=1024, xmin=-0.5, xmax=1023.5)
 
     varName = 'm_lb_pixhits;NPixPerLumiBlock'
@@ -87,7 +86,6 @@ def IDAlignMonGenericTracksAlgCfg(helper, alg, **kwargs):
     varName = 'm_lb_trthits;NTRTPerLumiBlock'
     title = 'TRT Hits per LumiBlock;Lumiblock;TRT Hits'
     genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=1024, xmin=-0.5, xmax=1023.5)
-
 
     # Start loop on tracks
     ## Hits per track
@@ -104,11 +102,11 @@ def IDAlignMonGenericTracksAlgCfg(helper, alg, **kwargs):
     genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=m_rangePixHits+1, xmin=-0.5, xmax=m_rangePixHits +0.5)
     
     varName = 'm_npixelhits_per_track_eca;Npixhits_per_track_eca'
-    title = 'Number of PIXEL hits per track (ECA);Pixel hits in EndCap A;Tracks'
+    title = 'Number of PIXEL (PIX+IBL) hits per track (ECA);Pixel hits in EndCap A;Tracks'
     genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=m_rangePixHits+1, xmin=-0.5, xmax=m_rangePixHits +0.5)
     
     varName = 'm_npixelhits_per_track_ecc;Npixhits_per_track_ecc'
-    title = 'Number of PIXEL hits per track (ECC);Pixel hits in EndCap C;Tracks'
+    title = 'Number of PIXEL (PIX+IBL) hits per track (ECC);Pixel hits in EndCap C;Tracks'
     genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=m_rangePixHits+1, xmin=-0.5, xmax=m_rangePixHits +0.5)
     
     varName = 'm_nscthits_per_track;Nscthits_per_track'
@@ -144,15 +142,15 @@ def IDAlignMonGenericTracksAlgCfg(helper, alg, **kwargs):
     genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=m_rangeTRTHits+1, xmin=-0.5, xmax=m_rangeTRTHits +0.5)
 
     varName = 'm_eta_2fillpix,m_npixelhits_per_track_2filleta;Npixhits_vs_eta'
-    title = "Number of Pixel hits vs track #eta;Track #eta;Pixel hits (PIX+IBL)"
+    title = "Number of Pixel hits vs track #eta; Track #eta;Pixel hits (PIX+IBL)"
     genericTrackGroup.defineHistogram(varName, type='TH2F', path=pathtrack, title=title, xbins=m_etaBins, xmin=-m_etaRange, xmax=m_etaRange, ybins=m_rangePixHits+1, ymin=-0.5, ymax=m_rangePixHits +0.5)
 
     varName = 'm_eta_2fillsct,m_nscthits_per_track_2filleta;Nscthits_vs_eta'
-    title = "Number of SCT hits vs track #eta;Track #eta;SCT hits"
+    title = "Number of SCT hits vs track #eta; Track #eta;SCT hits"
     genericTrackGroup.defineHistogram(varName, type='TH2F', path=pathtrack, title=title, xbins=m_etaBins, xmin=-m_etaRange, xmax=m_etaRange, ybins=m_rangeSCTHits+1, ymin=-0.5, ymax=m_rangeSCTHits +0.5)
 
     varName = 'm_eta_2filltrt,m_ntrthits_per_track_2filleta;Ntrthits_vs_eta'
-    title = "Number of TRT hits vs track #eta;Track #eta;TRT hits"
+    title = "Number of TRT hits vs track #eta; Track #eta;TRT hits"
     genericTrackGroup.defineHistogram(varName, type='TH2F', path=pathtrack, title=title, xbins=m_etaBins, xmin=-m_etaRange, xmax=m_etaRange, ybins=m_rangeTRTHits+1, ymin=-0.5, ymax=m_rangeTRTHits +0.5)
 
     varName = 'm_chi2oDoF;chi2oDoF'
@@ -161,7 +159,7 @@ def IDAlignMonGenericTracksAlgCfg(helper, alg, **kwargs):
 
     ## Track params
     varName = 'm_eta;eta'
-    title = 'Track #eta;Track #eta;Tracks'
+    title = 'eta;Track #eta;Tracks'
     genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=m_etaBins, xmin=-m_etaRange, xmax=m_etaRange)
 
     varName = 'm_errEta;err_Eta'
@@ -185,15 +183,15 @@ def IDAlignMonGenericTracksAlgCfg(helper, alg, **kwargs):
     genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=50, xmin=0, xmax= 0.002)
 
     varName = 'm_z0;z0_origin'
-    title = 'z_{0} (computed vs origin);z_{0} (origin) [mm];Tracks'
+    title = 'z_{0} (computed vs origin); z_{0} (origin) [mm];Tracks'
     genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=m_d0BsNbins, xmin=-m_z0Range, xmax=m_z0Range)
 
     varName = 'm_errZ0;err_z0'
     title = 'z_{0} error; z_{0} error [mm];Tracks'
     genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=50, xmin=0, xmax=0.3)
 
-    varName = 'm_z0_bscorr;z0_bscorr'
-    title = 'z_{0} (corrected for beamspot);z_{0} (BS) [mm];Tracks'
+    varName = 'm_z0_bscorr;z0'
+    title = 'z_{0} (corrected for beamspot);z_{0} (BS) [mm]; Tracks'
     genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=m_d0BsNbins, xmin=-m_z0Range, xmax=m_z0Range)
 
     varName = 'm_z0sintheta;z0sintheta'
@@ -205,11 +203,11 @@ def IDAlignMonGenericTracksAlgCfg(helper, alg, **kwargs):
     genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=m_d0BsNbins, xmin=-m_d0Range, xmax=m_d0Range)
 
     varName = 'm_errD0;errD0'
-    title = 'd_{0} error;d_{0} error [mm];Tracks'
+    title = 'd_{0} error;d_{0} error [mm]; Tracks'
     genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=60, xmin=0, xmax=0.05)
 
     varName = 'm_d0_bscorr;d0_bscorr'
-    title = 'd_{0} (corrected for beamspot);d_{0} (BS) [mm];Tracks'
+    title = 'd_{0} (corrected for beamspot);d_{0} (BS) [mm]; Tracks'
     genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=m_d0BsNbins, xmin=-m_d0BsRange, xmax=m_d0BsRange)
 
     varName = 'm_pT;pT'
@@ -244,19 +242,19 @@ def IDAlignMonGenericTracksAlgCfg(helper, alg, **kwargs):
     title = 'd_{0} (BS) Vs p_{T};Signed track p_{T} [GeV];d_{0} (BS) [mm]'
     genericTrackGroup.defineHistogram(varName, type='TH2F', path=pathtrack, title=title, xbins=200, xmin=-m_pTRange, xmax=m_pTRange, ybins=m_d0BsNbins, ymin=-m_d0BsRange, ymax=m_d0BsRange)
    
-    varName = 'm_phi_2filld0bscorr,m_d0_bscorr_2fillphi;D0bsVsPhi0'
+    varName = 'm_phi_2filld0bscorr,m_d0_bscorr_2fillphi;D0VsPhi0'
     title = 'd_{0} (BS) Vs #phi_{0};Track #phi_{0} [rad];d_{0} (BS) [mm]'
     genericTrackGroup.defineHistogram(varName, type='TH2F', path=pathtrack, title=title, xbins=m_phiBins, xmin=0, xmax= 2 * M_PI, ybins=m_d0BsNbins, ymin=-m_d0BsRange, ymax=m_d0BsRange)
    
-    varName = 'm_phi_2filld0bscorrBAR,m_d0_bscorrBAR;D0bsVsPhi0_Barrel'
+    varName = 'm_phi_2filld0bscorrBAR,m_d0_bscorrBAR;D0VsPhi0_Barrel'
     title = 'd_{0} (BS) Vs #phi_{0} (Barrel);Track #phi_{0} [rad];d_{0} (BS) [mm]'
     genericTrackGroup.defineHistogram(varName, type='TH2F', path=pathtrack, title=title, xbins=m_phiBins, xmin=0, xmax= 2 * M_PI, ybins=m_d0BsNbins, ymin=-m_d0BsRange, ymax=m_d0BsRange)
    
-    varName = 'm_phi_2filld0bscorrECA,m_d0_bscorrECA;D0bsVsPhi0_ECA'
+    varName = 'm_phi_2filld0bscorrECA,m_d0_bscorrECA;D0VsPhi0_ECA'
     title = 'd_{0} (BS) Vs #phi_{0} (ECA);Track #phi_{0} [rad];d_{0} (BS) [mm]'
     genericTrackGroup.defineHistogram(varName, type='TH2F', path=pathtrack, title=title, xbins=m_phiBins, xmin=0, xmax= 2 * M_PI, ybins=m_d0BsNbins, ymin=-m_d0BsRange, ymax=m_d0BsRange)
    
-    varName = 'm_phi_2filld0bscorrECC,m_d0_bscorrECC;D0bsVsPhi0_ECC'
+    varName = 'm_phi_2filld0bscorrECC,m_d0_bscorrECC;D0VsPhi0_ECC'
     title = 'd_{0} (BS) Vs #phi_{0} (ECC);Track #phi_{0} [rad];d_{0} (BS) [mm]'
     genericTrackGroup.defineHistogram(varName, type='TH2F', path=pathtrack, title=title, xbins=m_phiBins, xmin=0, xmax= 2 * M_PI, ybins=m_d0BsNbins, ymin=-m_d0BsRange, ymax=m_d0BsRange)
    

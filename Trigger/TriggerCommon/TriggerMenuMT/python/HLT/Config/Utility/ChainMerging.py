@@ -480,11 +480,7 @@ def makeCombinedStep(parallel_steps, stepNumber, chainDefList, allSteps = [], cu
                 currentStepName = step.name
                 #remove redundant instances of StepN_ and merged_ (happens when merging already merged chains)
                 
-                if re.search('^Step[0-9]_',currentStepName):
-                    currentStepName = currentStepName[6:]
-                elif re.search('^Step[0-9]{2}_', currentStepName):
-                    currentStepName = currentStepName[7:]                
-                if re.search('^merged_',currentStepName):
+                if currentStepName.startswith('merged_'):
                     currentStepName = currentStepName[7:]
 
                 # update the chain dict list for the combined step with the chain dict from this step
@@ -561,11 +557,7 @@ def makeCombinedStep(parallel_steps, stepNumber, chainDefList, allSteps = [], cu
                 comboHypo = step.comboHypoCfg
             currentStepName = step.name
             #remove redundant instances of StepN_ and merged_ (happens when merging already merged chains)
-            if re.search('^Step[0-9]_',currentStepName):
-                currentStepName = currentStepName[6:]
-            elif re.search('^Step[0-9]{2}_', currentStepName):
-                currentStepName = currentStepName[7:]    
-            if re.search('^merged_',currentStepName):
+            if currentStepName.startswith('merged_'):
                 currentStepName = currentStepName[7:]
             stepSeq.extend(step.sequenceFunctions)
             # set the multiplicity of all the legs 

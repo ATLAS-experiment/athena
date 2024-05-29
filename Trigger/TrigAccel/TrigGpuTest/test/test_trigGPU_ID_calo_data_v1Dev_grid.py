@@ -25,7 +25,6 @@ from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 
 ex = ExecStep.ExecStep()
 ex.type = 'athena'
-ex.args = '--CA'
 ex.input = 'data'
 ex.threads = 1
 ex.job_options = 'TriggerJobOpts/runHLT.py'

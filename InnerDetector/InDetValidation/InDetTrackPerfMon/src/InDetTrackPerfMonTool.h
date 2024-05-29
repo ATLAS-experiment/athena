@@ -20,17 +20,14 @@
 /// Athena includes
 #include "AthenaMonitoring/ManagedMonitorToolBase.h"
 #include "TrigDecisionTool/TrigDecisionTool.h"
-/// TODO - To be included in later MRs
-//#include "AsgAnalysisInterfaces/IGoodRunsListSelectionTool.h"
 
 /// local includes
 #include "InDetTrackPerfMon/ITrackAnalysisDefinitionSvc.h"
-#include "../src/TrackAnalysisCollections.h"
-#include "../src/RoiSelectionTool.h"
+#include "TrackAnalysisCollections.h"
+#include "RoiSelectionTool.h"
 #include "InDetTrackPerfMon/ITrackSelectionTool.h"
-#include "../src/ITrackMatchingTool.h"
-/// TODO - To be included in later MRs
-//#include "InDetTrackPerfMon/TrackAnalysisPlotsMgr.h"
+#include "ITrackMatchingTool.h"
+#include "TrackAnalysisPlotsMgr.h"
 
 /// STL includes
 #include <string>
@@ -72,24 +69,9 @@ private :
     SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthParticleName {
         this, "TruthParticleContainerName",  "TruthParticles", "Name of container of TruthParticles" };
 
-    /// Offline Primary vertex container's name
-    //SG::ReadHandleKey<xAOD::VertexContainer> m_offlineVertexContainerName {
-    //    this, "VertexContainerName", "PrimaryVertices", "offline vertices" };
-
-    /// Truth vertex container's name
-    //SG::ReadHandleKey<xAOD::TruthVertexContainer> m_truthVertexContainerName {
-    //    this, "TruthVertexContainerName",  "TruthVertices", "truth vertices" };
-
     /// EventInfo container name
     SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoContainerName {
         this, "EventInfoContainerName", "EventInfo", "event info" };
-
-    /// TODO - To be included in later MRs
-    //SG::ReadHandleKey<xAOD::TruthEventContainer> m_truthEventName {
-    //    this, "TruthEvents", "TruthEvents", "Name of the truth events container probably either TruthEvent or TruthEvents" };
-
-    //SG::ReadHandleKey<xAOD::TruthPileupEventContainer> m_truthPileUpEventName {
-    //    this, "TruthPileupEvents", "TruthPileupEvents", "Name of the truth pileup events container probably TruthPileupEvent(s)" };
 
     PublicToolHandle< Trig::TrigDecisionTool > m_trigDecTool {
         this, "TrigDecisionTool", "Trig::TrigDecisionTool/TrigDecisionTool", "" };
@@ -106,10 +88,6 @@ private :
     ToolHandle< IDTPM::ITrackMatchingTool > m_trackMatchingTool {
         this, "TrackMatchingTool", "IDTPM::InDetTrackPerfMon/ITrackMatchingTool", "Tool to match test to reference tracks and viceversa" };
 
-    /// Properties to fine-tune the tool behaviour
-    StringProperty m_dirName{
-        this, "DirName", "InDetTrackPerfMonPlots/", "Top level directory to write histograms into" };
-
     StringProperty m_anaTag{ this, "AnaTag", "", "Track analysis tag" }; 
 
     BooleanProperty m_doMatch{ this, "doMatch", false, "Enable TrackMatchingTool" };
@@ -117,9 +95,8 @@ private :
     /// TrackAnalysisDefinitionSvc
     ITrackAnalysisDefinitionSvc* m_trkAnaDefSvc;
 
-    /// histograms
-    /// TODO - To be included in later MRs
-    //std::vector< std::unique_ptr<TrackAnalysisPlotsMgr> > m_trkAnaPlotsMgrVec;
+    /// plots
+    std::vector< std::unique_ptr< IDTPM::TrackAnalysisPlotsMgr > >  m_trkAnaPlotsMgrVec;
 };
 
 #endif

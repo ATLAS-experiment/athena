@@ -116,6 +116,11 @@
     <class name="std::vector< std::pair<unsigned int, Muon::MuonSimData_p2> >" />
     <class name="Muon::MuonSimDataCollection_p2" id="E0AA3013-4EF7-45B6-BDB1-17B21BF60791"/>
 
+    <class name="Muon::MuonSimData_p3" />
+    <class pattern="std::*pair*<unsigned int, Muon::MuonSimData_p3>" />
+    <class name="std::vector< std::pair<unsigned int, Muon::MuonSimData_p3> >" />
+    <class name="Muon::MuonSimDataCollection_p3" id="018F527E-346B-7A37-8C3D-5E7420A9C76A"/>
+
     <class name="Muon::CscSimData_p1" />
     <class name="Muon::CscMcData_p1" />
     <class pattern="std::*pair*<HepMcParticleLink_p1, Muon::CscMcData_p1>" />
@@ -167,6 +172,11 @@
     <class pattern="std::*pair*<unsigned int, Muon::CscSimData_p2>" />
     <class name="std::vector< std::pair<unsigned int, Muon::CscSimData_p2> >" />
     <class name="Muon::CscSimDataCollection_p2" id="023993E1-BAAA-4F36-8CD4-8F03E3983E8D"/>
+
+    <class name="Muon::CscSimData_p3" />
+    <class pattern="std::*pair*<unsigned int, Muon::CscSimData_p3>" />
+    <class name="std::vector< std::pair<unsigned int, Muon::CscSimData_p3> >" />
+    <class name="Muon::CscSimDataCollection_p3" id="018F5280-E75C-7B27-9881-75B356B2A282"/>
 
     <!-- <class name="Muon::NSW_PadTriggerSegment_p1" /> -->
     <!-- <class name="std::vector<Muon::NSW_PadTriggerSegment_p1>" /> -->

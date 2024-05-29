@@ -64,7 +64,7 @@ namespace CP
         
         for (auto& [acc, writeHandle] : m_doubleWriteHandles) {
           if (truthParticle == nullptr or !acc->isAvailable(*truthParticle)) {
-            writeHandle->set(*tau, 0., sys);
+            writeHandle->set(*tau, -999., sys);
           } else {
             writeHandle->set(*tau, acc->operator()(*truthParticle), sys);
           }
@@ -72,7 +72,7 @@ namespace CP
 
         for (auto& [acc, writeHandle] : m_floatWriteHandles) {
           if (truthParticle == nullptr or !acc->isAvailable(*truthParticle)) {
-            writeHandle->set(*tau, 0., sys);
+            writeHandle->set(*tau, -999., sys);
           } else {
             writeHandle->set(*tau, acc->operator()(*truthParticle), sys);
           }
@@ -80,7 +80,7 @@ namespace CP
 
         for (auto& [acc, writeHandle] : m_intWriteHandles) {
           if (truthParticle == nullptr or !acc->isAvailable(*truthParticle)) {
-            writeHandle->set(*tau, 0, sys);
+            writeHandle->set(*tau, -999, sys);
           } else {
             writeHandle->set(*tau, acc->operator()(*truthParticle), sys);
           }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibTest/LArReadHadDMCoeffFile.h"
@@ -45,7 +45,7 @@ StatusCode  LArReadHadDMCoeffFile::finalize()
 }
 
 
-StatusCode LArReadHadDMCoeffFile::initDataFromFile(std::string hadDMCoeffFileName)
+StatusCode LArReadHadDMCoeffFile::initDataFromFile(const std::string& hadDMCoeffFileName)
 {
    m_data = new CaloHadDMCoeff();
 

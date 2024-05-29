@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 /**
  * @file DataModelTestDataCommon/src/CLinksAuxContainer_v1.cxx
@@ -18,8 +18,6 @@ namespace DMTest {
 CLinksAuxContainer_v1::CLinksAuxContainer_v1()
   : xAOD::AuxContainerBase()
 {
-  AUX_VARIABLE (link);
-  AUX_VARIABLE (links);
 }
 
 

@@ -92,11 +92,16 @@ void test1()
 
   assert (!ityp1.isAvailable(b));
   assert (!ftyp1.isAvailable(b));
+  assert (ityp1.withDefault(b, -1) == -1);
+  assert (ftyp1.withDefault(b, -1) == -1);
 
   SG::AuxVectorBase v;
   v.set (b, 5);
   SG::AuxStoreInternal store;
   v.setStore (&store);
+  assert (ityp1.withDefault(v, 5, -1) == -1);
+  assert (ftyp1.withDefault(v, 5, -1) == -1);
+
   int* anInt = reinterpret_cast<int*> (store.getData(ityp1_id, 10, 10));
   anInt[5] = 3;
   float* aFloat = reinterpret_cast<float*> (store.getData(ftyp1_id, 10, 10));
@@ -109,6 +114,10 @@ void test1()
   assert (ftyp1 (b) == 1.5);
   assert (ityp1.getDataArray (v) == anInt);
   assert (ftyp1.getDataArray (v) == aFloat);
+  assert (ityp1.withDefault(b, -1) == 3);
+  assert (ftyp1.withDefault(b, -1) == 1.5);
+  assert (ityp1.withDefault(v, 5, -1) == 3);
+  assert (ftyp1.withDefault(v, 5, -1) == 1.5);
 
   auto ispan = ityp1.getDataSpan (v);
   auto fspan = ftyp1.getDataSpan (v);

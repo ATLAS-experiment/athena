@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -12,6 +12,7 @@
 // Core include(s):
 #include "AthContainers/AuxTypeRegistry.h"
 #include "AthContainers/normalizedTypeinfoName.h"
+#include "AthContainers/ConstAccessor.h"
 
 #include <iostream>
 #include <utility>
@@ -186,9 +187,9 @@ namespace xAOD {
       SG::AuxTypeRegistry& reg = SG::AuxTypeRegistry::instance();       \
       const std::type_info* ti = reg.getType( auxid );			\
       if ( ti != NULL && *ti == typeid( TYPE ) ) {			\
+        SG::ConstAccessor< TYPE > acc( auxid );                         \
 	const std::string name = reg.getName( auxid );			\
-	const TYPE & value = m_fm->auxdata< TYPE >( name );		\
-	metaMap[name] = value;						\
+	metaMap[name] = acc( *m_fm );                                   \
       }									\
     }									\
     return metaMap;							\

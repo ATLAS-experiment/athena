@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetSubStructureMomentTools/EnergyCorrelatorTool.h"
 #include "JetSubStructureUtils/EnergyCorrelator.h"
+#include "AthContainers/ConstAccessor.h"
 
 EnergyCorrelatorTool::EnergyCorrelatorTool(const std::string& name) : 
   JetSubStructureMomentToolsBase(name)
@@ -79,7 +80,8 @@ int EnergyCorrelatorTool::modifyJet(xAOD::Jet &injet) const {
   if( m_doDichroic ) {
 
     /// Get parent jet
-    ElementLink<xAOD::JetContainer> parentLink = injet.auxdata<ElementLink<xAOD::JetContainer> >("Parent");
+    static const SG::ConstAccessor<ElementLink<xAOD::JetContainer> > ParentAcc ("Parent");
+    ElementLink<xAOD::JetContainer> parentLink = ParentAcc (injet);
 
     /// Return error is parent element link is broken
     if( !parentLink.isValid() ) {

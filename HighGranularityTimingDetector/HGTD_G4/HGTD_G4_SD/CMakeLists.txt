@@ -13,7 +13,7 @@ atlas_add_library( HGTD_G4_SD
                    src/*.h src/*.cxx src/components/*.cxx
                    OBJECT
                    NO_PUBLIC_HEADERS
-                   INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${GEANT4_INCLUDE_DIRS} ${GEOMODEL_INCLUDE_DIRS}
+                   INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS} ${GEANT4_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS} 
                    LINK_LIBRARIES ${CLHEP_LIBRARIES} ${GEANT4_LIBRARIES} ${GEOMODEL_LIBRARIES} StoreGateLib
                    HGTD_Identifier InDetSimEvent G4AtlasToolsLib MCTruth GeoModelInterfaces GeoPrimitives )
 set_target_properties( HGTD_G4_SD PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )

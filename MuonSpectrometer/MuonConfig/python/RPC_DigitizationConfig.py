@@ -55,7 +55,6 @@ def RPC_DigitizationToolCommonCfg(flags, name="RpcDigitizationTool", **kwargs):
     kwargs.setdefault("PatchForRpcTimeShift", 12.5)
     kwargs.setdefault("turnON_efficiency", True)
     kwargs.setdefault("turnON_clustersize", True)
-    kwargs.setdefault("testbeam_clustersize", 0)
     kwargs.setdefault("ClusterSize1_2uncorr", False)
     kwargs.setdefault("CutProjectedTracks", 100)
     kwargs.setdefault("RPCInfoFromDb", True)

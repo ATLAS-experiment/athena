@@ -2,7 +2,7 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "MDT_Digitization/MDT_Response_DigiTool.h"
+#include "MDT_Response_DigiTool.h"
 
 #include <iostream>
 

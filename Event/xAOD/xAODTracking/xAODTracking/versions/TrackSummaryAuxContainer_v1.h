@@ -28,6 +28,7 @@ namespace xAOD {
         std::vector<unsigned int> nSharedHits;
         std::vector<unsigned int> tipIndex;
         std::vector<unsigned int> stemIndex;
+        std::vector<unsigned int> surfaceIndex;
         std::vector<uint8_t> particleHypothesis;
     };
 }

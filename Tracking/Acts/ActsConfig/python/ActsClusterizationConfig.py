@@ -5,6 +5,39 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import BeamType
 from ActsConfig.ActsUtilities import extractChildKwargs
 
+def ActsHgtdClusteringToolCfg(flags,
+                              name: str = "ActsHgtdClusteringTool",
+                              **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+    acc.setPrivateTools(CompFactory.ActsTrk.HgtdClusteringTool(name,**kwargs))
+    return acc
+
+def ActsHgtdClusterizationAlgCfg(flags,
+                                 name: str = "ActsHgtdClusterizationAlg",
+                                 **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+
+    if flags.HGTD.Geometry.useGeoModelXml:
+        from HGTD_GeoModelXml.HGTD_GeoModelConfig import HGTD_ReadoutGeometryCfg
+    else:
+        from HGTD_GeoModel.HGTD_GeoModelConfig import HGTD_ReadoutGeometryCfg
+    acc.merge(HGTD_ReadoutGeometryCfg(flags))
+
+    kwargs.setdefault('RDOContainerName', 'HGTD_RDOs')
+    kwargs.setdefault('ClusterContainerName', 'HGTD_Clusters')
+
+    if 'ClusteringTool' not in kwargs:
+        kwargs.setdefault('ClusteringTool', acc.popToolsAndMerge(ActsHgtdClusteringToolCfg(flags)))
+
+    if flags.Acts.doMonitoring and 'MonTool' not in kwargs:
+        from ActsConfig.ActsMonitoringConfig import ActsHgtdClusterizationMonitoringToolCfg
+        kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsHgtdClusterizationMonitoringToolCfg(flags)))        
+        
+    acc.addEventAlgo(CompFactory.ActsTrk.HgtdClusterizationAlg(name, **kwargs))
+    return acc
+
+
+
 def ActsPixelClusteringToolCfg(flags,
                                name: str = "ActsPixelClusteringTool",
                                **kwargs) -> ComponentAccumulator:
@@ -143,7 +176,7 @@ def ActsPixelClusterPreparationAlgCfg(flags,
 
     kwargs.setdefault('InputCollection', 'ITkPixelClusters')
     kwargs.setdefault('DetectorElements', 'ITkPixelDetectorElementCollection')
-
+    
     if 'RegSelTool' not in kwargs:
         from RegionSelector.RegSelToolConfig import regSelTool_ITkPixel_Cfg
         kwargs.setdefault('RegSelTool', acc.popToolsAndMerge(regSelTool_ITkPixel_Cfg(flags)))
@@ -244,21 +277,20 @@ def ActsMainClusterizationCfg(flags,
 
     return acc
 
-def ActsClusterizationCfg(flags) -> ComponentAccumulator:
+def ActsClusterizationCfg(flags,
+                          *,
+                          previousActsExtension: str = None) -> ComponentAccumulator:
+    assert previousActsExtension is None or isinstance(previousActsExtension, str)
+
     acc = ComponentAccumulator()
                       
     processPixels = flags.Detector.EnableITkPixel
     processStrips = flags.Detector.EnableITkStrip
 
-    # For conversion pass we do not process pixels since we assume
-    # they have been processed on the primary pass.
-    if flags.Tracking.ActiveConfig.extension == "ActsConversion":
-        processPixels = False
-
     kwargs = dict()
     kwargs.setdefault('processPixels', processPixels)
     kwargs.setdefault('processStrips', processStrips)
-                      
+
     # Clusterization is a three step process at maximum:
     #   (1) Cache Creation
     #   (2) Clusterization algorithm (reconstruction of clusters)
@@ -275,7 +307,7 @@ def ActsClusterizationCfg(flags) -> ComponentAccumulator:
     # pass only if cache is enabled. In the latter case it is useed to collect all
     # the clusters from all views before passing them to the downstream algorithms
 
-    if flags.Tracking.ActiveConfig.extension in ['ActsConversion']:
+    if flags.Tracking.ActiveConfig.isSecondaryPass:
         # Secondary passes
         kwargs.setdefault('runCacheCreation', False)
         kwargs.setdefault('runReconstruction', flags.Acts.useCache)
@@ -288,6 +320,10 @@ def ActsClusterizationCfg(flags) -> ComponentAccumulator:
 
     # Name of the RoI to be used
     roisName = f'{flags.Tracking.ActiveConfig.extension}RegionOfInterest'
+    # Large Radius Tracking uses full scan RoI created in the primary pass
+    if flags.Tracking.ActiveConfig.extension == 'ActsLargeRadius':
+        roisName = 'ActsRegionOfInterest'
+        
     # Name of the Cluster container -> ITk + extension without "Acts" + Pixel or Strip + Clusters
     # We also define the same collection from the main ACTS pass (primary)
     primaryPixelClustersName = 'ITkPixelClusters'
@@ -296,7 +332,7 @@ def ActsClusterizationCfg(flags) -> ComponentAccumulator:
     stripClustersName = primaryStripClustersName
 
     # If the workflow is not a primary pass, then change the name of the cluster collections adding that information
-    if flags.Tracking.ActiveConfig.extension in ['ActsConversion']:
+    if flags.Tracking.ActiveConfig.isSecondaryPass:
         pixelClustersName = f'ITk{flags.Tracking.ActiveConfig.extension.replace("Acts", "")}PixelClusters'
         stripClustersName = f'ITk{flags.Tracking.ActiveConfig.extension.replace("Acts", "")}StripClusters'
     
@@ -332,6 +368,9 @@ def ActsClusterizationCfg(flags) -> ComponentAccumulator:
             else:
                 kwargs.setdefault('PixelClusterPreparationAlg.InputCollection', '')
                 kwargs.setdefault('PixelClusterPreparationAlg.InputIDC', f'{flags.Tracking.ActiveConfig.extension}PixelClustersCache')
+            # Prd Map for removing previously used measurements
+            if flags.Tracking.ActiveConfig.isSecondaryPass and previousActsExtension is not None:
+                kwargs.setdefault('PixelClusterPreparationAlg.InputPrdMap', f'{previousActsExtension}PrdMap')
                 
         if kwargs['processStrips']:
             kwargs.setdefault('StripClusterPreparationAlg.name', f'{flags.Tracking.ActiveConfig.extension}StripClusterPreparationAlg')
@@ -343,6 +382,9 @@ def ActsClusterizationCfg(flags) -> ComponentAccumulator:
             else:
                 kwargs.setdefault('StripClusterPreparationAlg.InputCollection', '')
                 kwargs.setdefault('StripClusterPreparationAlg.InputIDC', f'{flags.Tracking.ActiveConfig.extension}StripClustersCache')
+            # Prd Map for removing previously used measurements
+            if flags.Tracking.ActiveConfig.isSecondaryPass and previousActsExtension is not None:
+                kwargs.setdefault('StripClusterPreparationAlg.InputPrdMap', f'{previousActsExtension}PrdMap')
 
     # Analysis algo(s)
     if flags.Acts.doAnalysis:

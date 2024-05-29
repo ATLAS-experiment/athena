@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include "TrkFitterUtils/TrackFitInputPreparator.h"
 #include "TrkGlobalChi2Fitter/GlobalChi2Fitter.h"
@@ -15,6 +15,7 @@
 #include "TrkSurfaces/CylinderBounds.h"
 #include "TrkSurfaces/PerigeeSurface.h"
 #include "TrkSurfaces/TrapezoidBounds.h"
+#include "TrkEventPrimitives/SurfaceConsistencyCheck.h"
 
 #include "TrkGeometry/Layer.h"
 #include "TrkGeometry/CylinderLayer.h"
@@ -2899,7 +2900,7 @@ namespace Trk {
     // loop over confined layers
     if (confinedLayers != nullptr) {
       Trk::BinnedArraySpan<Trk::Layer const * const >layerVector = confinedLayers->arrayObjects();
-      Trk::BinnedArraySpan<Trk::Layer const * const >::const_iterator layerIter = layerVector.begin();
+      Trk::BinnedArraySpan<Trk::Layer const * const >::iterator layerIter = layerVector.begin();
 
       // loop over layers
       for (; layerIter != layerVector.end(); ++layerIter) {
@@ -2989,8 +2990,8 @@ namespace Trk {
     if (confinedVolumes != nullptr) {
       Trk::BinnedArraySpan<Trk::TrackingVolume const * const> volumes = confinedVolumes->arrayObjects();
 
-      Trk::BinnedArraySpan<Trk::TrackingVolume const * const >::const_iterator volIter = volumes.begin();
-      Trk::BinnedArraySpan<Trk::TrackingVolume const * const>::const_iterator volIterEnd = volumes.end();
+      Trk::BinnedArraySpan<Trk::TrackingVolume const * const >::iterator volIter = volumes.begin();
+      Trk::BinnedArraySpan<Trk::TrackingVolume const * const>::iterator volIterEnd = volumes.end();
 
       for (; volIter != volIterEnd; ++volIter) {
         if (*volIter != nullptr) {
@@ -7374,6 +7375,14 @@ namespace Trk {
         hit->resetTrackCovariance();
         continue;
       }
+
+      if (!Trk::consistentSurfaces (hit->trackParameters(),
+                                    hit->measurement(),
+                                    hit->materialEffects()))
+      {
+        return nullptr;
+      }
+
       //should check hit->isSane() here with better equality check(other than ptr comparison)
       auto trackState = hit->trackStateOnSurface();
       hit->resetTrackCovariance();

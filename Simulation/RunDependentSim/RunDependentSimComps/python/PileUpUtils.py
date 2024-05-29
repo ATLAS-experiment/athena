@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from copy import deepcopy
 from math import ceil
@@ -120,8 +120,7 @@ def loadPileUpProfile(flags, fragment_string):
 
     from importlib import import_module
     loaded_module = import_module(fragment_string)
-    function_def = getattr(loaded_module, 'setupProfile')
-    return function_def(flags)
+    return loaded_module.setupProfile(flags)
 
 
 def generatePileUpProfile(flags,
@@ -143,8 +142,7 @@ def generatePileUpProfile(flags,
         totalEvents = flags.ExecutorSplitting.TotalEvents
 
     if maxEvents == -1:
-        raise SystemExit("maxEvents = %d is not supported! Please set this to the number of events per file times the number of files per job." % (
-            maxEvents,))
+        raise ValueError("maxEvents = -1 is not supported! Please set this to the number of events per file times the number of files per job.")
     if not doNotCorrectMaxEvents and not flags.ExecutorSplitting.TotalSteps > 1:
         # round up to nearest 100 events..
         corrMaxEvents = ceil(float(maxEvents) / 100.0) * 100.0
@@ -357,8 +355,7 @@ def setupPileUpProfile(flags):
 
     from importlib import import_module
     loaded_module = import_module(bunchStructure)
-    function_def = getattr(loaded_module, 'setupBunchStructure')
-    function_def(flags)
+    loaded_module.setupBunchStructure(flags)
 
     # Setup pile-up profile
     flags.Digitization.PU.NumberOfCollisions = flags.Digitization.PU.NumberOfLowPtMinBias + flags.Digitization.PU.NumberOfHighPtMinBias

@@ -291,7 +291,7 @@ float BCM_DigitizationTool::computeEnergy(float simEner, const HepGeom::Point3D<
 //----------------------------------------------------------------------
 // CreateAnalog method:
 //----------------------------------------------------------------------
-std::vector<float> BCM_DigitizationTool::createAnalog(int iMod, std::vector<float> enerVect, std::vector<float> timeVect)
+std::vector<float> BCM_DigitizationTool::createAnalog(int iMod, const std::vector<float>& enerVect, const std::vector<float>& timeVect)
 {
   std::vector<float> analog(64,0);
   for (unsigned int iHit=0; iHit<enerVect.size(); ++iHit) {

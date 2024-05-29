@@ -19,7 +19,7 @@
 
 #include <sstream>
 
-FPGATrackSimFitConstantBank::FPGATrackSimFitConstantBank(FPGATrackSimPlaneMap const * pmap, int ncoords, std::string const & fname, bool isFirstStage, int missingPlane) :
+FPGATrackSimFitConstantBank::FPGATrackSimFitConstantBank(FPGATrackSimPlaneMap const * pmap, int ncoords, std::string const & fname, bool /*isFirstStage*/, int missingPlane) :
     AthMessaging ("FPGATrackSimFitConstantBank"),
     m_pmap(pmap),
     m_bankID(0),
@@ -28,7 +28,7 @@ FPGATrackSimFitConstantBank::FPGATrackSimFitConstantBank(FPGATrackSimPlaneMap co
     m_nconstr(0),
     m_npixcy(0),
     m_missingPlane(missingPlane),
-    m_isFirstStage(isFirstStage),
+//    m_isFirstStage(isFirstStage),
     m_isIdealCoordFit(true)
 {
   std::ifstream geocfile(fname);
@@ -418,7 +418,8 @@ int FPGATrackSimFitConstantBank::missing_point_guess(sector_t sector, FPGATrackS
 	newhit.setLayer(missedplane);
 	newhit.setSection(0);
 	if (m_isIdealCoordFit) {
-	  double target_r = (m_isFirstStage) ? fpgatracksim::TARGET_R_1STAGE[missedplane] : fpgatracksim::TARGET_R_2STAGE[missedplane];
+          // TODO: all the missing hit logic will eventually need spacepoint updates.
+	  double target_r = track.getIdealRadius(missedplane);
 	  newhit.setX(target_r*TMath::Cos(missing_hits[m]));
 	  newhit.setY(target_r*TMath::Sin(missing_hits[m]));
 	}
@@ -439,7 +440,8 @@ int FPGATrackSimFitConstantBank::missing_point_guess(sector_t sector, FPGATrackS
 	newhit.setLayer(missedplane);
 	newhit.setSection(0);
 	if (m_isIdealCoordFit) {
-	  double target_r = (m_isFirstStage) ? fpgatracksim::TARGET_R_1STAGE[missedplane] : fpgatracksim::TARGET_R_2STAGE[missedplane];
+          // TODO This will also eventually ned spacepoint updates.
+	  double target_r = track.getIdealRadius(missedplane);
 	  newhit.setX(target_r*TMath::Cos(missing_hits[m]));
 	  newhit.setY(target_r*TMath::Sin(missing_hits[m]));
 	  newhit.setZ(missing_hits[m+1]);

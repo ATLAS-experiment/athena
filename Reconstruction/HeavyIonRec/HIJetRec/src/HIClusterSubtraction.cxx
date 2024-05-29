@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HIClusterSubtraction.h"
@@ -15,6 +15,7 @@
 
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
+#include "AthContainers/ConstAccessor.h"
 
 //**********************************************************************
 
@@ -46,7 +47,8 @@ bool HIClusterSubtraction::doOriginCorrection( xAOD::CaloCluster* cl, const xAOD
 	//made boolean to return what was "missingMoment" in HIJetConstituentSubtractionTool
 	bool missingMoment = false;
 	float mag = 0;
-	if(cl->isAvailable<float>("HIMag")) mag=cl->auxdataConst<float>("HIMag");
+        static const SG::ConstAccessor<float> HIMagAcc("HIMag");
+	if(HIMagAcc.isAvailable(*cl)) mag=HIMagAcc(*cl);
 	else
 	{
 		double cm_mag=0;

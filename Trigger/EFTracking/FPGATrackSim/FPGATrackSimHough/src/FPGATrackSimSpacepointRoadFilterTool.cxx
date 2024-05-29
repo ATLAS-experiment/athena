@@ -359,9 +359,7 @@ unsigned FPGATrackSimSpacepointRoadFilterTool::findUnique(std::vector<const FPGA
     unsigned num_unique = 0;
     for (auto* spacepoint : sp_in) {
         coords = {spacepoint->getX(), spacepoint->getY(), spacepoint->getZ()};
-        if (merged_map.count(coords) == 0) {
-            merged_map.emplace(coords, spacepoint);
-        }
+        merged_map.try_emplace(coords, spacepoint);
     }
 
     // Loop over the outer spacepoints. If a hit is *not* in the map already,

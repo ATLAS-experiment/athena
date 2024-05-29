@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCombinedInDetCandidateAlg.h"
@@ -8,6 +8,7 @@
 #include "MuonLayerEvent/MuonSystemExtension.h"
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODTruth/xAODTruthHelpers.h"
+#include "AthContainers/ConstAccessor.h"
 
 using namespace MuonCombined;
 MuonCombinedInDetCandidateAlg::MuonCombinedInDetCandidateAlg(const std::string& name, ISvcLocator* pSvcLocator) :
@@ -99,9 +100,11 @@ StatusCode MuonCombinedInDetCandidateAlg::create(const EventContext& ctx, InDetC
         if (msgLvl(MSG::VERBOSE)) {
             const xAOD::TruthParticle* truth_part = xAOD::TruthHelpers::getTruthParticle(*tp);
             if (truth_part) {
-                ATH_MSG_VERBOSE("  Truth particle: pdgId " << truth_part->pdgId() << " type " << tp->auxdata<int>("truthType") << " origin "
-                                                           << tp->auxdata<int>("truthOrigin") << " pt " << truth_part->pt() << " eta "
-                                                           << truth_part->eta() << " phi " << truth_part->phi());
+                static const SG::ConstAccessor<int> truthTypeAcc("truthType");
+                static const SG::ConstAccessor<int> truthOriginAcc("truthOrigin");
+                ATH_MSG_VERBOSE("  Truth particle: pdgId " << truth_part->pdgId() << " type " << truthTypeAcc(*tp) << " origin "
+                                << truthOriginAcc(*tp) << " pt " << truth_part->pt() << " eta "
+                                << truth_part->eta() << " phi " << truth_part->phi());
             }
         }
         Muon::IMuonSystemExtensionTool::SystemExtensionCache cache;

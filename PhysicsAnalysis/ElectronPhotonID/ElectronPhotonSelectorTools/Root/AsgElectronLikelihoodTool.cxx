@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -28,6 +28,7 @@
 #include "AsgDataHandles/ReadHandle.h"
 #include "AsgDataHandles/ReadDecorHandle.h"
 #include "AsgTools/CurrentContext.h"
+#include "AthContainers/ConstAccessor.h"
 #include "PathResolver/PathResolver.h"
 #include "TEnv.h"
 
@@ -325,9 +326,9 @@ AsgElectronLikelihoodTool::accept(const EventContext& ctx,
 
   // get the ambiguity type from the decoration
   if (!m_rootTool->m_cutAmbiguity.empty()) {
-    if (el->isAvailable<uint8_t>("ambiguityType")) {
-      static const SG::AuxElement::Accessor<uint8_t> acc("ambiguityType");
-      ambiguityBit = acc(*el);
+    static const SG::AuxElement::Accessor<uint8_t> ambiguityTypeAcc("ambiguityType");
+    if (ambiguityTypeAcc.isAvailable(*el)) {
+      ambiguityBit = ambiguityTypeAcc(*el);
     } else {
       allFound = false;
       notFoundList += "ambiguityType ";
@@ -952,13 +953,14 @@ double AsgElectronLikelihoodTool::getAverageMu(const EventContext &ctx) const
 double
 AsgElectronLikelihoodTool::getFcalEt(const EventContext& ctx) const
 {
+  static const SG::ConstAccessor<std::string> SummaryAcc ("Summary");
   double fcalEt(0.);
   SG::ReadHandle<xAOD::HIEventShapeContainer> HIESCont(m_HIESContKey, ctx);
   xAOD::HIEventShapeContainer::const_iterator es_itr = HIESCont->begin();
   xAOD::HIEventShapeContainer::const_iterator es_end = HIESCont->end();
   for (; es_itr != es_end; ++es_itr) {
     double et = (*es_itr)->et();
-    const std::string name = (*es_itr)->auxdataConst<std::string>("Summary");
+    const std::string name = SummaryAcc (**es_itr);
     if (name == "FCal")
       fcalEt = et * 1.e-6;
   }

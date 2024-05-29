@@ -112,10 +112,10 @@ def getGainLayerNames(tool):
     """getGainLayerNames( tool ) -> return a list of names of the decorations added to the
     egamma tool, given the GainDecorator tool"""
     return [
-        getattr(tool, "decoration_pattern").format(info=info, layer=layer, gain=gain)
+        tool.decoration_pattern.format(info=info, layer=layer, gain=gain)
         for info in ["E", "nCells"]
-        for layer in getattr(tool, "layers")
-        for gain in getattr(tool, "gain_names").values()
+        for layer in tool.layers
+        for gain in tool.gain_names.values()
     ]
 
 
@@ -168,13 +168,13 @@ def getClusterEnergyPerLayerDecorations(acc, kernel):
     for tool in ClusterEnergyPerLayerDecorators:
         collections = filter(bool, (getattr(tool, x) for x in properties))
         for part in collections:
-            for layer in getattr(tool, "layers"):
+            for layer in tool.layers:
                 decorations.extend(
                     [
                         "{part}.E{neta}x{nphi}_Lr{layer}".format(
                             part=part,
-                            neta=getattr(tool, "neta"),
-                            nphi=getattr(tool, "nphi"),
+                            neta=tool.neta,
+                            nphi=tool.nphi,
                             layer=layer,
                         )
                     ]

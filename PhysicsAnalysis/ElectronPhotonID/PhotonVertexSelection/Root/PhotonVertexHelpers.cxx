@@ -11,6 +11,7 @@
 #include "xAODEgamma/PhotonContainer.h"
 #include "xAODTracking/TrackParticle.h"
 #include "xAODTracking/VertexContainer.h"
+#include "AthContainers/ConstAccessor.h"
 #include "CxxUtils/trapping_fp.h"
 
 // Asg tools
@@ -123,8 +124,8 @@ passConvSelection(const xAOD::Vertex& conversionVertex,
            convPtCut;
 
   std::string s = Form("pt%lu", i + 1);
-  return (conversionVertex.isAvailable<float>(s) &&
-          conversionVertex.auxdata<float>(s) > convPtCut);
+  SG::ConstAccessor<float> acc (s);
+  return (acc.withDefault(conversionVertex, 0) > convPtCut);
 }
 
 //____________________________________________________________________________
@@ -215,8 +216,9 @@ getVertexSumPt(const xAOD::Vertex* vertex, int power, bool useAux /* = true */)
 {
 
   std::string pw = (power == 1) ? "sumPt" : Form("sumPt%d", power);
-  if (useAux and vertex->isAvailable<float>(pw))
-    return vertex->auxdata<float>(pw);
+  SG::ConstAccessor<float> acc(pw);
+  if (useAux and acc.isAvailable(*vertex))
+    return acc(*vertex);
 
   // Loop over all track particles, sum up their pt
   float pt = 0.0;

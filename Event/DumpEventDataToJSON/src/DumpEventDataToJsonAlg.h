@@ -36,11 +36,13 @@
 // ACTS
 #include "ActsEvent/MultiTrajectory.h"
 #include "ActsEvent/TrackContainer.h"
+#include "ActsGeometryInterfaces/ActsGeometryContext.h"
 // Misc
 #include <nlohmann/json.hpp>
 #include <string>
 #include <vector>
 #include <map>
+
 
 /** Algorithm to dump some Event data to JSON.
  */
@@ -70,6 +72,10 @@ protected:
                                  const std::string &jsonType);
   template <class TYPE>
   nlohmann::json getData(const TYPE &object);
+
+  nlohmann::json getActsData(const Acts::TrackProxy<ActsTrk::TrackSummaryContainer, ActsTrk::MultiTrajectory, ActsTrk::DataLinkHolder, true> &track, 
+                         const Acts::GeometryContext& gctx);
+
 
   template <class TYPE>
   void addLink(const TYPE &link, nlohmann::json &data);
@@ -108,7 +114,9 @@ protected:
   SG::ReadHandleKey<InDet::TRT_DriftCircleContainer> m_trtPrepRawDataKey{this, "TrtPrepRawDataKey", "TRT_DriftCircles", "Key for TRT PRD Container"};
 
   ToolHandle<Trk::IExtrapolationEngine> m_extrapolator{this, "Extrapolator", "Trk::ExtrapolationEngine/AtlasExtrapolation"};
-  ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
+
+  SG::ReadHandleKey<ActsGeometryContext> m_geometryContextKey {
+      this, "ActsAlignmentKey", "ActsAlignment", "cond read key for the alignment"};
 
   Gaudi::Property<std::string> m_outputJSON_Name{this, "OutputLocation", "EventData.json", "Default filename for "};
 

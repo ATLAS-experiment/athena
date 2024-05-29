@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
   */
 #ifndef ATLASSOURCELINKSURFACEACCESSOR_H
 #define ATLASSOURCELINKSURFACEACCESSOR_H
@@ -35,8 +35,9 @@ namespace ActsTrk {
 // surface accessor implementation for ATLASUncalibSourceLink i.e. xAOD::UncalibratedMeasurement
 inline const Acts::Surface* ATLASUncalibSourceLinkSurfaceAccessor::operator()(const Acts::SourceLink& sourceLink) const {
    const auto atlas_uncalib_source_link = sourceLink.get<ATLASUncalibSourceLink>();
-   assert(atlas_uncalib_source_link.isValid() && *atlas_uncalib_source_link );
-   return &this->m_converterTool->trkSurfaceToActsSurface(m_surfaceHelper->associatedSurface( **atlas_uncalib_source_link ) );
+   const xAOD::UncalibratedMeasurement &uncalibMeas = getUncalibratedMeasurement(atlas_uncalib_source_link);
+
+   return &this->m_converterTool->trkSurfaceToActsSurface(m_surfaceHelper->associatedSurface( uncalibMeas ));
 }
 
 // surface accessor implementation for ATLASSourceLink i.e. Trk::MeasurementBase

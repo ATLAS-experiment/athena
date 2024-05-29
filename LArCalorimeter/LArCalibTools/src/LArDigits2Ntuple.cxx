@@ -178,11 +178,12 @@ StatusCode LArDigits2Ntuple::execute()
       }
     }
     m_ntNsamples   = trueMaxSample;
+    ATH_MSG_DEBUG( "The number of digi samples in data "<< m_Nsamples  );
 
     fillFromIdentifier(digi->hardwareID());      
 
-    if(m_fillEMB && m_barrel_ec !=0) continue;
-    if(m_fillEndcap && m_barrel_ec !=1) continue;
+    if(m_isSC && m_fillEMB && m_barrel_ec !=0) continue;
+    if(m_isSC && m_fillEndcap && m_barrel_ec !=1) continue;
 
     if(m_FTlist.size() > 0) {	// should do a selection
       if(std::find(std::begin(m_FTlist), std::end(m_FTlist), m_FT)  == std::end(m_FTlist)) {	// is our FT in list ?

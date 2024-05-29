@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -54,7 +54,7 @@ StatusCode LArRampFCalCorr::stop(){
 
   HWIdentifier chid;
   std::vector<int> badChan;
-  int channel, module;
+  int channel{}, module{};
   int slot = 0;
   double avg[3];
   int numChan[3];

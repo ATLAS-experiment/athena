@@ -19,9 +19,9 @@ namespace SG {
  *
  * The name -> auxid lookup is done here.
  */
-template <class T>
+template <class T, class ALLOC>
 inline
-AtomicDecorator<T>::AtomicDecorator (const std::string& name)
+AtomicDecorator<T, ALLOC>::AtomicDecorator (const std::string& name)
   : Base (name, "", SG::AuxVarFlags::Atomic)
 {
 }
@@ -34,10 +34,10 @@ AtomicDecorator<T>::AtomicDecorator (const std::string& name)
  *
  * The name -> auxid lookup is done here.
  */
-template <class T>
+template <class T, class ALLOC>
 inline
-AtomicDecorator<T>::AtomicDecorator (const std::string& name,
-                                     const std::string& clsname)
+AtomicDecorator<T, ALLOC>::AtomicDecorator (const std::string& name,
+                                            const std::string& clsname)
   : Base (name, clsname, SG::AuxVarFlags::Atomic)
 {
 }
@@ -49,9 +49,9 @@ AtomicDecorator<T>::AtomicDecorator (const std::string& name,
  *
  * Will throw @c SG::ExcAuxTypeMismatch if the types don't match.
  */
-template <class T>
+template <class T, class ALLOC>
 inline
-AtomicDecorator<T>::AtomicDecorator (const SG::auxid_t auxid)
+AtomicDecorator<T, ALLOC>::AtomicDecorator (const SG::auxid_t auxid)
   : Base (auxid, SG::AuxVarFlags::Atomic)
 {
 }
@@ -65,10 +65,13 @@ AtomicDecorator<T>::AtomicDecorator (const SG::auxid_t auxid)
  * that do not yet exist (in which case they will be marked as decorations)
  * or variables already marked as decorations.
  */
-template <class T>
+template <class T, class ALLOC>
+template <class ELT>
+ATH_REQUIRES( IsConstAuxElement<ELT> )
 inline
-typename AtomicDecorator<T>::reference_type
-AtomicDecorator<T>::operator() (const AuxElement& e) const
+auto
+AtomicDecorator<T, ALLOC>::operator() (const ELT& e) const
+  -> reference_type
 {
   return reinterpret_cast<reference_type> (Base::operator() (e));
 }
@@ -87,11 +90,12 @@ AtomicDecorator<T>::operator() (const AuxElement& e) const
  * that do not yet exist (in which case they will be marked as decorations)
  * or variables already marked as decorations.
  */
-template <class T>
+template <class T, class ALLOC>
 inline
-typename AtomicDecorator<T>::reference_type
-AtomicDecorator<T>::operator() (const AuxVectorData& container,
-                                size_t index) const
+auto
+AtomicDecorator<T, ALLOC>::operator() (const AuxVectorData& container,
+                                       size_t index) const
+  -> reference_type
 {
   return reinterpret_cast<reference_type> (Base::operator() (container, index));
 }
@@ -102,9 +106,9 @@ AtomicDecorator<T>::operator() (const AuxVectorData& container,
  * @param e The element for which to fetch the variable.
  * @param x The variable value to set.
  */
-template <class T>
+template <class T, class ALLOC>
 inline
-void AtomicDecorator<T>::set (const AuxElement& e, const element_type& x) const
+void AtomicDecorator<T, ALLOC>::set (const AuxElement& e, const element_type& x) const
 {
   (*this)(e) = x;
 }
@@ -114,10 +118,11 @@ void AtomicDecorator<T>::set (const AuxElement& e, const element_type& x) const
  * @brief Get a pointer to the start of the auxiliary data array.
  * @param container The container from which to fetch the variable.
  */
-template <class T>
+template <class T, class ALLOC>
 inline
-typename AtomicDecorator<T>::const_container_pointer_type
-AtomicDecorator<T>::getDataArray (const AuxVectorData& container) const
+auto
+AtomicDecorator<T, ALLOC>::getDataArray (const AuxVectorData& container) const
+  -> const_container_pointer_type
 {
   return reinterpret_cast<const_container_pointer_type>
     (container.getDataArray (Base::auxid()));
@@ -132,10 +137,11 @@ AtomicDecorator<T>::getDataArray (const AuxVectorData& container) const
  * that do not yet exist (in which case they will be marked as decorations)
  * or variables already marked as decorations.
  */
-template <class T>
+template <class T, class ALLOC>
 inline
-typename AtomicDecorator<T>::container_pointer_type
-AtomicDecorator<T>::getDecorationArray (const AuxVectorData& container) const
+auto
+AtomicDecorator<T, ALLOC>::getDecorationArray (const AuxVectorData& container) const
+  -> container_pointer_type
 {
   return reinterpret_cast<container_pointer_type>
     (container.getDecorationArray (Base::auxid()));

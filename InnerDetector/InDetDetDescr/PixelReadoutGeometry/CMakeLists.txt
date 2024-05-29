@@ -14,6 +14,7 @@ atlas_add_library( PixelReadoutGeometryLib
   src/PixelDetectorManager.cxx
   src/PixelModuleDesign.cxx
   PUBLIC_HEADERS PixelReadoutGeometry
+  INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
   LINK_LIBRARIES ${GEOMODEL_LIBRARIES} AthenaKernel CxxUtils GaudiKernel GeoPrimitives InDetIdentifier InDetReadoutGeometry PixelReadoutDefinitionsLib ReadoutGeometryBase TrkDetElementBase TrkSurfaces
   PRIVATE_LINK_LIBRARIES AthenaBaseComps AthenaPoolUtilities DetDescrConditions Identifier StoreGateLib TrkEventPrimitives InDetGeoModelUtils)
 
@@ -47,4 +48,6 @@ if( NOT SIMULATIONBASE )
                   LINK_LIBRARIES ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} AthenaBaseComps AthenaKernel CxxUtils GaudiKernel PixelReadoutGeometryLib
                   POST_EXEC_SCRIPT nopost.sh
                   ENVIRONMENT "JOBOPTSEARCHPATH=${CMAKE_CURRENT_SOURCE_DIR}/test" )
+  # Needed for the dynamic_cast to work properly with clang.
+  set_target_properties( PixelReadoutGeometry_ITkPixelReadoutManager_test PROPERTIES ENABLE_EXPORTS True )
 endif()

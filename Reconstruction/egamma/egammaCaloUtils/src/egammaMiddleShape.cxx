@@ -1,9 +1,10 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "egammaCaloUtils/egammaMiddleShape.h"
-#include "egammaUtils/egammaEnergyPositionAllSamples.h"
+#include "egammaCaloUtils/egammaEnergyPositionAllSamples.h"
+#include "egammaCaloUtils/egammaqweta2c.h"
 
 #include "CaloDetDescr/CaloDetDescrManager.h"
 #include "CaloEvent/CaloCluster.h"
@@ -11,7 +12,6 @@
 #include "CaloUtils/CaloLayerCalculator.h"
 #include "xAODCaloEvent/CaloCluster.h"
 
-#include "egammaUtils/egammaqweta2c.h"
 
 StatusCode
 egammaMiddleShape::execute(const xAOD::CaloCluster& cluster,
@@ -69,7 +69,7 @@ egammaMiddleShape::execute(const xAOD::CaloCluster& cluster,
   double dphi = dde->dphi();
 
   // Find the hottest cell
-  // in a 7x7 (7deta,7*dphi) window 
+  // in a 7x7 (7deta,7*dphi) window
   // opened in the eta/phi of the
   // cluster in this sampling
   CaloLayerCalculator calc;
@@ -90,7 +90,7 @@ egammaMiddleShape::execute(const xAOD::CaloCluster& cluster,
 
   // Using that list do the filling
   // of all the sub windows.
- 
+
   // 7x7
   calc.fill(cell_list.begin(),
             cell_list.end(),

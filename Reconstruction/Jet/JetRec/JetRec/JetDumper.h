@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetDumper.h
@@ -92,8 +92,8 @@ private:  // methods
 
   // Write the label for a single object.
   template<typename T>
-  std::string object_label(const T* pjet, std::string label) const;
-  std::string object_label(const fastjet::PseudoJet& jet, std::string label) const;
+  std::string object_label(const T* pjet, const std::string& label) const;
+  std::string object_label(const fastjet::PseudoJet& jet, const std::string& label) const;
 
   // Process a single jet after writing prefix.
   template<typename T>
@@ -353,7 +353,7 @@ int JetDumper::dump_object_after_prefix(const T* pjet, const std::string& objtyp
 }
 
 template<typename T>
-std::string JetDumper::object_label(const T*, std::string label) const {
+std::string JetDumper::object_label(const T*, const std::string& label) const {
   return label;
 }
 

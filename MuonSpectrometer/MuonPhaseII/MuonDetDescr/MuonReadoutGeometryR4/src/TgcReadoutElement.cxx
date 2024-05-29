@@ -62,7 +62,8 @@ StatusCode TgcReadoutElement::initElement() {
             const StripDesign& layout{wireGangLayout(gap)};
             ATH_CHECK(planeSurfaceFactory(layHash, m_pars.layerBounds->make_bounds(layout.shortHalfHeight(),
                                                                                    layout.longHalfHeight(),
-                                                                                   layout.halfWidth())));
+                                                                                   layout.halfWidth(),
+                                                                                   90.* Gaudi::Units::deg)));
 #endif
          }
          if (numStrips(gap)) {
@@ -70,8 +71,7 @@ StatusCode TgcReadoutElement::initElement() {
             ATH_CHECK(insertTransform<TgcReadoutElement>(layHash));
 #ifndef SIMULATIONBASE
             const StripDesign& layout{stripLayout(gap)};
-            /// We probably need a rotated version of these bounds. However, that's not part
-            /// of Acts yet
+            /// Strips are rotated bounds
             ATH_CHECK(planeSurfaceFactory(layHash, m_pars.layerBounds->make_bounds(layout.shortHalfHeight(),
                                                                                    layout.longHalfHeight(),
                                                                                    layout.halfWidth())));
@@ -93,7 +93,7 @@ Amg::Transform3D TgcReadoutElement::fromGapToChamOrigin(const IdentifierHash& la
       return m_pars.sensorLayouts[layIdx]->toOrigin();
 }
 Amg::Vector3D TgcReadoutElement::channelPosition(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const { 
-   const StripLayerPtr& layDesign{sensorLayout(gasGapNumber(measHash), isStrip(measHash))};
+   const StripLayerPtr& layDesign{sensorLayout(measHash)};
    if (!layDesign) {
        ATH_MSG_WARNING("The gasGap "<<gasGapNumber(measHash)<<" & strip:"<<isStrip(measHash)<<" is unknown");
        return Amg::Vector3D::Zero();

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonHistUtils/TruthRelatedMuonPlotOrganizer.h"
@@ -7,6 +7,7 @@
 #include "xAODTruth/TruthParticleAuxContainer.h"
 #include "xAODTracking/TrackParticleContainer.h"
 #include "xAODTracking/TrackParticleAuxContainer.h"
+#include "AthContainers/ConstAccessor.h"
 
 typedef ElementLink< xAOD::TruthParticleContainer > TruthLink;
 
@@ -91,7 +92,9 @@ TruthRelatedMuonPlotOrganizer::~TruthRelatedMuonPlotOrganizer() = default;
     //const xAOD::TrackParticle* msExtrapTrk = mu.trackParticle(xAOD::Muon::ExtrapolatedMuonSpectrometerTrackParticle);
   
     //trying to accomodate both in a way that the code compiles in both releases
-    if (mu.isAvailable< ElementLink<xAOD::TrackParticleContainer> >("extrapolatedMuonSpectrometerTrackParticleLink") && (mu.auxdata<ElementLink<xAOD::TrackParticleContainer> >("extrapolatedMuonSpectrometerTrackParticleLink")).isValid() ) {
+    static const SG::ConstAccessor< ElementLink<xAOD::TrackParticleContainer> >
+      extrapLinkAcc("extrapolatedMuonSpectrometerTrackParticleLink");
+    if (extrapLinkAcc.isAvailable(mu) && extrapLinkAcc(mu).isValid() ) {
       //cool, we got both links:
       //int correctEnumForExtrap = ((int)xAOD::Muon::MuonSpectrometerTrackParticle)+2;
       //msExtrapTrk = mu.trackParticle((xAOD::Muon::TrackParticleType) correctEnumForExtrap);
@@ -99,18 +102,20 @@ TruthRelatedMuonPlotOrganizer::~TruthRelatedMuonPlotOrganizer() = default;
     }
     else {
       // gymnastics to get msTrk...
-      const ElementLink<xAOD::TrackParticleContainer>& msExtrapTrkLink = mu.trackParticleLink(xAOD::Muon::MuonSpectrometerTrackParticle);      
+      const ElementLink<xAOD::TrackParticleContainer>& msExtrapTrkLink = mu.trackParticleLink(xAOD::Muon::MuonSpectrometerTrackParticle);
+      static const SG::ConstAccessor<TruthLink>
+        truthParticleLinkAcc("truthParticleLink");
       if (msExtrapTrkLink.isValid()) {
 	//msExtrapTrk = mu.trackParticle( xAOD::Muon::MuonSpectrometerTrackParticle );
 	TruthLink truthLink_muTrk;
-	if( (*msExtrapTrkLink)->isAvailable<TruthLink>("truthParticleLink") ) {
-	  truthLink_muTrk = (*msExtrapTrkLink)->auxdata<TruthLink>("truthParticleLink");
+	if( truthParticleLinkAcc.isAvailable(**msExtrapTrkLink) ) {
+	  truthLink_muTrk = truthParticleLinkAcc(**msExtrapTrkLink);
 	}
 	if (truthLink_muTrk.isValid()) {
 	  for (const auto trk: *MSTracks) {
 	    TruthLink truthLink_msTrk;
-	    if( trk->isAvailable<TruthLink>("truthParticleLink") ) {
-	      truthLink_msTrk = trk->auxdata<TruthLink>("truthParticleLink");
+	    if( truthParticleLinkAcc.isAvailable(*trk) ) {
+	      truthLink_msTrk = truthParticleLinkAcc(*trk);
 	      if (truthLink_msTrk.isValid()) {
 		if (truthLink_msTrk == truthLink_muTrk) {
 		  msTrk = trk; //got it!

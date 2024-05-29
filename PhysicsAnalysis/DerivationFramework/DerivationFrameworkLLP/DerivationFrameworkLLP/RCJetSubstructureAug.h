@@ -98,7 +98,7 @@ namespace DerivationFramework {
         /// Cluster jets informations decorators 
         SG::AuxElement::Decorator<float> dec_pT;
         SG::AuxElement::Decorator<float> dec_m;
-        SG::AuxElement::Decorator<float> dec_NClusts;
+        SG::AuxElement::Decorator<float> dec_NConstits;
         SG::AuxElement::Decorator<float> dec_eta;
         SG::AuxElement::Decorator<float> dec_phi;
 
@@ -129,7 +129,7 @@ namespace DerivationFramework {
 
             dec_pT("pT_" + suffix),
             dec_m("m_" + suffix),
-            dec_NClusts("NClusts"),
+            dec_NConstits("NConstits_" + suffix),
             dec_eta("eta_" + suffix),
             dec_phi("phi_" + suffix),
 

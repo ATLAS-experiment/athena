@@ -7,7 +7,8 @@
 # and translate it into the python configuration objects used by
 # jet reco code.
 
-from JetRecConfig.JetDefinition import JetInputConstitSeq,JetInputConstit, xAODType, JetDefinition
+from JetRecConfig.JetDefinition import JetInputConstitSeq,JetInputConstit, xAODType, JetInputType, JetDefinition, formatRvalue
+from JetRecConfig.JetGrooming import GroomingDefinition
 from ..Menu.SignatureDicts import JetRecoKeys as recoKeys
 # this is to define trigger specific JetModifiers (ex: ConstitFourMom_copy) : 
 from . import TriggerJetMods
@@ -68,7 +69,7 @@ def extractRecoDict(chainParts):
 
     # set proper jetCalib key in default case
     if recoDict['jetCalib'] == "default":
-        recoDict['jetCalib'] = getJetCalibDefaultString(recoDict)
+        recoDict['jetCalib'] = getJetCalibDefaultString(recoDict['recoAlg'],recoDict['constitType'],recoDict['trkopt'])
 
     recoDict['jetDefStr'] = jetRecoDictToString(recoDict)
 
@@ -93,7 +94,7 @@ def jetRecoDictFromString(jet_def_string):
 
     # set proper jetCalib key in default case
     if jetRecoDict['jetCalib'] == "default":
-        jetRecoDict['jetCalib'] = getJetCalibDefaultString(jetRecoDict)
+        jetRecoDict['jetCalib'] = getJetCalibDefaultString(jetRecoDict['recoAlg'],jetRecoDict['constitType'],jetRecoDict['trkopt'])
 
     jetRecoDict['jetDefStr'] = jetRecoDictToString(jetRecoDict)
 
@@ -106,6 +107,52 @@ def cloneAndUpdateJetRecoDict(jetRecoDict,**kwargs):
     newJetRecoDict.update(dict(**kwargs))
     newJetRecoDict["jetDefStr"] = jetRecoDictToString(newJetRecoDict)
     return newJetRecoDict
+
+##########################################################################################
+### --- Interpreting JetDefinition ---
+
+# Condense the jet definition down into a string representation
+# compatible with the jetDefStr in jetRecoDict
+# Also useful as a consistency check
+def jetDefToString(jetDef):
+    _jetDef = jetDef
+    poststr = ''
+    if isinstance(jetDef,GroomingDefinition):
+        _jetDef = jetDef.ungroomeddef
+        # We don't support multiple configurations of a given grooming 
+        if jetDef.groomSpecAsStr().startswith('Trimmed'):
+            poststr = 't'
+        elif jetDef.groomSpecAsStr().startswith('SoftDrop'):
+            poststr = 'sd'
+        else:
+            raise ValueError('Unsupported grooming type for HLT')
+    elif jetDef.inputdef.jetinputtype == JetInputType.Jet:
+        # Reclustered
+        poststr = 'r'
+
+    algstr = f'{str.lower(_jetDef.algorithm[0])}{formatRvalue(_jetDef._radius)}{poststr}'
+    constitdef = _jetDef.inputdef
+    if constitdef.label == 'HI':
+        constitstr = 'ion'
+    else:
+        clusterCalib = 'lcw' if 'LC' in constitdef.label else 'em'
+        constittype = 'pf' if 'PFlow' in constitdef.label else 'tc'
+        constitmods = ''
+        if isinstance(constitdef,JetInputConstitSeq):
+            ignore = ['EM','LC','CHS','CorrectPFO']
+            for mod in constitdef.modifiers:
+                if mod not in ignore:
+                    constitmods += str.lower(mod)
+        constitstr = f'{constitmods}{constittype}_{clusterCalib}'
+    jetdefstr = f'{algstr}_{constitstr}{jetDef.suffix}'
+
+    return jetdefstr
+
+def jetCalibFromJetDef(jetDef):
+    jetCalib = jetDef.suffix[1:]
+    if jetCalib.endswith('_ftf'):
+        jetCalib = jetCalib[:-4]
+    return jetCalib
 
 ##########################################################################################
 ### --- General helpers ---
@@ -143,7 +190,6 @@ def isPFlow(jetRecoDict):
 # return the min jet pT in MeV for the configured recoAlg
 def getFilterCut(recoAlg):
     return {"a4":4000, "a10":50000, "a10r": 50000, "a10t":50000, "a10sd":50000}[recoAlg]
-
 
 def addJetContextFlags(flags):
 
@@ -201,6 +247,8 @@ def getHLTPrefix():
     return prefix
 
 def getClustersKey(recoDict):
+        if recoDict['ionopt'] == 'ion':
+            return "HLT_HICaloClustersFS"
         clusterCalib = recoDict["clusterCalib"]
         if clusterCalib == "em":
             from ..CommonSequences.FullScanDefs import em_clusters
@@ -211,22 +259,22 @@ def getClustersKey(recoDict):
         else:
             raise ValueError("Invalid value for calib: '{}'".format(clusterCalib))
 
-def getJetCalibDefaultString(recoDict):
-    if recoDict['recoAlg'] == 'a4':
-        if recoDict['constitType'] == 'tc':
-            return 'subresjesgscIS' if recoDict['trkopt'] == 'ftf' else 'subjesIS'
-        elif recoDict['constitType'] == 'pf':
+def getJetCalibDefaultString(recoAlg, constitType, trkopt):
+    if recoAlg == 'a4':
+        if constitType == 'tc':
+            return 'subresjesgscIS' if trkopt == 'ftf' else 'subjesIS'
+        elif constitType == 'pf':
             return 'subresjesgscIS'
-    elif recoDict['recoAlg'] == 'a10':
+    elif recoAlg == 'a10':
         return 'subjes'
-    elif recoDict['recoAlg'] == 'a10t':
+    elif recoAlg == 'a10t':
         return 'jes'
-    elif recoDict['recoAlg'] == 'a10sd':
+    elif recoAlg == 'a10sd':
         return 'jes'
-    elif recoDict['recoAlg'] == 'a10r':
+    elif recoAlg == 'a10r':
         return 'subjesIS' # calibration for the small-R jets used to reconstruct the reclustered jets
     else:
-        raise RuntimeError('No default calibration is defined for %s' % recoDict['recoAlg'])
+        raise RuntimeError(f'No default calibration is defined for {recoAlg}, {constitType}, {trkopt}')
 
 cleaningDict = {
     'CLEANlb':  'LooseBad',
@@ -322,25 +370,25 @@ def getModSpec(modname,modspec=''):
     return (TriggerJetMods.stdJetModifiers[modname],str(modspec))
 
 # Get list of jet attributes to be calculated for jet
-def getDecorList(jetRecoDict):
+def getDecorList(jetDef):
     # Basic jet info provided by the jet builder
     decorlist = []
 
     # return empty list for non-calibrated jets
-    if jetRecoDict['jetCalib'] == 'nojcalib': return decorlist
+    if jetCalibFromJetDef(jetDef) == 'nojcalib': return decorlist
 
     decorlist += [ 'AlgorithmType', 'InputType',
                   'ActiveArea', 'ActiveArea4vec_eta', 'ActiveArea4vec_m',
                   'ActiveArea4vec_phi', 'ActiveArea4vec_pt',
                   'EMFrac','HECFrac','EnergyPerSampling','N90Constituents','constit','Tile0Frac']
 
-    if doFSTracking(jetRecoDict):
+    if jetDef.context == 'ftf':
         decorlist += ["GhostTrack_ftf",
                       "NumTrkPt500","NumTrkPt1000",
                       "SumPtTrkPt500","SumPtTrkPt1000",
                       "TrackWidthPt1000",
                       "JVFCorr", "JvtRpt", "Jvt"]
-        if isPFlow(jetRecoDict):
+        if 'PFlow' in jetDef.basename:
             decorlist += ["SumPtChargedPFOPt500"]
     return decorlist
 
@@ -442,7 +490,7 @@ def defineJets(flags,jetRecoDict,clustersKey=None,prefix='',suffix='',pfoPrefix=
 
 def defineReclusteredJets(jetRecoDict,smallRjets,inputlabel,prefix,suffix):
     rcJetConstit = JetInputConstit("RCJet", xAODType.Jet, smallRjets, label=inputlabel+'RC', lock=True)
-    rcJetDef = JetDefinition( "AntiKt", 1.0, rcJetConstit, prefix=prefix, suffix=suffix)
+    rcJetDef = JetDefinition( "AntiKt", 1.0, rcJetConstit, prefix=prefix, suffix=suffix, context=jetRecoDict['trkopt'])
     return rcJetDef
 
 def defineGroomedJets(jetRecoDict,ungroomedDef):#,ungroomedJetsName):
@@ -453,8 +501,8 @@ def defineGroomedJets(jetRecoDict,ungroomedDef):#,ungroomedJetsName):
         suffix += "_"+jetRecoDict["trkopt"]
     
     groomDef = {
-        "sd":JetSoftDrop(ungroomedDef,ZCut=0.1,Beta=1.0, suffix=suffix),
-        "t" :JetTrimming(ungroomedDef,RClus=0.2,PtFrac=0.04, suffix=suffix),
+        "sd":JetSoftDrop(ungroomedDef,ZCut=0.1,Beta=1.0,suffix=suffix,context=jetRecoDict['trkopt']),
+        "t" :JetTrimming(ungroomedDef,RClus=0.2,PtFrac=0.04,suffix=suffix,context=jetRecoDict['trkopt']),
     }[groomAlg]
     return groomDef
 

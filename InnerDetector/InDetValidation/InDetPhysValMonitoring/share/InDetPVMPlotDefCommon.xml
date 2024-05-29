@@ -1243,9 +1243,25 @@
   <x title="Local PU density [vertices/mm]" n="&NBINSPUDENS;" lo="0.0" hi="&PUDENSMAX;"/>
   <y title="HS vertex selection efficiency" lo="0.6" hi="1.2"/>
 </h>
+<h id="vx_hs_reco_sel_eff" type="TEfficiency" title="HS vertex reconstruction and selection efficiency (sum[pt,track^2])">
+  <x title="Local PU density [vertices/mm]" n="&NBINSPUDENS;" lo="0.0" hi="&PUDENSMAX;"/>
+  <y title="HS vertex reconstruction and selection efficiency" lo="0.6" hi="1.2"/>
+</h>
 <h id="vx_hs_sel_eff_dist" type="TEfficiency" title="HS vertex selection efficiency (distance based)">
   <x title="Placeholder" n="80" lo="0.0" hi="80.0"/>
   <y title="HS vertex selection efficiency" lo="0.6" hi="1.2"/>
+</h>
+<h id="vx_hs_reco_eff_vs_ntruth" type="TEfficiency" title="HS vertex reconstruction efficiency">
+  <x title="Number of interactions" n="&NBINSNINTERACTIONS;" lo="0.0" hi="&NINTERACTIONSMAX;"/>
+  <y title="HS vertex reconstruction efficiency" lo="0.8" hi="1.2"/>
+</h>
+<h id="vx_hs_sel_eff_vs_ntruth" type="TEfficiency" title="HS vertex selection efficiency (sum[pt,track^2])">
+  <x title="Number of interactions" n="&NBINSNINTERACTIONS;" lo="0.0" hi="&NINTERACTIONSMAX;"/>
+  <y title="HS vertex selection efficiency" lo="0.6" hi="1.2"/>
+</h>
+<h id="vx_hs_reco_sel_eff_vs_ntruth" type="TEfficiency" title="HS vertex reconstruction and selection efficiency (sum[pt,track^2])">
+  <x title="Number of interactions" n="&NBINSNINTERACTIONS;" lo="0.0" hi="&NINTERACTIONSMAX;"/>
+  <y title="HS vertex reconstruction and selection efficiency" lo="0.6" hi="1.2"/>
 </h>
 <h id="vx_hs_reco_long_reso" type="TProfile" title="Reco Longitudinal Resolution">
   <x title="Local PU density [vertices/mm]" n="&NBINSPUDENS;" lo="0.0" hi="&PUDENSMAX;"/>
@@ -3189,4 +3205,15 @@
 <h id="TrkRec_eta_pT" type="TEfficiency" title="Fraction of reco-matched truth track">
   <x title="#eta"        n="&EtaBinsTrkRec;" lo="-&ETA;" hi="&ETA;"/>
   <y title="p_{T} [GeV]" n="&pTBinsTrkRec;"  lo="0.0"    hi="&pTTrkRec;"/>
+</h>
+
+<!-- Extra information about the sample -->
+<h id="vx_PUdensity" type="TH1F" title="Pileup density">
+  <x title="Local PU density [vertices/mm]" n="&NBINSPUDENS;" lo="0.0" hi="&PUDENSMAX;"/>
+  <y title="Entries" />
+</h>
+
+<h id="vx_nTruth" type="TH1F" title="Number interactions">
+  <x title="Number of interactions" n="&NBINSNINTERACTIONS;" lo="0.0" hi="&NINTERACTIONSMAX;"/>
+  <y title="Entries" />
 </h>

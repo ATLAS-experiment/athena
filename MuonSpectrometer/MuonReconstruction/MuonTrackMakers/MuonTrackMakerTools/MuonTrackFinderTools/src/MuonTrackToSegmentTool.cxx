@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTrackToSegmentTool.h"
@@ -17,6 +17,7 @@
 #include "TrkEventPrimitives/LocalDirection.h"
 #include "TrkGeometry/MagneticFieldProperties.h"
 #include "TrkTrack/Track.h"
+#include "CxxUtils/trapping_fp.h"
 
 namespace Muon {
     MuonTrackToSegmentTool::MuonTrackToSegmentTool(const std::string& t, const std::string& n, const IInterface* p) : AthAlgTool(t, n, p) {
@@ -33,6 +34,8 @@ namespace Muon {
     }
 
     MuonSegment* MuonTrackToSegmentTool::convert(const EventContext& ctx, const Trk::Track& track) const {
+        // Avoids FPE with clang.
+        CXXUTILS_TRAPPING_FP;
         /** convert track to segment, express the new segment parameters on the surface of the first segment */
 
         ATH_MSG_DEBUG(" creating MuonSegment from track ");

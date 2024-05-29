@@ -130,7 +130,7 @@ class MonitorChainConfiguration(ChainConfigurationBase):
     # TimeBurner configuration
     # --------------------
     def getTimeBurnerStep(self, flags):
-        return self.getStep(flags,1,'TimeBurner',[timeBurnerCfg])
+        return self.getStep(flags, 'TimeBurner',[timeBurnerCfg])
 
     # --------------------
     # L1TopoOnlineMonitor configuration
@@ -138,10 +138,10 @@ class MonitorChainConfiguration(ChainConfigurationBase):
     def getL1TopoOnlineMonitorStep(self, flags):
 
         sequenceCfg = L1TopoOnlineMonitorSequenceCfg
-        return self.getStep(flags,1,'L1TopoOnlineMonitor',[sequenceCfg])
+        return self.getStep(flags, 'L1TopoOnlineMonitor',[sequenceCfg])
 
     # --------------------
     # MistTimeMon configuration
     # --------------------
     def getMistimeMonStep(self, flags):
-        return self.getStep(flags,1,'MistimeMon',[MistimeMonSequenceCfg])
+        return self.getStep(flags, 'MistimeMon',[MistimeMonSequenceCfg])

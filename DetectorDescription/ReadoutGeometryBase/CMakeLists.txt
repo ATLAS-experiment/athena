@@ -5,18 +5,16 @@ atlas_subdir( ReadoutGeometryBase )
 
 # External dependencies:
 find_package( CLHEP )
-find_package( Eigen ) # Needed by GeoModelKernel
 find_package( GeoModel COMPONENTS GeoModelKernel )
 
 # Component(s) in the package:
 atlas_add_library( ReadoutGeometryBase
    ReadoutGeometryBase/*.h ReadoutGeometryBase/*.icc src/*.cxx
    PUBLIC_HEADERS ReadoutGeometryBase
-   INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${EIGEN_INCLUDE_DIRS}
-                ${GEOMODEL_INCLUDE_DIRS}
+   INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
+                
    DEFINITIONS ${CLHEP_DEFINITIONS}
-   LINK_LIBRARIES ${CLHEP_LIBRARIES} ${EIGEN_LIBRARIES} ${GEOMODEL_LIBRARIES}
+   LINK_LIBRARIES ${GEOMODEL_LIBRARIES} ${CLHEP_LIBRARIES}  
                   CxxUtils AthenaKernel AtlasDetDescr GeoPrimitives Identifier
-                  GaudiKernel InDetCondTools TrkDetElementBase
-                  TrkEventPrimitives AthenaBaseComps
+                  GaudiKernel InDetCondTools TrkDetElementBase AthenaBaseComps
    PRIVATE_LINK_LIBRARIES GeoModelUtilities TrkSurfaces )

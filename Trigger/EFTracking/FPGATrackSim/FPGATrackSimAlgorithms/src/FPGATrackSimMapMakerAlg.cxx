@@ -368,7 +368,7 @@ StatusCode FPGATrackSimMapMakerAlg::writeSubrmap(std::vector<FPGATrackSimHit> co
     // 1D key layer slicing
     else
     {
-        for (auto hit: allHits) // Fill the track to slice map
+        for (const FPGATrackSimHit& hit: allHits) // Fill the track to slice map
         {
             if (m_usedTracks.find(hit.getEventIndex()) != m_usedTracks.end()) continue; // skip if already done a hit from this track
             if (isOnKeyLayer(1,hit.getDetType(),hit.getDetectorZone(), hit.getPhysLayer()))
@@ -427,27 +427,16 @@ StatusCode FPGATrackSimMapMakerAlg::writeSubrmap(std::vector<FPGATrackSimHit> co
 
     // Now do trimming and Fill slice2module map
     int trimmed = 0;
-    std::vector<std::vector<Module*>::iterator> toTrim;
     for (int s = 0; s < m_nSlices.value(); s++) {
         ATH_MSG_INFO("Applying local trimming in slice " << s);
         for (auto trk : slicedTracks[s]) {
-            toTrim.clear();
-            ATH_MSG_DEBUG("Starting iterator loop.");
-            for (std::vector<Module*>::iterator m = m_track2modules[trk].begin(); m != m_track2modules[trk].end(); m++) {
-                if (100 * ( float((*m)->numTracks[s]) / float(slicedTracks[s].size()) ) < m_trim) {
-                    ATH_MSG_DEBUG("About to push m back, will trim.");
-                    toTrim.insert(toTrim.begin(), m);
-                    ATH_MSG_DEBUG("Pushed m back");
-                }
-            }
-            ATH_MSG_DEBUG("Finished iterator loop.");
-            trimmed += toTrim.size();
-
-            for(auto m : toTrim) {
-                ATH_MSG_DEBUG("About to erase from size = " << m_track2modules[trk].size());
-                m_track2modules[trk].erase(m);
-                ATH_MSG_DEBUG("Erased.");
-            }
+            auto it = std::remove_if (m_track2modules[trk].begin(),
+                                      m_track2modules[trk].end(),
+                                      [&] (const Module* m) {
+                                        return 100 * ( float(m->numTracks[s]) / float(slicedTracks[s].size()) ) < m_trim;
+                                      });
+            trimmed += m_track2modules[trk].end() - it;
+            m_track2modules[trk].erase (it, m_track2modules[trk].end());
 
             ATH_MSG_DEBUG("About to query trk2slice");
             int s = m_track2slice[trk];
@@ -520,13 +509,14 @@ StatusCode FPGATrackSimMapMakerAlg::writeEtaPatterns()
         unsigned planesDone = 0;
         for (unsigned p = 0; p < (m_planes->at(m_region)).size(); p++)
         {
-            for (std::vector<Module*>::iterator m = m_track2modules[trk].begin(); m != m_track2modules[trk].end(); m++)
-                if ((*m)->plane == static_cast<int>(p))
+            for (const Module* m : m_track2modules[trk]) {
+                if (m->plane == static_cast<int>(p))
                 {
-                    track_etapatts << std::to_string(static_cast<int>((*m)->det)) << "\t" << std::to_string(static_cast<int>((*m)->bec)) << "\t" << std::to_string((*m)->eta) << "\t\t";
+                    track_etapatts << std::to_string(static_cast<int>(m->det)) << "\t" << std::to_string(static_cast<int>(m->bec)) << "\t" << std::to_string(m->eta) << "\t\t";
                     planesDone++;
                     break;
                 }
+            }
         }
         if (planesDone == (m_planes->at(m_region)).size())
             m_etapat << track_etapatts.str() << "\n";
@@ -540,7 +530,7 @@ StatusCode FPGATrackSimMapMakerAlg::writeRadiiFile(std::vector<FPGATrackSimHit> 
 {
     // calculate mean radii.
   m_radii.resize(m_nSlices.value(), std::vector<std::vector<float>>(m_planes->at(m_region).size(),std::vector<float>(0)));
-    for (auto hit: allHits)
+    for (const auto& hit: allHits)
     {
         SiliconTech det = hit.getDetType();
         DetectorZone bec = hit.getDetectorZone();
@@ -609,7 +599,7 @@ StatusCode FPGATrackSimMapMakerAlg::writeMedianZFile(std::vector<FPGATrackSimHit
 {
     // calculate median z. We do this globally and slice-by-slice.
   m_z.resize(m_nSlices.value(), std::vector<std::vector<float>>((m_planes->at(m_region)).size(),std::vector<float>(0)));
-    for (auto hit: allHits)
+    for (const auto& hit: allHits)
     {
         SiliconTech det = hit.getDetType();
         DetectorZone bec = hit.getDetectorZone();
@@ -709,18 +699,18 @@ void FPGATrackSimMapMakerAlg::drawSlices(std::vector<FPGATrackSimHit> const & al
     m_monitorFile->cd();
 
     std::vector<TH2F*> h_slicemap;
-    char *hname = new char[10];
+    char *hname = new char[20];
 
     for (unsigned i = 0; i < (unsigned)m_nSlices.value(); i++)
     {
-        sprintf(hname,"rz_slice%d",i);
+        sprintf(hname,"rz_slice%u",i);
         // This should just default to the entire range, I think.
         // The user can reduce the binning.
         TH2F *h = new TH2F(hname,hname,7000,-3500,3500,1200,0,1200);
         h_slicemap.push_back(h);
     }
 
-    for (auto hit: allHits)
+    for (const auto& hit: allHits)
     {
         if (m_usedTracks.find(hit.getEventIndex()) == m_usedTracks.end()) continue; // skip if we don't use this track
         int s = m_track2slice[hit.getEventIndex()];
@@ -748,7 +738,7 @@ bool FPGATrackSimMapMakerAlg::isOnKeyLayer(int keynum, SiliconTech t_det, Detect
     return false;
 }
 
-int FPGATrackSimMapMakerAlg::findPlane(const std::vector<std::vector<std::string>>& planes, std::string test) // find what plane a layer is assigned to.
+int FPGATrackSimMapMakerAlg::findPlane(const std::vector<std::vector<std::string>>& planes, const std::string& test) // find what plane a layer is assigned to.
 {
     int pcounter = 0;
     for (auto& plane : planes) {
@@ -769,7 +759,7 @@ std::string FPGATrackSimMapMakerAlg::makeRmapLines(std::vector<FPGATrackSimHit> 
     {
         etas.clear();
         phis.clear();
-        for (auto hit: hits)
+        for (const auto& hit: hits)
         {
             if(static_cast<int>(hit.getPhysLayer()) == lyr && hit.getDetectorZone() == bec)  // cast from uint to int just to remove Wsign-compare warnings
             {

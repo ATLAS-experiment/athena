@@ -64,7 +64,7 @@ class ATLAS_NOT_THREAD_SAFE EgammaPhysValMonitoringTool
 		  const IInterface* parent );
 
   /// Destructor: 
-  virtual ~EgammaPhysValMonitoringTool(); 
+  virtual ~EgammaPhysValMonitoringTool() = default; 
 
   // Athena algtool's Hooks
   virtual StatusCode initialize();

@@ -22,6 +22,7 @@
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
 #include "xAODInDetMeasurement/StripClusterContainer.h"
+#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
 
 // Handle Keys
 #include "StoreGate/ReadHandleKey.h"
@@ -45,6 +46,7 @@ namespace ActsTrk
 
   private:
     ToolHandle< GenericMonitoringTool > m_monTool {this, "MonTool", "", "Monitoring tool"};
+    ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
 
     SG::ReadHandleKey<ActsTrk::TrackContainer> m_tracksKey
        {this, "TracksLocation", "", "Input track collection"};

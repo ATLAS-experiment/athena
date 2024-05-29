@@ -16,7 +16,7 @@ ISF::ISFParticle::ISFParticle(
                               double time,
                               const ISFParticle &parent,
                               int id,
-                             Barcode::ParticleBarcode barcode,
+                             int barcode,
                               TruthBinding* truth,
                               const HepMcParticleLink* partLink):
   m_position(pos),
@@ -47,7 +47,7 @@ ISF::ISFParticle::ISFParticle(
                               double time,
                               const ISFParticle &parent,
                               int id,
-                              Barcode::ParticleBarcode barcode,
+                              int barcode,
                               TruthBinding* truth,
                               const HepMcParticleLink* partLink):
   m_position( pos.x(), pos.y(), pos.z()),
@@ -78,7 +78,7 @@ ISF::ISFParticle::ISFParticle(
                               double time,
                               const DetRegionSvcIDPair &origin,
                               int id,
-                              Barcode::ParticleBarcode barcode,
+                              int barcode,
                               TruthBinding* truth,
                               const HepMcParticleLink* partLink):
   m_position(pos),
@@ -266,19 +266,4 @@ bool ISF::ISFParticle::isIdent(const ISF::ISFParticle& rhs) const
   pass &= m_userInfo == rhs.getUserInformation();
   pass &= m_partLink == rhs.getParticleLink();
   return pass;
-}
-
-void ISF::ISFParticle::setBarcodeAndUpdateHepMcParticleLink( Barcode::ParticleBarcode bc) {
-  // set a new barcode
-  setBarcode(bc);
-
-  //creating/changing the ISFParticle's HepMcParticleLink
-  HepMcParticleLink* newHMPL = nullptr;
-  if (m_partLink) {
-    newHMPL = new HepMcParticleLink(bc, m_partLink->eventIndex(), HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE); // FIXME barcode-based
-    delete m_partLink;
-  } else {
-    newHMPL = new HepMcParticleLink(bc, 0, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE); // FIXME barcode-based
-  }
-  m_partLink = newHMPL;
 }

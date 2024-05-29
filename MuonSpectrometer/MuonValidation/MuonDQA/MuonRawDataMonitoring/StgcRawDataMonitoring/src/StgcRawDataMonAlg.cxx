@@ -624,7 +624,7 @@ void sTgcRawDataMonAlg::fillsTgcPadTriggerEfficiencyHistograms(const xAOD::MuonC
     bool muonRecoTriggerMatch = false;
     
     if (minDeltaRtrigIt != -1) {
-      if (minDeltaR < 0.1) {
+      if (minDeltaR < m_minDeltaR) {
         muonRecoTriggerMatch = true;
       }
     }

@@ -44,7 +44,7 @@ def find_standby(nlayer, hhits, lb_max, standby_lb):
                 standby_lb.append([i, start_lb, lb_max])
 
 
-def find_notready(nlayer, hist, pct_low, pct_high, notready_lb):
+def find_notready(nlayer, hist, pct_low, pct_high, notready_lb, lb_max=2000):
 
     for i in range(0, nlayer):
         start = 0
@@ -64,7 +64,7 @@ def find_notready(nlayer, hist, pct_low, pct_high, notready_lb):
                     start = 0
                     start_lb = 0
             if start == 1:
-                notready_lb.append([i, start_lb, 2000])
+                notready_lb.append([i, start_lb, lb_max])
         elif i == 3:
             # nothing to do
             pass
@@ -80,10 +80,10 @@ def find_notready(nlayer, hist, pct_low, pct_high, notready_lb):
                     start = 0
                     start_lb = 0
             if start == 1:
-                notready_lb.append([i, start_lb, 2000])
+                notready_lb.append([i, start_lb, lb_max])
 
 
-def find_btagdeg(hist, pct_low, pct_high, btagdeg_lb):
+def find_btagdeg(hist, pct_low, pct_high, btagdeg_lb, lb_max):
     start = 0
     start_lb = 0
 
@@ -99,7 +99,7 @@ def find_btagdeg(hist, pct_low, pct_high, btagdeg_lb):
             start = 0
             start_lb = 0
     if start == 1:
-        btagdeg_lb.append([start_lb, 2000])
+        btagdeg_lb.append([start_lb, lb_max])
  
 
 def print_def(defect_name, defect_lb):
@@ -208,8 +208,8 @@ def execute(run, sfile, lb_max):
     btagdegestim_intolerable_lb = []
 
     if fexist_hhits is True and fexist_hbtagdeg is True: 
-        find_btagdeg(hbtagdeg, 0.05, 0.25, btagdegestim_tolerable_lb) 
-        find_btagdeg(hbtagdeg, 0.25, 1., btagdegestim_intolerable_lb)
+        find_btagdeg(hbtagdeg, 0.05, 0.25, btagdegestim_tolerable_lb, lb_max) 
+        find_btagdeg(hbtagdeg, 0.25, 1., btagdegestim_intolerable_lb, lb_max)
 
     if 0:
         print_btagdegdef("tolerable", btagdegestim_tolerable_lb)

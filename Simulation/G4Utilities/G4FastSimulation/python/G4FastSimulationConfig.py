@@ -29,5 +29,16 @@ def FastCaloSimCfg(flags, **kwargs):
     # Name of region where FastCaloSim will be triggered
     kwargs.setdefault("RegionNames", ["CALO"])
     kwargs.setdefault('CaloCellContainerSDName', "ToolSvc.SensitiveDetectorMasterTool.CaloCellContainerSD")
+    
+    if flags.Sim.SimplifiedGeoPath:
+        # Enable Geant4 track transportation only if simplified geometry is provided
+        kwargs.setdefault('doG4Transport', True)
+    else:
+        kwargs.setdefault('doG4Transport', False)
+
+    # Set the G4CaloTransportTool
+    from G4AtlasTools.G4AtlasToolsConfig import G4CaloTransportToolCfg
+    kwargs.setdefault("G4CaloTransportTool", result.addPublicTool(result.popToolsAndMerge(G4CaloTransportToolCfg(flags))))
+    
     result.setPrivateTools(CompFactory.FastCaloSimTool(name="FastCaloSim", **kwargs))
     return result

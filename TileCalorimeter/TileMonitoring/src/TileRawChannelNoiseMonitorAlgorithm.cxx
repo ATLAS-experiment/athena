@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileRawChannelNoiseMonitorAlgorithm.h"
@@ -132,6 +132,11 @@ StatusCode TileRawChannelNoiseMonitorAlgorithm::fillHistograms( const EventConte
         int adc = m_tileHWID->adc(adc_id);
 
         if (adc != m_gain) continue;
+
+        if (m_ignoreDisconnectedChannels && m_cabling->isDisconnected(ros, drawer, channel)) {
+          ATH_MSG_VERBOSE(m_tileHWID->to_string(adc_id) << ": Disconnected => skipping!");
+          continue;
+        }
 
         if (checkDQ && !(dqStatus->isAdcDQgood(ros, drawer, channel, adc))) {
           ATH_MSG_VERBOSE(m_tileHWID->to_string(adc_id) << ": DQ is BAD => skipping!");

@@ -5,12 +5,25 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 def ITkFastTrackFinderStandaloneCfg(flags, SiSPSeededTrackCollectionKey = None):
     acc = ComponentAccumulator()
 
+    acc.addPublicTool( CompFactory.TrigL2LayerNumberToolITk( name = "TrigL2LayerNumberTool_FTF",UseNewLayerScheme = True) )
+
     from TrkConfig.TrkTrackSummaryToolConfig import ITkTrackSummaryToolNoHoleSearchCfg
     ITkTrackSummaryTool = acc.popToolsAndMerge(ITkTrackSummaryToolNoHoleSearchCfg(flags))
     acc.addPublicTool(ITkTrackSummaryTool)
-
+    
     from InDetConfig.SiTrackMakerConfig import ITkSiTrackMaker_xkCfg
     ITkSiTrackMakerTool = acc.popToolsAndMerge(ITkSiTrackMaker_xkCfg(flags))
+
+    if flags.Trigger.InDetTracking.UseTrigTrackFollowing :
+        acc.addPublicTool( CompFactory.TrigInDetTrackFollowingTool( name = "TrigTrackFollowingTool_FTF") )
+        ITkSiTrackMakerTool.useTrigTrackFollowingTool = True
+        ITkSiTrackMakerTool.TrigTrackFollowingTool = acc.getPublicTool("TrigTrackFollowingTool_FTF")
+    
+    if flags.Trigger.InDetTracking.UseTrigRoadPredictor :
+        acc.addPublicTool( CompFactory.TrigInDetRoadPredictorTool( name = "TrigRoadPredictorTool_FTF", LayerNumberTool = acc.getPublicTool("TrigL2LayerNumberTool_FTF") ) )
+        ITkSiTrackMakerTool.useTrigInDetRoadPredictorTool = True
+        ITkSiTrackMakerTool.TrigInDetRoadPredictorTool = acc.getPublicTool("TrigRoadPredictorTool_FTF")
+    
     acc.addPublicTool(ITkSiTrackMakerTool)
 
     acc.addPublicTool( CompFactory.TrigInDetTrackFitter( "TrigInDetTrackFitter" ) )
@@ -33,9 +46,7 @@ def ITkFastTrackFinderStandaloneCfg(flags, SiSPSeededTrackCollectionKey = None):
         acc.addService(inDetAccelSvc)
 
         acc.addPublicTool(CompFactory.TrigITkAccelerationTool(name = "TrigITkAccelerationTool_FTF"))
-
-    acc.addPublicTool( CompFactory.TrigL2LayerNumberToolITk( name = "TrigL2LayerNumberTool_FTF",UseNewLayerScheme = True) )
-
+    
     acc.addPublicTool( CompFactory.TrigSpacePointConversionTool( "TrigSpacePointConversionTool",
                                                                     DoPhiFiltering    = True,
                                                                     UseBeamTilt       = False,
@@ -52,34 +63,35 @@ def ITkFastTrackFinderStandaloneCfg(flags, SiSPSeededTrackCollectionKey = None):
     monTool = TrigFastTrackFinderMonitoringArg(flags, name = "FullScan", doResMon=False)
     
     ftf = CompFactory.TrigFastTrackFinder( name = "TrigFastTrackFinder_",
-                                            LayerNumberTool          = acc.getPublicTool( "TrigL2LayerNumberTool_FTF" ),
-                                            TrigAccelerationTool     = acc.getPublicTool( "TrigITkAccelerationTool_FTF" ) if flags.Trigger.InDetTracking.doGPU else None,
-                                            TrigAccelerationSvc      = acc.getService("TrigInDetAccelerationSvc") if flags.Trigger.InDetTracking.doGPU else None,
-                                            SpacePointProviderTool   = acc.getPublicTool( "TrigSpacePointConversionTool"),
-                                            TrackSummaryTool         = ITkTrackSummaryTool,
-                                            initialTrackMaker        = ITkSiTrackMakerTool,
-                                            trigInDetTrackFitter     = acc.getPublicTool( "TrigInDetTrackFitter" ),
-                                            trigZFinder              = CompFactory.TrigZFinder(),
-                                            doZFinder                = False,
-                                            SeedRadBinWidth          = 10,
-                                            TrackInitialD0Max        = 20.0,
-                                            TracksName               = SiSPSeededTrackCollectionKey,
-                                            Triplet_D0Max            = 4,
-                                            Triplet_MaxBufferLength  = 1,
-                                            Triplet_MinPtFrac        = 0.8,
-                                            UseTrigSeedML            = 1,
-                                            doResMon                 = False,
-                                            doSeedRedundancyCheck    = True,
-                                            pTmin                    = flags.Tracking.ActiveConfig.minPT[0],
-                                            useNewLayerNumberScheme  = True,
-                                            MinHits                  = 3,
-                                            ITkMode                  = True, # Allows ftf to use the new TrigTrackSeedGenerator for ITk
-                                            useGPU                   = flags.Trigger.InDetTracking.doGPU,
-                                            StandaloneMode           = True, # Allows ftf to be run as an offline algorithm with reco_tf
-                                            doTrackRefit             = False,
-                                            FreeClustersCut          = 1,
-                                            MonTool                  = monTool,
-                                            DoubletDR_Max            = 150.0)
+                                           LayerNumberTool          = acc.getPublicTool( "TrigL2LayerNumberTool_FTF" ),
+                                           TrigAccelerationTool     = acc.getPublicTool( "TrigITkAccelerationTool_FTF" ) if flags.Trigger.InDetTracking.doGPU else None,
+                                           TrigAccelerationSvc      = acc.getService("TrigInDetAccelerationSvc") if flags.Trigger.InDetTracking.doGPU else None,
+                                           SpacePointProviderTool   = acc.getPublicTool( "TrigSpacePointConversionTool"),
+                                           TrackSummaryTool         = ITkTrackSummaryTool,
+                                           initialTrackMaker        = ITkSiTrackMakerTool,
+                                           trigInDetTrackFitter     = acc.getPublicTool( "TrigInDetTrackFitter" ),
+                                           trigZFinder              = CompFactory.TrigZFinder(),
+                                           doZFinder                = False,
+                                           SeedRadBinWidth          = 10,
+                                           TrackInitialD0Max        = 20.0,
+                                           TracksName               = SiSPSeededTrackCollectionKey,
+                                           Triplet_D0Max            = 4,
+                                           Triplet_MaxBufferLength  = 1,
+                                           Triplet_MinPtFrac        = 0.8,
+                                           UseTrigSeedML            = 1,
+                                           doResMon                 = False,
+                                           doSeedRedundancyCheck    = True,
+                                           pTmin                    = flags.Tracking.ActiveConfig.minPT[0],
+                                           useNewLayerNumberScheme  = True,
+                                           MinHits                  = 3,
+                                           ITkMode                  = True, # Allows ftf to use the new TrigTrackSeedGenerator for ITk
+                                           useGPU                   = flags.Trigger.InDetTracking.doGPU,
+                                           StandaloneMode           = True, # Allows ftf to be run as an offline algorithm with reco_tf
+                                           UseTracklets             = flags.Trigger.InDetTracking.UseTracklets,
+                                           doTrackRefit             = False,
+                                           FreeClustersCut          = 1,
+                                           MonTool                  = monTool,
+                                           DoubletDR_Max            = 150.0)
 
     acc.addEventAlgo( ftf, primary=True )
     

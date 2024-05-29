@@ -12,7 +12,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 def PrecisionPhotonCaloIsoMonitorCfg(flags, name = 'PrecisionPhotonCaloIsoEgammaBuilderMon', ion=False):
     acc = ComponentAccumulator()
     from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import getTrigEgammaKeys
-    TrigEgammaKeys = getTrigEgammaKeys(ion = ion)
+    TrigEgammaKeys = getTrigEgammaKeys(flags, ion = ion)
     from TrigEgammaMonitoring.egammaMonitorPrecisionConfig import egammaMonitorPrecisionCfg
     monTool = egammaMonitorPrecisionCfg(flags, name)
     collectionIn = TrigEgammaKeys.precisionPhotonContainer
@@ -27,7 +27,7 @@ def PrecisionPhotonCaloIsoMonitorCfg(flags, name = 'PrecisionPhotonCaloIsoEgamma
 def TrigEMClusterToolCfg(flags, ion=False):
     acc = ComponentAccumulator()
     from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import getTrigEgammaKeys
-    TrigEgammaKeys = getTrigEgammaKeys(ion = ion)
+    TrigEgammaKeys = getTrigEgammaKeys(flags, ion = ion)
     from egammaMVACalib.egammaMVACalibConfig import egammaMVASvcCfg
     tool = CompFactory.EMClusterTool('TrigEMClusterTool_photon',
                                       OutputClusterContainerName = TrigEgammaKeys.precisionPhotonEMClusterContainer,
@@ -38,7 +38,7 @@ def TrigEMClusterToolCfg(flags, ion=False):
 def TrigTopoEgammaPhotonCfg(flags):
     acc = ComponentAccumulator()
     from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import getTrigEgammaKeys
-    TrigEgammaKeys = getTrigEgammaKeys()
+    TrigEgammaKeys = getTrigEgammaKeys(flags)
     from egammaTools.EMShowerBuilderConfig import EMShowerBuilderCfg
     from egammaTools.EMPIDBuilderConfig import EMPIDBuilderPhotonCfg
     TrigTopoEgammaPhotons = CompFactory.xAODEgammaBuilder( name = 'TrigTopoEgammaPhotons',
@@ -48,7 +48,6 @@ def TrigTopoEgammaPhotonCfg(flags):
                                                            PhotonOutputName = TrigEgammaKeys.precisionPhotonContainer,
                                                            EMClusterTool = acc.popToolsAndMerge(TrigEMClusterToolCfg(flags, ion=False)),
                                                            EMShowerTool = acc.popToolsAndMerge(EMShowerBuilderCfg(flags,name='TrigEMShowerBuilder',CellsName="CaloCells")),
-                                                           egammaTools = [CompFactory.EMFourMomBuilder()],
                                                            PhotonTools = [acc.popToolsAndMerge(EMPIDBuilderPhotonCfg(flags,name='TrigEMPIDBuilderPhotonCfg'))],
                                                            doPhotons = True,
                                                            doElectrons = False,
@@ -59,7 +58,7 @@ def TrigTopoEgammaPhotonCfg(flags):
 def TrigTopoEgammaPhotonCfg_HI(flags):
     acc = ComponentAccumulator()
     from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import getTrigEgammaKeys
-    TrigEgammaKeys = getTrigEgammaKeys(ion=True)
+    TrigEgammaKeys = getTrigEgammaKeys(flags,ion=True)
     from egammaTools.EMShowerBuilderConfig import EMShowerBuilderCfg
     from egammaTools.EMPIDBuilderConfig import EMPIDBuilderPhotonCfg
     TrigTopoEgammaPhotons = CompFactory.xAODEgammaBuilder( name = 'TrigTopoEgammaPhotons_HI',
@@ -69,7 +68,6 @@ def TrigTopoEgammaPhotonCfg_HI(flags):
                                                            PhotonOutputName = TrigEgammaKeys.precisionPhotonContainer,
                                                            EMClusterTool = acc.popToolsAndMerge(TrigEMClusterToolCfg(flags, ion=True)),
                                                            EMShowerTool = acc.popToolsAndMerge(EMShowerBuilderCfg(flags,name='TrigEMShowerBuilder_HI',CellsName="CorrectedRoICaloCells")),
-                                                           egammaTools = [CompFactory.EMFourMomBuilder()],
                                                            PhotonTools = [acc.popToolsAndMerge(EMPIDBuilderPhotonCfg(flags,name='TrigEMPIDBuilderPhotonCfg_HI'))],
                                                            doPhotons = True,
                                                            doElectrons = False,
@@ -81,7 +79,7 @@ def PrecisionPhotonTopoMonitorCfg(flags, ion=False,name = 'PrecisionPhotonTopoMo
 
     acc = ComponentAccumulator()
     from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import getTrigEgammaKeys
-    TrigEgammaKeys = getTrigEgammaKeys(ion=ion)
+    TrigEgammaKeys = getTrigEgammaKeys(flags,ion=ion)
     from TrigEgammaMonitoring.egammaMonitorPrecisionConfig import egammaMonitorPrecisionCfg
     monTool = egammaMonitorPrecisionCfg(flags, name+('HI' if ion is True else ''))
 
@@ -98,7 +96,7 @@ def PrecisionPhotonSuperClusterMonitorCfg(flags, ion = False, name ='PrecisionPh
 
     acc = ComponentAccumulator()
     from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import getTrigEgammaKeys
-    TrigEgammaKeys = getTrigEgammaKeys(ion=ion)
+    TrigEgammaKeys = getTrigEgammaKeys(flags, ion=ion)
     from TrigEgammaMonitoring.egammaMonitorPrecisionConfig import egammaMonitorSuperClusterCfg
     monTool = egammaMonitorSuperClusterCfg(flags, name+('HI' if ion is True else ''))
 

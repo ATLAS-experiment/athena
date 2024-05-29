@@ -111,7 +111,7 @@ iFatras::PhotonConversionTool::~PhotonConversionTool()
 // initialize
 StatusCode iFatras::PhotonConversionTool::initialize()
 {
-    ATH_MSG_INFO( "initialize()" );
+    ATH_MSG_DEBUG( "initialize()" );
 
     // ISF Services
     if (m_particleBroker.retrieve().isFailure()){
@@ -136,17 +136,8 @@ StatusCode iFatras::PhotonConversionTool::initialize()
     }
      
     // the validation setup ----------------------------------------------------------------------------------
+    ATH_CHECK( m_validationTool.retrieve( DisableTool{ m_validationTool.empty() || !m_validationMode } ) );
     if (m_validationMode){
-
-      // retrieve the physics validation tool
-      if (m_validationTool.retrieve().isFailure()){
-	ATH_MSG_FATAL( "Could not retrieve " << m_validationTool );
-	return StatusCode::FAILURE;
-      } else
-	ATH_MSG_VERBOSE( "Successfully retrieved " << m_validationTool );
-      
-      
-      
       ATH_MSG_VERBOSE(  "Booking conversion validation TTree ... " );
       
       // create the new Tree
@@ -173,7 +164,8 @@ StatusCode iFatras::PhotonConversionTool::initialize()
       }
 
     } // ------------- end of validation mode -----------------------------------------------------------------
-   
+    ATH_MSG_DEBUG( "finalize() successful" );
+
     return StatusCode::SUCCESS;
 }
 
@@ -185,7 +177,7 @@ StatusCode iFatras::PhotonConversionTool::finalize()
     ATH_MSG_INFO( "                     Minimum energy cut of conversions into e+e-  : " <<   m_minChildEnergy << " [MeV] " );
     ATH_MSG_INFO( "                     Conversions into e+e-  (above cut, recorded) : " <<   m_recordedConversions );
     ATH_MSG_INFO( "                     Conversions into e+e-  (below cut, dropped)  : " <<   m_droppedConversions );
-    ATH_MSG_INFO( "finalize() successful" );
+    ATH_MSG_DEBUG( "finalize() successful" );
 
     return StatusCode::SUCCESS;
 }
@@ -242,16 +234,18 @@ void iFatras::PhotonConversionTool::recordChilds(double time,
     ISF::ISFParticleVector children(nchild);
 
     int ichild = 0;
+    const int status = 1 + HepMC::SIM_STATUS_THRESHOLD;
+    const int id = HepMC::UNDEFINED_ID; // This will be set if the child particle is saved to the GenEvent
     if (  p1 > m_minChildEnergy ) {
       ISF::ISFParticle* ch1 = new ISF::ISFParticle( vertex,
-                                               p1*childDirection,
-                                               mass,
-                                               charge1,
-                                               pdg1,
-                                               1 + HepMC::SIM_STATUS_THRESHOLD,
-                                               time,
-                                               *parent,
-                                                    0 // FIXME hard-coded id
+                                                    p1*childDirection,
+                                                    mass,
+                                                    charge1,
+                                                    pdg1,
+                                                    status,
+                                                    time,
+                                                    *parent,
+                                                    id
                                                     );
       // in the validation mode, add process info
       if (m_validationMode) {
@@ -262,23 +256,19 @@ void iFatras::PhotonConversionTool::recordChilds(double time,
         ch1->setUserInformation(validInfo);
       }
       children[ichild] = ch1;
-      if (!ch1->getTruthBinding()) {
-	ch1->setTruthBinding(new ISF::TruthBinding(*parent->getTruthBinding()));
-      }
-      m_particleBroker->push( ch1, parent);
       ichild++;
     }
 
     if (  p2 > m_minChildEnergy ) {
       ISF::ISFParticle* ch2  = new ISF::ISFParticle( vertex,
-                                               p2*childDirection,
-                                               mass,
-                                               charge2,
-                                               pdg2,
-                                               1 + HepMC::SIM_STATUS_THRESHOLD,
-                                               time,
-                                               *parent,
-                                                     0 // FIXME hard-coded id
+                                                     p2*childDirection,
+                                                     mass,
+                                                     charge2,
+                                                     pdg2,
+                                                     status,
+                                                     time,
+                                                     *parent,
+                                                     id
                                                      );
       
       // in the validation mode, add process info
@@ -290,10 +280,6 @@ void iFatras::PhotonConversionTool::recordChilds(double time,
         ch2->setUserInformation(validInfo);
       }
       children[ichild] = ch2;
-      if (!ch2->getTruthBinding()) {
-        ch2->setTruthBinding(new ISF::TruthBinding(*parent->getTruthBinding()));
-      }
-      m_particleBroker->push( ch2, parent);
     }
 
     // register TruthIncident
@@ -303,9 +289,23 @@ void iFatras::PhotonConversionTool::recordChilds(double time,
                                  parent->nextGeoID(),
                                  ISF::fKillsPrimary );
     m_truthRecordSvc->registerTruthIncident( truth);
+    // At this point we need to update the properties of the
+    // ISFParticles produced in the interaction
+    truth.updateChildParticleProperties();
+
+    // push onto ParticleStack
+    if (!children.empty() ) {
+      for (auto *childParticle : children) {
+        //Check that the new ISFParticles have a valid TruthBinding
+        if (!childParticle->getTruthBinding()) {
+          ATH_MSG_ERROR("Could not retrieve TruthBinding from child ISFParticle "<< *childParticle);
+        }
+        m_particleBroker->push(childParticle, parent);
+      }
+    }
 
     // save info for validation
-    if (m_validationMode && m_validationTool) {
+    if (m_validationMode && m_validationTool.isEnabled()) {
       Amg::Vector3D* nPrim=nullptr;
       m_validationTool->saveISFVertexInfo(14,vertex,*parent,parent->momentum(),nPrim,children);
     }
@@ -320,6 +320,7 @@ ISF::ISFParticleVector iFatras::PhotonConversionTool::getChilds(const ISF::ISFPa
 								       const Amg::Vector3D& childDirection,
 								       Trk::ParticleHypothesis childType) const
 {
+  // Called by PhotonConversionTool::doConversionOnLayer
     // calculate the child momentum
     double p1 = sqrt(childEnergy*childEnergy-Trk::ParticleMasses::mass[childType]*Trk::ParticleMasses::mass[childType]);    
 
@@ -350,16 +351,17 @@ ISF::ISFParticleVector iFatras::PhotonConversionTool::getChilds(const ISF::ISFPa
     int    pdg2  = s_pdgToHypo.convert(childType, charge2, false);
 
     // removal of soft children to be done in layer mat updator
-
+    const int status = 1 + HepMC::SIM_STATUS_THRESHOLD;
+    const int id = HepMC::UNDEFINED_ID; // This will be set if the child particle is saved to the GenEvent
     std::unique_ptr<ISF::ISFParticle> ch1(new ISF::ISFParticle(vertex,
                                                                p1*childDirection,
                                                                mass,
                                                                charge1,
                                                                pdg1,
-                                                               1,
+                                                               status,
                                                                time,
                                                                *parent,
-                                                               0 // FIXME hard-coded id
+                                                               id
                                                                ));
     
     std::unique_ptr<ISF::ISFParticle> ch2(new ISF::ISFParticle(vertex,
@@ -367,10 +369,10 @@ ISF::ISFParticleVector iFatras::PhotonConversionTool::getChilds(const ISF::ISFPa
                                                                mass,
                                                                charge2,
                                                                pdg2,
-                                                               1,
+                                                               status,
                                                                time,
                                                                *parent,
-                                                               0 // FIXME hard-coded id
+                                                               id
                                                                ));
 
     ISF::ISFParticleVector children{ch1.release(),
@@ -383,13 +385,15 @@ ISF::ISFParticleVector iFatras::PhotonConversionTool::getChilds(const ISF::ISFPa
                                  parent->nextGeoID(),
                                  ISF::fKillsPrimary );
     m_truthRecordSvc->registerTruthIncident( truth);
+    // At this point we need to update the properties of the
+    // ISFParticles produced in the interaction
+    truth.updateChildParticleProperties();
 
-    //Make sure the conversion products get a chance to have correct truth info before pushing into the particle broker
-    if (!children[0]->getTruthBinding()) {
-        children[0]->setTruthBinding(new ISF::TruthBinding(*parent->getTruthBinding()));
-    }
-    if (!children[1]->getTruthBinding()) {
-        children[1]->setTruthBinding(new ISF::TruthBinding(*parent->getTruthBinding()));
+    // Check that the new ISFParticles have a valid TruthBinding
+    for (auto *childParticle : children) {
+      if (!childParticle->getTruthBinding()) {
+        ATH_MSG_ERROR("Could not retrieve TruthBinding from child ISFParticle "<< *childParticle);
+      }
     }
 
     return children;
@@ -607,6 +611,7 @@ Amg::Vector3D iFatras::PhotonConversionTool::childDirection(const Amg::Vector3D&
 bool iFatras::PhotonConversionTool::doConversion(double time, const Trk::NeutralParameters& parm,
 						const Trk::ExtendedMaterialProperties* /*extMatProp*/) const {
 
+  // Called by McMaterialEffectsUpdator::interact
   double p = parm.momentum().mag();
 
   // get the energy
@@ -626,7 +631,7 @@ bool iFatras::PhotonConversionTool::doConversion(double time, const Trk::Neutral
                parm.momentum().unit(),
 	       childEnergy, p,
 	       childDir,
-	       Trk::electron);
+	       Trk::electron); // Registers TruthIncident internally
   // fill the TTree ----------------------------
   if (m_validationTree)
     m_validationTree->Fill();
@@ -638,7 +643,7 @@ bool iFatras::PhotonConversionTool::doConversion(double time, const Trk::Neutral
 ISF::ISFParticleVector iFatras::PhotonConversionTool::doConversionOnLayer(const ISF::ISFParticle* parent, 
 									 double time, const Trk::NeutralParameters& parm,
 									 const Trk::ExtendedMaterialProperties* /*ematprop*/) const {
-  
+  // Called by McMaterialEffectsUpdator::interactLay
   double p = parm.momentum().mag();
 
   // get the energy
@@ -662,7 +667,7 @@ ISF::ISFParticleVector iFatras::PhotonConversionTool::doConversionOnLayer(const 
 		   parm.momentum().unit(),
 		   childEnergy, p,
 		   childDir,
-		   Trk::electron);
+		   Trk::electron); // Registers TruthIncident internally
 
 }
 

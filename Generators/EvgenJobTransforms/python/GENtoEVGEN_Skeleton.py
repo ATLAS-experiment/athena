@@ -8,13 +8,14 @@ JobProperties.jobPropertiesDisallowed = True
 
 # Get logger
 from AthenaCommon.Logging import logging
-evgenLog = logging.getLogger('Gen_tf')
-    
-# Functions for pre/post-include/exec
-from PyJobTransforms.TransformUtils import processPreExec, processPreInclude
+evgenLog = logging.getLogger("Gen_tf")
 
-# For creating CA instances of algorithms
-from AthenaConfiguration.ComponentFactory import CompFactory
+# Common
+from AthenaCommon.SystemOfUnits import GeV
+from GeneratorConfig.Sequences import EvgenSequence
+
+# Functions for pre/post-include/exec
+from PyJobTransforms.TransformUtils import processPreExec, processPreInclude, processPostExec, processPostInclude
 
 # Other imports that are needed
 import sys, os
@@ -27,55 +28,53 @@ def setupSample(runArgs, flags):
         evgenLog.info("runArgs.jobConfig = %s", runArgs.jobConfig)
         evgenLog.error("You must supply one and only one jobConfig file argument")
         sys.exit(1)
-    
+
     evgenLog.info("Using JOBOPTSEARCHPATH (as seen in skeleton) = {}".format(os.environ["JOBOPTSEARCHPATH"]))
-    
-    FIRST_DIR = (os.environ['JOBOPTSEARCHPATH']).split(":")[0]
-    
+
+    FIRST_DIR = (os.environ["JOBOPTSEARCHPATH"]).split(":")[0]
+
     # Find jO file
-    jofiles = [f for f in os.listdir(FIRST_DIR) if (f.startswith('mc') and f.endswith('.py'))]
+    jofiles = [f for f in os.listdir(FIRST_DIR) if (f.startswith("mc") and f.endswith(".py"))]
     if len(jofiles) !=1:
         evgenLog.error("You must supply one and only one jobOption file in DSID directory")
         sys.exit(1)
     jofile = jofiles[0]
-    
+
     # Perform consistency checks on the jO
     from GeneratorConfig.GenConfigHelpers import checkJOConsistency
     checkJOConsistency(jofile)
-    
+
     # Import the jO as a module
-    # We cannot do import BLAH directly since 
+    # We cannot do import BLAH directly since
     # 1. the filenames are not python compatible (mc.GEN_blah.py)
-    # 2. the filenames are different for every jO       
-    import importlib.util 
+    # 2. the filenames are different for every jO
+    import importlib.util
     spec = importlib.util.spec_from_file_location(
         name="sample",
         location=os.path.join(FIRST_DIR,jofile),
     )
     jo = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(jo)
-    
+
     # Create instance of Sample(EvgenCAConfig)
     sample = jo.Sample(flags)
-    
+
     # Set up the sample properties
     sample.setupFlags(flags)
-            
+
     # Set the random number seed
-    # Need to use logic in EvgenJobTransforms.Generate_dsid_ranseed 
-    
+    # Need to use logic in EvgenJobTransforms.Generate_dsid_ranseed
+
     # Get DSID
     dsid = os.path.basename(runArgs.jobConfig[0])
-        
+    if dsid.startswith("Test"):
+        dsid = dsid.split("Test")[-1]
+
     # Update the global flags
-    if dsid.isdigit(): 
-        flags.Generator.DSID
-    flags.Input.Files = []
-    flags.Input.RunNumbers = [flags.Generator.DSID]
-    flags.Input.TimeStamps = [0]
+    if dsid.isdigit():
+        flags.Generator.DSID = int(dsid)
+    
     flags.Generator.nEventsPerJob = sample.nEventsPerJob
-    flags.Exec.MaxEvents = runArgs.maxEvents if runArgs.maxEvents != -1 else sample.nEventsPerJob
-    flags.Output.EVNTFileName = runArgs.outputEVNTFile
 
     # Check if sample attributes have been properly set
     sample.checkAttributes()
@@ -83,67 +82,47 @@ def setupSample(runArgs, flags):
     return sample
 
 
-# Function to set up event generation services
-def setupEvgenServices(flags, cfg):   
-    
-    # EventInfoCnvAlg
-    from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoCnvAlgCfg
-    cfg.merge(EventInfoCnvAlgCfg(flags, disableBeamSpot=True, xAODKey="TMPEvtInfo"))
-
-
-# Function to set up event generation services
-def setupOutputStream(flags, runArgs, cfg, sample):   
-    
-    # Items to save
-    ItemList = ["McEventCollection#*"]
-    
-    # Configure output stream
-    from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    cfg.merge(
-        OutputStreamCfg(
-            flags, 
-            "EVNT", 
-            ItemList = ItemList
-        )
-    )
-        
-    # Add in-file MetaData
-    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
-    cfg.merge(SetupMetaDataForStreamCfg(flags, "EVNT"))  
-    
-    # Write AMI tag into in-file MetaData
-    from PyUtils.AMITagHelperConfig import AMITagCfg
-    cfg.merge(AMITagCfg(flags, runArgs))    
-
-
 # Main function
 def fromRunArgs(runArgs):
-    # Set logging level
-    evgenLog.setLevel(logging.DEBUG if runArgs.VERBOSE else logging.INFO)
-    
-    # Announce arg checking
-    if runArgs.VERBOSE:
-        evgenLog.debug("****************** CHECKING EVENT GENERATION ARGS *****************")
-        evgenLog.debug(runArgs)
-        evgenLog.debug('****************** Setting-up configuration flags *****************')
-    
+    evgenLog.info("****************** STARTING EVENT GENERATION *****************")
+
+    evgenLog.info("**** Transformation run arguments")
+    evgenLog.info(runArgs)
+
+    evgenLog.info("**** Setting-up configuration flags")
+
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
-    
+
+    from AthenaConfiguration.Enums import ProductionStep
+    flags.Common.ProductionStep = ProductionStep.Generation
+
     # Convert run arguments to global athena flags
     from PyJobTransforms.CommonRunArgsToFlags import commonRunArgsToFlags
     commonRunArgsToFlags(runArgs, flags)
-    
+
     # Convert generator-specific run arguments to global athena flags
     from GeneratorConfig.GeneratorConfigFlags import  generatorRunArgsToFlags
     generatorRunArgsToFlags(runArgs, flags)
-        
-    # convert arguments to flags 
+
+    # convert arguments to flags
     flags.fillFromArgs()
-    
+
     # Create an instance of the Sample(EvgenCAConfig) and update global flags accordingly
     sample = setupSample(runArgs, flags)
-        
+
+    # Setup the main flags
+    flags.Exec.FirstEvent = runArgs.firstEvent
+    flags.Exec.MaxEvents = runArgs.maxEvents if runArgs.maxEvents != -1 else flags.Generator.nEventsPerJob
+
+    flags.Input.Files = []
+    flags.Input.RunNumbers = [flags.Generator.DSID]
+    flags.Input.TimeStamps = [0]
+
+    flags.Output.EVNTFileName = runArgs.outputEVNTFile
+
+    flags.Beam.Energy = runArgs.ecmEnergy / 2 * GeV
+
     # Process pre-include
     processPreInclude(runArgs, flags)
 
@@ -152,34 +131,114 @@ def fromRunArgs(runArgs):
 
     # Lock flags
     flags.lock()
-    
+
+    evgenLog.info("**** Configuration flags")
     if runArgs.VERBOSE:
-        evgenLog.debug('****************** Dump configuration flags *****************')
-        evgenLog.debug(flags.dump())
-        
-        # Announce start of job configuration
-        evgenLog.debug("****************** CONFIGURING EVENT GENERATION *****************")
-    
+        flags.dump()
+    else:
+        flags.dump("Generator.*")
+
+    # Announce start of job configuration
+    evgenLog.info("**** Configuring event generation")
+
     # Main object
     from AthenaConfiguration.MainServicesConfig import MainEvgenServicesCfg
-    cfg = MainEvgenServicesCfg(flags)  
-    
-    # Set up evgen job with all sequences
-    setupEvgenServices(flags, cfg)
-    
+    cfg = MainEvgenServicesCfg(flags, withSequences=True)
+
+    # EventInfoCnvAlg
+    from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoCnvAlgCfg
+    cfg.merge(EventInfoCnvAlgCfg(flags, disableBeamSpot=True, xAODKey="TMPEvtInfo"), sequenceName=EvgenSequence.Generator.value)
+
     # Set up the process
-    AthSequencer = CompFactory.AthSequencer
-    evgenGenSeq = AthSequencer('EvgenGenSeq')
-    cfg.addSequence(evgenGenSeq, parentName='AthAllAlgSeq')
-    cfg.merge(sample.setupProcess(flags), sequenceName="EvgenGenSeq")
-    
-    # Set up the output stream
-    setupOutputStream(flags, runArgs, cfg, sample)
-    
+    cfg.merge(sample.setupProcess(flags))
+
+    # Fix non-standard event features
+    from EvgenProdTools.EvgenProdToolsConfig import FixHepMCCfg
+    cfg.merge(FixHepMCCfg(flags))
+
+    ## Sanity check the event record (not appropriate for all generators)
+    from GeneratorConfig.GenConfigHelpers import gens_testhepmc
+    if gens_testhepmc(sample.generators):
+        from EvgenProdTools.EvgenProdToolsConfig import TestHepMCCfg
+        cfg.merge(TestHepMCCfg(flags))
+
+    # Copy the event weight from HepMC to the Athena EventInfo class
+    from EvgenProdTools.EvgenProdToolsConfig import CopyEventWeightCfg
+    cfg.merge(CopyEventWeightCfg(flags))
+
+    from EvgenProdTools.EvgenProdToolsConfig import FillFilterValuesCfg
+    cfg.merge(FillFilterValuesCfg(flags))
+
+    # Configure the event counting (AFTER all filters)
+    from EvgenProdTools.EvgenProdToolsConfig import CountHepMCCfg
+    cfg.merge(CountHepMCCfg(flags))
+
+    # Print out the contents of the first 5 events (after filtering)
+    # TODO: Allow configurability from command-line/exec/include args
+    if hasattr(runArgs, "printEvts") and runArgs.printEvts > 0:
+        from TruthIO.TruthIOConfig import PrintMCCfg
+        cfg.merge(PrintMCCfg(flags, LastEvent=runArgs.printEvts))
+
+    # Estimate time needed for Simulation
+    from EvgenProdTools.EvgenProdToolsConfig import SimTimeEstimateCfg
+    cfg.merge(SimTimeEstimateCfg(flags))
+
+    # TODO: Rivet
+
+    # Sort the list of generator names into standard form
+    from GeneratorConfig.GenConfigHelpers import gen_sortkey, gen_lhef
+    generatorNames = sorted(sample.generators, key=gen_sortkey)
+
+    ## Include information about generators in metadata
+    from GeneratorConfig.Versioning import generatorsGetInitialVersionedDictionary, generatorsVersionedStringList
+    generatorDictionary = generatorsGetInitialVersionedDictionary(generatorNames)
+    generatorList = generatorsVersionedStringList(generatorDictionary)
+
+    # Extra metadata
+    # TODO: to be optimised
+    from EventInfoMgt.TagInfoMgrConfig import TagInfoMgrCfg
+    metadata = {
+        "project_name": "IS_SIMULATION",
+        f"AtlasRelease_{runArgs.trfSubstepName}": flags.Input.Release or "n/a",
+        "beam_energy": str(int(flags.Beam.Energy)),
+        "beam_type": flags.Beam.Type.value,
+        "generators": '+'.join(generatorList),
+        "hepmc_version": f"HepMC{os.environ['HEPMCVER']}",
+        "keywords": ", ".join(sample.keywords).lower(),
+        "lhefGenerator": '+'.join(filter(gen_lhef, generatorNames)),
+        "mc_channel_number": str(flags.Generator.DSID),
+    }
+    if hasattr(sample, "process"): metadata.update({"evgenProcess": sample.process})
+    if hasattr(sample, "tune"): metadata.update({"evgenTune": sample.tune})
+    if hasattr(sample, "specialConfig"): metadata.update({"specialConfiguration": sample.specialConfig})
+    if hasattr(sample, "hardPDF"): metadata.update({"hardPDF": sample.hardPDF})
+    if hasattr(sample, "softPDF"): metadata.update({"softPDF": sample.softPDF})
+    if hasattr(sample, "randomSeed"): metadata.update({"randomSeed": str(runArgs.randomSeed)})
+    cfg.merge(TagInfoMgrCfg(flags, tagValuePairs=metadata))
+
+    # Print version of HepMC to the log
+    evgenLog.info("HepMC version %s", os.environ['HEPMCVER'])
+
+    # Configure output stream
+    from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+    cfg.merge(OutputStreamCfg(flags, "EVNT", ["McEventCollection#*"]))
+
+    # Add in-file MetaData
+    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
+    cfg.merge(SetupMetaDataForStreamCfg(flags, "EVNT"))
+
+    # Post-include
+    processPostInclude(runArgs, flags, cfg)
+
+    # Post-exec
+    processPostExec(runArgs, flags, cfg)
+
+    # Write AMI tag into in-file MetaData
+    from PyUtils.AMITagHelperConfig import AMITagCfg
+    cfg.merge(AMITagCfg(flags, runArgs))
+
     # Print ComponentAccumulator components
-    if runArgs.VERBOSE:
-        evgenLog.debug("****************** DUMPING CA CONFIG *****************")
-        evgenLog.debug(cfg.printConfig())
+    cfg.printConfig(prefix="Gen_tf", printSequenceTreeOnly=not runArgs.VERBOSE)
 
     # Run final ComponentAccumulator
     sys.exit(not cfg.run().isSuccess())

@@ -22,15 +22,6 @@ UPDATED:
 
 //  END OF HEADER FILES INCLUDE
 
-// ----------------------------
-//  Constructor
-// ----------------------------
-egPID::egPID() = default;
-
-// =========================================================
-// copy constructor
-egPID::egPID(const egPID& original) = default;
-
 // =========================================================
 // assignment
 egPID& egPID::operator=(const egPID& original)
@@ -43,10 +34,6 @@ egPID& egPID::operator=(const egPID& original)
   }
   return *this;
 }
-
-// =========================================================
-egPID::~egPID()
-= default;
 
 // =========================================================
 double egPID::egammaID(egammaPIDObs::PID key, bool *found) const 

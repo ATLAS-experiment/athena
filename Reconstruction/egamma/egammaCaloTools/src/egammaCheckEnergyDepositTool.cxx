@@ -33,9 +33,6 @@ egammaCheckEnergyDepositTool::egammaCheckEnergyDepositTool(const std::string& ty
 
 }
 
-egammaCheckEnergyDepositTool::~egammaCheckEnergyDepositTool() 
-= default;
-
 StatusCode egammaCheckEnergyDepositTool::initialize() 
 {
 

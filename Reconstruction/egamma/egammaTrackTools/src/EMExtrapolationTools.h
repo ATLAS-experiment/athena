@@ -52,7 +52,7 @@ public:
                        const std::string& name,
                        const IInterface* parent);
   /** @brief Destructor */
-  virtual ~EMExtrapolationTools();
+  virtual ~EMExtrapolationTools() = default;
 
   /** @brief initialize method */
   virtual StatusCode initialize() override final;

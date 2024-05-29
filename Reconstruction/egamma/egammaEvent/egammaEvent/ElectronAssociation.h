@@ -31,7 +31,7 @@ namespace Analysis
       
       
     public:
-      ElectronAssociation() ;      //!< constructor
+      ElectronAssociation() = default;      //!< constructor
       ElectronAssociation(const NameType& name) ;      //!< constructor
       ~ElectronAssociation() = default;
       

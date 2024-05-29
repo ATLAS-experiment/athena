@@ -37,8 +37,8 @@ def TileTBMonitoringConfig(flags, fragIDs=[0x100, 0x101, 0x200, 0x201, 0x402], *
     kwargs.setdefault('CellEnergyThreshold', 0.1 * GeV)
     energyThreshold = kwargs['CellEnergyThreshold']
 
-    masked = ['LBA01 0 ' + " ".join([str(channel) for channel in range(1, 48)]),
-              'LBA01 1 ' + " ".join([str(channel) for channel in range(1, 48)]),
+    masked = ['LBA01 0 ' + ",".join([str(channel) for channel in range(0, 48)]),
+              'LBA01 1 ' + ",".join([str(channel) for channel in range(0, 48)]),
               'LBC01 0 36,37,38,39,40,41',
               'LBC01 1 36,37,38,39,40,41']
     kwargs.setdefault('Masked', masked)
@@ -71,7 +71,7 @@ def TileTBMonitoringConfig(flags, fragIDs=[0x100, 0x101, 0x200, 0x201, 0x402], *
                                      xbins=100, xmin=0, xmax=10000)
 
     totalEnergyGroup = helper.addGroup(tileTBMonAlg, 'TileTBTotalEventEnergy', 'TestBeam')
-    totalEnergyGroup.defineHistogram('energy', path='', type='TH1F',
+    totalEnergyGroup.defineHistogram('energy;TileTBTotalEventEnergy', path='', type='TH1F',
                                      title=f'Run {run}: Total TileCal Event Energy;Event Energy [pC]',
                                      xbins=400, xmin=-2, xmax=200)
 

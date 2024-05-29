@@ -15,6 +15,7 @@
 
 #include <vector>
 #include <type_traits>
+#include <string_view>
 
 class ITrigGlobalEfficiencyCorrectionTool : public virtual CP::ISystematicsTool
 {
@@ -51,6 +52,8 @@ public:
 	virtual CP::CorrectionCode getEfficiencyScaleFactor(unsigned runNumber, const std::vector<const xAOD::IParticle*>& particles, double& efficiencyScaleFactor) = 0;
 	virtual CP::CorrectionCode getEfficiency(unsigned runNumber, const std::vector<const xAOD::IParticle*>& particles, double& efficiencyData, double& efficiencyMc) = 0;	
 	
+	/// To be used with the ListOfLegsPerTool property:
+	static std::string toolnameForDefaultScaleFactor() { return "RETURN_DEFAULT_SCALE_FACTOR"; }
 protected:
 	double* handleArg(double& arg, std::vector<const xAOD::IParticle*>&) { return &arg; }
 	template<typename P>  double* handleArg(const std::vector<P>& arg, std::vector<const xAOD::IParticle*>& particles)

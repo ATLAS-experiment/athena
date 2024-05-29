@@ -14,8 +14,6 @@ egammaCellRecoveryTool::egammaCellRecoveryTool(const std::string& type,
   declareInterface<IegammaCellRecoveryTool>(this);
 }
 
-egammaCellRecoveryTool::~egammaCellRecoveryTool()= default;
-
 StatusCode egammaCellRecoveryTool::initialize(){
   ATH_MSG_DEBUG("Initializing egammaCellRecoveryTool");
   return StatusCode::SUCCESS;

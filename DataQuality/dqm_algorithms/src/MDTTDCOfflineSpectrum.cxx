@@ -6,7 +6,6 @@
 #include <dqm_core/AlgorithmConfig.h>
 #include <dqm_algorithms/MDTTDCOfflineSpectrum.h>
 #include <dqm_algorithms/tools/AlgorithmHelper.h>
-#include <TH1.h>
 #include <TF1.h>
 #include <TClass.h>
 #include <ers/ers.h>
@@ -39,23 +38,18 @@ dqm_core::Result *
 dqm_algorithms::MDTTDCOfflineSpectrum::execute(	const std::string &  name, 
 						const TObject & object, 
                                                 const dqm_core::AlgorithmConfig & config )
-{  
-  const TH1 * histogram;
+{
 
-  if( object.IsA()->InheritsFrom( "TH1" ) ) {
-    histogram = static_cast<const TH1*>(&object);
-    if (histogram->GetDimension() > 2 ){ 
-      throw dqm_core::BadConfig( ERS_HERE, name, "dimension > 2 " );
-    }
-  } else {
-    throw dqm_core::BadConfig( ERS_HERE, name, "does not inherit from TH1" );
+
+  if (!object.IsA()->InheritsFrom("TH1")) {
+        throw dqm_core::BadConfig(ERS_HERE, name, "does not inherit from TH1");
+  }
+  std::unique_ptr<TH1> histogram(static_cast<TH1 *>(object.Clone())); // we just checked that this is really a TH1, so we can safely type-cast the pointer                                                                                
+  if (histogram->GetDimension() > 2) {
+    throw dqm_core::BadConfig(ERS_HERE, name, "dimension > 2");
   }
 
   const double minstat = dqm_algorithms::tools::GetFirstFromMap( "MinStat", config.getParameters(), -1);
-  /*
-  const bool publish = (bool) dqm_algorithms::tools::GetFirstFromMap( "PublishBins", config.getParameters(), 0); 
-  const int maxpublish = (int) dqm_algorithms::tools::GetFirstFromMap( "MaxPublish", config.getParameters(), 20); 
-  */
   
   if (histogram->GetEntries() < minstat ) {
     dqm_core::Result *result = new dqm_core::Result(dqm_core::Result::Undefined);
@@ -85,24 +79,38 @@ dqm_algorithms::MDTTDCOfflineSpectrum::execute(	const std::string &  name,
     throw dqm_core::BadConfig( ERS_HERE, name, ex.what(), ex );
   }
 
-  std::vector<int> range=dqm_algorithms::tools::GetBinRange(histogram, config.getParameters()); 
+
   dqm_core::Result* result = new dqm_core::Result();
-  
+
+  double t0;
+  double tmax;
+  double tdrift;
+  double t0Err;
+  double tmaxErr;
+    
   TF1* t0Fit = histogram->GetFunction("func1");
   TF1* tmaxFit = histogram->GetFunction("func2");
-  if(!t0Fit || !tmaxFit)  throw dqm_core::BadConfig( ERS_HERE, name, "TH1 has no TF1" );
-  double t0 = t0Fit->GetParameter(1);
-  double tmax = tmaxFit->GetParameter(1);
-  double tdrift = tmax - t0;
-  double t0Err = t0Fit->GetParameter(2);
-  double tmaxErr = tmaxFit->GetParameter(2);
+  
+  if(!t0Fit || !tmaxFit){
+    MDTFitTDC(histogram.get(), t0, t0Err, tmax, tmaxErr);
+    t0Fit = histogram->GetFunction("func1");
+    tmaxFit = histogram->GetFunction("func2");
+    tdrift = tmax - t0;
+    if(!t0Fit || !tmaxFit) throw dqm_core::BadConfig( ERS_HERE, name, "TH1 has no TF1" );
+  }else{
+    t0 = t0Fit->GetParameter(1);
+    tmax = tmaxFit->GetParameter(1);
+    tdrift = tmax - t0;
+    t0Err = t0Fit->GetParameter(2);
+    tmaxErr = tmaxFit->GetParameter(2);
+  }
   
   ERS_DEBUG(1, m_name << " TDrift " << " is " << tdrift );
   ERS_DEBUG(1,"Green threshold: "<< t0_low_warning << " < t0 < "<< t0_high_warning << " &&  " << tmax_low_warning <<" < tmax < " << tmax_high_warning <<   
-           " ;  Red threshold : t0 < " << t0_low_error      << "\n" << 
-                               "t0 > " << t0_high_error     << "\n" << 
-                               "tmax > " << tmax_high_error << "\n" <<
-                               "tmax < " << tmax_low_error
+	    " ;  Red threshold : t0 < " << t0_low_error      << "\n" << 
+	    "t0 > " << t0_high_error     << "\n" << 
+	    "tmax > " << tmax_high_error << "\n" <<
+	    "tmax < " << tmax_low_error
             );    
   
   std::map<std::string,double> tags;
@@ -167,3 +175,45 @@ dqm_algorithms::MDTTDCOfflineSpectrum::printDescription(std::ostream& out)
 
 }
 
+void dqm_algorithms::MDTTDCOfflineSpectrum::MDTFitTDC(TH1* h, double &t0, double &t0err, double &tmax, double &tmaxerr)
+{
+  t0 = tmax = 0;
+  t0err = tmaxerr = 0;
+  double up = h->GetBinCenter(h->GetMaximumBin()+1);
+  if( up > 200 ) up = 200;
+  double down = up + 650;
+  if( up < 50 ) up = 50;
+  double parESD0 = h->GetBinContent(h->GetMinimumBin());
+  double parESD1 = up;
+  double parESD2 = 20;
+  double parESD3 = h->GetBinContent(h->GetMaximumBin()) - h->GetBinContent(h->GetMinimumBin());
+  std::unique_ptr<TF1> func1 = std::make_unique<TF1>("func1", "[0]+([3]/(1+(TMath::Exp((-x+[1])/[2]))))", 0, up); // tzero             
+  func1->SetParameters(parESD0, parESD1, parESD2, parESD3);
+  if(h->GetEntries()>100){
+    h->Fit("func1","RQ");
+    t0 = func1->GetParameter(1) ;
+    t0err = func1->GetParError(1);
+    double binAtT0 = (double)h->GetBinContent(h->FindBin(t0));
+    if(binAtT0<1) binAtT0 = 1;
+    t0err += 10.0 * func1->GetChisquare() / (0.01*binAtT0*binAtT0*(double)func1->GetNumberFitPoints()); // to additionally account for bad fits                                                                                   
+  }
+  
+  parESD0 = h->GetBinContent(h->GetMinimumBin());
+  parESD1 = down;
+  parESD2 = 50;
+  parESD3 = (h->GetBinContent(h->GetMaximumBin())-h->GetBinContent(h->GetMinimumBin()))/10.;
+  std::unique_ptr<TF1> func2 = std::make_unique<TF1>("func2", "[0]+([3]/(1+(TMath::Exp((x-[1])/[2]))))", down-135, down+135); // tmax
+  func2->SetParameters(parESD0,parESD1,parESD2,parESD3);
+  if(h->GetEntries()>100){
+    func2->SetParLimits(0, parESD0, 2.0*parESD0+1);
+    func2->SetParLimits(2, 5, 90);
+    func2->SetParLimits(3, 0.2*parESD3, 7*parESD3);
+    h->Fit("func2","WWRQ+");
+    tmax = func2->GetParameter(1);
+    tmaxerr = func2->GetParError(1);
+    double binAtTmax = (double)h->GetBinContent(h->FindBin(tmax));
+    if(binAtTmax<1) binAtTmax = 1;
+    tmaxerr += 10.0 * func2->GetChisquare() / (0.01*binAtTmax*binAtTmax*(double)func2->GetNumberFitPoints()); // to additionally account for bad fits                                                                             
+  }
+
+}

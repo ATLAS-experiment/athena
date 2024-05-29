@@ -1,6 +1,6 @@
 #!/bin/env python
 
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 # WriteCalibToCool.py
 # Sanya Solodkov 2014-08-29
@@ -175,12 +175,12 @@ for o, a in opts:
         usage()
         sys.exit(2)
     else:
-        assert False, "unhandeled option"
+        raise RuntimeError("unhandeled option")
 
 moduleSwap={}
 if len(swap)>0:
     if len(swap)!=2:
-        assert False, "wrong module list for swap option"
+        RuntimeError("wrong module list for swap option")
     else:
         from TileCalibBlobPython import TileBchTools
         for i in range(2):

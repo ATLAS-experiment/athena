@@ -1,10 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file DataModelTestDataCommon/versions/CInfoAuxContainer_v1.h
  * @author scott snyder <snyder@bnl.gov>
@@ -34,8 +31,8 @@ public:
   CInfoAuxContainer_v1();
 
 private:
-  int anInt;
-  float aFloat;
+  AUXVAR_DECL (int, anInt);
+  AUXVAR_DECL (float, aFloat);
 };
 
 

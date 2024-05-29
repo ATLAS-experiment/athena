@@ -70,8 +70,8 @@ class CosmicChainConfiguration(ChainConfigurationBase):
         # define here the names of the steps and obtain the chainStep configuration         
         # --------------------
         if 'cosmic_id' in self.chainName:
-            steps += [  self.getStep(flags, 1, 'Empty', [EmptyMenuSequenceCfg], name="EmptyBeforeCosmicID"),
-                        self.getStep(flags, 2, 'CosmicTracking', [CosmicsTrkSequenceGenCfg]) ]
+            steps += [  self.getStep(flags, 'Empty', [EmptyMenuSequenceCfg], name="EmptyBeforeCosmicID"),
+                        self.getStep(flags, 'CosmicTracking', [CosmicsTrkSequenceGenCfg]) ]
 
         return self.buildChain(steps)
 

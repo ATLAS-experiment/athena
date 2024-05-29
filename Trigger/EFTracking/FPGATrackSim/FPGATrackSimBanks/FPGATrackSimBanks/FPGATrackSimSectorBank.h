@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #ifndef FPGATrackSimSECTORBANK_H
 #define FPGATrackSimSECTORBANK_H
@@ -47,10 +47,10 @@ class FPGATrackSimSectorBank
 
 
         // Helper functions to set and retrieve information about the sector q/pt binning.
-	std::vector<double> getQOverPtBins() const { return m_qOverPtBins; }
+	const std::vector<double>& getQOverPtBins() const { return m_qOverPtBins; }
         size_t getNQOverPtBins() const {return m_qOverPtBins.size(); }
         bool isAbsQOverPtBinning() const { return m_absQOverPtBinning; }
-        void storeQOverPtBinning(std::vector<double> qOverPtBins, bool absBinning);
+        void storeQOverPtBinning(const std::vector<double>& qOverPtBins, bool absBinning);
 
 
     private:

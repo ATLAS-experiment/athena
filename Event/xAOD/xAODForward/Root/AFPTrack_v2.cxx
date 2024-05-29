@@ -27,7 +27,7 @@ namespace xAOD
   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER (AFPTrack_v2, float, zLocal, setZLocal)
   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER (AFPTrack_v2, float, xSlope, setXSlope)
   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER (AFPTrack_v2, float, ySlope, setYSlope)
-  AUXSTORE_PRIMITIVE_SETTER_AND_GETTER (AFPTrack_v2, int, nHoles, setNHoles)
+  AUXSTORE_PRIMITIVE_SETTER_AND_GETTER (AFPTrack_v2, unsigned int, nHoles, setNHoles)
   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER (AFPTrack_v2, int, nClusters, setNClusters)
   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER (AFPTrack_v2, float, chi2, setChi2)
   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER (AFPTrack_v2, int, algID, setAlgID)

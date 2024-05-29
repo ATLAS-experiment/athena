@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local include(s):
@@ -114,15 +114,18 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
     m_badJetCut(""),
     m_fatJetUncConfig(""),
     m_fatJetUncVars(""),
+    m_WDecorName(""),
+    m_ZDecorName(""),
+    m_TopDecorName(""),
     m_WtagConfig(""),
     m_ZtagConfig(""),
-    m_WZTaggerCalibArea(""),
     m_ToptagConfig(""),
+    m_WZTaggerCalibArea(""),
+    m_TopTaggerCalibArea(""),
     m_WTagUncConfig(""),
     m_ZTagUncConfig(""),
     m_TopTagUncConfig(""),
     m_JetTruthLabelName(""),
-    m_TopTaggerCalibArea(""),
     m_tool_init(false),
     m_subtool_init(false),
     // set dummies for configuration
@@ -215,6 +218,7 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
     m_elez0(-99.),
     m_elebaselined0sig(-99.),
     m_elebaselinez0(-99),
+    m_eleAllowRun3TrigSFFallback(false),
     //
     m_muBaselinePt(-99.),
     m_muBaselineEta(-99.),
@@ -252,15 +256,16 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
     m_jetJvt(-99.),
     m_JvtWP(""),
     m_JvtPtMax(-99.),
-    m_JvtConfig(""),
+    m_JvtConfigRun2(""),
+    m_JvtConfigRun3(""),
     m_trkJetPt(-99.),
     m_trkJetEta(-99.),
     m_doFwdJVT(false),
     m_fJvtWP(""),
     m_fJvtPtMax(-99.),
     m_fJvtEtaMin(-99.),
-    m_fJvtConfig(""),
-    m_fJvtRecalculate(false),
+    m_fJvtConfigRun2(""),
+    m_fJvtConfigRun3(""),
     m_JMScalib(false),
     //
     m_orDoTau(false),
@@ -551,6 +556,7 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
   declareProperty( "EleCrackVeto", m_eleCrackVeto);
   declareProperty( "EleForceNoId", m_force_noElId );
   declareProperty( "EleEffMapFilePath", m_eleEffMapFilePath);
+  declareProperty( "EleAllowRun3TrigSFFallback", m_eleAllowRun3TrigSFFallback);
 
   //MUONS
   declareProperty( "MuonBaselinePt", m_muBaselinePt);
@@ -1333,6 +1339,7 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   m_conf_to_prop["Ele.CrackVeto"] = "EleCrackVeto";
   m_conf_to_prop["EleBaseline.CrackVeto"] = "EleBaselineCrackVeto";
   m_conf_to_prop["Ele.ForceNoId"] = "EleForceNoId";
+  m_conf_to_prop["Ele.AllowRun3TrigSFFallback"] = "EleAllowRun3TrigSFFallback";
   m_conf_to_prop["Muon.ForceNoId"] = "MuonForceNoId";
   m_conf_to_prop["Muon.TTVASF"] = "MuonTTVASF";
   m_conf_to_prop["Muon.passedHighPt"] = "MuonRequireHighPtCuts";
@@ -1397,6 +1404,7 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_eleConfigBaseline, "EleBaseline.Config", rEnv, "None");
   configFromFile(m_eleBaselineCrackVeto, "EleBaseline.CrackVeto", rEnv, false);
   configFromFile(m_force_noElId, "Ele.ForceNoId", rEnv, false);
+  
   //
   configFromFile(m_elePt, "Ele.Et", rEnv, 25000.);
   configFromFile(m_eleEta, "Ele.Eta", rEnv, 2.47);
@@ -1420,6 +1428,8 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_EG_corrFNList, "Ele.EffCorrFNList", rEnv, "None");
   configFromFile(m_electronTriggerSFStringSingle, "Ele.TriggerSFStringSingle", rEnv, "SINGLE_E_2015_e24_lhmedium_L1EM20VH_OR_e60_lhmedium_OR_e120_lhloose_2016_2018_e26_lhtight_nod0_ivarloose_OR_e60_lhmedium_nod0_OR_e140_lhloose_nod0");
   configFromFile(m_eleEffMapFilePath, "Ele.EffMapFilePath", rEnv, "ElectronEfficiencyCorrection/2015_2025/rel22.2/2022_Summer_Prerecom_v1/map4.txt");
+  configFromFile(m_eleAllowRun3TrigSFFallback, "Ele.AllowRun3TrigSFFallback", rEnv, false);
+  
   configFromFile(m_trig2015combination_singleLep, "Trig.Singlelep2015", rEnv, "e24_lhmedium_L1EM20VH_OR_e60_lhmedium_OR_e120_lhloose || mu20_iloose_L1MU15_OR_mu50");
   configFromFile(m_trig2016combination_singleLep, "Trig.Singlelep2016", rEnv, "e26_lhtight_nod0_ivarloose_OR_e60_lhmedium_nod0_OR_e140_lhloose_nod0 || mu26_ivarmedium_OR_mu50");
   configFromFile(m_trig2017combination_singleLep, "Trig.Singlelep2017", rEnv, "e26_lhtight_nod0_ivarloose_OR_e60_lhmedium_nod0_OR_e140_lhloose_nod0 || mu26_ivarmedium_OR_mu50");
@@ -1503,7 +1513,8 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_jetEta, "Jet.Eta", rEnv, 2.8);
   configFromFile(m_JvtWP, "Jet.JvtWP", rEnv, "FixedEffPt"); // https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/PileupJetRecommendations
   configFromFile(m_JvtPtMax, "Jet.JvtPtMax", rEnv, 60.0e3);
-  configFromFile(m_JvtConfig, "Jet.JvtConfig", rEnv, "", true); // empty string means dummy SF
+  configFromFile(m_JvtConfigRun2, "Jet.JvtConfigRun2", rEnv, "JetJvtEfficiency/May2024/NNJvtSFFile_Run2_EMPFlow.root", true); // empty string means dummy SF
+  configFromFile(m_JvtConfigRun3, "Jet.JvtConfigRun3", rEnv, "JetJvtEfficiency/May2024/NNJvtSFFile_Run3_EMPFlow.root", true); // empty string means dummy SF
   configFromFile(m_jetUncertaintiesConfig, "Jet.UncertConfig", rEnv, "rel22/Summer2023_PreRec/R4_CategoryReduction_FullJER.config"); // https://twiki.cern.ch/twiki/bin/view/AtlasProtected/JetUncertaintiesRel22/
   configFromFile(m_jetUncertaintiesAnalysisFile, "Jet.AnalysisFile", rEnv, "default"); // https://twiki.cern.ch/twiki/bin/view/AtlasProtected/JetUncertaintiesRel21Summer2018SmallR
   configFromFile(m_jetUncertaintiesCalibArea, "Jet.UncertCalibArea", rEnv, "default"); // Defaults to default area set by tool
@@ -1513,16 +1524,16 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_fatJetUncVars, "Jet.LargeRuncVars", rEnv, "default"); // do all if not specified
   configFromFile(m_WtagConfig, "Jet.WtaggerConfig", rEnv, "SmoothedContainedWTagger_AntiKt10UFOCSSKSoftDrop_FixedSignalEfficiency80_20220221.dat");
   configFromFile(m_ZtagConfig, "Jet.ZtaggerConfig", rEnv, "SmoothedContainedZTagger_AntiKt10UFOCSSKSoftDrop_FixedSignalEfficiency80_20220221.dat");
-  configFromFile(m_WZTaggerCalibArea, "Jet.WZTaggerCalibArea", rEnv, "SmoothedWZTaggers/Rel21/February2022/");
+  configFromFile(m_WZTaggerCalibArea, "Jet.WZTaggerCalibArea", rEnv, "Winter2024_R22_PreRecs/SmoothedWZTaggers/");
   configFromFile(m_ToptagConfig, "Jet.ToptaggerConfig", rEnv, "DNNTagger_AntiKt10UFOSD_TopInclusive80_Oct30.dat");
   configFromFile(m_JetTruthLabelName, "Jet.JetTruthLabelName", rEnv, "R10TruthLabel_R21Precision_2022v1");
-  configFromFile(m_TopTaggerCalibArea, "Jet.TopTaggerCalibArea", rEnv, "JSSWTopTaggerDNN/Rel21/February2022/");
+  configFromFile(m_TopTaggerCalibArea, "Jet.TopTaggerCalibArea", rEnv, "Winter2024_R22_PreRecs/JSSWTopTaggerDNN/");
   configFromFile(m_jesConfig, "Jet.JESConfig", rEnv, "PreRec_R22_PFlow_ResPU_EtaJES_GSC_February23_230215.config"); //https://twiki.cern.ch/twiki/bin/view/AtlasProtected/ApplyJetCalibrationR22
   configFromFile(m_jesConfigAFII, "Jet.JESConfigAFII", rEnv, "JES_MC16Recommendation_AFII_EMTopo_Apr2019_Rel21.config");
   configFromFile(m_jesConfigJMS, "Jet.JESConfigJMS", rEnv, "JES_JMS_MC16Recommendation_Consolidated_MC_only_EMTopo_July2019_Rel21.config");
   configFromFile(m_jesConfigJMSData, "Jet.JESConfigJMSData", rEnv, "JES_JMS_MC16Recommendation_Consolidated_data_only_EMTopo_Sep2019_Rel21.config");
-  configFromFile(m_jesConfigFat, "Jet.JESConfigFat", rEnv, "JES_MC16recommendation_R10_UFO_CSSK_SoftDrop_JMS_01April2020.config");
-  configFromFile(m_jesConfigFatData, "Jet.JESConfigFatData", rEnv, "JES_MC16recommendation_R10_UFO_CSSK_SoftDrop_JMS_01April2020.config");
+  configFromFile(m_jesConfigFat, "Jet.JESConfigFat", rEnv, "JES_MC20PreRecommendation_R10_UFO_CSSK_SoftDrop_JMS_R21Insitu_10Mar2023.config");
+  configFromFile(m_jesConfigFatData, "Jet.JESConfigFatData", rEnv, "JES_MC20PreRecommendation_R10_UFO_CSSK_SoftDrop_JMS_R21Insitu_10Mar2023.config");
   configFromFile(m_jesCalibSeq, "Jet.CalibSeq", rEnv, "JetArea_Residual_EtaJES_GSC_Insitu");
   configFromFile(m_jesCalibSeqJMS, "Jet.CalibSeqJMS", rEnv, "JetArea_Residual_EtaJES_GSC");
   configFromFile(m_jesCalibSeqFat, "Jet.CalibSeqFat", rEnv, "EtaJES_JMS");
@@ -1535,10 +1546,10 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   //
   configFromFile(m_doFwdJVT, "FwdJet.doJVT", rEnv, false); // https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/PileupJetRecommendations
   configFromFile(m_fJvtWP, "FwdJet.JvtWP", rEnv, "Loose");
-  configFromFile(m_fJvtPtMax, "FwdJet.JvtPtMax", rEnv, 120e3);
+  configFromFile(m_fJvtPtMax, "FwdJet.JvtPtMax", rEnv, 60e3);
   configFromFile(m_fJvtEtaMin, "FwdJet.JvtEtaMin", rEnv, 2.5);
-  configFromFile(m_fJvtConfig, "FwdJet.JvtConfig", rEnv, "", true); // empty string means dummy SF
-  configFromFile(m_fJvtRecalculate, "FwdJet.JvtRecalculate", rEnv, false);
+  configFromFile(m_fJvtConfigRun2, "FwdJet.JvtConfigRun2", rEnv, "JetJvtEfficiency/May2024/fJvtSFFile_Run2_EMPFlow.root", true); // empty string means dummy SF
+  configFromFile(m_fJvtConfigRun3, "FwdJet.JvtConfigRun3", rEnv, "JetJvtEfficiency/May2024/fJvtSFFile_Run2_EMPFlow.root", true); // empty string means dummy SF
   configFromFile(m_JMScalib, "Jet.JMSCalib", rEnv, false);
   //
   configFromFile(m_useBtagging, "Btag.enable", rEnv, true);

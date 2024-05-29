@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # @file: PyPerfMon.py
 # @author: Sebastien Binet <binet@cern.ch>
@@ -111,7 +111,7 @@ class Svc(object):
         self._configurable_parent = cfgs['PerfMonSvc']
         _msg = self.msg
         if hasattr(cfgs['PerfMonSvc'], 'OutputLevel'):
-            _msg.setLevel(getattr(cfgs['PerfMonSvc'], 'OutputLevel'))
+            _msg.setLevel(cfgs['PerfMonSvc'].OutputLevel)
         else:
             # default is fine with us
             pass

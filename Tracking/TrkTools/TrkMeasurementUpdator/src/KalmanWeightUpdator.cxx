@@ -18,6 +18,7 @@
 #include "TrkEventPrimitives/FitQualityOnSurface.h"
 #include "TrkParameters/TrackParameters.h"
 
+#include "EventPrimitives/EventPrimitivesCovarianceHelpers.h"
 
 // constructor
 Trk::KalmanWeightUpdator::KalmanWeightUpdator(const std::string& t,const std::string& n,const IInterface* p) :
@@ -431,8 +432,7 @@ Trk::KalmanWeightUpdator::predictedStateFitQuality (    const Trk::TrackParamete
 
     AmgSymMatrix(5) R = (covTrkOne + covTrkTwo).inverse();
 
-    double  chiSquared = r.transpose()*R*r;
-    return {chiSquared, 5};
+    return {Amg::chi2(R, r), 5};
 }
 
 std::vector<double> Trk::KalmanWeightUpdator::initialErrors() const {
@@ -675,8 +675,7 @@ Trk::FitQualityOnSurface  Trk::KalmanWeightUpdator::makeChi2Object( Amg::VectorX
     // attention: similarity(vector) and similarity(matrix) are defined differently in CLHEP:
     // similarity(const Amg::VectorX &v): Returns v.T()*s*v
     // similarity(const HepSymMatrix &m1): Returns m1*s*m1.T()
-    double  chiSquared = residual1.transpose()*weight1*residual1;
-    chiSquared += residual2.transpose()*weight2*residual2;
+    const double chiSquared = Amg::chi2(weight1, residual1) + Amg::chi2(weight2, residual2);
     // number of degree of freedom added
     int numberDoF  = weight1.cols();
 
@@ -694,7 +693,7 @@ Trk::FitQualityOnSurface  Trk::KalmanWeightUpdator::makeChi2Object( Amg::VectorX
 {   // sign: -1 = updated, +1 = predicted parameters.
     Amg::MatrixX R = covRio + sign* covTrk.similarity(H);
     // get chi2 = r.T() * R^-1 * r
-    double  chiSquared = residual.transpose()*R.inverse()*residual;
+    const double  chiSquared = Amg::chi2(R.inverse(), residual);
     ATH_MSG_VERBOSE( "-U- fitQuality of "<< (sign>0?"predicted":"updated")
                      <<" state, chi2 :" << chiSquared << " / ndof= " << covRio.cols()  );
 

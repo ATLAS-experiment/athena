@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ASCIIIOINPUT_H
@@ -36,13 +36,13 @@ class AsciiInput {
   
   /** A helper function to convert a string into a string vector, by
       using any number of space or tab characters as separators. */
-  static std::vector<std::string> strToStrVec(std::string inputString);
+  static std::vector<std::string> strToStrVec(const std::string& inputString);
 
   /** A helper function to convert a string to a long value. */
-  static long strToLong(std::string inputString);
+  static long strToLong(const std::string& inputString);
 
   /** A helper function to convert a string to a double value. */
-  static double strToDouble(std::string inputString);
+  static double strToDouble(const std::string& inputString);
 
  private:
 

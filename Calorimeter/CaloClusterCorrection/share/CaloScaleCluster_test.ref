@@ -13,10 +13,6 @@ GeoModelSvc                                          INFO Explicitly initializin
 DetDescrCnvSvc                                       INFO  initializing 
 DetDescrCnvSvc                                       INFO Found DetectorStore service
 DetDescrCnvSvc                                       INFO  filling proxies for detector managers 
-GeoModelSvc::RDBMaterialManager                   WARNING  Getting PixTBMatComponents with default tag
-GeoModelSvc::RDBMaterialManager                   WARNING  Getting PixTBMaterials with default tag
-GeoModelSvc::RDBMaterialManager                   WARNING  Getting InDetMatComponents with default tag
-GeoModelSvc::RDBMaterialManager                   WARNING  Getting InDetMaterials with default tag
 EventPersistencySvc                                  INFO Added successfully Conversion service:DetDescrCnvSvc
 LArElectrodeIDDetDescrCnv                            INFO in createObj: creating a LArElectrodeID helper object in the detector store
 LArElectrodeID                                       INFO  => initialize_from_dictionary()

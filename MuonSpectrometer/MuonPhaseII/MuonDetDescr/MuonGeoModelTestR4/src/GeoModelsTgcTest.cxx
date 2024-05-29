@@ -98,7 +98,7 @@ StatusCode GeoModelsTgcTest::execute() {
          }         
       }
       const sTgcIdHelper& id_helper{m_idHelperSvc->stgcIdHelper()};
-      for (int layer = 1; layer <= reElement->numLayers(); ++layer) {
+      for (unsigned int layer = 1; layer <= reElement->numLayers(); ++layer) {
         for (int chType = sTgcIdHelper::sTgcChannelTypes::Pad; chType <= sTgcIdHelper::sTgcChannelTypes::Wire; ++chType) {
             unsigned int numChannel = 0;
             bool isValidLay{false};
@@ -177,20 +177,17 @@ StatusCode GeoModelsTgcTest::dumpToTree(const EventContext& ctx,
     m_chamberDesign = reElement->chamberDesign();
     ///
     m_numLayers = reElement->numLayers();
-    m_yCutout = reElement->yCutout();
     m_gasTck = reElement->gasGapThickness();
     ///
     m_sChamberLength = reElement->sChamberLength();
     m_lChamberLength = reElement->lChamberLength();
     m_chamberHeight = reElement->chamberHeight();
-    ///
-    ///Pads will come here 
- 
+     
    /// Dump the local to global transformation of the readout element
    const Amg::Transform3D& transform{reElement->localToGlobalTrans(gctx)};
    m_readoutTransform = transform;
    const sTgcIdHelper& id_helper{m_idHelperSvc->stgcIdHelper()};
-   for (int layer = 1; layer <= reElement->numLayers(); ++layer) {
+   for (unsigned int layer = 1; layer <= reElement->numLayers(); ++layer) {
         for (int chType = sTgcIdHelper::sTgcChannelTypes::Pad; chType <= sTgcIdHelper::sTgcChannelTypes::Wire; ++chType) {
             unsigned int numWireGroup = 0;
             /// Use idHelper to get the identifier
@@ -207,6 +204,8 @@ StatusCode GeoModelsTgcTest::dumpToTree(const EventContext& ctx,
             m_sPadLength = reElement->sPadLength(layID);
             m_lPadLength = reElement->lPadLength(layID);
             m_gapHeight = reElement->gapHeight(layID);
+            m_yCutout = reElement->yCutout(layID);
+
             switch (chType) {
                 case sTgcIdHelper::sTgcChannelTypes::Pad:
                     m_numPads.push_back(reElement->numPads(layID));

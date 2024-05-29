@@ -39,22 +39,22 @@ namespace SG {
 /**
  * @brief Access an auxiliary variable atomically.
  */
-template <class T>
+template <class T, class ALLOC = AuxAllocator_t<T> >
 class AtomicConstAccessor
-  : public ConstAccessor<T>
+  : public ConstAccessor<T, ALLOC>
 {
 public:
   /// Base class.
-  typedef ConstAccessor<T> Base;
+  using Base = ConstAccessor<T, ALLOC>;
 
   /// Type referencing an item.
-  typedef const std::atomic<T>& const_reference_type;
+  using const_reference_type = const std::atomic<T>&;
 
   /// Type the user sees.
-  typedef typename AuxDataTraits<T>::element_type element_type;
+  using element_type = typename AuxDataTraits<T, ALLOC>::element_type;
 
   /// Pointer into the container holding this item.
-  typedef const std::atomic<T>* const_container_pointer_type;
+  using const_container_pointer_type = const std::atomic<T>*;
 
   // Consistency checks.
   static_assert (std::is_same<T, typename Base::element_type>::value,
@@ -104,7 +104,9 @@ public:
    * As this class can be used only read-only for basic types, return
    * the result by value.  That makes it easier to call from python.
    */
-  T operator() (const AuxElement& e) const;
+  template <class ELT>
+  ATH_REQUIRES( IsConstAuxElement<ELT> )
+  T operator() (const ELT& e) const;
 
 
   /**

@@ -102,7 +102,7 @@ fi
 
 echo "Running athena to compute new HV corrections"
 python -m LArCalibProcessing.LArCalib_HVCorrConfig $time $run $lb -g $globalTag > hv.log 2>&1
-athena.py -c "date=\"${time}\";GlobalTag=\"${globalTag}\""  LArCalibProcessing/LArCalib_Example_HVCorr.py > hv.log 2>&1
+#athena.py -c "date=\"${time}\";GlobalTag=\"${globalTag}\""  LArCalibProcessing/LArCalib_Example_HVCorr.py > hv.log 2>&1
 if [ $? -ne 0 ];  then
       echo "Athena reported an error ! Please check hv.log!"
       exit
@@ -189,18 +189,19 @@ _EOF5_
 
 globalTagES=`python getGlobalTagES.py | awk '{print($1)}'`
 echo " "
-echo "Running athena to compute L1Calo corrections"
-athena.py -c "date=\"${time}\";GlobalTag=\"${globalTagES}\";RunNumber=$run;LumiBlock=$lb;HVCorrDb=\"sqlite://;schema=HVScaleCorr.db;dbname=CONDBR2\";OutputSQLiteFile=\"hvcorrections_${time%%:*}.sqlite\"" TrigT1CaloCalibUtils/LArL1Calo_DumpHVCorr.py > l1calocorr.log 2>&1
-if [ $? -ne 0 ];  then
-      echo "Athena reported an error ! Please check l1calocorr.log!"
-      exit    
-fi
-
-if grep -q ERROR l1calocorr.log
-      then    
-      echo "An error occured ! Please check l1calocorr.log!"
-      exit    
-fi
+echo "Skipped Running athena to compute L1Calo corrections"
+#echo "Running athena to compute L1Calo corrections"
+#athena.py -c "date=\"${time}\";GlobalTag=\"${globalTagES}\";RunNumber=$run;LumiBlock=$lb;HVCorrDb=\"sqlite://;schema=HVScaleCorr.db;dbname=CONDBR2\";OutputSQLiteFile=\"hvcorrections_${time%%:*}.sqlite\"" TrigT1CaloCalibUtils/LArL1Calo_DumpHVCorr.py > l1calocorr.log 2>&1
+#if [ $? -ne 0 ];  then
+#      echo "Athena reported an error ! Please check l1calocorr.log!"
+#      exit    
+#fi
+#
+#if grep -q ERROR l1calocorr.log
+#      then    
+#      echo "An error occured ! Please check l1calocorr.log!"
+#      exit    
+#fi
 
 
 # Now noise....
@@ -282,7 +283,7 @@ AtlCoolCopy "sqlite://;schema=larnoisesqlite.db;dbname=CONDBR2" "sqlite://;schem
 
 echo "Doing check of the noise sqlite against P1HLT cache....."
 echo "Will take 3-5 minutes, be patient......"
-(mkdir /tmp/noise_test_$$; cp caloSqlite_UPD1_online.db /tmp/noise_test_$$/; cd /tmp/noise_test_$$/; athena.py --CA --evtMax=10 -c "sqlite='caloSqlite_UPD1_online.db'" TriggerJobOpts/test_hltConditions.py >/dev/null 2>&1 ) >/dev/null 2>&1
+(mkdir /tmp/noise_test_$$; cp caloSqlite_UPD1_online.db /tmp/noise_test_$$/; cd /tmp/noise_test_$$/; ln -s caloSqlite_UPD1_online.db noise.db; athena.py --CA --evtMax=6 TriggerJobOpts/test_hltConditions.py >/dev/null 2>&1 ) >/dev/null 2>&1
 if [ $? -ne 0 ];  then
       echo "Testing job reported an error ! "
       echo "Please, do not upload constants to online ! "
@@ -293,8 +294,9 @@ echo "  "
 echo " mergedb.log contains the log file of the various AtlCoolCopy operation to make local sqlite files"
 echo " " 
 echo "  After checking that everything is OK you can proceed with the database update"
-echo "  (1) /afs/cern.ch/user/a/atlcond/utils22/AtlCoolMerge.py --online HVScaleCorr.db  CONDBR2 ATONR_COOL  ATLAS_COOLONL_LAR_W  <password>"
-echo "  (2) /afs/cern.ch/user/a/atlcond/utils22/AtlCoolMerge.py --online caloSqlite_UPD1_online.db  CONDBR2 ATONR_COOL ATLAS_COOLONL_CALO_W <password>"
-echo "  (3) /afs/cern.ch/user/a/atlcond/utilsflask/AtlCoolMerge.py --flask larnoisesqlite.db CONDBR2 ATONR_COOLOFL_GPN ATLAS_COOLOFL_LAR_W <password>"
+echo "  (0) export COOL_FLASK=https://cool-proxy-app.cern.ch"
+echo "  (1) /afs/cern.ch/user/a/atlcond/utilsproxy/AtlCoolMerge.py --online HVScaleCorr.db  CONDBR2 ATONR_COOL  ATLAS_COOLONL_LAR_W  <password>"
+echo "  (2) /afs/cern.ch/user/a/atlcond/utilsproxy/AtlCoolMerge.py --online caloSqlite_UPD1_online.db  CONDBR2 ATONR_COOL ATLAS_COOLONL_CALO_W <password>"
+echo "  (3) /afs/cern.ch/user/a/atlcond/utilsproxy/AtlCoolMerge.py --flask larnoisesqlite.db CONDBR2 ATONR_COOLOFL_GPN ATLAS_COOLOFL_LAR_W <password>"
 
 

@@ -21,7 +21,7 @@ def precisionPhotonSequenceGenCfg(flags, ion=False, is_probe_leg=False):
     InViewRoIs="PrecisionPhotonRoIs"                                          
 
     # Configure the reconstruction algorithm sequence
-    TrigEgammaKeys = getTrigEgammaKeys(ion = ion)   
+    TrigEgammaKeys = getTrigEgammaKeys(flags, ion = ion)   
 
     hiInfo = 'HI' if ion is True else ''
     probeInfo = '_probe' if  is_probe_leg is True else ''

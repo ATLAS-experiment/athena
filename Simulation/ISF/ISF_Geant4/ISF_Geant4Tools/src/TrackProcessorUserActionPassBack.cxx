@@ -41,9 +41,9 @@ namespace G4UA {
 
   namespace iGeant4{
 
-    TrackProcessorUserActionPassBack::TrackProcessorUserActionPassBack(const Config& config):
-      m_config(config),m_particleBrokerQuick(0), m_geoIDSvcQuick(0){
-
+    TrackProcessorUserActionPassBack::TrackProcessorUserActionPassBack(const Config& config)
+      : m_config(config)
+    {
       if(4<m_config.verboseLevel)
         {
           G4cout << "Initializing TrackProcessorUserActionPassBack" << G4endl;
@@ -151,7 +151,7 @@ namespace G4UA {
         } else {
           // TODO: link G4Track to ISF particle with the new GeoID
         }
-      } else if ( aTrackStatus!=fAlive ) {
+      } else if ( aTrackStatus!=fAlive && aTrackStatus != fStopButAlive  ) {
         // particle is killed by G4 in this step
         // TODO: do we need to handle this case specifically?
         // ATH_MSG_DEBUG(" -> G4Track enters geoID = " << nextGeoID <<
@@ -203,11 +203,11 @@ namespace G4UA {
 
             // attach TrackInformation instance to the new secondary G4Track
             ISF::ISFParticle *parent                  = curISP;
-            HepMC::GenParticlePtr generationZeroTruthParticle = nullptr;
+            HepMC::GenParticlePtr generationZeroGenParticle = nullptr;
             ::iGeant4::ISFG4Helper::attachTrackInfoToNewG4Track( *aTrack_2nd,
                                                        *parent,
                                                        Secondary,
-                                                       generationZeroTruthParticle );
+                                                       generationZeroGenParticle );
 
             HepMC::GenParticlePtr truthParticle{};
             returnParticleToISF(aTrack_2nd, parent, truthParticle, nextGeoID_2nd);
@@ -231,10 +231,10 @@ namespace G4UA {
         return nullptr; //The G4Exception call above should abort the job, but Coverity does not seem to pick this up.
       }
 
-      HepMC::GenParticlePtr         primaryHepParticle = trackInfo->GetPrimaryHepMCParticle();
-      HepMC::GenParticlePtr  generationZeroHepParticle = trackInfo->GetHepMCParticle();
+      HepMC::GenParticlePtr         primaryGenParticle = trackInfo->GetPrimaryGenParticle();
+      HepMC::GenParticlePtr  generationZeroGenParticle = trackInfo->GetHepMCParticle(); // TODO CHECK THIS LOGIC
 
-      ISF::TruthBinding* tBinding = new ISF::TruthBinding(truthParticle, primaryHepParticle, generationZeroHepParticle);
+      ISF::TruthBinding* tBinding = new ISF::TruthBinding(truthParticle, primaryGenParticle, generationZeroGenParticle);
 
       return tBinding;
     }

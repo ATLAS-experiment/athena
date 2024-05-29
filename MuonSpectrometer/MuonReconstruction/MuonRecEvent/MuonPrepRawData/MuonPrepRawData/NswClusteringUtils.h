@@ -5,6 +5,7 @@
 #define MUONPREPRAWDATA_NSWCLUSTERING_UTILS_H
 
 #include "MuonPrepRawData/MuonCluster.h"
+#include "TrkSurfaces/Surface.h"
 
 /** 
  * Small helper functions to define a not neccessarily right-handed coordinate system which is
@@ -17,10 +18,13 @@ namespace Muon {
         ///    x-axis : Parallell to the radial direction of the detector centre
         ///    y-axis : Pependicular to the x-axis in the transverse plane
         ///    z-axis : Points to the big wheel
-        inline Amg::Vector3D toLocal(const MuonCluster& prd,const Amg::Vector3D& dir){
-            Amg::Rotation3D rotMat{prd.detectorElement()->surface(prd.identify()).transform().inverse().linear()};
+        inline Amg::Vector3D toLocal(const Trk::Surface& surf, const Amg::Vector3D& dir){
+            Amg::Rotation3D rotMat{surf.transform().inverse().linear()};
             const Amg::Vector3D rotDir = rotMat * dir;
             return Amg::Vector3D{rotDir.x(), rotDir.y(), std::abs(rotDir.z())};
+        }
+        inline Amg::Vector3D toLocal(const MuonCluster& prd,const Amg::Vector3D& dir){
+            return toLocal(prd.detectorElement()->surface(prd.identify()), dir);
         }
         inline Amg::Vector3D toLocal(const MuonCluster& prd) {
             return toLocal(prd, prd.globalPosition().unit());

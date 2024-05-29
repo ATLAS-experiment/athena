@@ -81,6 +81,16 @@ if( XAOD_STANDALONE )
 
 else()
 
+   atlas_install_scripts(share/test*)
+
+   atlas_add_test( PMGTruthWeightsAlg
+    SCRIPT testPMGTruthWeightsAlg.py --max-events 10
+    POST_EXEC_SCRIPT nopost.sh )
+
+   atlas_add_test( PileupReweightingAlg
+    SCRIPT testPileupReweightingAlgConfig.py --max-events 10
+    POST_EXEC_SCRIPT nopost.sh )
+
    atlas_add_test( EventAlgsTestJobData
       SCRIPT athena.py
              AsgAnalysisAlgorithms/EventAlgorithmsTest_jobOptions.py - --data-type data

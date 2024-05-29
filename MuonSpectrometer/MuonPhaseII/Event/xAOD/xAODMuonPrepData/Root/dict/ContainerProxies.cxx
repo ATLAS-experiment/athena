@@ -7,7 +7,9 @@
 
 // Local include(s):
 #include "xAODMuonPrepData/versions/MdtDriftCircleContainer_v1.h"
+#include "xAODMuonPrepData/versions/RpcStrip2DContainer_v1.h"
 #include "xAODMuonPrepData/versions/RpcStripContainer_v1.h"
+
 #include "xAODMuonPrepData/versions/TgcStripContainer_v1.h"
 #include "xAODMuonPrepData/versions/MMClusterContainer_v1.h"
 #include "xAODMuonPrepData/versions/sTgcStripContainer_v1.h"
@@ -17,6 +19,7 @@
 // Set up the collection proxies:
 ADD_NS_DV_PROXY(xAOD, MdtDriftCircleContainer_v1);
 ADD_NS_DV_PROXY(xAOD, RpcStripContainer_v1);
+ADD_NS_DV_PROXY(xAOD, RpcStrip2DContainer_v1);
 ADD_NS_DV_PROXY(xAOD, TgcStripContainer_v1);
 ADD_NS_DV_PROXY(xAOD, MMClusterContainer_v1);
 ADD_NS_DV_PROXY(xAOD, sTgcStripContainer_v1);

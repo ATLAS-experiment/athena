@@ -1,8 +1,10 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonPRDTest/RPCSDOVariables.h"
+#include "MuonReadoutGeometry/RpcReadoutElement.h"
+
 namespace MuonPRDTest {
     RpcSDOVariables::RpcSDOVariables(MuonTesterTree& tree, const std::string& container_name, MSG::Level msglvl) :
         PrdTesterModule(tree, "SDO_RPC", false, msglvl), m_key{container_name} {}
@@ -12,6 +14,10 @@ namespace MuonPRDTest {
     bool RpcSDOVariables::fill(const EventContext& ctx) {
         ATH_MSG_DEBUG("do fill RpcSDOVariable()");
         SG::ReadHandle<MuonSimDataCollection> rpcSdoContainer{m_key, ctx};
+        
+        const MuonGM::MuonDetectorManager* MuonDetMgr = getDetMgr(ctx);
+        if (!MuonDetMgr) { return false; }
+
         if (!rpcSdoContainer.isValid()) {
             ATH_MSG_FATAL("Failed to retrive digit container " << m_key.fullKey());
             return false;
@@ -31,18 +37,17 @@ namespace MuonPRDTest {
             rpc_sdo.deposits(deposits);
             m_RPC_dig_globalPos.push_back(rpc_sdo.globalPosition());
 
+            Amg::Vector2D locPos{Amg::Vector2D::Zero()};
+            const Trk::Surface& surf{MuonDetMgr->getRpcReadoutElement(id)->surface(id)};
+            surf.globalToLocal(rpc_sdo.globalPosition(), Amg::Vector3D::Zero(), locPos);
+            m_RPC_dig_localPos.push_back(locPos);
+            
             // use the information of the first deposit
             int barcode = deposits[0].first.barcode();
-            double MuonMCdata_firstentry = deposits[0].second.firstEntry();
-            double MuonMCdata_secondentry = deposits[0].second.secondEntry();
 
             ATH_MSG_DEBUG("RPC SDO barcode=" << barcode);
-            ATH_MSG_DEBUG("RPC SDO localPosX=" << std::setw(9) << std::setprecision(2) << MuonMCdata_firstentry
-                                               << ", localPosY=" << std::setw(9) << std::setprecision(2) << MuonMCdata_secondentry);
 
             m_rpc_sdo_barcode.push_back(barcode);
-            m_rpc_sdo_localPosX.push_back(MuonMCdata_firstentry);
-            m_rpc_sdo_localPosY.push_back(MuonMCdata_secondentry);
             ++n_sdo;
         }
         m_rpc_nsdo = n_sdo;

@@ -19,7 +19,7 @@ class forwardElectronMonTool : public egammaMonToolBase
   
   forwardElectronMonTool(const std::string& type, const std::string& name, const IInterface* parent); 
   
-  virtual ~forwardElectronMonTool();
+  virtual ~forwardElectronMonTool() = default;
   
   virtual StatusCode initialize() override;
   virtual StatusCode bookHistograms() override;

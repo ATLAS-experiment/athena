@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #ifndef FPGATrackSimSectorSlice_h
 #define FPGATrackSimSectorSlice_h
@@ -37,6 +37,9 @@ class FPGATrackSimSectorSlice
                 FPGATrackSimTrackParsI const & nBins, FPGATrackSimTrackPars const & min, FPGATrackSimTrackPars const & max);
         // Read from file
         FPGATrackSimSectorSlice(const std::string & filepath);
+
+        FPGATrackSimSectorSlice(const FPGATrackSimSectorSlice&) = delete;
+        FPGATrackSimSectorSlice& operator=(const FPGATrackSimSectorSlice&) = delete;
 
 
         // Slice writing functions

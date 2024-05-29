@@ -12,7 +12,6 @@
 #include <cstdlib>
 #include <memory>
 #include <type_traits>
-#include "CxxUtils/assume_aligned.h"
 namespace GSFUtils {
 
 /**

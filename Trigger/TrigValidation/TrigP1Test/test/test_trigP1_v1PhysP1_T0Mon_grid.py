@@ -75,17 +75,16 @@ tzreco.input = ''
 tzreco.explicit_input = True
 tzreco.args = '--inputBSFile=' + find_file('*.physics_Main*._athenaHLT*.data')  # output of the previous step
 tzreco.args += ' --outputAODFile=AOD.pool.root'
-tzreco.args += ' --outputHISTFile=hist.root'
-tzreco.args += ' --conditionsTag=\'CONDBR2-BLKPA-2022-08\' --geometryVersion=\'ATLAS-R3S-2021-03-00-00\''
+tzreco.args += ' --outputHISTFile=ExampleMonitorOutput.root'
+tzreco.args += ' --conditionsTag=\'CONDBR2-BLKPA-2024-03\' --geometryVersion=\'ATLAS-R3S-2021-03-02-00\''
 tzreco.args += ' --preExec="{:s}"'.format(tzrecoPreExec)
-tzreco.args += ' --CA'
 
 aod2daod = ExecStep.ExecStep('AODtoDAOD')
 aod2daod.type = 'Derivation_tf'
 aod2daod.input = ''
 aod2daod.forks = 4
 aod2daod.explicit_input = True
-aod2daod.args = '--inputAODFile=AOD.pool.root --outputDAODFile=DAOD.pool.root --CA --formats=PHYS'
+aod2daod.args = '--inputAODFile=AOD.pool.root --outputDAODFile=DAOD.pool.root --formats=PHYS'
 aod2daod.args += ' --sharedWriter=True --athenaMPMergeTargetSize "DAOD_*:0"'
 
 # The full test

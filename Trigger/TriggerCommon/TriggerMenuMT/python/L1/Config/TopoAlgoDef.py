@@ -1350,8 +1350,14 @@ class TopoAlgoDef:
 
 
         # DISAMB Lines with DR Cut
-        # output lines = 2DISAMB-jJ55ab-0DR25-eTAU30ab-eTAU20ab'
-        #               '2DISAMB-jJ55ab-0DR28-eTAU30ab-eTAU20ab',
+        # output lines = '2DISAMB-jJ55ab-0DR25-eTAU30ab-eTAU20ab'
+        #                '2DISAMB-jJ55ab-0DR28-eTAU30ab-eTAU20ab'
+        #                '2DISAMB-jJ50ab-0DR25-eTAU30ab-eTAU20ab',
+        #                '2DISAMB-jJ50ab-0DR28-eTAU30ab-eTAU20ab',
+        #                '2DISAMB-jJ40ab-0DR25-eTAU30ab-eTAU20ab',
+        #                '2DISAMB-jJ40ab-0DR28-eTAU30ab-eTAU20ab',
+        #                '2DISAMB-jJ30ab-0DR25-eTAU30ab-eTAU20ab',
+        #                '2DISAMB-jJ30ab-0DR28-eTAU30ab-eTAU20ab']
         DISAMB_DR_jJ_eTau_eTau_Map = [
         {
             "algoname": "2DISAMB_jJ55ab_DR_eTAU_eTAU",
@@ -1373,6 +1379,69 @@ class TopoAlgoDef:
             "nleading3": HW.jJetOutputWidthSelect,
             "inputwidth3": HW.jJetOutputWidthSelect,
             "olist3": "ab",
+        },
+        {
+            "algoname": "2DISAMB_jJ50ab_DR_eTAU_eTAU",
+            "disamb" :  2,
+            "minDR"   : 0,
+            "maxDR"   : [25,28],
+            "otype1"  : "eTAU",
+            "ocut1"   : 30,
+            "olist1": "ab",
+            "nleading1": HW.eTauOutputWidthSelect,
+            "inputwidth1": HW.eTauOutputWidthSelect,
+            "otype2"  : "eTAU",
+            "ocut2"   : 20,
+            "nleading2": HW.eTauOutputWidthSelect,
+            "inputwidth2": HW.eTauOutputWidthSelect,
+            "olist2": "ab",
+            "otype3"  : "jJ",
+            "ocut3"   : 50,
+            "nleading3": HW.jJetOutputWidthSelect,
+            "inputwidth3": HW.jJetOutputWidthSelect,
+            "olist3": "ab",
+        },
+        {
+            "algoname": "2DISAMB_jJ40ab_DR_eTAU_eTAU",
+            "disamb" :  2,
+            "minDR"   : 0,
+            "maxDR"   : [25, 28],
+            "otype1"  : "eTAU",
+            "ocut1"   : 30,
+            "olist1": "ab",
+            "nleading1": HW.eTauOutputWidthSelect,
+            "inputwidth1": HW.eTauOutputWidthSelect,
+            "otype2"  : "eTAU",
+            "ocut2"   : 20,
+            "nleading2": HW.eTauOutputWidthSelect,
+            "inputwidth2": HW.eTauOutputWidthSelect,
+            "olist2": "ab",
+            "otype3"  : "jJ",
+            "ocut3"   : 40,
+            "nleading3": HW.jJetOutputWidthSelect,
+            "inputwidth3": HW.jJetOutputWidthSelect,
+            "olist3": "ab",
+        },
+        {
+            "algoname": "2DISAMB_jJ30ab_DR_eTAU_eTAU",
+            "disamb" :  2,
+            "minDR"   : 0,
+            "maxDR"   : [25, 28],
+            "otype1"  : "eTAU",
+            "ocut1"   : 30,
+            "olist1": "ab",
+            "nleading1": HW.eTauOutputWidthSelect,
+            "inputwidth1": HW.eTauOutputWidthSelect,
+            "otype2"  : "eTAU",
+            "ocut2"   : 20,
+            "nleading2": HW.eTauOutputWidthSelect,
+            "inputwidth2": HW.eTauOutputWidthSelect,
+            "olist2": "ab",
+            "otype3"  : "jJ",
+            "ocut3"   : 30,
+            "nleading3": HW.jJetOutputWidthSelect,
+            "inputwidth3": HW.jJetOutputWidthSelect,
+            "olist3": "ab",
         }
         ]
         for x in DISAMB_DR_jJ_eTau_eTau_Map:
@@ -1390,7 +1459,6 @@ class TopoAlgoDef:
                                                                obj3, d.minDR, d.maxDR[bitId], obj1, obj2))
             
             alg = AlgConf.DisambiguationDRIncl3( name = d.algoname, inputs = inputList, outputs =  toponames )
-            
             alg.addgeneric('InputWidth1', d.inputwidth1)
             alg.addgeneric('InputWidth2', d.inputwidth2)
             alg.addgeneric('InputWidth3', d.inputwidth3)

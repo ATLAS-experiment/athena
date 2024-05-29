@@ -1,5 +1,5 @@
 /*
-+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
++  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FlavorTagDiscriminants/MultifoldGNN.h"
@@ -20,6 +20,17 @@ namespace {
     }
     return first;
   }
+  auto getNNs(
+    const std::vector<std::string>& nn_files,
+    const FlavorTagDiscriminants::GNNOptions& o)
+  {
+    namespace ftd = FlavorTagDiscriminants;
+    std::vector<std::shared_ptr<const ftd::GNN>> nns;
+    for (const auto& nn_file: nn_files) {
+      nns.emplace_back(std::make_shared<const ftd::GNN>(nn_file, o));
+    }
+    return nns;
+  }
 }
 
 namespace FlavorTagDiscriminants {
@@ -28,12 +39,16 @@ namespace FlavorTagDiscriminants {
     const std::vector<std::string>& nn_files,
     const std::string& fold_hash_name,
     const GNNOptions& o):
+    MultifoldGNN(getNNs(nn_files, o), fold_hash_name)
+  {
+  }
+  MultifoldGNN::MultifoldGNN(
+    const std::vector<std::shared_ptr<const GNN>>& nns,
+    const std::string& fold_hash_name):
+    m_folds(nns),
     m_fold_hash(fold_hash_name),
     m_jetLink(jetLinkName)
   {
-    for (const auto& nn_file: nn_files) {
-      m_folds.emplace_back(std::make_unique<GNN>(nn_file, o));
-    }
   }
   MultifoldGNN::MultifoldGNN(MultifoldGNN&&) = default;
   MultifoldGNN::MultifoldGNN(const MultifoldGNN&) = default;
@@ -45,8 +60,9 @@ namespace FlavorTagDiscriminants {
   void MultifoldGNN::decorate(const xAOD::Jet& jet) const {
     getFold(jet).decorate(jet);
   }
-  void MultifoldGNN::decorateWithDefaults(const xAOD::Jet& jet) const {
-    getFold(jet).decorateWithDefaults(jet);
+  void MultifoldGNN::decorateWithDefaults(const SG::AuxElement& jet) const {
+    // note that the default values should be identical betwen all folds
+    m_folds.at(0)->decorateWithDefaults(jet);
   }
 
   // Dependencies

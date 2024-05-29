@@ -43,11 +43,7 @@
 #include "SelectionVetoes.h"
 
 #include <boost/tokenizer.hpp>
-#include <boost/algorithm/string/predicate.hpp>
 #include <cassert>
-#include <mutex>
-#include <string>
-#include <vector>
 #include <sstream>
 
 using std::string;
@@ -447,7 +443,7 @@ void AthenaOutputStream::handle(const Incident& inc)
 
 
 // note - this method works in any slot - MetaCont uses the filenames to find objects
-void AthenaOutputStream::finalizeRange( const std::string rangeFN )
+void AthenaOutputStream::finalizeRange( const std::string & rangeFN )
 {
    ATH_MSG_DEBUG("Writing MetaData to " << rangeFN);
    // MN: not calling StopMetaDataIncident here but directly writeMetaData() - OK for Sim, check others
@@ -1168,7 +1164,7 @@ void AthenaOutputStream::tokenizeAtSep( std::vector<std::string>& subStrings,
                                         const std::string& sepstr ) const {
   subStrings.clear(); // clear from previous iteration step
   // If the portia starts with a wildcard, add an empty string
-  if ( boost::starts_with (portia, sepstr )) {
+  if (portia.starts_with( sepstr )) {
     subStrings.push_back("");
   }
   boost::char_separator<char> csep(sepstr.c_str());

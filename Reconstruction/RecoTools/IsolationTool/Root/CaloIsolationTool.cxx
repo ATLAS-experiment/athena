@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////////
@@ -34,6 +34,7 @@
 #include "xAODEgamma/EgammaxAODHelpers.h"
 #include "FourMomUtils/xAODP4Helpers.h"
 #include "xAODPFlow/FEHelpers.h"
+#include "AthContainers/ConstAccessor.h"
 
 #include <cmath>
 
@@ -1443,8 +1444,9 @@ bool CaloIsolationTool::correctIsolationEnergy_pflowCore(CaloIsolation& result,
     // initialize varialbes
     double ecore = 0.;
     auto muI = derefMap.find(&tp);
-    if(muI!=derefMap.end() && muI->second->isAvailable<float>("ET_Core")){
-      ecore = muI->second->auxdataConst<float>("ET_Core");
+    static const SG::ConstAccessor<float> ET_CoreAcc ("ET_Core");
+    if(muI!=derefMap.end()){
+      ecore = ET_CoreAcc.withDefault (*muI->second, 0);
     }else{
       ATH_MSG_WARNING("ET_Core of muon not found! coreMuon isolation correction will not be applied!!!");
       return false;

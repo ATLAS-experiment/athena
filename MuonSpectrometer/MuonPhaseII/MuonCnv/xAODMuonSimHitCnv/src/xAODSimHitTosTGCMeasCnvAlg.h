@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAODMUONSIMHITCNV_xAODSimHitTosTGCMeasurementCnvAlg_H
 #define XAODMUONSIMHITCNV_xAODSimHitTosTGCMeasurementCnvAlg_H
@@ -12,6 +12,9 @@
 
 #include <xAODMuonSimHit/MuonSimHitContainer.h>
 #include <xAODMuonPrepData/sTgcStripContainer.h>
+#include <xAODMuonPrepData/sTgcPadContainer.h>
+#include <xAODMuonPrepData/sTgcWireContainer.h>
+
 
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
@@ -37,12 +40,34 @@ class xAODSimHitTosTGCMeasCnvAlg : public AthReentrantAlgorithm {
     
     private:
         CLHEP::HepRandomEngine* getRandomEngine(const EventContext& ctx) const;
+
+        void digitizeStrip(const EventContext& ctx,
+                           const xAOD::MuonSimHit& simHit,
+                           xAOD::sTgcStripContainer& stripContainer,
+                           CLHEP::HepRandomEngine* rndEngine) const;
   
+        void digitizeWire(const EventContext& ctx,
+                          const xAOD::MuonSimHit& simHit,
+                          xAOD::sTgcWireContainer& wireContainer,
+                          CLHEP::HepRandomEngine* rndEngine) const;
+
+        void digitizePad(const EventContext& ctx,
+                         const xAOD::MuonSimHit& simHit,
+                         xAOD::sTgcPadContainer& padContainer) const;
+        
         SG::ReadHandleKey<xAOD::MuonSimHitContainer> m_readKey{this, "InputCollection", "xStgcSimHits",
                                                               "Name of the new xAOD SimHit collection"};
-        
-        SG::WriteHandleKey<xAOD::sTgcStripContainer> m_writeKey{this, "OutputContainer", "xAODsTGCStrips", 
-                                                                "Output container"};
+
+        SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+
+        SG::WriteHandleKey<xAOD::sTgcStripContainer> m_writeKeyStrip{this, "StripWriteKey", "xAODsTgcStrips", 
+                                                                     "Write strip key"};
+
+        SG::WriteHandleKey<xAOD::sTgcWireContainer> m_writeKeyWire{this, "WireWriteKey", "xAODsTgcWires", 
+                                                                     "Write wire key"};
+        SG::WriteHandleKey<xAOD::sTgcPadContainer> m_writeKeyPad{this, "PadWriteKey", "xAODsTgcPads", 
+                                                                 "Write pad key"};
+
 
         /// Access to the new readout geometry
         const MuonGMR4::MuonDetectorManager* m_DetMgr{nullptr};
@@ -53,7 +78,7 @@ class xAODSimHitTosTGCMeasCnvAlg : public AthReentrantAlgorithm {
         Gaudi::Property<std::string> m_streamName{this, "RandomStream", "sTGCSimHitForkLifting"};
 
         SG::ReadCondHandleKey<NswErrorCalibData> m_uncertCalibKey{this, "ErrorCalibKey", "NswUncertData",
-                                                         "Key of the parametrized NSW uncertainties"};
+                                                                  "Key of the parametrized NSW uncertainties"};
 
 };
 

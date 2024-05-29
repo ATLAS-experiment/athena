@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -95,7 +95,7 @@ PyObject* CPPInstanceExpand( PyObject*, PyObject* args )
   // use the PyString macros to by-pass error checking; do not adopt the buffer,
   // as the local TBufferFile can go out of scope (there is no copying)
   TBufferFile buf( TBuffer::kRead,
-                   PyUnicode_GET_SIZE( pybuf ),
+                   PyUnicode_GET_LENGTH( pybuf ),
                    (char*)PyGetString( pybuf ).first.c_str(),
                    kFALSE );
 

@@ -8,7 +8,6 @@
 # art-athena-mt: 8
 
 ATHENA_CORE_NUMBER=8 Derivation_tf.py \
-  --CA 'True' \
   --preExec 'flags.Output.TreeAutoFlush={"DAOD_PHYS": 100}' \
   --maxEvents '1000' \
   --multiprocess 'True' \

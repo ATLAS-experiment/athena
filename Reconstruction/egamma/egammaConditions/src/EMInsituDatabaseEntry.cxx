@@ -23,10 +23,6 @@ EMInsituDatabaseEntry::EMInsituDatabaseEntry(const std::string& dbaseID)
 	setDatabaseID(dbaseID);
 }
 
-/** Default Destructor*/
-EMInsituDatabaseEntry::~EMInsituDatabaseEntry()
-= default;
-
 /** Fill this EMInsituDatabaseEntry from given APEfficiencyMatrix*/
 bool EMInsituDatabaseEntry::setMatrix(const EMClusterErrorsMatrix &apClusterErrorsMatrix)
 {

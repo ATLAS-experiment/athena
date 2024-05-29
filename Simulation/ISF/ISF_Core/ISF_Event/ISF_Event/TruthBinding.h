@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// TruthBinding.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 #ifndef ISF_EVENT_TRUTHBINDING_H
 #define ISF_EVENT_TRUTHBINDING_H
@@ -51,18 +47,21 @@ namespace ISF {
     inline void                setTruthParticle(HepMC::GenParticlePtr p);
 
     /** pointer to the primary particle in the simulation truth */
-    inline HepMC::GenParticlePtr getPrimaryTruthParticle();
-    inline HepMC::ConstGenParticlePtr getPrimaryTruthParticle() const;
+    inline HepMC::GenParticlePtr getPrimaryGenParticle();
+    inline HepMC::ConstGenParticlePtr getPrimaryGenParticle() const;
 
     /** pointer to the simulation truth particle before any regeneration happened (eg. brem) */
-    inline HepMC::GenParticlePtr getGenerationZeroTruthParticle();
-    inline HepMC::ConstGenParticlePtr getGenerationZeroTruthParticle() const;
-    inline void                setGenerationZeroTruthParticle(HepMC::GenParticlePtr p);
+    inline HepMC::GenParticlePtr getGenerationZeroGenParticle();
+    inline HepMC::ConstGenParticlePtr getGenerationZeroGenParticle() const;
+    inline void                setGenerationZeroGenParticle(HepMC::GenParticlePtr p);
+
+    /** Create a TruthBinding for a child particle */
+    inline TruthBinding* childTruthBinding(HepMC::GenParticlePtr childP);
 
   private:
     HepMC::GenParticlePtr   m_truthParticle{};               //!< pointer to particle in MC truth
-    HepMC::GenParticlePtr   m_primaryTruthParticle{};        //!< pointer to corresponding primary (generator) particle
-    HepMC::GenParticlePtr   m_generationZeroTruthParticle{}; //!< pointer to corresponding truth particle before any regenration
+    HepMC::GenParticlePtr   m_primaryGenParticle{};        //!< pointer to corresponding primary (generator) particle
+    HepMC::GenParticlePtr   m_generationZeroGenParticle{}; //!< pointer to corresponding truth particle before any regenration
   };
 
 } // end of namespace

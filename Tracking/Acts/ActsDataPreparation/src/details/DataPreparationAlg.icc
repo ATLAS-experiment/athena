@@ -26,6 +26,8 @@ namespace ActsTrk {
     ATH_CHECK(m_detEleCollKey.initialize(not useCache));
     // Collections needed if we use the cache
     ATH_CHECK(m_inputIdentifiableContainer.initialize(useCache));
+    // Prd Map from previous tracking pass
+    ATH_CHECK(m_inputPrdMap.initialize(not m_inputPrdMap.empty()));
     
     // Tools
     ATH_CHECK(m_monTool.retrieve(EnableTool{not m_monTool.empty()}));
@@ -76,6 +78,15 @@ namespace ActsTrk {
       return StatusCode::SUCCESS;
     }
 
+    const ActsTrk::PrepRawDataAssociation *inputPrdMap = nullptr;
+    if (not m_inputPrdMap.empty()) {
+      ATH_MSG_DEBUG("Retrieving Prd map from previous Acts Tracking Pass with key: " << m_inputPrdMap.key());
+      SG::ReadHandle< ActsTrk::PrepRawDataAssociation > inputPrdMapHandle = SG::makeHandle( m_inputPrdMap, ctx );
+      ATH_CHECK( inputPrdMapHandle.isValid() );
+      inputPrdMap = inputPrdMapHandle.cptr();
+      ATH_MSG_DEBUG("   \\__ Number of already used measurement from previous passes: " << inputPrdMap->size());
+    }
+    
     ATH_MSG_DEBUG("Retrieving SiDetectorElementCollection with key `" << m_detEleCollKey.key() << "`");
     SG::ReadCondHandle< InDetDD::SiDetectorElementCollection > detEleHandle = SG::makeHandle( m_detEleCollKey, ctx );
     ATH_CHECK(detEleHandle.isValid());    
@@ -93,7 +104,8 @@ namespace ActsTrk {
     // Get the list of id hashes from the RoI
     std::set<IdentifierHash> hashes;
     ATH_CHECK( fetchIdHashes( ctx, hashes ) );
-    
+
+    int nRejected = 0;
     // Run on all the id hashes that overlap with the RoI
     for (const IdentifierHash id : hashes) {      
       // If the requested idHash is not present move to the next one
@@ -101,16 +113,30 @@ namespace ActsTrk {
       if (not accessor.isIdentifierPresent(id)) {
 	continue;
       }
-      
+
       // Get the objects and add them to the output collection
       const auto& ranges = accessor.rangesForIdentifierDirect(id);
       for (auto [firstElement, lastElement] : ranges) {
 	for (; firstElement != lastElement; ++firstElement) {
+	  // Check Prd Map
+	  if constexpr (not std::is_same<object_t, xAOD::SpacePoint >::value) {
+	    if ( inputPrdMap and inputPrdMap->isUsed((*firstElement)->identifier()) ) {
+	      ++nRejected;
+	      continue;
+	    }
+	  } else {
+	    if ( inputPrdMap and inputPrdMap->isUsed((*firstElement)->measurements()[0]->identifier()) ) {
+              ++nRejected;
+	      continue;
+	    }
+	  }
 	  outputCollection.push_back(*firstElement);
 	}
       }
     }
-
+    
+    ATH_MSG_VERBOSE("Rejected: " << nRejected);
+    
     return StatusCode::SUCCESS;
   }
 
@@ -125,10 +151,20 @@ namespace ActsTrk {
     ATH_MSG_DEBUG("Retrieving Identifiable Container with key `" << m_inputIdentifiableContainer.key() << "`");
     cache_read_handle_t cacheHandle = SG::makeHandle( m_inputIdentifiableContainer, ctx );
     ATH_CHECK( cacheHandle.isValid() );
+
+    const ActsTrk::PrepRawDataAssociation *inputPrdMap = nullptr;
+    if (not m_inputPrdMap.empty()) {
+      ATH_MSG_DEBUG("Retrieving Prd map from previous Acts Tracking Pass with key: " << m_inputPrdMap.key());
+      SG::ReadHandle< ActsTrk::PrepRawDataAssociation > inputPrdMapHandle = SG::makeHandle( m_inputPrdMap, ctx );
+      ATH_CHECK( inputPrdMapHandle.isValid() );
+      inputPrdMap = inputPrdMapHandle.cptr();
+      ATH_MSG_DEBUG("   \\__ Number of already used measurement from previous passes: " << inputPrdMap->size());
+    }
     
     std::set<IdentifierHash> hashes;
     ATH_CHECK( fetchIdHashes( ctx, hashes ) );
-    
+
+    int nRejected = 0;
     for(auto idHash: hashes) {
       //this function will wait if an item is not available
       auto ce = cacheHandle->indexFindPtr(idHash);
@@ -136,10 +172,26 @@ namespace ActsTrk {
 
       for(auto rng: ce->ranges){
         for(unsigned int i = rng.first; i < rng.second; i++){
+
+	  // Check the measurement has not been used previously
+	  if constexpr (not std::is_same<object_t, xAOD::SpacePoint >::value) {
+            if ( inputPrdMap and inputPrdMap->isUsed(ce->container->at(i)->identifier()) ) {
+              ++nRejected;
+              continue;
+            }
+          } else {
+            if ( inputPrdMap and inputPrdMap->isUsed(ce->container->at(i)->measurements()[0]->identifier()) ) {
+              ++nRejected;
+              continue;
+            }
+          }
+	  
           outputCollection.push_back(ce->container->at(i));
         }
       }
     }
+    
+    ATH_MSG_VERBOSE("Rejected: " << nRejected);
     
     return StatusCode::SUCCESS;
   }

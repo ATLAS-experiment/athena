@@ -20,8 +20,8 @@
                 "python.linting.flake8Enabled": true,
                 "python.linting.flake8Args": [
                     "--isolated",
-                    "--select=ATL,F,E101,E7,E9,W6",
-                    "--ignore=E701,E702,E704,E741",
+                    "--select=ATL,B,F,E101,E7,E9,W6",
+                    "--ignore=B006,B007,B019,E701,E702,E704,E741",
                     "--enable-extensions=ATL902"
                 ]
             },

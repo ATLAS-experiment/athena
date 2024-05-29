@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file MuonEventTPCnv/test/make_dd.icc
@@ -62,7 +62,8 @@ class MuonChamber
 {
 public:
   MuonChamber (MuonGM::MuonDetectorManager& muo_dd,
-               GeoFullPhysVol& pvol);
+               GeoFullPhysVol& pvol1,
+               GeoFullPhysVol& pvol4);
   void makeCsc (const Identifier& id);
   void makeRpc (const Identifier& id);
   void makeTgc (const Identifier& id);
@@ -71,20 +72,23 @@ public:
   void makeMm  (const Identifier& id);
 
   MuonGM::MuonDetectorManager& m_muo_dd;
-  GeoFullPhysVol& m_pvol;
+  GeoFullPhysVol& m_pvol1;
+  GeoFullPhysVol& m_pvol4;
 };
 
 MuonChamber::MuonChamber (MuonGM::MuonDetectorManager& muo_dd,
-                          GeoFullPhysVol& pvol)
+                          GeoFullPhysVol& pvol1,
+                          GeoFullPhysVol& pvol4)
   : m_muo_dd (muo_dd),
-    m_pvol (pvol)
+    m_pvol1 (pvol1),
+    m_pvol4 (pvol4)
 {
 }
 
 void MuonChamber::makeCsc (const Identifier& id)
 {
   auto elt = std::make_unique<MuonGM::CscReadoutElement>
-    (&m_pvol, "CSS", &m_muo_dd);
+    (&m_pvol1, "CSS", &m_muo_dd);
   elt->setIdentifier (id);
   elt->m_ngasgaps = 2;
   elt->fillCache();
@@ -94,7 +98,7 @@ void MuonChamber::makeCsc (const Identifier& id)
 
 void MuonChamber::makeRpc (const Identifier& id)
 {
-  auto elt = std::make_unique<MuonGM::RpcReadoutElement>(&m_pvol, "BIL", 1, 2, false, &m_muo_dd);
+  auto elt = std::make_unique<MuonGM::RpcReadoutElement>(&m_pvol1, "BIL", 1, 2, false, &m_muo_dd);
   elt->setIdentifier (id);
   elt->m_nphistrippanels = 1;
   elt->fillCache();
@@ -105,7 +109,7 @@ void MuonChamber::makeRpc (const Identifier& id)
 void MuonChamber::makeTgc (const Identifier& id)
 {
   auto elt = std::make_unique<MuonGM::TgcReadoutElement>
-    (&m_pvol, "T2F", &m_muo_dd);
+    (&m_pvol1, "T2F", &m_muo_dd);
   elt->setIdentifier (id);
   elt->m_ngasgaps = 2;
   elt->fillCache();
@@ -116,7 +120,7 @@ void MuonChamber::makeTgc (const Identifier& id)
 void MuonChamber::makeMdt (const Identifier& id)
 {
   auto elt = std::make_unique<MuonGM::MdtReadoutElement>
-    (&m_pvol, "BIL", &m_muo_dd);
+    (&m_pvol1, "BIL", &m_muo_dd);
   elt->setIdentifier (id);
   //elt->m_ngasgaps = 2;
   elt->fillCache();
@@ -126,8 +130,8 @@ void MuonChamber::makeMdt (const Identifier& id)
 
 void MuonChamber::makesTgc (const Identifier& id)
 {
-  auto elt = std::make_unique<MuonGM::sTgcReadoutElement>(&m_pvol, "STS", 1, 2, 1, &m_muo_dd);
-  elt->initDesign (0, 0, 0, 0, 0, 0, 0, 1);
+  auto elt = std::make_unique<MuonGM::sTgcReadoutElement>(&m_pvol4, "STS", 1, 2, 1, &m_muo_dd);
+  elt->initDesign (1);
   elt->setIdentifier (id);
   
   //elt->m_ngasgaps = 2;
@@ -139,7 +143,7 @@ void MuonChamber::makesTgc (const Identifier& id)
 void MuonChamber::makeMm (const Identifier& id)
 {
   auto elt = std::make_unique<MuonGM::MMReadoutElement>
-    (&m_pvol, "MMS", 1, 2, 1, &m_muo_dd, nullptr);
+    (&m_pvol1, "MMS", 1, 2, 1, &m_muo_dd, nullptr);
   elt->initDesign ();
   elt->setIdentifier (id);
   
@@ -173,12 +177,13 @@ Deleter deleter;
 
 
 void init_dd (MuonGM::MuonDetectorManager& muo_dd,
-              GeoFullPhysVol& pvol)
+              GeoFullPhysVol& pvol1,
+              GeoFullPhysVol& pvol4)
 {
   ServiceHandle<StoreGateSvc> sg ("DetectorStore", "test");
   assert (sg.retrieve().isSuccess());
 
-  MuonGM::MuonChamber chamber (muo_dd, pvol);
+  MuonGM::MuonChamber chamber (muo_dd, pvol1, pvol4);
 
   const CscIdHelper* csc_id = nullptr;
   assert ( sg->retrieve (csc_id, "CscIdHelper").isSuccess() );
@@ -218,7 +223,8 @@ void init_dd (MuonGM::MuonDetectorManager& muo_dd,
 }
 
 
-MuonGM::MuonDetectorManager&  init_cs (GeoFullPhysVol& pvol)
+MuonGM::MuonDetectorManager&  init_cs (GeoFullPhysVol& pvol1,
+                                       GeoFullPhysVol& pvol4)
 {
   EventContext ctx (1);
   ctx.setEventID (EventIDBase (1000, 1000,
@@ -239,7 +245,7 @@ MuonGM::MuonDetectorManager&  init_cs (GeoFullPhysVol& pvol)
                                                                      id);
 
   auto muo_dd = std::make_unique<MuonGM::MuonDetectorManager>();
-  init_dd (*muo_dd, pvol);
+  init_dd (*muo_dd, pvol1, pvol4);
   MuonGM::MuonDetectorManager& ret = *muo_dd.get();
 
   EventIDRange range (EventIDBase (0, 0,
@@ -259,6 +265,27 @@ MuonGM::MuonDetectorManager&  init_cs (GeoFullPhysVol& pvol)
 }
 
 
+GeoFullPhysVol* make_dummy_pvol ATLAS_NOT_THREAD_SAFE (size_t nlayer,
+                                                       GeoBox* box,
+                                                       GeoMaterial* mat)
+{
+  GeoLogVol* lvol = new GeoLogVol ("dummy", box, mat);
+  GeoFullPhysVol* pvol = new GeoFullPhysVol (lvol);
+  deleter.add (pvol);
+
+  for (size_t i = 0; i < nlayer; i++) {
+    GeoTrd* trd = new GeoTrd (5+i, 10+i, 7+i, 8+i, 6+i);
+    GeoLogVol* lvol2 = new GeoLogVol ("SensitiveDummy" + std::to_string(i+2),
+                                      trd, mat);
+    GeoFullPhysVol* pvol2 = new GeoFullPhysVol (lvol2);
+    pvol->add (pvol2);
+    deleter.add (pvol2);
+  }
+
+  return pvol;
+}
+
+
 const MuonGM::MuonDetectorManager& make_dd ATLAS_NOT_THREAD_SAFE ()
 {
   ISvcLocator* svcLoc = Gaudi::svcLocator();
@@ -267,15 +294,9 @@ const MuonGM::MuonDetectorManager& make_dd ATLAS_NOT_THREAD_SAFE ()
 
   GeoBox* box = new GeoBox (20, 10, 5);
   GeoMaterial* mat = new GeoMaterial ("dummy", 1);
-  GeoLogVol* lvol = new GeoLogVol ("dummy", box, mat);
-  GeoFullPhysVol* pvol = new GeoFullPhysVol (lvol);
-  deleter.add (pvol);
 
-  GeoTrd* trd = new GeoTrd (5, 10, 7, 8, 6);
-  GeoLogVol* lvol2 = new GeoLogVol ("SensitiveDummy2", trd, mat);
-  GeoFullPhysVol* pvol2 = new GeoFullPhysVol (lvol2);
-  pvol->add (pvol2);
-  deleter.add (pvol2);
+  GeoFullPhysVol* pvol1 = make_dummy_pvol (1, box, mat);
+  GeoFullPhysVol* pvol4 = make_dummy_pvol (4, box, mat);
 
   IAGDDtoGeoSvc* agddsvc = nullptr;
   assert ( svcLoc->service("AGDDtoGeoSvc", agddsvc).isSuccess() );
@@ -416,7 +437,7 @@ const MuonGM::MuonDetectorManager& make_dd ATLAS_NOT_THREAD_SAFE ()
   auto id_mgr = std::make_unique<IdDictManager>(idd);
   assert ( sg->record (std::move (id_mgr), "IdDict") );
 
-  MuonGM::MuonDetectorManager& ret = init_cs (*pvol);
+  MuonGM::MuonDetectorManager& ret = init_cs (*pvol1, *pvol4);
   // Some components still expect to get this through DetectorStore.
   // Has to be the same instance, or the detelement comparisons will fail.
   assert ( sg->record (&ret, "MuonDetectorManager") );

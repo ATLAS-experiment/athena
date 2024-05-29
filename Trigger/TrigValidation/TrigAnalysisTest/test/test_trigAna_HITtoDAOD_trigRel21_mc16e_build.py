@@ -22,13 +22,13 @@ hit2rdo.args += ' --postInclude "default:PyJobTransforms.UseFrontier"'
 hit2rdo.args += ' --conditionsTag="all:OFLCOND-MC16-SDR-RUN2-11"'
 hit2rdo.args += ' --steering "doOverlay"'
 hit2rdo.args += ' --autoConfiguration="everything"'
-hit2rdo.args += ' --CA "all:True"'
 
 # RDO -> RDO_TRIG step in 21.0
 rdo2rdotrig = ExecStep.ExecStep('RDOtoRDOTrigger')
 rdo2rdotrig.type = 'Reco_tf'
 rdo2rdotrig.input = ''
 rdo2rdotrig.imf = False
+rdo2rdotrig.fpe_auditor = False  # cannot be configured via flags in release 21
 rdo2rdotrig.explicit_input = True
 rdo2rdotrig.args = '--inputRDOFile=RDO.pool.root'
 rdo2rdotrig.args += ' --outputRDO_TRIGFile=RDO_TRIG.pool.root'
@@ -61,7 +61,6 @@ aod2daod.explicit_input = True
 aod2daod.args = '--inputAODFile=AOD.pool.root'
 aod2daod.args += ' --outputDAODFile=DAOD.pool.root'
 aod2daod.args += ' --formats=PHYS'
-aod2daod.args += ' --CA'
 aod2daod.args += ' --sharedWriter=True --athenaMPMergeTargetSize "DAOD_*:0"'
 aod2daod.args += ' --asetup="all:Athena,main,latest"'
 

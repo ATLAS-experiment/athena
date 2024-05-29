@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -16,6 +16,7 @@
 #include "ZdcConditions/ZdcLucrodMapRun3.h"
 #include "ZdcRec/ZdcRecChannelToolLucrod.h"
 #include "ZdcIdentifier/ZdcID.h"
+#include "AthContainers/Accessor.h"
 
 // This will normally be one for HI running, but not for the LHCf run
 #define LUCROD_TRIG_ID 1
@@ -148,10 +149,14 @@ int ZdcRecChannelToolLucrod::convertLucrod2ZM(const ZdcLucrodDataContainer* lucr
 	      if (type == 1) {
 		//  Save the (nominal) positions of the sector relative to the RPD center
 		//
-		(*iter).second->auxdata<float_t>("xposRel") = xpos;
-		(*iter).second->auxdata<float_t>("yposRel") = ypos;
-		(*iter).second->auxdata<uint16_t>("row") = row;
-		(*iter).second->auxdata<uint16_t>("col") = col;
+                static const SG::Accessor<float_t> xposRelAcc ("xposRel");
+                static const SG::Accessor<float_t> yposRelAcc ("yposRel");
+                static const SG::Accessor<uint16_t> rowAcc ("row");
+                static const SG::Accessor<uint16_t> colAcc ("col");
+		xposRelAcc (*iter->second) = xpos;
+		yposRelAcc (*iter->second) = ypos;
+		rowAcc (*iter->second) = row;
+		colAcc (*iter->second) = col;
 	      }
 	    }
 	  
@@ -171,7 +176,8 @@ int ZdcRecChannelToolLucrod::convertLucrod2ZM(const ZdcLucrodDataContainer* lucr
 
 	      if (lucrod_id==LUCROD_TRIG_ID) 
 		{
-		  (*iter).second->auxdata<uint16_t>("LucrodTriggerAmp") = zlt.at(i);
+                  static const SG::Accessor<uint16_t> LucrodTriggerAmpAcc ("LucrodTriggerAmp");
+		  LucrodTriggerAmpAcc (*iter->second) = zlt.at(i);
 		}
 	    }      
 	  
@@ -184,7 +190,8 @@ int ZdcRecChannelToolLucrod::convertLucrod2ZM(const ZdcLucrodDataContainer* lucr
 	      xAOD::ZdcModule* new_sum = new xAOD::ZdcModule();
 	      zdcSums->push_back(xAOD::ZdcModuleContainer::unique_type(new_sum));
 	      new_sum->setZdcSide((iside==0) ? -1 : 1);
-	      new_sum->auxdata<uint16_t>("LucrodTriggerSideAmp") = (iside==0) ? zld->GetTrigAvgC() : zld->GetTrigAvgA();
+              static const SG::Accessor<uint16_t> LucrodTriggerSideAmpAcc ("LucrodTriggerSideAmp");
+	      LucrodTriggerSideAmpAcc (*new_sum) = (iside==0) ? zld->GetTrigAvgC() : zld->GetTrigAvgA();
 	    }
 	}
     }
@@ -192,7 +199,8 @@ int ZdcRecChannelToolLucrod::convertLucrod2ZM(const ZdcLucrodDataContainer* lucr
   xAOD::ZdcModule* global_sum = new xAOD::ZdcModule();
   zdcSums->push_back(xAOD::ZdcModuleContainer::unique_type(global_sum));
   global_sum->setZdcSide(0); // special "global" sum
-  global_sum->auxdata<std::vector<uint16_t>>("rodBCID") = rodBCID;
+  static const SG::Accessor<std::vector<uint16_t> > rodBCIDAcc ("rodBCID");
+  rodBCIDAcc (*global_sum) = std::move (rodBCID);
 
   ATH_MSG_DEBUG("Done trying to convert!!");
   

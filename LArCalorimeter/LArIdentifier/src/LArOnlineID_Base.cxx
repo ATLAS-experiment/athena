@@ -1660,11 +1660,6 @@ bool LArOnlineID_Base::isFCALchannel(const HWIdentifier id) const
   return ( barrel_ec(id)==1 && feedthrough(id) == 6  );
 }
 
-bool LArOnlineID_Base::isEMECchannel(const HWIdentifier id) const
-/*========================================================*/
-{/* redefinition with isEMECIW and isEMECOW */
-  return (isEMECOW(id) || isEMECIW(id));
-}
 
 
 bool LArOnlineID_Base::isEMBPS(const HWIdentifier id) const

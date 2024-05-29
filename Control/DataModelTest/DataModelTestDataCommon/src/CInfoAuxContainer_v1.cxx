@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file DataModelTestDataCommon/src/CInfoAuxContainer_v1.xcx
  * @author scott snyder <snyder@bnl.gov>
@@ -20,8 +18,6 @@ namespace DMTest {
 CInfoAuxContainer_v1::CInfoAuxContainer_v1()
   : xAOD::AuxInfoBase()
 {
-  AUX_VARIABLE (anInt);
-  AUX_VARIABLE (aFloat);
 }
 
 

@@ -15,21 +15,21 @@ StatusCode RecoElectronHistograms::initializePlots() {
 
   ATH_CHECK(ParticleHistograms::initializePlots());
 
+  const char* fN = m_name.c_str();
+
   if (!m_isData) {
-    histoMap["truthType"] = new TH1D(Form("%s_%s",m_name.c_str(),"truthType"),";truth type; Events",41,-1,40);
-    histoMap["truthOrigin"] = new TH1D(Form("%s_%s",m_name.c_str(),"truthOrigin"),";truth origin; Events",51,-1,50);
-    ATH_CHECK(m_rootHistSvc->regHist(m_folder+"truthType", histoMap["truthType"]));
+    histoMap["truthType"]   = new TH1D(Form("%s_truthType",fN),   ";truth type; Events",  41,-1,40);
+    histoMap["truthOrigin"] = new TH1D(Form("%s_truthOrigin",fN), ";truth origin; Events",51,-1,50);
+    ATH_CHECK(m_rootHistSvc->regHist(m_folder+"truthType",   histoMap["truthType"]));
     ATH_CHECK(m_rootHistSvc->regHist(m_folder+"truthOrigin", histoMap["truthOrigin"]));
   }
 
-  histo2DMap["eta_nTracks"] =
-    new TH2D(Form("%s_%s",m_name.c_str(),"eta_nTracks"),
-	     ";#eta;n_{trk}; Events", 60, -4.5, 4.5, 10, 0,10);
+  histo2DMap["eta_nTracks"] = new TH2D(Form("%s_eta_nTracks",fN),
+      ";#eta;n_{trk}; Events", 90, -4.5, 4.5, 10, 0,10);
   ATH_CHECK(m_rootHistSvc->regHist(m_folder+"eta_nTracks", histo2DMap["eta_nTracks"]));
 
-  histo3DMap["eteta_eop"] =
-    new TH3D(Form("%s_%s",m_name.c_str(),"eteta_eop"),
-	     ";E_{T};#eta;E/p; Events", 20, 0, 200, 25, 0, 2.5, 250, 0.5,3.);
+  histo3DMap["eteta_eop"] = new TH3D(Form("%s_eteta_eop",fN),
+      ";E_{T} [GeV];#eta;E/p; Events", 20, 0, 200, 25, 0, 2.5, 250, 0.5,3.);
   ATH_CHECK(m_rootHistSvc->regHist(m_folder+"eteta_eop", histo3DMap["eteta_eop"]));
 
   return StatusCode::SUCCESS;

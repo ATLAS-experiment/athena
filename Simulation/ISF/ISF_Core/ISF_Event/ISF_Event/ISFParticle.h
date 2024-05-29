@@ -8,7 +8,7 @@
 // Gaudi Kernel
 #include "GaudiKernel/MsgStream.h"
 // Barcode includes
-#include "BarcodeEvent/Barcode.h"
+#include "TruthUtils/MagicNumbers.h"
 // ISF include
 #include "ISF_Event/TruthBinding.h"
 #include "ISF_Event/SimSvcID.h"
@@ -55,7 +55,7 @@ namespace ISF {
                 double time,
                 const ISFParticle &parent,
                 int id,
-                Barcode::ParticleBarcode barcode = Barcode::fUndefinedBarcode,
+                int barcode = HepMC::UNDEFINED_ID,
                 TruthBinding* truth = nullptr,
                 const HepMcParticleLink * partLink = nullptr );
 
@@ -69,7 +69,7 @@ namespace ISF {
                 double time,
                 const ISFParticle &parent,
                 int id,
-                Barcode::ParticleBarcode barcode = Barcode::fUndefinedBarcode,
+                int barcode = HepMC::UNDEFINED_ID,
                 TruthBinding* truth = nullptr,
                 const HepMcParticleLink * partLink = nullptr );
 
@@ -83,7 +83,7 @@ namespace ISF {
                 double time,
                 const DetRegionSvcIDPair &origin,
                 int id,
-                Barcode::ParticleBarcode barcode = Barcode::fUndefinedBarcode,
+                int barcode = HepMC::UNDEFINED_ID,
                 TruthBinding* truth = nullptr,
                 const HepMcParticleLink * partLink = nullptr );
 
@@ -154,11 +154,9 @@ namespace ISF {
     void                        setNextSimID(SimSvcID simID);
 
     /** the barcode */
-    Barcode::ParticleBarcode barcode() const; // FIXME barcode-based
+    int barcode() const; // FIXME barcode-based
     /** set a new barcode */
-    void setBarcode(Barcode::ParticleBarcode bc); // FIXME barcode-based
-    /** set a new barcode and update the HepMcParticleLink  */
-    void setBarcodeAndUpdateHepMcParticleLink(Barcode::ParticleBarcode bc); // FIXME barcode-based TODO Update this method to use the unique ID rather than the barcode.
+    void setBarcode(int bc); // FIXME barcode-based
 
     /** unique ID */
     int id() const;
@@ -199,7 +197,7 @@ namespace ISF {
     int                          m_status;
     double                       m_tstamp;
     ParticleHistory              m_history;
-    Barcode::ParticleBarcode     m_barcode; //!< barcode TODO remove in favour of m_status + m_uid
+    int     m_barcode; //!< barcode TODO remove in favour of m_status + m_uid
     int m_uid; //! < unique ID
     TruthBinding*                m_truth;
     ParticleOrder                m_order;                 //!< particle simulation order

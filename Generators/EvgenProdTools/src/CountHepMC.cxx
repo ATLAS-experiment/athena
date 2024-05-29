@@ -75,8 +75,8 @@ StatusCode CountHepMC::execute() {
 #else
 // Temporary solution to suppress the Warnings from HepMC3 printed for every event. 
 // Will be removed when generators authors fix the way they fill the x-section or when we switch to a new HepMC3 version , where the printout is limited.
-   if (newnum == 100) {
-      ATH_MSG_INFO("After " << newnum << " events we switch off HepMC3 warings to avoid blowing up logs.");
+   if (m_nPass == 100) {
+      ATH_MSG_INFO("After " << m_nPass << " events we switch off HepMC3 warnings to avoid blowing up logs.");
       HepMC3::Setup::set_print_warnings(false);
       }
 #endif

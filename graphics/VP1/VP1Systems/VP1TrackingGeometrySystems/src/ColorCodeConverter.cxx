@@ -261,7 +261,7 @@ ColorCodeConverter::~ColorCodeConverter()
 SoMaterial*
 ColorCodeConverter::lookup( unsigned int colorCode)
 {
-  SoMaterial* ret = 0;
+  SoMaterial* ret = nullptr;
   //sroe: coverity 16515, original was "if (colorCode > s_colorConversionTableSize)"
   //which still allows colorCode = 200, which is out-of-bounds.
   if( colorCode >= s_colorConversionTableSize)

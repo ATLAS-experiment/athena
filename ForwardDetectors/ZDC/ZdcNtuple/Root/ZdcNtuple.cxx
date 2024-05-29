@@ -16,10 +16,6 @@
 
 ZdcNtuple :: ZdcNtuple (const std::string& name, ISvcLocator *pSvcLocator)
   : EL::AnaAlgorithm(name, pSvcLocator),
-    //m_trigConfigTool("TrigConf::xAODConfigTool/xAODConfigTool", this),
-    //    m_trigMatchingTool("Trig::MatchingTool/TrigMatchingTool", this),
-    // disabling these
-    m_trigDecisionTool ("Trig::TrigDecisionTool/TrigDecisionTool"),
     m_grl ("GoodRunsListSelectionTool/grl", this),
     //m_zdcAnalysisTool("ZDC::ZdcAnalysisTool/ZdcAnalysisTool", this),
     m_selTool( "InDet::InDetTrackSelectionTool/TrackSelectionTool", this )
@@ -219,7 +215,7 @@ StatusCode ZdcNtuple :: initialize ()
     }
     if (enableCentroid)
     {
-      m_outputTree->Branch("zdc_centroidEventValid", &t_centroidEventValid, "zdc_centroidEventValid/b");
+      m_outputTree->Branch("zdc_centroidEventValid", &t_centroidEventValid, "zdc_centroidEventValid/B");
       m_outputTree->Branch("zdc_centroidStatus", &t_centroidStatus, "zdc_centroidStatus[2]/i");
       m_outputTree->Branch("zdc_RPDChannelSubtrAmp", &t_RPDChannelSubtrAmp, "zdc_RPDChannelSubtrAmp[2][16]/F");
       m_outputTree->Branch("zdc_RPDSubtrAmpSum", &t_RPDSubtrAmpSum, "zdc_RPDSubtrAmpSum[2]/F");
@@ -432,7 +428,7 @@ StatusCode ZdcNtuple :: initialize ()
   if (enableTrigger) // HLT related
   {
     ANA_MSG_INFO("Trying to initialize TDT");
-    ANA_CHECK(m_trigDecisionTool.initialize());
+    ANA_CHECK(m_trigDecisionTool.retrieve());
   }
 
   // ZDC re-reco tool
@@ -710,7 +706,7 @@ void ZdcNtuple::processZdcNtupleFromModules()
     {
       if (zdcSum->zdcSide()==0) {
         // new global sum
-        t_centroidEventValid = zdcSum->auxdataConst<bool>("centroidEventValid" + auxSuffix);
+        t_centroidEventValid = zdcSum->auxdataConst<char>("centroidEventValid" + auxSuffix);
         t_cosDeltaReactionPlaneAngle = zdcSum->auxdataConst<float>("cosDeltaReactionPlaneAngle" + auxSuffix);
         continue;
       }

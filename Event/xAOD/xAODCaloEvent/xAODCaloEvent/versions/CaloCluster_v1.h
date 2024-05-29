@@ -1,6 +1,6 @@
 // -*- c++ -*-
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAODCALOEVENT_VERSIONS_CALOCLUSTER_V1_H
 #define XAODCALOEVENT_VERSIONS_CALOCLUSTER_V1_H
@@ -13,6 +13,7 @@ extern "C" {
 #include <memory>
 #include <vector>
 #include <limits>
+#include <bit>
 
 #include <cmath>
 
@@ -873,17 +874,16 @@ namespace xAOD {
     if (s == 0) {
       return 0;
     } // shifting a 32-bit int by 32 bits is undefined behavior!
-    return __builtin_popcount(pattern << (32 - s));
+    return std::popcount(pattern << (32 - s));
     // Explanation: Need to get the number of bit (=samples) before the sampling in question
     // Shift to the left, so bits after the sampling in question fall off the 32bit integer
-    // Then use gcc builtin popcount to count the numbers of 1 in the rest
-    // AFAIK, this builtin is available for gcc, icc and clang (as well on ARM)
+    // Then use  popcount to count the numbers of 1 in the rest
   }
 
 
   inline unsigned CaloCluster_v1::nSamples() const {
     const uint32_t pattern=samplingPattern();
-    return  __builtin_popcount(pattern);
+    return  std::popcount(pattern);
   }
 
 

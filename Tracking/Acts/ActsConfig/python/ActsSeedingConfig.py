@@ -16,7 +16,6 @@ def ActsPixelSeedingToolCfg(flags,
     kwargs.setdefault("numSeedIncrement" , float("inf"))
     kwargs.setdefault("deltaZMax" , float("inf"))
     kwargs.setdefault("maxPtScattering", float("inf"))
-
     acc.setPrivateTools(CompFactory.ActsTrk.SeedingTool(name, **kwargs))
     return acc
 
@@ -335,7 +334,7 @@ def ActsSeedingCfg(flags) -> ComponentAccumulator:
     processStrips = flags.Detector.EnableITkStrip
 
     # For conversion pass we do not process pixels
-    if flags.Tracking.ActiveConfig.extension == "ActsConversion":
+    if flags.Tracking.ActiveConfig.extension in ["ActsConversion", "ActsLargeRadius"]:
         processPixels = False
     # For main pass disable strips if fast tracking configuration
     elif flags.Tracking.doITkFastTracking:
@@ -345,17 +344,20 @@ def ActsSeedingCfg(flags) -> ComponentAccumulator:
     kwargs.setdefault('processPixels', processPixels)
     kwargs.setdefault('processStrips', processStrips)
     
+    if flags.Tracking.ActiveConfig.extension == "ActsHeavyIon" and processPixels:
+        kwargs.setdefault('PixelSeedingAlg.SeedTool', acc.popToolsAndMerge(ActsPixelSeedingToolCfg(flags, name=f'{flags.Tracking.ActiveConfig.extension}PixelSeedingTool', minPt=flags.Tracking.ActiveConfig.minPTSeed)))
+
     if processPixels:
         # Seeding algo
         kwargs.setdefault('PixelSeedingAlg.name', f'{flags.Tracking.ActiveConfig.extension}PixelSeedingAlg')
         kwargs.setdefault('PixelSeedingAlg.useFastTracking', flags.Tracking.doITkFastTracking)    
         kwargs.setdefault('PixelSeedingAlg.OutputSeeds', f'{flags.Tracking.ActiveConfig.extension}PixelSeeds')
         kwargs.setdefault('PixelSeedingAlg.OutputEstimatedTrackParameters', f'{flags.Tracking.ActiveConfig.extension}PixelEstimatedTrackParams')
-        # Space Point naming is not yet fully connected to tracking passes - this will change
-        if flags.Tracking.ActiveConfig.extension == "ActsConversion":
-            kwargs.setdefault('PixelSeedingAlg.InputSpacePoints', ['ITkConversionPixelSpacePoints_Cached'] if flags.Acts.useCache else ['ITkConversionPixelSpacePoints'])
-        else:
-            kwargs.setdefault('PixelSeedingAlg.InputSpacePoints', ['ITkPixelSpacePoints_Cached'] if flags.Acts.useCache else ['ITkPixelSpacePoints'])
+
+        pixelSpacePoints = ['ITkPixelSpacePoints_Cached'] if flags.Acts.useCache else ['ITkPixelSpacePoints']        
+        if flags.Tracking.ActiveConfig.isSecondaryPass:
+            pixelSpacePoints = [f'ITk{flags.Tracking.ActiveConfig.extension.replace("Acts", "")}PixelSpacePoints_Cached'] if flags.Acts.useCache else [f'ITk{flags.Tracking.ActiveConfig.extension.replace("Acts", "")}PixelSpacePoints']
+        kwargs.setdefault('PixelSeedingAlg.InputSpacePoints', pixelSpacePoints)
 
         # Analysis algo(s)
         if flags.Acts.doAnalysis:
@@ -376,6 +378,10 @@ def ActsSeedingCfg(flags) -> ComponentAccumulator:
         # Space Point naming is not yet fully connected to tracking passes - this will change
         if flags.Tracking.ActiveConfig.extension == 'ActsConversion':
             kwargs.setdefault('StripSeedingAlg.InputSpacePoints', ['ITkConversionStripSpacePoints_Cached'] if flags.Acts.useCache else ['ITkConversionStripSpacePoints'])
+        elif flags.Tracking.ActiveConfig.extension == 'ActsLargeRadius':
+            kwargs.setdefault('StripSeedingAlg.InputSpacePoints', ['ITkLargeRadiusStripSpacePoints_Cached',
+                                                                   'ITkLargeRadiusStripOverlapSpacePoints_Cached'] if flags.Acts.useCache else ['ITkLargeRadiusStripSpacePoints',
+                                                                                                                                                'ITkLargeRadiusStripOverlapSpacePoints'])
         else:
             kwargs.setdefault('StripSeedingAlg.InputSpacePoints', ['ITkStripSpacePoints_Cached',
                                                                    'ITkStripOverlapSpacePoints_Cached'] if flags.Acts.useCache else ['ITkStripSpacePoints',

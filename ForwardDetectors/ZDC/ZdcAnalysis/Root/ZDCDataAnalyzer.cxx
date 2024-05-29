@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <ZdcAnalysis/ZDCDataAnalyzer.h>
@@ -25,6 +25,12 @@ ZDCDataAnalyzer::ZDCDataAnalyzer(ZDCMsg::MessageFunctionPtr msgFunc_p, int nSamp
   m_haveECalib(false),
   m_haveT0Calib(false),
   m_currentLB(-1),
+
+  // Default "calibrations"
+  m_currentECalibCoeff ({{{{1, 1, 1, 1}}, {{1, 1, 1, 1}}}}),
+  m_currentT0OffsetsHG ({{{{0, 0, 0, 0}}, {{0, 0, 0, 0}}}}),
+  m_currentT0OffsetsLG ({{{{0, 0, 0, 0}}, {{0, 0, 0, 0}}}}),
+
   m_moduleMask(0),
   m_moduleSum({{0, 0}}),
   m_moduleSumErrSq({{0, 0}}),
@@ -60,12 +66,6 @@ ZDCDataAnalyzer::ZDCDataAnalyzer(ZDCMsg::MessageFunctionPtr msgFunc_p, int nSamp
   m_pedestals[0] = {{100, 100, 100, 100}};
   m_pedestals[1] = {{100, 100, 100, 100}};
 
-  // Default "calibrations"
-  //
-  m_currentECalibCoeff = {{{{1, 1, 1, 1}}, {{1, 1, 1, 1}}}};
-
-  m_currentT0OffsetsHG = {{{{0, 0, 0, 0}}, {{0, 0, 0, 0}}}};
-  m_currentT0OffsetsLG = {{{{0, 0, 0, 0}}, {{0, 0, 0, 0}}}};
 
   // Construct the per-module pulse analyzers
   //
@@ -74,7 +74,7 @@ ZDCDataAnalyzer::ZDCDataAnalyzer(ZDCMsg::MessageFunctionPtr msgFunc_p, int nSamp
       std::ostringstream moduleTag;
       moduleTag << "_s" << side << "_m" << module;
 
-      m_moduleAnalyzers[side][module].reset (new ZDCPulseAnalyzer(m_msgFunc_p, moduleTag.str().c_str(), m_nSample, m_deltaTSample, m_preSampleIdx,
+      m_moduleAnalyzers[side][module].reset (new ZDCPulseAnalyzer(m_msgFunc_p, moduleTag.str(), m_nSample, m_deltaTSample, m_preSampleIdx,
                                              m_pedestals[side][module], m_HGGains[side][module], m_fitFunction,
                                              peak2ndDerivMinSamples[side][module],
                                              peak2ndDerivMinThresholdsHG[side][module],
@@ -130,6 +130,43 @@ void ZDCDataAnalyzer::enableDelayed(const ZDCModuleFloatArray& delayDeltaTArray,
     }
   }
 }
+
+void ZDCDataAnalyzer::enablePreExclusion(unsigned int maxSamplesExcl, const ZDCModuleIntArray& HGADCThresh, const ZDCModuleIntArray& LGADCThresh)
+{
+  for (size_t side : {0, 1}) {
+    for (size_t module : {0, 1, 2, 3}) {
+      m_moduleAnalyzers[side][module]->enablePreExclusion(maxSamplesExcl, HGADCThresh[side][module], LGADCThresh[side][module]);
+    }
+  }
+}
+
+void ZDCDataAnalyzer::enablePreExclusion(unsigned int maxSamplesExcl, unsigned int HGADCThresh, unsigned int LGADCThresh)
+{
+  for (size_t side : {0, 1}) {
+    for (size_t module : {0, 1, 2, 3}) {
+      m_moduleAnalyzers[side][module]->enablePreExclusion(maxSamplesExcl, HGADCThresh, LGADCThresh);
+    }
+  }
+}
+
+void ZDCDataAnalyzer::enablePostExclusion(unsigned int maxSamplesExcl, const ZDCModuleIntArray& HGADCThresh, const ZDCModuleIntArray& LGADCThresh)
+{
+  for (size_t side : {0, 1}) {
+    for (size_t module : {0, 1, 2, 3}) {
+      m_moduleAnalyzers[side][module]->enablePostExclusion(maxSamplesExcl, HGADCThresh[side][module], LGADCThresh[side][module]);
+    }
+  }
+}
+
+void ZDCDataAnalyzer::enablePostExclusion(unsigned int maxSamplesExcl, unsigned int HGADCThresh, unsigned int LGADCThresh)
+{
+  for (size_t side : {0, 1}) {
+    for (size_t module : {0, 1, 2, 3}) {
+      m_moduleAnalyzers[side][module]->enablePostExclusion(maxSamplesExcl, HGADCThresh, LGADCThresh);
+    }
+  }
+}
+
 
 void ZDCDataAnalyzer::enableRepass(const ZDCModuleFloatArray& peak2ndDerivMinRepassHG, const ZDCModuleFloatArray& peak2ndDerivMinRepassLG)
 {
@@ -286,6 +323,17 @@ void ZDCDataAnalyzer::SetNonlinCorrParams(float refADC, float refScale,
       m_moduleAnalyzers[side][module]->SetNonlinCorrParams(refADC, refScale,
 							   HGNonlinCorrParams[side][module],
 							   LGNonlinCorrParams[side][module]);
+    }
+  }
+}
+
+void ZDCDataAnalyzer::enableTimeSigCut(bool AND, float sigCut, std::string TF1String,
+			const std::array<std::array<std::vector<double>, 4>, 2>& parsHGArr, 
+			const std::array<std::array<std::vector<double>, 4>, 2>& parsLGArr)
+{
+  for (size_t side : {0, 1}) {
+    for (size_t module : {0, 1, 2, 3}) {
+      m_moduleAnalyzers[side][module]->enableTimeSigCut(AND, sigCut, TF1String, parsHGArr[side][module], parsLGArr[side][module]);
     }
   }
 }
@@ -517,21 +565,22 @@ bool ZDCDataAnalyzer::FinishEvent()
 	sumCalibAmpTimesBkgdFrac += amplitude*bkgdFraction;
       }
 
-      if (m_moduleSum[side] > 0) m_moduleSumBkgdFrac[side] = sumAmpTimesBkgdFrac/m_moduleSum[side];
-      else m_moduleSumBkgdFrac[side] = 0;
-      
-      if (m_calibModuleSum[side] > 1e-6) {
-	m_averageTime[side] /= m_calibModuleSum[side];
-	m_calibModSumBkgdFrac[side] = sumCalibAmpTimesBkgdFrac/m_calibModuleSum[side];
-      }
-      else {
-	m_averageTime[side] = 0;
-	m_calibModSumBkgdFrac[side] = 0;
-      }
-      
       // subtract the fraction of LGOverflow events if we have fraction available (<0 means unavailable)
       if (pulseAna_p->LGOverflow() && m_moduleAmpFractionLG[side][module] > 0) {tempFraction -= m_moduleAmpFractionLG[side][module];}
     }
+    
+    if (m_moduleSum[side] > 0) m_moduleSumBkgdFrac[side] = sumAmpTimesBkgdFrac/m_moduleSum[side];
+    else m_moduleSumBkgdFrac[side] = 0;
+    
+    if (m_calibModuleSum[side] > 1e-6) {
+      m_averageTime[side] /= m_calibModuleSum[side];
+      m_calibModSumBkgdFrac[side] = sumCalibAmpTimesBkgdFrac/m_calibModuleSum[side];
+    }
+    else {
+      m_averageTime[side] = 0;
+      m_calibModSumBkgdFrac[side] = 0;
+    }
+    
     if (tempFraction < 1.0) {m_moduleSum[side] /= tempFraction;}
   }
 

@@ -22,7 +22,7 @@
 class MonitorElectronAlgorithm : public AthMonitorAlgorithm  {
 public:
     MonitorElectronAlgorithm( const std::string& name, ISvcLocator* pSvcLocator );
-    virtual ~MonitorElectronAlgorithm();
+    virtual ~MonitorElectronAlgorithm() = default;
     virtual StatusCode initialize() override;
     StatusCode fillHistograms( const EventContext& ctx ) const override;
 

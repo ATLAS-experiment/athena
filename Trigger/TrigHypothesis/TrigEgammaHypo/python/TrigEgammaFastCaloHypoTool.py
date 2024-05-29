@@ -117,7 +117,7 @@ class TrigEgammaFastCaloHypoToolConfig:
                            ]
 
 
-  def __init__(self, name, monGroups, cpart, tool=None):
+  def __init__(self, flags, name, monGroups, cpart, tool=None):
 
     self.__log = logging.getLogger('TrigEgammaFastCaloHypoTool')
     self.__name = name
@@ -129,6 +129,7 @@ class TrigEgammaFastCaloHypoToolConfig:
     # self.__noringerinfo = cpart['L2IDAlg'] if cpart['trigType']=='e' else ''
     self.__noringerinfo = cpart['L2IDAlg']
     self.__monGroups = monGroups
+    self.__calibThreshold = flags.Trigger.egamma.CalibrationETThreshold
 
     if not tool:
       tool = CompFactory.TrigEgammaFastCaloHypoTool( name )
@@ -205,7 +206,7 @@ class TrigEgammaFastCaloHypoToolConfig:
 
     self.__log.debug( 'Configure etcut or nopid' )
     self.tool().UseRinger      = False
-    self.tool().ETthr          = same( ( self.etthr()  -  3 )*GeV, self.tool() )
+    self.tool().ETthr          = same( ( self.etthr()  -  self.__calibThreshold )*GeV, self.tool() )
     self.tool().dETACLUSTERthr = 9999.
     self.tool().dPHICLUSTERthr = 9999.
     self.tool().F1thr          = same( 0.0    ,self.tool())
@@ -219,7 +220,7 @@ class TrigEgammaFastCaloHypoToolConfig:
     self.__log.debug( 'Configure noringer' )
     from TrigEgammaHypo.TrigEgammaFastCutDefs import TrigFastCaloElectronCutMaps
     self.tool().UseRinger   = False
-    self.tool().ETthr       = same( ( self.etthr()  - 3 )*GeV , self.tool())
+    self.tool().ETthr       = same( ( self.etthr()  - self.__calibThreshold )*GeV , self.tool())
     self.tool().HADETthr    = TrigFastCaloElectronCutMaps( self.etthr() ).MapsHADETthr[self.pidname()]
     self.tool().CARCOREthr  = TrigFastCaloElectronCutMaps( self.etthr() ).MapsCARCOREthr[self.pidname()]
     self.tool().CAERATIOthr = TrigFastCaloElectronCutMaps( self.etthr() ).MapsCAERATIOthr[self.pidname()]
@@ -229,7 +230,7 @@ class TrigEgammaFastCaloHypoToolConfig:
 
     self.__log.debug( 'Configure ringer' )
     self.tool().UseRinger = True
-    self.tool().EtCut     = (self.etthr()-3.)*GeV  
+    self.tool().EtCut     = (self.etthr()-self.__calibThreshold)*GeV  
     if not self.pidname() in self.__operation_points:
       self.__log.fatal("Bad selection name: %s" % self.pidname())
     self.tool().PidName = treatPidName(self.pidname())
@@ -324,7 +325,7 @@ class TrigEgammaFastCaloHypoToolConfig:
 
 
 def _IncTool(flags, name, monGroups, cpart, tool=None):
-  config = TrigEgammaFastCaloHypoToolConfig(name, monGroups, cpart, tool=tool )
+  config = TrigEgammaFastCaloHypoToolConfig(flags, name, monGroups, cpart, tool=tool )
   config.compile(flags)
   return config.tool()
 

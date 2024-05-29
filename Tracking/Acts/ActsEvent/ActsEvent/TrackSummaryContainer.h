@@ -4,6 +4,7 @@
 #ifndef ACTSEVENT_TRACKSUMMARYCONTAINER_H
 #define ACTSEVENT_TRACKSUMMARYCONTAINER_H
 #include <type_traits>
+#include <string_view>
 
 #include "Acts/EventData/TrackContainer.hpp"
 #include "Acts/Surfaces/Surface.hpp"
@@ -11,7 +12,6 @@
 #include "ActsEvent/Decoration.h"
 #include "xAODTracking/TrackSummaryContainer.h"
 #include "xAODTracking/TrackSummaryAuxContainer.h"
-#include "xAODTracking/TrackSurfaceAuxContainer.h"
 #include "xAODTracking/TrackSurfaceContainer.h"
 #include "ActsEvent/SurfaceEncoding.h"
 
@@ -57,8 +57,7 @@ class TrackSummaryContainer {
  public:
   using IndexType = uint32_t; // TODO find common place for it
   static constexpr auto kInvalid = Acts::MultiTrajectoryTraits::kInvalid;
-  TrackSummaryContainer(const DataLink<xAOD::TrackSummaryContainer>& lin = nullptr,
-                        const DataLink<xAOD::TrackSurfaceAuxContainer>& surfLink = nullptr);
+  TrackSummaryContainer(const DataLink<xAOD::TrackSummaryContainer>& lin = nullptr);
   static const std::set<std::string> staticVariables;
   static const std::set<Acts::HashedString> staticVariableHashes;
   /**
@@ -97,11 +96,6 @@ class TrackSummaryContainer {
   */
   ActsTrk::ConstCovariance covariance(ActsTrk::IndexType itrack) const;
   
-  /**
-  * surface
-  */
-  std::shared_ptr<const Acts::Surface> surface(ActsTrk::IndexType itrack) const;
-
   void fillFrom(ActsTrk::MutableTrackSummaryContainer& mtb);
 
   template<typename T>
@@ -110,20 +104,15 @@ class TrackSummaryContainer {
 
   void restoreDecorations();
 
-  const xAOD::TrackSummaryContainer* trackBackend() const{
-    return m_trackBackend.cptr();
-  }
+  void decodeSurfaces(const xAOD::TrackSurfaceContainer* src, const Acts::GeometryContext&);
 
   std::vector<Acts::HashedString> dynamicKeys_impl() const;
 
  protected:
 
   DataLink<xAOD::TrackSummaryContainer> m_trackBackend = nullptr;
-  DataLink<xAOD::TrackSurfaceAuxContainer> m_surfBackendAux = nullptr;
-
   std::vector<ActsTrk::detail::Decoration> m_decorations;
-
-  std::vector<std::shared_ptr<const Acts::Surface>> m_surfaces;
+  std::vector<std::shared_ptr<const Acts::Surface>> m_surfaces; // decoded transient form of surfaces
 };
 
 class MutableTrackSummaryContainer : public TrackSummaryContainer {
@@ -134,17 +123,6 @@ class MutableTrackSummaryContainer : public TrackSummaryContainer {
   MutableTrackSummaryContainer(MutableTrackSummaryContainer&&);
   MutableTrackSummaryContainer& operator=(MutableTrackSummaryContainer&& other) noexcept;
   
- 
-  /**
-  * adds new surface to the tail of the container
-  */
-  ActsTrk::IndexType addSurface_impl();
-
-  /**
-  * clears surface data under index
-  */
-  void removeSurface_impl(ActsTrk::IndexType isurf);
-
   /**
   * adds new track to the tail of the container
   */
@@ -159,7 +137,7 @@ class MutableTrackSummaryContainer : public TrackSummaryContainer {
   * enables the container to support decoration of given name and type
   */
   template <typename T>
-  constexpr void addColumn_impl(const std::string& key);
+  constexpr void addColumn_impl(std::string_view key);
 
   /**
   * copies decorations from other container
@@ -225,16 +203,11 @@ class MutableTrackSummaryContainer : public TrackSummaryContainer {
     return m_mutableTrackBackend.get();
   }
 
-  xAOD::TrackSurfaceContainer* surfBackend(){
-    return m_mutableSurfBackend.get();
-  }
+  void encodeSurfaces(xAOD::TrackSurfaceAuxContainer* dest, const Acts::GeometryContext&) const;
 
  private:
   std::unique_ptr<xAOD::TrackSummaryContainer> m_mutableTrackBackend;
   std::unique_ptr<xAOD::TrackSummaryAuxContainer> m_mutableTrackBackendAux;
-
-  std::unique_ptr<xAOD::TrackSurfaceContainer> m_mutableSurfBackend;
-  std::unique_ptr<xAOD::TrackSurfaceAuxContainer> m_mutableSurfBackendAux;
 };
 
 
@@ -269,7 +242,7 @@ namespace details{
 
 template <typename T>
 constexpr void MutableTrackSummaryContainer::addColumn_impl(
-    const std::string& name) {
+    std::string_view name) {
   if (not ActsTrk::detail::accepted_decoration_types<T>::value) {
     throw std::runtime_error(
         "TrackSummaryContainer::addColumn_impl: "

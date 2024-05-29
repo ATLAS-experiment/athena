@@ -28,7 +28,6 @@ static const char* const MC_HISTO_NAME = "hMC";
 // Make the messaging functions available.
 ANA_MSG_SOURCE(ShowerDepthToolMessaging, "CP::ShowerDepthTool");
 using namespace ShowerDepthToolMessaging;
-
 ShowerDepthTool::ShowerDepthTool() = default;
 
 ShowerDepthTool::~ShowerDepthTool() = default;

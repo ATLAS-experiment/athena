@@ -12,7 +12,3 @@ atlas_add_library( MuonClusterizationLib
                    LINK_LIBRARIES GeoPrimitives Identifier GaudiKernel MuonReadoutGeometry MuonPrepRawData MuonIdHelpersLib
                    PRIVATE_LINK_LIBRARIES AthenaBaseComps EventPrimitives )
 
-atlas_add_component( MuonClusterization
-                     src/components/*.cxx
-                     LINK_LIBRARIES GeoPrimitives Identifier GaudiKernel MuonReadoutGeometry MuonIdHelpersLib MuonPrepRawData AthenaBaseComps EventPrimitives MuonClusterizationLib )
-

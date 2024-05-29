@@ -22,7 +22,7 @@
 class MonitorTnPAlgorithm : public AthMonitorAlgorithm  {
 public:
     MonitorTnPAlgorithm( const std::string& name, ISvcLocator* pSvcLocator );
-    virtual ~MonitorTnPAlgorithm();
+    virtual ~MonitorTnPAlgorithm() = default;
     virtual StatusCode initialize() override;
     StatusCode fillHistograms( const EventContext& ctx ) const override;
     StatusCode fillElectronProbe(const xAOD::Electron *el, const bool isleading, const EventContext& ctx) const;

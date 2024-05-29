@@ -142,8 +142,8 @@ StatusCode Trk::RecursiveGeometryProcessor::process(Trk::Layer& lay, size_t leve
         Trk::BinnedArraySpan<Trk::Surface * const > layerSurfaces = surfArray->arrayObjects();
         ATH_MSG_VERBOSE(displayBuffer.str() << "   ---> has " << layerSurfaces.size() << " surfaces on the layer.");
         
-        const auto *laySurfIter    = layerSurfaces.begin();
-        const auto *laySurfIterEnd = layerSurfaces.end();
+        auto laySurfIter    = layerSurfaces.begin();
+        auto laySurfIterEnd = layerSurfaces.end();
         // loop over the surfaces and draw them
         for ( ; laySurfIter != laySurfIterEnd; ++laySurfIter) {
              if (!(*laySurfIter))

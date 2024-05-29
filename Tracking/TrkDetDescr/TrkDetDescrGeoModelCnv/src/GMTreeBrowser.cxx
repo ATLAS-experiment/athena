@@ -132,7 +132,7 @@ int Trk::GMTreeBrowser::compareGeoVolumes(const GeoVPhysVol* gv1,
                           << ": between mother and child:"
                           << gv1->getLogVol()->getName() << ":"
                           << cv1->getLogVol()->getName() << std::endl;
-                this->printTranslationDiff(transf1, transf2, tolerance);
+                Trk::GMTreeBrowser::printTranslationDiff(transf1, transf2, tolerance);
             } else
                 return diff;
         }
@@ -148,7 +148,7 @@ int Trk::GMTreeBrowser::compareGeoVolumes(const GeoVPhysVol* gv1,
                           << ":between mother and child:"
                           << gv1->getLogVol()->getName() << ":"
                           << cv1->getLogVol()->getName() << std::endl;
-                this->printRotationDiff(transf1, transf2, tolerance);
+                Trk::GMTreeBrowser::printRotationDiff(transf1, transf2, tolerance);
             } else
                 return diff;
         }
@@ -399,7 +399,7 @@ namespace {
 class GeoFindTopName : public GeoNodeAction
 {
 public:
-  GeoFindTopName (const std::string_view name) : m_name (name)
+  explicit GeoFindTopName (const std::string_view name) : m_name (name)
   {
   }
   virtual void handlePhysVol (const GeoPhysVol* v) override
@@ -423,7 +423,7 @@ private:
 }
 
 const GeoVPhysVol* Trk::GMTreeBrowser::findTopBranch(
-    const GeoVPhysVol* gv, std::string_view name) const {
+    const GeoVPhysVol* gv, std::string_view name) {
 
     GeoFindTopName topName (name);
     gv->exec (&topName);
@@ -431,7 +431,7 @@ const GeoVPhysVol* Trk::GMTreeBrowser::findTopBranch(
 }
 
 bool Trk::GMTreeBrowser::identity_check(GeoTrf::RotationMatrix3D rotation,
-                                        double tol) const {
+                                        double tol) {
 
     if (std::abs(rotation(0, 1)) > tol)
         return false;
@@ -445,7 +445,7 @@ bool Trk::GMTreeBrowser::identity_check(GeoTrf::RotationMatrix3D rotation,
 
 void Trk::GMTreeBrowser::printTranslationDiff(GeoTrf::Transform3D tr_test,
                                               GeoTrf::Transform3D tr_ref,
-                                              double tolerance) const {
+                                              double tolerance) {
     std::ios oldState(nullptr);
     oldState.copyfmt(std::cout);
     //
@@ -463,9 +463,9 @@ void Trk::GMTreeBrowser::printTranslationDiff(GeoTrf::Transform3D tr_test,
     std::cout.copyfmt(oldState);  // restore ostream state
 }
 
-void Trk::GMTreeBrowser::printRotationDiff(GeoTrf::Transform3D tr_test,
-                                           GeoTrf::Transform3D tr_ref,
-                                           double tolerance) const {
+void Trk::GMTreeBrowser::printRotationDiff(const GeoTrf::Transform3D& tr_test,
+                                           const GeoTrf::Transform3D& tr_ref,
+                                           double tolerance) {
 
     GeoTrf::RotationMatrix3D rotest = tr_test.rotation();
     GeoTrf::RotationMatrix3D rotref = tr_ref.rotation();

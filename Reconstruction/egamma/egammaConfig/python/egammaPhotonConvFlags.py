@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.Enums import LHCPeriod
@@ -7,7 +7,11 @@ def createEGammaPhotonConvFlags():
     flags = AthConfigFlags()
 
     # Track selector tool
-    flags.addFlag("TrkSel.minPt", lambda pcf: pcf.Tracking.MainPass.minPT)
+    flags.addFlag("TrkSel.minPt", lambda pcf: (
+        pcf.Tracking.__getattr__(pcf.Tracking.PrimaryPassConfig.value+'Pass').minPT
+        if pcf.GeoModel.Run <= LHCPeriod.Run3 else
+        pcf.Tracking.__getattr__(pcf.Tracking.ITkPrimaryPassConfig.value+'Pass').minPT[0]
+    ))
     # e-prob for Si conversion tracks (affects 1Si, 2Si, SiTRT): Ntrt < 15
     flags.addFlag("TrkSel.RatioCut1", 0.0)
     # e-prob for Si conversion tracks (affects 1Si, 2Si, SiTRT): 15 < Ntrt < 25

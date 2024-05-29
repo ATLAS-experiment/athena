@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 """
 The `covarianceToolsLibrary.py` can be used directly to manipulate covariance info and evaluate goodness of fit, inmported into your own python script.
@@ -86,7 +86,7 @@ def makeCovarianceMatrix(ao, ignore_corrs=False):
    if len(corr) == 0:
      for ibin in range(nbins):
        covM[ibin][ibin] = ((ao.points()[ibin].yErrs()[0] + ao.points()[ibin].yErrs()[1]) / 2) ** 2
-       if covM[ibin][ibin] == 0: covM[ibin][ibin] == 1
+       if covM[ibin][ibin] == 0: covM[ibin][ibin] = 1
      print("[WARNING], ao ", ao.path, " has no errors. Setting cov martix to unit... but consider excluding it !")
      return covM
    systList = corr[0].keys()

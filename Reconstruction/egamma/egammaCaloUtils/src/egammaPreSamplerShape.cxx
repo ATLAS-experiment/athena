@@ -1,19 +1,19 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "egammaCaloUtils/egammaPreSamplerShape.h"
+#include "egammaCaloUtils/egammaEnergyPositionAllSamples.h"
 //
 #include "CaloDetDescr/CaloDetDescrManager.h"
 #include "CaloUtils/CaloLayerCalculator.h"
-#include "egammaUtils/egammaEnergyPositionAllSamples.h"
 #include "xAODCaloEvent/CaloCluster.h"
 
 StatusCode
 egammaPreSamplerShape::execute(const xAOD::CaloCluster& cluster,
                                const CaloDetDescrManager& cmgr,
                                const CaloCellContainer& cell_container,
-                               Info& info) 
+                               Info& info)
 {
   //
   // Estimate shower shapes in pre sampler

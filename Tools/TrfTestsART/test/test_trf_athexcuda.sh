@@ -21,7 +21,7 @@ echo "GPU with lowest utilization: $CUDA_VISIBLE_DEVICES"
 
 # Run athena
 echo "----- athena -----"
-athena --CA AthExCUDA/TrackParticleCalibratorExampleConfig.py
+prmon -i 1 -- athena --CA AthExCUDA/TrackParticleCalibratorExampleConfig.py --evtMax=1000000000
 rc1=$?
 echo "art-result: ${rc1} athena AthExCUDA/TrackParticleCalibratorExampleConfig.py"
 

@@ -229,55 +229,21 @@ namespace {
    /// @return A pointer to the container if successful, @c nullptr if not
    ///
    const SG::AuxElement* getElement ATLAS_NOT_CONST_THREAD_SAFE ( const std::string& key,
-                                                                  IProxyDict& evtStore,
+                                                                  StoreGateSvc& evtStore,
                                                                   bool allowMissing,
                                                                   MsgStream& msg ) {
 
-      // Find all proxies with this key:
-      auto proxies = evtStore.proxies();
-      proxies.erase( std::remove_if( proxies.begin(), proxies.end(),
-                                     std::not_fn( ProxyWithName( key ) ) ),
-                     proxies.end() );
-      // Now iterate over them:
-      for( const SG::DataProxy* proxy : proxies ) {
-         // We need a non-const version of it... :-(
-         SG::DataProxy* proxy_nc = const_cast< SG::DataProxy* >( proxy );
-         // Try to get the right object out of it.
-         DataBucketBase* bucket =
-            dynamic_cast< DataBucketBase* >( proxy_nc->accessData() );
-         if( ! bucket ) {
-            // This is a big problem in the job. Return right away.
-            msg << MSG::ERROR
-                << "Couldn't access data object as a data bucket?!?" << endmsg;
-            return nullptr;
-         }
-         // Get the dictionary for the type:
-         TClass* cl = TClass::GetClass( bucket->tinfo() );
-         if( ! cl ) {
-            if( msg.level() <= MSG::VERBOSE ) {
-               msg << MSG::VERBOSE << "No dictionary found for: "
-                   << bucket->tinfo().name() << endmsg;
-            }
-            continue;
-         }
-         // Check whether the object inherits from AuxVectorBase:
-         if( ! cl->InheritsFrom( "SG::AuxElement" ) ) {
-            if( msg.level() <= MSG::VERBOSE ) {
-               msg << MSG::VERBOSE << "Object \"" << key << "/" << cl->GetName()
-                   << "\" does not inherit from SG::AuxElement" << endmsg;
-            }
-            continue;
-         }
-         // If all is well, just assume that the inheritance is direct/simple:
-         return reinterpret_cast< const SG::AuxElement* >( bucket->object() );
+      
+      const SG::AuxElement* e = nullptr;
+      if( !evtStore.retrieve( e, key ).isSuccess() ) {
+        if(!allowMissing) {
+          msg << MSG::ERROR << "Couldn't retrieve object with key \"" << key
+             << "\"" << endmsg;
+        }
+        return nullptr;
       }
+      return e;
 
-      // Apparently we failed...
-      if( ! allowMissing ) {
-         msg << MSG::ERROR << "Couldn't retrieve object \"" << key
-             << "\" as SG::AuxElement" << endmsg;
-      }
-      return nullptr;
    }
 #endif // XAOD_STANDALONE
 

@@ -18,5 +18,6 @@ atlas_add_library( VP1PRDSystems VP1PRDSystems/*.h src/*.cxx
    PUBLIC_HEADERS VP1PRDSystems
    PRIVATE_INCLUDE_DIRS ${COIN3D_INCLUDE_DIRS}
    ${CMAKE_CURRENT_BINARY_DIR}
+   INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
    LINK_LIBRARIES ${GEOMODEL_LIBRARIES} GeoPrimitives InDetPrepRawData InDetReadoutGeometry MuonPrepRawData TrkPrepRawData TrkSpacePoint VP1Base VP1Utils Qt5::Core Qt5::Gui
    PRIVATE_LINK_LIBRARIES ${COIN3D_LIBRARIES} AthContainers EventPrimitives GeoModelUtilities InDetIdentifier MuonIdHelpersLib MuonReadoutGeometry TRT_ReadoutGeometry TrkCompetingRIOsOnTrack TrkMeasurementBase TrkRIO_OnTrack TrkSegment TrkSurfaces TrkTrack VP1GuideLineSystems VP1HEPVis )

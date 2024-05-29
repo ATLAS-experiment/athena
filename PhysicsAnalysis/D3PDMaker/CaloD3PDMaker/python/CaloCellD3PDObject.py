@@ -61,6 +61,24 @@ def hookForCaloCellFilterAlg(c, flags, acc, prefix, *args, **kw) :
         
     return
 
+def hookForCaloNoiseCondAlg(c, flags, acc, prefix, *args, **kw):
+    from CaloTools.CaloNoiseCondAlgConfig import CaloNoiseCondAlgCfg
+    acc.merge (CaloNoiseCondAlgCfg (flags, noisetype='totalNoise'))
+    return
+
+
+def hookForCaloBadChanTool(c, flags, acc, *args, **kw):
+    from CaloBadChannelTool.CaloBadChanToolConfig import CaloBadChanToolCfg
+    c.BadChannelTool = acc.popToolsAndMerge (CaloBadChanToolCfg (flags))
+    return
+
+
+def hookForCaloGM(c, flags, acc, prefix, *args, **kw):
+    from LArGeoAlgsNV.LArGMConfig import LArGMCfg
+    acc.merge (LArGMCfg (flags))
+    return
+
+
 def makeCaloCellD3PDObject (maker, prefix, object_name) :
 
     cellD3PDObject = D3PDObject (makeCellD3PDObject, prefix, object_name)
@@ -68,6 +86,8 @@ def makeCaloCellD3PDObject (maker, prefix, object_name) :
     if prefix in prefix_to_det.keys() :
         #print " in makeCaloCellD3PDMaker, prefix ="  , prefix 
         cellD3PDObject.defineHook  ( hookForCaloCellFilterAlg )
+
+    cellD3PDObject.defineHook  ( hookForCaloGM )
 
     cellD3PDObject.defineBlock (0, 'Kinematics',
                                 D3PD.FourMomFillerTool,
@@ -86,21 +106,22 @@ def makeCaloCellD3PDObject (maker, prefix, object_name) :
                                 )
 
 
-    cellD3PDObject.defineBlock (2, 'Detail2',
-                                D3PD.CaloCellDetailsFillerTool,
-                                SaveCellQuality=False,
-                                SaveTimeInfo=False,
-                                SaveDetInfo=False,
-                                SaveCellGain=False,
-                                SaveBadCellStatus=True,
-                                SaveId =True,
-                                SavePositionInfo=True,
-                                )
+    detail2 = cellD3PDObject.defineBlock (2, 'Detail2',
+                                          D3PD.CaloCellDetailsFillerTool,
+                                          SaveCellQuality=False,
+                                          SaveTimeInfo=False,
+                                          SaveDetInfo=False,
+                                          SaveCellGain=False,
+                                          SaveBadCellStatus=True,
+                                          SaveId =True,
+                                          SavePositionInfo=True,
+                                          )
+    detail2.defineHook  ( hookForCaloBadChanTool )
 
+    cellD3PDObject.defineHook  ( hookForCaloNoiseCondAlg )
     noiseType = "totalNoise"
-    from CaloTools.CaloNoiseCondAlg import CaloNoiseCondAlg
-    CaloNoiseCondAlg(noisetype=noiseType)
 
+    
     cellD3PDObject.defineBlock (3, 'Detail3',
                                 D3PD.CaloCellDetailsFillerTool,
                                 SaveCellQuality=False,
@@ -155,9 +176,8 @@ def makeCaloCellSlimmedD3PDObject (maker, prefix, object_name) :
                                 WriteE  = True,  WriteM = False, WritePt = False)
 
 
+    cellD3PDObject.defineHook  ( hookForCaloNoiseCondAlg )
     noiseType = "totalNoise"
-    from CaloTools.CaloNoiseCondAlg import CaloNoiseCondAlg
-    CaloNoiseCondAlg(noisetype=noiseType)
 
     cellD3PDObject.defineBlock (1, 'Detail1',
                                 D3PD.CaloCellDetailsFillerTool,

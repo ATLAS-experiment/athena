@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkDriftCircleMath/MdtChamberGeometry.h"
@@ -144,7 +144,7 @@ namespace TrkDriftCircleMath {
                             // if this is a chamber with only the second ml, set the ml index accordingly
                             unsigned int actualMl = m_isSecondMultiLayer ? 1 : ml;
                             crossedTubes.emplace_back(lp, m_tubeRad, res, DriftCircle::EmptyTube, MdtId(m_isBarrel, actualMl, lay, i),
-                                                      0);
+                                                      nullptr);
                         }
                     }
                 for (int i = ctube; i < (int)m_ntubesml[ml]; ++i) {
@@ -158,7 +158,7 @@ namespace TrkDriftCircleMath {
                         }
                     } else {
                         unsigned int actualMl = m_isSecondMultiLayer ? 1 : ml;
-                        crossedTubes.emplace_back(lp, m_tubeRad, res, DriftCircle::EmptyTube, MdtId(m_isBarrel, actualMl, lay, i), 0);
+                        crossedTubes.emplace_back(lp, m_tubeRad, res, DriftCircle::EmptyTube, MdtId(m_isBarrel, actualMl, lay, i), nullptr);
                     }
                 }
             }

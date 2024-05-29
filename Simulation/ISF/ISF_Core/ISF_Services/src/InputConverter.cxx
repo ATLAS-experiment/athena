@@ -474,7 +474,6 @@ G4Event* ISF::InputConverter::ISF_to_G4Event(const ISF::ISFParticleVector& ispVe
   // retrieve world solid (volume)
   const G4VSolid *worldSolid = G4TransportationManager::GetTransportationManager()->GetNavigatorForTracking()->GetWorldVolume()->GetLogicalVolume()->GetSolid();
 
-  int n_pp=0;
   for ( ISF::ISFParticle *ispPtr: ispVector ) {
     ISF::ISFParticle &isp = *ispPtr;
     if ( !isInsideG4WorldVolume(isp, worldSolid) ) {
@@ -491,12 +490,11 @@ G4Event* ISF::InputConverter::ISF_to_G4Event(const ISF::ISFParticleVector& ispVe
       continue;
     }
     this->addG4PrimaryVertex(g4evt,isp,useHepMC,shadowGenEvent);
-    n_pp++;
   }
 
   AtlasG4EventUserInfo *atlasG4EvtUserInfo=new AtlasG4EventUserInfo();
-  atlasG4EvtUserInfo->SetNrOfPrimaryParticles(n_pp);
-  atlasG4EvtUserInfo->SetNrOfPrimaryVertices(n_pp); // special case for ISF batches of particles
+  atlasG4EvtUserInfo->SetLastProcessedTrackID(0); // TODO Check if it is better to set this to -1 initially
+  atlasG4EvtUserInfo->SetLastProcessedStep(0); // TODO Check if it is better to set this to -1 initially
   atlasG4EvtUserInfo->SetHepMCEvent(genEvent);
   g4evt->SetUserInformation(atlasG4EvtUserInfo);
 
@@ -616,7 +614,6 @@ G4PrimaryParticle* ISF::InputConverter::getDaughterG4PrimaryParticle(const HepMC
   if (makeLinkToTruth) {
     // Set the user information for this primary to point to the HepMcParticleLink...
     PrimaryParticleInformation* ppi = new PrimaryParticleInformation(genpart);
-    ppi->SetParticle(genpart);
     ppi->SetRegenerationNr(0);
     g4particle->SetUserInformation(ppi);
     ATH_MSG_VERBOSE("Making primary down the line with barcode " << ppi->GetParticleUniqueID());
@@ -780,7 +777,6 @@ G4PrimaryParticle* ISF::InputConverter::getDaughterG4PrimaryParticle(HepMC::GenP
   if (makeLinkToTruth) {
     // Set the user information for this primary to point to the HepMcParticleLink...
     PrimaryParticleInformation* ppi = new PrimaryParticleInformation(&genpart);
-    ppi->SetParticle(&genpart);
     ppi->SetRegenerationNr(0);
     g4particle->SetUserInformation(ppi);
     ATH_MSG_VERBOSE("Making primary down the line with barcode " << ppi->GetParticleUniqueID());
@@ -1003,7 +999,7 @@ G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(ISF::ISFParticle& i
     return nullptr; //The G4Exception call above should abort the job, but Coverity does not seem to pick this up.
   }
   HepMC::GenParticlePtr        genpart = truthBinding->getTruthParticle();
-  HepMC::GenParticlePtr primaryGenpart = truthBinding->getPrimaryTruthParticle();
+  HepMC::GenParticlePtr primaryGenpart = truthBinding->getPrimaryGenParticle();
 
   const G4ParticleDefinition *particleDefinition = this->getG4ParticleDefinition(isp.pdgCode());
 
@@ -1039,13 +1035,21 @@ G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(ISF::ISFParticle& i
   /// In the case that particles are being passed back to Geant4 then
   /// we may have particles which have already interacted, so we
   /// should set the regeneration number accordingly.
-  const int regenerationNr = HepMC::generations(&isp);
+  const int regenerationNr = HepMC::StatusBased::generations(&isp);
+  if (HepMC::BarcodeBased::generations(&isp) != regenerationNr) {
+    ATH_MSG_WARNING ("StatusBased::generations() = " << regenerationNr << ", BarcodeBased::generations()  = " << HepMC::BarcodeBased::generations(&isp) << ", isp: " << isp);
+  }
   ppi->SetRegenerationNr(regenerationNr);
 
   if ( genpart ) {
     if (genpart->end_vertex()) {
       // Old approach particle had an end vertex - predefined decays taken from the main GenEvent
-      processPredefinedDecays(genpart, isp, g4particle.get(), true);
+      // No longer supported
+      ATH_MSG_ERROR ( "getG4PrimaryParticle(): GenParticle has a valid end GenVertexPtr!" );
+      ATH_MSG_ERROR ( "getG4PrimaryParticle(): genpart: " << genpart << ", barcode: " << HepMC::barcode(genpart) );
+      ATH_MSG_ERROR ( "getG4PrimaryParticle(): genpart->end_vertex(): " << genpart->end_vertex() << ", barcode: " << HepMC::barcode(genpart->end_vertex()) );
+      ATH_MSG_FATAL ( "getG4PrimaryParticle(): Passing GenParticles with a valid end GenVertexPtr as input is no longer supported." );
+      abort();
     }
     else if (MC::isDecayed(genpart) // Some assumptions about main GenEvent here
              && !genpart->end_vertex()) {

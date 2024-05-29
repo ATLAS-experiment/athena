@@ -11,7 +11,7 @@ find_package( GeoModel COMPONENTS GeoModelKernel )
 atlas_add_library( TRT_ReadoutGeometry
   src/*.cxx
   PUBLIC_HEADERS TRT_ReadoutGeometry
-  INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
+  INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}  ${GEOMODEL_INCLUDE_DIRS}
   DEFINITIONS ${CLHEP_DEFINITIONS}
   LINK_LIBRARIES ${CLHEP_LIBRARIES} ${GEOMODEL_LIBRARIES} AthenaBaseComps AthenaKernel CxxUtils EventPrimitives 
   GeoPrimitives TrkSurfaces Identifier InDetIdentifier InDetReadoutGeometry ReadoutGeometryBase TrkDetElementBase

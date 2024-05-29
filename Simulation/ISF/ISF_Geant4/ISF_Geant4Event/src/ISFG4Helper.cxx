@@ -43,15 +43,15 @@ iGeant4::ISFG4Helper::convertG4TrackToISFParticle(const G4Track& aTrack,
   double charge  = particleDefinition.GetPDGCharge();
   int    pdgID   = particleDefinition.GetPDGEncoding();
 
-  Barcode::ParticleBarcode barcode = (truth && truth->getTruthParticle() ) ?  HepMC::barcode(truth->getTruthParticle()) : Barcode::fUndefinedBarcode; // FIXME barcode-based
+  int barcode = (truth && truth->getTruthParticle() ) ?  HepMC::barcode(truth->getTruthParticle()) : HepMC::UNDEFINED_ID; // FIXME barcode-based
   const int id = (truth && truth->getTruthParticle() ) ? HepMC::uniqueID(truth->getTruthParticle()) : HepMC::UNDEFINED_ID;
-
+  const int status = (truth && truth->getTruthParticle() ) ? truth->getTruthParticle()->status() : 1;
   ISF::ISFParticle *isp = new ISF::ISFParticle( position,
                                                 momentum,
                                                 mass,
                                                 charge,
                                                 pdgID,
-                                                1,
+                                                status,
                                                 gTime,
                                                 parent,
                                                 id,
@@ -77,7 +77,7 @@ TrackInformation*
 iGeant4::ISFG4Helper::attachTrackInfoToNewG4Track( G4Track& aTrack,
                                                     ISF::ISFParticle& baseIsp,
                                                     TrackClassification classification,
-                                                    HepMC::GenParticlePtr nonRegeneratedTruthParticle)
+                                                    HepMC::GenParticlePtr generationZeroGenParticle)
 {
   if ( aTrack.GetUserInformation() ) {
     G4ExceptionDescription description;
@@ -100,10 +100,8 @@ iGeant4::ISFG4Helper::attachTrackInfoToNewG4Track( G4Track& aTrack,
     return nullptr;
   }
 
-  TrackInformation *trackInfo = new TrackInformation( nonRegeneratedTruthParticle, &baseIsp );
-  auto primaryTruthParticle   = truthBinding->getPrimaryTruthParticle();
-
-  trackInfo->SetPrimaryHepMCParticle( primaryTruthParticle );
+  TrackInformation *trackInfo = new TrackInformation( generationZeroGenParticle, &baseIsp );
+  trackInfo->SetPrimaryGenParticle( truthBinding->getPrimaryGenParticle() );
   trackInfo->SetClassification( classification );
   aTrack.SetUserInformation( trackInfo );
 

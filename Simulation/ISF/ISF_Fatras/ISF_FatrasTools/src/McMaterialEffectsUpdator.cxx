@@ -18,7 +18,7 @@
 #include "ISF_Event/ParticleClipboard.h"
 #include "ISF_Event/ParticleUserInformation.h"
 #include "ISF_FatrasInterfaces/IParticleDecayHelper.h"
-#include "TruthUtils/MagicNumbers.h"
+#include "TruthUtils/HepMCHelpers.h"
 // iFatras
 #include "ISF_FatrasInterfaces/IHadronicInteractionProcessor.h"
 #include "ISF_FatrasInterfaces/IProcessSamplingTool.h"
@@ -168,7 +168,7 @@ iFatras::McMaterialEffectsUpdator::~McMaterialEffectsUpdator()
 StatusCode iFatras::McMaterialEffectsUpdator::initialize()
 {
 
-    ATH_MSG_INFO( "initialize()" );
+    ATH_MSG_DEBUG( "initialize()" );
 
     // retrieve the process sampling tool
     if (m_samplingTool.retrieve().isFailure()){
@@ -276,16 +276,10 @@ StatusCode iFatras::McMaterialEffectsUpdator::initialize()
 
     // the validation setup -------------------------------- PART 1: General ----------------------------------
 
+    // retrieve the physics validation tool
+    ATH_CHECK( m_validationTool.retrieve( DisableTool{ m_validationTool.empty() || !m_validationMode } ) );
+
     if (m_validationMode){
-
-      // retrieve the physics validation tool
-      if (m_validationTool.retrieve().isFailure()) {
-        ATH_MSG_FATAL("Could not retrieve " << m_validationTool);
-        return StatusCode::FAILURE;
-      } else{
-        ATH_MSG_VERBOSE("Successfully retrieved " << m_validationTool);
-      }
-
       ATH_MSG_VERBOSE( "Booking material validation TTree ... " );
 
       // create the new Tree
@@ -307,8 +301,6 @@ StatusCode iFatras::McMaterialEffectsUpdator::initialize()
       } else
 	ATH_MSG_INFO( "TTree for MaterialEffects validation booked." );
 
-    } else {
-      m_validationTool.disable();
     }
     // the validation setup -------------------------------- PART 2: Brem Photons -----------------------------
     if (m_bremValidation){
@@ -360,7 +352,7 @@ StatusCode iFatras::McMaterialEffectsUpdator::initialize()
 
 
     } // ------------- end of validation mode -----------------------------------------------------------------
-
+    ATH_MSG_DEBUG( "finalize() successful" );
     return StatusCode::SUCCESS;
 }
 
@@ -372,7 +364,7 @@ StatusCode iFatras::McMaterialEffectsUpdator::finalize()
     ATH_MSG_INFO( "                     Minimum energy cut for brem photons : " <<   m_minimumBremPhotonMomentum  );
     ATH_MSG_INFO( "                     Brem photons (above cut, recorded)  : " <<   m_recordedBremPhotons        );
 
-    ATH_MSG_INFO( "finalize() successful" );
+    ATH_MSG_DEBUG( "finalize() successful" );
     return StatusCode::SUCCESS;
 }
 
@@ -492,6 +484,22 @@ iFatras::McMaterialEffectsUpdator::updateInLay(
     pathLim.updateMat(dX0, m_matProp->averageZ(), dInL0);
     // register particle if not in the stack already
     if (isp != m_isp) {
+      ISF::TruthBinding *regTruthBinding{};
+      if (isp->getTruthBinding()) {
+        regTruthBinding = new ISF::TruthBinding(*(isp->getTruthBinding()));
+      }
+      else {
+        ATH_MSG_WARNING("Incomming ISParticle had no TruthBinding " << *isp);
+        regTruthBinding = new ISF::TruthBinding(nullptr, nullptr, nullptr);
+      }
+      HepMcParticleLink *regHMPL{};
+      if (isp->getParticleLink()) {
+        regHMPL = new HepMcParticleLink(*(isp->getParticleLink()));
+      }
+      else {
+        ATH_MSG_WARNING("Incomming ISParticle had no ParticleLink: " << *isp);
+        regHMPL = new HepMcParticleLink(isp->id(), 0, HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_ID);
+      }
       ISF::ISFParticle* regisp = new ISF::ISFParticle(isp->position(),
                                                       currPar->momentum(),
                                                       isp->mass(),
@@ -501,7 +509,9 @@ iFatras::McMaterialEffectsUpdator::updateInLay(
                                                       isp->timeStamp(),
                                                       *m_isp,
                                                       isp->id(),
-                                                      isp->barcode() // FIXME barcode-based
+                                                      isp->barcode(), // FIXME barcode-based
+                                                      regTruthBinding,
+                                                      regHMPL
                                                       );
       // add presampled process info
       if (isp->getUserInformation() && isp->getUserInformation()->materialLimit()) {
@@ -530,10 +540,10 @@ iFatras::McMaterialEffectsUpdator::updateInLay(
         }
         regisp->setUserInformation(validInfo);
       }
-      // Making sure we get some correct truth info from parent if needed
+      // Check that the returned ISFParticle has a valid TruthBinding
       // before pushing into the particle broker
       if (!regisp->getTruthBinding()) {
-        regisp->setTruthBinding(new ISF::TruthBinding(*isp->getTruthBinding()));
+        ATH_MSG_ERROR("Could not retrieve TruthBinding from non-interacting ISFParticle "<< *regisp);
       }
       m_particleBroker->push(regisp, m_isp);
     }
@@ -629,7 +639,7 @@ iFatras::McMaterialEffectsUpdator::updateInLay(
     ISF::ISFParticleVector childs;
 
     if (iStatus == 1) {
-      childs = interactLay(isp, timeLim.time, *currPar, particle, pathLim.process);
+      childs = interactLay(isp, timeLim.time, *currPar, particle, pathLim.process); // Registers TruthIncident internally
     } else {
       if (extMatProp) {
         childs = m_hadIntProcessor->doHadIntOnLayer(
@@ -640,7 +650,7 @@ iFatras::McMaterialEffectsUpdator::updateInLay(
       }
     }
     // save info for locally created particles
-    if (m_validationMode && !childs.empty() && isp != m_isp) {
+    if (m_validationMode && m_validationTool.isEnabled() && !childs.empty() && isp != m_isp) {
       ATH_MSG_VERBOSE("  saving interaction info for locally produced particle " << isp->pdgCode());
       m_validationTool->saveISFParticleInfo(*isp, pathLim.process, currPar.get(), timeLim.time, pathLim.x0Max);
     }
@@ -656,7 +666,7 @@ iFatras::McMaterialEffectsUpdator::updateInLay(
       Trk::ParticleHypothesis pHypothesis =
         m_pdgToParticleHypothesis.convert(childs[ic]->pdgCode(), childs[ic]->charge());
       auto cparm = std::make_unique<Trk::CurvilinearParameters>(childs[ic]->position(), childs[ic]->momentum(), childs[ic]->charge());
-      Trk::PathLimit pLim = m_samplingTool->sampleProcess(mom, childs[ic]->charge(), pHypothesis);
+      Trk::PathLimit pLim = m_samplingTool->sampleProcess(m_randomEngine, mom, childs[ic]->charge(), pHypothesis);
 
       // TODO sample decays and save the material collection & path limits at the exit from the layer
       // (ISFFatrasParticle ?)
@@ -683,6 +693,22 @@ iFatras::McMaterialEffectsUpdator::updateInLay(
 
   // register particle if not in the stack already
   if (isp != m_isp) {
+    ISF::TruthBinding *regTruthBinding{};
+    if (isp->getTruthBinding()) {
+      regTruthBinding = new ISF::TruthBinding(*(isp->getTruthBinding()));
+    }
+    else {
+      ATH_MSG_WARNING("Incomming ISParticle had no TruthBinding " << *isp);
+      regTruthBinding = new ISF::TruthBinding(nullptr, nullptr, nullptr);
+    }
+    HepMcParticleLink *regHMPL{};
+    if (isp->getParticleLink()) {
+      regHMPL = new HepMcParticleLink(*(isp->getParticleLink()));
+    }
+    else {
+      ATH_MSG_WARNING("Incomming ISParticle had no ParticleLink: " << *isp);
+      regHMPL = new HepMcParticleLink(isp->id(), 0, HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_ID);
+    }
     ISF::ISFParticle* regisp = new ISF::ISFParticle(isp->position(),
                                                     currPar->momentum(),
                                                     isp->mass(),
@@ -692,7 +718,9 @@ iFatras::McMaterialEffectsUpdator::updateInLay(
                                                     isp->timeStamp(),
                                                     *m_isp,
                                                     isp->id(),
-                                                    isp->barcode() // FIXME barcode-based
+                                                    isp->barcode(), // FIXME barcode-based
+                                                    regTruthBinding,
+                                                    regHMPL
                                                     );
     // add presampled process info
     if (isp->getUserInformation() && isp->getUserInformation()->materialLimit()) {
@@ -718,9 +746,10 @@ iFatras::McMaterialEffectsUpdator::updateInLay(
       else
         validInfo->setGeneration(-1); // signal problem in the validation chain
     }
-    // Making sure we get some correct truth info from parent if needed before pushing into the particle broker
+    // Check that the returned ISFParticle has a valid TruthBinding
+    // before pushing into the particle broker
     if (!regisp->getTruthBinding()) {
-      regisp->setTruthBinding(new ISF::TruthBinding(*isp->getTruthBinding()));
+      ATH_MSG_ERROR("Could not retrieve TruthBinding from non-interacting ISFParticle "<< *regisp);
     }
     m_particleBroker->push(regisp, m_isp);
   }
@@ -1286,15 +1315,17 @@ void iFatras::McMaterialEffectsUpdator::recordBremPhoton(double time,
     //std::cout <<"brem opening angle:in:out:"<< cos(theta) <<","<<newDirection*particleDir<< std::endl;
 
     // -------> create the brem photon <--------------------
+    const int status = 1 + HepMC::SIM_STATUS_THRESHOLD;
+    const int id = HepMC::UNDEFINED_ID; // This will be set if the child particle is saved to the GenEvent
     ISF::ISFParticle *bremPhoton = new ISF::ISFParticle( vertex,
                                                          gammaE*newDirection,
                                                          0,   //!< mass
                                                          0,   //!< charge
-                                                         22,  //!< pdg code
-                                                         1 + HepMC::SIM_STATUS_THRESHOLD,   //!< status
+                                                         MC::PHOTON,  //!< pdg code
+                                                         status,
                                                          time,  //!< time
                                                          *parent,
-                                                         0 // FIXME hard-coded id
+                                                         id
                                                          );
 
     // in the validation mode, add process info
@@ -1314,15 +1345,24 @@ void iFatras::McMaterialEffectsUpdator::recordBremPhoton(double time,
                                  parent->nextGeoID(),
                                  ISF::fPrimarySurvives );
     m_truthRecordSvc->registerTruthIncident( truth);
-    //Making sure we get some correct truth info from parent if needed before pushing into the particle broker
-    if (!bremPhoton->getTruthBinding()) {
-	bremPhoton->setTruthBinding(new ISF::TruthBinding(*parent->getTruthBinding()));
-    }
-    m_particleBroker->push( bremPhoton, parent);
+    // At this point we need to update the properties of the
+    // ISFParticles produced in the interaction
+    truth.updateParentAfterIncidentProperties();
+    truth.updateChildParticleProperties();
 
+    // Check that the new/updated ISFParticles have a valid TruthBinding before pushing into the particle broker
+    if (!parent->getTruthBinding()) {
+      ATH_MSG_ERROR("Could not retrieve TruthBinding from parent ISFParticle "<< *parent);
+    }
+    for (auto *childParticle : children) {
+      if (!childParticle->getTruthBinding()) {
+        ATH_MSG_ERROR("Could not retrieve TruthBinding from child ISFParticle "<< *childParticle);
+      }
+      m_particleBroker->push(childParticle, parent);
+    }
 
     // save info for validation
-    if (m_validationMode && m_validationTool) {
+    if (m_validationMode && m_validationTool.isEnabled()) {
       Amg::Vector3D* nMom = new Amg::Vector3D((pElectron-gammaE)*particleDir);
       m_validationTool->saveISFVertexInfo(3,vertex,*parent,inEl,nMom,children);
       delete nMom;
@@ -1416,15 +1456,17 @@ void iFatras::McMaterialEffectsUpdator::recordBremPhotonLay(const ISF::ISFPartic
     particleDir = (particleDir*pElectron- gammaE*newDirection).unit();
 
     // -------> create the brem photon <--------------------
+    const int status = 1 + HepMC::SIM_STATUS_THRESHOLD;
+    const int id = HepMC::UNDEFINED_ID; // This will be set if the child particle is saved to the GenEvent
     ISF::ISFParticle *bremPhoton = new ISF::ISFParticle( vertex,
                                                          gammaE*newDirection,
                                                          0,   //!< mass
                                                          0,   //!< charge
-                                                         22,  //!< pdg code
-                                                         1,   //!< status
+                                                         MC::PHOTON,  //!< pdg code
+                                                         status,
                                                          timeLim.time,  //!< time
                                                          *parent,
-                                                         0 // FIXME hard-coded id
+                                                         id
                                                          );
 
 
@@ -1445,14 +1487,23 @@ void iFatras::McMaterialEffectsUpdator::recordBremPhotonLay(const ISF::ISFPartic
                                  parent->nextGeoID(),
                                  ISF::fPrimarySurvives );
     m_truthRecordSvc->registerTruthIncident( truth);
+    // At this point we need to update the properties of the
+    // ISFParticles produced in the interaction
+    truth.updateParentAfterIncidentProperties();
+    truth.updateChildParticleProperties();
 
-    //Making sure we get some correct truth info from parent if needed before pushing into the particle broker
-    if (!bremPhoton->getTruthBinding()) {
-	bremPhoton->setTruthBinding(new ISF::TruthBinding(*parent->getTruthBinding()));
+    // Check that the new/updated ISFParticles have a valid TruthBinding
+    if (!parent->getTruthBinding()) {
+      ATH_MSG_ERROR("Could not retrieve TruthBinding from parent ISFParticle "<< *parent);
+    }
+    for (auto *childParticle : children) {
+      if (!childParticle->getTruthBinding()) {
+        ATH_MSG_ERROR("Could not retrieve TruthBinding from child ISFParticle "<< *childParticle);
+      }
     }
 
     // save info for validation
-    if (m_validationMode && m_validationTool) {
+    if (m_validationMode && m_validationTool.isEnabled()) {
       Amg::Vector3D* nMom = new Amg::Vector3D((pElectron-gammaE)*particleDir);
       m_validationTool->saveISFVertexInfo(3,vertex,*parent,pElectron*particleDir,nMom,children);
       delete nMom;
@@ -1460,7 +1511,7 @@ void iFatras::McMaterialEffectsUpdator::recordBremPhotonLay(const ISF::ISFPartic
 
 
     // layer update : don't push into particle stack untill destiny resolved
-    Trk::PathLimit pLim = m_samplingTool->sampleProcess(bremPhoton->momentum().mag(),0.,Trk::photon);
+    Trk::PathLimit pLim = m_samplingTool->sampleProcess(m_randomEngine, bremPhoton->momentum().mag(),0.,Trk::photon);
 
     // material fraction : flip if direction of propagation changed
     double ci = m_layer->surfaceRepresentation().normal().dot(particleDir);
@@ -1533,6 +1584,7 @@ iFatras::McMaterialEffectsUpdator::interact(double time,
                                             int process,
                                             const Trk::Material* extMatProp) const
 {
+  // Responsible for registering TruthIncidents
   if (process == 0)
     return nullptr;
 
@@ -1550,13 +1602,24 @@ iFatras::McMaterialEffectsUpdator::interact(double time,
     // update parent before decay
     ISF::ISFParticleVector childVector = m_particleDecayer->decayParticle(*parent,position,momentum,time);
 
-    for (unsigned int i=0; i<childVector.size(); i++) {
+     // register TruthIncident
+    ISF::ISFTruthIncident truth( const_cast<ISF::ISFParticle&>(*parent),
+                                 childVector,
+                                 process,
+                                 parent->nextGeoID(),  // inherits from the parent
+                                 ISF::fKillsPrimary );
+    m_truthRecordSvc->registerTruthIncident( truth);
+    // At this point we need to update the properties of the
+    // ISFParticles produced in the interaction
+    truth.updateChildParticleProperties();
+
+   for (unsigned int i=0; i<childVector.size(); i++) {
       // in the validation mode, add process info
       if (m_validationMode) {
-	ISF::ParticleUserInformation* validInfo = new ISF::ParticleUserInformation();
-	validInfo->setProcess(process);
-	if (parent->getUserInformation()) validInfo->setGeneration(parent->getUserInformation()->generation()+1);
-	else validInfo->setGeneration(1);     // assume parent is a primary track
+        ISF::ParticleUserInformation* validInfo = new ISF::ParticleUserInformation();
+        validInfo->setProcess(process);
+        if (parent->getUserInformation()) validInfo->setGeneration(parent->getUserInformation()->generation()+1);
+        else validInfo->setGeneration(1);     // assume parent is a primary track
         childVector[i]->setUserInformation(validInfo);
       }
       // register next geo (is current), next flavor can be defined by filter
@@ -1565,16 +1628,8 @@ iFatras::McMaterialEffectsUpdator::interact(double time,
       m_particleBroker->push(childVector[i], parent);
     }
 
-    // register TruthIncident
-    ISF::ISFTruthIncident truth( const_cast<ISF::ISFParticle&>(*parent),
-                                 childVector,
-                                 process,
-                                 parent->nextGeoID(),  // inherits from the parent
-                                 ISF::fKillsPrimary );
-    m_truthRecordSvc->registerTruthIncident( truth);
-
     // save info for validation
-    if (m_validationMode && m_validationTool) {
+    if (m_validationMode && m_validationTool.isEnabled()) {
       Amg::Vector3D* nMom = nullptr;
       m_validationTool->saveISFVertexInfo(process,position,*parent,momentum,nMom,childVector);
       delete nMom;
@@ -1594,28 +1649,52 @@ iFatras::McMaterialEffectsUpdator::interact(double time,
     // double cTh = 1.-fmin/(1.-fr)/fr;
 
     // first implementation: ctH=1
+    const int status = 1 + HepMC::SIM_STATUS_THRESHOLD;
+    const int id = HepMC::UNDEFINED_ID; // This will be set if the child particle is saved to the GenEvent
 
     children[0] = new ISF::ISFParticle( position,
                                         fr*momentum,
                                         0.,
                                         0.,
-                                        22,
-                                        1,
+                                        MC::PHOTON,
+                                        status,
                                         time,
                                         *parent,
-                                        0 // FIXME hard-coded id
+                                        id
                                         );
 
     children[1] = new ISF::ISFParticle( position,
                                         (1-fr)*momentum,
                                         0.,
                                         0.,
-                                        22,
-                                        1,
+                                        MC::PHOTON,
+                                        status,
                                         time,
                                         *parent,
-                                        0 // FIXME hard-coded id
+                                        id
                                         );
+
+    // register TruthIncident
+    ISF::ISFTruthIncident truth( const_cast<ISF::ISFParticle&>(*parent),
+                                 children,
+                                 process,
+                                 parent->nextGeoID(),  // inherits from the parent
+                                 ISF::fPrimarySurvives );
+    m_truthRecordSvc->registerTruthIncident( truth);
+    // At this point we need to update the properties of the
+    // ISFParticles produced in the interaction
+    truth.updateParentAfterIncidentProperties();
+    truth.updateChildParticleProperties();
+
+    // Check that the new/updated ISFParticles have a valid TruthBinding
+    if (!parent->getTruthBinding()) {
+      ATH_MSG_ERROR("Could not retrieve TruthBinding from parent ISFParticle "<< *parent);
+    }
+    for (auto *childParticle : children) {
+      if (!childParticle->getTruthBinding()) {
+        ATH_MSG_ERROR("Could not retrieve TruthBinding from child ISFParticle "<< *childParticle);
+      }
+    }
 
     // in the validation mode, add process info
     if (m_validationMode) {
@@ -1631,20 +1710,12 @@ iFatras::McMaterialEffectsUpdator::interact(double time,
       children[1]->setUserInformation(validInfo2);
     }
 
-    // register TruthIncident
-    ISF::ISFTruthIncident truth( const_cast<ISF::ISFParticle&>(*parent),
-                                 children,
-                                 process,
-                                 parent->nextGeoID(),  // inherits from the parent
-                                 ISF::fPrimarySurvives );
-    m_truthRecordSvc->registerTruthIncident( truth);
-
     // push child particles onto stack
     m_particleBroker->push( children[0], parent);
     m_particleBroker->push( children[1], parent);
 
     // save info for validation
-    if (m_validationMode && m_validationTool) {
+    if (m_validationMode && m_validationTool.isEnabled()) {
       Amg::Vector3D* nMom = nullptr;
       m_validationTool->saveISFVertexInfo(process,position,*parent,momentum,nMom,children);
       delete nMom;
@@ -1658,12 +1729,12 @@ iFatras::McMaterialEffectsUpdator::interact(double time,
 
     auto parm = std::make_unique<Trk::NeutralCurvilinearParameters>(position,momentum,parent->charge());
 
-    bool cStat = m_conversionTool->doConversion(time, *parm);
+    bool cStat = m_conversionTool->doConversion(time, *parm); // Registers TruthIncident internally
 
     if (!cStat) ATH_MSG_WARNING( "Conversion failed, killing photon anyway ");
 
     // kill the mother particle
-     return nullptr;
+    return nullptr;
   }
 
   if (process==121) {    // hadronic interaction
@@ -1672,7 +1743,7 @@ iFatras::McMaterialEffectsUpdator::interact(double time,
 
     auto parm = std::make_unique<Trk::CurvilinearParameters>(position,momentum,parent->charge());
 
-    bool recHad = m_hadIntProcessor->doHadronicInteraction(time, position, momentum, extMatProp, particle, true);
+    bool recHad = m_hadIntProcessor->doHadronicInteraction(time, position, momentum, extMatProp, particle, true); // Registers TruthIncident internally
     // eventually : bool recHad =  m_hadIntProcessor->recordHadState( time, p, position, pDir, particle);
 
     // kill the track if interaction recorded --------------------------
@@ -1687,11 +1758,11 @@ iFatras::McMaterialEffectsUpdator::interact(double time,
 }
 
 ISF::ISFParticleVector  iFatras::McMaterialEffectsUpdator::interactLay(const ISF::ISFParticle* parent,
-								       double time,
-								       const Trk::TrackParameters& parm,
-								       Trk::ParticleHypothesis particle,
-								       int process,
-								       const Trk::MaterialProperties* extMatProp) const {
+                                                                       double time,
+                                                                       const Trk::TrackParameters& parm,
+                                                                       Trk::ParticleHypothesis particle,
+                                                                       int process,
+                                                                       const Trk::MaterialProperties* extMatProp) const {
   ISF::ISFParticleVector childVector(0);
 
   if ( process==0 ) return childVector;
@@ -1713,27 +1784,29 @@ ISF::ISFParticleVector  iFatras::McMaterialEffectsUpdator::interactLay(const ISF
     // double cTh = 1.-fmin/(1.-fr)/fr;
 
     // first implementation: ctH=1
+    const int status = 1 + HepMC::SIM_STATUS_THRESHOLD;
+    const int id = HepMC::UNDEFINED_ID; // This will be set if the child particle is saved to the GenEvent
 
     children[0] = new ISF::ISFParticle( position,
                                         fr*momentum,
                                         0.,
                                         0.,
-                                        22,
-                                        1,
+                                        MC::PHOTON,
+                                        status,
                                         time,
                                         *parent,
-                                        0 // FIXME hard-coded id
+                                        id
                                         );
 
     children[1] = new ISF::ISFParticle( position,
                                         (1-fr)*momentum,
                                         0.,
                                         0.,
-                                        22,
-                                        1,
+                                        MC::PHOTON,
+                                        status,
                                         time,
                                         *parent,
-                                        0 // FIXME hard-coded id
+                                        id
                                         );
 
     // in the validation mode, add process info
@@ -1757,20 +1830,26 @@ ISF::ISFParticleVector  iFatras::McMaterialEffectsUpdator::interactLay(const ISF
                                  parent->nextGeoID(),  // inherits from the parent
                                  ISF::fPrimarySurvives );
     m_truthRecordSvc->registerTruthIncident( truth);
+    // At this point we need to update the properties of the
+    // ISFParticles produced in the interaction
+    truth.updateParentAfterIncidentProperties();
+    truth.updateChildParticleProperties();
 
     // save info for validation
-    if (m_validationMode && m_validationTool) {
+    if (m_validationMode && m_validationTool.isEnabled()) {
       Amg::Vector3D* nMom = nullptr;
       m_validationTool->saveISFVertexInfo(process,position,*parent,momentum,nMom,children);
       delete nMom;
     }
 
-    //Making sure we get some correct truth info from parent if needed before pushing into the particle broker
-    if (!children[0]->getTruthBinding()) {
-	children[0]->setTruthBinding(new ISF::TruthBinding(*parent->getTruthBinding()));
+    // Check that the new/updated ISFParticles have a valid TruthBinding
+    if (!parent->getTruthBinding()) {
+      ATH_MSG_ERROR("Could not retrieve TruthBinding from parent ISFParticle "<< *parent);
     }
-    if (!children[1]->getTruthBinding()) {
-	children[1]->setTruthBinding(new ISF::TruthBinding(*parent->getTruthBinding()));
+    for (auto *childParticle : children) {
+      if (!childParticle->getTruthBinding()) {
+        ATH_MSG_ERROR("Could not retrieve TruthBinding from child ISFParticle "<< *childParticle);
+      }
     }
 
     return children;
@@ -1779,32 +1858,30 @@ ISF::ISFParticleVector  iFatras::McMaterialEffectsUpdator::interactLay(const ISF
   if (process==14) {  // photon conversion
 
     Trk::NeutralCurvilinearParameters neu(position,momentum,parent->charge());
-    childVector=m_conversionTool->doConversionOnLayer(parent, time, neu);
+    childVector=m_conversionTool->doConversionOnLayer(parent, time, neu); // Registers TruthIncident internally
 
     // validation mode
-    if (m_validationMode && m_validationTool) {
+    if (m_validationMode && m_validationTool.isEnabled()) {
 
       // add process info for children
       for (unsigned int i=0; i<childVector.size(); i++) {
-	ISF::ParticleUserInformation* validInfo = new ISF::ParticleUserInformation();
-	validInfo->setProcess(process);
-	if (parent->getUserInformation()) validInfo->setGeneration(parent->getUserInformation()->generation()+1);
-	else validInfo->setGeneration(1);     // assume parent is a primary track
-	childVector[i]->setUserInformation(validInfo);
+        ISF::ParticleUserInformation* validInfo = new ISF::ParticleUserInformation();
+        validInfo->setProcess(process);
+        if (parent->getUserInformation()) validInfo->setGeneration(parent->getUserInformation()->generation()+1);
+        else validInfo->setGeneration(1);     // assume parent is a primary track
+        childVector[i]->setUserInformation(validInfo);
       }
       // save interaction info
-      if ( m_validationTool ) {
-	Amg::Vector3D* nMom = nullptr;
-	m_validationTool->saveISFVertexInfo(process, position,*parent,momentum,nMom,childVector);
-	delete nMom;
-      }
+      Amg::Vector3D* nMom = nullptr;
+      m_validationTool->saveISFVertexInfo(process, position,*parent,momentum,nMom,childVector);
+      delete nMom;
     }
 
-    //Making sure we get some correct truth info from parent if needed before pushing into the particle broker
-    for (unsigned int i=0; i<childVector.size(); i++) {
-	if (!childVector[i]->getTruthBinding()) {
-		childVector[i]->setTruthBinding(new ISF::TruthBinding(*parent->getTruthBinding()));
-	}
+    // Check that the new ISFParticles have a valid TruthBinding
+    for (auto *childParticle : childVector) {
+      if (!childParticle->getTruthBinding()) {
+        ATH_MSG_ERROR("Could not retrieve TruthBinding from child ISFParticle "<< *childParticle);
+      }
     }
 
     return childVector;
@@ -1813,7 +1890,7 @@ ISF::ISFParticleVector  iFatras::McMaterialEffectsUpdator::interactLay(const ISF
   if (process==121) {    // hadronic interaction
 
     return ( m_hadIntProcessor->doHadIntOnLayer(parent, time, position, momentum,
-						extMatProp? &extMatProp->material() : nullptr, particle) );
+                                                extMatProp? &extMatProp->material() : nullptr, particle) );
 
   }
 
@@ -1822,10 +1899,10 @@ ISF::ISFParticleVector  iFatras::McMaterialEffectsUpdator::interactLay(const ISF
     // in the validation mode, add process info
     if (m_validationMode) {
       for (unsigned int i=0; i<childVector.size(); i++) {
-	ISF::ParticleUserInformation* validInfo = new ISF::ParticleUserInformation();
-	validInfo->setProcess(process);
-	if (parent->getUserInformation()) validInfo->setGeneration(parent->getUserInformation()->generation()+1);
-	else validInfo->setGeneration(1);     // assume parent is a primary track
+        ISF::ParticleUserInformation* validInfo = new ISF::ParticleUserInformation();
+        validInfo->setProcess(process);
+        if (parent->getUserInformation()) validInfo->setGeneration(parent->getUserInformation()->generation()+1);
+        else validInfo->setGeneration(1);     // assume parent is a primary track
         childVector[i]->setUserInformation(validInfo);
       }
     }
@@ -1837,20 +1914,23 @@ ISF::ISFParticleVector  iFatras::McMaterialEffectsUpdator::interactLay(const ISF
                                  parent->nextGeoID(),  // inherits from the parent
                                  ISF::fKillsPrimary );
     m_truthRecordSvc->registerTruthIncident( truth);
+    // At this point we need to update the properties of the
+    // ISFParticles produced in the interaction
+    truth.updateChildParticleProperties();
 
     // save info for validation
-    if (m_validationMode && m_validationTool) {
+    if (m_validationMode && m_validationTool.isEnabled()) {
       Amg::Vector3D* nMom = nullptr;
       m_validationTool->saveISFVertexInfo(process,parm.position(),*parent,parm.momentum(),nMom,childVector);
       delete nMom;
     }
   }
 
-  //Making sure we get some correct truth info from parent if needed before pushing into the particle broker
-  for (unsigned int i=0; i<childVector.size(); i++) {
-	if (!childVector[i]->getTruthBinding()) {
-		childVector[i]->setTruthBinding(new ISF::TruthBinding(*parent->getTruthBinding()));
-	}
+  // Check that the new ISFParticles have a valid TruthBinding
+  for (auto *childParticle : childVector) {
+    if (!childParticle->getTruthBinding()) {
+      ATH_MSG_ERROR("Could not retrieve TruthBinding from child ISFParticle "<< *childParticle);
+    }
   }
 
   return childVector;

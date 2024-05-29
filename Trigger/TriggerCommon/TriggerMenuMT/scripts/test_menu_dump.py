@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 """
 Dumps the trigger menu, optionally running some checks for name
@@ -79,6 +79,7 @@ def run():
     if args.check_l1 or args.dump_dicts:
         args.parse_names = True
 
+    flags.Trigger.triggerConfig='FILE'
     flags.Input.Files=[]
     flags.Trigger.triggerMenuSetup=menu_name
     flags.lock()

@@ -254,7 +254,7 @@ namespace TrkDriftCircleMath {
           const DriftCircle* ds  = & dcs[i];
           if(std::abs(ds->r()-ds->rot()->driftRadius())>m_dRTol) ATH_MSG_DEBUG("Different radii on dc " << ds->r() << " rot " << ds->rot()->driftRadius());
           
-          DriftCircle dc_keep(ds->position(), ds->rot()->driftRadius(), ds->dr(), ds->drPrecise(), ds->driftState(), ds->id(), ds->index(),ds->rot() );
+          DriftCircle dc_keep(ds->position(), ds->rot()->driftRadius(), ds->dr(), ds->drPrecise(), ds->driftState(), ds->id(), ds->rot(), ds->index());
           DCOnTrack dc_new(dc_keep, 0., 0.);
           
           dc_new.state(dcs[i].state());
@@ -433,7 +433,7 @@ namespace TrkDriftCircleMath {
       for(int i=0; it!=it_end; ++it, ++i ){
 	      const DriftCircle* ds  = & dcs[i];
         if(std::abs(ds->r()-ds->rot()->driftRadius())>m_dRTol) ATH_MSG_DEBUG("Different radii on dc " << ds->r() << " rot " << ds->rot()->driftRadius());
-        DriftCircle dc_keep(ds->position(), ds->rot()->driftRadius(), ds->dr(), ds->drPrecise(), ds->driftState(), ds->id(), ds->index(),ds->rot() );
+        DriftCircle dc_keep(ds->position(), ds->rot()->driftRadius(), ds->dr(), ds->drPrecise(), ds->driftState(), ds->id(), ds->rot(), ds->index() );
         DCOnTrack dc_new(dc_keep, 0., 0.);
         dc_new.state(dcs[i].state());
         dcs_new.push_back( std::move(dc_new) );
@@ -601,7 +601,7 @@ namespace TrkDriftCircleMath {
       const DriftCircle* ds  = & keep_me;
       if (m_propagateErrors) drad = coords.dr;
       
-      DriftCircle dc_newrad(keep_me.position(), rad, drad, ds->driftState(), keep_me.id(), keep_me.index(),ds->rot() );
+      DriftCircle dc_newrad(keep_me.position(), rad, drad, ds->driftState(), keep_me.id(), ds->rot(), keep_me.index() );
       DCOnTrack dc_new(dc_newrad, residuals, covsq);
       dc_new.state(keep_me.state());
 

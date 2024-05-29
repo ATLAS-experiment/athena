@@ -61,7 +61,8 @@ def defaultTrigTrackingFlags(flags : AthConfigFlags):
   flags.addFlag("doHitDV",              False)
   flags.addFlag("doDisappearingTrk",    False)
   flags.addFlag("useDynamicRoiZWidth",  False)
-
+  
+  
   #precision tracking configuration values
   #__provisional change__:
   #the following settings are incorrect but this is what is being used in the production running
@@ -198,7 +199,10 @@ def signatureTrigTrackingFlags(mode : str) -> AthConfigFlags:
     defaults = defaultInDetTrigTrackingFlags  
   elif mode == "ITk":                         
     category = 'Trigger.ITkTracking'          
-    defaults = defaultITkTrigTrackingFlags    
+    defaults = defaultITkTrigTrackingFlags
+  elif mode == "Acts":
+    category = "Trigger.ActsTracking"
+    defaults = defaultITkTrigTrackingFlags
   else:                                       
     log.error("Acts not supported yet")       
                                             
@@ -726,8 +730,11 @@ def derivedFromSignatureFlags(flags: AthConfigFlags, recoMode : str):
   flags.trkTracks_FTF     = f'HLT_IDTrkTrack_{flags.suffix}_FTF'
   flags.trkTracks_IDTrig  = f'HLT_IDTrkTrack_{flags.suffix}_IDTrig'
   flags.tracks_FTF    = collToRecordable(flags, f'HLT_IDTrack_{flags.suffix}_FTF')
-  flags.tracks_IDTrig = \
-    collToRecordable(flags,"HLT_IDTrack_{}_IDTrig".format(flags.suffix if flags.input_name != "tauIso" else "Tau"))
+  flags.tracks_IDTrig = collToRecordable(flags,"HLT_IDTrack_{}_IDTrig".format(flags.suffix if flags.input_name != "tauIso" else "Tau"))
+  
+  if recoMode == "Acts":
+    flags.trkTracks_FTF     = f'HLT_Acts_{flags.suffix}_Tracks'
+    flags.trkTracks_IDTrig  = f'HLT_Acts_{flags.suffix}_Ambi_Tracks'
 
   if flags.isLRT:             # to be moved to a separate function once LRTs differ 
     flags.minClusters         = tsetter(flags.minClusters         , 8)
@@ -771,6 +778,9 @@ def collToRecordable(flags,name):
 def addGlobalFlags(flags: AthConfigFlags, category : str):
   flags.addFlag(f'{category}.RoiZedWidthDefault', 180.0 * Units.mm)
   flags.addFlag(f'{category}.doGPU', False)
+  flags.addFlag(f'{category}.UseTrigTrackFollowing', False)
+  flags.addFlag(f'{category}.UseTrigRoadPredictor', False)
+  flags.addFlag(f'{category}.UseTracklets', False)
 
   
 import unittest

@@ -382,7 +382,7 @@ test_blend(const VEC& v1)
   // Add 10 to V1 (so as to be different)
   VEC v2 = v1 + 10;
   VEC v3;
-  // take the bottom half of v1 and v2 and put them together
+  // take the top half of v1 and v2 and put them together
   constexpr size_t N = CxxUtils::vec_size<VEC>();
   if constexpr (N == 2) {
     CxxUtils::vpermute2<0, 2>(v3, v1, v2);
@@ -402,6 +402,29 @@ test_blend(const VEC& v1)
       assert(v3[i] == v2[i - N/2]);
     }
   }
+}
+template<class VEC>
+void
+test_pick_elem(const VEC& v1)
+{
+  // Add 10 to V1 (so as to be different)
+  VEC v2 = v1 + 10;
+  // pick the first elements of each vector
+  // and put them in a vector of size 2
+  CxxUtils::vec<CxxUtils::vec_type_t<VEC>,2> v3;
+  constexpr size_t N = CxxUtils::vec_size<VEC>();
+  if constexpr (N == 2) {
+    CxxUtils::vpermute2<0, 2>(v3, v1, v2);
+  } else if constexpr (N == 4) {
+    CxxUtils::vpermute2<0, 4>(v3, v1, v2);
+  } else if constexpr (N == 8) {
+    CxxUtils::vpermute2<0, 8>(v3, v1, v2);
+  } else {
+    // N==16
+    CxxUtils::vpermute2<0, 16>(v3, v1, v2);
+  }
+  assert(v3[0] == v1[0]);
+  assert(v3[1] == v2[0]);
 }
 
 template<class VEC>
@@ -504,6 +527,7 @@ testFloat1()
     test_max(testVec1);                                           \
     test_permute(testVec1);                                       \
     test_blend(testVec1);                                         \
+    test_pick_elem(testVec1);                                     \
     test_convert_to_int(testVec1);                                \
   } while (0)
 
@@ -544,6 +568,7 @@ testInt1()
     test_max(testVec1);                                                     \
     test_permute(testVec1);                                                 \
     test_blend(testVec1);                                                   \
+    test_pick_elem(testVec1);                                               \
     test_convert_to_double(testVec1);                                       \
     test_any(testVec3);                                                     \
     test_none(testVec3);                                                    \

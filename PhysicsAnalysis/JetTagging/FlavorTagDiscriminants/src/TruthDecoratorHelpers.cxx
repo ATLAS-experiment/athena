@@ -9,13 +9,11 @@
 namespace FlavorTagDiscriminants {
     namespace TruthDecoratorHelpers {
 
-        bool sort_particles(const xAOD::IParticle* particle_A, 
-                            const xAOD::IParticle* particle_B) {
+        bool sort_particles(const xAOD::IParticle* particle_A, const xAOD::IParticle* particle_B) {
             return particle_A->pt() < particle_B->pt();
         }
 
-        const xAOD::TruthVertex* get_truth_vertex(
-            const xAOD::TruthParticle* truth) {
+        const xAOD::TruthVertex* get_truth_vertex(const xAOD::TruthParticle* truth) {
             // no truth
             if ( not truth ) { return nullptr; }
 
@@ -28,31 +26,27 @@ namespace FlavorTagDiscriminants {
             return truth_vertex;
         }
 
-        float get_distance(const xAOD::TruthVertex* vertex_A, 
-                           const xAOD::TruthVertex* vertex_B) {
+        float get_distance(const xAOD::TruthVertex* vertex_A, const xAOD::TruthVertex* vertex_B) {
             if ( !vertex_A || !vertex_B ) { return 999.0; }
             return (vertex_A->v4().Vect() - vertex_B->v4().Vect()).Mag();
         }
 
         bool is_bc_hadron(const xAOD::TruthParticle* truth_particle, int flavour) {
+            if( truth_particle == nullptr ) { return false; }
             if( flavour == 5 && truth_particle->isBottomHadron() ) { return true; }
             if( flavour == 4 && truth_particle->isCharmHadron()  ) { return true; }
             return false;
         }
-        
+
         bool is_weakly_decaying_hadron(const xAOD::TruthParticle* truth_particle, int flavour) {
-            if (is_bc_hadron(truth_particle, flavour)) {
-                if ( not truth_particle->hasDecayVtx() ) { return false; }
-                const auto vx = truth_particle->decayVtx();
-                for ( size_t i = 0; i < vx->nOutgoingParticles(); i++ ) {
-                    const auto out_part = vx->outgoingParticle(i);
-                    if ( is_bc_hadron(out_part, flavour) ) { return  false; }
-                } 
-                return true;
-            }
-            return false;
+          if (!is_bc_hadron(truth_particle, flavour)) return false;
+          if (!truth_particle->hasDecayVtx() ) return false;
+          for ( const auto out_part: truth_particle->decayVtx()->particles_out()) {
+             if ( is_bc_hadron(out_part, flavour) ) return  false;
+          }
+          return true;
         }
-        
+
         bool is_weakly_decaying_hadron(const xAOD::TruthParticle* truth_particle) {
             return is_weakly_decaying_hadron(truth_particle, 5) || is_weakly_decaying_hadron(truth_particle, 4);
         }
@@ -79,29 +73,15 @@ namespace FlavorTagDiscriminants {
         }
 
         int get_truth_type(const xAOD::TruthParticle* truth_particle) {
-            if (!truth_particle) {
-                return TruthType::Label::NoTruth;
-            }
+            if (!truth_particle) return TruthType::Label::NoTruth;
             // simple pdgid check for pion based on
             // PhysicsAnalysis/MCTruthClassifier/Root/MCTruthClassifierGen.cxx#L1159
-            if (std::abs(truth_particle->pdgId()) == 211) {
-                return TruthType::Label::Pion * truth_particle->charge();
-            }
-            else if (truth_particle->isStrangeMeson()) {
-                return TruthType::Label::Kaon * truth_particle->charge();
-            }
-            if (std::abs(truth_particle->pdgId()) == 3122) {
-                return TruthType::Label::Lambda;
-            }
-            else if (truth_particle->isElectron()) {
-                return TruthType::Label::Electron * truth_particle->charge() * -1;
-            }
-            else if (truth_particle->isMuon()) {
-                return TruthType::Label::Muon * truth_particle->charge() * -1;
-            }
-            else if (truth_particle->isPhoton()) {
-                return TruthType::Label::Photon;
-            }
+            if (std::abs(truth_particle->pdgId()) == 211) return TruthType::Label::Pion * truth_particle->charge();
+            if (truth_particle->isStrangeMeson()) return TruthType::Label::Kaon * truth_particle->charge();
+            if (std::abs(truth_particle->pdgId()) == 3122) return TruthType::Label::Lambda;
+            if (truth_particle->isElectron()) return TruthType::Label::Electron * truth_particle->charge() * -1;
+            if (truth_particle->isMuon()) return TruthType::Label::Muon * truth_particle->charge() * -1;
+            if (truth_particle->isPhoton()) return TruthType::Label::Photon;
             return TruthType::Label::Other;
         }
 
@@ -109,21 +89,11 @@ namespace FlavorTagDiscriminants {
             /* this label gives information about the origin of secondary
             particles (material interactions, gamme conversions, etc.)*/
 
-            if (!(InDet::TrkOrigin::isSecondary(origin))){
-                return TruthSource::Label::NotSecondary;
-                }
-            else if ( InDet::TrkOrigin::isHadronicInteraction(origin) ) {
-                return TruthSource::Label::HadronicInteraction;
-            }
-            else if ( InDet::TrkOrigin::isStrangeMesonDecay(origin) ) {
-                return TruthSource::Label::StrangeMesonDecay;
-            }
-            else if ( InDet::TrkOrigin::isStrangeBaryonDecay(origin) ) {
-                return TruthSource::Label::StrangeBaryonDecay;
-            }
-            else if ( InDet::TrkOrigin::isGammaConversion(origin) ) {
-                return TruthSource::Label::GammaConversion;
-            }
+            if (!(InDet::TrkOrigin::isSecondary(origin))) return TruthSource::Label::NotSecondary;
+            if ( InDet::TrkOrigin::isHadronicInteraction(origin) ) return TruthSource::Label::HadronicInteraction;
+            if ( InDet::TrkOrigin::isStrangeMesonDecay(origin) ) return TruthSource::Label::StrangeMesonDecay;
+            if ( InDet::TrkOrigin::isStrangeBaryonDecay(origin) ) return TruthSource::Label::StrangeBaryonDecay;
+            if ( InDet::TrkOrigin::isGammaConversion(origin) ) return TruthSource::Label::GammaConversion;
             // For simulation tracks not included in the above categories
             return TruthSource::Label::Other;
         }

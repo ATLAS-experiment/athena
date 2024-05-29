@@ -15,7 +15,7 @@ inline bool PlaneSurface::operator==(const PlaneSurface& psf) const
   return transfEqual && centerEqual && boundsEqual;
 }
 
-inline SurfaceType
+inline constexpr SurfaceType
 PlaneSurface::type() const
 {
   return PlaneSurface::staticType;

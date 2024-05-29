@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// TransportTool.cxx, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 // class header
 #include "TransportTool.h"
@@ -105,7 +101,7 @@ StatusCode
 iFatras::TransportTool::initialize()
 {
 
-  ATH_MSG_INFO( "initialize()" );
+  ATH_MSG_DEBUG( "initialize()" );
 
   // Retrieve the tools one by one
   if (retrieveTool<iFatras::ISimHitCreator>(m_simHitCreatorID).isFailure())
@@ -126,8 +122,7 @@ iFatras::TransportTool::initialize()
       return StatusCode::FAILURE;
   if (retrieveTool<iFatras::IProcessSamplingTool>(m_samplingTool).isFailure())
       return StatusCode::FAILURE;
-  if (m_validationOutput && retrieveTool<iFatras::IPhysicsValidationTool>(m_validationTool).isFailure())
-      return StatusCode::FAILURE;
+  ATH_CHECK( m_validationTool.retrieve( DisableTool{ m_validationTool.empty() || !m_validationOutput } ) );
 
   if ( m_rndGenSvc.retrieve().isFailure() ){
     ATH_MSG_FATAL( "Could not retrieve " << m_rndGenSvc );
@@ -139,7 +134,7 @@ iFatras::TransportTool::initialize()
     ATH_MSG_FATAL( "Could not get random engine '" << m_randomEngineName << "'" );
     return StatusCode::FAILURE;
   }
-
+  ATH_MSG_DEBUG( "finalize() successful" );
   return StatusCode::SUCCESS;
 }
 
@@ -149,7 +144,7 @@ iFatras::TransportTool::initialize()
  *=======================================================================*/
 StatusCode iFatras::TransportTool::finalize()
 {
-  ATH_MSG_INFO( "finalize() successful" );
+  ATH_MSG_DEBUG( "finalize() successful" );
   return StatusCode::SUCCESS;
 }
 
@@ -243,11 +238,11 @@ ISF::ISFParticle* iFatras::TransportTool::process( const ISF::ISFParticle& isp, 
   if ( freepath>0. && freepath<0.01 ) {
     if (!m_particleDecayHelper.empty()) {
       ATH_MSG_VERBOSE( "[ fatras transport ] Decay is triggered for input particle.");
-      m_particleDecayHelper->decay(isp,isp.position(),isp.momentum(),isp.timeStamp());
+      m_particleDecayHelper->decay(isp,isp.position(),isp.momentum(),isp.timeStamp()); // Registers TruthIncident internally
     }
 
     // validation mode - for all particle registered into stack
-    if ( m_validationOutput ) {
+    if ( m_validationOutput && m_validationTool.isEnabled() ) {
       int endProcess = decayProc;
       m_validationTool->saveISFParticleInfo(isp,endProcess,&inputPar,timeLim.time,0.);
     }
@@ -262,7 +257,7 @@ ISF::ISFParticle* iFatras::TransportTool::process( const ISF::ISFParticle& isp, 
     pathLim=Trk::PathLimit( matLimit->dMax,matLimit->process);
     pathLim.updateMat(matLimit->dCollected,13.,0.);          // arbitrary Z choice : update MaterialPathInfo
   } else if (absPdg!=999 && pHypothesis<99) { // need to resample
-    pathLim = m_samplingTool->sampleProcess(isp.momentum().mag(),isp.charge(),pHypothesis);
+    pathLim = m_samplingTool->sampleProcess(m_randomEngine, isp.momentum().mag(),isp.charge(),pHypothesis);
   }
 
   // use extrapolation with path limit - automatic exit at subdetector boundary
@@ -344,7 +339,7 @@ ISF::ISFParticle* iFatras::TransportTool::process( const ISF::ISFParticle& isp, 
   }
 
   // validation mode - for all particle registered into stack
-  if ( m_validationOutput ) {
+  if ( m_validationOutput && m_validationTool.isEnabled() ) {
 
     int dProc = ( timeLim.tMax>0. && timeLim.tMax<=timeLim.time ) ? timeLim.process : 0;
     int mProc = ( pathLim.x0Max>0. && ( pathLim.x0Max <= pathLim.x0Collected ||
@@ -381,7 +376,7 @@ ISF::ISFParticle* iFatras::TransportTool::process( const ISF::ISFParticle& isp, 
   if (uisp && timeLim.tMax>0.  && timeLim.time >=timeLim.tMax ) {
     if (!m_particleDecayHelper.empty()) {
       ATH_MSG_VERBOSE( "[ fatras transport ] Decay is triggered for input particle.");
-      m_particleDecayHelper->decay(*uisp,uisp->position(),uisp->momentum(),uisp->timeStamp());
+      m_particleDecayHelper->decay(*uisp,uisp->position(),uisp->momentum(),uisp->timeStamp()); // Registers TruthIncident internally
     }
     delete uisp;
     return nullptr;

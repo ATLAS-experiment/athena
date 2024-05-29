@@ -39,7 +39,7 @@ class EMTrackFit : public egDetail
   EMTrackFit(); 
 
   /** @brief Destructor*/
-  virtual ~EMTrackFit();
+  virtual ~EMTrackFit() = default;
 
   //void print() const; 
   virtual const std::string& className() const;

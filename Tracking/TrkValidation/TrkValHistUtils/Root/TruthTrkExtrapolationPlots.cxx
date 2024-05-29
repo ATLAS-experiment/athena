@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <utility>
@@ -7,6 +7,7 @@
 
 
 #include "TrkValHistUtils/TruthTrkExtrapolationPlots.h"
+#include "AthContainers/ConstAccessor.h"
 
 namespace Trk {
   TruthTrkExtrapolationPlots::TruthTrkExtrapolationPlots(PlotBase *pParent, const std::string& sDir) : PlotBase(pParent, sDir),
@@ -76,26 +77,28 @@ namespace Trk {
 
   void
   ExtrLayerPlots::fill(const xAOD::TruthParticle &truthprt, const std::string& sNom, float weight) {
-    if (!truthprt.isAvailable<float>(sNom + "_px") ||
-        !truthprt.isAvailable<float>(sNom + "_py") ||
-        !truthprt.isAvailable<float>(sNom + "_pz")) {
+    SG::ConstAccessor<float> pxAcc (sNom + "_px");
+    SG::ConstAccessor<float> pyAcc (sNom + "_py");
+    SG::ConstAccessor<float> pzAcc (sNom + "_pz");
+    if (!pxAcc.isAvailable(truthprt) ||
+        !pyAcc.isAvailable(truthprt) ||
+        !pzAcc.isAvailable(truthprt)) {
       return;
     }
 
-    TVector3 vec(truthprt.auxdata<float>(sNom + "_px"),
-                 truthprt.auxdata<float>(sNom + "_py"),
-                 truthprt.auxdata<float>(sNom + "_pz"));
+    TVector3 vec(pxAcc(truthprt), pyAcc(truthprt), pzAcc(truthprt));
 
+    SG::ConstAccessor<float> px_extrAcc (sNom + "_px_extr");
+    SG::ConstAccessor<float> py_extrAcc (sNom + "_py_extr");
+    SG::ConstAccessor<float> pz_extrAcc (sNom + "_pz_extr");
     TVector3 vec_extr;
-    if (!truthprt.isAvailable<float>(sNom + "_px_extr") ||
-        !truthprt.isAvailable<float>(sNom + "_py_extr") ||
-        !truthprt.isAvailable<float>(sNom + "_pz_extr")) {
+    if (!px_extrAcc.isAvailable(truthprt) ||
+        !py_extrAcc.isAvailable(truthprt) ||
+        !pz_extrAcc.isAvailable(truthprt)) {
       return;
     }
 
-    vec_extr.SetXYZ(truthprt.auxdata<float>(sNom + "_px_extr"),
-                    truthprt.auxdata<float>(sNom + "_py_extr"),
-                    truthprt.auxdata<float>(sNom + "_pz_extr"));
+    vec_extr.SetXYZ(px_extrAcc(truthprt), py_extrAcc(truthprt), pz_extrAcc(truthprt));
 
     p->Fill(vec.Mag() * 0.001, weight);
     // px->Fill(vec.Px()*0.001);
@@ -222,50 +225,54 @@ namespace Trk {
 
   void
   ExtrRegionPlots::fill(const xAOD::TruthParticle &truthprt, const std::string& sDetBegin, const std::string& sDetEnd, float weight) {
-    if (!truthprt.isAvailable<float>(sDetBegin + "px") ||
-        !truthprt.isAvailable<float>(sDetBegin + "py") ||
-        !truthprt.isAvailable<float>(sDetBegin + "pz") ||
-        !truthprt.isAvailable<float>(sDetEnd + "px") ||
-        !truthprt.isAvailable<float>(sDetEnd + "py") ||
-        !truthprt.isAvailable<float>(sDetEnd + "pz")) {
+    SG::ConstAccessor<float> pxBeginAcc (sDetBegin + "_px");
+    SG::ConstAccessor<float> pyBeginAcc (sDetBegin + "_py");
+    SG::ConstAccessor<float> pzBeginAcc (sDetBegin + "_pz");
+    SG::ConstAccessor<float> pxEndAcc (sDetEnd + "_px");
+    SG::ConstAccessor<float> pyEndAcc (sDetEnd + "_py");
+    SG::ConstAccessor<float> pzEndAcc (sDetEnd + "_pz");
+    if (!pxBeginAcc.isAvailable(truthprt) ||
+        !pyBeginAcc.isAvailable(truthprt) ||
+        !pzBeginAcc.isAvailable(truthprt) ||
+        !pxEndAcc.isAvailable(truthprt) ||
+        !pyEndAcc.isAvailable(truthprt) ||
+        !pzEndAcc.isAvailable(truthprt)) {
       return;
     }
 
-    TVector3 vecDetBegin(truthprt.auxdata<float>(sDetBegin + "px"),
-                         truthprt.auxdata<float>(sDetBegin + "py"),
-                         truthprt.auxdata<float>(sDetBegin + "pz"));
+    TVector3 vecDetBegin(pxBeginAcc(truthprt), pyBeginAcc(truthprt), pzBeginAcc(truthprt));
+    TVector3 vecDetEnd(pxEndAcc(truthprt), pyEndAcc(truthprt), pzEndAcc(truthprt));
 
-    TVector3 vecDetEnd(truthprt.auxdata<float>(sDetEnd + "px"),
-                       truthprt.auxdata<float>(sDetEnd + "py"),
-                       truthprt.auxdata<float>(sDetEnd + "pz"));
 
     // check if IP, since extr is not available there (sDetBegin="")
     TVector3 vecDetBegin_extr;
     if (!sDetBegin.empty()) {
-      if (!truthprt.isAvailable<float>(sDetBegin + "px_extr") ||
-          !truthprt.isAvailable<float>(sDetBegin + "py_extr") ||
-          !truthprt.isAvailable<float>(sDetBegin + "pz_extr")) {
+      SG::ConstAccessor<float> px_extrAcc (sDetBegin + "_px_extr");
+      SG::ConstAccessor<float> py_extrAcc (sDetBegin + "_py_extr");
+      SG::ConstAccessor<float> pz_extrAcc (sDetBegin + "_pz_extr");
+      if (!px_extrAcc.isAvailable(truthprt) ||
+          !py_extrAcc.isAvailable(truthprt) ||
+          !pz_extrAcc.isAvailable(truthprt)) {
         return;
       }
 
-      vecDetBegin_extr.SetXYZ(truthprt.auxdata<float>(sDetBegin + "px_extr"),
-                              truthprt.auxdata<float>(sDetBegin + "py_extr"),
-                              truthprt.auxdata<float>(sDetBegin + "pz_extr"));
+      vecDetBegin_extr.SetXYZ(px_extrAcc(truthprt), py_extrAcc(truthprt), pz_extrAcc(truthprt));
     }else {
       vecDetBegin_extr = vecDetBegin;
     }
 
     TVector3 vecDetEnd_extr;
     if (!sDetEnd.empty()) {
-      if (!truthprt.isAvailable<float>(sDetEnd + "px_extr") ||
-          !truthprt.isAvailable<float>(sDetEnd + "py_extr") ||
-          !truthprt.isAvailable<float>(sDetEnd + "pz_extr")) {
+      SG::ConstAccessor<float> px_extrAcc (sDetEnd + "_px_extr");
+      SG::ConstAccessor<float> py_extrAcc (sDetEnd + "_py_extr");
+      SG::ConstAccessor<float> pz_extrAcc (sDetEnd + "_pz_extr");
+      if (!px_extrAcc.isAvailable(truthprt) ||
+          !py_extrAcc.isAvailable(truthprt) ||
+          !pz_extrAcc.isAvailable(truthprt)) {
         return;
       }
 
-      vecDetEnd_extr.SetXYZ(truthprt.auxdata<float>(sDetEnd + "px_extr"),
-                            truthprt.auxdata<float>(sDetEnd + "py_extr"),
-                            truthprt.auxdata<float>(sDetEnd + "pz_extr"));
+      vecDetEnd_extr.SetXYZ(px_extrAcc(truthprt), py_extrAcc(truthprt), pz_extrAcc(truthprt));
     }else {
       vecDetEnd_extr = vecDetEnd;
     }

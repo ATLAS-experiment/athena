@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 /**
  * @file DataModelTestDataRead/versions/AllocTestAuxContainer_v1.h
@@ -41,10 +41,10 @@ public:
 
 
   // For this one, the dictionary will always be present (from AthContainers).
-  std::vector<int, std::pmr::polymorphic_allocator<int> > atInt1;
+  AUXVAR_DECL (int, atInt1, std::pmr::polymorphic_allocator);
 
   // For this one, the dictionary is only present in this package.
-  std::vector<int, Athena_test::TestAlloc<int> > atInt2;
+  AUXVAR_DECL (int, atInt2, Athena_test::TestAlloc);
 };
 
 

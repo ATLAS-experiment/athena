@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -56,6 +56,9 @@ namespace G4UA
   public:
     /// constructor
     TestActionTimer();
+
+    TestActionTimer(const TestActionTimer&) = delete;
+    TestActionTimer& operator=(const TestActionTimer&) = delete;
 
     /// this holds all the data from individual threads that needs to be merged at EoR
     struct Report

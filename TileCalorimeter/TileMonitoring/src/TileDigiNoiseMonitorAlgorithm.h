@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILEMONITORING_TILEDIGINOISEMONITORALGORITHM_H
@@ -41,6 +41,9 @@ class TileDigiNoiseMonitorAlgorithm : public AthMonitorAlgorithm {
 
     Gaudi::Property<bool> m_fillPedestalDifference{this,
         "fillPedestalDifference", true, "Fill pedestal difference between monitored pedestal and one from DB"};
+
+    Gaudi::Property<bool> m_ignoreDisconnectedChannels{this,
+        "ignoreDisconnectedChannels", false, "Ignore disconnected channels"};
 
     Gaudi::Property<std::vector<int>> m_fragIDsToIgnoreDMUerrors{this,
         "FragIDsToIgnoreDMUErrors", {}, "List of Tile frag IDs for which ignore DMU errors"};

@@ -6,18 +6,18 @@ atlas_subdir( ForwardRegionGeoModel )
 # External dependencies:
 find_package( CLHEP )
 find_package( GeoModel COMPONENTS GeoModelKernel )
-
 # Component(s) in the package:
 atlas_add_library( ForwardRegionGeoModelLib
 		   ForwardRegionGeoModel/*.h
 		   INTERFACE
                    PUBLIC_HEADERS ForwardRegionGeoModel
-                   INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
+                   INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} 
                    LINK_LIBRARIES ${CLHEP_LIBRARIES} GaudiKernel )
 
 atlas_add_component( ForwardRegionGeoModel
                      src/*.cxx
                      src/components/*.cxx
+		     INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
                      LINK_LIBRARIES ${GEOMODEL_LIBRARIES} ForwardRegionGeoModelLib AthenaKernel  GeoModelUtilities GeoModelInterfaces PathResolver StoreGateLib )
 
 # Install files from the package:

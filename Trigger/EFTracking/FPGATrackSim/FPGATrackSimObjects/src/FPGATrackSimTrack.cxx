@@ -45,13 +45,10 @@ std::vector<float> FPGATrackSimTrack::computeIdealCoords(unsigned ilayer) const
   // but distances for us are in mm, so 2*rho = 330 * (pT / GeV)
   // and 1/(2*rho) = (1 / (pT in GeV)) / 330
 
-  // TODO this needs updating to use spacepoint radii, which we need to compute somwhere.
-  // In HTTSim it was done in TrigHTTMaps.
-  double target_r = (m_trackStage == TrackStage::SECOND) ? fpgatracksim::TARGET_R_2STAGE[ilayer] : fpgatracksim::TARGET_R_1STAGE[ilayer];
-
+  double target_r = m_idealRadii[ilayer];
   if (m_hits[ilayer].getHitType() == HitType::spacepoint) {
     unsigned other_layer = (m_hits[ilayer].getSide() == 0) ? ilayer + 1 : ilayer - 1;
-    target_r = (target_r + ((m_trackStage == TrackStage::SECOND) ? fpgatracksim::TARGET_R_2STAGE[other_layer] : fpgatracksim::TARGET_R_1STAGE[other_layer])) / 2.;
+    target_r = (target_r + m_idealRadii[other_layer]) / 2.;
   }
 
   double hitGPhi = m_hits[ilayer].getGPhi();

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_PUNCHTHROUGHTOOLS_SRC_PUNCHTHROUGHTOOL_H
@@ -13,9 +13,6 @@
 // Athena Base
 #include "AthenaBaseComps/AthAlgTool.h"
 
-//Barcode
-#include "BarcodeInterfaces/IBarcodeSvc.h"
-
 //Geometry
 #include "SubDetectorEnvelopes/IEnvelopeDefSvc.h"
 
@@ -24,8 +21,6 @@
 // Gaudi & StoreGate
 #include "GaudiKernel/IPartPropSvc.h"
 
-#include "BarcodeEvent/Barcode.h"
-#include "BarcodeEvent/PhysicsProcessCode.h"
 #include "GeoPrimitives/GeoPrimitives.h"
 
 #include "ISF_Event/ISFParticleContainer.h"
@@ -117,7 +112,7 @@ namespace ISF {
     std::vector<double> inversePCA(int pcaCdfIterator, std::vector<double> &variables) const;
 
     //apply the inverse CDF trainsform
-    static double inverseCdfTransform(double variable, std::map<double, double> inverse_cdf_map) ;
+    static double inverseCdfTransform(double variable, const std::map<double, double>& inverse_cdf_map) ;
 
     //dot product between matrix and vector, used to inverse PCA
     static std::vector<double> dotProduct(const std::vector<std::vector<double>> &m, const std::vector<double> &v) ;
@@ -202,7 +197,6 @@ namespace ISF {
      *---------------------------------------------------------------------*/
     ServiceHandle<IPartPropSvc>          m_particlePropSvc{this, "PartPropSvc", "PartPropSvc", "particle properties svc"};
     ServiceHandle<IGeoIDSvc>             m_geoIDSvc{this, "GeoIDSvc", "ISF::GeoIDSvc"};
-    ServiceHandle<Barcode::IBarcodeSvc>  m_barcodeSvc{this, "BarcodeSvc", "BarcodeSvc"};
     ServiceHandle<IEnvelopeDefSvc>       m_envDefSvc{this, "EnvelopeDefSvc", "AtlasGeometry_EnvelopeDefSvc"};
 
     /** beam pipe radius */

@@ -25,22 +25,19 @@ atlas_add_test( ut_basicRead_test
                 SOURCES test/ut_basicRead_test.cxx
                 INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
                 LINK_LIBRARIES ${ROOT_LIBRARIES} AsgMessagingLib AthAnalysisBaseCompsLib POOLRootAccessLib xAODEventInfo xAODRootAccess CxxUtils
-                POST_EXEC_SCRIPT noerror.sh
-                PROPERTIES TIMEOUT 30 )
+                POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( ut_basicxAODRead_test
                  SOURCES test/ut_basicxAODRead_test.cxx
                       INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
                       LINK_LIBRARIES ${ROOT_LIBRARIES} POOLRootAccessLib xAODBase xAODEventInfo xAODRootAccess CxxUtils
-                      POST_EXEC_SCRIPT noerror.sh
-                 PROPERTIES TIMEOUT 30 )
+                      POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( ut_basicAlg_test
                 SOURCES test/ut_basicAlg_test.cxx
                 INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
                 LINK_LIBRARIES ${ROOT_LIBRARIES} POOLRootAccessLib AthAnalysisBaseCompsLib xAODEventInfo xAODRootAccess
-                POST_EXEC_SCRIPT noerror.sh
-                PROPERTIES TIMEOUT 30 )
+                POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( basicRead_py
                 SCRIPT python ${CMAKE_CURRENT_SOURCE_DIR}/test/ut_basicRead_test.py

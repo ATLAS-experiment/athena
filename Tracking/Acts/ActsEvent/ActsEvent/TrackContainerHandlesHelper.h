@@ -43,10 +43,13 @@ class MutableTrackContainerHandlesHelper {
    * produces ActsTrk::ConstTrackContainer with all backends stored in SG
    * @arg tc - MutableTrackContainer the source (will  be disassembled
    * after the operation)
-   * @arg context - event context (needed for SG operations)
+   * @arg - geoContext - geometry context, needed in surfaces conversion
+   * @arg evtContext - event context (needed for SG operations)
    */
   std::unique_ptr<ActsTrk::TrackContainer> moveToConst(
-      ActsTrk::MutableTrackContainer&& tc, const EventContext& context) const;
+      ActsTrk::MutableTrackContainer&& tc,
+      const Acts::GeometryContext& geoContext,
+      const EventContext& evtContext) const;
 
  private:
   // MTJ part

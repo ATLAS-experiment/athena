@@ -20,8 +20,11 @@ namespace MuonGMR4 {
     inline const Amg::Vector2D& StripDesign::cornerTopRight() const { return m_topRight; }
     inline const Amg::Vector2D& StripDesign::stripNormal() const { return m_stripNormal; }
     inline const Amg::Vector2D& StripDesign::stripDir() const { return m_stripDir; }
+    inline const Amg::Vector2D& StripDesign::firstStripPos() const { return m_firstStripPos; }
 
-
+/// Additional Functions for Diamonds
+    inline double StripDesign::yCutout() const { return m_yCutout; }
+/// ==============================================================================================
     SET_DIRECTION(edgeDirTop, m_dirTopEdge, m_topLeft, m_topRight)
     SET_DIRECTION(edgeDirBottom, m_dirBotEdge, m_bottomLeft, m_bottomRight)
     SET_DIRECTION(edgeDirLeft, m_dirLeftEdge, m_topLeft, m_bottomLeft)
@@ -102,10 +105,10 @@ namespace MuonGMR4 {
     }
     //============================================================================
     inline double StripDesign::stripLength(int stripNumber) const {
-        const int stripCh = (stripNumber - m_channelShift);
+        const int stripCh = (stripNumber - firstStripNumber());
         if (stripCh < 0 ||  stripCh > numStrips()) {
             ATH_MSG_WARNING("center() -- Invalid strip number given "<<stripNumber<<" allowed range ["
-                         <<m_channelShift<<";"<<numStrips()<<"]");
+                         <<firstStripNumber()<<";"<<numStrips()<<"]");
             return 0.;
         }
         const Amg::Vector2D strip{stripPosition(stripCh)};
@@ -115,9 +118,14 @@ namespace MuonGMR4 {
             return 0;
         }
         const Amg::Vector2D delta = (*bottomIsect) - (*topIsect);
+        double stripLen = std::hypot(delta.x(), delta.y());
+        /// Condition to limit the stripLength to a maximum length of long base of the sTGC L3 sector
+        if(yCutout() && stripLen > 2*longHalfHeight()) {
+            stripLen = 2*longHalfHeight();
+        }
         ATH_MSG_VERBOSE("Strip "<<stripNumber<<" right edge: "<<Amg::toString((*bottomIsect), 2)
-                     <<" left edge: "<<Amg::toString( (*topIsect),2)<<" length: "<<std::hypot(delta.x(), delta.y()));
-        return std::hypot(delta.x(), delta.y());
+                     <<" left edge: "<<Amg::toString( (*topIsect),2)<<" length: "<<stripLen);
+        return stripLen;
     }
     inline CheckVector2D StripDesign::rightInterSect(int stripCh, bool uncapped) const {
         return rightInterSect(stripPosition(stripCh), uncapped);
@@ -132,37 +140,37 @@ namespace MuonGMR4 {
     }
 
     inline CheckVector2D StripDesign::center(int stripNumber) const {
-        const int stripCh = (stripNumber - m_channelShift);
+        const int stripCh = (stripNumber - firstStripNumber());
         if (stripCh < 0 ||  stripCh > numStrips()) {
             ATH_MSG_WARNING("center() -- Invalid strip number given "<<stripNumber<<" allowed range ["
-                         <<m_channelShift<<";"<<numStrips()<<"]");
+                         <<firstStripNumber()<<";"<<numStrips()<<"]");
             return std::nullopt;
         }
         CheckVector2D cen{stripCenter(stripCh)};
         if (!cen) return std::nullopt;
-        return std::make_optional<Amg::Vector2D>(m_stereoRotMat * std::move(*cen));
+        return std::make_optional<Amg::Vector2D>(m_etaToStereo * std::move(*cen));
     }    
     inline CheckVector2D StripDesign::leftEdge(int stripNumber) const {
-       const int stripCh = (stripNumber - m_channelShift);
+       const int stripCh = (stripNumber - firstStripNumber());
        if (stripCh < 0 ||  stripCh > numStrips()) {
             ATH_MSG_WARNING("leftEdge() -- Invalid strip number given "<<stripNumber<<" allowed range ["
-                          <<m_channelShift<<";"<<numStrips()<<"]");
+                          <<firstStripNumber()<<";"<<numStrips()<<"]");
             return std::nullopt;
        }
        CheckVector2D iSect{leftInterSect(stripCh)};
        if (!iSect) return std::nullopt;
-       return std::make_optional<Amg::Vector2D>(m_stereoRotMat * std::move(*iSect));
+       return std::make_optional<Amg::Vector2D>(m_etaToStereo * std::move(*iSect));
     }
     inline CheckVector2D StripDesign::rightEdge(int stripNumber) const {
-        const int stripCh = (stripNumber - m_channelShift);
+        const int stripCh = (stripNumber - firstStripNumber());
         if (stripCh < 0 ||  stripCh > numStrips()) {
             ATH_MSG_WARNING("rightEdge() -- Invalid strip number given "<<stripNumber<<" allowed range ["
-                          <<m_channelShift<<";"<<numStrips()<<"]");
+                          <<firstStripNumber()<<";"<<numStrips()<<"]");
             return std::nullopt;
         }
         CheckVector2D iSect{rightInterSect(stripCh)};
         if (!iSect) return std::nullopt;
-        return std::make_optional<Amg::Vector2D>(m_stereoRotMat * std::move(*iSect));
+        return std::make_optional<Amg::Vector2D>(m_etaToStereo * std::move(*iSect));
     }
     inline double StripDesign::distanceToStrip(const Amg::Vector2D& pos, int stripNumber) const {
         CheckVector2D stripCent = center(stripNumber);
@@ -170,7 +178,7 @@ namespace MuonGMR4 {
         return (pos - (*stripCent)).x();
     }
     inline int StripDesign::stripNumber(const Amg::Vector2D& extPos) const {
-        const Amg::Vector2D pos = m_nominalRotMat * extPos;
+        const Amg::Vector2D pos = m_stereoToEta * extPos;
         std::optional<double> stripPitches = Amg::intersect<2>(m_firstStripPos, stripDir(),
                                                                pos, - Amg::Vector2D::UnitX());
         if (!stripPitches) {
@@ -178,7 +186,7 @@ namespace MuonGMR4 {
         }
         const double xMid = (*stripPitches);  
         if (xMid < - 0.5*stripPitch()) {
-            ATH_MSG_VERBOSE("Object "<<Amg::toString(pos)<<" is way before the first strip.");
+            ATH_MSG_VERBOSE("Object "<<Amg::toString(pos)<<" is way before the first strip "<<xMid<<".");
             return -1;
         }
         const int chNum = static_cast<int>(std::round(std::abs(xMid / stripPitch())));
@@ -187,18 +195,25 @@ namespace MuonGMR4 {
                           <<" Virtual channel number: "<<chNum<<" max strips: "<<numStrips());
             return -1;
         }
-        if (!insideTrapezoid(pos)){
-            ATH_MSG_VERBOSE("Object "<<Amg::toString(pos)<<" is outside the active area of the trapezoid");
+        if (!insideBoundaries(pos)){
+            ATH_MSG_VERBOSE("Object "<<Amg::toString(pos)<<" is outside the active area of the trapezoid. "
+                          <<"Distance to strip: "<<stripNormal().dot(pos - (*stripCenter(chNum)))
+                          <<","<<stripDir().dot(pos - (*stripCenter(chNum)))
+                          <<" stripLength: "<<0.5*stripLength(chNum + firstStripNumber()));
             return -1;
         }
-        return chNum + m_channelShift;
+        return chNum + firstStripNumber();
     }
+
     inline bool StripDesign::insideTrapezoid(const Amg::Vector2D& extPos) const {
+        return insideBoundaries(m_stereoToEta * extPos);
+    }
+    inline bool StripDesign::insideBoundaries(const Amg::Vector2D& pos) const {
         /// One needs to go backward to reach the bottom edge
-        CheckVector2D botIsect = rightInterSect(extPos);
-        if (!botIsect || stripDir().dot(extPos - (*botIsect)) < 0) return false;
-        CheckVector2D topIsect = leftInterSect(extPos);
-        return topIsect && stripDir().dot(extPos - (*topIsect)) < 0;       
+        CheckVector2D botIsect = rightInterSect(pos);
+        if (!botIsect || stripDir().dot(pos - (*botIsect)) < 0) return false;
+        CheckVector2D topIsect = leftInterSect(pos);
+        return topIsect && stripDir().dot(pos - (*topIsect)) < 0;       
     }
 }
 #undef SET_DIRECTION

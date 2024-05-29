@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 # Configuration of SiSpacePointsSeedTool_xk package
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -8,6 +8,8 @@ from AthenaConfiguration.Enums import BeamType
 def SiSpacePointsSeedMaker_CosmicCfg(
         flags, name="InDetSpSeedsMaker_Cosmic", **kwargs):
     acc = ComponentAccumulator()
+
+    kwargs.setdefault("fieldScale",flags.BField.configuredSolenoidFieldScale)
 
     acc.setPrivateTools(CompFactory.InDet.SiSpacePointsSeedMaker_Cosmic(
         name, **kwargs))
@@ -26,6 +28,7 @@ def SiSpacePointsSeedMaker_HeavyIonCfg(
                       flags.Tracking.ActiveConfig.maxdImpactPPSSeeds)
     kwargs.setdefault("maxdImpactSSS",
                       flags.Tracking.ActiveConfig.maxdImpactSSSSeeds)
+    kwargs.setdefault("fieldScale",flags.BField.configuredSolenoidFieldScale)
 
     acc.setPrivateTools(CompFactory.InDet.SiSpacePointsSeedMaker_HeavyIon(
         name+flags.Tracking.ActiveConfig.extension, **kwargs))
@@ -40,6 +43,7 @@ def SiSpacePointsSeedMaker_LowMomentumCfg(
                       flags.Tracking.ActiveConfig.maxPrimaryImpact)
     kwargs.setdefault("maxZ", flags.Tracking.ActiveConfig.maxZImpact)
     kwargs.setdefault("minZ", -flags.Tracking.ActiveConfig.maxZImpact)
+    kwargs.setdefault("fieldScale",flags.BField.configuredSolenoidFieldScale)
 
     kwargs.setdefault("maxRadius1",
                       0.75*flags.Tracking.ActiveConfig.radMax)
@@ -61,6 +65,7 @@ def SiSpacePointsSeedMaker_BeamGasCfg(
                       flags.Tracking.ActiveConfig.maxPrimaryImpact)
     kwargs.setdefault("maxZ", flags.Tracking.ActiveConfig.maxZImpact)
     kwargs.setdefault("minZ", -flags.Tracking.ActiveConfig.maxZImpact)
+    kwargs.setdefault("fieldScale",flags.BField.configuredSolenoidFieldScale)
 
     kwargs.setdefault("maxRadius1",
                       0.75*flags.Tracking.ActiveConfig.radMax)
@@ -82,6 +87,7 @@ def SiSpacePointsSeedMaker_ATLxkCfg(
                       flags.Tracking.ActiveConfig.maxPrimaryImpact)
     kwargs.setdefault("maxZ", flags.Tracking.ActiveConfig.maxZImpact)
     kwargs.setdefault("minZ", -flags.Tracking.ActiveConfig.maxZImpact)
+    kwargs.setdefault("fieldScale",flags.BField.configuredSolenoidFieldScale)
 
     if flags.Tracking.ActiveConfig.extension in ["", "Forward"]:
         kwargs.setdefault("maxdImpactSSS",
@@ -224,14 +230,6 @@ def ITkSiSpacePointsSeedMakerCfg(flags, name="ITkSpSeedsMaker", **kwargs):
     if flags.Tracking.doITkFastTracking:
         kwargs.setdefault("useFastTracking", True)
         kwargs.setdefault("maxSeedsForSpacePoint", 3)
-
-    if flags.Tracking.ActiveConfig.extension == "LargeD0":
-        kwargs.setdefault("maxSeedsForSpacePoint", 5)
-        kwargs.setdefault("isLRT", True)
-        kwargs.setdefault("maxZPPP",
-                          flags.Tracking.ActiveConfig.maxZSpacePointsPPPSeeds)
-        kwargs.setdefault("maxZSSS",
-                          flags.Tracking.ActiveConfig.maxZSpacePointsSSSSeeds)
 
     if flags.Tracking.writeSeedValNtuple:
         kwargs.setdefault("WriteNtuple", True)

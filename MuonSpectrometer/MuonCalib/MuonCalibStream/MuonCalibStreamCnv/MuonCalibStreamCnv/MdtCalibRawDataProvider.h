@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONCALIBSTREAM_MDTCALIBRAWDATAPROVIDER_H
 #define MUONCALIBSTREAM_MDTCALIBRAWDATAPROVIDER_H
@@ -66,6 +66,6 @@ class MdtCalibRawDataProvider : public AthReentrantAlgorithm {
                                                                                     "Key of input MuonDetectorManager condition data"};
         ServiceHandle<Muon::IMuonIdHelperSvc> m_muonIdHelper{this, "MuonIdHelper", "Muon::MuonIdHelperSvc/MuonIdHelperSvc",
                                                             "Handle to the MuonIdHelperSvc"};
-
+        Gaudi::Property<int> m_adcCut{this, "ADCCut" , 50, "Minimum threshold on the ADC to contribute to recondition"};
 };
 #endif

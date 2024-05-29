@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaPython import PyAthena
 from AthenaPython.PyAthena import StatusCode
@@ -27,7 +27,6 @@ class EvgenAlg(PyAthena.Alg):
 
 
     def initialize(self):
-        import McParticleEvent.Pythonizations  # noqa: F401
         self.msg.debug("Initializing [%s]", self.getName())
 
         return self.genInitialize()

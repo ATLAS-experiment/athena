@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EGAMMAMVACALIB_EGAMMAMVAFUNCTIONS
@@ -12,6 +12,7 @@
 #include "xAODEgamma/PhotonxAODHelpers.h"
 #include "xAODCaloEvent/CaloCluster.h"
 #include "egammaMVALayerDepth.h"
+#include "AthContainers/ConstAccessor.h"
 
 #include "TLorentzVector.h"
 
@@ -73,10 +74,22 @@ namespace egammaMVAFunctions
   inline float compute_rawcl_Es2(const xAOD::CaloCluster& cl) { return cl.energyBE(2); }
   inline float compute_rawcl_Es3(const xAOD::CaloCluster& cl) { return cl.energyBE(3); }
 
-  inline float compute_correctedcl_Es0(const xAOD::CaloCluster& cl) { return cl.isAvailable<double>("correctedcl_Es0") ? cl.auxdataConst<double>("correctedcl_Es0") : cl.energyBE(0); }
-  inline float compute_correctedcl_Es1(const xAOD::CaloCluster& cl) { return cl.isAvailable<double>("correctedcl_Es1") ? cl.auxdataConst<double>("correctedcl_Es1") : cl.energyBE(1); }
-  inline float compute_correctedcl_Es2(const xAOD::CaloCluster& cl) { return cl.isAvailable<double>("correctedcl_Es2") ? cl.auxdataConst<double>("correctedcl_Es2") : cl.energyBE(2); }
-  inline float compute_correctedcl_Es3(const xAOD::CaloCluster& cl) { return cl.isAvailable<double>("correctedcl_Es3") ? cl.auxdataConst<double>("correctedcl_Es3") : cl.energyBE(3); }
+  inline float compute_correctedcl_Es0(const xAOD::CaloCluster& cl) {
+    static const SG::ConstAccessor<double> acc ("correctedcl_Es0");
+    return acc.isAvailable(cl) ? acc(cl) : cl.energyBE(0);
+  }
+  inline float compute_correctedcl_Es1(const xAOD::CaloCluster& cl) {
+    static const SG::ConstAccessor<double> acc ("correctedcl_Es1");
+    return acc.isAvailable(cl) ? acc(cl) : cl.energyBE(1);
+  }
+  inline float compute_correctedcl_Es2(const xAOD::CaloCluster& cl) {
+    static const SG::ConstAccessor<double> acc ("correctedcl_Es2");
+    return acc.isAvailable(cl) ? acc(cl) : cl.energyBE(2);
+  }
+  inline float compute_correctedcl_Es3(const xAOD::CaloCluster& cl) {
+    static const SG::ConstAccessor<double> acc ("correctedcl_Es3");
+    return acc.isAvailable(cl) ? acc(cl) : cl.energyBE(3);
+  }
 
   inline float compute_rawcl_Eacc(const xAOD::CaloCluster& cl) { return cl.energyBE(1) + cl.energyBE(2) + cl.energyBE(3); }
   inline float compute_rawcl_f0(const xAOD::CaloCluster& cl) { return cl.energyBE(0) / (cl.energyBE(1) + cl.energyBE(2) + cl.energyBE(3)); }
@@ -125,7 +138,10 @@ namespace egammaMVAFunctions
   inline float compute_el_trackpt(const xAOD::Electron& el) { return el.trackParticle()->pt(); }
   inline float compute_el_trackz0(const xAOD::Electron& el) { return el.trackParticle()->z0(); }
   inline float compute_el_refittedTrack_qoverp(const xAOD::Electron& el) { return el.trackParticle()->qOverP(); }
-  inline int compute_el_author(const xAOD::Electron& el) { return el.auxdata<unsigned short int>("author"); }
+  inline int compute_el_author(const xAOD::Electron& el) {
+    static const SG::ConstAccessor<unsigned short int> acc ("author");
+    return acc (el);
+  }
 
 
   // photon functions

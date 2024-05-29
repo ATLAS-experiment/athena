@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonPRDTest/TGCPRDVariables.h"
 
 #include "MuonReadoutGeometry/TgcReadoutElement.h"
-
+#include "EventPrimitives/EventPrimitivesHelpers.h"
 namespace MuonPRDTest {
     TGCPRDVariables::TGCPRDVariables(MuonTesterTree& tree, const std::string& container_name, MSG::Level msglvl) :
         PrdTesterModule(tree, "PRD_TGC", true, msglvl), m_key{container_name} {}
@@ -41,6 +41,7 @@ namespace MuonPRDTest {
                 m_TGC_PRD_globalPos.push_back(pos);
                 m_TGC_PRD_localPos.push_back(loc_pos);                
                 m_TGC_PRD_bcId.push_back(prd->getBcBitMap());
+                m_TGC_PRD_cov.push_back(Amg::error(prd->localCovariance(), Trk::locX));
                 ++n_PRD;
             }
         }

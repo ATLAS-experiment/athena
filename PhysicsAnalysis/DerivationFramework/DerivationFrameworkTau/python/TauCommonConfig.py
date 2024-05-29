@@ -1,9 +1,9 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def AddTauAugmentationCfg(ConfigFlags, **kwargs):
+def AddTauAugmentationCfg(flags, **kwargs):
 
     prefix = kwargs["prefix"]
     kwargs.setdefault("doVeryLoose", False)
@@ -14,7 +14,7 @@ def AddTauAugmentationCfg(ConfigFlags, **kwargs):
     acc = ComponentAccumulator()
 
     # tau selection relies on RNN electron veto, we must decorate the fixed eveto WPs before applying tau selection
-    acc.merge(AddTauIDDecorationCfg(ConfigFlags, TauContainerName="TauJets"))
+    acc.merge(AddTauIDDecorationCfg(flags, TauContainerName="TauJets"))
 
     from DerivationFrameworkTools.DerivationFrameworkToolsConfig import AsgSelectionToolWrapperCfg
     from TauAnalysisTools.TauAnalysisToolsConfig import TauSelectionToolCfg
@@ -22,12 +22,12 @@ def AddTauAugmentationCfg(ConfigFlags, **kwargs):
     TauAugmentationTools = []
 
     if kwargs["doVeryLoose"]:
-        TauSelectorVeryLoose = acc.popToolsAndMerge(TauSelectionToolCfg(ConfigFlags,
+        TauSelectorVeryLoose = acc.popToolsAndMerge(TauSelectionToolCfg(flags,
                                                                         name = 'TauSelectorVeryLoose',
                                                                         ConfigPath = 'TauAnalysisAlgorithms/tau_selection_veryloose.conf'))
         acc.addPublicTool(TauSelectorVeryLoose)
 
-        TauVeryLooseWrapper = acc.getPrimaryAndMerge(AsgSelectionToolWrapperCfg(ConfigFlags,
+        TauVeryLooseWrapper = acc.getPrimaryAndMerge(AsgSelectionToolWrapperCfg(flags,
                                                                                 name               = "TauVeryLooseWrapper",
                                                                                 AsgSelectionTool   = TauSelectorVeryLoose,
                                                                                 StoreGateEntryName = "DFTauVeryLoose",
@@ -35,12 +35,12 @@ def AddTauAugmentationCfg(ConfigFlags, **kwargs):
         TauAugmentationTools.append(TauVeryLooseWrapper)
 
     if kwargs["doLoose"]:
-        TauSelectorLoose = acc.popToolsAndMerge(TauSelectionToolCfg(ConfigFlags,
+        TauSelectorLoose = acc.popToolsAndMerge(TauSelectionToolCfg(flags,
                                                                     name = 'TauSelectorLoose',
                                                                     ConfigPath = 'TauAnalysisAlgorithms/tau_selection_loose.conf'))
         acc.addPublicTool(TauSelectorLoose)
 
-        TauLooseWrapper = acc.getPrimaryAndMerge(AsgSelectionToolWrapperCfg(ConfigFlags,
+        TauLooseWrapper = acc.getPrimaryAndMerge(AsgSelectionToolWrapperCfg(flags,
                                                                             name               = "TauLooseWrapper",
                                                                             AsgSelectionTool   = TauSelectorLoose,
                                                                             StoreGateEntryName = "DFTauLoose",
@@ -48,12 +48,12 @@ def AddTauAugmentationCfg(ConfigFlags, **kwargs):
         TauAugmentationTools.append(TauLooseWrapper)
 
     if kwargs["doMedium"]:
-        TauSelectorMedium = acc.popToolsAndMerge(TauSelectionToolCfg(ConfigFlags,
+        TauSelectorMedium = acc.popToolsAndMerge(TauSelectionToolCfg(flags,
                                                                      name = 'TauSelectorMedium',
                                                                      ConfigPath = 'TauAnalysisAlgorithms/tau_selection_medium.conf'))
         acc.addPublicTool(TauSelectorMedium)
 
-        TauMediumWrapper = acc.getPrimaryAndMerge(AsgSelectionToolWrapperCfg(ConfigFlags,
+        TauMediumWrapper = acc.getPrimaryAndMerge(AsgSelectionToolWrapperCfg(flags,
                                                                              name               = "TauMediumWrapper",
                                                                              AsgSelectionTool   = TauSelectorMedium,
                                                                              StoreGateEntryName = "DFTauMedium",
@@ -61,12 +61,12 @@ def AddTauAugmentationCfg(ConfigFlags, **kwargs):
         TauAugmentationTools.append(TauMediumWrapper)
 
     if kwargs["doTight"]:
-        TauSelectorTight = acc.popToolsAndMerge(TauSelectionToolCfg(ConfigFlags,
+        TauSelectorTight = acc.popToolsAndMerge(TauSelectionToolCfg(flags,
                                                                     name = 'TauSelectorTight',
                                                                     ConfigPath = 'TauAnalysisAlgorithms/tau_selection_tight.conf'))
         acc.addPublicTool(TauSelectorTight)
 
-        TauTightWrapper = acc.getPrimaryAndMerge(AsgSelectionToolWrapperCfg(ConfigFlags,
+        TauTightWrapper = acc.getPrimaryAndMerge(AsgSelectionToolWrapperCfg(flags,
                                                                             name               = "TauTightWrapper",
                                                                             AsgSelectionTool   = TauSelectorTight,
                                                                             StoreGateEntryName = "DFTauTight",
@@ -81,7 +81,7 @@ def AddTauAugmentationCfg(ConfigFlags, **kwargs):
 
 
 # Low pT di-taus
-def AddDiTauLowPtCfg(ConfigFlags, **kwargs):
+def AddDiTauLowPtCfg(flags, **kwargs):
     """Configure the low-pt di-tau building"""
 
     acc = ComponentAccumulator()
@@ -90,10 +90,10 @@ def AddDiTauLowPtCfg(ConfigFlags, **kwargs):
     from JetRecConfig.StandardLargeRJets import AntiKt10LCTopo
     from JetRecConfig.StandardJetConstits import stdConstitDic as cst
     AntiKt10EMPFlow = AntiKt10LCTopo.clone(inputdef = cst.GPFlow)
-    acc.merge(JetRecCfg(ConfigFlags,AntiKt10EMPFlow))
+    acc.merge(JetRecCfg(flags,AntiKt10EMPFlow))
 
     from DiTauRec.DiTauBuilderConfig import DiTauBuilderLowPtCfg
-    acc.merge(DiTauBuilderLowPtCfg(ConfigFlags, name="DiTauLowPtBuilder"))
+    acc.merge(DiTauBuilderLowPtCfg(flags, name="DiTauLowPtBuilder"))
 
     return acc
 
@@ -102,7 +102,7 @@ def AddTauIDDecorationCfg(flags, **kwargs):
     """Decorate tau ID scores and working points"""
 
     kwargs.setdefault("evetoFix",         True)
-    kwargs.setdefault("DeepSetID",        True)
+    kwargs.setdefault("GNNTauID",         True)
     kwargs.setdefault("TauContainerName", "TauJets")
     kwargs.setdefault("prefix",           kwargs['TauContainerName'])
 
@@ -114,14 +114,12 @@ def AddTauIDDecorationCfg(flags, **kwargs):
     if kwargs['evetoFix']:
         tools.append( acc.popToolsAndMerge(tauTools.TauWPDecoratorEleRNNFixCfg(flags)) )
 
-    if kwargs['DeepSetID']:
+    if kwargs['GNNTauID']:    
+        # vertex-corrected clusters must be rebuilt for tau ID
         tools.append( acc.popToolsAndMerge(tauTools.TauVertexedClusterDecoratorCfg(flags)) )
-        # R22 DeepSet tau ID tune with track RNN scores
-        tools.append( acc.popToolsAndMerge(tauTools.TauJetDeepSetEvaluatorCfg(flags, version="v1")) )
-        tools.append( acc.popToolsAndMerge(tauTools.TauWPDecoratorJetDeepSetCfg(flags, version="v1")) )
-        # R22 DeepSet tau ID tune without track RNN scores
-        tools.append( acc.popToolsAndMerge(tauTools.TauJetDeepSetEvaluatorCfg(flags, version="v2")) )
-        tools.append( acc.popToolsAndMerge(tauTools.TauWPDecoratorJetDeepSetCfg(flags, version="v2")) )
+        # Add in GNTau!
+        tools.append( acc.popToolsAndMerge(tauTools.TauGNNEvaluatorCfg(flags)) )
+        tools.append( acc.popToolsAndMerge(tauTools.TauWPDecoratorGNNCfg(flags)) )
 
     if tools:
         for tool in tools:

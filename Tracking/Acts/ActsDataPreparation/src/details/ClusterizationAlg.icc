@@ -54,7 +54,8 @@ template <typename IClusteringTool, bool useCache>
 StatusCode ClusterizationAlg<IClusteringTool, useCache>::execute(const EventContext& ctx) const
 {
     auto timer = Monitored::Timer<std::chrono::milliseconds>( "TIME_execute" );
-    auto mon = Monitored::Group( m_monTool, timer );
+    auto mon_nclusters = Monitored::Scalar<int>("NClustersCreated");
+    auto mon = Monitored::Group( m_monTool, timer, mon_nclusters );
 
     Cache_WriteHandle cacheHandle;
     if constexpr (useCache) {
@@ -115,6 +116,7 @@ StatusCode ClusterizationAlg<IClusteringTool, useCache>::execute(const EventCont
         }
       } // loop on ids
     } // loop on rois
+    mon_nclusters = clusterContainer->size();
 
     m_stat[kNClusters] += clusterContainer->size();
     ATH_MSG_DEBUG("Clusters produced size: "<<clusterContainer->size());    

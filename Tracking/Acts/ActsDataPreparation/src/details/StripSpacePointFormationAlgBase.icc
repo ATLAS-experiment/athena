@@ -62,9 +62,11 @@ namespace ActsTrk {
   StatusCode StripSpacePointFormationAlgBase<useCache>::execute (const EventContext& ctx) const
   {
     auto timer = Monitored::Timer<std::chrono::milliseconds>( "TIME_execute" );
+    auto timer_ca = Monitored::Timer<std::chrono::milliseconds>( "TIME_containerAccessor" );
+    auto mon_nCachedIdHashes = Monitored::Scalar<int>( "nCachedIdHashes" , 0 );
     auto nReceivedSPsStrip = Monitored::Scalar<int>( "numStripSpacePoints" , 0 );
     auto nReceivedSPsStripOverlap = Monitored::Scalar<int>( "numStripOverlapSpacePoints" , 0 );
-    auto mon = Monitored::Group( m_monTool, timer, nReceivedSPsStrip, nReceivedSPsStripOverlap );
+    auto mon = Monitored::Group( m_monTool, timer,timer_ca, nReceivedSPsStrip, nReceivedSPsStripOverlap, mon_nCachedIdHashes );
 
     SG::ReadHandle<xAOD::StripClusterContainer> inputStripClusterContainer( m_stripClusterContainerKey, ctx );
     if (!inputStripClusterContainer.isValid()){
@@ -136,8 +138,11 @@ namespace ActsTrk {
       ATH_MSG_FATAL("Pointer of SiElementPropertiesTable (" << m_stripPropertiesKey.fullKey() << ") could not be retrieved");
       return StatusCode::FAILURE;
     }
-
+    timer_ca.start();
     ContainerAccessor<xAOD::StripCluster, IdentifierHash, 1> clusterAccessor ( *inputClusters, [](const xAOD::StripCluster& cl) { return cl.identifierHash();}, stripElements->size());
+    timer_ca.stop();
+
+    unsigned int nCachedIdHashes = 0;
 
     if constexpr(useCache){
       for(auto idHash: clusterAccessor.allIdentifiers()){
@@ -145,7 +150,10 @@ namespace ActsTrk {
         auto cache_wh = cacheHandle->getWriteHandle(idHash);
         auto overlap_cache_wh = overlapCacheHandle->getWriteHandle(idHash);
         //check if already available
-        if(cache_wh.OnlineAndPresentInAnotherView()) continue;
+        if(cache_wh.OnlineAndPresentInAnotherView()){
+          nCachedIdHashes += 1;
+          continue;
+        }
 
         unsigned int nsp = 0;
 
@@ -216,8 +224,15 @@ namespace ActsTrk {
       }
     }
 
-    nReceivedSPsStrip = stripSpacePointContainer->size();    
-    nReceivedSPsStripOverlap = overlapSpacePoints->size();
+    nReceivedSPsStrip = stripSpacePointContainer->size();
+
+    mon_nCachedIdHashes = nCachedIdHashes;
+
+    if(m_processOverlapForStrip){
+      nReceivedSPsStripOverlap = overlapSpacePoints->size();
+    }else{
+      nReceivedSPsStripOverlap = 0; //avoid undefined value
+    }
 
     m_stat[kNSpacePoints] += nReceivedSPsStrip;
     m_stat[kNOverlapSpacePoints] += nReceivedSPsStripOverlap;
@@ -255,5 +270,4 @@ namespace ActsTrk {
             toAdd.topStripCenter);
       }
   }
-
 }

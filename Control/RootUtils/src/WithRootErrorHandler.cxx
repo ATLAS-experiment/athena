@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file RootUtils/src/WithRootErrorHandler.cxx
@@ -12,6 +12,8 @@
 #include "RootUtils/WithRootErrorHandler.h"
 #include <vector>
 #include <cstdlib>
+#include <mutex>
+#include <atomic>
 
 
 namespace {
@@ -22,13 +24,8 @@ using Handler_t = RootUtils::WithRootErrorHandler::Handler_t;
 thread_local std::vector<Handler_t> rootErrorHandlers;
 
 
-/// Declare our own error handler to root during initialization
-/// and save the previous handler.
-void errorHandler (int level,
-                   Bool_t abort,
-                   const char* location,
-                   const char* msg);
-const ErrorHandlerFunc_t origHandler = ::SetErrorHandler (errorHandler);
+/// Pointer to the previous handler.
+std::atomic<ErrorHandlerFunc_t> origHandler;
 
 
 /**
@@ -45,7 +42,7 @@ void errorHandler (int level,
     if (!rootErrorHandlers[i] (level, abort, location, msg)) return;
   }
   // They all returned true.  Call the previous handler.
-  origHandler (level, abort, location, msg);
+  origHandler.load() (level, abort, location, msg);
 }
 
 
@@ -68,6 +65,27 @@ namespace RootUtils {
 WithRootErrorHandler::WithRootErrorHandler (Handler_t errhand)
   : m_size (rootErrorHandlers.size()+1)
 {
+  // Install our handler the first time we're called.
+  // We used to do that when the library was loaded, via a global static,
+  // but then we ran to issues where the behavior could depend on library
+  // loading order, since other libraries (such as Gaudi) also try to install
+  // their own handler.
+  //
+  // By the time we're called, there may be multiple threads running,
+  // so it is in principle not safe to call SetErrorHandler.
+  // However, there shouldn't be anything else in Athena calling it,
+  // so in practice it should be ok.  As an extra check, we abort if the
+  // handler we get back isn't what we set, indicating a potential race.
+  //
+  // See ATLASRECTS-7967.
+  static std::once_flag flag;
+  std::call_once (flag, []() {
+    origHandler = ::SetErrorHandler (errorHandler);
+    if (::GetErrorHandler() != errorHandler) {
+      std::abort();
+    }
+  });
+
   rootErrorHandlers.push_back (errhand);
 }
 

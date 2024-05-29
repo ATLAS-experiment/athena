@@ -35,6 +35,10 @@ def ActsRegionsOfInterestCreatorAlgCfg(flags,
                                        **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
+    # Large Radius tracking pass will use the full-scan roi made from primary pass
+    if flags.Tracking.ActiveConfig.extension == 'ActsLargeRadius':
+        return acc
+    
     # Conversion tracking pass requirements
     if flags.Tracking.ActiveConfig.extension == "ActsConversion":
         from InDetConfig.InDetCaloClusterROISelectorConfig import ITkCaloClusterROIPhiRZContainerMakerCfg

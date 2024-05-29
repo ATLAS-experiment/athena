@@ -64,7 +64,7 @@ StatusCode FPGATrackSimHough1DShiftTool::initialize()
     m_nLayers = m_FPGATrackSimMapping->PlaneMap_1st()->getNLogiLayers();
 
     // Error checking
-    if (m_phiMin >= m_phiMax || m_phiBins == 0) {
+    if (m_phiMin >= m_phiMax || m_phiBins == 0u) {
         ATH_MSG_FATAL("initialize() Phi range invalid");
 	return StatusCode::FAILURE;
     }
@@ -80,16 +80,12 @@ StatusCode FPGATrackSimHough1DShiftTool::initialize()
     } else {
       m_hitExtend.resize(m_nLayers,0); // all 0
     }
-    if (m_iterStep == 0) m_iterStep = m_hitExtend[m_iterLayer] * 2 + 1; // default 1
+    if (m_iterStep == 0u) m_iterStep = m_hitExtend[m_iterLayer] * 2 + 1; // default 1
 
-    // Copy correct r values
+    // Copy correct r values from the region map.
     m_r.resize(m_nLayers);
-    if (m_radii_file.value().empty()) {
-      ATH_MSG_ERROR("RADII FILE WAS EMPTY, We should not be in this configuration");
-      return StatusCode::FAILURE;
-    } else {
-      ATH_MSG_INFO("initialize() Reading Radii File: " << m_radii_file);
-      readRadii(m_radii_file);
+    for (unsigned ilayer = 0; ilayer < m_nLayers; ilayer++) {
+        m_r[ilayer] = m_FPGATrackSimMapping->SubRegionMap()->getAvgRadius(m_subRegion, ilayer);
     }
 
     // Warnings / corrections
@@ -163,7 +159,7 @@ void FPGATrackSimHough1DShiftTool::calculateShifts()
 		}
 
 		// if thre are d0shifts, apply them
-		for (auto d0shift: m_d0shifts){
+		for (const std::vector<int>& d0shift: m_d0shifts){
 		    m_shifts.push_back(applyVariation(shifts,d0shift,1));
 		    m_shifts.push_back(applyVariation(shifts,d0shift,-1));
 		}
@@ -312,55 +308,6 @@ void FPGATrackSimHough1DShiftTool::readShifts(std::string const & filepath)
     ATH_MSG_INFO("Read " << m_shifts.size() << " patterns from " << filepath);
 }
 
-void FPGATrackSimHough1DShiftTool::readRadii(std::string const & filepath)
-{
-    // Open the file
-    std::ifstream fin(filepath);
-    if (!fin.is_open())
-    {
-        ATH_MSG_FATAL("Couldn't open " << filepath);
-        throw ("FPGATrackSimHough1DShiftTool couldn't open " + filepath);
-    }
-
-    // Variables to fill
-    std::string line;
-    bool ok = true;
-
-    // Parse the file
-    while (getline(fin, line))
-    {
-        if (line.empty() || line[0] == '#') continue;
-        std::istringstream sline(line);
-        std::vector<int> shifts;
-
-	int subregion;
-	ok = ok && (sline >> subregion);
-	if (subregion==m_subRegion) {
-	    for (unsigned layer = 0; layer < m_nLayers; layer++)
-	    {
-	        float r;
-		ok = ok && (sline >> r);
-		if (!ok) break;
-		if (r<=0) {
-		  ATH_MSG_WARNING("Radius in radiiFile is "<< r <<" for layer:"
-				  << layer << " setting to dummy value!");
-		  r = 500.0; // dummy value that won't cause a crash, but won't work anywhere.
-		}
-		m_r[layer]=r;
-
-	   }
-	}
-	if (!ok) break;
-    }
-
-    if (!ok)
-    {
-        ATH_MSG_FATAL("Found error reading file at line: " << line);
-        throw "FPGATrackSimHough1DShiftTool read error";
-    }
-}
-
-
 
 StatusCode FPGATrackSimHough1DShiftTool::finalize()
 {
@@ -490,7 +437,7 @@ std::vector<boost::dynamic_bitset<>> FPGATrackSimHough1DShiftTool::makeHitMasks(
 }
 
 
-FPGATrackSimRoad FPGATrackSimHough1DShiftTool::makeRoad(std::vector<const FPGATrackSimHit*> hits, int bin_track, size_t iShift)
+FPGATrackSimRoad FPGATrackSimHough1DShiftTool::makeRoad(const std::vector<const FPGATrackSimHit*>& hits, int bin_track, size_t iShift)
 {
     std::vector<int> const & shifts = m_shifts[iShift];
     float qpT = m_qpt[iShift];
@@ -612,7 +559,7 @@ void FPGATrackSimHough1DShiftTool::matchIdealGeoSector(FPGATrackSimRoad & r) con
 // This does a linear approximation of the Hough transform equation.
 float FPGATrackSimHough1DShiftTool::getPtFromShiftDiff(int shift) const
 {
-    if (m_iterLayer == 0) ATH_MSG_FATAL("getPtFromShiftDiff() iterLayer can't be 0");
+    if (m_iterLayer == 0u) ATH_MSG_FATAL("getPtFromShiftDiff() iterLayer can't be 0");
     return (shift * m_phiStep / fpgatracksim::A) / (m_r[m_iterLayer] - m_r[0]);
 }
 
@@ -804,7 +751,7 @@ void FPGATrackSimHough1DShiftTool::calculated0Shifts()
     ATH_MSG_DEBUG("d0 Shifts Found = " << m_d0shifts.size());
 }
 
-std::vector<int> FPGATrackSimHough1DShiftTool::applyVariation(std::vector<int> base, std::vector<int> var, int sign) const
+std::vector<int> FPGATrackSimHough1DShiftTool::applyVariation(const std::vector<int>& base, const std::vector<int>& var, int sign) const
 {
     std::vector<int> retv;
 

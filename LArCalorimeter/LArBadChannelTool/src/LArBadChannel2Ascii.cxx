@@ -1,35 +1,15 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArBadChannelTool/LArBadChannel2Ascii.h"
 #include "LArRecConditions/LArBadFeb.h"
 #include "LArRecConditions/LArBadChanBitPacking.h"
 #include "LArIdentifier/LArOnline_SuperCellID.h"
-
 #include "LArIdentifier/LArOnlineID.h"
+
 #include <fstream>
 #include <algorithm>
-
-LArBadChannel2Ascii::LArBadChannel2Ascii(const std::string& name, ISvcLocator* pSvcLocator) :
-  AthAlgorithm( name, pSvcLocator),
-  m_BCKey("LArBadChannel"),
-  m_BFKey("LArBadFeb"),
-  m_cablingKey("LArOnOffIdMap")
-{
-  //declareProperty("BadChannelTool", m_BadChanTool, "public, shared BadChannelTool");
-  declareProperty("BCKey",m_BCKey);
-  declareProperty("BFKey",m_BFKey);
-  declareProperty("LArOnOffIdMapKey",m_cablingKey);
-  declareProperty("FileName",m_fileName="");
-  declareProperty("WithMissing",m_wMissing=false);
-  declareProperty("SkipDisconnected",m_skipDisconnected=false);
-  declareProperty("ExecutiveSummaryFile",m_executiveSummaryFile="");
-  declareProperty("SuperCell",m_isSC=false);
-}
-
-LArBadChannel2Ascii::~LArBadChannel2Ascii() = default;
-
 
 StatusCode LArBadChannel2Ascii::initialize() {
 
@@ -90,7 +70,7 @@ StatusCode LArBadChannel2Ascii::execute() {
   std::ostream *out = &(std::cout); 
   std::ofstream outfile;
   if (!m_fileName.empty()) {
-    outfile.open(m_fileName.c_str(),std::ios::out);
+    outfile.open(m_fileName.value().c_str(),std::ios::out);
     if (outfile.is_open()) {
       ATH_MSG_INFO ( "Writing to file " << m_fileName );
       out = &outfile;
@@ -111,7 +91,6 @@ StatusCode LArBadChannel2Ascii::execute() {
 
   for (; it != it_e; ++it) {
     const HWIdentifier chid = *it;
-    // if (m_skipDisconnected && !m_larCablingSvc->isOnlineConnected(chid)) continue;
     if (cabling && !cabling->isOnlineConnected(chid))
       continue;
     ++nConnected;
@@ -130,21 +109,20 @@ StatusCode LArBadChannel2Ascii::execute() {
   
     if (!bc.good()) {
       ++count;
-      (*out) << larOnlineID->barrel_ec(chid) << " " << larOnlineID->pos_neg(chid) << " " << larOnlineID->feedthrough(chid) << " " << larOnlineID->slot(chid)
-             << " " << larOnlineID->channel(chid) << " "
-             << "0 ";  // Dummy 0 for calib-line
+      (*out) << std::format("{} {} {} {} {} 0 ",larOnlineID->barrel_ec(chid),larOnlineID->pos_neg(chid),larOnlineID->feedthrough(chid),larOnlineID->slot(chid),larOnlineID->channel(chid));
+      // Dummy 0 for calib-line
       if (m_isSC) {
         (*out) << SCpacking.stringStatus(bc);
       } else {
         (*out) << packing.stringStatus(bc);
       }
 
-      (*out) << "  # 0x" << std::hex << chid.get_identifier32().get_compact();
+      (*out) << std::format("  # {:#x}", chid.get_identifier32().get_compact());
       if (cabling) {
         Identifier offid = cabling->cnvToIdentifier(chid);
-        (*out) << " -> 0x" << offid.get_identifier32().get_compact();
+        (*out) << std::format(" -> {:#x}",offid.get_identifier32().get_compact());
       }
-      (*out) << std::dec << std::endl;
+      (*out) << std::endl;
     }  // End if channel is not good (regular printout)
 
     if (doExecSummary) {
@@ -203,7 +181,7 @@ StatusCode LArBadChannel2Ascii::execute() {
 
   if (doExecSummary) {
     std::ofstream exeSum;
-    exeSum.open(m_executiveSummaryFile.c_str(),std::ios::out);
+    exeSum.open(m_executiveSummaryFile.value().c_str(),std::ios::out);
     if (!exeSum.is_open()) {
       ATH_MSG_ERROR ( "Failed to open file " << m_executiveSummaryFile );
       return StatusCode::FAILURE;
@@ -263,22 +241,20 @@ StatusCode LArBadChannel2Ascii::execute() {
 }
 
 
-void LArBadChannel2Ascii::writeSum(std::ofstream& exeFile, const std::vector<unsigned>& probs, const std::vector<unsigned> nChans)   {
+void LArBadChannel2Ascii::writeSum(std::ofstream& exeFile, const std::vector<unsigned>& probs, const std::vector<unsigned> nChans) const  {
   
   const unsigned nTot=std::accumulate(nChans.begin(),nChans.end(),0);
-  unsigned nTotProb=0;
+  const unsigned nTotProb=std::accumulate(probs.begin(),probs.end(),0);
 
-  for(size_t i=0;i<probs.size();++i) 
-    nTotProb+=probs[i];
+  constexpr const char* fmt="{:>7}: {:>5} of {} ({:.3f}%)";
+  
+  exeFile << std::format(fmt, "EMB",probs[EMB], nChans[EMB], probs[EMB]*(100./nChans[EMB])) << std::endl;
+  exeFile << std::format(fmt, "EMEC",probs[EMEC], nChans[EMEC], probs[EMEC]*(100./nChans[EMEC])) << std::endl;
+  exeFile << std::format(fmt, "EM tot",probs[EMEC]+probs[EMB],nChans[EMB]+nChans[EMEC],(probs[EMEC]+probs[EMB])*(100./(nChans[EMEC]+nChans[EMB]))) << std::endl;
+  exeFile << std::format(fmt, "EMEC",probs[HEC], nChans[HEC], probs[HEC]*(100./nChans[HEC])) << std::endl;
+  exeFile << std::format(fmt, "EMEC",probs[FCAL], nChans[FCAL], probs[FCAL]*(100./nChans[FCAL])) << std::endl;
+  exeFile << std::format(fmt, "Total",nTotProb,nTot,nTotProb*(100./nTot)) << std::endl;
 
-  exeFile << "    EMB: " <<  std::setw(5) << probs[EMB] << " of "  << nChans[EMB] << " (" << std::setprecision(3) <<  probs[EMB]*(100./nChans[EMB]) << "%)" << std::endl;
-  exeFile << "   EMEC: " <<  std::setw(5) <<probs[EMEC] << " of "  << nChans[EMEC] << " (" << std::setprecision(3) << probs[EMEC]*(100./nChans[EMEC]) << "%)" << std::endl;
-  exeFile << " EM tot: " <<  std::setw(5) << probs[EMEC]+probs[EMB]  << " of "  << nChans[EMB]+nChans[EMEC] 
-          << " (" << std::setprecision(3) << (probs[EMEC]+probs[EMB])*(100./(nChans[EMEC]+nChans[EMB])) << "%)" << std::endl;
-
-  exeFile << "    HEC: " <<  std::setw(5) <<probs[HEC] << " of "  << nChans[HEC] << " (" << std::setprecision(3) << probs[HEC]*(100./nChans[HEC]) << "%)" << std::endl;
-  exeFile << "   FCAL: " <<  std::setw(5) <<probs[FCAL] << " of "  << nChans[FCAL] << " (" << std::setprecision(3) << probs[FCAL]*(100./nChans[FCAL]) << "%)" << std::endl;    
-  exeFile << "  Total: " <<  std::setw(5) << nTotProb << " of "  << nTot << " (" << std::setprecision(3) << nTotProb*(100./nTot) << "%)" << std::endl;
   exeFile << std::endl;
 
 }

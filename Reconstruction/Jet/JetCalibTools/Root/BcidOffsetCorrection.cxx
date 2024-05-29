@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <utility>
@@ -7,6 +7,7 @@
 #include "JetCalibTools/CalibrationMethods/BcidOffsetCorrection.h"
 #include "JetCalibTools/JetCalibUtils.h"
 #include "PathResolver/PathResolver.h"
+#include "AthContainers/ConstAccessor.h"
 
 BcidOffsetCorrection::BcidOffsetCorrection()
   : JetCalibrationStep(),
@@ -142,7 +143,8 @@ StatusCode BcidOffsetCorrection::calibrate(xAOD::Jet& jet, JetEventInfo& jetEven
 
   xAOD::JetFourMom_t calibP4;
   calibP4 = jet.jetP4();
-  float detEta=jet.auxdata<float>("DetectorEta");
+  static const SG::ConstAccessor<float> DetectorEtaAcc ("DetectorEta");
+  float detEta=DetectorEtaAcc(jet);
   float mu=jetEventInfo.mu();
 
   if (m_doEMECIW2bcid && !is8b4e){

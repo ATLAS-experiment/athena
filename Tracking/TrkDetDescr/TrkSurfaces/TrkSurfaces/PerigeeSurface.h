@@ -135,7 +135,7 @@ public:
     std::optional<AmgSymMatrix(DIM)> cov = std::nullopt) const;
 
   /** Return the surface type */
-  virtual SurfaceType type() const override final;
+  constexpr virtual SurfaceType type() const override final;
 
   /** Returns the x global axis */
   virtual const Amg::Vector3D& normal() const override final;

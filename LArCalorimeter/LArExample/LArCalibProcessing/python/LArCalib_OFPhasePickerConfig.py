@@ -5,17 +5,22 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from LArCalibProcessing.utils import FolderTagResolver
 from IOVDbSvc.IOVDbSvcConfig import addFolders
 
-def _OFPhasePickerCfg(flags, inputSuffix="4samples3bins17phases",outputSuffix="4samples1phase",keySuffix="",nColl=0,loadInputs=True, storeShape=True):
+def _OFPhasePickerCfg(flags, inputSuffix="4samples3bins17phases",outputSuffix="4samples1phase",keySuffix="",nColl=0,loadInputs=True, storeShape=True, InputSCOFCPhaseDb = "", SCOFCPhaseTag = "", InputSCOFCWeightDb="", SCOFCWeightTag=""):
 
     result=ComponentAccumulator()
     FolderTagResolver._globalTag=flags.IOVDb.GlobalTag
+    if flags.LArCalib.isSC:
+       FolderTagResolver._defaultSuffix="-UPD3-00"
     rs=FolderTagResolver(dbname="sqlite://;schema=%s;dbname=CONDBR2"%flags.LArCalib.Input.Database)
     if nColl > 0:
        tagstr=rs.getFolderTag(flags.LArCalib.OFCPhys.Folder+inputSuffix)
        tagpref=tagstr[0:tagstr.find(inputSuffix)+len(inputSuffix)]
        tagpost=tagstr[tagstr.find(inputSuffix)+len(inputSuffix):]
        nc=int(nColl)
-       inputOFCTag=f'{tagpref}-mu-{nc}{tagpost}'
+       if 'mu' not in tagstr:
+          inputOFCTag=f'{tagpref}-mu-{nc}{tagpost}'
+       else:   
+          inputOFCTag=tagstr
        tagstr=rs.getFolderTag(flags.LArCalib.OFCPhys.Folder+outputSuffix)
        tagpref=tagstr[0:tagstr.find(outputSuffix)+len(outputSuffix)]
        tagpost=tagstr[tagstr.find(outputSuffix)+len(outputSuffix):]
@@ -47,10 +52,14 @@ def _OFPhasePickerCfg(flags, inputSuffix="4samples3bins17phases",outputSuffix="4
     if flags.LArCalib.isSC:
         LArOFPhasePick.KeyPhase = "LArSCOFCPhase"
         # FIXME: this should be taken from the COOL
-        InputSCOFCPhaseSQLiteFile = "/afs/cern.ch/user/p/pavol/w0/public/DB_update_22/fillDB/SCOFCPhase.db"
-        SCOFCPhaseTag = "LARElecCalibOflSCOFCBinPhysShift-07"
-        result.merge(addFolders(flags,"/LAR/ElecCalibOflSC/OFCBin/PhysShift",detDb=InputSCOFCPhaseSQLiteFile,tag=SCOFCPhaseTag,
+        print("InputSCOFCPhaseDb: ",InputSCOFCPhaseDb)
+        result.merge(addFolders(flags,"/LAR/ElecCalibOflSC/OFCBin/PhysShift",detDb=InputSCOFCPhaseDb,tag=SCOFCPhaseTag,
                                  modifiers="<key>LArSCOFCPhase</key>"))
+        if InputSCOFCWeightDb != "" and SCOFCWeightTag != "": # set up the weights for OFCPicker
+           result.merge(addFolders(flags,"/LAR/ElecCalibOflSC/OFCFactor",detDb=InputSCOFCWeightDb,tag=SCOFCWeightTag,className="CondAttrListCollection"))
+           LArOFCWeightCondAlg=CompFactory.getComp("LArFlatConditionsAlg<LArOFCweightSC>")
+           result.addCondAlgo(LArOFCWeightCondAlg(ReadKey="/LAR/ElecCalibOflSC/OFCFactor", WriteKey="LArOFCbWSC"))      
+           LArOFPhasePick.OFCbWeightKey="LArOFCbWSC"
 
     else:    
         LArOFPhasePick.KeyPhase = ""
@@ -69,8 +78,10 @@ def _OFPhasePickerCfg(flags, inputSuffix="4samples3bins17phases",outputSuffix="4
        LArOFPhasePick.doShape = False
     LArOFPhasePick.GroupingType = flags.LArCalib.GroupingType
     LArOFPhasePick.DefaultPhase = 4
-    LArOFPhasePick.TimeOffsetCorrection = 0
+    LArOFPhasePick.TimeOffsetCorrection = 12
     LArOFPhasePick.isSC = flags.LArCalib.isSC
+    from AthenaCommon.Constants import DEBUG
+    LArOFPhasePick.OutputLevel=DEBUG
 
     result.addEventAlgo(LArOFPhasePick)
 
@@ -121,16 +132,16 @@ def _OFPhasePickerCfg(flags, inputSuffix="4samples3bins17phases",outputSuffix="4
     
     return result
 
-def LArOFPhasePickerCfg(flags,loadInputs=True):
+def LArOFPhasePickerCfg(flags,loadInputs=True,InputSCOFCPhaseDb = "/afs/cern.ch/user/p/pavol/w0/public/DB_update_22/fillDB/SCOFCPhase.db",SCOFCPhaseTag="LARElecCalibOflSCOFCBinPhysShift-07",InputSCOFCWeightDb="",SCOFCWeightTag=""):
 
     #Get basic services and cond-algos
     from LArCalibProcessing.LArCalibBaseConfig import LArCalibBaseCfg
     result=LArCalibBaseCfg(flags)
 
     if flags.LArCalib.isSC:
-       result.merge(_OFPhasePickerCfg(flags, inputSuffix="4samples",outputSuffix="4samples1phase",keySuffix="_1ns", nColl=0, loadInputs=loadInputs))
+       result.merge(_OFPhasePickerCfg(flags, inputSuffix="4samples",outputSuffix="4samples1phase",keySuffix="_1ns", nColl=0, loadInputs=loadInputs,InputSCOFCPhaseDb=InputSCOFCPhaseDb,SCOFCPhaseTag=SCOFCPhaseTag,InputSCOFCWeightDb=InputSCOFCWeightDb,SCOFCWeightTag=SCOFCWeightTag))
        if flags.LArCalib.OFC.Ncoll > 0:
-          result.merge(_OFPhasePickerCfg(flags, inputSuffix="4samples",outputSuffix="4samples1phase",keySuffix="_1ns_mu", nColl=flags.LArCalib.OFC.Ncoll, loadInputs=loadInputs, storeShape=False))
+          result.merge(_OFPhasePickerCfg(flags, inputSuffix="4samples",outputSuffix="4samples1phase",keySuffix="_1ns_mu", nColl=flags.LArCalib.OFC.Ncoll, loadInputs=loadInputs, storeShape=False,InputSCOFCPhaseDb=InputSCOFCPhaseDb,SCOFCPhaseTag=SCOFCPhaseTag,InputSCOFCWeightDb=InputSCOFCWeightDb,SCOFCWeightTag=SCOFCWeightTag))
     else:
        result.merge(_OFPhasePickerCfg(flags, inputSuffix="4samples3bins17phases",outputSuffix="4samples1phase",keySuffix="_3ns", nColl=0, loadInputs=loadInputs))
        if flags.LArCalib.OFC.Ncoll > 0:
@@ -150,6 +161,90 @@ def LArOFPhasePickerCfg(flags,loadInputs=True):
         result.setAppProperty("HistogramPersistency","ROOT")
         pass # end if ROOT ntuple writing
 
+
+    #MC Event selector since we have no input data file
+    from McEventSelector.McEventSelectorConfig import McEventSelectorCfg
+    result.merge(McEventSelectorCfg(flags,
+                                    RunNumber         = flags.LArCalib.Input.RunNumbers[0],
+                                    EventsPerRun      = 1,
+                                    FirstEvent	      = 1,
+                                    InitialTimeStamp  = 0,
+                                    TimeStampInterval = 1))
+
+    from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
+    result.merge(PerfMonMTSvcCfg(flags))
+    
+
+    
+    return result
+
+def LArCaliOFPhasePickerCfg(flags,loadInputs=True,DefaultPhase=23):
+
+    #Get basic services and cond-algos
+    from LArCalibProcessing.LArCalibBaseConfig import LArCalibBaseCfg
+    result=LArCalibBaseCfg(flags)
+
+    FolderTagResolver._globalTag=flags.IOVDb.GlobalTag
+    if flags.LArCalib.isSC:
+       FolderTagResolver._defaultSuffix="-UPD3-00"
+    rs=FolderTagResolver(dbname="sqlite://;schema=%s;dbname=CONDBR2"%flags.LArCalib.Input.Database)
+    inputOFCTag=rs.getFolderTag(flags.LArCalib.OFCCali.Folder)
+    outputOFCTag=rs.getFolderTag(flags.LArCalib.OFCCali.Folder+"1phase")
+    del rs #Close database
+
+    from LArCalibProcessing.LArCalibBaseConfig import chanSelStr
+    if loadInputs:
+        result.merge(addFolders(flags,flags.LArCalib.OFCCali.Folder,detDb=flags.LArCalib.Input.Database, 
+                                tag=inputOFCTag, modifiers=chanSelStr(flags)))
+
+    LArOFPhasePick = CompFactory.LArOFPhasePicker("LArCaliOFPhasePicker")
+    LArOFPhasePick.KeyPhase = ""
+    LArOFPhasePick.KeyOFC_new = "LArOFC1phase"
+    LArOFPhasePick.KeyOFC = "LArOFCCali"
+    LArOFPhasePick.doShape = False
+    LArOFPhasePick.GroupingType = flags.LArCalib.GroupingType
+    LArOFPhasePick.DefaultPhase = DefaultPhase
+    LArOFPhasePick.isSC = flags.LArCalib.isSC
+    from AthenaCommon.Constants import DEBUG
+    LArOFPhasePick.OutputLevel=DEBUG
+
+    result.addEventAlgo(LArOFPhasePick)
+
+    from RegistrationServices.OutputConditionsAlgConfig import OutputConditionsAlgCfg
+    Obj=["LArOFCComplete#LArOFC1phase#"+flags.LArCalib.OFCCali.Folder+"1phase",]
+    Tag=[outputOFCTag,]
+    print('Obj: ',Obj)
+    result.merge(OutputConditionsAlgCfg(flags,
+                                        outputFile=flags.LArCalib.Output.POOLFile,
+                                        ObjectList=Obj,
+                                        IOVTagList=Tag,
+                                        Run1=flags.LArCalib.IOVStart,
+                                        Run2=flags.LArCalib.IOVEnd
+                                    ))
+
+    rootfile=flags.LArCalib.Output.ROOTFile
+    if rootfile != "":
+        bcKey = "LArBadChannelSC" if flags.LArCalib.isSC else "LArBadChannel"     
+        OFC2Ntup=CompFactory.LArOFC2Ntuple("LArCaliOFC2Ntuple")
+        OFC2Ntup.ContainerKey = "LArOFC1phase"
+        OFC2Ntup.NtupleName   = "OFC1phase"
+        OFC2Ntup.AddFEBTempInfo   = False   
+        OFC2Ntup.AddCalib   = True   
+        OFC2Ntup.isSC = flags.LArCalib.isSC
+        OFC2Ntup.BadChanKey = bcKey
+        result.addEventAlgo(OFC2Ntup)
+        import os
+        if os.path.exists(rootfile):
+            print("Warning, removing existing file: ",rootfile)
+            os.remove(rootfile)
+        result.addService(CompFactory.NTupleSvc(Output = [ "FILE1 DATAFILE='"+rootfile+"' OPT='NEW'" ]))
+        result.setAppProperty("HistogramPersistency","ROOT")
+        pass # end if ROOT ntuple writing
+
+
+    #RegistrationSvc    
+    result.addService(CompFactory.IOVRegistrationSvc(RecreateFolders = False))
+    result.getService("IOVDbSvc").DBInstance=""
 
     #MC Event selector since we have no input data file
     from McEventSelector.McEventSelectorConfig import McEventSelectorCfg

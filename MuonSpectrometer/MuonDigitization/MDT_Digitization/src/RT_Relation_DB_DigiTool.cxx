@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "MDT_Digitization/RT_Relation_DB_DigiTool.h"
+#include "RT_Relation_DB_DigiTool.h"
 
 #include <iostream>
 

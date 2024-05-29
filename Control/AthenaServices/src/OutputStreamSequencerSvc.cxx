@@ -205,7 +205,7 @@ std::string OutputStreamSequencerSvc::currentRangeID() const
 }
 
 
-std::string OutputStreamSequencerSvc::setRangeID(const std::string rangeID)
+std::string OutputStreamSequencerSvc::setRangeID(const std::string & rangeID)
 {
    auto slot = Gaudi::Hive::currentContext().slot();
    if( slot == EventContext::INVALID_CONTEXT_ID )  slot = 0;

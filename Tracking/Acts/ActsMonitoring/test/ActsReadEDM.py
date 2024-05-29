@@ -2,6 +2,23 @@
 
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
+def getAllAvailableTracks(flags) -> list[str]:
+    from ActsConfig.ActsCollectionsConfig import TrackBackends
+    typedCollections = flags.Input.TypedCollections
+
+    trackCollections = []
+    for typedCollection in typedCollections:
+        [colType, colName] = typedCollection.split('#')
+
+        if colType not in TrackBackends.types:
+            continue
+        
+        prefix = TrackBackends.extractPrefix(collection=colName)
+        if f"{prefix}Tracks" not in trackCollections:
+            trackCollections.append(f"{prefix}Tracks")
+
+    return trackCollections
+
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
@@ -20,6 +37,8 @@ if __name__ == "__main__":
     flags.addFlag("readSpacePoints", False)
     flags.addFlag("readTracks", False)
     flags.addFlag("tracks", "")
+    flags.addFlag("readTrackParticles", False)
+    flags.addFlag("trackParticles", "ActsCombinedTracksParticlesAlt")
     flags.fillFromArgs()
     
     flags.lock()
@@ -58,6 +77,16 @@ if __name__ == "__main__":
                                               name=f"{track}AnalysisAlg",
                                               OutputLevel=2,
                                               TracksLocation=track))
+    if flags.readTrackParticles:
+        allTracks = getAllAvailableTracks(flags)
+        from ActsConfig.ActsAnalysisConfig import ActsTrackParticleAnalysisAlgCfg
+        for tp in flags.trackParticles.split(','):
+            acc.merge(ActsTrackParticleAnalysisAlgCfg(flags,
+                                                      name=f"{tp}AnalysisAlg",
+                                                      OutputLevel=2,
+                                                      TrackParticleLocation=tp,
+                                                      ExtraInputs={ ('ActsTrk::TrackContainer', el) for el in allTracks },
+                                                      MonGroupName=f"{tp}Analysis"))
             
     acc.printConfig()
     status = acc.run()

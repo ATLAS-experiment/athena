@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef G4UserActions_RadLengthAction_H
@@ -78,7 +78,7 @@ namespace G4UA
     ServiceHandle<ITHistSvc> m_hSvc;
 
     // methode to fill vector stored in variables map (index volume name)
-    void fillVariables(std::vector<double> varvec, const std::string& name);
+    void fillVariables(const std::vector<double>& varvec, const std::string& name);
   }; //class RadLengthAction
 
 } //namespace G4UA

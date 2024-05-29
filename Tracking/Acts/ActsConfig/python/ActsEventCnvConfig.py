@@ -8,9 +8,12 @@ def ActsToTrkConverterToolCfg(flags,
                               **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
-    if 'TrackingGeometryTool' not in kwargs:
+    # Currently this does not work if we are in a muon-only mode
+    if flags.Detector.GeometryITk and 'TrackingGeometryTool' not in kwargs:
         from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
         kwargs.setdefault("TrackingGeometryTool", acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)))
+    else:
+         kwargs.setdefault("TrackingGeometryTool", "")
 
     acc.setPrivateTools(CompFactory.ActsTrk.ActsToTrkConverterTool(name, **kwargs))
     return acc
@@ -67,30 +70,14 @@ def ActsToTrkConvertorAlgCfg(flags,
     acc.addEventAlgo(CompFactory.ActsTrk.ActsToTrkConvertorAlg(name, **kwargs))
     return acc
 
-def RunConversion():
-    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+def RunTrackConversion(flags, track_collections = []):
     from TrkConfig.TrackCollectionReadConfig import TrackCollectionReadCfg
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    flags = initConfigFlags()
-    args = flags.fillFromArgs()
-
-    flags.Input.Files = [
-        '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/ESD/ATLAS-P2-RUN4-03-00-00/ESD.ttbar_mu0.pool.root']
-    flags.IOVDb.GlobalTag = "OFLCOND-MC15c-SDR-14-05"
-    flags.Scheduler.ShowDataDeps = True
-    flags.Scheduler.ShowDataFlow = True
-    flags.Scheduler.CheckDependencies = True
-    flags.lock()
-    flags.dump()
-
-    if not args.config_only:
-        from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-        cfg = MainServicesCfg(flags)
-    else:
-        cfg = ComponentAccumulator()
+    from AthenaConfiguration.MainServicesConfig import MainServicesCfg
+    
+    cfg = MainServicesCfg(flags)
 
     # Set up to read ESD and tracks
-    track_collections = ['CombinedITkTracks']
     cfg.merge(PoolReadCfg(flags))
     for collection in track_collections:
         cfg.merge(TrackCollectionReadCfg(flags, collection))
@@ -129,18 +116,34 @@ def RunConversion():
         TrackParticleContainerKeys=[""],
         OutputLocation="dump.json",
     )
-    print(acc.getEventAlgo('DumpEventDataToJsonAlg'))
     cfg.merge(acc)
     cfg.printConfig(withDetails=True, summariseProps=True)
 
-    if not args.config_only:
-        sc = cfg.run()
-        if not sc.isSuccess():
-            import sys
-            sys.exit("Execution failed")
+    sc = cfg.run()
+    if not sc.isSuccess():
+        import sys
+        sys.exit("Execution failed")
 
 
 if __name__ == "__main__":
     # To run this, do e.g.
     # python -m ActsEventCnv.ActsEventCnvConfig --threads=1
-    RunConversion()
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    args = flags.fillFromArgs()
+
+    flags.Input.Files = [
+        '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/ESD/ATLAS-P2-RUN4-03-00-00/ESD.ttbar_mu0.pool.root']
+    flags.IOVDb.GlobalTag = "OFLCOND-MC15c-SDR-14-05"
+    flags.Scheduler.ShowDataDeps = True
+    flags.Scheduler.ShowDataFlow = True
+    flags.Scheduler.CheckDependencies = True
+    
+    # Setup detector flags
+    from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
+    setupDetectorFlags(flags, None, use_metadata=True,
+                       toggle_geometry=True, keep_beampipe=True)
+
+    flags.lock()
+    flags.dump()
+    RunTrackConversion(flags)

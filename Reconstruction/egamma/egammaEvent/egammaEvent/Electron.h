@@ -30,7 +30,7 @@ public:
   { };
 
   /** @brief destructor */
-  ~Electron();
+  ~Electron() = default;
 
   Electron(const egamma& rhs, bool copyDetails=true, bool copyMinimal=false) : 
     egamma(rhs, copyDetails, copyMinimal)

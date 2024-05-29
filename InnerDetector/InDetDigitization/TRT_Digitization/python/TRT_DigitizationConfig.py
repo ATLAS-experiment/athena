@@ -62,6 +62,9 @@ def TRT_DigitizationBasicToolCfg(flags, name="TRT_DigitizationBasicTool", **kwar
     if flags.Digitization.DoXingByXingPileUp:
         kwargs.setdefault("FirstXing", TRT_FirstXing())
         kwargs.setdefault("LastXing", TRT_LastXing())
+    if flags.BField.configuredSolenoidFieldScale>0 and flags.BField.configuredSolenoidFieldScale<1:
+        from AthenaCommon.SystemOfUnits import tesla
+        kwargs.setdefault("Override_solenoidFieldStrength",  flags.BField.configuredSolenoidFieldScale * 2.0 * tesla)
     from RngComps.RngCompsConfig import AthRNGSvcCfg
     kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
     TRTDigitizationTool = CompFactory.TRTDigitizationTool
@@ -88,6 +91,15 @@ def TRT_DigitizationToolCfg(flags, name="TRTDigitizationTool", **kwargs):
         kwargs.setdefault("OutputObjectName", "TRT_RDOs")
         kwargs.setdefault("OutputSDOName", "TRT_SDO_Map")
     kwargs.setdefault("HardScatterSplittingMode", 0)
+    if flags.Digitization.TRT.HeavyIonHT:
+        kwargs.setdefault("Override_highThresholdBarShort", 0.00129875)
+        kwargs.setdefault("Override_highThresholdBarLong", 0.00118775)
+        kwargs.setdefault("Override_highThresholdECAwheels", 0.001185591)
+        kwargs.setdefault("Override_highThresholdECBwheels", 0.001145376)
+        kwargs.setdefault("Override_highThresholdBarShortArgon", 0.000468802)
+        kwargs.setdefault("Override_highThresholdBarLongArgon", 0.000456754)
+        kwargs.setdefault("Override_highThresholdECAwheelsArgon", 0.0006035)
+        kwargs.setdefault("Override_highThresholdECBwheelsArgon", 0.00057375)
     tool = acc.popToolsAndMerge(TRT_DigitizationBasicToolCfg(flags, name, **kwargs))
     acc.setPrivateTools(tool)
     return acc

@@ -11,6 +11,7 @@
 #include "FlavorTagDiscriminants/BTagMuonAugmenterTool.h"
 #include "FlavorTagDiscriminants/BTagDecoratorAlg.h"
 #include "FlavorTagDiscriminants/JetTagDecoratorAlg.h"
+#include "FlavorTagDiscriminants/BTagConditionalDecoratorAlg.h"
 #include "FlavorTagDiscriminants/JetTagConditionalDecoratorAlg.h"
 #include "FlavorTagDiscriminants/BTagToJetLinkerAlg.h"
 #include "FlavorTagDiscriminants/JetToBTagLinkerAlg.h"
@@ -26,6 +27,10 @@
 #include "FlavorTagDiscriminants/GNNAuxTaskDecoratorAlg.h"
 
 #include "src/FoldDecoratorAlg.h"
+#include "src/CountIParticleAlg.h"
+#include "src/CountTrackParticleAlg.h"
+
+#include "FlavorTagDiscriminants/NNSharingSvc.h"
 
 using namespace FlavorTagDiscriminants;
 
@@ -38,6 +43,7 @@ DECLARE_COMPONENT(BTagAugmenterTool)
 DECLARE_COMPONENT(BTagMuonAugmenterTool)
 DECLARE_COMPONENT(BTagDecoratorAlg)
 DECLARE_COMPONENT(JetTagDecoratorAlg)
+DECLARE_COMPONENT(BTagConditionalDecoratorAlg)
 DECLARE_COMPONENT(JetTagConditionalDecoratorAlg)
 DECLARE_COMPONENT(BTagToJetLinkerAlg)
 DECLARE_COMPONENT(JetToBTagLinkerAlg)
@@ -50,5 +56,10 @@ DECLARE_COMPONENT(TrackTruthDecoratorAlg)
 DECLARE_COMPONENT(SoftElectronDecoratorAlg)
 DECLARE_COMPONENT(SoftElectronTruthDecoratorAlg)
 DECLARE_COMPONENT(TrackClassifier)
+
+DECLARE_COMPONENT(NNSharingSvc)
+
 DECLARE_COMPONENT(FoldDecoratorAlg)
 DECLARE_COMPONENT(GNNAuxTaskDecoratorAlg)
+DECLARE_COMPONENT(CountIParticleAlg)
+DECLARE_COMPONENT(CountTrackParticleAlg)

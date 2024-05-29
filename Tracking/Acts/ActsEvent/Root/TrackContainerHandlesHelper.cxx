@@ -25,8 +25,8 @@ std::string prefixFromTrackContainerName(const std::string& tracks) {
 
 template <typename T, typename IFACE, typename AUX>
 void recordxAOD(const SG::WriteHandleKey<T>& key, IFACE& iface, AUX& aux,
-                const EventContext& context) {
-  SG::WriteHandle<T> handle = SG::makeHandle(key, context);
+                const EventContext& evtContext) {
+  SG::WriteHandle<T> handle = SG::makeHandle(key, evtContext);
   if (handle.record(std::move(iface), std::move(aux)).isFailure()) {
     throw std::runtime_error(
         std::string("MutableTrackContainerHandlesHelper::recordxAOD, can't record ") + key.key() + " backend");
@@ -74,44 +74,44 @@ StatusCode MutableTrackContainerHandlesHelper::initialize(
 
 std::unique_ptr<ActsTrk::MultiTrajectory>
 MutableTrackContainerHandlesHelper::moveToConst(
-    ActsTrk::MutableMultiTrajectory&& mmtj, const EventContext& context) const {
+    ActsTrk::MutableMultiTrajectory&& mmtj, const EventContext& evtContext) const {
 
   mmtj.trim();
 
-  auto statesBackendHandle = SG::makeHandle(m_statesKey, context);
+  auto statesBackendHandle = SG::makeHandle(m_statesKey, evtContext);
   auto statesInterface =
       ActsTrk::makeInterfaceContainer<xAOD::TrackStateContainer>(
           mmtj.trackStatesAux());
-  recordxAOD(m_statesKey, statesInterface, mmtj.m_trackStatesAux, context);
+  recordxAOD(m_statesKey, statesInterface, mmtj.m_trackStatesAux, evtContext);
 
   auto parametersInterface =
       ActsTrk::makeInterfaceContainer<xAOD::TrackParametersContainer>(
           mmtj.trackParametersAux());
-  recordxAOD(m_parametersKey, parametersInterface, mmtj.m_trackParametersAux, context);
+  recordxAOD(m_parametersKey, parametersInterface, mmtj.m_trackParametersAux, evtContext);
 
   auto jacobiansInterface =
       ActsTrk::makeInterfaceContainer<xAOD::TrackJacobianContainer>(
           mmtj.trackJacobiansAux());
-  recordxAOD(m_jacobiansKey, jacobiansInterface, mmtj.m_trackJacobiansAux, context);
+  recordxAOD(m_jacobiansKey, jacobiansInterface, mmtj.m_trackJacobiansAux, evtContext);
 
   auto measurementsInterface =
       ActsTrk::makeInterfaceContainer<xAOD::TrackMeasurementContainer>(
           mmtj.trackMeasurementsAux());
-   recordxAOD(m_measurementsKey, measurementsInterface, mmtj.m_trackMeasurementsAux, context);
+   recordxAOD(m_measurementsKey, measurementsInterface, mmtj.m_trackMeasurementsAux, evtContext);
 
-  auto surfacesBackendHandle = SG::makeHandle(m_surfacesKey, context);
-  recordxAOD(m_surfacesKey, mmtj.m_surfacesBackend, mmtj.m_surfacesBackendAux, context);
+  auto surfacesBackendHandle = SG::makeHandle(m_surfacesKey, evtContext);
+  recordxAOD(m_surfacesKey, mmtj.m_surfacesBackend, mmtj.m_surfacesBackendAux, evtContext);
 
   // construct const MTJ version
   auto cmtj = std::make_unique<ActsTrk::MultiTrajectory>(
       DataLink<xAOD::TrackStateAuxContainer>(m_statesKey.key() + "Aux.",
-                                             context),
+                                             evtContext),
       DataLink<xAOD::TrackParametersAuxContainer>(
-          m_parametersKey.key() + "Aux.", context),
+          m_parametersKey.key() + "Aux.", evtContext),
       DataLink<xAOD::TrackJacobianAuxContainer>(m_jacobiansKey.key() + "Aux.",
-                                                context),
+                                                evtContext),
       DataLink<xAOD::TrackMeasurementAuxContainer>(
-          m_measurementsKey.key() + "Aux.", context));
+          m_measurementsKey.key() + "Aux.", evtContext));
   cmtj->moveSurfaces(&mmtj);
   cmtj->moveLinks(&mmtj);
 
@@ -120,12 +120,13 @@ MutableTrackContainerHandlesHelper::moveToConst(
 
 std::unique_ptr<ActsTrk::TrackContainer>
 MutableTrackContainerHandlesHelper::moveToConst(
-    ActsTrk::MutableTrackContainer&& tc, const EventContext& context) const {
+    ActsTrk::MutableTrackContainer&& tc, const Acts::GeometryContext& geoContext, const EventContext& evtContext) const {
+
 
   std::unique_ptr<ActsTrk::MultiTrajectory> constMtj =
-      moveToConst(std::move(tc.trackStateContainer()), context);
+      moveToConst(std::move(tc.trackStateContainer()), evtContext);
 
-  auto constMtjHandle = SG::makeHandle(m_mtjKey, context);
+  auto constMtjHandle = SG::makeHandle(m_mtjKey, evtContext);
   if (constMtjHandle.record(std::move(constMtj)).isFailure()) {
     throw std::runtime_error(
         "MutableTrackContainerHandlesHelper::moveToConst, can't record "
@@ -135,17 +136,23 @@ MutableTrackContainerHandlesHelper::moveToConst(
   auto interfaceTrackSummaryContainer =
       ActsTrk::makeInterfaceContainer<xAOD::TrackSummaryContainer>(
           tc.container().m_mutableTrackBackendAux.get());
-  recordxAOD(m_xAODTrackSummaryKey, interfaceTrackSummaryContainer, tc.container().m_mutableTrackBackendAux, context);
+  recordxAOD(m_xAODTrackSummaryKey, interfaceTrackSummaryContainer, tc.container().m_mutableTrackBackendAux, evtContext);
 
-  recordxAOD(m_trackSurfacesKey, tc.container().m_mutableSurfBackend, tc.container().m_mutableSurfBackendAux, context);
+  auto trackSurfacesAux = std::make_unique<xAOD::TrackSurfaceAuxContainer>();
+  // TODO consider passing in GeoContext to this function  
+  tc.container().encodeSurfaces(trackSurfacesAux.get(), geoContext);
+
+  auto trackSurfaces = ActsTrk::makeInterfaceContainer<xAOD::TrackSurfaceContainer>(
+                        trackSurfacesAux.get());
+  recordxAOD(m_trackSurfacesKey, trackSurfaces, trackSurfacesAux, evtContext);
 
   auto constTrackSummary = std::make_unique<ActsTrk::TrackSummaryContainer>(
       DataLink<xAOD::TrackSummaryContainer>(m_xAODTrackSummaryKey.key(),
-                                            context));
+                                            evtContext));
   constTrackSummary->restoreDecorations();
   constTrackSummary->fillFrom(tc.container());
 
-  auto constTrackSummaryHandle = SG::makeHandle(m_trackSummaryKey, context);
+  auto constTrackSummaryHandle = SG::makeHandle(m_trackSummaryKey, evtContext);
   if (constTrackSummaryHandle.record(std::move(constTrackSummary))
           .isFailure()) {
     throw std::runtime_error(
@@ -154,8 +161,8 @@ MutableTrackContainerHandlesHelper::moveToConst(
   }
   auto constTrack = std::make_unique<ActsTrk::TrackContainer>(
       DataLink<ActsTrk::TrackSummaryContainer>(m_trackSummaryKey.key(),
-                                               context),
-      DataLink<ActsTrk::MultiTrajectory>(m_mtjKey.key(), context));
+                                               evtContext),
+      DataLink<ActsTrk::MultiTrajectory>(m_mtjKey.key(), evtContext));
   return constTrack;
 }
 
@@ -190,30 +197,30 @@ StatusCode ConstTrackContainerHandlesHelper::initialize(
 std::unique_ptr<ActsTrk::MultiTrajectory>
 ConstTrackContainerHandlesHelper::buildMtj(const Acts::TrackingGeometry* geo,
                                         const Acts::GeometryContext& geoContext,
-                                        const EventContext& context) const {
+                                        const EventContext& evtContext) const {
   // we need to build it from backends
   DataLink<xAOD::TrackStateAuxContainer> statesLink(m_statesKey.key() + "Aux.",
-                                                    context);
+                                                    evtContext);
   if (not statesLink.isValid()) {
     throw std::runtime_error(
         "ConstMultiTrajectoryHandle::build, StatesLink is invalid");
   }
   DataLink<xAOD::TrackParametersAuxContainer> parametersLink(
-      m_parametersKey.key() + "Aux.", context);
+      m_parametersKey.key() + "Aux.", evtContext);
   if (not parametersLink.isValid()) {
     throw std::runtime_error(
         "ConstMultiTrajectoryHandle::build, ParametersLink is invalid");
   }
 
   DataLink<xAOD::TrackJacobianAuxContainer> jacobiansLink(
-      m_jacobiansKey.key() + "Aux.", context);
+      m_jacobiansKey.key() + "Aux.", evtContext);
   if (not jacobiansLink.isValid()) {
     throw std::runtime_error(
         "ConstMultiTrajectoryHandle::build, JacobiansLink is invalid");
   }
 
   DataLink<xAOD::TrackMeasurementAuxContainer> measurementsLink(
-      m_measurementsKey.key() + "Aux.", context);
+      m_measurementsKey.key() + "Aux.", evtContext);
   if (not measurementsLink.isValid()) {
     throw std::runtime_error(
         "ConstMultiTrajectoryHandle::build, MeasurementsLink is invalid");
@@ -228,42 +235,42 @@ ConstTrackContainerHandlesHelper::buildMtj(const Acts::TrackingGeometry* geo,
 std::unique_ptr<ActsTrk::TrackContainer>
 ConstTrackContainerHandlesHelper::build(const Acts::TrackingGeometry* geo,
                                         const Acts::GeometryContext& geoContext,
-                                        const EventContext& context) const {
+                                        const EventContext& evtContext) const {
 
   std::unique_ptr<ActsTrk::MultiTrajectory> mtj =
-      buildMtj(geo, geoContext, context);
-  auto mtjHandle = SG::makeHandle(m_mtjKey, context);
+      buildMtj(geo, geoContext, evtContext);
+  auto mtjHandle = SG::makeHandle(m_mtjKey, evtContext);
   if (mtjHandle.record(std::move(mtj)).isFailure()) {
     throw std::runtime_error(
         "ConstTrackContainerHandle<C>::build failed recording MTJ");
   }
   DataLink<xAOD::TrackSummaryContainer> summaryLink(m_xAODTrackSummaryKey.key(),
-                                                    context);
+                                                    evtContext);
   if (not summaryLink.isValid()) {
     throw std::runtime_error(
         "ConstTrackContainerHandle::build, SummaryLink is invalid");
   }
 
-  DataLink<xAOD::TrackSurfaceAuxContainer> surfacesLink(
-      m_trackSurfacesKey.key() + "Aux.", context);
-  if (not surfacesLink.isValid()) {
+  auto surfacesHandle = SG::makeHandle(m_trackSurfacesKey, evtContext);
+  if (not surfacesHandle.isValid()) {
     throw std::runtime_error(
-        "ConstTrackContainerHandle::build, SurfaceLink is invalid");
+        "ConstTrackContainerHandle::build, SurfaceHandle is invalid");
   }
 
-  auto constTrackSummary = std::make_unique<ActsTrk::TrackSummaryContainer>(
-      summaryLink, surfacesLink);
-  auto summaryHandle = SG::makeHandle(m_trackSummaryKey, context);
+  auto constTrackSummary = std::make_unique<ActsTrk::TrackSummaryContainer>(summaryLink);
+  constTrackSummary->decodeSurfaces( surfacesHandle.cptr(),  geoContext); 
+    
+  auto summaryHandle = SG::makeHandle(m_trackSummaryKey, evtContext);
   if (summaryHandle.record(std::move(constTrackSummary)).isFailure()) {
     throw std::runtime_error(
-        "MutableTrackContainerHandle::moveToConst, can't record "
+        "MutableTrackContainerHandle::build, can't record "
         "TrackSummary");
   }
 
   auto constTrack = std::make_unique<ActsTrk::TrackContainer>(
       DataLink<ActsTrk::TrackSummaryContainer>(m_trackSummaryKey.key(),
-                                               context),
-      DataLink<ActsTrk::MultiTrajectory>(m_mtjKey.key(), context));
+                                               evtContext),
+      DataLink<ActsTrk::MultiTrajectory>(m_mtjKey.key(), evtContext));
 
   return constTrack;
 

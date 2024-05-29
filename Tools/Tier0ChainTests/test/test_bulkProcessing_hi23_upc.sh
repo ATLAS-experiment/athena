@@ -8,7 +8,7 @@
 # art-athena-mt: 8
 
 Reco_tf.py  \
---AMI f1395 \
+--AMI f1406 \
 --inputBSFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data23_hi.00462107.physics_UPC.daq.RAW._lb0500._SFO-14._0002.data" \
 --outputAODFile="AOD.pool.root" \
 --outputESDFile="ESD.pool.root" \

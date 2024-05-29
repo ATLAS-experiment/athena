@@ -178,14 +178,14 @@ namespace MuonGM {
         Amg::Vector3D localStripPos(int doubletPhi, int gasGap, bool measphi, int strip) const;       
         Amg::Vector3D localStripPos(const Identifier& id) const;
 
-    private:    
+        /// Returns the position of the gasGap w.r.t. rest frame of the chamber
         Amg::Vector3D localGasGapPos(const Identifier& id) const;
         Amg::Vector3D localGasGapPos(int doubletPhi, int gasGap) const;
 
+        /// Returns the centre of the gasGap
         Amg::Vector3D gasGapPos(int doubletPhi, int gasGap) const;
         Amg::Vector3D gasGapPos(const Identifier& id) const;
 
-    public:
         // Readout side infos
         // P is a point in the global reference frame
         // we want to have the distance from the side of the phi readout (length travelled along a phi strip) from a signal produced at P)

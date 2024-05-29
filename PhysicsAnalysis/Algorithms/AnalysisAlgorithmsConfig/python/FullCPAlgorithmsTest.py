@@ -10,7 +10,7 @@ from AnalysisAlgorithmsConfig.ConfigAccumulator import ConfigAccumulator, DataTy
 
 # Config:
 triggerChainsPerYear = {
-    '2015': ['HLT_e24_lhmedium_L1EM20VH || HLT_e60_lhmedium || HLT_e120_lhloose', 'HLT_mu20_iloose_L1MU15 || HLT_mu50', 'HLT_2g20_tight'],
+    '2015': ['HLT_e24_lhmedium_L1EM20VH || HLT_e60_lhmedium || HLT_e120_lhloose', 'HLT_mu20_iloose_L1MU15 || HLT_mu40', 'HLT_2g20_tight'],
     '2016': ['HLT_e26_lhtight_nod0_ivarloose || HLT_e60_lhmedium_nod0 || HLT_e140_lhloose_nod0', 'HLT_mu26_ivarmedium || HLT_mu50', 'HLT_g35_loose_g25_loose'],
     '2017': ['HLT_e26_lhtight_nod0_ivarloose || HLT_e60_lhmedium_nod0 || HLT_e140_lhloose_nod0', 'HLT_2g22_tight_L12EM15VHI', 'HLT_mu50'],
     '2018': ['HLT_e26_lhtight_nod0_ivarloose || HLT_e60_lhmedium_nod0 || HLT_e140_lhloose_nod0', 'HLT_g35_medium_g25_medium_L12EM20VH', 'HLT_mu26_ivarmedium', 'HLT_2mu14'],
@@ -21,6 +21,12 @@ triggerChains = [
     'HLT_mu20_mu8noL1',
     'HLT_2e17_lhvloose_nod0'
 ]
+tauTriggerChainsSF = {
+    '2015': ['HLT_tau25_medium1_tracktwo', 'HLT_tau35_medium1_tracktwo'],
+    '2016': ['HLT_tau25_medium1_tracktwo', 'HLT_tau35_medium1_tracktwo'],
+    '2017': ['HLT_tau25_medium1_tracktwo', 'HLT_tau35_medium1_tracktwo'],
+    '2018': ['HLT_tau25_medium1_tracktwoEF_OR_mediumRNN_tracktwoMVA', 'HLT_tau35_medium1_tracktwoEF_OR_mediumRNN_tracktwoMVA'],
+}
 
 # Example cuts used for event selection algorithm test
 exampleSelectionCuts = {
@@ -854,6 +860,12 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite,
         containerName='AnaTauJets',
         selectionName='tight')
     configSeq.setOptionValue ('.quality', 'Tight')
+
+    if not forCompare:
+        configSeq += config.makeConfig('TauJets.TriggerSF')
+        configSeq.setOptionValue('.containerName', 'AnaTauJets')
+        configSeq.setOptionValue('.tauID', 'Tight')
+        configSeq.setOptionValue('.triggerChainsPerYear', tauTriggerChainsSF)
 
     configSeq += config.makeConfig ('TauJets.PtEtaSelection',
         containerName='AnaTauJets')

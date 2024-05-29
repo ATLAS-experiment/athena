@@ -136,8 +136,7 @@ namespace FlavorTagDiscriminants {
     for ( size_t i = 0; i != tp_truth_vertices.size(); i++) {
       auto this_vert = tp_truth_vertices.at(i);
       auto this_tp = sorted_truth_particles.at(i);
-      dec_vertex_index(*this_tp) = TruthDecoratorHelpers::get_vertex_index(
-        this_vert, truth_PV, seen_vertices, m_truthVertexMergeDistance);
+      dec_vertex_index(*this_tp) = TruthDecoratorHelpers::get_vertex_index(this_vert, truth_PV, seen_vertices, m_truthVertexMergeDistance);
     }
     return StatusCode::SUCCESS;
   }

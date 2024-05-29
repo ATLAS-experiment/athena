@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetTrackSystematicsTools/InDetTrackTruthFilterTool.h"
@@ -11,6 +11,7 @@
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODTruth/TruthVertex.h"
 #include "xAODTruth/TruthVertexContainer.h"
+#include "AthContainers/ConstAccessor.h"
 
 #include "PathResolver/PathResolver.h"
 
@@ -282,12 +283,18 @@ namespace InDet {
     }
 
     if(m_doLRTSystematics) {
-      const ElementLink< xAOD::TruthParticleContainer > &truthParticleLink = track->auxdata< ElementLink< xAOD::TruthParticleContainer > >("truthParticleLink");
+      static const SG::ConstAccessor<ElementLink< xAOD::TruthParticleContainer > >
+        truthParticleLinkAcc ("truthParticleLink");
+      const ElementLink< xAOD::TruthParticleContainer > &truthParticleLink =
+        truthParticleLinkAcc (*track);
       if(truthParticleLink.isValid()) {
         const xAOD::TruthParticle *truthParticle = *truthParticleLink;
         double eta = truthParticle->eta();
 
-        const ElementLink< xAOD::TruthVertexContainer > &truthVertexLink = truthParticle->auxdata< ElementLink< xAOD::TruthVertexContainer > >("prodVtxLink");
+        static const SG::ConstAccessor<ElementLink< xAOD::TruthVertexContainer > >
+          prodVtxLinkAcc ("prodVtxLink");
+        const ElementLink< xAOD::TruthVertexContainer > &truthVertexLink =
+          prodVtxLinkAcc (*truthParticle);
         if(truthVertexLink.isValid()) {
           const xAOD::TruthVertex *truthVertex = *truthVertexLink;
           double prodR = truthVertex->perp();

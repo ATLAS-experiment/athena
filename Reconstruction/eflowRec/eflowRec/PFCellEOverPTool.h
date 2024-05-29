@@ -31,7 +31,7 @@ class PFCellEOverPTool : public IEFlowCellEOverPTool {
   std::vector<int> m_firstIntBinLowerBoundaries;
   std::vector<int> m_caloLayerBins;
 
-  /** Location for e/p and cell ordering reference files */
-  Gaudi::Property<std::string> m_referenceFileLocation{this,"referenceFileLocation","/home/markhodgkinson.linux/Releases/RLatest_eOvperP/athena/EOverPTools/EoverpNtupleAnalysis/ResultsDir/","Location for e/p and cell ordering reference files"};
+  /** Location for e/p and cell ordering reference files (set to null value so one cannot use a wrong reference silently) */
+  Gaudi::Property<std::string> m_referenceFileLocation{this,"referenceFileLocation","","Location for e/p and cell ordering reference files"};
 };
 #endif

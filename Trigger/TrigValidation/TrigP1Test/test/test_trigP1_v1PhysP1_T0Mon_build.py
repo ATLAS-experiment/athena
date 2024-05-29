@@ -66,10 +66,9 @@ tzreco.explicit_input = True
 tzreco.max_events = 50
 tzreco.args = '--inputBSFile=' + find_file('*.physics_Main*._athenaHLT*.data')  # output of the previous step
 tzreco.args += ' --outputAODFile=AOD.pool.root'
-tzreco.args += ' --outputHISTFile=hist.root'
-tzreco.args += ' --conditionsTag=\'CONDBR2-BLKPA-2022-08\' --geometryVersion=\'ATLAS-R3S-2021-03-00-00\''
+tzreco.args += ' --outputHISTFile=ExampleMonitorOutput.root'
+tzreco.args += ' --conditionsTag=\'CONDBR2-BLKPA-2024-03\' --geometryVersion=\'ATLAS-R3S-2021-03-02-00\''
 tzreco.args += ' --preExec="{:s}"'.format(tzrecoPreExec)
-tzreco.args += ' --CA'
 
 # The full test
 test = Test.Test()

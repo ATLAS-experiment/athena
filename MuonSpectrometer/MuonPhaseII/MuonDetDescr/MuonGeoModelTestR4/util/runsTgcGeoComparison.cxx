@@ -21,12 +21,12 @@
 #include <iostream>
 #include <cmath>
 
-using namespace MuonGMR4;
-using namespace ActsTrk;
-
 #include <PathResolver/PathResolver.h>
 #include <TFile.h>
 #include <TTreeReader.h>
+
+using namespace MuonGMR4;
+using namespace ActsTrk;
 
 constexpr double tolerance = 100.*Gaudi::Units::micrometer;
 
@@ -95,7 +95,8 @@ struct sTgcChamber{
         unsigned int gasGap{0};
         /// @brief Channel type to indicate wireGroup/strip
         unsigned int channelType{0};
-
+        /// @brief Length of channel wireGroup/strip
+        double channelLen{0};
         /// @brief Ordering operator to use the wireGroup with set
         bool operator<(const sTgcChannel& other) const {
             if (gasGap != other.gasGap) return gasGap < other.gasGap;
@@ -461,7 +462,7 @@ std::set<sTgcChamber> readTreeDump(const std::string& inputFile) {
             newWireGroup.channelNumber = (*wireGroupNum)[wg];
             newWireGroup.channelType = 2;
             ///Uncomment to avoid wireGroupPositions dump
-            //if (newWireGroup.channelNumber > 1) continue;
+            //if (newWireGroup.channelNumber > 0) continue;
             newchamber.channels.insert(std::move(newWireGroup));
         }
 
@@ -473,8 +474,9 @@ std::set<sTgcChamber> readTreeDump(const std::string& inputFile) {
             newStrip.gasGap = (*stripGasGap)[s];
             newStrip.channelNumber = (*stripNum)[s];
             newStrip.channelType = 1;
+            newStrip.channelLen = (*stripLengths)[s];
             ///Uncomment to avoid stripPositions dump
-            //if (newStrip.channelNumber > 1) continue;
+            //if (newStrip.channelNumber > 0) continue;
             newchamber.channels.insert(std::move(newStrip));
         }
 
@@ -657,8 +659,8 @@ int main( int argc, char** argv ) {
             TEST_BASICPROP(padPhiShift[c], "shift of inner pad edges in phi direction in the layer "<< c + 1 << " are ");
             TEST_BASICPROP(firstPadPhiDiv[c], "angular position of the outer edge of the first pad in the layer "<< c + 1 << " are ");
             ++c;
-            ///Uncomment to dump the local to global layer transformation
-/*
+          ///Uncomment to dump the local to global layer transformation
+/*            
             std::cout <<"runsTgcGeoComparison() "<<__LINE__<<": in chamber "<<test<<" "
                       << "The test layer transform for layer "<< c << " is: " << Amg::toString(testLayer.transform) 
                       << " and the reference layer transform is: " << Amg::toString(refLayer.transform) <<std::endl;
@@ -685,19 +687,27 @@ int main( int argc, char** argv ) {
         
             const Amg::Vector3D diffGlobalPos{testChannel.globalPosition - refChannel.globalPosition};
             const Amg::Vector2D diffLocalPos{testChannel.localPosition - refChannel.localPosition};        
-            if (diffGlobalPos.mag() > tolerance) {
+             if (diffGlobalPos.mag() > tolerance) {
                 std::cerr<<"runsTgcGeoComparison() "<<__LINE__<<": in chamber "<<test<<" "<<"channel (gasGap/number): "
                             <<testChannel.gasGap<<"/"<<testChannel.channelNumber<<", chType: "<<testChannel.channelType<<", "<< " global position: "
                             <<Amg::toString(testChannel.globalPosition, 2)<<" should be located at "<<Amg::toString(refChannel.globalPosition, 2)
                             <<" displacement: "<<Amg::toString(diffGlobalPos,2)<<std::endl;
                 chamberOkay = false;
             }
-            if (diffLocalPos.mag() > tolerance) {
+           if (diffLocalPos.mag() > tolerance) {
                 std::cerr<<"runsTgcGeoComparison() "<<__LINE__<<": in chamber "<<test<<" "<<"channel (gasGap/number): "
                             <<testChannel.gasGap<<"/"<<testChannel.channelNumber<<", chType: "<<testChannel.channelType<<", "<< " local position: "
                             <<Amg::toString(testChannel.localPosition, 2)<<" should be located at "<<Amg::toString(refChannel.localPosition, 2)
                             <<" displacement: "<<Amg::toString(diffLocalPos,2)<<std::endl;
-                                chamberOkay = false;
+                chamberOkay = false;
+            }
+            const double diffChannelLen{testChannel.channelLen - refChannel.channelLen};        
+            if (std::abs(diffChannelLen) > tolerance) {
+                std::cerr<<"runsTgcGeoComparison() "<<__LINE__<<": in chamber "<<test<<" "<<"channel (gasGap/number): "
+                            <<testChannel.gasGap<<"/"<<testChannel.channelNumber<<", chType: "<<testChannel.channelType<<", "<< " Run 4 strip Length: "
+                            <<testChannel.channelLen<<" Run 3 strip Length "<<refChannel.channelLen
+                            <<" displacement: "<<diffChannelLen<<std::endl;
+                chamberOkay = false;
             }
         }
 

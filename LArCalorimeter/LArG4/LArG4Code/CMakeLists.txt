@@ -1,6 +1,4 @@
-################################################################################
-# Package: LArG4Code
-################################################################################
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( LArG4Code )
@@ -11,8 +9,6 @@ find_package( Geant4 )
 find_package( XercesC )
 find_package( GTest )
 
-add_definitions(-DLARG4NOROOT)
-
 # Component(s) in the package:
 atlas_add_library( LArG4Code
                    src/*.cc
@@ -21,9 +17,9 @@ atlas_add_library( LArG4Code
                    PUBLIC_HEADERS LArG4Code
                    INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS} ${XERCESC_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
                    DEFINITIONS ${CLHEP_DEFINITIONS}
+                   PRIVATE_DEFINITIONS LARG4NOROOT
                    LINK_LIBRARIES ${GEANT4_LIBRARIES} ${XERCESC_LIBRARIES} ${CLHEP_LIBRARIES} AtlasDetDescr CaloSimEvent LArGeoCode LArSimEvent CaloG4SimLib G4AtlasToolsLib StoreGateLib GaudiKernel
                    PRIVATE_LINK_LIBRARIES CaloIdentifier AthenaKernel CxxUtils MCTruth )
-set_target_properties( LArG4Code PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 
 atlas_add_dictionary( LArG4CodeEnums
                       LArG4Code/LArG4EnumDefs.h
@@ -50,5 +46,13 @@ atlas_add_test( SDWrapper_gtest
                 LINK_LIBRARIES TestTools LArG4Code ${GTEST_LIBRARIES} ${GEANT4_LIBRARIES} ${XERCESC_LIBRARIES} ${CLHEP_LIBRARIES} AtlasDetDescr CaloSimEvent LArGeoCode LArSimEvent CaloG4SimLib G4AtlasToolsLib StoreGateLib GaudiKernel CaloIdentifier AthenaKernel CxxUtils MCTruth
                 POST_EXEC_SCRIPT nopost.sh )
 
-atlas_install_joboptions( share/optionForTest.txt )
+# Turn on/off LTO for all targets in the package.
+set_target_properties(
+   LArG4Code
+   LArG4Code_LArG4CalibSD_gtest
+   LArG4Code_LArG4SimpleSD_gtest
+   LArG4Code_SDWrapper_gtest
+   PROPERTIES
+   INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 
+atlas_install_joboptions( share/optionForTest.txt )

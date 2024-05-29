@@ -1,6 +1,6 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 // JetForwardJvtToolBDT.cxx
 // Implementation file for class JetForwardJvtToolBDT
@@ -11,6 +11,7 @@
 #include "JetMomentTools/JetForwardJvtToolBDT.h"
 // Jet EDM
 #include "xAODJet/JetAttributes.h"
+#include "AthContainers/ConstAccessor.h"
 #include "PathResolver/PathResolver.h"
 #include "CxxUtils/checker_macros.h"
 #include <mutex>
@@ -197,7 +198,8 @@ float JetForwardJvtToolBDT::getFJVT(const xAOD::Jet *jet, int pvind, const std::
 
 float JetForwardJvtToolBDT::getMVfJVT(const xAOD::Jet *jet, int pvind, const std::vector<TVector2>& pileupMomenta) const {
 
-  if(m_isAna && !m_getTagger) return jet->auxdata<float>("DFCommonJets_MVfJVT");
+  static const SG::ConstAccessor<float> MVfJVTAcc ("MVfJVT");
+  if(m_isAna && !m_getTagger) return MVfJVTAcc(*jet);
 
   StatusCode sc = getInputs(jet);
   if( sc.isFailure() ) {
@@ -307,20 +309,24 @@ StatusCode JetForwardJvtToolBDT::getInputs(const xAOD::Jet *jet) const {
     float cle2 = 0;
 
     // Loop over clusters within DeltaR<0.6 of the jet axis to compute the (energy-weighted) moment sums used in the BDT definitions
+    static const SG::ConstAccessor<float> ISOLATIONAcc ("ISOLATION");
+    static const SG::ConstAccessor<float> EM_PROBABILITYAcc ("EM_PROBABILITY");
     for (const xAOD::CaloCluster *cl: *clustersHandle) {
       if(cl->p4().DeltaR(jet->p4())>0.6) continue;
       cle1 += cl->e();
       cle2 += cl->e()*cl->e();
-      cliso1 += cl->auxdata<float>("ISOLATION")*cl->e()*cl->e();
-      clemprob1 += cl->auxdata<float>("EM_PROBABILITY")*cl->e()*cl->e();
+      cliso1 += ISOLATIONAcc(*cl)*cl->e()*cl->e();
+      clemprob1 += EM_PROBABILITYAcc(*cl)*cl->e()*cl->e();
       if(cl->rawE()/cosh(cl->rawEta()) > maxpt){
 	maxpt = cl->rawE()/cosh(cl->rawEta());
 	ind = cl->index();
       }
     }
     const xAOD::CaloCluster *cl = clustersHandle->at(ind);
-    clwidthHandle(*jet) = TMath::CosH(cl->rawEta()) * TMath::ATan2( TMath::Sqrt(cl->auxdata<float>("SECOND_R")),
-							     cl->auxdata<float>("CENTER_MAG"));
+    static const SG::ConstAccessor<float> SECOND_RAcc ("SECOND_R");
+    static const SG::ConstAccessor<float> CENTER_MAGAcc ("CENTER_MAG");
+    clwidthHandle(*jet) = TMath::CosH(cl->rawEta()) * TMath::ATan2( TMath::Sqrt(SECOND_RAcc(*cl)),
+                                                                    CENTER_MAGAcc(*cl));
 
     cleHandle(*jet) = cle1;
     clisoHandle(*jet)= cliso1/cle2;

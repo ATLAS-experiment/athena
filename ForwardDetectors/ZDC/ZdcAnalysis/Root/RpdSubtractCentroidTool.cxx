@@ -32,7 +32,7 @@ RpdSubtractCentroidTool::RpdSubtractCentroidTool(const std::string& name) :
   declareProperty("PileupMaxFrac", m_pileupMaxFrac = {1.0, 1.0}, "Maximum fractional pileup allowed in an RPD channel for valid centroid");
   declareProperty("ExcessiveSubtrUnderflowFrac", m_maximumNegativeSubtrAmpFrac = {1.0, 1.0}, "If any RPD channel subtracted amplitude is negative and its fraction of subtracted amplitude sum is greater than or equal to this number, the centroid is invalid");
   declareProperty("UseRpdSumAdc", m_useRpdSumAdc = true, "If true, use RPD channel sum ADC for centroid calculation, else use RPD channel max ADC");
-  declareProperty("UseCalibDecorations", m_useCalibDecorations = true, "If true, use reconstruction-calibrated RPD channel sum/max ADC decorations, else use uncalibrated");
+  declareProperty("UseCalibDecorations", m_useCalibDecorations = true, "If true, use RPD channel sum/max ADC decorations with output calibration factors applied during reconstruction, else use decorations with raw values");
 }
 
 RpdSubtractCentroidTool::~RpdSubtractCentroidTool()
@@ -404,7 +404,7 @@ void RpdSubtractCentroidTool::writeAOD(xAOD::ZdcModuleContainer const& moduleSum
   ATH_MSG_DEBUG("Adding variables with suffix=" + m_auxSuffix);
 
   // initialize write handles from write handle keys
-  SG::WriteDecorHandle<xAOD::ZdcModuleContainer, bool> centroidEventValidHandle(m_centroidEventValidKey);
+  SG::WriteDecorHandle<xAOD::ZdcModuleContainer, char> centroidEventValidHandle(m_centroidEventValidKey);
   SG::WriteDecorHandle<xAOD::ZdcModuleContainer, unsigned int> centroidStatusHandle(m_centroidStatusKey);
   SG::WriteDecorHandle<xAOD::ZdcModuleContainer, std::vector<float>> rpdChannelSubtrAmpHandle(m_RPDChannelSubtrAmpKey);
   SG::WriteDecorHandle<xAOD::ZdcModuleContainer, float> rpdSubtrAmpSumHandle(m_RPDSubtrAmpSumKey);
@@ -427,6 +427,7 @@ void RpdSubtractCentroidTool::writeAOD(xAOD::ZdcModuleContainer const& moduleSum
       side = 1;
     } else {
       // global sum container
+      // event status is bool, but stored as char to save disk space
       centroidEventValidHandle(*zdcSum) = m_eventStatus;
       cosDeltaReactionPlaneAngleHandle(*zdcSum) = m_cosDeltaReactionPlaneAngle;
       continue;

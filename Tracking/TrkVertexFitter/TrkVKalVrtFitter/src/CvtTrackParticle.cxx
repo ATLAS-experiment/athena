@@ -24,12 +24,11 @@ namespace Trk {
 //
 
  StatusCode
- TrkVKalVrtFitter::CvtTrackParticle(const std::vector<const xAOD::TrackParticle*>& InpTrk,
+ TrkVKalVrtFitter::CvtTrackParticle(std::span<const xAOD::TrackParticle* const> InpTrk,
                                     int& ntrk,
                                     State& state) const
  {
 
-    std::vector<const xAOD::TrackParticle*>::const_iterator   i_ntrk;
     AmgVector(5) VectPerig; VectPerig.setZero();
     const Trk::Perigee*        mPer=nullptr;
     double CovVertTrk[15]; std::fill(CovVertTrk,CovVertTrk+15,0.);
@@ -47,7 +46,7 @@ namespace Trk {
      int counter =0;
      Amg::Vector3D perGlobalPos;
      state.m_trkControl.clear(); state.m_trkControl.reserve(InpTrk.size());
-     for (i_ntrk = InpTrk.begin(); i_ntrk < InpTrk.end(); ++i_ntrk) {
+     for (auto i_ntrk = InpTrk.begin(); i_ntrk != InpTrk.end(); ++i_ntrk) {
 //-- (Measured)Perigee in xAOD::TrackParticle
        mPer = &(*i_ntrk)->perigeeParameters();
        if( mPer==nullptr ) continue; // No perigee!!!
@@ -81,7 +80,7 @@ namespace Trk {
 //  Common reference frame is ready. Start extraction of parameters for fit.
 //
 
-    for (i_ntrk = InpTrk.begin(); i_ntrk < InpTrk.end(); ++i_ntrk) {
+    for (auto i_ntrk = InpTrk.begin(); i_ntrk != InpTrk.end(); ++i_ntrk) {
 //
 //-- (Measured)Perigee in TrackParticle
 //
@@ -144,7 +143,7 @@ namespace Trk {
      int counter =0;
      Amg::Vector3D perGlobalPos;
      state.m_trkControl.clear(); state.m_trkControl.reserve(InpTrk.size());
-     for (i_ntrk = InpTrk.begin(); i_ntrk < InpTrk.end(); ++i_ntrk) {
+     for (i_ntrk = InpTrk.begin(); i_ntrk != InpTrk.end(); ++i_ntrk) {
 //-- (Measured)Perigee in xAOD::NeutralParticle
        mPer = &(*i_ntrk)->perigeeParameters();
        if( mPer==nullptr ) continue; // No perigee!!!
@@ -179,7 +178,7 @@ namespace Trk {
 
     state.m_refFrameX=state.m_refFrameY=state.m_refFrameZ=0.;        //set ATLAS frame
     state.m_fitField.setAtlasMagRefFrame( 0., 0., 0.);  //set ATLAS frame
-    for (i_ntrk = InpTrk.begin(); i_ntrk < InpTrk.end(); ++i_ntrk) {
+    for (i_ntrk = InpTrk.begin(); i_ntrk != InpTrk.end(); ++i_ntrk) {
 //
 //-- (Measured)Perigee in TrackParticle
 //

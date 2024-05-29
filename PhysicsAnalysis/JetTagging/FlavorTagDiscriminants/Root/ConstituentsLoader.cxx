@@ -3,6 +3,7 @@ Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FlavorTagDiscriminants/ConstituentsLoader.h"
+#include <regex>
 
 namespace {
   using namespace FlavorTagDiscriminants;
@@ -81,8 +82,8 @@ namespace FlavorTagDiscriminants {
     // Create a configuration for the constituents loaders
     //
     ConstituentsInputConfig createConstituentsLoaderConfig(
-      std::string name,
-      std::vector<std::string> input_variables,
+      const std::string & name,
+      const std::vector<std::string> & input_variables,
       FlipTagConfig flip_config
     ){
       ConstituentsInputConfig config;
@@ -143,18 +144,18 @@ namespace FlavorTagDiscriminants {
           trk_type_regexes, trk_sort_regexes, trk_select_regexes,
           flip_sequences, flip_config);
         config.type = ConstituentsType::TRACK;
-        config.output_name = "track_features";
+        config.output_name = "tracks";
       }
-      else if (name.find("flow") != std::string::npos){
+      else if (name.find("flows") != std::string::npos){
         config = get_iparticle_input_config(
           name, input_variables,
           iparticle_type_regexes);
         config.type = ConstituentsType::IPARTICLE;
-        config.output_name = "flow_features";
+        config.output_name = "flows";
       }
       else{
         throw std::runtime_error(
-          "Unknown constituent type: " + name + ". Only tracks and neutrals are supported."
+          "Unknown constituent type: " + name + ". Only tracks and flows are supported."
           );
       }
       return config;

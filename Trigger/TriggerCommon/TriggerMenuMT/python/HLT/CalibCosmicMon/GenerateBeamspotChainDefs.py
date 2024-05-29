@@ -32,6 +32,7 @@ def generateChainConfigs(flags,  chainDict):
             log.debug("chainDict %s", chainDict)
 
             jetConfig = JetChainConfiguration(chainDict)
+            jetConfig.prepareDataDependencies(flags)
             jetName = jetConfig.jetName
             log.debug("Jet name %s", jetConfig.jetName)
             jet =  jetConfig.assembleChain(flags)

@@ -63,17 +63,17 @@ class TauChainConfiguration(ChainConfigurationBase):
     # --------------------
     def getCaloMVASeq(self, flags, is_probe_leg=False):
         stepName = 'MVA_tau'
-        return self.getStep(flags,1,stepName, [tauCaloMVAMenuSequenceGenCfg], is_probe_leg=is_probe_leg)
+        return self.getStep(flags, stepName, [tauCaloMVAMenuSequenceGenCfg], is_probe_leg=is_probe_leg)
         
     # --------------------
     def getFTFCore(self, flags, is_probe_leg=False):
         stepName = 'FTFCore_tau'
-        return self.getStep(flags,2,stepName, [tauFTFTauCoreSequenceGenCfg], is_probe_leg=is_probe_leg)
+        return self.getStep(flags, stepName, [tauFTFTauCoreSequenceGenCfg], is_probe_leg=is_probe_leg)
 
     # --------------------
     def getFTFLRT(self, flags, is_probe_leg=False):
         stepName = 'FTFLRT_tau'
-        return self.getStep(flags,2,stepName, [tauFTFTauLRTSequenceGenCfg], is_probe_leg=is_probe_leg)
+        return self.getStep(flags, stepName, [tauFTFTauLRTSequenceGenCfg], is_probe_leg=is_probe_leg)
 
     # --------------------
 
@@ -85,7 +85,7 @@ class TauChainConfiguration(ChainConfigurationBase):
 
     def getFTFIso(self, flags, is_probe_leg=False):
         stepName = 'FTFIso_tau'
-        return self.getStep(flags,3,stepName, [tauFTFTauIsoSequenceGenCfg], is_probe_leg=is_probe_leg)
+        return self.getStep(flags, stepName, [tauFTFTauIsoSequenceGenCfg], is_probe_leg=is_probe_leg)
 
     # --------------------
 
@@ -97,12 +97,12 @@ class TauChainConfiguration(ChainConfigurationBase):
 
     def getPrecTrackIso(self, flags, is_probe_leg=False):
         stepName = 'PrecTrkIso_tau'
-        return self.getStep(flags,4,stepName,[tauPrecTrackIsoSequenceGenCfg],is_probe_leg=is_probe_leg)
+        return self.getStep(flags, stepName,[tauPrecTrackIsoSequenceGenCfg],is_probe_leg=is_probe_leg)
 
     # --------------------
     def getPrecTrackLRT(self, flags, is_probe_leg=False):
         stepName = 'PrecTrkLRT_tau'
-        return self.getStep(flags,4,stepName,[tauPrecTrackLRTSequenceGenCfg],is_probe_leg=is_probe_leg)
+        return self.getStep(flags, stepName,[tauPrecTrackLRTSequenceGenCfg],is_probe_leg=is_probe_leg)
 
     # --------------------
 
@@ -114,18 +114,18 @@ class TauChainConfiguration(ChainConfigurationBase):
 
     def getTrackTwoMVA(self, flags, is_probe_leg=False):
         stepName = "TrkTwoMVA_tau"
-        return self.getStep(flags,5,stepName,[tauTrackTwoMVASequenceGenCfg],is_probe_leg=is_probe_leg)
+        return self.getStep(flags, stepName,[tauTrackTwoMVASequenceGenCfg],is_probe_leg=is_probe_leg)
 
     # --------------------
 
     def getTrackTwoLLP(self, flags, is_probe_leg=False):
         stepName = "TrkTwoLLP_tau"
-        return self.getStep(flags,5,stepName,[tauTrackTwoLLPSequenceGenCfg],is_probe_leg=is_probe_leg)
+        return self.getStep(flags, stepName,[tauTrackTwoLLPSequenceGenCfg],is_probe_leg=is_probe_leg)
 
     # --------------------
     def getTrackLRT(self, flags, is_probe_leg=False):
         stepName = "TrkLRT_tau"
-        return self.getStep(flags,5,stepName,[tauTrackLRTSequenceGenCfg],is_probe_leg=is_probe_leg)
+        return self.getStep(flags, stepName,[tauTrackLRTSequenceGenCfg],is_probe_leg=is_probe_leg)
 
     # --------------------
 

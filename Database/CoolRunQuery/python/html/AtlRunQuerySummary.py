@@ -1,6 +1,6 @@
 #!/bin/env python
 
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 # ----------------------------------------------------------------
 # Script : AtlRunQuerySummary.py
@@ -177,7 +177,7 @@ def DecodeStr( s, tpe ):
     return int(s[0].value)
 
 def DrawGraph( graph, col, width, style, legend, title,
-               drawNumber=False, unit='M', text=TText() ):
+               drawNumber=False, unit='M', text=TText() ):  # noqa: B008 (TText instance is re-used)
     hist = graph.GetHistogram()
     hist.SetLineColor( col )
     graph.SetLineColor( col )

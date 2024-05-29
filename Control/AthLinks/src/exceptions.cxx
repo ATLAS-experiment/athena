@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file AthLinks/src/exceptions.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -304,6 +302,50 @@ ExcConstStorable::ExcConstStorable (CLID clid,
   : std::runtime_error (excConstStorable_format (clid, key, sgkey))
 {
   AthLinks_error();
+}
+
+
+//*************************************************************************
+
+
+/// Helper: format exception error string.
+std::string
+excBadThinning_format (CLID clid, const std::string& key, SG::sgkey_t sgkey)
+{
+  std::ostringstream os;
+  os << "SG::ExcBadThinning: "
+     << "Bad thinning request "
+     << "[" << clid << "/" << key << "] (" << sgkey << ")";
+  return os.str();
+}
+
+
+/**
+ * @brief Constructor.
+ * @param clid CLID of the link.
+ * @param key String key of the link.
+ * @param sgkey Hashed key of the link.
+ */
+ExcBadThinning::ExcBadThinning (CLID clid,
+                                const std::string& key,
+                                SG::sgkey_t sgkey)
+  : std::runtime_error (excBadThinning_format (clid, key, sgkey))
+{
+  AthLinks_error();
+}
+
+
+/**
+ * @brief Throw a SG::ExcBadThinning exception.
+ * @param clid CLID of the link.
+ * @param key String key of the link.
+ * @param sgkey Hashed key of the link.
+ */
+void throwExcBadThinning (CLID clid,
+                          const std::string& key,
+                          SG::sgkey_t sgkey)
+{
+  throw ExcBadThinning (clid, key, sgkey);
 }
 
 

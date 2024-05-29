@@ -163,7 +163,7 @@ namespace CaloG4
         G4RunManager::GetRunManager()->GetCurrentEvent()->GetUserInformation());
     if ( atlasG4EvtUserInfo ) {
       // Update the step info
-      atlasG4EvtUserInfo->SetLastProcessedBarcode( a_step->GetTrack()->GetTrackID() );
+      atlasG4EvtUserInfo->SetLastProcessedTrackID( a_step->GetTrack()->GetTrackID() );
       atlasG4EvtUserInfo->SetLastProcessedStep( a_step->GetTrack()->GetCurrentStepNumber() );
     }
   }

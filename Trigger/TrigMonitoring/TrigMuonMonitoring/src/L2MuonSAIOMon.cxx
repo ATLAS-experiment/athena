@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "L2MuonSAIOMon.h"
@@ -104,10 +104,10 @@ StatusCode L2MuonSAIOMon :: fillVariablesPerOfflineMuonPerChain(const EventConte
 
 
   if( chain.find("probe") != std::string::npos ){ // L2Inside-Out efficiency using Tag&Probe chain
-    if(chain.find("L1MU14FCH")){
+    if(chain.find("L1MU14FCH") != std::string::npos){
       if ( !getTrigDecisionTool()->isPassed("HLT_mu24_ivarmedium_L1MU14FCH") ) return StatusCode::SUCCESS; // impose trigger pass in order to eliminate bias
     }
-    else if(chain.find("L1MU18VFCH")){
+    else if(chain.find("L1MU18VFCH") != std::string::npos){
       if ( !getTrigDecisionTool()->isPassed("HLT_mu24_ivarmedium_L1MU18VFCH") ) return StatusCode::SUCCESS; // impose trigger pass in order to eliminate bias
     }
     else
@@ -674,7 +674,7 @@ StatusCode L2MuonSAIOMon :: matchL2IO_wContainer(const EventContext &ctx, const 
 }
 
 
-StatusCode L2MuonSAIOMon :: L2OverlapRemover( std::vector< const xAOD::L2CombinedMuon* > matchSA_L2IOobjects, std::vector< bool > &isoverlap, std::vector< bool > &passOR ) const {
+StatusCode L2MuonSAIOMon :: L2OverlapRemover( const std::vector< const xAOD::L2CombinedMuon* >& matchSA_L2IOobjects, std::vector< bool > &isoverlap, std::vector< bool > &passOR ) const {
 
   ATH_MSG_DEBUG ("L2OverlapRemover ..." );
 
@@ -856,7 +856,7 @@ bool L2MuonSAIOMon :: isOverlap( const xAOD::L2CombinedMuon* matchSA_L2IOobject1
 }
 
 
-StatusCode L2MuonSAIOMon :: chooseBestMuon( std::vector< const xAOD::L2CombinedMuon* > matchSA_L2IOobjects, std::vector< bool > &passOR, std::vector< unsigned int > &mucombResult ) const{
+StatusCode L2MuonSAIOMon :: chooseBestMuon( const std::vector< const xAOD::L2CombinedMuon* >& matchSA_L2IOobjects, std::vector< bool > &passOR, std::vector< unsigned int > &mucombResult ) const{
 
   const double ZERO_LIMIT = 1e-4;
   unsigned int i,j,k;

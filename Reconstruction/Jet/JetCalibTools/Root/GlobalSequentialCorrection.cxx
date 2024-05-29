@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -29,6 +29,7 @@
 
 #include "xAODTracking/VertexContainer.h"
 #include "xAODTracking/Vertex.h"
+#include "AthContainers/ConstAccessor.h"
 
 GlobalSequentialCorrection::GlobalSequentialCorrection()
   : JetCalibrationStep::JetCalibrationStep(),
@@ -498,8 +499,9 @@ StatusCode GlobalSequentialCorrection::calibrate(xAOD::Jet& jet, JetEventInfo& j
   //Nsegments number of ghost associated muon segments behind each jet
   int Nsegments = 0;
   if(m_depth & ApplyPunchThrough){
-    if( jet.isAvailable< int >( "GhostMuonSegmentCount" ) ) {
-      Nsegments = jet.getAttribute<int>("GhostMuonSegmentCount");
+    static const SG::ConstAccessor<int> GhostMuonSegmentCountAcc ("GhostMuonSegmentCount");
+    if( GhostMuonSegmentCountAcc.isAvailable(jet) ) {
+      Nsegments = GhostMuonSegmentCountAcc(jet);
     } else {
       ATH_MSG_WARNING("GhostMuonSegmentCount is not available, Nsegments=0 will be used, so NO PunchThrough Correction will be applied!");
     }

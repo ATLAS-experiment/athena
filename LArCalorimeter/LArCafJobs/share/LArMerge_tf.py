@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #########################################################################
 ##
@@ -19,7 +19,7 @@
 ##
 #########################################################################
 
-import sys, string, os, json, time, pprint, subprocess
+import sys, os, json, time, pprint, subprocess
 
 #########################################################################
 
@@ -109,7 +109,7 @@ def larMerge(dataMap) :
       print(e)
       exitAcronym = 'TRF_LAR_MERGE_ERROR'
       exitMsg = 'LAR merging error'
-      exitCode==1
+      exitCode=1
 
     logfile.close()
     logfile=open("log.LArMerge","r")

@@ -101,7 +101,7 @@ iFatras::HadIntProcessorParametric::~HadIntProcessorParametric()
 StatusCode iFatras::HadIntProcessorParametric::initialize()
 {
 
-    ATH_MSG_INFO( "initialize()" );
+    ATH_MSG_DEBUG( "initialize()" );
 
     // get the random generator serice
      if (m_rndGenSvc.retrieve().isFailure()){
@@ -128,15 +128,7 @@ StatusCode iFatras::HadIntProcessorParametric::initialize()
     }
 
     // the validation setup -------------------------------- PART 3: Hadronic Interaction ---------------------
-    if (m_validationMode){
-
-      // retrieve the physics validation tool
-      if (m_validationTool.retrieve().isFailure()){
-	ATH_MSG_FATAL( "Could not retrieve " << m_validationTool );
-	return StatusCode::FAILURE;
-      } else
-	ATH_MSG_VERBOSE( "Successfully retrieved " << m_validationTool );
-    }
+    ATH_CHECK( m_validationTool.retrieve( DisableTool{ m_validationTool.empty() || !m_validationMode } ) );
 
     if (m_hadIntValidation){
 
@@ -183,14 +175,14 @@ StatusCode iFatras::HadIntProcessorParametric::initialize()
            ATH_MSG_INFO( "TTree for Hadronic Interactions validation booked." );
       }
     } // ------------- end of validation mode -----------------------------------------------------------------
-
+    ATH_MSG_DEBUG( "finalize() successful" );
     return StatusCode::SUCCESS;
 }
 
 // finalize
 StatusCode iFatras::HadIntProcessorParametric::finalize()
 {
-    ATH_MSG_INFO( "finalize() successful" );
+    ATH_MSG_DEBUG( "finalize() successful" );
     return StatusCode::SUCCESS;
 }
 
@@ -227,7 +219,7 @@ bool iFatras::HadIntProcessorParametric::hadronicInteraction(const Amg::Vector3D
   if (CLHEP::RandFlat::shoot(m_randomEngine) < (1. - prob) * m_hadIntProbScale ) return recordHadState(0.,p,
 												       position,
 												       momentum.unit(),
-												       particle);
+												       particle); // Registers TruthIncident internally
 
   // no hadronic interactions were computed
   return false;
@@ -609,15 +601,17 @@ ISF::ISFParticleVector iFatras::HadIntProcessorParametric::getHadState(const ISF
 	double mass = Trk::ParticleMasses::mass[ childType[i] ];
 
 	// create the particle
+        const int status = 1 + HepMC::SIM_STATUS_THRESHOLD;
+        const int id = HepMC::UNDEFINED_ID;
 	ISF::ISFParticle *child = new ISF::ISFParticle ( vertex,
 							 childP,
 							 mass,
 							 charge[i],
 							 pdgid[i],
-							 1 + HepMC::SIM_STATUS_THRESHOLD,
+							 status,
 							 time,
 							 *parent,
-                                                         0 // FIXME hardcoded id
+                                                         id
                                                          );
 	// in the validation mode, add process info
 	if (m_validationMode) {
@@ -643,9 +637,12 @@ ISF::ISFParticleVector iFatras::HadIntProcessorParametric::getHadState(const ISF
 			       parent->nextGeoID(),
 			       ISF::fKillsPrimary );
   m_truthRecordSvc->registerTruthIncident( truth);
+  // At this point we need to update the properties of the
+  // ISFParticles produced in the interaction
+  truth.updateChildParticleProperties();
 
   // save info for validation
-  if (m_validationMode && m_validationTool) {
+  if (m_validationMode && m_validationTool.isEnabled()) {
     Amg::Vector3D* nMom = nullptr;
     m_validationTool->saveISFVertexInfo(m_processCode,vertex,*parent,p*particleDir,nMom,children);
     delete nMom;
@@ -663,27 +660,29 @@ ISF::ISFParticleVector iFatras::HadIntProcessorParametric::getHadState(const ISF
 }
 
 bool iFatras::HadIntProcessorParametric::doHadronicInteraction(double time, const Amg::Vector3D& position, const Amg::Vector3D& momentum,
-							       const Trk::Material* /*ematprop*/,
-							       Trk::ParticleHypothesis particle, bool processSecondaries) const {
+                                                               const Trk::Material* /*ematprop*/,
+                                                               Trk::ParticleHypothesis particle, bool processSecondaries) const {
+  // Called by McMaterialEffectsUpdator::interact
   // get parent particle
   const ISF::ISFParticle *parent = ISF::ParticleClipboard::getInstance().getParticle();
   // something is seriously wrong if there is no parent particle
   assert(parent);
 
-  ISF::ISFParticleVector ispVec=getHadState(parent, time, momentum.mag(), position, momentum.unit(), particle);
+  ISF::ISFParticleVector ispVec=getHadState(parent, time, momentum.mag(), position, momentum.unit(), particle); // Registers TruthIncident internally
+
 
   // having no secondaries does not necessarily mean the interaction did not take place  : TODO : add flag into ::getHadState
   //  if (!ispVec.size()) return false;
 
   // push onto ParticleStack
-
   if (processSecondaries && !ispVec.empty() ) {
-       for (unsigned int ic=0; ic<ispVec.size(); ic++) {
- 	        if (!ispVec[ic]->getTruthBinding()) {
- 	                ispVec[ic]->setTruthBinding(new ISF::TruthBinding(*parent->getTruthBinding()));
- 	        }
- 	        m_particleBroker->push(ispVec[ic], parent);
-       }
+    for (auto *childParticle : ispVec) {
+      //Check that the new ISFParticles have a valid TruthBinding
+      if (!childParticle->getTruthBinding()) {
+        ATH_MSG_ERROR("Could not retrieve TruthBinding from child ISFParticle "<< *childParticle);
+      }
+      m_particleBroker->push(childParticle, parent);
+    }
   }
 
   return true;
@@ -694,8 +693,9 @@ ISF::ISFParticleVector iFatras::HadIntProcessorParametric::doHadIntOnLayer(const
 									   const Amg::Vector3D& position, const Amg::Vector3D& momentum,
 									   const Trk::Material* /*emat*/,
 									   Trk::ParticleHypothesis particle) const {
-
-  return getHadState(parent, time, momentum.mag(), position, momentum.unit(), particle);
+  // called from McMaterialEffectsUpdator::interact and
+  // McMaterialEffectsUpdator::interactLay methods
+  return getHadState(parent, time, momentum.mag(), position, momentum.unit(), particle); // Registers TruthIncident internally
 
 }
 
@@ -709,20 +709,21 @@ bool iFatras::HadIntProcessorParametric::recordHadState(double time, double p,
   // something is seriously wrong if there is no parent particle
   assert(parent);
 
-  ISF::ISFParticleVector ispVec=getHadState(parent, time, p, vertex, particleDir, particle);
+  ISF::ISFParticleVector ispVec=getHadState(parent, time, p, vertex, particleDir, particle); // Registers TruthIncident internally
 
   // having no secondaries does not necessarily mean the interaction did not take place : TODO : add flag into ::getHadState
   //  if (!ispVec.size()) return false;
 
   // push onto ParticleStack
   if (!ispVec.empty() ) {
-	for (unsigned int ic=0; ic<ispVec.size(); ic++) {
-	        if (!ispVec[ic]->getTruthBinding()) {
-	                ispVec[ic]->setTruthBinding(new ISF::TruthBinding(*parent->getTruthBinding()));
-	        }
-	        m_particleBroker->push(ispVec[ic], parent);
-        }
-}
+    for (auto *childParticle : ispVec) {
+      //Check that the new ISFParticles have a valid TruthBinding
+      if (!childParticle->getTruthBinding()) {
+        ATH_MSG_ERROR("Could not retrieve TruthBinding from child ISFParticle "<< *childParticle);
+      }
+      m_particleBroker->push(childParticle, parent);
+    }
+  }
 
   return true;
 }

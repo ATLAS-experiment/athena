@@ -1159,7 +1159,7 @@ void Trk::TrackingVolume::interlinkLayers()
     BinnedArraySpan<Trk::Layer* const> layers = m_confinedLayers->arrayObjects();
     // forward loop
     const Trk::Layer* lastLayer = nullptr;
-    BinnedArraySpan<Trk::Layer*>::const_iterator layerIter = layers.begin();
+    BinnedArraySpan<Trk::Layer* const>::iterator layerIter = layers.begin();
     for (; layerIter != layers.end(); ++layerIter) {
       if (*layerIter) {
         // register the layers

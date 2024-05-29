@@ -8,47 +8,47 @@
 /**
   @class egammaForwardBuilder
           Algorithm which makes a egammaObjectCollection for forward electrons.
-          egammaForwardBuilder, is dedicated to the reconstruction and 
-          identification of electrons in the forward region of ATLAS 
-          (2.5<|eta|<4.9). In contrast to the softe and egamma builders the 
-          algorithm can use only the information from the calorimeters, as the 
-          tracking system is limited to |eta|<2.5, and the topological 
-          clusters (instead of SW clusters). The pre-selection and ID are 
-          done in the same algorithm. The variables used to discriminant 
-          between electron and hadrons are defined as the topo cluster moments 
-          or combination of them. This is done separately in two eta bins: 
-          the EMEC IW and the FCal using a cut based technic. 
-          The forward electron AUTHOR is 8. 
+          egammaForwardBuilder, is dedicated to the reconstruction and
+          identification of electrons in the forward region of ATLAS
+          (2.5<|eta|<4.9). In contrast to the softe and egamma builders the
+          algorithm can use only the information from the calorimeters, as the
+          tracking system is limited to |eta|<2.5, and the topological
+          clusters (instead of SW clusters). The pre-selection and ID are
+          done in the same algorithm. The variables used to discriminant
+          between electron and hadrons are defined as the topo cluster moments
+          or combination of them. This is done separately in two eta bins:
+          the EMEC IW and the FCal using a cut based technic.
+          The forward electron AUTHOR is 8.
 */
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
-#include "GaudiKernel/ToolHandle.h"
-#include "GaudiKernel/ServiceHandle.h"
-#include "GaudiKernel/EventContext.h"
+#include <Gaudi/Accumulators.h>
 
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "GaudiKernel/EventContext.h"
+#include "GaudiKernel/ServiceHandle.h"
+#include "GaudiKernel/ToolHandle.h"
+//
 #include "EventKernel/IParticle.h"
+#include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
-#include "StoreGate/ReadCondHandleKey.h"
-
-#include "xAODCaloEvent/CaloClusterContainer.h"
-#include "xAODCaloEvent/CaloCluster.h"
+//
 #include "CaloDetDescr/CaloDetDescrManager.h"
 #include "CaloEvent/CaloClusterCellLinkContainer.h"
-
+#include "xAODCaloEvent/CaloCluster.h"
+#include "xAODCaloEvent/CaloClusterContainer.h"
+//
 #include "xAODEgamma/Egamma.h"
 #include "xAODEgamma/ElectronContainer.h"
-
-#include "egammaInterfaces/IegammaOQFlagsBuilder.h" 
-#include "egammaInterfaces/IegammaBaseTool.h"
-#include "egammaInterfaces/IEMFourMomBuilder.h"
-#include "EgammaAnalysisInterfaces/IAsgForwardElectronIsEMSelector.h"
+//
 #include "egammaInterfaces/IEMTrackMatchBuilder.h"
-
-#include <string>
+#include "egammaInterfaces/IegammaBaseTool.h"
+#include "egammaInterfaces/IegammaOQFlagsBuilder.h"
+//
+#include "EgammaAnalysisInterfaces/IAsgForwardElectronIsEMSelector.h"
+//
 #include <memory>
-
-#include <Gaudi/Accumulators.h>
+#include <string>
 
 class egammaForwardBuilder : public AthReentrantAlgorithm
 {
@@ -57,7 +57,7 @@ public:
   egammaForwardBuilder(const std::string& name, ISvcLocator* pSvcLocator);
 
   /** @brief Destructor. */
-  ~egammaForwardBuilder();
+  ~egammaForwardBuilder() = default;
 
   /** @brief Initialize method. */
   virtual StatusCode initialize() override final;
@@ -92,14 +92,6 @@ private:
     "ObjectQualityTool",
     "",
     "Name of the object quality tool (empty tool name ignored)"
-  };
-
-  /** @brief Tool to perform the 4-mom computation. */
-  ToolHandle<IEMFourMomBuilder> m_fourMomBuilder{
-    this,
-    "FourMomBuilderTool",
-    "EMFourMomBuilder",
-    "Handle of 4-mom Builder"
   };
 
   /** @brief Tool to perform track-cluster matching. */
@@ -146,7 +138,7 @@ private:
   SG::WriteHandleKey<CaloClusterCellLinkContainer> m_outClusterContainerCellLinkKey;
 
   /** @brief Private member flag to do the track matching. */
-  Gaudi::Property<bool> m_doTrackMatching { 
+  Gaudi::Property<bool> m_doTrackMatching {
     this,
     "doTrackMatching",
     false,
@@ -154,7 +146,7 @@ private:
   };
 
   /** @brief Private member flag to do cookie cutting. */
-  Gaudi::Property<bool> m_doCookieCutting { 
+  Gaudi::Property<bool> m_doCookieCutting {
     this,
     "doCookieCutting",
     false,
@@ -196,14 +188,14 @@ protected:
   /** Handle to the selectors. */
   ToolHandleArray<IAsgForwardElectronIsEMSelector> m_forwardElectronIsEMSelectors {
     this,
-    "forwardelectronIsEMselectors", 
-    {}, 
+    "forwardelectronIsEMselectors",
+    {},
     "The selectors that we need to apply to the FwdElectron object"
   };
 
   Gaudi::Property<std::vector<std::string>> m_forwardElectronIsEMSelectorResultNames {
     this,
-    "forwardelectronIsEMselectorResultNames", 
+    "forwardelectronIsEMselectorResultNames",
     {},
     "The selector result names"
   };

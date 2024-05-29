@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #undef NDEBUG
 #define BOOST_TEST_MODULE MultiTrajectoryBasic_test
@@ -321,10 +321,10 @@ BOOST_FIXTURE_TEST_CASE(UncalibratedSourceLink, EmptyMTJ) {
 
   auto link1 = Acts::SourceLink(el1);  // a fictional geometry ID
   auto ts = mtj->getTrackState(index);
-  ts.setUncalibratedSourceLink(link1);  // set link at position 0
+  ts.setUncalibratedSourceLink(std::move(link1));  // set link at position 0
   // get it back
   auto link1Back = ts.getUncalibratedSourceLink();
-  auto el1Back =
+  const auto & el1Back =
       link1Back.get<ElementLink<xAOD::UncalibratedMeasurementContainer>>();
   // compare them by key & index because equality, requires proper has key
   // generation and is bound to SG

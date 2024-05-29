@@ -19,6 +19,7 @@ atlas_add_component( InDetGNNTracking
     InDetPrepRawData TrkTrack TrkRIO_OnTrack InDetSimEvent
     AtlasHepMCLib InDetRIO_OnTrack InDetRawData TrkTruthData
     AthOnnxInterfaces AthOnnxUtilsLib 
+    SiSPSeededTrackFinderData 
 )
 
 atlas_install_python_modules( python/*.py )

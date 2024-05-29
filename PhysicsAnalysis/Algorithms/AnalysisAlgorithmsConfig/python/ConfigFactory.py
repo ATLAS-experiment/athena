@@ -257,6 +257,9 @@ class ConfigFactory():
         from EgammaAnalysisAlgorithms.PhotonAnalysisConfig import PhotonWorkingPointConfig
         self.addAlgConfigBlock(algName="WorkingPoint", alg=PhotonWorkingPointConfig,
             superBlocks="Photons")
+        from EgammaAnalysisAlgorithms.PhotonExtraVariablesConfig import PhotonExtraVariablesBlock
+        self.addAlgConfigBlock(algName="ExtraVariables", alg=PhotonExtraVariablesBlock,
+            superBlocks="Photons")
 
         # muons
         from MuonAnalysisAlgorithms.MuonAnalysisConfig import MuonCalibrationConfig
@@ -271,6 +274,9 @@ class ConfigFactory():
         from TauAnalysisAlgorithms.TauAnalysisConfig import TauWorkingPointConfig
         self.addAlgConfigBlock(algName="WorkingPoint", alg=TauWorkingPointConfig,
             superBlocks="TauJets")
+        from TauAnalysisAlgorithms.TauAnalysisConfig import TauTriggerAnalysisSFBlock
+        self.addAlgConfigBlock(algName="TriggerSF", alg=TauTriggerAnalysisSFBlock,
+                               superBlocks="TauJets")
 
         # SystObjectLink
         from AsgAnalysisAlgorithms.SystObjectLinkConfig import SystObjectLinkBlock
@@ -336,5 +342,9 @@ class ConfigFactory():
         from AsgAnalysisAlgorithms.OutputAnalysisConfig import OutputAnalysisConfig
         self.addAlgConfigBlock(algName="Output", alg=OutputAnalysisConfig,
             defaults={'configName': 'Output'})
+
+        # IOStats printouts
+        from AsgAnalysisAlgorithms.AsgAnalysisConfig import IOStatsBlock
+        self.addAlgConfigBlock(algName="IOStats", alg=IOStatsBlock)
 
         return

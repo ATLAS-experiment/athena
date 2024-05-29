@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # @file: SummaryCreator.py
 # @purpose: a set of classes to create a summary from a perfmon tuple
@@ -246,7 +246,7 @@ class SummaryCreator(object):
         yMinCpu = min(yMinCpu)
         yMaxCpu = max(yMaxCpu)
 
-        def markForLegend(p): setattr(p, '_markedForLegend', True)
+        def markForLegend(p): p._markedForLegend = True
         def isMarked(p):      return hasattr(p, '_markedForLegend')
 
         memLeak = []

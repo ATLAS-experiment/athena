@@ -18,7 +18,6 @@ ex.threads = 1
 ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1"',
             'Trigger.doLVL1=True',
             'Trigger.enabledSignatures=[]']
-ex.args = '--CA'
 
 test = Test.Test()
 test.art_type = 'build'

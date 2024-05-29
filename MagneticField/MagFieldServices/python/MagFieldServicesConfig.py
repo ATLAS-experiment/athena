@@ -59,6 +59,12 @@ def AtlasFieldCacheCondAlgCfg(flags, **kwargs):
       # consider field off if current is below these values:
       afcArgs.update( SoleMinCurrent = 160 )  # Standby current is 150A
       afcArgs.update( ToroMinCurrent = 210 )  # Standby current is 200A
+    elif flags.Input.isMC:
+      if flags.BField.configuredSolenoidFieldScale>160/7730 and flags.BField.configuredSolenoidFieldScale<1:
+          afcArgs.update( UseDCS = False )
+          afcArgs.update( UseSoleCurrent = flags.BField.configuredSolenoidFieldScale * 7730 )
+      else:
+          afcArgs.update( UseDCS = True )
     else:
       afcArgs.update( UseDCS = True )
     # For test, UseDCS is set to False

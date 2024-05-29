@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonPerformanceAlg.h"
@@ -14,6 +14,7 @@
 #include "xAODTruth/TruthParticle.h"
 #include "xAODTruth/TruthParticleAuxContainer.h"
 #include "xAODTruth/TruthParticleContainer.h"
+#include "AthContainers/ConstAccessor.h"
 
 MuonPerformanceAlg::MuonPerformanceAlg(const std::string& name, ISvcLocator* pSvcLocator) :
     AthAlgorithm(name, pSvcLocator), m_writeToFile(false), m_nevents(0), m_runNumber(0), m_eventNumber(0) {
@@ -139,19 +140,25 @@ StatusCode MuonPerformanceAlg::execute() {
     ATH_MSG_VERBOSE("Retrieved truth muons " << TruthMuons->size());
     typedef ElementLink<xAOD::MuonContainer> MuonLink;
 
+    static const SG::ConstAccessor<int> truthTypeAcc("truthType");
+    static const SG::ConstAccessor<int> truthOriginAcc("truthOrigin");
+    static const SG::ConstAccessor<MuonLink> recoMuonLinkAcc("recoMuonLink");
+
     m_nevents += 1;
+
+    static const SG::ConstAccessor<uint8_t> nprecLayersAcc("nprecLayers");
 
     for (const auto truthMu : *TruthMuons) {
         MuonLink link;
-        const int& theType = truthMu->auxdata<int>("truthType");
-        const int& theOrigin = truthMu->auxdata<int>("truthOrigin");
+        const int theType = truthTypeAcc(*truthMu);
+        const int theOrigin = truthOriginAcc(*truthMu);
         ATH_MSG_VERBOSE("Truth muon: pt " << truthMu->pt() << " eta " << truthMu->eta());
         ATH_MSG_VERBOSE("first loop: type " << theType << " origin " << theOrigin);
         if (truthMu->pt() < 2000. || fabs(truthMu->eta()) > 2.8) continue;
         if (fabs(truthMu->eta()) > 2.5)
-            ATH_MSG_VERBOSE(" SA |eta| > 2.5 muon with truth prec layers " << (int)truthMu->auxdata<uint8_t>("nprecLayers"));
+            ATH_MSG_VERBOSE(" SA |eta| > 2.5 muon with truth prec layers " << (int)nprecLayersAcc(*truthMu));
 
-        if (fabs(truthMu->eta()) > 2.5 && (int)truthMu->auxdata<uint8_t>("nprecLayers") < 2) continue;
+        if (fabs(truthMu->eta()) > 2.5 && (int)nprecLayersAcc(*truthMu) < 2) continue;
         if (theType != 6 && theType != 7) continue;
         if (theOrigin == 0 || theOrigin > 17) continue;
         bool insideID = false;
@@ -186,8 +193,8 @@ StatusCode MuonPerformanceAlg::execute() {
                 for (int n = 7; n < 11; n++) m_ntruth10[n] += 1;
         }
 
-        if (truthMu->isAvailable<MuonLink>("recoMuonLink")) {
-            link = truthMu->auxdata<MuonLink>("recoMuonLink");
+        if (recoMuonLinkAcc.isAvailable(*truthMu)) {
+            link = recoMuonLinkAcc(*truthMu);
             ATH_MSG_VERBOSE(" link " << link.isValid());
             if (link.isValid()) {
                 bool loose = false;
@@ -217,7 +224,7 @@ StatusCode MuonPerformanceAlg::execute() {
                     // Use xAOD Muon ID hit selection cuts
                     passesIDcuts = (*link)->passesIDCuts();
                     if (passesIDcuts) {
-                        if (truthMu->auxdata<uint8_t>("nprecLayers") > 0) {
+                        if (nprecLayersAcc(*truthMu) > 0) {
                             m_ntruth[11] += 1;
                             if (truthMu->pt() > 5000.) m_ntruth5[11] += 1;
                             if (truthMu->pt() > 10000.) m_ntruth10[11] += 1;
@@ -288,7 +295,7 @@ StatusCode MuonPerformanceAlg::execute() {
                             m_nfound[1] += 1;
                             if (truthMu->pt() > 5000.) m_nfound5[1] += 1;
                             if (truthMu->pt() > 10000.) m_nfound10[1] += 1;
-                            if (truthMu->auxdata<uint8_t>("nprecLayers") > 0) {
+                            if (nprecLayersAcc(*truthMu) > 0) {
                                 m_nfound[11] += 1;
                                 if (truthMu->pt() > 5000.) m_nfound5[11] += 1;
                                 if (truthMu->pt() > 10000.) m_nfound10[11] += 1;
@@ -340,14 +347,14 @@ StatusCode MuonPerformanceAlg::execute() {
     for (const auto truthMu : *TruthMuons) {
         MuonLink link;
         if (truthMu->pt() < 2000. || fabs(truthMu->eta()) > 3.) continue;
-        const int& theType = truthMu->auxdata<int>("truthType");
-        const int& theOrigin = truthMu->auxdata<int>("truthOrigin");
+        const int theType = truthTypeAcc(*truthMu);
+        const int theOrigin = truthOriginAcc(*truthMu);
         if (theType != 6 && theType != 7) continue;
         if (theOrigin == 0 || theOrigin > 17) continue;
-        if (fabs(truthMu->eta()) > 2.5 && (int)truthMu->auxdata<uint8_t>("nprecLayers") < 2) continue;
+        if (fabs(truthMu->eta()) > 2.5 && (int)nprecLayersAcc(*truthMu) < 2) continue;
         bool insideID = false;
-        if (truthMu->isAvailable<MuonLink>("recoMuonLink")) {
-            link = truthMu->auxdata<MuonLink>("recoMuonLink");
+        if (recoMuonLinkAcc.isAvailable(*truthMu)) {
+            link = recoMuonLinkAcc(*truthMu);
             if (link.isValid()) {
                 const xAOD::TrackParticle* tp = (*link)->primaryTrackParticle();
                 if (tp) {
@@ -457,8 +464,10 @@ StatusCode MuonPerformanceAlg::execute() {
 
             bool insideID = false;
             if (fabs(mu->eta()) < 2.0) insideID = true;
-            if (tp->isAvailable<ElementLink<xAOD::TruthParticleContainer> >("truthParticleLink"))
-                truthLink = tp->auxdata<ElementLink<xAOD::TruthParticleContainer> >("truthParticleLink");
+            static const SG::ConstAccessor<ElementLink<xAOD::TruthParticleContainer> >
+              truthParticleLinkAcc ("truthParticleLink");
+            if (truthParticleLinkAcc.isAvailable(*tp))
+               truthLink = truthParticleLinkAcc(*tp);
             bool fake = true;
             if (truthLink.isValid()) {
                 //          if( (*truthLink)->auxdata<int>("truthType") == 6 || (*truthLink)->auxdata<int>("truthType") == 7 ) {
@@ -568,10 +577,11 @@ void MuonPerformanceAlg::print(const std::string& txt, const xAOD::TruthParticle
     int q = 1;
     if (muon->pdgId() > 0) q = -1;
     double p = sqrt(muon->e() * muon->e() - muon->m() * muon->m());
+    static const SG::ConstAccessor<uint8_t> nprecLayersAcc("nprecLayers");
     ATH_MSG_DEBUG(txt << " run " << m_runNumber << " event " << m_eventNumber << std::endl
                       << " Truth:  pdgId " << muon->pdgId() << " barcode " << muon->barcode() << " eta " << muon->eta() << " phi "
                       << muon->phi() << " q*p (GeV) " << q * p / 1000. << " pt (GeV) " << muon->pt() / 1000. << " precisionLayers "
-                      << static_cast<int>(muon->auxdata<uint8_t>("nprecLayers")));
+                      << static_cast<int>(nprecLayersAcc(*muon)));
 }
 void MuonPerformanceAlg::print(const std::string& txt, const xAOD::Muon* muon) {
     int nprec = 0;

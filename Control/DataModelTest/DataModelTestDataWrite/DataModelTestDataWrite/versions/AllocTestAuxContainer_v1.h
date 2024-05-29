@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 /**
  * @file DataModelTestDataWrite/versions/AllocTestAuxContainer_v1.h
@@ -37,8 +37,8 @@ class AllocTestAuxContainer_v1
 public:
   AllocTestAuxContainer_v1();
 
-  std::vector<int> atInt1;
-  std::vector<int> atInt2;
+  AUXVAR_DECL (int, atInt1);
+  AUXVAR_DECL (int, atInt2);
 };
 
 

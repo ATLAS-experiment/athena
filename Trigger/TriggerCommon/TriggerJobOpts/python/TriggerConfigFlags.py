@@ -22,8 +22,7 @@ def trigGlobalTag(flags):
     """Return global conditions data to be used in the HLT. Return None to indicate that
     no trigger-specific tag is required. Used for IOVDb.GlobalTag in AllConfigFlags.py.
     """
-    return None if flags.Input.isMC else 'CONDBR2-HLTP-2023-01'
-
+    return None if flags.Input.isMC else 'CONDBR2-HLTP-2024-02'
 
 def trigGeoTag(flags):
     """Return geometry tag to be used in the HLT. Returns None to indicate that
@@ -95,12 +94,13 @@ def createTriggerFlags(doTriggerRecoFlags):
     flags.addFlag('Trigger.L1MuonSim.CondDBOffline', 'OFLCOND-MC16-SDR-RUN2-04',
                   help='offline CondDB tag for RPC/TGC coincidence window in rerunLVL1 on data')
 
-    flags.addFlag('Trigger.L1MuonSim.RPCNBX', 8,
+    flags.addFlag('Trigger.L1MuonSim.RPCNBX', lambda prevFlags:
+                  8 if prevFlags.Input.isMC else 4,
                   help='Number of bunch crossings in RPC readout')
 
-    flags.addFlag('Trigger.L1MuonSim.RPCNBCZ', 3,
+    flags.addFlag('Trigger.L1MuonSim.RPCNBCZ', lambda prevFlags:
+                  3 if prevFlags.Input.isMC else 1,
                   help='Nominal BC for RPC readout')
-
 
 
     # Detector flags
@@ -471,6 +471,13 @@ def createTriggerRecoFlags():
         from TrigInDetConfig.TrigTrackingPassFlags import createTrigTrackingPassFlags
         return createTrigTrackingPassFlags(mode='ITk')
     flags.addFlagsCategory( 'Trigger.ITkTracking', __idITk )
+
+    def _idActs():
+        from TrigInDetConfig.TrigTrackingPassFlags import createTrigTrackingPassFlags
+        return createTrigTrackingPassFlags(mode='Acts')
+    flags.addFlagsCategory( 'Trigger.ActsTracking', _idActs )
+
+    flags.addFlag('Trigger.useActsTracking', False, help='use ACTS for ITk tracking')
 
     def __trigCalo():
         from TrigCaloRec.TrigCaloConfigFlags import createTrigCaloConfigFlags

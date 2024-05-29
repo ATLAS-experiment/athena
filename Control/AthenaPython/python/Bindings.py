@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # @file: AthenaPython/python/Bindings.py
 # @author: Sebastien Binet <binet@cern.ch>
@@ -262,7 +262,7 @@ def _py_init_IIncidentSvc():
     def addListener (self, *args):
         listener = args[0]
         if hasattr (listener, '_cppHandle'):
-            args = (getattr (listener, '_cppHandle'),) + args[1:]
+            args = (listener._cppHandle,) + args[1:]  # noqa: B009 (private property)
         return self._cpp_addListener (*args)
     addListener.__doc__ = IIncidentSvc._cpp_addListener.__doc__
     IIncidentSvc.addListener = addListener
@@ -272,7 +272,7 @@ def _py_init_IIncidentSvc():
     def removeListener (self, *args):
         listener = args[0]
         if hasattr (listener, '_cppHandle'):
-            args = (getattr (listener, '_cppHandle'),) + args[1:]
+            args = (listener._cppHandle,) + args[1:]
         return self._cpp_removeListener (*args)
     removeListener.__doc__ = IIncidentSvc._cpp_removeListener.__doc__
     IIncidentSvc.removeListener = removeListener

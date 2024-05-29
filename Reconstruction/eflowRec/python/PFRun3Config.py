@@ -75,13 +75,7 @@ def PFCfg(inputFlags,**kwargs):
     result.merge(PFTrackSelectorAlgCfg(inputFlags,"PFTrackSelector",useCaching))
 
     from eflowRec.PFCfg import getOfflinePFAlgorithm
-    result.merge(getOfflinePFAlgorithm(inputFlags))
-
-    # old PFO algorithm, keep gated behind a joboption but expect this is deprecated.    
-    if(inputFlags.PF.useOldPFO):
-        from eflowRec.PFCfg import getChargedPFOCreatorAlgorithm,getNeutralPFOCreatorAlgorithm
-        result.addEventAlgo(getChargedPFOCreatorAlgorithm(inputFlags,""))
-        result.addEventAlgo(getNeutralPFOCreatorAlgorithm(inputFlags,""))
+    result.merge(getOfflinePFAlgorithm(inputFlags))    
 
     from eflowRec.PFCfg import getChargedFlowElementCreatorAlgorithm,getNeutralFlowElementCreatorAlgorithm,getLCNeutralFlowElementCreatorAlgorithm
     result.addEventAlgo(getChargedFlowElementCreatorAlgorithm(inputFlags,""))

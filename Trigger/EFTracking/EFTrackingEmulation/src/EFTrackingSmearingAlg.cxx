@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
  
 
@@ -9,7 +9,7 @@
 #include "TH1.h"
 
 #ifndef XAOD_ANALYSIS
-#include "TrkEventTPCnv/helpers/EigenHelpers.h"
+#include "EventPrimitives/EventPrimitivesHelpers.h"
 #include "TrkEventPrimitives/ParamDefs.h"
 #else
 
@@ -41,15 +41,6 @@ namespace Amg
            }
        }
    }
-}
-
-// from Tracking/TrkEventCnv/TrkEventTPCnv/TrkEventTPCnv/helpers/EigenHelpers.h
-namespace EigenHelpers 
-{
-  template <class VECTOR, class COVARIANCE> 
-   inline static void eigenMatrixToVector(VECTOR& vec, COVARIANCE& cov, const char* ) {                                                    
-       Amg::compress(cov, vec);                                          
-     }
 }
 
 namespace Trk
@@ -86,6 +77,17 @@ namespace Trk
 
 }
 #endif
+
+
+// from Tracking/TrkEventCnv/TrkEventTPCnv/TrkEventTPCnv/helpers/EigenHelpers.h
+namespace EigenHelpers 
+{
+  template <class VECTOR, class COVARIANCE> 
+   inline static void eigenMatrixToVector(VECTOR& vec, COVARIANCE& cov, const char* ) {                                                    
+       Amg::compress(cov, vec);                                          
+     }
+}
+
 
 
 EFTrackingSmearingAlg::EFTrackingSmearingAlg( const std::string& name, ISvcLocator* pSvcLocator ) 
@@ -149,7 +151,7 @@ StatusCode EFTrackingSmearingAlg::initialize() {
   }
 
   // configure the Smearer
-  m_mySmearer = (void *) new FakeTrackSmearer(smearerName.c_str(), m_RandomSeed, msgLvl (MSG::DEBUG));
+  m_mySmearer = (void *) new FakeTrackSmearer(smearerName, m_RandomSeed, msgLvl (MSG::DEBUG));
   ((FakeTrackSmearer *) m_mySmearer)->SetInputTracksPtCut(m_inputTracksPtCut);
   ((FakeTrackSmearer *) m_mySmearer)->SetOutputTracksPtCut(m_outputTracksPtCut);
   ((FakeTrackSmearer *) m_mySmearer)->SetTrackingEfficiency(m_smearedTrackEfficiency);

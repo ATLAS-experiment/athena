@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Algs
@@ -11,6 +11,7 @@
 #include "src/EstimatedTrackParamsAnalysisAlg.h"
 #include "src/SeedingAlgorithmAnalysisAlg.h"
 #include "src/TrackAnalysisAlg.h"
+#include "src/TrackParticleAnalysisAlg.h"
 // Tools
 #include "src/PhysValTool.h"
 
@@ -23,5 +24,6 @@ DECLARE_COMPONENT( ActsTrk::SeedAnalysisAlg )
 DECLARE_COMPONENT( ActsTrk::SeedingAlgorithmAnalysisAlg )
 DECLARE_COMPONENT( ActsTrk::EstimatedTrackParamsAnalysisAlg )
 DECLARE_COMPONENT( ActsTrk::TrackAnalysisAlg )
+DECLARE_COMPONENT( ActsTrk::TrackParticleAnalysisAlg )
 // Tools
 DECLARE_COMPONENT( ActsTrk::PhysValTool )

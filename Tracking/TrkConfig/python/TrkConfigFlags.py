@@ -51,8 +51,6 @@ class TrackingComponent(FlagEnum):
     ActsValidateSeeds = "ActsValidateSeeds"
     ActsValidateTracks = "ActsValidateTracks"
     ActsValidateAmbiguityResolution = "ActsValidateAmbiguityResolution"
-    # Benchmarking
-    BenchmarkSpot = "BenchmarkSpot"
     # GNN
     GNNChain = "GNNChain"
 
@@ -180,44 +178,31 @@ def createTrackingConfigFlags():
     # The following flags are only used in InDet configurations for now
     # No corresponding ITk config is available yet
 
-    def cutLevel(flags):
-        if flags.Tracking.PrimaryPassConfig is PrimaryPassConfig.HeavyIon:
-            return 4
-        elif flags.Tracking.doLowMu:
-            return 3
-        elif flags.Beam.Type is BeamType.Cosmics:
-            return 8
-        elif flags.Tracking.doMinBias:
-            return 12
-        else:
-            return 19
-
-    # Control cuts and settings for different lumi to limit CPU and disk space
-    icf.addFlag("Tracking.cutLevel", cutLevel)
-
-    def useNewParamTRT(flags):
-        if flags.Tracking.PrimaryPassConfig is PrimaryPassConfig.HeavyIon:
-            return flags.Tracking.cutLevel >= 6
-        else:
-            return flags.Tracking.cutLevel >= 3
-    icf.addFlag("Tracking.useNewParamTRT", useNewParamTRT)
+    icf.addFlag("Tracking.useNewParamTRT", lambda prevFlags:
+                prevFlags.Tracking.PrimaryPassConfig is not(
+                    PrimaryPassConfig.HeavyIon))
 
     # --- run back tracking and TRT only in RoI seed regions
     icf.addFlag("Tracking.BackTracking.doRoISeeded", lambda prevFlags:
-                prevFlags.Tracking.cutLevel>=13 and
-                prevFlags.Detector.EnableCalo)
+                prevFlags.Detector.EnableCalo and not(
+                    prevFlags.Tracking.doLowMu or
+                    prevFlags.Tracking.PrimaryPassConfig is (
+                        PrimaryPassConfig.HeavyIon) or
+                    prevFlags.Beam.Type is BeamType.Cosmics or
+                    prevFlags.Tracking.doMinBias))
     
     # --- defaults for backtracking
     def BackTrackingMinPt(flags):
-        if flags.Tracking.cutLevel <= 1 or flags.Tracking.doMinBias:
-            return 0.4 * Units.GeV
-        elif flags.Tracking.cutLevel <= 18:
-            return 1.0 * Units.GeV
+        if flags.Tracking.doMinBias:
+            return 0.4 * Units.GeV * flags.BField.configuredSolenoidFieldScale
+        elif (flags.Tracking.doLowMu or
+              flags.Tracking.PrimaryPassConfig is PrimaryPassConfig.HeavyIon or
+              flags.Beam.Type is BeamType.Cosmics):
+            return 1.0 * Units.GeV * flags.BField.configuredSolenoidFieldScale
         else:
-            return 3.0 * Units.GeV
+            return 3.0 * Units.GeV * flags.BField.configuredSolenoidFieldScale
     icf.addFlag("Tracking.BackTracking.minPt", BackTrackingMinPt)
-    icf.addFlag("Tracking.BackTracking.TRTSegFinderPtBins", lambda prevFlags:
-                70 if prevFlags.Tracking.cutLevel<=1 else 50)
+    icf.addFlag("Tracking.BackTracking.TRTSegFinderPtBins", 50)
     icf.addFlag("Tracking.BackTracking.maxTRTSharedFrac", 0.7)
     icf.addFlag("Tracking.BackTracking.maxSecondaryImpact", 100.0 * Units.mm)
     icf.addFlag("Tracking.BackTracking.minClusters", 4)
@@ -225,39 +210,67 @@ def createTrackingConfigFlags():
     # cut is now on number of shared modules
     icf.addFlag("Tracking.BackTracking.maxShared", 1)
     icf.addFlag("Tracking.BackTracking.minTRT", lambda prevFlags:
-                10 if prevFlags.Tracking.cutLevel<=6 else 15)
+                10 if (prevFlags.Tracking.doLowMu or
+                       prevFlags.Tracking.PrimaryPassConfig is (
+                           PrimaryPassConfig.HeavyIon))
+                else 15)
     icf.addFlag("Tracking.BackTracking.minTRTPrecFrac", lambda prevFlags:
-                0. if prevFlags.Tracking.cutLevel<=6 else 0.3)
+                0. if (prevFlags.Tracking.doLowMu or
+                       prevFlags.Tracking.PrimaryPassConfig is (
+                           PrimaryPassConfig.HeavyIon))
+                else 0.3)
 
     icf.addFlag("Tracking.BackTracking.maxHoles", lambda prevFlags:
-                2 if prevFlags.Tracking.cutLevel<=6 else 1)
+                2 if (prevFlags.Tracking.doLowMu or
+                       prevFlags.Tracking.PrimaryPassConfig is (
+                           PrimaryPassConfig.HeavyIon))
+                else 1)
     icf.addFlag("Tracking.BackTracking.maxPixelHoles", lambda prevFlags:
-                2 if prevFlags.Tracking.cutLevel<=6 else 1)
+                2 if (prevFlags.Tracking.doLowMu or
+                      prevFlags.Tracking.PrimaryPassConfig is (
+                          PrimaryPassConfig.HeavyIon))
+                else 1)
     icf.addFlag("Tracking.BackTracking.maxSCTHoles", lambda prevFlags:
-                2 if prevFlags.Tracking.cutLevel<=6 else 1)
+                2 if (prevFlags.Tracking.doLowMu or
+                      prevFlags.Tracking.PrimaryPassConfig is (
+                          PrimaryPassConfig.HeavyIon))
+                else 1)
     icf.addFlag("Tracking.BackTracking.maxDoubleHoles", lambda prevFlags:
-                1 if prevFlags.Tracking.cutLevel<=6 else 0)
+                1 if (prevFlags.Tracking.doLowMu or
+                      prevFlags.Tracking.PrimaryPassConfig is (
+                          PrimaryPassConfig.HeavyIon))
+                else 0)
     icf.addFlag("Tracking.BackTracking.nHolesMax", 2)
     icf.addFlag("Tracking.BackTracking.nHolesGapMax", 2)
 
     # extension finder in back tracking
     icf.addFlag("Tracking.BackTracking.rejectShortExtensions", lambda prevFlags:
-                not(prevFlags.Beam.Type is BeamType.Cosmics) and
-                prevFlags.Tracking.cutLevel>=7)
+                not(prevFlags.Beam.Type is BeamType.Cosmics or
+                    prevFlags.Tracking.doLowMu or
+                    prevFlags.Tracking.PrimaryPassConfig is (
+                        PrimaryPassConfig.HeavyIon)))
     # cut in Si Extensions before fit
     icf.addFlag("Tracking.BackTracking.SiExtensionCuts", lambda prevFlags:
-                prevFlags.Tracking.cutLevel>=7)
+                not(prevFlags.Tracking.doLowMu or
+                    prevFlags.Tracking.PrimaryPassConfig is (
+                        PrimaryPassConfig.HeavyIon)))
     icf.addFlag("Tracking.BackTracking.minRoIClusterEt", lambda prevFlags:
-                6.*Units.GeV if prevFlags.Tracking.cutLevel>=19 else 0.)
+                0. if (prevFlags.Tracking.doLowMu or
+                       prevFlags.Tracking.PrimaryPassConfig is (
+                           PrimaryPassConfig.HeavyIon) or
+                       prevFlags.Beam.Type is BeamType.Cosmics or
+                       prevFlags.Tracking.doMinBias)
+                else 6.*Units.GeV * prevFlags.BField.configuredSolenoidFieldScale)
 
     # TRT standalone configuration
     def TRTStandaloneMinPt(flags):
-        if flags.Tracking.cutLevel <= 1 or flags.Tracking.doMinBias:
-            return 0.4 * Units.GeV
-        elif flags.Tracking.cutLevel <= 5:
-            return 1.0 * Units.GeV
+        if flags.Tracking.doMinBias:
+            return 0.4 * Units.GeV * flags.BField.configuredSolenoidFieldScale
+        elif flags.Tracking.doLowMu or (
+                flags.Tracking.PrimaryPassConfig is PrimaryPassConfig.HeavyIon):
+            return 1.0 * Units.GeV * flags.BField.configuredSolenoidFieldScale
         else:
-            return 2.0 * Units.GeV
+            return 2.0 * Units.GeV * flags.BField.configuredSolenoidFieldScale
     icf.addFlag("Tracking.TRTStandalone.minPt", TRTStandaloneMinPt)
     icf.addFlag("Tracking.TRTStandalone.minTRTPrecFrac", 0.15)
     icf.addFlag("Tracking.TRTStandalone.minTRT", 15)
@@ -381,6 +394,7 @@ def createTrackingConfigFlags():
     # GNN for ITk flags
     icf.addFlag("Tracking.GNN.useTrackFinder", False)
     icf.addFlag("Tracking.GNN.useTrackReader", False)
+    icf.addFlag("Tracking.GNN.usePixelHitsOnly", False)
 
     # enable reco steps
     icf.addFlag("Tracking.recoChain", [TrackingComponent.AthenaChain])
@@ -394,8 +408,8 @@ def createTrackingConfigFlags():
     from TrkConfig.TrackingPassFlags import (
         createTrackingPassFlags, createHighPileupTrackingPassFlags,
         createMinBiasTrackingPassFlags, createUPCTrackingPassFlags,
-        createHIPTrackingPassFlags, createLargeD0TrackingPassFlags,
-        createR3LargeD0TrackingPassFlags, createLowPtLargeD0TrackingPassFlags,
+        createHIPTrackingPassFlags, createR3LargeD0TrackingPassFlags,
+        createLowPtLargeD0TrackingPassFlags,
         createLowPtTrackingPassFlags, createVeryLowPtTrackingPassFlags,
         createLowPtRoITrackingPassFlags, createForwardTracksTrackingPassFlags,
         createBeamGasTrackingPassFlags, createVtxLumiTrackingPassFlags,
@@ -433,8 +447,6 @@ def createTrackingConfigFlags():
                          createHIPTrackingPassFlags, prefix=True)
     icf.addFlagsCategory("Tracking.MinBiasPass",
                          createMinBiasTrackingPassFlags, prefix=True)
-    icf.addFlagsCategory("Tracking.LargeD0Pass",
-                         createLargeD0TrackingPassFlags, prefix=True)
     icf.addFlagsCategory("Tracking.R3LargeD0Pass",
                          createR3LargeD0TrackingPassFlags, prefix=True)
     icf.addFlagsCategory("Tracking.LowPtLargeD0Pass",
@@ -510,18 +522,20 @@ def createTrackingConfigFlags():
     # Acts
     from ActsConfig.ActsTrackingPassFlags import (
         createActsTrackingPassFlags,
+        createActsLargeRadiusTrackingPassFlags,
         createActsConversionTrackingPassFlags,
         createActsValidateClustersTrackingPassFlags,
         createActsValidateSpacePointsTrackingPassFlags,
         createActsValidateSeedsTrackingPassFlags,
         createActsValidateTracksTrackingPassFlags,
         createActsValidateAmbiguityResolutionTrackingPassFlags,
-        createActsBenchmarkSpotTrackingPassFlags,
         createActsHeavyIonTrackingPassFlags
     )
 
     icf.addFlagsCategory ("Tracking.ITkActsPass",
                           createActsTrackingPassFlags, prefix=True)
+    icf.addFlagsCategory ("Tracking.ITkActsLargeRadiusPass",
+                          createActsLargeRadiusTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ('Tracking.ITkActsConversionPass',
                           createActsConversionTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ("Tracking.ITkActsValidateClustersPass",
@@ -534,8 +548,6 @@ def createTrackingConfigFlags():
                           createActsValidateTracksTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ("Tracking.ITkActsValidateAmbiguityResolutionPass",
                           createActsValidateAmbiguityResolutionTrackingPassFlags, prefix=True)
-    icf.addFlagsCategory ("Tracking.ITkActsBenchmarkSpotPass",
-                          createActsBenchmarkSpotTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ("Tracking.ITkActsHeavyIonPass",
                           createActsHeavyIonTrackingPassFlags, prefix=True)
 

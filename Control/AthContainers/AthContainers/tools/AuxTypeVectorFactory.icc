@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/tools/AuxTypeVectorFactory.icc
@@ -168,6 +168,7 @@ AuxTypeVectorFactoryImpl<T, ALLOC>::copyImpl (SG::auxid_t auxid,
                                               size_t src_index,
                                               size_t n) const -> vector_value_type*
 {
+  if (n == 0) return nullptr;
   auto dstptr = reinterpret_cast<vector_value_type*>(dst.getDataArray (auxid));
   if (&src == &dst) {
     // Source and destination containers are the same.
@@ -263,6 +264,7 @@ void AuxTypeVectorFactoryImpl<T, ALLOC>::swap (SG::auxid_t auxid,
                                                AuxVectorData& b, size_t bindex,
                                                size_t n) const
 {
+  if (n == 0) return;
   auto aptr = reinterpret_cast<vector_value_type*>(a.getDataArray (auxid));
   auto bptr = &a == &b ? aptr : reinterpret_cast<vector_value_type*>(b.getDataArray (auxid));
   for (size_t i = 0; i < n; i++) {
@@ -284,6 +286,7 @@ void AuxTypeVectorFactoryImpl<T, ALLOC>::clear (SG::auxid_t auxid,
                                                 size_t dst_index,
                                                 size_t n) const
 {
+  if (n == 0) return;
   auto ptr = reinterpret_cast<vector_value_type*>(dst.getDataArray (auxid));
   std::fill (ptr+dst_index, ptr+dst_index+n, SG::Zero<vector_value_type>::zero());
 }

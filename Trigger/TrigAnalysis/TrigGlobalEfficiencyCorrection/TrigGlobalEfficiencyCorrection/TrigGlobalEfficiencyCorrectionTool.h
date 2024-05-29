@@ -137,6 +137,7 @@ private:
 	bool m_checkMuonLegTag; //!
 	bool m_checkPhotonLegTag; //!
 	std::map<std::size_t, std::string> m_dictionary; //!
+	std::set<ToolKey> m_unsupportedLegs; //!
 	
 	std::vector<Hierarchy> m_hierarchyMeta; //!
 	std::vector<std::size_t> m_hierarchyData; //!
@@ -175,11 +176,17 @@ private:
 	template<class Container> CachedRanking rankTriggerLegs(float pt, const Container& legs);
 	template<class Particle> bool updateLeptonList(LeptonList& leptons, const std::vector<const Particle*>& particles);
 	void updateMuonTriggerNames(std::size_t leg, const std::string& name);
-	bool getTriggerLegEfficiencies(const xAOD::Electron* p, unsigned runNumber, std::size_t leg, std::size_t tag, TrigGlobEffCorr::Efficiencies& efficiencies);
-	bool getTriggerLegEfficiencies(const xAOD::Muon* p, std::size_t leg, std::size_t tag, TrigGlobEffCorr::Efficiencies& efficiencies);
-	bool getTriggerLegEfficiencies(const xAOD::Photon* p, unsigned runNumber, std::size_t leg, std::size_t tag, TrigGlobEffCorr::Efficiencies& efficiencies);
+	enum TLE_RESULT
+	{
+		TLE_OK,
+		TLE_UNAVAILABLE,
+		TLE_ERROR
+	};
+	TLE_RESULT getTriggerLegEfficiencies(const xAOD::Electron* p, unsigned runNumber, std::size_t leg, std::size_t tag, TrigGlobEffCorr::Efficiencies& efficiencies);
+	TLE_RESULT getTriggerLegEfficiencies(const xAOD::Muon* p, unsigned runNumber, std::size_t leg, std::size_t tag, TrigGlobEffCorr::Efficiencies& efficiencies);
+	TLE_RESULT getTriggerLegEfficiencies(const xAOD::Photon* p, unsigned runNumber, std::size_t leg, std::size_t tag, TrigGlobEffCorr::Efficiencies& efficiencies);
 	template<class ParticleType>
-	bool getEgammaTriggerLegEfficiencies(const ParticleType* p, unsigned runNumber, std::size_t leg, std::size_t tag, TrigGlobEffCorr::Efficiencies& efficiencies);
+	TLE_RESULT getEgammaTriggerLegEfficiencies(const ParticleType* p, unsigned runNumber, std::size_t leg, std::size_t tag, TrigGlobEffCorr::Efficiencies& efficiencies);
 	decltype(m_electronSfToolIndex)& GetScaleFactorToolIndex(const xAOD::Electron*) { return m_electronSfToolIndex; }
 	decltype(m_photonSfToolIndex)& GetScaleFactorToolIndex(const xAOD::Photon*) { return m_photonSfToolIndex; }
 	decltype(m_electronEffToolIndex)& GetEfficiencyToolIndex(const xAOD::Electron*) { return m_electronEffToolIndex; }

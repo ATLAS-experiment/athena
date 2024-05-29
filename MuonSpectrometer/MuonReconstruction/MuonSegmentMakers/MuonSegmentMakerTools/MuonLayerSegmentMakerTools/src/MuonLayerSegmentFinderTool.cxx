@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonLayerSegmentFinderTool.h"
@@ -306,7 +306,9 @@ namespace Muon {
 
                 // treat the case that the hit is a composite TGC hit
                 if (hit->tgc) {
-                    for (const auto& prd : hit->tgc->etaCluster.hitList) handleCluster(*prd, clusters);
+                    for (const auto& prd : hit->tgc->etaCluster) {
+                        handleCluster(*prd, clusters);
+                    }
                 } else if (hit->prd) {
                     Identifier id = hit->prd->identify();
                     if (m_idHelperSvc->isMdt(id))
@@ -333,10 +335,10 @@ namespace Muon {
 
                 for (const auto& phi_hit : maximum.hits) {
                     // treat the case that the hit is a composite TGC hit
-                    if (phi_hit->tgc && !phi_hit->tgc->phiCluster.hitList.empty()) {
-                        Identifier id = phi_hit->tgc->phiCluster.hitList.front()->identify();
+                    if (phi_hit->tgc) {
+                        Identifier id = phi_hit->tgc->phiCluster.front()->identify();
                         if (m_idHelperSvc->layerIndex(id) != intersection.layerSurface.layerIndex) continue;
-                        for (const auto& prd : phi_hit->tgc->phiCluster.hitList) handleCluster(*prd, clusters);
+                        for (const auto& prd : phi_hit->tgc->phiCluster) handleCluster(*prd, clusters);
                     } else if (phi_hit->prd) {
                         Identifier id = phi_hit->prd->identify();
                         if (m_idHelperSvc->layerIndex(id) != intersection.layerSurface.layerIndex) continue;

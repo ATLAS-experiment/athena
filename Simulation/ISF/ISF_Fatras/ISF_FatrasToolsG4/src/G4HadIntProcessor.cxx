@@ -5,9 +5,6 @@
 // Class Header
 #include "ISF_FatrasToolsG4/G4HadIntProcessor.h"
 
-// Fatras
-#include "ISF_FatrasInterfaces/IPhysicsValidationTool.h"
-
 // ISF
 #include "ISF_Event/ISFParticle.h"
 #include "ISF_Event/ISFParticleContainer.h"
@@ -48,6 +45,9 @@
 #include "G4ProductionCutsTable.hh"
 #include "G4ios.hh"
 
+// TruthUtils
+#include "TruthUtils/MagicNumbers.h"
+
 // CLHEP
 #include "CLHEP/Units/SystemOfUnits.h"
 #include "AtlasHepMC/GenParticle.h"
@@ -57,9 +57,6 @@
 
 // STD
 #include <math.h>
-
-// ROOT
-#include "TTree.h"
 
 namespace {
   /** projection factor for the non-parametric scattering */
@@ -77,18 +74,7 @@ iFatras::G4HadIntProcessor::G4HadIntProcessor(const std::string& t, const std::s
   m_particleBroker("ISF_ParticleBrokerSvc", n),
   m_truthRecordSvc("ISF_ValidationTruthService", n),
   m_randomEngine(0),
-  m_randomEngineName("FatrasRnd"),
-  m_validationMode(false),
-  m_validationTool(""),
-  m_validationTreeName("FatrasMaterialEffects"),
-  m_validationTreeDescription("Validation output from the McMaterialEffectsUpdator"),
-  m_validationTreeFolder("/val/FatrasSimulationMaterial"),
-  m_bremValidationTreeName("FatrasBremPhotons"),
-  m_bremValidationTreeDescription("Validation output from the McMaterialEffectsUpdator"),
-  m_bremValidationTreeFolder("/val/FatrasBremPhotons"),
-  m_edValidationTreeName("FatrasEnergyInCaloDeposit"),
-  m_edValidationTreeDescription("Validation output from the McMaterialEffectUpdator"),
-  m_edValidationTreeFolder("/val/FatrasEnergyInCaloDeposit")
+  m_randomEngineName("FatrasRnd")
 {
   // steering
   declareProperty("MomentumCut"                     , m_minMomentum                                                       );
@@ -100,8 +86,6 @@ iFatras::G4HadIntProcessor::G4HadIntProcessor(const std::string& t, const std::s
   // random number generator
   declareProperty("RandomNumberService"                 , m_rndGenSvc          , "Random number generator");
   declareProperty("RandomStreamName"                    , m_randomEngineName   , "Name of the random number stream");
-  declareProperty("ValidationMode"                      , m_validationMode);
-  declareProperty("PhysicsValidationTool"               , m_validationTool);
   declareProperty("G4RunManagerHelper"                  , m_g4RunManagerHelper);
 }
 
@@ -115,6 +99,8 @@ iFatras::G4HadIntProcessor::~G4HadIntProcessor()
 // initialize
 StatusCode iFatras::G4HadIntProcessor::initialize()
 {
+  ATH_MSG_DEBUG( "initialize()" );
+
   // ISF Services
   if (m_particleBroker.retrieve().isFailure()){
     ATH_MSG_FATAL( "Could not retrieve ParticleBroker: " << m_particleBroker );
@@ -123,16 +109,6 @@ StatusCode iFatras::G4HadIntProcessor::initialize()
   if (m_truthRecordSvc.retrieve().isFailure()){
     ATH_MSG_FATAL( "Could not retrieve TruthRecordSvc: " << m_truthRecordSvc );
     return StatusCode::FAILURE;
-  }
-
-  if (m_validationMode){
-
-    // retrieve the physics validation tool
-    if (m_validationTool.retrieve().isFailure()){
-      ATH_MSG_FATAL( "Could not retrieve " << m_validationTool );
-      return StatusCode::FAILURE;
-    } else
-      ATH_MSG_VERBOSE( "Successfully retrieved " << m_validationTool );
   }
 
   // get the random generator serice
@@ -150,7 +126,7 @@ StatusCode iFatras::G4HadIntProcessor::initialize()
   }
 
   // all good
-  ATH_MSG_INFO("initialize() successful");
+  ATH_MSG_DEBUG("initialize() successful");
   return StatusCode::SUCCESS;
 }
 
@@ -158,11 +134,7 @@ StatusCode iFatras::G4HadIntProcessor::initialize()
 // finalize
 StatusCode iFatras::G4HadIntProcessor::finalize()
 {
-  ATH_MSG_INFO( " ---------- Statistics output -------------------------- " );
-  //ATH_MSG_INFO( "                     Minimum energy cut for brem photons : " <<   m_minimumBremPhotonMomentum  );
-  //ATH_MSG_INFO( "                     Brem photons (above cut, recorded)  : " <<   m_recordedBremPhotons        );
-
-  ATH_MSG_INFO( "finalize() successful" );
+  ATH_MSG_DEBUG( "finalize() successful" );
   return StatusCode::SUCCESS;
 }
 
@@ -478,7 +450,7 @@ ISF::ISFParticleVector iFatras::G4HadIntProcessor::getHadState(const ISF::ISFPar
       const G4ParticleDefinition *parDef = trk->GetParticleDefinition();
 
       // skip ions
-      if (parDef->GetPDGEncoding()>1.e09) continue;
+      if (parDef->GetPDGEncoding()>1.e09) continue; // FIXME add a method to AtlasPID.h for this check
 
       //Prepare and build the physics table for secondaries
       //process->PreparePhysicsTable(*parDef);
@@ -492,25 +464,17 @@ ISF::ISFParticleVector iFatras::G4HadIntProcessor::getHadState(const ISF::ISFPar
       const G4ThreeVector &momG4 = dynPar->GetMomentum();
       Amg::Vector3D mom( momG4.x(), momG4.y(), momG4.z() );
 
-      //Let's make sure the new ISFParticle get some valid TruthBinding and HepMcParticleLink objects
-      ISF::TruthBinding* truthBinding = NULL;
-      if (parent->getTruthBinding()) {
- 	        ATH_MSG_VERBOSE("Could retrieve TruthBinding from original ISFParticle");
- 	        truthBinding = new ISF::TruthBinding(*parent->getTruthBinding());
-      }
-      else
- 	        ATH_MSG_WARNING("Could not retrieve TruthBinding from original ISFParticle, might cause issues later on.");
+      const int status = 1 + HepMC::SIM_STATUS_THRESHOLD;
+      const int id = HepMC::UNDEFINED_ID;
       ISF::ISFParticle* cParticle = new ISF::ISFParticle( position,
                                                           mom,
                                                           parDef->GetPDGMass(),
                                                           parDef->GetPDGCharge(),
                                                           parDef->GetPDGEncoding(),
-                                                          1, //status
+                                                          status,
                                                           time,
                                                           *parent,
-                                                          0, // undefined id
-                                                          Barcode::fUndefinedBarcode,
-                                                          truthBinding );
+                                                          id );
       cParticle->setNextGeoID( parent->nextGeoID() );
       cParticle->setNextSimID( parent->nextSimID() );
       // process sampling tool takes care of validation info
@@ -519,7 +483,25 @@ ISF::ISFParticleVector iFatras::G4HadIntProcessor::getHadState(const ISF::ISFPar
     }
 
     children.resize(numChildren);
-    // truth info handled by process sampling tool
+
+    // register TruthIncident
+    const int processForTI  = 121; // Hadronic interaction
+    ISF::ISFTruthIncident truth( const_cast<ISF::ISFParticle&>(*parent),
+                                 children,
+                                 processForTI,
+                                 parent->nextGeoID(),  // inherits from the parent
+                                 ISF::fKillsPrimary );
+    m_truthRecordSvc->registerTruthIncident( truth);
+    // At this point we need to update the properties of the
+    // ISFParticles produced in the interaction
+    truth.updateChildParticleProperties();
+
+    // Check that the new ISFParticles have a valid TruthBinding
+    for (auto *childParticle : children) {
+      if (!childParticle->getTruthBinding()) {
+        ATH_MSG_ERROR("Could not retrieve TruthBinding from child ISFParticle "<< *childParticle);
+      }
+    }
 
     // free up memory
     g4change->Clear();
@@ -539,25 +521,25 @@ bool iFatras::G4HadIntProcessor::doHadronicInteraction(double time, const Amg::V
 						       Trk::ParticleHypothesis /*particle*/,
 						       bool  processSecondaries) const
 {
+  // Called by G4HadIntProcessor::hadronicInteraction and McMaterialEffectsUpdator::interact
   // get parent particle
   // @TODO: replace by Fatras internal bookkeeping
   const ISF::ISFParticle *parent = ISF::ParticleClipboard::getInstance().getParticle();
   // something is seriously wrong if there is no parent particle
   assert(parent);
 
-  ISF::ISFParticleVector ispVec=getHadState(parent, time, position, momentum, ematprop);
+  ISF::ISFParticleVector ispVec=getHadState(parent, time, position, momentum, ematprop); // Registers TruthIncident interally
 
-  if (!ispVec.size()) return false;
+  if (ispVec.empty()) return false; // FIXME Inconsistent with HadIntProcessorParametric::doHadronicInteraction
 
   // push onto ParticleStack
-
   if (processSecondaries) {
-    for (unsigned int ic=0; ic<ispVec.size(); ic++) {
-	//First let's make sure that new ISFParticles have valid truth info
-	if (!ispVec[ic]->getTruthBinding()) {
-		ispVec[ic]->setTruthBinding(new ISF::TruthBinding(*parent->getTruthBinding()));
-	}
-	m_particleBroker->push(ispVec[ic], parent);
+    for (auto *childParticle : ispVec) {
+      //Check that the new ISFParticles have a valid TruthBinding
+      if (!childParticle->getTruthBinding()) {
+        ATH_MSG_ERROR("Could not retrieve TruthBinding from child ISFParticle "<< *childParticle);
+      }
+      m_particleBroker->push(childParticle, parent);
     }
   }
 
@@ -571,7 +553,7 @@ ISF::ISFParticleVector iFatras::G4HadIntProcessor::doHadIntOnLayer(const ISF::IS
 								   Trk::ParticleHypothesis /*particle=Trk::pion*/) const
 {
 
-  return getHadState(parent, time, position, momentum, emat);
+  return getHadState(parent, time, position, momentum, emat); // Registers TruthIncident interally
 
 }
 

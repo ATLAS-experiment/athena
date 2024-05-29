@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "egammaForwardBuilder.h"
 #include "egammaInterfaces/IegammaBaseTool.h"
 #include "egammaCaloUtils/CookieCutterHelpers.h"
+#include "egammaUtils/EMFourMomBuilder.h"
 #include "xAODCaloEvent/CaloClusterContainer.h"
 #include "xAODCaloEvent/CaloClusterAuxContainer.h"
 #include "xAODCaloEvent/CaloClusterKineHelper.h"
@@ -23,11 +24,11 @@
 #include <cmath>
 
 namespace {
-  static constexpr float cellEtaSize = 0.1;
-  static constexpr float cellPhiSize = 0.1;
-  
+  constexpr float cellEtaSize = 0.1;
+  constexpr float cellPhiSize = 0.1;
+
   template <typename... T>
-  void copyMoments(const xAOD::CaloCluster& src, 
+  void copyMoments(const xAOD::CaloCluster& src,
                    std::unique_ptr<xAOD::CaloCluster>& dest,
                    T... momentIds) {
     for (const auto& momentId : {momentIds...}) {
@@ -42,8 +43,6 @@ egammaForwardBuilder::egammaForwardBuilder(const std::string& name,
                                            ISvcLocator* pSvcLocator)
   : AthReentrantAlgorithm(name, pSvcLocator)
 {}
-
-egammaForwardBuilder::~egammaForwardBuilder() = default;
 
 StatusCode egammaForwardBuilder::initialize()
 {
@@ -66,15 +65,6 @@ StatusCode egammaForwardBuilder::initialize()
 
   else {
     m_objectQualityTool.disable();
-  }
-
-  // Retrieve 4-mom builder.
-  if (!m_fourMomBuilder.empty()) {
-    ATH_CHECK(m_fourMomBuilder.retrieve());
-  }
-
-  else { 
-    m_fourMomBuilder.disable();
   }
 
   ATH_CHECK(m_forwardElectronIsEMSelectors.retrieve());
@@ -151,37 +141,37 @@ StatusCode egammaForwardBuilder::execute(const EventContext& ctx) const
   // Prepare to create clusters.
   EgammaRecContainer egammaRecsFwd;
   size_t origClusterIndex = 0;
-  
+
   // Loop over input cluster container and create egRecs to store the electrons.
   for (const xAOD::CaloCluster* cluster : *inputClusters) {
 
     // Create links back to the original clusters.
     std::vector<ElementLink<xAOD::CaloClusterContainer>> constituentLinks;
 
-    // The constituent links should contain a CaloCal cluster. When not running 
-    // in ITk mode this is the default for the forward clusters used by egamma 
-    // so no sister link is needed to get the CaloCal. When running in ITk mode 
-    // the clusters used are CaloTopoClusters so need to access the sister 
+    // The constituent links should contain a CaloCal cluster. When not running
+    // in ITk mode this is the default for the forward clusters used by egamma
+    // so no sister link is needed to get the CaloCal. When running in ITk mode
+    // the clusters used are CaloTopoClusters so need to access the sister
     // cluster to maintain consistency.
     if (m_doTrackMatching) {
-      ElementLink<xAOD::CaloClusterContainer> sisterCluster = 
+      ElementLink<xAOD::CaloClusterContainer> sisterCluster =
         cluster->getSisterClusterLink();
 
       if (sisterCluster) {
         constituentLinks.push_back(sisterCluster);
       } else {
         ATH_MSG_WARNING("No sister Link available");
-      }      
+      }
     } else {
       constituentLinks.emplace_back(*inputClusters, origClusterIndex, ctx);
     }
 
-    const DataLink<CaloCellContainer>& cellCont = 
+    const DataLink<CaloCellContainer>& cellCont =
       cluster->getCellLinks()->getCellContainerLink();
 
     // Create the new cluster.
-    std::unique_ptr<xAOD::CaloCluster> newCluster = 
-      m_doCookieCutting ? 
+    std::unique_ptr<xAOD::CaloCluster> newCluster =
+      m_doCookieCutting ?
         cookieCut(*cluster, *calodetdescrmgr, cellCont) :
         std::make_unique<xAOD::CaloCluster>(*cluster);
 
@@ -195,7 +185,7 @@ StatusCode egammaForwardBuilder::execute(const EventContext& ctx) const
     size_t index = outClusterContainer->size() - 1;
     const ElementLink<xAOD::CaloClusterContainer> clusterLink(*outClusterContainer, index, ctx);
     const std::vector<ElementLink<xAOD::CaloClusterContainer>> clusterLinkVector{clusterLink};
-    
+
     // Now create the egamma Rec
     egammaRecsFwd.push_back(std::make_unique<egammaRec>(clusterLinkVector));
 
@@ -253,7 +243,7 @@ StatusCode egammaForwardBuilder::execute(const EventContext& ctx) const
       );
     }
 
-    ATH_CHECK(m_fourMomBuilder->execute(ctx, el));
+    EMFourMomBuilder::calculate(*el);
     ATH_CHECK(ExecObjectQualityTool(ctx, el));
 
     // Apply the Forward Electron selectors.
@@ -272,8 +262,8 @@ StatusCode egammaForwardBuilder::execute(const EventContext& ctx) const
   }//end of loop over egammaRecs
 
   CaloClusterStoreHelper::finalizeClusters(
-    ctx, 
-    outClusterContainer, 
+    ctx,
+    outClusterContainer,
     outClusterContainerCellLink);
 
   return StatusCode::SUCCESS;
@@ -354,8 +344,8 @@ std::unique_ptr<xAOD::CaloCluster> egammaForwardBuilder::cookieCut(
     const float deltaEta = std::abs(eta - cellItr->eta());
     const float deltaPhi = std::abs(phi - cellItr->phi());
 
-    const float deltaEta2 = deltaEta * deltaEta; 
-    const float deltaPhi2 = deltaPhi * deltaPhi; 
+    const float deltaEta2 = deltaEta * deltaEta;
+    const float deltaPhi2 = deltaPhi * deltaPhi;
 
     const bool excludeCell = isEC ?
       (deltaEta >= m_maxDelEta || deltaPhi >= m_maxDelPhi) :

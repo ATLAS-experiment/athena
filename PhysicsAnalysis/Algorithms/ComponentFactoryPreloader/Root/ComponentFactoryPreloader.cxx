@@ -29,6 +29,7 @@
 #include <AsgAnalysisAlgorithms/AsgxAODMetNTupleMakerAlg.h>
 #include <AsgAnalysisAlgorithms/AsgxAODNTupleMakerAlg.h>
 #include <AsgAnalysisAlgorithms/BootstrapGeneratorAlg.h>
+#include <AsgAnalysisAlgorithms/AsgEnergyDecoratorAlg.h>
 #include <AsgAnalysisAlgorithms/EventFlagSelectionAlg.h>
 #include <AsgAnalysisAlgorithms/EventStatusSelectionAlg.h>
 #include <AsgAnalysisAlgorithms/ObjectCutFlowHistAlg.h>
@@ -37,11 +38,13 @@
 #include <AsgAnalysisAlgorithms/SystObjectLinkerAlg.h>
 #include <AsgAnalysisAlgorithms/TreeFillerAlg.h>
 #include <AsgAnalysisAlgorithms/TreeMakerAlg.h>
+#include <AsgAnalysisAlgorithms/IOStatsAlg.h>
 #include <EgammaAnalysisAlgorithms/EgammaCalibrationAndSmearingAlg.h>
 #include <EgammaAnalysisAlgorithms/EgammaIsGoodOQSelectionTool.h>
 #include <EgammaAnalysisAlgorithms/EgammaIsolationCorrectionAlg.h>
 #include <EgammaAnalysisAlgorithms/EgammaIsolationSelectionAlg.h>
 #include <EgammaAnalysisAlgorithms/PhotonOriginCorrectionAlg.h>
+#include <EgammaAnalysisAlgorithms/PhotonExtraVariablesAlg.h>
 #include <ElectronPhotonFourMomentumCorrection/EgammaCalibrationAndSmearingTool.h>
 #include <ElectronPhotonSelectorTools/AsgDeadHVCellRemovalTool.h>
 #include <EventSelectionAlgorithms/MissingETPlusTransverseMassSelectorAlg.h>
@@ -117,10 +120,12 @@ namespace CP
     ANA_CHECK (asg::registerAlgorithmFactory<CP::AsgViewFromSelectionAlg>("CP::AsgViewFromSelectionAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::AsgxAODMetNTupleMakerAlg>("CP::AsgxAODMetNTupleMakerAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::AsgxAODNTupleMakerAlg>("CP::AsgxAODNTupleMakerAlg"));
+    ANA_CHECK (asg::registerAlgorithmFactory<CP::AsgEnergyDecoratorAlg>("CP::AsgEnergyDecoratorAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::BootstrapGeneratorAlg>("CP::BootstrapGeneratorAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::EgammaCalibrationAndSmearingAlg>("CP::EgammaCalibrationAndSmearingAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::EgammaIsolationCorrectionAlg>("CP::EgammaIsolationCorrectionAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::EgammaIsolationSelectionAlg>("CP::EgammaIsolationSelectionAlg"));
+    ANA_CHECK (asg::registerAlgorithmFactory<CP::PhotonExtraVariablesAlg>("CP::PhotonExtraVariablesAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::EventFlagSelectionAlg>("CP::EventFlagSelectionAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::EventStatusSelectionAlg>("CP::EventStatusSelectionAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::JetCalibrationAlg>("CP::JetCalibrationAlg"));
@@ -149,6 +154,7 @@ namespace CP
     ANA_CHECK (asg::registerAlgorithmFactory<CP::TrigEventSelectionAlg>("CP::TrigEventSelectionAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::TrigGlobalEfficiencyAlg>("CP::TrigGlobalEfficiencyAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::VertexSelectionAlg>("CP::VertexSelectionAlg"));
+    ANA_CHECK (asg::registerAlgorithmFactory<CP::IOStatsAlg>("CP::IOStatsAlg"));
 
     ANA_CHECK (asg::registerToolFactory<AsgDeadHVCellRemovalTool> ("AsgDeadHVCellRemovalTool"));
     ANA_CHECK (asg::registerToolFactory<BTaggingSelectionTool> ("BTaggingSelectionTool"));

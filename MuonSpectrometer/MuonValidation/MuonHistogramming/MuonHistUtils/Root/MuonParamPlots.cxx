@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonHistUtils/MuonParamPlots.h"
 #include "xAODTracking/TrackingPrimitives.h"
+#include "AthContainers/ConstAccessor.h"
 
 namespace Muon{
 
@@ -35,7 +36,8 @@ void MuonParamPlots::initializePlots()
   void MuonParamPlots::FillPlot(TH1* hist, const xAOD::Muon& mu,const xAOD::Muon::ParamDef paramDef,float scale, float weight) {
   if (mu.author()==xAOD::Muon::CaloTag || mu.author()==xAOD::Muon::CaloLikelihood || mu.author()==xAOD::Muon::ExtrapolateMuonToIP) return; //protection
   float fpar = 0;
-  if (mu.isAvailable<float>("EnergyLoss")) {
+  static const SG::ConstAccessor<float> elossAcc ("EnergyLoss");
+  if (elossAcc.isAvailable(mu)) {
      if (mu.parameter(fpar, paramDef)) 
        hist->Fill(scale*fpar, weight); //scale to GeV, if needed
   }

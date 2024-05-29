@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -506,6 +506,12 @@ void test4 (SGTest::TestStore& store)
   assert (sgkey == sgkey_foo);
   assert (index == 10);
 
+  std::string key = "foo";
+  ElementLinkBase_test link (key, fooclid, 12, &store);
+  link.thin (&cache);
+  assert (link.index() == 12);
+  assert (link.key() == sgkey_foo);
+
   SG::ThinningDecisionBase dec (20);
   dec.thin (7);
   dec.thin (8);
@@ -515,6 +521,10 @@ void test4 (SGTest::TestStore& store)
   assert (h1.thin (sgkey, index, &cache) == true);
   assert (sgkey == sgkey_foo);
   assert (index == 8);
+
+  link.thin (&cache);
+  assert (link.index() == 10);
+  assert (link.key() == sgkey_foo);
 }
 
 

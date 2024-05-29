@@ -47,10 +47,6 @@ DetDescrCnvSvc                                       INFO  filling address for C
 DetDescrCnvSvc                                       INFO  filling address for CaloDM_ID with CLID 167756483 and storage type 68 to detector store 
 DetDescrCnvSvc                                       INFO  filling address for ZdcID with CLID 190591643 and storage type 68 to detector store 
 TagInfoMgr                                           INFO   AlgTool: TagInfoMgr.IOVDbMetaDataTool
-GeoModelSvc::RDBMaterialManager                   WARNING  Getting PixTBMatComponents with default tag
-GeoModelSvc::RDBMaterialManager                   WARNING  Getting PixTBMaterials with default tag
-GeoModelSvc::RDBMaterialManager                   WARNING  Getting InDetMatComponents with default tag
-GeoModelSvc::RDBMaterialManager                   WARNING  Getting InDetMaterials with default tag
 IOVSvc                                               INFO No IOVSvcTool associated with store "StoreGateSvc"
 IOVSvc.IOVSvcTool                                    INFO IOVRanges will be checked at every Event
 ClassIDSvc                                           INFO  getRegistryEntries: read 829 CLIDRegistry entries for module ALL

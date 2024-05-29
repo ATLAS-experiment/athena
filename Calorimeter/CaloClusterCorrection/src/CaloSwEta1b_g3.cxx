@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -79,3 +79,8 @@ void CaloSwEta1b_g3::makeCorrection (const Context& myctx,
 }
 
 
+const std::string& CaloSwEta1b_g3::toolType() const
+{
+  static const std::string typeName = "CaloSwEta_g3";
+  return typeName;
+}

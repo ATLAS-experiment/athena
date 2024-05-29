@@ -207,29 +207,6 @@ def PhotonIsEMSelectorsCfg(flags):
     )
     acc.addPublicTool(PhotonIsEMSelectorMedium)
 
-    from DerivationFrameworkEGamma.EGammaToolsConfig import EGSelectionToolWrapperCfg
-
-    EGFudgeMCTool = PhotonVariableCorrectionTool if isFullSim else None
-
-    PhotonPassIsEMMedium = acc.getPrimaryAndMerge(
-        EGSelectionToolWrapperCfg(
-            flags,
-            name="PhotonPassIsEMMedium",
-            EGammaSelectionTool=PhotonIsEMSelectorMedium,
-            EGammaFudgeMCTool=EGFudgeMCTool,
-            CutType="",
-            StoreGateEntryName="DFCommonPhotonsIsEMMedium",
-            ContainerName="Photons"
-        )
-    )
-
-    PhotonIDAugmentationTools = [PhotonPassIsEMMedium]
-
-    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(
-        "LLP1PhotonIDKernel",
-        AugmentationTools=PhotonIDAugmentationTools
-    ))
-
     return acc
     
 # Electron LLH setup for LLP1

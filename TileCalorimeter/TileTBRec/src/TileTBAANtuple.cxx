@@ -207,7 +207,7 @@ TileTBAANtuple::TileTBAANtuple(const std::string& name, ISvcLocator* pSvcLocator
 }
 
 StatusCode TileTBAANtuple::initialize() {
-  ATH_CHECK( m_samplingFractionKey.initialize() );
+  ATH_CHECK( m_samplingFractionKey.initialize(SG::AllowEmpty) );
   m_saveFelixData = !(m_digitsContainerFlxKey.empty() && m_flxOptRawChannelContainerKey.empty() && m_flxFitRawChannelContainerKey.empty());
 
   ATH_CHECK( m_digitsContainerKey.initialize(SG::AllowEmpty) );

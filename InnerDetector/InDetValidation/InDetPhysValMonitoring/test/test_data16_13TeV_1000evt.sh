@@ -18,7 +18,7 @@ artdata=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art
 inputBS=${artdata}/RecJobTransformTests/data16_13TeV.00310809.physics_Main.daq.RAW._lb1219._SFO-2._0001.data 
 dcubeShifterXml="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/dcube/config/IDPVMPlots_data_baseline.xml"
 dcubeExpertXml="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/dcube/config/IDPVMPlots_data_expert.xml"
-dcubeRef="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/ReferenceHistograms/physval_data16_1000evt_reco_r24.0.39.root"
+dcubeRef="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/ReferenceHistograms/nightly_references/2024-05-20T2101/physval_data16_13TeV_1000evt_2024-05-20T2101.root"
 
 # Reco step based on test InDetPhysValMonitoring ART setup from Josh Moss.
 

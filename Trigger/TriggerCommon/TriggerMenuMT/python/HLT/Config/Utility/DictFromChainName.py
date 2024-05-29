@@ -31,8 +31,7 @@ def getOverallL1item(flags, chainName):
     assert '_L1' in chainName, 'ERROR IN CHAIN {}, missing L1 seed at the end i.e. _L1...' .format(chainName)
 
     from TriggerMenuMT.HLT.Menu.L1Seeds import valid_multiseeds, getSpecificL1Seeds
-    from TrigConfIO.L1TriggerConfigAccess import L1MenuAccess
-    from TrigConfigSvc.TrigConfigSvcCfg import getL1MenuFileName
+    from TrigConfigSvc.TriggerConfigAccess import getL1MenuAccess
 
     # this assumes that the last string of a chain name is the overall L1 item
     cNameParts = chainName.rsplit("_L1",1)
@@ -45,8 +44,7 @@ def getOverallL1item(flags, chainName):
         return 'L1_EM24VHI,L1_MU20'
     if l1seed in valid_multiseeds:
         # For these item seed specifications we need to derive the precise list of item names from the L1Menu.
-        lvl1name = getL1MenuFileName(flags)
-        lvl1access = L1MenuAccess(lvl1name)
+        lvl1access = getL1MenuAccess(flags)
         itemsDict = lvl1access.items(includeKeys = ['name','ctpid','triggerType'])
         l1seedlist = getSpecificL1Seeds(l1seed, itemsDict, flags.Trigger.triggerMenuSetup)
         return l1seedlist
