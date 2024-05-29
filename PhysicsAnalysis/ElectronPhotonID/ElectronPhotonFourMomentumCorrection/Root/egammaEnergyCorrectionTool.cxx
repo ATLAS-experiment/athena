@@ -65,7 +65,7 @@ namespace AtlasRoot {
     m_esmodel(egEnergyCorr::UNDEFINED)
   {
 
-    m_rootFileName = PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v28/egammaEnergyCorrectionData.root");
+    m_rootFileName = PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v31/egammaEnergyCorrectionData.root");
     
     if (m_rootFileName.empty()) {
       ATH_MSG_FATAL("cannot find configuration file");
@@ -659,7 +659,8 @@ namespace AtlasRoot {
 	     m_esmodel == egEnergyCorr::es2018_R21_v0 ||
 	     m_esmodel == egEnergyCorr::es2018_R21_lowmu_v0 ||
 	     m_esmodel == egEnergyCorr::es2018_R21_v1 ||
-	     m_esmodel == egEnergyCorr::es2022_R21_Precision) { //add release 21 here for now
+	     m_esmodel == egEnergyCorr::es2022_R21_Precision ||
+	     m_esmodel == egEnergyCorr::es2022_R21_Precision_lowmu  ) { //add release 21 here for now
 
       m_use_etaCalo_scales = true;
       m_use_new_resolution_model = true;
@@ -668,7 +669,8 @@ namespace AtlasRoot {
 	  m_esmodel == egEnergyCorr::es2018_R21_v0 ||
 	  m_esmodel == egEnergyCorr::es2018_R21_lowmu_v0 ||
 	  m_esmodel == egEnergyCorr::es2018_R21_v1 ||
-	  m_esmodel == egEnergyCorr::es2022_R21_Precision)
+	  m_esmodel == egEnergyCorr::es2022_R21_Precision ||
+	  m_esmodel == egEnergyCorr::es2022_R21_Precision_lowmu )
         m_resolution_tool.reset(new eg_resolution("run2_R21_v1"));
       else 
         m_resolution_tool.reset(new eg_resolution("run2_pre"));
@@ -692,8 +694,8 @@ namespace AtlasRoot {
         m_aS12Nom.reset( dynamic_cast< TH1* >( m_rootFile->Get("Scales/es2018_R21_v1/alphaS12_uncor")));           m_aS12Nom->SetDirectory(nullptr);
         m_daS12Cor.reset( dynamic_cast< TH1* >( m_rootFile->Get("Scales/es2012c/dalphaS12_cor")));                 m_daS12Cor->SetDirectory(nullptr);
       }
-      else if (m_esmodel == egEnergyCorr::es2022_R21_Precision) {
-	      m_aPSNom.reset( dynamic_cast< TH1* >( m_rootFile->Get("Scales/es2022_R21_Precision/alphaPS_uncor")));      m_aPSNom->SetDirectory(nullptr);
+      else if (m_esmodel == egEnergyCorr::es2022_R21_Precision or m_esmodel == egEnergyCorr::es2022_R21_Precision_lowmu) {
+	m_aPSNom.reset( dynamic_cast< TH1* >( m_rootFile->Get("Scales/es2022_R21_Precision/alphaPS_uncor")));      m_aPSNom->SetDirectory(nullptr);
         m_aS12Nom.reset( dynamic_cast< TH1* >( m_rootFile->Get("Scales/es2022_R21_Precision/alphaS12_uncor")));    m_aS12Nom->SetDirectory(nullptr);
       }
       else {
@@ -743,10 +745,17 @@ namespace AtlasRoot {
         m_zeeFwdb.reset(dynamic_cast<TH1*> (m_rootFile->Get("Scales/es2017_R21_v1/alphaFwd_Finalb"))); m_zeeFwdb->SetDirectory(nullptr);
       }
       else if (m_esmodel == egEnergyCorr::es2018_R21_lowmu_v0){
-	// only 1 set of alpha for 13TEV 2018 and 2017 lowmu data (mu=2) dataset
-	m_zeeNom.reset( dynamic_cast< TH1* >( m_rootFile->Get("Scales/es2018_R21_lowmu_v0/alphaZee_errStat")));               m_zeeNom->SetDirectory(nullptr);
-	m_zeeNom_data2017.reset( dynamic_cast< TH1* >( m_rootFile->Get("Scales/es2018_R21_lowmu_v0/alphaZee_errStat_5TeV"))); m_zeeNom_data2017->SetDirectory(nullptr);
-	m_zeeFwdk.reset( dynamic_cast< TH1* >( m_rootFile->Get("Scales/es2018_R21_v0/alphaFwd_Finalk"))); m_zeeFwdk->SetDirectory(nullptr);
+        // only 1 set of alpha for 13TEV 2018 and 2017 lowmu data (mu=2) dataset
+        m_zeeNom.reset( dynamic_cast< TH1* >( m_rootFile->Get("Scales/es2018_R21_lowmu_v0/alphaZee_errStat")));               m_zeeNom->SetDirectory(nullptr);
+        m_zeeNom_data2017.reset( dynamic_cast< TH1* >( m_rootFile->Get("Scales/es2018_R21_lowmu_v0/alphaZee_errStat_5TeV"))); m_zeeNom_data2017->SetDirectory(nullptr);
+        m_zeeFwdk.reset( dynamic_cast< TH1* >( m_rootFile->Get("Scales/es2018_R21_v0/alphaFwd_Finalk"))); m_zeeFwdk->SetDirectory(nullptr);
+        m_zeeFwdb.reset( dynamic_cast< TH1* >( m_rootFile->Get("Scales/es2018_R21_v0/alphaFwd_Finalb"))); m_zeeFwdb->SetDirectory(nullptr);
+      }
+      else if (m_esmodel == egEnergyCorr::es2022_R21_Precision_lowmu ){
+        // only 1 set of alpha for 13TEV 2018 and 2017 lowmu data (mu=2) dataset
+        m_zeeNom.reset( dynamic_cast< TH1* >( m_rootFile->Get("Scales/es2022_R21_Precision_lowmu/alphaZee_errStat")));               m_zeeNom->SetDirectory(nullptr);
+        m_zeeNom_data2017.reset( dynamic_cast< TH1* >( m_rootFile->Get("Scales/es2022_R21_Precision_lowmu/alphaZee_errStat_5TeV"))); m_zeeNom_data2017->SetDirectory(nullptr);
+        m_zeeFwdk.reset( dynamic_cast< TH1* >( m_rootFile->Get("Scales/es2018_R21_v0/alphaFwd_Finalk"))); m_zeeFwdk->SetDirectory(nullptr);
         m_zeeFwdb.reset( dynamic_cast< TH1* >( m_rootFile->Get("Scales/es2018_R21_v0/alphaFwd_Finalb"))); m_zeeFwdb->SetDirectory(nullptr);
       }
       else if (m_esmodel == egEnergyCorr::es2018_R21_v0) {
@@ -758,13 +767,13 @@ namespace AtlasRoot {
         m_zeeFwdb.reset( dynamic_cast< TH1* >( m_rootFile->Get("Scales/es2018_R21_v0/alphaFwd_Finalb"))); m_zeeFwdb->SetDirectory(nullptr);
       }
        else if (m_esmodel == egEnergyCorr::es2018_R21_v1) {
-	 m_zeeNom.reset( dynamic_cast< TH1* >( m_rootFile->Get("Scales/es2018_R21_v1/alphaZee_errStat_period_2018")));           m_zeeNom->SetDirectory(nullptr);
-	 m_zeeNom_data2017.reset( dynamic_cast< TH1* >( m_rootFile->Get("Scales/es2018_R21_v1/alphaZee_errStat_period_2017")));  m_zeeNom_data2017->SetDirectory(nullptr);
-	 m_zeeNom_data2016.reset( dynamic_cast< TH1* >( m_rootFile->Get("Scales/es2018_R21_v1/alphaZee_errStat_period_2016")));  m_zeeNom_data2016->SetDirectory(nullptr);
-	 m_zeeNom_data2015.reset( dynamic_cast< TH1* >( m_rootFile->Get("Scales/es2018_R21_v1/alphaZee_errStat_period_2015")));  m_zeeNom_data2015->SetDirectory(nullptr);
-	 //same as in v0 model
-	 m_zeeFwdk.reset( dynamic_cast< TH1* >( m_rootFile->Get("Scales/es2018_R21_v0/alphaFwd_Finalk"))); m_zeeFwdk->SetDirectory(nullptr);
-	 m_zeeFwdb.reset( dynamic_cast< TH1* >( m_rootFile->Get("Scales/es2018_R21_v0/alphaFwd_Finalb"))); m_zeeFwdb->SetDirectory(nullptr);
+        m_zeeNom.reset( dynamic_cast< TH1* >( m_rootFile->Get("Scales/es2018_R21_v1/alphaZee_errStat_period_2018")));           m_zeeNom->SetDirectory(nullptr);
+        m_zeeNom_data2017.reset( dynamic_cast< TH1* >( m_rootFile->Get("Scales/es2018_R21_v1/alphaZee_errStat_period_2017")));  m_zeeNom_data2017->SetDirectory(nullptr);
+        m_zeeNom_data2016.reset( dynamic_cast< TH1* >( m_rootFile->Get("Scales/es2018_R21_v1/alphaZee_errStat_period_2016")));  m_zeeNom_data2016->SetDirectory(nullptr);
+        m_zeeNom_data2015.reset( dynamic_cast< TH1* >( m_rootFile->Get("Scales/es2018_R21_v1/alphaZee_errStat_period_2015")));  m_zeeNom_data2015->SetDirectory(nullptr);
+        //same as in v0 model
+        m_zeeFwdk.reset( dynamic_cast< TH1* >( m_rootFile->Get("Scales/es2018_R21_v0/alphaFwd_Finalk"))); m_zeeFwdk->SetDirectory(nullptr);
+        m_zeeFwdb.reset( dynamic_cast< TH1* >( m_rootFile->Get("Scales/es2018_R21_v0/alphaFwd_Finalb"))); m_zeeFwdb->SetDirectory(nullptr);
        }
       else if (m_esmodel == egEnergyCorr::es2022_R21_Precision) {
         m_zeeNom.reset( dynamic_cast< TH1* >( m_rootFile->Get("Scales/es2022_R21_Precision/alphaZee_errStat_period_2018")));           m_zeeNom->SetDirectory(nullptr);
@@ -807,6 +816,9 @@ namespace AtlasRoot {
 	       m_esmodel == egEnergyCorr::es2022_R21_Precision) {
         m_zeeSyst.reset( dynamic_cast< TH1* >( m_rootFile->Get("Scales/es2018_R21_v1/alphaZee_errSyst")));               m_zeeSyst->SetDirectory(nullptr);
       }
+      else if ( m_esmodel == egEnergyCorr::es2022_R21_Precision_lowmu ) {
+        m_zeeSyst.reset( dynamic_cast< TH1* >( m_rootFile->Get("Scales/es2022_R21_Precision_lowmu/alphaZee_errSyst")));               m_zeeSyst->SetDirectory(nullptr);
+      }
       else {
         m_zeeSyst.reset( dynamic_cast< TH1* >( m_rootFile->Get("Scales/es2017_summer/alphaZee_errSyst")));               m_zeeSyst->SetDirectory(nullptr);
       }
@@ -831,6 +843,9 @@ namespace AtlasRoot {
       else if (m_esmodel==egEnergyCorr::es2018_R21_lowmu_v0) {
 	m_resNom.reset( dynamic_cast< TH1* >( m_rootFile->Get("Resolution/es2018_R21_lowmu_v0/ctZee_errStat")));  m_resNom->SetDirectory(nullptr);
 	m_resNom_datalowmu.reset( dynamic_cast< TH1* >( m_rootFile->Get("Resolution/es2018_R21_lowmu_v0/ctZee_errStat_5TeV")));        m_resNom_datalowmu->SetDirectory(nullptr);}
+      else if (m_esmodel==egEnergyCorr::es2022_R21_Precision_lowmu) {
+	m_resNom.reset( dynamic_cast< TH1* >( m_rootFile->Get("Resolution/es2022_R21_Precision_lowmu/ctZee_errStat")));  m_resNom->SetDirectory(nullptr);
+	m_resNom_datalowmu.reset( dynamic_cast< TH1* >( m_rootFile->Get("Resolution/es2022_R21_Precision_lowmu/ctZee_errStat_5TeV")));        m_resNom_datalowmu->SetDirectory(nullptr);}
       else if (m_esmodel==egEnergyCorr::es2018_R21_v1) {
 	m_resNom.reset( dynamic_cast< TH1* >( m_rootFile->Get("Resolution/es2018_R21_v1/ctZee_errStat")));        m_resNom->SetDirectory(nullptr); }
       else if (m_esmodel == egEnergyCorr::es2022_R21_Precision) {
@@ -862,7 +877,7 @@ namespace AtlasRoot {
         m_resSyst.reset( dynamic_cast< TH1* >( m_rootFile->Get("Resolution/es2018_R21_v0/ctZee_errSyst")));        m_resSyst->SetDirectory(nullptr);
       }
       else if (m_esmodel == egEnergyCorr::es2018_R21_v1 ||
-	       m_esmodel == egEnergyCorr::es2022_R21_Precision) {
+	       m_esmodel == egEnergyCorr::es2022_R21_Precision ||    m_esmodel == egEnergyCorr::es2022_R21_Precision_lowmu ) {
         m_resSyst.reset( dynamic_cast< TH1* >( m_rootFile->Get("Resolution/es2018_R21_v1/ctZee_errSyst")));        m_resSyst->SetDirectory(nullptr);
       }
       else { 
@@ -890,7 +905,7 @@ namespace AtlasRoot {
 	m_convFakeRate.reset( dynamic_cast< TH1* >( m_rootFile->Get("Conversions/es2012c/convFakeRate")));                          m_convFakeRate->SetDirectory(nullptr);
 	m_convRecoEfficiency.reset( dynamic_cast< TH1* >( m_rootFile->Get("Conversions/es2012c/convRecoEfficiency")));              m_convRecoEfficiency->SetDirectory(nullptr);
       }
-      else if (m_esmodel == egEnergyCorr::es2022_R21_Precision) {
+      else if (m_esmodel == egEnergyCorr::es2022_R21_Precision || m_esmodel == egEnergyCorr::es2022_R21_Precision_lowmu) {
 	m_convFakeRate_2D.reset( dynamic_cast< TH2* >( m_rootFile->Get("Conversions/es2022_R21_Precision/convFakeRate")));             m_convFakeRate_2D->SetDirectory(nullptr);
 	m_convRecoEfficiency_2D.reset( dynamic_cast< TH2* >( m_rootFile->Get("Conversions/es2022_R21_Precision/convRecoEfficiency"))); m_convRecoEfficiency_2D->SetDirectory(nullptr);
       }
@@ -940,7 +955,8 @@ namespace AtlasRoot {
 	  m_esmodel == egEnergyCorr::es2018_R21_v0 ||
 	  m_esmodel == egEnergyCorr::es2018_R21_lowmu_v0 ||
 	  m_esmodel == egEnergyCorr::es2018_R21_v1 ||
-	  m_esmodel == egEnergyCorr::es2022_R21_Precision) {
+	  m_esmodel == egEnergyCorr::es2022_R21_Precision ||
+	  m_esmodel == egEnergyCorr::es2022_R21_Precision_lowmu  ) {
          m_G4OverAFII_resolution_electron.reset( dynamic_cast< TH2* >( m_rootFile->Get("FastSim/es2017_v1/resol_Af2ToG4_elec_rel21")));
          m_G4OverAFII_resolution_unconverted.reset( dynamic_cast< TH2* >( m_rootFile->Get("FastSim/es2017_v1/resol_Af2ToG4_unco_rel21")));
          m_G4OverAFII_resolution_converted.reset( dynamic_cast< TH2* >( m_rootFile->Get("FastSim/es2017_v1/resol_Af2ToG4_conv_rel21")));
@@ -968,7 +984,7 @@ namespace AtlasRoot {
 	  m_esmodel == egEnergyCorr::es2015_5TeV) {
         gain_tool_run_2_filename = PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v11/gain_uncertainty_specialRun.root"); 
       }
-      else if (m_esmodel == egEnergyCorr::es2022_R21_Precision) {
+      else if (m_esmodel == egEnergyCorr::es2022_R21_Precision || m_esmodel == egEnergyCorr::es2022_R21_Precision_lowmu) {
 	      gain_tool_run_2_filename = PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v29/gain_uncertainty_specialRun.root");
         
       }
@@ -977,7 +993,7 @@ namespace AtlasRoot {
         gain_tool_run_2_filename = PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v14/gain_uncertainty_specialRun.root");
       }
 
-      if (m_esmodel == egEnergyCorr::es2022_R21_Precision){
+      if (m_esmodel == egEnergyCorr::es2022_R21_Precision || m_esmodel == egEnergyCorr::es2022_R21_Precision_lowmu){
         m_gain_tool_run2.reset(new egGain::GainUncertainty(gain_tool_run_2_filename,true));
       }
       else{
@@ -986,7 +1002,7 @@ namespace AtlasRoot {
 
       m_gain_tool_run2->msg().setLevel(this->msg().level());
 
-      if(m_esmodel == egEnergyCorr::es2022_R21_Precision) {
+      if(m_esmodel == egEnergyCorr::es2022_R21_Precision || m_esmodel == egEnergyCorr::es2022_R21_Precision_lowmu ) {
         m_e1hg_tool.reset(new e1hg_systematics(PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v29/e1hg_systematics_histos.root")));
       }
       else {
@@ -1072,8 +1088,9 @@ namespace AtlasRoot {
 	m_esmodel == egEnergyCorr::es2018_R21_v0 ||
 	m_esmodel == egEnergyCorr::es2018_R21_lowmu_v0 ||
 	m_esmodel == egEnergyCorr::es2018_R21_v1 ||
-	m_esmodel == egEnergyCorr::es2022_R21_Precision)
-    {
+	m_esmodel == egEnergyCorr::es2022_R21_Precision ||
+	m_esmodel == egEnergyCorr::es2022_R21_Precision_lowmu)
+      {
       // E4 systematics
       m_E4ElectronEtaBins.reset( dynamic_cast< TAxis* >( m_rootFile->Get("E4Recalibration/v4/electron_eta_axis")));
       m_E4ElectronGraphs.reset( dynamic_cast< TList* >( m_rootFile->Get("E4Recalibration/v4/electron")));m_E4ElectronGraphs->SetOwner();
@@ -1118,7 +1135,7 @@ namespace AtlasRoot {
       m_s12ConvertedEtaBins.reset( dynamic_cast< TAxis* >( m_rootFile->Get("S1Recalibration/es2015PRE/ConvertedAxis")));
       m_s12ConvertedGraphs.reset( dynamic_cast< TList* >( m_rootFile->Get("S1Recalibration/es2015PRE/ConvertedBiasS1")));m_s12ConvertedGraphs->SetOwner();
 
-    } else if(m_esmodel == egEnergyCorr::es2022_R21_Precision) {
+    } else if(m_esmodel == egEnergyCorr::es2022_R21_Precision || m_esmodel == egEnergyCorr::es2022_R21_Precision_lowmu) {
 
       m_psElectronEtaBins.reset( dynamic_cast< TAxis* >( m_rootFile->Get("PSRecalibration/es2022_R21_Precision/ElectronAxis")));
       m_psElectronGraphs.reset( dynamic_cast< TList* >( m_rootFile->Get("PSRecalibration/es2022_R21_Precision/ElectronBiasPS")));m_psElectronGraphs->SetOwner();
@@ -1201,7 +1218,8 @@ namespace AtlasRoot {
 	m_esmodel == egEnergyCorr::es2018_R21_v0 ||
 	m_esmodel == egEnergyCorr::es2018_R21_lowmu_v0 ||
 	m_esmodel == egEnergyCorr::es2018_R21_v1 ||
-	m_esmodel == egEnergyCorr::es2022_R21_Precision) {
+	m_esmodel == egEnergyCorr::es2022_R21_Precision||
+	m_esmodel == egEnergyCorr::es2022_R21_Precision_lowmu) {
      // update dX0 plots for distorted geometry for case A, EL, FMX and N
       m_matX0Additions.emplace_back(std::unique_ptr<TH1>(  (TH1*) m_rootFile->Get("Material_rel21/DX0_ConfigA") )); 
       m_matX0Additions.back()->SetDirectory(nullptr);
@@ -1247,7 +1265,8 @@ namespace AtlasRoot {
 	m_esmodel == egEnergyCorr::es2018_R21_v0 ||
 	m_esmodel == egEnergyCorr::es2018_R21_lowmu_v0 ||
 	m_esmodel == egEnergyCorr::es2018_R21_v1 ||
-	m_esmodel == egEnergyCorr::es2022_R21_Precision) {
+	m_esmodel == egEnergyCorr::es2022_R21_Precision ||
+	m_esmodel == egEnergyCorr::es2022_R21_Precision_lowmu ) {
       m_electronBias_ConfigA.reset( dynamic_cast< TH2* >( m_rootFile->Get("Material_rel21/electronBias_ConfigA")));            m_electronBias_ConfigA->SetDirectory(nullptr);
       m_electronBias_ConfigEpLp.reset( dynamic_cast< TH2* >( m_rootFile->Get("Material_rel21/electronBias_ConfigEpLp")));      m_electronBias_ConfigEpLp->SetDirectory(nullptr);
       m_electronBias_ConfigFpMX.reset( dynamic_cast< TH2* >( m_rootFile->Get("Material_rel21/electronBias_ConfigFpMX")));      m_electronBias_ConfigFpMX->SetDirectory(nullptr);
@@ -1296,7 +1315,8 @@ namespace AtlasRoot {
 	     m_esmodel == egEnergyCorr::es2018_R21_v0 ||
 	     m_esmodel == egEnergyCorr::es2018_R21_lowmu_v0 ||
 	     m_esmodel == egEnergyCorr::es2018_R21_v1 ||
-	     m_esmodel == egEnergyCorr::es2022_R21_Precision) {
+	     m_esmodel == egEnergyCorr::es2022_R21_Precision ||
+	     m_esmodel == egEnergyCorr::es2022_R21_Precision_lowmu ) {
       m_G4OverAFII_electron_2D.reset( dynamic_cast< TH2* >( m_rootFile->Get("FastSim/es2017_v1/scale_Af2ToG4_elec_rel21"))); m_G4OverAFII_electron_2D->SetDirectory(nullptr);
       m_G4OverAFII_unconverted_2D.reset( dynamic_cast< TH2* >( m_rootFile->Get("FastSim/es2017_v1/scale_Af2ToG4_unco_rel21"))); m_G4OverAFII_unconverted_2D->SetDirectory(nullptr);
       m_G4OverAFII_converted_2D.reset( dynamic_cast< TH2* >( m_rootFile->Get("FastSim/es2017_v1/scale_Af2ToG4_conv_rel21"))); m_G4OverAFII_converted_2D->SetDirectory(nullptr);
@@ -1319,11 +1339,12 @@ namespace AtlasRoot {
 	m_esmodel != egEnergyCorr::es2018_R21_v0 &&
 	m_esmodel != egEnergyCorr::es2018_R21_lowmu_v0 &&
 	m_esmodel != egEnergyCorr::es2018_R21_v1 &&
-	m_esmodel != egEnergyCorr::es2022_R21_Precision) {
+	m_esmodel != egEnergyCorr::es2022_R21_Precision &&
+	m_esmodel != egEnergyCorr::es2022_R21_Precision_lowmu	) {
       m_leakageConverted.reset( dynamic_cast< TH1* >( m_rootFile->Get("Leakage/LeakageDiffConverted")));
       m_leakageUnconverted.reset( dynamic_cast< TH1* >( m_rootFile->Get("Leakage/LeakageDiffUnconverted")));
     }
-    else if (m_esmodel != egEnergyCorr::es2022_R21_Precision) {
+    else if (m_esmodel != egEnergyCorr::es2022_R21_Precision && m_esmodel != egEnergyCorr::es2022_R21_Precision_lowmu ) {
       m_leakageConverted.reset( dynamic_cast< TH1* >( m_rootFile->Get("Leakage/es2017_summer/LeakageDiffConverted")));
       m_leakageUnconverted.reset( dynamic_cast< TH1* >( m_rootFile->Get("Leakage/es2017_summer/LeakageDiffUnconverted")));
     } else {
@@ -1448,7 +1469,9 @@ namespace AtlasRoot {
 	   m_esmodel == egEnergyCorr::es2018_R21_v0 ||
 	   m_esmodel == egEnergyCorr::es2018_R21_lowmu_v0 ||
 	   m_esmodel == egEnergyCorr::es2018_R21_v1 ||
-	   m_esmodel == egEnergyCorr::es2022_R21_Precision) ) {
+	   m_esmodel == egEnergyCorr::es2022_R21_Precision ||
+	   m_esmodel == egEnergyCorr::es2022_R21_Precision_lowmu )
+	  ) {
         if (scaleVar==egEnergyCorr::Scale::af2Up || scaleVar==egEnergyCorr::Scale::af2Down) {
            double daAF2=0.;
            if (m_esmodel == egEnergyCorr::es2017_R21_v0) {
@@ -1460,7 +1483,8 @@ namespace AtlasRoot {
 	       m_esmodel == egEnergyCorr::es2018_R21_v0 ||
 	       m_esmodel == egEnergyCorr::es2018_R21_lowmu_v0 ||
 	       m_esmodel == egEnergyCorr::es2018_R21_v1 ||
-	       m_esmodel == egEnergyCorr::es2022_R21_Precision) {
+	       m_esmodel == egEnergyCorr::es2022_R21_Precision ||
+	       m_esmodel == egEnergyCorr::es2022_R21_Precision_lowmu ) {
               if (scaleVar == egEnergyCorr::Scale::af2Up) daAF2 = 0.001;
               if (scaleVar == egEnergyCorr::Scale::af2Down) daAF2 = -0.001;
            }
@@ -1521,13 +1545,13 @@ namespace AtlasRoot {
 	 m_esmodel == egEnergyCorr::es2017_R21_v0 || m_esmodel == egEnergyCorr::es2017_R21_v1 ||
 	 m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 || m_esmodel == egEnergyCorr::es2018_R21_v0 ||
 	 m_esmodel == egEnergyCorr::es2018_R21_lowmu_v0 || m_esmodel == egEnergyCorr::es2018_R21_v1 ||
-	 m_esmodel == egEnergyCorr::es2022_R21_Precision) &&
+	 m_esmodel == egEnergyCorr::es2022_R21_Precision ||   m_esmodel == egEnergyCorr::es2022_R21_Precision_lowmu  ) &&
         (var == egEnergyCorr::Scale::E4ScintillatorUp || var == egEnergyCorr::Scale::E4ScintillatorDown))
-    {
-      daE4 = getE4Uncertainty(cl_eta);
-      if (var == egEnergyCorr::Scale::E4ScintillatorDown) daE4 *= -1;
-      linE4 = getE4NonLinearity(cl_eta, energy, ptype) - getE4NonLinearity(cl_eta, meanE, PATCore::ParticleType::Electron);
-    }
+      {
+	daE4 = getE4Uncertainty(cl_eta);
+	if (var == egEnergyCorr::Scale::E4ScintillatorDown) daE4 *= -1;
+	linE4 = getE4NonLinearity(cl_eta, energy, ptype) - getE4NonLinearity(cl_eta, meanE, PATCore::ParticleType::Electron);
+      }
 
     //wtots1 contribution
     double daWtots1 = 0.;
@@ -1537,7 +1561,7 @@ namespace AtlasRoot {
 	 m_esmodel == egEnergyCorr::es2017_R21_v0 || m_esmodel == egEnergyCorr::es2017_R21_v1 ||
 	 m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 || m_esmodel == egEnergyCorr::es2018_R21_v0 ||
 	 m_esmodel == egEnergyCorr::es2018_R21_lowmu_v0 ||  m_esmodel == egEnergyCorr::es2018_R21_v1 ||
-	 m_esmodel == egEnergyCorr::es2022_R21_Precision) &&
+	 m_esmodel == egEnergyCorr::es2022_R21_Precision || m_esmodel == egEnergyCorr::es2022_R21_Precision_lowmu  ) &&
 	(var == egEnergyCorr::Scale::Wtots1Up || var == egEnergyCorr::Scale::Wtots1Down)){
       daWtots1 = getWtots1Uncertainty(cl_eta, energy, ptype);
       if(var == egEnergyCorr::Scale::Wtots1Down)
@@ -1548,7 +1572,7 @@ namespace AtlasRoot {
     if( var == egEnergyCorr::Scale::PSUp            || var == egEnergyCorr::Scale::PSDown ||
 	var == egEnergyCorr::Scale::PSb12Up         || var == egEnergyCorr::Scale::PSb12Down ||
 	var == egEnergyCorr::Scale::LArElecUnconvUp || var == egEnergyCorr::Scale::LArElecUnconvDown ) {
-      if (m_esmodel != egEnergyCorr::es2022_R21_Precision){
+      if (m_esmodel != egEnergyCorr::es2022_R21_Precision && m_esmodel != egEnergyCorr::es2022_R21_Precision_lowmu ){
         daPS  = getLayerUncertainty(  0, cl_eta, var, varSF );
         linPS = getLayerNonLinearity( 0, cl_eta, energy, ptype )- getLayerNonLinearity( 0, cl_eta, meanE,  PATCore::ParticleType::Electron );
       }
@@ -1558,9 +1582,9 @@ namespace AtlasRoot {
         linEacc = getLayerNonLinearity( 6, m_use_etaCalo_scales ? cl_etaCalo : cl_eta, energy,  ptype);
         linPS_40_elec = getLayerNonLinearity( 0, cl_eta, meanE,  PATCore::ParticleType::Electron);
         linEacc_40_elec= getLayerNonLinearity( 6, m_use_etaCalo_scales ? cl_etaCalo : cl_eta, meanET*std::cosh(m_use_etaCalo_scales ? cl_etaCalo : cl_eta),  PATCore::ParticleType::Electron);
-        ATH_MSG_DEBUG("es2022_R21_Precision PS non-linearity before Acc correction: " << linPS); 
+        ATH_MSG_DEBUG("es2022_R21_Precision (low mu / high mu) PS non-linearity before Acc correction: " << linPS); 
         linPS= linPS-linEacc*linPS_40_elec/linEacc_40_elec;
-        ATH_MSG_DEBUG("es2022_R21_Precision PS non-linearity after Acc correction: " << linPS); 
+        ATH_MSG_DEBUG("es2022_R21_Precision  (low mu / high mu)  PS non-linearity after Acc correction: " << linPS); 
       }
     }
 
@@ -1570,7 +1594,7 @@ namespace AtlasRoot {
         var == egEnergyCorr::Scale::LArCalibExtra2015PreUp   || var == egEnergyCorr::Scale::LArCalibExtra2015PreDown ||
         var == egEnergyCorr::Scale::S12ExtraLastEtaBinRun2Up || var == egEnergyCorr::Scale::S12ExtraLastEtaBinRun2Down)
       {
-        if (m_esmodel != egEnergyCorr::es2022_R21_Precision){
+        if (m_esmodel != egEnergyCorr::es2022_R21_Precision && m_esmodel != egEnergyCorr::es2022_R21_Precision_lowmu){
           daS12  = getLayerUncertainty(1, cl_eta, var, varSF);
 	        linS12 = getLayerNonLinearity( 1, cl_eta, energy, ptype ) - getLayerNonLinearity( 1, cl_eta, meanE,  PATCore::ParticleType::Electron );
         }
@@ -1580,9 +1604,9 @@ namespace AtlasRoot {
           linEacc = getLayerNonLinearity( 6, m_use_etaCalo_scales ? cl_etaCalo : cl_eta, energy,  ptype);
           linS12_40_elec = getLayerNonLinearity( 1, cl_eta, meanE,  PATCore::ParticleType::Electron);
           linEacc_40_elec= getLayerNonLinearity( 6, m_use_etaCalo_scales ? cl_etaCalo : cl_eta, meanET*std::cosh(m_use_etaCalo_scales ? cl_etaCalo : cl_eta),  PATCore::ParticleType::Electron);
-          ATH_MSG_DEBUG("es2022_R21_Precision S12 non-linearity before Acc correction: " << linS12); 
+          ATH_MSG_DEBUG("es2022_R21_Precision ( low/hihg mu ) S12 non-linearity before Acc correction: " << linS12); 
           linS12= linS12-linEacc*linS12_40_elec/linEacc_40_elec; 
-          ATH_MSG_DEBUG("es2022_R21_Precision S12 non-linearity after Acc correction: " << linS12); 
+          ATH_MSG_DEBUG("es2022_R21_Precision (low/hihg mu )  S12 non-linearity after Acc correction: " << linS12); 
         }
       }
 
@@ -1596,7 +1620,7 @@ namespace AtlasRoot {
     if (ptype!=PATCore::ParticleType::Electron &&
 	(m_esmodel != egEnergyCorr::es2017_R21_v1 && m_esmodel != egEnergyCorr::es2017_R21_ofc0_v1 &&
 	 m_esmodel != egEnergyCorr::es2018_R21_v0 && m_esmodel != egEnergyCorr::es2018_R21_lowmu_v0 &&
-	 m_esmodel != egEnergyCorr::es2018_R21_v1 && m_esmodel != egEnergyCorr::es2022_R21_Precision) ) {
+	 m_esmodel != egEnergyCorr::es2018_R21_v1 && m_esmodel != egEnergyCorr::es2022_R21_Precision &&  m_esmodel != egEnergyCorr::es2022_R21_Precision_lowmu ) ) {
 
       daMatID   = getAlphaMaterial( cl_eta, egEnergyCorr::MatID,   ptype, var, varSF );
       daMatCryo = getAlphaMaterial( cl_eta, egEnergyCorr::MatCryo, ptype, var, varSF );
@@ -1651,7 +1675,7 @@ namespace AtlasRoot {
     double daL2MediumGainSwitch = 0.;
     double daL2LowGainSwitch = 0.;
 
-    if (m_esmodel != egEnergyCorr::es2022_R21_Precision && (var == egEnergyCorr::Scale::L2GainUp || var == egEnergyCorr::Scale::L2GainDown)) {
+    if ( ( m_esmodel != egEnergyCorr::es2022_R21_Precision && m_esmodel != egEnergyCorr::es2022_R21_Precision_lowmu ) && (var == egEnergyCorr::Scale::L2GainUp || var == egEnergyCorr::Scale::L2GainDown)) {
       if (m_gain_tool) { // recipe for run1
         if (!(std::abs(cl_eta) < 1.52 && std::abs(cl_eta) > 1.37) && std::abs(cl_eta) < 2.4) {
 	  double evar = m_gain_tool->CorrectionGainTool(cl_eta, energy/GeV, energyS2/GeV, ptype);
@@ -1674,7 +1698,7 @@ namespace AtlasRoot {
       }
     }
 
-    if (m_esmodel == egEnergyCorr::es2022_R21_Precision && (var == egEnergyCorr::Scale::L2MediumGainUp || var == egEnergyCorr::Scale::L2MediumGainDown)) {
+    if ( ( m_esmodel == egEnergyCorr::es2022_R21_Precision ||  m_esmodel == egEnergyCorr::es2022_R21_Precision_lowmu )  && (var == egEnergyCorr::Scale::L2MediumGainUp || var == egEnergyCorr::Scale::L2MediumGainDown)) {
       if (m_gain_tool_run2) { // recipe for run 2, see ATLASEG-44
         if(m_useL2GainInterpolation)m_gain_tool_run2->setInterpolation();
         daL2MediumGainSwitch = m_gain_tool_run2->getUncertainty(cl_etaCalo, Et, ptype, m_useL2GainCorrection,egGain::GainUncertainty::GainType::MEDIUM);
@@ -1687,7 +1711,7 @@ namespace AtlasRoot {
       }
     }
 
-    if (m_esmodel == egEnergyCorr::es2022_R21_Precision && (var == egEnergyCorr::Scale::L2LowGainUp || var == egEnergyCorr::Scale::L2LowGainDown)) {
+    if ( ( m_esmodel == egEnergyCorr::es2022_R21_Precision ||  m_esmodel == egEnergyCorr::es2022_R21_Precision_lowmu  )  && (var == egEnergyCorr::Scale::L2LowGainUp || var == egEnergyCorr::Scale::L2LowGainDown)) {
       if (m_gain_tool_run2) { // recipe for run 2, see ATLASEG-44
         if(m_useL2GainInterpolation)m_gain_tool_run2->setInterpolation();
         daL2LowGainSwitch = m_gain_tool_run2->getUncertainty(cl_etaCalo, Et, ptype, m_useL2GainCorrection,egGain::GainUncertainty::GainType::LOW);
@@ -1709,7 +1733,7 @@ namespace AtlasRoot {
       // new parameterization for release 21 reconstruction with mc16 geometries + distortions
       if (m_esmodel == egEnergyCorr::es2017_R21_v1 || m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 ||
 	  m_esmodel == egEnergyCorr::es2018_R21_v0 || m_esmodel == egEnergyCorr::es2018_R21_lowmu_v0 ||
-	  m_esmodel == egEnergyCorr::es2018_R21_v1 || m_esmodel == egEnergyCorr::es2022_R21_Precision )  {
+	  m_esmodel == egEnergyCorr::es2018_R21_v1 || m_esmodel == egEnergyCorr::es2022_R21_Precision || m_esmodel == egEnergyCorr::es2022_R21_Precision_lowmu )  {
 
 	if (std::abs(cl_eta)<1.5)
            dapp0 = getMaterialEffect(egEnergyCorr::ConfigIBL,ptype,cl_eta,Et / GeV)
@@ -1753,7 +1777,8 @@ namespace AtlasRoot {
 	 m_esmodel == egEnergyCorr::es2018_R21_v0 ||
 	 m_esmodel == egEnergyCorr::es2018_R21_lowmu_v0 ||
 	 m_esmodel == egEnergyCorr::es2018_R21_v1 ||
-	 m_esmodel == egEnergyCorr::es2022_R21_Precision)) {
+	 m_esmodel == egEnergyCorr::es2022_R21_Precision ||
+	 m_esmodel == egEnergyCorr::es2022_R21_Precision_lowmu )) {
       static const double Et0 = 10000.;
       //  Effect taken as 10**-3/(Et/10GeV) - order of magniture from https://indico.cern.ch/event/669895/contributions/2745266/attachments/1535612/2405452/slides.pdf
       if (var == egEnergyCorr::Scale::topoClusterThresUp)   daTopoCluster = 1e-3*(1./(Et/Et0)-1./(meanET/Et0));
@@ -1762,8 +1787,8 @@ namespace AtlasRoot {
 
     // ADC non linearity correction. 30% of the effect from https://indico.cern.ch/event/1001455/contributions/4205636/attachments/2179584/3681315/ADC-linearity-28jan2021.pdf ?
     double daADCLin = 0;
-    if (m_esmodel == egEnergyCorr::es2022_R21_Precision &&
-	(var == egEnergyCorr::Scale::ADCLinUp || var == egEnergyCorr::Scale::ADCLinDown)) {
+    if ( ( m_esmodel == egEnergyCorr::es2022_R21_Precision || m_esmodel == egEnergyCorr::es2022_R21_Precision_lowmu ) &&
+	 (var == egEnergyCorr::Scale::ADCLinUp || var == egEnergyCorr::Scale::ADCLinDown)) {
       if (m_ADCLinearity_tool) {
 	double corr = m_ADCLinearity_tool->getCorr(cl_etaCalo,Et,ptype)-1.;
 	daADCLin = 0.3*corr;
@@ -1877,7 +1902,7 @@ namespace AtlasRoot {
 
   // returns mean electron ET at given eta
   double egammaEnergyCorrectionTool::getZeeMeanET(double  cl_eta) const {
-    if(m_esmodel != egEnergyCorr::es2022_R21_Precision) return 40000.; 
+    if(m_esmodel != egEnergyCorr::es2022_R21_Precision && m_esmodel != egEnergyCorr::es2022_R21_Precision_lowmu ) return 40000.; 
     else {
       if(std::abs(cl_eta)>=2.47) cl_eta=2.46;
       return m_meanZeeProfile->GetBinContent(m_meanZeeProfile->FindBin(std::abs(cl_eta)))*1000;
@@ -2191,16 +2216,17 @@ namespace AtlasRoot {
 	  m_esmodel == egEnergyCorr::es2017_R21_v0 || m_esmodel == egEnergyCorr::es2017_R21_v1 ||
 	  m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 || m_esmodel == egEnergyCorr::es2018_R21_v0 ||
 	  m_esmodel == egEnergyCorr::es2018_R21_lowmu_v0 || m_esmodel == egEnergyCorr::es2018_R21_v1 ||
-	  m_esmodel == egEnergyCorr::es2022_R21_Precision) {
+	  m_esmodel == egEnergyCorr::es2022_R21_Precision || m_esmodel == egEnergyCorr::es2022_R21_Precision_lowmu) {
 
         double ratio_IQR_full_fast = 1.;
         const double ptGeV = energy / std::cosh(cl_eta) / 1E3;
 
         if  (m_esmodel == egEnergyCorr::es2017_R21_v1 || m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 ||
 	     m_esmodel == egEnergyCorr::es2018_R21_v0 || m_esmodel == egEnergyCorr::es2018_R21_lowmu_v0 ||
-	     m_esmodel == egEnergyCorr::es2018_R21_v1 || m_esmodel == egEnergyCorr::es2022_R21_Precision) {
-//
-// for es2017_R21_v1, histograms contain directly values of deltaSigma**2 of relative energy resolution (FastSIm-FulSim) so need to subtract this value to get the sigma**2 of FastSim
+	     m_esmodel == egEnergyCorr::es2018_R21_v1 || m_esmodel == egEnergyCorr::es2022_R21_Precision ||
+	     m_esmodel == egEnergyCorr::es2022_R21_Precision_lowmu ) {
+	  //
+	  // for es2017_R21_v1, histograms contain directly values of deltaSigma**2 of relative energy resolution (FastSIm-FulSim) so need to subtract this value to get the sigma**2 of FastSim
 
            if (ptype == PATCore::ParticleType::Electron)          sig2 -= getValueHistAt(*m_G4OverAFII_resolution_electron,cl_eta,ptGeV,true,true,true,true);
            if (ptype == PATCore::ParticleType::UnconvertedPhoton) sig2 -= getValueHistAt(*m_G4OverAFII_resolution_unconverted,cl_eta,ptGeV,true,true,true,true);
@@ -2344,11 +2370,11 @@ namespace AtlasRoot {
 	m_esmodel == egEnergyCorr::es2017_R21_PRE || m_esmodel == egEnergyCorr::es2017_R21_v0 ||
 	m_esmodel == egEnergyCorr::es2017_R21_v1 || m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 ||
 	m_esmodel == egEnergyCorr::es2018_R21_v0 || m_esmodel == egEnergyCorr::es2018_R21_lowmu_v0 ||
-	m_esmodel == egEnergyCorr::es2018_R21_v1 || m_esmodel == egEnergyCorr::es2022_R21_Precision ) {
+	m_esmodel == egEnergyCorr::es2018_R21_v1 || m_esmodel == egEnergyCorr::es2022_R21_Precision ||  m_esmodel == egEnergyCorr::es2022_R21_Precision_lowmu ) {
      
       if (m_esmodel == egEnergyCorr::es2017_R21_v1 || m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 ||
 	  m_esmodel == egEnergyCorr::es2018_R21_v0 || m_esmodel == egEnergyCorr::es2018_R21_lowmu_v0 ||
-	  m_esmodel == egEnergyCorr::es2018_R21_v1 || m_esmodel == egEnergyCorr::es2022_R21_Precision) {
+	  m_esmodel == egEnergyCorr::es2018_R21_v1 || m_esmodel == egEnergyCorr::es2022_R21_Precision || m_esmodel == egEnergyCorr::es2022_R21_Precision_lowmu ) {
 	//
 	// in es02017_R21_v1 : AF2 to FullSim correction is in a 2D eta-Pt histogram
         if      (ptype == PATCore::ParticleType::Electron)          { return (1.+getValueHistAt(*m_G4OverAFII_electron_2D, aeta,ptGeV,true,true,true,true)); }
@@ -2400,9 +2426,9 @@ namespace AtlasRoot {
       value = m_zeeNom_data2017->GetBinContent(ieta);
     }
 
-    // low mu data 2017 5TeV differnet scale    
-    if (m_esmodel == egEnergyCorr::es2018_R21_lowmu_v0 &&
-	runnumber<=341184 && runnumber>=340634) {
+    // low mu data 2017 5TeV differnet scale    [5TeV low-mu: 340634-341184]
+    if ( ( m_esmodel == egEnergyCorr::es2018_R21_lowmu_v0 || m_esmodel == egEnergyCorr::es2022_R21_Precision_lowmu )  &&
+	 runnumber<=341184 && runnumber>=340634) {
       int ieta = m_zeeNom_data2017->GetXaxis()->FindBin(eta);
       value = m_zeeNom_data2017->GetBinContent(ieta); 
     }
@@ -2530,8 +2556,8 @@ namespace AtlasRoot {
 	   runnumber>=324320 && runnumber<=341649 ){
         h=((TH1*)m_zeeNom_data2017.get()); // 2017 data                                                           
       }
-      if (m_esmodel == egEnergyCorr::es2018_R21_lowmu_v0 &&
-	  runnumber<=341184 && runnumber>=340634)
+      if ( ( m_esmodel == egEnergyCorr::es2018_R21_lowmu_v0 || m_esmodel == egEnergyCorr::es2022_R21_Precision_lowmu ) &&
+	   runnumber<=341184 && runnumber>=340634)
 	h=((TH1*)m_zeeNom_data2017.get()); // 2017 data 5TeV
     
       double stat_error = h->GetBinError(h->FindFixBin(eta));
@@ -2716,7 +2742,7 @@ namespace AtlasRoot {
 
     // nearest eta outside of crack (for PS scale values and uncertainties)
     double  nearestEta = cl_eta;
-    if (m_esmodel != egEnergyCorr::es2022_R21_Precision) nearestEta = nearestEtaBEC(cl_eta);
+    if (m_esmodel != egEnergyCorr::es2022_R21_Precision && m_esmodel != egEnergyCorr::es2022_R21_Precision_lowmu ) nearestEta = nearestEtaBEC(cl_eta);
 
     if( iLayer==0 ) { // use nearestEta
 
@@ -2874,7 +2900,7 @@ namespace AtlasRoot {
     double ET = energy/std::cosh(cl_eta);
 
     // move out of crack
-    if (m_esmodel != egEnergyCorr::es2022_R21_Precision)
+    if (m_esmodel != egEnergyCorr::es2022_R21_Precision && m_esmodel != egEnergyCorr::es2022_R21_Precision_lowmu)
       aeta = nearestEtaBEC(aeta);
 
     // argument ET is transverse energy in MeV
@@ -3239,7 +3265,8 @@ namespace AtlasRoot {
     if( (ptype!=PATCore::ParticleType::Electron &&
 	 (m_esmodel != egEnergyCorr::es2017_R21_v1 && m_esmodel != egEnergyCorr::es2017_R21_ofc0_v1 &&
 	  m_esmodel != egEnergyCorr::es2018_R21_v0 && m_esmodel != egEnergyCorr::es2018_R21_lowmu_v0 &&
-	  m_esmodel != egEnergyCorr::es2018_R21_v1 && m_esmodel != egEnergyCorr::es2022_R21_Precision) ) ||
+	  m_esmodel != egEnergyCorr::es2018_R21_v1 && m_esmodel != egEnergyCorr::es2022_R21_Precision &&
+	  m_esmodel != egEnergyCorr::es2022_R21_Precision_lowmu ) ) ||
 	var==egEnergyCorr::Scale::Nominal )
       return value;
 
@@ -3255,7 +3282,8 @@ namespace AtlasRoot {
     if (std::abs(cl_eta)>1.52 &&
 	(m_esmodel == egEnergyCorr::es2017_R21_v1 || m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 ||
 	 m_esmodel == egEnergyCorr::es2018_R21_v0 || m_esmodel == egEnergyCorr::es2018_R21_lowmu_v0 ||
-	 m_esmodel == egEnergyCorr::es2018_R21_v1 || m_esmodel == egEnergyCorr::es2022_R21_Precision ))
+	 m_esmodel == egEnergyCorr::es2018_R21_v1 || m_esmodel == egEnergyCorr::es2022_R21_Precision ||
+	 m_esmodel == egEnergyCorr::es2022_R21_Precision_lowmu  ))
       geoCalo = egEnergyCorr::ConfigN;
     else   
       geoCalo = egEnergyCorr::ConfigFMX;
@@ -3272,7 +3300,7 @@ namespace AtlasRoot {
 
     if (m_esmodel == egEnergyCorr::es2017_R21_v1 || m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 ||
 	m_esmodel == egEnergyCorr::es2018_R21_v0 || m_esmodel == egEnergyCorr::es2018_R21_lowmu_v0 ||
-	m_esmodel == egEnergyCorr::es2018_R21_v1 || m_esmodel == egEnergyCorr::es2022_R21_Precision ) {
+	m_esmodel == egEnergyCorr::es2018_R21_v1 || m_esmodel == egEnergyCorr::es2022_R21_Precision || m_esmodel == egEnergyCorr::es2022_R21_Precision_lowmu ) {
        DAlphaDXGp = getMaterialEffect(egEnergyCorr::ConfigFMX,ptype,cl_eta,ET);   // no G' in release 21, use FMX for the crack
        DAlphaDXID = getMaterialEffect(geoID,ptype,cl_eta,ET);
        DAlphaDXCryo = getMaterialEffect(geoCryo,ptype,cl_eta,ET);
@@ -3375,7 +3403,7 @@ namespace AtlasRoot {
 						       double varSF) const {
 
     // To be on the safe side
-    if (m_esmodel != egEnergyCorr::es2022_R21_Precision) {
+    if ( m_esmodel != egEnergyCorr::es2022_R21_Precision &&  m_esmodel != egEnergyCorr::es2022_R21_Precision_lowmu ) {
       return getAlphaLeakage(cl_eta, ptype, var, varSF);
     }
 
@@ -3503,24 +3531,24 @@ namespace AtlasRoot {
 
     if (ptype == PATCore::ParticleType::UnconvertedPhoton) {
 
-      if (var == egEnergyCorr::Scale::ConvEfficiencyUp && m_esmodel != egEnergyCorr::es2022_R21_Precision)
+      if (var == egEnergyCorr::Scale::ConvEfficiencyUp && ( m_esmodel != egEnergyCorr::es2022_R21_Precision &&  m_esmodel != egEnergyCorr::es2022_R21_Precision_lowmu )  )
 	alpha =  m_convRecoEfficiency->GetBinContent( m_convRecoEfficiency->FindBin(aeta) );
-      else if (var == egEnergyCorr::Scale::ConvEfficiencyDown && m_esmodel != egEnergyCorr::es2022_R21_Precision)
+      else if (var == egEnergyCorr::Scale::ConvEfficiencyDown && ( m_esmodel != egEnergyCorr::es2022_R21_Precision &&  m_esmodel != egEnergyCorr::es2022_R21_Precision_lowmu ) )
 	alpha = -m_convRecoEfficiency->GetBinContent( m_convRecoEfficiency->FindBin(aeta) );
-      else if (var == egEnergyCorr::Scale::ConvRecoUp && m_esmodel == egEnergyCorr::es2022_R21_Precision)
+      else if (var == egEnergyCorr::Scale::ConvRecoUp && ( m_esmodel == egEnergyCorr::es2022_R21_Precision || m_esmodel == egEnergyCorr::es2022_R21_Precision_lowmu ))
 	alpha = getInterpolateConvSyst2D(m_convRecoEfficiency_2D.get(),aeta,ET);
-      else if (var == egEnergyCorr::Scale::ConvRecoDown && m_esmodel == egEnergyCorr::es2022_R21_Precision)
+      else if (var == egEnergyCorr::Scale::ConvRecoDown && ( m_esmodel == egEnergyCorr::es2022_R21_Precision || m_esmodel == egEnergyCorr::es2022_R21_Precision_lowmu ))
 	alpha = -1.*getInterpolateConvSyst2D(m_convRecoEfficiency_2D.get(),aeta,ET);
 
     } else if (ptype==PATCore::ParticleType::ConvertedPhoton) {
 
-      if (var == egEnergyCorr::Scale::ConvFakeRateUp && m_esmodel != egEnergyCorr::es2022_R21_Precision)
+      if (var == egEnergyCorr::Scale::ConvFakeRateUp && (  m_esmodel != egEnergyCorr::es2022_R21_Precision &&  m_esmodel != egEnergyCorr::es2022_R21_Precision_lowmu ) )
 	alpha =  m_convFakeRate->GetBinContent( m_convFakeRate->FindBin(aeta) );
-      else if (var == egEnergyCorr::Scale::ConvFakeRateDown && m_esmodel != egEnergyCorr::es2022_R21_Precision)
+      else if (var == egEnergyCorr::Scale::ConvFakeRateDown && ( m_esmodel != egEnergyCorr::es2022_R21_Precision && m_esmodel != egEnergyCorr::es2022_R21_Precision_lowmu ) )
 	alpha = -m_convFakeRate->GetBinContent( m_convFakeRate->FindBin(aeta) );
-      else if (var == egEnergyCorr::Scale::ConvRecoUp && m_esmodel == egEnergyCorr::es2022_R21_Precision)
+      else if (var == egEnergyCorr::Scale::ConvRecoUp && ( m_esmodel == egEnergyCorr::es2022_R21_Precision || m_esmodel == egEnergyCorr::es2022_R21_Precision_lowmu ) )
 	alpha =  getInterpolateConvSyst2D(m_convFakeRate_2D.get(),aeta,ET);
-      else if (var == egEnergyCorr::Scale::ConvRecoDown && m_esmodel == egEnergyCorr::es2022_R21_Precision)
+      else if (var == egEnergyCorr::Scale::ConvRecoDown && (  m_esmodel == egEnergyCorr::es2022_R21_Precision || m_esmodel == egEnergyCorr::es2022_R21_Precision_lowmu ) )
 	alpha = -1.*getInterpolateConvSyst2D(m_convFakeRate_2D.get(),aeta,ET);
       else if (var == egEnergyCorr::Scale::ConvRadiusUp)
 	alpha =  m_convRadius->GetBinContent( m_convRadius->FindBin(aeta, ET/GeV) );
@@ -3592,7 +3620,8 @@ namespace AtlasRoot {
 	      m_esmodel == egEnergyCorr::es2015_5TeV || m_esmodel == egEnergyCorr::es2017_R21_v0 ||
 	      m_esmodel == egEnergyCorr::es2017_R21_v1 || m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 ||
 	      m_esmodel == egEnergyCorr::es2018_R21_v0 || m_esmodel == egEnergyCorr::es2018_R21_lowmu_v0 ||
-	      m_esmodel == egEnergyCorr::es2018_R21_v1 || m_esmodel == egEnergyCorr::es2022_R21_Precision){
+	      m_esmodel == egEnergyCorr::es2018_R21_v1 || m_esmodel == egEnergyCorr::es2022_R21_Precision ||
+	      m_esmodel == egEnergyCorr::es2022_R21_Precision_lowmu ){
 	//Et uncertainty band: 10 MeV for the corrected cluster
 	alpha = 10. / (energy / std::cosh(cl_eta));
 	if (var == egEnergyCorr::Scale::PedestalDown) alpha *= -1;
@@ -3688,11 +3717,11 @@ namespace AtlasRoot {
     if (m_esmodel == egEnergyCorr::es2017_R21_v0       || m_esmodel == egEnergyCorr::es2017_R21_v1 ||
 	m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1  || m_esmodel == egEnergyCorr::es2018_R21_v0 ||
 	m_esmodel == egEnergyCorr::es2018_R21_lowmu_v0 || m_esmodel == egEnergyCorr::es2018_R21_v1 ||
-	m_esmodel == egEnergyCorr::es2022_R21_Precision) {
+	m_esmodel == egEnergyCorr::es2022_R21_Precision || m_esmodel == egEnergyCorr::es2022_R21_Precision_lowmu ) {
       double avgmu = 32;
       if (m_esmodel == egEnergyCorr::es2022_R21_Precision)
 	avgmu = 34.;
-      else if (m_esmodel == egEnergyCorr::es2018_R21_lowmu_v0)
+      else if (m_esmodel == egEnergyCorr::es2018_R21_lowmu_v0 || m_esmodel == egEnergyCorr::es2022_R21_Precision_lowmu )
 	avgmu = 2.;
       double et = energy/std::cosh(eta);
       if (et<5000.) et=5000.;
@@ -3818,7 +3847,7 @@ namespace AtlasRoot {
           // release 21 - 10% uncertainty on pileup noise
           if (m_esmodel == egEnergyCorr::es2017_R21_v0 || m_esmodel == egEnergyCorr::es2017_R21_v1 ||
 	      m_esmodel == egEnergyCorr::es2018_R21_v0 || m_esmodel == egEnergyCorr::es2018_R21_v1 ||
-	      m_esmodel == egEnergyCorr::es2022_R21_Precision) {
+	      m_esmodel == egEnergyCorr::es2022_R21_Precision || m_esmodel == egEnergyCorr::es2022_R21_Precision_lowmu ) {
               double deltaNoise = std::sqrt(1.1*1.1-1.0)*pileupNoise;  // uncertainty in quadrature 1.1*noise - noise
               sigmaPileUp = deltaNoise/et;   // sigmaE/E impact
               sigmaZ = deltaNoise/40000.;    // sigmaE/E for Z->ee electrons (absorbed in smearing correction)
@@ -3851,7 +3880,8 @@ namespace AtlasRoot {
 	     m_esmodel == egEnergyCorr::es2015_5TeV   || m_esmodel == egEnergyCorr::es2017_R21_v0 ||
 	     m_esmodel == egEnergyCorr::es2017_R21_v1 || m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 ||
 	     m_esmodel == egEnergyCorr::es2018_R21_v0 || m_esmodel == egEnergyCorr::es2018_R21_lowmu_v0 ||
-	     m_esmodel == egEnergyCorr::es2018_R21_v1 || m_esmodel == egEnergyCorr::es2022_R21_Precision)) {
+	     m_esmodel == egEnergyCorr::es2018_R21_v1 || m_esmodel == egEnergyCorr::es2022_R21_Precision || 
+	     m_esmodel == egEnergyCorr::es2022_R21_Precision_lowmu    )) {
 	  double sigmaE = m_getMaterialDelta->getDelta(particle_type,energy,eta,1,5);
 	  sigma2 = sigmaE*sigmaE;
 	  sigma2up = sigma2;
@@ -3866,7 +3896,8 @@ namespace AtlasRoot {
 	     m_esmodel == egEnergyCorr::es2015_5TeV   || m_esmodel == egEnergyCorr::es2017_R21_v0 ||
 	     m_esmodel == egEnergyCorr::es2017_R21_v1 || m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 ||
 	     m_esmodel == egEnergyCorr::es2018_R21_v0 || m_esmodel == egEnergyCorr::es2018_R21_lowmu_v0 ||
-	     m_esmodel == egEnergyCorr::es2018_R21_v1 || m_esmodel == egEnergyCorr::es2022_R21_Precision)) {
+	     m_esmodel == egEnergyCorr::es2018_R21_v1 || m_esmodel == egEnergyCorr::es2022_R21_Precision ||
+	     m_esmodel == egEnergyCorr::es2022_R21_Precision_lowmu )) {
 	  double sigmaE = m_getMaterialDelta->getDelta(particle_type,energy,eta,1,5);
 	  // scale factor 2.3 in X0 => sqrt(2) in resolution or 2 in resolution**2
 	  sigma2 = 2.3*sigmaE*sigmaE;
@@ -3879,7 +3910,8 @@ namespace AtlasRoot {
         if (isys==9 &&
 	    (m_esmodel == egEnergyCorr::es2017_R21_v1 || m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 ||
 	     m_esmodel == egEnergyCorr::es2018_R21_v0 || m_esmodel == egEnergyCorr::es2018_R21_lowmu_v0 ||
-	     m_esmodel == egEnergyCorr::es2018_R21_v1 || m_esmodel == egEnergyCorr::es2022_R21_Precision) &&
+	     m_esmodel == egEnergyCorr::es2018_R21_v1 || m_esmodel == egEnergyCorr::es2022_R21_Precision ||
+	     m_esmodel == egEnergyCorr::es2022_R21_Precision_lowmu ) &&
 	    fast) {
 	  const double ptGeV = et/1e3;
 	  if(particle_type == 0) sigma2 = getValueHistAt(*m_G4OverAFII_resolution_electron,eta,ptGeV,true,true,true,true);
