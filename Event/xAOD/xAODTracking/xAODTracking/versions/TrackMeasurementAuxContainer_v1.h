@@ -17,7 +17,6 @@ namespace xAOD {
         typedef std::vector<double> Storage;
         std::vector<Storage> meas;
         std::vector<Storage> covMatrix;
-        std::vector<const xAOD::UncalibratedMeasurement *> uncalibratedMeasurement;
         std::vector<std::uint64_t> projector;
     };
 }

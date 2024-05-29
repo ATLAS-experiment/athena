@@ -109,8 +109,9 @@ BOOST_FIXTURE_TEST_CASE(AllMtjStaticxAODVaraiblesAreKnown, EmptyTrackStatesAux) 
         const std::string name = SG::AuxTypeRegistry::instance().getName(id);
         BOOST_CHECK(ActsTrk::MutableMultiTrajectory::s_staticVariables.count(name) == 1);
     }
-    BOOST_CHECK_MESSAGE( m.trackStatesAux()->getAuxIDs().size() == ActsTrk::MutableMultiTrajectory::s_staticVariables.size(),
-        "getAuxIDs.size() = " << m.trackStatesAux()->getAuxIDs().size() << "  staticVariables.size() = " << ActsTrk::MutableMultiTrajectory::s_staticVariables.size());
+    BOOST_CHECK_MESSAGE( m.trackStatesAux()->getAuxIDs().size() + 2 /* two dynamic variables: measurement pointer and element link*/
+                         == ActsTrk::MutableMultiTrajectory::s_staticVariables.size(),
+        "getAuxIDs.size() = " << m.trackStatesAux()->getAuxIDs().size() << "  staticVariables.size()+2 = " << ActsTrk::MutableMultiTrajectory::s_staticVariables.size());
 }
 
 // Fill a TrackStateProxy with values from a TestTrackState.
@@ -316,11 +317,6 @@ BOOST_FIXTURE_TEST_CASE(UncalibratedSourceLink, EmptyMTJ) {
   auto index = mtj->addTrackState();
   using namespace Acts::HashedStringLiteral;
 
-  // auto el1 = ElementLink<xAOD::UncalibratedMeasurementContainer>(
-  //     "hello", 7);  // EL to a fictional container & a fictional index
-  // auto el1 = ElementLink<xAOD::UncalibratedMeasurementContainer>(
-  //     "hello", 7);  // EL to a fictional container & a fictional index
-
   auto link1 = Acts::SourceLink(reinterpret_cast<const xAOD::UncalibratedMeasurement *>(0xDEADBEEF));  // a fictional geometry ID
   auto ts = mtj->getTrackState(index);
   ts.setUncalibratedSourceLink(std::move(link1));  // set link at position 0
@@ -329,10 +325,6 @@ BOOST_FIXTURE_TEST_CASE(UncalibratedSourceLink, EmptyMTJ) {
   auto ptrBack =
        link1Back.get<const xAOD::UncalibratedMeasurement *>();
   BOOST_CHECK_EQUAL(static_cast<const void *>(ptrBack), reinterpret_cast<const void *>(0xDEADBEEF));
-  // // compare them by key & index because equality, requires proper has key
-  // // generation and is bound to SG
-  // BOOST_CHECK_EQUAL(el1.key(), el1Back.key());
-  // BOOST_CHECK_EQUAL(el1.index(), el1Back.index());
 }
 
 BOOST_FIXTURE_TEST_CASE(Clear, EmptyMTJ) {
@@ -850,8 +842,8 @@ BOOST_FIXTURE_TEST_CASE(TrackStateProxyStorage, EmptyMTJ) {
   // check that chi2 is set
   BOOST_CHECK_EQUAL(ts.chi2(), pc.chi2);
 
-  // set SourceLink and get it back
-  auto link = Acts::SourceLink(reinterpret_cast<const xAOD::UncalibratedMeasurement *>(0xDEADBEEF));  // a fictional geometry ID
+  // set SourceLink to a pointer to a fictional measurement and get it back
+  auto link = Acts::SourceLink(reinterpret_cast<const xAOD::UncalibratedMeasurement *>(0xDEADBEEF));
   ts.setUncalibratedSourceLink(link);
   BOOST_CHECK_EQUAL(
       static_cast<const void *>(ts.getUncalibratedSourceLink()

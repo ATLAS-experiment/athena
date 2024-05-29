@@ -9,6 +9,7 @@
 #include <string>
 #include <sstream>
 #include <regex>
+#include <span>
 
 #include "StoreGate/WriteHandle.h"
 
@@ -287,7 +288,27 @@ ConstTrackContainerHandlesHelper::build(const Acts::TrackingGeometry* geo,
 }
 
 namespace {
-   void throwConflictingUncalibratedMeasurementPointerValue(const xAOD::UncalibratedMeasurement *is, const xAOD::UncalibratedMeasurement *should) {
+   template <typename T>
+   using const_span = std::span<T const>;
+
+   // get an aux variable for elements (read only)
+   template <typename T>
+   const_span<T> getElementVector( const xAOD::AuxContainerBase &aux_container, const SG::ConstAccessor<T> &accessor) {
+      const T *data = static_cast<const T *>(aux_container.getData (accessor.auxid()));
+      const_span<T> ret( data, aux_container.size() );
+      return ret;
+   }
+
+   // create a new decoration for all elements using the default value
+   template <typename T>
+   std::span<T> createDecoration(xAOD::AuxContainerBase &aux_container, const SG::Decorator<T> &decor) {
+      std::size_t sz=aux_container.size();
+      T *data = static_cast<T *>(aux_container.getDecoration(decor.auxid(), sz, sz));
+      return std::span<T>( data, sz );
+   }
+
+   void throwConflictingUncalibratedMeasurementPointerValue(const xAOD::UncalibratedMeasurement *is,
+                                                            const xAOD::UncalibratedMeasurement *should) {
       std::stringstream msg;
       msg << "Conflicting values for TrackState.uncalibratedMeasurement. Already set " << static_cast<const void *>(is)
           << " would set " << static_cast<const void *>(should);
@@ -296,27 +317,30 @@ namespace {
 }
 
 void ConstTrackContainerHandlesHelper::restoreUncalibMeasurementPtr(xAOD::TrackStateAuxContainer &statesLink) const {
-      // see if we can get the variable from trans
    using link_t = ElementLink< xAOD::UncalibratedMeasurementContainer >;
-   auto linkAuxId = SG::AuxTypeRegistry::instance().getAuxID< link_t >("uncalibratedMeasurementLink");
+   static const SG::ConstAccessor< link_t > link_accessor("uncalibratedMeasurementLink");
 
-   xAOD::TrackStateContainer helper;
-   for (std::size_t i(0); i<statesLink.size(); ++i) {
-      helper.push_back( std::make_unique< xAOD::TrackState >() );
+   if (statesLink.getAuxIDs().test(link_accessor.auxid())){
+      const_span<link_t> elementLinks = getElementVector(statesLink, link_accessor);
+
+      static const SG::AuxElement::Decorator< const xAOD::UncalibratedMeasurement * >
+         decor("uncalibratedMeasurement");
+
+      std::span<const xAOD::UncalibratedMeasurement *> uncalibratedMeasurements
+         = createDecoration( statesLink, decor);
+
+      for (unsigned int index = 0; index < elementLinks.size(); ++index) {
+         const link_t &el = elementLinks[index];
+         const xAOD::UncalibratedMeasurement *a_measurement = (el.isValid() ? *el : nullptr);
+         // @TODO is this check necessary ?
+         if (uncalibratedMeasurements[index] != nullptr && a_measurement != uncalibratedMeasurements[index]) {
+            throwConflictingUncalibratedMeasurementPointerValue(uncalibratedMeasurements[index], a_measurement);
+         }
+         uncalibratedMeasurements[index]=a_measurement;
+      }
    }
-   helper.setStore( &statesLink );
-
-   static const SG::AuxElement::Accessor< const xAOD::UncalibratedMeasurement * > accesor("uncalibratedMeasurement");
-   const void* ptrToSomething = statesLink.getData (linkAuxId);
-   for (xAOD::TrackState *state : helper) {
-      const link_t &el = static_cast<const link_t *>(ptrToSomething)[state->index()];
-      const xAOD::UncalibratedMeasurement *ptr = (el.isValid() ? *el : nullptr);
-      if (accesor(*state) != ptr && accesor(*state)!=nullptr) {
-         throwConflictingUncalibratedMeasurementPointerValue(accesor(*state), ptr);
-      }
-      else {
-         accesor(*state) = ptr;
-      }
+   else {
+      std::cerr << "WARNING no uncalibratedMeasurementLink aux data " << std::endl;
    }
 }
 }  // namespace ActsTrk

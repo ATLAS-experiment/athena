@@ -23,11 +23,28 @@ StatusCode xAODTrackStateAuxContainerCnv::initialize()
    return xAODTrackStateAuxContainerCnvBase::initialize();
 }
 
+namespace {
+
+   template <typename T>
+   using const_span = std::span<T const>;
+
+   template <typename T, typename T_AuxContainer>
+   const_span<T> getElementVector(const T_AuxContainer &aux_container, const SG::ConstAccessor<T> &accessor) {
+      const T *data = static_cast<const T *>(aux_container.getData (accessor.auxid()));
+      const_span<T> ret( data, aux_container.size() );
+      return ret;
+   }
+   template <typename T, typename T_AuxContainer>
+   std::span<T> createDecoration(T_AuxContainer &aux_container, const SG::Decorator<T> &decor) {
+      std::size_t sz=aux_container.size();
+      T *data = static_cast<T *>(aux_container.getDecoration(decor.auxid(), sz, sz));
+      return std::span<T>( data, sz );
+   }
+}
+
 xAOD::TrackStateAuxContainer* xAODTrackStateAuxContainerCnv::createPersistentWithKey( xAOD::TrackStateAuxContainer* trans,
                                                                                       const std::string& key )
 {
-   ATH_MSG_DEBUG("Calling xAODTrackStateAuxContainerCnv::createPersistentWithKey for our xAOD space points");
-
    // Load the necessary ROOT class(es):
    static char const* const NAME =
       "std::vector<ElementLink<xAOD::UncalibratedMeasurementContainer> >";
@@ -41,38 +58,28 @@ xAOD::TrackStateAuxContainer* xAODTrackStateAuxContainerCnv::createPersistentWit
       ( xAODTrackStateAuxContainerCnvBase::createPersistentWithKey (trans, key) );
 
    // see if we can get the variable from trans
-   using uncalib_measurement_ptr_t = const xAOD::UncalibratedMeasurement*;
-   static const SG::auxid_t uncalibMeasurementAuxId = SG::ConstAccessor<uncalib_measurement_ptr_t>("uncalibratedMeasurement").auxid();
+   static const SG::ConstAccessor<const xAOD::UncalibratedMeasurement*> uncalibMeasurement_acc("uncalibratedMeasurement");
+   if (trans->getAuxIDs().test(uncalibMeasurement_acc.auxid())){
 
-   // Create a helper object for the Element Links
-   xAOD::TrackStateContainer helper;
-   for (std::size_t i(0); i<result->size(); ++i) {
-      helper.push_back( std::make_unique< xAOD::TrackState >() );
-   }
-   helper.setStore( result.get() );
+      const_span<const xAOD::UncalibratedMeasurement*>
+         uncalibratedMeasurements = getElementVector(*trans, uncalibMeasurement_acc);
 
-   // Convert the bare pointer(s) to Element Link(s)
-   static const SG::AuxElement::Accessor< ElementLink<xAOD::UncalibratedMeasurementContainer> > accesor("uncalibratedMeasurementLink");
-   // result is a newly created container which we owne here
-   // so we can manipulate the data
-   void* ptrToSomething ATLAS_THREAD_SAFE = const_cast<void *>(result->getData (uncalibMeasurementAuxId));
-   assert (trans->getData (uncalibMeasurementAuxId) != ptrToSomething);
-   if (trans->getData (uncalibMeasurementAuxId) == ptrToSomething) {
-      throw std::runtime_error("Modifiying source data.");
+      static const SG::Decorator< ElementLink<xAOD::UncalibratedMeasurementContainer> > link_decor("uncalibratedMeasurementLink");
+      std::span<decltype(link_decor)::element_type> links = createDecoration(*result, link_decor);
+      // @TODD thinning is not supported for Acts tracks but this would break if thinning was somehow implemented
+      assert( links.size() == uncalibratedMeasuremens.size() );
+      // Convert the bare pointer(s) to Element Link(s)
+      for (unsigned int index =0; index < uncalibratedMeasurements.size(); ++index) {
+         const xAOD::UncalibratedMeasurement *measurement = uncalibratedMeasurements[index];
+         if (measurement) {
+            links[index]
+                = ElementLink< xAOD::UncalibratedMeasurementContainer >(*dynamic_cast<const xAOD::UncalibratedMeasurementContainer*>(measurement->container()),
+                                                                        measurement->index());
+         }
+      }
    }
-   for (xAOD::TrackState *state : helper) {
-      const xAOD::UncalibratedMeasurement *measurement = static_cast<const uncalib_measurement_ptr_t *>(ptrToSomething)[state->index()];
-      if (measurement) {
-         // set the raw pointer to zero for persistification otherwise if the data is written the tree check will seg-fault
-         static_cast<uncalib_measurement_ptr_t *>(ptrToSomething)[state->index()]=nullptr;
-         accesor(*state)
-            = ElementLink< xAOD::UncalibratedMeasurementContainer >(*dynamic_cast<const xAOD::UncalibratedMeasurementContainer*>(measurement->container()),
-                                                                    measurement->index());
-      }
-      else {
-         accesor(*state)
-            = ElementLink< xAOD::UncalibratedMeasurementContainer >();
-      }
+   else {
+      ATH_MSG_WARNING("No uncalibratedMeasurement aux data.");
    }
 
    return result.release();

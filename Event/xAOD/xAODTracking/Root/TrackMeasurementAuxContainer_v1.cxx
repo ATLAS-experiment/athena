@@ -8,7 +8,6 @@ namespace xAOD {
     : AuxContainerBase() {
     AUX_VARIABLE(meas);
     AUX_VARIABLE(covMatrix);
-    AUX_VARIABLE(uncalibratedMeasurement);
     AUX_VARIABLE(projector);
   }
 }
