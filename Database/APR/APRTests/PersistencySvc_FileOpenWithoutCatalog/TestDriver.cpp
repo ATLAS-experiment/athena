@@ -131,7 +131,7 @@ pool::TestDriver::read(const std::string& fileName, pool::DatabaseSpecification:
   }
 
   // Opening a database
-  auto fname = (fileName.empty()? m_fileName : fileName);
+  const auto & fname = (fileName.empty()? m_fileName : fileName);
   pool::IDatabase* db = persistencySvc->session().databaseHandle(fname, nameType);
   if ( ! db ) {
     throw std::runtime_error( "Could not retrieve a database handle" );
