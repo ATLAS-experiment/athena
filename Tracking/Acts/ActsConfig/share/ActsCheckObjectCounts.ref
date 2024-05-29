@@ -72,45 +72,45 @@ ActsTrackFindingAlg                                               INFO Ratios
 |------------------------------------------|------------|------------|------------|
 ActsConversionStripSeedingAlg                                     INFO Seed statistics
 |---------------------|------------|
-| Spacepoints         |       5022 |
-| Seeds               |        235 |
+| Spacepoints         |       4503 |
+| Seeds               |         43 |
 | No track parameters |          0 |
 |---------------------|------------|
 ActsConversionTrackFindingAlg                                     INFO statistics
 |-----------------------------------|------------|------------|
 |                           All eta | SSS        | ALL        |
 |-----------------------------------|------------|------------|
-| Input seeds                       |        235 |        235 |
+| Input seeds                       |         43 |         43 |
 | No track parameters               |          0 |          0 |
-| Used   seeds                      |        202 |        202 |
-| Cannot find track                 |        179 |        179 |
-| Duplicate seeds                   |         33 |         33 |
-| CKF tracks                        |         23 |         23 |
+| Used   seeds                      |         43 |         43 |
+| Cannot find track                 |         43 |         43 |
+| Duplicate seeds                   |          0 |          0 |
+| CKF tracks                        |          0 |          0 |
 | Rejected refined parameters       |          0 |          0 |
-| selected tracks                   |         22 |         22 |
-| Stopped tracks reaching max holes |        192 |        192 |
+| selected tracks                   |          0 |          0 |
+| Stopped tracks reaching max holes |         39 |         39 |
 | Seeds with more than one branch   |          0 |          0 |
-| Tracks failing second CKF         |         22 |         22 |
-| Stopped tracks below pT cut       |          9 |          9 |
+| Tracks failing second CKF         |          0 |          0 |
+| Stopped tracks below pT cut       |          4 |          4 |
 | Stopped tracks above max eta      |          0 |          0 |
 |-----------------------------------|------------|------------|
 ActsConversionTrackFindingAlg                                     INFO Ratios
 |------------------------------------------|------------|------------|
 |                                          | SSS        | ALL        |
 |------------------------------------------|------------|------------|
-| failed / seeds                           |   0.761702 |   0.761702 |
-| duplication / seeds                      |   0.140426 |   0.140426 |
+| failed / seeds                           |          1 |          1 |
+| duplication / seeds                      |          0 |          0 |
 | Rejected refined params / seeds          |          0 |          0 |
-| selected / CKF tracks                    |   0.956522 |   0.956522 |
-| selected tracks / used seeds             |   0.108911 |   0.108911 |
+| selected / CKF tracks                    |          0 |          0 |
+| selected tracks / used seeds             |          0 |          0 |
 | branched tracks / used seeds             |          0 |          0 |
-| no 2nd CKF / CKF tracks                  |   0.956522 |   0.956522 |
+| no 2nd CKF / CKF tracks                  |          0 |          0 |
 |------------------------------------------|------------|------------|
-| selected / CKF tracks           0.0- 0.5 |          1 |          1 |
-|                                 0.5- 1.0 |          1 |          1 |
+| selected / CKF tracks           0.0- 0.5 |          0 |          0 |
+|                                 0.5- 1.0 |          0 |          0 |
 |                                 1.0- 1.5 |          0 |          0 |
-|                                 1.5- 2.0 |          1 |          1 |
-|                                 2.0- 2.5 |     0.9375 |     0.9375 |
+|                                 1.5- 2.0 |          0 |          0 |
+|                                 2.0- 2.5 |          0 |          0 |
 |                                 2.5- 3.0 |          0 |          0 |
 |                                 3.0- 3.5 |          0 |          0 |
 |                                 3.5-+inf |          0 |          0 |

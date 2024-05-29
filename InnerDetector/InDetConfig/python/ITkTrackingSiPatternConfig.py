@@ -12,7 +12,8 @@ def ITkTrackingSiPatternCfg(flags,
                             InputCollections=None,
                             ResolvedTrackCollectionKey=None,
                             SiSPSeededTrackCollectionKey=None,
-                            ClusterSplitProbContainer=''):
+                            ClusterSplitProbContainer='',
+                            previousActsExtension=None):
     acc = ComponentAccumulator()
     #
     # --- get list of already associated hits (always do this, even if no other tracking ran before)
@@ -152,6 +153,11 @@ def ITkTrackingSiPatternCfg(flags,
             from ActsConfig.ActsTrackFindingConfig import ActsAmbiguityResolutionCfg
             acc.merge(ActsAmbiguityResolutionCfg(flags))
             runTruth = False
+
+            from ActsConfig.ActsPrdAssociationConfig import ActsPrdAssociationAlgCfg
+            acc.merge(ActsPrdAssociationAlgCfg(flags,
+                                               name = f'{flags.Tracking.ActiveConfig.extension}PrdAssociationAlg',
+                                               previousActsExtension=previousActsExtension))
 
         if flags.Tracking.ActiveConfig.doActsToAthenaResolvedTrack:
             from ActsConfig.ActsEventCnvConfig import ActsToTrkConvertorAlgCfg

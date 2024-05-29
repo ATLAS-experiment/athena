@@ -163,6 +163,7 @@ def ActsTrackFindingCfg(flags,
     acc = ComponentAccumulator()
 
     kwargs.setdefault('ACTSTracksLocation', f"{flags.Tracking.ActiveConfig.extension}Tracks")
+
     if flags.Tracking.ActiveConfig.extension in ["ActsConversion", "ActsLargeRadius"]:
         dataPrepPrefix = f'ITk{flags.Tracking.ActiveConfig.extension.replace("Acts", "")}'
         kwargs.setdefault('SeedLabels', isdet(flags,

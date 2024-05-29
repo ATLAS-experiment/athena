@@ -62,7 +62,7 @@ def ActsPixelSpacePointPreparationAlgCfg(flags,
 
     kwargs.setdefault('InputCollection', 'ITkPixelSpacePoints')
     kwargs.setdefault('DetectorElements', 'ITkPixelDetectorElementCollection')
-
+    
     if 'RegSelTool' not in kwargs:
         from RegionSelector.RegSelToolConfig import regSelTool_ITkPixel_Cfg
         kwargs.setdefault('RegSelTool', acc.popToolsAndMerge(regSelTool_ITkPixel_Cfg(flags)))
@@ -87,7 +87,7 @@ def ActsStripSpacePointPreparationAlgCfg(flags,
 
     kwargs.setdefault('InputCollection', 'ITkStripSpacePoints')
     kwargs.setdefault('DetectorElements', 'ITkStripDetectorElementCollection')
-
+    
     if 'RegSelTool' not in kwargs:
         from RegionSelector.RegSelToolConfig import regSelTool_ITkStrip_Cfg
         kwargs.setdefault('RegSelTool', acc.popToolsAndMerge(regSelTool_ITkStrip_Cfg(flags)))
@@ -212,11 +212,17 @@ def ActsMainSpacePointFormationCfg(flags,
 
     if kwargs['runPreparation']:
         if kwargs['processPixels']:
-            acc.merge(ActsPixelSpacePointPreparationAlgCfg(flags, RoIs=RoIs, **extractChildKwargs(prefix='PixelSpacePointPreparationAlg.', **kwargs)))
+            acc.merge(ActsPixelSpacePointPreparationAlgCfg(flags,
+                                                           RoIs=RoIs,
+                                                           **extractChildKwargs(prefix='PixelSpacePointPreparationAlg.', **kwargs)))
         if kwargs['processStrips']:
-            acc.merge(ActsStripSpacePointPreparationAlgCfg(flags, RoIs=RoIs, **extractChildKwargs(prefix='StripSpacePointPreparationAlg.', **kwargs)))
+            acc.merge(ActsStripSpacePointPreparationAlgCfg(flags,
+                                                           RoIs=RoIs,
+                                                           **extractChildKwargs(prefix='StripSpacePointPreparationAlg.', **kwargs)))
         if kwargs['processOverlapSpacePoints']:
-            acc.merge(ActsStripOverlapSpacePointPreparationAlgCfg(flags, RoIs=RoIs, **extractChildKwargs(prefix='StripOverlapSpacePointPreparationAlg.', **kwargs)))
+            acc.merge(ActsStripOverlapSpacePointPreparationAlgCfg(flags,
+                                                                  RoIs=RoIs,
+                                                                  **extractChildKwargs(prefix='StripOverlapSpacePointPreparationAlg.', **kwargs)))
             
     # Analysis extensions
     if flags.Acts.doAnalysis:
@@ -232,7 +238,9 @@ def ActsMainSpacePointFormationCfg(flags,
 
     return acc
 
-def ActsSpacePointFormationCfg(flags) -> ComponentAccumulator:
+def ActsSpacePointFormationCfg(flags,
+                               *,
+                               previousActsExtension = None) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
     processPixels = flags.Detector.EnableITkPixel
@@ -356,7 +364,11 @@ def ActsSpacePointFormationCfg(flags) -> ComponentAccumulator:
             else:
                 kwargs.setdefault('PixelSpacePointPreparationAlg.InputCollection', '')
                 kwargs.setdefault('PixelSpacePointPreparationAlg.InputIDC', f'{flags.Tracking.ActiveConfig.extension}PixelSpacePointCache')
+            # Prd Map
+            if flags.Tracking.ActiveConfig.isSecondaryPass and previousActsExtension is not None:
+                kwargs.setdefault('PixelSpacePointPreparationAlg.InputPrdMap', f'{previousActsExtension}PrdMap')
 
+                
         if kwargs['processStrips']:
             kwargs.setdefault('StripSpacePointPreparationAlg.name', f'{flags.Tracking.ActiveConfig.extension}StripSpacePointPreparationAlg')
             kwargs.setdefault('StripSpacePointPreparationAlg.useCache', flags.Acts.useCache)
@@ -369,6 +381,9 @@ def ActsSpacePointFormationCfg(flags) -> ComponentAccumulator:
             else:
                 kwargs.setdefault('StripSpacePointPreparationAlg.InputCollection', '')
                 kwargs.setdefault('StripSpacePointPreparationAlg.InputIDC', f'{flags.Tracking.ActiveConfig.extension}StripSpacePointCache')
+            # Prd Map
+            if flags.Tracking.ActiveConfig.isSecondaryPass and previousActsExtension is not None:
+                kwargs.setdefault('StripSpacePointPreparationAlg.InputPrdMap', f'{previousActsExtension}PrdMap')
 
         if kwargs['processOverlapSpacePoints']:
             kwargs.setdefault('StripOverlapSpacePointPreparationAlg.name', f'{flags.Tracking.ActiveConfig.extension}StripOverlapSpacePointPreparationAlg')
@@ -382,6 +397,9 @@ def ActsSpacePointFormationCfg(flags) -> ComponentAccumulator:
             else:
                 kwargs.setdefault('StripOverlapSpacePointPreparationAlg.InputCollection', '')
                 kwargs.setdefault('StripOverlapSpacePointPreparationAlg.InputIDC', f'{flags.Tracking.ActiveConfig.extension}StripOverlapSpacePointCache')
+            # Prd Map
+            if flags.Tracking.ActiveConfig.isSecondaryPass and previousActsExtension is not None:
+                kwargs.setdefault('StripOverlapSpacePointPreparationAlg.InputPrdMap', f'{previousActsExtension}PrdMap')
 
     # Analysis algo(s)
     if flags.Acts.doAnalysis:
