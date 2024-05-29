@@ -43,6 +43,7 @@
 #include <EgammaAnalysisAlgorithms/EgammaIsolationCorrectionAlg.h>
 #include <EgammaAnalysisAlgorithms/EgammaIsolationSelectionAlg.h>
 #include <EgammaAnalysisAlgorithms/PhotonOriginCorrectionAlg.h>
+#include <EgammaAnalysisAlgorithms/PhotonExtraVariablesAlg.h>
 #include <ElectronPhotonFourMomentumCorrection/EgammaCalibrationAndSmearingTool.h>
 #include <ElectronPhotonSelectorTools/AsgDeadHVCellRemovalTool.h>
 #include <EventSelectionAlgorithms/MissingETPlusTransverseMassSelectorAlg.h>
@@ -123,6 +124,7 @@ namespace CP
     ANA_CHECK (asg::registerAlgorithmFactory<CP::EgammaCalibrationAndSmearingAlg>("CP::EgammaCalibrationAndSmearingAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::EgammaIsolationCorrectionAlg>("CP::EgammaIsolationCorrectionAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::EgammaIsolationSelectionAlg>("CP::EgammaIsolationSelectionAlg"));
+    ANA_CHECK (asg::registerAlgorithmFactory<CP::PhotonExtraVariablesAlg>("CP::PhotonExtraVariablesAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::EventFlagSelectionAlg>("CP::EventFlagSelectionAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::EventStatusSelectionAlg>("CP::EventStatusSelectionAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::JetCalibrationAlg>("CP::JetCalibrationAlg"));
