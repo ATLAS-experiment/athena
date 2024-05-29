@@ -142,6 +142,9 @@ def createBTaggingConfigFlags():
     # a flag to add V0finder
     btagcf.addFlag("BTagging.AddV0Finder", False)
 
+    # GNN vertex fitter
+    btagcf.addFlag("BTagging.GNNVertexFitter", False)
+
     # (multifold) NN trainings, each jet collection maps to a list of
     # dicts. The dict has several keys:
     #  - folds: list of NNs to run
