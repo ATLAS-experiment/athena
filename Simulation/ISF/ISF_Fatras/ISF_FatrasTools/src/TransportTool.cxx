@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// TransportTool.cxx, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 // class header
 #include "TransportTool.h"
@@ -105,7 +101,7 @@ StatusCode
 iFatras::TransportTool::initialize()
 {
 
-  ATH_MSG_INFO( "initialize()" );
+  ATH_MSG_DEBUG( "initialize()" );
 
   // Retrieve the tools one by one
   if (retrieveTool<iFatras::ISimHitCreator>(m_simHitCreatorID).isFailure())
@@ -126,8 +122,7 @@ iFatras::TransportTool::initialize()
       return StatusCode::FAILURE;
   if (retrieveTool<iFatras::IProcessSamplingTool>(m_samplingTool).isFailure())
       return StatusCode::FAILURE;
-  if (m_validationOutput && retrieveTool<iFatras::IPhysicsValidationTool>(m_validationTool).isFailure())
-      return StatusCode::FAILURE;
+  ATH_CHECK( m_validationTool.retrieve( DisableTool{ m_validationTool.empty() || !m_validationOutput } ) );
 
   if ( m_rndGenSvc.retrieve().isFailure() ){
     ATH_MSG_FATAL( "Could not retrieve " << m_rndGenSvc );
@@ -139,7 +134,7 @@ iFatras::TransportTool::initialize()
     ATH_MSG_FATAL( "Could not get random engine '" << m_randomEngineName << "'" );
     return StatusCode::FAILURE;
   }
-
+  ATH_MSG_DEBUG( "finalize() successful" );
   return StatusCode::SUCCESS;
 }
 
@@ -149,7 +144,7 @@ iFatras::TransportTool::initialize()
  *=======================================================================*/
 StatusCode iFatras::TransportTool::finalize()
 {
-  ATH_MSG_INFO( "finalize() successful" );
+  ATH_MSG_DEBUG( "finalize() successful" );
   return StatusCode::SUCCESS;
 }
 
@@ -247,7 +242,7 @@ ISF::ISFParticle* iFatras::TransportTool::process( const ISF::ISFParticle& isp, 
     }
 
     // validation mode - for all particle registered into stack
-    if ( m_validationOutput ) {
+    if ( m_validationOutput && m_validationTool.isEnabled() ) {
       int endProcess = decayProc;
       m_validationTool->saveISFParticleInfo(isp,endProcess,&inputPar,timeLim.time,0.);
     }
@@ -344,7 +339,7 @@ ISF::ISFParticle* iFatras::TransportTool::process( const ISF::ISFParticle& isp, 
   }
 
   // validation mode - for all particle registered into stack
-  if ( m_validationOutput ) {
+  if ( m_validationOutput && m_validationTool.isEnabled() ) {
 
     int dProc = ( timeLim.tMax>0. && timeLim.tMax<=timeLim.time ) ? timeLim.process : 0;
     int mProc = ( pathLim.x0Max>0. && ( pathLim.x0Max <= pathLim.x0Collected ||

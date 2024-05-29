@@ -111,7 +111,7 @@ iFatras::PhotonConversionTool::~PhotonConversionTool()
 // initialize
 StatusCode iFatras::PhotonConversionTool::initialize()
 {
-    ATH_MSG_INFO( "initialize()" );
+    ATH_MSG_DEBUG( "initialize()" );
 
     // ISF Services
     if (m_particleBroker.retrieve().isFailure()){
@@ -136,17 +136,8 @@ StatusCode iFatras::PhotonConversionTool::initialize()
     }
      
     // the validation setup ----------------------------------------------------------------------------------
+    ATH_CHECK( m_validationTool.retrieve( DisableTool{ m_validationTool.empty() || !m_validationMode } ) );
     if (m_validationMode){
-
-      // retrieve the physics validation tool
-      if (m_validationTool.retrieve().isFailure()){
-	ATH_MSG_FATAL( "Could not retrieve " << m_validationTool );
-	return StatusCode::FAILURE;
-      } else
-	ATH_MSG_VERBOSE( "Successfully retrieved " << m_validationTool );
-      
-      
-      
       ATH_MSG_VERBOSE(  "Booking conversion validation TTree ... " );
       
       // create the new Tree
@@ -173,7 +164,8 @@ StatusCode iFatras::PhotonConversionTool::initialize()
       }
 
     } // ------------- end of validation mode -----------------------------------------------------------------
-   
+    ATH_MSG_DEBUG( "finalize() successful" );
+
     return StatusCode::SUCCESS;
 }
 
@@ -185,7 +177,7 @@ StatusCode iFatras::PhotonConversionTool::finalize()
     ATH_MSG_INFO( "                     Minimum energy cut of conversions into e+e-  : " <<   m_minChildEnergy << " [MeV] " );
     ATH_MSG_INFO( "                     Conversions into e+e-  (above cut, recorded) : " <<   m_recordedConversions );
     ATH_MSG_INFO( "                     Conversions into e+e-  (below cut, dropped)  : " <<   m_droppedConversions );
-    ATH_MSG_INFO( "finalize() successful" );
+    ATH_MSG_DEBUG( "finalize() successful" );
 
     return StatusCode::SUCCESS;
 }
@@ -313,7 +305,7 @@ void iFatras::PhotonConversionTool::recordChilds(double time,
     }
 
     // save info for validation
-    if (m_validationMode && m_validationTool) {
+    if (m_validationMode && m_validationTool.isEnabled()) {
       Amg::Vector3D* nPrim=nullptr;
       m_validationTool->saveISFVertexInfo(14,vertex,*parent,parent->momentum(),nPrim,children);
     }
