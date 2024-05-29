@@ -41,6 +41,8 @@ def setupHistSvc(flags, out_file="MdtGeoDump.root"):
 def GeoModelMdtTestCfg(flags, name = "GeoModelMdtTest", **kwargs):
     result = ComponentAccumulator()
     if not flags.Detector.GeometryMDT: return result
+    from MuonConfig.MuonCablingConfig import MDTCablingConfigCfg
+    result.merge(MDTCablingConfigCfg(flags))
     the_alg = CompFactory.MuonGM.GeoModelMdtTest(name, **kwargs)
     result.addEventAlgo(the_alg)
     return result
