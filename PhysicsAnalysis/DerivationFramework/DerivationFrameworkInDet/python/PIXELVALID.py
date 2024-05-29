@@ -66,7 +66,7 @@ def PIXELVALID_ZTAUTAUCfg(flags, name='PIXELVALID_ZTAUTAU'):
     return acc
 
 
-def PIXELVALIDKernelCommonCfg(flags, name='PIXELVALIDKernel'):
+def PIXELVALIDKernelCommonCfg(flags, name='PIXELVALIDKernelCommon'):
     acc = ComponentAccumulator()
 
     # ====================================================================
@@ -142,7 +142,7 @@ def PIXELVALIDThinningKernelCfg(flags, name="PIXELVALIDThinningKernel", StreamNa
     return acc
 
 
-def PIXELVALIDKernelCfg(flags, StreamName=""):
+def PIXELVALIDKernelCfg(flags, name="PIXELVALIDKernel", StreamName=""):
     """Configure the derivation framework driving algorithm (kernel) for PIXELVALID"""
     acc = ComponentAccumulator()
 
@@ -167,14 +167,17 @@ def PIXELVALIDKernelCfg(flags, StreamName=""):
     if flags.InDet.PixelDumpMode==3:
         PixelStoreMode = 1
 
-    from DerivationFrameworkInDet.PixelNtupleMakerConfig import PixelNtupleMakerCfg
-    PixelMonitoringTool = acc.getPrimaryAndMerge(PixelNtupleMakerCfg(flags,
-                                                                     name          = "PixelMonitoringTool",
-                                                                     StoreMode     = PixelStoreMode))
-    tsos_augmentationTools.append(PixelMonitoringTool)
+    ## when using PIXELVALID for ID Lumi, remove this tool which has enormous CPU costs
+    if flags.InDet.PixelDumpMode != 4:
+        from DerivationFrameworkInDet.PixelNtupleMakerConfig import PixelNtupleMakerCfg
+        PixelMonitoringTool = acc.getPrimaryAndMerge(PixelNtupleMakerCfg(flags,
+                                                                        name          = "PixelMonitoringTool",
+                                                                        StoreMode     = PixelStoreMode))
+        tsos_augmentationTools.append(PixelMonitoringTool)
 
     # shared between IDTIDE and PIXELVALID
     acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(
+        name,
         AugmentationTools=tsos_augmentationTools,
         ThinningTools=[],
         OutputLevel=INFO))
@@ -436,15 +439,15 @@ def PixelVALIDCfg(flags):
     # Output stream
     PIXELVALIDItemList = PIXELVALIDSlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(flags, "DAOD_PIXELVALID",
-        ItemList=PIXELVALIDItemList, AcceptAlgs=["PIXELVALIDKernel"]))
+        ItemList=PIXELVALIDItemList, AcceptAlgs=["PIXELVALIDKernelCommon"]))
 
     if flags.InDet.PixelDumpMode == 4:
         acc.merge(SetupMetaDataForStreamCfg(
-            flags, "DAOD_PIXELVALID", AcceptAlgs=["PIXELVALIDKernel"],
+            flags, "DAOD_PIXELVALID", AcceptAlgs=["PIXELVALIDKernelCommon"],
             createMetadata=[MetadataCategory.CutFlowMetaData, MetadataCategory.TriggerMenuMetaData]))
     else:
         acc.merge(SetupMetaDataForStreamCfg(
-            flags, "DAOD_PIXELVALID", AcceptAlgs=["PIXELVALIDKernel"],
+            flags, "DAOD_PIXELVALID", AcceptAlgs=["PIXELVALIDKernelCommon"],
             createMetadata=[MetadataCategory.CutFlowMetaData]))
 
     return acc
