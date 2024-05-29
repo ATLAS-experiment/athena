@@ -206,7 +206,7 @@ calculateFilterStep_1D(Trk::TrackParameters& TP,
   KtimesH.col(mk) = K;
   const AmgMatrix(5, 5) M = s_unitMatrix - KtimesH;
   AmgSymMatrix(5) newCov =
-    M * trkCov * M.transpose() + sign * K * measCov * K.transpose();
+    trkCov.similarity(M) + sign * K * measCov * K.transpose();
 
   if ((!thetaPhiWithinRange_5D(newPar, absoluteCheck))
         ? !correctThetaPhiRange_5D(newPar, newCov, absoluteCheck)
@@ -299,7 +299,7 @@ calculateFilterStep_T(Trk::TrackParameters& TP,
   // --- compute filtered covariance matrix
   // C = M * trkCov * M.T() +/- K * covRio * K.T()
   const AmgSymMatrix(5) newCov =
-    M * trkCov * M.transpose() + sign * K * measCov * K.transpose();
+    trkCov.similarity(M) + sign * K * measCov * K.transpose();
   const double chiSquared = Amg::chi2(R, r, sign);
   // create the FQSonSurface
   fQ = Trk::FitQualityOnSurface(chiSquared, DIM);
@@ -493,7 +493,7 @@ calculateWeight_T(const Trk::TrackParameters* componentTrackParameters,
   AmgVector(DIM) r = measPar - H * componentTrackParameters->parameters();
   // Residual covariance. Posterior weights is calculated used predicted state
   // and measurement. Therefore add covariances
-  AmgSymMatrix(DIM) R(measCov + H * (*predictedCov) * H.transpose());
+  AmgSymMatrix(DIM) R(measCov + predictedCov->similarity(H));
   // compute determinant of residual
   const double det = R.determinant();
   if (det == 0) {
