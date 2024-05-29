@@ -1,0 +1,19 @@
+LineNumber,VariableName,Type,Description
+1,barcode,vector<int>,BSM (Beyond the Standard Model) particle barcode
+2,childLinks,vector<vector<ElementLink<DataVector<xAOD::TruthParticle_v1> > > >,Link from BSM particle to truth children
+3,Classification,vector<unsigned int>,Classification of BSM particle based on new MCTC (Monte Carlo Truth Classifier)
+4,classifierParticleOrigin,vector<unsigned int>,Classification of BSM particle origin from MCTC
+5,classifierParticleOutCome,vector<unsigned int>,Classification of BSM particle outcome from MCTC
+6,classifierParticleType,vector<unsigned int>,Classification of BSM particle type from MCTC
+7,decayVtxLink,vector<ElementLink<DataVector<xAOD::TruthVertex_v1> > >,Link from BSM particle to decay vertex
+8,e,vector<float>,BSM particle energy
+9,m,vector<float>,BSM particle mass
+10,parentLinks,vector<vector<ElementLink<DataVector<xAOD::TruthParticle_v1> > > >,Link from BSM particle to truth parents
+11,pdgId,vector<int>,BSM particle pdg identification
+12,polarizationPhi,vector<float>,BSM particle polarization in phi
+13,polarizationTheta,vector<float>,BSM particle polarization in theta
+14,prodVtxLink,vector<ElementLink<DataVector<xAOD::TruthVertex_v1> > >,Link from BSM particle to production vertex
+15,px,vector<float>,x-component of BSM particle momentum
+16,py,vector<float>,y-component of BSM particle momentum
+17,pz,vector<float>,z-component of BSM particle momentum
+18,status,vector<int>,Status code for BSM particle

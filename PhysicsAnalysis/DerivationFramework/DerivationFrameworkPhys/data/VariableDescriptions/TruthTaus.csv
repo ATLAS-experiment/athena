@@ -1,0 +1,51 @@
+LineNumber,VariableName,Type,Description
+1,prodVtxLink,vector<ElementLink<DataVector<xAOD::TruthVertex_v1> > >,Link from truth tau to production vertex
+2,decayVtxLink,vector<ElementLink<DataVector<xAOD::TruthVertex_v1> > >,Link from truth tau to decay vertex
+3,parentLinks,vector<vector<ElementLink<DataVector<xAOD::TruthParticle_v1> > > >,Link from truth tau to truth parents
+4,childLinks,vector<vector<ElementLink<DataVector<xAOD::TruthParticle_v1> > > >,Link from truth tau to truth children
+5,m,vector<float>,Truth tau kinematics
+6,px,vector<float>,Truth tau kinematics
+7,py,vector<float>,Truth tau kinematics
+8,pz,vector<float>,Truth tau kinematics
+9,e,vector<float>,Truth tau kinematics
+10,pdgId,vector<int>,PDG identification of truth taus
+11,classifierParticleOrigin,vector<unsigned int>,Truth Particle Classifier Output
+12,Classification,vector<unsigned int>,Truth Particle Classifier Output
+13,pt_vis,vector<double>,Visible decay products of truth taus: kinematics
+14,eta_vis,vector<double>,Visible decay products of truth taus: kinematics
+15,phi_vis,vector<double>,Visible decay products of truth taus: kinematics
+16,m_vis,vector<double>,Visible decay products of truth taus: kinematics
+17,barcode,vector<int>,True tau barcode (unique identifier)
+18,status,vector<int>,"True tau status (decayed, etc) from generator"
+19,classifierParticleType,vector<unsigned int>,Truth Particle Classifier Output
+20,classifierParticleOutCome,vector<unsigned int>,Truth Particle Classifier Output
+21,originalTruthParticle,vector<ElementLink<DataVector<xAOD::TruthParticle_v1> > >,"Link from truth tau to identified ""original"" particle"
+22,polarizationPhi,vector<float>,Truth tau polarization variable
+23,polarizationTheta,vector<float>,Truth tau polarization variable
+24,pt_vis_dressed,vector<float>,"Visible decay products of truth taus: ""dressed"" version of kinematics"
+25,eta_vis_dressed,vector<float>,"Visible decay products of truth taus: ""dressed"" version of kinematics"
+26,phi_vis_dressed,vector<float>,"Visible decay products of truth taus: ""dressed"" version of kinematics"
+27,m_vis_dressed,vector<float>,"Visible decay products of truth taus: ""dressed"" version of kinematics"
+28,nPhotons_dressed,vector<int>,Number of truth photons dressed on the tau
+29,dressedPhoton,vector<char>,Decoration from photon dressing
+30,numCharged,vector<unsigned long>,Number of charged constituents
+31,numChargedPion,vector<unsigned long>,Number of charged pions
+32,numNeutral,vector<unsigned long>,Number of neutral constituents
+33,numNeutralPion,vector<unsigned long>,Number of neutral pions
+34,IsHadronicTau,vector<char>,Flag (decoration) to check if the tau decays hadronically
+35,pt_invis,vector<double>,Invisible decay products of truth taus: kinematics
+36,eta_invis,vector<double>,Invisible decay products of truth taus: kinematics
+37,phi_invis,vector<double>,Invisible decay products of truth taus: kinematics
+38,m_invis,vector<double>,Invisible decay products of truth taus: kinematics
+39,pt_vis_neutral,vector<double>,Neutral decay products of truth taus: kinematics
+40,eta_vis_neutral,vector<double>,Neutral decay products of truth taus: kinematics
+41,phi_vis_neutral,vector<double>,Neutral decay products of truth taus: kinematics
+42,m_vis_neutral,vector<double>,Neutral decay products of truth taus: kinematics
+43,DecayModeVector,vector<vector<int> >,Truth decay mode of the tau
+44,decay_vertex_x,vector<double>,Truth tau: x-coordinate of the tau decay vertex
+45,decay_vertex_y,vector<double>,Truth tau: y-coordinate of the tau decay vertex
+46,decay_vertex_z,vector<double>,Truth tau: z-coordinate of the tau decay vertex
+47,prod_vertex_x,vector<double>,Truth tau: x-coordinate of the tau production vertex
+48,prod_vertex_y,vector<double>,Truth tau: y-coordinate of the tau production vertex
+49,prod_vertex_z,vector<double>,Truth tau: z-coordinate of the tau production vertex
+50,unusedPhotonDecoration,vector<char>,Name of the decoration for photons that were used in dressing ("unused” means no photons used in the dressing procedure)

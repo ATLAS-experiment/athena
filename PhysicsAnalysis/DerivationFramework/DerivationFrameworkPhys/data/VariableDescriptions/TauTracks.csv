@@ -1,0 +1,6 @@
+LineNumber,VariableName,Type,Description
+1,pt,vector<float>,Tracks associated to tau: kinematics
+2,eta,vector<float>,Tracks associated to tau: kinematics
+3,phi,vector<float>,Tracks associated to tau: kinematics
+4,flagSet,vector<unsigned short>,"Encode information about track classification type (charged, isolated, etc)"
+5,trackLinks,vector<vector<ElementLink<DataVector<xAOD::TrackParticle_v1> > > >,Link from tau tracks to Inner Detector tracks

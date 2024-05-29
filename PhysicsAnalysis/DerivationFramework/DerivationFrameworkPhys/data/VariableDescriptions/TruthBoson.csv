@@ -1,0 +1,19 @@
+LineNumber,VariableName,Type,Description
+1,m,vector<float>,Truth boson (W/Z/h) mass
+2,px,vector<float>,Truth boson (W/Z/h) x-momentum
+3,py,vector<float>,Truth boson (W/Z/h) y-momentum
+4,pz,vector<float>,Truth boson (W/Z/h) z-momentum
+5,e,vector<float>,Truth boson (W/Z/h) energy
+6,pdgId,vector<int>,Truth boson PDG identification
+7,barcode,vector<int>,Truth boson barcode (unique identifier)
+8,status,vector<int>,Truth boson status
+9,classifierParticleOrigin,vector<unsigned int>,Classification of boson origin from MCTC (Monte Carlo Truth Classifier)
+10,classifierParticleType,vector<unsigned int>,Classification of boson type from MCTC 
+11,classifierParticleOutCome,vector<unsigned int>,Classification of boson outcome from MCTC
+12,Classification,vector<unsigned int>,Classification of boson based on new MCTC
+13,prodVtxLink,vector<ElementLink<DataVector<xAOD::TruthVertex_v1> > >,Truth bosons production vertex
+14,decayVtxLink,vector<ElementLink<DataVector<xAOD::TruthVertex_v1> > >,Truth bosons decay vertex
+15,parentLinks,vector<vector<ElementLink<DataVector<xAOD::TruthParticle_v1> > > >,Parents of truth bosons
+16,childLinks,vector<vector<ElementLink<DataVector<xAOD::TruthParticle_v1> > > >,Children of truth bosons
+17,polarizationPhi,vector<float>,Truth boson polarization in phi
+18,polarizationTheta,vector<float>,Truth boson polarization in theta

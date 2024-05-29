@@ -1,0 +1,21 @@
+LineNumber,VariableName,Type,Description
+1,definingParametersCovMatrixDiag,vector<vector<float> >,Combined muon track: covariance matrix diagonal of track fit
+2,definingParametersCovMatrixOffDiag,vector<vector<float> >,Combined muon track: covariance matrix off-diagonal of track fit
+3,phi,vector<float>,Combined muon track kinematics
+4,truthType,vector<int>,Truth type associated with Combined muon track
+5,truthOrigin,vector<int>,Truth origin associated with Combined muon track
+6,numberOfPixelHits,vector<unsigned char>,Combined muon track: number of Pixel hits
+7,numberOfPixelHoles,vector<unsigned char>,Combined muon track: number of Pixel holes
+8,numberOfSCTHits,vector<unsigned char>,Combined muon track: number of SCT hits
+9,numberOfSCTHoles,vector<unsigned char>,Combined muon track: number of SCT holes
+10,numberOfPixelDeadSensors,vector<unsigned char>,Combined muon track: number of Pixel dead sensors on the track
+11,numberOfSCTDeadSensors,vector<unsigned char>,Combined muon track: number of SCT dead sensors on the track
+12,qOverP,vector<float>,Combined muon track kinematics
+13,d0,vector<float>,"Transverse impact parameter, i.e. the distance of the closest point of the track to the beamspot on the transverse plane"
+14,z0,vector<float>,"Longitudinal impact parameter, i.e. the track's distance from the beamspot along the z-axis, calculated at the point of closest approach to the beamspot on the transverse plane"
+15,theta,vector<float>,Combined muon track kinematics
+16,vz,vector<float>,"The point of reference for the z0 calculation, i.e. the beamspot position along the z-axis"
+17,chiSquared,vector<float>,Combined muon track: chi square of fit
+18,numberDoF,vector<float>,Combined muon track: number of degrees of freedom of fit
+19,numberOfTRTHits,vector<unsigned char>,Combined muon track: number of TRT hits
+20,numberOfTRTOutliers,vector<unsigned char>,Combined muon track: number of TRT outliers

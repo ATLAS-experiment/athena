@@ -1,0 +1,8 @@
+LineNumber,VariableName,Type,Description
+1,trackParticleLinks,vector<vector<ElementLink<DataVector<xAOD::TrackParticle_v1> > > >,Link to tracks associated with special vertices used in 4-lepton analysis
+2,x,vector<float>,x position of special vertices used in 4-lepton analysis
+3,y,vector<float>,y position of special vertices used in 4-lepton analysis
+4,z,vector<float>,z position of special vertices used in 4-lepton analysis
+5,vertexType,vector<short>,type of special vertices used in 4-lepton analysis
+6,chiSquared,vector<float>,chi square of special vertices used in 4-lepton analysis
+7,numberDoF,vector<float>,Number of degrees of freedom of special vertices used in 4-lepton analysis

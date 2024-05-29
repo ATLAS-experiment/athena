@@ -1,0 +1,27 @@
+LineNumber,VariableName,Type,Description
+1,prodVtxLink,vector<ElementLink<DataVector<xAOD::TruthVertex_v1> > >,Link from truth electron to production vertex
+2,decayVtxLink,vector<ElementLink<DataVector<xAOD::TruthVertex_v1> > >,Link from truth electron to decay vertex
+3,parentLinks,vector<vector<ElementLink<DataVector<xAOD::TruthParticle_v1> > > >,Link from truth electron to truth parents
+4,childLinks,vector<vector<ElementLink<DataVector<xAOD::TruthParticle_v1> > > >,Link from truth electron to truth children
+5,m,vector<float>,Truth bare electron mass (0.511 MeV)
+6,px,vector<float>,Truth bare electron momentum
+7,py,vector<float>,Truth bare electron momentum
+8,pz,vector<float>,Truth bare electron momentum
+9,e,vector<float>,Truth bare electron energy
+10,pdgId,vector<int>,Truth electron pdg identification (+/- 11)
+11,ptcone30,vector<float>,Truth track isolation (cone radius 0.3)
+12,etcone20,vector<float>,Truth isolation (cone radius 0.2)
+13,classifierParticleOrigin,vector<unsigned int>,Classification of origin from MCTC
+14,Classification,vector<unsigned int>,Classification based on new MCTC (Monte Carlo Truth Classifier)
+15,barcode,vector<int>,Truth electron unique identifier
+16,status,vector<int>,Truth electron status (1)
+17,classifierParticleType,vector<unsigned int>,Classification of type from MCTC
+18,classifierParticleOutCome,vector<unsigned int>,Classification of outcome from MCTC
+19,polarizationPhi,vector<float>,Truth electron polarization in phi
+20,polarizationTheta,vector<float>,Truth electron polarization in theta
+21,e_dressed,vector<float>,Dressed electron energy
+22,pt_dressed,vector<float>,Dressed electron pT
+23,eta_dressed,vector<float>,Dressed electron eta
+24,phi_dressed,vector<float>,Dressed electron phi
+25,nPhotons_dressed,vector<int>,Number of added photon
+26,dressedPhoton,vector<char>,Decoration from photon dressing

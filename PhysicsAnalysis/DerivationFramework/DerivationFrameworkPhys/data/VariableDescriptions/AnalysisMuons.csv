@@ -1,0 +1,89 @@
+LineNumber,VariableName,Type,Description
+1,pt,vector<float>,Muon kinematics
+2,eta,vector<float>,Muon kinematics
+3,phi,vector<float>,Muon kinematics
+4,charge,vector<float>,Charge of muon
+5,MuonSpectrometerPt,vector<float>,pT of Muon Spectrometer track
+6,InnerDetectorPt,vector<float>,pT of Inner Detector track
+7,EnergyLoss,vector<float>,Energy loss in calorimeters
+8,truthType,vector<int>,Truth info on type of muon
+9,truthOrigin,vector<int>,Truth info on origin of muon
+10,momentumBalanceSignificance,vector<float>,Quality of muon: significance of Inner Detector-Muon Spectrometer imbalance
+11,scatteringNeighbourSignificance,vector<float>,Quality of muon: significance of a change in trajectory (kink) along the track
+12,CaloMuonScore,vector<float>,Score resulting from the CaloMuonScore algorithm
+13,neflowisol20,vector<float>,Isolation computed as the sum of pT of neutral flow elements within cone of radius 0.2
+14,ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt500,vector<float>,Track Isolation in 0.3 varcone with improved track-vertex association
+15,ptcone20_Nonprompt_All_MaxWeightTTVA_pt500,vector<float>,Track Isolation in 0.2 cone with improved track-vertex association
+16,author,vector<unsigned short>,Primary algorithm author of muon
+17,allAuthors,vector<unsigned short>,Bitmask of algorithm authors of muon
+18,muonType,vector<unsigned short>,"Reconstruction type (combined, standalone,...)"
+19,quality,vector<unsigned char>,Output quality of muon selection tool
+20,energyLossType,vector<unsigned char>,"Type of energy loss (measured, parametric,...)"
+21,numberOfPrecisionLayers,vector<unsigned char>,Number of precision stations used for muon reconstruction
+22,numberOfPrecisionHoleLayers,vector<unsigned char>,Number of precision stations holes resulting from muon reconstruction
+23,innerSmallHits,vector<unsigned char>,Number of hits in the Inner station of Muon Spectrometer in small sectors
+24,innerLargeHits,vector<unsigned char>,Number of hits in the Inner station of Muon Spectrometer in large sectors
+25,middleSmallHits,vector<unsigned char>,Number of hits in the middle station of Muon Spectrometer in small sectors
+26,middleLargeHits,vector<unsigned char>,Number of hits in the middle station of Muon Spectrometer in large sectors
+27,outerSmallHits,vector<unsigned char>,Number of hits in the outer station of Muon Spectrometer in small sectors
+28,outerLargeHits,vector<unsigned char>,Number of hits in the outer station of Muon Spectrometer in large sectors
+29,extendedSmallHits,vector<unsigned char>,Number of hits in the extended station of Muon Spectrometer in small sectors
+30,extendedLargeHits,vector<unsigned char>,Number of hits in the extended station of Muon Spectrometer in large sectors
+31,extendedSmallHoles,vector<unsigned char>,Number of holes in the extended station of Muon Spectrometer in small sectors
+32,cscUnspoiledEtaHits,vector<unsigned char>,Number of unspoiled CSC hits in the eta plane
+33,scatteringCurvatureSignificance,vector<float>,"Quality of muon: normalized integral of the scattering angle significances, corrected for single kinks along the trajectory that diminish the absolute value of the integral significance"
+34,CaloMuonIDTag,vector<int>,Result of the CaloMuonTag algorithm
+35,combinedTrackOutBoundsPrecisionHits,vector<unsigned char>,Quality of muon
+36,isSmallGoodSectors,vector<unsigned char>,Quality of muon
+37,numberOfGoodPrecisionLayers,vector<unsigned char>,Quality of muon
+38,ptcone20_Nonprompt_All_MaxWeightTTVA_pt1000,vector<float>,Track isolation in 0.2 cone with improved track-vertex association
+39,ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt1000,vector<float>,Track isolation in 0.3 varcone with improved track-vertex association
+40,truthParticleLink,vector<ElementLink<DataVector<xAOD::TruthParticle_v1> > >,Link from muon to corresponding truth particle
+41,TruthLink,vector<ElementLink<DataVector<xAOD::TruthParticle_v1> > >,Link from muon to corresponding truth particle
+42,inDetTrackParticleLink,vector<ElementLink<DataVector<xAOD::TrackParticle_v1> > >,Link from muon to corresponding Inner Detector track
+43,muonSpectrometerTrackParticleLink,vector<ElementLink<DataVector<xAOD::TrackParticle_v1> > >,Link from muon to corresponding Muon Spectrometer track
+44,extrapolatedMuonSpectrometerTrackParticleLink,vector<ElementLink<DataVector<xAOD::TrackParticle_v1> > >,Link from muon to corresponding extrapolated Muon Spectrometer track
+45,combinedTrackParticleLink,vector<ElementLink<DataVector<xAOD::TrackParticle_v1> > >,Link from muon to corresponding combined Inner Detector+Muon Spectrometer track
+46,ptcone20,vector<float>,Track isolation in 0.2 cone
+47,ptcone30,vector<float>,Track isolation in 0.3 cone
+48,ptvarcone20,vector<float>,Track isolation in 0.2 varcone
+49,ptvarcone30,vector<float>,Track isolation in 0.3 varcone
+50,topoetcone20,vector<float>,TopoCluster isolation in 0.2 cone 
+51,topoetcone30,vector<float>,TopoCluster isolation in 0.3 cone
+52,topoetcone40,vector<float>,TopoCluster isolation in 0.4 cone 
+53,ptcone40,vector<float>,Track isolation in 0.4 cone
+54,ptvarcone40,vector<float>,Track isolation in 0.4 varcone
+55,topoetcone20_CloseByCorr,vector<float>,Muon topo isolation within R = 0.2 (calo-based) with close-by lepton correction
+56,innerSmallHoles,vector<unsigned char>,Number of holes in the Inner station of Muon Spectrometer in small sectors
+57,innerLargeHoles,vector<unsigned char>,Number of holes in the Inner station of Muon Spectrometer in large sectors
+58,middleSmallHoles,vector<unsigned char>,Number of holes in the middle station of Muon Spectrometer in small sectors
+59,middleLargeHoles,vector<unsigned char>,Number of holes in the middle station of Muon Spectrometer in large sectors
+60,outerSmallHoles,vector<unsigned char>,Number of holes in the outer station of Muon Spectrometer in small sectors
+61,outerLargeHoles,vector<unsigned char>,Number of holes in the outer station of Muon Spectrometer in large sectors
+62,extendedLargeHoles,vector<unsigned char>,Number of holes in the extended station of Muon Spectrometer in large sectors
+63,CaloLRLikelihood,vector<float>,can be removed
+64,clusterLink,vector<ElementLink<DataVector<xAOD::CaloCluster_v1> > >,can be removed
+65,DFCommonJetDr,vector<float>,can be removed
+66,DFCommonMuonPassIDCuts,vector<char>,can be removed
+67,DFCommonMuonPassPreselection,vector<char>,can be removed
+68,etaLayer1STGCHits,vector<unsigned char>,Number of hits in the first eta layer of sTGC chambers in the New Small Wheel
+69,etaLayer2STGCHits,vector<unsigned char>,Number of hits in the second eta layer of sTGC chambers in the New Small Wheel
+70,extendedClosePrecisionHits,vector<unsigned char>,can be removed
+71,extendedOutBoundsPrecisionHits,vector<unsigned char>,can be removed
+72,innerClosePrecisionHits,vector<unsigned char>,can be removed
+73,innerOutBoundsPrecisionHits,vector<unsigned char>,can be removed
+74,isEndcapGoodLayers,vector<unsigned char>,can be removed
+75,middleClosePrecisionHits,vector<unsigned char>,can be removed
+76,middleOutBoundsPrecisionHits,vector<unsigned char>,can be removed
+77,MMHits,vector<unsigned char>,Number of hits in the MicroMegas chambers in the New Small Wheel
+78,msOnlyExtrapolatedMuonSpectrometerTrackParticleLink,vector<ElementLink<DataVector<xAOD::TrackParticle_v1> > >,Helper variable to allow for retrieving the link to the original Muon Spectrometer track only track with back extrapolation to the primary vertex
+79,muonSegmentLinks,vector<vector<ElementLink<DataVector<xAOD::MuonSegment_v1> > > >,Links to muon tracks segments in the Muon Spectrometer
+80,neflowisol20_CloseByCorr,vector<float>,Neutral particle flow isolation variable in 0.2 cone with close-by lepton correction
+81,outerClosePrecisionHits,vector<unsigned char>,can be removed
+82,outerOutBoundsPrecisionHits,vector<unsigned char>,can be removed
+83,phiLayer1STGCHits,vector<unsigned char>,Number of hits in the first phi layer of sTGC chambers in the New Small Wheel
+84,phiLayer2STGCHits,vector<unsigned char>,Number of hits in the second phi layer of sTGC chambers in the New Small Wheel
+85,ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt1000_CloseByCorr,vector<float>,Track Isolation in 0.3 varcone with improved track-vertex association and close-by lepton correction
+86,ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt500_CloseByCorr,vector<float>,Track Isolation in 0.3 varcone with improved track-vertex association and close-by lepton correction
+87,segmentDeltaEta,vector<float>,"Angular difference between the extrapolated track and the innermost segment, measured in the eta coordinate"
+88,spectrometerFieldIntegral,vector<float>,can be removed

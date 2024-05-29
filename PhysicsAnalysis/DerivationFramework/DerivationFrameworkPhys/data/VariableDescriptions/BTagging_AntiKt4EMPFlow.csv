@@ -1,0 +1,14 @@
+LineNumber,VariableName,Type,Description
+1,DL1dv01_pu,vector<float>,Posterior score of DL1dv01 tagger
+2,DL1dv01_pc,vector<float>,Posterior score of DL1dv01 tagger
+3,DL1dv01_pb,vector<float>,Posterior score of DL1dv01 tagger
+4,GN2v00_pc,vector<float>,Posterior score of next-gen GN2 tagger
+5,GN2v00_pb,vector<float>,Posterior score of next-gen GN2 tagger
+6,GN2v00_pu,vector<float>,Posterior score of next-gen GN2 tagger
+7,DL1dv00_pb,vector<float>,Posterior score of DL1dv00 tagger (replaced by DL1dv01)
+8,DL1dv00_pc,vector<float>,Posterior score of DL1dv00 tagger (replaced by DL1dv01)
+9,DL1dv00_pu,vector<float>,Posterior score of DL1dv00 tagger (replaced by DL1dv01)
+10,GN2v01_pb,vector<float>,Posterior score of next-gen GN2 tagger
+11,GN2v01_pc,vector<float>,Posterior score of next-gen GN2 tagger
+12,GN2v01_ptau,vector<float>,Posterior score of next-gen GN2 tagger
+13,GN2v01_pu,vector<float>,Posterior score of next-gen GN2 tagger

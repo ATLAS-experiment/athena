@@ -1,0 +1,40 @@
+LineNumber,VariableName,Type,Description
+1,pt,vector<float>,Small radius jet transverse momentum
+2,eta,vector<float>,Small radius jet eta
+3,phi,vector<float>,Small radius jet phi
+4,m,vector<float>,Small radius jet mass
+5,JetConstitScaleMomentum_pt,vector<float>,Small-R jet transverse momentum at the constituent scale
+6,JetConstitScaleMomentum_eta,vector<float>,Small-R jet eta at the constituent scale
+7,JetConstitScaleMomentum_phi,vector<float>,Small-R jet phi at the constituent scale
+8,JetConstitScaleMomentum_m,vector<float>,Small-R jet mass at the constituent scale
+9,ActiveArea4vec_eta,vector<float>,Eta of the four-vector area from ghosts
+10,ActiveArea4vec_m,vector<float>,Mass of the four-vector area from ghosts
+11,ActiveArea4vec_phi,vector<float>,Phi of the four-vector area from ghosts
+12,ActiveArea4vec_pt,vector<float>,pT of the four-vector area from ghosts
+13,DetectorEta,vector<float>,Eta of small-R jet as measured in the detector
+14,EMFrac,vector<float>,Fraction of jet energy in the Electromagnetic calorimeter
+15,JVFCorr,vector<float>,Jet vertex fraction correction factor
+16,Timing,vector<float>,Cell cluster timing from calorimeter information
+17,NumTrkPt1000,vector<vector<int> >,"Number of ghost associated tracks with pT > 1.0 GeV using ID group loose track selection. The first index spans the number of jets, while the second spans the number of vertices (with 0 corresponding to the primary vertex)"
+18,NumTrkPt500,vector<vector<int> >,"Number of ghost associated tracks with pT > 0.5 GeV using ID group loose track selection. The first index spans the number of jets, while the second spans the number of vertices (with 0 corresponding to the primary vertex)"
+19,EnergyPerSampling,vector<vector<float> >,Energy deposited in calo sampling layer
+20,SumPtChargedPFOPt500,vector<vector<float> >,"Sum of pT of charged PFOs (Particle Flow Objects) with pT > 0.5 GeV. The first index spans the number of jets, while the second spans the number of vertices (with 0 corresponding to the primary vertex)"
+21,SumPtTrkPt500,vector<vector<float> >,"Sum of pT of ghost associated tracks with pT > 0.5 GeV using ID group loose track selection.The first index spans the number of jets, while the second spans the number of vertices (with 0 corresponding to the primart vertex)"
+22,TrackWidthPt1000,vector<vector<float> >,"Width (radial moment) of the jet based on associated tracks with pT > 1 GeV. The first index spans the number of jets, while the second spans the number of vertices (with 0 corresponding to the primary vertex)"
+23,PSFrac,vector<float>,Fraction of the jet energy in the presampler
+24,Width,vector<float>,"Width defined as sum( DeltaR(jet,constit ) * pT(constit) ) / sum( pT(constit) )"
+25,DFCommonJets_fJvt,vector<float>,"Forward JVT (Jet Vertex Tagger) score, approaching 0 (large values) for hard-scatter (pile-up) jets"
+26,HadronConeExclTruthLabelID,vector<int>,"Truth labels (5=B, 4=C, 15=tau), used by flavour tagging group"
+27,HadronConeExclExtendedTruthLabelID,vector<int>,"Extended truth label (additional states, e.g. BB, allowed) used by flavour tagging group"
+28,PartonTruthLabelID,vector<int>,PDG (Particle Data Group) identification of the highest-energy ghost-associated parton
+29,ConeTruthLabelID,vector<int>,"Truth labels (5=B, 4=C, 15=tau), used by flavour tagging group"
+30,GhostMuonSegmentCount,vector<int>,Number of ghost-associated muon segments
+31,DFCommonJets_QGTagger_NTracks,vector<int>,Number of tracks (input to quark-gluon tagger)
+32,DFCommonJets_QGTagger_TracksWidth,vector<float>,Width (radial moment) of tracks associated to jet (input to quark-gluon tagger)
+33,DFCommonJets_QGTagger_TracksC1,vector<float>,C1 (energy moment) of tracks associated to jet (input to quark-gluon tagger)
+34,NNJvtPass,vector<char>,Flag indicating whether jet passes NNJvt
+35,GhostTrack,vector<vector<ElementLink<DataVector<xAOD::IParticle> > > >,Link from jets to ghost-associated tracks
+36,btaggingLink,vector<ElementLink<DataVector<xAOD::BTagging_v1> > >,Links from jets to b-tagging variables
+37,isJvtHS,vector<char>,Flag to indicate if a jet originates from the hard-scatter (HS) event or not
+38,DFCommonJets_jetClean_LooseBad,vector<char>,Loose working point for identifying "bad" jets from non-collision backgrounds
+39,DFCommonJets_jetClean_TightBad,vector<char>,Tight working point for identifying "bad" jets from non-collision backgrounds

@@ -1,0 +1,29 @@
+LineNumber,VariableName,Type,Description
+1,ambiguityLink,vector<ElementLink<DataVector<xAOD::Egamma_v1> > >,Links Photon<-> Electron when ambiguous
+2,pt,vector<float>,Photon kinematics
+3,eta,vector<float>,Photon kinematics
+4,phi,vector<float>,Photon kinematics
+5,m,vector<float>,Photon mass (0)
+6,ptcone20,vector<float>,Photon track isolation
+7,topoetcone20,vector<float>,Photon topo isolation within a cone of 0.2
+8,topoetcone40,vector<float>,Photon topo isolation within a cone of 0.4
+9,f1,vector<float>,Photon: ratio of the energy measured in the first layer of the EM to the total energy of the EM cluster
+10,truthType,vector<int>,MCTC (Monte Carlo Truth Classifier) type of matched truth particle
+11,truthOrigin,vector<int>,MCTC (Monte Carlo Truth Classifier) origin of matched truth particle
+12,truthParticleLink,vector<ElementLink<DataVector<xAOD::TruthParticle_v1> > >,Link from photon to corresponding truth object
+13,topoetcone20_CloseByCorr,vector<float>,Photon topo isolation within R=0.2 (calo-based) with close-by lepton correction
+14,ptcone20_CloseByCorr,vector<float>,Photon fixed radius (0.2) track-based isolation with close-by lepton correction
+15,topoetcone40_CloseByCorr,vector<float>,Photon topo isolation within R=0.4 (calo-based) with close-by lepton correction
+16,DFCommonPhotonsCleaning,vector<char>,Full cleaning decision (includes timing)
+17,DFCommonPhotonsIsEMLoose,vector<char>,Identification decision
+18,TruthLink,vector<ElementLink<DataVector<xAOD::TruthParticle_v1> > >,Link from photon to corresponding truth object
+19,caloClusterLinks,vector<vector<ElementLink<DataVector<xAOD::CaloCluster_v1> > > >,Photon/electron -> Cluster
+20,author,vector<unsigned short>,Almost surely a photon or ambiguous with electron
+21,OQ,vector<unsigned int>,Cluster quality
+22,topoetcone20ptCorrection,vector<float>,"Leakage correction for topo isolation, R = 0.2"
+23,topoetcone40ptCorrection,vector<float>,"Leakage correction for topo isolation, R = 0.4"
+24,vertexLinks,vector<vector<ElementLink<DataVector<xAOD::Vertex_v1> > > >,Photon -> vertex
+25,DFCommonPhotonsIsEMTight,vector<char>,Identification decision
+26,DFCommonPhotonsIsEMTightIsEMValue,vector<unsigned int>,Word to find which cuts did not pass (cut-based)
+27,DFCommonPhotonsCleaningNoTime,vector<char>,Cleaning decision (no requirement on timing)
+28,DFCommonPhotonsIsEMMedium,vector<char>,Identification decision

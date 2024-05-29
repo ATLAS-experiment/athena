@@ -1,0 +1,50 @@
+LineNumber,VariableName,Type,Description
+1,trackParticleLinks,vector<vector<ElementLink<DataVector<xAOD::TrackParticle_v1> > > >,Electron -> track particle
+2,ambiguityLink,vector<ElementLink<DataVector<xAOD::Egamma_v1> > >,Links Photon<-> Electron when ambiguous
+3,pt,vector<float>,Electron kinematics
+4,eta,vector<float>,Electron kinematics
+5,phi,vector<float>,Electron kinematics
+6,m,vector<float>,Electron mass (0.511 MeV)
+7,charge,vector<float>,Electron charge from best track match (+/- 1)
+8,topoetcone20,vector<float>,Topo isolation within cone of radius 0.2
+9,f1,vector<float>,Electron: ratio of the energy measured in the first layer of the EM to the total energy of the EM cluster
+10,truthType,vector<int>,Truth isolation (cone radius 0.2)
+11,truthOrigin,vector<int>,MCTC origin of matched truth particle
+12,truthParticleLink,vector<ElementLink<DataVector<xAOD::TruthParticle_v1> > >,Link from electron to corresponding truth object
+13,neflowisol20,vector<float>,Isolation computed as the sum of pT of neutral flow elements within cone of radius 0.2
+14,ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000,vector<float>,Electron variable-radius track-based isolation
+15,ptcone20_Nonprompt_All_MaxWeightTTVALooseCone_pt1000,vector<float>,Electron fixed radius (0.2) track-based isolation 
+16,ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000_CloseByCorr,vector<float>,Electron variable-radius track-based isolation with close-by lepton correction
+17,topoetcone20_CloseByCorr,vector<float>,Photon topo isolation within R=0.2 (calo-based) with close-by lepton correction
+18,ptcone20_Nonprompt_All_MaxWeightTTVALooseCone_pt1000_CloseByCorr,vector<float>,Electron fixed radius (0.2) track-based isolation with close-by lepton correction
+19,DFCommonElectronsLHLoose,vector<char>,Likelihood identification decision
+20,DFCommonElectronsLHLooseBLIsEMValue,vector<unsigned int>,Is EM (bitmask) value for corresponding identification decision
+21,TruthLink,vector<ElementLink<DataVector<xAOD::TruthParticle_v1> > >,Link from electron to corresponding truth object
+22,caloClusterLinks,vector<vector<ElementLink<DataVector<xAOD::CaloCluster_v1> > > >,Photon/electron -> Cluster
+23,author,vector<unsigned short>,"Electron, Photon, Ambiguous, Forward Electron"
+24,OQ,vector<unsigned int>,Cluster quality
+25,ambiguityType,vector<unsigned char>,"Ambiguity (almost surely electron 0 or photon 7/6 (>= rel22/rel21) or ambiguous 1-6/5, (>= rel22/rel21)"
+26,topoetcone20ptCorrection,vector<float>,Leakage correction for topo isolation within a cone of R=0.2
+27,ptcone20_Nonprompt_All_MaxWeightTTVALooseCone_pt500,vector<float>,Electron fixed radius (0.2) track-based isolation
+28,ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt500,vector<float>,Electron variable-radius track-based isolation
+29,DFCommonElectronsLHVeryLoose,vector<char>,Likelihood identification decision
+30,DFCommonElectronsLHVeryLooseIsEMValue,vector<unsigned int>,Is EM (bitmask) value for corresponding identification decision
+31,DFCommonElectronsLHLooseIsEMValue,vector<unsigned int>,Is EM (bitmask) value for corresponding identification decision
+32,DFCommonElectronsLHLooseBL,vector<char>,Likelihood identification decision
+33,DFCommonElectronsLHMedium,vector<char>,Likelihood identification decision
+34,DFCommonElectronsLHMediumIsEMValue,vector<unsigned int>,Is EM (bitmask) value for corresponding identification decision
+35,DFCommonElectronsLHTight,vector<char>,Likelihood identification decision
+36,DFCommonElectronsLHTightIsEMValue,vector<unsigned int>,Is EM (bitmask) value for corresponding identification decision
+37,DFCommonElectronsDNNLoose,vector<char>,DNN identification + charge-flip rejection decision
+38,DFCommonElectronsDNNMedium,vector<char>,DNN identification + charge-flip rejection decision
+39,DFCommonElectronsDNNTight,vector<char>,DNN identification + charge-flip rejection decision
+40,DFCommonElectronsDNNLooseNoCF,vector<char>,DNN identification decision
+41,DFCommonElectronsDNNMediumNoCF,vector<char>,DNN identification decision
+42,DFCommonElectronsDNNTightNoCF,vector<char>,DNN identification decision
+43,DFCommonElectronsECIDS,vector<char>,Charge selection (to reject wrong charge assignment)
+44,DFCommonElectronsECIDSResult,vector<float>,BDT (Boosted Decision Tree) score for the charge selection
+45,truthPdgId,vector<int>,Reco -> truth PDG identification
+46,firstEgMotherTruthType,vector<int>,Classification of type from MCTC for first mother
+47,firstEgMotherTruthOrigin,vector<int>,Classification of origin from MCTC (Monte Carlo Truth Classifier) for first mother
+48,firstEgMotherPdgId,vector<int>,Reco -> truth: first mother PDG identification
+49,firstEgMotherTruthParticleLink,vector<ElementLink<DataVector<xAOD::TruthParticle_v1> > >,"Link from electron to ""first"" truth parent"

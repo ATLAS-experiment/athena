@@ -1,0 +1,6 @@
+LineNumber,VariableName,Type,Description
+1,mpx,vector<float>,Missing transverse energy core soft term x component
+2,mpy,vector<float>,Missing transverse energy core soft term y component
+3,sumet,vector<float>,Missing transverse energy core soft term scalar sum pT
+4,name,vector<string>,Missing transverse energy core soft term name
+5,source,vector<ULong64_t>,Missing transverse energy core soft term source bitmask

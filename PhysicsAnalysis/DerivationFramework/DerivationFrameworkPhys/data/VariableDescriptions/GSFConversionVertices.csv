@@ -1,0 +1,12 @@
+LineNumber,VariableName,Type,Description
+1,px,vector<float>,Conversion vertex momentum
+2,py,vector<float>,Conversion vertex momentum
+3,pz,vector<float>,Conversion vertex momentum
+4,x,vector<float>,Conversion vertex coordinates
+5,y,vector<float>,Conversion vertex coordinates
+6,z,vector<float>,Conversion vertex coordinates
+7,minRfirstHit,vector<float>,Minimum radius of first hit of track(s) from the vertex
+8,pt1,vector<float>,Transverse momentum of 1st track in conversion vertex
+9,pt2,vector<float>,Transverse momentum of 2nd track in conversion vertex
+10,neutralParticleLinks,vector<vector<ElementLink<DataVector<xAOD::NeutralParticle_v1> > > >,Check as usually legs charged
+11,trackParticleLinks,vector<vector<ElementLink<DataVector<xAOD::TrackParticle_v1> > > >,Links to the legs of the conversion

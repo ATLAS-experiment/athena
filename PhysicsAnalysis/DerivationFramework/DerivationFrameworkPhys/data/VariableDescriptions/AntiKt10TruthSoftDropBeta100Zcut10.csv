@@ -1,0 +1,5 @@
+LineNumber,VariableName,Type,Description
+1,D2,vector<float>,D2 (energy correlation function ratio) moment of the large-R jet
+2,Tau1_wta,vector<float>,1-subjettiness of the large radius jet (useful in ratios)
+3,Tau2_wta,vector<float>,2-subjettiness of the large radius jet (useful in ratios)
+4,Tau3_wta,vector<float>,3-subjettiness of the large radius jet (useful in ratios)

@@ -1,0 +1,19 @@
+LineNumber,VariableName,Type,Description
+1,m,vector<float>,Truth neutrino mass
+2,px,vector<float>,Truth neutrino x-momentum
+3,py,vector<float>,Truth neutrino y-momentum
+4,pz,vector<float>,Truth neutrino z-momentum
+5,e,vector<float>,Truth neutrino energy
+6,pdgId,vector<int>,Truth neutrino PDG identification
+7,barcode,vector<int>,Truth neutrino barcode (unique identifier)
+8,status,vector<int>,Truth neutrino status
+9,classifierParticleOrigin,vector<unsigned int>,Classification of neutrino origin from MCTC
+10,classifierParticleType,vector<unsigned int>,Classification of neutrino type from MCTC
+11,classifierParticleOutCome,vector<unsigned int>,Classification of neutrino outcome from MCTC
+12,Classification,vector<unsigned int>,Classification of neutrino based on new MCTC (Monte Carlo Truth Classifier)
+13,prodVtxLink,vector<ElementLink<DataVector<xAOD::TruthVertex_v1> > >,Production vertex for truth neutrinos
+14,decayVtxLink,vector<ElementLink<DataVector<xAOD::TruthVertex_v1> > >,Decay vertex for truth neutrinos
+15,parentLinks,vector<vector<ElementLink<DataVector<xAOD::TruthParticle_v1> > > >,Parents of truth neutrinos (e.g. W bosons)
+16,childLinks,vector<vector<ElementLink<DataVector<xAOD::TruthParticle_v1> > > >,Children of truth neutrinos
+17,polarizationPhi,vector<float>,Truth neutrino polarization in phi
+18,polarizationTheta,vector<float>,Truth neutrino polarization in theta

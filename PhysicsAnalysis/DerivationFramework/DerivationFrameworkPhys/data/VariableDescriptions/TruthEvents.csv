@@ -1,0 +1,11 @@
+LineNumber,VariableName,Type,Description
+1,crossSection,vector<float>,Truth event cross section (weight)
+2,PDFID1,vector<int>,Incoming parton 1 LHAPDF identification
+3,PDFID2,vector<int>,Incoming parton 2 LHAPDF Identification
+4,PDGID1,vector<int>,Incoming parton 1 PDG identification
+5,PDGID2,vector<int>,Incoming parton 2 PDG identification
+6,Q,vector<float>,Event scale
+7,X1,vector<float>,Incoming part 1 momentum fraction
+8,X2,vector<float>,Incoming part 2 momentum fraction
+9,XF1,vector<float>,Incoming parton 1 PDF value
+10,XF2,vector<float>,Incoming parton 2 PDF value

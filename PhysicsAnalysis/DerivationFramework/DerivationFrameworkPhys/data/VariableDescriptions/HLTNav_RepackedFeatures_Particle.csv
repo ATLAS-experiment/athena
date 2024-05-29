@@ -1,0 +1,7 @@
+LineNumber,VariableName,Type,Description
+1,px,vector<float>,"4-vectors of all final-stage HLT physics objects which accepted the event for a given trigger chain. Referenced by trigger navigation, used in trigger matching from DAODa"
+2,py,vector<float>,"4-vectors of all final-stage HLT physics objects which accepted the event for a given trigger chain. Referenced by trigger navigation, used in trigger matching from DAOD"
+3,pz,vector<float>,"4-vectors of all final-stage HLT physics objects which accepted the event for a given trigger chain. Referenced by trigger navigation, used in trigger matching from DAOD"
+4,e,vector<float>,"4-vectors of all final-stage HLT physics objects which accepted the event for a given trigger chain. Referenced by trigger navigation, used in trigger matching from DAOD"
+5,charge,vector<float>,to be removed
+6,pdgId,vector<int>,to be removed

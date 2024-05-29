@@ -1,0 +1,23 @@
+LineNumber,VariableName,Type,Description
+1,m,vector<float>,Truth boson/child mass
+2,px,vector<float>,Truth boson/child x-momentum
+3,py,vector<float>,Truth boson/child y-momentum
+4,pz,vector<float>,Truth boson/child z-momentum
+5,e,vector<float>,Truth boson/child energy
+6,pdgId,vector<int>,Truth boson/child PDG identification
+7,barcode,vector<int>,Truth boson/child barcode (unique identifier)
+8,status,vector<int>,Truth boson/child status
+9,classifierParticleOrigin,vector<unsigned int>,Classification of particle origin from MCTC
+10,classifierParticleType,vector<unsigned int>,Classification of particle type from MCTC 
+11,classifierParticleOutCome,vector<unsigned int>,Classification of particle outcome
+12,Classification,vector<unsigned int>,Classification of particle based on new MCTC (Monte Carlo Truth Classifier)
+13,barcode,vector<int>,Truth vertex unique identifier for boson decays
+14,id,vector<int>,Truth vertex status (type of vertex)
+15,x,vector<float>,Truth vertex x-position for boson decays
+16,y,vector<float>,Truth vertex y-position for boson decays
+17,z,vector<float>,Truth vertex z-position for boson decays
+18,t,vector<float>,Truth vertex time for boson decays
+19,prodVtxLink,vector<ElementLink<DataVector<xAOD::TruthVertex_v1> > >,Production vertex in boson decay collection
+20,decayVtxLink,vector<ElementLink<DataVector<xAOD::TruthVertex_v1> > >,Decay vertex in boson decay collection
+21,incomingParticleLinks,vector<vector<ElementLink<DataVector<xAOD::TruthParticle_v1> > > >,Incoming particles in boson decay collection
+22,outgoingParticleLinks,vector<vector<ElementLink<DataVector<xAOD::TruthParticle_v1> > > >,Outgoing particles in boson decay collection

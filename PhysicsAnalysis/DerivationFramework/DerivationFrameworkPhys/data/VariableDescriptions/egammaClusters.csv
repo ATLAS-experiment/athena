@@ -1,0 +1,12 @@
+LineNumber,VariableName,Type,Description
+1,calE,vector<float>,Cluster kinematics
+2,calEta,vector<float>,Cluster kinematics
+3,calPhi,vector<float>,Cluster kinematics
+4,calM,vector<float>,Cluster kinematics
+5,eta_sampl,vector<vector<float> >,Eta in each Electromagnetic calorimeter layers (ATLAS reference frame)
+6,e_sampl,vector<vector<float> >,Energies in each Electromagnetic calorimeter layers (ATLAS reference frame)
+7,ETA2CALOFRAME,vector<float>,Eta in the 2nd layer of the calorimeter (calorimeter reference frame)
+8,ETACALOFRAME,vector<float>,Eta of cluster in calorimeter frame
+9,PHI2CALOFRAME,vector<float>,Phi in the 2nd layer of the calorimeter (calorimeter reference frame)
+10,PHICALOFRAME,vector<float>,Phi of cluster in calorimeter frame
+11,constituentClusterLinks,vector<vector<ElementLink<DataVector<xAOD::CaloCluster_v1> > > >,This is egammaCluster to topo clusters

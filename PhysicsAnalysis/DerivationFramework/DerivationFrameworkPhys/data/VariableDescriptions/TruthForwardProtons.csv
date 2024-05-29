@@ -1,0 +1,17 @@
+LineNumber,VariableName,Type,Description
+1,m,vector<float>,Forward proton mass
+2,px,vector<float>,Forward proton x-momentum
+3,py,vector<float>,Forward proton y-momentum
+4,pz,vector<float>,Forward proton z-momentum
+5,e,vector<float>,Forward proton energy
+6,pdgId,vector<int>,Forward proton PDG identification
+7,barcode,vector<int>,Forward proton barcode (unique identifier)
+8,status,vector<int>,Forward proton status
+9,classifierParticleOrigin,vector<unsigned int>,Classification of proton origin from MCTC
+10,classifierParticleType,vector<unsigned int>,Classification of proton type from MCTC 
+11,classifierParticleOutCome,vector<unsigned int>,Classification of proton outcome from MCTC
+12,Classification,vector<unsigned int>,Classification of proton based on new MCTC (Monte Carlo Truth Classifier)
+13,prodVtxLink,vector<ElementLink<DataVector<xAOD::TruthVertex_v1> > >,Production vertex for forward protons
+14,decayVtxLink,vector<ElementLink<DataVector<xAOD::TruthVertex_v1> > >,Decay vertex for forward protons
+15,polarizationPhi,vector<float>,Truth forward proton polarization in phi
+16,polarizationTheta,vector<float>,Truth forward proton polarization in theta

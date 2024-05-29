@@ -1,0 +1,14 @@
+LineNumber,VariableName,Type,Description
+1,m,vector<float>,Mass of particle involved in truth hard scatter
+2,px,vector<float>,x-momentum of particle involved in truth hard scatter
+3,py,vector<float>,y-momentum of particle involved in truth hard scatter
+4,pz,vector<float>,z-momentum of particle involved in truth hard scatter
+5,e,vector<float>,Energy of particle involved in truth hard scatter
+6,pdgId,vector<int>,PDG identification of particle involved in truth hard scatter
+7,barcode,vector<int>,Barcode of particle involved in truth hard scatter
+8,status,vector<int>,Status of particle involved in truth hard scatter
+9,classifierParticleOrigin,vector<unsigned int>,Classification of particle origin from MCTC (Monte Carlo Truth Classifier)
+10,classifierParticleType,vector<unsigned int>,Classification of particle type from MCTC 
+11,classifierParticleOutCome,vector<unsigned int>,Classification of particle outcome from MCTC
+12,prodVtxLink,vector<ElementLink<DataVector<xAOD::TruthVertex_v1> > >,Production vertex in hard scatter collection
+13,decayVtxLink,vector<ElementLink<DataVector<xAOD::TruthVertex_v1> > >,Decay vertex in hard scatter collection

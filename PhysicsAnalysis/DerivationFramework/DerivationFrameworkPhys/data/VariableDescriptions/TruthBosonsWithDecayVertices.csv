@@ -1,0 +1,11 @@
+LineNumber,VariableName,Type,Description
+1,barcode,vector<int>,Truth vertex unique identifier for boson decays
+2,id,vector<int>,Truth vertex status (type of vertex)
+3,x,vector<float>,Truth vertex x-position for boson decays
+4,y,vector<float>,Truth vertex y-position for boson decays
+5,z,vector<float>,Truth vertex z-position for boson decays
+6,t,vector<float>,Truth vertex time for boson decays
+7,prodVtxLink,vector<ElementLink<DataVector<xAOD::TruthVertex_v1> > >,Production vertex in boson decay collection
+8,decayVtxLink,vector<ElementLink<DataVector<xAOD::TruthVertex_v1> > >,Decay vertex in boson decay collection
+9,incomingParticleLinks,vector<vector<ElementLink<DataVector<xAOD::TruthParticle_v1> > > >,Incoming particles in boson decay collection
+10,outgoingParticleLinks,vector<vector<ElementLink<DataVector<xAOD::TruthParticle_v1> > > >,Outgoing particles in boson decay collection

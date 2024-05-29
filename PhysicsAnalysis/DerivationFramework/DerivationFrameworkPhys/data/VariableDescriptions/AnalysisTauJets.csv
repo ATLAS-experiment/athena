@@ -1,0 +1,32 @@
+LineNumber,VariableName,Type,Description
+1,pt,vector<float>,Reconstructed taus: kinematics
+2,eta,vector<float>,Reconstructed taus: kinematics
+3,phi,vector<float>,Reconstructed taus: kinematics
+4,m,vector<float>,Reconstructed taus: kinematics
+5,charge,vector<float>,"Charge of the reconstructed taus (integer, but it can be different from +-1)"
+6,EleRNNLoose_v1,vector<char>,Electron discrimination Loose working point
+7,EleRNNMedium_v1,vector<char>,Electron discrimination Medium working point
+8,EleRNNTight_v1,vector<char>,Electron discrimination Tight working point
+9,JetDeepSetVeryLoose,vector<char>,Deepset jet discrimination Very Loose working point
+10,JetDeepSetLoose,vector<char>,Deepset jet discrimination Loose working point
+11,JetDeepSetMedium,vector<char>,Deepset jet discrimination Medium working point
+12,JetDeepSetTight,vector<char>,Deepset jet discrimination Tight working point
+13,ptTauEnergyScale,vector<float>,Reconstructed taus at calo level energy scale: kinematics
+14,etaTauEnergyScale,vector<float>,Reconstructed taus at calo level energy scale: kinematics
+15,ptFinalCalib,vector<float>,Reconstructed pT from the final tau calibration
+16,etaFinalCalib,vector<float>,Reconstructed eta from the final tau calibration
+17,isTauFlags,vector<unsigned int>,Set of flags to check if taus has passed some ID/eVeto levels
+18,PanTau_DecayMode,vector<int>,"Identified tau decay mode (1p0n, 1p1n, 1pXn, 3p0n, 3pxN)"
+19,RNNJetScore,vector<float>,MVA score from RNN jet discrimination
+20,RNNJetScoreSigTrans,vector<float>,MVA score from RNN jet discrimination (flattened in signal efficiency)
+21,RNNEleScore,vector<float>,MVA score from RNN electron discrimination
+22,RNNEleScoreSigTrans,vector<float>,"buggy version, to be removed, RNNEleScoreSigTrans_v1 is the correct version"
+23,RNNEleScoreSigTrans_v1,vector<float>,MVA score from RNN electron discrimination (flattened in signal efficiency)
+24,NNDecayMode,vector<int>,"Identified tau decay mode from NN algorithm (1p0n, 1p1n, 1pXn, 3p0n, 3pxN)"
+25,IsTruthMatched,vector<char>,Reco to truth tau matching
+26,JetDeepSetScore,vector<float>,MVA score from DeepSet jet discrimination
+27,JetDeepSetScoreTrans,vector<float>,MVA score from RNN jet discrimination (flattened in signal efficiency)
+28,vertexLink,vector<ElementLink<DataVector<xAOD::Vertex_v1> > >,Link from tau to corresponding decay vertex
+29,tauTrackLinks,vector<vector<ElementLink<DataVector<xAOD::TauTrack_v1> > > >,Link from tau to corresponding tracks
+30,truthParticleLink,vector<ElementLink<DataVector<xAOD::TruthParticle_v1> > >,Link from tau to corresponding truth particles
+31,truthJetLink,vector<ElementLink<DataVector<xAOD::Jet_v1> > >,Link from tau to corresponding truth jet
