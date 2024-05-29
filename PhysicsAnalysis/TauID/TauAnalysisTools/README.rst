@@ -4,6 +4,8 @@ TauAnalysisTools: Package hosting tools for tau analysis
 
 :authors: Dirk Duschinger
 :contact: dirk.duschinger@cern.ch
+:revision: Antonio De Maria
+:contact: antonio.de.maria@cern.ch           
 
 .. meta::
    :description: TauAnalysisTools: Package hosting tools for tau analysis
@@ -18,70 +20,36 @@ Introduction
 This package is designed to provide dual-use tools for easy use of taus in your
 analysis. Currently following tools are available:
 
-* **TauSelectionTool:** generic tool to apply a set of requirements on tau
-    candidates
+* **TauSelectionTool:** generic tool to apply a set of requirements on tau candidates
 * **TauSmearingTool:** currently support tau energy corrections
-* **TauEfficiencyCorrectionsTool:** provides identification scale factors and the
-    associated uncertainties
-* **TauTruthMatchingTool:** performs matching of taus to the visible truth tau
-    4-momentum
-* **TauTruthTrackMatchingTool:** performs matching of tracks to truth taus and
-    tracks to truth charged particles
+* **TauEfficiencyCorrectionsTool:** provides identification scale factors and the associated uncertainties
+* **TauTruthMatchingTool:** performs matching of taus to the visible truth tau 4th-momentum
+* **TauTruthTrackMatchingTool:** performs matching of tracks to truth taus and tracks to truth charged particles
     
-All relevant information about the actual measurement of uncertainties for run 1
-can be found here: `TauRecommendationsWinterConf2013
-<https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/TauRecommendationsWinterConf2013>`_.
-These numbers are mostly valid for 2012 data analysis using reprocessed data,
-i.e. p1443 (p1344/p1345).
-Information on 2015 tau recommendations can be found here:
-`TauPreRecommendations2015 <https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/TauPreRecommendations2015>`_.
+All relevant information about the actual measurement of uncertainties
+can be found here: `TauRecommendationsR22
+<https://twiki.cern.ch/twiki/bin/view/AtlasProtected/TauRecommendationsR22>`_.
 
 In case of any problems, issues or suggestions don't hesitate to contact the
-authors.
+authorsi or the TauCP conveners.
 
 -----
 Setup
 -----
 
-AthAnalysisBase
+AnalysisBase (AthAnalysisBase)
 ---------------
 
-First start with a clean shell and setup ATHENA, for example via::
+First start with a clean shell and setup athena using sparse checkout, following the instructions from `Setup Sparse Checkout <https://atlassoftwaredocs.web.cern.ch/gittutorial/git-clone/#sparse-checkout>`_.
 
-  setupATLAS
+Then checkout the TauAnalysisTools package::
 
-  #use 2.4.19 or higher
-  asetup AthAnalysisBase,2.4.19,here
+  git atlas addpkg TauAnalysisTools
 
-Where X stands for a release number. Get the package and setup environment::
-  
-  cmt co PhysicsAnalysis/TauID/TauAnalysisTools
-  
-  cd PhysicsAnalysis/TauID/TauAnalysisTools/cmt/
-  source setup.sh
+Compile the package following the instructions from `Setting up to compile and test code <https://atlassoftwaredocs.web.cern.ch/gittutorial/git-develop/>`_.
+Please make sure to setup AnalysisBase (or AthAnalysisBase), for example typing::
 
-Finally compile::
-  
-  cmt make
-
-AnalysisBase
-------------
-
-First start with a clean shell and setup RootCore via::
-
-  setupATLAS
-
-  #use 2.4.19 or higher
-  rcSetup Base,2.4.19
-  rc find_packages
-
-and compile with::
-
-  rc compile
-
-or directly with::
-
-  rc compile_pkg TauAnalysisTools
+  asetup AnalysisBase,25.2.12,here
 
 ---------------
 General Remarks
@@ -96,9 +64,7 @@ Examples
 --------
 
 An example implementation of all tools can be found for stand-alone mode in
-``TauAnalysisTools/util/TauAnalysisToolsExample.cxx``. The binary file should be
-found after compilation in
-``RootCoreBin/bin/x86_64-slc6-gcc47-opt/TauAnalysisToolsExample``.
+``TauAnalysisTools/util/TauAnalysisToolsExample.cxx``. 
 
 The example can be executed via::
 
