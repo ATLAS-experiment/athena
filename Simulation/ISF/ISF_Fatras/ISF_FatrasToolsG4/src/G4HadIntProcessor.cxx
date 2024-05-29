@@ -5,9 +5,6 @@
 // Class Header
 #include "ISF_FatrasToolsG4/G4HadIntProcessor.h"
 
-// Fatras
-#include "ISF_FatrasInterfaces/IPhysicsValidationTool.h"
-
 // ISF
 #include "ISF_Event/ISFParticle.h"
 #include "ISF_Event/ISFParticleContainer.h"
@@ -61,9 +58,6 @@
 // STD
 #include <math.h>
 
-// ROOT
-#include "TTree.h"
-
 namespace {
   /** projection factor for the non-parametric scattering */
   const double s_projectionFactor = sqrt(2.);
@@ -80,18 +74,7 @@ iFatras::G4HadIntProcessor::G4HadIntProcessor(const std::string& t, const std::s
   m_particleBroker("ISF_ParticleBrokerSvc", n),
   m_truthRecordSvc("ISF_ValidationTruthService", n),
   m_randomEngine(0),
-  m_randomEngineName("FatrasRnd"),
-  m_validationMode(false),
-  m_validationTool(""),
-  m_validationTreeName("FatrasMaterialEffects"),
-  m_validationTreeDescription("Validation output from the McMaterialEffectsUpdator"),
-  m_validationTreeFolder("/val/FatrasSimulationMaterial"),
-  m_bremValidationTreeName("FatrasBremPhotons"),
-  m_bremValidationTreeDescription("Validation output from the McMaterialEffectsUpdator"),
-  m_bremValidationTreeFolder("/val/FatrasBremPhotons"),
-  m_edValidationTreeName("FatrasEnergyInCaloDeposit"),
-  m_edValidationTreeDescription("Validation output from the McMaterialEffectUpdator"),
-  m_edValidationTreeFolder("/val/FatrasEnergyInCaloDeposit")
+  m_randomEngineName("FatrasRnd")
 {
   // steering
   declareProperty("MomentumCut"                     , m_minMomentum                                                       );
@@ -103,8 +86,6 @@ iFatras::G4HadIntProcessor::G4HadIntProcessor(const std::string& t, const std::s
   // random number generator
   declareProperty("RandomNumberService"                 , m_rndGenSvc          , "Random number generator");
   declareProperty("RandomStreamName"                    , m_randomEngineName   , "Name of the random number stream");
-  declareProperty("ValidationMode"                      , m_validationMode);
-  declareProperty("PhysicsValidationTool"               , m_validationTool);
   declareProperty("G4RunManagerHelper"                  , m_g4RunManagerHelper);
 }
 
@@ -118,6 +99,8 @@ iFatras::G4HadIntProcessor::~G4HadIntProcessor()
 // initialize
 StatusCode iFatras::G4HadIntProcessor::initialize()
 {
+  ATH_MSG_DEBUG( "initialize()" );
+
   // ISF Services
   if (m_particleBroker.retrieve().isFailure()){
     ATH_MSG_FATAL( "Could not retrieve ParticleBroker: " << m_particleBroker );
@@ -126,16 +109,6 @@ StatusCode iFatras::G4HadIntProcessor::initialize()
   if (m_truthRecordSvc.retrieve().isFailure()){
     ATH_MSG_FATAL( "Could not retrieve TruthRecordSvc: " << m_truthRecordSvc );
     return StatusCode::FAILURE;
-  }
-
-  if (m_validationMode){
-
-    // retrieve the physics validation tool
-    if (m_validationTool.retrieve().isFailure()){
-      ATH_MSG_FATAL( "Could not retrieve " << m_validationTool );
-      return StatusCode::FAILURE;
-    } else
-      ATH_MSG_VERBOSE( "Successfully retrieved " << m_validationTool );
   }
 
   // get the random generator serice
@@ -153,7 +126,7 @@ StatusCode iFatras::G4HadIntProcessor::initialize()
   }
 
   // all good
-  ATH_MSG_INFO("initialize() successful");
+  ATH_MSG_DEBUG("initialize() successful");
   return StatusCode::SUCCESS;
 }
 
@@ -161,11 +134,7 @@ StatusCode iFatras::G4HadIntProcessor::initialize()
 // finalize
 StatusCode iFatras::G4HadIntProcessor::finalize()
 {
-  ATH_MSG_INFO( " ---------- Statistics output -------------------------- " );
-  //ATH_MSG_INFO( "                     Minimum energy cut for brem photons : " <<   m_minimumBremPhotonMomentum  );
-  //ATH_MSG_INFO( "                     Brem photons (above cut, recorded)  : " <<   m_recordedBremPhotons        );
-
-  ATH_MSG_INFO( "finalize() successful" );
+  ATH_MSG_DEBUG( "finalize() successful" );
   return StatusCode::SUCCESS;
 }
 

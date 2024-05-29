@@ -87,8 +87,9 @@ StatusCode
 iFatras::G4ParticleDecayHelper::initialize()
 {
 
-  ATH_MSG_INFO( "initialize()" );
+  ATH_MSG_DEBUG( "initialize()" );
 
+  ATH_CHECK( m_validationTool.retrieve( DisableTool{ m_validationTool.empty() || !m_validationMode } ) );
   // ISF Services
   if ( m_particleBroker.retrieve().isFailure()){
       ATH_MSG_FATAL( "Could not retrieve " <<  m_particleBroker );
@@ -133,7 +134,7 @@ iFatras::G4ParticleDecayHelper::initialize()
   // if this happens before the run manager is created.
   m_pdgToG4Conv.disable();
 
-  ATH_MSG_INFO("initialize() successful");
+  ATH_MSG_DEBUG("initialize() successful");
   return StatusCode::SUCCESS;
 }
 
@@ -144,7 +145,7 @@ iFatras::G4ParticleDecayHelper::initialize()
 StatusCode
 iFatras::G4ParticleDecayHelper::finalize()
 {
-  ATH_MSG_INFO( "finalize() successful" );  
+  ATH_MSG_DEBUG( "finalize() successful" );
   return StatusCode::SUCCESS;
 }
 
@@ -258,7 +259,7 @@ void iFatras::G4ParticleDecayHelper::handleDecayParticles(const ISF::ISFParticle
       ATH_MSG_VERBOSE(  productSummaryString.str() );
 
       // save info for validation
-      if (m_validationMode && m_validationTool) {
+      if (m_validationMode && m_validationTool.isEnabled()) {
         Amg::Vector3D* nMom = 0;
         m_validationTool->saveISFVertexInfo(process,particle.position(),particle,particle.momentum(),nMom,decayProducts);
         delete nMom;

@@ -25,7 +25,6 @@
 #include "ISF_Event/ISFParticleContainer.h"
 
 // Forward Declarations
-class TTree;
 class G4DynamicParticle;
 class G4VProcess;
 class G4RunManager;
@@ -51,8 +50,6 @@ namespace ISF {
 }
 
 namespace iFatras {
-
-  class IPhysicsValidationTool;
 
   /** @class G4HadIntProcessor
 
@@ -134,24 +131,6 @@ namespace iFatras {
       CLHEP::HepRandomEngine*              m_randomEngine;
       std::string                          m_randomEngineName;       //!< Name of the random number stream
 
-      // ------------------------ Validation section ------------------------------------
-      bool                          m_validationMode;
-      ToolHandle<IPhysicsValidationTool>  m_validationTool;
-      std::string                   m_validationTreeName;        //!< validation tree name - to be acessed by this from root
-      std::string                   m_validationTreeDescription; //!< validation tree description - second argument in TTree
-      std::string                   m_validationTreeFolder;      //!< stream/folder to for the TTree to be written out
-
-
-      std::string                   m_bremValidationTreeName;        //!< validation tree name - to be acessed by this from root
-      std::string                   m_bremValidationTreeDescription; //!< validation tree description - second argument in TTree
-      std::string                   m_bremValidationTreeFolder;      //!< stream/folder to for the TTree to be written out
-
-
-      // --------------------------------------------------------------------------------
-
-      std::string                   m_edValidationTreeName;        //!< validation tree name - to be acessed by this from root
-      std::string                   m_edValidationTreeDescription; //!< validation tree description - second argument in TTree
-      std::string                   m_edValidationTreeFolder;      //!< stream/folder to for the TTree to be written out
   };
 
 }

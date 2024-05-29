@@ -168,7 +168,7 @@ iFatras::McMaterialEffectsUpdator::~McMaterialEffectsUpdator()
 StatusCode iFatras::McMaterialEffectsUpdator::initialize()
 {
 
-    ATH_MSG_INFO( "initialize()" );
+    ATH_MSG_DEBUG( "initialize()" );
 
     // retrieve the process sampling tool
     if (m_samplingTool.retrieve().isFailure()){
@@ -276,16 +276,10 @@ StatusCode iFatras::McMaterialEffectsUpdator::initialize()
 
     // the validation setup -------------------------------- PART 1: General ----------------------------------
 
+    // retrieve the physics validation tool
+    ATH_CHECK( m_validationTool.retrieve( DisableTool{ m_validationTool.empty() || !m_validationMode } ) );
+
     if (m_validationMode){
-
-      // retrieve the physics validation tool
-      if (m_validationTool.retrieve().isFailure()) {
-        ATH_MSG_FATAL("Could not retrieve " << m_validationTool);
-        return StatusCode::FAILURE;
-      } else{
-        ATH_MSG_VERBOSE("Successfully retrieved " << m_validationTool);
-      }
-
       ATH_MSG_VERBOSE( "Booking material validation TTree ... " );
 
       // create the new Tree
@@ -307,8 +301,6 @@ StatusCode iFatras::McMaterialEffectsUpdator::initialize()
       } else
 	ATH_MSG_INFO( "TTree for MaterialEffects validation booked." );
 
-    } else {
-      m_validationTool.disable();
     }
     // the validation setup -------------------------------- PART 2: Brem Photons -----------------------------
     if (m_bremValidation){
@@ -360,7 +352,7 @@ StatusCode iFatras::McMaterialEffectsUpdator::initialize()
 
 
     } // ------------- end of validation mode -----------------------------------------------------------------
-
+    ATH_MSG_DEBUG( "finalize() successful" );
     return StatusCode::SUCCESS;
 }
 
@@ -372,7 +364,7 @@ StatusCode iFatras::McMaterialEffectsUpdator::finalize()
     ATH_MSG_INFO( "                     Minimum energy cut for brem photons : " <<   m_minimumBremPhotonMomentum  );
     ATH_MSG_INFO( "                     Brem photons (above cut, recorded)  : " <<   m_recordedBremPhotons        );
 
-    ATH_MSG_INFO( "finalize() successful" );
+    ATH_MSG_DEBUG( "finalize() successful" );
     return StatusCode::SUCCESS;
 }
 
@@ -658,7 +650,7 @@ iFatras::McMaterialEffectsUpdator::updateInLay(
       }
     }
     // save info for locally created particles
-    if (m_validationMode && !childs.empty() && isp != m_isp) {
+    if (m_validationMode && m_validationTool.isEnabled() && !childs.empty() && isp != m_isp) {
       ATH_MSG_VERBOSE("  saving interaction info for locally produced particle " << isp->pdgCode());
       m_validationTool->saveISFParticleInfo(*isp, pathLim.process, currPar.get(), timeLim.time, pathLim.x0Max);
     }
@@ -1370,7 +1362,7 @@ void iFatras::McMaterialEffectsUpdator::recordBremPhoton(double time,
     }
 
     // save info for validation
-    if (m_validationMode && m_validationTool) {
+    if (m_validationMode && m_validationTool.isEnabled()) {
       Amg::Vector3D* nMom = new Amg::Vector3D((pElectron-gammaE)*particleDir);
       m_validationTool->saveISFVertexInfo(3,vertex,*parent,inEl,nMom,children);
       delete nMom;
@@ -1511,7 +1503,7 @@ void iFatras::McMaterialEffectsUpdator::recordBremPhotonLay(const ISF::ISFPartic
     }
 
     // save info for validation
-    if (m_validationMode && m_validationTool) {
+    if (m_validationMode && m_validationTool.isEnabled()) {
       Amg::Vector3D* nMom = new Amg::Vector3D((pElectron-gammaE)*particleDir);
       m_validationTool->saveISFVertexInfo(3,vertex,*parent,pElectron*particleDir,nMom,children);
       delete nMom;
@@ -1637,7 +1629,7 @@ iFatras::McMaterialEffectsUpdator::interact(double time,
     }
 
     // save info for validation
-    if (m_validationMode && m_validationTool) {
+    if (m_validationMode && m_validationTool.isEnabled()) {
       Amg::Vector3D* nMom = nullptr;
       m_validationTool->saveISFVertexInfo(process,position,*parent,momentum,nMom,childVector);
       delete nMom;
@@ -1723,7 +1715,7 @@ iFatras::McMaterialEffectsUpdator::interact(double time,
     m_particleBroker->push( children[1], parent);
 
     // save info for validation
-    if (m_validationMode && m_validationTool) {
+    if (m_validationMode && m_validationTool.isEnabled()) {
       Amg::Vector3D* nMom = nullptr;
       m_validationTool->saveISFVertexInfo(process,position,*parent,momentum,nMom,children);
       delete nMom;
@@ -1844,7 +1836,7 @@ ISF::ISFParticleVector  iFatras::McMaterialEffectsUpdator::interactLay(const ISF
     truth.updateChildParticleProperties();
 
     // save info for validation
-    if (m_validationMode && m_validationTool) {
+    if (m_validationMode && m_validationTool.isEnabled()) {
       Amg::Vector3D* nMom = nullptr;
       m_validationTool->saveISFVertexInfo(process,position,*parent,momentum,nMom,children);
       delete nMom;
@@ -1869,7 +1861,7 @@ ISF::ISFParticleVector  iFatras::McMaterialEffectsUpdator::interactLay(const ISF
     childVector=m_conversionTool->doConversionOnLayer(parent, time, neu); // Registers TruthIncident internally
 
     // validation mode
-    if (m_validationMode && m_validationTool) {
+    if (m_validationMode && m_validationTool.isEnabled()) {
 
       // add process info for children
       for (unsigned int i=0; i<childVector.size(); i++) {
@@ -1880,11 +1872,9 @@ ISF::ISFParticleVector  iFatras::McMaterialEffectsUpdator::interactLay(const ISF
         childVector[i]->setUserInformation(validInfo);
       }
       // save interaction info
-      if ( m_validationTool ) {
-        Amg::Vector3D* nMom = nullptr;
-        m_validationTool->saveISFVertexInfo(process, position,*parent,momentum,nMom,childVector);
-        delete nMom;
-      }
+      Amg::Vector3D* nMom = nullptr;
+      m_validationTool->saveISFVertexInfo(process, position,*parent,momentum,nMom,childVector);
+      delete nMom;
     }
 
     // Check that the new ISFParticles have a valid TruthBinding
@@ -1929,7 +1919,7 @@ ISF::ISFParticleVector  iFatras::McMaterialEffectsUpdator::interactLay(const ISF
     truth.updateChildParticleProperties();
 
     // save info for validation
-    if (m_validationMode && m_validationTool) {
+    if (m_validationMode && m_validationTool.isEnabled()) {
       Amg::Vector3D* nMom = nullptr;
       m_validationTool->saveISFVertexInfo(process,parm.position(),*parent,parm.momentum(),nMom,childVector);
       delete nMom;

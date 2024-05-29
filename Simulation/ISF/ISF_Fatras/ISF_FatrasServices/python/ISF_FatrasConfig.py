@@ -293,6 +293,8 @@ def fatrasParticleDecayHelperCfg(flags, name="ISF_FatrasParticleDecayHelper", **
     kwargs.setdefault("RandomStreamName", flags.Sim.Fatras.RandomStreamName)
     kwargs.setdefault("G4RandomStreamName", flags.Sim.Fatras.G4RandomStreamName)
     kwargs.setdefault("ValidationMode", flags.Sim.ISF.ValidationMode)
+    if flags.Sim.ISF.ValidationMode:
+        kwargs.setdefault("PhysicsValidationTool", result.addPublicTool(result.popToolsAndMerge(fatrasPhysicsValidationToolCfg(flags))))
 
     if "ParticleBroker" not in kwargs:
         kwargs.setdefault("ParticleBroker", result.getPrimaryAndMerge(ATLFAST_ParticleBrokerSvcCfg(flags)).name)
@@ -301,7 +303,6 @@ def fatrasParticleDecayHelperCfg(flags, name="ISF_FatrasParticleDecayHelper", **
         kwargs.setdefault("ParticleTruthSvc", result.getPrimaryAndMerge(TruthServiceCfg(flags)).name)
 
     kwargs.setdefault("PDGToG4ParticleConverter", result.addPublicTool(result.popToolsAndMerge(fatrasPdgG4ParticleCfg(flags))))
-    kwargs.setdefault("PhysicsValidationTool", result.addPublicTool(result.popToolsAndMerge(fatrasPhysicsValidationToolCfg(flags))))
     kwargs.setdefault("G4RunManagerHelper", result.addPublicTool(result.popToolsAndMerge(G4RunManagerHelperCfg(flags))))
     result.setPrivateTools(CompFactory.iFatras.G4ParticleDecayHelper(name=name, **kwargs))
     return result
@@ -385,7 +386,8 @@ def fatrasMaterialUpdatorCfg(flags, name="ISF_FatrasMaterialUpdator", **kwargs):
     kwargs.setdefault("MomentumCut", flags.Sim.Fatras.MomCutOffSec)
     kwargs.setdefault("MinimumBremPhotonMomentum", flags.Sim.Fatras.MomCutOffSec)
 
-    kwargs.setdefault("PhysicsValidationTool", result.addPublicTool(result.popToolsAndMerge(fatrasPhysicsValidationToolCfg(flags))))
+    if flags.Sim.ISF.ValidationMode:
+        kwargs.setdefault("PhysicsValidationTool", result.addPublicTool(result.popToolsAndMerge(fatrasPhysicsValidationToolCfg(flags))))
 
     kwargs.setdefault("ProcessSamplingTool", result.addPublicTool(result.popToolsAndMerge(fatrasProcessSamplingToolCfg(flags))))
 
@@ -460,7 +462,8 @@ def fatrasConversionCreatorCfg(flags, name="ISF_FatrasConversionCreator", **kwar
     if "TruthRecordSvc" not in kwargs:
         kwargs.setdefault("TruthRecordSvc", result.getPrimaryAndMerge(TruthServiceCfg(flags)).name)
 
-    kwargs.setdefault("PhysicsValidationTool", result.addPublicTool(result.popToolsAndMerge(fatrasPhysicsValidationToolCfg(flags))))
+    if flags.Sim.ISF.ValidationMode:
+        kwargs.setdefault("PhysicsValidationTool", result.addPublicTool(result.popToolsAndMerge(fatrasPhysicsValidationToolCfg(flags))))
 
     kwargs.setdefault("PhysicsProcessCode", 14)  # TODO: to be taken from central definition
     kwargs.setdefault("ValidationMode", flags.Sim.ISF.ValidationMode)
@@ -484,9 +487,6 @@ def fatrasG4HadIntProcessorCfg(flags, name="ISF_FatrasG4HadIntProcessor", **kwar
     if "TruthRecordSvc" not in kwargs:
         kwargs.setdefault("TruthRecordSvc", result.getPrimaryAndMerge(TruthServiceCfg(flags)).name)
 
-    kwargs.setdefault("PhysicsValidationTool", result.addPublicTool(result.popToolsAndMerge(fatrasPhysicsValidationToolCfg(flags))))
-
-    kwargs.setdefault("ValidationMode", flags.Sim.ISF.ValidationMode)
     kwargs.setdefault("MomentumCut", flags.Sim.Fatras.MomCutOffSec)
 
     kwargs.setdefault("G4RunManagerHelper", result.addPublicTool(result.popToolsAndMerge(G4RunManagerHelperCfg(flags))))
@@ -516,9 +516,9 @@ def fatrasParametricHadIntProcessorCfg(flags, name="ISF_FatrasParametricHadIntPr
     kwargs.setdefault("MinimumHadronicOutEnergy", flags.Sim.Fatras.MomCutOffSec)
     kwargs.setdefault("HadronicInteractionValidation", False)
     kwargs.setdefault("PhysicsProcessCode", 121)  # TODO: to be taken from central definition
-    kwargs.setdefault("PhysicsValidationTool", result.addPublicTool(result.popToolsAndMerge(fatrasPhysicsValidationToolCfg(flags))))
     kwargs.setdefault("ValidationMode", flags.Sim.ISF.ValidationMode)
-
+    if flags.Sim.ISF.ValidationMode:
+        kwargs.setdefault("PhysicsValidationTool", result.addPublicTool(result.popToolsAndMerge(fatrasPhysicsValidationToolCfg(flags))))
     result.setPrivateTools(CompFactory.iFatras.HadIntProcessorParametric(name, **kwargs))
     return result
 
@@ -553,7 +553,8 @@ def fatrasTransportToolCfg(flags, name="ISF_FatrasSimTool", **kwargs):
 
     kwargs.setdefault("Extrapolator", result.addPublicTool(result.popToolsAndMerge(fatrasExtrapolatorCfg(flags))))
 
-    kwargs.setdefault("PhysicsValidationTool", result.addPublicTool(result.popToolsAndMerge(fatrasPhysicsValidationToolCfg(flags))))
+    if flags.Sim.ISF.ValidationMode:
+        kwargs.setdefault("PhysicsValidationTool", result.addPublicTool(result.popToolsAndMerge(fatrasPhysicsValidationToolCfg(flags))))
 
     kwargs.setdefault("ProcessSamplingTool", result.addPublicTool(result.popToolsAndMerge(fatrasProcessSamplingToolCfg(flags))))
 

@@ -101,7 +101,7 @@ iFatras::HadIntProcessorParametric::~HadIntProcessorParametric()
 StatusCode iFatras::HadIntProcessorParametric::initialize()
 {
 
-    ATH_MSG_INFO( "initialize()" );
+    ATH_MSG_DEBUG( "initialize()" );
 
     // get the random generator serice
      if (m_rndGenSvc.retrieve().isFailure()){
@@ -128,15 +128,7 @@ StatusCode iFatras::HadIntProcessorParametric::initialize()
     }
 
     // the validation setup -------------------------------- PART 3: Hadronic Interaction ---------------------
-    if (m_validationMode){
-
-      // retrieve the physics validation tool
-      if (m_validationTool.retrieve().isFailure()){
-	ATH_MSG_FATAL( "Could not retrieve " << m_validationTool );
-	return StatusCode::FAILURE;
-      } else
-	ATH_MSG_VERBOSE( "Successfully retrieved " << m_validationTool );
-    }
+    ATH_CHECK( m_validationTool.retrieve( DisableTool{ m_validationTool.empty() || !m_validationMode } ) );
 
     if (m_hadIntValidation){
 
@@ -183,14 +175,14 @@ StatusCode iFatras::HadIntProcessorParametric::initialize()
            ATH_MSG_INFO( "TTree for Hadronic Interactions validation booked." );
       }
     } // ------------- end of validation mode -----------------------------------------------------------------
-
+    ATH_MSG_DEBUG( "finalize() successful" );
     return StatusCode::SUCCESS;
 }
 
 // finalize
 StatusCode iFatras::HadIntProcessorParametric::finalize()
 {
-    ATH_MSG_INFO( "finalize() successful" );
+    ATH_MSG_DEBUG( "finalize() successful" );
     return StatusCode::SUCCESS;
 }
 
@@ -650,7 +642,7 @@ ISF::ISFParticleVector iFatras::HadIntProcessorParametric::getHadState(const ISF
   truth.updateChildParticleProperties();
 
   // save info for validation
-  if (m_validationMode && m_validationTool) {
+  if (m_validationMode && m_validationTool.isEnabled()) {
     Amg::Vector3D* nMom = nullptr;
     m_validationTool->saveISFVertexInfo(m_processCode,vertex,*parent,p*particleDir,nMom,children);
     delete nMom;
