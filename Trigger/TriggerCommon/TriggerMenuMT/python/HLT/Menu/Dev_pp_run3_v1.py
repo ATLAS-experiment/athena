@@ -335,10 +335,8 @@ def getDevSignatures():
         ChainProp(name='HLT_j60_j0_FBDJSHARED_L1J20', l1SeedThresholds=['FSNOSEED']*2, groups=MultiJetGroup+DevGroup),
 
         # Emerging Jets test chains ATR-21593
-
         # alternate emerging jet single-jet chain
         ChainProp(name='HLT_j175_0eta160_emergingPTF0p08dR1p2_a10sd_cssk_pf_jes_ftf_preselj225_L1J100', groups=SingleJetGroup+DevGroup, l1SeedThresholds=['FSNOSEED']),
-
 
         # backup emerging jets chains to be used for rate refinement in enhanced bias reprocessing
         ChainProp(name='HLT_j175_0eta180_emergingPTF0p08dR1p2_a10sd_cssk_pf_jes_ftf_L1J100', groups=SingleJetGroup+PrimaryLegGroup, l1SeedThresholds=['FSNOSEED']),
