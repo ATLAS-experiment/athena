@@ -30,7 +30,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 // MDT digitization includes
-#include "MDT_Digitization/MdtDigitizationTool.h"
+#include "MdtDigitizationTool.h"
 
 #include "MDT_Digitization/MdtDigiToolInput.h"
 #include "MDT_Digitization/chargeCalculator.h"
