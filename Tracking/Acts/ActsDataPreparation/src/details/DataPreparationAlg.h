@@ -15,6 +15,7 @@
 #include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "xAODMeasurementBase/MeasurementDefs.h"
+#include "ActsEvent/PrepRawDataAssociation.h"
 
 #include <set>
 
@@ -72,6 +73,9 @@ namespace ActsTrk {
 
     SG::ReadHandleKey< TrigRoiDescriptorCollection > m_roiCollectionKey {this, "RoIs", "",
       "RoIs to read in"};
+
+    SG::ReadHandleKey< ActsTrk::PrepRawDataAssociation > m_inputPrdMap {this, "InputPrdMap", "",
+      "Map of used measurements from previous tracking pass"};
     
     SG::WriteHandleKey< output_collection_t > m_outputCollectionKey {this, "OutputCollection", "",
 	"Output Collection - result of the selection process"};

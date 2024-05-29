@@ -172,6 +172,7 @@ def ITkStoreTrackSeparateContainerCfg(flags,
 
 # Returns CA + ClusterSplitProbContainer
 def ITkTrackRecoPassCfg(flags,
+                        previousActsExtension: str = None,
                         InputCombinedITkTracks: list[str] = None,
                         InputCombinedActsTracks: list[str] = None,
                         InputExtendedITkTracks: list[str] = None,
@@ -214,6 +215,7 @@ def ITkTrackRecoPassCfg(flags,
     from InDetConfig.ITkTrackingSiPatternConfig import ITkTrackingSiPatternCfg
     result.merge(ITkTrackingSiPatternCfg(
         flags,
+        previousActsExtension=previousActsExtension,
         InputCollections=InputExtendedITkTracks,
         ResolvedTrackCollectionKey=TrackContainer,
         SiSPSeededTrackCollectionKey=SiSPSeededTracks,
@@ -524,7 +526,9 @@ def ITkTrackRecoCfg(flags) -> ComponentAccumulator:
     # To be passed to the InDetRecStatistics alg
     StatTrackCollections = []
     StatTrackTruthCollections = []
-
+    # Record previous ACTS extension
+    previousActsExtension = None
+    
     from InDetConfig.SiliconPreProcessing import ITkRecPreProcessingSiliconCfg
 
     for current_flags in flags_set:
@@ -539,7 +543,8 @@ def ITkTrackRecoCfg(flags) -> ComponentAccumulator:
         # (1) Full Athena data preparation  
         # (2) Full Acts data preparation 
         # (3) Hybrid configurations with EDM converters
-        result.merge(ITkRecPreProcessingSiliconCfg(current_flags))
+        result.merge(ITkRecPreProcessingSiliconCfg(current_flags,
+                                                   previousActsExtension=previousActsExtension))
 
         # Track Reconstruction
         # This includes track finding and ambiguity resolution
@@ -550,6 +555,7 @@ def ITkTrackRecoCfg(flags) -> ComponentAccumulator:
         # since it will create a data dependency from the prevous pass
         acc, ClusterSplitProbContainer = ITkTrackRecoPassCfg(
             current_flags,
+            previousActsExtension,
             InputCombinedITkTracks=InputCombinedITkTracks,
             InputCombinedActsTracks=InputCombinedActsTracks,
             InputExtendedITkTracks=InputExtendedITkTracks,
@@ -557,6 +563,10 @@ def ITkTrackRecoCfg(flags) -> ComponentAccumulator:
             StatTrackTruthCollections=StatTrackTruthCollections,
             ClusterSplitProbContainer=ClusterSplitProbContainer)
         result.merge(acc)
+
+        # Store ACTS extension
+        if 'Acts' in extension:
+            previousActsExtension = extension
 
     # This merges the track collection in InputCombinedITkTracks
     # and creates a track particle collection from that

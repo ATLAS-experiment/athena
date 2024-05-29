@@ -176,7 +176,7 @@ def ActsPixelClusterPreparationAlgCfg(flags,
 
     kwargs.setdefault('InputCollection', 'ITkPixelClusters')
     kwargs.setdefault('DetectorElements', 'ITkPixelDetectorElementCollection')
-
+    
     if 'RegSelTool' not in kwargs:
         from RegionSelector.RegSelToolConfig import regSelTool_ITkPixel_Cfg
         kwargs.setdefault('RegSelTool', acc.popToolsAndMerge(regSelTool_ITkPixel_Cfg(flags)))
@@ -277,7 +277,11 @@ def ActsMainClusterizationCfg(flags,
 
     return acc
 
-def ActsClusterizationCfg(flags) -> ComponentAccumulator:
+def ActsClusterizationCfg(flags,
+                          *,
+                          previousActsExtension: str = None) -> ComponentAccumulator:
+    assert previousActsExtension is None or isinstance(previousActsExtension, str)
+
     acc = ComponentAccumulator()
                       
     processPixels = flags.Detector.EnableITkPixel
@@ -286,7 +290,7 @@ def ActsClusterizationCfg(flags) -> ComponentAccumulator:
     kwargs = dict()
     kwargs.setdefault('processPixels', processPixels)
     kwargs.setdefault('processStrips', processStrips)
-                      
+
     # Clusterization is a three step process at maximum:
     #   (1) Cache Creation
     #   (2) Clusterization algorithm (reconstruction of clusters)
@@ -364,6 +368,9 @@ def ActsClusterizationCfg(flags) -> ComponentAccumulator:
             else:
                 kwargs.setdefault('PixelClusterPreparationAlg.InputCollection', '')
                 kwargs.setdefault('PixelClusterPreparationAlg.InputIDC', f'{flags.Tracking.ActiveConfig.extension}PixelClustersCache')
+            # Prd Map for removing previously used measurements
+            if flags.Tracking.ActiveConfig.isSecondaryPass and previousActsExtension is not None:
+                kwargs.setdefault('PixelClusterPreparationAlg.InputPrdMap', f'{previousActsExtension}PrdMap')
                 
         if kwargs['processStrips']:
             kwargs.setdefault('StripClusterPreparationAlg.name', f'{flags.Tracking.ActiveConfig.extension}StripClusterPreparationAlg')
@@ -375,6 +382,9 @@ def ActsClusterizationCfg(flags) -> ComponentAccumulator:
             else:
                 kwargs.setdefault('StripClusterPreparationAlg.InputCollection', '')
                 kwargs.setdefault('StripClusterPreparationAlg.InputIDC', f'{flags.Tracking.ActiveConfig.extension}StripClustersCache')
+            # Prd Map for removing previously used measurements
+            if flags.Tracking.ActiveConfig.isSecondaryPass and previousActsExtension is not None:
+                kwargs.setdefault('StripClusterPreparationAlg.InputPrdMap', f'{previousActsExtension}PrdMap')
 
     # Analysis algo(s)
     if flags.Acts.doAnalysis:
