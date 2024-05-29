@@ -38,6 +38,7 @@
 #include <AsgAnalysisAlgorithms/SystObjectLinkerAlg.h>
 #include <AsgAnalysisAlgorithms/TreeFillerAlg.h>
 #include <AsgAnalysisAlgorithms/TreeMakerAlg.h>
+#include <AsgAnalysisAlgorithms/IOStatsAlg.h>
 #include <EgammaAnalysisAlgorithms/EgammaCalibrationAndSmearingAlg.h>
 #include <EgammaAnalysisAlgorithms/EgammaIsGoodOQSelectionTool.h>
 #include <EgammaAnalysisAlgorithms/EgammaIsolationCorrectionAlg.h>
@@ -151,6 +152,7 @@ namespace CP
     ANA_CHECK (asg::registerAlgorithmFactory<CP::TrigEventSelectionAlg>("CP::TrigEventSelectionAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::TrigGlobalEfficiencyAlg>("CP::TrigGlobalEfficiencyAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::VertexSelectionAlg>("CP::VertexSelectionAlg"));
+    ANA_CHECK (asg::registerAlgorithmFactory<CP::IOStatsAlg>("CP::IOStatsAlg"));
 
     ANA_CHECK (asg::registerToolFactory<AsgDeadHVCellRemovalTool> ("AsgDeadHVCellRemovalTool"));
     ANA_CHECK (asg::registerToolFactory<BTaggingSelectionTool> ("BTaggingSelectionTool"));

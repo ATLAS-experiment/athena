@@ -41,5 +41,6 @@
 #include <AsgAnalysisAlgorithms/SystObjectUnioniserAlg.h>
 #include <AsgAnalysisAlgorithms/TreeFillerAlg.h>
 #include <AsgAnalysisAlgorithms/TreeMakerAlg.h>
+#include <AsgAnalysisAlgorithms/IOStatsAlg.h>
 
 #endif
