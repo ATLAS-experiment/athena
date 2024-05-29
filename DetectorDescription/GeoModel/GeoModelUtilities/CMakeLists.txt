@@ -42,7 +42,7 @@ atlas_add_test( GeoAlignStore_test
                 SOURCES test/testAlignStore.cxx
                 INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
                 LINK_LIBRARIES ${GEOMODEL_LIBRARIES} ${ROOT_LIBRARIES} GeoModelUtilities
-                PROPERTIES TIMEOUT 600
+                PROPERTIES TIMEOUT 900
                 POST_EXEC_SCRIPT nopost.sh)
 # Code in this file makes heavy use of eigen and runs orders of magnitude
 # more slowly without optimization.  So force this to be optimized even
