@@ -12,13 +12,15 @@ namespace egammaMonitoring {
 
   StatusCode DiObjectHistograms::initializePlots() {
 
-    histoMap["mass"] = new TH1D(Form("%s_%s",m_name.c_str(),"mass"),"",300,50,200);
+    const char* fN = m_name.c_str();
+
+    histoMap["mass"] = new TH1D(Form("%s_mass",fN),";m [GeV]; Events",300,50,200);
     ATH_CHECK(m_rootHistSvc->regHist(m_folder+"mass", histoMap["mass"]));
 
-    histoMap["massvsmu"] = new TH2D(Form("%s_%s",m_name.c_str(),"massvsmu"),"",100,0,100,150,50,200);
+    histoMap["massvsmu"] = new TH2D(Form("%s_massvsmu",fN),";#mu;m [GeV]",100,0,100,150,50,200);
     ATH_CHECK(m_rootHistSvc->regHist(m_folder+"massvsmu", histoMap["massvsmu"]));
 
-    histoMap["massvspT"] = new TH2D(Form("%s_%s",m_name.c_str(),"massvspT"),"",20,0,100,150,50,200);
+    histoMap["massvspT"] = new TH2D(Form("%s_massvspT",fN),";p_{T} [GeV];m [GeV]",20,0,100,150,50,200);
     ATH_CHECK(m_rootHistSvc->regHist(m_folder+"massvspT", histoMap["massvspT"]));
     return StatusCode::SUCCESS;
   }
