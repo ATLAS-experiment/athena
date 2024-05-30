@@ -104,7 +104,8 @@ struct EmptyTrackStatesAux {
   ActsTrk::MutableMultiTrajectory m;
 };
 
-BOOST_FIXTURE_TEST_CASE(AllMtjStaticxAODVaraiblesAreKnown, EmptyTrackStatesAux) {
+// cppcheck-suppress syntaxError
+BOOST_FIXTURE_TEST_CASE(AllMtjStaticxAODVariablesAreKnown, EmptyTrackStatesAux) {
     for (auto id : m.trackStatesAux()->getStore()->getAuxIDs()) {
         const std::string name = SG::AuxTypeRegistry::instance().getName(id);
         BOOST_CHECK(ActsTrk::MutableMultiTrajectory::s_staticVariables.count(name) == 1);
