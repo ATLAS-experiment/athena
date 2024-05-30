@@ -5,6 +5,7 @@
 
 #include "EFTrackingSmearingAlg.h"
 #include "xAODTracking/VertexContainer.h" 
+#include "AthContainers/ConstAccessor.h"
 
 #include "TH1.h"
 
@@ -229,6 +230,11 @@ StatusCode EFTrackingSmearingAlg::smearTruthParticles(const EventContext& ctx) {
   FakeTrackSmearer *mySmearer=static_cast<FakeTrackSmearer *>(m_mySmearer);
   mySmearer->Clear();
 
+  static const SG::ConstAccessor<float> ptAcc("pt");
+  static const SG::ConstAccessor<float> d0Acc("d0");
+  static const SG::ConstAccessor<float> z0Acc("z0");
+  static const SG::ConstAccessor<float> thetaAcc("theta");
+
   int n_input_tracks=0;
   int n_output_tracks=0;
   int n_output_broad_tracks=0;
@@ -237,9 +243,9 @@ StatusCode EFTrackingSmearingAlg::smearTruthParticles(const EventContext& ctx) {
   for ( const auto* part : *inputTruth ) 
     {    
       double pt = part->pt();// MeV      
-      float theta = part->auxdata<float>("theta");
-      float z0 = part->auxdata<float>("z0");
-      float d0 = part->auxdata<float>("d0");
+      float theta = thetaAcc(*part);
+      float z0 = z0Acc(*part);
+      float d0 = d0Acc(*part);
       float eta = part->eta();
       float phi = part->phi();
       if (part->isNeutral()) continue;
@@ -249,8 +255,8 @@ StatusCode EFTrackingSmearingAlg::smearTruthParticles(const EventContext& ctx) {
                       <<" curv=" << 1./part->pt()
                       <<" phi="  << part->phi()
                       <<" eta="  << part->eta()
-                      <<" d0="   << part->auxdata<float>("d0")
-                      <<" z0="   << part->auxdata<float>("z0")
+                      <<" d0="   << d0Acc(*part)
+                      <<" z0="   << z0Acc(*part)
                       <<" pT="   << part->pt()  
                       <<" PDGID=" << part->pdgId()
                       <<" status=" << part->status()                       
@@ -286,15 +292,15 @@ StatusCode EFTrackingSmearingAlg::smearTruthParticles(const EventContext& ctx) {
                   ptDecorator(*newtrk) = otrack.pt()*1000.; //MeV
                   //TrackParticle has already ::pt(), so the smeared value is in the decorator 
                   // and can be accessed by                
-                  newpt = newtrk->auxdata<float>("pt");
+                  newpt = ptAcc(*newtrk);
                 }
                 if (newpt==0.) continue;
                 ATH_MSG_DEBUG ("Smeared Truth: "
                       <<" curv=" << 1./newpt
                       <<" phi="  << newtrk->phi()
                       <<" eta="  << newtrk->eta()
-                      <<" d0="   << newtrk->auxdata<float>("d0")
-                      <<" z0="   << newtrk->auxdata<float>("z0")
+                      <<" d0="   << d0Acc(*newtrk)
+                      <<" z0="   << z0Acc(*newtrk)
                       <<" pT="   << newpt
                       <<" PDGID=" << newtrk->pdgId()
                       <<" status=" << newtrk->status()                      
@@ -310,18 +316,18 @@ StatusCode EFTrackingSmearingAlg::smearTruthParticles(const EventContext& ctx) {
                   hist("track_output_d0" )->Fill(otrack.d0() );      
         
                   hist("track_outputcoll_eta")->Fill(newtrk->eta());
-                  hist("track_outputcoll_theta")->Fill(newtrk->auxdata<float>("theta"));
+                  hist("track_outputcoll_theta")->Fill(thetaAcc(*newtrk));
                   hist("track_outputcoll_pt" )->Fill(part->charge()* newpt/1000.); 
                   hist("track_outputcoll_phi")->Fill(newtrk->phi());
-                  hist("track_outputcoll_z0" )->Fill(newtrk->auxdata<float>("z0"));
-                  hist("track_outputcoll_d0" )->Fill(newtrk->auxdata<float>("d0"));
+                  hist("track_outputcoll_z0" )->Fill(z0Acc(*newtrk));
+                  hist("track_outputcoll_d0" )->Fill(d0Acc(*newtrk));
                 
                   hist("track_delta_eta")->Fill(newtrk->eta() - part->eta());  
                   hist("track_delta_pt") ->Fill((newpt - part->pt())/1000.);  	      
                   hist("track_delta_crv")->Fill(newtrk->charge()*1000./newpt - ((part->charge()*1000./part->pt())));
                   hist("track_delta_phi")->Fill(newtrk->phi() - part->phi());
-                  hist("track_delta_z0" )->Fill(newtrk->auxdata<float>("z0") - part->auxdata<float>("z0"));
-                  hist("track_delta_d0" )->Fill(newtrk->auxdata<float>("d0") - part->auxdata<float>("d0"));
+                  hist("track_delta_z0" )->Fill(z0Acc(*newtrk) - z0Acc(*part));
+                  hist("track_delta_d0" )->Fill(d0Acc(*newtrk) - d0Acc(*part));
                 }                         	                
       	    } // end of loop                      
 	      }
