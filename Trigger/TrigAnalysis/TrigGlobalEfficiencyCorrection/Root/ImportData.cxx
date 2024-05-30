@@ -700,7 +700,14 @@ bool ImportData::suggestEgammaMapKeys(const std::map<std::string,std::string>& t
 			legsPerKey.emplace(std::to_string(legsPerKey.size()), m_dictionary.at(kv.first));
 		}
 	}
-	
+	for (auto& [key, legs]: legsPerKey)
+	{
+		if (key == ITrigGlobalEfficiencyCorrectionTool::toolnameForDefaultScaleFactor())
+		{
+			ATH_MSG_WARNING("Some of the requested triggers will result in "
+							"a default scale factor of 1 being returned");
+		}
+	}
 	if(!success) legsPerKey.clear();
 	return success;
 }
