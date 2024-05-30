@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DataQualityUtils/MonitoringFile.h"
@@ -222,7 +222,7 @@ MonitoringFile::fitMergedFile_DiMuMonAll( TFile* f, const std::string & run_dir,
   f->Write();
 }
 
-void MonitoringFile::fitHistos (TH2F* hin, std::vector<TH1F*> hout, int mode, const std::string & triggerName, const std::string & resonName, TH1F* h_chi2){
+void MonitoringFile::fitHistos (TH2F* hin, const std::vector<TH1F*>& hout, int mode, const std::string & triggerName, const std::string & resonName, TH1F* h_chi2){
   bool saveHistos = false;
   // a canvas may be needed when implmenting this into the post-processing file 
   //std::cout<<"The fitHistos method is called"<<endl;

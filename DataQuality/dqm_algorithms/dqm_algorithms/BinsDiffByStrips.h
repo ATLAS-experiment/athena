@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /*! \file BinsDiffByStrips.h file declares the dqm_algorithms::BinContentComp  class.
@@ -26,7 +26,7 @@ namespace dqm_algorithms
 	  dqm_core::Result * execute( const std::string & , const TObject & , const dqm_core::AlgorithmConfig & );
           using dqm_core::Algorithm::printDescription;
 	  void  printDescription(std::ostream& out);
-          void find_n(std::string, int&);
+          void find_n(const std::string&, int&);
 	};
 }
 

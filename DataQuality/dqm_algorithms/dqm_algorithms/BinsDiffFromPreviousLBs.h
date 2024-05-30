@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /*! \file BinsDiffFromPreviousLBs.cxx evaluates the number of consecutive bins with bin value different from set threshold. Also usable for
@@ -28,7 +28,7 @@ namespace dqm_algorithms
 	  dqm_core::Result * execute( const std::string & , const TObject & , const dqm_core::AlgorithmConfig & );
           using dqm_core::Algorithm::printDescription;
 	  void  printDescription(std::ostream& out);
-	  bool areConsecutive(std::vector<int>, int elements);
+	  bool areConsecutive(const std::vector<int>&, int elements);
 	};
 }
 

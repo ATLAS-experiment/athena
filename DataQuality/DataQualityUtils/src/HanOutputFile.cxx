@@ -309,7 +309,7 @@ namespace dqutils
     }
   }
 
-  std::string HanOutputFile::getStringName(std::string location, int file_version)
+  std::string HanOutputFile::getStringName(const std::string& location, int file_version)
   {
     std::string stringName("Undefined");
     if (file_version == 1)
@@ -540,7 +540,7 @@ namespace dqutils
     }
   }
 
-  std::string HanOutputFile::getInfo(std::string location, int file_version)
+  std::string HanOutputFile::getInfo(const std::string& location, int file_version)
   {
     dqi::DisableMustClean disabled;
     std::string value("");
@@ -667,7 +667,7 @@ namespace dqutils
     return value;
   }
 
-  std::string HanOutputFile::getInfo(std::string JSON_str)
+  std::string HanOutputFile::getInfo(const std::string& JSON_str)
   {
     dqi::DisableMustClean disabled;
     std::string value("");

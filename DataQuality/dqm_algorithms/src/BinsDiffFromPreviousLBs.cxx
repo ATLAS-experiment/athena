@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /*! \file BinsDiffFromPreviousLBs.cxx evaluates the number of consecutive bins with bin value different from set threshold. Also usable for single bins. 
@@ -38,7 +38,7 @@ dqm_algorithms::BinsDiffFromPreviousLBs::clone()
   return new BinsDiffFromPreviousLBs();
 }
 
-bool dqm_algorithms::BinsDiffFromPreviousLBs::areConsecutive(std::vector<int> lbs, int n) 
+bool dqm_algorithms::BinsDiffFromPreviousLBs::areConsecutive(const std::vector<int>& lbs, int n) 
 { 
   if ( n <  1 ) 
     return false; 

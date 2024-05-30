@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /*! \file 
@@ -426,7 +426,7 @@ dqm_algorithms::OccupancyHoleFinder::getMDTChamberName(const TH2* histo, int bin
   return name;
 }
 std::string
-dqm_algorithms::OccupancyHoleFinder::getMDTChamberNameByCrate(int biny, std::string crate){
+dqm_algorithms::OccupancyHoleFinder::getMDTChamberNameByCrate(int biny, const std::string& crate){
 
   int phiStat = -99;
   int etaStat = -99;

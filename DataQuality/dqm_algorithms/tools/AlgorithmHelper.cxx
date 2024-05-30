@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /*! \file AlgorithmHelper.cpp does basic functions to get dqm_core::Results from algorithms 
@@ -1384,14 +1384,14 @@ dqm_algorithms::tools::BestCaseAddStatus(dqm_core::Result::Status baseStatus, dq
 
 
 std::pair<double,double> 
-dqm_algorithms::tools::CalcBinsProbChisq(std::vector<double> inputval,std::vector<double> inputerr,std::vector<double> x0,std::vector<double> x0err){
+dqm_algorithms::tools::CalcBinsProbChisq(const std::vector<double>& inputval,const std::vector<double>& inputerr,const std::vector<double>& x0,const std::vector<double>& x0err){
 
   double chisq = 0.;
-  std::vector<double>::iterator iter_vals = inputval.begin();
-  std::vector<double>::iterator iter_err = inputerr.begin();
+  std::vector<double>::const_iterator iter_vals = inputval.begin();
+  std::vector<double>::const_iterator iter_err = inputerr.begin();
 
-  std::vector<double>::iterator iter_x0 = x0.begin();
-  std::vector<double>::iterator iter_x0err = x0err.begin();
+  std::vector<double>::const_iterator iter_x0 = x0.begin();
+  std::vector<double>::const_iterator iter_x0err = x0err.begin();
 
   int ndf = 0;
   for ( ; iter_vals != inputval.end(); ++iter_vals,++iter_err,++iter_x0,++iter_x0err){
@@ -1408,11 +1408,11 @@ dqm_algorithms::tools::CalcBinsProbChisq(std::vector<double> inputval,std::vecto
 }
 
 std::pair<double,double> 
-dqm_algorithms::tools::CalcBinsProbChisq(std::vector<double> inputval,std::vector<double> inputerr,double x0,double x0_err){
+dqm_algorithms::tools::CalcBinsProbChisq(const std::vector<double>& inputval,const std::vector<double>& inputerr,double x0,double x0_err){
 
   double chisq = 0.;
-  std::vector<double>::iterator iter_vals = inputval.begin();
-  std::vector<double>::iterator iter_err = inputerr.begin();
+  std::vector<double>::const_iterator iter_vals = inputval.begin();
+  std::vector<double>::const_iterator iter_err = inputerr.begin();
   int ndf = 0;
   for ( ; iter_vals != inputval.end(); ++iter_vals,++iter_err){
     if (fabs(*iter_err) > 1.0e-5){
