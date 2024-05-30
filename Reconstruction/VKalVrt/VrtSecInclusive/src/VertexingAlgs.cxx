@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Header include
 #include "VrtSecInclusive/VrtSecInclusive.h"
 #include "VrtSecInclusive/NtupleVars.h"
 #include "VrtSecInclusive/Tools.h"
+#include "AthContainers/Accessor.h"
 
 #include "TrkTrackSummary/TrackSummary.h"
 
@@ -187,11 +188,16 @@ namespace VKalVrtAthena {
           vertex->setPosition( wrkvrt.vertex );
           vertex->setFitQuality( wrkvrt.Chi2, 1 ); // Ndof is always 1
 
-          vertex->auxdata<float>("mass")   = wrkvrt.vertexMom.M();
-          vertex->auxdata<float>("pT")     = wrkvrt.vertexMom.Perp();
-          vertex->auxdata<float>("charge") = wrkvrt.Charge;
-          vertex->auxdata<float>("vPos")   = vPos;
-          vertex->auxdata<bool>("isFake")  = true;
+          static const SG::Accessor<float> massAcc("mass");
+          static const SG::Accessor<float> pTAcc("pT");
+          static const SG::Accessor<float> chargeAcc("charge");
+          static const SG::Accessor<float> vPosAcc("vPos");
+          static const SG::Accessor<bool>  isFakeAcc("isFake");
+          massAcc(*vertex)   = wrkvrt.vertexMom.M();
+          pTAcc(*vertex)     = wrkvrt.vertexMom.Perp();
+          chargeAcc(*vertex) = wrkvrt.Charge;
+          vPosAcc(*vertex)   = vPos;
+          isFakeAcc(*vertex) = true;
         }
 
 
@@ -310,7 +316,8 @@ namespace VKalVrtAthena {
 
         // The vertex passed the quality cut: overwrite isFake to false
         if( m_jp.FillIntermediateVertices && vertex ) {
-          vertex->auxdata<bool>("isFake")  = false;
+          static const SG::Accessor<bool> isFakeAcc("isFake");
+          isFakeAcc(*vertex)  = false;
         }
 
         
@@ -1744,8 +1751,9 @@ namespace VKalVrtAthena {
         p4wrtSV_electron.SetPtEtaPhiM( pt_wrtSV, eta_wrtSV, phi_wrtSV, PhysConsts::mass_electron    );
         
         // for selected tracks only
-        if( trk->isAvailable<char>("is_associated" + m_jp.augVerString ) ) {
-          if( !trk->auxdataConst<char>("is_associated" + m_jp.augVerString) ) {
+        static const SG::ConstAccessor<char> is_associatedAcc("is_associated" + m_jp.augVerString);
+        if( is_associatedAcc.isAvailable(*trk) ) {
+          if( !is_associatedAcc(*trk) ) {
             sumP4_selected += p4wrtSV_pion;
           }
         } else {
@@ -1829,26 +1837,44 @@ namespace VKalVrtAthena {
       vertex->setCovariance(fCov);
 
       // Registering the vertex momentum and charge
-      vertex->auxdata<float>("vtx_px")                   = wrkvrt.vertexMom.Px();
-      vertex->auxdata<float>("vtx_py")                   = wrkvrt.vertexMom.Py();
-      vertex->auxdata<float>("vtx_pz")                   = wrkvrt.vertexMom.Pz();
+      static const SG::Accessor<float> vtx_pxAcc("vtx_px");
+      static const SG::Accessor<float> vtx_pyAcc("vtx_py");
+      static const SG::Accessor<float> vtx_pzAcc("vtx_pz");
+      static const SG::Accessor<float> vtx_massAcc("vtx_mass");
+      static const SG::Accessor<float> vtx_chargeAcc("vtx_charge");
+      static const SG::Accessor<float> chi2_coreAcc("chi2_core");
+      static const SG::Accessor<float> ndof_coreAcc("ndof_core");
+      static const SG::Accessor<float> chi2_assocAcc("chi2_assoc");
+      static const SG::Accessor<float> ndof_assocAcc("ndof_assoc");
+      static const SG::Accessor<float> massAcc("mass");
+      static const SG::Accessor<float> mass_eAcc("mass_e");
+      static const SG::Accessor<float> mass_selectedTracksAcc("mass_selectedTracks");
+      static const SG::Accessor<float> minOpAngAcc("minOpAng");
+      static const SG::Accessor<int> num_trksAcc("num_trks");
+      static const SG::Accessor<int> num_selectedTracksAcc("num_selectedTracks");
+      static const SG::Accessor<int> num_associatedTracksAcc("num_associatedTracks");
+      static const SG::Accessor<float> dCloseVrtAcc("dCloseVrt");
 
-      vertex->auxdata<float>("vtx_mass")                 = wrkvrt.vertexMom.M();
-      vertex->auxdata<float>("vtx_charge")               = wrkvrt.Charge;
+      vtx_pxAcc(*vertex)                   = wrkvrt.vertexMom.Px();
+      vtx_pyAcc(*vertex)                   = wrkvrt.vertexMom.Py();
+      vtx_pzAcc(*vertex)                   = wrkvrt.vertexMom.Pz();
 
-      vertex->auxdata<float>("chi2_core")                = wrkvrt.Chi2_core;
-      vertex->auxdata<float>("ndof_core")                = wrkvrt.ndof_core();
-      vertex->auxdata<float>("chi2_assoc")               = wrkvrt.Chi2;
-      vertex->auxdata<float>("ndof_assoc")               = wrkvrt.ndof();
+      vtx_massAcc(*vertex)                 = wrkvrt.vertexMom.M();
+      vtx_chargeAcc(*vertex)               = wrkvrt.Charge;
+
+      chi2_coreAcc(*vertex)                = wrkvrt.Chi2_core;
+      ndof_coreAcc(*vertex)                = wrkvrt.ndof_core();
+      chi2_assocAcc(*vertex)               = wrkvrt.Chi2;
+      ndof_assocAcc(*vertex)               = wrkvrt.ndof();
       // Other SV properties
-      vertex->auxdata<float> ("mass")                    = sumP4_pion.M();
-      vertex->auxdata<float> ("mass_e")                  = sumP4_electron.M();
-      vertex->auxdata<float> ("mass_selectedTracks")     = sumP4_selected.M();
-      vertex->auxdata<float> ("minOpAng")                = minOpAng;
-      vertex->auxdata<int>   ("num_trks")                = wrkvrt.nTracksTotal();
-      vertex->auxdata<int>   ("num_selectedTracks")      = wrkvrt.selectedTrackIndices.size();
-      vertex->auxdata<int>   ("num_associatedTracks")    = wrkvrt.associatedTrackIndices.size();
-      vertex->auxdata<float> ("dCloseVrt")               = wrkvrt.closestWrkVrtValue;
+      massAcc(*vertex)                    = sumP4_pion.M();
+      mass_eAcc(*vertex)                  = sumP4_electron.M();
+      mass_selectedTracksAcc(*vertex)     = sumP4_selected.M();
+      minOpAngAcc(*vertex)                = minOpAng;
+      num_trksAcc(*vertex)                = wrkvrt.nTracksTotal();
+      num_selectedTracksAcc(*vertex)      = wrkvrt.selectedTrackIndices.size();
+      num_associatedTracksAcc(*vertex)    = wrkvrt.associatedTrackIndices.size();
+      dCloseVrtAcc(*vertex)               = wrkvrt.closestWrkVrtValue;
       
       // Registering tracks comprising the vertex to xAOD::Vertex
       // loop over the tracks comprising the vertex
@@ -1880,18 +1906,23 @@ namespace VKalVrtAthena {
       if( m_jp.doMapToLocal ) {
         // Obtain the local mapping of the reconstructed vertex
         Trk::MappedVertex mappedVtx = m_vertexMapper->mapToLocal( wrkvrt.vertex );
+        static const SG::Accessor<int> local_identifierHashAcc("local_identifierHash");
+        static const SG::Accessor<int> local_layerIndexAcc("local_layerIndex");
+        static const SG::Accessor<float> local_posXAcc("local_posX");
+        static const SG::Accessor<float> local_posYAcc("local_posY");
+        static const SG::Accessor<float> local_posZAcc("local_posZ");
         if( mappedVtx.valid ) {
-          vertex->auxdata<int>("local_identifierHash") = mappedVtx.identifierHash;
-          vertex->auxdata<int>("local_layerIndex")     = mappedVtx.layerIndex;
-          vertex->auxdata<float>("local_posX")         = mappedVtx.localPosition.x();
-          vertex->auxdata<float>("local_posY")         = mappedVtx.localPosition.y();
-          vertex->auxdata<float>("local_posZ")         = mappedVtx.localPosition.z();
+          local_identifierHashAcc(*vertex) = mappedVtx.identifierHash;
+          local_layerIndexAcc(*vertex)     = mappedVtx.layerIndex;
+          local_posXAcc(*vertex)           = mappedVtx.localPosition.x();
+          local_posYAcc(*vertex)           = mappedVtx.localPosition.y();
+          local_posZAcc(*vertex)           = mappedVtx.localPosition.z();
         } else {
-          vertex->auxdata<int>("local_identifierHash") = AlgConsts::invalidInt;
-          vertex->auxdata<int>("local_layerIndex")     = AlgConsts::invalidInt;
-          vertex->auxdata<float>("local_posX")         = AlgConsts::invalidFloat;
-          vertex->auxdata<float>("local_posY")         = AlgConsts::invalidFloat;
-          vertex->auxdata<float>("local_posZ")         = AlgConsts::invalidFloat;
+          local_identifierHashAcc(*vertex) = AlgConsts::invalidInt;
+          local_layerIndexAcc(*vertex)     = AlgConsts::invalidInt;
+          local_posXAcc(*vertex)           = AlgConsts::invalidFloat;
+          local_posYAcc(*vertex)           = AlgConsts::invalidFloat;
+          local_posZAcc(*vertex)           = AlgConsts::invalidFloat;
         }
       }
 
