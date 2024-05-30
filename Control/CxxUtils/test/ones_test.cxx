@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file CxxUtils/test/ones_test.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -38,6 +36,12 @@ void test1()
 
   for (int i=0; i<=64; i++)
     testit<uint64_t> (i);
+}
+
+
+[[maybe_unused]] unsigned check_ones1()
+{
+  return CxxUtils::ones<unsigned> (13);
 }
 
 

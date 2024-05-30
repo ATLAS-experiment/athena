@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -32,7 +32,7 @@ namespace CxxUtils {
   namespace detail {
 
     template <typename T>
-    inline unsigned ctz_portable(T x) {
+    inline constexpr unsigned ctz_portable(T x) {
       static_assert(std::is_integral<T>::value, "An integer type is required.");
       unsigned n(0);
       if (x!=0) {
@@ -42,7 +42,7 @@ namespace CxxUtils {
     }    
 
     template <typename T>
-    inline unsigned clz_portable(T x) {
+    inline constexpr unsigned clz_portable(T x) {
       static_assert(std::is_integral<T>::value, "An integer type is required.");
       if (x==0) return sizeof(T)*8;
       unsigned n(0);
@@ -52,7 +52,7 @@ namespace CxxUtils {
     }    
 
     template <typename T>
-    inline unsigned popcount_portable(T x) {
+    inline constexpr unsigned popcount_portable(T x) {
       static_assert(std::is_integral<T>::value, "An integer type is required.");
       unsigned n = 0;
       while (x != 0) {
@@ -69,7 +69,7 @@ namespace CxxUtils {
    * @param x Number to check
    * @return Number of trailing zeros, 0 if x==0
    */
-  inline unsigned count_trailing_zeros(unsigned x) {
+  inline constexpr unsigned count_trailing_zeros(unsigned x) {
 #if HAVE_BITCOUNT_INTRINSICS
     return (x!=0 ? __builtin_ctz(x) : 0);
 #else
@@ -77,7 +77,7 @@ namespace CxxUtils {
 #endif
   }
 
-  inline unsigned count_trailing_zeros(unsigned long x) {
+  inline constexpr unsigned count_trailing_zeros(unsigned long x) {
 #if HAVE_BITCOUNT_INTRINSICS
     return (x!=0 ? __builtin_ctzl(x) : 0);
 #else
@@ -85,7 +85,7 @@ namespace CxxUtils {
 #endif
   }
 
-  inline unsigned count_trailing_zeros(unsigned long long x) {
+  inline constexpr unsigned count_trailing_zeros(unsigned long long x) {
 #if HAVE_BITCOUNT_INTRINSICS
     return (x!=0 ? __builtin_ctzll(x) : 0);
 #else
@@ -99,7 +99,7 @@ namespace CxxUtils {
    * @param x Number to check
    * @return Number of leading zeros, input size in bits if x==0
    */
-  inline unsigned count_leading_zeros(unsigned x) {
+  inline constexpr unsigned count_leading_zeros(unsigned x) {
 #if HAVE_BITCOUNT_INTRINSICS
     return (x!=0 ? __builtin_clz(x) : sizeof(x)*CHAR_BIT);
 #else
@@ -107,7 +107,7 @@ namespace CxxUtils {
 #endif
   }
 
-  inline unsigned count_leading_zeros(unsigned long x) {
+  inline constexpr unsigned count_leading_zeros(unsigned long x) {
 #if HAVE_BITCOUNT_INTRINSICS
     return (x!=0 ? __builtin_clzl(x) : sizeof(x)*CHAR_BIT);
 #else
@@ -115,7 +115,7 @@ namespace CxxUtils {
 #endif
   }
 
-  inline unsigned count_leading_zeros(unsigned long long x) {
+  inline constexpr unsigned count_leading_zeros(unsigned long long x) {
 #if HAVE_BITCOUNT_INTRINSICS
     return (x!=0 ? __builtin_clzll(x) : sizeof(x)*CHAR_BIT);
 #else
@@ -138,7 +138,7 @@ namespace CxxUtils {
   // clang has intrinsics for popcount but not target_clones. 
   [[gnu::target_clones("popcnt,default")]]
 #endif
-  inline unsigned count_ones(unsigned x) {
+  inline constexpr unsigned count_ones(unsigned x) {
 #if HAVE_BITCOUNT_INTRINSICS
     return __builtin_popcount(x);
 #else
@@ -149,7 +149,7 @@ namespace CxxUtils {
 #if defined(__x86_64__) && HAVE_TARGET_CLONES
   [[gnu::target_clones("popcnt,default")]]
 #endif
-  inline unsigned count_ones(unsigned long x) {
+  inline constexpr unsigned count_ones(unsigned long x) {
 #if HAVE_BITCOUNT_INTRINSICS
     return __builtin_popcountl(x);
 #else
@@ -161,16 +161,18 @@ namespace CxxUtils {
 #if defined(__x86_64__) && HAVE_TARGET_CLONES
   [[gnu::target_clones("popcnt,default")]]
 #endif
-  inline unsigned count_ones(unsigned long long x) {
+  inline constexpr unsigned count_ones(unsigned long long x) {
 #if HAVE_BITCOUNT_INTRINSICS
     return __builtin_popcountll(x);
 #else
     return detail::popcount_portable(x);
 #endif
   }
-  /// Returns the position (counting from the left hand side) of the last set bit
-  template<typename T> int maxSetBit(const T x) {
-      return x != 0 ? sizeof(T) * 8 - count_leading_zeros(x) : -1;
+  /// Returns the position (counting from least-significant-bit=0)
+  /// of the most significant set bit.
+  /// Returns -1 if no bits are set.
+  template<typename T> constexpr int maxSetBit(const T x) {
+      return x != 0 ? sizeof(T) * 8 - count_leading_zeros(x) - 1 : -1;
   }
 }
 #endif // CXXUTILS_BITSCAN_H
