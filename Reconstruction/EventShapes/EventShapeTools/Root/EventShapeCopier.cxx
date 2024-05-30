@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // EventShapeCopier.cxx 
@@ -10,6 +10,8 @@
 #include "xAODEventShape/EventShapeAuxInfo.h"
 #include "AsgDataHandles/ReadHandle.h"
 #include "AsgDataHandles/WriteHandle.h"
+#include "AthContainers/Accessor.h"
+#include "AthContainers/ConstAccessor.h"
 
 //**********************************************************************
 
@@ -83,9 +85,15 @@ StatusCode EventShapeCopier::fillEventShape(xAOD::EventShape *evs) const {
     return StatusCode::FAILURE;      
   }
 
-  evs->auxdata<float> ("Density")      = inputES->auxdata<float>( m_eventDensityName ) ;
-  evs->auxdata<float> ("DensitySigma") = inputES->auxdata<float>( m_eventDensityName+"Sigma" ) ;
-  evs->auxdata<float> ("DensityArea")  = inputES->auxdata<float>( m_eventDensityName+"Area" ) ;
+  SG::ConstAccessor<float> InputDensityAcc ( m_eventDensityName ) ;
+  SG::ConstAccessor<float> InputDensitySigmaAcc ( m_eventDensityName+"Sigma" ) ;
+  SG::ConstAccessor<float> InputDensityAreaAcc ( m_eventDensityName+"Area" ) ;
+  static const SG::Accessor<float> DensityAcc ( "Density" ) ;
+  static const SG::Accessor<float> DensitySigmaAcc ( "DensitySigma" ) ;
+  static const SG::Accessor<float> DensityAreaAcc ( "DensityArea" ) ;
+  DensityAcc(*evs)      = InputDensityAcc(*inputES);
+  DensitySigmaAcc(*evs) = InputDensitySigmaAcc(*inputES);
+  DensityAreaAcc(*evs)  = InputDensityAreaAcc(*inputES);
 
   return StatusCode::SUCCESS;      
 }
