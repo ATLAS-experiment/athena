@@ -15,11 +15,11 @@ Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #include <array>
 #include <cstdint>
 
-template<class T> class ItkpixLayout{
+template<class T> class ITkPixLayout{
 
     public:
 
-        ItkpixLayout(){};
+        ITkPixLayout(){};
 
         T& operator()(const uint16_t col, const uint16_t row){
 

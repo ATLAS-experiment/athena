@@ -3,9 +3,9 @@
 */
 
 #include "src/ITkPixelEncodingAlg.h"
-#include "src/ItkPixelEncodingTool.h"
+#include "src/ITkPixelEncodingTool.h"
 #include "src/ITkPixelHitSortingTool.h"
 
 DECLARE_COMPONENT( ITkPixelEncodingAlg )
-DECLARE_COMPONENT( ItkPixelEncodingTool )
+DECLARE_COMPONENT( ITkPixelEncodingTool )
 DECLARE_COMPONENT( ITkPixelHitSortingTool)
