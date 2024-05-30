@@ -62,9 +62,9 @@ namespace SG {
 RootAuxVector::RootAuxVector (const RootAuxVectorFactory* factory,
                               SG::auxid_t auxid,
                               size_t size, size_t /*capacity*/)
-  : m_factory (factory),
-    m_ownFlag (true),
-    m_auxid (auxid)
+  : IAuxTypeVector (auxid),
+    m_factory (factory),
+    m_ownFlag (true)
 {
   const TClass* vecClass = factory->vecClass();
   m_proxy.reset (vecClass->GetCollectionProxy()->Generate());
@@ -94,9 +94,9 @@ RootAuxVector::RootAuxVector (const RootAuxVectorFactory* factory,
                               void* data,
                               bool isPacked,
                               bool ownFlag)
-  : m_factory (factory),
-    m_ownFlag (ownFlag),
-    m_auxid (auxid)
+  : IAuxTypeVector (auxid),
+    m_factory (factory),
+    m_ownFlag (ownFlag)
 {
   if (isPacked) std::abort();
   const TClass* vecClass = factory->vecClass();
@@ -112,10 +112,10 @@ RootAuxVector::RootAuxVector (const RootAuxVectorFactory* factory,
  * @param other The vector to copy.
  */
 RootAuxVector::RootAuxVector (const RootAuxVector& other)
-  : m_factory (other.m_factory),
+  : IAuxTypeVector (other),
+    m_factory (other.m_factory),
     m_proxy (other.m_proxy->Generate()),
-    m_ownFlag (true),
-    m_auxid (other.m_auxid)
+    m_ownFlag (true)
 {
   m_obj = m_factory->objClass()->New ();
   m_vec = reinterpret_cast<char*> (m_obj) + m_factory->offset();
@@ -149,15 +149,6 @@ RootAuxVector::~RootAuxVector()
 std::unique_ptr<SG::IAuxTypeVector> RootAuxVector::clone() const
 {
   return std::make_unique<RootAuxVector> (*this);
-}
-
-
-/**
- * @brief Return the auxid of the variable this vector represents.
- */
-SG::auxid_t RootAuxVector::auxid() const
-{
-  return m_auxid;
 }
 
 

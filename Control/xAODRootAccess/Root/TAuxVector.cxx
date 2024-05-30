@@ -20,9 +20,9 @@ namespace xAOD {
    TAuxVector::TAuxVector( const TAuxVectorFactory* factory,
                            SG::auxid_t auxid,
                            const ::TClass* cl, size_t size, size_t )
-      : m_factory( factory ),
-        m_proxy( cl->GetCollectionProxy()->Generate() ), m_vec( cl->New() ),
-        m_auxid( auxid ) {
+      : IAuxTypeVector( auxid ),
+        m_factory( factory ),
+        m_proxy( cl->GetCollectionProxy()->Generate() ), m_vec( cl->New() ) {
 
       // A little sanity check:
       if( ! m_proxy ) {
@@ -39,9 +39,9 @@ namespace xAOD {
    }
 
    TAuxVector::TAuxVector( const TAuxVector& parent )
-      : m_factory( parent.m_factory ), m_proxy( parent.m_proxy->Generate() ),
-        m_vec( parent.m_proxy->GetCollectionClass()->New() ),
-        m_auxid( parent.m_auxid ) {
+      : IAuxTypeVector( parent ),
+        m_factory( parent.m_factory ), m_proxy( parent.m_proxy->Generate() ),
+        m_vec( parent.m_proxy->GetCollectionClass()->New() ) {
 
       m_proxy->PushProxy( m_vec );
 
@@ -78,9 +78,9 @@ namespace xAOD {
       m_proxy->Destructor( m_vec );
 
       // Get the information from the other object:
+      IAuxTypeVector::operator=( other );
       m_factory = other.m_factory;
       m_proxy.reset( other.m_proxy->Generate() );
-      m_auxid = other.m_auxid;
 
       // Create a new vector:
       m_vec = m_proxy->GetCollectionClass()->New();
@@ -106,12 +106,6 @@ namespace xAOD {
    std::unique_ptr< SG::IAuxTypeVector > TAuxVector::clone() const {
 
       return std::make_unique< TAuxVector >( *this );
-   }
-
-
-   SG::auxid_t TAuxVector::auxid() const
-   {
-      return m_auxid;
    }
 
 
@@ -226,10 +220,10 @@ namespace xAOD {
 
    void TAuxVector::copyRange( const void* src, void* dst, size_t n ) {
 
-      SG::AuxVectorInterface idst( m_auxid, n, dst );
-      m_factory->copy( m_auxid,
+      SG::AuxVectorInterface idst( auxid(), n, dst );
+      m_factory->copy( auxid(),
                        idst, 0,
-                       SG::AuxVectorInterface( m_auxid, n, src ), 0,
+                       SG::AuxVectorInterface( auxid(), n, src ), 0,
                        n );
 
       return;
