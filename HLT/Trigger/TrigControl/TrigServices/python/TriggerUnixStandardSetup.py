@@ -6,11 +6,6 @@
 ###############################################################
 
 
-def setupCommonServices(flags):
-    from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper
-    CAtoGlobalWrapper(commonServicesCfg, flags)
-
-
 def commonServicesCfg(flags):
     from AthenaCommon.Constants import INFO
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator

@@ -477,7 +477,6 @@ def main():
          flags.fillFromString(flag_arg)
 
    PscConfig.interactive = args.interactive
-   PscConfig.dumpJobProperties = args.dump_config or args.dump_config_exit or args.dump_config_reload
    PscConfig.exitAfterDump = args.dump_config_exit
    PscConfig.reloadAfterDump = args.dump_config_reload
 
