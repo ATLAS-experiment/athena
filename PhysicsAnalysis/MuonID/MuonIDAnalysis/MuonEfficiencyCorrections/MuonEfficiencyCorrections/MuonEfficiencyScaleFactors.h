@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef MUONEFFICIENCYSCALEFACTORS_H_
@@ -141,7 +141,7 @@ namespace CP {
             /// Returns the string telling the tool in which
             /// float AuxElement the information of the separation
             /// to the closest jet is stored
-            std::string close_by_jet_decoration() const;
+            const std::string& close_by_jet_decoration() const;
             /// option to set if we want to use 1D or 2D isolation SFs
             bool use_2D_iso_corrections() const;
             

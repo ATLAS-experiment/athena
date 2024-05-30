@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "MuonEfficiencyCorrections/MuonEfficiencyScaleFactors.h"
@@ -73,7 +73,7 @@ namespace CP {
         declareProperty("CloseJetDRDecorator", m_iso_jet_dR);
         declareProperty("Use2DIsoCorrections", m_use2DIsoCorr);
     }
-    std::string MuonEfficiencyScaleFactors::close_by_jet_decoration() const{
+    const std::string& MuonEfficiencyScaleFactors::close_by_jet_decoration() const{
         return m_iso_jet_dR;
     }
     bool MuonEfficiencyScaleFactors::use_2D_iso_corrections() const{
