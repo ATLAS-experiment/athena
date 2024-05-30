@@ -72,11 +72,12 @@ StatusCode TrigBjetBtagHypoTool::decide( std::vector< TrigBjetBtagHypoToolInfo >
     bool pass = true;
     std::string stage = "pass";
 
+    // check beamspot info, see https://cern.ch/beam-bits
     int bits = bTagInfo.beamSpot->beamStatus();
     // beamspot is converged if first and second bit are set
-    bool converged = ((bits | 0b11) == bits);
+    bool converged = ((bits | 0b011) == bits);
     // beamspot is online if thrid bit is set
-    bool online = ((bits | 0b001) == bits);
+    bool online = ((bits | 0b100) == bits);
 
     ATH_MSG_DEBUG(
       "Beamspot status: 0x" << std::hex << bits << ", "
