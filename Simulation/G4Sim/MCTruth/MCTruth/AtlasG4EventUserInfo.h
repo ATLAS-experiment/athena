@@ -58,15 +58,15 @@ public:
    * @brief return a pointer to the GenParticle corresponding to the
    * current G4Track (if there is one). TODO Rename
    */
-  HepMC::GenParticlePtr GetCurrentlyTraced() {return m_currentlyTraced;}
-  HepMC::ConstGenParticlePtr GetCurrentlyTraced() const {return m_currentlyTraced;}
+  HepMC::GenParticlePtr GetCurrentGenParticle() {return m_currentGenParticle;}
+  HepMC::ConstGenParticlePtr GetCurrentGenParticle() const {return m_currentGenParticle;}
   /**
-   * @brief set m_currentlyTraced, the pointer to the GenParticle
+   * @brief set m_currentGenParticle, the pointer to the GenParticle
    * corresponding to the current G4Track. This will be updated each
    * time an interaction of the G4Track is recorded to the
    * HepMC::GenEvent. TODO Rename
    */
-  void SetCurrentlyTraced(HepMC::GenParticlePtr p) {m_currentlyTraced=p;}
+  void SetCurrentGenParticle(HepMC::GenParticlePtr p) {m_currentGenParticle = p;}
 
   /**
    * @brief return the value of G4Track::GetTrackID() for the last
@@ -106,7 +106,7 @@ public:
 private:
   HepMC::GenEvent *m_theEvent{};
   HepMC::ConstGenParticlePtr m_currentPrimaryGenParticle{};
-  HepMC::GenParticlePtr m_currentlyTraced{};
+  HepMC::GenParticlePtr m_currentGenParticle{};
   // These next two variables are used by the CaloCalibrationHit
   // recording code as event-level flags They correspond to the Track
   // ID and step number of the last G4Step processed by a

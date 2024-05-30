@@ -172,11 +172,11 @@ HepMC::GenParticlePtr ISF::ISFTruthIncident::childParticle(unsigned short index,
 /** return attached truth particle */
 HepMC::GenParticlePtr ISF::ISFTruthIncident::getHepMCTruthParticle( ISF::ISFParticle& particle ) const {
   auto* truthBinding     = particle.getTruthBinding();
-  HepMC::GenParticlePtr hepTruthParticle = truthBinding ? truthBinding->getTruthParticle() : nullptr;
+  HepMC::GenParticlePtr currentGenParticle = truthBinding ? truthBinding->getCurrentGenParticle() : nullptr;
  
   // We have what we want
-  if (hepTruthParticle) {
-    return hepTruthParticle;
+  if (currentGenParticle) {
+    return currentGenParticle;
   }
   //Otherwise we need to create it
   return updateHepMCTruthParticle(particle,&particle);
@@ -189,7 +189,7 @@ HepMC::GenParticlePtr ISF::ISFTruthIncident::updateHepMCTruthParticle( ISF::ISFP
   HepMC::GenParticlePtr newGenParticle = ParticleHelper_convert( particle );
 
   if (truthBinding) {
-    truthBinding->setTruthParticle(newGenParticle);
+    truthBinding->setCurrentGenParticle(newGenParticle);
   } else {
     auto parentTruthBinding = parent ? parent->getTruthBinding() : nullptr;
     auto primaryGenParticle = parentTruthBinding ? parentTruthBinding->getPrimaryGenParticle() : nullptr;
@@ -211,7 +211,7 @@ void ISF::ISFTruthIncident::updateParentAfterIncidentProperties() {
   // particle survives the interaction, but is rejected by
   // registerTruthIncident
   const ISF::TruthBinding *parentAfterIncidentTruthBinding = m_parent.getTruthBinding();
-  auto parentAfterIncidentGenParticle = (parentAfterIncidentTruthBinding)  ? parentAfterIncidentTruthBinding->getTruthParticle() : nullptr;
+  auto parentAfterIncidentGenParticle = (parentAfterIncidentTruthBinding)  ? parentAfterIncidentTruthBinding->getCurrentGenParticle() : nullptr;
   const int parentAfterIncidentID = (parentAfterIncidentGenParticle) ? HepMC::uniqueID(parentAfterIncidentGenParticle) : HepMC::UNDEFINED_ID;
   HepMcParticleLink* parentAfterIncidentHMPL{};
   const HepMcParticleLink* parentBeforeIncidentHMPL = m_parent.getParticleLink();
@@ -253,7 +253,7 @@ void ISF::ISFTruthIncident::updateChildParticleProperties() {
       }
       child->setTruthBinding(childTruthBinding);
     }
-    auto childGenParticle = childTruthBinding->getTruthParticle();
+    auto childGenParticle = childTruthBinding->getCurrentGenParticle();
     const int childID = (childGenParticle) ? HepMC::uniqueID(childGenParticle) : HepMC::UNDEFINED_ID;
     HepMcParticleLink* childHMPL{};
     const HepMcParticleLink* oldChildHMPL = child->getParticleLink();

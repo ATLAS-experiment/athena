@@ -43,13 +43,13 @@ namespace G4UA
     // Condition for storing the GenParticle in the AtlasG4EventUserInfo for later.
     if (trackHelper.IsPrimary() || trackHelper.IsRegisteredSecondary())
     {
-      HepMC::GenParticlePtr part = trackHelper.GetTrackInformation()->GetHepMCParticle();
+      HepMC::GenParticlePtr currentGenParticle = trackHelper.GetTrackInformation()->GetCurrentGenParticle();
 
       // Assign the GenParticle to the AtlasG4EventUserInfo.
       AtlasG4EventUserInfo* atlasG4EvtUserInfo = static_cast<AtlasG4EventUserInfo*>
         (G4EventManager::GetEventManager()->GetConstCurrentEvent()->GetUserInformation());
-      if (trackHelper.IsPrimary()) atlasG4EvtUserInfo->SetCurrentPrimaryGenParticle(part);
-      atlasG4EvtUserInfo->SetCurrentlyTraced(part);
+      if (trackHelper.IsPrimary()) atlasG4EvtUserInfo->SetCurrentPrimaryGenParticle(currentGenParticle);
+      atlasG4EvtUserInfo->SetCurrentGenParticle(currentGenParticle);
     }
 
     // Condition for creating a trajectory object to store truth.

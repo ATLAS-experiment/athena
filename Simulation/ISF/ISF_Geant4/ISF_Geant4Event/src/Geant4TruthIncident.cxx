@@ -133,7 +133,7 @@ int iGeant4::Geant4TruthIncident::parentStatus()  {
 }
 
 HepMC::GenParticlePtr iGeant4::Geant4TruthIncident::parentParticle() {
-  return m_atlasG4EvtUserInfo->GetCurrentlyTraced();
+  return m_atlasG4EvtUserInfo->GetCurrentGenParticle();
 }
 
 bool iGeant4::Geant4TruthIncident::parentSurvivesIncident() const { 
@@ -162,7 +162,7 @@ HepMC::GenParticlePtr iGeant4::Geant4TruthIncident::parentParticleAfterIncident(
     // from G4DynamicParticle (which should be equivalent to postStep)
     m_parentParticleAfterIncident = convert(track, newBarcode, false);
     
-    m_atlasG4EvtUserInfo->SetCurrentlyTraced( m_parentParticleAfterIncident );
+    m_atlasG4EvtUserInfo->SetCurrentGenParticle( m_parentParticleAfterIncident );
     
     // store (new) hepmc particle in track's UserInformation
     TrackHelper       tHelper(track);
@@ -170,7 +170,7 @@ HepMC::GenParticlePtr iGeant4::Geant4TruthIncident::parentParticleAfterIncident(
     if (tInfo) {
       // do NOT update the TrackInformation for regenerated particles!
       // (most recent truth info is kept in AtlasG4EventUserInfo)
-      //tInfo->SetParticle( m_parentParticleAfterIncident );
+      //tInfo->SetCurrentGenParticle( m_parentParticleAfterIncident );
       int regenerationNr = tInfo->GetRegenerationNr();
       regenerationNr++;
       tInfo->SetRegenerationNr(regenerationNr);
@@ -245,7 +245,7 @@ HepMC::GenParticlePtr iGeant4::Geant4TruthIncident::childParticle(unsigned short
     thisChildTrack->SetUserInformation( trackInfo );
   }
 
-  trackInfo->SetParticle(hepParticle);
+  trackInfo->SetCurrentGenParticle(hepParticle);
   trackInfo->SetClassification(RegisteredSecondary);
   trackInfo->SetRegenerationNr(0);
 
@@ -282,7 +282,7 @@ HepMC::GenParticlePtr iGeant4::Geant4TruthIncident::convert(const G4Track *track
   const int pdgCode = track->GetDefinition()->GetPDGEncoding();
   const HepMC::FourVector fourMomentum( mom.x(), mom.y(), mom.z(), energy);
 
-  const HepMC::GenParticlePtr parent = m_atlasG4EvtUserInfo->GetCurrentlyTraced();
+  const HepMC::GenParticlePtr parent = m_atlasG4EvtUserInfo->GetCurrentGenParticle();
   int status = (secondary) ? 1 + HepMC::SIM_STATUS_THRESHOLD : parent->status() + HepMC::SIM_STATUS_INCREMENT;
   // Treat child particles of pre-defined decays differently
   if (this->interactionClassification() == ISF::QS_PREDEF_VTX) {

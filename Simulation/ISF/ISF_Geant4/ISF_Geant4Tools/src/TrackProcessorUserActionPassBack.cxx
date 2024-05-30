@@ -164,8 +164,8 @@ namespace G4UA {
         //               " and is returned to ISF.");
 
         const ISF::ISFParticle*    parent = curISP;
-        HepMC::GenParticlePtr truthParticle = m_atlasG4EvtUserInfo->GetCurrentlyTraced();
-        this->returnParticleToISF(aTrack, parent, truthParticle, nextGeoID);
+        HepMC::GenParticlePtr currentGenParticle = m_atlasG4EvtUserInfo->GetCurrentGenParticle();
+        this->returnParticleToISF(aTrack, parent, currentGenParticle, nextGeoID); // TODO CHECK THIS LOGIC
       }
 
       //
@@ -209,8 +209,8 @@ namespace G4UA {
                                                        Secondary,
                                                        generationZeroGenParticle );
 
-            HepMC::GenParticlePtr truthParticle{};
-            returnParticleToISF(aTrack_2nd, parent, truthParticle, nextGeoID_2nd);
+            HepMC::GenParticlePtr currentGenParticle{};
+            returnParticleToISF(aTrack_2nd, parent, currentGenParticle, nextGeoID_2nd); // TODO CHECK THIS LOGIC
           }
         }
 
@@ -219,7 +219,7 @@ namespace G4UA {
       return;
     }
 
-    ISF::TruthBinding* TrackProcessorUserActionPassBack::newTruthBinding(const G4Track* aTrack, HepMC::GenParticlePtr truthParticle) const
+    ISF::TruthBinding* TrackProcessorUserActionPassBack::newTruthBinding(const G4Track* aTrack, HepMC::GenParticlePtr currentGenParticle) const
     {
       auto* trackInfo = ::iGeant4::ISFG4Helper::getISFTrackInfo(*aTrack);
       if (!trackInfo) {
@@ -232,19 +232,19 @@ namespace G4UA {
       }
 
       HepMC::GenParticlePtr         primaryGenParticle = trackInfo->GetPrimaryGenParticle();
-      HepMC::GenParticlePtr  generationZeroGenParticle = trackInfo->GetHepMCParticle(); // TODO CHECK THIS LOGIC
+      HepMC::GenParticlePtr  generationZeroGenParticle = trackInfo->GetCurrentGenParticle(); // TODO CHECK THIS LOGIC
 
-      ISF::TruthBinding* tBinding = new ISF::TruthBinding(truthParticle, primaryGenParticle, generationZeroGenParticle);
+      ISF::TruthBinding* tBinding = new ISF::TruthBinding(currentGenParticle, primaryGenParticle, generationZeroGenParticle);
 
       return tBinding;
     }
 
     ISF::ISFParticle* TrackProcessorUserActionPassBack::newISFParticle(G4Track* aTrack,
                                                                        const ISF::ISFParticle* parentISP,
-                                                                       HepMC::GenParticlePtr truthParticle,
+                                                                       HepMC::GenParticlePtr currentGenParticle,
                                                                        AtlasDetDescr::AtlasRegion  nextGeoID)
     {
-      ISF::TruthBinding* tBinding = newTruthBinding(aTrack, truthParticle);
+      ISF::TruthBinding* tBinding = newTruthBinding(aTrack, currentGenParticle);
 
       ISF::ISFParticle* isp = ::iGeant4::ISFG4Helper::convertG4TrackToISFParticle( *aTrack,
                                                                          *parentISP,
@@ -260,14 +260,14 @@ namespace G4UA {
 
     void TrackProcessorUserActionPassBack::returnParticleToISF( G4Track *aTrack,
                                                                 const ISF::ISFParticle* parentISP,
-                                                                HepMC::GenParticlePtr truthParticle,
+                                                                HepMC::GenParticlePtr currentGenParticle,
                                                                 AtlasDetDescr::AtlasRegion nextGeoID )
     {
       // kill track inside G4
       aTrack->SetTrackStatus( fStopAndKill );
 
       // create new ISFParticle and attach it to current G4Track
-      ISF::ISFParticle *newISP = newISFParticle( aTrack, parentISP, truthParticle, nextGeoID );
+      ISF::ISFParticle *newISP = newISFParticle( aTrack, parentISP, currentGenParticle, nextGeoID );
 
       // update TrackInformation
       auto trackInfo = ::iGeant4::ISFG4Helper::getISFTrackInfo(*aTrack);

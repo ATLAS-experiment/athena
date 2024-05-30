@@ -110,7 +110,7 @@ namespace G4UA
         int currentBarcode(0);
 
         if (trackHelper.IsPrimary() || trackHelper.IsRegisteredSecondary()) {
-          currentBarcode = HepMC::barcode(atlasG4EvtUserInfo->GetCurrentlyTraced()); // FIXME Barcode-based
+          currentBarcode = HepMC::barcode(atlasG4EvtUserInfo->GetCurrentGenParticle()); // FIXME Barcode-based
         }
 
         bool p1 = m_config.targetTrack<0 && m_config.targetBarcode<0 && m_config.targetPdgIDs.empty();

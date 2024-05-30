@@ -226,25 +226,25 @@ namespace G4UA{
 	m_scIn = creation? creation->GetProcessSubType() : -1;
 	
 	VTrackInformation * trackInfo= static_cast<VTrackInformation*>(track->GetUserInformation());
-	HepMC::GenParticlePtr genpart= trackInfo ? trackInfo->GetHepMCParticle() : nullptr;
-	HepMC::GenVertexPtr vtx = genpart ? genpart->production_vertex() : nullptr;
-	m_gen = genpart? 0 : -1;
+	HepMC::GenParticlePtr currentGenParticle= trackInfo ? trackInfo->GetCurrentGenParticle() : nullptr;
+	HepMC::GenVertexPtr vtx = currentGenParticle ? currentGenParticle->production_vertex() : nullptr;
+	m_gen = currentGenParticle? 0 : -1;
 	
-	if (genpart)  { // mc truth known
-	  while (genpart && vtx ) {
-	    int pdgID=genpart->pdg_id();
+	if (currentGenParticle)  { // mc truth known
+	  while (currentGenParticle && vtx ) {
+	    int pdgID=currentGenParticle->pdg_id();
 #ifdef HEPMC3
 	    const HepMC::GenParticlePtr  genmom = vtx->particles_in().size()>0 ? vtx->particles_in().front() : nullptr;
 	    if ( genmom && pdgID!=genmom->pdg_id() ) m_gen++;
-	    else if (vtx->particles_out().size()>0 && genpart!=vtx->particles_out().front()) m_gen++;
+	    else if (vtx->particles_out().size()>0 && currentGenParticle!=vtx->particles_out().front()) m_gen++;
 
 #else
 	    HepMC::GenParticlePtr genmom = vtx->particles_in_size()>0 ? *(vtx->particles_in_const_begin()) : nullptr;
 	    if ( genmom && pdgID!=genmom->pdg_id() ) m_gen++;
-	    else if (vtx->particles_out_size()>0 && genpart!=*(vtx->particles_out_const_begin())) m_gen++;
+	    else if (vtx->particles_out_size()>0 && currentGenParticle!=*(vtx->particles_out_const_begin())) m_gen++;
 #endif
 	    vtx = genmom ? genmom->production_vertex() : nullptr;
-	    genpart = genmom;
+	    currentGenParticle = genmom;
 	  }
 	} else {
 	  // retrieve info from parent track

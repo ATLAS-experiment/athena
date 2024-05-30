@@ -42,9 +42,9 @@ namespace ISF {
     inline ~TruthBinding();
 
     /** pointer to the particle in the simulation truth */
-    inline HepMC::GenParticlePtr getTruthParticle();
-    inline HepMC::ConstGenParticlePtr getTruthParticle() const;
-    inline void                setTruthParticle(HepMC::GenParticlePtr p);
+    inline HepMC::GenParticlePtr getCurrentGenParticle();
+    inline HepMC::ConstGenParticlePtr getCurrentGenParticle() const;
+    inline void                setCurrentGenParticle(HepMC::GenParticlePtr p);
 
     /** pointer to the primary particle in the simulation truth */
     inline HepMC::GenParticlePtr getPrimaryGenParticle();
