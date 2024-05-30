@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetMonitoring/JetSubStructureHistos.h"
@@ -66,19 +66,28 @@ int JetSubStructureHistos::buildHistos(){
 int JetSubStructureHistos::fillHistosFromJet(const xAOD::Jet &j, float weight){
   //For definitions see JetSubStructureMomentTools
 
-  if( j.isAvailable<float>("Tau1") && j.isAvailable<float>("Tau2") && j.isAvailable<float>("Tau3")){
-    if( j.getAttribute<float>("Tau1") > 1e-8 ) m_tau21->Fill( j.getAttribute<float>("Tau2") / j.getAttribute<float>("Tau1"), weight );
-    if( j.getAttribute<float>("Tau2") > 1e-8 ) m_tau32->Fill( j.getAttribute<float>("Tau3") / j.getAttribute<float>("Tau2"), weight );
+  static const SG::ConstAccessor<float> Tau1Acc("Tau1");
+  static const SG::ConstAccessor<float> Tau2Acc("Tau2");
+  static const SG::ConstAccessor<float> Tau3Acc("Tau3");
+  static const SG::ConstAccessor<float> Tau1_wtaAcc("Tau1_wta");
+  static const SG::ConstAccessor<float> Tau2_wtaAcc("Tau2_wta");
+  static const SG::ConstAccessor<float> Tau3_wtaAcc("Tau3_wta");
+  static const SG::ConstAccessor<float> ECF1Acc("ECF1");
+  static const SG::ConstAccessor<float> ECF2Acc("ECF2");
+  static const SG::ConstAccessor<float> ECF3Acc("ECF3");
+  if( Tau1Acc.isAvailable(j) && Tau2Acc.isAvailable(j) && Tau3Acc.isAvailable(j)){
+    if( Tau1Acc(j) > 1e-8 ) m_tau21->Fill( Tau2Acc(j) / Tau1Acc(j), weight );
+    if( Tau2Acc(j) > 1e-8 ) m_tau32->Fill( Tau3Acc(j) / Tau2Acc(j), weight );
   }
-  if( j.isAvailable<float>("Tau1_wta") && j.isAvailable<float>("Tau2_wta") && j.isAvailable<float>("Tau3_wta")){
-    if( j.getAttribute<float>("Tau1_wta") > 1e-8 ) m_tau21_wta->Fill( j.getAttribute<float>("Tau2_wta") / j.getAttribute<float>("Tau1_wta"), weight );
-    if( j.getAttribute<float>("Tau2_wta") > 1e-8 ) m_tau32_wta->Fill( j.getAttribute<float>("Tau3_wta") / j.getAttribute<float>("Tau2_wta"), weight );
+  if( Tau1_wtaAcc.isAvailable(j) && Tau2_wtaAcc(j) && Tau3_wtaAcc(j)){
+    if( Tau1_wtaAcc(j) > 1e-8 ) m_tau21_wta->Fill( Tau2_wtaAcc(j) / Tau1_wtaAcc(j), weight );
+    if( Tau2_wtaAcc(j) > 1e-8 ) m_tau32_wta->Fill( Tau3_wtaAcc(j) / Tau2_wtaAcc(j), weight );
   }
-  if( j.isAvailable<float>("ECF1") && j.isAvailable<float>("ECF2") && j.isAvailable<float>("ECF3")){
-    if( j.getAttribute<float>("ECF1") > 1e-8 ) m_C1->Fill( j.getAttribute<float>("ECF2") / pow( j.getAttribute<float>("ECF1"), 2.0), weight );
-    if( j.getAttribute<float>("ECF2") > 1e-8 ) {
-      m_C2->Fill( ( j.getAttribute<float>("ECF3") * j.getAttribute<float>("ECF1") ) / pow( j.getAttribute<float>("ECF2"), 2.0), weight );
-      m_D2->Fill( ( j.getAttribute<float>("ECF3") * pow( j.getAttribute<float>("ECF1"), 3.0 ) ) / pow( j.getAttribute<float>("ECF2"), 3.0), weight );
+  if( ECF1Acc.isAvailable(j) && ECF2Acc.isAvailable(j) && ECF3Acc.isAvailable(j)){
+    if( ECF1Acc(j) > 1e-8 ) m_C1->Fill( ECF2Acc(j) / pow( ECF1Acc(j), 2.0), weight );
+    if( ECF2Acc(j) > 1e-8 ) {
+      m_C2->Fill( ( ECF3Acc(j) * ECF1Acc(j) ) / pow( ECF2Acc(j), 2.0), weight );
+      m_D2->Fill( ( ECF3Acc(j) * pow( ECF1Acc(j), 3.0 ) ) / pow( ECF2Acc(j), 3.0), weight );
     }
   }
 
