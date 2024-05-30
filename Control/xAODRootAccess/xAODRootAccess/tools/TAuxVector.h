@@ -48,8 +48,6 @@ namespace xAOD {
       /// Copy the managed vector
       virtual std::unique_ptr< SG::IAuxTypeVector > clone() const override;
 
-      /// Return the auxid of the variable this vector represents.
-      virtual SG::auxid_t auxid() const override;
       /// Return a pointer to the start of the vector's data
       virtual void* toPtr() override;
       virtual const void* toPtr() const override;
@@ -86,8 +84,6 @@ namespace xAOD {
       std::unique_ptr<::TVirtualCollectionProxy> m_proxy;
       /// Pointer to the vector object
       void* m_vec;
-      /// ID of the variable we represent.
-      SG::auxid_t m_auxid;
 
    }; // class TAuxVector
 

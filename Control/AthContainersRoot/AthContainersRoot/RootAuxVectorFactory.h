@@ -108,12 +108,6 @@ public:
 
 
   /**
-   * @brief Return the auxid of the variable this vector represents.
-   */
-  SG::auxid_t auxid() const override;
-
-
-  /**
    * @brief Return a pointer to the start of the vector's data.
    */
   virtual void* toPtr() override;
@@ -240,9 +234,6 @@ private:
 
   /// Should be delete the vector object?
   bool m_ownFlag;
-
-  /// The auxid of the variable this vector represents.
-  auxid_t m_auxid;
 };
 
 

@@ -122,12 +122,6 @@ public:
 
 
   /**
-   * @brief Return the auxid of the variable this vector represents.
-   */
-  virtual auxid_t auxid() const override;
-
-
-  /**
    * @brief Return a pointer to the start of the vector's data.
    */
   virtual void* toPtr() override;
@@ -287,10 +281,6 @@ private:
 
   /// True if we need to delete the object.
   bool m_ownFlag;
-
-protected:
-  /// The auxid of the variable this vector represents.
-  auxid_t m_auxid;
 };
 
 

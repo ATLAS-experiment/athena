@@ -36,11 +36,7 @@ namespace xAOD {
 
       /// Constructor
       AuxPersInfo( SG::auxid_t auxid, info_type info ) :
-         m_info( info ), m_auxid( auxid ) {}
-
-      virtual SG::auxid_t auxid() const override {
-         return m_auxid;
-      }
+         IAuxTypeVector( auxid), m_info( info ) {}
 
       virtual std::unique_ptr<SG::IAuxTypeVector> clone() const override {
         return std::make_unique<AuxPersInfo<T> >(*this);
@@ -88,8 +84,6 @@ namespace xAOD {
    private:
       /// Reference to the info being handled
       info_type m_info;
-
-      SG::auxid_t m_auxid;
 
    }; // class AuxPersInfo
 

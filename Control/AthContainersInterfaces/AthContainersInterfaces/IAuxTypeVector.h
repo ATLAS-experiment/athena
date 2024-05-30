@@ -39,6 +39,15 @@ class AuxDataOption;
 class IAuxTypeVector
 {
 public:
+  /**
+   * @brief Constructor.
+   * @param auxid The ID of the variable that this vector represents.
+   */
+  IAuxTypeVector (auxid_t auxid)
+    : m_auxid (auxid)
+  {}
+
+
   /// Destructor.
   virtual ~IAuxTypeVector() = default;
 
@@ -49,12 +58,6 @@ public:
   virtual std::unique_ptr<IAuxTypeVector> clone() const = 0;
 
   
-  /**
-   * @brief Return the auxid of the variable this vector represents.
-   */
-  virtual auxid_t auxid() const = 0;
-
-
   /**
    * @brief Return a pointer to the start of the vector's data.
    */
@@ -190,6 +193,20 @@ public:
    * I/O will use the type found from the variable registry.
    */
   virtual const std::type_info* objType() const { return 0; }
+
+
+  /**
+   * @brief Return the auxid of the variable this vector represents.
+   */
+  auxid_t auxid() const
+  {
+    return m_auxid;
+  }
+
+
+private:
+  /// The auxid of the variable this vector represents.
+  auxid_t m_auxid;
 };
 
 
