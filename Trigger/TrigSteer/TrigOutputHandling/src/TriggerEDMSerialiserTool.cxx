@@ -432,6 +432,7 @@ StatusCode TriggerEDMSerialiserTool::fill( HLT::HLTResultMT& resultToFill, const
   std::vector<uint32_t> buffer;
   buffer.reserve(1000);
 
+  std::unordered_map<uint16_t, std::vector<uint32_t>> deferredInterfaceBuffer;
   for ( const Address& address: m_toSerialise ) {
     // Check if we need to serialise this object for this event
     std::vector<uint16_t> addressActiveModuleIds;
@@ -451,14 +452,23 @@ StatusCode TriggerEDMSerialiserTool::fill( HLT::HLTResultMT& resultToFill, const
       ATH_MSG_DEBUG("Streaming of " << address.persTypeName() << " is skipped");
       continue;
     }
-
+   
     const size_t thisFragmentSize = buffer.size()*sizeof(uint32_t);
     ATH_MSG_DEBUG( "Serialised size of " << address.persTypeName() << " is " << thisFragmentSize << " bytes" );
-
     for (const uint16_t id : addressActiveModuleIds) {
       // If result not yet truncated, try adding the serialised data
       if (resultToFill.getTruncatedModuleIds().count(id)==0) {
-        ATH_CHECK(tryAddData(resultToFill, id, buffer, address.truncationMode));
+        // for truncation allowed collections, save the interface for a deferred addition
+        if (address.truncationMode==Address::Truncation::Allowed &&
+           address.category == Address::Category::xAODInterface){
+            deferredInterfaceBuffer[id]=buffer;
+            continue;
+        } 
+        else {
+          ATH_CHECK(tryAddData(resultToFill, id, buffer, address.truncationMode, deferredInterfaceBuffer));
+          // clean up the deferred interface buffer, if used          
+           deferredInterfaceBuffer.erase(id);
+        }
       }
       // Check for truncation after adding data
       if (resultToFill.getTruncatedModuleIds().count(id)==0) {
@@ -484,7 +494,8 @@ StatusCode TriggerEDMSerialiserTool::fill( HLT::HLTResultMT& resultToFill, const
 StatusCode TriggerEDMSerialiserTool::tryAddData(HLT::HLTResultMT& hltResult,
                                                 const uint16_t id,
                                                 const std::vector<uint32_t>& data,
-                                                Address::Truncation truncationMode) const {
+                                                Address::Truncation truncationMode, 
+                                                const std::unordered_map<uint16_t, std::vector<uint32_t>> & deferredInterfaceBuffer) const {
   if (m_truncationThresholds.value().count(id)==0) {
     ATH_MSG_ERROR("Module ID " << id << " missing from TruncationThresholds map. Cannot determine if result needs truncation");
     return StatusCode::FAILURE;
@@ -513,6 +524,10 @@ StatusCode TriggerEDMSerialiserTool::tryAddData(HLT::HLTResultMT& hltResult,
     hltResult.addTruncatedModuleId(id, severeTruncation);
   }
   else {
+    // for truncation allowed collections, add first the interface, only if the Aux is can be stored
+    if (truncationMode==Address::Truncation::Allowed){
+      hltResult.addSerialisedData(id, deferredInterfaceBuffer.at(id));
+    }
     // The data fits, so add it to the result
     ATH_MSG_DEBUG("Adding data to result with module ID " << id);
     hltResult.addSerialisedData(id, data);
@@ -546,9 +561,11 @@ StatusCode TriggerEDMSerialiserTool::fillDebugInfo(const TruncationInfoMap& trun
       xAOD::TrigComposite::Accessor<std::vector<char>> isRecordedVec("isRecorded");
       std::pair<std::string, size_t> largestRecorded{"None", 0};
       std::pair<std::string, size_t> largestDropped{"None", 0};
+      std::pair<std::string, size_t> firstDropped{"None", 0};
       moduleId(*debugInfoThisModule) = id;
       uint32_t sizeSum = 0;
       bool severeTruncation = false;
+      bool truncated = false;
       for (const TruncationInfo& truncationInfo : truncationInfoVec) {
         // Store typeName and size information
         sizeSum += truncationInfo.size;
@@ -560,6 +577,10 @@ StatusCode TriggerEDMSerialiserTool::fillDebugInfo(const TruncationInfoMap& trun
         }
         if (!truncationInfo.recorded && truncationInfo.size > largestDropped.second) {
           largestDropped = {truncationInfo.addrPtr->persTypeName(), truncationInfo.size};
+        }
+        if (!truncationInfo.recorded && !truncated) {
+          firstDropped = {truncationInfo.addrPtr->persTypeName(), truncationInfo.size};
+          truncated = true;
         }
         // Decide if this was a severe truncation (event goes to debug stream)
         if (!truncationInfo.recorded) {
@@ -573,7 +594,8 @@ StatusCode TriggerEDMSerialiserTool::fillDebugInfo(const TruncationInfoMap& trun
         << m_truncationThresholds.value().at(id)/1024. << " kB, total size: "
         << sizeSum/1024. << " kB, largest recorded collection: " << largestRecorded.first
         << " (" << largestRecorded.second/1024. << " kB), largest dropped collection: "
-        << largestDropped.first << " (" << largestDropped.second/1024. << " kB)."
+        << largestDropped.first << " (" << largestDropped.second/1024. << " kB), "
+        << " first dropped collection: " <<firstDropped.first << " (" << firstDropped.second/1024. << " kB)"
         << endmsg;
       // Give more information on the chains which accepted this event
       using namespace TrigCompositeUtils;
