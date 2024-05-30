@@ -46,16 +46,16 @@ public:
    * @brief return a pointer to the GenParticle corresponding to the
    * current G4Track (if there is one).
    */
-  virtual HepMC::ConstGenParticlePtr GetHepMCParticle() const override {return m_theParticle;}
-  virtual HepMC::GenParticlePtr GetHepMCParticle() override {return m_theParticle;}
+  virtual HepMC::ConstGenParticlePtr GetCurrentGenParticle() const override {return m_currentGenParticle;}
+  virtual HepMC::GenParticlePtr GetCurrentGenParticle() override {return m_currentGenParticle;}
   /**
-   * @brief set m_theParticle, the pointer to the GenParticle
+   * @brief set m_currentGenParticle, the pointer to the GenParticle
    * corresponding to the current G4Track. This will be updated each
    * time an interaction of the G4Track is recorded to the
    * HepMC::GenEvent. Also invalidates previously cached values in
    * m_barcode and m_uniqueID.
    */
-  virtual void SetParticle(HepMC::GenParticlePtr) override;
+  virtual void SetCurrentGenParticle(HepMC::GenParticlePtr) override;
 
   /**
    * @brief return a pointer to the ISFParticle corresponding to the
@@ -100,7 +100,7 @@ public:
   virtual int GetParticleStatus() const override;
 private:
   int m_regenerationNr{0};
-  HepMC::GenParticlePtr m_theParticle{};
+  HepMC::GenParticlePtr m_currentGenParticle{};
   mutable int m_barcode ATLAS_THREAD_SAFE = HepMC::INVALID_PARTICLE_BARCODE; // TODO Drop this once UniqueID and Status are used instead
   mutable int m_uniqueID ATLAS_THREAD_SAFE = HepMC::INVALID_PARTICLE_BARCODE;
   ISF::ISFParticle *m_theBaseISFParticle{};

@@ -29,7 +29,7 @@ namespace ISF {
   bool TruthBinding::isEqual(const TruthBinding& rhs) const {
     bool pass = true;
 
-    const auto rhsTruth = rhs.getTruthParticle();
+    const auto rhsTruth = rhs.getCurrentGenParticle();
     if (m_truthParticle && rhsTruth) {
 #ifdef HEPMC3
       pass &= (m_truthParticle == rhsTruth);
@@ -68,16 +68,16 @@ namespace ISF {
   /** check identity */
   bool TruthBinding::isIdent(const TruthBinding& rhs) const {
     bool pass = true;
-    pass &= m_truthParticle == rhs.getTruthParticle();
+    pass &= m_truthParticle == rhs.getCurrentGenParticle();
     pass &= m_primaryGenParticle == rhs.getPrimaryGenParticle();
     pass &= m_generationZeroGenParticle == rhs.getGenerationZeroGenParticle();
     return pass;
   }
 
   /** pointer to the particle in the simulation truth */
-  HepMC::GenParticlePtr TruthBinding::getTruthParticle() { return m_truthParticle; }
-  HepMC::ConstGenParticlePtr TruthBinding::getTruthParticle() const { return m_truthParticle; }
-  void                TruthBinding::setTruthParticle(HepMC::GenParticlePtr p) { m_truthParticle = p; }
+  HepMC::GenParticlePtr TruthBinding::getCurrentGenParticle() { return m_truthParticle; }
+  HepMC::ConstGenParticlePtr TruthBinding::getCurrentGenParticle() const { return m_truthParticle; }
+  void                TruthBinding::setCurrentGenParticle(HepMC::GenParticlePtr p) { m_truthParticle = p; }
 
   /** pointer to the primary particle in the simulation truth */
   HepMC::GenParticlePtr TruthBinding::getPrimaryGenParticle() { return m_primaryGenParticle; }

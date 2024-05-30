@@ -66,14 +66,14 @@ public:
    * @brief return a pointer to the GenParticle corresponding to the
    * current G4Track (if there is one).
    */
-  virtual HepMC::ConstGenParticlePtr GetHepMCParticle() const {return nullptr;}
-  virtual HepMC::GenParticlePtr GetHepMCParticle() {return nullptr;}
+  virtual HepMC::ConstGenParticlePtr GetCurrentGenParticle() const {return nullptr;}
+  virtual HepMC::GenParticlePtr GetCurrentGenParticle() {return nullptr;}
   /**
    * @brief set the pointer to the GenParticle corresponding to the
    * current G4Track. This will be updated each time an interaction of
    * the G4Track is recorded to the HepMC::GenEvent.
    */
-  virtual void SetParticle(HepMC::GenParticlePtr);
+  virtual void SetCurrentGenParticle(HepMC::GenParticlePtr);
 
   /**
    * @brief return a pointer to the ISFParticle corresponding to the

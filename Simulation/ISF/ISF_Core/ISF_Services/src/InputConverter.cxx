@@ -998,7 +998,7 @@ G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(ISF::ISFParticle& i
     G4Exception("iGeant4::TransportTool", "NoISFTruthBinding", FatalException, description);
     return nullptr; //The G4Exception call above should abort the job, but Coverity does not seem to pick this up.
   }
-  HepMC::GenParticlePtr        genpart = truthBinding->getTruthParticle();
+  HepMC::GenParticlePtr currentGenPart = truthBinding->getCurrentGenParticle();
   HepMC::GenParticlePtr primaryGenpart = truthBinding->getPrimaryGenParticle();
 
   const G4ParticleDefinition *particleDefinition = this->getG4ParticleDefinition(isp.pdgCode());
@@ -1015,11 +1015,11 @@ G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(ISF::ISFParticle& i
   G4double px(0.0);
   G4double py(0.0);
   G4double pz(0.0);
-  if (useHepMC && genpart) {
-    auto &genpartMomentum = genpart->momentum();
-    px = genpartMomentum.x();
-    py = genpartMomentum.y();
-    pz = genpartMomentum.z();
+  if (useHepMC && currentGenPart) {
+    auto &currentGenPartMomentum = currentGenPart->momentum();
+    px = currentGenPartMomentum.x();
+    py = currentGenPartMomentum.y();
+    pz = currentGenPartMomentum.z();
   }
   else {
     auto &ispMomentum = isp.momentum();
@@ -1041,25 +1041,25 @@ G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(ISF::ISFParticle& i
   }
   ppi->SetRegenerationNr(regenerationNr);
 
-  if ( genpart ) {
-    if (genpart->end_vertex()) {
+  if ( currentGenPart ) {
+    if (currentGenPart->end_vertex()) {
       // Old approach particle had an end vertex - predefined decays taken from the main GenEvent
       // No longer supported
       ATH_MSG_ERROR ( "getG4PrimaryParticle(): GenParticle has a valid end GenVertexPtr!" );
-      ATH_MSG_ERROR ( "getG4PrimaryParticle(): genpart: " << genpart << ", barcode: " << HepMC::barcode(genpart) );
-      ATH_MSG_ERROR ( "getG4PrimaryParticle(): genpart->end_vertex(): " << genpart->end_vertex() << ", barcode: " << HepMC::barcode(genpart->end_vertex()) );
+      ATH_MSG_ERROR ( "getG4PrimaryParticle(): currentGenPart: " << currentGenPart << ", barcode: " << HepMC::barcode(currentGenPart) );
+      ATH_MSG_ERROR ( "getG4PrimaryParticle(): currentGenPart->end_vertex(): " << currentGenPart->end_vertex() << ", barcode: " << HepMC::barcode(currentGenPart->end_vertex()) );
       ATH_MSG_FATAL ( "getG4PrimaryParticle(): Passing GenParticles with a valid end GenVertexPtr as input is no longer supported." );
       abort();
     }
-    else if (MC::isDecayed(genpart) // Some assumptions about main GenEvent here
-             && !genpart->end_vertex()) {
+    else if (MC::isDecayed(currentGenPart) // Some assumptions about main GenEvent here
+             && !currentGenPart->end_vertex()) {
       // New approach - predefined decays taken from shadow GenEvent
       // Find the matching particle in the shadowGenEvent
 #ifdef HEPMC3
-      auto A_part = genpart->attribute<HepMC::ShadowParticle>("ShadowParticle");
-      HepMC::ConstGenParticlePtr shadowPart = (A_part) ? A_part->value() : findShadowParticle(genpart, shadowGenEvent);
+      auto A_part = currentGenPart->attribute<HepMC::ShadowParticle>("ShadowParticle");
+      HepMC::ConstGenParticlePtr shadowPart = (A_part) ? A_part->value() : findShadowParticle(currentGenPart, shadowGenEvent);
 #else
-      HepMC::GenParticlePtr shadowPart = findShadowParticle(genpart, shadowGenEvent);
+      HepMC::GenParticlePtr shadowPart = findShadowParticle(currentGenPart, shadowGenEvent);
 #endif
       if (!shadowPart) {
         ATH_MSG_FATAL ("Found a GenParticle with no matching GenParticle in the shadowGenEvent - something is wrong here!");
@@ -1088,18 +1088,18 @@ G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(ISF::ISFParticle& i
       py=g4py;
       pz=g4pz;
     } else {
-      //Take mass from g4particle, put keep momentum as in genpart
-      px=genpart->momentum().px();
-      py=genpart->momentum().py();
-      pz=genpart->momentum().pz();
+      //Take mass from g4particle, put keep momentum as in currentGenPart
+      px=currentGenPart->momentum().px();
+      py=currentGenPart->momentum().py();
+      pz=currentGenPart->momentum().pz();
       //Now a dirty hack to keep backward compatibility in the truth:
-      //When running AtlasG4 or FullG4 between 21.0.41 and 21.0.111, the genpart 3-momentum and mass was reset to the values from the g4particle
+      //When running AtlasG4 or FullG4 between 21.0.41 and 21.0.111, the currentGenPart 3-momentum and mass was reset to the values from the g4particle
       //together with the mass of the g4particle after the 1st initialization of the g4particle from the genevent. This is done for a consistent mass
       //value in the truth record compared to the used g4 mass. Since g4particles don't store the 3-momentum directly, but rather a
       //unit direction vector, the mass and the kinetic energy, this reduces the numeric accuracy.
       //For backward compatibility, if all 3-momentum components agree to the g4particle momentum within 1 keV, we keep
       //this old method. This comparison is needed, since in ISF this code could be rerun after the ID or CALO simulation, where
-      //real energy was lost in previous detectors and hence genpart should NOT be changed to some g4particle values!
+      //real energy was lost in previous detectors and hence currentGenPart should NOT be changed to some g4particle values!
       //TODO: find a way to implement this in a backward compatible way in ISF::InputConverter::convertParticle(HepMC::GenParticlePtr genPartPtr)
       if (std::abs(px-g4px)<CLHEP::keV && std::abs(py-g4py)<CLHEP::keV && std::abs(pz-g4pz)<CLHEP::keV) {
         px=g4px;
@@ -1110,23 +1110,23 @@ G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(ISF::ISFParticle& i
     const double mag2=px*px + py*py + pz*pz;
     const double pe = std::sqrt(mag2 + pmass*pmass);  // this does only change for boosts, etc.
 
-    double originalEnergy=genpart->momentum().e();
+    double originalEnergy=currentGenPart->momentum().e();
     if (originalEnergy>0.01) { //only test for >1 MeV in momentum
       if ((originalEnergy-pe)/originalEnergy>0.01) {
-        double genpx=genpart->momentum().px();
-        double genpy=genpart->momentum().py();
-        double genpz=genpart->momentum().pz();
+        double genpx=currentGenPart->momentum().px();
+        double genpy=currentGenPart->momentum().py();
+        double genpz=currentGenPart->momentum().pz();
         double genp=sqrt(genpx*genpx + genpy*genpy + genpz*genpz);
-        ATH_MSG_WARNING("Truth change in energy for: " << genpart<<" Morg="<<genpart->momentum().m()<<" Mmod="<<pmass<<" Eorg="<<originalEnergy<<" Emod="<<pe<<" porg="<<genp<<" pmod="<<gpv.mag());
+        ATH_MSG_WARNING("Truth change in energy for: " << currentGenPart<<" Morg="<<currentGenPart->momentum().m()<<" Mmod="<<pmass<<" Eorg="<<originalEnergy<<" Emod="<<pe<<" porg="<<genp<<" pmod="<<gpv.mag());
       }
     }
 
 #ifdef HEPMC3
-    auto& genpart_nc = genpart;
+    auto& currentGenPart_nc = currentGenPart;
 #else
-    auto* genpart_nc = genpart;
+    auto* currentGenPart_nc = currentGenPart;
 #endif
-    genpart_nc->set_momentum(HepMC::FourVector(px,py,pz,pe));
+    currentGenPart_nc->set_momentum(HepMC::FourVector(px,py,pz,pe));
   } // Truth was detected
 
   ATH_MSG_VERBOSE("PrimaryParticleInformation:");

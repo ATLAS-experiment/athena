@@ -98,17 +98,17 @@ void iGeant4::ISFTrajectory::AppendStep(const G4Step* aStep)
     AtlasDetDescr::AtlasRegion geoID = baseIsp->nextGeoID();
 
     auto* atlasG4EvtUserInfo = ISFG4Helper::getAtlasG4EventUserInfo();
-    if (atlasG4EvtUserInfo->GetCurrentlyTraced() &&
-        atlasG4EvtUserInfo->GetCurrentlyTraced()->end_vertex()) {
-      HepMC::GenParticlePtr currentlyTracedGenParticle = atlasG4EvtUserInfo->GetCurrentlyTraced();
+    if (atlasG4EvtUserInfo->GetCurrentGenParticle() &&
+        atlasG4EvtUserInfo->GetCurrentGenParticle()->end_vertex()) {
+      HepMC::GenParticlePtr currentGenParticle = atlasG4EvtUserInfo->GetCurrentGenParticle();
       G4ExceptionDescription description;
       description << G4String("AppendStep: ") + "Currently Traced Particle has an end vertex!\n";
       description <<  "G4Track Properties: trackID = " << track->GetTrackID()<< ", Step Number = "<<track->GetCurrentStepNumber() << ", parentID = " << track->GetParentID() << ", TrackStatus = " <<  track->GetTrackStatus() << "\n";
       description << "G4Step Properties: number of secondaries in the current step: " << aStep->GetSecondaryInCurrentStep()->size() << "\n";
-      description << "currentlyTracedGenParticle : " << currentlyTracedGenParticle << ", barcode: " << HepMC::barcode(currentlyTracedGenParticle) << "\n";
-      description << "currentlyTracedGenParticle->end_vertex(): " << currentlyTracedGenParticle->end_vertex() << ", barcode: " << HepMC::barcode(currentlyTracedGenParticle->end_vertex()) << "\n";
+      description << "currentGenParticle : " << currentGenParticle << ", barcode: " << HepMC::barcode(currentGenParticle) << "\n";
+      description << "currentGenParticle->end_vertex(): " << currentGenParticle->end_vertex() << ", barcode: " << HepMC::barcode(currentGenParticle->end_vertex()) << "\n";
       description << "ISFParticle (from TrackInformation): " << *baseIsp;
-      HepMC::GenParticlePtr currentTrackInfoGenParticle = trackInfo->GetHepMCParticle();
+      HepMC::GenParticlePtr currentTrackInfoGenParticle = trackInfo->GetCurrentGenParticle();
       if (currentTrackInfoGenParticle) {
         description << "currentTrackInfoGenParticle : " << currentTrackInfoGenParticle << ", barcode: " << HepMC::barcode(currentTrackInfoGenParticle) << "\n";
         if (currentTrackInfoGenParticle->end_vertex()) {
@@ -134,8 +134,8 @@ void iGeant4::ISFTrajectory::AppendStep(const G4Step* aStep)
         // make sure that the TruthBinding of the ISFParticle points to the newest
         // HepMC::GenParticle instance in case it got updated by the
         // ITruthSvc::registerTruthIncident call above
-        auto currentGenPart = atlasG4EvtUserInfo->GetCurrentlyTraced();
-        baseIsp->getTruthBinding()->setTruthParticle( currentGenPart );
+        auto currentGenPart = atlasG4EvtUserInfo->GetCurrentGenParticle();
+        baseIsp->getTruthBinding()->setCurrentGenParticle( currentGenPart );
         int newBarcode = HepMC::barcode(currentGenPart); // FIXME barcode-based
         baseIsp->setBarcode( newBarcode ); // FIXME barcode-based
         baseIsp->setStatus( currentGenPart->status() );

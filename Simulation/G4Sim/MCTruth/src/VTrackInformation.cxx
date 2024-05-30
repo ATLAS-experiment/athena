@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MCTruth/VTrackInformation.h"
 
-VTrackInformation::VTrackInformation(TrackClassification tc):m_classify(tc)
+VTrackInformation::VTrackInformation(TrackClassification tc)
+  : m_classify(tc)
 {
 }
 
@@ -18,18 +19,16 @@ bool VTrackInformation::GetReturnedToISF() const
   return false;
 }
 
-void VTrackInformation::SetParticle(HepMC::GenParticlePtr /*p*/)
+void VTrackInformation::SetCurrentGenParticle(HepMC::GenParticlePtr /*p*/)
 {
   // you should not call this, perhaps throw an exception?
-  std::cerr<<"ERROR  VTrackInformation::SetParticle() not supported  "<<std::endl;
- 
+  std::cerr<<"ERROR  VTrackInformation::SetCurrentGenParticle() not supported  "<<std::endl;
 }
 
 void VTrackInformation::SetBaseISFParticle(ISF::ISFParticle* /*p*/)
 {
   // you should not call this, perhaps throw an exception?
   std::cerr<<"ERROR  VTrackInformation::SetBaseISFParticle() not supported  "<<std::endl;
- 
 }
 
 void VTrackInformation::SetReturnedToISF(bool)
