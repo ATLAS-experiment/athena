@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CxxUtils/ones.h
@@ -22,7 +22,7 @@ namespace CxxUtils {
  */
 template <class T>
 inline
-T ones (unsigned int n)
+constexpr T ones (unsigned int n)
 {
   if (n >= sizeof(T) * 8)
     return ~static_cast<T>(0);

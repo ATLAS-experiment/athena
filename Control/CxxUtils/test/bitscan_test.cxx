@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -42,11 +42,47 @@ int check(const std::vector<T>& v)
     std::cout << std::bitset<sizeof(T)*8>(t) << " "
               << lz1 << "=" << lz2 << " "
               << tz1 << "=" << tz2 << " "
-              << nz1 << "=" << nz2
+              << nz1 << "=" << nz2 << " "
+              << maxSetBit(t)
               << (ok ? "" : " ERROR")
               << std::endl;
   }
   return error;
+}
+
+
+// For checking optimization.
+[[maybe_unused]] unsigned check_count_trailing_zeros1()
+{
+  return count_trailing_zeros (0x0baa3f00u);
+}
+[[maybe_unused]] unsigned check_count_leading_zeros1()
+{
+  return count_leading_zeros (0x0baa3f00u);
+}
+[[maybe_unused]] unsigned check_count_ones1()
+{
+  return count_ones (0x0baa3f00u);
+}
+[[maybe_unused]] unsigned check_maxSetBit()
+{
+  return maxSetBit (0x0baa3f00u);
+}
+[[maybe_unused]] unsigned check_count_trailing_zeros(unsigned x)
+{
+  return count_trailing_zeros (x);
+}
+[[maybe_unused]] unsigned check_count_leading_zeros(unsigned x)
+{
+  return count_leading_zeros (x);
+}
+[[maybe_unused]] unsigned check_count_ones(unsigned x)
+{
+  return count_ones (x);
+}
+[[maybe_unused]] unsigned check_maxSetBit(unsigned x)
+{
+  return maxSetBit (x);
 }
 
 
