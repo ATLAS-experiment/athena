@@ -1,8 +1,9 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetMonitoring/JetKinematicHistos.h"
+#include "AthContainers/ConstAccessor.h"
 #include "TProfile2D.h"
 #include "TString.h"
 #include <map>
@@ -110,8 +111,9 @@ int JetKinematicHistos::fillHistosFromContainer(const xAOD::JetContainer & cont,
 
     float JVT_cut = 0.50;
 
+    static const SG::ConstAccessor<float> JvtAcc("Jvt");
     if(!cont.empty()){
-      if(cont[0]->isAvailable<float>("Jvt")){
+      if(JvtAcc.isAvailable(*cont[0])){
 	xAOD::JetInput::Type inputtype = cont[0]->getInputType();
 	if(inputtype == xAOD::JetInput::EMTopoOrigin || inputtype == xAOD::JetInput::LCTopoOrigin)
 	  JVT_cut = 0.59;
@@ -119,8 +121,8 @@ int JetKinematicHistos::fillHistosFromContainer(const xAOD::JetContainer & cont,
     }
 
     for(const auto *jet : cont){
-      if(jet->isAvailable<float>("Jvt")){
-        if(jet->getAttribute<float>("Jvt") > JVT_cut) counter_passJVT++;
+      if(JvtAcc.isAvailable(*jet)) {
+        if(JvtAcc(*jet) > JVT_cut) counter_passJVT++;
         else counter_failJVT++;
       }
     }
@@ -136,7 +138,8 @@ int JetKinematicHistos::fillHistosFromContainer(const xAOD::JetContainer & cont,
 
 int JetKinematicHistos::fillHistosFromJet(const xAOD::Jet &j, float weight){
 
-  if(m_jetScale != "JetAssignedScaleMomentum" && !j.isAvailable<float>(m_jetScale+"_pt")){
+  SG::ConstAccessor<float> momAcc(m_jetScale+"_pt");
+  if(m_jetScale != "JetAssignedScaleMomentum" && !momAcc.isAvailable(j)){
     if(m_doNConstit) m_nConstit->Fill( j.numConstituents(), weight );
     return 0;
   }
