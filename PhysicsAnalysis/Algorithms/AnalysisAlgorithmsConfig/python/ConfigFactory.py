@@ -338,6 +338,10 @@ class ConfigFactory():
         self.addAlgConfigBlock(algName='SelectionDecoration',
                                alg=SelectionDecorationBlock)
 
+        # di-tau mass calculator
+        from TauAnalysisAlgorithms.DiTauMassConfig import DiTauMassBlock
+        self.addAlgConfigBlock(algName="DiTauMMC", alg=DiTauMassBlock)
+
         # output
         from AsgAnalysisAlgorithms.OutputAnalysisConfig import OutputAnalysisConfig
         self.addAlgConfigBlock(algName="Output", alg=OutputAnalysisConfig,

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 # @author Nils Krumnack
 
@@ -9,7 +9,7 @@ atlas_subdir( TauAnalysisAlgorithms )
 atlas_add_library( TauAnalysisAlgorithmsLib
    TauAnalysisAlgorithms/*.h TauAnalysisAlgorithms/*.icc Root/*.cxx
    PUBLIC_HEADERS TauAnalysisAlgorithms
-   LINK_LIBRARIES xAODTau SelectionHelpersLib
+   LINK_LIBRARIES xAODTau SelectionHelpersLib DiTauMassToolsLib
    SystematicsHandlesLib
    AnaAlgorithmLib TauAnalysisToolsLib )
 

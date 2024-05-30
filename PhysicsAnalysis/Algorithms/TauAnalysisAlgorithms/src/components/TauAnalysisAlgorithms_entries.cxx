@@ -5,6 +5,7 @@
 #include <TauAnalysisAlgorithms/TauSmearingAlg.h>
 #include <TauAnalysisAlgorithms/TauTruthMatchingAlg.h>
 #include <TauAnalysisAlgorithms/TauTruthDecorationsAlg.h>
+#include <TauAnalysisAlgorithms/DiTauMassCalculatorAlg.h>
 
 DECLARE_COMPONENT (CP::DiTauEfficiencyCorrectionsAlg)
 DECLARE_COMPONENT (CP::DiTauSmearingAlg)
@@ -13,3 +14,4 @@ DECLARE_COMPONENT (CP::TauEfficiencyCorrectionsAlg)
 DECLARE_COMPONENT (CP::TauSmearingAlg)
 DECLARE_COMPONENT (CP::TauTruthMatchingAlg)
 DECLARE_COMPONENT (CP::TauTruthDecorationsAlg)
+DECLARE_COMPONENT (CP::DiTauMassCalculatorAlg)

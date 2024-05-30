@@ -80,9 +80,11 @@
 #include <SelectionHelpers/SelectionNameSvc.h>
 #include <SystematicsHandles/SystematicsSvc.h>
 #include <TauAnalysisAlgorithms/TauSmearingAlg.h>
+#include <TauAnalysisAlgorithms/DiTauMassCalculatorAlg.h>
 #include <TauAnalysisTools/CommonSmearingTool.h>
 #include <TauAnalysisTools/TauSelectionTool.h>
 #include <TauAnalysisTools/TauSmearingTool.h>
+#include <DiTauMassTools/MissingMassToolV2.h>
 #include <TrackingAnalysisAlgorithms/VertexSelectionAlg.h>
 #include <TrigConfxAOD/xAODConfigTool.h>
 #include <TrigGlobalEfficiencyCorrection/TrigGlobalEfficiencyCorrectionTool.h>
@@ -148,6 +150,7 @@ namespace CP
     ANA_CHECK (asg::registerAlgorithmFactory<CP::SaveFilterAlg>("CP::SaveFilterAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::SystObjectLinkerAlg>("CP::SystObjectLinkerAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::TauSmearingAlg>("CP::TauSmearingAlg"));
+    ANA_CHECK (asg::registerAlgorithmFactory<CP::DiTauMassCalculatorAlg>("CP::DiTauMassCalculatorAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::TransverseMassSelectorAlg>("CP::TransverseMassSelectorAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::TreeFillerAlg>("CP::TreeFillerAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::TreeMakerAlg>("CP::TreeMakerAlg"));
@@ -185,6 +188,7 @@ namespace CP
     ANA_CHECK (asg::registerToolFactory<TauAnalysisTools::CommonSmearingTool> ("TauAnalysisTools::CommonSmearingTool"));
     ANA_CHECK (asg::registerToolFactory<TauAnalysisTools::TauSelectionTool> ("TauAnalysisTools::TauSelectionTool"));
     ANA_CHECK (asg::registerToolFactory<TauAnalysisTools::TauSmearingTool> ("TauAnalysisTools::TauSmearingTool"));
+    ANA_CHECK (asg::registerToolFactory<DiTauMassTools::MissingMassToolV2> ("DiTauMassTools::MissingMassToolV2"));
     ANA_CHECK (asg::registerToolFactory<Trig::DRScoringTool> ("Trig::DRScoringTool"));
     ANA_CHECK (asg::registerToolFactory<Trig::MatchFromCompositeTool> ("Trig::MatchFromCompositeTool"));
     ANA_CHECK (asg::registerToolFactory<Trig::TrigDecisionTool> ("Trig::TrigDecisionTool"));
