@@ -34,8 +34,9 @@ BOOST_AUTO_TEST_CASE(MutableCompilesWithInterface) {
 }
 
 struct EmptyBackend {
-  EmptyBackend() {
-    m = std::make_unique<ActsTrk::MutableTrackSummaryContainer>();
+  EmptyBackend()
+    : m (std::make_unique<ActsTrk::MutableTrackSummaryContainer>())
+  {
   }
   std::unique_ptr<ActsTrk::MutableTrackSummaryContainer> m;
 };

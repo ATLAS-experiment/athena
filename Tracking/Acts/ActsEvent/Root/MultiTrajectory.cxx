@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include "ActsEvent/MultiTrajectory.h"
 #include "ActsEvent/SurfaceEncoding.h"
@@ -23,19 +23,16 @@ const T* to_const_ptr(const std::unique_ptr<T>& ptr) {
   return ptr.get();
 }
 
-ActsTrk::MutableMultiTrajectory::MutableMultiTrajectory() {
+ActsTrk::MutableMultiTrajectory::MutableMultiTrajectory()
+  : m_trackStatesAux (std::make_unique<xAOD::TrackStateAuxContainer>()),
+    m_trackParametersAux (std::make_unique<xAOD::TrackParametersAuxContainer>()),
+    m_trackJacobiansAux (std::make_unique<xAOD::TrackJacobianAuxContainer>()),
+    m_trackMeasurementsAux (std::make_unique<xAOD::TrackMeasurementAuxContainer>()),
+    m_surfacesBackend (std::make_unique<xAOD::TrackSurfaceContainer>()),
+    m_surfacesBackendAux (std::make_unique<xAOD::TrackSurfaceAuxContainer>())
+{
   INSPECTCALL("c-tor " << this)
 
-  m_trackStatesAux = std::make_unique<xAOD::TrackStateAuxContainer>();
-
-  m_trackParametersAux = std::make_unique<xAOD::TrackParametersAuxContainer>();
-
-  m_trackJacobiansAux = std::make_unique<xAOD::TrackJacobianAuxContainer>();
-
-  m_trackMeasurementsAux = std::make_unique<xAOD::TrackMeasurementAuxContainer>();
-
-  m_surfacesBackend = std::make_unique<xAOD::TrackSurfaceContainer>();
-  m_surfacesBackendAux = std::make_unique<xAOD::TrackSurfaceAuxContainer>();
   m_surfacesBackend->setStore(m_surfacesBackendAux.get());
 
 }
