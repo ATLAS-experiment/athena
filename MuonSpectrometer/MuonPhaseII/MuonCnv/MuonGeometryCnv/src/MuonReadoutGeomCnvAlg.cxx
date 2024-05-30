@@ -445,7 +445,7 @@ StatusCode  MuonReadoutGeomCnvAlg::buildSTGC(const ActsGeometryContext& gctx,
         if (alignStore && alignStore->getBLine(reId)) {
             newRE->setBLinePar(*alignStore->getBLine(reId));
         }
-        for (unsigned int layer = 1; layer < copyMe->numLayers(); ++layer) {
+        for (unsigned int layer = 1; layer <= copyMe->numLayers(); ++layer) {
             using channelType = MuonGMR4::sTgcReadoutElement::ReadoutChannelType;
             using ChannelDesign =  MuonGM::MuonChannelDesign;
             const IdentifierHash layerHash = MuonGMR4::sTgcReadoutElement::createHash(layer,channelType::Strip,0);
@@ -496,6 +496,12 @@ StatusCode  MuonReadoutGeomCnvAlg::buildSTGC(const ActsGeometryContext& gctx,
               phiDesign.nGroups = copyPhiDesign.numStrips();                           // Number of Wire Groups
               phiDesign.wireCutout = copyPhiDesign.wireCutout();                       // Size of "active" wire region for digits
               phiDesign.nch = copyPhiDesign.nAllWires();
+
+              const MuonGMR4::PadDesign& copyPadDesign{copyMe->padDesign(layerHash)};
+              MuonGM::MuonPadDesign& padDesign{newRE->m_padDesign[layer-1]};
+              padDesign.sPadWidth = 2.*copyPadDesign.shortHalfHeight();
+              padDesign.lPadWidth = 2.*copyPadDesign.longHalfHeight();
+              padDesign.Size =  2.*copyPadDesign.halfWidth();
         }     
         newRE->fillCache();
         mgr->addsTgcReadoutElement(std::move(newRE));
