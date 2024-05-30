@@ -1,8 +1,9 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "EFTrackingSmearMonAlg.h"
+#include "AthContainers/ConstAccessor.h"
 
 
 EFTrackingSmearMonAlg::EFTrackingSmearMonAlg( const std::string& name, ISvcLocator* pSvcLocator ) 
@@ -92,16 +93,20 @@ StatusCode EFTrackingSmearMonAlg::execute() {
         return StatusCode::FAILURE;
     }
 
+    static const SG::ConstAccessor<float> ptAcc("pt");
+    static const SG::ConstAccessor<float> d0Acc("d0");
+    static const SG::ConstAccessor<float> z0Acc("z0");
+
     ATH_MSG_DEBUG ("Found "<<inputTruth->size()<< " input truth particles");
     for ( const auto* part : *inputTruth ) 
     {          
-      if (part->pt() == 0.) continue;   
+      if (part->pt() == 0.) continue;
       ATH_MSG_DEBUG ("===> Truth : "       
                       <<" curv=" << 1./part->pt()
                       <<" phi="  << part->phi()
                       <<" eta="  << part->eta()
-                      <<" d0="   << part->auxdata<float>("d0")
-                      <<" z0="   << part->auxdata<float>("z0")
+                      <<" d0="   << d0Acc(*part)
+                      <<" z0="   << z0Acc(*part)
                       <<" pT="   << part->pt()
                       <<" PDGID=" << part->pdgId()
                       <<" status=" << part->status()                                        
@@ -123,12 +128,12 @@ StatusCode EFTrackingSmearMonAlg::execute() {
     {          
       if (part->pt() == 0.) continue;   
       ATH_MSG_DEBUG ("===> Truth : "       
-                      <<" curv=" << 1./part->auxdata<float>("pt")
+                      <<" curv=" << 1./ptAcc(*part)
                       <<" phi="  << part->phi()
                       <<" eta="  << part->eta()
-                      <<" d0="   << part->auxdata<float>("d0")
-                      <<" z0="   << part->auxdata<float>("z0")
-                      <<" pT="   << part->auxdata<float>("pt")
+                      <<" d0="   << d0Acc(*part)
+                      <<" z0="   << z0Acc(*part)
+                      <<" pT="   << ptAcc(*part)
                       <<" PDGID=" << part->pdgId()
                       <<" status=" << part->status()                                        
                       ); 
