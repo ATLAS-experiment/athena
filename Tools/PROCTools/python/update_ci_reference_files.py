@@ -22,9 +22,10 @@ import subprocess
 import re
 import argparse
 try:
-    import requests 
+    import gitlab
+    import requests
 except ImportError:
-    print('FATAL: this script needs the requests module. Either install it yourself, or run "lsetup gitlab"')
+    print('FATAL: this script needs the gitlab and requests modules. Either install them yourself, or run "lsetup gitlab"')
 
 class CITest:
     def __init__(self, name, tag, mr, date, existing_ref, existing_version, new_version, new_version_directory, copied_file_path, digest_old, digest_new, type):
@@ -408,13 +409,18 @@ if __name__ == '__main__':
     if not mr_url:
         sys.exit(1)
     print('========================')
+
+    # Retrieve MR infos:
+    gl_project = gitlab.Gitlab("https://gitlab.cern.ch").projects.get("atlas/athena")
+    mr = gl_project.mergerequests.get(mr_url.split('/')[-1])
+    author = mr.author['username']
+    remote = f'https://:@gitlab.cern.ch:8443/{author}/athena.git'
+    local_branch = f'mr-{mr.iid}'
+
     print("The next step is to update the MR with the new content i.e. the References.py file and the digest files.")
-    print(" IMPORTANT: before you do this, you must first make sure that the local repository is on same branch as the MR!")
-    print("i.e. you would go to the MR: "+mr_url)
-    print(" and then copy the branch name and do:")
-    print(" $ git remote add <MR_AUTHOR> <URL_TO_FORK>") # TODO - automate this?
-    print(" $ git fetch <MR_AUTHOR>")
-    print(" $ git switch -c <MR_BRANCH> <MR_AUTHOR>/<MR_BRANCH>")
+    print(" IMPORTANT: before you do this, you must first make sure that the local repository is on same branch as the MR by doing:")
+    print(f" $ git fetch --no-tags {remote} {mr.source_branch}:{local_branch}")
+    print(f" $ git switch {local_branch}")
     print(" $ git rebase upstream/main") # In case there have been any changes since the MR was created
     print()
 
@@ -430,9 +436,13 @@ if __name__ == '__main__':
     commands = update_reference_files(not args.test_run, update_local_files)
     
     if commands and args.test_run:
-        print('')
+        print()
         print(' -> In test-run mode. In normal mode we would also have executed:')
         for command in commands:
             print('    ', command)
     if not args.test_run:
-        print("Finished! Before pushing, you might want to manually trigger an EOS to cvmfs copy here: https://atlas-jenkins.cern.ch/view/Install%20(Boeriu)/job/ART_data_eos2cvmfs/")
+        print()
+        print("Finished! Before pushing, you might want to manually trigger an EOS to cvmfs copy here: https://atlas-jenkins.cern.ch/view/all/job/ART_data_eos2cvmfs/")
+        print("Then commit your changes and (force) push the updated branch to the author's remote:")
+        print(" $ git commit")
+        print(f" $ git push [-f] {remote} {local_branch}:{mr.source_branch}")
