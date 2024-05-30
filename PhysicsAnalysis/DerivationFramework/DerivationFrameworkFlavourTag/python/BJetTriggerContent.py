@@ -17,6 +17,8 @@ BJetTriggerContent = [
     "HLT_xAOD__JetContainer_SplitJetAux.",
     "HLT_xAOD__JetContainer_a4tcemsubjesFS",
     "HLT_xAOD__JetContainer_a4tcemsubjesFSAux.",
+    "HLT_xAOD__JetContainer_a4tcemsubjesISFS",
+    "HLT_xAOD__JetContainer_a4tcemsubjesISFSAux.",
     "HLT_xAOD__VertexContainer_EFHistoPrmVtx",
     "HLT_xAOD__VertexContainer_EFHistoPrmVtxAux.",
     "HLT_xAOD__VertexContainer_xPrimVx",
