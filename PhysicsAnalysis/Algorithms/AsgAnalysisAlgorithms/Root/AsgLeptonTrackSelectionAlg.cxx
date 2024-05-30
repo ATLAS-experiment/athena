@@ -48,6 +48,28 @@ namespace CP
     if (m_nMinSCTHits != -1 || m_nMaxSCTHits != -1)
       m_accept.addCut ("numSCTHits", "Minimum and/or maxiumum SCT hits");
 
+    if(m_decorateTTVAVars){
+      if (m_d0sigDecoration.empty()){
+        ANA_MSG_ERROR ("No d0significance decoration name set");
+        return StatusCode::FAILURE;
+      } else {
+        m_d0sigDecorator = std::make_unique<SG::AuxElement::Decorator<float> > (m_d0sigDecoration);
+      }
+      if (m_z0sinthetaDecoration.empty()){
+        ANA_MSG_ERROR ("No z0sintheta decoration name set");
+        return StatusCode::FAILURE;
+      } else {
+        m_z0sinthetaDecorator = std::make_unique<SG::AuxElement::Decorator<float> > (m_z0sinthetaDecoration);
+      }
+    } else{
+      if (!m_d0sigDecoration.empty()){
+        ANA_MSG_WARNING ("d0significance decoration name set, please set decorateTTVVars to True if you want this to be written out");
+      }
+      if (!m_z0sinthetaDecoration.empty()){
+        ANA_MSG_WARNING ("z0sintheta decoration name set, please set decorateTTVVars to True if you want this to be written out");
+      }
+    }
+
     ANA_CHECK (m_particlesHandle.initialize (m_systematicsList));
     ANA_CHECK (m_preselection.initialize (m_systematicsList, m_particlesHandle, SG::AllowEmpty));
     ANA_CHECK (m_selectionHandle.initialize (m_systematicsList, m_particlesHandle));
@@ -72,28 +94,25 @@ namespace CP
   execute ()
   {
     SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey);
-
+    SG::ReadHandle<xAOD::VertexContainer> vertices(m_primaryVerticesKey);
     const xAOD::Vertex *primaryVertex {nullptr};
-    if (m_maxDeltaZ0SinTheta > 0)
+
+    for (const xAOD::Vertex *vertex : *vertices)
     {
-      SG::ReadHandle<xAOD::VertexContainer> vertices(m_primaryVerticesKey);
-      for (const xAOD::Vertex *vertex : *vertices)
+      if (vertex->vertexType() == xAOD::VxType::PriVtx)
       {
-        if (vertex->vertexType() == xAOD::VxType::PriVtx)
+        // The default "PrimaryVertex" container is ordered in
+        // sum-pt, and the tracking group recommends to pick the one
+        // with the maximum sum-pt, so this will do the right thing.
+        // If the user needs a different primary vertex, they need to
+        // provide a reordered primary vertex container and point
+        // this algorithm to it.  Currently there is no central
+        // algorithm to do that, so users will have to write their
+        // own (15 Aug 18).
+        if (primaryVertex == nullptr)
         {
-          // The default "PrimaryVertex" container is ordered in
-          // sum-pt, and the tracking group recommends to pick the one
-          // with the maximum sum-pt, so this will do the right thing.
-          // If the user needs a different primary vertex, he needs to
-          // provide a reordered primary vertex container and point
-          // this algorithm to it.  Currently there is no central
-          // algorithm to do that, so users will have to write their
-          // own (15 Aug 18).
-          if (primaryVertex == nullptr)
-          {
-            primaryVertex = vertex;
-            break;
-          }
+          primaryVertex = vertex;
+          break;
         }
       }
     }
@@ -105,44 +124,38 @@ namespace CP
       for (const xAOD::IParticle *particle : *particles)
       {
         asg::AcceptData acceptData (&m_accept);
+        float d0sig = -999;
+        float deltaZ0SinTheta = -999;
 
         if (m_preselection.getBool (*particle, sys))
         {
           std::size_t cutIndex {0};
-
+          
           const xAOD::TrackParticle *track {nullptr};
-          if (const xAOD::Muon *muon = dynamic_cast<const xAOD::Muon *>(particle))
+          if (const xAOD::Muon *muon = dynamic_cast<const xAOD::Muon *>(particle)){
             track = muon->primaryTrackParticle();
-          else if (const xAOD::Electron *electron = dynamic_cast<const xAOD::Electron *>(particle))
+          } else if (const xAOD::Electron *electron = dynamic_cast<const xAOD::Electron *>(particle)){
             track = electron->trackParticle();
-          else
-          {
+          } else {
             ANA_MSG_ERROR ("failed to cast input to electron or muon");
             return StatusCode::FAILURE;
           }
 
           acceptData.setCutResult (cutIndex ++, track != nullptr);
-          if (track != nullptr)
-          {
-            if (m_maxD0Significance > 0)
-            {
-              try
-              {
-                const float d0sig = xAOD::TrackingHelpers::d0significance
-                  (track, eventInfo->beamPosSigmaX(), eventInfo->beamPosSigmaY(),
-                   eventInfo->beamPosSigmaXY());
-                acceptData.setCutResult (cutIndex ++, fabs( d0sig ) < m_maxD0Significance);
-              } catch (const std::runtime_error &) {
-                acceptData.setCutResult (cutIndex ++, false);
-              }
+          
+          if (track != nullptr) {
+            try {
+              d0sig = xAOD::TrackingHelpers::d0significance(track, eventInfo->beamPosSigmaX(), eventInfo->beamPosSigmaY(), eventInfo->beamPosSigmaXY());
+              if (m_maxD0Significance > 0) acceptData.setCutResult (cutIndex ++, fabs( d0sig ) < m_maxD0Significance);
+            
+            } catch (const std::runtime_error &) {
+              acceptData.setCutResult (cutIndex ++, false);
             }
-            if (m_maxDeltaZ0SinTheta > 0)
-            {
-              const double vertex_z = primaryVertex ? primaryVertex->z() : 0;
-              const float deltaZ0SinTheta
-                = (track->z0() + track->vz() - vertex_z) * sin (particle->p4().Theta());
-              acceptData.setCutResult (cutIndex ++, fabs (deltaZ0SinTheta) < m_maxDeltaZ0SinTheta);
-            }
+            
+            const double vertex_z = primaryVertex ? primaryVertex->z() : 0;
+            deltaZ0SinTheta = (track->z0() + track->vz() - vertex_z) * sin (particle->p4().Theta());
+            if (m_maxDeltaZ0SinTheta > 0) acceptData.setCutResult (cutIndex ++, fabs (deltaZ0SinTheta) < m_maxDeltaZ0SinTheta);
+
             if (m_nMinPixelHits != -1 || m_nMaxPixelHits != -1) {
               uint8_t nPixelHits;
               track->summaryValue(nPixelHits, xAOD::numberOfPixelHits);
@@ -169,9 +182,11 @@ namespace CP
             }
           }
         }
-
-        m_selectionHandle.setBits
-          (*particle, selectionFromAccept (acceptData), sys);
+        if(m_decorateTTVAVars){
+          (*m_z0sinthetaDecorator)(*particle) = deltaZ0SinTheta;
+          (*m_d0sigDecorator)(*particle) = d0sig;
+        }
+        m_selectionHandle.setBits(*particle, selectionFromAccept (acceptData), sys);
       }
     }
 

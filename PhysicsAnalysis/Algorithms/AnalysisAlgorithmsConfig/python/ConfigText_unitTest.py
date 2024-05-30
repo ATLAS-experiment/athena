@@ -99,6 +99,7 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     config.setOptions (likelihoodWP='LooseBLayerLH')
     config.setOptions (isolationWP='Loose_VarRad')
     config.setOptions (recomputeLikelihood=False)
+    config.setOptions (writeTrackD0Z0=True)
     # Electrons.PtEtaSelection
     config.addBlock ('Electrons.PtEtaSelection')
     config.setOptions (containerName='AnaElectrons')
@@ -133,6 +134,7 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     config.setOptions (quality='Medium')
     config.setOptions (isolation='Loose_VarRad')
     config.setOptions (onlyRecoEffSF=True)
+    config.setOptions (writeTrackD0Z0=True)
     # Muons.PtEtaSelection
     config.addBlock ('Muons.PtEtaSelection')
     config.setOptions (containerName='AnaMuons')
