@@ -613,10 +613,10 @@ G4PrimaryParticle* ISF::InputConverter::getDaughterG4PrimaryParticle(const HepMC
 
   if (makeLinkToTruth) {
     // Set the user information for this primary to point to the HepMcParticleLink...
-    PrimaryParticleInformation* ppi = new PrimaryParticleInformation(genpart);
-    ppi->SetRegenerationNr(0);
-    g4particle->SetUserInformation(ppi);
-    ATH_MSG_VERBOSE("Making primary down the line with barcode " << ppi->GetParticleUniqueID());
+    std::unique_ptr<PrimaryParticleInformation> primaryPartInfo = std::make_unique<PrimaryParticleInformation>(genpart);
+    primaryPartInfo->SetRegenerationNr(0);
+    g4particle->SetUserInformation(primaryPartInfo.release());
+    ATH_MSG_VERBOSE("Making primary down the line with barcode " << primaryPartInfo->GetParticleUniqueID());
   }
 
   return g4particle.release();
@@ -776,10 +776,10 @@ G4PrimaryParticle* ISF::InputConverter::getDaughterG4PrimaryParticle(HepMC::GenP
 
   if (makeLinkToTruth) {
     // Set the user information for this primary to point to the HepMcParticleLink...
-    PrimaryParticleInformation* ppi = new PrimaryParticleInformation(&genpart);
-    ppi->SetRegenerationNr(0);
-    g4particle->SetUserInformation(ppi);
-    ATH_MSG_VERBOSE("Making primary down the line with barcode " << ppi->GetParticleUniqueID());
+    std::unique_ptr<PrimaryParticleInformation> primaryPartInfo = std::make_unique<PrimaryParticleInformation>(&genpart);
+    primaryPartInfo->SetRegenerationNr(0);
+    g4particle->SetUserInformation(primaryPartInfo.release());
+    ATH_MSG_VERBOSE("Making primary down the line with barcode " << primaryPartInfo->GetParticleUniqueID());
   }
 
   return g4particle.release();
@@ -1030,7 +1030,7 @@ G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(ISF::ISFParticle& i
 
   std::unique_ptr<G4PrimaryParticle> g4particle = std::make_unique<G4PrimaryParticle>(particleDefinition,px,py,pz);
   // UserInformation
-  std::unique_ptr<PrimaryParticleInformation> ppi = std::make_unique<PrimaryParticleInformation>(primaryGenpart,&isp);
+  std::unique_ptr<PrimaryParticleInformation> primaryPartInfo = std::make_unique<PrimaryParticleInformation>(primaryGenpart,&isp);
 
   /// In the case that particles are being passed back to Geant4 then
   /// we may have particles which have already interacted, so we
@@ -1039,7 +1039,7 @@ G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(ISF::ISFParticle& i
   if (HepMC::BarcodeBased::generations(&isp) != regenerationNr) {
     ATH_MSG_WARNING ("StatusBased::generations() = " << regenerationNr << ", BarcodeBased::generations()  = " << HepMC::BarcodeBased::generations(&isp) << ", isp: " << isp);
   }
-  ppi->SetRegenerationNr(regenerationNr);
+  primaryPartInfo->SetRegenerationNr(regenerationNr);
 
   if ( currentGenPart ) {
     if (currentGenPart->end_vertex()) {
@@ -1130,11 +1130,11 @@ G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(ISF::ISFParticle& i
   } // Truth was detected
 
   ATH_MSG_VERBOSE("PrimaryParticleInformation:");
-  ATH_MSG_VERBOSE("     GetParticleUniqueID = " << ppi->GetParticleUniqueID());
-  ATH_MSG_VERBOSE("     GetRegenerationNr = " << ppi->GetRegenerationNr());
-  ATH_MSG_VERBOSE("     GetHepMCParticle = " << ppi->GetHepMCParticle());
-  ATH_MSG_VERBOSE("     GetISFParticle = " << ppi->GetISFParticle());
-  g4particle->SetUserInformation(ppi.release());
+  ATH_MSG_VERBOSE("     GetParticleUniqueID = " << primaryPartInfo->GetParticleUniqueID());
+  ATH_MSG_VERBOSE("     GetRegenerationNr = " << primaryPartInfo->GetRegenerationNr());
+  ATH_MSG_VERBOSE("     GetHepMCParticle = " << primaryPartInfo->GetHepMCParticle());
+  ATH_MSG_VERBOSE("     GetISFParticle = " << primaryPartInfo->GetISFParticle());
+  g4particle->SetUserInformation(primaryPartInfo.release());
 
   return g4particle.release();
 }

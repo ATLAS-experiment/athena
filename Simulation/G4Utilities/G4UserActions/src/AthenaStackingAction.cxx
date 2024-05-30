@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // System includes
@@ -112,12 +112,12 @@ namespace G4UA
     // Handle primary particles
     if(track->GetParentID() == 0) { // Condition for Primaries
       // Extract the PrimaryParticleInformation
-      PrimaryParticleInformation* ppi = this->getPrimaryParticleInformation(track);
+      PrimaryParticleInformation* primaryPartInfo = this->getPrimaryParticleInformation(track);
       // Fill some information for this track
-      if(ppi) {
+      if(primaryPartInfo) {
         if (!m_config.isISFJob) {
           // don't do anything
-          auto  part = ppi->GetHepMCParticle();
+          auto  part = primaryPartInfo->GetHepMCParticle();
           if (part) {
             // OK, we got back to HepMC
             std::unique_ptr<TrackInformation> ti = std::make_unique<TrackInformation>(part);
@@ -130,9 +130,9 @@ namespace G4UA
             track->SetUserInformation(ti.release());
           }
           // TODO What does this condition mean?
-          else if(ppi->GetParticleUniqueID() >= 0 && ppi->GetParticleBarcode() >= 0) {
+          else if(primaryPartInfo->GetParticleUniqueID() >= 0 && primaryPartInfo->GetParticleBarcode() >= 0) {
             // PrimaryParticleInformation should at least provide a barcode
-            std::unique_ptr<TrackBarcodeInfo> bi = std::make_unique<TrackBarcodeInfo>(ppi->GetParticleUniqueID(), ppi->GetParticleBarcode());
+            std::unique_ptr<TrackBarcodeInfo> bi = std::make_unique<TrackBarcodeInfo>(primaryPartInfo->GetParticleUniqueID(), primaryPartInfo->GetParticleBarcode());
             /// Pass ownership to track. The G4VUserTrackInformation*
             /// fpUserInformation member variable set by this method
             /// is mutable. G4Tracks are thread-local.
