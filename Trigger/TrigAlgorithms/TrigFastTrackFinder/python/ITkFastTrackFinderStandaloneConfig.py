@@ -14,6 +14,8 @@ def ITkFastTrackFinderStandaloneCfg(flags, SiSPSeededTrackCollectionKey = None):
     from InDetConfig.SiTrackMakerConfig import ITkSiTrackMaker_xkCfg
     ITkSiTrackMakerTool = acc.popToolsAndMerge(ITkSiTrackMaker_xkCfg(flags))
 
+    ITkSiTrackMakerTool.CombinatorialTrackFinder.writeHolesFromPattern = False
+    
     if flags.Trigger.InDetTracking.UseTrigTrackFollowing :
         acc.addPublicTool( CompFactory.TrigInDetTrackFollowingTool( name = "TrigTrackFollowingTool_FTF") )
         ITkSiTrackMakerTool.useTrigTrackFollowingTool = True

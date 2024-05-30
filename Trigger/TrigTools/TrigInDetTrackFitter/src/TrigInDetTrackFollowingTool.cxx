@@ -1102,7 +1102,7 @@ bool TrigInDetTrackFollowingTool::checkIntersection(double const* Rk, const Trk:
 
   const double C = 299.9975;
   const double minStep = 100.0;
-  const double bound_tol = -1.0;
+  const double bound_tol = 0.2;
   
   double Re[5];
   
@@ -1260,8 +1260,15 @@ bool TrigInDetTrackFollowingTool::checkIntersection(double const* Rk, const Trk:
 
   double locX = d[0] * Ax2[0] + d[1] * Ax2[1] + d[2] * Ax2[2];
   double locY = d[0] * Ay2[0] + d[1] * Ay2[1] + d[2] * Ay2[2];
-    
-  return (pN->insideBounds(Amg::Vector2D(locX, locY), bound_tol, bound_tol));
+
+  const InDetDD::SiDetectorElement* pDE = dynamic_cast<const InDetDD::SiDetectorElement*>(pN->associatedDetectorElement());
+  if(!pDE) return false;
+  
+  InDetDD::SiIntersect intersection = pDE->inDetector(Amg::Vector2D(locX, locY), bound_tol, bound_tol);
+
+  if (intersection.out()) return false;
+
+  return true;
 
 }
 
