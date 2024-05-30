@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -39,7 +39,7 @@ void PairBuilder ::inputxy(const int xystrip){
 int PairBuilder::numberOfPairs() const {
 	return m_pairs.size();
 }
-PairBuilder::PairVector PairBuilder::pairs() const {
+const PairBuilder::PairVector& PairBuilder::pairs() const {
 	return m_pairs;
 }
 float PairBuilder::weight() const {

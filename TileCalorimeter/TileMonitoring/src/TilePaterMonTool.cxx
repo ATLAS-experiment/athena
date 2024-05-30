@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************
@@ -343,7 +343,7 @@ TProfile2D* TilePaterMonTool::bookProfile2D(std::string subdir, std::string nam,
 }
 
 
-TH1I_LW* TilePaterMonTool::book1ILW(std::string subdir, std::string nam, std::string tit,
+TH1I_LW* TilePaterMonTool::book1ILW(const std::string& subdir, const std::string& nam, const std::string& tit,
                                     int nx, double xmin, double xmax,
                                     Interval_t interval, MgmtAttr_t attribute,
                                     std::string trigChain, std::string mergeAlgo)
@@ -353,7 +353,7 @@ TH1I_LW* TilePaterMonTool::book1ILW(std::string subdir, std::string nam, std::st
   return hist;
 }
 
-TH2I_LW* TilePaterMonTool::book2ILW(std::string subdir, std::string nam, std::string tit,
+TH2I_LW* TilePaterMonTool::book2ILW(const std::string& subdir, const std::string& nam, const std::string& tit,
                                     int nx, double xmin, double xmax,
                                     int ny, double ymin, double ymax,
                                     Interval_t interval, MgmtAttr_t attribute,
@@ -365,7 +365,7 @@ TH2I_LW* TilePaterMonTool::book2ILW(std::string subdir, std::string nam, std::st
 }
 
 
-TProfile_LW* TilePaterMonTool::bookProfileLW(std::string subdir, std::string nam, std::string tit,
+TProfile_LW* TilePaterMonTool::bookProfileLW(const std::string& subdir, const std::string& nam, const std::string& tit,
                                              int nx, double xmin, double xmax,
                                              double ymin, double ymax,
                                              Interval_t interval, MgmtAttr_t attribute,
@@ -425,7 +425,7 @@ class TGraph1: public TGraph {
     TDirectory* fDirectory;
 };
 
-TGraph* TilePaterMonTool::bookGraph(std::string subdir, std::string nam, std::string tit, int N, float * X, float * Y) {
+TGraph* TilePaterMonTool::bookGraph(const std::string& subdir, const std::string& nam, const std::string& tit, int N, float * X, float * Y) {
 
   TGraph1 *hist = new TGraph1(N, X, Y);
   hist->SetName(TString(nam));
@@ -455,7 +455,7 @@ class TGraphErrors1: public TGraphErrors {
     TDirectory * fDirectory;
 };
 
-TGraphErrors * TilePaterMonTool::bookGraphErrors(std::string subdir, std::string nam, std::string tit, int N, float * X, float * Y, float * X_errors, float * Y_errors) {
+TGraphErrors * TilePaterMonTool::bookGraphErrors(const std::string& subdir, const std::string& nam, const std::string& tit, int N, float * X, float * Y, float * X_errors, float * Y_errors) {
 
   TGraphErrors *hist = new TGraphErrors(N, X, Y, X_errors, Y_errors);
   hist->SetName(TString(nam));
@@ -512,7 +512,7 @@ class TGraphAsymmErrors1: public TGraphAsymmErrors {
     TDirectory* fDirectory;
 };
 
-TGraphAsymmErrors* TilePaterMonTool::bookGraphAsymmErrors(std::string subdir, std::string nam, std::string tit, int N,
+TGraphAsymmErrors* TilePaterMonTool::bookGraphAsymmErrors(const std::string& subdir, const std::string& nam, const std::string& tit, int N,
                                                            float* X, float* Y, float* X_errors1, float* X_errors2,
                                                            float* Y_errors1, float* Y_errors2)
 {
@@ -544,7 +544,7 @@ class TMultiGraph1: public TMultiGraph {
     TDirectory* fDirectory;
 };
 
-TMultiGraph* TilePaterMonTool::bookMultiGraph(std::string subdir, std::string nam, std::string tit) {
+TMultiGraph* TilePaterMonTool::bookMultiGraph(const std::string& subdir, const std::string& nam, const std::string& tit) {
 
   TMultiGraph1* hist = new TMultiGraph1();
   hist->SetName(TString(nam));

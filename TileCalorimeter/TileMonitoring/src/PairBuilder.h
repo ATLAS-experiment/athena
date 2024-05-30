@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -45,7 +45,7 @@ public:
 	/// Return the number of XY pairs made
 	int numberOfPairs() const;
 	/// Return the pairs as a vector of pairs of integers
-	PairVector pairs() const;
+	const PairVector& pairs() const;
 	/// Return the 'weight', = 1/(number of pairs)
 	float weight() const;
 	/// Return a specific XY pair at some vector index
