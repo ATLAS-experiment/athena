@@ -797,6 +797,7 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite,
         configSeq.setOptionValue ('.likelihoodWP', 'LooseDNN')
     configSeq.setOptionValue ('.isolationWP', 'Loose_VarRad')
     configSeq.setOptionValue ('.recomputeLikelihood', recomputeLikelihood)
+    configSeq.setOptionValue ('.writeTrackD0Z0', True)
 
     configSeq += config.makeConfig ('Electrons.PtEtaSelection',
         containerName='AnaElectrons')
@@ -841,6 +842,8 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite,
     configSeq.setOptionValue ('.isolation', 'Loose_VarRad')
     if forCompare :
         configSeq.setOptionValue ('.onlyRecoEffSF', True)
+    configSeq.setOptionValue ('.writeTrackD0Z0', True)
+
     # TODO: MCP should restore this when the recommendations for Tight WP exist in R23
     # configSeq += config.makeConfig ('Muons.Selection', 'AnaMuons.tight')
     # configSeq.setOptionValue ('.quality', 'Tight')
@@ -851,7 +854,6 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite,
     configSeq.setOptionValue ('.selectionDecoration', 'selectPtEta')
     configSeq.setOptionValue ('.minPt', muonMinPt)
     configSeq.setOptionValue ('.maxEta', muonMaxEta)
-
 
     # Include, and then set up the tau analysis algorithm sequence:
     configSeq += config.makeConfig ('TauJets',

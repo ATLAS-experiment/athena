@@ -132,6 +132,8 @@ class MuonWorkingPointConfig (ConfigBlock) :
         self.addOption ('maxDeltaZ0SinTheta', 0.5, type=float,
             info="maximum Delta z0sinTheta in mm used for the trackSelection"
             "The default is 0.5 mm")
+        self.addOption ('writeTrackD0Z0', False, type = bool,
+            info="save the d0 significance and z0sinTheta variables so they can be written out")
         self.addOption ('quality', None, type=str,
             info="the ID WP (string) to use. Supported ID WPs: Tight, Medium, "
             "Loose, LowPt, HighPt.")
@@ -185,15 +187,22 @@ class MuonWorkingPointConfig (ConfigBlock) :
             postfix = '_' + postfix
 
         # Set up the track selection algorithm:
-        if self.trackSelection :
+        if self.writeTrackD0Z0 or self.trackSelection:
             alg = config.createAlgorithm( 'CP::AsgLeptonTrackSelectionAlg',
                                 'MuonTrackSelectionAlg' + postfix )
             alg.selectionDecoration = 'trackSelection' + postfix + ',as_bits'
+            alg.decorateTTVAVars = self.writeTrackD0Z0
+            alg.d0sigDecoration = 'd0sig' + postfix
+            alg.z0sinthetaDecoration = 'z0sintheta' + postfix
             alg.maxD0Significance = self.maxD0Significance
             alg.maxDeltaZ0SinTheta = self.maxDeltaZ0SinTheta
             alg.particles = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, '')
-            config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration, preselection=self.qualitySelectionOutput)
+            if self.trackSelection :
+                config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration, preselection=self.qualitySelectionOutput)
+            if self.writeTrackD0Z0 :
+                config.addOutputVar (self.containerName, alg.d0sigDecoration, alg.d0sigDecoration,noSys=True)
+                config.addOutputVar (self.containerName, alg.z0sinthetaDecoration, alg.z0sinthetaDecoration,noSys=True)
 
         # Setup the muon quality selection
         alg = config.createAlgorithm( 'CP::MuonSelectionAlgV2',
