@@ -211,8 +211,10 @@ def MdtRDODecodeCfg(flags, name="MdtRdoToMdtPrepData", RDOContainer = None, **kw
     acc.merge(MDTCablingConfigCfg(flags))
 
     tool_kwargs = {}
-    tool_kwargs["MdtxAODKey"] =  "MDT_DriftCircles" if flags.Muon.writexAODPRD else ""
-    tool_kwargs["UseTwin"] = True
+    tool_kwargs["MdtxAODKey"] =  "xAODMdtCircles" if flags.Muon.writexAODPRD or flags.Muon.usePhaseIIGeoSetup else ""
+    ### Disable the twin tubes in the Phase II geometry setup
+    tool_kwargs["UseTwin"] = not flags.Muon.usePhaseIIGeoSetup
+    tool_kwargs["UseR4DetMgr"]  = flags.Muon.usePhaseIIGeoSetup
     tool_kwargs["CalibrationTool"] = acc.popToolsAndMerge(MdtCalibrationToolCfg(flags, TimeWindowSetting = 2, DoPropagationCorrection = False))
     if RDOContainer: tool_kwargs["RDOContainer"] = RDOContainer
     # Get the RDO -> PRD tool
