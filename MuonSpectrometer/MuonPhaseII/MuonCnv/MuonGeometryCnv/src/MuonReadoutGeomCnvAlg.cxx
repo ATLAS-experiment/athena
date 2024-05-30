@@ -534,6 +534,7 @@ StatusCode MuonReadoutGeomCnvAlg::buildMdt(const ActsGeometryContext& gctx,
 
         std::unique_ptr<MuonGM::MdtReadoutElement> newElement = std::make_unique<MuonGM::MdtReadoutElement>(physVol, stName, mgr);
         newElement->setIdentifier(reId);
+        newElement->setMultilayer(copyMe->multilayer());
         // cppcheck-suppress invalidLifetime; ok: mgr took ownership.
         newElement->setParentMuonStation(station);
         /// Define the dimensions
