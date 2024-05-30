@@ -220,8 +220,8 @@ int  iGeant4::Geant4TruthIncident::childBarcode(unsigned short index) const {
       track->GetDynamicParticle()->GetPrimaryParticle() &&
       track->GetDynamicParticle()->GetPrimaryParticle()->GetUserInformation()){
     // Then the new particle should use the same barcode as the old one!!
-    PrimaryParticleInformation* ppi = dynamic_cast<PrimaryParticleInformation*>( track->GetDynamicParticle()->GetPrimaryParticle()->GetUserInformation() );
-    return ppi->GetParticleBarcode();
+    PrimaryParticleInformation* primaryPartInfo = dynamic_cast<PrimaryParticleInformation*>( track->GetDynamicParticle()->GetPrimaryParticle()->GetUserInformation() );
+    return primaryPartInfo->GetParticleBarcode();
   }
   return 0;
 }
@@ -302,8 +302,8 @@ HepMC::GenParticlePtr iGeant4::Geant4TruthIncident::convert(const G4Track *track
       track->GetDynamicParticle()->GetPrimaryParticle() &&
       track->GetDynamicParticle()->GetPrimaryParticle()->GetUserInformation()){
     // Then the new particle should use the same barcode as the old one!!
-    PrimaryParticleInformation* ppi = dynamic_cast<PrimaryParticleInformation*>( track->GetDynamicParticle()->GetPrimaryParticle()->GetUserInformation() );
-    HepMC::suggest_barcode( newParticle, ppi->GetParticleBarcode() );
+    PrimaryParticleInformation* primaryPartInfo = dynamic_cast<PrimaryParticleInformation*>( track->GetDynamicParticle()->GetPrimaryParticle()->GetUserInformation() );
+    HepMC::suggest_barcode( newParticle, primaryPartInfo->GetParticleBarcode() );
   } else {
     HepMC::suggest_barcode( newParticle, barcode );
   }

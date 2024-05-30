@@ -125,8 +125,8 @@ void TrackProcessorUserActionBase::setupPrimary(G4Track& aTrack)
     return; // The G4Exception call above should abort the job, but Coverity does not seem to pick this up.
   }
 
-  auto* ppInfo = dynamic_cast <PrimaryParticleInformation*> (aTrack.GetDynamicParticle()->GetPrimaryParticle()->GetUserInformation());
-  if (!ppInfo) {
+  auto* primaryPartInfo = dynamic_cast <PrimaryParticleInformation*> (aTrack.GetDynamicParticle()->GetPrimaryParticle()->GetUserInformation());
+  if (!primaryPartInfo) {
     G4ExceptionDescription description;
     description << G4String("PreUserTrackingAction: ") + "NULL PrimaryParticleInformation pointer for current G4Step (trackID "
                 << aTrack.GetTrackID() << ", track pos: "<<aTrack.GetPosition() << ", mom: "<<aTrack.GetMomentum()
@@ -136,7 +136,7 @@ void TrackProcessorUserActionBase::setupPrimary(G4Track& aTrack)
   }
 
   // get base ISFParticle and link to TrackInformation
-  auto* baseISP = ppInfo->GetISFParticle();
+  auto* baseISP = primaryPartInfo->GetISFParticle();
   if (!baseISP) {
     G4ExceptionDescription description;
     description << G4String("PreUserTrackingAction: ") + "No ISFParticle associated with primary particle (trackID: "
@@ -156,7 +156,7 @@ void TrackProcessorUserActionBase::setupPrimary(G4Track& aTrack)
     return; // The G4Exception call above should abort the job, but Coverity does not seem to pick this up.
   }
 
-  int regenerationNr = ppInfo->GetRegenerationNr();
+  int regenerationNr = primaryPartInfo->GetRegenerationNr();
 
   HepMC::GenParticlePtr primaryGenParticle = truthBinding->getGenerationZeroGenParticle();
   HepMC::GenParticlePtr generationZeroGenParticle = truthBinding->getGenerationZeroGenParticle();
