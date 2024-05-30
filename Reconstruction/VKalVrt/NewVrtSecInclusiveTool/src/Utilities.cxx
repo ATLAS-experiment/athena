@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 ///
 ///    @author Vadim Kostyukhin <vadim.kostyukhin@cern.ch>
@@ -9,6 +9,7 @@
 #include "TrkNeutralParameters/NeutralParameters.h"
 #include "TrkTrackSummary/TrackSummary.h"
 #include  "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
+#include "AthContainers/ConstAccessor.h"
 #include "CxxUtils/sincos.h"
 //-------------------------------------------------
 #include "TrkGeometry/TrackingGeometry.h"
@@ -240,11 +241,15 @@ namespace Rec{
 /*************************************************************************************************************/
 
   int NewVrtSecInclusiveTool::getIdHF(const xAOD::TrackParticle* TP ) const {
-      if( TP->isAvailable< ElementLink< xAOD::TruthParticleContainer> >( "truthParticleLink") ) {
+    static const SG::ConstAccessor< ElementLink< xAOD::TruthParticleContainer> >
+      truthParticleLinkAcc ( "truthParticleLink");
+     if( truthParticleLinkAcc.isAvailable(*TP) ) {
         const ElementLink<xAOD::TruthParticleContainer>& tplink = 
-                               TP->auxdata< ElementLink< xAOD::TruthParticleContainer > >("truthParticleLink");
+          truthParticleLinkAcc(*TP);
         if( !tplink.isValid() ) return 0;
-        if( TP->auxdata< float >( "truthMatchProbability" ) < 0.75 ) return 0;
+        static const SG::ConstAccessor< float >
+          truthMatchProbabilityAcc ( "truthMatchProbability" );
+        if( truthMatchProbabilityAcc( *TP ) < 0.75 ) return 0;
         if( HepMC::is_simulation_particle((*tplink))) return 0;
         if( (*tplink)->hasProdVtx()){
           if( (*tplink)->prodVtx()->nIncomingParticles()==1){
@@ -287,17 +292,21 @@ namespace Rec{
 
 
   int NewVrtSecInclusiveTool::getG4Inter(const xAOD::TrackParticle* TP ) {
-      if( TP->isAvailable< ElementLink< xAOD::TruthParticleContainer> >( "truthParticleLink") ) {
+      static const SG::ConstAccessor< ElementLink< xAOD::TruthParticleContainer> >
+        truthParticleLinkAcc ( "truthParticleLink");
+      if( truthParticleLinkAcc.isAvailable( *TP ) ) {
         const ElementLink<xAOD::TruthParticleContainer>& tplink = 
-                               TP->auxdata< ElementLink< xAOD::TruthParticleContainer > >("truthParticleLink");
+          truthParticleLinkAcc( *TP );
         if( tplink.isValid() && HepMC::is_simulation_particle((*tplink))) return 1;
       }
       return 0;
   }
   int NewVrtSecInclusiveTool::getMCPileup(const xAOD::TrackParticle* TP ) {
-      if( TP->isAvailable< ElementLink< xAOD::TruthParticleContainer> >( "truthParticleLink") ) {
+      static const SG::ConstAccessor< ElementLink< xAOD::TruthParticleContainer> >
+        truthParticleLinkAcc ( "truthParticleLink");
+      if( truthParticleLinkAcc.isAvailable( *TP ) ) {
         const ElementLink<xAOD::TruthParticleContainer>& tplink = 
-                               TP->auxdata< ElementLink< xAOD::TruthParticleContainer > >("truthParticleLink");
+          truthParticleLinkAcc( *TP );
         if( !tplink.isValid() ) return 1;
       } else { return 1; }
       return 0;
