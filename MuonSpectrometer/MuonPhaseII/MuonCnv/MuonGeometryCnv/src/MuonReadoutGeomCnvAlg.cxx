@@ -82,7 +82,9 @@ StatusCode MuonReadoutGeomCnvAlg::execute(const EventContext& ctx) const {
         writeHandle.addDependency(readHandle);
         auto alignStore = std::make_unique<ActsTrk::DetectorAlignStore>(**readHandle);
         /// Ensure that the position & tracking alignment caches are split from the conditions object
-        alignStore->geoModelAlignment->clearPosCache();
+        if (alignStore->geoModelAlignment) {
+            alignStore->geoModelAlignment->clearPosCache();
+        }
         alignStore->trackingAlignment = std::make_unique<TrackingAlignment>(alignStore->detType);
         geoContext.setStore(std::move(alignStore));
     }
