@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONMdtRdoToPrepDataToolMT_H
@@ -22,6 +22,8 @@
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "xAODMuonPrepData/MdtDriftCircleContainer.h"
+
+#include "MuonReadoutGeometryR4/MuonDetectorManager.h"
 
 class MdtDigit;
 class MdtCalibHit;
@@ -61,75 +63,86 @@ namespace Muon {
 
         /// method to get the twin tube 2nd coordinate
         Muon::MdtDriftCircleStatus getMdtTwinPosition(const MdtDigit& prompt_digit, const MdtDigit& twin_digit, double& radius,
-                                                      double& errRadius, double& zTwin, double& errZTwin, bool& twinIsPrompt,
-                                                      const MuonGM::MuonDetectorManager* muDetMgr) const;
+                                                      double& errRadius, double& zTwin, double& errZTwin, bool& twinIsPrompt) const;
 
         // decode method for Rob based readout
         StatusCode decode(const EventContext& ctx, const std::vector<IdentifierHash>& multiLayerHashInRobs) const;
 
-        /// Helper struct to steer which collections were added by
-        /// this tool and which already existed before hand
-        struct ModfiablePrdColl {
-            ModfiablePrdColl() = default;
-            ModfiablePrdColl(Muon::MdtPrepDataContainer* cont) : prd_cont{cont} {}
+        /// Helper struct to parse the event data around the tool
+        struct ConvCache {
+            ConvCache(const Muon::IMuonIdHelperSvc* idHelperSvc):
+                m_idHelperSvc{idHelperSvc}{}
             /// Creates a new MdtPrepDataCollection, if it's neccessary
             /// and also possible. Nullptr is returned if the collection
             /// cannot be modified
-            MdtPrepDataCollection* createCollection(const Identifier& id, const MdtIdHelper& id_helper, MsgStream& msg);
+            MdtPrepDataCollection* createCollection(const Identifier& id, MsgStream& msg);
             /// Copy the non-empty collections into the created prd container. Fill the id_hash vector with
             /// the corresponding hashes
             StatusCode finalize(std::vector<IdentifierHash>& id_hash, MsgStream& msg);
 
-            Muon::MdtPrepDataContainer* prd_cont{nullptr};
+            Muon::MdtPrepDataContainer* legacyPrd{nullptr};
+            xAOD::MdtDriftCircleContainer* xAODPrd{nullptr};
 
-            using PrdCollMap = std::map<IdentifierHash, std::unique_ptr<MdtPrepDataCollection>>;
+            const Muon::IMuonIdHelperSvc* m_idHelperSvc{nullptr};
+            /// Detector manager from the conditions store
+            const MuonGM::MuonDetectorManager* legacyDetMgr{nullptr};
+            /// Acts Geometry context
+            const ActsGeometryContext* gctx{nullptr};
+
+            /// Flag set to indicate that the complete validation was successful
+            bool isValid{false};
+
+            using PrdCollMap = std::unordered_map<IdentifierHash, std::unique_ptr<MdtPrepDataCollection>>;
             PrdCollMap addedCols{};
         };
 
-        StatusCode processCsm(const EventContext& ctx, ModfiablePrdColl& mdtPrepDataContainer, xAOD::MdtDriftCircleContainer* xAODMdtPrepDataContainer, const MdtCsm* rdoColl,
-                              const MuonGM::MuonDetectorManager* muDetMgr) const;
+        StatusCode processCsm(const EventContext& ctx, ConvCache& mdtPrepDataContainer, 
+                              const MdtCsm* rdoColl) const;
 
-        StatusCode processCsmTwin(const EventContext& ctx, ModfiablePrdColl& mdtPrepDataContainer, xAOD::MdtDriftCircleContainer* xAODMdtPrepDataContainer, const MdtCsm* rdoColll,
-                                  const MuonGM::MuonDetectorManager* muDetMgr) const;
+        StatusCode processCsmTwin(const EventContext& ctx, 
+                                  ConvCache& mdtPrepDataContainer,  
+                                  const MdtCsm* rdoColll) const;
         
         /// Creates the PRD object
         std::unique_ptr<MdtPrepData> createPrepData(const MdtCalibInput& calibInput,
-                                                    const MdtCalibOutput& calibOutput) const;
+                                                    const MdtCalibOutput& calibOutput,
+                                                    ConvCache& cache) const;
         
         /// Creates the xAOD PRD object
         void createxAODPrepData(const MdtCalibInput& calibInput,
-                                                    const MdtCalibOutput& calibOutput, 
-                                                    xAOD::MdtDriftCircleContainer* xAODMdtPrepDataContainer) const;
+                                const MdtCalibOutput& calibOutput, 
+                                xAOD::MdtDriftCircleContainer* xAODMdtPrepDataContainer) const;
 
         /// Creates the prep data container to be written
-        ModfiablePrdColl setupMdtPrepDataContainer(const EventContext& ctx) const;
+        ConvCache setupMdtPrepDataContainer(const EventContext& ctx) const;
         
-        /// Creates the xAOD PRD container to be written
-        xAOD::MdtDriftCircleContainer* setupxAODMdtPrepDataContainer(SG::WriteHandle<xAOD::MdtDriftCircleContainer>& outputContainer) const;
-        
-        /// Is the identifier disabled due to BMG cut outs
-        bool deadBMGChannel(const Identifier& channelId) const;
-
         /// Loads the input RDO container from StoreGate
         const MdtCsmContainer* getRdoContainer(const EventContext& ctx) const;
 
-        void processPRDHashes(const EventContext& ctx, ModfiablePrdColl& mdtPrepDataContainer,
-                                xAOD::MdtDriftCircleContainer* xAODMdtPrepDataContainer,
+        void processPRDHashes(const EventContext& ctx, ConvCache& mdtPrepDataContainer,
                                 const std::vector<IdentifierHash>& chamberHashInRobs) const;
 
-        bool handlePRDHash(const EventContext& ctx, ModfiablePrdColl& mdtPrepDataContainer, 
-                                xAOD::MdtDriftCircleContainer* xAODMdtPrepDataContainer,
-                                IdentifierHash rdoHash) const;
+        bool handlePRDHash(const EventContext& ctx, ConvCache& mdtPrepDataContainer, 
+                           IdentifierHash rdoHash) const;
 
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
         /// MDT calibration service
         ToolHandle<IMdtCalibrationTool> m_calibrationTool{this, "CalibrationTool", "MdtCalibrationTool"};
 
+        
+        Gaudi::Property<bool> m_useNewGeo{this, "UseR4DetMgr", false,
+                                         "Switch between the legacy and the new geometry"};
+
+        const MuonGMR4::MuonDetectorManager* m_detMgrR4{nullptr};
+        SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "Stored alignment"};
+
+
         /// MdtPrepRawData containers
         SG::WriteHandleKey<Muon::MdtPrepDataContainer> m_mdtPrepDataContainerKey{this, "OutputCollection", "MDT_DriftCircles"};
 
         SG::ReadHandleKey<MdtCsmContainer> m_rdoContainerKey{this, "RDOContainer", "MDTCSM"};
+        
 
         /** member variables for algorithm properties: */
         Gaudi::Property<int>  m_adcCut{this, "AdcCut", 50, 
@@ -152,7 +165,7 @@ namespace Muon {
         int m_secondaryHit_twin_chamber[2][3][36]{};
         // - TWIN TUBE
 
-        std::map<Identifier, std::set<Identifier>> m_DeadChannels{};
+        std::unordered_set<Identifier> m_DeadChannels{};
         void initDeadChannels(const MuonGM::MdtReadoutElement* mydetEl);
 
         SG::ReadCondHandleKey<MuonMDT_CablingMap> m_readKey{this, "ReadKey", "MuonMDT_CablingMap", "Key of MuonMDT_CablingMap"};
@@ -164,7 +177,7 @@ namespace Muon {
                                                                                 "Optional external cache for the MDT PRD container"};
 
         // xAOD PRDs
-        SG::WriteHandleKey<xAOD::MdtDriftCircleContainer>   m_mdtxAODKey  {this, "MdtxAODKey", "", "If empty, do not produce xAOD, otherwise this is the key of the output xAOD MDT PRD container"};
+        SG::WriteHandleKey<xAOD::MdtDriftCircleContainer> m_mdtxAODKey{this, "MdtxAODKey", "", "If empty, do not produce xAOD, otherwise this is the key of the output xAOD MDT PRD container"};
     };
 }  // namespace Muon
 
