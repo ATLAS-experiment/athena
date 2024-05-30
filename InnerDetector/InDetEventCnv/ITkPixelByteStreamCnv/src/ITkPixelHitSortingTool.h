@@ -1,4 +1,8 @@
 /*
+Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
+
+/*
 * Author: Ondra Kovanda, ondrej.kovanda at cern.ch
 * Date: 05/2024
 * Description: Athena tool wrapper around the ITkPix encoder
@@ -13,13 +17,11 @@
 #include "InDetRawData/PixelRDO_Container.h"
 #include "InDetIdentifier/PixelID.h"
 
-#include "ItkpixLayout.h"
-
 
 class ITkPixelHitSortingTool: public AthAlgTool {
     public:
 
-        typedef ItkpixLayout<uint16_t> HitMap;
+        typedef ITkPixLayout<uint16_t> HitMap;
         
         ITkPixelHitSortingTool(const std::string& type,const std::string& name,const IInterface* parent);
 

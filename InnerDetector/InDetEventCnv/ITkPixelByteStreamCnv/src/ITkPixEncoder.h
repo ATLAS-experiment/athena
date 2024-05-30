@@ -1,4 +1,8 @@
 /*
+Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
+
+/*
 * Author: Ondra Kovanda, ondrej.kovanda at cern.ch
 * Date: 03/2024
 * Description: ITkPix* encoding base class
@@ -8,13 +12,12 @@
 #define ITKPIXENCODER_H
 
 #include <vector>
-#include <iostream>
 #include <cstdint>
-#include "ItkpixLayout.h"
+#include "ITkPixLayout.h"
 
-class ItkpixEncoder{
+class ITkPixEncoder{
     public:
-        typedef ItkpixLayout<uint16_t> HitMap;
+        typedef ITkPixLayout<uint16_t> HitMap;
     
         ItkpixEncoder(const uint nCol = 400, const uint nRow = 384, const uint nColInCCol = 8, const uint nRowInQRow = 2, const uint nEventsPerStream = 16, const bool plainHitMap = false, const bool dropToT = false);
         

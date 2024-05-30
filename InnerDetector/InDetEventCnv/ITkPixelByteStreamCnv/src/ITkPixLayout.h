@@ -1,4 +1,7 @@
 /*
+Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
+/*
 * Author: Ondra Kovanda, ondrej.kovanda at cern.ch
 * Date: 04/2024
 * Description: ITkPix* chip layout template. This aims for a contiguously stored
