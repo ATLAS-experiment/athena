@@ -50,7 +50,7 @@ StatusCode TileTBBeamMonitorAlgorithm::initialize() {
 
 
   std::map<std::string, unsigned int> roses = { {"AUX", 0}, {"LBA", 1}, {"LBC", 2}, {"EBA", 3}, {"EBC", 4} };
-  for (std::string maskedModuleChannels : m_masked) {
+  for (const std::string& maskedModuleChannels : m_masked) {
 
     std::string module = maskedModuleChannels.substr(0, 5);
     std::string partition = module.substr(0, 3);

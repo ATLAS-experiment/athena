@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileTBMonitorAlgorithm.h"
@@ -56,7 +56,7 @@ StatusCode TileTBMonitorAlgorithm::initialize() {
   ATH_MSG_INFO("Monitored modules/frag ID:" << os.str());
 
   std::map<std::string, unsigned int> roses = { {"AUX", 0}, {"LBA", 1}, {"LBC", 2}, {"EBA", 3}, {"EBC", 4} };
-  for (std::string maskedModuleChannels : m_masked) {
+  for (const std::string& maskedModuleChannels : m_masked) {
 
     std::string module = maskedModuleChannels.substr(0, 5);
     std::string partition = module.substr(0, 3);

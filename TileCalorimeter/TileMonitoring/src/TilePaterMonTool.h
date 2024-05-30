@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************
@@ -173,31 +173,31 @@ protected:
 
  // TTree* bookTree  (std::string dir, std::string nam, std::string tit);
 
-  TGraph* bookGraph (std::string dir, std::string nam, std::string tit, int N, float* X, float* Y);
+  TGraph* bookGraph (const std::string& dir, const std::string& nam, const std::string& tit, int N, float* X, float* Y);
 
-  TGraphErrors* bookGraphErrors (std::string dir, std::string nam, std::string tit,
+  TGraphErrors* bookGraphErrors (const std::string& dir, const std::string& nam, const std::string& tit,
                                   int N, float* X, float* Y, float* X_errors, float* Y_errors);
 
-  TGraphAsymmErrors* bookGraphAsymmErrors (std::string dir, std::string nam, std::string tit,
+  TGraphAsymmErrors* bookGraphAsymmErrors (const std::string& dir, const std::string& nam, const std::string& tit,
                                            int N, float* X, float* Y, float* X_errors1,
                                            float* X_errors2, float* Y_errors1, float* Y_errors2);
 
-  TMultiGraph* bookMultiGraph (std::string dir, std::string nam, std::string tit);
+  TMultiGraph* bookMultiGraph (const std::string& dir, const std::string& nam, const std::string& tit);
 
 
-  TH1I_LW* book1ILW(std::string dir, std::string nam, std::string tit, 
+  TH1I_LW* book1ILW(const std::string& dir, const std::string& nam, const std::string& tit, 
                     int nx, double xmin, double xmax, 
                     Interval_t interval = run, MgmtAttr_t attribute = ATTRIB_MANAGED,
                     std::string trigChain = "", std::string mergeAlgo = "");
 
-  TH2I_LW* book2ILW(std::string dir, std::string nam, std::string tit, 
+  TH2I_LW* book2ILW(const std::string& dir, const std::string& nam, const std::string& tit, 
                     int nx, double xmin, double xmax, 
                     int ny, double ymin, double ymax,
                     Interval_t interval = run, MgmtAttr_t attribute = ATTRIB_MANAGED,
                     std::string trigChain = "", std::string mergeAlgo = "");
 
     
-  TProfile_LW* bookProfileLW(std::string dir, std::string nam, std::string tit,
+  TProfile_LW* bookProfileLW(const std::string& dir, const std::string& nam, const std::string& tit,
                              int nx, double xmin, double xmax,
                              double ymin, double ymax,
                              Interval_t interval = run, MgmtAttr_t attribute = ATTRIB_MANAGED,
