@@ -1,10 +1,12 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Header include
 #include "VrtSecInclusive/VrtSecInclusive.h"
 #include "VrtSecInclusive/NtupleVars.h"
+#include "AthContainers/ConstAccessor.h"
+#include "AthContainers/Accessor.h"
 
 #include <iostream>
 #include <set>
@@ -25,10 +27,11 @@ namespace VKalVrtAthena {
   {
     typedef ElementLink< xAOD::TruthParticleContainer > Link_t;
     constexpr const char* NAME = "truthParticleLink";
-    if(  ! trkPart->isAvailable< Link_t >( NAME ) ) {
+    static const SG::ConstAccessor< Link_t > acc (NAME);
+    if(  ! acc.isAvailable( *trkPart ) ) {
       return nullptr;
     }
-    const Link_t& link = trkPart->auxdata< Link_t >(  NAME );
+    const Link_t& link = acc( *trkPart );
     if(  ! link.isValid() ) {
       return nullptr;
     }
@@ -71,7 +74,8 @@ namespace VKalVrtAthena {
 	
       ATH_MSG_VERBOSE( "categorizeVertexTruthTopology(): track loop itrk = " << itrk );
       typedef ElementLink<xAOD::TruthParticleContainer> truthLink;
-      const truthLink& link = trk->auxdataConst< truthLink >( "truthParticleLink" );
+      static const SG::ConstAccessor< truthLink > truthParticleLinkAcc( "truthParticleLink" );
+      const truthLink& link = truthParticleLinkAcc(*trk);
       
       if (  ! link ) {
 	fake_tracks.emplace_back(  trk );
@@ -94,12 +98,13 @@ namespace VKalVrtAthena {
     
     // Add truth track pattern to the reco vertex
     ATH_MSG_VERBOSE( "categorizeVertexTruthTopology(): Add truth track pattern to the reco vertex" );
+    const static SG::Accessor<char> trkpatAcc( "truth_trk_pattern" );
     if(  reco_tracks.size() == vertex->nTrackParticles() ) {
-      vertex->auxdata<char>( "truth_trk_pattern" ) = allTruthAssociated;
+      trkpatAcc( *vertex ) = allTruthAssociated;
     } else if(  fake_tracks.size() == vertex->nTrackParticles() ) {
-      vertex->auxdata<char>( "truth_trk_pattern" ) = allFakeTracks;
+      trkpatAcc( *vertex ) = allFakeTracks;
     } else {
-      vertex->auxdata<char>( "truth_trk_pattern" ) = hasFakeTracks;
+      trkpatAcc( *vertex ) = hasFakeTracks;
     }
     
     
@@ -130,7 +135,8 @@ namespace VKalVrtAthena {
     } else {
       truth_vtx_pattern = multipleTruthVertices;
     }
-    vertex->auxdata<char>( "truth_vtx_pattern" ) = truth_vtx_pattern;
+    static const SG::Accessor<char> vtxpatAcc( "truth_vtx_pattern" );
+    vtxpatAcc(*vertex) = truth_vtx_pattern;
     
     
     ElementLink<xAOD::TruthVertexContainer> vtx_link;
@@ -152,7 +158,9 @@ namespace VKalVrtAthena {
     } 
     // [JDC] a ElementLink decorator should be filled every event
     // although using a null link
-    vertex->auxdata<ElementLink<xAOD::TruthVertexContainer> >( "truth_vtx_link" ) = vtx_link;
+    static const SG::Accessor<ElementLink<xAOD::TruthVertexContainer> >
+      linkAcc( "truth_vtx_link" );
+    linkAcc(*vertex) = vtx_link;
             
     return StatusCode::SUCCESS;
   }

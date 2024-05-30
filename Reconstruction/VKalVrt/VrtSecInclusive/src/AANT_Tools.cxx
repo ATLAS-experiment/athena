@@ -1,11 +1,13 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Header include
 #include "VrtSecInclusive/VrtSecInclusive.h"
 #include "VrtSecInclusive/IntersectionPos.h"
 #include "VrtSecInclusive/NtupleVars.h"
+#include "AthContainers/ConstAccessor.h"
+
 
 #include <iostream>
 #include <vector>
@@ -296,7 +298,8 @@ namespace VKalVrtAthena {
       
         // here we have to look at the original recotrack id to establish cross-link
         // between "SVTrk" vars and "RecoTrk" vars:
-        m_ntupleVars->get< vector<int> >( "SVTrk_id" )      .emplace_back( trk->auxdataConst<unsigned long>("trk_id") );
+        static const SG::ConstAccessor<unsigned long> trk_idAcc("trk_id");
+        m_ntupleVars->get< vector<int> >( "SVTrk_id" )      .emplace_back( trk_idAcc(*trk) );
       
         m_ntupleVars->get< vector<double> >( "SVTrk_pT" )   .emplace_back(pT);
         m_ntupleVars->get< vector<double> >( "SVTrk_p" )    .emplace_back(ptrk);
@@ -313,7 +316,8 @@ namespace VKalVrtAthena {
             if( aTemp_truth )
               {
                 barcode = aTemp_truth->barcode();
-                matchProb= trk->auxdataConst< float >( "truthMatchProbability" );
+                static const SG::ConstAccessor<float> truthMatchProbabilityAcc( "truthMatchProbability" ); 
+                matchProb= truthMatchProbabilityAcc( *trk );
               }
           }
       
@@ -373,24 +377,32 @@ namespace VKalVrtAthena {
         m_ntupleVars->get< vector<int> >( "SecVtx_TrkPixExclBLay" ) .emplace_back( trk_summary.numPixelHits - trk_summary.numIBLHits );
         m_ntupleVars->get< vector<int> >( "SecVtx_TrkSCT" )         .emplace_back( trk_summary.numSctHits );
         
+        static const SG::ConstAccessor<float> pt_wrtSVAcc("pt_wrtSV");
+        static const SG::ConstAccessor<float> eta_wrtSVAcc("eta_wrtSV");
+        static const SG::ConstAccessor<float> phi_wrtSVAcc("phi_wrtSV");
+        static const SG::ConstAccessor<float> d0_wrtSVAcc("d0_wrtSV");
+        static const SG::ConstAccessor<float> z0_wrtSVAcc("z0_wrtSV");
+        static const SG::ConstAccessor<float> errP_wrtSVAcc("errP_wrtSV");
+        static const SG::ConstAccessor<float> errd0_wrtSVAcc("errd0_wrtSV");
+        static const SG::ConstAccessor<float> errz0_wrtSVAcc("errz0_wrtSV");
         ATH_MSG_VERBOSE(" >> fillAANT_SecondaryVertices : filling track vars wrt. SV");
-        if( trk->isAvailable<float>("pt_wrtSV")    &&
-            trk->isAvailable<float>("eta_wrtSV")   &&
-            trk->isAvailable<float>("phi_wrtSV")   &&
-            trk->isAvailable<float>("d0_wrtSV")    &&
-            trk->isAvailable<float>("z0_wrtSV")    &&
-            trk->isAvailable<float>("errP_wrtSV")  &&
-            trk->isAvailable<float>("errd0_wrtSV") &&
-            trk->isAvailable<float>("errz0_wrtSV")          ) {
+        if( pt_wrtSVAcc.isAvailable(*trk) &&
+            eta_wrtSVAcc.isAvailable(*trk) &&
+            phi_wrtSVAcc.isAvailable(*trk) &&
+            d0_wrtSVAcc.isAvailable(*trk) &&
+            z0_wrtSVAcc.isAvailable(*trk) &&
+            errP_wrtSVAcc.isAvailable(*trk) &&
+            errd0_wrtSVAcc.isAvailable(*trk) &&
+            errz0_wrtSVAcc.isAvailable(*trk)       ) {
           
-          m_ntupleVars->get< vector<double> >( "SecVtx_TrkPtWrtSV" )      .emplace_back( trk->auxdataConst<float>( "pt_wrtSV" ) );
-          m_ntupleVars->get< vector<double> >( "SecVtx_TrkEtaWrtSV" )     .emplace_back( trk->auxdataConst<float>( "eta_wrtSV" ) );
-          m_ntupleVars->get< vector<double> >( "SecVtx_TrkPhiWrtSV" )     .emplace_back( trk->auxdataConst<float>( "phi_wrtSV" ) );
-          m_ntupleVars->get< vector<double> >( "SecVtx_Trk2dIPWrtSV" )    .emplace_back( trk->auxdataConst<float>( "d0_wrtSV" ) );
-          m_ntupleVars->get< vector<double> >( "SecVtx_TrkZIPWrtSV" )     .emplace_back( trk->auxdataConst<float>( "z0_wrtSV" ) );
-          m_ntupleVars->get< vector<double> >( "SecVtx_TrkdelPWrtSV" )    .emplace_back( trk->auxdataConst<float>( "errP_wrtSV" ) );
-          m_ntupleVars->get< vector<double> >( "SecVtx_Trkdel2dIPWrtSV" ) .emplace_back( trk->auxdataConst<float>( "errd0_wrtSV"  ) );
-          m_ntupleVars->get< vector<double> >( "SecVtx_TrkdelZIPWrtSV" )  .emplace_back( trk->auxdataConst<float>( "errz0_wrtSV"  ) );
+          m_ntupleVars->get< vector<double> >( "SecVtx_TrkPtWrtSV" )      .emplace_back( pt_wrtSVAcc(*trk) );
+          m_ntupleVars->get< vector<double> >( "SecVtx_TrkEtaWrtSV" )     .emplace_back( eta_wrtSVAcc(*trk) );
+          m_ntupleVars->get< vector<double> >( "SecVtx_TrkPhiWrtSV" )     .emplace_back( phi_wrtSVAcc(*trk) );
+          m_ntupleVars->get< vector<double> >( "SecVtx_Trk2dIPWrtSV" )    .emplace_back( d0_wrtSVAcc(*trk) );
+          m_ntupleVars->get< vector<double> >( "SecVtx_TrkZIPWrtSV" )     .emplace_back( z0_wrtSVAcc(*trk) );
+          m_ntupleVars->get< vector<double> >( "SecVtx_TrkdelPWrtSV" )    .emplace_back( errP_wrtSVAcc(*trk) );
+          m_ntupleVars->get< vector<double> >( "SecVtx_Trkdel2dIPWrtSV" ) .emplace_back( errd0_wrtSVAcc(*trk) );
+          m_ntupleVars->get< vector<double> >( "SecVtx_TrkdelZIPWrtSV" )  .emplace_back( errz0_wrtSVAcc(*trk) );
           
         } else {
           
@@ -412,20 +424,29 @@ namespace VKalVrtAthena {
       ATH_MSG_DEBUG(" >> fillAANT_SecondaryVertices : Track loop end. ");
       
       ATH_MSG_VERBOSE(" >> fillAANT_SecondaryVertices : filling vertex vars");
-      
+
+      static const SG::ConstAccessor<float> massAcc("mass");
+      static const SG::ConstAccessor<float> mass_eAcc("mass_e");
+      static const SG::ConstAccessor<float> pTAcc("pT");
+      static const SG::ConstAccessor<float> pzAcc("pz");
+      static const SG::ConstAccessor<float> vtx_chargeAcc("vtx_charge");
+      static const SG::ConstAccessor<float> sumBLayHitsAcc("sumBLayHits");
+      static const SG::ConstAccessor<float> allTrksBLayHitsAcc("allTrksBLayHits");
+      static const SG::ConstAccessor<float> minOpAngAcc("minOpAng");
+
       m_ntupleVars->get< vector<int>    >( "SecVtx_NumTrks" )         .emplace_back( vertex->nTrackParticles()   );
       m_ntupleVars->get< vector<double> >( "SecVtx_Chi2" )            .emplace_back( vertex->chiSquared()   );
       m_ntupleVars->get< vector<double> >( "SecVtxX" )                .emplace_back( vertex->x()     );
       m_ntupleVars->get< vector<double> >( "SecVtxY" )                .emplace_back( vertex->y()     );
       m_ntupleVars->get< vector<double> >( "SecVtxZ" )                .emplace_back( vertex->z()     );
-      m_ntupleVars->get< vector<double> >( "SecVtx_Mass" )            .emplace_back( vertex->isAvailable<float>("mass")            ? vertex->auxdataConst<float>("mass")            : AlgConsts::invalidFloat);
-      m_ntupleVars->get< vector<double> >( "SecVtx_Mass_electron" )   .emplace_back( vertex->isAvailable<float>("mass_e")          ? vertex->auxdataConst<float>("mass_e")          : AlgConsts::invalidFloat);
-      m_ntupleVars->get< vector<double> >( "SecVtx_pT" )              .emplace_back( vertex->isAvailable<float>("pT")              ? vertex->auxdataConst<float>("pT")              : AlgConsts::invalidFloat);
-      m_ntupleVars->get< vector<double> >( "SecVtx_pZ" )              .emplace_back( vertex->isAvailable<float>("pz")              ? vertex->auxdataConst<float>("pz")              : AlgConsts::invalidFloat);
-      m_ntupleVars->get< vector<int> >( "SecVtx_Charge" )             .emplace_back( vertex->isAvailable<float>("vtx_charge")      ? vertex->auxdataConst<float>("vtx_charge")      : AlgConsts::invalidFloat);
-      m_ntupleVars->get< vector<int>    >( "SecVtx_SumBLayHits" )     .emplace_back( vertex->isAvailable<float>("sumBLayHits")     ? vertex->auxdataConst<float>("sumBLayHits")     : AlgConsts::invalidFloat);
-      m_ntupleVars->get< vector<int>    >( "SecVtx_AllTrksBLayHits" ) .emplace_back( vertex->isAvailable<float>("allTrksBLayHits") ? vertex->auxdataConst<float>("allTrksBLayHits") : AlgConsts::invalidFloat);
-      m_ntupleVars->get< vector<double> >( "SecVtx_MinOpAng" )        .emplace_back( vertex->isAvailable<float>("minOpAng")        ? vertex->auxdataConst<float>("minOpAng")        : AlgConsts::invalidFloat);
+      m_ntupleVars->get< vector<double> >( "SecVtx_Mass" )            .emplace_back( massAcc.withDefault(*vertex, AlgConsts::invalidFloat) );
+      m_ntupleVars->get< vector<double> >( "SecVtx_Mass_electron" )   .emplace_back( mass_eAcc.withDefault(*vertex, AlgConsts::invalidFloat) );
+      m_ntupleVars->get< vector<double> >( "SecVtx_pT" )              .emplace_back( pTAcc.withDefault(*vertex, AlgConsts::invalidFloat) );
+      m_ntupleVars->get< vector<double> >( "SecVtx_pZ" )              .emplace_back( pzAcc.withDefault(*vertex, AlgConsts::invalidFloat) );
+      m_ntupleVars->get< vector<int> >( "SecVtx_Charge" )             .emplace_back( vtx_chargeAcc.withDefault(*vertex, AlgConsts::invalidFloat) );
+      m_ntupleVars->get< vector<int>    >( "SecVtx_SumBLayHits" )     .emplace_back( sumBLayHitsAcc.withDefault(*vertex, AlgConsts::invalidFloat) );
+      m_ntupleVars->get< vector<int>    >( "SecVtx_AllTrksBLayHits" ) .emplace_back( allTrksBLayHitsAcc.withDefault(*vertex, AlgConsts::invalidFloat) );
+      m_ntupleVars->get< vector<double> >( "SecVtx_MinOpAng" )        .emplace_back( minOpAngAcc.withDefault(*vertex, AlgConsts::invalidFloat) );
       
       
     } // loop over vertices
