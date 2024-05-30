@@ -19,15 +19,21 @@ namespace ActsTrk{
         virtual ~MuonDetectorBuilderTool() = default;
 
         StatusCode initialize() override final;
-
-        Acts::Experimental::DetectorComponent construct(const Acts::GeometryContext& context) const override final;        
+ 
+        Acts::Experimental::DetectorComponent construct(const Acts::GeometryContext& context) const override final; 
+        
 
     private:
 
         const MuonGMR4::MuonDetectorManager* m_detMgr{nullptr};
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc",  "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
-        Gaudi::Property<bool> m_dumpVisual{this, "DumpVisualization", false, "If set to true the DetectorVolumes are dumped into a visualization file format"};
+        Gaudi::Property<bool> m_dumpVisual{this, "DumpVisualization", true, "If set to true the DetectorVolumes are dumped into a visualization file format"};
+
+        
+        //private method for the readout element construction
+        std::pair<std::vector<std::shared_ptr<Acts::Experimental::DetectorVolume>>,std::vector<std::shared_ptr<Acts::Surface>>> constructElements(const ActsGeometryContext& gctx, 
+        const MuonGMR4::MuonChamber& mChamber, std::pair<unsigned int, unsigned int> chId) const;
 
     };
 
