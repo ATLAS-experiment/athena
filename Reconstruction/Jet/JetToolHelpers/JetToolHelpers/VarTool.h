@@ -5,18 +5,17 @@
 #ifndef JETTOOLHELPERS_VARTOOL_H
 #define JETTOOLHELPERS_VARTOOL_H
 
-#include <cmath>
-#include <memory>
-#include <functional>
-#include <string>
+
 
 #include "JetToolHelpers/JetContext.h"
 #include "JetToolHelpers/InputVariable.h"
 #include "xAODJet/Jet.h"
-#include "AthContainers/AuxElement.h"
-#include "AsgTools/AsgTool.h"
-#include "JetAnalysisInterfaces/IVarTool.h"
+#include "AsgTools/AsgTool.h" //inheritance
+#include "JetAnalysisInterfaces/IVarTool.h" //inheritance
 #include "AsgTools/PropertyWrapper.h"
+
+#include <memory> //unique_ptr
+#include <string>
 
 namespace JetHelper {
 

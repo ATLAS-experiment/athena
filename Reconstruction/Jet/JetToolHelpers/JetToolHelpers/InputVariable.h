@@ -5,16 +5,17 @@
 #ifndef JETTOOLHELPERS_INPUTVARIABLE_H
 #define JETTOOLHELPERS_INPUTVARIABLE_H
 
-#include <cmath>
-#include <memory>
-#include <functional>
-#include <string>
-#include <optional>
 
-#include "JetToolHelpers/JetContext.h"
-#include "xAODJet/Jet.h"
-#include "AthContainers/AuxElement.h"
-#include "JetAnalysisInterfaces/IInputVariable.h"
+#include "JetToolHelpers/JetContext.h" //used here
+#include "xAODJet/Jet.h" //used here
+#include "AthContainers/AuxElement.h" //member variable
+#include "JetAnalysisInterfaces/IInputVariable.h"//inheritance
+
+#include <memory> //std::unique_ptr
+#include <functional> //std::function
+#include <string>
+#include <stdexcept> //std::runtime_error
+
 
 namespace JetHelper {
 

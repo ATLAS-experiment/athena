@@ -7,15 +7,16 @@
  *
  */
 
-#include <iostream>
 #include "JetToolHelpers/InputVariable.h"
+#include <cmath> //std::abs
+#include <iostream> //std::cerr
 
 namespace JetHelper{
 
 InputVariable::InputVariable(const std::string& name, std::function<float(const xAOD::Jet& jet, const JetContext& jc)> func):
 InputVariable(name)
 {
-    m_customFunction = func;
+    m_customFunction = std::move(func);
 }
 
 std::unique_ptr<InputVariable> InputVariable::createVariable(const std::string& name, const std::string& type, const bool isJetVar) {
