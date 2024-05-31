@@ -11,8 +11,7 @@
 #include "G4ChargedGeantino.hh"
 #include "G4MuonPlus.hh"
 #include "G4MuonMinus.hh"
-//STL headers
-#include <iostream>
+#include "G4Step.hh"
 
 namespace G4UA
 {

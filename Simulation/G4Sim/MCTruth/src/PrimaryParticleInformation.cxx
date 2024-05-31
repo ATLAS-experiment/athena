@@ -3,6 +3,7 @@
 */
 
 #include "MCTruth/PrimaryParticleInformation.h"
+#include "AtlasHepMC/GenParticle.h"
 
 PrimaryParticleInformation::PrimaryParticleInformation()
 {

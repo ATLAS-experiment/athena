@@ -4,7 +4,7 @@
 
 #include "G4TrackCounter.h"
 #include "MCTruth/TrackHelper.h"
-
+#include "G4Track.hh" 
 
 namespace G4UA
 {

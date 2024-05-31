@@ -5,8 +5,6 @@
 #ifndef ISF_GEANT4TOOLS_TRACKPROCESSORUSERACTIONBASE_H
 #define ISF_GEANT4TOOLS_TRACKPROCESSORUSERACTIONBASE_H
 
-#include <string>
-
 #include "G4UserTrackingAction.hh"
 #include "G4UserSteppingAction.hh"
 #include "G4UserEventAction.hh"
@@ -68,7 +66,7 @@ private:
                           HepMC::GenParticlePtr currentGenParticle);
 
   /// Classify the particle represented by the given set of truth links
-  TrackClassification classify(HepMC::ConstGenParticlePtr primaryGenParticle,
+  VTrackInformation::TrackClassification classify(HepMC::ConstGenParticlePtr primaryGenParticle,
                                HepMC::ConstGenParticlePtr generationZeroGenParticle,
                                HepMC::ConstGenParticlePtr currentGenParticle,
                                int regenerationNumber) const;

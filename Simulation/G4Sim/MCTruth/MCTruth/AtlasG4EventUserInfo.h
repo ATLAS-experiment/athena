@@ -5,10 +5,8 @@
 #ifndef MCTRUTH_ATLASG4EVENTUSERINFO_H
 #define MCTRUTH_ATLASG4EVENTUSERINFO_H
 
-#include "AtlasHepMC/GenEvent.h"
+#include "AtlasHepMC/GenEvent_fwd.h"
 #include "AtlasHepMC/GenParticle.h"
-#include "TruthUtils/MagicNumbers.h"
-#include "G4ThreeVector.hh"
 #include "G4VUserEventInformation.hh"
 
 /** @class AtlasG4EventUserInfo
@@ -66,7 +64,7 @@ public:
    * time an interaction of the G4Track is recorded to the
    * HepMC::GenEvent. TODO Rename
    */
-  void SetCurrentGenParticle(HepMC::GenParticlePtr p) {m_currentGenParticle = p;}
+  void SetCurrentGenParticle(HepMC::GenParticlePtr p) {m_currentGenParticle = std::move(p);}
 
   /**
    * @brief return the value of G4Track::GetTrackID() for the last

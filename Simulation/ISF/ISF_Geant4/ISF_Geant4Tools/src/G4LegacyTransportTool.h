@@ -5,9 +5,7 @@
 #ifndef ISF_GEANT4TOOLS_G4LEGACYTRANSPORTTOOL_H
 #define ISF_GEANT4TOOLS_G4LEGACYTRANSPORTTOOL_H
 
-// STL headers
-#include <string>
-#include <unordered_map>
+
 
 // Gaudi headers
 #include "GaudiKernel/ToolHandle.h"
@@ -32,9 +30,12 @@
 #include "ISF_Interfaces/ISimulationSelector.h"
 #include "ISF_Interfaces/IInputConverter.h"
 #include "ISF_Geant4Tools/IG4RunManagerHelper.h"
+// STL headers
+#include <string>
+#include <unordered_map>
 
 class G4Event;
-
+class G4Timer;
 class G4AtlasRunManager;
 
 namespace ISF {

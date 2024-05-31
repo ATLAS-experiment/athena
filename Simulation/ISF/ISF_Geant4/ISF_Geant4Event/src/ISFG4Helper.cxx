@@ -21,6 +21,7 @@
 // ISF includes
 #include "ISF_Event/ISFParticle.h"
 
+
 // ATLAS GeoPrimitves (Amg::Vector3D etc)
 #include "GeoPrimitives/GeoPrimitives.h"
 
@@ -76,7 +77,7 @@ iGeant4::ISFG4Helper::getISFTrackInfo(const G4Track& aTrack)
 TrackInformation*
 iGeant4::ISFG4Helper::attachTrackInfoToNewG4Track( G4Track& aTrack,
                                                     ISF::ISFParticle& baseIsp,
-                                                    TrackClassification classification,
+                                                    VTrackInformation::TrackClassification classification,
                                                     HepMC::GenParticlePtr generationZeroGenParticle)
 {
   if ( aTrack.GetUserInformation() ) {

@@ -3,6 +3,7 @@
 */
 
 #include "MCTruth/AtlasG4EventUserInfo.h"
+#include "AtlasHepMC/GenEvent.h"
 
 HepMC::GenEvent* AtlasG4EventUserInfo::GetHepMCEvent()
 {

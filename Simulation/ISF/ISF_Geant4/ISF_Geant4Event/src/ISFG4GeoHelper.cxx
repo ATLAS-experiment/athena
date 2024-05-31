@@ -5,17 +5,14 @@
 #include "ISF_Geant4Event/ISFG4GeoHelper.h"
 
 // Athena includes
-#include "AtlasDetDescr/AtlasRegion.h"
 
 //Geant4
 #include "G4LogicalVolumeStore.hh"
 #include "G4Step.hh"
 #include "globals.hh"
-
+#include "ISF_Interfaces/IGeoIDSvc.h"
 #include "G4TransportationManager.hh"
 #include "SimHelpers/StepHelper.h"
-
-#include <iostream>
 
 
 //________________________________________________________________________

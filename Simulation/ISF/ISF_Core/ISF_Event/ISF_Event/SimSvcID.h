@@ -9,8 +9,6 @@
 #ifndef ISF_EVENT_SIMSVCID_H
 #define ISF_EVENT_SIMSVCID_H 1
 
-// stl includes
-#include <limits>
 
 // Gaudi Kernel
 #include "GaudiKernel/MsgStream.h"

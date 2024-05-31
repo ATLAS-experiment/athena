@@ -3,7 +3,11 @@
 */
 
 #include "MCTruth/TrackHelper.h"
+#include "G4Track.hh"
 #include "ISF_Event/ISFParticle.h"
+#include "MCTruth/TrackInformation.h"
+#include "GeneratorObjects/HepMcParticleLink.h"
+
 
 TrackHelper::TrackHelper(const G4Track* t)
 {
@@ -12,22 +16,22 @@ TrackHelper::TrackHelper(const G4Track* t)
 bool TrackHelper::IsPrimary() const
 {
   if (m_trackInfo==0) return false;
-  return m_trackInfo->GetClassification()==Primary;
+  return m_trackInfo->GetClassification()==TrackInformation::Primary;
 }
 bool TrackHelper::IsRegeneratedPrimary() const
 {
   if (m_trackInfo==0) return false;
-  return m_trackInfo->GetClassification()==RegeneratedPrimary;
+  return m_trackInfo->GetClassification()==TrackInformation::RegeneratedPrimary;
 }
 bool TrackHelper::IsRegisteredSecondary() const
 {
   if (m_trackInfo==0) return false;
-  return m_trackInfo->GetClassification()==RegisteredSecondary;
+  return m_trackInfo->GetClassification()==TrackInformation::RegisteredSecondary;
 }
 bool TrackHelper::IsSecondary() const
 {
   if (m_trackInfo==0) return true;
-  return m_trackInfo->GetClassification()==Secondary;
+  return m_trackInfo->GetClassification()==TrackInformation::Secondary;
 }
 int TrackHelper::GetBarcode() const  // TODO Drop this once UniqueID and Status are used instead
 {
