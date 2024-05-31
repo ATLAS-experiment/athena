@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -220,7 +220,7 @@ DataObject* SG::DataProxy::accessData()
 inline
 SG::DataProxy::ErrNo SG::DataProxy::errNo() const
 {
-  lock_t lock (m_mutex);
+  lock_t lock (m_objMutex);
   return m_errno;
 }
 

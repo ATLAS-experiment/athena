@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SGTOOLS_DATAPROXY_H
@@ -44,7 +44,8 @@ class DataStore;
   {
 
   public:
-    enum ErrNo {ALLOK, NOCNVSVC, NOIOA, CNVFAILED, T2PREGFAILED, NERRORS};
+    enum ErrNo {ALLOK, NOCNVSVC, NOIOA, CNVFAILED, T2PREGFAILED,
+                RECURSIVEREAD, NERRORS};
     //FIXME private typedef IRegistry::name_type name_type;
     //FIXME private typedef IRegistry::id_type id_type;
     typedef std::string name_type;
@@ -339,7 +340,7 @@ class DataStore;
     // For m_dObject.
     typedef std::recursive_mutex objMutex_t;
     typedef std::lock_guard<objMutex_t> objLock_t;
-    mutable objMutex_t m_objMutex; // For m_dObject.
+    mutable objMutex_t m_objMutex; // For m_dObject, m_errno
 
     
     Athena::IMessageSvcHolder m_ims;
@@ -348,7 +349,7 @@ class DataStore;
     std::atomic<IProxyDict*> m_store;
 
     /// errno-style error code for accessData
-    enum ErrNo m_errno;
+    enum ErrNo m_errno;  // protected by m_objMutex
 
     
     /**

@@ -438,7 +438,17 @@ std::unique_ptr<DataObject> DataProxy::readData()
  */
 std::unique_ptr<DataObject> DataProxy::readData (objLock_t&, ErrNo* errNo)
 {
-  if (errNo) *errNo = ALLOK;
+  if (errNo) {
+    if (*errNo == RECURSIVEREAD) {
+      MsgStream gLog(m_ims, "DataProxy");
+      gLog << MSG::ERROR
+           << "readData: ERROR recursive read for object" 
+           <<m_tAddress.clID() << '/' << m_tAddress.name() << '\n'
+           <<" Returning NULL DataObject pointer  " << endmsg;
+      return nullptr;
+    }
+    *errNo = RECURSIVEREAD;
+  }
 
   IConverter* dataLoader;
   IProxyDict* store;
@@ -474,8 +484,10 @@ std::unique_ptr<DataObject> DataProxy::readData (objLock_t&, ErrNo* errNo)
     sc = store->createObj (dataLoader, address, obj);
   else
     sc = dataLoader->createObj (address, obj);
-  if (sc.isSuccess())
+  if (sc.isSuccess()) {
+    if (errNo && *errNo == RECURSIVEREAD) *errNo = ALLOK;
     return std::unique_ptr<DataObject>(obj);
+  }
   if (errNo) *errNo = CNVFAILED;
   return nullptr;
 }
