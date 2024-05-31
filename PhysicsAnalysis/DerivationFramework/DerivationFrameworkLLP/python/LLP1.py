@@ -699,7 +699,7 @@ def LLP1Cfg(flags):
                                         "MSOnlyExtraPolatedMuonsLRTTrackParticles",
                                         "CombinedStauTrackParticles",
                                         "SlowMuons",
-                                        "Staus"
+                                        "Staus",
                                         "METAssoc_AntiKt4EMTopo",
                                         "MET_Core_AntiKt4EMTopo",
                                         "METAssoc_AntiKt4EMPFlow",
