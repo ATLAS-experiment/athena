@@ -238,7 +238,7 @@ StatusCode RpcReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
         /// indicates whether we're dealing with a MDT / TGC / CSC / RPC chamber
         ///    If we are dealing with a MDT chamber, then there are 3 additional
         ///    properties encoded into the chamber
-        ///       <STATIONETA>_(<STATIONPHI>-1)_<DOUBLETR>_<DOUBLETPHI>_<DOUBLETZ>
+        ///       <STATIONETA>_<STATIONPHI>_<DOUBLETR>_<DOUBLETPHI>_<DOUBLETZ>
         std::vector<std::string> key_tokens = tokenize(key, "_");
         if (key_tokens.size() < 7 ||
             key_tokens[1].find("RPC") == std::string::npos) {
@@ -248,7 +248,7 @@ StatusCode RpcReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
         /// Retrieve first the station Identifier
         const Identifier elementID = idHelper.padID(idHelper.stationNameIndex(key_tokens[0].substr(0, 3)),
                                                     atoi(key_tokens[2]),      ///stationEta
-                                                    atoi(key_tokens[3]) + 1,  ///stationPhi
+                                                    atoi(key_tokens[3]),      ///stationPhi
                                                     atoi(key_tokens[4]),      ///DoubletR
                                                     atoi(key_tokens[6]),      ///DoubletZ
                                                     atoi(key_tokens[5]),      ///DoubletPhi

@@ -168,10 +168,10 @@ const MuonGMR4::RpcReadoutElement* RpcSensitiveDetector::getReadoutElement(const
       THROW_EXCEPTION(" Cannot deduce the station name from "<<stationVolume);
    }
    /// Find the Detector element from the Identifier
-    ///       <STATIONETA>_(<STATIONPHI>-1)_<DOUBLETR>_<DOUBLETPHI>_<DOUBLETZ>
+    ///       <STATIONETA>_<STATIONPHI>_<DOUBLETR>_<DOUBLETPHI>_<DOUBLETZ>
    const std::string stName = volumeTokens[0].substr(0,3);
    const int stationEta = atoi(volumeTokens[2]);
-   const int stationPhi = atoi(volumeTokens[3]) + 1;
+   const int stationPhi = atoi(volumeTokens[3]);
    const int doubletR = atoi(volumeTokens[4]);
    const int doubletPhi = atoi(volumeTokens[5]);
    const int doubletZ = atoi(volumeTokens[6]);

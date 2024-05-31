@@ -252,7 +252,7 @@ StatusCode sTgcReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
 
     for (auto& [key, pv] : mapFPV) {
         /// Key formatted as follows for sTGC:
-        /// <sTGC>_<L/S + MODULE TYPE>_<QUADRUPLET NUMBER>_<ETA INDEX>_<PHI INDEX + 1>
+        /// <sTGC>_<L/S + MODULE TYPE>_<QUADRUPLET NUMBER>_<ETA INDEX>_<PHI INDEX>
         /// e.g. sTGC_STL1QL2_1_6_1 .
         std::vector<std::string> key_tokens = tokenize(key, "_");
         if (key_tokens.size() != 5 ||
@@ -262,10 +262,9 @@ StatusCode sTgcReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
         bool isValid{false};
         const std::string stName = key_tokens[1][1] == 'L' ? "STL" : "STS";
         const int stEta = atoi(key_tokens[2]);
-        const int stPhi = atoi(key_tokens[3]) + 1;
+        const int stPhi = atoi(key_tokens[3]);
         const int ml = atoi(key_tokens[4]);
-        /// Uncomment to avoid dumping diamonds
-        //if (stName == "STL" && std::abs(stEta) == 3) continue; 
+
         defineArgs define{};        
 #ifndef SIMULATIONBASE
         define.layerBounds = layerBounds;
