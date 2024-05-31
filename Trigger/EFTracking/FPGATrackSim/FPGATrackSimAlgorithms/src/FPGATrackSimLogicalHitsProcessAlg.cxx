@@ -159,7 +159,6 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     auto mon_regionID = Monitored::Scalar<unsigned>("regionID", regionID);
     Monitored::Group(m_monTool, mon_regionID);
 
-
     TIME(m_tprocess);
 
     // Get roads
@@ -188,7 +187,6 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     Monitored::Group(m_monTool, mon_nroads_1st);
     
     TIME(m_troads);
-
     // Standard road Filter
     std::vector<FPGATrackSimRoad*> postfilter_roads;
     if (m_filterRoads)
@@ -198,23 +196,24 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
         roads_1st = postfilter_roads;
     }
     ATH_CHECK(m_overlapRemovalTool_1st->runOverlapRemoval(roads_1st));
-
     // Road Filter2
     std::vector<FPGATrackSimRoad*> postfilter2_roads;
     if (m_filterRoads2) {
         ATH_CHECK(m_roadFilterTool2->filterRoads(roads_1st, postfilter2_roads));
         roads_1st = postfilter2_roads;
     }
-
     // Spacepoint road filter tool. Needed when fitting to spacepoints.
     std::vector<FPGATrackSimRoad*> postfilter3_roads;
     if (m_doSpacepoints) {
         ATH_CHECK(m_spRoadFilterTool->filterRoads(roads_1st, postfilter3_roads));
         roads_1st = postfilter3_roads;
     }
+    auto mon_nroads_1st_postfilter = Monitored::Scalar<unsigned>("nroads_1st_postfilter", roads_1st.size());
+    Monitored::Group(m_monTool, mon_nroads_1st_postfilter);
 
+
+    
     TIME(m_troad_filter);
-
     // Get tracks
     std::vector<FPGATrackSimTrack> tracks_1st;
     if (m_doTracking) {
@@ -236,7 +235,6 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
 	  Monitored::Group(m_monTool,mon_best_chi2_1st);
         }
     }
-
     auto mon_ntracks_1st = Monitored::Scalar<unsigned>("ntrack_1st", tracks_1st.size());
     Monitored::Group(m_monTool,mon_ntracks_1st);
     

@@ -16,7 +16,7 @@ def FPGATrackSimConstsGenCfg(flags, **kwargs):
     acc = ComponentAccumulator()
 
     kwargs.setdefault("merged_file_path", flags.Trigger.FPGATrackSim.FPGATrackSimMatrixFileRegEx)
-    kwargs.setdefault("region", flags.Trigger.FPGATrackSim.FPGATrackSimBankRegion)
+    kwargs.setdefault("region", flags.Trigger.FPGATrackSim.region)
     kwargs.setdefault("CheckGood2ndStage",flags.Trigger.FPGATrackSim.CheckGood2ndStage)
     kwargs.setdefault("UseHitScaleFactor",flags.Trigger.FPGATrackSim.UseHitScaleFactor)
     kwargs.setdefault("IsSecondStage",flags.Trigger.FPGATrackSim.Is2ndStage)

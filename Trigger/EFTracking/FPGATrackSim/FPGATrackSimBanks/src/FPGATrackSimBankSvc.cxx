@@ -132,7 +132,6 @@ const FPGATrackSimSectorBank* FPGATrackSimBankSvc::SectorBank_1st()
 {
     // Don't need to check the return actually, will return nullptr anyways
     if (!m_SectorBank_1st) LoadSectorBank_1st();
-
     return m_SectorBank_1st.get();
 }
 

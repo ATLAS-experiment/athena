@@ -12,7 +12,7 @@
 #include "FPGATrackSimObjects/FPGATrackSimConstants.h"
 #include "FPGATrackSimBanks/FPGATrackSimSectorBank.h"
 #include "FPGATrackSimEtaPatternFilterTool.h"
-
+#include "PathResolver/PathResolver.h"
 #include "TH2.h"
 
 #include <sstream>
@@ -67,8 +67,9 @@ StatusCode FPGATrackSimEtaPatternFilterTool::initialize()
 
 void FPGATrackSimEtaPatternFilterTool::readPatterns(std::string const & filepath)
 {
+  
     // Open the file
-    std::ifstream fin(filepath);
+    std::ifstream fin(PathResolverFindCalibFile(filepath));
     if (!fin.is_open())
     {
         ATH_MSG_FATAL("Couldn't open " << filepath);
@@ -138,11 +139,11 @@ StatusCode FPGATrackSimEtaPatternFilterTool::filterRoads(const std::vector<FPGAT
 {
     m_postfilter_roads.clear();
     postfilter_roads.clear();
-
     for (auto & road : prefilter_roads)
     {
         // reset all maps
         resetCounters();
+	
 
         // put hits in module objects
         addHitsToMap(road);
@@ -154,7 +155,6 @@ StatusCode FPGATrackSimEtaPatternFilterTool::filterRoads(const std::vector<FPGAT
         // during constant generation (where we don't want to discard training tracks).
         // At least, where we *might* not want to discard training tracks?
         int numMatches = 0;
-
         // check what is above threshold, moving down from 8/8 hits
         for (unsigned working_threshold = m_nLayers; working_threshold >= m_threshold; working_threshold--)
         {
@@ -187,19 +187,16 @@ StatusCode FPGATrackSimEtaPatternFilterTool::filterRoads(const std::vector<FPGAT
                     m_postfilter_roads.push_back(buildRoad(patt_bitmask, road, index));
                 }
             }
-
             // If using a "dynamic" threshold-- once matches have been found at a given level, exit.
             if (numMatches > 0 && m_dynamicThreshold) {
-                break;
+	      break;
             }
         }
     }
-
     // copy roads to outputs
     postfilter_roads.reserve(m_postfilter_roads.size());
     for (FPGATrackSimRoad & r : m_postfilter_roads)
         postfilter_roads.push_back(&r);
-
     return StatusCode::SUCCESS;
 }
 
@@ -294,7 +291,6 @@ FPGATrackSimRoad FPGATrackSimEtaPatternFilterTool::buildRoad(std::pair<EtaPatter
         const FPGATrackSimSectorBank* sectorbank = !m_isSecondStage ? m_FPGATrackSimBankSvc->SectorBank_1st() : m_FPGATrackSimBankSvc->SectorBank_2nd();
         r.setSector(sectorbank->findSector(modules));
     }
-
     return r;
 }
 

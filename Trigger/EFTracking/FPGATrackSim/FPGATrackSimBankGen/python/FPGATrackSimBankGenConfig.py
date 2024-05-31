@@ -66,9 +66,7 @@ def FPGATrackSimBankGenCfg(flags, **kwargs):
 
     theFPGATrackSimMatrixGenAlg.SpacePoints = True
     theFPGATrackSimMatrixGenAlg.SpacePointTool = acc.getPrimaryAndMerge(FPGATrackSimSpacePointsToolCfg(flags))
-
-    # We should make it possible to configure this, probably.
-    theFPGATrackSimMatrixGenAlg.minSpacePlusPixel = 4
+    theFPGATrackSimMatrixGenAlg.minSpacePlusPixel = flags.Trigger.FPGATrackSim.minSpacePlusPixel
 
     # Override this. It gets set somewhere from bank_tag.
     theFPGATrackSimMatrixGenAlg.WCmax = 2

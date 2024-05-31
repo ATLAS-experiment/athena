@@ -255,7 +255,8 @@ def FPGATrackSimLogicalHitsProcessAlgMonitoringCfg(flags):
     monTool.defineHistogram('nHits_1st', path='EXPERT', type='TH1I', title='nHits_1st', xbins=nbin, xmin=low, xmax=high)
     monTool.defineHistogram('nHits_1st_unmapped', path='EXPERT', type='TH1I', title='nHits_1st_unmapped', xbins=nbin, xmin=low, xmax=high)
     monTool.defineHistogram('nroads_1st', path='EXPERT', type='TH1I', title='nroads_1st', xbins=nbin, xmin=low, xmax=high)
-    monTool.defineHistogram('layerIDs_1st', path='EXPERT', type='TH1I', title='layerIDs_1st', xbins=nbin, xmin=low, xmax=high)
+    monTool.defineHistogram('nroads_1st_postfilter', path='EXPERT', type='TH1I', title='nroads_1st_postfilter', xbins=nbin, xmin=low, xmax=high)    
+    monTool.defineHistogram('layerIDs_1st', path='EXPERT', type='TH1I', title='layerIDs_1st', xbins=20, xmin=-0.5, xmax = 19.5)
     monTool.defineHistogram('chi2_1st_all', path='EXPERT', type='TH1F', title='chi2_1st_all', xbins=nbin, xmin=low, xmax=high)
     monTool.defineHistogram('best_chi2_1st', path='EXPERT', type='TH1F', title='chi2_1st_all', xbins=nbin, xmin=low, xmax=high)
     monTool.defineHistogram('ntrack_1st', path='EXPERT', type='TH1F', title='ntrack_1st', xbins=nbin, xmin=low, xmax=high)
@@ -279,8 +280,6 @@ def FPGATrackSimLogicalHitsProcessAlgMonitoringCfg(flags):
     monTool.defineHistogram('eff_track,z0', path='EXPERT', type='TEfficiency', title='eff_track_z0', xbins = 20, xmin = -150.0, xmax = 150.0)
     monTool.defineHistogram('eff_track_chi2,z0', path='EXPERT', type='TEfficiency', title='eff_track_chi2_z0', xbins = 20, xmin = -150.0, xmax = 150.0)
 
-
-    
     result.setPrivateTools(monTool)
 
     return result
