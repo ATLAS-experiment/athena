@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "InDetCaloClusterROISelector/CaloClusterROIPhiRZContainerMaker.h"
@@ -76,7 +76,7 @@ StatusCode CaloClusterROIPhiRZContainerMaker::initialize()
        else {
           m_outputUnsorted.push_back(output_i);
        }
-       ATH_MSG_INFO( "ROIPhiRZ container " << m_outputClusterContainerName[  m_outputIndex[output_i] ]
+       ATH_MSG_DEBUG( "ROIPhiRZ container " << m_outputClusterContainerName[  m_outputIndex[output_i] ]
                      << " : " << m_minPtEm[m_outputIndex[output_i] ] << " MeV " <<  ( m_phiWidth[m_outputIndex[output_i]]>0. ? " order by phi " : " unordered" ) );
     }
     return StatusCode::SUCCESS;
@@ -90,7 +90,7 @@ StatusCode CaloClusterROIPhiRZContainerMaker::finalize()
     //
     // finalize method
     //
-   ATH_MSG_INFO ("AllClusters " << m_allClusters << " selected " << m_selectedClusters << " max ROIs per event " << m_maxNROIs);
+   ATH_MSG_DEBUG ("AllClusters " << m_allClusters << " selected " << m_selectedClusters << " max ROIs per event " << m_maxNROIs);
 
     return StatusCode::SUCCESS;
 }
@@ -279,7 +279,7 @@ void CaloClusterROIPhiRZContainerMaker::addROI( const xAOD::CaloCluster &cluster
 
   }
   else {
-     ATH_MSG_INFO("Skip selected cluster " << energy << " * " << std::sin(global_position.theta()) << " = " << energy * std::sin(global_position.theta())<< " >= " << m_sortedMinPtEm[0] );
+     ATH_MSG_DEBUG("Skip selected cluster " << energy << " * " << std::sin(global_position.theta()) << " = " << energy * std::sin(global_position.theta())<< " >= " << m_sortedMinPtEm[0] );
   }
 }
 }

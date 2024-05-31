@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -87,12 +87,7 @@ namespace InDet{
     if ( !m_monTool.empty() ) {
        ATH_CHECK(m_monTool.retrieve() );
     }
-    else {
-       ATH_MSG_INFO("Monitoring tool is empty");
-    }
 
-
-    ATH_MSG_DEBUG( "Initialize done !" );
     return StatusCode::SUCCESS;
   }
   
