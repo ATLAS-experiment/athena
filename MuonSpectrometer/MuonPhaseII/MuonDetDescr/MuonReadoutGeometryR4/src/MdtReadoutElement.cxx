@@ -191,4 +191,19 @@ double MdtReadoutElement::distanceToReadout(const ActsGeometryContext& ctx,
                                      Amg::Vector3D::UnitZ();
     return readOutPos.z() - locPoint.z();
 }
+#ifndef SIMULATIONBASE
+std::map<Identifier, std::shared_ptr<Acts::Surface>> MdtReadoutElement::getSurfaces() const {
+    std::map<Identifier,  std::shared_ptr<Acts::Surface>> surfaces{};
+    for (unsigned int layer = 1; layer<= numLayers(); ++layer) {
+         for (unsigned int tube = 1; tube<= numTubesInLay(); ++tube) {
+            const IdentifierHash measHash = measurementHash(layer, tube);
+            if (isValid(measHash)) {
+               surfaces[measurementId(measHash)] = surfacePtr(measHash);
+            }
+         }
+    }
+    return surfaces;
+}
+#endif
+
 }  // namespace MuonGMR4

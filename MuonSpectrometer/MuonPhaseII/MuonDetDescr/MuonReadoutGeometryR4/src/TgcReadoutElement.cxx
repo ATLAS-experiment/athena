@@ -100,4 +100,19 @@ Amg::Vector3D TgcReadoutElement::channelPosition(const ActsGeometryContext& ctx,
    }
    return localToGlobalTrans(ctx, layerHash(measHash)) * layDesign->localStripPos(channelNumber(measHash));
 }
+#ifndef SIMULATIONBASE
+std::map<Identifier, std::shared_ptr<Acts::Surface>> TgcReadoutElement::getSurfaces()  const {
+     std::map<Identifier, std::shared_ptr<Acts::Surface>> surfaces{};
+     for (unsigned int gasGap = 1; gasGap <= nGasGaps(); ++gasGap) {
+        for (bool measPhi: {false, true}) {
+            const IdentifierHash hash = constructHash(1, gasGap, measPhi);
+            if ( (measPhi && numStrips(gasGap)) ||
+                 (!measPhi && numWireGangs(gasGap)) ) {
+                surfaces[measurementId(hash)] = surfacePtr(layerHash(hash));
+            }
+        }
+     }
+     return surfaces;
+}
+#endif
 }

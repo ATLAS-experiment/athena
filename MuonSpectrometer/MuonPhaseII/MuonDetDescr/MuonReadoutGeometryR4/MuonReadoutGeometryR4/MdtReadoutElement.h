@@ -161,6 +161,9 @@ class MdtReadoutElement : public MuonReadoutElement {
     
     double wireLength(const IdentifierHash& hash) const;
 
+#ifndef SIMULATIONBASE
+    std::map<Identifier, std::shared_ptr<Acts::Surface>> getSurfaces() const override final;
+#endif
 
         friend ActsTrk::TransformCacheDetEle<MdtReadoutElement>;
    private:
