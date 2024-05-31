@@ -7,18 +7,16 @@
 #include "TFitResult.h"
 #include "TFitResultPtr.h"
 #include "TVirtualFitter.h"
-#include "TFitter.h"
 #include "TList.h"
 #include "TMinuit.h"
 
 #include <algorithm>
 #include <sstream>
 #include <cmath>
-#include <memory>
 #include <numeric>
 #include <iomanip>
+#include <stdexcept>
 
-#include "CxxUtils/checker_macros.h"
 ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
 extern int gErrorIgnoreLevel;
@@ -90,7 +88,7 @@ void ZDCPulseAnalyzer::CombinedPulsesFCN(int& /*numParam*/, double*, double& f, 
 ZDCPulseAnalyzer::ZDCPulseAnalyzer(ZDCMsg::MessageFunctionPtr msgFunc_p, const std::string& tag, int Nsample, float deltaTSample, size_t preSampleIdx, int pedestal,
                                    float gainHG, const std::string& fitFunction, int peak2ndDerivMinSample,
                                    float peak2ndDerivMinThreshHG, float peak2ndDerivMinThreshLG) :
-  m_msgFunc_p(msgFunc_p),
+  m_msgFunc_p(std::move(msgFunc_p)),
   m_tag(tag), m_Nsample(Nsample),
   m_preSampleIdx(preSampleIdx),
   m_deltaTSample(deltaTSample),
@@ -1756,7 +1754,7 @@ void ZDCPulseAnalyzer::dump() const
 void ZDCPulseAnalyzer::dumpTF1(const TF1* func) const
 {
   std::string message = "Dump of TF1: " + std::string(func->GetName());
-  (*m_msgFunc_p)(ZDCMsg::Verbose, message);
+  (*m_msgFunc_p)(ZDCMsg::Verbose, std::move(message));
 
   unsigned int npar = func->GetNpar();
   for (unsigned int ipar = 0; ipar < npar; ipar++) {
@@ -1978,7 +1976,7 @@ std::vector<float> ZDCPulseAnalyzer::Calculate2ndDerivative(const std::vector <f
 //
 float ZDCPulseAnalyzer::obtainDelayedBaselineCorr(const std::vector<float>& samples)
 {
-  unsigned int nsamples = samples.size();
+  const unsigned int nsamples = samples.size();
   
   std::vector<float> derivVec = CalculateDerivative(samples, 2);
   std::vector<float> deriv2ndVec = Calculate2ndDerivative(samples, 2);
@@ -2014,6 +2012,10 @@ float ZDCPulseAnalyzer::obtainDelayedBaselineCorr(const std::vector<float>& samp
   // Because of the way the above analysis is done, we can always
   // Go back one even and one odd sample and forward one odd sample.
   //
+  //if minIndex is < 2 or >samples.size() the result is undefined; prevent this:
+  if (minIndex<2 or (minIndex+1) >=nsamples){
+    throw std::out_of_range("minIndex out of range in ZDCPulseAnalyzer::obtainDelayedBaselineCorr");
+  }
   float sample0 = samples[minIndex - 2];
   float sample1 = samples[minIndex - 1];
   float sample2 = samples[minIndex];

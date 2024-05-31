@@ -9,7 +9,6 @@
 #include "ZdcAnalysis/ZDCMsg.h"
 #include "TGraphErrors.h"
 #include "TFitter.h"
-#include "TList.h"
 #include "TF1.h"
 #include "TH1.h"
 
@@ -293,7 +292,7 @@ private:
   int m_lastHGOverFlowSample{};
   int m_firstHGOverFlowSample{};
 
-  unsigned int m_NSamplesAna;
+  unsigned int m_NSamplesAna{};
   std::vector<float> m_ADCSamplesHG;
   std::vector<float> m_ADCSamplesLG;
   std::vector<float> m_ADCSamplesHGSub;
