@@ -24,5 +24,3 @@ atlas_add_dictionary( AthenaPoolExampleConverterDict
                       AthenaPoolExampleConverter/selection.xml
                       LINK_LIBRARIES AthenaPoolExampleConverter )
 
-# Install files from the package:
-atlas_install_joboptions( share/*.py )
