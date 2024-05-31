@@ -34,3 +34,16 @@ atlas_add_test( SCT_OnlineId_test
   POST_EXEC_SCRIPT nopost.sh
 )
 
+atlas_add_test( SCT_CablingCondAlgFromText_test
+  SOURCES test/SCT_CablingCondAlgFromText_test.cxx src/SCT_CablingCondAlgFromText.cxx
+  INCLUDE_DIRS ${Boost_INCLUDE_DIRS} 
+  LINK_LIBRARIES ${Boost_LIBRARIES} TestTools AthenaBaseComps GaudiKernel 
+    AthenaPoolUtilities  PathResolver StoreGateLib IdDictParser SCT_CablingLib 
+    InDetIdentifier
+  POST_EXEC_SCRIPT "nopost.sh"
+)
+
+atlas_install_joboptions(share/*.txt)
+atlas_install_runtime(share/*.dat)
+
+
