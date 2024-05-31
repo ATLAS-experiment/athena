@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // IG4RunManagerHelper.h, (c) ATLAS Detector software
@@ -12,7 +12,8 @@
 #include "GaudiKernel/IAlgTool.h"
 
 #include "CxxUtils/checker_macros.h"
-#include "G4AtlasAlg/G4AtlasRunManager.h"
+class G4AtlasRunManager;
+class G4RunManager;
 
 namespace ISF {
 

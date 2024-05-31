@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_GEANT4EVENT_ISFG4GEOHELPER_H
@@ -7,8 +7,16 @@
 
 
 #include "AtlasDetDescr/AtlasRegion.h"
-#include "G4Step.hh"
-#include "ISF_Interfaces/IGeoIDSvc.h"
+
+
+class G4Step;
+class G4LogicalVolume;
+class G4StepPoint;
+
+
+namespace ISF{
+  class IGeoIDSvc;
+}
 
 
 namespace iGeant4 {

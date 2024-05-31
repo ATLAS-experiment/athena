@@ -14,11 +14,13 @@
 #include "AtlasHepMC/GenEvent.h"
 #include "TruthUtils/MagicNumbers.h"
 
+#include <cmath>
+
 static HepMC::GenParticlePtr ParticleHelper_convert( const ISF::ISFParticle &particle) {
 
   const Amg::Vector3D &mom = particle.momentum();
   double mass = particle.mass();
-  double energy = sqrt( mom.mag2() + mass*mass);
+  double energy = std::sqrt( mom.mag2() + mass*mass);
   HepMC::FourVector fourMomentum( mom.x(), mom.y(), mom.z(), energy);
 
   auto hepParticle = HepMC::newGenParticlePtr( fourMomentum, particle.pdgCode(), particle.status() );

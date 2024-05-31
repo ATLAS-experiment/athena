@@ -11,7 +11,7 @@ VTrackInformation::VTrackInformation(TrackClassification tc)
 
 void VTrackInformation::SetPrimaryGenParticle(HepMC::GenParticlePtr p)
 {
-  m_primaryGenParticle = p;
+  m_primaryGenParticle = std::move(p);
 }
 
 bool VTrackInformation::GetReturnedToISF() const

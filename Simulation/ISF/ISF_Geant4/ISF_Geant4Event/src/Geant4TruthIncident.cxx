@@ -24,7 +24,6 @@
 // Geant4 includes
 #include "G4Step.hh"
 #include "G4Track.hh"
-#include "G4ThreeVector.hh"
 #include "G4VProcess.hh"
 
 #include "G4TrackStatus.hh"
@@ -175,7 +174,7 @@ HepMC::GenParticlePtr iGeant4::Geant4TruthIncident::parentParticleAfterIncident(
       regenerationNr++;
       tInfo->SetRegenerationNr(regenerationNr);
       if ( tHelper.IsPrimary() ) { 
-        tInfo->SetClassification(RegeneratedPrimary);
+        tInfo->SetClassification(TrackInformation::RegeneratedPrimary);
       }
     }
 
@@ -246,7 +245,7 @@ HepMC::GenParticlePtr iGeant4::Geant4TruthIncident::childParticle(unsigned short
   }
 
   trackInfo->SetCurrentGenParticle(hepParticle);
-  trackInfo->SetClassification(RegisteredSecondary);
+  trackInfo->SetClassification(TrackInformation::RegisteredSecondary);
   trackInfo->SetRegenerationNr(0);
 
   return hepParticle;

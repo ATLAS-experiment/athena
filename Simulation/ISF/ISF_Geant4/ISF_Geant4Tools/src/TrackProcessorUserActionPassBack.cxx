@@ -206,7 +206,7 @@ namespace G4UA {
             HepMC::GenParticlePtr generationZeroGenParticle = nullptr;
             ::iGeant4::ISFG4Helper::attachTrackInfoToNewG4Track( *aTrack_2nd,
                                                        *parent,
-                                                       Secondary,
+                                                       VTrackInformation::Secondary,
                                                        generationZeroGenParticle );
 
             HepMC::GenParticlePtr currentGenParticle{};

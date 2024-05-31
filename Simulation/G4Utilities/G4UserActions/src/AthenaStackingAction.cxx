@@ -1,11 +1,8 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-// System includes
-#include <iostream>
-#include <memory>
-#include <string>
+
 
 // Local includes
 #include "AthenaStackingAction.h"
@@ -30,6 +27,10 @@
 #include "G4Neutron.hh"
 
 #include "CxxUtils/checker_macros.h"
+
+// System includes
+#include <memory>
+#include <string>
 
 namespace G4UA
 {
@@ -122,7 +123,7 @@ namespace G4UA
             // OK, we got back to HepMC
             std::unique_ptr<TrackInformation> ti = std::make_unique<TrackInformation>(part);
             ti->SetRegenerationNr(0);
-            ti->SetClassification(Primary);
+            ti->SetClassification(TrackInformation::Primary);
             // regNr=0 and classify=Primary are default values anyway
             /// Pass ownership to track. The G4VUserTrackInformation*
             /// fpUserInformation member variable set by this method

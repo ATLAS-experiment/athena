@@ -42,6 +42,7 @@
 #include "G4VUserPhysicsList.hh"
 #include "G4VModularPhysicsList.hh"
 #include "G4ParallelWorldPhysics.hh"
+#include "G4Timer.hh"
 
 #include "AtlasDetDescr/AtlasRegionHelper.h"
 

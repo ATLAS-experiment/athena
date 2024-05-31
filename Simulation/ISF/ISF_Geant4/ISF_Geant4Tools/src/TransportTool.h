@@ -5,12 +5,7 @@
 #ifndef ISF_GEANT4TOOLS_TRANSPORTTOOL_H
 #define ISF_GEANT4TOOLS_TRANSPORTTOOL_H
 
-// STL headers
-#include <string>
-#include <thread>
 
-// TBB
-#include "tbb/concurrent_unordered_map.h"
 
 // Gaudi headers
 #include "GaudiKernel/ToolHandle.h"
@@ -21,7 +16,7 @@
 
 // Athena headers
 #include "AthenaKernel/IAthRNGSvc.h"
-#include "AthenaKernel/SlotSpecificObj.h"
+//#include "AthenaKernel/SlotSpecificObj.h"
 #include "G4AtlasInterfaces/IUserActionSvc.h"
 #include "G4AtlasInterfaces/IDetectorGeometrySvc.h"
 #include "G4AtlasInterfaces/ISensitiveDetectorMasterTool.h"
@@ -32,21 +27,30 @@
 
 // ISF includes
 #include "ISF_Interfaces/BaseSimulatorTool.h"
-#include "ISF_Interfaces/ISimulationSelector.h"
+//#include "ISF_Interfaces/ISimulationSelector.h"
 #include "ISF_Interfaces/IInputConverter.h"
-#include "ISF_Geant4Tools/IG4RunManagerHelper.h"
+//#include "ISF_Geant4Tools/IG4RunManagerHelper.h"
 
 #include "TrackProcessorUserActionBase.h"
+#include "AtlasHepMC/GenEvent_fwd.h"
+// TBB
+#include "tbb/concurrent_unordered_map.h"
+
+// STL headers
+#include <string>
+#include <thread>
+
+
 
 class G4Event;
-
+class G4Timer;
 class G4AtlasRunManager;
 
 namespace ISF {
   class ISFParticle;
 }
 
-#include "AtlasHepMC/GenEvent_fwd.h"
+
 
 namespace iGeant4
 {

@@ -6,7 +6,7 @@
 #define MCTRUTH_TRACKINFORMATION_H
 
 #include "VTrackInformation.h"
-#include "TruthUtils/MagicNumbers.h"
+#include "TruthUtils/MagicNumbers.h" //HepMC::INVALID_PARTICLE_BARCODE
 #include "CxxUtils/checker_macros.h"
 
 namespace ISF {

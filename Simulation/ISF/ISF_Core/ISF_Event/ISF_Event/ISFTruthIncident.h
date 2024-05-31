@@ -9,11 +9,10 @@
 #include <vector>
 
 // ISF includes
-#include "ISF_Event/ISFParticle.h"
 #include "ISF_Event/ISFParticleContainer.h"
 #include "ISF_Event/ITruthIncident.h"
 // DetectorDescription
-#include "AtlasDetDescr/AtlasRegion.h"
+#include "AtlasDetDescr/AtlasRegion.h" //enum
 
 namespace ISF {
   class ISFParticle;

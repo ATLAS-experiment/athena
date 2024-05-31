@@ -6,9 +6,8 @@
 #define MCTRUTH_PRIMARYPARTICLEINFORMATION_H
 
 #include "G4VUserPrimaryParticleInformation.hh"
-#include "AtlasHepMC/GenEvent.h"
-#include "AtlasHepMC/GenParticle.h"
-#include "TruthUtils/MagicNumbers.h"
+#include "AtlasHepMC/GenParticle_fwd.h" 
+#include "TruthUtils/MagicNumbers.h" //HepMC::INVALID_PARTICLE_BARCODE
 #include "CxxUtils/checker_macros.h"
 
 namespace ISF {

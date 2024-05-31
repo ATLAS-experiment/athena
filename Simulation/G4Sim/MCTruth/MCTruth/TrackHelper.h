@@ -5,9 +5,11 @@
 #ifndef TrackHelper_H
 #define TrackHelper_H
 
-#include "G4Track.hh"
-#include "MCTruth/TrackInformation.h"
-#include "GeneratorObjects/HepMcParticleLink.h"
+
+
+class G4Track;
+class TrackInformation;
+class HepMcParticleLink;
 
 class TrackHelper {
 public:

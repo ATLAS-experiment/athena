@@ -6,17 +6,16 @@
 #define ISF_GEANT4TOOLS_ISFG4HELPER_H
 
 // ISF Includes
-#include "ISF_Event/ISFParticle.h"
 
 // MCTruth includes
-#include "MCTruth/VTrackInformation.h"
+#include "MCTruth/VTrackInformation.h" //use enum
 
 // forward declarations
 #include "AtlasHepMC/GenParticle_fwd.h"
 namespace ISF {
   class TruthBinding;
+  class ISFParticle;
 }
-class VTrackInformation;
 class TrackInformation;
 class AtlasG4EventUserInfo;
 class G4Track;
@@ -45,7 +44,7 @@ class ISFG4Helper {
    *  (the G4Track must not have a UserInformation object attached to it) */
   static TrackInformation* attachTrackInfoToNewG4Track( G4Track& aTrack,
                                    ISF::ISFParticle& baseIsp,
-                                   TrackClassification classification,
+                                   VTrackInformation::TrackClassification classification,
                                    HepMC::GenParticlePtr generationZeroGenParticle = nullptr);
   
   /** return pointer to current AtlasG4EventUserInfo */

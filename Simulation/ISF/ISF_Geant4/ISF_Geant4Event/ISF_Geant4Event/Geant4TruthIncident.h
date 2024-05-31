@@ -5,19 +5,22 @@
 #ifndef ISF_GEANT4TOOLS_Geant4TruthIncident_H
 #define ISF_GEANT4TOOLS_Geant4TruthIncident_H
 
+// ISF includes
+#include "ISF_Event/ITruthIncident.h" //inheritance
+
+//G4 includes
+#include "G4ThreeVector.hh" //typedef
+
+// HepMC includes
+#include "AtlasHepMC/SimpleVector.h" //typedef FourVector
+#include "AtlasHepMC/GenParticle_fwd.h" //typedef GenParticlePtr
+
+#include "AtlasDetDescr/AtlasRegion.h" //enum
+
+#include "CxxUtils/checker_macros.h" //ATLAS_THREAD_SAFE
 // std
 #include <vector>
 
-// ISF includes
-#include "ISF_Event/ITruthIncident.h"
-
-// HepMC includes
-#include "AtlasHepMC/SimpleVector.h"
-
-//Geant4 includes
-#include "G4ThreeVector.hh"
-
-#include "CxxUtils/checker_macros.h"
 
 // forward declarations
 class G4Step;

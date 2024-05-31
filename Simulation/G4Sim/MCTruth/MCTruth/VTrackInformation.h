@@ -6,9 +6,6 @@
 #define MCTRUTH_VTRACKINFORMATION_H
 
 #include "G4VUserTrackInformation.hh"
-
-enum TrackClassification { Primary, RegeneratedPrimary, RegisteredSecondary, Secondary, BarcodeOnly } ;
-
 #include "AtlasHepMC/GenParticle_fwd.h"
 
 namespace ISF {
@@ -32,6 +29,7 @@ namespace ISF {
  */
 class VTrackInformation: public G4VUserTrackInformation {
 public:
+  enum TrackClassification { Primary, RegeneratedPrimary, RegisteredSecondary, Secondary, BarcodeOnly } ;
   VTrackInformation(TrackClassification tc=Primary);
 
   /**

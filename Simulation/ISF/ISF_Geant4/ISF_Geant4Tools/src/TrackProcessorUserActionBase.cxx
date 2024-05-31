@@ -87,7 +87,7 @@ void TrackProcessorUserActionBase::UserSteppingAction(const G4Step* aStep)
       HepMC::GenParticlePtr generationZeroGenParticle{};
       ::iGeant4::ISFG4Helper::attachTrackInfoToNewG4Track( *aSecondaryTrack,
                                                 *m_curBaseISP,
-                                                Secondary,
+                                                VTrackInformation::Secondary,
                                                 generationZeroGenParticle );
     }
   } // <- loop over secondaries from this step
@@ -204,25 +204,27 @@ void TrackProcessorUserActionBase::updateCachedParticleInfo(ISF::ISFParticle* ba
 }
 
 /// Classify the particle represented by the given set of truth links
-TrackClassification TrackProcessorUserActionBase::classify(HepMC::ConstGenParticlePtr primaryGenParticle,
+VTrackInformation::TrackClassification 
+TrackProcessorUserActionBase::classify(HepMC::ConstGenParticlePtr primaryGenParticle,
                                                            HepMC::ConstGenParticlePtr generationZeroGenParticle,
                                                            HepMC::ConstGenParticlePtr currentGenParticle,
                                                            int regenerationNumber) const
 {
   // if particle points to a non-zero truth particle it can not just be a 'simple' Secondary
+
   if (currentGenParticle) {
     if (currentGenParticle == primaryGenParticle) {
-      return Primary;
+      return VTrackInformation::Primary;
     }
     else if (generationZeroGenParticle == primaryGenParticle && regenerationNumber>0) {
-      return RegeneratedPrimary;
+      return VTrackInformation::RegeneratedPrimary;
     }
     else {
-      return RegisteredSecondary;
+      return VTrackInformation::RegisteredSecondary;
     }
   }
 
-  return Secondary;
+  return VTrackInformation::Secondary;
 }
 
 
