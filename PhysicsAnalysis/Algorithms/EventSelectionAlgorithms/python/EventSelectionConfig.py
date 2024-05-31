@@ -226,6 +226,13 @@ class EventSelectionConfig(ConfigBlock):
         config.addSelection('EventInfo', '', decoration)
         return
 
+    def checkDecorationName(self, decoration):
+        if decoration == '':
+            return decoration
+        decoration = decoration.split("&&")
+        decoration = [sub + ',as_char' if ',as_char' not in sub else sub for sub in decoration]
+        return '&&'.join(decoration)
+
     def add_IMPORT(self, text, config):
         # this is used to import a previous selection
         items = text.split()
@@ -254,7 +261,7 @@ class EventSelectionConfig(ConfigBlock):
         thisalg = f'{self.name}_NEL_{self.step}'
         alg = config.createAlgorithm('CP::NObjectPtSelectorAlg', thisalg)
         alg.particles, alg.objectSelection = config.readNameAndSelection(self.electrons)
-        alg.eventPreselection = f'{self.currentDecoration},as_char' if self.currentDecoration else ''
+        alg.eventPreselection = self.checkDecorationName(self.currentDecoration)
         if len(items) == 4:
             alg.minPt = self.check_float(items[1])
             alg.sign  = self.check_sign(items[2])
@@ -282,7 +289,7 @@ class EventSelectionConfig(ConfigBlock):
         thisalg = f'{self.name}_NMU_{self.step}'
         alg = config.createAlgorithm('CP::NObjectPtSelectorAlg', thisalg)
         alg.particles, alg.objectSelection = config.readNameAndSelection(self.muons)
-        alg.eventPreselection = f'{self.currentDecoration},as_char' if self.currentDecoration else ''
+        alg.eventPreselection = self.checkDecorationName(self.currentDecoration)
         if len(items) == 4:
             alg.minPt = self.check_float(items[1])
             alg.sign  = self.check_sign(items[2])
@@ -311,7 +318,7 @@ class EventSelectionConfig(ConfigBlock):
         alg = config.createAlgorithm('CP::SumNElNMuPtSelectorAlg', thisalg)
         alg.electrons, alg.electronSelection = config.readNameAndSelection(self.electrons)
         alg.muons, alg.muonSelection = config.readNameAndSelection(self.muons)
-        alg.eventPreselection = f'{self.currentDecoration},as_char' if self.currentDecoration else ''
+        alg.eventPreselection = self.checkDecorationName(self.currentDecoration)
         if len(items) == 4:
             alg.minPtEl = self.check_float(items[1])
             alg.minPtMu = self.check_float(items[1])
@@ -336,7 +343,7 @@ class EventSelectionConfig(ConfigBlock):
         thisalg = f'{self.name}_NJET_{self.step}'
         alg = config.createAlgorithm('CP::NObjectPtSelectorAlg', thisalg)
         alg.particles, alg.objectSelection = config.readNameAndSelection(self.jets)
-        alg.eventPreselection = f'{self.currentDecoration},as_char' if self.currentDecoration else ''
+        alg.eventPreselection = self.checkDecorationName(self.currentDecoration)
         if len(items) == 4:
             alg.minPt = self.check_float(items[1])
             alg.sign  = self.check_sign(items[2])
@@ -366,7 +373,7 @@ class EventSelectionConfig(ConfigBlock):
         particles, selection = config.readNameAndSelection(self.jets)
         alg.particles = particles
         alg.objectSelection = f'{selection}&&{self.btagDecoration},as_char'
-        alg.eventPreselection = f'{self.currentDecoration},as_char' if self.currentDecoration else ''
+        alg.eventPreselection = self.checkDecorationName(self.currentDecoration)
         alg.minPt = 25000.
         if len(items) == 3:
             alg.sign  = self.check_sign(items[1])
@@ -391,7 +398,7 @@ class EventSelectionConfig(ConfigBlock):
         thisalg = f'{self.name}_NPH_{self.step}'
         alg = config.createAlgorithm('CP::NObjectPtSelectorAlg', thisalg)
         alg.particles, alg.objectSelection = config.readNameAndSelection(self.photons)
-        alg.eventPreselection = f'{self.currentDecoration},as_char' if self.currentDecoration else ''
+        alg.eventPreselection = self.checkDecorationName(self.currentDecoration)
         if len(items) == 4:
             alg.minPt = self.check_float(items[1])
             alg.sign  = self.check_sign(items[2])
@@ -419,7 +426,7 @@ class EventSelectionConfig(ConfigBlock):
         thisalg = f'{self.name}_NTAU_{self.step}'
         alg = config.createAlgorithm('CP::NObjectPtSelectorAlg', thisalg)
         alg.particles, alg.objectSelection = config.readNameAndSelection(self.taus)
-        alg.eventPreselection = f'{self.currentDecoration},as_char' if self.currentDecoration else ''
+        alg.eventPreselection = self.checkDecorationName(self.currentDecoration)
         if len(items) == 4:
             alg.minPt = self.check_float(items[1])
             alg.sign  = self.check_sign(items[2])
@@ -445,7 +452,7 @@ class EventSelectionConfig(ConfigBlock):
         thisalg = f'{self.name}_NLJET_{self.step}'
         alg = config.createAlgorithm('CP::NObjectPtSelectorAlg', thisalg)
         alg.particles, alg.objectSelection = config.readNameAndSelection(self.largeRjets)
-        alg.eventPreselection = f'{self.currentDecoration},as_char' if self.currentDecoration else ''
+        alg.eventPreselection = self.checkDecorationName(self.currentDecoration)
         if len(items) == 4:
             alg.minPt = self.check_float(items[1])
             alg.sign  = self.check_sign(items[2])
@@ -471,7 +478,7 @@ class EventSelectionConfig(ConfigBlock):
         thisalg = f'{self.name}_NLJETMASS_{self.step}'
         alg = config.createAlgorithm('CP::NObjectMassSelectorAlg', thisalg)
         alg.particles, alg.objectSelection = config.readNameAndSelection(self.largeRjets)
-        alg.eventPreselection = f'{self.currentDecoration},as_char' if self.currentDecoration else ''
+        alg.eventPreselection = self.checkDecorationName(self.currentDecoration)
         if len(items) == 4:
             alg.minMass = self.check_float(items[1])
             alg.sign    = self.check_sign(items[2])
@@ -514,7 +521,7 @@ class EventSelectionConfig(ConfigBlock):
             alg.sign     = self.check_sign(items[4])
             alg.count    = self.check_int(items[5])
             alg.vetoMode = (len(items) ==7 and self.check_string(items[6]) == "veto")
-        alg.eventPreselection = f'{self.currentDecoration},as_char' if self.currentDecoration else ''
+        alg.eventPreselection = self.checkDecorationName(self.currentDecoration)
         self.setDecorationName(alg, config, f'{thisalg}_%SYS%')
         return
 
@@ -532,7 +539,7 @@ class EventSelectionConfig(ConfigBlock):
         alg.metTerm = self.metTerm
         alg.sign = self.check_sign(items[1])
         alg.refMET = self.check_float(items[2])
-        alg.eventPreselection = f'{self.currentDecoration},as_char' if self.currentDecoration else ''
+        alg.eventPreselection = self.checkDecorationName(self.currentDecoration)
         self.setDecorationName(alg, config, f'{thisalg}_%SYS%')
         return
     
@@ -552,7 +559,7 @@ class EventSelectionConfig(ConfigBlock):
         alg.muons, alg.muonSelection = config.readNameAndSelection(self.muons)
         alg.sign = self.check_sign(items[1])
         alg.refMWT = self.check_float(items[2])
-        alg.eventPreselection = f'{self.currentDecoration},as_char' if self.currentDecoration else ''
+        alg.eventPreselection = self.checkDecorationName(self.currentDecoration)
         self.setDecorationName(alg, config, f'{thisalg}_%SYS%')
         return
 
@@ -574,7 +581,7 @@ class EventSelectionConfig(ConfigBlock):
         alg.muons, alg.muonSelection = config.readNameAndSelection(self.muons)
         alg.sign = self.check_sign(items[1])
         alg.refMETMWT = self.check_float(items[2])
-        alg.eventPreselection = f'{self.currentDecoration},as_char' if self.currentDecoration else ''
+        alg.eventPreselection = self.checkDecorationName(self.currentDecoration)
         self.setDecorationName(alg, config, f'{thisalg}_%SYS%')
         return
 
@@ -594,7 +601,7 @@ class EventSelectionConfig(ConfigBlock):
             alg.muons, alg.muonSelection = config.readNameAndSelection(self.muons)
         alg.sign = self.check_sign(items[1])
         alg.refMLL = self.check_float(items[2])
-        alg.eventPreselection = f'{self.currentDecoration},as_char' if self.currentDecoration else ''
+        alg.eventPreselection = self.checkDecorationName(self.currentDecoration)
         self.setDecorationName(alg, config, f'{thisalg}_%SYS%')
         return
 
@@ -615,7 +622,7 @@ class EventSelectionConfig(ConfigBlock):
         alg.lowMLL = self.check_float(items[1])
         alg.highMLL = self.check_float(items[2])
         alg.vetoMode = (len(items) == 4 and self.check_string(items[3]) == "veto")
-        alg.eventPreselection = f'{self.currentDecoration},as_char' if self.currentDecoration else ''
+        alg.eventPreselection = self.checkDecorationName(self.currentDecoration)
         self.setDecorationName(alg, config, f'{thisalg}_%SYS%')
         return
 
@@ -638,7 +645,7 @@ class EventSelectionConfig(ConfigBlock):
             else:
                 alg.muons, alg.muonSelection = config.readNameAndSelection(self.muons)
         alg.OS = True
-        alg.eventPreselection = f'{self.currentDecoration},as_char' if self.currentDecoration else ''
+        alg.eventPreselection = self.checkDecorationName(self.currentDecoration)
         self.setDecorationName(alg, config, f'{thisalg}_%SYS%')
         return
 
@@ -661,7 +668,7 @@ class EventSelectionConfig(ConfigBlock):
             else:
                 alg.muons, alg.muonSelection = config.readNameAndSelection(self.muons)
         alg.OS = False
-        alg.eventPreselection = f'{self.currentDecoration},as_char' if self.currentDecoration else ''
+        alg.eventPreselection = self.checkDecorationName(self.currentDecoration)
         self.setDecorationName(alg, config, f'{thisalg}_%SYS%')
         return
 
@@ -688,7 +695,7 @@ class EventSelectionConfig(ConfigBlock):
         alg.lowMll = self.check_float(items[1])
         alg.highMll = self.check_float(items[2])
         alg.vetoMode = (len(items) == 4 and self.check_string(items[3]) == "veto")
-        alg.eventPreselection = f'{self.currentDecoration},as_char' if self.currentDecoration else ''
+        alg.eventPreselection = self.checkDecorationName(self.currentDecoration)
         self.setDecorationName(alg, config, f'{thisalg}_%SYS%')
         return
 
@@ -721,7 +728,7 @@ class EventSelectionConfig(ConfigBlock):
         alg = config.createAlgorithm('CP::SaveFilterAlg', thisalg)
         alg.FilterDescription = f'events passing < {self.name} >'
         alg.eventDecisionOutputDecoration = f'ignore_{self.name}_%SYS%'
-        alg.selection = f'{self.currentDecoration},as_char'
+        alg.selection = self.checkDecorationName(self.currentDecoration)
         alg.noFilter = self.noFilter
         alg.selectionName = f'pass_{self.name}_%SYS%,as_char' # this one is used as a selection
         alg.decorationName = f'ntuplepass_{self.name}_%SYS%' # this one is saved to file
