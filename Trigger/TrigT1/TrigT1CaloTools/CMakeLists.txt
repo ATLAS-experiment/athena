@@ -19,5 +19,4 @@ atlas_add_component( TrigT1CaloTools
                      TrigT1CaloUtilsLib TrigT1Interfaces xAODEventInfo xAODTrigL1Calo )
 
 # Install files from the package:
-atlas_install_joboptions( share/*.py )
 atlas_install_runtime( share/*.txt )
