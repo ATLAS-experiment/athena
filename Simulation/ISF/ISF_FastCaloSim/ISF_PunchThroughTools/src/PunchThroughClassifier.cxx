@@ -49,7 +49,7 @@ double ISF::PunchThroughClassifier::computePunchThroughProbability(const ISF::IS
 
 StatusCode ISF::PunchThroughClassifier::initialize(){
 
-    ATH_MSG_INFO( "[ punchthroughclassifier ] initialize()" );
+    ATH_MSG_VERBOSE( "[ punchthroughclassifier ] initialize()" );
 
     std::string resolvedScalerFileName = PathResolverFindCalibFile (m_scalerConfigFileName);
     if ( initializeScaler(resolvedScalerFileName) != StatusCode::SUCCESS)
@@ -74,7 +74,7 @@ StatusCode ISF::PunchThroughClassifier::initialize(){
 
 StatusCode ISF::PunchThroughClassifier::finalize(){
 
-    ATH_MSG_INFO( "[punchthroughclassifier] finalize() successful" );
+    ATH_MSG_VERBOSE( "[punchthroughclassifier] finalize() successful" );
 
     return StatusCode::SUCCESS;
 }

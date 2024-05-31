@@ -43,9 +43,9 @@ ISF::GenericParticleOrderingTool::~GenericParticleOrderingTool()
 /** Athena algtool's Hooks */
 StatusCode  ISF::GenericParticleOrderingTool::initialize()
 {
-  ATH_MSG_INFO("initialize() ...");
+  ATH_MSG_VERBOSE("initialize() ...");
 
-  ATH_MSG_INFO("initialize() successful");
+  ATH_MSG_VERBOSE("initialize() successful");
   return StatusCode::SUCCESS;
 }
 
@@ -53,9 +53,9 @@ StatusCode  ISF::GenericParticleOrderingTool::initialize()
 /** Athena algtool's Hooks */
 StatusCode  ISF::GenericParticleOrderingTool::finalize()
 {
-  ATH_MSG_INFO("finalize() ...");
+  ATH_MSG_VERBOSE("finalize() ...");
 
-  ATH_MSG_INFO("finalize() successful");
+  ATH_MSG_VERBOSE("finalize() successful");
   return StatusCode::SUCCESS;
 }
 

@@ -21,7 +21,7 @@ StatusCode G4AtlasSvc::initialize(){
   // go through all tools and retrieve them
   //  This fires initialize() for each of those tools
 
-  ATH_MSG_INFO( "this is G4AtlasSvc::initialize() " );
+  ATH_MSG_DEBUG( "this is G4AtlasSvc::initialize() " );
   auto* rm = G4RunManager::GetRunManager();
   if(!rm) {
     ATH_MSG_ERROR("Run manager retrieval has failed");
@@ -33,10 +33,10 @@ StatusCode G4AtlasSvc::initialize(){
     rm->RunInitialization();
   }
 
-  ATH_MSG_INFO( "retireving the Detector Geometry Service" );
+  ATH_MSG_DEBUG( "retireving the Detector Geometry Service" );
   CHECK(m_detGeoSvc.retrieve());
 
-  ATH_MSG_INFO( "retrieving the Physics List Tool" );
+  ATH_MSG_DEBUG( "retrieving the Physics List Tool" );
   CHECK(m_physicsListSvc.retrieve());
   CHECK(m_userLimitsSvc.retrieve());
 
@@ -62,6 +62,6 @@ StatusCode G4AtlasSvc::initialize(){
 
 StatusCode G4AtlasSvc::finalize()
 {
-  ATH_MSG_INFO( "G4AtlasSvc being finalized!!!" );
+  ATH_MSG_DEBUG( "G4AtlasSvc being finalized!!!" );
   return StatusCode::SUCCESS;
 }

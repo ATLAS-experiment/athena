@@ -37,9 +37,9 @@ ISF::EntryLayerFilter::~EntryLayerFilter()
 /** Athena algtool's Hooks */
 StatusCode  ISF::EntryLayerFilter::initialize()
 {
-  ATH_MSG_INFO("initialize() ...");
+  ATH_MSG_VERBOSE("initialize() ...");
 
-  ATH_MSG_INFO("initialize() successful");
+  ATH_MSG_VERBOSE("initialize() successful");
   return StatusCode::SUCCESS;
 }
 
@@ -47,9 +47,9 @@ StatusCode  ISF::EntryLayerFilter::initialize()
 /** Athena algtool's Hooks */
 StatusCode  ISF::EntryLayerFilter::finalize()
 {
-  ATH_MSG_INFO("finalize() ...");
+  ATH_MSG_VERBOSE("finalize() ...");
 
-  ATH_MSG_INFO("finalize() successful");
+  ATH_MSG_VERBOSE("finalize() successful");
   return StatusCode::SUCCESS;
 }
 

@@ -44,7 +44,7 @@ iFatras::McEnergyLossUpdator::~McEnergyLossUpdator()
 StatusCode iFatras::McEnergyLossUpdator::initialize()
 {
 
-  ATH_MSG_INFO( "initialize()" );
+  ATH_MSG_VERBOSE( "initialize()" );
    
   // Retrieve the energy loss updator tool
   if ( m_energyLossUpdator.retrieve().isFailure() ){
@@ -72,7 +72,7 @@ StatusCode iFatras::McEnergyLossUpdator::initialize()
 StatusCode iFatras::McEnergyLossUpdator::finalize()
 {
 
-  ATH_MSG_INFO( "finalize() successful" );
+  ATH_MSG_VERBOSE( "finalize() successful" );
 
   return StatusCode::SUCCESS;
 

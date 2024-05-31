@@ -126,14 +126,14 @@ StatusCode iFatras::HitCreatorSilicon::initialize()
   // register to the incident service: BeginEvent for TrackCollection
   m_incidentSvc->addListener( this, IncidentType::BeginEvent);
   m_dEdX_function = new TF1 ("fitfunc2", langaufun_fast, 0.,10.,4);
-  ATH_MSG_INFO( "[ sihit ]  initialize() successful." );
+  ATH_MSG_VERBOSE( "[ sihit ]  initialize() successful." );
   return StatusCode::SUCCESS;
 }
 
 
 StatusCode iFatras::HitCreatorSilicon::finalize()
 {    delete m_dEdX_function;
-  ATH_MSG_INFO( "[ sihit ]  finalize() successful " );
+  ATH_MSG_VERBOSE( "[ sihit ]  finalize() successful " );
   return StatusCode::SUCCESS;
 }
 

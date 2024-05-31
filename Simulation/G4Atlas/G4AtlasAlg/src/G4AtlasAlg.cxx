@@ -282,7 +282,7 @@ void G4AtlasAlg::initializeG4()
 StatusCode G4AtlasAlg::finalize()
 {
   ATH_MSG_DEBUG(std::endl<<std::endl<<std::endl);
-  ATH_MSG_INFO("++++++++++++  G4AtlasAlg finalized  ++++++++++++" <<std::endl<<std::endl);
+  ATH_MSG_DEBUG("++++++++++++  G4AtlasAlg finalized  ++++++++++++" <<std::endl<<std::endl);
 
   // One time finalization
   try {

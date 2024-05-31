@@ -104,14 +104,14 @@ StatusCode iFatras::HitCreatorTRT::initialize()
   // register to the incident service: BeginEvent for TrackCollection
   m_incidentSvc->addListener( this, IncidentType::BeginEvent);
 
-  ATH_MSG_INFO( "[ trthit ]  initialize() successful." );
+  ATH_MSG_VERBOSE( "[ trthit ]  initialize() successful." );
   return StatusCode::SUCCESS;
 }
 
 
 StatusCode iFatras::HitCreatorTRT::finalize()
 {
-  ATH_MSG_INFO( "[ trthit ]  finalize() successful " );
+  ATH_MSG_VERBOSE( "[ trthit ]  finalize() successful " );
   return StatusCode::SUCCESS;
 }
 
