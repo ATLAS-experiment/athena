@@ -57,7 +57,7 @@ void TrigTrackSeedGeneratorITk::loadSpacePoints(const std::vector<TrigSiSpacePoi
 
 }
 
-void TrigTrackSeedGeneratorITk::runGNN_TrackFinder(const IRoiDescriptor* roiDescriptor, std::vector<GNN_TrigTracklet>& vTracks) {
+void TrigTrackSeedGeneratorITk::runGNN_TrackFinder(const IRoiDescriptor* roiDescriptor, std::vector<GNN_TrigTracklet>& vTracks, bool makeTriplets) {
 
   const int MaxEdges = 2000000;
 
@@ -481,91 +481,92 @@ void TrigTrackSeedGeneratorITk::runGNN_TrackFinder(const IRoiDescriptor* roiDesc
     unsigned int nTriplets = 0;
 
     std::vector<TrigInDetTriplet> output;
+    
+    if(makeTriplets) {
+    
+      for(unsigned int idx_m = 1;idx_m < vSP.size()-1;idx_m++) {
 
-    for(unsigned int idx_m = 1;idx_m < vSP.size()-1;idx_m++) {
-
-      const TrigSiSpacePointBase& spM = *vSP.at(idx_m);
-      const double pS_r = spM.r();
-      const double pS_x = spM.x();
-      const double pS_y = spM.y();
-      const double cosA = pS_x/pS_r;
-      const double sinA = pS_y/pS_r;
-      
-      for(unsigned int idx_o = idx_m+1; idx_o < vSP.size(); idx_o++) {
-
-	const TrigSiSpacePointBase& spO = *vSP.at(idx_o);
+	const TrigSiSpacePointBase& spM = *vSP.at(idx_m);
+	const double pS_r = spM.r();
+	const double pS_x = spM.x();
+	const double pS_y = spM.y();
+	const double cosA = pS_x/pS_r;
+	const double sinA = pS_y/pS_r;
 	
-	double dx = spO.x() - pS_x;
-	double dy = spO.y() - pS_y;
-	double R2inv = 1.0/(dx*dx+dy*dy);
-	double xn = dx*cosA + dy*sinA;
-	double yn =-dx*sinA + dy*cosA;
-
-	const double uo = xn*R2inv;
-	const double vo = yn*R2inv;
-
-	for(unsigned int idx_i = 0; idx_i < idx_m; idx_i++) {
-	  const TrigSiSpacePointBase& spI = *vSP.at(idx_i);
-	
-
-	  dx = spI.x() - pS_x;
-	  dy = spI.y() - pS_y;
-	  R2inv = 1.0/(dx*dx+dy*dy);
+	for(unsigned int idx_o = idx_m+1; idx_o < vSP.size(); idx_o++) {
 	  
-	  xn = dx*cosA + dy*sinA;
-	  yn =-dx*sinA + dy*cosA;
+	  const TrigSiSpacePointBase& spO = *vSP.at(idx_o);
+	  
+	  double dx = spO.x() - pS_x;
+	  double dy = spO.y() - pS_y;
+	  double R2inv = 1.0/(dx*dx+dy*dy);
+	  double xn = dx*cosA + dy*sinA;
+	  double yn =-dx*sinA + dy*cosA;
+	  
+	  const double uo = xn*R2inv;
+	  const double vo = yn*R2inv;
+	  
+	  for(unsigned int idx_i = 0; idx_i < idx_m; idx_i++) {
+	    const TrigSiSpacePointBase& spI = *vSP.at(idx_i);
+	    
+	    dx = spI.x() - pS_x;
+	    dy = spI.y() - pS_y;
+	    R2inv = 1.0/(dx*dx+dy*dy);
+	  
+	    xn = dx*cosA + dy*sinA;
+	    yn =-dx*sinA + dy*cosA;
     
-	  const double ui = xn*R2inv;
-	  const double vi = yn*R2inv;
-
-	  //1. pT estimate
+	    const double ui = xn*R2inv;
+	    const double vi = yn*R2inv;
+	    
+	    //1. pT estimate
     
-	  const double du = uo - ui;
-	  if(du==0.0) continue;
-	  const double A = (vo - vi)/du;
-	  const double B = vi - A*ui;
-	  if(B==0.0) continue;
-	  const double R_squ = (1 + A*A)/(B*B);
-	  
-	  if(R_squ < m_minR_squ) {
-	    continue;
-	  }
-
-	  //2. d0 cut
-    
-	  const double fabs_d0 = std::abs(pS_r*(B*pS_r - A));
-	  
-	  if(fabs_d0 > m_settings.m_tripletD0Max) {
-	    continue;
-	  }
-
-	  //3. phi0 cut
-	  
-	  if (!roiDescriptor->isFullscan()) {
-	    const double uc = 2*B*pS_r - A;
-	    const double phi0 = std::atan2(sinA - uc*cosA, cosA + uc*sinA);
-	    if ( !RoiUtil::containsPhi( *roiDescriptor, phi0 ) ) {
+	    const double du = uo - ui;
+	    if(du==0.0) continue;
+	    const double A = (vo - vi)/du;
+	    const double B = vi - A*ui;
+	    if(B==0.0) continue;
+	    const double R_squ = (1 + A*A)/(B*B);
+	    
+	    if(R_squ < m_minR_squ) {
 	      continue;
 	    }
+	    
+	    //2. d0 cut
+	    
+	    const double fabs_d0 = std::abs(pS_r*(B*pS_r - A));
+	    
+	    if(fabs_d0 > m_settings.m_tripletD0Max) {
+	      continue;
+	    }
+	    
+	    //3. phi0 cut
+	  
+	    if (!roiDescriptor->isFullscan()) {
+	      const double uc = 2*B*pS_r - A;
+	      const double phi0 = std::atan2(sinA - uc*cosA, cosA + uc*sinA);
+	      if ( !RoiUtil::containsPhi( *roiDescriptor, phi0 ) ) {
+		continue;
+	      }
+	    }
+
+	    //4. add new triplet
+
+	    const double Q = fabs_d0*fabs_d0;
+
+	    output.emplace_back(spI, spM, spO, Q);
+
+	    nTriplets++;
+
+	    if(nTriplets >= m_settings.m_maxTripletBufferLength) break;
 	  }
-
-	  //4. add new triplet
-
-	  const double Q = fabs_d0*fabs_d0;
-
-	  output.emplace_back(spI, spM, spO, Q);
-
-	  nTriplets++;
-
 	  if(nTriplets >= m_settings.m_maxTripletBufferLength) break;
 	}
 	if(nTriplets >= m_settings.m_maxTripletBufferLength) break;
       }
-      if(nTriplets >= m_settings.m_maxTripletBufferLength) break;
+      if(output.empty()) continue;
     }
     
-    if(output.empty()) continue;
-
     vTracks.emplace_back(vSP, output);
   }
 
@@ -577,7 +578,7 @@ void TrigTrackSeedGeneratorITk::createSeeds(const IRoiDescriptor* roiDescriptor)
 
   vTracks.reserve(5000);
 
-  runGNN_TrackFinder(roiDescriptor, vTracks);
+  runGNN_TrackFinder(roiDescriptor, vTracks, true);
 
   if(vTracks.empty()) return;
 
@@ -607,8 +608,8 @@ void TrigTrackSeedGeneratorITk::createSeeds(const IRoiDescriptor* roiDescriptor)
 
 }
 
-void TrigTrackSeedGeneratorITk::getTracklets(const IRoiDescriptor* roiDescriptor, std::vector<GNN_TrigTracklet>& vTracks) {
-  runGNN_TrackFinder(roiDescriptor, vTracks);
+void TrigTrackSeedGeneratorITk::getTracklets(const IRoiDescriptor* roiDescriptor, std::vector<GNN_TrigTracklet>& vTracks, bool makeTriplets) {
+  runGNN_TrackFinder(roiDescriptor, vTracks, makeTriplets);
 }
 
 void TrigTrackSeedGeneratorITk::createSeedsZv() {
