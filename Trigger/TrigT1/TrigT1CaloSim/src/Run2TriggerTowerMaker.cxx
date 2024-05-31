@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // ================================================
@@ -25,6 +25,7 @@
 #include "TileConditions/TileInfo.h"
 
 #include "xAODEventInfo/EventInfo.h"
+#include "AthContainers/Decorator.h"
 
 //For getting TriggerTowers from BS
 #include "TrigT1CaloByteStream/ITrigT1CaloDataAccessV2.h"
@@ -401,11 +402,11 @@ namespace LVL1 {
     // decorate the overlay TTs to indicate if they have been used or not 
     char decor_ttNotUsedInOverlay = 0;
     char decor_ttUsedInOverlay = 1;
-    std::string decor_name = "addedToSignal";
+    static const SG::Decorator<char> decor ("addedToSignal");
     for (auto tt:*overlayDataTTs) {
       // Let's exclude all dead and disabled towers
       if (IsGoodTower(tt,m_deadChannelsContaineroverlay,m_disabledTowersContaineroverlay)) {
-        tt->auxdecor<char>(decor_name) = decor_ttNotUsedInOverlay;
+        decor(*tt) = decor_ttNotUsedInOverlay;
         overlayMap.insert( std::make_pair( tt->coolId() , tt ) );
       }
     }
@@ -432,7 +433,7 @@ namespace LVL1 {
         ATH_CHECK( addOverlay(bcid,mu,tt,(*match).second) );
         
         // Let the overlay TT know that it has been used
-        (*match).second->auxdecor<char>(decor_name) = decor_ttUsedInOverlay;
+        decor(*match->second) = decor_ttUsedInOverlay;
         
       } // end of match
     } // end of loop over primary TTs 
@@ -440,7 +441,7 @@ namespace LVL1 {
     // Now we need to add all overlay TTs that have not been used so far
     for (Itr i=overlayMap.begin();i!=overlayMap.end();++i) {
       xAOD::TriggerTower* tt = (*i).second;
-      if (tt->auxdataConst<char>(decor_name) == decor_ttNotUsedInOverlay) {
+      if (decor(*tt) == decor_ttNotUsedInOverlay) {
         // Ensure that LUT vectors are the same size as the primary TTs 
         std::vector<uint8_t> overlay_lut_cp(sizeOfPrimaryLUT,0.);
         std::vector<uint8_t> overlay_lut_jep(sizeOfPrimaryLUT,0.);
