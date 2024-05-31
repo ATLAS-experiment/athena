@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-# Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 ## @Package test_ParallelJobProcessor.py
 #  @brief Unittests for trfUtils.py ParallelJobProcessor
@@ -72,8 +72,9 @@ def exception():
 
 ## @brief unit tests for the parallel job processor
 class TestParallelJobProcessor(unittest.TestCase):
-    # Disable for now
-    pass
+    # Dummy test --- in python3.12, unittest fails if there are no tests.
+    def test_dummy(self):
+        return
     
     
     ## @brief unit test for working functions

@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-# Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 ## @Package test_ParallelJobProcessorData.py
 #  @brief Unittests for output file validation using trfUtils.py
@@ -30,8 +30,9 @@ fileBS1   = "/afs/cern.ch/atlas/project/rig/referencefiles/dataStreams_high_mu/d
 ## @brief unit tests for output data file validation using the parallel job
 #  processor
 class TestOutputFileValidationInParallel(unittest.TestCase):
-    # Disable for now
-    pass
+    # Dummy test --- in python3.12, unittest fails if there are no tests.
+    def test_dummy(self):
+        return
     
 # 
 #     ## @brief unit test for AOD
