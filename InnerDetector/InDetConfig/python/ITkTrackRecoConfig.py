@@ -402,6 +402,8 @@ def ITkTrackSeedsFinalCfg(flags):
 def ITkSiSPSeededTracksFinalCfg(flags):
     result = ComponentAccumulator()
 
+    primaryPassExtension = flags.Tracking.__getattr__(f"{flags.Tracking.ITkPrimaryPassConfig.value}Pass").extension
+
     # get list of extensions requesting track candidates.
     # Add always the Primary Pass.
     listOfExtensionsRequesting = [
@@ -412,7 +414,7 @@ def ITkSiSPSeededTracksFinalCfg(flags):
         AssociationMapNameKey="PRDtoTrackMapMerge_CombinedITkTracks"
         if 'Acts' in extension:
             AssociationMapNameKey="PRDtoTrackMapMerge_CombinedITkTracks"
-        elif not (extension == ''):
+        elif not (extension == primaryPassExtension):
             AssociationMapNameKey = f"ITkPRDtoTrackMap{extension}"
 
         from xAODTrackingCnv.xAODTrackingCnvConfig import (
