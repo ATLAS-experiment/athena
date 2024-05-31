@@ -278,6 +278,7 @@
      <TDirectory name="Unlinked">
       <TDirectory name="FakeRate">
        <graph name="fakerate_vs_eta" plotopts="" type="TEfficiency"/>
+       <graph name="fakerate_vs_pt" plotopts="" type="TEfficiency"/>
       </TDirectory>
      </TDirectory>
      <TDirectory name="Efficiency">
