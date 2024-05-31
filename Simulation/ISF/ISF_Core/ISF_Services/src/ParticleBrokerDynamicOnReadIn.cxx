@@ -90,7 +90,7 @@ ISF::ParticleBrokerDynamicOnReadIn::~ParticleBrokerDynamicOnReadIn()
 /** framework methods */
 StatusCode ISF::ParticleBrokerDynamicOnReadIn::initialize()
 {
-  ATH_MSG_INFO("initialize() ...");
+  ATH_MSG_DEBUG("initialize() ...");
 
   // retrieve the entry layer tool
   if ( m_entryLayerTool.retrieve().isFailure() ){
@@ -166,7 +166,7 @@ StatusCode ISF::ParticleBrokerDynamicOnReadIn::initialize()
 /** framework methods */
 StatusCode ISF::ParticleBrokerDynamicOnReadIn::finalize()
 {
-  ATH_MSG_INFO("finalize() ...");
+  ATH_MSG_DEBUG("finalize() ...");
   return StatusCode::SUCCESS;
 }
 

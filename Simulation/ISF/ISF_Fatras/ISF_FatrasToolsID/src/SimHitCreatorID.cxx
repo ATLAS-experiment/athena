@@ -66,7 +66,7 @@ iFatras::SimHitCreatorID::~SimHitCreatorID()
  *=======================================================================*/
 StatusCode iFatras::SimHitCreatorID::initialize()
 {
-  ATH_MSG_INFO( "[ idhit ] initialize()" );
+  ATH_MSG_VERBOSE( "[ idhit ] initialize()" );
   // Get Pixel / SCT / TRT hit creator tools
   if (!m_pixelHitCreator.empty() && m_pixelHitCreator.retrieve().isFailure()) {
     ATH_MSG_FATAL( "[ --- ] Could not retrieve " << m_pixelHitCreator );
@@ -85,7 +85,7 @@ StatusCode iFatras::SimHitCreatorID::initialize()
      ATH_MSG_ERROR ("[ --- ] Could not get AtlasDetectorID helper" );
     return StatusCode::FAILURE; 
   } 
-  ATH_MSG_INFO( "[ idhit ] initialize() successful" );
+  ATH_MSG_VERBOSE( "[ idhit ] initialize() successful" );
   return StatusCode::SUCCESS;
 }
 
@@ -96,7 +96,7 @@ StatusCode iFatras::SimHitCreatorID::initialize()
 StatusCode iFatras::SimHitCreatorID::finalize()
 {
 
-  ATH_MSG_INFO( "finalize() successful" );
+  ATH_MSG_VERBOSE( "finalize() successful" );
   return StatusCode::SUCCESS;
 }
 

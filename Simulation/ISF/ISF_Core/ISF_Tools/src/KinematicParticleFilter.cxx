@@ -37,7 +37,7 @@ ISF::KinematicParticleFilter::~KinematicParticleFilter()
 /** Athena algtool's Hooks */
 StatusCode  ISF::KinematicParticleFilter::initialize()
 {
-  ATH_MSG_INFO("initialize() ...");
+  ATH_MSG_VERBOSE("initialize() ...");
 
   // internally storing the p^2
   m_cut_minMom2  *= m_cut_minMom2;
@@ -45,7 +45,7 @@ StatusCode  ISF::KinematicParticleFilter::initialize()
   m_cut_minMomEta = -m_maxEtaSym;
   m_cut_maxMomEta =  m_maxEtaSym;
 
-  ATH_MSG_INFO("initialize() successful");
+  ATH_MSG_VERBOSE("initialize() successful");
   return StatusCode::SUCCESS;
 }
 
@@ -53,9 +53,9 @@ StatusCode  ISF::KinematicParticleFilter::initialize()
 /** Athena algtool's Hooks */
 StatusCode  ISF::KinematicParticleFilter::finalize()
 {
-  ATH_MSG_INFO("finalize() ...");
+  ATH_MSG_VERBOSE("finalize() ...");
 
-  ATH_MSG_INFO("finalize() successful");
+  ATH_MSG_VERBOSE("finalize() successful");
   return StatusCode::SUCCESS;
 }
 

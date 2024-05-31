@@ -55,7 +55,7 @@ ISF::G4PolyconeGeoIDSvc::~G4PolyconeGeoIDSvc()
 // Athena algtool's Hooks
 StatusCode  ISF::G4PolyconeGeoIDSvc::initialize()
 {
-  ATH_MSG_INFO("initialize()");
+  ATH_MSG_VERBOSE("initialize()");
 
   // retrieve envelope definition service
   ATH_CHECK( m_envDefSvc.retrieve() );
@@ -74,14 +74,14 @@ StatusCode  ISF::G4PolyconeGeoIDSvc::initialize()
   m_typeConverter[kSurface] = ISF::fSurface;
   m_typeConverter[kInside]  = ISF::fInside;
 
-  ATH_MSG_INFO("initialize() successful");
+  ATH_MSG_VERBOSE("initialize() successful");
   return StatusCode::SUCCESS;
 }
 
 
 StatusCode  ISF::G4PolyconeGeoIDSvc::finalize()
 {
-  ATH_MSG_INFO("finalize() successful");
+  ATH_MSG_VERBOSE("finalize() successful");
   return StatusCode::SUCCESS;
 }
 

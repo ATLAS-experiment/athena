@@ -28,7 +28,7 @@ ISF::GeoIDSvc::GeoIDSvc(const std::string& name,ISvcLocator* svc) :
 // Athena algtool's Hooks
 StatusCode  ISF::GeoIDSvc::initialize()
 {
-  ATH_MSG_INFO("initialize() ...");
+  ATH_MSG_DEBUG("initialize() ...");
 
   // retrieve envelope definition service
   ATH_CHECK(m_envDefSvc.retrieve());
@@ -224,15 +224,15 @@ StatusCode  ISF::GeoIDSvc::initialize()
   //pos = HepGeom::Point3D<double>(1149., 0., 3476.);
   //std::cout << " pos=" << pos << " geoID=" << identifyGeoID(pos)<<std::endl;
 
-  ATH_MSG_INFO("initialize() successful");
+  ATH_MSG_DEBUG("initialize() successful");
   return StatusCode::SUCCESS;
 }
 
 
 StatusCode  ISF::GeoIDSvc::finalize() {
-  ATH_MSG_INFO("finalize() ...");
+  ATH_MSG_DEBUG("finalize() ...");
 
-  ATH_MSG_INFO("finalize() successful");
+  ATH_MSG_DEBUG("finalize() successful");
   return StatusCode::SUCCESS;
 }
 

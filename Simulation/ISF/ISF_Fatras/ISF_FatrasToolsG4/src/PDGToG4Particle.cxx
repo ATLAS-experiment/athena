@@ -62,7 +62,7 @@ StatusCode
 iFatras::PDGToG4Particle::initialize()
 {
   // Update output level
-  ATH_MSG_INFO( "initialize()" );
+  ATH_MSG_VERBOSE( "initialize()" );
 
   /*-----------------------------------------------------------------------
    *  Fill map of particles
@@ -118,7 +118,7 @@ StatusCode
 iFatras::PDGToG4Particle::finalize()
 {
 
-  ATH_MSG_INFO( "finalize() successful" );  
+  ATH_MSG_VERBOSE( "finalize() successful" );  
   return StatusCode::SUCCESS;
 }
 

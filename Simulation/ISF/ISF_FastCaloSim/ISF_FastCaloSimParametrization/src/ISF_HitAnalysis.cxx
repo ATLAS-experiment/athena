@@ -126,7 +126,7 @@ StatusCode ISF_HitAnalysis::updateMetaData( IOVSVC_CALLBACK_ARGS_P( I, keys ) )
 
 StatusCode ISF_HitAnalysis::initialize ATLAS_NOT_THREAD_SAFE ()
 {
-  ATH_MSG_INFO( "Initializing ISF_HitAnalysis" );
+  ATH_MSG_VERBOSE( "Initializing ISF_HitAnalysis" );
   //
   // Register the callback(s):
   //
@@ -166,7 +166,7 @@ StatusCode ISF_HitAnalysis::initialize ATLAS_NOT_THREAD_SAFE ()
   ATH_MSG_DEBUG("Extrapolator retrieved "<< m_extrapolator);
 
   ATH_CHECK(m_calo_tb_coord.retrieve());
-  ATH_MSG_INFO("retrieved " << m_calo_tb_coord);
+  ATH_MSG_VERBOSE("retrieved " << m_calo_tb_coord);
 
   if( detStore()->contains< AthenaAttributeList >( m_MC_DIGI_PARAM ) )
     {
@@ -424,7 +424,7 @@ StatusCode ISF_HitAnalysis::initialize ATLAS_NOT_THREAD_SAFE ()
 StatusCode ISF_HitAnalysis::finalize ATLAS_NOT_THREAD_SAFE ()
 {
 
- ATH_MSG_INFO( "doing finalize()" );
+ ATH_MSG_VERBOSE( "doing finalize()" );
  std::unique_ptr<TFile> dummyGeoFile = std::unique_ptr<TFile>(TFile::Open("dummyGeoFile.root", "RECREATE")); //This is added to suppress the error messages about memory-resident trees
  TTree* geo = new TTree( m_geoModel->atlasVersion().c_str() , m_geoModel->atlasVersion().c_str() );
  std::string fullNtupleName =  "/"+m_geoFileName+"/"+m_geoModel->atlasVersion();
