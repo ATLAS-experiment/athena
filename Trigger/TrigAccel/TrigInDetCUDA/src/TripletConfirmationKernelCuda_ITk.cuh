@@ -25,6 +25,7 @@ __global__ static void tripletConfirmationKernel_ITk(
     __shared__ int currentSpiIdx;
     __shared__ int currentSpmIdx;
     __shared__ int currentSpoIdx;
+    __shared__ bool isBarrel;
 
 
     if (blockIdx.x == 0 && threadIdx.x == 0) {
@@ -40,22 +41,26 @@ __global__ static void tripletConfirmationKernel_ITk(
             currentSpiIdx = d_Triplets->m_innerIndex[currentTripletIdx];
             currentSpmIdx = d_Triplets->m_middleIndex[currentTripletIdx];
             currentSpoIdx = d_Triplets->m_outerIndex[currentTripletIdx];
-
-            // Empty output
-            if (currentSpiIdx == currentSpoIdx) continue;
-
+            
             // Barrel triplets don't require confirmation
-            bool isBarrel = isTripletInBarrel(currentSpiIdx, currentSpmIdx, currentSpoIdx, dSpacepoints);
-            if (isBarrel) {
-                if (threadIdx.x == 0) {
-                    int k = atomicAdd(&d_Out->m_nSeeds, 1); 
-                    d_Out->m_innerIndex[k] = dSpacepoints->m_index[currentSpiIdx];
-                    d_Out->m_middleIndex[k] = dSpacepoints->m_index[currentSpmIdx];
-                    d_Out->m_outerIndex[k] = dSpacepoints->m_index[currentSpoIdx];
-                    d_Out->m_Q[k] = d_Triplets->m_Q[currentTripletIdx];
-                }
-                continue;
+            isBarrel = isTripletInBarrel(currentSpiIdx, currentSpmIdx, currentSpoIdx, dSpacepoints);
+
+        }
+        __syncthreads();
+
+        // Empty output
+        if (currentSpiIdx == currentSpoIdx) continue;
+
+
+        if (isBarrel) {
+            if (threadIdx.x == 0) {
+                int k = atomicAdd(&d_Out->m_nSeeds, 1); 
+                d_Out->m_innerIndex[k] = dSpacepoints->m_index[currentSpiIdx];
+                d_Out->m_middleIndex[k] = dSpacepoints->m_index[currentSpmIdx];
+                d_Out->m_outerIndex[k] = dSpacepoints->m_index[currentSpoIdx];
+                d_Out->m_Q[k] = d_Triplets->m_Q[currentTripletIdx];
             }
+            continue;
         }
 
         __syncthreads();
