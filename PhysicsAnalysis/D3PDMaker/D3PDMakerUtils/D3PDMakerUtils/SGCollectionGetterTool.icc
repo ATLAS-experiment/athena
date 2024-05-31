@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file D3PDMakerUtils/SGCollectionGetterTool.icc
  * @author scott snyder <snyder@bnl.gov>
@@ -35,6 +33,7 @@ SGCollectionGetterTool<CONT>::SGCollectionGetterTool
   {
     REPORT_MESSAGE (MSG::ERROR) << "Can't set TypeName property for tool "
                                 << type << "/" << name;
+    // cppcheck-suppress missingReturn; false positive
   }
 }
 
