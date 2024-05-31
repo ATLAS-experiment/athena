@@ -59,7 +59,7 @@ def OutputUsageIgnoreCfg(flags, algorithm):
 
 def AthenaEventLoopMgrCfg(flags):
     cfg = ComponentAccumulator()
-    elmgr = CompFactory.AthenaEventLoopMgr()
+    elmgr = CompFactory.AthenaEventLoopMgr(EventPrintoutInterval = flags.Exec.EventPrintoutInterval)
     if flags.Input.OverrideRunNumber:
         from AthenaKernel.EventIdOverrideConfig import EvtIdModifierSvcCfg
         elmgr.EvtIdModifierSvc = cfg.getPrimaryAndMerge( EvtIdModifierSvcCfg(flags) ).name
@@ -87,7 +87,8 @@ def AthenaHiveEventLoopMgrCfg(flags):
 
     elmgr = CompFactory.AthenaHiveEventLoopMgr(
         WhiteboardSvc = "EventDataSvc",
-        SchedulerSvc = scheduler.getName())
+        SchedulerSvc = scheduler.getName(),
+        EventPrintoutInterval = flags.Exec.EventPrintoutInterval)
 
     if flags.Input.OverrideRunNumber:
         from AthenaKernel.EventIdOverrideConfig import EvtIdModifierSvcCfg
@@ -105,7 +106,7 @@ def AthenaMpEventLoopMgrCfg(flags):
     cfg = ComponentAccumulator()
     if flags.Common.isOverlay:
         if not flags.Overlay.DataOverlay:
-            elmgr = CompFactory.AthenaEventLoopMgr()
+            elmgr = CompFactory.AthenaEventLoopMgr(EventPrintoutInterval = flags.Exec.EventPrintoutInterval)
             elmgr.RequireInputAttributeList = True
             elmgr.UseSecondaryEventNumber = True
             cfg.addService( elmgr )
@@ -132,7 +133,8 @@ def AthenaMtesEventLoopMgrCfg(flags, mtEs=False, channel=''):
     elmgr = CompFactory.AthenaMtesEventLoopMgr(
         WhiteboardSvc = "EventDataSvc",
         SchedulerSvc = scheduler.getName(),
-        EventRangeChannel = channel)
+        EventRangeChannel = channel,
+        EventPrintoutInterval = flags.Exec.EventPrintoutInterval)
 
     if mtEs:
         from AthenaServices.OutputStreamSequencerSvcConfig import OutputStreamSequencerSvcCfg
