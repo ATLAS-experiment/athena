@@ -29,7 +29,16 @@
 #include "GeoModelKernel/GeoTubs.h"
 #include "GeoModelKernel/GeoVPhysVol.h"
 #include "GeoModelUtilities/GeoVisitVolumes.h"
+#include "CxxUtils/inline_hints.h"
 
+#if defined(FLATTEN)
+    // We compile this package with optimization, even in debug builds; otherwise,
+    // the heavy use of Eigen makes it too slow.  However, from here we may call
+    // to out-of-line Eigen code that is linked from other DSOs; in that case,
+    // it would not be optimized.  Avoid this by forcing all Eigen code
+    // to be inlined here if possible.
+    ATH_FLATTEN
+#endif
 int Trk::GMTreeBrowser::compareGeoVolumes(const GeoVPhysVol* gv1,
                                           const GeoVPhysVol* gv2,
                                           double tolerance, bool dumpInfo,
@@ -162,6 +171,14 @@ int Trk::GMTreeBrowser::compareGeoVolumes(const GeoVPhysVol* gv1,
     return diff;
 }
 
+#if defined(FLATTEN)
+    // We compile this package with optimization, even in debug builds; otherwise,
+    // the heavy use of Eigen makes it too slow.  However, from here we may call
+    // to out-of-line Eigen code that is linked from other DSOs; in that case,
+    // it would not be optimized.  Avoid this by forcing all Eigen code
+    // to be inlined here if possible.
+    ATH_FLATTEN
+#endif
 bool Trk::GMTreeBrowser::compareShapes(const GeoShape* sh1, const GeoShape* sh2,
                                        double tol) const {
 
