@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// KinematicParticleFilter.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 #ifndef ISF_TOOLS_KINEMATICPARTICLEFILTER_H
 #define ISF_TOOLS_KINEMATICPARTICLEFILTER_H 1
@@ -18,36 +14,32 @@
 namespace ISF {
 
   /** @class KinematicParticleFilter
-  
+
       A generic kinematic ISFParticle filter using the implementation
       present in ISF::KinematicParticleCuts.
 
       @author Elmar.Ritsch -at- cern.ch
-     */
+  */
   class KinematicParticleFilter : public extends<AthAlgTool, IParticleFilter>,
-                                  public KinematicParticleCuts { 
-      
-    public: 
-      /** Constructor with parameters */
-      KinematicParticleFilter( const std::string& t, const std::string& n, const IInterface* p );
+                                  public KinematicParticleCuts {
 
-      /** Virtual destructor */
-      virtual ~KinematicParticleFilter();
+  public:
+    /** Constructor with parameters */
+    KinematicParticleFilter( const std::string& t, const std::string& n, const IInterface* p );
 
-      /** Athena AlgTool initialize */
-      StatusCode  initialize();
+    /** Virtual destructor */
+    virtual ~KinematicParticleFilter() = default;
 
-      /** Athena AlgTool finalize */
-      StatusCode  finalize();
-       
-      /** Returns a pass boolean on the particle  */
-      inline virtual bool passFilter(const ISFParticle& isp) const;
-     
-    private:
-      float                        m_maxEtaSym;        //!< maximum pseudorapidity cut (-eta/+eta)
-  }; 
-  
+    /** Athena AlgTool initialize */
+    StatusCode  initialize();
+
+    /** Returns a pass boolean on the particle  */
+    inline virtual bool passFilter(const ISFParticle& isp) const;
+
+  private:
+    float                        m_maxEtaSym;        //!< maximum pseudorapidity cut (-eta/+eta)
+  };
+
 }
 
 #endif //> !ISF_TOOLS_KINEMATICPARTICLEFILTER_H
-

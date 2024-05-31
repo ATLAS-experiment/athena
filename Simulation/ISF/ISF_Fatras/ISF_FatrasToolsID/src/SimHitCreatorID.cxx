@@ -1,16 +1,11 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// SimHitCreatorID.cxx
-///////////////////////////////////////////////////////////////////
 
 // class header
 #include "SimHitCreatorID.h"
 
 // iFatras && ISF
-#include "ISF_FatrasInterfaces/IHitCreator.h"
 #include "ISF_Event/ISFParticle.h"
 // Tracking
 #include "TrkDetElementBase/TrkDetElementBase.h"
@@ -40,17 +35,8 @@
  *  ==> see headerfile
  *=======================================================================*/
 iFatras::SimHitCreatorID::SimHitCreatorID(const std::string& t, const std::string& n, const IInterface* p)
-        : base_class(t,n,p),
-          m_pixelHitCreator(""),
-          m_sctHitCreator(""),
-          m_trtHitCreator(""),
-          m_idHelperName("AtlasID"),
-          m_idHelper(0)
+        : base_class(t,n,p)
 {
-  // retrieve the Extrapolator  ------------------------------------------------
-  declareProperty("PixelHitCreator"              , m_pixelHitCreator);
-  declareProperty("SctHitCreator"                , m_sctHitCreator);
-  declareProperty("TrtHitCreator"                , m_trtHitCreator);
 }
 
 /*=========================================================================
@@ -68,35 +54,11 @@ StatusCode iFatras::SimHitCreatorID::initialize()
 {
   ATH_MSG_VERBOSE( "[ idhit ] initialize()" );
   // Get Pixel / SCT / TRT hit creator tools
-  if (!m_pixelHitCreator.empty() && m_pixelHitCreator.retrieve().isFailure()) {
-    ATH_MSG_FATAL( "[ --- ] Could not retrieve " << m_pixelHitCreator );
-    return StatusCode::FAILURE;
-  }
-  if (!m_sctHitCreator.empty() && m_sctHitCreator.retrieve().isFailure()) {
-    ATH_MSG_FATAL( "[ --- ] Could not retrieve " << m_sctHitCreator );
-    return StatusCode::FAILURE;
-  }
-  if (!m_trtHitCreator.empty() && m_trtHitCreator.retrieve().isFailure()) {
-    ATH_MSG_FATAL( "[ --- ] Could not retrieve " << m_trtHitCreator );
-    return StatusCode::FAILURE;
-  }
+  ATH_CHECK ( m_pixelHitCreator.retrieve( DisableTool(m_pixelHitCreator.empty()) ) );
+  ATH_CHECK ( m_sctHitCreator.retrieve( DisableTool(m_sctHitCreator.empty()) ) );
+  ATH_CHECK ( m_trtHitCreator.retrieve( DisableTool(m_trtHitCreator.empty()) ) );
   // Get ID Helper from detector store
-  if (detStore()->retrieve(m_idHelper, m_idHelperName).isFailure()) { 
-     ATH_MSG_ERROR ("[ --- ] Could not get AtlasDetectorID helper" );
-    return StatusCode::FAILURE; 
-  } 
-  ATH_MSG_VERBOSE( "[ idhit ] initialize() successful" );
-  return StatusCode::SUCCESS;
-}
-
-/*=========================================================================
- *  DESCRIPTION OF FUNCTION:
- *  ==> see headerfile
- *=======================================================================*/
-StatusCode iFatras::SimHitCreatorID::finalize()
-{
-
-  ATH_MSG_VERBOSE( "finalize() successful" );
+  ATH_CHECK ( detStore()->retrieve(m_idHelper, m_idHelperName) );
   return StatusCode::SUCCESS;
 }
 

@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// GenericParticleOrderingTool.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 #ifndef ISF_TOOLS_GENERICPARTICLEORDERINGTOOL_H
 #define ISF_TOOLS_GENERICPARTICLEORDERINGTOOL_H 1
@@ -20,34 +16,29 @@
 
 namespace ISF {
 
-    
+
   /** @class GenericParticleOrderingTool
 
       This AtheanAlgTool orders the particles according to it's SimSvcID.
-  
+
       @author Elmar.Ritsch -at- cern.ch
-     */
+  */
   class GenericParticleOrderingTool : public extends<AthAlgTool, IParticleOrderingTool> {
 
-    public: 
-      /** Constructor with parameters */
-      GenericParticleOrderingTool( const std::string& t, const std::string& n, const IInterface* p );
+  public:
+    /** Constructor with parameters */
+    GenericParticleOrderingTool( const std::string& t, const std::string& n, const IInterface* p );
 
-      /** Virtual destructor */
-      virtual ~GenericParticleOrderingTool();
+    /** Virtual destructor */
+    virtual ~GenericParticleOrderingTool() = default;
 
-      /** Athena algtool's Hooks */
-      StatusCode  initialize();
-      StatusCode  finalize();
-       
-      /** Returns a pass boolean on the particle  */
-      virtual ISF::ParticleOrder computeOrder(const ISFParticle& p) const;
-     
-    private:
-      ParticleOrder                         m_geoIDorder[AtlasDetDescr::fNumAtlasRegions]; //!< particle order per sub detector
-  }; 
-  
+    /** Returns a pass boolean on the particle  */
+    virtual ISF::ParticleOrder computeOrder(const ISFParticle& p) const;
+
+  private:
+    ParticleOrder m_geoIDorder[AtlasDetDescr::fNumAtlasRegions]; //!< particle order per sub detector
+  };
+
 }
 
 #endif //> !ISF_TOOLS_GENERICPARTICLEORDERINGTOOL_H
-

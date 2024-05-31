@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// PunchThroughClassifier.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 #ifndef ISF_PUNCHTHROUGHTOOLS_SRC_PUNCHTHROUGHCLASSIFIER_H
 #define ISF_PUNCHTHROUGHTOOLS_SRC_PUNCHTHROUGHCLASSIFIER_H 1
@@ -38,8 +34,6 @@ public:
 
     /** AlgTool initialize method */
     virtual StatusCode initialize() override final;
-    /** AlgTool finalize method */
-    virtual StatusCode finalize() override final;
 
     /** input variable MinMaxScaler initialize method */
     StatusCode initializeScaler(const std::string & scalerConfigFile);

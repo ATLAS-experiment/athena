@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// GenericParticleOrderingTool.cxx, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 // class header include
 #include "GenericParticleOrderingTool.h"
@@ -32,31 +28,6 @@ ISF::GenericParticleOrderingTool::GenericParticleOrderingTool(const std::string&
   declareProperty( "OrderCavern",
                    m_geoIDorder[AtlasDetDescr::fAtlasCavern]=1,
                    "Order for Cavern particles");
-}
-
-/** Destructor **/
-ISF::GenericParticleOrderingTool::~GenericParticleOrderingTool()
-{
-
-}
-
-/** Athena algtool's Hooks */
-StatusCode  ISF::GenericParticleOrderingTool::initialize()
-{
-  ATH_MSG_VERBOSE("initialize() ...");
-
-  ATH_MSG_VERBOSE("initialize() successful");
-  return StatusCode::SUCCESS;
-}
-
-
-/** Athena algtool's Hooks */
-StatusCode  ISF::GenericParticleOrderingTool::finalize()
-{
-  ATH_MSG_VERBOSE("finalize() ...");
-
-  ATH_MSG_VERBOSE("finalize() successful");
-  return StatusCode::SUCCESS;
 }
 
 

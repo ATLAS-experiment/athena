@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_SERVICES_GEOIDSVC_H
@@ -50,7 +50,6 @@ namespace ISF {
 
     // Athena algtool's Hooks
     StatusCode  initialize();
-    StatusCode  finalize();
 
     /** A static filter that returns the SimGeoID of the given position */
     AtlasDetDescr::AtlasRegion    identifyGeoID(const Amg::Vector3D &pos) const;

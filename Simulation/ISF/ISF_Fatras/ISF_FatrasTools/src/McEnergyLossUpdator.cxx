@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// McMaterialEffectsUpdator.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 // class header
 #include "McEnergyLossUpdator.h"
@@ -21,62 +17,31 @@
 
 iFatras::McEnergyLossUpdator::McEnergyLossUpdator( const std::string& type, const std::string& name, const IInterface* parent )
   :
-  base_class( type, name, parent ),
-  m_energyLossUpdator("Trk::EnergyLossUpdator/AtlasEnergyLossUpdator" ),
-  m_energyLossDistribution(3),
-  m_rndGenSvc("AtDSFMTGenSvc", name),
-  m_randomEngine(nullptr),
-  m_randomEngineName("FatrasRnd"),
-  m_usePDGformula(false)
+  base_class( type, name, parent )
 {
-  // heavy particles energy loss
-  declareProperty( "EnergyLossUpdator",                 m_energyLossUpdator);
-  // random number service
-  declareProperty( "RandomNumberService",               m_rndGenSvc);
-  declareProperty( "UsePDG_EnergyLossFormula",          m_usePDGformula);
-  declareProperty( "EnergyLossDistribution",            m_energyLossDistribution);
-  declareProperty( "RandomStreamName",                  m_randomEngineName,     "Name of the random number stream");
 }
 
-iFatras::McEnergyLossUpdator::~McEnergyLossUpdator()
-= default;
 
 StatusCode iFatras::McEnergyLossUpdator::initialize()
 {
-
   ATH_MSG_VERBOSE( "initialize()" );
-   
+
   // Retrieve the energy loss updator tool
-  if ( m_energyLossUpdator.retrieve().isFailure() ){
-    ATH_MSG_FATAL( "Could not retrieve " << m_energyLossUpdator );
-    return StatusCode::FAILURE;
-  }
+  ATH_CHECK ( m_energyLossUpdator.retrieve() );
 
   // get the random generator serice
-   if (m_rndGenSvc.retrieve().isFailure()){
-        ATH_MSG_FATAL( "Could not retrieve " << m_rndGenSvc );
-        return StatusCode::FAILURE;
-   } else 
-        ATH_MSG_VERBOSE( "Successfully retrieved " << m_rndGenSvc );
-  
+  ATH_CHECK ( m_rndGenSvc.retrieve() );
+
   //Get own engine with own seeds:
   m_randomEngine = m_rndGenSvc->GetEngine(m_randomEngineName);
   if (!m_randomEngine) {
       ATH_MSG_FATAL( "Could not get random engine '" << m_randomEngineName << "'" );
       return StatusCode::FAILURE;
   }
-  
+
   return StatusCode::SUCCESS;
 }
 
-StatusCode iFatras::McEnergyLossUpdator::finalize()
-{
-
-  ATH_MSG_VERBOSE( "finalize() successful" );
-
-  return StatusCode::SUCCESS;
-
-}
 
 double iFatras::McEnergyLossUpdator::dEdX( const Trk::MaterialProperties& materialProperties,
                                           double momentum,
@@ -96,7 +61,7 @@ iFatras::McEnergyLossUpdator::energyLoss(
   bool) const
 {
 
- 
+
   // get the number of the material effects distribution
   Trk::EnergyLoss sampledEloss =
     m_energyLossUpdator->energyLoss(materialProperties,
@@ -112,20 +77,20 @@ iFatras::McEnergyLossUpdator::energyLoss(
     // no straggling
   case 0 : { } break;
     // gaussian smearing
-  case 1 : { 
+  case 1 : {
     float deIoni = sampledEloss.sigmaIoni() * CLHEP::RandGaussZiggurat::shoot(m_randomEngine);
     float deRad  = sampledEloss.sigmaRad() * CLHEP::RandGaussZiggurat::shoot(m_randomEngine);
     sampledEloss.update(deIoni,0.,deRad,0.,false);
   } break;
   case 2 : {
     float deIoni = -sampledEloss.sigmaIoni() * CLHEP::RandLandau::shoot(m_randomEngine);  // TODO :check sign
-    sampledEloss.update(deIoni,0.,0.,0.,false);   
+    sampledEloss.update(deIoni,0.,0.,0.,false);
   } break;
     // landau smearing
     default : {
       float deIoni = -sampledEloss.sigmaIoni() * CLHEP::RandLandau::shoot(m_randomEngine);  // TODO :check sign
-      float deRad  = -sampledEloss.sigmaRad() * CLHEP::RandLandau::shoot(m_randomEngine);   // TODO :check sign      
-      sampledEloss.update(deIoni,0.,deRad,0.,false);   
+      float deRad  = -sampledEloss.sigmaRad() * CLHEP::RandLandau::shoot(m_randomEngine);   // TODO :check sign
+      sampledEloss.update(deIoni,0.,deRad,0.,false);
     } break;
   }
 
@@ -135,7 +100,7 @@ iFatras::McEnergyLossUpdator::energyLoss(
 
   if (sampledEloss.deltaE()+E<m ) {    // particle stopping - rest energy
       float dRad_rest = m-E-sampledEloss.deltaE();
-      sampledEloss.update(0.,0.,dRad_rest,0.,false);   
+      sampledEloss.update(0.,0.,dRad_rest,0.,false);
   }
 
   return sampledEloss;

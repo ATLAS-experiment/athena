@@ -45,52 +45,17 @@
 double langaufun_fast(double* x, double* par);
 //================ Constructor =================================================
 iFatras::HitCreatorSilicon::HitCreatorSilicon(const std::string& t, const std::string& n, const IInterface*  p ) :
-  base_class(t,n,p),
-  m_incidentSvc("IncidentSvc", n),
-  m_hitColl(0),
-  m_collectionName("PixelHits"),
-  m_randomSvc("AtRndmGenSvc", n),
-  m_randomEngineName("FatrasRnd"),
-  m_randomEngine(0),
-  m_siIdHelperName("PixelID"),
-  m_pixIdHelper(0),
-  m_sctIdHelper(0),
-  m_condSummaryTool("PixelConditionsSummaryTool", this),
-  m_useConditionsTool(true),
-  m_dEdX_function(0),
-  m_siPathToCharge(500.),
-  m_fastEnergyDepositionModel(true)
+  base_class(t,n,p)
 {
-  // The Hit Collection Name
-  declareProperty("CollectionName",               m_collectionName = "PixelHits");
-  // Random number svc
-  declareProperty("RandomNumberService",          m_randomSvc,        "Random number generator");
-  declareProperty("RandomStreamName",             m_randomEngineName, "Name of the random number stream");
-  // The Pixel / SCT ID helper
-  declareProperty("IdHelperName",                 m_siIdHelperName);
-  // For the SiHit creation
-  declareProperty("PathToChargeConversion",       m_siPathToCharge);
-  // Tools & Services
-  declareProperty("UseConditionsTool",            m_useConditionsTool);
-  declareProperty("ConditionsTool",               m_condSummaryTool);
-  // Services
-  declareProperty("IncidentService",              m_incidentSvc);
-  declareProperty("FastEnergyDepositionModel",    m_fastEnergyDepositionModel);
 }
 
-//================ Destructor =================================================
-
-iFatras::HitCreatorSilicon::~HitCreatorSilicon()
-{}
 
 //================ Initialisation =================================================
 StatusCode iFatras::HitCreatorSilicon::initialize()
 {
   // Random number service
-  if ( m_randomSvc.retrieve().isFailure() ) {
-    ATH_MSG_ERROR( "[ --- ] Could not retrieve " << m_randomSvc );
-    return StatusCode::FAILURE;
-  }
+  ATH_CHECK ( m_randomSvc.retrieve() );
+
   //Get own engine with own seeds:
   m_randomEngine = m_randomSvc->GetEngine(m_randomEngineName);
   if (!m_randomEngine) {
@@ -98,31 +63,19 @@ StatusCode iFatras::HitCreatorSilicon::initialize()
     return StatusCode::FAILURE;
   }
 
-  if ( m_useConditionsTool ) {
-    if ( m_condSummaryTool.retrieve().isFailure()) {
-      ATH_MSG_ERROR( "[ --- ] Could not Retrieve '" << m_condSummaryTool << "'" );
-      return StatusCode::FAILURE;
-    } else {
-      ATH_MSG_VERBOSE( "[ sihit ] Successfully retireved " << m_condSummaryTool );
-    }
-  } else {
-    m_condSummaryTool.disable();
-  }
+  ATH_CHECK ( m_condSummaryTool.retrieve( DisableTool{ !m_useConditionsTool } ) );
 
   // Get the Pixel Identifier-helper:
-  if (m_siIdHelperName == "PixelID" && detStore()->retrieve(m_pixIdHelper, m_siIdHelperName).isFailure()) {
-    ATH_MSG_ERROR( "[ --- ] Could not get PixelID helper");
-    return StatusCode::FAILURE;
-  } else if ( m_siIdHelperName == "SCT_ID" && detStore()->retrieve(m_sctIdHelper, m_siIdHelperName).isFailure() )   {
-    ATH_MSG_ERROR( "[ --- ] Could not get SCT_ID helper");
-    return StatusCode::FAILURE;
+  if ( m_siIdHelperName == "PixelID" ) {
+    ATH_CHECK ( detStore()->retrieve(m_pixIdHelper, m_siIdHelperName) );
+  }
+  else if ( m_siIdHelperName == "SCT_ID" ) {
+    ATH_CHECK ( detStore()->retrieve(m_sctIdHelper, m_siIdHelperName) );
   }
 
   // Athena/Gaudi framework
-  if (m_incidentSvc.retrieve().isFailure()){
-    ATH_MSG_WARNING("[ sihit ] Could not retrieve " << m_incidentSvc << ". Exiting.");
-    return StatusCode::FAILURE;
-  }
+  ATH_CHECK (m_incidentSvc.retrieve());
+
   // register to the incident service: BeginEvent for TrackCollection
   m_incidentSvc->addListener( this, IncidentType::BeginEvent);
   m_dEdX_function = new TF1 ("fitfunc2", langaufun_fast, 0.,10.,4);
@@ -132,8 +85,8 @@ StatusCode iFatras::HitCreatorSilicon::initialize()
 
 
 StatusCode iFatras::HitCreatorSilicon::finalize()
-{    delete m_dEdX_function;
-  ATH_MSG_VERBOSE( "[ sihit ]  finalize() successful " );
+{
+  delete m_dEdX_function;
   return StatusCode::SUCCESS;
 }
 

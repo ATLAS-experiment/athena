@@ -153,16 +153,6 @@ iFatras::PhysicsValidationTool::initialize()
  *  DESCRIPTION OF FUNCTION:
  *  ==> see headerfile
  *=======================================================================*/
-StatusCode iFatras::PhysicsValidationTool::finalize()
-{
-  ATH_MSG_VERBOSE( "finalize() successful" );
-  return StatusCode::SUCCESS;
-}
-
-/*=========================================================================
- *  DESCRIPTION OF FUNCTION:
- *  ==> see headerfile
- *=======================================================================*/
 
 /** new transport tool */
 void iFatras::PhysicsValidationTool::saveISFParticleInfo(const ISF::ISFParticle& isp, 

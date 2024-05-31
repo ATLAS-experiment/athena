@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// GeoIDSvc.cxx, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 // class header include
 #include "GeoIDSvc.h"
@@ -186,53 +182,6 @@ StatusCode  ISF::GeoIDSvc::initialize()
     m_radiusBins[i*m_maxRBins+ii] = RadiusGeoIDPair( 1e99, AtlasDetDescr::fUndefinedAtlasRegion) ;
   };
 
-  // validate the internal representation of r and z bins
-  //if ( msgLevel(MSG::VERBOSE)) {
-  //  ATH_MSG_VERBOSE("Internal (r,z) representation:");
-  //  int zBin = 0;
-  //  while ( (zBin<m_numZBins) ) {
-  //    int radiusBin = 0;
-  //    ATH_MSG_VERBOSE(" + zBin=" << zBin << " (z<"<<m_zBins[zBin]<<")");
-  //    while ( (m_radiusBins[zBin*m_maxRBins+radiusBin].second!=AtlasDetDescr::fUndefinedAtlasRegion)) {
-  //      ATH_MSG_VERBOSE("  - radiusBin=" << radiusBin <<
-  //                      " r<"<< sqrt(m_radiusBins[zBin*m_maxRBins+radiusBin].first)<<
-  //                      " geoID="<<m_radiusBins[zBin*m_maxRBins+radiusBin].second);
-  //      radiusBin++;
-  //    }
-  //    zBin++;
-  //  }
-  //}
-  // can be used for debugging:
-  //HepGeom::Point3D<double> pos(0.,0.,999999.);
-  //std::cout << " pos=" << pos << " geoID=" << identifyGeoID(pos)<<std::endl;
-  //pos = HepGeom::Point3D<double>(99999., 0., 35.0);
-  //std::cout << " pos=" << pos << " geoID=" << identifyGeoID(pos)<<std::endl;
-  //pos = HepGeom::Point3D<double>(999999., 0., 35.0);
-  //std::cout << " pos=" << pos << " geoID=" << identifyGeoID(pos)<<std::endl;
-  //pos = HepGeom::Point3D<double>(0., 0., 3475.0);
-  //std::cout << " pos=" << pos << " geoID=" << identifyGeoID(pos)<<std::endl;
-  //pos = HepGeom::Point3D<double>(0., 0., 3474.9);
-  //std::cout << " pos=" << pos << " geoID=" << identifyGeoID(pos)<<std::endl;
-  //pos = HepGeom::Point3D<double>(0., 0., 3474.999);
-  //std::cout << " pos=" << pos << " geoID=" << identifyGeoID(pos)<<std::endl;
-  //pos = HepGeom::Point3D<double>(0., 0., 3474.);
-  //std::cout << " pos=" << pos << " geoID=" << identifyGeoID(pos)<<std::endl;
-  //pos = HepGeom::Point3D<double>(1147., 0., 3474.);
-  //std::cout << " pos=" << pos << " geoID=" << identifyGeoID(pos)<<std::endl;
-  //pos = HepGeom::Point3D<double>(1148., 0., 3475.);
-  //std::cout << " pos=" << pos << " geoID=" << identifyGeoID(pos)<<std::endl;
-  //pos = HepGeom::Point3D<double>(1149., 0., 3476.);
-  //std::cout << " pos=" << pos << " geoID=" << identifyGeoID(pos)<<std::endl;
-
-  ATH_MSG_DEBUG("initialize() successful");
-  return StatusCode::SUCCESS;
-}
-
-
-StatusCode  ISF::GeoIDSvc::finalize() {
-  ATH_MSG_DEBUG("finalize() ...");
-
-  ATH_MSG_DEBUG("finalize() successful");
   return StatusCode::SUCCESS;
 }
 

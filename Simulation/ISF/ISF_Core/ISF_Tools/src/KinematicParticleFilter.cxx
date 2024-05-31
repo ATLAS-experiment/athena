@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// KinematicParticleFilter.cxx, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 // class header include
 #include "KinematicParticleFilter.h"
@@ -29,11 +25,6 @@ ISF::KinematicParticleFilter::KinematicParticleFilter(const std::string& t, cons
                    "Momentum cut");
 }
 
-/** Destructor **/
-ISF::KinematicParticleFilter::~KinematicParticleFilter()
-{
-}
-
 /** Athena algtool's Hooks */
 StatusCode  ISF::KinematicParticleFilter::initialize()
 {
@@ -46,16 +37,6 @@ StatusCode  ISF::KinematicParticleFilter::initialize()
   m_cut_maxMomEta =  m_maxEtaSym;
 
   ATH_MSG_VERBOSE("initialize() successful");
-  return StatusCode::SUCCESS;
-}
-
-
-/** Athena algtool's Hooks */
-StatusCode  ISF::KinematicParticleFilter::finalize()
-{
-  ATH_MSG_VERBOSE("finalize() ...");
-
-  ATH_MSG_VERBOSE("finalize() successful");
   return StatusCode::SUCCESS;
 }
 

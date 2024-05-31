@@ -2,10 +2,6 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-///////////////////////////////////////////////////////////////////
-// PhysicsValidationTool.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
-
 #ifndef ISF_FATRASTOOLS_PHYSICSVALIDATIONTOOL_H
 #define ISF_FATRASTOOLS_PHYSICSVALIDATIONTOOL_H
 
@@ -55,10 +51,6 @@ namespace iFatras
     
     /** AlgTool initialize method */
     virtual StatusCode initialize() override;
-    
-    /** AlgTool finalize method */
-
-    virtual StatusCode finalize() override;
 
     /** ISFParticle info: old transport tool */
     virtual

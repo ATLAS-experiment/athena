@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// IGeoIDSvc.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 #ifndef ISF_INTERFACES_IGEOIDSVC_H
 #define ISF_INTERFACES_IGEOIDSVC_H 1
@@ -19,8 +15,8 @@
 #include "AtlasDetDescr/AtlasRegion.h"
 
 // ISF Simulation includes
-#include "ISF_Event/ISFParticle.h" 
- 
+#include "ISF_Event/ISFParticle.h"
+
 namespace ISF {
 
   enum InsideType {
@@ -36,24 +32,20 @@ namespace ISF {
 
    The interface to chose between the sub geometry services,
    realized as an AlgTool since it does not have to be dynamically created
-   
+
    The IGeoIDSvc registers the nextGeoSvcID to the ISFParticle.
-       
+
    @author Andreas.Salzburger -at- cern.ch , Elmar.Ritsch -at- cern.ch
    */
-     
+
   class IGeoIDSvc : virtual public IInterface {
      public:
-     
+
        /** Virtual destructor */
        virtual ~IGeoIDSvc(){}
 
        /// Creates the InterfaceID and interfaceID() method
        DeclareInterfaceID(IGeoIDSvc, 1, 0);
-
-       /** Athena algtool's Hooks */
-       virtual StatusCode  initialize() = 0;
-       virtual StatusCode  finalize() = 0;
 
        /** Checks if the given position (ISFParticle) is inside/outside/onsurface a given AtlasRegion */
        virtual ISF::InsideType inside(const Amg::Vector3D &pos, AtlasDetDescr::AtlasRegion geoID) const = 0;
@@ -91,10 +83,10 @@ namespace ISF {
   }
 
   // identifyGeoID() wrappers
-  inline AtlasDetDescr::AtlasRegion IGeoIDSvc::identifyGeoID(const ISFParticle &sp) const { 
+  inline AtlasDetDescr::AtlasRegion IGeoIDSvc::identifyGeoID(const ISFParticle &sp) const {
     return identifyGeoID( sp.position());
   }
-  inline AtlasDetDescr::AtlasRegion IGeoIDSvc::identifyGeoID(double x, double y, double z) const { 
+  inline AtlasDetDescr::AtlasRegion IGeoIDSvc::identifyGeoID(double x, double y, double z) const {
     const Amg::Vector3D pos(x, y, z);
     return identifyGeoID( pos);
   }
@@ -119,4 +111,4 @@ namespace ISF {
 
 } // end of namespace
 
-#endif // ISF_INTERFACES_IGEOIDSVC_H 
+#endif // ISF_INTERFACES_IGEOIDSVC_H

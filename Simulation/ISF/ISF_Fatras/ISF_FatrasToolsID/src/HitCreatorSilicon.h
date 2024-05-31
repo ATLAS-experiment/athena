@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// HitCreatorSilicon.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 #ifndef ISF_FATRASTOOLSID_HITCREATORSILICON_H
 #define ISF_FATRASTOOLSID_HITCREATORSILICON_H
@@ -29,6 +25,7 @@
 //InDet
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "InDetSimEvent/SiHitCollection.h"
+#include "InDetConditionsSummaryService/IInDetConditionsTool.h"
 
 class PixelID;
 class SCT_ID;
@@ -37,84 +34,83 @@ class StoreGateSvc;
 class TF1;
 
 namespace ISF {
-    class ISFParticle;
+  class ISFParticle;
 }
 
 namespace iFatras {
-      
-  /** 
-   @class HitCreatorSilicon
 
-   RIOOnTrack creation, starting from intersection on an active surface
+  /**
+     @class HitCreatorSilicon
 
-   @author Andreas.Salzburger -at- cern.ch 
-   */
-      
+     RIOOnTrack creation, starting from intersection on an active surface
+
+     @author Andreas.Salzburger -at- cern.ch
+  */
+
   class ATLAS_NOT_THREAD_SAFE HitCreatorSilicon : public extends<AthAlgTool, IHitCreator, IIncidentListener>  // deprecated: ATLASSIM-6020
   {
-    public:
+  public:
 
-      /**Constructor */
-      HitCreatorSilicon(const std::string&,const std::string&,const IInterface*);
-      
-      /**Destructor*/
-      ~HitCreatorSilicon();
-      
-      /** AlgTool initailize method.*/
-      StatusCode initialize();
-      
-      /** AlgTool finalize method */
-      StatusCode finalize();
-    
-      /** handle for incident service */
-      void handle(const Incident& inc);    
-    
-      /** Return nothing - store the HIT in hit collection */
-      void createSimHit(const ISF::ISFParticle& isp, const Trk::TrackParameters&, double  ) const;
-      
-      /** templated function Return nothing - store the HIT in hit collection */
-      void createSimHit(const ISF::ISFParticle& isp, const Trk::TrackParameters& pars, double time, const InDetDD::SiDetectorElement& hitSiDetElement, bool isSiDetElement) const;
-      
-      /** Return the cluster on Track -- the PrepRawData is contained in this one */       
-      const ParametersROT* createHit(const ISF::ISFParticle&, const Trk::TrackParameters&  ) const { return 0; }
-      
-      /** Return the cluster on Track -- the PrepRawData is contained in this one */       
-      const std::vector< ParametersROT >* createHits(const ISF::ISFParticle&, const ParametersLayer& ) const { return 0; }
+    /**Constructor */
+    HitCreatorSilicon(const std::string&,const std::string&,const IInterface*);
 
-    protected:
-      
-      /* Incident Service */  
-      ServiceHandle<IIncidentSvc>          m_incidentSvc; 
-            
-      /*  SiHit collection and collection name */
-      SiHitCollection                     *m_hitColl;                  //!< the SiHit collection
-      std::string                          m_collectionName;           //!< name of the collection on storegate
+    /**Destructor*/
+    virtual ~HitCreatorSilicon() = default;
 
-      /** Pointer to the random number generator service */
-      ServiceHandle<IAtRndmGenSvc>         m_randomSvc;                //!< Random Svc  
-      std::string                          m_randomEngineName;         //!< Name of the random number stream
-      CLHEP::HepRandomEngine*              m_randomEngine;             //!< Random Engine 
+    /** AlgTool initailize method.*/
+    StatusCode initialize();
 
-      std::string                          m_siIdHelperName;          //!< where to find the Si helper
-      const PixelID*                       m_pixIdHelper;             //!< the Pixel ID helper
-      const SCT_ID*                        m_sctIdHelper;             //!< the SCT ID helper
+    /** AlgTool finalize method */
+    StatusCode finalize();
 
-      /** ToolHandle to ClusterMaker */
-      ToolHandle<IInDetConditionsTool>     m_condSummaryTool;          //!< Handle to Pixel/SCT conditions tool
-      bool                                 m_useConditionsTool;
-      TF1*                                 m_dEdX_function;            //!< function to evaluate dEdx
+    /** handle for incident service */
+    void handle(const Incident& inc);
 
-      double                               m_siPathToCharge;           //!< convert path in silicon to charge
-      bool                                 m_fastEnergyDepositionModel; //!< use fast energy deposition model (landau approximation ) 
+    /** Return nothing - store the HIT in hit collection */
+    void createSimHit(const ISF::ISFParticle& isp, const Trk::TrackParameters&, double  ) const;
 
-     /** Calculate Energyloss with simple Landau approximation */
-      double energyDeposit_fast(const ISF::ISFParticle& isp, bool& isPix, bool& isSCT ) const;
+    /** templated function Return nothing - store the HIT in hit collection */
+    void createSimHit(const ISF::ISFParticle& isp, const Trk::TrackParameters& pars, double time, const InDetDD::SiDetectorElement& hitSiDetElement, bool isSiDetElement) const;
 
-   /** Calculate Energyloss with exact Landau*Gauss */
-      double energyDeposit_exact(const ISF::ISFParticle& isp, bool& isPix, bool& isSCT ) const;
+    /** Return the cluster on Track -- the PrepRawData is contained in this one */
+    const ParametersROT* createHit(const ISF::ISFParticle&, const Trk::TrackParameters&  ) const { return 0; }
+
+    /** Return the cluster on Track -- the PrepRawData is contained in this one */
+    const std::vector< ParametersROT >* createHits(const ISF::ISFParticle&, const ParametersLayer& ) const { return 0; }
+
+  protected:
+
+    /* Incident Service */
+    ServiceHandle<IIncidentSvc> m_incidentSvc{this, "IncidentService", "IncidentSvc"};
+
+    /*  SiHit collection and collection name */
+    SiHitCollection *m_hitColl{};                  //!< the SiHit collection
+    StringProperty m_collectionName{this, "CollectionName", "PixelHits"};           //!< name of the collection on storegate
+
+    /** Pointer to the random number generator service */
+    ServiceHandle<IAtRndmGenSvc> m_randomSvc{this, "RandomNumberService", "AtRndmGenSvc"};                //!< Random Svc
+    StringProperty m_randomEngineName{this, "RandomStreamName", "FatrasRnd"};         //!< Name of the random number stream
+    CLHEP::HepRandomEngine *m_randomEngine{};             //!< Random Engine
+
+    StringProperty m_siIdHelperName{this, "IdHelperName", "PixelID"};          //!< where to find the Si helper
+    const PixelID *m_pixIdHelper{};             //!< the Pixel ID helper
+    const SCT_ID *m_sctIdHelper{};             //!< the SCT ID helper
+
+    /** ToolHandle to ClusterMaker */
+    ToolHandle<IInDetConditionsTool>     m_condSummaryTool{this, "ConditionsTool", "PixelConditionsSummaryTool"};          //!< Handle to Pixel/SCT conditions tool
+    BooleanProperty m_useConditionsTool{this, "UseConditionsTool", true};
+    TF1 *m_dEdX_function{};            //!< function to evaluate dEdx
+
+    DoubleProperty m_siPathToCharge{this, "PathToChargeConversion", 500.};           //!< convert path in silicon to charge
+    BooleanProperty m_fastEnergyDepositionModel{this, "FastEnergyDepositionModel", true}; //!< use fast energy deposition model (landau approximation )
+
+    /** Calculate Energyloss with simple Landau approximation */
+    double energyDeposit_fast(const ISF::ISFParticle& isp, bool& isPix, bool& isSCT ) const;
+
+    /** Calculate Energyloss with exact Landau*Gauss */
+    double energyDeposit_exact(const ISF::ISFParticle& isp, bool& isPix, bool& isSCT ) const;
   };
 
 } // end of namespace
 
-#endif 
-
+#endif
