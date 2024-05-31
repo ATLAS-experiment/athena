@@ -392,9 +392,11 @@ namespace Muon {
       const MdtIdHelper& id_helper{m_idHelperSvc->mdtIdHelper()};
 
       const Identifier prdId{calibInput.identify()};
-      xprd->setIdentifier(calibInput.identify().get_identifier32().get_compact());
+      xprd->setIdentifier(calibInput.identify().get_compact());
 
-      xprd->setMeasurement(calibInput.legacyDescriptor()->identifyHash(), driftRadius, cov);
+      xprd->setMeasurement(calibInput.decriptor()  
+                           ? calibInput.decriptor()->identHash()
+                           : calibInput.legacyDescriptor()->identifyHash(), driftRadius, cov);
 
       xprd->setTdc(calibInput.tdc());
       xprd->setAdc(calibInput.adc());

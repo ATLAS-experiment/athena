@@ -75,7 +75,11 @@ def xAODSimHitToMmMeasCnvAlgCfg(flags, name = "SimHitToMmMeasurementCnvAlg",**kw
 def MuonSimHitToMeasurementCfg(flags):
     result = ComponentAccumulator()
     if flags.Detector.GeometryMDT:
-        result.merge(xAODSimHitToMdtMeasCnvAlgCfg(flags))
+        from MuonConfig.MDT_DigitizationConfig import MDT_DigitizationDigitToRDOCfg
+        #result.merge(xAODSimHitToMdtMeasCnvAlgCfg(flags))
+        from MuonConfig.MuonRdoDecodeConfig import MdtRDODecodeCfg
+        result.merge(MDT_DigitizationDigitToRDOCfg(flags))
+        result.merge(MdtRDODecodeCfg(flags))
     if flags.Detector.GeometryRPC:
         result.merge(xAODSimHitToRpcMeasCnvAlgCfg(flags))
     if flags.Detector.GeometryTGC:

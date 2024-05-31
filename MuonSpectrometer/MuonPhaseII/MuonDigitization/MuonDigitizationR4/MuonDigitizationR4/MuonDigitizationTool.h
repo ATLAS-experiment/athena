@@ -1,0 +1,149 @@
+/*
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
+#ifndef MUONDIGITIZATIONR4_MUONDIGITIZATIONTOOL_H
+#define MUONDIGITIZATIONR4_MUONDIGITIZATIONTOOL_H
+
+#include "PileUpTools/PileUpMergeSvc.h"
+#include "PileUpTools/PileUpToolBase.h"
+
+#include "CLHEP/Random/RandomEngine.h"
+#include "AthenaKernel/IAthRNGSvc.h"
+#include "AthenaBaseComps/AthAlgTool.h"
+
+#include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/ReadCondHandleKey.h"
+
+#include "xAODMuonSimHit/MuonSimHitContainer.h"
+#include "MuonReadoutGeometryR4/MuonDetectorManager.h"
+#include "MuonIdHelpers/IMuonIdHelperSvc.h"
+#include "ActsGeometryInterfaces/ActsGeometryContext.h"
+#include "HitManagement/TimedHitPtr.h"
+
+
+namespace MuonR4 {
+     /** @brief Barebone implementation of the I/O infrastructure for all MuonDigitizationTools.
+      *         
+     */
+     class MuonDigitizationTool: public PileUpToolBase {
+        public:
+            MuonDigitizationTool(const std::string& type, 
+                                const std::string& name, 
+                                const IInterface* pIID);
+
+            StatusCode initialize() override;
+
+
+            StatusCode processBunchXing(int bunchXing, 
+                                        SubEventIterator bSubEvents, 
+                                        SubEventIterator eSubEvents) override final;
+
+            StatusCode mergeEvent(const EventContext& ctx) override final;
+
+            /** When being run from PileUpToolsAlgs, this method is called at the start of the subevts loop. Not able to access SubEvents */
+            StatusCode prepareEvent(const EventContext& ctx, 
+                                    const unsigned int /*nInputEvents*/) override final;
+
+  
+            /** alternative interface which uses the PileUpMergeSvc to obtain
+            all the required SubEvents. */
+            StatusCode processAllSubEvents(const EventContext& ctx) override final;
+        
+        protected:
+            CLHEP::HepRandomEngine* getRandomEngine(const EventContext&ctx) const;
+            
+            using TimedHit = TimedHitPtr<xAOD::MuonSimHit>;
+            using TimedHits = std::vector<TimedHitPtr<xAOD::MuonSimHit>>;
+
+            /** @brief Digitize the time ordered hits and write them to the digit format specific for the 
+             *         detector technology. A new MuonSimHitContainer pointer is parsed to also create the MuonSDO. 
+             *         If a new SDO should be added to the container plese use the addSDO() method as defined below.         
+            */
+            virtual StatusCode digitize(const EventContext& ctx,
+                                        const TimedHits& hitsToDigit,
+                                        xAOD::MuonSimHitContainer* sdoContainer) const = 0;
+            
+            /** @brief Adds the timed simHit to the output SDO container. The hit may be rejected if it's originating from
+             *         pile-up and the pile-up truth skimming strategy is applied
+             */
+            void addSDO(const TimedHit& hit, xAOD::MuonSimHitContainer* sdoContainer) const;
+
+            /** @brief Returns the reference to the ActsGeometryContext needed to fetch global positions from the Readout geometry*/
+            const ActsGeometryContext& getGeoCtx(const EventContext& ctx) const;
+
+
+            /** @brief Helper function to retrieve a container from StoreGate. If the readHandleKey is empty, the container is assigned 
+             *         to be a nullptr and the operation is marked as success. Otherwise, a failure is returned if the Container cannot be fetched
+             *         from StoreGate
+            */
+            template <class Container> StatusCode retrieveContainer(const EventContext& ctx,
+                                                                    const SG::ReadHandleKey<Container>& key,
+                                                                    const Container* & contPtr) const;
+            /** @brief Helper function to access the conditions data. If the key is empty, the conditions object is assigned to be a nullptr
+             *         Otherwise, a failure is returned if the Conditions data are not available in the event.
+            */            
+            template <class Container> StatusCode retrieveConditions(const EventContext&ctx,
+                                                                     const SG::ReadCondHandleKey<Container>& key,
+                                                                     const Container* & contPtr) const;
+
+            
+            /** @brief DigitContainers are sorted by DigitCollections which are the ensemble of all hits in a given
+             *         MuonChamber. To fill the final DigitContainer thread-safely, the DigitCollections shall be cached
+             *         pre cached in a OutDigitCache_t vector which is later moved to the final DigitContainer
+            */
+            template <class DetType> using OutDigitCache_t = std::vector<std::unique_ptr<DetType>>;
+            
+            /** @brief Helper function that provides fetches the proper DigitCollection from the DigitCache for a given hit identifier
+             *         If the Collection is fetched for the first time, it's inserted into the cache first.
+            */
+            template <class DigitColl> 
+                      DigitColl* fetchCollection(const Identifier& hitId,
+                                                 OutDigitCache_t<DigitColl>& digitCache) const;
+            /** @brief Helper function to move the collected digits into the final DigitContainer. The function needs the maximal
+             *         size of the container in advance which is provided by calling the module_hash_max() function of the corresponding
+             *         MuonIdHelper.
+            */
+            template <class DigitCont, class DigitColl> 
+                    StatusCode writeDigitContainer(const EventContext& ctx,
+                                                   const SG::WriteHandleKey<DigitCont>& key,
+                                                   OutDigitCache_t<DigitColl>&& digitCache,
+                                                   unsigned int hashMax) const;
+
+            
+            const MuonGMR4::MuonDetectorManager* m_detMgr{nullptr};
+
+            ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", 
+                                                                "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
+        private:
+            using PileUpHits = PileUpMergeSvc::TimedList<xAOD::MuonSimHitContainer>::type;
+            StatusCode fillTimedHits(const PileUpHits& hitColl);
+            
+            SG::ReadHandleKey<xAOD::MuonSimHitContainer> m_simHitKey{this, "SimHitKey", ""};
+
+            SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", 
+                                                               "Geometry context"};
+
+            ServiceHandle<PileUpMergeSvc> m_mergeSvc{this, "PileUpMergeSvc", "PileUpMergeSvc", ""};
+
+            Gaudi::Property<std::string> m_streamName{this, "StreamName", ""};
+
+            ServiceHandle<IAthRNGSvc> m_rndmSvc{this, "RndmSvc", "AthRNGSvc", ""};  // Random number service
+
+            SG::WriteHandleKey<xAOD::MuonSimHitContainer> m_sdoKey{this, "OutputSDOName", ""};
+
+            Gaudi::Property<bool> m_onlyUseContainerName{this, "OnlyUseContainerName", true,
+                                                         "Don't use the ReadHandleKey directly. Just extract the container name from it."};
+
+            Gaudi::Property<bool> m_includePileUpTruth{this, "IncludePileUpTruth", true, "Include pile-up truth info"};
+
+            std::string m_inputObjectName{""};
+
+            TimedHits m_timedHits{};
+
+
+};
+
+}
+#include "MuonDigitizationR4/MuonDigitizationTool.icc"
+#endif
+

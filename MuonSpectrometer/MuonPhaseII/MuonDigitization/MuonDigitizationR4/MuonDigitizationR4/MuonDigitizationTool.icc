@@ -1,0 +1,68 @@
+/*
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
+#ifndef MUONDIGITIZATION_MUONDIGITIZATIONTOOL_ICC
+#define MUONDIGITIZATION_MUONDIGITIZATIONTOOL_ICC
+
+#include <StoreGate/ReadHandle.h>
+#include <StoreGate/WriteHandle.h>
+#include <StoreGate/ReadCondHandle.h>
+
+namespace MuonR4{
+    template <class Container> 
+        StatusCode MuonDigitizationTool::retrieveContainer(const EventContext& ctx,
+                                                           const SG::ReadHandleKey<Container>& key,
+                                                           const Container* & contPtr) const {
+        if (key.empty()) {
+            ATH_MSG_VERBOSE("No container key has been set for "<<typeid(Container).name());
+            contPtr = nullptr;
+            return StatusCode::SUCCESS;
+        }
+        SG::ReadHandle<Container> readHandle{key, ctx};
+        ATH_CHECK(readHandle.isPresent());
+        contPtr = readHandle.cptr();
+        return StatusCode::SUCCESS;
+    }
+    template <class Container> StatusCode MuonDigitizationTool::retrieveConditions(const EventContext&ctx,
+                                                                                   const SG::ReadCondHandleKey<Container>& key,
+                                                                                   const Container* & contPtr) const {
+        if (key.empty()) {
+            ATH_MSG_VERBOSE("No conditions key has been set for "<<typeid(Container).name());
+            contPtr = nullptr;
+            return StatusCode::SUCCESS;
+        }
+        SG::ReadCondHandle<Container> readCondHandle{key, ctx};
+        ATH_CHECK(readCondHandle.isValid());
+        contPtr = readCondHandle.cptr();
+        return StatusCode::SUCCESS;    
+    }
+    template <class DigitColl> 
+        DigitColl* MuonDigitizationTool::fetchCollection(const Identifier& hitId,
+                                                         OutDigitCache_t<DigitColl>& digitCache) const {
+        const IdentifierHash hash{m_idHelperSvc->moduleHash(hitId)};
+        
+        if (static_cast<unsigned>(hash) >= digitCache.size()) {
+            digitCache.resize(static_cast<unsigned>(hash) + 1);
+        }
+        std::unique_ptr<DigitColl>& coll = digitCache[static_cast<unsigned>(hash)];
+        if (!coll) {
+            coll = std::make_unique<DigitColl>(m_idHelperSvc->chamberId(hitId), hash);
+        }
+        return coll.get();
+    }
+    template <class DigitCont, class DigitColl> 
+        StatusCode MuonDigitizationTool:: writeDigitContainer(const EventContext& ctx,
+                                                              const SG::WriteHandleKey<DigitCont>& key,
+                                                              OutDigitCache_t<DigitColl>&& digitCache,
+                                                              unsigned int hashMax) const {
+        SG::WriteHandle<DigitCont> writeHandle{key, ctx};
+        ATH_CHECK(writeHandle.record(std::make_unique<DigitCont>(hashMax)));
+        for (size_t coll_hash = 0; coll_hash < digitCache.size(); ++coll_hash) {
+            if (digitCache[coll_hash] && digitCache[coll_hash]->size()) {
+                ATH_CHECK(writeHandle->addCollection(digitCache[coll_hash].release(), coll_hash));
+            }
+        }
+        return StatusCode::SUCCESS;
+    }
+}
+#endif
