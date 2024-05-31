@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -49,11 +49,7 @@ InDet::TRT_StandaloneTrackFinder::~TRT_StandaloneTrackFinder()
 
 StatusCode InDet::TRT_StandaloneTrackFinder::initialize()
 {
-
-  StatusCode  sc;
   m_total = {};
-
-  ATH_MSG_DEBUG ("Initializing TRT_StandaloneTrackFinder");
 
   ATH_CHECK(m_segToTrackTool.retrieve());
 
@@ -61,11 +57,7 @@ StatusCode InDet::TRT_StandaloneTrackFinder::initialize()
   ATH_CHECK(m_prdToTrackMap.initialize(!m_prdToTrackMap.key().empty()));
   ATH_CHECK(m_finalTracks.initialize());
 
-  // Get output print level
-  //
-  ATH_MSG_DEBUG ( (*this) );
-  return sc;
-
+  return StatusCode::SUCCESS;
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -203,10 +195,7 @@ StatusCode InDet::TRT_StandaloneTrackFinder::execute(const EventContext& ctx) co
   }
 
   // Print common event information
-  
- ATH_MSG_DEBUG( counter  << std::endl );
-  
-
+  ATH_MSG_DEBUG( counter  << std::endl );
    
   return StatusCode::SUCCESS;
 }
@@ -217,7 +206,7 @@ StatusCode InDet::TRT_StandaloneTrackFinder::execute(const EventContext& ctx) co
 
 StatusCode InDet::TRT_StandaloneTrackFinder::finalize() 
 {
-  ATH_MSG_INFO( m_total  << std::endl );   
+  ATH_MSG_DEBUG( m_total  << std::endl );
   return StatusCode::SUCCESS;
 }
 

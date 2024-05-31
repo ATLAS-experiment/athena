@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetMultipleVertexSeedFinder/HistogrammingMultiSeedFinder.h"
@@ -22,14 +22,12 @@ namespace InDet
    ATH_MSG_ERROR(" Unable to retrieve "<<m_trkFilter);
    return StatusCode::FAILURE;
   }
-  ATH_MSG_DEBUG("Track summary tool retrieved");
    
   if(m_cleaningTool.retrieve().isFailure())
   {
    ATH_MSG_ERROR(" Unable to retrieve "<<m_cleaningTool);
    return StatusCode::FAILURE;
   }
-  ATH_MSG_DEBUG("Cluster cleaning tool retrieved");
    
   ATH_CHECK(m_beamSpotKey.initialize());
   if(m_vtxSeedFinder.retrieve().isFailure())
@@ -37,14 +35,12 @@ namespace InDet
    ATH_MSG_ERROR("Unable to retrieve " << m_vtxSeedFinder);
    return StatusCode::FAILURE;
   }
-  ATH_MSG_DEBUG("Vertex seed finder retriever");
  
   if ( m_extrapolator.retrieve().isFailure() ) 
   {                              
    ATH_MSG_ERROR("Failed to retrieve tool " << m_extrapolator);
    return StatusCode::FAILURE;                                                  
   }
-  ATH_MSG_DEBUG("Retrieved tool " << m_extrapolator);
                 
   return StatusCode::SUCCESS;
  }//end of initialize mtehod
@@ -207,7 +203,7 @@ namespace InDet
       //-------------------End of debug output -----------------------------------------
 
       if(core_cluster.empty()){
-       ATH_MSG_INFO("Core cluster has 0 size, remaining tracks are discarded.");
+       ATH_MSG_DEBUG("Core cluster has 0 size, remaining tracks are discarded.");
        clean_again = false;
       }else{
        //storing clusters with >1 track (optional)
@@ -219,8 +215,8 @@ namespace InDet
         tracks_to_clean = core_outl;
        }else if(core_outl.size()>1){
         clean_again = false;
-        ATH_MSG_INFO("There were remaining outliers of size: "<< core_outl.size());
-        ATH_MSG_INFO("Not evident, whether these tracks form a cluster. Rejected...");
+        ATH_MSG_DEBUG("There were remaining outliers of size: "<< core_outl.size());
+        ATH_MSG_DEBUG("Not evident, whether these tracks form a cluster. Rejected...");
        }else clean_again = false;//end of outlier size check 
       }//end of core cluster 0 check
      }while(clean_again);//end of loop
@@ -365,7 +361,7 @@ namespace InDet
        //-------------------End of debug output -----------------------------------------
 
        if(core_cluster.empty()){
-        ATH_MSG_INFO("Core cluster has 0 size, remaining tracks are discarded.");
+        ATH_MSG_DEBUG("Core cluster has 0 size, remaining tracks are discarded.");
         clean_again = false;
        }else{
         //storing clusters with >1 track (optional)
@@ -378,8 +374,8 @@ namespace InDet
          tracks_to_clean = core_outl;
         }else if(core_outl.size()>1){
          clean_again = false;
-         ATH_MSG_INFO("There were remaining outliers of size: "<< core_outl.size());
-         ATH_MSG_INFO("Not evident, whether these tracks form a cluster. Rejected...");
+         ATH_MSG_DEBUG("There were remaining outliers of size: "<< core_outl.size());
+         ATH_MSG_DEBUG("Not evident, whether these tracks form a cluster. Rejected...");
 	}else clean_again = false;//end of outlier size check
        }//end of core cluster 0 check   
 

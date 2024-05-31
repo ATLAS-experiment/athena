@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 //Author: Lianyou Shan <lianyou.shan@cern.ch>
 
@@ -12,7 +12,6 @@
 #include "TrkTrack/Track.h"
 #include "VxVertex/Vertex.h"
 #include "TrkTrackSummary/TrackSummary.h"
-//#include "TrkEventPrimitives/FitQuality.h"
 #endif
 
 #include <memory>
@@ -20,17 +19,11 @@
 InDet::InDetSecVtxTrackSelectionTool::InDetSecVtxTrackSelectionTool(const std::string& name )
   : asg::AsgTool(name) 
   , m_acceptInfo( "InDetSecVtxTrackSelection" )
-//#ifndef XAOD_ANALYSIS
-//  , m_trkFilter( "InDet::InDetTrackSelection", this )
-//#else
-//  , m_trkFilter( "InDet::InDetTrackSelection", this )
-//#endif
 {
 
 #ifndef XAOD_STANDALONE
   declareInterface<IInDetTrackSelectionTool>(this);
 #endif
-//  declareProperty("TrackSelector",  m_trkFilter );
 
   declareProperty("minD0", m_minD0, "Minimum transverse separation");
   declareProperty("minNPixelHitsAtZeroTRT", m_NPixel0TRT , "Minimum number of Pixel hit upon zero TRT hit" ) ;
@@ -52,28 +45,20 @@ StatusCode InDet::InDetSecVtxTrackSelectionTool::initialize() {
   }
 
   // Greet the user:
-  ATH_MSG_INFO( "Initializing SecVtx track selection tool." );
   ATH_CHECK( asg::AsgTool::initialize() );
-
-//#ifndef XAOD_ANALYSIS
-//  ATH_CHECK( m_trkFilter.retrieve() ) ;
-//  ATH_MSG_DEBUG( "Retrieved original InDetTrackSelectionTool : " << m_trkFilter.typeAndName() ) ;
-//#endif
 
   // if the CutLevel string is set to something recognizable,
   // then do a soft set on the cuts (i.e. not overwriting those already set)
 
-  ATH_MSG_DEBUG( " SecVtx trackSelector " << " local cuts initializing" ) ;
-
   if ( m_minD0 >= 0 ) 
   {
-    ATH_MSG_INFO( "  Maximum on d0: " << m_minD0 << " mm" );
+    ATH_MSG_DEBUG( "  Maximum on d0: " << m_minD0 << " mm" );
     m_trackCuts["D0"].push_back(std::make_unique<D0minCut>(this, m_minD0));
   }
 
   if ( m_NPixel0TRT > 0 )
   {
-    ATH_MSG_INFO( "  Minimum number of Pixel hit when TRT has zero hit: " << m_NPixel0TRT  );
+    ATH_MSG_DEBUG( "  Minimum number of Pixel hit when TRT has zero hit: " << m_NPixel0TRT  );
 
     auto minPixelHits = std::make_unique< FuncSummaryValueCut<3> >
     (  this, std::array<xAOD::SummaryType,3>
@@ -93,7 +78,7 @@ StatusCode InDet::InDetSecVtxTrackSelectionTool::initialize() {
 
   if ( m_minInDetHits > 0 )
   {
-    ATH_MSG_INFO( "  Minimum number of Pixel + SCT + TRT hits: " << m_minInDetHits  );
+    ATH_MSG_DEBUG( "  Minimum number of Pixel + SCT + TRT hits: " << m_minInDetHits  );
 
     auto mintotHits = std::make_unique< FuncSummaryValueCut<4> >
     (  this, std::array<xAOD::SummaryType,4>
@@ -134,7 +119,6 @@ StatusCode InDet::InDetSecVtxTrackSelectionTool::finalize()
 {
   StatusCode fin = StatusCode::SUCCESS ;
 
-  ATH_MSG_INFO("Finalizing track selection tool.");
   if (!m_isInitialized) {
     ATH_MSG_ERROR( "You are attempting to finalize a tool that has not been initialized()." );
   }
@@ -143,16 +127,8 @@ StatusCode InDet::InDetSecVtxTrackSelectionTool::finalize()
     ATH_MSG_INFO( "No tracks processed in selection tool." );
     return fin ;
   }
-  ATH_MSG_INFO( m_numTracksPassed << " / " << m_numTracksProcessed << " = "
+  ATH_MSG_DEBUG( m_numTracksPassed << " / " << m_numTracksProcessed << " = "
 		<< m_numTracksPassed*100./m_numTracksProcessed << "% passed all cuts." );
-/**
-  std::lock_guard<std::mutex> lock{m_mutex};
-  for (const auto& cutFamily : m_trackCuts) {
-    ULong64_t numPassed = m_numTracksPassedCuts.at(m_acceptInfo.getCutPosition(cutFamily.first));
-    ATH_MSG_INFO( numPassed << " = " << numPassed*100./m_numTracksProcessed << "% passed "
-		  << cutFamily.first << " cut." );
-  }
-**/
 
   return fin ; 
 
@@ -203,22 +179,12 @@ asg::AcceptData InDet::InDetSecVtxTrackSelectionTool::accept( const xAOD::TrackP
 
   bool passAll = true;
 
-//#ifndef XAOD_ANALYSIS
-//  m_accept = m_trkFilter->accept( trk, vtx ) ;
-//  if ( ! (bool)( m_accept ) ) 
-//  {
-//    ATH_MSG_DEBUG( "SecVtx Failed at usual track selection ! " ) ;
-//    return m_accept ;
-//  }
-//#endif
-
   for ( const auto & accessor : m_trackAccessors ) {
     if( !  accessor.second->access( trk, vtx ).isSuccess() ) {
       ATH_MSG_WARNING("Track access for " << accessor.first << " unsuccessful.");
     }
   }
 
-  //  std::lock_guard<std::mutex> lock{m_mutex};
   // loop over all cuts
   UShort_t cutFamilyIndex = 0;
   for ( const auto& cutFamily : m_trackCuts ) {
@@ -288,10 +254,6 @@ InDet::InDetSecVtxTrackSelectionTool::accept( const Trk::Track& /* track */,
   
   bool passAll = true;
 
-//  m_accept = m_trkFilter->accept( track, vertex ) ;
-//  if ( ! (bool)( m_accept ) ) return m_accept ;
-  
-//  std::lock_guard<std::mutex> lock{m_mutex};
   // for faster lookup in setCutResult we will keep track of the index explicitly
   UShort_t cutFamilyIndex = 0;
   for ( const auto& cutFamily : m_trackCuts ) {
@@ -305,8 +267,7 @@ InDet::InDetSecVtxTrackSelectionTool::accept( const Trk::Track& /* track */,
     }
     acceptData.setCutResult( cutFamilyIndex, pass );
     if (pass)
-      //      m_numTracksPassedCuts.at(cutFamilyIndex)++; // increment the number of tracks that passed this cut family
-    cutFamilyIndex++;
+      cutFamilyIndex++;
   }
   
   if (passAll)

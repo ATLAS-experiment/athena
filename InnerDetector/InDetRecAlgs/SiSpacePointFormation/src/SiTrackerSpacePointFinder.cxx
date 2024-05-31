@@ -1,6 +1,5 @@
-
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -59,8 +58,6 @@ namespace InDet {
 //-----------------------------------------------------------------------
 StatusCode SiTrackerSpacePointFinder::initialize()
 {
-  ATH_MSG_DEBUG( "SiTrackerSpacePointFinder::initialize()" );
-
   // Check that clusters, space points and ids have names
   if (m_selectSCTs && m_Sct_clcontainerKey.key().empty()){
     ATH_MSG_FATAL( "SCTs selected and no name set for SCT clusters");
@@ -368,9 +365,9 @@ StatusCode SiTrackerSpacePointFinder::execute (const EventContext& ctx) const
 //---------------------------------------------------------------------------
 StatusCode SiTrackerSpacePointFinder::finalize()
 {
-  ATH_MSG_INFO( m_numberOfEvents << " events processed" );
-  ATH_MSG_INFO( m_numberOfPixel << " pixel collections processed" );
-  ATH_MSG_INFO( m_numberOfSCT << " sct collections processed" );
+  ATH_MSG_DEBUG( m_numberOfEvents << " events processed" );
+  ATH_MSG_DEBUG( m_numberOfPixel << " pixel collections processed" );
+  ATH_MSG_DEBUG( m_numberOfSCT << " sct collections processed" );
   if(m_cachemode){
     //These are debug messages because they can be indeterminate in an MT environment and it could
     //lead to confusing log comparisons.
