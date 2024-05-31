@@ -44,8 +44,7 @@ def RT_Relation_DB_DigiToolCfg(flags, name="RT_Relation_DB_DigiTool", **kwargs):
 def MDT_Response_DigiToolCfg(flags, name="MDT_Response_DigiTool",**kwargs):
     """Return a configured MDT_Response_DigiTool"""
     acc = ComponentAccumulator()
-    QballConfig = (flags.Input.SpecialConfiguration.get("MDT_QballConfig", "False") == "True")
-    kwargs.setdefault("DoQballGamma", QballConfig)
+    kwargs.setdefault("DoQballGamma", (flags.Input.SpecialConfiguration.get("MDT_QballConfig", "False") == "True"))
     MDT_Response_DigiTool = CompFactory.MDT_Response_DigiTool
     acc.setPrivateTools(MDT_Response_DigiTool(name, **kwargs))
     return acc
@@ -60,19 +59,27 @@ def MDT_DigitizationToolCommonCfg(flags, name="MdtDigitizationTool", **kwargs):
     acc.merge(MdtCondDbAlgCfg(flags))
     acc.merge(MdtCalibDbAlgCfg(flags))
 
-    kwargs.setdefault("DiscardEarlyHits", True)
-    kwargs.setdefault("UseTof", flags.Beam.Type is not BeamType.Cosmics)
-    # "RT_Relation_DB_DigiTool" in jobproperties.Digitization.experimentalDigi() not migrated
-    kwargs.setdefault("DigitizationTool", acc.popToolsAndMerge(MDT_Response_DigiToolCfg(flags)))
-    QballConfig = (flags.Input.SpecialConfiguration.get("MDT_QballConfig", "False") == "True")
-    kwargs.setdefault("DoQballCharge", QballConfig)
+    ### configuration arguments not yet migrated to the PhaseII geometry
+    if not flags.Muon.usePhaseIIGeoSetup:
+        kwargs.setdefault("DiscardEarlyHits", True)
+        kwargs.setdefault("UseTof", flags.Beam.Type is not BeamType.Cosmics)
+        kwargs.setdefault("DoQballCharge", (flags.Input.SpecialConfiguration.get("MDT_QballConfig", "False") == "True"))
+        kwargs.setdefault("DigitizationTool", acc.popToolsAndMerge(MDT_Response_DigiToolCfg(flags)))
+    else:
+        ### Use the simple digitization tool as a first start
+        kwargs.setdefault("DigitizationTool", acc.popToolsAndMerge(RT_Relation_DB_DigiToolCfg(flags)))
+        kwargs.setdefault("SimHitKey", "xMdtSimHits")
+        kwargs.setdefault("StreamName", "MdtDigitForklifting")
+
     if flags.Digitization.DoXingByXingPileUp:
         kwargs.setdefault("FirstXing", MDT_FirstXing())
         kwargs.setdefault("LastXing", MDT_LastXing())
     from RngComps.RngCompsConfig import AthRNGSvcCfg
-    kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
-    MdtDigitizationTool = CompFactory.MdtDigitizationTool
-    acc.setPrivateTools(MdtDigitizationTool(name, **kwargs))
+    kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)))
+    if not flags.Muon.usePhaseIIGeoSetup:
+         acc.setPrivateTools(CompFactory.MdtDigitizationTool(name, **kwargs))
+    else:
+         acc.setPrivateTools(CompFactory.MuonR4.MdtDigitizationTool(name, **kwargs))
     return acc
 
 
@@ -148,8 +155,7 @@ def MDT_OverlayDigitizationBasicCfg(flags, **kwargs):
     # Set common overlay extra inputs
     kwargs.setdefault("ExtraInputs", flags.Overlay.ExtraInputs)
 
-    MDT_Digitizer = CompFactory.MDT_Digitizer
-    acc.addEventAlgo(MDT_Digitizer(name="MDT_OverlayDigitizer", **kwargs))
+    acc.addEventAlgo(CompFactory.MDT_Digitizer(name="MDT_OverlayDigitizer", **kwargs))
     return acc
 
 
