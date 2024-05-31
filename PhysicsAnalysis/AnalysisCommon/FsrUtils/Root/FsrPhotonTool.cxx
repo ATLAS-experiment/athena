@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <utility>
@@ -456,7 +456,7 @@ namespace FSR {
         return &m_fsrPhotons;
     }
 
-    bool FsrPhotonTool::isOverlap(const xAOD::Electron_v1* electron, std::vector< std::pair <const xAOD::IParticle*, double> > phfsr, unsigned int nofPhFsr)
+    bool FsrPhotonTool::isOverlap(const xAOD::Electron_v1* electron, const std::vector< std::pair <const xAOD::IParticle*, double> >& phfsr, unsigned int nofPhFsr)
     {
    	for (unsigned int indx=0; indx < nofPhFsr; indx++ ) {
             const xAOD::Photon* ph = dynamic_cast<const xAOD::Photon*>(phfsr.at(indx).first);
