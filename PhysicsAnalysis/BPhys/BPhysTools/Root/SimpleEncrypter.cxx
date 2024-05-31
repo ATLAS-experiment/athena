@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // system include:
@@ -387,8 +387,12 @@ namespace xAOD {
     if ( sizeof(float)*CHAR_BIT >= r ) {
       // check whether a quick conversion is possible
       if ( sizeof(float) == sizeof(int) ) {
-        float* p = reinterpret_cast<float*>(&val);
-        res = *p;
+        union {
+          float f;
+          ULLI_t i;
+        } ficnv;
+        ficnv.i = val;
+        res = ficnv.f;
       } else {
         // do a slow conversion
         char* pres = reinterpret_cast<char*>(&res);

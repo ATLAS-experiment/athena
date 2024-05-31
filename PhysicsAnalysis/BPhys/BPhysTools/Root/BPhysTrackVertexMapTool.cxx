@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id: $
 
 // system include:
 #include "boost/format.hpp"
@@ -505,7 +503,7 @@ namespace xAOD {
     if ( withMasses && m_hypoName != "__NONE__" ) {
       // vector of possible hypo names
       std::vector<std::string> hypoNames = getTokens(m_hypoName, "|;/");
-      for ( auto hypoName : hypoNames ) {
+      for ( const std::string& hypoName : hypoNames ) {
 	BPhysHypoHelper bhh(hypoName, vtx);
 	float bMass       = bhh.mass();
 	float bMassErr    = bhh.massErr();
