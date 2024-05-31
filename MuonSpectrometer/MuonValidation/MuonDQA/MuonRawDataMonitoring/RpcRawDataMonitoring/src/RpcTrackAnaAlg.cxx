@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // C/C++
@@ -414,11 +414,11 @@ StatusCode RpcTrackAnaAlg::fillMuonExtrapolateEff(
     //
     // Z tag & probe
     //
-    for (auto tag_muon : tagmuons) {
+    for (const auto& tag_muon : tagmuons) {
         if (!(tag_muon->tagged))
             continue;
 
-        for (auto probe_muon : probemuons) {
+        for (const auto& probe_muon : probemuons) {
             if (tag_muon->muon == probe_muon->muon)
                 continue;
 
