@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGHLTJETHYPO_DipzMLPLCONDITION_H
@@ -14,6 +14,7 @@
  *********************************************************************/
 
 #include "./ICondition.h"
+#include "./DipzLikelihoodCmp.h"
 
 #include <string>
 
@@ -46,20 +47,8 @@ class DipzMLPLCondition: public ICondition{
   const unsigned int m_capacity;
   const std::string m_decName_z;
   const std::string m_decName_negLogSigma2;
-
-  float getDipzMLPLDecValue(const pHypoJet &ip,
-                         const std::unique_ptr<ITrigJetHypoInfoCollector> &collector,
-                         const std::string &decName) const;
-
-  float calcNum(float acmlt, const pHypoJet &ip,
-                  const std::unique_ptr<ITrigJetHypoInfoCollector> &collector) const ;     
-  float calcDenom(float acmlt, const pHypoJet &ip,
-                  const std::unique_ptr<ITrigJetHypoInfoCollector> &collector) const ;                       
-
-  float calcLogTerm(float acmlt, const pHypoJet &ip, float zhat,
-                  const std::unique_ptr<ITrigJetHypoInfoCollector> &collector) const ;  
-
-  float safeLogRatio(float num, float denom);                         
+  
+  DipzLikelihood m_likelihoodCalculator;           
   
 };
 
