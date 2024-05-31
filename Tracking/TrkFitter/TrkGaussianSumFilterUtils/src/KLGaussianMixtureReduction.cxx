@@ -96,9 +96,9 @@ constexpr inline int32_t
 numPadded(const int32_t n)
 {
   //This always return a padded number dividable
-  //with 32
-  //e.g ((33+31)&~31) = 64
-  return ((n+31)&~31);
+  //with 16
+  //e.g ((33+15)&~15) = 48
+  return ((n+15)&~15);
 }
 
 inline int32_t
@@ -343,7 +343,7 @@ findMergesImpl(const Component1DArray& componentsIn,
   while (numberOfComponentsLeft > reducedSize) {
     // find pair with minimum distance
     const int32_t minIndex =
-        findIdxOfMinimum::impl<findIdxOfMinimum::VecAlwaysTrackIdx>(
+        findIdxOfMinimum::impl<findIdxOfMinimum::VecMinThenIdx>(
             distances.buffer(), nnpadded);
     const triangularToIJ conversion = convert(minIndex);
     int8_t minTo = conversion.I;
