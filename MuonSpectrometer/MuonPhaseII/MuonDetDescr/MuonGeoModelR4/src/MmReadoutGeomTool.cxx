@@ -186,7 +186,7 @@ StatusCode MmReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
 
     for (auto& [key, pv] : mapFPV) {
         /// For MicroMegas the Keys are formatted in the following way.
-        ///   <MM>_<LARGE/SMALL SECTOR + MODULE TYPE>_<QUADRUPLET NUMBER>_<ETA INDEX>_<PHI INDEX -1>_<COPY NUMBER>
+        ///   <MM>_<LARGE/SMALL SECTOR + MODULE TYPE>_<QUADRUPLET NUMBER>_<ETA INDEX>_<PHI INDEX>_<Quadruplet>
         // e.g. MM_SM1Q2_1_6_1 . It's the "type" Attribute in the new GeoModel XML files.
         std::vector<std::string> key_tokens = tokenize(key, "_");
 
@@ -199,7 +199,7 @@ StatusCode MmReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
         bool isValid{false};
         define.detElId = idHelper.channelID(key_tokens[1][0] == 'S' ? "MMS" : "MML", // Replace <MM> string part with <MMS> or <MML> to match the Identifier.
                                             atoi(key_tokens[2].c_str()), // Eta index
-                                            atoi(key_tokens[3].c_str()) + 1, // Phi index (from 0 to 7 in GeoModel). needs a +1
+                                            atoi(key_tokens[3].c_str()), // Phi index (from 0 to 7 in GeoModel). needs a +1
                                             atoi(key_tokens[4].c_str()), 1, 1, isValid); //Copy Number which reflects the number of the multilayer.
                                             // THen the two 1s are reflecting gasGap and channel Number. They can be set to 1s as this is all we need
                                             // to get the Identifier for the multilayer.

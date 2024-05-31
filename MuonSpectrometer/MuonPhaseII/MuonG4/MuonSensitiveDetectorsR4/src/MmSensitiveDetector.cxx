@@ -156,7 +156,7 @@ const MuonGMR4::MmReadoutElement* MmSensitiveDetector::getReadoutElement(const A
    /// Find the Detector element from the Identifier  
    const std::string stName = volumeTokens[0][0] == 'S' ? "MMS" : "MML";
    const int stationEta = atoi(volumeTokens[2]);
-   const int stationPhi = atoi(volumeTokens[3]) + 1;
+   const int stationPhi = atoi(volumeTokens[3]);
 
    const MmIdHelper& idHelper{m_detMgr->idHelperSvc()->mmIdHelper()};
    const Identifier detElIdMl1 = idHelper.channelID(idHelper.stationNameIndex(stName), stationEta, stationPhi, 1, 1, 1);

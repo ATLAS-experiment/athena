@@ -168,7 +168,7 @@ const MuonGMR4::sTgcReadoutElement* sTgcSensitiveDetector::getReadoutElement(con
    /// Find the Detector element from the Identifier  
    const std::string stName = volumeTokens[0][1] == 'S' ? "STS" : "STL";
    const int stationEta = atoi(volumeTokens[2]);
-   const int stationPhi = atoi(volumeTokens[3]) + 1;
+   const int stationPhi = atoi(volumeTokens[3]);
 
    const sTgcIdHelper& idHelper{m_detMgr->idHelperSvc()->stgcIdHelper()};
    const Identifier detElIdMl1 = idHelper.channelID(idHelper.stationNameIndex(stName), stationEta, stationPhi, 1, 1,

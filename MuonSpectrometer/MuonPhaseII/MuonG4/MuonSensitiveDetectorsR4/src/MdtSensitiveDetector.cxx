@@ -59,7 +59,7 @@ const MuonGMR4::MdtReadoutElement* MdtSensitiveDetector::getReadoutElement(const
    /// Find the Detector element from the Identifier
    const std::string stName = volumeTokens[0].substr(0,3);
    const int stationEta = atoi(volumeTokens[2]);
-   const int stationPhi = atoi(volumeTokens[3]) + 1;
+   const int stationPhi = atoi(volumeTokens[3]);
    const int multiLayer = atoi(volumeTokens[4]);
    const MdtIdHelper& idHelper{m_detMgr->idHelperSvc()->mdtIdHelper()};
    /// Build first the Identifier to find the detector element

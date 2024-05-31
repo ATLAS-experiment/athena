@@ -129,7 +129,7 @@ StatusCode MdtReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
         /// indicates whether we're dealing with a MDT / TGC / CSC / RPC chamber
         ///    If we are dealing with a MDT chamber, then there are 3 additional
         ///    properties encoded into the chamber
-        ///       <STATIONETA>_(<STATIONPHI>-1)_ML
+        ///       <STATIONETA>_<STATIONPHI>_ML
         std::vector<std::string> key_tokens = tokenize(key, "_");
         if (key_tokens.size() != 5 ||
             key_tokens[1].find("MDT") == std::string::npos)
@@ -139,7 +139,7 @@ StatusCode MdtReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
         bool isValid{false};
         define.detElId = idHelper.channelID(key_tokens[0].substr(0, 3), 
                                             atoi(key_tokens[2]),
-                                            atoi(key_tokens[3]) + 1, 
+                                            atoi(key_tokens[3]), 
                                             atoi(key_tokens[4]), 1, 1, isValid);
         if (!isValid) {
             ATH_MSG_FATAL("Failed to build a good identifier out of " << key);
