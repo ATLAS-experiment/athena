@@ -1,28 +1,23 @@
 #!/bin/env python
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-import os,re
 import sys
-from os import popen
-import string
-import commands
 import ROOT
 
 def DumpPathology(inf, hvline, outfile, append):
 
-    try:
-       if not inf.IsOpen():
-          print 'File not open ?'
-          return
-    except:
-          return
+    if not inf.IsOpen():
+        print('File not open ?')
+        return
 
     try:
        if append:
           fout=open(outfile,'a')
        else:
           fout=open(outfile,'w')
-    except:
-          print 'Could not open output file ',outfile
+    except Exception as e:
+          print('Could not open output file ',outfile)
+          print (e)
           return
 
     tree=inf.Get("hv/mytree")
@@ -30,7 +25,7 @@ def DumpPathology(inf, hvline, outfile, append):
     br_hvline=tree.GetBranch("HVline")
     hvdict={}
     for i in range(0,tree.GetEntries()):
-       if i%10000 == 0: print i
+       if i%10000 == 0: print(i)
        br_hvline.GetEntry(i)
        if tree.HVline != hvline: continue
        tree.GetEntry(i)
@@ -49,10 +44,10 @@ def DumpPathology(inf, hvline, outfile, append):
     #print hvdict
     # now write to a file
     if not append: fout.write('/LAR/HVPathologiesOfl/Pathologies\n')
-    for k in hvdict.keys():
+    for k in list(hvdict.keys()):
        ll=hvdict[k]
        if len(ll) != 6:
-          print 'Wrong list: ',ll,' continue to next!!!'
+          print('Wrong list: ',ll,' continue to next!!!')
           continue
        wstr=str(ll[0])+' '+str(ll[1])+' '+str(ll[2])+' '+str(ll[3])+' '+str(ll[4])+' '+str(hvline/1000)+' '+str(hvline%1000)+' '+str((ihv<<4)&0xFFF0)+'\n'
        fout.write(wstr)
@@ -66,20 +61,22 @@ if __name__=="__main__":
     try:
       infile = sys.argv[1]
       inf = ROOT.TFile(infile,'read')
-    except:
-       print 'HV ntuple ',infile,' doesnt exist ?'
+    except Exception as e:
+       print('HV ntuple ',infile,' doesnt exist ?')
+       print(e)
        sys.exit()
 
-    print 'HV ntuple file: ',infile
+    print('HV ntuple file: ',infile)
 
     try:
       hvline = int(sys.argv[2])
-    except:
-       print 'HVline number doesnt exist ?'
+    except Exception as e:
+       print('HVline number doesnt exist ?')
+       print (e)
        sys.exit()
 
     if hvline < 1000 or hvline > 400000:
-       print 'wrong HV line number: ',hvline
+       print('wrong HV line number: ',hvline)
        sys.exit()
 
     if len(sys.argv) > 3:
@@ -87,7 +84,7 @@ if __name__=="__main__":
     else:
        outfile='hvpat.txt'
 
-    print 'Output file: ',outfile
+    print('Output file: ',outfile)
 
     if len(sys.argv) > 4:
        if int(sys.argv[4])==0: 
@@ -97,7 +94,7 @@ if __name__=="__main__":
     else:
        append=False
 
-    print 'Append to out file: ',append
+    print('Append to out file: ',append)
 
     DumpPathology(inf, hvline, outfile, append)
     inf.Close()

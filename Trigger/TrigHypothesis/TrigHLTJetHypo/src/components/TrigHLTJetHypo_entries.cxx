@@ -31,6 +31,7 @@
 #include "../TrigJetConditionConfig_repeated.h"
 #include "../TrigJetConditionConfig_timing.h"
 #include "../TrigJetConditionConfig_timesig.h"
+#include "../TrigJetConditionConfig_pileuprm.h"
 
 //
 #include "../TrigJetHypoTool.h"
@@ -72,6 +73,7 @@ DECLARE_COMPONENT(TrigJetConditionConfig_acceptAll)
 DECLARE_COMPONENT(TrigJetConditionConfig_moment)
 DECLARE_COMPONENT(TrigJetConditionConfig_repeated)
 DECLARE_COMPONENT(TrigJetConditionConfig_qjet_mass)
+DECLARE_COMPONENT(TrigJetConditionConfig_pileuprm)
 
 DECLARE_COMPONENT(TrigJetHypoAlg)
 DECLARE_COMPONENT(TrigJetHypoTool)

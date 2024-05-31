@@ -15000,6 +15000,12 @@ HLT_j20_calratiovar_roiftf_preselj20emf24_L1LLPDPHI-jXE40-jJ40:
   stepFeatures:
     0: 3
     1: 21
+HLT_j20_n041pileuprmn015_j70_j50a_j0_DJMASS900j50dphi260x200deta_L1MJJ-500-NFF:
+  eventCount: 1
+  stepCounts:
+    0: 1
+  stepFeatures:
+    0: 24
 HLT_j20_pf_ftf_presel4j85_PhysicsTLA_L13J50:
   eventCount: 1
   stepCounts:

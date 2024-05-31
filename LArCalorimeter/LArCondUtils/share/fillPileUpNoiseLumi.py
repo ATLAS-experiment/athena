@@ -1,8 +1,7 @@
 #!/bin/env python
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from PyCool import cool
-from time import asctime,gmtime
-
 
 def createFolder(db,name):
     desc='<timeStamp>run-lumi</timeStamp><addrHeader><address_header service_type="71" clid="1238547719" /></addrHeader><typeName>CondAttrListCollection</typeName>'
@@ -24,7 +23,7 @@ def fillPileUpNoiseLumi(db,tag,dataIn, folderName="/CALO/Ofl/Noise/PileUpNoiseLu
         folder = db.getFolder(folderName)
     else:
         #create new folder
-        print "Folder", folderName,"does not exit yet. Creating it now." 
+        print("Folder", folderName,"does not exit yet. Creating it now.") 
         folder=createFolder(db,folderName)
 
     since=cool.ValidityKeyMin
@@ -40,45 +39,45 @@ def fillPileUpNoiseLumi(db,tag,dataIn, folderName="/CALO/Ofl/Noise/PileUpNoiseLu
 
 
 if __name__=='__main__':
-    import os,sys,getopt
+    import os,sys
 
     if len(sys.argv)<2 or sys.argv[1]=="-h" or sys.argv[1]=="--help":
-        print "Usage:"
+        print("Usage:")
 
-        print "fillPileUpNoiseLumi.py lumi"
+        print("fillPileUpNoiseLumi.py lumi")
         sys.exit(-1)
 
 
     from LArConditionsCommon.getCurrentFolderTag import getCurrentFolderTag
     (current,next)=getCurrentFolderTag("COOLOFL_CALO/CONDBR2","/CALO/Ofl/Noise/PileUpNoiseLumi")
     if current is None:
-        print "Failed to get CURRENT folder level tag!"
+        print("Failed to get CURRENT folder level tag!")
         sys.exit(-1)
     
     try:
      float(sys.argv[1])
     except ValueError:
-     print "Argument is not a float"   
+     print("Argument is not a float")   
 
     newlumi=float(sys.argv[1])
 
     sqlitename="PileUpNoiseLumi.db"
     if os.access(sqlitename,os.F_OK):
-            print "ERROR: File",sqlitename,"exists already. Please delete!"
+            print("ERROR: File",sqlitename,"exists already. Please delete!")
             sys.exit(-1)
 
-    print "Using folder-level tag:",current
+    print("Using folder-level tag:",current)
     connect="sqlite://;schema="+sqlitename+";dbname=CONDBR2"
     dbSvc = cool.DatabaseSvcFactory.databaseService()
     try:
         db = dbSvc.openDatabase(connect,False)
     except Exception:
-        print "Database does not exist, try to create it ..."
+        print("Database does not exist, try to create it ...")
         try:
             db=dbSvc.createDatabase(connect)
-        except Exception,e:
-            print e
-            print "Could not create database"
+        except Exception as e:
+            print(e)
+            print("Could not create database")
             sys.exit(-1)
         pass
     pass

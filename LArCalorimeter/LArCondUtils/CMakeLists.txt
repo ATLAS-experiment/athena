@@ -19,5 +19,10 @@ atlas_add_component( LArCondUtils
 
 # Install files from the package:
 atlas_install_runtime( share/LArEmLvl1.data share/LArHecLvl1.data share/LArFcalLvl1.data )
-atlas_install_scripts( share/LArBuildHVPathologies.sh share/fillPileUpNoiseLumi.py share/dumpHVPathFromNtuple.py )
+atlas_install_scripts( share/LArBuildHVPathologies.sh )
+
+atlas_install_scripts( 
+		       share/fillPileUpNoiseLumi.py
+		       share/dumpHVPathFromNtuple.py
+		       POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
