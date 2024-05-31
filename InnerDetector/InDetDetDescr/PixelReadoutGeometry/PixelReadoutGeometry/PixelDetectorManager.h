@@ -11,17 +11,15 @@
 #ifndef InDetReadoutGeometry_PixelDetectorManager_h
 #define InDetReadoutGeometry_PixelDetectorManager_h 1
 
-#include "GeoPrimitives/GeoPrimitives.h"
-#include "GeoModelKernel/GeoVPhysVol.h"
-
 #include "InDetReadoutGeometry/SiDetectorManager.h"
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "InDetReadoutGeometry/ExtendedAlignableTransform.h"
 #include "ReadoutGeometryBase/InDetDD_Defs.h"
 
-#include "InDetIdentifier/PixelID.h"
+#include "InDetIdentifier/PixelID.h" //covariant return type
 
 #include <map>
+#include <vector>
 
 class StoreGateSvc;
 class Identifier; 

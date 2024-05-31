@@ -22,7 +22,7 @@
 // IOV SVC for alignment:
 #include "AthenaKernel/IIOVSvc.h"
 
-#include "DetDescrConditions/AlignableTransformContainer.h"
+#include "DetDescrConditions/AlignableTransformContainer.h"//typedef
 #include "AthenaBaseComps/AthMessaging.h"
 
 #include <atomic>
@@ -97,7 +97,8 @@ namespace InDetDD {
     
     protected:
       StoreGateSvc * m_detStore;
-    
+      mutable std::atomic_bool                  m_suppressWarnings;
+
     private:
       /** @class LevelInfo
          Private helper class definition.
@@ -117,7 +118,6 @@ namespace InDetDD {
           bool isGlobalDelta() const {return m_type == InDetDD::global;}
           bool isLocalDelta() const {return m_type == InDetDD::local;} 
           bool isValid() const {return (m_level >= 0);}
-        
       };
 
       class AlignInfo {
@@ -180,8 +180,7 @@ namespace InDetDD {
       std::set<std::string>                     m_folders;
       std::set<std::string>                     m_specialFolders;
       std::set<std::string>                     m_globalFolders; // new time-dependent global folders
-      mutable std::atomic_bool                  m_suppressWarnings;
-
+     
       static const LevelInfo s_invalidLevel;
     };
 

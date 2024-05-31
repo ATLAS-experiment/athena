@@ -1,21 +1,17 @@
 /*
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
+#include "PixelReadoutGeometry/PixelDetectorManager.h"
 
 #include "DetDescrConditions/AlignableTransformContainer.h"
 #include "DetDescrConditions/AlignableTransform.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
-
-#include "PixelReadoutGeometry/PixelDetectorManager.h"
-#include "InDetIdentifier/PixelID.h"
 #include "InDetIdentifier/PLR_ID.h"
 #include "Identifier/Identifier.h"
 #include "Identifier/IdentifierHash.h"
-#include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
 #include "StoreGate/StoreGateSvc.h"
-
 #include "GeoModelKernel/GeoVAlignmentStore.h"
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "GeoPrimitives/GeoPrimitivesHelpers.h"
@@ -36,8 +32,6 @@ namespace InDetDD {
     //
     // Initialized the Identifier helper.
     //
-
-
     if (pixelIDName == "PLR_ID") {
       const PLR_ID* plr_idHelper;
       StatusCode sc = detStore->retrieve(plr_idHelper, pixelIDName);
@@ -62,6 +56,8 @@ namespace InDetDD {
       m_elementCollection.resize(m_idHelper->wafer_hash_max());
       m_alignableTransforms.resize(m_idHelper->wafer_hash_max());
     }
+    //https://its.cern.ch/jira/browse/ATLASRECTS-4886
+    InDetDetectorManager::m_suppressWarnings = true;
   }
 
   PixelDetectorManager::PixelDetectorManager(StoreGateSvc* detStore)
@@ -434,7 +430,6 @@ namespace InDetDD {
                         << getIdHelper()->show_to_string(trans_iter->identify())
                         << " at level 0 for IBLDist bowing deformation");
         }
-
         alignmentChange = (alignmentChange || status);
       }
     }
