@@ -649,6 +649,8 @@ def TrackSeedsFinalCfg(flags):
 def SiSPSeededTracksFinalCfg(flags):
     result = ComponentAccumulator()
 
+    primaryPassExtension = flags.Tracking.__getattr__(f"{flags.Tracking.PrimaryPassConfig.value}Pass").extension
+
     # get list of extensions requesting track candidates.
     # Add always the Primary Pass.
     listOfExtensionsRequesting = [
@@ -659,7 +661,7 @@ def SiSPSeededTracksFinalCfg(flags):
         AssociationMapNameKey="PRDtoTrackMapMerge_CombinedInDetTracks"
         if extension=='Disappearing':
             AssociationMapNameKey = "PRDtoTrackMapMerge_DisappearingTracks"
-        elif not (extension == ''):
+        elif not (extension == primaryPassExtension):
             AssociationMapNameKey = f"InDetPRDtoTrackMap{extension}"
 
         from xAODTrackingCnv.xAODTrackingCnvConfig import (
