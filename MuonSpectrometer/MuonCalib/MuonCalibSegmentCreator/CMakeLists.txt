@@ -5,7 +5,7 @@ atlas_subdir( MuonCalibSegmentCreator )
 #                    src/*.cxx
 #                    PUBLIC_HEADERS MuonCalibPatRec
 #                    LINK_LIBRARIES AthenaBaseComps GaudiKernel MuonCalibEvent MuonSegment TrkSegment MdtCalibSvcLib MuonIdHelpersLib
-#                    PRIVATE_LINK_LIBRARIES Identifier MuonCalibEventBase MuonCalibITools  MuonReadoutGeometry MuonPattern MuonRIO_OnTrack MuonRecToolInterfaces TrkCompetingRIOsOnTrack TrkEventPrimitives TrkParameters )
+#                    PRIVATE_LINK_LIBRARIES Identifier MuonCalibEventBase MuonCalibITools  MuonReadoutGeometry MuonRecTools MuonPattern MuonRIO_OnTrack MuonRecToolInterfaces TrkCompetingRIOsOnTrack TrkEventPrimitives TrkParameters )
 
 # atlas_add_component( MuonCalibSegmentCreator
 #                      src/components/*.cxx
@@ -23,7 +23,7 @@ atlas_add_component( MuonCalibSegmentCreator
                     INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${TBB_INCLUDE_DIRS} ${EIGEN_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
                     LINK_LIBRARIES ${ROOT_LIBRARIES} ${Boost_LIBRARIES} ${TBB_LIBRARIES} ${EIGEN_LIBRARIES} ${CLHEP_LIBRARIES} 
                                     GaudiKernel AthenaBaseComps EventInfo MuonSegment TrkSegment MuonTesterTreeLib 
-                                    TrkTrack MuonRIO_OnTrack MuonPrepRawData MuonCalibITools MdtCalibSvcLib TrkExInterfaces TrkToolInterfaces)
+                                    TrkTrack MuonCompetingRIOsOnTrack MuonRecHelperToolsLib MuonRecToolInterfaces MuonRIO_OnTrack MuonPrepRawData MuonCalibITools MdtCalibSvcLib TrkExInterfaces TrkToolInterfaces)
 
 atlas_install_python_modules( python/*.py )
 

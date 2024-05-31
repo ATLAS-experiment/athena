@@ -2,11 +2,13 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-// Trigger includes
+// Local includes
 #include "HltEventLoopMgr.h"
 #include "TrigCOOLUpdateHelper.h"
-#include "TrigKernel/HltExceptions.h"
 #include "TrigRDBManager.h"
+
+// Trigger includes
+#include "TrigKernel/HltExceptions.h"
 #include "TrigSteeringEvent/HLTResultMT.h"
 
 // Athena includes
@@ -31,14 +33,12 @@
 #include "eformat/StreamTag.h"
 #include "owl/time.h"
 
-// Boost includes
-#include <filesystem>
-
 // ROOT includes
 #include "TROOT.h"
 #include "TSystem.h"
 
 // System includes
+#include <filesystem>
 #include <sstream>
 #include <string>
 
@@ -68,6 +68,15 @@ HltEventLoopMgr::HltEventLoopMgr(const std::string& name, ISvcLocator* svcLoc)
 : base_class(name, svcLoc) {}
 
 // =============================================================================
+// Standard destructor
+// =============================================================================
+HltEventLoopMgr::~HltEventLoopMgr() noexcept
+{
+  // tbb:task_group destructor throws if wait() was never called
+  m_parallelIOTaskGroup.wait();
+}
+
+// =============================================================================
 // Reimplementation of AthService::initalize (IStateful interface)
 // =============================================================================
 StatusCode HltEventLoopMgr::initialize()
@@ -95,6 +104,7 @@ StatusCode HltEventLoopMgr::initialize()
   ATH_MSG_INFO(" ---> HardTimeout               = " << m_hardTimeout.value());
   ATH_MSG_INFO(" ---> SoftTimeoutFraction       = " << m_softTimeoutFraction.value());
   ATH_MSG_INFO(" ---> SoftTimeoutValue          = " << m_softTimeoutValue.count());
+  ATH_MSG_INFO(" ---> TimeoutThreadIntervalMs   = " << m_timeoutThreadIntervalMs.value());
   ATH_MSG_INFO(" ---> TraceOnTimeout            = " << m_traceOnTimeout.value());
   ATH_MSG_INFO(" ---> MaxFrameworkErrors        = " << m_maxFrameworkErrors.value());
   ATH_MSG_INFO(" ---> FwkErrorDebugStreamName   = " << m_fwkErrorDebugStreamName.value());
@@ -103,10 +113,11 @@ StatusCode HltEventLoopMgr::initialize()
   ATH_MSG_INFO(" ---> TruncationDebugStreamName = " << m_truncationDebugStreamName.value());
   ATH_MSG_INFO(" ---> SORPath                   = " << m_sorPath.value());
   ATH_MSG_INFO(" ---> setMagFieldFromPtree      = " << m_setMagFieldFromPtree.value());
+  ATH_MSG_INFO(" ---> execAtStart               = " << m_execAtStart.value());
   ATH_MSG_INFO(" ---> forceRunNumber            = " << m_forceRunNumber.value());
+  ATH_MSG_INFO(" ---> forceLumiblock            = " << m_forceLumiblock.value());
   ATH_MSG_INFO(" ---> forceStartOfRunTime       = " << m_forceSOR_ns.value());
   ATH_MSG_INFO(" ---> RewriteLVL1               = " << m_rewriteLVL1.value());
-  ATH_MSG_INFO(" ---> PopAllMode                = " << m_popAll.value());
   ATH_MSG_INFO(" ---> EventContextWHKey         = " << m_eventContextWHKey.key());
   ATH_MSG_INFO(" ---> EventInfoRHKey            = " << m_eventInfoRHKey.key());
 
@@ -140,8 +151,7 @@ StatusCode HltEventLoopMgr::initialize()
     ATH_CHECK(m_maxParallelIOTasks.fromString(threads));
   }
   ATH_MSG_INFO(" ---> MaxParallelIOTasks        = " << m_maxParallelIOTasks.value());
-  ATH_MSG_INFO(" ---> PopFromSchedulerTimeout   = " << m_popFromSchedulerTimeout.value());
-  ATH_MSG_INFO(" ---> PopFromSchedulerQueryInterval = " << m_popFromSchedulerQueryInterval.value());
+  ATH_MSG_INFO(" ---> MaxIOWakeUpIntervalMs     = " << m_maxIOWakeUpIntervalMs.value());
 
   //----------------------------------------------------------------------------
   // Setup all Hive services for multithreaded event processing with the exception of SchedulerSvc,
@@ -455,29 +465,21 @@ StatusCode HltEventLoopMgr::hltUpdateAfterFork(const ptree& /*pt*/)
   }
   ATH_CHECK(m_ioCompMgr->io_reinitialize());
 
-  // Start the timeout thread
-  ATH_MSG_DEBUG("Starting the timeout thread");
-  m_timeoutThread = std::make_unique<std::thread>(std::bind(&HltEventLoopMgr::runEventTimer,this));
+  const size_t numSlots = m_whiteboard->getNumberOfStores();
+  m_freeSlots = numSlots;
 
   // Initialise vector of time points for event timeout monitoring
-  {
-    std::unique_lock<std::mutex> lock(m_timeoutMutex);
-    m_eventTimerStartPoint.clear();
-    m_eventTimerStartPoint.resize(m_whiteboard->getNumberOfStores(), std::chrono::steady_clock::now());
-    m_isSlotProcessing.resize(m_whiteboard->getNumberOfStores(), false);
-  }
-  m_timeoutCond.notify_all();
+  m_eventTimerStartPoint.clear();
+  m_eventTimerStartPoint.resize(numSlots, std::chrono::steady_clock::now());
+  m_isSlotProcessing.resize(numSlots, false);
 
   // Initialise vector of time points for free slots monitoring
   m_freeSlotStartPoint.clear();
-  m_freeSlotStartPoint.resize(m_whiteboard->getNumberOfStores(), std::chrono::steady_clock::now());
+  m_freeSlotStartPoint.resize(numSlots, std::chrono::steady_clock::now());
 
-  // Initialise arena and queues used in parallel I/O steering
-  m_parallelIOTaskArena = std::make_unique<tbb::task_arena>(int(tbb::task_arena::automatic), 0);
-  m_parallelIOQueue.set_capacity(static_cast<size_t>(m_maxParallelIOTasks.value()));
-  m_finishedEventsQueue.set_capacity(m_whiteboard->getNumberOfStores());
-  m_drainSchedulerStatusQueue.set_capacity(m_whiteboard->getNumberOfStores());
-  m_startNextEventStatusQueue.set_capacity(m_whiteboard->getNumberOfStores());
+  // Initialise the queues used in parallel I/O steering
+  m_parallelIOQueue.set_capacity(static_cast<decltype(m_parallelIOQueue)::size_type>(m_maxParallelIOTasks.value()));
+  m_finishedEventsQueue.set_capacity(static_cast<decltype(m_finishedEventsQueue)::size_type>(numSlots));
 
   // Fire incident to update listeners after forking
   m_incidentSvc->fireIncident(AthenaInterprocess::UpdateAfterFork(m_workerID, m_workerPID, name(), m_currentRunCtx));
@@ -511,17 +513,6 @@ StatusCode HltEventLoopMgr::executeRun(int maxevt)
 
   if (m_monitorScheduler) ATH_CHECK(m_schedulerMonSvc->stopMonitoring());
 
-  // Stop the timer thread
-  {
-    ATH_MSG_DEBUG("Stopping the timeout thread");
-    std::unique_lock<std::mutex> lock(m_timeoutMutex);
-    m_runEventTimer = false;
-  }
-  m_timeoutCond.notify_all();
-  m_timeoutThread->join();
-  m_timeoutThread.reset();
-  ATH_MSG_DEBUG("The timeout thread finished");
-
   ATH_MSG_VERBOSE("end of " << __FUNCTION__);
   return sc;
 }
@@ -534,94 +525,40 @@ StatusCode HltEventLoopMgr::nextEvent(int /*maxevt*/)
 {
   ATH_MSG_VERBOSE("start of " << __FUNCTION__);
 
+  // Start the event timer thread
+  ATH_MSG_DEBUG("Starting the timeout thread");
+  m_timeoutThread = std::make_unique<HLT::LoopThread>([this]{return eventTimerCallback();}, m_timeoutThreadIntervalMs.value());
+  m_timeoutThread->start();
+
+  // Start the event loop
   ATH_MSG_INFO("Starting loop on events");
+  std::unique_lock<std::mutex> lock{m_loopStatus.loopEndedMutex};
+  m_inputThread = std::make_unique<HLT::LoopThread>([this]{return inputThreadCallback();}, m_maxIOWakeUpIntervalMs.value());
+  m_outputThread = std::make_unique<HLT::LoopThread>([this]{return outputThreadCallback();}, m_maxIOWakeUpIntervalMs.value());
+  m_outputThread->start();
+  m_inputThread->start();
 
-  EventLoopStatus loopStatus{};
+  // Wait for event loop to end. The condition means the main input and output threads flagged they have
+  // nothing else to do and will exit asynchronously (later than the wait here ends)
+  ATH_MSG_DEBUG("Event loop started, the main thread is going to sleep until it finishes");
+  m_loopStatus.loopEndedCond.wait(lock, [this](){return m_loopStatus.loopEnded.load();});
+  ATH_MSG_INFO("All events processed, finalising the event loop");
 
-  while (!loopStatus.loopEnded) {
-    ATH_MSG_DEBUG("Free processing slots = " << m_schedulerSvc->freeSlots());
-    ATH_MSG_DEBUG("Free event data slots = " << m_whiteboard->freeSlots());
+  // Wait for the I/O TBB tasks and main I/O threads to finish. Note the TBB tasks need to finish first
+  // because they may notify the condition variables in the main I/O threads. The lifetime of the condition
+  // variables must span beyond any I/O TBB task.
+  ATH_MSG_DEBUG("Waiting for all I/O tasks and threads to return");
+  m_parallelIOTaskGroup.wait();
+  m_inputThread.reset();
+  m_outputThread.reset();
 
-    if (m_schedulerSvc->freeSlots() != m_whiteboard->freeSlots()) {
-      // Starvation detected - try to recover and return FAILURE if the recovery fails. This can only happen if there
-      // is an unhandled error after popping an event from the scheduler and before clearing the event data slot for
-      // this finished event. It's an extra protection in the unlikely case that failedEvent doesn't cover all errors.
-      ATH_CHECK(recoverFromStarvation());
-    }
+  // Stop the event timer thread
+  ATH_MSG_DEBUG("All I/O threads and tasks finished. Stopping the timeout thread");
+  m_timeoutThread->stop();
+  m_timeoutThread.reset();
+  ATH_MSG_DEBUG("The timeout thread finished");
 
-    // Decide what to do in this event loop step
-    bool do_fill_scheduler = m_schedulerSvc->freeSlots()>0 && loopStatus.eventsAvailable && !loopStatus.triggerOnHold;
-    bool do_drain_scheduler = !do_fill_scheduler;
-    // Clear the trigger_on_hold flag
-    loopStatus.triggerOnHold.store(false, std::memory_order_relaxed);
-
-    // Read in and start processing another event
-    if (do_fill_scheduler) {
-      size_t numSlotsToFill = m_schedulerSvc->freeSlots();
-      ATH_MSG_DEBUG("Free slots = " << numSlotsToFill << ". Reading new event(s) to fill the slot(s).");
-
-      // Fill all free slots with new events
-      for (size_t i=0; i<numSlotsToFill; ++i) {
-        auto task = [mgr=this, &loopStatus](){
-          StatusCode sc = StatusCode::SUCCESS;
-          try {
-            sc = mgr->startNextEvent(loopStatus);
-          }
-          catch (const std::exception& e) {
-            mgr->error() << "Exception caught in startNextEvent: " << e.what() << endmsg;
-            sc = StatusCode::FAILURE;
-          }
-          catch (...) {
-            mgr->error() << "Exception caught in startNextEvent" << endmsg;
-            sc = StatusCode::FAILURE;
-          }
-          mgr->m_startNextEventStatusQueue.push(sc);
-          // Pop one item from parallel I/O queue to decrement its size - it doesn't matter which item
-          // is popped, we only use the queue size to limit the number of tasks running in parallel
-          bool popIOQueue{false};
-          mgr->m_parallelIOQueue.pop(popIOQueue);
-        };
-
-        // Push one item to the parallel I/O queue to increment its size - the value doesn't matter,
-        // we only use the queue size and benefit from the blocking push call here to limit the number
-        // of tasks running in parallel. Once we can push to the queue, we can enqueue the task to the arena.
-        m_parallelIOQueue.push(true);
-        m_parallelIOTaskArena->enqueue(std::move(task));
-      }
-
-      // Wait until startNextEvent is done for all slots
-      std::vector<StatusCode> statusCodes;
-      while (statusCodes.size() < numSlotsToFill) {
-        StatusCode sc = StatusCode::FAILURE;
-        m_startNextEventStatusQueue.pop(sc);
-        statusCodes.push_back(sc);
-      }
-
-      // Check the startNextEvent status code for all slots
-      for (StatusCode sc : statusCodes) {
-        if (sc.isFailure()) {return sc;}
-      }
-    } // End of if(do_fill_scheduler)
-
-    // Wait for events to finish processing and write their output
-    if (do_drain_scheduler) {
-      ATH_MSG_DEBUG("No free slots or no more events to process - draining the scheduler");
-      DrainSchedulerStatusCode drainResult = drainScheduler();
-      if (drainResult==DrainSchedulerStatusCode::FAILURE) {
-        ATH_MSG_ERROR("Error in draining scheduler, exiting the event loop");
-        return StatusCode::FAILURE;
-      }
-      if (drainResult==DrainSchedulerStatusCode::RECOVERABLE) {
-        ATH_MSG_WARNING("Recoverable error in draining scheduler, continuing the event loop");
-        continue;
-      }
-      if (drainResult==DrainSchedulerStatusCode::SCHEDULER_EMPTY && !loopStatus.eventsAvailable) {
-        ATH_MSG_INFO("All events processed, finalising the event loop");
-        loopStatus.loopEnded = true;
-      }
-      // else drainResult is SUCCESS or NO_EVENT, so we just continue
-    }
-  }
+  ATH_MSG_INFO("Finished loop on events");
 
   ATH_MSG_VERBOSE("end of " << __FUNCTION__);
   return StatusCode::SUCCESS;
@@ -883,55 +820,70 @@ StatusCode HltEventLoopMgr::failedEvent(HLT::OnlineErrorCode errorCode, const Ev
   // Used by MsgSvc (and possibly others but not relevant here)
   Gaudi::Hive::setCurrentContext(eventContext);
 
-  auto drainAllAndProceed = [&]() -> StatusCode {
-    resetEventTimer(eventContext, /*processing=*/ false); // stop the timeout monitoring for the failed slot
-    ATH_CHECK(drainAllSlots()); // break the event loop on failure
-    if ( m_maxFrameworkErrors.value()>=0 && ((++m_nFrameworkErrors)>m_maxFrameworkErrors.value()) ) {
-      ATH_MSG_ERROR("The number of tolerable framework errors for this HltEventLoopMgr instance, which is "
-                    << m_maxFrameworkErrors.value() << ", was exceeded. Exiting the event loop.");
-      return StatusCode::FAILURE; // break the event loop
-    }
-    return StatusCode::SUCCESS; // continue the event loop
+  auto returnFailureAndStopEventLoop = [this]() -> StatusCode {
+    ATH_MSG_INFO("Stopping event loop due to failure");
+    // Change the loop exit code to FAILURE
+    m_loopStatus.exitCode = StatusCode::FAILURE;
+
+    // Flag eventsAvailable=false which will result in I/O threads to finish all the ongoing event processing
+    // and then stop. We cannot flag loopEnded=true here yet, because it would finish the I/O threads while
+    // there might be still events being processed and they would crash when finished.
+    m_loopStatus.eventsAvailable = false;
+
+    // Inform the caller the failure could not be handled cleanly and the event loop will stop
+    return StatusCode::FAILURE;
   };
 
   //----------------------------------------------------------------------------
-  // Handle cases where we can only try to clear all slots and continue
+  // Handle framework errors by printing an informative message and breaking the loop
   //----------------------------------------------------------------------------
-
   if (errorCode==HLT::OnlineErrorCode::BEFORE_NEXT_EVENT) {
     ATH_MSG_ERROR("Failure occurred with OnlineErrorCode=" << errorCode
-      << " meaning there was a framework error before requesting a new event. No output will be produced and"
-      << " all slots of this HltEventLoopMgr instance will be drained before proceeding.");
-    return drainAllAndProceed();
+      << " meaning there was a framework error before requesting a new event. No output will be produced for this event"
+      << " and the event loop will exit after all ongoing processing is finished.");
+    return returnFailureAndStopEventLoop();
+  }
+  if (errorCode==HLT::OnlineErrorCode::CANNOT_RETRIEVE_EVENT) {
+    ATH_MSG_ERROR("Failure occurred with OnlineErrorCode=" << errorCode
+      << " meaning a new event could not be correctly read. No output will be produced for this event."
+      << " The event loop will exit after all ongoing processing is finished.");
+    return returnFailureAndStopEventLoop();
   }
   if (errorCode==HLT::OnlineErrorCode::AFTER_RESULT_SENT) {
     ATH_MSG_ERROR("Failure occurred with OnlineErrorCode=" << errorCode
       << " meaning there was a framework error after HLT result was already sent out."
-      << " All slots of this HltEventLoopMgr instance will be drained before proceeding.");
-    return drainAllAndProceed();
+      << " The event loop will exit after all ongoing processing is finished.");
+    return returnFailureAndStopEventLoop();
   }
   if (errorCode==HLT::OnlineErrorCode::CANNOT_ACCESS_SLOT) {
-    ATH_MSG_ERROR("Failed to access the slot for the processed event, cannot produce output. OnlineErrorCode=" << errorCode
-      << ". All slots of this HltEventLoopMgr instance will be drained before proceeding, then either the loop will"
-      << " exit with a failure code or the failed event will reach a hard timeout.");
-    return drainAllAndProceed();
+    ATH_MSG_ERROR("Failed to access the slot for the processed event, cannot produce output. OnlineErrorCode="
+      << errorCode << ". The event loop will exit after all ongoing processing is finished unless the failed event"
+      << " reaches a hard timeout sooner and this process is killed.");
+    return returnFailureAndStopEventLoop();
+  }
+  if (errorCode==HLT::OnlineErrorCode::SCHEDULING_FAILURE) {
+    // Here we cannot be certain if the scheduler started processing the event or not. If yes, the output thread
+    // will finalise the event as normal. If not, the event will eventually reach a hard timeout and this process
+    // is killed, or we exit the process without ever producing output for this event (needs to be handled upstream).
+    ATH_MSG_ERROR("Failure occurred with OnlineErrorCode=" << errorCode
+      << ". Cannot determine if the event processing started or not and whether a decision for this event will be"
+      << " produced. The event loop will exit after all ongoing processing is finished, which may include or"
+      << " not include the problematic event.");
+    return returnFailureAndStopEventLoop();
+  }
+  if (errorCode==HLT::OnlineErrorCode::SCHEDULER_POP_FAILURE) {
+    ATH_MSG_ERROR("Failure occurred with OnlineErrorCode=" << errorCode
+      << " meaning the Scheduler returned FAILURE when asked to give a finished event. Will keep trying to"
+      << " pop further events if there are any still in the scheduler, but this may keep repeating until"
+      << " this process is killed by hard timeout or other means. If all ongoing processing manages to finish"
+      << " then the event loop will exit.");
+    return returnFailureAndStopEventLoop();
   }
   if (!eventContext.valid()) {
     ATH_MSG_ERROR("Failure occurred with an invalid EventContext. Likely there was a framework error before"
       << " requesting a new event or after sending the result of a finished event. OnlineErrorCode=" << errorCode
-      << ". All slots of this HltEventLoopMgr instance will be drained before proceeding.");
-    return drainAllAndProceed();
-  }
-
-  //----------------------------------------------------------------------------
-  // In case of event source failure, drain the scheduler and break the loop
-  //----------------------------------------------------------------------------
-  if (errorCode==HLT::OnlineErrorCode::CANNOT_RETRIEVE_EVENT) {
-    ATH_MSG_ERROR("Failure occurred with OnlineErrorCode=" << errorCode
-      << " meaning a new event could not be correctly read. No output will be produced for this event."
-      << " All slots of this HltEventLoopMgr instance will be drained and the loop will exit.");
-    ATH_CHECK(drainAllSlots());
-    return StatusCode::FAILURE;
+      << ". The event loop will exit after all ongoing processing is finished.");
+    return returnFailureAndStopEventLoop();
   }
 
   //----------------------------------------------------------------------------
@@ -939,20 +891,6 @@ StatusCode HltEventLoopMgr::failedEvent(HLT::OnlineErrorCode errorCode, const Ev
   //----------------------------------------------------------------------------
   if (m_whiteboard->selectStore(eventContext.slot()).isFailure()) {
     return failedEvent(HLT::OnlineErrorCode::CANNOT_ACCESS_SLOT,eventContext);
-  }
-
-  //----------------------------------------------------------------------------
-  // Handle SCHEDULING_FAILURE
-  //----------------------------------------------------------------------------
-  if (errorCode==HLT::OnlineErrorCode::SCHEDULING_FAILURE) {
-    // Here we cannot be certain if the scheduler started processing the event or not, so we can only try to drain
-    // the scheduler and continue. Trying to create a debug stream result for this event and clear the event slot may
-    // lead to further problems if the event is being processed
-    ATH_MSG_ERROR("Failure occurred with OnlineErrorCode=" << errorCode
-      << ". Cannot determine if the event processing started or not. Current local event number is "
-      << eventContext.evt() << ", slot " << eventContext.slot()
-      << ". All slots of this HltEventLoopMgr instance will be drained before proceeding.");
-    return drainAllAndProceed();
   }
 
   //----------------------------------------------------------------------------
@@ -1006,9 +944,8 @@ StatusCode HltEventLoopMgr::failedEvent(HLT::OnlineErrorCode errorCode, const Ev
       // Avoid infinite loop
       ATH_MSG_ERROR("Second failure to build or record the HLT Result in event store while handling a failed event. "
                     << "Cannot force-accept this event from HLT side, will rely on data collector to do this. "
-                    << "All slots of this HltEventLoopMgr instance will be drained and the loop will exit.");
-      ATH_CHECK(drainAllSlots());
-      return StatusCode::FAILURE;
+                    << "The event loop will exit after all ongoing processing is finished.");
+      return returnFailureAndStopEventLoop();
     }
     ATH_MSG_ERROR("Failed to build or record the HLT Result in event store while handling a failed event. "
                   << "Trying again with skipped filling of the result contents (except debug stream tag).");
@@ -1030,9 +967,8 @@ StatusCode HltEventLoopMgr::failedEvent(HLT::OnlineErrorCode errorCode, const Ev
   if (m_outputCnvSvc->connectOutput("").isFailure()) {
     ATH_MSG_ERROR("The output conversion service failed in connectOutput() while handling a failed event. "
                   << "Cannot force-accept this event from HLT side, will rely on data collector to do this. "
-                  << "All slots of this HltEventLoopMgr instance will be drained and the loop will exit.");
-    ATH_CHECK(drainAllSlots());
-    return StatusCode::FAILURE;
+                  << "The event loop will exit after all ongoing processing is finished.");
+    return returnFailureAndStopEventLoop();
   }
 
   DataObject* hltResultDO = m_evtStore->accessData(hltResultWH.clid(),hltResultWH.key());
@@ -1041,9 +977,8 @@ StatusCode HltEventLoopMgr::failedEvent(HLT::OnlineErrorCode errorCode, const Ev
       // Avoid infinite loop
       ATH_MSG_ERROR("Second failure to build or record the HLT Result in event store while handling a failed event. "
                     << "Cannot force-accept this event from HLT side, will rely on data collector to do this. "
-                    << "All slots of this HltEventLoopMgr instance will be drained and the loop will exit.");
-      ATH_CHECK(drainAllSlots());
-      return StatusCode::FAILURE;
+                    << "The event loop will exit after all ongoing processing is finished.");
+      return returnFailureAndStopEventLoop();
     }
     ATH_MSG_ERROR("Failed to retrieve DataObject for the HLT result object while handling a failed event. "
                   << "Trying again with skipped filling of the result contents (except debug stream tag).");
@@ -1054,19 +989,17 @@ StatusCode HltEventLoopMgr::failedEvent(HLT::OnlineErrorCode errorCode, const Ev
   if (m_outputCnvSvc->createRep(hltResultDO,addr).isFailure() || addr == nullptr) {
     ATH_MSG_ERROR("Conversion of HLT result object to the output format failed while handling a failed event. "
                   << "Cannot force-accept this event from HLT side, will rely on data collector to do this. "
-                  << "All slots of this HltEventLoopMgr instance will be drained and the loop will exit.");
+                  << "The event loop will exit after all ongoing processing is finished.");
     delete addr;
-    ATH_CHECK(drainAllSlots());
-    return StatusCode::FAILURE;
+    return returnFailureAndStopEventLoop();
   }
 
   if (m_outputCnvSvc->commitOutput("",true).isFailure()) {
     ATH_MSG_ERROR("The output conversion service failed in commitOutput() while handling a failed event. "
                   << "Cannot force-accept this event from HLT side, will rely on data collector to do this. "
-                  << "All slots of this HltEventLoopMgr instance will be drained and the loop will exit.");
+                  << "The event loop will exit after all ongoing processing is finished.");
     delete addr;
-    ATH_CHECK(drainAllSlots());
-    return StatusCode::FAILURE;
+    return returnFailureAndStopEventLoop();
   }
 
   // The output has been sent out, the ByteStreamAddress can be deleted
@@ -1085,6 +1018,13 @@ StatusCode HltEventLoopMgr::failedEvent(HLT::OnlineErrorCode errorCode, const Ev
   if (clearWBSlot(eventContext.slot()).isFailure())
     return failedEvent(HLT::OnlineErrorCode::AFTER_RESULT_SENT,eventContextCopy);
 
+  // Only now after store clearing we can allow the slot to be filled again,
+  // so we increment m_freeSlots and notify the input thread
+  ++m_freeSlots;
+  if (!m_loopStatus.loopEnded && m_inputThread!=nullptr) {
+    m_inputThread->cond().notify_all();
+  }
+
   //----------------------------------------------------------------------------
   // Finish handling the failed event
   //----------------------------------------------------------------------------
@@ -1096,9 +1036,8 @@ StatusCode HltEventLoopMgr::failedEvent(HLT::OnlineErrorCode errorCode, const Ev
         << " was successfully handled, but the number of tolerable framework errors for this HltEventLoopMgr instance,"
         << " which is " << m_maxFrameworkErrors.value() << ", was exceeded. Current local event number is "
         << eventContextCopy.evt() << ", slot " << eventContextCopy.slot()
-        << ". All slots of this HltEventLoopMgr instance will be drained and the loop will exit.");
-      ATH_CHECK(drainAllSlots());
-      return StatusCode::FAILURE;
+        << ". The event loop will exit after all ongoing processing is finished.");
+      return returnFailureAndStopEventLoop();
     }
   }
 
@@ -1107,33 +1046,29 @@ StatusCode HltEventLoopMgr::failedEvent(HLT::OnlineErrorCode errorCode, const Ev
     << " Current local event number is " << eventContextCopy.evt() << ", slot " << eventContextCopy.slot());
 
   ATH_MSG_VERBOSE("end of " << __FUNCTION__);
-  return StatusCode::SUCCESS; // continue the event loop
+  return StatusCode::SUCCESS; // error handling succeeded, event loop may continue
 }
 
 // =============================================================================
-void HltEventLoopMgr::runEventTimer()
+void HltEventLoopMgr::eventTimerCallback()
 {
   ATH_MSG_VERBOSE("start of " << __FUNCTION__);
-  std::unique_lock<std::mutex> lock(m_timeoutMutex);
-  while (m_runEventTimer) {
-    m_timeoutCond.wait_for(lock,std::chrono::seconds(1));
-    auto now=std::chrono::steady_clock::now();
-    for (size_t i=0; i<m_eventTimerStartPoint.size(); ++i) {
-      // iterate over all slots and check for timeout
-      if (!m_isSlotProcessing.at(i)) continue;
-      if (now > m_eventTimerStartPoint.at(i) + m_softTimeoutValue) {
-        EventContext ctx(0,i); // we only need the slot number for Athena::Timeout instance
-        // don't duplicate the actions if the timeout was already reached
-        if (!Athena::Timeout::instance(ctx).reached()) {
-          ATH_MSG_ERROR("Soft timeout in slot " << i << ". Processing time exceeded the limit of " << m_softTimeoutValue.count() << " ms");
-          setTimeout(Athena::Timeout::instance(ctx));
-          // Generate stack trace and scheduler dump only once, on the first timeout
-          if (m_traceOnTimeout.value() && !m_timeoutTraceGenerated) {
-            m_schedulerSvc->dumpState();
-            ATH_MSG_INFO("Generating stack trace due to the soft timeout");
-            m_timeoutTraceGenerated = true;
-            gSystem->StackTrace();
-          }
+  auto now=std::chrono::steady_clock::now();
+  for (size_t i=0; i<m_eventTimerStartPoint.size(); ++i) {
+    // iterate over all slots and check for timeout
+    if (!m_isSlotProcessing.at(i)) continue;
+    if (now > m_eventTimerStartPoint.at(i) + m_softTimeoutValue) {
+      EventContext ctx(0,i); // we only need the slot number for Athena::Timeout instance
+      // don't duplicate the actions if the timeout was already reached
+      if (!Athena::Timeout::instance(ctx).reached()) {
+        ATH_MSG_ERROR("Soft timeout in slot " << i << ". Processing time exceeded the limit of " << m_softTimeoutValue.count() << " ms");
+        setTimeout(Athena::Timeout::instance(ctx));
+        // Generate stack trace and scheduler dump only once, on the first timeout
+        if (m_traceOnTimeout.value() && !m_timeoutTraceGenerated) {
+          m_schedulerSvc->dumpState();
+          ATH_MSG_INFO("Generating stack trace due to the soft timeout");
+          m_timeoutTraceGenerated = true;
+          gSystem->StackTrace();
         }
       }
     }
@@ -1145,16 +1080,203 @@ void HltEventLoopMgr::runEventTimer()
 void HltEventLoopMgr::resetEventTimer(const EventContext& eventContext, bool processing) {
   if (!eventContext.valid()) {return;}
   {
-    std::unique_lock<std::mutex> lock(m_timeoutMutex);
+    std::unique_lock<std::mutex> lock(m_timeoutThread->mutex());
     m_eventTimerStartPoint[eventContext.slot()] = std::chrono::steady_clock::now();
     m_isSlotProcessing[eventContext.slot()] = processing;
     resetTimeout(Athena::Timeout::instance(eventContext));
   }
-  m_timeoutCond.notify_all();
+  m_timeoutThread->cond().notify_all();
 }
 
 // =============================================================================
-StatusCode HltEventLoopMgr::startNextEvent(EventLoopStatus& loopStatus)
+StatusCode HltEventLoopMgr::clearWBSlot(size_t evtSlot) const
+{
+  ATH_MSG_VERBOSE("start of " << __FUNCTION__);
+  auto monTime = Monitored::Timer<std::chrono::duration<float, std::milli>>("TIME_clearStore");
+  StatusCode sc = m_whiteboard->clearStore(evtSlot);
+  Monitored::Group(m_monTool, monTime);
+  if( !sc.isSuccess() )  {
+    ATH_MSG_WARNING("Clear of event data store failed");
+  }
+  ATH_MSG_VERBOSE("end of " << __FUNCTION__ << ", returning m_whiteboard->freeStore(evtSlot=" << evtSlot << ")");
+  return m_whiteboard->freeStore(evtSlot);
+}
+
+// =============================================================================
+void HltEventLoopMgr::inputThreadCallback() {
+  ATH_MSG_VERBOSE("start of " << __FUNCTION__);
+  if (m_loopStatus.loopEnded) {
+    ATH_MSG_VERBOSE("Event loop ended, stopping the input thread and returning from " << __FUNCTION__);
+    m_inputThread->stop();
+    // Notify output thread which may be still waiting for events
+    m_outputThread->cond().notify_all();
+    return;
+  }
+
+  // Early exit conditions
+  if (!m_loopStatus.eventsAvailable) {
+    ATH_MSG_VERBOSE("No more events, flagging the event loop as finished, stopping the input thread"
+                    << " and returning from " << __FUNCTION__);
+    m_inputThread->stop();
+    // Notify output thread which may be still waiting for events
+    m_outputThread->cond().notify_all();
+    return;
+  }
+  const size_t numSlotsToFill = m_freeSlots.load();
+  if (numSlotsToFill==0) {
+    ATH_MSG_VERBOSE("No free slots, returning from " << __FUNCTION__);
+    return;
+  }
+  m_freeSlots -= numSlotsToFill;
+
+  // Read in and start processing another event
+  ATH_MSG_DEBUG("Free slots = " << numSlotsToFill << ". Reading new event(s) to fill the slot(s).");
+
+  // Fill all free slots with new events
+  for (size_t i=0; i<numSlotsToFill; ++i) {
+    auto task = [mgr=this](){
+      StatusCode sc = StatusCode::SUCCESS;
+      try {
+        sc = mgr->startNextEvent();
+      }
+      catch (const std::exception& e) {
+        mgr->error() << "Exception caught in startNextEvent: " << e.what() << endmsg;
+        sc = StatusCode::FAILURE;
+      }
+      catch (...) {
+        mgr->error() << "Exception caught in startNextEvent" << endmsg;
+        sc = StatusCode::FAILURE;
+      }
+      if (sc.isFailure()) {
+        mgr->error() << "startNextEvent failed, stopping the event loop" << endmsg;
+        mgr->m_loopStatus.exitCode = StatusCode::FAILURE;
+        mgr->m_loopStatus.eventsAvailable = false;
+        return;
+      }
+      // Pop one item from parallel I/O queue to decrement its size - it doesn't matter which item
+      // is popped, we only use the queue size to limit the number of tasks running in parallel
+      bool popIOQueue{false};
+      mgr->m_parallelIOQueue.pop(popIOQueue);
+    };
+
+    // Push one item to the parallel I/O queue to increment its size - the value doesn't matter,
+    // we only use the queue size and benefit from the blocking push call here to limit the number
+    // of tasks running in parallel. Once we can push to the queue, we can schedule the task.
+    m_parallelIOQueue.push(true);
+    m_parallelIOTaskGroup.run(std::move(task));
+  }
+  ATH_MSG_VERBOSE("end of " << __FUNCTION__);
+}
+
+// =============================================================================
+void HltEventLoopMgr::outputThreadCallback() {
+  ATH_MSG_VERBOSE("start of " << __FUNCTION__);
+  const size_t nslots = m_isSlotProcessing.size(); // size is fixed in hltUpdateAfterFork after configuring scheduler
+  if (m_schedulerSvc->freeSlots() == nslots) {
+    if (m_loopStatus.eventsAvailable) {
+      ATH_MSG_DEBUG("There are currently no events being processed by the Scheduler, returning from " << __FUNCTION__);
+    } else {
+      ATH_MSG_DEBUG("No more events to process and scheduler is empty, stopping the event loop and output thread");
+      if (!m_loopStatus.loopEnded && m_outputThread!=nullptr) {
+        m_outputThread->stop();
+      }
+      // Notify input thread which may be still waiting for free slots
+      if (!m_loopStatus.loopEnded && m_inputThread!=nullptr) {
+        m_inputThread->cond().notify_all();
+      }
+      // Notify the main thread that the loop ended - this is the only place able to do this!
+      m_loopStatus.loopEnded = true;
+      m_loopStatus.loopEndedCond.notify_all();
+    }
+    return;
+  }
+
+  //----------------------------------------------------------------------------
+  // Pop events from the Scheduler
+  //----------------------------------------------------------------------------
+  std::vector<EventContext*> finishedEvtContexts;
+  EventContext* finishedEvtContext(nullptr);
+  const auto popStartTime = std::chrono::steady_clock::now();
+
+  // Pop one event from the scheduler (blocking call)
+  ATH_MSG_DEBUG("Waiting for a finished event from the Scheduler");
+  if (m_schedulerSvc->popFinishedEvent(finishedEvtContext).isFailure()) {
+    failedEvent(HLT::OnlineErrorCode::SCHEDULER_POP_FAILURE, EventContext()).ignore();
+    delete finishedEvtContext;
+    return;
+  }
+  ATH_MSG_DEBUG("Scheduler returned a finished event: " << finishedEvtContext);
+  finishedEvtContexts.push_back(finishedEvtContext);
+
+  // See if more events are available (non-blocking call)
+  while (m_schedulerSvc->tryPopFinishedEvent(finishedEvtContext).isSuccess()){
+    ATH_MSG_DEBUG("Scheduler returned a finished event: " << *finishedEvtContext);
+    finishedEvtContexts.push_back(finishedEvtContext);
+  }
+  const auto popSpentTime = std::chrono::steady_clock::now() - popStartTime;
+  const auto popSpentTimeMs = std::chrono::duration_cast<std::chrono::milliseconds>(popSpentTime).count();
+  Monitored::Scalar<int64_t> monPopSchedulerTime{"PopSchedulerTime", popSpentTimeMs};
+  Monitored::Scalar<size_t> monPopSchedulerNumEvt{"PopSchedulerNumEvt", finishedEvtContexts.size()};
+  Monitored::Group{m_monTool, monPopSchedulerNumEvt, monPopSchedulerTime};
+
+  //----------------------------------------------------------------------------
+  // Post-process the finished events
+  //----------------------------------------------------------------------------
+  const size_t nFinishedEvents = finishedEvtContexts.size();
+  ATH_MSG_DEBUG("Number of finished events to post-process: " << nFinishedEvents);
+
+  // Push all post-processing tasks to TBB
+  for (EventContext* thisFinishedEvtContext : finishedEvtContexts) {
+    // Reset free slot timer for monitoring
+    if (thisFinishedEvtContext != nullptr) {
+      m_freeSlotStartPoint[thisFinishedEvtContext->slot()] = std::chrono::steady_clock::now();
+    }
+
+    // Create and enqueue the task
+    m_finishedEventsQueue.push(thisFinishedEvtContext);
+    auto task = [mgr=this](){
+      StatusCode sc = StatusCode::SUCCESS;
+      try {
+        sc = mgr->processFinishedEvent();
+      }
+      catch (const std::exception& e) {
+        mgr->error() << "Exception caught in processFinishedEvent: " << e.what() << endmsg;
+        sc = StatusCode::FAILURE;
+      }
+      catch (...) {
+        mgr->error() << "Exception caught in processFinishedEvent" << endmsg;
+        sc = StatusCode::FAILURE;
+      }
+
+      if (sc.isFailure()) {
+        mgr->error() << "processFinishedEvent failed, stopping the event loop" << endmsg;
+        mgr->m_loopStatus.exitCode = StatusCode::FAILURE;
+        mgr->m_loopStatus.eventsAvailable = false;
+      }
+
+      // Pop one item from parallel I/O queue to decrement its size - it doesn't matter which item
+      // is popped, we only use the queue size to limit the number of tasks running in parallel
+      bool popIOQueue{false};
+      mgr->m_parallelIOQueue.pop(popIOQueue);
+
+      // Wake up the output thread if it's sleeping - this prevents a deadlock after the last event
+      // when input thread already finished and is no longer waking up the output thread. Spurious wake-ups
+      // during the event loop from this notification should have negligible effect on CPU load.
+      mgr->m_outputThread->cond().notify_one();
+    };
+
+    // Push one item to the parallel I/O queue to increment its size - the value doesn't matter,
+    // we only use the queue size and benefit from the blocking push call here to limit the number
+    // of tasks running in parallel. Once we can push to the queue, we can schedule the task.
+    m_parallelIOQueue.push(true);
+    m_parallelIOTaskGroup.run(std::move(task));
+  }
+
+  ATH_MSG_VERBOSE("end of " << __FUNCTION__);
+}
+
+// =============================================================================
+StatusCode HltEventLoopMgr::startNextEvent()
 {
   StatusCode sc = StatusCode::SUCCESS;
   auto check = [this, &sc](std::string&& errmsg, HLT::OnlineErrorCode errcode, const EventContext& eventContext) {
@@ -1224,25 +1346,29 @@ StatusCode HltEventLoopMgr::startNextEvent(EventLoopStatus& loopStatus)
   // Get the next event
   //------------------------------------------------------------------------
   try {
-    sc = m_evtSelector->next(*m_evtSelContext);
+    bool noEventsTemporarily{false};
+    do {
+      try {
+        noEventsTemporarily = false;
+        sc = m_evtSelector->next(*m_evtSelContext);
+      } catch (const hltonl::Exception::NoEventsTemporarily& e) {
+        ATH_MSG_DEBUG("No new input events available temporarily, requesting again");
+        noEventsTemporarily = true;
+      }
+    } while (noEventsTemporarily);
   }
   catch (const hltonl::Exception::NoMoreEvents& e) {
     sc = StatusCode::SUCCESS;
-    loopStatus.eventsAvailable = false;
+    m_loopStatus.eventsAvailable = false;
     sc = clearWBSlot(eventContext->slot());
     if (sc.isFailure()) {
       ATH_MSG_WARNING("Failed to clear the whiteboard slot " << eventContext->slot()
                       << " after NoMoreEvents detected");
     }
-    return StatusCode::SUCCESS;
-  }
-  catch (const hltonl::Exception::NoEventsTemporarily& e) {
-    sc = StatusCode::SUCCESS;
-    loopStatus.triggerOnHold = true;
-    sc = clearWBSlot(eventContext->slot());
-    if (sc.isFailure()) {
-      ATH_MSG_WARNING("Failed to clear the whiteboard slot " << eventContext->slot()
-                      << " after NoEventsTemporarily detected");
+    // Increment m_freeSlots after clearing the store and notify the input thread
+    ++m_freeSlots;
+    if (!m_loopStatus.loopEnded && m_inputThread!=nullptr) {
+      m_inputThread->cond().notify_all();
     }
     return StatusCode::SUCCESS;
   }
@@ -1318,32 +1444,32 @@ StatusCode HltEventLoopMgr::startNextEvent(EventLoopStatus& loopStatus)
   EventIDBase::number_type oldMaxLB{0}, newMaxLB{0};
   bool updatedLB{false};
   do {
-    oldMaxLB = loopStatus.maxLB.load();
+    oldMaxLB = m_loopStatus.maxLB.load();
     newMaxLB = std::max(oldMaxLB, eventContext->eventID().lumi_block());
     updatedLB = newMaxLB > oldMaxLB;
-  } while (updatedLB && !loopStatus.maxLB.compare_exchange_strong(oldMaxLB, newMaxLB));
-  loopStatus.maxLB.compare_exchange_strong(oldMaxLB, newMaxLB);
+  } while (updatedLB && !m_loopStatus.maxLB.compare_exchange_strong(oldMaxLB, newMaxLB));
+  m_loopStatus.maxLB.compare_exchange_strong(oldMaxLB, newMaxLB);
 
   // Wait in case a COOL update is ongoing to avoid executeEvent
   // reading conditions data while they are being updated.
   {
-    std::unique_lock<std::mutex> lock(loopStatus.coolUpdateMutex);
-    loopStatus.coolUpdateCond.wait(lock, [&]{return !loopStatus.coolUpdateOngoing;});
+    std::unique_lock<std::mutex> lock(m_loopStatus.coolUpdateMutex);
+    m_loopStatus.coolUpdateCond.wait(lock, [&]{return !m_loopStatus.coolUpdateOngoing;});
   }
 
   // Do COOL updates (if needed) and notify other threads about it
   if (updatedLB) {
     {
-      std::lock_guard<std::mutex> lock(loopStatus.coolUpdateMutex);
-      loopStatus.coolUpdateOngoing = true;
+      std::lock_guard<std::mutex> lock(m_loopStatus.coolUpdateMutex);
+      m_loopStatus.coolUpdateOngoing = true;
       sc = m_coolHelper->hltCoolUpdate(*eventContext);
       if (check("Failure during COOL update", HLT::OnlineErrorCode::COOL_UPDATE, *eventContext)) {
-        loopStatus.coolUpdateOngoing = false;
+        m_loopStatus.coolUpdateOngoing = false;
         return sc;
       }
-      loopStatus.coolUpdateOngoing = false;
+      m_loopStatus.coolUpdateOngoing = false;
     }
-    loopStatus.coolUpdateCond.notify_all();
+    m_loopStatus.coolUpdateCond.notify_all();
   }
 
   //------------------------------------------------------------------------
@@ -1357,6 +1483,8 @@ StatusCode HltEventLoopMgr::startNextEvent(EventLoopStatus& loopStatus)
             HLT::OnlineErrorCode::SCHEDULING_FAILURE, *eventContext)) {
     return sc;
   }
+  // Notify the output thread to start waiting for a finished event
+  m_outputThread->cond().notify_one();
 
   //------------------------------------------------------------------------
   // Set ThreadLocalContext to an invalid context
@@ -1368,150 +1496,20 @@ StatusCode HltEventLoopMgr::startNextEvent(EventLoopStatus& loopStatus)
 }
 
 // =============================================================================
-/**
- * @brief Retrieves finished events from the scheduler, processes their output and cleans up the slots
- * @return SUCCESS if at least one event was finished, NO_EVENT if there were no finished events before timeout,
- * SCHEDULER_EMPTY if there are no events being processed, RECOVERABLE if there was an error which was handled
- * correctly, FAILURE if the error should break the event loop
- **/
-HltEventLoopMgr::DrainSchedulerStatusCode HltEventLoopMgr::drainScheduler()
-{
-  ATH_MSG_VERBOSE("start of " << __FUNCTION__);
-
-  //----------------------------------------------------------------------------
-  // Pop events from the Scheduler
-  //----------------------------------------------------------------------------
-  std::vector<EventContext*> finishedEvtContexts;
-  EventContext* finishedEvtContext(nullptr);
-  const size_t nslots = m_isSlotProcessing.size(); // size is fixed in hltUpdateAfterFork after configuring scheduler
-
-  ATH_MSG_DEBUG("Waiting for a finished event from the Scheduler");
-  const auto popStartTime = std::chrono::steady_clock::now();
-  auto popSpentTimeMs = [&popStartTime]() {
-    const auto popSpentTime = std::chrono::steady_clock::now() - popStartTime;
-    const auto popSpentTimeMs = std::chrono::duration_cast<std::chrono::milliseconds>(popSpentTime);
-    return popSpentTimeMs.count();
-  };
-  auto monPopScheduler = [](const ToolHandle<GenericMonitoringTool>& monTool, const size_t nEvents, const int64_t popTime) {
-    Monitored::Scalar<int64_t> monPopSchedulerNumEvt("PopSchedulerNumEvt", nEvents);
-    Monitored::Scalar<int64_t> monPopSchedulerTime("PopSchedulerTime", popTime);
-    Monitored::Group(monTool, monPopSchedulerNumEvt, monPopSchedulerTime);
-  };
-  while (true) {
-    if (m_schedulerSvc->tryPopFinishedEvent(finishedEvtContext).isSuccess()) {
-      ATH_MSG_DEBUG("Scheduler returned a finished event: " << finishedEvtContext);
-      finishedEvtContexts.push_back(finishedEvtContext);
-      if (!m_popAll) {
-        // Already got one event and we don't want more in PopAll=False mode
-        break;
-      }
-    } else {
-      // Got no new finished event in the last query
-      if (!finishedEvtContexts.empty()) {
-        // Already got some finished events and there aren't any more available
-        break;
-      }
-      if (m_schedulerSvc->freeSlots() == nslots) {
-        // There are no events being processed by the Scheduler
-        ATH_MSG_DEBUG("Scheduler empty");
-        monPopScheduler(m_monTool, finishedEvtContexts.size(), popSpentTimeMs());
-        return DrainSchedulerStatusCode::SCHEDULER_EMPTY;
-      }
-      const auto popTime = popSpentTimeMs();
-      if (popTime > m_popFromSchedulerTimeout.value()) {
-        // Got no finished events and ran past the timeout
-        ATH_MSG_DEBUG("PopFromSchedulerTimeout reached, drainScheduler() returns NO_EVENT");
-        monPopScheduler(m_monTool, finishedEvtContexts.size(), popTime);
-        return DrainSchedulerStatusCode::NO_EVENT;
-      }
-      std::this_thread::sleep_for(std::chrono::milliseconds(m_popFromSchedulerQueryInterval.value()));
-    }
-  }
-  monPopScheduler(m_monTool, finishedEvtContexts.size(), popSpentTimeMs());
-
-  //----------------------------------------------------------------------------
-  // Post-process the finished events
-  //----------------------------------------------------------------------------
-  const size_t nFinishedEvents = finishedEvtContexts.size();
-  ATH_MSG_DEBUG("Number of finished events to post-process: " << nFinishedEvents);
-
-  // Push all post-processing tasks to TBB
-  for (EventContext* thisFinishedEvtContext : finishedEvtContexts) {
-    // Reset free slot timer for monitoring
-    if (thisFinishedEvtContext != nullptr) {
-      m_freeSlotStartPoint[thisFinishedEvtContext->slot()] = std::chrono::steady_clock::now();
-    }
-
-    // Create and enqueue the task
-    m_finishedEventsQueue.push(thisFinishedEvtContext);
-    auto task = [mgr=this](){
-      DrainSchedulerStatusCode sc = DrainSchedulerStatusCode::INVALID;
-      try {
-        sc = mgr->processFinishedEvent();
-      }
-      catch (const std::exception& e) {
-        mgr->error() << "Exception caught in processFinishedEvent: " << e.what() << endmsg;
-        sc = DrainSchedulerStatusCode::FAILURE;
-      }
-      catch (...) {
-        mgr->error() << "Exception caught in processFinishedEvent" << endmsg;
-        sc = DrainSchedulerStatusCode::FAILURE;
-      }
-      mgr->m_drainSchedulerStatusQueue.push(sc);
-
-      // Pop one item from parallel I/O queue to decrement its size - it doesn't matter which item
-      // is popped, we only use the queue size to limit the number of tasks running in parallel
-      bool popIOQueue{false};
-      mgr->m_parallelIOQueue.pop(popIOQueue);
-    };
-
-    // Push one item to the parallel I/O queue to increment its size - the value doesn't matter,
-    // we only use the queue size and benefit from the blocking push call here to limit the number
-    // of tasks running in parallel. Once we can push to the queue, we can enqueue the task to the arena.
-    m_parallelIOQueue.push(true);
-    m_parallelIOTaskArena->enqueue(std::move(task));
-  }
-
-  // Wait until post-processing is done for all events
-  std::vector<DrainSchedulerStatusCode> statusCodes;
-  while (statusCodes.size() < nFinishedEvents) {
-    DrainSchedulerStatusCode sc = DrainSchedulerStatusCode::INVALID;
-    m_drainSchedulerStatusQueue.pop(sc);
-    if (sc == DrainSchedulerStatusCode::INVALID) {
-      ATH_MSG_ERROR("DrainSchedulerStatusCode::INVALID popped from the queue");
-      continue;
-    }
-    statusCodes.push_back(sc);
-  }
-
-  // Check the post-processing status code for all events
-  DrainSchedulerStatusCode worstCode = DrainSchedulerStatusCode::SUCCESS;
-  for (DrainSchedulerStatusCode sc : statusCodes) {
-    if (static_cast<int>(sc) < static_cast<int>(worstCode)) {
-      worstCode = sc;
-    }
-  }
-
-  ATH_MSG_VERBOSE("end of " << __FUNCTION__);
-  return worstCode;
-}
-
-// =============================================================================
-HltEventLoopMgr::DrainSchedulerStatusCode HltEventLoopMgr::processFinishedEvent()
+StatusCode HltEventLoopMgr::processFinishedEvent()
 {
   EventContext* eventContext{nullptr};
   m_finishedEventsQueue.pop(eventContext);
 
   StatusCode sc = StatusCode::SUCCESS;
-  DrainSchedulerStatusCode rc = DrainSchedulerStatusCode::SUCCESS;
   auto check = [this, &sc, &eventContext](std::string&& errmsg, HLT::OnlineErrorCode errcode) {
-    if (sc.isSuccess()) {return DrainSchedulerStatusCode::SUCCESS;}
+    if (sc.isSuccess()) {return false;}
     ATH_MSG_ERROR(errmsg);
     const EventContext& eventContextRef = (eventContext==nullptr) ? EventContext() : *eventContext;
     sc = failedEvent(errcode, eventContextRef);
     Gaudi::Hive::setCurrentContext(EventContext());
     delete eventContext;
-    return (sc.isSuccess() ? DrainSchedulerStatusCode::RECOVERABLE : DrainSchedulerStatusCode::FAILURE);
+    return true;
   };
 
   //--------------------------------------------------------------------------
@@ -1520,8 +1518,10 @@ HltEventLoopMgr::DrainSchedulerStatusCode HltEventLoopMgr::processFinishedEvent(
   // Check if the EventContext object exists
   if (eventContext == nullptr) {
     sc = StatusCode::FAILURE;
-    return check("Detected nullptr EventContext while finalising a processed event",
-                 HLT::OnlineErrorCode::CANNOT_ACCESS_SLOT);
+    if (check("Detected nullptr EventContext while finalising a processed event",
+              HLT::OnlineErrorCode::CANNOT_ACCESS_SLOT)) {
+      return sc;
+    }
   }
 
   // Set ThreadLocalContext to the currently processed finished context
@@ -1531,19 +1531,21 @@ HltEventLoopMgr::DrainSchedulerStatusCode HltEventLoopMgr::processFinishedEvent(
   if (m_aess->eventStatus(*eventContext) != EventStatus::Success) {
     sc = StatusCode::FAILURE;
     auto algErrors = m_errorMonTool->algExecErrors(*eventContext);
-    HLT::OnlineErrorCode errCode = isTimedOut(algErrors) ?
-                                    HLT::OnlineErrorCode::TIMEOUT : HLT::OnlineErrorCode::PROCESSING_FAILURE;
-    rc = check("Processing event with context " + toString(*eventContext) + \
-               " failed with status " + toString(m_aess->eventStatus(*eventContext)),
-               errCode);
-    if (rc != DrainSchedulerStatusCode::SUCCESS) {return rc;}
+    const HLT::OnlineErrorCode errCode = isTimedOut(algErrors) ?
+                                         HLT::OnlineErrorCode::TIMEOUT : HLT::OnlineErrorCode::PROCESSING_FAILURE;
+    if (check("Processing event with context " + toString(*eventContext) + \
+              " failed with status " + toString(m_aess->eventStatus(*eventContext)),
+              errCode)) {
+      return sc;
+    }
   }
 
   // Select the whiteboard slot
   sc = m_whiteboard->selectStore(eventContext->slot());
-  rc = check("Failed to select event store slot " + std::to_string(eventContext->slot()),
-             HLT::OnlineErrorCode::CANNOT_ACCESS_SLOT);
-  if (rc != DrainSchedulerStatusCode::SUCCESS) {return rc;};
+  if (check("Failed to select event store slot " + std::to_string(eventContext->slot()),
+            HLT::OnlineErrorCode::CANNOT_ACCESS_SLOT)) {
+    return sc;
+  }
 
   // Fire EndProcessing incident - some services may depend on this
   m_incidentSvc->fireIncident(Incident(name(), IncidentType::EndProcessing, *eventContext));
@@ -1553,36 +1555,30 @@ HltEventLoopMgr::DrainSchedulerStatusCode HltEventLoopMgr::processFinishedEvent(
   //--------------------------------------------------------------------------
   // Call the result builder to record HLTResultMT in SG
   sc = m_hltResultMaker->makeResult(*eventContext);
-  rc = check("Failed to create the HLT result object", HLT::OnlineErrorCode::NO_HLT_RESULT);
-  if (rc != DrainSchedulerStatusCode::SUCCESS) {return rc;}
+  if (check("Failed to create the HLT result object", HLT::OnlineErrorCode::NO_HLT_RESULT)) {return sc;}
 
   // Connect output (create the output container) - the argument is currently not used
   sc = m_outputCnvSvc->connectOutput("");
-  rc = check("Conversion service failed to connectOutput", HLT::OnlineErrorCode::OUTPUT_BUILD_FAILURE);
-  if (rc != DrainSchedulerStatusCode::SUCCESS) {return rc;}
+  if (check("Conversion service failed to connectOutput", HLT::OnlineErrorCode::OUTPUT_BUILD_FAILURE)) {return sc;}
 
   // Retrieve the HLT result and the corresponding DataObject
   auto hltResult = SG::makeHandle(m_hltResultRHKey,*eventContext);
   if (!hltResult.isValid()) {sc = StatusCode::FAILURE;}
-  rc = check("Failed to retrieve the HLT result", HLT::OnlineErrorCode::NO_HLT_RESULT);
-  if (rc != DrainSchedulerStatusCode::SUCCESS) {return rc;}
+  if (check("Failed to retrieve the HLT result", HLT::OnlineErrorCode::NO_HLT_RESULT)) {return sc;}
 
   DataObject* hltResultDO = m_evtStore->accessData(hltResult.clid(),hltResult.key());
   if (hltResultDO == nullptr) {sc = StatusCode::FAILURE;}
-  rc = check("Failed to retrieve the HLTResult DataObject", HLT::OnlineErrorCode::NO_HLT_RESULT);
-  if (rc != DrainSchedulerStatusCode::SUCCESS) {return rc;}
+  if (check("Failed to retrieve the HLTResult DataObject", HLT::OnlineErrorCode::NO_HLT_RESULT)) {return sc;}
 
   // Check for result truncation
   if (!hltResult->getTruncatedModuleIds().empty() && hltResult->severeTruncation()) {sc = StatusCode::FAILURE;}
-  rc = check("HLT result truncation", HLT::OnlineErrorCode::RESULT_TRUNCATION);
-  if (rc != DrainSchedulerStatusCode::SUCCESS) {return rc;}
+  if (check("HLT result truncation", HLT::OnlineErrorCode::RESULT_TRUNCATION)) {return sc;}
 
   // Convert the HLT result to the output data format
   IOpaqueAddress* addr = nullptr;
   sc = m_outputCnvSvc->createRep(hltResultDO,addr);
   if (sc.isFailure()) {delete addr;}
-  rc = check("Conversion service failed to convert HLTResult", HLT::OnlineErrorCode::OUTPUT_BUILD_FAILURE);
-  if (rc != DrainSchedulerStatusCode::SUCCESS) {return rc;}
+  if (check("Conversion service failed to convert HLTResult", HLT::OnlineErrorCode::OUTPUT_BUILD_FAILURE)) {return sc;}
 
   // Retrieve and convert the L1 result to the output data format
   IOpaqueAddress* l1addr = nullptr;
@@ -1592,41 +1588,47 @@ HltEventLoopMgr::DrainSchedulerStatusCode HltEventLoopMgr::processFinishedEvent(
     if (not m_l1TriggerResultRHKey.empty()) {
       auto l1TriggerResult = SG::makeHandle(m_l1TriggerResultRHKey, *eventContext);
       if (!l1TriggerResult.isValid()) {sc = StatusCode::FAILURE;}
-      rc = check("Failed to retrieve the L1 Trigger Result for RewriteLVL1",
-                 HLT::OnlineErrorCode::OUTPUT_BUILD_FAILURE);
-      if (rc != DrainSchedulerStatusCode::SUCCESS) {return rc;}
+      if (check("Failed to retrieve the L1 Trigger Result for RewriteLVL1",
+                HLT::OnlineErrorCode::OUTPUT_BUILD_FAILURE)) {
+        return sc;
+      }
 
       DataObject* l1TriggerResultDO = m_evtStore->accessData(l1TriggerResult.clid(),l1TriggerResult.key());
       if (l1TriggerResultDO == nullptr) {sc = StatusCode::FAILURE;}
-      rc = check("Failed to retrieve the L1 Trigger Result DataObject for RewriteLVL1",
-                 HLT::OnlineErrorCode::OUTPUT_BUILD_FAILURE);
-      if (rc != DrainSchedulerStatusCode::SUCCESS) {return rc;}
+      if (check("Failed to retrieve the L1 Trigger Result DataObject for RewriteLVL1",
+                HLT::OnlineErrorCode::OUTPUT_BUILD_FAILURE)) {
+        return sc;
+      }
 
       sc = m_outputCnvSvc->createRep(l1TriggerResultDO,l1addr);
       if (sc.isFailure()) {delete l1addr;}
-      rc = check("Conversion service failed to convert L1 Trigger Result for RewriteLVL1",
-                 HLT::OnlineErrorCode::OUTPUT_BUILD_FAILURE);
-      if (rc != DrainSchedulerStatusCode::SUCCESS) {return rc;}
+      if (check("Conversion service failed to convert L1 Trigger Result for RewriteLVL1",
+                HLT::OnlineErrorCode::OUTPUT_BUILD_FAILURE)) {
+        return sc;
+      }
     }
     // Legacy (Run-2) L1 simulation result
     if (not m_roibResultRHKey.empty()) {
       auto roibResult = SG::makeHandle(m_roibResultRHKey, *eventContext);
       if (!roibResult.isValid()) {sc = StatusCode::FAILURE;}
-      rc = check("Failed to retrieve the RoIBResult for RewriteLVL1",
-                 HLT::OnlineErrorCode::OUTPUT_BUILD_FAILURE);
-      if (rc != DrainSchedulerStatusCode::SUCCESS) {return rc;}
+      if (check("Failed to retrieve the RoIBResult for RewriteLVL1",
+                HLT::OnlineErrorCode::OUTPUT_BUILD_FAILURE)) {
+        return sc;
+      }
 
       DataObject* roibResultDO = m_evtStore->accessData(roibResult.clid(),roibResult.key());
       if (roibResultDO == nullptr) {sc = StatusCode::FAILURE;}
-      rc = check("Failed to retrieve the RoIBResult DataObject for RewriteLVL1",
-                 HLT::OnlineErrorCode::OUTPUT_BUILD_FAILURE);
-      if (rc != DrainSchedulerStatusCode::SUCCESS) {return rc;}
+      if (check("Failed to retrieve the RoIBResult DataObject for RewriteLVL1",
+                HLT::OnlineErrorCode::OUTPUT_BUILD_FAILURE)) {
+        return sc;
+      }
 
       sc = m_outputCnvSvc->createRep(roibResultDO,l1addrLegacy);
       if (sc.isFailure()) {delete l1addrLegacy;}
-      rc = check("Conversion service failed to convert RoIBResult for RewriteLVL1",
-                 HLT::OnlineErrorCode::OUTPUT_BUILD_FAILURE);
-      if (rc != DrainSchedulerStatusCode::SUCCESS) {return rc;}
+      if (check("Conversion service failed to convert RoIBResult for RewriteLVL1",
+                HLT::OnlineErrorCode::OUTPUT_BUILD_FAILURE)) {
+        return sc;
+      }
     }
   }
 
@@ -1638,8 +1640,7 @@ HltEventLoopMgr::DrainSchedulerStatusCode HltEventLoopMgr::processFinishedEvent(
   // Commit output (write/send the output data) - the arguments are currently not used
   sc = m_outputCnvSvc->commitOutput("",true);
   if (sc.isFailure()) {delete addr;}
-  rc = check("Conversion service failed to commitOutput", HLT::OnlineErrorCode::OUTPUT_SEND_FAILURE);
-  if (rc != DrainSchedulerStatusCode::SUCCESS) {return rc;}
+  if (check("Conversion service failed to commitOutput", HLT::OnlineErrorCode::OUTPUT_SEND_FAILURE)) {return sc;}
 
   // The output has been sent out, the ByteStreamAddress can be deleted
   delete addr;
@@ -1658,13 +1659,21 @@ HltEventLoopMgr::DrainSchedulerStatusCode HltEventLoopMgr::processFinishedEvent(
                 << " (event " << eventContext->evt() << ") of the whiteboard");
 
   sc = clearWBSlot(eventContext->slot());
-  rc = check("Whiteboard slot " + std::to_string(eventContext->slot()) + " could not be properly cleared",
-             HLT::OnlineErrorCode::AFTER_RESULT_SENT);
-  if (rc != DrainSchedulerStatusCode::SUCCESS) {return rc;}
+  if (check("Whiteboard slot " + std::to_string(eventContext->slot()) + " could not be properly cleared",
+            HLT::OnlineErrorCode::AFTER_RESULT_SENT)) {
+    return sc;
+  }
 
   ATH_MSG_DEBUG("Finished processing " << (eventAccepted ? "accepted" : "rejected")
                 << " event with context " << *eventContext
                 << " which took " << eventTimeMillisec << " ms");
+
+  // Only now after store clearing we can allow the slot to be filled again,
+  // so we increment m_freeSlots and notify the input thread
+  ++m_freeSlots;
+  if (!m_loopStatus.loopEnded && m_inputThread!=nullptr) {
+    m_inputThread->cond().notify_all();
+  }
 
   // Fill the time monitoring histograms
   auto monTimeAny = Monitored::Scalar<int64_t>("TotalTime", eventTimeMillisec);
@@ -1677,79 +1686,5 @@ HltEventLoopMgr::DrainSchedulerStatusCode HltEventLoopMgr::processFinishedEvent(
   // Delete the EventContext which was created when calling executeEvent( EventContext(*eventContext) )
   delete eventContext;
 
-  return rc;
-}
-
-// =============================================================================
-StatusCode HltEventLoopMgr::clearWBSlot(size_t evtSlot) const
-{
-  ATH_MSG_VERBOSE("start of " << __FUNCTION__);
-  auto monTime = Monitored::Timer<std::chrono::duration<float, std::milli>>("TIME_clearStore");
-  StatusCode sc = m_whiteboard->clearStore(evtSlot);
-  Monitored::Group(m_monTool, monTime);
-  if( !sc.isSuccess() )  {
-    ATH_MSG_WARNING("Clear of event data store failed");
-  }
-  ATH_MSG_VERBOSE("end of " << __FUNCTION__ << ", returning m_whiteboard->freeStore(evtSlot=" << evtSlot << ")");
-  return m_whiteboard->freeStore(evtSlot);
-}
-
-// =============================================================================
-StatusCode HltEventLoopMgr::recoverFromStarvation()
-{
-  auto freeSlotsScheduler = m_schedulerSvc->freeSlots();
-  auto freeSlotsWhiteboard = m_whiteboard->freeSlots();
-  if (freeSlotsScheduler == freeSlotsWhiteboard) {
-    ATH_MSG_WARNING("Starvation recovery was requested but not needed, so it was not attempted. "
-                    << "This method should not have been called.");
-    return StatusCode::SUCCESS;
-  }
-
-  if (drainAllSlots().isFailure()) {
-    ATH_MSG_ERROR("Starvation recovery failed. Scheduler saw " << freeSlotsScheduler << " free slots,"
-      << " whereas whiteboard saw " << freeSlotsWhiteboard << " free slots. Total number of slots is "
-      << m_isSlotProcessing.size() << ". Now scheduler sees " << m_schedulerSvc->freeSlots()
-      << " free slots, whereas whiteboard sees " << m_whiteboard->freeSlots() << " free slots");
-    return StatusCode::FAILURE;
-  }
-  else {
-    ATH_MSG_WARNING("Starvation detected, but successfully recovered. Scheduler saw " << freeSlotsScheduler
-      << " free slots, whereas whiteboard saw " << freeSlotsWhiteboard << " free slots. All slots have been cleared,"
-      << " now scheduler sees " << m_schedulerSvc->freeSlots() << " free slots and whiteboard sees "
-      << m_whiteboard->freeSlots() << " free slots");
-    return StatusCode::SUCCESS;
-  }
-}
-
-// =============================================================================
-StatusCode HltEventLoopMgr::drainAllSlots()
-{
-  size_t nslots = m_isSlotProcessing.size(); // size is fixed in hltUpdateAfterFork after configuring scheduler
-
-  // First try to drain the scheduler to free all processing slots
-  DrainSchedulerStatusCode drainResult = DrainSchedulerStatusCode::SUCCESS;
-  do {
-    drainResult = drainScheduler();
-    // fail on recoverable, because it means an error while handling an error
-    // (drainAllSlots is a "clean up on failure" method)
-    if (drainResult == DrainSchedulerStatusCode::FAILURE || drainResult == DrainSchedulerStatusCode::RECOVERABLE) {
-      ATH_MSG_ERROR("Failed to drain the scheduler");
-      return StatusCode::FAILURE;
-    }
-  } while (drainResult != DrainSchedulerStatusCode::SCHEDULER_EMPTY); // while there were still events to finish
-
-  // Now try to clear all event data slots (should have no effect if done already)
-  for (size_t islot=0; islot<nslots; ++islot) {
-    if (clearWBSlot(islot).isFailure()) {
-      ATH_MSG_ERROR("Failed to clear whiteboard slot " << islot);
-      return StatusCode::FAILURE;
-    }
-  }
-
-  // Check if the cleanup succeeded
-  if (m_schedulerSvc->freeSlots() == nslots && m_whiteboard->freeSlots() == nslots) {
-    return StatusCode::SUCCESS;
-  }
-
-  return StatusCode::FAILURE;
+  return StatusCode::SUCCESS;
 }

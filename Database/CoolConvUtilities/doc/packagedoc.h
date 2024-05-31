@@ -13,10 +13,7 @@ They are each constructed as standalone executable commands
 which get put into the offline software install/bin area. The executable 
 DCSTxtToCool.exe allows DCS data stored in simple text files (output from
 the DCS PVSS internal archive using a utility provided by Jim Cook)
-to be input to COOL. The executable LisToCool.exe provides a simple migration
-tool for data stored in the Lisbon MySQL conditions database to be put into
-COOL - this is intended particularly for use in migrating the 2004 combined
-testbeam conditions data to COOL.  AtlCoolCopy.exe is a flexible tool
+to be input to COOL. AtlCoolCopy.exe is a flexible tool
 for copying data between COOL databases and verifying their contents.
 AtlCoolConsole.py is an enhanced version of the PyCoolConsole tool that comes
 with COOL distribution, and provides an interactive 'file-system-like' shell
@@ -103,66 +100,6 @@ some subsequent DCS data to a folder already containing earlier DCS data,
 providing all the new data has later timestamps than the old data. This
 is in accordance with the runs for updating COOL single-version folders.
 
-@section CoolConvUtilities_LisToCool 
-
-The LisToCool command is used as follows:
-<pre>
-LisToCool.exe <LisbonDBconnection> <lisbon_folder> <coolDBConnection> <cool_folder> <mode> [<time_offset>] [<new_column_names> | <tag_prefix>] [<channel>]
-</pre>
-The command will copy the data from the specified folder in a Lisbon MySQL
-conditions database to the specified folder in a COOL conditions database.
-The Lisbon database connection is specified using the Lisbon native syntax,
-e.g.: 
-<pre>
-atlobk02.cern.ch:conditions_ctb_2004:conditions:conditions
-</pre>
-for a readonly connection to the conditions_ctb_2004 database on atlobk02 
-(the combined testbeam database for real data).
-The COOL database connection is specified as discussed above for 
-DCSTxtToCool. 
-
-The mode parameter can take three values:
-
-- mode=1: This is suitable for copying Lisbon CondDBTable data structures,
-as typically used by DCS data stored using the Lisbon PVSS manager application.
-In this mode, data is copied to COOL single-version folders (i.e. there is
-no version tagging). Appropriate COOL data types are defined for each column
-in the Lisbon tables (note the Lisbon long-long type is mapped to COOL long
-as COOL does not support the storage of 64 bit integers). Array data is not
-properly supported - if arrays are present, only the first member is copied
-to COOL.
-
-- mode=11: This also copies CondDBTables, but applies a form of 
-'store on change'. All data is copied with open-ended intervals of validity
-(in the way DCS data is usually stored). If the next entry has the same
-payload as the previous one, it is not stored again. This can be used to
-convert e.g. a set of Lisbon data with values stored every 5 minutes 
-(and changing infrequently) to a COOL structure with individual IOVs
-representing longer periods of stable values.
-
-- mode=2: This is suitable for copying Lisbon Blob with Tag structures,
-as typically used to store references to POOL objects in Athena. In this mode,
-the data corresponding to each tag in the table is copied, but the HEAD 
-tag is not copied (unless there are no other tags in the folder).
-
-The time_offset parameter can be used to apply an offset (in hours) to the
-data before copying, to compensate for various timing errors made with
-the combined testbeam conditions data.
-
-If the channels parameter is given, the data will be copied to COOL with a 
-particular channel number. This is useful for merging a set of Lisbon 
-CondDB folders into a single COOL folder, with each Lisbon folder being 
-given a separate channel number. If this is done, the column(s) in the Lisbon
-table have to be renamed, as they may be different in each folder. This can
-be achieved by specifying the COOL column names using the new_column_names
-parameter - they are given as a comma separated list of names in quotes.
-
-The tag_prefix parameter (in the same place as the new_column_names parameter 
-for CondDBTable folders) is used for Blob with Tag folders to apply a prefix
-to the tag names before they are used in COOL. This helps to apply 
-the COOL tagging convention where a unique folder-based prefix is applied
-to tag names (e.g. MyFolder_MyTag) to ensure they are globally unique. If
-no prefix is supplied, the Lisbon tags will be used unchanged.
 
 @section CoolConvUtilities_AtlCoolCopy 
 

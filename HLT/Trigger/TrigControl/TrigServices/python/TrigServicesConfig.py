@@ -104,17 +104,11 @@ def getHltROBDataProviderSvc(flags, name='ROBDataProviderSvc'):
 
 def getHltEventLoopMgr(flags, name='HltEventLoopMgr'):
    '''online event loop manager'''
-   if flags.Trigger.enableAsyncIO:
-      svc = CompFactory.HltAsyncEventLoopMgr(
-         name,
-         setMagFieldFromPtree = flags.Trigger.Online.BFieldAutoConfig
-      )
-      log.info("Running with HltAsyncEventLoopMgr")
-   else:
-      svc = CompFactory.HltEventLoopMgr(
-         name,
-         setMagFieldFromPtree = flags.Trigger.Online.BFieldAutoConfig
-      )
+
+   svc = CompFactory.HltEventLoopMgr(
+      name,
+      setMagFieldFromPtree = flags.Trigger.Online.BFieldAutoConfig
+   )
 
    # Rewrite LVL1 result if L1 simulation and BS-writing is enabled
    if flags.Trigger.doLVL1 and flags.Trigger.writeBS:
