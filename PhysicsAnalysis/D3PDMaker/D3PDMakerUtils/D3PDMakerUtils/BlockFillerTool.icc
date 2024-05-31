@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file D3PDMakerUtils/BlockFillerTool.h
  * @author scott snyder <snyder@bnl.gov>
@@ -26,6 +24,7 @@ BlockFillerTool<T>::BlockFillerTool (const std::string& type,
                                      const IInterface* parent)
   : BlockFillerToolImpl (type, name, parent)
 {
+  // cppcheck-suppress missingReturn; false positive
 }
 
 
