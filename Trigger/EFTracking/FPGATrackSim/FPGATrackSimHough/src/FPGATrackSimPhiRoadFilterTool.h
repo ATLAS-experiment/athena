@@ -23,6 +23,7 @@
 #include "FPGATrackSimObjects/FPGATrackSimHit.h"
 #include "FPGATrackSimObjects/FPGATrackSimTrackPars.h"
 #include "FPGATrackSimHough/IFPGATrackSimRoadFilterTool.h"
+#include "FPGATrackSimConfTools/IFPGATrackSimEventSelectionSvc.h"
 
 #include "TFile.h"
 
@@ -32,7 +33,6 @@
 
 class IFPGATrackSimBankSvc;
 class IFPGATrackSimMappingSvc;
-
 
 class FPGATrackSimPhiRoadFilterTool : public extends <AthAlgTool, IFPGATrackSimRoadFilterTool>
 {
@@ -55,14 +55,15 @@ class FPGATrackSimPhiRoadFilterTool : public extends <AthAlgTool, IFPGATrackSimR
         ///////////////////////////////////////////////////////////////////////
         // Handles
         ServiceHandle<IFPGATrackSimMappingSvc> m_FPGATrackSimMapping {this, "FPGATrackSimMappingSvc", "FPGATrackSimMappingSvc"};
-
+  	ServiceHandle<IFPGATrackSimEventSelectionSvc> m_EvtSel {this, "FPGATrackSimEventSelectionSvc", "FPGATrackSimEventSelectionSvc"};
+  
         ///////////////////////////////////////////////////////////////////////
         // Properties
 
 	Gaudi::Property <unsigned> m_threshold {this, "threshold", 0, "Minimum number of hit layers to fire a road"};
-	Gaudi::Property <std::vector<float> > m_window {this, "window", {}, "Distance from nominal path to keep hit, list of length nLayers"};
+        Gaudi::Property <std::vector<float> > m_window {this, "window", {}, "Distance from nominal path to keep hit, list of length nLayers"};
 	Gaudi::Property <float> m_ptscaling {this, "ptscaling", 0.0, "Add a pT dependent resolution to each resolution in window"};
-
+        Gaudi::Property <bool> m_fieldCorrection {this, "fieldCorrection", true, "Apply B field correction"};
   
         //////////////////////////////////////////////////////////////////////
         // Event Storage

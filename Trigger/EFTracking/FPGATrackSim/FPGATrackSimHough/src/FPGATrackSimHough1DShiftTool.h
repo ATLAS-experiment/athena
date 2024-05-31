@@ -46,6 +46,9 @@
 #include "FPGATrackSimObjects/FPGATrackSimHit.h"
 #include "FPGATrackSimObjects/FPGATrackSimTrackPars.h"
 #include "FPGATrackSimHough/IFPGATrackSimRoadFinderTool.h"
+#include "FPGATrackSimBanks/IFPGATrackSimBankSvc.h"
+#include "FPGATrackSimMaps/IFPGATrackSimMappingSvc.h"
+#include "FPGATrackSimConfTools/IFPGATrackSimEventSelectionSvc.h"
 
 #include "TFile.h"
 
@@ -53,10 +56,6 @@
 #include <vector>
 #include <map>
 #include <boost/dynamic_bitset_fwd.hpp>
-
-class IFPGATrackSimEventSelectionSvc;
-class IFPGATrackSimMappingSvc;
-class IFPGATrackSimBankSvc;
 
 
 
@@ -81,7 +80,7 @@ class IFPGATrackSimBankSvc;
  *      q       : e
  *      pT      : GeV / c
  */
-class FPGATrackSimHough1DShiftTool : public AthAlgTool, virtual public IFPGATrackSimRoadFinderTool
+class FPGATrackSimHough1DShiftTool : public extends <AthAlgTool, IFPGATrackSimRoadFinderTool>
 {
     public:
 
@@ -102,10 +101,9 @@ class FPGATrackSimHough1DShiftTool : public AthAlgTool, virtual public IFPGATrac
 
         ///////////////////////////////////////////////////////////////////////
         // Handles
-
-        ServiceHandle<IFPGATrackSimEventSelectionSvc>  m_EvtSel;
-        ServiceHandle<IFPGATrackSimMappingSvc> m_FPGATrackSimMapping;
-        ServiceHandle<IFPGATrackSimBankSvc> m_FPGATrackSimBankSvc;
+        ServiceHandle<IFPGATrackSimEventSelectionSvc> m_EvtSel {this, "FPGATrackSimEventSelectionSvc", "FPGATrackSimEventSelectionSvc"};
+        ServiceHandle<IFPGATrackSimBankSvc> m_FPGATrackSimBankSvc {this, "FPGATrackSimBankSvc", "FPGATrackSimBankSvc"};
+	ServiceHandle<IFPGATrackSimMappingSvc> m_FPGATrackSimMapping {this, "FPGATrackSimMappingSvc", "FPGATrackSimMappingSvc"};
 
         ///////////////////////////////////////////////////////////////////////
         // Properties
@@ -117,10 +115,11 @@ class FPGATrackSimHough1DShiftTool : public AthAlgTool, virtual public IFPGATrac
         Gaudi::Property<bool> m_useSectors { this, "useSectors", false, "Will reverse calculate the sector for track-fitting purposes" };
         Gaudi::Property<bool> m_idealGeoRoads { this, "IdealGeoRoads", false, "Set sectors to use ideal geometry fit constants" };
         Gaudi::Property<bool> m_doRegionalMapping { this, "RegionalMapping", false, "Use the sub-region maps to define the sector" };
+        Gaudi::Property<bool> m_drawHitMasks { this, "drawHitMasks", false, "Draws hit masks if true"};
 
         Gaudi::Property<int> m_subRegion { this, "subRegion", 0, "Sub region of this transform, or -1 for full region" };
         Gaudi::Property<float> m_phiMin { this, "phiMin", 0, "Minimum phi of transform" };
-        Gaudi::Property<float> m_phiMax { this, "phiMin", 0, "Maximum phi of transform" };
+        Gaudi::Property<float> m_phiMax { this, "phiMax", 0, "Maximum phi of transform" };
         Gaudi::Property<float> m_qptMin { this, "qptMin", 0, "Minimum q/pT of transform" };
         Gaudi::Property<float> m_qptMax { this, "qptMax", 0, "Maximum q/pT of transform" };
 

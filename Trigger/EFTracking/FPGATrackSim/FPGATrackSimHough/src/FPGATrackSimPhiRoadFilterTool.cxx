@@ -13,6 +13,7 @@
 #include "FPGATrackSimMaps/IFPGATrackSimMappingSvc.h"
 #include "FPGATrackSimMaps/FPGATrackSimPlaneMap.h"
 #include "FPGATrackSimPhiRoadFilterTool.h"
+#include "FPGATrackSimHoughTransformTool.h"
 
 #include "TH2.h"
 
@@ -42,7 +43,6 @@ StatusCode FPGATrackSimPhiRoadFilterTool::initialize()
   // Retrieve info
   ATH_CHECK(m_FPGATrackSimMapping.retrieve());
   m_nLayers = m_FPGATrackSimMapping->PlaneMap_1st()->getNLogiLayers();
-  
   return StatusCode::SUCCESS;
 }
 
@@ -67,7 +67,7 @@ StatusCode FPGATrackSimPhiRoadFilterTool::filterRoads(const std::vector<FPGATrac
 	if (hit_layers & (1<<lyr)) layer_cnt++;
       }
       
-      if (layer_cnt >= m_threshold) {
+      if (layer_cnt >= m_threshold.value()) {
 	m_postfilter_roads.push_back(newroad);
       }
 	
@@ -99,6 +99,7 @@ FPGATrackSimRoad FPGATrackSimPhiRoadFilterTool::buildRoad(FPGATrackSimRoad* orig
     std::vector<const FPGATrackSimHit*> road_hits;
     for (auto hit : origr->getHits(lyr)) {
       float phi_expected = -1.0*asin(fpgatracksim::A * hit->getR() * qPt) + phi;
+      if (m_fieldCorrection) phi_expected  -= FPGATrackSimHoughTransformTool::fieldCorrection(m_EvtSel->getRegionID(), qPt, hit->getR());
       if (abs(hit->getGPhi()-phi_expected)< (m_window.value()[lyr]+qPt*m_ptscaling)) {
 	road_hits.push_back(hit);
 	hitLayers |= 1 << hit->getLayer();

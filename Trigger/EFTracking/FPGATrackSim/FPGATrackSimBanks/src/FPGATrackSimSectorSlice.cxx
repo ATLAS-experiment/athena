@@ -86,7 +86,6 @@ FPGATrackSimSectorSlice::FPGATrackSimSectorSlice(std::string const & filepath)
       delete slice_file;
       return;
     }
-
     slice_tree->SetBranchAddress("qOverPt_max", &m_max.qOverPt);
     slice_tree->SetBranchAddress("d0_max",        &m_max.d0);
     slice_tree->SetBranchAddress("phi_max",       &m_max.phi);
@@ -109,7 +108,6 @@ FPGATrackSimSectorSlice::FPGATrackSimSectorSlice(std::string const & filepath)
     if (slice_tree->GetBranch("qOverPt_max") == nullptr) slice_tree->SetBranchAddress("halfInvPt_max", &m_max.qOverPt);
     if (slice_tree->GetBranch("qOverPt_min") == nullptr) slice_tree->SetBranchAddress("halfInvPt_min", &m_min.qOverPt);
     if (slice_tree->GetBranch("qOverPt_bins") == nullptr) slice_tree->SetBranchAddress("halfInvPt_bins", &m_nBins.qOverPt);
-
 
     slice_tree->GetEntry(0);
 

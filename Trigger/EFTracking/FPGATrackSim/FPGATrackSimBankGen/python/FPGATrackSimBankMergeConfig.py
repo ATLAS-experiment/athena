@@ -25,7 +25,7 @@ def FPGATrackSimMatrixMergeCfg(flags, **kwargs):
 
     kwargs.setdefault("nbank",flags.Trigger.FPGATrackSim.FPGATrackSimNBanks)
     kwargs.setdefault("allregion",flags.Trigger.FPGATrackSim.FPGATrackSimallBanks)
-    kwargs.setdefault("region",flags.Trigger.FPGATrackSim.FPGATrackSimBankRegion)
+    kwargs.setdefault("region",flags.Trigger.FPGATrackSim.region)
 
     theFPGATrackSimMatrixMergeAlg = CompFactory.FPGATrackSimMatrixMergeAlgo()
     file_path = getListOfFiles(flags.Trigger.FPGATrackSim.FPGATrackSimMatrixFileRegEx)

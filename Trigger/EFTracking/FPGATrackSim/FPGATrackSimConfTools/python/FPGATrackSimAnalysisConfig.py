@@ -6,11 +6,34 @@ from AthenaCommon.Logging import AthenaLogger
 from PathResolver import PathResolver
 log = AthenaLogger(__name__)
 
+def getBaseName(flags):
+    if (not (flags.Trigger.FPGATrackSim.baseName == '')):
+        return flags.Trigger.FPGATrackSim.baseName
+    elif (flags.Trigger.FPGATrackSim.region == 0):
+        return 'eta0103phi0305'    
+    elif (flags.Trigger.FPGATrackSim.region == 1):
+        return 'eta0709phi0305'
+    elif (flags.Trigger.FPGATrackSim.region == 2):
+        return 'eta1214phi0305'
+    elif (flags.Trigger.FPGATrackSim.region == 3):
+        return 'eta2022phi0305'
+    elif (flags.Trigger.FPGATrackSim.region == 4):
+        return 'eta3234phi0305'
+    elif (flags.Trigger.FPGATrackSim.region == 5):
+        return 'eta0103phi1113'
+    elif (flags.Trigger.FPGATrackSim.region == 6):
+        return 'eta0103phi1921'
+    elif (flags.Trigger.FPGATrackSim.region == 7):
+        return 'eta0103phi3436'
+    else:
+        return 'default'
+
+    
 def getNSubregions(filePath):
     with open(PathResolver.FindCalibFile(filePath), 'r') as f:
         fields = f.readline()
         assert(fields.startswith('towers'))
-        n = fields.split()[1]
+        n = fields.split()[1] 
         return int(n)
 
 
@@ -18,7 +41,7 @@ def FPGATrackSimEventSelectionCfg(flags):
     result=ComponentAccumulator()
     eventSelector = CompFactory.FPGATrackSimEventSelectionSvc()
     eventSelector.regions = "HTT/TrigHTTMaps/V1/map_file/slices_v01_Jan21.txt"
-    eventSelector.regionID = 0
+    eventSelector.regionID = flags.Trigger.FPGATrackSim.region
     eventSelector.sampleType = flags.Trigger.FPGATrackSim.sampleType
     eventSelector.withPU = False
     result.addService(eventSelector, create=True, primary=True)
@@ -29,11 +52,11 @@ def FPGATrackSimMappingCfg(flags):
 
     mappingSvc = CompFactory.FPGATrackSimMappingSvc()
     mappingSvc.mappingType = "FILE"
-    mappingSvc.rmap = flags.Trigger.FPGATrackSim.mapsDir+"/eta0103phi0305.rmap" # we need more configurability here i.e. file choice should depend on some flag
-    mappingSvc.subrmap =  flags.Trigger.FPGATrackSim.mapsDir+"/eta0103phi0305.subrmap" # presumably also here we want to be able to change the slices definition file
+    mappingSvc.rmap = flags.Trigger.FPGATrackSim.mapsDir+"/"+getBaseName(flags)+".rmap" # we need more configurability here i.e. file choice should depend on some flag
+    mappingSvc.subrmap =  flags.Trigger.FPGATrackSim.mapsDir+"/"+getBaseName(flags)+".subrmap" # presumably also here we want to be able to change the slices definition file
     mappingSvc.pmap = flags.Trigger.FPGATrackSim.mapsDir+"/pmap"
     mappingSvc.modulemap = flags.Trigger.FPGATrackSim.mapsDir+"/moduleidmap"
-    mappingSvc.radiiFile = flags.Trigger.FPGATrackSim.mapsDir + "/eta0103phi0305_radii.txt"
+    mappingSvc.radiiFile = flags.Trigger.FPGATrackSim.mapsDir + "/"+getBaseName(flags)+"_radii.txt"
     mappingSvc.NNmap = ""
     mappingSvc.layerOverride = []
     result.addService(mappingSvc, create=True, primary=True)
@@ -42,7 +65,7 @@ def FPGATrackSimMappingCfg(flags):
 def FPGATrackSimBankSvcCfg(flags):
     result=ComponentAccumulator()
     FPGATrackSimBankSvc = CompFactory.FPGATrackSimBankSvc()
-    pathBankSvc = flags.Trigger.FPGATrackSim.bankDir if flags.Trigger.FPGATrackSim.bankDir != '' else f'/eos/atlas/atlascerngroupdisk/det-htt/HTTsim/{flags.GeoModel.AtlasVersion}/21.9.16/eta0103phi0305/SectorBanks/'
+    pathBankSvc = flags.Trigger.FPGATrackSim.bankDir if flags.Trigger.FPGATrackSim.bankDir != '' else f'/eos/atlas/atlascerngroupdisk/det-htt/HTTsim/{flags.GeoModel.AtlasVersion}/21.9.16/'+getBaseName(flags)+'/SectorBanks/'
     FPGATrackSimBankSvc.constantsNoGuess_1st = [
         f'{pathBankSvc}corrgen_raw_8L_skipPlane0.gcon', 
         f'{pathBankSvc}corrgen_raw_8L_skipPlane1.gcon', 
@@ -66,7 +89,7 @@ def FPGATrackSimBankSvcCfg(flags):
     FPGATrackSimBankSvc.sectorBank_1st = f'{pathBankSvc}sectorsHW_raw_9L_reg0_checkGood1.patt'
     FPGATrackSimBankSvc.sectorBank_2nd = f'{pathBankSvc}sectorsHW_raw_13L_reg0_checkGood1.patt'
     FPGATrackSimBankSvc.sectorSlices = f'{pathBankSvc}slices_9L_reg0.root'
-
+    
     # These should be configurable. The tag system needs updating though.
     import FPGATrackSimConfTools.FPGATrackSimTagConfig as FPGATrackSimTagConfig
     bank_tag = FPGATrackSimTagConfig.getTags(stage='bank')['bank']
@@ -124,11 +147,56 @@ def FPGATrackSimRoadUnionToolCfg(flags):
         HoughTransform.traceHits = True
         HoughTransform.IdealGeoRoads = flags.Trigger.FPGATrackSim.ActiveConfig.IdealGeoRoads
         HoughTransform.useSpacePoints = flags.Trigger.FPGATrackSim.ActiveConfig.spacePoints
+
         tools.append(HoughTransform)
 
     RF.tools = tools
     result.addPublicTool(RF, primary=True)
     return result
+
+def FPGATrackSimRoadUnionTool1DCfg(flags):
+    result=ComponentAccumulator()
+    tools = []
+    RF = CompFactory.FPGATrackSimRoadUnionTool()
+    splitpt=flags.Trigger.FPGATrackSim.Hough1D.splitpt
+    FPGATrackSimMapping = result.getPrimaryAndMerge(FPGATrackSimMappingCfg(flags))
+    for ptstep in range(splitpt):
+        qpt_min = flags.Trigger.FPGATrackSim.Hough1D.qptMin
+        qpt_max = flags.Trigger.FPGATrackSim.Hough1D.qptMax
+        lowpt = qpt_min + (qpt_max-qpt_min)/splitpt*ptstep
+        highpt = qpt_min + (qpt_max-qpt_min)/splitpt*(ptstep+1)
+        nSlice = getNSubregions(FPGATrackSimMapping.subrmap)
+        for iSlice in range(nSlice):
+            tool = CompFactory.FPGATrackSimHough1DShiftTool("Hough1DShift" + str(iSlice)+(("_pt{}".format(ptstep))  if splitpt>1 else ""))
+            tool.subRegion = iSlice if nSlice > 1 else -1
+            tool.phiMin = flags.Trigger.FPGATrackSim.Hough1D.phiMin
+            tool.phiMax = flags.Trigger.FPGATrackSim.Hough1D.phiMax
+            tool.qptMin = lowpt
+            tool.qptMax = highpt
+            tool.nBins = flags.Trigger.FPGATrackSim.Hough1D.xBins
+            tool.useDiff = True
+            tool.variableExtend = True
+            tool.drawHitMasks = False
+            tool.phiRangeCut = flags.Trigger.FPGATrackSim.Hough1D.phiRangeCut
+            tool.d0spread=-1.0 # mm
+            tool.iterStep = 0 # auto, TODO put in tag
+            tool.iterLayer = 7 # TODO put in tag
+            tool.threshold = flags.Trigger.FPGATrackSim.Hough1D.threshold[0]
+            tool.hitExtend = flags.Trigger.FPGATrackSim.Hough1D.hitExtendX
+            tool.FPGATrackSimEventSelectionSvc = result.getPrimaryAndMerge(FPGATrackSimEventSelectionCfg(flags))
+            tool.FPGATrackSimBankSvc = result.getPrimaryAndMerge(FPGATrackSimBankSvcCfg(flags))
+            tool.FPGATrackSimMappingSvc = FPGATrackSimMapping
+            tool.IdealGeoRoads = flags.Trigger.FPGATrackSim.ActiveConfig.IdealGeoRoads
+            tool.useSpacePoints = flags.Trigger.FPGATrackSim.ActiveConfig.spacePoints
+
+            tools.append(tool)
+
+    RF.tools = tools
+    result.addPublicTool(RF, primary=True)
+    return result
+
+
+
 
 
 def FPGATrackSimRawLogicCfg(flags):
@@ -311,8 +379,14 @@ def FPGATrackSimLogicalHistProcessAlgCfg(inputFlags):
 
     result.getPrimaryAndMerge(FPGATrackSimBankSvcCfg(flags))
 
-    theFPGATrackSimLogicalHistProcessAlg.RoadFinder = result.getPrimaryAndMerge(FPGATrackSimRoadUnionToolCfg(flags))
+
+    if (flags.Trigger.FPGATrackSim.ActiveConfig.hough1D):
+      theFPGATrackSimLogicalHistProcessAlg.RoadFinder = result.getPrimaryAndMerge(FPGATrackSimRoadUnionTool1DCfg(flags))
+    else:
+      theFPGATrackSimLogicalHistProcessAlg.RoadFinder = result.getPrimaryAndMerge(FPGATrackSimRoadUnionToolCfg(flags))
+
     theFPGATrackSimLogicalHistProcessAlg.RawToLogicalHitsTool = result.getPrimaryAndMerge(FPGATrackSimRawLogicCfg(flags))
+
 
     if flags.Trigger.FPGATrackSim.wrapperFileName != [] and flags.Trigger.FPGATrackSim.wrapperFileName is not None:
         theFPGATrackSimLogicalHistProcessAlg.InputTool = result.getPrimaryAndMerge(FPGATrackSimReadInputCfg(flags))
@@ -326,19 +400,28 @@ def FPGATrackSimLogicalHistProcessAlgCfg(inputFlags):
         from FPGATrackSimSGInput.FPGATrackSimSGInputConfig import FPGATrackSimSGInputToolCfg
         theFPGATrackSimLogicalHistProcessAlg.SGInputTool = result.getPrimaryAndMerge(FPGATrackSimSGInputToolCfg(flags))
 
-    # TODO, will need also the alternative TOOL implementation
-    # InputTool2 = CompFactory.FPGATrackSimReadRawRandomHitsTool("FPGATrackSimReadRawRandomHitsTool")
-    # InputTool2.InFileName = flags.Input.Files[0]
-    # result.addPublicTool(InputTool2)
-    # theFPGATrackSimLogicalHistProcessAlg.InputTool2 = InputTool2
-
     theFPGATrackSimLogicalHistProcessAlg.DataFlowTool = result.getPrimaryAndMerge(FPGATrackSimDataFlowToolCfg(flags))
     theFPGATrackSimLogicalHistProcessAlg.SpacePointTool = result.getPrimaryAndMerge(FPGATrackSimSpacePointsToolCfg(flags))
 
+    if (flags.Trigger.FPGATrackSim.ActiveConfig.etaPatternFilter):
+        EtaPatternFilter = CompFactory.FPGATrackSimEtaPatternFilterTool()
+        EtaPatternFilter.FPGATrackSimMappingSvc = FPGATrackSimMaping
+        EtaPatternFilter.threshold = flags.Trigger.FPGATrackSim.Hough1D.threshold[0]
+        EtaPatternFilter.EtaPatterns = flags.Trigger.FPGATrackSim.mapsDir+"/"+getBaseName(flags)+".patt"
+        theFPGATrackSimLogicalHistProcessAlg.RoadFilter = EtaPatternFilter
+        theFPGATrackSimLogicalHistProcessAlg.FilterRoads = True
 
-    RoadFilter = CompFactory.FPGATrackSimEtaPatternFilterTool()
-    RoadFilter.FPGATrackSimMappingSvc = FPGATrackSimMaping
-    theFPGATrackSimLogicalHistProcessAlg.RoadFilter = RoadFilter
+    if (flags.Trigger.FPGATrackSim.ActiveConfig.phiRoadFilter):
+        RoadFilter2 = CompFactory.FPGATrackSimPhiRoadFilterTool()
+        RoadFilter2.FPGATrackSimMappingSvc = FPGATrackSimMaping
+        RoadFilter2.threshold = flags.Trigger.FPGATrackSim.Hough1D.threshold[0]
+        RoadFilter2.fieldCorrection = flags.Trigger.FPGATrackSim.ActiveConfig.fieldCorrection
+        ### set the window to be a constant value (could be changed), array should be length of the threshold
+        windows = [flags.Trigger.FPGATrackSim.Hough1D.phifilterwindow for i in range(len(flags.Trigger.FPGATrackSim.ActiveConfig.hitExtendX))]
+        RoadFilter2.window = windows
+        
+        theFPGATrackSimLogicalHistProcessAlg.RoadFilter2 = RoadFilter2
+        theFPGATrackSimLogicalHistProcessAlg.FilterRoads2 = True
 
     theFPGATrackSimLogicalHistProcessAlg.HitFilteringTool = result.getPrimaryAndMerge(FPGATrackSimHitFilteringToolCfg(flags))
     theFPGATrackSimLogicalHistProcessAlg.HoughRootOutputTool = result.getPrimaryAndMerge(FPGATrackSimHoughRootOutputToolCfg(flags))
@@ -349,11 +432,6 @@ def FPGATrackSimLogicalHistProcessAlgCfg(inputFlags):
 
     theFPGATrackSimLogicalHistProcessAlg.LRTRoadFinder = result.getPrimaryAndMerge(LRTRoadFinderCfg(flags))
     theFPGATrackSimLogicalHistProcessAlg.NNTrackTool = result.getPrimaryAndMerge(NNTrackToolCfg(flags))
-
-    RoadFilter2 = CompFactory.FPGATrackSimPhiRoadFilterTool()
-    RoadFilter2.FPGATrackSimMappingSvc = FPGATrackSimMaping
-    RoadFilter2.window = []
-    theFPGATrackSimLogicalHistProcessAlg.RoadFilter2 = RoadFilter2
 
     theFPGATrackSimLogicalHistProcessAlg.ClusteringTool = CompFactory.FPGATrackSimClusteringTool()
     theFPGATrackSimLogicalHistProcessAlg.OutputTool = result.getPrimaryAndMerge(FPGATrackSimWriteOutputCfg(flags))
@@ -366,9 +444,12 @@ def FPGATrackSimLogicalHistProcessAlgCfg(inputFlags):
     if flags.Trigger.FPGATrackSim.ActiveConfig.spacePoints:
         SPRoadFilter = CompFactory.FPGATrackSimSpacepointRoadFilterTool()
         SPRoadFilter.filtering = flags.Trigger.FPGATrackSim.ActiveConfig.spacePointFiltering
-        SPRoadFilter.minSpacePlusPixel = 4
+        SPRoadFilter.minSpacePlusPixel = flags.Trigger.FPGATrackSim.minSpacePlusPixel
         # TODO guard here against threshold being more htan one value?
-        SPRoadFilter.threshold = flags.Trigger.FPGATrackSim.ActiveConfig.threshold[0]
+        if (flags.Trigger.FPGATrackSim.ActiveConfig.hough1D):
+          SPRoadFilter.threshold = flags.Trigger.FPGATrackSim.Hough1D.threshold[0]
+        else:
+          SPRoadFilter.threshold = flags.Trigger.FPGATrackSim.ActiveConfig.threshold[0]
         theFPGATrackSimLogicalHistProcessAlg.SPRoadFilterTool = SPRoadFilter
         theFPGATrackSimLogicalHistProcessAlg.Spacepoints = True
 
@@ -388,7 +469,8 @@ def FPGATrackSimLogicalHistProcessAlgCfg(inputFlags):
     theFPGATrackSimLogicalHistProcessAlg.MonTool = result.getPrimaryAndMerge(FPGATrackSimLogicalHitsProcessAlgMonitoringCfg(flags))
 
     result.addEventAlgo(theFPGATrackSimLogicalHistProcessAlg)
-    return result 
+    return result
+
 
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
@@ -403,12 +485,13 @@ if __name__ == "__main__":
         log.info("wrapperFile is string, converting to list")
         flags.Trigger.FPGATrackSim.wrapperFileName = [flags.Trigger.FPGATrackSim.wrapperFileName]
         flags.Input.Files = lambda f: [f.Trigger.FPGATrackSim.wrapperFileName]
-
+    
     flags.lock()
     acc=MainServicesCfg(flags)
-    
+
     acc.addService(CompFactory.THistSvc(Output = ["EXPERT DATAFILE='monitoring.root', OPT='RECREATE'"]))
     acc.addService(CompFactory.THistSvc(Output = ["MONITOROUT DATAFILE='dataflow.root', OPT='RECREATE'"]))
+
     
     if not flags.Trigger.FPGATrackSim.wrapperFileName:
         from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg

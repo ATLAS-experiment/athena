@@ -13,7 +13,9 @@ def createFPGATrackSimConfigFlags():
     cf.addFlag('outputMergedFPGATrackSimMatrixFile', 'combined_matrix.root')
     cf.addFlag('FPGATrackSimNBanks', 1)
     cf.addFlag('FPGATrackSimallBanks', False)
-    cf.addFlag('FPGATrackSimBankRegion', 0)
+    cf.addFlag('region', 0)
+    cf.addFlag('minSpacePlusPixel', 3)
+    cf.addFlag('baseName', '')    
     cf.addFlag('CheckGood2ndStage', True)
     cf.addFlag('Is2ndStage', False)
     cf.addFlag('UseHitScaleFactor', False)
@@ -146,13 +148,15 @@ def createHough1dFPGATrackSimConfigFlags():
 
     cf.hough1D =  True
 
+    cf.phiMin = 0.0
     cf.phiMax = 0.8
     cf.xBins = 200
+    cf.threshold = [7]
     cf.hitExtendX = [1] * 9
 
     cf.addFlag('phiRangeCut', True)
     cf.addFlag('splitpt', 1)
-
+    cf.addFlag('phifilterwindow', 0.005)
     cf.outputHitTxt = ""
 
     return cf
@@ -164,6 +168,8 @@ def createHoughFPGATrackSimConfigFlags():
     cf.name = 'hough'
     cf.hough = True
 
+    cf.addFlag('etaPatternFilter', False)
+    cf.addFlag('phiRoadFilter', False)    
     cf.phiMin = 0.3
     cf.phiMax = 0.5
     cf.xBins = 216
@@ -172,8 +178,7 @@ def createHoughFPGATrackSimConfigFlags():
     cf.yBufferBins = 2
     cf.addFlag('combineLayers', [])
     cf.addFlag('scale', [])
-    # Default to 9 layers.
-    cf.hitExtendX = [2,1,1,0,0,0,0,0,0]
+    cf.hitExtendX = [2,1,0,0,0,0,0,0,0]
 
     cf.addFlag('lrtSkipHitFiltering', False)
     cf.addFlag('lrtPtmin', 5)

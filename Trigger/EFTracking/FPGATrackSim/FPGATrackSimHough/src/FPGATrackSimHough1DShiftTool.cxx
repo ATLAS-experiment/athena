@@ -38,14 +38,9 @@ static inline int layersHit(FPGATrackSimRoad& r);
 // AthAlgTool
 
 FPGATrackSimHough1DShiftTool::FPGATrackSimHough1DShiftTool(const std::string& algname, const std::string &name, const IInterface *ifc) :
-    AthAlgTool(algname, name, ifc),
-    m_EvtSel("FPGATrackSimEventSelectionSvc", name),
-    m_FPGATrackSimMapping("TrigFPGATrackSimMappingSvc", name),
-    m_FPGATrackSimBankSvc("TrigFPGATrackSimBankSvc", name),
-    m_name(instance_name(name)),
-    m_monitorFile((m_name + ".root").c_str(), "RECREATE")
+  base_class(algname, name, ifc)
 {
-    declareInterface<IFPGATrackSimRoadFinderTool>(this);
+  declareInterface<IFPGATrackSimRoadFinderTool>(this);
 }
 
 
@@ -328,7 +323,7 @@ StatusCode FPGATrackSimHough1DShiftTool::getRoads(const std::vector<const FPGATr
 
     // Get hit masks
     std::vector<boost::dynamic_bitset<>> hitMasks(makeHitMasks(hits));
-    if (m_event < 5) drawHitMasks(hitMasks, m_name + "_e" + std::to_string(m_event));
+    if (m_drawHitMasks) drawHitMasks(hitMasks, m_name + "_e" + std::to_string(m_event));
 
     // Iterate over shifts
     for (size_t iShift = 0; iShift < m_shifts.size(); iShift++)
@@ -376,7 +371,7 @@ StatusCode FPGATrackSimHough1DShiftTool::getRoads(const std::vector<const FPGATr
     roads.reserve(m_roads.size());
     for (FPGATrackSimRoad & r : m_roads) roads.push_back(&r);
 
-    if (roads.size()==0) drawHitMasks(hitMasks, m_name + "_fail_e" + std::to_string(m_event));
+    if (roads.size()==0 && m_drawHitMasks) drawHitMasks(hitMasks, m_name + "_fail_e" + std::to_string(m_event));
 
     m_event++;
     return StatusCode::SUCCESS;
@@ -491,7 +486,6 @@ FPGATrackSimRoad FPGATrackSimHough1DShiftTool::makeRoad(const std::vector<const 
 // Taken from "HoughTransformTool.cxx"
 void FPGATrackSimHough1DShiftTool::matchIdealGeoSector(FPGATrackSimRoad & r) const
 {
-
     // We now look up the binning information in the sector bank.
     const FPGATrackSimSectorBank* sectorbank = m_FPGATrackSimBankSvc->SectorBank_1st();
 
