@@ -42,9 +42,9 @@
  * - A "STL" implementation.
  * - A "Vec"  implementation always tracking the index.
  * - A "Vec" implementation that updates the index when an new minimum is
- * found. This can be faster than the above when the inputs are not ordered.
+ * found. This can be faster when the inputs are not ordered.
  * - A "Vec" implementation that first finds the minimum and then
- *   finds the index. This can be faster in many cases.
+ *   finds the index. This will be the faster on average.
  *
  * We provide a convenient entry method
  * to select in compile time an implementation
@@ -187,17 +187,13 @@ int32_t vecUpdateIdxOnNewMin(const float* distancesIn, int n) {
 
   int32_t idx = 0;
   float min = distancesIn[0];
-  vec<float, 4> minvalues;
-  vbroadcast(minvalues, min);
+  vec<float, 4> minValues;
+  vbroadcast(minValues, min);
   vec<float, 4> values1;
   vec<float, 4> values2;
   vec<float, 4> values3;
   vec<float, 4> values4;
-  vec<float, 4> values5;
-  vec<float, 4> values6;
-  vec<float, 4> values7;
-  vec<float, 4> values8;
-  for (int i = 0; i < n; i += 32) {
+  for (int i = 0; i < n; i += 16) {
     // 1
     vload(values1, array + i);  // 0-3
     // 2
@@ -206,34 +202,15 @@ int32_t vecUpdateIdxOnNewMin(const float* distancesIn, int n) {
     vload(values3, array + i + 8);  // 8-11
     // 4
     vload(values4, array + i + 12);  // 12-15
-    // 5
-    vload(values5, array + i + 16);  // 16-19
-    // 6
-    vload(values6, array + i + 20);  // 20-23
-    // 7
-    vload(values7, array + i + 24);  // 24-27
-    // 8
-    vload(values8, array + i + 28);  // 28-31
 
-    // Compare //1 with //2
+    // compare 1 with 2 result is 1
     vmin(values1, values1, values2);
-    // compare //3 with //4
+    // compare 3 with 4 result is 3
     vmin(values3, values3, values4);
-    // Compare //5 with //6
-    vmin(values5, values5, values6);
-    // compare /7 with //8
-    vmin(values7, values7, values8);
-
-    // Compare //1 with //3
+    // compare 1 with 3 result is 1
     vmin(values1, values1, values3);
-    // Compare //5 with //7
-    vmin(values5, values5, values7);
-    // Compare //1 with //5
-    vmin(values1, values1, values5);
-
-    // see if the new minimum contain something less
-    // than the existing.
-    vec<int, 4> newMinimumMask = values1 < minvalues;
+    //see if the new minimum is less than existing
+    vec<int, 4> newMinimumMask = values1 < minValues;
     if (vany(newMinimumMask)) {
       idx = i;
       float minCandidates[4];
@@ -243,49 +220,36 @@ int32_t vecUpdateIdxOnNewMin(const float* distancesIn, int n) {
           min = minCandidates[j];
         }
       }
-      vbroadcast(minvalues, min);
+      vbroadcast(minValues, min);
     }
   }
-
-  // Do the final calculation scalar way
-  for (int i = idx; i < idx + 32; ++i) {
+  //Do the final calculation scalar way
+  for (int i = idx; i < idx + 16; ++i) {
     if (distancesIn[i] == min) {
       return i;
     }
   }
   return 0;
 }
+
 ATH_ALWAYS_INLINE
 float vecFindMinimum(const float* distancesIn, int n) {
   using namespace CxxUtils;
   const float* array =
       std::assume_aligned<GSFConstants::alignment>(distancesIn);
-
   vec<float, 4> minValues1;
   vec<float, 4> minValues2;
   vec<float, 4> minValues3;
   vec<float, 4> minValues4;
-  vec<float, 4> minValues5;
-  vec<float, 4> minValues6;
-  vec<float, 4> minValues7;
-  vec<float, 4> minValues8;
   vload(minValues1, array);
   vload(minValues2, array + 4);
   vload(minValues3, array + 8);
   vload(minValues4, array + 12);
-  vload(minValues5, array + 16);
-  vload(minValues6, array + 20);
-  vload(minValues7, array + 24);
-  vload(minValues8, array + 28);
   vec<float, 4> values1;
   vec<float, 4> values2;
   vec<float, 4> values3;
   vec<float, 4> values4;
-  vec<float, 4> values5;
-  vec<float, 4> values6;
-  vec<float, 4> values7;
-  vec<float, 4> values8;
-  for (int i = 32; i < n; i += 32) {
+  for (int i = 16; i < n; i += 16) {
     // 1
     vload(values1, array + i);  // 0-3
     vmin(minValues1, values1, minValues1);
@@ -298,39 +262,17 @@ float vecFindMinimum(const float* distancesIn, int n) {
     // 4
     vload(values4, array + i + 12);  // 12-15
     vmin(minValues4, values4, minValues4);
-    // 4
-    vload(values5, array + i + 16);  // 16-19
-    vmin(minValues5, values5, minValues5);
-    // 4
-    vload(values6, array + i + 20);  // 20-23
-    vmin(minValues6, values6, minValues6);
-    // 4
-    vload(values7, array + i + 24);  // 24-27
-    vmin(minValues7, values7, minValues7);
-    // 4
-    vload(values8, array + i + 28);  // 28-31
-    vmin(minValues8, values8, minValues8);
   }
-  // Compare //1 with //2
+  // Minimum of 1 and 2 goes to 1
   vmin(minValues1, minValues1, minValues2);
-  // compare //3 with //4
+  // Minimum of 3 and 4 goes to 3
   vmin(minValues3, minValues3, minValues4);
-  // compare //5 with //6
-  vmin(minValues5, minValues5, minValues6);
-  // compare //7 with //8
-  vmin(minValues7, minValues7, minValues8);
-
-  // Compare //1 with //3
+  // Minimum of 1 and 3 goes to 1
   vmin(minValues1, minValues1, minValues3);
-  // Compare //5 with //7
-  vmin(minValues5, minValues5, minValues7);
-
-  // Compare //1 with //5
-  vmin(minValues1, minValues1, minValues5);
-
-  // Do the final calculation scalar way
+  //
   float minValues[4];
   vstore(minValues, minValues1);
+  // Do the final calculation scalar way
   float minvalue = minValues[0];
   for (size_t i = 1; i < 4; ++i) {
     const float value = minValues[i];
@@ -340,6 +282,7 @@ float vecFindMinimum(const float* distancesIn, int n) {
   }
   return minvalue;
 }
+
 ATH_ALWAYS_INLINE
 int32_t vecIdxOfValue(const float value, const float* distancesIn, int n) {
   using namespace CxxUtils;
@@ -365,12 +308,12 @@ int32_t vecIdxOfValue(const float value, const float* distancesIn, int n) {
     // 4
     vload(values4, array + i + 12);  // 12-15
     vec<int, 4> eq4 = values4 == target;
-    //See if we have the value in any
-    //of the vectors
+    // See if we have the value in any
+    // of the vectors
     vec<int, 4> eq12 = eq1 || eq2;
     vec<int, 4> eq34 = eq3 || eq4;
     vec<int, 4> eqAny = eq12 || eq34;
-    //If yes then use scalar code to locate it
+    // If yes then use scalar code to locate it
     if (vany(eqAny)) {
       for (int32_t idx = i; idx < i + 16; ++idx) {
         if (distancesIn[idx] == value) {
@@ -387,8 +330,37 @@ int32_t vecMinThenIdx(const float* distancesIn, int n) {
   using namespace CxxUtils;
   const float* array =
       std::assume_aligned<GSFConstants::alignment>(distancesIn);
-  const float min = vecFindMinimum(array, n);
-  return vecIdxOfValue(min, array, n);
+  // Finding of minimum needs to loop over all elements
+  // But we can run the finding of index only inside a block
+  constexpr int blockSizePower2 = 8;
+  constexpr int blockSize = 2 << blockSizePower2;
+  // case for n less than blockSize
+  if (n <= blockSize) {
+    float min = vecFindMinimum(array, n);
+    return vecIdxOfValue(min, array, n);
+  }
+  int32_t idx = 0;
+  float min = array[0];
+  // We might have a remainder that we need to handle
+  const int remainder = n & (blockSize - 1);
+  for (int32_t i = 0; i < (n - remainder); i += blockSize) {
+    float mintmp = vecFindMinimum(array + i, blockSize);
+    if (mintmp < min) {
+      min = mintmp;
+      idx = i;
+    }
+  }
+  if (remainder != 0) {
+    int index = n - remainder;
+    float mintmp = vecFindMinimum(array + index, remainder);
+    // if the minimum is in this part
+    if (mintmp < min) {
+      min = mintmp;
+      return index + vecIdxOfValue(min, array + index, remainder);
+    }
+  }
+  //default return
+  return idx + vecIdxOfValue(min, array + idx, blockSize);
 }
 
 }  // namespace findIdxOfMinDetail
