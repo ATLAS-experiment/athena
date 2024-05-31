@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -26,6 +26,17 @@ namespace {
  * So 0.1 Gauss in Units of kT (which is what we return)
  */
 constexpr double defaultB = 0.1 * Gaudi::Units::gauss;
+
+inline void defaultField(double* ATH_RESTRICT bxyz,
+                         double* ATH_RESTRICT deriv) {
+  bxyz[0] = bxyz[1] = bxyz[2] = defaultB;
+  // return zero gradient if requested
+  if (deriv) {
+    for (int i = 0; i < 9; i++) {
+      deriv[i] = 0.;
+    }
+  }
+}
 }
 
 // We compile this package with optimization, even in debug builds; otherwise,
@@ -41,14 +52,7 @@ MagField::AtlasFieldCache::getField(const double* ATH_RESTRICT xyz,
 {
   // Allow for the case of no map for testing
   if (m_fieldMap == nullptr) {
-    // return default
-    bxyz[0] = bxyz[1] = bxyz[2] = defaultB;
-    // return zero gradient if requested
-    if (deriv) {
-      for (int i = 0; i < 9; i++) {
-        deriv[i] = 0.;
-      }
-    }
+    defaultField(bxyz, deriv);
     return;
   }
 
@@ -65,14 +69,7 @@ MagField::AtlasFieldCache::getField(const double* ATH_RESTRICT xyz,
     if (!fillFieldCache(z, r, phi)) {
       // caching failed
       // outside the valid map volume
-      // return default
-      bxyz[0] = bxyz[1] = bxyz[2] = defaultB;
-      // return zero gradient if requested
-      if (deriv) {
-        for (int i = 0; i < 9; i++) {
-          deriv[i] = 0.;
-        }
-      }
+      defaultField(bxyz, deriv);
       return;
     }
   }
@@ -87,6 +84,7 @@ MagField::AtlasFieldCache::getField(const double* ATH_RESTRICT xyz,
   // conductor SF since the conductor is part of the static magnetic field model
   const size_t condSize = m_cond->size();
   for (size_t i = 0; i < condSize; i++) {
+    //Heavy Eigen use from here
     (*m_cond)[i].addBiotSavart(m_scaleToUse, xyz, bxyz, deriv);
   }
 }
@@ -99,14 +97,7 @@ MagField::AtlasFieldCache::getFieldZR(const double* ATH_RESTRICT xyz,
 
   // Allow for the case of no map for testing
   if (m_fieldMap == nullptr) {
-    // return default
-    bxyz[0] = bxyz[1] = bxyz[2] = defaultB;
-    // return zero gradient if requested
-    if (deriv) {
-      for (int i = 0; i < 9; i++) {
-        deriv[i] = 0.;
-      }
-    }
+    defaultField(bxyz, deriv);
     return;
   }
 
