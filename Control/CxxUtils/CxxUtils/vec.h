@@ -271,7 +271,12 @@ ATH_ALWAYS_INLINE
 void
 vload(VEC& dst, vec_type_t<VEC> const* src)
 {
+
+#if !HAVE_VECTOR_SIZE_ATTRIBUTE || WANT_VECTOR_FALLBACK
+  std::memcpy(dst.m_arr, src, sizeof(VEC));
+#else
   std::memcpy(&dst, src, sizeof(VEC));
+#endif
 }
 
 /*
@@ -284,7 +289,11 @@ ATH_ALWAYS_INLINE
 void
 vstore(vec_type_t<VEC>* dst, const VEC& src)
 {
+#if !HAVE_VECTOR_SIZE_ATTRIBUTE || WANT_VECTOR_FALLBACK
+  std::memcpy(dst, src.m_arr, sizeof(VEC));
+#else
   std::memcpy(dst, &src, sizeof(VEC));
+#endif
 }
 
 /*
@@ -356,7 +365,11 @@ vany(const VEC& mask){
                 "compatible with a mask");
   VEC zero;
   vbroadcast(zero,vec_type_t<VEC>{0});
+#if !HAVE_VECTOR_SIZE_ATTRIBUTE || WANT_VECTOR_FALLBACK
+  return std::memcmp(mask.m_arr, zero.m_arr, sizeof(VEC)) != 0;
+#else
   return std::memcmp(&mask, &zero, sizeof(VEC)) != 0;
+#endif
 }
 
 /*
@@ -372,7 +385,11 @@ vnone(const VEC& mask){
                 "compatible with a mask");
   VEC zero;
   vbroadcast(zero,vec_type_t<VEC>{0});
+#if !HAVE_VECTOR_SIZE_ATTRIBUTE || WANT_VECTOR_FALLBACK
+  return std::memcmp(mask.m_arr, zero.m_arr, sizeof(VEC)) == 0;
+#else
   return std::memcmp(&mask, &zero, sizeof(VEC)) == 0;
+#endif
 }
 
 /*
@@ -391,13 +408,14 @@ vall(const VEC& mask){
   // fallback compares to 0 when false
   // and 1 when is true
   vbroadcast(alltrue, vec_type_t<VEC>{1});
+  return std::memcmp(mask.m_arr, alltrue.m_arr, sizeof(VEC)) == 0;
 #else
   // For the gnu vector extensions
   // Vectors are compared element-wise producing 0 when comparison is false
   // and -1 (constant of the appropriate type where all bits are set) otherwise.
   vbroadcast(alltrue, vec_type_t<VEC>{-1});
-#endif
   return std::memcmp(&mask, &alltrue, sizeof(VEC)) == 0;
+#endif
 }
 
 
