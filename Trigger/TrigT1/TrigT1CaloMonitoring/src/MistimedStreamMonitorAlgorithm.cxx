@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
 #include "MistimedStreamMonitorAlgorithm.h"
+#include "AthContainers/ConstAccessor.h"
 #include <iostream>
 #include <vector>
 #include <TMath.h>
@@ -211,7 +212,9 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
   std::unique_ptr<xAOD::TriggerTowerAuxContainer> ttContainerAux = std::make_unique<xAOD::TriggerTowerAuxContainer>();
   ttContainer->setStore(ttContainerAux.get());
   
-  // Creating a new contianer for TT with pulseClasification 
+  static const SG::Accessor<float> pulseClassificationAcc("pulseClassification");
+
+  // Creating a new container for TT with pulseClassification 
   for (const xAOD::TriggerTower* tt : *triggerTowerTES) {
   
     float ttPulseCategory = 0;
@@ -284,7 +287,7 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
     xAOD::TriggerTower* newTT = new xAOD::TriggerTower; //create a new TT object
     ttContainer->push_back(newTT); // add the newTT to new output TT container (at the end of it)
     *newTT = *(tt);// copy over all information from TT to newTT
-    newTT->auxdata<float>("pulseClassification") = ttPulseCategory; //decorate
+    pulseClassificationAcc(*newTT) = ttPulseCategory; //decorate
   }
 
   // count all eFex in-time and out-of-time TOBs with at least 5GeV 
@@ -560,7 +563,7 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
     //Create the trigger tower objects and calculate scaled phi
     for (const xAOD::TriggerTower* tt : *ttContainer) {
       ATH_CHECK( makeTowerPPM(tt, vecMonTTDecor) );     
-      ATH_MSG_DEBUG( "tt->pulseClassification :: " <<  tt->auxdata<float>("pulseClassification"));
+      ATH_MSG_DEBUG( "tt->pulseClassification :: " <<  pulseClassificationAcc(*tt));
     }
     
     groupName = "EventofInterest_" +  std::to_string(eventCounter) + "_";
@@ -570,7 +573,7 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
     for (auto& myTower : vecMonTTDecor) {
       ATH_MSG_DEBUG(" looping over TTs"); 
       const int layer =   (myTower.tower)->layer();
-      pulseCat = (myTower.tower)->auxdata<float>("pulseClassification");
+      pulseCat = pulseClassificationAcc(*myTower.tower);
       bcidWord = (myTower.tower)->bcidVec()[0]; // look at the status bit in the central time slice
       ATH_MSG_DEBUG("groupName :: " <<  groupName);
 	
