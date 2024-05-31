@@ -142,7 +142,6 @@ void MuonReadoutElement::setChamberLink(GeoModel::TransientConstSharedPtr<MuonCh
 const MuonChamber* MuonReadoutElement::getChamber() const {
     return m_chambLink.get();
 }
-
 #endif
 
 }  // namespace MuonGMR4

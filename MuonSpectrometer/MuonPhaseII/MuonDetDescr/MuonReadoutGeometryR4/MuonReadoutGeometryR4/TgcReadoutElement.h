@@ -98,6 +98,10 @@ class TgcReadoutElement : public MuonReadoutElement {
 
     friend class ActsTrk::TransformCacheDetEle<TgcReadoutElement>;
 
+#ifndef SIMULATIONBASE
+    std::map<Identifier, std::shared_ptr<Acts::Surface>> getSurfaces() const override final;
+#endif
+
    private:
         parameterBook m_pars{};
         const TgcIdHelper& m_idHelper{idHelperSvc()->tgcIdHelper()};

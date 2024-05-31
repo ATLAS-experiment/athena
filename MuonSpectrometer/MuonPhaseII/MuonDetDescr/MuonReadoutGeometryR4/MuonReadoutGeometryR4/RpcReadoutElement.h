@@ -119,6 +119,10 @@ class RpcReadoutElement : public MuonReadoutElement {
                                      const bool measPhi);
     
     friend class ActsTrk::TransformCacheDetEle<RpcReadoutElement>;
+
+#ifndef SIMULATIONBASE
+    std::map<Identifier, std::shared_ptr<Acts::Surface>> getSurfaces() const override final;
+#endif
    private:
         /// Access to the StripLayer associated to a given measurement Hash
         const StripLayer& sensorLayout(const IdentifierHash& measHash) const;

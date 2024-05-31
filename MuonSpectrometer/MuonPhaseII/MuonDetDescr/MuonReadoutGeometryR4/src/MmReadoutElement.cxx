@@ -101,4 +101,16 @@ Amg::Vector3D MmReadoutElement::rightStripEdge(const ActsGeometryContext& ctx, c
     return Amg::Vector3D::Zero();
 }
 
+#ifndef SIMULATIONBASE
+std::map<Identifier, std::shared_ptr<Acts::Surface>> MmReadoutElement::getSurfaces() const {
+    std::map<Identifier,  std::shared_ptr<Acts::Surface>> surfaces{};
+    for (unsigned int gasGap = 1; gasGap<= nGasGaps(); ++gasGap) {
+        const IdentifierHash measHash = createHash(gasGap, 1);
+        surfaces[measurementId(measHash)] = surfacePtr(layerHash(measHash));
+    }
+    return surfaces;
+}
+#endif
+
+
 }

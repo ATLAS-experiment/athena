@@ -229,5 +229,17 @@ Amg::Vector3D sTgcReadoutElement::chamberStripPos(const IdentifierHash& measHash
                  <<" is out of range. Maximum range "<<m_pars.stripLayers.size());
    return Amg::Vector3D::Zero();
 }
-
+#ifndef SIMULATIONBASE
+std::map<Identifier, std::shared_ptr<Acts::Surface>> sTgcReadoutElement::getSurfaces() const {
+    std::map<Identifier, std::shared_ptr<Acts::Surface>> surfaces{};
+    for (unsigned int gasGap = 1; gasGap <= numLayers(); ++gasGap) {
+         for (unsigned int ch : {ReadoutChannelType::Strip, ReadoutChannelType::Wire,
+                                 ReadoutChannelType::Pad}) {
+            IdentifierHash hash  = createHash(gasGap,ch, 1);
+            surfaces[measurementId(hash)] = surfacePtr(layerHash(hash));
+         }
+    }
+    return surfaces;
+}
+#endif
 }  // namespace MuonGMR4

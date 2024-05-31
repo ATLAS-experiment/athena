@@ -83,5 +83,19 @@ Amg::Vector3D RpcReadoutElement::leftStripEdge(const ActsGeometryContext& ctx, c
 Amg::Vector3D RpcReadoutElement::chamberStripPos(const IdentifierHash& measHash) const {
    return sensorLayout(measHash).stripPosition(stripNumber(measHash));
 }
+#ifndef SIMULATIONBASE
+std::map<Identifier, std::shared_ptr<Acts::Surface>> RpcReadoutElement::getSurfaces() const {
+    std::map<Identifier, std::shared_ptr<Acts::Surface>> surfaces{};
+    for (const StripLayerPtr& layer : m_pars.layers) {
+        if (!layer) continue;
+        const IdentifierHash hash = createHash(1, gasGapNumber(layer->hash()) +1 , 
+                                                  doubletPhiNumber(layer->hash()) +1, 
+                                                  measuresPhi(layer->hash()));
+        surfaces[measurementId(hash)] = surfacePtr(layerHash(hash));
+    }
+    return surfaces;
+
+}
+#endif
 
 }

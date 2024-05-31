@@ -268,6 +268,10 @@ class sTgcReadoutElement : public MuonReadoutElement {
                                      const unsigned int channel,
                                      const unsigned int wireInGrp = 0);
     friend class ActsTrk::TransformCacheDetEle<sTgcReadoutElement>;
+#ifndef SIMULATIONBASE
+    std::map<Identifier, std::shared_ptr<Acts::Surface>> getSurfaces() const override final;
+#endif
+
    private:
         /// Returns channel position for a given identifierHash
         static unsigned int channelNumber(const IdentifierHash& measHash);

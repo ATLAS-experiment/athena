@@ -119,7 +119,9 @@ class MmReadoutElement : public MuonReadoutElement {
     const StripLayer& stripLayer(const IdentifierHash& measHash) const;    
  
     friend ActsTrk::TransformCacheDetEle<MmReadoutElement>;
-
+#ifndef SIMULATIONBASE
+    std::map<Identifier, std::shared_ptr<Acts::Surface>> getSurfaces() const override final;
+#endif
    private:
        
     

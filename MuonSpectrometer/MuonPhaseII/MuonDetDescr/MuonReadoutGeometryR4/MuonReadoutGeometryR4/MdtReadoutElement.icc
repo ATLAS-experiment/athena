@@ -85,7 +85,7 @@ inline bool MdtReadoutElement::isBarrel() const { return m_isBarrel; }
 
 
 inline Amg::Vector3D MdtReadoutElement::globalTubePos(const ActsGeometryContext& ctx, 
-                                const Identifier& measId) const {
+                                                      const Identifier& measId) const {
     return globalTubePos(ctx, measurementHash(measId));
 }
 inline Amg::Vector3D MdtReadoutElement::readOutPos(const ActsGeometryContext& ctx,
