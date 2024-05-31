@@ -337,3 +337,6 @@ atlas_add_citest( Trigger_athenaHLT_v1PhysP1
 
 atlas_add_citest( Trigger_athenaHLT_v1Cosmic
    SCRIPT test_trigP1_v1Cosmic_build.py )
+
+atlas_add_citest( EFTracking_FPGATrackSim_workflow
+   SCRIPT FPGATrackSimCI.sh )
