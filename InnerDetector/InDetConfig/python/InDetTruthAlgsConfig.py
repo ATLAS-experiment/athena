@@ -4,6 +4,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import BeamType
+from AthenaConfiguration.Enums import ProductionStep
 
 def InDetPRD_MultiTruthMakerSiCfg(flags, name="InDetPRD_MultiTruthMakerSi",
                                   **kwargs):
@@ -14,7 +15,10 @@ def InDetPRD_MultiTruthMakerSiCfg(flags, name="InDetPRD_MultiTruthMakerSi",
         from PixelGeoModel.PixelGeoModelConfig import PixelReadoutGeometryCfg
         acc.merge(PixelReadoutGeometryCfg(flags))
         kwargs.setdefault("PixelClusterContainerName", 'PixelClusters')
-        kwargs.setdefault("SimDataMapNamePixel", 'PixelSDO_Map')
+        if flags.Common.ProductionStep is ProductionStep.PileUpPretracking:
+            kwargs.setdefault("SimDataMapNamePixel", flags.Overlay.BkgPrefix + 'PixelSDO_Map')
+        else:
+            kwargs.setdefault("SimDataMapNamePixel", 'PixelSDO_Map')
         kwargs.setdefault("TruthNamePixel", 'PRD_MultiTruthPixel')
     else:
         kwargs.setdefault("PixelClusterContainerName", "")
@@ -25,7 +29,10 @@ def InDetPRD_MultiTruthMakerSiCfg(flags, name="InDetPRD_MultiTruthMakerSi",
         from SCT_GeoModel.SCT_GeoModelConfig import SCT_ReadoutGeometryCfg
         acc.merge(SCT_ReadoutGeometryCfg(flags))
         kwargs.setdefault("SCTClusterContainerName", 'SCT_Clusters')
-        kwargs.setdefault("SimDataMapNameSCT", 'SCT_SDO_Map')
+        if flags.Common.ProductionStep is ProductionStep.PileUpPretracking:
+            kwargs.setdefault("SimDataMapNameSCT", flags.Overlay.BkgPrefix + 'SCT_SDO_Map')
+        else:
+            kwargs.setdefault("SimDataMapNameSCT", 'SCT_SDO_Map')
         kwargs.setdefault("TruthNameSCT", 'PRD_MultiTruthSCT')
     else:
         kwargs.setdefault("SCTClusterContainerName", "")
@@ -68,7 +75,10 @@ def InDetPRD_MultiTruthMakerTRTCfg(flags, name="InDetTRT_PRD_MultiTruthMaker",
     kwargs.setdefault("TruthNameSCT", "")
 
     kwargs.setdefault("TRTDriftCircleContainerName", 'TRT_DriftCircles')
-    kwargs.setdefault("SimDataMapNameTRT", 'TRT_SDO_Map')
+    if flags.Common.ProductionStep is ProductionStep.PileUpPretracking:
+        kwargs.setdefault("SimDataMapNameTRT", flags.Overlay.BkgPrefix + 'TRT_SDO_Map')
+    else:
+        kwargs.setdefault("SimDataMapNameTRT", 'TRT_SDO_Map')
     kwargs.setdefault("TruthNameTRT", 'PRD_MultiTruthTRT')
 
     acc.addEventAlgo(CompFactory.InDet.PRD_MultiTruthMaker(name, **kwargs))
@@ -90,7 +100,10 @@ def ITkPRD_MultiTruthMakerSiCfg(flags, name="ITkPRD_MultiTruthMakerSi",
             ITkPixelReadoutGeometryCfg)
         acc.merge(ITkPixelReadoutGeometryCfg(flags))
         kwargs.setdefault("PixelClusterContainerName", 'ITkPixelClusters')
-        kwargs.setdefault("SimDataMapNamePixel", 'ITkPixelSDO_Map')
+        if flags.Common.ProductionStep is ProductionStep.PileUpPretracking:
+            kwargs.setdefault("SimDataMapNamePixel", flags.Overlay.BkgPrefix + 'ITkPixelSDO_Map')
+        else:
+            kwargs.setdefault("SimDataMapNamePixel", 'ITkPixelSDO_Map')
         kwargs.setdefault("TruthNamePixel", 'PRD_MultiTruthITkPixel')
     else:
         kwargs.setdefault("PixelClusterContainerName", "")
@@ -102,7 +115,10 @@ def ITkPRD_MultiTruthMakerSiCfg(flags, name="ITkPRD_MultiTruthMakerSi",
             ITkStripReadoutGeometryCfg)
         acc.merge(ITkStripReadoutGeometryCfg(flags))
         kwargs.setdefault("SCTClusterContainerName", 'ITkStripClusters')
-        kwargs.setdefault("SimDataMapNameSCT", 'ITkStripSDO_Map')
+        if flags.Common.ProductionStep is ProductionStep.PileUpPretracking:
+            kwargs.setdefault("SimDataMapNameSCT", flags.Overlay.BkgPrefix + 'ITkStripSDO_Map')
+        else:
+            kwargs.setdefault("SimDataMapNameSCT", 'ITkStripSDO_Map')
         kwargs.setdefault("TruthNameSCT", 'PRD_MultiTruthITkStrip')
     else:
         kwargs.setdefault("SCTClusterContainerName", "")

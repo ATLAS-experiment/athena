@@ -6,6 +6,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import LHCPeriod
 from TileConfiguration.TileConfigFlags import TileRunType
+from AthenaConfiguration.Enums import ProductionStep
 
 def TileCellBuilderCfg(flags, mergeChannels=True, **kwargs):
     """Return component accumulator with configured private Tile Cell builder tool
@@ -25,6 +26,8 @@ def TileCellBuilderCfg(flags, mergeChannels=True, **kwargs):
     kwargs.setdefault('E4prContainer', 'E4prContainer' if flags.GeoModel.Run is LHCPeriod.Run2 else "")
 
     kwargs['mergeChannels'] = mergeChannels
+    if flags.Common.ProductionStep is ProductionStep.PileUpPretracking:
+        kwargs.setdefault('EventInfo', flags.Overlay.BkgPrefix + "EventInfo")
 
     if kwargs['SkipGain'] not in [-1, 0, 1]:
         raise(Exception("Invalid Tile gain requsted to be skipped: %s" % kwargs['SkipGain']))
