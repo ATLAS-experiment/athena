@@ -11,6 +11,7 @@ from AthenaConfiguration.Enums import BeamType
 from IOVDbSvc.IOVDbSvcConfig import addFolders
 from AthenaCommon.Logging import logging
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
+from AthenaConfiguration.Enums import ProductionStep
 
 @AccumulatorCache
 def LuminosityCondAlgCfg (flags, useOnlineLumi=None, suffix=None):
@@ -40,6 +41,11 @@ def LuminosityCondAlgCfg (flags, useOnlineLumi=None, suffix=None):
     else:
         log.warning ("LuminosityCondAlgCfg can't resolve database instance = %s, assume Run2!" % flags.IOVDb.DatabaseInstance)
         kwargs = luminosityCondAlgRun2Cfg (flags, name, result)
+  
+    if flags.Common.ProductionStep is ProductionStep.PileUpPretracking:
+         kwargs.setdefault("EventInfoKey", flags.Overlay.BkgPrefix + "EventInfo")
+         kwargs.setdefault("actualMuKey", flags.Overlay.BkgPrefix + "EventInfo.actualInteractionsPerCrossing")
+         kwargs.setdefault("averageMuKey", flags.Overlay.BkgPrefix + "EventInfo.averageInteractionsPerCrossing")
 
     LuminosityCondAlg=CompFactory.LuminosityCondAlg
 
