@@ -24,10 +24,12 @@ echo "Reference file has been resolved to: ${refFileAbsPath}"
 echo "Running reconstruction job ..."
 source ${TESTNAME}.sh >& countsObjects.txt
 
+cat log.RAWtoALL
+
 rc=$?
 if [ $rc != 0 ]; then
-    echo ">>>>>>>>>>>>>>>> here is the full log (log.RAWtoALL):"
-    cat log.RAWtoALL
+    echo "Test did not complete successfully"
+    echo "  -- FAILURE"
     exit $rc
 fi
 
@@ -39,5 +41,5 @@ if [[ $ret -eq 0 ]]; then
     exit 0
 else
     echo "  -- FAILURE"
-    exit 1
+    exit $rc
 fi
