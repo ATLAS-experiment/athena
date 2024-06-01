@@ -30,7 +30,7 @@ def LArRawChannelBuilderAlgCfg(flags, **kwargs):
            dbInstance="LAR_OFL"
            acc.merge(addFolders(flags,fld, dbInstance, className=obj, db=dbString))
 
-        if flags.Common.ProductionStep is ProductionStep.PileUpPresampling:
+        if flags.Common.ProductionStep in [ProductionStep.PileUpPresampling, ProductionStep.PileUpPretracking]:
             kwargs.setdefault("LArDigitKey", flags.Overlay.BkgPrefix + "LArDigitContainer_MC")
         else:
             kwargs.setdefault("LArDigitKey", "LArDigitContainer_MC")

@@ -6,9 +6,9 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import ProductionStep
 
-
-def CaloBCIDAvgAlgCfg (flags):
+def CaloBCIDAvgAlgCfg (flags, **kwargs):
     CaloBCIDAvgAlg=CompFactory.CaloBCIDAvgAlg
 
     result = ComponentAccumulator()
@@ -18,8 +18,9 @@ def CaloBCIDAvgAlgCfg (flags):
 
     from CaloRec.CaloBCIDLumiCondAlgConfig import CaloBCIDLumiCondAlgCfg
     result.merge (CaloBCIDLumiCondAlgCfg (flags))
-
-    result.addEventAlgo (CaloBCIDAvgAlg())
+    if flags.Common.ProductionStep is ProductionStep.PileUpPretracking:
+         kwargs.setdefault("EventInfoKey", flags.Overlay.BkgPrefix + "EventInfo")
+    result.addEventAlgo (CaloBCIDAvgAlg(**kwargs))
     return result
 
 

@@ -3,6 +3,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from TrkConfig.TrackingPassFlags import RoIStrategy
+from AthenaConfiguration.Enums import ProductionStep
 
 def SiSPSeededTrackFinderCfg(flags, name="InDetSiSpTrackFinder", **kwargs):
     acc = ComponentAccumulator()
@@ -37,6 +38,9 @@ def SiSPSeededTrackFinderCfg(flags, name="InDetSiSpTrackFinder", **kwargs):
 
     kwargs.setdefault("useZBoundFinding",
                       flags.Tracking.ActiveConfig.doZBoundary)
+
+    if flags.Common.ProductionStep is ProductionStep.PileUpPretracking:
+        kwargs.setdefault("EventInfoKey", flags.Overlay.BkgPrefix + "EventInfo")
 
     # Heavy-ion config
     kwargs.setdefault("useZvertexTool",
@@ -155,6 +159,8 @@ def ITkSiSPSeededTrackFinderCfg(flags, name="ITkSiSpTrackFinder", **kwargs):
                       if flags.Tracking.ActiveConfig.useITkStripSeeding else "")
     kwargs.setdefault("SpacePointsPixelName", "ITkPixelSpacePoints"
                       if flags.Tracking.ActiveConfig.useITkPixelSeeding else "")
+    if flags.Common.ProductionStep is ProductionStep.PileUpPretracking:
+        kwargs.setdefault("EventInfoKey", flags.Overlay.BkgPrefix + "EventInfo")
 
     if flags.Tracking.doITkFastTracking:
         kwargs.setdefault("doFastTracking", True)
