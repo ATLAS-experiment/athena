@@ -28,7 +28,6 @@
 #include <iostream>
 
 static inline std::string to_string(std::vector<size_t> v);
-static inline std::string instance_name(std::string const & s);
 static inline boost::dynamic_bitset<> lshift(boost::dynamic_bitset<> const & b, int n);
 static inline boost::dynamic_bitset<> rshift(boost::dynamic_bitset<> const & b, int n);
 static inline void updateBinHits(std::vector<boost::dynamic_bitset<>> & binHits, unsigned layer, boost::dynamic_bitset<> const & b);
@@ -634,14 +633,6 @@ static inline std::string to_string(std::vector<size_t> v)
     return oss.str();
 }
 
-
-static inline std::string instance_name(std::string const & s)
-{
-    size_t pos = s.find_last_of(".");
-    if (pos != std::string::npos)
-        return s.substr(pos + 1);
-    return s;
-}
 
 static inline boost::dynamic_bitset<> lshift(boost::dynamic_bitset<> const & b, int n)
 {
