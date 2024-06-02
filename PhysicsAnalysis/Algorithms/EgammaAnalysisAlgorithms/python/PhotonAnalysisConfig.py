@@ -337,7 +337,7 @@ class PhotonWorkingPointConfig (ConfigBlock) :
             elif config.dataType() is DataType.FullSim:
                 alg.efficiencyCorrectionTool.ForceDataType = \
                     PATCore.ParticleDataType.Full
-            if config.geometry() == LHCPeriod.Run2:
+            if config.geometry() is LHCPeriod.Run2:
                 alg.efficiencyCorrectionTool.MapFilePath = 'PhotonEfficiencyCorrection/2015_2018/rel21.2/Summer2020_Rec_v1/map3.txt'
             alg.outOfValidity = 2 #silent
             alg.outOfValidityDeco = 'ph_id_bad_eff' + postfix
@@ -360,7 +360,7 @@ class PhotonWorkingPointConfig (ConfigBlock) :
                 alg.efficiencyCorrectionTool.ForceDataType = \
                     PATCore.ParticleDataType.Full
             alg.efficiencyCorrectionTool.IsoKey = self.isolationWP.replace("FixedCut","")
-            if config.geometry() == LHCPeriod.Run2:
+            if config.geometry() is LHCPeriod.Run2:
                 alg.efficiencyCorrectionTool.MapFilePath = 'PhotonEfficiencyCorrection/2015_2018/rel21.2/Summer2020_Rec_v1/map3.txt'
             alg.outOfValidity = 2 #silent
             alg.outOfValidityDeco = 'ph_isol_bad_eff' + postfix

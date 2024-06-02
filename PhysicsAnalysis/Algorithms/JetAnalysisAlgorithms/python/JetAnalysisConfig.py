@@ -287,7 +287,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             if self.jetInput == "EMPFlow":
                 configFile = "PreRec_R22_PFlow_ResPU_EtaJES_GSC_February23_230215.config"
             else:
-                if config.dataType() == DataType.FastSim:
+                if config.dataType() is DataType.FastSim:
                     configFile = "JES_MC16Recommendation_AFII_{0}_Apr2019_Rel21.config"
                 else:
                     configFile = "JES_MC16Recommendation_Consolidated_{0}_Apr2019_Rel21.config"

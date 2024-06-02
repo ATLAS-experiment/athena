@@ -70,7 +70,7 @@ class TriggerAnalysisSFBlock (ConfigBlock):
         decisionTool = config.createPublicTool( 'Trig::TrigDecisionTool', 'TrigDecisionTool' )
         decisionTool.ConfigTool = '%s/%s' % \
             ( xAODConfTool.getType(), xAODConfTool.getName() )
-        if config.geometry() == LHCPeriod.Run3:
+        if config.geometry() is LHCPeriod.Run3:
             decisionTool.NavigationFormat = 'TrigComposite' # Read Run 3 navigation (options are "TrigComposite" for R3 or "TriggElement" for R2, R2 navigation is not kept in most DAODs)
             decisionTool.HLTSummary = 'HLTNav_Summary_DAODSlimmed' # Name of R3 navigation container (if reading from AOD, then "HLTNav_Summary_AODSlimmed" instead)
 
@@ -80,7 +80,7 @@ class TriggerAnalysisSFBlock (ConfigBlock):
 
         # Create public trigger tools
         drScoringTool = config.createPublicTool( 'Trig::DRScoringTool', 'DRScoringTool' )
-        if config.geometry() == LHCPeriod.Run3:
+        if config.geometry() is LHCPeriod.Run3:
             matchingTool = config.createPublicTool( 'Trig::R3MatchingTool', 'MatchingTool' )
             matchingTool.ScoringTool = '%s/%s' % \
                     ( drScoringTool.getType(), drScoringTool.getName() )
@@ -98,7 +98,7 @@ class TriggerAnalysisSFBlock (ConfigBlock):
                                     triggerSuffix=''):
 
         alg = config.createAlgorithm( 'CP::TrigGlobalEfficiencyAlg', 'TrigGlobalSFAlg' )
-        if config.geometry() == LHCPeriod.Run3:
+        if config.geometry() is LHCPeriod.Run3:
             alg.triggers_2022 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in self.triggerChainsPerYear.get('2022',[])]
             alg.triggers_2023 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in self.triggerChainsPerYear.get('2023',[])]
             alg.triggers_2024 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in self.triggerChainsPerYear.get('2024',[])]
@@ -125,7 +125,7 @@ class TriggerAnalysisSFBlock (ConfigBlock):
                     raise ValueError( 'TriggerAnalysisConfig: you must provide a set of triggers for the year 2018!' )
 
         alg.matchingTool = '%s/%s' % ( matchingTool.getType(), matchingTool.getName() )
-        alg.isRun3Geo = config.geometry() == LHCPeriod.Run3
+        alg.isRun3Geo = config.geometry() is LHCPeriod.Run3
         alg.scaleFactorDecoration = 'globalTriggerEffSF'+triggerSuffix+'_%SYS%'
         alg.matchingDecoration = 'globalTriggerMatch'+triggerSuffix+'_%SYS%'
         alg.eventDecisionOutputDecoration = 'globalTriggerMatch'+triggerSuffix+'_dontsave_%SYS%'
@@ -144,7 +144,7 @@ class TriggerAnalysisSFBlock (ConfigBlock):
         if not (self.electrons or self.muons or self.photons):
             raise ValueError ('TriggerAnalysisConfig: at least one object collection must be provided! (electrons, muons, photons)' )
 
-        if config.dataType() != DataType.Data and not alg.doMatchingOnly:
+        if config.dataType() is not DataType.Data and not alg.doMatchingOnly:
             config.addOutputVar ('EventInfo', alg.scaleFactorDecoration, 'globalTriggerEffSF'+triggerSuffix)
         config.addOutputVar ('EventInfo', alg.matchingDecoration, 'globalTriggerMatch'+triggerSuffix, noSys=False)
 

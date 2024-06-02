@@ -180,10 +180,10 @@ class FTagConfig (ConfigBlock):
             if self.generator == "autoconfig":
                 self.generator = self.resolveMCMCgenerator(config, generatorDict=config.generatorInfo())
 
-            if config.geometry() == LHCPeriod.Run2:
+            if config.geometry() is LHCPeriod.Run2:
                 if self.generator not in ["default", "Pythia8", "Sherpa221", "Sherpa2210", "Sherpa2212", "Herwig713", "Herwig721", "amcAtNLOPythia", "amcAtNLOHerwig"]:
                     raise ValueError ("invalid generator type: " + self.generator)
-            elif config.geometry() == LHCPeriod.Run3:
+            elif config.geometry() is LHCPeriod.Run3:
                 if self.generator not in ["default", "Pythia8", "Sherpa2212", "Herwig713"]:
                     raise ValueError ("invalid generator type: " + self.generator)
 
@@ -208,7 +208,7 @@ class FTagConfig (ConfigBlock):
         if self.bTagCalibFile is not None :
             bTagCalibFile = self.bTagCalibFile
         else:
-            if config.geometry() == LHCPeriod.Run2:
+            if config.geometry() is LHCPeriod.Run2:
                 bTagCalibFile = "xAODBTaggingEfficiency/13TeV/2023-22-13TeV-MC20-CDI-2023-09-13_v1.root"
             elif config.geometry() >= LHCPeriod.Run3:
                 bTagCalibFile = "xAODBTaggingEfficiency/13p6TeV/2023-22-13TeV-MC21-CDI-2023-09-13_v1.root"
