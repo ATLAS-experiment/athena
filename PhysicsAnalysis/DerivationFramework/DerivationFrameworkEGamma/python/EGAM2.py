@@ -179,7 +179,9 @@ def EGAM2KernelCfg(flags, name="EGAM2Kernel", **kwargs):
     # Gain and cluster energies per layer decoration tool
     # ====================================================================
     from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import (
-        CaloDecoratorKernelCfg)
+        CaloDecoratorKernelCfg,
+    )
+
     acc.merge(CaloDecoratorKernelCfg(flags))
 
     # thinning tools
@@ -348,6 +350,15 @@ def EGAM2Cfg(flags):
     EGAM2TriggerListsHelper = TriggerListsHelper(flags)
 
     # configure skimming/thinning/augmentation tools
+    # add some single-leg trigger matching info needed for Jpsi triggers
+    if flags.Trigger.EDMVersion == 2:
+        EGAM2TriggerListsHelper.Run2TriggerNamesNoTau.extend(
+            [
+                "HLT_e5_lhtight_nod0",
+                "HLT_e9_lhtight_nod0",
+                "HLT_e14_lhtight_nod0",
+            ]
+        )
     acc.merge(
         EGAM2KernelCfg(
             flags,
