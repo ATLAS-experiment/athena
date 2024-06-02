@@ -305,7 +305,6 @@ def InputContainerListCfg(flags):
 def SensitiveDetectorListCfg(flags):
     result = ComponentAccumulator()
     tools = []
-
     tools += result.popToolsAndMerge(EnvelopeSensitiveDetectorListCfg(flags))
     tools += result.popToolsAndMerge(InDetSensitiveDetectorListCfg(flags))
     tools += result.popToolsAndMerge(ITkSensitiveDetectorListCfg(flags))
@@ -375,12 +374,12 @@ def SensitiveDetectorMasterToolCfg(flags, name="SensitiveDetectorMasterTool", **
     # NB Currently only supporting the standard ATLAS dector and the Tile Test Beam
     if flags.Beam.Type is BeamType.TestBeam:
         kwargs.setdefault("SensitiveDetectors", result.popToolsAndMerge(TileTestBeamSensitiveDetectorListCfg(flags)))
-    elif "ATLAS" in flags.GeoModel.AtlasVersion:
-        kwargs.setdefault("SensitiveDetectors", result.popToolsAndMerge(SensitiveDetectorListCfg(flags)))
     elif "tb_LArH6" in flags.GeoModel.AtlasVersion:
         pass
     elif "ctbh8" in flags.GeoModel.AtlasVersion:
         kwargs.setdefault("SensitiveDetectors", result.popToolsAndMerge(CombinedTestBeamSensitiveDetectorListCfg(flags)))
+    else:
+        kwargs.setdefault("SensitiveDetectors", result.popToolsAndMerge(SensitiveDetectorListCfg(flags)))
 
     result.setPrivateTools(CompFactory.SensitiveDetectorMasterTool(name, **kwargs))
     return result
