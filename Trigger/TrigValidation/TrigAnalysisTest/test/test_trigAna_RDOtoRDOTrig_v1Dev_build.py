@@ -23,6 +23,8 @@ ex.args = '--outputRDO_TRIGFile=RDO_TRIG.pool.root'
 ex.args += ' --preExec="all:{:s};"'.format(preExec)
 # TODO: ex.args += ' --preInclude "all:Campaigns.MC23c"'
 ex.args += ' --CA "all:True"'
+# temporary conditions override, until the MC23c RDO is replaced with a MC23e RDO
+ex.args += ' --conditionsTag "OFLCOND-MC23-SDR-RUN3-05"'
 
 test = Test.Test()
 test.art_type = 'build'
