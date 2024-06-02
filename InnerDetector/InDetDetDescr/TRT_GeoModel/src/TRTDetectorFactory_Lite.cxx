@@ -36,6 +36,8 @@
 #include "RDBAccessSvc/IRDBAccessSvc.h"
 #include "RDBAccessSvc/IRDBRecordset.h"
 #include "RDBAccessSvc/IRDBRecord.h"
+#include "TRT_ConditionsServices/ITRT_StrawStatusSummaryTool.h" //for Argon
+
 
 #include <vector>
 #include <sstream>

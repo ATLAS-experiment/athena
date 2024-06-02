@@ -13,15 +13,14 @@
 
 #include "TRTParameterInterface.h"
 
-#include "TRT_ReadoutGeometry/TRT_DetectorManager.h"
-#include "TRT_ConditionsServices/ITRT_StrawStatusSummaryTool.h" //for Argon
-
 #include "InDetGeoModelUtils/InDetDetectorFactoryBase.h"
 #include "GeoModelKernel/GeoDefinitions.h"
-#include <string>
+#include "TRT_ReadoutGeometry/TRT_DetectorManager.h" //covariant return type
+
 
 class GeoPhysVol;
 class GeoFullPhysVol;
+class ITRT_StrawStatusSummaryTool;
 
 namespace GeoModelIO {
   class ReadGeoModel;
@@ -68,17 +67,17 @@ private:
   void refreshGasBarrel(int strawStatusHT, GeoVPhysVol *shell) const;
   
   // private member data:
-  GeoModelIO::ReadGeoModel                      *m_sqliteReader;
+  GeoModelIO::ReadGeoModel                      *m_sqliteReader{};
   InDetDD::TRT_DetectorManager                  *m_detectorManager = nullptr; // ownership handed to calleer.
   std::unique_ptr<TRTParameterInterface>        m_data;
 
-  bool m_useOldActiveGasMixture;
-  bool m_DC2CompatibleBarrelCoordinates;
-  int m_overridedigversion;
-  bool m_alignable;
-  const ITRT_StrawStatusSummaryTool* m_sumTool; // added for Argon
-  bool m_strawsvcavailable;
-  bool m_useDynamicAlignFolders;
+  bool m_useOldActiveGasMixture{};
+  bool m_DC2CompatibleBarrelCoordinates{};
+  int m_overridedigversion{};
+  bool m_alignable{};
+  const ITRT_StrawStatusSummaryTool* m_sumTool{}; // added for Argon
+  bool m_strawsvcavailable{};
+  bool m_useDynamicAlignFolders{};
 
   GeoIntrusivePtr<const GeoMaterial> m_xenonGas{nullptr};
   GeoIntrusivePtr<const GeoMaterial> m_argonGas{nullptr};
