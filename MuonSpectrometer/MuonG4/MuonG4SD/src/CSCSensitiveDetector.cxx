@@ -204,7 +204,7 @@ G4bool CSCSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory* /*ROH
   /** insert hit in collection */
   m_myCSCHitColl->Emplace(CSCid, globalTime, energyDeposit,
                           HitStart, HitEnd, lundcode,
-                          trHelp.GetParticleLink(), kinEnergy);
+                          trHelp.GenerateParticleLink(), kinEnergy);
 
   return true;
 }

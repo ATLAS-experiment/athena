@@ -181,7 +181,7 @@ TEST_F( SctSensorSDtest, AddHit )
   SctSensorSD sd4("name4", "name4");
   G4HCofThisEvent hce;
   sd4.Initialize( &hce );
-  sd4.AddHit(lP1, lP2, 2.0, 1.0, trHelp.GetParticleLink(), 1, brlEcap, layerDisk, etaMod, phiMod, side);
+  sd4.AddHit(lP1, lP2, 2.0, 1.0, trHelp.GenerateParticleLink(), 1, brlEcap, layerDisk, etaMod, phiMod, side);
 
   HepGeom::Point3D<double> P1,P2;
   P1[SiHit::xEta] = 1;

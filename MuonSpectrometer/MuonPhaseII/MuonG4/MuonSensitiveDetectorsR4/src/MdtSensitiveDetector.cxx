@@ -125,7 +125,7 @@ G4bool MdtSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory* /*ROH
     TrackHelper trHelp{currentTrack};
 
     ATH_MSG_VERBOSE(" Dumping of hit "<<m_detMgr->idHelperSvc()->toString(HitID)
-                  <<", barcode: "<<trHelp.GetParticleLink().barcode()
+                  <<", barcode: "<<trHelp.GenerateParticleLink().barcode()
                   <<", "<<(*currentTrack)
                   <<", driftCircle: "<<Amg::toString(driftHit, 2)
                   <<", direction "<<Amg::toString(trackLocDir, 2)
@@ -141,7 +141,7 @@ G4bool MdtSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory* /*ROH
     hit->setPdgId(currentTrack->GetDefinition()->GetPDGEncoding());
     hit->setEnergyDeposit(aStep->GetTotalEnergyDeposit());
     hit->setKineticEnergy(currentTrack->GetKineticEnergy());
-    hit->setGenParticleLink(trHelp.GetParticleLink());
+    hit->setGenParticleLink(trHelp.GenerateParticleLink());
 
   return true;
 }

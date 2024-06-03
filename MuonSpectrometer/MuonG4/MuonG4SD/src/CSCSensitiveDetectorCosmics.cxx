@@ -244,7 +244,7 @@ G4bool CSCSensitiveDetectorCosmics::ProcessHits(G4Step* aStep,G4TouchableHistory
   /** insert hit in collection */
   m_myCSCHitColl->Emplace(CSCid, m_globalTime, energyDeposit,
                           HitStart, HitEnd, lundcode,
-                          trHelp.GetParticleLink(), kinEnergy);
+                          trHelp.GenerateParticleLink(), kinEnergy);
 
   // #ifndef CSCG4_DEBUG
   //

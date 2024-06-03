@@ -131,7 +131,7 @@ G4bool TgcSensitiveDetector::ProcessHits(G4Step* aStep, G4TouchableHistory*) {
     hit->setPdgId(currentTrack->GetDefinition()->GetPDGEncoding());
     hit->setEnergyDeposit(aStep->GetTotalEnergyDeposit());
     hit->setKineticEnergy(currentTrack->GetKineticEnergy());
-    hit->setGenParticleLink(trHelp.GetParticleLink());
+    hit->setGenParticleLink(trHelp.GenerateParticleLink());
     return true;
 }
 const MuonGMR4::TgcReadoutElement* TgcSensitiveDetector::getReadoutElement(const G4TouchableHistory* touchHist) const {

@@ -128,7 +128,7 @@ G4bool RpcSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
   hit->setPdgId(currentTrack->GetDefinition()->GetPDGEncoding());
   hit->setEnergyDeposit(aStep->GetTotalEnergyDeposit());
   hit->setKineticEnergy(currentTrack->GetKineticEnergy());
-  hit->setGenParticleLink(trHelp.GetParticleLink());
+  hit->setGenParticleLink(trHelp.GenerateParticleLink());
   return true;
 }
 

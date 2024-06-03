@@ -112,7 +112,7 @@ G4bool PixelSensorGmxSD::ProcessHits(G4Step* aStep, G4TouchableHistory* /*ROhist
                      lP2,
                      edep,
                      aStep->GetPreStepPoint()->GetGlobalTime(),//use the global time. i.e. the time from the beginning of the event
-                     trHelp.GetParticleLink(),
+                     trHelp.GenerateParticleLink(),
                      hitIdOfWafer);
         return true;
         
@@ -126,7 +126,7 @@ G4bool PixelSensorGmxSD::ProcessHits(G4Step* aStep, G4TouchableHistory* /*ROhist
                      lP2,
                      edep,
                      aStep->GetPreStepPoint()->GetGlobalTime(),
-                     trHelp.GetParticleLink(),
+                     trHelp.GenerateParticleLink(),
                      id);
   return true; 
 }

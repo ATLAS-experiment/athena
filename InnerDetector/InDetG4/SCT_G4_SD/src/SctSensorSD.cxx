@@ -105,7 +105,7 @@ G4bool SctSensorSD::ProcessHits(G4Step* aStep, G4TouchableHistory* /*ROhist*/)
                      lP2,
                      edep,
                      aStep->GetPreStepPoint()->GetGlobalTime(),//use the global time. i.e. the time from the beginning of the event
-                     trHelp.GetParticleLink(),
+                     trHelp.GenerateParticleLink(),
                      1,brlEcap,layerDisk,etaMod,phiMod,side);
   return true;
 }

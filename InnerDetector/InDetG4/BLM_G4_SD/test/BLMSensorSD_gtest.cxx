@@ -143,7 +143,7 @@ TEST_F( BLMSensorSDtest, AddHit )
   BLMSensorSD sd3("name3", "name3");
   G4HCofThisEvent hce;
   sd3.Initialize( &hce );
-  sd3.AddHit(lP1, lP2, 2.0, 1.0, trHelp.GetParticleLink(), 1, brlEcap, layerDisk, etaMod, phiMod, side);
+  sd3.AddHit(lP1, lP2, 2.0, 1.0, trHelp.GenerateParticleLink(), 1, brlEcap, layerDisk, etaMod, phiMod, side);
 
   HepGeom::Point3D<double> P1,P2;
   P1[SiHit::xEta] = 1;

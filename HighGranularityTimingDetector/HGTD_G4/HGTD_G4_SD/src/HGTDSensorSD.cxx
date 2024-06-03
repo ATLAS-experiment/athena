@@ -171,7 +171,7 @@ G4bool HGTDSensorSD::ProcessHits(G4Step* aStep, G4TouchableHistory* /*ROhist*/)
                        lP2,
                        edep,
                        aStep->GetPreStepPoint()->GetGlobalTime(),
-                       trHelp.GetParticleLink(),
+                       trHelp.GenerateParticleLink(),
                        // this is hgtd, endcap_barrel, layer_disk, eta_module, phi_module, side
                        2,endcap_side,layer,eta,phi,0);
 

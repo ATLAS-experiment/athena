@@ -108,7 +108,7 @@ G4bool HGTDSensorGmxSD::ProcessHits(G4Step* aStep, G4TouchableHistory* /*ROhist*
                            lP2,
                            edep,
                            aStep->GetPreStepPoint()->GetGlobalTime(),
-                           trHelp.GetParticleLink(),
+                           trHelp.GenerateParticleLink(),
                            hitIdOfWafer);
         
         return true;
@@ -125,7 +125,7 @@ G4bool HGTDSensorGmxSD::ProcessHits(G4Step* aStep, G4TouchableHistory* /*ROhist*
                        lP2,
                        edep,
                        aStep->GetPreStepPoint()->GetGlobalTime(),
-                       trHelp.GetParticleLink(),
+                       trHelp.GenerateParticleLink(),
                        id);
 
     return true;
