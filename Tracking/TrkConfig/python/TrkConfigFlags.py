@@ -33,7 +33,6 @@ class KalmanUpdatorType(FlagEnum):
     KalmanUpdator_xk = 'KalmanUpdator_xk'
     KalmanUpdatorSMatrix = 'KalmanUpdatorSMatrix'
     KalmanWeightUpdator = 'KalmanWeightUpdator'
-    KalmanUpdatorAmg = 'KalmanUpdatorAmg'
 
 
 class PixelClusterSplittingType(FlagEnum):

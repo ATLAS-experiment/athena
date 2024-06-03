@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -21,9 +21,9 @@ operations are implemented:
 @section TrkMeasurementUpdator_TrkMeasurementUpdatorOverview Class Overview
   The TrkMeasurementUpdator package contains the following classes:
 
-  - Trk::KalmanUpdator : measurement updator in gain matrix formalism (internally using SMatrix)
-  - Trk::KalmanUpdator_CLHEP : measurement updator in gain matrix formalism using CLHEP
-  - Trk::KalmanWeightUpdator : measurement updator using weighted means formalism
+  - Trk::KalmanUpdator        : measurement updator in gain matrix formalism (internally using dynamic Eigen Matrices)
+  - Trk::KalmanUpdatorSMatrix : measurement updator in gain matrix formalism (internally using SMatrix)
+  - Trk::KalmanWeightUpdator  : measurement updator using weighted means formalism
 
 @author Sebastian Fleischmann <http://consult.cern.ch/xwho/people/630599><br>
         Wolfgang Liebig <http://consult.cern.ch/xwho/people/485812>
