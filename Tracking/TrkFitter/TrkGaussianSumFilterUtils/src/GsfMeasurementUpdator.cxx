@@ -167,7 +167,6 @@ calculateFilterStep_1D(Trk::TrackParameters& TP,
                        double measPar,
                        double measCov,
                        int paramKey,
-                       int sign,
                        Trk::FitQualityOnSurface& fitQoS)
 {
   int mk = measurementCoord_1D(paramKey);
@@ -175,7 +174,7 @@ calculateFilterStep_1D(Trk::TrackParameters& TP,
   const AmgVector(5)& trkPar = TP.parameters();
   // use measuring coordinate (variable "mk") instead of reduction matrix
   const double r = measPar - trkPar(mk);
-  double R = (sign * measCov) + trkCov(mk, mk);
+  double R = measCov + trkCov(mk, mk);
   if (R == 0.0) {
     return false;
   }
@@ -206,7 +205,7 @@ calculateFilterStep_1D(Trk::TrackParameters& TP,
   KtimesH.col(mk) = K;
   const AmgMatrix(5, 5) M = s_unitMatrix - KtimesH;
   AmgSymMatrix(5) newCov =
-    trkCov.similarity(M) + sign * K * measCov * K.transpose();
+    trkCov.similarity(M) + K * measCov * K.transpose();
 
   if ((!thetaPhiWithinRange_5D(newPar, absoluteCheck))
         ? !correctThetaPhiRange_5D(newPar, newCov, absoluteCheck)
@@ -214,13 +213,9 @@ calculateFilterStep_1D(Trk::TrackParameters& TP,
     return false;
   }
 
-  const double predictedResidual = (sign < 0) ? r : (measPar - newPar(mk));
-  const AmgSymMatrix(5)& updatedCov =
-    (sign < 0) ? trkCov : // when removing, the input are updated par
-      newCov;             // when adding, chi2 is made from upd. par
+  const double predictedResidual = (measPar - newPar(mk));
+  const AmgSymMatrix(5)& updatedCov = newCov;
 
-  // for both signs (add/remove) the chi2 is now calculated like for updated
-  // states
   double chiSquared = measCov - updatedCov(mk, mk);
   if (chiSquared != 0.0) {
     // get chi2 = r.T() * R^-1 * r
@@ -237,7 +232,6 @@ calculateFilterStep_5D(Trk::TrackParameters& TP,
                        const AmgSymMatrix(5) & trkCov,
                        const AmgVector(5) & measPar,
                        const AmgSymMatrix(5) & measCov,
-                       int sign,
                        Trk::FitQualityOnSurface& fQ)
 {
   // get the parameter vector
@@ -246,15 +240,15 @@ calculateFilterStep_5D(Trk::TrackParameters& TP,
   const AmgVector(5) r = measPar - trkPar;
   // for full safety in Eigen see
   // http://eigen.tuxfamily.org/dox/classEigen_1_1FullPivLU.html
-  const AmgSymMatrix(5) R = (sign * measCov + trkCov).inverse();
+  const AmgSymMatrix(5) R = (measCov + trkCov).inverse();
   const AmgMatrix(5, 5) K = trkCov * R;
   const AmgMatrix(5, 5) M = s_unitMatrix - K;
   // --- compute local filtered state
   const AmgVector(5) newPar = trkPar + K * r;
   // --- compute filtered covariance matrix
   const AmgSymMatrix(5) newCov =
-    trkCov.similarity(M) + sign * measCov.similarity(K);
-  const double chiSquared = Amg::chi2(R, r, sign);
+    trkCov.similarity(M) + measCov.similarity(K);
+  const double chiSquared = Amg::chi2(R, r);
   // create the FQSonSurface
   fQ = Trk::FitQualityOnSurface(chiSquared, 5);
   TP.updateParameters(newPar, newCov);
@@ -268,7 +262,6 @@ calculateFilterStep_T(Trk::TrackParameters& TP,
                       const AmgVector(DIM) & measPar,
                       const AmgSymMatrix(DIM) & measCov,
                       int paramKey,
-                      int sign,
                       Trk::FitQualityOnSurface& fQ)
 {
 
@@ -290,17 +283,17 @@ calculateFilterStep_T(Trk::TrackParameters& TP,
   const AmgVector(DIM) r = measPar - projTrkPar;
   // combined covariance after reduction
   const AmgSymMatrix(DIM) R =
-    (sign * measCov + projection_T<DIM>(trkCov, paramKey)).inverse();
+    (measCov + projection_T<DIM>(trkCov, paramKey)).inverse();
   // Kalman gain matrix
   const AmgMatrix(5, DIM) K = trkCov * H.transpose() * R;
   const AmgMatrix(5, 5) M = s_unitMatrix - K * H;
   // --- compute local filtered state
   const AmgVector(5) newPar = trkPar + K * r;
   // --- compute filtered covariance matrix
-  // C = M * trkCov * M.T() +/- K * covRio * K.T()
+  // C = M * trkCov * M.T() + K * covRio * K.T()
   const AmgSymMatrix(5) newCov =
-    trkCov.similarity(M) + sign * K * measCov * K.transpose();
-  const double chiSquared = Amg::chi2(R, r, sign);
+    trkCov.similarity(M) + K * measCov * K.transpose();
+  const double chiSquared = Amg::chi2(R, r);
   // create the FQSonSurface
   fQ = Trk::FitQualityOnSurface(chiSquared, DIM);
   // In place update of parameters
@@ -319,8 +312,7 @@ bool
 filterStep(Trk::TrackParameters& trackParameters,
            Trk::FitQualityOnSurface& fitQos,
            const Trk::LocalParameters& measurement,
-           const Amg::MatrixX& measCovariance,
-           const int sign)
+           const Amg::MatrixX& measCovariance)
 {
 
   const AmgSymMatrix(5)* trkCov = trackParameters.covariance();
@@ -340,7 +332,6 @@ filterStep(Trk::TrackParameters& trackParameters,
                                     measurement(0),
                                     measCovariance(0, 0),
                                     measurement.parameterKey(),
-                                    sign,
                                     fitQos);
     }
     case 2: {
@@ -349,7 +340,6 @@ filterStep(Trk::TrackParameters& trackParameters,
                                       measurement.head<2>(),
                                       measCovariance.topLeftCorner<2, 2>(),
                                       measurement.parameterKey(),
-                                      sign,
                                       fitQos);
     }
     case 3: {
@@ -358,7 +348,6 @@ filterStep(Trk::TrackParameters& trackParameters,
                                       measurement.head<3>(0),
                                       measCovariance.topLeftCorner<3, 3>(),
                                       measurement.parameterKey(),
-                                      sign,
                                       fitQos);
     }
     case 4: {
@@ -367,7 +356,6 @@ filterStep(Trk::TrackParameters& trackParameters,
                                       measurement.head<4>(0),
                                       measCovariance.topLeftCorner<4, 4>(),
                                       measurement.parameterKey(),
-                                      sign,
                                       fitQos);
     }
     case 5: {
@@ -375,7 +363,6 @@ filterStep(Trk::TrackParameters& trackParameters,
                                     *trkCov,
                                     measurement.head<5>(),
                                     measCovariance.topLeftCorner<5, 5>(),
-                                    sign,
                                     fitQos);
     }
     default: {
@@ -394,15 +381,13 @@ makeChi2_1D(Trk::FitQualityOnSurface& updatedFitQoS,
             const AmgSymMatrix(5) & trkCov,
             double valRio,
             double rioCov,
-            int paramKey,
-            int sign)
+            int paramKey)
 {
 
   const int mk = measurementCoord_1D(paramKey);
-  // sign: -1 = updated, +1 = predicted parameters.
   double r = valRio - trkPar(mk);
   //  if (mk==3) catchPiPi;
-  double chiSquared = rioCov + sign * trkCov(mk, mk);
+  double chiSquared = rioCov + trkCov(mk, mk);
   if (chiSquared == 0.0) {
     return false;
   }
@@ -418,15 +403,15 @@ makeChi2_T(Trk::FitQualityOnSurface& updatedFitQoS,
            const AmgSymMatrix(5) & trkCov,
            const AmgVector(DIM) & measPar,
            const AmgSymMatrix(DIM) & covPar,
-           int paramKey,
-           int sign)
+           int paramKey)
 
-{ // sign: -1 = updated, +1 = predicted parameters.
+{
+
   const AmgMatrix(DIM, 5) H =
     s_reMatrices.expansionMatrix(paramKey).topLeftCorner<DIM, 5>();
   const AmgVector(DIM) r = measPar - H * trkPar;
   // get the projected matrix
-  AmgSymMatrix(DIM) R = sign * projection_T<DIM>(trkCov, paramKey);
+  AmgSymMatrix(DIM) R = projection_T<DIM>(trkCov, paramKey);
   R += covPar;
   // calcualte the chi2 value
   const double chiSquared = Amg::chi2(R.inverse(), r);
@@ -438,8 +423,7 @@ bool
 stateFitQuality(Trk::FitQualityOnSurface& updatedFitQoS,
                 const Trk::TrackParameters& trkPar,
                 const Trk::LocalParameters& position,
-                const Amg::MatrixX& covariance,
-                int predFull)
+                const Amg::MatrixX& covariance)
 {
   if (!trkPar.covariance()) {
     return false;
@@ -454,8 +438,7 @@ stateFitQuality(Trk::FitQualityOnSurface& updatedFitQoS,
                          (*trkPar.covariance()),
                          position[Trk::locX],
                          covariance(0, 0),
-                         1,
-                         predFull);
+                         1);
     }
     case 2: {
       return makeChi2_T<2>(updatedFitQoS,
@@ -463,8 +446,7 @@ stateFitQuality(Trk::FitQualityOnSurface& updatedFitQoS,
                            (*trkPar.covariance()),
                            position,
                            covariance.topLeftCorner<2, 2>(),
-                           3,
-                           predFull);
+                           3);
     }
     default: {
       return false;
@@ -755,8 +737,7 @@ rebuildState(Trk::MultiComponentState&& stateBeforeUpdate)
 Trk::MultiComponentState
 calculateFilterStep(Trk::MultiComponentState&& stateBeforeUpdate,
                     const Trk::MeasurementBase& measurement,
-                    Trk::FitQualityOnSurface& fitQoS,
-                    const int updatingSign)
+                    Trk::FitQualityOnSurface& fitQoS)
 {
   // state Assembler cache
   Trk::MultiComponentStateAssembler::Cache cache;
@@ -784,8 +765,7 @@ calculateFilterStep(Trk::MultiComponentState&& stateBeforeUpdate,
     bool updateSuccess = filterStep(*(component.params),
                                     componentFitQuality,
                                     measurement.localParameters(),
-                                    measurement.localCovariance(),
-                                    updatingSign);
+                                    measurement.localCovariance());
     if (!updateSuccess) {
       continue;
     }
@@ -833,8 +813,7 @@ calculateFilterStep(Trk::MultiComponentState&& stateBeforeUpdate,
 Trk::MultiComponentState
 Trk::GsfMeasurementUpdator::update(Trk::MultiComponentState&& stateBeforeUpdate,
                                    const Trk::MeasurementBase& measurement,
-                                   FitQualityOnSurface& fitQoS,
-                                   const int updatingSign)
+                                   FitQualityOnSurface& fitQoS)
 {
 
   // Check all components have associated error matrices
@@ -851,7 +830,7 @@ Trk::GsfMeasurementUpdator::update(Trk::MultiComponentState&& stateBeforeUpdate,
       rebuildState(std::move(stateBeforeUpdate));
     // Perform the measurement update with the modified state
     Trk::MultiComponentState updatedState = calculateFilterStep(
-      std::move(stateWithInsertedErrors), measurement, fitQoS, updatingSign);
+      std::move(stateWithInsertedErrors), measurement, fitQoS);
     if (updatedState.empty()) {
       return {};
     }
@@ -860,7 +839,7 @@ Trk::GsfMeasurementUpdator::update(Trk::MultiComponentState&& stateBeforeUpdate,
 
   // Perform the measurement update
   Trk::MultiComponentState updatedState = calculateFilterStep(
-    std::move(stateBeforeUpdate), measurement, fitQoS, updatingSign);
+    std::move(stateBeforeUpdate), measurement, fitQoS);
 
   if (updatedState.empty()) {
     return {};
@@ -879,8 +858,7 @@ Trk::GsfMeasurementUpdator::fitQuality(const MultiComponentState& updatedState,
     stateFitQuality(componentFitQuality,
                     *trackParameters,
                     measurement.localParameters(),
-                    measurement.localCovariance(),
-                    1);
+                    measurement.localCovariance());
 
     double componentChi2 = componentFitQuality.chiSquared();
     chi2 += component.weight * componentChi2;
