@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "TriggerMatchingTool/EgammaDRScoringTool.h"
@@ -7,6 +7,7 @@
 #include "xAODBase/ObjectType.h"
 #include "xAODCaloEvent/CaloCluster.h"
 #include "xAODEgamma/Egamma.h"
+#include "AthContainers/ConstAccessor.h"
 #include <sstream>
 
 // Anonymous namespace for helper functions
@@ -17,8 +18,10 @@ namespace {
     }
     float dr(const xAOD::IParticle &online, const xAOD::CaloCluster &offline, bool useDecor = true)
     {
-        double lhs_eta = useDecor ? online.auxdata<float>("cl_eta2") : online.eta();
-        double lhs_phi = useDecor ? online.auxdata<float>("cl_phi2") : online.phi();
+        static const SG::ConstAccessor<float> cl_eta2Acc ("cl_eta2");
+        static const SG::ConstAccessor<float> cl_phi2Acc ("cl_phi2");
+        double lhs_eta = useDecor ? cl_eta2Acc(online) : online.eta();
+        double lhs_phi = useDecor ? cl_phi2Acc(online) : online.phi();
         double rhs_eta = offline.etaBE(2);
         double rhs_phi = offline.phiBE(2);
 

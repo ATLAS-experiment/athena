@@ -838,15 +838,15 @@ class SampledParticle(object):
     """
     A particle object for use as a return value from the particle samplers.
     """
-    def __init__(self, pid=None, mom=ROOT.TLorentzVector(0,0,0,0), pos=ROOT.TLorentzVector(0,0,0,0)):
+    def __init__(self, pid=None, mom=None, pos=None):
         """
         Constructor/initializer: PID is the (int) PDG particle ID code
         of this particle, mom is its momentum 4-vector, and pos is
         the vertex 4-position (both as ROOT.TLorentzVector, in MeV).
         """
         self.pid = pid
-        self.mom = mom
-        self.pos = pos
+        self.mom = mom or ROOT.TLorentzVector(0,0,0,0)
+        self.pos = pos or ROOT.TLorentzVector(0,0,0,0)
         self.mass = None
 
 
@@ -856,9 +856,9 @@ class ParticleSampler(Sampler):
     """
 
     def __init__(self, pid=999,
-                 mom=NullMomSampler(),
+                 mom=NullMomSampler(),      # noqa: B008 (re-using same ConstSampler)
                  n=1,
-                 pos=PosSampler(0, 0, 0)):
+                 pos=PosSampler(0, 0, 0)):  # noqa: B008 (re-using same ConstSampler)
         self.pid = pid
         self.mom = mom
         self.n = n

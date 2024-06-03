@@ -119,6 +119,34 @@ public:
 
 
   /**
+   * @brief Fetch the variable for one element, as a const reference,
+   *        with a default.
+   * @param e The element for which to fetch the variable.
+   * @param deflt Default value.
+   *
+   * If this variable is not available, then return @c deflt instead.
+   */
+  template <class ELT>
+  ATH_REQUIRES( IsConstAuxElement<ELT> )
+  const_reference_type withDefault (const ELT& e, const T& deflt) const;
+
+
+  /**
+   * @brief Fetch the variable for one element, as a const reference.
+   * @param container The container from which to fetch the variable.
+   * @param index The index of the desired element.
+   * @param deflt Default value.
+   *
+   * This allows retrieving aux data by container / index.
+   * Looping over the index via this method will be faster then
+   * looping over the elements of the container.
+   * If this variable is not available, then return @c deflt instead.
+   */
+  const_reference_type
+  withDefault (const AuxVectorData& container, size_t index, const T& deflt) const;
+
+
+  /**
    * @brief Get a pointer to the start of the auxiliary data array.
    * @param container The container from which to fetch the variable.
    */

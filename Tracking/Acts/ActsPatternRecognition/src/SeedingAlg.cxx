@@ -71,7 +71,8 @@ namespace ActsTrk {
     auto timer = Monitored::Timer<std::chrono::milliseconds>( "TIME_execute" );
     auto time_seedCreation = Monitored::Timer<std::chrono::milliseconds>( "TIME_seedCreation" );
     auto time_parameterEstimation = Monitored::Timer<std::chrono::milliseconds>( "TIME_parameterEstimation" );
-    auto mon = Monitored::Group( m_monTool, timer, time_seedCreation, time_parameterEstimation );
+    auto mon_nSeeds = Monitored::Scalar<int>("nSeeds");
+    auto mon = Monitored::Group( m_monTool, timer, time_seedCreation, time_parameterEstimation, mon_nSeeds );
 
     // ================================================== // 
     // ===================== OUTPUTS ==================== //
@@ -220,6 +221,8 @@ namespace ActsTrk {
     }
     m_stat[kNSeedsWithoutParam] += (seedPtrs->size() - trackParams->size() );
     time_parameterEstimation.stop();
+
+    mon_nSeeds = seedPtrs->size();
 
     return StatusCode::SUCCESS;
   }

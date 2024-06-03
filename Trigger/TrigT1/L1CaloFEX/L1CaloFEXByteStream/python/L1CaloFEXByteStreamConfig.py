@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -258,7 +258,6 @@ def gFexInputByteStreamToolCfg(flags, name, *, writeBS=False):
   tool = CompFactory.gFexInputByteStreamTool(name)
   gfex_roi_moduleids = [0x3000]
   tool.ROBIDs = [int(SourceIdentifier(SubDetector.TDAQ_CALO_FEAT_EXTRACT_DAQ, moduleid)) for moduleid in gfex_roi_moduleids]  
-  print ("[L1CaloFEXByteStreamConfig::gFexInputByteStreamToolCfg]  tool.ROBIDs   ", tool.ROBIDs)
 
   if writeBS:
     # write BS == read xAOD

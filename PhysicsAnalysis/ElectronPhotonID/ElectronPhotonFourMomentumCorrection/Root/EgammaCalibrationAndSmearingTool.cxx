@@ -19,6 +19,7 @@
 #include "xAODTracking/TrackParticle.h"
 #include "xAODTracking/TrackingPrimitives.h"
 #include "xAODEventInfo/EventInfo.h"
+#include "AthContainers/ConstAccessor.h"
 #include "PATInterfaces/SystematicRegistry.h"
 #include "PathResolver/PathResolver.h"
 #include <algorithm>
@@ -688,6 +689,11 @@ CP::CorrectionCode EgammaCalibrationAndSmearingTool::applyCorrection(xAOD::Egamm
     setRandomSeed(m_set_seed_function(*this, input, event_info));
   }
 
+  static const SG::ConstAccessor<double> Es0Acc ("correctedcl_Es0");
+  static const SG::ConstAccessor<double> Es1Acc ("correctedcl_Es1");
+  static const SG::ConstAccessor<double> Es2Acc ("correctedcl_Es2");
+  static const SG::ConstAccessor<double> Es3Acc ("correctedcl_Es3");
+
   if (dataType == PATCore::ParticleDataType::Data and m_layer_recalibration_tool) {
     // if data apply energy recalibration
     ATH_MSG_DEBUG("applying energy recalibration before E0|E1|E2|E3 = "
@@ -700,12 +706,12 @@ CP::CorrectionCode EgammaCalibrationAndSmearingTool::applyCorrection(xAOD::Egamm
     ATH_MSG_DEBUG("eta|phi = " << input.eta() << "|" << input.phi());
     if (status_layer_recalibration == CP::CorrectionCode::Ok) {
       ATH_MSG_DEBUG("decoration E0|E1|E2|E3 = "
-                    << input.caloCluster()->auxdataConst<double>("correctedcl_Es0") << "|"
-                    << input.caloCluster()->auxdataConst<double>("correctedcl_Es1") << "|"
-                    << input.caloCluster()->auxdataConst<double>("correctedcl_Es2") << "|"
-                    << input.caloCluster()->auxdataConst<double>("correctedcl_Es3") << "|");
-      if (input.caloCluster()->auxdataConst<double>("correctedcl_Es2") == 0 and input.caloCluster()->auxdataConst<double>("correctedcl_Es1") == 0 and
-          input.caloCluster()->auxdataConst<double>("correctedcl_Es3") == 0 and input.caloCluster()->auxdataConst<double>("correctedcl_Es0") == 0 and
+                    << Es0Acc(*input.caloCluster()) << "|"
+                    << Es1Acc(*input.caloCluster()) << "|"
+                    << Es2Acc(*input.caloCluster()) << "|"
+                    << Es3Acc(*input.caloCluster()) << "|");
+      if (Es2Acc(*input.caloCluster()) == 0 and Es1Acc(*input.caloCluster()) == 0 and
+          Es3Acc(*input.caloCluster()) == 0 and Es0Acc(*input.caloCluster()) == 0 and
           (std::abs(input.eta()) < 1.37 or (std::abs(input.eta()) > 1.55 and std::abs(input.eta()) < 2.47)))
       {
         ATH_MSG_WARNING("all layer energies are zero");
@@ -748,16 +754,16 @@ CP::CorrectionCode EgammaCalibrationAndSmearingTool::applyCorrection(xAOD::Egamm
   if (dataType == PATCore::ParticleDataType::Data and m_gain_tool)
   {
     const auto cl_eta = input.caloCluster()->eta();
-    const auto es2 = input.caloCluster()->isAvailable<double>("correctedcl_Es2") ? input.caloCluster()->auxdataConst<double>("correctedcl_Es2") : input.caloCluster()->energyBE(2);
+    const auto es2 = Es2Acc.isAvailable(*input.caloCluster()) ? Es2Acc(*input.caloCluster()) : input.caloCluster()->energyBE(2);
     if ((std::abs(cl_eta) >= 1.52 || std::abs(cl_eta) <= 1.37) and std::abs(cl_eta) < 2.4)
     energy = m_gain_tool->CorrectionGainTool(cl_eta, energy / GeV, es2 / GeV, xAOD2ptype(input)); // cl_eta ok, TODO: check corrected E2
     ATH_MSG_DEBUG("energy after gain correction = " << boost::format("%.2f") % energy);
   }
 
-  const double eraw = ((input.caloCluster()->isAvailable<double>("correctedcl_Es0") ? input.caloCluster()->auxdataConst<double>("correctedcl_Es0") : input.caloCluster()->energyBE(0)) +
-                       (input.caloCluster()->isAvailable<double>("correctedcl_Es1") ? input.caloCluster()->auxdataConst<double>("correctedcl_Es1") : input.caloCluster()->energyBE(1)) +
-                       (input.caloCluster()->isAvailable<double>("correctedcl_Es2") ? input.caloCluster()->auxdataConst<double>("correctedcl_Es2") : input.caloCluster()->energyBE(2)) +
-                       (input.caloCluster()->isAvailable<double>("correctedcl_Es3") ? input.caloCluster()->auxdataConst<double>("correctedcl_Es3") : input.caloCluster()->energyBE(3)));
+  const double eraw = ((Es0Acc.isAvailable(*input.caloCluster()) ? Es0Acc(*input.caloCluster()) : input.caloCluster()->energyBE(0)) +
+                       (Es1Acc.isAvailable(*input.caloCluster()) ? Es1Acc(*input.caloCluster()) : input.caloCluster()->energyBE(1)) +
+                       (Es2Acc.isAvailable(*input.caloCluster()) ? Es2Acc(*input.caloCluster()) : input.caloCluster()->energyBE(2)) +
+                       (Es3Acc.isAvailable(*input.caloCluster()) ? Es3Acc(*input.caloCluster()) : input.caloCluster()->energyBE(3)));
 
 
   unsigned int runNumber_for_tool = 0;
@@ -791,7 +797,7 @@ CP::CorrectionCode EgammaCalibrationAndSmearingTool::applyCorrection(xAOD::Egamm
              input.caloCluster()->eta(),
              xAOD::get_eta_calo(*input.caloCluster(), input.author(), false),
              energy,
-             input.caloCluster()->isAvailable<double>("correctedcl_Es2") ? input.caloCluster()->auxdataConst<double>("correctedcl_Es2") : input.caloCluster()->energyBE(2),
+             Es2Acc.isAvailable(*input.caloCluster()) ? Es2Acc(*input.caloCluster()) : input.caloCluster()->energyBE(2),
              eraw,
              oldtool_scale_flag_this_event(input, event_info),
              oldtool_resolution_flag_this_event(input, event_info),

@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #ifndef FPGATrackSimConstGenAlgo_h
 #define FPGATrackSimConstGenAlgo_h
@@ -108,7 +108,7 @@ class FPGATrackSimConstGenAlgo : public AthAlgorithm
 	Gaudi::Property<std::string> m_skipFile{this, "skip_sectors", "File with list of sectors to skip"};
 	Gaudi::Property<bool> m_Monitor{this,"Monitor",false,"flag to enable the monitor"};
 	Gaudi::Property<int> m_region{this, "region",0,"region to run"};
-	Gaudi::Property<bool> m_CheckGood2ndStage{this,"CheckGood2ndStage","Check goodness of 2nd stage fit constants?"};    
+	Gaudi::Property<bool> m_CheckGood2ndStage{this,"CheckGood2ndStage",true,"Check goodness of 2nd stage fit constants?"};    
 	Gaudi::Property<bool> m_useHitScaleFactor{this,"UseHitScaleFactor",false,"Scale factor for hits"};
 	Gaudi::Property<bool> m_isSecondStage{this,"IsSecondStage",false,"If false, we're doing a 1st stage fit, otherwise 2nd stage"};
 	Gaudi::Property<bool> m_dumpMissingHitsConstants{this, "missHitsConsts", false, "if this is true we dump constants assuming a missing hit in each layer, too"};

@@ -26,7 +26,6 @@
 #include "TrkGeometry/HomogeneousLayerMaterial.h"
 #include "TrkGeometry/BinnedLayerMaterial.h"
 #include "TrkGeometry/GlueVolumesDescriptor.h"
-#include "TrkGeometry/TrackingVolume.h"
 // Amg
 #include "GeoPrimitives/GeoPrimitivesHelpers.h"
 
@@ -415,8 +414,8 @@ TrackingVolume* TrackingVolumeHelper::glueTrackingVolumeArrays(
 { 
     TrackingVolume* enclosingVolume = nullptr;
 
-    auto cyl1 = dynamic_cast<const CylinderVolumeBounds*> (&(firstVol.volumeBounds()));
-    auto cyl2 = dynamic_cast<const CylinderVolumeBounds*> (&(secondVol.volumeBounds()));
+    const auto *cyl1 = dynamic_cast<const CylinderVolumeBounds*> (&(firstVol.volumeBounds()));
+    const auto *cyl2 = dynamic_cast<const CylinderVolumeBounds*> (&(secondVol.volumeBounds()));
 
     if (!cyl1 || !cyl2) {
         ATH_MSG_ERROR( "TrackingVolumeHelper::glueTrackingVolumeArrays: input volumes not cylinders, return 0" );
@@ -560,8 +559,8 @@ std::unique_ptr<TrackingVolume> TrackingVolumeHelper::glueTrackingVolumeArrays(s
                                                                                const std::string& name) const { 
     std::unique_ptr<TrackingVolume> enclosingVolume{};
 
-    auto cyl1 = dynamic_cast<const CylinderVolumeBounds*>(&(firstVol->volumeBounds()));
-    auto cyl2 = dynamic_cast<const CylinderVolumeBounds*>(&(secondVol->volumeBounds()));
+    const auto *cyl1 = dynamic_cast<const CylinderVolumeBounds*>(&(firstVol->volumeBounds()));
+    const auto *cyl2 = dynamic_cast<const CylinderVolumeBounds*>(&(secondVol->volumeBounds()));
 
     if (!cyl1 || !cyl2) {
         ATH_MSG_ERROR( "TrackingVolumeHelper::glueTrackingVolumeArrays: input volumes not cylinders, return 0" );

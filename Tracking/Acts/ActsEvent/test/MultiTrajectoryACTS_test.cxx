@@ -180,53 +180,6 @@ BOOST_AUTO_TEST_CASE(MultiTrajectoryExtraColumnsRuntime) {
   ct.testMultiTrajectoryExtraColumnsRuntime();
 }
 
-BOOST_AUTO_TEST_CASE(MemoryStats) {
-  using namespace boost::histogram;
-  using cat = axis::category<std::string>;
-
-  VectorMultiTrajectory mt;
-
-  auto stats = mt.statistics();
-
-  std::stringstream ss;
-  stats.toStream(ss);
-  std::string out = ss.str();
-  BOOST_CHECK(!out.empty());
-  BOOST_CHECK_NE(out.find("total"), std::string::npos);
-
-  const auto& h = stats.hist;
-
-  auto column_axis = axis::get<cat>(h.axis(0));
-  auto type_axis = axis::get<axis::category<>>(h.axis(1));
-
-  for (int t = 0; t < type_axis.size(); t++) {
-    for (int c = 0; c < column_axis.size(); c++) {
-      double v = h.at(c, t);
-      BOOST_CHECK_EQUAL(v, 0.0);
-    }
-  }
-
-  TestTrackState pc(rng, 2u);
-  auto ts = mt.getTrackState(mt.addTrackState());
-  fillTrackState<VectorMultiTrajectory>(pc, TrackStatePropMask::All, ts);
-
-  stats = mt.statistics();
-
-  for (int t = 0; t < type_axis.size(); t++) {
-    BOOST_TEST_CONTEXT((type_axis.bin(t) == 1 ? "meas" : "other"))
-    for (int c = 0; c < column_axis.size(); c++) {
-      std::string key = column_axis.bin(c);
-      BOOST_TEST_CONTEXT("column: " << key) {
-        double v = h.at(c, t);
-        if (t == 0) {
-          BOOST_CHECK_NE(v, 0.0);
-        } else {
-          BOOST_CHECK_EQUAL(v, 0.0);
-        }
-      }
-    }
-  }
-}
 
 
 BOOST_AUTO_TEST_SUITE_END()

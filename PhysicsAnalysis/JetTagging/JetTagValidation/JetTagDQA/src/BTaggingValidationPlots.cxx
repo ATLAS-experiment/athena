@@ -1,14 +1,23 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BTaggingValidationPlots.h"
 #include "ParticleJetTools/JetFlavourInfo.h"
 #include "xAODBTagging/BTaggingUtilities.h" 
-using CLHEP::GeV;
+#include "CLHEP/Units/SystemOfUnits.h"
+#include "InDetTrackSystematicsTools/InDetTrackTruthOriginDefs.h"//TrkOrigin
+#include "xAODTruth/TruthParticle.h"
+#include "xAODJet/Jet.h"
+#include "xAODTracking/Vertex.h"
+#include "xAODTruth/TruthVertex.h"
+#include "xAODMuon/Muon.h"
+#include "xAODMuon/MuonContainer.h"
+
 #include <stdexcept>
 #include <utility>
 
+using CLHEP::GeV;
 namespace JetTagDQA{
   BTaggingValidationPlots::BTaggingValidationPlots(PlotBase* pParent, 
                                                    const std::string& sDir, 
@@ -852,7 +861,7 @@ namespace JetTagDQA{
 
 
   // a fill method for track related vars
-  void BTaggingValidationPlots::fillTrackVariables(const xAOD::Jet* jet, const xAOD::BTagging* btag, const xAOD::Vertex *myVertex, std::map<const xAOD::TrackParticle*, int> track_truth_associations, const bool& has_muon, const int& truth_label, int& num_HF_tracks_in_jet, const xAOD::EventInfo* event){
+  void BTaggingValidationPlots::fillTrackVariables(const xAOD::Jet* jet, const xAOD::BTagging* btag, const xAOD::Vertex *myVertex, const std::map<const xAOD::TrackParticle*, int> & track_truth_associations, const bool& has_muon, const int& truth_label, int& num_HF_tracks_in_jet, const xAOD::EventInfo* event){
 
     // get the jet TLorentzVector
     TLorentzVector jet_tlv;
@@ -1080,7 +1089,7 @@ namespace JetTagDQA{
 
 
   // a fill method for SV related vars
-  void BTaggingValidationPlots::fillSVVariables(const xAOD::BTagging* btag, std::map<const xAOD::TrackParticle*, int> track_truth_associations, const bool& has_muon, const int& truth_label, const int& num_HF_tracks_in_jet, bool& contains_SV, const xAOD::EventInfo* event){
+  void BTaggingValidationPlots::fillSVVariables(const xAOD::BTagging* btag, const std::map<const xAOD::TrackParticle*, int> & track_truth_associations, const bool& has_muon, const int& truth_label, const int& num_HF_tracks_in_jet, bool& contains_SV, const xAOD::EventInfo* event){
     // SV1
 
     // SV1 mass of the SV

@@ -69,7 +69,7 @@ ScintillatorHit::ScintillatorHit( const int volNumber,
   m_globalPostStepY(globalPostStepY),
   m_globalPostStepZ(globalPostStepZ),
   m_globalTime(globalTime),
-  m_partLink(track, 0, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE) // FIXME barcode-based syntax
+  m_partLink(track, 0, HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_BARCODE) // FIXME barcode-based syntax
 {}
 	
 int ScintillatorHit::truthBarcode() const {

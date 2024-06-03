@@ -14,7 +14,6 @@ namespace MuonGMR4 {
 class RpcReadoutElement : public MuonReadoutElement {
 
    public:
-    using StripLayerPtr = GeoModel::TransientConstSharedPtr<StripLayer>;
     /// Set of parameters to describe a RPC chamber
     struct parameterBook {
         /// RPC panel dimensions
@@ -30,7 +29,7 @@ class RpcReadoutElement : public MuonReadoutElement {
         unsigned int nGasGaps{0};
         /// Each gas gap is usually subdivided into 2 phi panels
         /// which is actually the sector granularity of the Rpc trigger
-        int nGapsInPhi{0};
+        int nPanelsInPhi{0};
         std::vector<StripLayerPtr> layers{};
 
         StripDesignPtr phiDesign{nullptr};

@@ -29,7 +29,6 @@ ex.input = 'ttbar'
 ex.threads = 4
 ex.concurrent_events = 4
 ex.flags = ['Trigger.triggerMenuSetup="PhysicsP1_pp_run3_v1"']
-ex.args = '--CA'
 
 test = Test.Test()
 test.art_type = 'grid'

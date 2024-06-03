@@ -1,3 +1,6 @@
+/*
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  */
 #include "TruthGuidedProtoTrackCreator.h"
 #include "TrkEventPrimitives/ParticleHypothesis.h"
 #include "Acts/Surfaces/PerigeeSurface.hpp"
@@ -81,7 +84,7 @@ StatusCode ActsTrk::TruthGuidedProtoTrackCreator::findProtoTracks(const EventCon
             if(identToHepMCMap.find(id) != identToHepMCMap.end())
             {
                 auto truthParticle = identToHepMCMap.at(id);
-                trackCollections[truthParticle].emplace_back(ATLASUncalibSourceLink(cluster, pixelContainer, ctx));
+                trackCollections[truthParticle].emplace_back(makeATLASUncalibSourceLink(&pixelContainer, cluster, ctx));
             }
         }
     }
@@ -98,7 +101,7 @@ StatusCode ActsTrk::TruthGuidedProtoTrackCreator::findProtoTracks(const EventCon
             if(identToHepMCMap.find(id) != identToHepMCMap.end())
             {
                 auto truthParticle = identToHepMCMap.at(id);
-                trackCollections[truthParticle].emplace_back(ATLASUncalibSourceLink(cluster, stripContainer, ctx));
+                trackCollections[truthParticle].emplace_back(makeATLASUncalibSourceLink(&stripContainer, cluster, ctx));
             }
         }
     }

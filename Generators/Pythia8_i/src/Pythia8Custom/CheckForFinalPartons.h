@@ -16,7 +16,7 @@ class CheckForFinalPartons: public AthAlgTool, virtual public IPythia8Custom{
   
   CheckForFinalPartons(const std::string &type, const std::string &name, const IInterface *parent);
   
-  StatusCode ModifyPythiaEvent(Pythia8::Pythia &pythia) const;
+  StatusCode ModifyPythiaEvent(Pythia8::Pythia &pythia) const override;
   
   private:
   

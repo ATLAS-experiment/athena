@@ -3,9 +3,9 @@
 atlas_subdir ( EFTrackingEmulation )
 
 atlas_add_library (EFTrackingEmulationLib
-  EFTrackingEmulation/*.h src/*.cxx src/FitFunctions/* 
+  EFTrackingEmulation/*.h src/*.cxx 
   NO_PUBLIC_HEADERS
-  LINK_LIBRARIES AnaAlgorithmLib xAODTruth xAODTracking TrkEventTPCnv TrkEventPrimitives)
+  LINK_LIBRARIES AnaAlgorithmLib xAODTruth xAODTracking TrkEventPrimitives)
 
 
 atlas_add_component (EFTrackingEmulation

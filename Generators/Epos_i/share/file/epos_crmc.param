@@ -38,4 +38,7 @@ fname inihy  tabs/epos.inihy
 !print * 4
 !printcheck screen
 
+! Take into account the non-zero width of resonances in decays
+set ibreit  1
+
 EndEposInput

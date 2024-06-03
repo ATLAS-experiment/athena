@@ -11,6 +11,7 @@
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "xAODTracking/VertexFwd.h"
 #include "xAODTracking/TrackParticle.h" //Full include needed for FourMom_t
+#include <span>
 
 /**
  *  @class V0Tools
@@ -58,7 +59,6 @@ namespace Trk
    return IID_V0Tools;
   }
 
- 
 /**
  *  Methods, returning the invariant mass, error on the invariant mass and 
  *  Chi2 probability of the invariant mass of an xAOD::Vertex
@@ -68,11 +68,11 @@ namespace Trk
  *  are returned excluding that track
  */
   double invariantMass(const xAOD::Vertex * vxCandidate, double posTrackMass, double negTrackMass) const;
-  double invariantMass(const xAOD::Vertex * vxCandidate, const std::vector<double> &masses) const;
+  double invariantMass(const xAOD::Vertex * vxCandidate, std::span<const double> masses) const;
   double invariantMassError(const xAOD::Vertex * vxCandidate, double posTrackMass, double negTrackMass) const;
-  double invariantMassError(const xAOD::Vertex * vxCandidate, const std::vector<double> &masses) const;
+  double invariantMassError(const xAOD::Vertex * vxCandidate, std::span<const double> masses) const;
   double invariantMassProbability(const xAOD::Vertex * vxCandidate, double V0Mass, double posTrackMass, double negTrackMass) const;   
-  double invariantMassProbability(const xAOD::Vertex * vxCandidate, double V0Mass, const std::vector<double> &masses) const;   
+  double invariantMassProbability(const xAOD::Vertex * vxCandidate, double V0Mass, std::span<const double> masses) const;   
   double massProbability(double V0Mass, double mass, double massErr) const;
 
 /**
@@ -224,7 +224,7 @@ namespace Trk
 /**
  * proper time wrt an xAOD::Vertex vertex assuming track masses
  */
-  double tau(const xAOD::Vertex * vxCandidate, const xAOD::Vertex* vertex, const std::vector<double> &masses) const;
+  double tau(const xAOD::Vertex * vxCandidate, const xAOD::Vertex* vertex, std::span<const double> masses) const;
 
 /**
  * proper time wrt an xAOD::Vertex vertex assuming posTrackMass and negTrackMass (imposing massV0)
@@ -236,7 +236,7 @@ namespace Trk
  * proper time wrt an xAOD::Vertex vertex assuming track masses (imposing massV0)
  * making a correction to the proper time consistent with the imposed V0 mass
  */
-  double tau(const xAOD::Vertex * vxCandidate, const xAOD::Vertex* vertex, const std::vector<double> &masses, double massV0) const;
+  double tau(const xAOD::Vertex * vxCandidate, const xAOD::Vertex* vertex, std::span<const double> masses, double massV0) const;
 
 /**
  * proper time wrt an xAOD::Vertex vertex assuming massV0
@@ -253,7 +253,7 @@ namespace Trk
 /**
  * proper time error wrt an xAOD::Vertex vertex assuming track masses
  */
-  double tauError(const xAOD::Vertex * vxCandidate, const xAOD::Vertex* vertex, const std::vector<double> &masses) const;
+  double tauError(const xAOD::Vertex * vxCandidate, const xAOD::Vertex* vertex, std::span<const double> masses) const;
 
 /**
  * proper time error wrt an xAOD::Vertex vertex assuming posTrackMass and negTrackMass (imposing massV0) 
@@ -265,7 +265,7 @@ namespace Trk
  * proper time error wrt an xAOD::Vertex vertex assuming track masses (imposing massV0)
  * independent of massV0, variable included to match the corresponding proper time method
  */
-  double tauError(const xAOD::Vertex * vxCandidate, const xAOD::Vertex* vertex, const std::vector<double> &masses, double massV0) const;
+  double tauError(const xAOD::Vertex * vxCandidate, const xAOD::Vertex* vertex, std::span<const double> masses, double massV0) const;
 
 /**
  * proper time error wrt an xAOD::Vertex vertex assuming massV0
@@ -276,13 +276,13 @@ namespace Trk
 /**
  * mass-proper time covariance
  */
-  Amg::MatrixX tauMassCovariance(const xAOD::Vertex * vxCandidate, const xAOD::Vertex* vertex, const std::vector<double> &masses) const;
-  double massTauCov(const xAOD::Vertex * vxCandidate, const xAOD::Vertex* vertex, const std::vector<double> &masses) const;
+  Amg::MatrixX tauMassCovariance(const xAOD::Vertex * vxCandidate, const xAOD::Vertex* vertex, std::span<const double> masses) const;
+  double massTauCov(const xAOD::Vertex * vxCandidate, const xAOD::Vertex* vertex, std::span<const double> masses) const;
 
 /**
  * proper time in 3D wrt an xAOD::Vertex vertex assuming track masses
  */
-  double tau3D(const xAOD::Vertex * vxCandidate, const xAOD::Vertex* vertex, const std::vector<double> &masses) const;
+  double tau3D(const xAOD::Vertex * vxCandidate, const xAOD::Vertex* vertex, std::span<const double> masses) const;
 
 /**
  * proper time in 3D wrt an xAOD::Vertex vertex assuming massV0
@@ -293,7 +293,7 @@ namespace Trk
 /**
  * proper time error in 3D wrt an xAOD::Vertex vertex assuming track masses
  */
-  double tau3DError(const xAOD::Vertex * vxCandidate, const xAOD::Vertex* vertex, const std::vector<double> &masses) const;
+  double tau3DError(const xAOD::Vertex * vxCandidate, const xAOD::Vertex* vertex, std::span<const double> masses) const;
 
 /**
  * proper time error in 3D wrt an xAOD::Vertex vertex assuming massV0
@@ -360,12 +360,12 @@ namespace Trk
  *  if a negative value for a track is provided, the invariantMass and invariantMassError
  *  are returned excluding that track
  */
-  double invariantMassBeforeFitIP(const xAOD::Vertex * vxCandidate, const std::vector<double> &masses) const;
-  double invariantMassBeforeFit(const xAOD::Vertex * vxCandidate, const std::vector<double> &masses, const EventContext&, const Trk::IExtrapolator*) const;
-  double invariantMassBeforeFit(const xAOD::Vertex * vxCandidate, const std::vector<double> &masses, const Amg::Vector3D& vertex, const EventContext&, const Trk::IExtrapolator*) const;
-  double invariantMassErrorBeforeFitIP(const xAOD::Vertex * vxCandidate, const std::vector<double> &masses) const;
-  double invariantMassErrorBeforeFit(const xAOD::Vertex * vxCandidate, const std::vector<double> &masses, const EventContext& ctx, const Trk::IExtrapolator*) const;
-  double invariantMassErrorBeforeFit(const xAOD::Vertex * vxCandidate, const std::vector<double> &masses, const Amg::Vector3D& vertex, const EventContext& ctx, const Trk::IExtrapolator*) const;
+  double invariantMassBeforeFitIP(const xAOD::Vertex * vxCandidate, std::span<const double> masses) const;
+  double invariantMassBeforeFit(const xAOD::Vertex * vxCandidate, std::span<const double> masses, const EventContext&, const Trk::IExtrapolator*) const;
+  double invariantMassBeforeFit(const xAOD::Vertex * vxCandidate, std::span<const double> masses, const Amg::Vector3D& vertex, const EventContext&, const Trk::IExtrapolator*) const;
+  double invariantMassErrorBeforeFitIP(const xAOD::Vertex * vxCandidate, std::span<const double> masses) const;
+  double invariantMassErrorBeforeFit(const xAOD::Vertex * vxCandidate, std::span<const double> masses, const EventContext& ctx, const Trk::IExtrapolator*) const;
+  double invariantMassErrorBeforeFit(const xAOD::Vertex * vxCandidate, std::span<const double> masses, const Amg::Vector3D& vertex, const EventContext& ctx, const Trk::IExtrapolator*) const;
 
   static Amg::MatrixX convertCovMatrix(const xAOD::Vertex * vxCandidate) ;
 
@@ -374,11 +374,11 @@ namespace Trk
   private:
 
   double massErrorV0Fitter(const xAOD::Vertex * vxCandidate, double posTrackMass, double negTrackMass) const;
-  double massErrorV0Fitter(const xAOD::Vertex * vxCandidate, const std::vector<double> &masses) const;
+  double massErrorV0Fitter(const xAOD::Vertex * vxCandidate, std::span<const double> masses) const;
   double massErrorVKalVrt(const xAOD::Vertex * vxCandidate, double posTrackMass, double negTrackMass) const;
-  double massErrorVKalVrt(const xAOD::Vertex * vxCandidate, const std::vector<double> &masses) const;
+  double massErrorVKalVrt(const xAOD::Vertex * vxCandidate, std::span<const double> masses) const;
   double massErrorVxCandidate(const xAOD::Vertex * vxCandidate, double posTrackMass, double negTrackMass) const;
-  double massErrorVxCandidate(const xAOD::Vertex * vxCandidate, const std::vector<double> &masses) const;
+  double massErrorVxCandidate(const xAOD::Vertex * vxCandidate, std::span<const double> masses) const;
 
  };//end of class definitions
 

@@ -1,19 +1,21 @@
 [OVAL] Creating the test driver.
 [OVAL] Creating a file catalog
+APRFileCatalog      DEBUG addCatalog("xmlcatalog_file:FCO.catatlog.xml")
 [OVAL] Loading the shared libraries.
 Loading library test_TestDictionaryDict
 [OVAL] Writing objects in the database.
 Creating the persistency service
 Writing 100 objects
+APRFileCatalog      DEBUG Registering PFN=FCO.pool1.root of type=ROOT_All GUID=3EBCEFD2-D1DF-644C-A165-F4163CF269D6
 Committing the transaction.
-XMLCatalog           INFO File 'PoolFileCatalog.xml' does not exist. New file created.
+XMLCatalog           INFO File 'FCO.catatlog.xml' does not exist. New file created.
 [OVAL] ...done
 [OVAL] Adding LFNs in the file catalog.
 [OVAL] ...done
 [OVAL] Reading the objects back from the database.
 Creating the persistency service
-PFN1 = pool1.root
-FID1 = 58900B05-DC52-E148-B232-F6287C42C939
+PFN1 = FCO.pool1.root
+FID1 = 3EBCEFD2-D1DF-644C-A165-F4163CF269D6
 Committing the transaction.
 [OVAL] ...done
 [OVAL] Number of floating tokens : 0

@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAODTRIGGER_VERSIONS_BYTESTREAMAUXCONTAINER_V1_H
 #define XAODTRIGGER_VERSIONS_BYTESTREAMAUXCONTAINER_V1_H
@@ -125,11 +125,16 @@ namespace xAOD {
 
       /// @}
 
-   protected:
+      /// Declare how to wrap variables for this sort of base.
+      template <class T, class ALLOC = std::allocator<T> >
+      using AuxVariable_t = std::vector<T, ALLOC>;
+
       /// Get the auxiliary ID for one of the persistent variables
       template< typename T >
       auxid_t getAuxID( const std::string& name,
-                        std::vector< T >& /*vec*/ );
+                        std::vector< T >& /*vec*/,
+                        SG::AuxVarFlags flags =
+                        SG::AuxVarFlags::None );
       /// Register one of the user defined persistent variables internally
       template< typename T >
       void regAuxVar( auxid_t auxid, const std::string& name,

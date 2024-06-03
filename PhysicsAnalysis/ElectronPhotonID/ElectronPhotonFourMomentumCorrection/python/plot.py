@@ -298,7 +298,7 @@ def plot_all_syst_eta_slice(
     esmodel="es2012c",
     decorrelation="FULL_v1",
     ptype="unconverted",
-    pts=np.logspace(np.log10(5e3), 6, 100),
+    pts=np.logspace(np.log10(5e3), 6, 100),  # noqa: B008 (used as constant)
     basedir="plot",
     only_material=False,
     beautify_sysnames=False,
@@ -1076,7 +1076,7 @@ def plot_all_syst_eta_pt(
 
 @timed
 def plot_all_scales(
-    esmodels, basedir, labels=None, etas=np.arange(-4.5, 4.5, 0.01), add_patch=False, debug=False
+    esmodels, basedir, labels=None, etas=np.arange(-4.5, 4.5, 0.01), add_patch=False, debug=False  # noqa: B008 (range used as constant)
 ):
     log.info("comparing scale factors %s", esmodels)
     log.warning("<mu> fixed")
@@ -1199,7 +1199,7 @@ def plot_all_scales(
     plt.close(f)
 
 
-def plot_all_cterms(esmodels, basedir, labels=None, etas=np.arange(-4.5, 4.5, 0.01)):
+def plot_all_cterms(esmodels, basedir, labels=None, etas=np.arange(-4.5, 4.5, 0.01)):  # noqa: B008 (used as constant)
     labels = labels or esmodels
     cterms_all_models = {}
     for esmodel, label in zip(esmodels, labels):

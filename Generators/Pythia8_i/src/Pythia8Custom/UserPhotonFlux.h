@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef MAIN70EXAMPLE__H
-#define MAIN70EXAMPLE__H
+#ifndef PYTHIA8_I_USERPHOTONFLUX_H
+#define PYTHIA8_I_USERPHOTONFLUX_H
 
 #include "Pythia8_i/IPythia8Custom.h"
 #include "AthenaBaseComps/AthAlgTool.h"
@@ -87,20 +87,20 @@ class UserPhotonFlux: public AthAlgTool, virtual public IPythia8Custom {
   virtual ~UserPhotonFlux(){};
   
   /** AlgTool initialize method */
-  StatusCode initialize();
+  StatusCode initialize()  override;
   /** AlgTool finalize method */
-  StatusCode finalize();
+  StatusCode finalize() override;
   
   /** Update the pythia event 
   Probably not used for this application
   */
-  StatusCode ModifyPythiaEvent(Pythia8::Pythia& pythia) const;
+  StatusCode ModifyPythiaEvent(Pythia8::Pythia& pythia) const  override;
 
   /** Return how much the cross section is modified.
    *  Probably not used for this application */
-  virtual double CrossSectionScaleFactor() const;
+  virtual double CrossSectionScaleFactor() const  override;
 
-  StatusCode InitializePythiaInfo(Pythia8::Pythia& ) const;
+  StatusCode InitializePythiaInfo(Pythia8::Pythia& ) const override;
 
  private:
 

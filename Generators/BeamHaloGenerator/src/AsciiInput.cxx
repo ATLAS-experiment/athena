@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BeamHaloGenerator/AsciiInput.h"
@@ -64,7 +64,7 @@ std::vector<std::string> AsciiInput::readRow() {
 
 //-------------------------------------------------------------------------
 
-std::vector<std::string> AsciiInput::strToStrVec(std::string inputString) {
+std::vector<std::string> AsciiInput::strToStrVec(const std::string& inputString) {
   std::vector<std::string> strVec;
   std::string tmpString;
   size_t stringLength, i;
@@ -110,7 +110,7 @@ std::vector<std::string> AsciiInput::strToStrVec(std::string inputString) {
 
 //-------------------------------------------------------------------------
 
-long AsciiInput::strToLong(std::string inputString) {
+long AsciiInput::strToLong(const std::string& inputString) {
   long longValue;
   std::istringstream inStr(inputString);
   inStr >> longValue;
@@ -119,7 +119,7 @@ long AsciiInput::strToLong(std::string inputString) {
 
 //-------------------------------------------------------------------------
 
-double AsciiInput::strToDouble(std::string inputString) {
+double AsciiInput::strToDouble(const std::string& inputString) {
   double doubleValue;
   std::istringstream inStr(inputString);
   inStr >> doubleValue;

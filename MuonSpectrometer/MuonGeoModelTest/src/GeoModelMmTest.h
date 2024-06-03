@@ -59,6 +59,9 @@ class GeoModelMmTest : public AthHistogramAlgorithm {
     MuonVal::ScalarBranch<short>& m_stationPhi{m_tree.newScalar<short>("stationPhi")};
     MuonVal::ScalarBranch<int>& m_stationName{m_tree.newScalar<int>("stationName")};
     MuonVal::ScalarBranch<short>& m_multilayer{m_tree.newScalar<short>("multilayer")};
+
+    MuonVal::ScalarBranch<float>& m_stStripPitch{m_tree.newScalar<float>("stripPitch")};
+
     
     MuonVal::VectorBranch<bool>& m_isStereo{m_tree.newVector<bool>("isStereo")};
     MuonVal::VectorBranch<short>& m_gasGap{m_tree.newVector<short>("gasGap")};
@@ -85,6 +88,10 @@ class GeoModelMmTest : public AthHistogramAlgorithm {
     /// Rotation matrix of the respective strip layers
     MuonVal::CoordSystemsBranch m_stripRot{m_tree, "stripRot"};    
     MuonVal::VectorBranch<uint8_t>& m_stripRotGasGap{m_tree.newVector<uint8_t>("stripRotGasGap")};
+    MuonVal::TwoVectorBranch m_firstStripPos{m_tree, "firstStripPos"};
+    MuonVal::VectorBranch<int>& m_readoutSide{m_tree.newVector<int>("stripReadoutSide")};
+    MuonVal::VectorBranch<unsigned>& m_readoutFirstStrip{m_tree.newVector<unsigned int>("stripFirstStrip")};
+    
 };
 
 }

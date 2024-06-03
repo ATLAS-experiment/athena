@@ -22,8 +22,9 @@ static HepMC::GenParticlePtr ParticleHelper_convert( const ISF::ISFParticle &par
   HepMC::FourVector fourMomentum( mom.x(), mom.y(), mom.z(), energy);
 
   auto hepParticle = HepMC::newGenParticlePtr( fourMomentum, particle.pdgCode(), particle.status() );
+#ifndef HEPMC3
   HepMC::suggest_barcode(hepParticle, particle.barcode() );
-
+#endif
   // return a newly created GenParticle
   return hepParticle;
 }
@@ -32,7 +33,7 @@ static HepMC::GenParticlePtr ParticleHelper_convert( const ISF::ISFParticle &par
 
 ISF::ISFTruthIncident::ISFTruthIncident( ISF::ISFParticle &parent,
                                          const ISFParticleVector& children,
-                                         Barcode::PhysicsProcessCode process,
+                                         int process,
                                          AtlasDetDescr::AtlasRegion geoID,
                                          ISF::KillPrimary killsPrimary,
                                          const HepMC::FourVector *position) :
@@ -67,7 +68,7 @@ int ISF::ISFTruthIncident::physicsProcessCategory() const {
   return -1;
 }
 
-Barcode::PhysicsProcessCode ISF::ISFTruthIncident::physicsProcessCode() const {
+int ISF::ISFTruthIncident::physicsProcessCode() const {
   return m_process;
 }
 
@@ -95,7 +96,7 @@ HepMC::GenParticlePtr ISF::ISFTruthIncident::parentParticle() {
     return getHepMCTruthParticle(m_parent);
 }
 
-Barcode::ParticleBarcode ISF::ISFTruthIncident::parentBarcode() { // TODO Remove this method
+int ISF::ISFTruthIncident::parentBarcode() { // TODO Remove this method
   return m_parent.barcode();
 }
 
@@ -107,7 +108,7 @@ bool ISF::ISFTruthIncident::parentSurvivesIncident() const {
   return !(m_killsPrimary == ISF::fKillsPrimary);
 }
 
-HepMC::GenParticlePtr ISF::ISFTruthIncident::parentParticleAfterIncident(Barcode::ParticleBarcode newBC) {
+HepMC::GenParticlePtr ISF::ISFTruthIncident::parentParticleAfterIncident(int newBC) {
   // if parent is killed in the interaction -> return nullptr
   if (m_killsPrimary==ISF::fKillsPrimary) return nullptr;
 
@@ -118,6 +119,9 @@ HepMC::GenParticlePtr ISF::ISFTruthIncident::parentParticleAfterIncident(Barcode
 
   // set a new status
   m_parent.setStatus( parentStatus() + HepMC::SIM_STATUS_INCREMENT );
+
+  // FIXME At this point the m_parent ISFParticle's id, truthBinding
+  // and particleLink all still need to be updated
 
   // and update truth info (including the ISFParticle's HMPL)
   return updateHepMCTruthParticle(m_parent, &m_parent);
@@ -140,12 +144,12 @@ int ISF::ISFTruthIncident::childPdgCode(unsigned short index) const {
   return m_children[index]->pdgCode();
 }
 
-Barcode::ParticleBarcode ISF::ISFTruthIncident::childBarcode(unsigned short index) const {
-  return numberOfChildren() > index ? m_children[index]->barcode() : Barcode::fUndefinedBarcode;
+int ISF::ISFTruthIncident::childBarcode(unsigned short index) const {
+  return numberOfChildren() > index ? m_children[index]->barcode() : HepMC::UNDEFINED_ID;
 }
 
 HepMC::GenParticlePtr ISF::ISFTruthIncident::childParticle(unsigned short index,
-                                                           Barcode::ParticleBarcode bc) {
+                                                           int bc) {
   // the child particle
   ISF::ISFParticle *sec = m_children[index];
 
@@ -154,27 +158,14 @@ HepMC::GenParticlePtr ISF::ISFTruthIncident::childParticle(unsigned short index,
     sec->setBarcode( bc);
   }
 
+  // Enforce that the status is set correctly
+  sec->setStatus(1 + HepMC::SIM_STATUS_THRESHOLD);
+
+  // FIXME At this point the sec ISFParticle's id, truthBinding
+  // and particleLink all still need to be updated
+
   // and update truth info (including the ISFParticle's HMPL)
   return updateHepMCTruthParticle( *sec, &m_parent );
-}
-
-HepMC::GenParticlePtr ISF::ISFTruthIncident::updateChildParticle(unsigned short /*index*/,
-                                                               HepMC::GenParticlePtr existingChild) const {
-  // Dummy implementation
-  return existingChild;
-}
-
-void ISF::ISFTruthIncident::setAllChildrenBarcodes(Barcode::ParticleBarcode bc) {
-  unsigned short numSec = numberOfChildren();
-  for (unsigned short i=0; i<numSec; i++) {
-    // the current particle
-    ISF::ISFParticle *p = m_children[i];
-
-    // set a new barcode and update the ISFParticle's HMPL
-    p->setBarcodeAndUpdateHepMcParticleLink(bc);
-  }
-
-  return;
 }
 
 
@@ -184,7 +175,7 @@ HepMC::GenParticlePtr ISF::ISFTruthIncident::getHepMCTruthParticle( ISF::ISFPart
   HepMC::GenParticlePtr hepTruthParticle = truthBinding ? truthBinding->getTruthParticle() : nullptr;
  
   // We have what we want
-  if(hepTruthParticle){
+  if (hepTruthParticle) {
     return hepTruthParticle;
   }
   //Otherwise we need to create it
@@ -195,28 +186,92 @@ HepMC::GenParticlePtr ISF::ISFTruthIncident::getHepMCTruthParticle( ISF::ISFPart
 HepMC::GenParticlePtr ISF::ISFTruthIncident::updateHepMCTruthParticle( ISF::ISFParticle& particle,
                                                                        ISF::ISFParticle* parent ) const {
   auto* truthBinding     = particle.getTruthBinding();
-  HepMC::GenParticlePtr hepTruthParticle = ParticleHelper_convert( particle );
+  HepMC::GenParticlePtr newGenParticle = ParticleHelper_convert( particle );
 
   if (truthBinding) {
-    truthBinding->setTruthParticle(hepTruthParticle);
+    truthBinding->setTruthParticle(newGenParticle);
   } else {
     auto parentTruthBinding = parent ? parent->getTruthBinding() : nullptr;
-    auto hepPrimaryParticle = parentTruthBinding ? parentTruthBinding->getPrimaryTruthParticle() : nullptr;
-    auto hepGenZeroParticle = hepTruthParticle;
-    truthBinding = new TruthBinding( hepTruthParticle, hepPrimaryParticle, hepGenZeroParticle );
+    auto primaryGenParticle = parentTruthBinding ? parentTruthBinding->getPrimaryGenParticle() : nullptr;
+    auto generationZeroGenParticle = newGenParticle; // New physical particle so this is also the generation zero particle
+    truthBinding = new TruthBinding( newGenParticle, primaryGenParticle, generationZeroGenParticle );
     particle.setTruthBinding(truthBinding);
   }
+  // At this point the values returned by particle.getParticleLink()
+  // and particle.id() are not consistent with what is stored in the
+  // TruthBinding.
 
-  //register the new GenParticle as HepMcParticleLink, copying over some old properties if present
-  const HepMcParticleLink* oldHMPL = particle.getParticleLink();
-  HepMcParticleLink* newHMPL = nullptr;
-  if (oldHMPL) {
-    newHMPL = new HepMcParticleLink(hepTruthParticle, oldHMPL->eventIndex(), HepMcParticleLink::IS_EVENTNUM);
-    delete oldHMPL;
-  } else {
-    newHMPL = new HepMcParticleLink(hepTruthParticle, 0, HepMcParticleLink::IS_EVENTNUM); // FIXME should be HepMcParticleLink::IS_POSITION
+  // FIXME Consider deleting the HepMcParticleLink and setting the id to HepMC::UNDEFINED_ID at this point?
+  return newGenParticle;
+}
+
+/** Update the id and particleLink properties of the parentAfterIncident (to be called after registerTruthIncident) */
+void ISF::ISFTruthIncident::updateParentAfterIncidentProperties() {
+  // FIXME Check that we correctly deal with the case that the parent
+  // particle survives the interaction, but is rejected by
+  // registerTruthIncident
+  const ISF::TruthBinding *parentAfterIncidentTruthBinding = m_parent.getTruthBinding();
+  auto parentAfterIncidentGenParticle = (parentAfterIncidentTruthBinding)  ? parentAfterIncidentTruthBinding->getTruthParticle() : nullptr;
+  const int parentAfterIncidentID = (parentAfterIncidentGenParticle) ? HepMC::uniqueID(parentAfterIncidentGenParticle) : HepMC::UNDEFINED_ID;
+  HepMcParticleLink* parentAfterIncidentHMPL{};
+  const HepMcParticleLink* parentBeforeIncidentHMPL = m_parent.getParticleLink();
+  int eventIndex{0};
+  if (parentAfterIncidentGenParticle) { eventIndex = parentAfterIncidentGenParticle->parent_event()->event_number(); }
+  else if (parentBeforeIncidentHMPL) { eventIndex = parentBeforeIncidentHMPL->eventIndex(); }
+  const HepMcParticleLink::PositionFlag idxFlag =
+    (eventIndex==0) ? HepMcParticleLink::IS_POSITION: HepMcParticleLink::IS_EVENTNUM;
+  if (parentBeforeIncidentHMPL) {
+    delete parentBeforeIncidentHMPL;
   }
-  particle.setParticleLink(newHMPL);
+  if (!parentAfterIncidentGenParticle) {
+    parentAfterIncidentHMPL = new HepMcParticleLink(parentAfterIncidentID, eventIndex, idxFlag, HepMcParticleLink::IS_ID);
+  }
+  else {
+    parentAfterIncidentHMPL = new HepMcParticleLink(parentAfterIncidentGenParticle, eventIndex, idxFlag);
+  }
+  m_parent.setId(parentAfterIncidentID);
+  m_parent.setParticleLink(parentAfterIncidentHMPL);
+}
 
-  return hepTruthParticle;
+/** Update the id and particleLink properties of the child particles (to be called after registerTruthIncident) */
+void ISF::ISFTruthIncident::updateChildParticleProperties() {
+  unsigned short numSec = numberOfChildren();
+  for (unsigned short i=0; i<numSec; i++) {
+    // the current particle
+    ISF::ISFParticle *child = m_children[i];
+    ISF::TruthBinding *childTruthBinding = child->getTruthBinding();
+    if (!childTruthBinding) {
+      // Child particles which were rejected during
+      // registerTruthIncident need a TruthBinding
+      auto parentTruthBinding = m_parent.getTruthBinding();
+      if  (parentTruthBinding) {
+        childTruthBinding = parentTruthBinding->childTruthBinding(nullptr);
+      }
+      else  {
+        // FIXME We really shouldn't end up here, possibly abort if we hit this?
+        childTruthBinding = new TruthBinding( nullptr, nullptr, nullptr );
+      }
+      child->setTruthBinding(childTruthBinding);
+    }
+    auto childGenParticle = childTruthBinding->getTruthParticle();
+    const int childID = (childGenParticle) ? HepMC::uniqueID(childGenParticle) : HepMC::UNDEFINED_ID;
+    HepMcParticleLink* childHMPL{};
+    const HepMcParticleLink* oldChildHMPL = child->getParticleLink();
+    int eventIndex{0};
+    if (childGenParticle) { eventIndex = childGenParticle->parent_event()->event_number(); }
+    else if (oldChildHMPL) { eventIndex = oldChildHMPL->eventIndex(); }
+    const HepMcParticleLink::PositionFlag idxFlag =
+      (eventIndex==0) ? HepMcParticleLink::IS_POSITION: HepMcParticleLink::IS_EVENTNUM;
+    if (oldChildHMPL) {
+      delete oldChildHMPL;
+    }
+    if (!childGenParticle) {
+      childHMPL = new HepMcParticleLink(childID, eventIndex, idxFlag, HepMcParticleLink::IS_ID);
+    }
+    else {
+      childHMPL = new HepMcParticleLink(childGenParticle, eventIndex, idxFlag);
+    }
+    child->setId(childID);
+    child->setParticleLink(childHMPL);
+  }
 }

@@ -5,7 +5,6 @@
 #include <string.h>
 #include <sstream>
 #include <stdexcept>
-#include "CxxUtils/starts_with.h"
 
 // ROOT include(s):
 #include <TError.h>
@@ -1572,7 +1571,7 @@ namespace xAOD {
          // resource usage that implies, that can lead to crashes in dbg
          // builds due to cling bugs.
          std::string tn = Utils::getTypeName( *ti );
-         if (CxxUtils::starts_with (tn, "std::vector<"))
+         if (tn.starts_with("std::vector<"))
            tn.erase (0, 5);
          std::string fac_class_name = "SG::AuxTypeVectorFactory<" +
              tn + ",allocator<" + tn;

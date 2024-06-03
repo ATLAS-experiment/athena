@@ -12,7 +12,7 @@ atlas_add_library( egammaUtils
    PUBLIC_HEADERS egammaUtils
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} xAODCaloEvent xAODEgamma GeoPrimitives
-   PRIVATE_LINK_LIBRARIES PathResolver )
+   PRIVATE_LINK_LIBRARIES PathResolver)
 
 atlas_add_dictionary( egammaUtilsDict
    egammaUtils/egammaUtilsDict.h

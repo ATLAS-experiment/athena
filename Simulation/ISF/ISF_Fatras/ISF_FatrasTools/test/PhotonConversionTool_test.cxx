@@ -33,7 +33,7 @@ class TestTruthSvc
        return StatusCode::SUCCESS;
      };
      void registerTruthIncident(ISF::ITruthIncident&, bool) const { };
-     StatusCode initializeTruthCollection() { return StatusCode::SUCCESS; };
+     StatusCode initializeTruthCollection(int, int) { return StatusCode::SUCCESS; };
      StatusCode releaseEvent() { return StatusCode::SUCCESS; };
 };
 DECLARE_COMPONENT( TestTruthSvc )

@@ -19,6 +19,7 @@
 #include "DoubletCountingKernelCuda_ITk.cuh"
 #include "DoubletMakingKernelCuda_ITk.cuh"
 #include "DoubletMatchingKernelCuda_ITk.cuh"
+#include "TripletConfirmationKernelCuda_ITk.cuh"
 
 SeedMakingWorkCudaITk::SeedMakingWorkCudaITk(unsigned int id, SeedMakingDeviceContext* ctx, std::shared_ptr<TrigAccel::OffloadBuffer> data, 
   tbb::concurrent_vector<WorkTimeStamp>* TL) : 
@@ -190,6 +191,7 @@ SeedMakingWorkCudaManagedITk::~SeedMakingWorkCudaManagedITk() {
   cudaFree(p->m_spacepoints);
   
   cudaFree(p->m_outputseeds);
+  cudaFree(p->m_confirmedseeds);
   cudaFree(p->d_doubletstorage);
   cudaFree(p->d_doubletinfo);
 
@@ -209,7 +211,7 @@ bool SeedMakingWorkCudaManagedITk::run() {
   
   int id = p.m_deviceId;  
   
-  TrigAccel::ITk::OUTPUT_SEED_STORAGE* ps = reinterpret_cast<TrigAccel::ITk::OUTPUT_SEED_STORAGE*>(p.m_outputseeds);
+  TrigAccel::ITk::OUTPUT_SEED_STORAGE* ps = reinterpret_cast<TrigAccel::ITk::OUTPUT_SEED_STORAGE*>(p.m_confirmedseeds);
   
   cudaSetDevice(id);
   checkError();
@@ -225,11 +227,15 @@ bool SeedMakingWorkCudaManagedITk::run() {
   TrigAccel::ITk::SPACEPOINT_STORAGE* dSpacepoints = reinterpret_cast<TrigAccel::ITk::SPACEPOINT_STORAGE *>(p.m_spacepoints);
   TrigAccel::ITk::DETECTOR_MODEL* dDetModel        = reinterpret_cast<TrigAccel::ITk::DETECTOR_MODEL*>(p.d_detmodel);
   TrigAccel::ITk::OUTPUT_SEED_STORAGE* dOutput     = reinterpret_cast<TrigAccel::ITk::OUTPUT_SEED_STORAGE*>(p.m_outputseeds);
+  TrigAccel::ITk::OUTPUT_SEED_STORAGE* dConfirmed  = reinterpret_cast<TrigAccel::ITk::OUTPUT_SEED_STORAGE*>(p.m_confirmedseeds);
 
   DOUBLET_INFO_ITk* dInfo                         = reinterpret_cast<DOUBLET_INFO_ITk*>(p.d_doubletinfo);
   DOUBLET_STORAGE_ITk* dStorage                   = reinterpret_cast<DOUBLET_STORAGE_ITk*>(p.d_doubletstorage);
 
   cudaMemset(p.m_outputseeds,0,10*sizeof(int));
+  checkError();
+
+  cudaMemset(p.m_confirmedseeds,0,10*sizeof(int));
   checkError();
 
   cudaMemset(p.d_doubletstorage,0,3*sizeof(int));
@@ -269,9 +275,13 @@ bool SeedMakingWorkCudaManagedITk::run() {
 
   cudaMemcpy(&nStats[0], p.d_doubletstorage, 3*sizeof(int), cudaMemcpyDeviceToHost);
 
-  
   doubletMatchingKernel_ITk<<<p.m_gpuParams.m_nNUM_TRIPLET_BLOCKS, NUM_TRIPLET_THREADS_ITk, 0, p.m_stream>>>(dSettings, dSpacepoints, dDetModel, dInfo, 
     dStorage,  dOutput, nStats[0]);
+  cudaStreamSynchronize(p.m_stream);
+
+  checkError();
+
+  tripletConfirmationKernel_ITk<<<p.m_gpuParams.m_nNUM_TRIPLET_BLOCKS, NUM_TRIPLET_THREADS_ITk, 0, p.m_stream>>>(dSpacepoints, dOutput, dConfirmed, dOutput->m_nSeeds);
   cudaStreamSynchronize(p.m_stream);
 
   checkError();

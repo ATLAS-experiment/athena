@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGEGAMMAHYPO_ITRIGEGAMMAFASTELECTRONHYPOTOOL_H
 #define TRIGEGAMMAHYPO_ITRIGEGAMMAFASTELECTRONHYPOTOOL_H 1
@@ -33,7 +33,7 @@ class ITrigEgammaFastElectronHypoTool: virtual public ::IAlgTool
                     const xAOD::TrigElectron* el,
                     const xAOD::TrigEMCluster* cl,
                     const xAOD::TrigRingerRings* r,
-                    const TrigCompositeUtils::DecisionIDContainer previousDecisions )
+                    const TrigCompositeUtils::DecisionIDContainer& previousDecisions )
       : decision( d ), 
         electron(el),
         cluster(cl),

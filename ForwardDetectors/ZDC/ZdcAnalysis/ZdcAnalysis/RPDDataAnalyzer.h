@@ -89,8 +89,8 @@ class RPDDataAnalyzer
 
   void setSideStatusBits();
 
-  bool doPileupExpFit(unsigned int channel);
-  bool doPileupStretchedExpFit(unsigned int channel);
+  bool doPileupExpFit(unsigned int channel, std::vector<std::pair<unsigned int, float>> const& pileupFitPoints);
+  bool doPileupStretchedExpFit(unsigned int channel, std::vector<std::pair<unsigned int, float>> const& pileupFitPoints);
   float calculateBaselineSamplesMSE(unsigned int channel, std::function<float(unsigned int)> const& fit) const;
 
   ZDCMsg::MessageFunctionPtr m_msgFunc_p;
@@ -111,15 +111,15 @@ class RPDDataAnalyzer
   float m_pileupBaselineStdDevThresh; /** Baseline standard deviations less than this number indicate there is not pileup */
   unsigned int m_nNegativesAllowed; /** Maximum number of negative ADC values after baseline and pileup subtraction allowed in signal range */
   unsigned int m_AdcOverflow; /** ADC values greater than or equal to this number are considered overflow */
-  std::vector<float> m_calibFactors; /** multiplicative calibration factors to apply to raw data; per channel */
+  std::vector<float> m_outputCalibFactors; /** multiplicative calibration factors to apply to output, e.g., max and sum ADC; per channel */
 
   std::vector<std::vector<float>> m_chFadcData; /** raw RPD data; index channel then sample */
   std::vector<std::vector<float>> m_chCorrectedFadcData; /** RPD data with baseline and pileup subtracted; index channel then sample */
   std::vector<float> m_chMaxSample; /** sample of max of RPD data in signal range after pileup subtraction; per channel */
   std::vector<float> m_chSumAdc; /** sum of RPD data in signal range after baseline and pileup subtraction; per channel */
-  std::vector<float> m_chSumAdcCalib; /** sum of RPD data in signal range after baseline and pileup subtraction, with calibration factors applied; per channel */
+  std::vector<float> m_chSumAdcCalib; /** sum of RPD data in signal range after baseline and pileup subtraction, with output calibration factors applied; per channel */
   std::vector<float> m_chMaxAdc; /** max of RPD data in signal range after baseline and pileup subtraction; per channel */
-  std::vector<float> m_chMaxAdcCalib; /** max of RPD data in signal range after baseline and pileup subtraction, with calibration factors applied; per channel */
+  std::vector<float> m_chMaxAdcCalib; /** max of RPD data in signal range after baseline and pileup subtraction, with output calibration factors applied; per channel */
   std::vector<float> m_chPileupFrac; /** OOT pileup sum as a fraction of non-pileup sum in entire window (0 if no OOT pileup, -1 if sum ADC <= 0); per channel */
   std::vector<float> m_chBaseline; /** baseline used in baseline subtraction; per channel */
   std::vector<std::vector<float>> m_chPileupExpFitParams; /** parameters for pileup exponential fit (if pileup was detected and fit did not fail): exp( [0] + [1]*sample ); per channel */
@@ -133,5 +133,18 @@ class RPDDataAnalyzer
   std::vector<float> m_ch2ndOrderStretchedExpPileupMSE; /** mean squared error of pileup stretched exponential fit in baseline samples (if pileup was detected and fit did not fail); per channel */
   std::vector<std::bitset<32>> m_chStatus; /** status bits per channel */
   std::bitset<32> m_sideStatus; /** status bits for side */
+
+  /**
+   * in the case of pileup, the number of points (above baseline) in baseline samples required to perform fit.
+   * if insufficient points, set InsufficientPileupFitPointsBit and abort pileup subtraction
+   */
+  static unsigned int constexpr s_minPileupFitPoints = 3;
+  /**
+   * in the case of pileup, the number of UNIQUE points (above baseline) in baseline samples required to perform fit.
+   * this number must be at least the number of parameters in pileup fits, else inversion of Gram matrix in TLinearFitter
+   * will fail and generate ROOT error that propagates to Athena.
+   * if insufficient points, set InsufficientPileupFitPointsBit and abort pileup subtraction.
+   */
+  static unsigned int constexpr s_minUniquePileupFitPoints = 3;
 };
 #endif

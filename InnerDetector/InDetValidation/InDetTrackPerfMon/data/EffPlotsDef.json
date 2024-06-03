@@ -1,0 +1,12 @@
+{
+    "eff_vs_$TRKTAG_pt" : {
+        "type" : "TEfficiency",
+        "xAxis" : { "title" : "$TRKTYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "Efficiency" }
+    },
+    "eff_vs_$TRKTAG_eta" : {
+        "type" : "TEfficiency",
+        "xAxis" : { "title" : "$TRKTYPE #eta", "nBins" : "100", "low" : "-$ETAMAX", "high" : "$ETAMAX" },
+        "yAxis" : { "title" : "Efficiency" }
+    }
+}

@@ -3,6 +3,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import Format
 from TrkConfig.TrackingPassFlags import printActiveConfig
+from AthenaCommon.Constants import WARNING, INFO
 
 _flags_set = []  # For caching
 _extensions_list = [] # For caching
@@ -21,8 +22,7 @@ def CombinedTrackingPassFlagSets(flags):
         TrackingComponent.ActsValidateSpacePoints : "ActsValidateSpacePoints",
         TrackingComponent.ActsValidateSeeds : "ActsValidateSeeds",
         TrackingComponent.ActsValidateTracks : "ActsValidateTracks",
-        TrackingComponent.ActsValidateAmbiguityResolution : "ActsValidateAmbiguityResolution",
-        TrackingComponent.BenchmarkSpot : "ActsBenchmarkSpot"
+        TrackingComponent.ActsValidateAmbiguityResolution : "ActsValidateAmbiguityResolution"
     }
     
     # Athena Pass
@@ -36,7 +36,7 @@ def CombinedTrackingPassFlagSets(flags):
         flags_set += [flags.cloneAndReplace(
             "Tracking.ActiveConfig",
             "Tracking.ITkActsPass")]
-
+        
     # Acts Heavy Ion Pass
     if TrackingComponent.ActsHeavyIon in flags.Tracking.recoChain:
         flags_set += [flags.cloneAndReplace(
@@ -49,6 +49,12 @@ def CombinedTrackingPassFlagSets(flags):
             "Tracking.ActiveConfig",
             "Tracking.ITkGNNPass")]
 
+    # Acts Large Radius Pass
+    if flags.Acts.doLargeRadius:
+        flags_set += [flags.cloneAndReplace(
+            "Tracking.ActiveConfig",
+            "Tracking.ITkActsLargeRadiusPass")]
+        
     # Acts Conversion Pass
     if flags.Detector.EnableCalo and flags.Acts.doITkConversion:
         flags_set += [flags.cloneAndReplace(
@@ -122,7 +128,7 @@ def ITkStoreTrackSeparateContainerCfg(flags,
             AssociationMapName=AssociationMapName))
 
     # Run truth, but only do this for non ACTS workflows
-    if flags.Tracking.doTruth and extension not in ['Acts', 'ActsConversion']:
+    if flags.Tracking.doTruth and extension not in ['Acts', 'ActsConversion', 'ActsLargeRadius']:
         from InDetConfig.ITkTrackTruthConfig import ITkTrackTruthCfg
         result.merge(ITkTrackTruthCfg(
             flags,
@@ -132,7 +138,7 @@ def ITkStoreTrackSeparateContainerCfg(flags,
 
     # Create track particles from all the different track collections
     # We have different algorithms depending on the EDM being used
-    if extension not in ['Acts', 'ActsConversion']:
+    if extension not in ['Acts', 'ActsConversion', 'ActsLargeRadius']:
         # Workflows that use Trk Tracks
         from xAODTrackingCnv.xAODTrackingCnvConfig import ITkTrackParticleCnvAlgCfg
         result.merge(ITkTrackParticleCnvAlgCfg(
@@ -153,13 +159,20 @@ def ITkStoreTrackSeparateContainerCfg(flags,
         result.merge(ActsTrackToTrackParticleCnvAlgCfg(flags, f"{prefix}ResolvedTrackToAltTrackParticleCnvAlg",
                                                        ACTSTracksLocation=TrackContainer,
                                                        TrackParticlesOutKey=f'{TrackContainer}ParticlesAlt'))
-            
-            
+
+        if flags.Tracking.doTruth :
+            from ActsConfig.ActsTruthConfig import ActsTrackParticleTruthDecorationAlgCfg
+            result.merge(ActsTrackParticleTruthDecorationAlgCfg(flags,
+                                                                name=f'{TrackContainer}ParticleTruthDecorationAlg',
+                                                                TrackToTruthAssociationMaps = [f'{TrackContainer}ToTruthParticleAssociation'],
+                                                                TrackParticleContainerName = f'{TrackContainer}ParticlesAlt'
+                                                                ))
     return result
 
 
 # Returns CA + ClusterSplitProbContainer
 def ITkTrackRecoPassCfg(flags,
+                        previousActsExtension: str = None,
                         InputCombinedITkTracks: list[str] = None,
                         InputCombinedActsTracks: list[str] = None,
                         InputExtendedITkTracks: list[str] = None,
@@ -187,7 +200,7 @@ def ITkTrackRecoPassCfg(flags,
     # This is the track collection AFTER the ambiguity resolution
     TrackContainer = "Resolved" + extension + "Tracks"
     # For Acts we have another convention, with the extention as the first element in the name
-    if extension in ['Acts', 'ActsConversion']:
+    if extension in ['Acts', 'ActsConversion', 'ActsLargeRadius']:
         TrackContainer = extension + "ResolvedTracks"
     if doTrackOverlay and extension == "Conversion":
         TrackContainer = flags.Overlay.SigPrefix + TrackContainer
@@ -195,13 +208,14 @@ def ITkTrackRecoPassCfg(flags,
     # This is the track collection BEFORE the ambiguity resolution
     SiSPSeededTracks = "SiSPSeeded" + extension + "Tracks"
     # For ACTS the name is totally different
-    if  extension in ['Acts', 'ActsConversion']:
+    if  extension in ['Acts', 'ActsConversion', 'ActsLargeRadius']:
         SiSPSeededTracks = extension + "Tracks"
         
     # This performs track finding
     from InDetConfig.ITkTrackingSiPatternConfig import ITkTrackingSiPatternCfg
     result.merge(ITkTrackingSiPatternCfg(
         flags,
+        previousActsExtension=previousActsExtension,
         InputCollections=InputExtendedITkTracks,
         ResolvedTrackCollectionKey=TrackContainer,
         SiSPSeededTrackCollectionKey=SiSPSeededTracks,
@@ -224,7 +238,7 @@ def ITkTrackRecoPassCfg(flags,
 
         # Track container, for ACTS workflow, depends on whether we activated the ambiguity resolution or not
         inputTrack = TrackContainer
-        if extension in ['Acts', 'ActsConversion'] and not flags.Tracking.ActiveConfig.doActsAmbiguityResolution:
+        if extension in ['Acts', 'ActsConversion', 'ActsLargeRadius'] and not flags.Tracking.ActiveConfig.doActsAmbiguityResolution:
             inputTrack = SiSPSeededTracks
 
         result.merge(ITkStoreTrackSeparateContainerCfg(
@@ -238,14 +252,14 @@ def ITkTrackRecoPassCfg(flags,
             "ITkAmbiguityProcessorSplitProb" + extension)
         # Collect all the Trk Track collections to be then merged in a single big collection
         # Merging will be done later, and after that we create track particles from the merged collection
-        if extension not in ['Acts', 'ActsConversion']:
+        if extension not in ['Acts', 'ActsConversion', 'ActsLargeRadius']:
             InputCombinedITkTracks += [TrackContainer]
         else:
             InputCombinedActsTracks += [TrackContainer]
 
     # This is only used in this same function for the Track-PRD association
     # Not yet supported for ACTS tracks
-    if extension not in ['Acts', 'ActsConversion']:
+    if extension not in ['Acts', 'ActsConversion', 'ActsLargeRadius']:
         InputExtendedITkTracks += [TrackContainer]
         
     return result, ClusterSplitProbContainer
@@ -260,20 +274,28 @@ def ITkActsTrackFinalCfg(flags,
     if len(InputCombinedITkTracks) == 0:
         return acc
     
-    # Schedule track merger
     mergeTrackContainer = "ActsCombinedTracks"
-    from ActsConfig.ActsTrackFindingConfig import ActsTrackMergerAlgCfg
-    acc.merge(ActsTrackMergerAlgCfg(flags,
-                                    InputTrackCollections = InputCombinedITkTracks,
-                                    OutputTrackCollection = mergeTrackContainer))
-
     # Schedule Track particle creation
     from ActsConfig.ActsTrackFindingConfig import ActsTrackToTrackParticleCnvAlgCfg
     acc.merge(ActsTrackToTrackParticleCnvAlgCfg(flags, "ActsCombinedTrackToAltTrackParticleCnvAlg",
-                                                ACTSTracksLocation=mergeTrackContainer,
+                                                ACTSTracksLocation=InputCombinedITkTracks,
                                                 TrackParticlesOutKey=f'{mergeTrackContainer}ParticlesAlt'))
-    
-    
+    if flags.Tracking.doTruth :
+        from ActsConfig.ActsTruthConfig import ActsTrackParticleTruthDecorationAlgCfg
+        track_to_truth_maps=[]
+        for track_container in InputCombinedITkTracks :
+            track_to_truth_maps += [f'{track_container}ToTruthParticleAssociation']
+        # note: suppress stat dumps from ActsTrackParticleTruthDecorationAlg if there is only
+        #       a single input collection, because it duplicates in that case the output of
+        #       the TrackFindingValidationAlg
+        acc.merge(ActsTrackParticleTruthDecorationAlgCfg(
+                     flags,
+                     name=f'{mergeTrackContainer}ParticleTruthDecorationAlg',
+                     TrackToTruthAssociationMaps = track_to_truth_maps,
+                     TrackParticleContainerName = f'{mergeTrackContainer}ParticlesAlt',
+                     OutputLevel=WARNING              if len(InputCombinedITkTracks)==1 else INFO,
+                     ComputeTrackRecoEfficiency=False if len(InputCombinedITkTracks)==1 else True
+                     ))
     return acc
 
 def ITkTrackFinalCfg(flags,
@@ -339,6 +361,7 @@ def ITkTrackFinalCfg(flags,
         isActsAmbi = 'ActsValidateResolvedTracks' in splitProbName or \
         'ActsValidateAmbiguityResolution' in splitProbName or \
         'ActsConversion' in splitProbName or \
+        'ActsLargeRadius' in splitProbName or \
         ('Acts' in  splitProbName and 'Validate' not in splitProbName) ))
 
     return result
@@ -387,7 +410,9 @@ def ITkSiSPSeededTracksFinalCfg(flags):
 
     for extension in listOfExtensionsRequesting:
         AssociationMapNameKey="PRDtoTrackMapMerge_CombinedITkTracks"
-        if not (extension == ''):
+        if 'Acts' in extension:
+            AssociationMapNameKey="PRDtoTrackMapMerge_CombinedITkTracks"
+        elif not (extension == ''):
             AssociationMapNameKey = f"ITkPRDtoTrackMap{extension}"
 
         from xAODTrackingCnv.xAODTrackingCnvConfig import (
@@ -466,7 +491,7 @@ def ITkExtendedPRDInfoCfg(flags):
             result.merge(ITkPhysHitDecoratorAlgCfg(
                 flags,
                 name=f"ITkPhysHit{extension}DecoratorAlg",
-                TrackParticleContainerName=f"ITk{extension}TrackParticles"))
+                TrackParticleContainerName=f"InDet{extension}TrackParticles"))
 
     return result
 
@@ -501,7 +526,9 @@ def ITkTrackRecoCfg(flags) -> ComponentAccumulator:
     # To be passed to the InDetRecStatistics alg
     StatTrackCollections = []
     StatTrackTruthCollections = []
-
+    # Record previous ACTS extension
+    previousActsExtension = None
+    
     from InDetConfig.SiliconPreProcessing import ITkRecPreProcessingSiliconCfg
 
     for current_flags in flags_set:
@@ -516,7 +543,8 @@ def ITkTrackRecoCfg(flags) -> ComponentAccumulator:
         # (1) Full Athena data preparation  
         # (2) Full Acts data preparation 
         # (3) Hybrid configurations with EDM converters
-        result.merge(ITkRecPreProcessingSiliconCfg(current_flags))
+        result.merge(ITkRecPreProcessingSiliconCfg(current_flags,
+                                                   previousActsExtension=previousActsExtension))
 
         # Track Reconstruction
         # This includes track finding and ambiguity resolution
@@ -527,6 +555,7 @@ def ITkTrackRecoCfg(flags) -> ComponentAccumulator:
         # since it will create a data dependency from the prevous pass
         acc, ClusterSplitProbContainer = ITkTrackRecoPassCfg(
             current_flags,
+            previousActsExtension,
             InputCombinedITkTracks=InputCombinedITkTracks,
             InputCombinedActsTracks=InputCombinedActsTracks,
             InputExtendedITkTracks=InputExtendedITkTracks,
@@ -534,6 +563,10 @@ def ITkTrackRecoCfg(flags) -> ComponentAccumulator:
             StatTrackTruthCollections=StatTrackTruthCollections,
             ClusterSplitProbContainer=ClusterSplitProbContainer)
         result.merge(acc)
+
+        # Store ACTS extension
+        if 'Acts' in extension:
+            previousActsExtension = extension
 
     # This merges the track collection in InputCombinedITkTracks
     # and creates a track particle collection from that

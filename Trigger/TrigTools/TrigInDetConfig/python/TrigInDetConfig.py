@@ -42,6 +42,21 @@ def InDetIDCCacheCreatorCfg(flags):
   acc.addEventAlgo( InDetCacheCreatorTrig )
   return acc
 
+def ActsIDCCacheCreatorCfg(flags):
+  #Create IdentifiableCaches
+  acc = ComponentAccumulator()
+
+  creator = CompFactory.ActsTrk.Cache.CreatorAlg(name="ActsCacheCreatorTrig", 
+                                                   PixelClustersCacheKey="ActsPixelClusterCache_Back",
+                                                   StripClustersCacheKey="ActsStripClusterCache_Back",
+                                                   PixelSpacePointCacheKey="ActsPixelSpacePointCache_Back",
+                                                   StripSpacePointCacheKey="ActsStripSpacePointCache_Back",
+                                                   StripOverlapSpacePointCacheKey="ActsStripOverlapSpacePointCache_Back")
+  
+  acc.addEventAlgo(creator)
+
+  return acc
+
 
 @AccumulatorCache
 def trigInDetFastTrackingCfg( inflags, roisKey="EMRoIs", signatureName='', in_view=True ):
@@ -113,7 +128,7 @@ def trigInDetPrecisionTrackingCfg( inflags, rois, signatureName, in_view=True ):
                                                       DataObjects= {('xAOD::EventInfo', 'StoreGateSvc+EventInfo'),
                                                                     ('TrigRoiDescriptorCollection', flags.Tracking.ActiveConfig.roi),
                                                                     ( 'TagInfo', 'DetectorStore+ProcessingTags' ), 
-                                                                    ( 'TrackCollection', flags.Tracking.ActiveConfig.trkTracks_FTF )} )
+                                                                    ( ('ActsTrk::TrackContainer' if "Acts" in flags.Tracking.ActiveConfig.trkTracks_FTF else 'TrackCollection'), flags.Tracking.ActiveConfig.trkTracks_FTF )} )
 
     acc.addEventAlgo(verifier)
 

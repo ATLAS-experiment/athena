@@ -163,13 +163,18 @@ std::vector<std::unique_ptr<gFEXJetTOB>> gFEXJetAlgo::largeRfinder(
   gTowersType hasSeedA;
   gBlockAB(Atwr, gBLKA, hasSeedA, gLJ_seedThrA);
 
+  SaturateBlocks(gBLKA, Asat); 
+
   gTowersType gBLKB;
   gTowersType hasSeedB;
   gBlockAB(Btwr, gBLKB, hasSeedB, gLJ_seedThrB);  
+ SaturateBlocks(gBLKA, Bsat);
+
 
   gTowersType gBLKC;
   gTowersType hasSeedC;
   gBlockAB(Ctwr, gBLKC, hasSeedC, gLJ_seedThrC);  
+ SaturateBlocks(gBLKA, Csat);
 
   // sorting by jet engine -- not done in FPGA
   std::array<int, 32> AgBlockOutL{};
@@ -571,36 +576,41 @@ std::vector<std::unique_ptr<gFEXJetTOB>> gFEXJetAlgo::largeRfinder(
   CTOB2_dat[3] =  CTOB2_dat[3] | ( ( gJetTOBphi[5] & 0x0000001F ) <<26);
 
 
-  if( gTOBsat[0] ) {
-    ATOB1_dat[1] =  ( ATOB1_dat[1] | 0x80000000 );
-    ATOB1_dat[3] =  ( ATOB1_dat[3] | 0x80000000 );
-  }
+// saturation  currently not set in firmware
+//
+//
+  bool setSat = 0; 
+  if ( setSat) {
+    if( gTOBsat[0] ) {
+      ATOB1_dat[1] =  ( ATOB1_dat[1] | 0x80000000 );
+      ATOB1_dat[3] =  ( ATOB1_dat[3] | 0x80000000 );
+    }
 
-  if( gTOBsat[1] ) {
-    ATOB2_dat[1] =  ( ATOB2_dat[1] | 0x80000000 );
-    ATOB2_dat[3] =  ( ATOB2_dat[3] | 0x80000000 );
-  }
+    if( gTOBsat[1] ) {
+      ATOB2_dat[1] =  ( ATOB2_dat[1] | 0x80000000 );
+      ATOB2_dat[3] =  ( ATOB2_dat[3] | 0x80000000 );
+    }
 
-  if( gTOBsat[2] ) {
-    BTOB1_dat[1] =  ( BTOB1_dat[1] | 0x80000000 );
-    BTOB1_dat[3] =  ( BTOB1_dat[3] | 0x80000000 );
-  }
+    if( gTOBsat[2] ) {
+      BTOB1_dat[1] =  ( BTOB1_dat[1] | 0x80000000 );
+      BTOB1_dat[3] =  ( BTOB1_dat[3] | 0x80000000 );
+    }
 
-  if( gTOBsat[3] ) {
-    BTOB2_dat[1] =  ( BTOB2_dat[1] | 0x80000000 );
-    BTOB2_dat[3] =  ( BTOB2_dat[3] | 0x80000000 );
-  }
+    if( gTOBsat[3] ) {
+      BTOB2_dat[1] =  ( BTOB2_dat[1] | 0x80000000 );
+      BTOB2_dat[3] =  ( BTOB2_dat[3] | 0x80000000 );
+    }
 
-  if( gTOBsat[4] ) {
-    CTOB1_dat[1] =  ( CTOB1_dat[1] | 0x80000000 );
-    CTOB1_dat[3] =  ( CTOB1_dat[3] | 0x80000000 );
-  }
+    if( gTOBsat[4] ) {
+      CTOB1_dat[1] =  ( CTOB1_dat[1] | 0x80000000 );
+      CTOB1_dat[3] =  ( CTOB1_dat[3] | 0x80000000 );
+    }
 
-  if( gTOBsat[5] ) {
-    CTOB2_dat[1] =  ( CTOB2_dat[1] | 0x80000000 );
-    CTOB2_dat[3] =  ( CTOB2_dat[3] | 0x80000000 );
+    if( gTOBsat[5] ) {
+      CTOB2_dat[1] =  ( CTOB2_dat[1] | 0x80000000 );
+      CTOB2_dat[3] =  ( CTOB2_dat[3] | 0x80000000 );
+    }
   }
-
 
   // zero tob 4 word
 
@@ -908,11 +918,22 @@ void gFEXJetAlgo::ZeroNegative(gTowersType & jets) const{
 
 
 // https://gitlab.cern.ch/atlas-l1calo/gfex/firmware/-/blob/devel/common/jet_finder/HDL/jet_eng.vhd#L538
-void gFEXJetAlgo::SaturateJets( gTowersType & jets, gTowersType sat ) const {
+void gFEXJetAlgo::SaturateJets( gTowersType & jets, const gTowersType & sat ) const {
    for(unsigned int irow = 0; irow < FEXAlgoSpaceDefs::ABCrows; irow++ ){
     for(unsigned int icolumn =0; icolumn<FEXAlgoSpaceDefs::ABcolumns; icolumn++){
       if(static_cast<unsigned>(sat[irow][icolumn])) {
-        jets[irow][icolumn] = 0x0003ffff;
+          // this should perhaps be 0xfff -- firmware turncates to 12 bits before sorting.  
+      	      jets[irow][icolumn] = 0x0003ffff;
+      }
+    }
+  }
+}
+
+void gFEXJetAlgo::SaturateBlocks( gTowersType & gBlkSum, const gTowersType & sat ) const {
+   for(unsigned int irow = 0; irow < FEXAlgoSpaceDefs::ABCrows; irow++ ){
+    for(unsigned int icolumn =0; icolumn<FEXAlgoSpaceDefs::ABcolumns; icolumn++){
+      if(static_cast<unsigned>(sat[irow][icolumn])) {
+        gBlkSum[irow][icolumn] = 0x00000fff;
       }
     }
   }

@@ -113,10 +113,15 @@ def FTAG2Cfg(flags):
             "TruthBottom", "TruthElectrons","TruthMuons","TruthTaus",
             ]
 
+
     from DerivationFrameworkFlavourTag import FtagBaseContent
+    # update AppendToDictionary
+    extra_AppendToDictionary = {} #only add those items specifically for FTAG2 here!
+    FtagBaseContent.update_AppendToDictionary_in_SlimmingHelper(FTAG2SlimmingHelper, flags, extra_AppendToDictionary)
 
     # Static content
-    FtagBaseContent.add_static_content_to_SlimmingHelper(FTAG2SlimmingHelper)
+    extra_StaticContent = [] #only add those items specifically for FTAG2 here! 
+    FtagBaseContent.add_static_content_to_SlimmingHelper(FTAG2SlimmingHelper, flags, extra_StaticContent)
 
     # Add truth containers
     if flags.Input.isMC:

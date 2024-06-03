@@ -28,19 +28,20 @@ def PHYSKernelCfg(flags, name='PHYSKernel', **kwargs):
     ))
 
     # Thinning tools
-    # These are set up in PhysCommonThinningConfig. Only thing needed here the list of tools to schedule 
+    # These are set up in PhysCommonThinningConfig. Only thing needed here the list of tools to schedule
+    nametag = name.replace('Kernel', '') #get the name to label the tools below such that other formats can use this KernelCfg
     thinningToolsArgs = {
-        'TrackParticleThinningToolName'       : "PHYSTrackParticleThinningTool",
-        'MuonTPThinningToolName'              : "PHYSMuonTPThinningTool",
-        'TauJetThinningToolName'              : "PHYSTauJetThinningTool",
-        'TauJets_MuonRMThinningToolName'      : "PHYSTauJets_MuonRMThinningTool",
-        'DiTauTPThinningToolName'             : "PHYSDiTauTPThinningTool",
-        'DiTauLowPtThinningToolName'          : "PHYSDiTauLowPtThinningTool",
-        'DiTauLowPtTPThinningToolName'        : "PHYSDiTauLowPtTPThinningTool",
+        'TrackParticleThinningToolName'       : nametag+"TrackParticleThinningTool",
+        'MuonTPThinningToolName'              : nametag+"MuonTPThinningTool",
+        'TauJetThinningToolName'              : nametag+"TauJetThinningTool",
+        'TauJets_MuonRMThinningToolName'      : nametag+"TauJets_MuonRMThinningTool",
+        'DiTauTPThinningToolName'             : nametag+"DiTauTPThinningTool",
+        'DiTauLowPtThinningToolName'          : nametag+"DiTauLowPtThinningTool",
+        'DiTauLowPtTPThinningToolName'        : nametag+"DiTauLowPtTPThinningTool",
     } 
     # for AOD produced before 24.0.17, the electron removal tau is not available
     if kwargs.get('TauJets_EleRM_in_input', False):
-        thinningToolsArgs['TauJets_EleRMThinningToolName'] = "PHYSTauJets_EleRMThinningTool"
+        thinningToolsArgs['TauJets_EleRMThinningToolName'] = nametag+"TauJets_EleRMThinningTool"
     # Configure the thinning tools
     from DerivationFrameworkPhys.PhysCommonThinningConfig import PhysCommonThinningCfg
     acc.merge(PhysCommonThinningCfg(flags, StreamName = kwargs['StreamName'], **thinningToolsArgs))

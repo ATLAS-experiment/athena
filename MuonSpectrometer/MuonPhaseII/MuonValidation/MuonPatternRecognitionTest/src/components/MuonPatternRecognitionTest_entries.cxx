@@ -2,6 +2,6 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "../MdtEtaTransformTester.h"
+#include "../MuonHoughTransformTester.h"
 
-DECLARE_COMPONENT(MuonValR4::MdtEtaTransformTester)
+DECLARE_COMPONENT(MuonValR4::MuonHoughTransformTester)

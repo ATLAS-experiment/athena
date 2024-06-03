@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef G4UserActions_LengthIntegrator_H
@@ -45,7 +45,10 @@ namespace G4UA
     public:
 
       /// Constructor takes the name of the histogram service as argument.
-    LengthIntegrator(const std::string& histSvcName, bool doHistos);
+      LengthIntegrator(const std::string& histSvcName, bool doHistos);
+
+      LengthIntegrator(const LengthIntegrator&) = delete;
+      LengthIntegrator& operator=(const LengthIntegrator&) = delete;
 
       /// Called at beginning of G4 event to cache some details about the
       /// current primary vertex and particle. Also resets some measurements.

@@ -132,7 +132,7 @@ class ThresholdDef:
             eEMThreshold('eEMSPARE%i' % thrV, 'eEM').addThrValue(thrVal_SPARE)
 
         # L section (used to be VH in Run2)
-        eEM_cuts = [9, 10, 12, 18, 24, 26]
+        eEM_cuts = [9, 10, 12, 18, 24, 26, 40]
         for thrV in eEM_cuts:
             eEMThreshold('eEM%iL' % thrV, 'eEM').addThrValue(get_threshold_cut('eEM',thrV)).setIsolation( reta = "Loose", wstot = "Loose", rhad = "Loose" )
 
@@ -166,9 +166,12 @@ class ThresholdDef:
             jEMThreshold('jEMSPARE%i' % thrV, 'jEM').addThrValue(thrVal_SPARE)
 
         # eTAU
-        eTAU_cuts = [12, 20, 30, 35, 60, 80, 140]
+        eTAU_cuts = [1, 12, 20, 30, 35, 60, 80, 140]
+        # get ptMinToTopo value (different for pp and HI), then adjust threshold for lowest pT items based on this value
+        ttconfig = tc.l1menu.thresholds.typeWideThresholdConfig('eTAU')
+        ptMin = ttconfig["ptMinToTopo"]
         for thrV in eTAU_cuts:
-            eTauThreshold('eTAU%i' % thrV, 'eTAU').setEt(get_threshold_cut('eTAU', thrV))
+            eTauThreshold('eTAU%i' % thrV, 'eTAU').setEt(max(get_threshold_cut('eTAU', thrV), ptMin))
 
         eTAU_cuts = [20]
         for thrV in eTAU_cuts:
@@ -187,7 +190,7 @@ class ThresholdDef:
         for thrV in eTAU_cuts:
             eTauThreshold('eTAU%iHL' % thrV, 'eTAU').setEt(get_threshold_cut('eTAU', thrV)).setIsolation( rHad = "Loose" )
         # eTAU SPARES
-        for thrV in range(1,11):
+        for thrV in range(1,10):
             eTauThreshold('eTAUSPARE%i' % thrV, 'eTAU').setEt(thrVal_SPARE)
 
         # cTAU
@@ -200,16 +203,17 @@ class ThresholdDef:
             cTauThreshold('cTAUSPARE%i' % thrV, 'cTAU').setEt(thrVal_SPARE)
 
         # jTAU
-        jTAU_cuts = [20, 30]
+        jTAU_cuts = [1, 20, 30]
+        # get ptMinToTopo1 value (different for pp and HI), then adjust threshold for lowest pT items based on this value
+        ttconfig = tc.l1menu.thresholds.typeWideThresholdConfig('jTAU')
+        ptMin = ttconfig["ptMinToTopo1"]
         for thrV in jTAU_cuts:
-            jTauThreshold('jTAU%i' % thrV, 'jTAU').setEt(get_threshold_cut('jTAU', thrV))
+            jTauThreshold('jTAU%i' % thrV, 'jTAU').setEt(max(get_threshold_cut('jTAU', thrV), ptMin))
         jTAU_cuts = [30]
         for thrV in jTAU_cuts:
             jTauThreshold('jTAU%iM' % thrV, 'jTAU').setEt(get_threshold_cut('jTAU', thrV)).setIsolation( isolation = "Medium" )
 
         # jTAU SPARES
-        for thrV in range(1,2):
-            jTauThreshold('jTAUSPARE%i' % thrV, 'jTAU').setEt(thrVal_SPARE)
 
         # jJET (default eta range)
         # For correspondence to Run 2, see https://twiki.cern.ch/twiki/bin/viewauth/Atlas/TriggerNamingRun3#New_naming_for_Calo_items

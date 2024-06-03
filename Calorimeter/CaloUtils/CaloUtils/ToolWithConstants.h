@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CaloUtils/ToolWithConstants.h
@@ -503,6 +503,19 @@ public:
    * Otherwise, it will default to a version number of 0.
    */
   virtual int toolVersion() const;
+
+
+  /**
+   * @brief Return the name of the type of this tool.
+   *
+   * A saved set of constants includes both the C++ class name and
+   * a version number.  Normally, the class name is taken from the
+   * Gaudi type() method, but that may be changed by overriding
+   * this method.  This can be used, for example, when there are
+   * tools with distinct C++ classes but which are yet similar enough
+   * to combine together.
+   */
+  virtual const std::string& toolType() const;
 
 
 private:

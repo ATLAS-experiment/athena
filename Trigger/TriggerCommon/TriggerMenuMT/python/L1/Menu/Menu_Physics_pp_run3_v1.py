@@ -20,7 +20,7 @@ def defineMenu():
         'L1_eEM22M', 'L1_eEM24L', 'L1_eEM24VM',
         'L1_eEM5_EMPTY','L1_eEM9_EMPTY', 'L1_eEM9_FIRSTEMPTY','L1_2eEM9_EMPTY', 'L1_eEM9_UNPAIRED_ISO',
         'L1_eEM15_EMPTY',
-        'L1_eEM26', 'L1_eEM26L', 'L1_eEM26M', 'L1_eEM26T', 'L1_eEM28M',
+        'L1_eEM26', 'L1_eEM26L', 'L1_eEM26M', 'L1_eEM26T', 'L1_eEM28M', 'L1_eEM40L_2eEM18L',
 
         #beam splashes
         'L1_eEM22A', 'L1_eEM22C',
@@ -178,7 +178,7 @@ def defineMenu():
         # multi jet
         'L1_J50_2J40p0ETA25_3J15p0ETA25',
         
-        'L1_3J50', 'L1_4J15', 
+        'L1_3J50', #'L1_4J15', 
 
 
         # multi jet forward

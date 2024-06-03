@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TESTDRIVER_H
@@ -15,7 +15,7 @@ namespace pool {
 
   class TestDriver {
   public:
-    TestDriver();
+    TestDriver(const std::string& filename = "NCI.pool.root", const std::string& catname = "NCI.catatlog.xml" );
     ~TestDriver();
     TestDriver(const TestDriver & ) = delete;
     TestDriver& operator=(const TestDriver & ) = delete;

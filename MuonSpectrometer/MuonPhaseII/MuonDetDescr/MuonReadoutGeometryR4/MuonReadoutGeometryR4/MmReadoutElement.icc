@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONREADOUTGEOMETRYR4_MMREADOUTELEMENT_ICC
 #define MUONREADOUTGEOMETRYR4_MMREADOUTELEMENT_ICC
@@ -19,28 +19,31 @@ inline double MmReadoutElement::moduleHeight() const { return 2.*m_pars.halfHeig
 inline double MmReadoutElement::moduleWidthS() const { return 2.*m_pars.halfShortWidth; }
 inline double MmReadoutElement::moduleWidthL() const { return 2.*m_pars.halfLongWidth; }
 inline double MmReadoutElement::moduleThickness() const { return 2.*m_pars.halfThickness; }
-inline double MmReadoutElement::gapLengthS(const int layer) const { return 2.*m_pars.layers.at(layer-1).design().shortHalfHeight(); }
-inline double MmReadoutElement::gapLengthL(const int layer) const { return 2.*m_pars.layers.at(layer-1).design().longHalfHeight();}
-inline double MmReadoutElement::gapHeight(const int layer) const { return 2.*m_pars.layers.at(layer-1).design().halfWidth();}
+inline double MmReadoutElement::gapLengthS(const IdentifierHash& hash) const { return 2.*stripLayer(hash).design().shortHalfHeight(); }
+inline double MmReadoutElement::gapLengthL(const IdentifierHash& hash) const { return 2.*stripLayer(hash).design().longHalfHeight();}
+inline double MmReadoutElement::gapHeight(const IdentifierHash& hash) const { return 2.*stripLayer(hash).design().halfWidth();}
+inline int MmReadoutElement::readoutSide(const IdentifierHash& measHash) const {
+    return m_pars.readoutSide[static_cast<unsigned>(layerHash(measHash))];
+}
 inline unsigned int MmReadoutElement::nGasGaps() const { return m_pars.layers.size(); }
-inline unsigned int MmReadoutElement::numStrips(const int layer) const { 
-    return m_pars.layers.at(layer-1).design().numStrips();
+inline unsigned int MmReadoutElement::numStrips(const IdentifierHash& hash) const { 
+    return stripLayer(hash).design().numStrips();
   }
-inline unsigned int MmReadoutElement::firstStrip(const int layer) const { 
-    return m_pars.layers.at(layer-1).design().firstStripNumber();
+inline unsigned int MmReadoutElement::firstStrip(const IdentifierHash& hash) const { 
+    return stripLayer(hash).design().firstStripNumber();
   }
-inline double MmReadoutElement::stripLength(const int stripNumb,const int layer) const { 
-    return m_pars.layers.at(layer-1).design().stripLength(stripNumb);
+inline double MmReadoutElement::stripLength(const IdentifierHash& hash) const { 
+    return stripLayer(hash).design().stripLength(stripNumber(hash));
 }
 
 
-inline IdentifierHash MmReadoutElement::createHash(const int strip, const int gasGap) {
+inline IdentifierHash MmReadoutElement::createHash(const int gasGap, const int strip) {
     /*gasGap can be 1 to 4. So we make sure it contributes to the lower 4 bits. (Bit shifting begins from left to right).
       Then we shift the bit position to the left by 4 positions and allocate the strip binary expression.
       (gasGap-1) --> is the binary representation of the gasGap.
       strip --> is the binary representation of the strip.
     */
-    IdentifierHash hash = (gasGap - 1) | strip  << 4;
+    IdentifierHash hash = strip  << 4 | (gasGap - 1);
     return hash;
 }
 
@@ -49,8 +52,7 @@ inline IdentifierHash MmReadoutElement::measurementHash(const Identifier& measId
         ATH_MSG_WARNING("The measurement " << idHelperSvc()->toString(measId)
                         << " picks the wrong readout element " << idHelperSvc()->toStringDetEl(identify()));
     }
-    return createHash(m_idHelper.channel(measId),
-                      m_idHelper.gasGap(measId));
+    return createHash(m_idHelper.gasGap(measId), m_idHelper.channel(measId));
 }
 
 inline IdentifierHash MmReadoutElement::layerHash(const Identifier& measId) const {
@@ -58,7 +60,7 @@ inline IdentifierHash MmReadoutElement::layerHash(const Identifier& measId) cons
         ATH_MSG_WARNING("The measurement " << idHelperSvc()->toString(measId)
                         << " picks the wrong readout element " << idHelperSvc()->toStringDetEl(identify()));
     }
-    return createHash(0, m_idHelper.gasGap(measId));
+    return createHash(m_idHelper.gasGap(measId), 0);
 }
 
 inline IdentifierHash MmReadoutElement::layerHash(const IdentifierHash& measHash) const {
@@ -85,8 +87,7 @@ inline unsigned int MmReadoutElement::stripNumber(const IdentifierHash& measHash
 }
 
 inline const StripLayer& MmReadoutElement::stripLayer(const IdentifierHash& measHash) const {
-    unsigned int gasGap = gasGapNumber(measHash);
-    return m_pars.layers.at(gasGap-1);
+    return *m_pars.layers.at(static_cast<unsigned int>(layerHash(measHash)));
 }
 
 inline const StripLayer& MmReadoutElement::stripLayer(const Identifier& measId) const {

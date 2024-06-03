@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VerboseSelector.h"
@@ -110,10 +110,7 @@ namespace G4UA
         int currentBarcode(0);
 
         if (trackHelper.IsPrimary() || trackHelper.IsRegisteredSecondary()) {
-          // FIXME: re-evaluate this comment below.
-          // ADS this code crashes in MT runs, since atlasG4EvtUserInfo->GetCurrentlyTraced()
-          // is NULL untill we migrate the truth
-          currentBarcode = HepMC::barcode(atlasG4EvtUserInfo->GetCurrentlyTraced());
+          currentBarcode = HepMC::barcode(atlasG4EvtUserInfo->GetCurrentlyTraced()); // FIXME Barcode-based
         }
 
         bool p1 = m_config.targetTrack<0 && m_config.targetBarcode<0 && m_config.targetPdgIDs.empty();

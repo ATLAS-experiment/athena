@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file StoreGate/test/ReadDecorHandle_test.cxx
@@ -218,6 +218,8 @@ void test3()
   assert (h1.auxid() == ityp);
   assert (h1.isPresent());
   assert (!h1.isAvailable());
+  assert (h1.withDefault(1, -1) == -1);
+  assert (h1.withDefault(*(*pcont)[0], -1) == -1);
 
   MyObj::Decorator<int> adec ("aaa");
   adec (*(*pcont)[0]) = 10;
@@ -229,6 +231,8 @@ void test3()
   assert (h1 (2) == 12);
   assert (h1.getDataArray()[0] == 10);
   assert (h1.getDataSpan()[0] == 10);
+  assert (h1.withDefault(1, -1) == 11);
+  assert (h1.withDefault(*(*pcont)[0], -1) == 10);
 
   // Test case of no alias.
   SG::ReadDecorHandleKey<MyObjCont> k2 ("foo.bbb");

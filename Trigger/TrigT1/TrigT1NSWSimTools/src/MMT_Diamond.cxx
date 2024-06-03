@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1NSWSimTools/MMT_Diamond.h"
@@ -19,7 +19,7 @@ void MMT_Diamond::clearEvent() {
   }
 }
 
-void MMT_Diamond::createRoads_fillHits(const unsigned int iterator, std::map<hitData_key,hitData_entry> &hitDatas, const MuonGM::MuonDetectorManager* detManager, std::shared_ptr<MMT_Parameters> par, const int phi) {
+void MMT_Diamond::createRoads_fillHits(const unsigned int iterator, std::vector<hitData_entry> &hitDatas, const MuonGM::MuonDetectorManager* detManager, std::shared_ptr<MMT_Parameters> par, const int phi) {
   ATH_MSG_DEBUG("createRoads_fillHits: Feeding hitDatas Start");
 
   diamond_t entry;
@@ -61,7 +61,7 @@ void MMT_Diamond::createRoads_fillHits(const unsigned int iterator, std::map<hit
   this->setUVfactor(uvfactor);
 
   for (const auto &hit_entry : hitDatas) {
-    auto myhit = std::make_shared<MMT_Hit>(hit_entry.second, detManager, par, planeCoordinates);
+    auto myhit = std::make_shared<MMT_Hit>(hit_entry, detManager, par, planeCoordinates);
     if (myhit->verifyHit()) {
       m_hitslopes.push_back(myhit->getRZSlope());
       entry.ev_hits.push_back(myhit);
@@ -131,6 +131,7 @@ void MMT_Diamond::findDiamonds(const unsigned int iterator, const int event) {
   std::vector< std::pair<int, int> > addc_same = {};
   std::vector<int> to_erase = {};
   int n_addc = 4;
+  int n_vmm  = 128;
 
   // each road makes independent triggers, evaluated on each BC
   for (int bc = m_diamonds[iterator].ev_hits.front()->getBC(); bc < bc_end; bc++) {
@@ -145,13 +146,38 @@ void MMT_Diamond::findDiamonds(const unsigned int iterator, const int event) {
       }
     }
 
-    // Implement ADDC-like filter
+    // Simulate harware filters: ART hits + ADDC filter
     for (unsigned int ib = 0; ib < 8; ib++) { //loop on plane from 0 to 7
+      // VMM-ART-hit filter
+      for (int j = 0; j < n_vmm; j++) {
+        vmm_same.clear();
+        unsigned int k = 0;
+        for (auto hit_pointer: hits_now) {
+          if (static_cast<unsigned int>(hit_pointer->getPlane()) != ib) continue;
+          if (hit_pointer->getVMM() == j){
+            vmm_same.push_back( std::make_pair(k, hit_pointer->getTime()) );
+          }
+          k++;
+        }
+        if (vmm_same.size() > 1) {
+          to_erase.clear();
+          std::sort(vmm_same.begin(), vmm_same.end(), [](const std::pair<int, float>& p1, const std::pair<int, float>& p2) { return p1.second < p2.second; });
+          for (auto pair: vmm_same) to_erase.push_back(pair.first);
+          // reverse and erase
+          std::sort(to_erase.rbegin(), to_erase.rend());
+          to_erase.pop_back(); //removes the hit with the earliest time
+          for (auto l : to_erase) {
+            hits_now.erase(hits_now.begin() + l);
+          }
+        }
+      }
+      // ADDC-like filter
       for (int ia = 0; ia < n_addc; ia++) { // From 0 to 3 (local index of the ART ASIC in the layer)
         addc_same.clear();
         for (unsigned int k = 0; k < hits_now.size(); k++) {
           if ((unsigned int)(hits_now[k]->getPlane()) != ib) continue;
-          if (hits_now[k]->getART() == ia) addc_same.push_back( std::make_pair(k, hits_now[k]->getChannel()) );
+          int istrip = (std::abs(hits_now[k]->getStationEta())-1) * (64*8*10) + hits_now[k]->getChannel(); //needed the global strip index on the sector layer (getChannel returns chamber's local strip index)
+          if (hits_now[k]->getART() == ia) addc_same.emplace_back(k, istrip);
         }
 
         if (addc_same.size() > 8) {
@@ -242,7 +268,7 @@ void MMT_Diamond::findDiamonds(const unsigned int iterator, const int event) {
 }
 
 double MMT_Diamond::phiShift(const int n, const double phi, const char side) const {
-  double Phi = (side == 'A') ? phi : -phi;
+  double Phi = (side == 'A') ? -phi : phi;
   double shift = (n > 8) ? (16-n)*M_PI/8. : n*M_PI/8.;
   if (n < 8)       return (Phi + shift);
   else if (n == 8) return (Phi + ((Phi > 0.) ? -1. : 1.)*shift);

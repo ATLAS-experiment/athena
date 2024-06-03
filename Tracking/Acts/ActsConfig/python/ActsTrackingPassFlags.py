@@ -1,6 +1,6 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration 
 
-from TrkConfig.TrackingPassFlags import createITkTrackingPassFlags, createITkConversionTrackingPassFlags, createITkHeavyIonTrackingPassFlags
+from TrkConfig.TrackingPassFlags import createITkTrackingPassFlags, createITkConversionTrackingPassFlags, createITkHeavyIonTrackingPassFlags, createITkLargeD0TrackingPassFlags
 
 def deactivateAthenaComponents(icf):
     icf.doAthenaCluster = False
@@ -33,6 +33,7 @@ def createActsHeavyIonTrackingPassFlags():
     icf.doActsSpacePoint = True
     icf.doActsSeed = True
     icf.doActsTrack = True
+    icf.minPTSeed = 0.4
     # If we do not want acts ambi resolution, first do the track convertion
     # and then the Athena ambi
     icf.doActsToAthenaTrack = lambda pcf : not pcf.Acts.doAmbiguityResolution
@@ -47,6 +48,25 @@ def createActsHeavyIonTrackingPassFlags():
 
     return icf
 
+def createActsLargeRadiusTrackingPassFlags():
+    icf = createITkLargeD0TrackingPassFlags()
+    icf.extension = "ActsLargeRadius"
+    deactivateAthenaComponents(icf)
+    icf.doActsCluster = True
+    icf.doActsSpacePoint = True
+    icf.doActsSeed = True
+    icf.doActsTrack = True
+    # Ambiguity resolution can follow if ActsTrack is 
+    # enabled. Ambi. can be activated/deactivated with 
+    # the flag: Acts.doAmbiguityResolution
+    icf.doActsAmbiguityResolution = lambda pcf: pcf.Acts.doAmbiguityResolution
+    # Mark as secondary pass 
+    icf.isSecondaryPass = True
+    # For the time being we do not store sepate containers for LRT (to be revised)
+    # In Athena this is handled by the Tracking.storeSeparateLargeD0Container flag
+    icf.storeSeparateContainer = False
+    return icf
+
 def createActsConversionTrackingPassFlags():
     icf = createITkConversionTrackingPassFlags()
     icf.extension = "ActsConversion"
@@ -59,6 +79,8 @@ def createActsConversionTrackingPassFlags():
     # enabled. Ambi. can be activated/deactivated with 
     # the flag: Acts.doAmbiguityResolution
     icf.doActsAmbiguityResolution = lambda pcf: pcf.Acts.doAmbiguityResolution
+    # Mark as secondary pass
+    icf.isSecondaryPass = True
     return icf
     
 def createActsValidateClustersTrackingPassFlags():
@@ -142,20 +164,3 @@ def createActsValidateAmbiguityResolutionTrackingPassFlags():
     icf.doActsToAthenaResolvedTrack = True
     return icf
 
-def createActsBenchmarkSpotTrackingPassFlags():
-    icf = createITkTrackingPassFlags()
-    icf.extension = "ActsBenchmarkSpot"
-    deactivateAthenaComponents(icf)
-    # Very not-standard configuration
-    icf.doAthenaCluster = True
-    icf.doActsCluster = True
-    icf.doAthenaToActsCluster = True
-    icf.doActsSpacePoint = True
-    icf.doActsSeed = True
-    icf.doActsTrack = True
-    icf.doActsAmbiguityResolution = True
-    icf.doActsToAthenaResolvedTrack = True
-    return icf
-
-
-    

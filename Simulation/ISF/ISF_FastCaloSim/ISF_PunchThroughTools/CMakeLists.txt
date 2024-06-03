@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( ISF_PunchThroughTools )
@@ -17,4 +17,4 @@ atlas_add_component( ISF_PunchThroughTools
                      src/*.cxx
                      src/components/*.cxx
                      INCLUDE_DIRS ${HEPPDT_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}  ${EIGEN_INCLUDE_DIRS} ${LWTNN_INCLUDE_DIRS} ${LIBXML2_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${HEPPDT_LIBRARIES} ${ROOT_LIBRARIES} ${CLHEP_LIBRARIES} AtlasHepMCLib ${EIGEN_LIBRARIES} ${LWTNN_LIBRARIES} ${LIBXML2_LIBRARIES} AthenaBaseComps AthenaKernel BarcodeInterfacesLib GeoPrimitives ISF_FastCaloSimInterfaces ISF_FastCaloSimEvent AthContainers GaudiKernel ISF_Event ISF_InterfacesLib PathResolver SubDetectorEnvelopesLib TruthUtils )
+                     LINK_LIBRARIES ${HEPPDT_LIBRARIES} ${ROOT_LIBRARIES} ${CLHEP_LIBRARIES} AtlasHepMCLib ${EIGEN_LIBRARIES} ${LWTNN_LIBRARIES} ${LIBXML2_LIBRARIES} AthenaBaseComps AthenaKernel GeoPrimitives ISF_FastCaloSimInterfaces ISF_FastCaloSimEvent AthContainers GaudiKernel ISF_Event ISF_InterfacesLib PathResolver SubDetectorEnvelopesLib TruthUtils )

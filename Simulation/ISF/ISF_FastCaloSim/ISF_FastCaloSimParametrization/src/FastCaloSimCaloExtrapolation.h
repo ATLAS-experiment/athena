@@ -51,7 +51,8 @@ public:
     ON       //hit position is on cylinder bounds
   };
 
-  virtual void extrapolate(TFCSExtrapolationState& result,const TFCSTruthState* truth) const override final;
+  virtual void extrapolate(TFCSExtrapolationState& result, const TFCSTruthState* truth, const std::vector<G4FieldTrack>& caloSteps) const override final;
+  virtual void extrapolate(TFCSExtrapolationState& result, const TFCSTruthState* truth) const override final;
 
 protected:
 

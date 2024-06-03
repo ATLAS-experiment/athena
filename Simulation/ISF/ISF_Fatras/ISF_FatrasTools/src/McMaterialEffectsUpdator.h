@@ -27,9 +27,6 @@
 // ISF
 #include "ISF_Event/ISFParticleContainer.h"
 
-// Barcode
-#include "BarcodeEvent/PhysicsProcessCode.h"
-
 #ifndef MAXHADINTCHILDREN
 #define MAXHADINTCHILDREN 20
 #endif
@@ -232,7 +229,7 @@ private:
   ToolHandle<iFatras::IPhotonConversionTool> m_conversionTool;
 
   /** MCTruth process code for TruthIncidents created by this tool */
-  Barcode::PhysicsProcessCode m_processCode;
+  int m_processCode;
 
   /** MCTruth process sampling */
   ToolHandle<iFatras::IProcessSamplingTool> m_samplingTool;

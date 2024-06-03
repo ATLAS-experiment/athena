@@ -475,6 +475,13 @@ StatusCode Run2ToRun3TrigNavConverterV2::extractTECtoChainMapping(TEIdToChainsMa
       // we'll assign legs only to these TEs of the steps that have identical multiplicity pattern
       // e.g. for the chain: HLT_2g25_loose_g20 the multiplicities are: [2, 1]
       // 
+
+      // hack for HLT.*tau.*xe.* case
+      if (std::regex_match(chainName, SpecialCases::tauXeChain)) {
+          if (multiplicities.size()==3) multiplicities={1,1};
+          else if (multiplicities.size()==2) multiplicities={1};
+      }
+
       ATH_MSG_DEBUG("CHAIN " << chainName << " needs legs: " << multiplicities );
       std::vector<unsigned int> teIdsLastHealthyStepIds;
 
@@ -495,7 +502,10 @@ StatusCode Run2ToRun3TrigNavConverterV2::extractTECtoChainMapping(TEIdToChainsMa
           }
 
           ATH_MSG_DEBUG("TE multiplicities seen in this step " << teCounts);
-          if ( multiplicities == teCounts ) {
+          bool multiplicityCounts = multiplicities == teCounts;
+          // hack for HLT.*tau.*xe.* case
+          if(std::regex_match(chainName, SpecialCases::tauXeChain)) multiplicityCounts = true;
+          if ( multiplicityCounts ) {
             teIdsLastHealthyStepIds = teIds;
             ATH_MSG_DEBUG("There is a match, will assign chain leg IDs to TEs " << teCounts << " " << teIds);
             for ( size_t legNumber = 0; legNumber < teIds.size(); ++ legNumber){

@@ -39,7 +39,6 @@ function( _add_test name )
       ${ROOT_LIBRARIES}
       ENVIRONMENT "ROOT_INCLUDE_PATH=$ENV{ROOT_INCLUDE_PATH}:${CMAKE_CURRENT_SOURCE_DIR}/TestDictionary"
       PROPERTIES TIMEOUT 300
-      PRE_EXEC_SCRIPT "rm -f pool*.root *xml"
       LOG_IGNORE_PATTERN "POOL_CATALOG is not defined|using default|New file created|FID|0x[0-9a-f]{4,}|APRFileCatalog.*DEBUG"
       DEPENDS ${ARG_DEPENDS} )
 endfunction( _add_test )
@@ -47,30 +46,17 @@ endfunction( _add_test )
 # Declare the test(s) of the package:
 # Make them all run sequentially so PRE_EXEC cleanups do not interfere
 _add_test( FileCatalog_Functionality )
-_add_test( StorageSvc_BasicFunctionality
-  DEPENDS FileCatalog_Functionality_test )
-_add_test( StorageSvc_AuxStore
-  DICTHEADER StorageSvc_AuxStore/AuxStoreTest.h
-  DEPENDS StorageSvc_BasicFunctionality_test )
-_add_test( StorageSvc_MultipleIterators
-  DEPENDS StorageSvc_AuxStore_test )
-_add_test( StorageSvc_ParallelReadWrite
-  DEPENDS StorageSvc_MultipleIterators_test )
-_add_test( StorageSvc_TransientMembers
-  DICTHEADER StorageSvc_TransientMembers/TestClassWithTransients.h
-  DEPENDS StorageSvc_ParallelReadWrite_test )
-
-_add_test( PersistencySvc_Functionality
-  DEPENDS StorageSvc_TransientMembers_test )
-_add_test( PersistencySvc_FileCatalogOperations
-  DEPENDS PersistencySvc_Functionality_test )
-_add_test( PersistencySvc_FileOpenWithoutCatalog
-  DEPENDS PersistencySvc_FileCatalogOperations_test )
-_add_test( PersistencySvc_Parameters
-  DEPENDS PersistencySvc_FileOpenWithoutCatalog_test )
-_add_test( PersistencySvc_NoClassID
-  DICTHEADER PersistencySvc_NoClassID/MyTestClass.h
-  DEPENDS PersistencySvc_Parameters_test )
+_add_test( StorageSvc_BasicFunctionality )
+_add_test( StorageSvc_AuxStore  DICTHEADER StorageSvc_AuxStore/AuxStoreTest.h )
+_add_test( StorageSvc_MultipleIterators )
+_add_test( StorageSvc_ParallelReadWrite )
+_add_test( StorageSvc_TransientMembers DICTHEADER StorageSvc_TransientMembers/TestClassWithTransients.h )
+_add_test( PersistencySvc_Functionality )
+_add_test( PersistencySvc_FileCatalogOperations )
+_add_test( PersistencySvc_FileOpenWithoutCatalog )
+_add_test( PersistencySvc_Parameters )
+_add_test( PersistencySvc_NoClassID DICTHEADER PersistencySvc_NoClassID/MyTestClass.h )
+_add_test( OpenFileDifferentPaths )
 
 # Clean up:
 unset( _add_test )

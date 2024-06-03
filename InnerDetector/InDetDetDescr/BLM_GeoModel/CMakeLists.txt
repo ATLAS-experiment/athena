@@ -5,10 +5,10 @@ atlas_subdir( BLM_GeoModel )
 
 # External dependencies:
 find_package( GeoModel COMPONENTS GeoModelKernel )
-
 # Component(s) in the package:
 atlas_add_component( BLM_GeoModel
                      src/*.cxx
                      src/components/*.cxx
+		     INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
                      LINK_LIBRARIES ${GEOMODEL_LIBRARIES} AthenaBaseComps AthenaKernel GaudiKernel GeoModelInterfaces GeoModelUtilities
                      PRIVATE_LINK_LIBRARIES RDBAccessSvcLib )

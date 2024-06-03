@@ -55,18 +55,18 @@ class GMTreeBrowser {
 
     /** search of top branch : returns mother volume for children matching name
      */
-    const GeoVPhysVol* findTopBranch(const GeoVPhysVol* gv,
-                                     std::string_view name) const;
+    static const GeoVPhysVol* findTopBranch(const GeoVPhysVol* gv,
+                                     std::string_view name) ;
 
    private:
     /** check of rotation invariance */
-    bool identity_check(GeoTrf::RotationMatrix3D rotation, double tol) const;
+    static bool identity_check(GeoTrf::RotationMatrix3D rotation, double tol) ;
     /** printout diff - unify output */
-    void printTranslationDiff(GeoTrf::Transform3D trtest,
+    static void printTranslationDiff(GeoTrf::Transform3D trtest,
                               GeoTrf::Transform3D trref,
-                              double tolerance) const;
-    void printRotationDiff(GeoTrf::Transform3D trtest,
-                           GeoTrf::Transform3D trref, double tolerance) const;
+                              double tolerance) ;
+    static void printRotationDiff(const GeoTrf::Transform3D& trtest,
+                           const GeoTrf::Transform3D& trref, double tolerance) ;
 };
 
 }  // end of namespace Trk

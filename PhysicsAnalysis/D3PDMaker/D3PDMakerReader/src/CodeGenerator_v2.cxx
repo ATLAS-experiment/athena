@@ -17,7 +17,6 @@
 // Gaudi/Athena include(s):
 #include "GaudiKernel/System.h"
 #include "AthenaKernel/errorcheck.h"
-#include "CxxUtils/starts_with.h"
 
 // D3PD include(s):
 #include "D3PDMakerUtils/ObjectMetadata.h"
@@ -78,9 +77,9 @@ namespace {
       //
       ok = true;
       std::string result = type;
-      if( CxxUtils::starts_with (result , "std::vector<" ) ) {
+      if( result.starts_with( "std::vector<" ) ) {
          result.replace( 0, 12, "" );
-      } else if( CxxUtils::starts_with( result, "vector<" ) ) {
+      } else if( result.starts_with( "vector<" ) ) {
          result.replace( 0, 7, "" );
       } else {
          ok = false;

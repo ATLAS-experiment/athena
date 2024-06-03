@@ -32,7 +32,6 @@ ex.max_events = 2000
 ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1_TriggerValidation_prescale"',
             'Trigger.doLVL1=True',
             'Trigger.doRuntimeNaviVal=True']
-ex.args = '--CA'
 
 test = Test.Test()
 test.art_type = 'grid'

@@ -3,6 +3,7 @@
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
+from Campaigns.Utils import Campaign
 
 
 class TauCalibrationConfig (ConfigBlock):
@@ -11,6 +12,8 @@ class TauCalibrationConfig (ConfigBlock):
     def __init__ (self, containerName='') :
         super (TauCalibrationConfig, self).__init__ ()
         self.containerName = containerName
+        self.addOption ('inputContainer', 'TauJets', type=str, 
+            info="select tau input container, by default set to TauJets")     
         self.addOption ('containerName', containerName, type=str,
             noneAction='error',
             info="the name of the output container after calibration.")
@@ -35,7 +38,7 @@ class TauCalibrationConfig (ConfigBlock):
         if config.isPhyslite() :
             config.setSourceName (self.containerName, "AnalysisTauJets")
         else :
-            config.setSourceName (self.containerName, "TauJets")
+            config.setSourceName (self.containerName, self.inputContainer)
 
         # Set up the tau truth matching algorithm:
         if self.rerunTruthMatching and config.dataType() is not DataType.Data:
@@ -67,14 +70,19 @@ class TauCalibrationConfig (ConfigBlock):
         # Set up the tau 4-momentum smearing algorithm:
         alg = config.createAlgorithm( 'CP::TauSmearingAlg', 'TauSmearingAlg' + postfix )
         config.addPrivateTool( 'smearingTool', 'TauAnalysisTools::TauSmearingTool' )
-        alg.smearingTool.isAFII = config.dataType() is DataType.FastSim
+        alg.smearingTool.useFastSim = config.dataType() is DataType.FastSim
         alg.taus = config.readName (self.containerName)
         alg.tausOut = config.copyName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')
 
+        # Additional decorations
+        alg = config.createAlgorithm( 'CP::AsgEnergyDecoratorAlg', 'EnergyDecorator' + self.containerName + self.postfix )
+        alg.particles = config.readName (self.containerName)
+
         config.addOutputVar (self.containerName, 'pt', 'pt')
         config.addOutputVar (self.containerName, 'eta', 'eta', noSys=True)
         config.addOutputVar (self.containerName, 'phi', 'phi', noSys=True)
+        config.addOutputVar (self.containerName, 'e_%SYS%', 'e')
         config.addOutputVar (self.containerName, 'charge', 'charge', noSys=True)
         config.addOutputVar (self.containerName, 'NNDecayMode', 'NNDecayMode', noSys=True)
 
@@ -166,7 +174,7 @@ class TauWorkingPointConfig (ConfigBlock) :
                             'TauAnalysisTools::TauEfficiencyCorrectionsTool' )
             alg.efficiencyCorrectionsTool.TauSelectionTool = '%s/%s' % \
                 ( selectionTool.getType(), selectionTool.getName() )
-            alg.efficiencyCorrectionsTool.isAFII = config.dataType() is DataType.FastSim
+            alg.efficiencyCorrectionsTool.useFastSim = config.dataType() is DataType.FastSim
             alg.scaleFactorDecoration = 'tau_effSF' + selectionPostfix + '_%SYS%'
             alg.outOfValidity = 2 #silent
             alg.outOfValidityDeco = 'bad_eff' + selectionPostfix
@@ -175,8 +183,8 @@ class TauWorkingPointConfig (ConfigBlock) :
             config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'effSF' + postfix)
 
 
-def makeTauCalibrationConfig( seq, containerName, postfix = None,
-                              rerunTruthMatching = None):
+def makeTauCalibrationConfig( seq, containerName, inputContainer='TauJets',
+                              postfix = None, rerunTruthMatching = None):
     """Create tau calibration analysis algorithms
 
     This makes all the algorithms that need to be run first befor
@@ -192,6 +200,7 @@ def makeTauCalibrationConfig( seq, containerName, postfix = None,
     """
 
     config = TauCalibrationConfig (containerName)
+    config.setOptionValue ('inputContainer', inputContainer)
     if postfix is not None :
         config.setOptionValue ('postfix', postfix)
     if rerunTruthMatching is not None :
@@ -225,3 +234,67 @@ def makeTauWorkingPointConfig( seq, containerName, workingPoint, selectionName,
     config.setOptionValue ('legacyRecommendations', legacyRecommendations)
     config.setOptionValue ('noEffSF', noEffSF)
     seq.append (config)
+
+
+class TauTriggerAnalysisSFBlock (ConfigBlock):
+
+    def __init__ (self, configName='') :
+        super (TauTriggerAnalysisSFBlock, self).__init__ ()
+
+        self.addOption ('triggerChainsPerYear', {}, type=None,
+                        info="a dictionary with key (string) the year and value (list of "
+                        "strings) the trigger chains. The default is {} (empty dictionary).")
+        self.addOption ('tauID', '', type=str,
+                        info="the tau quality WP (string) to use.")
+        self.addOption ('containerName', '', type=str,
+                        info="the input tau container, with a possible selection, in "
+                        "the format container or container.selection.")
+
+    def makeAlgs (self, config) :
+
+        if config.dataType() is not DataType.Data:
+            if config.campaign() is Campaign.MC20a:
+                triggers = self.triggerChainsPerYear.get('2015',[])
+                triggers += self.triggerChainsPerYear.get('2016',[])
+                # Remove potential duplicates
+                triggers = list(set(triggers))
+            elif config.campaign() is Campaign.MC20d:
+                triggers = self.triggerChainsPerYear.get('2017',[])
+            elif config.campaign() is Campaign.MC20e:
+                triggers = self.triggerChainsPerYear.get('2018',[])
+            elif config.campaign() in [Campaign.MC21a, Campaign.MC23a]:
+                triggers = self.triggerChainsPerYear.get('2022',[])
+            elif config.campaign() is Campaign.MC23c:
+                triggers = self.triggerChainsPerYear.get('2023',[])
+
+            for trig in triggers:
+                alg = config.createAlgorithm( 'CP::TauEfficiencyCorrectionsAlg',
+                                              'TauTrigEfficiencyCorrectionsAlg' + trig )
+                config.addPrivateTool( 'efficiencyCorrectionsTool',
+                                       'TauAnalysisTools::TauEfficiencyCorrectionsTool' )
+                # SFTriggerHadTau correction type from
+                # https://gitlab.cern.ch/atlas/athena/-/blob/main/PhysicsAnalysis/TauID/TauAnalysisTools/TauAnalysisTools/Enums.h#L79
+                alg.efficiencyCorrectionsTool.EfficiencyCorrectionTypes = [12]
+                alg.efficiencyCorrectionsTool.TriggerName = trig
+
+                # JetIDLevel from
+                # https://gitlab.cern.ch/atlas/athena/-/blob/main/PhysicsAnalysis/TauID/TauAnalysisTools/TauAnalysisTools/Enums.h#L79
+                if self.tauID=="Loose":
+                    JetIDLevel = 7
+                elif self.tauID=="Medium":
+                    JetIDLevel = 8
+                elif self.tauID=="Tight":
+                    JetIDLevel = 9
+                else:
+                    raise ValueError ("invalid tauID: \"" + self.tauID + "\". Allowed values are loose, medium, tight")
+                alg.efficiencyCorrectionsTool.JetIDLevel = JetIDLevel
+                alg.efficiencyCorrectionsTool.TriggerSFMeasurement = "combined"
+
+                alg.scaleFactorDecoration = 'tau_trigEffSF_' + trig + '_%SYS%'
+                alg.outOfValidity = 2 #silent
+                alg.outOfValidityDeco = 'bad_eff_tautrig_' + trig
+                alg.taus = config.readName (self.containerName)
+                alg.preselection = config.getPreselection (self.containerName, self.tauID)
+                config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'trigEffSF_' + trig)
+
+        return

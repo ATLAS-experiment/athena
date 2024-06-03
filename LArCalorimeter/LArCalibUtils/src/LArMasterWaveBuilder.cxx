@@ -1,23 +1,30 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibUtils/LArMasterWaveBuilder.h"
+#include "LArRawConditions/LArWave.h"
+#include "LArRawConditions/LArWaveHelper.h"
+#include "LArRawConditions/LArCaliWave.h"
+#include "LArRawConditions/LArCaliWaveContainer.h"
+
+#include "LArIdentifier/LArOnlineID.h"
+#include "CaloIdentifier/LArEM_ID.h"
 
 #include "GaudiKernel/ToolHandle.h"
-#include "LArRawConditions/LArCaliWaveContainer.h"
 #include "CaloIdentifier/CaloCell_ID.h"
 #include "CaloIdentifier/CaloGain.h"
 
 #include <cstdio>
 #include <fstream>
 #include <iostream>
+#include <memory>
 
 using CaliCellIt = LArCaliWaveContainer::ConstConditionsMapIterator;
 using CaliWaveIt = LArCaliWaveContainer::LArCaliWaves::const_iterator;
 
 inline std::string ChanDacGain(HWIdentifier ch,int DAC,int gain) {
-  char compact[25] ;
+  char compact[25]{} ;
   int ich = ch.get_identifier32().get_compact() ;
   sprintf(compact,"[%10d;%5d,%1d]",ich,DAC,gain) ;
   return std::string(compact) ;
@@ -202,7 +209,7 @@ StatusCode LArMasterWaveBuilder::stop()
   ATH_MSG_INFO ( "Processing LArCaliWaveContainer from StoreGate, key = " << m_keyinput );
 
   // create new LArCaliWaveContainer for master waveforms and dac0 waveforms
-  LArCaliWaveContainer* mwContainer = new LArCaliWaveContainer();
+  auto mwContainer = std::make_unique<LArCaliWaveContainer>();
 
   ATH_CHECK( mwContainer->setGroupingType(m_groupingType,msg()) );
   ATH_CHECK( mwContainer->initialize() );
@@ -459,7 +466,7 @@ StatusCode LArMasterWaveBuilder::stop()
   }  // end loop over gains
 
   // register MW/DAC0 container into detStore
-  ATH_CHECK( detStore()->record(mwContainer,m_keyoutput) );
+  ATH_CHECK( detStore()->record(std::move(mwContainer),m_keyoutput) );
   ATH_MSG_INFO ( "Master waveforms' container recorded into StoreGate, key = " << m_keyoutput );
 
   ATH_MSG_INFO ( "List of DACs rejected" );

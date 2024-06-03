@@ -21,7 +21,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # Component(s) in the package:
 atlas_add_library( VP1RawDataSystems VP1RawDataSystems/*.h src/*.h src/*.cxx src/*.qrc  
                    PUBLIC_HEADERS VP1RawDataSystems
-                   INCLUDE_DIRS ${EIGEN_INCLUDE_DIRS}
+                   INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS} ${EIGEN_INCLUDE_DIRS}
                    PRIVATE_INCLUDE_DIRS ${COIN3D_INCLUDE_DIRS}
                    FILES LUCID_RawEvent/LUCID_Digit.h
                    LINK_LIBRARIES ${EIGEN_LIBRARIES} GeoPrimitives VP1Base GL

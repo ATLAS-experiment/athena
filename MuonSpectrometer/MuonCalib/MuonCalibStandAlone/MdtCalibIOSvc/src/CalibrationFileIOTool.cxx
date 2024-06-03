@@ -7,7 +7,6 @@
 
 // Framework
 #include "CxxUtils/checker_macros.h"
-#include "CxxUtils/starts_with.h"
 
 // MdtCalibUtils
 #include "MdtCalibUtils/RtDataFromFile.h"
@@ -214,7 +213,7 @@ namespace MuonCalib {
                                                               int &phi, int &ml) {
         // check if name begins with the prefix
         std::string prefix_st(prefix);
-        if (!CxxUtils::starts_with (nm, prefix_st)) return false;
+        if (!nm.starts_with( prefix_st)) return false;
         // check if filename ends in .dat
         if (!CxxUtils::ends_with (nm, ".dat")) return false;
         // cut prefix and suffix from filename

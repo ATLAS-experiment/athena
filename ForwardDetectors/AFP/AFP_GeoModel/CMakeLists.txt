@@ -11,6 +11,6 @@ find_package( GeoModel COMPONENTS GeoModelKernel )
 atlas_add_component( AFP_GeoModel
 		     src/*.cxx
                      src/components/*.cxx
-		     INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${GEOMODEL_INCLUDE_DIRS}
+		     INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
 		     LINK_LIBRARIES ${CLHEP_LIBRARIES} ${GEOMODEL_LIBRARIES} AFP_Geometry AthenaKernel GeoModelUtilities AthenaPoolUtilities GaudiKernel GeoModelInterfaces GeoPrimitives StoreGateLib )
 

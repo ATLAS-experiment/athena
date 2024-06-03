@@ -27,7 +27,6 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;  // unit test
 #include "GeoPrimitives/GeoPrimitives.h"
 
 #include "AtlasDetDescr/AtlasRegion.h"
-#include "BarcodeEvent/Barcode.h"
 
 // HepMC includes
 #include "AtlasHepMC/GenParticle.h"
@@ -49,7 +48,7 @@ namespace MCTesting {
     // global mock data used by several TruthIncident tests
     const ISF::DetRegionSvcIDPair origin( AtlasDetDescr::fAtlasCalo, 2 );
    // set this to conversion
-    Barcode::PhysicsProcessCode procBC = 14;
+    int procBC = 14;
     // rounding
     double eps = pow(10,-8);
 
@@ -173,11 +172,11 @@ namespace MCTesting {
       int    pdgCode = 675;
       int status     =  200045;
       double time    = 923.;
-      Barcode::ParticleBarcode partBC = 1;
-      Barcode::ParticleBarcode partID = 1;
+      int partBC = 1;
+      int partID = 1;
       ISF::TruthBinding *truth = 0;
-      Barcode::ParticleBarcode part2BC = 2;
-      Barcode::ParticleBarcode part2ID = 2;
+      int part2BC = 2;
+      int part2ID = 2;
       m_isp1 = std::make_unique<ISF::ISFParticle>(
                                                   pos,
                                                   mom,
@@ -284,7 +283,7 @@ namespace MCTesting {
 
   TEST_F(ISFTruthIncident_test, testChildBarcode) {
     ASSERT_EQ(m_truthIncident->childBarcode(0), m_isp2->barcode());
-    const Barcode::ParticleBarcode undefBC = Barcode::fUndefinedBarcode;
+    const int undefBC = HepMC::UNDEFINED_ID;
     const unsigned int childIndexOutOfRange = 1;
     ASSERT_EQ(undefBC, m_truthIncident->childBarcode(childIndexOutOfRange));
   }
@@ -300,7 +299,7 @@ namespace MCTesting {
     // prepare test info:
     // used to test gP child: index and bc
     const unsigned int childIndex = 0;
-    const Barcode::ParticleBarcode childBarcode = 3;
+    const int childBarcode = 3;
 
     // used to test TruthIncident: no change to properties, apart from BC
     // snapshot of original child properties
@@ -328,17 +327,6 @@ namespace MCTesting {
     ASSERT_EQ(m_truthIncident->childPt2(0), originalChildPt2);
     ASSERT_EQ(m_truthIncident->childPdgCode(0), originalChildPdgCode);
     ASSERT_EQ(m_truthIncident->childBarcode(0), childBarcode);
-
-  }
-
-  TEST_F(ISFTruthIncident_test, testSetAllChildrenBarcodes) {
-
-    Barcode::ParticleBarcode newBarcode = 42;
-    unsigned short numSec = m_truthIncident->numberOfChildren();
-    m_truthIncident->setAllChildrenBarcodes(newBarcode);
-    for (unsigned short index=0; index<numSec; index++) {
-      ASSERT_EQ(m_truthIncident->childBarcode(index), newBarcode);
-    }
 
   }
 

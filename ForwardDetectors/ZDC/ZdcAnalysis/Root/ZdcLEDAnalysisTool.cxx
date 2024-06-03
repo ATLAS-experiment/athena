@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <sstream>
@@ -13,6 +13,7 @@
 #include "AsgDataHandles/ReadDecorHandle.h"
 #include <AsgDataHandles/WriteHandle.h>
 #include <AsgDataHandles/WriteDecorHandle.h>
+#include "AthContainers/ConstAccessor.h"
 
 namespace ZDC
 {
@@ -323,9 +324,11 @@ ZDCLEDModuleResults ZdcLEDAnalysisTool::processZDCModule(const xAOD::ZdcModule& 
 {
   ATH_MSG_DEBUG("Processing ZDC side, channel = " << module.zdcSide() << ", " << module.zdcModule());
   bool doLG = false;
-  
-  std::vector<uint16_t> HGSamples = module.auxdata<std::vector<uint16_t> >("g1data");
-  std::vector<uint16_t> LGSamples = module.auxdata<std::vector<uint16_t> >("g0data");
+
+  static const SG::ConstAccessor<std::vector<uint16_t> > g1dataAcc ("g1data");
+  static const SG::ConstAccessor<std::vector<uint16_t> > g0dataAcc ("g0data");
+  std::vector<uint16_t> HGSamples = g1dataAcc (module);
+  std::vector<uint16_t> LGSamples = g0dataAcc (module);
 
   std::vector<uint16_t>::const_iterator maxIter = std::max_element(HGSamples.begin(), HGSamples.end());
   if (maxIter != HGSamples.end()) {
@@ -343,7 +346,8 @@ ZDCLEDModuleResults ZdcLEDAnalysisTool::processZDCModule(const xAOD::ZdcModule& 
 ZDCLEDModuleResults ZdcLEDAnalysisTool::processRPDModule(const xAOD::ZdcModule& module)
 {
   ATH_MSG_DEBUG("Processing RPD side, channel = " << module.zdcSide() << ", " << module.zdcChannel());
-  return processModuleData(module.auxdata<std::vector<uint16_t> >("g0data"), m_sampleAnaStartRPD, m_sampleAnaEndRPD, 1);
+  static const SG::ConstAccessor<std::vector<uint16_t> > g0dataAcc ("g0data");
+  return processModuleData(g0dataAcc (module), m_sampleAnaStartRPD, m_sampleAnaEndRPD, 1);
 }
 
 ZDCLEDModuleResults ZdcLEDAnalysisTool::processModuleData(const std::vector<unsigned short>& data,

@@ -31,7 +31,7 @@ class EMBremFit : public egDetail
   EMBremFit();
 
   /** @brief Destructor*/
-  virtual ~EMBremFit();
+  virtual ~EMBremFit() = default;
 
   void print() const; 
   virtual const std::string& className() const;

@@ -161,6 +161,7 @@
 #include "dqm_algorithms/TRTCheckPeakSimple.h"
 #include "dqm_algorithms/TRTHistogramHasNonZeroEntries.h"
 #include "dqm_algorithms/TRTWeightedAverage.h"
+#include "dqm_algorithms/TileTriggerMonitor.h"
 #include "dqm_algorithms/TripleGaussCollFit.h"
 #include "dqm_algorithms/LastBinThresholdAction.h"
 #endif // DQM_ALGORITHMS_DQM_ALGORITHMSDICT_H

@@ -19,7 +19,8 @@ def LArFlatFromFileCfg(flags):
                                                    OFCInput="",
                                                    SingleInput=flags.LArCalib.Input.Files[0],
                                                    Folder=flags.LArCalib.DetCellParams.Folder,
-                                                   Blob=flags.LArCalib.Input.SubDet
+                                                   Blob=flags.LArCalib.Input.SubDet,
+                                                   checkInput=flags.LArCalib.doValidation
                                                    ))
 
    from RegistrationServices.OutputConditionsAlgConfig import OutputConditionsAlgCfg
@@ -60,6 +61,7 @@ if __name__=="__main__":
     parser.add_argument('-b','--blob', dest='blb', default="", help='Blob name for constants`', type=str)
     parser.add_argument('-o','--outfile', dest='outfile', default="Float.db", help='Output sqlite file', type=str)
     parser.add_argument('-c','--isSC', dest='supercells', default=False, action="store_true", help='is SC data ?')
+    parser.add_argument('-m','--nocheck', dest='check', default=True, action="store_false", help='check input file ?')
  
     args = parser.parse_args()
     if help in args and args.help is not None and args.help:
@@ -95,6 +97,8 @@ if __name__=="__main__":
     flags.LArCalib.Input.Files=[args.infile]
     flags.LArCalib.Input.Type=args.tag
     flags.LArCalib.Input.SubDet=args.blb
+
+    flags.LArCalib.doValidation=args.check
 
     #Define the global output Level:
     from AthenaCommon.Constants import INFO

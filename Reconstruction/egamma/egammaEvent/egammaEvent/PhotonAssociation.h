@@ -31,7 +31,7 @@ namespace Analysis
       
       
     public:
-      PhotonAssociation() ;      //!< constructor
+      PhotonAssociation() = default;      //!< constructor
       PhotonAssociation(const NameType& name) ;      //!< constructor
       ~PhotonAssociation() = default;
       

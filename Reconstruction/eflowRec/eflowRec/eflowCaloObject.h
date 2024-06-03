@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EFLOWEVENT_EFLOWCALOOBJECT_H
@@ -61,7 +61,7 @@ public:
 
 
   /* Link accessor methods */
-  std::vector<std::pair<eflowTrackClusterLink*,std::pair<float,float> > > efRecLink() const { return m_trackClusterLinks; }
+  const std::vector<std::pair<eflowTrackClusterLink*,std::pair<float,float> > >& efRecLink() const { return m_trackClusterLinks; }
   void clearLinks() { m_trackClusterLinks.clear(); }
 
   /* Calculate total tracks energy, total tracks energy variance, total cluster energy for subtraction */

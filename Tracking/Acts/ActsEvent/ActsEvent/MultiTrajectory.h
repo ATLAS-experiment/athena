@@ -6,6 +6,7 @@
 #include <memory>
 #include <type_traits>
 #include <variant>
+#include <string_view>
 
 #include "Acts/EventData/MultiTrajectory.hpp"
 #include "Acts/EventData/SourceLink.hpp"
@@ -150,7 +151,7 @@ class MutableMultiTrajectory final
    * @param key name of the decoration
    */
   template <typename T>
-  void addColumn_impl(const std::string& key);
+  void addColumn_impl(std::string_view key);
 
   /**
    * @brief unsets a given state
@@ -365,7 +366,6 @@ class MutableMultiTrajectory final
 
   friend ActsTrk::MutableTrackContainerHandlesHelper;
 
-
  private:
 
   std::unique_ptr<xAOD::TrackStateAuxContainer> m_trackStatesAux;
@@ -389,7 +389,8 @@ class MutableMultiTrajectory final
 
   std::vector<StoredSurface> m_surfaces;
   ActsGeometryContext m_geoContext;
-  // addjust prealocated size to actualy used
+
+  // adjust preallocated size to actually used
   void trim();
 };
 

@@ -19,7 +19,6 @@ def PunchThroughClassifierCfg(flags, name="ISF_PunchThroughClassifier", **kwargs
 
 
 def PunchThroughToolCfg(flags, name="ISF_PunchThroughTool", **kwargs):
-    from BarcodeServices.BarcodeServicesConfig import BarcodeSvcCfg
     from SubDetectorEnvelopes.SubDetectorEnvelopesConfig import EnvelopeDefSvcCfg
     acc = ComponentAccumulator()
     if "PunchThroughClassifier" not in kwargs:
@@ -39,7 +38,6 @@ def PunchThroughToolCfg(flags, name="ISF_PunchThroughTool", **kwargs):
     kwargs.setdefault("FullCorrelationEnergy"   , [ 100000., 100000., 100000., 100000.,      0., 100000., 100000., 100000., 100000.]    )
     kwargs.setdefault("MinEnergy"               , [   938.3,   135.6,     50.,     50.,   105.7,   939.6, 493.7,   497.6,   497.6 ]    )
     kwargs.setdefault("MaxNumParticles"         , [      -1,      -1,      -1,      -1,      -1,    -1,     -1,     -1,     -1 ]    )
-    kwargs.setdefault("BarcodeSvc", acc.getPrimaryAndMerge(BarcodeSvcCfg(flags)).name)
     kwargs.setdefault("EnvelopeDefSvc", acc.getPrimaryAndMerge(EnvelopeDefSvcCfg(flags)).name)
     kwargs.setdefault("BeamPipeRadius", 500.)
     acc.setPrivateTools(CompFactory.ISF.PunchThroughTool(name, **kwargs))

@@ -44,6 +44,10 @@ def getFlagsForActiveConfig(
             "Menu code invoked ID config without flags.Tracking.ActiveConfig for %s",
             config_name,
         )
+
+    if flags.Trigger.useActsTracking:
+        return flags.cloneAndReplace("Tracking.ActiveConfig", "Trigger.ActsTracking."+config_name)
+    
     return cloneFlagsToActiveConfig(flags, config_name)
 
 

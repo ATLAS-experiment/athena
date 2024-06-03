@@ -15,18 +15,31 @@
 
 namespace {
   const std::string jetLinkName = "jetLink";
+
+  auto getOnnxUtil(const std::string& nn_file) {
+    using namespace FlavorTagDiscriminants;
+    std::string fullPathToOnnxFile = PathResolverFindCalibFile(nn_file);
+    return std::make_shared<const OnnxUtil>(fullPathToOnnxFile);
+  }
 }
 
 namespace FlavorTagDiscriminants {
 
   GNN::GNN(const std::string& nn_file, const GNNOptions& o):
-    m_onnxUtil(nullptr),
+    GNN(getOnnxUtil(nn_file), o)
+  {
+  }
+
+  GNN::GNN(const GNN& old, const GNNOptions& o):
+    GNN(old.m_onnxUtil, o)
+  {
+  }
+
+  GNN::GNN(std::shared_ptr<const OnnxUtil> util, const GNNOptions& o):
+    m_onnxUtil(util),
     m_jetLink(jetLinkName),
     m_defaultValue(o.default_output_value)
   {
-    // Load and initialize the neural network model from the given file path.
-    std::string fullPathToOnnxFile = PathResolverFindCalibFile(nn_file);
-    m_onnxUtil = std::make_shared<OnnxUtil>(fullPathToOnnxFile);
 
     // Extract metadata from the ONNX file, primarily about the model's inputs.
     auto lwt_config = m_onnxUtil->getLwtConfig();
@@ -34,7 +47,6 @@ namespace FlavorTagDiscriminants {
     // Create configuration objects for data preprocessing.
     auto [inputs, constituents_configs, options] = dataprep::createGetterConfig(
         lwt_config, o.flip_config, o.variable_remapping, o.track_link_type);
-    
     for (auto config : constituents_configs){
       switch (config.type){
       case ConstituentsType::TRACK:
@@ -46,7 +58,6 @@ namespace FlavorTagDiscriminants {
       }
     }
 
-    
     // Initialize jet and b-tagging input getters.
     auto [vb, vj, ds] = dataprep::createBvarGetters(inputs);
     m_varsFromBTag = vb;
@@ -95,9 +106,22 @@ namespace FlavorTagDiscriminants {
     decorate(jet, jet);
   }
 
-  void GNN::decorateWithDefaults(const xAOD::Jet& jet) const {
+  void GNN::decorateWithDefaults(const SG::AuxElement& jet) const {
     for (const auto& dec: m_decorators.jetFloat) {
       dec.second(jet) = m_defaultValue;
+    }
+    // for some networks we need to set a lot of empty vectors as well
+    if (m_onnxUtil->getOnnxModelVersion() == OnnxModelVersion::V1) {
+      // vector outputs, e.g. track predictions
+      for (const auto& dec: m_decorators.jetVecChar) {
+        dec.second(jet) = {};
+      }
+      for (const auto& dec: m_decorators.jetVecFloat) {
+        dec.second(jet) = {};
+      }
+      for (const auto& dec: m_decorators.jetTrackLinks) {
+        dec.second(jet) = {};
+      }
     }
   }
 
@@ -107,8 +131,9 @@ namespace FlavorTagDiscriminants {
 
     // prepare input
     // -------------
-    std::map<std::string, input_pair> gnn_input;
+    std::map<std::string, Inputs> gnn_inputs;
 
+    // jet level inputs
     std::vector<float> jet_feat;
     for (const auto& getter: m_varsFromBTag) {
       jet_feat.push_back(getter(btag).second);
@@ -117,18 +142,27 @@ namespace FlavorTagDiscriminants {
       jet_feat.push_back(getter(jet).second);
     }
     std::vector<int64_t> jet_feat_dim = {1, static_cast<int64_t>(jet_feat.size())};
+    Inputs jet_info(jet_feat, jet_feat_dim);
+    if (m_onnxUtil->getOnnxModelVersion() == OnnxModelVersion::V2) {
+      gnn_inputs.insert({"jets", jet_info});
+    } else {
+      gnn_inputs.insert({"jet_features", jet_info});
+    }
 
-    input_pair jet_info (jet_feat, jet_feat_dim);
-    gnn_input.insert({"jet_features", jet_info});
-
+    // constituent level inputs
     Tracks input_tracks;
-
     for (auto loader : m_constituentsLoaders){
-      auto [sequence_name, sequence_data, sequence_constituents] = loader->getData(jet, btag);
-      gnn_input.insert({sequence_name, sequence_data});
-      // collect tracks for decoration
+      auto [input_name, input_data, input_objects] = loader->getData(jet, btag);
+      if (m_onnxUtil->getOnnxModelVersion() != OnnxModelVersion::V2) {
+        input_name.pop_back();
+        input_name.append("_features");
+      }
+      gnn_inputs.insert({input_name, input_data});
+      
+      // for now we only collect tracks for aux task decoration
+      // they have to be converted back from IParticle to TrackParticle first
       if (loader->getType() == ConstituentsType::TRACK){
-        for (auto constituent : sequence_constituents){
+        for (auto constituent : input_objects){
           input_tracks.push_back(dynamic_cast<const xAOD::TrackParticle*>(constituent));
         }
       }
@@ -136,7 +170,7 @@ namespace FlavorTagDiscriminants {
 
     // run inference
     // -------------
-    auto [out_f, out_vc, out_vf] = m_onnxUtil->runInference(gnn_input);
+    auto [out_f, out_vc, out_vf] = m_onnxUtil->runInference(gnn_inputs);
 
     // decorate outputs
     // ----------------

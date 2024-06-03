@@ -25,6 +25,9 @@ class LArBadChannelMask {
   bool cellShouldBeMasked(const LArBadChannelCont* bcCont, const HWIdentifier& hardwareId) const;
   bool cellShouldBeMasked(const LArBadChannelCont* bcCont, const Identifier& offlineId) const;
 
+  bool isSC() const {return m_isSC;}
+  void setSC() {m_isSC=true;}
+
  private:
   const static LArBadChanBitPacking  s_bitPacking; // A helper for bit operations, etc.
   const static LArBadChanSCBitPacking  s_bitSCPacking; // A helper for bit operations, etc.

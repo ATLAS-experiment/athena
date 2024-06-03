@@ -22,13 +22,13 @@ if __name__ == "__main__":
     from TrkConfig.TrkConfigFlags import TrackingComponent
     configurations = ["Main",
                       "Acts",
+                      "ActsLargeRadius",
                       "ActsHeavyIon",
                       "ActsValidateClusters",
                       "ActsValidateSpacePoints",
                       "ActsValidateSeeds",
                       "ActsValidateTracks",
-                      "ActsValidateAmbiguityResolution",
-                      "ActsBenchmarkSpot"]
+                      "ActsValidateAmbiguityResolution"]
 
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()

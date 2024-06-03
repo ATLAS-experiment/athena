@@ -16,7 +16,7 @@ inline bool CylinderSurface::operator==(const CylinderSurface& csf) const
 }
 
 /** Return the surface type */
-inline SurfaceType
+inline constexpr SurfaceType
 CylinderSurface::type() const
 {
   return CylinderSurface::staticType;

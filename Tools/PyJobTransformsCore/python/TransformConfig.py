@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 __author__ = "clat@hep.ph.bham.ac.uk"
 
@@ -287,7 +287,6 @@ class AllowedExpression:
 
 class JobConfigMetaClass(type):
     def __init__( self, name, bases, dict ):
-##        print "JobConfigMetaClass( self=%r, name=%r, bases=%r, dict=%r )" % (self,name,bases,dict)
         if '__slots__' not in dict:
             raise TransformConfigError('Class %s does not have member __slots__. Please add __slots__ = ()'
                                        ' to the class definition' % (name,) )
@@ -296,24 +295,19 @@ class JobConfigMetaClass(type):
         #
         # first add it to __slots__
         slots = self.__slots__
-##        print "%s.__slots__ before: = %r" % (self.__name__,slots)
         descrName = '__properties'
         if descrName not in slots:
             # add variable
             slots += ( descrName, )
             # synchronise dict
             dict['__slots__'] = slots
-##            print "%s.__slots__ after: = %r" % (self.__name__,slots)
         # then add the list itself
         setattr(self,descrName,[])
         descrList = getattr(self,descrName)
         # set names of properties and add them to the list of properties
         for n,attrib in dict.items():
-#            attrib = getattr(self,n)
             if isinstance(attrib,Descriptor):
-##                print "Setting name of %s.%s" % (self.__name__,n)
-                setattr(attrib,'_Descriptor__name',n)
-##                print "Adding %s.%s to %s.%s" % (self.__name__,n,self.__name__,descrName)
+                setattr(attrib,'_Descriptor__name',n)  # noqa: B010 (private property)
                 descrList.append(attrib)
 
         type.__init__(self,name,bases,dict)
@@ -365,7 +359,7 @@ class JobConfig(with_metaclass(JobConfigMetaClass,object)):
 ##        print "%s.properties()" % self.__name__
         descr = []
         for cl in self.__class__.__bases__ + (self.__class__,):
-            descr += getattr(cl,'__properties')
+            descr += getattr(cl,'__properties')  # noqa: B009 (private property)
         return descr
     
 

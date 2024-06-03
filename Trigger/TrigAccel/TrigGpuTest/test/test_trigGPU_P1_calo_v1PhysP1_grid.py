@@ -4,8 +4,6 @@
 # art-description: Trigger athenaHLT test of the PhysicsP1_pp_run3_v1 menu
 # art-type: grid
 # art-include: main/Athena
-# art-include: 24.0/Athena
-# art-athena-mt: 4
 # art-architecture: '#&nvidia'
 # art-output: *.txt
 # art-output: *.log

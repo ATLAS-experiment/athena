@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "egammaUtils/eg_resolution.h"
@@ -9,7 +9,10 @@
 #include "xAODEgamma/Photon.h"
 #include <cassert>
 #include <stdexcept>
+#include <map>
+#include <string>
 
+namespace{
 template<typename T>
 std::unique_ptr<T>
 get_object(TFile& file, const std::string& name)
@@ -21,69 +24,58 @@ get_object(TFile& file, const std::string& name)
   obj->SetDirectory(nullptr);
   return std::unique_ptr<T>(obj);
 }
+}
 
 eg_resolution::eg_resolution(const std::string& configuration)
 {
+
+  static const std::map<std::string, std::array<std::string, 4>> fileMap = {
+      {"run1",
+       {"ElectronPhotonFourMomentumCorrection/v5/"
+        "resolutionFit_electron_run1.root",
+        "ElectronPhotonFourMomentumCorrection/v5/"
+        "resolutionFit_recoUnconv_run1.root",
+        "ElectronPhotonFourMomentumCorrection/v5/"
+        "resolutionFit_recoConv_run1.root",
+        "ElectronPhotonFourMomentumCorrection/v5/"
+        "resolutionFit_trueUnconv_run1.root"}},
+      {"run2_pre",
+       {"ElectronPhotonFourMomentumCorrection/v5/"
+        "resolutionFit_electron_run2_pre.root",
+        "ElectronPhotonFourMomentumCorrection/v5/"
+        "resolutionFit_recoUnconv_run2_pre.root",
+        "ElectronPhotonFourMomentumCorrection/v5/"
+        "resolutionFit_recoConv_run2_pre.root",
+        "ElectronPhotonFourMomentumCorrection/v5/"
+        "resolutionFit_trueUnconv_run2_pre.root"}},
+      {"run2_R21_v1",
+       {"ElectronPhotonFourMomentumCorrection/v20/"
+        "resolutionFit_electron_run2_release21_es2017_R21_v1.root",
+        "ElectronPhotonFourMomentumCorrection/v20/"
+        "resolutionFit_recoUnconv_run2_release21_es2017_R21_v1.root",
+        "ElectronPhotonFourMomentumCorrection/v20/"
+        "resolutionFit_recoConv_run2_release21_es2017_R21_v1.root",
+        "ElectronPhotonFourMomentumCorrection/v20/"
+        "resolutionFit_trueUnconvertedPhoton_run2_release21_es2017_R21_v1.root"}}};
   std::unique_ptr<TFile> file0;
   std::unique_ptr<TFile> file1;
   std::unique_ptr<TFile> file2;
   std::unique_ptr<TFile> file3;
-  if (configuration == "run1") {
-    file0 = std::make_unique<TFile>(
-      PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v5/"
-                                "resolutionFit_electron_run1.root")
-        .c_str());
-    file1 = std::make_unique<TFile>(
-      PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v5/"
-                                "resolutionFit_recoUnconv_run1.root")
-        .c_str());
-    file2 = std::make_unique<TFile>(
-      PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v5/"
-                                "resolutionFit_recoConv_run1.root")
-        .c_str());
-    file3 = std::make_unique<TFile>(
-      PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v5/"
-                                "resolutionFit_trueUnconv_run1.root")
-        .c_str());
-  } else if (configuration == "run2_pre") {
-    file0 = std::make_unique<TFile>(
-      PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v5/"
-                                "resolutionFit_electron_run2_pre.root")
-        .c_str());
-    file1 = std::make_unique<TFile>(
-      PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v5/"
-                                "resolutionFit_recoUnconv_run2_pre.root")
-        .c_str());
-    file2 = std::make_unique<TFile>(
-      PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v5/"
-                                "resolutionFit_recoConv_run2_pre.root")
-        .c_str());
-    file3 = std::make_unique<TFile>(
-      PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v5/"
-                                "resolutionFit_trueUnconv_run2_pre.root")
-        .c_str());
-  } else if (configuration == "run2_R21_v1") {
-    file0 = std::make_unique<TFile>(
-      PathResolverFindCalibFile(
-        "ElectronPhotonFourMomentumCorrection/v20/"
-        "resolutionFit_electron_run2_release21_es2017_R21_v1.root")
-        .c_str());
-    file1 = std::make_unique<TFile>(
-      PathResolverFindCalibFile(
-        "ElectronPhotonFourMomentumCorrection/v20/"
-        "resolutionFit_recoUnconv_run2_release21_es2017_R21_v1.root")
-        .c_str());
-    file2 = std::make_unique<TFile>(
-      PathResolverFindCalibFile(
-        "ElectronPhotonFourMomentumCorrection/v20/"
-        "resolutionFit_recoConv_run2_release21_es2017_R21_v1.root")
-        .c_str());
-    file3 = std::make_unique<TFile>(
-      PathResolverFindCalibFile(
-        "ElectronPhotonFourMomentumCorrection/v20/"
-        "resolutionFit_trueUnconvertedPhoton_run2_release21_es2017_R21_v1.root")
-        .c_str());
+
+  auto config = fileMap.find(configuration);
+
+  if (config != fileMap.end()) {
+    const std::array<std::string, 4>& files = config->second;
+    file0 =
+        std::make_unique<TFile>(PathResolverFindCalibFile(files[0]).c_str());
+    file1 =
+        std::make_unique<TFile>(PathResolverFindCalibFile(files[1]).c_str());
+    file2 =
+        std::make_unique<TFile>(PathResolverFindCalibFile(files[2]).c_str());
+    file3 =
+        std::make_unique<TFile>(PathResolverFindCalibFile(files[3]).c_str());
   }
+
   if (!file0 or !file1 or !file2 or !file3) {
     throw std::runtime_error("cannot find input file for resolutions");
   }

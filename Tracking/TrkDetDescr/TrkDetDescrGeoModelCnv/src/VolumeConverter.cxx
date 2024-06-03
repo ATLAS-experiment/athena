@@ -54,7 +54,7 @@ std::unique_ptr<TrackingVolume> VolumeConverter::translate(const GeoVPhysVol* gv
     VolumePairVec constituents = splitComposedVolume(*volGeo);
 
     // material properties
-    Material mat = m_materialConverter.convert(gv->getLogVol()->getMaterial());
+    Material mat = Trk::GeoMaterialConverter::convert(gv->getLogVol()->getMaterial());
 
     // calculate precision of volume estimate  taking into account material
     // properties
@@ -132,7 +132,7 @@ std::unique_ptr<TrackingVolume> VolumeConverter::translate(const GeoVPhysVol* gv
         findVolumeSpan(volGeo->volumeBounds(), transf, 0., 0.);
 
     bool isCyl = false;
-    for (auto fv : constituents) {
+    for (const auto& fv : constituents) {
         const CylinderVolumeBounds* cyl =
             dynamic_cast<const CylinderVolumeBounds*>(
                 &(fv.first->volumeBounds()));
@@ -178,7 +178,7 @@ std::unique_ptr<TrackingVolume> VolumeConverter::translate(const GeoVPhysVol* gv
                 0.5 * ((*span).yMax - (*span).yMin),
                 0.5 * ((*span).zMax - (*span).zMin));
         envelope = std::make_unique<Volume>(
-            makeTransform(std::move(cylTrf)), bounds.release());
+            makeTransform(cylTrf), bounds.release());
     } else {
         double dPhi = (*span).phiMin > (*span).phiMax
                           ? (*span).phiMax - (*span).phiMin + 2 * M_PI
@@ -197,7 +197,7 @@ std::unique_ptr<TrackingVolume> VolumeConverter::translate(const GeoVPhysVol* gv
                 0.5 * ((*span).zMax - (*span).zMin));
         }
         envelope = std::make_unique<Volume>(
-            makeTransform(std::move(cylTrf)), cylBounds.release());
+            makeTransform(cylTrf), cylBounds.release());
     }
 
     double volEnv = calculateVolume(*envelope);
@@ -288,7 +288,7 @@ double VolumeConverter::resolveBooleanVolume(const Volume& trVol,
             bool noovrlp = false;
             while (tit + 1 != (*sIter).parts.end()) {
                 std::pair<bool, std::unique_ptr<Volume>> overlap =
-                    m_intersectionHelper.intersect(**tit, **(tit + 1));
+                    Trk::VolumeIntersection::intersect(**tit, **(tit + 1));
                 if (overlap.first && !overlap.second) {
                     sIter=constituents.erase(sIter);
                     noovrlp = true;
@@ -310,7 +310,7 @@ double VolumeConverter::resolveBooleanVolume(const Volume& trVol,
                         break;
                     }
                     std::pair<bool, std::unique_ptr<Volume>> overlap =
-                        m_intersectionHelper.intersectApproximative(
+                        Trk::VolumeIntersection::intersectApproximative(
                             **tit, **(tit + 1));
                     if (overlap.first) {
                         if (overlap.second) {
@@ -337,7 +337,7 @@ double VolumeConverter::resolveBooleanVolume(const Volume& trVol,
         }
     }
 
-    if (constituents.size()) {
+    if (!constituents.empty()) {
         ATH_MSG_VERBOSE("boolean volume resolved to "
                         << constituents.size() << " items "
                         << ":volume estimate:" << volume);
@@ -346,7 +346,7 @@ double VolumeConverter::resolveBooleanVolume(const Volume& trVol,
 }
 
 VolumeConverter::VolumePairVec VolumeConverter::splitComposedVolume(
-    const Trk::Volume& trVol) const {
+    const Trk::Volume& trVol) {
 
     VolumePairVec constituents;
     constituents.emplace_back(std::make_unique<Volume>(trVol), nullptr);
@@ -527,18 +527,18 @@ std::unique_ptr<VolumeSpan> VolumeConverter::findVolumeSpan(
                          -box->halflengthZ());
         vtx.emplace_back(-box->halflengthX(), -box->halflengthY(),
                          -box->halflengthZ());
-        edges.emplace_back(std::make_pair(0, 1));
-        edges.emplace_back(std::make_pair(0, 2));
-        edges.emplace_back(std::make_pair(1, 3));
-        edges.emplace_back(std::make_pair(2, 3));
-        edges.emplace_back(std::make_pair(4, 5));
-        edges.emplace_back(std::make_pair(4, 6));
-        edges.emplace_back(std::make_pair(5, 7));
-        edges.emplace_back(std::make_pair(6, 7));
-        edges.emplace_back(std::make_pair(0, 4));
-        edges.emplace_back(std::make_pair(1, 5));
-        edges.emplace_back(std::make_pair(2, 6));
-        edges.emplace_back(std::make_pair(3, 7));
+        edges.emplace_back(0, 1);
+        edges.emplace_back(0, 2);
+        edges.emplace_back(1, 3);
+        edges.emplace_back(2, 3);
+        edges.emplace_back(4, 5);
+        edges.emplace_back(4, 6);
+        edges.emplace_back(5, 7);
+        edges.emplace_back(6, 7);
+        edges.emplace_back(0, 4);
+        edges.emplace_back(1, 5);
+        edges.emplace_back(2, 6);
+        edges.emplace_back(3, 7);
     }
     if (trd) {
         vtx.emplace_back(trd->maxHalflengthX(), trd->halflengthY(),
@@ -557,18 +557,18 @@ std::unique_ptr<VolumeSpan> VolumeConverter::findVolumeSpan(
                          -trd->halflengthZ());
         vtx.emplace_back(-trd->minHalflengthX(), -trd->halflengthY(),
                          -trd->halflengthZ());
-        edges.emplace_back(std::make_pair(0, 1));
-        edges.emplace_back(std::make_pair(0, 2));
-        edges.emplace_back(std::make_pair(1, 3));
-        edges.emplace_back(std::make_pair(2, 3));
-        edges.emplace_back(std::make_pair(4, 5));
-        edges.emplace_back(std::make_pair(4, 6));
-        edges.emplace_back(std::make_pair(5, 7));
-        edges.emplace_back(std::make_pair(6, 7));
-        edges.emplace_back(std::make_pair(0, 4));
-        edges.emplace_back(std::make_pair(1, 5));
-        edges.emplace_back(std::make_pair(2, 6));
-        edges.emplace_back(std::make_pair(3, 7));
+        edges.emplace_back(0, 1);
+        edges.emplace_back(0, 2);
+        edges.emplace_back(1, 3);
+        edges.emplace_back(2, 3);
+        edges.emplace_back(4, 5);
+        edges.emplace_back(4, 6);
+        edges.emplace_back(5, 7);
+        edges.emplace_back(6, 7);
+        edges.emplace_back(0, 4);
+        edges.emplace_back(1, 5);
+        edges.emplace_back(2, 6);
+        edges.emplace_back(3, 7);
     }
     if (dtrd) {
         vtx.emplace_back(dtrd->maxHalflengthX(), 2 * dtrd->halflengthY2(),
@@ -591,30 +591,30 @@ std::unique_ptr<VolumeSpan> VolumeConverter::findVolumeSpan(
                          -dtrd->halflengthZ());
         vtx.emplace_back(-dtrd->minHalflengthX(), -2 * dtrd->halflengthY1(),
                          -dtrd->halflengthZ());
-        edges.emplace_back(std::make_pair(0, 1));
-        edges.emplace_back(std::make_pair(0, 2));
-        edges.emplace_back(std::make_pair(1, 3));
-        edges.emplace_back(std::make_pair(2, 4));
-        edges.emplace_back(std::make_pair(3, 5));
-        edges.emplace_back(std::make_pair(4, 5));
-        edges.emplace_back(std::make_pair(6, 7));
-        edges.emplace_back(std::make_pair(6, 8));
-        edges.emplace_back(std::make_pair(7, 9));
-        edges.emplace_back(std::make_pair(8, 10));
-        edges.emplace_back(std::make_pair(9, 11));
-        edges.emplace_back(std::make_pair(10, 11));
-        edges.emplace_back(std::make_pair(0, 6));
-        edges.emplace_back(std::make_pair(1, 7));
-        edges.emplace_back(std::make_pair(2, 8));
-        edges.emplace_back(std::make_pair(3, 9));
-        edges.emplace_back(std::make_pair(4, 10));
-        edges.emplace_back(std::make_pair(5, 11));
+        edges.emplace_back(0, 1);
+        edges.emplace_back(0, 2);
+        edges.emplace_back(1, 3);
+        edges.emplace_back(2, 4);
+        edges.emplace_back(3, 5);
+        edges.emplace_back(4, 5);
+        edges.emplace_back(6, 7);
+        edges.emplace_back(6, 8);
+        edges.emplace_back(7, 9);
+        edges.emplace_back(8, 10);
+        edges.emplace_back(9, 11);
+        edges.emplace_back(10, 11);
+        edges.emplace_back(0, 6);
+        edges.emplace_back(1, 7);
+        edges.emplace_back(2, 8);
+        edges.emplace_back(3, 9);
+        edges.emplace_back(4, 10);
+        edges.emplace_back(5, 11);
     }
     if (bcyl) {
         dPhi = bcyl->halfPhiSector();
         vtx.emplace_back(0., 0., bcyl->halflengthZ());
         vtx.emplace_back(0., 0., -bcyl->halflengthZ());
-        edges.emplace_back(std::make_pair(0, 1));
+        edges.emplace_back(0, 1);
         if (dPhi < M_PI) {
             const double cosDphi = std::cos(dPhi);
             const double sinDphi = std::sin(dPhi);
@@ -645,17 +645,17 @@ std::unique_ptr<VolumeSpan> VolumeConverter::findVolumeSpan(
             vtx.emplace_back(bcyl->outerRadius(), 0.,
                              0.);  // to distinguish phi intervals for cylinders
                                    // aligned with z axis
-            edges.emplace_back(std::make_pair(2, 3));
-            edges.emplace_back(std::make_pair(4, 5));
-            edges.emplace_back(std::make_pair(6, 7));
-            edges.emplace_back(std::make_pair(8, 9));
+            edges.emplace_back(2, 3);
+            edges.emplace_back(4, 5);
+            edges.emplace_back(6, 7);
+            edges.emplace_back(8, 9);
             if (bcyl->type() == 1 || bcyl->type() == 3) {
-                edges.emplace_back(std::make_pair(3, 5));
-                edges.emplace_back(std::make_pair(7, 9));
+                edges.emplace_back(3, 5);
+                edges.emplace_back(7, 9);
             }
             if (bcyl->type() == 2 || bcyl->type() == 3) {
-                edges.emplace_back(std::make_pair(2, 4));
-                edges.emplace_back(std::make_pair(6, 8));
+                edges.emplace_back(2, 4);
+                edges.emplace_back(6, 8);
             }
         }
     }
@@ -663,7 +663,7 @@ std::unique_ptr<VolumeSpan> VolumeConverter::findVolumeSpan(
         dPhi = cyl->halfPhiSector();
         vtx.emplace_back(0., 0., cyl->halflengthZ());
         vtx.emplace_back(0., 0., -cyl->halflengthZ());
-        edges.emplace_back(std::make_pair(0, 1));
+        edges.emplace_back(0, 1);
         if (dPhi < M_PI) {
             const double cosDphi = std::cos(dPhi);
             const double sinDphi = std::sin(dPhi);
@@ -688,10 +688,10 @@ std::unique_ptr<VolumeSpan> VolumeConverter::findVolumeSpan(
             vtx.emplace_back(cyl->outerRadius(), 0.,
                              0.);  // to distinguish phi intervals for cylinders
                                    // aligned with z axis
-            edges.emplace_back(std::make_pair(2, 3));
-            edges.emplace_back(std::make_pair(4, 5));
-            edges.emplace_back(std::make_pair(6, 7));
-            edges.emplace_back(std::make_pair(8, 9));
+            edges.emplace_back(2, 3);
+            edges.emplace_back(4, 5);
+            edges.emplace_back(6, 7);
+            edges.emplace_back(8, 9);
         }
     }
 
@@ -700,20 +700,20 @@ std::unique_ptr<VolumeSpan> VolumeConverter::findVolumeSpan(
         for (const auto& vtc : vtcs) {
             vtx.emplace_back(vtc.first, vtc.second, spb->halflengthZ());
             vtx.emplace_back(vtc.first, vtc.second, -spb->halflengthZ());
-            edges.emplace_back(std::make_pair(vtx.size() - 2, vtx.size() - 1));
+            edges.emplace_back(vtx.size() - 2, vtx.size() - 1);
             if (vtx.size() > 2) {
                 edges.emplace_back(
-                    std::make_pair(vtx.size() - 4, vtx.size() - 2));
+                    vtx.size() - 4, vtx.size() - 2);
                 edges.emplace_back(
-                    std::make_pair(vtx.size() - 3, vtx.size() - 1));
+                    vtx.size() - 3, vtx.size() - 1);
             }
             if (vtx.size() > 4) {  // some diagonals
-                edges.emplace_back(std::make_pair(vtx.size() - 2, 1));
-                edges.emplace_back(std::make_pair(vtx.size() - 1, 0));
+                edges.emplace_back(vtx.size() - 2, 1);
+                edges.emplace_back(vtx.size() - 1, 0);
             }
         }
-        edges.emplace_back(std::make_pair(0, vtx.size() - 2));
-        edges.emplace_back(std::make_pair(1, vtx.size() - 1));
+        edges.emplace_back(0, vtx.size() - 2);
+        edges.emplace_back(1, vtx.size() - 1);
     }
 
     if (prism) {
@@ -721,16 +721,16 @@ std::unique_ptr<VolumeSpan> VolumeConverter::findVolumeSpan(
         for (const auto& vtc : vtcs) {
             vtx.emplace_back(vtc.first, vtc.second, prism->halflengthZ());
             vtx.emplace_back(vtc.first, vtc.second, -prism->halflengthZ());
-            edges.emplace_back(std::make_pair(vtx.size() - 2, vtx.size() - 1));
+            edges.emplace_back(vtx.size() - 2, vtx.size() - 1);
             if (vtx.size() > 2) {
                 edges.emplace_back(
-                    std::make_pair(vtx.size() - 4, vtx.size() - 2));
+                    vtx.size() - 4, vtx.size() - 2);
                 edges.emplace_back(
-                    std::make_pair(vtx.size() - 3, vtx.size() - 1));
+                    vtx.size() - 3, vtx.size() - 1);
             }
         }
-        edges.emplace_back(std::make_pair(0, vtx.size() - 2));
-        edges.emplace_back(std::make_pair(1, vtx.size() - 1));
+        edges.emplace_back(0, vtx.size() - 2);
+        edges.emplace_back(1, vtx.size() - 1);
     }
 
     std::vector<Amg::Vector3D> vtxt;
@@ -1012,7 +1012,7 @@ double VolumeConverter::estimateFraction(const VolumePair& sub,
     double fraction = -1.;
 
     std::pair<bool, std::unique_ptr<Volume>> overlap =
-        m_intersectionHelper.intersect(*sub.first, *sub.second);
+        Trk::VolumeIntersection::intersect(*sub.first, *sub.second);
 
     if (overlap.first && !overlap.second)
         return fraction = 1.;
@@ -1047,7 +1047,7 @@ void VolumeConverter::collectMaterial(const GeoVPhysVol* pv,
     std::vector<MaterialComponent> materialContent;
     collectMaterialContent(pv, materialContent);
 
-    for (auto mat : materialContent) {
+    for (const auto& mat : materialContent) {
         if (mat.second < 0)
             continue;  // protection unsolved booleans
         double d = sf > 0 ? mat.second / sf : 0.;
@@ -1069,12 +1069,12 @@ void VolumeConverter::collectMaterialContent(
     // mat.second) ); return;
 
     const GeoLogVol* lv = gv->getLogVol();
-    Material mat = m_materialConverter.convert(lv->getMaterial());
+    Material mat = Trk::GeoMaterialConverter::convert(lv->getMaterial());
 
     double motherVolume = 0.;
 
     // skip volume calculation for dummy material configuration
-    if (!m_materialConverter.dummy_material(lv->getMaterial())) {
+    if (!Trk::GeoMaterialConverter::dummy_material(lv->getMaterial())) {
         const GeoShape* sh = lv->getShape();
         while (sh && sh->type() == "Shift") {
             const GeoShapeShift* shift = dynamic_cast<const GeoShapeShift*>(sh);
@@ -1109,9 +1109,8 @@ void VolumeConverter::collectMaterialContent(
             nIdentical++;  // assuming identity for identical name and branching
                            // history
         else {             // scale and collect material from previous item
-            for (auto cmat : childMat) {
-                materialContent.push_back(
-                    MaterialComponent(cmat.first, nIdentical * cmat.second));
+            for (const auto& cmat : childMat) {
+                materialContent.emplace_back(cmat.first, nIdentical * cmat.second);
                 childVol += materialContent.back().second;
             }
             childMat.clear();  // reset
@@ -1119,9 +1118,8 @@ void VolumeConverter::collectMaterialContent(
             collectMaterialContent(cv, childMat);
         }
     }
-    for (auto cmat : childMat) {
-        materialContent.push_back(
-            MaterialComponent(cmat.first, nIdentical * cmat.second));
+    for (const auto& cmat : childMat) {
+        materialContent.emplace_back(cmat.first, nIdentical * cmat.second);
         childVol += materialContent.back().second;
     }
     if (motherVolume > 0 && childVol > 0)
@@ -1131,7 +1129,7 @@ void VolumeConverter::collectMaterialContent(
                                         << lv->getMaterial()->getName()
                                         << ":density(g/mm3)" << mat.rho
                                         << ":mass:" << mat.rho * motherVolume);
-    materialContent.push_back(std::pair<Material, double>(mat, motherVolume));
+    materialContent.emplace_back(mat, motherVolume);
 }
 
 double VolumeConverter::leadingVolume(const GeoShape* sh) const {

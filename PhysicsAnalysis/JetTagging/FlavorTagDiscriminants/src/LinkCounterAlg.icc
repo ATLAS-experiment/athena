@@ -1,0 +1,45 @@
+/*
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
+
+
+
+#include "StoreGate/ReadDecorHandle.h"
+#include "StoreGate/WriteDecorHandle.h"
+#include "AthLinks/ElementLink.h"
+
+
+namespace FlavorTagDiscriminants {
+
+  template <typename T, typename C>
+  LinkCounterAlg<T,C>::LinkCounterAlg(
+    const std::string& name, ISvcLocator* svcloc):
+    AthReentrantAlgorithm(name, svcloc)
+  {
+  }
+
+  template <typename T, typename C>
+  StatusCode LinkCounterAlg<T,C>::initialize()
+  {
+    if (m_links.empty()) {
+      ATH_MSG_ERROR("link not specified");
+      return StatusCode::FAILURE;
+    }
+    ATH_CHECK(m_links.initialize());
+    ATH_CHECK(m_flag.initialize());
+    return StatusCode::SUCCESS;
+  }
+
+  template <typename T, typename C>
+  StatusCode LinkCounterAlg<T,C>::execute(const EventContext& cxt) const {
+    using TV = std::vector<ElementLink<T>>;
+    SG::ReadDecorHandle<C, TV> links_handle(m_links, cxt);
+    SG::WriteDecorHandle<C, char> flag_handle(m_flag, cxt);
+    for (const auto* jet: *links_handle) {
+      const auto& links = links_handle(*jet);
+      flag_handle(*jet) = (links.size() >= m_minimumLinks) ? 1 : 0;
+    }
+    return StatusCode::SUCCESS;
+  }
+
+} // end namespace FlavorTagDiscriminants

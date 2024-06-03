@@ -36,7 +36,11 @@ InDetPerfPlot_VertexTruthMatching::InDetPerfPlot_VertexTruthMatching(InDetPlotBa
     m_vx_nReco_vs_nTruth_none(nullptr),
     m_vx_hs_reco_eff(nullptr),
     m_vx_hs_sel_eff(nullptr),
+    m_vx_hs_reco_sel_eff(nullptr),
     m_vx_hs_sel_eff_dist(nullptr),
+    m_vx_hs_reco_eff_vs_ntruth(nullptr),
+    m_vx_hs_sel_eff_vs_ntruth(nullptr),
+    m_vx_hs_reco_sel_eff_vs_ntruth(nullptr),
     m_vx_hs_reco_long_reso(nullptr),
     m_vx_hs_reco_trans_reso(nullptr),
     m_vx_hs_truth_long_reso_vs_PU(nullptr),
@@ -188,7 +192,10 @@ InDetPerfPlot_VertexTruthMatching::InDetPerfPlot_VertexTruthMatching(InDetPlotBa
     m_vx_nVertices_fake(nullptr),
 
     m_vx_all_dz(nullptr),
-    m_vx_hs_mindz(nullptr)
+    m_vx_hs_mindz(nullptr),
+
+    m_vx_PUdensity(nullptr),
+    m_vx_nTruth(nullptr)
 
 
 {
@@ -217,7 +224,11 @@ void InDetPerfPlot_VertexTruthMatching::initializePlots() {
         book(m_vx_nReco_vs_nTruth_none,"vx_nReco_vs_nTruth_none");
         book(m_vx_hs_reco_eff,"vx_hs_reco_eff");
         book(m_vx_hs_sel_eff,"vx_hs_sel_eff");
+        book(m_vx_hs_reco_sel_eff,"vx_hs_reco_sel_eff");
         book(m_vx_hs_sel_eff_dist,"vx_hs_sel_eff_dist");
+        book(m_vx_hs_reco_eff_vs_ntruth,"vx_hs_reco_eff_vs_ntruth");
+        book(m_vx_hs_sel_eff_vs_ntruth,"vx_hs_sel_eff_vs_ntruth");
+        book(m_vx_hs_reco_sel_eff_vs_ntruth,"vx_hs_reco_sel_eff_vs_ntruth");
         book(m_vx_hs_reco_long_reso,"vx_hs_reco_long_reso");
         book(m_vx_hs_reco_trans_reso,"vx_hs_reco_trans_reso");
         book(m_vx_hs_truth_long_reso,"vx_hs_truth_long_reso");
@@ -370,9 +381,11 @@ void InDetPerfPlot_VertexTruthMatching::initializePlots() {
         book(m_vx_nVertices_ALL_split,"vx_nVertices_ALL_split");
         book(m_vx_nVertices_ALL_fake,"vx_nVertices_ALL_fake");
 
-	  book(m_vx_hs_mindz,"vx_hs_mindz");
-	  book(m_vx_all_dz,"vx_all_dz");
+        book(m_vx_hs_mindz,"vx_hs_mindz");
+        book(m_vx_all_dz,"vx_all_dz");
 
+        book(m_vx_PUdensity,"vx_PUdensity");
+        book(m_vx_nTruth,"vx_nTruth");
     }
 
 }
@@ -595,6 +608,7 @@ void InDetPerfPlot_VertexTruthMatching::fill(const xAOD::Vertex* recoHardScatter
         int nTruthVertices = (int)(truthHSVertices.size() + truthPUVertices.size());
         int nRecoVertices = (int)vertexContainer.size();
         fillHisto(m_vx_nReco_vs_nTruth_inclusive, nTruthVertices, nRecoVertices, weight);
+        fillHisto(m_vx_nTruth, nTruthVertices, weight);
         
         // Let's also plot the vertices by vertex match type:
         const static xAOD::Vertex::Decorator<InDetVertexTruthMatchUtils::VertexMatchType> recoVtxMatchTypeInfo("VertexMatchType");
@@ -626,7 +640,9 @@ void InDetPerfPlot_VertexTruthMatching::fill(const xAOD::Vertex* recoHardScatter
         }
 
         const xAOD::TruthVertex* truthVtx = nullptr;
-        float localPUDensity;
+        //Calculating the local PU density around the true HS vertex
+        float localPUDensity = getLocalPUDensity(truthHSVtx, truthHSVertices, truthPUVertices);
+        fillHisto(m_vx_PUdensity, localPUDensity, weight);
 
         // Best reco HS vertex identified via truth HS weights
         const xAOD::Vertex* bestRecoHSVtx_truth = InDetVertexTruthMatchUtils::bestHardScatterMatch(vertexContainer);
@@ -647,8 +663,8 @@ void InDetPerfPlot_VertexTruthMatching::fill(const xAOD::Vertex* recoHardScatter
             ATH_MSG_INFO("No truth HS - not filling vertex truth matching."); 
             return;
         }
-        localPUDensity = getLocalPUDensity(truthVtx, truthHSVertices, truthPUVertices);
         fillHisto(m_vx_hs_sel_eff, localPUDensity, (recoHardScatter == bestRecoHSVtx_truth), weight);
+        fillHisto(m_vx_hs_sel_eff_vs_ntruth, nTruthVertices, (recoHardScatter == bestRecoHSVtx_truth), weight);
 
         // Did we successfully reconstruct our truth HS vertex?
         bool truthHSVtxRecoed = false;
@@ -678,11 +694,11 @@ void InDetPerfPlot_VertexTruthMatching::fill(const xAOD::Vertex* recoHardScatter
         float number_split_PU = 0;
         float number_fake_PU = 0;
         
-	  // variables for delta z between the HS and the closest one
-	  float vx_hs_mindz=9999.; 
-	  float min_fabs_dz = 9999.;
-        
-	  // Iterate over vertices:
+	    // variables for delta z between the HS and the closest one
+	    float vx_hs_mindz=9999.; 
+	    float min_fabs_dz = 9999.;
+
+  	    // Iterate over vertices:
         InDetVertexTruthMatchUtils::VertexMatchType matchType;
         for (const auto& vertex : vertexContainer.stdcont()) {
 
@@ -696,15 +712,6 @@ void InDetPerfPlot_VertexTruthMatching::fill(const xAOD::Vertex* recoHardScatter
             matchType = recoVtxMatchTypeInfo(*vertex);
             breakdown[matchType] += 1;
 
-            // If we have reconstructed the truth HS vertex but we have a different reco vertex closer to the truth HS vertex
-            // than the best one identified by the truth pkg, we say we have NOT successfully reconstructed the truth HS vertex
-            if (truthHSVtxRecoed && (vertex != bestRecoHSVtx_truth)) {
-                truthRecoRadialDiff2 = getRadialDiff2(vertex, truthHSVtx);
-                if (truthRecoRadialDiff2 < minTruthRecoRadialDiff2) {
-                    truthHSVtxRecoed = false;
-                    minTruthRecoRadialDiff2 = truthRecoRadialDiff2;
-                }
-            }
           
             const xAOD::TruthVertex *matchVertex = getTruthVertex(vertex);
             if(!matchVertex) continue;
@@ -1116,13 +1123,15 @@ void InDetPerfPlot_VertexTruthMatching::fill(const xAOD::Vertex* recoHardScatter
 
         // Now fill plots relating to the reconstruction of our truth HS vertex (efficiency and resolutions)
         if (!truthHSVertices.empty()) {
-            localPUDensity = getLocalPUDensity(truthHSVtx, truthHSVertices, truthPUVertices);
             if (truthHSVtxRecoed) {
                 float residual_z = truthHSVtx->z() - bestRecoHSVtx_truth->z();
                 float residual_r = std::sqrt(std::pow(truthHSVtx->x() - bestRecoHSVtx_truth->x(), 2) + std::pow(truthHSVtx->y() - bestRecoHSVtx_truth->y(), 2));
                 float residual_x = truthHSVtx->x() - bestRecoHSVtx_truth->x();
                 float residual_y = truthHSVtx->y() - bestRecoHSVtx_truth->y();
                 fillHisto(m_vx_hs_reco_eff, localPUDensity, 1, weight);
+                fillHisto(m_vx_hs_reco_sel_eff, localPUDensity, (recoHardScatter == bestRecoHSVtx_truth), weight);
+                fillHisto(m_vx_hs_reco_eff_vs_ntruth, nTruthVertices, 1, weight);
+                fillHisto(m_vx_hs_reco_sel_eff_vs_ntruth, nTruthVertices, (recoHardScatter == bestRecoHSVtx_truth), weight);
                 fillHisto(m_vx_hs_reco_long_reso, localPUDensity, getRecoLongitudinalReso(bestRecoHSVtx_truth), weight);
                 fillHisto(m_vx_hs_reco_trans_reso, localPUDensity, getRecoTransverseReso(bestRecoHSVtx_truth), weight);
                 fillHisto(m_vx_hs_truth_long_reso_vs_PU, localPUDensity, residual_z, weight);
@@ -1160,6 +1169,7 @@ void InDetPerfPlot_VertexTruthMatching::fill(const xAOD::Vertex* recoHardScatter
             }
             else {
                 fillHisto(m_vx_hs_reco_eff, localPUDensity, 0, weight);
+                fillHisto(m_vx_hs_reco_eff_vs_ntruth, nTruthVertices, 0, weight);
             }
         }
 

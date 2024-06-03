@@ -89,11 +89,8 @@
  *
  *  Permutations :
  *
- *  The mask has the same element count  as the input vectors.
- *  The functions return a vector of the same type as the input vector(s).
- *  Intentionally kept compatible with gcc's _builtin_shuffle.
- *  If we move to gcc>=12 we could unify with clang's _builtin_shuffle_vector
- *  and relax some of these requirements
+ *  The destination is a vector with the same element type as the source vector(s)
+ *  but that has an element count equal to the number of indices specified
  *
  *  - @c CxxUtils::vpermute<mask> (VEC& dst, const VEC& src)
  *                          Fills dst with permutation of src
@@ -175,7 +172,6 @@ struct vec_typedef {
  */
 template <class VEC>
 struct vec_type {
-  // Works in c++17.
   static auto elt(const VEC& v) -> decltype(v[0]);
   typedef typename std::invoke_result<decltype(elt), const VEC&>::type type1;
   typedef std::remove_cv_t<std::remove_reference_t<type1>> type;
@@ -353,7 +349,8 @@ vmax(VEC& dst, const VEC& a, const VEC& b)
  */
 template<typename VEC>
 ATH_ALWAYS_INLINE
-bool vany(const VEC& mask){
+bool
+vany(const VEC& mask){
   static_assert(std::is_integral<vec_type_t<VEC>>::value,
                 "vec elements must be of integral type. Aka vec must be "
                 "compatible with a mask");
@@ -364,11 +361,12 @@ bool vany(const VEC& mask){
 
 /*
  * @brief Returns true if
- * all values in k are false
+ * all values in mask are false
  */
 template<typename VEC>
 ATH_ALWAYS_INLINE
-bool vnone(const VEC& mask){
+bool
+vnone(const VEC& mask){
   static_assert(std::is_integral<vec_type_t<VEC>>::value,
                 "vec elements must be of integral type. Aka vec must be "
                 "compatible with a mask");
@@ -379,11 +377,12 @@ bool vnone(const VEC& mask){
 
 /*
  * @brief Returns true if
- * all values in k are false
+ * all values in mask are false
  */
 template<typename VEC>
 ATH_ALWAYS_INLINE
-bool vall(const VEC& mask){
+bool
+vall(const VEC& mask){
   static_assert(std::is_integral<vec_type_t<VEC>>::value,
                 "vec elements must be of integral type. Aka vec must be "
                 "compatible with a mask");
@@ -426,24 +425,23 @@ vconvert(VEC1& dst, const VEC2& src)
  * move any element of a vector src
  * into any or multiple position inside dst.
  */
-template<size_t... Indices, typename VEC>
+template<size_t... Indices, typename VEC, typename VEC1>
 ATH_ALWAYS_INLINE void
-vpermute(VEC& dst, const VEC& src)
+vpermute(VEC1& dst, const VEC& src)
 {
 
-  constexpr size_t N = vec_size<VEC>();
-  static_assert((sizeof...(Indices) == N),
-                "vpermute number of indices different than vector size");
-  static_assert(
-    vecDetail::bool_pack_helper::all_true<(Indices >= 0 && Indices < N)...>::value,
-    "vpermute value of a mask index is outside the allowed range");
+  static_assert((sizeof...(Indices) == vec_size<VEC1>()),
+                "vpermute number of indices different than return vector size");
+  static_assert(std::is_same<vec_type_t<VEC>, vec_type_t<VEC1>>::value,
+                "vpermute type of input and output vector elements differ");
+  static_assert(vecDetail::bool_pack_helper::all_true<(
+                    Indices >= 0 && Indices < vec_size<VEC>())...>::value,
+                "vpermute value of a mask index is outside the allowed range");
 
 #if !HAVE_VECTOR_SIZE_ATTRIBUTE || WANT_VECTOR_FALLBACK
-  dst = VEC{ src[Indices]... };
-#elif defined(__clang__)
+  dst = VEC1{ src[Indices]... };
+#else
   dst = __builtin_shufflevector(src, src, Indices...);
-#else // gcc
-  dst = __builtin_shuffle(src, vec_mask_type_t<VEC>{ Indices... });
 #endif
 }
 
@@ -452,20 +450,22 @@ vpermute(VEC& dst, const VEC& src)
  * move any element of the vectors src1, src2
  * into any or multiple position inside dst.
  */
-template<size_t... Indices, typename VEC>
+template<size_t... Indices, typename VEC, typename VEC1>
 ATH_ALWAYS_INLINE void
-vpermute2(VEC& dst, const VEC& src1, const VEC& src2)
+vpermute2(VEC1& dst, const VEC& src1, const VEC& src2)
 {
+  static_assert(
+      (sizeof...(Indices) == vec_size<VEC1>()),
+      "vpermute2 number of indices different than return vector size");
+  static_assert(std::is_same<vec_type_t<VEC>, vec_type_t<VEC1>>::value,
+                "vpermute2 type of input and output vector elements differ");
   constexpr size_t N = vec_size<VEC>();
-  static_assert(
-    (sizeof...(Indices) == N),
-    "vpermute2 number of indices different than vector size");
-  static_assert(
-    vecDetail::bool_pack_helper::all_true<(Indices >= 0 && Indices < 2 * N)...>::value,
-    "vpermute2 value of a mask index is outside the allowed range");
+  static_assert(vecDetail::bool_pack_helper::all_true<(
+                    Indices >= 0 && Indices < 2 * N)...>::value,
+                "vpermute2 value of a mask index is outside the allowed range");
 
 #if !HAVE_VECTOR_SIZE_ATTRIBUTE || WANT_VECTOR_FALLBACK
-  VEC tmp;
+  VEC1 tmp;
   size_t pos{0};
   for (auto index: { Indices... }) {
     if (index < N) {
@@ -476,10 +476,8 @@ vpermute2(VEC& dst, const VEC& src1, const VEC& src2)
     ++pos;
   }
   dst = tmp;
-#elif defined(__clang__)
+#else
   dst = __builtin_shufflevector(src1, src2, Indices...);
-#else // gcc
-  dst = __builtin_shuffle(src1, src2, vec_mask_type_t<VEC>{ Indices... });
 #endif
 }
 

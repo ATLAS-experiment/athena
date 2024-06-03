@@ -21,6 +21,7 @@
 
 #include <vector>
 #include <memory>
+#include <span>
 
 class EventContext;
 
@@ -100,7 +101,7 @@ class Track;
       //.........................................................................................
 
       virtual StatusCode VKalVrtFitFast(
-        const std::vector<const xAOD::TrackParticle*>& list,
+        std::span<const xAOD::TrackParticle* const> list,
         Amg::Vector3D& Vertex,
         IVKalState& istate) const = 0;
 
@@ -129,7 +130,7 @@ class Track;
       virtual void setMassForConstraint(double,
                                         IVKalState& istate) const =0;
 
-      virtual void setMassForConstraint(double, const std::vector<int>&,
+      virtual void setMassForConstraint(double, std::span<const int>,
                                         IVKalState& istate) const =0;
 
       virtual void setRobustness(int, IVKalState& istate) const =0;

@@ -110,9 +110,9 @@ StatusCode ISF::TruthSvc::finalize()
 
 
 /** Initialize the TruthSvc and the truthSvc */
-StatusCode ISF::TruthSvc::initializeTruthCollection()
+StatusCode ISF::TruthSvc::initializeTruthCollection(int largestGeneratedParticleBC, int largestGeneratedVertexBC)
 {
-  ATH_CHECK( m_barcodeSvc->initializeBarcodes() );
+  ATH_CHECK( m_barcodeSvc->initializeBarcodes(largestGeneratedParticleBC, largestGeneratedVertexBC) );
   return StatusCode::SUCCESS;
 }
 
@@ -190,8 +190,6 @@ void ISF::TruthSvc::registerTruthIncident( ISF::ITruthIncident& ti, bool saveAll
 
     }
 
-    //  -> assign shared barcode to all child particles (if barcode service supports it)
-    setSharedChildParticleBarcode( ti);
   }
 
   return;
@@ -202,8 +200,7 @@ void ISF::TruthSvc::recordIncidentToMCTruth( ISF::ITruthIncident& ti, bool passW
 #ifdef  DEBUG_TRUTHSVC
   ATH_MSG_INFO("Starting recordIncidentToMCTruth(...)");
 #endif
-  Barcode::PhysicsProcessCode processCode = ti.physicsProcessCode();
-  Barcode::ParticleBarcode       parentBC = ti.parentBarcode();
+  int       parentBC = ti.parentBarcode();
 
   if (ti.parentParticle()->end_vertex()) {
     ATH_MSG_WARNING ("Attempting to record a TruthIncident for a particle which has already decayed!");
@@ -225,19 +222,19 @@ void ISF::TruthSvc::recordIncidentToMCTruth( ISF::ITruthIncident& ti, bool passW
 
   ATH_MSG_VERBOSE ( "Outgoing particles:" );
   // update parent barcode and add it to the vertex as outgoing particle
-  Barcode::ParticleBarcode newPrimBC = Barcode::fUndefinedBarcode;
+  int newPrimaryBC = HepMC::UNDEFINED_ID;
   if (classification == ISF::QS_SURV_VTX) {
     // Special case when a particle with a pre-defined decay interacts
     // and survives.
     // Set the barcode to the next available value below the simulation
     // barcode offset.
-    newPrimBC = this->maxGeneratedParticleBarcode(ti.parentParticle()->parent_event())+1;
+    newPrimaryBC = m_barcodeSvc->newGeneratedParticle(parentBC);
   }
   else {
-    newPrimBC = parentBC + HepMC::SIM_REGENERATION_INCREMENT;
+    newPrimaryBC = parentBC + HepMC::SIM_REGENERATION_INCREMENT;
   }
 
-  HepMC::GenParticlePtr  parentAfterIncident = ti.parentParticleAfterIncident( newPrimBC ); // This call changes ti.parentParticle() output
+  HepMC::GenParticlePtr  parentAfterIncident = ti.parentParticleAfterIncident( newPrimaryBC ); // This call changes ti.parentParticle() output
   if(parentAfterIncident) {
     if (classification==ISF::QS_SURV_VTX) {
       // Special case when a particle with a pre-defined decay
@@ -251,8 +248,11 @@ void ISF::TruthSvc::recordIncidentToMCTruth( ISF::ITruthIncident& ti, bool passW
     }
     vtxFromTI->add_particle_out( parentAfterIncident );
 #ifdef HEPMC3
-    HepMC::suggest_barcode( parentAfterIncident, newPrimBC ); // TODO check this works correctly
+    HepMC::suggest_barcode( parentAfterIncident, newPrimaryBC ); // TODO check this works correctly
 #endif
+    // NB For ISFTruthIncident the m_parent ISFParticle still needs
+    // its id and particleLink properties to be properly updated at
+    // this point.
     ATH_MSG_VERBOSE ( "Parent After Incident: " << parentAfterIncident << ", barcode: " << HepMC::barcode(parentAfterIncident));
   }
 
@@ -264,9 +264,9 @@ void ISF::TruthSvc::recordIncidentToMCTruth( ISF::ITruthIncident& ti, bool passW
     if (writeOutChild) {
       HepMC::GenParticlePtr  p = nullptr;
       // generate a new barcode for the child particle
-      Barcode::ParticleBarcode secBC = (isQuasiStableVertex) ?
-        this->maxGeneratedParticleBarcode(ti.parentParticle()->parent_event())+1 : m_barcodeSvc->newSecondary( parentBC, processCode); // TODO replace m_barcodeSvc
-      if ( secBC == Barcode::fUndefinedBarcode) {
+      int secondaryParticleBC = (isQuasiStableVertex) ?
+        m_barcodeSvc->newGeneratedParticle(parentBC) : m_barcodeSvc->newSecondaryParticle(parentBC); // TODO replace m_barcodeSvc
+      if ( secondaryParticleBC == HepMC::UNDEFINED_ID) {
         if (m_ignoreUndefinedBarcodes)
           ATH_MSG_WARNING("Unable to generate new Secondary Particle Barcode. Continuing due to 'IgnoreUndefinedBarcodes'==True");
         else {
@@ -274,13 +274,16 @@ void ISF::TruthSvc::recordIncidentToMCTruth( ISF::ITruthIncident& ti, bool passW
           abort();
         }
       }
-      p = ti.childParticle( i, secBC ); // potentially overrides secBC
+      p = ti.childParticle( i, secondaryParticleBC ); // potentially overrides secondaryParticleBC
       if (p) {
         // add particle to vertex
         vtxFromTI->add_particle_out( p);
 #ifdef HEPMC3
-        Barcode::ParticleBarcode secBCFromTI = ti.childBarcode(i);
-        HepMC::suggest_barcode( p, secBCFromTI ? secBCFromTI :secBC );
+        int secondaryParticleBCFromTI = ti.childBarcode(i);
+        HepMC::suggest_barcode( p, secondaryParticleBCFromTI ? secondaryParticleBCFromTI : secondaryParticleBC );
+        // NB For ISFTruthIncident the current child ISFParticle still needs
+        // its id and particleLink properties to be properly updated at
+        // this point.
 #endif
       }
       ATH_MSG_VERBOSE ( "Writing out " << i << "th child particle: " << p << ", barcode: " << HepMC::barcode(p));
@@ -296,12 +299,12 @@ void ISF::TruthSvc::recordIncidentToMCTruth( ISF::ITruthIncident& ti, bool passW
 /** Record the given truth incident to the MC Truth */
 HepMC::GenVertexPtr  ISF::TruthSvc::createGenVertexFromTruthIncident( ISF::ITruthIncident& ti ) const {
 
-  Barcode::PhysicsProcessCode processCode = ti.physicsProcessCode();
-  Barcode::ParticleBarcode       parentBC = ti.parentBarcode();
+  int processCode = ti.physicsProcessCode();
+  int       parentBC = ti.parentBarcode();
 
   std::vector<double> weights(1);
-  Barcode::ParticleBarcode primaryBC = parentBC % HepMC::SIM_REGENERATION_INCREMENT;
-  weights[0] = static_cast<double>( primaryBC );
+  int primaryBC = parentBC % HepMC::SIM_REGENERATION_INCREMENT;
+  weights[0] = static_cast<double>( primaryBC ); // FIXME vertex weights should not be used to encode other info.
 
   // Check for a previous end vertex on this particle.  If one existed, then we should put down next to this
   //  a new copy of the particle.  This is the agreed upon version of the quasi-stable particle truth, where
@@ -319,8 +322,8 @@ HepMC::GenVertexPtr  ISF::TruthSvc::createGenVertexFromTruthIncident( ISF::ITrut
   }
 
   // generate vertex
-  Barcode::VertexBarcode vtxbcode = m_barcodeSvc->newVertex( parentBC, processCode ); // TODO replace barcodeSvc
-  if ( vtxbcode == Barcode::fUndefinedBarcode) {
+  int vtxbcode = m_barcodeSvc->newSimulationVertex(); // TODO replace barcodeSvc
+  if ( vtxbcode == HepMC::UNDEFINED_ID) {
     if (m_ignoreUndefinedBarcodes) {
       ATH_MSG_WARNING("Unable to generate new Truth Vertex Barcode. Continuing due to 'IgnoreUndefinedBarcodes'==True");
     } else {
@@ -328,17 +331,20 @@ HepMC::GenVertexPtr  ISF::TruthSvc::createGenVertexFromTruthIncident( ISF::ITrut
       abort();
     }
   }
-  const int vtxID = 1000 + static_cast<int>(processCode) + HepMC::SIM_STATUS_THRESHOLD;
+  const int vtxStatus = 1000 + static_cast<int>(processCode) + HepMC::SIM_STATUS_THRESHOLD;
 #ifdef HEPMC3
-  auto newVtx = HepMC::newGenVertexPtr( ti.position(),vtxID);
+  auto newVtx = HepMC::newGenVertexPtr( ti.position(),vtxStatus);
 #else
-  std::unique_ptr<HepMC::GenVertex> newVtx = std::make_unique<HepMC::GenVertex>( ti.position(), vtxID, weights );
+  // NB In HepMC2 there is no GenVertex status, so we set the GenVertex ID.
+  std::unique_ptr<HepMC::GenVertex> newVtx = std::make_unique<HepMC::GenVertex>( ti.position(), vtxStatus, weights );
   HepMC::suggest_barcode( newVtx.get(), vtxbcode );
 #endif
 
   if (parent->end_vertex()){
-      ATH_MSG_ERROR("Parent particle found with an end vertex attached.  This should not happen!");
-      abort();
+      ATH_MSG_ERROR ("createGVfromTI: Parent particle found with an end vertex attached.  This should not happen!");
+      ATH_MSG_ERROR ("createGVfromTI: Parent 1: " << parent << ", barcode: " << HepMC::barcode(parent));
+      ATH_MSG_ERROR ( "createGVfromTI: parent->end_vertex(): " << parent->end_vertex() << ", barcode: " << HepMC::barcode(parent->end_vertex()) );
+     abort();
   } else { // Normal simulation
 #ifdef DEBUG_TRUTHSVC
     ATH_MSG_VERBOSE ("createGVfromTI Parent 1: " << parent << ", barcode: " << HepMC::barcode(parent));
@@ -359,56 +365,4 @@ HepMC::GenVertexPtr  ISF::TruthSvc::createGenVertexFromTruthIncident( ISF::ITrut
   }
 
   return parent->end_vertex();
-}
-
-/** Set shared barcode for child particles particles */
-void ISF::TruthSvc::setSharedChildParticleBarcode( ISF::ITruthIncident& ti) const {
-  Barcode::PhysicsProcessCode processCode = ti.physicsProcessCode();
-  Barcode::ParticleBarcode       parentBC = ti.parentBarcode();
-
-  ATH_MSG_VERBOSE ( "End Vertex representing process: " << processCode << ". TruthIncident failed cuts. Skipping.");
-
-  // generate one new barcode for all child particles
-  Barcode::ParticleBarcode childBC = m_barcodeSvc->sharedChildBarcode( parentBC, processCode);
-
-  // propagate this barcode into the TruthIncident only if
-  // it is a proper barcode, ie !=fUndefinedBarcode
-  if (childBC != Barcode::fUndefinedBarcode) {
-    ti.setAllChildrenBarcodes( childBC );
-  }
-}
-
-int ISF::TruthSvc::maxGeneratedParticleBarcode(const HepMC::GenEvent *genEvent) const {
-  int maxBarcode=0;
-#ifdef HEPMC3
-  auto allbarcodes = genEvent->attribute<HepMC::GenEventBarcodes>("barcodes");
-  for (const auto& bp: allbarcodes->barcode_to_particle_map()) {
-    if (!HepMC::is_simulation_particle(bp.first)) { maxBarcode=std::max(maxBarcode,bp.first); }
-  }
-#else
-  for (auto currentGenParticle: *genEvent) {
-    const int barcode=HepMC::barcode(currentGenParticle);
-    if(barcode > maxBarcode &&  !HepMC::is_simulation_particle(barcode)) { maxBarcode=barcode; }
-  }
-#endif
-  return maxBarcode;
-}
-
-int ISF::TruthSvc::maxGeneratedVertexBarcode(const HepMC::GenEvent *genEvent) const {
-  int maxBarcode=0;
-#ifdef HEPMC3
-  auto allbarcodes = genEvent->attribute<HepMC::GenEventBarcodes>("barcodes");
-  for (const auto& bp: allbarcodes->barcode_to_vertex_map()) {
-    if (!HepMC::is_simulation_vertex(bp.first)) { maxBarcode=std::min(maxBarcode,bp.first); }
-  }
-#else
-  HepMC::GenEvent::vertex_const_iterator currentGenVertexIter;
-  for (currentGenVertexIter= genEvent->vertices_begin();
-       currentGenVertexIter!= genEvent->vertices_end();
-       ++currentGenVertexIter) {
-    const int barcode((*currentGenVertexIter)->barcode());
-    if(barcode < maxBarcode && !HepMC::is_simulation_vertex(barcode)) { maxBarcode=barcode; }
-  }
-#endif
-  return maxBarcode;
 }

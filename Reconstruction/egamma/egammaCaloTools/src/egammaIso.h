@@ -23,7 +23,7 @@ class egammaIso : public AthAlgTool, virtual public IegammaIso {
 	    const IInterface* parent);
 
   /** @brief Destructor*/
-  ~egammaIso();  
+  ~egammaIso() = default;
 
   /** @brief initialize method*/
   StatusCode initialize() override;

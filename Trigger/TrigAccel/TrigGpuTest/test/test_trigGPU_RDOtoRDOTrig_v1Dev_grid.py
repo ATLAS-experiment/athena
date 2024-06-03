@@ -4,9 +4,7 @@
 # art-description: Test of the RDOtoRDOTrigger transform with Dev menu
 # art-type: grid
 # art-include: main/Athena
-# art-include: 24.0/Athena
 # art-architecture: '#&nvidia'
-# art-athena-mt: 4
 # art-output: *.txt
 # art-output: *.log
 # art-output: log.*
@@ -39,7 +37,7 @@ ex.concurrent_events = 4
 ex.args = '--outputRDO_TRIGFile=RDO_TRIG.pool.root'
 ex.args += ' --preExec="all:{:s};"'.format(preExec)
 ex.args += ' --preInclude "all:Campaigns.MC23c"'
-ex.args += ' --CA "all:True"'
+ex.args += ' --CA'
 
 test = Test.Test()
 test.art_type = 'grid'

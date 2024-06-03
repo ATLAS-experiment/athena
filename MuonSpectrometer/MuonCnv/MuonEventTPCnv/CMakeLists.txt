@@ -45,9 +45,11 @@ atlas_install_joboptions( share/*.txt )
 # Set up the tests of the package:
 foreach( name CscMcDataCnv_p1_test CscSimDataCnv_p1_test
       CscSimDataCollectionCnv_p1_test CscSimDataCnv_p2_test
-      CscSimDataCollectionCnv_p2_test MuonMCDataCnv_p1_test
+      CscSimDataCollectionCnv_p2_test CscSimDataCnv_p3_test
+      CscSimDataCollectionCnv_p3_test MuonMCDataCnv_p1_test
       MuonSimDataCnv_p1_test MuonSimDataCollectionCnv_p1_test
       MuonSimDataCnv_p2_test MuonSimDataCollectionCnv_p2_test
+      MuonSimDataCnv_p3_test MuonSimDataCollectionCnv_p3_test
       CscClusterOnTrackCnv_p2_test RpcClusterOnTrackCnv_p3_test
       TgcClusterOnTrackCnv_p2_test MM_ClusterOnTrackCnv_p1_test
       STGC_ClusterOnTrackCnv_p1_test MdtDriftCircleOnTrackCnv_p2_test
@@ -76,15 +78,16 @@ foreach( name CscMcDataCnv_p1_test CscSimDataCnv_p1_test
       )
 
    atlas_add_test( ${name}
-      SOURCES test/${name}.cxx
-      LINK_LIBRARIES ${GEOMODEL_LIBRARIES} GaudiKernel TrkSurfaces TrkEventTPCnv TestTools
-      StoreGateLib TPTools AGDDKernel AGDDControl AtlasDetDescr 
-      IdDict IdDictDetDescr IdDictParser InDetIdentifier InDetReadoutGeometry PixelReadoutGeometryLib SCT_ReadoutGeometry TRT_ReadoutGeometry
-      MuonAGDDDescription MuonReadoutGeometry MuonIdHelpersLib
-      TrkEventPrimitives TrkPseudoMeasurementOnTrack MuonEventTPCnv AthenaKernel
-      LOG_IGNORE_PATTERN "MultiRange built successfully|element hash max|DEBUG|Strip range"
-      PROPERTIES TIMEOUT 300 )
+     SOURCES test/${name}.cxx
+     INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
+     LINK_LIBRARIES ${GEOMODEL_LIBRARIES} GaudiKernel TrkSurfaces TrkEventTPCnv TestTools
+     StoreGateLib TPTools AGDDKernel AGDDControl AtlasDetDescr 
+     IdDict IdDictDetDescr IdDictParser InDetIdentifier InDetReadoutGeometry PixelReadoutGeometryLib SCT_ReadoutGeometry TRT_ReadoutGeometry
+     MuonAGDDDescription MuonReadoutGeometry MuonIdHelpersLib
+     TrkEventPrimitives TrkPseudoMeasurementOnTrack MuonEventTPCnv AthenaKernel
+     LOG_IGNORE_PATTERN "MultiRange built successfully|element hash max|DEBUG|Strip range"
+     PROPERTIES TIMEOUT 300 )
    set_target_properties ( MuonEventTPCnv_${name} PROPERTIES ENABLE_EXPORTS True )
-
+   
 endforeach()
 

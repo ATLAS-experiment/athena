@@ -6,6 +6,7 @@ if __name__=="__main__":
     from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, executeTest,setupHistSvcCfg
     parser = SetupArgParser()
     parser.set_defaults(nEvents = -1)
+    parser.set_defaults(inputFile=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/R4SimHits.pool.root"])
 
     args = parser.parse_args()
     flags, cfg = setupGeoR4TestCfg(args)

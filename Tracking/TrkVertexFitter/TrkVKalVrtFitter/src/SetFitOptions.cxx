@@ -140,13 +140,13 @@ namespace Trk{
   }
 
   void TrkVKalVrtFitter::setMassForConstraint(double MASS,
-                                              const std::vector<int>& TrkIndex,
+                                              std::span<const int> TrkIndex,
                                               IVKalState& istate) const
   {
     assert(dynamic_cast<State*> (&istate)!=nullptr);
     State& state = static_cast<State&> (istate);
     state.m_partMassCnst.push_back(MASS);
-    state.m_partMassCnstTrk.push_back(TrkIndex);
+    state.m_partMassCnstTrk.emplace_back(TrkIndex.begin(), TrkIndex.end());
   }
 
   void TrkVKalVrtFitter::setVertexForConstraint(const xAOD::Vertex & Vrt,

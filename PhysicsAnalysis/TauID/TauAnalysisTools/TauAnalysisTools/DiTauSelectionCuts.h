@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAUANALYSISTOOLS_DITAUSELECTIONCUTS_H
@@ -40,7 +40,7 @@ public:
                       asg::AcceptData& accept) = 0;
   TH1F* CreateControlPlot(const char* sName, const char* sTitle, int iBins, double dXLow, double dXUp);
 
-  std::string getName()
+  const std::string& getName()
   {
     return m_sName;
   };

@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetCalibrationTool.cxx 
@@ -22,6 +22,7 @@
 #include "JetCalibTools/CalibrationMethods/GlobalLargeRDNNCalibration.h"
 #include "PathResolver/PathResolver.h"
 #include "AsgDataHandles/ReadDecorHandle.h"
+#include "AthContainers/ConstAccessor.h"
 
 JetCalibrationTool::JetCalibrationTool(const std::string& name)
   : asg::AsgTool( name ),
@@ -458,9 +459,13 @@ StatusCode JetCalibrationTool::initializeEvent(JetEventInfo& jetEventInfo) const
     // Extract the BCID information for the BCID correction
     if (m_doBcid)
     {
-      jetEventInfo.setBcidDistanceFromFront( eventObj->auxdata<int>("DFCommonJets_BCIDDistanceFromFront") );
-      jetEventInfo.setBcidGapBeforeTrain( eventObj->auxdata<int>("DFCommonJets_BCIDGapBeforeTrain") );
-      jetEventInfo.setBcidGapBeforeTrainMinus12( eventObj->auxdata<int>("DFCommonJets_BCIDGapBeforeTrainMinus12") );
+      static const SG::ConstAccessor<int> BCIDDistanceFromFrontAcc ("DFCommonJets_BCIDDistanceFromFront");
+      static const SG::ConstAccessor<int> BCIDGapBeforeTrainAcc ("DFCommonJets_BCIDGapBeforeTrain");
+      static const SG::ConstAccessor<int> BCIDGapBeforeTrainMinus12Acc ("DFCommonJets_BCIDGapBeforeTrainMinus12");
+
+      jetEventInfo.setBcidDistanceFromFront( BCIDDistanceFromFrontAcc (*eventObj) );
+      jetEventInfo.setBcidGapBeforeTrain( BCIDGapBeforeTrainAcc (*eventObj) );
+      jetEventInfo.setBcidGapBeforeTrainMinus12( BCIDGapBeforeTrainMinus12Acc (*eventObj) );
     }
     
     // If PV index is not zero, we need to confirm it's a reasonable value

@@ -5,6 +5,7 @@
 # art-include: main/Athena
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
+# art-memory: 7999
 # art-output: test.HITS.pool.root
 
 # MC16 setup

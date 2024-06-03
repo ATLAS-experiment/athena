@@ -22,7 +22,7 @@
 class MonitorPhotonAlgorithm : public AthMonitorAlgorithm {
   public:
     MonitorPhotonAlgorithm( const std::string& name, ISvcLocator* pSvcLocator );
-    virtual ~MonitorPhotonAlgorithm();
+    virtual ~MonitorPhotonAlgorithm() = default;
     virtual StatusCode initialize() override;
     StatusCode fillHistograms( const EventContext& ctx ) const override;
 

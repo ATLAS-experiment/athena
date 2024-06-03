@@ -4,8 +4,10 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 def ActsMonitoringHistSvcCfg(flags) -> ComponentAccumulator:
     acc = ComponentAccumulator()
-    histSvc = CompFactory.THistSvc(Output = ["EXPERT DATAFILE='acts-expert-monitoring.root', OPT='RECREATE'"])
-    acc.addService(histSvc)
+    #check that acts is not part of the trigger, if it is then the trigger will be setting up the histogramming service
+    if not flags.Trigger.useActsTracking:
+        histSvc = CompFactory.THistSvc(Output = ["EXPERT DATAFILE='acts-expert-monitoring.root', OPT='RECREATE'"])
+        acc.addService(histSvc)
     return acc
 
 def ActsITkPixelClusterizationMonitoringToolCfg(flags,
@@ -18,6 +20,9 @@ def ActsITkPixelClusterizationMonitoringToolCfg(flags,
     
     monTool.defineHistogram('TIME_execute', path='EXPERT', type='TH1F', title='Time for execute',
                             xbins=100, xmin=0, xmax=10000)
+    
+    monTool.defineHistogram('NClustersCreated', path='EXPERT', type='TH1F', title='Number of clusters produced',
+                            xbins=100, xmin=0, xmax=5000)
     
     acc.setPrivateTools(monTool)
     acc.merge(ActsMonitoringHistSvcCfg(flags))
@@ -33,6 +38,9 @@ def ActsITkStripClusterizationMonitoringToolCfg(flags,
     
     monTool.defineHistogram('TIME_execute', path='EXPERT', type='TH1F', title='Time for execute',
                             xbins=100, xmin=0, xmax=10000)
+    
+    monTool.defineHistogram('NClustersCreated', path='EXPERT', type='TH1F', title='Number of clusters produced',
+                            xbins=100, xmin=0, xmax=5000)
     
     acc.setPrivateTools(monTool)
     acc.merge(ActsMonitoringHistSvcCfg(flags))
@@ -79,7 +87,7 @@ def ActsPixelSpacePointFormationMonitoringToolCfg(flags,
     monTool.defineHistogram('TIME_execute', path='EXPERT', type='TH1F', title='Time for execute',
                             xbins=100, xmin=0, xmax=1000)
     monTool.defineHistogram('numPixSpacePoints', path='EXPERT', type='TH1I', title='Number of Pixel Space Points',
-                            xbins=100, xmin=0, xmax=1000000)    
+                            xbins=100, xmin=0, xmax=1000000)
 
     acc.setPrivateTools(monTool)
     acc.merge(ActsMonitoringHistSvcCfg(flags))
@@ -95,10 +103,15 @@ def ActsStripSpacePointFormationMonitoringToolCfg(flags,
     
     monTool.defineHistogram('TIME_execute', path='EXPERT', type='TH1F', title='Time for execute',
                             xbins=100, xmin=0, xmax=1000)
+    monTool.defineHistogram('TIME_containerAccessor', path='EXPERT', type='TH1F', title='Time for execute of containerAccessor',
+                            xbins=100, xmin=0, xmax=1000)
     monTool.defineHistogram('numStripSpacePoints', path='EXPERT', type='TH1I', title='Number of Strip Space Points',
                             xbins=100, xmin=0, xmax=1000000)
     monTool.defineHistogram('numStripOverlapSpacePoints', path='EXPERT', type='TH1I', title='Number of Strip Overlap Space Points',
                             xbins=100, xmin=0, xmax=100000)
+    
+    monTool.defineHistogram('nCachedIdHashes', path='EXPERT', type='TH1I', title='Number of cached ID hashes which have been inserted',
+                            xbins=100, xmin=0, xmax=5000)
     
     acc.setPrivateTools(monTool)
     acc.merge(ActsMonitoringHistSvcCfg(flags))
@@ -118,6 +131,8 @@ def ActsITkPixelSeedingMonitoringToolCfg(flags,
                             xbins=50, xmin=0, xmax=10000)
     monTool.defineHistogram('TIME_parameterEstimation', path='EXPERT', type='TH1F', title='Time for parameter estimation',
                             xbins=50, xmin=0, xmax=10000)
+    monTool.defineHistogram('nSeeds', path='EXPERT', type='TH1I', title='Number of seeds',
+                            xbins=100, xmin=0, xmax=100000)
     
     acc.setPrivateTools(monTool)
     acc.merge(ActsMonitoringHistSvcCfg(flags))     
@@ -138,6 +153,9 @@ def ActsITkStripSeedingMonitoringToolCfg(flags,
     monTool.defineHistogram('TIME_parameterEstimation', path='EXPERT', type='TH1F', title='Time for parameter estimation',
                             xbins=50, xmin=0, xmax=10000)
     
+    monTool.defineHistogram('nSeeds', path='EXPERT', type='TH1I', title='Number of seeds',
+                            xbins=100, xmin=0, xmax=100000)
+    
     acc.setPrivateTools(monTool)
     acc.merge(ActsMonitoringHistSvcCfg(flags))     
     return acc
@@ -152,6 +170,8 @@ def ActsTrackFindingMonitoringToolCfg(flags,
     
     monTool.defineHistogram('TIME_execute', path='EXPERT', type='TH1F', title="Time for execute",
                             xbins=100, xmin=0, xmax=70000)
+    monTool.defineHistogram('nTracks', path='EXPERT', type='TH1I', title='Number of tracks',
+                            xbins=100, xmin=0, xmax=100000)
     
     acc.setPrivateTools(monTool)
     acc.merge(ActsMonitoringHistSvcCfg(flags))

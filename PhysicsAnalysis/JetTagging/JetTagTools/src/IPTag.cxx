@@ -16,6 +16,7 @@
 #include "xAODTracking/TrackParticleContainer.h"
 #include "TrkVertexFitterInterfaces/ITrackToVertexIPEstimator.h"
 #include "ParticleJetTools/JetFlavourInfo.h"
+#include "AthContainers/AuxElement.h"
 
 #include <cmath>
 #include <algorithm>
@@ -398,8 +399,10 @@ namespace Analysis {
 
     /** extract the TrackParticles from the jet and apply track selection: */
     int nbTrak = 0;
+    SG::AuxElement::ConstAccessor<std::vector<ElementLink<xAOD::TrackParticleContainer> > >
+      trackAssocAcc (m_trackAssociationName);
     std::vector< ElementLink< xAOD::TrackParticleContainer > > associationLinks = 
-      BTag.auxdata<std::vector<ElementLink<xAOD::TrackParticleContainer> > >(m_trackAssociationName);
+      trackAssocAcc (BTag);
     double sumTrkpT = 0;
     if( associationLinks.size() == 0 ) {
         ATH_MSG_VERBOSE("#BTAG#  Could not find tracks associated with BTagging object as " << m_trackAssociationName);

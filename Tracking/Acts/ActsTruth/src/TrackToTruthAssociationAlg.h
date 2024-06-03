@@ -53,18 +53,18 @@ namespace ActsTrk
 
   private:
      ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool
-        {this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
+        {this, "TrackingGeometryTool", ""};
 
      SG::ReadHandleKey<ActsTrk::TrackContainer> m_tracksContainerKey
-        {this, "ACTSTracksLocation", "SiSPSeededActsTrackContainer","Track collection (ActsTrk variant)"};
+        {this, "ACTSTracksLocation", "","Track collection (ActsTrk variant)"};
 
      SG::ReadHandleKey<MeasurementToTruthParticleAssociation>  m_pixelClustersToTruth
-        {this, "PixelClustersToTruthAssociationMap","", "Association map from pixel measurements to generator particles." };
+        {this, "PixelClustersToTruthAssociationMap", "", "Association map from pixel measurements to generator particles." };
      SG::ReadHandleKey<MeasurementToTruthParticleAssociation>  m_stripClustersToTruth
-        {this, "StripClustersToTruthAssociationMap","", "Association map from strip measurements to generator particles." };
+        {this, "StripClustersToTruthAssociationMap", "", "Association map from strip measurements to generator particles." };
 
      SG::WriteHandleKey<TrackToTruthParticleAssociation>  m_trackToTruthOut
-        {this, "AssociationMapOut","", "Output association map from measurements to generator particles." };
+        {this, "AssociationMapOut", "", "Output association map from measurements to generator particles." };
 
      Gaudi::Property<float> m_maxEnergyLoss
         {this, "MaxEnergyLoss", 10e12, "Stop moving up the decay chain if the energy loss is above  this value." };

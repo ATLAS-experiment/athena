@@ -82,7 +82,10 @@ def LArRampCfg(flags):
     theLArRampBuilder = CompFactory.LArRampBuilder()
     theLArRampBuilder.KeyList      = [digKey,]
     theLArRampBuilder.SubtractDac0 = False
-    theLArRampBuilder.ProblemsToMask=["deadCalib","deadReadout","deadPhys","almostDead","short"]
+    if flags.LArCalib.isSC:
+       theLArRampBuilder.ProblemsToMask=["deadCalib","deadReadout","deadPhys","maskedOSUM","OffOFCs"]
+    else:
+       theLArRampBuilder.ProblemsToMask=["deadCalib","deadReadout","deadPhys","almostDead","short"]
 
     theLArRampBuilder.RecoType = "OF"
     theLArRampBuilder.PeakOFTool=CompFactory.LArOFPeakRecoTool(UseShape = False,OutputLevel=2)
@@ -120,7 +123,12 @@ def LArRampCfg(flags):
         theLArRampPatcher.PatchMethod="PhiAverage"
         theLArRampPatcher.SuperCells=flags.LArCalib.isSC
    
-        theLArRampPatcher.ProblemsToPatch=["deadCalib","deadReadout","deadPhys","almostDead","short"]
+        if flags.LArCalib.isSC:
+          theLArRampPatcher.ProblemsToPatch=["deadCalib","deadReadout","deadPhys","maskedOSUM","OffOFCs"]
+          theLArRampPatcher.OnOffMap="LArOnOffIdMapSC"
+          theLArRampPatcher.CalibLineKey="LArCalibIdMapSC"
+        else:  
+          theLArRampPatcher.ProblemsToPatch=["deadCalib","deadReadout","deadPhys","almostDead","short"]
         theLArRampPatcher.UseCorrChannels=False
         result.addEventAlgo(theLArRampPatcher)
 

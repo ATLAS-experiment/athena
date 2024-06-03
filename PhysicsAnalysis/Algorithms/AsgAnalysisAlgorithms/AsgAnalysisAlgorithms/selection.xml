@@ -3,6 +3,7 @@
    <class name="CP::AsgFlagSelectionTool" />
    <class name="CP::AsgPtEtaSelectionTool" />
    <class name="CP::AsgClassificationDecorationAlg" />
+   <class name="CP::AsgEnergyDecoratorAlg" />
    <class name="CP::AsgCutBookkeeperAlg" />
    <class name="CP::AsgEventScaleFactorAlg" />
    <class name="CP::AsgLeptonTrackSelectionAlg" />
@@ -33,5 +34,6 @@
    <class name="CP::SystObjectUnioniserAlg" />
    <class name="CP::TreeFillerAlg" />
    <class name="CP::TreeMakerAlg" />
+   <class name="CP::IOStatsAlg" />
 
 </lcgdict>

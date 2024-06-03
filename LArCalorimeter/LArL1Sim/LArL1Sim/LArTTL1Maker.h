@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARL1SIM_LARTTL1MAKER_H
@@ -31,13 +31,15 @@
 #include "LArSimEvent/LArHitContainer.h"
 #include "LArRawEvent/LArTTL1Container.h"
 
+#include <vector>
+#include <array>
+
 class ITriggerTime;
 class CaloTriggerTowerService;
 class CaloLVL1_ID;
 class LArEM_ID;
 class LArHEC_ID;
 class LArFCAL_ID;
-class LArHitEMap;
 namespace CLHEP
 {
   class HepRandomEngine;

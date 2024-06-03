@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonHistUtils/MuonHitSummaryPlots.h"
 #include "xAODTracking/TrackingPrimitives.h"
+#include "AthContainers/ConstAccessor.h"
 
 namespace Muon{
   
@@ -144,8 +145,9 @@ etaphiHoles(this, "etaphiHoles", "eta+phi holes", 0, 5)
 }
 
   void MuonHitSummaryPlots::fillPlot(Trk::HitTypePlots& hitPlots, const std::string& sInfo, const xAOD::TruthParticle& truthprt, float weight){
-  if (!truthprt.isAvailable<uint8_t>(sInfo)) return;
-  hitPlots.fill(truthprt.auxdata<uint8_t>(sInfo), truthprt.eta(), truthprt.phi(), weight);
+  SG::ConstAccessor<uint8_t> acc (sInfo);
+  if (!acc.isAvailable(truthprt)) return;
+  hitPlots.fill(acc(truthprt), truthprt.eta(), truthprt.phi(), weight);
 }
 
 

@@ -46,10 +46,6 @@ EMConvert::EMConvert()
   :	egDetail()
 { }
 
-// destructor
-EMConvert::~EMConvert()
-= default;
-
 bool EMConvert::hasBoolParameter(egammaParameters::ParamDef key) const {
   if (key == egammaParameters::convTrackMatch)          return true;
   if (key == egammaParameters::convAngleMatch)          return true;

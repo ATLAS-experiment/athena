@@ -4,7 +4,10 @@
 atlas_subdir( MuonPatternEvent )
 
 
+find_package( Acts COMPONENTS Core )
+
 atlas_add_library( MuonPatternEvent
-    MuonPatternEvent/*.h  Root/*.cxx
+    MuonPatternEvent/*.h 
+    INTERFACE
     PUBLIC_HEADERS MuonPatternEvent
-    LINK_LIBRARIES xAODMuonPrepData  Identifier MuonReadoutGeometryR4 xAODMeasurementBase MuonSpacePoint MuonStationIndexLib)
+    LINK_LIBRARIES xAODMuonPrepData ActsCore Identifier MuonReadoutGeometryR4 xAODMeasurementBase MuonSpacePoint MuonStationIndexLib)

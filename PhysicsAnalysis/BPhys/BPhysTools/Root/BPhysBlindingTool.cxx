@@ -414,7 +414,7 @@ namespace xAOD {
   //--------------------------------------------------------------------------
   bool BPhysBlindingTool::pass(const SG::AuxElement& em, std::string hypo) {
     
-    if ( !boost::algorithm::starts_with(hypo, "passed_") )
+    if ( !hypo.starts_with( "passed_") )
       hypo = "passed_" + hypo;
     SG::AuxElement::Accessor<Char_t> flagAcc(hypo);
     return flagAcc.isAvailable(em) && flagAcc(em) != 0;

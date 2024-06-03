@@ -39,7 +39,7 @@ namespace TrackingUtilities {
     Eigen::Matrix<float,3,3> localCovariance = Eigen::Matrix<float,3,3>::Zero();
     localCovariance(0, 0) = localCov(0, 0);
     localCovariance(1, 1) = localCov(1, 1);
-    localCovariance(2, 2) = timeResolution;
+    localCovariance(2, 2) = timeResolution * timeResolution;
 
     xaodCluster.setMeasurement<3>(idHash, localPosition, localCovariance);
     xaodCluster.setIdentifier( indetCluster.identify().get_compact() );
@@ -328,7 +328,7 @@ namespace TrackingUtilities {
     errorMatrix.setIdentity();
     errorMatrix.fillSymmetric(0, 0, xaodCluster.localCovariance<3>()(0, 0));
     errorMatrix.fillSymmetric(1, 1, xaodCluster.localCovariance<3>()(1, 1));    
-    float time_resolution = xaodCluster.localCovariance<3>()(2, 2);
+    float time_resolution = std::sqrt(xaodCluster.localCovariance<3>()(2, 2));
 
     double etaWidth = 1.3;
     double phiWidth = 1.3;

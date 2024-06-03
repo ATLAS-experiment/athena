@@ -9,20 +9,20 @@ def SetupArgParser():
     parser = ArgumentParser()
     parser.add_argument("--threads", type=int, help="number of threads", default=1)
     parser.add_argument("--inputFile", "-i", default=[
-                        "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/data17_13TeV.00330470.physics_Main.daq.RAW._lb0310._SFO-1._0001.data"
-                        #"/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/EVGEN_ParticleGun_FourMuon_Pt10to500.root"
+                        #"/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/data17_13TeV.00330470.physics_Main.daq.RAW._lb0310._SFO-1._0001.data"
+                        "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/EVGEN_ParticleGun_FourMuon_Pt10to500.root"
                         ], 
                         help="Input file to run on ", nargs="+")
-    parser.add_argument("--geoTag", default="ATLAS-R2-2016-01-02-01", help="Geometry tag to use", choices=["ATLAS-R2-2016-01-02-01",
+    parser.add_argument("--geoTag", default="ATLAS-R3S-2021-03-02-00", help="Geometry tag to use", choices=["ATLAS-R2-2016-01-02-01",
                                                                                      "ATLAS-R3S-2021-03-02-00"])
-    parser.add_argument("--condTag", default="CONDBR2-BLKPA-RUN2-11", help="Conditions tag to use",
+    parser.add_argument("--condTag", default="OFLCOND-MC23-SDR-RUN3-02", help="Conditions tag to use",
                                                                          choices=["OFLCOND-MC16-SDR-RUN2-11",
                                                                                   "OFLCOND-MC23-SDR-RUN3-02",
                                                                                   "CONDBR2-BLKPA-2023-02",
                                                                                   "CONDBR2-BLKPA-RUN2-11"])
     parser.add_argument("--chambers", default=["all"
     ], nargs="+", help="Chambers to check. If string is all, all chambers will be checked")
-    parser.add_argument("--outRootFile", default="GeoModelDump.root", help="Output ROOT file to dump the geomerty")
+    parser.add_argument("--outRootFile", default="LegacyGeoModelDump.root", help="Output ROOT file to dump the geomerty")
     parser.add_argument("--noMdt", help="Disable the Mdts from the geometry", action='store_true', default = False)
     parser.add_argument("--noRpc", help="Disable the Rpcs from the geometry", action='store_true', default = False)
     parser.add_argument("--noTgc", help="Disable the Tgcs from the geometry", action='store_true', default = False)
@@ -41,6 +41,8 @@ def setupHistSvc(flags, out_file="MdtGeoDump.root"):
 def GeoModelMdtTestCfg(flags, name = "GeoModelMdtTest", **kwargs):
     result = ComponentAccumulator()
     if not flags.Detector.GeometryMDT: return result
+    from MuonConfig.MuonCablingConfig import MDTCablingConfigCfg
+    result.merge(MDTCablingConfigCfg(flags))
     the_alg = CompFactory.MuonGM.GeoModelMdtTest(name, **kwargs)
     result.addEventAlgo(the_alg)
     return result

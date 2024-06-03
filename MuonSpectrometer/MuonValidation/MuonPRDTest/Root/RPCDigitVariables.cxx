@@ -26,8 +26,7 @@ namespace MuonPRDTest {
         unsigned int n_digits{0};
         for (const RpcDigitCollection* coll : *RpcDigitContainer) {
             ATH_MSG_DEBUG("processing collection with size " << coll->size());
-            for (unsigned int digitNum = 0; digitNum < coll->size(); digitNum++) {
-                const RpcDigit* digit = coll->at(digitNum);
+            for (const RpcDigit* digit: *coll) {
                 Identifier Id = digit->identify();
 
                 ATH_MSG_DEBUG("RPC Digit Offline id:  " << idHelperSvc()->toString(Id));
@@ -38,26 +37,15 @@ namespace MuonPRDTest {
                     return false;
                 }
 
-                Amg::Vector3D gpos{Amg::Vector3D::Zero()};
+                const Amg::Vector3D gpos{rdoEl->stripPos(Id)};
                 Amg::Vector2D lpos{Amg::Vector2D::Zero()};
-
-                const bool stripPosition = rdoEl->stripPosition(Id, lpos);
-                int stripNumber = rdoEl->stripNumber(lpos, Id);
-
-                if (!stripPosition) {
-                    ATH_MSG_WARNING("RPCDigitVariables: failed to associate a valid local position for strip n. "
-                                    << stripNumber << "; associated positions will be set to 0.0.");
-                    continue;
-                }
-
-                rdoEl->surface(Id).localToGlobal(lpos, gpos, gpos);
+                
+                rdoEl->surface(Id).globalToLocal(gpos, Amg::Vector3D::Zero(), lpos);
                 m_RPC_dig_globalPos.push_back(gpos);
                 m_RPC_dig_localPos.push_back(lpos);
                 m_RPC_dig_time.push_back(digit->time());
                 m_RPC_tot.push_back(digit->ToT());
                 m_RPC_dig_id.push_back(Id);
-                m_RPC_dig_stripNumber.push_back(stripNumber);
-
                 ++n_digits;
             }
         }

@@ -29,6 +29,13 @@ StatusCode sTgcReadoutElement::initElement() {
    ATH_MSG_DEBUG("Parameter book "<<parameterBook());
 
    ATH_CHECK(createGeoTransform());
+#ifndef SIMULATIONBASE
+
+      ATH_CHECK(planeSurfaceFactory(geoTransformHash(), m_pars.layerBounds->make_bounds(m_pars.sHalfChamberLength, 
+                                                                                        m_pars.lHalfChamberLength, 
+                                                                                        m_pars.halfChamberHeight)));
+#endif
+
    if (m_pars.stripLayers.empty() || m_pars.wireGroupLayers.empty()) {
       ATH_MSG_FATAL("The readout element "<<idHelperSvc()->toStringDetEl(identify())<<" doesn't have any layers defined");
       return StatusCode::FAILURE;
@@ -37,17 +44,34 @@ StatusCode sTgcReadoutElement::initElement() {
       IdentifierHash layHash{layer};
       if (gasGapNumber(m_pars.stripLayers[layer].hash()) != layHash) {
          ATH_MSG_FATAL("Layer "<<m_pars.stripLayers[layer]<<" has a very strange hash. Expect "<<layer);
-       return StatusCode::FAILURE;
+         return StatusCode::FAILURE;
       }
       ATH_CHECK(insertTransform<sTgcReadoutElement>(m_pars.stripLayers[layer].hash()));
+      
+#ifndef SIMULATIONBASE
+      const StripDesign& design{m_pars.stripLayers[layer].design()};
+      ATH_CHECK(planeSurfaceFactory(m_pars.stripLayers[layer].hash(), 
+                                    m_pars.layerBounds->make_bounds(design.shortHalfHeight(), 
+                                                                    design.longHalfHeight(), 
+                                                                    design.halfWidth(),
+                                                                    90.*Gaudi::Units::deg)));
+#endif
+
    }
    for (unsigned int layer = 0; layer < m_pars.wireGroupLayers.size(); ++layer) {
       IdentifierHash layHash{layer};
       if (gasGapNumber(m_pars.wireGroupLayers[layer].hash()) != layHash) {
          ATH_MSG_FATAL("Layer "<<m_pars.wireGroupLayers[layer]<<" has a very strange hash. Expect "<<layer);
-       return StatusCode::FAILURE;
+         return StatusCode::FAILURE;
       }
       ATH_CHECK(insertTransform<sTgcReadoutElement>(m_pars.wireGroupLayers[layer].hash()));
+#ifndef SIMULATIONBASE
+      const StripDesign& design{m_pars.wireGroupLayers[layer].design()};
+      ATH_CHECK(planeSurfaceFactory(m_pars.wireGroupLayers[layer].hash(), 
+                                    m_pars.layerBounds->make_bounds(design.shortHalfHeight(), 
+                                                                    design.longHalfHeight(), 
+                                                                    design.halfWidth())));
+#endif
    }
    for (unsigned int layer = 0; layer < m_pars.padLayers.size(); ++layer) {
       IdentifierHash layHash{layer};
@@ -56,10 +80,18 @@ StatusCode sTgcReadoutElement::initElement() {
        return StatusCode::FAILURE;
       }
       ATH_CHECK(insertTransform<sTgcReadoutElement>(m_pars.padLayers[layer].hash()));
+#ifndef SIMULATIONBASE
+      const StripDesign& design{m_pars.padLayers[layer].design()};
+      ATH_CHECK(planeSurfaceFactory(m_pars.padLayers[layer].hash(), 
+                                    m_pars.layerBounds->make_bounds(design.shortHalfHeight(), 
+                                                                    design.longHalfHeight(), 
+                                                                    design.halfWidth())));
+#endif
+
    }
    ActsGeometryContext gctx{};
    m_gasGapPitch = (center(gctx, createHash(1, sTgcIdHelper::sTgcChannelTypes::Strip, 0)) -
-                   center(gctx, createHash(2, sTgcIdHelper::sTgcChannelTypes::Strip, 0))).mag(); 
+                    center(gctx, createHash(2, sTgcIdHelper::sTgcChannelTypes::Strip, 0))).mag(); 
    return StatusCode::SUCCESS;
 }
 
@@ -88,7 +120,7 @@ Amg::Vector2D sTgcReadoutElement::localChannelPosition(const IdentifierHash& mea
       Amg::Vector2D stripCenter{Amg::Vector2D::Zero()};
       std::optional<Amg::Vector2D> stripCenterOpt = stripDesign(measHash).center(channelNumber(measHash));
       if (!stripCenterOpt) {
-         ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The strip" << channelNumber(measHash) << "doesn't intersect with the edges of the trapezoid.");
+         ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The strip " << channelNumber(measHash) << " doesn't intersect with the edges of the trapezoid.");
          return stripCenter;
       }
       stripCenter = std::move(*stripCenterOpt);

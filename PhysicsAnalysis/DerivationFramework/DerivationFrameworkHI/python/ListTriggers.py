@@ -2,6 +2,9 @@
 #!/usr/bin/env python
 # ListTriggers.py - List of triggers for skimming from athena 21.2 [HION4,HION12] 
 
+#################################################################################
+#HION4
+
 def HION4SkimmingTriggers2015():
     triggers  = ['HLT_mb_sptrk_vetombts2in_L1MU0_VTE50']
     triggers += ['HLT_noalg_L1MU0_VTE50']
@@ -237,3 +240,89 @@ def HION4SkimmingTriggersVM():
     VMtrigger = ['HLT_mb_sptrk_exclusiveloose_vetosp1500_L1VTE20']
     
     return VMtrigger
+
+#################################################################################
+#HION12
+
+def HION12MBtriggers2018():
+    triggers  = []
+    
+    # Photo-nuclear min-bias triggers
+
+    triggers += ['HLT_mb_sptrk_L1ZDC_XOR_TE5_VTE200']  # Main min-bias stream for photo-nuclear dijets
+    triggers += ['HLT_mb_sptrk_L1ZDC_XOR_VTE200']  # Min-bias stream to check the impact of the TE5 cut. Very pre-scaled.
+    triggers += ['HLT_noalg_L1ZDC_XOR_TE5_VTE200']  # Stream to deal with events where no tracks were re-constructed due to the rapidity gap
+    triggers += ['HLT_noalg_L1ZDC_XOR']  # Stream to deal with overall effects of TE5 and VTE200 cuts. Extremely pre-scaled.
+    triggers += ['HLT_noalg_L1TE5_VTE200'] # Stream to examine the impact of the ZDC cuts. Prescale is 276.6.
+ 
+    #2015 photo-nuclear triggers which do not have an identical version in 2018
+    
+    triggers += ['HLT_noalg_mb_L1TE50'] # 2015 MB trigger with high pre-scale on events with low total energy
+    triggers += ['HLT_mb_sptrk_ion_L1ZDC_A_C_VTE50'] # 2015 MB trigger with full ZDC activation for inefficiency
+
+    # Photoproduction min-bias triggers
+    # Need to apply a ZDC veto in order to assess actual efficiencies for comparison.
+
+    triggers += ['HLT_mb_sp_L1VTE50']  # Min-bias stream for dijet photoproduction up to 50 GeV. No minimum cut so high pre-scale.
+    triggers += ['HLT_noalg_pc_L1TE50_VTE600.0ETA49']  # Part of the main heavy ion min-bias stream from 50 to 600 GeV. In the PC stream so requires special attention.
+    triggers += ['HLT_mb_sptrk_L1ZDC_A_C_VTE50']  # Part of the main heavy ion min-bias stream from 0 to 50 GeV. In the PC stream so requires special attention.
+    
+    return triggers
+
+def HION12triggers2018():
+    triggers  = []
+    # Photo-nuclear dijet physics triggers (j40 not included since j30 is un-prescaled for the entire run)
+
+    triggers += ['HLT_j10_L1ZDC_XOR_TE5_VTE200']  # j10 trigger for first half of 2018 run
+    triggers += ['HLT_j10_0eta490_L1ZDC_XOR_TE5_VTE200']  # j10 trigger for second half of 2018 run
+    triggers += ['HLT_j15_L1ZDC_XOR_TE5_VTE200']  # j15 trigger for first half of 2018 run
+    triggers += ['HLT_j15_0eta490_L1ZDC_XOR_TE5_VTE200']  # j15 trigger for second half of 2018 run
+    triggers += ['HLT_j20_L1ZDC_XOR_TE5_VTE200']  # j20 trigger for first half of 2018 run
+    triggers += ['HLT_j20_0eta490_L1ZDC_XOR_TE5_VTE200']  # j20 trigger for second half of 2018 run
+    triggers += ['HLT_j30_L1ZDC_XOR_TE20_VTE200']  # j30 trigger for first half of 2018 run
+    triggers += ['HLT_j30_0eta490_L1ZDC_XOR_TE20_VTE200']  # j30 trigger for second half of 2018 run
+    triggers += ['HLT_j10_rcu4_0eta490_L1ZDC_XOR_TE5_VTE200']  # j10 rcu4 trigger for second half of 2018 run (Lower un-calibrated min-pT cut)
+
+    # Photoproduction dijet R = 0.4 physics triggers (j40 not included because j30 is un-prescaled for the entire run)
+    # Actually, all of these triggers (except the rcu4) are un-prescaled. Yay!
+
+    triggers += ['HLT_j10_L1VZDC_A_C_TE5_VTE200']  # j10 trigger for the first half of the 2018 run
+    triggers += ['HLT_j15_L1VZDC_A_C_TE5_VTE200']  # j15 trigger for the first half of the 2018 run
+    triggers += ['HLT_j20_L1VZDC_A_C_TE5_VTE200']  # j20 trigger for the first half of the 2018 run
+    triggers += ['HLT_j30_L1VZDC_A_C_TE20_VTE200']  # j30 trigger for the first half of the 2018 run
+    triggers += ['HLT_j10_0eta490_L1VZDC_A_C_TE5_VTE200']  # j10 trigger for the second half of the 2018 run
+    triggers += ['HLT_j15_0eta490_L1VZDC_A_C_TE5_VTE200']  # j15 trigger for the second half of the 2018 run
+    triggers += ['HLT_j20_0eta490_L1VZDC_A_C_TE5_VTE200']  # j20 trigger for the second half of the 2018 run
+    triggers += ['HLT_j30_0eta490_L1VZDC_A_C_TE20_VTE200']  # j30 trigger for the second half of the 2018 run
+    triggers += ['HLT_j10_rcu4_0eta490_L1VZDC_A_C_TE5_VTE200']  # j10 rcu4 trigger for second half of 2018 run (Lower un-calibrated min-pT cut)
+
+    # Photoproduction dijet R = 1.0 physics triggers
+
+    triggers += ['HLT_j10_a10_lcw_subjes_L1VZDC_A_C_TE5_VTE200'] # j10 R=1.0 trigger for second half of the 2018 run. Same pre-scale as j15.
+    triggers += ['HLT_j15_a10_lcw_subjes_L1VZDC_A_C_TE5_VTE200'] # j15 R=1.0 trigger for second half of the 2018 run. Same pre-scale as j10.
+    triggers += ['HLT_j20_a10_lcw_subjes_L1VZDC_A_C_TE5_VTE200'] # j20 R=1.0 trigger for second half of the 2018 run. Same pre-scale as j30.
+    triggers += ['HLT_j30_a10_lcw_subjes_L1VZDC_A_C_TE5_VTE200'] # j30 R=1.0 trigger for second half of the 2018 run. Same pre-scale as j20.
+    
+    #2015 photo-nuclear triggers which do not have an identical version in 2018.
+
+    triggers += ['HLT_j10_320eta490_ion_L1TE5_VTE200'] # Forward trigger on HI jets in 2015 without ZDC requirement
+    triggers += ['HLT_j10_ion_L1TE5_VTE200']  # Mid-rapidity j10 trigger on HI jets in 2015 without ZDC requirement
+    triggers += ['HLT_j15_ion_L1TE5_VTE200']  # Mid-rapidity j15 trigger on HI jets in 2015 without ZDC requirement
+    triggers += ['HLT_j20_ion_L1TE5_VTE200']  # Mid-rapidity j20 trigger on HI jets in 2015 without ZDC requirement
+    triggers += ['HLT_j20_ion_L1ZDC_XOR_TE5_VTE200']  # Mid-rapidity j20 trigger on HI jets in 2015 with ZDC requirement
+    triggers += ['HLT_j10_ion_L1ZDC_XOR_TE5_VTE200']  # Mid-rapidity j10 trigger on HI jets in 2015 with ZDC requirement
+    triggers += ['HLT_j15_ion_L1ZDC_XOR_TE5_VTE200']  # Mid-rapidity j15 trigger on HI jets in 2015 with ZDC requirement
+    triggers += ['HLT_j10_ion_mb_mbts_vetombts1side2in_L1ZDC_XOR_TE5_VTE200']  # j10 trigger on HI jets in 2015 with an asymmetric MBTS and ZDC XOR requirement
+
+    return triggers
+
+def HION12nJetCuts2018():
+    nJetCuts  = [] 
+    nJetCuts += ['(count(AntiKt4EMTopoJets.pt > 7.0*GeV) > 0)']
+    nJetCuts += ['(count(AntiKt4LCTopoJets.pt > 7.0*GeV) > 0)']
+    nJetCuts += ['(count(AntiKt4EMPFlowJets.pt > 7.0*GeV) > 0)']
+    nJetCuts += ['(count(AntiKt4HIJets.pt > 7.0*GeV) > 0)']
+    nJetCuts += ['(count(AntiKt4HITrackJets.pt > 7.0*GeV) > 0)']
+    nJetCuts += ['(count(AntiKt10LCTopoJets.pt > 7.0*GeV) > 0)']
+    
+    return nJetCuts

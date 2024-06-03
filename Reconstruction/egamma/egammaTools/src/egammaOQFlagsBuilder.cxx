@@ -178,8 +178,6 @@ egammaOQFlagsBuilder::egammaOQFlagsBuilder(const std::string& type,
   declareInterface<IegammaOQFlagsBuilder>(this);
 }
 
-egammaOQFlagsBuilder::~egammaOQFlagsBuilder() = default;
-
 StatusCode
 egammaOQFlagsBuilder::initialize()
 {

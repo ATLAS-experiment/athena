@@ -7,9 +7,6 @@
 
 namespace Analysis
 {
-  ElectronAssociation::ElectronAssociation()
-  = default; 
-  
   ElectronAssociation::ElectronAssociation(const NameType& name)
   {
     this->setName(name);

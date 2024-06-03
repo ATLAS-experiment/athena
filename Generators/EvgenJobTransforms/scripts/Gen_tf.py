@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-#  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 """
 # Run event generation and produce an EVNT file.
@@ -13,8 +13,6 @@ from PyJobTransforms.trfExe import athenaExecutor
 from PyJobTransforms.trfArgs import addAthenaArguments
 from PyJobTransforms.trfDecorators import stdTrfExceptionHandler, sigUsrStackTrace
 from EvgenJobTransforms.evgenTrfArgs import addStdEvgenArgs
-import PyJobTransforms.trfArgClasses as trfArgClasses
-
 
 ## Prodsys1 hack...
 # TODO: Remove!
@@ -23,9 +21,9 @@ ListOfDefaultPositionalKeys=['--AMIConfig', '--AMITag', '--argJSON', '--asetup',
 class EvgenExecutor(athenaExecutor):
   "Specialised trf executor class for event generation jobs"
   def __init__(self, name="generate", skeleton=None, skeletonCA=None, substep=None, inData=set(), outData=set()):
-        athenaExecutor.__init__(self, name=name, skeletonFile=skeleton, skeletonCA=skeletonCA, 
-                                substep=substep, inputEventTest=False, tryDropAndReload=False, 
-				inData=inData, outData=outData)
+        athenaExecutor.__init__(self, name=name, skeletonFile=skeleton, skeletonCA=skeletonCA,
+                                substep=substep, inputEventTest=False, tryDropAndReload=False,
+                                inData=inData, outData=outData)
 
   def preExecute(self, input=set(), output=set()):
         "Get input tarball, unpack and set up env if an evgenJobOpts arg was provided."
@@ -48,7 +46,7 @@ class EvgenExecutor(athenaExecutor):
 
         def get_immediate_subdirectories(a_dir):
             return [name for name in os.listdir(a_dir)
-                    if os.path.isdir(os.path.join(a_dir, name))]                
+                    if os.path.isdir(os.path.join(a_dir, name))]
 
         ## Handle locating of evgen job options / fragments, either from a tarball or CVMFS
         # read the JO directory
@@ -64,7 +62,7 @@ class EvgenExecutor(athenaExecutor):
         # Adding cvmfs path to JOBOPTSEARCHPATH
         BaseCvmfsPath = "/cvmfs/atlas.cern.ch/repo/sw/Generators/MCJobOptions/"
 
-        if dsidparam.isdigit() and (len(dsidparam)==6 or len(dsidparam)==7): 
+        if dsidparam.isdigit() and (len(dsidparam)==6 or len(dsidparam)==7):
             #only dsid is provided, add cvmfs folder like 123xxx to JOBOPTSEARCHPATH
             Jodir = dsidparam[:3]+'xxx'
             if len(dsidparam)==7:
@@ -74,7 +72,7 @@ class EvgenExecutor(athenaExecutor):
             if (os.path.isdir(cwd_ful)):
                os.environ["JOBOPTSEARCHPATH"] = cwd_ful+":"+os.environ["JOBOPTSEARCHPATH"]
                os.environ["DATAPATH"] = cwd_ful+":"+os.environ["DATAPATH"]
-            else:               
+            else:
                cwd_Jodir = os.path.join(cwdir,Jodir)
                cwd_Jodir_ful = os.path.join(cwd_Jodir,dsidparam)
                if (os.path.isdir(cwd_Jodir_ful)):
@@ -85,20 +83,27 @@ class EvgenExecutor(athenaExecutor):
                   JoCvmfsPath_ful = os.path.join(JoCvmfsPath, dsidparam)
                   os.environ["JOBOPTSEARCHPATH"] = JoCvmfsPath_ful+":"+os.environ["JOBOPTSEARCHPATH"]
                   os.environ["DATAPATH"] = JoCvmfsPath_ful+":"+os.environ["DATAPATH"]
-           
-            
-        else:  #Suppose full path of dsid folder is provided(/afs/.../123xxx/123456), add cvmfs floder and local path(/afs/.../123xxx) to JOBOPTSEARCHPATH
-            if (os.path.isdir(dsidparam)):
-               os.environ["JOBOPTSEARCHPATH"] = dsidparam+":"+os.environ["JOBOPTSEARCHPATH"]
-               os.environ["DATAPATH"] = dsidparam+":"+os.environ["DATAPATH"]
-            else:
-                msg.error("JOs not found, please check = '%s'" % dsidparam) 
 
-                
+
+        else:  #Suppose full path of dsid folder is provided(/afs/.../123xxx/123456), add cvmfs floder and local path(/afs/.../123xxx) to JOBOPTSEARCHPATH
+            if dsidparam.startswith("Test"):  # for testing
+                for token in (os.environ['JOBOPTSEARCHPATH']).split(":"):
+                    if "jobOptions" in token:
+                        search_token = token
+                        break
+                search_token += "/EvgenJobTransforms/EvgenTest/" + dsidparam.split("Test")[-1]
+                os.environ["JOBOPTSEARCHPATH"] = search_token+":"+os.environ["JOBOPTSEARCHPATH"]
+                os.environ["DATAPATH"] = search_token+":"+os.environ["DATAPATH"]
+            elif (os.path.isdir(dsidparam)):
+                os.environ["JOBOPTSEARCHPATH"] = dsidparam+":"+os.environ["JOBOPTSEARCHPATH"]
+                os.environ["DATAPATH"] = dsidparam+":"+os.environ["DATAPATH"]
+            else:
+                msg.error("JOs not found, please check = '%s'" % dsidparam)
+                raise RuntimeError("JOs not found")
 
         msg.info("Using JOBOPTSEARCHPATH = '%s'" % os.environ["JOBOPTSEARCHPATH"])
         msg.info("Using DATAPATH = '%s'" % os.environ["DATAPATH"])
-                
+
         if "evgenJobOpts" in self._trf.argdict: ## Use a specified JO tarball
             tarball = self._trf.argdict["evgenJobOpts"].value
             ## Prepend the standard tarball URL prefix if the arg is not a full URL
@@ -139,13 +144,13 @@ class EvgenExecutor(athenaExecutor):
                energy="13"
             for x in configFiles:
                 gridS="mc_"+energy+"TeV"
-                msg.info("Gridpack should start from "+gridS) 
+                msg.info("Gridpack should start from "+gridS)
                 if x.startswith(gridS):
                    confFile = os.path.join(FIRST_DIR, x)
                    msg.info("using gridpack = "+confFile)
             if confFile is None:
                msg.error("No *GRID* config files, for requested energy = '%s'  please check = '%s'" %(energy,dsidparam))
-            
+
         if confFile is not None:
            expand_if_archive(confFile)
 #       os.system("cp %s ." % confFile)
@@ -154,7 +159,7 @@ class EvgenExecutor(athenaExecutor):
         #Expand if a tarball is found in local directory
         loc_files = os.listdir(os.getcwd())
         for loc_file in loc_files:
-            if "GRID" not in loc_file:  
+            if "GRID" not in loc_file:
                expand_if_archive(loc_file)
 
         ## Expand tarball input event and generator conf files, if provided
@@ -221,7 +226,7 @@ def main():
       tmp_dir = os.getcwd()
       whitelist_in = ['MC','group','TXT']
       move_files(tmp_dir,main_dir,whitelist_in)
-      
+
     trf.execute()
     trf.generateReport()
     msg.info("%s stopped at %s, trf exit code %d" % (sys.argv[0], time.asctime(), trf.exitCode))
@@ -245,7 +250,7 @@ def main():
            elif os.path.isfile(test_ex):
              os.remove(test_ex)
          if not saveList[0].isdigit():
-             whitelist_out=whitelist_out+saveList 
+             whitelist_out=whitelist_out+saveList
 
        move_files(main_dir,tmp_dir,whitelist_out)
        os.chdir(main_dir)
@@ -261,7 +266,7 @@ def main():
         merge_file = 'merged_lhef._0.events'
         if((numberOfFiles>1) and (os.path.exists(merge_file))):
            os.remove(merge_file)
-#           
+#
     if (("lheOnly" in trf.argdict ) and (trf.argdict["lheOnly"].value == 1)):
           outputName = ''.join(trf.argdict["outputEVNTFile"].value)
           os.remove(outputName)

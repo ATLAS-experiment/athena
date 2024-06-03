@@ -78,7 +78,7 @@ namespace MuonGM {
       else if (key.substr(0,3)=="sTG") {
 	      std::string sName = vName.substr(7,4);
 	      std::unique_ptr<sTgcReadoutElement> re = std::make_unique<sTgcReadoutElement>(pV, sName, ec*eta, phi, ml, m_manager);
-	      re->initDesign(-999., -999., -999., 3.2, -999., 2.7, -999., 2.6);
+	      re->initDesign(2.6);
 	      re->fillCache();
 	      m_manager->addsTgcReadoutElement(std::move(re));
       }
@@ -178,8 +178,7 @@ namespace MuonGM {
 
 	// here define the GeoAlignableTransform associated to the chamber
 	// nominal transform first
-	GeoAlignableTransform *xf = mapAXF[station->GetName()];
-
+	GeoAlignableTransform *xf = mapAXF[station->GetName()+"_Station_"+std::to_string(zi)+"_"+std::to_string(fi)];
 	// alignment issues and readout geometry for station
 	MuonStation *mst = m_manager->getMuonStation(station->GetName(), zi, fi + 1);
 	if (!mst) {

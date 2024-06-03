@@ -6,7 +6,7 @@ RDO="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking
 RDO_EVT=200
 
 echo "... RDO to AOD with sim"
-Reco_tf.py --CA \
+Reco_tf.py \
     --steering doRAWtoALL \
     --preExec "flags.Trigger.FPGATrackSim.wrapperFileName='wrapper.root'" \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateTracksFlags" \

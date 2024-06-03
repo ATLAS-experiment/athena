@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 /**
  * @file FPGATrackSimSectorBank.cxx
@@ -170,7 +170,7 @@ sector_t FPGATrackSimSectorBank::findSector(std::vector<std::vector<const FPGATr
 
 
 // Helper function. Store the q/pt binning information for this set of sectors here.
-void FPGATrackSimSectorBank::storeQOverPtBinning(std::vector<double> qOverPtBins, bool absBinning)
+void FPGATrackSimSectorBank::storeQOverPtBinning(const std::vector<double>& qOverPtBins, bool absBinning)
 {
   m_absQOverPtBinning = absBinning;
 

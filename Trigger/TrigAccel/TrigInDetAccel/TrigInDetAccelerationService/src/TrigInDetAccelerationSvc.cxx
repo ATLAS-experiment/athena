@@ -15,6 +15,8 @@
 #include "TrigAccelEvent/TrigInDetAccelEDM.h"
 #include "TrigAccelEvent/TrigITkAccelEDM.h"
 #include "CxxUtils/checker_macros.h"
+#include "AthenaInterprocess/Incidents.h"
+#include "GaudiKernel/ConcurrencyFlags.h"
 
 #include <dlfcn.h>
 
@@ -102,13 +104,20 @@ StatusCode TrigInDetAccelerationSvc::initialize() {
   /*    
    * Ask to be informed at the beginning of a new run so that we    
    * can collect geometry, conditions, etc. and copy them to on-GPU data structures   
+   * For athenaHLT this should be UpdateAfterFork
    */   
 
-  IIncidentSvc* incsvc;   
-  StatusCode sc = service("IncidentSvc", incsvc);   
-  int priority = 100;   
-  if( sc.isSuccess() ) {     
-    incsvc->addListener( this, "BeginRun", priority);   
+  IIncidentSvc* incsvc;
+  StatusCode sc = service("IncidentSvc", incsvc);
+  int priority = 100;
+  if( sc.isSuccess() ) {
+    const bool is_multiprocess = (Gaudi::Concurrency::ConcurrencyFlags::numProcs() > 0);
+    if (is_multiprocess) {
+      incsvc->addListener( this, AthenaInterprocess::UpdateAfterFork::type(), priority);
+    }
+    else {
+      incsvc->addListener( this, "BeginRun", priority);
+    }
   }
   
   return StatusCode::SUCCESS;

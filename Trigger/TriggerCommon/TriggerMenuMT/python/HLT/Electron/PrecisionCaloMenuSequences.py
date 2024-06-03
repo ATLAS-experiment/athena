@@ -14,7 +14,7 @@ def tag(ion):
 @AccumulatorCache
 def precisionCaloSequenceGenCfg(flags, ion=False, is_probe_leg=False, variant=''):
     """ Creates PrecisionCalo sequence """
-    TrigEgammaKeys = getTrigEgammaKeys(variant, ion=ion)
+    TrigEgammaKeys = getTrigEgammaKeys(flags, variant, ion=ion)
     hiInfo = 'HI' if ion else ''
     # EV creator
     InViewRoIs="PrecisionCaloRoIs"+ variant

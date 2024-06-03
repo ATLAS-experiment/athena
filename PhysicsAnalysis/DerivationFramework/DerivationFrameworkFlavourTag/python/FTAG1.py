@@ -23,10 +23,11 @@ def FTAG1KernelCfg(flags, name='FTAG1Kernel', **kwargs):
     from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
     acc.merge(PhysCommonAugmentationsCfg(flags, TriggerListsHelper = kwargs['TriggerListsHelper']))
 
+    nametag = name.replace('Kernel', '') #get the name to label the tools below such that other formats can use this KernelCfg
     augmentationTools = []
     # Add V0Tool
     if flags.BTagging.AddV0Finder:
-        acc.merge(V0ToolCfg(flags, augmentationTools=augmentationTools, tool_name_prefix="FTAG1", container_name_prefix="FTAG"))
+        acc.merge(V0ToolCfg(flags, augmentationTools=augmentationTools, tool_name_prefix=nametag, container_name_prefix="FTAG"))
 
     # thinning tools
     thinningTools = []
@@ -104,11 +105,13 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
             "GlobalNeutralParticleFlowObjects",
             "CHSGChargedParticleFlowObjects",
             "CHSGNeutralParticleFlowObjects",
+            "CSSKGChargedParticleFlowObjects",
+            "CSSKGNeutralParticleFlowObjects",
             "TruthParticles",
             "TruthVertices",
             "TruthBottom", "TruthElectrons","TruthMuons","TruthTaus",
             ]
-
+    
     if flags.GeoModel.Run >= LHCPeriod.Run4:
         FTAG1SlimmingHelper.AllVariables += [
             "AntiKt4EMTopoJets",
@@ -133,16 +136,14 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
                 "JetAssociatedSCTClusters",
                 ]
 
-    if flags.BTagging.RunNewVrtSecInclusive:
-        FTAG1SlimmingHelper.AppendToDictionary.update({'NVSI_SecVrt_Tight' : 'xAOD::VertexContainer','NVSI_SecVrt_TightAux' : 'xAOD::VertexAuxContainer',
-                                                       'NVSI_SecVrt_Medium' : 'xAOD::VertexContainer','NVSI_SecVrt_MediumAux' : 'xAOD::VertexAuxContainer',
-                                                       'NVSI_SecVrt_Loose' : 'xAOD::VertexContainer','NVSI_SecVrt_LooseAux' : 'xAOD::VertexAuxContainer'})
 
-    # Append to dictionary
     from DerivationFrameworkFlavourTag import FtagBaseContent
+    # update AppendToDictionary
+    extra_AppendToDictionary = {} #only add those items specifically for FTAG1 here!
+    FtagBaseContent.update_AppendToDictionary_in_SlimmingHelper(FTAG1SlimmingHelper, flags, extra_AppendToDictionary)
 
     # Static content
-    StaticContent = []
+    StaticContent = [] #only add extra static content for FTAG1 here!
     if flags.BTagging.AddV0Finder:
         FTAGV0ContainerName = "FTAGRecoV0Candidates"
         FTAGKshortContainerName = "FTAGRecoKshortCandidates"
@@ -164,18 +165,9 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
             StaticContent += ["xAOD::VertexContainer#%s"   %     cascades]
             StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % cascades]
 
-    FtagBaseContent.add_static_content_to_SlimmingHelper(FTAG1SlimmingHelper, StaticContent)
 
-    if flags.BTagging.RunNewVrtSecInclusive:
-        excludedVertexAuxData = "-vxTrackAtVertex.-MvfFitInfo.-isInitialized.-VTAV"
-        FTAG1SlimmingHelper.StaticContent += ["xAOD::VertexContainer#NVSI_SecVrt_Loose", "xAOD::VertexContainer#NVSI_SecVrt_Medium", "xAOD::VertexContainer#NVSI_SecVrt_Tight"]
-        FTAG1SlimmingHelper.StaticContent += ["xAOD::VertexAuxContainer#NVSI_SecVrt_LooseAux."+excludedVertexAuxData]
-        FTAG1SlimmingHelper.StaticContent += ["xAOD::VertexAuxContainer#NVSI_SecVrt_MediumAux."+excludedVertexAuxData ]
-        FTAG1SlimmingHelper.StaticContent += ["xAOD::VertexAuxContainer#NVSI_SecVrt_TightAux."+excludedVertexAuxData]
+    FtagBaseContent.add_static_content_to_SlimmingHelper(FTAG1SlimmingHelper, flags, StaticContent)
 
-    excludedVertexAuxData = "-vxTrackAtVertex.-MvfFitInfo.-isInitialized.-VTAV"
-    FTAG1SlimmingHelper.StaticContent += ["xAOD::VertexContainer#GNNVertices"]
-    FTAG1SlimmingHelper.StaticContent += ["xAOD::VertexAuxContainer#GNNVerticesAux."+excludedVertexAuxData]
 
     # Add truth containers
     if flags.Input.isMC:
@@ -187,7 +179,6 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
 
     # Add ExtraVariables
     FtagBaseContent.add_ExtraVariables_to_SlimmingHelper(FTAG1SlimmingHelper)
-    FTAG1SlimmingHelper.ExtraVariables += ["AntiKt4EMPFlowJets.GNNVerticesLink"]
    
     # Trigger content
     FtagBaseContent.trigger_setup(FTAG1SlimmingHelper, trigger_option)

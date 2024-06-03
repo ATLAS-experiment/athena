@@ -11,7 +11,6 @@
 # art-athena-mt: 8
 
 ATHENA_CORE_NUMBER=8 Derivation_tf.py \
-  --CA True \
   --athenaMPEventsBeforeFork 1 \
   --inputAODFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/mc20_13TeV.361107.PowhegPythia8EvtGen_AZNLOCTEQ6L1_Zmumu.recon.AOD.e3601_s3681_r13167/AOD.27312826._000061.pool.root.1 \
   --outputDAODFile art.pool.root \

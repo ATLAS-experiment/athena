@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGMUONMONITORING_L2MUONSAIOMON_H
@@ -28,9 +28,9 @@ class L2MuonSAIOMon : public TrigMuonMonitorAlgorithm{
   std::map<std::string, double> m_plateaus {};
   SG::ReadHandleKey<xAOD::L2CombinedMuonContainer> m_L2MuonCBIOContainerKey {this, "L2CombinedMuonContainerName_IO", "HLT_MuonL2CBInfoIOmode", "L2MuonCBIO container"};
   StatusCode matchL2IO_wContainer(const EventContext &ctx, const std::string &chain, std::vector< const xAOD::L2CombinedMuon* > &Trig_L2IOobjects) const;
-  StatusCode L2OverlapRemover( std::vector< const xAOD::L2CombinedMuon* > matchSA_L2IOobjects, std::vector< bool > &isoverlap, std::vector< bool > &passOR ) const;
+  StatusCode L2OverlapRemover( const std::vector< const xAOD::L2CombinedMuon* >& matchSA_L2IOobjects, std::vector< bool > &isoverlap, std::vector< bool > &passOR ) const;
   bool isOverlap( const xAOD::L2CombinedMuon* matchSA_L2IOobject1, const xAOD::L2CombinedMuon* matchSA_L2IOobject2 ) const;
-  StatusCode chooseBestMuon( std::vector< const xAOD::L2CombinedMuon* > matchSA_L2IOobjects, std::vector< bool > &passOR, std::vector< unsigned int > &mucombResult ) const;
+  StatusCode chooseBestMuon( const std::vector< const xAOD::L2CombinedMuon* >& matchSA_L2IOobjects, std::vector< bool > &passOR, std::vector< unsigned int > &mucombResult ) const;
   StatusCode muCombHypo_TDTworkaround( const std::string &chain, const std::vector< const xAOD::L2CombinedMuon* >& Trig_L2IOobjects, std::vector< bool > &pass_muCombHypo ) const;
   StatusCode isPassedmuCombHypo( const std::string &chain, const xAOD::L2CombinedMuon* Trig_L2IOobjects ,bool &pass_muCombHypo) const;
   StatusCode decision_ptthreshold( const std::string &chain, std::vector< float > &my_EtaBins, std::vector< float > &my_muCombThres,

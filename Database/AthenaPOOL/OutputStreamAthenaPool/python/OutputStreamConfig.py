@@ -13,7 +13,7 @@ def OutputStreamCfg(flags, streamName, ItemList=[], MetadataItemList=[],
                     disableEventTag=False, trigNavThinningSvc=None, takeItemsFromInput=False,
                     AcceptAlgs=[], HelperTools=[]):
    eventInfoKey = "EventInfo"
-   if flags.Common.ProductionStep == ProductionStep.PileUpPresampling:
+   if flags.Common.ProductionStep in [ProductionStep.PileUpPresampling, ProductionStep.PileUpPretracking]:
       eventInfoKey = f"{flags.Overlay.BkgPrefix}EventInfo"
 
    msg = logging.getLogger("OutputStreamCfg")
@@ -160,7 +160,8 @@ def addToMetaData(flags, streamName, itemOrList, AcceptAlgs=[], HelperTools=[], 
 
    Returns CA to be merged
    """
-   if not getattr(flags.Output, f"doWrite{streamName}"):
+   flagName = f"Output.doWrite{streamName}"
+   if not flags.hasFlag(flagName):
        return ComponentAccumulator()
    items = [itemOrList] if isinstance(itemOrList, str) else itemOrList
    return OutputStreamCfg(flags, streamName, MetadataItemList=items,

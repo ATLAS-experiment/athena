@@ -17,6 +17,8 @@
 // Inputs
 #include "GaudiKernel/SystemOfUnits.h"
 #include "GaudiKernel/PhysicalConstants.h"
+#include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
+#include "GeoModelHelpers/TransformToStringConverter.h"
 #include "MuonSimEvent/RPCSimHit.h"
 #include "MuonSimEvent/RPCSimHitCollection.h"
 
@@ -36,7 +38,7 @@
 // Truth
 #include "AtlasHepMC/GenParticle.h"
 #include "GeneratorObjects/HepMcParticleLink.h"
-
+#include "GeoModelHelpers/throwExcept.h"
 // Random Numbers
 #include "AthenaKernel/RNGWrapper.h"
 #include "CLHEP/Random/RandExponential.h"
@@ -59,8 +61,8 @@
 namespace {
     constexpr int N_Charge = 12;
     constexpr int N_Velocity = 15;
-    constexpr double Charge[N_Charge] = {0.1, 0.2, 0.3, 0.33, 0.4, 0.5, 0.6, 0.66, 0.7, 0.8, 0.9, 1.0};
-    constexpr double Velocity[N_Velocity] = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 2.0, 3.0, 10.0, 100.0, 1000.0};
+    constexpr std::array<double, N_Charge> Charge{0.1, 0.2, 0.3, 0.33, 0.4, 0.5, 0.6, 0.66, 0.7, 0.8, 0.9, 1.0};
+    constexpr std::array<double,  N_Velocity> Velocity{0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 2.0, 3.0, 10.0, 100.0, 1000.0};
     constexpr double Eff_garfield[N_Charge][N_Velocity] = {
         {0.8648, 0.3476, 0.1407, 0.0618, 0.0368, 0.0234, 0.0150, 0.0120, 0.0096, 0.0079, 0.0038, 0.0041, 0.0035, 0.0049, 0.0054},
         {0.9999, 0.9238, 0.6716, 0.4579, 0.3115, 0.2238, 0.1727, 0.1365, 0.1098, 0.0968, 0.0493, 0.0451, 0.0528, 0.0694, 0.0708},
@@ -95,7 +97,6 @@ StatusCode RpcDigitizationTool::initialize() {
     ATH_MSG_DEBUG("RpcDigitizationTool:: in initialize()");
     ATH_MSG_DEBUG("Configuration  RpcDigitizationTool ");
 
-    ATH_MSG_DEBUG("Parameters             " << m_paraFile);
     ATH_MSG_DEBUG("InputObjectName        " << m_inputHitCollectionName);
     ATH_MSG_DEBUG("OutputObjectName       " << m_outputDigitCollectionKey.key());
     ATH_MSG_DEBUG("OutputSDOName          " << m_outputSDO_CollectionKey.key());
@@ -115,7 +116,6 @@ StatusCode RpcDigitizationTool::initialize() {
     ATH_MSG_DEBUG("turnON_clustersize     " << m_turnON_clustersize);
     ATH_MSG_DEBUG("ClusterSize_fromCOOL   " << m_ClusterSize_fromCOOL);
     ATH_MSG_DEBUG("ClusterSize_BIS78_fromCOOL" << m_ClusterSize_BIS78_fromCOOL);
-    ATH_MSG_DEBUG("testbeam_clustersize   " << m_testbeam_clustersize);
     ATH_MSG_DEBUG("FirstClusterSizeInTail " << m_FirstClusterSizeInTail);
     ATH_MSG_DEBUG("ClusterSize1_2uncorr   " << m_ClusterSize1_2uncorr);
     ATH_MSG_DEBUG("BOG_BOF_DoubletR2_OFF  " << m_BOG_BOF_DoubletR2_OFF);
@@ -146,6 +146,7 @@ StatusCode RpcDigitizationTool::initialize() {
     // initialize the output WriteHandleKeys
     ATH_CHECK(m_outputDigitCollectionKey.initialize());
     ATH_CHECK(m_outputSDO_CollectionKey.initialize());
+    ATH_CHECK(m_simHitValidKey.initialize(m_validationSetup));
     ATH_MSG_DEBUG("Output digits: '" << m_outputDigitCollectionKey.key() << "'");
 
     // set the configuration based on run1/run2
@@ -170,14 +171,11 @@ StatusCode RpcDigitizationTool::initialize() {
         ATH_MSG_INFO("From DD Database, Configuration is " << configVal);
         if (configVal == "RUN1") {
             run = Run1;
-        } 
-        if (configVal == "RUN2") {
+        } else if (configVal == "RUN2") {
             run = Run2;
-        }
-        if (configVal == "RUN3") {
+        } else if (configVal == "RUN3") {
             run = Run3;
-        }
-        if (configVal == "RUN4") {
+        } else if (configVal == "RUN4") {
             run = Run4;
         } 
         if (run == DataPeriod::Unknown) {
@@ -248,8 +246,6 @@ StatusCode RpcDigitizationTool::initialize() {
 
     ATH_MSG_DEBUG("Ready to read parameters for cluster simulation from file");
 
-    ATH_CHECK(readParameters());
-
     ATH_CHECK(m_rndmSvc.retrieve());
 
     // get TagInfoMgr
@@ -267,6 +263,8 @@ StatusCode RpcDigitizationTool::initialize() {
     m_BOS_id = m_idHelper->stationNameIndex("BOS");
     m_BIL_id = m_idHelper->stationNameIndex("BIL");
     m_BIS_id = m_idHelper->stationNameIndex("BIS");
+    m_muonHelper = RpcHitIdHelper::GetHelper(m_idHelper->gasGapMax());
+
     return StatusCode::SUCCESS;
 }
 
@@ -477,22 +475,8 @@ StatusCode RpcDigitizationTool::doDigitization(const EventContext& ctx,
     ATH_CHECK(retrieveCondData(ctx, m_detMgrKey, detMgr));
 
 
-    // StatusCode status = StatusCode::SUCCESS;
-    // status.ignore();
+    std::unique_ptr<RPCSimHitCollection> inputSimHitColl{std::make_unique<RPCSimHitCollection>("RPC_Hits")};
 
-    int nKilledStrips = 0;
-    int nToBeKilledStrips = 0;
-
-    RPCSimHitCollection* inputSimHitColl = nullptr;
-
-    if (m_validationSetup) {
-        inputSimHitColl = new RPCSimHitCollection("RPC_Hits");
-        StatusCode status = evtStore()->record(inputSimHitColl, "InputRpcHits");
-        if (status.isFailure()) {
-            ATH_MSG_ERROR("Unable to record Input RPC HIT collection in StoreGate");
-            return status;
-        }
-    }
 
     // get the iterator pairs for this DetEl
     // iterate over hits
@@ -504,14 +488,16 @@ StatusCode RpcDigitizationTool::doDigitization(const EventContext& ctx,
         return StatusCode::FAILURE;
     }
 
+    struct SimDataContent {
+        Identifier channelId{};
+        std::vector<MuonSimData::Deposit> deposits;
+        Amg::Vector3D gpos{Amg::Vector3D::Zero()};
+        double simTime{0.};
+    };
+
     while (m_thpcRPC->nextDetectorElement(i, e)) {
         // to store the a single
-        struct SimDataContent {
-            Identifier channelId;
-            std::vector<MuonSimData::Deposit> deposits;
-            Amg::Vector3D gpos{Amg::Vector3D::Zero()};
-            float simTime = 0.0F;
-        };
+
         std::map<Identifier, SimDataContent> channelSimDataMap;
 
         // Loop over the hits:
@@ -525,15 +511,15 @@ StatusCode RpcDigitizationTool::doDigitization(const EventContext& ctx,
             // the hit id
             const int idHit = hit.RPCid();
             // the global time (G4 time + bunch time)
-            double globalHitTime(hitTime(phit));
+            const double globalHitTime{hitTime(phit)};
             // the G4 time or TOF from IP
-            double G4Time(hit.globalTime());
+            const double G4Time{hit.globalTime()};
             // the bunch time
-            double bunchTime(globalHitTime - hit.globalTime());
+            const double bunchTime{globalHitTime - hit.globalTime()};
 
             ATH_MSG_DEBUG("Global time " << globalHitTime << " G4 time " << G4Time << " Bunch time " << bunchTime);
 
-            if (m_validationSetup) {
+            if (!m_simHitValidKey.empty()) {
                 ATH_MSG_VERBOSE("Validation:  globalHitTime, G4Time, BCtime = " << globalHitTime << " " << G4Time << " " << bunchTime);
                 inputSimHitColl->Emplace(idHit, globalHitTime, hit.localPosition(),
                                          HepMcParticleLink::getRedirectedLink(phit->particleLink(), phit.eventId(), ctx), // This link should now correctly resolve to the TruthEvent McEventCollection in the main StoreGateSvc.
@@ -542,36 +528,42 @@ StatusCode RpcDigitizationTool::doDigitization(const EventContext& ctx,
             }
 
             // convert sim id helper to offline id
-            m_muonHelper = RpcHitIdHelper::GetHelper(m_idHelper->gasGapMax());
-            std::string stationName = m_muonHelper->GetStationName(idHit);
-            int stationEta = m_muonHelper->GetZSector(idHit);
-            int stationPhi = m_muonHelper->GetPhiSector(idHit);
-            int doubletR = m_muonHelper->GetDoubletR(idHit);
-            int doubletZ = m_muonHelper->GetDoubletZ(idHit);
-            int doubletPhi = m_muonHelper->GetDoubletPhi(idHit);
+            const std::string stationName = m_muonHelper->GetStationName(idHit);
+            const int stationEta = m_muonHelper->GetZSector(idHit);
+            const int stationPhi = m_muonHelper->GetPhiSector(idHit);
+            const int doubletR = m_muonHelper->GetDoubletR(idHit);
+            const int doubletZ = m_muonHelper->GetDoubletZ(idHit);
+            const int doubletPhi = m_muonHelper->GetDoubletPhi(idHit);
             int gasGap = m_muonHelper->GetGasGapLayer(idHit);
-            int measphi = m_muonHelper->GetMeasuresPhi(idHit);
+            
+            if (m_muonHelper->GetMeasuresPhi(idHit)) continue;  // Skip phi strip . To be created after efficiency evaluation
 
-            if (measphi != 0) continue;  // Skip phi strip . To be created after efficiency evaluation
 
-            if (stationName[0] != 'B' || (std::abs(stationEta) == 8 && stationName == "BIS") || doubletZ > RpcIdHelper::doubletZMax()) {
-                ATH_MSG_WARNING("Found an invalid identifier "
-                                << " stationName " << stationName << " stationEta " << stationEta << " stationPhi " << stationPhi
-                                << " doubletR " << doubletR << " doubletZ " << doubletZ << " doubletPhi " << doubletPhi << " gasGap "
-                                << gasGap << " measphi " << measphi);
+            bool isValid{false};
+            const Identifier elementID = m_idHelper->elementID(stationName,stationEta,stationPhi,doubletR, isValid);
+            if (!isValid) {
+                ATH_MSG_WARNING("Failed to construct the element ID from "<<stationName
+                            <<", stationEta: "<<stationEta<<", stationPhi: "<<stationPhi<<", doubletR: "<<doubletR);
                 continue;
             }
             // construct Atlas identifier from components
             ATH_MSG_DEBUG("creating id for hit in element:"
                           << " stationName " << stationName << " stationEta " << stationEta << " stationPhi " << stationPhi << " doubletR "
-                          << doubletR << " doubletZ " << doubletZ << " doubletPhi " << doubletPhi << " gasGap " << gasGap << " measphi "
-                          << measphi);  //
+                          << doubletR << " doubletZ " << doubletZ << " doubletPhi " << doubletPhi << " gasGap " << gasGap);
+            const Identifier detElId{m_idHelper->channelID(elementID, doubletZ, doubletPhi, 1,0, 1, isValid)};
+            if (!isValid) {
+                continue;
+            }
+            const RpcReadoutElement* reEle = detMgr->getRpcReadoutElement(detElId);
+            /// Let's pray that we will never discover that BIS78 is mounted upside down
+            if (false && reEle->rotatedRpcModule()) {
+                gasGap = gasGap == 1 ? 2 : 1;
+            } 
 
+            
             bool isValidEta{false}, isValidPhi{false};
-            const Identifier idpaneleta =
-                m_idHelper->channelID(stationName, stationEta, stationPhi, doubletR, doubletZ, doubletPhi, gasGap, 0, 1, isValidEta);
-            const Identifier idpanelphi =
-                m_idHelper->channelID(stationName, stationEta, stationPhi, doubletR, doubletZ, doubletPhi, gasGap, 1, 1, isValidPhi);
+            const Identifier idpaneleta = m_idHelper->channelID(elementID, doubletZ, doubletPhi, gasGap, 0, 1, isValidEta);
+            const Identifier idpanelphi = m_idHelper->channelID(elementID, doubletZ, doubletPhi, gasGap, 1, 1, isValidPhi);
             if (!isValidEta || !isValidPhi) {
                 ATH_MSG_WARNING("Found an invalid identifier "
                                 << " stationName " << stationName << " stationEta " << stationEta << " stationPhi " << stationPhi
@@ -581,63 +573,72 @@ StatusCode RpcDigitizationTool::doDigitization(const EventContext& ctx,
             }
             // loop on eta and phi to apply correlated efficiency between the two views
 
-            double corrtimejitter = 0;
-            double tmp_CorrJitter = m_CorrJitter;
-            if (m_idHelper->stationName(idpaneleta) < 2) tmp_CorrJitter = m_CorrJitter_BIS78;
-            if (tmp_CorrJitter > 0.01)
-                corrtimejitter = CLHEP::RandGaussZiggurat::shoot(rndmEngine, 0., tmp_CorrJitter);  // correlated jitter
+            /// Use special jitter consant for BIS & BIL chambers.
+            const double tmp_CorrJitter = m_idHelper->stationName(idpaneleta) < 2 ? m_CorrJitter_BIS78 : m_CorrJitter;
+            /// If a jitter constant has been defined smear it!
+            const double corrtimejitter = tmp_CorrJitter > 0.01 ? 
+                                                CLHEP::RandGaussZiggurat::shoot(rndmEngine, 0., tmp_CorrJitter) : 0.;  // correlated jitter
             // handle here the special case where eta panel is dead => phi strip status (dead or eff.) cannot be resolved;
             // measured panel eff. will be used in that case and no phi strip killing will happen
-            bool undefPhiStripStat = false;
 
-            std::vector<int> pcseta = PhysicalClusterSize(ctx, idpaneleta, &hit, rndmEngine);  // set to one for new algorithms
-            ATH_MSG_DEBUG("Simulated cluster on eta panel: size/first/last= " << pcseta[0] << "/" << pcseta[1] << "/" << pcseta[2]);
-            std::vector<int> pcsphi = PhysicalClusterSize(ctx, idpanelphi, &hit, rndmEngine);  // set to one for new algorithms
-            ATH_MSG_DEBUG("Simulated cluster on phi panel: size/first/last= " << pcsphi[0] << "/" << pcsphi[1] << "/" << pcsphi[2]);
+
+            // Extrapolate the hit to the gas gap centre located at x=0 
+            const Amg::Vector3D hitDir{(hit.postLocalPosition() - hit.localPosition()).unit()};
+            const Amg::Vector3D gapCentre = hit.localPosition() + 
+                                            Amg::intersect<3>(hit.localPosition(), hitDir, Amg::Vector3D::UnitX(), 0).value_or(0) * hitDir;
+
+            std::array<int, 3> pcseta = physicalClusterSize(ctx, reEle, idpaneleta, gapCentre, rndmEngine);  // set to one for new algorithms
+            ATH_MSG_VERBOSE("Simulated cluster on eta panel: size/first/last= " << pcseta[0] << "/" << pcseta[1] << "/" << pcseta[2]);
+            std::array<int, 3> pcsphi = physicalClusterSize(ctx, reEle, idpanelphi, gapCentre, rndmEngine);  // set to one for new algorithms
+            ATH_MSG_VERBOSE("Simulated cluster on phi panel: size/first/last= " << pcsphi[0] << "/" << pcsphi[1] << "/" << pcsphi[2]);
+
+            
 
             // create Identifiers
-            Identifier atlasRpcIdeta =
-                m_idHelper->channelID(stationName, stationEta, stationPhi, doubletR, doubletZ, doubletPhi, gasGap, 0, pcseta[1], isValidEta);
-            Identifier atlasRpcIdphi =
-                m_idHelper->channelID(stationName, stationEta, stationPhi, doubletR, doubletZ, doubletPhi, gasGap, 1, pcsphi[1], isValidPhi);
+            const Identifier atlasRpcIdeta = m_idHelper->channelID(elementID, doubletZ, doubletPhi, gasGap, 0, pcseta[1], isValidEta);
+            const Identifier atlasRpcIdphi = m_idHelper->channelID(elementID, doubletZ, doubletPhi, gasGap, 1, pcsphi[1], isValidPhi);
 
-            if (!isValidEta || !isValidPhi) {
-                ATH_MSG_WARNING("Found an invalid identifier "
-                                << " stationName " << stationName << " stationEta " << stationEta << " stationPhi " << stationPhi
-                                << " doubletR " << doubletR << " doubletZ " << doubletZ << " doubletPhi " << doubletPhi << " gasGap "
-                                << gasGap);
-                continue;
-            }
-            const RpcReadoutElement* ele = detMgr->getRpcReadoutElement(atlasRpcIdeta);  // first add time jitter to the time:
             const HepMcParticleLink particleLink = HepMcParticleLink::getRedirectedLink(phit->particleLink(), phit.eventId(), ctx); // This link should now correctly resolve to the TruthEvent McEventCollection in the main StoreGateSvc.
+            const auto [etaStripOn, phiStripOn] = detectionEfficiency(ctx, idpaneleta, idpanelphi, rndmEngine, particleLink);
+            ATH_MSG_DEBUG("SetPhiOn " << phiStripOn << " SetEtaOn " << etaStripOn);
 
-            ATH_CHECK(DetectionEfficiency(ctx, atlasRpcIdeta, atlasRpcIdphi, undefPhiStripStat, rndmEngine, particleLink));
+            for (bool  imeasphi : {false, true}) {
+                if (!imeasphi &&  (!etaStripOn || !isValidEta)) continue;
+                if (imeasphi && (!phiStripOn || !isValidPhi)) continue;
 
-            ATH_MSG_DEBUG("SetPhiOn " << m_SetPhiOn << " SetEtaOn " << m_SetEtaOn);
 
-            for (int imeasphi = 0; imeasphi != 2; ++imeasphi) {
                 // get Identifier and list of clusters for this projection
-                const Identifier atlasId = (imeasphi == 0) ? atlasRpcIdeta : atlasRpcIdphi;
-                std::vector<int> pcs = (imeasphi == 0) ? pcseta : pcsphi;
+                const Identifier& atlasId = !imeasphi ? atlasRpcIdeta : atlasRpcIdphi;
+                std::array<int, 3> pcs{!imeasphi ? pcseta : pcsphi};
 
-                ATH_MSG_DEBUG("SetOn: stationName " << stationName.c_str() << " stationEta " << stationEta << " stationPhi " << stationPhi
+                ATH_MSG_DEBUG("SetOn: stationName " << stationName << " stationEta " << stationEta << " stationPhi " << stationPhi
                                                     << " doubletR " << doubletR << " doubletZ " << doubletZ << " doubletPhi " << doubletPhi
                                                     << " gasGap " << gasGap << " measphi " << imeasphi);
 
                 // pcs contains the cluster size, the first strip number and the last strip number of the cluster
-                pcs = TurnOnStrips(ctx, pcs, atlasId, rndmEngine);
-                if (pcs[2] < 0) return StatusCode::FAILURE;
+                pcs = TurnOnStrips(reEle, std::move(pcs), atlasId);
+                if (pcs[2] < 0){
+                    continue;
+                } 
 
                 ATH_MSG_DEBUG("Simulated cluster1: size/first/last= " << pcs[0] << "/" << pcs[1] << "/" << pcs[2]);
 
-                // Adjuststd::absolute position and local position
-                Amg::Vector3D pos = hit.localPosition();
-                pos = adjustPosition(ctx, atlasId, pos);  //
-                pos = posInPanel(ctx, atlasId, pos);      // This is what we want to save in deposit?
+                
+                const Amg::Vector3D pos = fromSimHitToLayer(reEle, atlasId) * hit.localPosition();
+                const Amg::Vector3D gpos = reEle->transform(atlasId) * pos;
+                
+                ATH_MSG_VERBOSE(" evt: "<<ctx.eventID().event_number()
+                                <<" hit  "<<m_idHelper->print_to_string(atlasId)
+                                <<" local simHit "<<Amg::toString(hit.localPosition())
+                                <<" corrected: "<<Amg::toString(pos)
+                                <<" transform: "<<GeoTrf::toString(fromSimHitToLayer(reEle, atlasId))
+                                <<" local strip: "<<Amg::toString(reEle->localToGlobalTransf(atlasId).inverse()*reEle->stripPos(atlasId))
+                                <<" local strip (II): "<<Amg::toString(reEle->transform(atlasId).inverse()*reEle->stripPos(atlasId))
+                                <<" global: "<<Amg::toString(gpos)
+                                <<" strip Pos: "<<Amg::toString(reEle->stripPos(atlasId)));
 
                 // Calculate propagation time along readout strip in seconds
-                Amg::Vector3D gpos = ele->localToGlobalCoords(pos, atlasId);
-                double proptime = PropagationTimeNew(ctx, atlasId, gpos);
+                double proptime = PropagationTime(reEle, atlasId, gpos);
 
                 double tns = G4Time + proptime + corrtimejitter;  // the time is in nanoseconds
                 ATH_MSG_VERBOSE("TOF+propagation time  " << tns << " /s where proptime " << proptime << "/s");
@@ -660,24 +661,18 @@ StatusCode RpcDigitizationTool::doDigitization(const EventContext& ctx,
                 // Do not store pile-up truth information
                 if (m_includePileUpTruth || !HepMC::ignoreTruthLink(phit->particleLink(), m_vetoPileUpTruthLinks)) {
                   if (std::abs(hit.particleEncoding()) == 13 || hit.particleEncoding() == 0) {
-                    auto channelSimDataMapPos = channelSimDataMap.find(atlasId);
-                    if (channelSimDataMapPos == channelSimDataMap.end()) {
-                      const Amg::Vector3D& ppos = hit.postLocalPosition();
-                      Amg::Vector3D gppos = ele->localToGlobalCoords(ppos, atlasId);
-                      Amg::Vector3D gdir = gppos - gpos;
-                      Trk::Intersection intersection = ele->surface(atlasId).straightLineIntersection(gpos, gdir, false, false);
+                    if (channelSimDataMap.find(atlasId) == channelSimDataMap.end()) {
                       SimDataContent& content = channelSimDataMap[atlasId];
                       content.channelId = atlasId;
                       content.deposits.push_back(deposit);
-                      content.gpos = intersection.position;
+                      content.gpos =  reEle->transform(atlasId)* 
+                                      fromSimHitToLayer(reEle,atlasId) * gapCentre;
                       content.simTime = hitTime(phit);
                       ATH_MSG_VERBOSE("adding SDO entry: r " << content.gpos.perp() << " z " << content.gpos.z());
                     }
                   }
                 }
 
-                if (imeasphi == 0 && m_SetEtaOn == 0) continue;
-                if (imeasphi == 1 && m_SetPhiOn == 0) continue;
 
                 //---------------------------------------------------------------------
                 // construct new digit and store it in the respective digit collection
@@ -693,24 +688,7 @@ StatusCode RpcDigitizationTool::doDigitization(const EventContext& ctx,
                                         <<" "<< doubletPhi<<" "<< gasGap <<" "<< imeasphi<<" "<< clus<<" is invalid");
                         continue;
                     }
-                    // here count and maybe kill dead strips if using COOL input for the detector status
-                    if (m_Efficiency_fromCOOL) {
-                        const RpcCondDbData* readCdo{nullptr};                        
-                        ATH_CHECK(retrieveCondData(ctx, m_readKey, readCdo));
-                        if (!undefPhiStripStat || imeasphi != 1) {
-                            if (readCdo->getDeadStripIntMap().find(newId) != readCdo->getDeadStripIntMap().end()) {
-                                ATH_MSG_DEBUG("After DetectionEfficiency: strip " << m_idHelper->show_to_string(newId)
-                                                                                  << " in a cluster of size " << pcs[2] - pcs[1] + 1
-                                                                                  << " is dead - kill it ");
-                                ++nToBeKilledStrips;
-                                if (m_kill_deadstrips) {
-                                    ++nKilledStrips;
-                                    continue;  // gabriele
-                                }
-                            }
-                        }
-                    }
-
+                    
                     if (!m_idHelper->valid(newId)) {
                         if (stationName.find("BI") != std::string::npos) {
                             ATH_MSG_WARNING("Temporary skipping creation of RPC digit for stationName="
@@ -824,11 +802,11 @@ StatusCode RpcDigitizationTool::doDigitization(const EventContext& ctx,
                 Amg::Vector3D posi = ele->stripPos(theId);
                 double tp = m_patch_for_rpc_time ? posi.mag() / Gaudi::Units::c_light : 0.;
                 // Calculate propagation time for a hit at the center of the strip, to be subtructed as well as the nominal TOF
-                double propTimeFromStripCenter = PropagationTimeNew(ctx, theId, posi);
+                double propTimeFromStripCenter = PropagationTime(ele, theId, posi);
                 double newDigit_time = currTime + uncorrjitter + m_rpc_time_shift - tp - propTimeFromStripCenter;
         
                 double digi_ToT = -1.;  // Time over threshold, for Narrow-gap RPCs only
-                if (m_idHelper->stationName(theId) < 2) digi_ToT = extract_time_over_threshold_value(rndmEngine);  //mn 
+                if (m_idHelper->stationName(theId) < 2) digi_ToT = timeOverThreshold(rndmEngine);  //mn 
 
                 ATH_MSG_VERBOSE("last_time=currTime " << last_time << " jitter " << uncorrjitter << " TOFcorrection " << tp << " shift "
                                                       << m_rpc_time_shift << "  newDigit_time " << newDigit_time);
@@ -899,156 +877,66 @@ StatusCode RpcDigitizationTool::doDigitization(const EventContext& ctx,
 
     // reset the pointer if it not null
     m_thpcRPC.reset();
+    if (!m_simHitValidKey.empty()) {
+        SG::WriteHandle<RPCSimHitCollection> validHandle{m_simHitValidKey, ctx};
+        ATH_CHECK(validHandle.record(std::move(inputSimHitColl)));
+    }
 
-    ATH_MSG_DEBUG("EndOf Digitize() n. of strips Killed (dead) in the DB = " << nKilledStrips << " (" << nToBeKilledStrips << ")");
     return StatusCode::SUCCESS;
+}
+Amg::Transform3D RpcDigitizationTool::fromSimHitToLayer(const MuonGM::RpcReadoutElement* reEle,
+                                                        const Identifier& layerId) const {
+    
+    Amg::Vector3D lGasGapPos = reEle->localGasGapPos(layerId);
+    if (reEle->NphiStripPanels() != reEle->nGasGapPerLay()) {
+        lGasGapPos.y() =0.;
+    }
+    
+    /// Yep. The second gas gap is upside down. But only for the rotated modules.
+    /// If you're asking yourself why that's the case, my fellow reader I've not even the 
+    /// glimpse of a clue about this beauty
+    const bool flip = reEle->numberOfLayers() == 2 &&  
+                      (m_idHelper->gasGap(layerId) == 2) != reEle->rotatedRpcModule();
+    const Amg::Transform3D fromHitToGap{reEle->transform(layerId).inverse() *
+                                        reEle->absTransform() * Amg::getTranslate3D(lGasGapPos) *
+                                        (flip ? Amg::getRotateY3D(180.*Gaudi::Units::deg) : Amg::Transform3D::Identity())};
+    ATH_MSG_VERBOSE("Transformation to go from hit to gap restframe "<<m_idHelper->print_to_string(layerId)
+                <<" "<<Amg::toString(fromHitToGap));
+    return fromHitToGap;
 }
 
 //--------------------------------------------
-std::vector<int> RpcDigitizationTool::PhysicalClusterSize(const EventContext& ctx, const Identifier& id, const RPCSimHit* theHit,
-                                                          CLHEP::HepRandomEngine* rndmEngine) {
+std::array<int, 3> RpcDigitizationTool::physicalClusterSize(const EventContext& ctx,
+                                                            const RpcReadoutElement* ele, 
+                                                            const Identifier& id, 
+                                                            const Amg::Vector3D& gapCentre,
+                                                            CLHEP::HepRandomEngine* rndmEngine) const {
     
-    const MuonGM::MuonDetectorManager* detMgr{nullptr};
-    retrieveCondData(ctx, m_detMgrKey, detMgr).ignore();
+ 
+    std::array<int, 3> result{};
 
-    int stationName = m_idHelper->stationName(id);
-    int stationEta = m_idHelper->stationEta(id);
-    float pitch;
-    int measuresPhi = m_idHelper->measuresPhi(id);
-    std::vector<int> result(3, 0);
-    const RpcReadoutElement* ele = detMgr->getRpcReadoutElement(id);
-    
-    pitch = ele->StripPitch(measuresPhi);
+    const Amg::Vector3D position = fromSimHitToLayer(ele, id) * gapCentre;
+    const int doubletPhi = m_idHelper->doubletPhi(id);
+    const int gasGap = m_idHelper->gasGap(id);
+    const bool measuresPhi = m_idHelper->measuresPhi(id);
+    const double pitch= ele->StripPitch(measuresPhi);
 
-    int nstrip;
-    double xstrip;
 
-    std::vector<double> cs = m_csPara;       // read from file
-    std::array<double, 5> cs1{0.}, cs2{0.};  // the contributions to the observed cluster size due to physical cluster size 1 and 2
-
-    Amg::Vector3D position = adjustPosition(ctx, id, theHit->localPosition());
-
-    nstrip = findStripNumber(ctx, position, id, xstrip);
-
-    xstrip = xstrip * 30. / pitch;
-
-    cs1[0] = cs[0];
-    cs2[0] = 0;
-
-    double cs1_tot{0.}, cs2_tot{0.}, pcs1_prob{0.};  // the probability to have physical cluster size 1
-    int pcsIs1 = 0;
-
-    // NOTE: standard identifiers require nstrip eta increasing with |eta|
-    // while now it is increasing with eta. Here we fix this problem.
-
-    if (!measuresPhi) {
-        if (stationEta < 0) {  // fix needed only for negative half-barrel
-            int totEtaStrips = ele->Nstrips(measuresPhi);
-            nstrip = totEtaStrips - nstrip + 1;
-            // if stationEta<0, invert the numbering AND invert the position of the hit in the strip
-            // s.spagnolo 20/10/2015; this fixes a small bias in the digit positions for clusters with size > 1
-            xstrip = 30. - xstrip;
-        }
-    }
-
-    if (measuresPhi) nstrip = adjustStripNumber(ctx, id, nstrip);
+    const int nstrip = ele->stripNumber(position.block<2,1>(0,0), id);
+    const int numStrips = ele->Nstrips(measuresPhi);
 
     result[1] = nstrip;
     result[2] = nstrip;
 
-    // testbeam algorithm
-    if (m_testbeam_clustersize && stationName != 1) {  // do not apply for BIS
-        // code to decide if the physical cluster size is 1 or 2;
-        // this is based on a distribution shown in the muon TDR, representing the
-        // fraction cs1/cs2 as a function of the impact point.
-        // this distribution was fitted with a composite function (gaus_const_gaus)
+    if (nstrip < 1 || nstrip > numStrips) {
+        return make_array<int, 3>(-1);
+    }    
+    const Amg::Vector3D locStripPos = ele->transform(id).inverse()*ele->stripPos(doubletPhi, gasGap, measuresPhi, nstrip); 
+    float xstripnorm = (locStripPos -position).x() / pitch ;
+    result[0] = determineClusterSize(ctx, id, xstripnorm, rndmEngine);
 
-        if (xstrip < 8)
-            pcs1_prob = m_rgausPara[0] *
-                        exp(-(xstrip - m_rgausPara[1]) * (xstrip - m_rgausPara[1]) * 0.5 / (m_rgausPara[2] * m_rgausPara[2])) / 100.;
-        else if (xstrip > 8 && xstrip < 22)
-            pcs1_prob = m_constPara[0];
-        else if (xstrip > 22 && xstrip < 30)
-            pcs1_prob = m_fgausPara[0] *
-                        exp(-(xstrip - m_fgausPara[1]) * (xstrip - m_fgausPara[1]) * 0.5 / (m_fgausPara[2] * m_fgausPara[2])) / 100.;
-
-        if (CLHEP::RandFlat::shoot(rndmEngine) < pcs1_prob) pcsIs1 = 1;
-
-        for (int i = 1; i < 5; i++) {
-            cs1[i] = pcs1_prob * cs[i];
-            cs2[i] = (1 - pcs1_prob) * cs[i];
-        }
-
-        // FIXME: there are too many pcs2, i.e. the two distributions we use (pcs and observed cs) were obtained with different experimental
-        // setups. The following lines convert some of the pcs2 to pcs1. This will be eliminated with new experimental distributions
-
-        constexpr double pcs1_av = 0.6688;
-        double pcs1_tot = cs[0] + cs[1] * pcs1_av + cs[2] * pcs1_av + cs[2] * pcs1_av + cs[4] * pcs1_av;
-        double pcs2_tot = 100. - pcs1_tot;
-        double pcs1_missing = pcs1_tot - pcs1_av * 100;
-        double pcs2_to_convert = pcs1_missing / pcs2_tot;
-
-        if (!pcsIs1 && CLHEP::RandFlat::shoot(rndmEngine) < pcs2_to_convert) {
-            pcsIs1 = 1;
-            for (int i = 1; i < 5; i++) {
-                cs1[i] = cs1[i] + pcs2_to_convert * cs2[i];  // recover
-                cs2[i] = cs2[i] - pcs2_to_convert * cs2[i];  // recover
-            }
-        }
-
-        // end recover
-
-        // normalization of the distributions
-
-        cs1_tot = cs1[1] + cs1[2] + cs1[3] + cs1[4];  // count here only cs>1, thus not cs1[0]
-        cs2_tot = cs2[0] + cs2[1] + cs2[2] + cs2[3] + cs2[4];
-
-        // if pcs is 2, decide which strip is activated
-
-        if (!pcsIs1 && xstrip > pitch / 2.) result[2]++;
-        if (!pcsIs1 && xstrip < pitch / 2.) result[1]--;
-
-        // now assign cs 'not physical', according to the distributions cs1 and cs2
-
-        if (pcsIs1) {
-            double rand1 = CLHEP::RandFlat::shoot(rndmEngine, 100.);
-            if (rand1 > cs1_tot + cs2_tot) {  // it means that cs is 1
-                result[0] = 1;
-            } else {
-                double rand = CLHEP::RandFlat::shoot(rndmEngine, cs1_tot);
-                if (rand < cs1[1])
-                    result[0] = 2;
-                else if (rand < cs1[1] + cs1[2])
-                    result[0] = 3;
-                else if (rand < cs1[1] + cs1[2] + cs1[3])
-                    result[0] = 4;
-                else
-                    result[0] = 4;
-            }
-
-        } else {
-            double rand = CLHEP::RandFlat::shoot(rndmEngine, cs2_tot);
-            if (rand < cs2[1])
-                result[0] = 2;
-            else if (rand < cs2[1] + cs2[2])
-                result[0] = 3;
-            else if (rand < cs2[1] + cs2[2] + cs2[3])
-                result[0] = 4;
-            else
-                result[0] = 4;
-        }
-    }  // testbeam algorithm
-    else { 
-        float xstripnorm = xstrip / 30.;
-        result[0] = ClusterSizeEvaluation(ctx, id, xstripnorm, rndmEngine);
-
-        int nstrips = ele->Nstrips(measuresPhi);
-        //
-        if (result[1] < 1) result[1] = 1;
-        if (result[2] < 1) result[2] = 1;
-        if (result[1] > nstrips) result[1] = nstrips;
-        if (result[2] > nstrips) result[2] = nstrips;
-    }
+    //
+    
 
     if (m_turnON_clustersize == false) result[0] = 1;
 
@@ -1056,124 +944,30 @@ std::vector<int> RpcDigitizationTool::PhysicalClusterSize(const EventContext& ct
 }
 
 //--------------------------------------------
-std::vector<int> RpcDigitizationTool::TurnOnStrips(const EventContext& ctx, 
-                                                   std::vector<int> pcs, 
-                                                   const Identifier& id, 
-                                                   CLHEP::HepRandomEngine* rndmEngine) {
+std::array<int, 3> RpcDigitizationTool::TurnOnStrips(const RpcReadoutElement* ele,
+                                                     std::array<int, 3>&& pcs, 
+                                                     const Identifier& id) const {
 
-    const MuonGM::MuonDetectorManager* detMgr{nullptr};
-    retrieveCondData(ctx, m_detMgrKey, detMgr).ignore();
 
-    int nstrips{0};
-    int measuresPhi = m_idHelper->measuresPhi(id);
-    int stationName = m_idHelper->stationName(id);
+    const int nstrips = ele->Nstrips(m_idHelper->measuresPhi(id));
 
-    const RpcReadoutElement* ele = detMgr->getRpcReadoutElement(id);
-
-    nstrips = ele->Nstrips(measuresPhi);
-
-    // testbeam algorithm
-    if (m_testbeam_clustersize && stationName != 1) {  // do not apply for BIS
-        int stripsAlreadyTurnedOn = 1 - pcs[1] + pcs[2];
-
-        // turn on strips according to spread distribution obtained from data
-
-        if (stripsAlreadyTurnedOn == 1) {
-            if (pcs[0] == 2) {
-                if (CLHEP::RandFlat::shoot(rndmEngine) < 0.5)
-                    pcs[1]--;
-                else
-                    pcs[2]++;
-            } else if (pcs[0] == 3) {
-                //  out3 << pcs[1]<< " ";
-                if (CLHEP::RandFlat::shoot(rndmEngine) < m_cs3Para) {
-                    pcs[1]--;  // -+-
-                    pcs[2]++;
-                } else {
-                    if (CLHEP::RandFlat::shoot(rndmEngine) < 0.5)
-                        pcs[2] += 2;  // +--
-                    else
-                        pcs[1] -= 2;  // --+
-                }
-                // out3 << pcs[1] <<std::endl;
-            } else if (pcs[0] == 4) {
-                // out4 << pcs[1]<< std::endl;
-                double rand = CLHEP::RandFlat::shoot(rndmEngine);
-                if (rand < m_cs4Para[0]) {
-                    pcs[2] += 3;
-                }                                               // +---
-                else if (rand < m_cs4Para[0] + m_cs4Para[1]) {  // -+--
-                    pcs[1]--;
-                    pcs[2] += 2;
-                } else if (rand < m_cs4Para[0] + m_cs4Para[1] + m_cs4Para[2]) {  // --+-
-                    pcs[1] -= 2;
-                    pcs[2]++;
-                } else
-                    pcs[1] -= 3;  //  ---+
-            }
-        }
-
-        if (stripsAlreadyTurnedOn == 2) {
-            if (pcs[0] == 3) {
-                double rand_norm = m_cs3Para + 0.5 * (1 - m_cs3Para);
-                if (CLHEP::RandFlat::shoot(rndmEngine) < 0.5) {  //  +-- or -+-
-                    if (CLHEP::RandFlat::shoot(rndmEngine) < m_cs3Para / rand_norm)
-                        pcs[1]--;  // -+-
-                    else
-                        pcs[2]++;  // +--
-                } else {           // -+- or --+
-                    if (CLHEP::RandFlat::shoot(rndmEngine) < m_cs3Para / rand_norm)
-                        pcs[2]++;  // -+-
-                    else
-                        pcs[1]--;  // --+
-                }
-            } else if (pcs[0] == 4) {
-                if (CLHEP::RandFlat::shoot(rndmEngine) < 0.5) {  // strip crossed is the first of the two
-                    double rand = CLHEP::RandFlat::shoot(rndmEngine, 2 * m_cs4Para[0] + m_cs4Para[1] + m_cs4Para[2]);
-                    if (rand < 2 * m_cs4Para[0]) {
-                        pcs[2] += 2;
-                    }  // the '2*' is to compensate for the 0.5
-                    else if (rand < 2 * m_cs4Para[0] + m_cs4Para[1]) {
-                        pcs[1]--;
-                        pcs[2]++;
-                    } else {
-                        pcs[1] -= 2;
-                    }
-                } else {  // strip crossed is the second of the two
-                    double rand = CLHEP::RandFlat::shoot(rndmEngine, m_cs4Para[1] + m_cs4Para[2] + 2 * m_cs4Para[3]);
-                    if (rand < 2 * m_cs4Para[3]) {
-                        pcs[1] -= 2;
-                    } else if (rand < 2 * m_cs4Para[3] + m_cs4Para[2]) {
-                        pcs[1]--;
-                        pcs[2]++;
-                    } else {
-                        pcs[2] += 2;
-                    }
-                }
-            }
-        }
-    }  // testbeam algorithm
-    else {
-        if (pcs[0] == -2) {
-            pcs[1] = pcs[2] - 1;
-        } else if (pcs[0] == 2) {
-            pcs[2] = pcs[1] + 1;
-        } else if (pcs[0] > 2) {
-            pcs[1] = pcs[1] - pcs[0] / 2;
-            if (fmod(pcs[0], 2) == 0) pcs[1] = pcs[1] + 1;
-            pcs[2] = pcs[1] + pcs[0] - 1;
-        } else if (pcs[0] < -2) {
-            pcs[1] = pcs[1] + pcs[0] / 2;
-            pcs[2] = pcs[1] - pcs[0] - 1;
-        }
+    if (pcs[0] == -2) {
+        pcs[1] = pcs[2] - 1;
+    } else if (pcs[0] == 2) {
+        pcs[2] = pcs[1] + 1;
+    } else if (pcs[0] > 2) {
+        pcs[1] = pcs[1] - pcs[0] / 2;
+        if (fmod(pcs[0], 2) == 0) pcs[1] = pcs[1] + 1;
+        pcs[2] = pcs[1] + pcs[0] - 1;
+    } else if (pcs[0] < -2) {
+        pcs[1] = pcs[1] + pcs[0] / 2;
+        pcs[2] = pcs[1] - pcs[0] - 1;
     }
 
     // cut the clusters at the beginning and at the end of the chamber
 
-    if (pcs[1] < 1) pcs[1] = 1;
-    if (pcs[2] < 1) pcs[2] = 1;  // could be 0, for some imprecisions in the case of hits at the border of the chamber
-    if (pcs[1] > nstrips) pcs[1] = (int)nstrips;
-    if (pcs[2] > nstrips) pcs[2] = (int)nstrips;
+    pcs[1] = std::clamp(pcs[1], 1, nstrips);
+    pcs[2] = std::clamp(pcs[2], 1, nstrips);
 
     pcs[0] = pcs[2] - pcs[1] + 1;
 
@@ -1181,16 +975,12 @@ std::vector<int> RpcDigitizationTool::TurnOnStrips(const EventContext& ctx,
 }
 
 //--------------------------------------------
-double RpcDigitizationTool::PropagationTimeNew(const EventContext& ctx, 
-                                               const Identifier& id, 
-                                               const Amg::Vector3D& globPos) const {
+double RpcDigitizationTool::PropagationTime(const MuonGM::RpcReadoutElement* ele, 
+                                            const Identifier& id, 
+                                            const Amg::Vector3D& globPos) const {
 
-    const MuonGM::MuonDetectorManager* detMgr{nullptr};
-    retrieveCondData(ctx, m_detMgrKey, detMgr).ignore();
     double distance{0.};
-    int measuresPhi = m_idHelper->measuresPhi(id);
-    const RpcReadoutElement* ele = detMgr->getRpcReadoutElement(id);
-    if (measuresPhi) {
+    if (m_idHelper->measuresPhi(id)) {
         distance = ele->distanceToPhiReadout(globPos);
     } else {
         distance = ele->distanceToEtaReadout(globPos);
@@ -1198,156 +988,6 @@ double RpcDigitizationTool::PropagationTimeNew(const EventContext& ctx,
 
     // distance in mm, SIG_VEL in ns/m
     return std::abs(distance * SIG_VEL * 1.e-3);
-}
-
-//--------------------------------------------
-Amg::Vector3D RpcDigitizationTool::adjustPosition(const EventContext& ctx, 
-                                                  const Identifier& id, 
-                                                  const Amg::Vector3D& hitPos) const {
-    // code to change local axis orientation taking into account geometrical rotations
-    const MuonGM::MuonDetectorManager* detMgr{nullptr};
-    retrieveCondData(ctx, m_detMgrKey, detMgr).ignore();
-
-    const RpcReadoutElement* ele = detMgr->getRpcReadoutElement(id);
-    // calculate flipEta
-    bool flipEta =
-        ele->rotatedRpcModule() || ele->isMirrored();  // both are false if MuonDetDescr is used, because axis re-oriented in RPCSD
-    Amg::Vector3D result = hitPos;
-    if (flipEta) result.z() = -result.z();
-    return result;
-}
-
-//--------------------------------------------
-int RpcDigitizationTool::adjustStripNumber(const EventContext& ctx, 
-                                           const Identifier& id, 
-                                           int nstrip) const {
-    
-    // code to change local axis orientation taking into account geometrical rotations
-    const MuonGM::MuonDetectorManager* detMgr{nullptr};
-    retrieveCondData(ctx, m_detMgrKey, detMgr).ignore();
-
-    const RpcReadoutElement* ele = detMgr->getRpcReadoutElement(id);
-    int result = nstrip;
-    bool flipPhi = ele->isMirrored();
-
-    if (flipPhi) {
-        int totStrips = ele->Nstrips(1);
-        result = totStrips - nstrip + 1;
-    }
-
-    return result;
-}
-
-//--------------------------------------------
-Amg::Vector3D RpcDigitizationTool::posInPanel(const EventContext& ctx, 
-                                              const Identifier& id, 
-                                              const Amg::Vector3D& posInGap) const {  // the hit has the position in the gap. we need the position in the panel
-
-    const MuonGM::MuonDetectorManager* detMgr{nullptr};
-    retrieveCondData(ctx, m_detMgrKey, detMgr).ignore();
-
-    int stationName = m_idHelper->stationName(id);
-    int measuresPhi = m_idHelper->measuresPhi(id);
-    std::string namestring = m_idHelper->stationNameString(stationName);
-
-    const RpcReadoutElement* ele = detMgr->getRpcReadoutElement(id);
-
-    float gaplength = ele->gasGapSsize();
-    // correction needed only in X direction
-    float panelXlength = ele->stripPanelSsize(measuresPhi);
-    Amg::Vector3D result = posInGap;
-
-    if (ele->nGasGapPerLay() != 1)
-        return result;  // all but BMS/F and ribs chambers
-
-    else if (ele->NphiStripPanels() == 1)
-        return result;  // for rib chambers no correction needed
-    else {
-        if (result.y() < 0) result.y() = gaplength / 2. - std::abs(result.y());  // wrt the beginning of the panel
-        result.y() = result.y() - panelXlength / 2.;                             // wrt the center of the panel
-        return result;
-    }
-}
-
-//--------------------------------------------
-int RpcDigitizationTool::findStripNumber(const EventContext& ctx, 
-                                         const Amg::Vector3D& posInGap, 
-                                         const Identifier& digitId, 
-                                         double& posinstrip) const {
-    
-    const MuonGM::MuonDetectorManager* detMgr{nullptr};
-    retrieveCondData(ctx, m_detMgrKey, detMgr).ignore();
-
-    const RpcReadoutElement* ele = detMgr->getRpcReadoutElement(digitId);
-
-    Amg::Vector3D posInElement = ele->absTransform().inverse() *
-                                 ele->localToGlobalCoords(posInGap, digitId);
-
-    // extract from digit id the relevant info
-
-    int measuresPhi = m_idHelper->measuresPhi(digitId);
-    int doubletZ = m_idHelper->doubletZ(digitId);
-    int doubletPhi = m_idHelper->doubletPhi(digitId);
-    int gasGap = m_idHelper->gasGap(digitId);
-    double stripWidth = ele->StripWidth(measuresPhi);
-
-    // find position of first and last strip
-
-    int nstrips = ele->Nstrips(measuresPhi);
-    bool isValidFirst{false}, isValidLast{false};
-    Identifier firstStrip = m_idHelper->channelID(digitId, doubletZ, doubletPhi, gasGap, measuresPhi, 1,isValidFirst);
-    Identifier lastStrip = m_idHelper->channelID(digitId, doubletZ, doubletPhi, gasGap, measuresPhi, nstrips, isValidLast);
-    if (!isValidFirst || !isValidLast) {
-        ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" "<<m_idHelper->show_to_string(digitId)<<" does not make much sense");
-        return -1;
-    }
-    Amg::Vector3D firstPos(0., 0., 0);
-    try {
-        firstPos = ele->localStripPos(firstStrip);
-    } catch (const std::exception& exc) {
-        ATH_MSG_ERROR("RpcReadoutElement::localStripPos call failed.");
-        ATH_MSG_WARNING("firstPos determination failed. " << exc.what());
-    }
-    Amg::Vector3D lastPos(0., 0., 0);
-    try {
-        lastPos = ele->localStripPos(lastStrip);
-    } catch (const std::exception& exc) {
-        ATH_MSG_ERROR("RpcReadoutElement::localStripPos call failed.");
-        ATH_MSG_WARNING("lastPos determination failed. " << exc.what());
-    }
-
-    double start{0.}, stop{0.}, impact{0.};
-    double pitch = ele->StripPitch(measuresPhi);
-    double dead = pitch - stripWidth;
-
-    if (measuresPhi) {
-        impact = (posInElement.y());
-        start = (firstPos.y());
-        stop = (lastPos.y());
-    } else {
-        impact = (posInElement.z());
-        start = (firstPos.z());
-        stop = (lastPos.z());
-    }
-
-    double min_ = std::min(start, stop);
-    double max_ = std::max(start, stop);
-
-    min_ = min_ - pitch / 2. - dead / 2. * 0;
-    max_ = max_ + pitch / 2. + dead / 2. * 0;
-
-    int result = int((impact - min_) / pitch) + 1;
-    if (result < 1 || result > nstrips) {
-        ATH_MSG_DEBUG("WARNING: strip closest to hit is outside the strip panel boundaries: impact, min_, max_ "
-                      << impact << " [" << min_ << ", " << max_ << "]  strip # " << result << " [1, " << nstrips << "]   pitch = " << pitch
-                      << " stripID=" << m_idHelper->show_to_string(digitId));
-        if (result > nstrips)
-            result = nstrips;
-        else if (result < 1)
-            result = 1;
-    }
-    posinstrip = std::abs(min_ - impact) - (result - 1) * pitch;
-    return result;
 }
 
 //--------------------------------------------
@@ -1427,91 +1067,41 @@ StatusCode RpcDigitizationTool::fillTagInfo() {
     return StatusCode::SUCCESS;
 }
 
-//--------------------------------------------
-StatusCode RpcDigitizationTool::readParameters() {
-    // Digitization parameters for RPC
-    std::string fileName = m_paraFile.value().c_str();
-    std::string file = PathResolver::find_file(fileName, "DATAPATH");
-    std::ifstream filein(file.c_str(), std::ios::in);
-
-    if (!filein.good()) {
-        ATH_MSG_FATAL("Failed to open file - check file name! " << fileName);
-        return StatusCode::FAILURE;
-    }
-
-    char linebuffer[200];
-    while (!filein.eof()) {
-        filein.getline(linebuffer, 200);
-        std::string s = linebuffer;
-        std::string tag;
-        std::istringstream str(s.c_str());
-        str >> tag;
-        ATH_MSG_DEBUG("read tag " << tag);
-        if (tag == "cs") {  // read cs distribution
-            if (m_csPara.empty()) m_csPara.resize(5);
-            str >> m_csPara[0] >> m_csPara[1] >> m_csPara[2] >> m_csPara[3] >> m_csPara[4];
-        } else if (tag == "rising_gaus") {
-            if (m_rgausPara.empty()) m_rgausPara.resize(3);
-            str >> m_rgausPara[0] >> m_rgausPara[1] >> m_rgausPara[2];
-        } else if (tag == "falling_gaus") {
-            if (m_fgausPara.empty()) m_fgausPara.resize(3);
-            str >> m_fgausPara[0] >> m_fgausPara[1] >> m_fgausPara[2];
-        } else if (tag == "const_value") {
-            if (m_constPara.empty()) m_constPara.resize(1);
-            str >> m_constPara[0];
-        } else if (tag == "cs_3_par") {
-            str >> m_cs3Para;
-        } else if (tag == "cs_4_par") {
-            if (m_cs4Para.empty()) m_cs4Para.resize(4);
-            str >> m_cs4Para[0] >> m_cs4Para[1] >> m_cs4Para[2] >> m_cs4Para[3];
-        }
-    }
-
-    if (m_csPara.empty() || m_rgausPara.empty() || m_fgausPara.empty() || m_constPara.empty()) {
-        return StatusCode::FAILURE;  // something didn't work properly
-    }
-    // if reading was successful, we print the vaues for debugging
-
-    ATH_MSG_DEBUG("Read from file the following parameters:");
-    ATH_MSG_DEBUG("Cluster size distribution: " << m_csPara[0] << " " << m_csPara[1] << " " << m_csPara[2] << " " << m_csPara[3] << " "
-                                                << m_csPara[4]);
-    ATH_MSG_DEBUG("Fit parameters: " << m_rgausPara[0] << " " << m_rgausPara[1] << " " << m_rgausPara[2] << " " << m_fgausPara[0] << " "
-                                     << m_fgausPara[1] << " " << m_fgausPara[2] << " " << m_constPara[0]);
-
-    return StatusCode::SUCCESS;
-}
 
 //--------------------------------------------
-StatusCode RpcDigitizationTool::DetectionEfficiency(const EventContext& ctx, const Identifier& idEtaRpcStrip,
-                                                    const Identifier& idPhiRpcStrip, bool& undefinedPhiStripStatus,
-                                                    CLHEP::HepRandomEngine* rndmEngine, const HepMcParticleLink& trkParticle) {
+std::pair<bool,bool> RpcDigitizationTool::detectionEfficiency(const EventContext& ctx, 
+                                                              const Identifier& IdEta,
+                                                              const Identifier& IdPhi, 
+                                                              CLHEP::HepRandomEngine* rndmEngine, 
+                                                              const HepMcParticleLink& trkParticle) const {
+    
+    
+
     ATH_MSG_DEBUG("RpcDigitizationTool::in DetectionEfficiency");
 
-    ATH_MSG_DEBUG("DetEff:Digit IdEta = " << m_idHelper->show_to_string(idEtaRpcStrip));
-    ATH_MSG_DEBUG("DetEff:Digit IdPhi = " << m_idHelper->show_to_string(idPhiRpcStrip));
+    ATH_MSG_DEBUG("EtaPanelId to look for Eff is " << m_idHelper->show_to_string(IdEta));
+    ATH_MSG_DEBUG("PhiPanelId to look for Eff is " << m_idHelper->show_to_string(IdPhi));
 
-    undefinedPhiStripStatus = false;
 
     // dead spacers are not simulated in GEANT4  => their effect must be emulated in the digitizer as an effective max. efficiency = 99%
     // (spacers are 1x1cm^2 over a grid of 10x10cm^2 =? geometrical ineff. introduced is 1% for normal incidence)
     float maxGeomEff{0.99}, PhiAndEtaEff{0.99}, OnlyEtaEff{0.f}, OnlyPhiEff{0.f};
 
     // 2=BML,3=BMS,4=BOL,5=BOS,8=BMF,9=BOF,10=BOG
-    int stationName = m_idHelper->stationName(idEtaRpcStrip);
-    int stationEta = m_idHelper->stationEta(idEtaRpcStrip);
-    int doubletR = m_idHelper->doubletR(idEtaRpcStrip);
+    int stationName = m_idHelper->stationName(IdEta);
+    int stationEta = m_idHelper->stationEta(IdEta);
+    int doubletR = m_idHelper->doubletR(IdEta);
 
     // remove feet extension. driven by joboption
     if (m_BOG_BOF_DoubletR2_OFF && (stationName == m_BOF_id || stationName == m_BOG_id) && doubletR == 2) {
-        m_SetPhiOn = false;
-        m_SetEtaOn = false;
-        return StatusCode::SUCCESS;
+        return std::make_pair(false, false);
     }
 
-    m_SetPhiOn = true;
-    m_SetEtaOn = true;
 
-    if (!m_turnON_efficiency) return StatusCode::SUCCESS;
+    if (!m_turnON_efficiency) {
+        return std::make_pair(true, true);
+    }
+    bool etaStripOn{true}, phiStripOn{true};
 
     // int stripetadead = 0 ; // not used
     // int stripphidead = 0 ; // not used
@@ -1526,8 +1116,7 @@ StatusCode RpcDigitizationTool::DetectionEfficiency(const EventContext& ctx, con
 
     if (!m_Efficiency_fromCOOL && stationName >= 2) {
         if (index > m_PhiAndEtaEff_A.size() || index > m_OnlyEtaEff_A.size() || index > m_OnlyPhiEff_A.size()) {
-            ATH_MSG_ERROR("Index out of array in Detection Efficiency SideA " << index << " stationName = " << stationName);
-            return StatusCode::FAILURE;
+            THROW_EXCEPTION("Index out of array in Detection Efficiency SideA " << index << " stationName = " << stationName);
         }
 
         PhiAndEtaEff = m_PhiAndEtaEff_A[index];
@@ -1536,8 +1125,7 @@ StatusCode RpcDigitizationTool::DetectionEfficiency(const EventContext& ctx, con
 
         if (stationEta < 0) {
             if (index > m_PhiAndEtaEff_C.size() || index > m_OnlyEtaEff_C.size() || index > m_OnlyPhiEff_C.size()) {
-                ATH_MSG_ERROR("Index out of array in Detection Efficiency SideC " << index << " stationName = " << stationName);
-                return StatusCode::FAILURE;
+                THROW_EXCEPTION("Index out of array in Detection Efficiency SideC " << index << " stationName = " << stationName);
             }
             PhiAndEtaEff = m_PhiAndEtaEff_C[index];
             OnlyEtaEff = m_OnlyEtaEff_C[index];
@@ -1550,29 +1138,22 @@ StatusCode RpcDigitizationTool::DetectionEfficiency(const EventContext& ctx, con
     } else {  // Efficiency from Cool
 
         const RpcCondDbData* readCdo{nullptr};                        
-        ATH_CHECK(retrieveCondData(ctx, m_readKey, readCdo));
+        if(!retrieveCondData(ctx, m_readKey, readCdo).isSuccess()){
+            THROW_EXCEPTION("Failed to retrieve conditions object");
+        }
 
         ATH_MSG_DEBUG("Efficiencies and cluster size + dead strips will be extracted from COOL");
 
-        Identifier IdEta = m_idHelper->panelID(idEtaRpcStrip);
-        Identifier IdPhi = m_idHelper->panelID(idPhiRpcStrip);
-        ATH_MSG_DEBUG("EtaPanelId to look for Eff is " << m_idHelper->show_to_string(IdEta));
-        ATH_MSG_DEBUG("PhiPanelId to look for Eff is " << m_idHelper->show_to_string(IdPhi));
-
-        float FracDeadStripEta = 0.;
-        float FracDeadStripPhi = 0.;
+        double FracDeadStripEta{0.}, FracDeadStripPhi{0.};
+        double EtaPanelEfficiency{1.}, PhiPanelEfficiency{1.}, GapEfficiency{1.};
         int RPC_ProjectedTracksEta = 0;
-        double EtaPanelEfficiency = 1.;
-        double PhiPanelEfficiency = 1.;
-        double GapEfficiency = 1.;
-
         bool noEntryInDb = false;
 
         if (readCdo->getFracDeadStripMap().find(IdEta) == readCdo->getFracDeadStripMap().end()) {
-            ATH_MSG_DEBUG("Not In CoolDB the Panel IdEtaRpcStrip :  " << IdEta << " i.e. " << m_idHelper->show_to_string(IdEta));
+            ATH_MSG_DEBUG("Not In CoolDB the Panel IdEta :  " << IdEta << " i.e. " << m_idHelper->show_to_string(IdEta));
             noEntryInDb = true;
         } else {
-            ATH_MSG_DEBUG("Found In CoolDB the Panel IdEtaRpcStrip :  " << IdEta << " i.e. " << m_idHelper->show_to_string(IdEta));
+            ATH_MSG_DEBUG("Found In CoolDB the Panel IdEta :  " << IdEta << " i.e. " << m_idHelper->show_to_string(IdEta));
         }
         if (readCdo->getFracDeadStripMap().find(IdPhi) == readCdo->getFracDeadStripMap().end()) {
             ATH_MSG_DEBUG("Not In CoolDB the Panel IdPhiRpcStrip :  " << IdPhi << " i.e. " << m_idHelper->show_to_string(IdPhi));
@@ -1603,7 +1184,6 @@ StatusCode RpcDigitizationTool::DetectionEfficiency(const EventContext& ctx, con
             // dead eta panel => cannot determine the strip status for phi strips
             // FracDeadStripPhi must be reset to 0. and undefinedPhiStripStatus = true
             FracDeadStripPhi = 0.;
-            undefinedPhiStripStatus = true;
             ATH_MSG_VERBOSE("Watch out: SPECIAL CASE: Resetting FracDeadStripPhi " << FracDeadStripPhi << " ignoring phi dead strips ");
         }
 
@@ -1680,14 +1260,14 @@ StatusCode RpcDigitizationTool::DetectionEfficiency(const EventContext& ctx, con
         //  RPCDQMFElementStatus_2012_Jaunuary_26
         bool applySpecialPatch = false;
         if (m_EfficiencyPatchForBMShighEta && m_Efficiency_fromCOOL) {
-            if (m_idHelper->stationName(idEtaRpcStrip) == 3)  ///// BMS
+            if (m_idHelper->stationName(IdEta) == 3)  ///// BMS
             {
-                if (abs(m_idHelper->stationEta(idEtaRpcStrip)) == 6 && m_idHelper->doubletR(idEtaRpcStrip) == 1 &&
-                    m_idHelper->doubletZ(idEtaRpcStrip) == 2 && m_idHelper->doubletPhi(idEtaRpcStrip) == 1) {
+                if (std::abs(m_idHelper->stationEta(IdEta)) == 6 && m_idHelper->doubletR(IdEta) == 1 &&
+                    m_idHelper->doubletZ(IdEta) == 2 && m_idHelper->doubletPhi(IdEta) == 1) {
                     applySpecialPatch = true;
                     ATH_MSG_WARNING(
                         "Applying special patch for BMS at |eta|=6 lowPt plane -dbbZ=2 and dbPhi=1 ... will use default eff. for Id "
-                        << m_idHelper->show_to_string(idEtaRpcStrip));
+                        << m_idHelper->show_to_string(IdEta));
                     ATH_MSG_WARNING(
                         "Applying special patch: THIS HAS TO BE DONE IF /RPC/DQMF/ELEMENT_STATUS tag is "
                         "RPCDQMFElementStatus_2012_Jaunuary_2");
@@ -1700,8 +1280,7 @@ StatusCode RpcDigitizationTool::DetectionEfficiency(const EventContext& ctx, con
             EtaPanelEfficiency > 1 || EtaPanelEfficiency < 0 || PhiPanelEfficiency > 1 || PhiPanelEfficiency < 0 || GapEfficiency > 1 ||
             GapEfficiency < 0) {
             if (index > m_PhiAndEtaEff_A.size() || index > m_OnlyEtaEff_A.size() || index > m_OnlyPhiEff_A.size()) {
-                ATH_MSG_ERROR("Index out of array in Detection Efficiency SideA COOLDB" << index << " stationName = " << stationName);
-                return StatusCode::FAILURE;
+                THROW_EXCEPTION("Index out of array in Detection Efficiency SideA COOLDB" << index << " stationName = " << stationName);
             }
             if (RPC_ProjectedTracksEta < m_CutProjectedTracks)
                 ATH_MSG_DEBUG("# of proj tracks = " << RPC_ProjectedTracksEta << " < cut = " << m_CutProjectedTracks
@@ -1713,8 +1292,7 @@ StatusCode RpcDigitizationTool::DetectionEfficiency(const EventContext& ctx, con
 
             if (stationEta < 0) {
                 if (index > m_PhiAndEtaEff_C.size() || index > m_OnlyEtaEff_C.size() || index > m_OnlyPhiEff_C.size()) {
-                    ATH_MSG_ERROR("Index out of array in Detection Efficiency SideC COOLDB" << index << " stationName = " << stationName);
-                    return StatusCode::FAILURE;
+                    THROW_EXCEPTION("Index out of array in Detection Efficiency SideC COOLDB" << index << " stationName = " << stationName);
                 }
                 PhiAndEtaEff = m_PhiAndEtaEff_C[index];
                 OnlyEtaEff = m_OnlyEtaEff_C[index];
@@ -1769,40 +1347,43 @@ StatusCode RpcDigitizationTool::DetectionEfficiency(const EventContext& ctx, con
     float EtaEff = PhiAndEtaEff + OnlyEtaEff;
 
     ATH_MSG_DEBUG("DetectionEfficiency: Final Efficiency Values applied for "
-                  << m_idHelper->show_to_string(idEtaRpcStrip) << " are " << PhiAndEtaEff << "=PhiAndEtaEff " << OnlyEtaEff
+                  << m_idHelper->show_to_string(IdEta) << " are " << PhiAndEtaEff << "=PhiAndEtaEff " << OnlyEtaEff
                   << "=OnlyEtaEff " << OnlyPhiEff << "=OnlyPhiEff " << GapEff << "=GapEff " << EtaEff << "=EtaEff " << PhiEff
                   << "=PhiEff ");
 
     float rndmEff = CLHEP::RandFlat::shoot(rndmEngine, 1);
 
     if (rndmEff < I0) {
-        m_SetPhiOn = true;
-        m_SetEtaOn = true;
+        phiStripOn = true;
+        etaStripOn = true;
     } else if ((I0 <= rndmEff) && (rndmEff < I1)) {
-        m_SetPhiOn = false;
-        m_SetEtaOn = true;
+        phiStripOn = false;
+        etaStripOn = true;
     } else if ((I1 <= rndmEff) && (rndmEff <= ITot)) {
-        m_SetPhiOn = true;
-        m_SetEtaOn = false;
+        phiStripOn = true;
+        etaStripOn = false;
     } else {
-        m_SetPhiOn = false;
-        m_SetEtaOn = false;
+        phiStripOn = false;
+        etaStripOn = false;
     }
 
-    return StatusCode::SUCCESS;
+    return std::make_pair(etaStripOn, phiStripOn);
 }
 
 //--------------------------------------------
-int RpcDigitizationTool::ClusterSizeEvaluation(const EventContext& ctx, const Identifier& idRpcStrip, float xstripnorm,
-                                               CLHEP::HepRandomEngine* rndmEngine) {
-    ATH_MSG_DEBUG("RpcDigitizationTool::in ClusterSizeEvaluation");
+int RpcDigitizationTool::determineClusterSize(const EventContext& ctx, 
+                                              const Identifier& idRpcStrip, 
+                                              double xstripnorm,
+                                              CLHEP::HepRandomEngine* rndmEngine) const {
+    ATH_MSG_DEBUG("RpcDigitizationTool::in determineClusterSize");
 
     ATH_MSG_DEBUG("Digit Id = " << m_idHelper->show_to_string(idRpcStrip));
 
     int ClusterSize = 1;
 
-    float FracClusterSize1{1.f}, FracClusterSize2{0.f}, MeanClusterSize{1.f}, FracClusterSizeTail{0.f}, MeanClusterSizeTail{1.f},
-        FracClusterSize2norm{0.f};
+    double FracClusterSize1{1.}, FracClusterSize2{0.}, MeanClusterSize{1.}, 
+          FracClusterSizeTail{0.}, MeanClusterSizeTail{1.},
+          FracClusterSize2norm{0.};
 
     // 2=BML,3=BMS,4=BOL,5=BOS,8=BMF,9=BOF,10=BOG
     int stationName = m_idHelper->stationName(idRpcStrip);
@@ -1819,9 +1400,11 @@ int RpcDigitizationTool::ClusterSizeEvaluation(const EventContext& ctx, const Id
 
     if (!m_ClusterSize_fromCOOL && stationName >= 2) {
         index += m_FracClusterSize1_A.size() / 2 * measuresPhi;
-        if (index > m_FracClusterSize1_A.size() || index > m_FracClusterSize2_A.size() || index > m_FracClusterSizeTail_A.size() ||
-            index > m_MeanClusterSizeTail_A.size()) {
-            ATH_MSG_ERROR("Index out of array in ClusterSizeEvaluation SideA " << index << " statName " << stationName);
+        if (index >= m_FracClusterSize1_A.size() || 
+            index >= m_FracClusterSize2_A.size() || 
+            index >= m_FracClusterSizeTail_A.size() ||
+            index >= m_MeanClusterSizeTail_A.size()) {
+            ATH_MSG_ERROR("Index out of array in determineClusterSize SideA " << index << " statName " << stationName);
             return 1;
         }
         FracClusterSize1 = m_FracClusterSize1_A[index];
@@ -1831,9 +1414,11 @@ int RpcDigitizationTool::ClusterSizeEvaluation(const EventContext& ctx, const Id
 
         if (stationEta < 0) {
             index += m_FracClusterSize1_C.size() / 2 * measuresPhi - m_FracClusterSize1_A.size() / 2 * measuresPhi;
-            if (index > m_FracClusterSize1_C.size() || index > m_FracClusterSize2_C.size() || index > m_FracClusterSizeTail_C.size() ||
-                index > m_MeanClusterSizeTail_C.size()) {
-                ATH_MSG_ERROR("Index out of array in ClusterSizeEvaluation SideC " << index << " statName " << stationName);
+            if (index >= m_FracClusterSize1_C.size() || 
+                index >= m_FracClusterSize2_C.size() || 
+                index >= m_FracClusterSizeTail_C.size() ||
+                index >= m_MeanClusterSizeTail_C.size()) {
+                ATH_MSG_ERROR("Index out of array in determineClusterSize SideC " << index << " statName " << stationName);
                 return 1;
             }
             FracClusterSize1 = m_FracClusterSize1_C[index];
@@ -1885,9 +1470,11 @@ int RpcDigitizationTool::ClusterSizeEvaluation(const EventContext& ctx, const Id
             FracClusterSize1 > 1 || FracClusterSize2 > 1) {
             if (stationName >= 2) {
                 index += m_FracClusterSize1_A.size() / 2 * measuresPhi;
-                if (index > m_FracClusterSize1_A.size() || index > m_FracClusterSize2_A.size() || index > m_FracClusterSizeTail_A.size() ||
-                    index > m_MeanClusterSizeTail_A.size()) {
-                    ATH_MSG_ERROR("Index out of array in ClusterSizeEvaluation SideA " << index << " statName " << stationName);
+                if (index >= m_FracClusterSize1_A.size() || 
+                    index >= m_FracClusterSize2_A.size() || 
+                    index >= m_FracClusterSizeTail_A.size() ||
+                    index >= m_MeanClusterSizeTail_A.size()) {
+                    ATH_MSG_ERROR("Index out of array in determineClusterSize SideA " << index << " statName " << stationName);
                     return 1;
                 }
                 FracClusterSize1 = m_FracClusterSize1_A[index];
@@ -1899,7 +1486,7 @@ int RpcDigitizationTool::ClusterSizeEvaluation(const EventContext& ctx, const Id
                     index += m_FracClusterSize1_C.size() / 2 * measuresPhi - m_FracClusterSize1_A.size() / 2 * measuresPhi;
                     if (index > m_FracClusterSize1_C.size() || index > m_FracClusterSize2_C.size() ||
                         index > m_FracClusterSizeTail_C.size() || index > m_MeanClusterSizeTail_C.size()) {
-                        ATH_MSG_ERROR("Index out of array in ClusterSizeEvaluation SideC " << index << " statName " << stationName);
+                        ATH_MSG_ERROR("Index out of array in determineClusterSize SideC " << index << " statName " << stationName);
                         return 1;
                     }
 
@@ -1916,9 +1503,9 @@ int RpcDigitizationTool::ClusterSizeEvaluation(const EventContext& ctx, const Id
             }
         }
     }
-    if (FracClusterSize1 > 1) FracClusterSize1 = 1.;
-    if (FracClusterSize2 > 1) FracClusterSize2 = 1.;
-    if (FracClusterSizeTail > 1) FracClusterSizeTail = 1.;
+    FracClusterSize1 = std::min(FracClusterSize1, 1.);
+    FracClusterSize2 = std::min(FracClusterSize2, 1.);
+    FracClusterSizeTail = std::min(FracClusterSizeTail, 1.);
     float FracTot = FracClusterSize1 + FracClusterSize2 + FracClusterSizeTail;
     if (FracTot != 1. && FracTot > 0) {
         FracClusterSize1 = FracClusterSize1 / FracTot;
@@ -1954,8 +1541,7 @@ int RpcDigitizationTool::ClusterSizeEvaluation(const EventContext& ctx, const Id
             }
             if (m_ClusterSize1_2uncorr) {
                 float rndmCS1_2 = CLHEP::RandFlat::shoot(rndmEngine, 1);
-                ClusterSize = 1;
-                if (rndmCS1_2 < FracClusterSize2norm) ClusterSize = 2;
+                ClusterSize = 1 + (rndmCS1_2 < FracClusterSize2norm);
             }
 
         } else if ((FracClusterSize1plus2 <= rndmCS) && (rndmCS <= ITot)) {
@@ -1975,7 +1561,7 @@ int RpcDigitizationTool::ClusterSizeEvaluation(const EventContext& ctx, const Id
         } else {
             ClusterSize = int(CLHEP::RandExponential::shoot(rndmEngine, MeanClusterSizeTail));
         }
-        if (ClusterSize < 1) ClusterSize = 1;
+        ClusterSize = std::max(ClusterSize, 1);
         if (ClusterSize > 1) {
             float rndmLR = CLHEP::RandFlat::shoot(rndmEngine, 1.0);
             if (rndmLR > 0.5) ClusterSize = -ClusterSize;
@@ -1985,9 +1571,8 @@ int RpcDigitizationTool::ClusterSizeEvaluation(const EventContext& ctx, const Id
     // negative CS correspond to left asymmetric cluster with respect to nstrip
     return ClusterSize;
 }
-double RpcDigitizationTool::FCPEfficiency(const HepMC::ConstGenParticlePtr& genParticle) {
+double RpcDigitizationTool::FCPEfficiency(const HepMC::ConstGenParticlePtr& genParticle) const {
     double qcharge = 1.;
-    double qbetagamma = -1.;
     const int particlePdgId = genParticle->pdg_id();
     // charge calculation
     qcharge = (static_cast<double>((std::abs(particlePdgId) / 1000) % 100)) / (static_cast<double>((std::abs(particlePdgId) / 10) % 100));
@@ -2000,17 +1585,9 @@ double RpcDigitizationTool::FCPEfficiency(const HepMC::ConstGenParticlePtr& genP
     const double QE = genParticle->momentum().e();
     const double QM2 = std::pow(QE, 2) - std::pow(QPx, 2) - std::pow(QPy, 2) - std::pow(QPz, 2);
     const double QP = std::hypot(QPx, QPy, QPz);
-    double QM;
-    if (QM2 >= 0.) {
-        QM = std::sqrt(QM2);
-    } else {
-        QM = -1.0;
-    }
-    if (QM > 0.) {
-        qbetagamma = QP / QM;
-    } else {
-        qbetagamma = -1.0;
-    }
+    const double QM  = QM2 >=0 ? std::sqrt(QM2) : -1.;
+
+    const double qbetagamma = QM > 0. ? QP / QM :  -1.;
 
     // find the i in the array
     int i_e = -1;
@@ -2056,7 +1633,7 @@ double RpcDigitizationTool::FCPEfficiency(const HepMC::ConstGenParticlePtr& genP
     return eff_SF;
 }
 
-double RpcDigitizationTool::extract_time_over_threshold_value(CLHEP::HepRandomEngine* rndmEngine) {
+double RpcDigitizationTool::timeOverThreshold(CLHEP::HepRandomEngine* rndmEngine) {
     //mn Time-over-threshold modeled as a narrow and a wide gaussian
     //mn based on the fit documented in https://its.cern.ch/jira/browse/ATLASRECTS-7820
     constexpr double tot_mean_narrow = 16.;

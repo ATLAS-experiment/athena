@@ -15,7 +15,7 @@ from G4AtlasTools.G4PhysicsRegionConfig import DriftWallPhysicsRegionToolCfg, Dr
 #the field config tools
 from G4AtlasTools.G4FieldConfig import ATLASFieldManagerToolCfg, TightMuonsATLASFieldManagerToolCfg, BeamPipeFieldManagerToolCfg, InDetFieldManagerToolCfg, ITkFieldManagerToolCfg, MuonsOnlyInCaloFieldManagerToolCfg, MuonFieldManagerToolCfg, Q1FwdFieldManagerToolCfg, Q2FwdFieldManagerToolCfg, Q3FwdFieldManagerToolCfg, D1FwdFieldManagerToolCfg, D2FwdFieldManagerToolCfg, Q4FwdFieldManagerToolCfg, Q5FwdFieldManagerToolCfg, Q6FwdFieldManagerToolCfg, Q7FwdFieldManagerToolCfg, Q1HKickFwdFieldManagerToolCfg, Q1VKickFwdFieldManagerToolCfg, Q2HKickFwdFieldManagerToolCfg, Q2VKickFwdFieldManagerToolCfg, Q3HKickFwdFieldManagerToolCfg, Q3VKickFwdFieldManagerToolCfg, Q4VKickAFwdFieldManagerToolCfg, Q4HKickFwdFieldManagerToolCfg, Q4VKickBFwdFieldManagerToolCfg, Q5HKickFwdFieldManagerToolCfg,  Q6VKickFwdFieldManagerToolCfg, FwdRegionFieldManagerToolCfg
 
-from G4AtlasTools.G4AtlasToolsConfig import SensitiveDetectorMasterToolCfg
+from G4AtlasTools.G4AtlasToolsConfig import SensitiveDetectorMasterToolCfg, G4CaloTransportToolCfg
 
 CylindricalEnvelope, PolyconicalEnvelope, MaterialDescriptionTool,VoxelDensityTool,G4AtlasDetectorConstructionTool,BoxEnvelope=CompFactory.getComps("CylindricalEnvelope","PolyconicalEnvelope","MaterialDescriptionTool","VoxelDensityTool","G4AtlasDetectorConstructionTool","BoxEnvelope")
 
@@ -727,6 +727,10 @@ def G4AtlasDetectorConstructionToolCfg(flags, name="G4AtlasDetectorConstructionT
         kwargs.setdefault("RegionCreators", result.popToolsAndMerge(ATLAS_RegionCreatorListCfg(flags)))
         if flags.BField.solenoidOn or flags.BField.barrelToroidOn or flags.BField.endcapToroidOn:
             kwargs.setdefault("FieldManagers", result.popToolsAndMerge(ATLAS_FieldMgrListCfg(flags)))
+    
+        if flags.Sim.LArParameterization is LArParameterization.FastCaloSim:
+            kwargs.setdefault("G4CaloTransportTool", result.addPublicTool(result.popToolsAndMerge(G4CaloTransportToolCfg(flags))))
+        
     result.setPrivateTools(G4AtlasDetectorConstructionTool(name, **kwargs))
     return result
 

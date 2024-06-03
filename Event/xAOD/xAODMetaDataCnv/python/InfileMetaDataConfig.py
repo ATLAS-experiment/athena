@@ -125,7 +125,7 @@ def propagateMetaData(flags, streamName="", category=None, *args, **kwargs):
             Key=outputStreamName(streamName),
             DataHeaderKey=outputStreamName(streamName),
             EventInfoKey=f"{flags.Overlay.BkgPrefix}EventInfo"
-            if flags.Common.ProductionStep == ProductionStep.PileUpPresampling
+            if flags.Common.ProductionStep in [ProductionStep.PileUpPresampling, ProductionStep.PileUpPretracking]
             else "EventInfo",
         )
         tools.mdItems += [
@@ -259,6 +259,7 @@ def SetupMetaDataForStreamCfg(
             itemOrList=helperLists.mdItems,
             AcceptAlgs=AcceptAlgs,
             HelperTools=helperLists.helperTools,
+            **kwargs
         )
     )
     # Configure the MetaDataSvc and pass the relevant tools

@@ -8,6 +8,9 @@ atlas_add_citest( DuplicateClass
    SCRIPT python -c 'import ROOT'
    PROPERTIES FAIL_REGULAR_EXPRESSION "class .* is already in" )
 
+atlas_add_citest( DuplicateComponent
+   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/DuplicateComponentsCheck.py )
+
 atlas_add_citest( Generation_PhPy8_13p6TeV
    SCRIPT RunWorkflowTests_Run3.py --CI -g --dsid 421356 )
 
@@ -31,3 +34,7 @@ atlas_add_citest( Generation_PhPy8_13TeV
 
 atlas_add_citest( Generation_PhPy8_14TeV
    SCRIPT RunWorkflowTests_Run4.py --CI -g --dsid 421356 )
+
+# CA Config
+atlas_add_citest( Generation_CA_ParticleGun_13p6TeV
+   SCRIPT RunWorkflowTests_Run3.py --CI -g --dsid Test950555 -e '--CA True' )

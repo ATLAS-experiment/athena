@@ -20,10 +20,10 @@ namespace TauAnalysisTools
     JETIDRNNLOOSE          = 7,
     JETIDRNNMEDIUM         = 8,
     JETIDRNNTIGHT          = 9,
-    JETIDDEEPSETVERYLOOSE  = 10,
-    JETIDDEEPSETLOOSE      = 11,
-    JETIDDEEPSETMEDIUM     = 12,
-    JETIDDEEPSETTIGHT      = 13,
+    JETIDGNTAUVERYLOOSE    = 10,
+    JETIDGNTAULOOSE        = 11,
+    JETIDGNTAUMEDIUM       = 12,
+    JETIDGNTAUTIGHT        = 13,
   };
 
   enum EleID

@@ -67,7 +67,6 @@ class sTgcReadoutElement : public MuonReadoutElement {
 
         StripDesignPtr stripDesign{nullptr};
         WireDesignPtr wireGroupDesign{nullptr};
-
         PadDesignPtr padDesign{nullptr};
 
 #ifndef SIMULATIONBASE
@@ -107,11 +106,10 @@ class sTgcReadoutElement : public MuonReadoutElement {
     /// Returns the multilayer of the sTgcReadoutElement
     int multilayer() const;
     /// Returns the number of gas gap layers
-    int numLayers() const;
+    unsigned int numLayers() const;
     /// Returns the thickness of the gas gap
     double gasGapThickness() const;
-    /// Returns the yCutout value of the chamber
-    double yCutout() const;
+
     /// Gas Gaps
     double firstStripPitch(const Identifier& measId) const;
     double firstStripPitch(const IdentifierHash& measHash) const;
@@ -130,7 +128,10 @@ class sTgcReadoutElement : public MuonReadoutElement {
     /// Height of gas Gap
     double gapHeight(const Identifier& measId) const;
     double gapHeight(const IdentifierHash& measHash) const;
-    
+    /// Returns the yCutout value of the chamber
+    double yCutout(const Identifier& measId) const;
+    double yCutout(const IdentifierHash& measHash) const;
+        
     ////Strips
     /// Number of strips in a chamber
     unsigned int numStrips(const Identifier& measId) const;

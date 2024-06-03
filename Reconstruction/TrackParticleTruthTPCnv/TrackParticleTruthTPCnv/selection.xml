@@ -17,6 +17,12 @@
   <class name="std::vector<Rec::TrackParticleTruthCollection_p2>" />
   <class name="Rec::TrackParticleTruthCollection_p2::Entry" />
 
+<!-- TrackParticleTruth p3 -->
+  <class name="Rec::TrackParticleTruthCollection_p3"  id="018F1ACE-8405-7174-9305-46B503B5EF52" />
+  <class name="std::vector<Rec::TrackParticleTruthCollection_p3::Entry>" />
+  <class name="std::vector<Rec::TrackParticleTruthCollection_p3>" />
+  <class name="Rec::TrackParticleTruthCollection_p3::Entry" />
+
 
   <!-- TrackParticleTruthCollectionContainer tlp1 -->
   <class name="TrackParticleTruthCollectionContainer_tlp1" id="9F47124C-0033-4556-B14A-D7F28E4249EC"/>
@@ -28,5 +34,9 @@
   <class name="TrackParticleTruthCollectionContainer_p2"  id="E11595FB-BFA4-4906-B882-9C63B0AB42E3"/>
   <class name="std::vector<TrackParticleTruthCollectionContainer_p2>" id="9E753324-456A-4F7B-B95A-07E302ACB73B"/>
 
+<!-- TrackParticleTruthCollectionContainer tlp3 -->
+  <class name="TrackParticleTruthCollectionContainer_tlp3" id="018F1AD6-09F9-7634-A065-2343D74DD289"/>
+  <class name="TrackParticleTruthCollectionContainer_p3"  id="018F1AD7-30D5-7C9A-95A2-2A1CE8ED393B"/>
+  <class name="std::vector<TrackParticleTruthCollectionContainer_p3>" id="018F1AD7-91BB-7EAB-B9D2-442C2F1CE751"/>
 </lcgdict>
 

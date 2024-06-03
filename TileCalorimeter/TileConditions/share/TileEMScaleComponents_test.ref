@@ -85,10 +85,6 @@ DetDescrCnvSvc       INFO  filling address for ZdcID with CLID 190591643 and sto
 DetDescrCnvSvc       INFO  filling address for JTower_ID with CLID 218674799 and storage type 68 to detector store 
 DetDescrCnvSvc       INFO  filling address for GTower_ID with CLID 49678914 and storage type 68 to detector store 
 TagInfoMgr           INFO   AlgTool: ToolSvc.IOVDbMetaDataTool
-GeoModelSvc::RD...WARNING  Getting PixTBMatComponents with default tag
-GeoModelSvc::RD...WARNING  Getting PixTBMaterials with default tag
-GeoModelSvc::RD...WARNING  Getting InDetMatComponents with default tag
-GeoModelSvc::RD...WARNING  Getting InDetMaterials with default tag
 TileCablingSvc       INFO RUN2 ATLAS geometry flag detected for geometry: ATLAS-R2-2016-01-00-01
 TileCablingSvc       INFO Setting RUN2 (2014-2017) cabling
 TileCablingSvc       INFO Setting Cabling type to 4

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FastCaloSimTool.h"
@@ -34,6 +34,22 @@ StatusCode FastCaloSimTool::BeginOfAthenaEvent(){
 }
 
 StatusCode FastCaloSimTool::EndOfAthenaEvent(){
+
+  // Get current event context
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+
+  if( !getFastSimModel() ){
+    ATH_MSG_ERROR ("EndOfAthenaEvent: FastSimModel was never created!");
+    return StatusCode::FAILURE;
+  }
+  else{
+    FastCaloSim *localFastSimModel = dynamic_cast<FastCaloSim*>(getFastSimModel());
+    if(!localFastSimModel){
+      ATH_MSG_ERROR ("EndOfAthenaEvent: Failed to cast m_FastSimModel into G4VFastSimulationModel.");
+      return StatusCode::FAILURE;
+    }
+    localFastSimModel->EndOfAthenaEvent(ctx);
+  }
   
   return StatusCode::SUCCESS;
 }
@@ -45,5 +61,5 @@ G4VFastSimulationModel* FastCaloSimTool::makeFastSimModel()
 
 
   // Create the FastCaloSim fast simulation model
-  return new FastCaloSim(name(), m_rndmGenSvc, m_randomEngineName,  m_FastCaloSimCaloExtrapolation, m_FastCaloSimSvc, m_CaloCellContainerSDName, this);
+  return new FastCaloSim(name(), m_rndmGenSvc, m_randomEngineName,  m_FastCaloSimCaloTransportation, m_FastCaloSimCaloExtrapolation, m_G4CaloTransportTool, m_FastCaloSimSvc, m_CaloCellContainerSDName, m_doG4Transport, this);
 }

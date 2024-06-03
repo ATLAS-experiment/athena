@@ -7,6 +7,7 @@
 # art-include: main/AthSimulation
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
+# art-memory: 2999
 # art-output: test.CA.HITS.pool.root
 # art-output: Config*
 

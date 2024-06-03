@@ -67,17 +67,26 @@ StatusCode xAODSimHitToMdtMeasCnvAlg::execute(const EventContext& ctx) const {
         /// extract the resolution from the Mdt calibration data
         bool bound{false};
         const MuonCalib::MdtFullCalibData* tubeContants = mdtCalibData->getCalibData(hitId, msgStream());
+        const MuonCalib::MdtTubeCalibContainer::SingleTubeCalib& tubeCalib{*tubeContants->tubeCalib->getCalib(hitId)};
         const Amg::Vector3D lHitPos{xAOD::toEigen(simHit->localPosition())};
+        /// Extract dift time to have an uncertainty estimate close to the one in the current simulation
         const double driftTime = tubeContants->rtRelation->tr()->tFromR(lHitPos.perp(), bound);
         const double resol = tubeContants->rtRelation->rtRes()->resolution(driftTime);
-        // Project and smear the hit
-        double smearedDriftRadius = CLHEP::RandGaussZiggurat::shoot(rndEngine, lHitPos.perp(), resol);
-        prd->setDriftRadius(std::min(readOutEle->innerTubeRadius(), std::max(0.,smearedDriftRadius)));
+        // Smear the hit using the best known uncertainties
+        const double targetRadius = std::clamp(1.*CLHEP::RandGaussZiggurat::shoot(rndEngine, lHitPos.perp(), resol), 
+                                               0., readOutEle->innerTubeRadius());
+        
+        /// Propagation time of the signal along the wire
+        const double sigPropTime = tubeCalib.inversePropSpeed*std::abs(0.5*readOutEle->getParameters().readoutSide*readOutEle->activeTubeLength(prd->measurementHash()) - lHitPos.z());
+        /// For the tdc spectrum, we're assuming a much more simplified version of the drift time relation
+        /// ---> let's take for the start r(t) = sqrt(t)
+        const double tdcTime = targetRadius * targetRadius + sigPropTime;
+        prd->setDriftRadius(std::sqrt(tdcTime));
         prd->setDriftRadCov(resol*resol);
         /// The sMdts have HPTDC chips built in which run at a 4 times higher frequency than the chips currently
         /// in use for the Run 3 data taking. We have to reassess this once, I've read about the chip design in 
         /// use for Phase II
-        const uint16_t tdcCounts = driftTime * timeToTdcCnv* (m_idHelperSvc->hasHPTDC(hitId) ? 4. : 1.);
+        const uint16_t tdcCounts = (tdcTime + simHit->globalTime()) * timeToTdcCnv* (m_idHelperSvc->hasHPTDC(hitId) ? 4. : 1.);
         prd->setTdc(tdcCounts);
 
     }

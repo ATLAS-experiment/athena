@@ -35,7 +35,13 @@ def enableG4Optimizations(flags):
     # Energy Loss fluctuation OFF
     # Switch off the Energy loss fluctuation process
     # More info: https://its.cern.ch/jira/browse/ATLASSIM-6995
-    flags.Sim.G4Commands+=["/process/eLoss/fluct false"]
+    # Main physics validation: https://its.cern.ch/jira/browse/ATLPHYSVAL-1009
+    # Follow-up validation for Muons:  https://its.cern.ch/jira/browse/ATLPHYSVAL-1022
+    # Follow-up validation for Egamma: https://its.cern.ch/jira/browse/ATLPHYSVAL-1030
+    # This optimization is on hold for mc23e - for discrepancies seen in the
+    # follow-up validations by EgammaCP group.
+    # It will be evaluated for future campaigns.
+    # flags.Sim.G4Commands+=["/process/eLoss/fluct false"]
 
 
     # Activate the Woodcock Tracking in the EMEC

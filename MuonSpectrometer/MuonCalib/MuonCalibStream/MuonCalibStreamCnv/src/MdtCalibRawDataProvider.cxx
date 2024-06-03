@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include "AthenaBaseComps/AthCheckMacros.h"
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
@@ -135,6 +135,9 @@ StatusCode MdtCalibRawDataProvider::decodeImpl(Muon::MdtPrepDataContainer *mdtPr
         std::unique_ptr<Muon::MdtPrepData> newPrepData = std::make_unique<Muon::MdtPrepData>(channelId, mdtHashId, driftRadius, std::move(errorMatrix), detEl, tdc_counts, adc_counts, digitStatus);
 
         ATH_MSG_DEBUG(" "<<m_muonIdHelper->toString(channelId)<<" ADC="<<adc_counts<<" TDC="<<tdc_counts<<" mdtHashId : "<<mdtHashId );
+        if (newPrepData->adc() < m_adcCut) {
+            continue;
+        }
         // add the MdtPrepData to the collection
         mdtCollection->push_back(std::move(newPrepData));
 

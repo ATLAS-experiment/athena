@@ -63,12 +63,12 @@ namespace MuonGMR4 {
 
             /// Defines the edges of the trapezoid
             void defineTrapezoid(double HalfShortY, double HalfLongY, double HalfHeight);
-            /// Defines the edges of the trapezoid with stereo angle
+            /// Defines the edges of the trapezoid with stereo angle. 
+            /// The stereo angle is defined as the angle going from the nominal scheme to the stereo scheme
             void defineTrapezoid(double HalfShortY, double HalfLongY, double HalfHeight, double sAngle);
             /// Flips the edges of the trapezoid boundaries by 90 degrees clockwise
             void flipTrapezoid();
-
-    
+   
             /// Returns the distance to the strip center along x
             double distanceToStrip(const Amg::Vector2D& pos, int strip) const;
 
@@ -95,6 +95,8 @@ namespace MuonGMR4 {
             /// Checks whether an external point is inside the trapezoidal area
             bool insideTrapezoid(const Amg::Vector2D& extPos) const;
         protected:
+            /// Checks wheather the internal point is inside hte trapezoidal area
+            bool insideBoundaries(const Amg::Vector2D& pos) const;
             /// Calculates the position of a given strip (Local numbering scheme)
             virtual Amg::Vector2D stripPosition(int stripNum) const;
             /// Returns the intersection of a given strip with the left or right edge of the trapezoid
@@ -140,6 +142,8 @@ namespace MuonGMR4 {
             const Amg::Vector2D& stripNormal() const;
             /// Vector pointing along the strip
             const Amg::Vector2D& stripDir() const;
+            /// Vector indicating the first strip position
+            const Amg::Vector2D& firstStripPos() const;
         private:
             void setStereoAngle(double stereo);
             /// Resets the cache of the directions
@@ -166,10 +170,11 @@ namespace MuonGMR4 {
             bool m_hasStereo{false};
             /// Stereo angle of the strip design
             double m_stereoAngle{0.};
+
             /// Matrix to translate from nominal -> stereo frame
-            AmgSymMatrix(2) m_stereoRotMat{AmgSymMatrix(2)::Identity()};
+            AmgSymMatrix(2) m_etaToStereo{AmgSymMatrix(2)::Identity()};
             /// Matrixt to translate from stereo -> nominal frame
-            AmgSymMatrix(2) m_nominalRotMat{AmgSymMatrix(2)::Identity()};
+            AmgSymMatrix(2) m_stereoToEta{AmgSymMatrix(2)::Identity()};
             /// Bottom left point of the trapezoid
             Amg::Vector2D m_bottomLeft{Amg::Vector2D::Zero()};
             /// Top right point of the trapezoid
@@ -194,6 +199,14 @@ namespace MuonGMR4 {
             double m_longHalfY{0.};
             double m_halfX{0.};
 
+        /// sTGC Diamond Variables                       
+            /// Stores the diamond cutout length from the SQLite DB file 
+            double m_yCutout{0.}; 
+        public:
+            /// Defines the edges of the sTGC diamond L3 sector
+            void defineDiamond(double HalfShortY, double HalfLongY, double HalfHeight, double yCutout);
+            /// Returns the cutout of the diamond
+            double yCutout() const;
     };
     
     struct StripDesignSorter{

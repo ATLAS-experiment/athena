@@ -12,7 +12,7 @@
 #include "ISF_Event/SimSvcID.h"
 
 // Barcode includes
-#include "BarcodeEvent/Barcode.h"
+#include "TruthUtils/MagicNumbers.h"
 
 // Amg includes
 #include "GeoPrimitives/GeoPrimitives.h"
@@ -58,7 +58,7 @@ namespace ISF {
                                         int status,
                                         double pTime,
                                         const ISFParticle &parent,
-                                        Barcode::ParticleBarcode bc = Barcode::fUndefinedBarcode,
+                                        int bc = HepMC::UNDEFINED_ID,
                                         int id = 0,
                                         TruthBinding* tBinding = nullptr,
                                         const HepMcParticleLink * partLink = nullptr) const = 0;
@@ -72,7 +72,7 @@ namespace ISF {
                                          int status,
                                          double pTime,
                                          const ISFParticle &parent,
-                                         Barcode::ParticleBarcode bc = Barcode::fUndefinedBarcode,
+                                         int bc = HepMC::UNDEFINED_ID,
                                          int id = 0,
                                          TruthBinding* tBinding = nullptr,
                                          const HepMcParticleLink * partLink = nullptr) const = 0;
@@ -86,7 +86,7 @@ namespace ISF {
                                          int status,
                                          double pTime,
                                          const ISFParticle &parent,
-                                         Barcode::ParticleBarcode bc = Barcode::fUndefinedBarcode,
+                                         int bc = HepMC::UNDEFINED_ID,
                                          int id = 0,
                                          TruthBinding* tBinding = nullptr,
                                          const HepMcParticleLink * partLink = nullptr) const = 0;

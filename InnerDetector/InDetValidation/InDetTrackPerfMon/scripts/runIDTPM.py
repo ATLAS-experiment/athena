@@ -14,10 +14,10 @@ def GetCustomAthArgs() :
     IDTPMparser.add_argument( "--writeAOD_IDTPM", help="Write output file for reprocessing", action="store_true", default=False )
     IDTPMparser.add_argument( "--trkAnaCfgFile", help='File with track analysis setup (.json format)', default='Default' )
     IDTPMparser.add_argument( "--unpackTrigChains", help="Run each configured trigger chain in a separate track analysis", action="store_true", default=False )
-    # TODO - to be included in next MRs
-    #IDTPMparser.add_argument( "--histoDefFormat", help='Format of the histogram definition file', default="JSON" )
-    #IDTPMparser.add_argument( "--histoDefFileList", help='Plain txt file containing the list of .json file names with the histograms definitions', default="InDetTrackPerfMon/HistoDefFileList_default.txt" )
-    #IDTPMparser.add_argument( "--plotsCommonValuesFile", help='JSON file listing all the default values to be used in plots', default="InDetTrackPerfMon/IDTPMPlotCommonValues.json" )
+    IDTPMparser.add_argument( "--plotsDefFormat", help='Format of the plots definition file', default="JSON" )
+    IDTPMparser.add_argument( "--plotsDefFileList", help='Plain txt file containing the list of .json file names with the plots definitions', default="InDetTrackPerfMon/PlotsDefFileList_default.txt" )
+    IDTPMparser.add_argument( "--plotsCommonValuesFile", help='JSON file listing all the default values to be used in plots', default="InDetTrackPerfMon/PlotsDefCommonValues.json" )
+    IDTPMparser.add_argument( "--sortPlotsByChain", help="Arrange plots first in subdirectories named after the current chain", action="store_true", default=False )
     return IDTPMparser.parse_args()
 
 ## Parse the arguments
@@ -50,10 +50,10 @@ flags.addFlagsCategory( "PhysVal.IDTPM",
                         prefix=True )
 
 flags.PhysVal.IDTPM.DirName = MyArgs.dirName
-# TODO - to be included in next MRs
-#flags.PhysVal.IDTPM.histoDefFormat = MyArgs.histoDefFormat
-#flags.PhysVal.IDTPM.HistoDefFileList = MyArgs.histoDefFileList
-#flags.PhysVal.IDTPM.plotsCommonValuesFile = MyArgs.plotsCommonValuesFile
+flags.PhysVal.IDTPM.plotsDefFormat = MyArgs.plotsDefFormat
+flags.PhysVal.IDTPM.plotsDefFileList = MyArgs.plotsDefFileList
+flags.PhysVal.IDTPM.plotsCommonValuesFile = MyArgs.plotsCommonValuesFile
+flags.PhysVal.IDTPM.sortPlotsByChain = MyArgs.sortPlotsByChain
 
 ## Create flags category and corresponding set of flags
 ## (read from trkAnaCfgFile.json) for each TrkAnalysis

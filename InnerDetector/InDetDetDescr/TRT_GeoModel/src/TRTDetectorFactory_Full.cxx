@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeoPrimitives/GeoPrimitives.h"
@@ -21,7 +21,6 @@
 
 #include "InDetGeoModelUtils/ExtraMaterial.h"
 #include "InDetGeoModelUtils/InDetDDAthenaComps.h"
-#include "InDetGeoModelUtils/InDetMaterialManager.h"
 #include "InDetGeoModelUtils/GeoNodePtr.h"
 
 #include "GeoModelKernel/GeoTube.h"
@@ -105,16 +104,6 @@ TRTDetectorFactory_Full::TRTDetectorFactory_Full(InDetDD::AthenaComps * athenaCo
 { 
 }
 //////////////////////////////////////////////////////////////////////////////////
-
-
-
-/////////////////////////////////// Destructor ///////////////////////////////////
-//
-TRTDetectorFactory_Full::~TRTDetectorFactory_Full() 
-{ 
-}
-//////////////////////////////////////////////////////////////////////////////////
-
 
 
 ///////////////////////////// getDetectorManager /////////////////////////////////
@@ -674,28 +663,13 @@ void TRTDetectorFactory_Full::create(GeoPhysVol *world)
 
     pCoolingTube->add(pCoolingFluid);
 
-    double activeGasZPositionNormalStraws, activeGasZPositionStrawsWithLargeDeadRegion;
-	//AALONSO, create the Argon Straws
-    GeoNodePtr<GeoPhysVol> pHoleForMixedStrawAR;
-    GeoNodePtr<GeoPhysVol> pHoleForMixedStrawWithLargeDeadRegionAR;
-    if (m_doArgon)
-      {
-      pHoleForMixedStrawAR                    = makeStraw(activeGasZPositionNormalStraws, false, GM_ARGON);
-      pHoleForMixedStrawWithLargeDeadRegionAR = makeStraw(activeGasZPositionStrawsWithLargeDeadRegion,true, GM_ARGON);
-      }
-    // and krypton straws
-    GeoNodePtr<GeoPhysVol> pHoleForMixedStrawKR;
-    GeoNodePtr<GeoPhysVol> pHoleForMixedStrawWithLargeDeadRegionKR;
-    if (m_doKrypton)
-      {
-      pHoleForMixedStrawKR                    = makeStraw(activeGasZPositionNormalStraws, false, GM_KRYPTON);
-      pHoleForMixedStrawWithLargeDeadRegionKR = makeStraw(activeGasZPositionStrawsWithLargeDeadRegion,true, GM_KRYPTON);
-      }
+    double lengthOfInnerDeadRegion= m_data->lengthOfDeadRegion;
+    double lengthOfActiveGas = (m_data->barrelLengthOfStraw-m_data->barrelLengthOfTwister)/2.0 - m_data->lengthOfDeadRegion - lengthOfInnerDeadRegion;
+    double activeGasZPositionNormalStraws = (lengthOfActiveGas + m_data->barrelLengthOfTwister) / 2. + lengthOfInnerDeadRegion;
 
-    // The barrel straw (including the "hole" in the radiator around it):
-    GeoNodePtr<GeoPhysVol> pHoleForMixedStraw = makeStraw(activeGasZPositionNormalStraws);
-    // The straws in the inner layers of module A have a large dead region, and are thus different.
-    GeoNodePtr<GeoPhysVol> pHoleForMixedStrawWithLargeDeadRegion = makeStraw(activeGasZPositionStrawsWithLargeDeadRegion,true);
+    lengthOfInnerDeadRegion = m_data->barrelLengthOfLargeDeadRegion;
+    lengthOfActiveGas = (m_data->barrelLengthOfStraw-m_data->barrelLengthOfTwister)/2.0 - m_data->lengthOfDeadRegion - lengthOfInnerDeadRegion;
+    double activeGasZPositionStrawsWithLargeDeadRegion = (lengthOfActiveGas + m_data->barrelLengthOfTwister) / 2. + lengthOfInnerDeadRegion;
   
     // The modules themselves.
     for (size_t iABC=0;iABC<m_data->nBarrelRings;iABC++) {
@@ -748,36 +722,13 @@ void TRTDetectorFactory_Full::create(GeoPhysVol *world)
       if (!radMat) radMat = m_materialManager->getMaterial("trt::FibreRadiator");
 
       lRad = new GeoLogVol(radName, sRad, radMat);
-      GeoNodePtr<GeoPhysVol> pRad(new GeoPhysVol(lRad));
-      GeoNodePtr<GeoPhysVol> pRadAR(m_doArgon   ? new GeoPhysVol(lRad) : nullptr );
-      GeoNodePtr<GeoPhysVol> pRadKR(m_doKrypton ? new GeoPhysVol(lRad) : nullptr);
 
       //---------------------------------------------------------------------------------------------------------------
       // Place the cooling tubes in the Radiator
-
       GeoTransform  *xCool1 = new GeoTransform(shellPosition.inverse()
 					       *GeoTrf::Translate3D(m_data->barrelXOfCoolingTube[iABC][0],m_data->barrelYOfCoolingTube[iABC][0],0));
       GeoTransform  *xCool2 = new GeoTransform(shellPosition.inverse()
 					       *GeoTrf::Translate3D(m_data->barrelXOfCoolingTube[iABC][1],m_data->barrelYOfCoolingTube[iABC][1],0));
-
-      pRad->add(xCool1);
-      pRad->add(pCoolingTube);
-      pRad->add(xCool2);
-      pRad->add(pCoolingTube);
-      if (m_doArgon)
-        {
-        pRadAR->add(xCool1);
-        pRadAR->add(pCoolingTube);
-        pRadAR->add(xCool2);
-        pRadAR->add(pCoolingTube);
-        }
-      if (m_doKrypton)
-        {
-        pRadKR->add(xCool1);
-        pRadKR->add(pCoolingTube);
-        pRadKR->add(xCool2);
-        pRadKR->add(pCoolingTube);
-        }
 
       //----------------------------------------------------------------------------------------------------------------
       // Parameterize all of the straws and put them within the radiator.
@@ -851,46 +802,7 @@ void TRTDetectorFactory_Full::create(GeoPhysVol *world)
       } else {
 	m_detectorManager->setBarrelTransformField(iABC,tx2.clone());
       }
-	//AALONSO
-      GeoSerialTransformer *serialTransformer = nullptr;
-      GeoSerialTransformer *serialTransformerAR = nullptr;  //Ruslan
-      GeoSerialTransformer *serialTransformerKR = nullptr;  //Artem
-
-      serialTransformer     = new GeoSerialTransformer(pHoleForMixedStraw,   &tx2, m_data->barrelNumberOfStrawsInModule[iABC]-nStrawsWithLargeDeadRegion);
-      if (m_doArgon) {
-        serialTransformerAR = new GeoSerialTransformer(pHoleForMixedStrawAR, &tx2, m_data->barrelNumberOfStrawsInModule[iABC]-nStrawsWithLargeDeadRegion);
-      }
-      if (m_doKrypton) {
-        serialTransformerKR = new GeoSerialTransformer(pHoleForMixedStrawKR, &tx2, m_data->barrelNumberOfStrawsInModule[iABC]-nStrawsWithLargeDeadRegion);
-      }
-
-
-      GeoNodePtr<GeoSerialTransformer> serialTransformerDead;
-      GeoNodePtr<GeoSerialTransformer> serialTransformerDeadAR;
-      GeoNodePtr<GeoSerialTransformer> serialTransformerDeadKR;
-      serialTransformerDead     = new GeoSerialTransformer(pHoleForMixedStrawWithLargeDeadRegion  , &tx2Dead,
-								      nStrawsWithLargeDeadRegion);
-      if (m_doArgon)
-        serialTransformerDeadAR = new GeoSerialTransformer(pHoleForMixedStrawWithLargeDeadRegionAR, &tx2Dead,
-                      nStrawsWithLargeDeadRegion);
-      if (m_doKrypton)
-        serialTransformerDeadKR = new GeoSerialTransformer(pHoleForMixedStrawWithLargeDeadRegionKR, &tx2Dead,
-                      nStrawsWithLargeDeadRegion);
-
-     
       
-      pRad->add(new GeoSerialIdentifier(0));
-      if (m_doArgon  ) pRadAR->add(new GeoSerialIdentifier(0));
-      if (m_doKrypton) pRadKR->add(new GeoSerialIdentifier(0));
-      if (iABC==0) {
-        pRad->add(serialTransformerDead);
-        if (m_doArgon  ) pRadAR->add(serialTransformerDeadAR);
-        if (m_doKrypton) pRadKR->add(serialTransformerDeadKR);
-      }
-      pRad->add(serialTransformer);
-      if (m_doArgon  ) pRadAR->add(serialTransformerAR);
-      if (m_doKrypton) pRadKR->add(serialTransformerKR);
-
       // Adds one straw from each layer (reformulate..) (should be done via m_data from database)
       double oldx=-999*GeoModelKernelUnits::cm, oldz=-999*GeoModelKernelUnits::cm;
       unsigned int c=0;
@@ -965,38 +877,63 @@ void TRTDetectorFactory_Full::create(GeoPhysVol *world)
 	// In barrel frame (generally the same as the global frame)
 	m_detectorManager->addAlignableTransform(AlignmentLevelModule, idModule, xfx1, pShell, pBarrelVol);
 
-  Identifier TRT_Identifier;
 	// Add the substructure here:
 	pShell->add(new GeoIdentifierTag(iABC));
-  TRT_Identifier = idHelper->straw_id(1, iMod, iABC, 1, 1);
-  int strawStatusHT = TRTCond::StrawStatus::Good;
-  if (m_strawsvcavailable && (m_doArgon || m_doKrypton)) strawStatusHT = m_sumTool->getStatusHT(TRT_Identifier);
-  ActiveGasMixture agm = DecideGasMixture(strawStatusHT);
+	Identifier TRT_Identifier = idHelper->straw_id(1, iMod, iABC, 1, 1);
+	int strawStatusHT = TRTCond::StrawStatus::Good;
+	if (m_strawsvcavailable && (m_doArgon || m_doKrypton)) strawStatusHT = m_sumTool->getStatusHT(TRT_Identifier);
+	ActiveGasMixture agm = DecideGasMixture(strawStatusHT);
 
-  // Ruslan: insert radiators with Ar-straws
-  // Artem: same for Kr
-  switch (agm)
-    {
-    case GM_ARGON:
-      ATH_MSG_DEBUG( "Marking Argon straws from /TRT/Cond/StatusHT:\t"
-		     << idHelper->print_to_string(TRT_Identifier)); 
-      pShell->add(pRadAR);
-      break;
-    case GM_KRYPTON:
-      ATH_MSG_DEBUG( "Marking Krypton straws from /TRT/Cond/StatusHT:\t"
-		     << idHelper->print_to_string(TRT_Identifier));
-      pShell->add(pRadKR);
-      break;
-    case GM_XENON:
-      ATH_MSG_DEBUG( "Marking Xenon straws from /TRT/Cond/StatusHT:\t"
-		     << idHelper->print_to_string(TRT_Identifier) );
-      pShell->add(pRad);
-      break;
-    default:
-      ATH_MSG_FATAL( "Unexpected gas mixture: " << agm ); 
-      throw std::runtime_error("Unexpected gas mixture");
-      return;
-    }
+	// Make a radiator
+	GeoNodePtr<GeoPhysVol> pRad(new GeoPhysVol(lRad));
+	pRad->add(xCool1);
+        pRad->add(pCoolingTube);
+        pRad->add(xCool2);
+        pRad->add(pCoolingTube);
+	pRad->add(new GeoSerialIdentifier(0));
+
+	GeoNodePtr<GeoPhysVol> pHoleForMixedStraw;
+	GeoNodePtr<GeoPhysVol> pHoleForMixedStrawWithLargeDeadRegion;
+
+	switch (agm)
+	{
+	case GM_ARGON:
+	  ATH_MSG_DEBUG( "Marking Argon straws from /TRT/Cond/StatusHT:\t"
+			 << idHelper->print_to_string(TRT_Identifier));
+	  pHoleForMixedStraw                    = makeStraw(false, GM_ARGON);
+	  pHoleForMixedStrawWithLargeDeadRegion = makeStraw(true, GM_ARGON);
+	  break;
+	case GM_KRYPTON:
+	  ATH_MSG_DEBUG( "Marking Krypton straws from /TRT/Cond/StatusHT:\t"
+			 << idHelper->print_to_string(TRT_Identifier));
+	  pHoleForMixedStraw                    = makeStraw(false, GM_KRYPTON);
+	  pHoleForMixedStrawWithLargeDeadRegion = makeStraw(true, GM_KRYPTON);
+	  break;
+	case GM_XENON:
+	  ATH_MSG_DEBUG( "Marking Xenon straws from /TRT/Cond/StatusHT:\t"
+			 << idHelper->print_to_string(TRT_Identifier) );
+	  pHoleForMixedStraw = makeStraw();
+	  pHoleForMixedStrawWithLargeDeadRegion = makeStraw(true);
+	  break;
+	default:
+	  ATH_MSG_FATAL( "Unexpected gas mixture: " << agm );
+	  throw std::runtime_error("Unexpected gas mixture");
+	  return;
+	}
+
+	GeoNodePtr<GeoSerialTransformer> serialTransformer = new GeoSerialTransformer(pHoleForMixedStraw
+										      , &tx2
+										      , m_data->barrelNumberOfStrawsInModule[iABC]-nStrawsWithLargeDeadRegion);
+
+	if (iABC==0) {
+	  GeoNodePtr<GeoSerialTransformer> serialTransformerDead = new GeoSerialTransformer(pHoleForMixedStrawWithLargeDeadRegion
+											    , &tx2Dead
+											    , nStrawsWithLargeDeadRegion);
+	  pRad->add(serialTransformerDead);
+	}
+	pRad->add(serialTransformer);
+
+	pShell->add(pRad);
 
 	//-------------------------------------------------------------------//
 	//                                                                   //
@@ -1279,37 +1216,36 @@ void TRTDetectorFactory_Full::create(GeoPhysVol *world)
 		  phiPlane +=  deltaPhiForStrawsA;
 		}
 
-    Identifier TRT_Identifier;
-    int bar_ec = (iiSide) ? -2 : +2;
-    TRT_Identifier = idHelper->straw_id(bar_ec, 1, iiWheel, 1, 1);
-    int strawStatusHT = TRTCond::StrawStatus::Good;
-    if (m_strawsvcavailable && (m_doArgon || m_doKrypton)) strawStatusHT = m_sumTool->getStatusHT(TRT_Identifier);
-    ActiveGasMixture agm = DecideGasMixture(strawStatusHT);
+		int bar_ec = (iiSide) ? -2 : +2;
+		Identifier TRT_Identifier = idHelper->straw_id(bar_ec, 1, iiWheel, 1, 1);
+		int strawStatusHT = TRTCond::StrawStatus::Good;
+		if (m_strawsvcavailable && (m_doArgon || m_doKrypton)) strawStatusHT = m_sumTool->getStatusHT(TRT_Identifier);
+		ActiveGasMixture agm = DecideGasMixture(strawStatusHT);
 
-    // Ruslan: insert plane with Ar-straws
-    // Artem: same for Kr
-    switch (agm)
-      {
-      case GM_ARGON:
-        ATH_MSG_DEBUG( "Marking Argon straws from /TRT/Cond/StatusHT:\t"
-		       << idHelper->print_to_string(TRT_Identifier) );
-        childPlane = pStrawPlaneA_Ar->clone(); 
-        break;
-      case GM_KRYPTON:
-        ATH_MSG_DEBUG( "Marking Krypton straws from /TRT/Cond/StatusHT:\t"
-		       << idHelper->print_to_string(TRT_Identifier) );
-        childPlane = pStrawPlaneA_Kr->clone();
-        break;
-      case GM_XENON:
-        ATH_MSG_DEBUG( "Marking Xenon straws from /TRT/Cond/StatusHT:\t"
-		       << idHelper->print_to_string(TRT_Identifier) );
-        childPlane = pStrawPlaneA->clone();
-        break;
-      default:
-        ATH_MSG_FATAL( "Unexpected gas mixture: " << agm ); 
-        throw std::runtime_error("Unexpected gas mixture");
-        return;
-      }
+		// Ruslan: insert plane with Ar-straws
+		// Artem: same for Kr
+		switch (agm)
+		{
+		case GM_ARGON:
+		  ATH_MSG_DEBUG( "Marking Argon straws from /TRT/Cond/StatusHT:\t"
+				 << idHelper->print_to_string(TRT_Identifier) );
+		  childPlane = pStrawPlaneA_Ar->clone();
+		  break;
+		case GM_KRYPTON:
+		  ATH_MSG_DEBUG( "Marking Krypton straws from /TRT/Cond/StatusHT:\t"
+				 << idHelper->print_to_string(TRT_Identifier) );
+		  childPlane = pStrawPlaneA_Kr->clone();
+		  break;
+		case GM_XENON:
+		  ATH_MSG_DEBUG( "Marking Xenon straws from /TRT/Cond/StatusHT:\t"
+				 << idHelper->print_to_string(TRT_Identifier) );
+		  childPlane = pStrawPlaneA->clone();
+		  break;
+		default:
+		  ATH_MSG_FATAL( "Unexpected gas mixture: " << agm );
+		  throw std::runtime_error("Unexpected gas mixture");
+		  return;
+		}
 
 
 		xfPlane = new GeoTransform(GeoTrf::TranslateZ3D(m_data->endCapLayerZPositionA[iiPlane] - m_data->endCapLengthOfWheelsA/2)*GeoTrf::RotateZ3D(phiPlane));
@@ -1579,40 +1515,37 @@ void TRTDetectorFactory_Full::create(GeoPhysVol *world)
 		  m_detectorManager->addAlignableTransform(AlignmentLevelSubWheel, idSubModule, xfAlignableModule, pWheelB); 	    
 		}
 
-    Identifier TRT_Identifier;
-    int bar_ec = (iiSide) ? -2 : +2;
-    TRT_Identifier = idHelper->straw_id(bar_ec, 1, iiWheel, 1, 1);
-    int strawStatusHT = TRTCond::StrawStatus::Good;
-    if (m_strawsvcavailable && (m_doArgon || m_doKrypton)) strawStatusHT = m_sumTool->getStatusHT(TRT_Identifier);
-    ActiveGasMixture agm = DecideGasMixture(strawStatusHT);
+		int bar_ec = (iiSide) ? -2 : +2;
+		Identifier TRT_Identifier = idHelper->straw_id(bar_ec, 1, iiWheel, 1, 1);
+		int strawStatusHT = TRTCond::StrawStatus::Good;
+		if (m_strawsvcavailable && (m_doArgon || m_doKrypton)) strawStatusHT = m_sumTool->getStatusHT(TRT_Identifier);
+		ActiveGasMixture agm = DecideGasMixture(strawStatusHT);
 
-    //Ruslan: insert plane with Ar-straws
-    //Artem: same for Kr
-    switch (agm)
-      {
-      case GM_ARGON:
-        ATH_MSG_DEBUG( "Marking Argon straws from /TRT/Cond/StatusHT:\t"
-		       << idHelper->print_to_string(TRT_Identifier) );
-        childPlane = pStrawPlaneB_Ar->clone();
-        break;
-      case GM_KRYPTON:
-        ATH_MSG_DEBUG( "Marking Krypton straws from /TRT/Cond/StatusHT:\t"
-		       << idHelper->print_to_string(TRT_Identifier));
-        childPlane = pStrawPlaneB_Kr->clone();
-        break;
-      case GM_XENON:
-        ATH_MSG_DEBUG( "Marking Xenon straws from /TRT/Cond/StatusHT:\t"
-		       << idHelper->print_to_string(TRT_Identifier));
-        childPlane = pStrawPlaneB->clone();
-        break;
-      default:
-        ATH_MSG_FATAL( "Unexpected gas mixture: " << agm); 
-        throw std::runtime_error("Unexpected gas mixture");
-        return;
-      }
+		//Ruslan: insert plane with Ar-straws
+		//Artem: same for Kr
+		switch (agm)
+		{
+		case GM_ARGON:
+		  ATH_MSG_DEBUG( "Marking Argon straws from /TRT/Cond/StatusHT:\t"
+				 << idHelper->print_to_string(TRT_Identifier) );
+		  childPlane = pStrawPlaneB_Ar->clone();
+		  break;
+		case GM_KRYPTON:
+		  ATH_MSG_DEBUG( "Marking Krypton straws from /TRT/Cond/StatusHT:\t"
+				 << idHelper->print_to_string(TRT_Identifier));
+		  childPlane = pStrawPlaneB_Kr->clone();
+		  break;
+		case GM_XENON:
+		  ATH_MSG_DEBUG( "Marking Xenon straws from /TRT/Cond/StatusHT:\t"
+				 << idHelper->print_to_string(TRT_Identifier));
+		  childPlane = pStrawPlaneB->clone();
+		  break;
+		default:
+		  ATH_MSG_FATAL( "Unexpected gas mixture: " << agm);
+		  throw std::runtime_error("Unexpected gas mixture");
+		  return;
+		}
         
-//		childPlane = pStrawPlaneB->clone();
-		
 		// phiPlane is phi of straw 0, sector 0 (online numbering)
 		double phiPlane = m_data->endCapPhiOfFirstStraw + RotationsOfStrawPlanes[iiPlane%nStrawLayMaxEc]*deltaPhiForStrawsB;
 
@@ -2135,15 +2068,12 @@ const GeoShape * TRTDetectorFactory_Full::makeModule ( double length, const GeoT
 //////////////////////////////////// makeStraw ///////////////////////////////////
 
 //
-//GeoPhysVol * TRTDetectorFactory_Full::makeStraw( double& activeGasZPosition, bool hasLargeDeadRegion /*= false*/ ) const {
-GeoPhysVol * TRTDetectorFactory_Full::makeStraw( double& activeGasZPosition, bool hasLargeDeadRegion /*= false*/, ActiveGasMixture gasMixture) {
+GeoPhysVol * TRTDetectorFactory_Full::makeStraw(bool hasLargeDeadRegion, ActiveGasMixture gasMixture) {
 
   double lengthOfInnerDeadRegion= hasLargeDeadRegion ? m_data->barrelLengthOfLargeDeadRegion : m_data->lengthOfDeadRegion ;
   double lengthOfActiveGas = (m_data->barrelLengthOfStraw-m_data->barrelLengthOfTwister)/2.0 - m_data->lengthOfDeadRegion - lengthOfInnerDeadRegion;
   double posA   = (lengthOfActiveGas + m_data->barrelLengthOfTwister) / 2. + lengthOfInnerDeadRegion; // middle of lengthOfActiveGas
   double posInnerDeadRegion = ( m_data->barrelLengthOfTwister + lengthOfInnerDeadRegion ) / 2;
-
-  activeGasZPosition=posA;
 
   // Straws:
   GeoTube    *sHole      = new GeoTube(0,m_data->barrelOuterRadiusOfStrawHole, m_data->barrelLengthOfStraw/2.0);

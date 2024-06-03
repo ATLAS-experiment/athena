@@ -21,7 +21,6 @@
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/SystemOfUnits.h"
 #include "AthenaBaseComps/AthCheckMacros.h"
-#include "CxxUtils/starts_with.h"
 
 #include <algorithm>
 #include <iostream>
@@ -65,8 +64,8 @@ int printElement ( GeoElement* &p_element)
   double a = p_element->getA();
   double z = p_element->getZ();
 	
-  std::cout << " ***** CheckElement(): Print the Element:  " << name << std::endl; 
-  std::cout << " ***** The Element: name,		symbol, 	A, 	Z " << std::endl; 
+  std::cout << " ***** CheckElement(): Print the Element:  " << name << "\n"; 
+  std::cout << " ***** The Element: name,		symbol, 	A, 	Z \n" ; 
   std::cout << " *****             "<<name <<"		"<<symbol <<"		"<< a * (Gaudi::Units::mole / GeoModelKernelUnits::gram) <<"	"<< z <<"	"  << std::endl;
 	
   return 1;
@@ -79,8 +78,8 @@ int printElement ( const GeoElement* &p_element)
   double a = p_element->getA();
   double z = p_element->getZ();
 	
-  std::cout << " ***** PrintElement(): Print the Element:  " << name << std::endl; 
-  std::cout << " ***** The Element: name,		symbol, 	A, 	Z " << std::endl; 
+  std::cout << " ***** PrintElement(): Print the Element:  " << name << "\n"; 
+  std::cout << " ***** The Element: name,		symbol, 	A, 	Z \n"; 
   std::cout << " *****             "<<name <<"		"<<symbol <<"		"<< a * (Gaudi::Units::mole / GeoModelKernelUnits::gram) <<"	"<< z <<"	"  << std::endl;
 	
   return 1;
@@ -91,8 +90,8 @@ int printMaterial ( GeoMaterial* &p_material)
   std::string name = p_material->getName();
   double density = p_material->getDensity() * (Gaudi::Units::cm3 / GeoModelKernelUnits::gram);
 
-  std::cout << " ***** PrintMaterial(): Print the Material:  " << name << std::endl; 
-  std::cout << " ***** The Material: name,	density	" << std::endl; 
+  std::cout << " ***** PrintMaterial(): Print the Material:  " << name << "\n"; 
+  std::cout << " ***** The Material: name,	density	\n" ; 
   std::cout << " *****              "<< name <<"		"<<density <<"		" << std::endl; 	
 	
   return 1;
@@ -103,8 +102,8 @@ int printFullMaterial ( GeoMaterial* &p_material)
   std::string name = p_material->getName();
   double density = p_material->getDensity() * (Gaudi::Units::cm3 / GeoModelKernelUnits::gram);
 	
-  std::cout << " ***** PrintFullMaterial(): Print the Material:  " << name << std::endl; 
-  std::cout << " ***** The Material: name, 	density" << std::endl; 
+  std::cout << " ***** PrintFullMaterial(): Print the Material:  " << name << "\n"; 
+  std::cout << " ***** The Material: name, 	density\n" ; 
   std::cout << " *****              "<< name <<" 	 "<<density <<"  " << std::endl; 
 	
   p_material->lock();
@@ -141,180 +140,171 @@ RDBMaterialManager::RDBMaterialManager(ISvcLocator* pSvcLocator)
 
 StatusCode RDBMaterialManager::readMaterialsFromDB(ISvcLocator* pSvcLocator)
 {
-  IGeoModelSvc*  iGeoModel;		
-  IRDBAccessSvc* iAccessSvc;
+  IGeoModelSvc*  iGeoModel{};		
+  IRDBAccessSvc* iAccessSvc{};
   MsgStream log(Athena::getMessageSvc(), "GeoModelSvc::RDBMaterialManager"); 		
 
   ATH_CHECK(pSvcLocator->service("GeoModelSvc",iGeoModel));
   ATH_CHECK(pSvcLocator->service("RDBAccessSvc",iAccessSvc));
-
+  
+  auto warn = [&](const std::string & msg){
+    if (log.level()<=MSG::WARNING){
+      log << MSG::WARNING <<msg << endmsg;
+    }
+  };
+  auto debug = [&](const std::string & msg){
+    if (log.level()<=MSG::DEBUG){
+      log << MSG::DEBUG <<msg << endmsg;
+    }
+  };
+  const bool loadDefaults = iGeoModel->geoConfig() != GeoModel::GEO_RUN4;
+  auto defaulted = [=](const IRDBRecordset_ptr pRecordset) -> bool{
+    return (loadDefaults and pRecordset->size() == 0);
+  };
   // Do not load defaults for RUN4
-  bool loadDefaults = iGeoModel->geoConfig() != GeoModel::GEO_RUN4;
-  log << MSG::DEBUG << "Will load material defaults if not present: " << loadDefaults << endmsg;
+  if (loadDefaults) debug("Will load material defaults if not present");
 
   // --- Standard materials, elements
   DecodeVersionKey keyAtlas(iGeoModel, "ATLAS");
   m_elements = iAccessSvc->getRecordsetPtr("Elements",keyAtlas.tag(),keyAtlas.node());
-  if(loadDefaults && m_elements->size()==0) {
-    if(log.level()<=MSG::WARNING)
-      log << MSG::WARNING << " Getting Elements with default tag" <<endmsg;
+  if(defaulted(m_elements)) {
+    warn("Getting Elements with default tag");
     m_elements = iAccessSvc->getRecordsetPtr("Elements","Materials-00","Materials");
   }
   m_stdmatcomponents = iAccessSvc->getRecordsetPtr("StdMatComponents",keyAtlas.tag(),keyAtlas.node());
-  if(loadDefaults && m_stdmatcomponents->size()==0)	{
-    if(log.level()<=MSG::WARNING)
-      log << MSG::WARNING << " Getting StdMatComponents with default tag" <<endmsg;
+  if(defaulted(m_stdmatcomponents))	{
+    warn("Getting StdMatComponents with default tag");
     m_stdmatcomponents = iAccessSvc->getRecordsetPtr("StdMatComponents","Materials-00","Materials");
   }
   m_stdmaterials = iAccessSvc->getRecordsetPtr("StdMaterials",keyAtlas.tag(),keyAtlas.node());
-  if(loadDefaults && m_stdmaterials->size()==0) {
-    if(log.level()<=MSG::WARNING)
-      log << MSG::WARNING << " Getting StdMaterials with default tag" <<endmsg;
+  if(defaulted(m_stdmaterials)) {
+    warn("Getting StdMaterials with default tag");
     m_stdmaterials = iAccessSvc->getRecordsetPtr("StdMaterials","Materials-00","Materials");
   }
   
   // --- Pixel materials
   DecodeVersionKey keyPixel(iGeoModel, "Pixel");
   m_pixmatcomponents = iAccessSvc->getRecordsetPtr("PixMatComponents",keyPixel.tag(),keyPixel.node());
-  if(loadDefaults && m_pixmatcomponents->size()==0) {
-    if(log.level()<=MSG::WARNING)
-      log << MSG::WARNING << " Getting PixMatComponents with default tag" <<endmsg;
+  if(defaulted(m_pixmatcomponents)) {
+    warn("Getting PixMatComponents with default tag");
     m_pixmatcomponents = iAccessSvc->getRecordsetPtr("PixMatComponents","PixMatComponents-00");
   }
   m_pixmaterials = iAccessSvc->getRecordsetPtr("PixMaterials",keyPixel.tag(),keyPixel.node());
-  if(loadDefaults && m_pixmaterials->size()==0) {
-    if(log.level()<=MSG::WARNING)
-      log << MSG::WARNING << " Getting PixMaterials with default tag" <<endmsg;
+  if(defaulted(m_pixmaterials)) {
+    warn("Getting PixMaterials with default tag");
     m_pixmaterials = iAccessSvc->getRecordsetPtr("PixMaterials","PixMaterials-00");
   }
   
   // --- Pixel materials for TB
+  //for test beam materials we just issue debug level messages. Perhaps this load can be fully omitted?
   m_pixtbmatcomponents = iAccessSvc->getRecordsetPtr("PixelTBMatComponents",keyPixel.tag(),keyPixel.node());
-  if(loadDefaults && m_pixtbmatcomponents->size()==0) {
-    if(log.level()<=MSG::WARNING)
-      log << MSG::WARNING << " Getting PixTBMatComponents with default tag" <<endmsg;
+  if(defaulted( m_pixtbmatcomponents)) {
+    debug("Getting PixTBMatComponents with default tag" );
     m_pixtbmatcomponents = iAccessSvc->getRecordsetPtr("PixMatComponents","PixMatComponents-00");
   }
   m_pixtbmaterials = iAccessSvc->getRecordsetPtr("PixelTBMaterials",keyPixel.tag(),keyPixel.node());
-  if(loadDefaults && m_pixtbmaterials->size()==0) {
-    if(log.level()<=MSG::WARNING)
-      log << MSG::WARNING << " Getting PixTBMaterials with default tag" <<endmsg;
+  if(defaulted(m_pixtbmaterials)) {
+    debug("Getting PixTBMaterials with default tag");
     m_pixtbmaterials = iAccessSvc->getRecordsetPtr("PixMaterials","PixMaterials-00");
   }
   
   // --- SCT materials
   DecodeVersionKey keySCT(iGeoModel, "SCT");
   m_sctmatcomponents = iAccessSvc->getRecordsetPtr("SCTMatComponents",keySCT.tag(),keySCT.node());
-  if(loadDefaults && m_sctmatcomponents->size()==0)	{
-    if(log.level()<=MSG::WARNING)
-      log << MSG::WARNING << " Getting SCTMatComponents with default tag" <<endmsg;
+  if(defaulted(m_sctmatcomponents))	{
+    warn("Getting SCTMatComponents with default tag");
     m_sctmatcomponents = iAccessSvc->getRecordsetPtr("SCTMatComponents","SCTMatComponents-00");
   }
   
   m_sctmaterials = iAccessSvc->getRecordsetPtr("SCTMaterials",keySCT.tag(),keySCT.node());
-  if(loadDefaults && m_sctmaterials->size()==0) {
-    if(log.level()<=MSG::WARNING)
-      log << MSG::WARNING << " Getting SCTMaterials with default tag" <<endmsg;
+  if(defaulted(m_sctmaterials)) {
+    warn("Getting SCTMaterials with default tag");
     m_sctmaterials = iAccessSvc->getRecordsetPtr("SCTMaterials","SCTMaterials-00");
   }
   
   // --- TRT materials
   DecodeVersionKey keyTRT(iGeoModel, "TRT");
   m_trtmatcomponents = iAccessSvc->getRecordsetPtr("TrtMatComponents",keyTRT.tag(),keyTRT.node());
-  if(loadDefaults && m_trtmatcomponents->size()==0)	{
-    if(log.level()<=MSG::WARNING)
-      log << MSG::WARNING << " Getting TrtMatComponents with default tag" <<endmsg;
+  if(defaulted(m_trtmatcomponents))	{
+    warn("Getting TrtMatComponents with default tag");
     m_trtmatcomponents = iAccessSvc->getRecordsetPtr("TrtMatComponents","TrtMatComponents-00");
   }
   m_trtmaterials = iAccessSvc->getRecordsetPtr("TrtMaterials",keyTRT.tag(),keyTRT.node());
-  if(loadDefaults && m_trtmaterials->size()==0) {
-    if(log.level()<=MSG::WARNING)
-      log << MSG::WARNING << " Getting TrtMaterials with default tag" <<endmsg;
+  if(defaulted(m_trtmaterials)) {
+    warn("Getting TrtMaterials with default tag");
     m_trtmaterials = iAccessSvc->getRecordsetPtr("TrtMaterials","TrtMaterials-00");
   }
   
   // --- InDet common materials
   DecodeVersionKey keyInDet(iGeoModel, "InnerDetector");
   m_indetmatcomponents = iAccessSvc->getRecordsetPtr("InDetMatComponents",keyInDet.tag(),keyInDet.node());
-  if(loadDefaults && m_indetmatcomponents->size()==0) {
-    if(log.level()<=MSG::WARNING)
-      log << MSG::WARNING << " Getting InDetMatComponents with default tag" <<endmsg;
+  if(defaulted(m_indetmatcomponents)) {
+    debug("Getting InDetMatComponents with default tag");
     m_indetmatcomponents = iAccessSvc->getRecordsetPtr("InDetMatComponents","InDetMatComponents-00");
   }
   
   m_indetmaterials = iAccessSvc->getRecordsetPtr("InDetMaterials",keyInDet.tag(),keyInDet.node());
-  if(loadDefaults && m_indetmaterials->size()==0) {
-    if(log.level()<=MSG::WARNING)
-      log << MSG::WARNING << " Getting InDetMaterials with default tag" <<endmsg;
+  if(defaulted(m_indetmaterials)) {
+    debug("Getting InDetMaterials with default tag");
     m_indetmaterials = iAccessSvc->getRecordsetPtr("InDetMaterials","InDetMaterials-00");
   }
   
   // --- LAr materials
   DecodeVersionKey keyLAr(iGeoModel, "LAr");    
   m_larmatcomponents = iAccessSvc->getRecordsetPtr("LArMatComponents",keyLAr.tag(),keyLAr.node());
-  if(loadDefaults && m_larmatcomponents->size()==0) {
-    if(log.level()<=MSG::WARNING)
-      log << MSG::WARNING << " Getting LArMatComponents with default tag" <<endmsg;
+  if(defaulted(m_larmatcomponents)) {
+    warn("Getting LArMatComponents with default tag");
     m_larmatcomponents = iAccessSvc->getRecordsetPtr("LArMatComponents","LArMatComponents-00");
   }
   m_larmaterials = iAccessSvc->getRecordsetPtr("LArMaterials",keyLAr.tag(),keyLAr.node());
-  if(loadDefaults && m_larmaterials->size()==0) {
-    if(log.level()<=MSG::WARNING)
-      log << MSG::WARNING << " Getting LArMaterials with default tag" <<endmsg;
+  if(defaulted(m_larmaterials)) {
+    warn("Getting LArMaterials with default tag");
     m_larmaterials = iAccessSvc->getRecordsetPtr("LArMaterials","LArMaterials-00");
   }
   
   // --- Tile materials
   DecodeVersionKey keyTile(iGeoModel, "TileCal");    
   m_tilematcomponents = iAccessSvc->getRecordsetPtr("TileMatComponents",keyTile.tag(),keyTile.node());
-  if(loadDefaults && m_tilematcomponents->size()==0) {
-    if(log.level()<=MSG::WARNING)
-      log << MSG::WARNING << " Getting TileMatComponents with default tag" <<endmsg;
+  if (defaulted(m_tilematcomponents)) {
+    warn("Getting TileMatComponents with default tag" );
     m_tilematcomponents = iAccessSvc->getRecordsetPtr("TileMatComponents","TileMatComponents-00");
   }
   m_tilematerials = iAccessSvc->getRecordsetPtr("TileMaterials",keyTile.tag(),keyTile.node());
-  if(loadDefaults && m_tilematerials->size()==0) {
-    if(log.level()<=MSG::WARNING)
-      log << MSG::WARNING << " Getting TileMaterials with default tag" <<endmsg;
+  if(defaulted(m_tilematerials)) {
+    warn("Getting TileMaterials with default tag");
     m_tilematerials = iAccessSvc->getRecordsetPtr("TileMaterials","TileMaterials-00");
   }
   
   // --- Muon
   DecodeVersionKey keyMuon(iGeoModel, "MuonSpectrometer");
   m_muomatcomponents = iAccessSvc->getRecordsetPtr("MUOMatComponents",keyMuon.tag(),keyMuon.node());
-  if(loadDefaults && m_muomatcomponents->size()==0)	{
-    if(log.level()<=MSG::WARNING)
-      log << MSG::WARNING << " Getting MUOMatComponents with default tag" <<endmsg;
+  if(defaulted(m_muomatcomponents))	{
+    warn("Getting MUOMatComponents with default tag");
     m_muomatcomponents = iAccessSvc->getRecordsetPtr("MUOMatComponents","MUOMatComponents-00");
   }
   m_muomaterials = iAccessSvc->getRecordsetPtr("MUOMaterials",keyMuon.tag(),keyMuon.node());
-  if(loadDefaults && m_muomaterials->size()==0) {
-    if(log.level()<=MSG::WARNING)
-      log << MSG::WARNING << " Getting MUOMaterials with default tag" <<endmsg;
+  if(defaulted(m_muomaterials)) {
+    warn("Getting MUOMaterials with default tag" );
     m_muomaterials = iAccessSvc->getRecordsetPtr("MUOMaterials","MUOMaterials-00");  
   }
   m_shieldmatcomponents = iAccessSvc->getRecordsetPtr("ShieldMatComponents",keyMuon.tag(),keyMuon.node());
-  if(loadDefaults && m_shieldmatcomponents->size()==0) {
-    if(log.level()<=MSG::WARNING)
-      log << MSG::WARNING << " Getting ShieldMatComponents with default tag" <<endmsg;
+  if(defaulted(m_shieldmatcomponents)) {
+    warn("Getting ShieldMatComponents with default tag");
     m_shieldmatcomponents = iAccessSvc->getRecordsetPtr("ShieldMatComponents","ShieldMatComponents-00");
   }
   m_shieldmaterials = iAccessSvc->getRecordsetPtr("ShieldMaterials",keyMuon.tag(),keyMuon.node());
-  if(loadDefaults && m_shieldmaterials->size()==0) {
-    if(log.level()<=MSG::WARNING)
-      log << MSG::WARNING << " Getting ShieldMaterials with default tag" <<endmsg;
+  if(defaulted(m_shieldmaterials)) {
+    warn("Getting ShieldMaterials with default tag");
     m_shieldmaterials = iAccessSvc->getRecordsetPtr("ShieldMaterials","ShieldMaterials-00");
   }
   m_toromatcomponents = iAccessSvc->getRecordsetPtr("ToroMatComponents",keyMuon.tag(),keyMuon.node());
-  if(loadDefaults && m_toromatcomponents->size()==0) {
-    if(log.level()<=MSG::WARNING)
-      log << MSG::WARNING << " Getting ToroMatComponents with default tag" <<endmsg;
+  if(defaulted(m_toromatcomponents)) {
+    warn("Getting ToroMatComponents with default tag");
     m_toromatcomponents =	iAccessSvc->getRecordsetPtr("ToroMatComponents","ToroMatComponents-00");
   }
   m_toromaterials = iAccessSvc->getRecordsetPtr("ToroMaterials",keyMuon.tag(),keyMuon.node());
-  if(loadDefaults && m_toromaterials->size()==0) {
-    if(log.level()<=MSG::WARNING)
-      log << MSG::WARNING << " Getting ToroMaterials with default tag" <<endmsg; 
+  if(defaulted(m_toromaterials)) {
+    warn("Getting ToroMaterials with default tag"); 
     m_toromaterials = iAccessSvc->getRecordsetPtr("ToroMaterials","ToroMaterials-00");
   }
   return StatusCode::SUCCESS;
@@ -424,77 +414,77 @@ const GeoMaterial*  RDBMaterialManager:: getMaterial(const std::string &name) {
   if (pmaterial!= nullptr) 
       return pmaterial;
 
-  if(CxxUtils::starts_with(name, "std"))
+  if(name.starts_with("std"))
     {
       detector = "std";
       tmp_materials = m_stdmaterials;
       tmp_matcomponents = m_stdmatcomponents;
       data_id = "STDMATERIALS_DATA_ID";
     }
-  else if(CxxUtils::starts_with(name, "trt"))
+  else if(name.starts_with("trt"))
     {
       detector = "trt";
       tmp_materials = m_trtmaterials;
       tmp_matcomponents = m_trtmatcomponents;
       data_id = "TRTMATERIALS_DATA_ID";
     }
-  else if(CxxUtils::starts_with(name, "LAr"))
+  else if(name.starts_with("LAr"))
     {
       detector = "LAr";
       tmp_materials = m_larmaterials;
       tmp_matcomponents = m_larmatcomponents;
       data_id = "LARMATERIALS_DATA_ID";
     }
-  else if(CxxUtils::starts_with(name, "muo"))
+  else if(name.starts_with("muo"))
     {
       detector = "muo";
       tmp_materials = m_muomaterials;
       tmp_matcomponents = m_muomatcomponents;
       data_id = "MUOMATERIALS_DATA_ID";
     }
-  else if(CxxUtils::starts_with(name, "pixtb"))
+  else if(name.starts_with("pixtb"))
     {
       detector = "pixtb";
       tmp_materials = m_pixtbmaterials;
       tmp_matcomponents = m_pixtbmatcomponents;
       data_id = "PIXELTBMATERIALS_DATA_ID";
     }
-  else if(CxxUtils::starts_with(name, "pix"))
+  else if(name.starts_with("pix"))
     {
       detector = "pix";
       tmp_materials = m_pixmaterials;
       tmp_matcomponents = m_pixmatcomponents;
       data_id = "PIXMATERIALS_DATA_ID";
     }
-  else if(CxxUtils::starts_with(name, "sct"))
+  else if(name.starts_with("sct"))
     {
       detector = "sct";
       tmp_materials = m_sctmaterials;
       tmp_matcomponents = m_sctmatcomponents;
       data_id = "SCTMATERIALS_DATA_ID";
     }
-  else if(CxxUtils::starts_with(name, "indet"))
+  else if(name.starts_with("indet"))
     {
       detector = "indet";
       tmp_materials = m_indetmaterials;
       tmp_matcomponents = m_indetmatcomponents;
       data_id = "INDETMATERIALS_DATA_ID";
     }
-  else if(CxxUtils::starts_with(name, "shield"))
+  else if(name.starts_with("shield"))
     {
       detector = "shield";
       tmp_materials = m_shieldmaterials;
       tmp_matcomponents = m_shieldmatcomponents;
       data_id = "SHIELDMATERIALS_DATA_ID";
     }
-  else if(CxxUtils::starts_with(name, "tile"))
+  else if(name.starts_with("tile"))
     {
       detector = "tile";
       tmp_materials = m_tilematerials;
       tmp_matcomponents = m_tilematcomponents;
       data_id = "TILEMATERIALS_DATA_ID";
     }
-  else if(CxxUtils::starts_with(name, "toro"))
+  else if(name.starts_with("toro"))
     {
       detector = "toro";
       tmp_materials = m_toromaterials;
@@ -502,12 +492,12 @@ const GeoMaterial*  RDBMaterialManager:: getMaterial(const std::string &name) {
       data_id = "TOROMATERIALS_DATA_ID";
     }
   else {return 0 ;}
-	
+
   for( ind = 0; ind < tmp_materials->size(); ind++)
     {
       const IRDBRecord* rec = (*tmp_materials)[ind];
       tmp_name = detector+"::"+rec->getString("NAME");
-		
+
       if( name == tmp_name){
 	material_name  =detector+"::"+rec->getString("NAME");
 	material_id = rec->getLong(data_id);
@@ -710,20 +700,17 @@ size_t RDBMaterialManager::size()
 
 std::ostream &  RDBMaterialManager::printAll(std::ostream & o) const 
 {
-  o << "============Material Manager Element List========================" << std::endl;
-  for (GeoElement* elt : m_elementVector)
-    {
-      o << elt->getSymbol() << '\t' << elt->getZ() <<  '\t' << elt->getA() * (Gaudi::Units::mole / GeoModelKernelUnits::gram) << '\t' << elt->getName() << std::endl;
-    }
+  o << "============Material Manager Element List========================\n";
+  for (GeoElement* elt : m_elementVector){
+    o << elt->getSymbol() << '\t' << elt->getZ() <<  '\t' << elt->getA() * (Gaudi::Units::mole / GeoModelKernelUnits::gram) << '\t' << elt->getName() << "\n";
+  }
 
-  for (const auto& p : m_materialMap)
-    {
-      o << "Material: " << p.first <<  " Density " << p.second->getDensity() * (Gaudi::Units::cm3 / GeoModelKernelUnits::gram)  << std::endl;
-      for (size_t i = 0; i< p.second->getNumElements();i++) 
-	{
-	  o <<" ***** ***** "<< int (p.second->getFraction(i)*100) << "% \t"  << p.second->getElement(i)->getName() << std::endl;
-	}
-    }
+  for (const auto& p : m_materialMap){
+    o << "Material: " << p.first <<  " Density " << p.second->getDensity() * (Gaudi::Units::cm3 / GeoModelKernelUnits::gram)  << "\n";
+    for (size_t i = 0; i< p.second->getNumElements();i++) {
+	    o <<" ***** ***** "<< int (p.second->getFraction(i)*100) << "% \t"  << p.second->getElement(i)->getName() << std::endl;
+	  }
+  }
   	  	
   return o;
 }

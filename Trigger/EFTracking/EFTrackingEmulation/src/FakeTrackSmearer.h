@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 // Stolen from A.Cerri
 
@@ -29,12 +29,12 @@ class FakeTrackSmearer
 {
  public:
   FakeTrackSmearer(const std::string & InstanceName, long long randomseed=0, bool verbose=false)
+    : m_baseName (InstanceName),
+      m_verbose (verbose),
+      m_myRandom (new TRandom3(randomseed))
     {    
-      m_baseName=InstanceName;
       Prepare();
-      m_myRandom=new TRandom3(randomseed);
       Tracks.clear(); 
-      m_verbose=verbose;   
       
       // Set these in order to define the scenario:
       //SetSigmaScaleFactor(1.0);

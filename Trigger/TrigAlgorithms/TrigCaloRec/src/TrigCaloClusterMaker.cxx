@@ -113,6 +113,7 @@ StatusCode TrigCaloClusterMaker::execute(const EventContext& ctx) const
   time_tot.start();
 
   ATH_MSG_DEBUG("in TrigCaloClusterMaker::execute()" );
+  bool shouldMon = ((ctx.eventID().event_number() % 20)==0);
 
   // We now take care of the Cluster Making... 
   auto  clusterContainer =   SG::makeHandle (m_outputClustersKey, ctx); 
@@ -132,6 +133,9 @@ StatusCode TrigCaloClusterMaker::execute(const EventContext& ctx) const
   std::vector<double>       N_BAD_CELLS;
   std::vector<double>       ENG_FRAC_MAX;
   std::vector<unsigned int> sizeVec; 
+  clus_phi.reserve(300); clus_eta.reserve(300);
+  N_BAD_CELLS.reserve(300); ENG_FRAC_MAX.reserve(300);
+  sizeVec.reserve(300);
   auto mon_clusPhi = Monitored::Collection("Phi", clus_phi); // phi and eta are virtual methods of CaloCluster
   auto mon_clusEta = Monitored::Collection("Eta", clus_eta);
   auto mon_badCells = Monitored::Collection("N_BAD_CELLS",N_BAD_CELLS );
@@ -139,14 +143,6 @@ StatusCode TrigCaloClusterMaker::execute(const EventContext& ctx) const
   auto mon_size = Monitored::Collection("size",sizeVec );
   auto monmu = Monitored::Scalar("mu",-999.0);
   auto mon_container_size = Monitored::Scalar("container_size", 0.);
-  auto moncount_1thrsigma = Monitored::Scalar("count_1thrsigma",-999.0);
-  auto moncount_2thrsigma = Monitored::Scalar("count_2thrsigma",-999.0);
-  auto mon_container_size_by_mu  = Monitored::Scalar("container_size_by_mu", 0.);
-  auto moncount_1thrsigma_by_mu2 = Monitored::Scalar("count_1thrsigma_by_mu2",-999.0);
-  auto moncount_2thrsigma_by_mu2 = Monitored::Scalar("count_2thrsigma_by_mu2",-999.0);
-  auto monitorIt = Monitored::Group( m_monTool, time_tot, time_clusMaker,  time_clusCorr, mon_container_size, mon_clusEt,
-					    mon_clusPhi, mon_clusEta, mon_clusSignalState, mon_clusSize, 
-					    mon_badCells, mon_engFrac, mon_size, monmu, moncount_1thrsigma, moncount_2thrsigma, mon_container_size_by_mu, moncount_1thrsigma_by_mu2, moncount_2thrsigma_by_mu2);
 
 
   // Looping over cluster maker tools...
@@ -160,22 +156,24 @@ StatusCode TrigCaloClusterMaker::execute(const EventContext& ctx) const
   SG::ReadDecorHandle<xAOD::EventInfo,float> eventInfoDecor(m_avgMuKey,ctx);
   if(eventInfoDecor.isPresent()) {
        mu = eventInfoDecor(0);
-       ATH_MSG_DEBUG("Average mu " << mu);
   }
   unsigned int count_1thrsigma(0), count_2thrsigma(0);
-  if (m_monCells) {
+  if (m_monCells && shouldMon) {
      SG::ReadCondHandle<CaloNoise> noiseHdl{m_noiseCDOKey, ctx};
      const CaloNoise *noisep = *noiseHdl;
      for (const auto cell : *cells ) {
+        float energy = cell->energy();
+        if ( energy <= 0.0 ) continue;
         const CaloDetDescrElement* cdde = cell->caloDDE();
-	if (cdde->is_tile() ) continue;
-	float thr=noisep->getNoise(cdde->identifyHash(), cell->gain());
-	if ( cell->energy() > m_1thr*thr ){
-	   count_1thrsigma++;
-	   if ( cell->energy() > m_2thr*thr )count_2thrsigma++;
-	} // if 1th
+        if (cdde->is_tile() ) continue;
+        float thr=noisep->getNoise(cdde->identifyHash(), cell->gain());
+        if ( energy <= thr ) continue;
+        if ( energy > m_1thr*thr ){
+           count_1thrsigma++;
+           if ( energy > m_2thr*thr )count_2thrsigma++;
+        } // if 1th
      } // end of for over cells
-   } // end of if m_monCells
+  } // end of if m_monCells
   
    
 
@@ -191,18 +189,22 @@ StatusCode TrigCaloClusterMaker::execute(const EventContext& ctx) const
   //save raw state (uncalibrated)
   for (xAOD::CaloCluster* cl : *pCaloClusterContainer)
     {
+#ifndef NDEBUG
       ATH_MSG_VERBOSE("found cluster with state "
 		      << cl->signalState() <<  ", calE: " << cl->calE() << ", calEta: " << cl->calEta() << ", calPhi: " << cl->calPhi() << " calM: " <<cl->calM());
       ATH_MSG_VERBOSE(" Cluster Et  = " << cl->et() );
       ATH_MSG_VERBOSE(" Cluster eta = " << cl->eta() );
       ATH_MSG_VERBOSE(" Cluster phi = " << cl->phi() );
+#endif
       cl->setRawE(cl->calE());
       cl->setRawEta(cl->calEta());
       cl->setRawPhi(cl->calPhi());
       cl->setRawM(cl->calM());
+#ifndef NDEBUG
       ATH_MSG_VERBOSE(" before correction=>Cluster Et  = " << cl->et() );
       ATH_MSG_VERBOSE(" before correction=>Cluster eta = " << cl->eta() );
       ATH_MSG_VERBOSE(" before correction=>Cluster phi = " << cl->phi() );
+#endif
     }
   
   
@@ -210,7 +212,6 @@ StatusCode TrigCaloClusterMaker::execute(const EventContext& ctx) const
   // Looping over cluster correction tools... 
   
   time_clusCorr.start();
-  ATH_MSG_VERBOSE(" Running cluster correction tools");
     
   for (const ToolHandle<CaloClusterProcessor>& clcorr : m_clusterCorrections) {
 
@@ -219,7 +220,6 @@ StatusCode TrigCaloClusterMaker::execute(const EventContext& ctx) const
           (std::abs(cl->eta0()) < 1.45  && clcorr->name().find("37") != std::string::npos) ||
           (std::abs(cl->eta0()) >= 1.45 && clcorr->name().find("55") != std::string::npos) ) {
         ATH_CHECK(clcorr->execute(ctx, cl) );
-        ATH_MSG_VERBOSE("Executed correction tool " << clcorr->name());
       }
     }
   }
@@ -257,13 +257,27 @@ StatusCode TrigCaloClusterMaker::execute(const EventContext& ctx) const
     mon_container_size = pCaloClusterContainer->size(); // fill monitored variable
   }
   monmu=mu;
-  moncount_1thrsigma = count_1thrsigma;
-  moncount_2thrsigma = count_2thrsigma;
-  if ( mu > 5 ){
-    mon_container_size_by_mu  = pCaloClusterContainer->size()/mu; // fill monitored variable
-    float onemu2 = 1.0/(mu*mu);
-    moncount_1thrsigma_by_mu2 = count_1thrsigma*onemu2;
-    moncount_2thrsigma_by_mu2 = count_2thrsigma*onemu2;
+  if ( shouldMon ){
+    auto moncount_1thrsigma = Monitored::Scalar("count_1thrsigma",-999.0);
+    auto moncount_2thrsigma = Monitored::Scalar("count_2thrsigma",-999.0);
+    auto mon_container_size_by_mu  = Monitored::Scalar("container_size_by_mu", 0.);
+    auto moncount_1thrsigma_by_mu2 = Monitored::Scalar("count_1thrsigma_by_mu2",-999.0);
+    auto moncount_2thrsigma_by_mu2 = Monitored::Scalar("count_2thrsigma_by_mu2",-999.0);
+    moncount_1thrsigma = count_1thrsigma;
+    moncount_2thrsigma = count_2thrsigma;
+    if ( mu > 5 ){
+      mon_container_size_by_mu  = pCaloClusterContainer->size()/mu; // fill monitored variable
+      float onemu2 = 1.0/(mu*mu);
+      moncount_1thrsigma_by_mu2 = count_1thrsigma*onemu2;
+      moncount_2thrsigma_by_mu2 = count_2thrsigma*onemu2;
+    }
+    auto monitorIt = Monitored::Group( m_monTool, time_tot, time_clusMaker,  time_clusCorr, mon_container_size, mon_clusEt,
+					    mon_clusPhi, mon_clusEta, mon_clusSignalState, mon_clusSize, 
+					    mon_badCells, mon_engFrac, mon_size, monmu, moncount_1thrsigma, moncount_2thrsigma, mon_container_size_by_mu, moncount_1thrsigma_by_mu2, moncount_2thrsigma_by_mu2);
+  }else{
+    auto monitorIt = Monitored::Group( m_monTool, time_tot, time_clusMaker,  time_clusCorr, mon_container_size, mon_clusEt,
+					    mon_clusPhi, mon_clusEta, mon_clusSignalState, mon_clusSize, 
+					    mon_badCells, mon_engFrac, mon_size, monmu );
   }
 
   // Stop timer

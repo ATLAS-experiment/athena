@@ -13,7 +13,6 @@ from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 # Generate configuration run file
 run = ExecStep.ExecStep()
 run.type = 'athena'
-run.args = '--CA'
 run.threads = 1
 run.input = 'ttbar_pu200_Run4'
 run.job_options = 'TriggerJobOpts/runHLT.py'

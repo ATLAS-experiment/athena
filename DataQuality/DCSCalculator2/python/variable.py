@@ -26,6 +26,10 @@ def CodeIOV(channel, Code):
 def DefectIOV(channel, present, comment):
     "Stores a defect IOV"
 
+@define_iov_type
+def DefectIOVFull(channel, present, comment, recoverable=False, user='sys:defectcalculator'):
+    "Stores a defect IOV with all fields"
+
 class DCSC_Variable(object):
     """
     Class which encapsulates logic behind an input variable.

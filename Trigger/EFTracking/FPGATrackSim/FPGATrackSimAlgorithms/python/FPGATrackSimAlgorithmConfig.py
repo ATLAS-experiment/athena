@@ -260,7 +260,27 @@ def FPGATrackSimLogicalHitsProcessAlgMonitoringCfg(flags):
     monTool.defineHistogram('best_chi2_1st', path='EXPERT', type='TH1F', title='chi2_1st_all', xbins=nbin, xmin=low, xmax=high)
     monTool.defineHistogram('ntrack_1st', path='EXPERT', type='TH1F', title='ntrack_1st', xbins=nbin, xmin=low, xmax=high)
     monTool.defineHistogram('ntrack_1st_afterOLR', path='EXPERT', type='TH1F', title='ntrack_1st_afterOLR', xbins=nbin, xmin=low, xmax=high)
+    monTool.defineHistogram('eff_road,pT', path='EXPERT', type='TEfficiency', title='eff_road_pt', xbins=20, xmin=0, xmax=100)
+    monTool.defineHistogram('eff_track,pT', path='EXPERT', type='TEfficiency', title='eff_track_pt', xbins=20, xmin=0, xmax=100)
+    monTool.defineHistogram('eff_track_chi2,pT', path='EXPERT', type='TEfficiency', title='eff_track_chi2_pt', xbins=20, xmin=0, xmax=100)
+    monTool.defineHistogram('eff_road,pT_zoom', path='EXPERT', type='TEfficiency', title='eff_road_pt_zoom', xbins=10, xmin=0, xmax=10)
+    monTool.defineHistogram('eff_track,pT_zoom', path='EXPERT', type='TEfficiency', title='eff_track_pt_zoom', xbins=10, xmin=0, xmax=10)
+    monTool.defineHistogram('eff_track_chi2,pT_zoom', path='EXPERT', type='TEfficiency', title='eff_track_chi2_pt_zoom', xbins=10, xmin=0, xmax=10) 
+    monTool.defineHistogram('eff_road,eta', path='EXPERT', type='TEfficiency', title='eff_road_eta', xbins = 20, xmin=0.1, xmax=0.3)
+    monTool.defineHistogram('eff_track,eta', path='EXPERT', type='TEfficiency', title='eff_track_eta', xbins = 20, xmin=0.1, xmax=0.3)
+    monTool.defineHistogram('eff_track_chi2,eta', path='EXPERT', type='TEfficiency', title='eff_track_chi2_eta', xbins = 20, xmin=0.1, xmax=0.3)
+    monTool.defineHistogram('eff_road,phi', path='EXPERT', type='TEfficiency', title='eff_road_phi', xbins = 20, xmin=flags.Trigger.FPGATrackSim.ActiveConfig.phiMin, xmax=flags.Trigger.FPGATrackSim.ActiveConfig.phiMax)
+    monTool.defineHistogram('eff_track,phi', path='EXPERT', type='TEfficiency', title='eff_track_phi', xbins = 20, xmin=flags.Trigger.FPGATrackSim.ActiveConfig.phiMin, xmax=flags.Trigger.FPGATrackSim.ActiveConfig.phiMax)
+    monTool.defineHistogram('eff_track_chi2,phi', path='EXPERT', type='TEfficiency', title='eff_track_chi2_phi', xbins = 20, xmin=flags.Trigger.FPGATrackSim.ActiveConfig.phiMin, xmax=flags.Trigger.FPGATrackSim.ActiveConfig.phiMax)
+    monTool.defineHistogram('eff_road,d0', path='EXPERT', type='TEfficiency', title='eff_road_d0', xbins = 20, xmin = -2.0, xmax = 2.0)
+    monTool.defineHistogram('eff_track,d0', path='EXPERT', type='TEfficiency', title='eff_track_d0', xbins = 20, xmin = -2.0, xmax = 2.0)
+    monTool.defineHistogram('eff_track_chi2,d0', path='EXPERT', type='TEfficiency', title='eff_track_chi2_d0', xbins = 20, xmin = -2.0, xmax = 2.0)
+    monTool.defineHistogram('eff_road,z0', path='EXPERT', type='TEfficiency', title='eff_road_z0', xbins = 20, xmin = -150, xmax = 150.0)
+    monTool.defineHistogram('eff_track,z0', path='EXPERT', type='TEfficiency', title='eff_track_z0', xbins = 20, xmin = -150.0, xmax = 150.0)
+    monTool.defineHistogram('eff_track_chi2,z0', path='EXPERT', type='TEfficiency', title='eff_track_chi2_z0', xbins = 20, xmin = -150.0, xmax = 150.0)
 
+
+    
     result.setPrivateTools(monTool)
 
     return result

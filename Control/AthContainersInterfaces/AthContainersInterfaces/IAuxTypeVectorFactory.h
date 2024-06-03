@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainersInterfaces/IAuxTypeVectorFactory.h
@@ -113,7 +113,7 @@ public:
    * @param auxid The aux data item being operated on.
    * @param dst Container for the destination vector.
    *            Declared as a rvalue reference to allow passing a temporary
-   *            here (such as from AuvVectorInterface).
+   *            here (such as from AuxVectorInterface).
    * @param dst_index Index of the first destination element in the vector.
    * @param src Container for the source vector.
    * @param src_index Index of the first source element in the vector.

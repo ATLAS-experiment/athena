@@ -538,16 +538,21 @@ namespace ST {
     std::string m_fatJetUncConfig;
     std::string m_fatJetUncVars;
 
+    TEnv m_WconfigReader;
+    TEnv m_ZconfigReader;
+    TEnv m_TopconfigReader;
+    std::string m_WDecorName;
+    std::string m_ZDecorName;
+    std::string m_TopDecorName;
     std::string m_WtagConfig;
     std::string m_ZtagConfig;
-    std::string m_WZTaggerCalibArea;
     std::string m_ToptagConfig;
+    std::string m_WZTaggerCalibArea;
+    std::string m_TopTaggerCalibArea;
     std::string m_WTagUncConfig;
     std::string m_ZTagUncConfig;
     std::string m_TopTagUncConfig;
     std::string m_JetTruthLabelName;
-    std::string m_TopTaggerCalibArea;
-
 
     bool m_tool_init;
     bool m_subtool_init;
@@ -678,6 +683,8 @@ namespace ST {
     double m_elebaselinez0;
     std::string m_eleEffMapFilePath;
     std::string m_eleEffMapFilePathRun2;
+    bool   m_eleAllowRun3TrigSFFallback;
+
 
     double m_muBaselinePt;
     double m_muBaselineEta;
@@ -716,8 +723,8 @@ namespace ST {
     double m_jetJvt;
     std::string m_JvtWP;
     double m_JvtPtMax;
-    std::string m_JvtConfig;
-    std::string m_JvtConfig_SFFile;
+    std::string m_JvtConfigRun2;
+    std::string m_JvtConfigRun3;
 
     double m_trkJetPt;
     double m_trkJetEta;
@@ -726,10 +733,8 @@ namespace ST {
     std::string m_fJvtWP;
     double m_fJvtPtMax;
     double m_fJvtEtaMin;
-    std::string m_fJvtConfig;
-    std::string m_fJvtConfig_SFFile;
-    bool m_fJvtRecalculate;
-    bool m_fJvt_useTightOP;
+    std::string m_fJvtConfigRun2;
+    std::string m_fJvtConfigRun3;
 
     bool m_JMScalib;
 

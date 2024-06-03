@@ -26,17 +26,10 @@ class ElectronCalibrationConfig (ConfigBlock) :
             info="whether to perform LAr crack veto based on the cluster eta, "
             "i.e. remove electrons within 1.37<|eta|<1.52. The default "
             "is False.")
-        self.addOption ('ptSelectionOutput', False, type=bool,
-            info="whether or not to apply a minimum pT cut to "
-            "calibrated electrons. The default is False.")
         self.addOption ('isolationCorrection', False, type=bool,
             info="whether or not to perform isolation corrections (leakage "
             "corrections), i.e. set up an instance of "
             "CP::EgammaIsolationCorrectionAlg.")
-        self.addOption ('trackSelection', True, type=bool,
-            info="whether or not to set up an instance of "
-            "CP::AsgLeptonTrackSelectionAlg, with the recommended d_0 and "
-            "z_0 sin(theta) cuts. The default is True.")
         self.addOption ('recalibratePhyslite', True, type=bool,
             info="whether to run the CP::EgammaCalibrationAndSmearingAlg on "
             "PHYSLITE derivations. The default is True.")
@@ -47,6 +40,35 @@ class ElectronCalibrationConfig (ConfigBlock) :
             info="whether to force the tool to use the configuration meant for "
             "full simulation samples. Only for testing purposes. The default "
             "is False.")
+
+        self.addOption ('splitCalibrationAndSmearing', False, type=bool,
+            info="EXPERIMENTAL: This splits the EgammaCalibrationAndSmearingTool "
+            " into two steps. The first step applies a baseline calibration that "
+            "is not affected by systematics. The second step then applies the "
+            "systematics dependent corrections.  The net effect is that the "
+            "slower first step only has to be run once, while the second is run "
+            "once per systematic. ATLASG-2358")
+
+
+    def makeCalibrationAndSmearingAlg (self, config, name) :
+        """Create the calibration and smearing algorithm
+        
+        Factoring this out into its own function, as we want to
+        instantiate it in multiple places"""
+        # Set up the calibration and smearing algorithm:
+        alg = config.createAlgorithm( 'CP::EgammaCalibrationAndSmearingAlg', name + self.postfix )
+        config.addPrivateTool( 'calibrationAndSmearingTool',
+                            'CP::EgammaCalibrationAndSmearingTool' )
+        alg.calibrationAndSmearingTool.ESModel = 'es2022_R22_PRE'
+        alg.calibrationAndSmearingTool.decorrelationModel = '1NP_v1'
+        alg.calibrationAndSmearingTool.useFastSim = (
+            0 if self.forceFullSimConfig
+            else int( config.dataType() is DataType.FastSim ))
+        alg.egammas = config.readName (self.containerName)
+        alg.egammasOut = config.copyName (self.containerName)
+        alg.preselection = config.getPreselection (self.containerName, '')
+        return alg
+
 
     def makeAlgs (self, config) :
 
@@ -79,17 +101,6 @@ class ElectronCalibrationConfig (ConfigBlock) :
         alg.preselection = config.getPreselection (self.containerName, '')
         config.addSelection (self.containerName, '', alg.selectionDecoration)
 
-        # Set up the track selection algorithm:
-        if self.trackSelection :
-            alg = config.createAlgorithm( 'CP::AsgLeptonTrackSelectionAlg',
-                                        'ElectronTrackSelectionAlg' + self.postfix )
-            alg.selectionDecoration = 'trackSelection' + self.postfix + ',as_bits'
-            alg.maxD0Significance = 5
-            alg.maxDeltaZ0SinTheta = 0.5
-            alg.particles = config.readName (self.containerName)
-            alg.preselection = config.getPreselection (self.containerName, '')
-            config.addSelection (self.containerName, '', alg.selectionDecoration)
-
         # Select electrons only with good object quality.
         alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronObjectQualityAlg' + self.postfix )
         alg.selectionDecoration = 'goodOQ' + self.postfix + ',as_bits'
@@ -99,21 +110,40 @@ class ElectronCalibrationConfig (ConfigBlock) :
         alg.preselection = config.getPreselection (self.containerName, '')
         config.addSelection (self.containerName, '', alg.selectionDecoration)
 
-        # Set up the calibration and smearing algorithm:
-        alg = config.createAlgorithm( 'CP::EgammaCalibrationAndSmearingAlg',
-                                      'ElectronCalibrationAndSmearingAlg' + self.postfix )
-        config.addPrivateTool( 'calibrationAndSmearingTool',
-                               'CP::EgammaCalibrationAndSmearingTool' )
-        alg.calibrationAndSmearingTool.ESModel = 'es2022_R22_PRE'
-        alg.calibrationAndSmearingTool.decorrelationModel = '1NP_v1'
-        alg.calibrationAndSmearingTool.useFastSim = (
-            0 if self.forceFullSimConfig
-            else int( config.dataType() is DataType.FastSim ))
-        alg.egammas = config.readName (self.containerName)
-        alg.egammasOut = config.copyName (self.containerName)
-        alg.preselection = config.getPreselection (self.containerName, '')
-        if config.isPhyslite() and not self.recalibratePhyslite :
-            alg.skipNominal = True
+        if not self.splitCalibrationAndSmearing :
+            # Set up the calibration and smearing algorithm:
+            alg = self.makeCalibrationAndSmearingAlg (config, 'ElectronCalibrationAndSmearingAlg')
+            if config.isPhyslite() and not self.recalibratePhyslite :
+                alg.skipNominal = True
+        else:
+            # This splits the EgammaCalibrationAndSmearingTool into two
+            # steps. The first step applies a baseline calibration that
+            # is not affected by systematics. The second step then
+            # applies the systematics dependent corrections.  The net
+            # effect is that the slower first step only has to be run
+            # once, while the second is run once per systematic.
+            #
+            # For now (22 May 24) this has to happen in the same job, as
+            # the output of the first step is not part of PHYSLITE, and
+            # even for the nominal the output of the first and second
+            # step are different.  In the future the plan is to put both
+            # the output of the first and second step into PHYSLITE,
+            # allowing to skip the first step when running on PHYSLITE.
+            #
+            # WARNING: All of this is experimental, see: ATLASG-2358
+
+            # Set up the calibration algorithm:
+            alg = self.makeCalibrationAndSmearingAlg (config, 'ElectronBaseCalibrationAlg')
+            # turn off systematics for the calibration step
+            alg.noToolSystematics = True
+            # turn off smearing for the calibration step
+            alg.calibrationAndSmearingTool.doSmearing = False
+
+            # Set up the smearing algorithm:
+            alg = self.makeCalibrationAndSmearingAlg (config, 'ElectronCalibrationSystematicsAlg')
+            # turn off scale corrections for the smearing step
+            alg.calibrationAndSmearingTool.doScaleCorrection = False
+            alg.calibrationAndSmearingTool.useMVACalibration = False
 
         if self.minPt > 0 :
             # Set up the the pt selection
@@ -124,7 +154,7 @@ class ElectronCalibrationConfig (ConfigBlock) :
             alg.particles = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, '')
             config.addSelection (self.containerName, '', alg.selectionDecoration,
-                                preselection=self.ptSelectionOutput)
+                                preselection=True)
 
         # Set up the isolation correction algorithm:
         if self.isolationCorrection:
@@ -140,9 +170,14 @@ class ElectronCalibrationConfig (ConfigBlock) :
             alg.egammasOut = config.copyName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, '')
 
+        # Additional decorations
+        alg = config.createAlgorithm( 'CP::AsgEnergyDecoratorAlg', 'EnergyDecorator' + self.containerName + self.postfix )
+        alg.particles = config.readName(self.containerName)
+
         config.addOutputVar (self.containerName, 'pt', 'pt')
         config.addOutputVar (self.containerName, 'eta', 'eta', noSys=True)
         config.addOutputVar (self.containerName, 'phi', 'phi', noSys=True)
+        config.addOutputVar (self.containerName, 'e_%SYS%', 'e')
         config.addOutputVar (self.containerName, 'charge', 'charge', noSys=True)
 
 
@@ -164,6 +199,16 @@ class ElectronWorkingPointConfig (ConfigBlock) :
         self.addOption ('postfix', None, type=str,
             info="a postfix to apply to decorations and algorithm names. "
             "Typically not needed here as selectionName is used internally.")
+        self.addOption ('trackSelection', True, type=bool,
+            info="whether or not to set up an instance of "
+            "CP::AsgLeptonTrackSelectionAlg, with the recommended d_0 and "
+            "z_0 sin(theta) cuts. The default is True.")
+        self.addOption ('maxD0Significance', 5, type=float,
+            info="maximum d0 significance used for the trackSelection"
+            "The default is 5")
+        self.addOption ('maxDeltaZ0SinTheta', 0.5, type=float,
+            info="maximum z0sinTheta in mm used for the trackSelection"
+            "The default is 0.5 mm")
         self.addOption ('likelihoodWP', None, type=str,
             info="the ID WP (string) to use. Supported ID WPs: TightLH, "
             "MediumLH, LooseBLayerLH. ")
@@ -210,6 +255,17 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             postfix = self.selectionName
         if postfix != '' and postfix[0] != '_' :
             postfix = '_' + postfix
+
+        # Set up the track selection algorithm:
+        if self.trackSelection :
+            alg = config.createAlgorithm( 'CP::AsgLeptonTrackSelectionAlg',
+                                        'ElectronTrackSelectionAlg' + postfix )
+            alg.selectionDecoration = 'trackSelection' + postfix + ',as_bits'
+            alg.maxD0Significance = self.maxD0Significance
+            alg.maxDeltaZ0SinTheta = self.maxDeltaZ0SinTheta
+            alg.particles = config.readName (self.containerName)
+            alg.preselection = config.getPreselection (self.containerName, '')
+            config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration)
 
         if 'LH' in self.likelihoodWP:
             # Set up the likelihood ID selection algorithm
@@ -388,6 +444,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
                     PATCore.ParticleDataType.Full
             if config.geometry() == LHCPeriod.Run2:
                 alg.efficiencyCorrectionTool.MapFilePath = "ElectronEfficiencyCorrection/2015_2018/rel21.2/Precision_Summer2020_v1/map4.txt"
+                alg.efficiencyCorrectionTool.CorrelationModel = "SIMPLIFIED" # remove when Run 2 R25 recommendations are available!
             alg.outOfValidity = 2 #silent
             alg.outOfValidityDeco = 'el_isol_bad_eff' + selectionPostfix
             alg.electrons = config.readName (self.containerName)
@@ -404,7 +461,6 @@ class ElectronWorkingPointConfig (ConfigBlock) :
 
 def makeElectronCalibrationConfig( seq, containerName, postfix = None,
                                    crackVeto = None,
-                                   ptSelectionOutput = None,
                                    isolationCorrection = None,
                                    forceFullSimConfig = None):
     """Create electron calibration configuration blocks
@@ -419,14 +475,11 @@ def makeElectronCalibrationConfig( seq, containerName, postfix = None,
                  sequence with multiple working points to ensure all
                  names are unique.
       isolationCorrection -- Whether or not to perform isolation correction
-      ptSelectionOutput -- Whether or not to apply pt selection when creating
-                           output containers.
       forceFullSimConfig -- imposes full-sim config for FastSim for testing
     """
 
     config = ElectronCalibrationConfig (containerName)
     config.setOptionValue ('crackVeto', crackVeto)
-    config.setOptionValue ('ptSelectionOutput', ptSelectionOutput)
     config.setOptionValue ('isolationCorrection', isolationCorrection)
     config.setOptionValue ('forceFullSimConfig', forceFullSimConfig)
     seq.append (config)

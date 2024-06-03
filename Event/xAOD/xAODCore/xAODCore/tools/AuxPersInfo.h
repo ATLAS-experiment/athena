@@ -71,7 +71,7 @@ namespace xAOD {
                                       "non-vector" );
          }
       }
-      virtual void shift( size_t /*pos*/, ptrdiff_t /*offs*/ ) override {
+      virtual bool shift( size_t /*pos*/, ptrdiff_t /*offs*/ ) override {
          throw std::runtime_error( "Calling shift on a non-vector" );
       }
 

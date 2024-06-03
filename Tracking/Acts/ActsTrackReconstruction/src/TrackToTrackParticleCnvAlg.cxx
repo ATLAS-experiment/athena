@@ -11,13 +11,13 @@
 #include "Acts/Propagator/detail/JacobianEngine.hpp"
 #include "ActsInterop/Logger.h"
 
+#include "AthContainers/Decorator.h"
 #include "xAODTracking/TrackParticleAuxContainer.h"
 #include "MagFieldElements/AtlasFieldCache.h"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "GaudiKernel/PhysicalConstants.h"
 
-#include "DataHandleUtils.h"
 #include "CurvilinearCovarianceHelper.h"
 #include "HitSummaryDataUtils.h"
 #include "ExpectedHitUtils.h"
@@ -182,11 +182,6 @@ namespace ActsTrk
      return StatusCode::SUCCESS;
   }
 
-  StatusCode TrackToTrackParticleCnvAlg::finalize()
-  {
-     return StatusCode::SUCCESS;
-  }
-
   StatusCode TrackToTrackParticleCnvAlg::execute(const EventContext &ctx) const
   {
     SG::WriteHandle<xAOD::TrackParticleContainer> wh_track_particles( m_trackParticlesOutKey, ctx);
@@ -198,24 +193,34 @@ namespace ActsTrk
 
     xAOD::TrackParticleContainer *track_particles = wh_track_particles.ptr();
 
-    const InDet::BeamSpotData *beamspot_data=nullptr;
-    MAKE_CHECKED_OPTIONAL_HANDLE(ctx, m_beamSpotKey, "beamspot data" , beamspot_data);
-    const ActsTrk::TrackContainer *tracksContainer=nullptr;
-    MAKE_CHECKED_HANDLE(ctx, m_tracksContainerKey, "tracks", tracksContainer);
+    SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle = SG::makeHandle( m_beamSpotKey, ctx );
+    ATH_CHECK(beamSpotHandle.isValid());
+    const InDet::BeamSpotData *beamspot_data = beamSpotHandle.cptr();
 
-    const AtlasFieldCacheCondObj *field_cond_data=nullptr;
-    MAKE_CHECKED_HANDLE(ctx, m_fieldCacheCondObjInputKey, "Atlas field", field_cond_data);
+    std::size_t nTracks = 0ul;
+    std::vector<const ActsTrk::TrackContainer *> trackContainers;
+    for (const SG::ReadHandleKey<ActsTrk::TrackContainer>& handleKey : m_tracksContainerKey) {
+      SG::ReadHandle<ActsTrk::TrackContainer> handle = SG::makeHandle( handleKey, ctx );
+      ATH_CHECK(handle.isValid());
+      trackContainers.push_back( handle.cptr() );
+      nTracks += trackContainers.back()->size();
+    }
+    
+    SG::ReadCondHandle<AtlasFieldCacheCondObj> fieldHandle = SG::makeHandle( m_fieldCacheCondObjInputKey, ctx );
+    ATH_CHECK(fieldHandle.isValid());
+    const AtlasFieldCacheCondObj *field_cond_data = fieldHandle.cptr();
     MagField::AtlasFieldCache fieldCache;
     field_cond_data->getInitializedCache(fieldCache);
 
     const ActsGeometryContext &gctx = m_extrapolationTool->trackingGeometryTool()->getNominalGeometryContext();
-    std::shared_ptr<Acts::PerigeeSurface> perigee_surface = makePerigeeSurface(beamspot_data);
-    track_particles->reserve( tracksContainer->size());
+    std::shared_ptr<Acts::PerigeeSurface> perigee_surface = makePerigeeSurface(beamspot_data);    
+    track_particles->reserve( nTracks );
 
     std::array<const InDetDD::SiDetectorElementCollection *,to_underlying(xAOD::UncalibMeasType::nTypes)> siDetEleColl {};
     for (unsigned int idx=0; idx <m_siDetEleCollToMeasurementType.size(); ++idx ) {
-       MAKE_CHECKED_HANDLE(ctx, m_siDetEleCollKey[idx], "detector element collection",
-                           siDetEleColl[m_siDetEleCollToMeasurementType[idx] ] );
+      SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> detHandle = SG::makeHandle( m_siDetEleCollKey[idx], ctx );
+      ATH_CHECK(detHandle.isValid());
+      siDetEleColl[m_siDetEleCollToMeasurementType[idx] ] = detHandle.cptr();
     }
 
    static const std::array<unsigned short,to_underlying(xAOD::UncalibMeasType::nTypes)>
@@ -232,70 +237,73 @@ namespace ActsTrk
     HitSummaryData hitInfo;
 
     unsigned int converted_track_states=0;
+
+    static const SG::AuxElement::Decorator<ElementLink<ActsTrk::TrackContainer> > trackLink("actsTrack");
     
     using namespace Acts::UnitLiterals;
-    for (const typename ActsTrk::TrackContainer::ConstTrackProxy &track : *tracksContainer) {
-       track_particles->push_back( new xAOD::TrackParticle );
-       xAOD::TrackParticle *track_particle=track_particles->back();
-
-       // convert defining parameters
-       // @TODO add support for other modes available in the legacy converter : wrt a vertex, origin, beamspot ?
-       Acts::BoundTrackParameters perigeeParam = parametersAtBeamLine(ctx, track, *perigee_surface);
-       track_particle->setDefiningParameters(perigeeParam.parameters()[Acts::eBoundLoc0],
-                                             perigeeParam.parameters()[Acts::eBoundLoc1],
-                                             perigeeParam.parameters()[Acts::eBoundPhi],
-                                             perigeeParam.parameters()[Acts::eBoundTheta],
-                                             perigeeParam.parameters()[Acts::eBoundQOverP] * 1_MeV);
-       if (perigeeParam.covariance().has_value()) {
+    for (const ActsTrk::TrackContainer *tracksContainer : trackContainers) {
+      for (const typename ActsTrk::TrackContainer::ConstTrackProxy &track : *tracksContainer) {
+	track_particles->push_back( new xAOD::TrackParticle );
+	xAOD::TrackParticle *track_particle=track_particles->back();
+	
+	// convert defining parameters
+	// @TODO add support for other modes available in the legacy converter : wrt a vertex, origin, beamspot ?
+	Acts::BoundTrackParameters perigeeParam = parametersAtBeamLine(ctx, track, *perigee_surface);
+	track_particle->setDefiningParameters(perigeeParam.parameters()[Acts::eBoundLoc0],
+					      perigeeParam.parameters()[Acts::eBoundLoc1],
+					      perigeeParam.parameters()[Acts::eBoundPhi],
+					      perigeeParam.parameters()[Acts::eBoundTheta],
+					      perigeeParam.parameters()[Acts::eBoundQOverP] * 1_MeV);
+	if (perigeeParam.covariance().has_value()) {
           // only use the 5x5 sub-matrix of the full covariance matrix
           lowerTriangleToVectorScaleLastRow(perigeeParam.covariance().value(),tmp_cov_vector,5, 1_MeV);
           track_particle->setDefiningParametersCovMatrixVec(tmp_cov_vector);
-       }
-       // optional beam tilt
-       if (beamspot_data) {
-         track_particle->setBeamlineTiltX(beamspot_data->beamTilt(0));
-         track_particle->setBeamlineTiltY(beamspot_data->beamTilt(1));
-       }
-
-       // fit info, quality
-       track_particle->setFitQuality(track.chi2(), track.nDoF());
-       track_particle->setPatternRecognitionInfo( (1ul << xAOD::SiSPSeededFinder) );
-       track_particle->setTrackFitter(xAOD::KalmanFitter);
-
-       const Acts::ParticleHypothesis &hypothesis = track.particleHypothesis();
-       track_particle->setParticleHypothesis(convertParticleHypothesis( hypothesis.absolutePdg() ));
-       constexpr float inv_1_MeV = 1/1_MeV;
-       // gather track state indices for parameter conversion
-       // @TODO add support for muons
-       
-       // xAOD::UncalibMeasType::underlying_type is expected to be the number of UncalibMeasTypes
-       std::array<std::array<uint8_t,to_underlying(HitCategory::N)>,
-                 to_underlying(xAOD::UncalibMeasType::nTypes)> specialHitCounts{};
-
-       SumOfValues chi2_stat;
-       gatherTrackSummaryData(*tracksContainer,
-                              track,
-                              siDetEleColl,
-                              measurementToSummaryType,
-                              chi2_stat,
-                              hitInfo,
-                              tmp_param_state_idx,
-                              specialHitCounts);
-       
-       // Muon
-       //    MdtDriftCircleType = 3
-       //    RpcStripType = 4,
-       //    TgcStripType = 5,
-       //    MMClusterType = 6,
-       //    sTgcStripType = 7,
-
-       // pixel summaries
-       std::array< std::tuple< uint8_t, uint8_t, uint8_t, bool >, 4> copy_summary {
+	}
+	// optional beam tilt
+	if (beamspot_data) {
+	  track_particle->setBeamlineTiltX(beamspot_data->beamTilt(0));
+	  track_particle->setBeamlineTiltY(beamspot_data->beamTilt(1));
+	}
+	
+	// fit info, quality
+	track_particle->setFitQuality(track.chi2(), track.nDoF());
+	track_particle->setPatternRecognitionInfo( (1ul << xAOD::SiSPSeededFinder) );
+	track_particle->setTrackFitter(xAOD::KalmanFitter);
+	
+	const Acts::ParticleHypothesis &hypothesis = track.particleHypothesis();
+	track_particle->setParticleHypothesis(convertParticleHypothesis( hypothesis.absolutePdg() ));
+	constexpr float inv_1_MeV = 1/1_MeV;
+	// gather track state indices for parameter conversion
+	// @TODO add support for muons
+	
+	// xAOD::UncalibMeasType::underlying_type is expected to be the number of UncalibMeasTypes
+	std::array<std::array<uint8_t,to_underlying(HitCategory::N)>,
+		   to_underlying(xAOD::UncalibMeasType::nTypes)> specialHitCounts{};
+	
+	SumOfValues chi2_stat;
+	gatherTrackSummaryData(*tracksContainer,
+			       track,
+			       siDetEleColl,
+			       measurementToSummaryType,
+			       chi2_stat,
+			       hitInfo,
+			       tmp_param_state_idx,
+			       specialHitCounts);
+	
+	// Muon
+	//    MdtDriftCircleType = 3
+	//    RpcStripType = 4,
+	//    TgcStripType = 5,
+	//    MMClusterType = 6,
+	//    sTgcStripType = 7,
+	
+	// pixel summaries
+	std::array< std::tuple< uint8_t, uint8_t, uint8_t, bool >, 4> copy_summary {
           std::make_tuple(static_cast<uint8_t>(HitSummaryData::pixelTotal),
                           static_cast<uint8_t>(xAOD::numberOfContribPixelLayers),
                           static_cast<uint8_t>(xAOD::numberOfPixelHits),
                           false),
-
+	  
           std::make_tuple(static_cast<uint8_t>(HitSummaryData::pixelBarrelFlat),
                           static_cast<uint8_t>(xAOD::numberOfContribPixelBarrelFlatLayers),
                           static_cast<uint8_t>(xAOD::numberOfPixelBarrelFlatHits),
@@ -310,118 +318,118 @@ namespace ActsTrk
                           static_cast<uint8_t>(xAOD::numberOfContribPixelEndcap),
                           static_cast<uint8_t>(xAOD::numberOfPixelEndcapHits),\
                           true) };
-
-       for (auto [src_region, dest_xaod_summary_layer, dest_xaod_summary_hits, add_outlier] : copy_summary ) {
+	
+	for (auto [src_region, dest_xaod_summary_layer, dest_xaod_summary_hits, add_outlier] : copy_summary ) {
           setSummaryValue(*track_particle,
                           hitInfo.contributingLayers( static_cast<HitSummaryData::DetectorRegion>(src_region)),
                           static_cast<xAOD::SummaryType>(dest_xaod_summary_layer));
           setSummaryValue(*track_particle,
-                            hitInfo.contributingHits(static_cast<HitSummaryData::DetectorRegion>(src_region))
+			  hitInfo.contributingHits(static_cast<HitSummaryData::DetectorRegion>(src_region))
                           + ( add_outlier
                               ? hitInfo.contributingOutlierHits(static_cast<HitSummaryData::DetectorRegion>(src_region))
                               : 0),
                           static_cast<xAOD::SummaryType>(dest_xaod_summary_hits));
-       }
-       setSummaryValue(*track_particle,
+	}
+	setSummaryValue(*track_particle,
                         hitInfo.sum<HitSummaryData::Hit>(HitSummaryData::pixelEndcap,0)
-                       +hitInfo.sum<HitSummaryData::Outlier>(HitSummaryData::pixelEndcap,0),
-                       xAOD::numberOfInnermostPixelLayerEndcapHits);
-       setSummaryValue(*track_particle,
-                       hitInfo.sum<HitSummaryData::Outlier>(HitSummaryData::pixelEndcap,0),
-                       xAOD::numberOfInnermostPixelLayerEndcapOutliers);
-       setSummaryValue(*track_particle,
+			+hitInfo.sum<HitSummaryData::Outlier>(HitSummaryData::pixelEndcap,0),
+			xAOD::numberOfInnermostPixelLayerEndcapHits);
+	setSummaryValue(*track_particle,
+			hitInfo.sum<HitSummaryData::Outlier>(HitSummaryData::pixelEndcap,0),
+			xAOD::numberOfInnermostPixelLayerEndcapOutliers);
+	setSummaryValue(*track_particle,
                         hitInfo.sum<HitSummaryData::Hit>(HitSummaryData::pixelEndcap,1)
-                       +hitInfo.sum<HitSummaryData::Hit>(HitSummaryData::pixelEndcap,2)
-                       +hitInfo.sum<HitSummaryData::Outlier>(HitSummaryData::pixelEndcap,1)
-                       +hitInfo.sum<HitSummaryData::Outlier>(HitSummaryData::pixelEndcap,2),
-                       xAOD::numberOfNextToInnermostPixelLayerEndcapHits);
-       setSummaryValue(*track_particle,
+			+hitInfo.sum<HitSummaryData::Hit>(HitSummaryData::pixelEndcap,2)
+			+hitInfo.sum<HitSummaryData::Outlier>(HitSummaryData::pixelEndcap,1)
+			+hitInfo.sum<HitSummaryData::Outlier>(HitSummaryData::pixelEndcap,2),
+			xAOD::numberOfNextToInnermostPixelLayerEndcapHits);
+	setSummaryValue(*track_particle,
                         hitInfo.sum<HitSummaryData::Outlier>(HitSummaryData::pixelEndcap,1)
-                       +hitInfo.sum<HitSummaryData::Outlier>(HitSummaryData::pixelEndcap,2),
-                       xAOD::numberOfNextToInnermostPixelLayerEndcapOutliers);
-       setSummaryValue(*track_particle,
-                       hitInfo.contributingOutlierHits(HitSummaryData::pixelTotal),
-                       //                       specialHitCounts[to_underlying(xAOD::UncalibMeasType::PixelClusterType)][HitCategory::Outlier],
-                       xAOD::numberOfPixelOutliers);
-       setSummaryValue(*track_particle,
-                       specialHitCounts[to_underlying(xAOD::UncalibMeasType::PixelClusterType)][HitCategory::Hole],
-                       xAOD::numberOfPixelHoles);
-       // do not expect pixel hits if there are not contributing pixel hits in the flat barrel and expectIfPixelContributes is true
-       std::array<unsigned int,4> expect_layer_pattern = ((   !m_expectIfPixelContributes.value()
-                                                           || hitInfo.contributingLayers(HitSummaryData::pixelTotal))
-                                                          ? expectedLayerPattern(ctx,
-                                                                                 *m_extrapolationTool,
-                                                                                 perigeeParam,
-                                                                                 *m_innerExtrapolationVolume)
-                                                          : std::array<unsigned int,4> {0u,0u, 0u,0u} );
-
-       // @TODO consider end-caps  for inner most pixel hits ?
-       setSummaryValue(*track_particle,
-                       static_cast<uint8_t>((expect_layer_pattern[0] & (1<<0)) != 0 ),
-                       xAOD::expectInnermostPixelLayerHit);
-       setSummaryValue(*track_particle,
-                       static_cast<uint8_t>((expect_layer_pattern[0] & (1<<1)) != 0 ),
-                       xAOD::expectNextToInnermostPixelLayerHit);
-       setSummaryValue(*track_particle,
-                       static_cast<unsigned int >(hitInfo.sum<HitSummaryData::Hit>(HitSummaryData::pixelBarrelFlat,0)),
-                       xAOD::numberOfInnermostPixelLayerHits);
-       setSummaryValue(*track_particle,
-                       static_cast<unsigned int >(hitInfo.sum<HitSummaryData::Outlier>(HitSummaryData::pixelBarrelFlat,0)),
-                       xAOD::numberOfInnermostPixelLayerOutliers);
-       setSummaryValue(*track_particle,
-                       static_cast<unsigned int >(hitInfo.sum<HitSummaryData::Hit>(HitSummaryData::pixelBarrelFlat,1)),
-                       xAOD::numberOfNextToInnermostPixelLayerHits);
-       setSummaryValue(*track_particle,
-                       static_cast<unsigned int >(hitInfo.sum<HitSummaryData::Outlier>(HitSummaryData::pixelBarrelFlat,1)),
-                       xAOD::numberOfNextToInnermostPixelLayerOutliers);
-
-       // Strip summaries
-       setSummaryValue(*track_particle,
-                       hitInfo.contributingHits( HitSummaryData::stripTotal ),
-                       xAOD::numberOfSCTHits);
-       setSummaryValue(*track_particle,
-                       hitInfo.contributingOutlierHits( HitSummaryData::stripTotal ),
-                       //                       specialHitCounts[to_underlying(xAOD::UncalibMeasType::StripClusterType)][HitCategory::Outlier],
-                       xAOD::numberOfSCTOutliers);
-       setSummaryValue(*track_particle,
-                       specialHitCounts[to_underlying(xAOD::UncalibMeasType::StripClusterType)][HitCategory::Hole],
-                       xAOD::numberOfSCTHoles);
-
-       double biased_chi2_variance = chi2_stat.biasedVariance();
-       setSummaryValue(*track_particle,
-                       static_cast<uint8_t> (biased_chi2_variance>0.
-                                             ? std::min(static_cast<unsigned int>(std::sqrt(biased_chi2_variance) * 100),255u)
-                                             : 0u),
-                       xAOD::standardDeviationOfChi2OS);
-
-       setSummaryValue(*track_particle,
+			+hitInfo.sum<HitSummaryData::Outlier>(HitSummaryData::pixelEndcap,2),
+			xAOD::numberOfNextToInnermostPixelLayerEndcapOutliers);
+	setSummaryValue(*track_particle,
+			hitInfo.contributingOutlierHits(HitSummaryData::pixelTotal),
+			//                       specialHitCounts[to_underlying(xAOD::UncalibMeasType::PixelClusterType)][HitCategory::Outlier],
+			xAOD::numberOfPixelOutliers);
+	setSummaryValue(*track_particle,
+			specialHitCounts[to_underlying(xAOD::UncalibMeasType::PixelClusterType)][HitCategory::Hole],
+			xAOD::numberOfPixelHoles);
+	// do not expect pixel hits if there are not contributing pixel hits in the flat barrel and expectIfPixelContributes is true
+	std::array<unsigned int,4> expect_layer_pattern = ((   !m_expectIfPixelContributes.value()
+							       || hitInfo.contributingLayers(HitSummaryData::pixelTotal))
+							   ? expectedLayerPattern(ctx,
+										  *m_extrapolationTool,
+										  perigeeParam,
+										  *m_innerExtrapolationVolume)
+							   : std::array<unsigned int,4> {0u,0u, 0u,0u} );
+	
+	// @TODO consider end-caps  for inner most pixel hits ?
+	setSummaryValue(*track_particle,
+			static_cast<uint8_t>((expect_layer_pattern[0] & (1<<0)) != 0 ),
+			xAOD::expectInnermostPixelLayerHit);
+	setSummaryValue(*track_particle,
+			static_cast<uint8_t>((expect_layer_pattern[0] & (1<<1)) != 0 ),
+			xAOD::expectNextToInnermostPixelLayerHit);
+	setSummaryValue(*track_particle,
+			static_cast<unsigned int >(hitInfo.sum<HitSummaryData::Hit>(HitSummaryData::pixelBarrelFlat,0)),
+			xAOD::numberOfInnermostPixelLayerHits);
+	setSummaryValue(*track_particle,
+			static_cast<unsigned int >(hitInfo.sum<HitSummaryData::Outlier>(HitSummaryData::pixelBarrelFlat,0)),
+			xAOD::numberOfInnermostPixelLayerOutliers);
+	setSummaryValue(*track_particle,
+			static_cast<unsigned int >(hitInfo.sum<HitSummaryData::Hit>(HitSummaryData::pixelBarrelFlat,1)),
+			xAOD::numberOfNextToInnermostPixelLayerHits);
+	setSummaryValue(*track_particle,
+			static_cast<unsigned int >(hitInfo.sum<HitSummaryData::Outlier>(HitSummaryData::pixelBarrelFlat,1)),
+			xAOD::numberOfNextToInnermostPixelLayerOutliers);
+	
+	// Strip summaries
+	setSummaryValue(*track_particle,
+			hitInfo.contributingHits( HitSummaryData::stripTotal ),
+			xAOD::numberOfSCTHits);
+	setSummaryValue(*track_particle,
+			hitInfo.contributingOutlierHits( HitSummaryData::stripTotal ),
+			//                       specialHitCounts[to_underlying(xAOD::UncalibMeasType::StripClusterType)][HitCategory::Outlier],
+			xAOD::numberOfSCTOutliers);
+	setSummaryValue(*track_particle,
+			specialHitCounts[to_underlying(xAOD::UncalibMeasType::StripClusterType)][HitCategory::Hole],
+			xAOD::numberOfSCTHoles);
+	
+	double biased_chi2_variance = chi2_stat.biasedVariance();
+	setSummaryValue(*track_particle,
+			static_cast<uint8_t> (biased_chi2_variance>0.
+					      ? std::min(static_cast<unsigned int>(std::sqrt(biased_chi2_variance) * 100),255u)
+					      : 0u),
+			xAOD::standardDeviationOfChi2OS);
+	
+	setSummaryValue(*track_particle,
                         hitInfo.contributingOutlierHits( HitSummaryData::pixelTotal )
-                       +hitInfo.contributingOutlierHits( HitSummaryData::stripTotal ),
-                       xAOD::numberOfOutliersOnTrack);
-
-
-       // @TODO slect states for which parameters are stored
-       if (m_firstAndLastParamOnly && tmp_param_state_idx.size()>2) {
+			+hitInfo.contributingOutlierHits( HitSummaryData::stripTotal ),
+			xAOD::numberOfOutliersOnTrack);
+	
+	
+	// @TODO slect states for which parameters are stored
+	if (m_firstAndLastParamOnly && tmp_param_state_idx.size()>2) {
           tmp_param_state_idx[1]=tmp_param_state_idx.back();
           tmp_param_state_idx.erase(tmp_param_state_idx.begin()+2,tmp_param_state_idx.end());
-       }
+	}
 
-       // store track parameters and covariances for slected states
-       parametersVec.clear();
-       parametersVec.reserve(tmp_param_state_idx.size());
-
-       for(std::vector<ActsTrk::TrackStateBackend::ConstTrackStateProxy::IndexType>::const_reverse_iterator
+	// store track parameters and covariances for slected states
+	parametersVec.clear();
+	parametersVec.reserve(tmp_param_state_idx.size());
+	
+	for(std::vector<ActsTrk::TrackStateBackend::ConstTrackStateProxy::IndexType>::const_reverse_iterator
               idx_iter = tmp_param_state_idx.rbegin();
-           idx_iter != tmp_param_state_idx.rend();
-           ++idx_iter) {
+	    idx_iter != tmp_param_state_idx.rend();
+	    ++idx_iter) {
           //       for(ActsTrk::TrackStateBackend::ConstTrackStateProxy::IndexType idx : tmp_param_state_idx) {
           ActsTrk::TrackStateBackend::ConstTrackStateProxy
-             state = tracksContainer->trackStateContainer().getTrackState(*idx_iter);
+	    state = tracksContainer->trackStateContainer().getTrackState(*idx_iter);
           const Acts::BoundTrackParameters actsParam = track.createParametersFromState(state);
-
+	  
           Acts::Vector3 position = actsParam.position(gctx.context());
           Acts::Vector3 momentum = actsParam.momentum();
-
+	  
           // scaling from Acts momentume units (GeV) to Athena Units (MeV)
           for (unsigned int i=0; i<momentum.rows(); ++i) {
              momentum(i) *= inv_1_MeV;
@@ -462,22 +470,30 @@ namespace ActsTrk
              }
           }
           parametersVec.emplace_back(std::vector<float>{
-                static_cast<float>(position[0]),static_cast<float>(position[1]),static_cast<float>(position[2]),
-                static_cast<float>(momentum[0]),static_cast<float>(momentum[1]),static_cast<float>(momentum[2]) });
+	      static_cast<float>(position[0]),static_cast<float>(position[1]),static_cast<float>(position[2]),
+	      static_cast<float>(momentum[0]),static_cast<float>(momentum[1]),static_cast<float>(momentum[2]) });
           ++converted_track_states;
-
-
-       }
-       for (const std::vector<float> &param : parametersVec) {
+	  
+	  
+	}
+	for (const std::vector<float> &param : parametersVec) {
           if (param.size() != 6) {
-             ATH_MSG_ERROR("Invalid size of param element " << param.size() <<  " != 6" );
+	    ATH_MSG_ERROR("Invalid size of param element " << param.size() <<  " != 6" );
           }
-       }
-       track_particle->setTrackParameters(parametersVec);
+	}
+	
+	track_particle->setTrackParameters(parametersVec);
+	
+	// add element to link to the correspond track
+	trackLink(*track_particle)
+          = ElementLink<ActsTrk::TrackContainer>( tracksContainer,
+                                                  track.index() );
+	ATH_CHECK( (trackLink(*track_particle)).isValid() );
+      }
     }
-    ATH_MSG_DEBUG( "Converted " <<  tracksContainer->size() << " acts tracks into " << track_particles->size()
-                  << " track particles with parameters for " << converted_track_states << " track states.");
-
+    ATH_MSG_DEBUG( "Converted " << nTracks << " acts tracks into " << track_particles->size()
+		   << " track particles with parameters for " << converted_track_states << " track states.");
+    
     return StatusCode::SUCCESS;
   }
 

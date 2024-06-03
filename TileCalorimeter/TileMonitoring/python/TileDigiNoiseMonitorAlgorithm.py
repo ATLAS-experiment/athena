@@ -26,6 +26,8 @@ def TileDigiNoiseMonitoringConfig(flags, **kwargs):
     from TileConditions.TileBadChannelsConfig import TileBadChannelsCondAlgCfg
     result.merge( TileBadChannelsCondAlgCfg(flags, **kwargs) )
 
+    kwargs.setdefault('ignoreDisconnectedChannels', flags.Common.isOnline)
+
     kwargs.setdefault('fillPedestalDifference', True)
     if kwargs['fillPedestalDifference'] and 'TileCondToolNoiseSample' not in kwargs:
         from TileConditions.TileSampleNoiseConfig import TileCondToolNoiseSampleCfg

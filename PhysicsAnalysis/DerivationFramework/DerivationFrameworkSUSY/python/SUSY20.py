@@ -61,9 +61,9 @@ def SUSY20KernelCfg(flags, name = "SUSY20Kernel", **kwargs):
 	
 	# Track isolation
 	from xAODPrimitives.xAODIso import xAODIso as isoPar
-	deco_ptcones        = [isoPar.ptcone40, isoPar.ptcone30, isoPar.ptcone20] #, isoPar.topoetcone40, isoPar.topoetcone30, isoPar.topoetcone20]
-	deco_ptcones_suffix = ["ptcone40", "ptcone30", "ptcone20"]                #, "topoetcone40", "topoetcone30", "topoetcone20"]
-	deco_prefix         = ''
+	deco_ptcones        = [isoPar.ptcone40, isoPar.ptcone30, isoPar.ptcone20, isoPar.topoetcone40, isoPar.topoetcone30, isoPar.topoetcone20]
+	deco_ptcones_suffix = ["ptcone40", "ptcone30", "ptcone20", "topoetcone40", "topoetcone30", "topoetcone20"]
+	deco_prefix         = 'SUSY20_'
 
 	from IsolationAlgs.IsoToolsConfig import TrackIsolationToolCfg
 	SUSY20TrackIsoTool = acc.popToolsAndMerge(TrackIsolationToolCfg(
@@ -104,9 +104,9 @@ def SUSY20KernelCfg(flags, name = "SUSY20Kernel", **kwargs):
 	acc.addPublicTool(SUSY20IDTrackDecoratorTool)
 	augmentationTools.append(SUSY20IDTrackDecoratorTool)
 
-	# Commented out calo isolation, not needed by DT analysis but still included in r21 SUSY20_DAODs
+	# Commented out calo isolation, not needed by current analyses but still included in r21 SUSY20_DAODs
 	'''# Electron TrackParticles isolation 
-	SUSY20ElectronDecorator = acc.getPrimaryAndMerge(IsolationDecoratorCfg(
+	SUSY20ElectronDecorator = acc.getPrimaryAndMerge(IsolationTrackDecoratorCfg(
 		flags,
 		name               = "SUSY20ElectronDecoratorTool",
 		TrackIsolationTool = SUSY20TrackIsoTool,
@@ -114,13 +114,13 @@ def SUSY20KernelCfg(flags, name = "SUSY20Kernel", **kwargs):
 		TargetContainer    = "Electrons",
 		iso                = [isoPar.topoetcone40, isoPar.topoetcone30, isoPar.topoetcone20],
 		isoSuffix          = ["topoetcone40", "topoetcone30", "topoetcone20"],
-		Prefix             = "SUSY20_",
+		Prefix             = deco_prefix,
 	))
 	acc.addPublicTool(SUSY20ElectronDecorator)
 	augmentationTools.append(SUSY20ElectronDecorator)
 
 	# Muon TrackParticles isolation 
-	SUSY20MuonDecorator = acc.getPrimaryAndMerge(IsolationDecoratorCfg(
+	SUSY20MuonDecorator = acc.getPrimaryAndMerge(IsolationTrackDecoratorCfg(
 		flags,
 		name               = "SUSY20MuonDecoratorTool",
 		TrackIsolationTool = SUSY20TrackIsoTool,
@@ -128,13 +128,13 @@ def SUSY20KernelCfg(flags, name = "SUSY20Kernel", **kwargs):
 		TargetContainer    = "Muons",
 		iso                = [isoPar.topoetcone40, isoPar.topoetcone30, isoPar.topoetcone20],
 		isoSuffix          = ["topoetcone40", "topoetcone30", "topoetcone20"],
-		Prefix             = "SUSY20_",
+		Prefix             = deco_prefix,
 	))
 	acc.addPublicTool(SUSY20MuonDecorator)
 	augmentationTools.append(SUSY20MuonDecorator)
 
 	# Photon TrackParticles isolation 
-	SUSY20PhotonDecorator = acc.getPrimaryAndMerge(IsolationDecoratorCfg(
+	SUSY20PhotonDecorator = acc.getPrimaryAndMerge(IsolationTrackDecoratorCfg(
 		flags,
 		name               = "SUSY20PhotonDecoratorTool",
 		TrackIsolationTool = SUSY20TrackIsoTool,
@@ -142,7 +142,7 @@ def SUSY20KernelCfg(flags, name = "SUSY20Kernel", **kwargs):
 		TargetContainer    = "Photons",
 		iso                = [isoPar.topoetcone40, isoPar.topoetcone30, isoPar.topoetcone20],
 		isoSuffix          = ["topoetcone40", "topoetcone30", "topoetcone20"],
-		Prefix             = "SUSY20_",
+		Prefix             = deco_prefix,
 	))
 	acc.addPublicTool(SUSY20PhotonDecorator)
 	augmentationTools.append(SUSY20PhotonDecorator)'''
@@ -151,10 +151,10 @@ def SUSY20KernelCfg(flags, name = "SUSY20Kernel", **kwargs):
 	from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
 	acc.merge(PhysCommonAugmentationsCfg(flags, TriggerListsHelper = kwargs['TriggerListsHelper']))
 
-	# EvtCleaning: get central tools from JetCommonCfg and set them up correctly 
-	# to add TightBad flags to EventInfo and AntiKt4EMTopoJets collections
-	acc.getEventAlgo("EventCleaningTestAlg_Tight").EventCleaningTool.DoDecorations = True
-	acc.getEventAlgo("EventCleaningTestAlg_Tight").doEvent = True
+	# EvtCleaning: instantiate our own version of EventCleaningAlg to
+	# add TightBad flags to EventInfo and AntiKt4EMTopoJets collections
+	from DerivationFrameworkSUSY.SUSYToolsConfig import SUSY20EventCleaningToolCfg
+	acc.merge(SUSY20EventCleaningToolCfg(flags, cleaningLevel = "TightBad"))
 
 	# CloseByIsolation correction augmentation
 	from IsolationSelection.IsolationSelectionConfig import IsoCloseByAlgsCfg
@@ -370,7 +370,7 @@ def SUSY20Cfg(flags):
 	]
 	
 	# Extra content
-	# Commented out variables not needed by DT analysis but still included in r21 SUSY20_DAODs
+	# Commented out variables not needed by current analyses but still included in r21 SUSY20_DAODs
 	SUSY20SlimmingHelper.ExtraVariables += [
 		"EventInfo.DFCommonJets_eventClean_TightBad.DFCommonJets_jetClean_TightBad",
 		"Electrons.DFCommonElectronsLHVeryLoose.DFCommonElectronsLHLoose.DFCommonElectronsLHLooseBL.DFCommonElectronsLHMedium.DFCommonElectronsLHTight.DFCommonElectronsLHVeryLooseIsEMValue.DFCommonElectronsLHLooseIsEMValue.DFCommonElectronsLHLooseBLIsEMValue.DFCommonElectronsLHMediumIsEMValue.DFCommonElectronsLHTightIsEMValue",
@@ -382,8 +382,9 @@ def SUSY20Cfg(flags):
 		"InDetTrackParticles.TRTdEdx.TRTdEdxUsedHits.hitPattern.numberOfContribPixelLayers.numberOfGangedFlaggedFakes.numberOfIBLOverflowsdEdx.numberOfPixelOutliers.numberOfPixelSplitHits.numberOfPixelSpoiltHits.numberOfSCTOutliers.numberOfSCTSpoiltHits.numberOfTRTDeadStraws.numberOfTRTHits.numberOfTRTHoles.numberOfTRTOutliers.numberOfTRTSharedHits.numberOfUsedHitsdEdx.pixeldEdx",
 		"InDetTrackParticles.chiSquared.d0.definingParametersCovMatrix.expectInnermostPixelLayerHit.expectNextToInnermostPixelLayerHit.numberDoF.numberOfInnermostPixelLayerHits.numberOfNextToInnermostPixelLayerHits.numberOfPixelDeadSensors.numberOfPixelHits.numberOfPixelHoles.numberOfPixelSharedHits.numberOfSCTDeadSensors.numberOfSCTHits.numberOfSCTHoles.numberOfSCTSharedHits.phi.qOverP.theta.z0",
 		"InDetTrackParticles.numberOfInnermostPixelLayerOutliers.numberOfInnermostPixelLayerSharedHits.numberOfInnermostPixelLayerSplitHits.numberOfNextToInnermostPixelLayerOutliers.numberOfNextToInnermostPixelLayerSharedHits.numberOfNextToInnermostPixelLayerSplitHits.numberOfGangedPixels.numberOfSCTDoubleHoles.numberOfTRTHighThresholdHits.numberOfTRTHighThresholdHitsTotal.numberOfTRTHighThresholdOutliers.numberOfTRTTubeHits.numberOfTRTXenonHits.numberOfOutliersOnTrack.standardDeviationOfChi2OS.eProbabilityHT.eProbabilityComb.TRTTrackOccupancy",
-		"InDetTrackParticles.ptcone20.ptcone30.ptcone40.ptvarcone20.ptvarcone30.ptvarcone40",
-		#"InDetTrackParticles.topoetcone20.topoetcone30.topoetcone40.topoetcone20NonCoreCone.topoetcone30NonCoreCone.topoetcone40NonCoreCone",
+		"InDetTrackParticles.SUSY20_ptcone20.SUSY20_ptcone30.SUSY20_ptcone40",
+		#"InDetTrackParticles.SUSY20_ptvarcone20.SUSY20_ptvarcone30.SUSY20_ptvarcone40",
+		"InDetTrackParticles.SUSY20_topoetcone20.SUSY20_topoetcone30.SUSY20_topoetcone40.SUSY20_topoetcone20NonCoreCone.SUSY20_topoetcone30NonCoreCone.SUSY20_topoetcone40NonCoreCone",
 		"InDetTrackParticles.TTVA_AMVFVertices.TTVA_AMVFWeights",
 		"InDetTrackParticles.vertexLink.vz",
 		#"InDetTrackParticles.trackCaloClusEta.trackCaloClusPhi.trackCaloSampleE.trackCaloSampleNumber",

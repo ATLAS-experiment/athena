@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header
@@ -138,13 +138,6 @@ StatusCode ISF::PunchThroughTool::initialize()
   if ( !m_geoIDSvc.empty() && m_geoIDSvc.retrieve().isFailure())
     {
       ATH_MSG_FATAL ( "[ punchthrough ] Could not retrieve GeometryIdentifier Service. Abort");
-      return StatusCode::FAILURE;
-    }
-
-  //barcode service
-  if (m_barcodeSvc.retrieve().isFailure() )
-    {
-      ATH_MSG_ERROR( "[ punchthrough ] Could not retrieve " << m_barcodeSvc );
       return StatusCode::FAILURE;
     }
 
@@ -966,7 +959,7 @@ std::map<double, double> ISF::PunchThroughTool::getVariableCDFmappings(xmlNodePt
     return mappings;
 }
 
-double ISF::PunchThroughTool::inverseCdfTransform(double variable, std::map<double, double> inverse_cdf_map) {
+double ISF::PunchThroughTool::inverseCdfTransform(double variable, const std::map<double, double>& inverse_cdf_map) {
 
     double norm_cdf = normal_cdf(variable);
 
@@ -1346,12 +1339,11 @@ ISF::ISFParticle* ISF::PunchThroughTool::createExitPs( const ISF::ISFParticle &i
   charge *= (pdg > 0.) ?  1. : -1.;
 
   const double pTime = 0;  /** @TODO: fix */
-
-  //assign barcodes to the produced particles
-  Barcode::PhysicsProcessCode processCode{0};
-  const Barcode::ParticleBarcode secBC = m_barcodeSvc->newSecondary( isfp.barcode(), processCode);
-
-  ISF::ISFParticle* finalPar = new ISF::ISFParticle (pos, mom, mass, charge, pdg, 1 + HepMC::SIM_STATUS_THRESHOLD, pTime, isfp, secBC);
+  const int status = 1 + HepMC::SIM_STATUS_THRESHOLD;
+  const int id = HepMC::UNDEFINED_ID;
+  // NB we are not considering the possibility that the punch-through
+  // particle is the incoming particle having survived an interaction.
+  ISF::ISFParticle* finalPar = new ISF::ISFParticle ( pos, mom, mass, charge, pdg, status, pTime, isfp, id);
   finalPar->setNextGeoID( AtlasDetDescr::fAtlasMS);
 
   // return the punch-through particle

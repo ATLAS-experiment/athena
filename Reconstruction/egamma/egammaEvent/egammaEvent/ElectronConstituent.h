@@ -50,7 +50,7 @@ namespace Analysis
 
     public:
       /** @brief Default constructor */
-      ElectronConstituent() ;      
+      ElectronConstituent() = default;      
       /** @brief constructor */
       ElectronConstituent(NameType& name) ;  
       /** @brief destructor */

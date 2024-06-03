@@ -393,7 +393,7 @@ InDetPhysValMonitoringTool::fillHistograms() {
 
       ATH_MSG_DEBUG("Filling vertex/event info monitoring plots");
       //Filling vertexing plots for the reconstructed hard-scatter as a function of mu
-      m_monPlots->fill(*vertices, puEvents, beamSpotWeight);
+      m_monPlots->fill(*vertices, truthMu, actualMu, beamSpotWeight);
     } else {
       //FIXME: Does this happen for single particles?
       ATH_MSG_WARNING("Skipping vertexing plots.");

@@ -45,8 +45,8 @@ class FPGATrackSimTrack : public TObject {
   //write a detmap
   int getNCoords() const;
   signed long getEventIndex() const { return m_eventindex; }
-  signed long getBarcode() const { return m_barcode; }
-  signed long barcode() const { return getBarcode(); }
+  unsigned long getBarcode() const { return m_barcode; }
+  unsigned long barcode() const { return getBarcode(); }
   float getBarcodeFrac() const { return m_barcode_frac; }
   //Should be passed as const ref to avoid excessive copying.
   const std::vector <FPGATrackSimHit>& getFPGATrackSimHits() const { return m_hits; }
@@ -61,6 +61,9 @@ class FPGATrackSimTrack : public TObject {
   //Has some size protections
   float getEtaCoord(int ilayer) const;
   float getPhiCoord(int ilayer) const;
+
+  // Retrieve the idealized radius for a given layer.
+  double getIdealRadius(int ilayer) const { return m_idealRadii.at(ilayer); };
 
   bool isValidCand() const    { return m_isValidCand; }
 
@@ -86,10 +89,11 @@ class FPGATrackSimTrack : public TObject {
   void setTypeMask(unsigned int v) { m_typemask = v; }
   void setHitMap(unsigned int v) { m_hitmap = v; }
   void setEventIndex(const signed long& v) { m_eventindex = v; }
-  void setBarcode(const signed long& v) { m_barcode = v; }
+  void setBarcode(const unsigned long& v) { m_barcode = v; }
   void setBarcodeFrac(const float& v) { m_barcode_frac = v; }
 
   void setValidCand(bool v)   { m_isValidCand = v; }
+  void setIdealRadii(const std::vector<double>& v) { m_idealRadii = v; }
 
   void calculateTruth(); // this will calculate the above quantities based on the hits
   void setNLayers(int); //Reset/resize the track hits vector
@@ -141,7 +145,7 @@ class FPGATrackSimTrack : public TObject {
   std::vector<FPGATrackSimHit> m_hits; //[m_nlayers] hits associated to the track
 
   signed long m_eventindex = -1; // matched particle event index
-  signed long m_barcode = -1; // matched geant particle barcode
+  unsigned long m_barcode = -1; // matched geant particle barcode
   float m_barcode_frac = 0.0F; // largest "matching fraction" with any "good"
   // geant particle, corresponding to the
   // particle with m_barcode
@@ -149,6 +153,11 @@ class FPGATrackSimTrack : public TObject {
   // Is this a valid track candidate for fitting?
   // At the moment, this is only *not* true if the track candidate has an illegal mix of duplicated spacepoints.
   bool m_isValidCand = true;
+
+  // Idealized radii used for the fit for this track. Unclear if it makes sense to store here,
+  // but the information is loaded into the region map class at runtime and needs to be propagated
+  // over to the track object (where the coordinate transform _currently_ lives) somehow.
+  std::vector<double> m_idealRadii;
 
   // Overlap removal member
   // There is currently only one algorithm

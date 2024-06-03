@@ -214,6 +214,13 @@ inline bool isPositiveDefiniteSlow(const Amg::MatrixX& mat) {
   }
   return true;
 }
+// Chi squared statistic of a linear regression as defined in Frühwirth, 
+// section 3.2.1, equation 3.19. Precision is defined as the inverse of 
+// of the covariance.
+template <typename T, typename U>
+inline double chi2(const T& precision, const U& residual, const int sign = 1) {
+  return sign * residual.transpose() * precision * residual;
+}
 
 }  // namespace Amg
 

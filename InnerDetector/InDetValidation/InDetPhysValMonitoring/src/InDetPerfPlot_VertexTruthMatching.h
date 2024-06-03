@@ -73,8 +73,16 @@ private:
     TEfficiency* m_vx_hs_reco_eff;
     // HS vertex selection efficiency vs PU
     TEfficiency* m_vx_hs_sel_eff;
+    // HS vertex reconstruction and selection efficiency vs PU
+    TEfficiency* m_vx_hs_reco_sel_eff;
     // HS vertex selection efficiency vs PU (distance based)
     TEfficiency* m_vx_hs_sel_eff_dist;
+    // HS vertex reconstruction efficiency vs n truth vertices
+    TEfficiency* m_vx_hs_reco_eff_vs_ntruth;
+    // HS vertex selection efficiency vs n truth vertices
+    TEfficiency* m_vx_hs_sel_eff_vs_ntruth;
+    // HS vertex reconstruction and selection efficiency vs n truth vertices
+    TEfficiency* m_vx_hs_reco_sel_eff_vs_ntruth;
     // For reco (covariance) resolutions:
     TProfile* m_vx_hs_reco_long_reso;
     TProfile* m_vx_hs_reco_trans_reso;
@@ -235,6 +243,9 @@ private:
     // delta z plot
     TH1* m_vx_all_dz;
     TH1* m_vx_hs_mindz;
+    
+    TH1* m_vx_PUdensity;
+    TH1* m_vx_nTruth;
 
     ///@}
 private:

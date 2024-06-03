@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonStauRecoTool.h"
@@ -25,6 +25,7 @@
 #include "TrkDriftCircleMath/SegmentFinder.h"
 #include "TrkDriftCircleMath/TransformToLine.h"
 #include "xAODTruth/TruthParticleContainer.h"
+#include "AthContainers/ConstAccessor.h"
 
 namespace {
     constexpr double inverseSpeedOfLight = 1 / Gaudi::Units::c_light;  // need 1/299.792458 inside calculateTof()/calculateBeta()
@@ -89,9 +90,11 @@ namespace MuonCombined {
 
     MuonStauRecoTool::TruthInfo* MuonStauRecoTool::getTruth(const xAOD::TrackParticle& indetTrackParticle) const {
         // in case we are using the truth, check if the truth link is set and create the TruthInfo object
-        if (m_doTruth && indetTrackParticle.isAvailable<ElementLink<xAOD::TruthParticleContainer>>("truthParticleLink")) {
+        static const SG::ConstAccessor<ElementLink<xAOD::TruthParticleContainer> >
+          truthParticleLinkAcc("truthParticleLink");
+        if (m_doTruth && truthParticleLinkAcc.isAvailable(indetTrackParticle)) {
             const ElementLink<xAOD::TruthParticleContainer>& truthLink =
-                indetTrackParticle.auxdata<ElementLink<xAOD::TruthParticleContainer>>("truthParticleLink");
+                truthParticleLinkAcc(indetTrackParticle);
             if (truthLink.isValid()) { return new TruthInfo((*truthLink)->pdgId(), (*truthLink)->m(), (*truthLink)->p4().Beta()); }
         }
         return nullptr;
@@ -524,9 +527,9 @@ namespace MuonCombined {
                 const Muon::MdtDriftCircleOnTrack& mdt = *entry.second;
                 Identifier id = mdt.identify();
                 // calibrate MDT
-                std::shared_ptr<const Muon::MdtDriftCircleOnTrack> calibratedMdt(
+                std::unique_ptr<const Muon::MdtDriftCircleOnTrack> calibratedMdt(
                     m_mdtCreatorStau->correct(*mdt.prepRawData(), pars, &calibrationStrategy, betaSeed));
-                if (!calibratedMdt.get()) {
+                if (!calibratedMdt) {
                     ATH_MSG_WARNING("Failed to recalibrate existing MDT on track " << m_idHelperSvc->toString(id));
                     continue;
                 }
@@ -553,11 +556,11 @@ namespace MuonCombined {
                                                 m_idHelperSvc->mdtIdHelper().tubeLayer(id) - 1, m_idHelperSvc->mdtIdHelper().tube(id) - 1);
 
                 // create new DriftCircle
-                TrkDriftCircleMath::DriftCircle dc(lpos, r, dr, TrkDriftCircleMath::DriftCircle::InTime, mdtid, index, &mdt);
+                TrkDriftCircleMath::DriftCircle dc(lpos, r, dr, TrkDriftCircleMath::DriftCircle::InTime, mdtid, &mdt, index);
                 TrkDriftCircleMath::DCOnTrack dcOnTrack(dc, 1., 1.);
 
                 dcs.push_back(dcOnTrack);
-                indexLookUp.emplace_back(calibratedMdt, &pars);
+                indexLookUp.emplace_back(std::move(calibratedMdt), &pars);
                 ++index;
             }
 
@@ -1158,7 +1161,7 @@ namespace MuonCombined {
             ATH_MSG_DEBUG("hit x,y_min,y_max,w = " << (*hit)->x << "," << (*hit)->ymin << "," << (*hit)->ymax << "," << (*hit)->w);
             // treat the case that the hit is a composite TGC hit
             if ((*hit)->tgc) {
-                for (const auto& prd : (*hit)->tgc->etaCluster.hitList) handleCluster(*prd, clusters);
+                for (const auto& prd : (*hit)->tgc->etaCluster) handleCluster(*prd, clusters);
             } else if ((*hit)->prd) {
                 Identifier id = (*hit)->prd->identify();
                 if (m_idHelperSvc->isMdt(id))
@@ -1356,10 +1359,10 @@ namespace MuonCombined {
             const MuonHough::MuonPhiLayerHough::Maximum& maximum = **pit;
             for (const std::shared_ptr<MuonHough::PhiHit>& hit : maximum.hits) {
                 // treat the case that the hit is a composite TGC hit
-                if (hit->tgc && !hit->tgc->phiCluster.hitList.empty()) {
-                    Identifier id = hit->tgc->phiCluster.hitList.front()->identify();
+                if (hit->tgc) {
+                    Identifier id = hit->tgc->phiCluster.front()->identify();
                     if (m_idHelperSvc->layerIndex(id) != intersection.layerSurface.layerIndex) continue;
-                    for (const Muon::MuonCluster* prd : hit->tgc->phiCluster.hitList) handleCluster(*prd, phiClusterOnTracks);
+                    for (const Muon::MuonCluster* prd : hit->tgc->phiCluster) handleCluster(*prd, phiClusterOnTracks);
                 } else if (hit->prd && !(hit->prd->type(Trk::PrepRawDataType::sTgcPrepData) || hit->prd->type(Trk::PrepRawDataType::MMPrepData))) {
                     const Identifier id = hit->prd->identify();
                     if (m_idHelperSvc->layerIndex(id) != intersection.layerSurface.layerIndex) continue;

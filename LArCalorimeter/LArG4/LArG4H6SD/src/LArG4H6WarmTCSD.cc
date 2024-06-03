@@ -84,7 +84,7 @@ G4bool LArG4H6WarmTCSD::ProcessHits(G4Step* aStep,G4TouchableHistory* ROhist)
       AtlasG4EventUserInfo * atlasG4EvtUserInfo = dynamic_cast<AtlasG4EventUserInfo*>(G4RunManager::GetRunManager()->GetCurrentEvent()->GetUserInformation());
       if ( atlasG4EvtUserInfo ) {
         // Update the step info
-        atlasG4EvtUserInfo->SetLastProcessedBarcode( aStep->GetTrack()->GetTrackID() );
+        atlasG4EvtUserInfo->SetLastProcessedTrackID( aStep->GetTrack()->GetTrackID() );
         atlasG4EvtUserInfo->SetLastProcessedStep( aStep->GetTrack()->GetCurrentStepNumber() );
       }
     }

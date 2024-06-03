@@ -23,6 +23,8 @@
 // STL includes
 #include <string>
 #include <vector>
+#include <set>
+#include <tuple>
 
 namespace FlavorTagDiscriminants {
 
@@ -64,8 +66,8 @@ namespace FlavorTagDiscriminants {
     };
 
     ConstituentsInputConfig createConstituentsLoaderConfig(
-      std::string name,
-      std::vector<std::string> input_variables,
+      const std::string & name,
+      const std::vector<std::string> & input_variables,
       FlipTagConfig flip_config
     );
 
@@ -76,7 +78,7 @@ namespace FlavorTagDiscriminants {
               m_config = cfg;
             };
             virtual ~IConstituentsLoader() = default;
-            virtual std::tuple<std::string, input_pair, std::vector<const xAOD::IParticle*>> getData(
+            virtual std::tuple<std::string, Inputs, std::vector<const xAOD::IParticle*>> getData(
                 const xAOD::Jet& jet, 
                 [[maybe_unused]] const SG::AuxElement& btag) const = 0;
             virtual FTagDataDependencyNames getDependencies() const = 0;

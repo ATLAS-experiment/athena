@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ZdcAnalysis/ZdcAnalysisTool.h"
@@ -16,6 +16,7 @@
 #include <AsgDataHandles/ReadHandle.h>
 #include <AsgDataHandles/WriteHandle.h>
 #include <AsgDataHandles/WriteDecorHandle.h>
+#include "AthContainers/ConstAccessor.h"
 
 namespace ZDC
 {
@@ -72,17 +73,17 @@ ZdcAnalysisTool::ZdcAnalysisTool(const std::string& name)
 
     declareProperty("RpdNbaselineSamples", m_rpdNbaselineSamples = 7, "Number of baseline samples; the sample equal to this number is the start of signal region");
     declareProperty("RpdEndSignalSample", m_rpdEndSignalSample = 23, "Samples before (not including) this sample are the signal region; 0 or Nsamples goes to end of window");
-    declareProperty("RpdPulse2ndDerivThresh", m_rpdPulse2ndDerivThresh = -18, "Second differences less than or equal to this number indicate a pulse"); // 3 sigma = 3*3.9, 2nd difference in baseline for first-in-train bcid evts
+    declareProperty("RpdPulse2ndDerivThresh", m_rpdPulse2ndDerivThresh = -18, "Second differences less than or equal to this number indicate a pulse");
     declareProperty("RpdPostPulseFracThresh", m_rpdPostPulseFracThresh = 0.15, "If there is a good pulse and post-pulse and size of post-pulse as a fraction of good pulse is less than or equal to this number, ignore post-pulse");
     declareProperty("RpdGoodPulseSampleStart", m_rpdGoodPulseSampleStart = 8, "Pulses before this sample are considered pre-pulses");
     declareProperty("RpdGoodPulseSampleStop", m_rpdGoodPulseSampleStop = 10, "Pulses after this sample are considered post-pulses");
     declareProperty("RpdNominalBaseline", m_rpdNominalBaseline = 100, "The global nominal baseline; used when pileup is detected");
-    declareProperty("RpdPileupBaselineSumThresh", m_rpdPileupBaselineSumThresh = 684 + 3*23, "Baseline sums less than this number indicate there is NO pileup"); // 3 sigma, sum of baseline samples in first-in-train bcid evts
+    declareProperty("RpdPileupBaselineSumThresh", m_rpdPileupBaselineSumThresh = 53, "Baseline sum (after subtracting nominal baseline) less than this number indicates there is NO pileup");
     declareProperty("RpdPileupBaselineStdDevThresh", m_rpdPileupBaselineStdDevThresh = 2, "Baseline standard deviations less than this number indicate there is NO pileup");
     declareProperty("RpdNNegativesAllowed", m_rpdNNegativesAllowed = 2, "Maximum number of negative ADC values after baseline and pileup subtraction allowed in signal range");
     declareProperty("RpdAdcOverflow", m_rpdAdcOverflow = 4095, "ADC values greater than or equal to this number are considered overflow");
-    declareProperty("RpdSideCCalibFactors", m_rpdSideCCalibFactors = std::vector<float>(16, 1.0), "Multiplicative calibration factors to apply to RPD side C (arm 1-2) channels in reconstruction");
-    declareProperty("RpdSideACalibFactors", m_rpdSideACalibFactors = std::vector<float>(16, 1.0), "Multiplicative calibration factors to apply to RPD side A (arm 8-1) channels in reconstruction");
+    declareProperty("RpdSideCCalibFactors", m_rpdSideCOutputCalibFactors = std::vector<float>(16, 1.0), "Multiplicative calibration factors to apply to RPD output, e.g., sum/max ADC, per channel on side C");
+    declareProperty("RpdSideACalibFactors", m_rpdSideAOutputCalibFactors = std::vector<float>(16, 1.0), "Multiplicative calibration factors to apply to RPD output, e.g., sum/max ADC, per channel on side A");
 
     declareProperty("LHCRun", m_LHCRun = 3);
 
@@ -307,8 +308,8 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializeLHCf2022()
   rpdConfig.pileupBaselineStdDevThresh = m_rpdPileupBaselineStdDevThresh;
   rpdConfig.nNegativesAllowed = m_rpdNNegativesAllowed;
   rpdConfig.AdcOverflow = m_rpdAdcOverflow;
-  m_rpdDataAnalyzer.push_back(std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdC", rpdConfig, m_rpdSideCCalibFactors));
-  m_rpdDataAnalyzer.push_back(std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdA", rpdConfig, m_rpdSideACalibFactors));
+  m_rpdDataAnalyzer.push_back(std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdC", rpdConfig, m_rpdSideCOutputCalibFactors));
+  m_rpdDataAnalyzer.push_back(std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdA", rpdConfig, m_rpdSideAOutputCalibFactors));
 
  return zdcDataAnalyzer;
 
@@ -414,8 +415,8 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializepp2023()
   rpdConfig.pileupBaselineStdDevThresh = m_rpdPileupBaselineStdDevThresh;
   rpdConfig.nNegativesAllowed = m_rpdNNegativesAllowed;
   rpdConfig.AdcOverflow = m_rpdAdcOverflow;
-  m_rpdDataAnalyzer.push_back(std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdC", rpdConfig, m_rpdSideCCalibFactors));
-  m_rpdDataAnalyzer.push_back(std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdA", rpdConfig, m_rpdSideACalibFactors));
+  m_rpdDataAnalyzer.push_back(std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdC", rpdConfig, m_rpdSideCOutputCalibFactors));
+  m_rpdDataAnalyzer.push_back(std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdA", rpdConfig, m_rpdSideAOutputCalibFactors));
 
  return zdcDataAnalyzer;
 
@@ -585,8 +586,8 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializePbPb2023()
   rpdConfig.pileupBaselineStdDevThresh = m_rpdPileupBaselineStdDevThresh;
   rpdConfig.nNegativesAllowed = m_rpdNNegativesAllowed;
   rpdConfig.AdcOverflow = m_rpdAdcOverflow;
-  m_rpdDataAnalyzer.push_back(std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdC", rpdConfig, m_rpdSideCCalibFactors));
-  m_rpdDataAnalyzer.push_back(std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdA", rpdConfig, m_rpdSideACalibFactors));
+  m_rpdDataAnalyzer.push_back(std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdC", rpdConfig, m_rpdSideCOutputCalibFactors));
+  m_rpdDataAnalyzer.push_back(std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdA", rpdConfig, m_rpdSideAOutputCalibFactors));
   
   return zdcDataAnalyzer;
 }
@@ -1451,6 +1452,9 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
       m_rpdDataAnalyzer.at(1)->reset();
     }
 
+  static const SG::ConstAccessor<std::vector<uint16_t> > g0dataAcc ("g0data");
+  static const SG::ConstAccessor<std::vector<uint16_t> > g1dataAcc ("g1data");
+
   const std::vector<unsigned short>* adcUndelayLG = 0;
   const std::vector<unsigned short>* adcUndelayHG = 0;
   
@@ -1487,18 +1491,11 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
 	    continue;
 	  }
 	  else {
-	    const std::vector<uint16_t>* vector_p = &(zdcModule->auxdata<std::vector<uint16_t>>("g0data"));
-	    if (!vector_p) {
-	      //  This is obviously a problem, generate a non-fatal but serious error and continue
-	      //
-	      ATH_MSG_WARNING("Could not retrieve waveform for side " << side << ", module " << zdcModule->zdcModule() << ", skipping this module");
-	      continue;
-	    }
-	    
 	    //
 	    // Pass the data to the RPD analysis tool 
 	    //
-	    m_rpdDataAnalyzer.at(side)->loadChannelData(rpdChannel, *vector_p);
+	    m_rpdDataAnalyzer.at(side)->loadChannelData(rpdChannel,
+                                                        g0dataAcc (*zdcModule));
 	  }
 	}
 	else {
@@ -1507,28 +1504,31 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
 	  //
 	  if (m_LHCRun==3) // no delay channels, so we drop the index
 	    {
-	      adcUndelayLG = &(zdcModule->auxdata<std::vector<uint16_t>>("g0data")); // g0
-	      adcUndelayHG = &(zdcModule->auxdata<std::vector<uint16_t>>("g1data")); // g1
+	      adcUndelayLG = &g0dataAcc(*zdcModule); // g0
+	      adcUndelayHG = &g1dataAcc(*zdcModule); // g1
 	    }
 	  else if (m_LHCRun==2)
 	    {
 	      if (zdcModule->zdcType() == 1) continue; // skip position sensitive modules
 	      
+              static const SG::ConstAccessor<std::vector<uint16_t> > g0d1dataAcc ("g0d1data");
+              static const SG::ConstAccessor<std::vector<uint16_t> > g1d1dataAcc ("g1d1data");
+              static const SG::ConstAccessor<std::vector<uint16_t> > g0d0dataAcc ("g0d0data");
+              static const SG::ConstAccessor<std::vector<uint16_t> > g1d0dataAcc ("g1d0data");
+
 	      if (zdcModule->zdcModule() == 0 && m_flipEMDelay) // flip delay/non-delay for 2015 ONLY
 		{
-		  adcUndelayLG = &(zdcModule->auxdata<std::vector<uint16_t>>("g0d1Data")); // g0d1
-		  adcUndelayHG = &(zdcModule->auxdata<std::vector<uint16_t>>("g1d1Data")); // g1d1
-		  
-		  adcDelayLG = &(zdcModule->auxdata<std::vector<uint16_t>>("g0d0Data")); // g0d0
-		  adcDelayHG = &(zdcModule->auxdata<std::vector<uint16_t>>("g1d0Data")); // g1d0
+		  adcUndelayLG = &g0d1dataAcc(*zdcModule); // g0d1
+		  adcUndelayHG = &g1d1dataAcc(*zdcModule); // g1d1
+		  adcDelayLG   = &g0d0dataAcc(*zdcModule); // g0d0
+		  adcDelayHG   = &g1d0dataAcc(*zdcModule); // g1d0
 		}
 	      else // nominal configuation
 		{
-		  adcUndelayLG = &(zdcModule->auxdata<std::vector<uint16_t>>("g0d0Data")); // g0d0
-		  adcUndelayHG = &(zdcModule->auxdata<std::vector<uint16_t>>("g1d0Data")); // g1d0
-		  
-		  adcDelayLG = &(zdcModule->auxdata<std::vector<uint16_t>>("g0d1Data")); // g0d1
-		  adcDelayHG = &(zdcModule->auxdata<std::vector<uint16_t>>("g1d1Data")); // g1d1
+		  adcUndelayLG = &g0d0dataAcc(*zdcModule); // g0d0
+		  adcUndelayHG = &g1d0dataAcc(*zdcModule); // g1d0
+                  adcDelayLG   = &g0d1dataAcc(*zdcModule); // g0d1
+		  adcDelayHG   = &g1d1dataAcc(*zdcModule); // g1d1
 		}
 	    }
 	  else

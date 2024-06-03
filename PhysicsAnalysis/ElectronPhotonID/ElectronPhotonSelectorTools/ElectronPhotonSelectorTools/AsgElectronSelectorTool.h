@@ -152,8 +152,10 @@ private:
 
   /// Multiclass model or not
   bool m_multiClass{};
-  /// Multiclass model or not
+  /// Run CF rejection or not
   bool m_CFReject{};
+  /// New or old set of variables 
+  bool m_newVars{};
   /// Use the CF output node in the numerator or the denominator
   bool m_cfSignal{};
   /// Fractions to combine the output nodes of a multiclass model into one discriminant.

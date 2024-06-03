@@ -88,7 +88,6 @@ def TrigTopoEgammaElectronCfg(flags, tag, variant, cellsName, InputElectronRecCo
                                                 AmbiguityTool = CompFactory.EGammaAmbiguityTool(),
                                                 EMClusterTool = acc.popToolsAndMerge(TrigEMClusterToolCfg(flags,variant,OutputClusterContainerName)),
                                                 EMShowerTool = acc.popToolsAndMerge(EMShowerBuilderCfg(flags, CellsName=cellsName)),
-                                                egammaTools = [CompFactory.EMFourMomBuilder()], # TODO use list defined elsewhere
                                                 doPhotons = False,
                                                 doElectrons = True)
         acc.addEventAlgo(builder)
@@ -126,7 +125,8 @@ def TrigElectronIsoBuilderCfg(flags, tag, TrackParticleLocation, electronCollect
                                         TrackIsolationTool    = acc.popToolsAndMerge(TrigTrackIsolationToolCfg(flags,tag,TrackParticleLocation)),
                                         ElIsoTypes            = [[isoPar.ptcone30,isoPar.ptcone20]],
                                         ElCorTypes            = [[isoPar.coreTrackPtr]],
-                                        ElCorTypesExtra       = [[]])
+                                        ElCorTypesExtra       = [[]],
+                                        IsTrigger = True)
         acc.addEventAlgo(builder)
         return acc
 

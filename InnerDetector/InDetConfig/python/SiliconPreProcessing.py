@@ -88,7 +88,9 @@ def InDetRecPreProcessingSiliconCfg(flags):
     return acc
 
 
-def ITkRecPreProcessingSiliconCfg(flags):
+def ITkRecPreProcessingSiliconCfg(flags,
+                                  *,
+                                  previousActsExtension: str = None):
     acc = ComponentAccumulator()
     # ------------------------------------------------------------
     #
@@ -120,7 +122,7 @@ def ITkRecPreProcessingSiliconCfg(flags):
                                                      name=f"{flags.Tracking.ActiveConfig.extension}RegionsOfInterestCreatorAlg"))
 
         from ActsConfig.ActsClusterizationConfig import ActsClusterizationCfg
-        acc.merge(ActsClusterizationCfg(flags))
+        acc.merge(ActsClusterizationCfg(flags, previousActsExtension=previousActsExtension))
 
     #
     # ---  Cluster EDM converters
@@ -157,7 +159,7 @@ def ITkRecPreProcessingSiliconCfg(flags):
     if flags.Tracking.ActiveConfig.doActsSpacePoint:
         from ActsConfig.ActsSpacePointFormationConfig import (
             ActsSpacePointFormationCfg)
-        acc.merge(ActsSpacePointFormationCfg(flags))
+        acc.merge(ActsSpacePointFormationCfg(flags, previousActsExtension=previousActsExtension))
 
     #
     # --- Space Point EDM converters
@@ -179,9 +181,9 @@ def ITkRecPreProcessingSiliconCfg(flags):
             acc.merge(ITkPRD_MultiTruthMakerSiCfg(flags))
 
         if flags.Tracking.ActiveConfig.doActsCluster or flags.Tracking.ActiveConfig.doAthenaToActsCluster:
-            from ActsConfig.ActsTruthConfig import ITkTruthAssociationCfg, TruthParticleHitCountAlgCfg
-            acc.merge(ITkTruthAssociationCfg(flags))
-            acc.merge(TruthParticleHitCountAlgCfg(flags))
+            from ActsConfig.ActsTruthConfig import ActsTruthAssociationAlgCfg, ActsTruthParticleHitCountAlgCfg
+            acc.merge(ActsTruthAssociationAlgCfg(flags))
+            acc.merge(ActsTruthParticleHitCountAlgCfg(flags))
 
 
     return acc

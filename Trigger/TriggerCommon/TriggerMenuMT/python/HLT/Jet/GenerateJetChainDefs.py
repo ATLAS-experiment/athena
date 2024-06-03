@@ -17,6 +17,7 @@ def generateChainConfigs(flags,  chainDict ):
 
     # Jet chain is assembled always from the full dictionary (multiple legs are handled internally by the jet reco / hypo)
     theChainDef = JetChainConfiguration(chainDict)
+    theChainDef.prepareDataDependencies(flags)
 
     listOfChainDefs = []
 

@@ -23,7 +23,6 @@
 
 // Barcode
 #include "BarcodeInterfaces/IBarcodeSvc.h"
-#include "BarcodeEvent/Barcode.h"
 
 // McEventCollection
 #include "GeneratorObjects/McEventCollection.h"
@@ -70,7 +69,7 @@ namespace ISF {
     void registerTruthIncident( ITruthIncident& truthincident, bool saveAllChildren=false) const override;
 
     /** Initialize the Truth Svc at the beginning of each event */
-    StatusCode initializeTruthCollection() override;
+    StatusCode initializeTruthCollection(int largestGeneratedParticleBC=0, int largestGeneratedVertexBC=0) override;
 
     /** Finalize the Truth Svc at the end of each event*/
     StatusCode releaseEvent() override;
@@ -80,15 +79,6 @@ namespace ISF {
     void recordIncidentToMCTruth( ITruthIncident& truthincident, bool passWholeVertex) const;
     /** Record and end vertex to the MC Truth for the parent particle */
     HepMC::GenVertexPtr  createGenVertexFromTruthIncident( ITruthIncident& truthincident) const;
-
-    /** Set shared barcode for child particles */
-    void setSharedChildParticleBarcode( ITruthIncident& truthincident) const;
-
-    /** Helper function to determine the largest particle barcode set by the generator */
-    int maxGeneratedParticleBarcode(const HepMC::GenEvent *genEvent) const;
-
-    /** Helper function to determine the largest vertex barcode set by the generator */
-    int maxGeneratedVertexBarcode(const HepMC::GenEvent *genEvent) const;
 
     ServiceHandle<Barcode::IBarcodeSvc> m_barcodeSvc{this, "BarcodeSvc", "BarcodeSvc", ""};           //!< The Barcode service
 

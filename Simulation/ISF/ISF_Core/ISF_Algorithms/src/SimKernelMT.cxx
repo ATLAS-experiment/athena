@@ -174,8 +174,12 @@ StatusCode ISF::SimKernelMT::execute() {
     }
   }
 
-  // Reset barcodes for this thread
-  ATH_CHECK(m_truthRecordSvc->initializeTruthCollection());
+  const int largestGeneratedParticleBC = (outputTruth->empty()) ? HepMC::UNDEFINED_ID
+    : HepMC::maxGeneratedParticleBarcode(outputTruth->at(0)); // TODO make this more robust
+  const int largestGeneratedVertexBC =  (outputTruth->empty()) ? HepMC::UNDEFINED_ID
+    : HepMC::maxGeneratedVertexBarcode(outputTruth->at(0)); // TODO make this more robust
+  // tell TruthService we're starting a new event
+  ATH_CHECK( m_truthRecordSvc->initializeTruthCollection(largestGeneratedParticleBC, largestGeneratedVertexBC) );
 
   // Create TrackRecordCollections and pass them to the entryLayerTool
   SG::WriteHandle<TrackRecordCollection> caloEntryLayer(m_caloEntryLayerKey, ctx);

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include "GeoModelMmTest.h"
 
@@ -8,7 +8,7 @@
 
 
 #include "MuonReadoutGeometry/MMReadoutElement.h"
-#include "MuonReadoutGeometry/MuonStation.h"
+#include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
 #include "StoreGate/ReadCondHandle.h"
 
 namespace MuonGM {
@@ -73,6 +73,7 @@ StatusCode GeoModelMmTest::execute() {
                       << m_detMgrKey.fullKey());
         return StatusCode::FAILURE;
     }
+    const MmIdHelper& id_helper{m_idHelperSvc->mmIdHelper()};
     //Looping through the MicroMegas identifiers and pushing back the respective roe.
     for (const Identifier& test_me : m_testStations) {
         ATH_MSG_VERBOSE("Test retrieval of Mm detector element " 
@@ -88,6 +89,35 @@ StatusCode GeoModelMmTest::execute() {
                           << m_idHelperSvc->toStringDetEl(test_me) << ". But got instead "
                           << m_idHelperSvc->toStringDetEl(reElement->identify()));
             return StatusCode::FAILURE;
+        }
+        for (int gasGap = 1; gasGap <= 4; ++gasGap) {
+             const Identifier layerId = id_helper.channelID(test_me, id_helper.multilayer(test_me), gasGap, 1024); 
+             int fStrip = reElement->numberOfMissingBottomStrips(layerId) + 1;
+             int lStrip = id_helper.channelMax(layerId)-reElement->numberOfMissingTopStrips(layerId);
+             for (int channel=fStrip; channel<=lStrip; ++channel) {
+
+                bool is_valid{false};
+                const Identifier strip_id = id_helper.channelID(test_me, id_helper.multilayer(test_me), 
+                                                                gasGap, channel, is_valid);
+                if (!is_valid) {
+                    continue;
+                }
+                Amg::Vector3D globStripPos{Amg::Vector3D::Zero()};
+                reElement->stripGlobalPosition(strip_id, globStripPos);
+                Amg::Vector2D locPos{Amg::Vector2D::Zero()};
+                reElement->surface(strip_id).globalToLocal(globStripPos, Amg::Vector3D::Zero(), locPos);
+                const MuonGM::MuonChannelDesign& design{*reElement->getDesign(strip_id)};
+                const double stripLength = 0.49 * reElement->stripLength(strip_id);
+                if (design.channelNumber(locPos) != channel || 
+                    design.channelNumber(locPos + stripLength *Amg::Vector2D::UnitY()) != channel ||
+                    design.channelNumber(locPos - stripLength *Amg::Vector2D::UnitY()) != channel ){
+                    ATH_MSG_FATAL("Conversion of channel -> strip -> channel failed for "
+                            <<m_idHelperSvc->toString(strip_id)<<", global pos:"
+                            <<Amg::toString(globStripPos)<<", locPos: "<<Amg::toString(locPos)
+                            <<", backward channel: "<<design.channelNumber(locPos));
+                    return StatusCode::FAILURE;
+                }                
+            }
         }
         ATH_CHECK(dumpToTree(ctx,reElement));
 
@@ -106,6 +136,7 @@ StatusCode GeoModelMmTest::dumpToTree(const EventContext& ctx, const MuonGM::MMR
     m_stationName = id_helper.stationName(detElId);
     const int multilayer = id_helper.multilayer(detElId);
     m_multilayer = multilayer;
+    m_stStripPitch = roEl->getDesign(detElId)->inputPitch;
 
 
     /// Transformation of the readout element (Translation, ColX, ColY, ColZ) 
@@ -113,9 +144,9 @@ StatusCode GeoModelMmTest::dumpToTree(const EventContext& ctx, const MuonGM::MMR
     m_readoutTransform = roEl->transform();
     for (int gasgap = 1; gasgap <= 4; ++gasgap) {
 
-        Identifier layerId = id_helper.channelID(detElId, multilayer, gasgap, 1024);
-        int fStrip = roEl->numberOfMissingBottomStrips(layerId)+1;
-        int lStrip = id_helper.channelMax(layerId)-roEl->numberOfMissingTopStrips(layerId);
+        const Identifier layerId = id_helper.channelID(detElId, multilayer, gasgap, 1024);
+        const int fStrip = roEl->numberOfMissingBottomStrips(layerId)+1;
+        const int lStrip = id_helper.channelMax(layerId)-roEl->numberOfMissingTopStrips(layerId);
         
         for (int channel=fStrip; channel<=lStrip; ++channel) {
 
@@ -137,18 +168,18 @@ StatusCode GeoModelMmTest::dumpToTree(const EventContext& ctx, const MuonGM::MMR
                           l_left{Amg::Vector2D::Zero()},
                           l_right{Amg::Vector2D::Zero()};
 
-            const MuonGM::MuonChannelDesign* design = roEl->getDesign(strip_id);
+            const MuonGM::MuonChannelDesign& design{*roEl->getDesign(strip_id)};
 
-            design->leftEdge(channel, l_left);
-            design->center(channel, l_cen);
-            design->rightEdge(channel, l_right);
+            design.leftEdge(channel, l_left);
+            design.center(channel, l_cen);
+            design.rightEdge(channel, l_right);
 
             roEl->surface(strip_id).localToGlobal(l_left, Amg::Vector3D::Zero(), strip_leftEdge);
             roEl->surface(strip_id).localToGlobal(l_cen, Amg::Vector3D::Zero(), strip_center);
             roEl->surface(strip_id).localToGlobal(l_right, Amg::Vector3D::Zero(), strip_rightEdge);
 
             m_locStripCenter.push_back(l_cen);
-            m_isStereo.push_back(design->hasStereoAngle());           
+            m_isStereo.push_back(design.hasStereoAngle());           
             m_gasGap.push_back(id_helper.gasGap(strip_id));
             m_channel.push_back(id_helper.channel(strip_id));
             m_stripCenter.push_back(strip_center);
@@ -159,23 +190,17 @@ StatusCode GeoModelMmTest::dumpToTree(const EventContext& ctx, const MuonGM::MMR
             m_stripActiveLengthLeft.push_back(roEl->stripActiveLengthLeft(strip_id));
             m_stripActiveLengthRight.push_back(roEl->stripActiveLengthRight(strip_id));
 
-            m_ActiveHeightR = roEl->getDesign(strip_id)->xSize();  
-            m_ActiveWidthL = roEl->getDesign(strip_id)->maxYSize();            
-            m_ActiveWidthS = roEl->getDesign(strip_id)->minYSize();
+            m_ActiveHeightR = design.xSize();  
+            m_ActiveWidthL =  design.maxYSize();            
+            m_ActiveWidthS =  design.minYSize();
 
             if (channel != fStrip) continue;
-            // /// Strip center
-            // const Amg::Vector3D globStripPos = roEl->globalPosition();
-            // Amg::Vector2D locStripPos{Amg::Vector2D::Zero()};
-            // const Trk::Surface& surf{roEl->surface(strip_id)};
-            // if (!surf.globalToLocal(globStripPos, Amg::Vector3D::Zero(), locStripPos)){
-            //     ATH_MSG_FATAL("Failed to build local strip position "<<m_idHelperSvc->toString(strip_id));
-            //     return StatusCode::FAILURE;
-            // }
-            // const Amg::Transform3D locTransf{locStripPos.x,locStripPos.y,0};
-            // m_locStripCenter.push_back(locStripPos);                  
-            // m_stripRotGasGap.push_back(gasgap);
 
+            m_stripRot.push_back(roEl->transform(strip_id));
+            m_stripRotGasGap.push_back(gasgap);
+            m_firstStripPos.push_back(design.firstPos() * Amg::Vector2D::UnitX()); 
+            m_readoutFirstStrip.push_back(design.numberOfMissingBottomStrips() + 1);
+            m_readoutSide.push_back(roEl->getReadoutSide()[gasgap -1]);    
         }
     }
     return m_tree.fill(ctx) ? StatusCode::SUCCESS : StatusCode::FAILURE;

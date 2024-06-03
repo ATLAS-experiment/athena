@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // STL include(s):
@@ -139,10 +139,10 @@ StatusCode RoIBResultToxAOD::createEmTauRoI( const ROIB::RoIBResult& result,
    ATH_CHECK( detStore()->retrieve(l1menu) );
    // Digit scale for calorimeter trigger
    float caloTrigScale = static_cast<float>(l1menu->thrExtraInfo().EM().resolutionMeV());
-   for( auto thr : l1menu->thresholds("EM")) {
+   for( const auto& thr : l1menu->thresholds("EM")) {
       emThresholdNames[ thr->mapping() ] = thr->name();
    }
-   for( auto thr : l1menu->thresholds("TAU")) {
+   for( const auto& thr : l1menu->thresholds("TAU")) {
       tauThresholdNames[ thr->mapping() ] = thr->name();
    }
 
@@ -260,16 +260,16 @@ RoIBResultToxAOD::createJetEnergyRoI( const ROIB::RoIBResult& result,
    std::map<int, std::string> teNames;
    std::map<int, std::string> xsNames;
    std::map<int, std::string> jeNames;
-   for( auto thr : l1menu->thresholds("JET")) {
+   for( const auto& thr : l1menu->thresholds("JET")) {
       jetNames[ thr->mapping() ] = thr->name();
    }
-   for( auto thr : l1menu->thresholds("XE")) {
+   for( const auto& thr : l1menu->thresholds("XE")) {
       xeNames[ thr->mapping() ] = thr->name();
    }
-   for( auto thr : l1menu->thresholds("TE")) {
+   for( const auto& thr : l1menu->thresholds("TE")) {
       teNames[ thr->mapping() ] = thr->name();
    }
-   for( auto thr : l1menu->thresholds("XS")) {
+   for( const auto& thr : l1menu->thresholds("XS")) {
       xsNames[ thr->mapping() ] = thr->name();
    }
 
@@ -467,7 +467,7 @@ StatusCode RoIBResultToxAOD::createMuonRoI( const ROIB::RoIBResult& result,
 
    std::vector< TrigConf::TriggerThreshold* > muonThresholds;
    std::map< int, std::string > thresholdNames;
-   for( auto thr : l1menu->thresholds("MU")) {
+   for( const auto& thr : l1menu->thresholds("MU")) {
       thresholdNames[ thr->mapping() ] = thr->name();
    }
 

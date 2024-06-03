@@ -1,11 +1,13 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include <algorithm>
 #include "InDetPrepRawData/PixelCluster.h"
 #include "InDetIdentifier/PixelID.h"
 #include "InDetIdentifier/SCT_ID.h"
 #include "SpacePointCopier.h"
+#include "AthContainers/ConstAccessor.h"
+#include "AthContainers/Accessor.h"
 
 SpacePointCopier::SpacePointCopier(const std::string& name, ISvcLocator* pSvcLocator) :
   AthReentrantAlgorithm(name, pSvcLocator)
@@ -61,13 +63,13 @@ StatusCode SpacePointCopier::execute(const EventContext& context) const
 
   if ( goodNumberOfSpacePoints() and goodNumberOfTracks() ) {
     ATH_MSG_DEBUG("Converting "  << pixSize + SCTSize << " SPs");
-    static const SG::AuxElement::Accessor< float > x ("x");
-    static const SG::AuxElement::Accessor< float > y ("y");
-    static const SG::AuxElement::Accessor< float > z ("z");
-    static const SG::AuxElement::Accessor< float > tot ("tot");
-    static const SG::AuxElement::Accessor< short > csize ("csize");
-    static const SG::AuxElement::Accessor< unsigned int > module1 ("module1");
-    static const SG::AuxElement::Accessor< unsigned int > module2 ("module2");
+    static const SG::Accessor< float > x ("x");
+    static const SG::Accessor< float > y ("y");
+    static const SG::Accessor< float > z ("z");
+    static const SG::Accessor< float > tot ("tot");
+    static const SG::Accessor< short > csize ("csize");
+    static const SG::Accessor< unsigned int > module1 ("module1");
+    static const SG::Accessor< unsigned int > module2 ("module2");
 
     const PixelID *pixelID = nullptr;
     const SCT_ID *stripID = nullptr;
@@ -110,9 +112,12 @@ StatusCode SpacePointCopier::execute(const EventContext& context) const
       }
     }
     for ( size_t i = 0; i < std::min(10ul, output->size()); ++i ) {
-      ATH_MSG_DEBUG("Saves SP x y z: " << output->at(i)->auxdata<float>("x") 
-                                       << " " << output->at(i)->auxdata<float>("y")
-                                       << " " << output->at(i)->auxdata<float>("z") );
+      static const SG::ConstAccessor<float> xAcc ("x");
+      static const SG::ConstAccessor<float> yAcc ("y");
+      static const SG::ConstAccessor<float> zAcc ("z");
+      ATH_MSG_DEBUG("Saves SP x y z: " << xAcc(*output->at(i))
+                                       << " " << yAcc(*output->at(i))
+                                       << " " << zAcc(*output->at(i)) );
     }
     ATH_MSG_DEBUG("... and more ...");
   }

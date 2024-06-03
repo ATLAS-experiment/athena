@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // -------------------------------------------------------------
@@ -119,7 +119,7 @@ StatusCode TrackRecordGenerator::callGenerator() {
         ATH_MSG_DEBUG("Our initial momentum had zero magnitude!!");
         perpendicularMomentum.setX(0);
         perpendicularMomentum.setY(0);
-      } else if ( tan(dTheta) == 0 ){
+      } else if ( std::tan(dTheta) == 0 ){
         ATH_MSG_DEBUG("Randomly deciding to keep the vector's direction...");
         perpendicularMomentum.setX(0);
         perpendicularMomentum.setY(0);
@@ -177,33 +177,32 @@ StatusCode TrackRecordGenerator::callGenerator() {
 //---------------------------------------------------------------------------
 StatusCode TrackRecordGenerator::fillEvt(HepMC::GenEvent* event) {
 
-  if(m_fourMom.size()==m_fourPos.size()&&m_fourMom.size()==m_polarization.size()){
-
-    for(std::size_t v=0;v<m_fourMom.size();++v){
-      // Note: The vertex and particle are owned by the event, so the
-      // event is responsible for those pointers.
-
-      // Create the particle, and specify its polarization.
-      HepMC::GenParticlePtr particle = HepMC::newGenParticlePtr( HepMC::FourVector(m_fourMom[v].x(),m_fourMom[v].y(),m_fourMom[v].z(),m_fourMom[v].t()),  m_pdgCode[v], 1);
-      HepMC::set_polarization(particle, m_polarization[v]);
-
-      // Create the vertex, and add the particle to the vertex.
-      HepMC::GenVertexPtr vertex = HepMC::newGenVertexPtr(HepMC::FourVector(m_fourPos[v].x(),m_fourPos[v].y(),m_fourPos[v].z(),m_fourPos[v].t()));
-      vertex->add_particle_out( particle );
-
-      // Add the vertex to the event.
-      event->add_vertex( vertex );
-    } // Loop over the particles
-
-    event->set_event_number(m_events); // Set the event number
-    if (event->weights().empty()){
-      event->weights().push_back(1.0);
-    }
-    return StatusCode::SUCCESS;
-  } else {
+  if ( m_fourMom.size() != m_fourPos.size() || m_fourMom.size() != m_polarization.size()) {
     ATH_MSG_ERROR("Wrong different number of vertexes/momenta/polaritazions!");
     return StatusCode::FAILURE;
   }
+  for(std::size_t v = 0; v < m_fourMom.size(); ++v){
+    // Note: The vertex and particle are owned by the event, so the
+    // event is responsible for those pointers.
 
+    // Create the particle, and specify its polarization.
+    HepMC::GenParticlePtr particle = HepMC::newGenParticlePtr( HepMC::FourVector(m_fourMom[v].x(),m_fourMom[v].y(),m_fourMom[v].z(),m_fourMom[v].t()),  m_pdgCode[v], 1);
+
+    // Create the vertex, and add the particle to the vertex.
+    HepMC::GenVertexPtr vertex = HepMC::newGenVertexPtr(HepMC::FourVector(m_fourPos[v].x(),m_fourPos[v].y(),m_fourPos[v].z(),m_fourPos[v].t()));
+    vertex->add_particle_out( particle );
+
+    // Add the vertex to the event.
+    event->add_vertex( vertex );
+    
+    // Add attributes
+    HepMC::set_polarization(particle, m_polarization[v]);
+  } // Loop over the particles
+
+  event->set_event_number(m_events); // Set the event number
+  if (event->weights().empty()){
+      event->weights().push_back(1.0);
+  }
+  return StatusCode::SUCCESS;
 }
 

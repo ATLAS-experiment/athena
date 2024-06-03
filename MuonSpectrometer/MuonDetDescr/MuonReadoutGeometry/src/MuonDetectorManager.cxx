@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
@@ -8,6 +8,7 @@
 #include <utility>
 
 #include "GeoPrimitives/GeoPrimitivesHelpers.h"
+#include "GeoModelHelpers/throwExcept.h"
 #include "MuonAlignmentData/ALinePar.h"
 #include "MuonAlignmentData/BLinePar.h"
 #include "MuonReadoutGeometry/CscReadoutElement.h"
@@ -19,45 +20,66 @@
 #include "MuonReadoutGeometry/TgcReadoutElement.h"
 #include "MuonReadoutGeometry/sTgcReadoutElement.h"
 
+namespace {
+    template <typename read_out> void clearCache(std::vector<std::unique_ptr<read_out>>& array) {
+        for (std::unique_ptr<read_out>& ele : array) {
+            if (ele) ele->clearCache();
+        }
+    }
+    template <typename read_out> void fillCache(std::vector<std::unique_ptr<read_out>>& array) {
+        for (std::unique_ptr<read_out>& ele : array) {
+            if (ele) ele->fillCache();
+        }
+    }
+}
+
 namespace MuonGM {
 
     MuonDetectorManager::MuonDetectorManager(): AthMessaging{"MGM::MuonDetectorManager"} { 
         setName("Muon");
         if (m_idHelperSvc.retrieve().isFailure()) {
-            throw std::runtime_error("MuonDetectorManager() - No IdHelper svc is available");
+           THROW_EXCEPTION("MuonDetectorManager() - No IdHelper svc is available");
         }
         loadStationIndices();
+        if (m_idHelperSvc->hasMDT()){
+            m_mdtArray.resize(m_idHelperSvc->mdtIdHelper().detectorElement_hash_max());
+        }
+        if (m_idHelperSvc->hasCSC()){
+            m_cscArray.resize(m_idHelperSvc->cscIdHelper().detectorElement_hash_max());
+        }
+        if (m_idHelperSvc->hasTGC()){
+            m_tgcArray.resize(m_idHelperSvc->tgcIdHelper().detectorElement_hash_max());
+        }
+        if (m_idHelperSvc->hasRPC()){
+            m_rpcArray.resize(m_idHelperSvc->rpcIdHelper().detectorElement_hash_max());
+        }
+        
+        if (m_idHelperSvc->hasMM()){
+            m_mmcArray.resize(m_idHelperSvc->mmIdHelper().detectorElement_hash_max());
+        }
+        if (m_idHelperSvc->hasSTGC()){
+            m_stgArray.resize(m_idHelperSvc->stgcIdHelper().detectorElement_hash_max());
+        }
     }
 
     MuonDetectorManager::~MuonDetectorManager()  = default;
-    
-    template <typename read_out, size_t N> void MuonDetectorManager::clearCache(std::array<std::unique_ptr<read_out>, N>& array) {
-        for (std::unique_ptr<read_out>& ele : array) {
-            if (ele) ele->clearCache();
-        }
-    }
-    template <typename read_out, size_t N> void MuonDetectorManager::fillCache(std::array<std::unique_ptr<read_out>, N>& array) {
-        for (std::unique_ptr<read_out>& ele : array) {
-            if (ele) ele->fillCache();
-        }
-    }
 
     void MuonDetectorManager::clearCache() {
-        clearCache(m_mdtArray);
-        clearCache(m_rpcArray);
-        clearCache(m_tgcArray);
-        if (nCscRE())   clearCache(m_cscArray);
-        if (nMMRE())    clearCache(m_mmcArray);
-        if (nsTgcRE())  clearCache(m_stgArray);
+        ::clearCache(m_mdtArray);
+        ::clearCache(m_rpcArray);
+        ::clearCache(m_tgcArray);
+        ::clearCache(m_cscArray);
+        ::clearCache(m_mmcArray);
+        ::clearCache(m_stgArray);
     }
     void MuonDetectorManager::fillCache() {       
         ATH_MSG_INFO( "Filling cache" );
-        fillCache(m_mdtArray);
-        fillCache(m_rpcArray);
-        fillCache(m_tgcArray);
-        if (nCscRE()) fillCache(m_cscArray);
-        if (nMMRE()) fillCache(m_mmcArray);
-        if (nsTgcRE()) fillCache(m_stgArray);
+        ::fillCache(m_mdtArray);
+        ::fillCache(m_rpcArray);
+        ::fillCache(m_tgcArray);
+        ::fillCache(m_cscArray);
+        ::fillCache(m_mmcArray);
+        ::fillCache(m_stgArray);
     }
 
     unsigned int MuonDetectorManager::getNumTreeTops() const { return m_envelope.size(); }
@@ -105,26 +127,11 @@ namespace MuonGM {
     }
 
     void MuonDetectorManager::addRpcReadoutElement(std::unique_ptr<RpcReadoutElement>&& x) {
-        const Identifier id = x->identify();
-        // add RE to map by RE hash
-        const IdentifierHash Idhash = x->detectorElementHash();
-        if (Idhash >= RpcRElMaxHash) {
-            ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" Trying to add ReadoutElement "<<m_idHelperSvc->toStringDetEl(id)<<" with hash Id"
-                                  <<Idhash<<" exceeding the allowed boundaries 0-"<<RpcRElMaxHash);
-            throw std::runtime_error("Invalid hash assignment");
-        } else {
-            if (m_rpcArrayByHash[Idhash]) {
-                ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" Trying to add ReadoutElement "<<m_idHelperSvc->toStringDetEl(id)<<" which has been added before by"<<
-                              m_idHelperSvc->toStringDetEl(m_rpcArrayByHash[Idhash]->identify()));
-                throw std::runtime_error("Double assignment of the Hash");
-            }
-            m_rpcArrayByHash[Idhash] = x.get();
-        }
-        int dbz_index{-1};
-        int idx = rpcIdentToArrayIdx(id, dbz_index);
+        const Identifier id = x->identify();        
+        int idx = rpcIdentToArrayIdx(id);
         if (m_rpcArray[idx]) {
             ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" Trying to add ReadoutElement "<<m_idHelperSvc->toStringDetEl(id)<<" which has been already added.");
-            throw std::runtime_error("Double readout element assignment");               
+            THROW_EXCEPTION("Double readout element assignment");               
         }
         m_rpcArray[idx] = std::move(x);
         ++m_n_rpcRE;
@@ -139,7 +146,7 @@ namespace MuonGM {
         const int array_idx = mmIdenToArrayIdx(x->identify());
         if (m_mmcArray[array_idx]) {
             ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" Trying to add ReadoutElement "<<m_idHelperSvc->toStringDetEl(x->identify())<<" which has been already added.");
-            throw std::runtime_error("Double readout element assignment"); 
+            THROW_EXCEPTION("Double readout element assignment"); 
         }
         m_mmcArray[array_idx] = std::move(x);
         ++m_n_mmcRE;
@@ -149,26 +156,18 @@ namespace MuonGM {
         const int array_idx = stgcIdentToArrayIdx(x->identify());
         if (m_stgArray[array_idx]) {
             ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" Trying to add ReadoutElement "<<m_idHelperSvc->toStringDetEl(x->identify())<<" which has been already added.");
-            throw std::runtime_error("Double readout element assignment"); 
+            THROW_EXCEPTION("Double readout element assignment"); 
         }
         m_stgArray[array_idx] = std::move(x);
         ++m_n_stgRE;
     }
 
     void MuonDetectorManager::addMdtReadoutElement(std::unique_ptr<MdtReadoutElement>&& x) {       
-       const Identifier id = x->identify();
-        // add here the MdtReadoutElement to the array by RE hash
-        // use already known RE hash
-        const IdentifierHash Idhash = x->detectorElementHash();
-        if (Idhash >= MdtRElMaxHash) {
-            ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" Trying to add ReadoutElement "<<m_idHelperSvc->toStringDetEl(id)<<" with hash Id"
-                                  <<Idhash<<" exceeding the allowed boundaries 0-"<<MdtRElMaxHash);
-            throw std::runtime_error("Invalid hash assignment");
-        }     
+        const Identifier id = x->identify();
         const int arrayIdx = mdtIdentToArrayIdx(id);
         if (m_mdtArray[arrayIdx]) {
             ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" Trying to add ReadoutElement "<<m_idHelperSvc->toStringDetEl(id)<<" which has been already added.");
-            throw std::runtime_error("Double readout element assignment");
+            THROW_EXCEPTION("Double readout element assignment");
         }
         m_mdtArray[arrayIdx] = std::move(x);
         ++m_n_mdtRE;
@@ -186,17 +185,10 @@ namespace MuonGM {
 
     void MuonDetectorManager::addCscReadoutElement(std::unique_ptr<CscReadoutElement>&& x) {
         const Identifier id = x->identify();
-        // add here RE to array by hash
-        const IdentifierHash Idhash = x->detectorElementHash();
-        if (Idhash >= CscRElMaxHash) {
-            ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" Trying to add ReadoutElement "<<m_idHelperSvc->toStringDetEl(id)<<" with hash Id"
-                                  <<Idhash<<" exceeding the allowed boundaries 0-"<<CscRElMaxHash);
-            throw std::runtime_error("Invalid hash assignment");
-        }
         const int array_idx = cscIdentToArrayIdx(id);
         if (m_cscArray[array_idx]) {
             ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" Trying to add ReadoutElement "<<m_idHelperSvc->toStringDetEl(id)<<" which has been already added.");
-            throw std::runtime_error("Double readout element assignment");
+            THROW_EXCEPTION("Double readout element assignment");
         }
         m_cscArray[array_idx] = std::move(x);
         ++m_n_cscRE;
@@ -214,17 +206,10 @@ namespace MuonGM {
     
     void MuonDetectorManager::addTgcReadoutElement(std::unique_ptr<TgcReadoutElement>&& x) {
         const Identifier id = x->identify();
-        // add RE to array by RE hash
-        const IdentifierHash Idhash = x->detectorElementHash();
-        if (Idhash >= TgcRElMaxHash) {
-            ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" Trying to add ReadoutElement "<<m_idHelperSvc->toStringDetEl(id)<<" with hash Id"
-                                  <<Idhash<<" exceeding the allowed boundaries 0-"<<TgcRElMaxHash);
-            throw std::runtime_error("Invalid hash assignment");
-        }
         const int array_idx = tgcIdentToArrayIdx(id);
         if (m_tgcArray[array_idx]) {
             ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" Trying to add ReadoutElement "<<m_idHelperSvc->toStringDetEl(id)<<" which has been already added.");
-            throw std::runtime_error("Double readout element assignment");
+            THROW_EXCEPTION("Double readout element assignment");
         }
 
         m_tgcArray[array_idx] = std::move(x);
@@ -246,114 +231,67 @@ namespace MuonGM {
     const sTgcReadoutElement* MuonDetectorManager::getsTgcReadoutElement(const Identifier& id) const {
         const int array_idx = stgcIdentToArrayIdx(id);
         return array_idx < 0 ? nullptr : m_stgArray[array_idx].get();
-    }   
-    int MuonDetectorManager::mmIdenToArrayIdx(const Identifier& id) const {
-        const MmIdHelper& idHelper{m_idHelperSvc->mmIdHelper()};
-        IdentifierHash hash{0};
-        if (idHelper.get_detectorElement_hash(id,hash)) {
-           ATH_MSG_WARNING("Failed to retrieve a proper hash for "<<m_idHelperSvc->toString(id));
-           return -1;
-        }
-        return static_cast<int>(hash);
-    }
-
-    int MuonDetectorManager::stgcIdentToArrayIdx(const Identifier& id) const {
-        const sTgcIdHelper& idHelper{m_idHelperSvc->stgcIdHelper()};
-        IdentifierHash hash{0};
-        if (idHelper.get_detectorElement_hash(id,hash)) {
-           ATH_MSG_WARNING("Failed to retrieve a proper hash for "<<m_idHelperSvc->toString(id));
-           return -1;
-        }
-        return static_cast<int>(hash);
-    }
-    int MuonDetectorManager::rpcIdentToArrayIdx(const Identifier& id) const {
-        int dbl_z{-1};
-        return rpcIdentToArrayIdx(id, dbl_z);
-    }
-    int MuonDetectorManager::rpcIdentToArrayIdx(const Identifier& id, int& dbz_index) const {
-        const RpcIdHelper& idHelper{m_idHelperSvc->rpcIdHelper()};
-        const int stationName = idHelper.stationName(id);
-        const int stationEta = idHelper.stationEta(id);
-        const int doubletPhi = idHelper.doubletPhi(id);
-        const int doubletZ = idHelper.doubletZ(id);
-        const int doubletR = idHelper.doubletR(id);
-        const int stname_index = rpcStationTypeIdx(stationName);
-        const int steta_index = stationEta + NRpcStEtaOffset;
-        const int stphi_index = idHelper.stationPhi(id) - 1;
-        const int dbr_index = doubletR - 1;
-        dbz_index = doubletZ - 1;
-
-        // BMS 5/ |stEta|= 2 / dbR = 1 and 2 / dbZ = 3
-        // BMS 6/ |stEta|= 4 / dbR = 2 / dbZ = 3
-        // BMS 6/ |stEta|= 4 / dbR = 1 / dbZ = 2
-        // these are the special cases where we want the rpc at doubletPhi = 2
-        // to be addressed with a dbz_index=dbZ+1
-        if (stname_index == RpcStatType::BMS) {
-            if (std::abs(stationEta) == 2 && doubletZ == 3 && doubletPhi == 2)
-                ++dbz_index;
-            else if (std::abs(stationEta) == 4 && doubletR == 2 && doubletZ == 3 && doubletPhi == 2)
-                ++dbz_index;
-            else if (std::abs(stationEta) == 4 && doubletR == 1 && doubletZ == 2 && doubletPhi == 2)
-                ++dbz_index;
-        }
-#ifndef NDEBUG
-        if (stname_index < 0 || stname_index >= NRpcStatType) {
-            ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" station name index is out of range "<<stname_index<<" allowed 0-"<<(NRpcStatType-1));
-            throw std::runtime_error("Out of range station index index");
-        }
-        if (steta_index < 0 || steta_index >= NRpcStatEta) {
-            ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" eta index is out of range "<<steta_index<<" allowed 0-"<<(NRpcStatEta-1));
-            throw std::runtime_error("Out of range eta index");
-        }
-        if (stphi_index < 0 || stphi_index >= NRpcStatPhi) {
-            ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" phi index is out of range "<<stphi_index<<" allowed 0-"<<(NRpcStatPhi-1));
-            throw std::runtime_error("Out of range phi index");            
-       }
-        if (dbr_index < 0 || dbr_index >= NDoubletR) {
-            ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" doublet R index is out of range "<<dbr_index<<" allowed 0-"<<(NDoubletR-1));
-            throw std::runtime_error("Out of doublet R index");
-        }
-        if (dbz_index < 0 || dbz_index >= NDoubletZ) {
-            ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" doublet Z index is out of range "<<dbz_index<<" allowed 0-"<<(NDoubletZ-1));
-            throw std::runtime_error("Out of doublet Z index");
-       }
-#endif
-        /// Unfold the array by
-        /// [A][B][C][D][E]
-        /// a * BxCxDxE + b * CxDxE + c*DxE +d*E +e
-        constexpr int E = NDoubletZ;
-        constexpr int DxE = NDoubletR * E;
-        constexpr int CxDxE = NRpcStatPhi * DxE;
-        constexpr int BxCxDxE = NRpcStatEta * CxDxE;
-        const int arrayIdx = stname_index * BxCxDxE + steta_index * CxDxE + stphi_index * DxE + dbr_index * E + dbz_index;
-        return arrayIdx;
     }
     int MuonDetectorManager::mdtIdentToArrayIdx(const Identifier& id) const {
-       const MdtIdHelper& idHelper{m_idHelperSvc->mdtIdHelper()};
-       IdentifierHash hash{0};
-       if (idHelper.get_detectorElement_hash(id,hash)) {
+        const int hash = static_cast<int>(m_idHelperSvc->detElementHash(id));
+#ifndef NDEBUG
+        if (hash <0) {
            ATH_MSG_WARNING("Failed to retrieve a proper hash for "<<m_idHelperSvc->toString(id));
            return -1;
-       }
-       return static_cast<int>(hash);
+        }
+#endif 
+        return hash;
+    }
+
+    int MuonDetectorManager::mmIdenToArrayIdx(const Identifier& id) const {
+        const int hash = static_cast<int>(m_idHelperSvc->detElementHash(id));
+#ifndef NDEBUG
+        if (hash <0) {
+           ATH_MSG_WARNING("Failed to retrieve a proper hash for "<<m_idHelperSvc->toString(id));
+           return -1;
+        }
+#endif 
+        return hash;
+    }
+    int MuonDetectorManager::stgcIdentToArrayIdx(const Identifier& id) const {
+        const int hash = static_cast<int>(m_idHelperSvc->detElementHash(id));
+#ifndef NDEBUG
+        if (hash <0) {
+           ATH_MSG_WARNING("Failed to retrieve a proper hash for "<<m_idHelperSvc->toString(id));
+           return -1;
+        }
+#endif 
+        return hash;
+    }
+    int MuonDetectorManager::rpcIdentToArrayIdx(const Identifier& id) const {
+        const int hash = static_cast<int>(m_idHelperSvc->detElementHash(id));
+#ifndef NDEBUG
+        if (hash <0) {
+           ATH_MSG_WARNING("Failed to retrieve a proper hash for "<<m_idHelperSvc->toString(id));
+           return -1;
+        }
+#endif 
+        return hash;
     }
     int MuonDetectorManager::tgcIdentToArrayIdx(const Identifier& id) const {
-        const TgcIdHelper& idHelper{m_idHelperSvc->tgcIdHelper()};
-        IdentifierHash hash{0};
-        if (idHelper.get_detectorElement_hash(id,hash)) {
+        const int hash = static_cast<int>(m_idHelperSvc->detElementHash(id));
+#ifndef NDEBUG
+        if (hash <0) {
            ATH_MSG_WARNING("Failed to retrieve a proper hash for "<<m_idHelperSvc->toString(id));
            return -1;
         }
-        return static_cast<int>(hash);
+#endif 
+        return hash;
     }    
     int MuonDetectorManager::cscIdentToArrayIdx(const Identifier& id) const {
-        const CscIdHelper& idHelper{m_idHelperSvc->cscIdHelper()};
-        IdentifierHash hash{0};
-        if (idHelper.get_detectorElement_hash(id,hash)) {
+        const int hash = static_cast<int>(m_idHelperSvc->detElementHash(id));
+#ifndef NDEBUG
+        if (hash <0) {
            ATH_MSG_WARNING("Failed to retrieve a proper hash for "<<m_idHelperSvc->toString(id));
            return -1;
         }
-        return static_cast<int>(hash);
+#endif
+        return hash;
     }
     
     StatusCode MuonDetectorManager::updateAlignment(const ALineContainer& alineData) {
@@ -629,9 +567,9 @@ namespace MuonGM {
 
     const MdtReadoutElement* MuonDetectorManager::getMdtReadoutElement(const IdentifierHash& id) const {
 #ifndef NDEBUG
-        if (id >= MdtRElMaxHash) {           
+        if (id >= m_idHelperSvc->mdtIdHelper().detectorElement_hash_max()) {           
             ATH_MSG_WARNING(" try to getMdtReadoutElement with hashId " << (unsigned int)id << " outside range 0-"
-                << MdtRElMaxHash - 1 );
+                << m_idHelperSvc->mdtIdHelper().detectorElement_hash_max() - 1 );
             return nullptr;
         }
 #endif
@@ -640,20 +578,20 @@ namespace MuonGM {
 
     const RpcReadoutElement* MuonDetectorManager::getRpcReadoutElement(const IdentifierHash& id) const {
 #ifndef NDEBUG
-        if (id >= RpcRElMaxHash) {           
+        if (id >= m_idHelperSvc->rpcIdHelper().detectorElement_hash_max()) {           
             ATH_MSG_WARNING(" try to getRpcReadoutElement with hashId " << (unsigned int)id << " outside range 0-"
-                << RpcRElMaxHash - 1 );
+                << m_idHelperSvc->rpcIdHelper().detectorElement_hash_max() - 1 );
             return nullptr;
         }
 #endif
-        return m_rpcArrayByHash[id];
+        return m_rpcArray[id].get();
     }
 
     const TgcReadoutElement* MuonDetectorManager::getTgcReadoutElement(const IdentifierHash& id) const {
 #ifndef NDEBUG
-        if (id >= TgcRElMaxHash) {           
+        if (id >= m_idHelperSvc->tgcIdHelper().detectorElement_hash_max()) {           
             ATH_MSG_WARNING(" try to getTgcReadoutElement with hashId " << (unsigned int)id << " outside range 0-"
-                << TgcRElMaxHash - 1 );
+                << m_idHelperSvc->tgcIdHelper().detectorElement_hash_max() - 1 );
             return nullptr;
         }
 #endif
@@ -662,9 +600,9 @@ namespace MuonGM {
 
     const CscReadoutElement* MuonDetectorManager::getCscReadoutElement(const IdentifierHash& id) const {
 #ifndef NDEBUG
-        if (id >= CscRElMaxHash) {           
+        if (id >= m_idHelperSvc->cscIdHelper().detectorElement_hash_max()) {           
             ATH_MSG_WARNING(" try to getCscReadoutElement with hashId " << (unsigned int)id << " outside range 0-"
-                << CscRElMaxHash - 1 );
+                << m_idHelperSvc->cscIdHelper().detectorElement_hash_max() - 1 );
             return nullptr;
         }
 #endif
@@ -684,13 +622,6 @@ namespace MuonGM {
     }
     void MuonDetectorManager::loadStationIndices() {
         
-        if (m_idHelperSvc->hasMDT()) {
-            const MdtIdHelper& mdtHelper{m_idHelperSvc->mdtIdHelper()};
-            m_mdt_EIS_stName = mdtHelper.stationNameIndex("EIS");
-            m_mdt_BIM_stName = mdtHelper.stationNameIndex("BIM");
-            m_mdt_BME_stName = mdtHelper.stationNameIndex("BME");
-            m_mdt_BMG_stName = mdtHelper.stationNameIndex("BMG");
-        }
         if (!m_idHelperSvc->hasRPC()) return;
         const RpcIdHelper& rpcHelper{m_idHelperSvc->rpcIdHelper()};
         m_rpcStatToIdx.insert(std::make_pair(rpcHelper.stationNameIndex("BML"), RpcStatType::BML));

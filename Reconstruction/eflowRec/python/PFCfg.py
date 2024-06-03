@@ -67,8 +67,14 @@ def getPFCellLevelSubtractionTool(inputFlags,toolName):
         eflowCellEOverPTool_Run2_mc20_JetETMiss = CompFactory.eflowCellEOverPTool_Run2_mc20_JetETMiss
         PFCellLevelSubtractionTool.eflowCellEOverPTool = eflowCellEOverPTool_Run2_mc20_JetETMiss()
     else:
-        eflowCellEOverPTool_mc12_HLLHC = CompFactory.eflowCellEOverPTool_mc12_HLLHC 
-        PFCellLevelSubtractionTool.eflowCellEOverPTool = eflowCellEOverPTool_mc12_HLLHC ()
+        if inputFlags.PF.useLegacyEOverPRun4:
+            eflowCellEOverPTool_mc12_HLLHC = CompFactory.eflowCellEOverPTool_mc12_HLLHC 
+            PFCellLevelSubtractionTool.eflowCellEOverPTool = eflowCellEOverPTool_mc12_HLLHC ()
+        else:
+            PFCellEOverPTool = CompFactory.PFCellEOverPTool
+            PFCellLevelSubtractionTool.eflowCellEOverPTool = PFCellEOverPTool("PFCellEOverPTool", referenceFileLocation = inputFlags.PF.EOverP_CellOrdering_ReferenceLocation)
+            #this should always be false for any reference derived, except eflowCellEOverPTool_mc12_HLLHC.h or eflowCellEOverPTool_Run2_mc20_JetETMiss.h
+            PFCellLevelSubtractionTool.useLegacyEBinIndex=False
 
     if(inputFlags.PF.EOverPMode):
         PFCellLevelSubtractionTool.CalcEOverP = True
@@ -99,8 +105,14 @@ def getPFRecoverSplitShowersTool(inputFlags,toolName):
         eflowCellEOverPTool_Run2_mc20_JetETMiss = CompFactory.eflowCellEOverPTool_Run2_mc20_JetETMiss
         PFRecoverSplitShowersTool.eflowCellEOverPTool = eflowCellEOverPTool_Run2_mc20_JetETMiss("eflowCellEOverPTool_Run2_mc20_JetETMiss_Recover")
     else:
-        eflowCellEOverPTool_mc12_HLLHC = CompFactory.eflowCellEOverPTool_mc12_HLLHC 
-        PFRecoverSplitShowersTool.eflowCellEOverPTool = eflowCellEOverPTool_mc12_HLLHC ()
+        if inputFlags.PF.useLegacyEOverPRun4:
+            eflowCellEOverPTool_mc12_HLLHC = CompFactory.eflowCellEOverPTool_mc12_HLLHC 
+            PFRecoverSplitShowersTool.eflowCellEOverPTool = eflowCellEOverPTool_mc12_HLLHC ()
+        else:
+            PFCellEOverPTool = CompFactory.PFCellEOverPTool
+            PFRecoverSplitShowersTool.eflowCellEOverPTool = PFCellEOverPTool("PFCellEOverPTool_Recover", referenceFileLocation = inputFlags.PF.EOverP_CellOrdering_ReferenceLocation)
+            #this should always be false for any reference derived, except eflowCellEOverPTool_mc12_HLLHC.h or eflowCellEOverPTool_Run2_mc20_JetETMiss.h
+            PFRecoverSplitShowersTool.useLegacyEBinIndex=False
 
     PFRecoverSplitShowersTool.RecoverSplitShowers = True
 

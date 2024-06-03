@@ -448,7 +448,7 @@ namespace Analysis {
         if (m_useMassConst) {
             constexpr double jpsiTableMass = 3096.916;
             m_VKVFitter->setMassInputParticles(m_altMassMuonTracks,*state);
-            std::vector<int> indices= {1, 2};
+            std::array<int,2> indices= {1, 2};
             if (m_altMassConst<0.0) m_VKVFitter->setMassForConstraint(jpsiTableMass,indices,*state);
             if (m_altMassConst>0.0) m_VKVFitter->setMassForConstraint(m_altMassConst,indices,*state);
         }
@@ -560,7 +560,7 @@ namespace Analysis {
         
     }
     
-    bool  JpsiPlus2Tracks::passCuts(xAOD::BPhysHelper &bHelper, const std::vector<double> &masses, const std::string &str) const{
+    bool  JpsiPlus2Tracks::passCuts(xAOD::BPhysHelper &bHelper, std::span<const double> masses, std::string_view str) const{
        
         TLorentzVector bMomentum = bHelper.totalP(masses);
 //      ATH_MSG_DEBUG(bMomentum.X() << " " << bMomentum.Y()<< " " << bMomentum.Z() << " " << bMomentum.E());
@@ -570,9 +570,10 @@ namespace Analysis {
         ATH_MSG_DEBUG("Candidate pt/mass under " << str << " track mass hypothesis is " << bPt << " / " << bMass);
         if( !JpsiUpsilonCommon::cutAcceptGreater(bPt, m_BThresholdPt)) return false;
         if( !JpsiUpsilonCommon::cutRange(bMass, m_BMassLower, m_BMassUpper)) return false;
-	TLorentzVector tr1 = bHelper.refTrk(2,masses.at(2));
-	TLorentzVector tr2 = bHelper.refTrk(3,masses.at(3));
-	double bDiTrkPt   = (tr1+tr2).Pt();
+        assert(masses.size()==4);
+        TLorentzVector tr1 = bHelper.refTrk(2,masses[2]);
+        TLorentzVector tr2 = bHelper.refTrk(3,masses[3]);
+        double bDiTrkPt   = (tr1+tr2).Pt();
         double bDiTrkMass = (tr1+tr2).M();
         if( !JpsiUpsilonCommon::cutAcceptGreater(bDiTrkPt, m_finalDiTrackPt)) return false;
         if( !JpsiUpsilonCommon::cutRange(bDiTrkMass, m_finalDiTrackMassLower, m_finalDiTrackMassUpper)) return false;

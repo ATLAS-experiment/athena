@@ -24,6 +24,7 @@
 #include "xAODTracking/TrackParametersContainer.h"
 #include "xAODTracking/TrackStateAuxContainer.h"
 #include "xAODTracking/TrackStateContainer.h"
+#include "ActsGeometryInterfaces/ActsGeometryContext.h"
 
 
 DumpEventDataToJsonAlg::DumpEventDataToJsonAlg(const std::string &name,
@@ -64,22 +65,20 @@ StatusCode DumpEventDataToJsonAlg::initialize() {
     ATH_CHECK(m_trtPrepRawDataKey.initialize());
 
   ATH_CHECK(m_extrapolator.retrieve( DisableTool{m_extrapolator.empty()} ));
-  ATH_CHECK(m_trackingGeometryTool.retrieve( DisableTool{m_trackingGeometryTool.empty()} ));
   if (m_extrapolator.empty()) {
     ATH_MSG_WARNING("No extrapolator found. Will not be able to extrapolate tracks.");
   } else {
     ATH_MSG_INFO("Extrapolator found. Will be able to extrapolate tracks.");
   }
+
+  if (!m_geometryContextKey.empty())
+    ATH_CHECK(m_geometryContextKey.initialize());
+
   return StatusCode::SUCCESS;
 }
 
-// Specialisation for TrackProxy
-// TODO understand why this is not matching: ActsTrk::TrackContainer::TrackProxy
-template <>
-nlohmann::json DumpEventDataToJsonAlg::getData(const Acts::TrackProxy<ActsTrk::TrackSummaryContainer, ActsTrk::MultiTrajectory, ActsTrk::DataLinkHolder, true> &track) {
+nlohmann::json DumpEventDataToJsonAlg::getActsData(const Acts::TrackProxy<ActsTrk::TrackSummaryContainer, ActsTrk::MultiTrajectory, ActsTrk::DataLinkHolder, true> &track, const Acts::GeometryContext& gctx) {
   nlohmann::json data;
-
-  Acts::GeometryContext gctx = m_trackingGeometryTool->getGeometryContext(getContext()).context();
 
   // ACTS units are GeV, whilst ATLAS is MeV. So we need to convert.
   data["dparams"] = {track.loc0(), track.loc1(), track.phi(), track.theta(), track.qOverP() * 0.001};
@@ -163,20 +162,21 @@ StatusCode DumpEventDataToJsonAlg::execute() {
   ATH_CHECK(getAndFillArrayOfContainers(j, m_trackCollectionKeys, "Tracks"));
 
   // ACTS
+  if (!m_geometryContextKey.empty()){
   auto tcHandles = m_trackContainerKeys.makeHandles();
-
+  SG::ReadHandle<ActsGeometryContext> gcx(m_geometryContextKey, Gaudi::Hive::currentContext());
 
   for ( SG::ReadHandle<ActsTrk::TrackContainer>& tcHandle: tcHandles ) {
     // Temporary debugging information
     ATH_MSG_VERBOSE("TrackStateContainer has "<< tcHandle->size() << " elements");
-
     
     ATH_MSG_VERBOSE("Trying to load " << tcHandle.key() << " with " << tcHandle->size() << " tracks");
     const ActsTrk::TrackContainer* tc = tcHandle.get();
     for (auto track : *tc) {
-      nlohmann::json tmp = getData(track);
+      nlohmann::json tmp = getActsData(track, gcx->context());
       j["TrackContainers"][tcHandle.key()].push_back(tmp);
     }
+  }
   }
 
   // hits

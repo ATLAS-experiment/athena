@@ -9,7 +9,7 @@ ignore_pattern="ActsTrackFindingAlg.+ERROR.+Propagation.+reached.+the.+step.+cou
 
 export ATHENA_CORE_NUMBER=1
 Reco_tf.py --CA \
-  --preExec "flags.Exec.FPE=500;" "from Campaigns import PhaseIINoPileUp; PhaseIINoPileUp(flags);" \
+  --preExec "flags.Exec.FPE=-1;" "from Campaigns import PhaseIINoPileUp; PhaseIINoPileUp(flags);" \
   --preInclude "all:InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" "all:ActsConfig.ActsCIFlags.actsHeavyIonFlags" \
   --postInclude "all:PyJobTransforms.UseFrontier" \
   --autoConfiguration everything \

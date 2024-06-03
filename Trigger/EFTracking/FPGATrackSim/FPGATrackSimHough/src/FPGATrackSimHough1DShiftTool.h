@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #ifndef FPGATRACKSIMHOUGH1DSHIFTTOOL_H
 #define FPGATRACKSIMHOUGH1DSHIFTTOOL_H
@@ -136,7 +136,6 @@ class FPGATrackSimHough1DShiftTool : public AthAlgTool, virtual public IFPGATrac
         Gaudi::Property<float> m_d0spread {this, "d0spread", -1.0, "Make patterns with a d0spread as given, negative value turns it off" };
         Gaudi::Property<std::vector<float>> m_hitExtendProperty {this, "hitExtend", {}, "Number of adjacent bins that a hit triggers" };
         Gaudi::Property<std::string> m_bitShift_path { this, "bitShifts", "", "Instead of calculating bit shifts, input a list of shifts via a text file" };
-        Gaudi::Property<std::string> m_radii_file { this, "radiiFile", "", "Provide file with mean radii per layer for each subregion" };
         Gaudi::Property<bool> m_applyDropable { this, "applyDropable", false, "Enable logic that prevents redundant patterns with dropped hits" };
         Gaudi::Property<int> m_neighborWindow { this, "neighborWindow", 0, "Supress if neighbors have higher number of hit layers" };
         Gaudi::Property<unsigned> m_historyWindow {this, "historyWindow", 0, "Suppress if previous N bit shifts have neighbors with higher nubmer of hit layers" };
@@ -145,7 +144,7 @@ class FPGATrackSimHough1DShiftTool : public AthAlgTool, virtual public IFPGATrac
 
 
         std::vector<float> m_hitExtend; // need second copy because property is "const" and can't be changed to default
-        std::vector<float> m_r;  // will be filled from m_radii_file
+        std::vector<float> m_r;  // will be filled from m_radii_file (now loaded through region map class).
 
         ///////////////////////////////////////////////////////////////////////
         // Convenience
@@ -191,7 +190,7 @@ class FPGATrackSimHough1DShiftTool : public AthAlgTool, virtual public IFPGATrac
         void readShifts(std::string const & filepath);
         std::vector<boost::dynamic_bitset<>> makeHitMasks(const std::vector<const FPGATrackSimHit*> & hits);
 
-        FPGATrackSimRoad makeRoad(std::vector<const FPGATrackSimHit*> hits, int bin_track, size_t iShift);
+        FPGATrackSimRoad makeRoad(const std::vector<const FPGATrackSimHit*>& hits, int bin_track, size_t iShift);
         void matchIdealGeoSector(FPGATrackSimRoad & r) const;
         bool passThreshold(std::vector<boost::dynamic_bitset<>>& binHits, int bin ) const;
         void printHitMasks(std::vector<boost::dynamic_bitset<>> const & hitMasks) const;
@@ -208,11 +207,11 @@ class FPGATrackSimHough1DShiftTool : public AthAlgTool, virtual public IFPGATrac
         float deltaPhi(float r, float qPt) const;
 
         void calculated0Shifts();
-        std::vector<int> applyVariation(std::vector<int> base, std::vector<int> var, int sign) const;
+        std::vector<int> applyVariation(const std::vector<int>& base, const std::vector<int>& var, int sign) const;
         void calculateDropable();
         std::vector<int> shiftWithDrop(std::vector<int>& shift,unsigned droplayer) const;
 
-        void readRadii(std::string const & filepath);
+
 };
 
 

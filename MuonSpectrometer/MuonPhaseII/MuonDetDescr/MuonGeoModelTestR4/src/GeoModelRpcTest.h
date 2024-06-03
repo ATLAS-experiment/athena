@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONGEOMODELTESTR4_GEOMODELRPCTEST_H
 #define MUONGEOMODELTESTR4_GEOMODELRPCTEST_H
@@ -11,8 +11,10 @@
 #include <MuonTesterTree/MuonTesterTree.h>
 #include <MuonTesterTree/IdentifierBranch.h>
 #include <MuonTesterTree/ThreeVectorBranch.h>
+#include <MuonTesterTree/TwoVectorBranch.h>
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
 #include <MuonTesterTree/CoordTransformBranch.h>
+
 namespace MuonGMR4{
 
 class GeoModelRpcTest : public AthHistogramAlgorithm{
@@ -89,6 +91,7 @@ class GeoModelRpcTest : public AthHistogramAlgorithm{
       
       /// Strip positions
       MuonVal::ThreeVectorBranch m_stripPos{m_tree, "stripPos"};
+      MuonVal::TwoVectorBranch m_locStripPos{m_tree, "stripLocPos"};
       MuonVal::VectorBranch<bool>& m_stripPosMeasPhi{m_tree.newVector<bool>("stripPosMeasPhi")};
       MuonVal::VectorBranch<uint8_t>& m_stripPosGasGap{m_tree.newVector<uint8_t>("stripPosGasGap")};
       MuonVal::VectorBranch<uint8_t>& m_stripPosNum{m_tree.newVector<uint8_t>("stripPosNum")};

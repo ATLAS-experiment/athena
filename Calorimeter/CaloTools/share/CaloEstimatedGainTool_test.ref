@@ -105,10 +105,6 @@ DetDescrCnvSvc                                       INFO  filling address for C
 DetDescrCnvSvc                                       INFO  filling address for CaloCell_SuperCell_ID with CLID 128365736 and storage type 68 to detector store 
 DetDescrCnvSvc                                       INFO  filling address for CaloDM_ID with CLID 167756483 and storage type 68 to detector store 
 DetDescrCnvSvc                                       INFO  filling address for ZdcID with CLID 190591643 and storage type 68 to detector store 
-GeoModelSvc::RDBMaterialManager                   WARNING  Getting PixTBMatComponents with default tag
-GeoModelSvc::RDBMaterialManager                   WARNING  Getting PixTBMaterials with default tag
-GeoModelSvc::RDBMaterialManager                   WARNING  Getting InDetMatComponents with default tag
-GeoModelSvc::RDBMaterialManager                   WARNING  Getting InDetMaterials with default tag
 EventPersistencySvc                                  INFO Added successfully Conversion service:DetDescrCnvSvc
 LArElectrodeIDDetDescrCnv                            INFO in createObj: creating a LArElectrodeID helper object in the detector store
 IdDictDetDescrCnv                                    INFO in initialize

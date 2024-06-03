@@ -44,6 +44,11 @@ class MetAnalysisConfig (ConfigBlock):
         self.addOption ('metWP', "Tight", type=str,
             info="the MET working point to use: Loose, Tight, Tighter, "
             "Tenacious")
+        self.addOption ('skipSystematicJetSelection', False, type=bool,
+            info="EXPERIMENTAL: whether to use simplified OR based on nominal jets "
+            "and for jet-related systematics only. "
+            "WARNING: this option is strictly for doing physics studies of the feasibility "
+            "of this OR scheme, it should not be used in a regular analysis")
 
     def makeAlgs (self, config) :
 
@@ -67,6 +72,7 @@ class MetAnalysisConfig (ConfigBlock):
         alg = config.createAlgorithm( 'CP::MetMakerAlg', 'MetMakerAlg' + postfix)
         config.addPrivateTool( 'makerTool', 'met::METMaker' )
         config.addPrivateTool( 'makerTool.JvtSelTool', 'CP::NNJvtSelectionTool' )
+        alg.makerTool.skipSystematicJetSelection = self.skipSystematicJetSelection
         alg.makerTool.JvtSelTool.JetContainer = config.readName (self.jets)
         alg.makerTool.JetSelection = self.metWP
         alg.makerTool.DoPFlow = 'PFlow' in metSuffix or metSuffix=="AnalysisMET"

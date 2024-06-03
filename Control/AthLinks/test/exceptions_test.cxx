@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthLinks/test/exceptions_test.cxx
@@ -28,6 +28,7 @@ void test1()
   std::cout << SG::ExcIncomparableEL().what() << "\n";
   std::cout << SG::ExcBadToTransient().what() << "\n";
   std::cout << SG::ExcConstStorable (123, "key", 765).what() << "\n";
+  std::cout << SG::ExcBadThinning (123, "key", 765).what() << "\n";
 }
 
 

@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // author: jie.yu@cern.ch
 
 #include "ParticleJetTools/JetParticleCenterOfMassAssociation.h"
 #include "AsgMessaging/Check.h"
+#include "AthContainers/ConstAccessor.h"
 #include "TLorentzVector.h"
 
 using namespace std;
@@ -35,17 +36,18 @@ JetParticleCenterOfMassAssociation::match(const JetContainer& jets, const xAOD::
 
         const IParticle& part = **part_itr;
 
+        static const SG::ConstAccessor< ElementLink< JetContainer > > ParentAcc ("Parent");
         double deltaAngleMatch = 999.;
         int matchjetidx = -1;
         for (unsigned int iJet = 0; iJet < jets.size(); iJet++) {
             const Jet& jet = *jets[iJet];
 
-            bool foundEL = jet.isAvailable< ElementLink< JetContainer > >("Parent");
+            bool foundEL = ParentAcc.isAvailable (jet);
             if ( ! foundEL ){
                 ATH_MSG_WARNING("PARTICLE to JET center-of-mass Associator: PARENT jet not available.");
                 continue;
             }
-            ElementLink< JetContainer > assoParentJet = jet.auxdata< ElementLink< JetContainer > >("Parent");
+            ElementLink< JetContainer > assoParentJet = ParentAcc (jet);
             if ( ! assoParentJet.isValid()){
                 ATH_MSG_WARNING("PARTICLE to JET center-of-mass Associator: Unable to get parent link Null ptr is returned.");
                 continue;

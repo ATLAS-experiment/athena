@@ -12,6 +12,8 @@
 #include <dqm_core/Algorithm.h>
 #include <string>
 #include <iosfwd>
+#include <TH1.h>
+
 
 namespace dqm_algorithms
 {
@@ -24,6 +26,7 @@ namespace dqm_algorithms
     dqm_core::Result * execute( const std::string & , const TObject & , const dqm_core::AlgorithmConfig & );
     using dqm_core::Algorithm::printDescription;
     void  printDescription(std::ostream& out);
+    void MDTFitTDC(TH1* h, double &t0, double &t0err, double &tmax, double &tmaxerr);
     
     private:
     std::string m_name;

@@ -16,8 +16,8 @@ def PhotonVariableCorrectionToolCfg(
         flags, name="PhotonVariableCorrectionTool", **kwargs):
     """Configure the e/gamma variable correction tool"""
     acc = ComponentAccumulator()
-    # Keep using TUNE 23 for now for photons
-    kwargs.setdefault("ConfigFile", "EGammaVariableCorrection/TUNE23/ElPhVariableNominalCorrection.conf")
+    # Use TUNE 25 for now for photons
+    kwargs.setdefault("ConfigFile", "EGammaVariableCorrection/TUNE25/ElPhVariableNominalCorrection.conf")
     acc.setPrivateTools(
         CompFactory.ElectronPhotonVariableCorrectionTool(name, **kwargs))
     return acc

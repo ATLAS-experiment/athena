@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file DataModelTestDataCommon/src/CTrigAuxContainer_v1.xcx
  * @author scott snyder <snyder@bnl.gov>
@@ -20,8 +18,6 @@ namespace DMTest {
 CTrigAuxContainer_v1::CTrigAuxContainer_v1()
   : xAOD::ByteStreamAuxContainer_v1()
 {
-  AUX_VARIABLE (anInt);
-  AUX_VARIABLE (aFloat);
 }
 
 

@@ -14,7 +14,7 @@ aod2daod = ExecStep.ExecStep('AODtoDAOD')
 aod2daod.type = 'Derivation_tf'
 aod2daod.input = 'data_run2_reco_run3_AOD'
 aod2daod.explicit_input = True
-aod2daod.args = ' --formats=PHYS --outputDAODFile=DAOD.pool.root --CA True'
+aod2daod.args = ' --formats=PHYS --outputDAODFile=DAOD.pool.root'
 aod2daod.args += ' --preExec="flags.Trigger.doEDMVersionConversion=True;"'
 test = Test.Test()
 test.art_type = 'build'

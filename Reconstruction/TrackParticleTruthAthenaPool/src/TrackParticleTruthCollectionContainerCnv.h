@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRACKPARTICLETRUTHCOLLECTIONCONTCNV_H
@@ -23,6 +23,7 @@ typedef T_AthenaPoolCustomCnv<TrackParticleTruthCollectionContainer, TrackPartic
 
 class TrackParticleTruthCollectionContainerCnv_tlp1;
 class TrackParticleTruthCollectionContainerCnv_tlp2;
+class TrackParticleTruthCollectionContainerCnv_tlp3;
 
 
 class TrackParticleTruthCollectionContainerCnv : public TrackParticleTruthCollectionContainerCnvBase
@@ -38,6 +39,7 @@ protected:
 private:
   TrackParticleTruthCollectionContainerCnv_tlp1* m_converter_p1;
   TrackParticleTruthCollectionContainerCnv_tlp2* m_converter_p2;
+  TrackParticleTruthCollectionContainerCnv_tlp3* m_converter_p3;
 };
 
 #endif

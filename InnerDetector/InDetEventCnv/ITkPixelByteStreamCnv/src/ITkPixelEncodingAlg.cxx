@@ -35,7 +35,7 @@ StatusCode ITkPixelEncodingAlg::execute(const EventContext& ctx) const
 
   SG::ReadHandle<PixelRDO_Container> rdoContainer(m_pixelRDOKey, ctx);
 
-  m_hitSortingTool->sortRDOHits(rdoContainer);
+  ATH_CHECK(m_hitSortingTool->sortRDOHits(rdoContainer));
 
   return StatusCode::SUCCESS;
 }

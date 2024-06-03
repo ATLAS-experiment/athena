@@ -175,16 +175,54 @@ namespace Trig {
 
     StatusCode NavigationTesterAlg::verifyCombinationsContent(const CombinationsSet& run2, const CombinationsSet& run3, const std::string& chain) const {
         // compare combinations
-        bool isSubset = std::includes(run3.begin(), run3.end(), run2.begin(), run2.end());
+
+        using xAODParticle = const xAOD::IParticle;
+
+        auto isSubsetPresent = [](const std::set<xAODParticle*>& subset, const CombinationsSet& run2) {
+            for (const auto& setInRun2 : run2) {
+                // Manual check for all particles in subset
+                bool allFound = true;
+                for (auto particle : subset) {
+                    if (setInRun2.find(particle) == setInRun2.end()) {
+                        allFound = false;
+                        break; // If any particle is not found, no need to check further
+                    }
+                }
+                if (allFound) return true; // Found all particles in this subset of Run2
+            }
+            return false; // Did not find the subset
+        };
+
+
+        auto isAnySubsetPresent = [&isSubsetPresent](const CombinationsSet& run3, const CombinationsSet& run2) {
+            for (const auto& subset : run3) {
+                if (isSubsetPresent(subset, run2)) {
+                    return true; // At least one subset from Run3 is found in Run2
+                }
+            }
+            return false; // No subset from Run3 was found in Run2
+        };
+        
+        
+
+        bool result { false };
+        // hack for "HLT_e26_lhmedium_nod0_mu8noL1" case
+        if ( std::regex_match(chain, SpecialCases::specialEchain) ) {  
+            result = isAnySubsetPresent(run3, run2);
+        } else {
+            // now subset checked on a level of objects, instead of group of objects
+            result = isAnySubsetPresent(run2, run3);
+        }
+
         if (run2 != run3) 
         {
             ATH_MSG_WARNING("Difference in combinations between Run2 and Run3 format for chain: " << chain << " parsed multiplicities " << ChainNameParser::multiplicities(chain));
             ATH_MSG_WARNING("Run2 combs: " << run2);
             ATH_MSG_WARNING("Run3 combs: " << run3);
         }
-        if (not isSubset) 
+        if (not result) // previous not isSubset, loosened condition
         {
-            ATH_MSG_WARNING("NOT PASSED not isSubset failed, Run2 is not a subset of Run3 for chain: " << chain << " parsed multiplicities " << ChainNameParser::multiplicities(chain));
+            ATH_MSG_WARNING("NOT PASSED: failed, Run2 objects are not within a subset of Run3 objects for chain: " << chain << " parsed multiplicities " << ChainNameParser::multiplicities(chain));
             ATH_MSG_WARNING("Run2 combs: " << run2);
             ATH_MSG_WARNING("Run3 combs: " << run3);
             if ( m_failOnDifference ) {

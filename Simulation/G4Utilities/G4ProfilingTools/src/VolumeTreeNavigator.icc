@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //VolumeTreeNavigator.icc - Access functions for VolumeTreeNavigator class
@@ -61,7 +61,7 @@ int VolumeTreeNavigator::GetStepNumber() const
 }
 
 inline
-VolTree VolumeTreeNavigator::GetHistory() const 
+const VolTree& VolumeTreeNavigator::GetHistory() const 
 {
   return m_history;
 }

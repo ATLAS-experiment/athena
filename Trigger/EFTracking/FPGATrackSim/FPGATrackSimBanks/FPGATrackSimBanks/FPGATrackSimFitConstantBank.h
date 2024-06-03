@@ -1,9 +1,10 @@
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #ifndef FPGATrackSimFITCONSTANTBANK_H
 #define FPGATrackSimFITCONSTANTBANK_H
 
 #include <Eigen/StdVector>
+// cppcheck-suppress unknownMacro
 EIGEN_DEFINE_STL_VECTOR_SPECIALIZATION(Eigen::MatrixXf)
 #include <Eigen/Core>
 #include <Eigen/LU>
@@ -53,7 +54,7 @@ class FPGATrackSimFitConstantBank : public AthMessaging
   
   void invlinfit(sector_t sector, FPGATrackSimTrack &track, double const *constr) const;
   void setIdealCoordFit(bool v) { m_isIdealCoordFit = v;}
-  
+
  private:
   
   FPGATrackSimPlaneMap const * m_pmap = nullptr;
@@ -68,7 +69,7 @@ class FPGATrackSimFitConstantBank : public AthMessaging
   int m_nconstr; // number of constraints: m_ncoords-m_npars
   int m_npixcy; // number of 2d coordinates
   int m_missingPlane; // plane that is missing
-  bool m_isFirstStage; // is this a first stage fit?
+//  bool m_isFirstStage; // is this a first stage fit?
   bool m_isIdealCoordFit; // fitting for ideal coordinates? by default always true for now
   
   ///////////////////////////////////////////////////////////////////////

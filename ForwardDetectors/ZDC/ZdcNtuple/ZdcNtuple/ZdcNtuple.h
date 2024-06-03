@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ZdcNtuple_ZdcNtuple_H
@@ -90,7 +90,8 @@ public:
 
 public:
 
-  asg::AnaToolHandle<Trig::TrigDecisionTool>  m_trigDecisionTool;
+  PublicToolHandle<Trig::TrigDecisionTool> m_trigDecisionTool
+  { this, "TrigDecisionTool", "", "Handle to the TrigDecisionTool" };
   asg::AnaToolHandle<IGoodRunsListSelectionTool> m_grl;
   asg::AnaToolHandle<ZDC::IZdcAnalysisTool> m_zdcAnalysisTool;
   ToolHandle< InDet::IInDetTrackSelectionTool > m_selTool;
@@ -234,7 +235,7 @@ public:
   unsigned int t_RpdSideStatus[2];
   unsigned int t_RpdModuleTruthNphotons[2][16];
 
-  bool t_centroidEventValid;
+  char t_centroidEventValid;
   unsigned int t_centroidStatus[2];
   float t_RPDChannelSubtrAmp[2][16];
   float t_RPDSubtrAmpSum[2];

@@ -1,7 +1,7 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Set up the project.
-cmake_minimum_required( VERSION 3.6 )
+cmake_minimum_required( VERSION 3.10 )
 file( READ ${CMAKE_SOURCE_DIR}/version.txt _version )
 string( STRIP ${_version} _version )
 project( AthSimulation VERSION ${_version} LANGUAGES C CXX Fortran )
@@ -11,15 +11,26 @@ unset( _version )
 set( HEPMC3_USE TRUE CACHE BOOL "Build with HepMC3" )
 
 # Configure flake8:
-set( ATLAS_FLAKE8 flake8_atlas --isolated --select ATL,F,E101,E7,E9,W6
-                               --ignore E701,E702,E704,E741
+set( ATLAS_FLAKE8 flake8_atlas --isolated --select ATL,B,F,E101,E7,E9,W6
+                               --ignore B006,B007,B019,E701,E702,E704,E741
                                --enable-extensions ATL902
    CACHE STRING "Default flake8 command" )
 set( ATLAS_PYTHON_CHECKER ${ATLAS_FLAKE8}
    CACHE STRING "Python checker command to run during Python module compilation" )
 
+# Apply (compiler) settings from CxxUtils:
+set( CxxUtilsSettings_DIR
+   "${CMAKE_SOURCE_DIR}/../../Control/CxxUtils/cmake" )
+find_package( CxxUtilsSettings )
+
 # Decide whether to enable LTO for AtlasGeant4 and its OBJECT libs
-option( ATLAS_GEANT4_USE_LTO "Use link-time-optimization in building AtlasGeant4" OFF )
+include( CheckIPOSupported )
+check_ipo_supported( RESULT ATLAS_IPO_CHECK_RESULT )
+if( NOT ATLAS_IPO_CHECK_RESULT )
+   message( STATUS "Link-time-optimization is not supported in this build" )
+endif()
+option( ATLAS_GEANT4_USE_LTO "Use link-time-optimization in building AtlasGeant4"
+   ${ATLAS_IPO_CHECK_RESULT} )
 
 # Find the ATLAS CMake code:
 find_package( AtlasCMake QUIET )

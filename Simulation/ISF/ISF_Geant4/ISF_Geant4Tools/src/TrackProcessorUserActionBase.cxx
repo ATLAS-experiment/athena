@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// TrackProcessorUserActionBase.cxx, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 // class header
 #include "TrackProcessorUserActionBase.h"
@@ -49,12 +45,6 @@ namespace G4UA {
 
 namespace iGeant4 {
 
-TrackProcessorUserActionBase::TrackProcessorUserActionBase():
-  m_atlasG4EvtUserInfo(nullptr),
-  m_curBaseISP(nullptr)
-{;
-}
-
 void TrackProcessorUserActionBase::BeginOfEventAction(const G4Event*)
 {
   m_curBaseISP = nullptr;
@@ -94,11 +84,11 @@ void TrackProcessorUserActionBase::UserSteppingAction(const G4Step* aStep)
     // G4Tracks aready returned to ISF will have a TrackInformation attached to them
     bool particleReturnedToISF = trackInfo && trackInfo->GetReturnedToISF();
     if (!particleReturnedToISF) {
-      HepMC::GenParticlePtr generationZeroTruthParticle{};
+      HepMC::GenParticlePtr generationZeroGenParticle{};
       ::iGeant4::ISFG4Helper::attachTrackInfoToNewG4Track( *aSecondaryTrack,
                                                 *m_curBaseISP,
                                                 Secondary,
-                                                generationZeroTruthParticle );
+                                                generationZeroGenParticle );
     }
   } // <- loop over secondaries from this step
 
@@ -168,23 +158,23 @@ void TrackProcessorUserActionBase::setupPrimary(G4Track& aTrack)
 
   int regenerationNr = ppInfo->GetRegenerationNr();
 
-  HepMC::GenParticlePtr primaryTruthParticle = truthBinding->getGenerationZeroTruthParticle();
-  HepMC::GenParticlePtr generationZeroTruthParticle = truthBinding->getGenerationZeroTruthParticle();
+  HepMC::GenParticlePtr primaryGenParticle = truthBinding->getGenerationZeroGenParticle();
+  HepMC::GenParticlePtr generationZeroGenParticle = truthBinding->getGenerationZeroGenParticle();
   HepMC::GenParticlePtr currentlyTracedHepPart = truthBinding->getTruthParticle();
 
-  auto classification = classify(primaryTruthParticle,
-                                 generationZeroTruthParticle,
+  auto classification = classify(primaryGenParticle,
+                                 generationZeroGenParticle,
                                  currentlyTracedHepPart,
                                  regenerationNr);
 
   auto* newTrackInfo = ::iGeant4::ISFG4Helper::attachTrackInfoToNewG4Track(aTrack,
                                                                  *baseISP,
                                                                  classification,
-                                                                 generationZeroTruthParticle );
+                                                                 generationZeroGenParticle );
   newTrackInfo->SetRegenerationNr(regenerationNr);
 
   setCurrentParticle(baseISP,
-                     primaryTruthParticle,
+                     primaryGenParticle,
                      currentlyTracedHepPart);
 
   return;
@@ -195,36 +185,36 @@ void TrackProcessorUserActionBase::setupSecondary(const G4Track& aTrack)
   auto* trackInfo = ::iGeant4::ISFG4Helper::getISFTrackInfo(aTrack);
 
   HepMC::GenParticlePtr currentlyTracedTruthParticle = trackInfo->GetHepMCParticle();
-  HepMC::GenParticlePtr primaryTruthParticle = trackInfo->GetPrimaryHepMCParticle();
+  HepMC::GenParticlePtr primaryGenParticle = trackInfo->GetPrimaryGenParticle();
   ISF::ISFParticle* baseISFParticle = trackInfo->GetBaseISFParticle();
 
-  setCurrentParticle(baseISFParticle, primaryTruthParticle, currentlyTracedTruthParticle);
+  setCurrentParticle(baseISFParticle, primaryGenParticle, currentlyTracedTruthParticle);
 
   return;
 }
 
 void TrackProcessorUserActionBase::setCurrentParticle(ISF::ISFParticle* baseISFParticle,
-                                                      HepMC::ConstGenParticlePtr truthPrimary,
+                                                      HepMC::ConstGenParticlePtr primaryGenParticle,
                                                       HepMC::GenParticlePtr truthCurrentlyTraced)
 {
   m_curBaseISP = baseISFParticle;
-  m_atlasG4EvtUserInfo->SetCurrentPrimary( truthPrimary );
+  m_atlasG4EvtUserInfo->SetCurrentPrimaryGenParticle( primaryGenParticle );
   m_atlasG4EvtUserInfo->SetCurrentlyTraced( truthCurrentlyTraced );
   return;
 }
 
 /// Classify the particle represented by the given set of truth links
-TrackClassification TrackProcessorUserActionBase::classify(HepMC::ConstGenParticlePtr primaryTruthParticle,
-                                                           HepMC::ConstGenParticlePtr generationZeroTruthParticle,
+TrackClassification TrackProcessorUserActionBase::classify(HepMC::ConstGenParticlePtr primaryGenParticle,
+                                                           HepMC::ConstGenParticlePtr generationZeroGenParticle,
                                                            HepMC::ConstGenParticlePtr currentlyTracedHepPart,
                                                            int regenerationNumber) const
 {
   // if particle points to a non-zero truth particle it can not just be a 'simple' Secondary
   if (currentlyTracedHepPart) {
-    if (currentlyTracedHepPart==primaryTruthParticle) {
+    if (currentlyTracedHepPart==primaryGenParticle) {
       return Primary;
     }
-    else if (generationZeroTruthParticle==primaryTruthParticle && regenerationNumber>0) {
+    else if (generationZeroGenParticle == primaryGenParticle && regenerationNumber>0) {
       return RegeneratedPrimary;
     }
     else {

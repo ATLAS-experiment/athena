@@ -98,6 +98,31 @@ void iGeant4::ISFTrajectory::AppendStep(const G4Step* aStep)
     AtlasDetDescr::AtlasRegion geoID = baseIsp->nextGeoID();
 
     auto* atlasG4EvtUserInfo = ISFG4Helper::getAtlasG4EventUserInfo();
+    if (atlasG4EvtUserInfo->GetCurrentlyTraced() &&
+        atlasG4EvtUserInfo->GetCurrentlyTraced()->end_vertex()) {
+      HepMC::GenParticlePtr currentlyTracedGenParticle = atlasG4EvtUserInfo->GetCurrentlyTraced();
+      G4ExceptionDescription description;
+      description << G4String("AppendStep: ") + "Currently Traced Particle has an end vertex!\n";
+      description <<  "G4Track Properties: trackID = " << track->GetTrackID()<< ", Step Number = "<<track->GetCurrentStepNumber() << ", parentID = " << track->GetParentID() << ", TrackStatus = " <<  track->GetTrackStatus() << "\n";
+      description << "G4Step Properties: number of secondaries in the current step: " << aStep->GetSecondaryInCurrentStep()->size() << "\n";
+      description << "currentlyTracedGenParticle : " << currentlyTracedGenParticle << ", barcode: " << HepMC::barcode(currentlyTracedGenParticle) << "\n";
+      description << "currentlyTracedGenParticle->end_vertex(): " << currentlyTracedGenParticle->end_vertex() << ", barcode: " << HepMC::barcode(currentlyTracedGenParticle->end_vertex()) << "\n";
+      description << "ISFParticle (from TrackInformation): " << *baseIsp;
+      HepMC::GenParticlePtr currentTrackInfoGenParticle = trackInfo->GetHepMCParticle();
+      if (currentTrackInfoGenParticle) {
+        description << "currentTrackInfoGenParticle : " << currentTrackInfoGenParticle << ", barcode: " << HepMC::barcode(currentTrackInfoGenParticle) << "\n";
+        if (currentTrackInfoGenParticle->end_vertex()) {
+          description << "currentTrackInfoGenParticle->end_vertex(): " << currentTrackInfoGenParticle->end_vertex() << ", barcode: " << HepMC::barcode(currentTrackInfoGenParticle->end_vertex()) << "\n";
+        }
+        else {
+          description << "currentTrackInfoGenParticle has no end_vertex!\n";
+        }
+      }
+      else {
+        description << " trackInfo->GetHepMCParticle() == nullptr \n";
+      }
+      G4Exception("iGeant4::ISFTrajectory", "EndVertexExists", FatalException, description);
+    }
     iGeant4::Geant4TruthIncident truth(aStep, *baseIsp, geoID, atlasG4EvtUserInfo);
 
     if (m_truthRecordSvcQuick) {
@@ -111,8 +136,9 @@ void iGeant4::ISFTrajectory::AppendStep(const G4Step* aStep)
         // ITruthSvc::registerTruthIncident call above
         auto currentGenPart = atlasG4EvtUserInfo->GetCurrentlyTraced();
         baseIsp->getTruthBinding()->setTruthParticle( currentGenPart );
-        Barcode::ParticleBarcode newBarcode = HepMC::barcode(currentGenPart); // FIXME barcode-based
+        int newBarcode = HepMC::barcode(currentGenPart); // FIXME barcode-based
         baseIsp->setBarcode( newBarcode ); // FIXME barcode-based
+        baseIsp->setStatus( currentGenPart->status() );
         int id = HepMC::uniqueID(currentGenPart);
         baseIsp->setId( id );
       }

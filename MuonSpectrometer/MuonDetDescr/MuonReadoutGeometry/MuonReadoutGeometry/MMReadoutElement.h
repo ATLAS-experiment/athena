@@ -12,7 +12,7 @@
 #include "MuonAlignmentData/NswPassivationDbData.h"
 
 class BLinePar;
-class GeoVFullPhysVol;
+class MuonReadoutGeomCnvAlg;
 
 namespace MuonGM {
     /**
@@ -22,6 +22,7 @@ namespace MuonGM {
 
     class MMReadoutElement final : public MuonClusterReadoutElement {
     public:
+        friend class ::MuonReadoutGeomCnvAlg;
         /** constructor */
         MMReadoutElement(GeoVFullPhysVol* pv, const std::string& stName, int zi, int fi, int mL, 
                          MuonDetectorManager* mgr, const NswPassivationDbData*);
@@ -133,7 +134,7 @@ namespace MuonGM {
         const BLinePar* getBLinePar() const { return m_BLinePar; }
         void  clearALinePar();
         void  clearBLinePar() { m_BLinePar = nullptr; }
-        const std::vector<int> & getReadoutSide() const { return m_readoutSide; }
+        const std::array<int, 4> & getReadoutSide() const { return m_readoutSide; }
       
         // Amdb local (szt) to global coord
         virtual Amg::Vector3D AmdbLRSToGlobalCoords(const Amg::Vector3D& x) const override final { return AmdbLRSToGlobalTransform()*x; }
@@ -143,18 +144,21 @@ namespace MuonGM {
         virtual Amg::Transform3D GlobalToAmdbLRSTransform() const override final { return AmdbLRSToGlobalTransform().inverse(); }
 
     private:
+
+        void initDesignSqLite();
+
+        const MmIdHelper& m_idHelper{idHelperSvc()->mmIdHelper()};
+        
         using PCBPassivation = NswPassivationDbData::PCBPassivation;
         static constexpr PCBPassivation s_dummy_passiv{};
         // MuonChannelDesign m_phiDesign;
-        std::vector<MuonChannelDesign> m_etaDesign;
+        std::array<MuonChannelDesign, 4> m_etaDesign{};
 
-        std::vector<int> m_nStrips;  // #of active strips
-        int m_nlayers{0};            // #of gas gaps
+        int m_nlayers{0};  // #of gas gaps
 
         const NswPassivationDbData* m_passivData{nullptr};
 
         int m_ml{0};  // multilayer (values: 1,2)
-        Identifier m_parentId;
 
         // surface dimensions
         double m_halfX{100.};       // 0.5*radial_size (active area)
@@ -169,20 +173,20 @@ namespace MuonGM {
         Amg::Transform3D m_delta{Amg::Transform3D::Identity()};
         const ALinePar*  m_ALinePar{nullptr};
         const BLinePar*  m_BLinePar{nullptr};
-        std::vector<int> m_readoutSide;
+        std::array<int, 4> m_readoutSide{};
         // transforms (RE->layer)
         std::array<Amg::Transform3D, 4> m_Xlg{make_array<Amg::Transform3D,4>(Amg::Transform3D::Identity())};
     };
 
-    inline int MMReadoutElement::surfaceHash(const Identifier& id) const { return surfaceHash(manager()->mmIdHelper()->gasGap(id), 0); }
+    inline int MMReadoutElement::surfaceHash(const Identifier& id) const { return surfaceHash(m_idHelper.gasGap(id), 0); }
 
     inline int MMReadoutElement::surfaceHash(int gasGap, int /*measPhi*/) const { return gasGap - 1; } // measPhi not used
 
-    inline int MMReadoutElement::layerHash(const Identifier& id) const { return layerHash(manager()->mmIdHelper()->gasGap(id)); }
+    inline int MMReadoutElement::layerHash(const Identifier& id) const { return layerHash(m_idHelper.gasGap(id)); }
 
     inline int MMReadoutElement::layerHash(int gasGap) const { return gasGap - 1; }
 
-    inline int MMReadoutElement::boundaryHash(const Identifier& id) const { return layerHash(manager()->mmIdHelper()->gasGap(id)); }
+    inline int MMReadoutElement::boundaryHash(const Identifier& id) const { return layerHash(m_idHelper.gasGap(id)); }
 
     inline bool MMReadoutElement::measuresPhi(const Identifier& /*id*/) const { return false; }
 
@@ -205,7 +209,7 @@ namespace MuonGM {
     inline bool MMReadoutElement::stripPosition(const Identifier& id, Amg::Vector2D& pos) const {
         const MuonChannelDesign* design = getDesign(id);
         if (!design) return false;
-        return design->center(manager()->mmIdHelper()->channel(id), pos);
+        return design->center(m_idHelper.channel(id), pos);
     }
 
     inline double MMReadoutElement::stereoAngle(const Identifier& id) const {
@@ -217,7 +221,7 @@ namespace MuonGM {
     inline double MMReadoutElement::stripLength(const Identifier& id) const {
         const MuonChannelDesign* design = getDesign(id);
         if (!design) return -1;
-        return design->channelLength(manager()->mmIdHelper()->channel(id));
+        return design->channelLength(m_idHelper.channel(id));
     }
 
     inline double MMReadoutElement::stripActiveLength(const Identifier& id) const {
@@ -232,7 +236,7 @@ namespace MuonGM {
         // Let's keep it for the moment as we have to think about proper treatmeant of the non-passivated stuff
         // if (m_passivData && !passiv.valid) return -1;
 
-        double l = design->channelHalfLength(manager()->mmIdHelper()->channel(id), true);
+        double l = design->channelHalfLength(m_idHelper.channel(id), true);
         if (l < 0) return -1;
         return std::max(0., l - design->passivatedLength(passiv.left, true));
     }
@@ -245,7 +249,7 @@ namespace MuonGM {
         // Let's keep it for the moment as we have to think about proper treatmeant of the non-passivated stuff
         // if (m_passivData && !passiv.valid) return -1;
 
-        double l = design->channelHalfLength(manager()->mmIdHelper()->channel(id), false);
+        double l = design->channelHalfLength(m_idHelper.channel(id), false);
         if (l < 0) return -1;
         return std::max(0., l - design->passivatedLength(passiv.right, false));
     }
@@ -256,7 +260,7 @@ namespace MuonGM {
         // Get the nearest strip number; not the time yet to check boundaries (in case of tolerance) 
         int stripNo = stripNumber(locpos, id);
         if (stripNo < 0) stripNo = (locpos.x()<0) ? 1 : design->totalStrips;
-        Identifier channelId = manager()->mmIdHelper()->channelID(id, m_ml, manager()->mmIdHelper()->gasGap(id), stripNo);
+        Identifier channelId = m_idHelper.channelID(id, m_ml, m_idHelper.gasGap(id), stripNo);
 
         // ** Horizontal passivation: mask entire strips
         //==============================================
@@ -284,11 +288,11 @@ namespace MuonGM {
 
     inline int MMReadoutElement::numberOfLayers(bool) const { return m_nlayers; }
 
-    inline int MMReadoutElement::numberOfStrips(const Identifier& layerId) const { return m_nStrips[layerHash(layerId)]; }
+    inline int MMReadoutElement::numberOfStrips(const Identifier& layerId) const { return m_etaDesign[layerHash(layerId)].totalStrips; }
 
     inline int MMReadoutElement::numberOfStrips(int lay, bool /*measPhi*/) const {
-        if (lay > -1 && lay < (int)m_nStrips.size())
-            return m_nStrips[lay];
+        if (lay > -1 && lay < static_cast<int>(m_etaDesign.size()))
+            return m_etaDesign[lay].totalStrips;
         else
             return -1;
     }

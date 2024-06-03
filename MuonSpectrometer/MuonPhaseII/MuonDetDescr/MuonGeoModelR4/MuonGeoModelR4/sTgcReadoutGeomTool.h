@@ -65,6 +65,8 @@ class sTgcReadoutGeomTool : public AthAlgTool,
       double lPadLength{0.};
       double sPadLength{0.};
 
+      double yCutout{0.};
+      double yCutoutCathode{0.};
       double gasTck{0.}; //gasTck
       double lFrameWidth{0.}; //ylFrame
       double sFrameWidth{0.}; //ysFrame

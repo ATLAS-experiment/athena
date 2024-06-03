@@ -236,7 +236,8 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
 
       std::string jesConfigFat = m_jesConfigFat;
       std::string jesCalibSeqFat = m_jesCalibSeqFat;
-      // add Insitu if data (currently missing)
+      // add Insitu if data
+      if(isData()) jesCalibSeqFat += "_Insitu";
 
       // now instantiate the tool
       ATH_CHECK( m_jetFatCalibTool.setProperty("JetCollection", fatjetcoll) );
@@ -265,6 +266,18 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
 #endif
       ATH_CHECK( m_WTaggerTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_WTaggerTool.retrieve() );
+
+      // Retrieving DecorationName (needed to access tagging results downstream):
+      std::string WConfigPath = PathResolverFindCalibFile("BoostedJetTaggers/"+m_WZTaggerCalibArea+"/"+m_WtagConfig);
+      if ( m_WconfigReader.ReadFile( WConfigPath.c_str(), EEnvLevel(0) ) ) {
+        ATH_MSG_ERROR( "Error while reading large-R config file : " << WConfigPath );
+        return StatusCode::FAILURE;
+      }
+      else ATH_MSG_DEBUG( "Successfully read large-R config file : " << WConfigPath );
+
+      m_WDecorName = m_WconfigReader.GetValue("DecorationName" ,"");
+      ANA_MSG_DEBUG( "Found DecorationName in large-R config file : " << m_WDecorName );
+
     } else if (m_WTaggerTool.isUserConfigured()) ATH_CHECK(m_WTaggerTool.retrieve());
 
     if (!m_ZTaggerTool.isUserConfigured() && !m_ZtagConfig.empty()) {
@@ -280,6 +293,18 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
 #endif
       ATH_CHECK( m_ZTaggerTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_ZTaggerTool.retrieve() );
+
+      // Retrieving DecorationName (needed to access tagging results downstream):
+      std::string ZConfigPath = PathResolverFindCalibFile("BoostedJetTaggers/"+m_WZTaggerCalibArea+"/"+m_ZtagConfig);
+      if ( m_ZconfigReader.ReadFile( ZConfigPath.c_str(), EEnvLevel(0) ) ) {
+        ATH_MSG_ERROR( "Error while reading large-R config file : " << ZConfigPath );
+        return StatusCode::FAILURE;
+      }
+      else ATH_MSG_DEBUG( "Successfully read large-R config file : " << ZConfigPath );
+
+      m_ZDecorName = m_ZconfigReader.GetValue("DecorationName" ,"");
+      ANA_MSG_DEBUG( "Found DecorationName in large-R config file : " << m_ZDecorName );
+
     } else if (m_ZTaggerTool.isUserConfigured()) ATH_CHECK(m_ZTaggerTool.retrieve());
 
     if (!m_TopTaggerTool.isUserConfigured() && !m_ToptagConfig.empty()) {
@@ -295,6 +320,18 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
 #endif
       ATH_CHECK( m_TopTaggerTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_TopTaggerTool.retrieve() );
+
+      // Retrieving DecorationName (needed to access tagging results downstream):
+      std::string TopConfigPath = PathResolverFindCalibFile("BoostedJetTaggers/"+m_TopTaggerCalibArea+"/"+m_ToptagConfig);
+      if ( m_TopconfigReader.ReadFile( TopConfigPath.c_str(), EEnvLevel(0) ) ) {
+        ATH_MSG_ERROR( "Error while reading large-R config file : " << TopConfigPath );
+        return StatusCode::FAILURE;
+      }
+      else ATH_MSG_DEBUG( "Successfully read large-R config file : " << TopConfigPath );
+
+      m_TopDecorName = m_TopconfigReader.GetValue("DecorationName" ,"");
+      ANA_MSG_DEBUG( "Found DecorationName in large-R config file : " << m_TopDecorName );
+
     } else if (m_TopTaggerTool.isUserConfigured()) ATH_CHECK(m_TopTaggerTool.retrieve());
 
     ///////////////////////////////////////////////////////////////////////////////////////////
@@ -312,6 +349,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_CHECK( m_jetTruthLabelingTool.setProperty("TruthParticleContainerName", "TruthParticles") );
       ATH_CHECK( m_jetTruthLabelingTool.setProperty("TruthBosonContainerName", "TruthBoson") );  // Set this if you are using a TRUTH3 style truth boson container
       ATH_CHECK( m_jetTruthLabelingTool.setProperty("TruthTopQuarkContainerName", "TruthTop") ); // Set this if you are using a TRUTH3 style truth top quark container
+      ATH_CHECK( m_jetTruthLabelingTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_jetTruthLabelingTool.retrieve() );
     } else if (m_jetTruthLabelingTool.isUserConfigured()) ATH_CHECK(m_jetTruthLabelingTool.retrieve());
 
@@ -537,7 +575,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_CHECK( m_jetNNJvtEfficiencyTool.setProperty("JetContainer", m_defaultJets) );  
       ATH_CHECK( m_jetNNJvtEfficiencyTool.setProperty("WorkingPoint", m_JvtWP) );
       ATH_CHECK( m_jetNNJvtEfficiencyTool.setProperty("MaxPtForJvt", m_JvtPtMax) );
-      ATH_CHECK( m_jetNNJvtEfficiencyTool.setProperty("SFFile", m_JvtConfig) );
+      ATH_CHECK( m_jetNNJvtEfficiencyTool.setProperty("SFFile", m_isRun3 ? m_JvtConfigRun3 : m_JvtConfigRun2) );
       ATH_CHECK( m_jetNNJvtEfficiencyTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_jetNNJvtEfficiencyTool.retrieve() );
     } else if (m_jetNNJvtEfficiencyTool.isUserConfigured()) ATH_CHECK( m_jetNNJvtEfficiencyTool.retrieve() );
@@ -565,7 +603,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_CHECK( m_jetfJvtEfficiencyTool.setProperty("JetContainer", m_defaultJets) );  
       ATH_CHECK( m_jetfJvtEfficiencyTool.setProperty("WorkingPoint", m_fJvtWP) );
       ATH_CHECK( m_jetfJvtEfficiencyTool.setProperty("MaxPtForJvt", m_fJvtPtMax) );
-      ATH_CHECK( m_jetfJvtEfficiencyTool.setProperty("SFFile", m_fJvtConfig) );
+      ATH_CHECK( m_jetfJvtEfficiencyTool.setProperty("SFFile", m_isRun3 ? m_fJvtConfigRun3 : m_fJvtConfigRun2) );
       ATH_CHECK( m_jetfJvtEfficiencyTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_jetfJvtEfficiencyTool.retrieve() );
     } else  ATH_CHECK( m_jetfJvtEfficiencyTool.retrieve() );
@@ -695,6 +733,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
         m_muonLRTORTool.setTypeAndName("CP::MuonLRTOverlapRemovalTool/"+toolName);
         ATH_CHECK( m_muonLRTORTool.setProperty("overlapStrategy", CP::IMuonLRTOverlapRemovalTool::defaultStrategy) );
         if (m_isRun3) ATH_CHECK( m_muonLRTORTool.setProperty("UseRun3WP", true ));
+        ATH_CHECK( m_muonLRTORTool.setProperty("OutputLevel", this->msg().level()) );
         ATH_CHECK( m_muonLRTORTool.retrieve() );
     } else ATH_CHECK( m_muonLRTORTool.retrieve() );
 
@@ -1085,13 +1124,40 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       // electron triggers - first SFs (but we need to massage the id string since all combinations are not supported)
   
       //single lepton
-      ATH_MSG_INFO("eSF_keys: " << m_electronTriggerSFStringSingle<< "_"<<eleId<<"_"<<m_eleIso_WP);
-      std::string triggerEleIso("");
-      if (std::find(eSF_keys.begin(), eSF_keys.end(), m_electronTriggerSFStringSingle+"_"+eleId+"_"+m_eleIso_WP) != eSF_keys.end()){
+      
+      if(m_isRun3 && eleId.find("LooseBLayer") != std::string::npos) ATH_MSG_WARNING("Replacing 'LooseBLayer' with 'Loose' for Electron ID while configuring single-ele trigger SF using: " << m_eleEffMapFilePath);
+      std::string triggerEleID = m_isRun3? TString(eleId).ReplaceAll("LooseBLayer", "Loose").Data() : eleId;
+      std::string triggerEleIso= m_eleIso_WP;
+      
+      // This is an hack to work with ElectronEfficiencyCorrection/2015_2025/rel22.2/2022_Summer_Prerecom_v1/map4.txt to allow 
+
+      if(m_isRun3 && m_eleAllowRun3TrigSFFallback){
+        bool pass_isRun3TrigSFFallback = true;
+        if (triggerEleID.find("Medium") != std::string::npos && triggerEleIso.find("Loose") != std::string::npos)                {triggerEleID = "Loose";}
+        else if (triggerEleID.find("Medium") != std::string::npos && triggerEleIso.find("Tight") != std::string::npos)           {triggerEleID = "Tight"; triggerEleIso = "Tight_VarRad";}
+        else if (triggerEleID.find("Medium") != std::string::npos && triggerEleIso.find("HighPtCaloOnly") != std::string::npos)  {triggerEleID = "Tight"; triggerEleIso = "Tight_VarRad";}
+        else if (triggerEleID.find("Tight")  != std::string::npos && triggerEleIso.find("Loose") != std::string::npos)           {triggerEleID = "Loose";}
+        else if (triggerEleID.find("Tight")  != std::string::npos && triggerEleIso.find("Tight") != std::string::npos)           {triggerEleIso= "Tight_VarRad";}
+        else if (triggerEleID.find("Tight")  != std::string::npos && triggerEleIso.find("HighPtCaloOnly") != std::string::npos)  {triggerEleID = "Tight"; triggerEleIso = "Tight_VarRad";}
+        else if (triggerEleID.find("Loose")  != std::string::npos && triggerEleIso.find("Tight") != std::string::npos)           {triggerEleID = "Loose"; triggerEleIso = "Loose_VarRad";}
+        else if (triggerEleID.find("Loose")  != std::string::npos && triggerEleIso.find("HighPtCaloOnly") != std::string::npos)  {triggerEleID = "Loose"; triggerEleIso = "Loose_VarRad";}
+        else {pass_isRun3TrigSFFallback=false;}
+        if(pass_isRun3TrigSFFallback){
+          ATH_MSG_INFO(" ************** This is only for testing/studying purpose! ************** ");
+          ATH_MSG_INFO(" ************** For official recommendation, please get in contact with the SUSY Bkg Forum ************** ");
+          ATH_MSG_INFO("In the current map ("<<m_eleEffMapFilePath<<"), the only supported Electron ID working-points supported for Electron Trigger Scale Factor are 'Loose_Loose_VarRad' and 'Tight_Tight_VarRad' ");
+          ATH_MSG_INFO("Only for single-lepton trigger scale factor, fall back to Electron ID:  -> "<< triggerEleID << " with Isolation: " << triggerEleIso);
+        }
+      }
+      
+      
+      ATH_MSG_INFO("eSF_keys: " << m_electronTriggerSFStringSingle<< "_"<<triggerEleID<<"_"<<triggerEleIso);
+
+      if (std::find(eSF_keys.begin(), eSF_keys.end(), m_electronTriggerSFStringSingle+"_"+triggerEleID+"_"+triggerEleIso) != eSF_keys.end()){
         triggerEleIso   = m_eleIso_WP;
-      } else if (std::find(eSF_keys.begin(), eSF_keys.end(), m_electronTriggerSFStringSingle+"_"+eleId+"_"+m_el_iso_fallback[m_eleIso_WP]) != eSF_keys.end()){
+      } else if (std::find(eSF_keys.begin(), eSF_keys.end(), m_electronTriggerSFStringSingle+"_"+triggerEleID+"_"+m_el_iso_fallback[triggerEleIso]) != eSF_keys.end()){
         //--- Check to see if the only issue is an unknown isolation working point
-        triggerEleIso = m_el_iso_fallback[m_eleIso_WP];
+        triggerEleIso = m_el_iso_fallback[triggerEleIso];
         ATH_MSG_WARNING("(AsgElectronEfficiencyCorrectionTool_trig_singleLep_*) Your selected electron Iso WP ("
           << m_eleIso_WP
           << ") does not have trigger SFs defined. Falling back to "
@@ -1103,12 +1169,12 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
         return StatusCode::FAILURE;
       }
   
-      toolName = "AsgElectronEfficiencyCorrectionTool_trig_singleLep_" + m_eleId;
+      toolName = "AsgElectronEfficiencyCorrectionTool_trig_singleLep_" + triggerEleID;
       if ( !m_elecEfficiencySFTool_trig_singleLep.isUserConfigured() ) {
         m_elecEfficiencySFTool_trig_singleLep.setTypeAndName("AsgElectronEfficiencyCorrectionTool/"+toolName);
         ATH_CHECK( m_elecEfficiencySFTool_trig_singleLep.setProperty("MapFilePath", m_isRun3? m_eleEffMapFilePath : m_eleEffMapFilePathRun2) );
         ATH_CHECK( m_elecEfficiencySFTool_trig_singleLep.setProperty("TriggerKey", m_electronTriggerSFStringSingle) );
-        ATH_CHECK( m_elecEfficiencySFTool_trig_singleLep.setProperty("IdKey", eleId) );
+        ATH_CHECK( m_elecEfficiencySFTool_trig_singleLep.setProperty("IdKey", triggerEleID) );
         ATH_CHECK( m_elecEfficiencySFTool_trig_singleLep.setProperty("IsoKey", triggerEleIso) );
         ATH_CHECK( m_elecEfficiencySFTool_trig_singleLep.setProperty("CorrelationModel", m_EG_corrModel) );
         if (!isData()) {
@@ -1119,12 +1185,12 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       } else ATH_CHECK( m_elecEfficiencySFTool_trig_singleLep.retrieve() );
       
   
-      toolName = "AsgElectronEfficiencyCorrectionTool_trigEff_singleLep_" + m_eleId;
+      toolName = "AsgElectronEfficiencyCorrectionTool_trigEff_singleLep_" + triggerEleID;
       if ( !m_elecEfficiencySFTool_trigEff_singleLep.isUserConfigured() ) {
         m_elecEfficiencySFTool_trigEff_singleLep.setTypeAndName("AsgElectronEfficiencyCorrectionTool/"+toolName);
         ATH_CHECK( m_elecEfficiencySFTool_trigEff_singleLep.setProperty("MapFilePath", m_isRun3? m_eleEffMapFilePath : m_eleEffMapFilePathRun2) );
         ATH_CHECK( m_elecEfficiencySFTool_trigEff_singleLep.setProperty("TriggerKey", "Eff_"+m_electronTriggerSFStringSingle) );
-        ATH_CHECK( m_elecEfficiencySFTool_trigEff_singleLep.setProperty("IdKey", eleId) );
+        ATH_CHECK( m_elecEfficiencySFTool_trigEff_singleLep.setProperty("IdKey", triggerEleID) );
         ATH_CHECK( m_elecEfficiencySFTool_trigEff_singleLep.setProperty("IsoKey", triggerEleIso) );
         ATH_CHECK( m_elecEfficiencySFTool_trigEff_singleLep.setProperty("CorrelationModel", m_EG_corrModel) );
         if (!isData()) {

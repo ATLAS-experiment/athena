@@ -4,8 +4,6 @@
 # art-description: Trigger BS->RDO_TRIG athena CaloGPU test of the Dev_pp_run3_v1 menu
 # art-type: grid
 # art-include: main/Athena
-# art-include: 24.0/Athena
-# art-athena-mt: 4
 # art-architecture: '#&nvidia'
 # art-output: *.txt
 # art-output: *.log
@@ -34,7 +32,6 @@ ex.flags = ['CaloRecGPU.GlobalFlags.UseCaloRecGPU=True',
             'Trigger.triggerMenuSetup="Dev_pp_run3_v1_TriggerValidation_prescale"',
             'Trigger.doLVL1=True',
             'Trigger.doRuntimeNaviVal=True']
-ex.args = '--CA'
 
 test = Test.Test()
 test.art_type = 'grid'

@@ -11,7 +11,6 @@
 set -e
 
 Derivation_tf.py \
---CA True \
 --inputAODFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/data23_cos/AOD/data23_cos.00459152.physics_CosmicMuons.merge.AOD.f1383_m2195/data23_cos.00459152.physics_CosmicMuons.merge.AOD.f1383_m2195._lb0124-lb0126._0001.1 \
 --outputDAODFile art.pool.root \
 --formats NCB1 \

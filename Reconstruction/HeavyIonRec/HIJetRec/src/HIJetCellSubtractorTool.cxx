@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HIJetCellSubtractorTool.h"
@@ -11,6 +11,8 @@
 #include "FourMomUtils/xAODP4Helpers.h"
 //forward class decl in base class.
 #include "HIJetRec/IHIUEModulatorTool.h"
+#include "AthContainers/ConstAccessor.h"
+#include "AthContainers/Accessor.h"
 
 HIJetCellSubtractorTool::HIJetCellSubtractorTool(const std::string& myname) : HIJetSubtractorToolBase(myname)
 {
@@ -203,6 +205,7 @@ void HIJetCellSubtractorTool::subtractWithMoments(xAOD::CaloCluster* cl, const x
   if(etot2!=0.) cm=er2/etot2;
 
   //attach the moment to the cluster
-  if(cl->isAvailable<float>("HIMag")) cl->auxdata<float>("HIMag")=cm;
+  static const SG::Accessor<float> HIMagAcc("HIMag");
+  if(HIMagAcc.isAvailable(*cl)) HIMagAcc(*cl)=cm;
   else cl->insertMoment(xAOD::CaloCluster::CENTER_MAG,cm);
 }

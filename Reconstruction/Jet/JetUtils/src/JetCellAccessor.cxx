@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAOD_ANALYSIS
@@ -32,7 +32,7 @@ namespace jet {
       // Build an end iterator by finding a valid end cell iterator:
       bool foundCells = false;
       // start from the last constituent, loop until one valid is found.
-      for(constItE-- ; constIt != constItE; constItE--) {
+      for(--constItE ; constIt != constItE; --constItE) {
         foundCells =setCellIteratorFromConstit(**constItE); 
         if( foundCells) break;
       }

@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENASERVICES_ATHENAOUTPUTSTREAM_H
@@ -241,7 +241,7 @@ private:
                                               const std::string& item_key) const;
 
    // close an EventService substream that was writing to 'rangeFN' output
-   void finalizeRange( const std::string rangeFN );
+   void finalizeRange( const std::string & rangeFN );
 
   /// Helper function to load dictionaries (both transient and persistent)
   /// for a given type.

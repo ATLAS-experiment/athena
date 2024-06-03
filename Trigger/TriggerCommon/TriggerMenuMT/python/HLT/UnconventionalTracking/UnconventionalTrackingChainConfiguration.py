@@ -68,7 +68,7 @@ class UnconventionalTrackingChainConfiguration(ChainConfigurationBase):
     # Step definitions in alignment order
     # Step 1
     def getJetReco(self, flags):
-        return self.getStep(flags,1,'JetRecoOnlyCfg',[UTTJetRecoSequenceGenCfg])
+        return self.getStep(flags, 'JetRecoOnlyCfg',[UTTJetRecoSequenceGenCfg])
     # Empty for alignment
     def getIsoHPtTrackEmpty(self, flags):
         return  self.getEmptyStep(1,'EmptyUncTrk')
@@ -83,31 +83,31 @@ class UnconventionalTrackingChainConfiguration(ChainConfigurationBase):
 
     # Step 2
     def getFSLRTTrigger(self, flags):
-        return self.getStep(flags,2,'FSLRT',[FullScanLRTMenuSequenceGenCfg])
+        return self.getStep(flags, 'FSLRT',[FullScanLRTMenuSequenceGenCfg])
     # Empty for alignment with jets
     def getRoITrkEmpty(self, flags):
         return self.getEmptyStep(2, 'RoITrkEmptyStep')
 
     # Step 3 -- all FTF tracking here
     def getFTFTrackReco(self, flags):
-        return self.getStep(flags,3,'FTFRecoOnly',[getFullScanRecoOnlySequenceGenCfg])
+        return self.getStep(flags, 'FTFRecoOnly',[getFullScanRecoOnlySequenceGenCfg])
 
     # Step 4+ -- everything post FTF tracking
     def getIsoHPtTrackTrigger(self, flags):
-        return self.getStep(flags,4,'IsoHPtTrack',[IsoHPtTrackTriggerHypoSequenceGenCfg])
+        return self.getStep(flags, 'IsoHPtTrack',[IsoHPtTrackTriggerHypoSequenceGenCfg])
     def getdEdxTrigger(self, flags):
-        return self.getStep(flags,4,'dEdx',[dEdxTriggerHypoSequenceGenCfg])
+        return self.getStep(flags, 'dEdx',[dEdxTriggerHypoSequenceGenCfg])
     def getHitDVTrigger(self, flags):
-        return self.getStep(flags,4,'HitDV',[HitDVHypoSequenceGenCfg])
+        return self.getStep(flags, 'HitDV',[HitDVHypoSequenceGenCfg])
     def getDisTrkTrigger(self, flags):
-        return self.getStep(flags,4,'DisTrk',[DisTrkTriggerHypoSequenceGenCfg])
+        return self.getStep(flags, 'DisTrk',[DisTrkTriggerHypoSequenceGenCfg])
     def getVSITrigger(self, flags):
-        return self.getStep(flags,4,'LRTVSI',[VrtSecInclusiveMenuSequenceGenCfg])
+        return self.getStep(flags, 'LRTVSI',[VrtSecInclusiveMenuSequenceGenCfg])
     def getDJPromptStep(self, flags):
-        return self.getStep(flags,3,'DJPromptStep',[DJPromptStepSequenceGenCfg], comboTools = [TrigDJComboHypoToolFromDict])
+        return self.getStep(flags, 'DJPromptStep',[DJPromptStepSequenceGenCfg], comboTools = [TrigDJComboHypoToolFromDict])
     def getDJDispStep(self, flags):
-        return self.getStep(flags,4,'DJDispStep',[DJDispStepSequenceGenCfg])
+        return self.getStep(flags, 'DJDispStep',[DJDispStepSequenceGenCfg])
     def getDVRecoStep(self, flags):
-        return self.getStep(flags,5,'DVRecoStep',[DVRecoSequenceGenCfg])
+        return self.getStep(flags, 'DVRecoStep',[DVRecoSequenceGenCfg])
     def getDVEDStep(self, flags):
-        return self.getStep(flags,6,'DVEDStep',[DVTriggerEDSequenceGenCfg])
+        return self.getStep(flags, 'DVEDStep',[DVTriggerEDSequenceGenCfg])

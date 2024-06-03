@@ -9,6 +9,7 @@
 #include <AsgAnalysisAlgorithms/AsgPtEtaSelectionTool.h>
 #include <AsgAnalysisAlgorithms/AsgCutBookkeeperAlg.h>
 #include <AsgAnalysisAlgorithms/AsgClassificationDecorationAlg.h>
+#include <AsgAnalysisAlgorithms/AsgEnergyDecoratorAlg.h>
 #include <AsgAnalysisAlgorithms/AsgPriorityDecorationAlg.h>
 #include <AsgAnalysisAlgorithms/AsgEventScaleFactorAlg.h>
 #include <AsgAnalysisAlgorithms/AsgLeptonTrackSelectionAlg.h>
@@ -36,11 +37,13 @@
 #include <AsgAnalysisAlgorithms/TreeMakerAlg.h>
 #include "AsgAnalysisAlgorithms/SystObjectLinkerAlg.h"
 #include "AsgAnalysisAlgorithms/SystObjectUnioniserAlg.h"
+#include "AsgAnalysisAlgorithms/IOStatsAlg.h"
 
 DECLARE_COMPONENT (CP::AsgFlagSelectionTool)
 DECLARE_COMPONENT (CP::AsgMaskSelectionTool)
 DECLARE_COMPONENT (CP::AsgPtEtaSelectionTool)
 DECLARE_COMPONENT (CP::AsgClassificationDecorationAlg)
+DECLARE_COMPONENT (CP::AsgEnergyDecoratorAlg)
 DECLARE_COMPONENT (CP::AsgPriorityDecorationAlg)
 DECLARE_COMPONENT (CP::AsgCutBookkeeperAlg)
 DECLARE_COMPONENT (CP::AsgEventScaleFactorAlg)
@@ -67,6 +70,7 @@ DECLARE_COMPONENT (CP::PMGTruthWeightAlg)
 DECLARE_COMPONENT (CP::SysListDumperAlg)
 DECLARE_COMPONENT (CP::TreeFillerAlg)
 DECLARE_COMPONENT (CP::TreeMakerAlg)
+DECLARE_COMPONENT (CP::IOStatsAlg)
 DECLARE_COMPONENT (CP::SystObjectLinkerAlg)
 // Concrete classes of SystObjectUnioniserAlg
 DECLARE_COMPONENT (CP::SystJetUnioniserAlg)

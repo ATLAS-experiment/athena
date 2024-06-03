@@ -127,6 +127,10 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             info="whether to run JVT selection. The default is True.")
         self.addOption ('runFJvtSelection', False, type=bool,
             info="whether to run forward JVT selection. The default is False.")
+        self.addOption ('jvtWP', "FixedEffPt", type=str,
+            info="which Jvt WP to apply. The default is FixedEffPt.")
+        self.addOption ('fJvtWP', "Loose", type=str,
+            info="which fJvt WP to apply. The default is Loose.")
         self.addOption ('runJvtEfficiency', True, type=bool,
             info="whether to calculate the JVT efficiency. The default is True.")
         self.addOption ('runFJvtEfficiency', False, type=bool,
@@ -266,6 +270,14 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             raise ValueError(
                 "Unsupported input type '{0}' for R=0.4 jets!".format(self.jetInput) )
 
+        if self.jvtWP not in ["FixedEffPt"]:
+            raise ValueError(
+                "Unsupported NNJvt WP '{0}'".format(self.jvtWP) )
+
+        if self.fJvtWP not in ["Loose", "Tight", "Tighter"]:
+            raise ValueError(
+                "Unsupported fJvt WP '{0}'".format(self.fJvtWP) )
+
         if not config.isPhyslite() or self.recalibratePhyslite:
             # Prepare the jet calibration algorithm
             alg = config.createAlgorithm( 'CP::JetCalibrationAlg', 'JetCalibrationAlg'+postfix )
@@ -343,11 +355,12 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
         # Set up the jet efficiency scale factor calculation algorithm
         # Change the truthJetCollection property to AntiKt4TruthWZJets if preferred
         if self.runJvtSelection :
+            assert self.jetInput=="EMPFlow", "NNJvt WPs and SFs only valid for PFlow jets"
             alg = config.createAlgorithm('CP::AsgSelectionAlg', f'JvtSelectionAlg{postfix}')
             config.addPrivateTool('selectionTool', 'CP::NNJvtSelectionTool')
             alg.selectionTool.JetContainer = config.readName(self.containerName)
-            alg.selectionTool.WorkingPoint = "FixedEffPt"
-            alg.selectionTool.MaxPtForJvt = 60e3 if self.jetInput == "EMPFlow" else 120e3
+            alg.selectionTool.WorkingPoint = self.jvtWP
+            alg.selectionTool.MaxPtForJvt = 60e3
             alg.selectionDecoration = "jvt_selection,as_char"
             alg.particles = config.readName(self.containerName)
 
@@ -355,8 +368,12 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
                 alg = config.createAlgorithm( 'CP::JvtEfficiencyAlg', 'JvtEfficiencyAlg'+postfix )
                 config.addPrivateTool( 'efficiencyTool', 'CP::NNJvtEfficiencyTool' )
                 alg.efficiencyTool.JetContainer = config.readName(self.containerName)
-                alg.efficiencyTool.MaxPtForJvt = 60e3 if self.jetInput == "EMPFlow" else 120e3
-                alg.efficiencyTool.WorkingPoint = 'FixedEffPt'
+                alg.efficiencyTool.MaxPtForJvt = 60e3
+                alg.efficiencyTool.WorkingPoint = self.jvtWP
+                if config.geometry() is LHCPeriod.Run2:
+                    alg.efficiencyTool.SFFile = "JetJvtEfficiency/May2024/NNJvtSFFile_Run2_EMPFlow.root"
+                else:
+                    alg.efficiencyTool.SFFile = "JetJvtEfficiency/May2024/NNJvtSFFile_Run3_EMPFlow.root"
                 alg.selection = 'jvt_selection,as_char'
                 alg.scaleFactorDecoration = 'jvt_effSF_%SYS%'
                 alg.outOfValidity = 2
@@ -368,20 +385,23 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             config.addSelection (self.containerName, 'baselineJvt', 'jvt_selection,as_char', preselection=False)
 
         if self.runFJvtSelection :
+            assert self.jetInput=="EMPFlow", "fJvt WPs and SFs only valid for PFlow jets"
             alg = config.createAlgorithm('CP::AsgSelectionAlg', f'FJvtSelectionAlg{postfix}')
             config.addPrivateTool('selectionTool', 'CP::FJvtSelectionTool')
             alg.selectionTool.JetContainer = config.readName(self.containerName)
-            alg.selectionTool.WorkingPoint = "Loose"
+            alg.selectionTool.WorkingPoint = self.fJvtWP
             alg.selectionDecoration = "fjvt_selection,as_char"
             alg.particles = config.readName(self.containerName)
-            alg = config.createAlgorithm( 'CP::JvtEfficiencyAlg', 'ForwardJvtEfficiencyAlg' )
-            config.addSelection (self.containerName, 'baselineFJvt', 'fjvt_selection,as_char', preselection=False)
 
-            if self.runFJvtEfficiency and self.config.dataType() is not DataType.Data:
+            if self.runFJvtEfficiency and config.dataType() is not DataType.Data:
                 alg = config.createAlgorithm( 'CP::JvtEfficiencyAlg', 'FJvtEfficiencyAlg'+postfix )
                 config.addPrivateTool( 'efficiencyTool', 'CP::FJvtEfficiencyTool' )
                 alg.efficiencyTool.JetContainer = config.readName(self.containerName)
-                alg.efficiencyTool.WorkingPoint = 'Loose'
+                alg.efficiencyTool.WorkingPoint = self.fJvtWP
+                if config.geometry() is LHCPeriod.Run2:
+                    alg.efficiencyTool.SFFile = "JetJvtEfficiency/May2024/fJvtSFFile_Run2_EMPFlow.root"
+                else:
+                    alg.efficiencyTool.SFFile = "JetJvtEfficiency/May2024/fvtSFFile_Run3_EMPFlow.root"
                 alg.selection = 'fjvt_selection,as_char'
                 alg.scaleFactorDecoration = 'fjvt_effSF_%SYS%'
                 alg.outOfValidity = 2
@@ -389,8 +409,14 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
                 alg.skipBadEfficiency = False
                 alg.jets = config.readName (self.containerName)
                 alg.preselection = config.getPreselection (self.containerName, '')
-                config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'jvtEfficiency')
+                config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'fjvtEfficiency')
+            config.addSelection (self.containerName, 'baselineFJvt', 'fjvt_selection,as_char', preselection=False)
 
+        # Additional decorations
+        alg = config.createAlgorithm( 'CP::AsgEnergyDecoratorAlg', 'EnergyDecorator' + self.containerName + self.postfix )
+        alg.particles = config.readName (self.containerName)
+
+        config.addOutputVar (self.containerName, 'e_%SYS%', 'e')
 
 
 class RScanJetAnalysisConfig (ConfigBlock) :
@@ -669,6 +695,7 @@ def makeSmallRJetAnalysisConfig( seq, containerName, jetCollection,
                                  jetInput, postfix = None,
                                  runJvtUpdate = None, runNNJvtUpdate = None, runFJvtUpdate = None,
                                  runJvtSelection = None, runFJvtSelection = None,
+                                 jvtWP = None, fJvtWP = None,
                                  runJvtEfficiency = None, runFJvtEfficiency = None,
                                  systematicsModelJES = None, systematicsModelJER = None):
     """Add algorithms for the R=0.4 jets.
@@ -683,6 +710,8 @@ def makeSmallRJetAnalysisConfig( seq, containerName, jetCollection,
         runFJvtUpdate -- Determines whether or not to update forward JVT on the jets
         runJvtSelection -- Determines whether or not to run JVT selection on the jets
         runFJvtSelection -- Determines whether or not to run forward JVT selection on the jets
+        jvtWP -- Defines the NNJvt WP to apply on the jets
+        fJvtWP -- Defines the fJvt WP to apply on the jets
         runJvtEfficiency -- Determines whether or not to calculate the JVT efficiency
         runFJvtEfficiency -- Determines whether or not to calculate the forward JVT efficiency
         systematicsModelJES -- Which NP systematicsModelJES scheme should be used (All, Global, Category, Scenario)
@@ -693,7 +722,6 @@ def makeSmallRJetAnalysisConfig( seq, containerName, jetCollection,
         raise ValueError(
             "Unsupported input type '{0}' for R=0.4 jets!".format(jetInput) )
 
-
     config = SmallRJetAnalysisConfig (containerName, jetCollection, jetInput)
     config.setOptionValue ('postfix', postfix)
     config.setOptionValue ('runJvtUpdate', runJvtUpdate)
@@ -701,6 +729,8 @@ def makeSmallRJetAnalysisConfig( seq, containerName, jetCollection,
     config.setOptionValue ('runFJvtUpdate', runFJvtUpdate)
     config.setOptionValue ('runJvtSelection', runJvtSelection)
     config.setOptionValue ('runFJvtSelection', runFJvtSelection)
+    config.setOptionValue ('jvtWP', jvtWP)
+    config.setOptionValue ('fJvtWP', fJvtWP)
     config.setOptionValue ('runJvtEfficiency', runJvtEfficiency)
     config.setOptionValue ('runFJvtEfficiency', runFJvtEfficiency)
     config.setOptionValue ('systematicsModelJES', systematicsModelJES)

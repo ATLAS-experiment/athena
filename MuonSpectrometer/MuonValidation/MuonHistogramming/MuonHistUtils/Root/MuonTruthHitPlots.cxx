@@ -1,8 +1,9 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonHistUtils/MuonTruthHitPlots.h"
+#include "AthContainers/ConstAccessor.h"
 
 namespace Muon{
   
@@ -102,8 +103,9 @@ PlotBase(pParent, sDir)
   //protection
   if (muon.author()!=xAOD::Muon::MuidCo && muon.author()!=xAOD::Muon::MuidSA &&  muon.author()!=xAOD::Muon::MuGirl)  return;
 
-  if (!muon.isAvailable<std::vector<unsigned int >>(sInfo)) return;
-      std::vector<unsigned int> vec=muon.auxdata<std::vector<unsigned int>>(sInfo);
+      SG::ConstAccessor<std::vector<unsigned int> > acc (sInfo);
+      if (!acc.isAvailable(muon)) return;
+      std::vector<unsigned int> vec=acc(muon);
       for (unsigned int i=0;i<vec.size();i++) {
 	hitPlots->Fill(vec[i], weight);
       }	     
@@ -113,8 +115,9 @@ PlotBase(pParent, sDir)
   //protection
   if (muon.author()!=xAOD::Muon::MuidCo && muon.author()!=xAOD::Muon::MuidSA &&  muon.author()!=xAOD::Muon::MuGirl)  return;
 
-  if (!muon.isAvailable<std::vector<unsigned int >>(sInfo)) return;
-      std::vector<unsigned int> vec=muon.auxdata<std::vector<unsigned int>>(sInfo);
+      SG::ConstAccessor<std::vector<unsigned int> > acc (sInfo);
+      if (!acc.isAvailable(muon)) return;
+      std::vector<unsigned int> vec=acc(muon);
       hitPlots->Fill(vec[index], weight);
            
 }
@@ -122,8 +125,9 @@ PlotBase(pParent, sDir)
   //protection
   if (muon.author()!=xAOD::Muon::MuidCo && muon.author()!=xAOD::Muon::MuidSA &&  muon.author()!=xAOD::Muon::MuGirl)  return;
 
-  if (!muon.isAvailable<std::vector<unsigned int >>(sInfo)) return;
-      std::vector<unsigned int> vec=muon.auxdata<std::vector<unsigned int>>(sInfo);
+      SG::ConstAccessor<std::vector<unsigned int> > acc (sInfo);
+      if (!acc.isAvailable(muon)) return;
+      std::vector<unsigned int> vec=acc(muon);
       hitPlots->Fill(vec[index], weight);
            
 }

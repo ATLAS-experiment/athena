@@ -2,6 +2,7 @@
 
 import json
 from AthenaCommon.Utils.unixtools import find_datafile
+from AthenaCommon.Logging import logging
 
 def getTrkAnaDicts( flags, input_file, unpackChains=False ):
     '''
@@ -31,6 +32,11 @@ def getTrkAnaDicts( flags, input_file, unpackChains=False ):
             analysesDict.update( { trkAnaName : trkAnaDict } )
             ## Update TrkAnalysis tag for this entry
             analysesDict[trkAnaName]["anaTag"] = "_" + trkAnaName
+            ## Update SubFolder for this entry (= trkAnaName if not set or empty)
+            if ( "SubFolder" not in analysesDict[trkAnaName].keys() or
+                 analysesDict[trkAnaName]["SubFolder"] == "" ) :
+                analysesDict[trkAnaName]["SubFolder"] = trkAnaName
+            analysesDict[trkAnaName]["SubFolder"] += "/"
             ## Update TrkAnalysis ChainNames to full chain list (not regex)
             if "ChainNames" in analysesDict[trkAnaName]:
                 fullChainList = getChainList( flags, analysesDict[trkAnaName]["ChainNames"] )
@@ -89,3 +95,132 @@ def getChainList( flags, regexChainList=[] ):
                     configChains.append( chain )
 
     return configChains
+
+
+def getPlotsDefList( flags ):
+    '''
+    Open json files and load all merged contents 
+    in a dictionary, which is later converted to a 
+    list of strings, each to be parsed in a 
+    (flattened) json format
+    '''
+    log = logging.getLogger( "getPlotsDefList" )
+
+    # open the list of json files
+    log.debug( "plotsDefFileList : %s", flags.PhysVal.IDTPM.plotsDefFileList ) 
+    listPath = find_datafile( flags.PhysVal.IDTPM.plotsDefFileList )
+    if listPath is None:
+        log.error( "plotsDefFileList not found" )
+        return None
+
+    plotsDefFileNames = []
+    with open( listPath, "r" ) as input_flist :
+        plotsDefFileNames = input_flist.read().splitlines()
+
+    # creating the basic histogrm definition dictionary 
+    plotsDefDict = {}
+
+    for plotsDefFileName in plotsDefFileNames :
+        dataPath = find_datafile( plotsDefFileName )
+        log.debug( "Reading input plots definitions : %s", dataPath )
+        if dataPath is None:
+            log.error( "plotsDefFile %s not found", plotsDefFileName )
+            return None
+
+        with open( dataPath, "r" ) as input_json_file :
+            plotsDefDict.update( json.load( input_json_file ) )
+
+    # Turn all histo definitions into a list of strings
+    # each string has a flattened json format
+    plotsDefStrList_v1 = []
+    for plotName, plotDict in plotsDefDict.items():
+        newPlotDict = plotDict.copy()
+        newPlotDict[ "name" ] = plotName
+
+        # flatten json histo dict
+        plotDictFlat = flatten_json( newPlotDict )
+
+        # Turn json into string
+        plotDefStr = str( json.dumps( plotDictFlat ) )
+
+        # append to list
+        plotsDefStrList_v1.append( plotDefStr )
+
+    # Replace standard common fields (e.g. &ETAMAX)
+    # with corresponding values (read from default json)
+    commonValuesDict = {}
+    commonValuesPath = find_datafile( flags.PhysVal.IDTPM.plotsCommonValuesFile )
+    if commonValuesPath is None :
+        log.error( "plotsCommonValuesFile not found" )
+        return None
+
+    with open( commonValuesPath, "r" ) as input_commonValues : 
+        commonValuesDict.update( json.load( input_commonValues ) )
+
+    plotsDefStrList_v2 = []
+    for plotDefStr in plotsDefStrList_v1 :
+        newPlotDefStr = plotDefStr
+        if commonValuesDict :
+            for key, value in commonValuesDict.items() :
+                plotDefStr_tmp = newPlotDefStr.replace( "$"+key, value[0] )
+                newPlotDefStr = plotDefStr_tmp
+        plotsDefStrList_v2.append( newPlotDefStr )
+
+    # Now expand the list to account for all required track types
+    trkLabels = [
+        getLabel( flags, flags.PhysVal.IDTPM.currentTrkAna.TestType ),
+        getLabel( flags, flags.PhysVal.IDTPM.currentTrkAna.RefType )
+    ]
+
+    plotsDefStrList = []
+    for plotsDefStr in plotsDefStrList_v2 :
+        if ( "$TRKTAG" not in plotsDefStr ) and ( "$TRKTYPE" not in plotsDefStr ) :
+            plotsDefStrList.append( plotsDefStr )
+            continue
+        for trkLabel in trkLabels :
+            newPlotsDefStr = plotsDefStr.replace( "$TRKTYPE", trkLabel[0] ).replace( "$TRKTAG",  trkLabel[1] )
+            plotsDefStrList.append( newPlotsDefStr )
+
+    return plotsDefStrList
+
+
+def getLabel( flags, key ) :
+    if key == "Offline" and flags.PhysVal.IDTPM.currentTrkAna.SelectOfflineObject:
+        if "Truth" not in flags.PhysVal.IDTPM.currentTrkAna.SelectOfflineObject:
+            key += flags.PhysVal.IDTPM.currentTrkAna.SelectOfflineObject
+    trkLabelsDict = {
+        "Trigger"             : [ "Trigger track",  "trig" ],
+        "Offline"             : [ "Offline track",              "offl" ],
+        "OfflineElectron"     : [ "Offline e^{#pm} track",      "offEle" ],
+        "OfflineMuon"         : [ "Offline #mu^{#pm} track",    "offMu" ],
+        "OfflineTau"          : [ "Offline #tau^{#pm} track",   "offTau" ],
+        "Truth"               : [ "Truth particle",     "truth" ],
+        "TruthElectron"       : [ "Truth e^{#pm}",      "truthEle" ],
+        "TruthMuon"           : [ "Truth #mu^{#pm}",    "truthMu" ],
+        "TruthTau"            : [ "Truth #tau^{#pm}",   "truthEle" ],
+    }
+    return trkLabelsDict[ key ]
+
+
+def getTag( flags, key ) :
+    labels = getLabel( flags, key )
+    return labels[1]
+
+
+def flatten_json( y ) :
+    out = {}
+    def flatten(x, name=''):
+        # If the Nested key-value pair is of dict type
+        if type(x) is dict:
+            for a in x:
+                flatten(x[a], name + a + '_')
+        # If the Nested key-value pair is of list type
+        elif type(x) is list:
+            i = 0
+            for a in x:
+                flatten(a, name + str(i) + '_')
+                i += 1
+        else:
+            out[name[:-1]] = x
+    flatten(y)
+    return out

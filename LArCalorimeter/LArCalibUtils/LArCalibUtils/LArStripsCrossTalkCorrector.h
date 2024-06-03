@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //Dear emacs, this is -*-c++-*-
@@ -11,8 +11,6 @@
 #include "StoreGate/ReadCondHandleKey.h"
 #include "LArRecConditions/LArBadChannelCont.h"
 #include "LArCabling/LArOnOffIdMapping.h"
-#include "CaloIdentifier/LArEM_ID.h"
-#include "LArIdentifier/LArOnlineID.h"
 #include "LArElecCalib/ILArPedestal.h"
 #include "LArRawEvent/LArAccumulatedCalibDigit.h"
 #include "LArRecConditions/LArBadChannelMask.h"
@@ -21,6 +19,11 @@
 #include <vector>
 #include <string>
 #include <bitset>
+#include <array>
+
+class LArEM_ID;
+class LArOnlineID;
+class LArAccumulatedCalibDigit;
 
 //Poor man's histogramming class to monitor difference introduced by xtalk corr
 class XtalkCorrHisto {
@@ -83,8 +86,8 @@ class ATLAS_NOT_THREAD_SAFE LArStripsCrossTalkCorrector : public AthAlgorithm
   const LArEM_ID*     m_emId{nullptr};
   unsigned int        m_event_counter=0;
   //Ranges for eta and phi indices for barrel(0) and endcap(1)
-  const std::array<unsigned,2> m_MAXeta{448,208};
-  const std::array<unsigned,2> m_MINeta{1,0};
+  static constexpr auto m_MAXeta=std::to_array<unsigned>({448,208});
+  static constexpr auto m_MINeta=std::to_array<unsigned>({1,0});
   const unsigned int  m_MAXphi=64;
   int                 m_nStrips=-1;
   //Algorithm-Properties:
@@ -111,10 +114,10 @@ class ATLAS_NOT_THREAD_SAFE LArStripsCrossTalkCorrector : public AthAlgorithm
   std::set<HWIdentifier> m_uncorrectedIds;
 
   struct neighbour_t{
-   int dist;
-   const LArAccumulatedCalibDigit* dig;
-   double ped;
-   double weight;
+   int dist{};
+   const LArAccumulatedCalibDigit* dig{};
+   double ped{};
+   double weight{};
  };
 
 

@@ -60,7 +60,7 @@ namespace Trk {
 //----------------------------------------------------------------------------------------
 
 VertexID TrkVKalVrtFitter::startVertex(const  std::vector<const xAOD::TrackParticle*> & list,
-                                       const  std::vector<double>& particleMass,
+                                       std::span<const double> particleMass,
                                        IVKalState& istate,
 	  			       const  double massConstraint) const
 {
@@ -95,7 +95,7 @@ int TrkVKalVrtFitter::getCascadeNDoF (const CascadeState& cstate)
 // Next vertex in cascade
 //
 VertexID TrkVKalVrtFitter::nextVertex(const  std::vector<const xAOD::TrackParticle*> & list,
-                                      const  std::vector<double>& particleMass,
+                                      std::span<const double> particleMass,
                                       IVKalState& istate,
 	  		              const  double massConstraint) const
 {
@@ -142,7 +142,7 @@ VertexID TrkVKalVrtFitter::nextVertex(const  std::vector<const xAOD::TrackPartic
 // Next vertex in cascade
 //
 VertexID TrkVKalVrtFitter::nextVertex(const  std::vector<const xAOD::TrackParticle*> & list,
-                                      const  std::vector<double>& particleMass,
+                                      std::span<const double> particleMass,
 		                      const  std::vector<VertexID> &precedingVertices,
                                       IVKalState& istate,
 	  		              const  double massConstraint) const
@@ -601,12 +601,11 @@ VxCascadeInfo * TrkVKalVrtFitter::fitCascade(IVKalState& istate,
         for( jt=0; jt<=it; jt++){                                      //
            genCOV(it,jt) = genCOV(jt,it) = fittedCovariance[iv][it*(it+1)/2+jt];      // for real tracks only
       } }                                                              // (first in the list)
-      Amg::MatrixX *fullDeriv=nullptr;
+      Amg::MatrixX fullDeriv;
       if( m_makeExtendedVertex ){
          //VK fullDeriv=new CLHEP::HepMatrix( NRealT*3+3, NRealT*3+3, 0); // matrix is filled by zeros
-         fullDeriv=new Amg::MatrixX( NRealT*3+3, NRealT*3+3);
-         (*fullDeriv)=Amg::MatrixX::Zero(NRealT*3+3, NRealT*3+3);    // matrix is filled by zeros
-	 (*fullDeriv)(0,0)=(*fullDeriv)(1,1)=(*fullDeriv)(2,2)=1.;
+         fullDeriv=Amg::MatrixX::Zero(NRealT*3+3, NRealT*3+3);    // matrix is filled by zeros
+	 fullDeriv(0,0)=fullDeriv(1,1)=fullDeriv(2,2)=1.;
       }
       for( it=0; it<NRealT; it++) {
          mom= sqrt(  fittedParticles[iv][it].Pz*fittedParticles[iv][it].Pz
@@ -637,7 +636,7 @@ VxCascadeInfo * TrkVKalVrtFitter::fitCascade(IVKalState& istate,
          tmpDeriv(2+2,3*it+3+1) = -Py/(mom*mom) * invP;  //dInvP/dPy
          tmpDeriv(2+2,3*it+3+2) = -Pz/(mom*mom) * invP;  //dInvP/dPz
 //----------  Here for Eigen block(startrow,startcol,sizerow,sizecol)
-         if( m_makeExtendedVertex )(*fullDeriv).block(3*it+3+0,3*it+3+0,3,3) = tmpDeriv.block(2,3*it+3+0,3,3);
+         if( m_makeExtendedVertex )fullDeriv.block(3*it+3+0,3*it+3+0,3,3) = tmpDeriv.block(2,3*it+3+0,3,3);
 //----------
 	 AmgSymMatrix(5) tmpCovMtx ;                      // New Eigen based EDM
 	 tmpCovMtx = genCOV.similarity(tmpDeriv);                            // New Eigen based EDM
@@ -647,7 +646,7 @@ VxCascadeInfo * TrkVKalVrtFitter::fitCascade(IVKalState& istate,
       std::vector<float> floatErrMtx;
       if( m_makeExtendedVertex ) {
   	 Amg::MatrixX tmpCovMtx(NRealT*3+3,NRealT*3+3);                      // New Eigen based EDM
-         tmpCovMtx=genCOV.similarity(*fullDeriv);
+         tmpCovMtx=genCOV.similarity(fullDeriv);
          floatErrMtx.resize((NRealT*3+3)*(NRealT*3+3+1)/2);
          int ivk=0;
          for(int i=0;i<NRealT*3+3;i++){
@@ -671,8 +670,6 @@ VxCascadeInfo * TrkVKalVrtFitter::fitCascade(IVKalState& istate,
       }
       xaodVrtList.push_back(tmpXAODVertex);              //VK Save xAOD::Vertex
 //
-//---- Save and clean
-      delete fullDeriv;   //Mandatory cleaning
     }
 //
 //  Save momenta of all particles including combined at vertex positions

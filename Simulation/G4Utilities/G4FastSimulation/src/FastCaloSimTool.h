@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef G4FASTSIMULATION_FASTCALOSIMTOOL_H
@@ -9,8 +9,12 @@
 #include "G4AtlasTools/FastSimulationBase.h"
 /* FastCaloSim parametrization service include */
 #include "ISF_FastCaloSimInterfaces/IFastCaloSimParamSvc.h"
+/* FastCaloSim calorimeter transportation include */
+#include "ISF_FastCaloSimParametrization/IFastCaloSimCaloTransportation.h"
 /* FastCaloSim calorimeter extrapolation include */
 #include "ISF_FastCaloSimParametrization/IFastCaloSimCaloExtrapolation.h"
+/* Geant4 transportation tool */
+#include "G4AtlasInterfaces/IG4CaloTransportTool.h"
 /* Random generator service include */
 #include "AthenaKernel/IAthRNGSvc.h"
 
@@ -38,16 +42,20 @@ protected:
   
   // FastCaloSim service 
   ServiceHandle<ISF::IFastCaloSimParamSvc> m_FastCaloSimSvc{this, "ISF_FastCaloSimV2ParamSvc", "ISF_FastCaloSimV2ParamSvc"};
+  // FastCaloSim transportation tool
+  PublicToolHandle<IFastCaloSimCaloTransportation> m_FastCaloSimCaloTransportation{this, "FastCaloSimCaloTransportation", "FastCaloSimCaloTransportation", ""};
   // FastCaloSim extrapolation tool
   PublicToolHandle<IFastCaloSimCaloExtrapolation> m_FastCaloSimCaloExtrapolation{this, "FastCaloSimCaloExtrapolation", "FastCaloSimCaloExtrapolation", ""};
+  // Geant4 transportation tool
+  PublicToolHandle<IG4CaloTransportTool> m_G4CaloTransportTool{this, "G4CaloTransportTool", "G4CaloTransportTool", ""};
   // Random generator service
   ServiceHandle<IAthRNGSvc> m_rndmGenSvc{this, "RandomSvc", "AthRNGSvc", ""};
   // Random generator engine name
   Gaudi::Property<std::string> m_randomEngineName{this, "RandomStream", ""};
   // Name of associated CaloCellContainerSD
   Gaudi::Property<std::string> m_CaloCellContainerSDName{this, "CaloCellContainerSDName", "", "Name of the associated CaloCellContainerSD"};
-
+  // Flag to enable G4 transportation
+  Gaudi::Property<bool> m_doG4Transport{this, "doG4Transport", false, "Flag to enable G4 transportation"};
 };
 
 #endif //G4FASTSIMULATION_FASTCALOSIMTOOL_H
-

@@ -21,6 +21,7 @@
 #include "Acts/EventData/TrackContainer.hpp"
 #include "Acts/EventData/TrackProxy.hpp"
 
+// ActsTrk
 #include "ActsEvent/Seed.h"
 #include "ActsEvent/TrackParameters.h"
 #include "ActsEvent/TrackContainer.h"
@@ -38,7 +39,7 @@
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "GaudiKernel/EventContext.h"
 
-// Other
+// STL
 #include <limits>
 #include <string>
 #include <vector>
@@ -107,12 +108,14 @@ namespace ActsTrk
     // Configuration
     Gaudi::Property<unsigned int> m_maxPropagationStep{this, "maxPropagationStep", 1000, "Maximum number of steps for one propagate call"};
     Gaudi::Property<bool> m_skipDuplicateSeeds{this, "skipDuplicateSeeds", true, "skip duplicate seeds before calling CKF"};
-    Gaudi::Property<bool> m_refitSeeds{this, "refitSeeds", true, "Run KalmanFitter on seeds before passing to CKF"};
+    Gaudi::Property<bool> m_refitSeeds{this, "refitSeeds", false, "Run KalmanFitter on seeds before passing to CKF"};
     Gaudi::Property<std::vector<double>> m_etaBins{this, "etaBins", {}, "bins in |eta| to specify variable selections"};
     // Acts::MeasurementSelector selection cuts for associating measurements with predicted track parameters on a surface.
     Gaudi::Property<std::vector<double>> m_chi2CutOff{this, "chi2CutOff", {}, "MeasurementSelector: maximum local chi2 contribution"};
     Gaudi::Property<std::vector<size_t>> m_numMeasurementsCutOff{this, "numMeasurementsCutOff", {}, "MeasurementSelector: maximum number of associated measurements on a single surface"};
-    Gaudi::Property<bool> m_doBranchHoleCut{this, "doBranchHoleCut", true, "select on maxHoles in branch stopper"};
+    Gaudi::Property<std::vector<std::size_t>> m_ptMinMeasurements{this, "ptMinMeasurements", {}, "if specified for the given seed collection, applies ptMin cut in branch stopper once ptMinMinMeasurements have been encountered"};
+    Gaudi::Property<std::vector<std::size_t>> m_absEtaMaxMeasurements{this, "absEtaMaxMeasurements", {}, "if specified for the given seed collection, applies absEtaMax cut in branch stopper once absEtaMaxMeasurements have been encountered"};
+    Gaudi::Property<bool> m_doBranchStopper{this, "doBranchStopper", true, "use branch stopper"};
     Gaudi::Property<bool> m_doTwoWay{this, "doTwoWay", true, "run CKF twice, first with forward propagation with smoothing, then with backward propagation"};
 
     // Acts::TrackSelector cuts
@@ -149,6 +152,8 @@ namespace ActsTrk
       kNStoppedTracksMaxHoles,
       kMultipleBranches,
       kNoSecond,
+      kNStoppedTracksMinPt,
+      kNStoppedTracksMaxEta,
       kNStat
     };
     using EventStats = std::vector<std::array<unsigned int, kNStat>>;
@@ -189,7 +194,6 @@ namespace ActsTrk
     CKF_pimpl &trackFinder();
     const CKF_pimpl &trackFinder() const;
 
-    struct CkfBranchStopper;
     std::unique_ptr<CKF_pimpl> m_trackFinder;
 
     // statistics

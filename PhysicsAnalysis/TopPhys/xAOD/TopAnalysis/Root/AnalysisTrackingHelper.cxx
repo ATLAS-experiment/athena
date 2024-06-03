@@ -17,8 +17,6 @@
 
 #include <TTree.h>
 
-#include <boost/algorithm/string/classification.hpp>
-#include <boost/algorithm/string.hpp>
 #include <optional>
 #include <boost/regex.hpp>
 #include <boost/scope_exit.hpp>
@@ -153,7 +151,7 @@ namespace top {
             size_t i = path.rfind('/');
             assert(i != std::string::npos);
             std::string const& basename = path.substr(i + 1);
-            if (boost::starts_with(basename, "lib")) {
+            if (basename.starts_with( "lib")) {
               std::string dirpath = path.substr(0, (i ? i : 1));
               libs[dirpath].insert(basename);
             }
@@ -201,7 +199,7 @@ namespace top {
         char const* sep = "\n  ";
         for (auto&& kv : readStats.containers()) {
           xAOD::BranchStats const& bs = kv.second;
-          if (boost::ends_with(bs.GetName(), "TDS") || boost::ends_with(bs.GetName(), "Aux.")) continue;
+          if (std::string(bs.GetName()).ends_with("TDS") || std::string(bs.GetName()).ends_with("Aux.")) continue;
           if (bs.readEntries()) {
             out << sep << json_dump(bs.GetName()) << ": " << json_dump(bs.readEntries());
             sep = ",\n  ";
@@ -232,7 +230,7 @@ namespace top {
       for (std::string const& toolname : listToolStore()) {
         auto&& tool = asg::ToolStore::get<asg::AsgTool>(toolname);
         if (tool == nullptr) continue;
-        if (boost::starts_with(tool->name(), "top::")) continue;
+        if (tool->name().starts_with( "top::")) continue;
         out << toolsep << json_dump(tool->name()) << ": {";
         auto&& props = *tool->getPropertyMgr();
         char const* propsep = "\n  ";

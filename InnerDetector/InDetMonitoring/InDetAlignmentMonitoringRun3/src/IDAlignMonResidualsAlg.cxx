@@ -91,6 +91,7 @@ StatusCode IDAlignMonResidualsAlg::initialize()
   ATH_CHECK( m_tracksKey.initialize() );
 
   m_pixResidualX = Monitored::buildToolMap<int>(m_tools, "PixResidualX", m_nSiBlayers);
+  m_pixResidualX_3D = Monitored::buildToolMap<int>(m_tools, "PixResidualX_3D", m_nSiBlayers);
   m_pixResidualY = Monitored::buildToolMap<int>(m_tools, "PixResidualY", m_nSiBlayers);
   m_pixPullX = Monitored::buildToolMap<int>(m_tools, "PixPullX", m_nSiBlayers);
   m_pixPullY = Monitored::buildToolMap<int>(m_tools, "PixPullY", m_nSiBlayers);
@@ -485,6 +486,7 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
 	  fill(residualGroup, pix_b_biased_residualy_m);
 	  auto pix_b_residualsx_m = Monitored::Scalar<float>("m_pix_residualsx", residualX);
 	  fill(m_tools[m_pixResidualX[layerDisk]], pix_b_residualsx_m);
+    fill(m_tools[m_pixResidualX_3D[layerDisk]], modEta_m, modPhi_m, pix_b_residualsx_m);
 	  auto pix_b_residualsy_m = Monitored::Scalar<float>("m_pix_residualsy", residualY);
 	  fill(m_tools[m_pixResidualY[layerDisk]], pix_b_residualsy_m);
 	  auto pix_b_pullsx_m = Monitored::Scalar<float>("m_pix_pullsx", pullX);

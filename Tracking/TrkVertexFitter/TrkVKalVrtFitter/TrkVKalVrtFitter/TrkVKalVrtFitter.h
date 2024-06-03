@@ -25,7 +25,6 @@
 #include  "TrkVKalVrtFitter/VKalExtPropagator.h" //for Trk::VKalExtPropagator (member)
 
 #include "TrkVKalVrtCore/TrkVKalVrtCore.h"  //for VKalVrtControl (member)
-
 //
 class IChronoStatSvc;
 class EventContext;
@@ -140,17 +139,17 @@ namespace Trk{
 //
         VertexID startVertex(
           const std::vector<const xAOD::TrackParticle*>& list,
-          const std::vector<double>& particleMass,
+          std::span<const double> particleMass,
           IVKalState& istate,
           double massConstraint = 0.) const override final;
 
         VertexID nextVertex(const std::vector<const xAOD::TrackParticle*>& list,
-                            const std::vector<double>& particleMass,
+                            std::span<const double> particleMass,
                             IVKalState& istate,
                             double massConstraint = 0.) const override final;
 
         VertexID nextVertex(const std::vector<const xAOD::TrackParticle*>& list,
-                            const std::vector<double>& particleMass,
+                            std::span<const double> particleMass,
                             const std::vector<VertexID>& precedingVertices,
                             IVKalState& istate,
                             double massConstraint = 0.) const override final;
@@ -218,12 +217,12 @@ namespace Trk{
                                           IVKalState& istate) const override final;
         //-----
         virtual StatusCode VKalVrtFitFast(
-          const std::vector<const xAOD::TrackParticle*>&,
+          std::span<const xAOD::TrackParticle* const>,
           Amg::Vector3D& Vertex, double &minDZ,
           IVKalState& istate) const;
 
         virtual StatusCode VKalVrtFitFast(
-          const std::vector<const xAOD::TrackParticle*>&,
+          const std::span<const xAOD::TrackParticle* const>,
           Amg::Vector3D& Vertex,
           IVKalState& istate) const override final;
 
@@ -260,7 +259,7 @@ namespace Trk{
                                           IVKalState& istate) const override final;
 
         virtual void setMassForConstraint(double Mass,
-                                          const std::vector<int>&,
+                                          std::span<const int>,
                                           IVKalState& istate) const override final;
 
         virtual void setRobustness(int, IVKalState& istate) const override final;
@@ -516,7 +515,7 @@ namespace Trk{
                               State& state) const;
 
         StatusCode CvtTrackParticle(
-          const std::vector<const xAOD::TrackParticle*>& list,
+          std::span<const xAOD::TrackParticle* const> list,
           int& ntrk,
           State& state) const;
 

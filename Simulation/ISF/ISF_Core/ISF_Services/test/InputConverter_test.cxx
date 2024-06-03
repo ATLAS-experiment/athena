@@ -40,8 +40,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #include "GeoPrimitives/GeoPrimitives.h"
 
 // HepMC
-#include "AtlasHepMC/GenParticle.h"
-#include "AtlasHepMC/GenVertex.h"
+#include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/Operators.h"
 #include "GeneratorObjects/HepMcParticleLink.h"
 #include "GeneratorObjects/McEventCollection.h"
@@ -205,13 +204,15 @@ TEST_F(InputConverter_test, convertParticle_using_generated_mass) {
   // create dummy input McEventCollection containing a dummy GenEvent
   SG::WriteHandle<McEventCollection> inputTestDataHandle{"GEN_EVENT"};
   inputTestDataHandle = std::make_unique<McEventCollection>();
-  inputTestDataHandle->push_back(new HepMC::GenEvent());
+  const int signal_process_id{1};
+  const int event_number{1};
+  inputTestDataHandle->push_back(HepMC::newGenEvent(signal_process_id, event_number));
   HepMC::GenEvent& ge = *(inputTestDataHandle->at(0));
   ge.add_vertex( prodVtx );
   //AV: we set barcode here because only here the particle in HepMC3 enters event and can have a meaningful barcode.
   HepMC::suggest_barcode(genPart,particleBarcode);
   HepMC::fillBarcodesAttribute(&ge);
-  HepMcParticleLink* trackLink = new HepMcParticleLink(particleBarcode, 0, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE); // FIXME barcode-based syntax
+  HepMcParticleLink* trackLink = new HepMcParticleLink(particleBarcode, event_number, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE); // FIXME barcode-based syntax
 
   Amg::Vector3D expectedPos(9.8, 7.65, 4.3);
   Amg::Vector3D expectedMom(12.3, 45.6, 78.9);
@@ -261,13 +262,15 @@ TEST_F(InputConverter_test, convertParticle_using_particleDataTable_photon) {
   // create dummy input McEventCollection containing a dummy GenEvent
   SG::WriteHandle<McEventCollection> inputTestDataHandle{"GEN_EVENT"};
   inputTestDataHandle = std::make_unique<McEventCollection>();
-  inputTestDataHandle->push_back(new HepMC::GenEvent());
+  const int signal_process_id{1};
+  const int event_number{1};
+  inputTestDataHandle->push_back(HepMC::newGenEvent(signal_process_id, event_number));
   HepMC::GenEvent& ge = *(inputTestDataHandle->at(0));
   ge.add_vertex( prodVtx );
   //AV: we set barcode here because only here the particle in HepMC3 enters event and can have a meaningful barcode.
   HepMC::suggest_barcode(genPart,particleBarcode);
   HepMC::fillBarcodesAttribute(&ge);
-  HepMcParticleLink* trackLink = new HepMcParticleLink(particleBarcode, 0, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE);
+  HepMcParticleLink* trackLink = new HepMcParticleLink(particleBarcode, event_number, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE);
 
   Amg::Vector3D expectedPos(9.8, 7.65, 4.3);
   Amg::Vector3D expectedMom(12.3, 45.6, 78.9);
@@ -317,11 +320,13 @@ TEST_F(InputConverter_test, convertParticle_using_particleDataTable_electron) {
   // create dummy input McEventCollection containing a dummy GenEvent
   SG::WriteHandle<McEventCollection> inputTestDataHandle{"GEN_EVENT"};
   inputTestDataHandle = std::make_unique<McEventCollection>();
-  inputTestDataHandle->push_back(new HepMC::GenEvent());
+  const int signal_process_id{1};
+  const int event_number{1};
+  inputTestDataHandle->push_back(HepMC::newGenEvent(signal_process_id, event_number));
   HepMC::GenEvent& ge = *(inputTestDataHandle->at(0));
   ge.add_vertex( prodVtx );
   HepMC::suggest_barcode(genPart,particleBarcode);
-  HepMcParticleLink* trackLink = new HepMcParticleLink(particleBarcode, 0, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE);
+  HepMcParticleLink* trackLink = new HepMcParticleLink(particleBarcode, event_number, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE);
 
   Amg::Vector3D expectedPos(9.8, 7.65, 4.3);
   Amg::Vector3D expectedMom(12.3, 45.6, 78.9);

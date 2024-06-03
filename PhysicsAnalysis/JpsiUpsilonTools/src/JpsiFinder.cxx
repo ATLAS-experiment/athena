@@ -363,9 +363,7 @@ namespace Analysis {
         }
         
         // (6) Select for invariant mass, if requested
-        std::vector<double> trkMasses;
-        trkMasses.push_back(m_trk1M);
-        trkMasses.push_back(m_trk2M);
+        std::array<double,2> trkMasses{m_trk1M, m_trk2M};
         if ( (m_invMassLower > 0.0) || (m_invMassUpper > 0.0) ) {
             std::vector<JpsiCandidate> selectCandidates;
             for(auto& cand : sortedJpsiCandidates){
@@ -594,19 +592,17 @@ namespace Analysis {
     
     // ---------------------------------------------------------------------------------
     // getInvariantMass: returns invariant mass
-    // ---------------------------------------------------------------------------------
+    // ----------------------------------------------------------getInvariantMass-----------------------
     
-    double JpsiFinder::getInvariantMass(const JpsiCandidate &jpsiIn, const std::vector<double> &massHypotheses) const {
-      double mass1 = massHypotheses[0];
-      double mass2 = massHypotheses[1];
+    double JpsiFinder::getInvariantMass(const JpsiCandidate &jpsiIn, std::span<const double> massHypotheses) const {
       
       // construct 4-vectors from track perigee parameters using given mass hypotheses.
       // NOTE: in new data model (xAOD) the defining parameters are expressed as perigee parameters w.r.t. the beamspot
       // NOTE2: TrackParticle::p4() method already returns TLorentzVector, however, we want to enforce our own mass hypothesis
       TLorentzVector mu1;
       TLorentzVector mu2;
-      mu1.SetVectM(jpsiIn.trackParticle1->p4().Vect(), mass1);
-      mu2.SetVectM(jpsiIn.trackParticle2->p4().Vect(), mass2);
+      mu1.SetVectM(jpsiIn.trackParticle1->p4().Vect(), massHypotheses[0]);
+      mu2.SetVectM(jpsiIn.trackParticle2->p4().Vect(), massHypotheses[1]);
       
       return (mu1+mu2).M();
         

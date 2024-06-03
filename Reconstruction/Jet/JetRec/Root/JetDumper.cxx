@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetDumper.cxx
@@ -106,7 +106,7 @@ void JetDumper::print() const {
 
 //**********************************************************************
 
-string JetDumper::object_label(const fastjet::PseudoJet& jet, string label) const {
+string JetDumper::object_label(const fastjet::PseudoJet& jet, const string& label) const {
   string sout;
   if ( jet.has_user_info<IConstituentUserInfo>() ) {
     const IConstituentUserInfo& cui = jet.user_info<IConstituentUserInfo>();

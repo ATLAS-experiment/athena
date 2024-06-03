@@ -9,9 +9,10 @@ def createIDTPMConfigFlags():
 
     icf.addFlag( "DirName", "InDetTrackPerfMonPlots/" )
     icf.addFlag( "trkAnaNames", ["Default"] )
-    icf.addFlag( "histoDefFormat", "JSON" )
-    icf.addFlag( "HistoDefFileList" , "InDetTrackPerfMon/HistoDefFileList_default.txt" )
+    icf.addFlag( "plotsDefFormat", "JSON" )
+    icf.addFlag( "plotsDefFileList" , "InDetTrackPerfMon/HistoDefFileList_default.txt" )
     icf.addFlag( "plotsCommonValuesFile", "InDetTrackPerfMon/IDTPMPlotCommonValues.json" )
+    icf.addFlag( "sortPlotsByChain", False )
     
     return icf
 
@@ -25,7 +26,7 @@ def createIDTPMTrkAnaConfigFlags():
     # General properties
     icf.addFlag( "enabled", True )
     icf.addFlag( "anaTag", "" )
-    icf.addFlag( "SubFolder", "IDTPM/" )
+    icf.addFlag( "SubFolder", "" )
     # Test-Reference collections properties
     icf.addFlag( "TestType", "Offline" )
     icf.addFlag( "RefType", "Truth" )
@@ -56,8 +57,8 @@ def createIDTPMTrkAnaConfigFlags():
     # Truth particles selection properties
     # ...
     # Histogram properties
-    icf.addFlag( "doTrackParameters"   , True )
-    icf.addFlag( "doEfficiencies"      , True )
-    icf.addFlag( "doOfflineElectrons"  , False )
+    icf.addFlag( "plotTrackParameters"   , True )
+    icf.addFlag( "plotEfficiencies"      , True )
+    icf.addFlag( "plotOfflineElectrons"  , False )
     
     return icf

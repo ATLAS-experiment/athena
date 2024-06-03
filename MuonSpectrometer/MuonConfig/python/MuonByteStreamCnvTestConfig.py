@@ -151,6 +151,9 @@ def RpcDigitToRpcRDOCfg(flags, name="RpcDigitToRpcRDO", **kwargs):
     else:
         kwargs.setdefault("OutputObjectName", "RPCPAD")
 
+    kwargs.setdefault("NOBXS", flags.Trigger.L1MuonSim.RPCNBX)
+    kwargs.setdefault("BCZERO", flags.Trigger.L1MuonSim.RPCNBCZ)
+
     acc.addEventAlgo(CompFactory.RpcDigitToRpcRDO(name, **kwargs))
     return acc
 

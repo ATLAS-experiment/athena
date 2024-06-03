@@ -49,10 +49,6 @@ DetDescrCnvSvc                                       INFO  filling address for Z
 DetDescrCnvSvc                                       INFO  filling address for JTower_ID with CLID 218674799 and storage type 68 to detector store 
 DetDescrCnvSvc                                       INFO  filling address for GTower_ID with CLID 49678914 and storage type 68 to detector store 
 TagInfoMgr                                           INFO   AlgTool: ToolSvc.IOVDbMetaDataTool
-GeoModelSvc::RDBMaterialManager                   WARNING  Getting PixTBMatComponents with default tag
-GeoModelSvc::RDBMaterialManager                   WARNING  Getting PixTBMaterials with default tag
-GeoModelSvc::RDBMaterialManager                   WARNING  Getting InDetMatComponents with default tag
-GeoModelSvc::RDBMaterialManager                   WARNING  Getting InDetMaterials with default tag
 EventPersistencySvc                                  INFO Added successfully Conversion service:McCnvSvc
 EventPersistencySvc                                  INFO Added successfully Conversion service:DetDescrCnvSvc
 LArElectrodeIDDetDescrCnv                            INFO in createObj: creating a LArElectrodeID helper object in the detector store

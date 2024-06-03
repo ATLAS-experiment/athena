@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from CoolConvUtilities.AtlCoolLib import indirectOpen
 
@@ -55,13 +55,10 @@ class LArRunInfo:
            return 'Result'
 
 
-def getLArFormatForRun(run,quiet=False,connstring=None):
+def getLArFormatForRun(run,quiet=False,connstring="COOLONL_LAR/CONDBR2"):
     from AthenaCommon.Logging import logging
     mlog_LRF = logging.getLogger( 'getLArRunFormatForRun' )
-    if connstring is None:
-        from IOVDbSvc.CondDB import conddb
-        connstring = "COOLONL_LAR/"+conddb.dbdata
-    
+
     mlog_LRF.info("Connecting to database %s", connstring)
 
     mlog_LRF.info("Found LAr info for run %i",run)
@@ -114,13 +111,9 @@ class LArDTRunInfo:
     def ADCCalib(self):
            return self._adcc
 
-def getLArDTInfoForRun(run,quiet=False,connstring=None):
+def getLArDTInfoForRun(run,quiet=False,connstring="COOLONL_LAR/CONDBR2"):
     from AthenaCommon.Logging import logging
     mlog_LRF = logging.getLogger( 'getLArDTRunInfoForRun' )
-    if connstring is None:
-        from IOVDbSvc.CondDB import conddb
-        connstring = "COOLONL_LAR/"+conddb.dbdata
-    
     mlog_LRF.info("Connecting to database %s", connstring)
 
     mlog_LRF.info("Found DT info for run %i",run)

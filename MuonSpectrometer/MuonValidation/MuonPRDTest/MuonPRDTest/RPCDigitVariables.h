@@ -24,7 +24,6 @@ namespace MuonPRDTest {
         ScalarBranch<unsigned int>& m_RPC_nDigits{parent().newScalar<unsigned int>("N_Digits_RPC")};
         VectorBranch<float>& m_RPC_dig_time{parent().newVector<float>("Digits_RPC_time")};
         VectorBranch<float>& m_RPC_tot{parent().newVector<float>("Digits_RPC_timeOverThresh")};
-        VectorBranch<int>& m_RPC_dig_stripNumber{parent().newVector<int>("Digits_RPC_stripNumber")};
         ThreeVectorBranch m_RPC_dig_globalPos{parent(), "Digits_RPC_globalPos"};
         TwoVectorBranch m_RPC_dig_localPos{parent(), "Digits_RPC_localPos"};
         RpcIdentifierBranch m_RPC_dig_id{parent(), "Digits_RPC"};

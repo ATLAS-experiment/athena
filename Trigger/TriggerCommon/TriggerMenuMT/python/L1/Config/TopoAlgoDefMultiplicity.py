@@ -26,8 +26,9 @@ class TopoAlgoDefMultiplicity(object):
         emVarThresholds_2bits = [
             'eEM24VM',  'eEM26',  'eEM26L', 'eEM26M', 'eEM26T', 'eEM28M',
             'eEM1', 'eEM2',
+            'eEM40L',
             # spares
-            'eEMSPARE1', 'eEMSPARE2',
+            'eEMSPARE1',
         ]
 
         for em in emThresholds_3bits:
@@ -61,10 +62,9 @@ class TopoAlgoDefMultiplicity(object):
             tm.registerTopoAlgo(alg)
                 
         etauThresholds_3bits = [ 
-            'eTAU12', 'eTAU20',    
+            'eTAU1', 'eTAU12', 'eTAU20',
 
             # spares
-            'eTAUSPARE1', 
         ]
         jtauThresholds_3bits = [ 
             'jTAU20'
@@ -82,10 +82,9 @@ class TopoAlgoDefMultiplicity(object):
             'eTAU40HT', 'eTAU60HM','eTAU60HL', 'eTAU80HL', #'eTAUSPARE6', 'eTAUSPARE7',
         ]
         jtauThresholds_2bits = [ 
-            'jTAU30', 'jTAU30M',
+            'jTAU1', 'jTAU30', 'jTAU30M',
 
             #spares
-            'jTAUSPARE1',
         ]
         ctauThresholds_2bits = [ 
             'cTAU30M', 'cTAU35M',  

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrackParticleTruthCollectionCnv.h"
@@ -7,8 +7,10 @@
 #include "TrackParticleTruthTPCnv/TrackParticleTruthCollection_p0.h"
 #include "TrackParticleTruthTPCnv/TrackParticleTruthCollection_p1.h"
 #include "TrackParticleTruthTPCnv/TrackParticleTruthCollection_p2.h"
+#include "TrackParticleTruthTPCnv/TrackParticleTruthCollection_p3.h"
 #include "TrackParticleTruthTPCnv/TrackParticleTruthCollectionCnv_p1.h"
 #include "TrackParticleTruthTPCnv/TrackParticleTruthCollectionCnv_p2.h"
+#include "TrackParticleTruthTPCnv/TrackParticleTruthCollectionCnv_p3.h"
 
 #include "GaudiKernel/StatusCode.h"
 #include "GaudiKernel/MsgStream.h"
@@ -24,6 +26,7 @@ const pool::Guid TrackParticleTruthCollectionCnv::s_p1_guid("D62AFEEE-EF2C-437A-
 
 const pool::Guid TrackParticleTruthCollectionCnv::s_p2_guid("D62AFEEE-EF2C-437A-B7BE-CA926D38CCFB");
 
+const pool::Guid TrackParticleTruthCollectionCnv::s_p3_guid("018F1ACE-8405-7174-9305-46B503B5EF52");
 
 //================================================================
 TrackParticleTruthCollectionCnv::TrackParticleTruthCollectionCnv(ISvcLocator* svcLoc) : 
@@ -44,7 +47,13 @@ TrackParticleTruthCollection* TrackParticleTruthCollectionCnv::createTransient()
   MsgStream log(msgSvc(), "TrackParticleTruthCollectionCnv" );
   std::unique_ptr<TrackParticleTruthCollection> trans(new TrackParticleTruthCollection());
   
-  if (compareClassGuid(s_p2_guid)) {
+  if (compareClassGuid(s_p3_guid)) {
+    log<<MSG::DEBUG<<"Read TrackParticleTruthCollection_p3. GUID="<<m_classID.toString()<<endmsg;
+    Rec::TrackParticleTruthCollection_p3* pers=poolReadObject<Rec::TrackParticleTruthCollection_p3>();
+    m_converter_p3.persToTrans(pers, trans.get(), log);
+    delete pers;
+  }
+  else if (compareClassGuid(s_p2_guid)) {
     log<<MSG::DEBUG<<"Read TrackParticleTruthCollection_p2. GUID="<<m_classID.toString()<<endmsg;
     Rec::TrackParticleTruthCollection_p2* pers=poolReadObject<Rec::TrackParticleTruthCollection_p2>();
     m_converter_p2.persToTrans(pers, trans.get(), log);

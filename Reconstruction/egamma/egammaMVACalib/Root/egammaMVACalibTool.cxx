@@ -30,8 +30,6 @@ egammaMVACalibTool::egammaMVACalibTool(const std::string& name) :
 {
 }
 
-egammaMVACalibTool::~egammaMVACalibTool() = default;
-
 StatusCode egammaMVACalibTool::initialize()
 {
   if (m_particleType == xAOD::EgammaParameters::NumberOfEgammaTypes) {

@@ -44,6 +44,16 @@ class MuonReadoutGeomCnvAlg : public AthReentrantAlgorithm {
                             MuonGM::MuonDetectorManager* mgr,
                             PVLink world) const;
 
+        StatusCode buildSTGC(const ActsGeometryContext& gctx,
+                             MuonGM::MuonDetectorManager* mgr,
+                             PVLink world) const;
+
+        StatusCode buildMM(const ActsGeometryContext& gctx,
+                           MuonGM::MuonDetectorManager* mgr,
+                           PVLink world) const;
+
+
+        
         StatusCode dumpAndCompare(const ActsGeometryContext& gctx,
                                   const MuonGMR4::RpcReadoutElement& refEle,
                                   const MuonGM::RpcReadoutElement& testEle) const;
@@ -51,13 +61,19 @@ class MuonReadoutGeomCnvAlg : public AthReentrantAlgorithm {
         StatusCode dumpAndCompare(const ActsGeometryContext& gctx,
                                   const MuonGMR4::MdtReadoutElement& refEle,
                                   const MuonGM::MdtReadoutElement& testEle) const;
-                                  
+
+        StatusCode dumpAndCompare(const ActsGeometryContext& gctx,
+                                  const MuonGMR4::MmReadoutElement& refEle,
+                                  const MuonGM::MMReadoutElement& testEle) const;
+        
+
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
         SG::WriteCondHandleKey<MuonGM::MuonDetectorManager> m_writeKey{this, "WriteKey", "MuonDetectorManager"};
         
         SG::ReadCondHandleKeyArray<ActsTrk::DetectorAlignStore> m_alignStoreKeys{this, "AlignmentKeys", {}, "Alignment key"};
         
+        Gaudi::Property<bool> m_checkGeo{this, "checkGeo", false, "Checks the positions of the sensors"};
         const MuonGMR4::MuonDetectorManager* m_detMgr{nullptr};
 
 

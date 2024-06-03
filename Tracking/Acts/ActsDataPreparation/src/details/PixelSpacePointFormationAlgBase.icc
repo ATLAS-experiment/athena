@@ -116,7 +116,10 @@ namespace ActsTrk {
     std::map<IdentifierHash, std::vector<std::pair<unsigned int, unsigned int>>> cache_ranges;
     int groupStartIdx = 0;
     std::optional<IdentifierHash> groupIdHash = std::nullopt;
-    
+
+    //when using the cache some clusters can be skipped, this results in discontinuous spacepoints (but the unpopulated SP still exists and is getting filled into the cache and the output container)
+    //need to track the index of the spacepoints which are being inserted, so they are continuous and so that the output collection can be trimmed
+    unsigned int spIdx = 0;
 
     for(unsigned int idx=0; idx<pixelClusters->size(); idx++){
       const xAOD::PixelCluster* cluster = pixelClusters->at(idx);
@@ -132,26 +135,41 @@ namespace ActsTrk {
         return StatusCode::FAILURE;
       }
 
+      //get the index of the output spacepoint, when not using the cache this should be equal to the cluster index
+      unsigned int thisSpIdx = spIdx++;
+
       ATH_CHECK( m_spacePointMakerTool->producePixelSpacePoint(*cluster,
-                                *pixelSpacePoints->at(idx),
+                                *pixelSpacePoints->at(thisSpIdx),
                                 *pixelElement ) );
 
       if constexpr(useCache){
         //check if the groupIdHash is defined if so and if it has changed then insert the range into the map
         if(groupIdHash && ((*groupIdHash) != idHash)){
-          cache_ranges[idHash].emplace_back(groupStartIdx, idx);
-          groupStartIdx = idx;
+          cache_ranges[(*groupIdHash)].emplace_back(groupStartIdx, thisSpIdx);
+          groupStartIdx = thisSpIdx;
         }
 
         groupIdHash = idHash;
       }
     }
+    
+    //handle final idHash
+    if constexpr(useCache){
+      if(groupIdHash){
+        cache_ranges[(*groupIdHash)].emplace_back(groupStartIdx, spIdx);
+      }
+    }
+
+    //finally resize the output for the actual number of inserted spacepoints
+    pixelSpacePoints->resize(spIdx);
 
 
     if constexpr(useCache){
       //add the ranges to the cache
       for(auto idr: cache_ranges){
         auto wh = cacheHandle->getWriteHandle(idr.first);
+        //check that item is not in the cache already (again)
+        if(wh.OnlineAndPresentInAnotherView()) continue;
         auto ce = std::make_unique<Cache::CacheEntry<xAOD::SpacePoint>>(pixelSpacePoints, idr.second);
         ATH_CHECK(wh.addOrDelete(std::move(ce))); 
       }

@@ -20,7 +20,6 @@ ex.concurrent_events = 4
 ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1"',
             'Trigger.enabledSignatures=[]',
             'Trigger.forceEnableAllChains=True']
-ex.args = '--CA'
 
 test = Test.Test()
 test.art_type = 'build'

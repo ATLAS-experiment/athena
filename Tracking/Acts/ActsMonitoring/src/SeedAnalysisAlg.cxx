@@ -13,6 +13,7 @@
 #include "Acts/Definitions/Units.hpp"
 #include "Acts/MagneticField/MagneticFieldContext.hpp"
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
+#include "AthContainers/ConstAccessor.h"
 
 namespace ActsTrk {
 
@@ -302,11 +303,11 @@ namespace ActsTrk {
 
   const Identifier SeedAnalysisAlg::identify(const xAOD::PixelCluster& cluster) const
   {
-    static const SG::AuxElement::Accessor< ElementLink< InDet::PixelClusterCollection > > pixelLinkAcc("pixelClusterLink");
+    static const SG::ConstAccessor< ElementLink< InDet::PixelClusterCollection > > pixelLinkAcc("pixelClusterLink");
 
     // TO-DO -- AODs will not have this decoration, we'll need to provide a function for recomputing 
     // the identifier from local position
-    if (not cluster.isAvailable< ElementLink< InDet::PixelClusterCollection > >("pixelClusterLink"))
+    if (not pixelLinkAcc.isAvailable (cluster))
       return Identifier();
 
     ElementLink<InDet::PixelClusterCollection> pixelLink = pixelLinkAcc(cluster);
@@ -315,11 +316,11 @@ namespace ActsTrk {
 
   const Identifier SeedAnalysisAlg::identify(const xAOD::StripCluster& cluster) const
   {
-    static const SG::AuxElement::Accessor< ElementLink< InDet::SCT_ClusterCollection > > stripLinkAcc("sctClusterLink");
+    static const SG::ConstAccessor< ElementLink< InDet::SCT_ClusterCollection > > stripLinkAcc("sctClusterLink");
 
     // TO-DO -- AODs will not have this decoration, we'll need to provide a function for recomputing 
     // the identifier from local position
-    if (not cluster.isAvailable< ElementLink< InDet::SCT_ClusterCollection > >("sctClusterLink"))
+    if (not stripLinkAcc.isAvailable (cluster))
       return Identifier();
 
     ElementLink<InDet::SCT_ClusterCollection> stripLink = stripLinkAcc(cluster);

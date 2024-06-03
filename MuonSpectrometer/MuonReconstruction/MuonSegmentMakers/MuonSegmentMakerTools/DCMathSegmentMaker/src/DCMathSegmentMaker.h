@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DCMATHSEGMENTMAKER_H
@@ -293,7 +293,7 @@ namespace Muon {
         TrkDriftCircleMath::CLVec createClusterVec(const Identifier& chid, ClusterVec& spVec, const Amg::Transform3D& gToStation) const;
 
        void associateMDTsToSegment(
-            const Amg::Vector3D& gdir, TrkDriftCircleMath::Segment& segment, const std::vector<const MdtDriftCircleOnTrack*>& mdts,
+            const Amg::Vector3D& gdir, TrkDriftCircleMath::Segment& segment, 
             const TrkDriftCircleMath::ChamberGeometry* multiGeo, const Amg::Transform3D& gToStation, const Amg::Transform3D& amdbToGlobal,
             std::set<Identifier>& deltaVec, std::set<Identifier>& outoftimeVec,
             std::vector<std::pair<double,  std::unique_ptr<const Trk::MeasurementBase>> >& rioDistVec) const;

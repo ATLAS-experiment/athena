@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonRecoValidationTool.h"
@@ -22,6 +22,7 @@
 #include "TrkTrack/Track.h"
 #include "xAODTruth/TruthParticle.h"
 #include "xAODTruth/TruthParticleContainer.h"
+#include "AthContainers/ConstAccessor.h"
 
 namespace {
     constexpr float SIG_VEL = 4.80000;
@@ -112,8 +113,10 @@ namespace Muon {
         float beta = 1.;
         // set truth
         typedef ElementLink<xAOD::TruthParticleContainer> ElementTruthLink_t;
-        if (indetTrackParticle.isAvailable<ElementTruthLink_t>("truthParticleLink")) {
-            const ElementTruthLink_t link = indetTrackParticle.auxdata<ElementTruthLink_t>("truthParticleLink");
+        static const SG::ConstAccessor<ElementTruthLink_t>
+          truthParticleLinkAcc("truthParticleLink");
+        if (truthParticleLinkAcc.isAvailable(indetTrackParticle)) {
+            const ElementTruthLink_t link = truthParticleLinkAcc(indetTrackParticle);
             if (link.isValid()) {
                 pdg = (*link)->pdgId();
                 barcode = (*link)->barcode();
@@ -418,7 +421,7 @@ namespace Muon {
         for (; hit != hit_end; ++hit) {
             // treat the case that the hit is a composite TGC hit
             if ((*hit)->tgc) {
-                for (const auto& prd : (*hit)->tgc->etaCluster.hitList) ids.insert(prd->identify());
+                for (const auto& prd : (*hit)->tgc->etaCluster) ids.insert(prd->identify());
             } else if ((*hit)->prd) {
                 ids.insert((*hit)->prd->identify());
             }

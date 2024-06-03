@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # art-description: Tests implementation of FastCaloSimV2 as a Geant4 fast simulation engine with Run 3 geometry and conditions
-# art-include: 23.0/Athena
+# art-include: 24.0/Athena
 # art-include: main/Athena
 # art-athena-mt: 8
 # art-type: grid

@@ -81,9 +81,6 @@ private:
 			 const InDetDD::SiDetectorElement* element,
 			 xAOD::PixelCluster& container) const;
 
-  double getPixelCTBPhiError(int layer, int phi,
-			     int phiClusterSize) const;
-  
 private:  
   ServiceHandle< InDetDD::IPixelReadoutManager > m_pixelReadout {this, "PixelReadoutManager", "ITkPixelReadoutManager",
       "Pixel readout manager" };

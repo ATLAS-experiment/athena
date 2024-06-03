@@ -44,7 +44,7 @@ namespace Trk{
 //
 
 
-  StatusCode TrkVKalVrtFitter::VKalVrtFitFast(const std::vector<const xAOD::TrackParticle*>& InpTrk,
+  StatusCode TrkVKalVrtFitter::VKalVrtFitFast(std::span<const xAOD::TrackParticle* const> InpTrk,
                                               Amg::Vector3D& Vertex,
                                               IVKalState& istate) const
   {
@@ -53,7 +53,7 @@ namespace Trk{
   }
 
 
-  StatusCode TrkVKalVrtFitter::VKalVrtFitFast(const std::vector<const xAOD::TrackParticle*>& InpTrk,
+  StatusCode TrkVKalVrtFitter::VKalVrtFitFast(std::span<const xAOD::TrackParticle* const> InpTrk,
                                               Amg::Vector3D& Vertex, double & minDZ,
                                               IVKalState& istate) const
   {

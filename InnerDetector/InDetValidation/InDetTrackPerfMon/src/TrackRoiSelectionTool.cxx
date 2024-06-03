@@ -17,7 +17,7 @@
 /// Local include(s)
 #include "TrackRoiSelectionTool.h"
 #include "TrackAnalysisCollections.h"
-#include "TrackParmetersHelper.h"
+#include "TrackParametersHelper.h"
 
 /// STD includes
 #include <cmath> // std::fabs

@@ -87,8 +87,9 @@ StatusCode
 iFatras::G4ParticleDecayHelper::initialize()
 {
 
-  ATH_MSG_INFO( "initialize()" );
+  ATH_MSG_DEBUG( "initialize()" );
 
+  ATH_CHECK( m_validationTool.retrieve( DisableTool{ m_validationTool.empty() || !m_validationMode } ) );
   // ISF Services
   if ( m_particleBroker.retrieve().isFailure()){
       ATH_MSG_FATAL( "Could not retrieve " <<  m_particleBroker );
@@ -133,7 +134,7 @@ iFatras::G4ParticleDecayHelper::initialize()
   // if this happens before the run manager is created.
   m_pdgToG4Conv.disable();
 
-  ATH_MSG_INFO("initialize() successful");
+  ATH_MSG_DEBUG("initialize() successful");
   return StatusCode::SUCCESS;
 }
 
@@ -144,7 +145,7 @@ iFatras::G4ParticleDecayHelper::initialize()
 StatusCode
 iFatras::G4ParticleDecayHelper::finalize()
 {
-  ATH_MSG_INFO( "finalize() successful" );  
+  ATH_MSG_DEBUG( "finalize() successful" );
   return StatusCode::SUCCESS;
 }
 
@@ -206,62 +207,65 @@ void iFatras::G4ParticleDecayHelper::decay(const ISF::ISFParticle& particleToDec
   const ISF::ISFParticleVector decayProducts = decayParticle(particleToDecay,vertex,momentum,timeStamp);
 
   // fill them into broker & truth svc
-  handleDecayParticles(particleToDecay,decayProducts);
+  handleDecayParticles(particleToDecay,decayProducts); // Registers TruthIncident internally
 }
 
-                
+
 void iFatras::G4ParticleDecayHelper::handleDecayParticles(const ISF::ISFParticle& particle,
                                                           const ISF::ISFParticleVector& decayProducts) const {
    // process the decay products ---------------------------------------
-  Barcode::PhysicsProcessCode                 process = 201;
-   // (i) none       
+  int                 process = 201;
+
+  // (i) none
    if (!decayProducts.size()) {
         ATH_MSG_WARNING("[ decay ] Particle Decay Creator did not return any"
             << " decay products for particle with PDG code "
-            << particle.pdgCode() );       
+            << particle.pdgCode() );
    } else {
    // (ii) many
       std::ostringstream productSummaryString;
       productSummaryString << "[ decay ] products:";
-      //!< @TODO
-      // truth service !!!
-      // simulate the tracks of the daughter particles ------- run over decay products
-      
-      ISF::ISFParticleVector::const_iterator decayProductsItr = decayProducts.begin();
-      for (; decayProductsItr != decayProducts.end(); ++decayProductsItr)
-      {
-	productSummaryString << "     - "  << (**decayProductsItr) << '\n';
-	// in the validation mode, add process info
-	if (m_validationMode) {
-	  ISF::ParticleUserInformation* validInfo = new ISF::ParticleUserInformation();
-	  validInfo->setProcess(process);
-	  if (particle.getUserInformation()) validInfo->setGeneration(particle.getUserInformation()->generation()+1);
-	  else validInfo->setGeneration(1);     // assume parent is a primary track
-	  (*decayProductsItr)->setUserInformation(validInfo);
-	}
-	// register next geo (is current), next flavor can be defined by filter
-	(*decayProductsItr)->setNextGeoID( particle.nextGeoID() );
-	// feed it the particle broker with parent information
-	m_particleBroker->push(*decayProductsItr, &particle);
+
+      for (ISF::ISFParticle *decayProduct : decayProducts) {
+        productSummaryString << "     - "  << (*decayProduct) << '\n';
+        // in the validation mode, add process info
+        if (m_validationMode) {
+          ISF::ParticleUserInformation* validInfo = new ISF::ParticleUserInformation();
+          validInfo->setProcess(process);
+          if (particle.getUserInformation()) validInfo->setGeneration(particle.getUserInformation()->generation()+1);
+          else validInfo->setGeneration(1);     // assume parent is a primary track
+          decayProduct->setUserInformation(validInfo);
+        }
+        // register next geo (is current), next flavor can be defined by filter
+        decayProduct->setNextGeoID( particle.nextGeoID() );
       }//loop over all decay products
-      ATH_MSG_VERBOSE(  productSummaryString.str() );     
 
       // register TruthIncident
       ISF::ISFTruthIncident truth( const_cast<ISF::ISFParticle&>(particle),
-				   decayProducts,
-				   process,
-				   particle.nextGeoID(),  // inherits from the parent
-				   ISF::fKillsPrimary );
+                                   decayProducts,
+                                   process,
+                                   particle.nextGeoID(),  // inherits from the parent
+                                   ISF::fKillsPrimary );
       m_truthRecordSvc->registerTruthIncident( truth);
-      
+      // At this point we need to update the properties of the
+      // ISFParticles produced in the interaction
+      truth.updateChildParticleProperties();
+
+      // simulate the tracks of the daughter particles ------- run over decay products
+      for (ISF::ISFParticle *decayProduct : decayProducts) {
+        // feed it the particle broker with parent information
+        m_particleBroker->push(decayProduct, &particle);
+      }//loop over all decay products
+      ATH_MSG_VERBOSE(  productSummaryString.str() );
+
       // save info for validation
-      if (m_validationMode && m_validationTool) {
-	Amg::Vector3D* nMom = 0;
-	m_validationTool->saveISFVertexInfo(process,particle.position(),particle,particle.momentum(),nMom,decayProducts);
-	delete nMom;
+      if (m_validationMode && m_validationTool.isEnabled()) {
+        Amg::Vector3D* nMom = 0;
+        m_validationTool->saveISFVertexInfo(process,particle.position(),particle,particle.momentum(),nMom,decayProducts);
+        delete nMom;
       }
 
-    }    
+    }
 }
 
 std::vector<ISF::ISFParticle*>
@@ -270,6 +274,7 @@ iFatras::G4ParticleDecayHelper::decayParticle(const ISF::ISFParticle& parent,
                                                const Amg::Vector3D& momentum,
                                                double timeStamp) const
 {
+  // Called from McMaterialEffectsUpdator::interact, McMaterialEffectsUpdator::interactLay and G4ParticleDecayHelper::decay
   // return vector for children
   std::vector<ISF::ISFParticle*> children;
 
@@ -368,23 +373,17 @@ iFatras::G4ParticleDecayHelper::decayParticle(const ISF::ISFParticle& parent,
     const G4ThreeVector &mom= prod->GetMomentum();
     Amg::Vector3D amgMom( mom.x(), mom.y(), mom.z() );
 
-    ISF::TruthBinding * truthBinding = NULL;
-    if (parent.getTruthBinding()) {
-       ATH_MSG_VERBOSE("Could retrieve TruthBinding from original ISFParticle");
-       truthBinding = new ISF::TruthBinding(*parent.getTruthBinding());
-    }
-    else ATH_MSG_WARNING("Could not retrieve original TruthBinding  from ISFParticle");
+    const int status = 1 + HepMC::SIM_STATUS_THRESHOLD;
+    const int id = HepMC::UNDEFINED_ID;
     ISF::ISFParticle* childParticle = new ISF::ISFParticle( vertex,
                                                             amgMom,
                                                             prod->GetMass(),
                                                             prod->GetCharge(),
                                                             prod->GetPDGcode(),
-                                                            1 + HepMC::SIM_STATUS_THRESHOLD, //status
-                                                            timeStamp, 
+                                                            status,
+                                                            timeStamp,
                                                             parent,
-                                                            0, // undefined id
-							    Barcode::fUndefinedBarcode,
-							    truthBinding );
+                                                            id );
 
     children.push_back( childParticle);
   }

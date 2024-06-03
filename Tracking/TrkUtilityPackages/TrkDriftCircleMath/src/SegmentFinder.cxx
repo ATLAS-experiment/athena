@@ -943,7 +943,7 @@ namespace TrkDriftCircleMath {
 
             if (m_debugLevel >= 4)
                 std::cout << " handling cluster " << cit->id() << " res " << res << " pull " << pull << " hit error " << cit->err()
-                          << " track error " << sqrt(resSeg.trackError2(*cit)) << " index " << cit->index() << " pos " << cit->position();
+                          << " track error " << sqrt(resSeg.trackError2(*cit)) << " pos " << cit->position();
 
             double pullCut = cit->id().isTgc() ? m_tgcPullCut : m_rpcPullCut;
 

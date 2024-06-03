@@ -150,6 +150,11 @@ StatusCode gFEXSim::executegFEXSim(const gTowersIDs& tmp_gTowersIDs_subset, gFEX
    m_gFEXFPGA_Tool->FillgTowerEDMForward(gTowersContainer, tmp_gTowersIDs_subset_forwardFPGA_N, tmp_gTowersIDs_subset_forwardFPGA_P, Ctwr, Ctwr50, Csat);
    m_gFEXFPGA_Tool->reset();
 
+   for(int irow=0; irow<32;irow++){
+     if(Ctwr[irow][0]  < 0x0B0 )   Ctwr[irow][0]   = 0; 
+     if(Ctwr[irow][11] < 0x0B0 )  Ctwr[irow][11]  = 0;
+   }
+
    //FPGA C----------------------------------------------------------------------------------------------------------------------------------------------
 
    // Retrieve the L1 menu configuration

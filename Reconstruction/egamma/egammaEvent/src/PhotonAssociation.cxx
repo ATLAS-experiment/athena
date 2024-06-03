@@ -7,9 +7,6 @@
 
 namespace Analysis
 {
-  PhotonAssociation::PhotonAssociation()
-  = default; 
-  
   PhotonAssociation::PhotonAssociation(const NameType& name)
   {
     this->setName(name);

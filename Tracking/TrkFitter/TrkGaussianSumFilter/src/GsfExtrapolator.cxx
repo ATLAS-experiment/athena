@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 /**
@@ -388,13 +388,8 @@ Trk::GsfExtrapolator::extrapolateImpl(
     associatedLayer = nullptr;
   } // end while loop
 
-  // Look to catch failures now
-  if (!currentState) {
-    currentState = &multiComponentState;
-    foundFinalBoundary = false;
-  }
-
-  if (currentVolume != destinationVolume) {
+  // catch failures now
+  if (!currentState || (currentVolume != destinationVolume)) {
     currentState = &multiComponentState;
     foundFinalBoundary = false;
   }
@@ -768,23 +763,14 @@ Trk::GsfExtrapolator::extrapolateFromLayerToLayer(
     // Only extrapolate to an intermediate layer if it requires material
     // update. Otherwise step over it
     if (nextLayer->layerMaterialProperties()) {
-      if (!currentState.empty()) {
-        currentState = extrapolateToIntermediateLayer(ctx,
-                                                      cache,
-                                                      currentState,
-                                                      *nextLayer,
-                                                      trackingVolume,
-                                                      direction,
-                                                      particleHypothesis);
-      } else {
-        currentState = extrapolateToIntermediateLayer(ctx,
-                                                      cache,
-                                                      multiComponentState,
-                                                      *nextLayer,
-                                                      trackingVolume,
-                                                      direction,
-                                                      particleHypothesis);
-      }
+      currentState = extrapolateToIntermediateLayer(
+          ctx,
+          cache,
+          !currentState.empty() ? currentState : multiComponentState,
+          *nextLayer,
+          trackingVolume,
+          direction,
+          particleHypothesis);
     }
 
     if (!currentState.empty()) {
@@ -1039,7 +1025,7 @@ Trk::GsfExtrapolator::initialiseNavigation(
     }
     // 3. Global search
   } else {
-    // If no reference parameters are defined, then determine them
+    // If no reference parameters are defined try to determine them
     if (!referenceParameters) {
       referenceParameters =
         currentVolume
@@ -1048,16 +1034,9 @@ Trk::GsfExtrapolator::initialiseNavigation(
           : nullptr;
     }
     // Global search of tracking geometry to find the destination volume
-    if (referenceParameters) {
-      destinationVolume =
-        m_navigator->volume(ctx, referenceParameters->position());
-    }
-    // If destination volume is still not found then global search based on
-    // surface position
-    else {
-      destinationVolume =
-        m_navigator->volume(ctx, surface.globalReferencePoint());
-    }
+    destinationVolume = m_navigator->volume(
+        ctx, referenceParameters ? referenceParameters->position()
+                                 : surface.globalReferencePoint());
   }
 }
 

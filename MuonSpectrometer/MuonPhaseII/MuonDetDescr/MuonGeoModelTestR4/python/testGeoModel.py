@@ -13,9 +13,9 @@ def SetupArgParser():
                                                                          choices= ["OFLCOND-MC23-SDR-RUN3-02"])
     parser.add_argument("--inputFile", "-i", default=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/EVGEN_ParticleGun_FourMuon_Pt10to500.root"], 
                         help="Input file to run on ", nargs="+")
-    parser.add_argument("--geoModelFile", default ="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/muonsOnlyR4WMDT.db", help="GeoModel SqLite file containing the muon geometry.")
+    parser.add_argument("--geoModelFile", default ="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/ATLAS-R3-MUONTEST.db", help="GeoModel SqLite file containing the muon geometry.")
     parser.add_argument("--chambers", default=["all"], nargs="+", help="Chambers to check. If string is all, all chambers will be checked")
-    parser.add_argument("--outRootFile", default="MdtGeoDump.root", help="Output ROOT file to dump the geomerty")
+    parser.add_argument("--outRootFile", default="NewGeoModelDump.root", help="Output ROOT file to dump the geomerty")
     parser.add_argument("--nEvents", help="Number of events to rum", type = int ,default = 1)
     parser.add_argument("--noMdt", help="Disable the Mdts from the geometry", action='store_true', default = False)
     parser.add_argument("--noRpc", help="Disable the Rpcs from the geometry", action='store_true', default = False)
@@ -76,6 +76,11 @@ def GeoModelMmTestCfg(flags, name = "GeoModelMmTest", **kwargs):
     result.addEventAlgo(the_alg, primary = True)
     return result
 
+def NswGeoPlottingAlgCfg(flags, name="NswGeoPlotting", **kwargs):
+    result = ComponentAccumulator()
+    the_alg = CompFactory.MuonGMR4.NswGeoPlottingAlg(name, **kwargs)
+    result.addEventAlgo(the_alg, primary = True)
+    return result
 
 def setupGeoR4TestCfg(args, setupSimJob = False):
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
@@ -147,7 +152,6 @@ def setupGeoR4TestCfg(args, setupSimJob = False):
     flags.Scheduler.AutoLoadUnmetDependencies = True
     flags.PerfMon.doFullMonMT = True
    
-
     flags.lock()
     flags.dump(evaluate = True)
     if not flags.Muon.usePhaseIIGeoSetup:
@@ -166,31 +170,38 @@ def executeTest(cfg, num_events = 1):
     
     cfg.printConfig(withDetails=True, summariseProps=True)
     if not cfg.run(num_events).isSuccess(): exit(1)
+
 if __name__=="__main__":
     args = SetupArgParser().parse_args()
     flags, cfg = setupGeoR4TestCfg(args)  
     cfg.merge(setupHistSvcCfg(flags, out_file = args.outRootFile))
     chambToTest =  args.chambers if len([x for x in args.chambers if x =="all"]) ==0 else []
-
+    
+    cfg.getCondAlgo("MuonDetectorManagerCondAlg").checkGeo = True
     cfg.getService("MessageSvc").setVerbose = []
-    cfg.getService("MessageSvc").warningLimit = 1000000
-    cfg.getService("MessageSvc").verboseLimit = 1000000
+    cfg.getService("MessageSvc").verboseLimit = 10000000
     
     if flags.Detector.GeometryMDT:
         cfg.merge(GeoModelMdtTestCfg(flags, 
                                      TestStations = [ch for ch in chambToTest if ch[0] == "B" or ch[0] == "E"],
-                                     ReadoutSideXML="ReadoutSides.xml"))
+                                     ReadoutSideXML="ReadoutSides.xml",
+                                     ExtraInputs=[( 'MuonGM::MuonDetectorManager' , 'ConditionStore+MuonDetectorManager' )]))
 
     if flags.Detector.GeometryRPC: 
-        cfg.merge(GeoModelRpcTestCfg(flags, TestStations = [ch for ch in chambToTest if ch[0] == "B"]))
+        cfg.merge(GeoModelRpcTestCfg(flags, TestStations = [ch for ch in chambToTest if ch[0] == "B"],
+                                             ExtraInputs=[( 'MuonGM::MuonDetectorManager' , 'ConditionStore+MuonDetectorManager' )]))
 
     if flags.Detector.GeometryTGC: 
-        cfg.merge(GeoModelTgcTestCfg(flags, TestStations = [ch for ch in chambToTest if ch[0] == "T"]))
+        cfg.merge(GeoModelTgcTestCfg(flags, TestStations = [ch for ch in chambToTest if ch[0] == "T"],
+                                            ExtraInputs=[( 'MuonGM::MuonDetectorManager' , 'ConditionStore+MuonDetectorManager' )]))
 
     if flags.Detector.GeometryMM: 
-        cfg.merge(GeoModelMmTestCfg(flags, TestStations = [ch for ch in chambToTest if ch[0] == "M"]))
+        cfg.merge(NswGeoPlottingAlgCfg(flags))
+        cfg.merge(GeoModelMmTestCfg(flags, TestStations = [ch for ch in chambToTest if ch[0] == "M"],
+                                           ExtraInputs=[( 'MuonGM::MuonDetectorManager' , 'ConditionStore+MuonDetectorManager' )]))
     
     if flags.Detector.GeometrysTGC: 
-        cfg.merge(GeoModelsTgcTestCfg(flags, TestStations = [ch for ch in chambToTest if ch[0] == "S"]))
+        cfg.merge(GeoModelsTgcTestCfg(flags, TestStations = [ch for ch in chambToTest if ch[0] == "S"],
+                                             ExtraInputs=[( 'MuonGM::MuonDetectorManager' , 'ConditionStore+MuonDetectorManager' )]))
     
     executeTest(cfg, num_events = args.nEvents)

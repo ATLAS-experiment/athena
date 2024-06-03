@@ -28,6 +28,9 @@ class EventCleaningBlock (ConfigBlock):
         self.addOption ('invertFlags', [0], type=None,
             info="list of booleans determining whether to invert the cut of the "
             "above selectionFlags. The default is [0].")
+        self.addOption ('GRLDict', {}, type=None)
+        self.addOption ('noFilter', False, type=bool,
+            info="do apply event decoration, but do not filter. The default is False, i.e. 'We decorate events but do not filter' ")
 
     def getDefaultGRLs (self, data_year) :
         """ returns a reasonable set of GRLs that should be suited for most analyses """
@@ -50,13 +53,24 @@ class EventCleaningBlock (ConfigBlock):
     def makeAlgs (self, config) :
 
         if config.dataType() is DataType.Data:
-            # Set up the GRL selection:
-            alg = config.createAlgorithm( 'GRLSelectorAlg', 'GRLSelectorAlg' )
-            config.addPrivateTool( 'Tool', 'GoodRunsListSelectionTool' )
-            if self.userGRLFiles:
-                alg.Tool.GoodRunsListVec = self.userGRLFiles
+            if self.noFilter:
+                """ here we only decorate the PHYSLITE events with a boolean and don't do any cleaning"""
+
+                # Set up the GRL Decoration
+                for GRLDecoratorName,GRLFile in (self.GRLDict).items():
+                    alg = config.createAlgorithm( 'GRLSelectorAlg', GRLDecoratorName )
+                    config.addPrivateTool( 'Tool', 'GoodRunsListSelectionTool' )
+                    alg.Tool.GoodRunsListVec = GRLFile
+                    alg.grlKey = "EventInfo." + GRLDecoratorName 
+                    # Using WriteDecorHandle thus no need for addOutputVar  
             else:
-                alg.Tool.GoodRunsListVec = self.getDefaultGRLs( config.dataYear() )
+                # Set up the GRL selection:
+                alg = config.createAlgorithm( 'GRLSelectorAlg', 'GRLSelectorAlg' )
+                config.addPrivateTool( 'Tool', 'GoodRunsListSelectionTool' )
+                if self.userGRLFiles:
+                    alg.Tool.GoodRunsListVec = self.userGRLFiles
+                else:
+                    alg.Tool.GoodRunsListVec = self.getDefaultGRLs( config.dataYear() )
 
         # Skip events with no primary vertex:
         if self.runPrimaryVertexSelection:
@@ -85,17 +99,24 @@ class EventCleaningBlock (ConfigBlock):
 def makeEventCleaningConfig( seq,
                              runPrimaryVertexSelection = None,
                              runEventCleaning = None,
-                             userGRLFiles = None):
+                             userGRLFiles = None,
+                             GRLDict = None,
+                             noFilter = None,
+                             ):
     """Create a basic event cleaning analysis algorithm sequence
 
     Keyword arguments:
       runPrimaryVertexSelection -- whether to run primary vertex selection
       runEventCleaning -- wether to run event cleaning
       userGRLFiles -- a list of GRL files to select data from
+      GRLDict -- a dictionary of GRL files to determine decoration names
+      noFilter -- wether to apply event decoration or not
     """
 
     config = EventCleaningBlock ()
     config.setOptionValue ('runPrimaryVertexSelection', runPrimaryVertexSelection)
     config.setOptionValue ('runEventCleaning', runEventCleaning)
     config.setOptionValue ('userGRLFiles', userGRLFiles)
+    config.setOptionValue ('GRLDict', GRLDict)
+    config.setOptionValue ('noFilter', noFilter)
     seq.append (config)

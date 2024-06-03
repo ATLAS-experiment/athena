@@ -107,7 +107,7 @@ class ParametersCommon {
   virtual ParametersCommon<DIM, T>* clone() const = 0;
 
   /** Return the ParametersType enum */
-  virtual ParametersType type() const = 0;
+  constexpr virtual ParametersType type() const = 0;
 
   /** Returns the Surface Type enum for the surface used
    * to define the derived class*/

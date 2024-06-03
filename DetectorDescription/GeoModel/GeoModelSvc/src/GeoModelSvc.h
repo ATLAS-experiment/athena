@@ -5,25 +5,24 @@
 #ifndef GEOMODELSVC_GEOMODELSVC_H
 #define GEOMODELSVC_GEOMODELSVC_H
 
-#include "GeoModelInterfaces/IGeoModelSvc.h"
-#include "GeoModelInterfaces/IGeoDbTagSvc.h"
-#include "GeoModelInterfaces/IGeoModelTool.h"
-#include "GeoModelDBManager/GMDBManager.h"
-#include "GeoModelRead/ReadGeoModel.h"
-#include "GaudiKernel/ServiceHandle.h"
-#include "GaudiKernel/ToolHandle.h"
-#include "Gaudi/Property.h"
-#include "AthenaBaseComps/AthService.h"
-#include "CxxUtils/checker_macros.h"
-#include "StoreGate/StoreGateSvc.h"
-#include "EventInfoMgt/ITagInfoMgr.h"
-#include <memory>
+#include "GeoModelInterfaces/IGeoModelSvc.h" //inheritance
+#include "EventInfoMgt/ITagInfoMgr.h"//inheritance
+#include "AthenaBaseComps/AthService.h" //inheritance
+
+#include "GeoModelInterfaces/IGeoDbTagSvc.h" //SvcHandle template
+#include "GeoModelInterfaces/IGeoModelTool.h" //ToolHandle template
+#include "GeoModelDBManager/GMDBManager.h" //unique_ptr with compiler d'tor
+#include "GeoModelRead/ReadGeoModel.h" //unique_ptr with compiler d'tor
+#include "GaudiKernel/ServiceHandle.h" //member
+#include "GaudiKernel/ToolHandle.h" //member
+#include "Gaudi/Property.h" //member
+
+#include "CxxUtils/checker_macros.h" //ATLAS_NOT_THREAD_SAFE()
+#include "StoreGate/StoreGateSvc.h" //SvcHandle template
+#include <memory> //unique_ptr
 
 class ISvcLocator;
-class GMDBManager;
-namespace GeoModelIO {
-  class ReadGeoModel;
-}
+
 
 template <class TYPE> class SvcFactory;
 

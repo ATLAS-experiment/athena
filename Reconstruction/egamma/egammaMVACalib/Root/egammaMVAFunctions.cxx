@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -11,6 +11,8 @@ using Gaudi::Units::GeV;
 #else
 #define GeV 1000
 #endif
+
+#include <numbers>
 
 /**
  * These functions are for building the maps of functions
@@ -163,6 +165,24 @@ namespace egammaMVAFunctions
                   std::fmod(compute_cl_phiCalo(*cl), TMath::Pi() / 512) :
                   std::fmod(compute_cl_phiCalo(*cl), TMath::Pi() / 384));
       };
+
+    // improved version of phiModCalo, proposed by G. Unal, studied by L. Nasella
+    // see https://its.cern.ch/jira/browse/ATLASEG-325
+    // see https://indico.cern.ch/event/1364593/contributions/5843081/
+    funcLibrary[prefix + "_phiModCalo1"] = funcLibrary["phiModCalo1"] =
+        [](const xAOD::Egamma*, const xAOD::CaloCluster* cl) {
+          using std::numbers::pi;
+          const double eta = compute_cl_eta(*cl);
+          const double phi = compute_cl_phiCalo(*cl);
+          const double pi_divisor = std::abs(eta) < 1.425 ? 512. : 384.;
+
+          if (eta > 0.) {
+            if (phi > 0.) return std::fmod(phi, pi / pi_divisor);
+            else return std::fmod((2 * pi + phi), pi / pi_divisor);
+          }
+          else return std::fmod((pi - phi), pi / pi_divisor);
+        };
+
     funcLibrary[prefix + "_phiModCell"] = funcLibrary["phiModCell"] = [](const xAOD::Egamma*, const xAOD::CaloCluster* cl)
       { return std::fmod(std::abs(compute_cl_phiCalo(*cl)), TMath::Pi() / 128); };
     funcLibrary[prefix + "_etaModCalo"] = funcLibrary["etaModCalo"] = [](const xAOD::Egamma*, const xAOD::CaloCluster* cl)

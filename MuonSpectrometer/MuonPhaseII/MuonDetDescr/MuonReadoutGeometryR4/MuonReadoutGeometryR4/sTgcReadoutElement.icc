@@ -32,11 +32,11 @@ inline double sTgcReadoutElement::thickness() const { return 2.* m_pars.halfCham
 inline double sTgcReadoutElement::sFrameWidth() const { return m_pars.sFrameWidth; }
 inline double sTgcReadoutElement::lFrameWidth() const { return m_pars.lFrameWidth; }
 inline int sTgcReadoutElement::multilayer() const { return m_multiLayer; }
-inline int sTgcReadoutElement::numLayers() const { return m_pars.numLayers; }
+
+inline unsigned int sTgcReadoutElement::numLayers() const { return m_pars.numLayers; }
 inline unsigned int sTgcReadoutElement::nChTypes() const { return m_pars.nChTypes; }
 inline double sTgcReadoutElement::gasGapThickness() const { return m_pars.gasTck; }
 inline double sTgcReadoutElement::gasGapPitch() const { return m_gasGapPitch; }
-inline double sTgcReadoutElement::yCutout() const { return m_pars.yCutout; }
 
 inline double sTgcReadoutElement::firstStripPitch(const IdentifierHash& measHash) const { return m_pars.firstStripPitch[gasGapNumber(measHash)]; }
 inline double sTgcReadoutElement::firstStripPitch(const Identifier& measId) const { return firstStripPitch(measurementHash(measId)); }
@@ -51,6 +51,8 @@ inline double sTgcReadoutElement::lPadLength(const Identifier& measId) const { r
 inline double sTgcReadoutElement::lPadLength(const IdentifierHash& measHash) const { return 2*padDesign(measHash).longHalfHeight(); }
 inline double sTgcReadoutElement::gapHeight(const Identifier& measId) const { return 2*stripDesign(measId).halfWidth(); }
 inline double sTgcReadoutElement::gapHeight(const IdentifierHash& measHash) const { return 2*stripDesign(measHash).halfWidth(); }
+inline double sTgcReadoutElement::yCutout(const Identifier& measId) const { return stripDesign(measId).yCutout(); }
+inline double sTgcReadoutElement::yCutout(const IdentifierHash& measHash) const { return stripDesign(measHash).yCutout(); }
 
 inline unsigned int sTgcReadoutElement::numStrips(const Identifier& measId) const { return stripDesign(measId).numStrips(); }
 inline unsigned int sTgcReadoutElement::numStrips(const IdentifierHash& measHash) const { return stripDesign(measHash).numStrips(); }

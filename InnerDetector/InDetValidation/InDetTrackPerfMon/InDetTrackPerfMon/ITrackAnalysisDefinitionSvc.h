@@ -33,6 +33,7 @@ public:
   virtual const std::vector< std::string >& configuredChains() const = 0;
   virtual const std::string& subFolder() const = 0;
   virtual const std::string& anaTag() const = 0;
+  virtual std::string plotsFullDir( std::string chain="" ) const = 0;
 
   virtual bool useTrigger() const = 0;
   virtual bool useTruth() const = 0;
@@ -52,9 +53,9 @@ public:
   virtual const std::string& matchingType() const = 0;
 
   /// histogram properties
-  virtual bool doTrackParameters() const = 0;
-  virtual bool doEfficiencies() const = 0;
-  virtual bool doOfflineElectrons() const = 0;
+  virtual bool plotTrackParameters() const = 0;
+  virtual bool plotEfficiencies() const = 0;
+  virtual bool plotOfflineElectrons() const = 0;
   
 };
 

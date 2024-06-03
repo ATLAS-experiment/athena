@@ -2200,15 +2200,30 @@ void VP1GeometrySystem::Imp::ensureInitPV2MuonStationMap()
     VP1Msg::message("WARNING: Could not get muon detector manager to construct volume -> muon station map!");
     return;
   }
-
-  for (unsigned i = 0; i < mgr->MdtRElMaxHash; ++i)
-    updatePV2MuonStationMap(mgr->getMdtReadoutElement(i));
-  for (unsigned i = 0; i < mgr->CscRElMaxHash; ++i)
-    updatePV2MuonStationMap(mgr->getCscReadoutElement(i));
-  for (unsigned i = 0; i < mgr->RpcRElMaxHash; ++i)
-    updatePV2MuonStationMap(mgr->getRpcReadoutElement(i));
-  for (unsigned i = 0; i < mgr->TgcRElMaxHash; ++i)
-    updatePV2MuonStationMap(mgr->getTgcReadoutElement(i));
+  if (mgr->nMdtRE()) {
+    for (auto det_el = mgr->mdtIdHelper()->detectorElement_begin();
+               det_el != mgr->mdtIdHelper()->detectorElement_end(); ++det_el) {
+        updatePV2MuonStationMap(mgr->getMdtReadoutElement(*det_el));
+    }
+  }
+  if (mgr->nRpcRE()) {
+    for (auto det_el = mgr->rpcIdHelper()->detectorElement_begin();
+               det_el != mgr->rpcIdHelper()->detectorElement_end(); ++det_el) {
+          updatePV2MuonStationMap(mgr->getRpcReadoutElement(*det_el));
+      }    
+  }
+  if (mgr->nCscRE()) {
+    for (auto det_el = mgr->cscIdHelper()->detectorElement_begin();
+              det_el != mgr->cscIdHelper()->detectorElement_end(); ++det_el) {
+        updatePV2MuonStationMap(mgr->getCscReadoutElement(*det_el));
+    }
+  }
+  if (mgr->nTgcRE()) {
+    for (auto det_el = mgr->tgcIdHelper()->detectorElement_begin();
+              det_el != mgr->tgcIdHelper()->detectorElement_end(); ++det_el) {
+        updatePV2MuonStationMap(mgr->getTgcReadoutElement(*det_el));
+    }
+  }
 
   VP1Msg::messageDebug("Initialised physical volume link -> MuonStation map. Found "+str(pv2MuonStation.size())+" stations.");
 

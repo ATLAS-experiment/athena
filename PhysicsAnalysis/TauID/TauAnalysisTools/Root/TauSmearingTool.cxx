@@ -28,6 +28,7 @@ TauSmearingTool::TauSmearingTool( const std::string& sName )
   declareProperty( "ApplyMVATESQualityCheck", m_bApplyMVATESQualityCheck = false );
   declareProperty( "ApplyInsituCorrection",   m_bApplyInsituCorrection = true );
   declareProperty( "isAFII",	              m_sAFII = false );
+  declareProperty( "useFastSim",              m_useFastSim = false );
 }
 
 TauSmearingTool::~TauSmearingTool()
@@ -53,6 +54,13 @@ StatusCode TauSmearingTool::initialize()
       if (m_sGenerator!="PoPy" && m_sCampaign!="Sherpa"){
         ATH_MSG_ERROR("unknown generator tag (PoPy|Sherpa):" << m_sCampaign);
         return StatusCode::FAILURE;
+      }
+
+      if (m_sAFII) {
+        ATH_MSG_ERROR("isAFII property is now deprecated, please use useFastSim property and AF3 samples");
+	return StatusCode::FAILURE;
+      } else if(m_useFastSim) {
+        ATH_MSG_WARNING("No fast-sim recommendation for tau smearing is available, using full sim");
       }
 
       if (m_sGenerator == "PoPy" && m_sCampaign=="mc20") m_sInputFilePath = sDirectory+"TES_TrueHadTau_PoPy8_mc20-prerec_v2.root";
@@ -98,10 +106,13 @@ StatusCode TauSmearingTool::beginInputFile()
     // if no result -> no simFlavor metadata, so must be data
     if(result)  std::transform(simType.begin(), simType.end(), simType.begin(), ::toupper);
 
-    if (simType.find("ATLFASTII")!=std::string::npos && !m_sAFII)
-      ATH_MSG_WARNING("Input file is fast simulation but you are _not_ using AFII corrections and uncertainties, you should set \"isAFII\" to \"true\"");
-    else if (simType.find("FULLG4")!=std::string::npos && m_sAFII)
-      ATH_MSG_WARNING("Input file is full simulation but you are using AFII corrections and uncertainties, you should set \"isAFII\" to \"false\"");
+    if (simType.find("ATLFASTII")!=std::string::npos){
+      ATH_MSG_WARNING("Input file is AFII sample which should be replaced by AF3 as this will be the only atlas fast simulation supported by TauCP");
+    } else if( simType.find("ATLFAST3") != std::string::npos && !m_useFastSim){
+      ATH_MSG_WARNING("Input file is AF3 sample but you are _not_ using AF3 corrections and uncertainties, you should set \"useFastSim\" to \"true\"");
+    } else if (simType.find("FULLG4")!=std::string::npos && m_useFastSim){
+      ATH_MSG_WARNING("Input file is full simulation but you are using AF3 corrections and uncertainties, you should set \"useFastSim\" to \"false\"");
+    }
   }
 
   return StatusCode::SUCCESS;

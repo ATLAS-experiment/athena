@@ -24,11 +24,13 @@ def DumpEventDataToJSONAlgCfg(flags, doExtrap=False, doACTSEDM = True, **kwargs)
 
 
     if doACTSEDM:
-        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-        kwargs.setdefault('TrackingGeometryTool', result.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)))
+        # Need to be able to retrieve the ActsAlignment in order to understand the geometry
+        from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
+        result.merge(ActsGeometryContextAlgCfg(flags))
     else:
-        kwargs.setdefault('TrackingGeometryTool', '')
+        kwargs.setdefault('ActsAlignmentKey', '')
         kwargs.setdefault('TrackContainerKeys', [])
+    
 
     # Special container names in DAOD_PHYSLITE for calibrated objects
     if 'StreamDAOD_PHYSLITE' in flags.Input.Collections:

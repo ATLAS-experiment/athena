@@ -157,7 +157,7 @@ std::unique_ptr<Volume> GeoShapeConverter::translateGeoShape(const GeoShape* sh,
             Amg::Transform3D totalTransform = transf *
                                               Amg::getRotateZ3D(m90deg) *
                                               Amg::Translation3D(0., dly, 0.);
-            return std::make_unique<Volume>(makeTransform(std::move(totalTransform)), 
+            return std::make_unique<Volume>(makeTransform(totalTransform), 
                                             volBounds.release());
         }
 
@@ -188,7 +188,7 @@ std::unique_ptr<Volume> GeoShapeConverter::translateGeoShape(const GeoShape* sh,
                               << volBounds->minHalflengthX()
                               << " maxHalflengthX() "
                               << volBounds->maxHalflengthX());
-                vol = std::make_unique<Volume>(makeTransform(std::move(totalTransform)),
+                vol = std::make_unique<Volume>(makeTransform(totalTransform),
                                                volBounds.release());
                 
 
@@ -240,7 +240,7 @@ std::unique_ptr<Volume> GeoShapeConverter::translateGeoShape(const GeoShape* sh,
                     topG = Amg::getRotateY3D(p180deg) * topR;
                     ATH_MSG_DEBUG(" topLocal XY sign Flip  x "<< Amg::toString(topG) << " Radius " << topG.perp());
                 }
-                vol = std::make_unique<Volume>(makeTransform(std::move(totalTransform)),
+                vol = std::make_unique<Volume>(makeTransform(totalTransform),
                                                volBounds.release());
             }
             return vol;
@@ -254,7 +254,7 @@ std::unique_ptr<Volume> GeoShapeConverter::translateGeoShape(const GeoShape* sh,
                 Amg::Transform3D totalTransform = transf *
                                                   Amg::getRotateZ3D(p90deg) *
                                                   Amg::getRotateX3D(p90deg);
-                vol = std::make_unique<Volume>(makeTransform(std::move(totalTransform)),
+                vol = std::make_unique<Volume>(makeTransform(totalTransform),
                                                volBounds.release());
 
             } else {
@@ -267,7 +267,7 @@ std::unique_ptr<Volume> GeoShapeConverter::translateGeoShape(const GeoShape* sh,
                                                    Amg::getRotateX3D(p180deg) *
                                                    Amg::getRotateZ3D(p90deg) * 
                                                    Amg::getRotateX3D(p90deg);
-                vol = std::make_unique<Volume>(makeTransform(std::move(totalTransform)),
+                vol = std::make_unique<Volume>(makeTransform(totalTransform),
                                                volBounds.release());
             }
             return vol;
@@ -304,7 +304,7 @@ std::unique_ptr<Volume> GeoShapeConverter::translateGeoShape(const GeoShape* sh,
         double dPhi = tubs->getDPhi();
         auto volBounds = std::make_unique<CylinderVolumeBounds>(rMin, rMax, 0.5 * dPhi, z);
         Amg::Transform3D totalTransform(transf * Amg::getRotateZ3D(aPhi + 0.5 * dPhi));
-        return std::make_unique<Volume>(makeTransform(std::move(totalTransform)), volBounds.release());
+        return std::make_unique<Volume>(makeTransform(totalTransform), volBounds.release());
     } else if (sh->type() == "Cons") {
         const GeoCons* cons = dynamic_cast<const GeoCons*>(sh);
         double rMin1 = cons->getRMin1();
@@ -325,7 +325,7 @@ std::unique_ptr<Volume> GeoShapeConverter::translateGeoShape(const GeoShape* sh,
                                                                    0.5 * (rMax1 + rMax2),
                                                                    0.5 * dPhi, z);
             Amg::Transform3D totalTransform = transf * Amg::getRotateZ3D(aPhi + 0.5 * dPhi);
-            return std::make_unique<Volume>(makeTransform(std::move(totalTransform)), 
+            return std::make_unique<Volume>(makeTransform(totalTransform), 
                                             volBounds.release());
         }
     } else if (sh->type() == "Pcon") {
@@ -382,13 +382,13 @@ std::unique_ptr<Volume> GeoShapeConverter::translateGeoShape(const GeoShape* sh,
                 if (dPhi == 2 * M_PI) {
                     volBounds = std::make_unique<CylinderVolumeBounds>(rmin, rmax, hz);
                     Amg::Transform3D totalTransform = transf * Amg::Translation3D{0., 0., zshift};
-                    cyls.emplace_back(std::make_unique<Volume>(makeTransform(std::move(totalTransform)),
+                    cyls.emplace_back(std::make_unique<Volume>(makeTransform(totalTransform),
                                                                volBounds.release()));
                 } else {
                     volBounds = std::make_unique<CylinderVolumeBounds>(rmin, rmax, 0.5 * dPhi, hz);
                     Amg::Transform3D totalTransform = transf * Amg::Translation3D{0., 0., zshift} *
                                                       Amg::getRotateZ3D(aPhi + 0.5 * dPhi);
-                    cyls.emplace_back(std::make_unique<Volume>(makeTransform(std::move(totalTransform)),
+                    cyls.emplace_back(std::make_unique<Volume>(makeTransform(totalTransform),
                                                                volBounds.release()));
                 }
             }  // end loop over steps
@@ -423,7 +423,7 @@ std::unique_ptr<Volume> GeoShapeConverter::translateGeoShape(const GeoShape* sh,
             std::vector<std::pair<double, double>> ystep;
             bool trdlike = true;
             for (unsigned int iv = 0; iv < nv; ++iv) {
-                if (!ystep.size() || spb->getYVertex(iv) > ystep.back().first)
+                if (ystep.empty() || spb->getYVertex(iv) > ystep.back().first)
                     ystep.emplace_back(spb->getYVertex(iv),
                                        std::abs(spb->getXVertex(iv)));
                 else {

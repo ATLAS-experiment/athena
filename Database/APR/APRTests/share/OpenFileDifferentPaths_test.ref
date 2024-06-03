@@ -1,0 +1,19 @@
+Creating the test driver.
+[OVAL] Creating a file catalog
+APRFileCatalog      DEBUG addCatalog("xmlcatalog_file:PoolFileCatalog.xml")
+Loading library test_TestDictionaryDict
+Creating a database
+APRFileCatalog      DEBUG Registering PFN=pool.root of type=ROOT_All GUID=E9143E5C-FDDA-8646-9204-2E4BAE14DC0
+Creating the persistency service
+Writing 100 objects.
+Committing the transaction.
+XMLCatalog           INFO File 'PoolFileCatalog.xml' does not exist. New file created.
+...done
+Reading objects back from the database.
+Creating the persistency service
+Container : SimpleTestClass_Container
+100 objects found in the container.
+Committing the transaction.
+...done
+[OVAL] Number of floating tokens : 0
+Exiting...

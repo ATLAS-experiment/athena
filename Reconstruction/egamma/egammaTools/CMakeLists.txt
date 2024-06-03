@@ -7,7 +7,11 @@ atlas_subdir( egammaTools )
 atlas_add_component( egammaTools
    src/*.cxx
    src/components/*.cxx
-   LINK_LIBRARIES AthenaBaseComps AthenaKernel CaloConditions CaloDetDescrLib CaloEvent CaloIdentifier CaloInterfaceLib CaloUtilsLib EgammaAnalysisInterfacesLib EventPrimitives FourMom FourMomUtils GaudiKernel GeoPrimitives Identifier LArCablingLib LArRecConditions LumiBlockCompsLib PATCoreAcceptLib SGTools StoreGateLib TrkEventPrimitives egammaInterfacesLib egammaRecEvent egammaUtils xAODCaloEvent xAODEgamma xAODTracking )
+   LINK_LIBRARIES AthenaBaseComps AthenaKernel CaloConditions CaloDetDescrLib CaloEvent CaloIdentifier
+   CaloInterfaceLib CaloUtilsLib EgammaAnalysisInterfacesLib EventPrimitives FourMom FourMomUtils
+   GaudiKernel GeoPrimitives Identifier LArCablingLib LArRecConditions LumiBlockCompsLib PATCoreAcceptLib
+   SGTools StoreGateLib TrkEventPrimitives egammaInterfacesLib egammaRecEvent egammaUtils egammaCaloUtils
+   xAODCaloEvent xAODEgamma xAODTracking )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

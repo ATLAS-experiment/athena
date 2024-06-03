@@ -9,5 +9,5 @@ atlas_add_library( BarcodeInterfacesLib
                    BarcodeInterfaces/*.h
                    INTERFACE
                    PUBLIC_HEADERS BarcodeInterfaces
-                   LINK_LIBRARIES BarcodeEventLib GaudiKernel )
+                   LINK_LIBRARIES TruthUtils GaudiKernel )
 

@@ -83,7 +83,7 @@ public:
                          const std::string& quantileFileName,
                          const std::vector<std::string>& variablesName,
                          const bool multiClass,
-                         const bool CFReject);
+                         const bool newVars);
 
   /** Standard destructor*/
   ~ElectronDNNCalculator() {};
@@ -106,7 +106,8 @@ private:
   std::vector<double> m_references;
   /// Whether the used model is a multiclass model or not.
   bool m_multiClass;
-  bool m_CFReject; 
+  /// Whether the model uses old or new set of variables.
+  bool m_newVars; 
 
 };
 

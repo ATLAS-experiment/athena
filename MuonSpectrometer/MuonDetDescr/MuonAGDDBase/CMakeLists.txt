@@ -13,6 +13,7 @@ find_package( GeoModel COMPONENTS GeoModelKernel )
 atlas_add_library( MuonAGDDBase
                    src/*.cxx
                    PUBLIC_HEADERS MuonAGDDBase
+		   INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
                    LINK_LIBRARIES AGDDControl AGDDKernel GaudiKernel MuonAGDDDescription StoreGateLib MuonGeoModelLib
                    PRIVATE_LINK_LIBRARIES ${GEOMODEL_LIBRARIES} AGDDModel )
 

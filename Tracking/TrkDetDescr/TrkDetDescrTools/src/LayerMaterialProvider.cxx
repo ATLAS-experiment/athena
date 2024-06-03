@@ -156,7 +156,7 @@ Trk::LayerMaterialProvider::process(Trk::TrackingVolume& tvol,
    // register the next round
    if (confinedVolumes) {
        Trk::BinnedArraySpan<Trk::TrackingVolume * const> volumes = confinedVolumes->arrayObjects();
-       Trk::BinnedArraySpan<Trk::TrackingVolume * const>::const_iterator volumesIter = volumes.begin();
+       Trk::BinnedArraySpan<Trk::TrackingVolume * const>::iterator volumesIter = volumes.begin();
        for (; volumesIter != volumes.end(); ++volumesIter){
            if (!(*volumesIter))
               ATH_MSG_WARNING("Zero-pointer found in VolumeArray - indicates problem !");

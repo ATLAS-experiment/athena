@@ -1,8 +1,9 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkValHistUtils/TruthInfoPlots.h"
+#include "AthContainers/ConstAccessor.h"
 
 namespace Trk {
   void
@@ -19,11 +20,13 @@ namespace Trk {
 
   void
   TruthInfoPlots::fill(const xAOD::TruthParticle &truthprt, float weight ) {
-    if (truthprt.isAvailable<int>("truthType")) {
-      truthType->Fill(truthprt.auxdata< int >("truthType"), weight);
+    static const SG::ConstAccessor<int> truthTypeAcc ("truthType");
+    if (truthTypeAcc.isAvailable (truthprt)) {
+      truthType->Fill(truthTypeAcc (truthprt), weight);
     }
-    if (truthprt.isAvailable<int>("truthOrigin")) {
-      origin->Fill(truthprt.auxdata< int >("truthOrigin"), weight);
+    static const SG::ConstAccessor<int> truthOriginAcc ("truthOrigin");
+    if (truthOriginAcc.isAvailable (truthprt)) {
+      origin->Fill(truthOriginAcc (truthprt), weight);
     }
   }
 }

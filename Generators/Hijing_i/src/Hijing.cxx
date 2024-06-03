@@ -24,7 +24,7 @@
 
 #include "GaudiKernel/MsgStream.h"
 
-#include "GeneratorUtils/StringParse.h"
+#include "CxxUtils/StringParse.h"
 
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenVertex.h"
@@ -838,14 +838,14 @@ Hijing::set_user_params       (void)
     {
        ATH_MSG_INFO( " Hijing init. Command is: " << *i );
        StringParse mystring(*i);
-       std::string myparam = mystring.piece(1);
+       std::string myparam = mystring.piece<std::string>(1);
        if (myparam == "efrm")
        {
-           m_efrm = mystring.numpiece(2);
+           m_efrm = mystring.piece<double>(2);
        }
        else if (myparam == "frame")
        {
-           m_frame       = mystring.piece(2);
+           m_frame       = mystring.piece<std::string>(2);
            if (m_frame.size() < 8)
            {
               unsigned nbl = 8 - m_frame.size();
@@ -854,7 +854,7 @@ Hijing::set_user_params       (void)
        }
        else if (myparam == "proj")
        {
-           m_proj       = mystring.piece(2);
+           m_proj       = mystring.piece<std::string>(2);
            if (m_proj.size() < 8)
            {
               unsigned nbl = 8 - m_proj.size();
@@ -863,7 +863,7 @@ Hijing::set_user_params       (void)
        }
        else if (myparam == "targ")
        {
-           m_targ       = mystring.piece(2);
+           m_targ       = mystring.piece<std::string>(2);
            if (m_targ.size() < 8)
            {
               unsigned nbl = 8 - m_targ.size();
@@ -872,51 +872,51 @@ Hijing::set_user_params       (void)
        }
        else if (myparam == "iap")
        {
-           m_iap       = mystring.intpiece(2);
+           m_iap       = mystring.piece<int>(2);
        }
        else if (myparam == "izp")
        {
-           m_izp       = mystring.intpiece(2);
+           m_izp       = mystring.piece<int>(2);
        }
        else if (myparam == "iat")
        {
-           m_iat       = mystring.intpiece(2);
+           m_iat       = mystring.piece<int>(2);
        }
        else if (myparam == "izt")
        {
-           m_izt       = mystring.intpiece(2);
+           m_izt       = mystring.piece<int>(2);
        }
        else if (myparam == "bmin")
        {
-           m_bmin       = mystring.numpiece(2);
+           m_bmin       = mystring.piece<double>(2);
        }
        else if (myparam == "bmax")
        {
-           m_bmax       = mystring.numpiece(2);
+           m_bmax       = mystring.piece<double>(2);
        }
        else if (myparam == "nseed")
        {
-           m_ranseed.nseed()         = mystring.intpiece(2);
+           m_ranseed.nseed()         = mystring.piece<int>(2);
        }
        else if (myparam == "hipr1")
        {
-           int              myelem  = mystring.intpiece(2);
-           m_hiparnt.hipr1(myelem) = mystring.numpiece(3);
+           int              myelem  = mystring.piece<int>(2);
+           m_hiparnt.hipr1(myelem) = mystring.piece<double>(3);
        }
        else if (myparam == "ihpr2")
        {
-           int              myelem  = mystring.intpiece(2);
-           m_hiparnt.ihpr2(myelem) = mystring.intpiece(3);
+           int              myelem  = mystring.piece<int>(2);
+           m_hiparnt.ihpr2(myelem) = mystring.piece<int>(3);
        }
        else if (myparam == "hint1")
        {
-           int              myelem  = mystring.intpiece(2);
-           m_hiparnt.hint1(myelem) = mystring.numpiece(3);
+           int              myelem  = mystring.piece<int>(2);
+           m_hiparnt.hint1(myelem) = mystring.piece<double>(3);
        }
        else if (myparam == "ihnt2")
        {
-           int              myelem  = mystring.intpiece(2);
-           m_hiparnt.ihnt2(myelem) = mystring.intpiece(3);
+           int              myelem  = mystring.piece<int>(2);
+           m_hiparnt.ihnt2(myelem) = mystring.piece<int>(3);
        }
        else
        {

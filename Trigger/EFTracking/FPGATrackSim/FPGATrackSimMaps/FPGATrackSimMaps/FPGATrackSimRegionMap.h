@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 /**
  * @file FPGATrackSimRegionMap.h
@@ -51,10 +51,10 @@ class FPGATrackSimHit;
 
 struct FPGATrackSimRegionBoundaries
 {
-    int phi_min; // minimum phi ID
-    int phi_max; // maximum phi ID
-    int eta_min; // minimum eta ID
-    int eta_max; // minimum eta ID
+    int phi_min{}; // minimum phi ID
+    int phi_max{}; // maximum phi ID
+    int eta_min{}; // minimum eta ID
+    int eta_max{}; // minimum eta ID
 };
 
 
@@ -68,6 +68,8 @@ class FPGATrackSimRegionMap
         FPGATrackSimRegionMap(FPGATrackSimPlaneMap const * pmap, std::string const & filepath);
 
         void loadModuleIDLUT(std::string const & filepath);
+
+        void loadRadiiFile(std::string const& radii_file);
 
         ///////////////////////////////////////////////////////////////////////
         // Simple Getters/Setters
@@ -96,6 +98,10 @@ class FPGATrackSimRegionMap
         uint32_t getLocalID(uint32_t region, uint32_t layer, uint32_t globalModuleID) const;
         uint32_t getGlobalID(uint32_t region, uint32_t layer, uint32_t localModuleID) const;
 
+        // These require the radii file to be loaded.
+        double getAvgRadius(unsigned region, unsigned layer) const;
+        const std::vector<double>& getAvgRadii(unsigned region) const { return m_radii_map.at(region); };
+
     private:
 
         const FPGATrackSimPlaneMap *m_pmap = nullptr;
@@ -106,6 +112,9 @@ class FPGATrackSimRegionMap
 
         std::vector<std::vector<std::map<uint32_t, uint32_t>>> m_global_local_map;
             // Index by region, logical layer, globalID. Returns a local id.
+
+        std::vector<std::vector<double>> m_radii_map;
+            // Index by region, logical layer. Assume we DON'T have separate radii per section.
 
         ///////////////////////////////////////////////////////////////////////
         // Helper Functions

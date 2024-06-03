@@ -3,7 +3,6 @@
   <class name="IEMClusterTool" />
   <class name="IEMConversionBuilder" />
   <class name="IEMExtrapolationTools" />
-  <class name="IEMFourMomBuilder" />
   <class name="IEMShowerBuilder" />
   <class name="IEMTrackMatchBuilder" />
   <class name="IegammaBaseTool" />

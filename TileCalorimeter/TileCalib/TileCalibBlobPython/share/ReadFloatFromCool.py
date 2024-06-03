@@ -1,6 +1,6 @@
 #!/bin/env python
 
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 # ReadFloatFromCool.py
 # Lukas Pribyl <lukas.pribyl@cern.ch>, 2008-11-18
@@ -77,7 +77,7 @@ for o, a in opts:
         usage()
         sys.exit(2)
     else:
-        assert False, "unhandeled option"
+        raise RuntimeError("unhandled option")
 
 
 if schema=='COOLONL_TILE/COMP200':

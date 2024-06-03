@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TestDriver.h"
@@ -7,6 +7,7 @@
 
 #include <stdexcept>
 #include <iostream>
+#include <filesystem>
 #include <sstream>
 #include <memory>
 
@@ -26,16 +27,17 @@
 #include "PersistencySvc/IPersistencySvc.h"
 
 
-pool::TestDriver::TestDriver():
-  m_fileCatalog( 0 ),
-  m_fileName( "pool.root" )
+pool::TestDriver::TestDriver(const std::string& filename, const std::string& catname):
+   m_fileName( filename ),
+   m_fileCatalog( 0 )
 {
   std::cout << "[OVAL] Creating a file catalog" << std::endl;
   m_fileCatalog = new pool::IFileCatalog;
   if ( ! m_fileCatalog ) {
     throw std::runtime_error( "Could not create a file catalog" );
   }
-  pool::URIParser p;
+  std::filesystem::remove( {catname} );
+  pool::URIParser p( std::string("file:") + catname );
   p.parse();
   m_fileCatalog->setWriteCatalog( p.contactstring() );
   m_fileCatalog->connect();
@@ -53,6 +55,8 @@ pool::TestDriver::write()
 {
   pool::IFileCatalog& catalog = *m_fileCatalog;
   catalog.start();
+  std::string fid {"E9143E5C-FDDA-8646-9204-2E4BAE14DC0"};
+  catalog.registerPFN(m_fileName, ROOT_StorageType.storageName(), fid);
 
   std::cout << "Creating the persistency service" << std::endl;
   std::unique_ptr< pool::IPersistencySvc > persistencySvc( pool::IPersistencySvc::create(catalog) );
@@ -107,13 +111,13 @@ pool::TestDriver::write()
     delete *iObject;
   }
 
-  // Removing the entries from the catalog
-  catalog.rollback();
+  // Need the catalog entry when testing double file opening
+  catalog.commit();
 }
 
 
 void
-pool::TestDriver::read()
+pool::TestDriver::read(const std::string& fileName, pool::DatabaseSpecification::NameType nameType)
 {
   pool::IFileCatalog& catalog = *m_fileCatalog;
   catalog.start();
@@ -127,7 +131,8 @@ pool::TestDriver::read()
   }
 
   // Opening a database
-  pool::IDatabase* db = persistencySvc->session().databaseHandle( m_fileName, pool::DatabaseSpecification::PFN );
+  const auto & fname = (fileName.empty()? m_fileName : fileName);
+  pool::IDatabase* db = persistencySvc->session().databaseHandle(fname, nameType);
   if ( ! db ) {
     throw std::runtime_error( "Could not retrieve a database handle" );
   }

@@ -11,6 +11,7 @@ find_package( GeoModel COMPONENTS GeoModelKernel )
 atlas_add_library( LArReadoutGeometry
                    src/*.cxx
                    PUBLIC_HEADERS LArReadoutGeometry
+		   INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
                    PRIVATE_INCLUDE_DIRS  ${CLHEP_INCLUDE_DIRS}
                    PRIVATE_DEFINITIONS ${CLHEP_DEFINITIONS}
                    LINK_LIBRARIES ${GEOMODEL_LIBRARIES} AthenaKernel GeoPrimitives Identifier LArHV StoreGateLib CxxUtils

@@ -30,6 +30,7 @@
 #include "G4VUserPhysicsList.hh"
 #include "G4VModularPhysicsList.hh"
 #include "G4ParallelWorldPhysics.hh"
+#include "G4GDMLParser.hh"
 
 // CLHEP includes
 #include "CLHEP/Random/RandomEngine.h"
@@ -41,6 +42,8 @@
 #include "GeoModelInterfaces/IGeoModelSvc.h"
 #include "GaudiKernel/IThreadInitTool.h"
 #include "GeneratorObjects/HepMcParticleLink.h"
+#include "PathResolver/PathResolver.h"
+
 
 // call_once mutexes
 #include <mutex>
@@ -64,6 +67,19 @@ G4AtlasAlg::G4AtlasAlg(const std::string& name, ISvcLocator* pSvcLocator)
 StatusCode G4AtlasAlg::initialize ATLAS_NOT_THREAD_SAFE ()
 {
   ATH_MSG_DEBUG("Start of initialize()");
+
+  // Read the simplified geometry for FastCaloSim track transportation if requested
+  if(!m_simplifiedGeoPath.empty()) {
+    std::string geoFile = PathResolverFindCalibFile(m_simplifiedGeoPath);
+    
+    if (geoFile.empty()) {
+      ATH_MSG_FATAL("Could not find simplified geometry file: " << m_simplifiedGeoPath);
+      return StatusCode::FAILURE;
+    }
+
+    G4GDMLParser parser;
+    parser.Read(geoFile, false);
+  }
 
   // Create the scoring manager if requested
   if (m_recordFlux) G4ScoringManager::GetScoringManager();
@@ -315,9 +331,6 @@ StatusCode G4AtlasAlg::execute()
     ATH_MSG_ALWAYS("G4AtlasAlg: Event num. "  << n_Event << " start processing");
   }
 
-  // tell TruthService we're starting a new event
-  ATH_CHECK( m_truthRecordSvc->initializeTruthCollection() );
-
   // Release GeoModel Geometry if necessary
   if (m_releaseGeoModel) {
     try {
@@ -378,6 +391,14 @@ StatusCode G4AtlasAlg::execute()
   }
 
   ATH_MSG_DEBUG("Recorded output GenEvent collection " << outputTruthCollection.name() << " in store " << outputTruthCollection.store());
+
+  const int largestGeneratedParticleBC =  (outputTruthCollection->empty()) ? HepMC::UNDEFINED_ID
+    : HepMC::maxGeneratedParticleBarcode(outputTruthCollection->at(0)); // TODO make this more robust
+  const int largestGeneratedVertexBC =  (outputTruthCollection->empty()) ? HepMC::UNDEFINED_ID
+    : HepMC::maxGeneratedVertexBarcode(outputTruthCollection->at(0)); // TODO make this more robust
+  // tell TruthService we're starting a new event
+  ATH_CHECK( m_truthRecordSvc->initializeTruthCollection(largestGeneratedParticleBC, largestGeneratedVertexBC) );
+
   G4Event *inputEvent{};
   ATH_CHECK( m_inputConverter->convertHepMCToG4Event(*outputTruthCollection, inputEvent, *shadowTruth) );
 

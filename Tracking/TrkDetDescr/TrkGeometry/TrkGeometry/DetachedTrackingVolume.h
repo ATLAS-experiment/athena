@@ -17,10 +17,12 @@ class MsgStream;
 #include "TrkGeometry/PlaneLayer.h"
 #include "TrkSurfaces/Surface.h"
 //CxxUtils
-#include "CxxUtils/span.h" 
 #include "CxxUtils/checker_macros.h"
 // Amg
 #include "GeoPrimitives/GeoPrimitives.h"
+
+
+#include <span>
 namespace Trk {
 class TrackingVolume;
 class Surface;
@@ -29,7 +31,7 @@ class MagneticFieldProperties;
 
 // For local spans (typedef to make it easier for C++20 std:: one)
 template<class T>
-using ArraySpan = CxxUtils::span<T>;
+using ArraySpan = std::span<T>;
 
 
 /**

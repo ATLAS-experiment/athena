@@ -73,6 +73,11 @@ def defineMenu():
         'L1_cTAU20M_cTAU12M_4jJ30p0ETA24_0DETA24_4DPHI99-eTAU30eTAU20',
         'L1_cTAU20M_cTAU12M_4jJ30p0ETA24_0DETA24_4DPHI99-eTAU30eTAU12',
         'L1_cTAU20M_cTAU12M_4jJ30p0ETA24_0DETA24_10DPHI99-eTAU30eTAU12',
+        #ATR-29439
+        'L1_cTAU30M_2cTAU20M_DR-eTAU30eTAU20-jJ50',
+        'L1_cTAU30M_2cTAU20M_DR-eTAU30eTAU20-jJ40',
+        'L1_cTAU30M_2cTAU20M_DR-eTAU30eTAU20-jJ30',
+        'L1_cTAU30M_2cTAU20M_3jJ30p0ETA25',
         
         #ATR-27252
         'L1_eTAU60_2cTAU20M_jXE80',
@@ -165,6 +170,9 @@ def defineMenu():
         #'L1_BPH-0M9-EM7-EM5', 
         #'L1_BPH-0DR3-EM7J15',
         'L1_LAR-ZEE',
+
+        #ATR-29330
+        'L1_4J15',
 
     ]
 

@@ -56,6 +56,7 @@ bool CheckConfig::basicConfigChecks()
 	for(auto& kv : m_parent.m_legsPerTool)
 	{
 		auto& name = kv.first;
+		if (name == ITrigGlobalEfficiencyCorrectionTool::toolnameForDefaultScaleFactor()) continue;
 		if(findToolByName(m_parent.m_suppliedElectronEfficiencyTools, name)
 			|| findToolByName(m_parent.m_suppliedElectronScaleFactorTools, name)
 			|| findToolByName(m_parent.m_suppliedPhotonEfficiencyTools, name)

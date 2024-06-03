@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -199,9 +199,15 @@ StatusCode AsgElectronSelectorTool::initialize()
     else {
       m_CFReject = false;
     }
+    // This is temporary solution to figure out if the dnn uses old or new set of variables
+    // (qd0+SCT vs d0). Longterm solution will be to define variables used in the dnn
+    // directly  based on `m_variables` so the config can contain any combination of
+    // supported variables
+    auto it = std::find(m_variables.begin(), m_variables.end(), "SCTWeightedCharge");
+    m_newVars = (it != m_variables.end());
 
     // Create an instance of the class calculating the DNN score
-    m_mvaTool = std::make_unique<ElectronDNNCalculator>(this, filename.c_str(), qfilename.c_str(), m_variables, m_multiClass, m_CFReject);
+    m_mvaTool = std::make_unique<ElectronDNNCalculator>(this, filename.c_str(), qfilename.c_str(), m_variables, m_multiClass, m_newVars);
 
     if (m_multiClass){
       // Fractions are only needed if multiclass model is used
@@ -364,9 +370,9 @@ asg::AcceptData AsgElectronSelectorTool::accept( const EventContext& ctx, const 
 
   // get the ambiguity type from the decoration
   if (!m_skipAmbiguityCut){
-    if (eg->isAvailable<uint8_t>("ambiguityType")){
-      static const SG::AuxElement::Accessor<uint8_t> acc("ambiguityType");
-      ambiguityBit = acc(*eg);
+    static const SG::AuxElement::Accessor<uint8_t> ambiguityTypeAcc("ambiguityType");
+    if (ambiguityTypeAcc.isAvailable(*eg)) {
+      ambiguityBit = ambiguityTypeAcc(*eg);
     }
     else {
       allFound = false;
@@ -779,7 +785,7 @@ std::vector<float> AsgElectronSelectorTool::calculateMultipleOutputs(const Event
   vars.f1 = f1;
   vars.Eratio = Eratio;
   vars.deltaEta1 = deltaEta1;
-  if (m_CFReject){
+  if (m_newVars){
     vars.qd0 = qd0;
     vars.SCTWeightedCharge = SCTWeightedCharge;
   }

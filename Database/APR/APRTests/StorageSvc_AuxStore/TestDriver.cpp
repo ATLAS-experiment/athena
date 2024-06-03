@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -33,7 +33,7 @@ using namespace std;
 
 static const bool test_nodict = false;
 
-static const std::string file = "pool_test.root";
+static const std::string file = "AUX.pool_test.root";
 static const std::string container = "CollectionTree(container_Aux.)";
 static const int nObjects = 10;
 

@@ -39,6 +39,15 @@ namespace ActsTrk {
     m_total_tot_barrel = Book1D("total_tot_barrel", "PixelCluster_totalTot_barrel;charge;Entries;", 50, 0, 5000, false);
     m_total_tot_endcap = Book1D("total_tot_endcap", "PixelCluster_totalTot_endcap;charge;Entries;", 50, 0, 5000, false);
 
+    m_omega_x_barrel = Book1D("omega_x_barrel", "PixelCluster_omega_x_barrel;omega x;Entries;", 50, 0, 1, false);
+    m_omega_x_endcap = Book1D("omega_x_endcap", "PixelCluster_omega_x_endcap;omega x;Entries;", 50, 0, 1, false);
+
+    m_omega_y_barrel = Book1D("omega_y_barrel", "PixelCluster_omega_y_barrel;omega x;Entries;", 50, 0, 1, false);
+    m_omega_y_endcap = Book1D("omega_y_endcap", "PixelCluster_omega_y_endcap;omega x;Entries;", 50, 0, 1, false);
+
+    m_lvl1a_barrel = Book1D("lvl1a_barrel", "PixelCluster_lvl1a_barrel;lvl1a;Entries;",20, 0, 20, false);
+    m_lvl1a_endcap = Book1D("lvl1a_endcap", "PixelCluster_lvl1a_endcap;lvl1a;Entries;",20, 0, 20, false);
+    
     m_global_x_barrel = Book1D("global_x_barrel", "PixelCluster_global_x_barrel;Global x [mm];Entries;", 64, -350, 350, false);
     m_global_x_endcap = Book1D("global_x_endcap", "PixelCluster_global_x_endcap;Global x [mm];Entries;", 64, -350, 350, false);
 
@@ -106,7 +115,12 @@ namespace ActsTrk {
 
       m_total_charge_barrel->Fill(cluster->totalCharge(), beamSpotWeight);
       m_total_tot_barrel->Fill(cluster->totalToT(), beamSpotWeight);
-    
+
+      m_omega_x_barrel->Fill(cluster->omegaX(), beamSpotWeight);
+      m_omega_y_barrel->Fill(cluster->omegaY(), beamSpotWeight);
+
+      m_lvl1a_barrel->Fill(cluster->lvl1a(), beamSpotWeight);
+      
       m_global_x_barrel->Fill(globalPos(0, 0), beamSpotWeight);
       m_global_y_barrel->Fill(globalPos(1, 0), beamSpotWeight);
       m_global_z_barrel->Fill(globalPos(2, 0), beamSpotWeight);
@@ -136,7 +150,12 @@ namespace ActsTrk {
 
       m_total_charge_endcap->Fill(cluster->totalCharge(), beamSpotWeight);
       m_total_tot_endcap->Fill(cluster->totalToT(), beamSpotWeight);
-       
+
+      m_omega_x_endcap->Fill(cluster->omegaX(), beamSpotWeight);
+      m_omega_y_endcap->Fill(cluster->omegaY(), beamSpotWeight);
+
+      m_lvl1a_endcap->Fill(cluster->lvl1a(), beamSpotWeight);
+      
       m_global_x_endcap->Fill(globalPos(0, 0), beamSpotWeight);
       m_global_y_endcap->Fill(globalPos(1, 0), beamSpotWeight);
       m_global_z_endcap->Fill(globalPos(2, 0), beamSpotWeight);

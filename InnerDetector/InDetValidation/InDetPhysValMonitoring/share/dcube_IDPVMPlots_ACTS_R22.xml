@@ -72,6 +72,12 @@
 	<hist1D name="total_charge_endcap" plotopts="logy" tests="KS" type="TH1F"/>
 	<hist1D name="total_tot_barrel" plotopts="logy" tests="KS" type="TH1F"/>
 	<hist1D name="total_tot_endcap" plotopts="logy" tests="KS" type="TH1F"/>
+	<hist1D name="omega_x_barrel" plotopts="" tests="KS" type="TH1F" />
+	<hist1D name="omega_x_endcap" plotopts="" tests="KS" type="TH1F" />
+	<hist1D name="omega_y_barrel" plotopts="" tests="KS" type="TH1F" />
+	<hist1D name="omega_y_endcap" plotopts="" tests="KS" type="TH1F" />
+	<hist1D name="lvl1a_barrel" plotopts="" tests="KS" type="TH1F" />
+	<hist1D name="lvl1a_endcap" plotopts="" tests="KS" type="TH1F" />
 	<hist1D name="global_x_barrel" plotopts="" tests="KS" type="TH1F"/>
 	<hist1D name="global_x_endcap" plotopts="" tests="KS" type="TH1F"/>
 	<hist1D name="global_y_barrel" plotopts="" tests="KS" type="TH1F"/>

@@ -7,7 +7,7 @@ n_events=5
 
 export ATHENA_CORE_NUMBER=1
 Reco_tf.py --CA \
-   --preExec "flags.Exec.FPE=500;" "flags.Acts.useActsGsfInEgamma=True;" \
+   --preExec "flags.Exec.FPE=-1;" "flags.Acts.useActsGsfInEgamma=True;" \
    --preInclude egammaConfig.egammaOnlyFromRawFlags.egammaOnlyFromRaw \
    --autoConfiguration="everything" \
    --inputRDOFile ${input_rdo} \

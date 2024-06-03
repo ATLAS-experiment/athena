@@ -18,7 +18,6 @@ class TgcReadoutElement : public MuonReadoutElement {
    public:
     
     /// Set of parameters to describe a Tgc chamber
-    using StripLayerPtr = GeoModel::TransientConstSharedPtr<StripLayer>;
     struct parameterBook {
         /// Describe the chamber dimensions
         /// Half thickness of the chamber
@@ -72,6 +71,9 @@ class TgcReadoutElement : public MuonReadoutElement {
     double moduleHeight() const;
     /// Returns the thickness of the chamber
     double moduleThickness() const;
+    
+    /// Returns the number of readout channels
+    unsigned int numChannels(const IdentifierHash& measHash) const;
     /// Returns the number of strips for a given gasGap [1-3]
     unsigned int numStrips(unsigned int gasGap) const;
     /// Returns the number of wire gangs for a given gasGap [1-3]
@@ -85,6 +87,8 @@ class TgcReadoutElement : public MuonReadoutElement {
     Amg::Vector3D channelPosition(const ActsGeometryContext& ctx, const Identifier& measId) const;
     Amg::Vector3D channelPosition(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const;
 
+    /// Returns the pointer to the strip layer associated with the gas gap.
+    const StripLayerPtr& sensorLayout(const IdentifierHash& hash) const;
     /// Returns access to the wire group design of the given gasGap [1-3]
     /// If the gap does not have a wires an exception is thrown
     const WireGroupDesign& wireGangLayout(unsigned int gasGap) const;
@@ -114,8 +118,6 @@ class TgcReadoutElement : public MuonReadoutElement {
         static unsigned int channelNumber(const IdentifierHash& measHash);
         static unsigned int gasGapNumber(const IdentifierHash& measHash);
         static bool isStrip(const IdentifierHash& measHash);
-    private:
-        const StripLayerPtr& sensorLayout(unsigned int gasGap, const bool isStrip) const;
  };
 std::ostream& operator<<(std::ostream& ostr, const TgcReadoutElement::parameterBook& pars);
 }  // namespace MuonGMR4

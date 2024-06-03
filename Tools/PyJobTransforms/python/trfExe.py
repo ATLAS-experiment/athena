@@ -1533,10 +1533,6 @@ class athenaExecutor(scriptExecutor):
                         any('--nprocs' in opt for opt in self.conf.argdict['athenaopts'].value[currentSubstep])):
                         self._cmd.append('--nprocs=%s' % str(self._athenaMP))
 
-        #Switch to ComponentAccumulator based config if requested
-        if self._isCAEnabled():
-            self._cmd.append("--CA")
-
         # Add topoptions
         if self._skeleton or self._skeletonCA:
             self._cmd += self._topOptionsFiles
@@ -1559,7 +1555,18 @@ class athenaExecutor(scriptExecutor):
         self._wrapperFile        = 'runwrapper.{name}.sh'.format(name = self._name)
         self._setupFile          = 'setup.{name}.sh'.format(name = self._name)
 
-        container_cmd = None
+        # Create a setupATLAS script
+        setupATLAS = 'my_setupATLAS.sh'
+        with open(setupATLAS, 'w') as f:
+            print("#!/bin/bash", file=f)
+            print("""
+if [ -z $ATLAS_LOCAL_ROOT_BASE ]; then
+  export ATLAS_LOCAL_ROOT_BASE=/cvmfs/atlas.cern.ch/repo/ATLASLocalRootBase
+fi
+source ${ATLAS_LOCAL_ROOT_BASE}/user/atlasLocalSetup.sh"""
+                  , file=f)
+        os.chmod(setupATLAS, 0o755)
+
         msg.debug(
             'Preparing wrapper file {wrapperFileName} with '
             'asetup={asetupStatus} and dbsetup={dbsetupStatus}'.format(
@@ -1568,43 +1575,27 @@ class athenaExecutor(scriptExecutor):
                 dbsetupStatus   = self._dbsetup
             )
         )
+
+        container_cmd = None
         try:
             with open(self._wrapperFile, 'w') as wrapper:
-                print('#! /bin/sh', file=wrapper)
+                print('#!/bin/sh', file=wrapper)
                 if self._containerSetup is not None:
-                    # Prepare for container run: generate a script launching container
-                    # This is required for running on the grid
-                    setupScript = "my_setupATLAS.sh"
-                    if not os.path.isfile(setupScript):
-                        contSetupFile = open(setupScript, 'w')
-                        contText = """#! /bin/bash
-
-if [ -z $ATLAS_LOCAL_ROOT_BASE ]; then
-  export ATLAS_LOCAL_ROOT_BASE=/cvmfs/atlas.cern.ch/repo/ATLASLocalRootBase
-fi
-
-source ${ATLAS_LOCAL_ROOT_BASE}/user/atlasLocalSetup.sh"""
-                        print(contText, file=contSetupFile)
-                        contSetupFile.close()
-                        os.chmod(setupScript, 0o755)
-                    container_cmd = [ os.path.abspath(setupScript),
+                    container_cmd = [ os.path.abspath(setupATLAS),
                                      "-c",
                                      self._containerSetup,
                                      "--pwd",
                                      self._workdir,
                                      "-s",
-                                     self._setupFile,
+                                     os.path.join('.', self._setupFile),
                                      "-r"]
-                    print('echo This wrapper is executed within a container', file=wrapper)
-                    print('echo For a local re-run, please do:', file=wrapper)
-                    container_cmd_local = container_cmd.copy()
-                    container_cmd_local[0] = "setupATLAS"
-                    print('echo '+ " ".join(container_cmd_local) + " " + path.join('.', self._wrapperFile), file=wrapper)
-                    print('echo "(or with --pwd \\`pwd\\`)"', file=wrapper)
+                    print('echo "This wrapper is executed within a container! For a local re-run, do:"', file=wrapper)
+                    print('echo " '+ " ".join(['setupATLAS'] + container_cmd[1:] + [path.join('.', self._wrapperFile)]) + '"', file=wrapper)
                     print('echo "N.B.: if launching a nested container, navigate to /srv before running the above command"',
                           file = wrapper)
-                    print('echo "and use --pwd workdir, where workdir is the transform running directory within /srv"',
+                    print('echo "      and use --pwd workdir, where workdir is the transform running directory within /srv"',
                           file=wrapper)
+                    print('echo', file=wrapper)
 
                 if asetup:
                     wfile = wrapper
@@ -1614,15 +1605,8 @@ source ${ATLAS_LOCAL_ROOT_BASE}/user/atlasLocalSetup.sh"""
                     if self._containerSetup is not None:
                         asetupFile = open(self._setupFile, 'w')
                         wfile = asetupFile
-                    print("# asetup", file=wfile)
-                    print('echo Sourcing {AtlasSetupDirectory}/scripts/asetup.sh {asetupStatus}'.format(
-                        AtlasSetupDirectory = os.environ['AtlasSetup'],
-                        asetupStatus        = asetup
-                    ), file=wfile)
-                    print('source {AtlasSetupDirectory}/scripts/asetup.sh {asetupStatus}'.format(
-                        AtlasSetupDirectory = os.environ['AtlasSetup'],
-                        asetupStatus        = asetup
-                    ), file=wfile)
+                    print(f'source ./{setupATLAS} -q', file=wfile)
+                    print(f'asetup {asetup}', file=wfile)
                     print('if [ ${?} != "0" ]; then exit 255; fi', file=wfile)
                 if dbsetup:
                     dbroot = path.dirname(dbsetup)
@@ -1639,7 +1623,6 @@ source ${ATLAS_LOCAL_ROOT_BASE}/user/atlasLocalSetup.sh"""
                 if self._disableMP:
                     print("# AthenaMP explicitly disabled for this executor", file=wrapper)
                 if self._envUpdate.len > 0:
-                    print("# Customised environment", file=wrapper)
                     for envSetting in  self._envUpdate.values:
                         if not envSetting.startswith('LD_PRELOAD'):
                             print("export", envSetting, file=wrapper)
@@ -1672,8 +1655,7 @@ source ${ATLAS_LOCAL_ROOT_BASE}/user/atlasLocalSetup.sh"""
                         defaultOptions = defaultOptions,
                         extraOptionsList = extraOptionsList,
                         AthenaSerialisedConfigurationFile = \
-                            AthenaSerialisedConfigurationFile,
-                        isCAEnabled = self._isCAEnabled()
+                            AthenaSerialisedConfigurationFile
                     )
                     msg.debug("Valgrind command: {command}".format(command = command))
                     print(command, file=wrapper)
@@ -1706,8 +1688,7 @@ source ${ATLAS_LOCAL_ROOT_BASE}/user/atlasLocalSetup.sh"""
                         defaultOptions = defaultOptions,
                         extraOptionsList = extraOptionsList,
                         AthenaSerialisedConfigurationFile = \
-                            AthenaSerialisedConfigurationFile,
-                        isCAEnabled = self._isCAEnabled()
+                            AthenaSerialisedConfigurationFile
                     )
                     msg.debug("VTune command: {command}".format(command = command))
                     print(command, file=wrapper)
@@ -1716,7 +1697,7 @@ source ${ATLAS_LOCAL_ROOT_BASE}/user/atlasLocalSetup.sh"""
                     # run Athena command
                     print(' '.join(self._cmd), file=wrapper)
             os.chmod(self._wrapperFile, 0o755)
-        except (IOError, OSError) as e:
+        except OSError as e:
             errMsg = 'error writing athena wrapper {fileName}: {error}'.format(
                 fileName = self._wrapperFile,
                 error = e
@@ -1990,7 +1971,7 @@ class DQMergeExecutor(scriptExecutor):
                 else:
                     exitErrorMessage = "Logfile error in {0}: \"{1}\"".format(self._logFileName,
                                                                               worstError['firstError']['message'])
-        except (OSError, IOError) as e:
+        except OSError as e:
             exitCode = trfExit.nameToCode('TRF_EXEC_LOGERROR')
             raise trfExceptions.TransformValidationException(exitCode,
                   'Exception raised while attempting to scan logfile {0}: {1}'.format(self._logFileName, e))
@@ -2074,7 +2055,7 @@ class bsMergeExecutor(scriptExecutor):
                 for fname in self.conf.dataDictionary[self._inputBS].value:
                     if fname not in self._maskedFiles:
                         print(fname, file=BSFileList)
-        except (IOError, OSError) as e:
+        except OSError as e:
             errMsg = 'Got an error when writing list of BS files to {0}: {1}'.format(self._mergeBSFileList, e)
             msg.error(errMsg)
             raise trfExceptions.TransformExecutionException(trfExit.nameToCode('TRF_EXEC_SETUP_WRAPPER'), errMsg)
@@ -2176,7 +2157,7 @@ class archiveExecutor(scriptExecutor):
                     print("            os.unlink(f)", file=zip_wrapper)
                     print("zf.close()", file=zip_wrapper)
                 os.chmod('zip_wrapper.py', 0o755)
-            except (IOError, OSError) as e:
+            except OSError as e:
                 errMsg = 'error writing zip wrapper {fileName}: {error}'.format(fileName = 'zip_wrapper.py',
                     error = e
                 )
@@ -2204,7 +2185,7 @@ class archiveExecutor(scriptExecutor):
                     print("     archive.extractall(path)", file=unarchive_wrapper)
                     print("     archive.close()", file=unarchive_wrapper)
                 os.chmod('unarchive_wrapper.py', 0o755)
-            except (IOError, OSError) as e:
+            except OSError as e:
                 errMsg = 'error writing unarchive wrapper {fileName}: {error}'.format(fileName = 'unarchive_wrapper.py',
                     error = e
                 )

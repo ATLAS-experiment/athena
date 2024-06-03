@@ -18,12 +18,14 @@ StatusCode RecoPhotonHistograms::initializePlots() {
 
   ATH_CHECK(ParticleHistograms::initializePlots());
 
-  histoMap["convRadius"] = new TH1D(Form("%s_%s",m_name.c_str(),"convRadius"), ";Conversion Radius [mm]; Events", 14, m_cR_bins);
-  histoMap["truthType"] = new TH1D(Form("%s_%s",m_name.c_str(),"truthType"),";truth type; Events",41,-1,40);
-  histoMap["truthOrigin"] = new TH1D(Form("%s_%s",m_name.c_str(),"truthOrigin"),";truth origin; Events",51,-1,50);
+  const char* fN = m_name.c_str();
 
-  ATH_CHECK(m_rootHistSvc->regHist(m_folder+"convRadius", histoMap["convRadius"]));
-  ATH_CHECK(m_rootHistSvc->regHist(m_folder+"truthType", histoMap["truthType"]));
+  histoMap["convRadius"]  = new TH1D(Form("%s_convRadius",fN),  ";Conversion Radius [mm]; Events", 14, m_cR_bins);
+  histoMap["truthType"]   = new TH1D(Form("%s_truthType",fN),   ";truth type; Events",  41,-1,40);
+  histoMap["truthOrigin"] = new TH1D(Form("%s_truthOrigin",fN), ";truth origin; Events",51,-1,50);
+
+  ATH_CHECK(m_rootHistSvc->regHist(m_folder+"convRadius",  histoMap["convRadius"]));
+  ATH_CHECK(m_rootHistSvc->regHist(m_folder+"truthType",   histoMap["truthType"]));
   ATH_CHECK(m_rootHistSvc->regHist(m_folder+"truthOrigin", histoMap["truthOrigin"]));
 
   return StatusCode::SUCCESS;

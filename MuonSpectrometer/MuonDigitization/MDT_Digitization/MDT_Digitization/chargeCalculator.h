@@ -21,18 +21,9 @@ to the third digit of decimal number of the  pdgid.
 
 #include "CLHEP/Units/PhysicalConstants.h"
 #include "GeneratorObjects/HepMcParticleLink.h"
-#include "MdtCalibData/MdtFullCalibData.h"
-#include "MdtCalibData/MdtTubeCalibContainer.h"
-#include "MuonDigitContainer/MdtDigitContainer.h"
-#include "MuonReadoutGeometry/MdtReadoutElement.h"
-#include "MuonReadoutGeometry/MuonDetectorManager.h"
 #include "MuonSimData/MuonSimData.h"
 #include "MuonSimData/MuonSimDataCollection.h"
 #include "MuonSimEvent/MDTSimHitCollection.h"
-#include "PathResolver/PathResolver.h"
-#include "PileUpTools/PileUpMergeSvc.h"
-#include "StoreGate/StoreGateSvc.h"
-#include "TrkDetDescrUtils/GeometryStatics.h"
 // SB
 #include "AtlasHepMC/GenParticle.h"
 //

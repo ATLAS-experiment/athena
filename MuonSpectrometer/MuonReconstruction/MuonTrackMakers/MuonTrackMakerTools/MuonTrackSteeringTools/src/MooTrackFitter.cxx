@@ -1894,19 +1894,14 @@ namespace Muon {
 
         const MuonGM::MdtReadoutElement* detEl = nullptr;
 
-        Amg::Transform3D gToStation;
+        Amg::Transform3D gToStation{Amg::Transform3D::Identity()};
 
-        // set to get Identifiers of chambers with hits
-        std::vector<std::pair<Identifier, bool>> indexIdMap;
-        indexIdMap.reserve(seg.containedMeasurements().size());
 
-        unsigned index = 0;
         float tubeRadius = 14.6;
-        std::vector<const Trk::MeasurementBase*>::const_iterator it = seg.containedMeasurements().begin();
-        std::vector<const Trk::MeasurementBase*>::const_iterator it_end = seg.containedMeasurements().end();
+
         ATH_MSG_DEBUG("loop through hits for segment");
-        for (; it != it_end; ++it) {
-            const MdtDriftCircleOnTrack* mdt = dynamic_cast<const MdtDriftCircleOnTrack*>(*it);
+        for ( const Trk::MeasurementBase* meas : seg.containedMeasurements()) {
+            const MdtDriftCircleOnTrack* mdt = dynamic_cast<const MdtDriftCircleOnTrack*>(meas);
 
             if (!mdt) { continue; }
             Identifier id = mdt->identify();
@@ -1934,14 +1929,12 @@ namespace Muon {
                                             m_idHelperSvc->mdtIdHelper().tubeLayer(id) - 1, m_idHelperSvc->mdtIdHelper().tube(id) - 1);
 
             // create new DriftCircle
-            TrkDriftCircleMath::DriftCircle dc(lpos, r, dr, TrkDriftCircleMath::DriftCircle::InTime, mdtid, index, mdt);
+            TrkDriftCircleMath::DriftCircle dc(lpos, r, dr, TrkDriftCircleMath::DriftCircle::InTime, mdtid, mdt);
             TrkDriftCircleMath::DCOnTrack dcOnTrack(dc, 1., 1.);
             ATH_MSG_VERBOSE(" new MDT hit " << m_idHelperSvc->toString(id));
 
             dcs.push_back(dcOnTrack);
-            indexIdMap.emplace_back(id, false);
 
-            ++index;
         }
 
         double angleYZ = seg.localDirection().angleYZ();
@@ -1980,19 +1973,10 @@ namespace Muon {
             TrkDriftCircleMath::MatchDCWithLine matchDC(segment.line(), 5., TrkDriftCircleMath::MatchDCWithLine::Pull, tubeRadius);
             const TrkDriftCircleMath::DCOnTrackVec& matchedDCs = matchDC.match(segment.dcs());
 
-            for (TrkDriftCircleMath::DCOnTrackCit dcit = matchedDCs.begin(); dcit != matchedDCs.end(); ++dcit) {
-                if (dcit->state() == TrkDriftCircleMath::DCOnTrack::OnTrack) continue;
-                if ((unsigned int)dcit->index() >= indexIdMap.size()) continue;
-                indexIdMap[dcit->index()].second = true;
-            }
-
-            std::vector<std::pair<Identifier, bool>>::iterator iit = indexIdMap.begin();
-            std::vector<std::pair<Identifier, bool>>::iterator iit_end = indexIdMap.end();
-            for (; iit != iit_end; ++iit) {
-                if (iit->second) {
-                    ATH_MSG_DEBUG(" removing hit " << m_idHelperSvc->toString(iit->first));
-                    removedIdentifiers.insert(iit->first);
-                }
+            for (const TrkDriftCircleMath::DCOnTrack& dcit: matchedDCs) {
+                if (dcit.state() == TrkDriftCircleMath::DCOnTrack::OnTrack) continue;
+                removedIdentifiers.insert(dcit.rot()->identify());
+                ATH_MSG_VERBOSE("Removing hit "<<m_idHelperSvc->toString(dcit.rot()->identify()));
             }
         }
     }

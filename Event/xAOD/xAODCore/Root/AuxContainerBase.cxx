@@ -4,6 +4,7 @@
 
 // System include(s):
 #include <iostream>
+#include <memory_resource>
 
 // EDM include(s):
 #include "AthContainers/AuxStoreInternal.h"

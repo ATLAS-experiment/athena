@@ -85,9 +85,9 @@ StatusCode sTgcReadoutGeomTool::loadDimensions(sTgcReadoutElement::defineArgs& d
     define.halfChamberTck = modPars.thickness;
     define.yCutout = modPars.yCutOut;
     
-    ATH_MSG_VERBOSE("chamber length (L/S) is: " << 2*define.lHalfChamberLength << "/" 
+    ATH_MSG_DEBUG("chamber length (L/S) is: " << 2*define.lHalfChamberLength << "/" 
                  << 2*define.sHalfChamberLength << " chamber height is: " 
-                 << 2*define.halfChamberHeight << " chamber thickness is: " << 2*define.halfChamberTck);
+                 << 2*define.halfChamberHeight << " chamber thickness is: " << 2*define.halfChamberTck << " yCutout value is: " << define.yCutout);
 
     /// Navigate through the GeoModel tree to find all gas volume leaves
     std::vector<physVolWithTrans> allGasGaps = m_geoUtilTool->findAllLeafNodesByName(define.physVol, "sTgcGas");
@@ -118,73 +118,112 @@ StatusCode sTgcReadoutGeomTool::loadDimensions(sTgcReadoutElement::defineArgs& d
 
         sTgcShape gapPars = extractParameters(m_geoUtilTool->extractShape(gapVol.volume));
 
-        if (true || !gapPars.yCutOut) {
-            //StripDesign
-            double firstStripPos = -gapPars.halfHeight + paramBook.firstStripPitch[gasGap] - 0.5 * paramBook.stripPitch;
-            define.firstStripPitch = paramBook.firstStripPitch;
-            ATH_MSG_DEBUG("FirstStripPos is: " << Amg::toString(firstStripPos, 2) << " and the half height is: " << gapPars.halfHeight);
+        /// Strip Parameters
+        double firstStripPos = -gapPars.halfHeight + paramBook.firstStripPitch[gasGap] - 0.5 * paramBook.stripPitch;
+        define.firstStripPitch = paramBook.firstStripPitch;
+        ATH_MSG_DEBUG("FirstStripPos is: " << Amg::toString(firstStripPos, 2) << " and the half height is: " << gapPars.halfHeight);
+        
+        /// wireGroup Parameters
+        unsigned int numWireGroups = paramBook.numWireGroups[gasGap];
+        /// firstWirePos locates the x-coordinate of the beginning of first WireGroup
+        double firstWirePos = paramBook.firstWirePos[gasGap];
+
+        if(gapPars.yCutOut) {
+            /// Diamond Strip Design       
+            stripDesign->defineDiamond(gapPars.shortWidth, gapPars.longWidth, gapPars.halfHeight, paramBook.yCutoutCathode);
+            ATH_MSG_VERBOSE("The yCutout of the active area is: " << gapPars.yCutOut);
+            stripDesign->defineStripLayout(Amg::Vector2D{firstStripPos, 0.},
+                                        paramBook.stripPitch, paramBook.stripWidth, paramBook.numStrips);
+            ATH_MSG_VERBOSE("Created new diamond strip design "<<(*stripDesign));
+            /// Diamond WireGroup Design
+            wireGroupDesign->defineDiamond(0.5*paramBook.sPadLength, 0.5*paramBook.lPadLength, gapPars.halfHeight, paramBook.yCutoutCathode);
+            wireGroupDesign->flipTrapezoid();
+            wireGroupDesign->defineStripLayout(Amg::Vector2D{firstWirePos, 0.}, 
+                                            paramBook.wirePitch, 
+                                            paramBook.wireWidth, 
+                                            numWireGroups);
+            ATH_MSG_VERBOSE("Created new diamond wireGroup design "<<(*wireGroupDesign));
+
+            /// Diamond Pad Design
+            padDesign->defineDiamond(0.5*paramBook.sPadLength, 0.5*paramBook.lPadLength, gapPars.halfHeight, paramBook.yCutoutCathode);
+            padDesign->flipTrapezoid();
+            ATH_MSG_VERBOSE("Created new diamond pad design "<<(*padDesign));
+        }
+        else if (!gapPars.yCutOut) {
+            /// Trapezoid Strip Design
             stripDesign->defineTrapezoid(gapPars.shortWidth, gapPars.longWidth, gapPars.halfHeight);
             stripDesign->defineStripLayout(Amg::Vector2D{firstStripPos, 0.},
-                                           paramBook.stripPitch, paramBook.stripWidth, paramBook.numStrips);
+                                        paramBook.stripPitch, paramBook.stripWidth, paramBook.numStrips);
             ATH_MSG_VERBOSE("Created new strip design "<<(*stripDesign));
 
-            //WireGroupDesign
+            /// Trapezoid WireGroup Design
             wireGroupDesign->defineTrapezoid(0.5*paramBook.sPadLength, 0.5*paramBook.lPadLength, gapPars.halfHeight);
-            wireGroupDesign->flipTrapezoid();
-            unsigned int numWireGroups = paramBook.numWireGroups[gasGap];
-            /// Placing wires in the designated wireGroups for easy retrieval later, first and last are placed separately.
-            wireGroupDesign->declareGroup(paramBook.firstWireGroupWidth[gasGap]);
-            for (uint wireGr=2; wireGr<numWireGroups; wireGr++){
-                wireGroupDesign->declareGroup(paramBook.wireGroupWidth);
-            }
-            unsigned int lastWireGroup = (paramBook.numWires[gasGap] - wireGroupDesign->nAllWires());
-            wireGroupDesign->declareGroup(lastWireGroup);
-            /// Defining the wire group layout
-            /// firstWirePos locates the y-coordinate of the beginning of first WireGroup
-            double firstWirePos = paramBook.firstWirePos[gasGap];
+            wireGroupDesign->flipTrapezoid();        
             wireGroupDesign->defineStripLayout(Amg::Vector2D{firstWirePos, 0.}, 
-                                                paramBook.wirePitch, 
-                                                paramBook.wireWidth, 
-                                                numWireGroups);
-            wireGroupDesign->defineWireCutout(paramBook.wireCutout[gasGap]);
+                                            paramBook.wirePitch, 
+                                            paramBook.wireWidth, 
+                                            numWireGroups);    
+            ATH_MSG_VERBOSE("Created new wireGroup design "<<(*wireGroupDesign));
 
-            //PadDesign
+            /// Trapezoid Pad Design
             padDesign->defineTrapezoid(0.5*paramBook.sPadLength, 0.5*paramBook.lPadLength, gapPars.halfHeight);
             padDesign->flipTrapezoid();
-            padDesign->definePadRow(paramBook.firstPadPhiDivision[gasGap],
-                                    paramBook.numPadPhi[gasGap],
-                                    paramBook.anglePadPhi,
-                                    paramBook.PadPhiShift[gasGap]);
-
-            padDesign->definePadColumn(paramBook.firstPadHeight[gasGap],
-                                        paramBook.numPadEta[gasGap],
-                                        paramBook.padHeight[gasGap]);
-
+            ATH_MSG_VERBOSE("Created new pad design "<<(*padDesign));
         }
-        /// Stacking strip, wireGroup and pad layers
-        ++gasGap;
-        ///wireGroups       
-        wireGroupDesign = (*factoryCache.wireGroupDesigns.emplace(wireGroupDesign).first);
-        StripLayer wireGroupLayer(gapVol.transform * Amg::getRotateY3D(180* Gaudi::Units::deg), wireGroupDesign, sTgcReadoutElement::createHash(gasGap, sTgcIdHelper::Wire, 0));
-        ATH_MSG_VERBOSE("Added new wireGroup layer at "<<wireGroupLayer);
-        define.wireGroupLayers.push_back(std::move(wireGroupLayer));
-        if(!define.wireGroupDesign) define.wireGroupDesign = wireGroupDesign;
-        ///Strips
-        stripDesign = (*factoryCache.stripDesigns.emplace(stripDesign).first);
-        StripLayer stripLayer(gapVol.transform * Amg::getRotateZ3D(-90. * Gaudi::Units::deg) * 
-                                                 Amg::getRotateY3D(180* Gaudi::Units::deg), stripDesign, 
-                                                 sTgcReadoutElement::createHash(gasGap, sTgcIdHelper::Strip, 0));
-        ATH_MSG_VERBOSE("Added new strip layer at "<< stripLayer);
-        define.stripLayers.push_back(std::move(stripLayer));
-        if (!define.stripDesign) define.stripDesign = stripDesign; 
-        ///Pads
+       
+        /// Placing wires in the designated wireGroups for easy retrieval later, first and last are placed separately.
+        wireGroupDesign->declareGroup(paramBook.firstWireGroupWidth[gasGap]);
+        for (uint wireGr=2; wireGr<numWireGroups; wireGr++){
+            wireGroupDesign->declareGroup(paramBook.wireGroupWidth);
+        }
+        unsigned int lastWireGroup = (paramBook.numWires[gasGap] - wireGroupDesign->nAllWires());
+        wireGroupDesign->declareGroup(lastWireGroup);
+        wireGroupDesign->defineWireCutout(paramBook.wireCutout[gasGap]);
+        
+        /// Defining the beamline radius, pad columns and pad rows            
         double beamlineRadius = (define.physVol->getAbsoluteTransform() * gapVol.transform).translation().perp();
         padDesign->defineBeamlineRadius(beamlineRadius);
         ATH_MSG_DEBUG("The beamline radius is: " << beamlineRadius);
-        StripLayer padLayer(gapVol.transform * Amg::getRotateY3D(180* Gaudi::Units::deg), padDesign, sTgcReadoutElement::createHash(gasGap, sTgcIdHelper::Pad, 0));
-        ATH_MSG_VERBOSE("Added new pad layer at "<<padLayer);
+        padDesign->definePadRow(paramBook.firstPadPhiDivision[gasGap],
+                                paramBook.numPadPhi[gasGap],
+                                paramBook.anglePadPhi,
+                                paramBook.PadPhiShift[gasGap]);
+        padDesign->definePadColumn(paramBook.firstPadHeight[gasGap],
+                                    paramBook.numPadEta[gasGap],
+                                    paramBook.padHeight[gasGap]);
+
+        /// Stacking strip, wireGroup and pad layers
+        /// Redefining the gasgap center for L3 (diamond) sector: Unlike the run 3 (legacy) code,
+        /// we are NOT offsetting the gasgap center in the local y coordinate to match the base 
+        /// of the cutout. As a result, localToGlobal transformations and the local y coordinate 
+        /// of the pads, strips and wireGroups will not match the run 3. Additionally, the 
+        /// global y coordinate of the wireGroup is shifted by ~25 mm due to this center redefinition.
+        /// The redefinition will not affect reconstruction and digitization, and will simplify the 
+        /// sTgc geometry code.
+        ++gasGap;
+        /// StripLayer
+        stripDesign = (*factoryCache.stripDesigns.emplace(stripDesign).first); 
+        StripLayer stripLayer(gapVol.transform * Amg::getRotateZ3D(-90. * Gaudi::Units::deg) 
+                                                * Amg::getRotateY3D(180* Gaudi::Units::deg), stripDesign, 
+                                                sTgcReadoutElement::createHash(gasGap, sTgcIdHelper::Strip, 0));
+        ATH_MSG_VERBOSE("Added new diamond strip layer at "<< stripLayer);
+        define.stripLayers.push_back(std::move(stripLayer));
+
+        /// WireGroup Layer      
+        wireGroupDesign = (*factoryCache.wireGroupDesigns.emplace(wireGroupDesign).first);
+        StripLayer wireGroupLayer(gapVol.transform * Amg::getRotateY3D(180* Gaudi::Units::deg), 
+                                                wireGroupDesign, sTgcReadoutElement::createHash(gasGap, 
+                                                sTgcIdHelper::Wire, 0));
+        ATH_MSG_VERBOSE("Added new diamond wireGroup layer at "<<wireGroupLayer);
+        define.wireGroupLayers.push_back(std::move(wireGroupLayer));
+
+        /// Pad Layer
+        padDesign = (*factoryCache.padDesigns.emplace(padDesign).first);
+        StripLayer padLayer(gapVol.transform * Amg::getRotateY3D(180* Gaudi::Units::deg), 
+                                                padDesign, sTgcReadoutElement::createHash(gasGap, 
+                                                sTgcIdHelper::Pad, 0));
+        ATH_MSG_VERBOSE("Added new diamond pad layer at "<<padLayer);
         define.padLayers.push_back(std::move(padLayer));
-        if(!define.padDesign) define.padDesign = padDesign;
     }
     return StatusCode::SUCCESS;
 }
@@ -287,11 +326,13 @@ StatusCode sTgcReadoutGeomTool::readParameterBook(FactoryCache& cache) {
         parBook.lPadLength = record->getDouble("lPadWidth");
         parBook.sPadLength = record->getDouble("sPadWidth");
 
+        parBook.yCutout = record->getDouble("yCutout");
+        parBook.yCutoutCathode = record->getDouble("yCutoutCathode");
         parBook.gasTck = record->getDouble("gasTck");
         parBook.lFrameWidth = record->getDouble("ylFrame");
         parBook.sFrameWidth = record->getDouble("ysFrame");
 
-        ATH_MSG_ALWAYS("Parameters of the chamber " << key << " are: "
+        ATH_MSG_DEBUG("Parameters of the chamber " << key << " are: "
                         << " numStrips: " << parBook.numStrips
                         << " stripPitch: " << parBook.stripPitch
                         << " stripWidth: " << parBook.stripWidth
@@ -313,6 +354,8 @@ StatusCode sTgcReadoutGeomTool::readParameterBook(FactoryCache& cache) {
                         << " firstPadPhiDivision: " << parBook.firstPadPhiDivision
                         << " lPadLength: " << parBook.lPadLength
                         << " sPadLength: " << parBook.sPadLength
+                        << " yCutout: " << parBook.yCutout
+                        << " yCutoutCathode: " << parBook.yCutoutCathode
                         << " gasGapTck: " << parBook.gasTck
                         << " lFrameWidth: " << parBook.lFrameWidth
                         << " sFrameWidth: " << parBook.sFrameWidth);

@@ -34,7 +34,7 @@ namespace CP {
                 this, "MaxEtaForJvt", 2.5, "Accept all jets with |eta| above this"};
         // NB: Use a string not a read handle key as this is not written with a write handle key
         Gaudi::Property<std::string> m_jetEtaName{
-                this, "JetEtaName", "DetectorEta", "The name of the jet eta to use."};
+                this, "JetEtaName", "eta", "The name of the jet eta to use."};
 
         // The template AcceptInfo object
         asg::AcceptInfo m_info;

@@ -1,0 +1,120 @@
+/*
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
+
+#ifndef MUONR4__PHIHOUGHTRANSFORMALG__H
+#define MUONR4__PHIHOUGHTRANSFORMALG__H
+
+#include "MuonPatternEvent/StationHoughMaxContainer.h"
+
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "GaudiKernel/ToolHandle.h"
+#include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/WriteHandleKey.h"
+#include "StoreGate/ReadCondHandleKey.h"
+#include "xAODMuonPrepData/MdtDriftCircleContainer.h"
+#include <xAODMuonPrepData/RpcStripContainer.h>
+#include <xAODMuonPrepData/TgcStripContainer.h>
+#include <MuonSpacePoint/MuonSpacePointContainer.h>
+#include "MuonIdHelpers/IMuonIdHelperSvc.h"
+#include "MuonPatternEvent/MuonHoughDefs.h"
+#include "Gaudi/Property.h"
+
+// muon includes
+
+
+namespace MuonR4{
+    
+    /// @brief Algorithm to handle the phi hough transform 
+    /// 
+    /// This algorithm is responsible for extending existing hough 
+    /// maxima found in a previous eta-transform. 
+    /// It will try to form a phi extension from the phi-sensitive
+    /// measurements attached to the maximum and remove incompatible
+    /// ones. It will write MuonSegmentSeeds into the event store
+    /// for downstream use. 
+    class MuonPhiHoughTransformAlg: public AthReentrantAlgorithm{
+        public:
+                MuonPhiHoughTransformAlg(const std::string& name, ISvcLocator* pSvcLocator);
+                virtual ~MuonPhiHoughTransformAlg() = default;
+                virtual StatusCode initialize() override;
+                virtual StatusCode execute(const EventContext& ctx) const override;
+
+        private:
+            
+            /// Helper method to fetch data from StoreGate. If the key is empty, a nullptr is assigned to the container ptr
+            /// Failure is returned in cases, of non-empty keys and failed retrieval
+            template <class ContainerType> StatusCode retrieveContainer(const EventContext& ctx,
+                                                                        const SG::ReadHandleKey<ContainerType>& key,
+                                                                        const ContainerType* & contToPush) const;
+
+            /// @brief prepare the hough plane once per event. 
+            /// Books the accumulator and attaches it to the event data
+            /// @param data: Event data object 
+            /// @return a status code 
+            StatusCode prepareHoughPlane(MuonHoughEventData & data) const; 
+
+            /// @brief pre-processing for a given input eta-maximum
+            /// Counts potential phi-hits and defines the search space 
+            /// @param data: Event data object 
+            /// @param maximum: An (eta) maximum  
+            /// @return a status code 
+            StatusCode preProcessMaximum(MuonHoughEventData & data, const MuonR4::HoughMaximum & maximum) const; 
+
+            /// @brief extend an eta maximum with just a single attached phi measurement. 
+            /// Uses the beam spot direction to guess an approximate phi-intercept and direction. 
+            /// @param data: event data object
+            /// @param maximum: eta-maximum to extend
+            /// @return a HoughSegmentSeed extended using the pointing assumption 
+            HoughSegmentSeed recoverSinglePhiMax(MuonHoughEventData & data, const MuonR4::HoughMaximum & maximum) const; 
+            
+            /// @brief perform a hough search for the most promising phi extension of an eta-maximum
+            /// Performs a local hough transform using the phi-measurements on the maximum and returns
+            /// the maxima ranked by their compatibility with the eta-measurements on the maximum. 
+            /// @param data: event data object
+            /// @param maximum: eta maximum to extend
+            /// @return: The best maxima found by the extension (lowest number of eta measurements that would need to be discarded)  
+            std::vector<MuonR4::ActsPeakFinderForMuon::Maximum> findRankedSegmentSeeds (MuonHoughEventData & data, const MuonR4::HoughMaximum & maximum) const; 
+
+            /// @brief helper to count the number of eta measurements that would be discarded for a given 
+            /// phi extension candidate. Correct extensions should have a very small or zero number.
+            /// @param phiMaximum Phi-maximum to evaluate
+            /// @param etaMaximum Eta-maximum the candidate was obtained from  
+            int countIncompatibleEtaHits(const MuonR4::ActsPeakFinderForMuon::Maximum & phiMaximum, const MuonR4::HoughMaximum &  etaMaximum) const; 
+            
+            /// @brief constructs a segment seed from an eta maximum and a phi-extension. 
+            /// Will keep all pure eta-measurements on the original maximum and add those
+            /// eta-phi or pure phi measurements compatible with the extension. 
+            /// @param etaMax: the eta-maximum
+            /// @param phiMax: the phi-transform maximum 
+            /// @return a HoughSegmentSeed representing the updated candidate
+            MuonR4::HoughSegmentSeed buildSegmentSeed(const HoughMaximum & etaMax,  const MuonR4::ActsPeakFinderForMuon::Maximum & phiMax) const; 
+
+            // read handle key for the input maxima (from a previous eta-transform)
+            SG::ReadHandleKey<StationHoughMaxContainer> m_maxima{this, "StationHoughMaxContainer", "MuonHoughStationMaxima"};
+            // write handle key for the output segment seeds 
+            SG::WriteHandleKey<StationHoughSegmentSeedContainer> m_segmentSeeds{this, "StationHoughSegmentSeedContainer", "MuonHoughStationSegmentSeeds"};
+
+            // access to the ACTS geometry context 
+            SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+
+            // steers the target resolution in tan(phi) 
+            DoubleProperty m_targetResoTanPhi{this, "ResolutionTargetTanAngle", 0.02};
+            // steers the target resolution in the x-axis intercept
+            DoubleProperty m_targetResoIntercept{this, "ResolutionTargetIntercept", 10.};
+            // number of accumulator bins in tan(phi)
+            IntegerProperty m_nBinsTanPhi{this, "nBinsTanAngle", 15};
+            // number of accumulator bins in the x-axis intercept
+            IntegerProperty m_nBinsIntercept{this, "nBinsIntercept", 30};
+            // maximum number of eta measurements allowed to be discarded by 
+            // a valid phi-extension
+            IntegerProperty m_maxEtaHolesOnMax{this, "maxEtaHoles", 1};
+            // flag to steer whether to recover maxima with a single phi measurement
+            // using a beam spot projection. Should not be used in splashes or cosmics. 
+            BooleanProperty m_recoverSinglePhiWithBS{this, "recoverSinglePhiHitsWithBS", true}; 
+
+    };
+}
+
+
+#endif

@@ -84,7 +84,7 @@ TEvent::TEvent(EReadMode mode, const std::string& name) :
    AAH::setProperty( m_evtLoop , "ClearStorePolicy", "BeginEvent" ).ignore();    //for interactive use of storegate
    AAH::setProperty( m_evtLoop , "EvtSel", m_evtSelect.typeAndName() ).ignore(); //connect loop to selector
    AAH::setProperty( m_evtLoop , "EvtStore", m_evtStore.typeAndName() ).ignore();//connect loop to store
-   AAH::setProperty( m_evtLoop , "EventPrintoutInterval", 999999999 ).ignore(); //disable printout (speeds up loop)
+   AAH::setProperty( m_evtLoop , "EventPrintoutInterval", 0 ).ignore(); //disable printout (speeds up loop)
 
    if(m_evtSelect.type()=="Athena::xAODEventSelector") {
      AAH::setProperty( m_evtSelect , "ReadMetaDataWithPool" , true).ignore(); //uses hybrid xAOD reading by default

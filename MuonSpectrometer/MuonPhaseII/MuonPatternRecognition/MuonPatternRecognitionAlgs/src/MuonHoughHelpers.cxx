@@ -3,20 +3,19 @@
 */
 
 #include "MuonHoughHelpers.h"
+
 using namespace MuonR4; 
 
   double HoughHelpers::Eta::houghParamMdtLeft(double tanTheta, const MuonR4::HoughHitType & DC){
     return DC->positionInChamber().y() - tanTheta * DC->positionInChamber().z() -
            DC->driftRadius() * std::sqrt(1 + (tanTheta*tanTheta));    // using cos(theta) = sqrt(1/[1+tan²(theta)])
   }
-  // right solution
   double HoughHelpers::Eta::houghParamMdtRight(double tanTheta, const MuonR4::HoughHitType & DC){
     return DC->positionInChamber().y() - tanTheta * DC->positionInChamber().z() +
            DC->driftRadius() * std::sqrt(1 + (tanTheta*tanTheta));    // using cos(theta) = sqrt(1/[1+tan²(theta)])
   }
-  // solution which doesn't look at the drift circle but places a hit at the tube center
-  double HoughHelpers::Eta::houghParamStrip(double tanTheta, const MuonR4::HoughHitType & DC){
-    return DC->positionInChamber().y() - tanTheta * DC->positionInChamber().z();
+  double HoughHelpers::Eta::houghParamStrip(double tanTheta, const MuonR4::HoughHitType & strip){
+    return strip->positionInChamber().y() - tanTheta * strip->positionInChamber().z();
   }
 
   double HoughHelpers::Eta::houghWidthMdt(double /*tanTheta*/, const MuonR4::HoughHitType & DC){
@@ -25,7 +24,14 @@ using namespace MuonR4;
                            // times the reported error as drift circle calib not
                            // fully reliable at this stage
   }
-  double HoughHelpers::Eta::houghWidthStrip(double /*tanTheta*/, const MuonR4::HoughHitType & DC){
-      return DC->uncertainty().y();  // assign full tube radius as uncertainty
+  double HoughHelpers::Eta::houghWidthStrip(double /*tanTheta*/, const MuonR4::HoughHitType & strip){
+      return strip->uncertainty().y();  // return positional uncertainty defined during SP creation
   }
 
+
+  double HoughHelpers::Phi::houghParamStrip(double tanPhi, const MuonR4::HoughHitType & strip){
+    return strip->positionInChamber().x() - tanPhi * strip->positionInChamber().z();
+  }
+  double HoughHelpers::Phi::houghWidthStrip(double /*tanPhi*/, const MuonR4::HoughHitType & DC){
+      return DC->uncertainty().x();  // return positional uncertainty defined during SP creation
+  }

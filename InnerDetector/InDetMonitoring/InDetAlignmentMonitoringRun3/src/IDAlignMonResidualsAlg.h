@@ -95,6 +95,7 @@ class IDAlignMonResidualsAlg :  public AthMonitorAlgorithm {
   static const int m_nTRTBlayers{3}; //
   static const int m_nTRTEClayers{2}; //
   std::vector<int> m_pixResidualX;
+  std::vector<int> m_pixResidualX_3D;
   std::vector<int> m_pixResidualY;
   std::vector<int> m_pixPullX;
   std::vector<int> m_pixPullY;

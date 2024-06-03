@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 /**
  * @file FPGATrackSimRegionMap.h
@@ -86,14 +86,15 @@ void FPGATrackSimRegionMap::readRegion(ifstream & fin, int expected_region)
 
         if (region < 0) // Find the starting header of the next region
         {
-            ok = ok && (sline >> region);
+            ok = ok && (sline >> region);// should check this is a sensible number
             ok = ok && !(sline >> dummy); // No keyword to check that we're not reading a detector line, so make sure rest of string is empty
             ok = ok && (region == expected_region);
             if (!ok) break;
         }
         else // Detector layer line
         {
-            int isPix, BEC, physLayer, phi_min, phi_max, phi_tot, eta_min, eta_max, eta_tot;
+            int isPix{}, BEC{}, physLayer{}, phi_min{}, phi_max{}, phi_tot{}, eta_min{}, eta_max{}, eta_tot{};
+            //should check these are within sensible limits after they are read
             ok = ok && (sline >> isPix >> BEC >> physLayer >> phi_min >> phi_max >> phi_tot >> eta_min >> eta_max >> eta_tot);
             if (!ok) break;
 
@@ -144,6 +145,69 @@ void FPGATrackSimRegionMap::loadModuleIDLUT(std::string const & filepath)
     }
 }
 
+// Copied from the 1D Hough bitstream tool.
+void FPGATrackSimRegionMap::loadRadiiFile(std::string const & filepath)
+{
+
+    // Resize the radius structure  appropriately.
+    m_radii_map.clear();
+    m_radii_map.resize(m_nregions, std::vector<double>(m_pmap->getNLogiLayers()));
+
+    // Open the file
+    std::ifstream fin(filepath);
+    if (!fin.is_open())
+    {
+        ANA_MSG_FATAL("Couldn't open radius file " << filepath);
+    }
+
+    // Variables to fill
+    std::string line;
+    bool ok = true;
+    double r = 0.0;
+
+    // Parse the file
+    while (getline(fin, line))
+    {
+        if (line.empty() || line[0] == '#') continue;
+        std::istringstream sline(line);
+        std::vector<int> shifts;
+
+        int subregion{-1};
+        ok = ok && (sline >> subregion);
+
+        // The radii file contains an "inclusive" line and then one for each subregion.
+        // If we only have one region (because we are the rmap or because we are a subrmap
+        // with one z-slice) then we only want to read the inclusive line.
+        // Otherwise we want to read everything BUT the inclusive line.
+        if (m_nregions == 1 && subregion != -1) {
+            continue;
+        }
+        if (m_nregions > 1 && subregion == -1) {
+            continue;
+        }
+
+        for (unsigned layer = 0; layer < m_pmap->getNLogiLayers(); layer++) {
+            ok = ok && (sline >> r);
+            if (!ok) break;
+            if (r<=0) {
+                ANA_MSG_WARNING("Radius in radiiFile is "<< r <<" for layer: " << layer << " setting to dummy value!");
+                r = 500.0; // dummy value that won't cause a crash, but won't work anywhere.
+            }
+            if (subregion == -1) {
+                m_radii_map[0][layer] = r;
+            } else {
+                m_radii_map[subregion][layer] = r;
+            }
+        }
+
+        if (!ok) break;
+    }
+
+    if (!ok)
+    {
+        ANA_MSG_FATAL("Found error reading file at line: " << line);
+    }
+}
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -222,31 +286,34 @@ uint32_t FPGATrackSimRegionMap::getUnmappedID(uint32_t region, const FPGATrackSi
   int eta          = hit.getEtaModule();
   int phi          = hit.getPhiModule();
 
+    int anyerr = 0;
     int err[] = {1,1,1,1,1,1};
 
-    if (region >= m_map.size()) err[1] = 2;
+    if (region >= m_map.size()) anyerr = err[1] = 2;
 
-    if (layer >= m_map[region].size()) err[2] = 2;
+    if (!anyerr && layer >= m_map[region].size()) anyerr = err[2] = 2;
 
-    if (section >= m_map[region][layer].size()) err[3] = 2;
+    if (!anyerr && section >= m_map[region][layer].size()) anyerr = err[3] = 2;
 
-    int eta_min = m_map[region][layer][section].eta_min;
-    int eta_max = m_map[region][layer][section].eta_max;
+    if (!anyerr) {
+      int eta_min = m_map[region][layer][section].eta_min;
+      int eta_max = m_map[region][layer][section].eta_max;
 
-    if (eta < eta_min) err[4] = 3;
-    if (eta > eta_max) err[4] = 2;
+      if (eta < eta_min) err[4] = 3;
+      if (eta > eta_max) err[4] = 2;
 
-    int phi_min = m_map[region][layer][section].phi_min;
-    int phi_max = m_map[region][layer][section].phi_max;
+      int phi_min = m_map[region][layer][section].phi_min;
+      int phi_max = m_map[region][layer][section].phi_max;
 
-    // Need special cases for phi berrause it can go from 2pi to 0.
-    if (phi_min <= phi_max) // Region does not cross phi = 0
-    {
+      // Need special cases for phi berrause it can go from 2pi to 0.
+      if (phi_min <= phi_max) // Region does not cross phi = 0
+      {
         if (phi < phi_min || phi > phi_max) err[5] = 2;
-    }
-    else // Region crosses phi = 0
-    {
+      }
+      else // Region crosses phi = 0
+      {
         if (phi < phi_min && phi > phi_max) err[5] = 3;
+      }
     }
 
     int error_code = 100000*err[0] + 10000*err[1] + 1000*err[2] + 100*err[3] + 10*err[4] + err[5];
@@ -279,5 +346,14 @@ uint32_t FPGATrackSimRegionMap::getGlobalID(uint32_t region, uint32_t layer, uin
     return -1;
 }
 
+double FPGATrackSimRegionMap::getAvgRadius(unsigned region, unsigned layer) const {
 
+    if (region >= m_radii_map.size() || layer >= m_pmap->getNLogiLayers())
+    {
+        ANA_MSG_ERROR("getAvgRadius() bad region=" << region << " or layer=" << layer);
+        return -1;
+    }
 
+    // Return the radius we loaded for this region.
+    return m_radii_map[region][layer];
+}

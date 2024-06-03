@@ -95,11 +95,14 @@ namespace ActsTrk
        ATH_MSG_ERROR("No sim data for key " << m_simDataKey.key() );
        return StatusCode::FAILURE;
     }
+
+    ATH_MSG_DEBUG("Retrieving measurement collection with key: " << m_measurementKey.key());
     SG::ReadHandle<T_MeasurementCollection> measurementHandle = SG::makeHandle(m_measurementKey, ctx);
     if (!measurementHandle.isValid()) {
        ATH_MSG_ERROR("No measurements for key " << m_measurementKey.key() );
        return StatusCode::FAILURE;
     }
+    ATH_MSG_DEBUG("Retrieved " << measurementHandle->size() << " input measurements" );
     association->resize( measurementHandle->size() );
 
     const T_TruthEventCollection *truth_event_collection=nullptr;

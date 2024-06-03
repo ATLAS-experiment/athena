@@ -17,7 +17,7 @@ fi
 
 export ATHENA_CORE_NUMBER=8
 
-Events=100
+Events=25
 DigiOutFileNameSP="mc21a_presampling_SP.RDO.pool.root"
 DigiOutFileNameMP0="mc21a_presampling_MP_fork_evt0.RDO.pool.root"
 DigiOutFileNameMP1="mc21a_presampling_MP_fork_evt1.RDO.pool.root"
@@ -35,7 +35,6 @@ LowPtMinbiasHitsFiles4="${ATLAS_REFERENCE_DATA}/CampaignInputs/mc21/HITS/mc21_13
 
 Digi_tf.py \
     --CA \
-    --splitConfig 'HITtoRDO:Campaigns.BeamspotSplitMC21a' \
     --detectors Truth \
     --PileUpPresampling True \
     --conditionsTag default:OFLCOND-MC21-SDR-RUN3-07 \
@@ -44,13 +43,7 @@ Digi_tf.py \
     --geometryVersion default:ATLAS-R3S-2021-03-00-00 \
     --inputHITSFile ${HSHitsFile} \
     --inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles1} \
-    --inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles2} \
-    --inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles3} \
-    --inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles4} \
     --inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles1} \
-    --inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles2} \
-    --inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles3} \
-    --inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles4} \
     --jobNumber 568 \
     --maxEvents ${Events} \
     --outputRDOFile ${DigiOutFileNameSP} \
@@ -66,7 +59,6 @@ echo "art-result: $rc Digi_tf.py SP"
 Digi_tf.py \
     --CA \
     --multiprocess --athenaMPEventsBeforeFork 0 \
-    --splitConfig 'HITtoRDO:Campaigns.BeamspotSplitMC21a' \
     --detectors Truth \
     --PileUpPresampling True \
     --conditionsTag default:OFLCOND-MC21-SDR-RUN3-07 \
@@ -75,13 +67,7 @@ Digi_tf.py \
     --geometryVersion default:ATLAS-R3S-2021-03-00-00 \
     --inputHITSFile ${HSHitsFile} \
     --inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles1} \
-    --inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles2} \
-    --inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles3} \
-    --inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles4} \
     --inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles1} \
-    --inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles2} \
-    --inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles3} \
-    --inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles4} \
     --jobNumber 568 \
     --maxEvents ${Events} \
     --outputRDOFile ${DigiOutFileNameMP0} \
@@ -99,7 +85,6 @@ echo "art-result: $rc2 Digi_tf.py MP fork after 0"
 Digi_tf.py \
     --CA \
     --multiprocess --athenaMPEventsBeforeFork 1 \
-    --splitConfig 'HITtoRDO:Campaigns.BeamspotSplitMC21a' \
     --detectors Truth \
     --PileUpPresampling True \
     --conditionsTag default:OFLCOND-MC21-SDR-RUN3-07 \
@@ -108,13 +93,7 @@ Digi_tf.py \
     --geometryVersion default:ATLAS-R3S-2021-03-00-00 \
     --inputHITSFile ${HSHitsFile} \
     --inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles1} \
-    --inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles2} \
-    --inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles3} \
-    --inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles4} \
     --inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles1} \
-    --inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles2} \
-    --inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles3} \
-    --inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles4} \
     --jobNumber 568 \
     --maxEvents ${Events} \
     --outputRDOFile ${DigiOutFileNameMP1} \

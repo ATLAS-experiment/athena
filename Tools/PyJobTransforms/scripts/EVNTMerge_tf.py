@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 ## AODMerge_tf.py - AOD merger with optional TAG and DPD outputs
 #  N.B. Do need clarification as to if AODtoDPD is ever run in parallel with AOD merging 
@@ -37,7 +37,7 @@ def main():
 def getTransform():
     executorSet = set()
     print(type(executorSet))
-    executorSet.add(athenaExecutor(name = 'EVNTMerge', skeletonFile = 'PyJobTransforms/skeleton.EVNTMerge.py',inData = ['EVNT'], outData = ['EVNT_MRG']))
+    executorSet.add(athenaExecutor(name = 'EVNTMerge', skeletonCA = 'EvgenJobTransforms.EVNTMerge_Skeleton', inData = ['EVNT'], outData = ['EVNT_MRG']))
 
     trf = transform(executor = executorSet)
     

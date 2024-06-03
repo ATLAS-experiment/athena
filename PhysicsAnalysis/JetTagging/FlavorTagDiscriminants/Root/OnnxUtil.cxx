@@ -58,8 +58,8 @@ namespace FlavorTagDiscriminants {
 
     // iterate over input nodes and get their names
     for (size_t i = 0; i < m_num_inputs; i++) {
-      auto input_name = m_session->GetInputNameAllocated(i, allocator);
-      m_input_node_names.push_back(input_name.get());
+      std::string input_name = m_session->GetInputNameAllocated(i, allocator).get();
+      m_input_node_names.push_back(input_name);
      }
 
     // iterate over output nodes and get their configuration
@@ -145,7 +145,7 @@ namespace FlavorTagDiscriminants {
 
 
   OnnxUtil::InferenceOutput OnnxUtil::runInference(
-    std::map<std::string, input_pair>& gnn_inputs) const {
+    std::map<std::string, Inputs>& gnn_inputs) const {
 
     std::vector<float> input_tensor_values;
 
@@ -154,7 +154,7 @@ namespace FlavorTagDiscriminants {
       OrtArenaAllocator, OrtMemTypeDefault
     );
     std::vector<Ort::Value> input_tensors;
-    for (auto const &node_name : m_input_node_names){
+    for (auto& node_name : m_input_node_names) {
       input_tensors.push_back(Ort::Value::CreateTensor<float>(
         memory_info, gnn_inputs.at(node_name).first.data(), gnn_inputs.at(node_name).first.size(),
         gnn_inputs.at(node_name).second.data(), gnn_inputs.at(node_name).second.size())

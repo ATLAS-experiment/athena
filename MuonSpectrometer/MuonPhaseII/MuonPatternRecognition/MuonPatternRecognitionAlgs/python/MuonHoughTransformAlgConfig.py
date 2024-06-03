@@ -4,9 +4,15 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 
-def MuonHoughTransformAlgCfg(flags, name = "MuonHoughTransformAlg", **kwargs):
+def MuonPhiHoughTransformAlgCfg(flags, name = "MuonPhiHoughTransformAlg", **kwargs):
     result = ComponentAccumulator()
-    theAlg = CompFactory.MuonR4.MuonHoughTransformAlg(name, **kwargs)
+    theAlg = CompFactory.MuonR4.MuonPhiHoughTransformAlg(name, **kwargs)
+    result.addEventAlgo(theAlg, primary=True)
+    return result
+
+def MuonEtaHoughTransformAlgCfg(flags, name = "MuonEtaHoughTransformAlg", **kwargs):
+    result = ComponentAccumulator()
+    theAlg = CompFactory.MuonR4.MuonEtaHoughTransformAlg(name, **kwargs)
     result.addEventAlgo(theAlg, primary=True)
     return result
 
@@ -19,12 +25,13 @@ if __name__=="__main__":
     args = parser.parse_args()
     flags, cfg = setupGeoR4TestCfg(args)
     
-    from xAODMuonSimHitCnv.MuonSimHitCnvCfg import xAODSimHitToMdtMeasCnvAlgCfg
+    from xAODMuonSimHitCnv.MuonSimHitCnvCfg import MuonSimHitToMeasurementCfg
     cfg.merge(setupHistSvcCfg(flags,out_file=args.outRootFile,out_stream="MuonHoughTransform"))
-    cfg.merge(xAODSimHitToMdtMeasCnvAlgCfg(flags))
-    from MuonSpacePointFormation.SpacePointFormationConfig import MuonSpacePointMakerAlgCfg
-    cfg.merge(MuonSpacePointMakerAlgCfg(flags))
-    cfg.merge(MuonHoughTransformAlgCfg(flags))
+    cfg.merge(MuonSimHitToMeasurementCfg(flags))
+    from MuonSpacePointFormation.SpacePointFormationConfig import MuonSpacePointFormationCfg
+    cfg.merge(MuonSpacePointFormationCfg(flags))
+    cfg.merge(MuonEtaHoughTransformAlgCfg(flags))
+    cfg.merge(MuonPhiHoughTransformAlgCfg(flags))
 
     # output spam reduction
     cfg.getService("AthenaHiveEventLoopMgr").EventPrintoutInterval=500

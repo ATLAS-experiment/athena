@@ -54,10 +54,8 @@ namespace MuonGM {
     }
 
     inline bool MuonStripDesign::stripPosition(int st, Amg::Vector2D& pos) const {
-        if (st < 1) return false;
-        if (st > nstrips) return false;
-        double x = firstStripPos.x() + stripPitch * (st - 1);
-        pos[0] = x;
+        if (st < 1 || st > nstrips) return false;
+        pos[0] = firstStripPos.x() + stripPitch * (st - 1);
         pos[1] = firstStripPos.y();
         return true;
     }

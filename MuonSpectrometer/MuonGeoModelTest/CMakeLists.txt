@@ -14,7 +14,7 @@ atlas_add_library( MuonGeoModelTestLib
                    PUBLIC_HEADERS MuonGeoModelTest
                    PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
                    LINK_LIBRARIES AthenaBaseComps Identifier GaudiKernel MuonCalibITools MuonReadoutGeometry MuonCondData
-                                  MuonPrepRawData MuonSimEvent MuonIdHelpersLib StoreGateLib RegionSelectorLib MuonTesterTreeLib
+                                  MuonCablingData MuonIdHelpersLib StoreGateLib RegionSelectorLib MuonTesterTreeLib
                    PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} GeoAdaptors GeoPrimitives GeneratorObjects 
                                           MuonAlignmentData MuonDigitContainer TrkDistortedSurfaces TrkSurfaces )
 
@@ -22,7 +22,7 @@ atlas_add_component( MuonGeoModelTest
                      src/components/*.cxx
                      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
                      LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps Identifier GaudiKernel 
-                                    MuonCalibITools MuonReadoutGeometry MuonIdHelpersLib MuonPrepRawData MuonSimEvent
+                                    MuonCalibITools MuonReadoutGeometry MuonIdHelpersLib MuonCablingData
                                     StoreGateLib GeoAdaptors GeoPrimitives RegionSelectorLib GeneratorObjects MuonCondData
                                     MuonAlignmentData MuonDigitContainer TrkDistortedSurfaces TrkSurfaces MuonGeoModelTestLib )
 

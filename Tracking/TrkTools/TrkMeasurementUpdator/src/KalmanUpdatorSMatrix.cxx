@@ -14,7 +14,10 @@
 // Wolfgang Liebig <http://consult.cern.ch/xwho/people/54608>
 ///////////////////////////////////////////////////////////////////
 
+#include "EventPrimitives/EventPrimitivesCovarianceHelpers.h"
+
 #include "TrkMeasurementUpdator/KalmanUpdatorSMatrix.h"
+
 #include "TrkEventPrimitives/ParamDefs.h"
 #include "TrkEventPrimitives/LocalParameters.h"
 #include "TrkEventPrimitives/FitQualityOnSurface.h"
@@ -1293,7 +1296,7 @@ Trk::FitQualityOnSurface Trk::KalmanUpdatorSMatrix::makeChi2Object(const Amg::Ve
 		chiSquared = 0.f;
     } else {
       // get chi2 = r.T() * R^-1 * r
-      chiSquared = residual.transpose() * R.inverse() * residual;
+      chiSquared = Amg::chi2(R.inverse(), residual);
       ATH_MSG_VERBOSE( "-U- fitQuality of "<< (sign>0?"predicted":"updated")
               <<" state, chi2 :" << chiSquared << " / ndof= " << covRio.cols() );
     }

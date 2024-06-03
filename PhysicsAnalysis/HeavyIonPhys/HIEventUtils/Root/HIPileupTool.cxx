@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // HIPileupTool.cxx
@@ -9,6 +9,7 @@
 #include "xAODForward/ZdcModuleContainer.h"
 #include "xAODForward/ZdcModuleAuxContainer.h"
 #include "xAODTrigL1Calo/TriggerTowerContainer.h"
+#include "AthContainers/ConstAccessor.h"
 
 #include <xAODHIEvent/HIEventShape.h>
 #include <xAODHIEvent/HIEventShapeContainer.h>
@@ -163,8 +164,9 @@ double HIPileupTool::get_nNeutrons(const xAOD::ZdcModuleContainer& ZdcCont) cons
    for (const auto *zdcModule : ZdcCont) {
       if (zdcModule->zdcType()!=0) continue;
 
-      if (!(zdcModule->isAvailable<float>("CalibEnergy"))) {isCalib = 0; continue;}
-      float modE = zdcModule->auxdecor<float>("CalibEnergy");
+      static const SG::ConstAccessor<float> CalibEnergyAcc("CalibEnergy");
+      if (!(CalibEnergyAcc.isAvailable(*zdcModule))) {isCalib = 0; continue;}
+      float modE = CalibEnergyAcc(*zdcModule);
       ZdcE += modE;
    }
    if (!isCalib) throw std::invalid_argument("ZDC Module not Calibrated");

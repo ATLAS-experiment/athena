@@ -11,7 +11,7 @@ find_package( GeoModel COMPONENTS GeoModelKernel GeoModelXml ExpressionEvaluator
 atlas_add_component( BCMPrimeGeoModelXml
                      src/*.cxx
                      src/components/*.cxx
-                     PRIVATE_INCLUDE_DIRS ${XERCESC_INCLUDE_DIRS} ${GEOMODEL_INCLUDE_DIRS}
+                     PRIVATE_INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS} ${XERCESC_INCLUDE_DIRS}
                      PRIVATE_LINK_LIBRARIES ${XERCESC_LIBRARIES} ${GEOMODEL_LIBRARIES} CxxUtils
                      GaudiKernel DetDescrConditions InDetGeoModelUtils InDetSimEvent BCMPrimeReadoutGeometry )
 

@@ -907,11 +907,7 @@ bool InDet::SiSpacePointsSeedMaker_ATLxk::newVertices(EventData& data, const std
 
 void InDet::SiSpacePointsSeedMaker_ATLxk::buildFrameWork() 
 {
-  m_ptmin = std::abs(m_ptmin);
-  
-  if (m_ptmin < 100.) {
-    m_ptmin = 100.;
-  }
+  m_ptmin = std::max( std::abs(m_ptmin), float(100.*m_fieldScale));
   /// ensure consistency in the transverse IP cuts 
   if (m_maxdImpactSSS < m_maxdImpact   ) m_maxdImpactSSS = m_maxdImpact;
   if (m_maxdImpactDecays < m_maxdImpactSSS) m_maxdImpactDecays = m_maxdImpactSSS;
@@ -972,11 +968,11 @@ void InDet::SiSpacePointsSeedMaker_ATLxk::buildFrameWork()
     /// The factor 3 we divide by is motivated by the fact that we combine sets of
     /// three consecutive phi bins in the seed making step. So each individual bin should 
     /// be approximately a third of the maximum expected azimutal deflection
-    const float binSizePhi_PPP = m_pixel ? azimuthalStep(m_ptmin,m_maxdImpact,radiusPixelStart,radiusPixelEnd)/3.f : 0.f; 
+    const float binSizePhi_PPP = m_pixel ? azimuthalStep(m_ptmin/m_fieldScale,m_maxdImpact,radiusPixelStart,radiusPixelEnd)/3.f : 0.f; 
     /// case 2: SSS seeds, if we use them
     constexpr float radiusSctStart = 295.; ; /// approximate lowest R location of strip hits (driven by barrel)
     constexpr float radiusSctEnd = 560.; /// approximate largest R location of strip hits (driven by endcap)
-    const float binSizePhi_SSS = m_sct ? azimuthalStep(m_ptmin,m_maxdImpactSSS,radiusSctStart,radiusSctEnd)/3.f : 0.f; 
+    const float binSizePhi_SSS = m_sct ? azimuthalStep(m_ptmin/m_fieldScale,m_maxdImpactSSS,radiusSctStart,radiusSctEnd)/3.f : 0.f; 
     /// pick the larger of the two and invert
     m_inverseBinSizePhi = 1.f/std::max(binSizePhi_PPP, binSizePhi_SSS); 
   }
@@ -985,7 +981,7 @@ void InDet::SiSpacePointsSeedMaker_ATLxk::buildFrameWork()
     /// a trajectory with 400 MeV, from the origin, and Rmin = 0 / Rmax = 600mm   float ptm = 400.;
     float ptm = 400.; 
     /// if we cut below 400 MeV, adapt the ptm 
-    if (m_ptmin < ptm) ptm = m_ptmin;
+    if (m_ptmin/m_fieldScale < ptm) ptm = m_ptmin/m_fieldScale;
     m_inverseBinSizePhi = ptm /60.f;
   }
 
@@ -1002,7 +998,7 @@ void InDet::SiSpacePointsSeedMaker_ATLxk::buildFrameWork()
   /// same logic as for the space points above 
   const int   nPhiBinsVertexMax  = arraySizePhiV;
   const float inverseBinSizePhiVertexMax = static_cast<float>(nPhiBinsVertexMax)/twoPi;
-  m_inverseBinSizePhiVertex = m_ptmin/120.f;
+  m_inverseBinSizePhiVertex = m_ptmin/m_fieldScale/120.f;
   if (m_inverseBinSizePhiVertex > inverseBinSizePhiVertexMax) m_inverseBinSizePhiVertex = inverseBinSizePhiVertexMax;
   m_maxBinPhiVertex = static_cast<int>(twoPi*m_inverseBinSizePhiVertex);
   if (m_maxBinPhiVertex>=nPhiBinsVertexMax) m_maxBinPhiVertex = nPhiBinsVertexMax-1;
@@ -2261,6 +2257,14 @@ void InDet::SiSpacePointsSeedMaker_ATLxk::newOneSeed
 ///////////////////////////////////////////////////////////////////
 // New 3 space points pro seeds production
 ///////////////////////////////////////////////////////////////////
+namespace {
+   inline
+   float computeEta( float r, float z) {
+      float theta = r > 10e-9 ? std::atan2(r,z) : 0.f;
+      float tan_half_theta = std::tan(.5f * theta);
+      return tan_half_theta > 0.f ? -std::log(tan_half_theta) : 0.f;
+   }
+}
 
 void InDet::SiSpacePointsSeedMaker_ATLxk::newOneSeedWithCurvaturesComparison
 (EventData& data, SiSpacePointForSeed*& SPb, SiSpacePointForSeed*& SP0, float Zob) const
@@ -2301,12 +2305,8 @@ void InDet::SiSpacePointsSeedMaker_ATLxk::newOneSeedWithCurvaturesComparison
       float Zot = std::abs(topR - bottomR) > 10e-9 ?
         bottomZ - (bottomR - originalSeedQuality) * ((topZ - bottomZ) / (topR - bottomR)) : bottomZ;
 
-      float theta1 = std::abs(topR - bottomR) > 10e-9 ?
-        std::atan2(topR - bottomR, topZ - bottomZ) : 0.f;
-      float eta1 = theta1 > 0.f ? -std::log(std::tan(.5f * theta1)) : 0.f;
-
-      float theta0 = seedIP > 0.f ? std::atan2(seedIP, Zot) : 0.f;
-      float eta0 = theta0 > 0.f ? -std::log(std::tan(.5f * theta0)) : 0.f;
+      float eta1 = computeEta(topR - bottomR, topZ - bottomZ);
+      float eta0 = computeEta(seedIP, Zot);
 
       float deltaEta=std::abs(eta1-eta0); //For LLP daughters, the direction of the track is correlated with the direction of the LLP (which is correlated with the direction of the point of closest approach
       //calculate weighted average of d0 and deltaEta, normalized by their maximum values

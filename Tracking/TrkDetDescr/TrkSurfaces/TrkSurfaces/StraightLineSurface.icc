@@ -15,7 +15,7 @@ inline bool StraightLineSurface::operator==(const StraightLineSurface& slsf) con
 }
 
 /** Return the surface type */
-inline SurfaceType
+inline constexpr SurfaceType
 StraightLineSurface::type() const
 {
   return StraightLineSurface::staticType;

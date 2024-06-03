@@ -18,7 +18,6 @@
 #include <algorithm>
 #include <sstream>
 #include <list>
-#include <boost/algorithm/string.hpp>
 #include <RootCoreUtils/StringUtil.h>
 
 namespace top {
@@ -164,18 +163,17 @@ namespace top {
       bool selectionHasGRLCut(false);
       bool selectionHasGOODCALOCut(false);
       for (std::string cut : sel.m_cutnames) {
-        using boost::algorithm::starts_with;
         cut.append(" ");
 
-        if (starts_with(cut, "GRL ")) {
+        if (cut.starts_with( "GRL ")) {
           selectionHasGRLCut = true;
         }
 
-        if (starts_with(cut, "GOODCALO ")) {
+        if (cut.starts_with( "GOODCALO ")) {
           selectionHasGOODCALOCut = true;
         }
 
-        if (starts_with(cut, "GTRIGDEC ")) {
+        if (cut.starts_with( "GTRIGDEC ")) {
           if (selectionHasTriggerCut || selectionHasTriggerCut_Loose || selectionHasTriggerCut_Tight) {
             throw std::runtime_error("You have multiple TRIGDEC selectors for selection "
                 + sel.m_name + ". Only one per selection is allowed.");
@@ -225,7 +223,7 @@ namespace top {
           return result;
         };
 
-        if (starts_with(cut, "TRIGDEC_TIGHT ")) {
+        if (cut.starts_with( "TRIGDEC_TIGHT ")) {
           if (selectionHasTriggerCut_Tight) {
             throw std::runtime_error("You have multiple TRIGDEC_TIGHT selectors for selection "
                 + sel.m_name + ". Only one per selection is allowed.");
@@ -278,7 +276,7 @@ namespace top {
           tauTriggers_perSelector_Tight->insert(std::make_pair(sel.m_name, tauTriggers_thisSelector_Tight));
           photonTriggers_perSelector_Tight->insert(std::make_pair(sel.m_name, photonTriggers_thisSelector_Tight));
         } // Cut requested is TRIGDEC_TIGHT
-        else if (starts_with(cut, "TRIGDEC_LOOSE ")) {
+        else if (cut.starts_with( "TRIGDEC_LOOSE ")) {
           if (selectionHasTriggerCut_Loose) {
             throw std::runtime_error("You have multiple TRIGDEC_LOOSE selectors for selection "
                 + sel.m_name + ". Only one per selection is allowed.");
@@ -331,7 +329,7 @@ namespace top {
           tauTriggers_perSelector_Loose->insert(std::make_pair(sel.m_name, tauTriggers_thisSelector_Loose));
           photonTriggers_perSelector_Loose->insert(std::make_pair(sel.m_name, photonTriggers_thisSelector_Loose));
         } // Cut requested is TRIGDEC_LOOSE
-        else if (starts_with(cut, "TRIGDEC ")) {
+        else if (cut.starts_with( "TRIGDEC ")) {
           if (selectionHasTriggerCut) {
             throw std::runtime_error("GTRIGDEC/TRIGDEC already used for selection "
                 + sel.m_name + ". Cannot be used multiple times.");

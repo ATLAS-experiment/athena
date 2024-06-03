@@ -1,1 +1,0 @@
-theApp.Dlls   += [ "InDetEventCnvTools" ]

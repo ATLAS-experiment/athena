@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaTrackingAction.h"
@@ -48,7 +48,7 @@ namespace G4UA
       // Assign the GenParticle to the AtlasG4EventUserInfo.
       AtlasG4EventUserInfo* atlasG4EvtUserInfo = static_cast<AtlasG4EventUserInfo*>
         (G4EventManager::GetEventManager()->GetConstCurrentEvent()->GetUserInformation());
-      if (trackHelper.IsPrimary()) atlasG4EvtUserInfo->SetCurrentPrimary(part);
+      if (trackHelper.IsPrimary()) atlasG4EvtUserInfo->SetCurrentPrimaryGenParticle(part);
       atlasG4EvtUserInfo->SetCurrentlyTraced(part);
     }
 

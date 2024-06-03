@@ -3,7 +3,7 @@
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
-def LArSC2NtupleCfg(flags, **kwargs):
+def LArSC2NtupleCfg(flags, isEmf=False, **kwargs):
 
        kwargs['isSC'] = True
 
@@ -16,6 +16,25 @@ def LArSC2NtupleCfg(flags, **kwargs):
        cfg.merge(LArOnOffIdMappingSCCfg(flags))
        cfg.merge(LArCalibIdMappingSCCfg(flags))
        cfg.merge(LArLATOMEMappingCfg(flags))
+       if isEmf:
+          # hack for different mapping from EMF
+          cil=cfg.getCondAlgo('CondInputLoader')
+          iovdbsvc=cfg.getService('IOVDbSvc') 
+          folder='/LAR/Identifier/LatomeMapping'
+          for i in range(0,len(iovdbsvc.Folders)):
+             if (iovdbsvc.Folders[i].find(folder)>=0):
+                del iovdbsvc.Folders[i]
+                break
+     
+          remove_folder = False
+          for cil_Loadval in cil.Load:
+             if folder in cil_Loadval:
+                print(f"Removing {cil_Loadval} from cil/Load")
+                remove_folder = True
+                break
+          if remove_folder: cil.Load.remove(cil_Loadval)
+          from IOVDbSvc.IOVDbSvcConfig import addFolders
+          cfg.merge(addFolders(flags,'/LAR/Identifier/LatomeMapping',tag='LARIdentifierLatomeMapping-EMF',className="CondAttrListCollection",detDb='/afs/cern.ch/user/p/pavol/w0/public/DB_update_24/SCcalib/LatomeMapping_EMF.db'))
 
        if flags.LArSCDump.doRawChan:
           from LArByteStream.LArRawDataReadingConfig import LArRawDataReadingCfg

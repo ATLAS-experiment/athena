@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 """core module for an interactive analysis
 
@@ -33,8 +33,8 @@ _HybridProcess = 2
 
 # dummy class for TAG and AANT
 class _DummyClass: pass
-setattr (GNS, 'AttributeList', _DummyClass)
-setattr (GNS, 'AANT',          _DummyClass)
+GNS.AttributeList = _DummyClass
+GNS.AANT = _DummyClass
 del _DummyClass
 
 storeGate = None

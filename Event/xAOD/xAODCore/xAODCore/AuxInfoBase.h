@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAODCORE_AUXINFOBASE_H
 #define XAODCORE_AUXINFOBASE_H
@@ -162,7 +162,10 @@ namespace xAOD {
 
       /// @}
 
-   protected:
+      /// Declare how to wrap variables for this sort of base.
+      template <class T, class ALLOC = std::allocator<T> >
+      using AuxVariable_t = T;
+
       /// Get the auxiliary ID for one of the persistent variables
       template< typename T >
       auxid_t getAuxID( const std::string& name,

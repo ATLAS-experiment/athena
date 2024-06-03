@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 import ROOT
 import sys
@@ -29,7 +29,7 @@ def main(infile, intree="CollectionTree"):
     for idx in range(nentries):
         t.GetEntry(idx)
         if hasattr(t, 'index_ref'):
-            iref = getattr(t, 'index_ref')
+            iref = t.index_ref
             if iref not in indices:
                 indices[iref] = 1
             else:

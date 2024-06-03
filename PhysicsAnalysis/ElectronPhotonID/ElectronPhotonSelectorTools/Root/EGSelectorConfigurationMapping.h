@@ -77,11 +77,11 @@ const std::map<std::string, std::string> PhotonCutPointToConfFile = {
     "ElectronPhotonSelectorTools/offline/mc15_20150712/"
     "PhotonIsEMLooseSelectorCutDefs.conf" },
   { "MediumPhoton",
-    "ElectronPhotonSelectorTools/offline/mc15_20160512/"
-    "PhotonIsEMMediumSelectorCutDefs.conf" },
+    "ElectronPhotonSelectorTools/offline/mc20_20240510/"
+    "PhotonIsEMMediumSelectorCutDefs_pTdep_smooth.conf" },
   { "TightPhoton",
-    "ElectronPhotonSelectorTools/offline/20180825/"
-    "PhotonIsEMTightSelectorCutDefs.conf" },
+    "ElectronPhotonSelectorTools/offline/mc20_20240510/"
+    "PhotonIsEMTightSelectorCutDefs_pTdep_mc20_smooth.conf" },
   { "TightPhotonWithMu",
     "ElectronPhotonSelectorTools/offline/mc16_20220621/"
     "PhotonIsEMTightSelectorCutDefs.conf" },
@@ -126,17 +126,29 @@ const std::map<std::string, unsigned int> PhotonCutPointToMask = {
 };
 const std::map<std::string, std::string> ElectronDNNPointToConfFile = {
   { "VeryLooseDNNElectron",
-    "ElectronPhotonSelectorTools/offline/mc20_20231026/"
+    "ElectronPhotonSelectorTools/offline/mc20_20240509/"
     "ElectronDNNMulticlassVeryLoose.conf"},
   { "LooseDNNElectron",
-    "ElectronPhotonSelectorTools/offline/mc20_20231026/"
+    "ElectronPhotonSelectorTools/offline/mc20_20240509/"
     "ElectronDNNMulticlassLoose.conf"},
   { "MediumDNNElectron",
-    "ElectronPhotonSelectorTools/offline/mc20_20231026/"
+    "ElectronPhotonSelectorTools/offline/mc20_20240509/"
     "ElectronDNNMulticlassMedium.conf"},
   { "TightDNNElectron",
-    "ElectronPhotonSelectorTools/offline/mc20_20231026/"
-    "ElectronDNNMulticlassTight.conf"}
+    "ElectronPhotonSelectorTools/offline/mc20_20240509/"
+    "ElectronDNNMulticlassTight.conf"},
+   { "VeryLooseDNNnoCFElectron",
+    "ElectronPhotonSelectorTools/offline/mc20_20240515/"
+    "ElectronDNNMulticlassVeryLoose.conf"},
+  { "LooseDNNnoCFElectron",
+    "ElectronPhotonSelectorTools/offline/mc20_20240515/"
+    "ElectronDNNMulticlassLoose.conf"},
+  { "MediumDNNnoCFElectron",
+    "ElectronPhotonSelectorTools/offline/mc20_20240515/"
+    "ElectronDNNMulticlassMedium.conf"},
+  { "TightDNNnoCFElectron",
+    "ElectronPhotonSelectorTools/offline/mc20_20240515/"
+    "ElectronDNNMulticlassTight.conf"}   
 };
 }
 ////////////////////////////////////////////

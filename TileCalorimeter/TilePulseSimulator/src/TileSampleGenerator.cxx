@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TilePulseSimulator/TileSampleGenerator.h"
@@ -61,7 +61,7 @@ void TileSampleGenerator::fillSamples(double t0, double pedestal, double amplitu
 
 //
 //________________________________________________________
-void TileSampleGenerator::fillNSamples(double t0, double pedestal, double amp_it, vector<float> amp_pu, TF1* pdf, bool addNoise, double itOffset, int nSamples, int nPul) {
+void TileSampleGenerator::fillNSamples(double t0, double pedestal, double amp_it, const vector<float>& amp_pu, TF1* pdf, bool addNoise, double itOffset, int nSamples, int nPul) {
 
     std::unique_ptr<TileSampleBuffer> bufall(new TileSampleBuffer(nPul, -25*((nPul-1)/2), 25.));
 

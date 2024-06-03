@@ -58,8 +58,6 @@ def egammaForwardBuilderCfg(flags, name='egammaForwardElectron', **kwargs):
                       flags.Egamma.Keys.Internal.ForwardTopoClusters)
     kwargs.setdefault("ClusterContainerName",
                       flags.Egamma.Keys.Output.ForwardClusters)
-    kwargs.setdefault("FourMomBuilderTool", CompFactory.EMFourMomBuilder())
-
     fwdAlg = CompFactory.egammaForwardBuilder(name, **kwargs)
 
     acc.addEventAlgo(fwdAlg)

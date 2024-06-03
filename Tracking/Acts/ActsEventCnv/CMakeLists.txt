@@ -50,7 +50,8 @@ atlas_add_component(ActsEventCnv
     xAODTracking
 )
 
-atlas_add_test(ActsEventCnvTest
-    SCRIPT test/testConversion.py
+atlas_add_test(ActsEventCnvTrackTest
+    SCRIPT test/testTrackConversion.py
     PROPERTIES TIMEOUT 900
     POST_EXEC_SCRIPT noerror.sh)
+

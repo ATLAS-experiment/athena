@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAODTRIGGER_VERSIONS_BYTESTREAMAUXCONTAINER_V1_ICC
 #define XAODTRIGGER_VERSIONS_BYTESTREAMAUXCONTAINER_V1_ICC
@@ -18,9 +18,10 @@ namespace xAOD {
    template< typename T >
    ByteStreamAuxContainer_v1::auxid_t
    ByteStreamAuxContainer_v1::getAuxID( const std::string& name,
-                                        std::vector< T >& /*vec*/ ) {
+                                        std::vector< T >& /*vec*/,
+                                        SG::AuxVarFlags flags) {
 
-      return SG::AuxTypeRegistry::instance().template getAuxID< T >( name );
+      return SG::AuxTypeRegistry::instance().template getAuxID< T >( name, "", flags );
    }
 
    /// The user is expected to use this function inside the constructor of

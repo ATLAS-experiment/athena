@@ -22,7 +22,7 @@ class egammaCellRecoveryTool : public AthAlgTool, virtual public IegammaCellReco
 	    const IInterface* parent);
 
   /** @brief Destructor*/
-  ~egammaCellRecoveryTool();  
+  ~egammaCellRecoveryTool() = default; 
 
   /** @brief initialize method*/
   StatusCode initialize() override;

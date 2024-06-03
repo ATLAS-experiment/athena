@@ -34,7 +34,7 @@ namespace FlavorTagDiscriminants {
     class IParticlesLoader : public IConstituentsLoader {
       public:
         IParticlesLoader(ConstituentsInputConfig, const FTagOptions& options);
-        std::tuple<std::string, input_pair, std::vector<const xAOD::IParticle*>> getData(
+        std::tuple<std::string, Inputs, std::vector<const xAOD::IParticle*>> getData(
           const xAOD::Jet& jet, 
           [[maybe_unused]] const SG::AuxElement& btag) const override ;
         FTagDataDependencyNames getDependencies() const override;
@@ -65,7 +65,7 @@ namespace FlavorTagDiscriminants {
         std::vector<const xAOD::IParticle*> getIParticlesFromJet(const xAOD::Jet& jet) const;
 
         IParticleSortVar m_iparticleSortVar;
-        getter_utils::CustomSequenceGetter<xAOD::IParticle> m_customSequenceGetter;        
+        getter_utils::SeqGetter<xAOD::IParticle> m_seqGetter;        
         std::function<IPV(const Jet&)> m_associator;
         bool m_isCharged;
     };

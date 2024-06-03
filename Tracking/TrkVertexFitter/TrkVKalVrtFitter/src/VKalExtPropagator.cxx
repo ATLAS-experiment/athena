@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 //
 // The VKalExtPropagator object is created if ATHENA propagator exists
@@ -19,6 +19,7 @@
 #include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
 #include "TrkSurfaces/CylinderSurface.h"
 #include "TrkSurfaces/StraightLineSurface.h"
+#include "AthContainers/ConstAccessor.h"
 //-------------------------------------------------
 #include<iostream>
 
@@ -431,7 +432,8 @@ namespace Trk {
 /*--------------------------------------------------------------------------------------*/
   const Perigee* VKalExtPropagator::myxAODFstPntOnTrk(const xAOD::TrackParticle* xprt) const
   {
-    if(!xprt->isAvailable<float>("radiusOfFirstHit")) return nullptr;  // No radiusOfFirstHit on track
+    static const SG::ConstAccessor<float> radiusOfFirstHitAcc ("radiusOfFirstHit");
+    if(!radiusOfFirstHitAcc.isAvailable (*xprt)) return nullptr;  // No radiusOfFirstHit on track
 
     const EventContext& ctx = Gaudi::Hive::currentContext();
     const Trk::Perigee*  mPer = &(xprt->perigeeParameters());

@@ -12,7 +12,7 @@ atlas_add_library( GeoMaterial2G4
                    src/*.cxx
                    OBJECT
                    PUBLIC_HEADERS GeoMaterial2G4
-                   INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS} ${GEOMODEL_INCLUDE_DIRS}
+                   INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS} ${GEANT4_INCLUDE_DIRS}
                    LINK_LIBRARIES ${GEANT4_LIBRARIES} ${GEOMODEL_LIBRARIES} AthenaBaseComps
                    PRIVATE_LINK_LIBRARIES CxxUtils GeoModelUtilities )
 set_target_properties( GeoMaterial2G4 PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )

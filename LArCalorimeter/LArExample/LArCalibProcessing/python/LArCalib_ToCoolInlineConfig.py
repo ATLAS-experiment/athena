@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -13,7 +13,7 @@ def LArToCoolInlineCfg(flags,inputFolders,singleV=True):
        from LArCabling.LArCablingConfig import LArOnOffIdMappingSCCfg
        result.merge(LArOnOffIdMappingSCCfg(flags))
 
-    theLArCompleteToFlat = CompFactory.LArCompleteToFlat(FakeEMBPSLowGain=True,isSC=flags.LArCalib.isSC)
+    theLArCompleteToFlat = CompFactory.LArCompleteToFlat(FakeEMBPSLowGain = not flags.LArCalib.isSC, isSC=flags.LArCalib.isSC)
     theLArCompleteToFlat.OutputLevel = 2
 
     outTypes = []
@@ -29,8 +29,12 @@ def LArToCoolInlineCfg(flags,inputFolders,singleV=True):
         theLArCompleteToFlat.RampInput=key
         overrides.extend(["RampVec"])
       elif "OFC" in fldr:
-        outTypes.append("OFC")
-        theLArCompleteToFlat.OFCInput=key
+        if 'CaliWave' in fldr:
+           outTypes.append("OFCCali")
+           theLArCompleteToFlat.OFCCaliInput=key
+        else:   
+           outTypes.append("OFC")
+           theLArCompleteToFlat.OFCInput=key
         overrides.extend(["OFCa", "OFCb","TimeOffset"])
       elif "MphysOverMcal" in fldr:
         outTypes.append("MphysOverMcal")
@@ -60,6 +64,8 @@ def LArToCoolInlineCfg(flags,inputFolders,singleV=True):
        flatName+="SC"
     if "outObjects" not in dir():
        outObjects=["CondAttrListCollection#/LAR/"+flatName+"/"+ot for ot in outTypes] 
+
+    print("outObjects are: ",outObjects)   
     
     from RegistrationServices.OutputConditionsAlgConfig import OutputConditionsAlgCfg
     result.merge(OutputConditionsAlgCfg(flags,
@@ -137,6 +143,12 @@ if __name__=="__main__":
     flags.LArCalib.Input.RunNumbers=[int(args.run),]
     flags.Input.RunNumbers=flags.LArCalib.Input.RunNumbers
 
+    flags.Debug.DumpDetStore=True
+    flags.Debug.DumpCondStore=True
+    flags.Debug.DumpEvtStore=True
+
+    from AthenaCommon.Constants import DEBUG
+    flags.Exec.OutputLevel=DEBUG
     flags.dump()
     flags.lock()
    
@@ -151,6 +163,7 @@ if __name__=="__main__":
        print(e)
        sys.exit(-1)
 
+    print("Input Folders: ",module.inputFolders)
     cfg=MainServicesCfg(flags)
     cfg.merge(LArToCoolInlineCfg(flags,module.inputFolders))
 
@@ -158,6 +171,6 @@ if __name__=="__main__":
     cfg.getService("PoolSvc").ReadCatalog+=["xmlcatalog_file:PoolFileCatalog.xml",]
     cfg.getService("PoolSvc").SortReplicas = False 
 
-    cfg.getService("MessageSvc").debugLimit=9999999
+    cfg.getService("MessageSvc").defaultLimit=9999999
 
     cfg.run(1)

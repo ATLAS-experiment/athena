@@ -238,7 +238,7 @@ ParametersT<DIM, T, S>::clone() const
 
 /** Return the ParametersType enum */
 template<int DIM, class T, class S>
-inline ParametersType
+inline constexpr ParametersType
 ParametersT<DIM, T, S>::type() const
 {
   return Trk::AtaSurface;
@@ -246,7 +246,7 @@ ParametersT<DIM, T, S>::type() const
 
 /** Return the Surface Type (check SurfaceType enums)*/
 template<int DIM, class T, class S>
-inline SurfaceType
+inline constexpr SurfaceType
 ParametersT<DIM, T, S>::surfaceType() const
 {
   return S::staticType;

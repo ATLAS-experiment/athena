@@ -125,7 +125,7 @@ def configurePOOL2EIglobals(runArgs, flags):
     # if EVNT, disable trigger processing
     if job.DoTriggerInfo:
         try:
-            if (EventStreamInfo_key is not None and 'StreamEVGEN' in flags.Input.ProcessingTags):
+            if (EventStreamInfo_key is not None and ('StreamEVGEN' in flags.Input.ProcessingTags or 'StreamEVNT' in flags.Input.ProcessingTags)):
                 eilog.info("Disable trigger processing for EVNT files")
                 job.DoTriggerInfo = False
 

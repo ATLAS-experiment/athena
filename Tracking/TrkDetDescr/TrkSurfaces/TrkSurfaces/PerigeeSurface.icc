@@ -13,7 +13,7 @@ inline bool PerigeeSurface::operator==(const PerigeeSurface& persf) const
 }
 
 /** Return the surface type */
-inline SurfaceType
+inline constexpr SurfaceType
 PerigeeSurface::type() const
 {
   return PerigeeSurface::staticType;

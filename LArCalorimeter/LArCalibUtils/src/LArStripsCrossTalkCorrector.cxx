@@ -1,8 +1,11 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibUtils/LArStripsCrossTalkCorrector.h"
+#include "CaloIdentifier/LArEM_ID.h"
+#include "LArIdentifier/LArOnlineID.h"
+#include "LArRawEvent/LArAccumulatedCalibDigit.h"
 
 #include "CaloIdentifier/CaloGain.h"
 #include "LArBadChannelTool/LArBadChannelDBTools.h"
@@ -216,7 +219,7 @@ StatusCode LArStripsCrossTalkCorrector::execute()
     //only half the signal of the next-to-next neihbor is summed 
     //A more correct approach would be to check if the 'mirrored' neighbor is pulsed as well and compute this weights on-the-fly
     //const float weight[4]={0.5,1,1,0.5};
-    neighbour_t neighbours[4]; //Keep pointers for the four neightbors
+    neighbour_t neighbours[4]={}; //Keep pointers for the four neightbors
     neighbours[0].dist=-2;
     neighbours[1].dist=-1;
     neighbours[2].dist=1;

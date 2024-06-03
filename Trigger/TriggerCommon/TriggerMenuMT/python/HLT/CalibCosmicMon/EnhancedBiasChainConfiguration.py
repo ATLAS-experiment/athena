@@ -27,11 +27,13 @@ l1seeds = { 'low'  : \
                [
                 'L1_2eEM18',\
                 'L1_2MU3V',\
+                'L1_MU5VF_3MU3V',\
                 'L1_BPH-0DR3-eEM9jJ40_2MU3V',\
                 'L1_BPH-0DR3-eEM9jJ40_MU5VF',\
                 'L1_BPH-0M9-eEM9-eEM7_MU5VF',\
                 'L1_BPH-2M9-2DR15-2MU5VF',\
                 'L1_BPH-2M9-0DR15-C-MU5VFMU3V',\
+                'L1_BPH-7M11-25DR99-2MU3VF',\
                 'L1_BPH-8M15-0DR22-2MU5VF',\
                 'L1_BPH-8M15-0DR22-MU5VFMU3V-BO',\
                 'L1_BTAG-MU3VjJ40',\
@@ -102,6 +104,6 @@ class EnhancedBiasChainConfiguration(ChainConfigurationBase):
         chainSteps = []
         log.debug("Assembling chain for %s", self.chainName)
 
-        chainSteps.append( self.getStep(flags, 1, "EnhancedBias", [enhancedBiasMenuSequenceGenCfg]) )
+        chainSteps.append( self.getStep(flags, "EnhancedBias", [enhancedBiasMenuSequenceGenCfg]) )
 
         return self.buildChain(chainSteps)

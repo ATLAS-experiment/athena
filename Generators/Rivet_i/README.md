@@ -69,7 +69,7 @@ If for some reason, you do need to revert back to an older Rivet version, feel f
 # Running Rivet over a local EVNT file
 
 Standalone Rivet cannot deal with EVNT files, but that's why we have a `Rivet_i` wrapper in Athena.
-As with everything in Athena, this requires some JOs. We've added an [example](share/example/local_jO.py) to this repo.
+As with everything in Athena, this requires some JOs. We've added an [example](examples/local_jO.py) to this repo.
 These JOs are very simple. Take a look:
 
 ```python

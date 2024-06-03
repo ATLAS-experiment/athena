@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibTools/LArCompleteToFlat.h"
@@ -76,6 +76,7 @@ StatusCode LArCompleteToFlat::initialize()
 {
   ATH_CHECK( m_cablingKey.initialize() );
   ATH_CHECK( m_cablingKeySC.initialize(m_isSC) );
+  ATH_CHECK( m_weightsKeySC.initialize(m_isSC && !m_weightsKeySC.empty()) );
   return StatusCode::SUCCESS;
 }
 
@@ -156,7 +157,8 @@ CondAttrListCollection* LArCompleteToFlat::pedestalFlat(const ILArPedestal* inpu
 
   CondAttrListCollection* collPed=new CondAttrListCollection(true);
 
-  for (unsigned gain=0;gain<3;++gain) {
+  const unsigned nGain = m_isSC ? 1 : 3;
+  for (unsigned gain=0;gain<nGain;++gain) {
     coral::AttributeList* attrList = new coral::AttributeList(*spec);               
     (*attrList)["version"].setValue(0U);                               
     coral::Blob& blobPed=(*attrList)["Pedestal"].data<coral::Blob>();
@@ -206,7 +208,7 @@ CondAttrListCollection* LArCompleteToFlat::pedestalFlat(const ILArPedestal* inpu
 }
 
 
-CondAttrListCollection* LArCompleteToFlat::ofcFlat(const ILArOFC* input, const std::string& outputName) {
+CondAttrListCollection* LArCompleteToFlat::ofcFlat(const ILArOFC* input, const std::string& outputName, const LArfSamplSC* weights) {
 
   ATH_MSG_INFO("LArCompleteToFlat::ofcFlat, starting");
   unsigned nChannels=0;
@@ -221,7 +223,8 @@ CondAttrListCollection* LArCompleteToFlat::ofcFlat(const ILArOFC* input, const s
   spec->extend<unsigned>("version");
   CondAttrListCollection* collOFC=new CondAttrListCollection(true);
   int phase = 0;
-  for (unsigned gain=0;gain<3;++gain) {
+  const unsigned nGain = m_isSC ? 1 : 3;
+  for (unsigned gain=0;gain<nGain;++gain) {
     
     //Auto-detect the number of samples (at least in theory, could be different for each gain)
     unsigned nSamples=0;
@@ -289,10 +292,12 @@ CondAttrListCollection* LArCompleteToFlat::ofcFlat(const ILArOFC* input, const s
           // FIXME: it should be replaced by proper conditions per channel
 	  // HERE - multiplying HEC OFCb by 1.5 for SCs
           // https://its.cern.ch/jira/browse/ATLLARONL-1784
-	  if (m_isSC && m_onlineID->isHECchannel(chid)){ 
-	    pOfcb[hs*nSamples+i]=ofcb[i]*1.5;
-	    ATH_MSG_WARNING("NOTE: this OFC for channel "<<chid<<" was multiplied by 1.5. This should be a HEC SC("<<m_onlineID->channel_name(chid)<<"). Was "<<ofcb[i]<<" now "<<pOfcb[hs*nSamples+i]);
-	  }
+	  //if (m_isSC && m_onlineID->isHECchannel(chid)){ 
+	  //  pOfcb[hs*nSamples+i]=ofcb[i]*1.5;
+	  //  ATH_MSG_WARNING("NOTE: this OFC for channel "<<chid<<" was multiplied by 1.5. This should be a HEC SC("<<m_onlineID->channel_name(chid)<<"). Was "<<ofcb[i]<<" now "<<pOfcb[hs*nSamples+i]);
+	  //}
+	  if (m_isSC && weights) pOfcb[hs*nSamples+i] *= weights->FSAMPL(chid);
+	  if (weights && weights->FSAMPL(chid) != 1.) ATH_MSG_WARNING("NOTE: this OFC for channel "<<chid<<" was multiplied by "<<weights->FSAMPL(chid)<<" This should be a  SC("<<m_onlineID->channel_name(chid)<<"). Was "<<ofcb[i]<<" now "<<pOfcb[hs*nSamples+i]);
 	}
       }
       else {
@@ -340,7 +345,8 @@ CondAttrListCollection* LArCompleteToFlat::shapeFlat(const LArShapeComplete* inp
   spec->extend<unsigned>("version");
   CondAttrListCollection* coll=new CondAttrListCollection(true);
   
-  for (unsigned gain=0;gain<3;++gain) {
+  const unsigned nGain = m_isSC ? 1 : 3;
+  for (unsigned gain=0;gain<nGain;++gain) {
 
     unsigned nSamples=0;
     for (unsigned hs=0;hs<m_hashMax && nSamples==0;++hs) {
@@ -463,7 +469,8 @@ CondAttrListCollection* LArCompleteToFlat::rampFlat(const ILArRamp* input, const
      return coll;
   }
 
-  for (unsigned gain=0;gain<3;++gain) {
+  const unsigned nGain = m_isSC ? 1 : 3;
+  for (unsigned gain=0;gain<nGain;++gain) {
 
     unsigned nPoints=0;
     for (unsigned hs=0;hs<m_hashMax && nPoints==0;++hs) {
@@ -712,7 +719,9 @@ StatusCode LArCompleteToFlat::stop() {
 	ATH_MSG_WARNING( "Will not process LArMphysOverMcal" );
       }   
     } else {
-      singleFloatFlat("MphysOverMcal", MphysOverMcalComplete, flatName+"/MphysOverMcal",3,false); //No MphysOverMCal for FCAL
+      const int nGain = m_isSC ? 1 : 3;
+      const bool wfcal = m_isSC ? true : false;
+      singleFloatFlat("MphysOverMcal", MphysOverMcalComplete, flatName+"/MphysOverMcal",nGain,wfcal); //No MphysOverMCal for FCAL
     }
   }//end if have m_MphysOverMcalInput
 
@@ -776,7 +785,15 @@ StatusCode LArCompleteToFlat::stop() {
 	ATH_MSG_WARNING( "Will not process LArOFCComplete" );
       }
     } else {
-      ofcFlat(ofcComplete,flatName+"/OFC");
+      const LArfSamplSC* weightsComplete(nullptr);
+      if(m_isSC && !m_weightsKeySC.empty()) { 
+         SG::ReadCondHandle<LArfSamplSC> wHdl{m_weightsKeySC};
+         weightsComplete=*wHdl;
+         if(!weightsComplete) {
+            ATH_MSG_WARNING("Do not have OFCb weights !!!! Not applying");
+         }
+      } 
+      ofcFlat(ofcComplete,flatName+"/OFC",weightsComplete);
     }
   }//end have m_OFCInput
   if (!m_OFCCaliInput.empty()) {

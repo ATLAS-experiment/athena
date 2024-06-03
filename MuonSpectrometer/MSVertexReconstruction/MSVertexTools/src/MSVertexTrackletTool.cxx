@@ -699,7 +699,7 @@ namespace Muon {
                     float mdt_y = std::hypot(prd->globalPosition().x(), prd->globalPosition().y());
                     float mdt_z = prd->globalPosition().z();
                     float yPi = -(mdt_z - zc) * sin_a + (mdt_y - yc) * cos_a - d;
-                    float signR = yPi >= 0 ? 1. : -1;
+                    float signR = yPi >= 0 ? -1. : 1;
                     float sigma2 = sq(Amg::error(prd->localCovariance(), Trk::locR));
                     float ri = signR * prd->localPosition()[Trk::locR];
                     ////

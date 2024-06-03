@@ -139,11 +139,11 @@ StatusCode DerivationFramework::RCJetSubstructureAug::addBranches() const
         }
 
         // Get number of constituents
-        int nConstit = constituents.size();
+        int nConstits = constituents.size();
         
         // Run clustering on constituents if not empty
         fastjet::PseudoJet groomed_jet;
-        if (nConstit!=0) {
+        if (nConstits!=0) {
             auto jet_def = fastjet::JetDefinition(fastjet::antikt_algorithm, 1.5);
             fastjet::ClusterSequence cs(constituents, jet_def);
             fastjet::PseudoJet recluster_jet = cs.inclusive_jets(0.0).front();
@@ -151,7 +151,7 @@ StatusCode DerivationFramework::RCJetSubstructureAug::addBranches() const
             // Apply grooming to reclustered jet
             if (m_grooming=="Trimming"){
                 groomed_jet = m_trimmer->result(recluster_jet);
-            }  else if (m_grooming=="SoftDrop"){
+            } else if (m_grooming=="SoftDrop"){
                 groomed_jet = m_softdropper->result(recluster_jet);
             } else {
                 ATH_MSG_DEBUG(" No grooming requested or wrong one, will not apply grooming");
@@ -159,11 +159,11 @@ StatusCode DerivationFramework::RCJetSubstructureAug::addBranches() const
             }
 
             // update nConstit
-            nConstit = groomed_jet.constituents().size();
+            nConstits = groomed_jet.constituents().size();
         }
 
         // Fill substructure vars with default values when no constituents in jet
-        if (nConstit==0) {
+        if (nConstits==0) {
             m_moments->dec_Qw(*jet) = -999;
 
             m_moments->dec_Tau1(*jet) = -999;
@@ -188,17 +188,17 @@ StatusCode DerivationFramework::RCJetSubstructureAug::addBranches() const
 
             m_moments->dec_pT(*jet) = 0;
             m_moments->dec_m(*jet) = 0;
-            m_moments->dec_NClusts(*jet) = 0;
+            m_moments->dec_NConstits(*jet) = 0;
             m_moments->dec_eta(*jet) = -999;
             m_moments->dec_phi(*jet) = -999;
 
-		    return StatusCode::SUCCESS;
-	    }
+            return StatusCode::SUCCESS;
+        }
         
         // Save reclustered jet infos
         m_moments->dec_pT(*jet) = groomed_jet.pt();
         m_moments->dec_m(*jet) = groomed_jet.m();
-        m_moments->dec_NClusts(*jet) = constituents.size();
+        m_moments->dec_NConstits(*jet) = nConstits;
         m_moments->dec_eta(*jet) = groomed_jet.eta();
         m_moments->dec_phi(*jet) = groomed_jet.phi() - M_PI;
 

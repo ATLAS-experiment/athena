@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/ConcurrencyFlags.h"
@@ -60,13 +60,8 @@ namespace NSWL1 {
     //  retrieve the Mm offline Id helper
     ATH_CHECK( detStore()->retrieve( m_MmIdHelper ) );
 
-    //Calculate and retrieve wedge geometry, defined in MMT_struct
-    const par_par standard = par_par(0.0009,4,4,0.0035,"xxuvxxuv",true);
-    const par_par xxuvuvxx = par_par(0.0009,4,4,0.007,"xxuvuvxx",true,true); //.0035 for uv_tol before...
-    const par_par xxuvuvxx_uvroads = par_par(0.0009,4,4,0.0035,"xxuvuvxx",true,true); //.0035 for uv_tol before...
-
-    m_par_large = std::make_shared<MMT_Parameters>(xxuvuvxx,'L', m_detManager);
-    m_par_small = std::make_shared<MMT_Parameters>(xxuvuvxx,'S', m_detManager);
+    m_par_large = std::make_shared<MMT_Parameters>("xxuvuvxx",'L', m_detManager);
+    m_par_small = std::make_shared<MMT_Parameters>("xxuvuvxx",'S', m_detManager);
 
     return StatusCode::SUCCESS;
   }
@@ -88,7 +83,7 @@ namespace NSWL1 {
     MMLoadVariables load = MMLoadVariables(m_detManager, m_MmIdHelper);
 
     std::map<std::pair<int, unsigned int>,std::vector<digitWrapper> > entries;
-    std::map<std::pair<int, unsigned int>,std::map<hitData_key,hitData_entry> > Hits_Data_Set_Time;
+    std::map<std::pair<int, unsigned int>,std::vector<hitData_entry> > Hits_Data_Set_Time;
     std::map<std::pair<int, unsigned int>,evInf_entry> Event_Info;
 
     const McEventCollection* ptrMcEventCollection = nullptr;
@@ -114,7 +109,7 @@ namespace NSWL1 {
       return StatusCode::FAILURE;
     }
     histogramDigitVariables histDigVars;
-    ATH_CHECK( load.getMMDigitsInfo(ctx, ptrMcEventCollection, ptrMuonEntryLayer, readMmDigitContainer.cptr(), entries, Hits_Data_Set_Time, Event_Info, pars, histDigVars) );
+    ATH_CHECK( load.getMMDigitsInfo(ctx, ptrMcEventCollection, ptrMuonEntryLayer, readMmDigitContainer.cptr(), entries, Hits_Data_Set_Time, Event_Info, histDigVars) );
     if (m_doNtuple) this->fillNtuple(histDigVars);
 
     if (entries.empty()) {
@@ -193,10 +188,10 @@ namespace NSWL1 {
             diamond->createRoads_fillHits(i-nskip, reco_it->second, m_detManager, pars[station], stationPhi);
             if (m_doNtuple) {
               for(const auto &hit : reco_it->second) {
-                m_trigger_VMM->push_back(hit.second.VMM_chip);
-                m_trigger_plane->push_back(hit.second.plane);
-                m_trigger_station->push_back(hit.second.station_eta);
-                m_trigger_strip->push_back(hit.second.strip);
+                m_trigger_VMM->push_back(hit.VMM_chip);
+                m_trigger_plane->push_back(hit.plane);
+                m_trigger_station->push_back(hit.station_eta);
+                m_trigger_strip->push_back(hit.strip);
               }
               std::vector<double> slopes = diamond->getHitSlopes();
               for (const auto &s : slopes) m_trigger_RZslopes->push_back(s);
@@ -309,134 +304,7 @@ namespace NSWL1 {
               }
               ATH_MSG_DEBUG("Filled MM RDO container now having size: " << rdo->size() << ". Clearing event information!");
             } else ATH_MSG_DEBUG("No output slopes to store");
-          } else {
-            //////////////////////////////////////////////////////////////
-            //                                                          //
-            //                Finder Applied Here                       //
-            //                                                          //
-            //////////////////////////////////////////////////////////////
-
-            //Initialization of the finder: defines all the roads
-            auto find = std::make_unique<MMT_Finder>(pars[station], 1);
-            ATH_MSG_DEBUG(  "Number of Roads Configured " <<  find->get_roads()  );
-
-            std::vector<hitData_entry> hitDatas;
-            for (const auto &hit_it : reco_it->second) hitDatas.push_back(hit_it.second);
-            std::map<std::pair<int,int>,finder_entry> hitBuffer;
-            for (const auto &hit_it : reco_it->second) {
-              find->fillHitBuffer( hitBuffer, hit_it.second.entry_hit(pars[station]), pars[station] ); // Hit object, Map (road,plane) -> Finder entry
-  
-              hitData_info hitInfo = hit_it.second.entry_hit(pars[station]).info;
-              if (m_doNtuple) {
-                m_trigger_VMM->push_back(hit_it.second.VMM_chip);
-                m_trigger_plane->push_back(hit_it.second.plane);
-                m_trigger_station->push_back(hit_it.second.station_eta);
-                m_trigger_strip->push_back(hit_it.second.strip);
-                m_trigger_slope->push_back(hitInfo.slope);
-              }
-            }
-
-            ////////////////////////////////////////////////////////////////
-            ////                                                          //
-            ////                 Fitter Applied Here                      //
-            ////                                                          //
-            ////////////////////////////////////////////////////////////////
-
-            auto fit = std::unique_ptr<MMT_Fitter>(new MMT_Fitter());
-
-            //First loop over the roads and planes and apply the fitter
-            int fits_occupied = 0;
-            const int nfit_max = 1;  //MOVE THIS EVENTUALLY
-            int nRoads = find->get_roads();
-
-            std::vector<evFit_entry> road_fits = std::vector<evFit_entry>(nRoads,evFit_entry());
-
-            //Variables saved for Alex T. for hardware validation
-            double mxl;
-            double fillmxl = -999;
-            double muGlobal;
-            double mvGlobal;
-            std::vector<std::pair<double,double> > mxmy;
-
-            for (int iRoad = 0; iRoad < nRoads; iRoad++) {
-              std::vector<bool> plane_is_hit;
-              std::vector<Hit> track;
-
-              //Check if there are hits in the buffer
-              find->checkBufferForHits(  plane_is_hit, // Empty, To be filled by function.
-                                         track,        // Empty, To be filled by function.
-                                         iRoad,        // roadID
-                                         hitBuffer,    // All hits. Map ( (road,plane) -> finder_entry  )
-                                         pars[station] // Pointer to geometrical info class
-                                      );
-
-              //Look for coincidences
-              int road_num = find->Coincidence_Gate(plane_is_hit, pars[station]);
-              if (road_num > 0) {
-                if (fits_occupied >= nfit_max) break;
-
-                //Perform the fit -> calculate local, global X, UV slopes -> calculate ROI and TriggerTool signal (theta, phi, deltaTheta)
-                evFit_entry candidate = fit->fit_event(event,track,hitDatas,fits_occupied,mxmy,mxl,mvGlobal,muGlobal,pars[station]);
-
-                ATH_MSG_DEBUG( "THETA " << candidate.fit_theta << " PHI " << candidate.fit_phi << " DTH " << candidate.fit_dtheta );
-                road_fits[iRoad] = candidate;
-                fillmxl = mxl;
-                fits_occupied++;
-              }
-              road_fits[iRoad].hcode = road_num;
-            } //end roads
-
-            //////////////////////////////////////////////////////////////
-            //                                                          //
-            //              Pass the ROI as Signal                      //
-            //                                                          //
-            //////////////////////////////////////////////////////////////
-
-            for (unsigned int i = 0; i < road_fits.size(); i++) {
-              if (road_fits[i].fit_roi > 0) {
-                //For the future: how do we want these to pass on as the signal?  Some new data structure?
-                double fitTheta      = road_fits[i].fit_theta;
-                double fitPhi        = road_fits[i].fit_phi;
-                double fitDeltaTheta = road_fits[i].fit_dtheta;
-
-                //need a correction for the fitted phi, taken from phi_shift in MMLoadVariables.cxx (now it's local)
-                int wedge = 0;
-                if (station == "MML") wedge = 0;
-                else if (station == "MMS") wedge = 1;
-                float n = 2*(stationPhi-1) + wedge;
-                float shift = n * M_PI/8.;
-                if(n > 8) shift = (16.-n)*M_PI/8.;
-                if(n < 8)       fitPhi = (fitPhi + shift);
-                else if(n == 8) fitPhi = (fitPhi + (fitPhi >= 0 ? -1 : 1)*shift);
-                else if(n > 8)  fitPhi = (fitPhi - shift);
-
-                double fitEta = -1. * std::log(std::tan(fitTheta/2.)); //VALE: trueta was filled!!!!
-
-                ATH_MSG_DEBUG( "FIT!! " << fitTheta << " " << fitPhi << " " << fitDeltaTheta );
-                if (m_doNtuple) {
-                  m_trigger_fitThe->push_back(fitTheta);
-                  m_trigger_fitPhi->push_back(fitPhi);
-                  m_trigger_fitDth->push_back(fitDeltaTheta);
-
-                  m_trigger_mx->push_back(mxmy.front().first);
-                  m_trigger_my->push_back(mxmy.front().second);
-                  m_trigger_mxl->push_back(fillmxl);
-
-                  m_trigger_mu->push_back(muGlobal);
-                  m_trigger_mv->push_back(mvGlobal);
-
-                  m_trigger_fitEtaRange->push_back(fitEta);
-                  if (station == "MML") {
-                    m_trigger_large_fitEtaRange->push_back(fitEta);
-                  }
-                  if (station == "MMS") {
-                    m_trigger_small_fitEtaRange->push_back(fitEta);
-                  }
-                }
-              }
-            }
-            hitDatas.clear();
-          } // if-else Diamond clause
+          } else ATH_MSG_WARNING("No algorithm defined, exiting gracefully");
         } else {
           ATH_MSG_DEBUG( "Available hits are " << reco_it->second.size() << ", less than X+UV threshold, skipping" );
           nskip++;

@@ -42,7 +42,7 @@ StatusCode DisplacedJetRankComboHypoTool::decide(Combo::LegDecisionsMap& passing
 	std::map<const xAOD::Jet*, std::vector<Combo::LegDecision>> jet_decisions;
 
 	//populate jet decision map first
-	for(auto leg_decs : legDecisions){
+	for(const auto& leg_decs : legDecisions){
 		for(auto dec_pair : leg_decs){
 			const TrigCompositeUtils::Decision* decision(*(dec_pair.second));
 

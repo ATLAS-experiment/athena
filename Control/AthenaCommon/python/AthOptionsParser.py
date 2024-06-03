@@ -26,7 +26,7 @@ class JobOptAction(argparse.Action):
             raise ValueError('Only job options or one pickle file is allowed')
 
         setattr(args, self.dest, scripts)
-        setattr(args, 'fromdb', pkls[0] if pkls else None)
+        args.fromdb = pkls[0] if pkls else None
 
 
 class MemCheckAction(argparse.Action):
@@ -40,25 +40,26 @@ class MemCheckAction(argparse.Action):
         import Hephaestus.MemoryTracker as memtrack  # noqa: F401
 
         if option_string=='--delete-check':
-            setattr(args, 'memchk_mode', 'delete-check')
+            args.memchk_mode = 'delete-check'
             import Hephaestus.DeleteChecker          # noqa: F401
         else:
-            setattr(args, 'memchk_mode', 'leak-check')
+            args.memchk_mode = 'leak-check'
 
 
-class AthHelp(argparse.Action):
-   """Custom help to hide/show expert groups"""
-   def __call__(self, parser, namespace, values, option_string=None):
+class AthHelpFlags(argparse.Action):
+    """Custom help action to support flags"""
+    def __call__(self, parser, namespace, values, option_string=None):
 
-      for g in parser.expert_groups:
-         for a in g._group_actions:
-            if values!='all':
-               a.help = argparse.SUPPRESS
+        if not values:
+            parser.print_help()
+        else:
+            import runpy
+            sys.argv = ['athena.py', '--help']
+            if values != 'flags':
+                sys.argv.append(values)
+            runpy.run_module('AthenaConfiguration.AthNoop', run_name='__main__')
 
-      parser.print_help()
-      if values!='all':
-         print('\nUse --help=all to show all (expert) options')
-      sys.exit(0)
+        sys.exit(0)
 
 
 def get_version():
@@ -190,8 +191,9 @@ def getArgumentParser(legacy_args=False, **kwargs):
     g.add_argument('--version', action='version', version=get_version(),
                    help='print version number')
 
-    g.add_argument('-h', '--help', action='help',
-                   help='show help message')
+    g.add_argument('-h', '--help', metavar='FLAGS', nargs='?', action=AthHelpFlags,
+                   help='show help message (for FLAGS, "flags" for all categories)' if __athenaCLI
+                   else 'show help message (for FLAGS category)')
 
     # --------------------------------------------------------------------------
     g = parser.add_argument_group('Monitoring and debugging')
@@ -222,8 +224,8 @@ def getArgumentParser(legacy_args=False, **kwargs):
                             'endrun', 'stop', 'full', 'full-athena', 'all'],
                    help='perform double delete checking, disables the use of tcmalloc.')
 
-    g.add_argument('--tracelevel', metavar='LEVEL', nargs='?', type=int, choices=range(0,4), const=3,
-                   help='trace level for python configuration')
+    g.add_argument('--tracelevel', metavar='LEVEL', nargs='?', type=int, choices=range(1,4), const=3,
+                   help='trace level for python configuration (%(choices)s)')
 
     # --------------------------------------------------------------------------
     if legacy_args:
@@ -240,9 +242,6 @@ def getArgumentParser(legacy_args=False, **kwargs):
 
         g.add_argument('-s', '--showincludes', action='store_true',
                        help='show printout of included files')
-
-        g.add_argument('--trace', metavar='PATTERN', dest='trace_pattern',
-                       help='also show files that match %(metavar)s')
 
     # --------------------------------------------------------------------------
     if __athenaCLI:
@@ -306,7 +305,7 @@ def parse(legacy_args=False):
 
     parser = getArgumentParser(legacy_args)
     opts, leftover = parser.parse_known_args(args)
-    setattr(opts, 'user_opts', user_opts)
+    opts.user_opts = user_opts
 
     # If the argument parser has been extended, the script name(s) may end up
     # in the leftovers. Try to find them there:

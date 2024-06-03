@@ -129,12 +129,12 @@ public:
 
     // --- Truth and Other ---
     void setToT(unsigned v) { m_ToT = v; }
-    void setBarcode(long v) { m_barcode = v; }
+    void setBarcode(unsigned long v) { m_barcode = v; }
     void setBarcodePt(float v) { m_barcode_pt = v; }
     void setEventIndex(long v) { m_eventindex = v; }
     void setParentageMask(unsigned long v) { m_parentage_mask = v; }
     void setTruth(const FPGATrackSimMultiTruth& v) { m_truth = v; }
-    long getBarcode() const { return m_barcode; }
+    unsigned long getBarcode() const { return m_barcode; }
     long getEventIndex() const { return m_eventindex; }
     float getBarcodePt() const { return m_barcode_pt; }
     unsigned long getParentageMask() const { return m_parentage_mask; }
@@ -193,7 +193,7 @@ protected:
     unsigned m_hw_word = 0; // store Strip and Pixel cluster positions as integers using the same FPGATrackSim_IM HW definition
     unsigned m_ToT = 0; // time over Threshold
     long m_eventindex = 0; // athena event index assigned to this channel
-    long m_barcode = 0; // geant particle barcode assigned to this channel
+    unsigned long m_barcode = 0; // geant particle barcode assigned to this channel
     float m_barcode_pt = 0; // maximum 'pt' for any 'good' geant particle contributing to the channel.
                             // corresponds to the particle with m_barcode
     unsigned long m_parentage_mask = 0; // ancestor information of this channel

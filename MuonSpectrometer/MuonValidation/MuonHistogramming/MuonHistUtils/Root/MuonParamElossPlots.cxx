@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonHistUtils/MuonParamElossPlots.h"
 #include "xAODTracking/TrackingPrimitives.h"
+#include "AthContainers/ConstAccessor.h"
 
 namespace Muon{
 
@@ -60,7 +61,8 @@ void MuonParamElossPlots::initializePlots()
   void MuonParamElossPlots::FillPlot(TH1* hist, const xAOD::Muon& mu,const xAOD::Muon::ParamDef paramDef,float scale, float weight) {
   if (mu.author()==xAOD::Muon::CaloTag || mu.author()==xAOD::Muon::CaloLikelihood || mu.author()==xAOD::Muon::ExtrapolateMuonToIP) return; //protection
   float fpar = 0;
-  if (mu.isAvailable<float>("EnergyLoss")) {
+  static const SG::ConstAccessor<float> elossAcc ("EnergyLoss");
+  if (elossAcc.isAvailable(mu)) {
      if (mu.parameter(fpar, paramDef)) 
        hist->Fill(scale*fpar,weight); //scale to GeV, if needed
   }
@@ -69,33 +71,40 @@ void MuonParamElossPlots::initializePlots()
   void MuonParamElossPlots::FillPlot(TH1* hist, TH1* hist_DiffTruth, TH1* hist_DiffTruthEta0_1p35,  TH1* hist_DiffTruthEta1p35_1p55, TH1* hist_DiffTruthEta1p55_end, const xAOD::TruthParticle& truthprt, const xAOD::Muon& mu,const xAOD::Muon::ParamDef paramDef,float scale, float weight) {
   if (mu.author()==xAOD::Muon::CaloTag || mu.author()==xAOD::Muon::CaloLikelihood || mu.author()==xAOD::Muon::ExtrapolateMuonToIP) return; //protection
   float fpar = 0;
-  if (mu.isAvailable<float>("EnergyLoss")) {
+  static const SG::ConstAccessor<float> elossAcc("EnergyLoss");
+  if (elossAcc.isAvailable(mu)) {
      if (mu.parameter(fpar, paramDef)) 
        hist->Fill(scale*fpar,weight); //scale to GeV, if needed
  
      //get true energy loss
+     static const SG::ConstAccessor<float> pxAcc("px");
+     static const SG::ConstAccessor<float> pyAcc("py");
+     static const SG::ConstAccessor<float> pzAcc("pz");
+     static const SG::ConstAccessor<float> muonEnt_pxAcc("MuonEntryLayer_px");
+     static const SG::ConstAccessor<float> muonEnt_pyAcc("MuonEntryLayer_py");
+     static const SG::ConstAccessor<float> muonEnt_pzAcc("MuonEntryLayer_pz");
      if (/*!truthprt.isAvailable<float>("CaloEntryLayer_px") ||
 	 !truthprt.isAvailable<float>("CaloEntryLayer_py") ||
 	 !truthprt.isAvailable<float>("CaloEntryLayer_pz") ||*/
-	 !truthprt.isAvailable<float>("px") ||
-	 !truthprt.isAvailable<float>("py") ||
-	 !truthprt.isAvailable<float>("pz") ||
-	 !truthprt.isAvailable<float>("MuonEntryLayer_px") ||
-	 !truthprt.isAvailable<float>("MuonEntryLayer_py") ||
-	 !truthprt.isAvailable<float>("MuonEntryLayer_pz")) return;
+	 !pxAcc.isAvailable(truthprt) ||
+	 !pyAcc.isAvailable(truthprt) ||
+	 !pzAcc.isAvailable(truthprt) ||
+	 !muonEnt_pxAcc.isAvailable(truthprt) ||
+	 !muonEnt_pyAcc.isAvailable(truthprt) ||
+	 !muonEnt_pzAcc.isAvailable(truthprt)) return;
 
      //workaround for missing caloentry
-     Amg::Vector3D vecCaloEntry{truthprt.auxdata<float>("px"),
-			   truthprt.auxdata<float>("py"),
-			   truthprt.auxdata<float>("pz")};
+     Amg::Vector3D vecCaloEntry{pxAcc(truthprt),
+                                pyAcc(truthprt),
+                                pzAcc(truthprt)};
 
      /* Amg::Vector3D vecCaloEntry(truthprt.auxdata<float>("CaloEntryLayer_px"),
 			  truthprt.auxdata<float>("CaloEntryLayer_py"),
 			  truthprt.auxdata<float>("CaloEntryLayer_pz"));*/
 
-     Amg::Vector3D vecMuonExit{truthprt.auxdata<float>("MuonEntryLayer_px"),
-			truthprt.auxdata<float>("MuonEntryLayer_py"),
-			truthprt.auxdata<float>("MuonEntryLayer_pz")};
+     Amg::Vector3D vecMuonExit{muonEnt_pxAcc(truthprt),
+                               muonEnt_pyAcc(truthprt),
+                               muonEnt_pzAcc(truthprt)};
      float dpTruth=vecCaloEntry.mag()-vecMuonExit.mag();
      hist_DiffTruth->Fill(scale*(fpar-dpTruth),weight); //scale to GeV, if needed
      //again in eta ranges
@@ -109,7 +118,8 @@ void MuonParamElossPlots::initializePlots()
 }
   void MuonParamElossPlots::FillPlotELossType(TH1* hist, const xAOD::Muon& mu, float scale, float weight) {
   if (mu.author()==xAOD::Muon::CaloTag || mu.author()==xAOD::Muon::CaloLikelihood || mu.author()==xAOD::Muon::ExtrapolateMuonToIP) return; //protection
-  if (mu.isAvailable<float>("EnergyLoss")) {
+  static const SG::ConstAccessor<float> elossAcc("EnergyLoss");
+  if (elossAcc.isAvailable(mu)) {
     hist->Fill(mu.energyLossType(), weight); 
     ELossTypeAllPt->Fill(mu.pt()*scale, weight);
     float used=0;
@@ -129,7 +139,8 @@ void MuonParamElossPlots::initializePlots()
 }
   void MuonParamElossPlots::FillPlotELossType(TH1* hist, const xAOD::Muon& mu, const xAOD::Muon::EnergyLossType type,  float scale, float weight) {
   if (mu.author()==xAOD::Muon::CaloTag || mu.author()==xAOD::Muon::CaloLikelihood || mu.author()==xAOD::Muon::ExtrapolateMuonToIP) return; //protection
-  if (mu.isAvailable<float>("EnergyLoss")) {
+  static const SG::ConstAccessor<float> elossAcc("EnergyLoss");
+  if (elossAcc.isAvailable(mu)) {
     if (mu.energyLossType()==type) hist->Fill(mu.pt()*scale,weight); //scale to GeV, if needed
   }
   return;

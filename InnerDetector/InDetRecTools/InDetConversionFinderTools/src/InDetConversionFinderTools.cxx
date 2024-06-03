@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -14,6 +14,7 @@
 
 #include "AthLinks/ElementLink.h"
 #include "TrkTrack/LinkToTrack.h"
+#include "AthContainers/Accessor.h"
 
 #include <vector>
 #include <utility> 
@@ -243,12 +244,14 @@ InDetConversionFinderTools::InDetConversionFinderTools(const std::string& t,
                   "Decorating vertex with values used in track pair selector");
                 for (const auto& kv :
                      m_trackPairsSelector->getLastValues(cache)) {
-                  myVertex->auxdata<float>(kv.first) = kv.second;
+                  SG::Accessor<float> acc (kv.first);
+                  acc (*myVertex) = kv.second;
                 }
                 ATH_MSG_DEBUG("Decorating vertex with values used in vertex "
                               "point estimator");
                 for (const auto& kv : intersectionDecors) {
-                  myVertex->auxdata<float>(kv.first) = kv.second;
+                  SG::Accessor<float> acc (kv.first);
+                  acc (*myVertex) = kv.second;
                 }
               }
 
@@ -321,13 +324,17 @@ InDetConversionFinderTools::InDetConversionFinderTools(const std::string& t,
             if (m_decorateVertices) {
               ATH_MSG_DEBUG("Decorating single track vertex with dummy values "
                             "used in track pair selector");
-              for (const auto& kv : m_trackPairsSelector->getLastValues(cache))
-                sConver->auxdata<float>(kv.first) = 0.;
+              for (const auto& kv : m_trackPairsSelector->getLastValues(cache)) {
+                SG::Accessor<float> acc (kv.first);
+                acc (*sConver) = 0.;
+              }
 
               ATH_MSG_DEBUG("Decorating single track vertex with dummy values "
                             "used in vertex point estimator");
-              for (const std::string& k : m_vertexEstimator->decorKeys())
-                sConver->auxdata<float>(k) = 0.;
+              for (const std::string& k : m_vertexEstimator->decorKeys()) {
+                SG::Accessor<float> acc (k);
+                acc (*sConver) = 0.;
+              }
 
               ATH_MSG_DEBUG("Decorating single track vertex with dummy values "
                             "used in post selector");

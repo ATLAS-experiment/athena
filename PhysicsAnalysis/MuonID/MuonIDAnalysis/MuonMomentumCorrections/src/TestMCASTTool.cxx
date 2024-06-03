@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TestMCASTTool.h"
@@ -8,6 +8,7 @@
 
 #include "xAODMuon/MuonAuxContainer.h"
 #include "xAODMuon/MuonContainer.h"
+#include "AthContainers/ConstAccessor.h"
 
 namespace CP {
 
@@ -117,11 +118,15 @@ namespace CP {
 
                 std::string syst_name = (*sysItr).name();
 
-                m_SelCategoryRaw = mu->auxdata<int>("raw_MCaST_Category");
-                m_SelCategory = mu->auxdata<int>("MCaST_Category");
+                static const SG::ConstAccessor<int> raw_MCaST_CategoryAcc ("raw_MCaST_Category");
+                static const SG::ConstAccessor<int> MCaST_CategoryAcc ("MCaST_Category");
+                static const SG::ConstAccessor<float> InnerDetectorPtAcc ("InnerDetectorPt");
+                static const SG::ConstAccessor<float> MuonSpectrometerPtAcc ("MuonSpectrometerPt");
+                m_SelCategoryRaw = raw_MCaST_CategoryAcc (*mu);
+                m_SelCategory = MCaST_CategoryAcc (*mu);
                 m_Combined->SetCalibPt(mu->pt(), syst_name);
-                m_InnerDet->SetCalibPt(mu->auxdata<float>("InnerDetectorPt"), syst_name);
-                m_MSExtr->SetCalibPt(mu->auxdata<float>("MuonSpectrometerPt"), syst_name);
+                m_InnerDet->SetCalibPt(InnerDetectorPtAcc (*mu), syst_name);
+                m_MSExtr->SetCalibPt(MuonSpectrometerPtAcc (*mu), syst_name);
                 delete mu;
             }
 

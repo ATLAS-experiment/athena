@@ -136,7 +136,7 @@ public:
   ///fill reco-vertex related plots
   void fill(const xAOD::VertexContainer& vertexContainer, const xAOD::Vertex* recoHardScatter, const std::vector<const xAOD::TruthVertex*>& truthHSVertices, const std::vector<const xAOD::TruthVertex*>& truthPUVertices, float weight=1.0); 
   ///fill reco-vertex related plots that need EventInfo
-  void fill(const xAOD::VertexContainer& vertexContainer, const unsigned int nPU, const float weight=1.0);
+  void fill(const xAOD::VertexContainer& vertexContainer, const unsigned int truthMu, const float actualMu, const float weight=1.0);
 
   void fill(const xAOD::TrackParticle& track, const xAOD::Jet& jet, bool isBjet=false, bool isFake=false, bool isUnlinked=false, bool truthIsFromB=false, const float weight=1.0);
   void fillEfficiency(const xAOD::TruthParticle& truth, const xAOD::Jet& jet, const bool isGood, bool isBjet=false, bool truthIsFromB=false, float weight=1.0);

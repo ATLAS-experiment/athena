@@ -33,9 +33,16 @@ MuonSimDataCollection* MuonSimDataCollectionCnv::createTransient() {
     static const pool::Guid   p0_guid("5B50C32E-A036-4B49-AC97-716E53210BE2");
     static const pool::Guid   p1_guid("0605B4A3-3744-4486-B39D-F9C9E809D868");
     static const pool::Guid   p2_guid("E0AA3013-4EF7-45B6-BDB1-17B21BF60791");
+    static const pool::Guid   p3_guid("018F527E-346B-7A37-8C3D-5E7420A9C76A");
     ATH_MSG_DEBUG("createTransient(): main converter");
     MuonSimDataCollection* p_collection(nullptr);
-    if( compareClassGuid(p2_guid) ) {
+    if( compareClassGuid(p3_guid) ) {
+      ATH_MSG_DEBUG("createTransient(): T/P version 3 detected");
+      std::unique_ptr< Muon::MuonSimDataCollection_p3 >   col_vect( this->poolReadObject< Muon::MuonSimDataCollection_p3 >() );
+      p_collection = m_TPConverter_p3.createTransient( col_vect.get(), log );
+    }
+  //----------------------------------------------------------------
+    else if( compareClassGuid(p2_guid) ) {
       ATH_MSG_DEBUG("createTransient(): T/P version 2 detected");
       std::unique_ptr< Muon::MuonSimDataCollection_p2 >   col_vect( this->poolReadObject< Muon::MuonSimDataCollection_p2 >() );
       p_collection = m_TPConverter_p2.createTransient( col_vect.get(), log );

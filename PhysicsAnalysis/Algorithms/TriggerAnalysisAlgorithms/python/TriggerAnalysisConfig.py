@@ -19,6 +19,12 @@ class TriggerAnalysisBlock (ConfigBlock):
             "to enforce an OR of triggers without looking up the individual "
             "triggers. Used for both trigger selection and SFs. "
             "The default is {} (empty dictionary).")
+        self.addOption ('multiTriggerChainsPerYear', {}, type=None,
+            info="a dictionary with key (string) a trigger set name and value a "
+            "triggerChainsPerYear dictionary, following the previous convention. "
+            "Relevant for analyses using different triggers in different categories, "
+            "where the trigger global scale factors shouldn't be combined. "
+            "The default is {} (empty dictionary).")
         self.addOption ('triggerChainsForSelection', [], type=None,
             info="a list of trigger chains (list of strings) to be used for "
             "trigger selection. Only set it if you need a different setup "
@@ -77,16 +83,25 @@ class TriggerAnalysisBlock (ConfigBlock):
         
 
     def makeAlgs (self, config) :
+        
+        if (self.multiTriggerChainsPerYear and self.triggerChainsPerYear and
+            self.triggerChainsPerYear is not self.multiTriggerChainsPerYear.get('')):
+            raise Exception('multiTriggerChainsPerYear and triggerChainsPerYear cannot be configured at the same time!')
+
+        if self.triggerChainsPerYear and not self.multiTriggerChainsPerYear:
+            self.multiTriggerChainsPerYear = {'': self.triggerChainsPerYear}
+
         # if we are only given the trigger dictionary, we fill the selection list automatically
         if self.triggerChainsPerYear and not self.triggerChainsForSelection:
             triggers = set()
-            for chain_list in self.triggerChainsPerYear.values():
-                for chain in chain_list:
-                    if '||' in chain:
-                        chains = chain.split('||')
-                        triggers.update(map(str.strip, chains))
-                    else:
-                        triggers.add(chain.strip())
+            for trigger_chains in self.multiTriggerChainsPerYear.values():
+                for chain_list in self.triggerChainsPerYear.values():
+                    for chain in chain_list:
+                        if '||' in chain:
+                            chains = chain.split('||')
+                            triggers.update(map(str.strip, chains))
+                        else:
+                            triggers.add(chain.strip())
             self.triggerChainsForSelection = list(triggers)
 
         # Create the decision algorithm, keeping track of the decision tool for later

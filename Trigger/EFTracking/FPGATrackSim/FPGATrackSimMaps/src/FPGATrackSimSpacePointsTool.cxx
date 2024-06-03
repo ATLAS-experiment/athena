@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <array>
@@ -161,9 +161,9 @@ StatusCode FPGATrackSimSpacePointsTool::makeSpacePoints(FPGATrackSimTowerInputHe
         }
 
         // add unpaired outer hits TODO use the hit type instead of another loop
-        for (auto hit_out : hits_outer) {
+        for (const FPGATrackSimHit& hit_out : hits_outer) {
             bool foundPair=false;
-            for (auto hit_in : hits_inner) {
+            for (const FPGATrackSimHit& hit_in : hits_inner) {
                 if (abs(hit_in.getGPhi()-hit_out.getGPhi()) < m_phiwindow) {
                     foundPair=true;
                     break;
@@ -230,7 +230,7 @@ StatusCode FPGATrackSimSpacePointsTool::makeSpacePoints(FPGATrackSimTowerInputHe
     }
 
     // add back the pixles
-    for (auto hit: m_pixel) tower.addHit(hit);
+    for (const FPGATrackSimHit& hit: m_pixel) tower.addHit(hit);
 
     m_inputhits -= m_pixel.size(); // so count is just input strips
     m_spacepts += spacepoints.size();
@@ -243,7 +243,7 @@ StatusCode FPGATrackSimSpacePointsTool::makeSpacePoints(FPGATrackSimTowerInputHe
 bool FPGATrackSimSpacePointsTool::searchForMatch(FPGATrackSimHit& hit_in,std::vector<FPGATrackSimHit>& hits_outer,FPGATrackSimTowerInputHeader &tower, std::vector<FPGATrackSimCluster> &spacepoints)
 {
     bool foundPair = false;
-    for (auto hit_out : hits_outer)
+    for (const FPGATrackSimHit& hit_out : hits_outer)
     {
 	// Too far apart to be from same track
         if (abs(hit_in.getGPhi()-hit_out.getGPhi()) < m_phiwindow) {

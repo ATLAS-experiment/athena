@@ -1,12 +1,9 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_GEANT4TOOLS_ISFG4HELPER_H
 #define ISF_GEANT4TOOLS_ISFG4HELPER_H
-
-// Barcode includes
-#include "BarcodeEvent/Barcode.h"
 
 // ISF Includes
 #include "ISF_Event/ISFParticle.h"
@@ -49,7 +46,7 @@ class ISFG4Helper {
   static TrackInformation* attachTrackInfoToNewG4Track( G4Track& aTrack,
                                    ISF::ISFParticle& baseIsp,
                                    TrackClassification classification,
-                                   HepMC::GenParticlePtr nonRegeneratedTruthParticle = nullptr);
+                                   HepMC::GenParticlePtr generationZeroGenParticle = nullptr);
   
   /** return pointer to current AtlasG4EventUserInfo */
   static AtlasG4EventUserInfo* getAtlasG4EventUserInfo();

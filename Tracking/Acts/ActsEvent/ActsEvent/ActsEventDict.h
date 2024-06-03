@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSEVENT_DICT_H
@@ -33,5 +33,13 @@ namespace {
   };
 }
 
+#include "ActsEvent/TrackContainer.h"
+namespace {
+  struct GCCXML_DUMMY_ELACTSTRK_TRACKCONTAINER {
+     ActsTrk::TrackContainer              m_dest;
+     ElementLink<ActsTrk::TrackContainer> m_linkToDest;
+     std::vector<ElementLink<ActsTrk::TrackContainer> > m_two;
+  };
+}
 
 #endif
