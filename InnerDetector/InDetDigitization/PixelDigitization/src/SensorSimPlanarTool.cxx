@@ -180,7 +180,7 @@ StatusCode SensorSimPlanarTool::initialize() {
   // read the correction histograms 
   if (m_radiationDamageSimulationType == RadiationDamageSimulationType::TEMPLATE_CORRECTION) {
 
-    const std::size_t numberOfLayers = m_isITk ? 5 : 4;
+    constexpr std::size_t numberOfLayers = 4;
 
     ATH_MSG_INFO("Opening file: " << m_templateCorrectionRootFile << " for radiation damage correction");
     std::unique_ptr<TFile> file(TFile::Open(PathResolverFindCalibFile(m_templateCorrectionRootFile).c_str(), "READ"));
@@ -265,13 +265,13 @@ StatusCode SensorSimPlanarTool::induceCharge(const TimedHitPtr<SiHit>& phit,
                                              std::vector<double>& initialConditions,
                                              CLHEP::HepRandomEngine* rndmEngine,
                                              const EventContext &ctx) {
+
+  bool isITk(false);
   if (p_design.getReadoutTechnology() == InDetDD::PixelReadoutTechnology::RD53) {
-    // TODO: check that detectors other than ITk have this properly set
-    // if (p_design.is3D()) {
-    //   return StatusCode::SUCCESS;
-    // }
-    // pass
-    // TODO: for now all RD53 sensors are digitized as planar
+    isITk = true;
+    if (p_design.is3D() && m_digitizeITk3Das3D) {
+      return StatusCode::SUCCESS;
+    }
   } else {
     // So far, this is only discriminating variable from 3D sensor.
     if (p_design.numberOfCircuits() < 2) {
@@ -566,9 +566,21 @@ StatusCode SensorSimPlanarTool::induceCharge(const TimedHitPtr<SiHit>& phit,
 
   }
   else if (m_radiationDamageSimulationType == RadiationDamageSimulationType::TEMPLATE_CORRECTION && !(Module.isDBM()) && Module.isBarrel()){ // will run radiation damage but with the template method
-    const PixelHistoConverter& distanceCorrectionHist = m_distanceCorrection[layer];
-    const PixelHistoConverter& lorentzCorrectionHist  = m_lorentzCorrection[layer];
-    const PixelHistoConverter& chargeCorrectionHist   = m_chargeCorrection[layer];
+
+    // For Pixel, the layers in the barrel are 0, 1, 2 and 3
+    // But for ITk Pixel, these are 1, 2, 3 and 4
+    // So, we need to adjust for the position in the vector for ITk
+
+    int layerToRead = isITk && m_digitizeITk3Das3D ? layer - 1 : layer;
+
+    // temporary solution for treating 3D as planar in the digitisation
+    if (layerToRead > 3) {
+      layerToRead = 3;
+    }
+
+    const PixelHistoConverter& distanceCorrectionHist = m_distanceCorrection[layerToRead];
+    const PixelHistoConverter& lorentzCorrectionHist  = m_lorentzCorrection[layerToRead];
+    const PixelHistoConverter& chargeCorrectionHist   = m_chargeCorrection[layerToRead];
 
     for (const auto & iHitRecord : trfHitRecord) {
       double eta_i = eta_0;

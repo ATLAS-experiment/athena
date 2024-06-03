@@ -81,7 +81,6 @@ def SensorSimPlanarToolCfg(flags, name="SensorSimPlanarTool", **kwargs):
     kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(PixelLorentzAngleToolCfg(flags)))
     SensorSimPlanarTool = CompFactory.SensorSimPlanarTool
     kwargs.setdefault("RadiationDamageSimulationType", flags.Digitization.PixelPlanarRadiationDamageSimulationType.value)
-    kwargs.setdefault("IsITk", False)
     if flags.Digitization.PixelPlanarRadiationDamageSimulationType is not PixelRadiationDamageSimulationType.NoRadiationDamage:
         acc.merge(PixelRadSimFluenceMapAlgCfg(flags))
     acc.setPrivateTools(SensorSimPlanarTool(name, **kwargs))
@@ -94,7 +93,6 @@ def SensorSim3DToolCfg(flags, name="SensorSim3DTool", **kwargs):
     kwargs.setdefault("SiPropertiesTool", acc.popToolsAndMerge(PixelSiPropertiesToolCfg(flags)))
     SensorSim3DTool = CompFactory.SensorSim3DTool
     kwargs.setdefault("RadiationDamageSimulationType", flags.Digitization.Pixel3DRadiationDamageSimulationType.value)
-    kwargs.setdefault("IsITk", False)
     if flags.Digitization.Pixel3DRadiationDamageSimulationType is not PixelRadiationDamageSimulationType.NoRadiationDamage:
         acc.merge(PixelRadSimFluenceMapAlgCfg(flags))
     acc.setPrivateTools(SensorSim3DTool(name, **kwargs))
