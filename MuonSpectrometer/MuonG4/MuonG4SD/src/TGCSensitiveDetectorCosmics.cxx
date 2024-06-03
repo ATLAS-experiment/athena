@@ -195,7 +195,7 @@ G4bool TGCSensitiveDetectorCosmics::ProcessHits(G4Step* aStep,G4TouchableHistory
                         m_globalTime,
                         localPosition,
                         localDireCos,
-                        trHelp.GetParticleLink(),
+                        trHelp.GenerateParticleLink(),
                         aStep->GetTotalEnergyDeposit(),
                         aStep->GetStepLength());
   return true;

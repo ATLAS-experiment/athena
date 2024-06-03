@@ -89,7 +89,7 @@ G4bool MicromegasSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory
  
   TrackHelper trHelp(aStep->GetTrack());
 
-  m_MMSimHitCollection->Emplace(MmId, globalTime,position,pdgCode,eKin,direction,depositEnergy,trHelp.GetParticleLink());
+  m_MMSimHitCollection->Emplace(MmId, globalTime,position,pdgCode,eKin,direction,depositEnergy,trHelp.GenerateParticleLink());
 
   //    G4cout << "MMs "<<m_muonHelper->GetStationName(MmId)
   // 	            << " "<<m_muonHelper->GetFieldValue("PhiSector")

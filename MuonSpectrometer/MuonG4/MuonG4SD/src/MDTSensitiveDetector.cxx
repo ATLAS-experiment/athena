@@ -118,7 +118,7 @@ G4bool MDTSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory* /*ROH
     TrackHelper trHelp(aStep->GetTrack());
 
     // construct new mdt hit
-    m_MDTHitColl->Emplace(MDTid, m_globalTime, m_driftRadius, m_localPosition, trHelp.GetParticleLink(),
+    m_MDTHitColl->Emplace(MDTid, m_globalTime, m_driftRadius, m_localPosition, trHelp.GenerateParticleLink(),
                           aStep->GetStepLength(),
                           aStep->GetTotalEnergyDeposit(),
                           currentTrack->GetDefinition()->GetPDGEncoding(),

@@ -71,7 +71,7 @@ bool LUCID_SensitiveDetector::ProcessHits(G4Step* aStep, G4TouchableHistory*) {
 
   m_HitColl->Emplace(m_hit->GetTubNumber(aStep),
                      aTrack->GetDefinition()->GetPDGEncoding(),
-                     trHelp.GetParticleLink(),
+                     trHelp.GenerateParticleLink(),
                      LUCID_HitHelper::GetVolNumber    (aTrack->GetLogicalVolumeAtVertex()->GetName()),
                      m_hit->GetPreStepPoint (aStep).x(),
                      m_hit->GetPreStepPoint (aStep).y(),

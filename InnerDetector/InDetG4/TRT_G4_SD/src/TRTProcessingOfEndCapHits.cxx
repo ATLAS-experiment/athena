@@ -245,7 +245,7 @@ bool TRTProcessingOfEndCapHits::ProcessHit(G4Step* pStep)
   hitID += strawID;
 
   m_pSensitiveDetector->m_hitID = hitID;
-  m_pSensitiveDetector->m_partLink = trHelp.GetParticleLink();
+  m_pSensitiveDetector->m_partLink = trHelp.GenerateParticleLink();
   m_pSensitiveDetector->m_preStepX = preStepX;
   m_pSensitiveDetector->m_preStepY = preStepY;
   m_pSensitiveDetector->m_preStepZ = preStepZ;

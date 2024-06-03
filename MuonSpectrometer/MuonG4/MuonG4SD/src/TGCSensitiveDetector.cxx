@@ -244,7 +244,7 @@ G4bool TGCSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
                         globalTime,
                         localPosition,
                         localDireCos,
-                        trHelp.GetParticleLink(),
+                        trHelp.GenerateParticleLink(),
                         aStep->GetTotalEnergyDeposit(),
                         aStep->GetStepLength(),
                         track->GetDefinition()->GetPDGEncoding(),

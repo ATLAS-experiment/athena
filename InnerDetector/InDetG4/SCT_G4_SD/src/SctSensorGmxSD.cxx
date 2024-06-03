@@ -83,7 +83,7 @@ G4bool SctSensorGmxSD::ProcessHits(G4Step *aStep, G4TouchableHistory * /* not us
                     lP2,
                     edep,
                     aStep->GetPreStepPoint()->GetGlobalTime(),//use the global time. i.e. the time from the beginning of the event
-                    trHelp.GetParticleLink(),
+                    trHelp.GenerateParticleLink(),
                     hitIdOfWafer);
     return true;
   }
@@ -95,7 +95,7 @@ G4bool SctSensorGmxSD::ProcessHits(G4Step *aStep, G4TouchableHistory * /* not us
   //
   const int id = myTouch->GetVolume(0)->GetCopyNo();
 
-  m_HitColl->Emplace(lP1, lP2, edep, aStep->GetPreStepPoint()->GetGlobalTime(), trHelp.GetParticleLink(), id);
+  m_HitColl->Emplace(lP1, lP2, edep, aStep->GetPreStepPoint()->GetGlobalTime(), trHelp.GenerateParticleLink(), id);
 
   return true;
 }

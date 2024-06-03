@@ -155,7 +155,7 @@ G4bool SctSensor_CTB::ProcessHits(G4Step* aStep, G4TouchableHistory* /*ROhist*/)
                      lP2,
                      edep,
                      aStep->GetPreStepPoint()->GetGlobalTime(),
-                     trHelp.GetParticleLink(),
+                     trHelp.GenerateParticleLink(),
                      1,BrlEcap,LayerDisk,etaMod,phiMod,side);
   return true;
 }
