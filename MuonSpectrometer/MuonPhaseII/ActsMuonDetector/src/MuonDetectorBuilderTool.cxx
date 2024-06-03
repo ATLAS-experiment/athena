@@ -19,7 +19,7 @@
 #include "Acts/Detector/DetectorVolume.hpp"
 #include "Acts/Detector/PortalGenerators.hpp"
 #include "Acts/Navigation/DetectorVolumeFinders.hpp"
-#include "Acts/Navigation/SurfaceCandidatesUpdaters.hpp"
+#include "Acts/Navigation/InternalNavigation.hpp"
 #include "Acts/Navigation/NavigationDelegates.hpp"
 #include "Acts/Navigation/NavigationState.hpp"
 #include "Acts/Visualization/ObjVisualization3D.hpp"
@@ -76,7 +76,7 @@ namespace ActsTrk {
           readoutElements = constructElements(*gctx, *chamber, std::make_pair(volNumb,chNumb));
           volumePtr detectorVolume = Acts::Experimental::DetectorVolumeFactory::construct(
                 portalGenerator, gctx->context(), std::to_string(chamber->stationName())+"_"+std::to_string(chamber->stationEta())+"_"+std::to_string(chamber->stationPhi()), chamber->localToGlobalTrans(*gctx), 
-                bounds, readoutElements.second, readoutElements.first, Acts::Experimental::tryAllPortals(), Acts::Experimental::tryAllPortalsAndSurfaces());
+                bounds, readoutElements.second, readoutElements.first, Acts::Experimental::tryAllSubVolumes(), Acts::Experimental::tryAllPortalsAndSurfaces());
           detectorVolume->assignGeometryId(Acts::GeometryIdentifier{}.setLayer(volNumb).setVolume(chNumb));
           if(m_dumpVisual){
                 //If we want to view each volume independently                
@@ -118,7 +118,7 @@ namespace ActsTrk {
         portalContainer,
         {{msDetectorVolume}, Acts::Experimental::tryRootVolumes()}};
     }
-    
+
 std::pair<std::vector<volumePtr>,std::vector<surfacePtr>> MuonDetectorBuilderTool::constructElements(const ActsGeometryContext& gctx, const MuonGMR4::MuonChamber& mChamber, std::pair<unsigned int, unsigned int> chId) const{
     
   std::vector<volumePtr> readoutDetectorVolumes = {};
