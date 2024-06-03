@@ -9,12 +9,11 @@
 #include "xAODTrigger/MuonRoI.h"
 #include "xAODTrigger/MuonRoIAuxContainer.h"
 
-// Athena includes
-#include "CxxUtils/span.h"
 
 // TDAQ includes
 #include "eformat/SourceIdentifier.h"
 #include "eformat/Status.h"
+#include <span>
 
 using ROBF = OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment;
 using WROBF = OFFLINE_FRAGMENTS_NAMESPACE_WRITE::ROBFragment;
@@ -64,7 +63,7 @@ StatusCode ExampleL1TriggerByteStreamTool::convertFromBS(const std::vector<const
   const uint32_t ndata = rob->rod_ndata();
   const uint32_t* data = rob->rod_data();
   ATH_MSG_DEBUG("Starting to decode " << ndata << " ROD words");
-  for (const uint32_t word : CxxUtils::span{data, ndata}) {
+  for (const uint32_t word : std::span{data, ndata}) {
     ATH_MSG_DEBUG("Muon RoI raw word: 0x" << std::hex << word << std::dec);
     // Here comes the decoding
     // Using some dummy values as this is not real decoding, just an example

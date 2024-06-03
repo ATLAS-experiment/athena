@@ -146,7 +146,7 @@ class NSWTriggerSTGL1AElink : public NSWTriggerElink {
 
   [[nodiscard]] static std::uint64_t correct_size_for_padding(std::uint64_t initial);
 
-  CxxUtils::span<const std::uint32_t> m_data;
+  std::span<const std::uint32_t> m_data;
   static constexpr auto WORD_SIZE = sizeof(decltype(m_data)::element_type) * 8;
   static constexpr auto WORD_SIZE_DOUBLE = static_cast<double>(WORD_SIZE);
 

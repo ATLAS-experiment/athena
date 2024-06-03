@@ -15,7 +15,7 @@
 Muon::nsw::MMARTPacket::MMARTPacket (std::vector<uint32_t>& payload) {
 
   std::size_t readPointer{0};
-  CxxUtils::span<const std::uint32_t> data{payload.data(), 3}; 
+  std::span<const std::uint32_t> data{payload.data(), 3}; 
   
   if (payload.size()!=3) {
     throw std::runtime_error( Muon::nsw::format( "ART Packet size not as expected: expected exactly 3 uint32_t, got {}", payload.size() ));

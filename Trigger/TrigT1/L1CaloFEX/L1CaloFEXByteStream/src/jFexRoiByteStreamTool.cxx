@@ -11,11 +11,11 @@
 
 #include "jFexRoiByteStreamTool.h"
 #include "jFexBits.h"
-#include "CxxUtils/span.h"
 #include "eformat/SourceIdentifier.h"
 #include "eformat/Status.h"
 
 #include <fstream>
+#include <span>
 
 using ROBF = OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment;
 using WROBF = OFFLINE_FRAGMENTS_NAMESPACE_WRITE::ROBFragment;
@@ -211,7 +211,7 @@ StatusCode jFexRoiByteStreamTool::convertFromBS(const std::vector<const ROBF*>& 
             continue;
         }
         
-        const auto dataArray = CxxUtils::span{rob->rod_data(), rob->rod_ndata()};
+        const auto dataArray = std::span{rob->rod_data(), rob->rod_ndata()};
         std::vector<uint32_t> vec_words(dataArray.begin(),dataArray.end());
         
         std::stringstream myPrint;

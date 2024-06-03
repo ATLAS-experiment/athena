@@ -20,7 +20,7 @@ Muon::nsw::NSWTriggerElink::NSWTriggerElink (const uint32_t *bs, const uint32_t 
     throw e;
   }
 
-  CxxUtils::span<const std::uint32_t> data{bs, 2};
+  std::span<const std::uint32_t> data{bs, 2};
   m_packet_status = Muon::nsw::bit_slice<uint64_t>(data,0,15);
   m_wordCountFlx = Muon::nsw::bit_slice<uint64_t>(data,16,31);
 

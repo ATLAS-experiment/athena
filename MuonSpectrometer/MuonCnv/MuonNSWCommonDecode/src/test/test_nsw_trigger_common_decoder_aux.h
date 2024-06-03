@@ -432,7 +432,7 @@ class CRCMonHelper {
   }
   
   template <typename Source>
-    uint getCRC(const CxxUtils::span<const Source> words) {
+    uint getCRC(const std::span<const Source> words) {
     uint crc = m_preset;
     uint N = sizeof(Source); //N 8b subwords per word
     
@@ -478,7 +478,7 @@ class CRCL1AHelper {
   CRCL1AHelper() {} 
 
   template <typename Source>
-    uint getCRC(const CxxUtils::span<const Source> words) {
+    uint getCRC(const std::span<const Source> words) {
     uint crc = 0;
     uint N = sizeof(Source)/2; //N 16b subwords per word
 
