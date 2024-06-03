@@ -7,7 +7,6 @@ from TrkConfig.TrkConfigFlags import KalmanUpdatorType
 # Relative timing results from ATLASRECTS-6755
 # normalized to Trk::KalmanUpdator_xk time
 # KalmanUpdator_xk   :   1
-# KalmanUpdatorAmg   :   1.2
 # KalmanUpdatorSMatrix : 1.45
 # KalmanUpdator : 3.8
 
@@ -37,8 +36,6 @@ def InDetUpdatorCfg(flags, name='InDetUpdator', **kwargs):
         tool = CompFactory.Trk.KalmanWeightUpdator(name, **kwargs)
     elif flags.Tracking.kalmanUpdator == KalmanUpdatorType.KalmanUpdatorSMatrix:
         tool = CompFactory.Trk.KalmanUpdatorSMatrix(name, **kwargs)
-    elif flags.Tracking.kalmanUpdator == KalmanUpdatorType.KalmanUpdatorAmg:
-        tool = CompFactory.Trk.KalmanUpdatorAmg(name, **kwargs)
     elif flags.Tracking.kalmanUpdator == KalmanUpdatorType.KalmanUpdator:
         tool = CompFactory.Trk.KalmanUpdator(name, **kwargs)
 

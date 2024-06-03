@@ -33,11 +33,10 @@ namespace Trk {
 
     Tool to provide calculations for
     Kalman filtering, i.e. to add or remove a measured hit to the
-    state vector. Implemented fully in Eigen using the EDM natively.
-    As a drawback due to Eigen's internal implementation of matrix
-    operations, this tool is generally slower than its alternatives
-    which are written based on array or SMatrix of fixed size Eigen
-    internal representations of EDM objects.
+    state vector. Implemented fully in Eigen using dynamic matrices
+    As a drawback due to using dynamic matrices
+    this tool is generally slower than alternatives
+    that are written based on fixed size objects.
 
     @author M. Elsing, W. Liebig <http://consult.cern.ch/xwho>
  */
