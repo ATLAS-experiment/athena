@@ -164,7 +164,7 @@ egammaSelectedTrackCopy::execute(const EventContext& ctx) const
         break;
       }
     } // Loop on clusters.
-  
+
     // Check if the track is selected for a forwand  electron
     // due to a forwand cluster
     if (m_doForwardTracks) {

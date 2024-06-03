@@ -95,9 +95,6 @@ Trk::GaussianSumFitter::GaussianSumFitter(const std::string& type,
   , m_directionToPerigee(Trk::oppositeMomentum)
   , m_trkParametersComparisonFunction{}
   , m_sortingReferencePoint{ 0, 0, 0 }
-  , m_FitPRD{ 0 }
-  , m_FitMeasurementBase{ 0 }
-  , m_fitSuccess{ 0 }
 {
   declareInterface<ITrackFitter>(this);
   declareProperty("SortingReferencePoint", m_sortingReferencePoint);
@@ -131,22 +128,6 @@ Trk::GaussianSumFitter::initialize()
   m_trkParametersComparisonFunction =
     Trk::TrkParametersComparisonFunction(referencePosition);
 
-  return StatusCode::SUCCESS;
-}
-
-StatusCode
-Trk::GaussianSumFitter::finalize()
-{
-  ATH_MSG_INFO(
-      '\n'
-      << "            Some Brief GSF Statistics          " << '\n'
-      << "-----------------------------------------------" << '\n'
-      << "Number of Fit PrepRawData Calls:          " << m_FitPRD << '\n'
-      << "Number of Fit MeasurementBase Calls:      " << m_FitMeasurementBase
-      << '\n'
-      << "Number of successful fits:                " << m_fitSuccess << '\n'
-      << '\n'
-      << "-----------------------------------------------" << '\n');
   return StatusCode::SUCCESS;
 }
 
@@ -254,7 +235,6 @@ Trk::GaussianSumFitter::fit(
   const Trk::RunOutlierRemoval /* Not used*/,
   const Trk::ParticleHypothesis particleHypothesis) const
 {
-  m_FitPRD.fetch_add(1, std::memory_order_relaxed);
 
   // Protect against empty PrepRawDataSet object
   if (prepRawDataSet.empty()) {
@@ -313,7 +293,6 @@ Trk::GaussianSumFitter::fit(
   Trk::TrackInfo info(Trk::TrackInfo::GaussianSumFilter, particleHypothesis);
   info.setTrackProperties(TrackInfo::BremFit);
   info.setTrackProperties(TrackInfo::BremFitSuccessful);
-  m_fitSuccess.fetch_add(1, std::memory_order_relaxed);
   return std::make_unique<Track>(
       info, convertTrajToTrack(smoothedTrajectory),
       std::move(fitQuality));
@@ -332,7 +311,6 @@ Trk::GaussianSumFitter::fit(
   const Trk::ParticleHypothesis particleHypothesis) const
 {
 
-  m_FitMeasurementBase.fetch_add(1, std::memory_order_relaxed);
   // Protect against empty PrepRawDataSet object
   if (measurementSet.empty()) {
     ATH_MSG_FATAL("MeasurementSet for fit is empty");
@@ -411,7 +389,6 @@ Trk::GaussianSumFitter::fit(
   Trk::TrackInfo info(Trk::TrackInfo::GaussianSumFilter, particleHypothesis);
   info.setTrackProperties(TrackInfo::BremFit);
   info.setTrackProperties(TrackInfo::BremFitSuccessful);
-  m_fitSuccess.fetch_add(1, std::memory_order_relaxed);
   return std::make_unique<Track>(
       info, convertTrajToTrack(smoothedTrajectory),
       std::move(fitQuality));
