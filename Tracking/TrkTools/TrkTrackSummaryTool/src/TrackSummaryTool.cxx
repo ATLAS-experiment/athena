@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkTrackSummaryTool/TrackSummaryTool.h"
@@ -73,19 +73,12 @@ Trk::TrackSummaryTool::initialize()
   if (not m_muonTool.empty()) {
     ATH_CHECK(m_muonTool.retrieve());
   }
-  auto bool2Txt = [](const bool flag) -> std::string {
-    return flag ? "ON" : "OFF";
-  };
-  ATH_MSG_INFO("Search for InDet holes using external tool turned "
-               << bool2Txt(m_doHolesInDet));
-  ATH_MSG_INFO("Search for Muon holes using external tool turned "
-               << bool2Txt(m_doHolesMuon));
-  return StatusCode::SUCCESS;
-}
-
-StatusCode
-Trk::TrackSummaryTool::finalize()
-{
+  if(m_doHolesInDet){
+    ATH_MSG_INFO("Search for InDet holes ON");
+  }
+  if(m_doHolesMuon){
+    ATH_MSG_INFO("Search for Muon holes ON");
+  }
   return StatusCode::SUCCESS;
 }
 

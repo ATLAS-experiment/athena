@@ -47,7 +47,6 @@ public:
   TrackSummaryTool(const std::string&, const std::string&, const IInterface*);
   virtual ~TrackSummaryTool();
   virtual StatusCode initialize() override;
-  virtual StatusCode finalize() override;
 
   /** Compute track summary and replace the summary in given track.
    * @param track the track whose track summary is replaced with a newly
