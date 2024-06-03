@@ -229,6 +229,7 @@ Amg::Vector3D sTgcReadoutElement::chamberStripPos(const IdentifierHash& measHash
                  <<" is out of range. Maximum range "<<m_pars.stripLayers.size());
    return Amg::Vector3D::Zero();
 }
+
 #ifndef SIMULATIONBASE
 std::map<Identifier, std::shared_ptr<Acts::Surface>> sTgcReadoutElement::getSurfaces() const {
     std::map<Identifier, std::shared_ptr<Acts::Surface>> surfaces{};
@@ -242,4 +243,95 @@ std::map<Identifier, std::shared_ptr<Acts::Surface>> sTgcReadoutElement::getSurf
     return surfaces;
 }
 #endif
+
+
+Amg::Vector3D sTgcReadoutElement::leftStripEdge(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const {
+   const IdentifierHash lHash = layerHash(measHash);
+   unsigned int gasGap = gasGapNumber(measHash);
+   unsigned int layIdx = static_cast<unsigned int>(lHash);
+
+   if(chType(measHash) == ReadoutChannelType::Strip){
+    if(gasGap > m_pars.stripLayers.size()){
+      ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The layer hash "<<layIdx
+                 <<" is out of range. Maximum range "<<m_pars.stripLayers.size());
+      return Amg::Vector3D::Zero();
+      }      
+   Amg::Vector3D stripleftEdge{Amg::Vector3D::Zero()};
+   Amg::Vector2D localstripleftEdge{Amg::Vector2D::Zero()};
+   std::optional<Amg::Vector2D> stripleftEdgeOpt = stripDesign(measHash).leftEdge(channelNumber(measHash));
+   localstripleftEdge = std::move(*stripleftEdgeOpt);
+   stripleftEdge.block<2,1>(0,0) = std::move(localstripleftEdge);
+
+   return localToGlobalTrans(ctx, lHash)*stripleftEdge;
+
+   }else if(chType(measHash) == ReadoutChannelType::Wire){
+      if(gasGap > m_pars.wireGroupLayers.size()){
+         ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The layer hash "<<layIdx
+                 <<" is out of range. Maximum range "<<m_pars.wireGroupLayers.size());
+         return Amg::Vector3D::Zero();
+
+      }
+
+   Amg::Vector3D wireleftEdge{Amg::Vector3D::Zero()};
+   Amg::Vector2D localwireleftEdge{Amg::Vector2D::Zero()};
+   std::optional<Amg::Vector2D> wireleftedgeOpt = wireDesign(measHash).leftEdge(channelNumber(measHash));
+   localwireleftEdge = std::move(*wireleftedgeOpt);
+   wireleftEdge.block<2,1>(0,0) = std::move(localwireleftEdge);
+     
+     return localToGlobalTrans(ctx, lHash)*wireleftEdge;
+
+   }
+
+   ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" The layer hash "<<layIdx
+                 <<" is not valid Type "<< chType(measHash));
+   return Amg::Vector3D::Zero();
+   
+}
+
+
+Amg::Vector3D sTgcReadoutElement::rightStripEdge(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const {
+   const IdentifierHash lHash = layerHash(measHash);
+   unsigned int gasGap = gasGapNumber(measHash);
+   unsigned int layIdx = static_cast<unsigned int>(lHash);
+
+   if(chType(measHash) == ReadoutChannelType::Strip){
+    if(gasGap > m_pars.stripLayers.size()){
+      ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The layer hash "<<layIdx
+                 <<" is out of range. Maximum range "<<m_pars.stripLayers.size());
+      return Amg::Vector3D::Zero();
+      }      
+   Amg::Vector3D striprightEdge{Amg::Vector3D::Zero()};
+   Amg::Vector2D localstriprightEdge{Amg::Vector2D::Zero()};
+   std::optional<Amg::Vector2D> striprightEdgeOpt = stripDesign(measHash).rightEdge(channelNumber(measHash));
+   localstriprightEdge = std::move(*striprightEdgeOpt);
+   striprightEdge.block<2,1>(0,0) = std::move(localstriprightEdge);
+
+   return localToGlobalTrans(ctx, lHash)*striprightEdge;
+
+   }else if(chType(measHash) == ReadoutChannelType::Wire){
+      if(gasGap > m_pars.wireGroupLayers.size()){
+         ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The layer hash "<<layIdx
+                 <<" is out of range. Maximum range "<<m_pars.wireGroupLayers.size());
+         return Amg::Vector3D::Zero();
+
+      }
+
+   Amg::Vector3D wirerightEdge{Amg::Vector3D::Zero()};
+   Amg::Vector2D localwirerightEdge{Amg::Vector2D::Zero()};
+   std::optional<Amg::Vector2D> wirerightedgeOpt = wireDesign(measHash).rightEdge(channelNumber(measHash));
+   localwirerightEdge = std::move(*wirerightedgeOpt);
+   wirerightEdge.block<2,1>(0,0) = std::move(localwirerightEdge);
+     
+     return localToGlobalTrans(ctx, lHash)*wirerightEdge;
+
+   }
+
+   ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" The layer hash "<<layIdx
+                 <<" is not valid Type "<< chType(measHash));
+   return Amg::Vector3D::Zero(); 
+
+   
+}
+
+
 }  // namespace MuonGMR4

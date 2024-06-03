@@ -8,6 +8,8 @@
 #include <MuonReadoutGeometryR4/MuonChamber.h>
 #include <MuonReadoutGeometryR4/MdtReadoutElement.h>
 #include <MuonReadoutGeometryR4/RpcReadoutElement.h>
+#include <MuonReadoutGeometryR4/MmReadoutElement.h>
+#include <MuonReadoutGeometryR4/sTgcReadoutElement.h>
 #include <GaudiKernel/SystemOfUnits.h>
 
 namespace MuonGMR4 {
@@ -65,7 +67,7 @@ namespace MuonGMR4 {
             return StatusCode::FAILURE;
         }
 
-        // m_detVolSvc->detector();
+        m_detVolSvc->detector();
         using ChamberSet = MuonDetectorManager::MuonChamberSet;
         const ChamberSet chambers = m_detMgr->getAllChambers();
         std::vector<const MuonReadoutElement*> elements = m_detMgr->getAllReadoutElements();
@@ -83,9 +85,14 @@ namespace MuonGMR4 {
                 } else if (readOut->detectorType() == ActsTrk::DetectorType::Rpc) {
                     const RpcReadoutElement* rpc = static_cast<const RpcReadoutElement*>(readOut);
                     ATH_CHECK(testRpc(*gctx, *rpc, *chamber, *boundVol));
+                } else if (readOut->detectorType() == ActsTrk::DetectorType::Mm) {
+                    const MmReadoutElement* mm = static_cast<const MmReadoutElement*>(readOut);
+                    ATH_CHECK(testMm(*gctx, *mm, *chamber, *boundVol));
+                } else if (readOut->detectorType() ==  ActsTrk::DetectorType::sTgc) {
+                    const sTgcReadoutElement* stgc = static_cast<const sTgcReadoutElement*>(readOut);
+                    ATH_CHECK(testStgc(*gctx, *stgc, *chamber, *boundVol));                    
                 } else {
-                    ATH_MSG_FATAL("The readout element "<<m_idHelperSvc->toStringDetEl(readOut->identify())
-                                <<" is not an Mdt, Rpc, Tgc or Mm");
+                    ATH_MSG_FATAL("Who brought the Cscs back? "<<m_idHelperSvc->toStringDetEl(readOut->identify()));
                     return StatusCode::FAILURE;
                 }
             }
@@ -166,6 +173,71 @@ namespace MuonGMR4 {
             }
         }
         return StatusCode::SUCCESS;
+    }
+
+    StatusCode MuonChamberToolTest::testMm(const ActsGeometryContext& gctx,
+                                           const MmReadoutElement& mm,
+                                           const MuonChamber& chamber,
+                                           const Acts::Volume& detVol) const {
+
+        const MmIdHelper& idHelper{m_idHelperSvc->mmIdHelper()};
+        for(unsigned int gasGap = 1; gasGap <= mm.nGasGaps(); ++gasGap){
+           IdentifierHash gasGapHash =  MmReadoutElement::createHash(gasGap,0);
+           unsigned int firstStrip = mm.firstStrip(gasGapHash);
+            for(unsigned int strip = firstStrip; strip <= mm.numStrips(gasGapHash); ++strip){
+                const Identifier stripId = idHelper.channelID(mm.identify(), mm.multilayer(), gasGap, strip);
+                ATH_CHECK(pointInside(chamber, detVol, mm.stripPosition(gctx, stripId), "center", stripId));
+                ATH_CHECK(pointInside(chamber, detVol, mm.leftStripEdge(gctx, mm.measurementHash(stripId)), "left edge", stripId));
+                ATH_CHECK(pointInside(chamber, detVol, mm.rightStripEdge(gctx, mm.measurementHash(stripId)), "right edge", stripId));
+            }
+        }
+
+        return StatusCode::SUCCESS;
+    }
+
+    StatusCode MuonChamberToolTest::testStgc(const ActsGeometryContext& gctx,
+                                            const sTgcReadoutElement& stgc,
+                                            const MuonChamber& chamber,
+                                            const Acts::Volume& detVol) const{
+        
+        const sTgcIdHelper& idHelper{m_idHelperSvc->stgcIdHelper()};
+        for(unsigned int gasGap = 1; gasGap <= stgc.numLayers(); ++gasGap){
+           
+            for(unsigned int nch = 1; nch <= stgc.nChTypes(); ++nch){                
+                IdentifierHash gasGapHash = sTgcReadoutElement::createHash(gasGap, nch, 0, 0);
+                unsigned int nStrips = stgc.numStrips(stgc.measurementId(gasGapHash));
+                sTgcReadoutElement::ReadoutChannelType channelType = static_cast<sTgcReadoutElement::ReadoutChannelType>(nch);
+                switch (channelType){
+                case sTgcReadoutElement::ReadoutChannelType::Pad:
+                    nStrips = stgc.numPads(stgc.measurementId(gasGapHash));                  
+                    break;
+                case sTgcReadoutElement::ReadoutChannelType::Wire:
+                    nStrips = stgc.numWires(gasGap);                                       
+                    break;                
+                default: 
+                                  
+                    break;
+                }
+                
+                for(unsigned int strip = 1; strip <= nStrips; ++strip){
+                    const Identifier stripId = idHelper.channelID(stgc.identify(), stgc.multilayer(), gasGap, nch, strip);
+                     ATH_CHECK(pointInside(chamber, detVol, stgc.globalChannelPosition(gctx, stripId), "channel position", stripId));
+                
+                    if(channelType == sTgcReadoutElement::ReadoutChannelType::Wire || channelType == sTgcReadoutElement::ReadoutChannelType::Strip){
+                        
+                        ATH_CHECK(pointInside(chamber, detVol, stgc.rightStripEdge(gctx, stgc.measurementHash(stripId)), "channel position", stripId));
+                        ATH_CHECK(pointInside(chamber, detVol, stgc.leftStripEdge(gctx, stgc.measurementHash(stripId)), "channel position", stripId));
+
+                    }
+
+                }
+
+            }            
+
+        }
+
+        return StatusCode::SUCCESS;
+
     }
 
  
