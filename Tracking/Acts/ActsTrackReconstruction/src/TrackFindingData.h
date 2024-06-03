@@ -46,23 +46,8 @@ namespace
   /// This is only required by code in TrackFindingAlg.cxx, so we keep it in the anonymous namespace.
   /// =========================================================================
 
-  // containers used during the reconstruction
+  // container used during the reconstruction
   using RecoTrackStateContainer = ActsTrk::TrackFindingAlg::RecoTrackStateContainer;
-  using RecoTrackStateContainerProxy = ActsTrk::TrackFindingAlg::RecoTrackStateContainerProxy;
-
-  /// Borrowed from Athena Tracking/Acts/ActsTrkTools/ActsTrkFittingTools/src/ActsKalmanFitter.ipp
-  /// We could also access them directly from there, but that would pull inline a lot of other stuff we
-  /// don't need.
-
-  static Acts::Result<void>
-  gainMatrixUpdate(const Acts::GeometryContext &gctx,
-                   RecoTrackStateContainerProxy trackState,
-                   Acts::Direction direction,
-                   const Acts::Logger &logger)
-  {
-    Acts::GainMatrixUpdater updater;
-    return updater.template operator()<RecoTrackStateContainer>(gctx, trackState, direction, logger);
-  }
 
   // Helper class to describe ranges of measurements
   // the range provides the measurement collection index and  element index range (begin, end)
