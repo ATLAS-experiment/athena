@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -614,7 +614,7 @@ void InDet::SiDetElementsRoadMaker_xk::computeBounds()
   if (m_usePIX) {
     sc = detStore()->retrieve(pixmgr, m_pix);
     if (sc.isFailure() || !pixmgr) {
-      ATH_MSG_INFO("Could not get PixelDetectorManager  !");
+      ATH_MSG_FATAL("Could not get PixelDetectorManager  !");
       return;
     }
   }
@@ -625,7 +625,7 @@ void InDet::SiDetElementsRoadMaker_xk::computeBounds()
   if (m_useSCT) {
     sc = detStore()->retrieve(sctmgr, m_sct);
     if (sc.isFailure() || !sctmgr) {
-      ATH_MSG_INFO("Could not get SCT_DetectorManager !");
+      ATH_MSG_FATAL("Could not get SCT_DetectorManager !");
       return;
     }
   }

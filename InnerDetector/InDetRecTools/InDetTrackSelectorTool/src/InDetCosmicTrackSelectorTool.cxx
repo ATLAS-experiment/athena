@@ -52,7 +52,6 @@ namespace InDet
          msg(MSG::ERROR)<<" Unable to retrieve "<<m_trackSumTool<<endmsg;
          return StatusCode::FAILURE;
        }
-       ATH_MSG_INFO("Track summary tool retrieved");
        m_trackSumToolAvailable = true;
      }
 

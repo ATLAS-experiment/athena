@@ -46,10 +46,6 @@
 //STL includes
 #include <sstream>
 
-//#define TRTDBG ATH_MSG_INFO("To line "<<__LINE__);
-//#define TRTDBG 0;
-
-//#include "TRT_ElectronPidToolRun2_HTcalculation.cxx"
 
 // Helper method to store NN input variables into maps
 template <typename T>

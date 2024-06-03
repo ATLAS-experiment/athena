@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -122,12 +122,10 @@ namespace InDet {
   }
 
   StatusCode SCT_ClusteringTool::initialize() {
-    ATH_MSG_INFO("Initialize clustering tool");
-
     ATH_CHECK(m_clusterMaker.retrieve());
 
     if (m_checkBadChannels) {
-      ATH_MSG_INFO("Clustering has been asked to look at bad channel info");
+      ATH_MSG_DEBUG("Clustering has been asked to look at bad channel info");
       ATH_CHECK(m_conditionsTool.retrieve());
     } else {
       m_conditionsTool.disable();
@@ -150,17 +148,17 @@ namespace InDet {
     if (m_innertwoBarrelX1X) countTrueSettings++;
     if (countTrueSettings!=1) {
       if (!m_timeBinStr.empty()) {
-        ATH_MSG_INFO("Timing requirement: m_timeBinStr " << m_timeBinStr << " is used for clustering");
+        ATH_MSG_DEBUG("Timing requirement: m_timeBinStr " << m_timeBinStr << " is used for clustering");
       } else {
         if (countTrueSettings==0) {
-          ATH_MSG_INFO("Timing requirement is not used for clustering");
+          ATH_MSG_DEBUG("Timing requirement is not used for clustering");
         } else {
           ATH_MSG_FATAL("One and only one of m_majority01X, m_innermostBarrelX1X and m_innertwoBarrelX1X should be set to True!");
           return StatusCode::FAILURE;
         }
       }
     } else {
-      ATH_MSG_INFO("Timing requirement: " <<
+      ATH_MSG_DEBUG("Timing requirement: " <<
                    (m_majority01X        ? "m_majority01X"        : "") <<
                    (m_innermostBarrelX1X ? "m_innermostBarrelX1X" : "") <<
                    (m_innertwoBarrelX1X  ? "m_innertwoBarrelX1X"  : "") <<

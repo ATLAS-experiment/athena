@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -504,11 +504,11 @@ namespace InDet {
           infoMsg += std::to_string(pair.first) + "\n ";
         }
         infoMsg += "\nNumber of subclusters requested : "+ std::to_string(numberSubClusters);
-        ATH_MSG_INFO(infoMsg);
-	      ATH_MSG_FATAL( "estimatePositionsLWTNN: No lwtnn network found for the number of clusters.\n"
-	        <<" If you are outside the valid range for an lwtnn-based configuration, please run with useNNTTrainedNetworks instead.\n Key = " 
-	        << m_readKeyJSON.key() );
-	      return {};
+        ATH_MSG_DEBUG(infoMsg);
+        ATH_MSG_FATAL( "estimatePositionsLWTNN: No lwtnn network found for the number of clusters.\n"
+		       <<" If you are outside the valid range for an lwtnn-based configuration, please run with useNNTTrainedNetworks instead.\n Key = "
+		       << m_readKeyJSON.key() );
+        return {};
       }
       if(numberSubClusters==1) {
         outputNode = m_outputNodesPos1; 

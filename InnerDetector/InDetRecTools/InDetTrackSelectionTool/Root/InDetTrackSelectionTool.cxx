@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetTrackSelectionTool/InDetTrackSelectionTool.h"
@@ -247,7 +247,6 @@ StatusCode InDet::InDetTrackSelectionTool::initialize() {
   }
 
   // Greet the user:
-  ATH_MSG_INFO( "Initializing track selection tool." );
   ATH_CHECK( asg::AsgTool::initialize() );
 
   // if the CutLevel string is set to something recognizable,
@@ -261,8 +260,8 @@ StatusCode InDet::InDetTrackSelectionTool::initialize() {
 	ATH_MSG_ERROR( "\t" << opt.first );
       }
     } else {
-      ATH_MSG_INFO( "Cut level set to \"" << it_mapCutLevel->first << "\"." );
-      ATH_MSG_INFO( "This will not overwrite other cuts that have been set.");
+      ATH_MSG_DEBUG( "Cut level set to \"" << it_mapCutLevel->first << "\"." );
+      ATH_MSG_DEBUG( "This will not overwrite other cuts that have been set.");
       setCutLevelPrivate( it_mapCutLevel->second, false );
     }
   }
@@ -597,32 +596,32 @@ StatusCode InDet::InDetTrackSelectionTool::setupCuts(std::map< std::string, std:
   }
 #endif
   if (m_maxEtaForTrtHitCuts > 0. && m_maxTrtEtaAcceptance < m_maxEtaForTrtHitCuts) {
-    ATH_MSG_INFO( "  -- TRT hit cuts applied above eta = " << m_maxTrtEtaAcceptance
+    if constexpr(VERBOSE>0) ATH_MSG_INFO( "  -- TRT hit cuts applied above eta = " << m_maxTrtEtaAcceptance
 		  << " and below eta = " << m_maxEtaForTrtHitCuts << " --" );
     if (m_minNTrtHits > 0) {
-      ATH_MSG_INFO( "    Minimum TRT hits outside eta acceptance: " << m_minNTrtHits );
+      if constexpr(VERBOSE>0) ATH_MSG_INFO( "    Minimum TRT hits outside eta acceptance: " << m_minNTrtHits );
       trackCuts["TrtHits"].push_back( MinTRTHitsCut<Trk_Helper,1>( m_maxTrtEtaAcceptance, m_maxEtaForTrtHitCuts, m_minNTrtHits,
                                                                    {xAOD::numberOfTRTHits} ));
     }
     if (m_minNTrtHitsPlusOutliers > 0) {
-      ATH_MSG_INFO( "    Minimum TRT hits outside eta acceptance including outliers: " << m_minNTrtHitsPlusOutliers );
+      if constexpr(VERBOSE>0) ATH_MSG_INFO( "    Minimum TRT hits outside eta acceptance including outliers: " << m_minNTrtHitsPlusOutliers );
       trackCuts["TrtHits"].push_back( MinTRTHitsCut<Trk_Helper,2>( m_maxTrtEtaAcceptance,m_maxEtaForTrtHitCuts, m_minNTrtHitsPlusOutliers,
                                                                    {xAOD::numberOfTRTHits, xAOD::numberOfTRTOutliers} ));
     }
     if (m_minNTrtHighThresholdHits > 0) {
-      ATH_MSG_INFO( "    Minimum TRT hits outside eta acceptance above high energy threshold: "
+      if constexpr(VERBOSE>0) ATH_MSG_INFO( "    Minimum TRT hits outside eta acceptance above high energy threshold: "
 		    << m_minNTrtHighThresholdHits );
       trackCuts["TrtHits"].push_back( MinTRTHitsCut<Trk_Helper,1>( m_maxTrtEtaAcceptance,m_maxEtaForTrtHitCuts, m_minNTrtHighThresholdHits,
                                                                    {xAOD::numberOfTRTHighThresholdHits} ));
     }
     if (m_minNTrtHighThresholdHitsPlusOutliers > 0) {
-      ATH_MSG_INFO( "    Minimum TRT hits outside eta acceptance above high energy threshold including outliers: "
+      if constexpr(VERBOSE>0) ATH_MSG_INFO( "    Minimum TRT hits outside eta acceptance above high energy threshold including outliers: "
 		    << m_minNTrtHighThresholdHitsPlusOutliers );
       trackCuts["TrtHits"].push_back( MinTRTHitsCut<Trk_Helper,2>( m_maxTrtEtaAcceptance,m_maxEtaForTrtHitCuts, m_minNTrtHighThresholdHitsPlusOutliers,
                                                                    {xAOD::numberOfTRTHighThresholdHits, xAOD::numberOfTRTHighThresholdOutliers} ));
     }
     if (maxDoubleIsSet(m_maxTrtHighEFraction)) { // I think this condition could be instead that it is between 0 and 1
-      ATH_MSG_INFO( "    Maximum ratio of high threshold to regular TRT hits outside eta acceptance: "
+      if constexpr(VERBOSE>0) ATH_MSG_INFO( "    Maximum ratio of high threshold to regular TRT hits outside eta acceptance: "
 		    << m_maxTrtHighEFraction);
       trackCuts["TrtHits"].push_back([maxTrtEtaAcceptance = m_maxTrtEtaAcceptance,
                                       maxEtaForTrtHitCuts = m_maxEtaForTrtHitCuts,
@@ -634,7 +633,7 @@ StatusCode InDet::InDetTrackSelectionTool::setupCuts(std::map< std::string, std:
       });
     }
     if (maxDoubleIsSet(m_maxTrtHighEFractionWithOutliers)) {
-      ATH_MSG_INFO( "    Maximum ratio of high threshold to regular TRT hits above eta acceptance including outliers: "
+      if constexpr(VERBOSE>0) ATH_MSG_INFO( "    Maximum ratio of high threshold to regular TRT hits above eta acceptance including outliers: "
 		    << m_maxTrtHighEFractionWithOutliers);
       trackCuts["TrtHits"].push_back([maxTrtEtaAcceptance             = m_maxTrtEtaAcceptance,
                                       maxEtaForTrtHitCuts             = m_maxEtaForTrtHitCuts,
@@ -646,7 +645,7 @@ StatusCode InDet::InDetTrackSelectionTool::setupCuts(std::map< std::string, std:
       });
     }
     if (m_maxTrtOutlierFraction < 1. && m_maxTrtOutlierFraction >= 0.) {
-      ATH_MSG_INFO( "    Maximum fraction of TRT hits that are outliers: " << m_maxTrtOutlierFraction );
+      if constexpr(VERBOSE>0) ATH_MSG_INFO( "    Maximum fraction of TRT hits that are outliers: " << m_maxTrtOutlierFraction );
       trackCuts["TrtHits"].push_back([maxTrtEtaAcceptance   = m_maxTrtEtaAcceptance,
                                       maxEtaForTrtHitCuts   = m_maxEtaForTrtHitCuts,
                                       maxTrtOutlierFraction = m_maxTrtOutlierFraction](Trk_Helper helper, const asg::AsgMessaging &msgHelper) {
@@ -838,7 +837,7 @@ StatusCode InDet::InDetTrackSelectionTool::setupCuts(std::map< std::string, std:
     std::stringstream pTRangeBuffer;
     std::copy(m_vecPtCutoffsForZ0SinThetaCut.begin(), m_vecPtCutoffsForZ0SinThetaCut.end(), std::ostream_iterator<Double_t>(pTRangeBuffer, ", "));
     std::string pTString=pTRangeBuffer.str();
-    ATH_MSG_INFO("Z0SinTheta cuts (<=) for pT above "<<pTString.substr(0, pTString.size()-2)<<"MeV, respectively:");
+    if constexpr(VERBOSE>0) ATH_MSG_INFO("Z0SinTheta cuts (<=) for pT above "<<pTString.substr(0, pTString.size()-2)<<"MeV, respectively:");
     for (size_t i_cut_eta=0; i_cut_eta<etaSize; ++i_cut_eta) 
     {
       std::stringstream etaRangeBuffer;
@@ -850,7 +849,7 @@ StatusCode InDet::InDetTrackSelectionTool::setupCuts(std::map< std::string, std:
       std::copy(m_vecvecMaxZ0SinThetaAboveEtaPt.at(i_cut_eta).begin(), m_vecvecMaxZ0SinThetaAboveEtaPt.at(i_cut_eta).end(), std::ostream_iterator<Double_t>(cutBuffer, ", "));
       std::string cutString=cutBuffer.str();
 
-      ATH_MSG_INFO(" for "<<etaRangeBuffer.str()<<": "<<cutString.substr(0, cutString.size()-2));
+      if constexpr(VERBOSE>0) ATH_MSG_INFO(" for "<<etaRangeBuffer.str()<<": "<<cutString.substr(0, cutString.size()-2));
     }
 
     if (!checkOrder(m_vecEtaCutoffsForZ0SinThetaCut)) {
@@ -894,7 +893,7 @@ StatusCode InDet::InDetTrackSelectionTool::setupCuts(std::map< std::string, std:
     std::stringstream pTRangeBuffer;
     std::copy(m_vecPtCutoffsForD0Cut.begin(), m_vecPtCutoffsForD0Cut.end(), std::ostream_iterator<Double_t>(pTRangeBuffer, ", "));
     std::string pTString=pTRangeBuffer.str();
-    ATH_MSG_INFO("D0 cuts (<=) for pT above "<<pTString.substr(0, pTString.size()-2)<<"MeV, respectively:");
+    if constexpr(VERBOSE>0) ATH_MSG_INFO("D0 cuts (<=) for pT above "<<pTString.substr(0, pTString.size()-2)<<"MeV, respectively:");
     for (size_t i_cut_eta=0; i_cut_eta<etaSize; ++i_cut_eta) 
     {
       std::stringstream etaRangeBuffer;
@@ -906,7 +905,7 @@ StatusCode InDet::InDetTrackSelectionTool::setupCuts(std::map< std::string, std:
       std::copy(m_vecvecMaxD0AboveEtaPt.at(i_cut_eta).begin(), m_vecvecMaxD0AboveEtaPt.at(i_cut_eta).end(), std::ostream_iterator<Double_t>(cutBuffer, ", "));
       std::string cutString=cutBuffer.str();
 
-      ATH_MSG_INFO(" for "<<etaRangeBuffer.str()<<": "<<cutString.substr(0, cutString.size()-2));
+      if constexpr(VERBOSE>0) ATH_MSG_INFO(" for "<<etaRangeBuffer.str()<<": "<<cutString.substr(0, cutString.size()-2));
     }
 
     if (!checkOrder(m_vecEtaCutoffsForD0Cut)) {
@@ -950,7 +949,7 @@ StatusCode InDet::InDetTrackSelectionTool::setupCuts(std::map< std::string, std:
     std::stringstream pTRangeBuffer;
     std::copy(m_vecPtCutoffsForSctHolesCut.begin(), m_vecPtCutoffsForSctHolesCut.end(), std::ostream_iterator<Double_t>(pTRangeBuffer, ", "));
     std::string pTString=pTRangeBuffer.str();
-    ATH_MSG_INFO("SctHoles cuts (<=) for pT above "<<pTString.substr(0, pTString.size()-2)<<"MeV, respectively:");
+    if constexpr(VERBOSE>0) ATH_MSG_INFO("SctHoles cuts (<=) for pT above "<<pTString.substr(0, pTString.size()-2)<<"MeV, respectively:");
     for (size_t i_cut_eta=0; i_cut_eta<etaSize; ++i_cut_eta) 
     {
       std::stringstream etaRangeBuffer;
@@ -962,7 +961,7 @@ StatusCode InDet::InDetTrackSelectionTool::setupCuts(std::map< std::string, std:
       std::copy(m_vecvecMaxSctHolesAboveEtaPt.at(i_cut_eta).begin(), m_vecvecMaxSctHolesAboveEtaPt.at(i_cut_eta).end(), std::ostream_iterator<Double_t>(cutBuffer, ", "));
       std::string cutString=cutBuffer.str();
 
-      ATH_MSG_INFO(" for "<<etaRangeBuffer.str()<<": "<<cutString.substr(0, cutString.size()-2));
+      if constexpr(VERBOSE>0) ATH_MSG_INFO(" for "<<etaRangeBuffer.str()<<": "<<cutString.substr(0, cutString.size()-2));
     }
 
     if (!checkOrder(m_vecEtaCutoffsForSctHolesCut)) {
@@ -1006,7 +1005,7 @@ StatusCode InDet::InDetTrackSelectionTool::setupCuts(std::map< std::string, std:
     std::stringstream pTRangeBuffer;
     std::copy(m_vecPtCutoffsForSctHitsPlusDeadCut.begin(), m_vecPtCutoffsForSctHitsPlusDeadCut.end(), std::ostream_iterator<Double_t>(pTRangeBuffer, ", "));
     std::string pTString=pTRangeBuffer.str();
-    ATH_MSG_INFO("SctHitsPlusDead cuts (>=) for pT above "<<pTString.substr(0, pTString.size()-2)<<"MeV, respectively:");
+    if constexpr(VERBOSE>0) ATH_MSG_INFO("SctHitsPlusDead cuts (>=) for pT above "<<pTString.substr(0, pTString.size()-2)<<"MeV, respectively:");
     for (size_t i_cut_eta=0; i_cut_eta<etaSize; ++i_cut_eta) 
     {
       std::stringstream etaRangeBuffer;
@@ -1018,7 +1017,7 @@ StatusCode InDet::InDetTrackSelectionTool::setupCuts(std::map< std::string, std:
       std::copy(m_vecvecMinSctHitsPlusDeadAboveEtaPt.at(i_cut_eta).begin(), m_vecvecMinSctHitsPlusDeadAboveEtaPt.at(i_cut_eta).end(), std::ostream_iterator<Double_t>(cutBuffer, ", "));
       std::string cutString=cutBuffer.str();
 
-      ATH_MSG_INFO(" for "<<etaRangeBuffer.str()<<": "<<cutString.substr(0, cutString.size()-2));
+      if constexpr(VERBOSE>0) ATH_MSG_INFO(" for "<<etaRangeBuffer.str()<<": "<<cutString.substr(0, cutString.size()-2));
     }
 
     if (!checkOrder(m_vecEtaCutoffsForSctHitsPlusDeadCut)) {
@@ -1096,14 +1095,17 @@ asg::AcceptData InDet::InDetTrackSelectionTool::accept(Trk_Helper helper,
 
 StatusCode InDet::InDetTrackSelectionTool::finalize()
 {
-  ATH_MSG_INFO("Finalizing track selection tool.");
   if (!m_isInitialized) {
     ATH_MSG_ERROR( "You are attempting to finalize a tool that has not been initialized()." );
   }
+
+#ifdef XAOD_ANALYSIS
   if (m_numTracksProcessed == 0) {
     ATH_MSG_INFO( "No tracks processed in selection tool." );
     return StatusCode::SUCCESS;
   }
+  
+  // Only printed out for analysis
   ATH_MSG_INFO( m_numTracksPassed << " / " << m_numTracksProcessed << " = "
 		<< m_numTracksPassed*100./m_numTracksProcessed << "% passed all cuts." );
   for (const auto& cutFamily : m_trackParticleCuts) {
@@ -1112,6 +1114,7 @@ StatusCode InDet::InDetTrackSelectionTool::finalize()
     ATH_MSG_INFO( numPassed << " = " << numPassed*100./m_numTracksProcessed << "% passed "
 		  << cutFamily.first << " cut." );
   }
+#endif
 
   return StatusCode::SUCCESS;
 }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -52,7 +52,6 @@ StatusCode InDet::SeedToTrackConversionTool::initialize()
 
   ATH_CHECK(m_seedsegmentsOutput.initialize());
 
-  ATH_MSG_INFO ("initialize() successful in " << name());
   return StatusCode::SUCCESS;
 }
 
@@ -85,7 +84,7 @@ void InDet::SeedToTrackConversionTool::endEvent(SeedToTrackConversionData& data)
     dump(data, msg(MSG::DEBUG));
   }
 
-  ATH_MSG_INFO(" Check SiSPSeedSegments Collection (" << m_seedsegmentsOutput << ") " << data.seedSegmentsCollection()->size() << " trackinfo: "
+  ATH_MSG_DEBUG(" Check SiSPSeedSegments Collection (" << m_seedsegmentsOutput << ") " << data.seedSegmentsCollection()->size() << " trackinfo: "
                << data.trackInfo());
   SG::WriteHandle<TrackCollection> seedsegmentsOutput{m_seedsegmentsOutput};
   if (seedsegmentsOutput.record(std::move(data.seedSegmentsCollection())).isFailure()) {
