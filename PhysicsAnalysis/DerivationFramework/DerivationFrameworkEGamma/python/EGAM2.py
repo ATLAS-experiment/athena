@@ -350,15 +350,6 @@ def EGAM2Cfg(flags):
     EGAM2TriggerListsHelper = TriggerListsHelper(flags)
 
     # configure skimming/thinning/augmentation tools
-    # add some single-leg trigger matching info needed for Jpsi triggers
-    if flags.Trigger.EDMVersion == 2:
-        EGAM2TriggerListsHelper.Run2TriggerNamesNoTau.extend(
-            [
-                "HLT_e5_lhtight_nod0",
-                "HLT_e9_lhtight_nod0",
-                "HLT_e14_lhtight_nod0",
-            ]
-        )
     acc.merge(
         EGAM2KernelCfg(
             flags,
@@ -508,6 +499,29 @@ def EGAM2Cfg(flags):
             OutputContainerPrefix="TrigMatch_",
             TriggerList=EGAM2TriggerListsHelper.Run2TriggerNamesNoTau,
         )
+
+        # add some single-leg trigger matching info needed for Jpsi triggers
+        from DerivationFrameworkPhys.TriggerMatchingCommonConfig import (
+            TriggerMatchingCommonRun2Cfg
+        )
+        EGAM2TrigMatchList = [
+            "HLT_e5_lhtight_nod0",
+            "HLT_e9_lhtight_nod0",
+            "HLT_e14_lhtight_nod0",
+        ]
+        acc.merge(TriggerMatchingCommonRun2Cfg(
+            flags,
+            name="EGAM2TrigMatch",
+            OutputContainerPrefix="TrigMatch_",
+            ChainNames=EGAM2TrigMatchList)
+        )
+
+        AddRun2TriggerMatchingToSlimmingHelper(
+            SlimmingHelper=EGAM2SlimmingHelper,
+            OutputContainerPrefix="TrigMatch_",
+            TriggerList=EGAM2TrigMatchList
+        )
+
     # Run 3
     if flags.Trigger.EDMVersion == 3:
         from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import (
