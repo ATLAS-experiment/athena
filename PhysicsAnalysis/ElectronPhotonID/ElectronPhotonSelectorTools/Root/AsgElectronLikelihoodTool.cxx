@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -65,9 +65,9 @@ AsgElectronLikelihoodTool::AsgElectronLikelihoodTool(const std::string& myname)
   declareProperty("skipDeltaPoverP",
                   m_skipDeltaPoverP = false,
                   "If true, it wil skip the check of deltaPoverP");
-  declareProperty("useAverageMu", 
+  declareProperty("useAverageMu",
                   m_useAverageMu=false,
-                  "Whether to use average mu instead of NPV." );                  
+                  "Whether to use average mu instead of NPV." );
 }
 
 AsgElectronLikelihoodTool::~AsgElectronLikelihoodTool()
@@ -82,8 +82,7 @@ AsgElectronLikelihoodTool::initialize()
 
   if (!m_WorkingPoint.empty()) {
     m_configFile = AsgConfigHelper::findConfigFile(
-      m_WorkingPoint, EgammaSelectors::LHPointToConfFile);
-    ATH_MSG_INFO("operating point : " << this->getOperatingPointName());
+        m_WorkingPoint, EgammaSelectors::LHPointToConfFile);
   }
 
   if (!m_configFile.empty()) {
@@ -92,8 +91,6 @@ AsgElectronLikelihoodTool::initialize()
       ATH_MSG_ERROR("Could not locate config " << m_configFile);
       return StatusCode::FAILURE;
     }
-
-    ATH_MSG_INFO("Configfile to use  " << m_configFile);
 
     TEnv env;
     if (env.ReadFile(configFile.c_str(), kEnvLocal)) {
@@ -214,16 +211,17 @@ AsgElectronLikelihoodTool::initialize()
     // if true, deltaEta1 will be corrected for the pear shape distortion of the
     // LAr
     m_correctDeltaEta = env.GetValue("doCorrectDeltaEta", false);
-    
+
     if (m_rootTool->m_doCentralityTransform && m_useAverageMu) {
         ATH_MSG_ERROR("Cannot use centrality transform and average mu "
             << "at the same time as they affect the same variable");
         return StatusCode::FAILURE;
     }
-  } else { // Error if it cant find the conf
+  } else {  // Error if it cant find the conf
     ATH_MSG_ERROR("Could not find configuration file");
     return StatusCode::FAILURE;
   }
+
   ///-----------End of text config----------------------------
 
   // Setup primary vertex key handle
@@ -912,7 +910,7 @@ double AsgElectronLikelihoodTool::getIpVariable(double mu, const EventContext& c
     else
       return static_cast<double>(m_usePVCont ? this->getNPrimVertices(ctx)
                                            : m_nPVdefault);
-  } 
+  }
   return mu;
 }
 

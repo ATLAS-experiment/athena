@@ -164,7 +164,7 @@ StatusCode AsgElectronSelectorTool::initialize()
     // cut on MVA discriminant
     m_cutSelector = AsgConfigHelper::HelperDouble("CutSelector", env);
     m_cutSelectorCF = AsgConfigHelper::HelperDouble("CutSelectorCF", env);
-    
+
     // cut on ambiuity bit
     m_cutAmbiguity = AsgConfigHelper::HelperInt("CutAmbiguity", env);
     // cut on b-layer
@@ -372,7 +372,7 @@ asg::AcceptData AsgElectronSelectorTool::accept( const EventContext& ctx, const 
       allFound = false;
       notFoundList += "ambiguityType ";
     }
-  } 
+  }
 
   nSiHitsPlusDeadSensors = ElectronSelectorHelpers::numberOfSiliconHitsAndDeadSensors(*track);
   nPixHitsPlusDeadSensors = ElectronSelectorHelpers::numberOfPixelHitsAndDeadSensors(*track);
@@ -394,7 +394,7 @@ asg::AcceptData AsgElectronSelectorTool::accept( const EventContext& ctx, const 
                         passBLayerRequirement,
                         ambiguityBit, mu));
   }
-  
+
   if (!allFound){
     throw std::runtime_error("AsgElectronSelectorTool: Not all variables needed for the decision are found. The following variables are missing: " + notFoundList );
   }
@@ -478,7 +478,7 @@ asg::AcceptData AsgElectronSelectorTool::accept( const EventContext& ctx, const 
       passMVA = false;
     }
   }
-  
+
 // (Second) cut on prompt discriminant
   if (!m_cutSelector.empty()){
     double cutDiscriminant;
@@ -493,7 +493,7 @@ asg::AcceptData AsgElectronSelectorTool::accept( const EventContext& ctx, const 
       cutDiscriminant = m_cutSelector.at(ibin_combinedMVA);
     }
     // Determine if the calculated mva score value passes the combined cut
-    ATH_MSG_DEBUG("MVA macro: Prompt Discriminant: "); 
+    ATH_MSG_DEBUG("MVA macro: Prompt Discriminant: ");
     if (mvaScore < cutDiscriminant){
       ATH_MSG_DEBUG("MVA macro: Prompt cut failed.");
       passMVA = false;
@@ -685,8 +685,8 @@ std::vector<float> AsgElectronSelectorTool::calculateMultipleOutputs(const Event
     SCTWeightedCharge = (eg->charge()*charge/SCT);
   else {
     ATH_MSG_WARNING("No SCT hit for any track associated to electron ! nTP = " << eg->nTrackParticles());
-  } 
-  
+  }
+
   // retrieve Calorimeter variables
   // reta = e237/e277
   if (!eg->showerShapeValue(Reta, xAOD::EgammaParameters::Reta)){
@@ -949,17 +949,17 @@ double AsgElectronSelectorTool::combineOutputs( const std::vector<float>& mvaSco
   return std::log(disc);
 }
 
-double AsgElectronSelectorTool::combineOutputsCF( const std::vector<float>& mvaScores ) 
+double AsgElectronSelectorTool::combineOutputsCF( const std::vector<float>& mvaScores )
 {
   double disc = 0;
   disc = mvaScores.at(0) / mvaScores.at(1);
-    
+
   return std::log(disc);
 }
 
 
 // Gets the Discriminant Eta bin [0,s_fnDiscEtaBins-1] given the eta
-unsigned int AsgElectronSelectorTool::getDiscEtaBin( double eta ) 
+unsigned int AsgElectronSelectorTool::getDiscEtaBin( double eta )
 {
   const unsigned int nEtaBins = s_fnDiscEtaBins;
   const double etaBins[nEtaBins] = {0.1, 0.6, 0.8, 1.15, 1.37, 1.52, 1.81, 2.01, 2.37, 2.47};
@@ -970,7 +970,7 @@ unsigned int AsgElectronSelectorTool::getDiscEtaBin( double eta )
 }
 
 // Gets the Discriminant Et bin (MeV) [0,s_fnDiscEtBins-1]
-unsigned int AsgElectronSelectorTool::getDiscEtBin( double et ) 
+unsigned int AsgElectronSelectorTool::getDiscEtBin( double et )
 {
   static const double GeV = 1000;
   const unsigned int nEtBins = s_fnDiscEtBins;
@@ -984,7 +984,7 @@ unsigned int AsgElectronSelectorTool::getDiscEtBin( double et )
 
 // Note that this will only perform the cut interpolation up to ~45 GeV, so
 // no smoothing is done above this for the high ET LH binning yet
-double AsgElectronSelectorTool::interpolateCuts( const std::vector<double>& cuts,double et,double eta ) 
+double AsgElectronSelectorTool::interpolateCuts( const std::vector<double>& cuts,double et,double eta )
 {
   const int etbin = getDiscEtBin(et);
   const int etabin = getDiscEtaBin(eta);
