@@ -23,7 +23,8 @@ if __name__=="__main__":
    
    # --- set flags
    # the input file
-   flags.Input.Files = ['/eos/user/s/sroygara/ITk/BytestreamDev/run/mc21_14TeV.900498.PG_single_muonpm_Pt100_etaFlatnp0_43.recon.RDO.e8481_s4149_r14697/RDO.33675668._000028.pool.root.1']
+   #flags.Input.Files = ['/eos/user/s/sroygara/ITk/BytestreamDev/run/mc21_14TeV.900498.PG_single_muonpm_Pt100_etaFlatnp0_43.recon.RDO.e8481_s4149_r14697/RDO.33675668._000028.pool.root.1']
+   flags.Input.Files = ['/eos/user/o/okovanda/data/ITk/DAQ/RDO/mc21_14TeV.900498.PG_single_muonpm_Pt100_etaFlatnp0_43.recon.RDO.e8481_s4149_r14697/RDO.33628990._000069.pool.root.1']
 
    
    # --- end flag customization
