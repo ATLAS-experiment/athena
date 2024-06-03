@@ -727,7 +727,7 @@ rebuildState(Trk::MultiComponentState&& stateBeforeUpdate)
     std::move(stateBeforeUpdate);
   // We need to loop checking for invalid componets i.e negative covariance
   // diagonal elements and update them with a large covariance matrix
-  for (auto& component : stateWithInsertedErrors) {
+  for (const Trk::ComponentParameters& component : stateWithInsertedErrors) {
     const Trk::TrackParameters* trackParameters = component.params.get();
     const bool rebuildCov = invalidComponent(trackParameters);
     if (rebuildCov) {
@@ -837,23 +837,19 @@ Trk::GsfMeasurementUpdator::update(Trk::MultiComponentState&& stateBeforeUpdate,
                                    const int updatingSign)
 {
 
-  // Check all components have associated error matricies
-  Trk::MultiComponentState::iterator component = stateBeforeUpdate.begin();
-
+  // Check all components have associated error matrices
   bool rebuildStateWithErrors = false;
-
   // Perform initial check of state awaiting update. If all states have
   // associated error matricies then no need to perform the rebuild
-  for (; component != stateBeforeUpdate.end(); ++component) {
+  for (const Trk::ComponentParameters& component : stateBeforeUpdate) {
     rebuildStateWithErrors =
-      rebuildStateWithErrors || invalidComponent(component->params.get());
+      rebuildStateWithErrors || invalidComponent(component.params.get());
   }
 
   if (rebuildStateWithErrors) {
     Trk::MultiComponentState stateWithInsertedErrors =
       rebuildState(std::move(stateBeforeUpdate));
     // Perform the measurement update with the modified state
-
     Trk::MultiComponentState updatedState = calculateFilterStep(
       std::move(stateWithInsertedErrors), measurement, fitQoS, updatingSign);
     if (updatedState.empty()) {
@@ -877,12 +873,9 @@ Trk::GsfMeasurementUpdator::fitQuality(const MultiComponentState& updatedState,
                                        const MeasurementBase& measurement)
 {
   double chi2 = 0;
-  int degreesOfFreedom = 0;
-  Trk::MultiComponentState::const_iterator component = updatedState.begin();
-
-  for (; component != updatedState.end(); ++component) {
-    const Trk::TrackParameters* trackParameters = component->params.get();
-    Trk::FitQualityOnSurface componentFitQuality;
+  Trk::FitQualityOnSurface componentFitQuality;
+  for (const Trk::ComponentParameters& component: updatedState) {
+    const Trk::TrackParameters* trackParameters = component.params.get();
     stateFitQuality(componentFitQuality,
                     *trackParameters,
                     measurement.localParameters(),
@@ -890,12 +883,10 @@ Trk::GsfMeasurementUpdator::fitQuality(const MultiComponentState& updatedState,
                     1);
 
     double componentChi2 = componentFitQuality.chiSquared();
-    chi2 += component->weight * componentChi2;
-    // The same measurement is included in each update
-    if (component == updatedState.begin()) {
-      degreesOfFreedom = componentFitQuality.numberDoF();
-    }
+    chi2 += component.weight * componentChi2;
   }
+  //The same measurement is included
+  int degreesOfFreedom = componentFitQuality.numberDoF();
   return { chi2, degreesOfFreedom };
 }
 

@@ -33,7 +33,7 @@ constexpr double s_componentMeanCut = 0.0;
  * We unroll up to order 5
  */
 template<size_t N>
-inline double
+inline constexpr double
 hornerEvaluate(const std::array<double, N>& a, const double& x)
 {
   constexpr size_t order = N - 1;
@@ -58,7 +58,7 @@ hornerEvaluate(const std::array<double, N>& a, const double& x)
     return result;
   }
 }
-inline bool
+inline constexpr bool
 inRange(int var, int lo, int hi)
 {
   return ((var <= hi) and (var >= lo));

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkGaussianSumFilterUtils/KLGaussianMixtureReduction.h"
@@ -185,6 +185,19 @@ numDistances(const int32_t n, float* distancesIn)
  */
 
 /**
+ * @brief precalculate the offsets for the column
+ */
+constexpr std::array<int32_t, GSFConstants::maxComponentsAfterConvolution>
+    offset = []() {
+      constexpr int32_t n = GSFConstants::maxComponentsAfterConvolution;
+      std::array<int32_t, n> tmp = {};
+      for (int32_t i = 0; i < n; ++i) {
+        tmp[i] = (i - 1) * i / 2;
+      }
+      return tmp;
+    }();
+
+/**
  * @brief Helper struct to map position in
  * triangular array to matrix(I, J) indices
  */
@@ -212,7 +225,7 @@ convert(int32_t idx)
     constexpr size_t nn = n * (n - 1) / 2;
     std::vector<triangularToIJ> indexMap(nn);
     for (int8_t i = 1; i < n; ++i) {
-      const int32_t indexConst = (i - 1) * i / 2;
+      const int32_t indexConst = offset[i];
       for (int8_t j = 0; j < i; ++j) {
         indexMap[indexConst + j] = { i, j };
       }
@@ -238,7 +251,7 @@ calculateAllDistances(const Component1D* componentsIn,
   float* distances =
     std::assume_aligned<GSFConstants::alignment>(distancesIn);
   for (int32_t i = 1; i < n; ++i) {
-    const int32_t indexConst = (i - 1) * i / 2;
+    const int32_t indexConst = offset[i];
     const Component1D componentI = components[i];
     for (int32_t j = 0; j < i; ++j) {
       const Component1D componentJ = components[j];
@@ -273,8 +286,8 @@ updateDistances(
   // After this the remaining components we care about
   // are n-1 which we return
   const int32_t last = (n - 1);
-  const int32_t indexOffsetJ = (minFrom - 1) * minFrom / 2;
-  const int32_t indexOffsetLast = (last - 1) * last / 2;
+  const int32_t indexOffsetJ = offset[minFrom];
+  const int32_t indexOffsetLast = offset[last];
   // we do no need to swap the last with itself
   if (minFrom != last) {
     // Rows in distance matrix
@@ -283,7 +296,7 @@ updateDistances(
     }
     // Columns in distance matrix
     for (int32_t i = minFrom + 1; i < last; ++i) {
-      const int32_t index = (i - 1) * i / 2 + minFrom;
+      const int32_t index = offset[i] + minFrom;
       std::swap(distances[index], distances[indexOffsetLast + i]);
     }
     // swap the components
@@ -295,7 +308,7 @@ updateDistances(
   if (minTo == last) {
     minTo = minFrom;
   }
-  const int32_t indexConst = (minTo - 1) * minTo / 2;
+  const int32_t indexConst = offset[minTo];
   // This is the component that has been updated
   const Component1D componentJ = components[minTo];
   // Rows in distance matrix
@@ -307,7 +320,7 @@ updateDistances(
   // Columns in distance matrix
   for (int32_t i = minTo + 1; i < last; ++i) {
     const Component1D componentI = components[i];
-    const int32_t index = (i - 1) * i / 2 + minTo;
+    const int32_t index = offset[i] + minTo;
     distances[index] = symmetricKL(componentI, componentJ);
   }
   return last;
@@ -368,7 +381,7 @@ findMergesImpl(const Component1DArray& componentsIn,
                                              numberOfComponentsLeft);
 
     // number of remaining distances padded
-    nn = numberOfComponentsLeft * (numberOfComponentsLeft - 1) / 2;
+    nn = offset[numberOfComponentsLeft];
     nnpadded = numDistances(nn, distances.buffer());
   } // end of merge while
   return result;
