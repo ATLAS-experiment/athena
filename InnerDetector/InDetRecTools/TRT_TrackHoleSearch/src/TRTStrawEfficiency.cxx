@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // TRTStrawEfficiency.cxx
@@ -80,7 +80,6 @@ TRTStrawEfficiency::TRTStrawEfficiency(const std::string& name, ISvcLocator* pSv
 
 //____________________________________________________________________________
 StatusCode TRTStrawEfficiency::initialize() {
-	ATH_MSG_DEBUG( "TRTStrawEfficiency::initialize()" );
 
 	// retrieve TRTTrackHoleSearchTool
 	ATH_CHECK(m_trt_hole_finder.retrieve());
@@ -295,9 +294,8 @@ StatusCode TRTStrawEfficiency::execute() {
 
 //____________________________________________________________________________
 StatusCode TRTStrawEfficiency::finalize() {
-	ATH_MSG_DEBUG( "TRTStrawEfficiency::finalize()" );
-	ATH_MSG_INFO( "# tracks = " << m_num_tracks );
-	ATH_MSG_INFO( "# preselected tracks = " << m_num_preselected_tracks );
+	ATH_MSG_DEBUG( "# tracks = " << m_num_tracks );
+	ATH_MSG_DEBUG( "# preselected tracks = " << m_num_preselected_tracks );
 
 #ifdef ANP_CPU_PROFILER
 	ATH_MSG_ALWAYS("ProfilerStop.");

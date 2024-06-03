@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 //Author: Lianyou Shan <lianyou.shan@cern.ch>
 // -*- c++ -*-
@@ -31,7 +31,6 @@ StatusCode InDet::SecVtxTrackCut::initialize()
   }
   // let the cut have a handle on the tool's accessors
   m_trackAccessors = &(m_selectionTool->m_trackAccessors);
-  ATH_MSG_INFO( "SecVtxTrackCut initialized ... " ) ;
   return StatusCode::SUCCESS;
 }
 

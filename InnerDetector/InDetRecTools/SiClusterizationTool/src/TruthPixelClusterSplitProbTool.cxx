@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -33,7 +33,6 @@ namespace InDet
 
   StatusCode TruthPixelClusterSplitProbTool::initialize()
   {
-    
  
     if (m_truthClusterizationFactory.retrieve().isFailure())
     {
@@ -41,8 +40,7 @@ namespace InDet
       return StatusCode::FAILURE;
     }
 
-
-    ATH_MSG_INFO(" Cluster split prob tool initialized successfully "<< m_truthClusterizationFactory );
+    ATH_MSG_DEBUG(" Cluster split prob tool initialized successfully "<< m_truthClusterizationFactory );
     return StatusCode::SUCCESS;
   }
 

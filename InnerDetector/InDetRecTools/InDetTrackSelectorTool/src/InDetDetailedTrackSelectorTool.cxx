@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetTrackSelectorTool/InDetDetailedTrackSelectorTool.h"
@@ -151,13 +151,13 @@ namespace InDet
   StatusCode  
   InDetDetailedTrackSelectorTool::initialize(){
     if(m_trackSumTool.empty()){
-      ATH_MSG_INFO("No TrackSummaryTool set. OK if running on AOD.");
+      ATH_MSG_DEBUG("No TrackSummaryTool set. OK if running on AOD.");
     }
     m_trackSumToolAvailable = !m_trackSumTool.empty();
     ATH_CHECK(m_trackSumTool.retrieve(DisableTool{!m_trackSumToolAvailable}));
 
     if(m_useSharedHitInfo && m_particleCreator.empty()){
-      ATH_MSG_INFO("No TrackParticleCreatorTool set but shared hit selection used. OK if running on AOD.");
+      ATH_MSG_DEBUG("No TrackParticleCreatorTool set but shared hit selection used. OK if running on AOD.");
     }
     m_partCreatorToolAvailable = m_useSharedHitInfo && !m_particleCreator.empty();
     ATH_CHECK(m_particleCreator.retrieve(DisableTool{!m_partCreatorToolAvailable}));
@@ -175,10 +175,10 @@ namespace InDet
       }
       ATH_MSG_DEBUG("Retrieved tool "<<m_trtDCTool);
       if(m_useEtaDepententMinHitTrt){
-	ATH_MSG_INFO("Using eta dependent cut on number of TRT hits.");
+	ATH_MSG_DEBUG("Using eta dependent cut on number of TRT hits.");
       }
       if(m_useEtaDepententMinHitTrtWithOutliers){
-	ATH_MSG_INFO("Using eta dependent cut on number of TRT hits + outliers.");
+	ATH_MSG_DEBUG("Using eta dependent cut on number of TRT hits + outliers.");
       }
     }else{
       m_trtDCTool.disable();
@@ -187,7 +187,7 @@ namespace InDet
     // Read handle for AtlasFieldCacheCondObj
     ATH_CHECK( m_fieldCacheCondObjInputKey.initialize() );
 
-    ATH_MSG_INFO("Using cuts on the number of Silicon hits");
+    ATH_MSG_DEBUG("Using cuts on the number of Silicon hits");
     if(m_usePtDependentCuts) {
 	    //checking whether sizes of cuts and pt interval expressed in vectors match
 	    if( m_ptBenchmarks.size() != m_nSCTValues.size()){
@@ -221,7 +221,7 @@ namespace InDet
 	      return false;
 	    }
     } else if (m_usePreselectionCuts){
-	    ATH_MSG_INFO( " Preselection was requested but cannot be made since no Perigee in Track is available. This is not an error." );
+      ATH_MSG_DEBUG( " Preselection was requested but cannot be made since no Perigee in Track is available. This is not an error." );
     }
     const Trk::Vertex* myVertex=vertex;
     //in case no Vertex is provided by the user, beam position will be used if available

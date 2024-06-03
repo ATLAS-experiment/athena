@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /*
  *   */
@@ -139,7 +139,7 @@ namespace InDet {
     }
     // Otherwise, set up lwtnn.
     else {
-      ATH_MSG_INFO("Setting up lwtnn for number network...");
+      ATH_MSG_DEBUG("Setting up lwtnn for number network...");
       pt::write_json(configStream, subtreeNumberNetwork);
       std::string numberNetworkConfig = configStream.str();
       if ((configureLwtnn(writeCdo->at(0), numberNetworkConfig)).isFailure())
@@ -165,7 +165,7 @@ namespace InDet {
         return StatusCode::FAILURE;
       } else {
         // Otherwise, set up lwtnn
-        ATH_MSG_INFO("Setting up lwtnn for n = " << i << " position network...");
+        ATH_MSG_DEBUG("Setting up lwtnn for n = " << i << " position network...");
         if ((configureLwtnn(writeCdo->at(i), posNetworkConfig)).isFailure())
           return StatusCode::FAILURE;
       }

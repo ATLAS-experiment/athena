@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -348,7 +348,7 @@ void TRT_DriftFunctionTool::setupRtRelation()
   }
 
   if (m_isoverlay){
-    ATH_MSG_INFO("Using TRTCalDbTool2 for overlay ! ");
+    ATH_MSG_DEBUG("Using TRTCalDbTool2 for overlay ! ");
     if ( m_TRTCalDbTool2.retrieve().isFailure() ) {
       ATH_MSG_FATAL(m_TRTCalDbTool2.propertyName() <<": Failed to retrieveservice " << m_TRTCalDbTool2.type());
       return;
@@ -372,7 +372,7 @@ void TRT_DriftFunctionTool::setupRtRelation()
 
     if(type>10) {
       m_t0_shift=-8.;
-      ATH_MSG_INFO(" Digitization version " << type << " - T0 for barrel is shifted by "
+      ATH_MSG_DEBUG(" Digitization version " << type << " - T0 for barrel is shifted by "
                    << m_t0_shift);
     }
 

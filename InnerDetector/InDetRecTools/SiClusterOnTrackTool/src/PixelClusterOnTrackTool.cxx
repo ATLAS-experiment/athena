@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -114,7 +114,7 @@ InDet::PixelClusterOnTrackTool::initialize() {
 
   // get the module distortions tool
   ATH_CHECK(m_distortionKey.initialize(!m_disableDistortions));
-  if (m_disableDistortions) ATH_MSG_INFO("No PixelDistortions will be simulated.");
+  if (m_disableDistortions) ATH_MSG_DEBUG("No PixelDistortions will be simulated.");
 
   ATH_CHECK (detStore()->retrieve(m_pixelid, "PixelID"));
 

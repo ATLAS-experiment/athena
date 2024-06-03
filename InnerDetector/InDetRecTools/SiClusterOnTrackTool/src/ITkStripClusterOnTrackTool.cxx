@@ -41,34 +41,34 @@ StatusCode
 ITk::StripClusterOnTrackTool::initialize() {
   StatusCode sc = AlgTool::initialize();
 
-  ATH_MSG_INFO("Error strategy set to ");
+  ATH_MSG_DEBUG("Error strategy set to ");
   switch (m_option_errorStrategy) {
-  case -1:  ATH_MSG_INFO("keep the PRD errors");
+  case -1:  ATH_MSG_DEBUG("keep the PRD errors");
     break;
 
-  case  0:  ATH_MSG_INFO("apply width/sqrt(12) as errors");
+  case  0:  ATH_MSG_DEBUG("apply width/sqrt(12) as errors");
     break;
 
   default:  ATH_MSG_ERROR(" -- NO, UNKNOWN. Pls check jobOptions!");
     return StatusCode::FAILURE;
   }
-  ATH_MSG_INFO(" will be applied during ITkStripClusterOnTrack making");
+  ATH_MSG_DEBUG(" will be applied during ITkStripClusterOnTrack making");
 
- ATH_MSG_INFO("Position correction strategy set to ");
+ ATH_MSG_DEBUG("Position correction strategy set to ");
   switch (m_option_correctionStrategy) {
-  case -1:  ATH_MSG_INFO("keep the global position as evaluated");
+  case -1:  ATH_MSG_DEBUG("keep the global position as evaluated");
     break;
 
   default:  ATH_MSG_ERROR(" -- NO, UNKNOWN. Pls check jobOptions!");
     return StatusCode::FAILURE;
   }
-  ATH_MSG_INFO(" will be applied during ITkStripClusterOnTrack making");
+  ATH_MSG_DEBUG(" will be applied during ITkStripClusterOnTrack making");
 
 
   // get the error scaling tool
   if (!m_stripErrorScalingKey.key().empty()) {
     ATH_CHECK(m_stripErrorScalingKey.initialize());
-    ATH_MSG_INFO("Detected need for scaling ITkStrip errors.");
+    ATH_MSG_DEBUG("Detected need for scaling ITkStrip errors.");
   }
 
   return sc;
