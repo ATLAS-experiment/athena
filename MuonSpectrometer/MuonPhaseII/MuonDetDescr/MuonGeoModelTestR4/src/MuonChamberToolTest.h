@@ -11,6 +11,8 @@
 #include <MuonReadoutGeometryR4/MdtReadoutElement.h>
 #include <MuonReadoutGeometryR4/RpcReadoutElement.h>
 #include <MuonReadoutGeometryR4/TgcReadoutElement.h>
+#include <MuonReadoutGeometryR4/sTgcReadoutElement.h>
+#include <MuonReadoutGeometryR4/MmReadoutElement.h>
 
 #include <ActsGeometryInterfaces/ActsGeometryContext.h>
 #include <ActsGeometryInterfaces/IDetectorVolumeSvc.h>
@@ -52,6 +54,16 @@ class MuonChamberToolTest: public AthReentrantAlgorithm {
                            const TgcReadoutElement& readoutEle,
                            const MuonChamber& chamber,
                            const Acts::Volume& boundVol) const;
+
+        StatusCode testMm(const ActsGeometryContext& gctx,
+                           const MmReadoutElement& readoutEle,
+                           const MuonChamber& chamber,
+                           const Acts::Volume& boundVol) const;
+
+        StatusCode testStgc(const ActsGeometryContext& gctx,
+                            const sTgcReadoutElement& stgc,
+                            const MuonChamber& chamber,
+                            const Acts::Volume& boundVol) const;
 
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc", 
                                                 "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};

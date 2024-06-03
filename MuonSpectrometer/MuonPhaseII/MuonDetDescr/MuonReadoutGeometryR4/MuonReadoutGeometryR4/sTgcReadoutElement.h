@@ -242,6 +242,10 @@ class sTgcReadoutElement : public MuonReadoutElement {
     Amg::Vector2D localChannelPosition(const Identifier& measId) const;
     Amg::Vector2D localChannelPosition(const IdentifierHash& measHash) const;
 
+    // Returns the global left/right edge position of strip or wire
+    Amg::Vector3D leftStripEdge(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const;
+    Amg::Vector3D rightStripEdge(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const;
+
     /// Constructs the identifier hash from the full measurement Identifier. The
     /// hash is always defined w.r.t the specific detector element and used to
     /// access the information in memory quickly
@@ -254,7 +258,6 @@ class sTgcReadoutElement : public MuonReadoutElement {
 
     const StripLayer& stripLayer(const Identifier& measId) const;
     const StripLayer& stripLayer(const IdentifierHash& measId) const;
-
     
     /** @brief Create a measurement hash from the Identifier fields
      *  @param: gasGap in which the measurment sits
