@@ -38,11 +38,11 @@ typedef class TrigTrackSeedGeneratorITk {
   void createSeeds(const IRoiDescriptor*);
   void createSeedsZv();
   void getSeeds(std::vector<TrigInDetTriplet>&);
-  void getTracklets(const IRoiDescriptor*, std::vector<GNN_TrigTracklet>&);
+  void getTracklets(const IRoiDescriptor*, std::vector<GNN_TrigTracklet>&, bool);
 
 private:
 
-  void runGNN_TrackFinder(const IRoiDescriptor*, std::vector<GNN_TrigTracklet>&);
+  void runGNN_TrackFinder(const IRoiDescriptor*, std::vector<GNN_TrigTracklet>&, bool);
   
   TrigFTF_GNN_DataStorage* m_storage;
 
