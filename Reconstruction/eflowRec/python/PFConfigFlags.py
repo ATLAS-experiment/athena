@@ -15,7 +15,7 @@ def createPFConfigFlags():
     pfConfigFlags.addFlag("PF.useMLEOverP",False) #Toggle whether to use the Machine Learning based EOverP inference or not
     pfConfigFlags.addFlag("PF.EOverP_NN_Model",'/afs/cern.ch/user/m/mhodgkin/onnx_15_03_23.onnx') #Model to use in EOverP inference
     #Reference location for cell ordering and e/p lookup in particle flow. 
-    pfConfigFlags.addFlag("PF.EOverP_CellOrdering_ReferenceLocation",'/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/eflowRec/PFCellEOverPTool/Run4/v1/')
+    pfConfigFlags.addFlag("PF.EOverP_CellOrdering_ReferenceLocation",'eflowRec/PFCellEOverPTool/Run4/v2/')
     pfConfigFlags.addFlag("PF.addCPData",False)
     #Toggle whether to use the legacy EOverP (eflowCellEOverPTool_mc12_HLLHC.h) or not. Off by default so we use the new reference - this toggle is so we can compare old/new in the production system
     #before eventually removing the old tool entirely.
