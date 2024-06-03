@@ -152,7 +152,7 @@ namespace CxxUtils {
 namespace vecDetail {
 /**
  * @brief check the type and the size  of the vector.
- * Choose between the built-in (if available or
+ * Choose between the built-in (if available) or
  * fallback type.
  */
 template <typename T, size_t N>
@@ -264,7 +264,7 @@ vbroadcast(VEC& v, T x)
 /*
  * @brief load elements from  memory address src (C-array)
  * to a vectorized type dst.
- * Used memcpy to avoid alignment issues
+ * Uses memcpy to avoid alignment issues
  */
 template<typename VEC>
 ATH_ALWAYS_INLINE
@@ -394,7 +394,7 @@ vnone(const VEC& mask){
 
 /*
  * @brief Returns true if
- * all values in mask are false
+ * all values in mask are true
  */
 template<typename VEC>
 ATH_ALWAYS_INLINE
@@ -418,7 +418,10 @@ vall(const VEC& mask){
 #endif
 }
 
-
+/**
+ * @brief performs dst is the result of a
+ * static cast of each element of src
+ */
 template<typename VEC1, typename VEC2>
 ATH_ALWAYS_INLINE
 void
