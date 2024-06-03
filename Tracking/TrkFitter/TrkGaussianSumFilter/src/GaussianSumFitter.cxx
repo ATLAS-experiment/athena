@@ -605,13 +605,13 @@ Trk::GaussianSumFitter::makePerigee(
   pattern.set(Trk::TrackStateOnSurface::Perigee);
 
   if(std::abs(combinedPerigee->position().z())>10000.) {
-    ATH_MSG_WARNING("Pathological perigee well outside of detector!! Returning null instead");
+    ATH_MSG_WARNING("Pathological perigee well outside of detector!! Returning {}");
     return {};
   }
 
   if (std::abs(combinedPerigee->parameters()[Trk::qOverP]) > 1e8) {
     ATH_MSG_WARNING(
-      "makePerigee() about to return with 0 momentum!! Returning null instead");
+      "makePerigee() about to return with 0 momentum!! Returning {}");
     return {};
   }
 
