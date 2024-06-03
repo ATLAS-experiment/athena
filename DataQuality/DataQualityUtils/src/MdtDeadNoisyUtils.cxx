@@ -152,7 +152,7 @@ namespace dqutils_mdtdeadnoisy {
       if( v.at(i) > 0 )
 	tmp.push_back( v.at(i) );
     }
-    v = tmp;
+    v = std::move(tmp);
   }
 
   void getNonEmptyBins( TH1F* h, std::vector<int> & v ) {
@@ -190,7 +190,7 @@ namespace dqutils_mdtdeadnoisy {
 	tmp.push_back( v.at(i) );
       }
     }
-    v = tmp;
+    v = std::move(tmp);
   }
 
   void getNotInDeadMezz( std::vector<int> & v, std::vector<int> & deadMezz_v, const TString & hardware_name, int totalTubes) {
@@ -208,7 +208,7 @@ namespace dqutils_mdtdeadnoisy {
 	tmp.push_back( v.at(i) );
       }
     }
-    v = tmp;
+    v = std::move(tmp);
   }
 
   void getNotInDeadLayer( std::vector<int> & v, std::vector<int> & deadLayer_v, const TString & hardware_name, int totalTubes) {
@@ -220,7 +220,7 @@ namespace dqutils_mdtdeadnoisy {
 	tmp.push_back( v.at(i) );
       }
     }
-    v = tmp;
+    v = std::move(tmp);
   }
 
   void getNotInDeadML( std::vector<int> & v, std::vector<int> & deadML_v, const TString & hardware_name, int totalTubes) {
@@ -516,7 +516,7 @@ namespace dqutils_mdtdeadnoisy {
     getNoBetweens( h_tube_fornoise, no_deads, no_betweens, betweenlist, .05 );
     getNoBetweens_middle( no_betweens, no_betweens_middle );
     getNoBetweens_middle_aggressive( no_betweens, no_betweens_middle_aggressive );
-    getNoBetweens_highmiddle_aggressive( no_betweens, no_betweens_highmiddle_aggressive );
+    getNoBetweens_highmiddle_aggressive( std::move(no_betweens), no_betweens_highmiddle_aggressive );
     getNoisyList2( h_tube_fornoise, no_betweens_middle, no_betweens_highmiddle_aggressive, 300.0, noisylist);
   
     //   std::cout << "h_tube->GetNbinsX(): " << h_tube->GetNbinsX() << ", noisylist.size(): " << noisylist.size() << std::endl;
@@ -533,7 +533,7 @@ namespace dqutils_mdtdeadnoisy {
 	if(dopush) tmp_non_dead_non_noisy.push_back((int)h_tube->At(i));      
       }
     }
-    non_dead_non_noisy = tmp_non_dead_non_noisy;
+    non_dead_non_noisy = std::move(tmp_non_dead_non_noisy);
   }
 
   void CatalogNoisyEff( TH1F* h_tube_bkd, TH1F* h_tube_fornoise, TH1F* num, TH1F* den, int nTriggers, TH1F* EffVSNoise_num, TH1F* EffVSNoise_den, TH1F* EffVSNoise_ADCCut_num, TH1F* EffVSNoise_ADCCut_den, TH1F* EffVSBkd_num, TH1F* EffVSBkd_den) {
@@ -584,7 +584,7 @@ namespace dqutils_mdtdeadnoisy {
     //   std::cout << "no_betweens_middle for " << chamber << ": " << no_betweens_middle.size() << std::endl; 
     getNoBetweens_middle_aggressive( no_betweens, no_betweens_middle_aggressive );
     //   std::cout << "no_betweens_middle_aggressive for " << chamber <<": " << no_betweens_middle_aggressive.size() << std::endl; 
-    getNoBetweens_highmiddle_aggressive( no_betweens, no_betweens_highmiddle_aggressive );
+    getNoBetweens_highmiddle_aggressive( std::move(no_betweens), no_betweens_highmiddle_aggressive );
     //   std::cout << "no_betweens_highmiddle_aggressive for " << chamber <<": " << no_betweens_highmiddle_aggressive.size() << std::endl; 
     getNoisyList2( h_tube_fornoise, no_betweens_middle, no_betweens_highmiddle_aggressive, 300.0, noisylist);
   
@@ -597,7 +597,7 @@ namespace dqutils_mdtdeadnoisy {
       validity = 2;
       //     std::cout << " ... validity check failed for noisy, trying with h_tube" << std::endl;
       //    return GetNoisyTubes_WithoutForNoise( h_tube_fornoise, h_tube, chamber);      
-      return GetNoisyTubes_WithoutForNoise( h_tube, validity, chamber );
+      return GetNoisyTubes_WithoutForNoise( h_tube, validity, std::move(chamber) );
     }
   }
 
@@ -615,7 +615,7 @@ namespace dqutils_mdtdeadnoisy {
     //   std::cout << "no_betweens_middle for " << chamber << ": " << no_betweens_middle.size() << std::endl; 
     getNoBetweens_middle_aggressive( no_betweens, no_betweens_middle_aggressive );
     //   std::cout << "no_betweens_middle_aggressive for " << chamber <<": " << no_betweens_middle_aggressive.size() << std::endl; 
-    getNoBetweens_highmiddle_aggressive( no_betweens, no_betweens_highmiddle_aggressive );
+    getNoBetweens_highmiddle_aggressive( std::move(no_betweens), no_betweens_highmiddle_aggressive );
     //   std::cout << "no_betweens_highmiddle_aggressive for " << chamber <<": " << no_betweens_highmiddle_aggressive.size() << std::endl; 
     getNoisyList2( h_tube, no_betweens_middle, no_betweens_highmiddle_aggressive, 500.0, noisylist);    // <--- use a higher tolerance
 
@@ -663,7 +663,7 @@ namespace dqutils_mdtdeadnoisy {
     getNoBetweens_middle( no_betweens, no_betweens_middle );
     getNoBetweens_lowmiddle( no_betweens, no_betweens_lowmiddle );
     getNoBetweens_middle_aggressive( no_betweens, no_betweens_middle_aggressive );
-    getNoBetweens_lowmiddle_aggressive( no_betweens, no_betweens_lowmiddle_aggressive );
+    getNoBetweens_lowmiddle_aggressive( std::move(no_betweens), no_betweens_lowmiddle_aggressive );
 
     // give indicies to consider, the histo (for bin-content), a couple vectors for mean calculation, the definition of a dead tube (percent of mode), and the vector to fill
     getIneffList2( all_tubes_DeadRegionsRemoved, h_tube, no_betweens_middle, no_betweens_lowmiddle_aggressive, 10.0, deadlist );
@@ -746,7 +746,7 @@ namespace dqutils_mdtdeadnoisy {
     getNonEmptyBins( h_tube, non_empty );
     getNoBetweens( h_tube, non_empty, no_betweens, betweenlist, .05 );
     getNoBetweens_middle( no_betweens, no_betweens_middle );
-    getNoBetweens_middle_aggressive( no_betweens, no_betweens_middle_aggressive );
+    getNoBetweens_middle_aggressive( std::move(no_betweens), no_betweens_middle_aggressive );
 
     double mean = getMean( no_betweens_middle_aggressive );
     return mean;
@@ -759,7 +759,7 @@ namespace dqutils_mdtdeadnoisy {
 
     getNonEmptyBins( h_tube, non_empty );
     getNoBetweens( h_tube, non_empty, no_betweens, betweenlist, .05 );
-    getNoBetweens_middle( no_betweens, no_betweens_middle );
+    getNoBetweens_middle( std::move(no_betweens), no_betweens_middle );
 
     return getStandardDevFromMean( no_betweens_middle, mean );
   }

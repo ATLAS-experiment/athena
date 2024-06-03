@@ -308,7 +308,7 @@ getCoolFolderH() {
   
 void
 HistogramDataCOOL::
-ntupleDB( int HistoId, std::string nameHisto, std::string configuration, int Irun, int Frun)
+ntupleDB( int HistoId, const std::string & nameHisto, const std::string & configuration, int Irun, int Frun)
 {
 
   gROOT->Reset();
@@ -789,7 +789,7 @@ ntupleDB( int HistoId, std::string nameHisto, std::string configuration, int Iru
   
 void
 HistogramDataCOOL::
-historyDB(  int HistoId, std::string nameHisto, std::string tag_name  )
+historyDB(  int HistoId, const std::string & nameHisto, const std::string & tag_name  )
 {
   gStyle->SetFrameBorderMode(0);
   gStyle->SetCanvasBorderMode(0);

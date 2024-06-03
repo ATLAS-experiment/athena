@@ -91,6 +91,10 @@ namespace dqutils {
     TIter nextcd0(gDirectory->GetListOfKeys());
     TKey *key0 = (TKey*)nextcd0();
     TDirectory *dir0= dynamic_cast<TDirectory*> (key0->ReadObj());
+    if (not dir0){
+      std::cerr<< "nullptr for dynamic cast in HLTMuonTriggerOverlapMatrix"<<std::endl;
+      return;
+    }
     dir0->cd();
     ///
 

@@ -12,8 +12,8 @@
   #include "CoolKernel/ValidityKey.h"
 #else
   namespace cool {
-    class IDatabasePtr;
-    class IFolderPtr;
+    class IDatabasePtr{};
+    class IFolderPtr{};
   }
 #endif
 
@@ -75,11 +75,11 @@ private:
 // Protect CINT from some system definitions that cause problems
 // CINT does not need to know about these private variables
 #ifndef __CINT__
-    cool::ValidityKey m_since;
-    cool::ValidityKey m_until;
-    cool::IDatabasePtr m_coolDb;
-    cool::IFolderPtr m_coolFolder;
-    cool::IFolderPtr m_coolFolderH;
+    cool::ValidityKey m_since{};
+    cool::ValidityKey m_until{};
+    cool::IDatabasePtr m_coolDb{};
+    cool::IFolderPtr m_coolFolder{};
+    cool::IFolderPtr m_coolFolderH{};
 #endif
 
 public:
@@ -124,8 +124,8 @@ public:
                  const std::string& tag_name);
     void insertH(std::string channelName, int code, std::string algo, int entries, float par1, float par2, float par3, float par4, float par5, std::string tag_name);
 
-    virtual void   ntupleDB( int HistoId, std::string nameHisto, std::string configuration, int Irun, int Frun );
-    virtual void   historyDB( int HistoId, std::string nameHisto, std::string tag_name );
+    virtual void   ntupleDB( int HistoId, const std::string & nameHisto, const std::string & configuration, int Irun, int Frun );
+    virtual void   historyDB( int HistoId, const std::string & nameHisto, const std::string & tag_name );
     std::string defParName( const std::string& Algorithm, const std::string& nameHisto, int i);
     virtual void formatGraph( TCanvas* c, TGraphErrors* gr ) const;
 

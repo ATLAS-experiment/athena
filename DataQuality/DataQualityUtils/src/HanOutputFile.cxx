@@ -120,7 +120,7 @@ namespace dqutils
     //   gROOT->SetMustClean(useRecursiveDelete);
   }
 
-  void HanOutputFile::getAllGroupDirs(DirMap_t& dirmap, TDirectory* dir, std::string dirName)
+  void HanOutputFile::getAllGroupDirs(DirMap_t& dirmap, TDirectory* dir, const std::string & dirName)
   {
     if (dir == 0) return;
 
@@ -177,7 +177,7 @@ namespace dqutils
     }
   }
 
-  void HanOutputFile::getAllGroupDirs_V2(DirStrMap_t& dirstrmap, TObject* obj, std::string objName)
+  void HanOutputFile::getAllGroupDirs_V2(DirStrMap_t& dirstrmap, TObject* obj, const std::string & objName)
   {
     if (obj == nullptr) return;
     TDirectory* dir{};
@@ -282,11 +282,11 @@ namespace dqutils
     }
   }
 
-  void HanOutputFile::printDQGroupJSON(nlohmann::json j, const std::string& location, const char* path_to_file)
+  void HanOutputFile::printDQGroupJSON(const nlohmann::json & j, const std::string& location, const char* path_to_file)
   {
     // Parse our JSON and get all nested Assessments
     nlohmann::json valuestring;
-    for (nlohmann::json::iterator it = j.begin(); it != j.end(); ++it)
+    for (nlohmann::json::const_iterator it = j.begin(); it != j.end(); ++it)
     {
       std::string sName = location;
       std::string keyname = it.key();
@@ -676,24 +676,24 @@ namespace dqutils
     return value;
   }
 
-  std::string HanOutputFile::processJSON_ingetInfo(nlohmann::ordered_json j)
+  std::string HanOutputFile::processJSON_ingetInfo(const nlohmann::ordered_json & j)
   {
     std::string value("");
-    for (nlohmann::ordered_json::iterator it = j.begin(); it != j.end(); ++it)
+    for (nlohmann::ordered_json::const_iterator it = j.begin(); it != j.end(); ++it)
     {                       // Search in Results/Config node
-      auto key = it.key();  // subdir name analog
+      const auto & key = it.key();  // subdir name analog
       auto val = it.value();
       if (strcmp(val.type_name(), "object") == 0)
       {  // subsubdir analog
-        for (nlohmann::ordered_json::iterator it1 = val.begin(); it1 != val.end(); ++it1)
+        for (nlohmann::ordered_json::const_iterator it1 = val.begin(); it1 != val.end(); ++it1)
         {
-          auto key1 = it1.key();  // subsubdir name analog
+          const auto & key1 = it1.key();  // subsubdir name analog
           auto val1 = it1.value();
           if (strcmp(val1.type_name(), "object") == 0)
           {  // finaldir analog
-            for (nlohmann::ordered_json::iterator it2 = val1.begin(); it2 != val1.end(); ++it2)
+            for (nlohmann::ordered_json::const_iterator it2 = val1.begin(); it2 != val1.end(); ++it2)
             {
-              auto key2 = it2.key();    // finaldir name analog
+              const auto & key2 = it2.key();    // finaldir name analog
               auto val2 = it2.value();  // leaf
               value += (key1 + key2 + ":  " + val2.get<std::string>() +
                         "  ");  //.get<std::string is needed to get rid of quotes in cout
@@ -1274,7 +1274,7 @@ namespace dqutils
     }
   }
 
-  int HanOutputFile::saveAllHistograms(std::string location, bool drawRefs, std::string run_min_LB, int cnvsType)
+  int HanOutputFile::saveAllHistograms(const std::string & location, bool drawRefs, const std::string & run_min_LB, int cnvsType)
   {
     if (m_file == 0)
     {
@@ -1343,8 +1343,8 @@ namespace dqutils
     }
   }
 
-  bool HanOutputFile::saveHistogramToFile(std::string nameHis, std::string location, TDirectory* groupDir,
-    bool drawRefs, std::string run_min_LB, std::string pathName, int cnvsType)
+  bool HanOutputFile::saveHistogramToFile(const std::string & nameHis, std::string location, TDirectory* groupDir,
+    bool drawRefs, const std::string & run_min_LB, const std::string & pathName, int cnvsType)
   {
     std::pair<std::string, std::string> pngAndJson =
       getHistogram(nameHis, groupDir, drawRefs, run_min_LB, pathName, cnvsType);
@@ -1371,21 +1371,21 @@ namespace dqutils
   }
 
   std::string HanOutputFile::getHistogramPNG(
-    std::string nameHis, TDirectory* groupDir, bool drawRefs, std::string run_min_LB, std::string pathName)
+    const std::string & nameHis, TDirectory* groupDir, bool drawRefs, const std::string & run_min_LB, const std::string & pathName)
   {
     int cnvsType = 1;
     return getHistogram(nameHis, groupDir, drawRefs, run_min_LB, pathName, cnvsType).first;
   }
 
   std::pair<std::string, std::string> HanOutputFile::getHistogramJSON(
-    std::string nameHis, TDirectory* groupDir, bool drawRefs, std::string run_min_LB, std::string pathName)
+    const std::string & nameHis, TDirectory* groupDir, bool drawRefs, const std::string & run_min_LB, const std::string & pathName)
   {
     int cnvsType = 2;
     return getHistogram(nameHis, groupDir, drawRefs, run_min_LB, pathName, cnvsType);
   }
 
-  std::pair<std::string, std::string> HanOutputFile::getHistogram(std::string nameHis, TDirectory* groupDir,
-    bool drawRefs, std::string run_min_LB, std::string pathName, int cnvsType)
+  std::pair<std::string, std::string> HanOutputFile::getHistogram(const std::string & nameHis, TDirectory* groupDir,
+    bool drawRefs, const std::string & run_min_LB, const std::string & pathName, int cnvsType)
   {
     dqi::DisableMustClean disabled;
     groupDir->cd();
@@ -2308,8 +2308,8 @@ namespace dqutils
     return rvPair;
   }
 
-  bool HanOutputFile::saveHistogramToFileSuperimposed(std::string nameHis, std::string location, TDirectory* groupDir1,
-    TDirectory* groupDir2, bool drawRefs, std::string run_min_LB, std::string pathName, int cnvsType)
+  bool HanOutputFile::saveHistogramToFileSuperimposed(const std::string & nameHis, std::string location, TDirectory* groupDir1,
+    TDirectory* groupDir2, bool drawRefs, const std::string & run_min_LB, const std::string & pathName, int cnvsType)
   {
     dqi::DisableMustClean disabled;
     groupDir1->cd();
@@ -2598,7 +2598,7 @@ namespace dqutils
       tt.SetTextSize(0.03);
       tt.DrawLatex(0.02, 0.01, pathName.c_str());
 
-      convertToGraphics(cnvsType, myC.get(), namePNG, nameJSON);
+      convertToGraphics(cnvsType, myC.get(), namePNG, std::move(nameJSON));
 
       gStyle->Reset();
     }
@@ -3212,7 +3212,7 @@ namespace dqutils
     else
     {
       clonehistref.reset((TH1F*)hRef->Clone());
-      if (!clonehist->GetSumw2()) {
+      if (!clonehistref->GetSumw2()) {
         clonehistref->Sumw2();
       }
     }
@@ -3274,6 +3274,7 @@ namespace dqutils
     myC_upperpad->cd();
     myC_upperpad->Clear(); // reset original canvas
     myC_main->DrawClonePad(); // clone contents of myC_main back into original canvas (will fix ownership shortly)
+    
     std::ignore = clonehist.release(); // this will be deleted by lowerpad cleanup
     // At this point myC_main contains the original lowerPad and upperPad, which contain clones of the original canvas
     // and ownership of clonehist. Iterate one level down and mark contained objects as deleteable. This will delete
@@ -3422,7 +3423,7 @@ namespace dqutils
     }
   }
 
-  void HanOutputFile::displayExtra(TCanvas* c, std::string str)
+  void HanOutputFile::displayExtra(TCanvas* c, const std::string & str)
   {
     std::size_t found = str.find("TLine");
     while (found != std::string::npos)
@@ -3748,7 +3749,7 @@ namespace dqutils
     //   gROOT->SetMustClean(useRecursiveDelete);
   }
 
-  bool HanOutputFile::writeToFile(std::string fname, std::string content)
+  bool HanOutputFile::writeToFile(const std::string & fname, const std::string & content)
   {
     std::ofstream outfile(fname);
     if (!outfile.is_open())
@@ -3773,7 +3774,7 @@ namespace dqutils
     }
   }
 
-  void HanOutputFile::convertToGraphics(int cnvsType, TCanvas* myC, std::string namePNG, std::string nameJSON)
+  void HanOutputFile::convertToGraphics(int cnvsType, TCanvas* myC, const std::string & namePNG, const std::string & nameJSON)
   {
     if (cnvsType & GENERATE_PNG)
     {
@@ -3787,7 +3788,7 @@ namespace dqutils
   }
 
   bool HanOutputFile::saveFile(
-    int cnvsType, std::string pngfName, std::string pngContent, std::string jsonfName, std::string jsonfContent)
+    int cnvsType, const std::string & pngfName, const std::string & pngContent, const std::string & jsonfName, const std::string & jsonfContent)
   {
     bool png = false;
     bool json = false;
