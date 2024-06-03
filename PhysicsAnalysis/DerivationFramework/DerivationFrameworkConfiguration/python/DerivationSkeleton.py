@@ -24,6 +24,7 @@ def fromRunArgs(runArgs):
     logDerivation.info('**** Setting-up configuration flags')
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
+    flags.Exec.EventPrintoutInterval = 100
     commonRunArgsToFlags(runArgs, flags)
 
     flags.Common.ProductionStep = ProductionStep.Derivation
@@ -145,11 +146,6 @@ def fromRunArgs(runArgs):
     else:
         from EventInfoMgt.TagInfoMgrConfig import TagInfoMgrCfg
         cfg.merge(TagInfoMgrCfg(flags))
-
-    # Set EventPrintoutInterval to 100 events
-    #  (in run interactive mode there's no loop manager service, do nothing in this case)
-    if flags.Exec.Interactive != 'run' :
-        cfg.getService(cfg.getAppProps()['EventLoop']).EventPrintoutInterval = 100
 
     # Post-include
     processPostInclude(runArgs, flags, cfg)

@@ -72,6 +72,7 @@ else:
     flags.Input.Files = [testFile]
 
 flags.Exec.FPE = 500
+flags.Exec.EventPrintoutInterval = 100
 flags.lock()
 
 # Setup main services
@@ -101,9 +102,6 @@ else:
 if athArgs.output_file:
     outputFile = f"ANALYSIS DATAFILE='{athArgs.output_file}' OPT='RECREATE'"
 cfg.addService(CompFactory.THistSvc(Output=[outputFile]))
-
-# Set EventPrintoutInterval to 100 events
-cfg.getService(cfg.getAppProps()['EventLoop']).EventPrintoutInterval = 100
 
 cfg.printConfig()  # For debugging
 

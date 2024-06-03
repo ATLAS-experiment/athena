@@ -40,6 +40,7 @@ if __name__=='__main__':
   flags = initConfigFlags()
   flags.Input.Files = ["root://eosatlas.cern.ch//eos/atlas/atlasdatadisk/rucio/data16_13TeV/8d/de/AOD.10654269._000566.pool.root.1"]
   flags.Exec.OutputLevel = args.loglevel
+  flags.Exec.EventPrintoutInterval = 1000
   flags.fillFromArgs(args.flags)
   useBunchCrossingData = (args.doRatesVsPositionInTrain or args.vetoStartOfTrain > 0)
 
@@ -108,10 +109,6 @@ if __name__=='__main__':
   # if useBunchCrossingData:
   #   from LumiBlockComps.BunchCrossingCondAlgConfig import BunchCrossingCondAlgCfg
   #   cfg.merge(BunchCrossingCondAlgCfg(flags))
-
-  eventLoop = CompFactory.AthenaEventLoopMgr()
-  eventLoop.EventPrintoutInterval = 1000
-  cfg.addService(eventLoop)
 
   # If you want to turn on more detailed messages ...
   # exampleMonitorAcc.getEventAlgo('ExampleMonAlg').OutputLevel = 2 # DEBUG

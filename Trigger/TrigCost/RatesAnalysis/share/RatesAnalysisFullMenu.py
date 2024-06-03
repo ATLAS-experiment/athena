@@ -39,6 +39,7 @@ if __name__=='__main__':
   from AthenaConfiguration.AllConfigFlags import initConfigFlags
   flags = initConfigFlags()
   flags.Exec.OutputLevel = args.loglevel
+  flags.Exec.EventPrintoutInterval = 1000
   flags.fillFromArgs(args.flags)
   useBunchCrossingData = (args.doRatesVsPositionInTrain or args.vetoStartOfTrain > 0)
 
@@ -153,10 +154,6 @@ if __name__=='__main__':
   if useBunchCrossingData:
     from LumiBlockComps.BunchCrossingCondAlgConfig import BunchCrossingCondAlgCfg
     cfg.merge(BunchCrossingCondAlgCfg(flags))
-
-  eventLoop = CompFactory.AthenaEventLoopMgr()
-  eventLoop.EventPrintoutInterval = 1000
-  cfg.addService(eventLoop)
 
   # If you want to turn on more detailed messages ...
   # exampleMonitorAcc.getEventAlgo('ExampleMonAlg').OutputLevel = 2 # DEBUG
