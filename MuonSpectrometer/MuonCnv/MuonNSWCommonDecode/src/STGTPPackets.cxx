@@ -22,7 +22,7 @@ Muon::nsw::STGTPPadPacket::STGTPPadPacket(const std::vector<uint32_t>& payload) 
 			     Muon::nsw::format("Packet vector has size {} instead of expected size {}", std::size(payload), PACKETS_SIZE));
   }
 
-  const auto packets = CxxUtils::span{payload.data(), std::size(payload)};
+  const auto packets = std::span{payload.data(), std::size(payload)};
   auto readPointer = std::size_t{0};
   auto decode = [&packets](std::size_t& readPointer, const std::size_t size) {
     return decode_and_advance<std::uint64_t, std::uint32_t>(packets, readPointer, size);
@@ -52,7 +52,7 @@ Muon::nsw::STGTPSegmentPacket::STGTPSegmentPacket(const std::vector<uint32_t>& p
 			     Muon::nsw::format("Packet vector has size {} instead of expected size {}", std::size(payload), PACKETS_SIZE));
   }
   auto readPointer = std::size_t{0};
-  const auto packets = CxxUtils::span{payload.data(), std::size(payload)};
+  const auto packets = std::span{payload.data(), std::size(payload)};
   auto decode = [&packets](std::size_t& readPointer, const std::size_t size) {
     return decode_and_advance<std::uint64_t, std::uint32_t>(packets, readPointer, size);
   };

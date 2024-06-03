@@ -11,7 +11,6 @@
 #include "xAODTrigger/MuonRoI.h"
 #include "xAODTrigger/MuonRoIAuxContainer.h"
 // Athena includes
-#include "CxxUtils/span.h"
 #include "PathResolver/PathResolver.h"
 
 // TDAQ includes
@@ -19,6 +18,8 @@
 
 // get bitsmasks from common definition source:
 #include "TrigT1MuctpiBits/MuCTPI_Bits.h"
+
+#include <span>
 
 using namespace LVL1::MuCTPIBits;
 
@@ -182,7 +183,7 @@ StatusCode MuonRoIByteStreamTool::convertFromBS(const std::vector<const ROBF*>& 
 
   // Iterate over ROD words and decode
   size_t iWord{0};
-  for (const uint32_t word : CxxUtils::span{data, ndata}) {
+  for (const uint32_t word : std::span{data, ndata}) {
     ATH_MSG_DEBUG("MUCTPI raw word " << iWord << ": 0x" << std::hex << word << std::dec);
     LVL1::MuCTPIBits::WordType wordType = LVL1::MuCTPIBits::getWordType(word);
     ++wordTypeCounts[static_cast<size_t>(wordType)];
@@ -432,7 +433,7 @@ StatusCode MuonRoIByteStreamTool::decodeRoiSlices(const uint32_t* data,
   auto outputIt = handles.begin();
   std::advance(outputIt, outputOffset);
   for (const auto& [sliceStart,sliceSize] : slices) {
-    for (const uint32_t word : CxxUtils::span{data+sliceStart, sliceSize}) {
+    for (const uint32_t word : std::span{data+sliceStart, sliceSize}) {
       ATH_MSG_DEBUG("Decoding RoI word 0x" << std::hex << word << std::dec << " into the " << outputIt->key() << " container");
 
       // Create a new xAOD::MuonRoI object for this candidate in the output container
@@ -515,7 +516,7 @@ StatusCode MuonRoIByteStreamTool::decodeTopoSlices(const uint32_t* data,
   // Loop over Topo candidate time slices
   for (const auto& [sliceStart,sliceSize] : slices) {
     toposliceiterator++;
-    for (const uint32_t word : CxxUtils::span{data+sliceStart, sliceSize}) {
+    for (const uint32_t word : std::span{data+sliceStart, sliceSize}) {
       //the cand usage should be optimised!
       std::stringstream sectorName;
       subsystem = 0;

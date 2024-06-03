@@ -11,10 +11,10 @@
 
 #include "jFexInputByteStreamTool.h"
 #include "jFexBits.h"
-#include "CxxUtils/span.h"
 #include "eformat/SourceIdentifier.h"
 #include "eformat/Status.h"
 
+#include <span>
 #include <fstream>
 
 using ROBF = OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment;
@@ -101,7 +101,7 @@ StatusCode jFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
             continue;
         }
         
-        const auto dataArray = CxxUtils::span{rob->rod_data(), rob->rod_ndata()};
+        const auto dataArray = std::span{rob->rod_data(), rob->rod_ndata()};
         std::vector<uint32_t> vec_words(dataArray.begin(),dataArray.end());
         
         // jFEX to ROD trailer position

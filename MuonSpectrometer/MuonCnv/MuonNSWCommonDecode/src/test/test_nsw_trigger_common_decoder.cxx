@@ -29,10 +29,10 @@
 #include "MuonNSWCommonDecode/NSWTriggerSTGL1AElink.h"
 #include "MuonNSWCommonDecode/STGTPPackets.h"
 
-#include <CxxUtils/span.h>
 
 #include <TFile.h>
 #include <TTree.h>
+#include <span>
 
 #include "test_nsw_trigger_common_decoder_aux.h"
 
@@ -341,7 +341,7 @@ int test_nsw_trigger_common_decoder_event (const eformat::read::ROBFragment &r, 
 	data.b_MML1A_trig_rBin.push_back( tmp_trig_rBin );
 	
 	CRCL1AHelper CRCL1A;
-	CxxUtils::span<const uint32_t> load{bs+bs_pointer+2,link->nwordsFlx()-2};
+	std::span<const uint32_t> load{bs+bs_pointer+2,link->nwordsFlx()-2};
         bs_pointer+=link->nwordsFlx();
         data.b_MML1A_CRC_ok.push_back( (CRCL1A.getCRC(load)==link->trailer_CRC()) );
       }
@@ -397,7 +397,7 @@ int test_nsw_trigger_common_decoder_event (const eformat::read::ROBFragment &r, 
 	data.b_MMMon_fitter_rBin.push_back( link->fitter_rBin() );
 	data.b_MMMon_trailer_CRC.push_back( link->trailer_CRC() );
 	CRCMonHelper CRCMon(0xffff, 0x11021);
-	CxxUtils::span<const uint32_t> load{bs+bs_pointer+2,link->nwordsFlx()-2};
+	std::span<const uint32_t> load{bs+bs_pointer+2,link->nwordsFlx()-2};
         bs_pointer+=link->nwordsFlx();
 	data.b_MMMon_CRC_ok.push_back( (CRCMon.getCRC(load)==link->trailer_CRC()) );
       }

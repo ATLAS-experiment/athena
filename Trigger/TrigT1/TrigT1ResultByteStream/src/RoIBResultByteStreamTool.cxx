@@ -13,8 +13,6 @@
 #include "TrigT1Result/L1TopoResult.h"
 #include "TrigT1Result/RoIBResult.h"
 
-// Athena includes
-#include "CxxUtils/span.h"
 
 // TDAQ includes:
 #include "eformat/SourceIdentifier.h"
@@ -22,6 +20,7 @@
 // System includes
 #include <exception>
 #include <sstream>
+#include <span>
 
 using DataType = OFFLINE_FRAGMENTS_NAMESPACE::PointerType;
 using OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment;
@@ -515,7 +514,7 @@ template<typename RoIType> std::vector<RoIType> RoIBResultByteStreamTool::roibCo
   std::vector<RoIType> content;
   content.reserve(ndata);
   ATH_MSG_VERBOSE("   Dumping RoI Words:");
-  for (const uint32_t word : CxxUtils::span{data, ndata}) {
+  for (const uint32_t word : std::span{data, ndata}) {
     ATH_MSG_VERBOSE("       0x" << MSG::hex << std::setfill('0') << std::setw(8) << word << MSG::dec);
     content.push_back(RoIType{word});
   }
@@ -530,7 +529,7 @@ L1TopoRDO RoIBResultByteStreamTool::l1topoContent(const ROBFragment& rob) const 
   ATH_MSG_VERBOSE( "   Dumping RoI Words:" );
   std::vector<uint32_t> vDataWords;
   vDataWords.reserve(ndata);
-  for (const uint32_t word : CxxUtils::span{data, ndata}) {
+  for (const uint32_t word : std::span{data, ndata}) {
     ATH_MSG_VERBOSE("       0x" << MSG::hex << std::setfill('0') << std::setw(8) << word << MSG::dec);
     vDataWords.push_back(word);
   }

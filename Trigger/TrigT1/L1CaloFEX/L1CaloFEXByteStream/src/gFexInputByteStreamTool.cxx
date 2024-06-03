@@ -11,9 +11,10 @@
 
 #include "gFexInputByteStreamTool.h"
 #include "gFexPos.h"
-#include "CxxUtils/span.h"
 #include "eformat/SourceIdentifier.h"
 #include "eformat/Status.h"
+
+#include <span>
 
 using ROBF = OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment;
 using WROBF = OFFLINE_FRAGMENTS_NAMESPACE_WRITE::ROBFragment;
@@ -74,7 +75,7 @@ StatusCode gFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
             continue;
         }
         
-        const auto dataArray = CxxUtils::span{rob->rod_data(), rob->rod_ndata()};
+        const auto dataArray = std::span{rob->rod_data(), rob->rod_ndata()};
     
         // Starting to loop over the gFEX words
 
