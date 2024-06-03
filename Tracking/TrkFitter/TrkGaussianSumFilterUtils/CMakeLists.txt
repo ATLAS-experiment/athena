@@ -9,7 +9,7 @@ atlas_add_library( TrkGaussianSumFilterUtilsLib
 		   PUBLIC_HEADERS TrkGaussianSumFilterUtils
 		   LINK_LIBRARIES EventPrimitives TrkParameters 
 		                  TrkEventPrimitives TrkMeasurementBase
-                          TrkGeometry PathResolver
+                      TrkGeometry PathResolver
            PRIVATE_LINK_LIBRARIES CxxUtils PathResolver TrkExUtils
            PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS})
 
