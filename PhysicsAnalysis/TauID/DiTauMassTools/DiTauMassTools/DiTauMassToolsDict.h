@@ -12,7 +12,6 @@
 #endif
 
 #include "DiTauMassTools/IMissingMassTool.h"
-#include "DiTauMassTools/MissingMassTool.h"
 
 #include "DiTauMassTools/HelperFunctions.h"
 #include "DiTauMassTools/MissingMassInput.h"
