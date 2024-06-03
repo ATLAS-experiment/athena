@@ -18,8 +18,8 @@
   #include "CoolKernel/ValidityKey.h"
 #else
   namespace cool {
-    class IDatabasePtr;
-    class IFolderPtr;
+    class IDatabasePtr{};
+    class IFolderPtr{};
   }
 #endif
 
@@ -83,10 +83,10 @@ private:
 // Protect CINT from some system definitions that cause problems
 // CINT does not need to know about these private variables
 #ifndef __CINT__
-    cool::ValidityKey m_since;
-    cool::ValidityKey m_until;
-    cool::IDatabasePtr m_coolDb;
-    cool::IFolderPtr m_coolFolder;
+    cool::ValidityKey m_since{};
+    cool::ValidityKey m_until{};
+    cool::IDatabasePtr m_coolDb{};
+    cool::IFolderPtr m_coolFolder{};
 #endif
 
 public:
