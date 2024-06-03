@@ -53,9 +53,6 @@ public:
   /** AlgTool initialise method */
   virtual StatusCode initialize() override final;
 
-  /** AlgTool finalise method */
-  virtual StatusCode finalize() override final;
-
   /** Refit a track using the Gaussian Sum Filter */
   virtual std::unique_ptr<Track> fit(
     const EventContext& ctx,
@@ -225,13 +222,6 @@ private:
  TrkParametersComparisonFunction m_trkParametersComparisonFunction;
  std::vector<double> m_sortingReferencePoint;
 
- // Counters for fit statistics
- // Number of Fit PrepRawData Calls
- mutable std::atomic<unsigned long int> m_FitPRD{};
- // Number of Fit MeasurementBase Calls
- mutable std::atomic<unsigned long int> m_FitMeasurementBase{};
- // Number of Tracks that are successfull
- mutable std::atomic<unsigned long int> m_fitSuccess{};
 };
 
 } // end Trk namespace

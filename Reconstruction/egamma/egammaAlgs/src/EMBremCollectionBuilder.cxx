@@ -29,8 +29,8 @@ using xAOD::EgammaHelpers::summaryValueInt;
 
 namespace {
   void copySummaryValue(
-    const xAOD::TrackParticle &src, 
-    xAOD::TrackParticle &dest, 
+    const xAOD::TrackParticle &src,
+    xAOD::TrackParticle &dest,
     const xAOD::SummaryType &information
   ) {
     uint8_t value = summaryValueInt(src, information, 0);
@@ -69,12 +69,11 @@ EMBremCollectionBuilder::initialize()
 StatusCode
 EMBremCollectionBuilder::EMBremCollectionBuilder::finalize()
 {
-
-  ATH_MSG_INFO("Not refitted due to Silicon Requirements "
-               << m_FailedSiliconRequirFit);
-  ATH_MSG_INFO("Failed Fit Tracks " << m_FailedFitTracks);
-  ATH_MSG_INFO("RefittedTracks " << m_RefittedTracks);
-
+  ATH_MSG_INFO("--- EMBremCollectionBuilder Statistics ---");
+  ATH_MSG_INFO("RefittedTracks: " << m_RefittedTracks);
+  ATH_MSG_INFO("Failed Fit Tracks: " << m_FailedFitTracks);
+  ATH_MSG_INFO("Not refitted due to selection: " << m_FailedSiliconRequirFit);
+  ATH_MSG_INFO("---------------------------------------------");
   return StatusCode::SUCCESS;
 }
 
@@ -315,7 +314,7 @@ EMBremCollectionBuilder::copyOverInfo(xAOD::TrackParticle& created,
       tO(created) = tO(original);
     }
   }
-  
+
   copySummaryValue(original, created, xAOD::numberOfPixelSplitHits);
   copySummaryValue(original, created, xAOD::numberOfInnermostPixelLayerSplitHits);
   copySummaryValue(original, created, xAOD::numberOfNextToInnermostPixelLayerSplitHits);
@@ -339,7 +338,7 @@ EMBremCollectionBuilder::copyOverInfo(xAOD::TrackParticle& created,
       copySummaryValue(original, created, xAOD::numberOfPixelDeadSensors);
 
       // Figure the new number of holes
-      uint8_t nPixHolesRefitted = 
+      uint8_t nPixHolesRefitted =
         - summaryValueInt(created, xAOD::numberOfPixelHits, -1)
         - summaryValueInt(created, xAOD::numberOfPixelOutliers, -1)
         + summaryValueInt(original, xAOD::numberOfPixelHits, -1)
@@ -353,7 +352,7 @@ EMBremCollectionBuilder::copyOverInfo(xAOD::TrackParticle& created,
       copySummaryValue(original, created, xAOD::numberOfSCTDeadSensors);
       copySummaryValue(original, created, xAOD::numberOfSCTDoubleHoles);
 
-      uint8_t nSCTHolesRefitted = 
+      uint8_t nSCTHolesRefitted =
         - summaryValueInt(created, xAOD::numberOfSCTHits, -1)
         - summaryValueInt(created, xAOD::numberOfSCTOutliers, -1)
         + summaryValueInt(original, xAOD::numberOfSCTHits, -1)
@@ -363,7 +362,7 @@ EMBremCollectionBuilder::copyOverInfo(xAOD::TrackParticle& created,
       created.setSummaryValue(nSCTHolesRefitted, xAOD::numberOfSCTHoles);
     }
     if (m_doTRT) {
-      uint8_t nTRTHolesRefitted = 
+      uint8_t nTRTHolesRefitted =
         - summaryValueInt(created, xAOD::numberOfTRTHits, -1)
         - summaryValueInt(created, xAOD::numberOfTRTOutliers, -1)
         + summaryValueInt(original, xAOD::numberOfTRTHits, -1)
