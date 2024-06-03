@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -49,7 +49,7 @@ StatusCode InDet::TRT_DriftCircleOnTrackTool::initialize()
   ATH_CHECK(m_trtErrorScalingKey.initialize(!m_trtErrorScalingKey.key().empty()));
   ATH_CHECK(m_lumiDataKey.initialize ( !m_lumiDataKey.key().empty() && !m_trtErrorScalingKey.key().empty()));
   if (m_lumiDataKey.key().empty()) {
-     ATH_MSG_INFO("Luminosity conditions data key not set. No mu correction." );
+     ATH_MSG_DEBUG("Luminosity conditions data key not set. No mu correction." );
   }
   return sc;
 }

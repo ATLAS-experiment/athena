@@ -25,10 +25,7 @@ namespace InDet
 
   StatusCode PixelRDOTool::initialize()
   {
-    ATH_MSG_INFO("initialize()");
-
     ATH_CHECK(m_pixelDetEleCollKey.initialize());
-
 
     bool disable_smry = 
 	!m_useModuleMap ||

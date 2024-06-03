@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetTrackSelectorTool/InDetTrackSelectorTool.h"
@@ -59,7 +59,6 @@ StatusCode InDetTrackSelectorTool::initialize()
       return StatusCode::FAILURE;
     }
     else {
-      ATH_MSG_INFO("Track summary tool retrieved");
       m_trackSumToolAvailable = true;
     }
   }
@@ -68,7 +67,6 @@ StatusCode InDetTrackSelectorTool::initialize()
     msg(MSG::ERROR) << "Failed to retrieve tool " << m_extrapolator << endmsg;
     return StatusCode::FAILURE;
   }
-  ATH_MSG_INFO("Retrieved tool " << m_extrapolator);
 
   return StatusCode::SUCCESS;
 }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRT_SegmentToTrackTool/TRT_SegmentToTrackTool.h"
@@ -54,8 +54,6 @@ namespace InDet {
   StatusCode TRT_SegmentToTrackTool::initialize() {
 
     ATH_CHECK( AthAlgTool::initialize() );
-
-    ATH_MSG_DEBUG( "Initializing TRT_SegmentToTrackTool" );
 
     ATH_CHECK(m_extrapolator.retrieve() );
 
@@ -410,7 +408,7 @@ namespace InDet {
              if (std::abs(diff_z)>1e-6) {
                 double diff_r( meas_zmax.perp() - meas_zmin.perp());
                 pseudotheta = std::atan2(diff_r, diff_z);
-                ATH_MSG_INFO("Initial pseudo theta is zero. Compute pseudo from inner- and outermost endcap measurements. delta R: " <<
+                ATH_MSG_DEBUG("Initial pseudo theta is zero. Compute pseudo from inner- and outermost endcap measurements. delta R: " <<
                              meas_zmax.perp() << " - " << meas_zmin.perp()  << " = " << diff_r
                              << " , diff Z: " << meas_zmax.z() << " - " << meas_zmin.z()
                              << " = " << diff_z
@@ -455,7 +453,7 @@ namespace InDet {
 
              }
              pseudotheta = std::atan2(r_path, zmax - zmin);
-             ATH_MSG_INFO("Initial pseudo theta is zero. Pseudo theta from inner- and outermost surfaces. Deleta r " << r2 << " - " << r1 << " -> " << r_path
+             ATH_MSG_DEBUG("Initial pseudo theta is zero. Pseudo theta from inner- and outermost surfaces. Deleta r " << r2 << " - " << r1 << " -> " << r_path
                           << " , delta Z " << zmax << " - " << zmin << " -> " << (zmax-zmin)
                           << " " << pseudotheta);
           }

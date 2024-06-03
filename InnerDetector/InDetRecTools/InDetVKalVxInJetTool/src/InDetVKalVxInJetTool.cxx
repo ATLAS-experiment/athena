@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 // Author: Vadim Kostyukhin (vadim.kostyukhin@cern.ch)
 
@@ -143,15 +143,15 @@ InDetVKalVxInJetTool::InDetVKalVxInJetTool(const std::string& type,
  
      m_useTrackClassificator = !(m_trackClassificator.empty());
      ATH_CHECK(m_trackClassificator.retrieve( DisableTool{!m_useTrackClassificator} ));
-     if(!m_useTrackClassificator) ATH_MSG_INFO("TrackClassificator disabled");
+     if(!m_useTrackClassificator) ATH_MSG_DEBUG("TrackClassificator disabled");
 
      m_useEtaDependentCuts = !(m_etaDependentCutsSvc.name().empty());
      if (m_useEtaDependentCuts){
        ATH_CHECK(m_etaDependentCutsSvc.retrieve());
-       ATH_MSG_INFO("Using InDetEtaDependentCutsSvc. Individual inclusive track selections from config not used");
+       ATH_MSG_DEBUG("Using InDetEtaDependentCutsSvc. Individual inclusive track selections from config not used");
      }
      else{
-       ATH_MSG_INFO("Using individual inclusive track selections from config");
+       ATH_MSG_DEBUG("Using individual inclusive track selections from config");
      }
 
      if (m_fitterSvc.retrieve().isFailure()) {
@@ -206,8 +206,8 @@ InDetVKalVxInJetTool::InDetVKalVxInJetTool(const std::string& type,
      if(!m_multiVertex)m_multiWithPrimary = false; 
 
      if(m_getNegativeTag){
-        if(msgLvl(MSG::INFO))msg(MSG::INFO) << " Negative TAG is requested! " << endmsg;
-        if(msgLvl(MSG::INFO))msg(MSG::INFO) << "Not compatible with negativeTAIL option, so getNegativeTail is set to FALSE." << endmsg;
+        if(msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << " Negative TAG is requested! " << endmsg;
+        if(msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "Not compatible with negativeTAIL option, so getNegativeTail is set to FALSE." << endmsg;
         m_getNegativeTail=false;
      }
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -43,7 +43,7 @@ namespace InDet
 
     ATH_CHECK(m_beamSpotKey.initialize());
 
-    ATH_MSG_INFO(" Cluster split prob tool initialized successfully "<< m_NnClusterizationFactory );
+    ATH_MSG_DEBUG(" Cluster split prob tool initialized successfully "<< m_NnClusterizationFactory );
     return StatusCode::SUCCESS;
   }
 
