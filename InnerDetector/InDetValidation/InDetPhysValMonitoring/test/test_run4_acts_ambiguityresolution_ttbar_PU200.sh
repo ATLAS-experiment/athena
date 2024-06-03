@@ -42,6 +42,7 @@ export ATHENA_CORE_NUMBER=4
 run "Reconstruction-athena" \
     Reco_tf.py --CA \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
+    --preExec "flags.Tracking.ITkMainPass.doAmbiguityProcessorTrackFit=False;flags.Reco.EnableHGTDExtension=False;" \
     --inputRDOFile ${ArtInFile} \
     --outputAODFile AOD.athena.root \
     --maxEvents ${n_events} \
