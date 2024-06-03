@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MicroSessionManager.h"
@@ -153,6 +153,8 @@ pool::PersistencySvc::MicroSessionManager::fidForPfn( const std::string& pfn )
 
   pool::DbStatus sc;
   pool::FileDescriptor fd( pfn, pfn );
+  // this is only a temporary FID so use a special pattern to make that clear
+  fd.setFID( fd.FID().substr(0,24) + "0FF0FF0FF0FF" );
   sc = m_storageSvc->existsConnection( m_session, pool::READ, fd );
   if ( !( sc.value() == static_cast<unsigned int>( IStorageSvc::CONNECTION_NOT_EXISTING ) ||
           sc.value() == static_cast<unsigned int>( IStorageSvc::INVALID_SESSION_TOKEN ) ) ) {
