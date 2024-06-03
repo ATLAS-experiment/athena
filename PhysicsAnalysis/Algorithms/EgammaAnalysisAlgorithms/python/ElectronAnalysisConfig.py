@@ -289,7 +289,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
                 # which differ from the one used for scale factors
                 if config.geometry() >= LHCPeriod.Run3:
                     alg.selectionTool.WorkingPoint = self.likelihoodWP.replace("BLayer","BL") + 'Electron'
-                elif config.geometry() == LHCPeriod.Run2:
+                elif config.geometry() is LHCPeriod.Run2:
                     alg.selectionTool.WorkingPoint = self.likelihoodWP.replace("BLayer","BL") + 'Electron_Run2'
             else:
                 # Select from Derivation Framework flags
@@ -335,7 +335,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
                 # Rerun the DNN ID
                 config.addPrivateTool( 'selectionTool', 'AsgElectronSelectorTool' )
                 # Here we have to match the naming convention of EGSelectorConfigurationMapping.h
-                if config.geometry() == LHCPeriod.Run3:
+                if config.geometry() is LHCPeriod.Run3:
                     raise ValueError ( "DNN working points are not available for Run 3 yet.")
                 else:
                     alg.selectionTool.WorkingPoint = self.likelihoodWP + 'Electron'
@@ -402,7 +402,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             elif config.dataType() is DataType.FullSim:
                 alg.efficiencyCorrectionTool.ForceDataType = \
                     PATCore.ParticleDataType.Full
-            if config.geometry() == LHCPeriod.Run2:
+            if config.geometry() is LHCPeriod.Run2:
                 alg.efficiencyCorrectionTool.MapFilePath = "ElectronEfficiencyCorrection/2015_2018/rel21.2/Precision_Summer2020_v1/map4.txt"
             alg.outOfValidity = 2 #silent
             alg.outOfValidityDeco = 'el_reco_bad_eff' + selectionPostfix
@@ -426,7 +426,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             elif config.dataType() is DataType.FullSim:
                 alg.efficiencyCorrectionTool.ForceDataType = \
                     PATCore.ParticleDataType.Full
-            if config.geometry() == LHCPeriod.Run2:
+            if config.geometry() is LHCPeriod.Run2:
                 alg.efficiencyCorrectionTool.MapFilePath = "ElectronEfficiencyCorrection/2015_2018/rel21.2/Precision_Summer2020_v1/map4.txt"
             alg.outOfValidity = 2 #silent
             alg.outOfValidityDeco = 'el_id_bad_eff' + selectionPostfix
@@ -451,7 +451,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             elif config.dataType() is DataType.FullSim:
                 alg.efficiencyCorrectionTool.ForceDataType = \
                     PATCore.ParticleDataType.Full
-            if config.geometry() == LHCPeriod.Run2:
+            if config.geometry() is LHCPeriod.Run2:
                 alg.efficiencyCorrectionTool.MapFilePath = "ElectronEfficiencyCorrection/2015_2018/rel21.2/Precision_Summer2020_v1/map4.txt"
                 alg.efficiencyCorrectionTool.CorrelationModel = "SIMPLIFIED" # remove when Run 2 R25 recommendations are available!
             alg.outOfValidity = 2 #silent
