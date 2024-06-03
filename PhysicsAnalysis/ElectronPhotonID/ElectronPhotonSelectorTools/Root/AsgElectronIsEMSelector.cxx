@@ -88,7 +88,6 @@ AsgElectronIsEMSelector::initialize()
     sc = StatusCode::FAILURE;
     return sc;
   }
-  ATH_MSG_INFO("Configfile to use  " << m_configFile);
   TEnv env;
   env.ReadFile(filename.c_str(), kEnvLocal);
 
@@ -149,10 +148,6 @@ AsgElectronIsEMSelector::initialize()
     AsgConfigHelper::HelperFloat("CutTRTRatio90", env);
   m_rootTool->m_cutEProbabilityHT =
     AsgConfigHelper::HelperFloat("CutEProbabilityHT", env);
-
-  ATH_MSG_INFO("operating point : " << this->getOperatingPointName()
-                                    << " with mask: "
-                                    << m_rootTool->m_isEMMask);
 
   // Get the message level and set the underlying ROOT tool message level
   // accordingly

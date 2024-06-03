@@ -97,7 +97,6 @@ AsgPhotonIsEMSelector::initialize()
     ATH_MSG_ERROR("Could not locate " << m_configFile);
     return StatusCode::FAILURE;
   }
-  ATH_MSG_INFO("Configfile to use  " << m_configFile);
   TEnv env;
   env.ReadFile(filename.c_str(), kEnvLocal);
   ///------- Read in the TEnv config ------///
@@ -185,7 +184,6 @@ AsgPhotonIsEMSelector::initialize()
   m_rootTool->m_cutF3_photonsConverted =
     AsgConfigHelper::HelperFloat("CutF3_photonsConverted", env);
 
-  ATH_MSG_INFO("operating point : " << this->getOperatingPointName());
   // Get the message level and set the underlying ROOT tool message level
   // accordingly
   m_rootTool->msg().setLevel(this->msg().level());
