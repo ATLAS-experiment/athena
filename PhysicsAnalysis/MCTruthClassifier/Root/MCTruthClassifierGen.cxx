@@ -989,7 +989,6 @@ ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleConta
   int motherPDG = mother->pdgId();
   const xAOD::TruthVertex* mothOriVert = mother->hasProdVtx() ? mother->prodVtx() : nullptr;
   int motherStatus = mother->status();
-  long motherBarcode = mother->barcode();
   if (info) info->setMotherProperties(mother);
   partOriVert = mother->decayVtx();
   numOfParents = partOriVert->nIncomingParticles();
@@ -1001,7 +1000,6 @@ ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleConta
   int NumOfTau(0);
   int NumOfPht(0);
   int NumOfLQ(0);
-  long DaugBarcode(0);
   long DaugType(0);
   long NumOfLep(0);
   long NumOfNeut(0);
@@ -1023,7 +1021,6 @@ ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleConta
     if (abs(DaugType) == 12 || abs(DaugType) == 14 || abs(DaugType) == 16) NumOfNeut++;
     if (abs(DaugType) < 11 || (abs(DaugType) > 16 && abs(DaugType) < 43 && abs(DaugType) != 22)) NumOfPartons++;
     if (DaugType == motherPDG) {
-      DaugBarcode = pout->barcode();
       Daug = pout;
      }
   }
@@ -1105,7 +1102,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleConta
 
   //-- Exotics - CompHep
   if (abs(motherPDG) == 11 && numOfParents == 1 && numOfDaug == 2 && (NumOfEl == 1 || NumOfPos == 1) && NumOfPht == 1 &&
-      !( Daug && info && info->Mother() && HepMC::is_same_generator_particle(Daug, info->Mother())) && DaugBarcode < 20000 && motherBarcode < 20000)
+      !( Daug && info && info->Mother() && HepMC::is_same_generator_particle(Daug, info->Mother())) && !HepMC::is_simulation_particle(Daug) && !HepMC::is_simulation_particle(info->Mother()))
     return FSRPhot;
 
   // FSR  from Photos
