@@ -288,9 +288,13 @@ def ITkTIDEKernelCfg(flags, StreamName=""):
     acc.addSequence(parAND(IDTIDEPostProcSequenceName),
                     parentName=IDTIDEPreselSequenceName)
 
-    from DerivationFrameworkInDet.InDetToolsConfig import DFITkTSOSKernelCfg
-    acc.merge(DFITkTSOSKernelCfg(flags),
-              sequenceName=IDTIDEPostProcSequenceName)
+    # if the flags.Tracking.writeExtendedSi_PRDInfo is enabled
+    # the TSOS_CommonKernelCfg( is scheduled, which would do the same
+    # augemntation as the (DFITkTSOSKernel
+    if not  flags.Tracking.writeExtendedSi_PRDInfo:
+        from DerivationFrameworkInDet.InDetToolsConfig import DFITkTSOSKernelCfg
+        acc.merge(DFITkTSOSKernelCfg(flags),
+                  sequenceName=IDTIDEPostProcSequenceName)
     acc.merge(IDTIDEThinningKernelCfg(flags, StreamName=StreamName),
               sequenceName=IDTIDEPostProcSequenceName)
     return acc

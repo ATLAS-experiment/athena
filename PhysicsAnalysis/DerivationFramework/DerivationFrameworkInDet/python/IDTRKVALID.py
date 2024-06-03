@@ -192,9 +192,13 @@ def ITkTRKVALIDKernelCfg(flags, StreamName=""):
     acc.merge(ITkPrepDataToxAODCfg(flags),
               sequenceName=IDTRKVALIDSequenceName)
 
-    from DerivationFrameworkInDet.InDetToolsConfig import DFITkTSOSKernelCfg
-    acc.merge(DFITkTSOSKernelCfg(flags),
-              sequenceName=IDTRKVALIDSequenceName)
+    # if the flags.Tracking.writeExtendedSi_PRDInfo is enabled
+    # the TSOS_CommonKernelCfg( is scheduled, which would do the same
+    # augemntation as the (DFITkTSOSKernel
+    if not  flags.Tracking.writeExtendedSi_PRDInfo:
+        from DerivationFrameworkInDet.InDetToolsConfig import DFITkTSOSKernelCfg
+        acc.merge(DFITkTSOSKernelCfg(flags),
+                  sequenceName=IDTRKVALIDSequenceName)
 
     acc.merge(IDTRKVALIDThinningKernelCfg(flags, StreamName=StreamName),
               sequenceName=IDTRKVALIDSequenceName)
