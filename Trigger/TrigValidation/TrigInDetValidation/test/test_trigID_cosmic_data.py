@@ -44,6 +44,8 @@ Input   = 'data_cos'    # defined in TrigValTools/share/TrigValInputs.json
 # don't use grid files, as ART submission doesn't allow multiple LBs to be processed in 1 job (ATR-26472)
 # once this is fixed, we can use the 3 files from group.trig-hlt.data23_cos.00448208.physics_CosmicMuons.merge.RAW
 GridFiles = False
+# needed when processing multiple LBs in trigbs_extractStream.py
+MultipleLB = True
 
 Jobs = [ ( "Offline",     " TIDAdata-run3-offline-cosmic.dat      -r Offline -o data-hists-offline.root" ) ]
 
