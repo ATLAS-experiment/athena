@@ -459,12 +459,6 @@ Trk::ElectronMaterialMixtureConvolution::update(
     assemblerCache.validWeightSum += updatedWeight;
   }
 
-  if (nMerges + assemblerCache.multiComponentState.size() != n) {
-    ATH_MSG_WARNING("Combining complete but merger size is incompatible: "
-                    << n << "  " << nMerges << " "
-                    << assemblerCache.multiComponentState.size());
-  }
-
   // Check all weights
   Trk::MultiComponentState mergedState =
     MultiComponentStateAssembler::assembledState(std::move(assemblerCache));
