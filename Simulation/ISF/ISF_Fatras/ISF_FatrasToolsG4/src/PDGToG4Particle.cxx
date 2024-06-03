@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// PDGToG4Particle.cxx, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 // class header
 #include "ISF_FatrasToolsG4/PDGToG4Particle.h"
@@ -35,10 +31,10 @@
  *  ==> see headerfile
  *=======================================================================*/
 iFatras::PDGToG4Particle::PDGToG4Particle(const std::string& t,
-                                         const std::string& n,
-                                         const IInterface* p)
-        : AthAlgTool(t,n,p),
-          m_pdgG4ParticleMap()
+                                          const std::string& n,
+                                          const IInterface* p)
+  : AthAlgTool(t,n,p),
+    m_pdgG4ParticleMap()
 {
   declareInterface<iFatras::PDGToG4Particle>(this);
 
@@ -47,12 +43,6 @@ iFatras::PDGToG4Particle::PDGToG4Particle(const std::string& t,
 
 }
 
-/*=========================================================================
- *  DESCRIPTION OF FUNCTION:
- *  ==> see headerfile
- *=======================================================================*/
-iFatras::PDGToG4Particle::~PDGToG4Particle()
-{}
 
 /*=========================================================================
  *  DESCRIPTION OF FUNCTION:
@@ -70,57 +60,46 @@ iFatras::PDGToG4Particle::initialize()
   static const auto s_predefinedParticles = predefinedParticles();
 
   if( m_useParticles.size() == 0)
-  {
-    ATH_MSG_INFO( "using all predefined particles" );
-    m_pdgG4ParticleMap.insert( s_predefinedParticles.begin(),
-                               s_predefinedParticles.end());
-    ATH_MSG_INFO( "loaded " << m_pdgG4ParticleMap.size() << " particles" );
-  }
-  else
-  {
-    std::vector<int>::const_iterator pdgIt = m_useParticles.begin();
-    for( ; pdgIt != m_useParticles.end(); ++pdgIt)
     {
-      PDGG4ParticleMap::const_iterator mapIt =
-          s_predefinedParticles.find( *pdgIt);
-      if( mapIt == s_predefinedParticles.end())
-      {
-        ATH_MSG_WARNING( "particle with pdg code " << *pdgIt
-              << " not found in list of predefined particles, ignoring" );
-        continue;
-      }
-      
-      if( m_pdgG4ParticleMap.find( *pdgIt) != m_pdgG4ParticleMap.end())
-      {
-        ATH_MSG_WARNING( "particle with pdg code " << *pdgIt
-              << " already loaded, ignoring" );
-        continue;
-      }
-      
-      m_pdgG4ParticleMap[*pdgIt] = mapIt->second;
+      ATH_MSG_INFO( "using all predefined particles" );
+      m_pdgG4ParticleMap.insert( s_predefinedParticles.begin(),
+                                 s_predefinedParticles.end());
+      ATH_MSG_INFO( "loaded " << m_pdgG4ParticleMap.size() << " particles" );
     }
-  }
+  else
+    {
+      std::vector<int>::const_iterator pdgIt = m_useParticles.begin();
+      for( ; pdgIt != m_useParticles.end(); ++pdgIt)
+        {
+          PDGG4ParticleMap::const_iterator mapIt =
+            s_predefinedParticles.find( *pdgIt);
+          if( mapIt == s_predefinedParticles.end())
+            {
+              ATH_MSG_WARNING( "particle with pdg code " << *pdgIt
+                               << " not found in list of predefined particles, ignoring" );
+              continue;
+            }
+
+          if( m_pdgG4ParticleMap.find( *pdgIt) != m_pdgG4ParticleMap.end())
+            {
+              ATH_MSG_WARNING( "particle with pdg code " << *pdgIt
+                               << " already loaded, ignoring" );
+              continue;
+            }
+
+          m_pdgG4ParticleMap[*pdgIt] = mapIt->second;
+        }
+    }
 
   if( m_printList)
-  {
-    ATH_MSG_INFO( "List of loaded particles:" );
-    printListOfParticles();
-  }
-            
+    {
+      ATH_MSG_INFO( "List of loaded particles:" );
+      printListOfParticles();
+    }
+
   return StatusCode::SUCCESS;
 }
 
-/*=========================================================================
- *  DESCRIPTION OF FUNCTION:
- *  ==> see headerfile
- *=======================================================================*/
-StatusCode
-iFatras::PDGToG4Particle::finalize()
-{
-
-  ATH_MSG_VERBOSE( "finalize() successful" );  
-  return StatusCode::SUCCESS;
-}
 
 /*=========================================================================
  *  DESCRIPTION OF FUNCTION:
@@ -130,26 +109,26 @@ G4ParticleDefinition*
 iFatras::PDGToG4Particle::getParticleDefinition( int pdgCode) const
 {
   G4ParticleDefinition* ret = 0;
-  
+
   PDGG4ParticleMap::const_iterator it =
-      m_pdgG4ParticleMap.find( pdgCode);
-  
+    m_pdgG4ParticleMap.find( pdgCode);
+
   if( it != m_pdgG4ParticleMap.end()) ret = it->second;
   else
-  {
-    it = m_pdgG4ParticleMap.find( std::abs( pdgCode));
-    if( it != m_pdgG4ParticleMap.end())
     {
-      if( std::abs( it->second->GetPDGCharge()) < 0.1)
-          ret = it->second;
-      else
-      {
-        ATH_MSG_WARNING( "PDG Code " << pdgCode << " not found,"
-              << " " << -pdgCode << " exists but is charged!" );
-      }
+      it = m_pdgG4ParticleMap.find( std::abs( pdgCode));
+      if( it != m_pdgG4ParticleMap.end())
+        {
+          if( std::abs( it->second->GetPDGCharge()) < 0.1)
+            ret = it->second;
+          else
+            {
+              ATH_MSG_WARNING( "PDG Code " << pdgCode << " not found,"
+                               << " " << -pdgCode << " exists but is charged!" );
+            }
+        }
     }
-  }
-  
+
   return ret;
 }
 
@@ -161,17 +140,17 @@ std::vector<std::pair<int,std::string> >
 iFatras::PDGToG4Particle::listOfParticles() const
 {
   std::vector<std::pair<int,std::string> > ret;
-  
+
   for( PDGG4ParticleMap::const_iterator it = m_pdgG4ParticleMap.begin();
        it != m_pdgG4ParticleMap.end(); ++it)
-  {
-    // Only return matter particles (for consistency with HepPDT)
-    if( it->first > 0)
     {
-      ret.push_back( std::make_pair( it->first, it->second->GetParticleName()));
+      // Only return matter particles (for consistency with HepPDT)
+      if( it->first > 0)
+        {
+          ret.push_back( std::make_pair( it->first, it->second->GetParticleName()));
+        }
     }
-  }
-    
+
   return ret;
 }
 
@@ -185,7 +164,7 @@ iFatras::PDGToG4Particle::printListOfParticles( bool withDecayTableOnly) const
   std::cout << "****************************************"
             << "****************************************"
             << std::endl;
-  
+
   std::cout << "* "
             << std::setw( 8) << "PDG Code" << " "
             << std::setw(16) << "Particle Name" << " "
@@ -195,30 +174,30 @@ iFatras::PDGToG4Particle::printListOfParticles( bool withDecayTableOnly) const
             << std::setw( 6) << "Charge" << " "
             << std::setw( 7) << "#DecChn" << " "
             << std::endl;
-  
+
   std::cout << "****************************************"
             << "****************************************"
             << std::endl;
-  
+
   for( PDGG4ParticleMap::const_iterator it = m_pdgG4ParticleMap.begin();
        it != m_pdgG4ParticleMap.end(); ++it)
-  {
-    G4DecayTable* dt = it->second->GetDecayTable();
-    int nDecayChannels = 0;
-    if( dt) nDecayChannels = dt->entries();
-    else if( withDecayTableOnly) continue;
-    
-    std::cout << "* "
-              << std::setw( 8) << it->first << " "
-              << std::setw(16) << it->second->GetParticleName() << " "
-              << std::setw( 8) << it->second->GetPDGEncoding() << " "
-              << std::setw( 8) << it->second->GetPDGMass() << " "
-              << std::setw(16) << it->second->GetPDGWidth() << " "
-              << std::setw( 6) << it->second->GetPDGCharge() << " "
-              << std::setw( 7) << nDecayChannels << " "
-              << std::endl;
-  }
-  
+    {
+      G4DecayTable* dt = it->second->GetDecayTable();
+      int nDecayChannels = 0;
+      if( dt) nDecayChannels = dt->entries();
+      else if( withDecayTableOnly) continue;
+
+      std::cout << "* "
+                << std::setw( 8) << it->first << " "
+                << std::setw(16) << it->second->GetParticleName() << " "
+                << std::setw( 8) << it->second->GetPDGEncoding() << " "
+                << std::setw( 8) << it->second->GetPDGMass() << " "
+                << std::setw(16) << it->second->GetPDGWidth() << " "
+                << std::setw( 6) << it->second->GetPDGCharge() << " "
+                << std::setw( 7) << nDecayChannels << " "
+                << std::endl;
+    }
+
   std::cout << "****************************************"
             << "****************************************"
             << std::endl;
@@ -255,7 +234,7 @@ iFatras::PDGToG4Particle::predefinedParticles()
   addParticle( G4AntiNeutrinoMu::AntiNeutrinoMuDefinition());
   addParticle( G4TauPlus::TauPlusDefinition());
   addParticle( G4AntiNeutrinoTau::AntiNeutrinoTauDefinition());
-  
+
   // Light I=1 Mesons
   addParticle( G4PionZero::PionZeroDefinition());
   addParticle( G4PionPlus::PionPlusDefinition());
@@ -313,7 +292,7 @@ iFatras::PDGToG4Particle::predefinedParticles()
   addParticle( G4AntiXiZero::AntiXiZeroDefinition());
   addParticle( G4AntiXiMinus::AntiXiMinusDefinition());
   addParticle( G4AntiOmegaMinus::AntiOmegaMinusDefinition());
-  
+
   // Charmed Baryons
   addParticle( G4LambdacPlus::LambdacPlusDefinition());
   addParticle( G4SigmacPlusPlus::SigmacPlusPlusDefinition());
@@ -342,4 +321,3 @@ iFatras::PDGToG4Particle::predefinedParticles()
 
   return predefinedParticles;
 }
-

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef G4ATLASSERVICES_G4AtlasSvc_H
@@ -23,7 +23,6 @@ class G4AtlasSvc : public extends<AthService , IG4AtlasSvc> {
 
   // Gaudi methods
   StatusCode initialize() override final;
-  StatusCode finalize() override final;
 
  private:
   ServiceHandle<IDetectorGeometrySvc> m_detGeoSvc{this, "DetectorGeometrySvc", "DetectorGeometrySvc"};

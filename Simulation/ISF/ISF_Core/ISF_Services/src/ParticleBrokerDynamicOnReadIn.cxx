@@ -10,8 +10,6 @@
 #include "ISF_Event/ISFParticleContainer.h"
 #include "ISF_Event/ISFBenchmarkHelper.h"
 
-#include "ISF_Interfaces/IEntryLayerTool.h"
-#include "ISF_Interfaces/IGeoIDSvc.h"
 #include "ISF_Interfaces/SimulationFlavor.h"
 
 // DetectorDescription
@@ -19,9 +17,6 @@
 
 // Benchmarking
 #include "PmbCxxUtils/CustomBenchmark.h"
-
-// Framework includes
-#include "GaudiKernel/ITHistSvc.h"
 
 // ROOT includes
 #include "TTree.h"
@@ -34,52 +29,12 @@
 /** Constructor **/
 ISF::ParticleBrokerDynamicOnReadIn::ParticleBrokerDynamicOnReadIn(const std::string& name,ISvcLocator* svc) :
   base_class(name,svc),
-  m_entryLayerTool("iGeant4::EntryLayerTool/ISF_EntryLayerTool"),
-  m_orderingTool(""),
-  m_hasOrderingTool(false),
-  m_geoIDSvc("", name),
-  m_geoIDSvcQuick(0),
-  m_forceGeoIDSvc(false),
-  m_validateGeoID(false),
   m_particles(),
   m_popParticles(),
   m_simSelector(),
   m_simSelectorSet(),
-  m_screenOutputPrefix("isf >> "),
-  m_doSelectorCPUMon(false),
-  m_benchPDGCode(0),
-  m_benchGeoID(0),
-  m_validationOutput(false),
-  m_thistSvc("THistSvc",name),
-  m_validationStream("ParticleBroker"),
-  m_t_pushPosition(0),
-  m_t_entryLayerPos(),
-  m_val_pdg(0),
-  m_val_p(0.),
-  m_val_x(0.),
-  m_val_y(0.),
-  m_val_z(0.)
+  m_t_entryLayerPos()
 {
-  // the entry layer tool to write TrackRecordCollections
-  declareProperty("EntryLayerTool"             , m_entryLayerTool       );
-  // particle ing tool
-  declareProperty("ParticleOrderingTool"       , m_orderingTool         );
-  // the geo service and selectors needed
-  declareProperty("GeoIDSvc"                   , m_geoIDSvc             );
-  declareProperty("AlwaysUseGeoIDSvc"          , m_forceGeoIDSvc        );
-  declareProperty("ValidateGeoIDs"             , m_validateGeoID        );
-  // collect and print cpu monitoring information
-  declareProperty("SimSelectorCPUMonitoring"   , m_doSelectorCPUMon     );
-  // write out validation info
-  declareProperty( "ValidationOutput",
-                   m_validationOutput = false,
-                   "If turned on, write out a ROOT tree.");
-  declareProperty("ValidationStreamName",
-                  m_validationStream = "ParticleBroker",
-                  "Name of the output stream" );
-  declareProperty("THistService",
-                  m_thistSvc,
-                  "The THistSvc" );
 }
 
 
@@ -93,80 +48,45 @@ StatusCode ISF::ParticleBrokerDynamicOnReadIn::initialize()
   ATH_MSG_DEBUG("initialize() ...");
 
   // retrieve the entry layer tool
-  if ( m_entryLayerTool.retrieve().isFailure() ){
-    ATH_MSG_FATAL("Could not retrieve EntryLayer Tool. Abort.");
-    return StatusCode::FAILURE;
-  } else {
-    ATH_MSG_INFO( "- EntryLayerTool   : " << m_entryLayerTool.typeAndName() );
-  }
+  ATH_CHECK ( m_entryLayerTool.retrieve() );
 
   // retrieve the particle ing tool if given
-  if ( ! m_orderingTool.empty()) {
-    if ( m_orderingTool.retrieve().isFailure() ){
-      ATH_MSG_FATAL("Could not retrieve ParticleOrderingTool. Abort.");
-      return StatusCode::FAILURE;
-    } else {
-      ATH_MSG_INFO( "- Particel OrderingTool   : " << m_orderingTool.typeAndName() );
-      m_hasOrderingTool = true;
-    }
-  }
+  ATH_CHECK ( m_orderingTool.retrieve( DisableTool{m_orderingTool.empty()} ) );
 
   // retrieve the geo identification decision tool
-  if ( m_geoIDSvc.retrieve().isFailure()){
-    ATH_MSG_FATAL("Could not retrieve GeometryIdentifier Service. Abort.");
-    return StatusCode::FAILURE;
-  } else {
-    ATH_MSG_INFO( "- GeoIDSvc         : "
-                  << (m_geoIDSvc.empty() ? "<not configured>" : m_geoIDSvc.typeAndName()) );
-    // store a quick-access-pointer (removes GaudiOverhead)
-    m_geoIDSvcQuick = &(*m_geoIDSvc);
-  }
+  ATH_CHECK ( m_geoIDSvc.retrieve() );
+  // store a quick-access-pointer (removes GaudiOverhead)
+  m_geoIDSvcQuick = &(*m_geoIDSvc);
 
   // setup CPU Benchmarks
   if (m_doSelectorCPUMon) {
-    if (!m_benchPDGCode)
-      m_benchPDGCode = new PMonUtils::CustomBenchmark(ISF::fMaxBenchmarkPDGCode );
-    if (!m_benchGeoID)
-      m_benchGeoID   = new PMonUtils::CustomBenchmark(AtlasDetDescr::fNumAtlasRegions      );
+    if (!m_benchPDGCode) {
+      m_benchPDGCode = new PMonUtils::CustomBenchmark( ISF::fMaxBenchmarkPDGCode );
+    }
+    if (!m_benchGeoID) {
+      m_benchGeoID   = new PMonUtils::CustomBenchmark( AtlasDetDescr::fNumAtlasRegions );
+    }
   }
 
   // setup for validation mode
   if ( m_validationOutput) {
-
     // retrieve the histogram service
-    if ( m_thistSvc.retrieve().isSuccess() ) {
-      ATH_CHECK( registerPosValTree( "push_position",
-                                     "push() particle positions",
-                                     m_t_pushPosition) );
-      ATH_CHECK( registerPosValTree( "caloEntry_pos",
-                                     "CaloEntryLayer positions",
-                                     m_t_entryLayerPos[ISF::fAtlasCaloEntry] ) );
-      ATH_CHECK( registerPosValTree( "muonEntry_pos",
-                                     "MuonEntryLayer positions",
-                                     m_t_entryLayerPos[ISF::fAtlasMuonEntry] ) );
-      ATH_CHECK( registerPosValTree( "muonExit_pos",
-                                     "MuonExitLayer positions",
-                                     m_t_entryLayerPos[ISF::fAtlasMuonExit]  ) );
-    }
-
-    // error when trying to retrieve the THistSvc
-    else {
-      // -> turn off validation output
-      ATH_MSG_ERROR("Validation mode turned on but unable to retrieve THistService. Will not write out ROOT histograms/Trees.");
-      m_validationOutput = false;
-    }
-
+    ATH_CHECK ( m_thistSvc.retrieve() );
+    ATH_CHECK( registerPosValTree( "push_position",
+                                   "push() particle positions",
+                                   m_t_pushPosition) );
+    ATH_CHECK( registerPosValTree( "caloEntry_pos",
+                                   "CaloEntryLayer positions",
+                                   m_t_entryLayerPos[ISF::fAtlasCaloEntry] ) );
+    ATH_CHECK( registerPosValTree( "muonEntry_pos",
+                                   "MuonEntryLayer positions",
+                                   m_t_entryLayerPos[ISF::fAtlasMuonEntry] ) );
+    ATH_CHECK( registerPosValTree( "muonExit_pos",
+                                   "MuonExitLayer positions",
+                                   m_t_entryLayerPos[ISF::fAtlasMuonExit]  ) );
   }
 
   // initialization was successful
-  return StatusCode::SUCCESS;
-}
-
-
-/** framework methods */
-StatusCode ISF::ParticleBrokerDynamicOnReadIn::finalize()
-{
-  ATH_MSG_DEBUG("finalize() ...");
   return StatusCode::SUCCESS;
 }
 
@@ -261,7 +181,7 @@ void ISF::ParticleBrokerDynamicOnReadIn::selectAndStore( ISF::ISFParticle* p)
     // register the SimulatorID to the particle
     p->setNextSimID( selectedSimID);
 
-    if (m_hasOrderingTool) m_orderingTool->setOrder(*p);
+    if ( m_orderingTool.isEnabled() ) { m_orderingTool->setOrder(*p); }
 
     // store particle locally
     m_particles.push(p);
@@ -366,7 +286,7 @@ StatusCode ISF::ParticleBrokerDynamicOnReadIn::initializeEvent(ISFParticleContai
 
   for ( auto& particlePtr: simParticles ) {
     // FIXME: ugly hack to keep bit-wise identical output with prior FullG4 implementation :(
-    if (!m_hasOrderingTool) particlePtr->setOrder(order--); 
+    if (!m_orderingTool.isEnabled() ) { particlePtr->setOrder(order--); }
 
     selectAndStore(particlePtr);
   }

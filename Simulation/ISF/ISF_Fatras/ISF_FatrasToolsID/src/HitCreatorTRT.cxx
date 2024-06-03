@@ -26,7 +26,6 @@
 #include "TRT_ReadoutGeometry/TRT_BaseElement.h"
 #include "InDetSimEvent/TRTUncompressedHit.h"
 #include "InDetSimEvent/TRTHitIdHelper.h"
-#include "TRT_ConditionsServices/ITRT_StrawStatusSummaryTool.h"
 // CLHEP
 #include "CLHEP/Units/PhysicalConstants.h"
 #include "CLHEP/Random/RandFlat.h"
@@ -37,36 +36,9 @@
 iFatras::HitCreatorTRT::HitCreatorTRT(const std::string& t,
                                       const std::string& n,
                                       const IInterface*  p ) :
-  base_class(t,n,p),
-  m_incidentSvc("IncidentSvc", n),
-  m_hitColl(0),
-  m_collectionName("TRTUncompressedHits"),
-  m_randomSvc("AtDSFMTGenSvc", n),
-  m_randomEngineName("FatrasRnd"),
-  m_randomEngine(0),
-  m_trtIdHelperName("TRT_ID"),
-  m_trtIdHelper(0),
-  m_trtStatusSummaryTool("TRT_StrawStatusSummaryTool", this),
-  m_useConditionsSvc(false)
+  base_class(t,n,p)
 {
-  // The Hit Collection Name
-  declareProperty("CollectionName",               m_collectionName, "TRTUncompressedHits");
-  // Random number svc
-  declareProperty("RandomNumberService",          m_randomSvc,        "Random number generator");
-  declareProperty("RandomStreamName",             m_randomEngineName, "Name of the random number stream");
-  // The TRT ID helper
-  declareProperty("TRT_IdHelperName",             m_trtIdHelperName);
-  // Tools & Services
-  declareProperty("StrawStatusSummaryTool",        m_trtStatusSummaryTool);
-  // general setup
-  declareProperty("IncidentService",              m_incidentSvc);
-
 }
-
-//================ Destructor =================================================
-
-iFatras::HitCreatorTRT::~HitCreatorTRT()
-{}
 
 
 //================ Initialisation =================================================
@@ -74,46 +46,28 @@ iFatras::HitCreatorTRT::~HitCreatorTRT()
 StatusCode iFatras::HitCreatorTRT::initialize()
 {
   // Random number service
-  if ( m_randomSvc.retrieve().isFailure() ) {
-    ATH_MSG_ERROR( "[ --- ] Could not retrieve " << m_randomSvc );
-    return StatusCode::FAILURE;
-  }
+  ATH_CHECK ( m_randomSvc.retrieve() );
   //Get own engine with own seeds:
   m_randomEngine = m_randomSvc->GetEngine(m_randomEngineName);
   if (!m_randomEngine) {
     ATH_MSG_ERROR( "[ --- ] Could not get random engine '" << m_randomEngineName << "'" );
     return StatusCode::FAILURE;
   }
+
   // Tools & Services
-  if ( m_useConditionsSvc && m_trtStatusSummaryTool.retrieve().isFailure()){
-    ATH_MSG_ERROR( "[ --- ] Could not Retrieve '" << m_trtStatusSummaryTool << "'" );
-    return StatusCode::FAILURE;
-  } else
-    ATH_MSG_VERBOSE( "[ trthit ] Successfully retireved " << m_trtStatusSummaryTool );
+  ATH_CHECK ( m_trtStatusSummaryTool.retrieve( DisableTool{ !m_useConditionsSvc } ) );
   // Get the TRT Identifier-helper:
-  if (detStore()->retrieve(m_trtIdHelper, m_trtIdHelperName).isFailure()) {
-    ATH_MSG_ERROR( "[ --- ] Could not get TRT ID helper");
-    return StatusCode::FAILURE;
-  }
+  ATH_CHECK ( detStore()->retrieve(m_trtIdHelper, m_trtIdHelperName) );
 
   // Athena/Gaudi framework
-  if (m_incidentSvc.retrieve().isFailure()){
-    ATH_MSG_WARNING("[ sihit ] Could not retrieve " << m_incidentSvc << ". Exiting.");
-    return StatusCode::FAILURE;
-  }
+  ATH_CHECK ( m_incidentSvc.retrieve() );
   // register to the incident service: BeginEvent for TrackCollection
-  m_incidentSvc->addListener( this, IncidentType::BeginEvent);
+  m_incidentSvc->addListener( this, IncidentType::BeginEvent );
 
   ATH_MSG_VERBOSE( "[ trthit ]  initialize() successful." );
   return StatusCode::SUCCESS;
 }
 
-
-StatusCode iFatras::HitCreatorTRT::finalize()
-{
-  ATH_MSG_VERBOSE( "[ trthit ]  finalize() successful " );
-  return StatusCode::SUCCESS;
-}
 
 void iFatras::HitCreatorTRT::handle( const Incident& inc ) {
   // check the incident type

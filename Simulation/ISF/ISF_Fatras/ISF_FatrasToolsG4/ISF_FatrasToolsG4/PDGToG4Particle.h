@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// PDGToG4Particle.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 #ifndef FATRASG4TOOLS_PDGTOG4PARTICLE_H
 #define FATRASG4TOOLS_PDGTOG4PARTICLE_H
@@ -26,9 +22,9 @@ namespace iFatras
   static const InterfaceID IID_PDGToG4Particle("PDGToG4Particle", 1, 0);
 
   /** @class PDGToG4Particle
-    
+
       AlgTool to convert a pdgCode into a particle definition used by the G4 decayer
-    
+
       @author Joerg.Mechnich -at- cern.ch, Andreas.Salzburger -at- cern.ch
   */
 
@@ -39,18 +35,15 @@ namespace iFatras
     PDGToG4Particle( const std::string&,
                      const std::string&,
                      const IInterface*);
-    
-    virtual ~PDGToG4Particle();
-    
+
+    virtual ~PDGToG4Particle() = default;
+
     /** AlgTool initailize method.*/
     StatusCode initialize();
 
-    /** AlgTool finalize method */
-    StatusCode finalize();
-
     /** AlgTool interface methods */
     static const InterfaceID& interfaceID() { return IID_PDGToG4Particle; }
-    
+
     /**
        Returns the G4ParticleDefinition of particle with PDG ID pdgCode,
        0 otherwise.
@@ -61,7 +54,7 @@ namespace iFatras
        returns a vector of pdgid / particlename pairs containing all particles
     */
     virtual std::vector<std::pair<int,std::string> > listOfParticles() const;
-    
+
     /** prints list of particles to stdout */
     virtual void printListOfParticles( bool withDecayTableOnly=false) const;
 
@@ -82,7 +75,7 @@ namespace iFatras
      *---------------------------------------------------------------------*/
     /** List of particles which should be available for conversion */
     std::vector<int> m_useParticles;
-    
+
     /** Print list of loaded particles in initialize() */
     bool m_printList;
   };

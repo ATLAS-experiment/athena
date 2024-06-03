@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// HitCreatorTRT.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 #ifndef ISF_FATRASTOOLSID_HITCREATORTRT_H
 #define ISF_FATRASTOOLSID_HITCREATORTRT_H
@@ -27,78 +23,73 @@
 #include "Identifier/Identifier.h"
 // InDetSimEvent
 #include "InDetSimEvent/TRTUncompressedHitCollection.h"
+#include "TRT_ConditionsServices/ITRT_StrawStatusSummaryTool.h"
 
-class ITRT_StrawStatusSummaryTool;
 class TRT_ID;
-class StoreGateSvc;
 
 namespace ISF {
-    class ISFParticle;
+  class ISFParticle;
 }
 
 namespace iFatras {
-      
-  /** 
-   @class HitCreatorTRT
 
-   RIOOnTrack creation, starting from intersection on an active surface
+  /**
+     @class HitCreatorTRT
 
-   @author Andreas.Salzburger -at- cern.ch 
-   */
-      
+     RIOOnTrack creation, starting from intersection on an active surface
+
+     @author Andreas.Salzburger -at- cern.ch
+  */
+
   class ATLAS_NOT_THREAD_SAFE HitCreatorTRT : public extends<AthAlgTool, IHitCreator, IIncidentListener>  // deprecated: ATLASSIM-6020
   {
-    public:
+  public:
 
-      /**Constructor */
-      HitCreatorTRT(const std::string&,const std::string&,const IInterface*);
-      
-      /**Destructor*/
-      ~HitCreatorTRT();
-      
-      /** AlgTool initailize method.*/
-      StatusCode initialize();
-      
-      /** AlgTool finalize method */
-      StatusCode finalize();
+    /**Constructor */
+    HitCreatorTRT(const std::string&,const std::string&,const IInterface*);
 
-      /** handle for incident service */
-      void handle(const Incident& inc);
-     
-      /** Record the hit */
-      void createSimHit(const ISF::ISFParticle& isp, const Trk::TrackParameters& , double ) const;
-      
-      /** Return the cluster on Track -- the PrepRawData is contained in this one */       
-      const ParametersROT* createHit(const ISF::ISFParticle&, const Trk::TrackParameters&  ) const { return 0; };
-      
-      /** Return the cluster on Track -- the PrepRawData is contained in this one */       
-      const std::vector< ParametersROT >* createHits(const ISF::ISFParticle&, const ParametersLayer& ) const { return 0; }
+    /**Destructor*/
+    virtual ~HitCreatorTRT() = default;
 
-    private:
-        
-      /* Incident Service */  
-      ServiceHandle<IIncidentSvc>         m_incidentSvc;
-              
-      /*  SiHit collection and collection helper */
-      TRTUncompressedHitCollection             *m_hitColl;                  //!< the sim hit collection
-      std::string                               m_collectionName;           //!< name of the collection on storegate
+    /** AlgTool initailize method.*/
+    StatusCode initialize();
 
-      /** Pointer to the random number generator service */
-      ServiceHandle<IAtRndmGenSvc>              m_randomSvc;                    //!< Random Svc  
-      std::string                               m_randomEngineName;             //!< Name of the random number stream
-      CLHEP::HepRandomEngine*                   m_randomEngine;                 //!< Random Engine 
-      
-      std::string                               m_trtIdHelperName;              //!< where to find the SCT helper
-      const TRT_ID*                             m_trtIdHelper;                  //!< TRT ID helper 
-      
-      ToolHandle<ITRT_StrawStatusSummaryTool> m_trtStatusSummaryTool;          //!< Handle to TRT conditions service
-      bool                                      m_useConditionsSvc;
-                                                                                    
-        
- 
+    /** handle for incident service */
+    void handle(const Incident& inc);
+
+    /** Record the hit */
+    void createSimHit(const ISF::ISFParticle& isp, const Trk::TrackParameters& , double ) const;
+
+    /** Return the cluster on Track -- the PrepRawData is contained in this one */
+    const ParametersROT* createHit(const ISF::ISFParticle&, const Trk::TrackParameters&  ) const { return 0; };
+
+    /** Return the cluster on Track -- the PrepRawData is contained in this one */
+    const std::vector< ParametersROT >* createHits(const ISF::ISFParticle&, const ParametersLayer& ) const { return 0; }
+
+  private:
+
+    /* Incident Service */
+    ServiceHandle<IIncidentSvc>         m_incidentSvc{this, "IncidentService", "IncidentSvc"};
+
+    /*  SiHit collection and collection helper */
+    TRTUncompressedHitCollection *m_hitColl{};                  //!< the sim hit collection
+    StringProperty  m_collectionName{this, "CollectionName", "TRTUncompressedHits"};           //!< name of the collection on storegate
+
+    /** Pointer to the random number generator service */
+    ServiceHandle<IAtRndmGenSvc> m_randomSvc{this, "RandomNumberService", "AtDSFMTGenSvc"};                    //!< Random Svc
+    StringProperty m_randomEngineName{this, "RandomStreamName", "FatrasRnd"};             //!< Name of the random number stream
+    CLHEP::HepRandomEngine *m_randomEngine{};                 //!< Random Engine
+
+    StringProperty m_trtIdHelperName{this, "TRT_IdHelperName", "TRT_ID"};              //!< where to find the SCT helper
+    const TRT_ID *m_trtIdHelper{};                  //!< TRT ID helper
+
+    ToolHandle<ITRT_StrawStatusSummaryTool> m_trtStatusSummaryTool{this, "StrawStatusSummaryTool", "TRT_StrawStatusSummaryTool"};          //!< Handle to TRT conditions service
+    bool m_useConditionsSvc{false};
+
+
+
   };
 
 } // end of namespace
 
-#endif 
-
+#endif

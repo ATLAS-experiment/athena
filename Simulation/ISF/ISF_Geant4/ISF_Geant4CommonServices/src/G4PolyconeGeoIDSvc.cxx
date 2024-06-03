@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// G4PolyconeGeoIDSvc.cxx, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 // class header include
 #include "G4PolyconeGeoIDSvc.h"
@@ -28,8 +24,6 @@
 #include "G4Polycone.hh"
 #include "G4UnionSolid.hh"
 
-// EnvelopeDefinitionService
-#include "SubDetectorEnvelopes/IEnvelopeDefSvc.h"
 
 // DetectorDescription
 #include "AtlasDetDescr/AtlasRegion.h"
@@ -38,11 +32,9 @@
 /** Constructor **/
 ISF::G4PolyconeGeoIDSvc::G4PolyconeGeoIDSvc(const std::string& name,ISvcLocator* svc) :
   base_class(name,svc),
-  m_envDefSvc("AtlasGeometry_EnvelopeDefSvc", name),
   m_volume(),
   m_typeConverter()
 {
-  declareProperty("EnvelopeDefSvc"            , m_envDefSvc );
 }
 
 
@@ -74,14 +66,6 @@ StatusCode  ISF::G4PolyconeGeoIDSvc::initialize()
   m_typeConverter[kSurface] = ISF::fSurface;
   m_typeConverter[kInside]  = ISF::fInside;
 
-  ATH_MSG_VERBOSE("initialize() successful");
-  return StatusCode::SUCCESS;
-}
-
-
-StatusCode  ISF::G4PolyconeGeoIDSvc::finalize()
-{
-  ATH_MSG_VERBOSE("finalize() successful");
   return StatusCode::SUCCESS;
 }
 

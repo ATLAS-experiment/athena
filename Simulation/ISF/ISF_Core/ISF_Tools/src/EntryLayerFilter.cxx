@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// EntryLayerFilter.cxx, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 // class header include
 #include "EntryLayerFilter.h"
@@ -27,30 +23,6 @@ ISF::EntryLayerFilter::EntryLayerFilter(const std::string& t, const std::string&
   declareProperty( "MinEkinNeutral",
                    m_ekinNeutral=-1.,
                    "Minimum kinetic energy cut for neutral particles (set -1 to filter out all)");
-}
-
-/** Destructor **/
-ISF::EntryLayerFilter::~EntryLayerFilter()
-{
-}
-
-/** Athena algtool's Hooks */
-StatusCode  ISF::EntryLayerFilter::initialize()
-{
-  ATH_MSG_VERBOSE("initialize() ...");
-
-  ATH_MSG_VERBOSE("initialize() successful");
-  return StatusCode::SUCCESS;
-}
-
-
-/** Athena algtool's Hooks */
-StatusCode  ISF::EntryLayerFilter::finalize()
-{
-  ATH_MSG_VERBOSE("finalize() ...");
-
-  ATH_MSG_VERBOSE("finalize() successful");
-  return StatusCode::SUCCESS;
 }
 
 
