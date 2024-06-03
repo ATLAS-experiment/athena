@@ -37,6 +37,7 @@ bool PileupRemovalCondition::isSatisfied(const pHypoJet& ip,
         double clusterPU_sumEEM = 0; double clusterPU_sumE = 0;
         for (size_t clust = 0; clust < nClusters; clust++) {
            const xAOD::CaloCluster * aCluster = dynamic_cast<const xAOD::CaloCluster*> ((*ip->xAODJet())->rawConstituent(clust));
+           if (not aCluster) continue;
            double clusEEM = 0;
            clusEEM+=(aCluster)->eSample(CaloSampling::EMB1);
            clusEEM+=(aCluster)->eSample(CaloSampling::EMB2);
