@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SiDetectorElementStatusCondAlg.h"
@@ -60,13 +60,13 @@ namespace InDet {
       if (writeHandle.record( std::move(detector_element_status) ).isFailure()) {
          ATH_MSG_FATAL("Could not record " << writeHandle.key()  );
       }
-      ATH_MSG_INFO( "SiDetectorElementStatus Recorded " << writeHandle.key() << " with Range : " << range );
+      ATH_MSG_DEBUG( "SiDetectorElementStatus Recorded " << writeHandle.key() << " with Range : " << range );
       return StatusCode::SUCCESS;
    }
 
    StatusCode SiDetectorElementStatusCondAlg::finalize()
    {
-      ATH_MSG_INFO("Max badCell size " << m_maxSize);
+      ATH_MSG_DEBUG("Max badCell size " << m_maxSize);
       return StatusCode::SUCCESS;
    }
 }

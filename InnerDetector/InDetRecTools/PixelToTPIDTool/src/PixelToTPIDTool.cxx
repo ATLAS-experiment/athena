@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PixelToTPIDTool/PixelToTPIDTool.h"
@@ -60,14 +60,12 @@ StatusCode InDet::PixelToTPIDTool::initialize() {
   if (m_IBLParameterSvc.retrieve().isFailure()) {
     ATH_MSG_FATAL("Could not retrieve IBLParameterSvc");
     return StatusCode::FAILURE;
-  } else
-    ATH_MSG_INFO("Retrieved service " << m_IBLParameterSvc);
+  }
 
   ATH_CHECK(m_moduleDataKey.initialize());
 
   ATH_CHECK(m_dedxKey.initialize());
 
-  ATH_MSG_INFO ("initialize() successful in " << name());
   return StatusCode::SUCCESS;
 }
 

@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 /***************************************************************************
@@ -824,7 +824,7 @@ InDetIterativePriVxFinderTool::finalize()
 void
 InDetIterativePriVxFinderTool::printParameterSettings()
 {
-  ATH_MSG_INFO("VxPrimary initialize(): Parametersettings "
+  ATH_MSG_DEBUG("VxPrimary initialize(): Parametersettings "
                << '\n'
                << "VertexFitter " << m_iVertexFitter << '\n');
 }

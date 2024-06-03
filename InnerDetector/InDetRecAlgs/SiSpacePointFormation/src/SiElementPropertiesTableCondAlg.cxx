@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SiElementPropertiesTableCondAlg.h"
@@ -18,8 +18,6 @@ namespace InDet {
 
   StatusCode SiElementPropertiesTableCondAlg::initialize()
   {
-    ATH_MSG_DEBUG("initialize " << name());
-
     // Read Handle
     ATH_CHECK(m_readKey.initialize());
 
@@ -69,15 +67,13 @@ namespace InDet {
                     << " into Conditions Store");
       return StatusCode::FAILURE;
     }
-    ATH_MSG_INFO("recorded new CDO " << writeHandle.key() << " with range " << writeHandle.getRange() << " into ConditionStore");
+    ATH_MSG_DEBUG("recorded new CDO " << writeHandle.key() << " with range " << writeHandle.getRange() << " into ConditionStore");
 
     return StatusCode::SUCCESS;
   }
 
   StatusCode SiElementPropertiesTableCondAlg::finalize()
   {
-    ATH_MSG_DEBUG("finalize " << name());
-
     return StatusCode::SUCCESS;
   }
 

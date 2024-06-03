@@ -166,7 +166,6 @@ Trk::GsfExtrapolator::initialize()
                         ? Trk::MagneticFieldProperties(Trk::FastField)
                         : Trk::MagneticFieldProperties(Trk::FullField);
 
-  ATH_MSG_INFO("Initialisation of " << name() << " was successful");
   return StatusCode::SUCCESS;
 }
 
@@ -219,7 +218,7 @@ Trk::GsfExtrapolator::extrapolateDirectly(
   const Trk::TrackingVolume* currentVolume = m_navigator->highestVolume(ctx);
   if (!currentVolume) {
     ATH_MSG_WARNING(
-      "Current tracking volume could not be determined... returning 0");
+      "Current tracking volume could not be determined... returning {}");
     return {};
   }
   return extrapolateDirectlyImpl(ctx,

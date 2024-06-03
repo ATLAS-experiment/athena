@@ -228,7 +228,7 @@ InDet::TRT_SeededTrackFinder::execute(const EventContext& ctx) const{
         // do we continue to process ?
         nTrtSegCur++;
         if(nTrtSegCur>=m_MaxSegNum) {
-          ATH_MSG_INFO ("====> Reached maximal number of segments in event, stop !!!");
+          ATH_MSG_DEBUG ("====> Reached maximal number of segments in event, stop !!!");
           // statistics
           ev_stat.m_counter[Stat_t::kNTrtLimit]++;
           break;

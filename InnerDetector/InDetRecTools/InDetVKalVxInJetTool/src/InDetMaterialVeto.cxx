@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Header include
@@ -24,7 +24,7 @@ namespace InDet {
     AthMessaging(Gaudi::svcLocator()->service< IMessageSvc >( "MessageSvc" ),"InDetMaterialVeto")
   {
 
-    ATH_MSG_INFO("Building material rejection map from BeamPipe and PixelDetectorManager");
+    ATH_MSG_DEBUG("Building material rejection map from BeamPipe and PixelDetectorManager");
     
     static constexpr int nbins_R = 76;
     double bins_R[nbins_R+1];
@@ -74,7 +74,7 @@ namespace InDet {
       }
     } // if(beamPipeLogVolume)
     
-    ATH_MSG_INFO("BeamPipeRadius used for material rejection="<<beamPipeRadius);
+    ATH_MSG_DEBUG("BeamPipeRadius used for material rejection="<<beamPipeRadius);
     
     // Fill map with beam pipe radius for all z
     for(double z = -zmax + 0.5*zbinwidth; z<zmax; z+=zbinwidth) m_ITkPixMaterialMap->Fill(z,beamPipeRadius);
@@ -103,7 +103,7 @@ namespace InDet {
       
     }
     
-    ATH_MSG_INFO("IPTRadius used for material rejection="<<IPTRadius);
+    ATH_MSG_DEBUG("IPTRadius used for material rejection="<<IPTRadius);
     
     // Fill map with IPT radius for all z
     for(double z = -zmax + 0.5*zbinwidth; z<zmax; z+=zbinwidth) m_ITkPixMaterialMap->Fill(z,IPTRadius);

@@ -225,6 +225,11 @@ class AlgConfig(ABC):
                 # Add its hypo alg
                 sel_acc.addHypoAlgo(hypo_alg)
 
+                # FIXME: We need to mark the CA as merged because during the fast menu generation
+                # the merging is only done once for all chains, which is not compatible with the MET
+                # menu generation code. Remove this once ATR-29211 is fixed.
+                sel_acc.wasMerged()
+
                 step_name = sel_acc.name
 
             # Build the menu sequence and create the actual chainStep

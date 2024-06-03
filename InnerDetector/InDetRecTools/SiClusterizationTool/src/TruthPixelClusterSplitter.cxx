@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -37,7 +37,7 @@ StatusCode InDet::TruthPixelClusterSplitter::initialize() {
     return StatusCode::FAILURE;
   }
   
-  ATH_MSG_INFO(" Cluster splitter initialized successfully "<< m_truthClusterizationFactory );
+  ATH_MSG_DEBUG(" Cluster splitter initialized successfully "<< m_truthClusterizationFactory );
   return StatusCode::SUCCESS;
 }
 
