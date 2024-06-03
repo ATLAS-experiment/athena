@@ -27,6 +27,7 @@
 #include "G4ReflectionFactory.hh"
 #include "G4LogicalBorderSurface.hh"
 #include "G4OpticalSurface.hh"
+#include "GeoModelHelpers/throwExcept.h"
 
 #include <map>
 #include <iostream>
@@ -40,20 +41,18 @@ Geo2G4Builder::Geo2G4Builder(const std::string& detectorName)
   ISvcLocator* svcLocator = Gaudi::svcLocator(); // from Bootstrap
   StatusCode sc=svcLocator->service("DetectorStore",m_pDetStore);
   if (sc.isFailure()) {
-    std::string errorMessage{"ERROR: Geo2G4Builder for detector " + detectorName + " could not access the detector store."};
-    ATH_MSG_FATAL(errorMessage);
-    throw std::runtime_error(errorMessage);
+    THROW_EXCEPTION("ERROR: Geo2G4Builder for detector "<< detectorName << " could not access the detector store.");
   }
 
   sc = m_pDetStore->retrieve( m_theExpt, "ATLAS" );
   if(sc.isFailure()){
-    std::string errorMessage{"ERROR: " + detectorName + " could not get GeoModelExperiment"};
-    ATH_MSG_FATAL(errorMessage);
-    throw std::runtime_error(errorMessage);
+    THROW_EXCEPTION(detectorName<<" could not get GeoModelExperiment");
   }
   else {
     const GeoVDetectorManager *theManager = m_theExpt->getManager(detectorName);
-
+    if (!theManager) {
+       THROW_EXCEPTION("Failed to retrieve manager "<<detectorName);
+    }
     for(unsigned int i=0; i<theManager->getNumTreeTops(); ++i) {
       m_treeTops.push_back(theManager->getTreeTop(i));
     }
