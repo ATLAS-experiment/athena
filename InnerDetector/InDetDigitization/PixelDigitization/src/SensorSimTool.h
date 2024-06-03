@@ -94,16 +94,9 @@ protected:
     "Path to the ROOT file with histograms for radiation damage template corrections"
   };
   
-  Gaudi::Property<bool> m_isITk
-  {
-    this, "IsITk", false,
-    "Flag to tell the code if the code is meant for ITk"
-  };
-  
   Gaudi::Property<std::vector<std::string> > m_lorentzAngleCorrectionHistos
   {
     this, "LorentzAngleCorrectionHistos", {
-      "la",
       "la",
       "la",
       "la",
@@ -118,7 +111,6 @@ protected:
       "cce",
       "cce",
       "cce",
-      "cce",
       "cce"
     },
     "Paths to the histograms inside the ROOT file for radiation damage charge correction"
@@ -130,7 +122,6 @@ protected:
       "dz",
       "dz",
       "dz",
-      "dz",
       "dz"
     },
     "Paths to the histograms inside the ROOT file for radiation damage distance correction"
@@ -139,6 +130,13 @@ protected:
   SG::ReadCondHandleKey<PixelRadiationDamageFluenceMapData> m_fluenceDataKey
   {
     this, "PixelRadiationDamageFluenceMapData", "PixelRadiationDamageFluenceMapData", "Pixel fluence map data for radiation damage"
+  };
+
+  
+  Gaudi::Property<bool> m_digitizeITk3Das3D
+  {
+    this, "DigitizeITk3Das3D", false,
+    "Flag to tell the code if the 3D sensors for ITK should be treated as 3D or as planar sensors for digitization"
   };
 
 };

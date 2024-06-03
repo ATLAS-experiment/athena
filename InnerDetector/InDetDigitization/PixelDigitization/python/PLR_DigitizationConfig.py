@@ -73,7 +73,7 @@ def PLR_SensorSimPlanarToolCfg(flags, name="PLR_SensorSimPlanarTool", **kwargs):
     kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(PLR_LorentzAngleToolCfg(flags)))
     kwargs.setdefault("PixelModuleData", "PLR_ModuleData")
     kwargs.setdefault("RadiationDamageSimulationType", flags.Digitization.PixelPlanarRadiationDamageSimulationType.value)
-    kwargs.setdefault("IsITk", True)
+    kwargs.setdefault("DigitizeITk3Das3D", False)
     if flags.Digitization.PixelPlanarRadiationDamageSimulationType is not PixelRadiationDamageSimulationType.NoRadiationDamage:
         # acc.merge(PLR_RadSimFluenceMapAlgCfg(flags))  # TODO: not supported yet
         pass
@@ -87,7 +87,7 @@ def PLR_SensorSim3DToolCfg(flags, name="PLR_SensorSim3DTool", **kwargs):
     kwargs.setdefault("SiPropertiesTool", acc.popToolsAndMerge(PLR_SiPropertiesToolCfg(flags)))
     kwargs.setdefault("PixelModuleData", "PLR_ModuleData")
     kwargs.setdefault("RadiationDamageSimulationType", flags.Digitization.Pixel3DRadiationDamageSimulationType.value)
-    kwargs.setdefault("IsITk", True)
+    kwargs.setdefault("DigitizeITk3Das3D", False)
     if flags.Digitization.Pixel3DRadiationDamageSimulationType is not PixelRadiationDamageSimulationType.NoRadiationDamage:
         # acc.merge(PLR_RadSimFluenceMapAlgCfg(flags))  # TODO: not supported yet
         pass

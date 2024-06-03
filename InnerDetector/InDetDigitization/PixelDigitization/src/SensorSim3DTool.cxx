@@ -67,10 +67,20 @@ StatusCode SensorSim3DTool::induceCharge(const TimedHitPtr<SiHit>& phit,
                                          std::vector<double>& initialConditions,
                                          CLHEP::HepRandomEngine* rndmEngine,
                                          const EventContext &ctx) {
-  // TODO: check that detectors other than ITk have this properly set
+
   if (p_design.getReadoutTechnology() == InDetDD::PixelReadoutTechnology::RD53) {
-    // disable for now!
-    return StatusCode::SUCCESS;
+    if (m_digitizeITk3Das3D) {
+      if (!p_design.is3D()) {
+        return StatusCode::SUCCESS;
+      }
+
+      // for now skip pixel luminosity rings
+      if (Module.isPLR()) {
+        return StatusCode::SUCCESS;
+      }
+    } else {
+      return StatusCode::SUCCESS;
+    }
   } else {
     if (!Module.isBarrel()) {
       return StatusCode::SUCCESS;
@@ -103,6 +113,7 @@ StatusCode SensorSim3DTool::induceCharge(const TimedHitPtr<SiHit>& phit,
   double sensorThickness = Module.design().thickness();
   const InDet::SiliconProperties& siProperties = m_siPropertiesTool->getSiProperties(Module.identifyHash(), ctx);
   double eleholePairEnergy = siProperties.electronHolePairsPerEnergy();
+  
 
   // Charge Collection Probability Map bin size
   const double x_bin_size = 0.001;
