@@ -49,9 +49,10 @@ StatusCode FPGATrackSimHough1DShiftTool::initialize()
     ATH_MSG_INFO("Phi range: (" << m_phiMin << "," << m_phiMax << "," << m_phiBins << ")");
     if (m_useDiff) ATH_MSG_INFO("useDiff Set True");
     if (m_variableExtend) ATH_MSG_INFO("variableExtend Set True");
-    ATH_MSG_INFO("enhancedHighPt" << m_enhanceHighPt.value());
-    ATH_MSG_INFO("applyDropable" << m_applyDropable.value());
-
+    ATH_MSG_INFO("enhancedHighPt " << m_enhanceHighPt.value());
+    ATH_MSG_INFO("applyDropable " << m_applyDropable.value());
+    ATH_MSG_INFO("threshold " << m_threshold.value());
+    
     // Retrieve info
     ATH_CHECK(m_FPGATrackSimBankSvc.retrieve());
     ATH_CHECK(m_FPGATrackSimMapping.retrieve());
@@ -477,7 +478,9 @@ FPGATrackSimRoad FPGATrackSimHough1DShiftTool::makeRoad(const std::vector<const 
     }
     r.setY(qpT);
 
-    matchIdealGeoSector(r);
+    if (m_useSectors) r.setSector(m_FPGATrackSimBankSvc->SectorBank_1st()->findSector(sorted_hits));
+    else if (m_idealGeoRoads) matchIdealGeoSector(r);
+
     return r;
     // TODO sector, wildcard layers?
 }
@@ -537,7 +540,7 @@ void FPGATrackSimHough1DShiftTool::matchIdealGeoSector(FPGATrackSimRoad & r) con
 
     // Similarly, we do the same thing for spacepoints. this probably means we can't combine the two.
     // maybe better to store the module array instead of just a number?
-
+    
     r.setSectorBin(sectorbin);
     if (!m_doEtaPatternConsts && !m_useSpacePoints) {
         r.setSector(sectorbank->findSector(modules));

@@ -10,7 +10,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from FPGATrackSimConfTools.FPGATrackSimAnalysisConfig import FPGATrackSimRoadUnionToolCfg
+from FPGATrackSimConfTools.FPGATrackSimAnalysisConfig import FPGATrackSimRoadUnionToolCfg,FPGATrackSimRoadUnionTool1DCfg
 from AthenaCommon.SystemOfUnits import GeV
 
 
@@ -19,7 +19,7 @@ def FPGATrackSimSpacePointsToolCfg(flags):
     SpacePointTool = CompFactory.FPGATrackSimSpacePointsTool()
     SpacePointTool.Filtering = flags.Trigger.FPGATrackSim.ActiveConfig.spacePointFiltering
     SpacePointTool.FilteringClosePoints = False
-    SpacePointTool.PhiWindow = 0.008
+    SpacePointTool.PhiWindow = 0.004
     SpacePointTool.Duplication = True
     result.setPrivateTools(SpacePointTool)
     return result
@@ -70,7 +70,13 @@ def FPGATrackSimBankGenCfg(flags, **kwargs):
 
     # Override this. It gets set somewhere from bank_tag.
     theFPGATrackSimMatrixGenAlg.WCmax = 2
-    theFPGATrackSimMatrixGenAlg.RoadFinder = acc.getPrimaryAndMerge(FPGATrackSimRoadUnionToolCfg(flags))
+    
+    if (flags.Trigger.FPGATrackSim.ActiveConfig.hough1D):
+      theFPGATrackSimMatrixGenAlg.RoadFinder = acc.getPrimaryAndMerge(FPGATrackSimRoadUnionTool1DCfg(flags))
+    else:
+        
+      theFPGATrackSimMatrixGenAlg.RoadFinder = acc.getPrimaryAndMerge(FPGATrackSimRoadUnionToolCfg(flags))
+
     from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
     acc.merge(BeamSpotCondAlgCfg(flags))
 

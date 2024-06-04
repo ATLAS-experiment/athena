@@ -338,6 +338,7 @@ bool FPGATrackSimConstGenAlgo::GetConstants(FPGATrackSimMatrixAccumulator const 
     // Calculate the eigen system
     std::vector<double> eigvals;
     vector2D<double> eigvecs;
+
     eigen(nusable, m_nCoords, mtx_reduced, coordsToUse, eigvals, eigvecs);
 
     // Calculate the constants
