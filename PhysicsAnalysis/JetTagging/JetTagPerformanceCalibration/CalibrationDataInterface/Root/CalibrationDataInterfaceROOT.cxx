@@ -1879,8 +1879,10 @@ Analysis::CalibrationDataInterfaceROOT::checkWeightScaleFactors(unsigned int ind
     }
     // Finally, carry out the cross-check that all this is about: recompute the scale factor
     // in each pseudo-bin
-    cout << "CalibrationDataInterfaceROOT::checkWeightScaleFactors: cross-checking scale factors for objects " << nameFromIndex(indexSF) << " and " << nameFromIndex(indexEff) << "\n" << std::setfill('-') << std::setw(100) << "-" << endl;
-    cout << std::setfill(' ');
+    if (m_verbose){
+      cout << "CalibrationDataInterfaceROOT::checkWeightScaleFactors: cross-checking scale factors for objects " << nameFromIndex(indexSF) << " and " << nameFromIndex(indexEff) << "\n" << std::setfill('-') << std::setw(100) << "-" << endl;
+      cout << std::setfill(' ');
+    }
     CalibrationDataVariables x;
     std::vector<double>& vPt = mergedBoundaries[CalibrationDataContainer::kPt], vEta = mergedBoundaries[CalibrationDataContainer::kEta], vTagWeight = mergedBoundaries[CalibrationDataContainer::kTagWeight];
     for (unsigned int ipt = 0; ipt < vPt.size()-1; ++ipt) {
