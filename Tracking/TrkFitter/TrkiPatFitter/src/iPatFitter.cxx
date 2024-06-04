@@ -44,38 +44,6 @@ iPatFitter::iPatFitter(const std::string& type, const std::string& name,
 }
 
 StatusCode iPatFitter::initialize() {
-  // print name and package version
-  if (!msgLvl(MSG::DEBUG)) {
-    m_extendedDebug = false;
-  }
-  ATH_MSG_INFO("iPatFitter::initialize()");
-  msg(MSG::INFO) << " with options: ";
-  if (m_aggregateMaterial) {
-    msg() << " AggregateMaterial";
-  }
-  if (m_asymmetricCaloEnergy) {
-    msg() << " AsymmetricCaloEnergy";
-  }
-  if (m_fullCombinedFit) {
-    msg() << " FullCombinedFit";
-  }
-  if (m_globalFit) {
-    msg() << " GlobalFitter";
-    if (m_lineFit) {
-      msg() << " LineFit with p = " << m_lineMomentum / Gaudi::Units::GeV
-            << " GeV";
-    }
-    if (m_constrainedAlignmentEffects)
-      msg() << " ConstrainedAlignmentEffects";
-  }
-  if (m_extendedDebug) {
-    msg() << " ExtendedDebug";
-  }
-  if (m_forcedRefitsForValidation) {
-    msg() << " ForcedRefitsForValidation = " << m_forcedRefitsForValidation;
-  }
-  msg() << endmsg;
-
   // fill WARNING messages
   m_messageHelper->setMaxNumberOfMessagesPrinted(m_maxWarnings);
   m_messageHelper->setMessage(0,
@@ -139,7 +107,6 @@ StatusCode iPatFitter::initialize() {
     ATH_MSG_FATAL("Failed to retrieve Svc " << m_trackingVolumesSvc);
     return StatusCode::FAILURE;
   }
-  ATH_MSG_INFO("Retrieved Svc " << m_trackingVolumesSvc);
   m_calorimeterVolume =
       std::make_unique<Trk::Volume>(m_trackingVolumesSvc->volume(
           ITrackingVolumesSvc::MuonSpectrometerEntryLayer));
@@ -168,19 +135,20 @@ StatusCode iPatFitter::finalize() {
   double goodFit = 0.;
   double iterations = 0.;
 
+  //avoid printing for 0 fit attempts
   if (m_countFitAttempts) {
     goodFit = static_cast<double>(100 * m_countGoodFits) / fits;
+    if (m_countGoodFits) {
+      iterations = static_cast<double>(m_countIterations) /
+                   static_cast<double>(m_countGoodFits);
+    }
+    ATH_MSG_INFO(std::setiosflags(std::ios::fixed)
+                 << "finalized after " << m_countFitAttempts
+                 << " track-fits attempted, out of which " << std::setw(5)
+                 << std::setprecision(1) << goodFit
+                 << "% converged, taking an average " << std::setw(5)
+                 << std::setprecision(2) << iterations << " iterations");
   }
-  if (m_countGoodFits) {
-    iterations = static_cast<double>(m_countIterations) /
-                 static_cast<double>(m_countGoodFits);
-  }
-  ATH_MSG_INFO(std::setiosflags(std::ios::fixed)
-               << "finalized after " << m_countFitAttempts
-               << " track-fits attempted, out of which " << std::setw(5)
-               << std::setprecision(1) << goodFit
-               << "% converged, taking an average " << std::setw(5)
-               << std::setprecision(2) << iterations << " iterations");
   if (m_forcedRefitsForValidation) {
     double refits = static_cast<double>(m_countRefitAttempts);
     double goodRefit = 0.;
