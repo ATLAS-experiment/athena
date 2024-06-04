@@ -39,7 +39,7 @@ if __name__=="__main__":
     args = parser.parse_args()
     flags, cfg = setupGeoR4TestCfg(args)
     
-    from MuonPatternRecognitionAlgs.MuonHoughTransformAlgConfig import MuonEtaHoughTransformAlgCfg, MuonPhiHoughTransformAlgCfg
+
     from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
     # from PerfMonVTune.PerfMonVTuneConfig import VTuneProfilerServiceCfg
     cfg.merge(setupHistSvcCfg(flags,out_file=args.outRootFile,out_stream="MuonEtaHoughTransformTest"))
@@ -50,8 +50,9 @@ if __name__=="__main__":
     from MuonSpacePointFormation.SpacePointFormationConfig import MuonSpacePointFormationCfg
     cfg.merge(MuonSpacePointFormationCfg(flags))
 
-    cfg.merge(MuonEtaHoughTransformAlgCfg(flags))
-    cfg.merge(MuonPhiHoughTransformAlgCfg(flags))
+    from MuonPatternRecognitionAlgs.MuonHoughTransformAlgConfig import MuonPatternRecognitionCfg
+    cfg.merge(MuonPatternRecognitionCfg(flags))
+    
     cfg.merge(MuonHoughTransformTesterCfg(flags,
                                        drawDisplayFailed =args.displayFailedSeeds,
                                        drawDisplaySuccss = args.displayGoodSeeds))

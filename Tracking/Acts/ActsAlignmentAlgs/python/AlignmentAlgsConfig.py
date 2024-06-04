@@ -1,6 +1,7 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
 
 def ActsAlignStoreProviderAlgCfg(flags, name="AlignStoreProviderAlg", **kwargs):
@@ -120,6 +121,7 @@ def SctAlignCondAlgCfg(flags):
     return result
 
 #### Setup the Geometry context algorithm
+@AccumulatorCache
 def ActsGeometryContextAlgCfg(flags, name="GeometryContextAlg", **kwargs):
     result = ComponentAccumulator()
     AlignmentStores = []
