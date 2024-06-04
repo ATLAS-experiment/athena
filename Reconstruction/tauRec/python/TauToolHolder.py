@@ -106,7 +106,7 @@ def TauTrackFinderCfg(flags):
                                     ghostTrackDR = flags.Tau.ghostTrackDR,
                                     Key_jetContainer = (flags.Tau.ActiveConfig.SeedJetCollection if flags.Tau.useGhostTracks else ""),
                                     Key_trackPartInputContainer = flags.Tau.ActiveConfig.TrackCollection,
-                                    Key_LargeD0TrackInputContainer = (flags.Tau.ActiveConfig.LargeD0TrackContainer if flags.Tau.associateLRT else ""),
+                                    Key_LargeD0TrackInputContainer = (flags.Tau.ActiveConfig.LargeD0TrackCollection if flags.Tau.associateLRT else ""),
                                     TrackToVertexIPEstimator = result.popToolsAndMerge(AtlasTrackToVertexIPEstimatorCfg(flags)),
                                     inEleRM = flags.Tau.ActiveConfig.inTauEleRM,
                                     #maxDeltaZ0wrtLeadTrk = 2, #in mm
