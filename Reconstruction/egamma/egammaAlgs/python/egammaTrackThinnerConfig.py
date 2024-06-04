@@ -9,9 +9,6 @@ def egammaTrackThinnerCfg(
         name='egammaTrackThinner',
         **kwargs):
 
-    mlog = logging.getLogger(name)
-    mlog.info('Starting configuration')
-
     acc = ComponentAccumulator()
 
     kwargs.setdefault("StreamName", "StreamAOD")
