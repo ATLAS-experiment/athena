@@ -146,7 +146,7 @@ def IDAlignMonGenericTracksAlgCfg(helper, alg, **kwargs):
     title = 'chi2oDoF;#chi^{2} / NDoF;Tracks'
     genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=50, xmin=0, xmax=5.)
 
-    ## Track params
+    # Track params
     varName = 'm_eta;eta'
     title = '#eta;Track #eta;Tracks'
     genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=m_etaBins, xmin=-m_etaRange, xmax=m_etaRange)
@@ -155,13 +155,13 @@ def IDAlignMonGenericTracksAlgCfg(helper, alg, **kwargs):
     title = 'Track #eta error;Track #eta error;Tracks'
     genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=50, xmin=0, xmax=0.002)
 
-    varName = 'm_eta_pos;eta_pos'
+    varName = 'm_eta;eta_pos'
     title = '#eta for positive tracks;Track #eta(#plusq);Tracks'
-    genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=m_etaBins, xmin=-m_etaRange, xmax=m_etaRange)
+    genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=m_etaBins, xmin=-m_etaRange, xmax=m_etaRange, cutmask='isTrkPositive')
 
-    varName = 'm_eta_neg;eta_neg'
+    varName = 'm_eta;eta_neg'
     title = '#eta for negative tracks;Track #eta(#minusq);Tracks'
-    genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=m_etaBins, xmin=-m_etaRange, xmax=m_etaRange)
+    genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=m_etaBins, xmin=-m_etaRange, xmax=m_etaRange, cutmask='isTrkNegative')
 
     varName = 'm_phi;phi'
     title = 'Track #phi_{0};Track #phi_{0} [rad];Tracks'
@@ -231,21 +231,21 @@ def IDAlignMonGenericTracksAlgCfg(helper, alg, **kwargs):
     title = 'd_{0} (BS) Vs p_{T};Signed track p_{T} [GeV];d_{0} (BS) [mm]'
     genericTrackGroup.defineHistogram(varName, type='TH2F', path=pathtrack, title=title, xbins=200, xmin=-m_pTRange, xmax=m_pTRange, ybins=m_d0BsNbins, ymin=-m_d0BsRange, ymax=m_d0BsRange)
    
-    varName = 'm_phi,m_d0_bscorr;D0VsPhi0'
+    varName = 'm_phi,m_d0_bscorr;D0bsVsPhi0'
     title = 'd_{0} (BS) Vs #phi_{0};Track #phi_{0} [rad];d_{0} (BS) [mm]'
     genericTrackGroup.defineHistogram(varName, type='TH2F', path=pathtrack, title=title, xbins=m_phiBins, xmin=0, xmax= 2 * M_PI, ybins=m_d0BsNbins, ymin=-m_d0BsRange, ymax=m_d0BsRange)
    
-    varName = 'm_phi_2filld0bscorrBAR,m_d0_bscorrBAR;D0VsPhi0_Barrel'
+    varName = 'm_phi,m_d0_bscorr;D0bsVsPhi0_Barrel'
     title = 'd_{0} (BS) Vs #phi_{0} (Barrel);Track #phi_{0} [rad];d_{0} (BS) [mm]'
-    genericTrackGroup.defineHistogram(varName, type='TH2F', path=pathtrack, title=title, xbins=m_phiBins, xmin=0, xmax= 2 * M_PI, ybins=m_d0BsNbins, ymin=-m_d0BsRange, ymax=m_d0BsRange)
+    genericTrackGroup.defineHistogram(varName, type='TH2F', path=pathtrack, title=title, xbins=m_phiBins, xmin=0, xmax= 2 * M_PI, ybins=m_d0BsNbins, ymin=-m_d0BsRange, ymax=m_d0BsRange, cutmask='isTrackBarrel')
    
-    varName = 'm_phi_2filld0bscorrECA,m_d0_bscorrECA;D0VsPhi0_ECA'
+    varName = 'm_phi,m_d0_bscorr;D0bsVsPhi0_ECA'
     title = 'd_{0} (BS) Vs #phi_{0} (ECA);Track #phi_{0} [rad];d_{0} (BS) [mm]'
-    genericTrackGroup.defineHistogram(varName, type='TH2F', path=pathtrack, title=title, xbins=m_phiBins, xmin=0, xmax= 2 * M_PI, ybins=m_d0BsNbins, ymin=-m_d0BsRange, ymax=m_d0BsRange)
+    genericTrackGroup.defineHistogram(varName, type='TH2F', path=pathtrack, title=title, xbins=m_phiBins, xmin=0, xmax= 2 * M_PI, ybins=m_d0BsNbins, ymin=-m_d0BsRange, ymax=m_d0BsRange, cutmask='isTrackECA')
    
-    varName = 'm_phi_2filld0bscorrECC,m_d0_bscorrECC;D0VsPhi0_ECC'
+    varName = 'm_phi,m_d0_bscorr;D0bsVsPhi0_ECC'
     title = 'd_{0} (BS) Vs #phi_{0} (ECC);Track #phi_{0} [rad];d_{0} (BS) [mm]'
-    genericTrackGroup.defineHistogram(varName, type='TH2F', path=pathtrack, title=title, xbins=m_phiBins, xmin=0, xmax= 2 * M_PI, ybins=m_d0BsNbins, ymin=-m_d0BsRange, ymax=m_d0BsRange)
+    genericTrackGroup.defineHistogram(varName, type='TH2F', path=pathtrack, title=title, xbins=m_phiBins, xmin=0, xmax= 2 * M_PI, ybins=m_d0BsNbins, ymin=-m_d0BsRange, ymax=m_d0BsRange, cutmask='isTrackECC')
    
     # end histograms
 
