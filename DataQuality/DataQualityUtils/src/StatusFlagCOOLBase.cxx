@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // **********************************************************************
@@ -187,7 +187,7 @@ dumpall(const std::string& tag_name) {
 void
 StatusFlagCOOLBase::
 insert_helper(cool::ChannelId channelId, coral::AttributeList& payload,
-	      std::string& tag_name) {
+	      const std::string& tag_name) {
   cool::ConstRecordAdapter record (m_coolFolder->payloadSpecification(), payload);
   if (tag_name=="HEAD") {
     m_coolFolder->storeObject(m_since, m_until, cool::Record(m_coolFolder->payloadSpecification(), payload), channelId);

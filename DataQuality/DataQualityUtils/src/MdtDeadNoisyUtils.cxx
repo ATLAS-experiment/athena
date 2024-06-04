@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -234,7 +234,7 @@ namespace dqutils_mdtdeadnoisy {
 	tmp.push_back( v.at(i) );
       }
     }
-    v = tmp;
+    v = std::move(tmp);
   }
 
   template <class T>
