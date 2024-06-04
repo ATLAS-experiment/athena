@@ -15,9 +15,9 @@
 #include <TF1.h>
 #include <TClass.h>
 #include <cmath>
+#include <algorithm>
 
 #include <iostream>
-#include <string>
 
 
 static dqm_algorithms::BinsDiffFromPreviousLBs myInstance;
@@ -38,29 +38,13 @@ dqm_algorithms::BinsDiffFromPreviousLBs::clone()
   return new BinsDiffFromPreviousLBs();
 }
 
-bool dqm_algorithms::BinsDiffFromPreviousLBs::areConsecutive(const std::vector<int>& lbs, int n) 
+bool dqm_algorithms::BinsDiffFromPreviousLBs::areConsecutive(const std::vector<int>& lbs) 
 { 
-  if ( n <  1 ) 
-    return false; 
-  
-  auto result = std::minmax_element(lbs.begin(), lbs.end());
-  
-  int min = lbs[*result.first];
-  int max = lbs[*result.second];
-  
-  if (max - min  + 1 == n) 
-    { 
-      bool *visited = (bool *) calloc (n, sizeof(bool)); 
-      int i; 
-      for (i = 0; i < n; i++) 
-	{ 
-	  if ( visited[lbs[i] - min] != false ) 
-	    return false; 
-	  visited[lbs[i] - min] = true; 
-	} 
-      return true; 
-    } 
-  return false; // if (max - min  + 1 != n) 
+  if (lbs.empty()) return false;
+  if (lbs.size() == 1) return true;
+  const bool monotonic = std::is_sorted(lbs.begin(), lbs.end());
+  const bool withinRange = (lbs.back() - lbs.front() + 1) == std::ssize(lbs);
+  return monotonic and withinRange;
 } 
 
 
@@ -87,7 +71,6 @@ dqm_algorithms::BinsDiffFromPreviousLBs::execute(const std::string &  name,
   const bool publish = (bool) dqm_algorithms::tools::GetFirstFromMap( "PublishBins", config.getParameters(), 0); 
   const int maxpublish = (int) dqm_algorithms::tools::GetFirstFromMap( "MaxPublish", config.getParameters(), 20); 
   const double maxdiffabs = dqm_algorithms::tools::GetFirstFromMap( "MaxDiffAbs", config.getParameters(), -1); 
-  const bool checksinglelb = dqm_algorithms::tools::GetFirstFromMap( "doCheckOnSingleLB", config.getParameters(), 0);
   
   if (greaterthan && lessthan) {
     ERS_INFO("Both GreaterThan and LessThan parameters set: Will check for for both");
@@ -153,10 +136,7 @@ dqm_algorithms::BinsDiffFromPreviousLBs::execute(const std::string &  name,
     }    
   }
 
-  int count = 0;
-  unsigned int n_lbs = LBs.size();
-  if(areConsecutive(LBs,n_lbs) && !checksinglelb) count = n_lbs;
-  else count = n_lbs;
+  int count =  LBs.size();
 
   result->tags_["NBins"] = count;
   result->object_ =  (boost::shared_ptr<TObject>)(TObject*)(resulthisto);

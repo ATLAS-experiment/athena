@@ -28,7 +28,7 @@ namespace dqm_algorithms
 	  dqm_core::Result * execute( const std::string & , const TObject & , const dqm_core::AlgorithmConfig & );
           using dqm_core::Algorithm::printDescription;
 	  void  printDescription(std::ostream& out);
-	  bool areConsecutive(const std::vector<int>&, int elements);
+	  bool areConsecutive(const std::vector<int>& lbVec);
 	};
 }
 
