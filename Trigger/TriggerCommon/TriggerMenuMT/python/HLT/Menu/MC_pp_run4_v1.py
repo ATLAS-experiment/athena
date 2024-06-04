@@ -134,6 +134,10 @@ def addMCSignatures(chains):
         # TEMP Support (remove once supercell RDOs are availble)
         ChainProp(name='HLT_e5_idperf_tight_L1EM3', groups=SingleElectronGroup+SupportLegGroup, monGroups=['idMon:t0']),
 
+        # For ML training
+        ChainProp(name='HLT_e5_nopid_L1eEM5', groups=SingleElectronGroup+SupportPhIGroup),
+        ChainProp(name='HLT_g5_nopid_L1eEM5', groups=SinglePhotonGroup+SupportPhIGroup),
+
         # From TDR studies
         ChainProp(name='HLT_e20_lhmedium_ivarloose_L1eEM12L', groups=PrimaryPhIGroup+SingleElectronGroup, monGroups=['egammaMon:t0_tp']),
         ChainProp(name='HLT_e20_lhtight_ivarloose_L1eEM12L',  groups=PrimaryPhIGroup+SingleElectronGroup, monGroups=['egammaMon:t0_tp']),
