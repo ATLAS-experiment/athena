@@ -1436,22 +1436,33 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
 
   if (m_slices["tau"]) {
   ///////////////////////////////////////////////////////////////////////////////////////////
-  // No tau score re-decorator in R21; might come back some day, would go here
 
-  ///////////////////////////////////////////////////////////////////////////////////////////
-  // Initialise tau selection tools
+    ///////////////////////////////////////////////////////////////////////////////////////////
+    // Initialise path to tau config file and config reader
+
+    std::string inputfile = "";
+    if (!m_tauConfigPath.empty() && (m_tauConfigPath!="default")) inputfile = m_tauConfigPath;
+    else if (m_tauId == "VeryLoose") inputfile = "SUSYTools/tau_selection_veryloose.conf";
+    else if (m_tauId == "Loose") inputfile = "SUSYTools/tau_selection_loose.conf";
+    else if (m_tauId == "Medium") inputfile = "SUSYTools/tau_selection_medium.conf";
+    else if (m_tauId == "Tight") inputfile = "SUSYTools/tau_selection_tight.conf";
+    else {
+      ATH_MSG_ERROR("Invalid tau ID selected: " << m_tauId);
+      return StatusCode::FAILURE;
+    }
+
+    // Read in the config file so we can retrieve the fields later when configuring the efficiency tools
+    if ( m_tauConfigReader.ReadFile( PathResolverFindCalibFile(inputfile).c_str(), EEnvLevel(0) ) ) {
+      ATH_MSG_ERROR( "Error while reading tau config file : " << inputfile );
+      return StatusCode::FAILURE;
+    }
+    else ATH_MSG_DEBUG( "Successfully read tau config file : " << inputfile );
+
+
+    ///////////////////////////////////////////////////////////////////////////////////////////
+    // Initialise tau selection tools
 
     if (!m_tauSelTool.isUserConfigured()) {
-      std::string inputfile = "";
-      if (!m_tauConfigPath.empty() && (m_tauConfigPath!="default")) inputfile = m_tauConfigPath;
-      else if (m_tauId == "VeryLoose") inputfile = "SUSYTools/tau_selection_veryloose.conf";
-      else if (m_tauId == "Loose") inputfile = "SUSYTools/tau_selection_loose.conf";
-      else if (m_tauId == "Medium") inputfile = "SUSYTools/tau_selection_medium.conf";
-      else if (m_tauId == "Tight") inputfile = "SUSYTools/tau_selection_tight.conf";
-      else {
-        ATH_MSG_ERROR("Invalid tau ID selected: " << m_tauId);
-        return StatusCode::FAILURE;
-      }
       toolName = "TauSelectionTool_" + m_tauId;
       m_tauSelTool.setTypeAndName("TauAnalysisTools::TauSelectionTool/"+toolName);
       ATH_CHECK( m_tauSelTool.setProperty("ConfigPath", inputfile) );
@@ -1480,27 +1491,57 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     } else  ATH_CHECK( m_tauSelToolBaseline.retrieve() );
 
 
-  ///////////////////////////////////////////////////////////////////////////////////////////
-  // Initialise tau efficiency tool
+    ///////////////////////////////////////////////////////////////////////////////////////////
+    // Initialise tau efficiency tool
 
     if (!m_tauEffTool.isUserConfigured()) {
       toolName = "TauEffTool_" + m_tauId;
       m_tauEffTool.setTypeAndName("TauAnalysisTools::TauEfficiencyCorrectionsTool/"+toolName);
       ATH_CHECK( m_tauEffTool.setProperty("PileupReweightingTool",m_prwTool.getHandle()) );
 
-      if (!m_tauSelTool.empty()) {
-        ATH_CHECK( m_tauEffTool.setProperty("TauSelectionTool", m_tauSelTool.getHandle()) );
+      std::vector<int> correction_types;
+      // Read out the tau ID from the config file and map into the enum from tau CP
+      std::string jetIDWP = m_tauConfigReader.GetValue("JetIDWP" ,"");
+      ANA_MSG_DEBUG( "Found JetIDWP in tau config file : " << jetIDWP );
+      int jet_id_lvl;
+      if (jetIDWP == "JETIDRNNVERYLOOSE") jet_id_lvl = (int)TauAnalysisTools::JetID::JETIDRNNVERYLOOSE;
+      else if (jetIDWP == "JETIDRNNLOOSE") jet_id_lvl = (int)TauAnalysisTools::JetID::JETIDRNNLOOSE;
+      else if (jetIDWP == "JETIDRNNMEDIUM") jet_id_lvl = (int)TauAnalysisTools::JetID::JETIDRNNMEDIUM;
+      else if (jetIDWP == "JETIDRNNTIGHT") jet_id_lvl = (int)TauAnalysisTools::JetID::JETIDRNNTIGHT;
+      else {
+        ATH_MSG_ERROR("Invalid Tau ID in tau config file " << jetIDWP);
+        return StatusCode::FAILURE; 
       }
+      // Add retrieval of reco and ID SFs
+      correction_types.insert(correction_types.end(), {TauAnalysisTools::EfficiencyCorrectionType::SFRecoHadTau,
+                                                       TauAnalysisTools::EfficiencyCorrectionType::SFJetIDHadTau});
+
+      // Read out the (optional) Ele OR from the config file and map into the enum from tau CP
+      std::string eleIDWP = m_tauConfigReader.GetValue("EleIDWP" ,"");
+      ANA_MSG_DEBUG( "Found EleIDWP in tau config file : " << eleIDWP );
+      int ele_id_lvl = -1;
+      if (eleIDWP == "ELEIDRNNLOOSE") ele_id_lvl = (int)TauAnalysisTools::EleID::ELEIDRNNLOOSE;
+      else if (eleIDWP == "ELEIDRNNMEDIUM") ele_id_lvl = (int)TauAnalysisTools::EleID::ELEIDRNNMEDIUM;
+      else if (eleIDWP == "ELEIDRNNTIGHT") ele_id_lvl = (int)TauAnalysisTools::EleID::ELEIDRNNTIGHT;
+      else {
+        ATH_MSG_INFO("No or invalid Ele OR in tau config file " << eleIDWP << " will not apply SFs for electro veto" );
+      }
+      // Add retrieval of electron veto SFs if its applied
+      if (ele_id_lvl != -1 )
+        correction_types.insert(correction_types.end(), {TauAnalysisTools::EfficiencyCorrectionType::SFEleIDHadTau,
+                                                         TauAnalysisTools::EfficiencyCorrectionType::SFEleIDElectron});
+
+      ATH_CHECK( m_tauEffTool.setProperty("JetIDLevel", jet_id_lvl) );
+      ATH_CHECK( m_tauEffTool.setProperty("EleIDLevel", ele_id_lvl) );
+      ATH_CHECK( m_tauEffTool.setProperty("EfficiencyCorrectionTypes", correction_types) );
       ATH_CHECK( m_tauEffTool.setProperty("OutputLevel", this->msg().level()) );
-      //disable -- not there ATH_CHECK( m_tauEffTool.setProperty("isAFII", isAtlfast()) );
+      ATH_CHECK( m_tauEffTool.setProperty("useFastSim", isAtlfast()) );
       ATH_CHECK( m_tauEffTool.retrieve() );
     } else ATH_CHECK( m_tauEffTool.retrieve() );
 
 
-    // TODO: add SF tool for baseline tau id as well? /CO
-
-  ///////////////////////////////////////////////////////////////////////////////////////////
-  // Initialise tau trigger efficiency tool(s)
+    ///////////////////////////////////////////////////////////////////////////////////////////
+    // Initialise tau trigger efficiency tool(s)
 
     if (!isData()) {
       int iTauID = (int) TauAnalysisTools::JETIDNONEUNCONFIGURED;
@@ -1547,14 +1588,14 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
         ATH_CHECK( tau_trigSF->setProperty("JetIDLevel", iTauID) );
         ATH_CHECK( tau_trigSF->setProperty("PileupReweightingTool", m_prwTool.getHandle()) );
         ATH_CHECK( tau_trigSF->setProperty("OutputLevel", this->msg().level()) );
-        //disable -- not there ATH_CHECK( tau_trigSF->setProperty("isAFII", isAtlfast()) );
+        ATH_CHECK( tau_trigSF->setProperty("useFastSim", isAtlfast()) );
         ATH_CHECK( tau_trigSF->initialize() );
       }
     }
 
 
-  ///////////////////////////////////////////////////////////////////////////////////////////
-  // Initialise tau smearing tool
+    ///////////////////////////////////////////////////////////////////////////////////////////
+    // Initialise tau smearing tool
 
     if (!m_tauSmearingTool.isUserConfigured()) {
       m_tauSmearingTool.setTypeAndName("TauAnalysisTools::TauSmearingTool/TauSmearingTool");
@@ -1562,14 +1603,14 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       if (m_isRun3){ ATH_CHECK( m_tauSmearingTool.setProperty("Campaign", "mc21") );}
       else         { ATH_CHECK( m_tauSmearingTool.setProperty("Campaign", "mc20") );}
       ATH_CHECK( m_tauSmearingTool.setProperty("Generator", m_tauSmearingToolGenerator) );
-      ATH_CHECK( m_tauSmearingTool.setProperty("isAFII", isAtlfast()) );
+      ATH_CHECK( m_tauSmearingTool.setProperty("useFastSim", isAtlfast()) );
       ATH_CHECK( m_tauSmearingTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_tauSmearingTool.retrieve() );
     } else ATH_CHECK( m_tauSmearingTool.retrieve() );
 
 
-  ///////////////////////////////////////////////////////////////////////////////////////////
-  // Initialise tau truth matching tool
+    ///////////////////////////////////////////////////////////////////////////////////////////
+    // Initialise tau truth matching tool
 
     if (!m_tauTruthMatch.isUserConfigured() && m_tauDoTTM) {
       m_tauTruthMatch.setTypeAndName("TauAnalysisTools::TauTruthMatchingTool/TauTruthMatch");
