@@ -113,8 +113,8 @@ def TrigSiTrackerSpacePointFinderCfg(
     kwargs.setdefault("ProcessPixels", flags.Detector.EnablePixel)
     kwargs.setdefault("ProcessSCTs", flags.Detector.EnableSCT)
     kwargs.setdefault("ProcessOverlaps", flags.Detector.EnableSCT)
-    kwargs.setdefault("SpacePointCacheSCT", "SctSpacePointCache")
-    kwargs.setdefault("SpacePointCachePix", "PixelSpacePointCache")
+    kwargs.setdefault("SpacePointCacheSCT", flags.Trigger.InDetTracking.SpacePointCacheSCT)
+    kwargs.setdefault("SpacePointCachePix", flags.Trigger.InDetTracking.SpacePointCachePix)
 
     acc.addEventAlgo(
         CompFactory.InDet.SiTrackerSpacePointFinder(name, **kwargs))

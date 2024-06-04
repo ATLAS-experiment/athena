@@ -32,7 +32,7 @@ def TrigITkPixelRawDataProviderAlgCfg(flags, suffix, RoIs):
         'suffix' : suffix,
         'RoIs' : RoIs,   
         'isRoI_Seeded': True,
-        'RDOCacheKey' : 'PixRDOCache',
-        'BSErrorsCacheKey' : 'PixBSErrCache'
+        'RDOCacheKey' :      flags.Trigger.ITkTracking.PixRDOCacheKey,
+        'BSErrorsCacheKey' : flags.Trigger.ITkTracking.PixBSErrCacheKey
     }
     return ITkPixelRawDataProviderAlgCfg(flags, **trigargs)
