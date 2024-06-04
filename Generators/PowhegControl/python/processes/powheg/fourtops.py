@@ -87,6 +87,7 @@ class fourtops(PowhegV2):
         self.add_keyword("doublefsr")
         self.add_keyword("dynamic_hdamp", 1)
         self.add_keyword("evenmaxrat")
+        self.add_keyword("ewborn")
         self.add_keyword("facscfact", self.default_scales[0])
         self.add_keyword("fastbtlbound")
         self.add_keyword("fixedgrid")

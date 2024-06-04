@@ -175,6 +175,7 @@ class Registry(metaclass=Singleton):
         self.add_default("etacutlep", 0, description="[0: LQ-s-chan eta cut on leptons]")
         self.add_default("etacutjet", 0, description="[0: LQ-s-chan eta cut on jets]")
         self.add_default("ew", 1, description="EW corrections. (0:disabled; 1:enabled)")
+        self.add_default("ewborn", 1, description="fourtops: (default 1) if 1 includes EW born contributions")
         self.add_default("ew_ho", -1, description="")
         self.add_default("ew_ho_only", -1, description="")
         self.add_default("ew_renorm_scheme", -1, description="[-1:use Powheg default]")
