@@ -268,6 +268,7 @@ class TauTriggerAnalysisSFBlock (ConfigBlock):
                 triggers = self.triggerChainsPerYear.get('2023',[])
 
             for trig in triggers:
+                trig = trig.replace("HLT_","")
                 alg = config.createAlgorithm( 'CP::TauEfficiencyCorrectionsAlg',
                                               'TauTrigEfficiencyCorrectionsAlg' + trig )
                 config.addPrivateTool( 'efficiencyCorrectionsTool',
@@ -275,7 +276,7 @@ class TauTriggerAnalysisSFBlock (ConfigBlock):
                 # SFTriggerHadTau correction type from
                 # https://gitlab.cern.ch/atlas/athena/-/blob/main/PhysicsAnalysis/TauID/TauAnalysisTools/TauAnalysisTools/Enums.h#L79
                 alg.efficiencyCorrectionsTool.EfficiencyCorrectionTypes = [12]
-                alg.efficiencyCorrectionsTool.TriggerName = trig
+                alg.efficiencyCorrectionsTool.TriggerName = 'HLT_' + trig
 
                 # JetIDLevel from
                 # https://gitlab.cern.ch/atlas/athena/-/blob/main/PhysicsAnalysis/TauID/TauAnalysisTools/TauAnalysisTools/Enums.h#L79
