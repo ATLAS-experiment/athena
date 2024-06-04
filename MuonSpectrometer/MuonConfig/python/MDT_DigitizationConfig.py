@@ -67,6 +67,8 @@ def MDT_DigitizationToolCommonCfg(flags, name="MdtDigitizationTool", **kwargs):
         kwargs.setdefault("DigitizationTool", acc.popToolsAndMerge(MDT_Response_DigiToolCfg(flags)))
     else:
         ### Use the simple digitization tool as a first start
+        from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
+        acc.merge(ActsGeometryContextAlgCfg(flags))
         kwargs.setdefault("DigitizationTool", acc.popToolsAndMerge(RT_Relation_DB_DigiToolCfg(flags)))
         kwargs.setdefault("SimHitKey", "xMdtSimHits")
         kwargs.setdefault("StreamName", "MdtDigitForklifting")
@@ -119,7 +121,11 @@ def MDT_OutputCfg(flags):
     if flags.Output.doWriteRDO:
         ItemList = ["MdtCsmContainer#*"]
         if flags.Digitization.EnableTruth:
-            ItemList += ["MuonSimDataCollection#*"]
+            for pref in  [flags.Overlay.SigPrefix, flags.Overlay.BkgPrefix, ""]:
+                ## Legacy SDO container
+                ItemList += [f"MuonSimDataCollection#{pref}MDT_SDO"]
+                ## New SDO container
+                ItemList += [f"xAOD::MuonSimHitContainer#{pref}MDT_SDO", f"xAOD::MuonSimHitAuxContainer#{pref}MDT_SDOAux."]
             acc.merge(TruthDigitizationOutputCfg(flags))
         acc.merge(OutputStreamCfg(flags, "RDO", ItemList))
     return acc

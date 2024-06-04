@@ -15,6 +15,8 @@
 #include "StoreGate/ReadCondHandleKey.h"
 
 #include "xAODMuonSimHit/MuonSimHitContainer.h"
+#include "xAODMuonSimHit/MuonSimHitAuxContainer.h"
+
 #include "MuonReadoutGeometryR4/MuonDetectorManager.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "ActsGeometryInterfaces/ActsGeometryContext.h"
@@ -48,6 +50,8 @@ namespace MuonR4 {
             /** alternative interface which uses the PileUpMergeSvc to obtain
             all the required SubEvents. */
             StatusCode processAllSubEvents(const EventContext& ctx) override final;
+            /** Reentrant version of the digitization tool */
+            StatusCode processAllSubEvents(const EventContext& ctx) const;
         
         protected:
             CLHEP::HepRandomEngine* getRandomEngine(const EventContext&ctx) const;
@@ -116,7 +120,9 @@ namespace MuonR4 {
                                                                 "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
         private:
             using PileUpHits = PileUpMergeSvc::TimedList<xAOD::MuonSimHitContainer>::type;
-            StatusCode fillTimedHits(const PileUpHits& hitColl);
+            
+            /** Translates the PileUpHits into the timed hits format */
+            StatusCode fillTimedHits(PileUpHits&& hitColl, TimedHits& timedHits) const;
             
             SG::ReadHandleKey<xAOD::MuonSimHitContainer> m_simHitKey{this, "SimHitKey", ""};
 
@@ -139,6 +145,10 @@ namespace MuonR4 {
             std::string m_inputObjectName{""};
 
             TimedHits m_timedHits{};
+            /// Create a local copy of the sim hits to ensure overlayed hits across the events remain valid
+            using SimHitLocalCopy = std::pair<std::unique_ptr<xAOD::MuonSimHitContainer>,
+                                              std::unique_ptr<xAOD::MuonSimHitAuxContainer>>;
+            std::vector<SimHitLocalCopy> m_simHits{};
 
 
 };

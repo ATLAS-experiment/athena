@@ -15,7 +15,8 @@ namespace MuonR4{
             PileUpToolBase{type,name, pIID} {}
 
     StatusCode MuonDigitizationTool::initialize(){
-        if (m_simHitKey.empty()) {
+        ATH_MSG_INFO("SimHitKey "<<m_simHitKey.key()<<", "<<m_streamName<<", SDO container: "<<m_sdoKey.key());
+        if (m_simHitKey.empty() && m_inputObjectName.empty()) {
             ATH_MSG_FATAL("Property <SimHitKey> not set !");
             return StatusCode::FAILURE;
         }
@@ -28,7 +29,7 @@ namespace MuonR4{
             ATH_CHECK(m_mergeSvc.retrieve());
         }
         /// Initialize ReadHandleKey
-        ATH_CHECK(m_simHitKey.initialize(!m_onlyUseContainerName));
+        ATH_CHECK(m_simHitKey.initialize());
         ATH_CHECK(m_geoCtxKey.initialize());
         ATH_CHECK(m_sdoKey.initialize(!m_sdoKey.empty()));
         ATH_CHECK(m_rndmSvc.retrieve());
@@ -42,18 +43,19 @@ namespace MuonR4{
 
         ATH_MSG_DEBUG("prepareEvent() called for " << nInputEvents << " input events");
         m_timedHits.clear();
+        m_simHits.clear();
         return StatusCode::SUCCESS;
     }
  
-    StatusCode MuonDigitizationTool::fillTimedHits(const PileUpHits& hitColl) {
+    StatusCode MuonDigitizationTool::fillTimedHits(PileUpHits&& hitColl, TimedHits& timedHits) const {
         for (const auto& [timeIndex, simHitColl] : hitColl) {
-            m_timedHits.reserve(m_timedHits.capacity() + simHitColl->size());
+            timedHits.reserve(timedHits.capacity() + simHitColl->size());
             for (const xAOD::MuonSimHit* simHit : *simHitColl) {
-                m_timedHits.emplace_back(timeIndex.time(), timeIndex.index(), simHit, timeIndex.type());
+                timedHits.emplace_back(timeIndex.time(), timeIndex.index(), simHit, timeIndex.type());
             }           
         }
-        std::sort(m_timedHits.begin(), m_timedHits.end(), 
-                 [](const TimedHitPtr<xAOD::MuonSimHit>& a, const TimedHitPtr<xAOD::MuonSimHit>& b){
+        std::sort(timedHits.begin(), timedHits.end(), 
+                 [](const TimedHit& a, const TimedHit& b){
                     if (a->identify() != b->identify()){
                         return a->identify() < b->identify();
                     }
@@ -65,7 +67,13 @@ namespace MuonR4{
         return StatusCode::SUCCESS;
     }
     StatusCode MuonDigitizationTool::processAllSubEvents(const EventContext& ctx) {
+        const MuonDigitizationTool* digiTool = this;
+        return digiTool->processAllSubEvents(ctx);
+    }
+
+    StatusCode MuonDigitizationTool::processAllSubEvents(const EventContext& ctx) const {
         PileUpHits hitCollList{};
+        TimedHits timedHits{};
         /// In case of single hits container just load the collection using read handles    
         if (!m_onlyUseContainerName) {            
             const xAOD::MuonSimHitContainer* hitCollection{nullptr};
@@ -74,8 +82,14 @@ namespace MuonR4{
          } else {
             ATH_CHECK(m_mergeSvc->retrieveSubEvtsData(m_inputObjectName, hitCollList));
         }
-        ATH_CHECK(fillTimedHits(hitCollList));
-        ATH_CHECK(mergeEvent(ctx));
+        ATH_CHECK(fillTimedHits(std::move(hitCollList), timedHits));
+        SG::WriteHandle<xAOD::MuonSimHitContainer> sdoContainer{};
+        if (!m_sdoKey.empty()) {
+             sdoContainer = SG::WriteHandle<xAOD::MuonSimHitContainer>{m_sdoKey, ctx};
+             ATH_CHECK(sdoContainer.record(std::make_unique<xAOD::MuonSimHitContainer>(),
+                                           std::make_unique<xAOD::MuonSimHitAuxContainer>()));
+        }
+        ATH_CHECK(digitize(ctx, timedHits, !m_sdoKey.empty() ? sdoContainer.ptr() : nullptr));
         return StatusCode::SUCCESS;
     }
     StatusCode MuonDigitizationTool::mergeEvent(const EventContext& ctx) {
@@ -89,6 +103,7 @@ namespace MuonR4{
         }
         ATH_CHECK(digitize(ctx, m_timedHits, !m_sdoKey.empty() ? sdoContainer.ptr() : nullptr));
         m_timedHits.clear();
+        m_simHits.clear();
         return StatusCode::SUCCESS;
     }
 
@@ -97,10 +112,20 @@ namespace MuonR4{
                                                       SubEventIterator bSubEvents, 
                                                       SubEventIterator eSubEvents) {        
         ATH_MSG_DEBUG("processBunchXing()" << bunchXing);
-        PileUpHits hitList{};
+        PileUpHits hitList{}, hitListPermanent{};
         ATH_CHECK(m_mergeSvc->retrieveSubSetEvtData(m_inputObjectName, hitList, bunchXing, bSubEvents, eSubEvents));
         ATH_MSG_VERBOSE(hitList.size() << " hits in  xAODMuonSimHitContainer " << m_inputObjectName << " found");
-        ATH_CHECK(fillTimedHits(hitList));
+        for (auto& [hitPtr, hitContainer] : hitList) {
+            auto copyContainer = std::make_unique<xAOD::MuonSimHitContainer>();
+            auto copyAuxContainer = std::make_unique<xAOD::MuonSimHitAuxContainer>();
+            copyContainer->setStore(copyAuxContainer.get());
+            for (const xAOD::MuonSimHit* copyMe : *hitContainer) {
+               (*copyContainer->push_back(std::make_unique<xAOD::MuonSimHit>())) = (*copyMe);
+            }
+            hitListPermanent.emplace_back(hitPtr, copyContainer.get());
+            m_simHits.emplace_back(std::move(copyContainer), std::move(copyAuxContainer));
+        } 
+        ATH_CHECK(fillTimedHits(std::move(hitListPermanent), m_timedHits));
         return StatusCode::SUCCESS;
     }
 
