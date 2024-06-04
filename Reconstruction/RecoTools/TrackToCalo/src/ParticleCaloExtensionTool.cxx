@@ -53,8 +53,6 @@ ParticleCaloExtensionTool::initialize()
   } else {
     m_calosurf.disable();
   }
-  ATH_MSG_INFO(" Using strategy based on particle type "
-               << m_particleTypeName << " enum value " << m_particleStrategy);
   if (!m_monTool.empty()) {
     ATH_CHECK(m_monTool.retrieve());
   }
