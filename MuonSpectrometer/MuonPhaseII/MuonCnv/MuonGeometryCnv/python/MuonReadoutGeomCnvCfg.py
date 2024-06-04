@@ -5,11 +5,9 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 def MuonReadoutGeometryCnvAlgCfg(flags,name="MuonDetectorManagerCondAlg", **kwargs):
-    from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
     from MuonGeoModelR4.MuonGeoModelConfig import MuonAlignStoreCfg
     
     result = ComponentAccumulator()
-    result.merge(ActsGeometryContextAlgCfg(flags))
     result.merge(MuonAlignStoreCfg(flags))
     alignStores = []
 

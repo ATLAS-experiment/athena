@@ -165,6 +165,10 @@ def setupGeoR4TestCfg(args, setupSimJob = False):
     from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
     cfg.merge(MuonGeoModelCfg(flags))
 
+    from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
+    cfg.merge(ActsGeometryContextAlgCfg(flags))
+
+
 
     return flags, cfg
 

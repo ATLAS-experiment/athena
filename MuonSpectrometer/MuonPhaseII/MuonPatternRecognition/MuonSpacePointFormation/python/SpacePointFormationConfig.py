@@ -19,6 +19,8 @@ def MuonSpacePointMakerAlgCfg(flags, name = "MuonSpacePointMakerAlg", **kwargs):
 
 def MuonSpacePointFormationCfg(flags):
     result = ComponentAccumulator()
+    from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
+    result.merge(ActsGeometryContextAlgCfg(flags))
     result.merge(MuonSpacePointMakerAlgCfg(flags, MmKey = "", sTgcKey = ""))
     ### Split the Nsw hits into a separate space point container
     if flags.Detector.GeometrysTGC or flags.Detector.GeometryMM:

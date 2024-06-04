@@ -16,6 +16,15 @@ def MuonEtaHoughTransformAlgCfg(flags, name = "MuonEtaHoughTransformAlg", **kwar
     result.addEventAlgo(theAlg, primary=True)
     return result
 
+def MuonPatternRecognitionCfg(flags):
+    result = ComponentAccumulator()
+    from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
+    result.merge(ActsGeometryContextAlgCfg(flags))
+    result.merge(MuonEtaHoughTransformAlgCfg(flags))
+    result.merge(MuonPhiHoughTransformAlgCfg(flags))
+    return result
+
+
 if __name__=="__main__":
     from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, executeTest,setupHistSvcCfg
     parser = SetupArgParser()
@@ -31,7 +40,6 @@ if __name__=="__main__":
     cfg.merge(MuonSimHitToMeasurementCfg(flags))
     from MuonSpacePointFormation.SpacePointFormationConfig import MuonSpacePointFormationCfg
     cfg.merge(MuonSpacePointFormationCfg(flags))
-    cfg.merge(MuonEtaHoughTransformAlgCfg(flags))
-    cfg.merge(MuonPhiHoughTransformAlgCfg(flags))
+    cfg.merge(MuonPatternRecognitionCfg(flags))
 
     executeTest(cfg, args.nEvents)
