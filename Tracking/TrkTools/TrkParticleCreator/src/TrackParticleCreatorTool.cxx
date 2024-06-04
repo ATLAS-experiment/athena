@@ -170,11 +170,9 @@ TrackParticleCreatorTool::initialize()
       ATH_MSG_FATAL("Could not retrieve IBLParameterSvc");
       return StatusCode::FAILURE;
     }
-    ATH_MSG_INFO("Retrieved tool " << m_IBLParameterSvc);
   }
 
   m_doIBL = !m_IBLParameterSvc.empty() && m_IBLParameterSvc->containsIBL();
-  ATH_MSG_INFO("doIBL set to " << m_doIBL);
 
   if (m_doIBL && !m_IBLParameterSvc->contains3D()) {
     ATH_MSG_WARNING("Assuming hybrid 2D/3D IBL module composition, but geometry is all-planar");
@@ -802,7 +800,7 @@ TrackParticleCreatorTool::setParameters(const EventContext& ctx,
     values[3] = mom[0];
     values[4] = mom[1];
     values[5] = mom[2];
-    
+
     const bool straightPars = (!fieldCache.solenoidOn() && m_trackingVolumesSvc->volume(Trk::ITrackingVolumesSvc::CalorimeterEntryLayer).inside(pos)) ||
                               (!fieldCache.toroidOn() && !m_trackingVolumesSvc->volume(Trk::ITrackingVolumesSvc::MuonSpectrometerEntryLayer).inside(pos) &&
                                    m_trackingVolumesSvc->volume(Trk::ITrackingVolumesSvc::MuonSpectrometerExitLayer).inside(pos));
@@ -830,7 +828,7 @@ TrackParticleCreatorTool::setParameters(const EventContext& ctx,
         } else {
            const Amg::Vector3D loc_x {param->parameters()[Trk::locX],0,0};
            const Amg::Vector3D loc_y {0,param->parameters()[Trk::locY],0};
-           JacobianLocalToCurvilinear jacobian(curvilinearUVT, loc_x, loc_y); 
+           JacobianLocalToCurvilinear jacobian(curvilinearUVT, loc_x, loc_y);
            covarianceMatrix = param->covariance()->similarity(jacobian);
         }
     }
@@ -950,8 +948,14 @@ TrackParticleCreatorTool::addPIDInformation(const EventContext& ctx, const Trk::
      static const std::vector<float> eProbabilityDefault(numberOfeProbabilityTypes,0.5);
      constexpr int initialValue{-1};
      std::vector<float> eProbability_tmp;
-     const std::vector<float> &eProbability ( track && !m_eProbabilityTool.empty() ? eProbability_tmp = m_eProbabilityTool->electronProbability(ctx,*track)  : eProbabilityDefault);
-     int nHits = track && !m_eProbabilityTool.empty() ? eProbability[Trk::eProbabilityNumberOfTRTHitsUsedFordEdx] : initialValue;
+     const std::vector<float>& eProbability(
+         track && !m_eProbabilityTool.empty()
+             ? eProbability_tmp =
+                   m_eProbabilityTool->electronProbability(ctx, *track)
+             : eProbabilityDefault);
+     int nHits = track && !m_eProbabilityTool.empty()
+                     ? eProbability[Trk::eProbabilityNumberOfTRTHitsUsedFordEdx]
+                     : initialValue;
      for (const Trk::eProbabilityType& copy : m_copyEProbabilities) {
         float eProbability_value = eProbability.at(copy);
         tp.setSummaryValue(eProbability_value, static_cast<xAOD::SummaryType>(copy + xAOD::eProbabilityComb));
@@ -1271,7 +1275,7 @@ TrackParticleCreatorTool::addSharedHitInformation(const Track *track, xAOD::Trac
 
 
 void
-TrackParticleCreatorTool::addDummyEndcapSharedHitInformation(xAOD::TrackParticle& tp) 
+TrackParticleCreatorTool::addDummyEndcapSharedHitInformation(xAOD::TrackParticle& tp)
 {
 
   uint8_t nInPixSharedEndcapHits = 0, nNInPixSharedEndcapHits = 0;
