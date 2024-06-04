@@ -227,7 +227,7 @@ public:
 private:
   ServiceHandle<IegammaMVASvc> m_MVACalibSvc{ this,
                                               "MVACalibSvc",
-                                              "egammaMVASvc",
+                                              "",
                                               "calibration service" };
 
   egGain::GainTool* m_gain_tool = nullptr; //!
