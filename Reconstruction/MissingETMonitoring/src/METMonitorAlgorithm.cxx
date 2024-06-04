@@ -109,7 +109,7 @@ StatusCode METMonitoringAlg::fillHistograms( const EventContext& ctx ) const {
   }
 
   if (m_dotrig) {    
-    if (trigDecTool !=0 && !(trigDecTool->isPassed("L1_XE50")))
+    if (trigDecTool !=0 && !(trigDecTool->isPassed("L1_jXE100")))
       return StatusCode::SUCCESS;
   }
 
