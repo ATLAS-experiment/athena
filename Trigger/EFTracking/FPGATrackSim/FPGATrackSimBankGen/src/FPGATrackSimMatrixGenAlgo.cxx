@@ -658,7 +658,7 @@ StatusCode FPGATrackSimMatrixGenAlgo::makeAccumulator(std::vector<FPGATrackSimHi
 
   ATH_MSG_DEBUG("Generating track in sectorbin = " << sectorbin << " with modules: " << module_printout);
 
-
+  
   if (m_single) {
     const int ToKeep[13] = {2200,2564,2861,3831,5368,14169,14173,20442,20446,29625,29629,42176,42180};
     bool keepThis = true;
