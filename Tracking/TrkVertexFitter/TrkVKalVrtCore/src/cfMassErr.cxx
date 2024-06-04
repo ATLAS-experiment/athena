@@ -8,6 +8,7 @@
 #include "TrkVKalVrtCore/TrkVKalVrtCoreBase.h"
 #include <cmath>
 #include <array>
+#include <iostream>
 
 namespace Trk {
 
@@ -58,12 +59,17 @@ void cfmasserr(VKVertex * vk, const int *list, double BMAG, double *MASS, double
     }
   }
 //----
-  double covM2=0;
+  double covM2=0.;
   for(int i=0; i<NTRK*3; i++){
+     double tmp=0.;
      for(int j=0; j<NTRK*3; j++){
-       covM2 += deriv[i] * ARR2D_FS(vk->ader, vkalNTrkM*3+3, i+3, j+3) *deriv[j];
+       tmp += ARR2D_FS(vk->ader, vkalNTrkM*3+3, i+3, j+3) *deriv[j];
      }
+     try{covM2 += tmp*deriv[i];}
+     catch(...){ }
   }
+  if(std::isnan(covM2))     {covM2=1.e12;}
+  else if(std::isinf(covM2)){covM2=1.e12;}
   if(covM2<1.e-10)covM2=1.e-10;
 //----
   (*MASS) = (ptot[3]-ptot[2])*(ptot[3]+ptot[2])-ptot[1]*ptot[1]-ptot[0]*ptot[0];
