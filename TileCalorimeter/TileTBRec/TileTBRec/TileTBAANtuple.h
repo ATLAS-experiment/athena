@@ -68,6 +68,7 @@
 #include "TileConditions/TileCondToolEmscale.h"
 #include "TileIdentifier/TileRawChannelUnit.h"
 #include "TileRecUtils/TileRawChannelBuilderFlatFilter.h"
+#include "TileEvent/TileDQstatus.h"
 
 #include "TFile.h"
 #include "TMatrixT.h"
@@ -158,6 +159,9 @@ class TileTBAANtuple: public AthAlgorithm {
     ToolHandle<TileRawChannelBuilderFlatFilter> m_adderFilterAlgTool{this,
         "TileRawChannelBuilderFlatFilter", "TileRawChannelBuilderFlatFilter", "Tile raw channel builder tool"};
 
+    SG::ReadHandleKey<TileDQstatus> m_dqStatusKey{ this,
+       "TileDQstatus", "TileDQstatus", "TileDQstatus key" };
+
     Gaudi::Property<bool> m_calibrateEnergy{this, "CalibrateEnergy", true, "Calibrate energy"};
     Gaudi::Property<bool> m_useDspUnits{this, "UseDspUnits", false, "Use DSP untis"};
     Gaudi::Property<int> m_finalUnit{this, "OfflineUnits", TileRawChannelUnit::MegaElectronVolts, "Calibrate everything to this level"};
@@ -227,7 +231,7 @@ class TileTBAANtuple: public AthAlgorithm {
                                 , std::vector<std::array<float, MAX_CHAN>>* pedVec
                                 , bool saveDQstatus = false);
 
-    StatusCode storeDigits(const EventContext& ctx, const SG::ReadHandleKey<TileDigitsContainer>& containerKey);
+    StatusCode storeDigits(const EventContext& ctx, const SG::ReadHandleKey<TileDigitsContainer>& containerKey, const TileDQstatus* dqStatus=nullptr);
     StatusCode storeDigitsFlx(const EventContext& ctx, const SG::ReadHandleKey<TileDigitsContainer>& containerKey);
     StatusCode storeBeamElements(const EventContext& ctx);
     StatusCode storeCells(const EventContext& ctx);
@@ -515,6 +519,8 @@ class TileTBAANtuple: public AthAlgorithm {
     std::vector<std::array<short, MAX_DMU>> m_DMUmemoryErrVec;
     std::vector<std::array<short, MAX_DMU>> m_DMUDstrobeErrVec;
     std::vector<std::array<short, MAX_DMU>> m_DMUSstrobeErrVec;
+    std::vector<std::array<short, MAX_DMU>> m_DMUHeadparityErrVec;
+    std::vector<std::array<short, MAX_DMU>> m_DMUDataparityErrVec;
     std::vector<std::array<int, 2>> m_dmuMaskVec;
     std::vector<std::array<int, 2>> m_slinkCRCVec;
     std::vector<std::array<int, MAX_CHAN>> m_gainVec;
@@ -557,9 +563,7 @@ class TileTBAANtuple: public AthAlgorithm {
     std::vector<std::array<short, MAX_DMU>> m_ROD_DMUSstrobeErrVec;
     std::vector<std::array<short, MAX_DMU>> m_ROD_DMUDstrobeErrVec;
     std::vector<std::array<short, MAX_DMU>> m_ROD_DMUHeadformatErrVec;
-    std::vector<std::array<short, MAX_DMU>> m_ROD_DMUHeadparityErrVec;
     std::vector<std::array<short, MAX_DMU>> m_ROD_DMUDataformatErrVec;
-    std::vector<std::array<short, MAX_DMU>> m_ROD_DMUDataparityErrVec;
     std::vector<std::array<short, 2>> m_ROD_DMUMaskVec;
 
     std::vector<std::array<int, MAX_MINIDRAWER>> m_mdL1idflxVec;
