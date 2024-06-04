@@ -17,6 +17,7 @@ def FoldDecoratorCfg(flags, jetCollection='AntiKt4EMPFlowJets', prefix=''):
             'GhostTrack': 1,
         },
     )
+    # original folding algorithm, used for GN2v01 right now
     ca.addEventAlgo(
         CompFactory.FlavorTagDiscriminants.FoldDecoratorAlg(
             f'{prefix}FoldHashWithHits{jetCollection}',
@@ -35,11 +36,27 @@ def FoldDecoratorCfg(flags, jetCollection='AntiKt4EMPFlowJets', prefix=''):
         )
     )
 
+    # simpler version, doesn't seem as random though
     ca.addEventAlgo(
         CompFactory.FlavorTagDiscriminants.FoldDecoratorAlg(
             f'{prefix}FoldHashWithoutHits{jetCollection}',
             **common,
             jetFoldHash=f'{prefix}jetFoldHash_noHits',
+        )
+    )
+    # version using jetRank, which should be unique for each jet in
+    # the event
+    ca.addEventAlgo(
+        CompFactory.FlavorTagDiscriminants.FoldDecoratorAlg(
+            f'{prefix}FoldHashJetRank{jetCollection}',
+            eventID=f'EventInfo.{evt_id}',
+            salt=42,
+            jetCollection=jetCollection,
+            ints=['jetRank'],
+            jetVariableSaltSeeds={
+                'jetRank': 137,
+            },
+            jetFoldHash=f'{prefix}jetFoldRankHash',
         )
     )
 
