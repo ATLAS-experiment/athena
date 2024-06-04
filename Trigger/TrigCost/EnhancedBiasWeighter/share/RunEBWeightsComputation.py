@@ -68,6 +68,7 @@ if __name__=='__main__':
     flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
     flags.Exec.OutputLevel = args.loglevel
     flags.Trigger.doNavigationSlimming = False
+    flags.Exec.EventPrintoutInterval = 1000
     flags.lock()
 
     # Initialize configuration object, add accumulator, merge, and run.
@@ -85,10 +86,6 @@ if __name__=='__main__':
     configKeys = getConfigKeys(flags.Input.Files)
     itemsMap = {} if args.skipHLTSeeds else readHLTSeeds(smk = configKeys["SMK"], db = configKeys["DB"]) 
     cfg.merge(ebComputingAlg(flags, itemsMap))
-
-    eventLoop = CompFactory.AthenaEventLoopMgr()
-    eventLoop.EventPrintoutInterval = 1000
-    cfg.addService(eventLoop)
 
     # If you want to turn on more detailed messages ...
     # exampleMonitorAcc.getEventAlgo('ExampleMonAlg').OutputLevel = 2 # DEBUG

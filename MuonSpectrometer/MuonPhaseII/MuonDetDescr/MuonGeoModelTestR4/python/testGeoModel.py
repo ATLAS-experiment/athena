@@ -22,6 +22,7 @@ def SetupArgParser():
     parser.add_argument("--noTgc", help="Disable the Tgcs from the geometry", action='store_true', default = False)
     parser.add_argument("--noMM", help="Disable the MMs from the geometry", action='store_true', default = False)
     parser.add_argument("--noSTGC", help="Disable the sTgcs from the geometry", action='store_true', default = False)
+    parser.add_argument("--eventPrintoutLevel", type=int, help="Interval of event heartbeat printouts from the loop manager", default = 1)
     return parser
 
 def setupServicesCfg(flags):
@@ -90,6 +91,7 @@ def setupGeoR4TestCfg(args, setupSimJob = False):
     flags.Input.isMC = args.condTag.find("OFLCOND") != -1
     flags.Input.Files = args.inputFile 
     flags.Exec.FPE= 500
+    flags.Exec.EventPrintoutInterval = args.eventPrintoutLevel
     from os import path, system
     if args.geoModelFile.startswith("root://"):
         if not path.exists("Geometry/{geoTag}.db".format(geoTag=args.geoTag)):

@@ -20,6 +20,7 @@ def fromRunArgs(runArgs):
     from PyJobTransforms.CommonRunArgsToFlags import commonRunArgsToFlags
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
+    flags.Exec.EventPrintoutInterval = 100
     commonRunArgsToFlags(runArgs, flags)
 
     # First let's find the input/output files
@@ -112,9 +113,6 @@ def fromRunArgs(runArgs):
     if flags.PerfMon.doFastMonMT or flags.PerfMon.doFullMonMT:
         from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
         cfg.merge(PerfMonMTSvcCfg(flags))
-
-    # Set EventPrintoutInterval to 100 events
-    cfg.getService(cfg.getAppProps()['EventLoop']).EventPrintoutInterval = 100
 
     # Post-include
     log.info('**** Processing postInclude')

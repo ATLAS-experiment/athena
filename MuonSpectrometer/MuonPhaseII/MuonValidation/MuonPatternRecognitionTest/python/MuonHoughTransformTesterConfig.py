@@ -29,6 +29,7 @@ if __name__=="__main__":
     parser.set_defaults(noMM=True)
     parser.set_defaults(noSTGC=True)
     parser.set_defaults(inputFile=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/R4SimHits.pool.root"])
+    parser.set_defaults(eventPrintoutLevel = 500)
     parser.add_argument("--displayFailedSeeds", 
                         help="Saves the hits of failed seeds in a pdf", action='store_true', default = False)
     parser.add_argument("--displayGoodSeeds", 
@@ -57,9 +58,4 @@ if __name__=="__main__":
     cfg.merge(PerfMonMTSvcCfg(flags))
     # cfg.merge(VTuneProfilerServiceCfg(flags, ProfiledAlgs=["MuonHoughTransformAlg"]))
 
-    # output spam reduction
-    cfg.getService("AthenaHiveEventLoopMgr").EventPrintoutInterval=500
-
-
     executeTest(cfg, args.nEvents)
-    

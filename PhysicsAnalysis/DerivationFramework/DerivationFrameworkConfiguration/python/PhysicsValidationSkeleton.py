@@ -22,6 +22,7 @@ def fromRunArgs(runArgs):
     logDerivation.info('**** Setting-up configuration flags')
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
+    flags.Exec.EventPrintoutInterval = 100
     commonRunArgsToFlags(runArgs, flags)
 
     # Switch on PerfMon
@@ -81,9 +82,6 @@ def fromRunArgs(runArgs):
     # PerfMonSD
     from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
     cfg.merge(PerfMonMTSvcCfg(flags))
-
-    # Set EventPrintoutInterval to 100 events
-    cfg.getService(cfg.getAppProps()['EventLoop']).EventPrintoutInterval = 100
 
     # Post-include
     processPostInclude(runArgs, flags, cfg)

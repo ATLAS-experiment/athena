@@ -21,6 +21,7 @@ if __name__=="__main__":
     parser = SetupArgParser()
     parser.set_defaults(nEvents = -1)
     parser.set_defaults(inputFile=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/R4SimHits.pool.root"])
+    parser.set_defaults(eventPrintoutLevel = 500)
 
     args = parser.parse_args()
     flags, cfg = setupGeoR4TestCfg(args)
@@ -33,9 +34,4 @@ if __name__=="__main__":
     cfg.merge(MuonEtaHoughTransformAlgCfg(flags))
     cfg.merge(MuonPhiHoughTransformAlgCfg(flags))
 
-    # output spam reduction
-    cfg.getService("AthenaHiveEventLoopMgr").EventPrintoutInterval=500
-
-
     executeTest(cfg, args.nEvents)
-    

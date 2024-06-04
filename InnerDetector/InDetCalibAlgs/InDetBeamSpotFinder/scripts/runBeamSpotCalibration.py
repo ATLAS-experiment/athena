@@ -90,6 +90,7 @@ for path in configMy.jobConfig['inputfiles']:
 flags.Trigger.triggerConfig = "DB"
 flags.DQ.enableLumiAccess = False
 flags.Output.HISTFileName = configMy.jobConfig['monfile']
+flags.Exec.EventPrintoutInterval = 10000
 flags.fillFromArgs()
 flags.lock()
 
@@ -98,7 +99,6 @@ acc = MainServicesCfg(flags)
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 acc.merge(PoolReadCfg(flags))
 acc.getService("MessageSvc").defaultLimit = configMy.jobConfig['MsgLimit']
-acc.getService(acc.getAppProps()['EventLoop']).EventPrintoutInterval = 10000
 
 from InDetBeamSpotFinder.InDetBeamSpotFinderConfig import InDetBeamSpotFinderCfg
 acc.merge(InDetBeamSpotFinderCfg(flags,configMy.jobConfig))

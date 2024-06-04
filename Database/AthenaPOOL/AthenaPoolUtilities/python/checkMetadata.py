@@ -155,6 +155,7 @@ if __name__ == "__main__":
     """
 
     flags = initConfigFlags()
+    flags.Exec.EventPrintoutInterval = 1000
     flags.fillFromArgs()
     flags.lock()
 
@@ -181,9 +182,6 @@ if __name__ == "__main__":
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 
     cfg = MainServicesCfg(flags)
-
-    # Set EventPrintoutInterval to 100 events
-    cfg.getService(cfg.getAppProps()["EventLoop"]).EventPrintoutInterval = 1000
 
     # Setup input reading
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
