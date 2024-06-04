@@ -3,6 +3,7 @@
 */
 #include "src/TrackFindingAlg.h"
 #include "src/TrackFindingData.h"
+#include "src/FitterHelperFunctions.h"
 
 // Athena
 #include "AsgTools/ToolStore.h"
@@ -214,7 +215,7 @@ namespace ActsTrk
     trackFinder().pOptions.direction = Acts::Direction::Forward;
     trackFinder().pSecondOptions.direction = trackFinder().pOptions.direction.invert();
 
-    trackFinder().ckfExtensions.updater.connect<&gainMatrixUpdate>();
+    trackFinder().ckfExtensions.updater.connect<&ActsTrk::FitterHelperFunctions::gainMatrixUpdate<RecoTrackStateContainer>>();
     trackFinder().ckfExtensions.measurementSelector.connect<&Acts::MeasurementSelector::select<RecoTrackStateContainer>>(&trackFinder().measurementSelector);
     initStatTables();
 
