@@ -252,9 +252,9 @@ StatusCode ActsMuonAlignCondAlg::execute(const EventContext& ctx) const {
 
         SG::WriteCondHandle<ActsTrk::DetectorAlignStore> writeHandle{key, ctx};
         if (writeHandle.isValid()) {
-            ATH_MSG_FATAL("The alignment constants for "<<ActsTrk::to_string(subDet)
-                          <<" is still valid. That should not happen at this stage");
-            return StatusCode::FAILURE;
+            ATH_MSG_VERBOSE("The alignment constants for "<<ActsTrk::to_string(subDet)
+                          <<" are still valid.");
+            continue;
         }
         std::unique_ptr<ActsTrk::DetectorAlignStore> writeCdo = std::make_unique<ActsTrk::DetectorAlignStore>(subDet);
 
