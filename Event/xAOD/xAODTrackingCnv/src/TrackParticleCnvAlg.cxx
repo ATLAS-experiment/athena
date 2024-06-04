@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: TrackParticleCnvAlg.cxx 298303 2013-12-05 08:41:30Z emoyse $
@@ -383,14 +383,14 @@ TrackParticleCnvAlg::convert(
             "Failed find truth associated with Track/TrackParticle");
         } else {
           // setTruthLink(link,result->second, type, origin);
-          ATH_MSG_VERBOSE("Found track Truth: barcode  "
-                          << result->second.particleLink().barcode() << " evt "
+          ATH_MSG_VERBOSE("Found track Truth: uniqueID  "
+                          << HepMC::uniqueID(result->second.particleLink()) << " evt "
                           << result->second.particleLink().eventIndex());
           probability = result->second.probability();
           link = truthLinkVec->find(result->second.particleLink());
           if (link.isValid()) {
-            ATH_MSG_DEBUG("Found matching xAOD Truth: barcode "
-                          << (*link)->barcode() << " pt " << (*link)->pt()
+            ATH_MSG_DEBUG("Found matching xAOD Truth: uniqueID "
+                          << HepMC::uniqueID(*link) << " pt " << (*link)->pt()
                           << " eta " << (*link)->eta() << " phi "
                           << (*link)->phi());
             // if configured also get truth classification
@@ -405,7 +405,7 @@ TrackParticleCnvAlg::convert(
                                                  << static_cast<int>(origin));
             }
           } else {
-            if (result->second.particleLink().barcode() > 0) {
+            if (HepMC::uniqueID(result->second.particleLink()) > 0) {
               ATH_MSG_WARNING("No associated xAOD truth for valid truth link "
                               << result->second.particleLink());
             }

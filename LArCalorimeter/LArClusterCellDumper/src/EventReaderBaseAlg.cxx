@@ -424,7 +424,7 @@ void EventReaderBaseAlg::bookBranches(TTree *tree){
       tree->Branch("mc_vert_eta", &m_mc_vert_eta);
       tree->Branch("mc_vert_phi", &m_mc_vert_phi);
       tree->Branch("mc_vert_barcode", &m_mc_vert_barcode);
-      tree->Branch("mc_vert_id", &m_mc_vert_id);
+      tree->Branch("mc_vert_status", &m_mc_vert_status);
     }
   }
   
@@ -673,7 +673,7 @@ void EventReaderBaseAlg::clear(){
       m_mc_vert_eta->clear();
       m_mc_vert_phi->clear();
       m_mc_vert_barcode->clear();
-      m_mc_vert_id->clear();
+      m_mc_vert_status->clear();
     }
   }
   // ## Photons ##

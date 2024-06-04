@@ -476,7 +476,7 @@ bool HFOR_Truth::findHFQuarks(const std::map <int,
             //Check the production vertex
             prodVtx = bcQuark->prodVtx() ;
             pdgId   = bcQuark->pdgId() ;
-            vtxBarcode = HepMC::barcode(prodVtx) ;
+            vtxBarcode = HepMC::barcode(prodVtx) ; // FIXME barcode-based
             bc34 = ( (vtxBarcode == -3) | (vtxBarcode == -4) ) ; // FIXME barcode-based comparison against specific values
             pvtx34 = prodVtx ;
             if (! bc34) {
@@ -489,7 +489,7 @@ bool HFOR_Truth::findHFQuarks(const std::map <int,
                   for (unsigned int npp=0; npp<nParents; npp++) {
                     ancestor = ancestor->parent(npp) ;
                     prodVtx = ancestor->prodVtx() ;
-                    vtxBarcode = HepMC::barcode(prodVtx) ;
+                    vtxBarcode = HepMC::barcode(prodVtx) ; // FIXME barcode-based
                     bc34 = ( (vtxBarcode == -3) | (vtxBarcode == -4) ) & (ancestor->pdgId() == pdgId) ; // FIXME barcode-based comparison against specific values
                     if (bc34) pvtx34 = prodVtx ;
                   }
