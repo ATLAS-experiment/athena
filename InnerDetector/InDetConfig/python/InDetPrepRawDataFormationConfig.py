@@ -76,7 +76,7 @@ def TrigPixelClusterizationCfg(flags, RoIs, name="InDetPixelClusterization", **k
     kwargs.setdefault("ClustersName", "PixelTrigClusters")
     kwargs.setdefault("isRoI_Seeded", True)
     kwargs.setdefault("RoIs", RoIs)
-    kwargs.setdefault("ClusterContainerCacheKey", "PixelTrigClustersCache")
+    kwargs.setdefault("ClusterContainerCacheKey", flags.Trigger.InDetTracking.PixelClusterCacheKey)
     kwargs.setdefault("useDataPoolWithCache", True)
     kwargs.setdefault("name", f"{name}_{RoIs}")
     
@@ -110,7 +110,7 @@ def ITkTrigPixelClusterizationCfg(flags, name = "ITkTrigPixelClusterization", ro
                                         isRoI_Seeded=True,
                                         RoIs=roisKey,
                                         ClustersName = "ITkTrigPixelClusters",
-                                        ClusterContainerCacheKey="PixelTrigClustersCache",
+                                        ClusterContainerCacheKey=flags.Trigger.ITkTracking.PixelClusterCacheKey,
                                         RegSelTool= acc.popToolsAndMerge(regSelTool_ITkPixel_Cfg(flags))))
     return acc
 
@@ -171,7 +171,7 @@ def TrigSCTClusterizationCfg(flags, RoIs, name="InDetSCT_Clusterization", **kwar
     kwargs.setdefault("ClustersName", 'SCT_TrigClusters')
     kwargs.setdefault("isRoI_Seeded", True)
     kwargs.setdefault("RoIs", RoIs)
-    kwargs.setdefault("ClusterContainerCacheKey", "SCT_ClustersCache")
+    kwargs.setdefault("ClusterContainerCacheKey", flags.Trigger.InDetTracking.SCTClusterCacheKey)
     kwargs.setdefault("FlaggedCondCacheKey", "")
     kwargs.setdefault("useDataPoolWithCache", True)
     kwargs.setdefault("name", f"{name}_{RoIs}")
@@ -209,7 +209,7 @@ def ITkTrigStripClusterizationCfg(flags, name="ITkTrigStripClusterization", rois
                                         isRoI_Seeded=True,
                                         RoIs=roisKey,
                                         ClustersName = "ITkTrigStripClusters",
-                                        ClusterContainerCacheKey="SCT_ClustersCache",
+                                        ClusterContainerCacheKey=flags.Trigger.ITkTracking.SCTClusterCacheKey,
                                         RegSelTool= acc.popToolsAndMerge(regSelTool_ITkStrip_Cfg(flags))))
     return acc
 
@@ -278,7 +278,7 @@ def TrigTRTRIOMakerCfg(flags, RoIs, name="InDetTrigMTTRTDriftCircleMaker", **kwa
     kwargs.setdefault("isRoI_Seeded", True)
     kwargs.setdefault("RoIs", RoIs)
     
-    kwargs.setdefault("TRT_DriftCircleCache", "TRT_DriftCircleCache")
+    kwargs.setdefault("TRT_DriftCircleCache", flags.Trigger.InDetTracking.TRT_DriftCircleCacheKey)
     kwargs.setdefault("useDataPoolWithCache", True)
 
     kwargs.setdefault("name", f"{name}_{RoIs}")

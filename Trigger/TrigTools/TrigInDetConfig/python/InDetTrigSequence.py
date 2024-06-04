@@ -1,7 +1,6 @@
 #  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from TrigInDetConfig.InnerTrackerTrigSequence import InnerTrackerTrigSequence
-from TrigInDetConfig.TrigInDetConfig import InDetCacheNames
 from AthenaConfiguration.Enums import Format
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -35,19 +34,19 @@ class InDetTrigSequence(InnerTrackerTrigSequence):
 
     acc = ComponentAccumulator()
 
-    ViewDataVerifier = \
-      CompFactory.AthViews.ViewDataVerifier( name = viewVerifier + "_" + self.signature,
-                                            DataObjects = {( 'InDet::PixelClusterContainerCache' , InDetCacheNames.Pixel_ClusterKey ),
-                                                            ( 'PixelRDO_Cache' , InDetCacheNames.PixRDOCacheKey ),
-                                                            ( 'InDet::SCT_ClusterContainerCache' , InDetCacheNames.SCT_ClusterKey ),
-                                                            ( 'SCT_RDO_Cache' , InDetCacheNames.SCTRDOCacheKey ),
-                                                            ( 'SpacePointCache' , InDetCacheNames.SpacePointCachePix ),
-                                                            ( 'SpacePointCache' , InDetCacheNames.SpacePointCacheSCT ),
-                                                            ( 'IDCInDetBSErrContainer_Cache' , InDetCacheNames.PixBSErrCacheKey ),
-                                                            ( 'IDCInDetBSErrContainer_Cache' , InDetCacheNames.SCTBSErrCacheKey ),
-                                                            ( 'xAOD::EventInfo' , 'StoreGateSvc+EventInfo' ),
-                                                            ( 'TagInfo' , 'DetectorStore+ProcessingTags' )}
-                                          )
+    dataObjs = {( 'InDet::PixelClusterContainerCache' , self.flags.Trigger.InDetTracking.PixelClusterCacheKey ),
+                ( 'PixelRDO_Cache' ,                    self.flags.Trigger.InDetTracking.PixRDOCacheKey ),
+                ( 'InDet::SCT_ClusterContainerCache' ,  self.flags.Trigger.InDetTracking.SCTClusterCacheKey ),
+                ( 'SCT_RDO_Cache' ,                     self.flags.Trigger.InDetTracking.SCTRDOCacheKey ),
+                ( 'SpacePointCache' ,                   self.flags.Trigger.InDetTracking.SpacePointCachePix ),
+                ( 'SpacePointCache' ,                   self.flags.Trigger.InDetTracking.SpacePointCacheSCT ),
+                ( 'IDCInDetBSErrContainer_Cache' ,      self.flags.Trigger.InDetTracking.PixBSErrCacheKey ),
+                ( 'IDCInDetBSErrContainer_Cache' ,      self.flags.Trigger.InDetTracking.SCTBSErrCacheKey ),
+                ( 'xAOD::EventInfo' , 'StoreGateSvc+EventInfo' ),
+                ( 'TagInfo' , 'DetectorStore+ProcessingTags' )}
+    
+    ViewDataVerifier = CompFactory.AthViews.ViewDataVerifier( name = viewVerifier + "_" + self.signature,
+                                                              DataObjects = dataObjs)
 
     isByteStream = self.flags.Input.Format == Format.BS
     if not isByteStream:
@@ -68,13 +67,14 @@ class InDetTrigSequence(InnerTrackerTrigSequence):
     ViewDataVerifier = \
       CompFactory.AthViews.ViewDataVerifier( name = viewVerifier + "_" + self.signature,
                                              DataObjects = {
-                                               ( 'InDet::TRT_DriftCircleContainerCache' , 'StoreGateSvc+TRT_DriftCircleCache'  ),
-
+                                               ( 'InDet::TRT_DriftCircleContainerCache' , 
+                                                 f'StoreGateSvc+{self.flags.Trigger.InDetTracking.TRT_DriftCircleCacheKey}'  ),
+                                               
                                              }
                                             )
 
     if self.flags.Input.Format == Format.BS:
-      ViewDataVerifier.DataObjects.add(( 'TRT_RDO_Cache' , 'StoreGateSvc+TrtRDOCache' ))
+      ViewDataVerifier.DataObjects.add(( 'TRT_RDO_Cache' , f'StoreGateSvc+{self.flags.Trigger.InDetTracking.TRTRDOCacheKey}'))
     else:
       ViewDataVerifier.DataObjects.add(( 'TRT_RDO_Container' , 'StoreGateSvc+TRT_RDOs' ))
 
