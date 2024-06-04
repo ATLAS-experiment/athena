@@ -14,6 +14,26 @@ from AthenaConfiguration.Enums import MetadataCategory
 from AthenaCommon.CFElements import seqAND
 from AthenaCommon.Constants import INFO
 
+IDTRKVALID_AOD_EXCLUDED_AUXDATA = ['IDTRKVALID_'+var for var in [
+        'biased_PVz0Sigma',
+        'unbiased_PVz0Sigma',
+        'biased_PVd0Sigma',
+        'unbiased_PVd0Sigma',
+        'biased_d0Sigma',
+        'unbiased_z0',
+        'unbiased_d0Sigma',
+        'biased_PVz0SigmaSinTheta',
+        'biased_z0',
+        'unbiased_PVz0SigmaSinTheta',
+        'biased_z0Sigma',
+        'biased_z0SigmaSinTheta',
+        'unbiased_d0',
+        'unbiased_z0Sigma',
+        'unbiased_z0SigmaSinTheta',
+        'biased_d0',
+        'biased_z0SinTheta',
+        'unbiased_z0SinTheta' ] ]
+
 # Main algorithm config
 
 def IDTRKVALID_ANDToolCfg(flags, name='IDTRKVALID_ANDTool'):
