@@ -8,7 +8,7 @@
 #include "StoreGate/ReadDecorHandle.h"
 #include "StoreGate/WriteDecorHandle.h"
 
-namespace ActsTrk {
+namespace InDet {
 
   SpacePointReader::SpacePointReader(const std::string& name,
 				     ISvcLocator* pSvcLocator)

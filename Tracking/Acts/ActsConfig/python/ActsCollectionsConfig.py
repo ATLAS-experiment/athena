@@ -60,13 +60,6 @@ class TrackBackends:
         # If not in allowed post fixes we raise Exception
         raise Exception(f"Collection {collection} is a NOT KNOWN ACTS track backend")
         
-def ActsSpacePointReaderAlgCfg(flags,
-                               name: str,
-                               **kwargs) -> ComponentAccumulator:
-    acc = ComponentAccumulator()
-    acc.addEventAlgo(CompFactory.ActsTrk.SpacePointReader(name=name, **kwargs))
-    return acc
-
 def ActsTrackReaderAlgCfg(flags,
                           prefix: str) -> ComponentAccumulator:
     assert isinstance(prefix, str)
@@ -85,18 +78,15 @@ def ActsTrackReaderAlgCfg(flags,
 def ActsPoolReadCfg(flags) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
+    # Reader for InDet objects (i.e. xAOD SpacePoints and Measurements)
+    from InDetConfig.InDetPoolReadConfig import InDetPoolReadCfg
+    acc.merge(InDetPoolReadCfg(flags))
+    
     StoredTracks = dict()
     
     typedCollections = flags.Input.TypedCollections
     for typedCollection in typedCollections:
         [colType, colName] = typedCollection.split('#')
-
-        # Space Point Collections
-        if colType == "xAOD::SpacePointContainer":
-            acc.merge(ActsSpacePointReaderAlgCfg(flags,
-                                                 name=f"Acts{colName}ReaderAlg",
-                                                 SpacePointKey=colName))
-            continue
 
         # Track Backend Collections
         if colType in TrackBackends.types:

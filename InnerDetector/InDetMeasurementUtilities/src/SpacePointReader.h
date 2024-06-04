@@ -2,8 +2,8 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef ACTS_COLLECTIONALGS_SPACEPOINTS_H
-#define ACTS_COLLECTIONALGS_SPACEPOINTS_H
+#ifndef INDET_MEASUREMENT_UTILITIES_SPACEPOINTS_READER_H
+#define INDET_MEASUREMENT_UTILITIES_SPACEPOINTS_READER_H
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/EventContext.h"
@@ -14,7 +14,7 @@
 // EDM
 #include "xAODInDetMeasurement/SpacePointContainer.h"
 
-namespace ActsTrk {
+namespace InDet {
 
 class SpacePointReader
   : public AthReentrantAlgorithm {

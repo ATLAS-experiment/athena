@@ -3,7 +3,6 @@
 */
 
 #include "src/TrackContainerReader.h"
-#include "src/SpacePointReader.h"
+
 // Algs
 DECLARE_COMPONENT( ActsTrk::TrackContainerReader )
-DECLARE_COMPONENT( ActsTrk::SpacePointReader )
