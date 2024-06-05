@@ -6,6 +6,7 @@
 #define ACTS_ANALOGUECLUSTERING_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
+#include "InDetIdentifier/PixelID.h"
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "PixelConditionsData/ITkPixelOfflineCalibData.h"
 #include "StoreGate/ReadCondHandleKey.h"
@@ -45,15 +46,19 @@ private:
     std::pair<float, float> anglesOfIncidence(const InDetDD::SiDetectorElement& element,
 					      const TrackStateProxy& state) const;
 
+    std::pair<float, float> getCentroid(const std::vector<Identifier>& rdos,
+					const InDetDD::SiDetectorElement& element) const;
+
     const error_data_t* getErrorData() const;
 
-    std::pair<float, float>
-    getPositionCorrection(const error_data_t& errorData,
-			  const InDetDD::SiDetectorElement& element,
-			  const std::pair<float, float>& angles,
-			  const xAOD::PixelCluster& cluster) const;
+    std::pair<std::optional<float>, std::optional<float>>
+    getCorrectedPosition(const std::vector<Identifier>& rdos,
+			 const error_data_t& errorData,
+			 const InDetDD::SiDetectorElement& element,
+			 const std::pair<float, float>& angles,
+			 const xAOD::PixelCluster& cluster) const;
 
-    std::pair<float, float>
+    std::pair<std::optional<float>, std::optional<float>>
     getCorrectedError(const error_data_t& errorData,
 		      const InDetDD::SiDetectorElement& element,
 		      const std::pair<float, float>& angles,
@@ -84,7 +89,7 @@ private:
     // in micrometers
     Gaudi::Property<int> m_thickness {this, "PixelThickness", 250};
 
-
+    const PixelID* m_pixelid;
 };
 
 } // namespace ActsTrk

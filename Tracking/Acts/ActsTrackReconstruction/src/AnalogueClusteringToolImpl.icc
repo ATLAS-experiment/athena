@@ -5,6 +5,10 @@
 #ifndef ANALOGUECLUSTERINGTOOLIMPL_ICC
 #define ANALOGUECLUSTERINGTOOLIMPL_ICC
 
+#include <limits>
+
+#include <PixelReadoutGeometry/PixelModuleDesign.h>
+
 namespace ActsTrk {
 
 template <typename calib_data_t, typename traj_t>
@@ -22,6 +26,7 @@ StatusCode AnalogueClusteringToolImpl<calib_data_t, traj_t>::initialize()
     ATH_CHECK(m_pixelDetEleCollKey.initialize());
     ATH_CHECK(m_clusterErrorKey.initialize()); 
     ATH_CHECK(m_lorentzAngleTool.retrieve());
+    ATH_CHECK(AthAlgTool::detStore()->retrieve(m_pixelid, "PixelID"));
     ATH_MSG_DEBUG(AthAlgTool::name() << " successfully initialized");
     return StatusCode::SUCCESS;
 }
@@ -94,6 +99,50 @@ AnalogueClusteringToolImpl<calib_data_t, traj_t>::anglesOfIncidence(const InDetD
     return std::make_pair(anglePhi, angleEta);
 }
 
+
+template <typename calib_data_t, typename traj_t>
+std::pair<float, float>
+AnalogueClusteringToolImpl<calib_data_t, traj_t>::getCentroid(
+    const std::vector<Identifier>& rdos,
+    const InDetDD::SiDetectorElement& element) const
+{
+
+    int rowmin = std::numeric_limits<int>::max();
+    int rowmax = std::numeric_limits<int>::min();
+    int colmin = std::numeric_limits<int>::max();
+    int colmax = std::numeric_limits<int>::min();
+    for (const Identifier& rid : rdos) {
+        int row = m_pixelid->phi_index(rid);
+        rowmin = std::min(row, rowmin);
+        rowmax = std::max(row, rowmax);
+
+        int col = m_pixelid->eta_index(rid);
+        colmin = std::min(col, colmin);
+        colmax = std::max(col, colmax);
+    }
+
+    const InDetDD::PixelModuleDesign& design =
+	dynamic_cast<const InDetDD::PixelModuleDesign&>(element.design());
+
+    InDetDD::SiLocalPosition pos1 =
+	design.positionFromColumnRow(colmin, rowmin);
+
+    InDetDD::SiLocalPosition pos2 =
+	design.positionFromColumnRow(colmax, rowmin);
+
+    InDetDD::SiLocalPosition pos3 =
+	design.positionFromColumnRow(colmin, rowmax);
+
+    InDetDD::SiLocalPosition pos4 =
+	design.positionFromColumnRow(colmax, rowmax);
+
+    InDetDD::SiLocalPosition centroid = 0.25 * (pos1 + pos2 + pos3 + pos4);
+
+    double shift = m_lorentzAngleTool->getLorentzShift(element.identifyHash());
+
+    return std::make_pair(centroid.xPhi() + shift, centroid.xEta());
+}
+
 template <typename calib_data_t, typename traj_t>
 const typename AnalogueClusteringToolImpl<calib_data_t, traj_t>::error_data_t*
 AnalogueClusteringToolImpl<calib_data_t, traj_t>::getErrorData() const
@@ -117,8 +166,9 @@ AnalogueClusteringToolImpl<calib_data_t, traj_t>::getErrorData() const
 }
 
 template <typename calib_data_t, typename traj_t>
-std::pair<float, float>
-AnalogueClusteringToolImpl<calib_data_t, traj_t>::getPositionCorrection(
+std::pair<std::optional<float>, std::optional<float>>
+AnalogueClusteringToolImpl<calib_data_t, traj_t>::getCorrectedPosition(
+    const std::vector<Identifier>& rdos,
     const error_data_t& errorData,
     const InDetDD::SiDetectorElement& element,
     const std::pair<float, float>& angles,
@@ -127,8 +177,8 @@ AnalogueClusteringToolImpl<calib_data_t, traj_t>::getPositionCorrection(
     // TODO validate these angles
     auto& [anglePhi, angleEta] = angles;
 
-    float deltaX = 0;
-    float deltaY = 0;
+    std::optional<float> posX;
+    std::optional<float> posY;
     
     float omX = cluster.omegaX();
     float omY = cluster.omegaY();
@@ -136,6 +186,9 @@ AnalogueClusteringToolImpl<calib_data_t, traj_t>::getPositionCorrection(
     int ncols = cluster.channelsInEta();
 
     if (omX > -0.5 && omY > -0.5 && (nrows > 1 || ncols > 1)) {
+
+	std::pair<float, float> centroid = getCentroid(rdos, element);
+
 	Identifier id = element.identify();
 	std::pair<double, double> delta =
 	    errorData.getDelta(
@@ -146,25 +199,25 @@ AnalogueClusteringToolImpl<calib_data_t, traj_t>::getPositionCorrection(
 		angleEta);
 
 	if (nrows > 1)
-	    deltaX = delta.first * (omX - 0.5);
+	    posX = centroid.first + delta.first * (omX - 0.5);
 
 	if (ncols > 1)
-	    deltaY = delta.second * (omY - 0.5);
+	    posY = centroid.second + delta.second * (omY - 0.5);
     }
 
-    return std::make_pair(deltaX, deltaY);
+    return std::make_pair(posX, posY);
 }
 
 template <typename calib_data_t, typename traj_t>
-std::pair<float, float>
+std::pair<std::optional<float>, std::optional<float>>
 AnalogueClusteringToolImpl<calib_data_t, traj_t>::getCorrectedError(
     const error_data_t& errorData,
     const InDetDD::SiDetectorElement& element,
     const std::pair<float, float>& angles,
     const xAOD::PixelCluster& cluster) const
 {
-    float errX = 0;
-    float errY = 0;
+    std::optional<float> errX;
+    std::optional<float> errY;
 
     int nrows = cluster.channelsInPhi();
     int ncols = cluster.channelsInEta();
@@ -180,11 +233,15 @@ AnalogueClusteringToolImpl<calib_data_t, traj_t>::getCorrectedError(
 	if (cluster.widthInEta() > errY) {
 	    errY = cluster.widthInEta() / std::sqrt(12);
 	} else {
-	    errY /= std::sqrt(12);
+	    errY = *errY / std::sqrt(12);
 	}
     } else if (nrows > 1 && ncols > 1) {
 	Identifier id = element.identify();
-	std::tie(errX, errY) = errorData.getDeltaError(&id);
+	auto [vX, vY] = errorData.getDeltaError(&id);
+	if (vX > 0)
+	    errX = vX;
+	if (vY > 0)
+	    errY = vY;
     }
 
     return std::make_pair(errX, errY);
@@ -215,15 +272,17 @@ AnalogueClusteringToolImpl<calib_data_t, traj_t>::calibrate(
 
     std::pair<float, float> angles = anglesOfIncidence(*detElement, state);
 
-    auto [deltaX, deltaY] = getPositionCorrection(*errorData, *detElement, angles, cluster);
-    pos[Acts::eBoundLoc0] += deltaX;
-    pos[Acts::eBoundLoc1] += deltaY;
+    auto [posX, posY] = getCorrectedPosition(cluster.rdoList(), *errorData, *detElement, angles, cluster);
+    if (posX.has_value())
+	pos[Acts::eBoundLoc0] = *posX;
+    if (posY.has_value())
+	pos[Acts::eBoundLoc1] = *posY;
 
     auto [errX, errY] = getCorrectedError(*errorData, *detElement, angles, cluster);
-    if (errX > 0)
-	cov(0, 0) = errX * errX;
-    if (errY > 0)
-	cov(1, 1) = errY * errY;
+    if (errX.has_value())
+	cov(0, 0) = (*errX) * (*errX);
+    if (errY.has_value())
+	cov(1, 1) = (*errY) * (*errY);
     
     return std::make_pair(pos, cov);
 }
