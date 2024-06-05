@@ -41,7 +41,8 @@ xAOD::SpacePointAuxContainer* xAODSpacePointAuxContainerCnv::createPersistentWit
   
   // see if we can get the variable from trans
   using measurement_collection_t = std::vector< const xAOD::UncalibratedMeasurement* >;
-  auto measurementAuxId = SG::AuxTypeRegistry::instance().getAuxID< measurement_collection_t >("measurements");
+  static const SG::ConstAccessor< measurement_collection_t > uncalibMeasurementAcc("measurements");
+  static const SG::auxid_t measurementAuxId = uncalibMeasurementAcc.auxid();
 
   // Create a helper object for the Element Links
   xAOD::SpacePointContainer helper;
