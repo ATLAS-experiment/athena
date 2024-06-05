@@ -10,6 +10,27 @@ should be added there, not here.
 
 
 ## Common items used in PHYSVAL, FTAG1 and FTAG2
+PHYSVAL_FTAG1_FTAG2_SmartCollections = [
+    "Electrons",
+    "Muons",
+    "PrimaryVertices",
+    "InDetTrackParticles",
+    "AntiKt4EMPFlowJets",
+    "BTagging_AntiKt4EMPFlow",
+    "MET_Baseline_AntiKt4EMPFlow",
+    "TauJets",
+]
+
+PHYSVAL_FTAG1_FTAG2_AllVariables = [
+    "EventInfo",
+    "PrimaryVertices",
+    "InDetTrackParticles",
+    "BTagging_AntiKt4EMPFlow",
+    "BTagging_AntiKt4EMPFlowJFVtx",
+    "BTagging_AntiKt4EMPFlowSecVtx",
+    "TruthBottom", "TruthElectrons","TruthMuons","TruthTaus",
+]
+
 PHYSVAL_FTAG1_FTAG2_mc_AppendToDictionary = {}
 
 PHYSVAL_FTAG1_FTAG2_ExtraVariables = [
@@ -127,3 +148,10 @@ def trigger_matching(SlimmingHelper, TriggerListsHelper, ConfigFlags):
                 OutputContainerPrefix = "TrigMatch_",
                 TriggerList = TriggerListsHelper.Run3TriggerNamesNoTau)
 
+
+def add_baseline_slimming_smartcollections(SlimmingHelper):
+    SlimmingHelper.SmartCollections += PHYSVAL_FTAG1_FTAG2_SmartCollections
+
+def add_baseline_slimming_allvariables(SlimmingHelper):
+    SlimmingHelper.AllVariables += PHYSVAL_FTAG1_FTAG2_AllVariables
+    

@@ -63,18 +63,16 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
     # these items in both places in case some of the smart collections
     # add variables from some other collection. For flavor tagging,
     # for example will add jet variables.
-    FTAG1SlimmingHelper.SmartCollections = [
-                                           "Electrons",
-                                           "Muons",
-                                           "PrimaryVertices",
-                                           "InDetTrackParticles",
-                                           "AntiKt4EMPFlowJets",
-                                           "BTagging_AntiKt4EMPFlow",
+    
+    from DerivationFrameworkFlavourTag import FtagBaseContent
+
+    FTAG1SlimmingHelper.SmartCollections = []
+    FtagBaseContent.add_baseline_slimming_smartcollections(FTAG1SlimmingHelper)
+
+    FTAG1SlimmingHelper.SmartCollections += [
                                            "AntiKt4UFOCSSKJets",
                                            "BTagging_AntiKt4UFOCSSK",
-                                           "MET_Baseline_AntiKt4EMPFlow",
                                            "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
-                                           "TauJets",
                                           ]
 
     if flags.GeoModel.Run >= LHCPeriod.Run4:
@@ -90,15 +88,12 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
             if a_container not in FTAG1SlimmingHelper.SmartCollections:
                 FTAG1SlimmingHelper.SmartCollections.append(a_container)
 
-    FTAG1SlimmingHelper.AllVariables = [
-            "EventInfo",
-            "PrimaryVertices",
-            "InDetTrackParticles",
+    FTAG1SlimmingHelper.AllVariables = []
+    FtagBaseContent.add_baseline_slimming_allvariables(FTAG1SlimmingHelper)
+
+    FTAG1SlimmingHelper.AllVariables += [
             "InDetLargeD0TrackParticles",
             "AntiKt4EMPFlowJets",
-            "BTagging_AntiKt4EMPFlow",
-            "BTagging_AntiKt4EMPFlowJFVtx",
-            "BTagging_AntiKt4EMPFlowSecVtx",
             "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
             "UFOCSSK",
             "GlobalChargedParticleFlowObjects",
@@ -109,8 +104,7 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
             "CSSKGNeutralParticleFlowObjects",
             "TruthParticles",
             "TruthVertices",
-            "TruthBottom", "TruthElectrons","TruthMuons","TruthTaus",
-            ]
+    ]
     
     if flags.GeoModel.Run >= LHCPeriod.Run4:
         FTAG1SlimmingHelper.AllVariables += [
@@ -137,7 +131,6 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
                 ]
 
 
-    from DerivationFrameworkFlavourTag import FtagBaseContent
     # update AppendToDictionary
     extra_AppendToDictionary = {} #only add those items specifically for FTAG1 here!
     FtagBaseContent.update_AppendToDictionary_in_SlimmingHelper(FTAG1SlimmingHelper, flags, extra_AppendToDictionary)
