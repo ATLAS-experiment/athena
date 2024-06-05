@@ -2250,7 +2250,12 @@ def modify_run_card(run_card_input=None,run_card_backup=None,process_dir=MADGRAP
                         mglog.info('Setting '+stripped_setting+' = '+str(settings_lower[stripped_setting.lower()]))
                         used_settings += [ stripped_setting.lower() ]
         newCard.write(line.strip()+'\n')
-
+    
+    # Check whether mcatnlo_delta is applied to setup pythia8 path
+    if 'mcatnlo_delta' in settings_lower:	    
+        if settings_lower['mcatnlo_delta'] == 'True':
+            modify_config_card(process_dir=process_dir,settings={'pythia8_path':os.getenv("PY8PATH")})
+    
     # Clean up unused options
     for asetting in settings_lower:
         if asetting in used_settings:
