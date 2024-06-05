@@ -250,6 +250,9 @@ class ConfigFactory():
         from EgammaAnalysisAlgorithms.ElectronAnalysisConfig import ElectronWorkingPointConfig
         self.addAlgConfigBlock(algName="WorkingPoint", alg=ElectronWorkingPointConfig,
             superBlocks="Electrons")
+        from EgammaAnalysisAlgorithms.ElectronAnalysisConfig import ElectronTriggerAnalysisSFBlock
+        self.addAlgConfigBlock(algName="TriggerSF", alg=ElectronTriggerAnalysisSFBlock,
+                               superBlocks="Electrons")
 
         # photons
         from EgammaAnalysisAlgorithms.PhotonAnalysisConfig import PhotonCalibrationConfig
