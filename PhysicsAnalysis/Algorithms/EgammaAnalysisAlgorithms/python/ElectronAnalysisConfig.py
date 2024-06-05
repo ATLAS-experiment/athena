@@ -4,6 +4,8 @@
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AthenaConfiguration.Enums import LHCPeriod
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
+from TrigGlobalEfficiencyCorrection.TriggerLeg_DictHelpers import TriggerDict, MapKeysDict
+from Campaigns.Utils import Campaign
 
 # E/gamma import(s).
 from xAODEgamma.xAODEgammaParameters import xAOD
@@ -530,3 +532,95 @@ def makeElectronWorkingPointConfig( seq, containerName, workingPoint,
     config.setOptionValue ('noEffSF', noEffSF)
     config.setOptionValue ('forceFullSimConfig', forceFullSimConfig)
     seq.append (config)
+
+
+class ElectronTriggerAnalysisSFBlock (ConfigBlock):
+
+    def __init__ (self, configName='') :
+        super (ElectronTriggerAnalysisSFBlock, self).__init__ ()
+
+        self.addOption ('triggerChainsPerYear', {}, type=None,
+                        info="a dictionary with key (string) the year and value (list of "
+                        "strings) the trigger chains. The default is {} (empty dictionary).")
+        self.addOption ('electronID', '', type=str,
+                        info="the electron ID WP (string) to use.")
+        self.addOption ('electronIsol', '', type=str,
+                        info="the electron isolation WP (string) to use.")
+        self.addOption ('saveEff', False, type=bool,
+                        info="define whether we decorate also the trigger scale efficiency "
+                        "The default is false.")
+        self.addOption ('containerName', '', type=str,
+                        info="the input electron container, with a possible selection, in "
+                        "the format container or container.selection.")
+
+    def makeAlgs (self, config) :
+
+        if config.dataType() is not DataType.Data:
+
+            # Dictionary from TrigGlobalEfficiencyCorrection/Triggers.cfg
+            # Key is trigger chain (w/o HLT prefix)
+            # Value is empty for single leg trigger or list of legs
+            triggerDict = TriggerDict()
+
+            version = ("2015_2018/rel21.2/Precision_Summer2020_v1"
+                       if config.geometry() is LHCPeriod.Run2 else
+                       "2015_2025/rel22.2/2022_Summer_Prerecom_v1")
+            # Dictionary from TrigGlobalEfficiencyCorrection/MapKeys.cfg
+            # Key is year_leg
+            # Value is list of configs available, first one will be used
+            mapKeysDict = MapKeysDict(version)
+
+            if config.campaign() is Campaign.MC20a:
+                years = ['2015', '2016']
+            elif config.campaign() is Campaign.MC20d:
+                years = ['2017']
+            elif config.campaign() is Campaign.MC20e:
+                years = ['2018']
+            elif config.campaign() in [Campaign.MC21a, Campaign.MC23a]:
+                years = ['2022']
+            elif config.campaign() is Campaign.MC23c:
+                years = ['2023']
+
+            triggerConfigs = {}
+            for year in years:
+                triggerChains = self.triggerChainsPerYear.get(year,[])
+                for chain in triggerChains:
+                    chain = chain.replace("HLT_", "").replace(" || ", "_OR_")
+                    legs = triggerDict[chain]
+                    if len(legs)==0:
+                        if chain[0]=='e' and chain[1].isdigit:
+                            triggerConfigs[chain] = mapKeysDict[year + '_' + chain]
+                    else:
+                        for leg in legs:
+                            if leg[0]=='e' and leg[1].isdigit:
+                                triggerConfigs[leg] = mapKeysDict[year + '_' + leg]
+
+            decorations = ['EffSF']
+            if self.saveEff:
+                decorations += ['Eff']
+
+            for trig, conf in triggerConfigs.items():
+                for deco in decorations:
+                    alg = config.createAlgorithm('CP::ElectronEfficiencyCorrectionAlg',
+                                                 'EleTrigEfficiencyCorrectionsAlg' + deco +
+                                                 '_' + trig)
+                    config.addPrivateTool( 'efficiencyCorrectionTool',
+                                           'AsgElectronEfficiencyCorrectionTool' )
+
+                    # Reproduce config from TrigGlobalEfficiencyAlg
+                    alg.efficiencyCorrectionTool.MapFilePath = "ElectronEfficiencyCorrection/" + version + "/map4.txt"
+                    alg.efficiencyCorrectionTool.IdKey = self.electronID.replace("LH","")
+                    alg.efficiencyCorrectionTool.IsoKey = self.electronIsol
+                    alg.efficiencyCorrectionTool.TriggerKey = (
+                        ("Eff_" if "SF" not in deco else "") + conf[0])
+                    alg.efficiencyCorrectionTool.CorrelationModel = "TOTAL"
+                    alg.efficiencyCorrectionTool.ForceDataType = \
+                        PATCore.ParticleDataType.Full
+
+                    alg.scaleFactorDecoration = (
+                        'el_trig' + deco + '_' + trig + '_%SYS%')
+                    alg.outOfValidity = 2 #silent
+                    alg.outOfValidityDeco = 'bad_eff_eletrig' + deco + '_' + trig
+                    alg.electrons = config.readName (self.containerName)
+                    alg.preselection = config.getPreselection (self.containerName, '')
+                    config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'trig' + deco + '_' + trig)

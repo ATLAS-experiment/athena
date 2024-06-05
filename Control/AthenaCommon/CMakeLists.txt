@@ -8,7 +8,8 @@ if (XAOD_STANDALONE)
     atlas_install_python_modules( python/SystemOfUnits.py
                                   python/Logging.py
                                   python/Constants.py
-                                  python/AthOptionsParser.py )
+                                  python/AthOptionsParser.py
+                                  python/Utils )
 else()
     # Set up specific Athena runtime environment:
     set( AthenaCommonEnvironment_DIR ${CMAKE_CURRENT_SOURCE_DIR}

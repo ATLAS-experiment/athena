@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // contact: jmaurer@cern.ch
@@ -119,10 +119,23 @@ bool ImportData::importTriggers()
 		ss.str(line);
 		ss >> triggerName;
 		std::size_t h = m_hasher(triggerName);
-		m_dictionary[h] = triggerName;
-		ATH_MSG_DEBUG(std::to_string(h) << " " << triggerName );
 		auto& def = m_triggerDefs[h];
 		def.name = h;
+
+		bool found_tau_leg = false;
+		// Skip chains with a tau leg, not yet supported
+		while((ss >> token) && !found_tau_leg)
+		{
+			auto flavour = associatedLeptonFlavour(token, success);
+			if(flavour == xAOD::Type::Tau) found_tau_leg = true;
+		}
+		if(found_tau_leg) continue;
+
+		ss.clear();
+		ss.str(line);
+		ss >> triggerName;
+		m_dictionary[h] = triggerName;
+		ATH_MSG_DEBUG(std::to_string(h) << " " << triggerName );
 		for(std::size_t& leg : def.leg)
 		{
 			if(!(ss >> token)) break;
@@ -505,6 +518,7 @@ xAOD::Type::ObjectType ImportData::associatedLeptonFlavour(const std::string& le
 	if(leg.length()>=2 && leg[0]=='e' && leg[1]>='1' && leg[1]<='9') return xAOD::Type::Electron;
 	else if(leg.length()>=3 && leg[0]=='m' && leg[1]=='u' && leg[2]>='1' && leg[2]<='9') return xAOD::Type::Muon;
 	else if(leg.length()>=3 && leg[0]=='g' && leg[1]>='1' && leg[1]<='9') return xAOD::Type::Photon;
+	else if(leg.length()>=4 && leg[0]=='t' && leg[1]=='a' && leg[2]=='u' && leg[3]>='1' && leg[3]<='9') return xAOD::Type::Tau;
 	success = false;
 	return xAOD::Type::Other;
 }

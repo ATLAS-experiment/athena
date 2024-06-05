@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigGlobalEfficiencyCorrection )
@@ -47,6 +47,7 @@ atlas_add_executable( TrigGlobEffCorrValidation
    LINK_LIBRARIES ${ROOT_LIBRARIES} CxxUtils TrigGlobalEfficiencyCorrectionLib xAODRootAccess )
 
 atlas_install_data( data/*.cfg )
+atlas_install_python_modules( python/*.py )
 
 # Test(s) in the package:
 atlas_add_test( Tool
