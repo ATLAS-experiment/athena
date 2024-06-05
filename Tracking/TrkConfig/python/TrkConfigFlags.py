@@ -507,7 +507,7 @@ def createTrackingConfigFlags():
                           createITkLargeD0TrackingPassFlags, prefix=True)
     icf.addFlagsCategory ("Tracking.ITkConversionPass",
                           createITkConversionTrackingPassFlags, prefix=True)
-    icf.addFlagsCategory ("Tracking.ITkLowPt",
+    icf.addFlagsCategory ("Tracking.ITkLowPtPass",
                           createITkLowPtTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ("Tracking.ITkFastPass",
                           createITkFastTrackingPassFlags, prefix=True)

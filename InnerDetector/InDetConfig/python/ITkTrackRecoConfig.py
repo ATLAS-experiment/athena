@@ -86,7 +86,7 @@ def CombinedTrackingPassFlagSets(flags):
     # LowPt
     if flags.Tracking.doLowPt:
         flagsLowPt = flags.cloneAndReplace("Tracking.ActiveConfig",
-                                           "Tracking.ITkLowPt")
+                                           "Tracking.ITkLowPtPass")
         flags_set += [flagsLowPt]
 
     _flags_set = flags_set  # Put into cache
