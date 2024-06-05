@@ -36,7 +36,7 @@ namespace CP
 
     /// \brief the smearing tool
   private:
-    ToolHandle<IMuonTriggerScaleFactors> m_efficiencyScaleFactorTool;
+    ToolHandle<IMuonTriggerScaleFactors> m_efficiencyScaleFactorTool {this, "efficiencyScaleFactorTool", "CP::MuonTriggerScaleFactors", "the trigger efficiency scale factor tool we apply"};
 
     /// \brief the systematics list we run
   private:

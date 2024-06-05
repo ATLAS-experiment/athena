@@ -270,6 +270,9 @@ class ConfigFactory():
         from MuonAnalysisAlgorithms.MuonAnalysisConfig import MuonWorkingPointConfig
         self.addAlgConfigBlock(algName="WorkingPoint", alg=MuonWorkingPointConfig,
             superBlocks="Muons")
+        from MuonAnalysisAlgorithms.MuonAnalysisConfig import MuonTriggerAnalysisSFBlock
+        self.addAlgConfigBlock(algName="TriggerSF", alg=MuonTriggerAnalysisSFBlock,
+                               superBlocks="Muons")
 
         # tauJets
         from TauAnalysisAlgorithms.TauAnalysisConfig import TauCalibrationConfig
