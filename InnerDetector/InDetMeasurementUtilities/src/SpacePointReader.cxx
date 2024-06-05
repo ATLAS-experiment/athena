@@ -67,7 +67,7 @@ namespace InDet {
 	meas.push_back(*el);
       }
 
-      barePointersToClusters(*sp) = meas;
+      barePointersToClusters(*sp) = std::move(meas);
     }
 
     ATH_MSG_DEBUG("Decorations have been attached to space point collection");
