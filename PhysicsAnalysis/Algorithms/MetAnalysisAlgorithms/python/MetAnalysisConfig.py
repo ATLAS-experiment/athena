@@ -49,6 +49,9 @@ class MetAnalysisConfig (ConfigBlock):
             "and for jet-related systematics only. "
             "WARNING: this option is strictly for doing physics studies of the feasibility "
             "of this OR scheme, it should not be used in a regular analysis")
+        self.addOption ('saveSignificance', True, type=bool, 
+            info="whether to save the MET significance (default=True)")
+
 
     def makeAlgs (self, config) :
 
@@ -105,21 +108,22 @@ class MetAnalysisConfig (ConfigBlock):
 
 
         # Set up the met significance algorithm:
-        alg = config.createAlgorithm( 'CP::MetSignificanceAlg', 'MetSignificanceAlg' + postfix )
-        config.addPrivateTool( 'significanceTool', 'met::METSignificance' )
-        if self.muons != "" :
-            config.addPrivateTool( 'significanceTool.MuonCalibTool', 'CP::MuonCalibTool' )
-            alg.significanceTool.MuonCalibTool.calibMode = config._muonCalibMode
+        if self.saveSignificance:
+            alg = config.createAlgorithm( 'CP::MetSignificanceAlg', 'MetSignificanceAlg' + postfix )
+            config.addPrivateTool( 'significanceTool', 'met::METSignificance' )
+            if self.muons != "" :
+                config.addPrivateTool( 'significanceTool.MuonCalibTool', 'CP::MuonCalibTool' )
+                alg.significanceTool.MuonCalibTool.calibMode = config._muonCalibMode
 
-        alg.significanceTool.SoftTermParam = 0
-        alg.significanceTool.TreatPUJets = self.treatPUJets
-        alg.significanceTool.IsAFII = config.dataType() is DataType.FastSim
-        alg.met = config.readName (self.containerName)
+            alg.significanceTool.SoftTermParam = 0
+            alg.significanceTool.TreatPUJets = self.treatPUJets
+            alg.significanceTool.IsAFII = config.dataType() is DataType.FastSim
+            alg.met = config.readName (self.containerName)
+            config.addOutputVar (self.containerName, 'significance', 'significance')
 
         config.addOutputVar (self.containerName, 'met', 'met')
         config.addOutputVar (self.containerName, 'phi', 'phi')
         config.addOutputVar (self.containerName, 'sumet', 'sumet')
-
 
 
 def makeMetAnalysisConfig( seq, containerName,
