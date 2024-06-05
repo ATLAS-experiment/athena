@@ -181,12 +181,28 @@ class TrigBmumuxComboHypo: public ::ComboHypo {
    */
   StatusCode createDecisionObjects(TrigBmumuxState&) const;
 
+  /**
+   * @brief Perform a vertex fit on selected tracks
+   * @param context the event context used to make the vertex threadsafe.
+   * @param trackParticleLinks the trackParticles to fit
+   * @param decay the decay enumerator to specify the mass contraints
+   * @param dimuon The dimuon vertex position can be used as the initial position to increase effeciency
+   * @return The fitted vertex - null if fit fails or is very low quality
+   */
   std::unique_ptr<xAOD::Vertex> fit(
       const EventContext& context,
       const std::vector<ElementLink<xAOD::TrackParticleContainer>>& trackParticleLinks,
       Decay decay = kPsi_2mu,
       const xAOD::Vertex* dimuon = nullptr) const;
 
+  /**
+   * @brief Construct the trigger object that may be stored for debugging or matching.
+   * @param state Event object containing the current events selections
+   * @param type decay type enumerator. Corresponds to EDM definitions
+   * @param trkMass Track mass hypothesis for mass calculations
+   * @param dimuonLink Associated dimuon container
+   * @return Pointer to the TrigBphys object
+   */
   xAOD::TrigBphys* makeTriggerObject(
       TrigBmumuxState& state,
       const xAOD::Vertex& vertex,
@@ -194,12 +210,36 @@ class TrigBmumuxComboHypo: public ::ComboHypo {
       const std::vector<double>& trkMass = {PDG::mMuon, PDG::mMuon},
       const ElementLink<xAOD::TrigBphysContainer>& dimuonLink = ElementLink<xAOD::TrigBphysContainer>()) const;
 
+   /**
+   * @brief Attempts to identify identical tracks by selection on DeltaR
+   * @return true if 'identical', false otherwise
+   */
   bool isIdenticalTracks(const xAOD::TrackParticle* lhs, const xAOD::TrackParticle* rhs) const;
   bool isIdenticalTracks(const xAOD::Muon* lhs, const xAOD::Muon* rhs) const;
+   /**
+   * @brief Attempts to identify if the track is in the same RoI as the muon by comparing the angle with the RoI limits
+   * @return true if in same RoI
+   */
   bool isInSameRoI(const xAOD::Muon*, const xAOD::TrackParticle*) const;
   bool passDimuonTrigger(const std::vector<const TrigCompositeUtils::DecisionIDContainer*>& previousDecisionIDs) const;
+
+  /**
+   * @brief Checks that the given mass value falls into the specified range.
+   */
   bool isInMassRange(double mass, const std::pair<double, double>& range) const { return (mass > range.first && mass < range.second); }
+  /**
+   * @brief Calculate the Lxy (~distance between vertices)
+   * It is defined as the transverse distance between the production and decay vertices projected along the transverse momentum of the particle.
+   * @return The Lxy value in [mm]
+  */
   double Lxy(const Amg::Vector3D& productionVertex, const xAOD::Vertex& decayVertex) const;
+
+  /**
+   * @brief Calculate 4-momentum of the fitted vertex particle assuming the given masses.
+   * @param vertex the fitted vertex linking to the original tracks
+   * @param the mass hypothesis for the given tracks in the vertex
+   * @return The 4-momentum of the vertexed hypothesis
+  */
   xAOD::TrackParticle::GenVecFourMom_t momentum(const xAOD::Vertex& vertex, const std::vector<double>& trkMass) const;
 
   SG::ReadHandleKey<xAOD::TrackParticleContainer> m_trackParticleContainerKey {this,

@@ -106,22 +106,52 @@ class TrigBmuxComboHypo: public ::ComboHypo {
   StatusCode findBmuxCandidates(TrigBmuxState&) const;
   StatusCode createDecisionObjects(TrigBmuxState&) const;
 
+  /**
+   * @brief Perform a vertex fit on selected tracks
+   * @param context the event context used to make the vertex threadsafe.
+   * @param trackParticleLinks the trackParticles to fit
+   * @param decay the decay enumerator to specify the mass contraints
+   * @return The fitted vertex - null if fit fails or is very low quality
+   */
   std::unique_ptr<xAOD::Vertex> fit(
       const EventContext& context,
       const std::vector<ElementLink<xAOD::TrackParticleContainer>>& trackParticleLinks,
       Decay decay) const;
 
+  /**
+   * @brief Perform a cascade vertex fit on selected tracks
+   * @param context the event context used to make the vertex threadsafe.
+   * @param trackParticleLinks the trackParticles to fit
+   * @param decay the decay enumerator to specify the mass contraints
+   * @return The fitted vertex - null if fit fails or is very low quality
+   */
   std::unique_ptr<Trk::VxCascadeInfo> fitCascade(
       const EventContext& context,
       const std::vector<ElementLink<xAOD::TrackParticleContainer>>& trackParticleLinks,
       Decay decay) const;
 
+
+  /**
+   * @brief Fill the trigger object that may be stored for debugging or matching.
+   * @param triggerObject the trigger object
+   * @param type decay type enumerator. Corresponds to EDM definitions
+   * @param trkMass Track mass hypothesis for mass calculations
+   * @return StatusCode to indicate success or failure
+   */
   StatusCode fillTriggerObject(
       xAOD::TrigBphys& triggerObject,
       xAOD::TrigBphys::pType type,
       const xAOD::Vertex& vertex,
       const std::vector<double>& trkMass) const;
 
+  /**
+   * @brief Fill the trigger object that may be stored for debugging or matching for a cascade vertex.
+   * @param triggerObjects the trigger objects for the cascade
+   * @param type decay type enumerator. Corresponds to EDM definitions
+   * @param vxCascadeInfo the cascade info object for the vertex fitter.
+   * @param beamSpotPosition The beamspot position
+   * @return StatusCode to indicate success or failure
+   */
   StatusCode fillTriggerObjects(
       std::vector<xAOD::TrigBphys*>& triggerObjects,
       xAOD::TrigBphys::pType type,
