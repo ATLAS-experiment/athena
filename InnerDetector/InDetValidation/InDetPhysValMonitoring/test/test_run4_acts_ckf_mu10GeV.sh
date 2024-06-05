@@ -54,7 +54,10 @@ fi
 run "IDPVM" \
     runIDPVM.py \
     --filesInput AOD.ckf.root \
-    --outputFile idpvm.ckf.root
+    --outputFile idpvm.ckf.root \
+    --doTightPrimary \
+    --doHitLevelPlots \
+    --HSFlag All
 
 reco_rc=$?
 if [ $reco_rc != 0 ]; then
@@ -82,7 +85,10 @@ fi
 run "IDPVM" \
     runIDPVM.py \
     --filesInput AOD.ambi.root \
-    --outputFile idpvm.ambi.root
+    --outputFile idpvm.ambi.root \
+    --doTightPrimary \
+    --doHitLevelPlots \
+    --HSFlag All
 
 reco_rc=$?
 if [ $reco_rc != 0 ]; then
