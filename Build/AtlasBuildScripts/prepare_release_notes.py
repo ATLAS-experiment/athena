@@ -102,26 +102,32 @@ def main():
     print('About to parse the MRs. Depending on the number, this could take a few minutes (run with --verbose to get more output while this is happening).')
     merged_mrs = parse_mrs_from_log(output_log['stdout'].decode("utf-8"),
                                     pretty_format=pretty_format, verbose=verbose, gl_project=gl_project)
-
+    
+    # Now handle adding a descriptive message/jira link to release notes
+    optional_message = ''
+    if not args.sweep:
+        print()
+        print('Is there a ticket associated with the release build request e.g. ATLINFR-XXXX? (press return to skip)')
+        ticket = input(': ')
+        print('Do you wish to add a description of the release?')
+        print('e.g. "Release for derivations and upgrade", or "Production release for data-taking. ')
+        print('(press return to skip)')
+        optional_message = input(': ')
+        if ticket:
+            optional_message = optional_message + '\nRelease request ticket: '+ticket
+    print('About to fill release note template.')
     release_notes = fill_template(sweep_template() if args.sweep else default_template(),
-                                  target_release, nightly_tag, previous_release,
+                                  target_release, nightly_tag, optional_message, previous_release,
                                   merged_mrs, output_filename=args.output, verbose=verbose,
                                   gl=gl, group_mrs=args.group_merge_requests)
 
     print()
+    # Use gitlab api to create a release  (and tag) in gitlab
     if not args.sweep and args.token and gitlab_available:
         msg = 'Would you like to create the release in gitlab (i.e. make the tag and fill in the release notes)?'
         if input("%s (y/N) " % msg).lower() == 'y':
-            print('Is there a ticket associated with the release build request e.g. ATLINFR-XXXX? (press return to skip)')
-            ticket = input(': ')
-            print('Do you wish to add a description of the release?')
-            print('e.g. "Release for derivations and upgrade", or "Production release for data-taking. ')
-            print('(press return to skip)')
-            message = input(': ')
-            if ticket:
-                message = message + '\nRelease request ticket: '+ticket
             try:
-                gl_project.tags.create({'tag_name':target_release, 'ref':nightly_tag, 'message':message+''})
+                gl_project.tags.create({'tag_name':target_release, 'ref':nightly_tag, 'message':optional_message+''})
                 release = gl_project.releases.create({'name':target_release, 'tag_name':target_release, 'description':release_notes})
             except Exception as err:
                 print(f"Failed to create tag or release. {err=}, {type(err)=}")
@@ -317,6 +323,8 @@ def default_template():
 The release {target_release_link:s}
 was built from the tag {nightly_tag_link:s}
 
+{optional_message:s}
+
 This is the list of merge requests that were included since
 the previous release {previous_release_link:s}:
 {formatted_list_of_merge_requests:s}
@@ -375,7 +383,7 @@ def format_mrs_from_gitlab(merged_mrs, group_mrs=False, gl=None):
     return '\n'.join(lines)
 
 
-def fill_template(template, target_release, nightly_tag, previous_release,
+def fill_template(template, target_release, nightly_tag, optional_message, previous_release,
                   merged_mrs=[], output_filename='foo.md', verbose=False, gl=None, group_mrs=False):
     formatted_mrs = ""
     if gl:
@@ -392,6 +400,7 @@ def fill_template(template, target_release, nightly_tag, previous_release,
                                          'target_release_link': formatted_tag_link(target_release),
                                          'nightly_tag': nightly_tag,
                                          'nightly_tag_link': formatted_tag_link(nightly_tag),
+                                         'optional_message': optional_message,
                                          'previous_release': previous_release,
                                          'previous_release_link': formatted_tag_link(previous_release),
                                          'formatted_list_of_merge_requests': formatted_mrs})
