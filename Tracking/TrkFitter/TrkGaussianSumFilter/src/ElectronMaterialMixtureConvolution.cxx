@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2020-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2020-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -379,7 +379,6 @@ Trk::ElectronMaterialMixtureConvolution::update(
 
   // Merge components "From" to components "To"
   MultiComponentStateAssembler::Cache assemblerCache;
-  int nMerges(0);
   std::array<bool, GSFConstants::maxComponentsAfterConvolution> isMerged = {};
   int32_t returnedMerges = KL.numMerges;
 
@@ -404,7 +403,6 @@ Trk::ElectronMaterialMixtureConvolution::update(
     size_t materialIndex2 = indices[minj].second;
 
     // Some values for sanity checks
-    ++nMerges;
     isMerged[minj] = true;
 
     // Update first parameters and weight
