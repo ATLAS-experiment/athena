@@ -731,7 +731,7 @@ class TrigEgammaMonAlgBuilder:
   def bookTrackingDistributions( self, monAlg, trigger,online=True ):
     
 
-    from TrigEgammaMonitoring.TrigEgammaMonitorHelper import TH1F
+    from TrigEgammaMonitoring.TrigEgammaMonitorHelper import TH1F, TH2F
 
     monGroup = self.addGroup( monAlg, trigger+'_Distributions_' + ("HLT" if online else "Offline"), 
                               self.basePath+'/Shifter/'+trigger+'/Distributions/' + ("HLT" if online else "Offline") )
@@ -745,15 +745,23 @@ class TrigEgammaMonAlgBuilder:
     self.addHistogram(monGroup, TH1F("npixhits","nPixHit; nPixHits; Count",10, 0, 10))
     self.addHistogram(monGroup, TH1F("nscthits","nSCTHit; nSCTHits; Count",20, 0, 20))
     self.addHistogram(monGroup, TH1F("charge","charge; charge; Count", 4,-2,2))
-    self.addHistogram(monGroup, TH1F("pt", "p_{T}; p_{T} [GeV] ; Count", 100,0.,100.))
+    self.addHistogram(monGroup, TH1F("pt", "p_{T}; p_{T} [GeV] ; Count", 50,0.,200.))
+    self.addHistogram(monGroup, TH1F("pt_track", "p_{T} tracks; p_{T} [GeV] ; Count", 100,0.,200.))
     self.addHistogram(monGroup, TH1F("ptcone20", "ptcone20; ptcone20; Count", 50, 0.0, 5.0))
     self.addHistogram(monGroup, TH1F("ptvarcone20", "ptvarcone20; ptvarcone20; Count", 50, 0.0, 5.0))
     self.addHistogram(monGroup, TH1F("ptcone20_rel", "ptcone20/pt; ptcone20/pt; Count", 50, 0.0, 1.0))
-    self.addHistogram(monGroup, TH1F("ptvarcone20_rel", "ptvarcone20/pt; ptvarcone20/pt; Count", 50, 0.0, 0.5))
-    self.addHistogram(monGroup, TH1F("z0", "z0; z0 ; Count", 40, -1, 1))
+    self.addHistogram(monGroup, TH1F("ptvarcone20_rel", "ptvarcone20/pt; ptvarcone20/pt; Count", 50, 0.0, 0.12))
+    self.addHistogram(monGroup, TH1F("z0", "z0; z0 ; Count", 50, -200, 200))
     self.addHistogram(monGroup, TH1F("d0", "d0; d0 ; Count", 40, -1, 1))
     self.addHistogram(monGroup, TH1F("d0sig", "d0sig; d0sig ; Count", 40, -10, 10))
+
+    self.addHistogram(monGroup, TH2F("mu,ptvarcone20_rel", "HLT ptvarcone20/pt as function of avg #mu; #mu; ptvarcone20/pt; Count",50, 0, 80,50, 0, 0.12))
+    self.addHistogram(monGroup, TH2F("eta,ptvarcone20_rel", "HLT ptvarcone20/pt as function of #eta; #eta; ptvarcone20/pt; Count",50, -3, 3,50, 0, 0.12))
     
+    self.addHistogram(monGroup, TH2F("pt,ptvarcone20_rel", "HLT ptvarcone20/pt as function of pt; pt [GeV]; ptvarcone20/pt; Count",50, 0, 200,50, 0, 0.12))
+    self.addHistogram(monGroup, TH2F("pt_track,ptvarcone20_rel", "HLT ptvarcone20/pt as function of pt_track; pt [GeV]; ptvarcone20/pt; Count",50, 0, 200,50, 0, 0.12))
+    self.addHistogram(monGroup, TH2F("z0,ptvarcone20_rel", "HLT ptvarcone20/pt as function of z0; z0; ptvarcone20/pt; Count",50, -200, 200,50, 0, 0.12))
+
     if self.detailedHistograms:
       self.addHistogram(monGroup, TH1F("deta1_EMECA", "deta1 EMEC-A; deta1 ; Count", 40, -0.01, 0.01))
       self.addHistogram(monGroup, TH1F("deta1_EMECC", "deta1 EMEC-C; deta1 ; Count", 40, -0.01, 0.01))
@@ -765,7 +773,7 @@ class TrigEgammaMonAlgBuilder:
   #
   def bookEfficiencies(self, monAlg, trigger, level, subgroup=None, doEmulation=False ):
 
-    from TrigEgammaMonitoring.TrigEgammaMonitorHelper import TH1F, TProfile
+    from TrigEgammaMonitoring.TrigEgammaMonitorHelper import TH1F, TH2F, TProfile
 
     dirname = 'Emulation' if doEmulation else 'Efficiency'
     if subgroup:
@@ -781,6 +789,9 @@ class TrigEgammaMonAlgBuilder:
     self.addHistogram(monGroup, TH1F("match_phi", "Trigger Matched #phi; #phi ; Count", 20, -3.2, 3.2))
     self.addHistogram(monGroup, TH1F("match_avgmu", "Trigger Matched <#mu>; <#mu> ; Count", 16, 0, 80))
     self.addHistogram(monGroup, TH1F("match_npvtx", "Trigger Matched npvtx; npvtx ; Count", 16, 0, 80))
+    self.addHistogram(monGroup, TH1F("match_ptvarcone20rel", "Trigger Matched ptvarcone20rel; ptvarcone20rel ; Count", 20, 0, 0.12))
+    self.addHistogram(monGroup, TH1F("match_z0", "Trigger Matched z0; z0 ; Count", 50, -200,200))
+    self.addHistogram(monGroup, TH1F("match_d0", "Trigger Matched d0; d0 ; Count", 50, -0.8,0.8))
 
     # Denominator
     self.addHistogram(monGroup, TH1F("pt", "Offline p_{T}; p_{T} [GeV] ; Count", self._nEtbins, self._etbins))
@@ -790,6 +801,10 @@ class TrigEgammaMonAlgBuilder:
     self.addHistogram(monGroup, TH1F("phi", "Offline #phi; #phi ; Count", 20, -3.2, 3.2))
     self.addHistogram(monGroup, TH1F("avgmu", "<#mu>; <#mu> ; Count", 16, 0, 80))
     self.addHistogram(monGroup, TH1F("npvtx", "npvtx; npvtx ; Count", 16, 0, 80))
+    self.addHistogram(monGroup, TH1F("ptvarcone20rel", "ptvarcone20rel; ptvarcone20rel ; Count", 20, 0, 0.12))
+    self.addHistogram(monGroup, TH1F("z0", "z0; z0 ; Count", 50, -200, 200))
+    self.addHistogram(monGroup, TH1F("d0", "d0; d0 ; Count", 50, -0.8, 0.8))
+
 
     # Efficiency
     self.addHistogram(monGroup, TProfile("pt,pt_passed", "#epsilon(p_T); p_{T} ; Efficiency", self._nEtbins, self._etbins))
@@ -799,6 +814,15 @@ class TrigEgammaMonAlgBuilder:
     self.addHistogram(monGroup, TProfile("phi,phi_passed", "#epsilon(#phi); #phi ; Efficiency", 20, -3.2, 3.2))
     self.addHistogram(monGroup, TProfile("avgmu,avgmu_passed", "#epsilon(<#mu>); <#mu> ; Efficiency", 16, 0, 80))
     self.addHistogram(monGroup, TProfile("npvtx,npvtx_passed", "#epsilon(npvtx); npvtx ; Efficiency", 16, 0, 80))
+    self.addHistogram(monGroup, TProfile("ptvarcone20rel,ptvarcone20rel_passed", "#epsilon(ptvarcone20rel); ptvarcone20rel ; Efficiency", 50, 0, 0.12))
+    self.addHistogram(monGroup, TProfile("z0,z0_passed", "#epsilon(z0); z0 ; Efficiency", 50, -200, 200))
+    self.addHistogram(monGroup, TProfile("d0,d0_passed", "#epsilon(d0); d0 ; Efficiency", 50, -0.8, 0.8))
+
+
+    #2D plots
+    self.addHistogram(monGroup, TH2F("match_avgmu,match_ptvarcone20rel", "Matched ptvarcone20/pt as function of avg #mu; #mu; ptvarcone20/pt; Count",50, 0, 80,50, 0, 0.12))
+    self.addHistogram(monGroup, TH2F("match_z0,match_ptvarcone20rel", "Matched ptvarcone20/pt as function of z0; z0; ptvarcone20/pt; Count",50, -200, 200,50, 0, 0.12))
+    self.addHistogram(monGroup, TH2F("match_d0,match_ptvarcone20rel", "Matched ptvarcone20/pt as function of d0; d0; ptvarcone20/pt; Count",50, -0.5, 0.5,50, 0, 0.12))
 
     # Inefficiency
     self.addHistogram(monGroup, TProfile("et,et_failed", "#epsilon(E_T); E_{T} [GeV] ; Inefficiency", self._nEtbins, self._etbins))

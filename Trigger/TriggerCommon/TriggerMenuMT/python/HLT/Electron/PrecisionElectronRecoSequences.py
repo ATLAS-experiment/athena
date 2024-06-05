@@ -89,7 +89,7 @@ def precisionElectronRecoSequence(flags, RoIs, ion=False, doGSF=True, doLRT=Fals
             dataObjects += [( 'TRT_RDO_Container' , 'StoreGateSvc+TRT_RDOs' )]
         else:
             dataObjects += [( 'IDCInDetBSErrContainer' , 'StoreGateSvc+PixelByteStreamErrs' )]
-            dataObjects += [( 'TRT_RDO_Cache' , 'StoreGateSvc+TrtRDOCache' )]
+            dataObjects += [( 'TRT_RDO_Cache' , f'StoreGateSvc+{flags.Trigger.InDetTracking.TRTRDOCacheKey}' )]
 
     precisionElectronVDV = CompFactory.AthViews.ViewDataVerifier("precisionElectron"+tag+"VDV")
     precisionElectronVDV.DataObjects = dataObjects

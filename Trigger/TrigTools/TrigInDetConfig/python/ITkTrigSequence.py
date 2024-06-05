@@ -1,7 +1,6 @@
 #  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from TrigInDetConfig.InnerTrackerTrigSequence import InnerTrackerTrigSequence
-from TrigInDetConfig.TrigInDetConfig import InDetCacheNames
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -21,19 +20,19 @@ class ITkTrigSequence(InnerTrackerTrigSequence):
 
     ViewDataVerifier = CompFactory.AthViews.ViewDataVerifier( 
         name = viewVerifier + "_" + self.signature,
-        DataObjects= {('xAOD::EventInfo', 'StoreGateSvc+EventInfo'),
-                      ('InDet::PixelClusterContainerCache', 'PixelTrigClustersCache'),
-                      ('PixelRDO_Cache', 'PixRDOCache'),
-                      ('InDet::SCT_ClusterContainerCache', 'SCT_ClustersCache'),
-                      ('SCT_RDO_Cache', 'SctRDOCache'),
-                      ( 'IDCInDetBSErrContainer_Cache' , InDetCacheNames.PixBSErrCacheKey ),
-                      ( 'IDCInDetBSErrContainer_Cache' , InDetCacheNames.SCTBSErrCacheKey ),
-                      ( 'IDCInDetBSErrContainer_Cache' , InDetCacheNames.SCTFlaggedCondCacheKey ),
-                      ('SpacePointCache', 'PixelSpacePointCache'),
-                      ('SpacePointCache', 'SctSpacePointCache'),
-                      ('xAOD::EventInfo', 'EventInfo'),
-                      ('TrigRoiDescriptorCollection', str(self.rois)),
-                      ( 'TagInfo' , 'DetectorStore+ProcessingTags' )} )
+        DataObjects= {('xAOD::EventInfo',                   'StoreGateSvc+EventInfo'),
+                      ('InDet::PixelClusterContainerCache', self.flags.Trigger.ITkTracking.PixelClusterCacheKey),
+                      ('PixelRDO_Cache',                    self.flags.Trigger.ITkTracking.PixRDOCacheKey),
+                      ('InDet::SCT_ClusterContainerCache',  self.flags.Trigger.ITkTracking.SCTClusterCacheKey),
+                      ('SCT_RDO_Cache',                     self.flags.Trigger.ITkTracking.SCTRDOCacheKey),
+                      ('IDCInDetBSErrContainer_Cache' ,     self.flags.Trigger.ITkTracking.PixBSErrCacheKey ),
+                      ('IDCInDetBSErrContainer_Cache' ,     self.flags.Trigger.ITkTracking.SCTBSErrCacheKey ),
+                      ('IDCInDetBSErrContainer_Cache' ,     self.flags.Trigger.ITkTracking.SCTFlaggedCondCacheKey ),
+                      ('SpacePointCache',                   self.flags.Trigger.ITkTracking.SpacePointCachePix),
+                      ('SpacePointCache',                   self.flags.Trigger.ITkTracking.SpacePointCacheSCT),
+                      ('xAOD::EventInfo',                   'EventInfo'),
+                      ('TrigRoiDescriptorCollection',       str(self.rois)),
+                      ( 'TagInfo' ,                         'DetectorStore+ProcessingTags' )} )
 
     if self.flags.Input.isMC:
         ViewDataVerifier.DataObjects |= {( 'PixelRDO_Container' , 'StoreGateSvc+ITkPixelRDOs' ),

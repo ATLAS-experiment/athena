@@ -64,7 +64,7 @@ CaloDepthTool::initialize()
   ATH_CHECK(detStore()->retrieve(m_calo_id, "CaloCell_ID"));
 
   if (!m_depth_choice.empty()) {
-  
+
     auto it = s_stringToEnum.find(m_depth_choice);
     if (it != s_stringToEnum.end()) {
       m_depthChoice = it->second;
@@ -74,9 +74,6 @@ CaloDepthTool::initialize()
     }
 
   }
-  ATH_MSG_INFO("Choice " << m_depth_choice << " enum "
-                         << static_cast<int>(m_depthChoice));
-
   return StatusCode::SUCCESS;
 }
 
@@ -146,7 +143,7 @@ CaloDepthTool::deta(const CaloCell_ID::SUBCALO subcalo,
                     const int sampling_or_module,
                     const bool barrel,
                     const double eta,
-                    const CaloDetDescrManager* caloDD) 
+                    const CaloDetDescrManager* caloDD)
 {
   CaloCell_ID::CaloSample sample;
   CaloDetDescrManager::build_sample(
@@ -157,7 +154,7 @@ CaloDepthTool::deta(const CaloCell_ID::SUBCALO subcalo,
 double
 CaloDepthTool::deta(const CaloCell_ID::CaloSample sample,
                     const double eta,
-                    const CaloDetDescrManager* caloDD) 
+                    const CaloDetDescrManager* caloDD)
 {
   double deta = 99999.;
   /*bool result =*/caloDD->is_in(eta, 0., sample, deta);
@@ -174,7 +171,7 @@ CaloDepthTool::egparametrized(const CaloCell_ID::SUBCALO subcalo,
                               const bool barrel,
                               const double eta,
                               const double phi,
-                              const CaloDetDescrManager* caloDD) 
+                              const CaloDetDescrManager* caloDD)
 {
   CaloCell_ID::CaloSample sample;
   CaloDetDescrManager::build_sample(
@@ -186,7 +183,7 @@ double
 CaloDepthTool::egparametrized(const CaloCell_ID::CaloSample sample,
                               const double eta,
                               const double /*phi*/,
-                              const CaloDetDescrManager* caloDD) 
+                              const CaloDetDescrManager* caloDD)
 {
   double radius = s_default;
 
@@ -256,7 +253,7 @@ double
 CaloDepthTool::cscopt_parametrized(const CaloCell_ID::CaloSample sample,
                                    const double eta,
                                    const double /*phi*/,
-                                   const CaloDetDescrManager* caloDD) 
+                                   const CaloDetDescrManager* caloDD)
 {
   double radius = s_default;
 
@@ -326,7 +323,7 @@ double
 CaloDepthTool::cscopt2_parametrized(const CaloCell_ID::CaloSample sample,
                                     const double eta,
                                     const double /*phi*/,
-                                    const CaloDetDescrManager* caloDD) 
+                                    const CaloDetDescrManager* caloDD)
 {
   double radius = s_default;
 
@@ -394,7 +391,7 @@ CaloDepthTool::TBparametrized(const CaloCell_ID::SUBCALO subcalo,
                               const bool barrel,
                               const double eta,
                               const double phi,
-                              const CaloDetDescrManager* caloDD) 
+                              const CaloDetDescrManager* caloDD)
 {
   CaloCell_ID::CaloSample sample;
   CaloDetDescrManager::build_sample(
@@ -406,7 +403,7 @@ double
 CaloDepthTool::TBparametrized(const CaloCell_ID::CaloSample sample,
                               const double eta,
                               const double phi,
-                              const CaloDetDescrManager* caloDD) 
+                              const CaloDetDescrManager* caloDD)
 {
   double radius = s_default;
 
@@ -438,7 +435,7 @@ CaloDepthTool::entrance(const CaloCell_ID::SUBCALO subcalo,
                         const bool barrel,
                         const double eta,
                         const double phi,
-                        const CaloDetDescrManager* caloDD) 
+                        const CaloDetDescrManager* caloDD)
 {
   CaloCell_ID::CaloSample sample;
   CaloDetDescrManager::build_sample(
@@ -450,7 +447,7 @@ double
 CaloDepthTool::entrance(const CaloCell_ID::CaloSample sample,
                         const double eta,
                         const double phi,
-                        const CaloDetDescrManager* caloDD) 
+                        const CaloDetDescrManager* caloDD)
 {
   double radius = s_default;
 
@@ -474,7 +471,7 @@ CaloDepthTool::middle(const CaloCell_ID::SUBCALO subcalo,
                       const bool barrel,
                       const double eta,
                       const double phi,
-                      const CaloDetDescrManager* caloDD) 
+                      const CaloDetDescrManager* caloDD)
 {
   CaloCell_ID::CaloSample sample;
   CaloDetDescrManager::build_sample(
@@ -486,7 +483,7 @@ double
 CaloDepthTool::middle(const CaloCell_ID::CaloSample sample,
                       const double eta,
                       const double phi,
-                      const CaloDetDescrManager* caloDD) 
+                      const CaloDetDescrManager* caloDD)
 {
   double radius = s_default;
 
@@ -509,7 +506,7 @@ CaloDepthTool::exit(const CaloCell_ID::SUBCALO subcalo,
                     const bool barrel,
                     const double eta,
                     const double phi,
-                    const CaloDetDescrManager* caloDD) 
+                    const CaloDetDescrManager* caloDD)
 {
   CaloCell_ID::CaloSample sample;
   CaloDetDescrManager::build_sample(
@@ -521,7 +518,7 @@ double
 CaloDepthTool::exit(const CaloCell_ID::CaloSample sample,
                     const double eta,
                     const double phi,
-                    const CaloDetDescrManager* caloDD) 
+                    const CaloDetDescrManager* caloDD)
 {
   double radius = s_default;
 
@@ -543,7 +540,7 @@ CaloDepthTool::flat(const CaloCell_ID::SUBCALO subcalo,
                     const int sampling_or_module,
                     const bool barrel,
                     const int side,
-                    const CaloDetDescrManager* caloDD) 
+                    const CaloDetDescrManager* caloDD)
 {
   CaloCell_ID::CaloSample sample;
   CaloDetDescrManager::build_sample(
@@ -554,7 +551,7 @@ CaloDepthTool::flat(const CaloCell_ID::SUBCALO subcalo,
 double
 CaloDepthTool::flat(const CaloCell_ID::CaloSample sample,
                     const int side,
-                    const CaloDetDescrManager* caloDD) 
+                    const CaloDetDescrManager* caloDD)
 {
   // FIXME : tiles is hardcoded !!!
   double radius = 2280.;
@@ -609,7 +606,7 @@ CaloDepthTool::depth(const CaloCell_ID::SUBCALO subcalo,
                      const int sampling_or_module,
                      const bool barrel,
                      const int side,
-                     const CaloDetDescrManager* caloDD) 
+                     const CaloDetDescrManager* caloDD)
 {
   CaloCell_ID::CaloSample sample;
   CaloDetDescrManager::build_sample(
@@ -620,7 +617,7 @@ CaloDepthTool::depth(const CaloCell_ID::SUBCALO subcalo,
 double
 CaloDepthTool::depth(const CaloCell_ID::CaloSample sample,
                      const int side,
-                     const CaloDetDescrManager* caloDD) 
+                     const CaloDetDescrManager* caloDD)
 {
   // FIXME : tiles is hardcoded !!!
   double radius = 1970.;
@@ -663,7 +660,7 @@ double
 CaloDepthTool::get_entrance_radius(CaloCell_ID::CaloSample sample,
                                    double eta,
                                    double phi,
-                                   const CaloDetDescrManager* caloDD) 
+                                   const CaloDetDescrManager* caloDD)
 {
   const CaloDetDescrElement* elt = caloDD->get_element(sample, eta, phi);
   if (!elt) {
@@ -680,7 +677,7 @@ double
 CaloDepthTool::get_entrance_z(CaloCell_ID::CaloSample sample,
                               double eta,
                               double phi,
-                              const CaloDetDescrManager* caloDD) 
+                              const CaloDetDescrManager* caloDD)
 {
   const CaloDetDescrElement* elt = caloDD->get_element(sample, eta, phi);
   if (!elt) {
@@ -697,7 +694,7 @@ double
 CaloDepthTool::get_middle_radius(CaloCell_ID::CaloSample sample,
                                  double eta,
                                  double phi,
-                                 const CaloDetDescrManager* caloDD) 
+                                 const CaloDetDescrManager* caloDD)
 {
 
   const CaloDetDescrElement* elt = caloDD->get_element(sample, eta, phi);
@@ -711,7 +708,7 @@ double
 CaloDepthTool::get_middle_z(CaloCell_ID::CaloSample sample,
                             double eta,
                             double phi,
-                            const CaloDetDescrManager* caloDD) 
+                            const CaloDetDescrManager* caloDD)
 {
 
   const CaloDetDescrElement* elt = caloDD->get_element(sample, eta, phi);
@@ -725,7 +722,7 @@ double
 CaloDepthTool::get_exit_radius(CaloCell_ID::CaloSample sample,
                                double eta,
                                double phi,
-                               const CaloDetDescrManager* caloDD) 
+                               const CaloDetDescrManager* caloDD)
 {
 
   const CaloDetDescrElement* elt = caloDD->get_element(sample, eta, phi);
@@ -743,14 +740,14 @@ double
 CaloDepthTool::get_exit_z(CaloCell_ID::CaloSample sample,
                           double eta,
                           double phi,
-                          const CaloDetDescrManager* caloDD) 
+                          const CaloDetDescrManager* caloDD)
 {
 
   const CaloDetDescrElement* elt = caloDD->get_element(sample, eta, phi);
   if (!elt) {
     return s_default;
   }
-  
+
   //Only for tile is dZ the full Z length of the layer  - for
   //other calorimeters it is half of this
   if (elt->is_tile()) return (elt->z() + (elt->z() < 0 ? -elt->dz()/2 : elt->dz()/2));

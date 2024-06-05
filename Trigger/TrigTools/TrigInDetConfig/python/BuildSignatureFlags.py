@@ -782,6 +782,18 @@ def addGlobalFlags(flags: AthConfigFlags, category : str):
   flags.addFlag(f'{category}.UseTrigRoadPredictor', False)
   flags.addFlag(f'{category}.UseTracklets', False)
 
+  flags.addFlag(f'{category}.PixelClusterCacheKey',    "PixelTrigClustersCache")
+  flags.addFlag(f'{category}.SCTClusterCacheKey',      "SCT_ClustersCache")
+  flags.addFlag(f'{category}.SpacePointCachePix',      "PixelSpacePointCache")
+  flags.addFlag(f'{category}.SpacePointCacheSCT',      "SctSpacePointCache")
+  flags.addFlag(f'{category}.SCTBSErrCacheKey',        "SctBSErrCache")
+  flags.addFlag(f'{category}.SCTFlaggedCondCacheKey',  "SctFlaggedCondCache")
+  flags.addFlag(f'{category}.SCTRDOCacheKey',          "SctRDOCache")
+  flags.addFlag(f'{category}.PixRDOCacheKey',          "PixRDOCache")
+  flags.addFlag(f'{category}.PixBSErrCacheKey',        "PixBSErrCache")
+  flags.addFlag(f'{category}.TRTRDOCacheKey',          "TrtRDOCache")
+  flags.addFlag(f'{category}.TRT_DriftCircleCacheKey', "TRT_DriftCircleCache")
+
   
 import unittest
 

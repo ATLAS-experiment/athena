@@ -40,10 +40,12 @@ def precisionTracks_GSFRefitted(flags, RoIs, ion=False, variant=''):
 
     if not flags.Input.isMC:
         dataObjects.append(( 'IDCInDetBSErrContainer' , 'StoreGateSvc+PixelByteStreamErrs' ))
-        dataObjects.append(( 'TRT_RDO_Cache' , 'StoreGateSvc+TrtRDOCache'  ))
+        dataObjects.append(( 'TRT_RDO_Cache' , 
+                             f'StoreGateSvc+{flags.Trigger.InDetTracking.TRTRDOCacheKey}'  ))
     else:
         dataObjects.append(( 'TRT_RDO_Container' , 'StoreGateSvc+TRT_RDOs' ))
-        dataObjects.append(( 'InDet::TRT_DriftCircleContainerCache' , 'StoreGateSvc+TRT_DriftCircleCache' ))
+        dataObjects.append(( 'InDet::TRT_DriftCircleContainerCache' , 
+                             f'StoreGateSvc+{flags.Trigger.InDetTracking.TRT_DriftCircleCacheKey}' ))
 
     precisionGsfVDV.DataObjects =  dataObjects
 

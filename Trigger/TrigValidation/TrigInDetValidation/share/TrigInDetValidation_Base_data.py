@@ -44,6 +44,7 @@ if "Art_type"  not in locals(): Art_type = 'grid'
 if "GridFiles" not in locals(): GridFiles=False
 if "Malloc" not in locals(): Malloc=False
 if "AbortDryRun" in locals(): abort_dry_run=AbortDryRun
+if "MultipleLB" not in locals(): MultipleLB=False
 
 for opt,arg in opts:
     if opt in ("-l", "--local"):
@@ -135,6 +136,9 @@ if (Malloc):
 
 
 filter_bs = TrigBSExtr()
+
+if MultipleLB:
+    filter_bs.args += ' -l 0'
 
 tzreco = TrigTZReco()
 

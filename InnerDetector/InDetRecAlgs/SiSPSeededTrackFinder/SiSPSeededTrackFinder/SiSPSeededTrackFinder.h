@@ -9,6 +9,7 @@
 #define SiSPSeededTrackFinder_H
 
 /// Base class
+#include <Gaudi/Property.h>
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
 /// Athena includes
@@ -100,6 +101,7 @@ namespace InDet {
     BooleanProperty m_useITkConvSeeded{this, "useITkConvSeeded", false, "ITk EM-seeded conversion reco"};
     BooleanProperty m_doFastTracking{this, "doFastTracking", false, "ITk fast tracking reco"};
     IntegerProperty m_maxNumberSeeds{this, "maxNumberSeeds", 3000000, "Max. number used seeds"};
+    BooleanProperty m_alwaysProtectAgainstBusyEvent{this, "alwaysProtectAgainstBusyEvents", false, "Flag that enables checking always maxNumberPIXsp and maxNumberSCTsp"};
     IntegerProperty m_maxPIXsp{this, "maxNumberPIXsp", 150000, "Max. number pixels space points"};
     IntegerProperty m_maxSCTsp{this, "maxNumberSCTsp", 500000, "Max. number sct    space points"};
     IntegerProperty m_nfreeCut{this, "FreeClustersCut", 1, "Min number free clusters"};

@@ -2,14 +2,10 @@
 
 __doc__ = "Prepare EGamma output list"
 
-from AthenaCommon.Logging import logging
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
 
 def egammaOutputCfg(flags, name="EGOutputList"):
-
-    mlog = logging.getLogger(name)
-    mlog.info('Starting EGamma Output configuration')
 
     acc = ComponentAccumulator()
     outFlags = flags.Egamma.Keys.Output
@@ -145,12 +141,9 @@ def egammaOutputCfg(flags, name="EGOutputList"):
     if flags.Output.doWriteESD:
         from OutputStreamAthenaPool.OutputStreamConfig import addToESD
         acc.merge(addToESD(flags, toESD))
-        mlog.info('egammaESDList: %s ', toESD)
 
     if flags.Output.doWriteAOD:
         from OutputStreamAthenaPool.OutputStreamConfig import addToAOD
         acc.merge(addToAOD(flags, toAOD))
-        mlog.info('egammaAODList: %s ', toAOD)
 
-    mlog.info("EGamma Output configured")
     return acc

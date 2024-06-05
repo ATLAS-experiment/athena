@@ -227,7 +227,7 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
     auto beamSpotZ_m = Monitored::Scalar<float>( "m_beamSpotZ", beamSpotZ );
     auto beamTiltX_m = Monitored::Scalar<float>( "m_beamTiltX", beamTiltX );
     auto beamTiltY_m = Monitored::Scalar<float>( "m_beamTiltY", beamTiltY );
-    fill(genericTrackGroup, beamSpotX_m, beamSpotY_m,beamSpotZ_m, lb_m);
+    fill(genericTrackGroup, beamSpotX_m, beamSpotY_m, beamSpotZ_m, lb_m);
 
     // interactions per beam crossing
     fill(genericTrackGroup, mu_m);
@@ -300,9 +300,6 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
     float beamX          = 0;
     float beamY          = 0;
     float d0bscorr       = -999;
-    bool  isTrackBarrel  = false;
-    bool  isTrackECA     = false;
-    bool  isTrackECC     = false;
  
     // get fit quality and chi2 probability of track
     const Trk::FitQuality* fitQual = trksItr->fitQuality();
@@ -341,9 +338,6 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
       Err_Pt       = sin(trktheta) * Err_qOverP / pow(qOverP, 2);
       if (qOverP < 0) charge = -1;
       else charge=+1; 
-      if (trketa < - m_barrelEta) isTrackECC = true;
-      if (trketa > m_barrelEta) isTrackECA = true;
-      if (!isTrackECA and !isTrackECC) isTrackBarrel = true;
 
       // correct the track d0 for the vertex position
       // would rather corrected for the beamline but could not find beamline
@@ -478,23 +472,17 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
     auto errEta_m = Monitored::Scalar<float>( "m_errEta", Err_eta );
     fill(genericTrackGroup, errEta_m);
 
-    
-    if (charge>0){
-      auto eta_pos_m = Monitored::Scalar<float>( "m_eta_pos", trketa );
-      fill(genericTrackGroup, eta_pos_m);
-    }
-    else{
-      auto eta_neg_m = Monitored::Scalar<float>( "m_eta_neg", trketa );
-      fill(genericTrackGroup, eta_neg_m);
-    }
-
+    // Eta for positive and negative tracks
+    auto isTrkPositive = Monitored::Scalar<float>( "isTrkPositive", charge > 0 ? 1 : 0 );
+    auto isTrkNegative = Monitored::Scalar<float>( "isTrkNegative", charge > 0 ? 0 : 1 );
+  
     // z0
     auto z0_m = Monitored::Scalar<float>( "m_z0", trkz0 );
     auto errZ0_m = Monitored::Scalar<float>( "m_errZ0", Err_z0 );
     auto z0_bscorr_m = Monitored::Scalar<float>( "m_z0_bscorr", trkz0-beamSpotZ );
     float z0sintheta = trkz0*(sin(trktheta));
     auto z0sintheta_m = Monitored::Scalar<float>( "m_z0sintheta", z0sintheta );
-    fill(genericTrackGroup, z0_m, errZ0_m, z0_bscorr_m, z0sintheta_m, errZ0_m);
+    fill(genericTrackGroup, z0_m, errZ0_m, z0_bscorr_m, z0sintheta_m);
 
     //d0
     auto d0_m = Monitored::Scalar<float>( "m_d0", trkd0 );
@@ -507,24 +495,10 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
     auto phi_m = Monitored::Scalar<float>( "m_phi", trkphi );
     auto errPhi_m = Monitored::Scalar<float>( "m_errPhi", Err_phi );
 
-    //d0 vs phi in barrel
-    if (isTrackBarrel) {
-      auto phi_2filld0bscorrBAR_m = Monitored::Scalar<float>( "m_phi_2filld0bscorrBAR", trkphi );
-      auto d0_bscorrBAR_m = Monitored::Scalar<float>( "m_d0_bscorrBAR", d0bscorr );
-      fill(genericTrackGroup, phi_2filld0bscorrBAR_m, d0_bscorrBAR_m);
-    } 
-    //d0 vs phi in End-cap A
-    if (isTrackECA) {
-      auto phi_2filld0bscorrECA_m = Monitored::Scalar<float>( "m_phi_2filld0bscorrECA", trkphi );
-      auto d0_bscorrECA_m = Monitored::Scalar<float>( "m_d0_bscorrECA", d0bscorr );
-      fill(genericTrackGroup, phi_2filld0bscorrECA_m, d0_bscorrECA_m);
-    } 
-    //d0 vs phi in End-cap C
-    if (isTrackECC) {
-      auto phi_2filld0bscorrECC_m = Monitored::Scalar<float>( "m_phi_2filld0bscorrECC", trkphi );
-      auto d0_bscorrECC_m = Monitored::Scalar<float>( "m_d0_bscorrECC", d0bscorr );
-      fill(genericTrackGroup, phi_2filld0bscorrECC_m, d0_bscorrECC_m);
-    } 
+    //d0 vs phi in barrel, End-Cap A, End-cap C
+    auto isTrackBarrel = Monitored::Scalar<float>( "isTrackBarrel", fabs(trketa) < m_barrelEta ? 1 : 0 );
+    auto isTrackECA = Monitored::Scalar<float>( "isTrackECA", trketa > m_barrelEta ? 1 : 0 );
+    auto isTrackECC = Monitored::Scalar<float>( "isTrackECC", trketa < - m_barrelEta ? 1 : 0 );
 
     //pT and p
     float pT = charge*trkpt;
@@ -532,8 +506,8 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
     auto errPt_m = Monitored::Scalar<float>( "m_errPt", Err_Pt );
     auto pTRes_m = Monitored::Scalar<float>( "m_pTRes", std::fabs(Err_qOverP / qOverP) );
 
-    //d0 vs Eta, Phi, pT // Eta vs Npixhits_per_track, SCT, TRT
-    fill(genericTrackGroup, npixelhits_per_track_m, nscthits_per_track_m, ntrthits_per_track_m, eta_m, d0_bscorr_m, phi_m, errPhi_m, pT_m, errPt_m, pTRes_m);
+    //d0 (BS) vs Eta, vs Phi (Phi, Barrel, EndCap A, EndCap C), vs pT // Eta vs Npixhits_per_track, SCT, TRT // Eta for positive and negative tracks 
+    fill(genericTrackGroup, npixelhits_per_track_m, nscthits_per_track_m, ntrthits_per_track_m, eta_m, isTrkPositive, isTrkNegative, d0_bscorr_m, phi_m, isTrackBarrel, isTrackECA, isTrackECC, errPhi_m, pT_m, errPt_m, pTRes_m);
     
     auto p_m = Monitored::Scalar<float>( "m_p", trkP );
     fill(genericTrackGroup, p_m);

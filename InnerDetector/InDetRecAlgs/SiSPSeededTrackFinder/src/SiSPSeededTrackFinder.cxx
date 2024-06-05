@@ -808,13 +808,15 @@ MsgStream& InDet::SiSPSeededTrackFinder::dumpevent(MsgStream& out, const InDet::
 
 bool InDet::SiSPSeededTrackFinder::isGoodEvent(const EventContext& ctx) const {
 
-  if (not m_useMBTS) return true;
+  if ( not m_alwaysProtectAgainstBusyEvent ) { // if not enabled the protection is only applied to specific events
+    // Test MBTS information from calorimeter
+    //
+    if (not m_useMBTS) return true;
 
-  // Test MBTS information from calorimeter
-  //
-  SG::ReadHandle<xAOD::EventInfo> eventInfo{m_evtKey, ctx};
-  if (not eventInfo->isEventFlagBitSet(xAOD::EventInfo::Background, xAOD::EventInfo::MBTSTimeDiffHalo)) {
-    return true;
+    SG::ReadHandle<xAOD::EventInfo> eventInfo{m_evtKey, ctx};
+    if (not eventInfo->isEventFlagBitSet(xAOD::EventInfo::Background, xAOD::EventInfo::MBTSTimeDiffHalo) ) {
+      return true;
+    }
   }
 
   // Test total number pixels space points
@@ -832,7 +834,6 @@ bool InDet::SiSPSeededTrackFinder::isGoodEvent(const EventContext& ctx) const {
       }
     }
   }
- 
   // Test total number sct space points
   //
   nsp = 0;

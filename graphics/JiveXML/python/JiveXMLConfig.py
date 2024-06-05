@@ -473,6 +473,7 @@ def AlgoJiveXMLCfg(flags, name="AlgoJiveXML", **kwargs):
     kwargs.setdefault("WriteToFile", True)
     ### Enable this to recreate the geometry XML files for Atlantis
     kwargs.setdefault("WriteGeometry", False)
+    kwargs.setdefault("StreamToServerTool", None)
 
     # This next bit sets the data types, then we set the associated public tools
     readAOD = False  # FIXME - set this properly

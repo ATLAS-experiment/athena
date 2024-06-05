@@ -7,35 +7,24 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.Logging import logging
 
-class InDetCacheNames(object):
-  Pixel_ClusterKey   = "PixelTrigClustersCache"
-  SCT_ClusterKey     = "SCT_ClustersCache"
-  SpacePointCachePix = "PixelSpacePointCache"
-  SpacePointCacheSCT = "SctSpacePointCache"
-  SCTBSErrCacheKey   = "SctBSErrCache"
-  SCTFlaggedCondCacheKey = "SctFlaggedCondCache"
-  SCTRDOCacheKey     = "SctRDOCache"
-  PixRDOCacheKey     = "PixRDOCache"
-  PixBSErrCacheKey   = "PixBSErrCache"
-  TRTRDOCacheKey     = "TrtRDOCache"
-  TRT_DriftCircleCacheKey = "TRT_DriftCircleCache"
 
 def InDetIDCCacheCreatorCfg(flags):
   #Create IdentifiableCaches
   acc = ComponentAccumulator()
   InDet__CacheCreator=CompFactory.getComp("InDet::CacheCreator")
-  InDetCacheCreatorTrig = InDet__CacheCreator(name = "InDetCacheCreatorTrig",
-                                              TRT_DriftCircleKey = InDetCacheNames.TRT_DriftCircleCacheKey,
-                                              Pixel_ClusterKey   = InDetCacheNames.Pixel_ClusterKey,
-                                              SCT_ClusterKey     = InDetCacheNames.SCT_ClusterKey,
-                                              SpacePointCachePix = InDetCacheNames.SpacePointCachePix,
-                                              SpacePointCacheSCT = InDetCacheNames.SpacePointCacheSCT,
-                                              SCTRDOCacheKey     = InDetCacheNames.SCTRDOCacheKey,
-                                              SCTBSErrCacheKey   = InDetCacheNames.SCTBSErrCacheKey,
-                                              SCTFlaggedCondCacheKey = InDetCacheNames.SCTFlaggedCondCacheKey,
-                                              PixRDOCacheKey     = InDetCacheNames.PixRDOCacheKey,
-                                              PixBSErrCacheKey   = InDetCacheNames.PixBSErrCacheKey,
-                                              TRTRDOCacheKey     = InDetCacheNames.TRTRDOCacheKey)
+  InDetCacheCreatorTrig = InDet__CacheCreator(name = "InDetCacheCreatorTrig", 
+                                              TRT_DriftCircleKey = flags.Trigger.InDetTracking.TRT_DriftCircleCacheKey,
+                                              Pixel_ClusterKey   = flags.Trigger.InDetTracking.PixelClusterCacheKey,
+                                              SCT_ClusterKey     = flags.Trigger.InDetTracking.SCTClusterCacheKey,
+                                              SpacePointCachePix = flags.Trigger.InDetTracking.SpacePointCachePix,
+                                              SpacePointCacheSCT = flags.Trigger.InDetTracking.SpacePointCacheSCT,
+                                              SCTRDOCacheKey     = flags.Trigger.InDetTracking.SCTRDOCacheKey,
+                                              SCTBSErrCacheKey   = flags.Trigger.InDetTracking.SCTBSErrCacheKey,
+                                              SCTFlaggedCondCacheKey = flags.Trigger.InDetTracking.SCTFlaggedCondCacheKey,
+                                              PixRDOCacheKey     = flags.Trigger.InDetTracking.PixRDOCacheKey,
+                                              PixBSErrCacheKey   = flags.Trigger.InDetTracking.PixBSErrCacheKey,
+                                              TRTRDOCacheKey     = flags.Trigger.InDetTracking.TRTRDOCacheKey)
+  
   if not flags.Detector.GeometryTRT:
     InDetCacheCreatorTrig.disableTRT = True
 
