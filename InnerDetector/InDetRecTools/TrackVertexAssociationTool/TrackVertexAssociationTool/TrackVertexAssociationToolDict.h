@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrackVertexAssociationToolDict_h
@@ -9,11 +9,7 @@
 #define EIGEN_DONT_VECTORIZE
 #endif // __GCCXML__ 
 
-//#include "TrackVertexAssociationTool/ITrackVertexAssociationTool.h"
 #include "TrackVertexAssociationTool/TrackVertexAssociationTool.h"
-#include "TrackVertexAssociationTool/BaseTrackVertexAssociationTool.h"
-#include "TrackVertexAssociationTool/ElectronTrackVertexAssociationTool.h"
-#include "TrackVertexAssociationTool/MuonTrackVertexAssociationTool.h"
 #include "TrackVertexAssociationTool/MVATrackVertexAssociationTool.h"
 
 #endif //TrackVertexAssociationTool
