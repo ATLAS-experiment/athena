@@ -59,7 +59,10 @@ fi
 run "IDPVM-athena" \
     runIDPVM.py \
     --filesInput AOD.athena.root \
-    --outputFile idpvm.athena.root
+    --outputFile idpvm.athena.root \
+    --doTightPrimary \
+    --doHitLevelPlots \
+    --HSFlag All
 
 reco_rc=$?
 if [ $reco_rc != 0 ]; then
@@ -89,7 +92,10 @@ fi
 run "IDPVM-acts" \
     runIDPVM.py \
     --filesInput AOD.acts.root \
-    --outputFile idpvm.acts.root
+    --outputFile idpvm.acts.root \
+    --doTightPrimary \
+    --doHitLevelPlots \
+    --HSFlag All
 
 reco_rc=$?
 if [ $reco_rc != 0 ]; then
