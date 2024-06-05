@@ -66,8 +66,8 @@ public:
     virtual ~StatusFlagCommentCOOL() {};
 
     // Methods of "interest". To insert a status flag you can use either ChannelId or ChannelName.
-    void insert(cool::ChannelId channelId, int code, float dfrac, float thrust, std::string comment, std::string tag_name);
-    void insert(std::string channelName, int code, float dfrac, float thrust, std::string comment, std::string tag_name);
+    void insert(cool::ChannelId channelId, int code, float dfrac, float thrust, std::string comment, const std::string & tag_name);
+    void insert(const std::string & channelName, int code, float dfrac, float thrust, const std::string & comment, const std::string & tag_name);
 
     // Needed for the ROOT interface.
     ClassDef( StatusFlagCommentCOOL, 0 ) // A class for modifying DQ info in the COOL database

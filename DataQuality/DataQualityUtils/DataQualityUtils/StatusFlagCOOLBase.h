@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef dqutilsStatusFlagCOOLBase_h
@@ -63,7 +63,7 @@ protected:
 
     void insert_helper(cool::ChannelId channelId, 
 		       coral::AttributeList& payload,
-		       std::string& tag_name);
+		       const std::string& tag_name);
     void Initialize(const std::string& dbStr, const std::string& folderStr, 
 		    int runS, int lumiS, int runU, int lumiU);
 

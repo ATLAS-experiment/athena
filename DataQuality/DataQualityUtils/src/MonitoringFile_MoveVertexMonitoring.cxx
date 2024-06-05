@@ -121,7 +121,7 @@ void MonitoringFile::VxMon_move( const std::string & inFilename, bool isIncremen
                 
                 if(writeEOS!=0 && writeLOCAL==0){
                     int return_code = system("xrdcp VxMon_" + run_dir + "_" + AthenaTAG + ".root root://eosatlas.cern.ch//eos/atlas/atlascerngroupdisk/perf-idtracking/VertexMonitoring/VxMon_" + run_dir + "_" + AthenaTAG + ".root");
-                    if(return_code==0)remove(out_LOCAL.c_str());
+                    if(return_code==0) std::ignore = remove(out_LOCAL.c_str());//returns zero on success
 		    else{
 		    	delete f;
 		    	return;
@@ -225,14 +225,14 @@ void MonitoringFile::VxMon_move( const std::string & inFilename, bool isIncremen
             
             std::string::size_type firstSlash = dirName.find('/');
             if (firstSlash == std::string::npos) {
-                success = makeDir(dirName);
+                success &= makeDir(dirName);
             } else {
                 std::string subdir(dirName, 0, firstSlash);
                 if (!subdir.empty())
-                    success = makeDir(subdir);
+                    success &= makeDir(subdir);
                 
                 std::string newSubdir(dirName, firstSlash + 1, dirName.size() - firstSlash);
-                success = makeDirectories(newSubdir);
+                success &= makeDirectories(newSubdir);
             }
         }
         return success;

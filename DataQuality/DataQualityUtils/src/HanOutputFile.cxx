@@ -412,7 +412,7 @@ namespace dqutils
       {
         maindir = maindir + "/" + str;
         dirname = dirname.substr(found + 1, dirname.size());
-        status = containsDir(dirname, maindir);
+        status = containsDir(std::move(dirname), std::move(maindir));
       }
       else
       {
@@ -660,7 +660,7 @@ namespace dqutils
       }
       else
       {
-        json_in_j = j;
+        json_in_j = std::move(j);
       }
       value = processJSON_ingetInfo(json_in_j);
     }
@@ -1314,11 +1314,11 @@ namespace dqutils
         std::string completeDir(location);
         completeDir += hisPath;
         completeDir += "/";
-        std::cout << "Saving " << completeDir << " " << hisName << "\n" << std::flush;
+        std::cout << "Saving " << completeDir << " " << hisName  << std::endl;
         try
         {
           bool isSaved = saveHistogramToFile(
-            hisName, completeDir, idir->second, drawRefs, run_min_LB, (hisPath + "/" + hisName), cnvsType);
+            hisName, std::move(completeDir), idir->second, drawRefs, run_min_LB, (hisPath + "/" + hisName), cnvsType);
           if (isSaved) ++nSaved;
         }
         catch (std::exception& e)

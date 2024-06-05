@@ -58,7 +58,7 @@ MonitoringFile::RPCPostProcess( const std::string & inFilename, bool /* isIncrem
     if (tdir_run !=0 ) {
       std::string tdir_run_name( tdir_run->GetName() );
       if (tdir_run_name.find("run")!= std::string::npos ) {
-        run_dir=tdir_run_name;
+        run_dir=std::move(tdir_run_name);
 	
 	int run_number;
 	run_number = atoi( (run_dir.substr(4, run_dir.size()-4 )).c_str() );
@@ -971,7 +971,7 @@ MonitoringFile::RPCPostProcess( const std::string & inFilename, bool /* isIncrem
 	        panel_occ = -10 ;
 	      }
 	      if ( h_OccupancySecDist ) h_OccupancySecDist->Fill( panel_occ );
-	      if ( ib>( h_PanelId->GetNbinsX()/2) ) { if ( h_AverageOccupancy_A ) h_AverageOccupancy_A->Fill( panel_occ ); }
+	      if ( h_PanelId and (ib>( h_PanelId->GetNbinsX()/2)) ) { if ( h_AverageOccupancy_A ) h_AverageOccupancy_A->Fill( panel_occ ); }
 	      else 				    { if ( h_AverageOccupancy_C ) h_AverageOccupancy_C->Fill( panel_occ ); }
 	    }
 	    // write occupancy histograms

@@ -2158,10 +2158,10 @@ void MonitoringFile::buildLBToIntervalMap(std::vector<TDirectory*>& v_dirLBs, st
     int lbnum = boost::lexical_cast<int>(dirname.substr(3, std::string::npos));
     for (range_t::const_iterator rangeit = v_ranges.begin(); 
    rangeit != v_ranges.end(); ++rangeit) {
-      if ((*rangeit).second.first <= lbnum && 
-    lbnum <= (*rangeit).second.second) {
-  map_dir_vdir::iterator mapit = mapping.find((*rangeit).first);
-  (*mapit).second.push_back(*dirit);
+      if ((*rangeit).second.first <= lbnum && lbnum <= (*rangeit).second.second) {
+        map_dir_vdir::iterator mapit = mapping.find((*rangeit).first);
+        if (mapit == mapping.end()) continue;
+        (*mapit).second.push_back(*dirit);
       }
     }
   }

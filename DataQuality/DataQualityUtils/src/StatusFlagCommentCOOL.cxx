@@ -72,11 +72,11 @@ createPayload(int colourCode, float dfrac, float thrust, std::string& comment, c
 
 void 
 StatusFlagCommentCOOL::
-insert(cool::ChannelId channelId, int code, float dfrac, float thrust, std::string comment, std::string tag_name) {
+insert(cool::ChannelId channelId, int code, float dfrac, float thrust, std::string comment, const std::string & tag_name) {
     try {
         cool::RecordSpecification spec = this->createSpec();
         coral::AttributeList payload = this->createPayload(code, dfrac, thrust, comment, spec);
-	insert_helper(channelId, payload, tag_name);
+        insert_helper(channelId, payload, tag_name);
     }
     catch (cool::Exception& e) {
         std::cout << "Unknown exception caught!" << e.what() << std::endl;
@@ -85,7 +85,7 @@ insert(cool::ChannelId channelId, int code, float dfrac, float thrust, std::stri
 
 void 
 StatusFlagCommentCOOL::
-insert(std::string channelName, int code, float dfrac, float thrust, std::string comment, std::string tag_name) {
+insert(const std::string & channelName, int code, float dfrac, float thrust, const std::string & comment, const std::string & tag_name) {
   try {
     this->insert(this->getCoolFolder()->channelId(channelName), code, dfrac, thrust, comment, tag_name);
   }

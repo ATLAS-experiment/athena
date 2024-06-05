@@ -803,27 +803,18 @@ historyDB(  int HistoId, const std::string & nameHisto, const std::string & tag_
   gStyle->SetTitleFontSize(0.06);
   gStyle->SetTitleH(0.06);
 
-  int run[10000];
+  auto pRun = std::make_unique<std::array<int, 10000>>();
   float StatusH[1000];
   float Entries[1000];
-  float Par1[1000];
-  float Par2[1000];
-  float Par3[1000];
-  float Par4[1000];
-  float Par5[1000];
+  float Par1[1000]={};
+  float Par2[1000]={};
+  float Par3[1000]={};
+  float Par4[1000]={};
+  float Par5[1000]={};
   std::string Algorithm;
   std::string Algorithm1;
   
   gROOT->SetBatch();
-
-  for (int j=0;j<1000;j++) {
-    StatusH[j]=-2.;  
-    Par1[j]=0.;  
-    Par2[j]=0.; 
-    Par3[j]=0.; 
-    Par4[j]=0.; 
-    Par5[j]=0.; 
-  }
 
   std::ifstream tmp_run("runxml");
   if (!tmp_run.is_open())
@@ -834,7 +825,7 @@ historyDB(  int HistoId, const std::string & nameHisto, const std::string & tag_
 
   Int_t dummy=0;
   while(tmp_run.good()) {
-    tmp_run >> run[dummy];
+    tmp_run >> pRun->at(dummy);
     dummy++;
   }
   int ALL = dummy-1;
@@ -843,7 +834,7 @@ historyDB(  int HistoId, const std::string & nameHisto, const std::string & tag_
   std::string tagDB = tag_name;
 
   for (int j=0;j<ALL;j++) {
-    setIOV(run[j]);
+    setIOV(pRun->at(j));
     StatusH[j]=dumpCode(nameh, tagDB);
     std::string entr=dumpHisto(i,"Entries", tagDB);
     std::string alg=dumpHisto(i,"Algo", tagDB);
@@ -914,7 +905,7 @@ historyDB(  int HistoId, const std::string & nameHisto, const std::string & tag_
     int npoints=entr_g->GetN();
     npoints++;
     entr_g->Set(npoints);
-    entr_g->SetPoint(npoints-1,run[j],Entries[j]);
+    entr_g->SetPoint(npoints-1,pRun->at(j),Entries[j]);
     entr_g->SetPointError(npoints-1,0.,sqrt(Entries[j]));
   }
 
@@ -929,10 +920,10 @@ historyDB(  int HistoId, const std::string & nameHisto, const std::string & tag_
     for (int k=0;k<4;k++) npoints=par1_g[k]->GetN();
     npoints++;
     for (int k=0;k<4;k++) par1_g[k]->Set(npoints);
-    par1_g[0]->SetPoint(npoints-1,run[j],Par1[j]);
-    if (StatusH[j]==1) par1_g[1]->SetPoint(npoints-1,run[j],Par1[j]);
-    if (StatusH[j]==2) par1_g[2]->SetPoint(npoints-1,run[j],Par1[j]);
-    if (StatusH[j]==3) par1_g[3]->SetPoint(npoints-1,run[j],Par1[j]);
+    par1_g[0]->SetPoint(npoints-1,pRun->at(j),Par1[j]);
+    if (StatusH[j]==1) par1_g[1]->SetPoint(npoints-1,pRun->at(j),Par1[j]);
+    if (StatusH[j]==2) par1_g[2]->SetPoint(npoints-1,pRun->at(j),Par1[j]);
+    if (StatusH[j]==3) par1_g[3]->SetPoint(npoints-1,pRun->at(j),Par1[j]);
 
     if (Algorithm=="GatherData" || Algorithm=="Histogram_Not_Empty&GatherData" || 
 	Algorithm=="CheckHisto_Mean&GatherData" || Algorithm=="BinContentComp&GatherData") {  
@@ -968,10 +959,10 @@ historyDB(  int HistoId, const std::string & nameHisto, const std::string & tag_
     for (int k=0;k<4;k++) npoints=par2_g[k]->GetN();
     npoints++;
     for (int k=0;k<4;k++) par2_g[k]->Set(npoints);
-    par2_g[0]->SetPoint(npoints-1,run[j],Par2[j]);
-    if (StatusH[j]==1) par2_g[1]->SetPoint(npoints-1,run[j],Par2[j]);
-    if (StatusH[j]==2) par2_g[2]->SetPoint(npoints-1,run[j],Par2[j]);
-    if (StatusH[j]==3) par2_g[3]->SetPoint(npoints-1,run[j],Par2[j]);
+    par2_g[0]->SetPoint(npoints-1,pRun->at(j),Par2[j]);
+    if (StatusH[j]==1) par2_g[1]->SetPoint(npoints-1,pRun->at(j),Par2[j]);
+    if (StatusH[j]==2) par2_g[2]->SetPoint(npoints-1,pRun->at(j),Par2[j]);
+    if (StatusH[j]==3) par2_g[3]->SetPoint(npoints-1,pRun->at(j),Par2[j]);
     if (Entries[j]>0.) {
       par2_g[0]->SetPointError(npoints-1,0.,Par2[j]/sqrt(Entries[j])); 
     } else {
@@ -981,10 +972,10 @@ historyDB(  int HistoId, const std::string & nameHisto, const std::string & tag_
     if ((Algorithm=="GatherData" || Algorithm=="Histogram_Not_Empty&GatherData") && 
 	(Par3[j]> 0 || Par4[j]>0) ) {
       // this is the new GatherData: return Mean, EMean, RMS, ERMS
-      par2_g[0]->SetPoint(npoints-1,run[j],Par3[j]);
-      if (StatusH[j]==1) par2_g[1]->SetPoint(npoints-1,run[j],Par3[j]);
-      if (StatusH[j]==2) par2_g[2]->SetPoint(npoints-1,run[j],Par3[j]);
-      if (StatusH[j]==3) par2_g[3]->SetPoint(npoints-1,run[j],Par3[j]);
+      par2_g[0]->SetPoint(npoints-1,pRun->at(j),Par3[j]);
+      if (StatusH[j]==1) par2_g[1]->SetPoint(npoints-1,pRun->at(j),Par3[j]);
+      if (StatusH[j]==2) par2_g[2]->SetPoint(npoints-1,pRun->at(j),Par3[j]);
+      if (StatusH[j]==3) par2_g[3]->SetPoint(npoints-1,pRun->at(j),Par3[j]);
       par2_g[0]->SetPointError(npoints-1,0.,Par4[j]);
     } 
 
@@ -992,17 +983,17 @@ historyDB(  int HistoId, const std::string & nameHisto, const std::string & tag_
 	 ) && (Par5[j]!= 0)) {	  
       // this is the new GatherData: return Mean, EMean, RMS, ERMS + XMean or Mean, EMean, NBins, RMS, ERMS 
       if (Algorithm=="BinContentComp&GatherData") {
-	par2_g[0]->SetPoint(npoints-1,run[j],Par4[j]);
-	if (StatusH[j]==1) par2_g[1]->SetPoint(npoints-1,run[j],Par4[j]);
-	if (StatusH[j]==2) par2_g[2]->SetPoint(npoints-1,run[j],Par4[j]);
-	if (StatusH[j]==3) par2_g[3]->SetPoint(npoints-1,run[j],Par4[j]);
+	par2_g[0]->SetPoint(npoints-1,pRun->at(j),Par4[j]);
+	if (StatusH[j]==1) par2_g[1]->SetPoint(npoints-1,pRun->at(j),Par4[j]);
+	if (StatusH[j]==2) par2_g[2]->SetPoint(npoints-1,pRun->at(j),Par4[j]);
+	if (StatusH[j]==3) par2_g[3]->SetPoint(npoints-1,pRun->at(j),Par4[j]);
 	par2_g[0]->SetPointError(npoints-1,0.,Par5[j]);
       }
       if (Algorithm=="CheckHisto_Mean&GatherData") {
-	par2_g[0]->SetPoint(npoints-1,run[j],Par3[j]);
-	if (StatusH[j]==1) par2_g[1]->SetPoint(npoints-1,run[j],Par3[j]);
-	if (StatusH[j]==2) par2_g[2]->SetPoint(npoints-1,run[j],Par3[j]);
-	if (StatusH[j]==3) par2_g[3]->SetPoint(npoints-1,run[j],Par3[j]);
+	par2_g[0]->SetPoint(npoints-1,pRun->at(j),Par3[j]);
+	if (StatusH[j]==1) par2_g[1]->SetPoint(npoints-1,pRun->at(j),Par3[j]);
+	if (StatusH[j]==2) par2_g[2]->SetPoint(npoints-1,pRun->at(j),Par3[j]);
+	if (StatusH[j]==3) par2_g[3]->SetPoint(npoints-1,pRun->at(j),Par3[j]);
 	par2_g[0]->SetPointError(npoints-1,0.,Par4[j]);
       } 
     } 
@@ -1016,10 +1007,10 @@ historyDB(  int HistoId, const std::string & nameHisto, const std::string & tag_
       for (int k=0;k<4;k++) npoints=par3_g[k]->GetN();
       npoints++;
       for (int k=0;k<4;k++) par3_g[k]->Set(npoints);
-      par3_g[0]->SetPoint(npoints-1,run[j],Par3[j]);
-      if (StatusH[j]==1) par3_g[1]->SetPoint(npoints-1,run[j],Par3[j]);
-      if (StatusH[j]==2) par3_g[2]->SetPoint(npoints-1,run[j],Par3[j]);
-      if (StatusH[j]==3) par3_g[3]->SetPoint(npoints-1,run[j],Par3[j]);
+      par3_g[0]->SetPoint(npoints-1,pRun->at(j),Par3[j]);
+      if (StatusH[j]==1) par3_g[1]->SetPoint(npoints-1,pRun->at(j),Par3[j]);
+      if (StatusH[j]==2) par3_g[2]->SetPoint(npoints-1,pRun->at(j),Par3[j]);
+      if (StatusH[j]==3) par3_g[3]->SetPoint(npoints-1,pRun->at(j),Par3[j]);
       if (Entries[j]>0.) {
 	par3_g[0]->SetPointError(npoints-1,0.,Par3[j]/sqrt(Entries[j]));
       } else {
@@ -1027,16 +1018,16 @@ historyDB(  int HistoId, const std::string & nameHisto, const std::string & tag_
       }
       if (Algorithm=="CheckHisto_Mean&GatherData") { 
 	if (Par5[j]!=0) {
-	  par3_g[0]->SetPoint(npoints-1,run[j],Par5[j]);
-	  if (StatusH[j]==1) par3_g[1]->SetPoint(npoints-1,run[j],Par5[j]);
-	  if (StatusH[j]==2) par3_g[2]->SetPoint(npoints-1,run[j],Par5[j]);
-	  if (StatusH[j]==3) par3_g[3]->SetPoint(npoints-1,run[j],Par5[j]);
+	  par3_g[0]->SetPoint(npoints-1,pRun->at(j),Par5[j]);
+	  if (StatusH[j]==1) par3_g[1]->SetPoint(npoints-1,pRun->at(j),Par5[j]);
+	  if (StatusH[j]==2) par3_g[2]->SetPoint(npoints-1,pRun->at(j),Par5[j]);
+	  if (StatusH[j]==3) par3_g[3]->SetPoint(npoints-1,pRun->at(j),Par5[j]);
 	  par3_g[0]->SetPointError(npoints-1,0.,Par4[j]);
 	} else {
-	  par3_g[0]->SetPoint(npoints-1,run[j],Par3[j]);
-	  if (StatusH[j]==1) par3_g[1]->SetPoint(npoints-1,run[j],Par3[j]);
-	  if (StatusH[j]==2) par3_g[2]->SetPoint(npoints-1,run[j],Par3[j]);
-	  if (StatusH[j]==3) par3_g[3]->SetPoint(npoints-1,run[j],Par3[j]);
+	  par3_g[0]->SetPoint(npoints-1,pRun->at(j),Par3[j]);
+	  if (StatusH[j]==1) par3_g[1]->SetPoint(npoints-1,pRun->at(j),Par3[j]);
+	  if (StatusH[j]==2) par3_g[2]->SetPoint(npoints-1,pRun->at(j),Par3[j]);
+	  if (StatusH[j]==3) par3_g[3]->SetPoint(npoints-1,pRun->at(j),Par3[j]);
 	  if (Entries[j]>0.) par3_g[0]->SetPointError(npoints-1,0.,Par2[j]/sqrt(Entries[j]));
 	} 
       }
@@ -1059,7 +1050,7 @@ historyDB(  int HistoId, const std::string & nameHisto, const std::string & tag_
   gPad->SetGridx(); gPad->SetGridy();
   formatGraph( c1,entr_g);
   entr_g->SetTitle("N Entries");
-  entr_g->GetXaxis()->SetRange(run[0],run[ALL-1]);
+  entr_g->GetXaxis()->SetRange(pRun->at(0),pRun->at(ALL-1));
   entr_g->GetYaxis()->SetTitle("N entries");
   entr_g->SetMarkerStyle(20);
   entr_g->Draw("ap");
