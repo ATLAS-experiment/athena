@@ -38,7 +38,7 @@ std::vector<std::unique_ptr<RpcDigit>> Muon::RpcRDO_Decoder::getDigit(const RpcF
     rpcDigitVec.reserve(idList.size());
     for (const Identifier& stripOfflineId: idList) {
         // and add the digit to the collection       
-        std::unique_ptr<RpcDigit> rpcDigit = std::make_unique<RpcDigit>(stripOfflineId, time);
+        std::unique_ptr<RpcDigit> rpcDigit = std::make_unique<RpcDigit>(stripOfflineId, time, time, -1.);
         rpcDigitVec.push_back(std::move(rpcDigit));
     }
 

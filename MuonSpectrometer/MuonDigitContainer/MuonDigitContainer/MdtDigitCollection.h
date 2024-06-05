@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // MdtDigitCollection.h
@@ -23,23 +23,19 @@ public:  // functions
   typedef MdtDigit DIGIT; 
   // Default constructor.
   MdtDigitCollection() 
-    : DataVector<MdtDigit>(),m_id(0),m_idHash(0)
-	{ };
+    : DataVector<MdtDigit>() { }
 
   // Creates an empty container ready for writing.
   MdtDigitCollection(Identifier id,IdentifierHash idHash) 
-    : DataVector<MdtDigit>(),m_id(id),m_idHash(idHash)
-	{ };
+    : DataVector<MdtDigit>(),m_id(id),m_idHash(idHash) {}
 
-  Identifier identify() const
-    {
-	return m_id;
-    }
+  Identifier identify() const {
+      return m_id;
+  }
 
-  IdentifierHash identifierHash() const
-    {
-	return m_idHash;
-    }
+  IdentifierHash identifierHash() const {
+      return m_idHash;
+  }
 
   private:
     Identifier     m_id; 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // CscDigit.h
@@ -7,12 +7,6 @@
 #ifndef CscDigitUH
 #define CscDigitUH
 
-// Augmented by Woochun Park
-// November 3, 2010
-
-// ketevi A. Assamagan
-// September 30 2002
-//
 // CSC digitization. Holds a channel ID.
 
 #include <iosfwd>
@@ -24,14 +18,14 @@ class CscDigit : public MuonDigit {
 
 private:
 
-  int m_charge;
-  float m_time;
-  std::vector<float> m_sampleCharges;
+  int m_charge{0};
+  float m_time{0.f};
+  std::vector<float> m_sampleCharges{};
   
 public:
 
   /** Default constructor */
-  CscDigit();
+  CscDigit() = default;
 
   /** Full constructor from Identifier */
   CscDigit(const Identifier& id, int charge);

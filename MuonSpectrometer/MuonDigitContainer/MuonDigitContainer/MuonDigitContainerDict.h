@@ -1,13 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-/*
-  Header file for the data dictionary filler
-
-   @ author Tadashi Maeno
-*/
-
 #ifndef MUONDIGITCONTAINER_MUONDIGITCONTAINERDICT_H
 #define MUONDIGITCONTAINER_MUONDIGITCONTAINERDICT_H
 
@@ -26,9 +19,4 @@
 #include "MuonDigitContainer/CscDigitCollection.h"
 #include "MuonDigitContainer/MmDigitCollection.h"
 #include "MuonDigitContainer/sTgcDigitCollection.h"
- //  namespace MuonPrepRawData_dict {
- //  struct tmp
- //  {
- //  };
- // }
 #endif

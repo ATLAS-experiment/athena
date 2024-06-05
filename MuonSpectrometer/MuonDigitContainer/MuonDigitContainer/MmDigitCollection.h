@@ -23,27 +23,23 @@ class MmDigitCollection : public DataVector<MmDigit>
   typedef MmDigit DIGIT; 
   // Default constructor.
   MmDigitCollection() 
-    : DataVector<MmDigit>(),m_id(0),m_idHash(0)
-    { };
+    : DataVector<MmDigit>() {}
 
     // Creates an empty container ready for writing.
     MmDigitCollection(Identifier id,IdentifierHash idHash) 
-      : DataVector<MmDigit>(),m_id(id),m_idHash(idHash)
-      { };
+      : DataVector<MmDigit>(),m_id(id),m_idHash(idHash) {}
 
-      Identifier identify() const
-      {
-	return m_id;
+      Identifier identify() const {
+          return m_id;
       }
 
-      IdentifierHash identifierHash() const
-      {
-	return m_idHash;
+      IdentifierHash identifierHash() const{
+          return m_idHash;
       }
 
  private:
-      Identifier     m_id; 
-      IdentifierHash m_idHash; 
+      Identifier     m_id{0}; 
+      IdentifierHash m_idHash{0}; 
 
 };
 

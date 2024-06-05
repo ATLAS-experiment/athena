@@ -23,7 +23,7 @@ class TgcDigit : public MuonDigit {
 public:  // functions
 
   // Default constructor.
-  TgcDigit();
+  TgcDigit() = default;
 
   // Full Constructor 
   TgcDigit(const Identifier& id);
@@ -37,7 +37,7 @@ public:  // functions
   enum {BC_UNDEFINED=0, BC_PREVIOUS, BC_CURRENT, BC_NEXT, BC_NEXTNEXT};
 
 private: // bctag
-  uint16_t  m_bcTag;
+  uint16_t  m_bcTag{BC_UNDEFINED};
 
 };
 

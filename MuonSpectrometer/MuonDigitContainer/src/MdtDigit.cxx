@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // MdtDigit.cxx
@@ -12,32 +12,24 @@
 namespace {
 
 // Range of TDC.
-const int tdcmin = 0;
-const int tdcmax = 4096;
+constexpr int tdcmin = 0;
+constexpr int tdcmax = 4096;
 
 }
 //**********************************************************************
 // Member functions.
 //**********************************************************************
 
-// Default constructor.
-
-MdtDigit::MdtDigit()
-: MuonDigit(), m_tdc(), m_adc(), m_isMasked(false) { }
- 
-//**********************************************************************
-
 // Full constructor from Identifier.
-
 MdtDigit::MdtDigit(const Identifier& id, int tdc)
-: MuonDigit(id), m_tdc(tdc), m_adc(), m_isMasked(false) { }
+: MuonDigit(id), m_tdc(tdc), m_adc() { }
 
 //**********************************************************************
 
 // Full constructor from Identifier for the combined measurement mode
 
 MdtDigit::MdtDigit(const Identifier& id, int tdc, int adc)
-: MuonDigit(id), m_tdc(tdc), m_adc(adc), m_isMasked(false) { }
+: MuonDigit(id), m_tdc(tdc), m_adc(adc) { }
 
 //**********************************************************************
 

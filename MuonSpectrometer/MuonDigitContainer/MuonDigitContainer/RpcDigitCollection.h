@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // RpcDigitCollection.h
@@ -22,27 +22,23 @@ public:  // functions
   typedef RpcDigit DIGIT; 
   // Default constructor.
   RpcDigitCollection() 
-    : DataVector<RpcDigit>(),m_id(0),m_idHash(0)
-	{ };
+    : DataVector<RpcDigit>() {}
 
   // Creates an empty container ready for writing.
   RpcDigitCollection(Identifier id, IdentifierHash idHash)
-    : DataVector<RpcDigit>(),m_id(id), m_idHash(idHash)
-	{ };
+    : DataVector<RpcDigit>(),m_id(id), m_idHash(idHash) {}
 
-  Identifier identify() const
-    {
-	return m_id;
-    }
+  Identifier identify() const {
+      return m_id;
+  }
 
-  IdentifierHash identifierHash() const
-    {
-	return m_idHash;
-    }
+  IdentifierHash identifierHash() const {
+    return m_idHash;
+  }
 
   private:
-    Identifier     m_id; 
-    IdentifierHash m_idHash; 
+    Identifier     m_id{0}; 
+    IdentifierHash m_idHash{0}; 
 
 };
 

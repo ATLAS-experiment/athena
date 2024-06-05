@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // MdtDigit.h
@@ -21,18 +21,18 @@ class MdtDigit : public MuonDigit {
 private:  // data
 
 // TDC value.
-  int m_tdc;
+  int m_tdc{0};
 
   // ADC value for combined measurement mode
-  int m_adc;
+  int m_adc{0};
 
   // Masked digit flag
-  bool m_isMasked;
+  bool m_isMasked{false};
 
 public:  // functions
 
   // Default constructor.
-  MdtDigit();
+  MdtDigit() = default;
 
   // Full constructor --- From Identifier.
   MdtDigit(const Identifier& id, int tdc);

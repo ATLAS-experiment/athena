@@ -21,8 +21,8 @@ class MmDigit : public MuonDigit {
 
  private:  // data
     /** strip response info */
-    float m_stripResponseTime{};
-    float m_stripResponseCharge{};
+    float m_stripResponseTime{0.f};
+    float m_stripResponseCharge{0.f};
  public:  // functions
 
   /** Default constructor */
