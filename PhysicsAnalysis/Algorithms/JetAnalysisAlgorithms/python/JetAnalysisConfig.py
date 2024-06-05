@@ -347,10 +347,9 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             # see https://twiki.cern.ch/twiki/bin/view/AtlasProtected/EtmissRecommendationsRel21p2#fJVT_and_MET
             alg.modifierTool.EtaThresh = 2.5 # Eta dividing central from forward jets
             alg.modifierTool.ForwardMaxPt = 120.0e3 #Max Pt to define fwdJets for JVT
-            alg.RenounceOutputs = True
+            alg.modifierTool.RenounceOutputs = True
             alg.jets = config.readName (self.containerName)
             alg.jetsOut = config.copyName (self.containerName)
-            alg.preselection = config.getPreselection (self.containerName, '')
 
         # Set up the jet efficiency scale factor calculation algorithm
         # Change the truthJetCollection property to AntiKt4TruthWZJets if preferred

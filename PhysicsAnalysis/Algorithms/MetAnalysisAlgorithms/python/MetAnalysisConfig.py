@@ -78,7 +78,7 @@ class MetAnalysisConfig (ConfigBlock):
         alg.makerTool.DoPFlow = 'PFlow' in metSuffix or metSuffix=="AnalysisMET"
         alg.makerTool.DoSetMuonJetEMScale = self.setMuonJetEMScale
         if self.useFJVT:
-            alg.makerTool.JetRejectionDec = 'passFJVT'
+            alg.makerTool.JetRejectionDec = 'passFJVT_internal'
 
         if config.dataType() is not DataType.Data :
             config.addPrivateTool( 'systematicsTool', 'met::METSystematicsTool' )
