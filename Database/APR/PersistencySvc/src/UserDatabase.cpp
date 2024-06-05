@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "UserDatabase.h"
@@ -114,8 +114,13 @@ pool::PersistencySvc::UserDatabase::connectForRead( const pool::DatabaseConnecti
            policy.readMode() == pool::DatabaseConnectionPolicy::UPDATE ) {
         accessMode = pool::UPDATE;
       }
-      m_databaseHandler = sessionManager.connect( m_the_fid, m_the_pfn, accessMode );
-      if ( m_databaseHandler ) {
+      // Check the registry now that we have the FID (in case of ambiguous PFNs)
+      m_databaseHandler = m_registry.lookupByFID( m_the_fid );
+      if( !m_databaseHandler ) {
+         // still no luck - make a new connection
+         m_databaseHandler = sessionManager.connect( m_the_fid, m_the_pfn, accessMode );
+      }
+      if( m_databaseHandler ) {
         m_openMode = ( ( accessMode == pool::READ ) ? pool::IDatabase::READ : pool::IDatabase::UPDATE );
       }
       else {
