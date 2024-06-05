@@ -717,6 +717,7 @@ class ItemDef:
         MenuItem('L1_jJ55p0ETA23_2jJ40p30ETA49'      ).setLogic( d.jJ550ETA23 & d.jJ4030ETA49.x(2)            & physcond).setTriggerType(TT.calo)
         MenuItem('L1_jJ80p0ETA25_2jJ40p30ETA49'      ).setLogic( d.jJ800ETA25 & d.jJ4030ETA49.x(2)            & physcond).setTriggerType(TT.calo)
         MenuItem('L1_jJ85p0ETA21_3jJ40p0ETA25'       ).setLogic( d.jJ850ETA21 & d.jJ400ETA25.x(3)             & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_3jJ40p0ETA25'  ).setLogic( d.jJ400ETA25.x(3) & physcond).setTriggerType(TT.calo)
 
         MenuItem('L1_jJ60_EMPTY'     ).setLogic( d.jJ60 & cosmiccond ).setTriggerType(TT.calo)
         MenuItem('L1_jJ60_FIRSTEMPTY').setLogic( d.jJ60 & firstempty ).setTriggerType(TT.calo)
