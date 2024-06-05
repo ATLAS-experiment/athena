@@ -61,7 +61,7 @@ def PersistifyActsEDMCfg(flags) -> ComponentAccumulator:
             toAOD +=  [f"xAOD::TrackSummaryContainer#{prefix}TrackSummary",
                        f"xAOD::TrackSummaryAuxContainer#{prefix}TrackSummaryAux.",
                        f"xAOD::TrackStateContainer#{prefix}TrackStates",
-                       f"xAOD::TrackStateAuxContainer#{prefix}TrackStatesAux.",                
+                       f"xAOD::TrackStateAuxContainer#{prefix}TrackStatesAux.-uncalibratedMeasurement",
                        f"xAOD::TrackParametersContainer#{prefix}TrackParameters",
                        f"xAOD::TrackParametersAuxContainer#{prefix}TrackParametersAux.",
                        f"xAOD::TrackJacobianContainer#{prefix}TrackJacobians",

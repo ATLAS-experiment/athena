@@ -9,13 +9,60 @@
 #include "xAODTracking/TrackParameters.h"
 #include "xAODTracking/TrackJacobian.h"
 
-
 constexpr uint64_t InvalidGeoID = std::numeric_limits<uint64_t>::max();
 
 const std::set<std::string> ActsTrk::MutableMultiTrajectory::s_staticVariables = {
-  "chi2", "pathLength", "typeFlags", "previous", "next", "predicted", "filtered", "smoothed", "jacobian", "calibrated", "measDim", "uncalibratedMeasurementLink", "geometryId", "surfaceLink"
- };
+  "chi2", "pathLength", "typeFlags", "previous", "next", "predicted", "filtered", "smoothed", "jacobian", "calibrated", "measDim",
+  "uncalibratedMeasurement", "uncalibratedMeasurementLink" /*created by converter*/, "geometryId", "surfaceLink"
+};
 
+namespace {
+   // utility functions facilitate access of dynamic (or static) aux variables
+   template <typename T>
+   using const_span = std::span<T const>;
+
+   // get an aux variable for elements (read/write)
+   template <typename T>
+   std::span<T> getElementVector( xAOD::AuxContainerBase &aux_container, const SG::ConstAccessor<T> &accessor) {
+      const T *data = static_cast<const T *>(aux_container.getData (accessor.auxid()));
+      T *non_const_data = const_cast< T *>(data); // aux_container is non-const so can be modified.
+      std::span<T> ret(non_const_data, aux_container.size() );
+      return ret;
+   }
+   // get an aux variable for elements (read only)
+   template <typename T>
+   const_span<T> getElementVector(const xAOD::AuxContainerBase &aux_container, const SG::ConstAccessor<T> &accessor) {
+      const T *data = static_cast<const T *>(aux_container.getData (accessor.auxid()));
+      const_span<T> ret( data, aux_container.size() );
+      return ret;
+   }
+
+   // create a new decoration for all elements using the default value
+   template <typename T>
+   std::span<T> createDecoration(xAOD::AuxContainerBase &aux_container, const SG::Decorator<T> &decor) {
+      std::size_t sz=aux_container.size();
+      T *data = static_cast<T *>(aux_container.getDecoration(decor.auxid(), sz, sz));
+      return std::span<T>( data, sz );
+   }
+
+   void throwRangeError(const xAOD::AuxContainerBase &aux_container, std::size_t index) {
+      std::stringstream msg;
+      msg << "range error: " << index << " >= " << aux_container.size()
+          << " when accessing container of type " << typeid(xAOD::AuxContainerBase).name();
+      throw std::range_error(msg.str());
+   }
+
+   // get one an aux variable (dynamic or static) for one element
+   // @throw will throw if the index exceeds the container size
+   template <typename T>
+   const T &getElement(const xAOD::AuxContainerBase &aux_container, const SG::ConstAccessor<T> &accessor, std::size_t index) {
+      if (index>= aux_container.size()) {
+         throwRangeError(aux_container, index);
+      }
+      const_span<const xAOD::UncalibratedMeasurement*> vec = getElementVector(aux_container, accessor);
+      return vec[index];
+   }
+}
 
 
 template<typename T>
@@ -134,7 +181,7 @@ ActsTrk::IndexType ActsTrk::MutableMultiTrajectory::addTrackState_impl(
   m_uncalibratedSourceLinks.emplace_back(std::nullopt);
   m_trackStatesAux->calibrated[m_trackStatesSize] = kInvalid;
   m_trackStatesAux->measDim[m_trackStatesSize] = 0;
-
+  // @TODO uncalibrated ?
   if (ACTS_CHECK_BIT(mask, TrackStatePropMask::Calibrated)) {
     m_trackStatesAux->calibrated[m_trackStatesSize]  = addMeasurement();
     m_calibratedSourceLinks.emplace_back(std::nullopt);
@@ -152,6 +199,7 @@ void ActsTrk::MutableMultiTrajectory::addTrackStateComponents_impl(
     Acts::TrackStatePropMask mask) {
   using namespace Acts::HashedStringLiteral;
   INSPECTCALL( this << " " <<  mask << " " << m_trackStatesAux->size() << " " << previous);
+
   assert(m_trackStatesAux && "Missing Track States backend");
   constexpr size_t NDim = 6; // TODO take this from somewhere
 
@@ -405,7 +453,14 @@ bool ActsTrk::MutableMultiTrajectory::has_impl(
   using namespace Acts::HashedStringLiteral;
   if (key == "uncalibratedSourceLink"_hash){
     INSPECTCALL(key << " " << istate << " uncalibratedSourceLink")
-    return m_uncalibratedSourceLinks[istate].has_value();
+    static const SG::Accessor<const xAOD::UncalibratedMeasurement*> acc{"uncalibratedMeasurement"};
+    bool has_auxid= m_trackStatesAux->getAuxIDs().test(acc.auxid());
+    if (has_auxid) {
+       return getElement(*m_trackStatesAux, acc, istate) != nullptr;
+    }
+    else {
+       return (istate < m_uncalibratedSourceLinks.size() &&  m_uncalibratedSourceLinks[istate].has_value());
+    }
   }
 
   for (auto& d : m_decorations) {
@@ -458,30 +513,25 @@ void ActsTrk::MutableMultiTrajectory::setUncalibratedSourceLink_impl(ActsTrk::In
                                     const Acts::SourceLink& sourceLink) {
   INSPECTCALL( istate );
 
-  // TODO restore this once tracking code uses source links with EL                                        
-  // auto el =
-  //     sourceLink.get<ElementLink<xAOD::UncalibratedMeasurementContainer>>();
-  // trackStates()[istate]->setUncalibratedMeasurementLink(el);
-  m_uncalibratedSourceLinks[istate] = std::move(sourceLink);
-}
+  static const SG::Decorator<const xAOD::UncalibratedMeasurement*> decor{"uncalibratedMeasurement"};
+  if (istate>= m_trackStatesAux->size()) {
+     throw std::range_error("istate out of range on TrackStates when attempting to acces uncalibrated measurements");
+  }
+  std::span<const xAOD::UncalibratedMeasurement*> uncalibratedMeasurements = createDecoration(*m_trackStatesAux, decor);
 
-
-typename Acts::SourceLink
-ActsTrk::MutableMultiTrajectory::getUncalibratedSourceLink_impl(
-    ActsTrk::IndexType istate) const {
-  // TODO see setUncalibratedSourceLink_impl
-  // auto el = trackStates()[istate]->uncalibratedMeasurementLink();
-  // return Acts::SourceLink(el);
-return m_uncalibratedSourceLinks[istate].value();
-}
-Acts::SourceLink
-ActsTrk::MutableMultiTrajectory::getUncalibratedSourceLink_impl(
-    ActsTrk::IndexType istate) {
-  // TODO see setUncalibratedSourceLink_impl
-  // auto el = trackStates()[istate]->uncalibratedMeasurementLink();
-  // return Acts::SourceLink(el);
-  return m_uncalibratedSourceLinks[istate].value();
-
+  // @TODO normally the source links should contain an xAOD::UncalibratedMeasurement pointer
+  //       but in some cases some other payload is used e.g. when converting Trk::Tracks.
+  //       Only UncalibratedMeasurement pointer can be stored in the xAOD backend. Everything
+  //       else has to go into the cache.
+  //       Currently there is no possibility to check whether the source link contains a certain payload
+  //       so can only catch the bad any cast
+  try {
+     uncalibratedMeasurements[istate] = sourceLink.get<ATLASUncalibSourceLink>();
+  }
+  catch  (std::bad_any_cast &err) {
+     assert( istate < m_uncalibratedSourceLinks.size());
+     m_uncalibratedSourceLinks[istate] = sourceLink;
+  }
 }
 
 void ActsTrk::MutableMultiTrajectory::setReferenceSurface_impl(IndexType istate,
@@ -518,6 +568,9 @@ const Acts::Surface* ActsTrk::MutableMultiTrajectory::referenceSurface_impl(Inde
 
 void ActsTrk::MutableMultiTrajectory::trim() {
   m_trackStatesAux->resize(m_trackStatesSize);
+  static const SG::Decorator<const xAOD::UncalibratedMeasurement*> decor{"uncalibratedMeasurement"};
+  std::span<const xAOD::UncalibratedMeasurement*> uncalibratedMeasurements = createDecoration(*m_trackStatesAux, decor);
+  (void) uncalibratedMeasurements;
   m_trackMeasurementsAux->resize(m_trackMeasurementsSize);
   m_trackJacobiansAux->resize(m_trackJacobiansSize);
   m_trackParametersAux->resize(m_trackParametersSize);
@@ -547,8 +600,16 @@ bool ActsTrk::MultiTrajectory::has_impl(Acts::HashedString key,
     return inTrackState.value();
   // TODO remove once EL based source links are in use only
   using namespace Acts::HashedStringLiteral;
-  if (key == "uncalibratedSourceLink"_hash)
-      return m_uncalibratedSourceLinks[istate].has_value();
+  if (key == "uncalibratedSourceLink"_hash) {
+      static const SG::Accessor<const xAOD::UncalibratedMeasurement*> acc{"uncalibratedMeasurement"};
+      bool has_auxid= m_trackStatesAux->getAuxIDs().test(acc.auxid());
+      if (has_auxid) {
+         return getElement( *m_trackStatesAux, acc, istate) != nullptr;
+      }
+      else {
+         return (istate < m_uncalibratedSourceLinks.size() &&  m_uncalibratedSourceLinks[istate].has_value());
+      }
+  }
   return false;
 }
 
@@ -623,18 +684,9 @@ bool ActsTrk::MultiTrajectory::hasColumn_impl(
   return false;
 }
 
-  ActsTrk::IndexType
-  ActsTrk::MultiTrajectory::calibratedSize_impl(ActsTrk::IndexType istate) const {
-    return m_trackStatesAux->measDim[istate];
-    }
-
-
-typename Acts::SourceLink
-ActsTrk::MultiTrajectory::getUncalibratedSourceLink_impl(ActsTrk::IndexType istate) const {
-  // TODO restore this implementation, see other methods like this
-  // auto el = (*m_trackStates)[istate]->uncalibratedMeasurementLink();
-  // return Acts::SourceLink(el);
-  return m_uncalibratedSourceLinks[istate].value();
+ActsTrk::IndexType
+ActsTrk::MultiTrajectory::calibratedSize_impl(ActsTrk::IndexType istate) const {
+   return m_trackStatesAux->measDim[istate];
 }
 
 void ActsTrk::MultiTrajectory::moveSurfaces(const ActsTrk::MutableMultiTrajectory* mtj) {
@@ -673,4 +725,40 @@ const Acts::Surface* ActsTrk::MultiTrajectory::referenceSurface_impl(IndexType i
   INSPECTCALL( this <<  " " << istate << " " << m_trackStatesAux->size() << " " << m_surfaces.size() << " surf ptr " << toSurfacePtr(m_surfaces[istate]));
   if ( istate >= m_surfaces.size() ) throw std::out_of_range("MultiTrajectory index " + std::to_string(istate) + " out of range " + std::to_string(m_surfaces.size()) + " when accessing reference surface");
   return toSurfacePtr(m_surfaces[istate]);
+}
+
+typename Acts::SourceLink
+ActsTrk::MutableMultiTrajectory::getUncalibratedSourceLink_impl(
+    ActsTrk::IndexType istate) const {
+  assert(istate < m_trackStatesAux->size());
+  // at the moment when converting Trk::Track to Acts tracks the measurements on track
+  // are not converted to xAOD::UncalibratedMeasurements, and the Acts::SourceLinks
+  // just contain a pointer to the Trk::Measurement. To keep this functionality
+  // SourceLinks are either stored in the m_uncalibratedSourceLinks cache
+  // or taken from the xAOD backend.
+  static const SG::Accessor<const xAOD::UncalibratedMeasurement*> acc{"uncalibratedMeasurement"};
+  if (m_trackStatesAux->getAuxIDs().test(acc.auxid())){
+     return Acts::SourceLink( getElement(*m_trackStatesAux, acc, istate) );
+  }
+  else {
+    return m_uncalibratedSourceLinks[istate].value();
+  }
+}
+
+typename Acts::SourceLink
+ActsTrk::MultiTrajectory::getUncalibratedSourceLink_impl(
+    ActsTrk::IndexType istate) const {
+  assert(istate < m_trackStatesAux->size());
+  // at the moment when converting Trk::Track to Acts tracks the measurements on track
+  // are not converted to xAOD::UncalibratedMeasurements, and the Acts::SourceLinks
+  // just contain a pointer to the Trk::Measurement. To keep this functionality
+  // SourceLinks are either stored in the m_uncalibratedSourceLinks cache
+  // or taken from the xAOD backend.
+  static const SG::Accessor<const xAOD::UncalibratedMeasurement*> acc{"uncalibratedMeasurement"};
+  if (m_trackStatesAux->getAuxIDs().test(acc.auxid())){
+     return Acts::SourceLink( getElement(*m_trackStatesAux, acc, istate) );
+  }
+  else {
+    return m_uncalibratedSourceLinks[istate].value();
+  }
 }

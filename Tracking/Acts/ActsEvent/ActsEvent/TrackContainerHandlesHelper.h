@@ -88,6 +88,8 @@ class ConstTrackContainerHandlesHelper {
       const EventContext& context) const;
 
  private:
+  // restore the pointer to uncalibrated measurements from element links
+  void restoreUncalibMeasurementPtr(xAOD::TrackStateAuxContainer &statesLink) const;
   // MTJ part
   SG::ReadHandleKey<xAOD::TrackStateContainer> m_statesKey;
   SG::ReadHandleKey<xAOD::TrackParametersContainer> m_parametersKey;

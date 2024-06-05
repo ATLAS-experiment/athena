@@ -19,7 +19,19 @@ namespace xAOD {
     DEFINE_API(TrackState_v1, TrackStateIndexType, jacobian, setJacobian)
     DEFINE_API(TrackState_v1, TrackStateIndexType, calibrated, setCalibrated)
     DEFINE_API(TrackState_v1, TrackStateIndexType, measDim, setMeasDim)
-    AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(TrackState_v1, ElementLink<xAOD::UncalibratedMeasurementContainer>, uncalibratedMeasurementLink, setUncalibratedMeasurementLink);
+
+    const xAOD::UncalibratedMeasurement *
+    TrackState_v1::uncalibratedMeasurement() const {
+       static const SG::ConstAccessor<const xAOD::UncalibratedMeasurement *> acc("uncalibratedMeasurement");
+       return acc.isAvailable(*this) ?  acc(*this) : nullptr;
+    }
+
+    void
+    TrackState_v1::setUncalibratedMeasurement(const xAOD::UncalibratedMeasurement *an_uncalibrated_measurement) {
+       static const SG::Decorator<const xAOD::UncalibratedMeasurement *> decor("uncalibratedMeasurement");
+       decor(*this) = an_uncalibrated_measurement;
+    }
+
     AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(TrackState_v1,  uint64_t, geometryId, setGeometryId);
     AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(TrackState_v1, ElementLink<xAOD::TrackSurfaceContainer>, surfaceLink, setSurfaceLink);
 

@@ -19,10 +19,17 @@ namespace xAOD {
                                         covMatrix,
                                         setCovMatrix)
 
-    AUXSTORE_OBJECT_SETTER_AND_GETTER(TrackMeasurement_v1,
-                                        ElementLink<xAOD::UncalibratedMeasurementContainer>,
-                                        uncalibratedMeasurementLink,
-                                        setUncalibratedMeasurementLink)
+    const xAOD::UncalibratedMeasurement *
+    TrackMeasurement_v1::uncalibratedMeasurement() const {
+       static const SG::ConstAccessor<const xAOD::UncalibratedMeasurement *> acc("uncalibratedMeasurement");
+       return acc.isAvailable(*this) ?  acc(*this) : nullptr;
+    }
+
+    void
+    TrackMeasurement_v1::setUncalibratedMeasurement(const xAOD::UncalibratedMeasurement *an_uncalibrated_measurement) {
+       static const SG::Decorator<const xAOD::UncalibratedMeasurement *> decor("uncalibratedMeasurement");
+       decor(*this) = an_uncalibrated_measurement;
+    }
 
     AUXSTORE_OBJECT_SETTER_AND_GETTER(TrackMeasurement_v1,
                                         std::uint64_t,
@@ -37,22 +44,6 @@ namespace xAOD {
         static const Accessor<std::uint64_t> acc("projector");
          return &(acc(*this));
     }
-
-
-    const UncalibratedMeasurement* TrackMeasurement_v1::uncalibratedMeasurement() const {
-        static const ConstAccessor<ElementLink<UncalibratedMeasurementContainer> >
-            acc("uncalibratedMeasurementLink");
-        if( ! acc.isAvailable( *this ) ) {
-            return nullptr;
-        }
-        const ElementLink<UncalibratedMeasurementContainer>& link = acc(*this);
-        if( ! link.isValid() ) {
-            return nullptr;
-        }
-        return *link;
-    }
-
-
 
     void TrackMeasurement_v1::resize(size_t sz) {
         s_measAcc(*this).resize(sz);

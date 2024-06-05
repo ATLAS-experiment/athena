@@ -24,7 +24,7 @@
 #include "xAODTracking/TrackStateAuxContainer.h"
 #include "xAODTracking/TrackSurfaceAuxContainer.h"
 #include "xAODTracking/TrackSurfaceContainer.h"
-
+#include "ActsGeometry/ATLASSourceLink.h"
 // #define DEBUG_MTJ
 #ifdef DEBUG_MTJ
 inline std::string_view name_only(const char* s) {
@@ -324,8 +324,6 @@ class MutableMultiTrajectory final
    */
   typename Acts::SourceLink getUncalibratedSourceLink_impl(
       ActsTrk::IndexType istate) const;
-  typename Acts::SourceLink getUncalibratedSourceLink_impl(IndexType istate);
-
 
   void setReferenceSurface_impl(IndexType,
                                 std::shared_ptr<const Acts::Surface>);
@@ -475,9 +473,12 @@ class MultiTrajectory
   const DataLink<xAOD::TrackMeasurementAuxContainer> m_trackMeasurementsAux;
   std::vector<ActsTrk::detail::Decoration> m_decorations;
 
-  // TODO remove once tracking code switches to sourceLinks with EL
-  std::vector<std::optional<Acts::SourceLink>> m_calibratedSourceLinks;  
-  std::vector<std::optional<Acts::SourceLink>> m_uncalibratedSourceLinks;  
+  // // TODO remove once tracking code switches to sourceLinks with EL
+  std::vector<std::optional<Acts::SourceLink>> m_calibratedSourceLinks;
+  // still need this to store SourceLinks with other payloads than
+  // pointer to xAOD::UncalibratedMeasurement e.g. pointer to Trk::Measurements
+  // when converting Trk::Tracks to Acts tracks.
+  std::vector<std::optional<Acts::SourceLink>> m_uncalibratedSourceLinks;
 
   std::vector<StoredSurface> m_surfaces;
 };

@@ -29,7 +29,6 @@ namespace xAOD {
         std::vector<TrackStateIndexType> jacobian;
         std::vector<TrackStateIndexType> calibrated;
         std::vector<TrackStateIndexType> measDim;
-        std::vector< ElementLink<xAOD::UncalibratedMeasurementContainer> > uncalibratedMeasurementLink;
         std::vector< uint64_t > geometryId;
         std::vector< ElementLink<xAOD::TrackSurfaceContainer> > surfaceLink;
 

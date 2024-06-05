@@ -32,6 +32,10 @@ def ActsTrackAnalysisAlgCfg(flags,
                                     xbins=60, xmin=0, xmax=60)
     monitoringGroup.defineHistogram('nMeasurements', title='Number of measurements / track;# measurements;Entries', type='TH1I', path=kwargs['MonGroupName'],
                                     xbins=35, xmin=0, xmax=35)
+    monitoringGroup.defineHistogram('nPixelHits', title='Number of pixel hits / track;# pixel hits;Entries', type='TH1I', path=kwargs['MonGroupName'],
+                                    xbins=35, xmin=0, xmax=35)
+    monitoringGroup.defineHistogram('nStripHits', title='Number of strip hits / track;# strip hits;Entries', type='TH1I', path=kwargs['MonGroupName'],
+                                    xbins=35, xmin=0, xmax=35)
     monitoringGroup.defineHistogram('surfaceType', title='type of reference surface;type;Entries', type='TH1I', path=kwargs['MonGroupName'],
                                     xbins=35, xmin=0, xmax=35)
 

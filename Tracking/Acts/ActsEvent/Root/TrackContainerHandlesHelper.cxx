@@ -2,9 +2,14 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include "ActsEvent/TrackContainerHandlesHelper.h"
+#include "xAODTracking/TrackStateContainer.h"
+#include "xAODTracking/TrackState.h"
+#include "xAODMeasurementBase/UncalibratedMeasurementContainer.h"
 
 #include <string>
+#include <sstream>
 #include <regex>
+#include <span>
 
 #include "StoreGate/WriteHandle.h"
 
@@ -205,6 +210,12 @@ ConstTrackContainerHandlesHelper::buildMtj(const Acts::TrackingGeometry* geo,
     throw std::runtime_error(
         "ConstMultiTrajectoryHandle::build, StatesLink is invalid");
   }
+  // The restoration of the pointers to uncalibrated measurements should only
+  // be done once, if it is done in parallel by multiple callers all callers should
+  // write exactly the same value to exactly the same memory location
+  xAOD::TrackStateAuxContainer *nonConstStatesLink ATLAS_THREAD_SAFE = const_cast<xAOD::TrackStateAuxContainer *>(statesLink.getDataPtr());
+  restoreUncalibMeasurementPtr(*nonConstStatesLink);
+
   DataLink<xAOD::TrackParametersAuxContainer> parametersLink(
       m_parametersKey.key() + "Aux.", evtContext);
   if (not parametersLink.isValid()) {
@@ -274,5 +285,62 @@ ConstTrackContainerHandlesHelper::build(const Acts::TrackingGeometry* geo,
 
   return constTrack;
 
+}
+
+namespace {
+   template <typename T>
+   using const_span = std::span<T const>;
+
+   // get an aux variable for elements (read only)
+   template <typename T>
+   const_span<T> getElementVector( const xAOD::AuxContainerBase &aux_container, const SG::ConstAccessor<T> &accessor) {
+      const T *data = static_cast<const T *>(aux_container.getData (accessor.auxid()));
+      const_span<T> ret( data, aux_container.size() );
+      return ret;
+   }
+
+   // create a new decoration for all elements using the default value
+   template <typename T>
+   std::span<T> createDecoration(xAOD::AuxContainerBase &aux_container, const SG::Decorator<T> &decor) {
+      std::size_t sz=aux_container.size();
+      T *data = static_cast<T *>(aux_container.getDecoration(decor.auxid(), sz, sz));
+      return std::span<T>( data, sz );
+   }
+
+   void throwConflictingUncalibratedMeasurementPointerValue(const xAOD::UncalibratedMeasurement *is,
+                                                            const xAOD::UncalibratedMeasurement *should) {
+      std::stringstream msg;
+      msg << "Conflicting values for TrackState.uncalibratedMeasurement. Already set " << static_cast<const void *>(is)
+          << " would set " << static_cast<const void *>(should);
+      throw std::runtime_error(msg.str());
+   }
+}
+
+void ConstTrackContainerHandlesHelper::restoreUncalibMeasurementPtr(xAOD::TrackStateAuxContainer &statesLink) const {
+   using link_t = ElementLink< xAOD::UncalibratedMeasurementContainer >;
+   static const SG::ConstAccessor< link_t > link_accessor("uncalibratedMeasurementLink");
+
+   if (statesLink.getAuxIDs().test(link_accessor.auxid())){
+      const_span<link_t> elementLinks = getElementVector(statesLink, link_accessor);
+
+      static const SG::AuxElement::Decorator< const xAOD::UncalibratedMeasurement * >
+         decor("uncalibratedMeasurement");
+
+      std::span<const xAOD::UncalibratedMeasurement *> uncalibratedMeasurements
+         = createDecoration( statesLink, decor);
+
+      for (unsigned int index = 0; index < elementLinks.size(); ++index) {
+         const link_t &el = elementLinks[index];
+         const xAOD::UncalibratedMeasurement *a_measurement = (el.isValid() ? *el : nullptr);
+         // @TODO is this check necessary ?
+         if (uncalibratedMeasurements[index] != nullptr && a_measurement != uncalibratedMeasurements[index]) {
+            throwConflictingUncalibratedMeasurementPointerValue(uncalibratedMeasurements[index], a_measurement);
+         }
+         uncalibratedMeasurements[index]=a_measurement;
+      }
+   }
+   else {
+      std::cerr << "WARNING no uncalibratedMeasurementLink aux data " << std::endl;
+   }
 }
 }  // namespace ActsTrk
