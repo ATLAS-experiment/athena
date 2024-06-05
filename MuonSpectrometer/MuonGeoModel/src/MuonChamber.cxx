@@ -1512,15 +1512,23 @@ namespace MuonGM {
         }
     }
 
-    void MuonChamber::setTgcReadoutGeom(const MYSQL& mysql,
-                                        TgcReadoutElement *re, const TgcComponent *cc, const Position &ip, const std::string& stName) {
+        void MuonChamber::setTgcReadoutGeom(const MYSQL& mysql,
+                                            TgcReadoutElement *re, 
+                                            const TgcComponent *cc, 
+                                            const Position &ip, 
+                                            const std::string& stName) {
        
-        re->m_Ssize = cc->dx1;
-        re->m_LongSsize = cc->dx2;
-        re->m_Rsize = cc->dy;
-        re->m_LongRsize = cc->dy;
-        re->m_Zsize = cc->GetThickness(mysql);
-        re->m_LongZsize = cc->GetThickness(mysql);
+        re->setSsize(cc->dx1);
+        re->setLongSsize(cc->dx2);
+        re->setRsize(cc->dy);
+        re->setLongRsize(cc->dy);
+        re->setZsize(cc->GetThickness(mysql));
+        re->setLongZsize(cc->GetThickness(mysql));
+
+        const TGC *genericTgc = dynamic_cast<const TGC*>(mysql.GetATechnology("TGC0"));
+        re->setFrameThickness(genericTgc->frame_h,
+                              genericTgc->frame_ab);
+
 
         const std::string &tname = cc->name;
         int tname_index = MuonGM::strtoint(tname, 3, 2);
@@ -1529,51 +1537,23 @@ namespace MuonGM {
         if (ip.isAssigned) {
             re->setStationS(ip.shift);
         } else {
-            ATH_MSG_ERROR( " MuonChamber::setTgcReadoutGeom position not found " );
-            assert(0);
+            throw std::runtime_error(" MuonChamberLite::setTgcReadoutGeom position not found ");
         }
 
         char index[2];
         sprintf(index, "%i", cc->index);
 
-        re->m_readout_name = stName.substr(0, 4) + '_' + index;
-        re->m_readoutParams = mysql.GetTgcRPars(tname_index);
-
-        if (!re->m_readoutParams) {
-           ATH_MSG_WARNING(" MuonChamber::setTgcReadoutGeometry: no readoutParams found for key <" << re->m_readout_name << ">" );
-        } else {
-            re->m_readout_type = re->m_readoutParams->chamberType();
-        }
+        re->setReadOutName(stName.substr(0, 4) + '_' + index);
+        re->setReadOutParams(mysql.GetTgcRPars(tname_index));
 
         const TGC *thist = dynamic_cast<const TGC*>(mysql.GetTechnology(tname));
         const std::size_t ncomp = (thist->materials).size();
-        std::string::size_type npos;
-        for (std::size_t i = 0; i < ncomp; ++i) {
-            double newpos = -re->m_Zsize / 2. + thist->positions[i] + thist->tck[i] / 2.;
-            const std::string &matname = thist->materials[i];
 
-            if ((npos = matname.find("TGCGas")) != std::string::npos) {
-                // here is a gasgap
-                int Nstripplanes = 0;
-                int Nwireplanes = 0;
-                re->m_ngasgaps++;
-                re->m_nwireplanes++;
-                Nwireplanes = re->m_nwireplanes;
-                re->m_nstripplanes++;
-                Nstripplanes = re->m_nstripplanes;
-                re->m_nstrips_per_plane[Nstripplanes - 1] = 0;
-                re->m_nwires_per_plane[Nwireplanes - 1] = 0;
-                re->m_nwiregangs_per_plane[Nwireplanes - 1] = 0;
-                re->m_strippitch[Nstripplanes - 1] = 0.;
-                re->m_stripwidth[Nstripplanes - 1] = 0.;
-                if (re->m_readoutParams)
-                    re->m_wirepitch[Nwireplanes - 1] = re->m_readoutParams->wirePitch();
-                else
-                    re->m_wirepitch[Nwireplanes - 1] = 0;
-                re->m_stripoffset[Nstripplanes - 1] = 0.;
-                re->m_wireoffset[Nwireplanes - 1] = 0.;
-                re->m_stripplanez[Nstripplanes - 1] = newpos;
-                re->m_wireplanez[Nwireplanes - 1] = newpos;
+        unsigned int gasGap{0};
+        for (std::size_t i = 0; i < ncomp; ++i) {
+            double newpos = -re->getZsize() / 2. + thist->positions[i] + thist->tck[i] / 2.;
+            if ( thist->materials[i].find("TGCGas") != std::string::npos) {
+                re->setPlaneZ(newpos, ++gasGap);
             }
         }
     }

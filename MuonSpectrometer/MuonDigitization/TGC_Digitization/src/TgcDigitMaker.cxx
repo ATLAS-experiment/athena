@@ -22,6 +22,7 @@
 #include "MuonSimEvent/TgcHitIdHelper.h"
 #include "PathResolver/PathResolver.h"
 
+
 //---------------------------------------------------
 //  Constructor and Destructor
 //---------------------------------------------------
@@ -207,13 +208,13 @@ TgcDigitCollection* TgcDigitMaker::executeDigi(
             // OR all wires are connected : 0
 
             double zPosInSensArea =
-                zLocal + static_cast<double>(tgcChamber->getTotalWires(ilyr) -
+                zLocal + static_cast<double>(tgcChamber->nWires(ilyr) -
                                              nWireOffset) *
                              wire_pitch / 2.;
 
             // check a hit in the sensitive area
             if (zPosInSensArea < 0. ||
-                zPosInSensArea > tgcChamber->getTotalWires(ilyr) * wire_pitch) {
+                zPosInSensArea > tgcChamber->nWires(ilyr) * wire_pitch) {
                 iWireGroup[iPosition] = 0;
                 posInWireGroup[iPosition] = 0.;
                 ATH_MSG_DEBUG(
@@ -230,15 +231,15 @@ TgcDigitCollection* TgcDigitMaker::executeDigi(
                 int wire_index = 0;
                 while (wire_pitch * (static_cast<float>(wire_index)) <
                            zPosInSensArea &&
-                       igang <= tgcChamber->getNGangs(ilyr)) {
-                    wire_index += tgcChamber->getNWires(ilyr, igang);
+                       igang <= tgcChamber->nWireGangs(ilyr)) {
+                    wire_index += tgcChamber->nWires(ilyr, igang);
                     igang++;
                 }
                 posInWireGroup[iPosition] =
                     (zPosInSensArea / wire_pitch -
                      (static_cast<float>(wire_index))) /
                         (static_cast<float>(
-                            tgcChamber->getNWires(ilyr, igang - 1))) +
+                            tgcChamber->nWires(ilyr, igang - 1))) +
                     1.;
 
                 iWireGroup[iPosition] = ((1 == igang) ? 1 : igang - 1);
@@ -259,7 +260,7 @@ TgcDigitCollection* TgcDigitMaker::executeDigi(
 
         // === BC tagging from the hit timing ===
         for (int iwg = iWG[0]; iwg <= iWG[1]; iwg++) {
-            if (1 <= iwg && iwg <= tgcChamber->getNGangs(ilyr)) {
+            if (1 <= iwg && iwg <= tgcChamber->nWireGangs(ilyr)) {
                 // timing window offset
                 float wire_timeOffset =
                     (TOffset != nullptr)
@@ -340,7 +341,7 @@ TgcDigitCollection* TgcDigitMaker::executeDigi(
                         << localPos.x() << "/" << localPos.y() << "/"
                         << localPos.z() << " " << direCos.x() << "/"
                         << direCos.y() << "/" << direCos.z() << " " << height
-                        << " " << tgcChamber->getNWires(ilyr, iwg) << " "
+                        << " " << tgcChamber->nWires(ilyr, iwg) << " "
                         << bctag);
                 }
             } else {
@@ -366,7 +367,6 @@ TgcDigitCollection* TgcDigitMaker::executeDigi(
               energyDeposit)))  // New efficiencyCheck for TGCSimHit_p2
     ) {
 
-        int iStation = atoi(stationName.substr(1, 1).c_str()) - 1;
 
         int iStrip[2];
         float posInStrip[2] = {0., 0.};
@@ -385,7 +385,7 @@ TgcDigitCollection* TgcDigitMaker::executeDigi(
                     << "/" << ilyr << zPos << " " << zLocal << " " << direCos[0]
                     << "/" << direCos[1] << "/" << direCos[2]);
             } else if (zPos > height - zwidth_frame * 2.) {
-                iStrip[iPosition] = tgcChamber->getNStrips(ilyr) + 1;
+                iStrip[iPosition] = tgcChamber->nStrips(ilyr) + 1;
                 posInStrip[iPosition] = 0.;
                 ATH_MSG_DEBUG(
                     "Strip: Hit position located at outside of a sensitive "
@@ -400,16 +400,7 @@ TgcDigitCollection* TgcDigitMaker::executeDigi(
                 //
                 // number of strips in exclusive phi coverage of a chamber in
                 // T[1-3] and T4
-                const float nDivInChamberPhi[4] = {29.5, 29.5, 29.5, 31.5};
-                float dphi;
-                if ("T4E" != stationName) {
-                    dphi = 360. * CLHEP::degree /
-                           static_cast<float>(tgcChamber->getNPhiChambers()) /
-                           nDivInChamberPhi[iStation];
-                } else {
-                    dphi =
-                        360. * CLHEP::degree / 36. / nDivInChamberPhi[iStation];
-                }
+                const float dphi = tgcChamber->stripDeltaPhi();
                 float phiLocal = atan2(yLocal, zLocal + height / 2. + hmin);
 
                 ATH_MSG_DEBUG(

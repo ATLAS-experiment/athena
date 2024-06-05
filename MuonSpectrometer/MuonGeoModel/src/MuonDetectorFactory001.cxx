@@ -39,7 +39,6 @@
 #include "MuonGeoModel/RDBReaderAtlas.h"
 #include "MuonGeoModel/Station.h"
 #include "MuonGeoModel/StationSelector.h"
-#include "MuonReadoutGeometry/GenericTGCCache.h"
 #include "MuonReadoutGeometry/MuonStation.h"
 #include "RDBAccessSvc/IRDBAccessSvc.h"
 #include "RDBAccessSvc/IRDBRecord.h"
@@ -201,15 +200,6 @@ namespace MuonGM {
             mem = umem;
             cpu = ucpu;
         }
-
-        const TGC *t = dynamic_cast<const TGC*>(mysql->GetATechnology("TGC0"));
-        GenericTGCCache tgcCache;
-        tgcCache.frame_h = t->frame_h;
-        tgcCache.frame_ab = t->frame_ab;
-        tgcCache.nlayers = t->nlayers;
-
-        m_manager->setGenericTgcDescriptor(tgcCache);
-
 
         StoredMaterialManager *theMaterialManager;
         if (StatusCode::SUCCESS != m_pDetStore->retrieve(theMaterialManager, "MATERIALS")) {

@@ -46,36 +46,14 @@ SoTransform * PRDHandle_TGC::createTransform() const
     const MuonGM::TgcReadoutElement* detEl = prd->detectorElement(); 
     
     // calculate two points along the tgc phi strip in the local tgc reference frame 
-    Amg::Vector3D lposTGC = detEl->localChannelPos(prd->identify());
-    double z_shift = lposTGC.z()+10; 
-    double locy_shift = detEl->stripCtrX(gasGap, stripNo, z_shift ); 
-    if (0 < detEl->getStationEta()) { 
-    locy_shift *= -1.; // Needed because the coord system for  stripCtrX is flipped compared to localChannelPos (!)
-    } 
-    Amg::Vector3D lpos_shift(lposTGC.x(),locy_shift,z_shift);
-    
-    const Amg::Transform3D tgcTrans = detEl->getMaterialGeom()->getAbsoluteTransform();
-    Amg::Vector3D gpos = tgcTrans*lposTGC;
-    Amg::Vector3D gpos_shift = tgcTrans*lpos_shift;
-    
-    std::optional<Amg::Vector2D> locPos1 =  theSurface.globalToLocal(gpos,100);
-    std::optional<Amg::Vector2D> locPos2 = theSurface.globalToLocal(gpos_shift,100);
-    
-    if (!locPos1 || !locPos2) {
-      VP1Msg::message("PRDHandle_TGC::createTransform() Warning: global to local failed - cannot make transform!");
-      return 0;
-    }
-    
-    Amg::Vector2D difPos = (*locPos2) - (*locPos1);
-    // std::cout << " Strip pos " << *locPos1 << " shifted " << *locPos2 << " dif " << difPos << std::endl;
-    double tmp= difPos[Trk::locY] / sqrt(pow(difPos[Trk::locX],2)+pow(difPos[Trk::locY],2));
-    
-    tmp = (tmp>1.0) ? 1.0 : tmp;
-    tmp = (tmp<-1.0) ? -1.0 : tmp;
-    double angle = atan2( difPos[Trk::locX],  difPos[Trk::locY]);
+    const Amg::Vector3D lposTGC = detEl->stripCenterLocX(gasGap, stripNo, 0.) * Amg::Vector3D::UnitX();
+    const double shift = detEl->getStationEta() > 0 ? 1.*Gaudi::Units::cm : - 1.*Gaudi::Units::cm;
+    const  Amg::Vector3D lposTgcShifted = detEl->stripCenterLocX(gasGap, stripNo, shift) * Amg::Vector3D::UnitX()+
+                                           shift * Amg::Vector3D::UnitY();
+    const double angle = (lposTGC - lposTgcShifted).phi();
      // for phi strips, use sinstereo to get correct orientation
-     Amg::RotationMatrix3D localRot;
-     localRot.setIdentity();
+     Amg::RotationMatrix3D localRot{Amg::RotationMatrix3D::Identity()};
+
 
      // std::ostream os;
      // std::cout<<localRot.print(os)<<std::endl;
@@ -131,11 +109,11 @@ void PRDHandle_TGC::buildShapes(SoNode*&shape_simple, SoNode*&shape_detailed)
   double striplength =0.0, stripWidth = 0.0;
 
   if (isStrip){
-    striplength = m_tgc->detectorElement()->stripLength(plane, strip);
+    striplength = m_tgc->detectorElement()->stripLength();
     stripWidth = m_tgc->detectorElement()->stripWidth(plane, strip);
   } else {    
     striplength = m_tgc->detectorElement()->gangShortWidth(plane, strip);
-    stripWidth = m_tgc->detectorElement()->gangLength(plane, strip);
+    stripWidth = m_tgc->detectorElement()->gangRadialLength(plane, strip);
   }
 
   if (static_cast<PRDCollHandle_TGC*>(collHandle())->project())

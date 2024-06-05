@@ -17,72 +17,80 @@
 #include "GaudiKernel/MsgStream.h"
 
 namespace MuonGM {
-
+    TgcReadoutParams::TgcReadoutParams():
+        AthMessaging{"TgcReadoutParams"}{}
     TgcReadoutParams::TgcReadoutParams(const std::string& name, 
                                        int iCh, 
                                        int Version, 
-                                       float WireSp, 
+                                       double WireSp, 
                                        const int NCHRNG, 
                                        GasGapIntArray && numWireGangs,
                                        WiregangArray && IWGS1, 
                                        WiregangArray && IWGS2, 
-                                       WiregangArray && IWGS3, 
-                                       GasGapIntArray && gangOffSet, 
-                                       GasGapIntArray && numStrips,
-                                       GasGapFloatArray && stripOffSet):
+                                       WiregangArray && IWGS3,                                        
+                                       GasGapIntArray && numStrips):
+        AthMessaging{"TgcRadoutParams - "+name},
         m_chamberName(name), 
         m_chamberType(iCh), 
         m_readoutVersion(Version), 
         m_wirePitch(WireSp), 
         m_nPhiChambers(NCHRNG),
-        m_nGangs{numWireGangs},
-        m_gangOffset{gangOffSet},
-        m_nStrips{numStrips},
-        m_stripOffset{stripOffSet}
-         {
-
+        m_nStrips{std::move(numStrips)} {
+        
+        for (int iGap =0 ; iGap < MaxNGaps; ++iGap){
+            m_nWires[iGap].resize(numWireGangs[iGap]);
+            m_nAccWires[iGap].resize(numWireGangs[iGap]);
+        }
         for (int iGang = 0; iGang < MaxNGangs; ++iGang) {
-            if (iGang < m_nGangs[0]) {
+            if (iGang < numWireGangs[0]) {
                 m_nWires[0][iGang] = IWGS1[iGang];
                 m_totalWires[0] += IWGS1[iGang];
-            } else
-                m_nWires[0][iGang] = 0;
-
-            if (iGang < m_nGangs[1]) {
+            }
+            if (iGang < numWireGangs[1]) {
                 m_nWires[1][iGang] = IWGS2[iGang];
                 m_totalWires[1] += IWGS2[iGang];
-            } else
-                m_nWires[1][iGang] = 0;
-
-            if (iGang < m_nGangs[2]) {
+            }
+            if (iGang < numWireGangs[2]) {
                 m_nWires[2][iGang] = IWGS3[iGang];
                 m_totalWires[2] += IWGS3[iGang];
-            } else
-                m_nWires[2][iGang] = 0;
+            }
+        }
+        for (size_t iGap = 0; iGap < m_nWires.size(); ++iGap) {
+            // Grap the total wires in the gasGap
+            const int totWires = totalWires(iGap + 1);
+            int accumWires = totWires;
+            for (int iGang = m_nWires[iGap].size() - 1; iGang >= 0; --iGang) {
+                accumWires -= m_nWires[iGap][iGang];
+                m_nAccWires[iGap][iGang] = accumWires;
+            }
         }
     }
     TgcReadoutParams::TgcReadoutParams(const std::string& name, 
                          int iCh, 
                          int Version, 
-                         float WireSp, 
+                         double WireSp, 
                          const int NCHRNG, 
                          GasGapIntArray && numWireGangs,
                          WiregangArray&& IWGS1, 
                          WiregangArray&& IWGS2, 
                          WiregangArray&& IWGS3,
-                         float PDIST, 
+                         double PDIST, 
                          StripArray&& SLARGE, 
-                         StripArray&& SSHORT,
-                         GasGapIntArray&& gangOffSet, 
-                         GasGapIntArray&& numStrips,
-                         GasGapFloatArray&& stripOffSet):
+                         StripArray&& SSHORT,                         
+                         GasGapIntArray&& numStrips):
         TgcReadoutParams(name, iCh, Version, WireSp, NCHRNG, std::move(numWireGangs), 
                         std::move(IWGS1), std::move(IWGS2), std::move(IWGS3),
-                        std::move(gangOffSet), std::move(numStrips), std::move(stripOffSet)){
+                        std::move(numStrips)){
       
         m_physicalDistanceFromBase = PDIST;
-        m_stripPositionOnLargeBase = SLARGE;
-        m_stripPositionOnShortBase = SSHORT;
+        m_stripPositionOnLargeBase = std::move(SLARGE);
+        m_stripPositionOnShortBase = std::move(SSHORT);
+        for (size_t s = 0 ; s < m_stripPositionOnLargeBase.size() - 1; ++s) {
+            /// Position of the left strip's left edge at the chamber chamber center + the one of the
+            /// right edge
+            m_stripPositionCenter[s] = 0.25 *( m_stripPositionOnLargeBase[s] + m_stripPositionOnShortBase[s] +
+                                            m_stripPositionOnLargeBase[s+1] + m_stripPositionOnShortBase[s+1]);
+        }
 
     }
 
@@ -91,129 +99,92 @@ namespace MuonGM {
     // Access to general parameters
 
     int TgcReadoutParams::chamberType() const { return m_chamberType; }
-
     int TgcReadoutParams::readoutVersion() const { return m_readoutVersion; }
-
     int TgcReadoutParams::nPhiChambers() const { return m_nPhiChambers; }
-
-    int TgcReadoutParams::nGaps() const {
-        int nGaps = 2;
-        if (nStrips(3) > 1) nGaps = 3;
-        return nGaps;
-    }
-
+    int TgcReadoutParams::nGaps() const { return 2 + (nStrips(3) > 1); }
     // Access to wire gang parameters
+    double TgcReadoutParams::wirePitch() const { return m_wirePitch; }
 
-    float TgcReadoutParams::wirePitch() const { return m_wirePitch; }
-
-    int TgcReadoutParams::nGangs(int gasGap) const {
+    int TgcReadoutParams::nWireGangs(int gasGap) const {
         if (gasGap < 1 || gasGap > MaxNGaps) {
-            MsgStream log(Athena::getMessageSvc(), "TgcReadoutParams");
-            log << MSG::WARNING << "TgcReadoutParams::nGangs(" << gasGap << ") gasGap out of allowed range: 1-" << MaxNGaps << endmsg;
-#ifndef NDEBUG
+            ATH_MSG_FATAL(__func__<<":"<<__LINE__<<"nWireGangs(" << gasGap << ") gasGap out of allowed range: 1-" << MaxNGaps );
             throw std::out_of_range("input gas gap index is incorrect");
-#endif
-            return 0;
         }
-        return m_nGangs[gasGap - 1];
+        return m_nWires[gasGap - 1].size();
     }
 
     int TgcReadoutParams::totalWires(int gasGap) const {
         if (gasGap < 1 || gasGap > MaxNGaps) {
-            MsgStream log(Athena::getMessageSvc(), "TgcReadoutParams");
-            log << MSG::WARNING << "TgcReadoutParams::totalWires(" << gasGap << ") gasGap out of allowed range: 1-" << MaxNGaps << endmsg;
-#ifndef NDEBUG
+            ATH_MSG_FATAL(__func__<<":"<<__LINE__<<"(" << gasGap << ") gasGap out of allowed range: 1-" << MaxNGaps );
             throw std::out_of_range("input gas gap index is incorrect");
-#endif
-            return 0;
         }
         return m_totalWires[gasGap - 1];
     }
 
     int TgcReadoutParams::nWires(int gasGap, int gang) const {
         if (gasGap < 1 || gasGap > MaxNGaps || gang < 1 || gang > MaxNGangs) {
-            MsgStream log(Athena::getMessageSvc(), "TgcReadoutParams");
-            log << MSG::WARNING << "TgcReadoutParams::nWires gasGap " << gasGap << " or gang " << gang << " out of allowed range" << endmsg;
-#ifndef NDEBUG
+            ATH_MSG_FATAL( __func__<<":"<<__LINE__<<" gasGap " << gasGap << " or gang " << gang << " out of allowed range" );
             throw std::out_of_range("input gas gap or wire gang index are incorrect");
-#endif
-            return 0;
         }
         return m_nWires[gasGap - 1][gang - 1];
     }
-
-    int TgcReadoutParams::gangOffset(int gasGap) const {
-        if (gasGap < 1 || gasGap > MaxNGaps) {
-            MsgStream log(Athena::getMessageSvc(), "TgcReadoutParams");
-            log << MSG::WARNING << "TgcReadoutParams::gangOffset(" << gasGap << ") gasGap out of allowed range: 1-" << MaxNGaps << endmsg;
-#ifndef NDEBUG
-            throw std::out_of_range("input gas gap index is incorrect");
-#endif
-            return 0;
+    int TgcReadoutParams::nSummedWires(int gasGap, int gang) const {
+        if (gasGap < 1 || gasGap > MaxNGaps || gang < 1 || gang > MaxNGangs) {
+            ATH_MSG_FATAL( __func__<<":"<<__LINE__<<" gasGap " << gasGap << " or gang " << gang << " out of allowed range" );
+            throw std::out_of_range("input gas gap or wire gang index are incorrect");
         }
-        return m_gangOffset[gasGap - 1];
+        return m_nAccWires[gasGap -1 ][gang - 1];
     }
-
+    double TgcReadoutParams::nPitchesToGang(int gasGap, int gang) const {
+        if (gasGap < 1 || gasGap > MaxNGaps || gang < 1 || gang > MaxNGangs) {
+            ATH_MSG_FATAL( __func__<<":"<<__LINE__<<" gasGap " << gasGap << " or gang " << gang << " out of allowed range" );
+            throw std::out_of_range("input gas gap or wire gang index are incorrect");
+        }
+        const double nPit = 1.*m_nAccWires[gasGap -1][gang - 1] +
+                            0.5*m_nWires[gasGap-1][gang-1] -
+                            0.5*m_totalWires[gasGap -1];
+        return nPit;   
+    }
     // Access to strip parameters
     int TgcReadoutParams::nStrips(int gasGap) const {
         if (gasGap < 1 || gasGap > MaxNGaps) {
-            MsgStream log(Athena::getMessageSvc(), "TgcReadoutParams");
-            log << MSG::WARNING << "TgcReadoutParams::nStrips(" << gasGap << ") gasGap out of allowed range: 1-" << MaxNGaps << endmsg;
-#ifndef NDEBUG
+            ATH_MSG_FATAL( __func__<<":"<<__LINE__<<"(" << gasGap << ") gasGap out of allowed range: 1-" << MaxNGaps );
             throw std::out_of_range("input gas gap index is incorrect");
-#endif
-            return 0;
         }
         return m_nStrips[gasGap - 1];
     }
+    double TgcReadoutParams::physicalDistanceFromBase() const { return m_physicalDistanceFromBase; }
 
-    float TgcReadoutParams::stripOffset(int gasGap) const {
-        if (gasGap < 1 || gasGap > MaxNGaps) {
-            MsgStream log(Athena::getMessageSvc(), "TgcReadoutParams");
-            log << MSG::WARNING << "TgcReadoutParams::stripOffset(" << gasGap << ") gasGap out of allowed range: 1-" << MaxNGaps << endmsg;
-#ifndef NDEBUG
-            throw std::out_of_range("input gas gap index is incorrect");
-#endif
-            return 0.;
-        }
-        return m_stripOffset[gasGap - 1];
-    }
-
-    float TgcReadoutParams::physicalDistanceFromBase() const { return m_physicalDistanceFromBase; }
-
-    float TgcReadoutParams::stripPositionOnLargeBase(int istrip) const {
+    double TgcReadoutParams::stripPositionOnLargeBase(int istrip) const {
         // all gas gaps have the same n. of strips (=> check the first one)
         if (istrip <= m_nStrips[0] + 1)
             return m_stripPositionOnLargeBase[istrip - 1];
-        else {
-            MsgStream log(Athena::getMessageSvc(), "TgcReadoutParams");
-            log << MSG::WARNING << "Input strip n. " << istrip
-                << " out of range in TgcReadoutParams::stripPositionOnLargeBase for TgcReadoutParams of name/type " << m_chamberName << "/"
-                << m_chamberType << "  - Nstrips = " << m_nStrips[0] << " MaxNStrips = " << MaxNStrips << endmsg;
-#ifndef NDEBUG
-            throw std::out_of_range(
-                "input strip index >= m_nStrips[0]+1 (remember that positions on short/large bases are given for 33 elements [begin of "
-                "each strip + end of last one])");
-#endif
-            return m_stripPositionOnLargeBase[0];  // if invalid input, return the first strip}
-        }
+       
+        ATH_MSG_FATAL( "Input strip n. " << istrip
+            << " out of range in TgcReadoutParams::stripPositionOnLargeBase for TgcReadoutParams of name/type " << m_chamberName << "/"
+            << m_chamberType << "  - Nstrips = " << m_nStrips[0] << " MaxNStrips = " << MaxNStrips );
+        throw std::out_of_range("invalid strip index");
+        return 0.;
     }
-
-    float TgcReadoutParams::stripPositionOnShortBase(int istrip) const {
+    double TgcReadoutParams::stripPositionOnShortBase(int istrip) const {
         // all gas gaps have the same n. of strips (=> check the first one)
         if (istrip <= m_nStrips[0] + 1)
             return m_stripPositionOnShortBase[istrip - 1];
-        else {
-            MsgStream log(Athena::getMessageSvc(), "TgcReadoutParams");
-            log << MSG::WARNING << "Input strip n. " << istrip
+        
+        ATH_MSG_FATAL( "Input strip n. " << istrip
                 << " out of range in TgcReadoutParams::stripPositionOnShortBase for TgcReadoutParams of name/type " << m_chamberName << "/"
-                << m_chamberType << "  - Nstrips = " << m_nStrips[0] << " MaxNStrips = " << MaxNStrips << endmsg;
-#ifndef NDEBUG
-            throw std::out_of_range(
-                "input strip index >= m_nStrips[0]+1 (remember that positions on short/large bases are given for 33 elements [begin of "
-                "each strip + end of last one])");
-#endif
-            return m_stripPositionOnShortBase[0];  //  if invalid input, return the first strip
+                << m_chamberType << "  - Nstrips = " << m_nStrips[0] << " MaxNStrips = " << MaxNStrips );
+        throw std::out_of_range("invalid strip index");
+        return 0.;
+    }
+    double TgcReadoutParams::stripCenter(int istrip) const {
+        if (istrip <= m_nStrips[0] + 1) {
+            return m_stripPositionCenter[istrip -1];
         }
+        ATH_MSG_FATAL( "Input strip n. " << istrip
+            << " out of range in TgcReadoutParams::stripPositionOnLargeBase for TgcReadoutParams of name/type " << m_chamberName << "/"
+            << m_chamberType << "  - Nstrips = " << m_nStrips[0] << " MaxNStrips = " << MaxNStrips );
+        throw std::out_of_range("invalid strip index");
+        return 0.;
     }
 }  // namespace MuonGM

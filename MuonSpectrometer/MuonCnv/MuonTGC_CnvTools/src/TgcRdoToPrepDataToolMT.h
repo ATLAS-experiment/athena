@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTGC_CNVTOOLS_TGCRDOTOPREPDATATOOLMT_H
@@ -280,22 +280,40 @@ namespace Muon
       bool isIncludedInChamberBoundary(const TgcRawData& rd) const;
       
       /** Get bitPos etc of TGC3 wire for HiPt */
-      static void getBitPosOutWire(const TgcRawData& rd, int& slbsubMatrix, int* bitpos_o) ;
+      static void getBitPosOutWire(const TgcRawData& rd, int& slbsubMatrix, std::array<int, 2>& bitpos_o) ;
       /** Get bitPos etc of TGC1 wire for HiPt */
-      void getBitPosInWire(const TgcRawData& rd, const int DeltaBeforeConvert,
-                           int* bitpos_i, int* slbchannel_i, int* slbId_in, int* sbLoc_in, int& sswId_i,
-                           const int* bitpos_o, int* slbchannel_o, const int slbId_o) const;
+      void getBitPosInWire(const TgcRawData& rd, 
+                           const int DeltaBeforeConvert,
+                           std::array<int, 4>& bitpos_i, 
+                           std::array<int, 4>& slbchannel_i, 
+                           std::array<int, 4>& slbId_in, 
+                           std::array<int, 4>& sbLoc_in, 
+                           int& sswId_i,
+                           const std::array<int, 2>& bitpos_o, 
+                           std::array<int, 2>& slbchannel_o, 
+                           const int slbId_o) const;
       /** Get bitPos etc of TGC3 strip for HiPt */
-      static void getBitPosOutStrip(const TgcRawData& rd, int& slbsubMatrix, int* bitpos_o) ;
+      static void getBitPosOutStrip(const TgcRawData& rd, int& slbsubMatrix, std::array<int, 2>& bitpos_o) ;
       /** Get bitPos etc of TGC1 strip for HiPt */
-      void getBitPosInStrip(const TgcRawData& rd, const int DeltaBeforeConvert,
-                            int* bitpos_i, int* slbchannel_i, int& sbLoc_i, int& sswId_i,
-                            const int* bitpos_o, int* slbchannel_o) const;
+      void getBitPosInStrip(const TgcRawData& rd, 
+                            const int DeltaBeforeConvert,
+                            std::array<int, 4>& bitpos_i, 
+                            std::array<int, 4>& slbchannel_i, 
+                            int& sbLoc_i, 
+                            int& sswId_i,
+                            const std::array<int, 2>& bitpos_o, 
+                            std::array<int, 2>& slbchannel_o) const;
       /** Get bitPos etc of wire for SL */
-      void getBitPosWire(const TgcRawData& rd, const int hitId_w, const int sub_w, int& subMatrix_w, 
-             int* bitpos_w) const;
+      void getBitPosWire(const TgcRawData& rd, 
+                         const int hitId_w, 
+                         const int sub_w, 
+                         int& subMatrix_w, 
+                         std::array<int, 3>& bitpos_w) const;
       /** Get bitPos etc of strip for SL */
-      static void getBitPosStrip(const int hitId_s, const int sub_s, int& subMatrix_s, int* bitpos_s) ;
+      static void getBitPosStrip(const int hitId_s, 
+                                 const int sub_s, 
+                                 int& subMatrix_s, 
+                                 std::array<int, 3>& bitpos_s) ;
       
       /** Get delta (sagitta) before converion for HiPt */
       static int getDeltaBeforeConvert(const TgcRawData& rd) ;
@@ -303,36 +321,52 @@ namespace Muon
       /** Check if a chamber in BigWheel is a backward chamber or a forward chamber */
       static bool isBackwardBW(const TgcRawData& rd) ;
       
-      /** Get the width of a wire channel in the r direction */
-      double getWidthWire(const MuonGM::TgcReadoutElement* descriptor, const int gasGap, const int channel) const;
-      /** Get the width of a strip channel in the phi direction */
-      double getWidthStrip(const MuonGM::TgcReadoutElement* descriptor, const int gasGap, const int channel, 
-               const Identifier channelId) const;
       /** Get wire geometry (width, r, z) for SL */ 
-      bool getSLWireGeometry(const Identifier* channelId_wire, double& width_wire, double& r_wire, double& z_wire) const;
+      bool getSLWireGeometry(const std::array<Identifier, 3>& channelId_wire, 
+                             double& width_wire, 
+                             double& r_wire, 
+                             double& z_wire) const;
       /** Get strip geometry (width, theta) for SL */ 
-      bool getSLStripGeometry(const Identifier* channelId_strip, const bool isBackWard, const bool isAside, 
-                  double& width_strip, double& theta_strip) const;
+      bool getSLStripGeometry(const std::array<Identifier, 3>& channelId_strip, 
+                              const bool isBackWard, 
+                              const bool isAside, 
+                              double& width_strip, 
+                              double& theta_strip) const;
       /** Get position and offline ID of TGC3 wire for HiPt */ 
-      bool getPosAndIdWireOut(const MuonGM::TgcReadoutElement** descriptor_o, const Identifier* channelIdOut,
-                              const int* gasGap_o, const int* channel_o,
-                              double& width_o, double& hit_position_o, Amg::Vector2D& tmp_hitPos_o,
+      bool getPosAndIdWireOut(const std::array<const MuonGM::TgcReadoutElement*, 2>& descriptor_o, 
+                              const std::array<Identifier, 2>& channelIdOut,
+                              const std::array<int, 2>& gasGap_o, 
+                              const std::array<int, 2>& channel_o,
+                              double& width_o, 
+                              double& hit_position_o, 
+                              Amg::Vector2D& tmp_hitPos_o,
                               Identifier& channelIdOut_tmp) const;
       /** Get position and offline ID of TGC3 strip for HiPt */ 
-      bool getPosAndIdStripOut(const MuonGM::TgcReadoutElement** descriptor_o, const Identifier* channelIdOut,
-                               const int* gasGap_o, const int* channel_o,
-                               double& width_o, double& hit_position_o, Amg::Vector2D& tmp_hitPos_o,
+      bool getPosAndIdStripOut(const std::array<const MuonGM::TgcReadoutElement*, 2>& descriptor_o, 
+                               const std::array<Identifier,2 >& channelIdOut,
+                               const std::array<int, 2>& gasGap_o, 
+                               const std::array<int, 2>& channel_o,
+                               double& width_o, 
+                               double& hit_position_o, 
+                               Amg::Vector2D& tmp_hitPos_o,
                                Identifier& channelIdOut_tmp,
                                const bool isBackward, const bool isAside) const;
+     
       /** Get position and offline ID of TGC1 wire for HiPt */ 
-      bool getPosAndIdWireIn(const MuonGM::TgcReadoutElement** descriptor_i, const Identifier* channelIdIn,
-                             const int* gasGap_i, const int* channel_i,
-                             double& width_i, double& hit_position_i, Amg::Vector2D& tmp_hitPos_i,
+      bool getPosAndIdWireIn(const std::array<const MuonGM::TgcReadoutElement*, 4>& descriptor_i, 
+                             const std::array<Identifier,4 >& channelIdIn,
+                             const std::array<int, 4>& gasGap_i, 
+                             const std::array<int, 4>& channel_i,
+                             double& width_i, double& hit_position_i, 
+                             Amg::Vector2D& tmp_hitPos_i,
                              Identifier& channelIdIn_tmp) const;
       /** Get position and offline ID of TGC1 strip for HiPt */ 
-      bool getPosAndIdStripIn(const MuonGM::TgcReadoutElement** descriptor_i, const Identifier* channelIdIn,
-                              const int* gasGap_i, const int* channel_i,
-                              double& width_i, double& hit_position_i, Amg::Vector2D& tmp_hitPos_i,
+      bool getPosAndIdStripIn(const std::array<const MuonGM::TgcReadoutElement*, 4>& descriptor_i, 
+                              const std::array<Identifier, 4>& channelIdIn,
+                              const std::array<int, 4>& gasGap_i, 
+                              const std::array<int, 4>& channel_i,
+                              double& width_i, double& hit_position_i, 
+                              Amg::Vector2D& tmp_hitPos_i,
                               Identifier& channelIdIn_tmp,
                               const bool isBackward, const bool isAside) const;
       
@@ -340,10 +374,13 @@ namespace Muon
       bool getHiPtIds(const TgcRawData& rd, int& sswId_o, int& sbLoc_o, int& slbId_o) const;
 
       /** Get ReadoutID of SL from RDO */  
-      bool getSLIds(const bool isStrip, const TgcRawData& rd, Identifier* channelId, 
-            int& index, int& chip, int& hitId, int& sub, int& sswId, int& sbLoc, int& subMatrix, int *bitpos, 
-            const bool isBoundary=false, const TgcRdo* rdoColl=0, 
-            const int index_w=-1, const int chip_w=-1, const int hitId_w=-1, const int sub_w=-1) const;
+      bool getSLIds(const bool isStrip, 
+                    const TgcRawData& rd, 
+                    std::array<Identifier, 3>& channelId, 
+                    int& index, int& chip, int& hitId, int& sub, int& sswId, int& sbLoc, int& subMatrix, 
+                    std::array<int, 3>& bitpos, 
+                    const bool isBoundary=false, const TgcRdo* rdoColl=0, 
+                    const int index_w=-1, const int chip_w=-1, const int hitId_w=-1, const int sub_w=-1) const;
       /** Get strip sbLoc of Endcap chamber boundary from HiPt Strip */
       bool getSbLocOfEndcapStripBoundaryFromHiPt(const TgcRawData& rd,
                                                  int& sbLoc,

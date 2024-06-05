@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DCMathSegmentMaker.h"
@@ -43,6 +43,7 @@
 #include "TrkSurfaces/PlaneSurface.h"
 #include "TrkSurfaces/StraightLineSurface.h"
 #include "TrkTrack/Track.h"
+
 namespace {
 
     double cot(double x) {
@@ -97,7 +98,7 @@ namespace Muon {
             return;
         }
 
-        ATH_MSG_DEBUG("In find, passed " << mdts.size() << " RIO_OnTracks");
+        ATH_MSG_DEBUG("In find, passed " << mdts.size() << " MDTs & "<<clusters.size()<<" clusters");
 
         if (mdts.size() < 3) return;
 
@@ -880,11 +881,11 @@ namespace Muon {
         return Cluster2D(detElId, gasGapId, Amg::Vector2D(lpx, lpy), error, etaHit, phiHit);
     }
 
-    DCMathSegmentMaker::Cluster2D DCMathSegmentMaker::createTgcSpacePoint(const Identifier& gasGapId, const MuonClusterOnTrack* etaHit,
+    DCMathSegmentMaker::Cluster2D DCMathSegmentMaker::createTgcSpacePoint(const Identifier& gasGapId, 
+                                                                          const MuonClusterOnTrack* etaHit,
                                                                           const MuonClusterOnTrack* phiHit) const {
         double error{1.}, lpx{0.}, lpy{0.};
         Identifier detElId = m_idHelperSvc->detElId(gasGapId);
-        const TgcIdHelper& id_helper = m_idHelperSvc->tgcIdHelper();
         // case one hit missing. Take position and error of the available hit
         if (!etaHit) {
             lpx = phiHit->localParameters()[Trk::locX];
@@ -895,38 +896,20 @@ namespace Muon {
         } else if (etaHit && phiHit) {
             // get orientation angle of strip to rotate back from local frame to strip
             // copy code from ROT creator
-            const int stripNo = id_helper.channel(phiHit->identify());
-            const int gasGap = id_helper.gasGap(phiHit->identify());
-
             const MuonGM::TgcReadoutElement* detEl = dynamic_cast<const MuonGM::TgcReadoutElement*>(etaHit->detectorElement());
-            if (!detEl) {
-                ATH_MSG_WARNING("dynamic cast error for "<<m_idHelperSvc->toString(etaHit->identify())<<". Expected TGCs. Returning");
-                return Cluster2D(detElId, gasGapId, Amg::Vector2D(lpx, lpy), error, etaHit, phiHit);
-            }
-            // calculate local position of endpoint of strip
-            Amg::Vector3D lEtapos = detEl->localChannelPos(etaHit->identify());
-            double localEtaY = detEl->stripCtrX(gasGap, stripNo, lEtapos.z());
-            if (0 < detEl->getStationEta()) { localEtaY *= -1.; }
-            Amg::Vector3D lSppos = lEtapos;
-            lSppos[1] = localEtaY;
+            const Amg::Vector3D lSpacePoint = Amg::getRotateZ3D(-90 * Gaudi::Units::deg) * detEl->localSpacePoint(phiHit->identify(),
+                                                                                                                  etaHit->globalPosition(),            
+                                                                                                                  phiHit->globalPosition());
 
-            // transform to global
-            const Amg::Transform3D tgcTrans = detEl->absTransform();
-            Amg::Vector3D gposSp = tgcTrans * lSppos;
-            lpx = etaHit->localParameters()[Trk::locX];
+           
+            lpx = lSpacePoint.x();
+            lpy = lSpacePoint.y();
             error = Amg::error(etaHit->localCovariance(), Trk::locX);
             if (error <= std::numeric_limits<double>::epsilon()) {
                 ATH_MSG_WARNING(" Unphysical error assigned for " << m_idHelperSvc->toString(etaHit->identify()));
                 if (etaHit->prepRawData())
                     ATH_MSG_WARNING(" PRD error " << Amg::error(etaHit->prepRawData()->localCovariance(), Trk::locX));
             }
-            Amg::Vector2D lspPos{Amg::Vector2D::Zero()};
-            if (etaHit->associatedSurface().globalToLocal(gposSp, gposSp, lspPos)) {
-                lpy = lspPos[Trk::locY];
-            } else {
-                ATH_MSG_WARNING(" globalToLocal failed ");
-            }
-
             ATH_MSG_DEBUG(" TGC space point: error " << error << " stripWith " << error * M_SQRT2 << std::endl
                                                      << "   " << m_idHelperSvc->toString(etaHit->identify()) << std::endl
                                                      << "   " << m_idHelperSvc->toString(phiHit->identify()));
@@ -1082,12 +1065,9 @@ namespace Muon {
                 updatePhiRanges(tubeEnds.phimin, tubeEnds.phimax, phimin, phimax);
             }
 
-            if (msgLvl(MSG::VERBOSE)) {
-                ATH_MSG_VERBOSE(" new MDT hit " << m_idHelperSvc->toString(id) << " x " << lpos.x() << " y " << lpos.y() << " time "
+            ATH_MSG_VERBOSE(" new MDT hit " << m_idHelperSvc->toString(id) << " x " << lpos.x() << " y " << lpos.y() << " time "
                                                 << rot->driftTime() << " r " << r << " dr " << dr << " phi range " << tubeEnds.phimin << " "
-                                                << tubeEnds.phimax);
-                if (m_usePreciseError) ATH_MSG_VERBOSE(" dr(2) " << preciseError);
-            }
+                                                << tubeEnds.phimax<<" precise error "<<preciseError);
             dcs.push_back(std::move(dc));
 
             chamberSet.insert(elId);
@@ -1885,10 +1865,8 @@ namespace Muon {
         if (ldir.z() < 0.0001) return false;
 
         double dXdZ = ldir.x() / ldir.z();
-        double dYdZ = ldir.y() / ldir.z();
         Amg::Vector3D lsegPos = gToSegment * gpos;
         double xline = lsegPos.x();
-        double yline = lsegPos.y();
         double zline = lsegPos.z();
         ATH_MSG_VERBOSE(" Associated  hits " << rots.size() << " angleXZ " << 90. * segLocDir.angleXZ() / (M_PI_2) << " dXdZ " << dXdZ
                                              << " seg Pos (" << xline << " " << zline << ") " << segLocPos);
@@ -1902,7 +1880,7 @@ namespace Muon {
         for (const Trk::MeasurementBase* meas : rots) {
             Identifier id = m_edmHelperSvc->getIdentifier(*meas);
             if (!id.is_valid()) continue;
-            Amg::Vector3D lpos;
+            Amg::Vector3D lpos{Amg::Vector3D::Zero()};
             double lxmin{0}, lxmax{0}, phimin{0}, phimax{0};
             bool isMdt = m_idHelperSvc->isMdt(id);
             bool measuresPhi = m_idHelperSvc->measuresPhi(id);
@@ -1956,46 +1934,18 @@ namespace Muon {
                             ATH_MSG_WARNING("dynamic cast failed for CompetingMuonClustersOnTrack");
                             continue;
                         }
-                        const MuonGM::TgcReadoutElement* detEl =
-                            dynamic_cast<const MuonGM::TgcReadoutElement*>(crot->containedROTs().front()->prepRawData()->detectorElement());
-                        if (!detEl) {
-                            ATH_MSG_WARNING("dynamic cast failed for TgcReadoutElement");
-                            continue;
-                        }
-                        // calculate two points along the tgc phi strip in the local tgc reference frame
-                        Amg::Vector3D lposTGC = detEl->localChannelPos(id);
-                        double z_shift = lposTGC.z() + 10;
-                        double locy_shift = detEl->stripCtrX(gasGap, stripNo, z_shift);
-                        if (0 < detEl->getStationEta()) { locy_shift *= -1.; }
-                        Amg::Vector3D lpos_shift(lposTGC.x(), locy_shift, z_shift);
+                        auto detEl = dynamic_cast<const MuonGM::TgcReadoutElement*>(crot->containedROTs().front()->prepRawData()->detectorElement());
+                        
+                        // transform the two points inth
+                        const Amg::Vector3D segFrame_StripDir = gToSegment.linear()* detEl->stripDir(gasGap, stripNo);
+                        const Amg::Vector3D segFrame_stripPos = gToSegment * detEl->channelPos(id);
 
-                        // transform the two points to global coordinates
-                        const Amg::Transform3D tgcTrans = detEl->absTransform();
-                        Amg::Vector3D gposL = tgcTrans * lposTGC;
-                        Amg::Vector3D gposL_shift = tgcTrans * lpos_shift;
-
-                        // now transform them into the segment frame
-                        Amg::Vector3D lposSeg = gToSegment * gposL;
-                        Amg::Vector3D lposSeg_shift = gToSegment * gposL_shift;
-
-                        // calculate the y coordinate of the intersect of the segment with the TGC plane in the segment
-                        // frame
-                        double segYAtHit = yline + dYdZ * (lposSeg.z() - zline);
-
-                        // the TGC phi strip is a line in the xy plane, calculate the x position of the point on the line
-                        // at the y intersect position of the segment
-                        double tgcdX = lposSeg_shift.x() - lposSeg.x();
-                        double tgcdY = lposSeg_shift.y() - lposSeg.y();
-                        if (std::abs(tgcdY) < 0.0001) {
-                            ATH_MSG_WARNING(" Bad TGC phi strip orientation ");
-                            continue;
-                        }
-                        double tgcExX = tgcdX / tgcdY * (segYAtHit - lposSeg.y()) + lposSeg.x();
-                        lpos[0] = tgcExX;
-                        lpos[1] = segYAtHit;
-                        if (msgLvl(MSG::VERBOSE))
-                            ATH_MSG_VERBOSE(" In seg frame: phi pos " << lposSeg << " shifted pos " << lposSeg_shift
-                                                                      << " intersect with segment " << lpos);
+                        lpos = segFrame_stripPos + 
+                               Amg::intersect<3>(lsegPos, ldir, segFrame_stripPos, segFrame_StripDir).value_or(0) * segFrame_StripDir;
+                        
+                        ATH_MSG_VERBOSE(" In seg frame: phi pos " << Amg::toString(lsegPos) 
+                                        << " shifted pos " << Amg::toString(segFrame_StripDir)
+                                        << " intersect with segment " << Amg::toString(lpos));
                     }
                     Amg::Vector3D globalPos = segmentToGlobal * lpos;
                     phimin = globalPos.phi();
@@ -2004,8 +1954,7 @@ namespace Muon {
                     // check whether phi is consistent with segment phi range
                     bool phiOk = checkPhiConsistency(phimin, seg_phimin, seg_phimax);
                     if (!phiOk) {
-                        if (msgLvl(MSG::DEBUG))
-                            ATH_MSG_DEBUG(" Inconsistent phi " << phimin << " range " << seg_phimin << " " << seg_phimax);
+                        ATH_MSG_DEBUG(" Inconsistent phi " << phimin << " range " << seg_phimin << " " << seg_phimax);
                     }
                 }
             }
@@ -2022,7 +1971,7 @@ namespace Muon {
                     } else {
                         // not count this phi hit
                         --nphiHits;
-                        if (msgLvl(MSG::DEBUG)) { ATH_MSG_DEBUG(" close phi hits, distance " << distPhiHits); }
+                        ATH_MSG_DEBUG(" close phi hits, distance " << distPhiHits);
                     }
                 }
             }
@@ -2048,13 +1997,12 @@ namespace Muon {
                     zline = firstPhiHit->z;
 
                     if (m_assumePointingPhi) {
-                        Amg::Vector3D ipLocPos = gToSegment * Amg::Vector3D{Amg::Vector3D::Zero()};
-                        if (msgLvl(MSG::VERBOSE)) ATH_MSG_VERBOSE(" IP position in local frame " << ipLocPos);
+                        Amg::Vector3D ipLocPos = gToSegment.translation();
+                        ATH_MSG_VERBOSE(" IP position in local frame " << ipLocPos);
 
                         double dz = ipLocPos.z() - zline;
                         if (std::abs(dz) > 0.001) {
-                            if (msgLvl(MSG::VERBOSE))
-                                ATH_MSG_VERBOSE(" hit (" << xline << "," << zline << ")  IP (" << ipLocPos.x() << "," << ipLocPos.z()
+                            ATH_MSG_VERBOSE(" hit (" << xline << "," << zline << ")  IP (" << ipLocPos.x() << "," << ipLocPos.z()
                                                          << ")  dXdZ " << (ipLocPos.x() - xline) / dz << " old " << dXdZ);
                             dXdZ = (ipLocPos.x() - xline) / dz;
                         }

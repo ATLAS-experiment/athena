@@ -8,7 +8,7 @@
  **   @date   Sun 22 Sep 2019 10:21:50 BST
  **
  **
- **   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ **   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -49,7 +49,7 @@ std::unique_ptr<RegSelSiLUT> TGC_RegSelCondAlg::createTable( const EventContext&
 
   if( !manager.range( id_range ) ) {
     ATH_MSG_ERROR("Failed to retrieve validity range for " << manager.key());
-    return {nullptr};
+    return nullptr;
   }
 
 
@@ -59,15 +59,12 @@ std::unique_ptr<RegSelSiLUT> TGC_RegSelCondAlg::createTable( const EventContext&
 
   if ( service( "MuonTGC_CablingSvc", cabling ).isFailure() ) { 
     ATH_MSG_ERROR( "Could not retrieve TGC cabling for " << name() );
-    return {nullptr};
+    return nullptr;
   }
 
 
 
   const TgcIdHelper*  helper = manager->tgcIdHelper();
-  
-  std::vector<Identifier>::const_iterator  idfirst = helper->module_begin();
-  std::vector<Identifier>::const_iterator  idlast =  helper->module_end();
  
   const IdContext ModuleContext = helper->module_context();
 
@@ -75,20 +72,13 @@ std::unique_ptr<RegSelSiLUT> TGC_RegSelCondAlg::createTable( const EventContext&
   
   std::unique_ptr<RegSelSiLUT> lut = std::make_unique<RegSelSiLUT>();
 
-  int maxRodId = 0;
-  int maxSRodId = 0;
-  int maxSswId = 0;
-  int maxSbloc = 0;
-  int minChannelId = 0;
-  int maxChannelId = 0;
-  cabling->getReadoutIDRanges(maxRodId, maxSRodId, maxSswId, maxSbloc, minChannelId, maxChannelId);
 
-  for (std::vector<Identifier>::const_iterator i = idfirst; i != idlast; ++i) {
+  for ( auto i = helper->module_begin(); i != helper->module_end(); ++i) {
    
     Identifier     Id = *i;
-    IdentifierHash hashId;
+    IdentifierHash hashId{0};
 
-    helper->get_hash( Id,hashId,&ModuleContext);
+    helper->get_module_hash(Id, hashId);
    
     ExpandedIdentifier exp_id;
     if (helper->get_expanded_id( Id, exp_id, &ModuleContext)) {
@@ -104,35 +94,31 @@ std::unique_ptr<RegSelSiLUT> TGC_RegSelCondAlg::createTable( const EventContext&
       continue;
     }
             
-    int gapMin = helper->gasGapMin(Id);
-    int gapMax = helper->gasGapMax(Id);
+    constexpr int gapMin = 1;
+    const int gapMax = tgc->nGasGaps();
 
-    Identifier chId;
-    chId = helper -> channelID(Id,gapMin,0,1);
-    const int chmax = helper -> channelMax(chId);
+    Identifier chId = helper -> channelID(Id,gapMin,0,1);
+    const int chmax = tgc->nWireGangs(gapMin);
     Amg::Vector3D posmax = tgc->channelPos(gapMin,0,chmax); // gapMax gives posmax!
     chId = helper -> channelID(Id,gapMax,0,1);
-    const int chmin = helper -> channelMin(chId);
-    Amg::Vector3D posmin = tgc->channelPos(gapMax,0,chmin); // gapMin gives posmin!
-
-    // caliculation based on max/min channels in a module
-    //  etamin = -logf(tan(atan(posmin.perp()/fabs(posmin.z()))/2.));
-    //  etamax = -logf(tan(atan(posmax.perp()/fabs(posmax.z()))/2.));
+    constexpr int chmin = 1;
+    Amg::Vector3D posmin = tgc->channelPos(gapMax, 0, chmin); // gapMin gives posmin!
 
     // caliculation based on active sensitive area
       
     Amg::Vector3D posctr = tgc->globalPosition();
     double activeheight  = tgc->length();
 
-    double etamin = -logf(std::tan(std::atan((posctr.perp()-0.5*activeheight)/std::fabs(posmin.z()))*0.5));
-    double etamax = -logf(std::tan(std::atan((posctr.perp()+0.5*activeheight)/std::fabs(posmax.z()))*0.5));
+    const double zmin = posmin.z();
+    const double zmax = posmax.z();
 
-    double zmin = posmin.z();
-    double zmax = posmax.z();
+    const double rmin = posctr.perp()-0.5*activeheight;
+    const double rmax = posctr.perp()+0.5*activeheight;
 
-    double rmin = posctr.perp()-0.5*activeheight;
-    double rmax = posctr.perp()+0.5*activeheight;
-
+    const double minTheta = std::atan2(std::abs(zmin), rmin);
+    const double maxTheta = std::atan2(std::abs(zmax), rmax);
+    double etamin = -std::log(0.5*std::tan(minTheta));
+    double etamax = -std::log(0.5*std::tan(maxTheta));
 
     if (helper->stationEta(Id) < 0) {
       etamin = -etamin;
@@ -141,11 +127,11 @@ std::unique_ptr<RegSelSiLUT> TGC_RegSelCondAlg::createTable( const EventContext&
 
 
     // caliculation based on active sensitive area
-    double activelongside = tgc->longWidth()-tgc->frameXwidth()*2.;
+    double activelongside = tgc->getLongSsize()-tgc->frameXwidth()*2.;
     /// Should use std::atan2 etc, but atan2f is not definied in cmath, so for backwards 
     /// compatability we are forced to use the old versions 
-    double phimin = atan2f(posctr.y(),posctr.x()) - atan2f(activelongside/2.,posctr.perp()+activeheight/2.);
-    double phimax = atan2f(posctr.y(),posctr.x()) + atan2f(activelongside/2.,posctr.perp()+activeheight/2.);
+    double phimin = std::atan2(posctr.y(),posctr.x()) - std::atan2(activelongside/2.,posctr.perp()+activeheight/2.);
+    double phimax = std::atan2(posctr.y(),posctr.x()) + std::atan2(activelongside/2.,posctr.perp()+activeheight/2.);
 
     if (phimin < 0) phimin += 2.*M_PI;
     if (phimax < 0) phimax += 2.*M_PI;
@@ -154,9 +140,6 @@ std::unique_ptr<RegSelSiLUT> TGC_RegSelCondAlg::createTable( const EventContext&
     int subDetectorId = 0; // 0x67 (A side) or 0x68 (C side)
     int rodId = 0; // 1-12
     cabling->getReadoutIDfromElementID(Id, subDetectorId, rodId);
-    //int isAside = (subDetectorId==0x67) ? 0 : 1;
-    //uint32_t robId = static_cast<uint32_t>(isAside*(maxRodId) + rodId -1); // 0-23
-    // using Source ID :see Muon::TGC_Hid2RESrcID::getRodID()/getRobId()
     uint32_t robId =  ( ((0x0ff) & subDetectorId)<<16 ) | (rodId);
     // end part to get ROB id
 

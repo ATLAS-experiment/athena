@@ -1110,7 +1110,7 @@ namespace Muon {
         } else if (m_idHelperSvc->isTgc(id)) {
             const MuonGM::TgcReadoutElement* tgcDetEl = dynamic_cast<const MuonGM::TgcReadoutElement*>(ele);
             if (!tgcDetEl) {return std::make_pair(0.,0.);}
-            const double halfLength = 0.5 * tgcDetEl->WireLength(m_idHelperSvc->tgcIdHelper().gasGap(id), m_idHelperSvc->tgcIdHelper().channel(id));
+            const double halfLength = 0.5 * tgcDetEl->gangCentralWidth(m_idHelperSvc->tgcIdHelper().gasGap(id), m_idHelperSvc->tgcIdHelper().channel(id));
             return std::make_pair(halfLength, halfLength);
         } else if (m_idHelperSvc->issTgc(id)) {
             const MuonGM::sTgcReadoutElement* stgcDetEl = dynamic_cast<const MuonGM::sTgcReadoutElement*>(ele);

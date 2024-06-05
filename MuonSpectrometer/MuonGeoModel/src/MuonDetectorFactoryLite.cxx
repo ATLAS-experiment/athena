@@ -14,7 +14,7 @@
 #include "MuonGeoModel/MuonChamberLite.h"
 #include "MuonGeoModel/RDBReaderAtlas.h"
 #include "MuonGeoModel/Station.h"
-#include "MuonReadoutGeometry/GenericTGCCache.h"
+
 #include "MuonReadoutGeometry/MuonStation.h"
 #include "MuonReadoutGeometry/MMReadoutElement.h"
 #include "MuonReadoutGeometry/sTgcReadoutElement.h"
@@ -118,15 +118,6 @@ namespace MuonGM {
       log << MSG::ERROR << " FAILURE in DB access; Muon node will not be built" << endmsg;
       return;
     }
-       
-    const TGC *t = dynamic_cast<const TGC*>(mysql->GetATechnology("TGC0"));
-    GenericTGCCache tgcCache;
-    tgcCache.frame_h = t->frame_h;
-    tgcCache.frame_ab = t->frame_ab;
-    tgcCache.nlayers = t->nlayers;
-
-    m_manager->setGenericTgcDescriptor(tgcCache);
-
 
     GeoFullPhysVol *p4 = mapFPV["MuonTreeTop"];
     m_manager->addTreeTop(p4); // This is the top!

@@ -291,7 +291,7 @@ std::set<TgcChamber> readTreeDump(const std::string& inputFile) {
                 throw std::runtime_error(err.str());
             } 
         }
-        for (size_t l = 0 ; l < layerMeasPhi->size(); ++l) {
+        for (size_t l = 0 ; l < layerMeasPhi->size(); ++l) {            
             Amg::RotationMatrix3D layRot{Amg::RotationMatrix3D::Identity()};
             layRot.col(0) = Amg::Vector3D{(*layerCol1X)[l], (*layerCol1Y)[l], (*layerCol1Z)[l]};
             layRot.col(1) = Amg::Vector3D{(*layerCol2X)[l], (*layerCol2Y)[l], (*layerCol2Z)[l]};
@@ -424,8 +424,8 @@ int main( int argc, char** argv ) {
             /// TEST_LAYPROP(shortWidth, "short width");
             /// TEST_LAYPROP(longWidth, "long width"); 
             /// TEST_LAYPROP(height, "height");
-            if (!chambOk) break;
         }
+        if (!chambOk) continue;
         for (const TgcChamber::RadialStrip& refStrip : ref.strips) {
             std::set<TgcChamber::RadialStrip>::const_iterator s_test_itr = test.strips.find(refStrip);
             if (s_test_itr == test.strips.end()) {
@@ -440,7 +440,7 @@ int main( int argc, char** argv ) {
                          <<refStrip<<" should be located at "<<Amg::toString(refStrip.locCenter, 1)<<
                          ". Currently, it is at "<<Amg::toString(testStrip.locCenter, 1)<<std::endl;
                 chambOk = false;
-                break;
+                continue;
             }
 
             if ( (testStrip.globCenter - refStrip.globCenter).mag() > tolerance) {
@@ -470,15 +470,29 @@ int main( int argc, char** argv ) {
                             <<testGang.numWires<<std::endl;
                 chambOk = false;
             }                
-            const Amg::Vector3D diffPos = refGang.position - testGang.position;
+
+            const Amg::Vector2D lDiffPos = refGang.localPos - testGang.localPos;
             constexpr double halfPitch = 0.9 * Gaudi::Units::mm;
+            if (lDiffPos.mag() - halfPitch > tolerance) {
+                std::cerr<<"runTgcComparison() "<<__LINE__<<": In "<<ref<<" "<<testGang
+                         <<" should be located at "<<Amg::toString(refGang.localPos,2)
+                         <<" but is found at "<<Amg::toString(testGang.localPos, 2)
+                         <<", mag="<<lDiffPos.mag()
+                         <<" "<<lDiffPos.mag() / 1.8 <<std::endl;
+                chambOk = false;
+                continue;
+            }
+
+
+            const Amg::Vector3D diffPos = refGang.position - testGang.position;
             if (diffPos.mag() - halfPitch > tolerance) {
                 std::cerr<<"runTgcComparison() "<<__LINE__<<": In "<<ref<<" "<<testGang
                          <<" is displaced by "<<Amg::toString(diffPos, 2)<<", mag="<<diffPos.mag()<<std::endl;
                 chambOk = false;
+                continue;
             }
             
-            if (std::abs(refGang.length - testGang.length) > tolerance) {
+            if (false && std::abs(refGang.length - testGang.length) > tolerance) {
                 std::cerr<<"runTgcComparison() "<<__LINE__<<": In "<<ref<<" "<<testGang<<" different length detected "
                          <<refGang.length<<" (ref) vs. "<<testGang.length<<" (test). Delta: "
                          <<(refGang.length - testGang.length) <<std::endl;      

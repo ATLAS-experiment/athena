@@ -21,10 +21,12 @@
 #include "TrkEventPrimitives/LocalParameters.h"
 #include "TrkEventPrimitives/LocalDirection.h"
 #include "TrkSurfaces/Surface.h"
+#include "GaudiKernel/PhysicalConstants.h"
 
-#define SIG_VEL 4.80000  // ns/m
-#define C_VEL 3.33564    // ns/m
-
+namespace {
+    constexpr double SIG_VEL =  4.80000;  // ns/m
+    constexpr double C_VEL = 1./ Gaudi::Units::c_light; // ns/m
+}
 namespace Muon {
 
     //================================================================================
@@ -160,27 +162,23 @@ namespace Muon {
             //***************************
 
             const TgcPrepData* MClus = static_cast<const TgcPrepData*>(&RIO);
+            const TgcIdHelper& idHelper{m_idHelperSvc->tgcIdHelper()};
 
             // calculation of 2D error matrix for TGC phi strips
-            if (m_idHelperSvc->measuresPhi(RIO.identify())) {
-                int stationeta = m_idHelperSvc->stationEta(RIO.identify());
-                int stripNo = m_idHelperSvc->tgcIdHelper().channel(RIO.identify());
-                int gasGap = m_idHelperSvc->tgcIdHelper().gasGap(RIO.identify());
+            if (idHelper.measuresPhi(RIO.identify())) {
+                const int stripNo    = idHelper.channel(RIO.identify());
+                const int gasGap     = idHelper.gasGap(RIO.identify());
 
                 const MuonGM::TgcReadoutElement* ele = MClus->detectorElement();
 
-                double stripLength = ele->stripLength(gasGap, stripNo);
-                double stripWidth = std::fabs(ele->stripMaxX(gasGap, stripNo, lp[Trk::locZ]) - ele->stripMinX(gasGap, stripNo, lp[Trk::locZ]));
+                double stripLength = ele->stripLength();
+                double stripWidth = std::abs(ele->stripPitch(gasGap, stripNo, lp[Trk::locZ]));
+                const Amg::Vector3D lStripDir = ele->transform(RIO.identify()).inverse().linear()*
+                                                ele->stripDir(RIO.identify());
 
-                double localX1 = ele->stripCtrX(gasGap, stripNo, stripLength / 2.);
-                double localX2 = ele->stripCtrX(gasGap, stripNo, -stripLength / 2.);
-                if (stationeta > 0) {
-                    localX1 = -localX1;
-                    localX2 = -localX2;
-                }
                 Amg::MatrixX mat(2, 2);
-
-                double phistereo = std::atan2(localX2 - localX1, stripLength);
+                
+                double phistereo = lStripDir.phi() - 90.*Gaudi::Units::deg;
                 double Sn = std::sin(phistereo);
                 double Sn2 = Sn * Sn;
                 double Cs2 = 1. - Sn2;

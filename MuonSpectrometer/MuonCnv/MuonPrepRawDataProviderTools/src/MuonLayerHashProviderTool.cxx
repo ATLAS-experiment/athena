@@ -76,9 +76,8 @@ namespace Muon {
         ATH_MSG_DEBUG(" No detector element found for " << m_idHelperSvc->toString(*it) );
         continue;
       }
-      IdentifierHash hash;
-      m_idHelperSvc->tgcIdHelper().get_module_hash(*it,hash);
-      int nstrips = detEl->getNStrips(1);
+      const IdentifierHash hash = m_idHelperSvc->moduleHash(*it);
+      int nstrips = detEl->nStrips(1);
       Amg::Vector3D p1 = detEl->channelPos(1,1,1);
       Amg::Vector3D p2 = detEl->channelPos(1,1,nstrips);
       std::vector<int> sectors1;

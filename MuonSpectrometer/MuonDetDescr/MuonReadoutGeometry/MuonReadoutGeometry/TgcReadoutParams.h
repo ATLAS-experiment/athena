@@ -25,54 +25,53 @@
 // None.
 //
 // ******************************************************************************
-
+#include <AthenaBaseComps/AthMessaging.h>
+#include <CxxUtils/ArrayHelper.h>
+#include <GaudiKernel/SystemOfUnits.h>
 #include <array>
 #include <string>
 
+
 namespace MuonGM {
 
-    class TgcReadoutParams {
+    class TgcReadoutParams : public AthMessaging {
     public:
         
         // Readout array sizes
         enum TgcReadoutArraySizes { MaxNGaps = 3, MaxNGangs = 180, MaxNStrips = 33 };
         using GasGapIntArray =  std::array<int, MaxNGaps>;
-        using GasGapFloatArray = std::array<float, MaxNGaps>;
+        using GasGapFloatArray = std::array<double, MaxNGaps>;
         using WiregangArray = std::array<int, MaxNGangs>;
-        using StripArray = std::array<float, MaxNStrips>;
+        using StripArray = std::array<double, MaxNStrips>;
 
-        
+        /// Constructor not setting any parameters
+        TgcReadoutParams();
+
         TgcReadoutParams(const std::string& name, 
                          int iCh, 
                          int Version, 
-                         float WireSp, 
+                         double WireSp, 
                          const int NCHRNG, 
                          GasGapIntArray && numWireGangs,
                          WiregangArray&& IWGS1, 
                          WiregangArray&& IWGS2, 
                          WiregangArray&& IWGS3, 
-                         GasGapIntArray&& gangOffSet, 
-                         GasGapIntArray&& numStrips,
-                         GasGapFloatArray&& stripOffSet);
+                         GasGapIntArray&& numStrips);
 
         // Another constructor for the layout Q
         TgcReadoutParams(const std::string& name, 
                          int iCh, 
-                         int Version, float WireSp, 
+                         int Version, double WireSp, 
                          const int NCHRNG, 
                          GasGapIntArray && numWireGangs,
                          WiregangArray&& IWGS1, 
                          WiregangArray&& IWGS2, 
                          WiregangArray&& IWGS3, 
-                          
-                         
-                         float PDIST, 
+
+                         double PDIST, 
                          StripArray&& SLARGE, 
                          StripArray&& SSHORT,
-
-                         GasGapIntArray&& gangOffSet, 
-                         GasGapIntArray&& numStrips,
-                         GasGapFloatArray&& stripOffSet);
+                         GasGapIntArray&& numStrips);
 
         ~TgcReadoutParams();
 
@@ -82,52 +81,71 @@ namespace MuonGM {
         int nPhiChambers() const;
         int nGaps() const;
 
-        // Access to wire gang parameters
-
-        float wirePitch() const;
-        inline float gangThickness() const;
-        int nGangs(int gasGap) const;
+        /// Returns the wire pitch
+        double wirePitch() const;
+        ///
+        inline double gangThickness() const;
+        /// Returns the number of wire gangs
+        int nWireGangs(int gasGap) const;
+        /// Returns the total number of wires in a given gang
         int totalWires(int gasGap) const;
+        /// Returns the number of wires in a given gang
         int nWires(int gasGap, int gang) const;
-        int gangOffset(int gasGap) const;
+        /// Returns the sum of all wires from gang [1 - i) 
+        int nSummedWires(int gasGap, int gang) const;
+        /// Returns the number of wire pitches that have to be travelled to reach gang i
+        double nPitchesToGang(int gasGap, int gang) const;
 
         // Access to strip parameters
-
-        inline float stripThickness() const;
+        inline double stripThickness() const;
         int nStrips(int gasGap) const;
-        float stripOffset(int gasGap) const;
-        float physicalDistanceFromBase() const;
-        float stripPositionOnLargeBase(int strip) const;
-        float stripPositionOnShortBase(int strip) const;
+
+        double physicalDistanceFromBase() const;
+        /// Returns the signed distance of the i-th's strip's left edge w.r.t 
+        /// the center of the bottom chamber edge
+        double stripPositionOnLargeBase(int strip) const;
+        /// Returns the signed distance of the i-th's strip's left edge w.r.t.
+        /// the center of the top chamber edge
+        double stripPositionOnShortBase(int strip) const;
+        /// Returns the signed distance along the chamber edge of the strip expressed at the 
+        /// chamber center
+        double stripCenter(int strip) const;
 
     private:
         // Data members
         std::string m_chamberName{};
         int m_chamberType{0};
         int m_readoutVersion{0};
-        float m_wirePitch{0.f};
+        double m_wirePitch{0.};
         int m_nPhiChambers{0};
-
-        int m_nWires[MaxNGaps][MaxNGangs];
         
-        GasGapIntArray m_nGangs{0};
-        GasGapIntArray m_gangOffset{0};
-        GasGapIntArray m_nStrips{0};
-        GasGapIntArray m_totalWires{0};
-        GasGapFloatArray m_stripOffset{0.f};
+        /// Map of number of wires in a given wire gang & gas gap
+        std::array<std::vector<int>, MaxNGaps> m_nWires{};
+        /// Map describing the number of all wires up to gang i in gasgap j 
+        std::array<std::vector<int>, MaxNGaps> m_nAccWires{};
+
+        GasGapIntArray m_nStrips{make_array<int, MaxNGaps>(0)};
+        GasGapIntArray m_totalWires{make_array<int, MaxNGaps>(0)};
 
 
         // strip postion on the bases for the first layer in +Z
-        float m_physicalDistanceFromBase{-9999.};
-        StripArray m_stripPositionOnLargeBase{0.f};
-        StripArray m_stripPositionOnShortBase{0.f};
+        double m_physicalDistanceFromBase{-9999.};
+        /// These 2 arrays represent the left edges of the i-th strip in a Tgc chamber
+        /// The numbers are given as the signed distance along the chamber edge measured 
+        /// from the center of the top edge (Large base) or of the bottom edge (Short base)
+        StripArray m_stripPositionOnLargeBase{make_array<double, MaxNStrips>(0)};
+        StripArray m_stripPositionOnShortBase{make_array<double, MaxNStrips>(0)};
+        /// The position of the strip center is defined as the intersector of the large and short edge
+        /// strip position values
+        StripArray m_stripPositionCenter{make_array<double, MaxNStrips>(0)};
+        
 
         // Hard-coded data
-        static constexpr float m_gangThickness = 0.05;
-        static constexpr float m_stripThickness = 0.03;
+        static constexpr double m_gangThickness = 0.05 * Gaudi::Units::mm;
+        static constexpr double m_stripThickness = 0.03 * Gaudi::Units::mm;
     };
-    float TgcReadoutParams::stripThickness() const { return m_stripThickness; }
-    float TgcReadoutParams::gangThickness() const { return m_gangThickness; }
+    double TgcReadoutParams::stripThickness() const { return m_stripThickness; }
+    double TgcReadoutParams::gangThickness() const { return m_gangThickness; }
 
     const std::string TgcReadoutParams::GetName() const { return m_chamberName; }
 }  // namespace MuonGM

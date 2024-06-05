@@ -217,8 +217,9 @@ StatusCode MuonSegmentFinderAlg::createSegmentsWithMDTs(const EventContext& ctx,
                     std::vector<const Trk::MeasurementBase*> meas {};
                     meas.insert(meas.end(), mdts.begin(), mdts.end());
                     meas.insert(meas.end(), region.clusters().begin(), region.clusters().end());
-                    ATH_MSG_VERBOSE("Call segment maker with "<<Amg::toString(region.regionPos)
-                                                             << " "<<Amg::toString(region.regionDir)                
+                    ATH_MSG_VERBOSE("Call segment maker with road pos: "<<Amg::toString(region.regionPos)
+                                                             << " road dir: "<<Amg::toString(region.regionDir) 
+                                                             <<" nMdts: "<<mdts.size()<<" nClusters "<<region.clusters().size()         
                                                              <<std::endl<<m_printer->print(meas));
                 
                 }

@@ -1,32 +1,19 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONREADOUTGEOMETRY_TGCREADOUTELEMENT_H
 #define MUONREADOUTGEOMETRY_TGCREADOUTELEMENT_H
 
-#include <string>
 
 #include "Identifier/Identifier.h"
-#include "Identifier/IdentifierHash.h"
-#include "MuonIdHelpers/TgcIdHelper.h"
 #include "MuonReadoutGeometry/MuonClusterReadoutElement.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 #include "MuonReadoutGeometry/TgcReadoutParams.h"
 #include "CxxUtils/ArrayHelper.h"
 
-class GeoVFullPhysVol;
-
-namespace Muon {
-    class TgcAlignModule;
-    class CombinedMuonAlignModule;
-}  // namespace Muon
 
 namespace MuonGM {
-    //<<<<<< PUBLIC DEFINES >>>>>>
-
-    constexpr int maxwpl = 3;
-    constexpr int maxstrp = 3;
 
     /**
        A TgcReadoutElement corresponds to a single TGC chamber; therefore typically
@@ -53,19 +40,15 @@ namespace MuonGM {
     */
 
     class TgcReadoutElement final : public MuonClusterReadoutElement {
-        friend class Muon::TgcAlignModule;
-        friend class Muon::CombinedMuonAlignModule;
-        friend class MuonChamber;
-	friend class MuonChamberLite;
 
     public:
         TgcReadoutElement(GeoVFullPhysVol* pv, const std::string& stName, MuonDetectorManager* mgr);
 
-        virtual ~TgcReadoutElement();
+        virtual ~TgcReadoutElement() = default;
 
         /** distance to readout.
             If the local position is outside the active volume, the function first shift the position back into the active volume */
-        virtual inline double distanceToReadout(const Amg::Vector2D& pos, const Identifier& id) const override;
+        virtual double distanceToReadout(const Amg::Vector2D& pos, const Identifier& id) const override;
 
         /** strip number corresponding to local position.
             If the local position is outside the active volume, the function first shift the position back into the active volume */
@@ -76,301 +59,237 @@ namespace MuonGM {
         virtual bool stripPosition(const Identifier& id, Amg::Vector2D& pos) const override;
 
         /** returns the hash function to be used to look up the center and the normal of the tracking surface for a given identifier */
-        virtual inline int layerHash(const Identifier& id) const override;
+        virtual  int layerHash(const Identifier& id) const override;
 
         /** returns the hash function to be used to look up the surface and surface transform for a given identifier */
-        virtual inline int surfaceHash(const Identifier& id) const override;
+        virtual  int surfaceHash(const Identifier& id) const override;
 
         /** returns the hash function to be used to look up the surface boundary for a given identifier */
-        virtual inline int boundaryHash(const Identifier& id) const override;
+        virtual  int boundaryHash(const Identifier& id) const override;
 
         /** returns whether the given identifier measures phi or not */
-        virtual inline bool measuresPhi(const Identifier& id) const override;
+        virtual  bool measuresPhi(const Identifier& id) const override;
 
         /** number of layers in phi/eta projection */
-        virtual inline int numberOfLayers(bool) const override;
+        virtual int numberOfLayers(bool isStrip) const override;
 
         /** number of strips per layer */
-        virtual inline int numberOfStrips(const Identifier& layerId) const override;
-        virtual inline int numberOfStrips(int layer, bool) const override;
+        virtual int numberOfStrips(const Identifier& layerId) const override;
+        virtual int numberOfStrips(int layer, bool isStrip) const override;
 
         /** space point position for a given pair of phi and eta identifiers
             The LocalPosition is expressed in the reference frame of the phi projection.
             If one of the identifiers is outside the valid range, the function will return false */
-        virtual inline bool spacePointPosition(const Identifier& phiId, const Identifier& etaId, Amg::Vector2D& pos) const override;
+        virtual  bool spacePointPosition(const Identifier& phiId, const Identifier& etaId, Amg::Vector2D& pos) const override;
 
         /** Global space point position for a given pair of phi and eta identifiers
             If one of the identifiers is outside the valid range, the function will return false */
-        virtual inline bool spacePointPosition(const Identifier& phiId, const Identifier& etaId, Amg::Vector3D& pos) const override;
+        virtual  bool spacePointPosition(const Identifier& phiId, const Identifier& etaId, Amg::Vector3D& pos) const override;
 
+        Amg::Vector3D localSpacePoint(const Identifier& stripId, 
+                                      const Amg::Vector3D& etaHitPos,
+                                      const Amg::Vector3D& phiHitPos) const;
+        
         virtual bool containsId(const Identifier& id) const override;
-        inline int Ngasgaps() const;
-        inline int NstripPlanes() const;
-        inline int NwirePlanes() const;
-        inline int Nstrips(int plane) const;
-        inline int Nwires(int plane) const;
-        inline int NwireGangs(int plane) const;
-        double StripWidth(int plane) const;
-        double stripWidth(int plane, int strip) const;
-        inline double StripLength(int plane) const;
-        double StripPitch(int plane) const;
-        double stripPitch(int plane, int strip) const;
-        inline double StripOffset(int plane) const;
-        inline double WireLength(int plane, int wire) const;
-        inline double WirePitch(int plane) const;
-        inline double WireOffset(int plane) const;
+        
+        
+        
+        int chamberType() const;
+        /// Returns the number of gas gaps associated with the readout element (2 or 3)
+        int nGasGaps() const;
+        /// Returns whether the gasGap is within the allowed range [1-nGasGaps()]
+        bool validGap(int gasGap) const;
 
-        // strip pitch
-        double StripPitch(int plane, int strip, float zlocal) const;
 
-        // local to global
-        Amg::Vector3D localToGlobalCoords(const Amg::Vector3D& x, const Identifier& id) const;
-        Amg::Transform3D localToGlobalTransf(const Identifier& id) const;
-        Amg::Transform3D localToGlobalTransf(int gasGap) const;
-        // global to local
-        Amg::Vector3D globalToLocalCoords(const Amg::Vector3D& x, const Identifier& id) const;
+        /// Returns the number of strips in a given gas gap
+        int nStrips(int gasGap) const;
+        /// Returns whether the strip in the given gasgap is within the allowed range        
+        bool validStrip(int gasGap, int strip) const;
+        /// Returns the width of a given strip in the gasGap i
+        double stripWidth(int gasGap, int strip) const;
+        /// Returns the length of each strip which is equal to the height of the chamber
+        double stripLength() const;
+        /// Returns the pitch of the given strip in gasGap i
+        double stripPitch(int gasGap, int strip) const;
+        /// Returns the pitch of the given strip in gasGap i evaluated at a local positiion along the strip
+        double stripPitch(int gasGap, int strip, double radialPos) const;
+        /// Returns the local X of the left edge of the strip at a given local radial position
+        double stripLowEdgeLocX(int gasGap, int strip, double radialPos) const;
+        /// Returns the local X of the right edge of the strip at a given local radial position
+        double stripHighEdgeLocX(int gasGap, int strip , double radialPos) const;
+        /// Returns the local X of the strip center at a given local radial position
+        double stripCenterLocX(int gasGap, int strip, double radialPos) const;
+
+        double physicalDistanceFromBase() const;
+        double stripPosOnLargeBase(int strip) const;
+        double stripPosOnShortBase(int strip) const;
+
+        
+        double stripDeltaPhi() const;
+        double stripDeltaPhi(int gasGap, int strip) const;
+
+        
+        /// Returns whether the wire gang in the given gasgap is within the allowed range
+        bool validGang(int gasGap, int wireGang) const;
+        /// Returns the total number of wires in a given gas gap
+        int nWires(int gasGap) const;
+        /// Returns the number of wires in a given gang in gas gap i
+        int nWires(int gasGap, int gang) const;
+        /// Returns the number of wire gangs (Random grouping of wires) in a given gas gap
+        int nWireGangs(int gasGap) const;
+        /// Returns the number of wire pitches that have to be travelled to reach gang i
+        int nPitchesToGang(int gasGap, int gang) const;
+        /// Returns the length of the wire gang along the radial direction [pitch x  N_{wire}^{gang}]
+        double gangRadialLength(int gasGap, int gang) const;
+        /// Returns the length of the most bottom wire in the gang
+        double gangShortWidth(int gasGap, int gang) const;
+        /// Returns the length of the central wire in the gang
+        double gangCentralWidth(int gasGap, int gang) const;
+        /// Returns the length of the most top wire in the gang
+        double gangLongWidth(int gasGap, int gang) const;
+        /// Returns the spatial thickness of the wire gang
+        double gangThickness() const;
+        /// Returns the length of a wire. The wire numbering is following scheme where 
+        /// the 1st wire coincides with the bottom edge of the readout element
+        double wireLength(int wire) const;
+        /// Returns the pitch of the wires
+        double wirePitch() const;
+
+
+
+        double stripShortWidth(int, int) const;
+        double stripLongWidth(int, int) const;
+
+        /// Returns the local -> global transformation
+        ///     x-axis: Parallel to the wires (strips) if the Identifier belongs to a wire (strip)
+        ///     y-axis: Perpendicular axis in the transverse plane
+        ///     z-axis: Along the beam-axis
+        const Amg::Transform3D& localToGlobalTransf(const Identifier& id) const;
+        /// Returns the global -> local transformation
         Amg::Transform3D globalToLocalTransf(const Identifier& id) const;
-        //
-        Amg::Vector3D channelPos(int gasGap, int isStrip, int channel) const;
+
+        /// Returns the position of the active channel (wireGang or strip)
         Amg::Vector3D channelPos(const Identifier& id) const;
-        Amg::Vector3D localChannelPos(int gasGap, int isStrip, int channel) const;
-        Amg::Vector3D localChannelPos(const Identifier& id) const;
+        Amg::Vector3D channelPos(int gasGap, bool isStrip, int channel) const;
 
-        Amg::Vector3D gangPos(int gasGap, int gang) const;
-        Amg::Vector3D gangPos(const Identifier& id) const;
-        Amg::Vector3D gangPos(const IdentifierHash& id) const;
-        Amg::Vector3D localGangPos(int gasGap, int gang) const;
-        Amg::Vector3D localGangPos(const Identifier& id) const;
-        Amg::Vector3D localGangPos(const IdentifierHash& id) const;
+        /// Returns the global position of a wireGang
+        Amg::Vector3D wireGangPos(const Identifier& id) const;
+        Amg::Vector3D wireGangPos(int gasGap, int gang) const;
 
+        /// Returns the global position of a strip
         Amg::Vector3D stripPos(int gasGap, int strip) const;
         Amg::Vector3D stripPos(const Identifier& id) const;
-        Amg::Vector3D stripPos(const IdentifierHash& id) const;
-        Amg::Vector3D localStripPos(int gasGap, int strip) const;
-        Amg::Vector3D localStripPos(const Identifier& id) const;
-        Amg::Vector3D localStripPos(const IdentifierHash& id) const;
+        /// Returns the direction of a strip
+        Amg::Vector3D stripDir(int gasGap, int strip) const;
+        Amg::Vector3D stripDir(const Identifier& id) const;
 
-        double localStripSCoord(int gasgap, int strip) const;
-        double localWireRCoord(int gasgap, int wire) const;
-        double localWireGangRCoord(int gasgap, int wiregang) const;
+        
+        /// Returns true if the chamber is belonging to the 48-fold TxE chambers
+        bool isEndcap() const;
+        /// Returns true if the chamber is mounted on the most inner ring, i.e. a TxF chamber
+        bool isForward() const;
+        /// Returns true if the chamber has 2 gasgaps
+        bool isDoublet() const;
+        /// Returns true if the chamber has 3 gasgaps
+        bool isTriplet() const;
+        /// Returns the minimum angle measured from the center that's covered by the chamber
+        double chamberLocPhiMin() const;
+        /// Returns the maximum angle measured from the center that's covered by the chamber
+        double chamberLocPhiMax() const;
+        
 
-        Amg::Vector3D localGasGapPos(const Identifier& id) const;
-        Amg::Vector3D localGasGapPos(int gg) const;
-        Amg::Vector3D gasGapPos(const Identifier& id) const;
-        Amg::Vector3D gasGapPos(int gg) const;
+        double length() const;
 
-        std::string stationType() const;
-        int chamberType() const;
-        bool endcap() const;
-        bool forward() const;
-        bool doublet() const;
-        bool triplet() const;
-        float shortWidth() const;
-        float longWidth() const;
-        float length() const;
-        float thickness() const;
-        float frameZwidth() const;
-        float frameXwidth() const;
-        float chamberWidth(float z) const;
-        float chamberMinPhi() const;
-        float chamberMaxPhi() const;
-        float wirePitch() const;
+        double frameZwidth() const;
+        double frameXwidth() const;
+        double chamberWidth(double z) const;
+
+
         int nPhiChambers() const;
         int nPhiSectors() const;
-        int nGaps() const;
-        int nVolumes() const;
-        //     std::string volumeType(int) const;
-        //     float volumeYpos(int) const;
-        //     float volumeThickness(int) const;
-        int nGangs(int) const;
-        int nWires(int, int) const;
-        int nWiresTotal(int) const;
-        int gangOffset(int) const;
-        float wireCoverage(int) const;
-        float gangCtrZ(int, int) const;
-        float gangMinZ(int, int) const;
-        float gangMaxZ(int, int) const;
-        float gangLength(int, int) const;
-        float gangShortWidth(int, int) const;
-        float gangLongWidth(int, int) const;
-        float gangThickness(int, int) const;
-        int nStrips(int) const;
-        float stripDeltaPhi(int) const;
-        float stripDeltaPhi(int, int) const;
-        float stripStaggerPhi(int) const;
-        float stripMinPhi(int, int) const;
-        float stripMaxPhi(int, int) const;
-        float stripCtrPhi(int, int) const;
-        float stripCtrX(int, int, float) const;
-        float stripMinX(int, int, float) const;
-        float stripMaxX(int, int, float) const;
-        float stripLength(int, int) const;
-        float stripShortWidth(int, int) const;
-        float stripLongWidth(int, int) const;
-        float stripSkew(int, int) const;
-        int findChannel(int, int, const Amg::Vector3D&) const;
-        int findGang(int, const Amg::Vector3D&) const;
-        int findStrip(int, const Amg::Vector3D&, const Amg::Vector3D&) const;
-        int gapVolume(int) const;
-        static bool isAgap(const std::string&) ;
-        bool validGap(int) const;
-        bool validGang(int, int) const;
-        bool validStrip(int, int) const;
-        void print() const;
+        
+        /// Set the local Z coordinate of the i-th gasGap [1-3]
+        void setPlaneZ(double value, int gasGap);
+        
+        /// Returns the gang number that's closest to the given external position
+        int findGang(int gasGap, const Amg::Vector3D& extPos) const;
+        /// Returns the strip number that's closest to the given external position
+        int findStrip(int gasGap, const Amg::Vector3D& extPos) const;
+        
 
-        inline void set_ngasgaps(int);
-        inline void set_nstripplanes(int);
-        inline void set_nwireplanes(int);
-        inline void set_nstripsperpanel(int, int);
-        inline void set_nwiresperpanel(int, int);
-        inline void set_nwiregangsperpanel(int, int);
-        inline void set_stripwidth(double, int);
-        inline void set_strippitch(double, int);
-        inline void set_wirepitch(double, int);
-        inline void set_stripoffset(double x, int ip);
-        inline void set_wireoffset(double x, int ip);
-        inline void set_stripplanez(double x, int ip);
-        inline void set_wireplanez(double x, int ip);
 
-        double sinStereo(const Identifier& id) const;
+        void setReadOutName(const std::string& rName);
+        void setReadOutParams(GeoModel::TransientConstSharedPtr<TgcReadoutParams> pars);
+        
+        void setFrameThickness(const double frameH, const double frameAB);
 
-        // Access to readout parameters
-        inline int getReadoutType() const;
-        inline const std::string getReadoutName() const;
-        inline int getReadoutVersion() const;
-        inline int getNPhiChambers() const;
-        inline int getNGaps() const;
-        inline float getWirePitch() const;
-        inline float getGangThickness() const;
-        inline int getNGangs(int gasGap) const;
-        inline int getTotalWires(int gasGap) const;
-        inline int getNWires(int gasGap, int gang) const;
-        inline int getGangOffset(int gasGap) const;
-        inline float getStripThickness() const;
-        inline int getNStrips(int gasGap) const;
-        inline float getStripOffset(int gasGap) const;
+       // Access to readout parameters
+        std::string readOutName() const;
 
-        inline const std::string getGeometryVersion() const;
-        inline float getPhysicalDistanceFromBase() const;
-        inline float getStripPositionOnLargeBase(int strip) const;
-        inline float getStripPositionOnShortBase(int strip) const;
-
-        inline const TgcReadoutParams* getReadoutParams() const;
+        const TgcReadoutParams* getReadoutParams() const;
 
         virtual void fillCache() override;
 
+        
     private:
-        int m_ngasgaps{0};
-        int m_nstripplanes{0};
-        int m_nwireplanes{0};
-        std::array<int, maxstrp> m_nstrips_per_plane{0};
-        std::array<double, maxstrp> m_strippitch{make_array<double, maxstrp>(-9999.)};
-        std::array<double, maxstrp> m_stripwidth{make_array<double, maxstrp>(-9999.)};
-        std::array<double, maxstrp> m_wirepitch{make_array<double, maxstrp>(-9999.)};
-       
-        std::array<double, maxstrp> m_stripoffset{make_array<double, maxstrp>(-9999.)};
-        std::array<double, maxstrp> m_stripplanez{make_array<double, maxstrp>(-9999.)};
+        /// Returns the local position of the active channel (wireGang or strip)
+        Amg::Vector3D localChannelPos(const Identifier& id) const;
+        Amg::Vector3D localChannelPos(int gasGap, bool isStrip, int channel) const;
+        // Returns the local position of a strip
+        Amg::Vector3D localStripPos(int gasGap, int strip) const;
+        Amg::Vector3D localStripPos(const Identifier& id) const;
+        /// Returns the local strip direction of a strip
+        Amg::Vector3D localStripDir(int gasGap, int strip) const;
+        Amg::Vector3D localStripDir(const Identifier& id) const;
 
-        std::array<int, maxwpl> m_nwires_per_plane{0};
-        std::array<int, maxwpl> m_nwiregangs_per_plane{0};
+        /// Returns the local position fo a wireGang
+        Amg::Vector3D localWireGangPos(int gasGap, int gang) const;
+        Amg::Vector3D localWireGangPos(const Identifier& id) const;
+        /// Returns the local position of the gasGap in the AMDB coordinate system
+        Amg::Vector3D localGasGapPos(int gg) const;
 
-        std::array<double, maxwpl> m_wireoffset{};
-        std::array<double, maxwpl> m_wireplanez{};
+        static int surfaceHash(int GasGap, bool isStrip);
 
-        int m_readout_type{-1};
-        std::string m_readout_name;
+        /// Returns the local X given the reference point 
+        ///   E.g. left edge, center, an external position along
+        ///   the radial coordinate [-R/2; R/2], and the strip number
+        double stripLocalX(const int stripNum,
+                           const double locY,
+                           const double refPoint) const;
+        
+        /// Returns the local X of the wire gang in gasGap i        
+        double wireGangLocalX(const int gasGap,
+                              const int gangNum) const;
+
+        /// Returns the local X of the bottom wire in the wireGang i in gasGap j 
+        double wireGangBottomX(int gasGap, int gangNum) const;
+        /// Returns the local X of the top wire in the wireGang i in gasGap j
+        double wireGangTopX(int gasGap, int gangNum) const;
+        
+        /// Returns whether a strip needs to be flipped and the final strip number parsed to
+        /// the TgcReadoutParams to fetch its absolute position.
+        std::pair<double, int> stripNumberToFetch(int gasGap, int inStrip) const;
+
+        const TgcIdHelper& m_idHelper{idHelperSvc()->tgcIdHelper()};
+
+        static constexpr int s_maxGasGap{3};
+        std::array<double, s_maxGasGap> m_gasPlaneZ{make_array<double, s_maxGasGap>(-9999.)};
+
+        std::string m_readout_name{};
         GeoModel::TransientConstSharedPtr <TgcReadoutParams> m_readoutParams{nullptr};
+        /// Cache of the function call 1./ (getRsize() - 2. * physicalDistanceFromBase())
+        /// which is the active height of the readout element 
+        double m_stripSlope{0.};
+        double m_locMinPhi{0.};
+        double m_locMaxPhi{0.};
+
+        int m_stIdxT4E{m_idHelper.stationNameIndex("T4E")};
+
+        double m_frameH{0.};
+        double m_frameAB{0.};
+
     };
 
-    int TgcReadoutElement::Ngasgaps() const { return m_ngasgaps; }
-    int TgcReadoutElement::NstripPlanes() const { return m_nstripplanes; }
-    int TgcReadoutElement::NwirePlanes() const { return m_nwireplanes; }
-    int TgcReadoutElement::Nstrips(int plane) const { return m_nstrips_per_plane[plane - 1]; }
-    int TgcReadoutElement::Nwires(int plane) const { return m_nwires_per_plane[plane - 1]; }
-    int TgcReadoutElement::NwireGangs(int plane) const { return m_nwiregangs_per_plane[plane - 1]; }
-    double TgcReadoutElement::StripLength(int /*plane*/) const { return m_Rsize; }
-    double TgcReadoutElement::StripOffset(int plane) const { return m_stripoffset[plane - 1]; }
-
-    double TgcReadoutElement::WireLength(int plane, int wire) const {
-        double pitch = m_wirepitch[plane - 1];
-        return m_Ssize + (wire - 1) * pitch * (m_LongSsize - m_Ssize) / m_Rsize;
-    }
-    double TgcReadoutElement::WirePitch(int plane) const { return m_wirepitch[plane - 1]; }
-    double TgcReadoutElement::WireOffset(int plane) const { return m_wireoffset[plane - 1]; }
-    void TgcReadoutElement::set_ngasgaps(int ix) { m_ngasgaps = ix; }
-    void TgcReadoutElement::set_nstripplanes(int ix) { m_nstripplanes = ix; }
-    void TgcReadoutElement::set_nwireplanes(int ix) { m_nwireplanes = ix; }
-    void TgcReadoutElement::set_nstripsperpanel(int ix, int ip) { m_nstrips_per_plane[ip - 1] = ix; }
-    void TgcReadoutElement::set_nwiresperpanel(int ix, int ip) { m_nwires_per_plane[ip - 1] = ix; }
-    void TgcReadoutElement::set_nwiregangsperpanel(int ix, int ip) { m_nwiregangs_per_plane[ip - 1] = ix; }
-    void TgcReadoutElement::set_stripwidth(double x, int ip) { m_stripwidth[ip - 1] = x; }
-    void TgcReadoutElement::set_strippitch(double x, int ip) { m_strippitch[ip - 1] = x; }
-    void TgcReadoutElement::set_wirepitch(double x, int ip) { m_wirepitch[ip - 1] = x; }
-    void TgcReadoutElement::set_stripoffset(double x, int ip) { m_stripoffset[ip - 1] = x; }
-    void TgcReadoutElement::set_wireoffset(double x, int ip) { m_wireoffset[ip - 1] = x; }
-    void TgcReadoutElement::set_stripplanez(double x, int ip) { m_stripplanez[ip - 1] = x; }
-    void TgcReadoutElement::set_wireplanez(double x, int ip) { m_wireplanez[ip - 1] = x; }
-
-    // readout Parameters go though TgcReadoutParams
-    int TgcReadoutElement::getReadoutType() const { return m_readout_type; }
-    const std::string TgcReadoutElement::getReadoutName() const { return m_readoutParams->GetName(); }
-    int TgcReadoutElement::getReadoutVersion() const { return m_readoutParams->readoutVersion(); }
-    int TgcReadoutElement::getNPhiChambers() const { return m_readoutParams->nPhiChambers(); }
-    int TgcReadoutElement::getNGaps() const { return m_readoutParams->nGaps(); }
-    float TgcReadoutElement::getWirePitch() const { return m_readoutParams->wirePitch(); }
-    float TgcReadoutElement::getGangThickness() const { return m_readoutParams->gangThickness(); }
-    int TgcReadoutElement::getNGangs(int gasGap) const { return m_readoutParams->nGangs(gasGap); }
-    int TgcReadoutElement::getTotalWires(int gasGap) const { return m_readoutParams->totalWires(gasGap); }
-    int TgcReadoutElement::getNWires(int gasGap, int gang) const { return m_readoutParams->nWires(gasGap, gang); }
-    int TgcReadoutElement::getGangOffset(int gasGap) const { return m_readoutParams->gangOffset(gasGap); }
-    float TgcReadoutElement::getStripThickness() const { return m_readoutParams->stripThickness(); }
-    int TgcReadoutElement::getNStrips(int gasGap) const { return m_readoutParams->nStrips(gasGap); }
-    float TgcReadoutElement::getStripOffset(int gasGap) const { return m_readoutParams->stripOffset(gasGap); }
-
-    const std::string TgcReadoutElement::getGeometryVersion() const { return manager()->geometryVersion(); }
-
-    float TgcReadoutElement::getPhysicalDistanceFromBase() const { return m_readoutParams->physicalDistanceFromBase(); }
-    float TgcReadoutElement::getStripPositionOnLargeBase(int strip) const { return m_readoutParams->stripPositionOnLargeBase(strip); }
-    float TgcReadoutElement::getStripPositionOnShortBase(int strip) const { return m_readoutParams->stripPositionOnShortBase(strip); }
-
-    const TgcReadoutParams* TgcReadoutElement::getReadoutParams() const { return m_readoutParams.get(); }
-
-    int TgcReadoutElement::layerHash(const Identifier& id) const { return manager()->tgcIdHelper()->gasGap(id) - 1; }
-
-    int TgcReadoutElement::surfaceHash(const Identifier& id) const {
-        return 2 * (manager()->tgcIdHelper()->gasGap(id) - 1) + (manager()->tgcIdHelper()->isStrip(id) ? 0 : 1);
-    }
-
-    int TgcReadoutElement::boundaryHash(const Identifier& id) const { return (measuresPhi(id) ? 0 : 1); }
-
-    bool TgcReadoutElement::measuresPhi(const Identifier& id) const { return manager()->tgcIdHelper()->isStrip(id); }
-
-    inline int TgcReadoutElement::numberOfLayers(bool measuresPhi) const { return measuresPhi ? NstripPlanes() : NwirePlanes(); }
-
-    inline int TgcReadoutElement::numberOfStrips(const Identifier& id) const {
-        return numberOfStrips(manager()->tgcIdHelper()->gasGap(id), manager()->tgcIdHelper()->isStrip(id));
-    }
-    inline int TgcReadoutElement::numberOfStrips(int layer, bool measuresPhi) const {
-        return measuresPhi ? Nstrips(layer) : NwireGangs(layer);
-    }
-
-    inline bool TgcReadoutElement::spacePointPosition(const Identifier& phiId, const Identifier& etaId, Amg::Vector3D& pos) const {
-        // get orientation angle of strip to rotate back from local frame to strip
-        int stripNo = manager()->tgcIdHelper()->channel(phiId);
-        int gasGap = manager()->tgcIdHelper()->gasGap(phiId);
-
-        // calculate local position of endpoint of strip
-        Amg::Vector3D lEtapos = localChannelPos(etaId);
-        double localEtaY = stripCtrX(gasGap, stripNo, lEtapos.z());
-        if (0 < getStationEta()) { localEtaY *= -1.; }
-        lEtapos[1] = localEtaY;
-
-        // transform to global
-        pos = absTransform() * lEtapos;
-
-        return true;
-    }
-
 }  // namespace MuonGM
-
+#include <MuonReadoutGeometry/TgcReadoutElement.icc>
 #endif  // MUONREADOUTGEOMETRY_TGCREADOUTELEMENT_H

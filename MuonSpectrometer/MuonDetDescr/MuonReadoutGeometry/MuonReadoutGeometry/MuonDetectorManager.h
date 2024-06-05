@@ -18,7 +18,7 @@
 #include "MuonAlignmentData/CorrContainer.h"
 #include "MuonAlignmentData/NswAsBuiltDbData.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
-#include "MuonReadoutGeometry/GenericTGCCache.h"
+
 
 #ifndef SIMULATIONBASE
 #include "MuonNSWAsBuilt/StripCalculator.h"
@@ -120,10 +120,6 @@ namespace MuonGM {
         inline const sTgcIdHelper* stgcIdHelper() const;
         inline const MmIdHelper* mmIdHelper() const;
 
-        // Generic Technology descriptors
-        void setGenericTgcDescriptor(const GenericTGCCache& tc);
-        inline const GenericTGCCache* getGenericTgcDescriptor() const;
-
 
         void setMinimalGeoFlag(int flag);
         inline int  MinimalGeoFlag() const;
@@ -185,7 +181,6 @@ namespace MuonGM {
 
         std::vector<PVLink> m_envelope;  // Tree-top...
 
-        GenericTGCCache m_genericTGC;
 
         // Geometry versioning
         std::string m_geometryVersion{};  // generic name of the Layout
@@ -242,7 +237,6 @@ namespace MuonGM {
     }
 
 
-    const GenericTGCCache* MuonDetectorManager::getGenericTgcDescriptor() const { return &m_genericTGC; }
 
     int MuonDetectorManager::MinimalGeoFlag() const { return m_minimalgeo; }
     int MuonDetectorManager::IncludeCutoutsFlag() const { return m_includeCutouts; }
