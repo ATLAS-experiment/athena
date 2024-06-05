@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTGRecTools/MuonTGMeasurementTool.h"
@@ -1061,7 +1061,7 @@ const Identifier Muon::MuonTGMeasurementTool::nearestDetEl(const Trk::Layer* lay
         if (strip > 0 && strip <= nStrips) {
             // check second coordinate for active volume
             if (!measPhi && fabs(refPar->localPosition()[Trk::locY]) >
-                                (tgcROE->WireLength(m_idHelperSvc->tgcIdHelper().gasGap(layId), strip) - tgcROE->frameXwidth())) {
+                                tgcROE->gangCentralWidth(m_idHelperSvc->tgcIdHelper().gasGap(layId), strip)) {
                 delete refPar;
                 return nid;
             }
@@ -1073,7 +1073,7 @@ const Identifier Muon::MuonTGMeasurementTool::nearestDetEl(const Trk::Layer* lay
 
             int plane = m_idHelperSvc->tgcIdHelper().gasGap(nearId);
             if (m_idHelperSvc->tgcIdHelper().isStrip(nearId))
-                pitch = tgcROE->StripPitch(plane, m_idHelperSvc->tgcIdHelper().channel(nearId), localhit[1]);
+                pitch = tgcROE->stripPitch(plane, m_idHelperSvc->tgcIdHelper().channel(nearId), localhit[1]);
             int last = 0;
             while (fabs(stripposition[0] - localhit[0]) > 0.5 * pitch) {
                 if (stripposition[0] < localhit[0]) {
@@ -1096,7 +1096,7 @@ const Identifier Muon::MuonTGMeasurementTool::nearestDetEl(const Trk::Layer* lay
                 stripposition = tgcROE->surface(nearId).transform().inverse() * tgcROE->channelPos(nearId);
                 localhit = tgcROE->surface(nearId).transform().inverse() * parm->position();
                 if (m_idHelperSvc->tgcIdHelper().isStrip(nearId))
-                    pitch = tgcROE->StripPitch(plane, m_idHelperSvc->tgcIdHelper().channel(nearId), localhit[1]);
+                    pitch = tgcROE->stripPitch(plane, m_idHelperSvc->tgcIdHelper().channel(nearId), localhit[1]);
             }
             delete refPar;
             if (strip < 1 || strip > nStrips) return nid;

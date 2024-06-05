@@ -245,10 +245,10 @@ MuonPatternCalibration::insertCluster(const MuonCluster& clus, RegionMap& region
             int gasGap = m_idHelperSvc->tgcIdHelper().gasGap(id);
             if (measuresPhi) {
                 hasPointingPhiStrips = true;
-                striplen             = tgc->detectorElement()->StripLength(gasGap);
+                striplen             = tgc->detectorElement()->stripLength();
             } else {
                 int wire = m_idHelperSvc->tgcIdHelper().channel(id);
-                striplen = tgc->detectorElement()->WireLength(gasGap, wire);
+                striplen = tgc->detectorElement()->gangCentralWidth(gasGap, wire);
             }
         }
 

@@ -42,14 +42,14 @@ namespace Muon {
             }
             void push_back(MdtVec&& vec) {
                 std::transform(vec.begin(), vec.end(),std::back_inserter(m_garbage), 
-                    [](const MdtDriftCircleOnTrack* mdt) {return std::shared_ptr<const Trk::MeasurementBase>{mdt};
+                    [](const MdtDriftCircleOnTrack* mdt) {return std::unique_ptr<const Trk::MeasurementBase>{mdt};
                 });
                 m_mdts.push_back(std::move(vec));
             }
         private:
             ClusterVec m_clusters{};
             MdtVecVec m_mdts{};
-            std::vector<std::shared_ptr<const Trk::MeasurementBase>> m_garbage{};
+            std::vector<std::unique_ptr<const Trk::MeasurementBase>> m_garbage{};
         };
 
         using ROTsPerRegion = std::vector<ROTRegion>;

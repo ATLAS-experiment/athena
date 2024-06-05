@@ -1976,7 +1976,7 @@ namespace Muon {
             }
             IdentifierHash hash;
             m_idHelperSvc->tgcIdHelper().get_module_hash(*it, hash);
-            int nstrips = detEl->getNStrips(1);
+            int nstrips = detEl->nStrips(1);
             Amg::Vector3D p1 = detEl->channelPos(1, 1, 1);
             Amg::Vector3D p2 = detEl->channelPos(1, 1, nstrips);
             std::vector<int> sectors1;

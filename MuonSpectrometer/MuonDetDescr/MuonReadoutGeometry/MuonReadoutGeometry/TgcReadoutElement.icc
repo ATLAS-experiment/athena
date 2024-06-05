@@ -1,0 +1,157 @@
+/*
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
+#ifndef MUONREADOUTGEOMETRY_TGCREADOUTELEMENT_ICC
+#define MUONREADOUTGEOMETRY_TGCREADOUTELEMENT_ICC
+
+namespace MuonGM {
+    inline std::string TgcReadoutElement::readOutName() const { return m_readout_name; }
+
+    
+    inline bool TgcReadoutElement::isEndcap() const { return getStationType()[2] == 'E'; }
+    inline bool TgcReadoutElement::isForward() const { return  getStationType()[2] == 'F'; }
+    inline bool TgcReadoutElement::isDoublet() const { return nGasGaps() == 2; }
+    inline bool TgcReadoutElement::isTriplet() const { return nGasGaps() == 3; }
+
+    inline double TgcReadoutElement::wirePitch() const { return m_readoutParams->wirePitch(); }
+    inline int TgcReadoutElement::nPhiChambers() const { return m_readoutParams->nPhiChambers(); }
+    inline int TgcReadoutElement::nPhiSectors() const { return m_stIdxT4E  == getStationIndex() ? 36 : nPhiChambers(); }
+    
+    inline double TgcReadoutElement::chamberLocPhiMin() const { return m_locMinPhi; }
+    inline double TgcReadoutElement::chamberLocPhiMax() const { return m_locMaxPhi; }
+
+
+    inline int TgcReadoutElement::nGasGaps() const { return m_readoutParams->nGaps(); }
+    inline int TgcReadoutElement::nStrips(int gasGap) const { return m_readoutParams->nStrips(gasGap); }
+    inline int TgcReadoutElement::nWires(int gasGap) const { return m_readoutParams->totalWires(gasGap); }
+    inline int TgcReadoutElement::nWires(int gasGap, int gang) const { return m_readoutParams->nWires(gasGap, gang); }
+    inline int TgcReadoutElement::nWireGangs(int gasGap) const { return m_readoutParams->nWireGangs(gasGap); }
+    inline int TgcReadoutElement::nPitchesToGang(int gasGap, int gang) const { return m_readoutParams->nPitchesToGang(gasGap, gang); }
+    inline double TgcReadoutElement::gangThickness() const { return m_readoutParams->gangThickness(); }
+    inline int TgcReadoutElement::chamberType() const { return m_readoutParams->chamberType(); }
+    
+    inline double TgcReadoutElement::chamberWidth(double z) const { 
+        return getSsize() + (0.5 *length() +z) * (getLongSsize() - getSsize()) / length(); 
+    }
+    inline double TgcReadoutElement::wireGangLocalX(const int gasGap, const int gang) const {
+        return nPitchesToGang(gasGap, gang) * wirePitch();
+    }
+    
+    
+    inline double TgcReadoutElement::stripLength() const { return m_Rsize; }
+    inline double TgcReadoutElement::physicalDistanceFromBase() const { return m_readoutParams->physicalDistanceFromBase(); }
+    inline double TgcReadoutElement::stripPosOnLargeBase(int strip) const { return m_readoutParams->stripPositionOnLargeBase(strip); }
+    inline double TgcReadoutElement::stripPosOnShortBase(int strip) const { return m_readoutParams->stripPositionOnShortBase(strip); }
+    
+    inline double TgcReadoutElement::wireLength(int wire) const {
+        return m_Ssize + (wire - 1) * wirePitch() * (m_LongSsize - m_Ssize) / m_Rsize;
+    }
+ 
+    inline const TgcReadoutParams* TgcReadoutElement::getReadoutParams() const { return m_readoutParams.get(); }
+
+    inline std::pair<double, int> TgcReadoutElement::stripNumberToFetch(int gasGap, int inStrip) const {
+        const bool swapStrip{!((getStationEta() > 0 && gasGap == 1) || (getStationEta() < 0 && gasGap != 1))};
+        const bool flip = gasGap !=1;/// {!((getStationEta() > 0 && gasGap == 1) || (getStationEta() < 0 && gasGap != 1))};
+        const int pickStrip = swapStrip ? 33 - inStrip : inStrip;
+        return std::make_pair(-1. + 2.*flip, pickStrip);
+    }  
+  
+    /// Override of functions declared as interfaces in the parent classes
+    inline int TgcReadoutElement::layerHash(const Identifier& id) const { return m_idHelper.gasGap(id) - 1; }
+    
+    inline int TgcReadoutElement::surfaceHash(const Identifier& id) const {
+        return surfaceHash(m_idHelper.gasGap(id) ,m_idHelper.isStrip(id));
+    }
+    inline int TgcReadoutElement::surfaceHash(int gasGap, bool isStrip) { return 2 * (gasGap -1) + isStrip; }
+    inline int TgcReadoutElement::boundaryHash(const Identifier& id) const { return (measuresPhi(id) ? 0 : 1); }
+    inline bool TgcReadoutElement::measuresPhi(const Identifier& id) const { return m_idHelper.isStrip(id); }
+    inline int TgcReadoutElement::numberOfLayers(bool) const { return nGasGaps(); }
+    inline int TgcReadoutElement::numberOfStrips(const Identifier& id) const { return numberOfStrips(m_idHelper.gasGap(id), 
+                                                                                                     m_idHelper.isStrip(id));
+    }
+    inline int TgcReadoutElement::numberOfStrips(int layer, bool isStrip) const { return isStrip ? nStrips(layer) : 
+                                                                                                   nWireGangs(layer);
+    }
+    inline double TgcReadoutElement::stripLocalX(const int stripNum,
+                                                 const double locY,
+                                                 const double refPoint) const {
+        return refPoint + (locY != 0. ? locY * m_stripSlope * (stripPosOnLargeBase(stripNum) - stripPosOnShortBase(stripNum)) : 0.);
+    }
+ 
+    inline const Amg::Transform3D& TgcReadoutElement::localToGlobalTransf(const Identifier& id) const { 
+        return transform(surfaceHash(id)); 
+    }
+    inline Amg::Transform3D TgcReadoutElement::globalToLocalTransf(const Identifier& id) const { 
+        return transform(id).inverse(); 
+    }
+
+    inline Amg::Vector3D TgcReadoutElement::wireGangPos(int gasGap, int gang) const {
+        return transform(surfaceHash(gasGap, false)) * localWireGangPos(gasGap, gang);
+    }
+
+    inline Amg::Vector3D TgcReadoutElement::wireGangPos(const Identifier& id) const {
+        return wireGangPos(m_idHelper.gasGap(id),
+                           m_idHelper.channel(id));
+    }
+
+    inline Amg::Vector3D TgcReadoutElement::localWireGangPos(const Identifier& id) const {
+        return localWireGangPos(m_idHelper.gasGap(id),
+                                m_idHelper.channel(id));
+    }
+    inline Amg::Vector3D TgcReadoutElement::localWireGangPos(int gasGap, int gang) const {
+        return wireGangLocalX(gasGap, gang) * Amg::Vector3D::UnitX();
+    }
+
+    inline Amg::Vector3D TgcReadoutElement::stripPos(const Identifier& id) const {
+        return stripPos(m_idHelper.gasGap(id), m_idHelper.channel(id));
+    }
+    inline Amg::Vector3D TgcReadoutElement::stripPos(int gasGap, int strip) const {
+        return transform(surfaceHash(gasGap, true)) * localStripPos(gasGap, strip);
+    }
+
+    inline Amg::Vector3D TgcReadoutElement::localStripPos(int gasGap, int strip) const {
+        return stripCenterLocX(gasGap, strip, 0.) * Amg::Vector3D::UnitX();
+    }
+    inline Amg::Vector3D TgcReadoutElement::localStripPos(const Identifier& id) const {
+        return localStripPos(m_idHelper.gasGap(id), m_idHelper.channel(id));
+    }
+    inline Amg::Vector3D TgcReadoutElement::localStripDir(int gasGap, int strip) const{
+        const double halfeight = 0.5 *getRsize();
+        return  (Amg::Vector3D{stripCenterLocX(gasGap,strip, halfeight), halfeight,0} -
+                 Amg::Vector3D{stripCenterLocX(gasGap,strip, -halfeight), -halfeight,0}).unit();
+
+    }
+    inline Amg::Vector3D TgcReadoutElement::localStripDir(const Identifier& id) const{
+        return localStripDir(m_idHelper.gasGap(id), m_idHelper.channel(id));
+    }
+    inline Amg::Vector3D TgcReadoutElement::stripDir(int gasGap, int strip) const {
+        return transform(surfaceHash(gasGap, true)).linear() * localStripDir(gasGap, strip);
+    }
+    inline Amg::Vector3D TgcReadoutElement::stripDir(const Identifier& id) const {
+        return stripDir(m_idHelper.gasGap(id), m_idHelper.channel(id));
+    }
+
+
+    inline Amg::Vector3D TgcReadoutElement::channelPos(const Identifier& id) const {
+        return channelPos(m_idHelper.gasGap(id), 
+                          m_idHelper.isStrip(id),
+                          m_idHelper.channel(id));
+    }
+    inline Amg::Vector3D TgcReadoutElement::channelPos(int gasGap, bool isStrip, int channel) const {
+        return transform(surfaceHash(gasGap, isStrip)) * localChannelPos(gasGap, isStrip, channel);
+    }
+    inline Amg::Vector3D TgcReadoutElement::localChannelPos(const Identifier& id) const {
+        return localChannelPos(m_idHelper.gasGap(id), 
+                               m_idHelper.isStrip(id),
+                               m_idHelper.channel(id));
+    }
+    inline Amg::Vector3D TgcReadoutElement::localChannelPos(int gasGap, bool isStrip, int channel) const {
+        return  isStrip ? localStripPos(gasGap, channel) : localWireGangPos(gasGap, channel);
+    }
+
+
+
+
+}  // namespace MuonGM
+
+#endif

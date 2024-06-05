@@ -655,15 +655,6 @@ namespace MuonGM {
     void MuonDetectorManager::setMinimalGeoFlag(int flag) { m_minimalgeo = flag; }
     void MuonDetectorManager::setCutoutsFlag(int flag) { m_includeCutouts = flag; }
     void MuonDetectorManager::setCutoutsBogFlag(int flag) { m_includeCutoutsBog = flag; }
-    void MuonDetectorManager::setGenericTgcDescriptor(const GenericTGCCache& tc) {
-        m_genericTGC.frame_h = tc.frame_h;
-        m_genericTGC.frame_ab = tc.frame_ab;
-        m_genericTGC.nlayers = tc.nlayers;
-        for (unsigned int i = 0; i < (tc.materials).size(); i++) {
-            m_genericTGC.materials[i] = tc.materials[i];
-            m_genericTGC.positions[i] = tc.positions[i];
-            m_genericTGC.tck[i] = tc.tck[i];
-        }
-    }
+
 
 }  // namespace MuonGM

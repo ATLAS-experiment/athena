@@ -437,8 +437,7 @@ StatusCode TgcDigitizationTool::digitizeCore(const EventContext& ctx) {
                     const MuonGM::TgcReadoutElement* tgcChamber =
                         m_mdManager->getTgcReadoutElement(newDigiId);
                     if (tgcChamber) {
-                        gpos = tgcChamber->localToGlobalCoords(
-                            hit.localPosition(), newDigiId);
+                        gpos = tgcChamber->localToGlobalTransf(newDigiId) * hit.localPosition();
                     }
 
                     // fill the SDO collection in StoreGate if not pile-up

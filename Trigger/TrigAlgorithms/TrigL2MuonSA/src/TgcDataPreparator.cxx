@@ -163,10 +163,10 @@ StatusCode TrigL2MuonSA::TgcDataPreparator::prepareData(const LVL1::RecMuonRoI* 
        lutDigit.sta = stationNum;
        lutDigit.isStrip = m_idHelperSvc->tgcIdHelper().isStrip(prepData.identify());
        if(m_idHelperSvc->tgcIdHelper().isStrip(prepData.identify())){
-	 lutDigit.width = tgcReadout->stripWidth(gasGap, channel);
+          lutDigit.width = tgcReadout->stripWidth(gasGap, channel);
        }
        else{
-	 lutDigit.width = tgcReadout->gangLength(gasGap, channel);
+          lutDigit.width = tgcReadout->gangRadialLength(gasGap, channel);
        }
        lutDigit.bcTag = 2;
        lutDigit.inRoad = false;
@@ -314,10 +314,10 @@ StatusCode TrigL2MuonSA::TgcDataPreparator::prepareData(const xAOD::MuonRoI*    
        lutDigit.sta = stationNum;
        lutDigit.isStrip = m_idHelperSvc->tgcIdHelper().isStrip(prepData.identify());
        if(m_idHelperSvc->tgcIdHelper().isStrip(prepData.identify())){
-	 lutDigit.width = tgcReadout->stripWidth(gasGap, channel);
+          lutDigit.width = tgcReadout->stripWidth(gasGap, channel);
        }
        else{
-	 lutDigit.width = tgcReadout->gangLength(gasGap, channel);
+          lutDigit.width = tgcReadout->gangRadialLength(gasGap, channel);
        }
        lutDigit.bcTag = 2;
        lutDigit.inRoad = false;

@@ -765,8 +765,8 @@ MuonEDMPrinterTool::print(const MuonPatternChamberIntersect& intersect) const
                 const MuonGM::TgcReadoutElement* detEl =
                     dynamic_cast<const MuonGM::TgcReadoutElement*>(prd->detectorElement());
                 if (detEl) {
-                    for (int i = 1; i <= detEl->Ngasgaps(); ++i) {
-                        nchannelsEta += detEl->getNGangs(i);
+                    for (int i = 1; i <= detEl->nGasGaps(); ++i) {
+                        nchannelsEta += detEl->nWireGangs(i);
                         nchannelsPhi += detEl->nStrips(i);
                     }
                 }

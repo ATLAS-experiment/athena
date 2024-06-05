@@ -44,7 +44,7 @@ template <typename VType> std::ostream& operator<<(std::ostream& ostr, const std
     return ostr;
 }
 inline int nStrips(const MuonGM::TgcReadoutElement& readoutEle, int layer) {
-    return readoutEle.getNStrips(layer) > 1 ? readoutEle.getNStrips(layer) : 0;
+    return readoutEle.nStrips(layer) > 1 ? readoutEle.nStrips(layer) : 0;
 } 
 
 
@@ -171,21 +171,22 @@ StatusCode GeoModelTgcTest::dumpToTree(const EventContext& ctx, const TgcReadout
     m_stIndex = readoutEle->getStationIndex();
     m_stEta   = readoutEle->getStationEta();
     m_stPhi   = readoutEle->getStationPhi();
-    m_nGasGaps = readoutEle->Ngasgaps();
+    m_nGasGaps = readoutEle->nGasGaps();
     ATH_MSG_DEBUG("Dump readout element "<<m_idHelperSvc->toString(readoutEle->identify()));
 
     const TgcIdHelper& idHelper{m_idHelperSvc->tgcIdHelper()};
 
     const Amg::Transform3D& trans{readoutEle->transform()};
     m_readoutTransform = trans;
-    m_shortWidth = readoutEle->shortWidth();
-    m_longWidth = readoutEle->longWidth();
+    m_shortWidth = readoutEle->getSsize();
+    m_longWidth = readoutEle->getLongSsize();
     m_height = readoutEle->length();
-    m_thickness = readoutEle->thickness();
+
+    m_thickness = readoutEle->getZsize();
     m_stLayout = readoutEle->getTechnologyName();
 
-   const MuonGM::MuonStation* station = readoutEle->parentMuonStation();
-   if (station->hasALines()){ 
+    const MuonGM::MuonStation* station = readoutEle->parentMuonStation();
+    if (station->hasALines()){ 
         m_ALineTransS = station->getALine_tras();
         m_ALineTransT = station->getALine_traz();
         m_ALineTransZ = station->getALine_trat();
@@ -197,16 +198,16 @@ StatusCode GeoModelTgcTest::dumpToTree(const EventContext& ctx, const TgcReadout
     for (bool isStrip : {false, true}) {        
         for (int layer = 1 ; layer <= readoutEle->numberOfLayers(isStrip); ++layer){
             const unsigned int nChan = isStrip ? nStrips(*readoutEle, layer) :
-                                                 readoutEle->nGangs(layer);
+                                                 readoutEle->nWireGangs(layer);
             if (!nChan) continue;
             const Identifier layerId = idHelper.channelID(readoutEle->identify(),layer, isStrip, 1);
             m_layTans.push_back(readoutEle->surface(layerId).transform());
             m_layMeasPhi.push_back(isStrip);
             m_layNumber.push_back(layer);
             m_layHeight.push_back(readoutEle->length());
-            m_layShortWidth.push_back(readoutEle->shortWidth() /*- readoutEle->frameXwidth() * 2. */);
-            m_layLongWidth.push_back(readoutEle->longWidth()   /*- readoutEle->frameXwidth() * 2. */);
-            unsigned int numWires = !isStrip ? readoutEle->getTotalWires(layer) : 0;
+            m_layShortWidth.push_back(readoutEle->getSsize() /*- readoutEle->frameXwidth() * 2. */);
+            m_layLongWidth.push_back(readoutEle->getLongSsize()   /*- readoutEle->frameXwidth() * 2. */);
+            unsigned int numWires = !isStrip ? readoutEle->nWires(layer) : 0;
             m_layNumWires.push_back(numWires);
             
             if (isStrip) {
@@ -227,10 +228,10 @@ StatusCode GeoModelTgcTest::dumpToTree(const EventContext& ctx, const TgcReadout
                     m_locStripCenter.push_back(locStripPos);
                     m_stripCenter.push_back(globStripPos);
                     /// Strip bottom & top edges
-                    const double stripHalfLength = readoutEle->stripLength(layer, strip) / 2.;
+                    const double stripHalfLength = readoutEle->stripLength() / 2.;
 
-                    const Amg::Vector2D locStripBot{readoutEle->getStripPositionOnShortBase(strip), -stripHalfLength};                    
-                    const Amg::Vector2D locStripTop{readoutEle->getStripPositionOnLargeBase(strip), stripHalfLength};
+                    const Amg::Vector2D locStripBot{readoutEle->stripPosOnShortBase(strip), -stripHalfLength};                    
+                    const Amg::Vector2D locStripTop{readoutEle->stripPosOnLargeBase(strip), stripHalfLength};
                     const Amg::Vector3D globStripBot{surf.localToGlobal(locStripBot)};
                     const Amg::Vector3D globStripTop{surf.localToGlobal(locStripTop)};
                     
@@ -249,10 +250,10 @@ StatusCode GeoModelTgcTest::dumpToTree(const EventContext& ctx, const TgcReadout
                 }
             } else {
                 /// The last gang is for one reason always 0
-                for (int gang = 1; gang < readoutEle->nGangs(layer); ++gang) {
+                for (int gang = 1; gang <= readoutEle->nWireGangs(layer); ++gang) {
                        const Identifier gangId{idHelper.channelID(readoutEle->identify(), layer, isStrip, gang)};
                        const Trk::Surface& surf{readoutEle->surface(gangId)};
-                       const Amg::Vector3D globPos{readoutEle->gangPos(layer, gang)};
+                       const Amg::Vector3D globPos{readoutEle->wireGangPos(layer, gang)};
                        Amg::Vector2D locPos{Amg::Vector2D::Zero()};
                        if (!surf.globalToLocal(globPos,Amg::Vector3D::Zero(),locPos)) {
                            ATH_MSG_FATAL("Failed to extract local position "<<m_idHelperSvc->toString(gangId));
@@ -262,7 +263,7 @@ StatusCode GeoModelTgcTest::dumpToTree(const EventContext& ctx, const TgcReadout
                        m_gangCenter.push_back(globPos);
                        m_gangGasGap.push_back(layer);
                        m_gangNum.push_back(gang);
-                       m_gangNumWires.push_back(readoutEle->getNWires(layer, gang));
+                       m_gangNumWires.push_back(readoutEle->nWires(layer, gang));
                        m_gangLength.push_back(0.5 *(readoutEle->gangShortWidth(layer, gang) + 
                                                     readoutEle->gangLongWidth(layer, gang) ));
                 }
@@ -290,34 +291,34 @@ void GeoModelTgcTest::dumpReadoutXML(const MuonGM::MuonDetectorManager& detMgr) 
                 chambLayout.gasGap = m_idHelperSvc->gasGapId(layerId);
                 chambLayout.techType = reEle->getTechnologyName();
                 if (isStrip && nStrips(*reEle, layer)) {
-                   const double halfHeight = 0.5 * (reEle->getRsize() - 2. * reEle->getPhysicalDistanceFromBase());
+                   const double halfHeight = 0.5 * (reEle->getRsize() - 2. * reEle->physicalDistanceFromBase());
                    const Amg::Transform3D globToLoc{reEle->surface(layerId).transform().inverse() * reEle->absTransform()};
                    const double sign = (reEle->getStationEta()> 0. ? -1. : 1.) *( (globToLoc*Amg::Vector3D::UnitY()).x() > 0 ? 1. : -1);
 
                    for (int strip = 1; strip < 33; ++strip) {
                         /// Note the slight shift in the coordinate system given that the positions in the legacy
                         /// are given w.r.t. strip center while for the new geometry we need them w.r.t. strip edge
-                        chambLayout.botStripPos.push_back(sign *reEle->stripMinX(layer,strip, -halfHeight));
-                        chambLayout.topStripPos.push_back(sign *reEle->stripMinX(layer,strip, +halfHeight));
+                        chambLayout.botStripPos.push_back(sign *reEle->stripLowEdgeLocX(layer,strip, -halfHeight));
+                        chambLayout.topStripPos.push_back(sign *reEle->stripLowEdgeLocX(layer,strip, +halfHeight));
                         if (strip != 32) continue;
-                        chambLayout.botStripPos.push_back(sign *reEle->stripMaxX(layer,strip, -halfHeight));
-                        chambLayout.topStripPos.push_back(sign *reEle->stripMaxX(layer,strip, +halfHeight));
+                        chambLayout.botStripPos.push_back(sign *reEle->stripHighEdgeLocX(layer,strip, -halfHeight));
+                        chambLayout.topStripPos.push_back(sign *reEle->stripHighEdgeLocX(layer,strip, +halfHeight));
                    }
                 } else if (!isStrip) {
                     unsigned int accumlWires{0};
-                    chambLayout.wirePitch = reEle->WirePitch(layer);
+                    chambLayout.wirePitch = reEle->wirePitch();
                     /// Another reason to love AMDB. Summing up the number of wires in a gang does not match the
                     /// number of wires in the gasgap, because the last gang has always 0 entries. However, the total
                     /// number of wires is used in the legacy geometry to calculate the position of the first wire. I am
                     /// amazed about the precision to get the N/2 wire right into the center of the chamber. Anyhow, let's 
                     /// insert this hack to have a proper number of wires in the last gang.
-                    for (int gang = 1; gang <= reEle->getNGangs(layer); ++gang) {
-                        unsigned int nWires = reEle->getNWires(layer , gang);
+                    for (int gang = 1; gang <= reEle->nWireGangs(layer); ++gang) {
+                        unsigned int nWires = reEle->nWires(layer , gang);
                         accumlWires+=nWires;
                         if (nWires) {
                             chambLayout.wireGangLayout.push_back(nWires);
                         } else {
-                            chambLayout.wireGangLayout.push_back(reEle->getTotalWires(layer) - accumlWires);
+                            chambLayout.wireGangLayout.push_back(reEle->nWires(layer) - accumlWires);
                             break;
                         }
                     }

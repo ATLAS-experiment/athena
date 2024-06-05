@@ -111,7 +111,7 @@ void MuonChamber::makeTgc (const Identifier& id)
   auto elt = std::make_unique<MuonGM::TgcReadoutElement>
     (&m_pvol1, "T2F", &m_muo_dd);
   elt->setIdentifier (id);
-  elt->m_ngasgaps = 2;
+  elt->setReadOutParams(std::make_unique<MuonGM::TgcReadoutParams>());
   elt->fillCache();
   m_muo_dd.addTgcReadoutElement (std::move(elt));
 }

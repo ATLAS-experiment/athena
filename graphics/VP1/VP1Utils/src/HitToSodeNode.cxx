@@ -92,36 +92,14 @@ double HitToSoNode::getTGCAngle(Identifier id) const {
     int gasGap  = idhelper->gasGap(id); 
 
 
-// calculate two points along the tgc phi strip in the local tgc reference frame 
-//    HepGeom::Point3D<double> lposTGC = detEl->localChannelPos(id);
-    Amg::Vector3D lposTGC = detEl->localChannelPos(id);
-    double z_shift = lposTGC.z()+10; 
-    double locy_shift = detEl->stripCtrX(gasGap, stripNo, z_shift ); 
-    if (0 < detEl->getStationEta()) { 
-        locy_shift *= -1.; // Needed because the coord system for  stripCtrX is flipped compared to localChannelPos (!)
-    } 
-    Amg::Vector3D lpos_shift(lposTGC.x(),locy_shift,z_shift);
+    /// calculate two points along the tgc phi strip in the local tgc reference frame 
 
-    const Amg::Transform3D tgcTrans = detEl->getMaterialGeom()->getAbsoluteTransform();
-    Amg::Vector3D gpos = tgcTrans * lposTGC;
-    Amg::Vector3D gpos_shift = tgcTrans*lpos_shift;
-
-    const Trk::Surface& surf =  detEl->surface(id);
-    std::optional<Amg::Vector2D> locPos1 = surf.globalToLocal(gpos,100);
-    std::optional<Amg::Vector2D> locPos2 = surf.globalToLocal(gpos_shift,100);
-
-    if (!locPos1 || !locPos2) {
-        VP1Msg::message("HitToSoNode::getTGCangle() Warning: global to local failed - cannot make transform!");
-        return 0;
-    }
-
-    Amg::Vector2D difPos = (*locPos2) - (*locPos1);
-// std::cout << " Strip pos " << *locPos1 << " shifted " << *locPos2 << " dif " << difPos << std::endl;
-    double tmp= difPos[Trk::locY] / sqrt(pow(difPos[Trk::locX],2)+pow(difPos[Trk::locY],2));
-
-    tmp = (tmp>1.0) ? 1.0 : tmp;
-    tmp = (tmp<-1.0) ? -1.0 : tmp;
-    return atan2( difPos[Trk::locX],  difPos[Trk::locY]);
+    Amg::Vector3D lposTGC = detEl->stripCenterLocX(gasGap, stripNo, 0.) * Amg::Vector3D::UnitX();
+    const double shift = detEl->getStationEta() > 0 ? 1.*Gaudi::Units::cm : - 1.*Gaudi::Units::cm;
+    Amg::Vector3D lposTgcShifted = detEl->stripCenterLocX(gasGap, stripNo, shift) * Amg::Vector3D::UnitX()
+                                 +  shift * Amg::Vector3D::UnitY();
+   
+    return (lposTGC - lposTgcShifted).phi();
     
 }
 
@@ -339,12 +317,12 @@ void HitToSoNode::fillTGCValues(Identifier& id, const Trk::TrkDetElementBase* ba
     int isStrip = idhelper->isStrip( id );
 
     if (isStrip){
-        striplength = detEl->stripLength(plane, strip);
+        striplength = detEl->stripLength();
         stripWidth = detEl->stripWidth(plane, strip);
         stripThickness = 3*0.8+0.1;
     } else {    
         striplength = detEl->gangShortWidth(plane, strip);
-        stripWidth = detEl->gangLength(plane, strip);
+        stripWidth = detEl->gangRadialLength(plane, strip);
         stripThickness = 3*0.8;
     }
     stripWidth=std::max(10.0,stripWidth);

@@ -380,14 +380,11 @@ namespace MuonGM {
 
                     int nchrng = (int)(*ggcd)[ich]->getDouble("NCHRNG");
            
-                    GasGapIntArray nwgs{}, roffst{}, nsps{};
-                    GasGapFloatArray  poffst{};
+                    GasGapIntArray nwgs{}, nsps{};
                     WiregangArray iwgs1{}, iwgs2{}, iwgs3{};
 
                     for (int i = 0; i < 3; ++i) {
                         nwgs[i] = (*ggcd)[ich]->getDouble("NWGS", i);
-                        roffst[i] = (*ggcd)[ich]->getDouble("ROFFST", i);
-                        poffst[i] = (*ggcd)[ich]->getDouble("POFFST", i);
                         nsps[i] = (*ggcd)[ich]->getDouble("NSPS", i);
                     }
 
@@ -405,8 +402,7 @@ namespace MuonGM {
                                 std::make_unique<TgcReadoutParams>(name, type, version, wirespacing, nchrng, 
                                                                    std::move(nwgs), std::move(iwgs1), 
                                                                    std::move(iwgs2), std::move(iwgs3), 
-                                                                   std::move(roffst), std::move(nsps),
-                                                                   std::move(poffst));
+                                                                   std::move(nsps));
                     mysql.StoreTgcRPars(rpar);
                 }
             }
@@ -444,15 +440,12 @@ namespace MuonGM {
                 } else {
                     nchrng = 48;
                 }
-                GasGapIntArray nwgs{}, roffst{}, nsps{};
-                GasGapFloatArray  poffst{};
-                    
+                GasGapIntArray nwgs{}, nsps{};
                 WiregangArray iwgs1{}, iwgs2{}, iwgs3{};
                 StripArray slarge{}, sshort{};
 
                 for (int i = 0; i < 3; i++) {
                     nwgs[i] = (*ggln)[ich]->getInt("NWGS", i );
-                    roffst[i] = (*ggln)[ich]->getInt("ROFFST",i);
                     nsps[i] = (*ggln)[ich]->getInt("NSPS", i);
                 }
 
@@ -479,7 +472,7 @@ namespace MuonGM {
                                                     std::move(nwgs), std::move(iwgs1), std::move(iwgs2), std::move(iwgs3), 
                                                     pdist, 
                                                     std::move(slarge), std::move(sshort), 
-                                                    std::move(roffst), std::move(nsps), std::move(poffst));
+                                                     std::move(nsps));
                 mysql.StoreTgcRPars(rpar);
              
                 // parameters for TGC inactive inner structure

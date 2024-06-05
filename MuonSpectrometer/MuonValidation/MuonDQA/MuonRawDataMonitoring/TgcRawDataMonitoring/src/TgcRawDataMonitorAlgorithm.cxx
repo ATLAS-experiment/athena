@@ -1522,10 +1522,10 @@ return (m.muon->charge()>0);
 	  const int gasGap = tgcIdHelper.gasGap(id);
 	  const int channel = tgcIdHelper.channel(id);
 	  const bool isStrip = tgcIdHelper.isStrip(id);
-	  const Amg::Vector3D &pos = isStrip ? element->stripPos(gasGap, channel) : element->gangPos(gasGap, channel);
-	  auto shortWidth = (isStrip)?(element->stripShortWidth(gasGap, channel)):(element->gangShortWidth(gasGap, channel));
-	  auto longWidth = (isStrip)?(element->stripLongWidth(gasGap, channel)):(element->gangLongWidth(gasGap, channel));
-	  auto length = (isStrip)?(element->stripLength(gasGap, channel)):(element->gangLength(gasGap, channel));
+	  const Amg::Vector3D &pos = isStrip ? element->stripPos(gasGap, channel) : element->wireGangPos(gasGap, channel);
+	  const double shortWidth = (isStrip)?(element->stripShortWidth(gasGap, channel)):(element->gangShortWidth(gasGap, channel));
+	  const double longWidth = (isStrip)?(element->stripLongWidth(gasGap, channel)):(element->gangLongWidth(gasGap, channel));
+	  const double length = (isStrip)?(element->stripLength()):(element->gangRadialLength(gasGap, channel));
 	  const int bcmask = data->getBcBitMap();
 	  TGC::TgcHit tgcHit(pos[0],pos[1],pos[2],
 			     shortWidth,longWidth, length,
@@ -1817,9 +1817,9 @@ return (m.muon->charge()>0);
 	    int etamap_index = 0;
 	    int phimap_global_index = 0;
 	    if(!m_tgcMonTool->getMapIndex(cham,iLay,etamap_index,phimap_index,phimap_global_index ))continue;
-	    double gapZ = detEle->localGasGapPos(iLay).z();
-	    double newX = extPosLocal.x() + extVecLocal.x() / extVecLocal.z() * ( gapZ - extPosLocal.z() );
-	    double newY = extPosLocal.y() + extVecLocal.y() / extVecLocal.z() * ( gapZ - extPosLocal.z() );
+
+	    double newX = extPosLocal.x() - extVecLocal.x() / extVecLocal.z() * extPosLocal.z();
+	    double newY = extPosLocal.y() - extVecLocal.y() / extVecLocal.z() * extPosLocal.z();
 	    for(int iSorW = 0 ; iSorW < 2 ; iSorW++){
 	      if(cham.iM()==1 && iLay==2 && iSorW==0)continue;
 	      std::string gap_name = Form("%sL%02d",cham_name.data(),iLay);

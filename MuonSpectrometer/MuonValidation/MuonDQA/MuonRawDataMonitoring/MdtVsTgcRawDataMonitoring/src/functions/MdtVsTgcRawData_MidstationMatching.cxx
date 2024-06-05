@@ -255,11 +255,11 @@ for(int ndis=0;ndis<nDisqualifiedSegm;ndis++)copyDisqualifiedSegments.push_back(
             // Convert extrapolated position to local position on the Sector
             Identifier sector_id=tre->identify();
             //const HepGeom::Point3D<double> sectorLocalPos3D=tre->globalToLocalCoords(sectorExtrapolatedPos, sector_id);
-            const Amg::Vector3D sectorLocalPos3D=tre->globalToLocalCoords(sectorExtrapolatedPos, sector_id); 
+            const Amg::Vector3D sectorLocalPos3D=tre->globalToLocalTransf(sector_id) * sectorExtrapolatedPos; 
 	    //Trk::LocalPosition sectorLocalPos2D(sectorLocalPos3D.y(),sectorLocalPos3D.z());
 	    Amg::Vector2D sectorLocalPos2D(sectorLocalPos3D.y(),sectorLocalPos3D.z());
             
-            double avWidth = (tre->longWidth()+tre->shortWidth())/2;
+            double avWidth = (tre->getLongSsize()+tre->getSsize())/2;
             //double dWidth  = (tre->longWidth()-tre->shortWidth());
             double length  = tre->length();
             
@@ -271,7 +271,7 @@ for(int ndis=0;ndis<nDisqualifiedSegm;ndis++)copyDisqualifiedSegments.push_back(
             if(!insideSectorBounds)continue;
             // Assign values to matching station variables
             if(stationIndex<0) continue;
-            TGCstation_StationFE[stationIndex]= (tre->forward()==false);
+            TGCstation_StationFE[stationIndex]= (tre->isForward()==false);
             TGCstation_StationEta[stationIndex]=stationeta;
             TGCstation_StationPhi[stationIndex]=stationphi;
             nStationMatch[stationIndex]++;
@@ -319,7 +319,7 @@ for(int ndis=0;ndis<nDisqualifiedSegm;ndis++)copyDisqualifiedSegments.push_back(
           // Get id values
           Identifier tgcid=(*prepitc)->identify();
           int tgcAC=(tre->sideA()==false);//isNotAside a:0, c:1
-          int tgcFE=(tre->forward()==false);//isNotForward f:0, e:1
+          int tgcFE=(tre->isForward()==false);//isNotForward f:0, e:1
           int tgcWS=(m_idHelperSvc->tgcIdHelper().isStrip(tgcid));//isStrip w=0, s=1
           int stationName = m_idHelperSvc->tgcIdHelper().stationName(tgcid);
           int stationEta  = std::abs(tre->getStationEta());

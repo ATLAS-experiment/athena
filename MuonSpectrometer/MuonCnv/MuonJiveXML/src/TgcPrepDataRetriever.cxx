@@ -76,15 +76,15 @@ namespace JiveXML {
           int strip = m_idHelperSvc->tgcIdHelper().channel(id);
           shortWidth = element->stripShortWidth(gasGap, strip);
           longWidth = element->stripLongWidth(gasGap, strip);
-          length = element->stripLength(gasGap, strip);
+          length = element->stripLength();
           globalPos = element->stripPos(gasGap, strip);
         } else {
           int gasGap = m_idHelperSvc->tgcIdHelper().gasGap(id);
           int gang = m_idHelperSvc->tgcIdHelper().channel(id);
           shortWidth = element->gangShortWidth(gasGap, gang);
           longWidth = element->gangLongWidth(gasGap, gang);
-          length = element->gangLength(gasGap, gang);
-          globalPos = element->gangPos(gasGap, gang);
+          length = element->gangRadialLength(gasGap, gang);
+          globalPos = element->wireGangPos(gasGap, gang);
         }
 
         x.push_back(DataType(globalPos.x()/CLHEP::cm));

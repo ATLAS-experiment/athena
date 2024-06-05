@@ -394,7 +394,7 @@ void Muon::MuonTrackSummaryHelperTool::updateHoleContent(Trk::MuonTrackSummary::
         }
 
         // get list of layers with a hole
-        neta = detEl->Ngasgaps();
+        neta = detEl->nGasGaps();
     }
 
     // code to recalculate the hole counts as they are not correct.

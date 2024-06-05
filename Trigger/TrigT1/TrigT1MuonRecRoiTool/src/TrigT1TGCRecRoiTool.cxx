@@ -305,7 +305,7 @@ namespace LVL1 {
     if(edge==UpperREdge || edge==LowerREdge) {
       int gasGap = m_idHelperSvc->tgcIdHelper().gasGap(wireId);
       int channel = m_idHelperSvc->tgcIdHelper().channel(wireId);
-      double halfLength = tgcwire->gangLength(gasGap, channel)/2.;
+      double halfLength = tgcwire->gangRadialLength(gasGap, channel)/2.;
       double r = w_pos.perp();
       double phi = w_pos.phi();
       r += halfLength*(edge==UpperREdge ? +1. : -1.);
