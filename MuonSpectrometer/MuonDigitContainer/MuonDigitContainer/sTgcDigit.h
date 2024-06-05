@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // sTgcDigit.h
@@ -22,7 +22,7 @@ class sTgcDigit : public MuonDigit {
  public:  // functions
 
   // Default constructor.
-  sTgcDigit();
+  sTgcDigit() = default;
 
   // Full constructor --- From Identifier.
   sTgcDigit(const Identifier& id, float time);
@@ -71,11 +71,11 @@ class sTgcDigit : public MuonDigit {
 
  private:  // data
 
-  uint16_t  m_bcTag;
-  float m_charge;
-  float m_time;
-  bool m_isDead = false;
-  bool m_isPileup = false;
+  uint16_t  m_bcTag{0};
+  float m_charge{-1.f};
+  float m_time{0.f};
+  bool m_isDead{false};
+  bool m_isPileup{false};
 };
 
 #endif

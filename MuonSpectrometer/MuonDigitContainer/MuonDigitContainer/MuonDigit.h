@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // MuonDigit.h
@@ -7,9 +7,6 @@
 #ifndef MuonDigitUH
 #define MuonDigitUH
 
-// Ketevi A. Assamagan
-// November 2002
-//
 // Muon Digit holds an identifier.
 
 #include <iosfwd>
@@ -21,11 +18,12 @@ class MuonDigit : public Identifiable {
 protected:  // data
 
   // ID.
-  Identifier m_muonId;
+  Identifier m_muonId{};
 
 public:  // functions
 
-  MuonDigit () { }
+  MuonDigit ()  = default;
+  virtual ~MuonDigit() = default;
   MuonDigit(const Identifier& id)
     : m_muonId(id) {}
   void setID(const Identifier id) {m_muonId = id;}

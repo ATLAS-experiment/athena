@@ -1,19 +1,11 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // TgcDigit.cxx
 
 #include "MuonDigitContainer/TgcDigit.h"
 
-//**********************************************************************
-// Member functions.
-//**********************************************************************
-
-// Default constructor.
-
-TgcDigit::TgcDigit() : m_bcTag (BC_UNDEFINED)
-{ }
  
 //**********************************************************************
 

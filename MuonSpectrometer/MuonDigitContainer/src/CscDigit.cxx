@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /** CscDigit.cxx */
@@ -8,17 +8,12 @@
 #include <algorithm>
 #include <utility>
 
-/** Member functions */
-
-/** Default constructor */
-CscDigit::CscDigit()
-: MuonDigit(), m_charge(0), m_time(0) { }
- 
+/** Member functions */ 
 
 /** Full constructor from Identifier */
 
 CscDigit::CscDigit(const Identifier& id, int charge)
-  : MuonDigit(id), m_charge(charge), m_time(0) { }
+  : MuonDigit(id), m_charge(charge) { }
 
 CscDigit::CscDigit(const Identifier& id, int charge, float time)
   : MuonDigit(id), m_charge(charge), m_time(time) { }

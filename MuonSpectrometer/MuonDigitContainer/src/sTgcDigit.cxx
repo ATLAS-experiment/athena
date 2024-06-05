@@ -1,28 +1,20 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonDigitContainer/sTgcDigit.h"
 
-sTgcDigit::sTgcDigit() : m_bcTag (0), m_charge(-1), m_time(0) { }
  
 //**********************************************************************
 // Full constructor from Identifier.
 sTgcDigit::sTgcDigit(const Identifier& id, float time)
-  : MuonDigit(id),
-    m_bcTag(0),
-    m_charge(-1.),
-    m_time(time),
-    m_isDead(false),
-    m_isPileup(false) { } 
+  : MuonDigit(id),   
+    m_time(time) { } 
 //**********************************************************************
 sTgcDigit::sTgcDigit(const Identifier& id, uint16_t bctag, float time)
   : MuonDigit (id),
     m_bcTag (bctag),
-    m_charge(-1.),
-    m_time(time),
-    m_isDead(false),
-    m_isPileup(false) { }    
+    m_time(time) { }    
 //**********************************************************************
 sTgcDigit::sTgcDigit(const Identifier& id, uint16_t bctag, float time, float charge, bool isDead, bool isPileup)
   : MuonDigit (id),
@@ -56,12 +48,12 @@ float sTgcDigit::charge() const {
 }
 
 int sTgcDigit::charge_6bit() const { 
- float ADC = 0.02734; // = saturation / (2^6);
+ constexpr float ADC = 0.02734; // = saturation / (2^6);
  return ((int)(m_charge/ADC));
 }
 
 int sTgcDigit::charge_10bit() const { 
- float ADC = 0.00171; // = saturation / (2^10);
+ constexpr float ADC = 0.00171; // = saturation / (2^10);
  return ((int)(m_charge/ADC));
 }
 

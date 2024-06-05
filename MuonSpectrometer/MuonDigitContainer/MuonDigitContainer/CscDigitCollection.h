@@ -21,12 +21,10 @@ public:  // functions
   typedef Identifier ID; 
   typedef CscDigit DIGIT; 
   // Default constructor.
-  CscDigitCollection() 
-    : DataVector<CscDigit>(),m_id(0),m_idHash(0)
-  { m_samplingPhase = false; };
+  CscDigitCollection()  = default;
   
   // Creates an empty container ready for writing.
-  CscDigitCollection(Identifier id, IdentifierHash idHash) 
+  CscDigitCollection(const Identifier& id, const IdentifierHash& idHash) 
     : DataVector<CscDigit>(),m_id(id),m_idHash(idHash)
   { m_samplingPhase = false; };
   
@@ -35,9 +33,9 @@ public:  // functions
   bool           samplingPhase()     const { return m_samplingPhase; }
   void           set_samplingPhase() { m_samplingPhase = true; }
   private:
-    Identifier     m_id; 
-    IdentifierHash m_idHash; 
-    bool m_samplingPhase;
+    Identifier     m_id{0}; 
+    IdentifierHash m_idHash{0}; 
+    bool m_samplingPhase{false};
 };
 
 CLASS_DEF(CscDigitCollection, 4198, 1)
