@@ -281,10 +281,20 @@ ActsCaloTrackingVolumeBuilder::trackingVolume(
        caloRMin, caloRMax, (caloDZ1 - caloDZ2) / 2.);
 
   // they share the same bounds and tvol array
-  auto posContainer = std::make_shared<Acts::TrackingVolume>(posTrf, posNegCylBounds, tVolArrPosNeg);
+  auto posContainer = std::make_shared<Acts::TrackingVolume>(
+      posTrf, 
+      posNegCylBounds, 
+      nullptr, nullptr,
+      tVolArrPosNeg,
+      Acts::MutableTrackingVolumeVector{});
   ATH_MSG_VERBOSE("Built positive container " << *posContainer);
   ATH_MSG_VERBOSE(" - containing: " << calo->volumeName());
-  auto negContainer = std::make_shared<Acts::TrackingVolume>(negTrf, posNegCylBounds, tVolArrPosNeg);
+  auto negContainer = std::make_shared<Acts::TrackingVolume>(
+      negTrf, 
+      posNegCylBounds, 
+      nullptr, nullptr,
+      tVolArrPosNeg,
+      Acts::MutableTrackingVolumeVector{});
   ATH_MSG_VERBOSE("Built negative container " << *negContainer);
   ATH_MSG_VERBOSE(" - containing: " << calo->volumeName());
 
@@ -309,7 +319,10 @@ ActsCaloTrackingVolumeBuilder::trackingVolume(
   auto ctrContainer = std::make_shared<Acts::TrackingVolume>(Acts::Transform3::Identity(),
                           std::make_shared<Acts::CylinderVolumeBounds>(
                           caloRMin, caloRMax, caloDZ2),
-                          tVolArrCtr);
+                          nullptr, nullptr,
+                          tVolArrCtr,
+                          Acts::MutableTrackingVolumeVector{}
+                          );
 
   ATH_MSG_VERBOSE("Built central container " << *ctrContainer);
   ATH_MSG_VERBOSE("- containing: " << idContainer->volumeName() << ", " << calo->volumeName());
@@ -320,8 +333,11 @@ ActsCaloTrackingVolumeBuilder::trackingVolume(
   auto mainContainer = std::make_shared<Acts::TrackingVolume>(Acts::Transform3::Identity(),
       std::make_shared<Acts::CylinderVolumeBounds>(
       caloRMin, caloRMax, caloDZ1),
+      nullptr, nullptr,
       tvac.trackingVolumeArray(gctx, {negContainer, ctrContainer, posContainer},
-      Acts::binZ));
+      Acts::binZ),
+      Acts::MutableTrackingVolumeVector{}
+      );
 
 
   ATH_MSG_VERBOSE("Built main container: " << *mainContainer);
