@@ -1,7 +1,4 @@
 <lcgdict>
   <class name="CP::TrackVertexAssociationTool" />
-  <class name="CP::BaseTrackVertexAssociationTool" />
-  <class name="CP::ElectronTrackVertexAssociationTool" />
-  <class name="CP::MuonTrackVertexAssociationTool" />
   <class name="CP::MVATrackVertexAssociationTool" />
 </lcgdict>
