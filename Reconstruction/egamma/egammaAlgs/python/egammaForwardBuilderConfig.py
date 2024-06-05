@@ -12,9 +12,6 @@ from egammaTools.egammaOQFlagsBuilderConfig import egammaOQFlagsBuilderCfg
 
 def egammaForwardBuilderCfg(flags, name='egammaForwardElectron', **kwargs):
 
-    mlog = logging.getLogger(name)
-    mlog.info('Starting configuration')
-
     acc = ComponentAccumulator()
 
     if flags.Detector.GeometryITk:

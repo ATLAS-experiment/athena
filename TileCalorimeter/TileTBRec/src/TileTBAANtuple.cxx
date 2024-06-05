@@ -227,6 +227,8 @@ StatusCode TileTBAANtuple::initialize() {
   ATH_CHECK( m_tileToolEmscale.retrieve() );
   ATH_CHECK( m_adderFilterAlgTool.retrieve(EnableTool{m_unpackAdder}) );
 
+  ATH_CHECK( m_dqStatusKey.initialize(SG::AllowEmpty) );
+
   return StatusCode::SUCCESS;
 }
 
@@ -466,6 +468,7 @@ StatusCode TileTBAANtuple::ntuple_initialize(const EventContext& ctx) {
 StatusCode TileTBAANtuple::execute() {
 
   const EventContext& ctx = Gaudi::Hive::currentContext();
+  const TileDQstatus* dqStatus = (!m_dqStatusKey.empty()) ? SG::makeHandle(m_dqStatusKey, ctx).get() : nullptr;
 
   if (m_evtNr < 0) {
 
@@ -508,7 +511,7 @@ StatusCode TileTBAANtuple::execute() {
 
     // store TileDigits
     if (m_nSamples > 0) {
-      empty &= (storeDigits(ctx, m_digitsContainerKey).isFailure());
+      empty &= (storeDigits(ctx, m_digitsContainerKey, dqStatus).isFailure());
     }
     if (m_nSamplesFlx > 0) {
       empty &= (storeDigitsFlx(ctx, m_digitsContainerFlxKey).isFailure());
@@ -640,7 +643,7 @@ StatusCode TileTBAANtuple::storeBeamElements(const EventContext& ctx) {
 
   if ( m_completeNtuple ) {
     // Store ROD header info from collection (just from first one)
-    int nDrawersAll = static_cast<unsigned int>(m_nDrawers) + static_cast<unsigned int>(m_nDrawersFlx);
+      int nDrawersAll = m_nDrawers + m_nDrawersFlx;
     if ( collItr!=lastColl ) {
       m_l1ID.at(nDrawersAll) = (*collItr)->getLvl1Id();
       m_l1Type.at(nDrawersAll) = (*collItr)->getLvl1Type();
@@ -1429,10 +1432,7 @@ StatusCode TileTBAANtuple::storeRawChannels(const EventContext& ctx
             m_ROD_DMUSstrobeErrVec.at(index)[dmu] = (rawChannelCollection->getFragSstrobe() >> dmu) & 1;
             m_ROD_DMUDstrobeErrVec.at(index)[dmu] = (rawChannelCollection->getFragDstrobe() >> dmu) & 1;
             m_ROD_DMUHeadformatErrVec.at(index)[dmu] = (rawChannelCollection->getFragHeaderBit() >> dmu) & 1;
-            m_ROD_DMUHeadparityErrVec.at(index)[dmu] = (rawChannelCollection->getFragHeaderPar() >> dmu) & 1;
             m_ROD_DMUDataformatErrVec.at(index)[dmu] = (rawChannelCollection->getFragSampleBit() >> dmu) & 1;
-            m_ROD_DMUDataparityErrVec.at(index)[dmu] = (rawChannelCollection->getFragSamplePar() >> dmu) & 1;
-
           }
         }
       }
@@ -1448,7 +1448,7 @@ StatusCode TileTBAANtuple::storeRawChannels(const EventContext& ctx
 /// Return true if the collection is empty,
 /// which means that there are no RawChanels either.
  */
-StatusCode TileTBAANtuple::storeDigits(const EventContext& ctx, const SG::ReadHandleKey<TileDigitsContainer>& containerKey) {
+StatusCode TileTBAANtuple::storeDigits(const EventContext& ctx, const SG::ReadHandleKey<TileDigitsContainer>& containerKey, const TileDQstatus* dqStatus) {
 
   if (containerKey.empty()) { // empty name, nothing to do
     return StatusCode::FAILURE;
@@ -1473,6 +1473,9 @@ StatusCode TileTBAANtuple::storeDigits(const EventContext& ctx, const SG::ReadHa
   for (const TileDigitsCollection* digitsCollection : * digitsCnt) {
     // determine type of frag
     int fragId = digitsCollection->identify();
+    int ros = (fragId >> 8);
+    int drawer = fragId & 0x3F;
+
     drawerMap_iterator itr = m_drawerMap.find(fragId);
     if ( itr != m_drawerMap.end() ) {
       drawerIndex = (*itr).second;
@@ -1551,9 +1554,13 @@ StatusCode TileTBAANtuple::storeDigits(const EventContext& ctx, const SG::ReadHa
             m_DMUmemoryErrVec.at(drawerIndex)[ih] = (headerVec[ih] >> 25 & 0x1); /// memory parity error bit_25
             m_DMUSstrobeErrVec.at(drawerIndex)[ih] = (headerVec[ih] >> 24 & 0x1); /// single strobe error bit_24 (it is recovered)
             m_DMUDstrobeErrVec.at(drawerIndex)[ih] = (headerVec[ih] >> 23 & 0x1); /// double strobe error bit_23 (cannot be recovered)
-
             m_feCRCVec.at(drawerIndex)[ih] = (fe_crc >> ih & 0x1);
             m_rodCRCVec.at(drawerIndex)[ih] = (rod_crc >> ih & 0x1);
+
+            if (dqStatus) {
+              m_DMUHeadparityErrVec.at(drawerIndex)[ih] = dqStatus->checkHeaderParityErr(ros, drawer, ih, 0);
+              m_DMUDataparityErrVec.at(drawerIndex)[ih] = dqStatus->checkSampleParityErr(ros, drawer, ih, 0);
+            }
           }
 
           for (unsigned int ihhi = 0; ihhi < headsizehi; ++ihhi) {
@@ -1566,6 +1573,11 @@ StatusCode TileTBAANtuple::storeDigits(const EventContext& ctx, const SG::ReadHa
             m_DMUDstrobeErrVec.at(drawerIndexHi)[ihhi] = (headerVecHi[ihhi] >> 23 & 0x1); /// double strobe error bit_23 (cannot be recovered)
             m_feCRCVec.at(drawerIndex)[ihhi] = -1; //Variables must be filled anyway, empty variables are not allowed
             m_rodCRCVec.at(drawerIndex)[ihhi] = -1; //Variables must be filled anyway, empty variables are not allowed
+
+            if (dqStatus) {
+              m_DMUHeadparityErrVec.at(drawerIndex)[ihhi] = dqStatus->checkHeaderParityErr(ros, drawer, ihhi, 1);
+              m_DMUDataparityErrVec.at(drawerIndex)[ihhi] = dqStatus->checkSampleParityErr(ros, drawer, ihhi, 1);
+            }
           }
 
           m_slinkCRCVec.at(drawerIndex)[0] = (digitsCollection->getFragCRC() >> 16) & 0xffff;
@@ -1657,6 +1669,11 @@ StatusCode TileTBAANtuple::storeDigits(const EventContext& ctx, const SG::ReadHa
           m_DMUDstrobeErrVec.at(drawerIndex)[ih] = (headerVec[ih] >> 23 & 0x1); /// double strobe error bit_23 (cannot be recovered)
           m_feCRCVec.at(drawerIndex)[ih] = (fe_crc >> ih & 0x1);
           m_rodCRCVec.at(drawerIndex)[ih] = (rod_crc >> ih & 0x1);
+
+          if (dqStatus) {
+            m_DMUHeadparityErrVec.at(drawerIndex)[ih] = dqStatus->checkHeaderParityErr(ros, drawer, ih, 0);
+            m_DMUDataparityErrVec.at(drawerIndex)[ih] = dqStatus->checkSampleParityErr(ros, drawer, ih, 0);
+          }
         }
 
         m_slinkCRCVec.at(drawerIndex)[0] = (digitsCollection->getFragCRC() >> 16) & 0xffff;
@@ -2117,6 +2134,8 @@ StatusCode TileTBAANtuple::initNTuple(void) {
   m_DMUmemoryErrVec.clear();
   m_DMUDstrobeErrVec.clear();
   m_DMUSstrobeErrVec.clear();
+  m_DMUHeadparityErrVec.clear();
+  m_DMUDataparityErrVec.clear();
   m_rodBCIDVec.clear();
   m_sizeVec.clear();
   m_dmuMaskVec.clear();
@@ -2172,9 +2191,7 @@ StatusCode TileTBAANtuple::initNTuple(void) {
   m_ROD_DMUSstrobeErrVec.clear();
   m_ROD_DMUDstrobeErrVec.clear();
   m_ROD_DMUHeadformatErrVec.clear();
-  m_ROD_DMUHeadparityErrVec.clear();
   m_ROD_DMUDataformatErrVec.clear();
-  m_ROD_DMUDataparityErrVec.clear();
   m_ROD_DMUMaskVec.clear();
 
   //Ntuple creation
@@ -2450,7 +2467,7 @@ StatusCode TileTBAANtuple::initListFlx(const EventContext& ctx) {
         ATH_MSG_INFO(os.str());
 
         if (m_eventsPerFile == 0) {
-          int nDrawersAll = static_cast<unsigned int>(m_nDrawers) + static_cast<unsigned int>(m_nDrawersFlx);
+          int nDrawersAll = m_nDrawers + m_nDrawersFlx;
           m_eventsPerFile = static_cast<int>(200 / nDrawersAll) * 1000;
           ATH_MSG_INFO( "Number of events per file was 0, set it to 200k/" << nDrawersAll << " = " << m_eventsPerFile );
         }
@@ -2571,7 +2588,7 @@ void TileTBAANtuple::TRIGGER_addBranch(void)
   m_ntuplePtr->Branch("OFLunits",&m_rchUnit,"OFLunits/S");
 
   if ( m_completeNtuple ) {
-    int nDrawersAll = static_cast<unsigned int>(m_nDrawers) + static_cast<unsigned int>(m_nDrawersFlx);
+    int nDrawersAll = m_nDrawers + m_nDrawersFlx;
     if (nDrawersAll > 0) {
       m_l1ID.resize(nDrawersAll + 1);
       m_l1Type.resize(nDrawersAll + 1);
@@ -3088,6 +3105,8 @@ void TileTBAANtuple::BEAM_clearBranch(void) {
     m_yImp = 0.;
   }
 
+  m_muBack.fill(0.0F);
+
   for (int i=0; i<16; i+=2) {
     m_tof[i] = +0xFFFF;
     m_tof[i+1] = -0xFFFF;
@@ -3222,6 +3241,8 @@ void TileTBAANtuple::DIGI_addBranch(void)
   m_DMUparityErrVec.reserve(MAX_DRAWERS);
   m_DMUmemoryErrVec.reserve(MAX_DRAWERS);
   m_DMUDstrobeErrVec.reserve(MAX_DRAWERS);
+  m_DMUHeadparityErrVec.reserve(MAX_DRAWERS);
+  m_DMUDataparityErrVec.reserve(MAX_DRAWERS);
   m_DMUSstrobeErrVec.reserve(MAX_DRAWERS);
   m_dmuMaskVec.reserve(MAX_DRAWERS);
   m_slinkCRCVec.reserve(MAX_DRAWERS);
@@ -3254,9 +3275,7 @@ void TileTBAANtuple::DIGI_addBranch(void)
   m_ROD_DMUSstrobeErrVec.reserve(MAX_DRAWERS);
   m_ROD_DMUDstrobeErrVec.reserve(MAX_DRAWERS);
   m_ROD_DMUHeadformatErrVec.reserve(MAX_DRAWERS);
-  m_ROD_DMUHeadparityErrVec.reserve(MAX_DRAWERS);
   m_ROD_DMUDataformatErrVec.reserve(MAX_DRAWERS);
-  m_ROD_DMUDataparityErrVec.reserve(MAX_DRAWERS);
   m_ROD_DMUMaskVec.reserve(MAX_DRAWERS);
 
   std::ostringstream oss;
@@ -3355,6 +3374,8 @@ void TileTBAANtuple::DIGI_addBranch(void)
       m_DMUmemoryErrVec.push_back(std::array<short, MAX_DMU>()); // U32
       m_DMUDstrobeErrVec.push_back(std::array<short, MAX_DMU>()); // U32
       m_DMUSstrobeErrVec.push_back(std::array<short, MAX_DMU>()); // U32
+      m_DMUHeadparityErrVec.push_back(std::array<short, MAX_DMU>());
+      m_DMUDataparityErrVec.push_back(std::array<short, MAX_DMU>());
 
       m_dmuMaskVec.push_back(std::array<int, 2>()); // U(2)
       m_slinkCRCVec.push_back(std::array<int, 2>()); // U(2)
@@ -3392,9 +3413,7 @@ void TileTBAANtuple::DIGI_addBranch(void)
       m_ROD_DMUSstrobeErrVec.push_back(std::array<short, MAX_DMU>());
       m_ROD_DMUDstrobeErrVec.push_back(std::array<short, MAX_DMU>());
       m_ROD_DMUHeadformatErrVec.push_back(std::array<short, MAX_DMU>());
-      m_ROD_DMUHeadparityErrVec.push_back(std::array<short, MAX_DMU>());
       m_ROD_DMUDataformatErrVec.push_back(std::array<short, MAX_DMU>());
-      m_ROD_DMUDataparityErrVec.push_back(std::array<short, MAX_DMU>());
       m_ROD_DMUMaskVec.push_back(std::array<short, 2>());
 
       if (i % m_nDrawers < listSize) {
@@ -3414,6 +3433,8 @@ void TileTBAANtuple::DIGI_addBranch(void)
           m_ntuplePtr->Branch(("DMUDstrobeErr"+suffixArr[i]).c_str(), &m_DMUDstrobeErrVec.back(), ("DMUDstrobeErr"+suffixArr[i]+"[16]/S").c_str()); // short
           m_ntuplePtr->Branch(("DMUMask"+suffixArr[i]).c_str(), &m_dmuMaskVec.back(), ("dmumask"+suffixArr[i]+"[2]/I").c_str()); // int
           m_ntuplePtr->Branch(("SlinkCRC"+suffixArr[i]).c_str(), &m_slinkCRCVec.back(), ("crc"+suffixArr[i]+"[2]/I").c_str()); // int
+          m_ntuplePtr->Branch(("DMUHeadparityErr"+suffixArr[i]).c_str(), &m_DMUHeadparityErrVec.back(), ("DMUHeadparityErr"+suffixArr[i]+"[16]/s").c_str()); // unsigned short
+          m_ntuplePtr->Branch(("DMUDataparityErr"+suffixArr[i]).c_str(), &m_DMUDataparityErrVec.back(), ("DMUDataparityErr"+suffixArr[i]+"[16]/s").c_str()); // unsigned short
         }
 
         m_ntuplePtr->Branch(("Gain"+suffixArr[i]).c_str(),&m_gainVec.back(), ("gain"+suffixArr[i]+"[48]/I").c_str()); // int
@@ -3476,9 +3497,7 @@ void TileTBAANtuple::DIGI_addBranch(void)
           m_ntuplePtr->Branch(("ROD_DMUSstrobeErr"+suffixArr[i]).c_str(), &m_ROD_DMUSstrobeErrVec.back(), ("ROD_DMUSstrobeErr"+suffixArr[i]+"[16]/s").c_str()); // unsigned short
           m_ntuplePtr->Branch(("ROD_DMUDstrobeErr"+suffixArr[i]).c_str(), &m_ROD_DMUDstrobeErrVec.back(), ("ROD_DMUDstrobeErr"+suffixArr[i]+"[16]/s").c_str()); // unsigned short
           m_ntuplePtr->Branch(("ROD_DMUHeadformatErr"+suffixArr[i]).c_str(), &m_ROD_DMUHeadformatErrVec.back(), ("ROD_DMUHeadformatErr"+suffixArr[i]+"[16]/s").c_str()); // unsigned short
-          m_ntuplePtr->Branch(("ROD_DMUHeadparityErr"+suffixArr[i]).c_str(), &m_ROD_DMUHeadparityErrVec.back(), ("ROD_DMUHeadparityErr"+suffixArr[i]+"[16]/s").c_str()); // unsigned short
           m_ntuplePtr->Branch(("ROD_DMUDataformatErr"+suffixArr[i]).c_str(), &m_ROD_DMUDataformatErrVec.back(), ("ROD_DMUDataformatErr"+suffixArr[i]+"[16]/s").c_str()); // unsigned short
-          m_ntuplePtr->Branch(("ROD_DMUDataparityErr"+suffixArr[i]).c_str(), &m_ROD_DMUDataparityErrVec.back(), ("ROD_DMUDataparityErr"+suffixArr[i]+"[16]/s").c_str()); // unsigned short
           m_ntuplePtr->Branch(("ROD_DMUMask"+suffixArr[i]).c_str(), &m_ROD_DMUMaskVec.back(), ("ROD_DMUMask"+suffixArr[i]+"[2]/s").c_str()); // unsigned short
 
         }
@@ -3505,6 +3524,8 @@ void TileTBAANtuple::DIGI_clearBranch(void)
   clear_init_minus1(m_DMUmemoryErrVec);
   clear_init_minus1(m_DMUDstrobeErrVec);
   clear_init_minus1(m_DMUSstrobeErrVec);
+  clear_init_minus1(m_DMUDataparityErrVec);
+  clear_init_minus1(m_DMUHeadparityErrVec);
 
   clear_init_minus1(m_ROD_GlobalCRCVec);
   clear_init_minus1(m_ROD_DMUBCIDVec);
@@ -3512,9 +3533,7 @@ void TileTBAANtuple::DIGI_clearBranch(void)
   clear_init_minus1(m_ROD_DMUSstrobeErrVec);
   clear_init_minus1(m_ROD_DMUDstrobeErrVec);
   clear_init_minus1(m_ROD_DMUHeadformatErrVec);
-  clear_init_minus1(m_ROD_DMUHeadparityErrVec);
   clear_init_minus1(m_ROD_DMUDataformatErrVec);
-  clear_init_minus1(m_ROD_DMUDataparityErrVec);
   clear_init_minus1(m_ROD_DMUMaskVec);
 
   clear_init_minus1(m_dmuMaskVec);

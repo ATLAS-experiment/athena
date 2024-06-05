@@ -49,7 +49,7 @@ def TrigTRTRawDataProviderCfg(flags : AthConfigFlags, RoIs : str, **kwargs):
     kwargs.setdefault('isRoI_Seeded', True)
     kwargs.setdefault('RoIs',         RoIs)
     kwargs.setdefault('RDOKey',       'TRT_RDOs_TRIG')
-    kwargs.setdefault('RDOCacheKey',  'TrtRDOCache')
+    kwargs.setdefault('RDOCacheKey',  flags.Trigger.InDetTracking.TRTRDOCacheKey)
     
     return TRTRawDataProviderCfg(flags, name = providerName, **kwargs)
 

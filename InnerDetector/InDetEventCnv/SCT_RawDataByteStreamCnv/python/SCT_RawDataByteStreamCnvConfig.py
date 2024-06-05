@@ -51,8 +51,8 @@ def TrigSCTRawDataProviderCfg(flags, suffix, RoIs):
         'RDOKey' : 'SCT_RDOs',
         'RoIs' : RoIs,   
         'isRoI_Seeded': True,
-        'RDOCacheKey' : 'SctRDOCache',
-        'BSErrCacheKey' : 'SctBSErrCache',
+        'RDOCacheKey' : flags.Trigger.InDetTracking.SCTRDOCacheKey,
+        'BSErrCacheKey' : flags.Trigger.InDetTracking.SCTBSErrCacheKey,
         'StoreInDetTimeCollections' : False,
     }
 

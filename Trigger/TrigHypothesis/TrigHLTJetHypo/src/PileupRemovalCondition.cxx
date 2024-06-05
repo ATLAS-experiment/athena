@@ -23,9 +23,12 @@ bool PileupRemovalCondition::isSatisfied(const pHypoJet& ip,
   float jetEMF = -999;
   double LR=-1;
   ip->getAttribute("EMFrac",jetEMF);
-  if (CxxUtils::fpcompare::less_equal (double(jetEMF),0))LR=-999; 
-  if(CxxUtils::fpcompare::greater_equal(double(jetEMF),1.)) LR=-999;
-  else  LR= log10(double(1./jetEMF - 1.));
+  if (CxxUtils::fpcompare::less_equal (0,double(jetEMF))){ 
+     if(CxxUtils::fpcompare::greater_equal(double(jetEMF),1.)) LR=-999;
+     else  LR= log10(double(1./jetEMF - 1.));
+  }else{
+     LR=-999;
+  }
   bool pass = LR > m_max;
   // Recalculating the LR only if it's not satisfied the LR>m_max criteria
   if (!pass){
@@ -65,10 +68,15 @@ bool PileupRemovalCondition::isSatisfied(const pHypoJet& ip,
            if ( s < 8 || (s > 20 && s < 28) ) jetEEM_EMscale+=samplingE; // EM layers 0-7 and 21-27
            jetE_EMscale+=samplingE; 
          }
-         jetEMF = (jetEEM_EMscale - clusterPU_sumEEM)/(jetE_EMscale - clusterPU_sumE);
-         if (CxxUtils::fpcompare::less_equal (double(jetEMF),0)) LR = -999.;
-         if(CxxUtils::fpcompare::greater_equal(double(jetEMF),1.0)) LR = -999.;
-         else LR = log10(double(1./jetEMF - 1.));
+	 if (CxxUtils::fpcompare::equal (0.,double(jetE_EMscale - clusterPU_sumE))) jetEMF=999;
+	 else jetEMF = (jetEEM_EMscale - clusterPU_sumEEM)/(jetE_EMscale - clusterPU_sumE);
+         if (CxxUtils::fpcompare::less_equal (0,double(jetEMF))) {
+            if(CxxUtils::fpcompare::greater_equal(double(jetEMF),1.0)) LR = -999.;
+            else {LR = log10(double(1./jetEMF - 1.));
+	    }
+	 }else{
+            LR = -999.;
+	 }
          pass=LR>m_max;
     }
   }

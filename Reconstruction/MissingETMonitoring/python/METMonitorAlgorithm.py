@@ -128,58 +128,58 @@ def METMonitoringConfig(inputFlags):
     for mets in metcalo_types:
         defineHistogramsCalo(METCalo_MonAlg, group,helper,mets)
 #trigger
-    METRefFinal_XE50_MonAlg = helper.addAlgorithm(CompFactory.METMonitoringAlg,'METRefFinal_XE50_MonAlg',
+    METRefFinal_jXE100_MonAlg = helper.addAlgorithm(CompFactory.METMonitoringAlg,'METRefFinal_jXE100_MonAlg',
                                                   addFilterTools = [AtlasReadyFilterCfg(inputFlags),
                                                                     LArBadLBFilterToolCfg(inputFlags),
                                                                     FilledBunchFilterToolCfg(inputFlags)]
                                                   )
-    METRefFinal_XE50_MonAlg.METContainer="MET_Reference_AntiKt4EMTopo"
-    METRefFinal_XE50_MonAlg.metTotalKey="FinalTrk"
-    METRefFinal_XE50_MonAlg.metKeys = met_types
-    METRefFinal_XE50_MonAlg.dotrigger = True
-    group = helper.addGroup(METRefFinal_XE50_MonAlg,"METMonitor","MissingEt/TrigXE50/MET_AntiKt4EMTopo/")
+    METRefFinal_jXE100_MonAlg.METContainer="MET_Reference_AntiKt4EMTopo"
+    METRefFinal_jXE100_MonAlg.metTotalKey="FinalTrk"
+    METRefFinal_jXE100_MonAlg.metKeys = met_types
+    METRefFinal_jXE100_MonAlg.dotrigger = True
+    group = helper.addGroup(METRefFinal_jXE100_MonAlg,"METMonitor","MissingEt/TrigjXE100/MET_AntiKt4EMTopo/")
     for mets in met_types:
-        defineHistograms(METRefFinal_XE50_MonAlg, group,helper,mets)
+        defineHistograms(METRefFinal_jXE100_MonAlg, group,helper,mets)
 
     if inputFlags.DQ.DataType is not DQDataType.Cosmics:
-        METPflow_XE50_MonAlg = helper.addAlgorithm(CompFactory.METMonitoringAlg,'METPflow_XE50_MonAlg',
+        METPflow_jXE100_MonAlg = helper.addAlgorithm(CompFactory.METMonitoringAlg,'METPflow_jXE100_MonAlg',
                                                    addFilterTools = [AtlasReadyFilterCfg(inputFlags),
                                                                      LArBadLBFilterToolCfg(inputFlags),
                                                                      FilledBunchFilterToolCfg(inputFlags)]
                                                    )
-        METPflow_XE50_MonAlg.METContainer="MET_Reference_AntiKt4EMPFlow"
-        METPflow_XE50_MonAlg.metTotalKey="FinalTrk"
-        METPflow_XE50_MonAlg.metKeys = pfmet_types
-        METPflow_XE50_MonAlg.dotrigger = True
-        group = helper.addGroup(METPflow_XE50_MonAlg,"METMonitor","MissingEt/TrigXE50/MET_AntiKt4EMPflow/")
+        METPflow_jXE100_MonAlg.METContainer="MET_Reference_AntiKt4EMPFlow"
+        METPflow_jXE100_MonAlg.metTotalKey="FinalTrk"
+        METPflow_jXE100_MonAlg.metKeys = pfmet_types
+        METPflow_jXE100_MonAlg.dotrigger = True
+        group = helper.addGroup(METPflow_jXE100_MonAlg,"METMonitor","MissingEt/TrigjXE100/MET_AntiKt4EMPflow/")
         for mets in pfmet_types:
-            defineHistograms(METPflow_XE50_MonAlg, group,helper,mets)
+            defineHistograms(METPflow_jXE100_MonAlg, group,helper,mets)
 
-    METCalo_XE50_MonAlg = helper.addAlgorithm(CompFactory.METMonitoringAlg,'METCalo_XE50_MonAlg',
+    METCalo_jXE100_MonAlg = helper.addAlgorithm(CompFactory.METMonitoringAlg,'METCalo_jXE100_MonAlg',
                                               addFilterTools = [AtlasReadyFilterCfg(inputFlags),
                                                                 LArBadLBFilterToolCfg(inputFlags),
                                                                 FilledBunchFilterToolCfg(inputFlags)]
                                               )
-    METCalo_XE50_MonAlg.METCaloContainer="MET_Calo"
-    METCalo_XE50_MonAlg.METCaloKeys = metcalo_types
-    METCalo_XE50_MonAlg.dotrigger = True
-    group = helper.addGroup(METCalo_XE50_MonAlg,"METMonitor","MissingEt/TrigXE50/MET_Calo/MET_Cell")
+    METCalo_jXE100_MonAlg.METCaloContainer="MET_Calo"
+    METCalo_jXE100_MonAlg.METCaloKeys = metcalo_types
+    METCalo_jXE100_MonAlg.dotrigger = True
+    group = helper.addGroup(METCalo_jXE100_MonAlg,"METMonitor","MissingEt/TrigjXE100/MET_Calo/MET_Cell")
     for mets in metcalo_types:
-        defineHistogramsCalo(METCalo_XE50_MonAlg, group,helper,mets)
+        defineHistogramsCalo(METCalo_jXE100_MonAlg, group,helper,mets)
 
-    METEMTopo_XE50_MonAlg = helper.addAlgorithm(CompFactory.METMonitoringAlg,'METEMTopo_XE50_MonAlg',
+    METEMTopo_jXE100_MonAlg = helper.addAlgorithm(CompFactory.METMonitoringAlg,'METEMTopo_jXE100_MonAlg',
                                                 addFilterTools = [AtlasReadyFilterCfg(inputFlags),
                                                                   LArBadLBFilterToolCfg(inputFlags),
                                                                   FilledBunchFilterToolCfg(inputFlags)]
                                                )
-    METEMTopo_XE50_MonAlg.METContainer="MET_EMTopo"
-    METEMTopo_XE50_MonAlg.METAntiKt4EMTopoContainer="MET_Reference_AntiKt4EMTopo"
+    METEMTopo_jXE100_MonAlg.METContainer="MET_EMTopo"
+    METEMTopo_jXE100_MonAlg.METAntiKt4EMTopoContainer="MET_Reference_AntiKt4EMTopo"
     emtopomet_types= ["MET_Topo"]
-    METEMTopo_XE50_MonAlg.metKeys = emtopomet_types
-    METEMTopo_XE50_MonAlg.dotrigger = True
-    METEMTopo_XE50_group = helper.addGroup(METEMTopo_XE50_MonAlg,"METMonitor","MissingEt/TrigXE50/MET_Calo/EMTopo")
+    METEMTopo_jXE100_MonAlg.metKeys = emtopomet_types
+    METEMTopo_jXE100_MonAlg.dotrigger = True
+    METEMTopo_jXE100_group = helper.addGroup(METEMTopo_jXE100_MonAlg,"METMonitor","MissingEt/TrigjXE100/MET_Calo/EMTopo")
     for mets in emtopomet_types:
-        defineHistograms(METEMTopo_XE50_MonAlg, METEMTopo_XE50_group,helper,mets) 
+        defineHistograms(METEMTopo_jXE100_MonAlg, METEMTopo_jXE100_group,helper,mets) 
 
 # metcut
     METRefFinal_METCut_MonAlg = helper.addAlgorithm(CompFactory.METMonitoringAlg,'METRefFinal_METCut_MonAlg',

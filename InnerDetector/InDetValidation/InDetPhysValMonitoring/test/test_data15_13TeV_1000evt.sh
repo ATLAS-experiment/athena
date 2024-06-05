@@ -51,14 +51,14 @@ if [ $rec_tf_exit_code -eq 0 ]  ;then
 
 #  echo "compare with R22 with nightly build at 24.0.1"
   $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
-    -p -x dcube \
+    -p -x dcube_shifter \
     -c ${dcubeShifterXml} \
     -r ${dcubeRef} \
     physval.ntuple.root
   echo "art-result: $? shifter_plots"
 
   $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
-    -p -x dcube \
+    -p -x dcube_expert \
     -c ${dcubeExpertXml} \
     -r ${dcubeRef} \
     physval.ntuple.root

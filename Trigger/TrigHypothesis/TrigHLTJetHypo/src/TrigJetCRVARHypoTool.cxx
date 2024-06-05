@@ -119,8 +119,9 @@ bool TrigJetCRVARHypoTool::emf_dis(const xAOD::Jet* jet  ) const {
         jetE_EMscale+=samplingE; 
       }
 
-      double pufixEMF = (jetEEM_EMscale - clusterPU_sumEEM)/(jetE_EMscale - clusterPU_sumE);
-
+      double pufixEMF = -999;
+      if (CxxUtils::fpcompare::equal (0.,double(jetE_EMscale - clusterPU_sumE))) pufixEMF=999;
+      else pufixEMF = (jetEEM_EMscale - clusterPU_sumEEM)/(jetE_EMscale - clusterPU_sumE);
       if (CxxUtils::fpcompare::greater(pufixEMF,0.)){
         if(CxxUtils::fpcompare::greater_equal(pufixEMF,1.0)) pufixLR = -999.;
         else pufixLR = log10(double(1./pufixEMF - 1.));
