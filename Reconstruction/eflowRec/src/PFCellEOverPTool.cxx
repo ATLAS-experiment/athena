@@ -33,11 +33,12 @@ StatusCode PFCellEOverPTool::initialize(){
 
   ATH_MSG_INFO("Using reference file location " + path);
 
-  std::ifstream binBoundariesFile(path+"EOverPBinBoundaries.json");
+  std::ifstream binBoundariesFile(path+"binBoundaries.json");
   nlohmann::json json_binBoundaries;
   binBoundariesFile >> json_binBoundaries;
 
-  auto fillBinBoundaries = [](auto && binBoundaries, const nlohmann::json &json_binBoundaries, const std::string &binName){
+  //whilst for calo layers and first interaction regions we want to lookup the full set of bin values
+  auto fillBinValues = [](auto && binBoundaries, const nlohmann::json &json_binBoundaries, const std::string &binName){
     if (json_binBoundaries.contains(binName)){
       for (auto binBoundary : json_binBoundaries[binName]) binBoundaries.push_back(binBoundary);
       return true;
@@ -53,26 +54,40 @@ StatusCode PFCellEOverPTool::initialize(){
 
   //here we verify we can load in the bin boundaries - if not we return a FAILURE code
   //because particle flow cannot run correctly without these being loaded
-  filledBins = fillBinBoundaries(m_energyBinLowerBoundaries, json_binBoundaries, energyBinBoundaries);
+  filledBins = fillBinValues(m_energyBinLowerBoundaries, json_binBoundaries, energyBinBoundaries);
   if (!filledBins) {
     ATH_MSG_ERROR("Could not bin boundaries in json file: " << energyBinBoundaries);
     return StatusCode::FAILURE;
   }
-  filledBins = fillBinBoundaries(m_etaBinLowerBoundaries, json_binBoundaries, etaBinBoundaries);
+  //remove the last bin boundary - the e/p derivation code measures e/p in an energy range and our json
+  //contains the bin boundaries as usded by the e/p derivation code:
+  //https://gitlab.cern.ch/atlas-jetetmiss/pflow/commontools/EOverPTools/-/blob/0dee81d8823be1fd725af2cfe62391bcb904b683/EoverpNtupleAnalysis/Run_EoverP_Comparison.py#L100
+  //But e.g if the last pair if boundaries are 40 and 100 GeV we measure e/p between those values, but we 
+  //want to allow any track with e > 40 GeV to find an e/p reference value.
+  //Note the same issue cannot occur for eta, calo layer or first interaction region bins
+  //because there is a hard upper limit from the detector geometry - so a track can never
+  //e.g have an eta above the final eta bin boundary
+  m_energyBinLowerBoundaries.pop_back(); 
+  filledBins = fillBinValues(m_etaBinLowerBoundaries, json_binBoundaries, etaBinBoundaries);
   if (!filledBins) {
     ATH_MSG_ERROR("Could not bin boundaries in json file: " << etaBinBoundaries);
     return StatusCode::FAILURE;
   }
-  filledBins = fillBinBoundaries(m_firstIntBinLowerBoundaries, json_binBoundaries, firstIntBinBoundaries);
+  filledBins = fillBinValues(m_firstIntBinLowerBoundaries, json_binBoundaries, firstIntBinBoundaries);
   if (!filledBins) {
     ATH_MSG_ERROR("Could not bin boundaries in json file: " << firstIntBinBoundaries);
     return StatusCode::FAILURE;
   }
-  filledBins = fillBinBoundaries(m_caloLayerBins, json_binBoundaries, caloLayerBinBoundaries);
+  filledBins = fillBinValues(m_caloLayerBins, json_binBoundaries, caloLayerBinBoundaries);
   if (!filledBins) {
     ATH_MSG_ERROR("Could not bin boundaries in json file: " << caloLayerBinBoundaries);
     return StatusCode::FAILURE;
   }
+
+  ATH_MSG_DEBUG("Energy bin boundaries: " << m_energyBinLowerBoundaries);
+  ATH_MSG_DEBUG("Eta bin boundaries: " << m_etaBinLowerBoundaries);
+  ATH_MSG_DEBUG("First interaction region bin boundaries: " << m_firstIntBinLowerBoundaries);
+  ATH_MSG_DEBUG("Calo layer bin boundaries: " << m_caloLayerBins);
 
   return StatusCode::SUCCESS;
 }
@@ -81,12 +96,16 @@ StatusCode PFCellEOverPTool::fillBinnedParameters(eflowEEtaBinnedParameters *bin
 
   if (binnedParameters) {
 
-    binnedParameters->initialise(m_energyBinLowerBoundaries, m_etaBinLowerBoundaries);
+    //The energy values in the json files are in GeV, but in athena we work in MeV
+    //so the energy values used by binnedParameters are converted to MeV
+    std::vector<double>  energyBinLowerBoundaries_GeV;
+    for (auto energyBin : m_energyBinLowerBoundaries) energyBinLowerBoundaries_GeV.push_back(energyBin*Gaudi::Units::GeV);
+    binnedParameters->initialise(energyBinLowerBoundaries_GeV, m_etaBinLowerBoundaries);
 
     std::string path;
     path = PathResolverFindCalibDirectory(m_referenceFileLocation);  
 
-    std::ifstream inputFile_eoverp(path+"EoverP.json");
+    std::ifstream inputFile_eoverp(path+"eOverP.json");
     nlohmann::json json_eoverp;
     inputFile_eoverp >> json_eoverp;  
 
@@ -105,11 +124,8 @@ StatusCode PFCellEOverPTool::fillBinnedParameters(eflowEEtaBinnedParameters *bin
       int etaBinCounter = -1;
       for (auto thisEtaBin : m_etaBinLowerBoundaries){
         etaBinCounter++;
-        //check if the eta value is divisible by exactly 1
-        unsigned int etaPrecision = 0;
-        if (std::fmod(thisEtaBin,1) != 0) etaPrecision = 1;
         std::stringstream currentEtaBinStream;
-        currentEtaBinStream << std::fixed << std::setprecision(etaPrecision) << thisEtaBin;
+        currentEtaBinStream << std::fixed << std::setprecision(1) << thisEtaBin;
         std::string currentEtaBin = currentEtaBinStream.str();
         for (auto thisFirstIntRegionBin_Int : m_firstIntBinLowerBoundaries){
           //enum version is used for the calls to binnedParameters APIs
@@ -117,28 +133,41 @@ StatusCode PFCellEOverPTool::fillBinnedParameters(eflowEEtaBinnedParameters *bin
           //and string version is used to lookup values from the json file
       	  std::string currentFirstIntBin = std::to_string(thisFirstIntRegionBin_Int);
           std::string eOverPBin = "energyBinLowerBound_"+currentEBin+"_etaBinLowerBound_"+currentEtaBin+"_firstIntBinLowerBound_"+currentFirstIntBin;
-          if (json_eoverp.contains(eOverPBin+"_mean")){
+          if (json_eoverp.contains(eOverPBin+"_mean")){     
             binnedParameters->setFudgeMean(energyBinCounter,etaBinCounter,thisFirstIntRegionBin,json_eoverp[eOverPBin+"_mean"]);
+            ATH_MSG_DEBUG("Setting mean for bin " << eOverPBin << " to " << json_eoverp[eOverPBin+"_mean"]);
           }
+          //DEBUG because this is expected to happen for some combinations (e.g HEC calo layers for tracks in the barrel)
+          else ATH_MSG_DEBUG("No mean found for bin " << eOverPBin);
           if (json_eoverp.contains(eOverPBin+"_sigma")){
             binnedParameters->setFudgeStdDev(energyBinCounter,etaBinCounter,thisFirstIntRegionBin,json_eoverp[eOverPBin+"_sigma"]);
+            ATH_MSG_DEBUG("Setting sigma for bin " << eOverPBin << " to " << json_eoverp[eOverPBin+"_sigma"]);
           }
+          else ATH_MSG_DEBUG("No sigma found for bin " << eOverPBin);
           for (auto thisLayerBin : m_caloLayerBins){
             eflowCalo::LAYER thisLayerBinEnum = static_cast<eflowCalo::LAYER>(thisLayerBin);   
             std::string currentLayerBin = eflowCalo::name(thisLayerBinEnum);            
             std::string cellOrderingBin = eOverPBin + "_caloLayer_"+std::to_string(thisLayerBin);
             if (json_cellOrdering.contains(cellOrderingBin+"_norm1")){
               binnedParameters->setShapeParam(energyBinCounter,etaBinCounter,thisFirstIntRegionBin,thisLayerBinEnum,NORM1,json_cellOrdering[cellOrderingBin+"_norm1"]);
+              ATH_MSG_DEBUG("Setting norm1 for bin " << cellOrderingBin << " to " << json_cellOrdering[cellOrderingBin+"_norm1"]);
             }
+            else ATH_MSG_DEBUG("No norm1 found for bin " << cellOrderingBin);
             if (json_cellOrdering.contains(cellOrderingBin+"_sigma1")){
               binnedParameters->setShapeParam(energyBinCounter,etaBinCounter,thisFirstIntRegionBin,thisLayerBinEnum,WIDTH1,json_cellOrdering[cellOrderingBin+"_sigma1"]);
+              ATH_MSG_DEBUG("Setting sigma1 for bin " << cellOrderingBin << " to " << json_cellOrdering[cellOrderingBin+"_sigma1"]);
             }
+            else ATH_MSG_DEBUG("No sigma1 found for bin " << cellOrderingBin);
             if (json_cellOrdering.contains(cellOrderingBin+"_norm2")){
               binnedParameters->setShapeParam(energyBinCounter,etaBinCounter,thisFirstIntRegionBin,thisLayerBinEnum,NORM2,json_cellOrdering[cellOrderingBin+"_norm2"]);
+              ATH_MSG_DEBUG("Setting norm2 for bin " << cellOrderingBin << " to " << json_cellOrdering[cellOrderingBin+"_norm2"]);
             }
+            else ATH_MSG_DEBUG("No norm2 found for bin " << cellOrderingBin);
             if (json_cellOrdering.contains(cellOrderingBin+"_sigma2")){
               binnedParameters->setShapeParam(energyBinCounter,etaBinCounter,thisFirstIntRegionBin,thisLayerBinEnum,WIDTH2,json_cellOrdering[cellOrderingBin+"_sigma2"]);
+              ATH_MSG_DEBUG("Setting sigma2 for bin " << cellOrderingBin << " to " << json_cellOrdering[cellOrderingBin+"_sigma2"]);
             }            
+            else ATH_MSG_DEBUG("No sigma2 found for bin " << cellOrderingBin);
           }
         }
       }
