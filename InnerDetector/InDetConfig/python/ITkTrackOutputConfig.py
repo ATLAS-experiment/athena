@@ -23,6 +23,8 @@ def ITkTrackRecoOutputCfg(flags, extensions_list=None):
     # exclude IDTIDE decorations
     from DerivationFrameworkInDet.IDTIDE import IDTIDE_AOD_EXCLUDED_AUXDATA
     excludedAuxData += '.-'.join([''] + IDTIDE_AOD_EXCLUDED_AUXDATA)
+    from DerivationFrameworkInDet.IDTRKVALID import IDTRKVALID_AOD_EXCLUDED_AUXDATA
+    excludedAuxData += '.-'.join([''] + IDTRKVALID_AOD_EXCLUDED_AUXDATA)
 
     if not flags.Tracking.writeExtendedSi_PRDInfo:
         excludedAuxData += '.-msosLink'

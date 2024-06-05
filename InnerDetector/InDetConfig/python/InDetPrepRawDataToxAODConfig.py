@@ -171,15 +171,23 @@ def InDetPrepDataToxAODCfg(flags):
 
 def ITkPrepDataToxAODCfg(flags):
     acc = ComponentAccumulator()
-
+    extra_truth = flags.Tracking.doTIDE_AmbiTrackMonitoring
     if flags.Detector.EnableITkPixel:
         from InDetConfig.ITkTrackRecoConfig import (
             ITkClusterSplitProbabilityContainerName)
-        acc.merge(ITkPixelPrepDataToxAODCfg(
-            flags, ClusterSplitProbabilityName=(
-                ITkClusterSplitProbabilityContainerName(flags))))
+        if extra_truth :
+           acc.merge(ITkPixelPrepDataToxAOD_ExtraTruthCfg(
+              flags, ClusterSplitProbabilityName=(
+                  ITkClusterSplitProbabilityContainerName(flags))))
+        else :
+           acc.merge(ITkPixelPrepDataToxAODCfg(
+              flags, ClusterSplitProbabilityName=(
+                  ITkClusterSplitProbabilityContainerName(flags))))
 
     if flags.Detector.EnableITkStrip:
-        acc.merge(ITkStripPrepDataToxAODCfg(flags))
+        if extra_truth :
+            acc.merge(ITkStripPrepDataToxAOD_ExtraTruthCfg(flags))
+        else :
+            acc.merge(ITkStripPrepDataToxAODCfg(flags))
 
     return acc
