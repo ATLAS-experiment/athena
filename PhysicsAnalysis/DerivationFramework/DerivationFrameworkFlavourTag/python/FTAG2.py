@@ -26,10 +26,16 @@ def FTAG2KernelCfg(flags, name='FTAG2Kernel', **kwargs):
 
 
     # filter leptons
+    # 2-leptons
     lepton_skimming_expression = 'count( (Muons.pt > 18*GeV) && (0 == Muons.muonType || 1 == Muons.muonType || 4 == Muons.muonType) ) + count(( Electrons.pt > 18*GeV) && ((Electrons.Loose) || (Electrons.DFCommonElectronsLHLoose))) >= 2 && count( (Muons.pt > 25*GeV) && (0 == Muons.muonType || 1 == Muons.muonType || 4 == Muons.muonType) ) + count(( Electrons.pt > 25*GeV) && ((Electrons.Loose) || (Electrons.DFCommonElectronsLHLoose))) >= 1'
+    # 1-lepton + 1-tau
+    taul_skimming_expression = '(count( TauJets.pt >= 20*GeV && abs(TauJets.eta) < 2.5 && abs(TauJets.charge)==1.0 && (TauJets.nTracks == 1 || TauJets.nTracks == 3) && TauJets.DFTauLoose) >= 1) && (count( (Muons.pt > 25*GeV) && (0 == Muons.muonType || 1 == Muons.muonType || 4 == Muons.muonType) ) + count(( Electrons.pt > 25*GeV) && ((Electrons.Loose) || (Electrons.DFCommonElectronsLHLoose))) >= 1)'
+
+    total_skimming_expression = '('+lepton_skimming_expression+') || ('+taul_skimming_expression+')'
+    
     FTAG2LeptonSkimmingTool = CompFactory.DerivationFramework.xAODStringSkimmingTool(
             name = "FTAG2LeptonSkimmingTool",
-            expression = lepton_skimming_expression )
+            expression = total_skimming_expression )
     acc.addPublicTool(FTAG2LeptonSkimmingTool)
 
 
@@ -93,28 +99,14 @@ def FTAG2Cfg(flags):
     
     FTAG2SlimmingHelper = SlimmingHelper("FTAG2SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
 
-    FTAG2SlimmingHelper.SmartCollections = [
-            "Electrons",
-            "Muons",
-            "PrimaryVertices",
-            "InDetTrackParticles",
-            "AntiKt4EMPFlowJets",
-            "BTagging_AntiKt4EMPFlow",
-            "MET_Baseline_AntiKt4EMPFlow",
-            ]
-
-    FTAG2SlimmingHelper.AllVariables = [
-            "EventInfo",
-            "PrimaryVertices",
-            "InDetTrackParticles",
-            "BTagging_AntiKt4EMPFlow",
-            "BTagging_AntiKt4EMPFlowJFVtx",
-            "BTagging_AntiKt4EMPFlowSecVtx",
-            "TruthBottom", "TruthElectrons","TruthMuons","TruthTaus",
-            ]
-
-
     from DerivationFrameworkFlavourTag import FtagBaseContent
+
+    FTAG2SlimmingHelper.SmartCollections = []
+    FtagBaseContent.add_baseline_slimming_smartcollections(FTAG2SlimmingHelper)
+    
+    FTAG2SlimmingHelper.AllVariables = []
+    FtagBaseContent.add_baseline_slimming_allvariables(FTAG2SlimmingHelper)
+    
     # update AppendToDictionary
     extra_AppendToDictionary = {} #only add those items specifically for FTAG2 here!
     FtagBaseContent.update_AppendToDictionary_in_SlimmingHelper(FTAG2SlimmingHelper, flags, extra_AppendToDictionary)
