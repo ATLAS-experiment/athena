@@ -14,8 +14,29 @@ def JETM42KernelCfg(flags, name='JETM42Kernel', **kwargs):
     """Configure the derivation framework driving algorithm (kernel) for JETM42"""
     acc = ComponentAccumulator()
     
-    from DerivationFrameworkPhys.PHYS import PHYSKernelCfg
-    acc.merge(PHYSKernelCfg(flags, name, StreamName = kwargs['StreamName'], TriggerListsHelper = kwargs['TriggerListsHelper'], TauJets_EleRM_in_input=kwargs['TauJets_EleRM_in_input']))
+    from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
+    acc.merge(PhysCommonAugmentationsCfg(
+        flags,
+        TriggerListsHelper     = kwargs['TriggerListsHelper'],
+        TauJets_EleRM_in_input = kwargs['TauJets_EleRM_in_input']
+    ))
+
+    thinningToolsArgs = {
+        'DiTauLowPtThinningToolName'          : "PHYSDiTauLowPtThinningTool",
+    } 
+
+    from DerivationFrameworkPhys.PhysCommonThinningConfig import PhysCommonThinningCfg
+
+    acc.merge(PhysCommonThinningCfg(flags, StreamName = kwargs['StreamName'], **thinningToolsArgs))
+    # Get them from the CA so they can be added to the kernel
+    thinningTools = []
+    for key in thinningToolsArgs:
+        thinningTools.append(acc.getPublicTool(thinningToolsArgs[key]))
+
+    # The kernel algorithm itself
+    DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
+    acc.addEventAlgo(DerivationKernel(name, ThinningTools = thinningTools))
+
 
     from JetRecConfig.JetRecConfig import JetRecCfg, getInputAlgs
     from JetRecConfig.StandardJetConstits import stdConstitDic as cst, standardReco, stdInputExtDic as inpext
@@ -100,7 +121,7 @@ def JETM42CoreCfg(flags, name, StreamName, TriggerListsHelper, TauJets_EleRM_in_
 
     JETM42SlimmingHelper = SlimmingHelper(name+"SlimmingHelper", flags=flags, NamesAndTypes = flags.Input.TypedCollections)
 
-    JETM42SlimmingHelper.AllVariables = ["CaloCalTopoClusters", "CaloCalFwdTopoTowers", "CaloTopoClusters422", "CaloCalAllTopoTowers"
+    JETM42SlimmingHelper.AllVariables = ["CaloCalTopoClusters", "CaloTopoClusters422", "CaloCalAllTopoTowers"
                                       ]
     jetOutputList = ["AntiKt4EMTopo422Jets","AntiKt4EMTopo422SKJets","AntiKt4TopoTowerJets","AntiKt4TopoTowerSKJets"] 
     from DerivationFrameworkJetEtMiss.JetCommonConfig import addJetsToSlimmingTool

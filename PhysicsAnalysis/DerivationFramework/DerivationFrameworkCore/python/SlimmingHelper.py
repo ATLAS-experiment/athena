@@ -38,6 +38,7 @@ from DerivationFrameworkCore.CompulsoryContent import CompulsoryContent, Compuls
 from DerivationFrameworkCore.ContentHandler import ContentHandler
 from DerivationFrameworkCore.ContainersOnTheFly import ContainersOnTheFly
 from DerivationFrameworkCore.FullListOfSmartContainers import FullListOfSmartContainers
+from AthenaConfiguration.Enums import LHCPeriod
 import PyUtils.Logging as L
 msg = L.logging.getLogger('DerivationFramework__SlimmingHelper')
 msg.setLevel(L.logging.INFO)
@@ -547,6 +548,9 @@ class SlimmingHelper:
                 elif collectionName=="InDetTrackParticles":
                         from DerivationFrameworkInDet.InDetTrackParticlesCPContent import InDetTrackParticlesCPContent
                         items.extend(InDetTrackParticlesCPContent)
+                        if self.flags.GeoModel.Run >= LHCPeriod.Run4:
+                            from DerivationFrameworkInDet.InDetTrackParticlesCPContentRun4 import InDetTrackParticlesCPContentRun4
+                            items.extend(InDetTrackParticlesCPContentRun4)
                 elif collectionName=="InDetPseudoTrackParticles":
                         from DerivationFrameworkInDet.InDetPseudoTrackParticlesCPContent import InDetPseudoTrackParticlesCPContent
                         items.extend(InDetPseudoTrackParticlesCPContent)
@@ -586,6 +590,9 @@ class SlimmingHelper:
                 elif collectionName=="PrimaryVertices":
                         from DerivationFrameworkInDet.PrimaryVerticesCPContent import PrimaryVerticesCPContent
                         items.extend(PrimaryVerticesCPContent)
+                        if self.flags.GeoModel.Run >= LHCPeriod.Run4:
+                            from DerivationFrameworkInDet.PrimaryVerticesCPContentRun4 import PrimaryVerticesCPContentRun4
+                            items.extend(PrimaryVerticesCPContentRun4)
                 elif self.IncludeAdditionalTriggerContent is True:
                         from DerivationFrameworkCore.AdditionalTriggerContent import AdditionalTriggerContent
                         items.extend(AdditionalTriggerContent)
