@@ -408,6 +408,8 @@ TrigConf::L1TopoMenuLoader::loadAllAlgsFixed( std::map<uint, TXC::L1TopoConfigAl
       theCondition0 += string(" AND TA2TG.TA2TG_GENERIC_ID = TG.TG_ID"); 
       query0->setCondition( theCondition0, bindList0 );
 
+      query0->addToOrderList("TG.TG_NAME");
+
       coral::AttributeList attList0;
       attList0.extend<int>( "TA2TG.TA2TG_ALGO_ID" );
       attList0.extend<string>( "TG.TG_NAME" );
