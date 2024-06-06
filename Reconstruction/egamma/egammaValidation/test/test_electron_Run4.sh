@@ -1,9 +1,9 @@
 #!/bin/sh
 #
-# art-description: ART Monitoring Tool for electron Validation
+# art-description: ART Monitoring Tool for electron Validation, phase II, no pileup
 #
 # art-type: grid
-# art-input: mc21_14TeV.901967.PG_single_epm_egammaET_etaFlatnp0_25.recon.RDO.e8481_s4149_r14697
+# art-input: mc21_14TeV.901967.PG_single_epm_egammaET_etaFlatnp0_25.recon.RDO.e8481_s4264_r15317
 # art-input-nfiles: 60
 # art-cores: 4
 # art-include: main/Athena
@@ -35,7 +35,7 @@ case $ArtProcess in
 
 	set +e
 
-	checkFile.py Nightly_AOD.pool.root > checkFile_Nightly_electron.txt
+	checkFile.py Nightly_AOD.pool.root > checkFile_Nightly.txt
 
 	echo  "art-result: $? checks_files"
 
@@ -47,8 +47,8 @@ case $ArtProcess in
 
 	echo  "art-result: $? final_comparison"
 
-	## dcube not so relevant for the time being. Still compare to the run2/3 sample
-	$ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py -p -x dcube -c /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/egammaValidation/DCube_Config/electron.xml -r /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/egammaValidation/Nightly_Files/ref_main/Nightly-monitoring_electron_cen_Run4.hist.root  Nightly-monitoring.hist.root
+	## dcube
+	$ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py -p -x dcube -c /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/egammaValidation/DCube_Config/electron.xml -r /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/egammaValidation/Nightly_Files/ref_main/Nightly-monitoring_electron_cen_Run4.hist.root Nightly-monitoring.hist.root
 	#echo  "art-result: $? plot"
 
 	;;
@@ -66,7 +66,7 @@ case $ArtProcess in
 	echo "Unsetting ATHENA_NUM_PROC=${ATHENA_NUM_PROC}"
 	unset  ATHENA_NUM_PROC
 
-	Reco_tf.py --CA --inputRDOFile=$x --outputAODFile=Nightly_AOD.pool.root --maxEvents=1000 --autoConfiguration="everything" --conditionsTag="OFLCOND-MC15c-SDR-14-05" --preInclude egammaConfig.egammaOnlyFromRawFlags.egammaOnlyFromRaw --postInclude egammaValidation.egammaArtSpecialContent.egammaArtSpecialContent
+	Reco_tf.py --CA --inputRDOFile=$x --outputAODFile=Nightly_AOD.pool.root --maxEvents=1000 --autoConfiguration="everything" --conditionsTag="OFLCOND-MC15c-SDR-14-05" --preInclude egammaConfig.egammaOnlyFromRawFlags.egammaOnlyFromRaw --postInclude egammaValidation.egammaArtSpecialContent.egammaArtSpecialContent --preExec "flags.Calo.Noise.fixedLumiForNoise=68.965" --postExec "from IOVDbSvc.IOVDbSvcConfig import addOverride;cfg.merge(addOverride(flags,\"/LAR/NoiseOfl/CellNoise\",\"LARNoiseOflCellNoise-mu200\",db=\"sqlite://;schema=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/egammaValidation/dbNoisePhaseII/CellNoise-mu200Formu0Sample.db;dbname=OFLP200\"))"
 
 	echo  "art-result: $? reconstruction"
 

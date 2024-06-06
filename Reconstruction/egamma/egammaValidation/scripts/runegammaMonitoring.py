@@ -5,6 +5,7 @@
 # Cut-and-paste from RunHitAnalysis.py
 
 import sys
+import os
 
 from argparse import ArgumentParser
 
@@ -33,7 +34,11 @@ from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.Enums import ProductionStep
 flags = initConfigFlags()
 flags.Common.ProductionStep = ProductionStep.Simulation
-flags.Input.Files = [ f for f in args.inputFiles.split(',') ]
+isDir = os.path.isdir(args.inputFiles)
+if isDir:
+    flags.Input.Files = [ args.inputFiles + '/' + f for f in os.listdir(args.inputFiles) ]
+else:
+    flags.Input.Files = [ f for f in args.inputFiles.split(',') ]
 from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
 setupDetectorFlags(flags, ['LAr','Tile'], use_metadata=True, toggle_geometry=True)
 # to be checked. Without this, I got
