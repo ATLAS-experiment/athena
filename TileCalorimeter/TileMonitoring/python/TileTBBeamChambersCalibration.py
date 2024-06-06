@@ -62,7 +62,7 @@ def getBeamChambersCalibrations(run):
         calibrations['BC2HorizontalSlope']  = calibrations['BC2X2'] = -0.0523055
         calibrations['BC2VerticalOffset']   = calibrations['BC2Y1'] = -0.0602012
         calibrations['BC2VerticalSlope']    = calibrations['BC2Y2'] = -0.0532108
-    else:
+    elif run <= 2410000:
         # July TB2023
         calibrations['BC1HorizontalOffset'] = calibrations['BC1X1'] =  2.465295
         calibrations['BC1HorizontalSlope']  = calibrations['BC1X2'] = -0.072135
@@ -73,6 +73,18 @@ def getBeamChambersCalibrations(run):
         calibrations['BC2HorizontalSlope']  = calibrations['BC2X2'] = -0.075384
         calibrations['BC2VerticalOffset']   = calibrations['BC2Y1'] =  1.875657
         calibrations['BC2VerticalSlope']    = calibrations['BC2Y2'] = -0.076717
+    else:
+        # May TB2024
+        calibrations['BC1HorizontalOffset'] = calibrations['BC1X1'] =  3.095518
+        calibrations['BC1HorizontalSlope']  = calibrations['BC1X2'] = -0.070485
+        calibrations['BC1VerticalOffset']   = calibrations['BC1Y1'] =  1.324992
+        calibrations['BC1VerticalSlope']    = calibrations['BC1Y2'] = -0.071980
+
+        calibrations['BC2HorizontalOffset'] = calibrations['BC2X1'] = -0.114170
+        calibrations['BC2HorizontalSlope']  = calibrations['BC2X2'] = -0.070819
+        calibrations['BC2VerticalOffset']   = calibrations['BC2Y1'] = -0.001407
+        calibrations['BC2VerticalSlope']    = calibrations['BC2Y2'] = -0.072557
+
 
     return calibrations
 
