@@ -20,6 +20,8 @@ from DCSCalculator2.variable import DefectIOV, DefectIOVFull
 
 import DCSCalculator2.config as config
 
+from contextlib import nullcontext
+
 def maketime(n):
     if n < 1000000:
         # Probably an LB.
@@ -131,28 +133,40 @@ def go(iov, systems, db, indb, timewise=False, use_flask=False):
     log.info("Calculation complete")
     
     if db != "None":
-        with timer("write result (%i iovs)" % len(result_iovs)):
-            log.debug("Writing result (%i iovs)", len(result_iovs))
-            defect_iovs = list(filter(lambda iov: isinstance(iov, DefectIOV), result_iovs))  # type: ignore
-            defect_iovs_full = [DefectIOVFull(recoverable=False, user='sys:defectcalculator', **_._asdict()) 
-                                for _ in defect_iovs]
-            if len(defect_iovs) > 0:
-                ddb = DefectsDB(db, read_only=False, create=not use_flask)
-                defect_names = set(i.channel for i in defect_iovs_full)
-                for defect in defect_names:
-                    if defect in ddb.defect_id_map:
-                        continue
-                    ddb.create_defect(defect, "Created by DCSCalculator2")
-                with ddb.storage_buffer:
-                    if use_flask:
-                        import os
-                        import json
-                        secret_path = os.environ.get('COOLFLASK_SECRET', '/afs/cern.ch/user/a/atlasdqm/private/coolflask_secret/coolflask_secret.json')
-                        auth = json.loads(open(secret_path).read())
-                    else:
-                        auth = {}
-                    ddb.insert_multiple(defect_iovs_full, use_flask=use_flask, flask_auth=auth)
-        
+        try:
+            with timer("write result (%i iovs)" % len(result_iovs)):
+                log.debug("Writing result (%i iovs)", len(result_iovs))
+                defect_iovs = list(filter(lambda iov: isinstance(iov, DefectIOV), result_iovs))  # type: ignore
+                defect_iovs_full = [DefectIOVFull(recoverable=False, user='sys:defectcalculator', **_._asdict()) 
+                                    for _ in defect_iovs]
+                if len(defect_iovs) > 0:
+                    log.warning(f'db {db}, read_only {not use_flask}')
+                    ddb = DefectsDB(db, read_only=use_flask, create=not use_flask)
+                    defect_names = set(i.channel for i in defect_iovs_full)
+                    for defect in defect_names:
+                        if defect in ddb.defect_id_map:
+                            continue
+                        ddb.create_defect(defect, "Created by DCSCalculator2")
+                    with ddb.storage_buffer if not use_flask else nullcontext():
+                        if use_flask:
+                            import os
+                            import json
+                            secret_path = os.environ.get('COOLFLASK_SECRET', '/afs/cern.ch/user/a/atlasdqm/private/coolflask_secret/coolflask_secret.json')
+                            auth = json.loads(open(secret_path).read())
+                        else:
+                            auth = {}
+                        ddb.insert_multiple(defect_iovs_full, use_flask=use_flask, flask_auth=auth)
+        except Exception:
+            log.warning("DCS Calculator failed to upload defects to DB")
+            if config.opts.email_on_failure:
+                from DataQualityUtils.panic import panic
+                from traceback import format_exc
+                runnum = lbtime[0].Run if len(lbtime)>0 else '??????'
+                panicmsg = "DCS Calculator failed to upload defects to database for run %s\n\n%s" % (runnum, format_exc())
+                panic(panicmsg)
+            raise
+
+
     args = len(result_iovs), hash(result_iovs)
     log.info("Success. Calculated %i iovs. Result hash: 0x%0x8.", *args)
 
