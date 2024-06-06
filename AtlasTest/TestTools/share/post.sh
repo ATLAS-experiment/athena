@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 #/** @file post.sh
 # @brief sh script that checks the return code of an executable and compares
@@ -59,6 +59,7 @@ s/^StoreGateSvc_Impl   DEBUG/StoreGateSvc        DEBUG/
 s/StoreGateSvc_Impl/StoreGateSvc/
 s/SGImplSvc/StoreGateSvc/
 s/SG::DataProxyHolder::sgkey_t/sgkey_t/
+s/Conversion service:/Conversion service /      # printout change (Gaudi!1598)
 s!(ERROR|INFO|WARNING|FATAL) [^ ]*/!\\\\1 ../!
 s/(\.cxx|\.cpp|\.h|\.icc|LINE):[0-9]+/\\\\1/
 s/.[[][?]1034h//
@@ -249,10 +250,10 @@ PP="$PP"'|^FileMgr +DEBUG Successfully registered handler for tech'
 
 # TagInfoMgr not longer a ConversionSvc
 # these lines are gone
-PP="$PP"'|Added successfully Conversion service:TagInfoMgr'
+PP="$PP"'|Added successfully Conversion service TagInfoMgr'
 PP="$PP"'|TagInfoMgr +DEBUG in queryInterface'
 # this line moved around
-PP="$PP"'|Added successfully Conversion service:AthenaPoolCnvSvc'
+PP="$PP"'|Added successfully Conversion service AthenaPoolCnvSvc'
 
 # Py:PropertyProxy
 PP="$PP"'|Py:PropertyProxy.*WARNING'
