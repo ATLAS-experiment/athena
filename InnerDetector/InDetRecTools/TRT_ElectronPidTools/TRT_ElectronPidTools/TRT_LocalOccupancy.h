@@ -114,7 +114,6 @@ namespace InDet
 
    SG::ReadCondHandleKey<TRTCond::AliveStraws> m_strawReadKey{this,"AliveStraws","AliveStraws","AliveStraws in-key"};
    SG::ReadCondHandleKey<TRTCond::StrawStatusData> m_strawStatusKey{this,"StrawStatus","StrawStatusData","StrawStatus key"};
-   SG::ReadCondHandleKey<TRTCond::StrawStatusData> m_strawStatusPermKey{this,"StrawStatusPerm","StrawStatusPermanentData","StrawStatusPermanent key"};
 
    SG::ReadHandleKey<OccupancyData> m_occupancyCacheRead{"OccupancyData"};
    SG::WriteHandleKey<OccupancyData> m_occupancyCacheWrite{"OccupancyData"};
