@@ -144,7 +144,6 @@ StatusCode BTaggingSelectionTool::initialize() {
       if(m_useCTag)
       ATH_MSG_WARNING( "Running in Continuous WP and using 1D c-tagging");
       m_continuous   = true;
-      m_continuouscuts.push_back(-1.e4);
       // For GN2v01, we have different WPs than the default ones.
       if ( m_taggerName == "GN2v01" )
         m_wps_raw="FixedCutBEff_90,FixedCutBEff_85,FixedCutBEff_77,FixedCutBEff_70,FixedCutBEff_65";
@@ -160,7 +159,6 @@ StatusCode BTaggingSelectionTool::initialize() {
           ATH_MSG_ERROR( "Continuous tagging is trying to use an invalid operating point: " + wp );
         }
       }
-      m_continuouscuts.push_back(+1.e4); // same as other approach...
 
       //The WP is not important. This is just to retrieve the c-fraction. 
       ExtractTaggerProperties(m_tagger, m_taggerName, workingpoints.at(0));
@@ -446,21 +444,21 @@ asg::AcceptData BTaggingSelectionTool::accept(double pT, double eta, double tag_
   // After initialization, either m_tagger.spline or m_tagger.constcut should be non-zero
   // Else, the initialization was incorrect and should be revisited
   if(m_continuous){
-    for(auto bin : m_tagger.benchmarks){
+    for(size_t bin : m_tagger.benchmarks){
       if(bin == 0){
-	      ATH_MSG_ERROR("bin == 0 in the list of tagged bins. you should not be here. Wrong convention");
-	      return acceptData;
-      }
-      double cutvalue_low = m_continuouscuts[bin-1]; 
-      double cutvalue_hig = m_continuouscuts[bin];
-      ATH_MSG_DEBUG("bin " <<bin    <<" taggerWeight "
-		    <<tag_weight   <<" cutvalue low " 
-		    <<cutvalue_low <<" cutvalue hig "
-		    <<cutvalue_hig );
-      
-      if (tag_weight > cutvalue_low && tag_weight <= cutvalue_hig){	    
-	      acceptData.setCutResult( "WorkingPoint", true );
-	      break;
+	      throw std::logic_error("bin == 0 in the list of tagged bins. you should not be here. Wrong convention");
+      } else if ( bin == 1 ) {
+        if ( tag_weight < m_continuouscuts.at(bin-1) ) {
+          acceptData.setCutResult( "WorkingPoint", true );
+        }
+      } else if (bin > 1 && bin <= m_continuouscuts.size()){
+        if ( tag_weight > m_continuouscuts.at(bin-2) && tag_weight < m_continuouscuts.at(bin-1) ) {
+          acceptData.setCutResult( "WorkingPoint", true );
+        }
+      } else {
+        if ( tag_weight < m_continuouscuts.at(bin-2) ) {
+          acceptData.setCutResult( "WorkingPoint", true );
+        }
       }
     }
   }
@@ -651,9 +649,11 @@ int BTaggingSelectionTool::getQuantile(double pT, double eta, double tag_weight 
   // Instead of checking low<tag_weight<high for each bin,
   // we simply check tag_weight<high and therefore range
   // from vector indices 1 to vector.size()
-  for (std::size_t i=1; i<m_continuouscuts.size(); i++) {
-    if (tag_weight < m_continuouscuts[i]) {
-      bin_index = i;
+  bin_index = 1; // setting the ones that pass selection you have default as 1
+  for (std::size_t i=0; i<m_continuouscuts.size(); i++) {
+    if ( tag_weight > m_continuouscuts.at(i) ) {
+      bin_index++;
+    } else {
       break;
     }
   }
