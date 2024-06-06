@@ -523,6 +523,7 @@ def createTrackingConfigFlags():
         createActsTrackingPassFlags,
         createActsLargeRadiusTrackingPassFlags,
         createActsConversionTrackingPassFlags,
+        createActsLowPtTrackingPassFlags,
         createActsValidateClustersTrackingPassFlags,
         createActsValidateSpacePointsTrackingPassFlags,
         createActsValidateSeedsTrackingPassFlags,
@@ -537,6 +538,8 @@ def createTrackingConfigFlags():
                           createActsLargeRadiusTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ('Tracking.ITkActsConversionPass',
                           createActsConversionTrackingPassFlags, prefix=True)
+    icf.addFlagsCategory ('Tracking.ITkActsLowPtPass',
+                          createActsLowPtTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ("Tracking.ITkActsValidateClustersPass",
                           createActsValidateClustersTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ("Tracking.ITkActsValidateSpacePointsPass",

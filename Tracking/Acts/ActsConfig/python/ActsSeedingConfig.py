@@ -382,6 +382,10 @@ def ActsSeedingCfg(flags) -> ComponentAccumulator:
             kwargs.setdefault('StripSeedingAlg.InputSpacePoints', ['ITkLargeRadiusStripSpacePoints_Cached',
                                                                    'ITkLargeRadiusStripOverlapSpacePoints_Cached'] if flags.Acts.useCache else ['ITkLargeRadiusStripSpacePoints',
                                                                                                                                                 'ITkLargeRadiusStripOverlapSpacePoints'])
+        elif flags.Tracking.ActiveConfig.extension == 'ActsLowPt':
+            kwargs.setdefault('StripSeedingAlg.InputSpacePoints', ['ITkLowPtStripSpacePoints_Cached',
+                                                                   'ITkLowPtStripOverlapSpacePoints_Cached'] if flags.Acts.useCache else ['ITkLowPtStripSpacePoints',
+                                                                                                                                          'ITkLowPtStripOverlapSpacePoints'])
         else:
             kwargs.setdefault('StripSeedingAlg.InputSpacePoints', ['ITkStripSpacePoints_Cached',
                                                                    'ITkStripOverlapSpacePoints_Cached'] if flags.Acts.useCache else ['ITkStripSpacePoints',

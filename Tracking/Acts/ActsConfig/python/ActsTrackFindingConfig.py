@@ -178,6 +178,22 @@ def ActsTrackFindingCfg(flags,
                                                                                                                                                            pixel=[f'{dataPrepPrefix}PixelClusters'],
                                                                                                                                                            strip=[f'{dataPrepPrefix}StripClusters']))
         
+    elif flags.Tracking.ActiveConfig.extension in ['ActsLowPt']:
+        dataPrepPrefix = f'ITk{flags.Tracking.ActiveConfig.extension.replace("Acts", "")}'
+        kwargs.setdefault('SeedLabels', isdet(flags,
+                                              pixel=["PPP"],
+                                              strip=["SSS"]))
+        kwargs.setdefault('EstimatedTrackParametersKeys', isdet(flags,
+                                                                pixel=[f"{flags.Tracking.ActiveConfig.extension}PixelEstimatedTrackParams"],
+                                                                strip=[f"{flags.Tracking.ActiveConfig.extension}StripEstimatedTrackParams"]))
+        kwargs.setdefault('SeedContainerKeys', isdet(flags,
+                                                     pixel=[f"{flags.Tracking.ActiveConfig.extension}PixelSeeds"],
+                                                     strip=[f"{flags.Tracking.ActiveConfig.extension}StripSeeds"]))
+        kwargs.setdefault('UncalibratedMeasurementContainerKeys', isdet(flags,
+                                                                        pixel=[f'{dataPrepPrefix}PixelClusters_Cached'],
+                                                                        strip=[f'{dataPrepPrefix}StripClusters_Cached']) if flags.Acts.useCache else isdet(flags,
+                                                                                                                                                           pixel=[f'{dataPrepPrefix}PixelClusters'],
+                                                                                                                                                           strip=[f'{dataPrepPrefix}StripClusters']))
     else:
         kwargs.setdefault('SeedLabels', isdet(flags, pixel=["PPP"], strip=["SSS"]) if not flags.Tracking.doITkFastTracking else isdet(flags, pixel=["PPP"]))
         kwargs.setdefault('EstimatedTrackParametersKeys', isdet(flags, pixel=[f"{flags.Tracking.ActiveConfig.extension}PixelEstimatedTrackParams"], strip=[f"{flags.Tracking.ActiveConfig.extension}StripEstimatedTrackParams"]) if not flags.Tracking.doITkFastTracking else isdet(flags, pixel=[f"{flags.Tracking.ActiveConfig.extension}PixelEstimatedTrackParams"]))
