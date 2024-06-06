@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -643,7 +643,7 @@ StatusCode TileTBAANtuple::storeBeamElements(const EventContext& ctx) {
 
   if ( m_completeNtuple ) {
     // Store ROD header info from collection (just from first one)
-      int nDrawersAll = m_nDrawers + m_nDrawersFlx;
+      int nDrawersAll = m_nDrawers.value() + m_nDrawersFlx.value();
     if ( collItr!=lastColl ) {
       m_l1ID.at(nDrawersAll) = (*collItr)->getLvl1Id();
       m_l1Type.at(nDrawersAll) = (*collItr)->getLvl1Type();
@@ -2467,7 +2467,7 @@ StatusCode TileTBAANtuple::initListFlx(const EventContext& ctx) {
         ATH_MSG_INFO(os.str());
 
         if (m_eventsPerFile == 0) {
-          int nDrawersAll = m_nDrawers + m_nDrawersFlx;
+          int nDrawersAll = m_nDrawers.value() + m_nDrawersFlx.value();
           m_eventsPerFile = static_cast<int>(200 / nDrawersAll) * 1000;
           ATH_MSG_INFO( "Number of events per file was 0, set it to 200k/" << nDrawersAll << " = " << m_eventsPerFile );
         }
@@ -2588,7 +2588,7 @@ void TileTBAANtuple::TRIGGER_addBranch(void)
   m_ntuplePtr->Branch("OFLunits",&m_rchUnit,"OFLunits/S");
 
   if ( m_completeNtuple ) {
-    int nDrawersAll = m_nDrawers + m_nDrawersFlx;
+    int nDrawersAll = m_nDrawers.value() + m_nDrawersFlx.value();
     if (nDrawersAll > 0) {
       m_l1ID.resize(nDrawersAll + 1);
       m_l1Type.resize(nDrawersAll + 1);
