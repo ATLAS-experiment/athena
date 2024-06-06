@@ -36,6 +36,8 @@ def main(args):
     if isinstance(files, str):
         files = [files]
 
+    from collections import defaultdict
+    from PyUtils.PoolFile import extract_items
     import os
     import sys
 
@@ -45,18 +47,17 @@ def main(args):
     exitcode = 0
     for fname in files:
         try:
-            import AthenaCommon.KeyStore as acks
             print ("## checking [%s]..." % (fname,))
-            ks = acks.loadKeyStoreFromPoolFile(
-                keyStore=os.path.basename(fname),
-                pool_file=fname,
-                label='inputFile')
+
+            item_list = defaultdict(list)
+            for name, key in extract_items(fname, verbose=False, items_type='eventdata'):
+                item_list[name].append(key)
 
             print ("="*80)
             print ("%40s%s%-40s" % ("Container type", " | ","StoreGate keys"))
             print ("%40s%s%-40s" % ("-"*40, "-+-", "-"*(40-3)))
-            for name,sgkeys in ks.inputFile.dict().items():
-                print ("%40s%s%-40s" % (name, " | ", ', '.join(sgkeys)))
+            for name, sgkeys in sorted(item_list.items()):
+                print ("%40s%s%-40s" % (name, " | ", ', '.join(sorted(sgkeys))))
             print ("="*80)
             if args.output:
                 outFileName = args.output
@@ -64,17 +65,16 @@ def main(args):
                 outFileName = os.path.expandvars(outFileName)
                 print ("## saving report into [%s]..." % (outFileName,))
                 if os.path.splitext(outFileName)[1] in ('.pkl', '.dat'):
-                    # we explicitely import 'bsddb' to try to always
-                    # get that particular backend for the shelve...
-                    import bsddb   # noqa: F401
                     import shelve
                     if os.path.exists(outFileName):
                         os.remove(outFileName)
-                    db = shelve.open(outFileName)
-                    db['eventdata_items'] = ks.inputFile.dict()
-                    db.close()
+                    with shelve.open(outFileName) as db:
+                        db['eventdata_items'] = item_list
                 else:
-                    ks.write(outFileName, label='inputFile')
+                    from pprint import pprint
+                    with open( outFileName, 'w' ) as txt:
+                        pprint( dict(item_list), txt )
+
         except Exception as e:
             print ("## Caught exception [%s] !!" % str(e.__class__))
             print ("## What:",e)
@@ -86,7 +86,7 @@ def main(args):
             pass
 
         if len(files) > 1:
-            print ("")
+            print ()
         pass # loop over fileNames
     
     print ("## Bye.")
