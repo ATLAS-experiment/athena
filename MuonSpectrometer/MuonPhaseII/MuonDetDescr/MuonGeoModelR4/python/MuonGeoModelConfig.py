@@ -89,13 +89,11 @@ def MuonAlignStoreCfg(flags):
     from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsAlignStoreProviderAlgCfg
     
     from ROOT.ActsTrk import DetectorType 
-    from AthenaConfiguration.Enums import ProductionStep
 
-    isSimJob = flags.Common.ProductionStep  == ProductionStep.Simulation
     if flags.Detector.GeometryMDT:  
         result.merge(ActsAlignStoreProviderAlgCfg(flags, 
                                                   name="ActsDetAlignmentAlgMdt",
-                                                  CondAlignStore="MdtActsAlignContainer" if not isSimJob else "",
+                                                  CondAlignStore="MdtActsAlignContainer" if flags.Muon.enableAlignment else "",
                                                   EventAlignStore="MdtActsAlignContainer",
                                                   SplitPhysVolCache = False,
                                                   SplitActsTrfCache = False,
@@ -105,7 +103,7 @@ def MuonAlignStoreCfg(flags):
     if flags.Detector.GeometryRPC:  
         result.merge(ActsAlignStoreProviderAlgCfg(flags, 
                                                   name="ActsDetAlignmentAlgRpc",
-                                                  CondAlignStore="RpcActsAlignContainer" if not isSimJob else "",
+                                                  CondAlignStore="RpcActsAlignContainer" if flags.Muon.enableAlignment else "",
                                                   EventAlignStore="RpcActsAlignContainer",
                                                   SplitPhysVolCache = False,
                                                   SplitActsTrfCache = False,
@@ -115,7 +113,7 @@ def MuonAlignStoreCfg(flags):
     if flags.Detector.GeometryTGC:  
         result.merge(ActsAlignStoreProviderAlgCfg(flags, 
                                                   name="ActsDetAlignmentAlgTgc",
-                                                  CondAlignStore="TgcActsAlignContainer" if not isSimJob else "",
+                                                  CondAlignStore="TgcActsAlignContainer" if flags.Muon.enableAlignment else "",
                                                   EventAlignStore="TgcActsAlignContainer",
                                                   SplitPhysVolCache = False,
                                                   SplitActsTrfCache = False,
@@ -125,7 +123,7 @@ def MuonAlignStoreCfg(flags):
     if flags.Detector.GeometrysTGC: 
         result.merge(ActsAlignStoreProviderAlgCfg(flags, 
                                                   name="ActsDetAlignmentAlgSTGC",
-                                                  CondAlignStore="sTgcActsAlignContainer" if not isSimJob else "",
+                                                  CondAlignStore="sTgcActsAlignContainer" if flags.Muon.enableAlignment else "",
                                                   EventAlignStore="sTgcActsAlignContainer",
                                                   SplitPhysVolCache = False,
                                                   SplitActsTrfCache = False,
@@ -136,7 +134,8 @@ def MuonAlignStoreCfg(flags):
     if flags.Detector.GeometryMM:
         result.merge(ActsAlignStoreProviderAlgCfg(flags, 
                                                   name="ActsDetAlignmentAlgMM",
-                                                  CondAlignStore="MmActsAlignContainer" if not isSimJob else "",
+                                                  CondAlignStore="MmActsAlignContainer" if flags.Muon.enableAlignment or \
+                                                                                           flags.Muon.applyMMPassivation else "",
                                                   EventAlignStore="MmActsAlignContainer",
                                                   SplitPhysVolCache = False,
                                                   SplitActsTrfCache = False,
