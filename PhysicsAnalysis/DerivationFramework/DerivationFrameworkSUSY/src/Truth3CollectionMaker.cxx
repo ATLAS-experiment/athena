@@ -180,13 +180,13 @@ StatusCode DerivationFramework::Truth3CollectionMaker::addBranches() const
 	      xAOD::TruthParticle* xTruthParticle = new xAOD::TruthParticle();
 	      newParticleCollection->push_back( xTruthParticle );
 	      
-	      int motherUniqueID = -1;
+	      int motherBarcode = -1;
 	      int motherPDGid = 0;
 	      float mothermass = 0.;
 	      if (theParticle->hasProdVtx()){
 		int parentid = abs(theParticle->prodVtx()->incomingParticle(0)->pdgId());
-		xTruthParticle->setBarcode(parentid);
-		motherUniqueID = HepMC::uniqueID(theParticle->prodVtx()->incomingParticle(0));
+		xTruthParticle->setBarcode(parentid); // FIXME barcode-based - This is wrong - sets the Barcode equal to the PDG Code!!
+		motherBarcode = HepMC::barcode(theParticle->prodVtx()->incomingParticle(0));
 		const xAOD::TruthParticle * mother_hold = theParticle->prodVtx()->incomingParticle(0);
 		motherPDGid = mother_hold->pdgId();
 		mothermass = mother_hold->p4().M()/1000.;
@@ -198,16 +198,16 @@ StatusCode DerivationFramework::Truth3CollectionMaker::addBranches() const
 		    break; //should not come in here, but just in case we have a closed loop from a bug
 		  }
 		  mother_hold = mother_hold->prodVtx()->incomingParticle(0);
-		  motherUniqueID = HepMC::uniqueID(mother_hold);
+		  motherBarcode = HepMC::barcode(mother_hold);
 		  motherPDGid = mother_hold->pdgId();
 		  mothermass = mother_hold->p4().M()/1000.;
 		}
 	      }
 
           *xTruthParticle=*theParticle;
-          xTruthParticle->setBarcode(motherUniqueID);
+          xTruthParticle->setBarcode(motherBarcode);
           originDecorator(*xTruthParticle) = motherPDGid;
-	      typeDecorator(*xTruthParticle) = motherUniqueID;
+	      typeDecorator(*xTruthParticle) = motherBarcode;
 	      typeDecoratorMass(*xTruthParticle) = mothermass;
 	      
 	      //Check for tau decays

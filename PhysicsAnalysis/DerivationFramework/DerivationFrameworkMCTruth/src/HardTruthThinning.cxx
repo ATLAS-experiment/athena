@@ -367,7 +367,7 @@ StatusCode DerivationFramework::HardTruthThinning::doThinning() const
     std::cout <<"Saved " <<outVertNum <<" vertices" <<std::endl;
     std::cout <<"Vertex unique IDs = ";
     for(unsigned int i=0; i<vertMask.size(); ++i){
-      if( vertMask[i] ) std::cout << HepMC::uniqueID((*inTruthVerts)[i]) <<" ";
+      if( vertMask[i] ) std::cout << HepMC::barcode((*inTruthVerts)[i]) <<" ";
     }
     std::cout <<std::endl;
     std::cout <<"======================================================================================" <<std::endl;

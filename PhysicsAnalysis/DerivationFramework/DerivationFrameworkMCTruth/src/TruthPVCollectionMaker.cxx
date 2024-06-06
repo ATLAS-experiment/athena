@@ -76,7 +76,7 @@ StatusCode DerivationFramework::TruthPVCollectionMaker::addBranches() const
             newVertexCollection->push_back( xTruthVertex );
             // Set properties
             xTruthVertex->setId(old_vert->id());
-            xTruthVertex->setBarcode(HepMC::uniqueID(old_vert));
+            xTruthVertex->setBarcode(HepMC::barcode(old_vert));
             xTruthVertex->setX(old_vert->x());
             xTruthVertex->setY(old_vert->y());
             xTruthVertex->setZ(old_vert->z());
