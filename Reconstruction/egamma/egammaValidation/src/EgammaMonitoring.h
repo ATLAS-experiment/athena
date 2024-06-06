@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef egammaValidation_EgammaMonitoring_H
@@ -82,11 +82,11 @@ public:
   std::unique_ptr<egammaMonitoring::TruthElectronHistograms>
     truthPromptElectronWithRecoTrack;
   std::unique_ptr<egammaMonitoring::TruthElectronHistograms>
-    truthRecoElectronLooseLH;
+    truthRecoElectronLoose;
   std::unique_ptr<egammaMonitoring::TruthElectronHistograms>
-    truthRecoElectronMediumLH;
+    truthRecoElectronMedium;
   std::unique_ptr<egammaMonitoring::TruthElectronHistograms>
-    truthRecoElectronTightLH;
+    truthRecoElectronTight;
 
   // photons
   std::unique_ptr<egammaMonitoring::ClusterHistograms> clusterConvPhoton;
@@ -101,6 +101,7 @@ public:
   std::unique_ptr<egammaMonitoring::IHistograms> truthPhotonAll;
   std::unique_ptr<egammaMonitoring::IHistograms> truthPhotonAllUnconv;
   std::unique_ptr<egammaMonitoring::IHistograms> truthPhotonAllConv;
+  std::unique_ptr<egammaMonitoring::IHistograms> truthPhotonAllLateConv;
   std::unique_ptr<egammaMonitoring::IHistograms> truthPhotonRecoPhoton;
   std::unique_ptr<egammaMonitoring::IHistograms>
     truthPhotonRecoPhotonOrElectron;
@@ -121,10 +122,10 @@ public:
   std::unique_ptr<egammaMonitoring::IHistograms>
     truthPhotonUnconvRecoConv2SiTRT;
   std::unique_ptr<egammaMonitoring::IHistograms> truthPhotonUnconvRecoUnconv;
-  std::unique_ptr<egammaMonitoring::IHistograms> recoPhotonUnconvLooseLH;
-  std::unique_ptr<egammaMonitoring::IHistograms> recoPhotonUnconvTightLH;
-  std::unique_ptr<egammaMonitoring::IHistograms> recoPhotonConvLooseLH;
-  std::unique_ptr<egammaMonitoring::IHistograms> recoPhotonConvTightLH;
+  std::unique_ptr<egammaMonitoring::IHistograms> recoPhotonUnconvLoose;
+  std::unique_ptr<egammaMonitoring::IHistograms> recoPhotonUnconvTight;
+  std::unique_ptr<egammaMonitoring::IHistograms> recoPhotonConvLoose;
+  std::unique_ptr<egammaMonitoring::IHistograms> recoPhotonConvTight;
   std::unique_ptr<egammaMonitoring::IHistograms>
     recoPhotonUnconvIsoFixedCutTight;
   std::unique_ptr<egammaMonitoring::IHistograms>
@@ -153,14 +154,24 @@ private:
   Gaudi::Property<std::string> m_sampleType
     { this, "sampleType", "Unknown", "electron or gamma" };
 
+  /// is it run 3 or run 4 and later ?
+  Gaudi::Property<bool> m_hasTRT
+    { this, "hasTRT", true, "is there a TRT in the ID" };
+
   /// Selector tools
   // electron ID
-  ToolHandle<IAsgElectronLikelihoodTool> m_LooseLH
-    { this, "LooseLH", "", "" };
-  ToolHandle<IAsgElectronLikelihoodTool> m_MediumLH
-    { this, "MediumLH", "", "" };
-  ToolHandle<IAsgElectronLikelihoodTool> m_TightLH
-    { this, "TightLH", "", "" };
+  ToolHandle<IAsgElectronLikelihoodTool> m_Loose_Ele
+    { this, "Loose_Ele", "", "" };
+  ToolHandle<IAsgElectronLikelihoodTool> m_Medium_Ele
+    { this, "Medium_Ele", "", "" };
+  ToolHandle<IAsgElectronLikelihoodTool> m_Tight_Ele
+    { this, "Tight_Ele", "", "" };
+  ToolHandle<IAsgElectronLikelihoodTool> m_Loose_FwdEle
+    { this, "Loose_FwdEle", "", "" };
+  ToolHandle<IAsgElectronLikelihoodTool> m_Medium_FwdEle
+    { this, "Medium_FwdEle", "", "" };
+  ToolHandle<IAsgElectronLikelihoodTool> m_Tight_FwdEle
+    { this, "Tight_FwdEle", "", "" };
 
   // photon ID
   ToolHandle<IAsgPhotonIsEMSelector> m_Loose_Photon
@@ -214,8 +225,8 @@ private:
 
   int m_CenFwdOverlap[2] = { 0, 0 };
 
-  TH1D *m_dR1; //!
-  TH1D *m_dR2; //!
+  TH1D *m_dR1{}; //!
+  TH1D *m_dR2{}; //!
 };
 
 #endif

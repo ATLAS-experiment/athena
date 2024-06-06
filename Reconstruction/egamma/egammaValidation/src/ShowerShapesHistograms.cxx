@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ShowerShapesHistograms.h"
@@ -15,23 +15,25 @@
 using namespace egammaMonitoring;
 
 StatusCode ShowerShapesHistograms::initializePlots() {
-  
-  histoMap["hadleak"] = new TH1D(Form("%s_%s",m_name.c_str(),"hadleak"), ";E_{hadleak} ; Hadronic leakage Events"      , 100, -0.07,  0.13  );
-  histoMap["rhad"]    = new TH1D(Form("%s_%s",m_name.c_str(),"rhad"   ), ";R_{had}; Events"                            , 100, -0.07,  0.13  );
-  histoMap["reta"]    = new TH1D(Form("%s_%s",m_name.c_str(),"reta"   ), ";R_{#eta}; R_{#eta} Events"                  , 355,  0.  ,  1.1005);
-  histoMap["rphi"]    = new TH1D(Form("%s_%s",m_name.c_str(),"rphi"   ), ";R_{#phi}; R_{#phi} Events"                  , 355,  0.  ,  1.1005);
-  histoMap["weta2"]   = new TH1D(Form("%s_%s",m_name.c_str(),"weta2"  ), ";W_{#etas2}; W_{#etas2} Events"              , 100,  0.  ,  0.03  );
-  histoMap["eratio"]  = new TH1D(Form("%s_%s",m_name.c_str(),"eratio" ), ";E_{ratio}; E_{ratio} Events"                , 100,  0.  ,  1.01  );
-  histoMap["deltae"]  = new TH1D(Form("%s_%s",m_name.c_str(),"deltae" ), ";#DeltaE [MeV]; #DeltaE Events"              , 100,  0.  ,  500.  );
-  histoMap["f1"]      = new TH1D(Form("%s_%s",m_name.c_str(),"f1"     ), ";f_{1}; f_{1} Events"                        , 100,  0.  ,  1.0   );
-  histoMap["fside"]   = new TH1D(Form("%s_%s",m_name.c_str(),"fside"  ), ";f_{side}; f_{side} Events"                  , 100,  0.  ,  2.0   );
-  histoMap["wtots1"]  = new TH1D(Form("%s_%s",m_name.c_str(),"wtots1" ), ";w_{s, tot}; w_{s, tot} Events"              , 100,  0.  , 10.    );
-  histoMap["ws3"]     = new TH1D(Form("%s_%s",m_name.c_str(),"ws3"    ), ";w_{s, 3}; w_{s, 3} Events"                  , 100,  0.  ,  1.    );
 
-  histoMap["lateral"]  = new TH1D(Form("%s_%s",m_name.c_str(),"lateral"),  ";Lateral of seed; Events"                  , 50,   0.  , 1.     );
-  histoMap["second_R"] = new TH1D(Form("%s_%s",m_name.c_str(),"second_R"), ";Second R; Events"                         , 150,  0.  , 15000. );
-  histoMap["EMFrac"]   = new TH1D(Form("%s_%s",m_name.c_str(),"EMFrac"  ), ";EMFrac; Events"                           , 51,   0.  , 1.02   );
-  histo2DMap["lateral_second_R_2D"] = new TH2D(Form("%s_%s",m_name.c_str(),"lateral_second_R_2D"), ";Lateral of seed; Second R", 50, 0, 1, 150,0.,15000.);
+  const char* fN = m_name.c_str();
+  
+  histoMap["hadleak"] = new TH1D(Form("%s_hadleak",fN), ";E_{hadleak}; Events"   , 100, -0.07,  0.13  );
+  histoMap["rhad"]    = new TH1D(Form("%s_rhad",fN)   , ";R_{had}; Events"       , 100, -0.07,  0.13  );
+  histoMap["reta"]    = new TH1D(Form("%s_reta",fN)   , ";R_{#eta}; Events"      , 355,  0.  ,  1.1005);
+  histoMap["rphi"]    = new TH1D(Form("%s_rphi",fN)   , ";R_{#phi}; Events"      , 355,  0.  ,  1.1005);
+  histoMap["weta2"]   = new TH1D(Form("%s_weta2",fN)  , ";W_{#etas2}; Events"    , 100,  0.  ,  0.03  );
+  histoMap["eratio"]  = new TH1D(Form("%s_eratio",fN) , ";E_{ratio}; Events"     , 101,  0.  ,  1.01  );
+  histoMap["deltae"]  = new TH1D(Form("%s_deltae",fN) , ";#DeltaE [MeV]; Events" , 100,  0.  ,  500.  );
+  histoMap["f1"]      = new TH1D(Form("%s_f1",fN)     , ";f_{1}; Events"         , 100,  0.  ,  1.0   );
+  histoMap["fside"]   = new TH1D(Form("%s_fside",fN)  , ";f_{side}; Events"      , 100,  0.  ,  2.0   );
+  histoMap["wtots1"]  = new TH1D(Form("%s_wtots1",fN) , ";w_{s, tot}; Events"    , 100,  0.  , 10.    );
+  histoMap["ws3"]     = new TH1D(Form("%s_ws3",fN)    , ";w_{s, 3}; Events"      , 100,  0.  ,  1.    );
+
+  histoMap["lateral"]  = new TH1D(Form("%s_lateral",fN),  ";Lateral of seed; Events" , 50,   0.  , 1.     );
+  histoMap["second_R"] = new TH1D(Form("%s_second_R",fN), ";Second R; Events"        , 150,  0.  , 15000. );
+  histoMap["EMFrac"]   = new TH1D(Form("%s_EMFrac",fN),  ";EMFrac; Events"           , 51,   0.  , 1.02   );
+  histo2DMap["lateral_second_R_2D"] = new TH2D(Form("%s_lateral_second_R_2D",fN), ";Lateral of seed; Second R", 50, 0, 1, 150,0.,15000.);
 
   ATH_CHECK(m_rootHistSvc->regHist(m_folder+"lateral", histoMap["lateral"]));
   ATH_CHECK(m_rootHistSvc->regHist(m_folder+"second_R", histoMap["second_R"]));
@@ -115,18 +117,20 @@ void ShowerShapesHistograms::fill(const xAOD::Egamma& egamma) {
       histoMap["rphi"]->Fill(Rphi);
     if (egamma.showerShapeValue(shweta2, xAOD::EgammaParameters::weta2))
       histoMap["weta2"]->Fill(shweta2);
-    if (egamma.showerShapeValue(Eratio, xAOD::EgammaParameters::Eratio))
-      histoMap["eratio"]->Fill(Eratio);
-    if (egamma.showerShapeValue(DeltaE, xAOD::EgammaParameters::DeltaE))
-      histoMap["deltae"]->Fill(DeltaE);
     if (egamma.showerShapeValue(frac_f1, xAOD::EgammaParameters::f1))
       histoMap["f1"]->Fill(frac_f1);
-    if (egamma.showerShapeValue(shfside, xAOD::EgammaParameters::fracs1))
-      histoMap["fside"]->Fill(shfside);
-    if (egamma.showerShapeValue(shwtots1, xAOD::EgammaParameters::wtots1))
-      histoMap["wtots1"]->Fill(shwtots1);
-    if (egamma.showerShapeValue(shws3, xAOD::EgammaParameters::weta1))
-      histoMap["ws3"]->Fill(shws3);
-
+    // Only fill S1 variables if there some energy in S1 (to avoid under/overflows
+    if (frac_f1 != 0) {
+      if (egamma.showerShapeValue(Eratio, xAOD::EgammaParameters::Eratio))
+	histoMap["eratio"]->Fill(Eratio);
+      if (egamma.showerShapeValue(DeltaE, xAOD::EgammaParameters::DeltaE))
+	histoMap["deltae"]->Fill(DeltaE);
+      if (egamma.showerShapeValue(shfside, xAOD::EgammaParameters::fracs1))
+	histoMap["fside"]->Fill(shfside);
+      if (egamma.showerShapeValue(shwtots1, xAOD::EgammaParameters::wtots1))
+	histoMap["wtots1"]->Fill(shwtots1);
+      if (egamma.showerShapeValue(shws3, xAOD::EgammaParameters::weta1))
+	histoMap["ws3"]->Fill(shws3);
+    }
   }
 }

@@ -28,10 +28,20 @@ def egammaMonitoringCfg(flags, particleType = 'electron',
             AsgElectronLikelihoodToolCfg)
         for k,w in eidWP.items():
             t = AsgElectronLikelihoodToolCfg(flags, k+'LHSelector', w)
-            kwarg[k+'LH'] = t.popPrivateTools()
+            kwarg[k+'_Ele'] = t.popPrivateTools()
             acc.merge(t)
         if addFwd:
             kwarg['FwdElectronsKey'] = 'ForwardElectrons'
+            from ElectronPhotonSelectorTools.AsgForwardElectronLikelihoodToolConfig import (
+                AsgForwardElectronLikelihoodToolCfg)
+            for k in eidWP.keys():
+                # do not use the WP name as mapping points to a corrupted ID (in main, 24/05/24)
+                # anyway, not appropriate for ITk but least corrupted within rel21.2/Run2
+                configFile = f'dev/ElectronPhotonSelectorTools/offline/mc16_20190729/FwdLH{k}Conf.conf'
+                t = AsgForwardElectronLikelihoodToolCfg(flags,k+'FwdSelector',
+                                                        ConfigFile = configFile)
+                kwarg[k+'_FwdEle'] = t.popPrivateTools()
+                acc.merge(t)
 
     if particleType == 'gamma':
         from ElectronPhotonSelectorTools.AsgPhotonIsEMSelectorsConfig import (
@@ -57,6 +67,10 @@ def egammaMonitoringCfg(flags, particleType = 'electron',
         kwarg['truthParticlesKey'] = 'TruthParticles'
     else:
         MCClassifier = None
+
+    from AthenaConfiguration.Enums import LHCPeriod
+    if flags.GeoModel.Run > LHCPeriod.Run3:
+        kwarg['hasTRT'] = False
 
     # The monitoring alg
     egMon = CompFactory.EgammaMonitoring(
