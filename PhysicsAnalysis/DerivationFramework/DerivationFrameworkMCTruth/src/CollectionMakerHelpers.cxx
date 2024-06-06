@@ -32,7 +32,7 @@ int DerivationFramework::CollectionMakerHelpers::addTruthVertex( const xAOD::Tru
     ElementLink<xAOD::TruthVertexContainer> eltv(*vertCont, myIndex);
     // Set properties
     xTruthVertex->setId(oldVert.id());
-    xTruthVertex->setBarcode(HepMC::uniqueID(&oldVert));
+    xTruthVertex->setBarcode(HepMC::barcode(&oldVert));
     xTruthVertex->setX(oldVert.x());
     xTruthVertex->setY(oldVert.y());
     xTruthVertex->setZ(oldVert.z());
@@ -92,7 +92,7 @@ xAOD::TruthParticle* DerivationFramework::CollectionMakerHelpers::setupTruthPart
     partCont->push_back( xTruthParticle );
     // Fill with numerical content
     xTruthParticle->setPdgId(oldPart.pdgId());
-    xTruthParticle->setBarcode(HepMC::uniqueID(&oldPart));
+    xTruthParticle->setBarcode(HepMC::barcode(&oldPart));
     xTruthParticle->setStatus(oldPart.status());
     xTruthParticle->setM(oldPart.m());
     xTruthParticle->setPx(oldPart.px());
