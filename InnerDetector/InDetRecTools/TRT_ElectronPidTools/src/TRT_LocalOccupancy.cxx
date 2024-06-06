@@ -66,7 +66,6 @@ StatusCode TRT_LocalOccupancy::initialize()
   ATH_CHECK( m_trt_driftcircles.initialize(SG::AllowEmpty));
 
   ATH_CHECK( m_strawStatusKey.initialize() );
-  ATH_CHECK( m_strawStatusPermKey.initialize() );
   ATH_CHECK( m_strawReadKey.initialize() );
 
   std::string OccupancyCacheName = "GlobalTRTOccupancyData";
@@ -193,9 +192,7 @@ std::map<int, double> TRT_LocalOccupancy::getDetectorOccupancy(const EventContex
                                                                const TRT_RDO_Container* p_trtRDOContainer) const
 {
   SG::ReadCondHandle<TRTCond::StrawStatusData> strawStatusHandle{m_strawStatusKey, ctx};
-  SG::ReadCondHandle<TRTCond::StrawStatusData> strawStatusPermHandle{m_strawStatusPermKey, ctx};
   const TRTCond::StrawStatusData *strawStatus{*strawStatusHandle};
-  const TRTCond::StrawStatusData *strawStatusPerm{*strawStatusPermHandle};
 
   std::map<int,int> hitCounter;
   std::map<int,double> occResults;
@@ -216,8 +213,7 @@ std::map<int, double> TRT_LocalOccupancy::getDetectorOccupancy(const EventContex
         IdentifierHash straw_hash = m_TRTHelper->straw_hash(rdo_id);
 
         //Check if straw is OK
-        if((strawStatus->findStatus(straw_hash) != TRTCond::StrawStatus::Good)
-            || (strawStatusPerm->findStatus(straw_hash))) {
+        if (strawStatus->findStatus(straw_hash) != TRTCond::StrawStatus::Good) {
           continue;
         }
 
