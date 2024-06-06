@@ -32,6 +32,7 @@ def createActsConfigFlags():
     # Scheduling
     actscf.addFlag('Acts.doITkConversion', False)
     actscf.addFlag('Acts.doLargeRadius', False)
+    actscf.addFlag('Acts.doLowPt', False)
     
     # Geometry Flags
 
