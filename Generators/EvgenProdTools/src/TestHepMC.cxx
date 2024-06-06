@@ -363,7 +363,7 @@ StatusCode TestHepMC::execute() {
         ATH_MSG_WARNING("NaN (Not A Number) or inf found in the event record vertex positions");
         
         ++m_vtxNANandINFCheckRate;
-        if (m_dumpEvent) HepMC::Print::line(std::cout,*evt);
+        if (m_dumpEvent) HepMC::Print::content(std::cout,*evt);
         if (m_vtxNaNTest) {
           filter_pass = false;
         }
@@ -591,7 +591,7 @@ StatusCode TestHepMC::execute() {
                             << "Event #" << evt->event_number() << ", "
                             << "The original particle = " << pitr);
             ++m_decayCheckRate;
-            if (m_dumpEvent) HepMC::Print::line(std::cout,*evt);
+            if (m_dumpEvent) HepMC::Print::content(std::cout,*evt);
           }
           //most taus should not decay immediately
           const HepMC::FourVector tau_decaypos = vtx->position();
@@ -601,7 +601,7 @@ StatusCode TestHepMC::execute() {
         } else {
           ATH_MSG_WARNING("UNDECAYED PARTICLE WITH PDG_ID = " << m_pdg);
           ++m_decayCheckRate;
-          if (m_dumpEvent) HepMC::Print::line(std::cout,*evt);
+          if (m_dumpEvent) HepMC::Print::content(std::cout,*evt);
         }
       } // End of checks for specific particle (tau by default)
 
@@ -658,7 +658,7 @@ StatusCode TestHepMC::execute() {
       if (m_doHist){
         m_h_energyImbalance->Fill(lostE*1.E-03);
       }
-      if (m_dumpEvent) HepMC::Print::line(std::cout,*evt);
+      if (m_dumpEvent) HepMC::Print::content(std::cout,*evt);
       if (m_energyImbalanceTest) {
         filter_pass = false;
       }
@@ -673,7 +673,7 @@ StatusCode TestHepMC::execute() {
         m_h_momentumImbalance_py->Fill(std::abs(totalPy)*1.E-03);
         m_h_momentumImbalance_pz->Fill(std::abs(totalPz)*1.E-03);
       }
-      if (m_dumpEvent) HepMC::Print::line(std::cout,*evt);
+      if (m_dumpEvent) HepMC::Print::content(std::cout,*evt);
       if (m_momImbalanceTest) {
         filter_pass = false;
       }
@@ -688,7 +688,7 @@ StatusCode TestHepMC::execute() {
         ss << " " << b;
       }
       ATH_MSG_WARNING(ss.str());
-      if (m_dumpEvent) HepMC::Print::line(std::cout,*evt);
+      if (m_dumpEvent) HepMC::Print::content(std::cout,*evt);
       if (m_negativeEnergyTest) {
         filter_pass = false;
       }
@@ -703,7 +703,7 @@ StatusCode TestHepMC::execute() {
         ss << " " << b;
       }
       ATH_MSG_WARNING(ss.str());
-      if (m_dumpEvent) HepMC::Print::line(std::cout,*evt);
+      if (m_dumpEvent) HepMC::Print::content(std::cout,*evt);
       if (m_tachyonsTest) {
         filter_pass = false;
       }
@@ -718,7 +718,7 @@ StatusCode TestHepMC::execute() {
         ss << " " << b;
       }
       ATH_MSG_WARNING(ss.str());
-      if (m_dumpEvent) HepMC::Print::line(std::cout,*evt);
+      if (m_dumpEvent) HepMC::Print::content(std::cout,*evt);
       if (m_unstableNoVtxTest) {
         filter_pass = false;
       }
@@ -733,7 +733,7 @@ StatusCode TestHepMC::execute() {
         ss << " " << b;
       }
       ATH_MSG_WARNING(ss.str());
-      if (m_dumpEvent) HepMC::Print::line(std::cout,*evt);
+      if (m_dumpEvent) HepMC::Print::content(std::cout,*evt);
       if (m_pi0NoVtxTest) {
         filter_pass = false;
       }
@@ -748,7 +748,7 @@ StatusCode TestHepMC::execute() {
         ss << " " << b;
       }
       ATH_MSG_WARNING(ss.str());
-      if (m_dumpEvent) HepMC::Print::line(std::cout,*evt);
+      if (m_dumpEvent) HepMC::Print::content(std::cout,*evt);
       if (m_undisplacedDaughtersTest) {
         filter_pass = false;
       }
