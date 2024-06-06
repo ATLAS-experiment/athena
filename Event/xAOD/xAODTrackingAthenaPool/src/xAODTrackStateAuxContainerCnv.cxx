@@ -67,7 +67,7 @@ xAOD::TrackStateAuxContainer* xAODTrackStateAuxContainerCnv::createPersistentWit
       static const SG::Decorator< ElementLink<xAOD::UncalibratedMeasurementContainer> > link_decor("uncalibratedMeasurementLink");
       std::span<decltype(link_decor)::element_type> links = createDecoration(*result, link_decor);
       // @TODD thinning is not supported for Acts tracks but this would break if thinning was somehow implemented
-      assert( links.size() == uncalibratedMeasuremens.size() );
+      assert( links.size() == uncalibratedMeasurements.size() );
       // Convert the bare pointer(s) to Element Link(s)
       for (unsigned int index =0; index < uncalibratedMeasurements.size(); ++index) {
          const xAOD::UncalibratedMeasurement *measurement = uncalibratedMeasurements[index];
