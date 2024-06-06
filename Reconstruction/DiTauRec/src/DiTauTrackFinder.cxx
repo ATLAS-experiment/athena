@@ -24,11 +24,13 @@ DiTauTrackFinder::DiTauTrackFinder(const std::string& type,
   DiTauToolBase(type, name, parent),
   m_MaxDrJet(1.0),
   m_MaxDrSubjet(0.2),
+  m_MaxNTracksSubjet(-1),
   m_TrackSelectorTool("")
 {
   declareInterface<DiTauToolBase > (this);
   declareProperty("MaxDrJet", m_MaxDrJet);
   declareProperty("MaxDrSubjet", m_MaxDrSubjet);
+  declareProperty("MaxNTracksSubjet", m_MaxNTracksSubjet);
   declareProperty("TrackSelectorTool", m_TrackSelectorTool);
 }
 
@@ -99,7 +101,10 @@ StatusCode DiTauTrackFinder::execute(DiTauCandidateData * data,
     if (nTracks == 0) {
       ATH_MSG_DEBUG("number of tracks is zero. Drop subjet");
       subjet_itr = vSubjets.erase(subjet_itr); //point subjet_itr to the next element/end of the vector
-    }
+    } else if( m_MaxNTracksSubjet != -1 && nTracks > m_MaxNTracksSubjet){
+      ATH_MSG_DEBUG("number of tracks greater than MaxNTracksSubjet threshold. Drop subjet");
+      subjet_itr = vSubjets.erase(subjet_itr); //point subjet_itr to the next element/end of the vector
+    }	    
     else {
       ++subjet_itr;
     }
