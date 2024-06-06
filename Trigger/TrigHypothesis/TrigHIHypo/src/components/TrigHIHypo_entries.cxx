@@ -1,5 +1,5 @@
-#include "../TrigHIFwdGapHypoAlg.h"
+#include "../TrigHIEventShapeHypoAlg.h"
 #include "../TrigHIFwdGapHypoTool.h"
 
-DECLARE_COMPONENT( TrigHIFwdGapHypoAlg )
+DECLARE_COMPONENT( TrigHIEventShapeHypoAlg )
 DECLARE_COMPONENT( TrigHIFwdGapHypoTool )
