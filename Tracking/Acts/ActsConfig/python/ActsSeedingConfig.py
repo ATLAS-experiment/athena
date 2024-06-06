@@ -215,6 +215,16 @@ def ActsPixelSeedingAlgCfg(flags,
                            **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
+    # Beam Spot Cond is a requirement
+    from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
+    acc.merge(BeamSpotCondAlgCfg(flags))
+
+    from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
+    acc.merge(AtlasFieldCacheCondAlgCfg(flags))
+
+    from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
+    acc.merge(ITkPixelReadoutGeometryCfg(flags))
+    
     # Need To add additional tool(s)
     # Tracking Geometry Tool
     if 'TrackingGeometryTool' not in kwargs:
@@ -264,6 +274,16 @@ def ActsStripSeedingAlgCfg(flags,
                            **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
+    # Beam Spot Cond is a requirement
+    from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
+    acc.merge(BeamSpotCondAlgCfg(flags))
+
+    from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
+    acc.merge(AtlasFieldCacheCondAlgCfg(flags))
+
+    from StripGeoModelXml.ITkStripGeoModelConfig import ITkStripReadoutGeometryCfg
+    acc.merge(ITkStripReadoutGeometryCfg(flags))
+    
     # Need To add additional tool(s)
     # Tracking Geometry Tool
     if 'TrackingGeometryTool' not in kwargs:
