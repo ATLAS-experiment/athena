@@ -106,20 +106,6 @@ def parse_args():
         action="store_true",
         help="Only show unique classes")
 
-    parser.add_argument(
-        "--includeClasses",
-        action='append',
-        default=[],
-        help="Only list the components selected by the given classname (anchored regular expression)  - only used in class listing, for diff or similar use --includeComps"
-        )
-
-    parser.add_argument(
-        "--excludeClasses",
-        action='append',
-        default=[],
-        help="Don't list the components excluded by the given classname (anchored regular expression) - only used in class listing, for diff or similar use --excludeComps"
-    )
-
     parser.add_argument("--showComponentName",
         help="Show component name with --classes",
         action="store_true")
