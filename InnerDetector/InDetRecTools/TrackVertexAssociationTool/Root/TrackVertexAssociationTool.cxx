@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Includes from this package
@@ -250,8 +250,6 @@ if (m_wp == #WORKING_POINT) {                                                   
 
 StatusCode TrackVertexAssociationTool::initialize()
 {
-  ATH_MSG_INFO("Initializing TrackVertexAssociationTool.");
-
   static const std::set<std::string> run_2_wps = {"Loose", "Nominal", "Tight", "Electron", "Muon", "Old_Loose", "Old_Nominal", "Old_Tight", "Old_Electron", "Old_Muon"};
   std::string wp{m_wp};  
   if (run_2_wps.count(wp)) {
@@ -297,14 +295,14 @@ StatusCode TrackVertexAssociationTool::initialize()
   }
 
   if (m_use_d0sig) {
-    ATH_MSG_INFO("(For Custom WP:) cut on d0 significance: " << m_d0sig_cut << "\t(d0sig_cut).");
+    ATH_MSG_DEBUG("(For Custom WP:) cut on d0 significance: " << m_d0sig_cut << "\t(d0sig_cut).");
   }
   else {
-    ATH_MSG_INFO("(For Custom WP:) cut on d0: " << m_d0_cut << "\t(d0_cut).");
+    ATH_MSG_DEBUG("(For Custom WP:) cut on d0: " << m_d0_cut << "\t(d0_cut).");
   }
-  ATH_MSG_INFO("(For Custom WP:) cut on Δz * sin θ: " << m_dzSinTheta_cut << "\t(dzSinTheta_cut).");
-  ATH_MSG_INFO("(For Custom WP:) allow UsedInFit MatchStatus: " << m_doUsedInFit << "\t(doUsedInFit).");
-  ATH_MSG_INFO("Require VxType::PriVtx for unique match: " << m_requirePriVtx << "\t(requirePriVtx).");
+  ATH_MSG_DEBUG("(For Custom WP:) cut on Δz * sin θ: " << m_dzSinTheta_cut << "\t(dzSinTheta_cut).");
+  ATH_MSG_DEBUG("(For Custom WP:) allow UsedInFit MatchStatus: " << m_doUsedInFit << "\t(doUsedInFit).");
+  ATH_MSG_DEBUG("Require VxType::PriVtx for unique match: " << m_requirePriVtx << "\t(requirePriVtx).");
 
   // Initialize our EventInfo container and decoration reads
   ATH_CHECK(m_eventInfo.initialize());

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // TRTTrackHoleSearchTool.cxx
@@ -205,7 +205,7 @@ const Trk::TrackStates* TRTTrackHoleSearchTool::getHolesOnTrack(
 
 		// remove trailing holes
 		if(trailing_hole_count > m_max_trailing_holes) {
-			ATH_MSG_INFO("There are " << trailing_hole_count << " trailing holes removed.");
+			ATH_MSG_DEBUG("There are " << trailing_hole_count << " trailing holes removed.");
 			for(int i=0; i < trailing_hole_count; i++) {
 				holes->pop_back();
 				/*

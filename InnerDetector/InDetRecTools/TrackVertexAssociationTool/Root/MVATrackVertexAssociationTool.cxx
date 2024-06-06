@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Includes from this package
@@ -38,8 +38,6 @@ MVATrackVertexAssociationTool::MVATrackVertexAssociationTool(const std::string& 
  
 StatusCode MVATrackVertexAssociationTool::initialize() {
 
-  ATH_MSG_INFO("Initializing MVATrackVertexAssociationTool.");
-
   // Init EventInfo and hardscatter vertex link deco
   ATH_CHECK(m_eventInfo.initialize());
   m_hardScatterDecoKey = m_eventInfo.key() +"." + m_hardScatterDeco;
@@ -71,7 +69,7 @@ StatusCode MVATrackVertexAssociationTool::initialize() {
     ATH_MSG_INFO("TVA working point \"" << m_wp << "\" provided - tool properties have been configured accordingly.");
   }
 
-  ATH_MSG_INFO("Cut on MVA output discriminant: " << m_cut);
+  ATH_MSG_DEBUG("Cut on MVA output discriminant: " << m_cut);
 
   return StatusCode::SUCCESS;
 }
