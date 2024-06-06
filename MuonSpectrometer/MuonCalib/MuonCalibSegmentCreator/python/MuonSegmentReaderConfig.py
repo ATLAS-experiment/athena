@@ -69,6 +69,8 @@ if __name__ == "__main__":
     flags.Detector.GeometrySCT   = False    # no ID data in calibration stream
 
     flags.Muon.makePRDs          = True
+
+    flags.Input.LumiBlockNumbers = [200]    # patch for avoiding ES_WrongFileFormat error due to autoConfig
     
     from AthenaConfiguration.Enums import BeamType, Format
     flags.Beam.Type            = BeamType.Collisions
