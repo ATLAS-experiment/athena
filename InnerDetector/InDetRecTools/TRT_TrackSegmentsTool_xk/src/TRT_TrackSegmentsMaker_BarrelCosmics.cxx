@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -57,7 +57,7 @@ InDet::TRT_TrackSegmentsMaker_BarrelCosmics::TRT_TrackSegmentsMaker_BarrelCosmic
 
 StatusCode InDet::TRT_TrackSegmentsMaker_BarrelCosmics::initialize() {
 
-   ATH_MSG_INFO("InDet::TRT_TrackSegmentsMaker_BarrelCosmics::initialize(), March 2012"
+   ATH_MSG_DEBUG("InDet::TRT_TrackSegmentsMaker_BarrelCosmics::initialize(), March 2012"
                 << ", magnetic field: " << (m_magneticField?"ON":"OFF")
                 << " search bins: " << m_nBinsInX << ", " << m_nBinsInPhi);
 
@@ -67,31 +67,28 @@ StatusCode InDet::TRT_TrackSegmentsMaker_BarrelCosmics::initialize() {
   ATH_CHECK(m_driftCirclesName.initialize());
   // TRT
   if (detStore()->retrieve(m_trtid, "TRT_ID").isFailure()) {
-    msg(MSG::FATAL) << "Could not get TRT ID helper" << endmsg;
+    ATH_MSG_FATAL("Could not get TRT ID helper");
     return StatusCode::FAILURE;
   }
 
   if (m_minHitsForSeed<=0) m_minHitsForSeed = (int) ( 0.601 * m_minHitsForSegment );
   if (m_minHitsAboveTOT<=0) m_minHitsAboveTOT = (int) (0.751 * m_minHitsForSegment );
 
-  msg(MSG::INFO) << "m_minHitsForSegment = " << m_minHitsForSegment << endmsg;
-  msg(MSG::INFO) << "m_minHitsForSeed    = " << m_minHitsForSeed << endmsg;
-  msg(MSG::INFO) << "m_minHitsAboveTOT   = " << m_minHitsAboveTOT << endmsg;
+  ATH_MSG_DEBUG("m_minHitsForSegment = " << m_minHitsForSegment);
+  ATH_MSG_DEBUG("m_minHitsForSeed    = " << m_minHitsForSeed);
+  ATH_MSG_DEBUG("m_minHitsAboveTOT   = " << m_minHitsAboveTOT);
 
   if (m_minSeedTOT<0. || m_minSeedTOT>20.)
-    msg(MSG::WARNING) << "initialize(): are you sure about the MinimalTOTForSeedSearch setting? (set at " << m_minSeedTOT << ")" << endmsg;
+    ATH_MSG_WARNING("initialize(): are you sure about the MinimalTOTForSeedSearch setting? (set at " << m_minSeedTOT << ")");
 
-  msg(MSG::INFO) << "InDet::TRT_TrackSegmentsMaker_BarrelCosmics::initialize(), jobProperties: "
-                 << "MinimalNumberOfTRTHits " << m_minHitsForSegment << ", MinimalTOTForSeedSearch: " << m_minSeedTOT
-                 << ", m_minHitsForSeed: " << m_minHitsForSeed << ", m_minHitsAboveTOT: " << m_minHitsAboveTOT << endmsg;
+  ATH_MSG_DEBUG("InDet::TRT_TrackSegmentsMaker_BarrelCosmics::initialize(), jobProperties: "
+		<< "MinimalNumberOfTRTHits " << m_minHitsForSegment << ", MinimalTOTForSeedSearch: " << m_minSeedTOT
+		<< ", m_minHitsForSeed: " << m_minHitsForSeed << ", m_minHitsAboveTOT: " << m_minHitsAboveTOT );
 
   return sc;
 }
 
 StatusCode InDet::TRT_TrackSegmentsMaker_BarrelCosmics::finalize() {
-
-   ATH_MSG_INFO("InDet::TRT_TrackSegmentsMaker_BarrelCosmics::finalize()" );
-
    return StatusCode::SUCCESS;
 }
 

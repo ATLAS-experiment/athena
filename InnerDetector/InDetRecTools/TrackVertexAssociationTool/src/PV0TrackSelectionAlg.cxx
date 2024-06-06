@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PV0TrackSelectionAlg.h"
@@ -8,8 +8,6 @@ PV0TrackSelectionAlg::PV0TrackSelectionAlg( const std::string& name, ISvcLocator
   AthReentrantAlgorithm( name, pSvcLocator ){}
 
 StatusCode PV0TrackSelectionAlg::initialize(){
-  ATH_MSG_INFO ("Initializing " << name() << "...");
-
   ATH_CHECK(m_inTrackKey.initialize());
   ATH_CHECK(m_vertexKey.initialize());
   ATH_CHECK(m_outTrackKey.initialize());
@@ -22,7 +20,6 @@ StatusCode PV0TrackSelectionAlg::initialize(){
 }
 
 StatusCode PV0TrackSelectionAlg::finalize(){
-  ATH_MSG_INFO ("Finalizing " << name() << "...");
   return StatusCode::SUCCESS;
 }
 
