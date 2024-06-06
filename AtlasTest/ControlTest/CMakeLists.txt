@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( ControlTest )
@@ -94,13 +94,6 @@ atlas_add_test( StoreGateDFlow
 atlas_add_test( test_interactive_athena
    SCRIPT athena.py ControlTest/test_interactive_athena.py )
 
-atlas_add_test( test_cfgItemList
-                SCRIPT python -m ControlTest.test_cfgItemList
-                LOG_IGNORE_PATTERN "../FooFoo at 0x" )
-
-atlas_add_test( test_keyStore
-                SCRIPT python -m ControlTest.test_keyStore )
-
 atlas_add_test( test_handleTest
                 SCRIPT athena.py AthExStoreGateExample/HandleTest_jobOptions.py )
 
@@ -109,5 +102,4 @@ atlas_add_test( test_decorHandleTest
                 LOG_SELECT_PATTERN "testalg.testool" )
 
 # Install files from the package:
-atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_joboptions( share/StoreGateTestCommon.txt share/DataLink_test.txt share/*.py )
