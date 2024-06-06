@@ -81,7 +81,7 @@ def configureFlagsAndArgsFromPartition(flags, args, partition, log):
             elif data[12] == 4:
                 runType = 'Pedestals'
             elif data[12] == 8:
-                runType = 'CIS'
+                runType = runType if 'mono' in runType else 'CIS'
 
             log.info(f'TILE CONFIGURATION: RunType: {runType}, Mode: {data[0]}, Samples: {data[1]}, Pipeline: {data[2]}'
                      + f', I3Delay: {data[3]}, Event: {data[4]}, Phase: {data[5]}, DAC: {data[6]}, Capacity: {data[7]}')
@@ -91,15 +91,15 @@ def configureFlagsAndArgsFromPartition(flags, args, partition, log):
     try:
         dspConfig = ISObject(ipcPartition, 'TileParams.TileCal_DSPConfig', 'TileCal_IS_DSPConfig')
     except Exception:
-        log.info("Could not find Tile DSP Config in IS => set default number of samples to {nSamples}")
+        log.info(f"Could not find Tile DSP Config in IS => set default number of samples to {nSamples}")
     else:
         try:
             dspConfig.checkout()
         except Exception:
-            log.info("Could not get Tile DSP Config from IS => set default number of samples to {nSamples}")
+            log.info(f"Could not get Tile DSP Config from IS => set default number of samples to {nSamples}")
         else:
             nSamples = dspConfig.samples
-            log.info("Set number of samples from DSP Config in IS: {nSamples}")
+            log.info(f"Set number of samples from DSP Config in IS: {nSamples}")
 
     if 'Physics' in runType:
         flags.Tile.RunType = TileRunType.PHY
@@ -110,8 +110,10 @@ def configureFlagsAndArgsFromPartition(flags, args, partition, log):
     elif 'Pedestals' in runType:
         flags.Tile.RunType = TileRunType.PED
 
-    flags.Beam.Type = BeamType(beamType)
-    flags.Beam.Energy = beamEnergy
+    if beamType in ['collisions', 'singlebeam', 'cosmics', 'testbeam']:
+        flags.Beam.Type = BeamType(beamType)
+
+    flags.Beam.Energy = beamEnergy if beamEnergy > 1 * GeV else 200 * GeV
     flags.Input.ProjectName = project
     flags.Input.RunNumbers = [runNumber]
     args.nsamples = nSamples
@@ -123,11 +125,13 @@ def TileTestBeamMonitoringCfg(flags, fragIDs=[0x100, 0x101, 0x200, 0x201, 0x402]
 
     acc = ComponentAccumulator()
 
+    caloCells = 'AllCaloHG' if flags.Tile.RunType.isBiGain() else 'AllCalo'
+
     from TileMonitoring.TileTBBeamMonitorAlgorithm import TileTBBeamMonitoringConfig
-    acc.merge(TileTBBeamMonitoringConfig(flags, fragIDs=fragIDs))
+    acc.merge(TileTBBeamMonitoringConfig(flags, fragIDs=fragIDs, CaloCellContainer=caloCells))
 
     from TileMonitoring.TileTBMonitorAlgorithm import TileTBMonitoringConfig
-    acc.merge(TileTBMonitoringConfig(flags, fragIDs=fragIDs))
+    acc.merge(TileTBMonitoringConfig(flags, fragIDs=fragIDs, CaloCellContainer=caloCells))
 
     from TileMonitoring.TileTBPulseMonitorAlgorithm import TileTBPulseMonitoringConfig
     acc.merge(TileTBPulseMonitoringConfig(flags, timeRange=[-200, 200], fragIDs=fragIDs))
@@ -217,7 +221,6 @@ if __name__ == '__main__':
     flags.DQ.useTrigger = False
     flags.DQ.enableLumiAccess = False
     flags.DQ.FileKey = 'Tile'
-    flags.Exec.MaxEvents = 3
     flags.Common.isOnline = True
     flags.GeoModel.AtlasVersion = 'ATLAS-R2-2015-04-00-00'
 
