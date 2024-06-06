@@ -50,7 +50,7 @@ double addTileGapCellsEnergy(xAOD::CaloCluster* cluster) {
 }
 
 bool checkIfValidForCentral(
-  double aeta, 
+  double aeta,
   float etaCut,
   double clusterE,
   float ECut
@@ -59,7 +59,7 @@ bool checkIfValidForCentral(
 }
 
 bool checkIfValidForFwd(
-  double aeta, 
+  double aeta,
   float etaCut,
   double ETCut,
   xAOD::CaloCluster *clus,
@@ -109,18 +109,18 @@ StatusCode egammaTopoClusterCopier::initialize() {
 }
 
 StatusCode egammaTopoClusterCopier::finalize() {
-  ATH_MSG_INFO(name() << " All Clusters " << m_AllClusters );
-  ATH_MSG_INFO(name() << " Pass Preselection Clusters " << m_PassPreSelection );
-  ATH_MSG_INFO(name() << " Pass Selection " << m_PassSelection );
-
-  ATH_MSG_INFO(name() << " Central: Pass Preselection Clusters " << m_CentralPassPreSelection );
-  ATH_MSG_INFO(name() << " Central: Pass Selection " << m_CentralPassSelection );
-
-  ATH_MSG_INFO(name() << " Fwd: Pass Preselection Clusters " << m_FwdPassPreSelection );
-  ATH_MSG_INFO(name() << " Fwd: Pass Selection " << m_FwdPassSelection );
-
-  ATH_MSG_INFO(name() << " Shared: Pass Preselection Clusters " << m_SharedPassPreSelection );
-  ATH_MSG_INFO(name() << " Shared: Pass Selection " << m_SharedPassSelection );
+  ATH_MSG_INFO("=====> Selected Topo cluster statistics ============");
+  ATH_MSG_INFO(" All Clusters " << m_AllClusters );
+  ATH_MSG_INFO(" Pass Preselection Clusters " << m_PassPreSelection );
+  ATH_MSG_INFO(" Pass Selection " << m_PassSelection );
+  ATH_MSG_INFO(" Central: Pass Preselection Clusters " << m_CentralPassPreSelection );
+  ATH_MSG_INFO(" Central: Pass Selection " << m_CentralPassSelection );
+  ATH_MSG_INFO(" Fwd: Pass Preselection Clusters " << m_FwdPassPreSelection );
+  ATH_MSG_INFO(" Fwd: Pass Selection " << m_FwdPassSelection );
+  ATH_MSG_INFO(" Shared: Pass Preselection Clusters " << m_SharedPassPreSelection );
+  ATH_MSG_INFO(" Shared: Pass Selection " << m_SharedPassSelection );
+  ATH_MSG_INFO(" All Clusters " << m_AllClusters );
+  ATH_MSG_INFO("===================================================");
 
   return StatusCode::SUCCESS;
 }
