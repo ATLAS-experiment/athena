@@ -364,8 +364,8 @@ xAODEgammaBuilder::getElectron(const egammaRec* egRec,
   }
   // Set DeltaEta, DeltaPhi , DeltaPhiRescaled
   electron->setTrackCaloMatchValues(
-    egRec->deltaEta(), 
-    egRec->deltaPhi(), 
+    egRec->deltaEta(),
+    egRec->deltaPhi(),
     egRec->deltaPhiRescaled(),
     egRec->deltaPhiLast()
   );
@@ -402,13 +402,11 @@ xAODEgammaBuilder::getPhoton(const egammaRec* egRec,
   float deltaPhi = egRec->deltaPhiVtx();
   if (!photon->setVertexCaloMatchValue(
         deltaEta, xAOD::EgammaParameters::convMatchDeltaEta1)) {
-    ATH_MSG_WARNING("Could not transfer deltaEta to photon");
     return false;
   }
 
   if (!photon->setVertexCaloMatchValue(
         deltaPhi, xAOD::EgammaParameters::convMatchDeltaPhi1)) {
-    ATH_MSG_WARNING("Could not transfer deltaPhi to photon");
     return false;
   }
   return true;

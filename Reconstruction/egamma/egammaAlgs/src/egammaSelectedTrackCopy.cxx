@@ -69,7 +69,7 @@ egammaSelectedTrackCopy::initialize()
 StatusCode
 egammaSelectedTrackCopy::egammaSelectedTrackCopy::finalize()
 {
-  ATH_MSG_INFO("--- egamma Selected Track Copy Statistics ---");
+  ATH_MSG_INFO("===> egamma Selected Tracks Statistics ===========");
   ATH_MSG_INFO("--- All Central Clusters: " << m_AllClusters);
   ATH_MSG_INFO("--- Selected Central Clusters: " << m_SelectedClusters);
   ATH_MSG_INFO("--- All Tracks: " << m_AllTracks);
@@ -82,7 +82,7 @@ egammaSelectedTrackCopy::egammaSelectedTrackCopy::finalize()
     ATH_MSG_INFO("--- All Forward Clusters: " << m_AllFwdClusters);
     ATH_MSG_INFO("--- Selected Forward Tracks: " << m_SelectedFwdTracks);
   }
-  ATH_MSG_INFO("---------------------------------------------");
+  ATH_MSG_INFO("<=====================================================");
 
   return StatusCode::SUCCESS;
 }

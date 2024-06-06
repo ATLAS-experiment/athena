@@ -60,15 +60,12 @@ EMPIDBuilder::initialize()
   }
 
   if (m_UselumiBlockMuTool) {
-    ATH_MSG_INFO("enabling lumiBlockMuTool");
     if (m_lumiBlockMuTool.retrieve().isFailure()) {
       ATH_MSG_FATAL("Unable to retrieve Luminosity Tool");
       return StatusCode::FAILURE;
     }
     ATH_MSG_DEBUG("Successfully retrieved Luminosity Tool");
-
   } else {
-    ATH_MSG_INFO("disabling lumiBlockMuTool");
     m_lumiBlockMuTool.disable();
   }
   return StatusCode::SUCCESS;
