@@ -37,6 +37,7 @@ atlas_add_component(ActsEventCnv
     InDetPrepRawData
     InDetReadoutGeometry
     InDetRIO_OnTrack
+    MuonReadoutGeometryR4
     StoreGateLib
     TrkEventPrimitives
     TrkExUtils
@@ -55,3 +56,7 @@ atlas_add_test(ActsEventCnvTrackTest
     PROPERTIES TIMEOUT 900
     POST_EXEC_SCRIPT noerror.sh)
 
+atlas_add_test(ActsEventCnvMuonTrackTest
+    SCRIPT test/testMuonTrackConversion.py
+    PROPERTIES TIMEOUT 900
+    POST_EXEC_SCRIPT noerror.sh)

@@ -13,7 +13,11 @@ def ActsToTrkConverterToolCfg(flags,
         from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
         kwargs.setdefault("TrackingGeometryTool", acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)))
     else:
+         # Disable TrackingGeometryTool
          kwargs.setdefault("TrackingGeometryTool", "")
+    
+    if flags.Muon.usePhaseIIGeoSetup:
+         kwargs.setdefault("ExtractMuonSurfaces", True)
 
     acc.setPrivateTools(CompFactory.ActsTrk.ActsToTrkConverterTool(name, **kwargs))
     return acc
