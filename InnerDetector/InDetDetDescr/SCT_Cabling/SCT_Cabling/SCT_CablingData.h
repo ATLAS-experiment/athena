@@ -6,7 +6,7 @@
 #define SCT_CablingData_h
 
 /**
- * @file SCT_CablingSvc.h
+ * @file SCT_CablingData.h
  * Header file for  SCT cabling data
  * @author Susumu Oda
  * @date 7 March, 2018
