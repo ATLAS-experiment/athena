@@ -54,7 +54,7 @@ def AthenaMPCfg(flags):
     result = ComponentAccumulator()
 
     # Configure MP Event Loop Manager
-    mpevtloop = CompFactory.AthMpEvtLoopMgr()
+    mpevtloop = CompFactory.AthMpEvtLoopMgr(EventPrintoutInterval = flags.Exec.EventPrintoutInterval)
 
     mpevtloop.NWorkers = flags.Concurrency.NumProcs
     mpevtloop.Strategy = flags.MP.Strategy
