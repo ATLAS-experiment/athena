@@ -64,6 +64,7 @@ class DiTauTrackFinder : public DiTauToolBase {
  private:
   float m_MaxDrJet;
   float m_MaxDrSubjet;
+  int m_MaxNTracksSubjet;
   SG::ReadHandleKey<xAOD::TrackParticleContainer> m_TrackParticleContainerName
     { this, "TrackParticleContainer", "InDetTrackParticles", "" };
   ToolHandle<Trk::ITrackSelectorTool> m_TrackSelectorTool;

@@ -61,6 +61,7 @@ def DiTauTrackFinderCfg(flags, name="DiTauRec_DiTauTrackFinder", **kwargs):
     
     kwargs.setdefault("MaxDrJet", 1.0)
     kwargs.setdefault("MaxDrSubjet", 0.2)
+    kwargs.setdefault("MaxNTracksSubjet", -1)
     kwargs.setdefault("TrackParticleContainer", "InDetTrackParticles")
 
     if "TrackSelectorTool" not in kwargs:
