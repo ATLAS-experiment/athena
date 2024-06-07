@@ -178,15 +178,6 @@ def update_nested_dict(d, u):
          d[k] = v
    return d
 
-def get_run_mode(jobOptions):
-   """Deduce the running mode: (legacy) 'JO', 'CA' or 'JSON'"""
-   if jobOptions.endswith('.json'):  # json file
-      return 'JSON'
-   elif jobOptions.endswith('.py'):  # regular job options
-      return 'JO'
-   else:                             # ComponentAccumulator
-      return 'CA'
-
 def HLTMPPy_cfgdict(args):
    """Create the configuration dictionary as expected by HLTMPPy as defined in
    https://gitlab.cern.ch/atlas-tdaq-software/HLTMPPU/blob/master/python/HLTMPPy/runner.py"""
@@ -284,10 +275,8 @@ def HLTMPPy_cfgdict(args):
          'logLevels' : args.log_level
       })
       # Python bootstrap depending on file type
-      bootstrap = {'JSON' : 'TrigPSC.TrigPSCPythonDbSetup',
-                   'JO'   : 'TrigPSC/TrigPSCPythonSetup.py',
-                   'CA'   : 'TrigPSC.TrigPSCPythonCASetup'}
-      cdict['trigger']['pythonSetupFile'] = bootstrap[get_run_mode(args.jobOptions)]
+      cdict['trigger']['pythonSetupFile'] = 'TrigPSC.TrigPSCPythonDbSetup' if \
+         args.jobOptions.endswith('.json') else 'TrigPSC.TrigPSCPythonCASetup'
 
    else:
       cdict['trigger'].update({
@@ -377,7 +366,6 @@ def main():
    g.add_argument('--hltpsk', type=int, default=None, help='HLT prescale key')
    g.add_argument('--dump-config', action='store_true', help='Dump joboptions JSON file')
    g.add_argument('--dump-config-exit', action='store_true', help='Dump joboptions JSON file and exit')
-   g.add_argument('--dump-config-reload', action='store_true', help='Dump joboptions JSON file and restart %(prog)s from this file')
 
    ## Online histogramming
    g = parser.add_argument_group('Online Histogramming')
@@ -439,14 +427,6 @@ def main():
    if args.loop_files and args.number_of_events<0:
       log.warning("Looping over files without specifying number of events will run forever!")
 
-   # In CA-mode we always dump and reload:
-   if args.jobOptions and get_run_mode(args.jobOptions)=='CA':
-      args.dump_config_reload = True
-
-   # the '-i' command line option only becomes active after the reload:
-   if args.dump_config_reload:
-      args.interactive = False
-
    # Update args and set athena flags
    from TrigPSC import PscConfig
 
@@ -478,7 +458,6 @@ def main():
 
    PscConfig.interactive = args.interactive
    PscConfig.exitAfterDump = args.dump_config_exit
-   PscConfig.reloadAfterDump = args.dump_config_reload
 
    flags.PerfMon.doFastMonMT = args.perfmon
    flags.Trigger.Online.useOnlineTHistSvc = args.oh_monitoring
