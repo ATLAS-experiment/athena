@@ -104,9 +104,6 @@ class EtaPtFilterTool : public TruthParticleFilterBaseTool
    */
   bool isAccepted( const HepMC::ConstGenVertexPtr& vtx ) const;
 
-  /** Check if a given vertex is the signal process vertex. */
-  bool isSignalProcessVertex( const HepMC::ConstGenVertexPtr& vtx, const HepMC::GenEvent* evt );
-
   /** Helper method to copy a given vertex and add it to a GenEvent
    */
   StatusCode addVertex( const HepMC::ConstGenVertexPtr& srcVtx, HepMC::GenEvent* evt,

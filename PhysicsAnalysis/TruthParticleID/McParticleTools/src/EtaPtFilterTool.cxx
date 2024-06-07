@@ -163,14 +163,15 @@ StatusCode EtaPtFilterTool::buildGenEvent( const HepMC::GenEvent* in, HepMC::Gen
   // loop over vertices
   VertexMap_t vmap;
   ParticleMap_t pmap;
+  auto spv =  HepMC::signal_process_vertex(in); //AV To be removed in the future
 #ifdef HEPMC3
   for ( auto vtx: in->vertices() ) {
 #else
   for ( HepMC::GenEvent::vertex_const_iterator vtxit = in->vertices_begin(); vtxit != in->vertices_end();  ++vtxit ) {
     auto vtx=*vtxit;
 #endif
-    bool isSignalVertex = isSignalProcessVertex(vtx, in);
-    if ( !isAccepted(vtx) and !isSignalVertex ) {
+    bool isSignalVertex = (vtx == spv);
+    if ( !isAccepted(vtx) && !isSignalVertex ) {
       // no in-going nor out-going particles at this vertex matches 
       // the requirements nor it is a signal process vertex : ==> Skip it
       continue;
@@ -287,17 +288,6 @@ bool EtaPtFilterTool::isAccepted( const HepMC::ConstGenVertexPtr& vtx ) const
     }
   }//> end loop over children
 
-  return false;
-}
-
-bool EtaPtFilterTool::isSignalProcessVertex(const HepMC::ConstGenVertexPtr& vtx, const HepMC::GenEvent* evt )
-{
-  if (HepMC::signal_process_vertex(evt) == vtx) {
-    ATH_MSG_DEBUG("Signal Process vertex found: " << vtx << " = ("
-		  << vtx->position().x() << ", " << vtx->position().y() 
-		  << ", " << vtx->position().z() << ")");
-    return true;
-  }
   return false;
 }
 
