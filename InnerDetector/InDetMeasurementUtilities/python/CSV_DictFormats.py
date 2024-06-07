@@ -27,10 +27,17 @@ CSV_DictFormats = {
                     # This container is empty
                     "ActsTrackSurfaces":
                     {
-                        "translation":"float",
-                        "rotation":"float",
-                        "boundValues":"float",
+                        "translation":"vector<float>",
+                        "rotation":"vector<float>",
+                        "boundValues":"vector<float>",
                         "surfaceType":"int",
+                    },
+                    "ActsTrackStateSurfaces": # this is the same type as above, two entries as output can possibly be customized differently
+                    {
+                        "translation":"vector<float>",
+                        "rotation":"vector<float>",
+                        "boundValues":"vector<float>",
+                        "surfaceType":"xAOD::SurfaceType",
                     },
 
                     "ActsTrackMeasurements":
@@ -42,9 +49,18 @@ CSV_DictFormats = {
                     "ActsTrackStates":
                     {
                         "chi2":"float",
-                        "pathLength":"float",
+                        "pathLength":"double",
                         "typeFlags":"uint64_t",
+                        "previous":"uint32_t",
+                        "next":"uint32_t",
+                        "predicted":"uint32_t",
+                        "filtered":"uint32_t",
+                        "smoothed":"uint32_t",
+                        "jacobian":"uint32_t",
+                        "calibrated":"uint32_t",
+                        "measDim":"uint32_t",
                         "geometryId":"uint64_t",
+                        "surfaceIndex":"unsigned int"
                     },
 
                     "ActsTrackSummary":
@@ -60,6 +76,8 @@ CSV_DictFormats = {
                         "particleHypothesis":"uint8_t",
                         "params":"vector<double>",
                         "covParams":"vector<double>",
+                        "surfaceIndex":"unsigned int"
+
                     },
           
                     "ActsTrackJacobians":

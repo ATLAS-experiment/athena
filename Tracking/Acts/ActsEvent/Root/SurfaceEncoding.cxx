@@ -46,10 +46,10 @@ void encodeSurface(xAOD::SurfaceType& surfaceType,
     translation.push_back(lTranslation[i]);
   }
 
-  // Transforming double->float
-  const std::vector<double> values = surface->bounds().values();
-  for (unsigned int i = 0; i < size(values); i++)
-    boundValues.push_back(values[i]);
+  // copy and transform double->float
+  const std::vector<double>& values = surface->bounds().values();
+  for (double v: values)
+    boundValues.push_back(v);
 }
 
 void encodeSurface(xAOD::TrackSurfaceAuxContainer* s, size_t i,

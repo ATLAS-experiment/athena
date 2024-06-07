@@ -68,12 +68,16 @@ class CSVDumper:
                 print(".. Missing ", container)
                 continue
 
+            if tp.size() == 0:
+                print(".. Empty ", container)
+                continue
+
             for var,fmt in dict_container.items():
                 try:
                     sp  = tp.getConstDataSpan[ fmt ]( var) 
                 except Exception:
                     # This is for the case arrays are either empty or have some trouble when accessed via getConstDataSpan. Used in excepction as makes the code slower
-                    print("getConstDataSpan failed for variable ",var,fmt)
+                    print("getConstDataSpan failed for variable ",var,fmt, container)
                     sp  = [ getattr(element, var)() for element in tp ]
 
                 try:

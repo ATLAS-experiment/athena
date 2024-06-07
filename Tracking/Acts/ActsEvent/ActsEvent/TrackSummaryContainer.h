@@ -203,7 +203,7 @@ class MutableTrackSummaryContainer : public TrackSummaryContainer {
     return m_mutableTrackBackend.get();
   }
 
-  void encodeSurfaces(xAOD::TrackSurfaceAuxContainer* dest, const Acts::GeometryContext&) const;
+  void encodeSurfaces(xAOD::TrackSurfaceAuxContainer* dest, const Acts::GeometryContext&);
 
  private:
   std::unique_ptr<xAOD::TrackSummaryContainer> m_mutableTrackBackend;

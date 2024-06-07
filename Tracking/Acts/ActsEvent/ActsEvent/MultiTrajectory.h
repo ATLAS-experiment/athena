@@ -360,6 +360,10 @@ class MutableMultiTrajectory final
     return m_trackMeasurementsAux.get();
   }
 
+  inline xAOD::TrackSurfaceAuxContainer* trackSurfacesAux() {
+    return m_surfacesBackendAux.get();
+  }
+
   static const std::set<std::string> s_staticVariables;
 
   friend ActsTrk::MutableTrackContainerHandlesHelper;
@@ -405,7 +409,8 @@ class MultiTrajectory
       DataLink<xAOD::TrackStateAuxContainer> trackStates,
       DataLink<xAOD::TrackParametersAuxContainer> trackParameters,
       DataLink<xAOD::TrackJacobianAuxContainer> trackJacobians,
-      DataLink<xAOD::TrackMeasurementAuxContainer> trackMeasurements);
+      DataLink<xAOD::TrackMeasurementAuxContainer> trackMeasurements, 
+      DataLink<xAOD::TrackSurfaceAuxContainer> trackSurfaces);
 
   bool has_impl(Acts::HashedString key, ActsTrk::IndexType istate) const;
 
@@ -471,6 +476,7 @@ class MultiTrajectory
   const DataLink<xAOD::TrackParametersAuxContainer> m_trackParametersAux;
   const DataLink<xAOD::TrackJacobianAuxContainer> m_trackJacobiansAux;
   const DataLink<xAOD::TrackMeasurementAuxContainer> m_trackMeasurementsAux;
+  const DataLink<xAOD::TrackSurfaceAuxContainer> m_trackSurfacesAux;
   std::vector<ActsTrk::detail::Decoration> m_decorations;
 
   // // TODO remove once tracking code switches to sourceLinks with EL

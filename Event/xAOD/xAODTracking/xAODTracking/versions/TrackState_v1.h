@@ -246,14 +246,14 @@ namespace xAOD {
         void setGeometryId(uint64_t);
 
         /**
-         * @brief obtains link to the surface representation
-         */
-        ElementLink<xAOD::TrackSurfaceContainer> surfaceLink() const;
+          * @brief index of the surfaces in the surfaces collection
+          */
+        unsigned int surfaceIndex() const;
 
         /**
-         * @brief sets link to the surface representation
-         */
-        void setSurfaceLink(ElementLink<xAOD::TrackSurfaceContainer>);
+          * @brief Set the index in surface container
+          */
+        void setSurfaceIndex(unsigned int);
 
 
     };

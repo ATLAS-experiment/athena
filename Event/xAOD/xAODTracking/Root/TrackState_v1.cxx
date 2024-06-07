@@ -33,7 +33,7 @@ namespace xAOD {
     }
 
     AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(TrackState_v1,  uint64_t, geometryId, setGeometryId);
-    AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(TrackState_v1, ElementLink<xAOD::TrackSurfaceContainer>, surfaceLink, setSurfaceLink);
+    AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(TrackState_v1, unsigned int, surfaceIndex, setSurfaceIndex);
 
 }
 
