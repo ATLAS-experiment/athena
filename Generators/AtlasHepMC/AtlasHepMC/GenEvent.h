@@ -553,6 +553,8 @@ template <> inline  bool suggest_barcode<std::unique_ptr<HepMC::GenParticle> >(s
 namespace Print {
 inline void line(std::ostream& os,const GenEvent& e) {e.print(os);}
 inline void line(std::ostream& os,const GenEvent* e) {e->print(os);}
+inline void content(std::ostream& os,const GenEvent& e) {e.print(os);}
+inline void content(std::ostream& os,const GenEvent* e) {e->print(os);}
 }
 inline bool valid_beam_particles(const GenEvent* e) {return e->valid_beam_particles();}
 }
