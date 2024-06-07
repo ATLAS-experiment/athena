@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "egammaTopoClusterCopier.h"
@@ -109,17 +109,14 @@ StatusCode egammaTopoClusterCopier::initialize() {
 }
 
 StatusCode egammaTopoClusterCopier::finalize() {
-  ATH_MSG_INFO("=====> Selected Topo cluster statistics ============");
+  ATH_MSG_INFO("=====> Selected Topo cluster statistics ===========");
   ATH_MSG_INFO(" All Clusters " << m_AllClusters );
-  ATH_MSG_INFO(" Pass Preselection Clusters " << m_PassPreSelection );
-  ATH_MSG_INFO(" Pass Selection " << m_PassSelection );
   ATH_MSG_INFO(" Central: Pass Preselection Clusters " << m_CentralPassPreSelection );
-  ATH_MSG_INFO(" Central: Pass Selection " << m_CentralPassSelection );
   ATH_MSG_INFO(" Fwd: Pass Preselection Clusters " << m_FwdPassPreSelection );
-  ATH_MSG_INFO(" Fwd: Pass Selection " << m_FwdPassSelection );
   ATH_MSG_INFO(" Shared: Pass Preselection Clusters " << m_SharedPassPreSelection );
+  ATH_MSG_INFO(" Central: Pass Selection " << m_CentralPassSelection );
+  ATH_MSG_INFO(" Fwd: Pass Selection " << m_FwdPassSelection );
   ATH_MSG_INFO(" Shared: Pass Selection " << m_SharedPassSelection );
-  ATH_MSG_INFO(" All Clusters " << m_AllClusters );
   ATH_MSG_INFO("===================================================");
 
   return StatusCode::SUCCESS;
@@ -160,8 +157,6 @@ StatusCode egammaTopoClusterCopier::execute(const EventContext& ctx) const {
   }
 
   auto buff_AllClusters = m_AllClusters.buffer();
-  auto buff_PassPreSelection = m_PassPreSelection.buffer();
-  auto buff_PassSelection = m_PassSelection.buffer();
   auto buff_CentralPassPreSelection = m_CentralPassPreSelection.buffer();
   auto buff_CentralPassSelection = m_CentralPassSelection.buffer();
   auto buff_FwdPassPreSelection = m_FwdPassPreSelection.buffer();
@@ -187,14 +182,17 @@ StatusCode egammaTopoClusterCopier::execute(const EventContext& ctx) const {
     const bool valid_for_central = checkIfValidForCentral(aeta, m_etaCut, clusterE, m_ECut);
     const bool valid_for_fwd = checkIfValidForFwd(aeta, m_fwdEtaCut, m_fwdETCut, clus, m_doForwardClusters, m_hasITk);
     const bool valid_for_both = valid_for_central && valid_for_fwd;
-    const bool valid_for_either = valid_for_central || valid_for_fwd;
 
-    if (valid_for_central) { ++buff_CentralPassPreSelection; }
-    if (valid_for_fwd) { ++buff_FwdPassPreSelection; }
-    if (valid_for_both) { ++buff_SharedPassPreSelection; }
-    if (valid_for_either) { ++buff_PassPreSelection; }
-    else {
+    if (valid_for_central) {
+      ++buff_CentralPassPreSelection;
+    } else if (valid_for_fwd) {
+      ++buff_FwdPassPreSelection;
+    } else {
       continue;
+    }
+
+    if (valid_for_both) {
+      ++buff_SharedPassPreSelection;
     }
 
     if (!m_hasITk && m_doForwardClusters && valid_for_fwd) {
@@ -221,8 +219,6 @@ StatusCode egammaTopoClusterCopier::execute(const EventContext& ctx) const {
         " , " << clus->et() <<
         " , " << emfrac
       );
-
-      ++buff_PassSelection;
 
       if (valid_for_central) {
         viewCopy->push_back(clus);
