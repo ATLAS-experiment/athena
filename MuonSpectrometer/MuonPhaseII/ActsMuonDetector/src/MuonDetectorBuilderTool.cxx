@@ -153,7 +153,7 @@ std::pair<std::vector<volumePtr>,std::vector<surfacePtr>> MuonDetectorBuilderToo
        //Get the transformation to the chamber's frame
        const Amg::Vector3D toChamber = mChamber.globalToLocalTrans(gctx)*mdtReadoutEle->center(gctx);
       
-       const Amg::Vector3D boxCenter = toChamber - parameters.halfY * Amg::Vector3D::UnitY() + parameters.halfHeight * Amg::Vector3D::UnitZ();
+       const Amg::Vector3D boxCenter = toChamber;
                                      
        const Acts::Transform3 mdtTransform = mChamber.localToGlobalTrans(gctx) * Amg::Translation3D(boxCenter);       
 
