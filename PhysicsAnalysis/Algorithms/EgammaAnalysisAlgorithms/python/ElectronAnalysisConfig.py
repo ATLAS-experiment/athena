@@ -268,13 +268,13 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             alg.maxD0Significance = self.maxD0Significance
             alg.maxDeltaZ0SinTheta = self.maxDeltaZ0SinTheta 
             alg.decorateTTVAVars = self.writeTrackD0Z0
-            alg.d0sigDecoration = 'd0sig' + postfix
-            alg.z0sinthetaDecoration = 'z0sintheta' + postfix
             alg.particles = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, '')
             if self.trackSelection : 
                 config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration)
             if self.writeTrackD0Z0 :
+                alg.d0sigDecoration = 'd0sig' + postfix
+                alg.z0sinthetaDecoration = 'z0sintheta' + postfix
                 config.addOutputVar (self.containerName, alg.d0sigDecoration, alg.d0sigDecoration,noSys=True)
                 config.addOutputVar (self.containerName, alg.z0sinthetaDecoration, alg.z0sinthetaDecoration,noSys=True)
                 
