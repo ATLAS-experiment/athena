@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EGAMMAALGS_EGAMMATOPOCLUSTERCOPIER_H
@@ -126,8 +126,6 @@ private:
   bool m_doForwardClusters = false;
 
   mutable Gaudi::Accumulators::Counter<> m_AllClusters {};
-  mutable Gaudi::Accumulators::Counter<> m_PassPreSelection {};
-  mutable Gaudi::Accumulators::Counter<> m_PassSelection {};
   mutable Gaudi::Accumulators::Counter<> m_CentralPassPreSelection {};
   mutable Gaudi::Accumulators::Counter<> m_CentralPassSelection {};
   mutable Gaudi::Accumulators::Counter<> m_FwdPassPreSelection {};

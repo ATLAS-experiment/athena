@@ -26,10 +26,9 @@ PACKAGE:  offline/Reconstruction/egammaRec
 
 
 // INITIALIZE METHOD:
-     
+
 StatusCode egammaTrackThinner::initialize()
 {
-  ATH_MSG_INFO("Initializing egammaTrackThinner");
 
   // initialize data handles
   ATH_CHECK(m_InputElectronContainerKey.initialize(m_doThinning));
@@ -40,7 +39,6 @@ StatusCode egammaTrackThinner::initialize()
   ATH_CHECK(m_TrackParticlesKey.initialize(m_streamName, m_doThinning));
   ATH_CHECK(m_VertexKey.initialize(m_streamName, m_doThinning));
 
-  ATH_MSG_INFO("Initialization completed successfully");
   return StatusCode::SUCCESS;
 }
 
@@ -52,16 +50,16 @@ StatusCode egammaTrackThinner::finalize() {
 
 /////////////////////////////////////////////////////////////////
 // ATHENA EXECUTE METHOD:
-   
+
 StatusCode egammaTrackThinner::execute (const EventContext& ctx) const {
-  
+
   ATH_MSG_DEBUG("Executing egammaTrackThinner");
   if(!m_doThinning){
     ATH_MSG_DEBUG("Thinning not requested do nothing");
     return StatusCode::SUCCESS;
   }
-  
-  /* 
+
+  /*
    * GSF Track Particles
    * The vector that we'll use to filter the track particles:
    */
@@ -83,7 +81,7 @@ StatusCode egammaTrackThinner::execute (const EventContext& ctx) const {
   ATH_MSG_DEBUG("Number of Vertices "<< vertices->size());
   keptVertices.resize( vertices->size(), false );
 
-  /* 
+  /*
    * In Det Track Particles
    * TRT standalone tracks are now centrally thinned by ThinTRTStandaloneTrackAlg for e/gamma and taus
    */
@@ -106,17 +104,17 @@ StatusCode egammaTrackThinner::execute (const EventContext& ctx) const {
         continue;
       }
       ATH_MSG_DEBUG("Electrons : Keeping GSF Track Particle with index : "<< link.index() );
-      keptTrackParticles[link.index() ] = true;        
+      keptTrackParticles[link.index() ] = true;
     }
   }
-  
+
   /*
    * Photon Vertex and track particle  Thinning
    */
   SG::ReadHandle<xAOD::PhotonContainer> photons(m_InputPhotonContainerKey, ctx);
   // check is only used for serial running; remove when MT scheduler used
   ATH_CHECK(photons.isValid());
-    
+
   //Loop over photons
   auto ph_itr = photons->begin();
   auto ph_end = photons->end();
@@ -172,7 +170,7 @@ StatusCode egammaTrackThinner::execute (const EventContext& ctx) const {
   trackPC.keep (keptTrackParticles);
   vertices.keep (keptVertices);
   ATH_MSG_DEBUG("completed successfully");
-  
+
   //Return Gracefully
   return StatusCode::SUCCESS;
 }

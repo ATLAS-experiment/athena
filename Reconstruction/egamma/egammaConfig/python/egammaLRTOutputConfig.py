@@ -1,8 +1,7 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 __doc__ = "Prepare LRT EGamma output list"
 
-from AthenaCommon.Logging import logging
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
 
@@ -11,8 +10,6 @@ def egammaLRTOutputCfg(flags, name="LRTEGOutputList"):
     # This need some work form LRT community
     # ....
     acc = ComponentAccumulator()
-
-    mlog = logging.getLogger(name)
 
     outFlags = flags.Egamma.Keys.Output
 
@@ -74,12 +71,9 @@ def egammaLRTOutputCfg(flags, name="LRTEGOutputList"):
     if flags.Output.doWriteESD:
         from OutputStreamAthenaPool.OutputStreamConfig import addToESD
         acc.merge(addToESD(flags, toESD))
-        mlog.info('egammaESDList: %s ', toESD)
 
     if flags.Output.doWriteAOD:
         from OutputStreamAthenaPool.OutputStreamConfig import addToAOD
         acc.merge(addToAOD(flags, toAOD))
-        mlog.info('egammaAODList: %s ', toAOD)
 
-    mlog.info("EGamma LRT Output configured")
     return acc
