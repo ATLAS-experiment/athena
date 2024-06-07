@@ -1,9 +1,8 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 # This module is used as a Python bootstrap in athenaHLT for ComponentAccumulator
-# based configurations. It is equivalent to TrigPSCPythonSetup.py for legacy
-# job options. In CA-mode, we always dump the configuraton to JSON and re-launch
-# ourselves from that file.
+# based configurations. In CA-mode, we always dump the configuraton to JSON and
+# re-launch ourselves from that file.
 #
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -18,9 +17,6 @@ from TrigServices.TriggerUnixStandardSetup import commonServicesCfg
 import os
 import sys
 
-# In CA-mode we always dump and reload:
-PscConfig.reloadAfterDump = True
-
 log = logging.getLogger("athenaHLT")
 
 # Ensure we are really in CA-mode:
@@ -33,7 +29,7 @@ if __name__ == "__main__":
       print("Syntax: python %s module.cfgFnc" % os.path.basename(sys.argv[0]))
       sys.exit(1)
 
-   PscConfig.reloadAfterDump = False  # no execution in that case
+   PscConfig.exitAfterDump = True  # no execution for standalone testing
    PscConfig.optmap = {"MESSAGESVCTYPE"    : "TrigMessageSvc",
                        "JOBOPTIONSSVCTYPE" : "TrigConf::JobOptionSvc",
                        "JOBOPTIONSPATH"    : sys.argv[1],
@@ -88,6 +84,5 @@ if PscConfig.exitAfterDump:
    log.info("Configuration dumped to %s.json Exiting...", fname)
    sys.exit(0)
 
-if PscConfig.reloadAfterDump:
-   AthHLT.reload_from_json(f"{fname}.json",
-                           suppress_args = PscConfig.unparsedArguments)
+AthHLT.reload_from_json(f"{fname}.json",
+                        suppress_args = PscConfig.unparsedArguments)

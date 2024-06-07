@@ -13,9 +13,6 @@ interactive = False
 ## Exit after dumping job properties
 exitAfterDump = False
 
-## Load configuration from file and restart process
-reloadAfterDump = False
-
 ## Read PSK from database and ignore COOL
 forcePSK = False
 
