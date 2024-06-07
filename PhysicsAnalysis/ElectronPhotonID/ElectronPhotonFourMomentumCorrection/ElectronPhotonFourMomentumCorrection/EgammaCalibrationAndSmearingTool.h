@@ -2,7 +2,6 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-
 #ifndef EGAMMA_CALIB_TOOL_H_
 #define EGAMMA_CALIB_TOOL_H_
 
@@ -27,7 +26,6 @@
 #include "AsgServices/ServiceHandle.h"
 #include "AthContainers/ConstAccessor.h"
 
-
 #include "ElectronPhotonFourMomentumCorrection/egammaEnergyCorrectionTool.h"
 
 // Forward declarations
@@ -36,58 +34,58 @@ namespace egGain { class GainTool; }
 
 namespace xAOD {
   inline float get_phi_calo(const xAOD::CaloCluster& cluster, int author, bool do_throw=false)
-	{
-          static const SG::ConstAccessor<float> phiCaloAcc ("phiCalo");
-	  double phi_calo;
-	  if(author== xAOD::EgammaParameters::AuthorFwdElectron){
-	    phi_calo = cluster.phi();
-	  }
-	  else if (cluster.retrieveMoment(xAOD::CaloCluster::PHICALOFRAME, phi_calo)) { }
-	  else if (phiCaloAcc.isAvailable(cluster)) {
-	    phi_calo = phiCaloAcc(cluster);
-	  }
-	  else {
-			asg::AsgMessaging msg("get_phi_calo");
-			msg.msg(MSG::ERROR) << "phiCalo not available as auxilliary variable" << endmsg;
-	    if (do_throw) { throw std::runtime_error("phiCalo not available as auxilliary variable"); }
-			msg.msg(MSG::WARNING) << "using phi as phiCalo" << endmsg;
-	    phi_calo = cluster.phi();
-	  }
-	  return phi_calo;
-	}
+  {
+    static const SG::ConstAccessor<float> phiCaloAcc ("phiCalo");
+    double phi_calo;
+    if(author== xAOD::EgammaParameters::AuthorFwdElectron){
+      phi_calo = cluster.phi();
+    }
+    else if (cluster.retrieveMoment(xAOD::CaloCluster::PHICALOFRAME, phi_calo)) { }
+    else if (phiCaloAcc.isAvailable(cluster)) {
+      phi_calo = phiCaloAcc(cluster);
+    }
+    else {
+      asg::AsgMessaging msg("get_phi_calo");
+      msg.msg(MSG::ERROR) << "phiCalo not available as auxilliary variable" << endmsg;
+      if (do_throw) { throw std::runtime_error("phiCalo not available as auxilliary variable"); }
+      msg.msg(MSG::WARNING) << "using phi as phiCalo" << endmsg;
+      phi_calo = cluster.phi();
+    }
+    return phi_calo;
+  }
 
   inline float get_eta_calo(const xAOD::CaloCluster& cluster, int author, bool do_throw=false)
-	{
-	  double eta_calo;
-          static const SG::ConstAccessor<float> etaCaloAcc ("etaCalo");
-	  if(author== xAOD::EgammaParameters::AuthorFwdElectron){
-            eta_calo = cluster.eta();
-          }
-	  else if (cluster.retrieveMoment(xAOD::CaloCluster::ETACALOFRAME,
-				       eta_calo)) { }
-	  else if (etaCaloAcc.isAvailable(cluster)) {
-	    eta_calo = etaCaloAcc(cluster);
-	  }
-	  else {
-			asg::AsgMessaging msg("get_eta_calo");
-			msg.msg(MSG::ERROR) << "etaCalo not available as auxilliary variable" << endmsg;
-	    if (do_throw) { throw std::runtime_error("etaCalo not available as auxilliary variable"); }
-			msg.msg(MSG::WARNING) << "using eta as etaCalo" << endmsg;
-	  }
-	  return eta_calo;
-	}
+  {
+    double eta_calo;
+    static const SG::ConstAccessor<float> etaCaloAcc ("etaCalo");
+    if(author== xAOD::EgammaParameters::AuthorFwdElectron){
+      eta_calo = cluster.eta();
+    }
+    else if (cluster.retrieveMoment(xAOD::CaloCluster::ETACALOFRAME,
+				    eta_calo)) { }
+    else if (etaCaloAcc.isAvailable(cluster)) {
+      eta_calo = etaCaloAcc(cluster);
+    }
+    else {
+      asg::AsgMessaging msg("get_eta_calo");
+      msg.msg(MSG::ERROR) << "etaCalo not available as auxilliary variable" << endmsg;
+      if (do_throw) { throw std::runtime_error("etaCalo not available as auxilliary variable"); }
+      msg.msg(MSG::WARNING) << "using eta as etaCalo" << endmsg;
+    }
+    return eta_calo;
+  }
 }
 
 namespace CP {
 
   class EgammaCalibrationAndSmearingTool : virtual public IEgammaCalibrationAndSmearingTool, public asg::AsgMetadataTool {
   // Create a proper constructor for Athena
-  ASG_TOOL_CLASS3( EgammaCalibrationAndSmearingTool, IEgammaCalibrationAndSmearingTool, CP::ISystematicsTool, CP::IReentrantSystematicsTool)
+  ASG_TOOL_CLASS3(EgammaCalibrationAndSmearingTool, IEgammaCalibrationAndSmearingTool, CP::ISystematicsTool, CP::IReentrantSystematicsTool)
 
 public:
 
-	enum class ScaleDecorrelation {FULL, ONENP, FULL_ETA_CORRELATED, ONENP_PLUS_UNCONR};
-	enum class ResolutionDecorrelation {FULL, ONENP};
+  enum class ScaleDecorrelation {FULL, ONENP, FULL_ETA_CORRELATED, ONENP_PLUS_UNCONR};
+  enum class ResolutionDecorrelation {FULL, ONENP};
   static const int AUTO = 2;  // this is used as a third state for boolean properties (true/false/automatic)
   typedef unsigned int RandomNumber;
   typedef std::function<int(const EgammaCalibrationAndSmearingTool&, const xAOD::Egamma&, const xAOD::EventInfo&)> IdFunction;
@@ -113,19 +111,22 @@ public:
   //Which systematics have an effect on the tool's behaviour?
   virtual CP::SystematicSet affectingSystematics() const override;
   //Is the tool affected by a specific systematic?
-  virtual bool isAffectedBySystematic( const CP::SystematicVariation& systematic ) const override;
+  virtual bool isAffectedBySystematic(const CP::SystematicVariation& systematic) const override;
   //Systematics to be used for physics analysis
   virtual CP::SystematicSet recommendedSystematics() const override;
   //Use specific systematic
   virtual StatusCode applySystematicVariation(const CP::SystematicSet& systConfig) override;
   virtual void setRandomSeed(unsigned seed=0) override;
   virtual void setRandomSeedFunction(const IdFunction&& function) { m_set_seed_function = function; }
-	const IdFunction getRandomSeedFuction() const { return m_set_seed_function; }
+  const IdFunction getRandomSeedFuction() const { return m_set_seed_function; }
 
-  virtual double resolution( double energy, double cl_eta, double cl_etaCalo,
-                             PATCore::ParticleType::Type ptype = PATCore::ParticleType::Electron, bool withCT=false) const override;
+  virtual double resolution(double energy, double cl_eta, double cl_etaCalo,
+			    PATCore::ParticleType::Type ptype = PATCore::ParticleType::Electron,
+			    bool withCT=false) const override;
 
 private:
+
+  static const unsigned int m_Run2Run3runNumberTransition = 400000;
 
   std::string m_ESModel;
   std::string m_decorrelation_model_name;
@@ -162,7 +163,7 @@ private:
   Gaudi::Property<bool> m_fixForMissingCells {
     this,
       "FixForMissingCells",
-      false,
+      true,
       "AOD fix for cell recovery in core egamma cluster" };
 
   void setupSystematics();
@@ -180,42 +181,43 @@ private:
   };
 
   const EgammaPredicate AbsEtaCaloPredicateFactory(double eta_min, double eta_max) const
-	{
-		/*return [eta_min, eta_max](const xAOD::Egamma& p) {
-			const double aeta = std::abs(xAOD::get_eta_calo(*p.caloCluster()));
-			return (aeta >= eta_min and aeta < eta_max); };*/
-		return AbsEtaCaloPredicate(eta_min, eta_max);
-	}
+  {
+    /*return [eta_min, eta_max](const xAOD::Egamma& p) {
+      const double aeta = std::abs(xAOD::get_eta_calo(*p.caloCluster()));
+      return (aeta >= eta_min and aeta < eta_max); };*/
+    return AbsEtaCaloPredicate(eta_min, eta_max);
+  }
 
-	const EgammaPredicate AbsEtaCaloPredicateFactory(std::pair<double, double> edges) const
-	{
-		return AbsEtaCaloPredicateFactory(edges.first, edges.second);
-	}
+  const EgammaPredicate AbsEtaCaloPredicateFactory(std::pair<double, double> edges) const
+  {
+    return AbsEtaCaloPredicateFactory(edges.first, edges.second);
+  }
 
-	const std::vector<EgammaPredicate> AbsEtaCaloPredicatesFactory(const std::vector<std::pair<double, double>>& edges) const
-	{
-		std::vector<EgammaPredicate> result;
-		result.reserve(edges.size());
-		for (const auto& it : edges) {
-			result.push_back(AbsEtaCaloPredicateFactory(it.first, it.second));
-		}
-		return result;
-	}
+  const std::vector<EgammaPredicate> AbsEtaCaloPredicatesFactory(const std::vector<std::pair<double, double>>& edges) const
+  {
+    std::vector<EgammaPredicate> result;
+    result.reserve(edges.size());
+    for (const auto& it : edges) {
+      result.push_back(AbsEtaCaloPredicateFactory(it.first, it.second));
+    }
+    return result;
+  }
 
-	const std::vector<EgammaPredicate> AbsEtaCaloPredicatesFactory(const std::vector<double>& edges) const
-	{
-		std::vector<EgammaPredicate> result;
-		result.reserve(edges.size() - 1);
-		auto it2 = edges.begin();
-		auto it = it2++;
-		for(; it2 != edges.end(); ++it, ++it2)
-		{
-			result.push_back(AbsEtaCaloPredicateFactory(*it, *it2));
-		}
-		return result;
-	}
+  const std::vector<EgammaPredicate> AbsEtaCaloPredicatesFactory(const std::vector<double>& edges) const
+  {
+    std::vector<EgammaPredicate> result;
+    result.reserve(edges.size() - 1);
+    auto it2 = edges.begin();
+    auto it = it2++;
+    for(; it2 != edges.end(); ++it, ++it2)
+      {
+	result.push_back(AbsEtaCaloPredicateFactory(*it, *it2));
+      }
+    return result;
+  }
 
   PATCore::ParticleType::Type xAOD2ptype(const xAOD::Egamma& particle) const;
+
 public:
   virtual double getEnergy(xAOD::Egamma*, const xAOD::EventInfo*);
   virtual double getElectronMomentum(const xAOD::Electron*, const xAOD::EventInfo*);
@@ -246,7 +248,6 @@ private:
   std::map<CP::SystematicVariation, SysInfo> m_syst_description;
   std::map<CP::SystematicVariation, egEnergyCorr::Resolution::Variation> m_syst_description_resolution;
 
-
   //These are modified by the ISystematicsTool methods
   egEnergyCorr::Scale::Variation m_currentScaleVariation_MC;
   egEnergyCorr::Scale::Variation m_currentScaleVariation_data;
@@ -257,8 +258,10 @@ private:
 
   IdFunction m_set_seed_function;
 
-  inline egEnergyCorr::Scale::Variation oldtool_scale_flag_this_event(const xAOD::Egamma& p, const xAOD::EventInfo& event_info) const;
-  inline egEnergyCorr::Resolution::Variation oldtool_resolution_flag_this_event(const xAOD::Egamma& p, const xAOD::EventInfo& event_info) const;
+  inline egEnergyCorr::Scale::Variation
+    oldtool_scale_flag_this_event(const xAOD::Egamma& p, const xAOD::EventInfo& event_info) const;
+  inline egEnergyCorr::Resolution::Variation
+    oldtool_resolution_flag_this_event(const xAOD::Egamma& p, const xAOD::EventInfo& event_info) const;
 
 };
 

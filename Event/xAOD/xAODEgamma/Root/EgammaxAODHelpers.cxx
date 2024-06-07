@@ -172,3 +172,22 @@ float xAOD::EgammaHelpers::summaryValueFloat(const xAOD::TrackParticle& tp,
   float dummy(0);
   return (tp.summaryValue(dummy, info) ? dummy : deflt);
 }
+
+// ==================================================================
+unsigned short xAOD::EgammaHelpers::energyInMissingCells(const xAOD::Egamma& eg,
+                                                        double& e2, double& e3) {
+
+  const static SG::AuxElement::ConstAccessor<float> acc_Eadded_s2("Eadded_Lr2");
+  const static SG::AuxElement::ConstAccessor<float> acc_Eadded_s3("Eadded_Lr3");
+
+  unsigned short status = 0;
+  if (acc_Eadded_s2.isAvailable(eg))
+    { e2 = acc_Eadded_s2(eg); }
+  else
+    { status += 1; }
+  if (acc_Eadded_s3.isAvailable(eg))
+    { e3 = acc_Eadded_s3(eg); }
+  else
+    { status += 2; }
+  return status;
+}

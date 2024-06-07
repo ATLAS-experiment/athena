@@ -79,13 +79,18 @@ namespace xAOD {
     std::vector<const xAOD::TrackParticle*> getTrackParticlesVec(const xAOD::Egamma *eg,
 								       bool useBremAssoc = true, bool allParticles = true);
 
-
     ///@brief return the summary value for a TrackParticle or default value (-999)
     /// (to be used mostly in python where uint8_t is converted to char and the Tracking does not provide unprotected methods)
     int summaryValueInt(const xAOD::TrackParticle& tp, const xAOD::SummaryType& info, int deflt = -999);
 
     ///@brief return the summary value for a TrackParticle or default value (-999)
     float summaryValueFloat(const xAOD::TrackParticle& tp, const xAOD::SummaryType& info, float deflt = -999.);
+
+    ///@brief Get the energies in sampling 2 and 3 that are in cells
+    /// rejected by the topo-cluster timing cut
+    /// but that would have been expected in a egamma cluster
+    unsigned short energyInMissingCells(const xAOD::Egamma& eg,
+					double& e2, double& e3);
 
   }// EgammaHelpers
 
