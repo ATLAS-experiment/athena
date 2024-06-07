@@ -3,6 +3,7 @@
 
 import json
 from ActsConfig.ActsEventCnvConfig import RunTrackConversion
+from MuonGeoModelTestR4.testGeoModel import geoModelFileDefault
 import math
 
 if "__main__" == __name__:
@@ -15,7 +16,7 @@ if "__main__" == __name__:
     
     flags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ActsEventCnv/q447_ESD.pool.root']
     flags.GeoModel.SQLiteDB = True
-    CommonGeoDB.SetupLocalSqliteGeometryDb("/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/ATLAS-R3-MUONTEST_v2.db", flags.GeoModel.AtlasVersion)
+    CommonGeoDB.SetupLocalSqliteGeometryDb(geoModelFileDefault(), flags.GeoModel.AtlasVersion)
 
     flags.IOVDb.GlobalTag = "OFLCOND-MC21-SDR-RUN4-01"
 
@@ -72,8 +73,11 @@ if "__main__" == __name__:
     import json
     success = False
     with open('dump.json') as f:
-        print('--- Opening dump.json')
-        print(f)
+        print('--- Dumping dump.json')
+        print(f.read())
+
+    with open('dump.json') as f:
+
         print('--- Processing dump.json')
         data = json.load(f)
         for event in data:
