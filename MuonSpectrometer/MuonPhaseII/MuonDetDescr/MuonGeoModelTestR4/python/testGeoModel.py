@@ -2,6 +2,11 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
+def geoModelFileDefault():
+    # If this is changed, remember to also test with other dependent tests 
+    # e.g. run ctest with ActsEventCnv
+    return "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/ATLAS-R3-MUONTEST_v2.db"
+
 def SetupArgParser():
     from argparse import ArgumentParser
 
@@ -13,7 +18,7 @@ def SetupArgParser():
                                                                          choices= ["OFLCOND-MC23-SDR-RUN3-02"])
     parser.add_argument("--inputFile", "-i", default=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/EVGEN_ParticleGun_FourMuon_Pt10to500.root"], 
                         help="Input file to run on ", nargs="+")
-    parser.add_argument("--geoModelFile", default ="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/ATLAS-R3-MUONTEST_v2.db", help="GeoModel SqLite file containing the muon geometry.")
+    parser.add_argument("--geoModelFile", default = geoModelFileDefault(), help="GeoModel SqLite file containing the muon geometry.")
     parser.add_argument("--chambers", default=["all"], nargs="+", help="Chambers to check. If string is all, all chambers will be checked")
     parser.add_argument("--outRootFile", default="NewGeoModelDump.root", help="Output ROOT file to dump the geomerty")
     parser.add_argument("--nEvents", help="Number of events to rum", type = int ,default = 1)
