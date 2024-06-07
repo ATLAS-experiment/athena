@@ -105,19 +105,6 @@ StatusCode DerivationFramework::GenericTruthThinning::doThinning() const
     partMask.assign(nParticles,false); // default: don't keep any truth items
     vertMask.assign(nVertices,false);
     m_ntotvtx += nVertices; m_ntotpart += nParticles;
-   
-    // Locate the signal process vertices and save them
-    // Do we need to do this for pile-up as well??
-    std::vector<const xAOD::TruthVertex*> signalProcessVertices;
-    for (const xAOD::TruthEvent* evt : *importedTruthEvents) {
-        const xAOD::TruthVertex* vtx = evt->signalProcessVertex();
-        signalProcessVertices.push_back(vtx);
-    }
-    for (unsigned int vertexCounter = 0; vertexCounter < nVertices; ++vertexCounter) {
-        for (const xAOD::TruthVertex* spVertex : signalProcessVertices) {
-                if ( (*importedTruthVertices)[vertexCounter] == spVertex) vertMask[vertexCounter]=true;
-        }          
-    } 
  
     // Execute the text parsers and update the mask
     if (!m_partString.empty()) {

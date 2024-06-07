@@ -219,19 +219,6 @@ StatusCode DerivationFramework::MenuTruthThinning::doThinning() const
     particleMask.assign(nTruthParticles,true); // default: keep all particles
     vertexMask.assign(nTruthVertices,false); // throw all vertices: to be discussed
     
-    // Locate the signal process vertices and save them
-    // Do we need to do this for pile-up as well??
-    std::vector<const xAOD::TruthVertex*> signalProcessVertices;
-    for (const xAOD::TruthEvent* evt : *importedTruthEvents) {
-        const xAOD::TruthVertex* vtx = evt->signalProcessVertex();
-        signalProcessVertices.push_back(vtx);
-    }
-    for (int vertexCounter = 0; vertexCounter < nTruthVertices; ++vertexCounter) {
-        for (const xAOD::TruthVertex* spVertex : signalProcessVertices) {
-            if ( (*importedTruthVertices)[vertexCounter] == spVertex) vertexMask[vertexCounter]=true;
-        }
-    }
-    
     // Standard particle loop
     for (int particleCounter = 0; particleCounter < nTruthParticles; ++particleCounter) {
         const xAOD::TruthParticle* particle = (*importedTruthParticles)[particleCounter];
