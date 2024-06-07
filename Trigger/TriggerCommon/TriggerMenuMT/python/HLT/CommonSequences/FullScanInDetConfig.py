@@ -33,11 +33,32 @@ def commonInDetFullScanCfg(flags: AthConfigFlags) -> ComponentAccumulator:
         seqname
     )
 
+    vxkwargs = {
+        "inputTracks": flagsWithTrk.Tracking.ActiveConfig.tracks_FTF,
+        "outputVtx": flagsWithTrk.Tracking.ActiveConfig.vertex_jet,
+    }
+    if flags.Trigger.FSTrk.doJetRestrictedVertexSort:
+        from TrkConfig.TrkVertexToolsConfig import JetRestrictedSumPt2VertexCollectionSortingToolCfg
+        from TrkConfig.TrkVertexWeightCalculatorsConfig import JetRestrictedSumPtVertexWeightCalculatorCfg
+        jetcalccfg = JetRestrictedSumPtVertexWeightCalculatorCfg(
+            flags,
+            JetContainer='HLT_AntiKt4EMTopoJets_subjesIS',
+            TrackParticleLocation=flagsWithTrk.Tracking.ActiveConfig.tracks_FTF,
+        )
+        jetcalc = jetcalccfg.popPrivateTools()
+        acc.merge(jetcalccfg)
+        vxsortcfg = JetRestrictedSumPt2VertexCollectionSortingToolCfg(
+            flags,
+            VertexWeightCalculator=jetcalc
+        )
+        vxsort = vxsortcfg.popPrivateTools()
+        acc.merge(vxsortcfg)
+        vxkwargs["VertexCollectionSortingTool"] = vxsort
+
     acc.merge(
         InDetTrigPriVxFinderCfg(
             flagsWithTrk,
-            inputTracks = flagsWithTrk.Tracking.ActiveConfig.tracks_FTF,
-            outputVtx = flagsWithTrk.Tracking.ActiveConfig.vertex_jet,
+            **vxkwargs,
         ),
         seqname
     )

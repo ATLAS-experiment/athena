@@ -12,6 +12,7 @@ _h_menu = "name of the menu to dump (default Physics_pp_run3_v1)"
 _h_l1check = "do check of L1 items vs L1 menu"
 _h_stream = "filter by stream"
 _h_dump_dicts = "dump dicts to json"
+_h_check_CPS = "verify that Support chains are in CPS"
 
 import sys
 from AthenaCommon.Logging import logging
@@ -45,6 +46,8 @@ def get_parser(flags):
                         help=_h_parse)
     parser.add_argument('-L', '--check-l1', action='store_true',
                         help=_h_l1check)
+    parser.add_argument('-C', '--check-CPS', action='store_true',
+                        help=_h_check_CPS)
     parser.add_argument('-s', '--stream', const='Main', nargs='?',
                         help=_h_stream)
     parser.add_argument('-D', '--dump-dicts', action='store_true',
@@ -76,7 +79,7 @@ def run():
     menu_name = MENU_ALIASES.get(args.menu, args.menu)
 
     # Can't do these without parsing
-    if args.check_l1 or args.dump_dicts:
+    if args.check_l1 or args.check_CPS or args.dump_dicts:
         args.parse_names = True
 
     flags.Trigger.triggerConfig='FILE'
@@ -132,6 +135,40 @@ def run():
                         break
             if missingl1:
                 sys.exit(1)
+
+        if args.check_CPS:
+            # Need to regenerate this because we already iterated through
+            chains = chain_iter(menu, filt)
+            def match_group(expr,chain):
+                for group in chain.groups:
+                    if expr in group:
+                        return True
+                return False
+
+            cps_to_chains = {}
+            support_L1_counts = {}
+
+            for chain in chains:
+                chain_dict = chain_to_dict[chain.name]
+                if (
+                    not chain_dict['L1item'] # Exception for L1All
+                    or not match_group('Support',chain)
+                ):
+                    continue
+                
+                # Increment the number of support chains seeded by this L1
+                if chain_dict['L1item'] not in support_L1_counts:
+                    support_L1_counts[chain_dict['L1item']] = []
+                support_L1_counts[chain_dict['L1item']] += 1
+
+                cps_item = None
+                for group in chain.groups:
+                    if group.startswith('CPS:'):
+                        cps_item = group[4:]
+                if cps_item not in cps_to_chains:
+                    cps_to_chains[cps_item] = []
+                cps_to_chains[cps_item] = chain.name
+
         if args.dump_dicts:
             dump_chain_dicts(chain_to_dict,args.menu)
 
