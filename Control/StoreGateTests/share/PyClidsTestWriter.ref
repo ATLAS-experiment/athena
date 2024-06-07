@@ -1,25 +1,24 @@
-Py:Athena            INFO executing ROOT6Setup
+Py:OutputStreamCfg    INFO No file name predefined for stream Stl. Using myStl.pool.root
 ApplicationMgr       INFO Application Manager Configured successfully
-AthDictLoaderSvc     INFO in initialize...
-AthDictLoaderSvc     INFO acquired Dso-registry
-AthenaEventLoopMgr   INFO Initializing AthenaEventLoopMgr
-PyComponentMgr       INFO Initializing PyComponentMgr...
-PyClidsTestWriter    INFO Initializing PyClidsTestWriter...
+AthenaEventLoopMgr                                   INFO Initializing AthenaEventLoopMgr
+PyComponentMgr                                       INFO Initializing PyComponentMgr...
+PyClidsTestWriter                                    INFO Initializing PyClidsTestWriter...
 Py:PyClidsTestWriter    INFO initializing...
-MetaDataSvc          INFO Initializing MetaDataSvc
 Py:PyClidsTestWriter    INFO Configuration:
 Py:PyClidsTestWriter    INFO  - ints:    [TestInts]
 Py:PyClidsTestWriter    INFO  - uints:   [TestUInts]
 Py:PyClidsTestWriter    INFO  - floats:  [TestFloats]
 Py:PyClidsTestWriter    INFO  - doubles: [TestDoubles]
-DecisionSvc          INFO Inserting stream: stream_stl with no Algs
-stream_stl.Athe...   INFO Initializing stream_stl.AthenaOutputStreamTool
-stream_stl           INFO Data output: out_stl_containers.pool
-stream_stl           INFO ../O reinitialization...
-ApplicationMgr       INFO Application Manager Initialized successfully
-ApplicationMgr       INFO Application Manager Started successfully
-AthenaEventLoopMgr   INFO   ===>>>  start of run 1    <<<===
-AthenaEventLoopMgr   INFO   ===>>>  start processing event #1, run #1 0 events processed so far  <<<===
+DecisionSvc                                          INFO Inserting stream: StreamStl with no Algs
+AthDictLoaderSvc                                     INFO in initialize...
+AthDictLoaderSvc                                     INFO acquired Dso-registry
+StreamStl.StreamStlTool                              INFO Initializing StreamStl.StreamStlTool
+StreamStl                                            INFO Data output: myStl.pool.root
+StreamStl                                            INFO ../O reinitialization...
+ApplicationMgr                                       INFO Application Manager Initialized successfully
+ApplicationMgr                                       INFO Application Manager Started successfully
+AthenaEventLoopMgr                                   INFO   ===>>>  start of run 1    <<<===
+AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #1, run #1 0 events processed so far  <<<===
 <<<<<<<<<<<<<<<<< Data Store Dump >>>>>>>>>>>>>>> 
 StoreGateSvc(StoreGateSvc)::dump():
 Found 1 proxy for ClassID 2101 (EventInfo): 
@@ -34,40 +33,23 @@ Py:PyClidsTestWriter    INFO [TestInts] content: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 Py:PyClidsTestWriter    INFO [TestUInts] content: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 Py:PyClidsTestWriter    INFO [TestFloats] content: [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
 Py:PyClidsTestWriter    INFO [TestDoubles] content: [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
-StorageSvc           INFO Building shape according to reflection information using shape ID for:
-StorageSvc           INFO EventInfo_p4 [C634FDB6-CC4B-4BA2-B8F9-A84BE6A786C7]
-StorageSvc           INFO Building shape according to reflection information using shape ID for:
-StorageSvc           INFO vector<int> [BB17783A-34CE-ED5D-F610-99DD35AC5E66]
-StorageSvc           INFO Building shape according to reflection information using shape ID for:
-StorageSvc           INFO vector<unsigned int> [AE69E9E7-BF52-0715-106E-BF6DC60AFB68]
-StorageSvc           INFO Building shape according to reflection information using shape ID for:
-StorageSvc           INFO vector<float> [E6E7FE2A-D1E5-BD9D-782C-4DEC22AD899D]
-StorageSvc           INFO Building shape according to reflection information using shape ID for:
-StorageSvc           INFO vector<double> [FF3DDE58-517D-F905-80B7-5D463011C6B2]
-StorageSvc           INFO Building shape according to reflection information using shape ID for:
-StorageSvc           INFO DataHeader_p6 [4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D]
-StorageSvc           INFO Building shape according to reflection information using shape ID for:
-StorageSvc           INFO DataHeaderForm_p6 [7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD]
-AthenaEventLoopMgr   INFO   ===>>>  done processing event #1, run #1 1 events processed so far  <<<===
-AthenaEventLoopMgr   INFO   ===>>>  start processing event #2, run #1 1 events processed so far  <<<===
-<<<<<<<<<<<<<<<<< Data Store Dump >>>>>>>>>>>>>>> 
-StoreGateSvc(StoreGateSvc)::dump():
-Found 1 proxy for ClassID 2101 (EventInfo): 
-Found 1 proxy for ClassID 22592129 (std::vector<int>): 
-Found 1 proxy for ClassID 55596997 (EventContext): 
-Found 1 proxy for ClassID 177480351 (std::vector<unsigned int>): 
-Found 1 proxy for ClassID 202242136 (std::vector<float>): 
-Found 1 proxy for ClassID 219400222 (std::vector<double>): 
-Found 1 proxy for ClassID 222376821 (DataHeader): 
- flags: (INVALID,   locked,  reset) --- data:          0 --- key: stream_stl
-<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>> 
-
-Py:PyClidsTestWriter    INFO [TestInts] content: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-Py:PyClidsTestWriter    INFO [TestUInts] content: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-Py:PyClidsTestWriter    INFO [TestFloats] content: [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
-Py:PyClidsTestWriter    INFO [TestDoubles] content: [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
-AthenaEventLoopMgr   INFO   ===>>>  done processing event #2, run #1 2 events processed so far  <<<===
-AthenaEventLoopMgr   INFO   ===>>>  start processing event #3, run #1 2 events processed so far  <<<===
+MetaDataSvc                                          INFO Initializing MetaDataSvc
+StorageSvc                                           INFO Building shape according to reflection information using shape ID for:
+StorageSvc                                           INFO EventInfo_p4 [C634FDB6-CC4B-4BA2-B8F9-A84BE6A786C7]
+StorageSvc                                           INFO Building shape according to reflection information using shape ID for:
+StorageSvc                                           INFO vector<int> [BB17783A-34CE-ED5D-F610-99DD35AC5E66]
+StorageSvc                                           INFO Building shape according to reflection information using shape ID for:
+StorageSvc                                           INFO vector<unsigned int> [AE69E9E7-BF52-0715-106E-BF6DC60AFB68]
+StorageSvc                                           INFO Building shape according to reflection information using shape ID for:
+StorageSvc                                           INFO vector<float> [E6E7FE2A-D1E5-BD9D-782C-4DEC22AD899D]
+StorageSvc                                           INFO Building shape according to reflection information using shape ID for:
+StorageSvc                                           INFO vector<double> [FF3DDE58-517D-F905-80B7-5D463011C6B2]
+StorageSvc                                           INFO Building shape according to reflection information using shape ID for:
+StorageSvc                                           INFO DataHeader_p6 [4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D]
+StorageSvc                                           INFO Building shape according to reflection information using shape ID for:
+StorageSvc                                           INFO DataHeaderForm_p6 [7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD]
+AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #1, run #1 1 events processed so far  <<<===
+AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #2, run #1 1 events processed so far  <<<===
 <<<<<<<<<<<<<<<<< Data Store Dump >>>>>>>>>>>>>>> 
 StoreGateSvc(StoreGateSvc)::dump():
 Found 1 proxy for ClassID 2101 (EventInfo): 
@@ -77,15 +59,15 @@ Found 1 proxy for ClassID 177480351 (std::vector<unsigned int>):
 Found 1 proxy for ClassID 202242136 (std::vector<float>): 
 Found 1 proxy for ClassID 219400222 (std::vector<double>): 
 Found 1 proxy for ClassID 222376821 (DataHeader): 
- flags: (INVALID,   locked,  reset) --- data:          0 --- key: stream_stl
+ flags: (INVALID,   locked,  reset) --- data:          0 --- key: StreamStl
 <<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>> 
 
 Py:PyClidsTestWriter    INFO [TestInts] content: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 Py:PyClidsTestWriter    INFO [TestUInts] content: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 Py:PyClidsTestWriter    INFO [TestFloats] content: [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
 Py:PyClidsTestWriter    INFO [TestDoubles] content: [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
-AthenaEventLoopMgr   INFO   ===>>>  done processing event #3, run #1 3 events processed so far  <<<===
-AthenaEventLoopMgr   INFO   ===>>>  start processing event #4, run #1 3 events processed so far  <<<===
+AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #2, run #1 2 events processed so far  <<<===
+AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #3, run #1 2 events processed so far  <<<===
 <<<<<<<<<<<<<<<<< Data Store Dump >>>>>>>>>>>>>>> 
 StoreGateSvc(StoreGateSvc)::dump():
 Found 1 proxy for ClassID 2101 (EventInfo): 
@@ -95,15 +77,15 @@ Found 1 proxy for ClassID 177480351 (std::vector<unsigned int>):
 Found 1 proxy for ClassID 202242136 (std::vector<float>): 
 Found 1 proxy for ClassID 219400222 (std::vector<double>): 
 Found 1 proxy for ClassID 222376821 (DataHeader): 
- flags: (INVALID,   locked,  reset) --- data:          0 --- key: stream_stl
+ flags: (INVALID,   locked,  reset) --- data:          0 --- key: StreamStl
 <<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>> 
 
 Py:PyClidsTestWriter    INFO [TestInts] content: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 Py:PyClidsTestWriter    INFO [TestUInts] content: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 Py:PyClidsTestWriter    INFO [TestFloats] content: [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
 Py:PyClidsTestWriter    INFO [TestDoubles] content: [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
-AthenaEventLoopMgr   INFO   ===>>>  done processing event #4, run #1 4 events processed so far  <<<===
-AthenaEventLoopMgr   INFO   ===>>>  start processing event #5, run #1 4 events processed so far  <<<===
+AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #3, run #1 3 events processed so far  <<<===
+AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #4, run #1 3 events processed so far  <<<===
 <<<<<<<<<<<<<<<<< Data Store Dump >>>>>>>>>>>>>>> 
 StoreGateSvc(StoreGateSvc)::dump():
 Found 1 proxy for ClassID 2101 (EventInfo): 
@@ -113,15 +95,15 @@ Found 1 proxy for ClassID 177480351 (std::vector<unsigned int>):
 Found 1 proxy for ClassID 202242136 (std::vector<float>): 
 Found 1 proxy for ClassID 219400222 (std::vector<double>): 
 Found 1 proxy for ClassID 222376821 (DataHeader): 
- flags: (INVALID,   locked,  reset) --- data:          0 --- key: stream_stl
+ flags: (INVALID,   locked,  reset) --- data:          0 --- key: StreamStl
 <<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>> 
 
 Py:PyClidsTestWriter    INFO [TestInts] content: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 Py:PyClidsTestWriter    INFO [TestUInts] content: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 Py:PyClidsTestWriter    INFO [TestFloats] content: [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
 Py:PyClidsTestWriter    INFO [TestDoubles] content: [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
-AthenaEventLoopMgr   INFO   ===>>>  done processing event #5, run #1 5 events processed so far  <<<===
-AthenaEventLoopMgr   INFO   ===>>>  start processing event #6, run #1 5 events processed so far  <<<===
+AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4, run #1 4 events processed so far  <<<===
+AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #5, run #1 4 events processed so far  <<<===
 <<<<<<<<<<<<<<<<< Data Store Dump >>>>>>>>>>>>>>> 
 StoreGateSvc(StoreGateSvc)::dump():
 Found 1 proxy for ClassID 2101 (EventInfo): 
@@ -131,15 +113,15 @@ Found 1 proxy for ClassID 177480351 (std::vector<unsigned int>):
 Found 1 proxy for ClassID 202242136 (std::vector<float>): 
 Found 1 proxy for ClassID 219400222 (std::vector<double>): 
 Found 1 proxy for ClassID 222376821 (DataHeader): 
- flags: (INVALID,   locked,  reset) --- data:          0 --- key: stream_stl
+ flags: (INVALID,   locked,  reset) --- data:          0 --- key: StreamStl
 <<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>> 
 
 Py:PyClidsTestWriter    INFO [TestInts] content: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 Py:PyClidsTestWriter    INFO [TestUInts] content: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 Py:PyClidsTestWriter    INFO [TestFloats] content: [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
 Py:PyClidsTestWriter    INFO [TestDoubles] content: [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
-AthenaEventLoopMgr   INFO   ===>>>  done processing event #6, run #1 6 events processed so far  <<<===
-AthenaEventLoopMgr   INFO   ===>>>  start processing event #7, run #1 6 events processed so far  <<<===
+AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #5, run #1 5 events processed so far  <<<===
+AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #6, run #1 5 events processed so far  <<<===
 <<<<<<<<<<<<<<<<< Data Store Dump >>>>>>>>>>>>>>> 
 StoreGateSvc(StoreGateSvc)::dump():
 Found 1 proxy for ClassID 2101 (EventInfo): 
@@ -149,15 +131,15 @@ Found 1 proxy for ClassID 177480351 (std::vector<unsigned int>):
 Found 1 proxy for ClassID 202242136 (std::vector<float>): 
 Found 1 proxy for ClassID 219400222 (std::vector<double>): 
 Found 1 proxy for ClassID 222376821 (DataHeader): 
- flags: (INVALID,   locked,  reset) --- data:          0 --- key: stream_stl
+ flags: (INVALID,   locked,  reset) --- data:          0 --- key: StreamStl
 <<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>> 
 
 Py:PyClidsTestWriter    INFO [TestInts] content: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 Py:PyClidsTestWriter    INFO [TestUInts] content: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 Py:PyClidsTestWriter    INFO [TestFloats] content: [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
 Py:PyClidsTestWriter    INFO [TestDoubles] content: [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
-AthenaEventLoopMgr   INFO   ===>>>  done processing event #7, run #1 7 events processed so far  <<<===
-AthenaEventLoopMgr   INFO   ===>>>  start processing event #8, run #1 7 events processed so far  <<<===
+AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #6, run #1 6 events processed so far  <<<===
+AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #7, run #1 6 events processed so far  <<<===
 <<<<<<<<<<<<<<<<< Data Store Dump >>>>>>>>>>>>>>> 
 StoreGateSvc(StoreGateSvc)::dump():
 Found 1 proxy for ClassID 2101 (EventInfo): 
@@ -167,15 +149,15 @@ Found 1 proxy for ClassID 177480351 (std::vector<unsigned int>):
 Found 1 proxy for ClassID 202242136 (std::vector<float>): 
 Found 1 proxy for ClassID 219400222 (std::vector<double>): 
 Found 1 proxy for ClassID 222376821 (DataHeader): 
- flags: (INVALID,   locked,  reset) --- data:          0 --- key: stream_stl
+ flags: (INVALID,   locked,  reset) --- data:          0 --- key: StreamStl
 <<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>> 
 
 Py:PyClidsTestWriter    INFO [TestInts] content: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 Py:PyClidsTestWriter    INFO [TestUInts] content: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 Py:PyClidsTestWriter    INFO [TestFloats] content: [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
 Py:PyClidsTestWriter    INFO [TestDoubles] content: [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
-AthenaEventLoopMgr   INFO   ===>>>  done processing event #8, run #1 8 events processed so far  <<<===
-AthenaEventLoopMgr   INFO   ===>>>  start processing event #9, run #1 8 events processed so far  <<<===
+AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #7, run #1 7 events processed so far  <<<===
+AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #8, run #1 7 events processed so far  <<<===
 <<<<<<<<<<<<<<<<< Data Store Dump >>>>>>>>>>>>>>> 
 StoreGateSvc(StoreGateSvc)::dump():
 Found 1 proxy for ClassID 2101 (EventInfo): 
@@ -185,15 +167,15 @@ Found 1 proxy for ClassID 177480351 (std::vector<unsigned int>):
 Found 1 proxy for ClassID 202242136 (std::vector<float>): 
 Found 1 proxy for ClassID 219400222 (std::vector<double>): 
 Found 1 proxy for ClassID 222376821 (DataHeader): 
- flags: (INVALID,   locked,  reset) --- data:          0 --- key: stream_stl
+ flags: (INVALID,   locked,  reset) --- data:          0 --- key: StreamStl
 <<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>> 
 
 Py:PyClidsTestWriter    INFO [TestInts] content: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 Py:PyClidsTestWriter    INFO [TestUInts] content: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 Py:PyClidsTestWriter    INFO [TestFloats] content: [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
 Py:PyClidsTestWriter    INFO [TestDoubles] content: [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
-AthenaEventLoopMgr   INFO   ===>>>  done processing event #9, run #1 9 events processed so far  <<<===
-AthenaEventLoopMgr   INFO   ===>>>  start processing event #10, run #1 9 events processed so far  <<<===
+AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #8, run #1 8 events processed so far  <<<===
+AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #9, run #1 8 events processed so far  <<<===
 <<<<<<<<<<<<<<<<< Data Store Dump >>>>>>>>>>>>>>> 
 StoreGateSvc(StoreGateSvc)::dump():
 Found 1 proxy for ClassID 2101 (EventInfo): 
@@ -203,22 +185,36 @@ Found 1 proxy for ClassID 177480351 (std::vector<unsigned int>):
 Found 1 proxy for ClassID 202242136 (std::vector<float>): 
 Found 1 proxy for ClassID 219400222 (std::vector<double>): 
 Found 1 proxy for ClassID 222376821 (DataHeader): 
- flags: (INVALID,   locked,  reset) --- data:          0 --- key: stream_stl
+ flags: (INVALID,   locked,  reset) --- data:          0 --- key: StreamStl
 <<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>> 
 
 Py:PyClidsTestWriter    INFO [TestInts] content: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 Py:PyClidsTestWriter    INFO [TestUInts] content: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 Py:PyClidsTestWriter    INFO [TestFloats] content: [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
 Py:PyClidsTestWriter    INFO [TestDoubles] content: [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
-AthenaEventLoopMgr   INFO   ===>>>  done processing event #10, run #1 10 events processed so far  <<<===
-ApplicationMgr       INFO Application Manager Stopped successfully
-AthDictLoaderSvc     INFO in finalize...
-ToolSvc              INFO Removing all tools created by ToolSvc
-*****Chrono*****     INFO ****************************************************************************************************
-*****Chrono*****     INFO  The Final CPU consumption ( Chrono ) Table (ordered)
-*****Chrono*****     INFO ****************************************************************************************************
-*****Chrono*****     INFO ****************************************************************************************************
-ChronoStatSvc.f...   INFO  Service finalized successfully 
-ApplicationMgr       INFO Application Manager Finalized successfully
-ApplicationMgr       INFO Application Manager Terminated successfully
-Py:Athena            INFO leaving with code 0: "successful run"
+AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #9, run #1 9 events processed so far  <<<===
+AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #10, run #1 9 events processed so far  <<<===
+<<<<<<<<<<<<<<<<< Data Store Dump >>>>>>>>>>>>>>> 
+StoreGateSvc(StoreGateSvc)::dump():
+Found 1 proxy for ClassID 2101 (EventInfo): 
+Found 1 proxy for ClassID 22592129 (std::vector<int>): 
+Found 1 proxy for ClassID 55596997 (EventContext): 
+Found 1 proxy for ClassID 177480351 (std::vector<unsigned int>): 
+Found 1 proxy for ClassID 202242136 (std::vector<float>): 
+Found 1 proxy for ClassID 219400222 (std::vector<double>): 
+Found 1 proxy for ClassID 222376821 (DataHeader): 
+ flags: (INVALID,   locked,  reset) --- data:          0 --- key: StreamStl
+<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>> 
+
+Py:PyClidsTestWriter    INFO [TestInts] content: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Py:PyClidsTestWriter    INFO [TestUInts] content: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Py:PyClidsTestWriter    INFO [TestFloats] content: [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
+Py:PyClidsTestWriter    INFO [TestDoubles] content: [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
+AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #10, run #1 10 events processed so far  <<<===
+StreamStl                                            INFO Metadata records written: 11
+ApplicationMgr                                       INFO Application Manager Stopped successfully
+AthDictLoaderSvc                                     INFO in finalize...
+ToolSvc                                              INFO Removing all tools created by ToolSvc
+ApplicationMgr                                       INFO Application Manager Finalized successfully
+ApplicationMgr                                       INFO Application Manager Terminated successfully
+leaving with code 0: "successful run"
