@@ -295,6 +295,9 @@ atlas_add_citest( ACTS_ActsGSFInEgamma
 
 atlas_add_citest( ACTS_ActsPersistifySeeds
    SCRIPT ActsPersistifySeeds.sh )
+
+atlas_add_citest( ACTS_ActsDumpGeometryIdentifiers
+   SCRIPT ActsDumpGeometryIdentifiers.sh )
  
 atlas_add_citest( ACTS_ActsBenchmarkWithSpot
    SCRIPT ActsBenchmarkWithSpot.sh 8 100

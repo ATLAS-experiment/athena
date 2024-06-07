@@ -218,6 +218,16 @@ def ActsWriteTrackingGeometryCfg(flags,
     acc.addEventAlgo(CompFactory.ActsWriteTrackingGeometry(name, **kwargs))
     return acc
 
+def ActsWriteTrackingGeometryTransformsAlgCfg(flags,
+                                              name: str = "ActsWriteTrackingGeometryTransformsAlg",
+                                              **kwargs: dict) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+
+    if 'TrackingGeometryTool' not in kwargs:
+      kwargs.setdefault("TrackingGeometryTool", acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags))) # PrivateToolHandle
+
+    acc.addEventAlgo(CompFactory.ActsWriteTrackingGeometryTransforms(name,**kwargs))
+    return acc
 
 def ActsMaterialMappingCfg(flags,
                            name: str = "ActsMaterialMapping",
