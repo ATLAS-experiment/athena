@@ -7,7 +7,7 @@
  * @file SCT_Cabling/test/SCT_OnlineId_test.cxx
  * @author Shaun Roe
  * @date May 2020
- * @brief Some tests for TrkExToolsStringUtility 
+ * @brief Some tests for SCT_OnlineId class 
  */
  
 
