@@ -30,8 +30,7 @@ namespace xAOD {
         std::vector<TrackStateIndexType> calibrated;
         std::vector<TrackStateIndexType> measDim;
         std::vector< uint64_t > geometryId;
-        std::vector< ElementLink<xAOD::TrackSurfaceContainer> > surfaceLink;
-
+        std::vector<unsigned int> surfaceIndex;
     };
 }
 

@@ -112,11 +112,14 @@ MutableTrackContainerHandlesHelper::moveToConst(
       DataLink<xAOD::TrackStateAuxContainer>(m_statesKey.key() + "Aux.",
                                              evtContext),
       DataLink<xAOD::TrackParametersAuxContainer>(
-          m_parametersKey.key() + "Aux.", evtContext),
-      DataLink<xAOD::TrackJacobianAuxContainer>(m_jacobiansKey.key() + "Aux.",
-                                                evtContext),
+        m_parametersKey.key() + "Aux.", evtContext),
+      DataLink<xAOD::TrackJacobianAuxContainer>(
+        m_jacobiansKey.key() + "Aux.", evtContext),
       DataLink<xAOD::TrackMeasurementAuxContainer>(
-          m_measurementsKey.key() + "Aux.", evtContext));
+        m_measurementsKey.key() + "Aux.", evtContext), 
+      DataLink<xAOD::TrackSurfaceAuxContainer>(
+        m_surfacesKey.key() + "Aux.", evtContext)
+      );
   cmtj->moveSurfaces(&mmtj);
   cmtj->moveLinks(&mmtj);
 
@@ -138,14 +141,13 @@ MutableTrackContainerHandlesHelper::moveToConst(
         "ConstMultiTrajectory");
   }
 
+  auto trackSurfacesAux = std::make_unique<xAOD::TrackSurfaceAuxContainer>();
+  tc.container().encodeSurfaces(trackSurfacesAux.get(), geoContext);
+
   auto interfaceTrackSummaryContainer =
       ActsTrk::makeInterfaceContainer<xAOD::TrackSummaryContainer>(
           tc.container().m_mutableTrackBackendAux.get());
   recordxAOD(m_xAODTrackSummaryKey, interfaceTrackSummaryContainer, tc.container().m_mutableTrackBackendAux, evtContext);
-
-  auto trackSurfacesAux = std::make_unique<xAOD::TrackSurfaceAuxContainer>();
-  // TODO consider passing in GeoContext to this function  
-  tc.container().encodeSurfaces(trackSurfacesAux.get(), geoContext);
 
   auto trackSurfaces = ActsTrk::makeInterfaceContainer<xAOD::TrackSurfaceContainer>(
                         trackSurfacesAux.get());
@@ -237,8 +239,16 @@ ConstTrackContainerHandlesHelper::buildMtj(const Acts::TrackingGeometry* geo,
         "ConstMultiTrajectoryHandle::build, MeasurementsLink is invalid");
   }
 
+  DataLink<xAOD::TrackSurfaceAuxContainer> surfacesLink(
+      m_surfacesKey.key() + "Aux.", evtContext);
+  if (not surfacesLink.isValid()) {
+    throw std::runtime_error(
+        "ConstMultiTrajectoryHandle::build, SurfacesLink is invalid");
+  }
+
+
   auto cmtj = std::make_unique<ActsTrk::MultiTrajectory>(
-      statesLink, parametersLink, jacobiansLink, measurementsLink);
+      statesLink, parametersLink, jacobiansLink, measurementsLink, surfacesLink);
   cmtj->fillSurfaces(geo, geoContext);
   return cmtj;
 }

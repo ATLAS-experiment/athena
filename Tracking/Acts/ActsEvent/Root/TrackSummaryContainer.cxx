@@ -2,6 +2,8 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include "ActsEvent/TrackSummaryContainer.h"
+#include <Acts/EventData/Types.hpp>
+#include <stdexcept>
 #include "xAODTracking/TrackSummary.h"
 #include "ActsEvent/ParticleHypothesisEncoding.h"
 
@@ -10,7 +12,7 @@
 const std::set<std::string> ActsTrk::TrackSummaryContainer::staticVariables = {
     "params", "covParams", "nMeasurements", "nHoles",   "chi2f",
     "ndf",    "nOutliers", "nSharedHits",   "tipIndex", "stemIndex",
-    "particleHypothesis"};
+    "particleHypothesis", "surfaceIndex"};
 
 using namespace Acts::HashedStringLiteral;
 const std::set<Acts::HashedString> ActsTrk::TrackSummaryContainer::staticVariableHashes = [](){
@@ -183,6 +185,7 @@ ActsTrk::IndexType ActsTrk::MutableTrackSummaryContainer::addTrack_impl() {
   m_mutableTrackBackend->back()->resize();
   // ACTS assumes default to be pion, xAOD::ParticleHypothesis == 0 is geantino
   m_mutableTrackBackend->back()->setParticleHypothesis(xAOD::pion);
+  m_surfaces.push_back(nullptr);
   return m_mutableTrackBackend->size() - 1;
 }
 
@@ -255,17 +258,24 @@ void ActsTrk::MutableTrackSummaryContainer::clear() {
 
 void ActsTrk::MutableTrackSummaryContainer::setReferenceSurface_impl(
     ActsTrk::IndexType itrack, std::shared_ptr<const Acts::Surface> surface) {
-  m_surfaces.resize(itrack + 1, nullptr);
-  m_surfaces[itrack] = std::move(surface);
+  m_surfaces[itrack] = surface;
 }
 
-void ActsTrk::MutableTrackSummaryContainer::encodeSurfaces( xAOD::TrackSurfaceAuxContainer* dest,  const Acts::GeometryContext& geoContext) const {
+void ActsTrk::MutableTrackSummaryContainer::encodeSurfaces(xAOD::TrackSurfaceAuxContainer* dest, const Acts::GeometryContext& geoContext) {
   dest->resize(m_surfaces.size());
-  size_t index = 0;
-  for ( auto& surface: m_surfaces ) {
-    encodeSurface(dest, index, surface.get(), geoContext);
-    index++;
+  size_t destIndex = 0;
+  // go over all surfaces and for each free surface record persistent version of it in the xAOD
+  // at the same time store index to it updating TrackSummary
+  for ( ActsTrk::IndexType index = 0, eindex = m_surfaces.size(); index < eindex; ++index ) {
+    if ( m_surfaces[index] == nullptr or m_surfaces[index]->geometryId().value() != 0  ) {
+      m_mutableTrackBackend->at(index)->setSurfaceIndex(Acts::kTrackIndexInvalid);
+    } else {
+      m_mutableTrackBackend->at(index)->setSurfaceIndex(destIndex);
+      encodeSurface(dest, destIndex, m_surfaces[index].get(), geoContext);
+      destIndex++;
+    }
   }
+  dest->resize(destIndex);
 }
 
 void ActsTrk::MutableTrackSummaryContainer::setParticleHypothesis_impl(ActsTrk::IndexType itrack, const Acts::ParticleHypothesis& particleHypothesis) {

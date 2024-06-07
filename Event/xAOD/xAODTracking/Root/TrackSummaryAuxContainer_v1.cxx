@@ -2,6 +2,7 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #include "xAODTracking/versions/TrackSummaryAuxContainer_v1.h"
+#include "xAODCore/tools/AuxVariable.h"
 
 namespace xAOD {
   TrackSummaryAuxContainer_v1::TrackSummaryAuxContainer_v1()
@@ -17,6 +18,7 @@ namespace xAOD {
     AUX_VARIABLE(tipIndex);
     AUX_VARIABLE(stemIndex);
     AUX_VARIABLE(particleHypothesis);
+    AUX_VARIABLE(surfaceIndex);
 
   }
 }

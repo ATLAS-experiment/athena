@@ -13,8 +13,8 @@ constexpr uint64_t InvalidGeoID = std::numeric_limits<uint64_t>::max();
 
 const std::set<std::string> ActsTrk::MutableMultiTrajectory::s_staticVariables = {
   "chi2", "pathLength", "typeFlags", "previous", "next", "predicted", "filtered", "smoothed", "jacobian", "calibrated", "measDim",
-  "uncalibratedMeasurement", "uncalibratedMeasurementLink" /*created by converter*/, "geometryId", "surfaceLink"
-};
+  "uncalibratedMeasurement", "uncalibratedMeasurementLink" /*created by converter*/, "geometryId", "surfaceIndex"
+ };
 
 namespace {
    // utility functions facilitate access of dynamic (or static) aux variables
@@ -542,9 +542,8 @@ void ActsTrk::MutableMultiTrajectory::setReferenceSurface_impl(IndexType istate,
   m_trackStatesAux->geometryId[istate] = surface->geometryId().value();
   if (surface->geometryId().value() == 0) { // free surface, needs recording of properties
     m_surfacesBackend->push_back(new xAOD::TrackSurface());
-    encodeSurface(m_surfacesBackendAux.get(), m_surfacesBackendAux->size()-1, surface.get(), m_geoContext.context()); // TODO
-    auto el = ElementLink<xAOD::TrackSurfaceContainer>(*m_surfacesBackend, m_surfacesBackend->size()-1);
-    m_trackStatesAux->surfaceLink[istate] =  el;
+    encodeSurface(m_surfacesBackendAux.get(), m_surfacesBackendAux->size()-1, surface.get(), m_geoContext.context());
+    m_trackStatesAux->surfaceIndex[istate] =  m_surfacesBackend->size()-1;
     m_surfaces[istate] = std::move(surface); // and memory management
 
   } else {
@@ -582,11 +581,13 @@ ActsTrk::MultiTrajectory::MultiTrajectory(
     DataLink<xAOD::TrackStateAuxContainer> trackStates,
     DataLink<xAOD::TrackParametersAuxContainer> trackParameters,
     DataLink<xAOD::TrackJacobianAuxContainer> trackJacobians,
-    DataLink<xAOD::TrackMeasurementAuxContainer> trackMeasurements)
+    DataLink<xAOD::TrackMeasurementAuxContainer> trackMeasurements, 
+    DataLink<xAOD::TrackSurfaceAuxContainer> trackSurfaces)
     : m_trackStatesAux(trackStates),
       m_trackParametersAux(trackParameters),
       m_trackJacobiansAux(trackJacobians),
-      m_trackMeasurementsAux(trackMeasurements) {
+      m_trackMeasurementsAux(trackMeasurements), 
+      m_trackSurfacesAux(trackSurfaces) {
       INSPECTCALL("ctor " << this << " " << m_trackStatesAux->size());
       m_decorations = ActsTrk::detail::restoreDecorations(m_trackStatesAux, ActsTrk::MutableMultiTrajectory::s_staticVariables);
 }
@@ -712,8 +713,8 @@ void ActsTrk::MultiTrajectory::fillSurfaces(const Acts::TrackingGeometry* geo, c
       if ( geoID != 0 ) {
         m_surfaces[i] = geo->findSurface(geoID);
       } else {
-        ElementLink<xAOD::TrackSurfaceContainer> backendLink = m_trackStatesAux->surfaceLink[i];
-        std::shared_ptr<const Acts::Surface> surface = decodeSurface( *backendLink, geoContext);
+        unsigned int backendIndex = m_trackStatesAux->surfaceIndex[i];
+        std::shared_ptr<const Acts::Surface> surface = decodeSurface( m_trackSurfacesAux, backendIndex, geoContext);
         m_surfaces[i] = surface; // TODO
 
       }

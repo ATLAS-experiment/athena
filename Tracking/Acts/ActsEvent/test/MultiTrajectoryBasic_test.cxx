@@ -179,7 +179,8 @@ struct EmptyMTJ {  // setup empty MTJ
         mtj->trackStatesAux(), 
         mtj->trackParametersAux(),
         mtj->trackJacobiansAux(),
-        mtj->trackMeasurementsAux()
+        mtj->trackMeasurementsAux(),
+        mtj->trackSurfacesAux()
       );
 
     }
