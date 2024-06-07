@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************
@@ -1919,7 +1919,7 @@ TF1* TileRawChannelMonTool::GetTimeFitFunc(TH2S* hist2d) {
       float shift = 0.;
       for (int i = 1; i < prof->GetNbinsX() + 1; i++) {
         if (prof->GetBinError(i) > 1e-7) {
-          if ((shift < 1.) && ((prof->GetBinContent(i) - (lastbin + (i - lasti))) < -15.)) { //allow only 1 shift and only of negative sign
+          if ((shift < 1.) && ((prof->GetBinContent(i) - (lastbin + (i - lasti))) < -10.)) { //allow only 1 shift and only of negative sign
             shift = 25.;
           }
           lasti = i;
