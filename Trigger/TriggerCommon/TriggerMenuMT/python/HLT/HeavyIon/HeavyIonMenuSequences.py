@@ -40,6 +40,6 @@ def HIFwdGapMenuSequenceGenCfg(flags):
 
   selAcc = SelectionCA("HLFwdGapSel")
   selAcc.mergeReco(recoAcc)
-  selAcc.addHypoAlgo(CompFactory.TrigHIFwdGapHypoAlg())
+  selAcc.addHypoAlgo(CompFactory.TrigHIEventShapeHypoAlg())
 
   return MenuSequenceCA(flags, selAcc, HypoToolGen = TrigHIFwdGapHypoToolFromDict)

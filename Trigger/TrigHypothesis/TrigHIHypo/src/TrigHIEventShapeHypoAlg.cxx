@@ -2,24 +2,24 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "TrigHIFwdGapHypoAlg.h"
+#include "TrigHIEventShapeHypoAlg.h"
 
 #include "Gaudi/Property.h"
 #include "TrigCompositeUtils/HLTIdentifier.h"
 #include "TrigCompositeUtils/TrigCompositeUtils.h"
 
-TrigHIFwdGapHypoAlg::TrigHIFwdGapHypoAlg(const std::string& name,
+TrigHIEventShapeHypoAlg::TrigHIEventShapeHypoAlg(const std::string& name,
                                          ISvcLocator* pSvcLocator) :
   ::HypoBase(name, pSvcLocator) {}
 
 
-StatusCode TrigHIFwdGapHypoAlg::initialize() {
+StatusCode TrigHIEventShapeHypoAlg::initialize() {
   ATH_CHECK(m_hypoTools.retrieve());
   ATH_CHECK(m_esKey.initialize());
   return StatusCode::SUCCESS;
 }
 
-StatusCode TrigHIFwdGapHypoAlg::execute(const EventContext& context) const {
+StatusCode TrigHIEventShapeHypoAlg::execute(const EventContext& context) const {
   ATH_MSG_DEBUG ("Executing " << name() << "...");
 
   // Retrieve the HI event shape container
@@ -48,14 +48,14 @@ StatusCode TrigHIFwdGapHypoAlg::execute(const EventContext& context) const {
 }
 
 
-StatusCode TrigHIFwdGapHypoAlg::decide(const xAOD::HIEventShapeContainer* eventShapeContainer,
+StatusCode TrigHIEventShapeHypoAlg::decide(const xAOD::HIEventShapeContainer* eventShapeContainer,
                                        TrigCompositeUtils::DecisionContainer* newDecisions,
                                        const TrigCompositeUtils::DecisionContainer* oldDecisions,
                                        const EventContext& context) const {
 
   ATH_MSG_DEBUG("Executing decide() of " << name());
   if (oldDecisions->size() != 1) {
-    ATH_MSG_ERROR("TrigHIFwdGapHypoAlg requires there to be exactly one previous Decision object, but found " << oldDecisions->size());
+    ATH_MSG_ERROR("TrigHIEventShapeHypoAlg requires there to be exactly one previous Decision object, but found " << oldDecisions->size());
     return StatusCode::FAILURE;
   }
   const TrigCompositeUtils::Decision* previousDecision = oldDecisions->at(0);

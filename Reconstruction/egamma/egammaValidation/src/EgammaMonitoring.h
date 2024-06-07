@@ -154,6 +154,10 @@ private:
   Gaudi::Property<std::string> m_sampleType
     { this, "sampleType", "Unknown", "electron or gamma" };
 
+  /// is it run 3 or run 4 and later ?
+  Gaudi::Property<bool> m_hasTRT
+    { this, "hasTRT", true, "is there a TRT in the ID" };
+
   /// Selector tools
   // electron ID
   ToolHandle<IAsgElectronLikelihoodTool> m_Loose_Ele

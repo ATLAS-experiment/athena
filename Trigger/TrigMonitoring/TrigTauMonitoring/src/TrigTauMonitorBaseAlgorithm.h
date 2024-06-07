@@ -66,7 +66,7 @@ protected:
     {
         double deta = std::fabs(eta1 - eta2);
         double dphi = std::fabs(CxxUtils::wrapToPi(phi1-phi2));
-        return sqrt(deta*deta + dphi*dphi);
+        return std::sqrt(deta*deta + dphi*dphi);
     }
 
     template <typename T1 = xAOD::IParticle, typename T2 = xAOD::IParticle>
@@ -93,10 +93,8 @@ protected:
     }
 
     std::vector<const xAOD::TauJet*> classifyTausAll(const std::vector<const xAOD::TauJet*>& taus, const float threshold = 0.0) const;
-    std::pair<std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>>
-    classifyOfflineTaus(const std::vector<const xAOD::TauJet*>& taus, const float threshold = 0.0) const;
-    std::tuple<std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>>
-    classifyOnlineTaus(const std::vector<const xAOD::TauJet*>& taus, const float threshold = 0.0) const;
+    std::pair<std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>> classifyOfflineTaus(const std::vector<const xAOD::TauJet*>& taus, const float threshold = 0.0) const;
+    std::tuple<std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>> classifyOnlineTaus(const std::vector<const xAOD::TauJet*>& taus, const float threshold = 0.0) const;
 
    private:
     std::map<std::string, TrigTauInfo> m_trigInfo; // TauTrigInfo cache

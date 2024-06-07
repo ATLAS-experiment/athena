@@ -114,7 +114,7 @@ def getEBnoL1PSSeed(l1items, l1seedname):
         [
             'L1_eEM18L_MU8F','L1_eEM26M', 'L1_eEM26T', 'L1_eEM28M','L1_2eEM10L_MU8F', 'L1_2eEM18M',
             'L1_eEM24L_3eEM12L',
-            'L1_4jJ40', 'L1_jJ160', 'L1_XE50', 'L1_2jJ40_jXE110',
+            'L1_4jJ40', 'L1_jJ160', 'L1_jXE100','L1_gXEJWOJ100', 'L1_2jJ40_jXE110',
             'L1_eTAU140',
             'L1_MU8F_cTAU30M', 'L1_MU14FCH', 'L1_MU18VFCH', 'L1_MU10BOM',
             'L1_5jJ40p0ETA25',

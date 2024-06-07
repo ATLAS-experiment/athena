@@ -284,11 +284,16 @@ StatusCode TrigTauMonitorBaseAlgorithm::fillHistograms(const EventContext& ctx) 
         return StatusCode::SUCCESS; 
     }
 
-    // Protect against noise bursts
-    SG::ReadHandle<xAOD::EventInfo> currEvent(GetEventInfo(ctx));
-    ATH_CHECK(currEvent.isValid());
-    if(currEvent->isEventFlagBitSet(xAOD::EventInfo::LAr, LArEventBitInfo::NOISEBURSTVETO)) return StatusCode::SUCCESS;
-    
+    // Protect against LAr noise bursts and other detector errors
+    SG::ReadHandle<xAOD::EventInfo> eventInfo(GetEventInfo(ctx));
+    ATH_CHECK(eventInfo.isValid());
+    if (eventInfo->errorState(xAOD::EventInfo::LAr) == xAOD::EventInfo::Error
+	|| eventInfo->errorState(xAOD::EventInfo::Tile) == xAOD::EventInfo::Error
+	|| eventInfo->errorState(xAOD::EventInfo::SCT) == xAOD::EventInfo::Error
+	|| eventInfo->isEventFlagBitSet(xAOD::EventInfo::Core, 18)) {
+      return StatusCode::SUCCESS;
+    }
+
     ATH_CHECK(processEvent(ctx));
 
     return StatusCode::SUCCESS;

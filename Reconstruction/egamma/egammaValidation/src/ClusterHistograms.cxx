@@ -35,7 +35,6 @@ StatusCode ClusterHistograms::initializePlots() {
     ATH_CHECK(m_rootHistSvc->regHist(pN.Data(), profileMap[pNm.Data()]));
   }
 
-  // tempo, for checks
   for (int is = 0; is < 24; is++) {
     TString pNm = Form("number_cells_vs_eta_in_sampling_%i_profile",is);
     TString pN = Form("%s_number_cells_vs_eta_in_sampling_%i_profile",fN,is);
@@ -99,11 +98,6 @@ void ClusterHistograms::fill(const xAOD::Egamma& egamma, float mu = 0) {
       int layer = cell->caloDDE()->getLayer();
       cells_per_layer[layer]++;
       int sam = cell->caloDDE()->getSampling();
-      /*
-      std::cout << m_name << " sam = " << sam << " layer = " << layer
-		<< " eta cell raw = " << cell->caloDDE()->eta_raw() //<< " eta part = " << truth_egamma->eta()
-		<< " IW " << cell->caloDDE()->is_lar_em_endcap_inner() << " OW " << cell->caloDDE()->is_lar_em_endcap_outer() << std::endl;
-      */
       cells_per_sam[sam]++;
     }
   }
