@@ -717,6 +717,26 @@ CP::CorrectionCode EgammaCalibrationAndSmearingTool::applyCorrection(xAOD::Egamm
         ATH_MSG_WARNING("all layer energies are zero");
       }
     }
+  } else {
+    static const SG::AuxElement::Decorator<double> deco_E2("correctedcl_Es2");
+    static const SG::AuxElement::Decorator<double> deco_E3("correctedcl_Es3");
+    double addE2 = 0, addE3 = 0;
+    if (m_fixForMissingCells && event_info.runNumber() > m_Run2Run3runNumberTransition) {
+      unsigned short status =
+	xAOD::EgammaHelpers::energyInMissingCells(input,addE2,addE3);
+      if (status) {
+	ATH_MSG_WARNING("Fix for missing cells required"
+			" but some layer info is not available,"
+			" from L2 : " << status%2 << " from L3 : " << status/2);
+      }
+    }
+    // We do it all the time... otherwise :
+    // imagine you have a job with two tools, one which fixes, the other not.
+    // The one that fixes will create the decoration,
+    // that will be used all the time but the one that does not fix
+    // would have 0 as decoration without those lines...
+    deco_E2(*input.caloCluster()) = input.caloCluster()->energyBE(2) + addE2;
+    deco_E3(*input.caloCluster()) = input.caloCluster()->energyBE(3) + addE3;
   }
 
   double energy = 0.;

@@ -347,6 +347,9 @@ public:
   void fixForMissingCells(bool fix = true) { m_aodFixMissingCells = fix; }
 
 private:
+
+  static const unsigned int m_Run2Run3runNumberTransition = 400000;
+
   std::string m_tune;
   const std::string resolve_path(std::string filename) const;
   static std::string resolve_alias(const std::string& tune) ;

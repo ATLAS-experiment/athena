@@ -18,6 +18,7 @@
 #include "PathResolver/PathResolver.h"
 
 #include "egammaLayerRecalibTool/egammaLayerRecalibTool.h"
+#include "xAODEgamma/EgammaxAODHelpers.h"
 
 namespace {
 const float VALUE_OVERFLOW = std::numeric_limits<float>::max();
@@ -908,9 +909,6 @@ CP::CorrectionCode egammaLayerRecalibTool::scale_inputs(StdCalibrationInputs & i
 
 CP::CorrectionCode egammaLayerRecalibTool::applyCorrection(xAOD::Egamma& particle, const xAOD::EventInfo& event_info) const
 {
-  const static SG::AuxElement::ConstAccessor<float> acc_Eadded_s2("Eadded_Lr2");
-  const static SG::AuxElement::ConstAccessor<float> acc_Eadded_s3("Eadded_Lr3");
-
   const xAOD::CaloCluster* cluster = particle.caloCluster();
   if (!cluster) {
     ATH_MSG_ERROR("egamma particle without CaloCluster");
@@ -918,18 +916,13 @@ CP::CorrectionCode egammaLayerRecalibTool::applyCorrection(xAOD::Egamma& particl
   }
 
   double addE2 = 0, addE3 = 0;
-  if (m_aodFixMissingCells) {
-    if (acc_Eadded_s2.isAvailable(particle))
-      { addE2 = acc_Eadded_s2(particle); }
-    else {
+  if (m_aodFixMissingCells && event_info.runNumber() > m_Run2Run3runNumberTransition) {
+    unsigned short stat =
+      xAOD::EgammaHelpers::energyInMissingCells(particle,addE2,addE3);
+    if (stat) {
       ATH_MSG_WARNING("Fix for missing cells required"
-		      " but layer 2 info is not available");
-    }
-    if (acc_Eadded_s3.isAvailable(particle))
-      { addE3 = acc_Eadded_s3(particle); }
-    else {
-      ATH_MSG_WARNING("Fix for missing cells required"
-		      " but layer 3 info is not available");
+		      " but some layer info is not available,"
+		      " from L2 : " << stat%2 << " from L3 : " << stat/2);
     }
   }
 
