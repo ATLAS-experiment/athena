@@ -66,7 +66,7 @@ std::pair<int, int> MuonPadDesign::channelNumber(const Amg::Vector2D& pos) const
         //+1 for firstRow, +1 because a remainder means another row (3.1=4)
         padEtadouble = ((y1 - firstRowPos) / inputRowPitch) + 1 + 1;
         padEta = padEtadouble;
-      } else if (y1 > 0) {
+      } else if (y1 >= 0) {
         padEta = 1;
       }
       double padPhidouble;

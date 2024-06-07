@@ -119,8 +119,8 @@ class MonitorDef:
                 ## Legacy L1 items
                 # L1Calo
                 "L1_TAU8","L1_TAU20IM",
-                "L1_J15","L1_J100","L1_J400",
-                "L1_XE30","L1_XE50","L1_XE55","L1_XE300",
+                "L1_J15","L1_J400",
+                "L1_XE30","L1_XE300",
   
                 ## Phase-I
                 # L1Calo
@@ -240,36 +240,15 @@ class MonitorDef:
             monItems[TBP|TAP|TAV] = [
                 # Random
                 "L1_RD0_FILLED",
-                # Detector
-                "L1_CALREQ0", "L1_CALREQ1", "L1_CALREQ2",
-                "L1_BPTX0_BGRP12","L1_BPTX1_BGRP12",
-                "L1_TGC_BURST",
-                "L1_ZeroBias",
                 # Forward
                 # AFP
-                "L1_AFP_A", "L1_AFP_C",
                 "L1_AFP_A_OR_C", "L1_AFP_A_AND_C",
-                # AFP Calib
-                "L1_AFP_FSA_BGRP12",
-                "L1_AFP_FSA_TOF_T0_BGRP12",
-                "L1_AFP_FSA_TOF_T1_BGRP12",
-                "L1_AFP_FSA_TOF_T2_BGRP12",
-                "L1_AFP_FSA_TOF_T3_BGRP12",
-                "L1_AFP_FSC_BGRP12",
-                "L1_AFP_FSC_TOF_T0_BGRP12",
-                "L1_AFP_FSC_TOF_T1_BGRP12",
-                "L1_AFP_FSC_TOF_T2_BGRP12",
-                "L1_AFP_FSC_TOF_T3_BGRP12",
-                "L1_AFP_NSA_BGRP12",
-                "L1_AFP_NSC_BGRP12",
                 # AFP combined
                 "L1_AFP_A_AND_C_J12",
-                "L1_AFP_A_AND_C_MBTS_2",
                 "L1_AFP_A_AND_C_TOF_J20",
                 "L1_AFP_A_AND_C_TOF_J30",
                 "L1_AFP_A_AND_C_TOF_J50",
                 "L1_AFP_A_AND_C_TOF_J75",
-                "L1_AFP_A_AND_C_TOF_T0T1",
                 "L1_AFP_A_AND_C_TOF_T0T1_J20",
                 "L1_AFP_A_AND_C_TOF_T0T1_J30",
                 "L1_AFP_A_AND_C_TOF_T0T1_J50",
@@ -284,16 +263,9 @@ class MonitorDef:
                 "L1_AFP_A_AND_C_TOF_jJ90",
                 "L1_AFP_A_AND_C_jJ20",
                 "L1_AFP_A_AND_C_jJ30",
-                "L1_AFP_A_OR_C_EMPTY",
-                "L1_AFP_A_OR_C_FIRSTEMPTY",
                 "L1_AFP_A_OR_C_J12",
-                "L1_AFP_A_OR_C_MBTS_2",
-                "L1_AFP_A_OR_C_UNPAIRED_ISO",
-                "L1_AFP_A_OR_C_UNPAIRED_NONISO",
                 "L1_AFP_A_OR_C_jJ20",
                 "L1_AFP_A_OR_C_jJ30",
-                # LUCID
-                "L1_LUCID_A", "L1_LUCID_C",
                 # ZDC
                 # Basic inputs
                 "L1_ZDC_BIT0", "L1_ZDC_BIT1", "L1_ZDC_BIT2",
@@ -315,28 +287,12 @@ class MonitorDef:
                 "L1_ZDC_E1_AND_E2ORE3",
                 "L1_ZDC_OR", "L1_ZDC_OR_EMPTY", "L1_ZDC_OR_UNPAIRED_NONISO",
                 "L1_ZDC_XOR_E1_E3", "L1_ZDC_XOR_E2",
-                # Vetos
-                "L1_ZDC_A_VZDC_C_VTE200",
-                "L1_VZDC_A_ZDC_C_VTE200",
-                "L1_VZDC_A_VZDC_C_TE5_VTE200",
                 # LHCF
                 "L1_LHCF",
                 # MBTS
-                "L1_MBTS_A",
-                "L1_MBTS_C",
-                "L1_MBTS_1", "L1_MBTS_2", "L1_MBTS_1_1",
-                "L1_MBTS_1_EMPTY", "L1_MBTS_1_UNPAIRED_ISO",
-                "L1_MBTS_2_EMPTY", "L1_MBTS_2_UNPAIRED_ISO",
-                "L1_MBTS_1_1_EMPTY", "L1_MBTS_1_1_UNPAIRED_ISO",
                 "L1_MBTS_2_2", "L1_MBTS_3_3", "L1_MBTS_4_4",
-                "L1_MBTS_1_VTE50", "L1_MBTS_1_1_VTE50", "L1_MBTS_1_VTE200",
-                "L1_MBTS_1_ZDC_A_VZDC_C_VTE200",
-                "L1_MBTS_1_VZDC_A_ZDC_C_VTE200",
                 # LAr Zee
                 "L1_LAR-ZEE-eEM",
-                # Background
-                "L1_BCM_Wide",
-                "L1_BCM_2A_FIRSTINTRAIN", "L1_BCM_2C_FIRSTINTRAIN",
                 # Muons
                 "L1_MU3V", "L1_MU5VF",
                 "L1_MU8F", "L1_MU8VF",
@@ -348,50 +304,8 @@ class MonitorDef:
                 "L1_3MU3V",
                 "L1_2MU14FCH_OVERLAY",
                 # Mu+X
-                "L1_MU3V_J12",
-                "L1_MU3V_VTE50",
-                "L1_MU5VF_VTE50",
                 "L1_MU5VF_AFP_A_OR_C",
-                "L1_2MU3V_VTE50",
                 # Legacy L1Calo
-                # Tau
-                "L1_TAU1_TE4_VTE200",
-                "L1_2TAU1_VTE200",
-                # Jet
-                "L1_J30", "L1_J50",
-                "L1_J20p31ETA49", "L1_J30p31ETA49",
-                "L1_J12_EMPTY",
-                "L1_J40_XE50",
-                # TE
-                "L1_TE3", "L1_TE4", "L1_TE5",
-                "L1_TE20", "L1_TE50",
-                "L1_TE100", "L1_TE200",
-                #
-                "L1_TE3_VTE50",
-                "L1_TE5_VTE200",
-                "L1_TE50_VTE200",
-                #
-                "L1_TE7p0ETA49",
-                "L1_TE600p0ETA49",
-                "L1_TE1500p0ETA49",
-                "L1_TE3000p0ETA49",
-                "L1_TE1500p0ETA49_OVERLAY",
-                "L1_TE3000p0ETA49_OVERLAY",
-                "L1_TE3500p0ETA49_OVERLAY",
-                "L1_TE6500p0ETA49_OVERLAY",
-                "L1_TE8000p0ETA49_OVERLAY",
-                #
-                "L1_ZDC_A_VZDC_C_TE5_VTE200",
-                "L1_VZDC_A_ZDC_C_TE5_VTE200",
-                #
-                "L1_ZDC_A_VZDC_C_TE3_VTE200",
-                "L1_VZDC_A_ZDC_C_TE3_VTE200",
-                #
-                "L1_VTE20", "L1_VTE50", "L1_VTE200",
-                # TRT
-                "L1_TRT_VTE50", "L1_TRT_VTE200", "L1_TRT_VTE20",
-                # XE
-                "L1_XE50",
                 # Phase-I L1Calo
                 "L1_eEM5", "L1_eEM9", "L1_eEM12", "L1_eEM15",
                 "L1_eEM18", "L1_eEM18L",
@@ -400,7 +314,7 @@ class MonitorDef:
                 #
                 "L1_jJ20", "L1_jJ30", "L1_jJ40", "L1_jJ50",
                 "L1_jJ55", "L1_jJ60", "L1_jJ90",
-                "L1_jJ500", "L1_jJ500_LAR",
+                "L1_jJ500",
                 "L1_jJ40p30ETA49", "L1_jJ50p30ETA49", "L1_jJ60p30ETA49",
                 "L1_jJ90p30ETA49",
                 #
@@ -409,13 +323,55 @@ class MonitorDef:
                 "L1_jTE200",
                 #
                 "L1_eEM9_AFP_A_AND_C", #"L1_eEM9_AFP_A_OR_C",
-                # Addtional L1 items added for 2022 Nov HI test run
-                "L1_MBTS_1_VTE5", "L1_VTE5", 
-                "L1_J12_VTE100", 
-                "L1_J30_VTE200", "L1_J100_VTE200", 
-                "L1_XE35_VTE200", "L1_XE50_VTE200",
                 ]
 
+            # Add triggers that are not in the MC menu
+            if 'MC' not in menuName:
+                monItems[TBP|TAP|TAV] += [
+                # Detector
+                "L1_CALREQ0", "L1_CALREQ1", "L1_CALREQ2",
+                "L1_BPTX0_BGRP12","L1_BPTX1_BGRP12",
+                "L1_TGC_BURST",
+                "L1_ZeroBias",
+                "L1_jJ500_LAR",
+                # Forward
+                # AFP
+                "L1_AFP_A", "L1_AFP_C",
+                # AFP Calib
+                "L1_AFP_FSA_BGRP12",
+                "L1_AFP_FSA_TOF_T0_BGRP12",
+                "L1_AFP_FSA_TOF_T1_BGRP12",
+                "L1_AFP_FSA_TOF_T2_BGRP12",
+                "L1_AFP_FSA_TOF_T3_BGRP12",
+                "L1_AFP_FSC_BGRP12",
+                "L1_AFP_FSC_TOF_T0_BGRP12",
+                "L1_AFP_FSC_TOF_T1_BGRP12",
+                "L1_AFP_FSC_TOF_T2_BGRP12",
+                "L1_AFP_FSC_TOF_T3_BGRP12",
+                "L1_AFP_NSA_BGRP12",
+                "L1_AFP_NSC_BGRP12",
+                # AFP combined
+                "L1_AFP_A_AND_C_MBTS_2",
+                "L1_AFP_A_AND_C_TOF_T0T1",
+                "L1_AFP_A_OR_C_FIRSTEMPTY",
+                "L1_AFP_A_OR_C_EMPTY",
+                "L1_AFP_A_OR_C_MBTS_2",
+                "L1_AFP_A_OR_C_UNPAIRED_ISO",
+                "L1_AFP_A_OR_C_UNPAIRED_NONISO",
+                # Background
+                "L1_BCM_Wide",
+                "L1_BCM_2A_FIRSTINTRAIN", "L1_BCM_2C_FIRSTINTRAIN",
+                # LUCID
+                "L1_LUCID_A", "L1_LUCID_C",
+                # MBTS
+                "L1_MBTS_A",
+                "L1_MBTS_C",
+                "L1_MBTS_1", "L1_MBTS_2", "L1_MBTS_1_1",
+                "L1_MBTS_1_EMPTY", "L1_MBTS_1_UNPAIRED_ISO",
+                "L1_MBTS_2_EMPTY", "L1_MBTS_2_UNPAIRED_ISO",
+                "L1_MBTS_1_1_EMPTY", "L1_MBTS_1_1_UNPAIRED_ISO",
+
+                ]
             topo3_monitems = []
 
         monItems[TBP|TAP|TAV] += topo3_monitems

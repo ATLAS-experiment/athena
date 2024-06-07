@@ -9,10 +9,10 @@
 #include "TrigCompositeUtils/TrigCompositeUtils.h"
 #include "TrigCompositeUtils/HLTIdentifier.h"
 
-#include "ITrigHIFwdGapHypoTool.h"
+#include "ITrigHIEventShapeHypoTool.h"
 #include "xAODHIEvent/HIEventShapeContainer.h"
 
-class TrigHIFwdGapHypoTool : public extends<AthAlgTool, ITrigHIFwdGapHypoTool> {
+class TrigHIFwdGapHypoTool : public extends<AthAlgTool, ITrigHIEventShapeHypoTool> {
 
   public:
 

@@ -79,6 +79,9 @@ def defineMenu():
         'L1_cTAU30M_2cTAU20M_DR-eTAU30eTAU20-jJ30',
         'L1_cTAU30M_2cTAU20M_3jJ30p0ETA25',
         
+        #ATR-29523
+        'L1_3jJ40p0ETA25',
+        
         #ATR-27252
         'L1_eTAU60_2cTAU20M_jXE80',
 
@@ -106,7 +109,7 @@ def defineMenu():
         'L1_TAU25IM_2TAU20IM_2J25_3J20',
 
         #ATR-28679 - legacy XE
-        'L1_XE35', 'L1_XE40', 'L1_XE45', 'L1_XE60',
+        'L1_XE35', 'L1_XE40', 'L1_XE45', 'L1_XE50','L1_XE55', 'L1_XE60',
 
         # Legacy combined em - jet moved by ATR-28761
         'L1_EM18VHI_3J20',
@@ -131,6 +134,7 @@ def defineMenu():
         "L1_J40",
         "L1_J75",
         "L1_J85",
+        "L1_J100",
         "L1_J120",
         "L1_J400_LAR",
         "L1_J20p31ETA49",

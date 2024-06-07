@@ -216,18 +216,36 @@ class TrigMultiTrkComboHypo: public ::ComboHypo {
    */
   StatusCode createDecisionObjects(TrigMultiTrkStateBase&) const;
 
-
+  /**
+   * @brief Perform a vertex fit on selected tracks
+   * @param trackParticleLinks the trackParticles to fit
+   * @param trkMass Track mass hypothesis for mass calculations
+   * @param fitterState The temporary state object
+   * @return The fitted vertex - null if fit fails or is very low quality
+   */
   std::unique_ptr<xAOD::Vertex> fit(
       const std::vector<ElementLink<xAOD::TrackParticleContainer>>& trackParticleLinks,
       const std::vector<double>& particleMasses,
       Trk::IVKalState& fitterState) const;
 
+  /**
+   * @brief Construct the trigger object that may be stored for debugging or matching.
+   * @param vertex Fitted Vertex object
+   * @param particleMasses Track mass hypothesis for mass calculations
+   * @param beamSpot The beamspot vertex
+   * @param fitterState Vertexer state object
+   * @return Pointer to the TrigBphys object
+   */
   xAOD::TrigBphys* makeTrigBPhys(
       const xAOD::Vertex& vertex,
       const std::vector<double>& particleMasses,
       const xAOD::Vertex& beamSpot,
       const Trk::IVKalState& fitterState) const;
 
+  /**
+  * @brief Attempts to identify identical tracks by selection on DeltaR
+  * @return true if 'identical', false otherwise
+  */
   bool isIdenticalTracks(const xAOD::TrackParticle* lhs, const xAOD::TrackParticle* rhs) const;
   bool isIdenticalTracks(const xAOD::Muon* lhs, const xAOD::Muon* rhs) const;
   bool isIdenticalTracks(const xAOD::Electron* lhs, const xAOD::Electron* rhs) const;

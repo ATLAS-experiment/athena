@@ -49,40 +49,6 @@ def MCTruthClassifierCaloTruthMatchCfg(flags, **kwargs):
     return acc
 
 
-##########################################################
-# The function below are for the old style and should be
-# condsidered deprecated
-##########################################################
-def firstSimCreatedBarcode():
-    """DEPRECATED!!! Return the simulation barcode offset for G4
-    particles from metadata
-    In the new configuration scheme use the Sim.SimBarcodeOffset flag instead
-    """
-
-    from AthenaCommon.Logging import logging
-    mlog = logging.getLogger("firstSimCreatedBarcode")
-    mlog.info("This function should not be used in the new configuration"
-              "scheme. Use Sim.SimBarcodeOffset flag insted")
-
-    offset = 200e3
-
-    # Don't try to run the input peeker for a generator job; it will fail
-    # without a proper input file.
-    # Is there a better way of doing this test?
-    from AthenaCommon.AppMgr import theApp
-    if getattr(theApp, 'EvtSel', None) == 'McEventSelector/EventSelector':
-        mlog.info('Generator job: leaving SimBarcodeOffset at 200k')
-
-    else:
-        from PyUtils.MetaReaderPeeker import metadata
-        try:
-            offset = int(metadata['SimBarcodeOffset'])
-        except Exception:
-            mlog.info(
-                'Could not retrieve SimBarcodeOffset from /Simulation/Parameters, leaving at 200k')
-    return int(offset + 1)
-
-
 if __name__ == "__main__":
 
     from AthenaConfiguration.AllConfigFlags import initConfigFlags

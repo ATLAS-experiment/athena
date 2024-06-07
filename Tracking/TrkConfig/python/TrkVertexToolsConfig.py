@@ -34,6 +34,23 @@ def SumPtVertexCollectionSortingToolCfg(flags, name="SumPtVertexCollectionSortin
         CompFactory.Trk.VertexCollectionSortingTool(name,**kwargs))
     return acc
 
+
+def JetRestrictedSumPt2VertexCollectionSortingToolCfg(flags, name="JetRestrictedSumPt2VertexCollectionSortingTool", **kwargs):
+    acc = ComponentAccumulator()
+
+    if "VertexWeightCalculator" not in kwargs:
+        from TrkConfig.TrkVertexWeightCalculatorsConfig import (
+            JetRestrictedSumPtVertexWeightCalculatorCfg)
+        kwargs.setdefault("VertexWeightCalculator", acc.popToolsAndMerge(
+            JetRestrictedSumPtVertexWeightCalculatorCfg(flags)))
+
+    kwargs.setdefault("decorationName", "sumPt2")
+
+    acc.setPrivateTools(
+        CompFactory.Trk.VertexCollectionSortingTool(name,**kwargs))
+    return acc
+
+
 def VertexCollectionSortingToolCfg(flags, **kwargs):
     if flags.Tracking.PriVertex.sortingSetup == \
        VertexSortingSetup.SumPt2Sorting:
@@ -41,6 +58,9 @@ def VertexCollectionSortingToolCfg(flags, **kwargs):
     elif flags.Tracking.PriVertex.sortingSetup == \
          VertexSortingSetup.SumPtSorting:
         return SumPtVertexCollectionSortingToolCfg(flags, **kwargs)
+    elif flags.Tracking.PriVertex.sortingSetup == \
+         VertexSortingSetup.JetWeightedSumPt2Sorting:
+        return JetRestrictedSumPt2VertexCollectionSortingToolCfg(flags, **kwargs)
 
 
 def SecVertexMergingToolCfg(flags, name='SecVertexMergingTool', **kwargs):

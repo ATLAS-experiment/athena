@@ -3,9 +3,12 @@
 from PyJobTransforms.CommonRunArgsToFlags import commonRunArgsToFlags
 from PyJobTransforms.TransformUtils import processPreExec, processPreInclude, processPostExec, processPostInclude
 
+from AthenaCommon import SystemOfUnits as Units
+
 # force no legacy job properties
 from AthenaCommon import JobProperties
 JobProperties.jobPropertiesDisallowed = True
+
 
 
 def fromRunArgs(runArgs):
@@ -26,6 +29,9 @@ def fromRunArgs(runArgs):
     log.info('**** Setting-up configuration flags')
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
+    # set per-event timeout (in ns)
+    flags.Exec.EventTimeOut = 3600*Units.second
+
     commonRunArgsToFlags(runArgs, flags)
 
     # Autoconfigure enabled subdetectors

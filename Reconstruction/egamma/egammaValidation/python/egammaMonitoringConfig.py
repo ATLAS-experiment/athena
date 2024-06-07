@@ -68,6 +68,10 @@ def egammaMonitoringCfg(flags, particleType = 'electron',
     else:
         MCClassifier = None
 
+    from AthenaConfiguration.Enums import LHCPeriod
+    if flags.GeoModel.Run > LHCPeriod.Run3:
+        kwarg['hasTRT'] = False
+
     # The monitoring alg
     egMon = CompFactory.EgammaMonitoring(
         name = 'egammaMonitoringAlg',

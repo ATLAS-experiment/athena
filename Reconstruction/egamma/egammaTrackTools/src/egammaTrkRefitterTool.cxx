@@ -36,8 +36,6 @@ egammaTrkRefitterTool::egammaTrkRefitterTool(const std::string& type,
 StatusCode
 egammaTrkRefitterTool::initialize()
 {
-  ATH_MSG_DEBUG("Initializing egammaTrackRefitter");
-
   // Retrieve fitter
   ATH_CHECK(m_ITrackFitter.retrieve());
 
@@ -49,11 +47,8 @@ egammaTrkRefitterTool::initialize()
   } else {
     m_CCOTBuilder.disable();
   }
-
   // Set the particle hypothesis to match the material effects
   m_ParticleHypothesis = Trk::ParticleSwitcher::particle[m_matEffects];
-
-  ATH_MSG_INFO("Initialization completed successfully");
   return StatusCode::SUCCESS;
 }
 

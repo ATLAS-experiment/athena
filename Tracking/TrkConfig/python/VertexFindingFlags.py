@@ -8,6 +8,7 @@ from TrkConfig.TrkConfigFlags import PrimaryPassConfig
 class VertexSortingSetup(FlagEnum):
     SumPt2Sorting = 'SumPt2Sorting'
     SumPtSorting = 'SumPtSorting'
+    JetWeightedSorting = 'JetWeightedSorting'
 
 
 class VertexSetup(FlagEnum):

@@ -14,13 +14,12 @@ import sys
 import os
 
 # Error keywords
-errorRegex = [
+regexMap = {}
+regexMap['error/fatal'] = [
     r'^ERROR ', '^ERROR:', ' ERROR ', ' FATAL ', 'CRITICAL ', 'ABORT_CHAIN',
     r'^Exception\:',
     r'^Caught signal',
     r'^Core dump',
-    r'inconsistent use of tabs and spaces in indentation',
-    r'glibc detected',
     r'tcmalloc\: allocation failed',
     r'athenaHLT.py\: error',
     r'HLTMPPU.*Child Issue',
@@ -30,6 +29,12 @@ errorRegex = [
     r'failure loading library',
     r'Cannot allocate memory',
     r'Attempt to free invalid pointer',
+    r'CUDA error',
+]
+
+regexMap['prohibited'] = [
+    r'inconsistent use of tabs and spaces in indentation',
+    r'glibc detected',
     r'in state: CONTROLREADY$',
     r'(^\s*|^\d\d:\d\d:\d\d\s*)missing data: ',
     r'(^\s*|^\d\d:\d\d:\d\d\s*)missing conditions data: ',
@@ -37,24 +42,26 @@ errorRegex = [
     r'(^\s*|^\d\d:\d\d:\d\d\s*)required by tool: ',
     r'pure virtual method called',
     r'Selected dynamic Aux atribute.*not found in the registry',
-    r'FPEAuditor.*WARNING FPE',
-    r'CUDA error',
+]
+
+regexMap['fpe'] = [
+        r'FPEAuditor.*WARNING FPE',
 ]
 
 # Add list of all builtin Python errors
 builtins = dir(locals()['__builtins__'])
 builtinErrors = [b for b in builtins if 'Error' in b]
-errorRegex.extend(builtinErrors)
+regexMap['python error'] = builtinErrors
 
 # Traceback keywords
-traceback = [
+backtrace = [
     r'Traceback',
     r'Shortened traceback',
     r'stack trace',
     r'^Algorithm stack',
     r'^#\d+\s*0x\w+ in ',
 ]
-errorRegex.extend(traceback)
+regexMap['backtrace'] = backtrace
 
 # FPEAuditor traceback keywords
 fpeTracebackStart = [r'FPEAuditor.*INFO FPE stacktrace']
@@ -63,10 +70,10 @@ fpeTracebackCont = [
     '  included from : ',
     '  in library : ',
 ]
-errorRegex.extend(fpeTracebackStart)
+regexMap['backtrace'].extend(fpeTracebackStart)
 
 # Warning keywords
-warningRegex = ['WARNING ']
+regexMap['warning'] = ['WARNING ']
 
 
 def main():
@@ -119,72 +126,91 @@ def parseConfig(args):
 
 def scanLogfile(args, logfile, ignorePattern=[]):
     """Scan one log file and print report"""
-    resultsA =[]
-    pattern = []
-    tPattern = re.compile('|'.join(traceback))
+    tPattern = re.compile('|'.join(backtrace))
     fpeStartPattern = re.compile('|'.join(fpeTracebackStart))
     fpeContPattern = re.compile('|'.join(fpeTracebackCont))
     ignoreDict = {}
 
+    categories = []
     if args.warnings is True:
-        pattern = warningRegex
+        categories += ['warning']
     if args.errors is True:
-        pattern = errorRegex
-    msgLevels = re.compile('|'.join(pattern))
+        categories += ['error/fatal', 'prohibited', 'python error', 'backtrace']
     igLevels = re.compile('|'.join(ignorePattern))
+
+    patterns = {
+        cat: re.compile('|'.join(regexMap[cat])) for cat in categories
+    }
+    resultsA = {cat:[] for cat in categories}
     with open(logfile, encoding='utf-8') as f:
         tracing = False
         fpeTracing = False
+
         for line in f:
-            #Tracing only makes sense for errors
-            if args.errors is True and re.search(tPattern,line) and not re.search(igLevels,line):
-                tracing = True
-            elif args.errors is True and re.search(fpeStartPattern,line) and not re.search(igLevels,line):
-                fpeTracing = True
-            elif line =='\n':
-                tracing = False
-                fpeTracing = False
-            if re.search(msgLevels,line):
-                resultsA.append(line)
-            elif tracing:
-                # This currently prints all lines after a traceback even if they don't belong to traceback
-                resultsA.append(line)
-            elif fpeTracing:
-                if re.search(fpeContPattern,line):
-                    resultsA.append(line)
-                else:
+            # First check if we need to start or continue following a trace
+            # Tracing only makes sense for errors
+            if args.errors  and not re.search(igLevels,line):
+                if re.search(tPattern,line):
+                    tracing = True
+                elif re.search(fpeStartPattern,line):
+                    fpeTracing = True
+                elif line =='\n':
+                    tracing = False
                     fpeTracing = False
+
+                if tracing:
+                    # Save all lines after a backtrace even if they don't belong to backtrace
+                    resultsA['backtrace'].append(line)
+                elif fpeTracing:
+                    # Continue following FPE so long as recognised
+                    if re.search(fpeContPattern,line):
+                        resultsA['backtrace'].append(line)
+                    else:
+                        fpeTracing = False
+                else:
+                    for cat in categories:
+                        if re.search(patterns[cat],line):
+                            resultsA[cat].append(line)
 
     if args.showexcludestats and args.config:
         separateIgnoreRegex = [re.compile(line) for line in ignorePattern]
         ignoreDict = {line:0 for line in ignorePattern} # stores counts of ignored errors/warnings
 
-    results = []
+    results = {cat:[] for cat in categories}
     if args.config is None:
         results = resultsA
     else:
         # Filter messages
-        for res in resultsA:
-            if not re.search(igLevels,res):
-                results.append(res)
-            elif args.showexcludestats:
-                for i in range(len(separateIgnoreRegex)):
-                    if re.search(separateIgnoreRegex[i],res):
-                        ignoreDict[ignorePattern[i]] += 1
+        for cat, messages in resultsA.items():
+            for res in messages:
+                if not re.search(igLevels,res):
+                    results[cat].append(res)
+                elif args.showexcludestats:
+                    for i in range(len(separateIgnoreRegex)):
+                        if re.search(separateIgnoreRegex[i],res):
+                            ignoreDict[ignorePattern[i]] += 1
+
 
     # Report results
-    if args.printpatterns:
-        print('check_log.py - Checking for: '+ str(pattern) +' in '+logfile+'\n')
+    found_bad_message = False
+    for cat in categories:
+
+        if args.printpatterns:
+            print(f'check_log.py - Checking for {cat} messages with pattern: {str(patterns[cat])} in '+logfile+'\n')
+        if len(results[cat]) > 0:
+            print(f'Found {len(results[cat])} {cat} message(s) in {logfile}:')
+            for msg in results[cat]: print(msg.strip('\n'))
+            found_bad_message = True
+
     if ignoreDict:
         print('Ignored:')
         for s in ignoreDict:
             if ignoreDict[s] > 0:
                 print(str(ignoreDict[s]) + "x " + s)
         print('\n')
-    if len(results) > 0:
-        print(f'Found {len(results)} error/warning message(s) in {logfile}:')
-        for msg in results: print(msg.strip('\n'))
-        print(f'FAILURE : error/fatal found in {logfile}')
+
+    if found_bad_message:
+        print(f'FAILURE : problematic message found in {logfile}')
         return 1
 
     print(f'No error/warning messages found in {logfile}')

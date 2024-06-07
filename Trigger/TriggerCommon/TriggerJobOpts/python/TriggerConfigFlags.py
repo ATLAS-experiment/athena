@@ -518,6 +518,9 @@ def createTriggerRecoFlags():
     flags.addFlag("Trigger.Jet.doVRJets", False,
                   help='enable the addition of the VR track jet reconstruction sequence')
 
+    flags.addFlag("Trigger.FSTrk.doJetRestrictedVertexSort", False,
+                  help='use tracks in jets for computing sumpt2 for vertex sorting')
+
     # chooses calibration config file for HLT small-R jets
     # mapping in: Reconstruction/Jet/JetCalibTools/python/JetCalibToolsConfig.py
     # All calib keys for HLT jets have to start with "Trig" otherwise the JetCalibTool config fails!

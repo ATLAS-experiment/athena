@@ -69,11 +69,11 @@ EMBremCollectionBuilder::initialize()
 StatusCode
 EMBremCollectionBuilder::EMBremCollectionBuilder::finalize()
 {
-  ATH_MSG_INFO("--- EMBremCollectionBuilder Statistics ---");
+  ATH_MSG_INFO("====> GSF fitting Statistics ===");
   ATH_MSG_INFO("RefittedTracks: " << m_RefittedTracks);
   ATH_MSG_INFO("Failed Fit Tracks: " << m_FailedFitTracks);
   ATH_MSG_INFO("Not refitted due to selection: " << m_FailedSiliconRequirFit);
-  ATH_MSG_INFO("---------------------------------------------");
+  ATH_MSG_INFO("<===========================================");
   return StatusCode::SUCCESS;
 }
 

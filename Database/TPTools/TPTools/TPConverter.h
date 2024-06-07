@@ -371,7 +371,6 @@ public:
       Needs to be implemented by the developer on the actual converter. 
       @param persObj [IN] persistent object
       @param transObj [IN] transient object
-      @param key [IN] SG key of object being read.
       @param log [IN] output message stream
   */
    virtual void persToTransWithKey(const PERS* persObj, TRANS* transObj,

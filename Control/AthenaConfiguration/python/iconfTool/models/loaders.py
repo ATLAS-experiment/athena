@@ -42,6 +42,21 @@ baseParser.add_argument(
     help="Ignore differences in e.g. outputlevel",
     action="store_true",
 )
+
+baseParser.add_argument(
+    "--includeClasses",
+    action='append',
+    default=[],
+    help="Only list the components selected by the given classname (anchored regular expression)  - only used in class listing, for diff or similar use --includeComps"
+    )
+
+baseParser.add_argument(
+    "--excludeClasses",
+    action='append',
+    default=[],
+    help="Don't list the components excluded by the given classname (anchored regular expression) - only used in class listing, for diff or similar use --excludeComps"
+)
+
 baseParser.add_argument(
     "--ignore",
     action="append",
