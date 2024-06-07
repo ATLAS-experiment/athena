@@ -14,7 +14,7 @@ from AthenaConfiguration.Enums import HIMode
 import logging
 logger = logging.getLogger('TrigHLTMonitoring')
 
-RAWonlySignatureList = ['Egamma', 'Calo', 'Bphys', 'MET']
+RAWonlySignatureList = ['Egamma', 'Calo', 'MET']
 
 def createHLTDQConfigFlags():
     from AthenaConfiguration.AthConfigFlags import AthConfigFlags
@@ -41,8 +41,8 @@ def verifySignatureDQSettings(inputFlags):
     if inputFlags.DQ.Environment == 'AOD' and not inputFlags.Input.isMC:
         for signature in RAWonlySignatureList:
             sigFlag = f"do{signature}"
-            if inputFlags.DQ.Steering.HLT[sigFlag]:
-                logger.error(f"HLT monitoring on data AOD input for {signature} not allowed - not all HLT collections are recorded to AOD!")
+            if getattr(inputFlags.DQ.Steering.HLT, sigFlag):
+                logger.error(f"HLT monitoring on data AOD input for {signature} not allowed - not all HLT collections are recorded to AOD! Try set DQ.Steering.HLT.{sigFlag}=False.")
                 raise ValueError("HLT monitoring enabled on data AOD input.")
 
 def TrigHLTMonTopConfig(inputFlags):
