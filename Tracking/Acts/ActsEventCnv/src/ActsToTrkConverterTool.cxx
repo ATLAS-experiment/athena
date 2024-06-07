@@ -16,6 +16,7 @@
 #include "TrkSurfaces/PerigeeSurface.h"
 #include "TrkSurfaces/Surface.h"
 #include "xAODMeasurementBase/UncalibratedMeasurement.h"
+#include "MuonReadoutGeometryR4/MuonDetectorManager.h"
 
 // PACKAGE
 #include "ActsGeometry/ActsDetectorElement.h"
@@ -69,8 +70,10 @@ ActsTrk::ActsToTrkConverterTool::ActsToTrkConverterTool(
     : base_class(type, name, parent) {}
 
 StatusCode ActsTrk::ActsToTrkConverterTool::initialize() {
-  ATH_MSG_INFO("Initializing ACTS to ATLAS converter tool");
-
+  ATH_MSG_VERBOSE("Initializing ACTS to ATLAS converter tool");
+  if (m_extractMuonSurfaces){
+    ATH_CHECK(m_idHelperSvc.retrieve());
+  }
   if (!m_trackingGeometryTool.empty()) {
     ATH_CHECK(m_trackingGeometryTool.retrieve());
     m_trackingGeometry = m_trackingGeometryTool->trackingGeometry();
@@ -99,6 +102,20 @@ StatusCode ActsTrk::ActsToTrkConverterTool::initialize() {
                                     << surface->geometryId());
       }
     });
+  }
+
+  if (m_extractMuonSurfaces){
+    const MuonGMR4::MuonDetectorManager* muonMgr{nullptr};    
+    ATH_CHECK(detStore()->retrieve(muonMgr));
+    unsigned int mapSize = m_actsSurfaceMap.size(); // For debugging message later
+    for (auto readoutElement : muonMgr->getAllReadoutElements()) {
+      std::map<Identifier, std::shared_ptr<Acts::Surface>> reSurfaces = readoutElement->getSurfaces();
+      for (auto [id, surf] : reSurfaces){
+        const Acts::Surface* tmp = surf.get();
+        m_actsSurfaceMap.insert(std::pair<Identifier, const Acts::Surface*>(id, tmp));
+      }
+    }
+    ATH_MSG_VERBOSE("After adding muon surfaces, the map has grown from "<<mapSize<<" to "<<m_actsSurfaceMap.size());
   }
   return StatusCode::SUCCESS;
 }
@@ -164,7 +181,7 @@ ActsTrk::ActsToTrkConverterTool::trkTrackParametersToActsParameters(
 
   // get the associated surface
   if (atlasParameter.hasSurface() &&
-      atlasParameter.associatedSurface().owner() != Trk::SurfaceOwner::noOwn) {
+      atlasParameter.associatedSurface().owner() == Trk::SurfaceOwner::DetElOwn) {
     try {
       actsSurface = trkSurfaceToActsSurface(atlasParameter.associatedSurface())
                         .getSharedPtr();
@@ -177,11 +194,12 @@ ActsTrk::ActsToTrkConverterTool::trkTrackParametersToActsParameters(
   // no associated surface create a perigee one
   else {
     ATH_MSG_VERBOSE(
-        "trkTrackParametersToActsParameters:: No associated surface found, "
-        "creating a perigee surface. Trk parameters:");
+        "trkTrackParametersToActsParameters:: No associated surface found (owner: "<<atlasParameter.associatedSurface().owner()<<
+        "). Creating a perigee surface. Trk parameters:");
     ATH_MSG_VERBOSE(atlasParameter);
     actsSurface = Acts::Surface::makeShared<const Acts::PerigeeSurface>(
         Acts::Vector3(0., 0., 0.));
+        // atlasParameter.position()); // FIXME! Dramatically better for Muons, but worse for ITK. 
   }
 
   // Construct track parameters
@@ -487,12 +505,12 @@ void ActsTrk::ActsToTrkConverterTool::trkTrackCollectionToActsTrackContainer(
             }
           }
         } catch (const std::exception& e){
-          ATH_MSG_ERROR("Unable to convert TrackParameter. Will be missing from ACTS track.");
+          ATH_MSG_ERROR("Unable to convert TrackParameter with exception ["<<e.what()<<"]. Will be missing from ACTS track.");
         }
       }
       if (tsos->measurementOnTrack()) {
-        ATH_MSG_VERBOSE("Converting measurement.");
         auto &measurement = *(tsos->measurementOnTrack());
+
         measurementsCount++;
         // const Acts::Surface &surface =
         //     trkSurfaceToActsSurface(measurement.associatedSurface());

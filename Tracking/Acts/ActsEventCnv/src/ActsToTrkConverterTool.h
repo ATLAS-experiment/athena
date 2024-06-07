@@ -19,6 +19,7 @@
 #include "xAODTracking/TrackStateContainer.h"
 #include "xAODTracking/TrackMeasurementContainer.h"
 #include "TrkEventPrimitives/PdgToParticleHypothesis.h"
+#include "MuonIdHelpers/IMuonIdHelperSvc.h"
 
 // PACKAGE
 #include "ActsEventCnv/IActsToTrkConverterTool.h"
@@ -102,6 +103,12 @@ private:
      "Print additional output for debug plots"};
 
   Trk::PdgToParticleHypothesis m_pdgToParticleHypothesis;
+
+  Gaudi::Property<bool> m_extractMuonSurfaces{
+     this, "ExtractMuonSurfaces", false,
+     "If True, use the MuonDetectorManager to extract the Muon surfaces"};
+  ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
+
 };
 
 }; // namespace ActsTrk

@@ -73,6 +73,10 @@ std::pair<const Trk::TrkDetElementBase*, const Trk::PrepRawData*> Muon::MuonEven
 
     const Identifier& id = rioOnTrack.identify();
     const TrkDetElementBase* detEl = getDetectorElement(id);
+    if (!detEl) {
+        ATH_MSG_ERROR("Could not find detector element for " << m_idHelperSvc->toString(id));
+        ATH_MSG_ERROR(rioOnTrack);
+    }
     const PrepRawData* prd = m_manuallyFindPRDs ? getLink(id, rioOnTrack.idDE()) : nullptr;
 
     if (m_fixTGCs && m_idHelperSvc->isTgc(id) && !rioOnTrack.prepRawData()) {
@@ -82,7 +86,7 @@ std::pair<const Trk::TrkDetElementBase*, const Trk::PrepRawData*> Muon::MuonEven
         ElementLinkToIDC_TGC_Container& el = tgc->m_rio;
         el.resetWithKeyAndIndex(m_tgcPrdKey.key(), el.index());
     }
-    if (!detEl) ATH_MSG_ERROR("Apparently could not find detector element for " << m_idHelperSvc->toString(id));
+
     ATH_MSG_VERBOSE("Found PRD at : " << prd);
     return std::pair<const Trk::TrkDetElementBase*, const Trk::PrepRawData*>(detEl, prd);
 }
@@ -187,7 +191,7 @@ const Trk::TrkDetElementBase* Muon::MuonEventCnvTool::getDetectorElement(const I
     } else if (m_idHelperSvc->isMM(id)) {
         detEl = muonMgr->getMMReadoutElement(id);
     }
-    if (!detEl) ATH_MSG_ERROR("Apparently could not find detector element for Identifier: " << m_idHelperSvc->toString(id));
+    if (!detEl) ATH_MSG_ERROR("Could not find detector element for Identifier: " << m_idHelperSvc->toString(id));
     return detEl;
 }
 
