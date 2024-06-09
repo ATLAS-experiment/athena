@@ -32,8 +32,6 @@ def InDetUpdatorCfg(flags, name='InDetUpdator', **kwargs):
     tool = None
     if flags.Tracking.kalmanUpdator == KalmanUpdatorType.KalmanUpdator_xk:
         tool = CompFactory.Trk.KalmanUpdator_xk(name, **kwargs)
-    elif flags.Tracking.kalmanUpdator == KalmanUpdatorType.KalmanWeightUpdator:
-        tool = CompFactory.Trk.KalmanWeightUpdator(name, **kwargs)
     elif flags.Tracking.kalmanUpdator == KalmanUpdatorType.KalmanUpdatorSMatrix:
         tool = CompFactory.Trk.KalmanUpdatorSMatrix(name, **kwargs)
     elif flags.Tracking.kalmanUpdator == KalmanUpdatorType.KalmanUpdator:
