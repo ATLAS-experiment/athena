@@ -3,12 +3,21 @@
 */
 
 
+#include "MagFieldElements/BFieldCond.h"
+#include "CxxUtils/inline_hints.h"
 /*
  * Compute the Biot-Savart field due to this conductor
  * If deriv[9] is passed, also computes the field derivatives
  * The results are _added_ to B[] and deriv[].
  */
-inline void
+
+ATH_FLATTEN
+// We compile this package with optimization, even in debug builds; otherwise,
+// the heavy use of Eigen makes it too slow.  However, from here we may call
+// to out-of-line Eigen code that is linked from other DSOs; in that case,
+// it would not be optimized.  Avoid this by forcing all Eigen code
+// to be inlined here if possible.
+void
 BFieldCond::addBiotSavart(double scaleFactor,
                           const double* ATH_RESTRICT xyz,
                           double* ATH_RESTRICT B_in,

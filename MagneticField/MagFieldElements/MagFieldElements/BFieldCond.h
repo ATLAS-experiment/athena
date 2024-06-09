@@ -15,6 +15,7 @@
 #define BFIELDCOND_H
 
 #include "EventPrimitives/EventPrimitives.h"
+#include "CxxUtils/restrict.h"
 #include <cmath>
 
 class BFieldCond
@@ -58,5 +59,4 @@ private:
   double m_curr;    // current (in A) flowing through the conductor
   double m_nomCurr; // nominal current (in A) read from the map file
 };
-#include "BFieldCond.icc"
 #endif
