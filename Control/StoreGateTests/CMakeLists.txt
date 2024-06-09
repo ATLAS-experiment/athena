@@ -19,7 +19,7 @@ atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_joboptions( share/*.py share/tests/*.py )
 
 atlas_add_test( PyClidsTestWriter
-                SCRIPT athena.py StoreGateTests/test_recordStlClids_jobOptions.py
+                SCRIPT athena.py ${CMAKE_CURRENT_SOURCE_DIR}/test/test_recordStlClids.py
                 PROPERTIES TIMEOUT 600
                 LOG_IGNORE_PATTERN "running|XMLCatalog|0x[0-9a-f]{4,}" )
 
