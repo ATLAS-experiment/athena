@@ -110,6 +110,9 @@ StatusCode ActsWriteTrackingGeometryTransforms::execute() {
       side = m_SCT_ID->side(ath_geoid);
       os << 1;
     }
+    else {
+      throw std::runtime_error{"The Detector Element is neither Pixel nor SCT"}; // this shouldn't happen
+    }
     // Write the type of silicon first (0=PIX, 1=SCT)
     os << ";";
     
