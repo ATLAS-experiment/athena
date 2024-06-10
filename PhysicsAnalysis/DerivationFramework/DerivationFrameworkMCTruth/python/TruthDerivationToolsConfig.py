@@ -214,9 +214,6 @@ def TruthBornLeptonCollectionMakerCfg(flags, name, **kwargs):
 def HardScatterCollectionMakerCfg(flags, name, **kwargs):
     """Add a mini-collection for the hard scatter and N subsequent generations"""
     acc = ComponentAccumulator()
-    HardScatterCollectionMaker = CompFactory.DerivationFramework.HardScatterCollectionMaker
-    acc.addPublicTool(HardScatterCollectionMaker(name = name, **kwargs),
-                      primary = True)
     return acc
 
 #add the 'decoration' tool to dress the main truth collection with the classification
