@@ -2,18 +2,18 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "MuonCondAlg/sTgcDigitEffiCondAlg.h"
+#include "MuonCondAlg/MmDigitEffiCondAlg.h"
 
 #include <StoreGate/WriteCondHandle.h>
 #include <AthenaKernel/IOVInfiniteRange.h>
 #include <PathResolver/PathResolver.h>
 #include <fstream>
 
-sTgcDigitEffiCondAlg::sTgcDigitEffiCondAlg(const std::string& name, ISvcLocator* pSvcLocator) :
+MmDigitEffiCondAlg::MmDigitEffiCondAlg(const std::string& name, ISvcLocator* pSvcLocator) :
     AthReentrantAlgorithm(name, pSvcLocator) {}
 
 // Initialize
-StatusCode sTgcDigitEffiCondAlg::initialize() {
+StatusCode MmDigitEffiCondAlg::initialize() {
     ATH_MSG_DEBUG("initializing " << name());
     ATH_CHECK(m_idHelperSvc.retrieve());
     ATH_CHECK(m_writeKey.initialize());
@@ -29,7 +29,7 @@ StatusCode sTgcDigitEffiCondAlg::initialize() {
 }
 
 // execute
-StatusCode sTgcDigitEffiCondAlg::execute(const EventContext& ctx) const {
+StatusCode MmDigitEffiCondAlg::execute(const EventContext& ctx) const {
     ATH_MSG_DEBUG("execute " << name());
     // launching Write Cond Handle
     SG::WriteCondHandle<Muon::DigitEffiData> writeHandle{m_writeKey, ctx};
@@ -68,8 +68,8 @@ StatusCode sTgcDigitEffiCondAlg::execute(const EventContext& ctx) const {
     ATH_MSG_DEBUG("Recorded new " << writeHandle.key() << " with range " << writeHandle.getRange() << " into Conditions Store");
     return StatusCode::SUCCESS;
 }
-StatusCode sTgcDigitEffiCondAlg::parseDataFromJSON(const nlohmann::json& lines,
-                                                   Muon::DigitEffiData& effiData) const {
+StatusCode MmDigitEffiCondAlg::parseDataFromJSON(const nlohmann::json& lines,
+                                                 Muon::DigitEffiData& effiData) const {
     for (auto& corr : lines.items()) {
         nlohmann::json line = corr.value();    
          /// Station Component identification
@@ -81,8 +81,8 @@ StatusCode sTgcDigitEffiCondAlg::parseDataFromJSON(const nlohmann::json& lines,
         const int feb = line["frontEndBoard"];
         const double efficiency = line["efficiency"];
         bool is_valid{false};
-        const Identifier id = m_idHelperSvc->stgcIdHelper().febID(stationType, stationEta, stationPhi, 
-                                                                  multiLayer, gasGap, feb, is_valid);
+        const Identifier id = m_idHelperSvc->mmIdHelper().febID(stationType, stationEta, stationPhi, 
+                                                                multiLayer, gasGap, feb, is_valid);
         if (!is_valid) {
             ATH_MSG_FATAL("The Identifier identifier "<<stationType<<", "<<stationEta<<", "<<stationPhi
                         << ", "<<multiLayer<<", "<<gasGap<<", "<<feb<<" is invalid");
