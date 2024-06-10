@@ -19,10 +19,7 @@
  */
 inline
 LArVectorProxy::LArVectorProxy()
-  : m_beg (nullptr),
-    m_end (nullptr)
-{
-}
+  : std::span<const float>() {}
 
 
 /**
@@ -31,8 +28,7 @@ LArVectorProxy::LArVectorProxy()
  */
 inline
 LArVectorProxy::LArVectorProxy (const std::vector<value_type>& vec)
-  : m_beg (vec.data()),
-    m_end (m_beg + vec.size())
+  :  std::span<const float>(vec.cbegin(),vec.cend())
 {
 }
 
@@ -44,8 +40,7 @@ LArVectorProxy::LArVectorProxy (const std::vector<value_type>& vec)
    */
 inline
 LArVectorProxy::LArVectorProxy (const value_type* beg, const value_type* end)
-  : m_beg (beg),
-    m_end (end)
+  :  std::span<const float>(beg,end)
 {
 }
 
@@ -56,27 +51,7 @@ LArVectorProxy::LArVectorProxy (const value_type* beg, const value_type* end)
 inline
 bool LArVectorProxy::valid() const
 {
-  return m_beg != nullptr;
-}
-
-
-/**
- * @brief Return the size of the range being proxied.
- */
-inline
-size_t LArVectorProxy::size() const
-{
-  return m_end - m_beg;
-}
-
-
-/**
- * @brief Vector indexing.
- */
-inline
-LArVectorProxy::value_type LArVectorProxy::operator[] (size_t i) const
-{
-  return m_beg[i];
+  return data() != nullptr;
 }
 
 
@@ -88,7 +63,7 @@ LArVectorProxy::value_type LArVectorProxy::at (size_t i) const
 {
   if (i >= size())
     throw std::out_of_range ("LArVectorProxy::at");
-  return m_beg[i];
+  return operator[](i);
 }
 
 
@@ -98,36 +73,5 @@ LArVectorProxy::value_type LArVectorProxy::at (size_t i) const
 inline
 std::vector<LArVectorProxy::value_type> LArVectorProxy::asVector() const
 {
-  return std::vector<value_type> (m_beg, m_end);
+  return std::vector<value_type> (begin(), end());
 }
-
-
-/**
- * @brief Return a pointer to the start of the data.
- */
-inline
-const LArVectorProxy::value_type* LArVectorProxy::data() const
-{
-  return m_beg;
-}
-
-
-/**
- * @brief Begin iterator.
- */
-inline
-LArVectorProxy::const_iterator LArVectorProxy::begin() const
-{
-  return m_beg;
-}
-
-
-/**
- * @brief End iterator.
- */
-inline
-LArVectorProxy::const_iterator LArVectorProxy::end() const
-{
-  return m_end;
-}
-

@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file LArElecCalib/LArVectorProxy.h
@@ -9,7 +9,6 @@
  * @date Apr, 2011
  * @brief Proxy for accessing a range of float values like a vector.
  *
- * Can change to a view once we switch to c++20?
  */
 
 
@@ -18,6 +17,7 @@
 
 
 #include <vector>
+#include <span>
 #include <cstdlib>
 
 
@@ -28,23 +28,17 @@
  * is flattened into a single vector.  But we still want to provide
  * a vector-like interface for the data for an individual channel.
  * 
- * We can do that with this proxy object.  It stores two pointers
- * to floats, which define a range.  It then provides methods
- * compatible with std::vector to access these data.
- *
- * We only implement methods that are actually used by existing clients.
+ * We can do that with this proxy object, based on std::span. 
+ * On top of std::span's interface, we implement methods that are 
+ * used by existing clients.
  */
-class LArVectorProxy
-{
+
+
+class LArVectorProxy :
+  public std::span<const float>  {
+  
 public:
-  /// The contained type.
-  typedef float value_type;
-
-
-  /// Be lazy and just use a pointer as the iterator type.
-  typedef const value_type* const_iterator;
-
-
+ 
   /**
    * @brief Default constructor. 
    *        Creates the proxy in an invalid state.
@@ -72,19 +66,6 @@ public:
    */
   bool valid() const;
 
-
-  /**
-   * @brief Return the size of the range being proxied.
-   */
-  size_t size() const;
-
-
-  /**
-   * @brief Vector indexing.
-   */
-  value_type operator[] (size_t i) const;
-
-
   /**
    * @brief Vector indexing with bounds check.
    */
@@ -95,29 +76,7 @@ public:
    * @brief Convert back to a vector.
    */
   std::vector<value_type> asVector() const;
-
-
-  /**
-   * @brief Return a pointer to the start of the data.
-   */
-  const value_type* data() const;
-
-
-  /**
-   * @brief Begin iterator.
-   */
-  const_iterator begin() const;
-
-
-  /**
-   * @brief End iterator.
-   */
-  const_iterator end() const;
-
-
-private:
-  const value_type* m_beg;
-  const value_type* m_end;
+  
 };
 
 
