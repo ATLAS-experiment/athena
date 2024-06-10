@@ -132,7 +132,7 @@ private:
   SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_detMgrKey{this, "DetectorManagerKey", "MuonDetectorManager",
                                                                             "Key of input MuonDetectorManager condition data"};
   
-  SG::ReadCondHandleKey<DigitEffiData> m_effiKey{this, "EffiDigiKey", "sTgcDigitEff",
+  SG::ReadCondHandleKey<Muon::DigitEffiData> m_effiKey{this, "EffiDigiKey", "sTgcDigitEff",
                                                       "Key of the efficiency data in the CondStore"};
 
   

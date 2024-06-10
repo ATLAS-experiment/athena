@@ -56,7 +56,7 @@ class sTgcDigitMaker : public AthMessaging {
   */
   struct DigiConditions {
      const MuonGM::MuonDetectorManager* detMgr{nullptr};
-     const DigitEffiData* efficiencies{nullptr};
+     const Muon::DigitEffiData* efficiencies{nullptr};
      const NswCalibDbThresholdData* thresholdData{nullptr};
      CLHEP::HepRandomEngine* rndmEngine{nullptr};
   };
