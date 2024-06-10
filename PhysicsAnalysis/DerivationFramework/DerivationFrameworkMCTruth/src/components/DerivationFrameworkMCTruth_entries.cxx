@@ -14,7 +14,6 @@
 #include "DerivationFrameworkMCTruth/TruthD2Decorator.h"
 #include "DerivationFrameworkMCTruth/TruthQGDecorationTool.h"
 #include "src/TruthBornLeptonCollectionMaker.h"
-#include "src/HardScatterCollectionMaker.h"
 #include "src/TruthLinkRepointTool.h"
 #include "DerivationFrameworkMCTruth/TruthPVCollectionMaker.h"
 #include "src/GenFilterTool.h"
@@ -43,7 +42,6 @@ DECLARE_COMPONENT( TruthNavigationDecorator )
 DECLARE_COMPONENT( TruthD2Decorator )
 DECLARE_COMPONENT( TruthQGDecorationTool )
 DECLARE_COMPONENT( TruthBornLeptonCollectionMaker )
-DECLARE_COMPONENT( HardScatterCollectionMaker )
 DECLARE_COMPONENT( TruthLinkRepointTool )
 DECLARE_COMPONENT( TruthPVCollectionMaker )
 DECLARE_COMPONENT( GenFilterTool )

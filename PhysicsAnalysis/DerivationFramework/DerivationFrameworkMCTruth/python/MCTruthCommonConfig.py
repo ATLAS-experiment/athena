@@ -332,14 +332,6 @@ def AddHardScatterCollectionCfg(flags, generations=1):
     """Add a mini-collection for the hard scatter and N subsequent generations"""
     # Set up a tool to keep the taus and all downstream particles
     acc = ComponentAccumulator()
-    from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import HardScatterCollectionMakerCfg
-    DFCommonHSCollectionTool = acc.getPrimaryAndMerge(HardScatterCollectionMakerCfg(flags,
-                                                                                    name = "DFCommonHSCollectionTool",
-                                                                                    NewCollectionName = "HardScatter",
-                                                                                    Generations        = generations))
-    CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
-    acc.addEventAlgo(CommonAugmentation(name              = "MCTruthCommonHSCollectionKernel",
-                                        AugmentationTools = [DFCommonHSCollectionTool] ))
     return acc
 
 # Add navigation decorations on the truth collections
