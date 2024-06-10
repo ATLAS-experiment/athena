@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -113,7 +113,7 @@ bool JetQuarkLabel::matchJet(const xAOD::Jet& myJet,
 	if (pt > m_ptCut) {
 	  // Herwig ! Do not use quark from Hadron decay !
 	  //bool fromHadron = false; // put this back in later
-	  ATH_MSG_VERBOSE( "MCTruth: part " << (*pitr)->barcode() << " PDG= " << pdg
+	  ATH_MSG_VERBOSE( "MCTruth: part " << HepMC::barcode(*pitr) << " PDG= " << pdg
 			   << " pT= "  <<part_momentum_lv.Pt()
 			   << " eta= " <<part_momentum_lv.Eta()
 			   << " phi= " <<part_momentum_lv.Phi()
@@ -140,15 +140,15 @@ bool JetQuarkLabel::matchJet(const xAOD::Jet& myJet,
 	  if (afterFSR) {
 	  //if (afterFSR && !fromHadron) {
 	    deltaR=part_momentum_lv.DeltaR(jet_hlv);
-	    if (std::abs(pdg) == 4 && deltaR < deltaRC) {deltaRC = deltaR; barcc = (*pitr)->barcode(); }
-	    if (std::abs(pdg) == 5 && deltaR < deltaRB) {deltaRB = deltaR; barcb = (*pitr)->barcode(); LabellingParticle=(*pitr);}
+	    if (std::abs(pdg) == 4 && deltaR < deltaRC) {deltaRC = deltaR; barcc = HepMC::barcode(*pitr); }
+	    if (std::abs(pdg) == 5 && deltaR < deltaRB) {deltaRB = deltaR; barcb = HepMC::barcode(*pitr); LabellingParticle=(*pitr);}
 	  }
 	}
       }
       if (std::abs(pdg) == 15) {
 	double pt = part_momentum_lv.Pt();
 	if (pt > m_ptCut) {
-	  ATH_MSG_VERBOSE( "MCTruth: part " << (*pitr)->barcode() << " PDG= " << pdg
+	  ATH_MSG_VERBOSE( "MCTruth: part " << HepMC::barcode(*pitr) << " PDG= " << pdg
 			   << " pT= "  <<part_momentum_lv.Pt()
 			   << " eta= " <<part_momentum_lv.Eta()
 			   << " phi= " <<part_momentum_lv.Phi()
@@ -171,7 +171,7 @@ bool JetQuarkLabel::matchJet(const xAOD::Jet& myJet,
   if (deltaRB < m_deltaRCut) {
     if (info) {
       info->pdg      = 5;
-      info->barcode  = barcb;
+      info->barcode  = barcb; // FIXME barcode-based
       info->jetLabel = 5;
     }
     ATH_MSG_VERBOSE("Jet matched with a b "<<barcb<<" after FSR, dR: " << deltaRB);
@@ -185,7 +185,7 @@ bool JetQuarkLabel::matchJet(const xAOD::Jet& myJet,
   } else if (deltaRC < m_deltaRCut) {
     if (info) {
       info->pdg      = 4;
-      info->barcode  = barcc;
+      info->barcode  = barcc; // FIXME barcode-based
       info->jetLabel = 4;
     }
     ATH_MSG_VERBOSE("Jet matched with a c "<<barcc<<" after FSR, dR: " << deltaRC);
@@ -200,7 +200,7 @@ bool JetQuarkLabel::matchJet(const xAOD::Jet& myJet,
   } else {
     if (info) {
       info->pdg      = 0;
-      info->barcode  = 0;
+      info->barcode  = HepMC::UNDEFINED_ID; // FIXME barcode-based
       info->jetLabel = 0;
     }
     return true;

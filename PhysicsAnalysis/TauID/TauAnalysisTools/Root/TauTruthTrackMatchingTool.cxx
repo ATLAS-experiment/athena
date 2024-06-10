@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <TauAnalysisTools/TauTruthTrackMatchingTool.h>
@@ -93,7 +93,7 @@ StatusCode TauTruthTrackMatchingTool::checkTrackType(const xAOD::TauTrack& xTrac
     return StatusCode::SUCCESS;
   }
 
-  int iBarcode = xTruthParticle->barcode();
+  const int iBarcode = HepMC::barcode(xTruthParticle); // FIXME barcode-based - comparison against a specific value
   if (iBarcode > 0 && iBarcode < 10000)            decTruthType(xTrackParticle) = TauAnalysisTools::UnderlyingEventTrack;
   else if (iBarcode >= 10000 && iBarcode < 200000) decTruthType(xTrackParticle) = TauAnalysisTools::PileupTrack;
   else if (iBarcode == 0)                          decTruthType(xTrackParticle) = TauAnalysisTools::FakeTrack;

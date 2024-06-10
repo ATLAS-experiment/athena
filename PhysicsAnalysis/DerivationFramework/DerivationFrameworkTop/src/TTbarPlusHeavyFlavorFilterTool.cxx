@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DerivationFrameworkTop/TTbarPlusHeavyFlavorFilterTool.h"
@@ -183,7 +183,7 @@ bool TTbarPlusHeavyFlavorFilterTool::isInitialHadron(const xAOD::TruthParticle* 
   int type = std::abs(MC::leadingQuark(part));
   for(unsigned int i=0; i<part->nParents(); ++i){
     const xAOD::TruthParticle* parent = part->parent(i);
-      if( part->barcode() < parent->barcode() ) continue; /// protection for sherpa
+      if( HepMC::barcode(part) < HepMC::barcode(parent) ) continue; /// protection for sherpa // FIXME barcode-based
       int mothertype = std::abs(MC::leadingQuark(parent));
       if( mothertype == type ){
 	return false;
@@ -199,7 +199,7 @@ bool TTbarPlusHeavyFlavorFilterTool::isFinalHadron(const xAOD::TruthParticle* pa
   int type = std::abs(MC::leadingQuark(part));
   for(unsigned j = 0; j < part->nChildren(); j++){
     const xAOD::TruthParticle* child = part->child(j);
-    if( part->barcode() > child->barcode() ) continue; /// protection for sherpa
+    if( HepMC::barcode(part) > child->barcode() ) continue; /// protection for sherpa // FIXME barcode-based
     int childtype = std::abs(MC::leadingQuark(child));
     if( childtype == type ){
       return false;
@@ -214,7 +214,7 @@ bool TTbarPlusHeavyFlavorFilterTool::isQuarkFromHadron(const xAOD::TruthParticle
 
   for(unsigned int i=0; i<part->nParents(); ++i){
     const xAOD::TruthParticle* parent = part->parent(i);
-    if( part->barcode() < parent->barcode() ) continue; /// protection for sherpa
+    if( HepMC::barcode(part) < HepMC::barcode(parent) ) continue; /// protection for sherpa // FIXME barcode-based
     int mothertype = std::abs(MC::leadingQuark(parent));
     if( 4 == mothertype || 5 == mothertype ){
       return true;
@@ -232,7 +232,7 @@ bool TTbarPlusHeavyFlavorFilterTool::isCHadronFromB(const xAOD::TruthParticle* p
 
   for(unsigned int i=0; i<part->nParents(); ++i){
     const xAOD::TruthParticle* parent = part->parent(i);
-    if( part->barcode() < parent->barcode() ) continue; /// protection for sherpa
+    if( HepMC::barcode(part) < HepMC::barcode(parent) ) continue; /// protection for sherpa // FIXME barcode-based
     if( MC::isBottomHadron(parent)&&!HepMC::is_simulation_particle(parent) ){
       return true;
     }
@@ -267,7 +267,7 @@ const xAOD::TruthParticle*  TTbarPlusHeavyFlavorFilterTool::findInitial(const xA
 
   for(unsigned int i=0; i<part->nParents(); ++i){
     const xAOD::TruthParticle* parent = part->parent(i);
-    if( part->barcode() < parent->barcode() &&  looping) continue; /// protection for sherpa
+    if( HepMC::barcode(part) < HepMC::barcode(parent) &&  looping) continue; /// protection for sherpa // FIXME barcode-based
     if( part->pdgId() == parent->pdgId() ){
       return findInitial(parent, looping);
     }
@@ -290,7 +290,7 @@ bool TTbarPlusHeavyFlavorFilterTool::isDirectlyFromTop(const xAOD::TruthParticle
 
   for(unsigned int i=0; i<part->nParents(); ++i){
     const xAOD::TruthParticle* parent = part->parent(i);
-    if( part->barcode() < parent->barcode() &&  looping ) continue; /// protection for sherpa
+    if( HepMC::barcode(part) < HepMC::barcode(parent) &&  looping ) continue; /// protection for sherpa // FIXME barcode-based
     if( abs( parent->pdgId() ) == 6 ) return true;
   }
 
@@ -303,7 +303,7 @@ bool TTbarPlusHeavyFlavorFilterTool::isDirectlyFromWTop(const xAOD::TruthParticl
 
   for(unsigned int i=0; i<part->nParents(); ++i){
     const xAOD::TruthParticle* parent = part->parent(i);
-    if( part->barcode() < parent->barcode() &&  looping ) continue; /// protection for sherpa
+    if( HepMC::barcode(part) < HepMC::barcode(parent) &&  looping ) continue; /// protection for sherpa // FIXME barcode-based
     if( MC::isW(parent) ){
       if( isFromTop(parent, looping) ) return true;
     }

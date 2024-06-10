@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -9,6 +9,7 @@
 #include "TruthNavigationDecorator.h"
 #include "xAODTruth/TruthEventContainer.h"
 #include "xAODTruth/TruthParticleContainer.h"
+#include "TruthUtils/MagicNumbers.h"
 #include <string>
 #include <vector>
 #include <map>
@@ -67,13 +68,13 @@ StatusCode DerivationFramework::TruthNavigationDecorator::addBranches() const
     inputParticles.push_back(SG::ReadHandle<xAOD::TruthParticleContainer>(inputKey, ctx));
   }  
 
-  // Build a dictionary of barcodes and element links
+  // Build a dictionary of uniqueIDs and element links
   std::map<int,ElementLink<xAOD::TruthParticleContainer> > linkMap;
   for (auto& coll : inputParticles){
     for (size_t p=0;p<coll.ptr()->size();++p){
       if (!coll.ptr()->at(p)) continue; // Protection against null ptrs
-      if (linkMap.find(coll.ptr()->at(p)->barcode())!=linkMap.end()) continue; // Particle in multiple collections
-      linkMap[coll.ptr()->at(p)->barcode()] = ElementLink<xAOD::TruthParticleContainer>(*coll,p);
+      if (linkMap.find(HepMC::uniqueID(coll.ptr()->at(p))) != linkMap.end()) continue; // Particle in multiple collections
+      linkMap[HepMC::uniqueID(coll.ptr()->at(p))] = ElementLink<xAOD::TruthParticleContainer>(*coll,p);
     } // Loop over particles in the collection
   } // Loop over collections
 
@@ -93,7 +94,7 @@ StatusCode DerivationFramework::TruthNavigationDecorator::addBranches() const
   const xAOD::TruthEvent * event = truthEvents->at(0);
   for (size_t p=0;p<event->nTruthParticles();++p){
     if (!event->truthParticle(p)) continue; // Protection against null ptrs
-    if (linkMap.find(event->truthParticle(p)->barcode())==linkMap.end()) continue; // Not a particle we are interested in
+    if (linkMap.find(HepMC::uniqueID(event->truthParticle(p))) == linkMap.end()) continue; // Not a particle we are interested in
     // Make parent and child lists
     std::vector<ElementLink<xAOD::TruthParticleContainer> > parents;
     std::vector<ElementLink<xAOD::TruthParticleContainer> > children;
@@ -103,8 +104,8 @@ StatusCode DerivationFramework::TruthNavigationDecorator::addBranches() const
     seen_particles.clear();
     find_children( event->truthParticle(p) , children , linkMap , seen_particles );
     // Set the maps, so that we can decorate later
-    parentMap[event->truthParticle(p)->barcode()] = parents;
-    childMap[event->truthParticle(p)->barcode()] = children;
+    parentMap[HepMC::uniqueID(event->truthParticle(p))] = parents;
+    childMap[HepMC::uniqueID(event->truthParticle(p))] = children;
   } // Loop over truth particles in the big truth collection
 
   // Now final loop over the collections and setting all the decorators
@@ -118,8 +119,8 @@ StatusCode DerivationFramework::TruthNavigationDecorator::addBranches() const
     }
     for (size_t p=0;p<coll.ptr()->size();++p){
       if (!coll.ptr()->at(p)) continue; // Protection against null ptrs
-      parent_decorator.at(pCntr)(*coll.ptr()->at(p)) = parentMap[ coll->at(p)->barcode() ];
-      child_decorator.at(pCntr)(*coll.ptr()->at(p)) = childMap[ coll->at(p)->barcode() ];
+      parent_decorator.at(pCntr)(*coll.ptr()->at(p)) = parentMap[ HepMC::uniqueID(coll->at(p)) ];
+      child_decorator.at(pCntr)(*coll.ptr()->at(p)) = childMap[ HepMC::uniqueID(coll->at(p)) ];
     } // Loop over the particles in each collection
     ++pCntr;
   } // Loop over the collections
@@ -134,14 +135,14 @@ void DerivationFramework::TruthNavigationDecorator::find_parents( const xAOD::Tr
   // Null pointer protection
   if (!part) return;
   // Check if we've seen the particle before, otherwise add it to our list
-  if (std::find(seen_particles.begin(),seen_particles.end(),part->barcode())!=seen_particles.end()) return;
-  seen_particles.push_back(part->barcode());
+  if (std::find(seen_particles.begin(), seen_particles.end(), HepMC::uniqueID(part)) != seen_particles.end()) return;
+  seen_particles.push_back(HepMC::uniqueID(part));
   // Loop through the parents and see if we know about them; otherwise iterate through the list
   for (size_t parent=0;parent<part->nParents();++parent){
     if (!part->parent(parent)) continue; // Null pointer check
-    if (linkMap.find(part->parent(parent)->barcode())!=linkMap.end()){
+    if (linkMap.find(HepMC::uniqueID(part->parent(parent))) != linkMap.end()){
       // Hit!  Add it to the list
-      parents.push_back( linkMap[part->parent(parent)->barcode()] );
+      parents.push_back( linkMap[HepMC::uniqueID(part->parent(parent))] );
     } else {
       // Not a hit yet, keep iterating
       find_parents( part->parent(parent) , parents , linkMap , seen_particles );
@@ -156,14 +157,14 @@ void DerivationFramework::TruthNavigationDecorator::find_children( const xAOD::T
   // Null pointer protection
   if (!part) return;
   // Check if we've seen the particle before, otherwise add it to our list
-  if (std::find(seen_particles.begin(),seen_particles.end(),part->barcode())!=seen_particles.end()) return;
-  seen_particles.push_back(part->barcode());
+  if (std::find(seen_particles.begin(),seen_particles.end(),HepMC::uniqueID(part)) != seen_particles.end()) return;
+  seen_particles.push_back(HepMC::uniqueID(part));
   // Look through the children and see if we know about them; otherwise iterate through the list
   for (size_t child=0;child<part->nChildren();++child){
     if (!part->child(child)) continue; // Null pointer check
-    if (linkMap.find(part->child(child)->barcode())!=linkMap.end()){
+    if (linkMap.find(HepMC::uniqueID(part->child(child))) != linkMap.end()){
       // Hit!  Add it to the list
-      children.push_back( linkMap[part->child(child)->barcode()] );
+      children.push_back( linkMap[HepMC::uniqueID(part->child(child))] );
     } else {
       // Not a hit yet, keep iterating
       find_children( part->child(child) , children , linkMap , seen_particles );

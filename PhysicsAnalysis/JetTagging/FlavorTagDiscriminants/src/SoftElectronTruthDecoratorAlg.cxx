@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -16,6 +16,8 @@
 
 #include "xAODTruth/TruthVertex.h"
 #include "xAODTruth/TruthVertexContainer.h"
+
+#include "TruthUtils/MagicNumbers.h"
 
 namespace FlavorTagDiscriminants {
 
@@ -116,7 +118,7 @@ namespace FlavorTagDiscriminants {
         dec_vertex_index(*electron) = acc_vertex_index(*truth);
         dec_type_label(*electron) = acc_type_label(*truth);
         dec_source_label(*electron) = acc_source_label(*truth);
-        dec_barcode(*electron) = truth->barcode();
+        dec_barcode(*electron) = HepMC::barcode(truth); // FIXME barcode-based
         dec_parent_barcode(*electron) = acc_parent_barcode(*truth);
       }
     }

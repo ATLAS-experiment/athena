@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // ThinGeantTruthAlg.cxx
@@ -208,14 +208,14 @@ ThinGeantTruthAlg::execute(const EventContext& ctx) const
   }
 
   // Loop over truth particles and update mask
-  std::unordered_set<int> encounteredBarcodes; // for loop protection
+  std::unordered_set<int> encounteredUniqueIDs; // for loop protection
   for (int i = 0; i < nTruthParticles; ++i) {
-    encounteredBarcodes.clear();
+    encounteredUniqueIDs.clear();
     const xAOD::TruthParticle* particle = (*truthParticles)[i];
     // Retain status 1 BSM particles and descendants
     if (MC::isBSM(particle) && MC::isStable(particle)) {
-      descendants(particle, particleMask, encounteredBarcodes);
-      encounteredBarcodes.clear();
+      descendants(particle, particleMask, encounteredUniqueIDs);
+      encounteredUniqueIDs.clear();
     }
     // Retain children of longer-lived generator particles
     if (MC::isStable(particle)) {
@@ -242,10 +242,10 @@ ThinGeantTruthAlg::execute(const EventContext& ctx) const
                   i) != recoParticleTruthIndices.end()) {
       if (HepMC::is_simulation_particle(particle)) { // only need to do this for Geant particles since
                            // non-Geant are kept anyway
-        ancestors(particle, particleMask, encounteredBarcodes);
-        encounteredBarcodes.clear();
-        descendants(particle, particleMask, encounteredBarcodes);
-        encounteredBarcodes.clear();
+        ancestors(particle, particleMask, encounteredUniqueIDs);
+        encounteredUniqueIDs.clear();
+        descendants(particle, particleMask, encounteredUniqueIDs);
+        encounteredUniqueIDs.clear();
       }
     }
 
@@ -253,8 +253,8 @@ ThinGeantTruthAlg::execute(const EventContext& ctx) const
     // Particles
     if (std::find(egammaTruthIndices.begin(), egammaTruthIndices.end(), i) !=
         egammaTruthIndices.end()) {
-      descendants(particle, particleMask, encounteredBarcodes);
-      encounteredBarcodes.clear();
+      descendants(particle, particleMask, encounteredUniqueIDs);
+      encounteredUniqueIDs.clear();
     }
 
     if (!HepMC::is_simulation_particle(particle)) {
@@ -306,15 +306,15 @@ ThinGeantTruthAlg::execute(const EventContext& ctx) const
 void
 ThinGeantTruthAlg::ancestors(const xAOD::TruthParticle* pHead,
                              std::vector<bool>& particleMask,
-                             std::unordered_set<int>& encounteredBarcodes) const
+                             std::unordered_set<int>& encounteredUniqueIDs) const
 {
 
-  // Check that this barcode hasn't been seen before (e.g. we are in a loop)
+  // Check that this uniqueID hasn't been seen before (e.g. we are in a loop)
   std::unordered_set<int>::const_iterator found =
-    encounteredBarcodes.find(pHead->barcode());
-  if (found != encounteredBarcodes.end())
+    encounteredUniqueIDs.find(HepMC::uniqueID(pHead));
+  if (found != encounteredUniqueIDs.end())
     return;
-  encounteredBarcodes.insert(pHead->barcode());
+  encounteredUniqueIDs.insert(HepMC::uniqueID(pHead));
 
   // Save particle position in the mask
   int headIndex = pHead->index();
@@ -331,7 +331,7 @@ ThinGeantTruthAlg::ancestors(const xAOD::TruthParticle* pHead,
   // Get children particles and self-call
   int nParents = prodVtx->nIncomingParticles();
   for (int i = 0; i < nParents; ++i)
-    ancestors(prodVtx->incomingParticle(i), particleMask, encounteredBarcodes);
+    ancestors(prodVtx->incomingParticle(i), particleMask, encounteredUniqueIDs);
 }
 
 // ==============================
@@ -342,14 +342,14 @@ void
 ThinGeantTruthAlg::descendants(
   const xAOD::TruthParticle* pHead,
   std::vector<bool>& particleMask,
-  std::unordered_set<int>& encounteredBarcodes) const
+  std::unordered_set<int>& encounteredUniqueIDs) const
 {
-  // Check that this barcode hasn't been seen before (e.g. we are in a loop)
+  // Check that this uniqueID hasn't been seen before (e.g. we are in a loop)
   std::unordered_set<int>::const_iterator found =
-    encounteredBarcodes.find(pHead->barcode());
-  if (found != encounteredBarcodes.end())
+    encounteredUniqueIDs.find(HepMC::uniqueID(pHead));
+  if (found != encounteredUniqueIDs.end())
     return;
-  encounteredBarcodes.insert(pHead->barcode());
+  encounteredUniqueIDs.insert(HepMC::uniqueID(pHead));
 
   // Save the particle position in the mask
   int headIndex = pHead->index();
@@ -367,7 +367,7 @@ ThinGeantTruthAlg::descendants(
   int nChildren = decayVtx->nOutgoingParticles();
   for (int i = 0; i < nChildren; ++i) {
     descendants(
-      decayVtx->outgoingParticle(i), particleMask, encounteredBarcodes);
+      decayVtx->outgoingParticle(i), particleMask, encounteredUniqueIDs);
   }
 
   }

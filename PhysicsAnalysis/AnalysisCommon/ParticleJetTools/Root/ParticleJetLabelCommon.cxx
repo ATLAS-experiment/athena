@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ParticleJetTools/ParticleJetLabelCommon.h"
@@ -38,13 +38,13 @@ namespace ParticleJetTools {
     , const xAOD::TruthParticle* c
     ) {
 
-    if (p->barcode() == c->barcode()) { return false; }
+    if (HepMC::uniqueID(p) == HepMC::uniqueID(c)) { return false; }
 
     for (size_t iC = 0; iC < p->nChildren(); iC++) {
       const xAOD::TruthParticle* cc = p->child(iC);
       if (!cc) { continue; }
 
-      if (cc->barcode() == c->barcode()) { return true; }
+      if (HepMC::uniqueID(cc) == HepMC::uniqueID(c)) { return true; }
 
       if (isChild(cc, c)) { return true; }
     }
@@ -95,7 +95,7 @@ namespace ParticleJetTools {
     CHECK(Lxy);
     CHECK(dr);
     CHECK(pdgId);
-    CHECK(barcode);
+    CHECK(barcode); // FIXME barcode-based
     CHECK(childLxy);
     CHECK(childPt);
     CHECK(childPdgId);
@@ -109,7 +109,7 @@ namespace ParticleJetTools {
     Lxy(n.Lxy),
     dr(n.dr),
     pdgId(n.pdgId),
-    barcode(n.barcode),
+    barcode(n.barcode), // FIXME barcode-based
     childLxy(n.childLxy),
     childPt(n.childPt),
     childPdgId(n.childPdgId)
@@ -182,7 +182,7 @@ namespace ParticleJetTools {
       decs.Lxy(jet) = NAN;
       decs.dr(jet) = NAN;
       decs.pdgId(jet) = 0;
-      decs.barcode(jet) = -1;
+      decs.barcode(jet) = HepMC::INVALID_PARTICLE_BARCODE; // FIXME barcode-based
       decs.childLxy(jet) = NAN;
       decs.childPt(jet) = NAN;
       decs.childPdgId(jet) = 0;
@@ -192,7 +192,7 @@ namespace ParticleJetTools {
       decs.dr(jet) = partDR(labelling_particle, jet);
       decs.pdgId(jet) = partPdgId(labelling_particle);
       decs.barcode(jet) = labelling_particle ?
-        labelling_particle->barcode() : -1;
+        HepMC::barcode(labelling_particle) : HepMC::INVALID_PARTICLE_BARCODE; // FIXME barcode-based
       decs.childLxy(jet) = partLxy(child_particle);
       decs.childPt(jet) = partPt(child_particle);
       decs.childPdgId(jet) = partPdgId(child_particle);

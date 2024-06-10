@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -99,13 +99,13 @@ namespace FlavorTagDiscriminants {
         dec_source_label(*truth_particle) = TruthDecoratorHelpers::TruthSource::Label::NoTruth;
         tp_truth_vertices.push_back(nullptr);
         dec_vertex_index(*truth_particle) = -1;
-        dec_parent_barcode(*truth_particle) = -1;
+        dec_parent_barcode(*truth_particle) = HepMC::INVALID_PARTICLE_BARCODE; // FIXME barcode-based
         continue;
       }
 
       // get parent hadron and decorate barcode 
       auto truth_parent = TruthDecoratorHelpers::get_parent_hadron(truth_particle);
-      dec_parent_barcode(*truth_particle) = truth_parent ? truth_parent->barcode() : -2;
+      dec_parent_barcode(*truth_particle) = truth_parent ? HepMC::barcode(truth_parent) : -2; // FIXME barcode-based -2 is an odd default
 
       // get truth origin and use it for exclusive origin and secondary origin
       int truth_origin = m_truthOriginTool->getTruthOrigin(truth_particle);

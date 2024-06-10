@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -14,7 +14,7 @@
 #include "GaudiKernel/IPartPropSvc.h"
 #include "HepPDT/ParticleData.hh"
 #include "HepPDT/ParticleDataTable.hh"
-
+#include "TruthUtils/MagicNumbers.h"
 
 namespace D3PD {
 
@@ -73,7 +73,7 @@ StatusCode TruthParticleFillerTool::book()
 StatusCode TruthParticleFillerTool::fill (const xAOD::TruthParticle& p)
 {
   *m_status = p.status();
-  *m_barcode = p.barcode();
+  *m_barcode = HepMC::barcode(p); // FIXME barcode-based
   *m_pdgId = p.pdgId();
 
   const HepPDT::ParticleDataTable* pdt = m_ppsvc->PDT();

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -125,7 +125,7 @@ StatusCode DerivationFramework::TruthBornLeptonCollectionMaker::addBranches() co
   SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int > classificationDecorator(m_classificationDecoratorKey, ctx);
 
   // add relevant particles to new collection
-  int sherpLepParentBarcode = 0;
+  int sherpLepParentUniqueID = HepMC::UNDEFINED_ID;
   for (unsigned int i=0; i<truthParticles->size(); ++i) {
     // Grab the particle
     const xAOD::TruthParticle* theParticle = (*truthParticles)[i];
@@ -137,21 +137,21 @@ StatusCode DerivationFramework::TruthBornLeptonCollectionMaker::addBranches() co
       if (theParticle->status() != 11) continue;
       // Sherpa may have two sets of status == 11 leptons. Here we take the first set.
       // To do so, we check the first status == 11 leptons, 
-      //   check that it has a child a parent barecode corresponding the the lepton's barcode
-      // If so, then save this parent barcode and skip all status 11 leptons with this parent barcode.
+      //   check that it has a child a parent barecode corresponding the the lepton's uniqueID
+      // If so, then save this parent uniqueID and skip all status 11 leptons with this parent uniqueID.
 
-      if (sherpLepParentBarcode == 0) {
+      if (sherpLepParentUniqueID == HepMC::UNDEFINED_ID) {
         // Do test on first status 11 lepton
         const xAOD::TruthParticle* thePartchild = theParticle->child();
         if (thePartchild) {
-          int cparentBarcode = (thePartchild->parent()) ? thePartchild->parent()->barcode() : 0;
-          if (cparentBarcode == theParticle->barcode()) {
-            sherpLepParentBarcode = cparentBarcode;
-          } 
+          int cparentUniqueID = (thePartchild->parent()) ? HepMC::uniqueID(thePartchild->parent()) : HepMC::UNDEFINED_ID;
+          if (cparentUniqueID == HepMC::uniqueID(theParticle)) {
+            sherpLepParentUniqueID = cparentUniqueID;
+          }
         }
       }
-      int pbarcode = (theParticle->parent()) ? theParticle->parent()->barcode() : 0;
-      if (sherpLepParentBarcode > 0 && sherpLepParentBarcode == pbarcode) continue;
+      int puniqueID = (theParticle->parent()) ? HepMC::uniqueID(theParticle->parent()) : HepMC::UNDEFINED_ID;
+      if (sherpLepParentUniqueID > 0 && sherpLepParentUniqueID == puniqueID) continue;
     } else if (is_sherpa == 0) {
       // Some generators, look for leptons with status 3 coming from vertices with other leptons
       bool has_status_n3=false, has_status_3=false, has_V=false;

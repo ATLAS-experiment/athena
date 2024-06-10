@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -14,7 +14,7 @@
 #include "TruthParticleChildAssociationTool.h"
 #include "xAODTruth/TruthVertex.h"
 #include "AthenaKernel/errorcheck.h"
-
+#include "TruthUtils/MagicNumbers.h"
 
 namespace D3PD {
 
@@ -65,7 +65,7 @@ TruthParticleChildAssociationTool::reset (const xAOD::TruthParticle& p)
     if (p2)
       m_xaod_children[i] =  p2;
   }
-  std::sort (m_xaod_children.begin(), m_xaod_children.end(), [](const auto & a, const auto & b) -> bool{ return a->barcode()< b->barcode(); });
+  std::sort (m_xaod_children.begin(), m_xaod_children.end(), [](const auto & a, const auto & b) -> bool{ return HepMC::uniqueID(a) < HepMC::uniqueID(b); }); // FIXME barcode-based - NB ordering may change when this function switches to return id rather than barcode
   return StatusCode::SUCCESS;
 }
 

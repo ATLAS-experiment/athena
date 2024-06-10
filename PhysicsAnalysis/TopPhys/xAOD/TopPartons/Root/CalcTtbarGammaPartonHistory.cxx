@@ -1,11 +1,12 @@
 /*
-   Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "TopPartons/CalcTtbarGammaPartonHistory.h"
 #include "TopConfiguration/TopConfig.h"
 #include "TopPartons/PartonHistoryUtils.h"
 
+#include "TruthUtils/MagicNumbers.h"
 
 namespace top {
   using PartonHistoryUtils::decorateWithMPtPhi;
@@ -68,7 +69,7 @@ namespace top {
         branchtype_t != 55) {
       bool Wonshell = false;
       for (const xAOD::TruthParticle* particle : *truthParticles) {
-        if (particle->barcode() != 3) continue;
+        if (HepMC::barcode(particle) != 3) continue; // FIXME barcode-based - comparison against a specific value
         for (size_t q = 0; q < particle->nChildren(); q++) {
           if (particle->child(q) && particle->child(q)->pdgId() == -5) bbar =PartonHistoryUtils::findAfterFSR(particle->child(
                                                                                                                    q))->
@@ -113,7 +114,7 @@ namespace top {
                branchtype_tbar != 15 && branchtype_tbar != 55) {
       bool Wonshell = false;
       for (const xAOD::TruthParticle* particle : *truthParticles) {
-        if (particle->barcode() != 3) continue;
+        if (HepMC::barcode(particle) != 3) continue; // FIXME barcode-based - comparison against a specific value
         for (size_t q = 0; q < particle->nChildren(); q++) {
           if (particle->child(q) && particle->child(q)->pdgId() == 5) b = PartonHistoryUtils::findAfterFSR(particle->child(
                                                                                                                q))->p4();
@@ -184,7 +185,7 @@ namespace top {
 
     if ((event_top && !event_topbar) || (!event_top && event_topbar) || (!event_top && !event_topbar)) {// missing top
       for (const xAOD::TruthParticle* particle : *truthParticles) {
-        if (particle->barcode() != 3) continue;
+        if (HepMC::barcode(particle) != 3) continue; // FIXME barcode-based - comparison against a specific value
         if (abs(particle->pdgId()) == 21) init_type = 1; //gg
         else if (abs(particle->pdgId()) < 6) init_type = 2; //qq
       }

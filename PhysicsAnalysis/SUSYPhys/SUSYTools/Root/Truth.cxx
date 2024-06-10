@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // This source file implements all of the functions related to Truth
@@ -10,6 +10,8 @@
 
 // For using the MCTruthClassifier definitions
 #include "MCTruthClassifier/MCTruthClassifierDefs.h"
+
+#include "TruthUtils/MagicNumbers.h"
 
 #ifndef XAOD_STANDALONE // For now metadata is Athena-only
 #include "AthAnalysisBaseComps/AthAnalysisHelper.h"
@@ -160,17 +162,17 @@ bool SUSYObjDef_xAOD::FindSusyHardProc(const xAOD::TruthParticleContainer *truth
           } else if (!secondsp) {
             secondsp = tp;
           } else {
-            if (firstsp->nChildren() != 0 && tp->barcode() == firstsp->child(0)->barcode()) {
+            if (firstsp->nChildren() != 0 && HepMC::uniqueID(tp) == HepMC::uniqueID(firstsp->child(0))) {
               firstsp = tp;
             }
-            else if (secondsp->nChildren() != 0 && tp->barcode() == secondsp->child(0)->barcode()) {
+            else if (secondsp->nChildren() != 0 && HepMC::uniqueID(tp) == HepMC::uniqueID(secondsp->child(0))) {
               secondsp = tp;
             }
-            else if (firstsp->nChildren() != 0 && firstsp->child(0)->barcode() == secondsp->barcode()) {
+            else if (firstsp->nChildren() != 0 && HepMC::uniqueID(firstsp->child(0)) == HepMC::uniqueID(secondsp)) {
               firstsp = secondsp;
               secondsp = tp;
             }
-            else if (secondsp->nChildren() != 0 && secondsp->child(0)->barcode() == firstsp->barcode()) {
+            else if (secondsp->nChildren() != 0 && HepMC::uniqueID(secondsp->child(0)) == HepMC::uniqueID(firstsp)) {
               secondsp = firstsp;
               firstsp = tp;
             }
@@ -185,7 +187,7 @@ bool SUSYObjDef_xAOD::FindSusyHardProc(const xAOD::TruthParticleContainer *truth
 
   if (firstsp->nChildren() == 1) {
     for (const xAOD::TruthParticle* tp : *truthP) {
-      if (tp->barcode() == firstsp->child(0)->barcode() && tp->pdgId() != firstsp->pdgId()) {
+      if (HepMC::uniqueID(tp) == HepMC::uniqueID(firstsp->child(0)) && tp->pdgId() != firstsp->pdgId()) {
         firstsp = tp;
         break;
       }
@@ -194,7 +196,7 @@ bool SUSYObjDef_xAOD::FindSusyHardProc(const xAOD::TruthParticleContainer *truth
 
   if (secondsp->nChildren() == 1) {
     for (const xAOD::TruthParticle* tp : *truthP) {
-      if (tp->barcode() == secondsp->child(0)->barcode() && tp->pdgId() != secondsp->pdgId()) {
+      if (HepMC::uniqueID(tp) == HepMC::uniqueID(secondsp->child(0)) && tp->pdgId() != secondsp->pdgId()) {
         secondsp = tp;
         break;
       }
@@ -253,17 +255,17 @@ bool SUSYObjDef_xAOD::FindSusyHardProc(const xAOD::TruthEvent *truthE, int& pdgi
           } else if (!secondsp) {
             secondsp = tp;
           } else {
-            if (firstsp->nChildren() != 0 && tp->barcode() == firstsp->child(0)->barcode()) {
+            if (firstsp->nChildren() != 0 && HepMC::uniqueID(tp) == HepMC::uniqueID(firstsp->child(0))) {
               firstsp = tp;
             }
-            else if (secondsp->nChildren() != 0 && tp->barcode() == secondsp->child(0)->barcode()) {
+            else if (secondsp->nChildren() != 0 && HepMC::uniqueID(tp) == HepMC::uniqueID(secondsp->child(0))) {
               secondsp = tp;
             }
-            else if (firstsp->nChildren() != 0 && firstsp->child(0)->barcode() == secondsp->barcode()) {
+            else if (firstsp->nChildren() != 0 && HepMC::uniqueID(firstsp->child(0)) == HepMC::uniqueID(secondsp)) {
               firstsp = secondsp;
               secondsp = tp;
             }
-            else if (secondsp->nChildren() != 0 && secondsp->child(0)->barcode() == firstsp->barcode()) {
+            else if (secondsp->nChildren() != 0 && HepMC::uniqueID(secondsp->child(0)) == HepMC::uniqueID(firstsp)) {
               secondsp = firstsp;
               firstsp = tp;
             }
@@ -279,7 +281,7 @@ bool SUSYObjDef_xAOD::FindSusyHardProc(const xAOD::TruthEvent *truthE, int& pdgi
   if (firstsp->nChildren() == 1) {
     for (unsigned int p=0; p < truthE->nTruthParticles(); ++p){
       const xAOD::TruthParticle* tp = truthE->truthParticle(p);
-      if (tp->barcode() == firstsp->child(0)->barcode() && tp->pdgId() != firstsp->pdgId()) {
+      if (HepMC::uniqueID(tp) == HepMC::uniqueID(firstsp->child(0)) && tp->pdgId() != firstsp->pdgId()) {
         firstsp = tp;
         break;
       }
@@ -289,7 +291,7 @@ bool SUSYObjDef_xAOD::FindSusyHardProc(const xAOD::TruthEvent *truthE, int& pdgi
   if (secondsp->nChildren() == 1) {
     for (unsigned int p=0; p < truthE->nTruthParticles(); ++p){
       const xAOD::TruthParticle* tp = truthE->truthParticle(p);
-      if (tp->barcode() == secondsp->child(0)->barcode() && tp->pdgId() != secondsp->pdgId()) {
+      if (HepMC::uniqueID(tp) == HepMC::uniqueID(secondsp->child(0)) && tp->pdgId() != secondsp->pdgId()) {
         secondsp = tp;
         break;
       }

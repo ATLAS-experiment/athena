@@ -75,8 +75,8 @@ StatusCode DerivationFramework::TruthPVCollectionMaker::addBranches() const
             xAOD::TruthVertex* xTruthVertex = new xAOD::TruthVertex();
             newVertexCollection->push_back( xTruthVertex );
             // Set properties
-            xTruthVertex->setId(old_vert->id());
-            xTruthVertex->setBarcode(HepMC::barcode(old_vert));
+            xTruthVertex->setId(HepMC::status(old_vert));
+            xTruthVertex->setBarcode(HepMC::barcode(old_vert)); // FIXME barcode-based
             xTruthVertex->setX(old_vert->x());
             xTruthVertex->setY(old_vert->y());
             xTruthVertex->setZ(old_vert->z());

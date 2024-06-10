@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -12,6 +12,9 @@
 #include "xAODTruth/TruthEventContainer.h"
 #include "StoreGate/WriteDecorHandle.h"
 #include "StoreGate/ReadDecorHandle.h"
+
+#include "TruthUtils/MagicNumbers.h"
+
 #include "fastjet/PseudoJet.hh"
 #include "fastjet/ClusterSequence.hh"
 #include <vector>
@@ -312,8 +315,8 @@ StatusCode DerivationFramework::TruthDressingTool::addBranches() const
       if (!m_decorationName.empty()){
         //loop over photons, uniquely associate each to nearest bare particle
         for (const auto& phot : photonsFSRList ) {
-          bool found=std::find(photon_uniqueIDs.begin(),photon_uniqueIDs.end(),phot->barcode())!=photon_uniqueIDs.end();
-          if (found){
+          bool found = std::find(photon_uniqueIDs.begin(), photon_uniqueIDs.end(), HepMC::uniqueID(phot)) != photon_uniqueIDs.end();
+          if (found) {
             dressDec(*phot) = 1;
           }
         } // End of loop over photons
