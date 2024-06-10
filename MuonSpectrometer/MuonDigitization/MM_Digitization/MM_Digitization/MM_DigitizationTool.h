@@ -46,7 +46,6 @@
 #include "HitManagement/TimedHitCollection.h"
 #include "MM_Digitization/MM_ElectronicsResponseSimulation.h"
 #include "MM_Digitization/MM_SortedHitVector.h"
-#include "MM_Digitization/MM_StripVmmMappingTool.h"
 #include "MM_Digitization/MM_StripsResponseSimulation.h"
 #include "MagFieldConditions/AtlasFieldCacheCondObj.h"
 #include "MagFieldElements/AtlasFieldCache.h"

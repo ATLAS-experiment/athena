@@ -55,7 +55,7 @@ private:
     double m_xpos{0.};
     double m_incomingAngleXZ{0.};
     double m_incomingAngleYZ{0.};
-    Amg::Vector3D m_magneticField{0., 0., 0.};
+    Amg::Vector3D m_magneticField{Amg::Vector3D::Zero()};
     int m_stripMinId{0};
     int m_stripMaxId{0};
     int m_gasgap{0};

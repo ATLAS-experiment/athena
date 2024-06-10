@@ -24,7 +24,6 @@
 #include "MM_Digitization/MM_ElectronicsToolInput.h"
 
 // VMM Mapping
-#include "MM_Digitization/MM_StripVmmMappingTool.h"
 #include "MM_Digitization/VMM_Shaper.h"
 namespace CLHEP{
   class HepRandomEngine;

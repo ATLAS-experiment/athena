@@ -25,11 +25,9 @@ Comments to be added here...
 */
 
 /// ROOT
-#include <TF1.h>
 #include <TFile.h>
 #include <TH1F.h>
 #include <TH2F.h>
-#include <TRandom3.h>
 
 /// Projects
 #include "AthenaBaseComps/AthMessaging.h"
@@ -87,7 +85,7 @@ public:
 
     virtual ~MM_StripsResponseSimulation();
     MM_StripToolOutput GetResponseFrom(const MM_DigitToolInput& digiInput, double gainFraction, double stripPitch,
-                                       CLHEP::HepRandomEngine* rndmEngine);   
+                                       CLHEP::HepRandomEngine* rndmEngine) const;   
   
    
     float getQThreshold() const { return m_cfg.qThreshold; };
@@ -113,12 +111,13 @@ private:
     };
 
     void whichStrips(DataCache& cache,
-                     const MM_DigitToolInput& digiInput, double gainFraction,
-                     double stripPitch, CLHEP::HepRandomEngine* rndmEngine);
+                     const MM_DigitToolInput& digiInput, 
+                     double gainFraction,
+                     double stripPitch, CLHEP::HepRandomEngine* rndmEngine) const;
 
   
-    std::map<TString, TH1F*> m_mapOfHistograms{};
-    std::map<TString, TH2F*> m_mapOf2DHistograms{};
+    std::map<std::string, std::unique_ptr<TH1F>> m_mapOfHistograms{};
+    std::map<std::string, std::unique_ptr<TH2F>> m_mapOf2DHistograms{};
 
     std::unique_ptr<CLHEP::RandGeneral> m_randNelectrons{};
 

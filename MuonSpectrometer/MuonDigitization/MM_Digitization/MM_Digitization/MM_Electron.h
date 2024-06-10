@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MM_DIGITIZATION_MM_ELECTRON_H
@@ -9,11 +9,11 @@
 //     Primary electron objects that are diffused, propagated and avalanched
 //
 
+#include <GeoPrimitives/GeoPrimitives.h>
+
 #include <cfloat>
 #include <memory>
 
-#include "TRandom3.h"
-#include "TVector2.h"
 
 class MM_Electron {
 public:
@@ -25,7 +25,7 @@ public:
     void setTime(float Time);
     void setCharge(float Charge);
 
-    TVector2 getOffsetPosition() const;
+    const Amg::Vector2D& getOffsetPosition() const;
     float getCharge() const;
     float getTime() const;
     float getX() const;
@@ -34,8 +34,8 @@ public:
     float getInitialY() const;
 
 private:
-    TVector2 m_initialPosition{};
-    TVector2 m_offsetPosition{};
+    Amg::Vector2D m_initialPosition{Amg::Vector2D::Zero()};
+    Amg::Vector2D m_offsetPosition{Amg::Vector2D::Zero()};
 
     float m_time{-FLT_MAX};
     float m_charge{-FLT_MAX};

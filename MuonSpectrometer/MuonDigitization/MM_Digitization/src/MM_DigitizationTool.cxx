@@ -31,10 +31,6 @@
 #include "GeneratorObjects/HepMcParticleLink.h"
 #include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
 
-// VMM Mapping
-#include "MM_Digitization/MM_StripVmmMappingTool.h"
-
-
 // ROOT
 #include <fstream>
 #include <iostream>

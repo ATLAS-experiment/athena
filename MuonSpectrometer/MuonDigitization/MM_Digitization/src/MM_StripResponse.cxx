@@ -11,9 +11,9 @@ MM_StripResponse::MM_StripResponse(std::vector<std::unique_ptr<MM_IonizationClus
         for (auto& Electron : IonizationCluster->getElectrons()) m_Electrons.push_back(std::move(Electron));
 }
 
-int MM_StripResponse::getNElectrons() { return m_Electrons.size(); }
+int MM_StripResponse::getNElectrons() const { return m_Electrons.size(); }
 
-float MM_StripResponse::getTotalCharge() {
+float MM_StripResponse::totalCharge() const {
     float qtot = 0;
     for (const std::unique_ptr<MM_Electron>& electron : m_Electrons) { qtot += electron->getCharge(); }
     return qtot;

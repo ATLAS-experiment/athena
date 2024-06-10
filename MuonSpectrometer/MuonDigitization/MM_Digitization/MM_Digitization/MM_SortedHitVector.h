@@ -18,11 +18,10 @@ public:
     double stripPos{0.};
     const TimedHitPtr<MMSimHit>* simhit{nullptr};
     bool operator<(const micromegas_hit_info& aInfo) const {
-        if (id < aInfo.id)
-            return true;
-        else if (id == aInfo.id)
-            return time < aInfo.time;
-        return false;
+        if (id != aInfo.id) {
+            return id < aInfo.id;
+        }
+        return time < aInfo.time;
     }
 };
 /*******************************************************************************/
