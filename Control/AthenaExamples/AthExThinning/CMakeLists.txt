@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( AthExThinning )
@@ -40,17 +40,35 @@ atlas_add_dictionary( AthExThinningEventDict
 # Install files from the package:
 atlas_install_python_modules( python/*.py
                               POST_BUILD_CMD ${ATLAS_FLAKE8} )
-atlas_install_joboptions( share/*.py )
-atlas_install_runtime( test/*.ref )
 
+# Tests in the package:
+atlas_add_test( AthExThinning_makeData
+                SCRIPT athena.py ${CMAKE_CURRENT_SOURCE_DIR}/test/AthExThinning_makeData.py
+                LOG_SELECT_PATTERN "^CreateData" )
 
-atlas_add_test( test_thinning
-                SCRIPT test/test_thinning.sh
-                PROPERTIES TIMEOUT 900
-                POST_EXEC_SCRIPT nopost.sh )
+atlas_add_test( WriteThinnedData
+                SCRIPT athena.py ${CMAKE_CURRENT_SOURCE_DIR}/test/WriteThinnedData.py Exec.AlgMode="cpp" \"Input.Files=['../unitTestRun/myToThin.pool.root']\"
+                DEPENDS AthExThinning_makeData
+                PRIVATE_WORKING_DIRECTORY
+                LOG_SELECT_PATTERN "^WriteThinnedData" )
 
-atlas_add_test( test_pythinning
-                SCRIPT test/test_pythinning.sh
-                PROPERTIES TIMEOUT 900
-                DEPENDS test_thinning
-                POST_EXEC_SCRIPT nopost.sh )
+atlas_add_test( pyWriteThinnedData
+                SCRIPT athena.py ${CMAKE_CURRENT_SOURCE_DIR}/test/WriteThinnedData.py Exec.AlgMode="py" \"Input.Files=['../unitTestRun/myToThin.pool.root']\"
+                DEPENDS AthExThinning_makeData
+                PRIVATE_WORKING_DIRECTORY
+                LOG_SELECT_PATTERN "^Py:WriteThinnedData" )
+
+# Add two Reader tests for each of the two write modes
+foreach( prefix "" "py")
+   atlas_add_test( ${prefix}ReadThinnedData
+      SCRIPT athena.py ${CMAKE_CURRENT_SOURCE_DIR}/test/ReadData.py \"Input.Files=['../unitTestRun_${prefix}WriteThinnedData/myUSR_0.pool.root']\"
+      PRIVATE_WORKING_DIRECTORY
+      DEPENDS ${prefix}WriteThinnedData
+      LOG_SELECT_PATTERN "^ReadThinnedData" )
+
+   atlas_add_test( ${prefix}ReadNonThinnedData
+      SCRIPT athena.py ${CMAKE_CURRENT_SOURCE_DIR}/test/ReadData.py Input.Mode="NonThinned" \"Input.Files=['../unitTestRun_${prefix}WriteThinnedData/myUSR_1.pool.root']\"
+      PRIVATE_WORKING_DIRECTORY
+      DEPENDS ${prefix}WriteThinnedData
+      LOG_SELECT_PATTERN "^Py:ReadNonThinnedData" )
+endforeach()
