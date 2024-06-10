@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MM_DIGITIZATION_MM_IONIZATIONCLUSTER_H
@@ -11,9 +11,8 @@
 
 #include <memory>
 #include <vector>
-
+#include "GeoPrimitives/GeoPrimitives.h"
 #include "MM_Digitization/MM_Electron.h"
-#include "TVector2.h"
 
 class MM_IonizationCluster {
 public:
@@ -23,13 +22,13 @@ public:
     void propagateElectrons(float lorentzAngle, float driftVel);
     std::vector<std::unique_ptr<MM_Electron>>& getElectrons();
     float getHitX() const { return m_HitX; }
-    TVector2 getIonizationStart() const { return m_IonizationStart; }
+    const Amg::Vector2D& getIonizationStart() const { return m_IonizationStart; }
 
 private:
     // Members supplied by user
     std::vector<std::unique_ptr<MM_Electron>> m_Electrons;
     float m_HitX{0.0F};
-    TVector2 m_IonizationStart{0., 0.};
+    Amg::Vector2D m_IonizationStart{Amg::Vector2D::Zero()};
 };
 
 #endif

@@ -38,8 +38,8 @@ public:
     const std::vector<float>& getMaxChargeVec() const;
     const std::vector<float>& getTimeMaxChargeVec() const;
 
-    int getNElectrons();
-    float getTotalCharge();
+    int getNElectrons() const;
+    float totalCharge() const;
     std::vector<std::unique_ptr<MM_Electron>>& getElectrons();
 
 private:

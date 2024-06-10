@@ -10,7 +10,7 @@ MM_IonizationCluster::MM_IonizationCluster(float HitX, float IonizationX, float 
 void MM_IonizationCluster::createElectrons(int nElectrons) {
     m_Electrons.reserve(nElectrons);
     for (int iElectron = 0; iElectron < nElectrons; iElectron++)
-        m_Electrons.push_back(std::make_unique<MM_Electron>(m_IonizationStart.X() + m_HitX, m_IonizationStart.Y()));
+        m_Electrons.push_back(std::make_unique<MM_Electron>(m_IonizationStart.x() + m_HitX, m_IonizationStart.y()));
 }
 
 void MM_IonizationCluster::propagateElectrons(float lorentzAngle, float driftVel) {

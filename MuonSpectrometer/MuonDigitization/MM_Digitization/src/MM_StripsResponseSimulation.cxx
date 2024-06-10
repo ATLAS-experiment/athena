@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// PROJECTS
@@ -8,6 +8,8 @@
 #include <TGraph.h>
 
 #include <algorithm>
+#include <mutex>
+#include <thread>
 #include <map>
 
 #include "CLHEP/Random/RandFlat.h"
@@ -19,7 +21,6 @@
 #include "MM_Digitization/MM_IonizationCluster.h"
 #include "MM_Digitization/MM_StripResponse.h"
 #include "PathResolver/PathResolver.h"
-#include "TMath.h"  // for TF1 formulas
 
 /*
 
@@ -32,6 +33,7 @@ Check Lorentz Angle is in correct direction...
 namespace {
     constexpr float electronsToFC = 1. / 6241.;
     constexpr float polyaTheta = 1.765;
+    static std::mutex fillMutex{};
 }  // namespace
 
 /*******************************************************************************/
@@ -48,8 +50,7 @@ MM_StripsResponseSimulation::MM_StripsResponseSimulation(ConfigModule&& mod) :
     for (unsigned int Nelectron = NelectronProb.size(); Nelectron < s_NelectronPropBins; ++Nelectron)
         NelectronProb.push_back(21.6 / ((Nelectron) * (Nelectron)));
 
-    m_randNelectrons =
-        std::make_unique<CLHEP::RandGeneral>(NelectronProb.data(), NelectronProb.size(), 1);  // 1 means non-continious random numbers
+    m_randNelectrons = std::make_unique<CLHEP::RandGeneral>(NelectronProb.data(), NelectronProb.size(), 1);  // 1 means non-continious random numbers
 
     ATH_MSG_DEBUG("MM_StripsResponseSimulation::initializationFrom set values");
     }
@@ -60,40 +61,47 @@ void MM_StripsResponseSimulation::initHistos() {
         m_outputFile = std::make_unique<TFile>("MM_StripsResponse_Plots.root", "RECREATE");
         if (m_outputFile) m_outputFile->cd();
 
-        m_mapOfHistograms["nInteractions"] = new TH1F("nInteractions", "nInteractions", 200, 0, 200);
-        m_mapOfHistograms["nElectrons"] = new TH1F("nElectrons", "nElectrons", 200, 0, 200);
-        m_mapOfHistograms["lorentzAngle"] = new TH1F("lorentzAngle", "lorentzAngle", 100, 0, 3);
-        m_mapOfHistograms["effectiveCharge"] = new TH1F("effectiveCharge", "effectiveCharge", 100, 0, 1e5);
-        m_mapOfHistograms["effectiveNElectrons"] = new TH1F("effectiveNElectrons", "effectiveNElectrons", 200, 0, 200);
-        m_mapOfHistograms["totalEffectiveCharge"] = new TH1F("totalEffectiveCharge", "totalEffectiveCharge", 400, 0, 200);
-        m_mapOf2DHistograms["totalEffectiveChargeVsTheta"] =
-            new TH2F("totalEffectiveChargeVsTheta", "totalEffectiveChargeVsTheta", 17, 0, 35, 300, 0, 300);
+        m_mapOfHistograms["nInteractions"] = std::make_unique<TH1F>("nInteractions", "nInteractions", 200, 0, 200);
+        m_mapOfHistograms["nElectrons"] = std::make_unique<TH1F>("nElectrons", "nElectrons", 200, 0, 200);
+        m_mapOfHistograms["lorentzAngle"] = std::make_unique<TH1F>("lorentzAngle", "lorentzAngle", 100, 0, 3);
+        m_mapOfHistograms["effectiveCharge"] = std::make_unique<TH1F>("effectiveCharge", "effectiveCharge", 100, 0, 1e5);
+        m_mapOfHistograms["effectiveNElectrons"] = std::make_unique<TH1F>("effectiveNElectrons", "effectiveNElectrons", 200, 0, 200);
+        m_mapOfHistograms["totalEffectiveCharge"] = std::make_unique<TH1F>("totalEffectiveCharge", "totalEffectiveCharge", 400, 0, 200);
+        m_mapOf2DHistograms["totalEffectiveChargeVsTheta"] = std::make_unique<TH2F>("totalEffectiveChargeVsTheta", "totalEffectiveChargeVsTheta", 17, 0, 35, 300, 0, 300);
 
-        m_mapOf2DHistograms["pathLengthVsTheta"] = new TH2F("pathLengthVsTheta", "pathLengthVsTheta", 100, 0, 10, 100, -3, 3);
-        m_mapOf2DHistograms["pathLengthVsAlpha"] = new TH2F("pathLengthVsAlpha", "pathLengthVsAlpha", 100, 0, 10, 100, -3, 3);
+        m_mapOf2DHistograms["pathLengthVsTheta"] = std::make_unique<TH2F>("pathLengthVsTheta", "pathLengthVsTheta", 100, 0, 10, 100, -3, 3);
+        m_mapOf2DHistograms["pathLengthVsAlpha"] = std::make_unique<TH2F>("pathLengthVsAlpha", "pathLengthVsAlpha", 100, 0, 10, 100, -3, 3);
 
-        m_mapOf2DHistograms["lorentzAngleVsTheta"] = new TH2F("lorentzAngleVsTheta", "lorentzAngleVsTheta", 100, -3, 3, 100, -3, 3);
-        m_mapOf2DHistograms["lorentzAngleVsBy"] = new TH2F("lorentzAngleVsBy", "lorentzAngleVsBy", 100, -3, 3, 100, -2., 2.);
+        m_mapOf2DHistograms["lorentzAngleVsTheta"] = std::make_unique<TH2F>("lorentzAngleVsTheta", "lorentzAngleVsTheta", 100, -3, 3, 100, -3, 3);
+        m_mapOf2DHistograms["lorentzAngleVsBy"] = std::make_unique<TH2F>("lorentzAngleVsBy", "lorentzAngleVsBy", 100, -3, 3, 100, -2., 2.);
 
         m_mapOf2DHistograms["deltaLorentzAngleVsByForPosTheta"] =
-            new TH2F("deltaLorentzAngleVsByForPosTheta", "deltaLorentzAngleVsByForPosTheta", 100, -3, 3, 100, -2., 2.);
+            std::make_unique<TH2F>("deltaLorentzAngleVsByForPosTheta", "deltaLorentzAngleVsByForPosTheta", 100, -3, 3, 100, -2., 2.);
         m_mapOf2DHistograms["deltaLorentzAngleVsByForNegTheta"] =
-            new TH2F("deltaLorentzAngleVsByForNegTheta", "deltaLorentzAngleVsByForNegTheta", 100, -3, 3, 100, -2., 2.);
+            std::make_unique<TH2F>("deltaLorentzAngleVsByForNegTheta", "deltaLorentzAngleVsByForNegTheta", 100, -3, 3, 100, -2., 2.);
 
         m_mapOf2DHistograms["driftDistanceVsDriftTime"] =
-            new TH2F("driftDistanceVsDriftTime", "driftDistanceVsDriftTime", 100, 0, 10, 100, 0, 200);
+            std::make_unique<TH2F>("driftDistanceVsDriftTime", "driftDistanceVsDriftTime", 100, 0, 10, 100, 0, 200);
     }
 }
 /*******************************************************************************/
 void MM_StripsResponseSimulation::writeHistos() {
-    if (m_outputFile) {
-        m_outputFile->cd();
-        m_outputFile->Write();
+    if (!m_outputFile) {
+        return;
     }
+    for (auto& [histo_name, histo] : m_mapOfHistograms) {
+        m_outputFile->WriteObject(histo.get(), histo_name.c_str());
+    }
+    for (auto& [histo_name, histo] : m_mapOf2DHistograms) {
+        m_outputFile->WriteObject(histo.get(), histo_name.c_str());
+    }
+    m_mapOf2DHistograms.clear();
+    m_mapOfHistograms.clear();
 }
 /*******************************************************************************/
-MM_StripToolOutput MM_StripsResponseSimulation::GetResponseFrom(const MM_DigitToolInput& digiInput, double gainFraction, double stripPitch,
-                                                                CLHEP::HepRandomEngine* rndmEngine) {
+MM_StripToolOutput MM_StripsResponseSimulation::GetResponseFrom(const MM_DigitToolInput& digiInput, 
+                                                                double gainFraction, double stripPitch,
+                                                                CLHEP::HepRandomEngine* rndmEngine) const {
     ATH_MSG_DEBUG("Starting to get response from strips");
     DataCache cache{};
     whichStrips(cache, digiInput, gainFraction, stripPitch, rndmEngine);
@@ -112,8 +120,9 @@ MM_StripToolOutput MM_StripsResponseSimulation::GetResponseFrom(const MM_DigitTo
 // calculate the strips that got fired, charge and time. Assume any angle thetaDegrees....
 //==================================================================================================
 void MM_StripsResponseSimulation::whichStrips(DataCache& cache,
-                                              const MM_DigitToolInput& digiInput, double gainFraction, double stripPitch,
-                                              CLHEP::HepRandomEngine* rndmEngine) {
+                                              const MM_DigitToolInput& digiInput, 
+                                              double gainFraction, double stripPitch,
+                                              CLHEP::HepRandomEngine* rndmEngine) const {
     ATH_MSG_DEBUG("Starting to calculate strips that got fired");
     const float hitx = digiInput.positionWithinStrip();
     const int stripID = digiInput.stripIDLocal();
@@ -122,7 +131,7 @@ void MM_StripsResponseSimulation::whichStrips(DataCache& cache,
     const int stripMinID = digiInput.stripMinID();
     const int stripMaxID = digiInput.stripMaxID();
 
-
+    CLHEP::RandGeneral* randDist ATLAS_THREAD_SAFE = m_randNelectrons.get();
     const float eventTime = digiInput.eventTime();
     const float theta = incidentAngleXZ * Gaudi::Units::degree;  // Important for path length and strip distribution
     const float alpha = incidentAngleYZ * Gaudi::Units::degree;  // Important for path length
@@ -133,10 +142,11 @@ void MM_StripsResponseSimulation::whichStrips(DataCache& cache,
 
     // Still need to understand which sign is which... But I think this is correct...
 
-    float lorentzAngle = (b.y() > 0. ? 1. : -1.) * m_cfg.lorentzAngleFunction(std::abs(b.y())) * TMath::DegToRad();  // in radians
+    float lorentzAngle = (b.y() > 0. ? 1. : -1.) * m_cfg.lorentzAngleFunction(std::abs(b.y())) * Gaudi::Units::deg;  // in radians
     if (m_cfg.writeOutputFile) {
-        m_mapOf2DHistograms["lorentzAngleVsTheta"]->Fill(lorentzAngle, theta);
-        m_mapOf2DHistograms["lorentzAngleVsBy"]->Fill(lorentzAngle, b.y());
+        std::lock_guard guard{fillMutex};
+        m_mapOf2DHistograms.at("lorentzAngleVsTheta")->Fill(lorentzAngle, theta);
+        m_mapOf2DHistograms.at("lorentzAngleVsBy")->Fill(lorentzAngle, b.y());
     }
 
     ATH_MSG_DEBUG("LorentzAngle vs theta: " << lorentzAngle << " " << theta);
@@ -147,31 +157,32 @@ void MM_StripsResponseSimulation::whichStrips(DataCache& cache,
     pathLength /= std::cos(alpha);                         // Further increasing path length for YZ angle
 
     if (m_cfg.writeOutputFile) {
-        m_mapOf2DHistograms["pathLengthVsTheta"]->Fill(pathLength, theta);
-        m_mapOf2DHistograms["pathLengthVsAlpha"]->Fill(pathLength, alpha);
+        std::lock_guard guard{fillMutex};
+        m_mapOf2DHistograms.at("pathLengthVsTheta")->Fill(pathLength, theta);
+        m_mapOf2DHistograms.at("pathLengthVsAlpha")->Fill(pathLength, alpha);
 
         if (theta > 0)
-            m_mapOf2DHistograms["deltaLorentzAngleVsByForPosTheta"]->Fill(lorentzAngle - theta, b.y());
+            m_mapOf2DHistograms.at("deltaLorentzAngleVsByForPosTheta")->Fill(lorentzAngle - theta, b.y());
         else
-            m_mapOf2DHistograms["deltaLorentzAngleVsByForNegTheta"]->Fill(lorentzAngle - theta, b.y());
+            m_mapOf2DHistograms.at("deltaLorentzAngleVsByForNegTheta")->Fill(lorentzAngle - theta, b.y());
     }
     while (pathLengthTraveled < pathLength) {
         // N.B. Needs correction from alpha angle still...
         std::unique_ptr<MM_IonizationCluster> IonizationCluster =
             std::make_unique<MM_IonizationCluster>(hitx, pathLengthTraveled * std::sin(theta), pathLengthTraveled * std::cos(theta));
 
-        int nElectrons = m_randNelectrons->shoot(rndmEngine) * s_NelectronPropBins +
-                         1;  // +1 since first entry in electron probability vector corresponds to 1 electron and not to 0 electrons
+        // +1 since first entry in electron probability vector corresponds to 1 electron and not to 0 electrons
+        int nElectrons = s_NelectronPropBins * randDist->shoot(rndmEngine) + 1;  
         IonizationCluster->createElectrons(nElectrons);
 
-        TVector2 initialPosition = IonizationCluster->getIonizationStart();
+        const Amg::Vector2D& initialPosition = IonizationCluster->getIonizationStart();
 
-        ATH_MSG_DEBUG("New interaction starting at x,y, pathLengthTraveled: " << initialPosition.X() << " " << initialPosition.Y() << " "
+        ATH_MSG_DEBUG("New interaction starting at x,y, pathLengthTraveled: " << initialPosition.x() << " " << initialPosition.y() << " "
                                                                               << pathLengthTraveled);
 
         for (auto& Electron : IonizationCluster->getElectrons()) {
-            Electron->setOffsetPosition(getTransverseDiffusion(initialPosition.Y(), rndmEngine),
-                                        getLongitudinalDiffusion(initialPosition.Y(), rndmEngine));
+            Electron->setOffsetPosition(getTransverseDiffusion(initialPosition.y(), rndmEngine),
+                                        getLongitudinalDiffusion(initialPosition.y(), rndmEngine));
         }
 
         IonizationCluster->propagateElectrons(lorentzAngle, m_cfg.driftVelocity);
@@ -186,8 +197,9 @@ void MM_StripsResponseSimulation::whichStrips(DataCache& cache,
             ATH_MSG_DEBUG("Electron's effective charge is  " << effectiveCharge);
 
             if (m_cfg.writeOutputFile) {
-                m_mapOfHistograms["effectiveCharge"]->Fill(effectiveCharge);
-                m_mapOf2DHistograms["driftDistanceVsDriftTime"]->Fill(Electron->getOffsetPosition().Mod(), Electron->getTime());
+                std::lock_guard guard{fillMutex};
+                m_mapOfHistograms.at("effectiveCharge")->Fill(effectiveCharge);
+                m_mapOf2DHistograms.at("driftDistanceVsDriftTime")->Fill(Electron->getOffsetPosition().mag(), Electron->getTime());
             }
             // Add eventTime in Electron time
             Electron->setTime(Electron->getTime() + eventTime);
@@ -195,8 +207,10 @@ void MM_StripsResponseSimulation::whichStrips(DataCache& cache,
             tmpEffectiveNElectrons += effectiveCharge;
         }
 
-        if (m_cfg.writeOutputFile) m_mapOfHistograms["effectiveNElectrons"]->Fill(tmpEffectiveNElectrons / m_cfg.avalancheGain);
-
+        if (m_cfg.writeOutputFile) {
+            std::lock_guard guard{fillMutex};
+            m_mapOfHistograms.at("effectiveNElectrons")->Fill(tmpEffectiveNElectrons / m_cfg.avalancheGain);
+        }
         //---
         cache.IonizationClusters.push_back(std::move(IonizationCluster));
 
@@ -228,23 +242,25 @@ void MM_StripsResponseSimulation::whichStrips(DataCache& cache,
     // Output diagnostic hists and graphs
     //
     if (m_cfg.writeOutputFile) {
-        m_mapOfHistograms["nInteractions"]->Fill(nPrimaryIons);
-        m_mapOfHistograms["nElectrons"]->Fill(stripResponseObject.getNElectrons());
-        m_mapOfHistograms["totalEffectiveCharge"]->Fill(stripResponseObject.getTotalCharge() * electronsToFC);
-        m_mapOf2DHistograms["totalEffectiveChargeVsTheta"]->Fill(std::abs(incidentAngleXZ),
-                                                                 stripResponseObject.getTotalCharge() * electronsToFC);
-        ATH_MSG_DEBUG("incidentAngleXZ" << incidentAngleXZ << "charge [fC]" << stripResponseObject.getTotalCharge() / 6241.);
-        m_mapOfHistograms["lorentzAngle"]->Fill(lorentzAngle);
+        std::lock_guard guard{fillMutex};
+        m_mapOfHistograms.at("nInteractions")->Fill(nPrimaryIons);
+        m_mapOfHistograms.at("nElectrons")->Fill(stripResponseObject.getNElectrons());
+        m_mapOfHistograms.at("totalEffectiveCharge")->Fill(stripResponseObject.totalCharge() * electronsToFC);
+        m_mapOf2DHistograms.at("totalEffectiveChargeVsTheta")->Fill(std::abs(incidentAngleXZ),
+                                                                 stripResponseObject.totalCharge() * electronsToFC);
+        ATH_MSG_DEBUG("incidentAngleXZ" << incidentAngleXZ << "charge [fC]" << stripResponseObject.totalCharge() / 6241.);
+        m_mapOfHistograms.at("lorentzAngle")->Fill(lorentzAngle);
     }
 
-    if (m_cfg.writeEventDisplays) {
-        if (m_outputFile) m_outputFile->cd();
+    if (m_cfg.writeEventDisplays && m_outputFile) {
+        std::lock_guard guard{fillMutex};
+        static std::atomic<unsigned> written{0};
         TGraph grIonizationXZ(cache.IonizationClusters.size());
         for (size_t  iIonization = 0; iIonization < cache.IonizationClusters.size(); ++iIonization) {
-            TVector2 ionizationPosition(cache.IonizationClusters.at(iIonization)->getIonizationStart());
-            grIonizationXZ.SetPoint(iIonization, ionizationPosition.X(), ionizationPosition.Y());
+            Amg::Vector2D ionizationPosition(cache.IonizationClusters.at(iIonization)->getIonizationStart());
+            grIonizationXZ.SetPoint(iIonization, ionizationPosition.x(), ionizationPosition.y());
         }
-        grIonizationXZ.Write("ionizationXZ");
+        m_outputFile->WriteObject(&grIonizationXZ, Form("ionizationXZ_%u", ++written));
 
         TGraph grElectronsXZ(stripResponseObject.getNElectrons());
         int iElectron = 0;
@@ -252,7 +268,7 @@ void MM_StripsResponseSimulation::whichStrips(DataCache& cache,
             grElectronsXZ.SetPoint(iElectron, electron->getX(), electron->getY());
             iElectron++;
         }
-        grElectronsXZ.Write("electronsXZ");
+        m_outputFile->WriteObject(&grElectronsXZ, Form("electronsXZ_%u", ++written));
     }
 
 }  // end of whichStrips()
