@@ -427,6 +427,10 @@ def main():
    if args.loop_files and args.number_of_events<0:
       log.warning("Looping over files without specifying number of events will run forever!")
 
+   # interactive mode only becomes active after python configuration/reload:
+   if args.interactive and not (args.use_database or args.jobOptions.endswith('.json')):
+      args.interactive = False
+
    # Update args and set athena flags
    from TrigPSC import PscConfig
 
