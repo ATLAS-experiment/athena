@@ -62,28 +62,28 @@ StatusCode xAODTruthParticleSlimmerPhoton::execute()
     xAOD::TruthEventContainer::const_iterator itr;
     for (itr = xTruthEventContainer->begin(); itr!=xTruthEventContainer->end(); ++itr) {
 
-        std::vector<int> barcode_list;  
-        int zero_barcode=0;
-        int dup_barcode = 0;
+        std::vector<int> uniqueID_list;  
+        int zero_uniqueID=0;
+        int dup_uniqueID = 0;
 
         unsigned int nPart = (*itr)->nTruthParticles();
 
         for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
             const xAOD::TruthParticle* theParticle =  (*itr)->truthParticle(iPart);
              
-            int my_barcode = theParticle->barcode();
-            if (my_barcode==0 ) {
-                zero_barcode++;
+            int my_uniqueID = HepMC::uniqueID(theParticle);
+            if ( my_uniqueID == HepMC::UNDEFINED_ID ) {
+                zero_uniqueID++;
                 continue;
             }
            bool found = false;
-           if (barcode_list.size() > 0){
-             found = (std::find(barcode_list.begin(), barcode_list.end(), my_barcode) != barcode_list.end());
+           if (uniqueID_list.size() > 0){
+             found = (std::find(uniqueID_list.begin(), uniqueID_list.end(), my_uniqueID) != uniqueID_list.end());
              if(found) {
-                       dup_barcode++;
+                       dup_uniqueID++;
                        continue;}
            }
-           barcode_list.push_back(my_barcode);
+           uniqueID_list.push_back(my_uniqueID);
           
 
             //Save stable Photons
@@ -96,7 +96,7 @@ StatusCode xAODTruthParticleSlimmerPhoton::execute()
                 *xTruthParticle=*theParticle;
             }   
         }
-     if (zero_barcode != 0 || dup_barcode != 0) ATH_MSG_INFO("Found " << zero_barcode << " barcode zero particles and  " <<dup_barcode<< " duplicated");
+     if (zero_uniqueID != 0 || dup_uniqueID != 0) ATH_MSG_INFO("Found " << zero_uniqueID << " uniqueID zero particles and  " <<dup_uniqueID<< " duplicated");
     }
 
     return StatusCode::SUCCESS;

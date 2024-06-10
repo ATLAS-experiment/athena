@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TruthConverters/xAODtoHepMCTool.h"
@@ -163,28 +163,23 @@ HepMC::GenEvent xAODtoHepMCTool::createHepMCEvent(const xAOD::TruthEvent *xEvt, 
 
   // Loop over all of the particles in the event, call particle builder
   // Call suggest_barcode only after insertion!
-  for (auto tlink : xEvt->truthParticleLinks())
-  {
-    if (!tlink.isValid())
-      continue;
+  for (auto tlink : xEvt->truthParticleLinks()) {
+    if (!tlink.isValid()) { continue; }
     const xAOD::TruthParticle *xPart = *tlink;
 
     // sanity check
-    if (xPart == nullptr)
-    {
+    if (xPart == nullptr) {
       ATH_MSG_WARNING("xAOD TruthParticle is equal to NULL. This should not happen!");
       continue;
     }
 
-    if (!xPart->hasProdVtx() && !xPart->hasDecayVtx())
-    {
-      ATH_MSG_WARNING("xAOD particle with no vertices, bc = " << xPart->barcode());
+    if (!xPart->hasProdVtx() && !xPart->hasDecayVtx()) {
+      ATH_MSG_WARNING("xAOD particle with no vertices, uniqueID = " << HepMC::uniqueID(xPart));
       continue;
     }
 
-    // skip particles with barcode which are Geant4 secondaries
-    if (HepMC::is_simulation_particle(xPart))
-      continue;
+    // skip particles which are Geant4 secondaries
+    if (HepMC::is_simulation_particle(xPart)) { continue; }
 
       // Create GenParticle
       // presumably the GenEvent takes ownership of this, but creating a unique_ptr here as that will only happen if there's an associated vertex
@@ -193,19 +188,18 @@ HepMC::GenEvent xAODtoHepMCTool::createHepMCEvent(const xAOD::TruthEvent *xEvt, 
 #else
     std::unique_ptr<HepMC::GenParticle> hepmcParticle(createHepMCParticle(xPart));
 #endif
-    int bcpart = xPart->barcode();
+    int bcpart = HepMC::barcode(xPart);
 
     // status HepMC::SPECIALSTATUS should be treated just as status 2
-    if (hepmcParticle->status() == HepMC::SPECIALSTATUS)
+    if (hepmcParticle->status() == HepMC::SPECIALSTATUS) {
       hepmcParticle->set_status(2);
+    }
 
     // Get the production and decay vertices
-    if (xPart->hasProdVtx())
-    {
+    if (xPart->hasProdVtx()) {
       const xAOD::TruthVertex *xAODProdVtx = xPart->prodVtx();
       // skip production vertices which are Geant4 secondaries
-      if (HepMC::is_simulation_vertex(xAODProdVtx))
-        continue;
+      if (HepMC::is_simulation_vertex(xAODProdVtx)) { continue; }
       bool prodVtxSeenBefore(false); // is this new?
       auto hepmcProdVtx = vertexHelper(xAODProdVtx, vertexMap, prodVtxSeenBefore);
       // Set the decay/production links
@@ -215,37 +209,30 @@ HepMC::GenEvent xAODtoHepMCTool::createHepMCEvent(const xAOD::TruthEvent *xEvt, 
       hepmcProdVtx->add_particle_out(hepmcParticle.get());
 #endif
       // Insert into Event
-      if (!prodVtxSeenBefore)
-      {
+      if (!prodVtxSeenBefore) {
         genEvt.add_vertex(hepmcProdVtx);
-        if (!HepMC::suggest_barcode(hepmcProdVtx, xAODProdVtx->barcode()))
-        {
-          ATH_MSG_WARNING("suggest_barcode failed for vertex " << xAODProdVtx->barcode());
+        if (!HepMC::suggest_barcode(hepmcProdVtx, HepMC::barcode(xAODProdVtx))) {
+          ATH_MSG_WARNING("suggest_barcode failed for vertex " << HepMC::barcode(xAODProdVtx));
           ++m_badSuggest;
         }
       }
-      if (!HepMC::suggest_barcode(hepmcParticle, bcpart))
-      {
+      if (!HepMC::suggest_barcode(hepmcParticle, bcpart)) {
         ATH_MSG_VERBOSE("suggest_barcode failed for particle " << bcpart);
         ++m_badSuggest;
       }
       bcpart = 0;
     }
-    else
-    {
-      ATH_MSG_VERBOSE("No production vertex found for particle " << xPart->barcode());
+    else {
+      ATH_MSG_VERBOSE("No production vertex found for particle " << HepMC::uniqueID(xPart));
     }
 
-    if (xPart->hasDecayVtx())
-    {   
+    if (xPart->hasDecayVtx()) {
       const xAOD::TruthVertex *xAODDecayVtx = xPart->decayVtx();
       // skip decay vertices which are Geant4 secondaries
-      if (HepMC::is_simulation_vertex(xAODDecayVtx))
-      {
-/// Avoid double deletion
+      if (HepMC::is_simulation_vertex(xAODDecayVtx)) {
+        /// Avoid double deletion
 #ifndef HEPMC3
-        if (xPart->hasProdVtx())
-          (void)hepmcParticle.release();
+        if (xPart->hasProdVtx()) { (void)hepmcParticle.release(); }
 #endif
         continue;
       }
@@ -258,20 +245,16 @@ HepMC::GenEvent xAODtoHepMCTool::createHepMCEvent(const xAOD::TruthEvent *xEvt, 
       hepmcDecayVtx->add_particle_in(hepmcParticle.get());
 #endif
       // Insert into Event
-      if (!decayVtxSeenBefore)
-      {
+      if (!decayVtxSeenBefore) {
         genEvt.add_vertex(hepmcDecayVtx);
-        if (!HepMC::suggest_barcode(hepmcDecayVtx, xAODDecayVtx->barcode()))
-        {
+        if (!HepMC::suggest_barcode(hepmcDecayVtx, HepMC::barcode(xAODDecayVtx))) {
           ATH_MSG_WARNING("suggest_barcode failed for vertex "
-                          << xAODDecayVtx->barcode());
+                          << HepMC::barcode(xAODDecayVtx));
           ++m_badSuggest;
         }
       }
-      if (bcpart != 0)
-      {
-        if (!HepMC::suggest_barcode(hepmcParticle, bcpart))
-        {
+      if (bcpart != 0) {
+        if (!HepMC::suggest_barcode(hepmcParticle, bcpart)) {
           ATH_MSG_DEBUG("suggest_barcode failed for particle " << bcpart);
           ++m_badSuggest;
         }
@@ -298,14 +281,12 @@ HepMC::GenVertexPtr xAODtoHepMCTool::vertexHelper(const xAOD::TruthVertex *xaodV
   std::map<const xAOD::TruthVertex *, HepMC::GenVertexPtr>::iterator vMapItr;
   vMapItr = vertexMap.find(xaodVertex);
   // Vertex seen before?
-  if (vMapItr != vertexMap.end())
-  {
+  if (vMapItr != vertexMap.end()) {
     // YES: use the HepMC::Vertex already in the map
     hepmcVertex = (*vMapItr).second;
     seenBefore = true;
   }
-  else
-  {
+  else {
     // NO: create a new HepMC::Vertex
     vertexMap[xaodVertex] = createHepMCVertex(xaodVertex);
     hepmcVertex = vertexMap[xaodVertex];
@@ -318,7 +299,7 @@ HepMC::GenVertexPtr xAODtoHepMCTool::vertexHelper(const xAOD::TruthVertex *xaodV
 // Call suggest_barcode after insertion!
 HepMC::GenParticlePtr xAODtoHepMCTool::createHepMCParticle(const xAOD::TruthParticle *particle) const
 {
-  ATH_MSG_VERBOSE("Creating GenParticle for barcode " << particle->barcode());
+  ATH_MSG_VERBOSE("Creating GenParticle for uniqueID " << HepMC::uniqueID(particle));
   const HepMC::FourVector fourVec(m_momFac * particle->px(), m_momFac * particle->py(), m_momFac * particle->pz(), m_momFac * particle->e());
   auto hepmcParticle = HepMC::newGenParticlePtr(fourVec, particle->pdgId(), particle->status());
   hepmcParticle->set_generated_mass(m_momFac * particle->m());
@@ -329,7 +310,7 @@ HepMC::GenParticlePtr xAODtoHepMCTool::createHepMCParticle(const xAOD::TruthPart
 // Call suggest_barcode after insertion!
 HepMC::GenVertexPtr xAODtoHepMCTool::createHepMCVertex(const xAOD::TruthVertex *vertex) const
 {
-  ATH_MSG_VERBOSE("Creating GenVertex for barcode " << vertex->barcode());
+  ATH_MSG_VERBOSE("Creating GenVertex for uniqueID " << HepMC::uniqueID(vertex));
   HepMC::FourVector prod_pos(m_lenFac * vertex->x(), m_lenFac * vertex->y(), m_lenFac * vertex->z(), m_lenFac * vertex->t());
   auto genVertex = HepMC::newGenVertexPtr(prod_pos);
   return genVertex;
@@ -340,14 +321,14 @@ HepMC::GenVertexPtr xAODtoHepMCTool::createHepMCVertex(const xAOD::TruthVertex *
 void xAODtoHepMCTool::printxAODEvent(const xAOD::TruthEvent *event, const xAOD::EventInfo *eventInfo) const
 {
 
-  std::vector<int> bcPars;
-  std::vector<int> bcKids;
+  std::vector<int> uidPars;
+  std::vector<int> uidKids;
 
   long long int evtNum = eventInfo->eventNumber();
 
   std::cout << "======================================================================================" << std::endl;
   std::cout << "xAODTruth Event " << evtNum << std::endl;
-  std::cout << "   Barcode      PDG Id  Status   px(GeV)   py(GeV)   pz(GeV)    E(GeV)   Parent: Decay" << std::endl;
+  std::cout << "   UniqueID      PDG Id  Status   px(GeV)   py(GeV)   pz(GeV)    E(GeV)   Parent: Decay" << std::endl;
   std::cout << "   -----------------------------------------------------------------------------------" << std::endl;
 
   int nPart = event->nTruthParticles();
@@ -363,37 +344,37 @@ void xAODtoHepMCTool::printxAODEvent(const xAOD::TruthEvent *event, const xAOD::
     float py = part->py() / 1000.;
     float pz = part->pz() / 1000.;
     float e = part->e() / 1000.;
-    bcPars.clear();
-    bcKids.clear();
+    uidPars.clear();
+    uidKids.clear();
 
     if (part->hasProdVtx())
     {
       const xAOD::TruthVertex *pvtx = part->prodVtx();
       if (pvtx)
-        bcPars.push_back(pvtx->barcode());
+        uidPars.push_back(HepMC::uniqueID(pvtx));
     }
 
     if (part->hasDecayVtx())
     {
       const xAOD::TruthVertex *dvtx = part->decayVtx();
       if (dvtx)
-        bcKids.push_back(dvtx->barcode());
+        uidKids.push_back(HepMC::uniqueID(dvtx));
     }
 
-    std::cout << std::setw(10) << part->barcode() << std::setw(12) << id
+    std::cout << std::setw(10) << HepMC::uniqueID(part) << std::setw(12) << id
               << std::setw(8) << stat
               << std::setprecision(2) << std::fixed
               << std::setw(10) << px << std::setw(10) << py
               << std::setw(10) << pz << std::setw(10) << e << "   ";
     std::cout << "P: ";
-    for (unsigned int k = 0; k < bcPars.size(); ++k)
+    for (unsigned int k = 0; k < uidPars.size(); ++k)
     {
-      std::cout << bcPars[k] << " ";
+      std::cout << uidPars[k] << " ";
     }
     std::cout << "  D: ";
-    for (unsigned int k = 0; k < bcKids.size(); ++k)
+    for (unsigned int k = 0; k < uidKids.size(); ++k)
     {
-      std::cout << bcKids[k] << " ";
+      std::cout << uidKids[k] << " ";
     }
     std::cout << std::endl;
   }
