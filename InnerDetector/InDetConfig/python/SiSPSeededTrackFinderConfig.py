@@ -193,6 +193,14 @@ def ITkSiSPSeededTrackFinderROIConvCfg(
     kwargs.setdefault("EMROIPhiRZContainer",
                       "ITkCaloClusterROIPhiRZ15GeVUnordered")
 
+    if "SeedsTool" not in kwargs:
+        if flags.Tracking.ActiveConfig.doActsToAthenaSeed:
+            from ActsConfig.ActsSeedingConfig import ActsSiSpacePointsSeedMakerToolCfg
+            kwargs.setdefault("SeedsTool", acc.popToolsAndMerge(ActsSiSpacePointsSeedMakerToolCfg(flags)))
+        else:
+            from InDetConfig.SiSpacePointsSeedToolConfig import ITkSiSpacePointsSeedMakerCfg
+            kwargs.setdefault("SeedsTool", acc.popToolsAndMerge(ITkSiSpacePointsSeedMakerCfg(flags)))
+            
     acc.merge(ITkSiSPSeededTrackFinderCfg(flags, name, **kwargs))
     return acc
 

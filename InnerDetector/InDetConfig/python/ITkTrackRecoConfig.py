@@ -21,6 +21,7 @@ def CombinedTrackingPassFlagSets(flags):
         TrackingComponent.ActsValidateClusters : "ActsValidateClusters",
         TrackingComponent.ActsValidateSpacePoints : "ActsValidateSpacePoints",
         TrackingComponent.ActsValidateSeeds : "ActsValidateSeeds",
+        TrackingComponent.ActsValidateConversionSeeds : "ActsValidateConversionSeeds",
         TrackingComponent.ActsValidateTracks : "ActsValidateTracks",
         TrackingComponent.ActsValidateAmbiguityResolution : "ActsValidateAmbiguityResolution"
     }
@@ -56,7 +57,8 @@ def CombinedTrackingPassFlagSets(flags):
             "Tracking.ITkActsLargeRadiusPass")]
         
     # Acts Conversion Pass
-    if flags.Detector.EnableCalo and flags.Acts.doITkConversion:
+    if flags.Detector.EnableCalo and flags.Acts.doITkConversion and \
+       TrackingComponent.ActsValidateConversionSeeds not in flags.Tracking.recoChain:
         flags_set += [flags.cloneAndReplace(
             "Tracking.ActiveConfig",
             "Tracking.ITkActsConversionPass")]

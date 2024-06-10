@@ -45,6 +45,12 @@ def actsValidateSeedsFlags(flags) -> None:
     flags.Tracking.recoChain = [TrackingComponent.ActsValidateSeeds]
     flags.Tracking.writeSeedValNtuple = True
 
+def actsValidateConversionSeedsFlags(flags) -> None:
+    """flags for Reco_tf with CA used in CI tests: use SiSpacePointSeedMaker tool during reconstruction"""
+    flags.Tracking.recoChain = [TrackingComponent.AthenaChain,
+                                TrackingComponent.ActsValidateConversionSeeds]
+    flags.Tracking.writeSeedValNtuple = True
+    
 def actsValidateOrthogonalSeedsFlags(flags) -> None:
     """flags for Reco_tf with CA used in CI tests: use SiSpacePointSeedMaker tool during reconstruction (orthogonal seeding)"""
     from ActsConfig.ActsConfigFlags import SeedingStrategy

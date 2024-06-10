@@ -60,11 +60,14 @@ namespace ActsTrk {
     ATH_CHECK( m_seedsToolPixel.retrieve(EnableTool{m_pixel}) );
     ATH_CHECK( m_seedsToolStrip.retrieve(EnableTool{m_strip}) );
 
-    ATH_CHECK( m_prdToTrackMap.initialize(SG::AllowEmpty) );
-
+    ATH_CHECK( m_prdToTrackMap.initialize(not m_prdToTrackMap.empty() ) );
+    
     ATH_CHECK( m_beamSpotKey.initialize() );
     ATH_CHECK( m_fieldCondObjInputKey.initialize() );
 
+    ATH_CHECK(m_pixelDetEleCollKey.initialize());
+    ATH_CHECK(m_stripDetEleCollKey.initialize());
+    
     // Validation
     if (m_writeNtuple) 
       ATH_CHECK( InitTree() );
@@ -140,7 +143,7 @@ namespace ActsTrk {
   }
 
   void SiSpacePointsSeedMaker::pixInform(const Trk::SpacePoint* const& sp,
-					     float *r)
+					 float *r)
   {
     const InDet::SiCluster *cl = static_cast<const InDet::SiCluster *>(sp->clusterList().first);
     const InDetDD::SiDetectorElement *de = cl->detectorElement();
@@ -152,8 +155,8 @@ namespace ActsTrk {
 
 
   void SiSpacePointsSeedMaker::stripInform(InDet::SiSpacePointsSeedMakerEventData& data,
-					       const Trk::SpacePoint* const& sp, 
-					       float *r)
+					   const Trk::SpacePoint* const& sp, 
+					   float *r)
   {
     const InDet::SiCluster *c0 = static_cast<const InDet::SiCluster *>(sp->clusterList().first);
     const InDet::SiCluster *c1 = static_cast<const InDet::SiCluster *>(sp->clusterList().second);
@@ -199,11 +202,11 @@ namespace ActsTrk {
   StatusCode 
   SiSpacePointsSeedMaker::retrievePixel(const EventContext& ctx,
 					InDet::SiSpacePointsSeedMakerEventData& data,
-					const Trk::PRDtoTrackMap* /*prd_to_track_map_cptr*/) const
+					const Trk::PRDtoTrackMap* prd_to_track_map_cptr) const
   {
     // get the xAOD::SpacePointContainer and loop on entries to check which space point
     // you want to use for seeding
-    
+    ATH_MSG_DEBUG("Retrieving pixel space point collection " << m_actsSpacepointsPixel.key());
     SG::ReadHandle< xAOD::SpacePointContainer > inputSpacePointContainer( m_actsSpacepointsPixel, ctx );
     if (not inputSpacePointContainer.isValid()){
       ATH_MSG_FATAL("xAOD::SpacePointContainer with key " << m_actsSpacepointsPixel.key() << " is not available...");
@@ -213,7 +216,53 @@ namespace ActsTrk {
     // TODO: here you need to write some lines to implement the
     // check on the used PDRs in previous tracking passes
     for (const xAOD::SpacePoint * sp : *inputSpacePointCollection) {
+      if (prd_to_track_map_cptr != nullptr and isUsed(sp, *prd_to_track_map_cptr)) continue;
       newSpacePoint(data, sp);
+    }
+    
+    return StatusCode::SUCCESS;
+  }
+
+  StatusCode
+  SiSpacePointsSeedMaker::retrievePixel(const EventContext& ctx,
+					InDet::SiSpacePointsSeedMakerEventData& data,
+					const std::vector<IdentifierHash>& ids,
+					const Trk::PRDtoTrackMap* prd_to_track_map_cptr) const
+  {
+    if (ids.empty()) return StatusCode::SUCCESS;
+    
+    ATH_MSG_DEBUG("Retrieving strip space point collection " << m_actsSpacepointsPixel.key());
+    SG::ReadHandle< xAOD::SpacePointContainer > inputSpacePointContainer( m_actsSpacepointsPixel, ctx );
+    if (not inputSpacePointContainer.isValid()){
+      ATH_MSG_FATAL("xAOD::SpacePointContainer with key " << m_actsSpacepointsPixel.key() << " is not available...");
+      return StatusCode::FAILURE;
+    }
+    const xAOD::SpacePointContainer *inputCollection = inputSpacePointContainer.cptr();
+
+    ATH_MSG_DEBUG("Retrieving SiDetectorElementCollection with key `" << m_pixelDetEleCollKey.key() << "`");
+    SG::ReadCondHandle< InDetDD::SiDetectorElementCollection > detEleHandle = SG::makeHandle( m_pixelDetEleCollKey, ctx );
+    ATH_CHECK(detEleHandle.isValid());    
+    const InDetDD::SiDetectorElementCollection* detElements = detEleHandle.cptr();
+    
+    ContainerAccessor< xAOD::SpacePoint, IdentifierHash, 1>
+      accessor ( *inputCollection,
+		 [this] (const xAOD::SpacePoint& coll) -> IdentifierHash 
+		 { return coll.elementIdList()[0]; },
+		 detElements->size());    
+    
+    for (const IdentifierHash id : ids) {
+      if (not accessor.isIdentifierPresent(id)) {
+	continue;
+      }
+
+      const auto& ranges = accessor.rangesForIdentifierDirect(id);
+      for (auto [firstElement, lastElement] : ranges) {
+	for (; firstElement != lastElement; ++firstElement) {
+	  const xAOD::SpacePoint *sp = *firstElement;
+	  if (prd_to_track_map_cptr != nullptr and isUsed(sp, *prd_to_track_map_cptr)) continue;
+	  newSpacePoint(data, sp);
+	}
+      }
     }
     
     return StatusCode::SUCCESS;
@@ -222,11 +271,11 @@ namespace ActsTrk {
   StatusCode
   SiSpacePointsSeedMaker::retrieveStrip(const EventContext& ctx,
 					InDet::SiSpacePointsSeedMakerEventData& data,
-					const Trk::PRDtoTrackMap* /*prd_to_track_map_cptr*/) const
+					const Trk::PRDtoTrackMap* prd_to_track_map_cptr) const
   {
     // get the xAOD::SpacePointContainer and loop on entries to check which space point
     // you want to use for seeding
-    
+    ATH_MSG_DEBUG("Retrieving strip space point collection " << m_actsSpacepointsStrip.key());
     SG::ReadHandle< xAOD::SpacePointContainer > inputSpacePointContainer( m_actsSpacepointsStrip, ctx );
     if (!inputSpacePointContainer.isValid()){
       ATH_MSG_FATAL("xAOD::SpacePointContainer with key " << m_actsSpacepointsStrip.key() << " is not available...");
@@ -236,20 +285,68 @@ namespace ActsTrk {
     // TODO: here you need to write some lines to implement the
     // check on the used PDRs in previous tracking passes
     for (const xAOD::SpacePoint * sp : *inputSpacePointCollection) {
+      if (prd_to_track_map_cptr != nullptr and isUsed(sp, *prd_to_track_map_cptr)) continue;
       newSpacePoint(data, sp);
     }
 
     return StatusCode::SUCCESS;
   }
 
+  StatusCode
+  SiSpacePointsSeedMaker::retrieveStrip(const EventContext& ctx,
+					InDet::SiSpacePointsSeedMakerEventData& data,
+					const std::vector<IdentifierHash>& ids,
+					const Trk::PRDtoTrackMap* prd_to_track_map_cptr) const
+
+  {
+    if (ids.empty()) return StatusCode::SUCCESS;
+    
+    ATH_MSG_DEBUG("Retrieving pixel space point collection " << m_actsSpacepointsStrip.key());
+    SG::ReadHandle< xAOD::SpacePointContainer > inputSpacePointContainer( m_actsSpacepointsStrip, ctx );
+    if (not inputSpacePointContainer.isValid()){
+      ATH_MSG_FATAL("xAOD::SpacePointContainer with key " << m_actsSpacepointsStrip.key() << " is not available...");
+      return StatusCode::FAILURE;
+    }
+    const xAOD::SpacePointContainer *inputCollection = inputSpacePointContainer.cptr();
+    
+    ATH_MSG_DEBUG("Retrieving SiDetectorElementCollection with key `" << m_stripDetEleCollKey.key() << "`");
+    SG::ReadCondHandle< InDetDD::SiDetectorElementCollection > detEleHandle = SG::makeHandle( m_stripDetEleCollKey, ctx );
+    ATH_CHECK(detEleHandle.isValid());
+    const InDetDD::SiDetectorElementCollection* detElements = detEleHandle.cptr();
+    
+    ContainerAccessor< xAOD::SpacePoint, IdentifierHash, 1>
+      accessor ( *inputCollection,
+		 [this] (const xAOD::SpacePoint& coll) -> IdentifierHash
+		 { return coll.elementIdList()[0]; },
+		 detElements->size());
+    
+    for (const IdentifierHash id : ids) {
+      if (not accessor.isIdentifierPresent(id)) {
+	continue;
+      }
+      
+      const auto& ranges = accessor.rangesForIdentifierDirect(id);
+      for (auto [firstElement, lastElement] : ranges) {
+        for (; firstElement != lastElement; ++firstElement) {
+          const xAOD::SpacePoint *sp = *firstElement;
+	  if (prd_to_track_map_cptr != nullptr and isUsed(sp, *prd_to_track_map_cptr)) continue;
+          newSpacePoint(data, sp);
+        }
+      }
+    }
+    
+    return StatusCode::SUCCESS;
+  }
+
+
   StatusCode 
   SiSpacePointsSeedMaker::retrieveOverlap(const EventContext& ctx,
 					  InDet::SiSpacePointsSeedMakerEventData& data,
-					  const Trk::PRDtoTrackMap* /*prd_to_track_map_cptr*/) const
+					  const Trk::PRDtoTrackMap* prd_to_track_map_cptr) const
   {
     // get the xAOD::SpacePointContainer and loop on entries to check which space point
     // you want to use for seeding
-    
+    ATH_MSG_DEBUG("Retrieving strip overlap space point collection " << m_actsSpacepointsOverlap.key());
     SG::ReadHandle< xAOD::SpacePointContainer > inputSpacePointContainer( m_actsSpacepointsOverlap, ctx );
     if (!inputSpacePointContainer.isValid()){
       ATH_MSG_FATAL("xAOD::SpacePointContainer with key " << m_actsSpacepointsOverlap.key() << " is not available...");
@@ -259,11 +356,57 @@ namespace ActsTrk {
     // TODO: here you need to write some lines to implement the
     // check on the used PDRs in previous tracking passes
     for (const xAOD::SpacePoint * sp : *inputSpacePointCollection) {
+      if (prd_to_track_map_cptr != nullptr and isUsed(sp, *prd_to_track_map_cptr)) continue;
       newSpacePoint(data, sp);
     }
     
     return StatusCode::SUCCESS;
   }
+
+  StatusCode
+  SiSpacePointsSeedMaker::retrieveOverlap(const EventContext& ctx,
+					  InDet::SiSpacePointsSeedMakerEventData& data,
+					  const std::vector<IdentifierHash>& ids,
+					  const Trk::PRDtoTrackMap* prd_to_track_map_cptr) const    
+  {
+    if (ids.empty()) return StatusCode::SUCCESS;
+
+    ATH_MSG_DEBUG("Retrieving ovrlap pixel space point collection " << m_actsSpacepointsOverlap.key());
+    SG::ReadHandle< xAOD::SpacePointContainer > inputSpacePointContainer( m_actsSpacepointsOverlap, ctx );
+    if (not inputSpacePointContainer.isValid()){
+      ATH_MSG_FATAL("xAOD::SpacePointContainer with key " << m_actsSpacepointsOverlap.key() << " is not available...");
+      return StatusCode::FAILURE;
+    }
+    const xAOD::SpacePointContainer *inputCollection = inputSpacePointContainer.cptr();
+
+    ATH_MSG_DEBUG("Retrieving SiDetectorElementCollection with key `" << m_stripDetEleCollKey.key() << "`");
+    SG::ReadCondHandle< InDetDD::SiDetectorElementCollection > detEleHandle = SG::makeHandle( m_stripDetEleCollKey, ctx );
+    ATH_CHECK(detEleHandle.isValid());
+    const InDetDD::SiDetectorElementCollection* detElements = detEleHandle.cptr();
+
+    ContainerAccessor< xAOD::SpacePoint, IdentifierHash, 1>
+      accessor ( *inputCollection,
+                 [this] (const xAOD::SpacePoint& coll) -> IdentifierHash
+                 { return coll.elementIdList()[0]; },
+                 detElements->size());
+
+    for (const IdentifierHash id : ids) {
+      if (not accessor.isIdentifierPresent(id)) {
+        continue;
+      }
+
+      const auto& ranges = accessor.rangesForIdentifierDirect(id);
+      for (auto [firstElement, lastElement] : ranges) {
+        for (; firstElement != lastElement; ++firstElement) {
+          const xAOD::SpacePoint *sp = *firstElement;
+          if (prd_to_track_map_cptr != nullptr and isUsed(sp, *prd_to_track_map_cptr)) continue;
+          newSpacePoint(data, sp);
+        }
+      }
+    }
+
+    return StatusCode::SUCCESS;
+  }  
 
   void
   SiSpacePointsSeedMaker::buildBeamFrameWork(const EventContext& ctx,
@@ -337,6 +480,58 @@ namespace ActsTrk {
   // Interface Methods
   // ===================================================================== //  
 
+  void
+  SiSpacePointsSeedMaker::newRegion(const EventContext& ctx,
+				    InDet::SiSpacePointsSeedMakerEventData& data,
+				    const std::vector<IdentifierHash>& vPixel,
+				    const std::vector<IdentifierHash>& vStrip) const
+  {
+    ATH_MSG_DEBUG("Calling " << name() << "::newRegion");
+    if (!m_pixel && !m_strip)
+      return;
+
+    InDet::SiSpacePointsSeedMakerEventData::clearPoolList(data.l_ITkSpacePointForSeed);
+    data.i_ITkSpacePointForSeed = data.l_ITkSpacePointForSeed.begin();
+    data.v_ActsSpacePointForSeed.clear();
+    
+    InDet::SiSpacePointsSeedMakerEventData::clearPoolList(data.i_ITkSeeds);
+    data.i_ITkSeed = data.i_ITkSeeds.begin();
+    
+    buildBeamFrameWork(ctx, data); 
+
+    data.ns = 0;
+    data.nsaz = 0;
+    data.nsazv = 0;
+
+    const Trk::PRDtoTrackMap *prd_to_track_map_cptr = nullptr;
+    if ( not m_prdToTrackMap.empty() ) {
+      SG::ReadHandle<Trk::PRDtoTrackMap> prd_handle = SG::makeHandle( m_prdToTrackMap, ctx );
+      if ( not prd_handle.isValid() ) {
+        ATH_MSG_ERROR("Failed to read PRD to track association map: " << m_prdToTrackMap.key());
+      }
+      prd_to_track_map_cptr = prd_handle.get();
+    }
+    if (prd_to_track_map_cptr != nullptr) {
+      ATH_MSG_DEBUG("Retrieved prd map with name " << m_prdToTrackMap.key());
+    }
+    
+    if ( not retrievePixel(ctx, data, vPixel, prd_to_track_map_cptr).isSuccess() ) {
+      ATH_MSG_ERROR("Error while retrieving Pixel space points with key " << m_actsSpacepointsPixel.key());
+    }
+
+    if ( not retrieveStrip(ctx, data, vStrip, prd_to_track_map_cptr).isSuccess() ) {
+      ATH_MSG_ERROR("Error while retrieving Strip space points with key " << m_actsSpacepointsStrip.key());
+    }
+
+    if ( m_useOverlap and not retrieveOverlap(ctx, data, prd_to_track_map_cptr).isSuccess() ) {
+      ATH_MSG_ERROR("Error while retrieving Strip Overlap space points with key " <<  m_actsSpacepointsOverlap.key());
+    }
+
+    data.initialized = true;
+  }
+
+
+  
   void
   SiSpacePointsSeedMaker::newEvent(const EventContext& ctx,
 				       InDet::SiSpacePointsSeedMakerEventData& data,
