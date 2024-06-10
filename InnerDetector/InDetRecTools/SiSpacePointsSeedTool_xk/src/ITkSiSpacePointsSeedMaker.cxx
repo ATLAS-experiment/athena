@@ -2161,6 +2161,28 @@ void SiSpacePointsSeedMaker::production3SpSSS(EventData &data,
         if (std::abs(dz) > m_dzmaxSSS || std::abs(z0) > zmax)
           continue;
 
+        /// for LRT: Before adding top SP to the list, apply a cut for LRT
+        if(m_isLRT){
+          float Ri = 1./R;
+          const float ax = X*Ri;
+          const float ay = Y*Ri;
+          float VR    = m_maxdImpact*Ri*Ri ;
+          float dx = (*iter_otherSP)->x() - X;
+          float dy = (*iter_otherSP)->y() - Y;
+          float x = dx * ax + dy * ay;
+          float y = dy * ax - dx * ay;
+          
+          if(std::abs(R*y) > maxd0cut * x) {
+              float r2 = 1. / (x * x + y * y);
+              float u   = x*r2        ;
+              float v   = y*r2        ;
+              const float V0 = (y < 0.) ? VR: -VR;
+              float A   = (v-V0)/(u+Ri)          ;
+              float B   = V0+A*Ri                ;
+              if((B*B) > (ipt2K*(1.+A*A))) continue;
+          }
+        }
+
         /// add SP to the list
         data.ITkSP[Nt] = (*iter_otherSP);
         data.ITkSP[Nt]->setDZDR(dZdR);
@@ -2214,6 +2236,29 @@ void SiSpacePointsSeedMaker::production3SpSSS(EventData &data,
         const float z0 = Z - R * dZdR;
         if (std::abs(dz) > m_dzmaxSSS || std::abs(z0) > zmax)
           continue;
+
+        /// for LRT: Before adding top SP to the list, apply a cut for LRT
+        if(m_isLRT){
+          float Ri = 1./R;
+          const float ax = X*Ri;
+          const float ay = Y*Ri;
+          float VR    = m_maxdImpact*Ri*Ri ;
+          float dx = (*iter_otherSP)->x() - X;
+          float dy = (*iter_otherSP)->y() - Y;
+          float x = dx * ax + dy * ay;
+          float y = dy * ax - dx * ay;
+          
+          if(std::abs(R*y) > -maxd0cut * x) {
+              float r2 = 1. / (x * x + y * y);
+              float u   = x*r2        ;
+              float v   = y*r2        ;
+              const float V0 = (y < 0.) ? VR: -VR;
+              float A   = (v-V0)/(u+Ri)          ;
+              float B   = V0+A*Ri                ;
+              if((B*B) > (ipt2K*(1.+A*A))) continue;
+          }
+        }
+
         /// found a bottom SP candidate, write it into the data object
         data.ITkSP[Nb] = (*iter_otherSP);
         data.ITkSP[Nb]->setDZDR(dZdR);
