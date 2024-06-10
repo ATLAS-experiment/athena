@@ -144,6 +144,9 @@ def ActsSiSpacePointsSeedMakerToolCfg(flags,
 
     acc = ComponentAccumulator()
 
+    if flags.Tracking.ActiveConfig.extension == "ActsValidateConversionSeeds":
+        kwargs.setdefault('useOverlapSpCollection', False)
+    
     # Main properties
     kwargs.setdefault('usePixel', 
                       flags.Tracking.ActiveConfig.useITkPixel and
@@ -158,6 +161,7 @@ def ActsSiSpacePointsSeedMakerToolCfg(flags,
     kwargs.setdefault('ActsSpacePointsStripName'    , "ITkStripSpacePoints")
     kwargs.setdefault('ActsSpacePointsOverlapName'  , "ITkStripOverlapSpacePoints")
 
+    
     # The code will need to use Trk::SpacePoint object for downstream Athena tracking
     # If we run this tool we have two options to retrieve this:
     #     (1) Have the Athena->Acts Space Point Converter scheduled beforehand
@@ -185,16 +189,22 @@ def ActsSiSpacePointsSeedMakerToolCfg(flags,
         else:
             if flags.Tracking.doITkFastTracking:
                 kwargs.setdefault("useFastTracking", True)
-                seedTool_pixel = acc.popToolsAndMerge(ActsFastPixelSeedingToolCfg(flags))
+                seedTool_pixel = acc.popToolsAndMerge(ActsFastPixelSeedingToolCfg(flags,
+                                                                                  rMax=flags.Tracking.ActiveConfig.radMax,
+                                                                                  gridRMax=flags.Tracking.ActiveConfig.radMax))
             else:
-                seedTool_pixel = acc.popToolsAndMerge(ActsPixelSeedingToolCfg(flags))
+                seedTool_pixel = acc.popToolsAndMerge(ActsPixelSeedingToolCfg(flags,
+                                                                              rMax=flags.Tracking.ActiveConfig.radMax,
+                                                                              gridRMax=flags.Tracking.ActiveConfig.radMax))
 
     seedTool_strip = None
     if 'SeedToolStrip' not in kwargs:
         if flags.Acts.SeedingStrategy is SeedingStrategy.Orthogonal:
             seedTool_strip = acc.popToolsAndMerge(ActsStripOrthogonalSeedingToolCfg(flags))
         else:
-            seedTool_strip = acc.popToolsAndMerge(ActsStripSeedingToolCfg(flags))
+            seedTool_strip = acc.popToolsAndMerge(ActsStripSeedingToolCfg(flags,
+                                                                          rMax=flags.Tracking.ActiveConfig.radMax,
+                                                                          gridRMax=flags.Tracking.ActiveConfig.radMax))
 
     kwargs.setdefault('SeedToolPixel', seedTool_pixel)
     kwargs.setdefault('SeedToolStrip', seedTool_strip)

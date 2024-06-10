@@ -561,6 +561,8 @@ StatusCode InDet::SiSPSeededTrackFinder::itkFastTrackingStrategy(const EventCont
 
 StatusCode InDet::SiSPSeededTrackFinder::itkConvStrategy(const EventContext& ctx) const
 {
+  ATH_MSG_DEBUG("Executing " << name() << "::itkConvStrategy");
+
   SG::WriteHandle<TrackCollection> outputTracks{m_outputTracksKey, ctx};
   ATH_CHECK(outputTracks.record(std::make_unique<TrackCollection>()));
   /// For HI events we can use MBTS information from calorimeter
@@ -596,7 +598,10 @@ StatusCode InDet::SiSPSeededTrackFinder::itkConvStrategy(const EventContext& ctx
         roiComp->push_back(roi);
     }
   }
-  else return StatusCode::FAILURE;
+  else {
+    ATH_MSG_ERROR("Calo RoI is not valid: " << m_caloClusterROIKey.key());
+    return StatusCode::FAILURE;
+  }
 
   std::vector<IdentifierHash> listOfStripIds;
   std::vector<IdentifierHash> listOfPixIds;

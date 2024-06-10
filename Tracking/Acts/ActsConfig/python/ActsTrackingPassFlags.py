@@ -8,6 +8,11 @@ def deactivateAthenaComponents(icf):
     icf.doAthenaSeed = False
     icf.doAthenaTrack = False
     icf.doAthenaAmbiguityResolution = False
+    icf.doActsCluster = False
+    icf.doActsSpacePoint = False
+    icf.doActsSeed = False
+    icf.doActsTrack = False
+    icf.doActsAmbiguityResolution = False
 
 def createActsTrackingPassFlags():
     icf = createITkTrackingPassFlags()
@@ -138,6 +143,19 @@ def createActsValidateSeedsTrackingPassFlags():
     icf.doActsToAthenaSeed = True
     icf.doAthenaTrack = True
     icf.doAthenaAmbiguityResolution = True
+    return icf
+
+def createActsValidateConversionSeedsTrackingPassFlags():
+    icf = createActsConversionTrackingPassFlags()
+    icf.extension = "ActsValidateConversionSeeds"
+    deactivateAthenaComponents(icf)
+    icf.doAthenaCluster = True
+    icf.doAthenaSpacePoint = True
+    icf.doAthenaToActsSpacePoint = True
+    icf.doActsToAthenaSeed = True
+    icf.doAthenaTrack = True
+    icf.doAthenaAmbiguityResolution = True
+    icf.isSecondaryPass = False
     return icf
 
 def createActsValidateTracksTrackingPassFlags():

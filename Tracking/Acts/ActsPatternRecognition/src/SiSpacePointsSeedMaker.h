@@ -21,6 +21,9 @@
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
 #include "xAODInDetMeasurement/StripClusterContainer.h"
 
+#include "InDetReadoutGeometry/SiDetectorElementCollection.h"
+#include "xAODInDetMeasurement/ContainerAccessor.h"
+
 #include "TrkEventUtils/PRDtoTrackMap.h"
 #include "TrkSpacePoint/SpacePoint.h" //used in an inline function in the header
 //for validation
@@ -85,10 +88,7 @@ namespace ActsTrk {
       newRegion(const EventContext&,
 		InDet::SiSpacePointsSeedMakerEventData&,
 		const std::vector<IdentifierHash>&,
-		const std::vector<IdentifierHash>&) const override 
-    {
-      ATH_MSG_ERROR("Method `newRegion` is not implemented.");
-    }
+		const std::vector<IdentifierHash>&) const override;
     
     virtual void 
       newRegion(const EventContext&, 
@@ -173,12 +173,26 @@ namespace ActsTrk {
 			       InDet::SiSpacePointsSeedMakerEventData& data,
 			       const Trk::PRDtoTrackMap* prd_to_track_map_cptr) const;
 
+    StatusCode retrievePixel(const EventContext& ctx,
+			     InDet::SiSpacePointsSeedMakerEventData& data,
+			     const std::vector<IdentifierHash>& ids,
+			     const Trk::PRDtoTrackMap* prd_to_track_map_cptr = nullptr) const;
+
+    StatusCode retrieveStrip(const EventContext& ctx,
+                             InDet::SiSpacePointsSeedMakerEventData& data,
+                             const std::vector<IdentifierHash>& ids,
+                             const Trk::PRDtoTrackMap* prd_to_track_map_cptr = nullptr) const;
+    StatusCode retrieveOverlap(const EventContext& ctx,
+			       InDet::SiSpacePointsSeedMakerEventData& data,
+			       const std::vector<IdentifierHash>& ids,
+			       const Trk::PRDtoTrackMap* prd_to_track_map_cptr) const;
+
     // Validation
     StatusCode InitTree();
 
   private:
     bool isUsed(const Trk::SpacePoint*, const Trk::PRDtoTrackMap &prd_to_track_map) const;
-
+    bool isUsed(const xAOD::SpacePoint*, const Trk::PRDtoTrackMap &prd_to_track_map) const;
 
   private:
     ToolHandle< ActsTrk::ISeedingTool > m_seedsToolPixel {this, "SeedToolPixel", "","Seed Tool for Pixel detector"};
@@ -194,13 +208,18 @@ namespace ActsTrk {
     SG::ReadCondHandleKey< AtlasFieldCacheCondObj > m_fieldCondObjInputKey {this, "AtlasFieldCacheCondObj", "fieldCondObj",
         "Name of the Magnetic Field conditions object key"};
 
+    SG::ReadCondHandleKey< InDetDD::SiDetectorElementCollection > m_pixelDetEleCollKey {this, "PixelDetectorElements", "ITkPixelDetectorElementCollection",
+      "Key of input SiDetectorElementCollection"};
+    SG::ReadCondHandleKey< InDetDD::SiDetectorElementCollection > m_stripDetEleCollKey {this, "StripDetectorElements", "ITkStripDetectorElementCollection",
+      "Key of input SiDetectorElementCollection"};
+    
     Gaudi::Property< bool > m_pixel {this, "usePixel", true};
     Gaudi::Property< bool > m_strip {this, "useStrip", true };
     Gaudi::Property< bool > m_useOverlap {this, "useOverlapSpCollection", true};
     Gaudi::Property< bool > m_fastTracking {this, "useFastTracking", false};
     Gaudi::Property< bool > m_doSeedConversion {this, "doSeedConversion", true, "Convert ActsTrk::Seed into ITk::SiSpacePointsProSeed"};
     Gaudi::Property< bool > m_useClusters {this, "useClustersForSeedConversion", false};
-
+    
   private:
     // Validation
     Gaudi::Property< bool > m_writeNtuple {this, "WriteNtuple", false};
@@ -244,16 +263,41 @@ namespace ActsTrk {
   //////////////////////////////////////////////////////////////////
 
   inline bool
-    SiSpacePointsSeedMaker::isUsed(const Trk::SpacePoint* sp,
-				       const Trk::PRDtoTrackMap &prd_to_track_map) const
+  SiSpacePointsSeedMaker::isUsed(const Trk::SpacePoint* sp,
+				 const Trk::PRDtoTrackMap &prd_to_track_map) const
   {
     const Trk::PrepRawData* d = sp->clusterList().first;
     if (!d || !prd_to_track_map.isUsed(*d)) return false;
     
     d = sp->clusterList().second;
     if (!d || prd_to_track_map.isUsed(*d)) return true;
-
+    
     return false;
+  }
+
+  inline bool
+  SiSpacePointsSeedMaker::isUsed(const xAOD::SpacePoint* sp, const Trk::PRDtoTrackMap &prd_to_track_map) const
+  {
+    static const SG::AuxElement::ConstAccessor< ElementLink< ::SpacePointCollection > > pixelLinkAcc("pixelSpacePointLink");
+    static const SG::AuxElement::ConstAccessor< ElementLink< ::SpacePointCollection > > stripLinkAcc("sctSpacePointLink");
+    static const SG::AuxElement::ConstAccessor< ElementLink< ::SpacePointOverlapCollection > > stripOverlapLinkacc("stripOverlapSpacePointLink");
+
+    const Trk::SpacePoint *indetSp = nullptr;
+    if ( pixelLinkAcc.isAvailable(*sp) ) {
+      const ElementLink< ::SpacePointCollection > link = pixelLinkAcc( *sp );
+      indetSp = *link;
+    }
+    else if ( stripLinkAcc.isAvailable(*sp) ) {
+      const ElementLink< ::SpacePointCollection > link = stripLinkAcc( *sp );
+      indetSp = *link;
+    } else if ( stripOverlapLinkacc.isAvailable(*sp) ) {
+      const ElementLink< ::SpacePointOverlapCollection > link = stripOverlapLinkacc( *sp );
+      indetSp = *link;
+    } else {
+      return false;
+    }
+
+    return isUsed(indetSp, prd_to_track_map);
   }
   
 }

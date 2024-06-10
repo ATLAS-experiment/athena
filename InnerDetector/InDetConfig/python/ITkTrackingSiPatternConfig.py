@@ -57,18 +57,13 @@ def ITkTrackingSiPatternCfg(flags,
 
         # Athena Track
         if flags.Tracking.ActiveConfig.doAthenaTrack:
-
-            from InDetConfig.SiSPSeededTrackFinderConfig import (
-                ITkSiSPSeededTrackFinderCfg)
-            SiSPSeededTrackFinderCfg = ITkSiSPSeededTrackFinderCfg
-            if flags.Tracking.ActiveConfig.extension == "Conversion":
-                from InDetConfig.SiSPSeededTrackFinderConfig import (
-                    ITkSiSPSeededTrackFinderROIConvCfg)
-                SiSPSeededTrackFinderCfg = ITkSiSPSeededTrackFinderROIConvCfg
-
-            acc.merge(SiSPSeededTrackFinderCfg(
-                flags,
-                TracksLocation=SiSPSeededTrackCollectionKey))
+            if flags.Tracking.ActiveConfig.extension in ["Conversion", "ActsValidateConversionSeeds"]:
+                from InDetConfig.SiSPSeededTrackFinderConfig import ITkSiSPSeededTrackFinderROIConvCfg
+                acc.merge(ITkSiSPSeededTrackFinderROIConvCfg(flags,
+                                                             TracksLocation=SiSPSeededTrackCollectionKey))
+            else:                
+                from InDetConfig.SiSPSeededTrackFinderConfig import ITkSiSPSeededTrackFinderCfg
+                acc.merge(ITkSiSPSeededTrackFinderCfg(flags, TracksLocation=SiSPSeededTrackCollectionKey))
 
         # GNN Track
         if flags.Tracking.ActiveConfig.doGNNTrack:

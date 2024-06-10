@@ -47,6 +47,7 @@ class TrackingComponent(FlagEnum):
     ActsValidateClusters = "ActsValidateClusters"
     ActsValidateSpacePoints = "ActsValidateSpacePoints"
     ActsValidateSeeds = "ActsValidateSeeds"
+    ActsValidateConversionSeeds = "ActsValidateConversionSeeds"
     ActsValidateTracks = "ActsValidateTracks"
     ActsValidateAmbiguityResolution = "ActsValidateAmbiguityResolution"
     # GNN
@@ -526,6 +527,7 @@ def createTrackingConfigFlags():
         createActsValidateClustersTrackingPassFlags,
         createActsValidateSpacePointsTrackingPassFlags,
         createActsValidateSeedsTrackingPassFlags,
+        createActsValidateConversionSeedsTrackingPassFlags,
         createActsValidateTracksTrackingPassFlags,
         createActsValidateAmbiguityResolutionTrackingPassFlags,
         createActsHeavyIonTrackingPassFlags
@@ -545,6 +547,8 @@ def createTrackingConfigFlags():
                           createActsValidateSpacePointsTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ("Tracking.ITkActsValidateSeedsPass",
                           createActsValidateSeedsTrackingPassFlags, prefix=True)
+    icf.addFlagsCategory ("Tracking.ITkActsValidateConversionSeedsPass",
+                          createActsValidateConversionSeedsTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ("Tracking.ITkActsValidateTracksPass",
                           createActsValidateTracksTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ("Tracking.ITkActsValidateAmbiguityResolutionPass",
