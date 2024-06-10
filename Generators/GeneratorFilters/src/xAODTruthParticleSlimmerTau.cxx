@@ -105,9 +105,9 @@ StatusCode xAODTruthParticleSlimmerTau::execute()
 
   // Loop over full TruthParticle container
   
-  std::vector<int> barcode_list;  
-  int zero_barcode=0;
-  int dup_barcode = 0;
+  std::vector<int> uniqueID_list;  
+  int zero_uniqueID=0;
+  int dup_uniqueID = 0;
 
   unsigned int nParticles = xTruthParticleContainer->size();
 
@@ -116,19 +116,19 @@ StatusCode xAODTruthParticleSlimmerTau::execute()
     ElementLink<xAOD::TruthParticleContainer> eltp(*xTruthParticleContainer, iPart);
     const xAOD::TruthParticle *theParticle = (*xTruthParticleContainer)[iPart];
              
-    int my_barcode = theParticle->barcode();
-    if (my_barcode==0 ) {
-       zero_barcode++;
+    int my_uniqueID = HepMC::uniqueID(theParticle);
+    if ( my_uniqueID == HepMC::UNDEFINED_ID ) {
+       zero_uniqueID++;
        continue;
        }
      bool found = false;
-     if (barcode_list.size() > 0){
-        found = (std::find(barcode_list.begin(), barcode_list.end(), my_barcode) != barcode_list.end());
+     if (uniqueID_list.size() > 0){
+        found = (std::find(uniqueID_list.begin(), uniqueID_list.end(), my_uniqueID) != uniqueID_list.end());
         if(found) {
-           dup_barcode++;
+           dup_uniqueID++;
            continue;}
      }
-     barcode_list.push_back(my_barcode);
+     uniqueID_list.push_back(my_uniqueID);
 
     float this_abseta = theParticle->abseta();
     float this_pt = theParticle->pt();
@@ -177,6 +177,6 @@ Common::classify(m_classifier,theParticle,particleOutCome,result,hadron_pdg,part
     }
 
   } //end of loop over particles
-  if(zero_barcode!=0 || dup_barcode != 0) ATH_MSG_INFO("Found " << zero_barcode << " barcode=0 particles and " << dup_barcode << " duplicated");
+  if(zero_uniqueID!=0 || dup_uniqueID != 0) ATH_MSG_INFO("Found " << zero_uniqueID << " uniqueID=0 particles and " << dup_uniqueID << " duplicated");
   return StatusCode::SUCCESS;
 }

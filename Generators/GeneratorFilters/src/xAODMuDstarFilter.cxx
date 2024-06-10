@@ -42,6 +42,9 @@
 
 #include "TruthUtils/AtlasPID.h"
 
+#include "xAODTruth/TruthParticle.h"
+#include "xAODTruth/TruthVertex.h"
+
 //--------------------------------------------------------------------------
 xAODMuDstarFilter::xAODMuDstarFilter(const std::string &name,
                                      ISvcLocator *pSvcLocator) : GenFilter(name, pSvcLocator)

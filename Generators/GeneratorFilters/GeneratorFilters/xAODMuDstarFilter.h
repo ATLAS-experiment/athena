@@ -33,7 +33,7 @@
 #include "CLHEP/Vector/LorentzVector.h"
 #include "TLorentzVector.h"
 
-#include "xAODTruth/TruthParticleAuxContainer.h"
+#include "xAODTruth/TruthParticleContainer.h"
 
 class xAODMuDstarFilter:public GenFilter {
 public:
