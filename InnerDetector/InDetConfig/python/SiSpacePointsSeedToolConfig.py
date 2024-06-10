@@ -231,6 +231,9 @@ def ITkSiSpacePointsSeedMakerCfg(flags, name="ITkSpSeedsMaker", **kwargs):
         kwargs.setdefault("useFastTracking", True)
         kwargs.setdefault("maxSeedsForSpacePoint", 3)
 
+    if flags.Tracking.ActiveConfig.extension == "LargeD0":
+        kwargs.setdefault("isLRT", True)
+
     if flags.Tracking.writeSeedValNtuple:
         kwargs.setdefault("WriteNtuple", True)
         acc.addService(CompFactory.THistSvc(
