@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ParticleJetTools/CopyTruthJetParticles.h"
@@ -251,9 +251,9 @@ bool CopyTruthJetParticles::comesFrom( const xAOD::TruthParticle* tp, const int 
   // If it doesn't have a production vertex or has no parents, it doesn't come from much of anything
   if (!tp->prodVtx() || tp->nParents()==0) return false;
   // If we have seen it before, then skip this production vertex
-  if (std::find(used_vertices.begin(),used_vertices.end(), tp->prodVtx()->barcode())!=used_vertices.end()) return false;
+  if (std::find(used_vertices.begin(),used_vertices.end(), HepMC::uniqueID(tp->prodVtx()))!=used_vertices.end()) return false;
   // Add the production vertex to our used list
-  used_vertices.push_back( tp->prodVtx()->barcode() );
+  used_vertices.push_back( HepMC::uniqueID(tp->prodVtx()) );
   // Loop over the parents
   for (size_t par=0;par<tp->nParents();++par){
     // Check for null pointers in case of skimming

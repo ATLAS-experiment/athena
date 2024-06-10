@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include "DerivationFrameworkMCTruth/HadronOriginClassifier.h"
 #include "TruthUtils/HepMCHelpers.h"
@@ -295,8 +295,6 @@ namespace DerivationFramework{
         if(!part) continue;
         
         // Simulated particles are not considered.
-        // The barcode of these particles is greater than 200000 (Check is_simulation_particle function).
-
         if(HepMC::is_simulation_particle(part)) break;
 
         // Create a set of boolean variables to indicate the type of particle.
@@ -422,7 +420,7 @@ namespace DerivationFramework{
 
     for(unsigned int i=0; i<part->nParents(); ++i){
       const xAOD::TruthParticle* parent = part->parent(i);
-      if( part->barcode() < parent->barcode() ) continue; /// protection for sherpa
+      if( HepMC::barcode(part) < HepMC::barcode(parent) ) continue; /// protection for sherpa FIXME barcode-based
       int mothertype = std::abs(MC::leadingQuark(parent));
       if( 4 == mothertype || 5 == mothertype ){
         return true;
@@ -440,7 +438,7 @@ namespace DerivationFramework{
 
     for(unsigned int i=0; i<part->nParents(); ++i){
       const xAOD::TruthParticle* parent = part->parent(i);
-      if( part->barcode() < parent->barcode() ) continue; /// protection for sherpa
+      if( HepMC::barcode(part) < HepMC::barcode(parent) ) continue; /// protection for sherpa FIXME barcode-based
       if( MC::isBottomHadron(parent) ){
         return true;
       }
@@ -558,7 +556,7 @@ namespace DerivationFramework{
 
       const xAOD::TruthParticle* parent = part->parent(i);
 
-      if( part->barcode() < parent->barcode() &&  looping ) continue; // protection for sherpa
+      if( HepMC::barcode(part) < HepMC::barcode(parent) &&  looping ) continue; // protection for sherpa FIXME barcode-based
 
       // If the i-th parent is a top, then return true
 
@@ -599,7 +597,7 @@ namespace DerivationFramework{
       // Get the i-th parent.
 
       const xAOD::TruthParticle* parent = part->parent(i);
-      if( part->barcode() < parent->barcode() &&  looping ) continue; /// protection for sherpa
+      if( HepMC::barcode(part) < HepMC::barcode(parent) &&  looping ) continue; /// protection for sherpa FIXME barcode-based
       if( MC::isW(parent)){
         if( isFromTop(parent, looping) ) return true;
 
@@ -620,7 +618,7 @@ namespace DerivationFramework{
 
     for(unsigned int i=0; i<part->nParents(); ++i){
       const xAOD::TruthParticle* parent = part->parent(i);
-      if( part->barcode() < parent->barcode() &&  looping ) continue; /// protection for sherpa
+      if( HepMC::barcode(part) < HepMC::barcode(parent) &&  looping ) continue; /// protection for sherpa FIXME barcode-based
       if( MC::isPhoton(parent) || abs(parent->pdgId())<5 ) return true;
     }
 
@@ -641,7 +639,7 @@ namespace DerivationFramework{
 
     for(unsigned int i=0; i<part->nParents(); ++i){
       const xAOD::TruthParticle* parent = part->parent(i);
-      if( part->barcode() < parent->barcode() &&  looping ) continue; /// protection for sherpa
+      if( HepMC::barcode(part) < HepMC::barcode(parent) &&  looping ) continue; /// protection for sherpa FIXME barcode-based
       if(!MC::isW(parent)) continue;
         if(abs(part->pdgId())==4){
           //trick to get at least 50% of PowhegPythia c from FSR
@@ -663,7 +661,7 @@ namespace DerivationFramework{
 
     for(unsigned int i=0; i<part->nParents(); ++i){
       const xAOD::TruthParticle* parent = part->parent(i);
-      if( part->barcode() < parent->barcode() &&  looping ) continue; /// protection for sherpa
+      if( HepMC::barcode(part) < HepMC::barcode(parent) &&  looping ) continue; /// protection for sherpa FIXME barcode-based
       if( MC::isPhoton(parent) || MC::isGluon(parent) ){
         if( isFromQuarkTop( parent,looping ) ) return true;
       }
@@ -683,7 +681,7 @@ namespace DerivationFramework{
 
     for(unsigned int i=0; i<part->nParents(); ++i){
       const xAOD::TruthParticle* parent = part->parent(i);
-      if( part->barcode() < parent->barcode() &&  looping ) continue; /// protection for sherpa
+      if( HepMC::barcode(part) < HepMC::barcode(parent) &&  looping ) continue; /// protection for sherpa FIXME barcode-based
       if( abs(parent->pdgId())<6 ) {
 
         if(isFromTop(parent,looping)){
@@ -722,7 +720,7 @@ namespace DerivationFramework{
       // Extract the i-th parent.
 
       const xAOD::TruthParticle* parent = part->parent(i);
-      if( part->barcode() < parent->barcode() &&  looping ) continue; /// protection for sherpa
+      if( HepMC::barcode(part) < HepMC::barcode(parent) &&  looping ) continue; /// protection for sherpa FIXME barcode-based
       if( MC::isPhoton(parent) || MC::isGluon(parent) ){
         if( isFromQuarkTopPythia8( parent,looping ) ) return true;
       }
@@ -753,7 +751,7 @@ namespace DerivationFramework{
 
       const xAOD::TruthParticle* parent = part->parent(i);
       
-      if( part->barcode() < parent->barcode() &&  looping ) continue; // Protection for sherpa.
+      if( HepMC::barcode(part) < HepMC::barcode(parent) &&  looping ) continue; // protection for sherpa FIXME barcode-based.
 
       // Check if the parent is a quark different from the top.
 
@@ -801,7 +799,7 @@ namespace DerivationFramework{
 
     for(unsigned int i=0; i<part->nParents(); ++i){
       const xAOD::TruthParticle* parent = part->parent(i);
-      if( part->barcode() < parent->barcode() &&  looping ) continue; /// protection for sherpa
+      if( HepMC::barcode(part) < HepMC::barcode(parent) &&  looping ) continue; /// protection for sherpa FIXME barcode-based
       if( abs(parent->pdgId())== 2212 && part->status()!=3) return true;
 
     }
@@ -826,7 +824,7 @@ namespace DerivationFramework{
     if(!part->hasProdVtx()) return false;
 
     const xAOD::TruthVertex* vertex = part->prodVtx();
-    return vertex->id()==2;
+    return HepMC::status(vertex) == 2;
 
   }
 
@@ -886,7 +884,7 @@ namespace DerivationFramework{
 
       const xAOD::TruthParticle* parent = part->parent(i);
 
-      if( part->barcode() < parent->barcode() &&  looping) continue; // protection for sherpa
+      if( HepMC::barcode(part) < HepMC::barcode(parent) &&  looping) continue; // protection for sherpa FIXME barcode-based
       
       // If the parent has the same pdgId as the particle, then it means that the parent is the same as the considered particle.
       // This happens if the particle irradiates for example.

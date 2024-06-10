@@ -39,11 +39,11 @@ MCTruthClassifier::particleTruthClassifier(const HepMcParticleLink& theLink, MCT
 }
 
 std::pair<ParticleType, ParticleOrigin>
-MCTruthClassifier::particleTruthClassifier(HepMC::ConstGenParticlePtr thePart, MCTruthPartClassifier::Info* info /*= nullptr*/) const {
+MCTruthClassifier::particleTruthClassifier(HepMC::ConstGenParticlePtr theGenPart, MCTruthPartClassifier::Info* info /*= nullptr*/) const {
   ParticleType partType = Unknown;
   ParticleOrigin partOrig = NonDefined;
 
-  if (!thePart) return std::make_pair(partType, partOrig);
+  if (!theGenPart) return std::make_pair(partType, partOrig);
 
   // Retrieve the links between HepMC and xAOD::TruthParticle
   const EventContext& ctx = info ? info->eventContext : Gaudi::Hive::currentContext();
@@ -53,15 +53,15 @@ MCTruthClassifier::particleTruthClassifier(HepMC::ConstGenParticlePtr thePart, M
     ATH_MSG_WARNING( " Invalid ReadHandle for xAODTruthParticleLinkVector with key: " << truthParticleLinkVecReadHandle.key());
     return std::make_pair(partType, partOrig);
   }
-  int theBC = HepMC::barcode(thePart);
+  const int theUID = HepMC::uniqueID(theGenPart);
   for (const auto *const entry : *truthParticleLinkVecReadHandle) {
-    if (entry->first.isValid() && entry->second.isValid() && entry->first.barcode() == theBC) {
+    if (entry->first.isValid() && entry->second.isValid() && HepMC::uniqueID(entry->first) == theUID) {
       const xAOD::TruthParticle* truthParticle = *entry->second;
         // if the barcode/pdg id / status of the pair does not match return default
-      if (!thePart || !truthParticle ||
-          thePart->pdg_id() != truthParticle->pdgId() ||
-          thePart->status() != truthParticle->status() ||
-          HepMC::barcode(thePart) != truthParticle->barcode()) {
+      if (!theGenPart || !truthParticle ||
+          theGenPart->pdg_id() != truthParticle->pdgId() ||
+          theGenPart->status() != truthParticle->status() ||
+          HepMC::barcode(theGenPart) != HepMC::uniqueID(truthParticle)) { // FIXME barcode-based have to use GenParticle barcode as uniqueID returns barcode when called on xAOD::TruthParticle
         ATH_MSG_DEBUG(
             "HepMC::GenParticle and xAOD::TruthParticle do not match");
         return std::make_pair(partType, partOrig);
@@ -268,7 +268,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
   }
 
   // to resolve Sherpa loop
-  if (mothOriVert && mothOriVert->barcode() == partOriVert->barcode())
+  if (mothOriVert && HepMC::uniqueID(mothOriVert) == HepMC::uniqueID(partOriVert))
     samePart = true;
   //
 
@@ -362,7 +362,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
       if (!info) continue;
       info->photonMother = theMother;
       info->photonMotherStatus = theMother->status();
-      info->photonMotherBarcode = theMother->barcode();
+      info->photonMotherBarcode = HepMC::barcode(theMother);
       info->photonMotherPDG = theMother->pdgId();
     }
   }
@@ -494,7 +494,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
       if (!pout) continue;
       for (const auto *const pin: partOriVert->particles_in()) {
         if (!pin) continue;
-        if (pout->barcode() != pin->barcode()) continue;
+        if (HepMC::uniqueID(pout) != HepMC::uniqueID(pin)) continue;
         if (MC::isElectron(pout)) NumOfEleLoop++;
         if (std::abs(pin->pdgId()) == 12) NumOfEleNeuLoop++;
         if (MC::isSMLepton(pout)) NumOfLepLoop++;
@@ -737,7 +737,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContain
       for (const auto & pin: partOriVert->particles_in()) {
         if (!pout) continue;
         if (!pin) continue;
-        if (pout->barcode() == pin->barcode()) {
+        if (HepMC::uniqueID(pout) == HepMC::uniqueID(pin)) {
           if (std::abs(pout->pdg_id()) == 13) NumOfMuLoop++;
           if (std::abs(pout->pdg_id()) == 14) NumOfMuNeuLoop++;
           if (MC::isSMLepton(pout)) NumOfLepLoop++;
@@ -924,7 +924,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContaine
       if (!pout) continue;
       for (const auto *const pin: partOriVert->particles_in()) {
         if (!pin) continue;
-        if (pout->barcode() != pin->barcode()) continue;
+        if (HepMC::uniqueID(pout) != HepMC::uniqueID(pin)) continue;
         if (std::abs(pout->pdgId()) == 15) NumOfTauLoop++;
         if (std::abs(pout->pdgId()) == 16) NumOfTauNeuLoop++;
         if (MC::isSMLepton(pout)) NumOfLepLoop++;
@@ -1190,7 +1190,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleConta
       if (!pout) continue;
       for (const auto *const pin: partOriVert->particles_in()) {
         if (!pin) continue;
-        if (pout->barcode() == pin->barcode() && MC::isPhoton(pout)) NumOfPhtLoop++;
+        if (HepMC::uniqueID(pout) == HepMC::uniqueID(pin) && MC::isPhoton(pout)) NumOfPhtLoop++;
         if (NumOfPhtLoop == 1) return SinglePhot;
       }
     }
@@ -1247,7 +1247,7 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
 
   // to resolve Sherpa loop
   bool samePart = false;
-  if (mothOriVert && mothOriVert->barcode() == partOriVert->barcode()) samePart = true;
+  if (mothOriVert && HepMC::uniqueID(mothOriVert) == HepMC::uniqueID(partOriVert)) samePart = true;
   //
   if ((abs(motherPDG) == nuFlav || abs(motherPDG) == 15 || MC::isW(motherPDG)) && mothOriVert != nullptr &&
       !samePart) {
@@ -1434,7 +1434,7 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
       if (!pout) continue;
       for (const auto *const pin: partOriVert->particles_in()) {
         if (!pin) continue;
-        if (pin->barcode() == pout->barcode()) continue;
+        if (HepMC::uniqueID(pin) == HepMC::uniqueID(pout)) continue;
         int apdgid = abs(pout->pdgId());
         if (apdgid == 12 || apdgid == 14 || apdgid == 16) NumOfNeuLoop++;
         if (apdgid == 11 || apdgid == 13 || apdgid == 15) NumOfLepLoop++;

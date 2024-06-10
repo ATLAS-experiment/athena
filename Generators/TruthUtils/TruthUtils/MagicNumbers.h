@@ -21,6 +21,11 @@ namespace HepMC {
   template <>  inline int barcode(const int& p){ return p;}
 }
 #endif
+namespace xAOD {
+  // Temporarily specialize for xAOD::Truth classes ahead of the barcode migration - TODO remove this
+  class TruthParticle_v1;
+  class TruthVertex_v1;
+}
 namespace HepMC {
 
   /// @brief Constant defining the barcode threshold for simulated particles, eg. can be used to separate generator event record entries from simulated particles
@@ -51,6 +56,77 @@ namespace HepMC {
   constexpr int INVALID_PARTICLE_BARCODE = -1;
 
   constexpr int SINGLE_PARTICLE = 10001;
+
+  // Temporarily specialize uniqueID for xAOD::Truth classes ahead of the barcode migration - TODO remove this
+#if  defined(HEPMC3)
+  template <typename T>
+  inline int uniqueID(const T&  p) {
+    if constexpr (std::is_integral_v<T>) {
+      return p;
+    }
+    else if constexpr (std::is_integral_v<std::remove_pointer_t<T>>) {
+      return *p;
+    }
+    else if constexpr (std::is_same_v<T, xAOD::TruthParticle_v1> || std::is_same_v<T, xAOD::TruthVertex_v1>) {
+      return p.barcode();
+    }
+    else if constexpr (std::is_same_v<std::remove_const_t<std::remove_pointer_t<T>>, xAOD::TruthParticle_v1> || std::is_same_v<std::remove_const_t<std::remove_pointer_t<T>>, xAOD::TruthVertex_v1>) {
+      return p->barcode();
+    }
+    else if constexpr (std::is_pointer_v<T>){ //T is ptr
+      return p->id();
+    }
+    else {
+      return p.id();
+    }
+  }
+#else
+  template <typename T>
+  inline int uniqueID(const T&  p) {
+    if constexpr (std::is_integral_v<T>) {
+      return p;
+    }
+    else if constexpr (std::is_integral_v<std::remove_pointer_t<T>>) {
+      return *p;
+    }
+    else if constexpr (std::is_pointer_v<T>){ //T is ptr
+      return p->barcode();
+    }
+    else {
+      return p.barcode();
+    }
+  }
+#endif
+#if defined(HEPMC3) && !defined(XAOD_STANDALONE)
+  template <>  inline int uniqueID(const ConstGenParticlePtr& p1){ return p1->id();}
+  template <>  inline int uniqueID(const GenParticlePtr& p1){ return p1->id();}
+#endif
+  // Temporarily specialize status for xAOD::Truth classes ahead of the barcode migration - TODO remove this
+  template <typename T>
+  inline int status(const T&  p) {
+    if constexpr (std::is_integral_v<T>) {
+      return p;
+    }
+    else if constexpr (std::is_integral_v<std::remove_pointer_t<T>>) {
+      return *p;
+    }
+    else if constexpr (std::is_same_v<T, xAOD::TruthVertex_v1>) {
+      return p.id();
+    }
+    else if constexpr (std::is_same_v<std::remove_const_t<std::remove_pointer_t<T>>, xAOD::TruthVertex_v1>) {
+      return p->id();
+    }
+    else if constexpr (std::is_pointer_v<T>){ //T is ptr
+      return p->status();
+    }
+    else {
+      return p.status();
+    }
+  }
+#if !defined(HEPMC3) && !defined(XAOD_STANDALONE)
+  template <>  inline int status(const ConstGenVertexPtr& v1){ return v1->id();}
+  template <>  inline int status(const GenVertexPtr& v1){ return v1->id();}
+#endif
 
   namespace BarcodeBased {
     /// @brief Method to establish if a particle (or barcode) corresponds to truth-suppressed pile-up
@@ -94,20 +170,16 @@ namespace HepMC {
     /// TODO implement a status/id based version of ignoreTruthLink
 
     /// @brief Method to establish if a particle was created during the simulation based on the status value
-    template <class T>  inline bool is_simulation_particle(const T& p){ return (p->status()>SIM_STATUS_THRESHOLD);}
+    template <class T>  inline bool is_simulation_particle(const T& p){ return (status(p)>SIM_STATUS_THRESHOLD);}
 
     /// @brief Method to establish if a particle is a new seondary created during the simulation based on the status value
-    template <class T>  inline bool is_sim_secondary(const T& p){ return (p->status()%SIM_STATUS_INCREMENT > SIM_STATUS_THRESHOLD); }
+    template <class T>  inline bool is_sim_secondary(const T& p){ return (status(p)%SIM_STATUS_INCREMENT > SIM_STATUS_THRESHOLD); }
 
     /// @brief Method to return how many interactions a particle has undergone during simulation based on the status value
-    template <class T>  inline int generations(const T& p){ return (p->status()/SIM_STATUS_INCREMENT);}
+    template <class T>  inline int generations(const T& p){ return (status(p)/SIM_STATUS_INCREMENT);}
 
     /// @brief Method to establish if the vertex was created during simulation from the status
-#if defined(HEPMC3)
-    template <class T>  inline bool is_simulation_vertex(const T& v){ return (v->status()>SIM_STATUS_THRESHOLD);}
-#else
-    template <class T>  inline bool is_simulation_vertex(const T& v){ return (v->id()>SIM_STATUS_THRESHOLD);}
-#endif
+    template <class T>  inline bool is_simulation_vertex(const T& v){ return (status(v)>SIM_STATUS_THRESHOLD);}
 
     /// @brief Method to establish if two particles in the GenEvent actually represent the same generated particle
     // TODO implement a non-barcode-based version of is_same_generator_particle
@@ -141,17 +213,6 @@ namespace HepMC {
   /// @brief Method to check if the first particle is a descendant of the second in the simulation, i.e. particle p1 was produced simulations particle p2.
   template <class T1,class T2>
   inline bool is_sim_descendant(const T1& p1,const T2& p2) { return BarcodeBased::is_sim_descendant(p1, p2);}
-
-#if  defined(HEPMC3)
-  template <class T> inline int uniqueID(const T& p) { return p->id(); }
-#else
-  template <class T> inline int uniqueID(const T* p) { return barcode(p); }
-#endif
-#if  defined(HEPMC3) && !defined(XAOD_STANDALONE)
-  template <>  inline int uniqueID(const ConstGenParticlePtr& p1){ return p1->id();}
-  template <>  inline int uniqueID(const GenParticlePtr& p1){ return p1->id();}
-#endif
-
 
   /// @brief Function to calculate all the descendants(direction=1)/ancestors(direction=-1) of the particle.
   template <class T> inline void get_particle_history(const T& p, std::deque<int>& out, int direction=0) {

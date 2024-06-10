@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GammaORTools/VGammaORTool.h"
@@ -265,7 +265,7 @@ std::vector<TLorentzVector> VGammaORTool::getLeptonP4s(const xAOD::TruthParticle
       // make sure tau has no tau children, i.e. is tau before decay
       for (uint i = 0; i < p->nChildren(); i++) {
         if (p->child(i) == nullptr) continue;
-        if (p->child(i)->barcode() == p->barcode()) continue;
+        if (HepMC::uniqueID(p->child(i)) == HepMC::uniqueID(p)) continue;
         hasChildren = true;
         if (p->child(i)->pdgId() == p->pdgId()) {
           childIsTau = true;

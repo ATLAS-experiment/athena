@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -250,23 +250,23 @@ StatusCode DerivationFramework::MenuTruthThinning::doThinning() const
     // To ensure graph completeness, this  over-rides anything set by the special treatment
     // of taus in the section above
     DerivationFramework::DecayGraphHelper decayHelper;
-    std::unordered_set<int> encounteredBarcodes; // For loop handling
+    std::unordered_set<int> encounteredUniqueIDs; // For loop handling
     if (m_preserveDescendants || m_preserveGeneratorDescendants || m_preserveAncestors) {
         for (int i=0; i<nTruthParticles; ++i) {
             bool toKeep = particleMask[i];
             if (!toKeep) continue;
             const xAOD::TruthParticle* particle = (*importedTruthParticles)[i];
-            encounteredBarcodes.clear();
-            if (m_preserveDescendants) decayHelper.descendants(particle,particleMask,vertexMask,encounteredBarcodes,true);
-            encounteredBarcodes.clear();
-            if (m_preserveGeneratorDescendants) decayHelper.descendants(particle,particleMask,vertexMask,encounteredBarcodes,false);
-            encounteredBarcodes.clear();
-            if (m_preserveAncestors) decayHelper.ancestors(particle,particleMask,vertexMask,encounteredBarcodes);
-            encounteredBarcodes.clear();
+            encounteredUniqueIDs.clear();
+            if (m_preserveDescendants) decayHelper.descendants(particle,particleMask,vertexMask,encounteredUniqueIDs,true);
+            encounteredUniqueIDs.clear();
+            if (m_preserveGeneratorDescendants) decayHelper.descendants(particle,particleMask,vertexMask,encounteredUniqueIDs,false);
+            encounteredUniqueIDs.clear();
+            if (m_preserveAncestors) decayHelper.ancestors(particle,particleMask,vertexMask,encounteredUniqueIDs);
+            encounteredUniqueIDs.clear();
         }
     }
     // User only wants to keep parents, siblings and children of retained states
-    // Much simpler case - no recursion so no need for barcodes etc
+    // Much simpler case - no recursion so no need for uniqueIDs etc
     if (m_preserveImmediate) {
         // Make a copy of the particle mask to avoid changes being propagated
         // down the chain
@@ -296,7 +296,7 @@ bool DerivationFramework::MenuTruthThinning::isAccepted(const xAOD::TruthParticl
     int pdg_id = std::abs(p->pdgId());
 
     // All explicitly requested PDG IDs of long lived particles, this is needed
-    // because their childrens barcodes can be above the cut off m_geantOffset
+    // because their childrens uniqueIDs can be above the cut off m_geantOffset
     if(!m_longLivedPdgIds.empty() && parentIsLongLived(p)) ok = true; 
 
 
@@ -353,8 +353,8 @@ bool DerivationFramework::MenuTruthThinning::isAccepted(const xAOD::TruthParticl
     
     // Hadronic tau decays
     if(m_writeTauHad){
-        std::unordered_set<int> barcode_trace;
-        if (isFromTau(p, barcode_trace))
+        std::unordered_set<int> uniqueID_trace;
+        if (isFromTau(p, uniqueID_trace))
             ok = true;
     }
     
@@ -564,7 +564,7 @@ bool DerivationFramework::MenuTruthThinning::isLeptonFromTau(const xAOD::TruthPa
 }
 
 bool DerivationFramework::MenuTruthThinning::isFromTau(const xAOD::TruthParticle* part,
-                                                       std::unordered_set<int>& barcode_trace) const {
+                                                       std::unordered_set<int>& uniqueID_trace) const {
     
     int pdg = part->pdgId();
     
@@ -575,12 +575,12 @@ bool DerivationFramework::MenuTruthThinning::isFromTau(const xAOD::TruthParticle
     if (prod==part->decayVtx()) return false;
     
     // More complex loop catch
-    std::unordered_set<int>::const_iterator foundVtx = barcode_trace.find( prod->barcode() );
-    if( foundVtx != barcode_trace.end() ) {
-        ATH_MSG_DEBUG( "Found a loop (a la Sherpa sample).  Backing out." );
-        return false;
+    std::unordered_set<int>::const_iterator foundVtx = uniqueID_trace.find( HepMC::uniqueID(prod) );
+    if( foundVtx != uniqueID_trace.end() ) {
+      ATH_MSG_DEBUG( "Found a loop (a la Sherpa sample).  Backing out." );
+      return false;
     }
-    barcode_trace.insert(prod->barcode());
+    uniqueID_trace.insert(HepMC::uniqueID(prod));
     
     // Loop over the parents of this particle.
     unsigned int nIncoming = prod->nIncomingParticles();
@@ -611,7 +611,7 @@ bool DerivationFramework::MenuTruthThinning::isFromTau(const xAOD::TruthParticle
         }
         
         // Go up the generator record until a tau is found or not.
-        if(isFromTau(itrParent, barcode_trace)) {
+        if(isFromTau(itrParent, uniqueID_trace)) {
             return true;
         }
     }
@@ -655,7 +655,7 @@ bool DerivationFramework::MenuTruthThinning::isFsrFromLepton(const xAOD::TruthPa
         if(abs(parentId) == 11 || 
            abs(parentId) == 13 ||
            abs(parentId) == 15) {
-            ATH_MSG_DEBUG("Photon with barcode " << part->barcode() << " matched to particle with pdgId = " << parentId );
+          ATH_MSG_DEBUG("Photon with uniqueID " << HepMC::uniqueID(part) << " matched to particle with pdgId = " << parentId );
             return true; // Has lepton parent
         }
         if(parentId == pdg) { // Same particle just a different MC status

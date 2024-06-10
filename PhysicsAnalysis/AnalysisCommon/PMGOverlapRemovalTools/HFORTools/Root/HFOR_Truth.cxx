@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <cmath>
@@ -229,17 +229,17 @@ HFORType HFOR_Truth::jetBasedRemoval( const xAOD::JetContainer* jets) {
     for (const xAOD::TruthParticle * part : ghostB ) {
       if(!part) Error("HFOR_Truth::jetBasedRemoval()","No BQuark particles but ghost-matching exists!! It should not happen!");
       for (const xAOD::TruthParticle * part_B_ME : B_ME_v ) 
-        if( part->barcode() == part_B_ME->barcode()) nB_ME++;
+        if( HepMC::uniqueID(part) == HepMC::uniqueID(part_B_ME)) nB_ME++;
       for (const xAOD::TruthParticle * part_B_GS : B_GS_v ) 
-        if( part->barcode() == part_B_GS->barcode()) nB_GS++;
+        if( HepMC::uniqueID(part) == HepMC::uniqueID(part_B_GS)) nB_GS++;
     }          
     
     for (const xAOD::TruthParticle * part : ghostC ) {
       if(!part) Error("HFOR_Truth::jetBasedRemoval()","No CQuark particles but ghost-matching exists!! It should not happen!");
       for (const xAOD::TruthParticle * part_C_ME : C_ME_v ) 
-        if( part->barcode() == part_C_ME->barcode()) nC_ME++;
+        if( HepMC::uniqueID(part) == HepMC::uniqueID(part_C_ME)) nC_ME++;
       for (const xAOD::TruthParticle * part_C_GS : C_GS_v ) 
-        if( part->barcode() == part_C_GS->barcode()) nC_GS++;
+        if( HepMC::uniqueID(part) == HepMC::uniqueID(part_C_GS)) nC_GS++;
     }      
     
     //Decide if you want to keep or not the event on the basis of this jet
@@ -476,8 +476,8 @@ bool HFOR_Truth::findHFQuarks(const std::map <int,
             //Check the production vertex
             prodVtx = bcQuark->prodVtx() ;
             pdgId   = bcQuark->pdgId() ;
-            vtxBarcode = prodVtx->barcode() ;
-            bc34 = ( (vtxBarcode == -3) | (vtxBarcode == -4) ) ;
+            vtxBarcode = HepMC::barcode(prodVtx) ;
+            bc34 = ( (vtxBarcode == -3) | (vtxBarcode == -4) ) ; // FIXME barcode-based comparison against specific values
             pvtx34 = prodVtx ;
             if (! bc34) {
               //Navigate the ancestor, stop if find a vtxBarcode == -3 or -4
@@ -489,8 +489,8 @@ bool HFOR_Truth::findHFQuarks(const std::map <int,
                   for (unsigned int npp=0; npp<nParents; npp++) {
                     ancestor = ancestor->parent(npp) ;
                     prodVtx = ancestor->prodVtx() ;
-                    vtxBarcode = prodVtx->barcode() ;
-                    bc34 = ( (vtxBarcode == -3) | (vtxBarcode == -4) ) & (ancestor->pdgId() == pdgId) ;
+                    vtxBarcode = HepMC::barcode(prodVtx) ;
+                    bc34 = ( (vtxBarcode == -3) | (vtxBarcode == -4) ) & (ancestor->pdgId() == pdgId) ; // FIXME barcode-based comparison against specific values
                     if (bc34) pvtx34 = prodVtx ;
                   }
                 }

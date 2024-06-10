@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file egammaD3PDAnalysis/src/egammaTruthAlg.h
@@ -125,7 +125,7 @@ bool egammaTruthAlg::isAccepted (const xAOD::TruthParticle& tp,
 
   int id = tp.pdgId();
   int aid = abs(id);
-  int barcode = tp.barcode();
+  int uniqueID = HepMC::uniqueID(tp);
 
   if (aid != abs(MC::ELECTRON) && !MC::isPhoton(aid)) return false;
   if (aid == abs(MC::ELECTRON) && tp.pt() < m_electronPtMin) return false;
@@ -141,7 +141,7 @@ bool egammaTruthAlg::isAccepted (const xAOD::TruthParticle& tp,
     size_t sz = v->nOutgoingParticles();
     for (size_t i = 0; i < sz; i++) {
       const xAOD::TruthParticle* child = v->outgoingParticle(i);
-      if( child && child->pdgId()==id && child->barcode()!=barcode
+      if( child && child->pdgId()==id && HepMC::uniqueID(child) != uniqueID
           && (HepMC::generations(child) == 0))
       {
         return false;
@@ -170,7 +170,7 @@ float egammaTruthAlg::computeIso (const xAOD::TruthParticle& tp,
 {
   TLorentzVector sum;
   for (const xAOD::TruthParticle* p : cont) {
-    if (p == &tp || p->barcode() == tp.barcode()) continue;
+    if (p == &tp || HepMC::uniqueID(p) == HepMC::uniqueID(tp)) continue;
     if (!((HepMC::is_simulation_particle(p) || MC::isZeroEnergyPhoton(p) || ( MC::isStable(p) && MC::isSpecialNonInteracting(p))) && MC::isStableOrSimDecayed(p))) continue;
     if (tp.p4().DeltaR (p->p4()) < m_isoCone)
       sum += p->p4();

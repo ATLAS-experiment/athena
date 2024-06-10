@@ -15,6 +15,8 @@
 #include "xAODTruth/TruthVertex.h"
 #include "xAODTruth/TruthVertexContainer.h"
 
+#include "TruthUtils/MagicNumbers.h"
+
 #include "InDetTrackSystematicsTools/InDetTrackTruthOriginDefs.h"
 
 
@@ -108,8 +110,8 @@ namespace FlavorTagDiscriminants {
 
       // everything else is already decorated to the associated truth particle
       const auto truth = m_trackTruthOriginTool->getTruth(track);
-      dec_barcode(*track) = truth ? truth->barcode() : -2;
-      dec_parent_barcode(*track) = truth ? acc_parent_barcode(*truth) : -2;
+      dec_barcode(*track) = truth ? HepMC::barcode(truth) : -2; // FIXME barcode-based -2 is an odd value to use as default
+      dec_parent_barcode(*track) = truth ? acc_parent_barcode(*truth) : -2; // FIXME barcode-based -2 is an odd value to use as default
       dec_type_label(*track) = truth ? acc_type_label(*truth) : TruthDecoratorHelpers::TruthType::Label::NoTruth;
       dec_source_label(*track) = truth ? acc_source_label(*truth) : TruthDecoratorHelpers::TruthSource::Label::NoTruth;
       dec_vertex_index(*track) = truth ? acc_vertex_index(*truth) : -2;

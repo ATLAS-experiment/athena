@@ -14,6 +14,7 @@
 #include "TrkTruthData/PRD_MultiTruthCollection.h"
 #include "AthenaKernel/errorcheck.h"
 #include "AtlasHepMC/GenParticle.h"
+#include "TruthUtils/MagicNumbers.h"
 
 namespace D3PD {
 /**
@@ -92,7 +93,7 @@ StatusCode MuonTruthHitsFillerTool::book()
  */
 StatusCode MuonTruthHitsFillerTool::fill (const TrackRecord& trackRecord)
 {
-  CHECK( fillHitCounts (trackRecord.barcode()) );  // FIXME barcode-based
+  CHECK( fillHitCounts (HepMC::barcode(trackRecord)) );  // FIXME barcode-based
   return StatusCode::SUCCESS;
 }
 
@@ -102,7 +103,7 @@ StatusCode MuonTruthHitsFillerTool::fill (const TrackRecord& trackRecord)
  */
 StatusCode MuonTruthHitsFillerTool::fill (const xAOD::TruthParticle& p)
 {
-  CHECK( fillHitCounts (p.barcode()) );
+  CHECK( fillHitCounts (HepMC::barcode(p)) );
   return StatusCode::SUCCESS;
 }
 

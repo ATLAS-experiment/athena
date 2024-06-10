@@ -14,6 +14,8 @@
 #include "xAODTruth/TruthVertex.h"
 #include "xAODEventInfo/EventInfo.h"
 
+#include "TruthUtils/MagicNumbers.h"
+
 // Tool include(s)
 #include "MCTruthClassifier/MCTruthClassifier.h"
 
@@ -217,9 +219,9 @@ StatusCode BuildTruthTaus::examineTruthTau(const xAOD::TruthParticle& xTruthPart
   examineTruthTauDecay(xTruthParticle, truthInfo).ignore();
 
   if (truthInfo.m_bIsHadronicTau)
-    ATH_MSG_VERBOSE(truthInfo.m_iNChargedDaughters << " prong hadronic truth tau was found with barcode "<<xTruthParticle.barcode());
+    ATH_MSG_VERBOSE(truthInfo.m_iNChargedDaughters << " prong hadronic truth tau was found with uniqueID "<<HepMC::uniqueID(xTruthParticle));
   else
-    ATH_MSG_VERBOSE(truthInfo.m_iNChargedDaughters << " prong leptonic truth tau was found with barcode "<<xTruthParticle.barcode());
+    ATH_MSG_VERBOSE(truthInfo.m_iNChargedDaughters << " prong leptonic truth tau was found with uniqueID "<<HepMC::uniqueID(xTruthParticle));
   if ( truthInfo.m_iNChargedDaughters%2 == 0 )
   {
     ATH_MSG_WARNING("found tau with even multiplicity: " << truthInfo.m_iNChargedDaughters);
@@ -426,7 +428,7 @@ void BuildTruthTaus::printDecay(const xAOD::TruthParticle& xTruthParticle, int d
                     <<" phi "<<xTruthDaughter->p4().Phi()
                     <<" pdgid "<<xTruthDaughter->pdgId()
                     <<" status "<<xTruthDaughter->status()
-                    <<" barcode "<<xTruthDaughter->barcode());
+                    <<" uniqueID "<<HepMC::uniqueID(xTruthDaughter));
     printDecay(*xTruthDaughter, depth+1);
   }
 }

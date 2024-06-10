@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -31,8 +31,8 @@ int DerivationFramework::CollectionMakerHelpers::addTruthVertex( const xAOD::Tru
     int myIndex = vertCont->size()-1;
     ElementLink<xAOD::TruthVertexContainer> eltv(*vertCont, myIndex);
     // Set properties
-    xTruthVertex->setId(oldVert.id());
-    xTruthVertex->setBarcode(HepMC::barcode(&oldVert));
+    xTruthVertex->setId(HepMC::status(oldVert));
+    xTruthVertex->setBarcode(HepMC::barcode(&oldVert)); // FIXME barcode-based
     xTruthVertex->setX(oldVert.x());
     xTruthVertex->setY(oldVert.y());
     xTruthVertex->setZ(oldVert.z());
@@ -55,7 +55,7 @@ int DerivationFramework::CollectionMakerHelpers::addTruthParticle( const xAOD::T
                                                                    xAOD::TruthVertexContainer* vertCont, std::vector<int>& seenParticles,
                                                                    const int generations, bool includeVertex) {
     // See if we've seen it - note, could also do this with a unary function on the container itself
-    if (std::find(seenParticles.begin(),seenParticles.end(),HepMC::uniqueID(&oldPart))!=seenParticles.end()){
+    if (std::find(seenParticles.begin(), seenParticles.end(), HepMC::uniqueID(&oldPart)) != seenParticles.end()){
       for (size_t p=0;p<partCont->size();++p){
         // Was it a hit?
         const xAOD::TruthParticle *theParticle = (*partCont)[p];
@@ -92,7 +92,7 @@ xAOD::TruthParticle* DerivationFramework::CollectionMakerHelpers::setupTruthPart
     partCont->push_back( xTruthParticle );
     // Fill with numerical content
     xTruthParticle->setPdgId(oldPart.pdgId());
-    xTruthParticle->setBarcode(HepMC::barcode(&oldPart));
+    xTruthParticle->setBarcode(HepMC::barcode(&oldPart)); // FIXME barcode-based
     xTruthParticle->setStatus(oldPart.status());
     xTruthParticle->setM(oldPart.m());
     xTruthParticle->setPx(oldPart.px());

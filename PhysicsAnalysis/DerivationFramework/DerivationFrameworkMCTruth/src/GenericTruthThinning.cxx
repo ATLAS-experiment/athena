@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -14,6 +14,9 @@
 #include "xAODTruth/TruthEventContainer.h"
 #include "StoreGate/ThinningHandle.h"
 #include "GaudiKernel/ThreadLocalContext.h"
+
+#include "TruthUtils/MagicNumbers.h"
+
 #include <vector>
 #include <string>
 
@@ -142,8 +145,8 @@ StatusCode DerivationFramework::GenericTruthThinning::doThinning() const
             if ( abs(particle->pdgId())==15 ) { // This is a tau
                 bool last(true);
                 std::vector<int> tauDecayProducts; // all decay products of the tau
-                std::unordered_set<int> tauDecayEncounteredBarcodes; // loop checking
-                tauDecayHelper.descendants(particle,tauDecayProducts,tauDecayEncounteredBarcodes); // recursive 
+                std::unordered_set<int> tauDecayEncounteredUniqueIDs; // loop checking
+                tauDecayHelper.descendants(particle,tauDecayProducts,tauDecayEncounteredUniqueIDs); // recursive
                 for (unsigned int tauDecIt=0; tauDecIt<tauDecayProducts.size(); ++tauDecIt) {
                     if (abs(tauDecayProducts[tauDecIt])==15) { // any taus in the decay products?
                         last = false;
@@ -162,19 +165,19 @@ StatusCode DerivationFramework::GenericTruthThinning::doThinning() const
     // To ensure graph completeness, this  over-rides anything set by the special treatment 
     // of taus in the section above 
     DerivationFramework::DecayGraphHelper decayHelper;
-    std::unordered_set<int> encounteredBarcodes; // to enable loop handling
+    std::unordered_set<int> encounteredUniqueIDs; // to enable loop handling
     if (m_preserveDescendants || m_preserveGeneratorDescendants  || m_preserveAncestors) {
         for (unsigned int i=0; i<nParticles; ++i) {
             bool toKeep = partMask[i];
             if (!toKeep) continue;
             const xAOD::TruthParticle* particle = (*importedTruthParticles)[i];
-            encounteredBarcodes.clear();
-            if (m_preserveDescendants) decayHelper.descendants(particle,partMask,vertMask,encounteredBarcodes,true);
-            encounteredBarcodes.clear();
-            if (m_preserveGeneratorDescendants) decayHelper.descendants(particle,partMask,vertMask,encounteredBarcodes,false);
-            encounteredBarcodes.clear();			
-	    if (m_preserveAncestors) decayHelper.ancestors(particle,partMask,vertMask,encounteredBarcodes);
-	    encounteredBarcodes.clear();	
+            encounteredUniqueIDs.clear();
+            if (m_preserveDescendants) decayHelper.descendants(particle,partMask,vertMask,encounteredUniqueIDs,true);
+            encounteredUniqueIDs.clear();
+            if (m_preserveGeneratorDescendants) decayHelper.descendants(particle,partMask,vertMask,encounteredUniqueIDs,false);
+            encounteredUniqueIDs.clear();			
+	    if (m_preserveAncestors) decayHelper.ancestors(particle,partMask,vertMask,encounteredUniqueIDs);
+	    encounteredUniqueIDs.clear();	
         }
     }
     //for (unsigned int i=0; i<nVertices; ++i) {
