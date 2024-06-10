@@ -49,7 +49,8 @@ regexMap['fpe'] = [
 ]
 
 # Add list of all builtin Python errors
-builtins = dir(locals()['__builtins__'])
+import builtins
+builtins = dir(builtins)
 builtinErrors = [b for b in builtins if 'Error' in b]
 regexMap['python error'] = builtinErrors
 
@@ -75,8 +76,12 @@ regexMap['backtrace'].extend(fpeTracebackStart)
 # Warning keywords
 regexMap['warning'] = ['WARNING ']
 
+for key,exprlist in regexMap.items():
+    if not exprlist:
+        raise RuntimeError(f'Empty regex list for category \'{key}\' -- will match everything!')
+        sys.exit(1)
 
-def main():
+def get_parser():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=
                                      lambda prog : argparse.HelpFormatter(
                                          prog, max_help_position=40, width=100))
@@ -93,6 +98,12 @@ def main():
                         help='check for WARNING messages')
     parser.add_argument('--errors', action = 'store_true',
                         help='check for ERROR messages')
+
+    return parser
+
+
+def main():
+    parser = get_parser()
 
     args = parser.parse_args()
     if not (args.errors or args.warnings):
@@ -129,13 +140,13 @@ def scanLogfile(args, logfile, ignorePattern=[]):
     tPattern = re.compile('|'.join(backtrace))
     fpeStartPattern = re.compile('|'.join(fpeTracebackStart))
     fpeContPattern = re.compile('|'.join(fpeTracebackCont))
-    ignoreDict = {}
 
     categories = []
     if args.warnings is True:
         categories += ['warning']
     if args.errors is True:
         categories += ['error/fatal', 'prohibited', 'python error', 'backtrace']
+
     igLevels = re.compile('|'.join(ignorePattern))
 
     patterns = {
@@ -149,45 +160,46 @@ def scanLogfile(args, logfile, ignorePattern=[]):
         for line in f:
             # First check if we need to start or continue following a trace
             # Tracing only makes sense for errors
-            if args.errors  and not re.search(igLevels,line):
-                if re.search(tPattern,line):
+            if args.errors:
+                if tPattern.search(line) and not igLevels.search(line):
                     tracing = True
-                elif re.search(fpeStartPattern,line):
+                elif fpeStartPattern.search(line) and not igLevels.search(line):
                     fpeTracing = True
                 elif line =='\n':
                     tracing = False
                     fpeTracing = False
 
-                if tracing:
-                    # Save all lines after a backtrace even if they don't belong to backtrace
-                    resultsA['backtrace'].append(line)
-                elif fpeTracing:
-                    # Continue following FPE so long as recognised
-                    if re.search(fpeContPattern,line):
-                        resultsA['backtrace'].append(line)
-                    else:
-                        fpeTracing = False
+            if tracing:
+                # Save all lines after a backtrace even if they don't belong to backtrace
+                resultsA['backtrace'].append(line)
+            elif fpeTracing:
+                # Continue following FPE so long as recognised
+                if fpeContPattern.search(line):
+                    resultsA['fpe'].append(line)
                 else:
-                    for cat in categories:
-                        if re.search(patterns[cat],line):
-                            resultsA[cat].append(line)
+                    fpeTracing = False
+            else:
+                for cat in categories:
+                    if patterns[cat].search(line):
+                        resultsA[cat].append(line)
 
-    if args.showexcludestats and args.config:
-        separateIgnoreRegex = [re.compile(line) for line in ignorePattern]
-        ignoreDict = {line:0 for line in ignorePattern} # stores counts of ignored errors/warnings
-
+    ignoreDict = {}
     results = {cat:[] for cat in categories}
     if args.config is None:
         results = resultsA
     else:
+        if args.showexcludestats:
+            separateIgnoreRegex = [re.compile(line) for line in ignorePattern]
+            ignoreDict = {line:0 for line in ignorePattern} # stores counts of ignored errors/warnings
+
         # Filter messages
         for cat, messages in resultsA.items():
             for res in messages:
-                if not re.search(igLevels,res):
+                if not igLevels.search(res):
                     results[cat].append(res)
                 elif args.showexcludestats:
                     for i in range(len(separateIgnoreRegex)):
-                        if re.search(separateIgnoreRegex[i],res):
+                        if separateIgnoreRegex[i].search(res):
                             ignoreDict[ignorePattern[i]] += 1
 
 

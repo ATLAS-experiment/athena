@@ -527,7 +527,7 @@ StatusCode ZdcNtuple :: execute ()
     ANA_MSG_INFO ("Reprocessing ZDC in ZdcNtuple");
     ANA_CHECK(m_zdcAnalysisTool->reprocessZdc());
   }else{
-    ANA_MSG_INFO ("No ZDC reprocessing");
+    ANA_MSG_DEBUG ("No ZDC reprocessing");
   }
 
   processZdcNtupleFromModules(); // same model in both cases -- processZdcNtuple() goes straight to the anlaysis tool, which is good for debugging

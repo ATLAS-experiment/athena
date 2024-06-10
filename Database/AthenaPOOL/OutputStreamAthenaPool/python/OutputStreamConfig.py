@@ -11,7 +11,7 @@ def outputStreamName(streamName):
 
 def OutputStreamCfg(flags, streamName, ItemList=[], MetadataItemList=[],
                     disableEventTag=False, trigNavThinningSvc=None, takeItemsFromInput=False,
-                    AcceptAlgs=[], HelperTools=[]):
+                    extendProvenanceRecord=True, AcceptAlgs=[], HelperTools=[]):
    eventInfoKey = "EventInfo"
    if flags.Common.ProductionStep in [ProductionStep.PileUpPresampling, ProductionStep.PileUpPretracking]:
       eventInfoKey = f"{flags.Overlay.BkgPrefix}EventInfo"
@@ -76,6 +76,10 @@ def OutputStreamCfg(flags, streamName, ItemList=[], MetadataItemList=[],
       # to True (default in C++ is False). This avoids CA merge
       # conflicts.
       outputStream.TakeItemsFromInput = True
+   if not extendProvenanceRecord:
+       # Treat this similar to takeItemsFromInput
+       # (C++ default in this case is True)
+       outputStream.ExtendProvenanceRecord = False
    outputStream.AcceptAlgs += AcceptAlgs
    outputStream.ExtraOutputs.add(("DataHeader", f"StoreGateSvc+{outputStreamName(streamName)}"))
    if flags.Scheduler.CheckOutputUsage and flags.Concurrency.NumThreads > 0:

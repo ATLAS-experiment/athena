@@ -4,14 +4,10 @@ __doc__ = """
           Instantiate the Egamma related xAOD Thinning
           """
 
-from AthenaCommon.Logging import logging
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
 
 def egammaxAODThinningCfg(flags, name="EGammaxAODThinning"):
-
-    mlog = logging.getLogger(name)
-    mlog.info('Starting EGamma xAOD Thinning configuration')
 
     acc = ComponentAccumulator()
     # Add e/gamma track thinning
@@ -59,7 +55,6 @@ def egammaxAODThinningCfg(flags, name="EGammaxAODThinning"):
                 cells=cellsName
             ))
 
-    mlog.info("EGamma xAOD Thinning configured")
     return acc
 
 

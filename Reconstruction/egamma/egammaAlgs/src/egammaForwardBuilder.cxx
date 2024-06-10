@@ -90,8 +90,11 @@ StatusCode egammaForwardBuilder::initialize()
 
 StatusCode egammaForwardBuilder::finalize()
 {
-  ATH_MSG_INFO(name() << " All Clusters " << m_AllClusters);
-  ATH_MSG_INFO(name() << " Matched Clusters " << m_MatchedClusters);
+
+  ATH_MSG_INFO("====> Forward Egamma Statistics =============");
+  ATH_MSG_INFO(" All Clusters " << m_AllClusters);
+  ATH_MSG_INFO(" Matched Clusters " << m_MatchedClusters);
+  ATH_MSG_INFO("=============================================");
 
   return StatusCode::SUCCESS;
 }
@@ -318,6 +321,7 @@ std::unique_ptr<xAOD::CaloCluster> egammaForwardBuilder::cookieCut(
   const float phi = isEC ? cp0.phiEC : cp0.phiF;
 
   auto newCluster = CaloClusterStoreHelper::makeCluster(cellCont);
+
 
   if (!newCluster) {
     ATH_MSG_ERROR("CaloClusterStoreHelper::makeCluster failed.");

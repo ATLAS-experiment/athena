@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 '''
@@ -913,7 +913,7 @@ def getTileModuleTimeSlopeAndOffset(inputs):
                 if profile.GetBinError(xBin) > 1e-7:
                     binContent = profile.GetBinContent(xBin)
                     # Allow only 1 shift and only of negative sign
-                    if (timeShift < 1) and (binContent - (lastBinContent + (xBin - lastBin))) < -15.0:
+                    if (timeShift < 1) and (binContent - (lastBinContent + (xBin - lastBin))) < -10.0:
                         timeShift = 25.
                     lastBin = xBin
                     lastBinContent = binContent

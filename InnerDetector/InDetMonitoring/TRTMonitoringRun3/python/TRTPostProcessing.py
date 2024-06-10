@@ -66,7 +66,7 @@ def hHitXonTMap2(inputs):
     if hist == 'hHitAonTMap':  title = 'Any LL Bit on Track: '
     if hist == 'hHitAWonTMap': title = 'Any LL Bit on Track in Time Window: '
     if hist == 'hHitHonTMap':  title = 'HL Hit on Track: '
-    rh = ROOT.TH1F(name, title + titleElement, 1, 0, 1)
+    rh = ROOT.TProfile(name, title + titleElement, 1, 0, 1)
     rh.GetXaxis().SetTitle(titleElement[:-1] + ' Number in Stack')
     rh.GetYaxis().SetTitle('Probability')
 
@@ -76,9 +76,9 @@ def hHitXonTMap2(inputs):
     rh.SetBins(nBins, 0, nBins)
     for j in range(1,nBins+2): #range of the input histogram, not the output
         if plot0.GetBinEntries(j) > 0:
-            rh.SetBinContent(j, plot1.GetBinContent(j)*1./plot0.GetBinEntries(j))
+            rh.Fill(j, plot1.GetBinContent(j)*1./plot0.GetBinEntries(j))
         else:
-            rh.SetBinContent(j, 0)
+            rh.Fill(j, 0)
     return [rh]
     
 def hHitOnTrackVsAll(inputs):

@@ -92,7 +92,7 @@ def fromRunArgs(runArgs):
 
     # Configure the output stream
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg, outputStreamName
-    cfg.merge(OutputStreamCfg(flags, streamToMerge, takeItemsFromInput = True))
+    cfg.merge(OutputStreamCfg(flags, streamToMerge, takeItemsFromInput = True, extendProvenanceRecord = False))
     Stream = cfg.getEventAlgo(outputStreamName(streamToMerge))
     Stream.ForceRead = True
     # Add in-file MetaData

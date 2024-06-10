@@ -77,12 +77,12 @@ egammaSelectedTrackCopy::egammaSelectedTrackCopy::finalize()
   ATH_MSG_INFO("--- All Si Tracks: " << m_AllSiTracks);
   ATH_MSG_INFO("--- Selected Central Si Tracks: " << m_SelectedSiTracks);
   ATH_MSG_INFO("--- All TRT Tracks: " << m_AllTRTTracks);
-  ATH_MSG_INFO("--- Selected Central TRT Tracks: " << m_SelectedTRTTracks);
+  ATH_MSG_INFO("--- Selected TRT Tracks: " << m_SelectedTRTTracks);
   if (m_doForwardTracks) {
     ATH_MSG_INFO("--- All Forward Clusters: " << m_AllFwdClusters);
     ATH_MSG_INFO("--- Selected Forward Tracks: " << m_SelectedFwdTracks);
   }
-  ATH_MSG_INFO("<=====================================================");
+  ATH_MSG_INFO("<=================================================");
 
   return StatusCode::SUCCESS;
 }

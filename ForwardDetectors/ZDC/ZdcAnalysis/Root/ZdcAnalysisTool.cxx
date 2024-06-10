@@ -516,9 +516,12 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializePbPb2023()
   
   zdcDataAnalyzer->enableRepass(peak2ndDerivMinRepassHG, peak2ndDerivMinRepassLG);
 
-  // Set up non-linear corrections for the ZDC
+  // Turn on exclusion of early and late samples to address OOT pileup
   //
-  // Non-linear corrections
+  zdcDataAnalyzer->enablePreExclusion(4, 500, 200);
+  zdcDataAnalyzer->enablePostExclusion(4, 300, 200);
+  
+  // Set up non-linear corrections for the ZDC
   //
   std::array<std::array<std::vector<float>, 4>, 2> nonLinearCorrCoefficHG, nonLinearCorrCoefficLG;
   

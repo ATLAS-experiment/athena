@@ -12,7 +12,7 @@ from PyJobTransforms.trfLogger import msg
 msg.info('logging set in %s', sys.argv[0])
 
 from PyJobTransforms.transform import transform
-from PyJobTransforms.trfExe import athenaExecutor, hybridPOOLMergeExecutor
+from PyJobTransforms.trfExe import athenaExecutor, POOLMergeExecutor
 from PyJobTransforms.trfArgs import addAthenaArguments, addDetectorArguments
 from PyJobTransforms.trfDecorators import stdTrfExceptionHandler, sigUsrStackTrace
 from RecJobTransforms.recTransformUtils import addCommonRecTrfArgs
@@ -40,8 +40,8 @@ def main():
 
 def getTransform():
     executorSet = set()
-    executorSet.add(hybridPOOLMergeExecutor(name = 'ESDMerge', inData = ['ESD'], outData = ['ESD_MRG']))
-    executorSet.add(hybridPOOLMergeExecutor(name = 'AODMerge', inData = ['AOD'], outData = ['AOD_MRG']))
+    executorSet.add(POOLMergeExecutor(name = 'ESDMerge', inData = ['ESD'], outData = ['ESD_MRG']))
+    executorSet.add(POOLMergeExecutor(name = 'AODMerge', inData = ['AOD'], outData = ['AOD_MRG']))
     executorSet.add(DQMergeExecutor(name = 'DQHistogramMerge', inData = [('HIST_ESD', 'HIST_AOD'), 'HIST'], outData = ['HIST_MRG']))
     executorSet.add(bsMergeExecutor(name = 'RAWFileMerge', exe = 'file_merging', inData = set(['BS']), outData = set(['BS_MRG'])))
     executorSet.add(athenaExecutor(name = 'EVNTMerge', skeletonCA = 'EvgenJobTransforms.EVNTMerge_Skeleton', inData = ['EVNT'], outData = ['EVNT_MRG']))

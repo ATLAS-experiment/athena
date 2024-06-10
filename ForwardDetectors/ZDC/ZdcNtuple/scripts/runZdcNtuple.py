@@ -37,13 +37,19 @@ acc.merge(PoolReadCfg(flags))
 from ZdcNtuple.ZdcNtupleConfig import ZdcNtupleCfg
 acc.merge(ZdcNtupleCfg(flags, name = "AnalysisAlg",
                        zdcConfig = "LHCf2022",
-                       zdcOnly = True,
+                       lhcf2022 = False,
+                       lhcf2022zdc = True,
+                       lhcf2022afp = False,
+                       zdcOnly = False,
                        useGRL = False,
                        zdcCalib = False,
                        reprocZdc = False,
                        enableOutputTree = True,
-                       enableOutputSamples = True,
-                       enableTrigger = True))
+                       enableOutputSamples = False,
+                       enableTrigger = True,
+                       enableTracks = True,
+                       enableClusters = True,
+                       writeOnlyTriggers = True))
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 acc.addService(CompFactory.THistSvc(

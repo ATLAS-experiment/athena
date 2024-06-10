@@ -107,7 +107,7 @@ def fromRunArgs(runArgs):
         cfg.merge(MuonGeoModelCfg(flags))
 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    cfg.merge(OutputStreamCfg(flags, 'RDO', takeItemsFromInput = True))
+    cfg.merge(OutputStreamCfg(flags, 'RDO', takeItemsFromInput = True, extendProvenanceRecord = False))
 
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     cfg.merge(SetupMetaDataForStreamCfg(flags, 'RDO'))
