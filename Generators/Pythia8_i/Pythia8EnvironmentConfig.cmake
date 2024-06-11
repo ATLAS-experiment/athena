@@ -13,7 +13,13 @@ if( PYTHIA8_FOUND AND LHAPDF_FOUND )
         FORCESET PYTHIA8VER ${PYTHIA8_LCGVERSION}
         FORCESET PY8PATH ${PYTHIA8_LCGROOT}
         FORCESET LHAPDFVER ${LHAPDF_LCGVERSION} 
-        FORCESET LHAPDF_INSTAL_PATH ${LHAPDF_LCGROOT} )
+        FORCESET LHAPDF_INSTAL_PATH ${LHAPDF_LCGROOT}
+        PREPEND LHAPDF_DATA_PATH
+      /cvmfs/sft.cern.ch/lcg/external/lhapdfsets/current
+        PREPEND LHAPATH
+      /cvmfs/sft.cern.ch/lcg/external/lhapdfsets/current
+
+ )
 endif()
 
 # Silently declare the module found:
