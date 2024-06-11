@@ -47,8 +47,7 @@ include("PartPropSvc/PartPropSvc.py")
 
 ## Run performance monitoring (memory logging)
 from PerfMonComps.PerfMonFlags import jobproperties as perfmonjp
-perfmonjp.PerfMonFlags.doMonitoring = True
-perfmonjp.PerfMonFlags.doSemiDetailedMonitoring = True
+perfmonjp.PerfMonFlags.doFastMonMT = True
 
 from RngComps.RngCompsConf import AthRNGSvc
 svcMgr += AthRNGSvc()
