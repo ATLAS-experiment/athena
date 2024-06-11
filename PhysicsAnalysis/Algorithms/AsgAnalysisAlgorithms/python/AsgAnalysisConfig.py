@@ -555,7 +555,7 @@ class SelectionDecorationBlock (ConfigBlock):
     def __init__ (self, containers='') :
         super (SelectionDecorationBlock, self).__init__ ()
         # TODO: add info string
-        self.addOption('containers', containers, type=str,
+        self.addOption('containers', containers, type=list,
             noneAction='error',
             info="")
 
