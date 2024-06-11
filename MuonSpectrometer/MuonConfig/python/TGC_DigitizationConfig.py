@@ -128,9 +128,7 @@ def TGC_OverlayDigitizationBasicCfg(flags, **kwargs):
         from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
         acc.merge(SGInputLoaderCfg(flags, ["TGCSimHitCollection#TGC_Hits"]))
 
-    if "DigitizationTool" not in kwargs:
-        tool = acc.popToolsAndMerge(TGC_OverlayDigitizationToolCfg(flags))
-        kwargs["DigitizationTool"] = tool
+    kwargs.setdefault("DigitizationTool", acc.popToolsAndMerge(TGC_OverlayDigitizationToolCfg(flags)))
 
     if flags.Concurrency.NumThreads > 0:
         kwargs.setdefault("Cardinality", flags.Concurrency.NumThreads)
@@ -138,8 +136,8 @@ def TGC_OverlayDigitizationBasicCfg(flags, **kwargs):
     # Set common overlay extra inputs
     kwargs.setdefault("ExtraInputs", flags.Overlay.ExtraInputs)
 
-    TGCDigitizer = CompFactory.TGCDigitizer
-    acc.addEventAlgo(TGCDigitizer(name="TGC_OverlayDigitizer", **kwargs))
+    the_alg = CompFactory.MuonDigitizer(name="TGC_OverlayDigitizer", **kwargs)
+    acc.addEventAlgo(the_alg)
     return acc
 
 

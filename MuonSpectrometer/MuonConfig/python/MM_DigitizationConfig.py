@@ -123,9 +123,7 @@ def MM_OverlayDigitizationBasicCfg(flags, **kwargs):
         else:
             acc.merge(SGInputLoaderCfg(flags, ["MMSimHitCollection#MM_Hits"]))
 
-    if "DigitizationTool" not in kwargs:
-        tool = acc.popToolsAndMerge(MM_OverlayDigitizationToolCfg(flags))
-        kwargs["DigitizationTool"] = tool
+    kwargs.setdefault("DigitizationTool", acc.popToolsAndMerge(MM_OverlayDigitizationToolCfg(flags)))
 
     if flags.Concurrency.NumThreads > 0:
         kwargs.setdefault("Cardinality", flags.Concurrency.NumThreads)
@@ -133,7 +131,7 @@ def MM_OverlayDigitizationBasicCfg(flags, **kwargs):
     # Set common overlay extra inputs
     kwargs.setdefault("ExtraInputs", flags.Overlay.ExtraInputs)
 
-    acc.addEventAlgo(CompFactory.MM_Digitizer(name="MM_OverlayDigitizer", **kwargs))
+    acc.addEventAlgo(CompFactory.MuonDigitizer(name="MM_OverlayDigitizer", **kwargs))
     return acc
 
 

@@ -135,9 +135,7 @@ def sTGC_OverlayDigitizationBasicCfg(flags, **kwargs):
         else:
             acc.merge(SGInputLoaderCfg(flags, ["sTGCSimHitCollection#sTGC_Hits"]))
 
-    if "DigitizationTool" not in kwargs:
-        tool = acc.popToolsAndMerge(sTGC_OverlayDigitizationToolCfg(flags))
-        kwargs["DigitizationTool"] = tool
+    kwargs.setdefault("DigitizationTool", acc.popToolsAndMerge(sTGC_OverlayDigitizationToolCfg(flags)))
 
     if flags.Concurrency.NumThreads > 0:
         kwargs.setdefault("Cardinality", flags.Concurrency.NumThreads)
@@ -145,7 +143,8 @@ def sTGC_OverlayDigitizationBasicCfg(flags, **kwargs):
     # Set common overlay extra inputs
     kwargs.setdefault("ExtraInputs", flags.Overlay.ExtraInputs)
 
-    acc.addEventAlgo(CompFactory.sTGC_Digitizer(name="STGC_OverlayDigitizer", **kwargs))
+    the_alg = CompFactory.MuonDigitizer(name="STGC_OverlayDigitizer", **kwargs)
+    acc.addEventAlgo(the_alg)
     return acc
 
 

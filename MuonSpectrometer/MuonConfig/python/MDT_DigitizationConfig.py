@@ -151,17 +151,15 @@ def MDT_OverlayDigitizationBasicCfg(flags, **kwargs):
         from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
         acc.merge(SGInputLoaderCfg(flags, ["MDTSimHitCollection#MDT_Hits"]))
 
-    if "DigitizationTool" not in kwargs:
-        tool = acc.popToolsAndMerge(MDT_OverlayDigitizationToolCfg(flags))
-        kwargs["DigitizationTool"] = tool
-
+    kwargs.setdefault("DigitizationTool", acc.popToolsAndMerge(MDT_OverlayDigitizationToolCfg(flags)))
+    
     if flags.Concurrency.NumThreads > 0:
        kwargs.setdefault("Cardinality", flags.Concurrency.NumThreads)
 
     # Set common overlay extra inputs
     kwargs.setdefault("ExtraInputs", flags.Overlay.ExtraInputs)
 
-    acc.addEventAlgo(CompFactory.MDT_Digitizer(name="MDT_OverlayDigitizer", **kwargs))
+    acc.addEventAlgo(CompFactory.MuonDigitizer(name="MDT_OverlayDigitizer", **kwargs))
     return acc
 
 

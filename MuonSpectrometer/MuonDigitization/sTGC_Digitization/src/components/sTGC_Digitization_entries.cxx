@@ -1,7 +1,6 @@
+/*
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
 #include "sTGC_Digitization/sTgcDigitizationTool.h"
-#include "sTGC_Digitization/sTGC_Digitizer.h"
-
-DECLARE_COMPONENT( sTGC_Digitizer )
  
 DECLARE_COMPONENT( sTgcDigitizationTool )
-
