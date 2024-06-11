@@ -84,11 +84,11 @@ def FPGATrackSimBankSvcCfg(flags):
         f'{pathBankSvc}corrgen_raw_13L_skipPlane5.gcon', 
         f'{pathBankSvc}corrgen_raw_13L_skipPlane6.gcon', 
         f'{pathBankSvc}corrgen_raw_13L_skipPlane7.gcon']
-    FPGATrackSimBankSvc.constants_1st = f'{pathBankSvc}corrgen_raw_9L_reg0_checkGood1.gcon'
-    FPGATrackSimBankSvc.constants_2nd = f'{pathBankSvc}corrgen_raw_13L_reg0_checkGood1.gcon'
-    FPGATrackSimBankSvc.sectorBank_1st = f'{pathBankSvc}sectorsHW_raw_9L_reg0_checkGood1.patt'
-    FPGATrackSimBankSvc.sectorBank_2nd = f'{pathBankSvc}sectorsHW_raw_13L_reg0_checkGood1.patt'
-    FPGATrackSimBankSvc.sectorSlices = f'{pathBankSvc}slices_9L_reg0.root'
+    FPGATrackSimBankSvc.constants_1st = f'{pathBankSvc}corrgen_raw_9L_reg{flags.Trigger.FPGATrackSim.region}_checkGood1.gcon'
+    FPGATrackSimBankSvc.constants_2nd = f'{pathBankSvc}corrgen_raw_13L_reg{flags.Trigger.FPGATrackSim.region}_checkGood1.gcon'
+    FPGATrackSimBankSvc.sectorBank_1st = f'{pathBankSvc}sectorsHW_raw_9L_reg{flags.Trigger.FPGATrackSim.region}_checkGood1.patt'
+    FPGATrackSimBankSvc.sectorBank_2nd = f'{pathBankSvc}sectorsHW_raw_13L_reg{flags.Trigger.FPGATrackSim.region}_checkGood1.patt'
+    FPGATrackSimBankSvc.sectorSlices = f'{pathBankSvc}slices_9L_reg{flags.Trigger.FPGATrackSim.region}.root'
     
     # These should be configurable. The tag system needs updating though.
     import FPGATrackSimConfTools.FPGATrackSimTagConfig as FPGATrackSimTagConfig

@@ -22,6 +22,7 @@ def FPGATrackSimConstsGenCfg(flags, **kwargs):
     kwargs.setdefault("IsSecondStage",flags.Trigger.FPGATrackSim.Is2ndStage)
     kwargs.setdefault("missHitsConsts",flags.Trigger.FPGATrackSim.missHitsConsts)
 
+    from FPGATrackSimConfTools.FPGATrackSimAnalysisConfig import FPGATrackSimMappingCfg
     FPGATrackSimMapping = acc.getPrimaryAndMerge(FPGATrackSimMappingCfg(flags))
     theFPGATrackSimConstGenAlg = CompFactory.FPGATrackSimConstGenAlgo(**kwargs)
     theFPGATrackSimConstGenAlg.FPGATrackSimMappingSvc = FPGATrackSimMapping 
@@ -35,22 +36,6 @@ def FPGATrackSimConstsGenCfg(flags, **kwargs):
 
     acc.addEventAlgo(theFPGATrackSimConstGenAlg)
     return acc
-
-def FPGATrackSimMappingCfg(flags):
-    result=ComponentAccumulator()
-
-    mappingSvc = CompFactory.FPGATrackSimMappingSvc()
-    mappingSvc.mappingType = "FILE"
-    mappingSvc.rmap = flags.Trigger.FPGATrackSim.mapsDir+"/eta0103phi0305.rmap" # we need more configurability here i.e. file choice should depend on some flag
-    mappingSvc.subrmap =  flags.Trigger.FPGATrackSim.mapsDir+"/eta0103phi0305.subrmap" # presumably also here we want to be able to change the slices definition file
-    mappingSvc.pmap = flags.Trigger.FPGATrackSim.mapsDir+"/pmap"
-    mappingSvc.modulemap = flags.Trigger.FPGATrackSim.mapsDir+"/moduleidmap"
-    mappingSvc.NNmap = ""
-    mappingSvc.radiiFile = flags.Trigger.FPGATrackSim.mapsDir + "/eta0103phi0305_radii.txt"
-    mappingSvc.layerOverride = []
-    result.addService(mappingSvc, create=True, primary=True)
-    return result
-
 
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
