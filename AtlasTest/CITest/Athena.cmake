@@ -94,10 +94,10 @@ atlas_add_citest( RecoRun3Data_Calib
    SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a q451 -e '--CA True --maxEvents 25  --preExec="all:flags.Exec.FPE=500;"' --no-output-checks )
 
 atlas_add_citest( RecoRun3MC
-   SCRIPT RunWorkflowTests_Run3.py --CI -r -w MCReco -e '--maxEvents 25' )
+   SCRIPT RunWorkflowTests_Run3.py --CI -r -w MCReco -e '--maxEvents 25 --conditionsTag OFLCOND-MC23-SDR-RUN3-05' )
 
 atlas_add_citest( RecoRun3MC_PileUp
-   SCRIPT RunWorkflowTests_Run3.py --CI -p -w MCPileUpReco -e '--maxEvents 5 --inputRDO_BKGFile=../../PileUpPresamplingRun3/run_d1919/myRDO.pool.root' --no-output-checks  # go two levels up as the test runs in a subfolder
+   SCRIPT RunWorkflowTests_Run3.py --CI -p -w MCPileUpReco -e '--maxEvents 5 --conditionsTag OFLCOND-MC23-SDR-RUN3-05 --inputRDO_BKGFile=../../PileUpPresamplingRun3/run_d1919/myRDO.pool.root' --no-output-checks  # go two levels up as the test runs in a subfolder
    DEPENDS_SUCCESS PileUpPresamplingRun3 )
 
 atlas_add_citest( RecoRun4MC
