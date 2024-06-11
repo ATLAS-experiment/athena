@@ -13,7 +13,7 @@ from PyJobTransforms.trfLogger import msg
 msg.info('logging set in %s' % sys.argv[0])
 
 from PyJobTransforms.transform import transform
-from PyJobTransforms.trfExe import hybridPOOLMergeExecutor
+from PyJobTransforms.trfExe import POOLMergeExecutor
 from PyJobTransforms.trfArgs import addAthenaArguments, addDetectorArguments
 from PyJobTransforms.trfDecorators import stdTrfExceptionHandler, sigUsrStackTrace
 from RecJobTransforms.recTransformUtils import addCommonRecTrfArgs
@@ -38,7 +38,7 @@ def main():
 
 def getTransform():
     executorSet = set()
-    executorSet.add(hybridPOOLMergeExecutor(name = 'ESDMerge', inData = ['ESD'], outData = ['ESD_MRG']))
+    executorSet.add(POOLMergeExecutor(name = 'ESDMerge', inData = ['ESD'], outData = ['ESD_MRG']))
 
     trf = transform(executor = executorSet)
     

@@ -2097,6 +2097,14 @@ StatusCode TRTMonitoringRun3RAW_Alg::fillTRTHits(const TrackCollection& trackCol
     auto HtoLWonTMapC_passed     = Monitored::Scalar<bool>("HtoLWonTMapC_passed", false);
     auto HitTronTMapC_x          = Monitored::Scalar<float>("HitTronTMapC_x", 0.0);
     auto HitTronTMapC_y          = Monitored::Scalar<float>("HitTronTMapC_y", 0.0);
+    auto HitTronTMapS_x          = Monitored::Scalar<float>("HitTronTMapS_x", 0.0);
+    auto HitTronTMapS_y          = Monitored::Scalar<float>("HitTronTMapS_y", 0.0);
+    auto HitToTonTMapS_x         = Monitored::Scalar<float>("HitToTonTMapS_x", 0.0);
+    auto HitToTonTMapS_y         = Monitored::Scalar<float>("HitToTonTMapS_y", 0.0);
+    auto HitToTonTMapC_x         = Monitored::Scalar<float>("HitToTonTMapC_x", 0.0);
+    auto HitToTonTMapC_y         = Monitored::Scalar<float>("HitToTonTMapC_y", 0.0);
+
+
 
     // TProfile 
     auto HitWonTMap_B_y          = Monitored::Scalar<float>("HitWonTMap_B_y", 0.0);
@@ -2396,12 +2404,25 @@ StatusCode TRTMonitoringRun3RAW_Alg::fillTRTHits(const TrackCollection& trackCol
             const InDet::TRT_DriftCircle *RawDriftCircle = dynamic_cast<const InDet::TRT_DriftCircle *>(trtCircle->prepRawData());
             if (RawDriftCircle) {
                 nTRTHits_side[ibe][iside]++;
+                float timeOverThreshold = RawDriftCircle->timeOverThreshold();
                 int middleHTbit       = RawDriftCircle->getWord() & 0x00020000;
                 //0x00020000 = 0000 0000 0000 0000 0000 0010 0000 0000 0000 0000
                 int hitinvaliditygate = RawDriftCircle->getWord() & 0x000DFE80;
                 //0x000DFE80 = 0000 0000 0000 0000 0000 1101 1111 1110 1000 0000
                 bool is_middleHTbit_high = (middleHTbit != 0);
                 bool is_anybininVgate_high = (hitinvaliditygate != 0);
+
+                if (m_doExpert && m_doStraws) {
+                    HitToTonTMapS_x = thisStrawNumber[ibe];
+                    HitToTonTMapS_y = timeOverThreshold;
+                    fill("TRTTrackHistograms"+std::to_string(ibe)+std::to_string(iphi_module), HitToTonTMapS_x, HitToTonTMapS_y);
+                }
+
+                if (m_doExpert && m_doChips) {
+                    HitToTonTMapC_x = chip[ibe] - 1;
+                    HitToTonTMapC_y = timeOverThreshold;
+                    fill("TRTTrackHistograms"+std::to_string(ibe)+std::to_string(iphi_module), HitToTonTMapC_x, HitToTonTMapC_y);
+                }
 
                 if (m_doExpert && m_doStraws) {
                     if (is_middleHTbit_high) {
@@ -2472,6 +2493,12 @@ StatusCode TRTMonitoringRun3RAW_Alg::fillTRTHits(const TrackCollection& trackCol
                 if ((trailingEdge < 23) &&
                     !(RawDriftCircle->lastBinHigh()) &&
                     !(RawDriftCircle->firstBinHigh())) {
+                    if (m_doExpert && m_doStraws) {
+                        HitTronTMapS_x = thisStrawNumber[ibe];
+                        HitTronTMapS_y = trailingEdgeScaled;
+                        fill("TRTTrackHistograms"+std::to_string(ibe)+std::to_string(iphi_module), HitTronTMapS_x, HitTronTMapS_y);
+                    }
+
                     if (m_doExpert && m_doChips) {
                         HitTronTMapC_x = chip[ibe] - 1;
                         HitTronTMapC_y = trailingEdgeScaled;

@@ -9,7 +9,7 @@ msg = msg.getChild(__name__)
 import PyJobTransforms.trfArgClasses as trfArgClasses
 
 from PyJobTransforms.trfArgs import listKnownD3PDs, getExtraDPDList
-from PyJobTransforms.trfExe import  NTUPMergeExecutor, hybridPOOLMergeExecutor
+from PyJobTransforms.trfExe import  NTUPMergeExecutor, POOLMergeExecutor
 
 
 def addPhysValidationFiles(parser):
@@ -72,7 +72,7 @@ def addDAODArguments(parser, mergerTrf=True):
 def addDAODMergerSubsteps(executorSet):
     DAODTypes = knownDAODTypes()
     for DAOD in DAODTypes:
-        executorSet.add(hybridPOOLMergeExecutor(name = DAOD.removeprefix("DAOD_") + 'Merge', inData = [DAOD], outData = [DAOD+'_MRG']))
+        executorSet.add(POOLMergeExecutor(name = DAOD.removeprefix("DAOD_") + 'Merge', inData = [DAOD], outData = [DAOD+'_MRG']))
 
 def knownDAODTypes():
     DAODTypes = []

@@ -146,28 +146,45 @@ def run():
                 return False
 
             cps_to_chains = {}
-            support_L1_counts = {}
+            L1_to_chains = {}
 
             for chain in chains:
                 chain_dict = chain_to_dict[chain.name]
                 if (
                     not chain_dict['L1item'] # Exception for L1All
                     or not match_group('Support',chain)
+                    or match_group('TagAndProbe',chain)
                 ):
                     continue
                 
                 # Increment the number of support chains seeded by this L1
-                if chain_dict['L1item'] not in support_L1_counts:
-                    support_L1_counts[chain_dict['L1item']] = []
-                support_L1_counts[chain_dict['L1item']] += 1
+                # Ignore multiseed
+                if len(chain_dict['L1item'].split(',')) == 1:
+                    if chain_dict['L1item'] not in L1_to_chains:
+                        L1_to_chains[chain_dict['L1item']] = set()
+                    L1_to_chains[chain_dict['L1item']].add(chain.name)
 
-                cps_item = None
-                for group in chain.groups:
-                    if group.startswith('CPS:'):
-                        cps_item = group[4:]
-                if cps_item not in cps_to_chains:
-                    cps_to_chains[cps_item] = []
-                cps_to_chains[cps_item] = chain.name
+                if match_group('RATE:CPS',chain):
+                    cps_item = None
+                    for group in chain.groups:
+                        if group.startswith('RATE:CPS_'):
+                            cps_item = 'L1_'+group[9:]
+                        if cps_item == 'L1_ZB':
+                            cps_item = 'L1_ZeroBias'
+                    if cps_item not in cps_to_chains:
+                        cps_to_chains[cps_item] = set()
+                    cps_to_chains[cps_item].add(chain.name)
+
+            for cps_item, cps_chains in cps_to_chains.items():
+                L1_chains = L1_to_chains[cps_item]
+                if len(L1_chains) < len(cps_chains):
+                    raise RuntimeError('More CPS chains than L1-seeded, something wrong in parsing')
+                if len(cps_chains) < len(L1_chains):
+                    print(f'CPS group seeded by {cps_item} does not include all support chains')
+                    print(f'  Contains {len(cps_chains)} / {len(L1_chains)}')
+                    print('  Missing:')
+                    for missing in L1_chains.difference(cps_chains):
+                        print('   ', missing)
 
         if args.dump_dicts:
             dump_chain_dicts(chain_to_dict,args.menu)

@@ -191,6 +191,11 @@ def TRTMonitoringRun3RAW_AlgConfig(flags):
                 trackGroup.defineHistogram('HtoLWonTMapC,HtoLWonTMapC_passed;hHtoLWonTMapC',type='TProfile',title='HL/LL(In Time Window) Ratio on Track: Chips;Chip Number in Stack;Probability',path=oss,xbins=iChipMax[ibe],xmin=0,xmax=iChipMax[ibe],opt='kAlwaysCreate')
                 trackGroup.defineHistogram('HtoLonTMapC,HtoLonTMapC_passed;hHtoLonTMapC',type='TProfile',title='HL/LL Ratio on Track: Chips;Chip Number in Stack;Probability',path=oss,xbins=iChipMax[ibe],xmin=0,xmax=iChipMax[ibe],opt='kAlwaysCreate')
 
+                trackGroup.defineHistogram('HitTronTMapS_x,HitTronTMapS_y;hHitTronTMapS',type='TProfile',title='Mean Trailing Edge on Track: Straws;Straw Number in Stack;Time (ns)',path=oss,xbins=strawMax[ibe],xmin=0,xmax=strawMax[ibe],duration='run',opt='kAlwaysCreate')
+                trackGroup.defineHistogram('HitToTonTMapS_x,HitToTonTMapS_y;hHitToTonTMapS',type='TProfile',title='Mean ToT on Track: Straws;Straw Number in Stack;Time (ns)',path=oss,xbins=strawMax[ibe],xmin=0,xmax=strawMax[ibe],duration='run',opt='kAlwaysCreate')
+                trackGroup.defineHistogram('HitTronTMapC_x,HitTronTMapC_y;hHitTronTMapC',type='TProfile',title='Mean Trailing Edge on Track: Chips;Chip Number in Stack;Time (ns)',path=oss,xbins=iChipMax[ibe],xmin=0,xmax=iChipMax[ibe],duration='run',opt='kAlwaysCreate')
+                trackGroup.defineHistogram('HitToTonTMapC_x,HitToTonTMapC_y;hHitToTonTMapC',type='TProfile',title='Chip Number in Stack;Time (ns);Chip Number in Stack;Time (ns)',path=oss,xbins=iChipMax[ibe],xmin=0,xmax=iChipMax[ibe],duration='run',opt='kAlwaysCreate')
+
     for ibe in range(2):
         if ibe == 0:
             regionTag = ' (' + barrelOrEndcap[ibe] + ')'

@@ -63,7 +63,7 @@ def fromRunArgs(runArgs):
     cfg.merge(IOVDbSvcCfg(flags))
 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    cfg.merge(OutputStreamCfg(flags, "EVNT", disableEventTag=True, takeItemsFromInput = True))
+    cfg.merge(OutputStreamCfg(flags, "EVNT", disableEventTag = True, takeItemsFromInput = True, extendProvenanceRecord = False))
 
     # Add in-file MetaData
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg

@@ -1819,7 +1819,7 @@ class optionalAthenaExecutor(athenaExecutor):
         msg.debug('valStop time is {0}'.format(self._valStop))
 
 
-class hybridPOOLMergeExecutor(athenaExecutor):
+class POOLMergeExecutor(athenaExecutor):
     ## @brief Initialise hybrid POOL merger athena executor
     #  @param name Executor name
     #  @param trf Parent transform
@@ -1836,7 +1836,7 @@ class hybridPOOLMergeExecutor(athenaExecutor):
                  perfMonFile = None, tryDropAndReload = True, extraRunargs = {},
                  manualDataDictionary = None, memMonitor = True):
         
-        super(hybridPOOLMergeExecutor, self).__init__(name, trf=trf, conf=conf, skeletonFile=skeletonFile, skeletonCA=skeletonCA,
+        super(POOLMergeExecutor, self).__init__(name, trf=trf, conf=conf, skeletonFile=skeletonFile, skeletonCA=skeletonCA,
                                                       inData=inData, outData=outData, exe=exe, exeArgs=exeArgs, substep=substep,
                                                       inputEventTest=inputEventTest, perfMonFile=perfMonFile, 
                                                       tryDropAndReload=tryDropAndReload, extraRunargs=extraRunargs,
@@ -1844,12 +1844,12 @@ class hybridPOOLMergeExecutor(athenaExecutor):
     
     def preExecute(self, input = set(), output = set()):
         self.setPreExeStart()
-        super(hybridPOOLMergeExecutor, self).preExecute(input=input, output=output)
+        super(POOLMergeExecutor, self).preExecute(input=input, output=output)
 
     
     def execute(self):
         # First call the parent executor, which will manage the athena execution for us
-        super(hybridPOOLMergeExecutor, self).execute()
+        super(POOLMergeExecutor, self).execute()
 
 
 ## @brief Specialist executor to manage the handling of multiple implicit input

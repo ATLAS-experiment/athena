@@ -21,7 +21,7 @@ run() { (set -x; exec "$@") }
 lastref_dir=last_results
 artdata=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art
 dcubeXml_idtide="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/dcube/config/IDPVMPlots_idtide.xml"
-dcubeRef_idtide="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/ReferenceHistograms/physval_test_zprime_tide_r24.0.39.root"
+dcubeRef_idtide="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/ReferenceHistograms/nightly_references/2024-05-30T2101/physval_test_zprime_tide_2024-05-30T2101.root"
 
 export ATHENA_PROC_NUMBER=1
 export ATHENA_CORE_NUMBER=1
