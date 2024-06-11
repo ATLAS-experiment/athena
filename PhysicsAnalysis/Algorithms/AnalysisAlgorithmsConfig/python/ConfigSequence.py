@@ -143,7 +143,6 @@ class ConfigSequence:
         if names:
             raise ValueError(f'Option name can be either <groupName>.<optionName>'
                 f' or <optionName> not {name}')
-
         blocks = self._blocks
         # check if last block added has an instance name
         if not groupName:
@@ -175,16 +174,26 @@ class ConfigSequence:
 
     def getOptions(self):
         """get information on options for last block in sequence"""
+        # get groupName for last added block
+        groupName = self._blocks[-1].getOptionValue('groupName')
+        blocks = [self._blocks[-1]]
+        # get all blocks with the same groupName
+        if groupName:
+            for block in self._blocks[:-1]:
+                if block.getOptionValue('groupName') == groupName:
+                    blocks.append(block)
         options = []
-        for name, o in self._blocks[-1].getOptions().items():
-            val = getattr(self._blocks[-1], name)
-            valDefault = o.default
-            valType = o.type
-            valRequired = o.required 
-            noneAction = o.noneAction
-            options.append({'name': name, 'defaultValue': valDefault,
-                'type': valType, 'required': valRequired,
-                'noneAction': noneAction, 'value': val})
+        # get options for all blocks with same groupName
+        for block in blocks:
+            for name, o in block.getOptions().items():
+                val = getattr(block, name)
+                valDefault = o.default
+                valType = o.type
+                valRequired = o.required
+                noneAction = o.noneAction
+                options.append({'name': name, 'defaultValue': valDefault,
+                    'type': valType, 'required': valRequired,
+                    'noneAction': noneAction, 'value': val})
         return options
 
     
@@ -201,7 +210,9 @@ class ConfigSequence:
                     raise ValueError(f'{name} is required but not included in config')
                 # add default used to config
                 defaultVal = opt['defaultValue']
-                options[name] = defaultVal
+                # do not overwright groupName unless set by user
+                if name != 'groupName':
+                    options[name] = defaultVal
                 logCPAlgCfgSeq.info(f"    {name}: {defaultVal}")
         return algOptions
 
