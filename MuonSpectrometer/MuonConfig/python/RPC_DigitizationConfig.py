@@ -145,9 +145,7 @@ def RPC_OverlayDigitizationBasicCfg(flags, **kwargs):
         from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
         acc.merge(SGInputLoaderCfg(flags, ["RPCSimHitCollection#RPC_Hits"]))
 
-    if "DigitizationTool" not in kwargs:
-        tool = acc.popToolsAndMerge(RPC_OverlayDigitizationToolCfg(flags))
-        kwargs["DigitizationTool"] = tool
+    kwargs.setdefault("DigitizationTool", acc.popToolsAndMerge(RPC_OverlayDigitizationToolCfg(flags)))
 
     if flags.Concurrency.NumThreads > 0:
         kwargs.setdefault("Cardinality", flags.Concurrency.NumThreads)
@@ -155,8 +153,8 @@ def RPC_OverlayDigitizationBasicCfg(flags, **kwargs):
     # Set common overlay extra inputs
     kwargs.setdefault("ExtraInputs", flags.Overlay.ExtraInputs)
 
-    RPC_Digitizer = CompFactory.RPC_Digitizer
-    acc.addEventAlgo(RPC_Digitizer(name="RPC_OverlayDigitizer", **kwargs))
+    the_alg = CompFactory.MuonDigitizer(name="RPC_OverlayDigitizer", **kwargs)
+    acc.addEventAlgo(the_alg)
     return acc
 
 
