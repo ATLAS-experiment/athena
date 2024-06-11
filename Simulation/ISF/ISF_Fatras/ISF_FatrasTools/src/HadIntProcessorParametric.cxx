@@ -296,7 +296,7 @@ ISF::ISFParticleVector iFatras::HadIntProcessorParametric::getHadState(const ISF
     return chDef;
   }
 
-  ATH_MSG_VERBOSE( "[ had ] interaction of " << parent->barcode()
+  ATH_MSG_VERBOSE( "[ had ] interaction of " << HepMC::barcode(parent)
 		   << " with " << Npart << " outgoing particles " );
 
   // record the interaction
@@ -304,7 +304,7 @@ ISF::ISFParticleVector iFatras::HadIntProcessorParametric::getHadState(const ISF
   // ------ now create the new hadrons ------
   ATH_MSG_DEBUG(  "[ had ] create hadronic shower for particle with PDG ID "
 		  << parent->pdgCode() << " and barcode "
-		  << parent->barcode() );
+		  << HepMC::barcode(parent) );
 
 
   // create the genParticles
@@ -316,7 +316,7 @@ ISF::ISFParticleVector iFatras::HadIntProcessorParametric::getHadState(const ISF
     m_hadIntPointZ        = vertex.z();
     m_hadIntPointR        = vertex.perp();
     m_hadIntMotherPdg     = parent->pdgCode();
-    m_hadIntMotherBarcode = parent->barcode();
+    m_hadIntMotherBarcode = HepMC::barcode(parent); // FIXME barcode-based
     m_hadIntMotherP       = p;
     m_hadIntMotherPt      = p*particleDir.perp();
     m_hadIntMotherPhi     = particleDir.phi();
@@ -328,8 +328,7 @@ ISF::ISFParticleVector iFatras::HadIntProcessorParametric::getHadState(const ISF
   ATH_MSG_VERBOSE( "[ had ] incoming particle energy | mass | momentum "
 		   << E << " | " << m << " | " << p << " | " );
 
-  /* TODO: this will not work with the new barcode style */
-  if (m_cutChain && ( HepMC::generations(parent) > 0 || parent->barcode()==0 ) ) {
+  if (m_cutChain && ( HepMC::generations(parent) > 0 || (HepMC::barcode(parent) ==HepMC::UNDEFINED_ID && HepMC::uniqueID(parent) == HepMC::UNDEFINED_ID) ) ) {
     if (m_hadIntValidationTree) m_hadIntValidationTree->Fill();
     ATH_MSG_VERBOSE( "[ had ] interaction initiated by a secondary particle, no children saved " );
     return chDef;

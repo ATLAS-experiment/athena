@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // ISF_Algs includes
@@ -214,7 +214,7 @@ std::unique_ptr<HepMC::GenEvent> ISF::TruthPreselectionTool::filterGenEvent(cons
       continue; // skip vertices created by the simulation
     }
     std::unique_ptr<HepMC::GenVertex> copyOfGenVertex =std::make_unique<HepMC::GenVertex>(pCurrentVertex->position(), pCurrentVertex->id(), pCurrentVertex->weights() );
-    copyOfGenVertex->suggest_barcode( pCurrentVertex->barcode() );
+    copyOfGenVertex->suggest_barcode( HepMC::barcode(pCurrentVertex) );
     inputEvtVtxToOutputEvtVtx[pCurrentVertex] = copyOfGenVertex.get();
     outputEvent->add_vertex( copyOfGenVertex.release() );
   } //vertex loop

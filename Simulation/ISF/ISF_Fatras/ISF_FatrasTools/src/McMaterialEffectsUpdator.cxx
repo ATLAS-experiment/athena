@@ -505,11 +505,11 @@ iFatras::McMaterialEffectsUpdator::updateInLay(
                                                       isp->mass(),
                                                       isp->charge(),
                                                       isp->pdgCode(),
-                                                      isp->status(),
+                                                      HepMC::status(isp),
                                                       isp->timeStamp(),
                                                       *m_isp,
-                                                      isp->id(),
-                                                      isp->barcode(), // FIXME barcode-based
+                                                      HepMC::uniqueID(isp),
+                                                      HepMC::barcode(isp), // FIXME barcode-based
                                                       regTruthBinding,
                                                       regHMPL
                                                       );
@@ -714,11 +714,11 @@ iFatras::McMaterialEffectsUpdator::updateInLay(
                                                     isp->mass(),
                                                     isp->charge(),
                                                     isp->pdgCode(),
-                                                    isp->status(),
+                                                    HepMC::status(isp),
                                                     isp->timeStamp(),
                                                     *m_isp,
-                                                    isp->id(),
-                                                    isp->barcode(), // FIXME barcode-based
+                                                    HepMC::uniqueID(isp),
+                                                    HepMC::barcode(isp), // FIXME barcode-based
                                                     regTruthBinding,
                                                     regHMPL
                                                     );

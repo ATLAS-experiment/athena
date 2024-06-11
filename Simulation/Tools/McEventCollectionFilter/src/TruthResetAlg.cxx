@@ -131,7 +131,7 @@ StatusCode TruthResetAlg::execute() {
       continue; // skip vertices created by the simulation
     }
     std::unique_ptr<HepMC::GenVertex> copyOfGenVertex =std::make_unique<HepMC::GenVertex>(pCurrentVertex->position(), pCurrentVertex->id(), pCurrentVertex->weights() );
-    copyOfGenVertex->suggest_barcode( pCurrentVertex->barcode() );
+    copyOfGenVertex->suggest_barcode( HepMC::barcode(pCurrentVertex) );
     inputEvtVtxToOutputEvtVtx[pCurrentVertex] = copyOfGenVertex.get();
     outputEvent->add_vertex( copyOfGenVertex.release() );
   } //vertex loop

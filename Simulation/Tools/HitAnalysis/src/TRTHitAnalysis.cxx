@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRTHitAnalysis.h"
@@ -166,13 +166,13 @@ StatusCode TRTHitAnalysis::execute() {
       m_h_TRT_r->Fill(p.perp());
       m_h_TRT_xy->Fill(p.x(), p.y());
       m_h_TRT_zr->Fill(p.z(),sqrt(pow(p.x(),2)+pow(p.y(),2)));
-      m_h_TRT_barcode->Fill(i_hit->particleLink().barcode());
+      m_h_TRT_barcode->Fill(HepMC::barcode(i_hit->particleLink()));
 
       m_TRT_x->push_back(p.x());
       m_TRT_y->push_back(p.y());
       m_TRT_z->push_back(p.z());
       m_TRT_r->push_back(p.perp());
-      m_TRT_barcode->push_back(i_hit->particleLink().barcode());
+      m_TRT_barcode->push_back(HepMC::barcode(i_hit->particleLink()));
       
       int particleId(i_hit->GetParticleEncoding());
       if(particleId == 22 || static_cast<int>(std::abs(particleId)/100000)==41 || static_cast<int>(std::abs(particleId)/10000000)==1) {

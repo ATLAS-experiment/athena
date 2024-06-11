@@ -42,7 +42,7 @@ TrackRecordCnv_p1::transToPers(const TrackRecord* transObj, TrackRecord_p1* pers
    persObj->m_positionY = (float) pos.y();
    persObj->m_positionZ = (float) pos.z();
    persObj->m_time = (float) transObj->GetTime();
-   persObj->m_barCode = transObj->barcode(); // FIXME barcode-based
+   persObj->m_barCode = HepMC::barcode(transObj); // FIXME barcode-based
    persObj->m_volName = transObj->GetVolName();
 }
 

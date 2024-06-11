@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SiHitsTestTool.h"
@@ -105,7 +105,7 @@ StatusCode SiHitsTestTool::processEvent() {
       m_hits_edep->Fill(hit.energyLoss());
       m_hits_log_edep->Fill( log(hit.energyLoss()) );
       m_hits_edep_zr->Fill(u.z(),u.perp(),hit.energyLoss());
-      int barcode = hit.particleLink().barcode();
+      int barcode = HepMC::barcode(hit.particleLink()); // FIXME barcode-based
       m_hits_log_barcode->Fill( barcode > 0 ? log(barcode) : -1 );
       double step_length = ( hit.localStartPosition()-hit.localEndPosition() ).mag();
       m_hits_step_length->Fill(step_length);

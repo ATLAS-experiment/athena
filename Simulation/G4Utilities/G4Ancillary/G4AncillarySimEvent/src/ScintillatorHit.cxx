@@ -73,7 +73,7 @@ ScintillatorHit::ScintillatorHit( const int volNumber,
 {}
 	
 int ScintillatorHit::truthBarcode() const {
-  return m_partLink.barcode();
+  return HepMC::barcode(m_partLink); // FIXME barcode-based
 }
 
 int ScintillatorHit::truthID() const

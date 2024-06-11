@@ -99,7 +99,7 @@ HepMC::GenParticlePtr ISF::ISFTruthIncident::parentParticle() {
 }
 
 int ISF::ISFTruthIncident::parentBarcode() { // TODO Remove this method
-  return m_parent.barcode();
+  return HepMC::barcode(m_parent); // FIXME barcode-based
 }
 
 int ISF::ISFTruthIncident::parentUniqueID() {
@@ -147,7 +147,7 @@ int ISF::ISFTruthIncident::childPdgCode(unsigned short index) const {
 }
 
 int ISF::ISFTruthIncident::childBarcode(unsigned short index) const {
-  return numberOfChildren() > index ? m_children[index]->barcode() : HepMC::UNDEFINED_ID;
+  return numberOfChildren() > index ? HepMC::barcode(m_children[index]) : HepMC::UNDEFINED_ID;
 }
 
 HepMC::GenParticlePtr ISF::ISFTruthIncident::childParticle(unsigned short index,

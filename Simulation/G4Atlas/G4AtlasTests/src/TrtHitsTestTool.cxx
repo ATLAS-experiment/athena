@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrtHitsTestTool.h"
@@ -71,7 +71,7 @@ StatusCode TrtHitsTestTool::processEvent() {
       m_indetLongView->Fill(u.z(),u.perp());
       m_hits_xy->Fill(u.x(),u.y());
       m_hits_zr->Fill(u.z(),u.perp());
-      int barcode = hit.particleLink().barcode();
+      int barcode = HepMC::barcode(hit.particleLink()); // FIXME barcode-based
       m_hits_log_barcode->Fill( barcode > 0 ? log(barcode) : -1);
       int particleId(hit.GetParticleEncoding());
       if (particleId == 22 || static_cast<int>(abs(particleId)/100000) == 41 ||  static_cast<int>(abs(particleId)/10000000) == 1)

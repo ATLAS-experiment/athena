@@ -3,6 +3,7 @@
 */
 
 #include "TRT_HitsTruthRelink.h"
+#include "TruthUtils/MagicNumbers.h"
 
 
 TRT_HitsTruthRelink::TRT_HitsTruthRelink(const std::string &name, ISvcLocator *pSvcLocator)
@@ -72,7 +73,7 @@ HepMcParticleLink TRT_HitsTruthRelink::updatedLink(const EventContext &ctx, cons
   ATH_MSG_DEBUG ("oldLink.id() = " << oldLink.id());
   int currentId = oldLink.id();
   // Hits previously linked to truth particles should now be linked to the reference truthParticle
-  if (oldLink.id() != 0 || oldLink.barcode() !=0) { // FIXME barcode-based for now to work around reading in HepMcParticleLink_p2 based EDM
+  if (oldLink.id() != HepMC::UNDEFINED_ID || HepMC::barcode(oldLink) != HepMC::UNDEFINED_ID ) { // FIXME barcode-based for now to work around reading in HepMcParticleLink_p2 based EDM
     // For the TRT truth electrons may optionally be kept
     if (!(m_keepElectronsLinkedToTRTHits && std::abs(pdgId) == 11)) {
       currentId = referenceId;

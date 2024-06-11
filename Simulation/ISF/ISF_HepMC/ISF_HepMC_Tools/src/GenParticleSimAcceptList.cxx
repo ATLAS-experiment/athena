@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header include
@@ -107,7 +107,7 @@ bool ISF::GenParticleSimAcceptList::pass(const HepMC::GenParticle& particle) con
     for (HepMC::GenVertex::particle_iterator it = particle.production_vertex()->particles_begin(HepMC::parents);
                                              it != particle.production_vertex()->particles_end(HepMC::parents); ++it){
       // Loop breaker
-      if ( (*it)->barcode() == particle.barcode() ) continue;
+      if ( HepMC::uniqueID(*it) == HepMC::uniqueID(particle) ) continue;
       // Check this particle
       vertices.clear();
       bool parent_all_clear = pass( **it , vertices );
@@ -180,8 +180,8 @@ bool ISF::GenParticleSimAcceptList::pass(const HepMC::GenParticle& particle , st
     passFilter = passFilter && ( (m_minDecayRadiusQS < particle.end_vertex()->position().perp()) || (m_minDecayRadiusQS < particle.production_vertex()->position().perp()) );
     if (passFilter) {
       // Break loops
-      if ( std::find( used_vertices.begin() , used_vertices.end() , particle.end_vertex()->barcode() )==used_vertices.end() ){
-        used_vertices.push_back( particle.end_vertex()->barcode() );
+      if ( std::find( used_vertices.begin() , used_vertices.end() , HepMC::uniqueID(particle.end_vertex()) )==used_vertices.end() ){
+        used_vertices.push_back( HepMC::uniqueID(particle.end_vertex()) );
         for (HepMC::GenVertex::particle_iterator it = particle.end_vertex()->particles_begin(HepMC::children);
              it != particle.end_vertex()->particles_end(HepMC::children); ++it){
           passFilter = passFilter && pass( **it , used_vertices );
