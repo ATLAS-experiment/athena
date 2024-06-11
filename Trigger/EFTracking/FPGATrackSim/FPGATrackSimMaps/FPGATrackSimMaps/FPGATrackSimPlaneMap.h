@@ -61,15 +61,17 @@ struct LayerInfo
 class FPGATrackSimPlaneMap 
 {
     public:
-
         ///////////////////////////////////////////////////////////////////////
         // Constructor/Destructor
         ///////////////////////////////////////////////////////////////////////
-
+        
         // See doc on m_layerOverrides for info on argument layerOverrides
+        //TODO KILL OLD METHOD 
         FPGATrackSimPlaneMap(const std::string & filepath, unsigned region, unsigned stage,
                 std::vector<int> layerOverrides = std::vector<int>());
 
+        FPGATrackSimPlaneMap(std::ifstream& fin, unsigned region, unsigned stage,
+                std::vector<int> layerOverrides = std::vector<int>());
         ///////////////////////////////////////////////////////////////////////
         // Sizing
         ///////////////////////////////////////////////////////////////////////
@@ -178,7 +180,8 @@ class FPGATrackSimPlaneMap
 
         ///////////////////////////////////////////////////////////////////////
         // Helper Functions
-
+        //TODO KILL int readPmapSize()
+        //int readPmapSize();
         void allocateMap(std::ifstream & fin, uint32_t stage);
         void seek(std::ifstream & fin, unsigned region);
         void readLayers(std::ifstream & fin, uint32_t stage);
