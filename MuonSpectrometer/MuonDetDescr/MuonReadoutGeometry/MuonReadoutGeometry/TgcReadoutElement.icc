@@ -26,7 +26,7 @@ namespace MuonGM {
     inline int TgcReadoutElement::nWires(int gasGap) const { return m_readoutParams->totalWires(gasGap); }
     inline int TgcReadoutElement::nWires(int gasGap, int gang) const { return m_readoutParams->nWires(gasGap, gang); }
     inline int TgcReadoutElement::nWireGangs(int gasGap) const { return m_readoutParams->nWireGangs(gasGap); }
-    inline int TgcReadoutElement::nPitchesToGang(int gasGap, int gang) const { return m_readoutParams->nPitchesToGang(gasGap, gang); }
+    inline double TgcReadoutElement::nPitchesToGang(int gasGap, int gang) const { return m_readoutParams->nPitchesToGang(gasGap, gang); }
     inline double TgcReadoutElement::gangThickness() const { return m_readoutParams->gangThickness(); }
     inline int TgcReadoutElement::chamberType() const { return m_readoutParams->chamberType(); }
     
@@ -34,7 +34,7 @@ namespace MuonGM {
         return getSsize() + (0.5 *length() +z) * (getLongSsize() - getSsize()) / length(); 
     }
     inline double TgcReadoutElement::wireGangLocalX(const int gasGap, const int gang) const {
-        return nPitchesToGang(gasGap, gang) * wirePitch();
+        return wirePitch()  * nPitchesToGang(gasGap, gang);
     }
     
     

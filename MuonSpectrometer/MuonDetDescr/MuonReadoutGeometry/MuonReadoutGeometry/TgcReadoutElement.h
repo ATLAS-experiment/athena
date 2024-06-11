@@ -138,7 +138,7 @@ namespace MuonGM {
         /// Returns the number of wire gangs (Random grouping of wires) in a given gas gap
         int nWireGangs(int gasGap) const;
         /// Returns the number of wire pitches that have to be travelled to reach gang i
-        int nPitchesToGang(int gasGap, int gang) const;
+        double nPitchesToGang(int gasGap, int gang) const;
         /// Returns the length of the wire gang along the radial direction [pitch x  N_{wire}^{gang}]
         double gangRadialLength(int gasGap, int gang) const;
         /// Returns the length of the most bottom wire in the gang
