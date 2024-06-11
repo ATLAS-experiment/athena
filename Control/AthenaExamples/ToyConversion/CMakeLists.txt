@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( ToyConversion )
@@ -14,4 +14,4 @@ atlas_add_component( ToyConversion
                      LINK_LIBRARIES ToyConversionLib )
 
 # Install files from the package:
-atlas_install_joboptions( share/ToyConversionOpts.txt share/ToyConversionOpts.py )
+atlas_install_joboptions( share/ToyConversionOpts.txt )
