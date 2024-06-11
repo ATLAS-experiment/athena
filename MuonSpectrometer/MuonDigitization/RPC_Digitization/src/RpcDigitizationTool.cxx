@@ -1148,34 +1148,19 @@ std::pair<bool,bool> RpcDigitizationTool::detectionEfficiency(const EventContext
         double FracDeadStripEta{0.}, FracDeadStripPhi{0.};
         double EtaPanelEfficiency{1.}, PhiPanelEfficiency{1.}, GapEfficiency{1.};
         int RPC_ProjectedTracksEta = 0;
-        bool noEntryInDb = false;
+        
+        std::optional<double> fracDeadStripEtaFromCOOL = readCdo->getFracDeadStrip(IdEta);
+        std::optional<double> fracDeadStripPhiFromCOOL = readCdo->getFracDeadStrip(IdPhi);
+        
+        bool noEntryInDb = !fracDeadStripEtaFromCOOL || !fracDeadStripPhiFromCOOL;
 
-        if (readCdo->getFracDeadStripMap().find(IdEta) == readCdo->getFracDeadStripMap().end()) {
-            ATH_MSG_DEBUG("Not In CoolDB the Panel IdEta :  " << IdEta << " i.e. " << m_idHelper->show_to_string(IdEta));
-            noEntryInDb = true;
-        } else {
-            ATH_MSG_DEBUG("Found In CoolDB the Panel IdEta :  " << IdEta << " i.e. " << m_idHelper->show_to_string(IdEta));
-        }
-        if (readCdo->getFracDeadStripMap().find(IdPhi) == readCdo->getFracDeadStripMap().end()) {
-            ATH_MSG_DEBUG("Not In CoolDB the Panel IdPhiRpcStrip :  " << IdPhi << " i.e. " << m_idHelper->show_to_string(IdPhi));
-            noEntryInDb = true;
-        } else {
-            ATH_MSG_DEBUG("Found In CoolDB the Panel IdPhiRpcStrip :  " << IdPhi << " i.e. " << m_idHelper->show_to_string(IdPhi));
-        }
-
-        if (readCdo->getFracDeadStripMap().find(IdEta) != readCdo->getFracDeadStripMap().end())
-            FracDeadStripEta = readCdo->getFracDeadStripMap().find(IdEta)->second;
-        if (readCdo->getFracDeadStripMap().find(IdPhi) != readCdo->getFracDeadStripMap().end())
-            FracDeadStripPhi = readCdo->getFracDeadStripMap().find(IdPhi)->second;
-        if (readCdo->getProjectedTracksMap().find(IdEta) != readCdo->getProjectedTracksMap().end())
-            RPC_ProjectedTracksEta = readCdo->getProjectedTracksMap().find(IdEta)->second;
-
-        if (readCdo->getEfficiencyMap().find(IdEta) != readCdo->getEfficiencyMap().end())
-            EtaPanelEfficiency = readCdo->getEfficiencyMap().find(IdEta)->second;
-        if (readCdo->getEfficiencyMap().find(IdPhi) != readCdo->getEfficiencyMap().end())
-            PhiPanelEfficiency = readCdo->getEfficiencyMap().find(IdPhi)->second;
-        if (readCdo->getEfficiencyGapMap().find(IdEta) != readCdo->getEfficiencyGapMap().end())
-            GapEfficiency = readCdo->getEfficiencyGapMap().find(IdEta)->second;
+        FracDeadStripEta = fracDeadStripEtaFromCOOL.value_or(0.);
+        FracDeadStripPhi = fracDeadStripPhiFromCOOL.value_or(0.);
+        RPC_ProjectedTracksEta = readCdo->getProjectedTrack(IdEta).value_or(0);
+        
+        EtaPanelEfficiency = readCdo->getEfficiency(IdEta).value_or(1.);
+        PhiPanelEfficiency = readCdo->getEfficiency(IdPhi).value_or(1.);
+        GapEfficiency = readCdo->getGapEfficiency(IdEta).value_or(1.);
 
         if (std::abs(FracDeadStripEta - 1.) < 0.001) {
             ATH_MSG_DEBUG("Watch out: SPECIAL CASE: Read from Cool: FracDeadStripEta/Phi "
@@ -1438,28 +1423,15 @@ int RpcDigitizationTool::determineClusterSize(const EventContext& ctx,
 
         Identifier Id = m_idHelper->panelID(idRpcStrip);
 
-        int RPC_ProjectedTracks = 0;
+        int RPC_ProjectedTracks = readCdo->getProjectedTrack(Id).value_or(0);
+        FracClusterSize1 = readCdo->getFracClusterSize1(Id).value_or(1.);
+        FracClusterSize2 = readCdo->getFracClusterSize2(Id).value_or(0.);
+        MeanClusterSize = readCdo->getMeanClusterSize(Id).value_or(1.);
 
-        if (readCdo->getProjectedTracksMap().find(Id) != readCdo->getProjectedTracksMap().end())
-            RPC_ProjectedTracks = readCdo->getProjectedTracksMap().find(Id)->second;
-
-        if (readCdo->getFracClusterSize1Map().find(Id) != readCdo->getFracClusterSize1Map().end())
-            FracClusterSize1 = float(readCdo->getFracClusterSize1Map().find(Id)->second);
-        else
-            ATH_MSG_INFO("FracClusterSize1 entry not found for id = " << m_idHelper->show_to_string(idRpcStrip) << " default will be used");
-        if (readCdo->getFracClusterSize2Map().find(Id) != readCdo->getFracClusterSize2Map().end())
-            FracClusterSize2 = float(readCdo->getFracClusterSize2Map().find(Id)->second);
-        else
-            ATH_MSG_INFO("FracClusterSize2 entry not found for id = " << m_idHelper->show_to_string(idRpcStrip) << " default will be used");
-
+      
         ATH_MSG_DEBUG("FracClusterSize1 and 2 " << FracClusterSize1 << " " << FracClusterSize2);
 
         FracClusterSizeTail = 1. - FracClusterSize1 - FracClusterSize2;
-
-        if (readCdo->getMeanClusterSizeMap().find(Id) != readCdo->getMeanClusterSizeMap().end())
-            MeanClusterSize = float(readCdo->getMeanClusterSizeMap().find(Id)->second);
-        else
-            ATH_MSG_INFO("MeanClusterSize entry not found for id = " << m_idHelper->show_to_string(idRpcStrip) << " default will be used");
 
         MeanClusterSizeTail = MeanClusterSize - FracClusterSize1 - 2 * FracClusterSize2;
 

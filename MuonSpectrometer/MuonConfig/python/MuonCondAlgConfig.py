@@ -76,23 +76,13 @@ def MdtCondDbAlgCfg(flags, **kwargs):
     return result
 
 def RpcCondDbAlgCfg(flags, **kwargs):
-    result  = ComponentAccumulator()
-    folders = []
+    result  = ComponentAccumulator()   
     if flags.Common.isOnline:
         return result ## avoid adding algo to the component accumulator
-        kwargs["isOnline"] = True
-    else:
-        kwargs["isOnline"] = False
-        if flags.Input.isMC:
-            kwargs['isData'] = False
-            kwargs['ReadKey_DA_DP'] = ''
-            kwargs['ReadKey_DA_OP'] = ''
-        else:
-            kwargs['isData'] = True
-            kwargs['isRun1'] = flags.IOVDb.DatabaseInstance == 'COMP200'
-            folders          = ["/RPC/DCS/DeadRopanels", "/RPC/DCS/OffRopanels"]
+
+    kwargs['isData'] = not flags.Input.isMC
     alg = CompFactory.RpcCondDbAlg(**kwargs)
-    result.merge( addFolders(flags, folders                     , detDb="DCS_OFL", className='CondAttrListCollection') )
+
     result.merge( addFolders(flags, ["/RPC/DQMF/ELEMENT_STATUS"], detDb="RPC_OFL", className='CondAttrListCollection') )
     result.addCondAlgo(alg)
     return result
