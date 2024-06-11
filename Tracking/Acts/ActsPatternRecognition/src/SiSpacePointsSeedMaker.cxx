@@ -246,7 +246,7 @@ namespace ActsTrk {
     
     ContainerAccessor< xAOD::SpacePoint, IdentifierHash, 1>
       accessor ( *inputCollection,
-		 [this] (const xAOD::SpacePoint& coll) -> IdentifierHash 
+		 [] (const xAOD::SpacePoint& coll) -> IdentifierHash 
 		 { return coll.elementIdList()[0]; },
 		 detElements->size());    
     
@@ -316,7 +316,7 @@ namespace ActsTrk {
     
     ContainerAccessor< xAOD::SpacePoint, IdentifierHash, 1>
       accessor ( *inputCollection,
-		 [this] (const xAOD::SpacePoint& coll) -> IdentifierHash
+		 [] (const xAOD::SpacePoint& coll) -> IdentifierHash
 		 { return coll.elementIdList()[0]; },
 		 detElements->size());
     
@@ -386,7 +386,7 @@ namespace ActsTrk {
 
     ContainerAccessor< xAOD::SpacePoint, IdentifierHash, 1>
       accessor ( *inputCollection,
-                 [this] (const xAOD::SpacePoint& coll) -> IdentifierHash
+                 [] (const xAOD::SpacePoint& coll) -> IdentifierHash
                  { return coll.elementIdList()[0]; },
                  detElements->size());
 
