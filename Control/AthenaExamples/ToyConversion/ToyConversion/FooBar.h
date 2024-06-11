@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef TEST_FOOBAR_H
-# define TEST_FOOBAR_H
+#ifndef TOYCONVERSION_FOOBAR_H
+#define TOYCONVERSION_FOOBAR_H
 
 #include "AthenaKernel/CLASS_DEF.h"
 class Foo{
@@ -29,4 +29,4 @@ struct Bar{
 };
 CLASS_DEF( Bar, 8107, 0) 
 
-#endif // TEST_FOOBAR_H
+#endif // TOYCONVERSION_FOOBAR_H
