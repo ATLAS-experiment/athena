@@ -71,7 +71,7 @@ fpeTracebackCont = [
     '  included from : ',
     '  in library : ',
 ]
-regexMap['backtrace'].extend(fpeTracebackStart)
+regexMap['fpe'].extend(fpeTracebackStart)
 
 # Warning keywords
 regexMap['warning'] = ['WARNING ']
@@ -140,12 +140,13 @@ def scanLogfile(args, logfile, ignorePattern=[]):
     tPattern = re.compile('|'.join(backtrace))
     fpeStartPattern = re.compile('|'.join(fpeTracebackStart))
     fpeContPattern = re.compile('|'.join(fpeTracebackCont))
+    ignoreDict = None
 
     categories = []
     if args.warnings is True:
         categories += ['warning']
     if args.errors is True:
-        categories += ['error/fatal', 'prohibited', 'python error', 'backtrace']
+        categories += ['error/fatal', 'prohibited', 'python error', 'fpe', 'backtrace']
 
     igLevels = re.compile('|'.join(ignorePattern))
 
@@ -174,7 +175,7 @@ def scanLogfile(args, logfile, ignorePattern=[]):
                 resultsA['backtrace'].append(line)
             elif fpeTracing:
                 # Continue following FPE so long as recognised
-                if fpeContPattern.search(line):
+                if fpeStartPattern.search(line) or fpeContPattern.search(line):
                     resultsA['fpe'].append(line)
                 else:
                     fpeTracing = False
