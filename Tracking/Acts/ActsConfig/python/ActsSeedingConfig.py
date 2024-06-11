@@ -189,13 +189,9 @@ def ActsSiSpacePointsSeedMakerToolCfg(flags,
         else:
             if flags.Tracking.doITkFastTracking:
                 kwargs.setdefault("useFastTracking", True)
-                seedTool_pixel = acc.popToolsAndMerge(ActsFastPixelSeedingToolCfg(flags,
-                                                                                  rMax=flags.Tracking.ActiveConfig.radMax,
-                                                                                  gridRMax=flags.Tracking.ActiveConfig.radMax))
+                seedTool_pixel = acc.popToolsAndMerge(ActsFastPixelSeedingToolCfg(flags))
             else:
-                seedTool_pixel = acc.popToolsAndMerge(ActsPixelSeedingToolCfg(flags,
-                                                                              rMax=flags.Tracking.ActiveConfig.radMax,
-                                                                              gridRMax=flags.Tracking.ActiveConfig.radMax))
+                seedTool_pixel = acc.popToolsAndMerge(ActsPixelSeedingToolCfg(flags))
 
     seedTool_strip = None
     if 'SeedToolStrip' not in kwargs:
