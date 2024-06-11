@@ -152,7 +152,7 @@ StatusCode TauRecToolBase::executePi0CreateROI(xAOD::TauJet& /*pTau*/, CaloConst
 }
 #endif
 
-StatusCode TauRecToolBase::executeVertexFinder(xAOD::TauJet&, const xAOD::VertexContainer*, const xAOD::TrackParticleContainer*) const {
+StatusCode TauRecToolBase::executeVertexFinder(xAOD::TauJet&, const xAOD::VertexContainer*) const {
   ATH_MSG_ERROR("function not implemented");
   return StatusCode::FAILURE;
 }

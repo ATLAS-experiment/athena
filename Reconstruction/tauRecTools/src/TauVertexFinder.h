@@ -40,21 +40,15 @@ public:
   //-------------------------------------------------------------
   StatusCode initialize() override;
   StatusCode executeVertexFinder(xAOD::TauJet& pTau,
-                                const xAOD::VertexContainer* vertexContainer = nullptr,
-                                const xAOD::TrackParticleContainer* trackContainer = nullptr) const override;
+                                const xAOD::VertexContainer* vertexContainer = nullptr) const override;
 
 private:
   ElementLink<xAOD::VertexContainer>
   getPV_TJVA(const xAOD::TauJet& tauJet,
              const xAOD::VertexContainer& vertices,
-             const xAOD::TrackParticleContainer* trackContainer,
              float& maxJVF) const;
 
   std::pair<float, float> getVertexScores(const std::vector<const xAOD::TrackParticle*>& tracks, float vx_z) const;
-  // for online ATR-15665
-  float getJetVertexFraction(const xAOD::Vertex* vertex,
-                             const std::vector<const xAOD::TrackParticle*>& tracks,
-                             const std::vector<const xAOD::Vertex*>& matchedVertexOnline) const;
   
 private:
   

@@ -47,8 +47,7 @@ class TauRecToolBase : public asg::AsgTool, virtual public ITauToolBase {
   virtual StatusCode executePi0CreateROI(xAOD::TauJet& pTau, CaloConstCellContainer& caloCellContainer, boost::dynamic_bitset<>& map) const override;
 #endif
   virtual StatusCode executeVertexFinder(xAOD::TauJet& pTau, 
-                                         const xAOD::VertexContainer* vertexContainer = nullptr, 
-                                         const xAOD::TrackParticleContainer* trackContainer = nullptr) const override;
+                                         const xAOD::VertexContainer* vertexContainer = nullptr) const override;
   virtual StatusCode executeTrackFinder(xAOD::TauJet& pTau, xAOD::TauTrackContainer& tauTrackContainer) const override;
   virtual StatusCode executeTrackClassifier(xAOD::TauJet& pTau, xAOD::TauTrackContainer& tauTrackContainer) const override;
   virtual StatusCode executeShotFinder(xAOD::TauJet& pTau, xAOD::CaloClusterContainer& shotClusterContainer, xAOD::PFOContainer& PFOContainer ) const override;
