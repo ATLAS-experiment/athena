@@ -40,7 +40,7 @@ SimpleScintillatorHit::SimpleScintillatorHit(const int particleEncoding,
 {}
 
 int SimpleScintillatorHit::truthBarcode() const {
-  return m_partLink.barcode();
+  return HepMC::barcode(m_partLink); // FIXME barcode-based
 }
 
 int SimpleScintillatorHit::truthID() const

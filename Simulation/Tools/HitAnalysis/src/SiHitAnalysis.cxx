@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SiHitAnalysis.h"
@@ -279,7 +279,7 @@ StatusCode SiHitAnalysis::execute()
       m_h_hits_time->Fill(hit.meanTime());
       double step_length = (hit.localStartPosition() - hit.localEndPosition()).mag();
       m_h_hits_step->Fill(step_length);
-      m_h_hits_barcode->Fill(hit.particleLink().barcode());
+      m_h_hits_barcode->Fill(HepMC::barcode(hit.particleLink()));
 
       if (m_expert.value()) {
         m_h_time_eloss->Fill(hit.meanTime(), hit.energyLoss());
@@ -303,7 +303,7 @@ StatusCode SiHitAnalysis::execute()
       m_hits_eloss->push_back(hit.energyLoss());
       m_hits_time->push_back(hit.meanTime());
       m_hits_step->push_back(step_length);
-      m_hits_barcode->push_back(hit.particleLink().barcode());
+      m_hits_barcode->push_back(HepMC::barcode(hit.particleLink()));
       if (m_extraTruthBranches) {
         const auto& HMPL = hit.particleLink();
         if (HMPL.isValid()) {

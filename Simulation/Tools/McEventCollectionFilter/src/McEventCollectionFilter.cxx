@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////
@@ -140,19 +140,19 @@ StatusCode McEventCollectionFilter::execute(const EventContext &ctx) const
     for (const TRTUncompressedHit &hit : *inputCollectionH) {
       const HepMcParticleLink& link = hit.particleLink();
       int pdgID = hit.GetParticleEncoding();
-      if (std::abs(pdgID) != 11 || link.barcode() == 0) continue; // FIXME
+      if (std::abs(pdgID) != 11 || HepMC::barcode(link) == HepMC::UNDEFINED_ID) continue; // FIXME barcode-based
       HepMC::ConstGenParticlePtr particle = link.cptr();
       HepMC::ConstGenVertexPtr vx = particle->production_vertex();
       HepMC::GenParticlePtr newParticle = HepMC::newGenParticlePtr(particle->momentum(), particle->pdg_id(), particle->status());
 #ifndef HEPMC3
-      HepMC::suggest_barcode(newParticle, link.barcode()); // HepMC2 still barcode-based
+      HepMC::suggest_barcode(newParticle, HepMC::barcode(link)); // HepMC2 still barcode-based
 #endif
       const HepMC::FourVector &position = vx->position();
       HepMC::GenVertexPtr newVertex = HepMC::newGenVertexPtr(position);
       newVertex->add_particle_out(newParticle);
       evt->add_vertex(newVertex);
 #ifdef HEPMC3
-      HepMC::suggest_barcode(newParticle, link.barcode()); // FIXME
+      HepMC::suggest_barcode(newParticle, HepMC::barcode(link)); // FIXME
 #endif
     }
   }

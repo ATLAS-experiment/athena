@@ -116,7 +116,7 @@ HepMcParticleLink HitsTruthRelinkBase::updatedLink(const EventContext &ctx, cons
   ATH_MSG_DEBUG ("oldLink.id() = " << oldLink.id());
   int currentId{};
   // Hits previously linked to truth particles should now be linked to the reference truthParticle
-  if (oldLink.id() != 0 || oldLink.barcode() !=0) { // FIXME barcode-based for now to work around reading in HepMcParticleLink_p2 based EDM
+  if ( HepMC::uniqueID(oldLink) != HepMC::UNDEFINED_ID || HepMC::barcode(oldLink) != HepMC::UNDEFINED_ID ) { // FIXME barcode-based for now to work around reading in HepMcParticleLink_p2 based EDM
     currentId = referenceId;
   }
   // TODO test using the ConstGenParticlePtr directly in the HepMcParticleLink constructor

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MergeMcEventCollTool.h"
@@ -512,7 +512,7 @@ for (const auto& pCurrentVertexParticle: pCurrentVertex->particles_in())
     // requires an update to the HepMC version used by ATLAS.
     if ( (4==pCurrentVertexParticle->status()) ||
          (2212==pCurrentVertexParticle->pdg_id()
-          && (1==pCurrentVertexParticle->barcode() || 2==pCurrentVertexParticle->barcode()) ) ) {
+          && (1==HepMC::barcode(pCurrentVertexParticle) || 2==HepMC::barcode(pCurrentVertexParticle)) ) ) { // FIXME barcode-based
       return true;
     }
     ++currentVertexParticleIter;

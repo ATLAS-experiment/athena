@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -329,7 +329,7 @@ StatusCode MDT_RDOAnalysis::execute() {
       const std::vector<MuonSimData::Deposit>::const_iterator dep_end(deposits.end());
       for ( ; dep_itr != dep_end; ++dep_itr ) {
         const HepMcParticleLink& particleLink = (*dep_itr).first;
-        const int bar(particleLink.barcode());
+        const int bar(HepMC::barcode(particleLink)); // FIXME barcode-based
         const int eventIx(particleLink.eventIndex());
         const MuonMCData& data = (*dep_itr).second;
         const double radius(data.firstEntry());

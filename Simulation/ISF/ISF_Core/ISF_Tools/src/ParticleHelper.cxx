@@ -120,11 +120,11 @@ ISF::ISFParticle* ISF::ParticleHelper::updatedParticle(const ISFParticle& origIs
                                origIsp.mass(),
                                origIsp.charge(),
                                origIsp.pdgCode(),
-                               origIsp.status(),
+                               HepMC::status(origIsp),
                                origIsp.timeStamp()+deltaTime,
                                origIsp,
-                               origIsp.id(),
-                               origIsp.barcode(),
+                               HepMC::uniqueID(origIsp),
+                               HepMC::barcode(origIsp),
                                origIsp.getTruthBinding() ? new TruthBinding(*origIsp.getTruthBinding()) : nullptr,
                                origIsp.getParticleLink() ? new HepMcParticleLink(*origIsp.getParticleLink()) : nullptr);
 }
@@ -140,11 +140,11 @@ ISF::ISFParticle* ISF::ParticleHelper::updatedParticle(const ISFParticle& origIs
                                origIsp.mass(),
                                origIsp.charge(),
                                origIsp.pdgCode(),
-                               origIsp.status(),
+                               HepMC::status(origIsp),
                                origIsp.timeStamp()+deltaTime,
                                origIsp,
-                               origIsp.id(),
-                               origIsp.barcode(),
+                               HepMC::uniqueID(origIsp),
+                               HepMC::barcode(origIsp),
                                origIsp.getTruthBinding() ? new TruthBinding(*origIsp.getTruthBinding()) : nullptr,
                                origIsp.getParticleLink() ? new HepMcParticleLink(*origIsp.getParticleLink()) : nullptr);
 }

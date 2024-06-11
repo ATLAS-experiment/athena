@@ -49,7 +49,7 @@ void testConstructors() {
     const ISF::ParticleHistory &history1 = isp1.history();
     assert( 1       == history1.size()     );
     assert( origin  == history1[0]         );
-    assert( bc      == isp1.barcode()      );
+    assert( bc      == HepMC::barcode(isp1)      );
     assert( id == isp1.id() );
     assert( truth   == isp1.getTruthBinding() );
 
@@ -78,7 +78,7 @@ void testConstructors() {
     const ISF::ParticleHistory &history2 = isp2.history();
     assert( 1       == history2.size()     );
     assert( origin  == history2[0]         );
-    assert( bc      == isp2.barcode()      );
+    assert( bc      == HepMC::barcode(isp2)      );
     assert( id      == isp2.id()      );
     assert( truth   == isp2.getTruthBinding() );
 
@@ -109,7 +109,7 @@ void testConstructors() {
     const ISF::ParticleHistory &history3 = isp3.history();
     assert( 1       == history3.size()     );
     assert( origin  == history3[0]         );
-    assert( bc      == isp3.barcode()      );
+    assert( bc      == HepMC::barcode(isp3)      );
     assert( id      == isp3.id()      );
     assert( truth   == isp3.getTruthBinding() );
 }

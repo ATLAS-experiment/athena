@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TruthClosureCheck.h"
@@ -145,7 +145,7 @@ StatusCode TruthClosureCheck::compareGenVertex(const HepMC::ConstGenVertexPtr& o
   if (!origVertex || !resetVertex) return StatusCode::FAILURE;
   bool pass{true};
 
-  if (HepMC::barcode(origVertex) != HepMC::barcode(resetVertex)) {
+  if (HepMC::barcode(origVertex) != HepMC::barcode(resetVertex)) { // FIXME barcode-based
     ATH_MSG_ERROR ("vertex barcode differs! Original: "<<HepMC::barcode(origVertex)<<", Reset: "<<HepMC::barcode(resetVertex));
     pass = false;
   }
@@ -204,8 +204,8 @@ StatusCode TruthClosureCheck::compareGenVertex(const HepMC::GenVertex& origVerte
 {
   bool pass{true};
 
-  if (origVertex.barcode() != resetVertex.barcode()) {
-    ATH_MSG_ERROR ("vertex barcode differs! Original: "<<origVertex.barcode()<<", Reset: "<<resetVertex.barcode());
+  if (HepMC::barcode(origVertex) != HepMC::barcode(resetVertex)) { // FIXME HepMC::barcode
+    ATH_MSG_ERROR ("vertex barcode differs! Original: " << HepMC::barcode(origVertex) << ", Reset: " << HepMC::barcode(resetVertex));
     pass = false;
   }
   if (origVertex.position() != resetVertex.position()) {
@@ -242,11 +242,11 @@ StatusCode TruthClosureCheck::compareGenVertex(const HepMC::GenVertex& origVerte
   // ordering of particles may differ in each case - sigh..
   const HepMC::GenVertex::particles_out_const_iterator endOfResetListOfParticlesOut(resetVertex.particles_out_const_end());
   while( originalPartOutIter!=endOfOriginalListOfParticlesOut) {
-    const int barcodeOrig{(*originalPartOutIter)->barcode()};
+    const int barcodeOrig{HepMC::barcode(*originalPartOutIter)}; // FIXME barcode-based
     HepMC::GenVertex::particles_out_const_iterator resetPartOutIter(resetVertex.particles_out_const_begin());
     HepMC::GenVertex::particles_in_const_iterator matchingResetParticleIter{endOfResetListOfParticlesOut};
     while(resetPartOutIter!=endOfResetListOfParticlesOut) {
-      if ( barcodeOrig == (*resetPartOutIter)->barcode() ) {
+      if ( barcodeOrig == HepMC::barcode(*resetPartOutIter) ) {
         matchingResetParticleIter = resetPartOutIter;
         break;
       }
@@ -301,7 +301,7 @@ StatusCode TruthClosureCheck::compareGenParticle(const HepMC::ConstGenParticlePt
   if (!origParticle || !resetParticle) return StatusCode::FAILURE;
   
   bool pass{true};
-  if (HepMC::barcode(origParticle) != HepMC::barcode(resetParticle)) {
+  if (HepMC::barcode(origParticle) != HepMC::barcode(resetParticle)) { // FIXME barcode-based
     ATH_MSG_ERROR ("particle barcode differs! Original: "<<HepMC::barcode(origParticle)<<", Reset: "<<HepMC::barcode(resetParticle));
     pass &= false;
   }
@@ -328,8 +328,8 @@ StatusCode TruthClosureCheck::compareGenParticle(const HepMC::GenParticle& origP
                                                  const HepMC::GenParticle& resetParticle) const
 {
   bool pass{true};
-  if (origParticle.barcode() != resetParticle.barcode()) {
-    ATH_MSG_ERROR ("particle barcode differs! Original: "<<origParticle.barcode()<<", Reset: "<<resetParticle.barcode());
+  if (HepMC::barcode(origParticle) != HepMC::barcode(resetParticle)) { // FIXME barcode-based
+    ATH_MSG_ERROR ("particle barcode differs! Original: "<<HepMC::barcode(origParticle)<<", Reset: "<<HepMC::barcode(resetParticle));
     pass &= false;
   }
   if (origParticle.status() != resetParticle.status()) {

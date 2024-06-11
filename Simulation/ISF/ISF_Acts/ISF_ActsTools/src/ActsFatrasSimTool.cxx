@@ -120,8 +120,8 @@ StatusCode ISF::ActsFatrasSimTool::simulateVector(
     // Acts: Energy, mass, and momentum are in GeV, position in mm
     std::vector<ActsFatras::Particle> input = std::vector<ActsFatras::Particle>{
       ActsFatras::Particle(ActsFatras::Barcode().setVertexPrimary(0).setParticle(
-        isfp->barcode()),static_cast<Acts::PdgParticle>(isfp->pdgCode()), 
-        isfp->charge(),isfp->mass() * Acts::UnitConstants::MeV)
+                           HepMC::barcode(isfp)), static_cast<Acts::PdgParticle>(isfp->pdgCode()),
+                           isfp->charge(),isfp->mass() * Acts::UnitConstants::MeV)
       .setDirection(Acts::makeDirectionFromPhiEta(
                     isfp->momentum().phi(), isfp->momentum().eta()))
       .setAbsoluteMomentum(isfp->momentum().mag() * Acts::UnitConstants::MeV)
