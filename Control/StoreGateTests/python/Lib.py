@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # @file: StoreGateTests/python/Lib.py
 # @purpose: a set of Py-components to tests py-record performances
@@ -21,7 +21,7 @@ class PySgStressProducer( PyAthena.Alg ):
         if 'UseDataPool' not in kw:  self.UseDataPool  = False
 
     def initialize(self):
-        self.msg.info( "Initializing %s", self.name() )
+        self.msg.info( "Initializing %s", self.name )
         self.sg = PyAthena.py_svc ("StoreGateSvc")
         if not self.sg:
             self.msg.error ("could not retrieve event store")
@@ -30,7 +30,7 @@ class PySgStressProducer( PyAthena.Alg ):
         return StatusCode.Success
 
     def execute(self):
-        self.msg.debug( "Executing %s...", self.name() )
+        self.msg.debug( "Executing %s...", self.name )
         if self.createData() != StatusCode.Success:
             self.msg.error( "Could not create PayLoad data !!" )
             return StatusCode.Failure
@@ -67,7 +67,7 @@ class PySgStressProducer( PyAthena.Alg ):
         return StatusCode.Failure
 
     def finalize(self):
-        self.msg.info( "Finalizing %s...", self.name() )
+        self.msg.info( "Finalizing %s...", self.name )
         return StatusCode.Success
 
     pass # PySgStressProducer
@@ -85,7 +85,7 @@ class PySgStressConsumer(PyAthena.Alg):
         if 'NbrOfObjects' not in kw: self.NbrOfObjects = 1000
 
     def initialize(self):
-        self.msg.info( "Initializing %s...", self.name() )
+        self.msg.info( "Initializing %s...", self.name )
         self.sg = PyAthena.py_svc("StoreGateSvc")
         if not self.sg:
             self.msg.error ("could not retrieve event store")
@@ -93,7 +93,7 @@ class PySgStressConsumer(PyAthena.Alg):
         return StatusCode.Success
 
     def execute(self):
-        self.msg.debug( "Executing %s...", self.name() )
+        self.msg.debug( "Executing %s...", self.name )
         return self.readData()
 
     def readData(self):
@@ -113,7 +113,7 @@ class PySgStressConsumer(PyAthena.Alg):
         return StatusCode.Failure
 
     def finalize(self):
-        self.msg.info( "Finalizing %s...", self.name() )
+        self.msg.info( "Finalizing %s...", self.name )
         return StatusCode.Success
     
     pass # class PySgStressConsumer
