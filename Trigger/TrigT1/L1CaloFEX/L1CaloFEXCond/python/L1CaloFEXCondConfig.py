@@ -17,12 +17,9 @@ def jFexDBConfig(flags, name="jFEXCondAlgo"):
 
     from IOVDbSvc.IOVDbSvcConfig import addFolders
     database = "TRIGGER_OFL" if flags.Input.isMC else "TRIGGER_ONL"
-    tagModule = "JfexModuleSettings-RUN3-MCDEFAULT-TEST" if flags.Input.isMC else None
-    tagNoise = "JfexNoiseCuts-RUN3-MCDEFAULT-TEST" if flags.Input.isMC else None
-    tagSystem = "JfexSystemSettings-RUN3-MCDEFAULT-TEST" if flags.Input.isMC else None
-    acc.merge(addFolders(flags, ModSettings_folder , database, className="CondAttrListCollection", tag=tagModule))
-    acc.merge(addFolders(flags, NoiseCut_folder    , database, className="CondAttrListCollection", tag=tagNoise))
-    acc.merge(addFolders(flags, SysSettingst_folder, database, className="CondAttrListCollection", tag=tagSystem))
+    acc.merge(addFolders(flags, ModSettings_folder , database, className="CondAttrListCollection"))
+    acc.merge(addFolders(flags, NoiseCut_folder    , database, className="CondAttrListCollection"))
+    acc.merge(addFolders(flags, SysSettingst_folder, database, className="CondAttrListCollection"))
     
     DBCond.JfexModuleSettings = ModSettings_folder
     DBCond.JfexNoiseCuts      = NoiseCut_folder
