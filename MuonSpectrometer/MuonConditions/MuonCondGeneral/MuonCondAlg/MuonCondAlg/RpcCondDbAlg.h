@@ -33,26 +33,23 @@ public:
     virtual bool isReEntrant() const override { return false; }
 
 private:
-    StatusCode loadDataDeadPanels(EventIDRange &, RpcCondDbData *, const EventContext &) const;
-    StatusCode loadDataOffPanels(EventIDRange &, RpcCondDbData *, const EventContext &) const;
-    StatusCode loadMcElementStatus(EventIDRange &, RpcCondDbData *, const EventContext &) const;
+    template <class WriteCont>
+    StatusCode addDependency(const EventContext& ctx,
+                             const SG::ReadCondHandleKey<CondAttrListCollection>& key,
+                             SG::WriteCondHandle<WriteCont>& writeHandle) const;
 
-    bool m_isOnline{false};
-    bool m_isData{false};
-    bool m_isRun1{false};
+    StatusCode loadMcElementStatus(const EventContext & ctx, RpcCondDbData& condData) const;
+
+
+    Gaudi::Property<bool> m_isData{this, "isData", false};
 
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
     SG::WriteCondHandleKey<RpcCondDbData> m_writeKey{this, "WriteKey", "RpcCondDbData", "Key of output RPC condition data"};
 
-    SG::ReadCondHandleKey<CondAttrListCollection> m_readKey_folder_da_deadPanels{this, "ReadKey_DA_DP", "/RPC/DCS/DeadRopanels",
-                                                                                 "Key of input RPC condition data for data dead panels"};
-    SG::ReadCondHandleKey<CondAttrListCollection> m_readKey_folder_da_offPanels{this, "ReadKey_DA_OP", "/RPC/DCS/OffRopanels",
-                                                                                "Key of input RPC condition data for data off panels"};
     SG::ReadCondHandleKey<CondAttrListCollection> m_readKey_folder_mc_deadElements{this, "ReadKey_MC_DE", "/RPC/DQMF/ELEMENT_STATUS",
                                                                                    "Key of input RPC condition data for MC dead elements"};
 
-    float m_panelEfficiency;
 };
 
 #endif

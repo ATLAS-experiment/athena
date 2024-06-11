@@ -1493,21 +1493,10 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::processPad(
               // correct prd time from cool db
               if (m_RPCInfoFromDb) {
                 SG::ReadCondHandle<RpcCondDbData> readHandle{m_readKey, ctx};
-                const RpcCondDbData* readCdo{*readHandle};
-                ATH_MSG_DEBUG(" Time correction from COOL "
-                              << " size of  RPC_TimeMapforStrip "
-                              << readCdo->getStripTimeMap().size());
-                std::vector<double> StripTimeFromCool;
-                if (readCdo->getStripTimeMap().find(channelId) !=
-                    readCdo->getStripTimeMap().end()) {
-                  StripTimeFromCool =
-                      readCdo->getStripTimeMap().find(channelId)->second;
-                  ATH_MSG_DEBUG(" Time "
-                                << time
-                                << " Time correction from COOL for jstrip "
-                                << StripTimeFromCool.at(0));
-                  time -= StripTimeFromCool.at(0);
-                }
+                std::optional<double> StripTimeFromCool = readHandle->getStripTime(channelId);
+                if (StripTimeFromCool) {
+                  time -= (*StripTimeFromCool);
+                }                
               }
 
               if (triggerHit) {
