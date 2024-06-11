@@ -30,12 +30,12 @@ namespace MuonGM {
                                        WiregangArray && IWGS3,                                        
                                        GasGapIntArray && numStrips):
         AthMessaging{"TgcRadoutParams - "+name},
-        m_chamberName(name), 
-        m_chamberType(iCh), 
-        m_readoutVersion(Version), 
-        m_wirePitch(WireSp), 
-        m_nPhiChambers(NCHRNG),
-        m_nStrips{std::move(numStrips)} {
+            m_chamberName(name), 
+            m_chamberType(iCh), 
+            m_readoutVersion(Version), 
+            m_wirePitch(WireSp), 
+            m_nPhiChambers(NCHRNG),
+            m_nStrips{std::move(numStrips)} {
         
         for (int iGap =0 ; iGap < MaxNGaps; ++iGap){
             m_nWires[iGap].resize(numWireGangs[iGap]);
@@ -66,18 +66,18 @@ namespace MuonGM {
         }
     }
     TgcReadoutParams::TgcReadoutParams(const std::string& name, 
-                         int iCh, 
-                         int Version, 
-                         double WireSp, 
-                         const int NCHRNG, 
-                         GasGapIntArray && numWireGangs,
-                         WiregangArray&& IWGS1, 
-                         WiregangArray&& IWGS2, 
-                         WiregangArray&& IWGS3,
-                         double PDIST, 
-                         StripArray&& SLARGE, 
-                         StripArray&& SSHORT,                         
-                         GasGapIntArray&& numStrips):
+                                       int iCh, 
+                                       int Version, 
+                                       double WireSp, 
+                                       const int NCHRNG, 
+                                       GasGapIntArray && numWireGangs,
+                                       WiregangArray&& IWGS1, 
+                                       WiregangArray&& IWGS2, 
+                                       WiregangArray&& IWGS3,
+                                       double PDIST, 
+                                       StripArray&& SLARGE, 
+                                       StripArray&& SSHORT,                         
+                                       GasGapIntArray&& numStrips):
         TgcReadoutParams(name, iCh, Version, WireSp, NCHRNG, std::move(numWireGangs), 
                         std::move(IWGS1), std::move(IWGS2), std::move(IWGS3),
                         std::move(numStrips)){
@@ -141,7 +141,7 @@ namespace MuonGM {
             throw std::out_of_range("input gas gap or wire gang index are incorrect");
         }
         const double nPit = 1.*m_nAccWires[gasGap -1][gang - 1] +
-                            0.5*m_nWires[gasGap-1][gang-1] -
+                            0.5*(m_nWires[gasGap-1][gang-1] -1) -
                             0.5*m_totalWires[gasGap -1];
         return nPit;   
     }
