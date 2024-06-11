@@ -231,7 +231,7 @@ namespace ActsTrk {
   {
     if (ids.empty()) return StatusCode::SUCCESS;
     
-    ATH_MSG_DEBUG("Retrieving strip space point collection " << m_actsSpacepointsPixel.key());
+    ATH_MSG_DEBUG("Retrieving pixel space point collection " << m_actsSpacepointsPixel.key());
     SG::ReadHandle< xAOD::SpacePointContainer > inputSpacePointContainer( m_actsSpacepointsPixel, ctx );
     if (not inputSpacePointContainer.isValid()){
       ATH_MSG_FATAL("xAOD::SpacePointContainer with key " << m_actsSpacepointsPixel.key() << " is not available...");
@@ -301,7 +301,7 @@ namespace ActsTrk {
   {
     if (ids.empty()) return StatusCode::SUCCESS;
     
-    ATH_MSG_DEBUG("Retrieving pixel space point collection " << m_actsSpacepointsStrip.key());
+    ATH_MSG_DEBUG("Retrieving strip space point collection " << m_actsSpacepointsStrip.key());
     SG::ReadHandle< xAOD::SpacePointContainer > inputSpacePointContainer( m_actsSpacepointsStrip, ctx );
     if (not inputSpacePointContainer.isValid()){
       ATH_MSG_FATAL("xAOD::SpacePointContainer with key " << m_actsSpacepointsStrip.key() << " is not available...");
@@ -371,7 +371,7 @@ namespace ActsTrk {
   {
     if (ids.empty()) return StatusCode::SUCCESS;
 
-    ATH_MSG_DEBUG("Retrieving ovrlap pixel space point collection " << m_actsSpacepointsOverlap.key());
+    ATH_MSG_DEBUG("Retrieving strip overlap space point collection " << m_actsSpacepointsOverlap.key());
     SG::ReadHandle< xAOD::SpacePointContainer > inputSpacePointContainer( m_actsSpacepointsOverlap, ctx );
     if (not inputSpacePointContainer.isValid()){
       ATH_MSG_FATAL("xAOD::SpacePointContainer with key " << m_actsSpacepointsOverlap.key() << " is not available...");
