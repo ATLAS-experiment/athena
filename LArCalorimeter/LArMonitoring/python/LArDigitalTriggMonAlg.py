@@ -246,7 +246,7 @@ def LArDigitalTriggMonConfig(flags,larLATOMEBuilderAlg, nsamples=32, streamTypes
                                                ybins=64, ymin=-32, ymax=32,
                                                xlabels=BinLabel_LATOME,
                                                pattern=[(part)])
-
+                
                 partGroup_digi.defineHistogram('Digi_part_latomesourceidbin,Digi_part_diff_adc_ped_norm;Diff_ADC_Ped_Norm_vs_LATOME_'+thisSel,
                                                title='(ADC-ped)/fabs(ADC_max-ped) '+selStrPart[thisSel]+'; LATOME Name; (ADC - pedestal) / fabs(ADC_max - pedestal)',
                                                type='TH2F',
@@ -345,7 +345,7 @@ def LArDigitalTriggMonConfig(flags,larLATOMEBuilderAlg, nsamples=32, streamTypes
                                            xbins=nsamples,xmin=0.5,xmax=nsamples+0.5,
                                            xlabels = [str(x) for x in range(1,nsamples+1)],
                                            pattern=[(part)])
-            
+                       
             partGroup_digi.defineHistogram('Digi_part_BCID, Digi_part_adc;ADC_vs_BCID_'+thisSel, 
                                            title='ADC value vs BCID '+selStrPart[thisSel]+'; BCID; ADC Value',
                                            type='TProfile',
@@ -525,40 +525,35 @@ def LArDigitalTriggMonConfig(flags,larLATOMEBuilderAlg, nsamples=32, streamTypes
 if __name__=='__main__':
 
    from AthenaConfiguration.AllConfigFlags import initConfigFlags
-   from AthenaCommon.Logging import log
-   from AthenaCommon.Constants import WARNING,ERROR,DEBUG # noqa: F401
-   log.setLevel(WARNING)
+   from AthenaConfiguration.TestDefaults import defaultGeometryTags
    flags = initConfigFlags()
    
    from AthenaConfiguration.Enums import LHCPeriod
    flags.GeoModel.Run = LHCPeriod.Run3
 
-   def __monflags():
-      from LArMonitoring.LArMonConfigFlags import createLArMonConfigFlags
-      return createLArMonConfigFlags()
-
-   flags.addFlagsCategory("LArMon", __monflags)
-
    flags.Input.Files = ["/eos/atlas/atlascerngroupdisk/proj-spot/spot-job-inputs/data23_13p6TeV/data23_13p6TeV.00451569.physics_Main.daq.RAW._lb0260._SFO-14._0001.data"]
 
-   flags.Input.RunNumbers=[451569]
    flags.Output.HISTFileName = 'LArDigitalTriggMonOutput.root'
 
    flags.DQ.useTrigger = False
-   from AthenaConfiguration.Enums import BeamType
-   flags.Beam.Type = BeamType.Collisions
+   flags.GeoModel.AtlasVersion=defaultGeometryTags.RUN3
+   flags.PerfMon.doFullMonMT=True
+   flags.Exec.MaxEvents=100
+   flags.fillFromArgs()
    flags.lock()
 
+   from AthenaConfiguration.MainServicesConfig import MainServicesCfg
+   cfg = MainServicesCfg(flags)
+   
    # in case of tier0 workflow:
    from CaloRec.CaloRecoConfig import CaloRecoCfg
-   cfg=CaloRecoCfg(flags)
+   cfg.merge(CaloRecoCfg(flags))
 
    from LArBadChannelTool.LArBadChannelConfig import LArBadChannelCfg
    cfg.merge(LArBadChannelCfg(flags, isSC=True))
 
    from LArByteStream.LArRawSCDataReadingConfig import LArRawSCDataReadingCfg
    SCData_acc =  LArRawSCDataReadingCfg(flags)
-   SCData_acc.OutputLevel=WARNING
  
    cfg.merge(SCData_acc)
 
@@ -568,15 +563,10 @@ if __name__=='__main__':
    streamTypes = ["SelectedEnergy", "ADC"]
    aff_acc = LArDigitalTriggMonConfig(flags, larLATOMEBuilderAlg, streamTypes=streamTypes)
    cfg.merge(aff_acc)
+
+   from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
+   cfg.merge(PerfMonMTSvcCfg(flags))
    
-   cfg.getCondAlgo("LArHVCondAlg").OutputLevel=DEBUG
-
-   flags.dump()
-   f=open("LArDigitalTriggMon.pkl","wb")
-   cfg.store(f)
-   f.close()
-
-
-   #cfg.run()
+   cfg.run()
 
 
