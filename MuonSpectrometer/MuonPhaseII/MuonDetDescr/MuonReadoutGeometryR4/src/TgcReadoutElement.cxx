@@ -37,15 +37,12 @@ StatusCode TgcReadoutElement::initElement() {
           ATH_MSG_FATAL("Layer "<<(*layPtr)<<" has an unexpected hash "<<s);
           return StatusCode::FAILURE;
        }
+       ATH_MSG_VERBOSE(idHelperSvc()->toStringDetEl(identify())<<" gasGap: "<<gasGapNumber(layPtr->hash())
+                      <<" isStrip: "<<isStrip(layPtr->hash())<<" hash: "<<s);
        hasSensor = true;
     }
     if (!hasSensor) {
          ATH_MSG_FATAL("No active layer is defined for "<<idHelperSvc()->toStringDetEl(identify()));
-         return StatusCode::FAILURE;
-    }
-    if (std::find_if(m_pars.sensorLayouts.begin(), m_pars.sensorLayouts.end(),
-                     [](const StripLayerPtr & ptr)->bool{ return ptr; }) == m_pars.sensorLayouts.end()) {
-         ATH_MSG_FATAL("No sensor structure is provided to "<<idHelperSvc()->toStringDetEl(identify()));
          return StatusCode::FAILURE;
     }
 #ifndef SIMULATIONBASE

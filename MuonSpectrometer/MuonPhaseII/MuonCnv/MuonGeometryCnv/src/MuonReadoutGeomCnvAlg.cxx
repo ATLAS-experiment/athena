@@ -28,6 +28,7 @@
 #include <MuonReadoutGeometry/RpcReadoutElement.h>
 #include <MuonReadoutGeometry/sTgcReadoutElement.h>
 #include <MuonReadoutGeometry/MMReadoutElement.h>
+#include <MuonReadoutGeometry/TgcReadoutElement.h>
 
 #include <MuonReadoutGeometry/MuonChannelDesign.h>
 
@@ -48,6 +49,7 @@ namespace {
         return  readOutVol->getAbsoluteTransform().inverse() *
                 readOutVol->getParent()->getX();
     }
+
     using SubDetAlignment = ActsGeometryContext::AlignmentStorePtr;
 }
 
@@ -105,9 +107,8 @@ StatusCode MuonReadoutGeomCnvAlg::execute(const EventContext& ctx) const {
     ATH_CHECK(buildMdt(geoContext, detMgr.get(), world));
     ATH_CHECK(buildSTGC(geoContext, detMgr.get(), world));
     ATH_CHECK(buildMM(geoContext, detMgr.get(), world));
-
+    ATH_CHECK(buildTgc(geoContext, detMgr.get(), world));
     ATH_CHECK(buildRpc(geoContext, detMgr.get(), world));
-
     ATH_CHECK(writeHandle.record(std::move(detMgr)));
     return StatusCode::SUCCESS;
 }
@@ -187,7 +188,7 @@ StatusCode MuonReadoutGeomCnvAlg::buildRpc(const ActsGeometryContext& gctx,
                                            PVLink world) const {
     
     const std::vector<const MuonGMR4::RpcReadoutElement*> readoutEles = m_detMgr->getAllRpcReadoutElements();
-    ATH_MSG_DEBUG("Going to build "<<readoutEles.size()<<" Rpc readout elements.");
+    ATH_MSG_INFO("Copy "<<readoutEles.size()<<" Rpc readout elements to the legacy system");
     const RpcIdHelper& idHelper{m_idHelperSvc->rpcIdHelper()};
     for (const MuonGMR4::RpcReadoutElement* copyMe : readoutEles) {
         const Identifier reId = copyMe->identify();
@@ -316,47 +317,110 @@ StatusCode MuonReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx
     return StatusCode::SUCCESS;
 }
 
-StatusCode MuonReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
-                                                 const MuonGMR4::RpcReadoutElement& refEle,
-                                                 const MuonGM::RpcReadoutElement& testEle) const {
-    if (!m_checkGeo) {
-        return StatusCode::SUCCESS;
-    }
-    ATH_MSG_VERBOSE("Compare basic readout transforms"<<std::endl
-                <<GeoTrf::toString(testEle.absTransform(),true)<<std::endl
-                <<GeoTrf::toString(refEle.localToGlobalTrans(gctx), true));
-    const RpcIdHelper& idHelper{m_idHelperSvc->rpcIdHelper()};
-    for (unsigned int gasGap = 1; gasGap <= refEle.nGasGaps(); ++gasGap) {
-        for (int doubPhi = refEle.doubletPhi(); doubPhi <= refEle.doubletPhiMax(); ++doubPhi) {
-            for (bool measPhi : {false, true}) {
-                for (int strip = 1; strip <= testEle.Nstrips(measPhi); ++strip) {
-                    const Identifier stripId = idHelper.channelID(refEle.identify(), 
-                                                                refEle.doubletZ(), 
-                                                                doubPhi, gasGap, measPhi, strip);
-                    
-                    const Amg::Transform3D& refTrans{refEle.localToGlobalTrans(gctx, stripId)};
-                    const Amg::Transform3D& testTrans{testEle.transform(stripId)};
-                    if (strip == 1 && Amg::doesNotDeform(refTrans.inverse()*testTrans)) {
-                        ATH_MSG_ERROR("Transformation for "<<m_idHelperSvc->toString(stripId)<<std::endl
-                            <<" *** ref:  "<<GeoTrf::toString(refTrans, true)<<std::endl
-                            <<" *** test: "<<GeoTrf::toString(testTrans, true));
-                            return StatusCode::FAILURE;
-                    }
+StatusCode MuonReadoutGeomCnvAlg::buildTgc(const ActsGeometryContext& gctx,
+                                           MuonGM::MuonDetectorManager* mgr,
+                                           PVLink world) const {
 
-                    const Amg::Vector3D refStripPos = refEle.stripPosition(gctx, stripId);
-                    const Amg::Vector3D testStripPos = testEle.stripPos(stripId);
-                    if ((refStripPos - testStripPos).mag() > std::numeric_limits<float>::epsilon()){
-                        ATH_MSG_ERROR("Mismatch in strip positions "<<m_idHelperSvc->toString(stripId)
-                                <<" ref: "<<Amg::toString(refStripPos)<<" test: "<<Amg::toString(testStripPos)
-                                <<" local coordinates -- ref: "<<Amg::toString(testEle.absTransform().inverse()*refStripPos)
-                                <<" test: "<<Amg::toString(testEle.absTransform().inverse()*testStripPos));
-                        return StatusCode::FAILURE;
+    std::vector<const MuonGMR4::TgcReadoutElement*> tgcReadouts{m_detMgr->getAllTgcReadoutElements()};
+    std::stable_sort(tgcReadouts.begin(), tgcReadouts.end(),
+                     [](const MuonGMR4::TgcReadoutElement* a, const MuonGMR4::TgcReadoutElement* b){
+                            return a->stationEta() > b->stationEta();
+                     });
+    ATH_MSG_INFO("Copy "<<tgcReadouts.size()<<" Tgc readout elements to the legacy system");
+    const TgcIdHelper& idHelper{m_idHelperSvc->tgcIdHelper()};    
+    
+    using TgcReadoutParams = MuonGM::TgcReadoutParams;
+    std::map<std::string, std::shared_ptr<TgcReadoutParams>> readoutParMap{};
+
+    for (const MuonGMR4::TgcReadoutElement* copyMe: tgcReadouts) {        
+        const Identifier reId = copyMe->identify();
+        /// Build the mother station if it's not already existing
+        ATH_CHECK(buildStation(gctx, *mgr, reId, world));
+
+        const std::string stName{m_idHelperSvc->stationNameString(reId)};
+        MuonGM::MuonStation* station = mgr->getMuonStation(stName, 
+                                                           m_idHelperSvc->stationEta(reId), 
+                                                           m_idHelperSvc->stationPhi(reId));
+        
+        PVLink parentPhysVol{station->getPhysVol()};
+        GeoIntrusivePtr<const GeoVFullPhysVol> readOutVol{copyMe->getMaterialGeom()};
+        parentPhysVol->add(make_intrusive<GeoTransform>(readOutToStation(readOutVol).inverse()));
+        PVLink clonedVol{cloneVolume(const_pointer_cast<GeoVFullPhysVol>(readOutVol))};
+        GeoIntrusivePtr<GeoVFullPhysVol> physVol{dynamic_pointer_cast<GeoVFullPhysVol>(clonedVol)};
+        parentPhysVol->add(physVol);
+
+        auto newRE = std::make_unique<MuonGM::TgcReadoutElement>(physVol, stName, mgr);
+        newRE->setIdentifier(reId);
+        
+        std::shared_ptr<TgcReadoutParams>& readOutPars = readoutParMap[copyMe->chamberDesign()];
+        if (!readOutPars) {
+            using WiregangArray = TgcReadoutParams::WiregangArray;
+            using StripArray = TgcReadoutParams::StripArray;
+            using GasGapIntArray = TgcReadoutParams::GasGapIntArray;
+
+            std::array<WiregangArray, 3> wires{};
+            GasGapIntArray nWireGangs{}, nStrips{};
+            StripArray botMountings{}, topMountings{};
+            bool stripSet{false};
+            double wirePitch{0.};
+
+            for (unsigned int gasGap =1; gasGap <= copyMe->nGasGaps(); ++gasGap) {
+                nWireGangs[gasGap -1] = copyMe->numWireGangs(gasGap);
+                nStrips[gasGap -1] = copyMe->numStrips(gasGap);
+                if (nWireGangs[gasGap -1]) {
+                    const MuonGMR4::WireGroupDesign& design{copyMe->wireGangLayout(gasGap)};
+                    wirePitch = design.stripPitch();
+                    WiregangArray& fillMe{wires[gasGap-1]};
+                    for (int gang = 1; gang <= design.numStrips(); ++gang) {
+                        fillMe[gang -1] = design.numWiresInGroup(gang);
                     }
-                    ATH_MSG_VERBOSE("Agreement between new and old geometry for channel "<<m_idHelperSvc->toString(stripId)
-                                    <<" strip position "<<Amg::toString(refStripPos));
+                }
+                if (nStrips[gasGap -1] && !stripSet) {
+                    const MuonGMR4::RadialStripDesign& design {copyMe->stripLayout(gasGap)};
+                    const int nCh = nStrips[gasGap -1];
+                    for (int strip = 1; strip <= nCh; ++strip) {
+                        botMountings[strip-1] = - design.stripLeftBottom(strip).x();
+                        topMountings[strip-1] = - design.stripLeftTop(strip).x();
+                    }
+                    botMountings[nCh] = - design.stripRightBottom(nCh).x();
+                    topMountings[nCh] = - design.stripRightTop(nCh).x();
+
+                    stripSet = true;
                 }
             }
+            readOutPars = std::make_unique<TgcReadoutParams>(copyMe->chamberDesign(),
+                                                             0, 0, wirePitch,
+                                                             idHelper.stationPhiMax(reId),
+                                                             std::move(nWireGangs),
+                                                             std::move(wires[0]), 
+                                                             std::move(wires[1]), 
+                                                             std::move(wires[2]),
+                                                             0,
+                                                             std::move(botMountings),
+                                                             std::move(topMountings),
+                                                             std::move(nStrips));
         }
+        
+        /// Define the local gasGap positions
+        for (unsigned int gasGap = 1; gasGap <= copyMe->nGasGaps(); ++gasGap) {
+            const IdentifierHash layHash{ copyMe->constructHash(0, gasGap, false)};
+            /// In the chamber frame, the gasGap is oriented along the x-axis
+            const Amg::Vector3D translation{copyMe->globalToLocalTrans(gctx) * copyMe->center(gctx, layHash)};            
+            newRE->setPlaneZ(translation.x(), gasGap);
+        }
+        newRE->setSsize(copyMe->moduleHeight());
+        newRE->setRsize(copyMe->moduleWidthS());
+        newRE->setZsize(copyMe->moduleThickness());
+
+        newRE->setLongSsize(copyMe->moduleHeight());
+        newRE->setLongRsize(copyMe->moduleWidthL());
+        newRE->setLongZsize(copyMe->moduleThickness());
+
+        newRE->setReadOutParams(readOutPars);
+        newRE->fillCache();
+        ATH_CHECK(dumpAndCompare(gctx, *copyMe, *newRE));
+        mgr->addTgcReadoutElement(std::move(newRE));
+    
     }
     return StatusCode::SUCCESS;
 }
@@ -370,6 +434,8 @@ StatusCode MuonReadoutGeomCnvAlg::buildMM(const ActsGeometryContext& gctx,
                             static_cast<const MmAlignmentStore*>(alignItr->internalAlignment.get()) : nullptr;
 
     const std::vector<const MuonGMR4::MmReadoutElement*> mmReadouts{m_detMgr->getAllMmReadoutElements()};
+    ATH_MSG_INFO("Copy "<<mmReadouts.size()<<" Mm readout elements to the legacy system");
+    
     for (const MuonGMR4::MmReadoutElement* copyMe : mmReadouts) {
         const Identifier reId = copyMe->identify();
         GeoIntrusivePtr<const GeoVFullPhysVol> readOutVol{copyMe->getMaterialGeom()};
@@ -416,7 +482,6 @@ StatusCode MuonReadoutGeomCnvAlg::buildMM(const ActsGeometryContext& gctx,
         }
         ATH_CHECK(dumpAndCompare(gctx, *copyMe, *newRE));
         mgr->addMMReadoutElement(std::move(newRE));
-
     }
     return StatusCode::SUCCESS;
 }
@@ -428,6 +493,8 @@ StatusCode  MuonReadoutGeomCnvAlg::buildSTGC(const ActsGeometryContext& gctx,
     auto alignStore = alignItr ? static_cast<const sTgcAlignmentStore*>(alignItr->internalAlignment.get()) : nullptr;
 
     const std::vector<const MuonGMR4::sTgcReadoutElement*> sTgcReadOuts{m_detMgr->getAllsTgcReadoutElements()};
+    ATH_MSG_INFO("Copy "<<sTgcReadOuts.size()<<" sTgc readout elements to the legacy system");
+
     for (const MuonGMR4::sTgcReadoutElement* copyMe : sTgcReadOuts) {
         const Identifier reId = copyMe->identify();
         GeoIntrusivePtr<const GeoVFullPhysVol> readOutVol{copyMe->getMaterialGeom()};
@@ -505,9 +572,7 @@ StatusCode  MuonReadoutGeomCnvAlg::buildSTGC(const ActsGeometryContext& gctx,
         }     
         newRE->fillCache();
         mgr->addsTgcReadoutElement(std::move(newRE));
-   }
-    
-    
+    }
     return StatusCode::SUCCESS;
 }
 StatusCode MuonReadoutGeomCnvAlg::buildMdt(const ActsGeometryContext& gctx,
@@ -655,5 +720,121 @@ StatusCode MuonReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx
         }
     }
 
+    return StatusCode::SUCCESS;
+}
+StatusCode MuonReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
+                                                 const MuonGMR4::RpcReadoutElement& refEle,
+                                                 const MuonGM::RpcReadoutElement& testEle) const {
+    if (!m_checkGeo) {
+        return StatusCode::SUCCESS;
+    }
+    ATH_MSG_VERBOSE("Compare basic readout transforms"<<std::endl
+                <<GeoTrf::toString(testEle.absTransform(),true)<<std::endl
+                <<GeoTrf::toString(refEle.localToGlobalTrans(gctx), true));
+    const RpcIdHelper& idHelper{m_idHelperSvc->rpcIdHelper()};
+    for (unsigned int gasGap = 1; gasGap <= refEle.nGasGaps(); ++gasGap) {
+        for (int doubPhi = refEle.doubletPhi(); doubPhi <= refEle.doubletPhiMax(); ++doubPhi) {
+            for (bool measPhi : {false, true}) {
+                for (int strip = 1; strip <= testEle.Nstrips(measPhi); ++strip) {
+                    const Identifier stripId = idHelper.channelID(refEle.identify(), 
+                                                                refEle.doubletZ(), 
+                                                                doubPhi, gasGap, measPhi, strip);
+                    
+                    const Amg::Transform3D& refTrans{refEle.localToGlobalTrans(gctx, stripId)};
+                    const Amg::Transform3D& testTrans{testEle.transform(stripId)};
+                    if (strip == 1 && Amg::doesNotDeform(refTrans.inverse()*testTrans)) {
+                        ATH_MSG_ERROR("Transformation for "<<m_idHelperSvc->toString(stripId)<<std::endl
+                            <<" *** ref:  "<<GeoTrf::toString(refTrans, true)<<std::endl
+                            <<" *** test: "<<GeoTrf::toString(testTrans, true));
+                            return StatusCode::FAILURE;
+                    }
+
+                    const Amg::Vector3D refStripPos = refEle.stripPosition(gctx, stripId);
+                    const Amg::Vector3D testStripPos = testEle.stripPos(stripId);
+                    if ((refStripPos - testStripPos).mag() > std::numeric_limits<float>::epsilon()){
+                        ATH_MSG_ERROR("Mismatch in strip positions "<<m_idHelperSvc->toString(stripId)
+                                <<" ref: "<<Amg::toString(refStripPos)<<" test: "<<Amg::toString(testStripPos)
+                                <<" local coordinates -- ref: "<<Amg::toString(testEle.absTransform().inverse()*refStripPos)
+                                <<" test: "<<Amg::toString(testEle.absTransform().inverse()*testStripPos));
+                        return StatusCode::FAILURE;
+                    }
+                    ATH_MSG_VERBOSE("Agreement between new and old geometry for channel "<<m_idHelperSvc->toString(stripId)
+                                    <<" strip position "<<Amg::toString(refStripPos));
+                }
+            }
+        }
+    }
+    return StatusCode::SUCCESS;
+}
+StatusCode MuonReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
+                                                 const MuonGMR4::TgcReadoutElement& refEle,
+                                                 const MuonGM::TgcReadoutElement& testEle) const {
+    
+    if (!m_checkGeo) {
+        return StatusCode::SUCCESS;
+    }
+    const TgcIdHelper& idHelper{m_idHelperSvc->tgcIdHelper()};
+    
+    ATH_MSG_VERBOSE("Detector element "<<m_idHelperSvc->toString(refEle.identify())
+                <<std::endl<<GeoTrf::toString(refEle.localToGlobalTrans(gctx), true)                        
+                <<std::endl<<GeoTrf::toString(testEle.getMaterialGeom()->getAbsoluteTransform(), true)
+                <<std::endl<<"r-size: "<<testEle.getRsize()<<"/"<<testEle.getLongRsize()
+                           <<" s-size: "<<testEle.getSsize()<<"/"<<testEle.getLongSsize()
+                           <<" z-size: "<<testEle.getZsize()<<"/"<<testEle.getLongZsize());
+ 
+    for (unsigned int gasGap = 1; gasGap <= refEle.nGasGaps(); ++gasGap) {
+        for (bool isStrip : {false, true}) {
+            const IdentifierHash layHash = refEle.constructHash(0, gasGap, isStrip);
+            const Identifier layId = idHelper.channelID(refEle.identify(), gasGap, isStrip, 1);
+            ATH_MSG_VERBOSE("Test layer "<<m_idHelperSvc->toString(layId)<<" "<<refEle.numChannels(layHash)<<" "<<layHash);
+            if (!refEle.numChannels(layHash)) continue;
+            const Amg::Transform3D& refLayerTrf = refEle.localToGlobalTrans(gctx, layHash);
+            const Amg::Transform3D& testLayerTrf = testEle.transform(layId);
+            if (!Amg::isIdentity(refLayerTrf.inverse()* testLayerTrf)) {
+                ATH_MSG_FATAL("The transformations in "<<m_idHelperSvc->toString(layId)
+                            <<std::endl<<"ref : "<<GeoTrf::toString(refLayerTrf,true)
+                            <<std::endl<<"test: "<<GeoTrf::toString(testLayerTrf,true)
+                            <<" are not identical. ");
+                return StatusCode::FAILURE;
+            }
+            ATH_MSG_VERBOSE("Transformations in "<<m_idHelperSvc->toString(layId)
+                            <<std::endl<<"ref : "<<GeoTrf::toString(refLayerTrf,true)
+                            <<std::endl<<"test: "<<GeoTrf::toString(testLayerTrf,true));
+
+            for (unsigned int ch = 1; ch <= refEle.numChannels(layHash); ++ch) {
+                const IdentifierHash measHash = refEle.constructHash(ch, gasGap, isStrip);
+                const Identifier measId = refEle.measurementId(measHash);
+                const Amg::Vector3D refChannel = refEle.channelPosition(gctx, measHash);
+                const Amg::Vector3D testChannel = testEle.channelPos(measId);
+                if ((refChannel - testChannel).mag() < std::numeric_limits<float>::epsilon()){
+                    continue;
+                }
+                std::stringstream msg{};
+                msg<<"The channel "<<m_idHelperSvc->toString(measId)
+                        << " is not at the same position "<<Amg::toString(refChannel)
+                        <<" vs. "<<Amg::toString(testChannel)<<". Difference: "
+                        <<(refChannel - testChannel).mag();
+                if (!isStrip) {
+                    msg<<std::endl<<"*** Test *** - wirePitch: "<<testEle.wirePitch()
+                                  <<", tot wires "<<testEle.nWires(gasGap)
+                                  <<", wires to reach "<<testEle.nPitchesToGang(gasGap, ch)
+                                  <<", wires in gang "<<testEle.nWires(gasGap, ch);
+                    const MuonGMR4::WireGroupDesign& design{refEle.wireGangLayout(gasGap)};
+                    msg<<std::endl<<"*** Ref  *** - wirePitch: "<<design.stripPitch()
+                                  <<", tot wires "<<testEle.nWires(gasGap)
+                                  <<", wires to reach "<<design.numPitchesToGroup(ch)
+                                  <<", wires in gang "<<design.numWiresInGroup(ch);
+                } else {
+                    const Amg::Vector3D locRefPos{refLayerTrf.inverse() * refChannel};
+                    const Amg::Vector3D locTestPos{refLayerTrf.inverse()* testChannel};
+                    msg<<std::endl<<"*** Ref  **** - "<<Amg::toString(locRefPos)<<std::endl;
+                    msg<<std::endl<<"*** Test **** - "<<Amg::toString(locTestPos)<<std::endl;
+                }
+                ATH_MSG_FATAL(msg.str());
+                return StatusCode::FAILURE;
+            }
+
+        }
+    }
     return StatusCode::SUCCESS;
 }

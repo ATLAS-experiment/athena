@@ -47,7 +47,7 @@ const Amg::Transform3D& MuonReadoutElement::localToGlobalTrans(const ActsGeometr
     TransformCacheMap::const_iterator cache = m_localToGlobalCaches.find(hash);
     if (cache != m_localToGlobalCaches.end()) return cache->second->getTransform(ctx.getStore(detectorType()).get());
     ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" "<<__func__<<"() -- "
-                <<idHelperSvc()->toString(measurementId(hash))<<" is unknown.");
+                <<idHelperSvc()->toStringDetEl(identify())<<" hash: "<<hash<<" is unknown.");
     return dummyTrans;
 }
 

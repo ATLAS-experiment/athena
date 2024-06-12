@@ -16,7 +16,7 @@ namespace MuonGMR4 {
         }
         const wireGroup& wireGrp = m_groups[groupNum];
         return firstStripPos() + 
-               (wireGrp.accumlWires + wireGrp.numWires/2)*stripPitch() * stripNormal();
+               (1. * wireGrp.accumlWires + 0.5 * (wireGrp.numWires -1))*stripPitch() * stripNormal();
     }
     inline CheckVector2D WireGroupDesign::wirePosition(unsigned int groupNum, 
                                                        unsigned int wireNum) const {

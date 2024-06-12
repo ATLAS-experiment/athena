@@ -29,6 +29,8 @@ class WireGroupDesign: public StripDesign {
         void declareGroup(const unsigned int x);
         /// Returns the number of wires in a given group.
         unsigned int numWiresInGroup(unsigned int groupNum) const;
+        /// Returns the number of wire pitches to reach the given group
+        unsigned int numPitchesToGroup(unsigned int groupNum) const;
         /// Returns the number of all wires
         unsigned int nAllWires() const;
         /// Returns the positition of the i-th wire in the g-th group
@@ -68,6 +70,7 @@ class WireGroupDesign: public StripDesign {
         
     private:
         void print(std::ostream& ostr) const override final; 
+        /// @brief Returns the center of the wire group.
         Amg::Vector2D stripPosition(int stripNum) const override final;
         /// @brief helper construct to cache the number of wires in each group as well
         ///        as the accumulated number of wires from the previous groups.

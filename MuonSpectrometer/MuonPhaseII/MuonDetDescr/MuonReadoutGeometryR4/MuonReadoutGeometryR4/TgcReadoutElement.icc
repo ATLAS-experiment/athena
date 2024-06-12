@@ -74,8 +74,8 @@ inline Identifier TgcReadoutElement::measurementId(const IdentifierHash& measHas
 inline unsigned int TgcReadoutElement::nGasGaps() const { return m_pars.nGasGaps; }
 
 inline unsigned int TgcReadoutElement::numChannels(const IdentifierHash& measHash) const {
-    return isStrip(measHash) ? numStrips(gasGapNumber(measHash) + 1) 
-                             : numWireGangs(gasGapNumber(measHash) + 1);
+    return isStrip(measHash) ? numStrips(gasGapNumber(measHash)) 
+                             : numWireGangs(gasGapNumber(measHash));
 }
 inline unsigned int TgcReadoutElement::numStrips(unsigned int gasGap) const {
     const StripLayerPtr& sensor{sensorLayout(constructHash(0, gasGap, true))};

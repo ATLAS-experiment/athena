@@ -52,6 +52,9 @@ class MuonReadoutGeomCnvAlg : public AthReentrantAlgorithm {
                            MuonGM::MuonDetectorManager* mgr,
                            PVLink world) const;
 
+        StatusCode buildTgc(const ActsGeometryContext& gctx,
+                           MuonGM::MuonDetectorManager* mgr,
+                           PVLink world) const;
 
         
         StatusCode dumpAndCompare(const ActsGeometryContext& gctx,
@@ -64,8 +67,11 @@ class MuonReadoutGeomCnvAlg : public AthReentrantAlgorithm {
 
         StatusCode dumpAndCompare(const ActsGeometryContext& gctx,
                                   const MuonGMR4::MmReadoutElement& refEle,
-                                  const MuonGM::MMReadoutElement& testEle) const;
-        
+                                  const MuonGM::MMReadoutElement& testEle) const;        
+
+        StatusCode dumpAndCompare(const ActsGeometryContext& gctx,
+                                  const MuonGMR4::TgcReadoutElement& refEle,
+                                  const MuonGM::TgcReadoutElement& testEle) const;
 
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
