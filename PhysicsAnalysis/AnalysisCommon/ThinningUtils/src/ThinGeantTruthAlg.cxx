@@ -344,7 +344,7 @@ ThinGeantTruthAlg::descendants(
   std::vector<bool>& particleMask,
   std::unordered_set<int>& encounteredUniqueIDs) const
 {
-  // Check that this uniqueID hasn't been seen before (e.g. we are in a loop)
+  // Check that this unique ID hasn't been seen before (e.g. we are in a loop)
   std::unordered_set<int>::const_iterator found =
     encounteredUniqueIDs.find(HepMC::uniqueID(pHead));
   if (found != encounteredUniqueIDs.end())

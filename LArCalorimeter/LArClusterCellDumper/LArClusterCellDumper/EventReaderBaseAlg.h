@@ -260,7 +260,7 @@ class ATLAS_NOT_THREAD_SAFE EventReaderBaseAlg: public ::AthAlgorithm
         std::vector < float > *m_mc_vert_eta   = nullptr;
         std::vector < float > *m_mc_vert_phi   = nullptr;
         std::vector < int > *m_mc_vert_barcode = nullptr;
-        std::vector < int > *m_mc_vert_id      = nullptr;
+        std::vector < int > *m_mc_vert_status      = nullptr;
 
         // ## Primary Vertex ##
         std::vector < float >  *m_vtx_x            = nullptr;

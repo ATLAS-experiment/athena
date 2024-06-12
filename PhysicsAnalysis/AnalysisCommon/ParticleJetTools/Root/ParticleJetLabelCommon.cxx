@@ -38,13 +38,13 @@ namespace ParticleJetTools {
     , const xAOD::TruthParticle* c
     ) {
 
-    if (HepMC::uniqueID(p) == HepMC::uniqueID(c)) { return false; }
+    if ( HepMC::uniqueID(p) == HepMC::uniqueID(c) ) { return false; }
 
     for (size_t iC = 0; iC < p->nChildren(); iC++) {
       const xAOD::TruthParticle* cc = p->child(iC);
       if (!cc) { continue; }
 
-      if (HepMC::uniqueID(cc) == HepMC::uniqueID(c)) { return true; }
+      if ( HepMC::uniqueID(cc) == HepMC::uniqueID(c) ) { return true; }
 
       if (isChild(cc, c)) { return true; }
     }
