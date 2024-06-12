@@ -473,7 +473,6 @@ class Configurable(metaclass=ConfigurableMeta.ConfigurableMeta ):
          raise TypeError("Configurable.__init__ not called in %s override" % self.__class__.__name__)
 
     # setup self: this collects all values on the python side
-      self.__setupServices()
       self.__setupDlls()
       self.__setupDefaults()
 
@@ -621,23 +620,6 @@ class Configurable(metaclass=ConfigurableMeta.ConfigurableMeta ):
 
    def _isInSetDefaults( self ):
       return self._flags & self._fInSetDefaults
-
-   def __setupServices( self ):
-      #svcs = self.getServices()
-      #if not svcs:
-      svcs = []
-      #elif type(svcs) == types.StringType:
-      #   svcs = [ svcs ]
-
-      from AthenaCommon import OldStyleConfig
-      for svc in svcs:
-         handle = OldStyleConfig.Service( svc )  # noqa: F841
-       # services should be configurables as well, but aren't for now
-       # handle.setup()
-
-       # allow Configurable to make some changes
-         if hasattr( self, 'configure' + svc ):
-            eval( 'self.configure' + svc + '( handle )' )
 
    def __setupDlls( self ):
       dlls = self.getDlls()
