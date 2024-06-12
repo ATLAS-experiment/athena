@@ -70,6 +70,30 @@ def RpcBytestreamDecodeCfg(flags, name="RpcRawDataProvider", **kwargs):
     acc.addEventAlgo(RpcRawDataProvider, primary=True)
     return acc
 
+def NrpcBytestreamDecodeCfg(flags, name="NrpcRawDataProvider", **kwargs):
+    acc = ComponentAccumulator()
+    
+    # We need the NRPC cabling to be setup
+    from MuonConfig.MuonCablingConfig import NRPCCablingConfigCfg
+    acc.merge( NRPCCablingConfigCfg(flags) )
+
+    # Make sure muon geometry is configured
+    from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
+    acc.merge(MuonGeoModelCfg(flags))
+
+
+    # Setup the RAW data provider tool
+    keyName = flags.Overlay.BkgPrefix + "NRPCRDO" if flags.Common.isOverlay else "NRPCRDO"
+    MuonNrpcRawDataProviderTool = CompFactory.Muon.NRPC_RawDataProviderTool(name    = "NRPC_RawDataProviderTool",
+                                                                   NrpcRdoKey = keyName )
+    
+    # Setup the RAW data provider algorithm
+    NrpcRawDataProvider = CompFactory.Muon.NrpcRawDataProvider(name         = name,
+                                                    ProviderTool = MuonNrpcRawDataProviderTool, **kwargs )
+
+    acc.addEventAlgo(NrpcRawDataProvider, primary=True)
+    return acc
+
 def TgcBytestreamDecodeCfg(flags, name="TgcRawDataProvider", **kwargs):
     acc = ComponentAccumulator()
 
@@ -383,6 +407,11 @@ def MuonByteStreamDecodersCfg(flags):
     # Schedule Rpc data decoding
     rpcdecodingAcc = RpcBytestreamDecodeCfg( flags ) 
     cfg.merge( rpcdecodingAcc )
+
+    if flags.Muon.enableNRPC:
+        # Schedule Nrpc data decoding
+        nrpcdecodingAcc = NrpcBytestreamDecodeCfg( flags )
+        cfg.merge( nrpcdecodingAcc )
 
     # Schedule Tgc data decoding
     tgcdecodingAcc = TgcBytestreamDecodeCfg( flags ) 

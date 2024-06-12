@@ -57,6 +57,8 @@ class MuonNRPC_CablingMap {
     /** return a HashId list for a  given ROD */
     const std::vector<IdentifierHash>& getChamberHashVec(const uint32_t ROBI,
                                                          MsgStream& log) const;
+    /** return the full list of ROD id */
+    const ListOfROB& getAllROBId() const;
 
    private:
     using OnlToOfflMap = std::map<NrpcCablOnDataByTdc, NrpcCablingOfflineID, std::less<>>;
@@ -71,6 +73,10 @@ class MuonNRPC_CablingMap {
 
    /** Pointer to the RpcIdHelper */
     const RpcIdHelper* m_rpcIdHelper{};
+
+    /** full list of ROBs */
+    ListOfROB m_listOfROB{};
+
 };
 
 CLASS_DEF(MuonNRPC_CablingMap, 94020450, 0)
