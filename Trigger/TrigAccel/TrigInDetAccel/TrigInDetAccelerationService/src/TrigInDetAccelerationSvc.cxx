@@ -1,5 +1,5 @@
 /*   
-     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration 
+     Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration 
 */
 
 #include "InDetIdentifier/SCT_ID.h"
@@ -428,6 +428,7 @@ bool TrigInDetAccelerationSvc::exportGeometryInformation(const std::map<std::tup
 
   TrigAccel::DETECTOR_MODEL* pArray = reinterpret_cast<TrigAccel::DETECTOR_MODEL*>(pBG->m_buffer + bufferOffset);
 
+  // cppcheck-suppress memsetClassFloat; deliberate
   memset(pArray,0,dataTypeSize);
   
   int nLayers = (int)hashMap.size();
