@@ -22,8 +22,10 @@ public:
    //* Constructors, destructors
    //**
 
-   CaloSamplingHelper( );
-   ~CaloSamplingHelper( ) {}
+   CaloSamplingHelper( ) = default;
+   ~CaloSamplingHelper() = default;
+   CaloSamplingHelper( const CaloSamplingHelper& rhs) = delete;
+   CaloSamplingHelper& operator =( const CaloSamplingHelper& rhs) = delete;
 
    //**
    //* Accessors
@@ -43,7 +45,10 @@ public:
     *
     *  Returns 0 for \a CaloSampling::Unknown .
     */
-   static unsigned int getSamplingBit(const CaloSample& rSample);
+   static unsigned int getSamplingBit(const CaloSample& rSample) {
+      return CaloSampling::getSamplingPattern(rSample);
+   }
+
    /*! \brief Return a unique bit set for a given sampling
     *
     *  \overload
@@ -54,13 +59,8 @@ public:
     */
    static unsigned int getSamplingBit(const CaloCell& rCell);
 
-   /*! \brief Get number of available samplings */
-   static unsigned int getNumberOfSamplings();
 
-   /*! \brief Get list of available samplings */
-   static bool getSamplingList(std::vector<CaloSampling::CaloSample>& vSamp);
-
-   /*! \brief Get sampling characteristics */
+     /*! \brief Get sampling characteristics */
    static bool isEMSampling(const CaloSample& rSample);
    static bool isHADSampling(const CaloSample& rSample);
    static bool isBarrelSampling(const CaloSample& rSample);
@@ -72,8 +72,7 @@ public:
    //* Private/Implementation
    //**
 private:
-   CaloSamplingHelper( const CaloSamplingHelper& rhs);
-   CaloSamplingHelper& operator =( const CaloSamplingHelper& rhs);
+  
 
    static const unsigned int m_EMMask;
    static const unsigned int m_HADMask;
@@ -86,12 +85,5 @@ private:
 			    const unsigned int& mask);   
 
 };
-
-inline
-unsigned int
-CaloSamplingHelper::getNumberOfSamplings()
-{
-  return (unsigned int)Unknown;
-}
 
 #endif  /* CALOSAMPLING_H */
