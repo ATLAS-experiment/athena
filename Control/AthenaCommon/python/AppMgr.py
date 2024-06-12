@@ -17,21 +17,12 @@ from PyUtils.Helpers import release_metadata
 __version__ = '3.2.0'
 __author__  = 'Wim Lavrijsen (WLavrijsen@lbl.gov)'
 
-__all__ = [ 'theApp', 'ServiceMgr', 'ToolSvc', 'AuditorSvc', 'theAuditorSvc',
+__all__ = [ 'theApp', 'ServiceMgr', 'ToolSvc', 'theAuditorSvc',
             'athMasterSeq',
             'athCondSeq',
             'athAlgSeq',    'topSequence',
             'athOutSeq',
             ]
-
-### helpers ------------------------------------------------------------------
-def _type_and_name(n):
-   """`n` is the usual gaudi string identifier ('KlassName/Name' or 'KlassName')
-   """
-   s = n.split('/')
-   t = s[0]
-   if len(s)==2: n=s[1]
-   return t,n
 
 ### associator for public tools ----------------------------------------------
 def iadd( self, tool ):
@@ -142,8 +133,7 @@ class AthAppMgr( AppMgr ):
 
     # for reference, the numbers below can also be obtained through a dictionary:
     #    import cppyy 
-    #    melm = cppyy.makeClass( 'MinimalEventLoopMgr' )
-    #    print melm.OFFLINE, melm.CONFIGURED, melm.FINALIZED, melm.INITIALIZED
+    #    cppyy.gbl.Gaudi.StateMachine.OFFLINE, ...
 
       OFFLINE     = 0
       CONFIGURED  = 1
@@ -185,14 +175,10 @@ class AthAppMgr( AppMgr ):
     # can't be called directly due to transforms etc.)
       self.__dict__[ '_opts' ] = None
 
-    # this code is to be factored out; for now flag it with 'minimal' to test
-    # the effects of its removal
-
     # figure out which release are we running, for logging purposes
       d = release_metadata()
       msg = Logging.log.info
       msg( 'using release [%(project name)s-%(release)s] [%(platform)s] [%(nightly name)s/%(nightly release)s] -- built on [%(date)s]' % d )
-    # -- end of (proposed) minimal
 
       return
 
@@ -409,11 +395,8 @@ class AthAppMgr( AppMgr ):
                svcMgr += getConfigurable(self.JobOptionsSvcType)("JobOptionsSvc")
             if not hasattr(svcMgr, 'MessageSvc'):
                svcMgr += getConfigurable(self.MessageSvcType)("MessageSvc")
-       # -- end minimal
-         try:
-            from GaudiPython import AppMgr as GaudiAppMgr
-         except ImportError:
-            from gaudimodule import AppMgr as GaudiAppMgr
+
+         from GaudiPython import AppMgr as GaudiAppMgr
          self._cppApp = GaudiAppMgr( outputlevel = self.outputLevel,
                                      joboptions  = None,
                                      selfoptions = selfOptions )
@@ -500,10 +483,7 @@ class AthAppMgr( AppMgr ):
       handle.__dict__['CreateSvc'] = self.__dict__.get('CreateSvc',
                                                        handle.CreateSvc)
       
-      try:
-         from GaudiPython import AppMgr as GaudiAppMgr
-      except ImportError:
-         from gaudimodule import AppMgr as GaudiAppMgr
+      from GaudiPython import AppMgr as GaudiAppMgr
 
     # Likely the first (or at least the first important) place if we're
     # running in compatibility mode where gaudimodule will be loaded. And
@@ -682,14 +662,10 @@ class AthAppMgr( AppMgr ):
       if nEvt is None:
          nEvt = self.EvtMax            # late, as sequences may have changed it
 
-    # another communication that needs improving (TODO) ...
-      try:
-         from AthenaCommon.Debugging import DbgStage
-         if DbgStage.value == "exec":
-            from .Debugging import hookDebugger
-            hookDebugger()
-      except ImportError:
-         pass
+      from AthenaCommon.Debugging import DbgStage
+      if DbgStage.value == "exec":
+         from .Debugging import hookDebugger
+         hookDebugger()
 
     # actual run (FIXME: capture beginRun() exceptions and failures, which is
     #               not currently supported by IEventProcessor interface)
@@ -706,22 +682,12 @@ class AthAppMgr( AppMgr ):
          raise
 
       sc = self.stop()
-      if sc.isFailure():
-         return sc
-      
       return sc
 
    def start( self ):
       import GaudiPython
       sc = GaudiPython.SUCCESS
-      import cppyy
-      #backward compatibility v19 (no StateMachine)
-      try:
-         canStart = cppyy.gbl.Gaudi.StateMachine.INITIALIZED == self.getHandle().FSMState()
-      except AttributeError:
-         canStart=False # no start available
-
-      if canStart:
+      if self.State.INITIALIZED == self.getHandle().FSMState():
          Logging.log.debug( 'Starting application manager' )
          sc = self.getHandle().start()
       return sc
@@ -729,14 +695,7 @@ class AthAppMgr( AppMgr ):
    def stop( self ):
       import GaudiPython
       sc = GaudiPython.SUCCESS
-      import cppyy
-      #backward compatibility v19 (no StateMachine)
-      try:
-         canStop = cppyy.gbl.Gaudi.StateMachine.RUNNING == self.getHandle().FSMState()
-      except AttributeError:
-         canStop=False # no stop available
-
-      if canStop:
+      if self.State.RUNNING == self.getHandle().FSMState():
          Logging.log.debug( 'Stopping application manager' )
          sc = self.getHandle().stop()
       return sc
@@ -860,21 +819,6 @@ ServiceMgr  = theApp.serviceMgr()
 ServiceMgr += theApp.toolSvc()
 ToolSvc     = ServiceMgr.ToolSvc
 
-# old-style ...
-def auditor( self, auditor ):
-   Logging.log.warning( """AuditorSvc.auditor is deprecated, use instead:
-   from GaudiAud import %s
-   svcMgr.AuditorSvc += %s()""", auditor, auditor )
-
-   if type(auditor) is str:
-      from AthenaCommon import ConfigurableDb
-      auditor = ConfigurableDb.getConfigurable( auditor )()
-   self.__iadd__( auditor )
-   return auditor
-
-GaudiCommonSvcConf.AuditorSvc.auditor = auditor
-del auditor
-
 # convenience customization to deal with "Auditors" property
 def iadd( self, config ):
    super( GaudiCommonSvcConf.AuditorSvc, self ).__iadd__( config )
@@ -917,9 +861,6 @@ del _delattr
 ServiceMgr += GaudiCommonSvcConf.AuditorSvc()
 theAuditorSvc = ServiceMgr.AuditorSvc
 
-def AuditorSvc():             # backwards compatibility
-   global theAuditorSvc
-   return theAuditorSvc
 
 ### create default sequences:
 #      athMasterSeq
