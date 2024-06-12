@@ -181,8 +181,6 @@ StatusCode egammaTopoClusterCopier::execute(const EventContext& ctx) const {
 
     const bool valid_for_central = checkIfValidForCentral(aeta, m_etaCut, clusterE, m_ECut);
     const bool valid_for_fwd = checkIfValidForFwd(aeta, m_fwdEtaCut, m_fwdETCut, clus, m_doForwardClusters, m_hasITk);
-    const bool valid_for_both = valid_for_central && valid_for_fwd;
-
     if (valid_for_central) {
       ++buff_CentralPassPreSelection;
     } else if (valid_for_fwd) {
@@ -191,7 +189,9 @@ StatusCode egammaTopoClusterCopier::execute(const EventContext& ctx) const {
       continue;
     }
 
+    const bool valid_for_both = valid_for_central && valid_for_fwd;
     if (valid_for_both) {
+      ++buff_FwdPassPreSelection;  // since we count them only in the else above
       ++buff_SharedPassPreSelection;
     }
 
