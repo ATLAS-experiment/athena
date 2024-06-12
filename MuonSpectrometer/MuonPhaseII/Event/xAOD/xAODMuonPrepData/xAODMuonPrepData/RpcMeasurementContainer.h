@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODMUONPREPDATA_RPCMEASUREMENTCONTAINER_H
@@ -7,6 +7,7 @@
 
 #include "xAODMuonPrepData/RpcStrip.h"
 #include "xAODMuonPrepData/RpcStrip2D.h"
+#include "xAODMuonPrepData/RpcMeasurement.h"
 #include "xAODMuonPrepData/versions/RpcMeasurementContainer_v1.h"
 
 /// Namespace holding all the xAOD EDM classes
