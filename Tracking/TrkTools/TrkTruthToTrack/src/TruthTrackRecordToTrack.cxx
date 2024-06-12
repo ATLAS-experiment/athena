@@ -72,34 +72,34 @@ const Trk::TrackParameters* Trk::TruthTrackRecordToTrack::makeProdVertexParamete
   const HepPDT::ParticleData* pd = nullptr;
 
 
-  SG::ReadHandle<TrackRecordCollection> recordCollection(m_reccollkey);
+  SG::ReadHandle<TrackRecordCollection> trackRecordCollection(m_reccollkey);
 
-  if (recordCollection.isValid()) {
+  if (trackRecordCollection.isValid()) {
     ATH_MSG_ERROR ("Could not get track record!");
     return nullptr;
   }
-  ATH_MSG_DEBUG("reading from track record, size=" << recordCollection->size());
+  ATH_MSG_DEBUG("reading from track record, size=" << trackRecordCollection->size());
 
-  if (recordCollection->empty()) ATH_MSG_WARNING ("action required but record size is 0");
+  if (trackRecordCollection->empty()) ATH_MSG_WARNING ("action required but TrackRecordCollection size is 0");
 
   const int barcodepart = HepMC::barcode(part);
-  for (const auto & record : *recordCollection){
+  for (const auto & trackRecord : *trackRecordCollection){
 
-    if ( record.barcode() != barcodepart ) continue; // FIXME barcode-based
+    if ( HepMC::barcode(trackRecord) != barcodepart ) continue; // FIXME barcode-based - currently TrackRecords read in from input files will have invalid ID values, so stick with barcodes
 
-      id = record.GetPDGCode();
+      id = trackRecord.GetPDGCode();
       pd = m_particleDataTable->particle(std::abs(id));
       if (!pd) {
         ATH_MSG_WARNING ("Found particle with problematic PDG ID " << part << " , " << id);
         continue;
       }
 
-      CLHEP::Hep3Vector tv = record.GetPosition();
+      CLHEP::Hep3Vector tv = trackRecord.GetPosition();
       prodVertexVector = Amg::Vector3D(tv.x(),tv.y(),tv.z());
       globalPos = prodVertexVector;
 
-      Amg::Vector3D hv2(record.GetMomentum().x(), record.GetMomentum().y(),
-                            record.GetMomentum().z());
+      Amg::Vector3D hv2(trackRecord.GetMomentum().x(), trackRecord.GetMomentum().y(),
+                            trackRecord.GetMomentum().z());
       globalMom = hv2;
 
       ATH_MSG_DEBUG("Found particle " << part << ", momentum " << hv2 << " production " << globalPos);
@@ -140,33 +140,33 @@ const Trk::TrackParameters* Trk::TruthTrackRecordToTrack::makeProdVertexParamete
   double charge = 0.0;
   const HepPDT::ParticleData* pd = nullptr;
 
-   SG::ReadHandle<TrackRecordCollection> recordCollection(m_reccollkey);
+   SG::ReadHandle<TrackRecordCollection> trackRecordCollection(m_reccollkey);
 
-  if (recordCollection.isValid()) {
+  if (trackRecordCollection.isValid()) {
     ATH_MSG_ERROR ("Could not get track record!");
     return nullptr;
   }
 
-  ATH_MSG_DEBUG("reading from track record, size=" << recordCollection->size());
+  ATH_MSG_DEBUG("reading from track record, size=" << trackRecordCollection->size());
 
-  if (recordCollection->empty()) ATH_MSG_WARNING ("action required but record size is 0");
+  if (trackRecordCollection->empty()) ATH_MSG_WARNING ("action required but TrackRecordCollection size is 0");
 
-  for (const auto & record : *recordCollection){
+  for (const auto & trackRecord : *trackRecordCollection){
 
-    if ( record.barcode() == part->barcode() ) { // FIXME barcode-based
+    if ( HepMC::barcode(trackRecord) == HepMC::barcode(part) ) { // FIXME barcode-based - currently TrackRecords read in from input files will have invalid ID values and xAOD::TruthParticle only supports barcodes, so stick with barcodes
 
-      id = record.GetPDGCode();
+      id = trackRecord.GetPDGCode();
       pd = m_particleDataTable->particle(std::abs(id));
       if (!pd) {
         ATH_MSG_WARNING ("found particle with problematic PDG ID" << part << " , " << id);
         continue;
       }
 
-      CLHEP::Hep3Vector  tv = record.GetPosition();
+      CLHEP::Hep3Vector  tv = trackRecord.GetPosition();
       prodVertexVector = Amg::Vector3D(tv.x(),tv.y(),tv.z());
       globalPos = prodVertexVector;
 
-      Amg::Vector3D hv2(record.GetMomentum().x(), record.GetMomentum().y(), record.GetMomentum().z());
+      Amg::Vector3D hv2(trackRecord.GetMomentum().x(), trackRecord.GetMomentum().y(), trackRecord.GetMomentum().z());
       globalMom = hv2;
 
       ATH_MSG_DEBUG("found particle " << part << ", momentum " << hv2 << " production " << globalPos);
