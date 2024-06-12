@@ -27,7 +27,7 @@ public:
   //  StatusCode createRep(DataObject* pO, IOpaqueAddress*& pA);
 
   // per->tran
-  StatusCode createObj(IOpaqueAddress*, DataObject *& pO) {
+  virtual StatusCode createObj(IOpaqueAddress*, DataObject *& pO) override {
     //could alse get DATA (perhaps as std::any) from the IOA
     pO = SG::asStorable(new DATA);
     return StatusCode::SUCCESS;

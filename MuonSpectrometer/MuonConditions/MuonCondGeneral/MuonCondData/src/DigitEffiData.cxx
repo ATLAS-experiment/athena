@@ -40,7 +40,7 @@ namespace Muon{
             return effi_itr->second;
         }
         ATH_MSG_VERBOSE("Efficiency of channel "<<m_idHelperSvc->toString(channelId)<<" is unknown. Return 1.");
-        return 1.;
+        return m_defaultEffi;
     }
 
     StatusCode DigitEffiData::setEfficiency(const Identifier& channelId, const double effi){
