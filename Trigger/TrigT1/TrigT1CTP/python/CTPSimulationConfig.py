@@ -8,7 +8,9 @@ def CTPSimulationCfg(flags):
     log = logging.getLogger("CTPMCSimulationCfg")
     acc = ComponentAccumulator()
     acc.addEventAlgo(CompFactory.LVL1CTP.CTPSimulation("CTPSimulation",
-                                                        #DoL1Topo    = not flags.Trigger.enableL1Phase1, #TODO confirm that this setting exists actually
+                                                        DoL1Topo       = flags.Trigger.L1.doTopo, 
+                                                        DoL1TopoLegacy = flags.Trigger.L1.doTopo,
+                                                        #Using same as Phase1L1Topo for now, but it should be changed in the future
                                                         DoL1CaloLegacy = flags.Trigger.enableL1CaloLegacy,
                                                         #TODO enable when input are also simulatedDetectors (and remove message)
                                                         jFexJetInput = "",
