@@ -36,12 +36,7 @@ StatusCode MMLoadVariables::getMMDigitsInfo(const EventContext& ctx,
       if( truthContainer != nullptr ){
       for(const auto it : *truthContainer) {
         const HepMC::GenEvent *subEvent = it;
-#ifdef HEPMC3
-        for(const auto& particle : subEvent->particles()){
-#else
-        for(const auto pit : subEvent->particle_range()){
-          const HepMC::GenParticle *particle = pit;
-#endif
+        for(const auto& particle : *subEvent){
           const HepMC::FourVector momentum = particle->momentum();
           if( HepMC::generations(particle) < 1 && std::abs(particle->pdg_id())==13){
             thePart.SetCoordinates(momentum.perp(),momentum.eta(),momentum.phi(),momentum.e());
