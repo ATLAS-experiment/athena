@@ -84,7 +84,6 @@ class ConfigurationJar( object ):
 
       from . import AlgSequence as _as
       self.athMasterSeq = _as.AthSequencer ("AthMasterSeq")
-      self.TopSequence  = _as.AlgSequence  ("TopAlg")
       self.athAlgSeq    = _as.AthSequencer ("AthAlgSeq")
       self.athOutSeq    = _as.AthSequencer ("AthOutSeq")
       
@@ -105,7 +104,6 @@ class ConfigurationJar( object ):
 
       d[ 'AthMasterSeq' ]  = self.athMasterSeq
       d[ 'AthAlgSeq' ]     = self.athAlgSeq
-      d[ 'TopSequence' ]   = self.TopSequence
       d[ 'AthOutSeq' ]     = self.athOutSeq
       d[ 'AppMgr' ]        = self.AppMgr
       d[ 'Streams' ]       = self.AppMgr._streams
@@ -453,9 +451,9 @@ def cmpConfigs (ref, chk, refName=None, chkName=None):
                values.extend (_visit_cfg(c))
          return values
 
-      for c in jar.TopSequence.getChildren():
+      for c in jar.athAlgSeq.getChildren():
          d.extend (_visit_cfg(c))
-      
+
       for c in jar.ServiceMgr.getChildren():
          d.extend (_visit_cfg(c))
       return d, all_cfgs

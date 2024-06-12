@@ -206,19 +206,6 @@ class AthAppMgr( AppMgr ):
          athOutSeq    = _as.AthSequencer ("AthOutSeq", StopOverride=True)
          athAllAlgSeq = _as.AthSequencer ("AthAllAlgSeq", StopOverride=True)
          athAlgEvtSeq = _as.AthSequencer ("AthAlgEvtSeq",Sequential = True, StopOverride=True)
-         # transfer old TopAlg to new AthAlgSeq
-         _top_alg = _as.AlgSequence("TopAlg")
-         # first transfer properties
-         for n,prop in _top_alg.properties().items():
-            if hasattr(_top_alg, n) and n != "Members":
-               setattr(athAlgSeq, n, prop)
-               
-         # then sub-configurables
-         children = [c for c in _top_alg.getChildren()]
-         for c in children:
-            athAlgSeq += c
-            delattr(_top_alg, c.getName())
-         del _top_alg, children
 
          #Setup begin and end sequences
          # Begin Sequence
@@ -836,7 +823,7 @@ theAuditorSvc = ServiceMgr.AuditorSvc
 #                         |
 #                         +--- athCondSeq (after athAlgSeq in MT)
 #                         |
-#                         +--- athAlgSeq == TopAlg
+#                         +--- athAlgSeq == topSequence
 #                 |
 #                 +--- athEndSeq
 #         |
@@ -848,4 +835,4 @@ athOutSeq    = AlgSequence.AthSequencer( "AthOutSeq" )
 athBeginSeq  = AlgSequence.AthSequencer( "AthBeginSeq" )
 athEndSeq    = AlgSequence.AthSequencer( "AthEndSeq" )
 
-topSequence  = AlgSequence.AlgSequence( "TopAlg" )     # for backward compatibility
+topSequence  = athAlgSeq  # for backward compatibility
