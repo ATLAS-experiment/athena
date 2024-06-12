@@ -376,7 +376,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
 
 
       ATH_CHECK( m_jetUncertaintiesTool.setProperty("JetDefinition", jetdef) );
-      ATH_CHECK( m_jetUncertaintiesTool.setProperty("MCType", m_isRun3 ? "MC21" : "MC20") );
+      ATH_CHECK( m_jetUncertaintiesTool.setProperty("MCType", isAtlfast() ? "AF3" : (m_isRun3 ? "MC21" : "MC20")) );
       ATH_CHECK( m_jetUncertaintiesTool.setProperty("IsData", false) ); // Never use the PDSmearing for the nominal tool.
       ATH_CHECK( m_jetUncertaintiesTool.setProperty("ConfigFile", m_jetUncertaintiesConfig) );
       if(m_jetUncertaintiesAnalysisFile!="default") ATH_CHECK( m_jetUncertaintiesTool.setProperty("AnalysisFile", m_jetUncertaintiesAnalysisFile) );
@@ -405,7 +405,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
         return StatusCode::FAILURE;
       }
       ATH_CHECK( m_jetUncertaintiesPDSmearTool.setProperty("JetDefinition", jetdef) );
-      ATH_CHECK( m_jetUncertaintiesPDSmearTool.setProperty("MCType", m_isRun3 ? "MC21" : "MC20") );
+      ATH_CHECK( m_jetUncertaintiesPDSmearTool.setProperty("MCType", isAtlfast() ? "AF3" : (m_isRun3 ? "MC21" : "MC20")) );
       ATH_CHECK( m_jetUncertaintiesPDSmearTool.setProperty("IsData", true) ); // Set to True by default for PDSmear-named tool.
       ATH_CHECK( m_jetUncertaintiesPDSmearTool.setProperty("ConfigFile", m_jetUncertaintiesConfig) );
       if (m_jetUncertaintiesCalibArea != "default") ATH_CHECK( m_jetUncertaintiesPDSmearTool.setProperty("CalibArea", m_jetUncertaintiesCalibArea) );
