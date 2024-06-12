@@ -459,7 +459,7 @@ namespace CP {
       }
 
       // Create the data object.
-      m_data = m_factory->create( m_acc->auxid(), 1, 1 );
+      m_data = m_factory->create( m_acc->auxid(), 1, 1, false );
 
       // Pointer to the branch, to be created.
       TBranch* br = nullptr;

@@ -85,6 +85,7 @@ public:
    * @param name The name of the aux data item.
    * @param clsname The name of its associated class.  May be blank.
    * @param flags Optional flags qualifying the type.  See above.
+   * @param linkedVariable auxid of a linked variable, or null_auxid.
    *
    * The type of the item is given by the template parameter @c T,
    * and the @c ALLOC gives the type of the vector allocator.
@@ -94,7 +95,8 @@ public:
   template <class T, class ALLOC = AuxAllocator_t<T> >
   SG::auxid_t getAuxID (const std::string& name,
                         const std::string& clsname = "",
-                        const Flags flags = Flags::None);
+                        const Flags flags = Flags::None,
+                        const SG::auxid_t linkedVariable = SG::null_auxid);
 
 
   /**
@@ -103,6 +105,7 @@ public:
    * @param name The name of the aux data item.
    * @param clsname The name of its associated class.  May be blank.
    * @param flags Optional flags qualifying the type.  See above.
+   * @param linkedVariable auxid of a linked variable, or null_auxid.
    *
    * The type of the item is given by @a ti.
    * Return @c null_auxid if we don't know how to make vectors of @a ti.
@@ -113,7 +116,8 @@ public:
   SG::auxid_t getAuxID (const std::type_info& ti,
                         const std::string& name,
                         const std::string& clsname = "",
-                        const Flags flags = Flags::None);
+                        const Flags flags = Flags::None,
+                        const SG::auxid_t linkedVariable = SG::null_auxid);
 
 
   /**
@@ -123,6 +127,7 @@ public:
    * @param name The name of the aux data item.
    * @param clsname The name of its associated class.  May be blank.
    * @param flags Optional flags qualifying the type.  See above.
+   * @param linkedVariable auxid of a linked variable, or null_auxid.
    *
    * The type of the item is given by @a ti.
    * Return @c null_auxid if we don't know how to make vectors of @a ti.
@@ -134,7 +139,8 @@ public:
                         const std::type_info& ti,
                         const std::string& name,
                         const std::string& clsname = "",
-                        const Flags flags = Flags::None);
+                        const Flags flags = Flags::None,
+                        const SG::auxid_t linkedVariable = SG::null_auxid);
 
 
   /**
@@ -144,6 +150,7 @@ public:
    * @param name The name of the aux data item.
    * @param clsname The name of its associated class.  May be blank.
    * @param flags Optional flags qualifying the type.  See above.
+   * @param linkedVariable auxid of a linked variable, or null_auxid.
    *
    * The type of the item is given by @a ti.
    * Return @c null_auxid if we don't know how to make vectors of @a ti.
@@ -155,7 +162,8 @@ public:
                         const std::type_info& ti,
                         const std::string& name,
                         const std::string& clsname = "",
-                        const Flags flags = Flags::None);
+                        const Flags flags = Flags::None,
+                        const SG::auxid_t linkedVariable = SG::null_auxid);
 
 
   /**
@@ -167,7 +175,7 @@ public:
    * this won't make a new one.  If the item isn't found, this
    * returns @c null_auxid.
    */
-  SG::auxid_t findAuxID( const std::string& name,
+  SG::auxid_t findAuxID (const std::string& name,
                          const std::string& clsname = "") const;
 
 
@@ -178,7 +186,7 @@ public:
    *
    * If the type of @c auxid is not compatible with the supplied
    * types @c T / @c ALLOC, then throw a @c SG::ExcAuxTypeMismatch exception.
-   * Also may throw @c SG::ExcAtomicMismatch.
+   * Also may throw @c SG::ExcFlagMismatch.
    */
   template <class T, class ALLOC = AuxAllocator_t<T> >
   void checkAuxID (const SG::auxid_t auxid,
@@ -194,7 +202,7 @@ public:
    *
    * If the type of @c auxid is not compatible with the supplied
    * types @c ti / @c ti_alloc, then throw a @c SG::ExcAuxTypeMismatch exception.
-   * Also may throw @c SG::ExcAtomicMismatch.
+   * Also may throw @c SG::ExcFlagMismatch.
    */
   void checkAuxID (const SG::auxid_t auxid,
                    const std::type_info& ti,
@@ -301,6 +309,23 @@ public:
    * @param auxid The desired aux data item.
    */
   Flags getFlags (SG::auxid_t auxid) const;
+
+
+  /**
+   * @brief Test whether this is a linked variable.
+   * @param auxid The aux data item to test.
+   */
+  bool isLinked (SG::auxid_t auxid) const;
+
+
+  /**
+   * @brief Return the auxid if the linked variable, if there is one.
+   * @param auxid The aux data item to test.
+   *
+   * Returns null_auxid if @c auxid is invalid or it doesn't have
+   * a linked variable.
+   */
+  SG::auxid_t linkedVariable (SG::auxid_t auxid) const;
 
 
   /**
@@ -483,6 +508,26 @@ public:
                                   const std::string& name) const;
 
 
+  /**
+   * @brief Test if a variable name corresponds to a linked variable.
+   */
+  static bool isLinkedName (const std::string& name);
+
+
+  /**
+   * @brief Given a variable name, return the name of the corresponding
+   *        linked variable.
+   */
+  static std::string linkedName (const std::string& name);
+
+
+  /**
+   * @brief Test to see if a class name corresponds to a class
+   *        with a linked variable.
+   */
+  static bool classNameHasLink (const std::string& className);
+
+
 private:
   typedef AthContainers_detail::mutex mutex_t;
   typedef AthContainers_detail::lock_guard<mutex_t> lock_t;
@@ -513,6 +558,7 @@ private:
    * @param name The name of the aux data item.
    * @param clsname The name of its associated class.  May be blank.
    * @param flags Optional flags qualifying the type.  See above.
+   * @param linkedVariable auxid of a linked variable, or null_auxid.
    * @param ti The type of this aux data item.
    * @param ti_alloc The type of the vector allocator.
    * @param alloc_name The name of the vector allocator.
@@ -535,6 +581,7 @@ private:
   findAuxID (const std::string& name,
              const std::string& clsname,
              const Flags flags,
+             const SG::auxid_t linkedVariable,
              const std::type_info& ti,
              const std::type_info* ti_alloc,
              const std::string* alloc_name,
@@ -655,6 +702,9 @@ private:
 
     /// Class name associated with this aux data item.  May be blank.
     std::string m_clsname;
+
+    /// auxid of a linked variable, or null_auxid.
+    auxid_t m_linked;
 
     /// Additional type flags.
     Flags m_flags;

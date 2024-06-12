@@ -69,6 +69,13 @@ enum AuxVarFlags {
   /// Contact core software before using this for new code.
   Atomic = 0x01,
 
+  /// Mark that this variable is linked to another one.
+  /// Examples are the payload for a jagged vector and the array of
+  /// DataLinks for packed ElementLinks.  Linked variables are 
+  /// `global' in that their entries do not correspond directly with
+  /// entries of the container (and hence their size may be different).
+  Linked = 0x02,
+
   // These flags control the behavior of findAuxID() but are not
   // stored with the variable.
   SkipNameCheck = 0x80,

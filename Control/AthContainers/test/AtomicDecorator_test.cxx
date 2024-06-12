@@ -95,7 +95,7 @@ void test1()
     SG::AtomicDecorator<int> i2 (ityp2_id);
     assert (i2.auxid() == ityp2_id);
     EXPECT_EXCEPTION (SG::ExcAuxTypeMismatch, (SG::AtomicDecorator<float> (ityp2_id)));
-    EXPECT_EXCEPTION (SG::ExcAtomicMismatch, (SG::Decorator<int> (ityp2_id)));
+    EXPECT_EXCEPTION (SG::ExcFlagMismatch, (SG::Decorator<int> (ityp2_id)));
   }
 
   SG::AtomicDecorator<int> ityp3 ("anInt3");
@@ -114,7 +114,7 @@ void test1()
   ityp3(cb) |= 128;
   ityp3(cb) = 12 + 128;
 
-  EXPECT_EXCEPTION (SG::ExcAtomicMismatch,
+  EXPECT_EXCEPTION (SG::ExcFlagMismatch,
                     SG::Decorator<int> ityp3a ("anInt3"));
 }
 

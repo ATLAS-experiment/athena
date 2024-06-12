@@ -49,7 +49,7 @@ namespace xAOD {
       }
 
       // Register the variable:
-      m_staticVecs[ auxid ] = new AuxPersVector< T >( auxid, vec );
+      m_staticVecs[ auxid ] = new AuxPersVector< T >( auxid, vec, false );
 
       // Remember that we are now handling this variable:
       m_auxids.insert( auxid );

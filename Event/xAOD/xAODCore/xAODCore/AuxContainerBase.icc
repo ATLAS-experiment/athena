@@ -56,7 +56,8 @@ namespace xAOD {
       }
 
       // Register the variable:
-      m_vecs[ auxid ] = new AuxPersVector< ELT, CONT >( auxid, vec );
+      const SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
+      m_vecs[ auxid ] = new AuxPersVector< ELT, CONT >( auxid, vec, r.isLinked( auxid ) );
 
       // Remember that we are now handling this variable:
       m_auxids.insert( auxid );

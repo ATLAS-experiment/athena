@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/test/AuxTypeVector_test.cxx
@@ -65,9 +65,10 @@ bool wasMoved (const MoveTest& x) { return x.m_v.empty(); }
 template <class T, template<typename> class ALLOC = std::allocator>
 void test_vector1()
 {
-  auto vconcrete = new SG::AuxTypeVector<T, ALLOC<T> > (1, 10, 20);
+  auto vconcrete = new SG::AuxTypeVector<T, ALLOC<T> > (1, 10, 20, false);
   SG::IAuxTypeVector* v = vconcrete;
   assert (v->auxid() == 1);
+  assert (!v->isLinked());
   T* ptr = reinterpret_cast<T*> (v->toPtr());
   assert (std::as_const(*v).toPtr() == ptr);
   ptr[0] = makeT<T>(1);
@@ -97,7 +98,8 @@ void test_vector1()
   assert (ptr[0] == makeT<T>(20));
   assert (ptr[1] == makeT<T>(2));
 
-  SG::IAuxTypeVector* v2 = new SG::AuxTypeVector<T> (1, 10, 20);
+  SG::IAuxTypeVector* v2 = new SG::AuxTypeVector<T> (1, 10, 20, true);
+  assert (v2->isLinked());
   ptr2 = reinterpret_cast<T*> (v2->toPtr());
 
   ptr2[0] = makeT<T>(10);
@@ -106,6 +108,7 @@ void test_vector1()
   std::unique_ptr<SG::IAuxTypeVector> v3 = v->clone();
   assert (v3->size() == v->size());
   assert (v3->auxid() == 1);
+  assert (!v3->isLinked());
   T* ptr3 = reinterpret_cast<T*> (v3->toPtr());
   for (size_t i = 0; i < v->size(); i++)
     assert (ptr[i] == ptr3[i]);
@@ -125,23 +128,25 @@ void test_vector1()
   delete v;
   delete v2;
 
-  SG::AuxTypeVector<T> v4 (1, 0, 3);
+  SG::AuxTypeVector<T> v4 (1, 0, 3, false);
   assert (!v4.resize (3));
   assert (v4.size() == 3);
 }
 
 
 template <class T, template<typename> class ALLOC = std::allocator>
-void test_vector2()
+void test_vector2 (bool linked)
 {
-  SG::AuxTypeVector<T, ALLOC<T> > v1 (1, 10, 10);
+  SG::AuxTypeVector<T, ALLOC<T> > v1 (1, 10, 10, linked);
   assert (v1.auxid() == 1);
+  assert (v1.isLinked() == linked);
   T* ptr1 = reinterpret_cast<T*> (v1.toPtr());
   ptr1[0] = makeT<T>(1);
   ptr1[1] = makeT<T>(2);
 
   SG::AuxTypeVector<T, ALLOC<T> > v2 (v1);
   assert (v2.auxid() == 1);
+  assert (v2.isLinked() == linked);
   T* ptr2 = reinterpret_cast<T*> (v2.toPtr());
   assert (v1.size() == 10);
   assert (v2.size() == 10);
@@ -150,8 +155,9 @@ void test_vector2()
   assert (ptr2[0] == makeT<T>(1));
   assert (ptr2[1] == makeT<T>(2));
 
-  SG::AuxTypeVector<T, ALLOC<T> > v3 (1, 0, 0);
+  SG::AuxTypeVector<T, ALLOC<T> > v3 (1, 0, 0, false);
   v3 = v1;
+  assert (v3.isLinked() == linked);
   T* ptr3 = reinterpret_cast<T*> (v3.toPtr());
   assert (v1.size() == 10);
   assert (v3.size() == 10);
@@ -167,6 +173,7 @@ void test_vector2()
 
   SG::AuxTypeVector<T, ALLOC<T> > v4 (std::move (v3));
   assert (v4.auxid() == 1);
+  assert (v4.isLinked() == linked);
   T* ptr4 = reinterpret_cast<T*> (v4.toPtr());
   assert (v4.size() == 3);
   assert (v3.size() == 0);
@@ -176,6 +183,7 @@ void test_vector2()
 
   v3 = std::move(v4);
   assert (v3.auxid() == 1);
+  assert (v3.isLinked() == linked);
   assert (v3.size() == 3);
   assert (v4.size() == 0);
   assert (ptr3[0] == makeT<T>(3));
@@ -185,7 +193,7 @@ void test_vector2()
 
 
 template <class T, template<typename> class ALLOC = std::allocator>
-void test_vector3()
+void test_vector3 (bool linked)
 {
   using vector_type = typename SG::AuxDataTraits<T, ALLOC<T> >::vector_type;
 
@@ -194,9 +202,10 @@ void test_vector3()
   vptr1->push_back (makeT<T>(2));
   vptr1->push_back (makeT<T>(3));
 
-  SG::AuxTypeVectorHolder<T, vector_type> v1 (1, vptr1, true);
+  SG::AuxTypeVectorHolder<T, vector_type> v1 (1, vptr1, true, linked);
   assert (v1.size() == 3);
   assert (v1.auxid() == 1);
+  assert (v1.isLinked() == linked);
   T* ptr1 = reinterpret_cast<T*> (v1.toPtr());
   assert (ptr1[0] == makeT<T>(1));
   assert (ptr1[1] == makeT<T>(2));
@@ -206,6 +215,7 @@ void test_vector3()
   assert (v1.size() == 3);
   assert (v2.size() == 3);
   assert (v2.auxid() == 1);
+  assert (v2.isLinked() == linked);
   T* ptr2 = reinterpret_cast<T*> (v2.toPtr());
   assert (ptr2[0] == makeT<T>(1));
   assert (ptr2[1] == makeT<T>(2));
@@ -217,6 +227,7 @@ void test_vector3()
   v1 = v2;
   assert (v1.size() == 2);
   assert (v2.size() == 2);
+  assert (v1.isLinked() == linked);
   assert (ptr2[0] == makeT<T>(2));
   assert (ptr2[1] == makeT<T>(1));
 
@@ -224,6 +235,7 @@ void test_vector3()
   assert (v2.size() == 2);
   assert (v3.size() == 2);
   assert (v3.auxid() == 1);
+  assert (v3.isLinked() == linked);
   T* ptr3 = reinterpret_cast<T*> (v3.toPtr());
   assert (ptr3[0] == makeT<T>(2));
   assert (ptr3[1] == makeT<T>(1));
@@ -233,6 +245,7 @@ void test_vector3()
   assert (v1.size() == 2);
   assert (v3.size() == 2);
   assert (v1.auxid() == 1);
+  assert (v1.isLinked() == linked);
   assert (ptr1[0] == makeT<T>(2));
   assert (ptr1[1] == makeT<T>(1));
 }
@@ -244,12 +257,12 @@ void test_vector4 (bool isPOD)
 {
   SG::AuxStoreInternal store;
 
-  SG::AuxTypeVector<T, ALLOC<T> > v1 (1, 10, 20);
+  SG::AuxTypeVector<T, ALLOC<T> > v1 (1, 10, 20, false);
   T* ptr1 = reinterpret_cast<T*> (v1.toPtr());
   for (int i=0; i<10; i++)
     ptr1[i] = makeT<T>(i);
 
-  SG::AuxTypeVector<T, ALLOC<T> > v2 (1, 5, 5);
+  SG::AuxTypeVector<T, ALLOC<T> > v2 (1, 5, 5, false);
   T* ptr2 = reinterpret_cast<T*> (v2.toPtr());
   for (int i=0; i<5; i++)
     ptr2[i] = makeT<T>(i+10);
@@ -285,7 +298,7 @@ void test_vector4 (bool isPOD)
   for (int i=0; i<5; i++)
     assert (wasMoved (ptr2[i]));
 
-  SG::AuxTypeVector<T, ALLOC<T> > v3 (1, 1000, 1000);
+  SG::AuxTypeVector<T, ALLOC<T> > v3 (1, 1000, 1000, false);
   T* ptr3 = reinterpret_cast<T*> (v3.toPtr());
   assert ( ! v1.insertMove (20, ptr3, ptr3 + v3.size(), store) );
 }
@@ -295,13 +308,13 @@ template <class T>
 void test_vector()
 {
   test_vector1<T>();
-  test_vector2<T>();
-  test_vector3<T>();
+  test_vector2<T>(false);
+  test_vector3<T>(false);
   test_vector4<T>(true);
 
   test_vector1<T, Athena_test::TestAlloc>();
-  test_vector2<T, Athena_test::TestAlloc>();
-  test_vector3<T, Athena_test::TestAlloc>();
+  test_vector2<T, Athena_test::TestAlloc>(true);
+  test_vector3<T, Athena_test::TestAlloc>(true);
   test_vector4<T, Athena_test::TestAlloc>(true);
 }
 
@@ -336,10 +349,10 @@ void test2()
 {
   std::cout << "test2\n";
 
-  SG::AuxTypeVector<int> v1 (1, 10, 20);
+  SG::AuxTypeVector<int> v1 (1, 10, 20, false);
   assert (!v1.setOption (SG::AuxDataOption ("opt", 1)));
 
-  SG::AuxTypeVector<int, std::allocator<int>, TestContainer> v2 (2, 10, 20);
+  SG::AuxTypeVector<int, std::allocator<int>, TestContainer> v2 (2, 10, 20, false);
   assert (v2.setOption (SG::AuxDataOption ("opt", 1)));
   assert (TestContainer::lastopt.name() == "opt");
   assert (TestContainer::lastopt.intVal() == 1);
@@ -350,7 +363,7 @@ void test2()
 template <template<typename> class ALLOC = std::allocator>
 void test3a()
 {
-  SG::AuxTypeVector<int, ALLOC<int> > v1 (1, 0, 0);
+  SG::AuxTypeVector<int, ALLOC<int> > v1 (1, 0, 0, false);
   v1.vec().push_back(1);
   v1.vec().push_back(2);
 
@@ -384,7 +397,7 @@ void test3()
   test3a<std::allocator>();
   test3a<Athena_test::TestAlloc>();
 
-  SG::AuxTypeVector<std::string> v3 (1 ,0, 0);
+  SG::AuxTypeVector<std::string> v3 (1 ,0, 0, false);
   v3.vec().push_back("1");
   v3.vec().push_back("2");
 

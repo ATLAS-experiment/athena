@@ -70,6 +70,7 @@ size_t AuxTypeRegistry::numVariables() const
  * @param name The name of the aux data item.
  * @param clsname The name of its associated class.  May be blank.
  * @param flags Optional flags qualifying the type.  See above.
+ * @param linkedVariable auxid of a linked variable, or null_auxid.
  *
  * The type of the item is given by @a ti.
  * Return @c null_auxid if we don't know how to make vectors of @a ti.
@@ -80,9 +81,11 @@ size_t AuxTypeRegistry::numVariables() const
 SG::auxid_t AuxTypeRegistry::getAuxID (const std::type_info& ti,
                                        const std::string& name,
                                        const std::string& clsname /*= ""*/,
-                                       const Flags flags /*= Flags::None*/)
+                                       const Flags flags /*= Flags::None*/,
+                                       const SG::auxid_t linkedVariable /*= SG::null_auxid*/)
 {
-  return findAuxID (name, clsname, flags, ti, nullptr, nullptr,
+  return findAuxID (name, clsname, flags, linkedVariable,
+                    ti, nullptr, nullptr,
                     &AuxTypeRegistry::makeFactoryNull);
 }
 
@@ -94,6 +97,7 @@ SG::auxid_t AuxTypeRegistry::getAuxID (const std::type_info& ti,
  * @param name The name of the aux data item.
  * @param clsname The name of its associated class.  May be blank.
  * @param flags Optional flags qualifying the type.  See above.
+ * @param linkedVariable auxid of a linked variable, or null_auxid.
  *
  * The type of the item is given by @a ti.
  * Return @c null_auxid if we don't know how to make vectors of @a ti.
@@ -105,9 +109,11 @@ SG::auxid_t AuxTypeRegistry::getAuxID (const std::type_info& ti_alloc,
                                        const std::type_info& ti,
                                        const std::string& name,
                                        const std::string& clsname /*= ""*/,
-                                       const Flags flags /*= Flags::None*/)
+                                       const Flags flags /*= Flags::None*/,
+                                       const SG::auxid_t linkedVariable /*= SG::null_auxid*/)
 {
-  return findAuxID (name, clsname, flags, ti, &ti_alloc, nullptr,
+  return findAuxID (name, clsname, flags, linkedVariable,
+                    ti, &ti_alloc, nullptr,
                     &AuxTypeRegistry::makeFactoryNull);
 }
 
@@ -119,6 +125,7 @@ SG::auxid_t AuxTypeRegistry::getAuxID (const std::type_info& ti_alloc,
  * @param name The name of the aux data item.
  * @param clsname The name of its associated class.  May be blank.
  * @param flags Optional flags qualifying the type.  See above.
+ * @param linkedVariable auxid of a linked variable, or null_auxid.
  *
  * The type of the item is given by @a ti.
  * Return @c null_auxid if we don't know how to make vectors of @a ti.
@@ -130,9 +137,11 @@ SG::auxid_t AuxTypeRegistry::getAuxID (const std::string& alloc_type,
                                        const std::type_info& ti,
                                        const std::string& name,
                                        const std::string& clsname /*= ""*/,
-                                       const Flags flags /*= Flags::None*/)
+                                       const Flags flags /*= Flags::None*/,
+                                       const SG::auxid_t linkedVariable /*= SG::null_auxid*/)
 {
-  return findAuxID (name, clsname, flags, ti, nullptr, &alloc_type,
+  return findAuxID (name, clsname, flags, linkedVariable,
+                    ti, nullptr, &alloc_type,
                     &AuxTypeRegistry::makeFactoryNull);
 }
 
@@ -147,8 +156,8 @@ SG::auxid_t AuxTypeRegistry::getAuxID (const std::string& alloc_type,
  * returns @c null_auxid.
  */
 SG::auxid_t
-AuxTypeRegistry::findAuxID( const std::string& name,
-                            const std::string& clsname ) const
+AuxTypeRegistry::findAuxID (const std::string& name,
+                            const std::string& clsname) const
 {
   // No locking needed here.
   // The extra test here is to avoid having to copy a string
@@ -172,7 +181,7 @@ AuxTypeRegistry::findAuxID( const std::string& name,
  *
  * If the type of @c auxid is not compatible with the supplied
  * types @c ti / @c ti_alloc, then throw a @c SG::ExcAuxTypeMismatch exception.
- * Also may throw @c SG::ExcAtomicMismatch.
+ * Also may throw @c SG::ExcFlagMismatch.
  */
 void AuxTypeRegistry::checkAuxID (const SG::auxid_t auxid,
                                   const std::type_info& ti,
@@ -188,10 +197,11 @@ void AuxTypeRegistry::checkAuxID (const SG::auxid_t auxid,
                                   SG::normalizedTypeinfoName (ti_alloc),
                                   m.m_alloc_name);
   }
-  if (CxxUtils::test (m.m_flags, Flags::Atomic) &&
-      !CxxUtils::test (flags, Flags::Atomic))
+  if ((CxxUtils::test (m.m_flags, Flags::Atomic) &&
+       !CxxUtils::test (flags, Flags::Atomic)) ||
+      (CxxUtils::test (m.m_flags, Flags::Linked) != CxxUtils::test (flags, Flags::Linked)))
   {
-    throw SG::ExcAtomicMismatch (auxid, ti);
+    throw SG::ExcFlagMismatch (auxid, ti, m.m_flags, flags);
   }
 }
 
@@ -209,7 +219,7 @@ AuxTypeRegistry::makeVector (SG::auxid_t auxid,
 {
   const SG::IAuxTypeVectorFactory* factory = getFactory (auxid);
   assert (factory != 0);
-  return factory->create (auxid, size, capacity);
+  return factory->create (auxid, size, capacity, isLinked (auxid));
 }
 
 
@@ -235,7 +245,8 @@ AuxTypeRegistry::makeVectorFromData (SG::auxid_t auxid,
 {
   const SG::IAuxTypeVectorFactory* factory = getFactory (auxid);
   assert (factory != 0);
-  return factory->createFromData (auxid, data, isPacked, ownMode);
+  return factory->createFromData (auxid, data,
+                                  isPacked, ownMode, isLinked (auxid));
 }
 
 
@@ -356,6 +367,21 @@ size_t AuxTypeRegistry::getEltSize (SG::auxid_t auxid) const
   if (factory)
     return factory->getEltSize();
   return 0;
+}
+
+
+/**
+ * @brief Return the auxid if the linked variable, if there is one.
+ * @param auxid The aux data item to test.
+ *
+ * Returns null_auxid if @c auxid is invalid or it doesn't have
+ * a linked variable.
+ */
+SG::auxid_t AuxTypeRegistry::linkedVariable (SG::auxid_t auxid) const
+{
+  if (auxid >= m_types.size())
+    return null_auxid;
+  return m_types[auxid].m_linked;
 }
 
 
@@ -707,6 +733,7 @@ AuxTypeRegistry::~AuxTypeRegistry()
  * @param name The name of the aux data item.
  * @param clsname The name of its associated class.  May be blank.
  * @param flags Optional flags qualifying the type.  See above.
+ * @param linkedVariable auxid of a linked variable, or null_auxid.
  * @param ti The type of this aux data item.
  * @param ti_alloc The type of the vector allocator.
  * @param alloc_name The name of the vector allocator.
@@ -729,6 +756,7 @@ SG::auxid_t
 AuxTypeRegistry::findAuxID (const std::string& name,
                             const std::string& clsname,
                             const Flags flags,
+                            const SG::auxid_t linkedVariable,
                             const std::type_info& ti,
                             const std::type_info* ti_alloc,
                             const std::string* alloc_name,
@@ -747,6 +775,8 @@ AuxTypeRegistry::findAuxID (const std::string& name,
       typeinfo_t& m = m_types[i->second];
       if (!(CxxUtils::test (m.m_flags, Flags::Atomic) &&
             !CxxUtils::test (flags, Flags::Atomic)) &&
+          (CxxUtils::test (m.m_flags, Flags::Linked) == CxxUtils::test (flags, Flags::Linked)) &&
+          (linkedVariable == m.m_linked) &&
           (&ti == m.m_ti || strcmp(ti.name(), m.m_ti->name()) == 0) &&
           m.checkAlloc (ti_alloc, alloc_name) &&
           !(*m.m_factory).isDynamic())
@@ -762,10 +792,16 @@ AuxTypeRegistry::findAuxID (const std::string& name,
   if (i != m_auxids.end()) {
     typeinfo_t& m = m_types[i->second];
 
-    if (CxxUtils::test (m.m_flags, Flags::Atomic) &&
-        !CxxUtils::test (flags, Flags::Atomic))
+    if ((CxxUtils::test (m.m_flags, Flags::Atomic) &&
+         !CxxUtils::test (flags, Flags::Atomic)) ||
+        (CxxUtils::test (m.m_flags, Flags::Linked) != CxxUtils::test (flags, Flags::Linked)))
     {
-      throw SG::ExcAtomicMismatch (i->second, ti);
+      throw SG::ExcFlagMismatch (i->second, ti, m.m_flags, flags);
+    }
+
+    if (linkedVariable != m.m_linked)
+    {
+      throw SG::ExcLinkMismatch (i->second, ti, m.m_linked, linkedVariable);
     }
 
     // By all rights, these two tests should be redundant.
@@ -851,6 +887,10 @@ AuxTypeRegistry::findAuxID (const std::string& name,
   t.m_alloc_name = fac->tiAllocName();
   t.m_factory = fac;
   t.m_flags = (flags & ~Flags::SkipNameCheck);
+  t.m_linked = linkedVariable;
+  if (linkedVariable != SG::null_auxid) {
+    if (!isLinked (linkedVariable)) std::abort();
+  }
   AthContainers_detail::fence_seq_cst();
   m_auxids.insert_or_assign (key, auxid);
 
@@ -916,6 +956,35 @@ const std::string& AuxTypeRegistry::inputRename (const std::string& key,
   if (it != m_renameMap.end())
     return it->second;
   return name;
+}
+
+
+/**
+ * @brief Test if a variable name corresponds to a linked variable.
+ */
+bool AuxTypeRegistry::isLinkedName (const std::string& name)
+{
+  return name.ends_with ("_linked");
+}
+
+
+/**
+ * @brief Given a variable name, return the name of the corresponding
+ *        linked variable.
+ */
+std::string AuxTypeRegistry::linkedName (const std::string& name)
+{
+  return name + "_linked";
+}
+
+
+/**
+ * @brief Test to see if a class name corresponds to a class
+ *        with a linked variable.
+ */
+bool AuxTypeRegistry::classNameHasLink (const std::string& /*className*/)
+{
+  return false;
 }
 
 

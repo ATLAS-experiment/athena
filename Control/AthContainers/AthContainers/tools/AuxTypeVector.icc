@@ -19,13 +19,15 @@ namespace SG {
  * @param auxid The auxid of the variable this vector represents.
  * @param vecPtr Pointer to the object (of type @c CONT).
  * @param ownFlag If true, take ownership of the object.
+ * @param isLinked True if this variable is linked from another one.
  */
 template <class T, class CONT>
 inline
 AuxTypeVectorHolder<T, CONT>::AuxTypeVectorHolder (auxid_t auxid,
                                                    vector_type* vecPtr,
-                                                   bool ownFlag)
-  : IAuxTypeVector (auxid),
+                                                   bool ownFlag,
+                                                   bool isLinked)
+  : IAuxTypeVector (auxid, isLinked),
     m_vecPtr (vecPtr),
     m_ownFlag (ownFlag)
 {
@@ -136,7 +138,10 @@ inline
 std::unique_ptr<IAuxTypeVector> AuxTypeVectorHolder<T, CONT>::clone() const
 {
   vector_type* vecPtr = new vector_type (*m_vecPtr);
-  return std::make_unique<AuxTypeVectorHolder<T, CONT> > (auxid(), vecPtr, true);
+  return std::make_unique<AuxTypeVectorHolder<T, CONT> > (auxid(),
+                                                          vecPtr,
+                                                          true,
+                                                          isLinked());
 }
 
 
@@ -428,12 +433,13 @@ namespace DataModel_detail {
 /// Specialization for the case of types that can be packed.
 template <class T, class ALLOC>
 std::unique_ptr<SG::IAuxTypeVector> makePacked (SG::auxid_t auxid,
+                                                bool isLinked,
                                                 std::vector<T, ALLOC>& v,
                                                 std::true_type)
 {
   // Make the new container and move our contents.
   auto iv =
-    std::make_unique<SG::AuxTypeVector<T, ALLOC, SG::PackedContainer<T, ALLOC> > > (auxid, 0, 0);
+    std::make_unique<SG::AuxTypeVector<T, ALLOC, SG::PackedContainer<T, ALLOC> > > (auxid, 0, 0, isLinked);
   iv->vec().swap (v);
 #ifdef __COVERITY__
   // Coverity gives a bogus complaint about the derived->base conversion here.
@@ -446,7 +452,7 @@ std::unique_ptr<SG::IAuxTypeVector> makePacked (SG::auxid_t auxid,
 
 /// Specialization for the case of types that cannot be packed.
 template <class T, class FLAG>
-std::unique_ptr<SG::IAuxTypeVector> makePacked (SG::auxid_t, T&, FLAG)
+std::unique_ptr<SG::IAuxTypeVector> makePacked (SG::auxid_t, bool, T&, FLAG)
 {
   return nullptr;
 }
@@ -504,7 +510,7 @@ std::unique_ptr<IAuxTypeVector> AuxTypeVectorHolder<T, CONT>::toPacked()
   /// Use the proper instantiation depending on whether or not
   /// this type can be packed.
   return DataModel_detail::makePacked
-    (auxid(), *m_vecPtr, typename DataModel_detail::can_pack<T>::type());
+    (auxid(), isLinked(), *m_vecPtr, typename DataModel_detail::can_pack<T>::type());
 }
 
 
@@ -516,10 +522,14 @@ std::unique_ptr<IAuxTypeVector> AuxTypeVectorHolder<T, CONT>::toPacked()
  * @param auxid The auxid of the variable this vector represents.
  * @param size Initial size of the new vector.
  * @param capacity Initial capacity of the new vector.
+ * @param isLinked True if this variable is linked from another one.
  */
 template <class HOLDER>
-AuxTypeVectorT<HOLDER>::AuxTypeVectorT (auxid_t auxid, size_t size, size_t capacity)
-  : Base (auxid, &m_vec, false)
+AuxTypeVectorT<HOLDER>::AuxTypeVectorT (auxid_t auxid,
+                                        size_t size,
+                                        size_t capacity,
+                                        bool isLinked)
+  : Base (auxid, &m_vec, false, isLinked)
 {
   m_vec.reserve (capacity * Base::SCALE);
   m_vec.resize (size * Base::SCALE);
@@ -531,7 +541,7 @@ AuxTypeVectorT<HOLDER>::AuxTypeVectorT (auxid_t auxid, size_t size, size_t capac
  */
 template <class HOLDER>
 AuxTypeVectorT<HOLDER>::AuxTypeVectorT (const AuxTypeVectorT& other)
-  : Base (other.auxid(), &m_vec, false),
+  : Base (other.auxid(), &m_vec, false, other.isLinked()),
     m_vec (other.m_vec)
 {
 }
@@ -542,7 +552,7 @@ AuxTypeVectorT<HOLDER>::AuxTypeVectorT (const AuxTypeVectorT& other)
  */
 template <class HOLDER>
 AuxTypeVectorT<HOLDER>::AuxTypeVectorT (AuxTypeVectorT&& other)
-  : Base (other.auxid(), &m_vec, false),
+  : Base (other.auxid(), &m_vec, false, other.isLinked()),
     m_vec (std::move (other.m_vec))
 {
 }

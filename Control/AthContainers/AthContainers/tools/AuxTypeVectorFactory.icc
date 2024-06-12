@@ -61,13 +61,16 @@ void applyAuxThinning (std::vector<ElementLink<T> >* p)
  * @param auxid ID for the variable being created.
  * @param size Initial size of the new vector.
  * @param capacity Initial capacity of the new vector.
+ * @param isLinked True if this variable is linked from another one.
  */
 template <class T, class ALLOC>
 std::unique_ptr<IAuxTypeVector> 
 AuxTypeVectorFactoryImpl<T, ALLOC>::create (SG::auxid_t auxid,
-                                            size_t size, size_t capacity) const
+                                            size_t size, size_t capacity,
+                                            bool isLinked) const
 {
-  return std::make_unique<AuxTypeVector<T, ALLOC> > (auxid, size, capacity);
+  return std::make_unique<AuxTypeVector<T, ALLOC> > (auxid, size, capacity,
+                                                     isLinked);
 }
 
 
@@ -78,6 +81,7 @@ AuxTypeVectorFactoryImpl<T, ALLOC>::create (SG::auxid_t auxid,
  * @param isPacked If true, @c data is a @c PackedContainer.
  * @param ownFlag If true, the newly-created IAuxTypeVector object
  *                will take ownership of @c data.
+ * @param isLinked True if this variable is linked from another one.
  *
  * This is for types which are packable.
  */
@@ -87,6 +91,7 @@ AuxTypeVectorFactoryImpl<T, ALLOC>::createFromData (auxid_t auxid,
                                                     void* data,
                                                     bool isPacked,
                                                     bool ownFlag,
+                                                    bool isLinked,
                                                     std::true_type) const
 {
   if (isPacked) {
@@ -95,11 +100,11 @@ AuxTypeVectorFactoryImpl<T, ALLOC>::createFromData (auxid_t auxid,
     using unpacked_vector_allocator_type = typename SG::AuxDataTraits<T, ALLOC>::allocator_type;
     using vector_type = SG::PackedContainer<element_type, unpacked_vector_allocator_type>;
     return std::make_unique<AuxTypeVectorHolder<T, vector_type > >
-      (auxid, reinterpret_cast<vector_type*>(data), ownFlag);
+      (auxid, reinterpret_cast<vector_type*>(data), ownFlag, isLinked);
   }
   else {
     using vector_type = typename SG::AuxDataTraits<T, ALLOC>::vector_type;
-    return std::make_unique<AuxTypeVectorHolder<T, vector_type> > (auxid, reinterpret_cast<vector_type*>(data), true);
+    return std::make_unique<AuxTypeVectorHolder<T, vector_type> > (auxid, reinterpret_cast<vector_type*>(data), true, isLinked);
   }
 }
 
@@ -111,6 +116,7 @@ AuxTypeVectorFactoryImpl<T, ALLOC>::createFromData (auxid_t auxid,
  * @param isPacked If true, @c data is a @c PackedContainer.
  * @param ownFlag If true, the newly-created IAuxTypeVector object
  *                will take ownership of @c data.
+ * @param isLinked True if this variable is linked from another one.
  *
  * This is for types which are not packable.
  */
@@ -120,12 +126,13 @@ AuxTypeVectorFactoryImpl<T, ALLOC>::createFromData (auxid_t auxid,
                                                     void* data,
                                                     bool isPacked,
                                                     bool ownFlag,
+                                                    bool isLinked,
                                                     std::false_type) const
 {
   if (isPacked) std::abort();
   using vector_type = typename SG::AuxDataTraits<T, ALLOC>::vector_type;
   return std::make_unique<AuxTypeVectorHolder<T, vector_type> >
-    (auxid, reinterpret_cast<vector_type*>(data), ownFlag);
+    (auxid, reinterpret_cast<vector_type*>(data), ownFlag, isLinked);
 }
 
 
@@ -136,6 +143,7 @@ AuxTypeVectorFactoryImpl<T, ALLOC>::createFromData (auxid_t auxid,
  * @param isPacked If true, @c data is a @c PackedContainer.
  * @param ownFlag If true, the newly-created IAuxTypeVector object
  *                will take ownership of @c data.
+ * @param isLinked True if this variable is linked from another one.
  *
  * If the element type is T, then @c data should be a pointer
  * to a std::vector<T> object, which was obtained with @c new.
@@ -149,10 +157,12 @@ std::unique_ptr<IAuxTypeVector>
 AuxTypeVectorFactoryImpl<T, ALLOC>::createFromData (SG::auxid_t auxid,
                                                     void* data,
                                                     bool isPacked,
-                                                    bool ownFlag) const
+                                                    bool ownFlag,
+                                                    bool isLinked) const
 {
   return createFromData (auxid,
                          data, isPacked, ownFlag,
+                         isLinked,
                          typename DataModel_detail::can_pack<T>::type());
 }
 

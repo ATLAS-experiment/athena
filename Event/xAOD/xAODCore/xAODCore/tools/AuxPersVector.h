@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODCORE_AUXPERSVECTOR_H
@@ -32,10 +32,10 @@ namespace xAOD {
       typedef VEC& vector_type;
 
       /// Constructor
-      AuxPersVector( SG::auxid_t auxid, vector_type vec )
-        : SG::AuxTypeVectorHolder<T, VEC> (auxid, &vec, false) {}
+      AuxPersVector( SG::auxid_t auxid, vector_type vec, bool isLinked )
+        : SG::AuxTypeVectorHolder<T, VEC> (auxid, &vec, false, isLinked) {}
 
-      virtual std::unique_ptr<SG::IAuxTypeVector> clone() const {
+      virtual std::unique_ptr<SG::IAuxTypeVector> clone() const override {
         return std::make_unique<AuxPersVector<T, VEC> >(*this);
       }
 

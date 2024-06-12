@@ -42,9 +42,11 @@ public:
   /**
    * @brief Constructor.
    * @param auxid The ID of the variable that this vector represents.
+   * @param isLinked True if this variable is linked from another one.
    */
-  IAuxTypeVector (auxid_t auxid)
-    : m_auxid (auxid)
+  IAuxTypeVector (auxid_t auxid, bool isLinked)
+    : m_auxid (auxid),
+      m_isLinked (isLinked)
   {}
 
 
@@ -196,6 +198,15 @@ public:
 
 
   /**
+   * @brief Return true if this variable is linked from another one.
+   *
+   * This is inlined here rather than being a virtual function because
+   * this is frequently called from loops over auxids.
+   */
+  bool isLinked() const { return m_isLinked; }
+
+
+  /**
    * @brief Return the auxid of the variable this vector represents.
    */
   auxid_t auxid() const
@@ -207,6 +218,9 @@ public:
 private:
   /// The auxid of the variable this vector represents.
   auxid_t m_auxid;
+
+  /// True if this variable is linked from another one.
+  bool m_isLinked;
 };
 
 

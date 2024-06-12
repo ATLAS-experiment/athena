@@ -72,8 +72,10 @@ public:
    * @param auxid The auxid of the variable this vector represents.
    * @param vecPtr Pointer to the object (of type @c CONT).
    * @param ownFlag If true, take ownership of the object.
+   * @param isLinked True if this variable is linked from another one.
    */
-  AuxTypeVectorHolder (auxid_t auxid, vector_type* vecPtr, bool ownFlag);
+  AuxTypeVectorHolder (auxid_t auxid, vector_type* vecPtr, bool ownFlag,
+                       bool isLinked);
 
 
   /**
@@ -311,8 +313,10 @@ public:
    * @param auxid The auxid of the variable this vector represents.
    * @param size Initial size of the new vector.
    * @param capacity Initial capacity of the new vector.
+   * @param isLinked True if this variable is linked from another one.
    */
-  AuxTypeVectorT (auxid_t auxid, size_t size, size_t capacity);
+  AuxTypeVectorT (auxid_t auxid, size_t size, size_t capacity,
+                  bool isLinked);
 
 
 
