@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
    */
 
 // ************************************************
@@ -16,6 +16,7 @@
 #include "AthenaMonitoringKernel/Monitored.h"
 #include "TrigBjetBtagHypoTool.h"
 #include "xAODBTagging/BTagging.h"
+#include "AthContainers/ConstAccessor.h"
 
 TrigBjetBtagHypoTool::TrigBjetBtagHypoTool( const std::string& type,
     const std::string& name,
@@ -103,13 +104,20 @@ StatusCode TrigBjetBtagHypoTool::decide( std::vector< TrigBjetBtagHypoToolInfo >
         mons.emplace_back(monpair.second, monpair.first(*btagging));
       }
 
-      if ( not btagging->auxdata<char>("SV1_isDefaults") ){
-	mons.emplace_back("SV1_masssvx",btagging->auxdata<float>("SV1_masssvx"));
-	mons.emplace_back("SV1_efracsvx",btagging->auxdata<float>("SV1_efracsvx"));
+      static const SG::ConstAccessor<char> SV1_isDefaultsAcc("SV1_isDefaults");
+      static const SG::ConstAccessor<float> SV1_masssvxAcc("SV1_masssvx");
+      static const SG::ConstAccessor<float> SV1_efracsvxAcc("SV1_efracsvx");
+      if ( not SV1_isDefaultsAcc(*btagging) ){
+	mons.emplace_back("SV1_masssvx",SV1_masssvxAcc(*btagging));
+	mons.emplace_back("SV1_efracsvx",SV1_efracsvxAcc(*btagging));
       }
-      if ( not btagging->auxdata<char>("JetFitter_isDefaults") ){
-	mons.emplace_back("JetFitter_mass",btagging->auxdata<float>("JetFitter_mass"));
-	mons.emplace_back("JetFitter_energyFraction",btagging->auxdata<float>("JetFitter_energyFraction"));
+
+      static const SG::ConstAccessor<char> JetFitter_isDefaultsAcc("JetFitter_isDefaults");
+      static const SG::ConstAccessor<float> JetFitter_massAcc("JetFitter_mass");
+      static const SG::ConstAccessor<float> JetFitter_energyFractionAcc("JetFitter_energyFraction");
+      if ( not JetFitter_isDefaultsAcc(*btagging) ){
+	mons.emplace_back("JetFitter_mass",JetFitter_massAcc(*btagging));
+	mons.emplace_back("JetFitter_energyFraction",JetFitter_energyFractionAcc(*btagging));
       }
 
 

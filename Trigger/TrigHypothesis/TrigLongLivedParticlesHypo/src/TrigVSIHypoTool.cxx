@@ -1,11 +1,12 @@
 /*
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigVSIHypoTool.h"
 
 #include "TrigCompositeUtils/HLTIdentifier.h"
 #include "AthenaMonitoringKernel/Monitored.h"
+#include "AthContainers/ConstAccessor.h"
 
 #include <array>
 
@@ -33,6 +34,9 @@ StatusCode TrigVSIHypoTool::decide(  eventVtxInfo& vtxinfo )  const {
 
    bool passSelection = false;
 
+   static const SG::ConstAccessor<float> vsi_massAcc ("vsi_mass");
+   static const SG::ConstAccessor<float> vsi_pTAcc ("vsi_pT");
+
    for (auto vertex : vtxinfo.vertices) {
       passNTrkCut = false;
       passRCut = false;
@@ -42,9 +46,9 @@ StatusCode TrigVSIHypoTool::decide(  eventVtxInfo& vtxinfo )  const {
 
       if ( vertex == nullptr ) continue;
       const size_t ntrk  = vertex->nTrackParticles();
-      const float  pT    = (vertex->isAvailable<float>("vsi_pT"))?    vertex->auxdata<float>("vsi_pT")    : 0.;
+      const float  pT    = vsi_pTAcc.withDefault(*vertex, 0);
       const float  chi2  = vertex->chiSquared();
-      const float  mass  = (vertex->isAvailable<float>("vsi_mass"))?  vertex->auxdata<float>("vsi_mass")  : 0.;
+      const float  mass  = vsi_massAcc.withDefault(*vertex, 0);
 
       const float  x_ = vertex->position().x();
       const float  y_ = vertex->position().y();
