@@ -14,7 +14,7 @@
 #include "MuonReadoutGeometryR4/MuonDetectorManager.h"
 #include "MuonSpacePoint/MuonSpacePointContainer.h"
 #include "xAODMuonPrepData/MdtDriftCircleContainer.h"
-#include "xAODMuonPrepData/RpcStripContainer.h"
+#include "xAODMuonPrepData/RpcMeasurementContainer.h"
 #include "xAODMuonPrepData/TgcStripContainer.h"
 #include "xAODMuonPrepData/MMClusterContainer.h"
 #include "xAODMuonPrepData/sTgcMeasContainer.h"
@@ -57,7 +57,7 @@ namespace MuonR4{
             SG::ReadHandleKey<xAOD::MdtDriftCircleContainer> m_mdtKey{this, "MdtKey", "xAODMdtCircles",
                                                                       "Key to the uncalibrated Drift circle measurements"};
             
-            SG::ReadHandleKey<xAOD::RpcStripContainer> m_rpcKey{this, "RpcKey", "xRpcStrips",
+            SG::ReadHandleKey<xAOD::RpcMeasurementContainer> m_rpcKey{this, "RpcKey", "xRpcMeasurements",
                                                                 "Key to the uncalibrated 1D rpc hits"};
             
             SG::ReadHandleKey<xAOD::TgcStripContainer> m_tgcKey{this, "TgcKey", "xTgcStrips",

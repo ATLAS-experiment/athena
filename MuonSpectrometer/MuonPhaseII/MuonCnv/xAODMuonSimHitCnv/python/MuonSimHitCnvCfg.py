@@ -19,6 +19,8 @@ def xAODSimHitToRpcMeasCnvAlgCfg(flags,name = "SimHitToRpcMeasurementCnvAlg", **
     kwargs.setdefault("RndmSvc", result.getPrimaryAndMerge(AthRNGSvcCfg(flags)))
     the_alg = CompFactory.xAODSimHitToRpcMeasCnvAlg(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
+    from xAODMuonMeasViewAlgs.ViewAlgsConfig import RpcMeasViewAlgCfg
+    result.merge(RpcMeasViewAlgCfg(flags))
     return result
 
 def xAODSimHitToTgcMeasCnvAlgCfg(flags,name = "SimHitToTgcMeasurementCnvAlg", **kwargs):

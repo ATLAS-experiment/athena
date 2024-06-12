@@ -10,3 +10,11 @@ def sTgcMeasViewAlgCfg(flags, name="sTgcMeasViewAlg", **kwargs):
     the_alg = CompFactory.MuonR4.sTgcMeasViewAlg(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
+
+def RpcMeasViewAlgCfg(flags, name="RpcMeasViewAlg", **kwargs):
+    result = ComponentAccumulator()
+    if not flags.Detector.GeometryRPC:
+        return result
+    the_alg = CompFactory.MuonR4.RpcMeasViewAlg(name, **kwargs)
+    result.addEventAlgo(the_alg, primary = True)
+    return result

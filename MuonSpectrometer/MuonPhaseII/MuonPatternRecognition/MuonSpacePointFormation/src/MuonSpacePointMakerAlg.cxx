@@ -61,7 +61,7 @@ template <class ContType>StatusCode MuonSpacePointMakerAlg::loadContainerAndSort
             /// Sort the hit into a GasGap
             unsigned int gapIdx = prd->gasGap() -1;
             /// Split the Rpcs additionally according to their doubletPhi. 
-            if constexpr (std::is_same<ContType, xAOD::RpcStripContainer>::value) {
+            if constexpr (std::is_same<ContType, xAOD::RpcMeasurementContainer>::value) {
                 gapIdx = 2*gapIdx + (prd->doubletPhi() - 1);
             }
             bool measPhi{false};
