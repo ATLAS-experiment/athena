@@ -152,7 +152,6 @@
 + Event/xAOD/xAODTruthCnv
 + External/AtlasDataArea
 + External/Pythia8
-- Generators/CavernBkgGenerator
 - Generators/TrackRecordGenerator
 + Generators/.*
 #+ InnerDetector/InDetRecTools/InDetTrackSelectionTool
