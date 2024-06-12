@@ -12,6 +12,9 @@
 #include "AthContainers/DataVector.h"
 #include "AthContainers/AuxElement.h"
 
+// required to use SG::AuxElement as a base class
+#include "xAODCore/BaseContainer.h"
+
 namespace xAOD {
 
   /// Class describing a TrackMeasurementValidation.
