@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONREADOUTGEOMETRY_TGCREADOUTPARAMS_H
@@ -30,6 +30,7 @@
 #include <GaudiKernel/SystemOfUnits.h>
 #include <array>
 #include <string>
+#include <vector>
 
 
 namespace MuonGM {
@@ -139,7 +140,8 @@ namespace MuonGM {
         /// strip position values
         StripArray m_stripPositionCenter{make_array<double, MaxNStrips>(0)};
         
-
+        inline bool invalidGasGap(int gasGap) const{ return gasGap<1 or gasGap>MaxNGaps;}
+        inline bool invalidGang(int gang) const{ return gang<1 or gang>MaxNGangs;}
         // Hard-coded data
         static constexpr double m_gangThickness = 0.05 * Gaudi::Units::mm;
         static constexpr double m_stripThickness = 0.03 * Gaudi::Units::mm;
