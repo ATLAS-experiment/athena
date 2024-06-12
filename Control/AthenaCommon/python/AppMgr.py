@@ -98,31 +98,6 @@ class AthServiceManager( Configurable.Configurable ):
 
       return self
 
-### integrator for TopAlg and stream sequences -------------------------------
-class OldToNewSequenceProxy( object ):
-   def __init__( self, seq ):
-      self.sequence = seq
-
-   def __get__( self, obj, type = None ):
-      return list(map( lambda x: x.getFullName(), self.sequence.getChildren() ))
-
-   def __set__( self, obj, value ):
-      from AthenaCommon.OldStyleConfig import Algorithm
-
-    # explicit removal/addition is required to maintain copy identity
-      current = self.sequence.getChildren()
-      names = dict( zip( map( lambda x: x.getFullName(), current ), current ) )
-
-      self.sequence.removeAll()
-      current = self.sequence._Configurable__children
-
-      for name in value:
-         try:                # can't use get() b/c of Configurable caches
-            current.append( names[ name ] )      # hack to prevent dupe parents
-         except KeyError:
-            self.sequence += Algorithm( name )
-   pass # class OldToNewSequenceProxy
-
 ### retro application manager ------------------------------------------------
 from GaudiCoreSvc.GaudiCoreSvcConf import ApplicationMgr as AppMgr
 class AthAppMgr( AppMgr ):
@@ -159,15 +134,14 @@ class AthAppMgr( AppMgr ):
       self.__dict__[ '_sequences' ] = []
       self.__dict__[ '_streams' ]   = AlgSequence.AlgSequence( "Streams" )
       self.__dict__[ 'CreateSvc' ]  = []          # block the property
+      # TopAlg and OutStream are not user-settable directly (see __setattr__)
+      self.__dict__[ 'TopAlg' ] = [ AlgSequence.AthSequencer( "AthMasterSeq" ).getFullName() ]
+      self.__dict__[ 'OutStream' ]  = []
       self.__dict__[ '_exitstate' ] = ExitCodes.ALL_OK
 
       self.__dict__['state'] = lambda : AthAppMgr.State.OFFLINE
       self.__dict__['Dlls'] = []
       
-    # install sequence proxies
-      self.__class__.TopAlg    = OldToNewSequenceProxy( AlgSequence.AlgSequence( "TopAlg" ) )
-      self.__class__.OutStream = OldToNewSequenceProxy( self.__dict__[ '_streams' ] )
-
     # install services
       svcMgr = self.serviceMgr()  # noqa: F841
 
@@ -191,12 +165,14 @@ class AthAppMgr( AppMgr ):
          name in AthAppMgr.__slots__:
          handle = self.getHandle()
          return handle.__setattr__(name, value)
-      elif name == "TopAlg":       # special case
-         return self.__class__.__dict__[ 'TopAlg' ].__set__( self, value )
+      elif name == "TopAlg" and value:
+         raise RuntimeError("Setting theApp.TopAlg is not supported. "
+                            "Add the algorithm to the default AlgSequence() instead.")
       elif name == "Dlls":         # block Dlls calls
          return
-      elif name == "OutStream":    # idem TopAlg
-         return self.__class__.__dict__[ 'OutStream' ].__set__( self, value )
+      elif name == "OutStream" and value:
+         raise RuntimeError("Setting theApp.OutStream is not supported. "
+                            "Use theApp.addOutputStream instead.")
       elif name == "CreateSvc":    # for delaying creation of services
          self.__dict__[ name ] = value
       else:
@@ -564,19 +540,6 @@ class AthAppMgr( AppMgr ):
       handle.CreateSvc = _createSvc
       Logging.log.debug( 'Updating (C++) "CreateSvc" property... [ok]' )
       
-    # finally, print a warning for the generic Algorithms that were left over
-      names  = list(map( lambda x: x[x.find( '/' )+1:], handle.TopAlg ))
-      names += list(map( lambda x: x[x.find( '/' )+1:], handle.OutStream ))
-      from AthenaCommon.OldStyleConfig import Algorithm
-      for grc in Algorithm.configurables.values():
-         if not (grc._flags & Configurable.Configurable._fSetupOk):      # debugging variable
-          # first, back-hack ... this will go rather wrong, so issue an error no matter what
-            if grc.getName() in names:
-               detail = 'type missing'
-            else:
-               detail = 'not in TopAlg or other known list'
-            Logging.log.error( 'Algorithm "%s": %s, no properties set', grc.getFullName(), detail )
-
     # if requested, dump the current state of the configuration to an ASCII file
       if self._opts and self._opts.config_dump_file:
          import AthenaCommon.ConfigurationShelve as cs
