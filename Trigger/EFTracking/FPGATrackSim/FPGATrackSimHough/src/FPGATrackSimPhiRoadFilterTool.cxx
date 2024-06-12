@@ -52,7 +52,7 @@ StatusCode FPGATrackSimPhiRoadFilterTool::initialize()
 
 StatusCode FPGATrackSimPhiRoadFilterTool::filterRoads(const std::vector<FPGATrackSimRoad*> & prefilter_roads, std::vector<FPGATrackSimRoad*> & postfilter_roads) 
 {
-    ATH_MSG_INFO("Start Phi Road Filter"); 
+    ATH_MSG_DEBUG("Start Phi Road Filter"); 
     
     m_postfilter_roads.clear();
     postfilter_roads.clear();
@@ -77,7 +77,7 @@ StatusCode FPGATrackSimPhiRoadFilterTool::filterRoads(const std::vector<FPGATrac
     postfilter_roads.reserve(m_postfilter_roads.size());
     for (FPGATrackSimRoad & r : m_postfilter_roads) postfilter_roads.push_back(&r);
     
-    ATH_MSG_INFO("Event Done");
+    ATH_MSG_DEBUG("Event Done");
     
     m_event++;
     return StatusCode::SUCCESS;

@@ -165,7 +165,9 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     std::vector<FPGATrackSimRoad*> prefilter_roads;
     std::vector<FPGATrackSimRoad*>& roads_1st = prefilter_roads;
     std::vector<const FPGATrackSimHit*> phits_1st;
-    std::vector<FPGATrackSimHit> const & hits_1st = m_logicEventHeader_1st->towers().at(regionID).hits();
+
+    // If and when we set up code to run over more than one region/tower at a time this will need to be updated
+    std::vector<FPGATrackSimHit> const & hits_1st = m_logicEventHeader_1st->towers().at(0).hits();
 
     for (FPGATrackSimHit const & h : hits_1st) phits_1st.push_back(&h);
 
