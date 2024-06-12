@@ -32,6 +32,7 @@ public:
     inline T& get(size_t i, size_t j);
 
     /// Push back the element into the i-th inner vector
+    using VectorBranch<std::vector<T>>::push_back;
     inline void push_back(size_t i, const T& value);
 
     /// Size of the outer vector
