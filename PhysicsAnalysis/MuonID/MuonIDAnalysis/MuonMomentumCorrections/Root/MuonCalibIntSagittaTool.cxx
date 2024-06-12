@@ -224,7 +224,10 @@ namespace CP
 
                 double deltas = m_extraRebiasSys;
                 // systematic for Run3 data 2022
-                if (trk.year==MCP::DataYear::Data22)  deltas = 1.2 * deltas;
+                if (trk.year==MCP::DataYear::Data22) {
+                   if(m_release.value().find("Recs2023") != std::string::npos) deltas = 1.2 * deltas;
+                   else if(std::abs(eta)>1.05)  deltas = 1.5 * deltas;
+                }
                 double corr = deltas * scale;
                 ATH_MSG_VERBOSE("Deltas corr: "<<deltas);
 
@@ -255,11 +258,30 @@ namespace CP
                     else
                         corr += std::abs(pT - 45) / 200 * deltas;
                 }
-                // Systematics for Run3 2022 data
-                if ( (trk.year==MCP::DataYear::Data22) && pT > 100.0) {
+                // additional uncertainties for 2022 data
+                if (m_release.value().find("Recs2023") != std::string::npos) {
+                  if ( (trk.year==MCP::DataYear::Data22) && pT > 100.0) {
                     if (eta < 0 && eta> -0.5) corr += 2.1*deltas;
                     else if (eta < -1.05) corr += 1.1*deltas;
                     else if (eta > 0.5 ) corr += 0.8*deltas;
+                  }
+                } else {
+                  if ( trk.year==MCP::DataYear::Data22 ) {
+                    if (eta > -2 && eta < -1.05) corr = corr*2.5;
+                    if (eta < -2) corr = corr*6;
+                    if (eta > 1.5 && eta < 2) {
+                      if (pT > 450.0)
+                        corr += std::abs(450.0 - 45) / 80 * deltas;  // Above 450 GeV flat
+                      else
+                        corr += std::abs(pT - 45) / 80 * deltas;
+                    }
+                    if (eta > 1.05 && eta < 1.5) {
+                      if (pT > 450.0)
+                        corr += std::abs(450.0 - 45) / 40 * deltas;  // Above 450 GeV flat
+                      else
+                        corr += std::abs(pT - 45) / 40 * deltas;
+                    }
+                  }
                 }
                 ATH_MSG_VERBOSE("Deltas corr: "<<deltas);
 
