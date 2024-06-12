@@ -34,7 +34,7 @@ MainGenerators += ["HepMCAscii"]
 # note: we have to use TauolaPP, because Tauolapp is used as a namespace in the external Tauolapp code
 AfterburnerGenerators = ["Photospp", "TauolaPP", "EvtGen", "ParticleDecayer"]
 
-# Set up list of allowed generators. The evgenConfig.generators list will be used
+# Set up list of allowed generators. The sample.generators list will be used
 # to set random seeds, determine input config and event files, and report used generators to AMI.
 KnownGenerators = LHEFGenerators + MainGenerators + AfterburnerGenerators
 
@@ -101,10 +101,11 @@ def gen_sortkey(genname):
 # Function to perform consistency check on jO
 def checkJOConsistency(jofile):
     import os, sys, string
-    
+    officialJO = False
     joparts = (os.path.basename(jofile)).split(".")
     # Perform some consistency checks
     if joparts[0].startswith("mc") and all(c in string.digits for c in joparts[0][2:]):
+        officialJO = True
         # Check that there are exactly 4 name parts separated by '.': MCxx, DSID, physicsShort, .py
         if len(joparts) != 3:
             evgenLog.error(jofile + " name format is wrong: must be of the form mc.<physicsShort>.py: please rename.")
@@ -129,3 +130,83 @@ def checkJOConsistency(jofile):
         else:
             evgenLog.error("check_jo_consistency.py not found")
             sys.exit(1)
+    return officialJO
+    
+def checkNEventsPerJob(sample):
+    if sample.nEventsPerJob < 1:
+        raise RuntimeError("nEventsPerJob must be at least 1")
+    elif sample.nEventsPerJob > 100000:
+        raise RuntimeError("nEventsPerJob can be max. 100000")
+    else:
+        allowed_nEventsPerJob_lt1000 = [1, 2, 5, 10, 20, 25, 50, 100, 200, 500, 1000]
+        if sample.nEventsPerJob >= 1000 and sample.nEventsPerJob <= 10000 and \
+          (sample.nEventsPerJob % 1000 != 0 or 10000 % sample.nEventsPerJob != 0):
+            raise RuntimeError("nEventsPerJob in range [1K, 10K] must be a multiple of 1K and a divisor of 10K")
+        elif sample.nEventsPerJob > 10000  and sample.nEventsPerJob % 10000 != 0:
+            raise RuntimeError("nEventsPerJob >10K must be a multiple of 10K")
+        elif sample.nEventsPerJob < 1000 and sample.nEventsPerJob not in allowed_nEventsPerJob_lt1000:
+            raise RuntimeError("nEventsPerJob in range <= 1000 must be one of %s" % allowed_nEventsPerJob_lt1000)
+    
+def checkKeywords(sample, evgenLog, officialJO):
+    # Get file containing keywords
+    from AthenaCommon.Utils.unixtools import find_datafile
+    kwpath = find_datafile("evgenkeywords.txt")
+    
+    # Load the allowed keywords from the file
+    allowed_keywords = []
+    if kwpath: 
+        evgenLog.info("evgenkeywords = %s", kwpath)
+        kwf = open(kwpath, "r")
+        for l in kwf:
+            allowed_keywords += l.strip().lower().split()
+        # Check the JO keywords against the allowed ones
+        evil_keywords = []
+        for k in sample.keywords:
+            if k.lower() not in allowed_keywords:
+                evil_keywords.append(k)
+        if evil_keywords:
+            msg = "keywords contains non-standard keywords: %s. " % ", ".join(evil_keywords)
+            msg += "Please check the allowed keywords list and fix."
+            evgenLog.error(msg)
+            if officialJO:
+                import sys
+                sys.exit(1)
+    else:
+        evgenLog.warning("evgenkeywords = not found ")
+
+def checkCategories(sample, evgenLog, officialJO):
+    # Get file containing category names
+    from AthenaCommon.Utils.unixtools import find_datafile
+    lkwpath = find_datafile("CategoryList.txt")
+    
+    # Load the allowed categories names from the file
+    allowed_cat = []
+    if lkwpath:
+        from ast import literal_eval
+        with open(lkwpath, 'r') as catlist:
+            for line in catlist:
+               allowed_list = literal_eval(line)
+               allowed_cat.append(allowed_list)
+
+        # Check the JO categories against the allowed ones
+        bad_cat =[]
+        it = iter(sample.categories)
+        for x in it:
+           l1 = x
+           l2 = next(it)
+           if "L1:" in l2 and "L2:" in l1:
+               l1, l2 = l2, l1
+           print ("first",l1,"second",l2)
+           bad_cat.extend([l1, l2])
+           for a1,a2 in allowed_cat:
+               if l1.strip().lower()==a1.strip().lower() and l2.strip().lower()==a2.strip().lower():
+                 bad_cat=[]
+           if bad_cat:
+               msg = "categories contains non-standard category: %s. " % ", ".join(bad_cat)
+               msg += "Please check the allowed categories list and fix."
+               evgenLog.error(msg)
+               if officialJO:
+                   import sys
+                   sys.exit(1)
+    else:
+        evgenLog.warning("Could not find CategoryList.txt file ", lkwpath, " in $DATAPATH")

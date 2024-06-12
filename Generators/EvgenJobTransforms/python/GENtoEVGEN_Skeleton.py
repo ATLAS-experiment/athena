@@ -20,14 +20,11 @@ from PyJobTransforms.TransformUtils import processPreExec, processPreInclude, pr
 # Other imports that are needed
 import sys, os
 
-
 # Function that reads the jO and returns an instance of Sample(EvgenCAConfig)
 def setupSample(runArgs, flags):
     # Only permit one jobConfig argument for evgen
     if len(runArgs.jobConfig) != 1:
-        evgenLog.info("runArgs.jobConfig = %s", runArgs.jobConfig)
-        evgenLog.error("You must supply one and only one jobConfig file argument")
-        sys.exit(1)
+        raise RuntimeError("You must supply one and only one jobConfig file argument")
 
     evgenLog.info("Using JOBOPTSEARCHPATH (as seen in skeleton) = {}".format(os.environ["JOBOPTSEARCHPATH"]))
 
@@ -36,13 +33,12 @@ def setupSample(runArgs, flags):
     # Find jO file
     jofiles = [f for f in os.listdir(FIRST_DIR) if (f.startswith("mc") and f.endswith(".py"))]
     if len(jofiles) !=1:
-        evgenLog.error("You must supply one and only one jobOption file in DSID directory")
-        sys.exit(1)
+        raise RuntimeError("You must supply one and only one jobOption file in DSID directory")
     jofile = jofiles[0]
 
     # Perform consistency checks on the jO
-    from GeneratorConfig.GenConfigHelpers import checkJOConsistency
-    checkJOConsistency(jofile)
+    from GeneratorConfig.GenConfigHelpers import checkJOConsistency, checkNEventsPerJob, checkKeywords, checkCategories
+    officialJO = checkJOConsistency(jofile)
 
     # Import the jO as a module
     # We cannot do import BLAH directly since
@@ -74,11 +70,35 @@ def setupSample(runArgs, flags):
     if dsid.isdigit():
         flags.Generator.DSID = int(dsid)
     
-    flags.Generator.nEventsPerJob = sample.nEventsPerJob
+    # Set nEventsPerJob
+    if not sample.nEventsPerJob:
+        evgenLog.info("#############################################################")
+        evgenLog.info(" !!!! no sample.nEventsPerJob set !!!  The default 10000 used. !!! ") 
+        evgenLog.info("#############################################################")
+    else:
+        checkNEventsPerJob(sample)
+        evgenLog.info(" nEventsPerJob = " + str(sample.nEventsPerJob)) 
+        flags.Generator.nEventsPerJob = sample.nEventsPerJob
 
     # Check if sample attributes have been properly set
     sample.checkAttributes()
-
+    
+    # Check for other inconsistencies in jO
+    if len(sample.generators) > len(set(sample.generators)):
+        raise RuntimeError("Duplicate entries in generators: invalid configuration, please check your JO")
+    from GeneratorConfig.GenConfigHelpers import gen_require_steering
+    if gen_require_steering(sample.generators):
+        if hasattr(runArgs, "outputEVNTFile") and not hasattr(runArgs, "outputEVNT_PreFile"):
+            raise RuntimeError("'EvtGen' found in job options name, please set '--steering=afterburn'")
+    
+    # Keywords check
+    if hasattr(sample, "keywords"):
+        checkKeywords(sample, evgenLog, officialJO)
+    
+    # L1, L2 categories check
+    if hasattr(sample, "categories"):
+        checkCategories(sample, evgenLog, officialJO)
+    
     return sample
 
 
@@ -137,7 +157,11 @@ def fromRunArgs(runArgs):
         flags.dump()
     else:
         flags.dump("Generator.*")
-
+    
+    # Print various stuff
+    evgenLog.info(".transform =                  Gen_tf")
+    evgenLog.info(".platform = " + str(os.environ["BINARY_TAG"]))
+    
     # Announce start of job configuration
     evgenLog.info("**** Configuring event generation")
 
@@ -147,7 +171,8 @@ def fromRunArgs(runArgs):
 
     # EventInfoCnvAlg
     from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoCnvAlgCfg
-    cfg.merge(EventInfoCnvAlgCfg(flags, disableBeamSpot=True, xAODKey="TMPEvtInfo"), sequenceName=EvgenSequence.Generator.value)
+    cfg.merge(EventInfoCnvAlgCfg(flags, disableBeamSpot=True, xAODKey="TMPEvtInfo"), 
+                                 sequenceName=EvgenSequence.Generator.value)
 
     # Set up the process
     cfg.merge(sample.setupProcess(flags))
@@ -171,20 +196,23 @@ def fromRunArgs(runArgs):
 
     # Configure the event counting (AFTER all filters)
     from EvgenProdTools.EvgenProdToolsConfig import CountHepMCCfg
-    cfg.merge(CountHepMCCfg(flags))
+    cfg.merge(CountHepMCCfg(flags,
+                            RequestedOutput = sample.nEventsPerJob if runArgs.maxEvents == -1
+                                              else runArgs.maxEvents))
+    evgenLog.info("Requested output events = %s", str(cfg.getEventAlgo("CountHepMC").RequestedOutput))
 
     # Print out the contents of the first 5 events (after filtering)
-    # TODO: Allow configurability from command-line/exec/include args
     if hasattr(runArgs, "printEvts") and runArgs.printEvts > 0:
         from TruthIO.TruthIOConfig import PrintMCCfg
-        cfg.merge(PrintMCCfg(flags, LastEvent=runArgs.printEvts))
+        cfg.merge(PrintMCCfg(flags, 
+                             LastEvent=runArgs.printEvts))
 
     # Estimate time needed for Simulation
     from EvgenProdTools.EvgenProdToolsConfig import SimTimeEstimateCfg
     cfg.merge(SimTimeEstimateCfg(flags))
 
     # TODO: Rivet
-
+     
     # Sort the list of generator names into standard form
     from GeneratorConfig.GenConfigHelpers import gen_sortkey, gen_lhef
     generatorNames = sorted(sample.generators, key=gen_sortkey)
@@ -217,7 +245,7 @@ def fromRunArgs(runArgs):
     cfg.merge(TagInfoMgrCfg(flags, tagValuePairs=metadata))
 
     # Print version of HepMC to the log
-    evgenLog.info("HepMC version %s", os.environ['HEPMCVER'])
+    evgenLog.info("HepMC version %s", os.environ["HEPMCVER"])
 
     # Configure output stream
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg

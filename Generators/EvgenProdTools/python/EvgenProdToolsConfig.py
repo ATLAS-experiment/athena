@@ -26,9 +26,6 @@ def CountHepMCCfg(flags, name="CountHepMC", **kwargs):
     kwargs.setdefault("InputEventInfo", "TMPEvtInfo")
     kwargs.setdefault("OutputEventInfo", "EventInfo")
     kwargs.setdefault("mcEventWeightsKey", "TMPEvtInfo.mcEventWeights")
-
-    # kwargs.setdefault("RequestedOutput",  flags.Exec.MaxEvents)
-
     kwargs.setdefault("FirstEvent", flags.Exec.FirstEvent)
     kwargs.setdefault("CorrectHepMC", True)
     kwargs.setdefault("CorrectEventID", True)
