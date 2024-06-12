@@ -86,14 +86,13 @@ if __name__ == "__main__":
 
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
-
+    
     # this job specific flags
     flags.addFlag("outputNTupleFile", "refits.root")
 
     # Disable calo for this test
     flags.Detector.EnableCalo = False
 
-    flags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.900498.PG_single_muonpm_Pt100_etaFlatnp0_43.recon.RDO.e8481_s4149_r14697/RDO.33675668._000016.pool.root.1"]
 
     # ensure that the xAOD SP and cluster containers are available
     flags.Tracking.ITkMainPass.doAthenaToActsSpacePoint=True
@@ -114,8 +113,11 @@ if __name__ == "__main__":
     flags.PhysVal.IDPVM.doTechnicalEfficiency = False
     flags.PhysVal.OutputFileName = "IDPVM.root"
     flags.fillFromArgs()
+    if flags.Input.Files == ['_ATHENA_GENERIC_INPUTFILE_NAME_']:
+        flags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.900498.PG_single_muonpm_Pt100_etaFlatnp0_43.recon.RDO.e8481_s4149_r14697/RDO.33675668._000016.pool.root.1"]
     flags.lock()
-
+    flags = flags.cloneAndReplace("Tracking.ActiveConfig","Tracking.MainPass")
+    
     # Main services
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     top_acc = MainServicesCfg(flags)
@@ -134,31 +136,36 @@ if __name__ == "__main__":
     # ProtoTrackChain Track algo
     top_acc.merge(SetupHistSvc(flags,streamName="HmmRefits",dataFile=flags.outputNTupleFile))
     top_acc.merge(ActsProtoTackCreationAndFitAlgCfg(flags,"ActsProtoTackCreationAndFitAlg",ACTSTracksLocation=ACTSProtoTrackChainTrackKey   ))
-
-    ## Convert ACTs container to Trk converter
-    from ActsConfig.ActsEventCnvConfig import ActsToTrkConvertorAlgCfg
-    top_acc.merge(ActsToTrkConvertorAlgCfg(flags,
-                                               ACTSTracksLocation=ACTSProtoTrackChainTrackKey,
-                                               TracksLocation=FinalProtoTrackChainTracksKey))
     
-    # Add truth to the container
-    from InDetConfig.ITkTrackTruthConfig import ITkTrackTruthCfg
-    top_acc.merge(ITkTrackTruthCfg(
-        flags,
-        Tracks=FinalProtoTrackChainTracksKey,
-        DetailedTruth=FinalProtoTrackChainxAODTracksKey+"DetailedTruth",
-        TracksTruth=FinalProtoTrackChainxAODTracksKey+"TruthCollection"))
+    ## Associate truth to the xAOD clusters and validate track finding
+    from ActsConfig.ActsTruthConfig import ActsTruthAssociationAlgCfg, ActsTruthParticleHitCountAlgCfg
+    top_acc.merge(ActsTruthAssociationAlgCfg(flags))
+    top_acc.merge(ActsTruthParticleHitCountAlgCfg(flags))
+    
+    from ActsConfig.ActsTruthConfig import ActsTrackToTruthAssociationAlgCfg, ActsTrackFindingValidationAlgCfg
+    acts_tracks=f"{flags.Tracking.ActiveConfig.extension}Tracks" if not flags.Acts.doAmbiguityResolution else f"{flags.Tracking.ActiveConfig.extension}ResolvedTracks"
+    top_acc.merge(ActsTrackToTruthAssociationAlgCfg(flags,
+                                                    name=f"{acts_tracks}TrackToTruthAssociationAlg",
+                                                    ACTSTracksLocation=ACTSProtoTrackChainTrackKey,
+                                                    AssociationMapOut=acts_tracks+"ToTruthParticleAssociation"))
 
-    # Trk to xAOD converter
-    from xAODTrackingCnv.xAODTrackingCnvConfig import ITkTrackParticleCnvAlgCfg
-    top_acc.merge(ITkTrackParticleCnvAlgCfg(flags,
-           name = f"{FinalProtoTrackChainTracksKey}TrackParticleCnvAlg",
-           TrackContainerName = FinalProtoTrackChainTracksKey,
-           xAODTrackParticlesFromTracksContainerName = f"{FinalProtoTrackChainxAODTracksKey}TrackParticles",
-           TrackTruthContainerName = f"{FinalProtoTrackChainxAODTracksKey}TruthCollection")) 
+    top_acc.merge(ActsTrackFindingValidationAlgCfg(flags,
+                                                    name=f"{acts_tracks}TrackFindingValidationAlg",
+                                                    TrackToTruthAssociationMap=acts_tracks+"ToTruthParticleAssociation"
+                                                    ))
 
-    # Printout for ProtoTrackChain Tracking
-    top_acc.merge(ActsProtoTrackReportingAlgCfg(flags, TrackCollection=FinalProtoTrackChainTracksKey, xAODTrackCollection=f"{FinalProtoTrackChainxAODTracksKey}TrackParticles"))
+    # Convert ActsTrk::TrackContainer to xAOD::TrackParticleContainer
+    prefix = flags.Tracking.ActiveConfig.extension
+    from ActsConfig.ActsTrackFindingConfig import ActsTrackToTrackParticleCnvAlgCfg
+    top_acc.merge(ActsTrackToTrackParticleCnvAlgCfg(flags, f"{prefix}ResolvedProtoTrackToAltTrackParticleCnvAlg",
+                                                       ACTSTracksLocation=[ACTSProtoTrackChainTrackKey,],
+                                                       TrackParticlesOutKey=f"{FinalProtoTrackChainxAODTracksKey}TrackParticles"))
+   
+    from ActsConfig.ActsTruthConfig import ActsTrackParticleTruthDecorationAlgCfg
+    top_acc.merge(ActsTrackParticleTruthDecorationAlgCfg(flags,
+                                                         f"{prefix}ActsSandboxTrackParticleTruthDecorationAlg",
+                                                         TrackToTruthAssociationMaps=[acts_tracks+"ToTruthParticleAssociation"],
+                                                         TrackParticleContainerName=f"{FinalProtoTrackChainxAODTracksKey}TrackParticles"))
 
     # Add the truth decorators
     from InDetPhysValMonitoring.InDetPhysValDecorationConfig import AddDecoratorCfg
@@ -176,7 +183,7 @@ if __name__ == "__main__":
     top_acc.foreach_component("AthEventSeq/*").OutputLevel = DEBUG
     top_acc.printConfig(withDetails=True, summariseProps=True)
     top_acc.store(open("ITkTrackRecoWithProtoTracks.pkl", "wb"))
-    sc = top_acc.run(1)
+    sc = top_acc.run(flags.Exec.MaxEvents)
 
     if sc.isFailure():
         import sys
