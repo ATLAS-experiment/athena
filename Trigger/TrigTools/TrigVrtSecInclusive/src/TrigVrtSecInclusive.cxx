@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
   * Trigger specific modification of VSI, that is aimed at reconstructing displaced vertex
   * author Kunihiro Nagano <kunihiro.nagano@cern.ch> - KEK
@@ -20,6 +20,7 @@
 #include "TrkParticleBase/LinkToTrackParticleBase.h"
 #include "TrkLinks/LinkToXAODTrackParticle.h"
 #include "TrkVKalVrtCore/PGraph.h"
+#include "AthContainers/Decorator.h"
 
 #include <limits>
 
@@ -313,34 +314,60 @@ StatusCode TrigVrtSecInclusive::fillVtxContainer( xAODContainers& theXAODContain
     vertex->setPosition( wrkvrt.vertex );
     vertex->setFitQuality( wrkvrt.chi2, 1 ); // Ndof is always 1
 
-    vertex->auxdata<float>("vsi_mass")   = wrkvrt.vertexMom.M();
-    vertex->auxdata<float>("vsi_pT")     = wrkvrt.vertexMom.Perp();
-    vertex->auxdata<float>("vsi_charge") = wrkvrt.charge;
-    vertex->auxdata<char>("vsi_isFake")  = 0;
+    static const SG::Accessor<float> vsi_massAcc("vsi_mass");
+    static const SG::Accessor<float> vsi_pTAcc("vsi_pT");
+    static const SG::Accessor<float> vsi_chargeAcc("vsi_charge");
+    static const SG::Accessor<char> vsi_isFakeAcc("vsi_isFake");
+    vsi_massAcc(*vertex)   = wrkvrt.vertexMom.M();
+    vsi_pTAcc(*vertex)     = wrkvrt.vertexMom.Perp();
+    vsi_chargeAcc(*vertex) = wrkvrt.charge;
+    vsi_isFakeAcc(*vertex)  = 0;
 
-    vertex->auxdata<float>("vsi_twoCirc_dr")                      = wrkvrt.param.twoCirc_dr;
-    vertex->auxdata<float>("vsi_twoCirc_dphi")                    = wrkvrt.param.twoCirc_dphi;
-    vertex->auxdata<float>("vsi_twoCirc_int_r")                   = wrkvrt.param.twoCirc_int_r;
-    vertex->auxdata<float>("vsi_vrtFast_r")                       = wrkvrt.param.vrtFast_r;
-    vertex->auxdata<float>("vsi_vrtFast_eta")                     = wrkvrt.param.vrtFast_eta;
-    vertex->auxdata<float>("vsi_vrtFast_phi")                     = wrkvrt.param.vrtFast_phi;
-    vertex->auxdata< std::vector<float> >("vsi_vrtFast_trkd0")    = wrkvrt.param.vrtFast_trkd0;
-    vertex->auxdata< std::vector<float> >("vsi_vrtFast_trkz0")    = wrkvrt.param.vrtFast_trkz0;
-    vertex->auxdata<float>("vsi_vrtFit_r")                        = wrkvrt.vertex.perp();
-    vertex->auxdata<float>("vsi_vrtFit_chi2")                     = wrkvrt.chi2;
-    vertex->auxdata<float>("vsi_vPos")                            = wrkvrt.param.vPos;
-    vertex->auxdata<float>("vsi_vPosMomAngT")                     = wrkvrt.param.vPosMomAngT;
-    vertex->auxdata<float>("vsi_dphi1")                           = wrkvrt.param.dphi1;
-    vertex->auxdata<float>("vsi_dphi2")                           = wrkvrt.param.dphi2;
-    vertex->auxdata<char>("vsi_isPassMMV")                        = wrkvrt.param.isPassMMV ? 1 : 0;
+    static const SG::Accessor<float> vsi_twoCirc_drAcc("vsi_twoCirc_dr");
+    static const SG::Accessor<float> vsi_twoCirc_dphiAcc("vsi_twoCirc_dphi");
+    static const SG::Accessor<float> vsi_twoCirc_int_rAcc("vsi_twoCirc_int_r");
+    static const SG::Accessor<float> vsi_vrtFast_rAcc("vsi_vrtFast_r");
+    static const SG::Accessor<float> vsi_vrtFast_etaAcc("vsi_vrtFast_eta");
+    static const SG::Accessor<float> vsi_vrtFast_phiAcc("vsi_vrtFast_phi");
+    static const SG::Accessor< std::vector<float> > vsi_vrtFast_trkd0Acc("vsi_vrtFast_trkd0");
+    static const SG::Accessor< std::vector<float> > vsi_vrtFast_trkz0Acc("vsi_vrtFast_trkz0");
+    static const SG::Accessor<float> vsi_vrtFit_rAcc("vsi_vrtFit_r");
+    static const SG::Accessor<float> vsi_vrtFit_chi2Acc("vsi_vrtFit_chi2");
+    static const SG::Accessor<float> vsi_vPosAcc("vsi_vPos");
+    static const SG::Accessor<float> vsi_vPosMomAngTAcc("vsi_vPosMomAngT");
+    static const SG::Accessor<float> vsi_dphi1Acc("vsi_dphi1");
+    static const SG::Accessor<float> vsi_dphi2Acc("vsi_dphi2");
+    static const SG::Accessor<char> vsi_isPassMMVAcc("vsi_isPassMMV");
+    vsi_twoCirc_drAcc(*vertex)                      = wrkvrt.param.twoCirc_dr;
+    vsi_twoCirc_dphiAcc(*vertex)                    = wrkvrt.param.twoCirc_dphi;
+    vsi_twoCirc_int_rAcc(*vertex)                   = wrkvrt.param.twoCirc_int_r;
+    vsi_vrtFast_rAcc(*vertex)                       = wrkvrt.param.vrtFast_r;
+    vsi_vrtFast_etaAcc(*vertex)                     = wrkvrt.param.vrtFast_eta;
+    vsi_vrtFast_phiAcc(*vertex)                     = wrkvrt.param.vrtFast_phi;
+    vsi_vrtFast_trkd0Acc(*vertex)    = wrkvrt.param.vrtFast_trkd0;
+    vsi_vrtFast_trkz0Acc(*vertex)    = wrkvrt.param.vrtFast_trkz0;
+    vsi_vrtFit_rAcc(*vertex)                        = wrkvrt.vertex.perp();
+    vsi_vrtFit_chi2Acc(*vertex)                     = wrkvrt.chi2;
+    vsi_vPosAcc(*vertex)                            = wrkvrt.param.vPos;
+    vsi_vPosMomAngTAcc(*vertex)                     = wrkvrt.param.vPosMomAngT;
+    vsi_dphi1Acc(*vertex)                           = wrkvrt.param.dphi1;
+    vsi_dphi2Acc(*vertex)                           = wrkvrt.param.dphi2;
+    vsi_isPassMMVAcc(*vertex)                        = wrkvrt.param.isPassMMV ? 1 : 0;
 
-    vertex->auxdata<char>("vsi_trkd0cut")                         = wrkvrt.cuts.trkd0cut ?      1 : 0;
-    vertex->auxdata<char>("vsi_twoCircErrcut")                    = wrkvrt.cuts.twoCircErrcut ? 1 : 0;
-    vertex->auxdata<char>("vsi_twoCircRcut")                      = wrkvrt.cuts.twoCircRcut ?   1 : 0;
-    vertex->auxdata<char>("vsi_fastErrcut")                       = wrkvrt.cuts.fastErrcut ?    1 : 0;
-    vertex->auxdata<char>("vsi_fastRcut")                         = wrkvrt.cuts.fastRcut ?      1 : 0;
-    vertex->auxdata<char>("vsi_fitErrcut")                        = wrkvrt.cuts.fitErrcut ?     1 : 0;
-    vertex->auxdata<char>("vsi_chi2cut")                          = wrkvrt.cuts.chi2cut ?       1 : 0;
+    static const SG::Accessor<char> vsi_trkd0cutAcc("vsi_trkd0cut");
+    static const SG::Accessor<char> vsi_twoCircErrcutAcc("vsi_twoCircErrcut");
+    static const SG::Accessor<char> vsi_twoCircRcutAcc("vsi_twoCircRcut");
+    static const SG::Accessor<char> vsi_fastErrcutAcc("vsi_fastErrcut");
+    static const SG::Accessor<char> vsi_fastRcutAcc("vsi_fastRcut");
+    static const SG::Accessor<char> vsi_fitErrcutAcc("vsi_fitErrcut");
+    static const SG::Accessor<char> vsi_chi2cutAcc("vsi_chi2cut");
+    vsi_trkd0cutAcc(*vertex)                         = wrkvrt.cuts.trkd0cut ?      1 : 0;
+    vsi_twoCircErrcutAcc(*vertex)                    = wrkvrt.cuts.twoCircErrcut ? 1 : 0;
+    vsi_twoCircRcutAcc(*vertex)                      = wrkvrt.cuts.twoCircRcut ?   1 : 0;
+    vsi_fastErrcutAcc(*vertex)                       = wrkvrt.cuts.fastErrcut ?    1 : 0;
+    vsi_fastRcutAcc(*vertex)                         = wrkvrt.cuts.fastRcut ?      1 : 0;
+    vsi_fitErrcutAcc(*vertex)                        = wrkvrt.cuts.fitErrcut ?     1 : 0;
+    vsi_chi2cutAcc(*vertex)                          = wrkvrt.cuts.chi2cut ?       1 : 0;
 
   }
   //
