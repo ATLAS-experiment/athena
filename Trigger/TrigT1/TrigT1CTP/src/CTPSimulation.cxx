@@ -69,11 +69,11 @@ LVL1CTP::CTPSimulation::initialize() {
    ATH_CHECK( m_bgKey.initialize( !m_forceBunchGroupPattern ) );
 
    // data links
-   ATH_CHECK( m_iKeyTopo.initialize( !m_iKeyTopo.empty() ) );
+   ATH_CHECK( m_iKeyTopo.initialize( !m_iKeyTopo.empty() && m_doL1Topo ) );
    ATH_CHECK( m_iKeyMuctpi.initialize( ! m_iKeyMuctpi.empty() ) );
 
    // Legacy L1Calo
-   ATH_CHECK( m_iKeyLegacyTopo.initialize( !m_iKeyLegacyTopo.empty() &&  m_doL1CaloLegacy ) );
+   ATH_CHECK( m_iKeyLegacyTopo.initialize( !m_iKeyLegacyTopo.empty() &&  m_doL1CaloLegacy && m_doL1TopoLegacy ) );
    ATH_CHECK( m_iKeyCtpinEM.initialize( m_doL1CaloLegacy ) );
    ATH_CHECK( m_iKeyCtpinJet.initialize( m_doL1CaloLegacy ) );
    ATH_CHECK( m_iKeyCtpinXE.initialize( m_doL1CaloLegacy ) );
@@ -557,7 +557,7 @@ LVL1CTP::CTPSimulation::fillInputHistograms(const EventContext& context) const {
    }
 
    // topo
-   if( not m_iKeyLegacyTopo.empty() &&  m_doL1CaloLegacy) {
+   if( not m_iKeyLegacyTopo.empty() && m_doL1CaloLegacy && m_doL1TopoLegacy ) {
       auto legacyTopoInput = SG::makeHandle( m_iKeyLegacyTopo, context );
       if(legacyTopoInput.isValid()) {
          ATH_MSG_DEBUG("Retrieved input from L1Topo from StoreGate with key " << m_iKeyTopo);
@@ -577,7 +577,7 @@ LVL1CTP::CTPSimulation::fillInputHistograms(const EventContext& context) const {
       }
    }
 
-   if( not m_iKeyTopo.empty() ) {
+   if( not m_iKeyTopo.empty() && m_doL1Topo ) {
       auto topoInput = SG::makeHandle( m_iKeyTopo, context );
       if(topoInput.isValid()) {
          ATH_MSG_DEBUG("Retrieved input from L1Topo from StoreGate with key " << m_iKeyTopo);
@@ -635,7 +635,7 @@ LVL1CTP::CTPSimulation::extractMultiplicities(std::map<std::string, unsigned int
       std::bitset<128> cable128 {0};
       uint64_t cable {0};
       if (CxxUtils::starts_with (connName, "Legacy")) { // legacy topo
-         if (m_iKeyLegacyTopo.empty() || !m_doL1CaloLegacy )
+         if (m_iKeyLegacyTopo.empty() || !m_doL1CaloLegacy || !m_doL1TopoLegacy )
          {
             continue;
          }
@@ -694,7 +694,7 @@ LVL1CTP::CTPSimulation::extractMultiplicities(std::map<std::string, unsigned int
       }
 
        else { // new topo
-         if (m_iKeyTopo.empty())
+         if (m_iKeyTopo.empty() || !m_doL1Topo )
          {
             continue;
          }
@@ -977,7 +977,7 @@ LVL1CTP::CTPSimulation::calculateMuonMultiplicity( const TrigConf::L1Threshold &
 
 unsigned int
 LVL1CTP::CTPSimulation::calculateTopoOptMultiplicity( const TrigConf::L1Threshold & confThr, const TrigConf::L1Menu * l1menu, const EventContext& context ) const {
-  if(m_iKeyTopo.empty()) {
+  if(m_iKeyTopo.empty() || !m_doL1Topo ) {
     return 0;
   }
   unsigned int multiplicity = 0;
@@ -1015,30 +1015,59 @@ LVL1CTP::CTPSimulation::calculateTopoOptMultiplicity( const TrigConf::L1Threshol
 
 
 unsigned int
-LVL1CTP::CTPSimulation::calculateTopoMultiplicity( const TrigConf::L1Threshold & confThr, const TrigConf::L1Menu * l1menu, const EventContext& context ) const {
-   if (m_iKeyTopo.empty())
-   {
-      return 0;
-   }
+LVL1CTP::CTPSimulation::calculateTopoMultiplicity( const TrigConf::L1Threshold & confThr, const TrigConf::L1Menu * l1menu, const EventContext& context, bool UseLegacy = false ) const {
    unsigned int multiplicity = 0;
-   auto topoInput = SG::makeHandle( m_iKeyTopo, context );
-   if(topoInput.isValid()) {
-      uint64_t cable = 0;
-      std::string conn("");
-      if( l1menu->connector("LegacyTopo0").hasLine(confThr.name()) ) {
-         conn = "LegacyTopo0";
+   if(UseLegacy){
+     if (m_iKeyLegacyTopo.empty() || !m_doL1TopoLegacy )
+       {
+	 return 0;
+       }
+     multiplicity = 0;
+     auto topoInput = SG::makeHandle( m_iKeyTopo, context );
+     if(topoInput.isValid()) {
+       uint64_t cable = 0;
+       std::string conn("");
+       if( l1menu->connector("LegacyTopo0").hasLine(confThr.name()) ) {
+	 conn = "LegacyTopo0";
+	 cable = ( (uint64_t)topoInput->cableWord1( 1 ) << 32) + topoInput->cableWord1( 0 );
+       } else if( l1menu->connector("LegacyTopo1").hasLine(confThr.name()) ) {
+	 conn = "LegacyTopo1";
+	 cable = ( (uint64_t)topoInput->cableWord2( 1 ) << 32) + topoInput->cableWord2( 0 );
+       }
+       if(conn != "") {
+	 auto & triggerline = l1menu->connector(conn).triggerLine(confThr.name());
+	 ATH_MSG_DEBUG( " ---> Topo input " << confThr.name() << " on module " << conn
+			<< ", cable start " << triggerline.startbit() << " and end " << triggerline.endbit()
+			<< " double word 0x" << std::setw(16) << std::setfill('0') << std::hex << cable << std::dec << std::setfill(' ') );
+	 multiplicity = CTPUtil::getMultTopo( cable, triggerline.startbit(), triggerline.endbit(), triggerline.clock() );
+       }
+     }
+   }
+   else{
+     if (m_iKeyTopo.empty() || !m_doL1Topo )
+       {
+	 return 0;
+       }
+     multiplicity = 0;
+     auto topoInput = SG::makeHandle( m_iKeyTopo, context );
+     if(topoInput.isValid()) {
+       uint64_t cable = 0;
+       std::string conn("");
+       if( l1menu->connector("Topo2El").hasLine(confThr.name()) ) {
+         conn = "Topo2El";
          cable = ( (uint64_t)topoInput->cableWord1( 1 ) << 32) + topoInput->cableWord1( 0 );
-      } else if( l1menu->connector("LegacyTopo1").hasLine(confThr.name()) ) {
-         conn = "LegacyTopo1";
+       } else if( l1menu->connector("Topo3El").hasLine(confThr.name()) ) {
+         conn = "Topo3El";
          cable = ( (uint64_t)topoInput->cableWord2( 1 ) << 32) + topoInput->cableWord2( 0 );
-      }
-      if(conn != "") {
+       }
+       if(conn != "") {
          auto & triggerline = l1menu->connector(conn).triggerLine(confThr.name());
          ATH_MSG_DEBUG( " ---> Topo input " << confThr.name() << " on module " << conn
                         << ", cable start " << triggerline.startbit() << " and end " << triggerline.endbit()
                         << " double word 0x" << std::setw(16) << std::setfill('0') << std::hex << cable << std::dec << std::setfill(' ') );
          multiplicity = CTPUtil::getMultTopo( cable, triggerline.startbit(), triggerline.endbit(), triggerline.clock() );
-      }
+       }
+     }
    }
    return multiplicity;
 }
@@ -1058,8 +1087,10 @@ LVL1CTP::CTPSimulation::calculateMultiplicity( const TrigConf::L1Threshold & con
          multiplicity = calculateJetMultiplicity( confThr, l1menu, context );
       } else if ( confThr.type() == "MU" ) {
          multiplicity = calculateMuonMultiplicity( confThr, l1menu, context );
+      } else if ( confThr.type() == "R2TOPO") {
+  	 multiplicity = calculateTopoMultiplicity( confThr, l1menu, context, true );
       } else if ( confThr.type() == "TOPO" ) {
-         multiplicity = calculateTopoMultiplicity( confThr, l1menu, context );
+ 	 multiplicity = calculateTopoMultiplicity( confThr, l1menu, context, m_doL1TopoLegacy);
       } else if ( confThr.type()[0] == 'e' || confThr.type()[0] == 'c' || confThr.type()[0] == 'j' || confThr.type()[0] == 'g' ){
       	 multiplicity = calculateTopoOptMultiplicity( confThr, l1menu, context );
       }

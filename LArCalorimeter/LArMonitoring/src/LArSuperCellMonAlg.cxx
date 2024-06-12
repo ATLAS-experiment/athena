@@ -146,6 +146,7 @@ StatusCode LArSuperCellMonAlg::fillHistograms(const EventContext& ctx) const{
 
     const CaloCell* superCellRef = superCellRefCont->findCell( SCcaloDDE->identifyHash() );
     float SCetRef = superCellRef->et();
+    float SCetDiff = SCet - SCetRef;
     float resolution = -1000;
     float resolutionPass = -1000;
     float resolutionHET = -1000;
@@ -158,12 +159,14 @@ StatusCode LArSuperCellMonAlg::fillHistograms(const EventContext& ctx) const{
     auto MSCt = Monitored::Scalar<float>("superCelltime",SCt);
     auto MSCprov = Monitored::Scalar<int>("superCellprovenance",SCprov);
     auto MSCeta = Monitored::Scalar<float>("superCellEta",SCeta);
+    auto MSCphi = Monitored::Scalar<float>("superCellPhi",SCphi);
     auto MSCres = Monitored::Scalar<float>("resolution",resolution);
     auto MSCresPass = Monitored::Scalar<float>("resolutionPass",resolutionPass);
     auto MSCresHET = Monitored::Scalar<float>("resolutionHET",resolutionHET);
     auto MSCetRef = Monitored::Scalar<float>("superCellEtRef",SCetRef);
     auto MSCtRef = Monitored::Scalar<float>("superCelltimeRef",superCellRef->time());
     auto MSCprovRef = Monitored::Scalar<int>("superCellprovenanceRef",(superCellRef->provenance()&0xFFF));
+    auto MSCetDiff = Monitored::Scalar<float>("superCellEtDiff",SCetDiff);
     variables.push_back(MSCet);
     variables.push_back(MSCt);
     variables.push_back(MSCprov);
@@ -171,11 +174,13 @@ StatusCode LArSuperCellMonAlg::fillHistograms(const EventContext& ctx) const{
     if (  SCetRef > m_thresholdsForResolution ) variables.push_back(MSCres);
     if ( (SCetRef > m_thresholdsForResolution ) && (SCpassTime || SCpassPF ) ) variables.push_back(MSCresPass);
     if ( (SCetRef > m_thresholdsForResolution ) && (SCet > 4e3 ) ) variables.push_back(MSCresHET);
+    variables.push_back(MSCphi);
     variables.push_back(MSCetRef);
     // let us put conditional to force building the linearity plot
     // only when the new signal passes BCID
     variables.push_back(MSCtRef);
     variables.push_back(MSCprovRef);
+    variables.push_back(MSCetDiff);
 
     // per layer
     auto layerName=m_layerNames[iLyr];
@@ -183,6 +188,7 @@ StatusCode LArSuperCellMonAlg::fillHistograms(const EventContext& ctx) const{
     auto LMSCt = Monitored::Scalar<float>("superCelltime_"+layerName,SCt);
     auto LMSCprov = Monitored::Scalar<int>("superCellprovenance_"+layerName,SCprov);
     auto LMSCeta = Monitored::Scalar<float>("superCellEta_"+layerName,SCeta);
+    auto LMSCphi = Monitored::Scalar<float>("superCellPhi_"+layerName,SCphi);
     auto LMSCres = Monitored::Scalar<float>("resolution_"+layerName,resolution);
     auto LMSCresPass = Monitored::Scalar<float>("resolutionPass_"+layerName,resolutionPass);
     auto LMSCresHET = Monitored::Scalar<float>("resolutionHET_"+layerName,resolutionHET);
@@ -191,6 +197,7 @@ StatusCode LArSuperCellMonAlg::fillHistograms(const EventContext& ctx) const{
     auto LMSCprovRef = Monitored::Scalar<int>("superCellprovenanceRef_"+layerName,(superCellRef->provenance()&0xFFF));
 
     auto MBCIDFFB = Monitored::Scalar<int>("BCID",bcidFFB);
+    auto LMSCetDiff = Monitored::Scalar<float>("superCellEtDiff_"+layerName,SCetDiff);
     variables.push_back(LMSCet);
     variables.push_back(LMSCt);
     variables.push_back(LMSCprov);
@@ -198,10 +205,12 @@ StatusCode LArSuperCellMonAlg::fillHistograms(const EventContext& ctx) const{
     if (  SCetRef > m_thresholdsForResolution ) variables.push_back(LMSCres);
     if ( (SCetRef > m_thresholdsForResolution ) && (SCpassTime || SCpassPF ) ) variables.push_back(LMSCresPass);
     if ( (SCetRef > m_thresholdsForResolution ) && (SCet > 4e3 ) ) variables.push_back(LMSCresHET);
+    variables.push_back(LMSCphi);
     variables.push_back(LMSCetRef);
     if ( SCpassTime || SCpassPF ) variables.push_back(LMSCtRef);
     variables.push_back(LMSCprovRef);
     variables.push_back(MBCIDFFB);
+    variables.push_back(LMSCetDiff);
 
     auto MSCtReco = Monitored::Scalar<float>("superCelltimeReco",0.);
     auto MSCetReco = Monitored::Scalar<float>("superCellEtReco",0.);

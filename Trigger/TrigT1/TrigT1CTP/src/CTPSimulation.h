@@ -104,7 +104,7 @@ namespace LVL1CTP {
       unsigned int calculateTauMultiplicity ( const TrigConf::L1Threshold & confThr, const TrigConf::L1Menu * l1menu, const EventContext& context ) const;
       unsigned int calculateMETMultiplicity ( const TrigConf::L1Threshold & confThr, const TrigConf::L1Menu * l1menu, const EventContext& context ) const;
       unsigned int calculateMuonMultiplicity( const TrigConf::L1Threshold & confThr, const TrigConf::L1Menu * l1menu, const EventContext& context ) const;
-      unsigned int calculateTopoMultiplicity( const TrigConf::L1Threshold & confThr, const TrigConf::L1Menu * l1menu, const EventContext& context ) const;
+      unsigned int calculateTopoMultiplicity( const TrigConf::L1Threshold & confThr, const TrigConf::L1Menu * l1menu, const EventContext& context, bool UseLegacy ) const;
       unsigned int calculateTopoOptMultiplicity( const TrigConf::L1Threshold & confThr, const TrigConf::L1Menu * l1menu, const EventContext& context ) const;
 
       // Needed services and tools
@@ -161,7 +161,8 @@ namespace LVL1CTP {
       Gaudi::Property<unsigned int> m_bunchGroupPattern { this, "BunchGroupPattern", 0x0003, "Bunchgroup pattern applied at every event, useful for simulation. Bit x corresponds to bunchgroup x" };
 
       Gaudi::Property<bool> m_doL1CaloLegacy { this, "DoL1CaloLegacy", false, "Use L1Calo legacy" };
-
+      Gaudi::Property<bool> m_doL1Topo       { this, "DoL1Topo",       false, "Use L1Topo" };
+      Gaudi::Property<bool> m_doL1TopoLegacy { this, "DoL1TopoLegacy", false, "Use L1Topo Legacy" };
       Gaudi::Property<bool> m_muonRun2Format { this, "MuonMultiplicityRun2Format", false, "Interpret muon multiplicity in Run 2 format (bit 0 unused)" };
 
       SG::ReadCondHandleKey<TrigConf::L1BunchGroupSet> m_bgKey{this, "L1BunchGroup", "L1BunchGroup", "L1BunchGroupSet key name"};

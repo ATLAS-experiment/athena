@@ -162,10 +162,7 @@ class TrigBphysMonAlgBuilder:
     self.monitored_containers = ['HLT_DimuEF',
                                  'HLT_Bmumux',
                                  'HLT_Bmutrk',
-                                 #'HLT_DrellYan', #uncomment when the DY chains are implemented
-                                 'HLT_DiElecPrecision', # not used
                                  'HLT_DiElecPrecisionGSF', 
-                                 'HLT_NoMuonDiElecPrecision', # not used
                                  'HLT_NoMuonDiElecPrecisionGSF',
                                  ]
     

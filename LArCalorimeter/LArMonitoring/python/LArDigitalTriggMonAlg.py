@@ -283,16 +283,15 @@ def LArDigitalTriggMonConfig(flags,larLATOMEBuilderAlg, nsamples=32, streamTypes
 
 
             #####################
-
-            partGroup_digi.defineHistogram('Digi_part_BCID,Digi_part_iphi,Digi_part_diff_adc0_ped;Diff_ADC0_Ped_Per_BCID_Per_iphi_'+thisSel,
-                                           title='ADC[0] - Pedestal '+selStrPart[thisSel]+': iphi vs BCID;BCID;iphi',
+            partGroup_digi.defineHistogram('Digi_part_BCID,Digi_part_iphi,Digi_part_diff_adc_ped;Diff_ADC_Ped_Per_BCID_Per_iphi_'+thisSel,
+                                           title='ADC - Pedestal (all samples) '+selStrPart[thisSel]+': iphi vs BCID;BCID;iphi',
                                            type='TProfile2D',
                                            cutmask='Digi_part_'+thisSel,
                                            path=thisTopPath,
                                            xbins=3564,xmin=-0.5,xmax=3563.5,
                                            ybins=iphi_bins+1,ymin=0,ymax=iphi_bins+1,  # Make a lardqglobals for ieta iphi?
                                            pattern=[(part)])
-
+            
 
 
             ##################

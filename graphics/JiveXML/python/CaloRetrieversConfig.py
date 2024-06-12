@@ -1,0 +1,110 @@
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import Format
+
+
+def CaloRetrieversCfg(flags, **kwargs):
+    result = ComponentAccumulator()
+    from LArRecUtils.LArADC2MeVCondAlgConfig import LArADC2MeVCondAlgCfg
+    result.merge(LArADC2MeVCondAlgCfg (flags))
+
+    if flags.Input.Format is Format.BS:
+        tileDigitsContainer = "TileDigitsCnt"
+
+        if flags.Tile.doOpt2:
+            tileRawChannelContainer = 'TileRawChannelOpt2'
+        elif flags.Tile.doOptATLAS:
+            tileRawChannelContainer = 'TileRawChannelFixed'
+        elif flags.Tile.doFitCOOL:
+            tileRawChannelContainer = 'TileRawChannelFitCool'
+        elif flags.Tile.doFit:
+            tileRawChannelContainer = 'TileRawChannelFit'
+        else:
+            tileRawChannelContainer = 'TileRawChannelCnt'
+
+    else:
+        if "TileDigitsCnt" in flags.Input.Collections:
+            tileDigitsContainer = "TileDigitsCnt"
+        elif "TileDigitsFlt" in flags.Input.Collections:
+            tileDigitsContainer = "TileDigitsFlt"
+
+        if "TileRawChannelOpt2" in flags.Input.Collections:
+            tileRawChannelContainer = 'TileRawChannelOpt2'
+        elif "TileRawChannelFitCool" in flags.Input.Collections:
+            tileRawChannelContainer = 'TileRawChannelFitCool'
+        elif "TileRawChannelFit" in flags.Input.Collections:
+            tileRawChannelContainer = 'TileRawChannelFit'
+        elif "TileRawChannelCnt" in flags.Input.Collections:
+            tileRawChannelContainer = 'TileRawChannelCnt'
+
+    from CaloJiveXML.CaloJiveXMLConf import JiveXML__LArDigitRetriever
+    theLArDigitRetriever = JiveXML__LArDigitRetriever(name="LArDigitRetriever")
+    theLArDigitRetriever.DoLArDigit = False
+    theLArDigitRetriever.DoHECDigit = False
+    theLArDigitRetriever.DoFCalDigit = False
+
+    if (theLArDigitRetriever.DoLArDigit or theLArDigitRetriever.DoHECDigit or theLArDigitRetriever.DoFCalDigit):
+        result.addPublicTool(
+            CompFactory.JiveXML.LArDigitRetriever(
+                name="LArDigitRetriever",
+                DoLArDigit=False,
+                DoHECDigit=False,
+                DoFCalDigit=False,
+            )
+        )
+
+    else:
+        result.addPublicTool(
+            CompFactory.JiveXML.CaloFCalRetriever(
+                name="CaloFCalRetriever",
+                DoFCalCellDetails=False,
+                DoBadFCal=False,
+            )
+        )
+
+        result.addPublicTool(
+            CompFactory.JiveXML.CaloLArRetriever(
+                name="CaloLArRetriever",
+                DoLArCellDetails=False,
+                DoBadLAr=False,
+                LArlCellThreshold = 500 if flags.OnlineEventDisplays.BeamSplashMode else 50,
+            )
+        )
+
+        result.addPublicTool(
+            CompFactory.JiveXML.CaloHECRetriever(
+                name="CaloHECRetriever",
+                DoHECCellDetails=False,
+                DoBadHEC=False,
+                HEClCellThreshold = 500 if flags.OnlineEventDisplays.BeamSplashMode else 50,
+            )
+        )
+
+    result.addPublicTool(
+        CompFactory.JiveXML.CaloClusterRetriever(name = "CaloClusterRetriever",**kwargs
+        )
+    )
+
+    result.addPublicTool(
+        CompFactory.JiveXML.CaloTileRetriever(
+            name = "CaloTileRetriever",
+            TileDigitsContainer = tileDigitsContainer,
+            TileRawChannelContainer = tileRawChannelContainer,
+            DoTileCellDetails = False,
+            DoTileDigit = False,
+            DoBadTile = False,
+        )
+    )
+
+    result.addPublicTool(
+        CompFactory.JiveXML.CaloMBTSRetriever(
+            name = "CaloMBTSRetriever",
+            TileDigitsContainer= tileDigitsContainer,
+            TileRawChannelContainer = tileRawChannelContainer,
+            DoMBTSDigits = False,
+        )
+    )
+
+    return result

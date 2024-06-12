@@ -145,6 +145,17 @@ bool MuonNRPC_CablingMap::insertChannels(const NrpcCablingCoolData& cabling_data
             << static_cast<const NrpcCablingOfflineID&>(cabling_data) << endmsg;
         return false;
     }
+    
+    int sub = cabling_data.subDetector;
+    int rod = cabling_data.tdcSector;
+
+    uint32_t hardId = (sub << 16) | rod;
+
+    const bool robInitialized = std::find(m_listOfROB.begin(), m_listOfROB.end(), hardId) != m_listOfROB.end();
+    if (!robInitialized) {
+        m_listOfROB.push_back(hardId);
+    }
+    
     return true;
 }
 bool MuonNRPC_CablingMap::finalize(MsgStream& log) {
@@ -206,4 +217,7 @@ const std::vector<IdentifierHash>& MuonNRPC_CablingMap::getChamberHashVec(
     log << MSG::WARNING << "ROB ID " << ROBI << " not found ! " << endmsg;
     static const std::vector<IdentifierHash> dummy;
     return dummy;
+}
+const MuonNRPC_CablingMap::ListOfROB& MuonNRPC_CablingMap::getAllROBId() const {
+    return m_listOfROB;
 }
