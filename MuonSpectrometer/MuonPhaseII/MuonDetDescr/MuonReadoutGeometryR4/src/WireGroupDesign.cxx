@@ -46,6 +46,16 @@ namespace MuonGMR4{
        }
        return m_groups[grpIdx].numWires;
     }
+    unsigned int WireGroupDesign::numPitchesToGroup(unsigned int groupNum) const {
+       unsigned int grpIdx = groupNum - firstStripNumber();
+       if (grpIdx >= m_groups.size()) {
+          ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The group number "<<groupNum
+                        <<" is out of range. Expect ["<<firstStripNumber()
+                        <<"-"<<m_groups.size()+firstStripNumber()<<").");
+          return 0;
+       }
+       return m_groups[grpIdx].accumlWires;
+    }
     double WireGroupDesign::wireCutout() const {return m_wireCutout;} 
     
     void WireGroupDesign::defineWireCutout(const double wireCutout){m_wireCutout=wireCutout;}
