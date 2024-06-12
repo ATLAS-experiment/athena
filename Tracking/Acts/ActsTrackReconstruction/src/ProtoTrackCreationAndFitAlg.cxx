@@ -81,7 +81,7 @@ StatusCode ActsTrk::ProtoTrackCreationAndFitAlg::execute(const EventContext & ct
     ATH_MSG_DEBUG("Retrieved " << detEleColl.back()->size() << " input condition elements from key " << detEleCollKey.key());
   }
 
-  TrackingSurfaceHelper tracking_surface_helper;
+  TrackingSurfaceHelper trackingSurfaceHelper;
   for (auto & coll : detEleColl)
   {
     for (const auto *det_el : *coll){
@@ -90,7 +90,7 @@ StatusCode ActsTrk::ProtoTrackCreationAndFitAlg::execute(const EventContext & ct
       xAOD::UncalibMeasType type = xAOD::UncalibMeasType::Other;
       if (det_el->isPixel()) type = xAOD::UncalibMeasType::PixelClusterType;
       else if (det_el->isSCT()) type = xAOD::UncalibMeasType::StripClusterType;
-      tracking_surface_helper.actsSurfaces(type).push_back(&surface);
+      trackingSurfaceHelper.actsSurfaces(type).push_back(&surface);
     }
   }
   for (const auto & coll : detEleColl)
@@ -98,7 +98,7 @@ StatusCode ActsTrk::ProtoTrackCreationAndFitAlg::execute(const EventContext & ct
     xAOD::UncalibMeasType measType = xAOD::UncalibMeasType::Other;
     if (coll->front()->isPixel()) measType = xAOD::UncalibMeasType::PixelClusterType;
     else measType = xAOD::UncalibMeasType::StripClusterType;
-    tracking_surface_helper.setSiDetectorElements(measType, coll);
+    trackingSurfaceHelper.setSiDetectorElements(measType, coll);
   }
   Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
   Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(ctx);
@@ -111,13 +111,21 @@ StatusCode ActsTrk::ProtoTrackCreationAndFitAlg::execute(const EventContext & ct
 
   // now we fit each of the proto tracks
   for (auto & proto : myProtoTracks){
-    auto res = m_actsFitter->fit(ctx, proto.measurements, *proto.parameters, 
-											  m_trackingGeometryTool->getGeometryContext(ctx).context(),  m_extrapolationTool->getMagneticFieldContext(ctx), Acts::CalibrationContext(),
-											  tracking_surface_helper);
+    auto res = m_actsFitter->fit(ctx, proto.measurements,*proto.parameters, 
+											           m_trackingGeometryTool->getGeometryContext(ctx).context(),
+                                 m_extrapolationTool->getMagneticFieldContext(ctx),
+                                 Acts::CalibrationContext(),
+                                 trackingSurfaceHelper);
 
     if(!res) continue;
+    if (res->size() == 0 ) continue;
+    if(not proto.measurements.size()) continue;
     ATH_MSG_DEBUG(".......Done track with size "<< proto.measurements.size());
     const auto trackProxy = res->getTrack(0);
+    if (not trackProxy.hasReferenceSurface()) {
+      ATH_MSG_INFO("There is not reference surface for this track");
+      continue;
+    }
     auto destProxy = trackContainer.getTrack(trackContainer.addTrack());
     destProxy.copyFrom(trackProxy, true); // make sure we copy track states!
   }
