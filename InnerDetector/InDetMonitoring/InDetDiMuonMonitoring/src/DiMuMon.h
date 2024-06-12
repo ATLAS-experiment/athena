@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DiMuMon_H
@@ -40,7 +40,7 @@ class DiMuMon : public ManagedMonitorToolBase
   double getEta(const xAOD::TrackParticle* id1, const xAOD::TrackParticle* id2 ) const;
   double getPhi(const xAOD::TrackParticle* id1, const xAOD::TrackParticle* id2 ) const;
   double getPt(const xAOD::TrackParticle* id1, const xAOD::TrackParticle* id2 ) const;
-  void iterativeGausFit(TH2F* hin, std::vector<TH1F*> hout, int mode);
+  void iterativeGausFit(TH2F* hin, const std::vector<TH1F*>& hout, int mode);
   bool trackQuality(const xAOD::TrackParticle *idTrk);
 
 

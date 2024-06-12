@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <sstream>
@@ -477,7 +477,7 @@ StatusCode DiMuMon::procHistograms()
 }
 
 
-void DiMuMon::iterativeGausFit (TH2F* hin, std::vector<TH1F*> hout, int mode){
+void DiMuMon::iterativeGausFit (TH2F* hin, const std::vector<TH1F*>& hout, int mode){
   // a canvas may be needed when implmenting this into the post-processing file
   TString hname =  hin->GetName();
   TString psName = hname + m_triggerChainName + ".ps";

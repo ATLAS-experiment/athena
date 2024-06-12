@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************
@@ -89,7 +89,7 @@ public:
    unsigned int GetMinimumSignalHeight(void) const {return m_minSignalHeight;};
    
    void SetTimingRegime(const std::string& regime){m_timingRegime = regime;};
-   std::string GetTimingRegime(void) const {return m_timingRegime;};
+   const std::string& GetTimingRegime(void) const {return m_timingRegime;};
    
    void SetHistogramTool(ToolHandle<LVL1::TrigT1CaloLWHistogramTool>& histTool){m_histTool = &histTool;};
    
@@ -138,7 +138,7 @@ public:
    unsigned int GetRunNumber(void){return m_runNumber;};
    
    void SetOutputDirectoryName(const std::string& name){m_outputFileDirName = name;};
-   std::string GetOutputDirectoryName(void){return m_outputFileDirName;};
+   const std::string& GetOutputDirectoryName(void){return m_outputFileDirName;};
    
    void SetTileRun(bool value = true){m_isTileRun = value;};
    bool IsTileRun(void) const {return m_isTileRun;};
