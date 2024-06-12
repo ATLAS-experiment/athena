@@ -261,7 +261,7 @@ StatusCode CaloLCOutOfClusterTool::weight(CaloCluster *theCluster, const EventCo
             for (;itrCell!=itrCellEnd; ++itrCell) {
               CaloPrefetch::nextDDE(itrCell, itrCellEnd);
               const CaloDetDescrElement* cDDE = itrCell->caloDDE();
-              if ( cDDE && m_invalidSamplings.find(cDDE->getSampling()) == m_invalidSamplings.end() ) { //Fixme ... could use a bit-pattern
+              if ( cDDE && !m_invalidSamplings.contains(cDDE->getSampling())) { //Fixme ... could use a bit-pattern
                 double weight = itrCell.weight();//theCluster->getCellWeight(itrCell); // fastest!
                 weight *= oocWeight;
                 // reweight cell in cluster
