@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/test/AuxTypeVectorFactory_test.cxx
@@ -78,14 +78,16 @@ void test_vector()
   else
     assert (fac.tiVec() == &typeid (std::vector<T, ALLOC<T> >));
 
-  std::unique_ptr<SG::IAuxTypeVector> v = fac.create (1, 10, 20);
+  std::unique_ptr<SG::IAuxTypeVector> v = fac.create (1, 10, 20, false);
   assert (v->auxid() == 1);
+  assert (!v->isLinked());
   T* ptr = reinterpret_cast<T*> (v->toPtr());
   ptr[0] = makeT(20);
   ptr[1] = makeT(2);
 
-  std::unique_ptr<SG::IAuxTypeVector> v2 = fac.create (1, 10, 20);
+  std::unique_ptr<SG::IAuxTypeVector> v2 = fac.create (1, 10, 20, true);
   assert (v2->auxid() == 1);
+  assert (v2->isLinked());
   T* ptr2 = reinterpret_cast<T*> (v2->toPtr());
 
   AuxVectorData_test avd1;
@@ -130,13 +132,19 @@ void test_vector()
   vec3->push_back (makeT(3));
   vec3->push_back (makeT(2));
   vec3->push_back (makeT(1));
-  std::unique_ptr<SG::IAuxTypeVector> v3 = fac.createFromData (1, vec3, false, true);
+  std::unique_ptr<SG::IAuxTypeVector> v3 = fac.createFromData (1, vec3, false, true, false);
   assert (v3->auxid() == 1);
   assert (v3->size() == 3);
+  assert (!v3->isLinked());
   T* ptr3 = reinterpret_cast<T*> (v3->toPtr());
   assert (ptr3[0] == makeT(3));
   assert (ptr3[1] == makeT(2));
   assert (ptr3[2] == makeT(1));
+
+  vector_type* vec4 = new vector_type;
+  std::unique_ptr<SG::IAuxTypeVector> v4 = fac.createFromData (1, vec4, false, true, true);
+  assert (v4->auxid() == 1);
+  assert (v4->isLinked());
 
   // Testing range copy, with and without overlap.
   for (size_t i = 0; i < 10; i++) {
@@ -187,7 +195,7 @@ void test_vector2()
   vec4->push_back (makeT(3));
   vec4->push_back (makeT(2));
   vec4->push_back (makeT(1));
-  std::unique_ptr<SG::IAuxTypeVector> v4 = fac.createFromData (1, vec4, true, true);
+  std::unique_ptr<SG::IAuxTypeVector> v4 = fac.createFromData (1, vec4, true, true, false);
   assert (v4->auxid() == 1);
   assert (v4->size() == 4);
   T* ptr4 = reinterpret_cast<T*> (v4->toPtr());
@@ -244,7 +252,7 @@ void test2()
   SG::AuxTypeVectorFactory<EL> ve1;
   SG::AuxTypeVectorFactory<std::vector<EL> > ve2;
 
-  std::unique_ptr<SG::IAuxTypeVector> v1 = ve1.create (1, 10, 10);
+  std::unique_ptr<SG::IAuxTypeVector> v1 = ve1.create (1, 10, 10, false);
   EL* elv = reinterpret_cast<EL*> (v1->toPtr());
   elv[1] = EL (123, 10);
   elv[2] = EL (124, 11);
@@ -260,7 +268,7 @@ void test2()
   assert (elv[3].key() == 124);
   assert (elv[3].index() == 11);
 
-  std::unique_ptr<SG::IAuxTypeVector> v2 = ve2.create (2, 10, 10);
+  std::unique_ptr<SG::IAuxTypeVector> v2 = ve2.create (2, 10, 10, false);
   std::vector<EL>* velv = reinterpret_cast<std::vector<EL>*> (v2->toPtr());
   velv[1].push_back (EL (123, 5));
   velv[1].push_back (EL (123, 6));

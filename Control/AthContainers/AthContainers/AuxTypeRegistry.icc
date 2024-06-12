@@ -17,6 +17,7 @@ namespace SG {
  * @param name The name of the aux data item.
  * @param clsname The name of its associated class.  May be blank.
  * @param flags Optional flags qualifying the type.  See above.
+ * @param linkedVariable auxid of a linked variable, or null_auxid.
  *
  * The type of the item is given by the template parameter @c T,
  * and the @c ALLOC gives the type of the vector allocator.
@@ -27,9 +28,11 @@ template <class T, class ALLOC>
 SG::auxid_t
 AuxTypeRegistry::getAuxID (const std::string& name,
                            const std::string& clsname /*= ""*/,
-                           const Flags flags /*= Flags::None*/)
+                           const Flags flags /*= Flags::None*/,
+                           const SG::auxid_t linkedVariable /*= SG::null_auxid*/)
 {
-  return findAuxID (name, clsname, flags, typeid(T), &typeid(ALLOC), nullptr,
+  return findAuxID (name, clsname, flags, linkedVariable,
+                    typeid(T), &typeid(ALLOC), nullptr,
                     &AuxTypeRegistry::makeFactory<T, ALLOC>);
 }
 
@@ -41,7 +44,7 @@ AuxTypeRegistry::getAuxID (const std::string& name,
  *
  * If the type of @c auxid is not compatible with the supplied
  * types @c T / @c ALLOC, then throw a @c SG::ExcAuxTypeMismatch exception.
- * Also may throw @c SG::ExcAtomicMismatch.
+ * Also may throw @c SG::ExcFlagMismatch.
  */
 template <class T, class ALLOC>
 void
@@ -102,6 +105,16 @@ void AuxTypeRegistry::copy (SG::auxid_t auxid,
                             size_t n) const
 {
   return copy (auxid, dst, dst_index, src, src_index, n);
+}
+
+
+/*
+ * @brief Test whether this is a linked variable.
+ */
+inline
+bool AuxTypeRegistry::isLinked (SG::auxid_t auxid) const
+{
+  return getFlags (auxid) & Flags::Linked;
 }
 
 

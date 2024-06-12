@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/src/exceptions.cxx
@@ -29,6 +29,9 @@ std::string excFormatName (SG::auxid_t auxid)
       os << "::";
     os << r.getName (auxid);
     os << "' (" << auxid << ")";
+  }
+  else {
+    os << "(null)";
   }
   return os.str();
 }
@@ -462,13 +465,102 @@ ExcInsertMoveOwnershipMismatch::ExcInsertMoveOwnershipMismatch()
 //*************************************************************************
 
 
+/// Helper: format flags.
+std::string excFormatFlags (SG::AuxVarFlags flags)
+{
+  std::string out;
+  if (flags & SG::AuxVarFlags::Atomic)
+    out = "atomic";
+  if (flags & SG::AuxVarFlags::Linked) {
+    if (!out.empty()) out += " ";
+    out = "linked";
+  }
+
+  return "[" + out + "]";
+}
+
+
 /// Helper: format exception error string.
-std::string excAtomicMismatch_format (SG::auxid_t auxid,
-                                      const std::type_info& type)
+std::string excFlagMismatch_format (SG::auxid_t auxid,
+                                    const std::type_info& type,
+                                    SG::AuxVarFlags existing_flags,
+                                    SG::AuxVarFlags requested_flags)
 {
   std::ostringstream os;
-  os << "SG::ExcAtomicMismatch: "
-     << "Non-atomic access to atomic aux variable  "
+  os << "SG::ExcFlagMismatch: "
+     << "Flag mismatch for aux variable "
+     << excFormatName (auxid)
+     << " of type " << AthContainers_detail::typeinfoName (type)
+     << " between existing " << excFormatFlags (existing_flags)
+     << " and requested " << excFormatFlags (requested_flags) << " flags. "
+     << "This may occur as a result of not using AtomicDecorator to access an atomic variable.";
+  return os.str();
+}
+
+
+/**
+ * @brief Constructor.
+ * @param auxid ID of the requested aux data item.
+ * @param new_type Type of the item.
+ * @param existing_flags Existing flags for the variable.
+ * @param requested_flags Requested flags for the variable.
+ */
+ExcFlagMismatch::ExcFlagMismatch (SG::auxid_t auxid,
+                                  const std::type_info& type,
+                                  SG::AuxVarFlags existing_flags,
+                                  SG::AuxVarFlags requested_flags)
+  : std::runtime_error (excFlagMismatch_format (auxid, type, existing_flags, requested_flags))
+{
+}
+
+
+//*************************************************************************
+
+
+/// Helper: format exception error string.
+std::string excLinkMismatch_format (SG::auxid_t auxid,
+                                    const std::type_info& type,
+                                    SG::auxid_t existing_linked_id,
+                                    SG::auxid_t requested_linked_id)
+{
+  std::ostringstream os;
+  os << "SG::ExcLinkMismatch: "
+     << "Linked variable mismatch for aux variable "
+     << excFormatName (auxid)
+     << " of type " << AthContainers_detail::typeinfoName (type)
+     << " between existing " << excFormatName (existing_linked_id)
+     << " and requested " << excFormatName (requested_linked_id) << " linked variables.";
+  return os.str();
+}
+
+
+/**
+ * @brief Constructor.
+ * @param auxid ID of the requested aux data item.
+ * @param type Type of the item.
+ * @param existing_linked_id ID of existing linked variable.
+ * @param requested_linked_id ID of requested linked variable.
+ */
+ExcLinkMismatch::ExcLinkMismatch (SG::auxid_t auxid,
+                                  const std::type_info& type,
+                                  SG::auxid_t existing_linked_id,
+                                  SG::auxid_t requested_linked_id)
+  : std::runtime_error (excLinkMismatch_format (auxid, type,
+                                                existing_linked_id, requested_linked_id))
+{
+}
+
+
+//*************************************************************************
+
+
+/// Helper: format exception error string.
+std::string excNoLinkedVar_format (SG::auxid_t auxid,
+                                   const std::type_info& type)
+{
+  std::ostringstream os;
+  os << "SG::ExcNoLinkedVar: "
+     << "Linked variable not found for aux variable "
      << excFormatName (auxid)
      << " of type " << AthContainers_detail::typeinfoName (type);
   return os.str();
@@ -478,11 +570,11 @@ std::string excAtomicMismatch_format (SG::auxid_t auxid,
 /**
  * @brief Constructor.
  * @param auxid ID of the requested aux data item.
- * @param new_type Type of the item.
+ * @param type Type of the item.
  */
-ExcAtomicMismatch::ExcAtomicMismatch (SG::auxid_t auxid,
-                                      const std::type_info& type)
-  : std::runtime_error (excAtomicMismatch_format (auxid, type))
+ExcNoLinkedVar::ExcNoLinkedVar (SG::auxid_t auxid,
+                                const std::type_info& type)
+  : std::runtime_error (excNoLinkedVar_format (auxid, type))
 {
 }
 

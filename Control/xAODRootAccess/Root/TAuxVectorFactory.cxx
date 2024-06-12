@@ -58,17 +58,20 @@ namespace xAOD {
    }
 
    std::unique_ptr< SG::IAuxTypeVector >
-   TAuxVectorFactory::create( SG::auxid_t auxid, size_t size, size_t capacity ) const {
+   TAuxVectorFactory::create( SG::auxid_t auxid, size_t size, size_t capacity,
+                              bool isLinked ) const {
 
      return std::make_unique< TAuxVector >( this, auxid,
                                             CxxUtils::as_const_ptr(m_class),
-                                            size, capacity );
+                                            size, capacity,
+                                            isLinked );
    }
 
    std::unique_ptr< SG::IAuxTypeVector >
    TAuxVectorFactory::createFromData( SG::auxid_t /*auxid*/,
                                       void* /*data*/, bool /*isPacked*/,
-                                      bool /*ownFlag*/ ) const {
+                                      bool /*ownFlag*/,
+                                      bool /*isLinked*/ ) const {
 
       std::abort();
    }

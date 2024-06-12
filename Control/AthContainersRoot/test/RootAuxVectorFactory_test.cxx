@@ -65,9 +65,10 @@ void test1()
   SG::AuxStoreInternal store;
   TClass* cl = TClass::GetClass ("vector<int>");
   SG::RootAuxVectorFactory fac (cl);
-  SG::IAuxTypeVector* vec = new SG::RootAuxVector (&fac, 1, 10, 20);
+  SG::IAuxTypeVector* vec = new SG::RootAuxVector (&fac, 1, 10, 20, false);
   assert (vec->size() == 10);
   assert (vec->auxid() == 1);
+  assert (!vec->isLinked());
   int* ptr = reinterpret_cast<int*> (vec->toPtr());
   assert (std::as_const (*vec).toPtr() == ptr);
   for (int i=0; i < 10; i++)
@@ -113,6 +114,7 @@ void test1()
 
   std::unique_ptr<SG::IAuxTypeVector> vec2 = vec->clone();
   assert (vec2->auxid() == 1);
+  assert (!vec2->isLinked());
   int* ptr2 = reinterpret_cast<int*> (vec2->toPtr());
   assert (ptr != ptr2);
   assert (ptr2[0] == 1);
@@ -179,9 +181,13 @@ void test2()
   SG::AuxStoreInternal store;
   TClass* cl = TClass::GetClass ("vector<std::string>");
   SG::RootAuxVectorFactory fac (cl);
-  SG::IAuxTypeVector* vec = new SG::RootAuxVector (&fac, 1, 10, 10);
+  SG::IAuxTypeVector* vec = new SG::RootAuxVector (&fac, 1, 10, 10, true);
   assert (vec->size() == 10);
   assert (vec->auxid() == 1);
+  assert (vec->isLinked());
+  std::unique_ptr<SG::IAuxTypeVector> vecx = vec->clone();
+  assert (vecx->auxid() == 1);
+  assert (vecx->isLinked());
   std::string* ptr = reinterpret_cast<std::string*> (vec->toPtr());
   for (int i=0; i < 10; i++)
     ptr[i] = str(i+1);
@@ -278,9 +284,10 @@ void test3()
   assert (fac.getEltSize() == sizeof(int));
   assert (fac.tiVec() == &typeid(std::vector<int>));
   assert (fac.isDynamic());
-  std::unique_ptr<SG::IAuxTypeVector> vec = fac.create (1, 10, 10);
+  std::unique_ptr<SG::IAuxTypeVector> vec = fac.create (1, 10, 10, false);
   assert (vec->size() == 10);
   assert (vec->auxid() == 1);
+  assert (!vec->isLinked());
 
   int* ptr = reinterpret_cast<int*> (vec->toPtr());
 
@@ -343,7 +350,9 @@ void test3()
   AuxVectorData_test avd2;
   AuxStoreInternal_test store2;
   avd2.setStore (&store2);
-  std::unique_ptr<SG::IAuxTypeVector> vec2 = fac.create (1, 10, 10);
+  std::unique_ptr<SG::IAuxTypeVector> vec2 = fac.create (1, 10, 10, true);
+  assert (vec2->auxid() == 1);
+  assert (vec2->isLinked());
   int* ptr2 = reinterpret_cast<int*> (vec2->toPtr());
   store2.addVector (std::move(vec2), false);
 
@@ -373,7 +382,7 @@ void test4()
   assert (fac.getEltSize() == sizeof(std::string));
   assert (fac.tiVec() == &typeid(std::vector<std::string>));
   assert (fac.isDynamic());
-  std::unique_ptr<SG::IAuxTypeVector> vec = fac.create (1, 10, 10);
+  std::unique_ptr<SG::IAuxTypeVector> vec = fac.create (1, 10, 10, false);
   assert (vec->size() == 10);
 
   std::string* ptr = reinterpret_cast<std::string*> (vec->toPtr());
@@ -429,7 +438,7 @@ void test4()
   AuxVectorData_test avd2;
   AuxStoreInternal_test store2;
   avd2.setStore (&store2);
-  std::unique_ptr<SG::IAuxTypeVector> vec2 = fac.create (1, 10, 10);
+  std::unique_ptr<SG::IAuxTypeVector> vec2 = fac.create (1, 10, 10, false);
   std::string* ptr2 = reinterpret_cast<std::string*> (vec2->toPtr());
   store2.addVector (std::move(vec2), false);
 
@@ -461,9 +470,10 @@ void test5()
   vec1->push_back(3);
   vec1->push_back(2);
   vec1->push_back(1);
-  std::unique_ptr<SG::IAuxTypeVector> v1 = fac.createFromData (1, vec1, false, true);
+  std::unique_ptr<SG::IAuxTypeVector> v1 = fac.createFromData (1, vec1, false, true, false);
   assert (v1->size() == 3);
   assert (v1->auxid() == 1);
+  assert (!v1->isLinked());
   int* ptr1 = reinterpret_cast<int*> (v1->toPtr());
   assert (ptr1[0] == 3);
   assert (ptr1[1] == 2);
@@ -472,9 +482,10 @@ void test5()
   std::vector<int>* vec2 = new std::vector<int>;
   vec2->push_back(4);
   vec2->push_back(5);
-  std::unique_ptr<SG::IAuxTypeVector> v2 = fac.createFromData (1, vec2, false, false);
+  std::unique_ptr<SG::IAuxTypeVector> v2 = fac.createFromData (1, vec2, false, false, true);
   assert (v2->size() == 2);
   assert (v2->auxid() == 1);
+  assert (v2->isLinked());
   int* ptr2 = reinterpret_cast<int*> (v2->toPtr());
   assert (ptr2[0] == 4);
   assert (ptr2[1] == 5);
@@ -506,7 +517,7 @@ void test6()
   TClass* cl4 = TClass::GetClass ("std::vector<std::vector<ElementLink<std::vector<AthContainersRootTest::Foo> > > >");
   SG::RootAuxVectorFactory fac4 (cl4);
 
-  std::unique_ptr<SG::IAuxTypeVector> vec1 = fac1.create (1, 10, 10);
+  std::unique_ptr<SG::IAuxTypeVector> vec1 = fac1.create (1, 10, 10, false);
   EL* elv = reinterpret_cast<EL*> (vec1->toPtr());
   elv[1] = EL (123, 10);
   elv[2] = EL (124, 11);
@@ -522,7 +533,7 @@ void test6()
   assert (elv[3].key() == 124);
   assert (elv[3].index() == 11);
 
-  std::unique_ptr<SG::IAuxTypeVector> vec2 = fac2.create (2, 10, 10);
+  std::unique_ptr<SG::IAuxTypeVector> vec2 = fac2.create (2, 10, 10, false);
   std::vector<EL>* velv = reinterpret_cast<std::vector<EL>*> (vec2->toPtr());
   store1.addVector (std::move(vec2), false);
 
@@ -562,7 +573,7 @@ void test6()
   assert (velv[6][1].index() == 28);
 
   typedef ElementLink<std::vector<AthContainersRootTest::Foo> > EL2;
-  std::unique_ptr<SG::IAuxTypeVector> vec3 = fac3.create (3, 10, 10);
+  std::unique_ptr<SG::IAuxTypeVector> vec3 = fac3.create (3, 10, 10, false);
   EL2* elv2 = reinterpret_cast<EL2*> (vec3->toPtr());
   store1.addVector (std::move(vec3), false);
   elv2[1] = EL2 (123, 10);
@@ -570,7 +581,7 @@ void test6()
 
   fac3.copyForOutput (3, avd1, 2, avd1, 1, 2);
 
-  std::unique_ptr<SG::IAuxTypeVector> vec4 = fac4.create (4, 10, 10);
+  std::unique_ptr<SG::IAuxTypeVector> vec4 = fac4.create (4, 10, 10, false);
   std::vector<EL2>* velv2 = reinterpret_cast<std::vector<EL2>*> (vec4->toPtr());
   store1.addVector (std::move(vec4), false);
   velv2[1].push_back (EL2 (123, 5));

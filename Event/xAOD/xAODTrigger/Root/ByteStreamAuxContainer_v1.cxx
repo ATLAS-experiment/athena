@@ -485,7 +485,7 @@ namespace xAOD {
       }
 
       // Register the variable:
-      m_dynamicVecs[ auxid ] = new AuxPersVector< T >( auxid, var );
+      m_dynamicVecs[ auxid ] = new AuxPersVector< T >( auxid, var, false );
 
       if (capacity > 0) {
         // Set it to the right size:

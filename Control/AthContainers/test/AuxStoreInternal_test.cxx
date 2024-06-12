@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/test/AuxStoreInternal_test.cxx
@@ -333,7 +333,7 @@ void test4()
   SG::auxid_t ityp3 = SG::AuxTypeRegistry::instance().getAuxID<int> ("anInt3");
 
   assert (s.size() == 0);
-  auto vec1 = std::make_unique<SG::AuxTypeVector<int> > (ityp1, 10, 10);
+  auto vec1 = std::make_unique<SG::AuxTypeVector<int> > (ityp1, 10, 10, false);
   SG::IAuxTypeVector* vec1ptr = vec1.get();
   s.addVector (std::move(vec1), false);
   assert (s.size() == 10);
@@ -341,7 +341,7 @@ void test4()
   assert (s.getData(ityp1) == vec1ptr->toPtr());
   assert (vec1ptr->size() == 10);
 
-  auto vec2 = std::make_unique<SG::AuxTypeVector<int> > (ityp2, 5, 5);
+  auto vec2 = std::make_unique<SG::AuxTypeVector<int> > (ityp2, 5, 5, false);
   SG::IAuxTypeVector* vec2ptr = vec2.get();
   s.addVector (std::move(vec2), true);
   assert (s.size() == 10);
@@ -350,7 +350,7 @@ void test4()
   assert (s.getData(ityp2) == vec2ptr->toPtr());
 
   s.lock();
-  auto vec3 = std::make_unique<SG::AuxTypeVector<int> > (ityp3, 5, 5);
+  auto vec3 = std::make_unique<SG::AuxTypeVector<int> > (ityp3, 5, 5, false);
   EXPECT_EXCEPTION (SG::ExcStoreLocked, s.addVector (std::move(vec3), false));
   EXPECT_EXCEPTION (SG::ExcStoreLocked, s.getDecoration (ityp1, 10, 10));
   s.getDecoration (ityp2, 10, 10);

@@ -33,7 +33,8 @@ namespace xAOD {
       /// Constructor
       TAuxVector( const TAuxVectorFactory* factory,
                   SG::auxid_t auxid,
-                  const ::TClass* cl, size_t size, size_t capacity );
+                  const ::TClass* cl, size_t size, size_t capacity,
+                  bool isLinked );
       /// Copy constructor
       TAuxVector( const TAuxVector& parent );
       /// Destructor

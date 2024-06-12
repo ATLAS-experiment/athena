@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file xAODRootAccess/test/ut_xaodrootaccess_tauxvectorfactory_test.cxx
@@ -65,14 +65,14 @@ void test1()
   AuxVectorData_test avd1;
   AuxStoreInternal_test store1;
   avd1.setStore (&store1);
-  std::unique_ptr<SG::IAuxTypeVector> vec = fac.create (1, 10, 10);
+  std::unique_ptr<SG::IAuxTypeVector> vec = fac.create (1, 10, 10, false);
   int* ptr = reinterpret_cast<int*> (vec->toPtr());
   store1.addVector (std::move(vec), false);
 
   AuxVectorData_test avd2;
   AuxStoreInternal_test store2;
   avd2.setStore (&store2);
-  std::unique_ptr<SG::IAuxTypeVector> vec2 = fac.create (1, 10, 10);
+  std::unique_ptr<SG::IAuxTypeVector> vec2 = fac.create (1, 10, 10, false);
   int* ptr2 = reinterpret_cast<int*> (vec2->toPtr());
   store2.addVector (std::move(vec2), false);
 
@@ -156,14 +156,18 @@ void test2()
   AuxVectorData_test avd1;
   AuxStoreInternal_test store1;
   avd1.setStore (&store1);
-  std::unique_ptr<SG::IAuxTypeVector> vec = fac.create (1, 10, 10);
+  std::unique_ptr<SG::IAuxTypeVector> vec = fac.create (1, 10, 10, false);
+  assert (vec->auxid() == 1);
+  assert (!vec->isLinked());
   std::string* ptr = reinterpret_cast<std::string*> (vec->toPtr());
   store1.addVector (std::move(vec), false);
 
   AuxVectorData_test avd2;
   AuxStoreInternal_test store2;
   avd2.setStore (&store2);
-  std::unique_ptr<SG::IAuxTypeVector> vec2 = fac.create (1, 10, 10);
+  std::unique_ptr<SG::IAuxTypeVector> vec2 = fac.create (1, 10, 10, true);
+  assert (vec2->auxid() == 1);
+  assert (vec2->isLinked());
   std::string* ptr2 = reinterpret_cast<std::string*> (vec2->toPtr());
   store2.addVector (std::move(vec2), false);
 

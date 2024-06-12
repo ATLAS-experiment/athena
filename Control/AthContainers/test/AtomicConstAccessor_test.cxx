@@ -89,7 +89,7 @@ void test1()
     SG::AtomicConstAccessor<int> i2 (ityp2_id);
     assert (i2.auxid() == ityp2_id);
     EXPECT_EXCEPTION (SG::ExcAuxTypeMismatch, (SG::AtomicConstAccessor<float> (ityp2_id)));
-    EXPECT_EXCEPTION (SG::ExcAtomicMismatch, (SG::Accessor<int> (ityp2_id)));
+    EXPECT_EXCEPTION (SG::ExcFlagMismatch, (SG::Accessor<int> (ityp2_id)));
   }
 
   SG::AtomicDecorator<int> ityp2_d ("anInt2");
@@ -107,7 +107,7 @@ void test1()
   static_assert (std::is_same<decltype(ityp3.getDataArray(v)),
                               const std::atomic<int>*>::value, "test");
 
-  EXPECT_EXCEPTION (SG::ExcAtomicMismatch,
+  EXPECT_EXCEPTION (SG::ExcFlagMismatch,
                     SG::Accessor<int> ityp3a ("anInt3"));
 }
 

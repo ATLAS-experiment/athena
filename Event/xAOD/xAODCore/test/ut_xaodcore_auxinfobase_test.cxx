@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -53,7 +53,7 @@ void test1()
   SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
   SG::auxid_t ityp1 = r.getAuxID<int> ("i1");
 
-  EXPECT_EXCEPTION (SG::ExcAtomicMismatch,
+  EXPECT_EXCEPTION (SG::ExcFlagMismatch,
                     r.getAuxID<int> ("a1"));
 
   SG::auxid_t atyp1 = r.getAuxID<int> ("a1", "",

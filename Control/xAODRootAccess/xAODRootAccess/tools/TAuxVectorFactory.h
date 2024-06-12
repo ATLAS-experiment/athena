@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef XAODROOTACCESS_TOOLS_TAUXVECTORFACTORY_H
 #define XAODROOTACCESS_TOOLS_TAUXVECTORFACTORY_H
@@ -43,12 +43,14 @@ namespace xAOD {
 
       /// Create a new vector in memory with the requested size and capacity
       virtual std::unique_ptr< SG::IAuxTypeVector >
-      create( SG::auxid_t auxid, size_t size, size_t capacity ) const override;
+      create( SG::auxid_t auxid, size_t size, size_t capacity,
+              bool isLinked ) const override;
 
       /// Create a vector object of this type from a data blob
       virtual std::unique_ptr< SG::IAuxTypeVector >
       createFromData( SG::auxid_t auxid, void* data, bool isPacked,
-                      bool ownFlag ) const override;
+                      bool ownFlag,
+                      bool isLinked ) const override;
 
       /// Copy elements from one location to another
       virtual void

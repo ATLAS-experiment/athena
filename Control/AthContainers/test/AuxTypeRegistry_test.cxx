@@ -2,10 +2,10 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
- * @file AthContainers/test/AuxBaseRegistry_test.cxx
+ * @file AthContainers/test/AuxTypeRegistry_test.cxx
  * @author scott snyder <snyder@bnl.gov>
  * @date Apr, 2013
- * @brief Regression tests for AuxBaseRegistry
+ * @brief Regression tests for AuxTypeRegistry
  */
 
 
@@ -491,8 +491,44 @@ void test_atomic()
   assert (r.getFlags (auxid1) == SG::AuxVarFlags::None);
   assert (r.getFlags (auxid2) == SG::AuxVarFlags::Atomic);
   
-  EXPECT_EXCEPTION (SG::ExcAtomicMismatch, r.getAuxID<int> ("atest2"));
-  EXPECT_EXCEPTION (SG::ExcAtomicMismatch, r.checkAuxID<int> (auxid2));
+  EXPECT_EXCEPTION (SG::ExcFlagMismatch, r.getAuxID<int> ("atest2"));
+  EXPECT_EXCEPTION (SG::ExcFlagMismatch, r.checkAuxID<int> (auxid2));
+}
+
+
+void test_linked()
+{
+  std::cout << "test_linked\n";
+
+  SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
+  SG::auxid_t auxid1 = r.getAuxID<int> ("ltest1");
+  assert (!r.isLinked (auxid1));
+  assert (r.linkedVariable (auxid1) == SG::null_auxid);
+
+  SG::auxid_t auxid2 = r.getAuxID<int> ("ltest2", "",
+                                        SG::AuxVarFlags::Linked);
+  assert (r.isLinked (auxid2));
+  assert (r.linkedVariable (auxid2) == SG::null_auxid);
+
+  SG::auxid_t auxid3 = r.getAuxID<int> ("ltest3", "",
+                                        SG::AuxVarFlags::None,
+                                        auxid2);
+  assert (!r.isLinked (auxid3));
+  assert (r.linkedVariable (auxid3) == auxid2);
+
+  EXPECT_EXCEPTION( SG::ExcFlagMismatch, r.getAuxID<int> ("ltest2") );
+  EXPECT_EXCEPTION( SG::ExcLinkMismatch, r.getAuxID<int> ("ltest3") );
+
+  auto v1 = r.makeVector (auxid1, 1, 1);
+  assert (!v1->isLinked());
+  auto v2 = r.makeVector (auxid2, 1, 1);
+  assert (v2->isLinked());
+
+  assert (SG::AuxTypeRegistry::isLinkedName ("foo_linked"));
+  assert (!SG::AuxTypeRegistry::isLinkedName ("foo_liked"));
+  assert (SG::AuxTypeRegistry::linkedName ("bar") == "bar_linked");
+
+  assert (!SG::AuxTypeRegistry::classNameHasLink ("foo"));
 }
 
 
@@ -505,5 +541,6 @@ int main()
   test_copyForOutput();
   test_renameMap();
   test_atomic();
+  test_linked();
   return 0;
 }

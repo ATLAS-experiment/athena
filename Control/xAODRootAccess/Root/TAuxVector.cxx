@@ -19,8 +19,9 @@ namespace xAOD {
 
    TAuxVector::TAuxVector( const TAuxVectorFactory* factory,
                            SG::auxid_t auxid,
-                           const ::TClass* cl, size_t size, size_t )
-      : IAuxTypeVector( auxid ),
+                           const ::TClass* cl, size_t size, size_t,
+                           bool isLinked )
+      : IAuxTypeVector( auxid, isLinked ),
         m_factory( factory ),
         m_proxy( cl->GetCollectionProxy()->Generate() ), m_vec( cl->New() ) {
 

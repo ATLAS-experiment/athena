@@ -218,7 +218,7 @@ void test2()
 {
   std::cout << "test2\n";
   SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
-  EXPECT_EXCEPTION (SG::ExcAtomicMismatch,
+  EXPECT_EXCEPTION (SG::ExcFlagMismatch,
                     r.getAuxID<int> ("a1"));
 
   SG::auxid_t atyp1 = r.getAuxID<int> ("a1", "",

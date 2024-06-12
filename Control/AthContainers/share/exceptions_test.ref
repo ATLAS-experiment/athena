@@ -1,11 +1,11 @@
 test1
 SG::ExcNoAuxStore: Requested aux data item `::foo' (0) but there is no associated aux data store.
 SG::ExcNoAuxStore: Requested aux data item `cl::bar' (1) but there is no associated aux data store.
-SG::ExcNoAuxStore: Requested aux data item  but there is no associated aux data store.
+SG::ExcNoAuxStore: Requested aux data item (null) but there is no associated aux data store.
 SG::ExcNoAuxStore: Operation attempted on container with no associated aux data store: op
 SG::ExcBadAuxVar: Attempt to retrieve nonexistent aux data item `::foo' (0).
 SG::ExcConstAuxData: Non-const operation `someop' performed on const aux data `::foo' (0).
-SG::ExcConstAuxData: Non-const operation `otherop' performed on const aux data .
+SG::ExcConstAuxData: Non-const operation `otherop' performed on const aux data (null).
 SG::ExcUntrackedSetStore: Attempt to set aux data store on container that doesn't track indices, or disable index tracking for a container with aux data.
 SG::ExcBadPrivateStore: Bad use of private store: op
 SG::ExcAuxTypeMismatch: Type mismatch for aux variable `::foo' (0); old type is float new type is int
@@ -21,7 +21,9 @@ SG::ExcDVToELV: Can't convert DataVector to vector of ElementLinks: why
 ViewVector not in view mode.
 ViewVector intwas used in a context that requires a CLID, but no CLID was available.  Make sure a VIEWVECTOR_CLASS_DEF declaration exists for the class in a library that has been loaded.
 Ownership mismatch for insertMove.
-SG::ExcAtomicMismatch: Non-atomic access to atomic aux variable  `cl::bar' (1) of type int
+SG::ExcFlagMismatch: Flag mismatch for aux variable `cl::bar' (1) of type int between existing [atomic] and requested [linked] flags. This may occur as a result of not using AtomicDecorator to access an atomic variable.
+SG::ExcLinkMismatch: Linked variable mismatch for aux variable `::foo' (0) of type int between existing `cl::bar' (1) and requested (null) linked variables.
+SG::ExcNoLinkedVar: Linked variable not found for aux variable `::foo' (0) of type int
 SG::ExcInvalidThinningTarget: ThinningHandle target does not exist: 1234/asd
 SG::ExcBadIterSwap: Attempt to swap between containers with inconsistent ownership.
 SG::ExcAllocOwnership: Bad allocation ownership.

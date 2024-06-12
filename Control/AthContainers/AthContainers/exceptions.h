@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/exceptions.h
@@ -367,11 +367,11 @@ public:
 
 
 /**
- * @brief Exception --- Non-atomic access to atomic aux variable.
+ * @brief Exception --- Flag mismatch for aux variable.
  *
- * Must use AtomicDecorator to access the variable.
+ * Could occur due to not using AtomicDecorator to access an atomic variable.
  */
-class ExcAtomicMismatch
+class ExcFlagMismatch
   : public std::runtime_error
 {
 public:
@@ -379,9 +379,51 @@ public:
    * @brief Constructor.
    * @param auxid ID of the requested aux data item.
    * @param new_type Type of the item.
+   * @param existing_flags Existing flags for the variable.
+   * @param requested_flags Requested flags for the variable.
    */
-  ExcAtomicMismatch (SG::auxid_t auxid,
-                     const std::type_info& type);
+  ExcFlagMismatch (SG::auxid_t auxid,
+                   const std::type_info& type,
+                   SG::AuxVarFlags existing_flags,
+                   SG::AuxVarFlags requested_flags);
+};
+
+
+/**
+ * @brief Exception --- Linked variable mismatch.
+ */
+class ExcLinkMismatch
+  : public std::runtime_error
+{
+public:
+  /**
+   * @brief Constructor.
+   * @param auxid ID of the requested aux data item.
+   * @param type Type of the item.
+   * @param existing_linked_id ID of existing linked variable.
+   * @param requested_linked_id ID of requested linked variable.
+   */
+  ExcLinkMismatch (SG::auxid_t auxid,
+                   const std::type_info& type,
+                   SG::auxid_t existing_linked_id,
+                   SG::auxid_t requested_linked_id);
+};
+
+
+/**
+ * @brief Exception --- Linked variable not found.
+ */
+class ExcNoLinkedVar
+  : public std::runtime_error
+{
+public:
+  /**
+   * @brief Constructor.
+   * @param auxid ID of the requested aux data item.
+   * @param type Type of the item.
+   */
+  ExcNoLinkedVar (SG::auxid_t auxid,
+                  const std::type_info& type);
 };
 
 

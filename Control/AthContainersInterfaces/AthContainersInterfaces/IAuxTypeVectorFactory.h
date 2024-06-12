@@ -60,13 +60,15 @@ public:
    * @param auxid ID for the variable being created.
    * @param size Initial size of the new vector.
    * @param capacity Initial capacity of the new vector.
+   * @param isLinked True if this variable is linked from another one.
    *
    * Returns a newly-allocated object.
    */
   virtual
   std::unique_ptr<IAuxTypeVector> create (SG::auxid_t auxid,
                                           size_t size,
-                                          size_t capacity) const = 0;
+                                          size_t capacity,
+                                          bool isLinked) const = 0;
 
 
   /**
@@ -76,6 +78,7 @@ public:
    * @param isPacked If true, @c data is a @c PackedContainer.
    * @param ownFlag If true, the newly-created IAuxTypeVector object
    *                will take ownership of @c data.
+   * @param isLinked True if this variable is linked from another one.
    *
    * If the element type is T, then @c data should be a pointer
    * to a std::vector<T> object, which was obtained with @c new.
@@ -88,7 +91,8 @@ public:
   std::unique_ptr<IAuxTypeVector> createFromData (SG::auxid_t auxid,
                                                   void* data,
                                                   bool isPacked,
-                                                  bool ownFlag) const = 0;
+                                                  bool ownFlag,
+                                                  bool isLinked) const = 0;
 
 
   /**
