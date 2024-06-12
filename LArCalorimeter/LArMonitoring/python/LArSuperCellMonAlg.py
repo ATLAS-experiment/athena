@@ -45,8 +45,8 @@ def LArSuperCellMonConfig(flags, **kwargs):
     cfg.merge(emulateSC_Cfg(flags))
 
     from LArCellRec.LArRAWtoSuperCellConfig import LArRAWtoSuperCellCfg
-    # removed 5.3.2024 on Denis suggestion
-    #cfg.merge(LArRAWtoSuperCellCfg(flags,mask=mask) )
+
+    cfg.merge(LArRAWtoSuperCellCfg(flags,SCellContainerOut="EmulatedSuperCells",mask=mask) )
 
     # Reco SC:
     #get SC onl-offl mapping from DB    
@@ -84,7 +84,7 @@ def LArSuperCellMonConfig(flags, **kwargs):
     
     #return cfg
     algname='LArSuperCellMonAlg'
-    lArCellMonAlg=CompFactory.LArSuperCellMonAlg(algname,CaloCellContainerReco="SCell_ET_RECO", CaloCellContainerRef=flags.Trigger.L1.L1CaloSuperCellContainerName, doSCReco=True)
+    lArCellMonAlg=CompFactory.LArSuperCellMonAlg(algname,CaloCellContainerReco="SCell_ET_RECO",CaloCellContainerRef=flags.Trigger.L1.L1CaloSuperCellContainerName,doSCReco=True,CaloCellContainer='EmulatedSuperCells')
 
     if flags.Input.isMC is False and not flags.Common.isOnline:
        from LumiBlockComps.LuminosityCondAlgConfig import  LuminosityCondAlgCfg
@@ -107,6 +107,9 @@ def LArSuperCellMonConfig(flags, **kwargs):
 
 
 def LArSuperCellMonConfigCore(helper, algclass, flags, isCosmics=False, isMC=False, algname='LArSuperCellMonAlg', RemoveMasked=True):
+
+    # For SC binning
+    from LArMonitoring.GlobalVariables import lArDQGlobals
 
 
     LArSuperCellMonAlg = helper.addAlgorithm(algclass, algname)
@@ -214,9 +217,34 @@ def LArSuperCellMonConfigCore(helper, algclass, flags, isCosmics=False, isMC=Fal
                                  type='TH1F', path=sc_hist_path,
                                  xbins = 120, xmin=0,xmax=120)
 
+
+    partxbins=lArDQGlobals.SuperCell_Variables["etaRange"]["All"]["All"]
+    partybins=lArDQGlobals.SuperCell_Variables["phiRange"]["All"]["All"]
+    cellMonGroup.defineHistogram('superCellEta,superCellPhi,superCellEtDiff;h_SuperCellCoverage_EtDiff',
+                                 title='ET Diff: #phi vs #eta;#eta;#phi',
+                                 type='TProfile2D', path=sc_hist_path,
+                                 xbins = partxbins, ybins = partybins)
+
+
     sc_hist_path='SC_Layer/'
     for part in LArSuperCellMonAlg.LayerNames:
            partp='('+part+')'
+
+           Part = part[:-2]
+           if Part == "FCAL": 
+               Part = "FCal"
+           Side = part[-1]
+           Sampling = part[-2]
+           if Sampling == "P": 
+               Sampling = "0"
+           partxbins=lArDQGlobals.SuperCell_Variables["etaRange"][Part][Side][Sampling]
+           partybins=lArDQGlobals.SuperCell_Variables["phiRange"][Part][Side][Sampling]
+           cellMonGroup.defineHistogram('superCellEta_'+part+',superCellPhi_'+part+',superCellEtDiff_'+part+';h_SuperCellCoverage_EtDiff_'+part,
+                                         title='ET Diff '+part+': #phi vs #eta;#eta;#phi',
+                                         type='TProfile2D', path=sc_hist_path,
+                                         xbins = partxbins, ybins = partybins)
+
+           
            cellMonGroup.defineHistogram('superCellEt_'+part+';h_SuperCellEt'+part,
                                         title='Super Cell E_T [MeV] '+partp+'; MeV; # entries',
                                         type='TH1F', path=sc_hist_path,
@@ -343,8 +371,7 @@ if __name__=='__main__':
     #flags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/OverlayTests/data15_13TeV.00278748.physics_ZeroBias.merge.RAW._lb0384._SFO-ALL._0001.1']
     #flags.Input.Files = ['../data22_13p6TeV/data22_13p6TeV.00432180.physics_Main.daq.RAW._lb0335._SFO-16._0001.data']
     #flags.Input.Files = ['/eos/atlas/atlastier0/daq/data22_13p6TeV/express_express/00432180/data22_13p6TeV.00432180.express_express.daq.RAW/data22_13p6TeV.00432180.express_express.daq.RAW._lb0374._SFO-12._0001.data']
-    #flags.Input.Files = ['/eos/atlas/atlastier0/daq/data22_13p6TeV/express_express/00439798/data22_13p6TeV.00439798.express_express.daq.RAW/data22_13p6TeV.00439798.express_express.daq.RAW._lb1085._SFO-16._0001.data']
-    flags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data22_13p6TeV.00440499.physics_EnhancedBias.merge.RAW._lb0470._SFO-11._0001.1']
+    flags.Input.Files = ['/eos/atlas/atlastier0/daq/data22_13p6TeV/express_express/00439798/data22_13p6TeV.00439798.express_express.daq.RAW/data22_13p6TeV.00439798.express_express.daq.RAW._lb1085._SFO-16._0001.data']
 
     #flags.Calo.Cell.doPileupOffsetBCIDCorr=True
     flags.Output.HISTFileName = 'LArSuperCellMonOutput.root'
