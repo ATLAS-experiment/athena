@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetExternalAssocTool.cxx
@@ -48,7 +48,7 @@ StatusCode JetExternalAssocTool::initialize() {
   }
 
   // setup vector of decorator
-  for(auto NewLinkName : m_VectorOfNewLinkNames){
+  for(const std::string& NewLinkName : m_VectorOfNewLinkNames){
     m_dec_keys.emplace_back(  m_containerName + "." + m_momentPrefix + NewLinkName);
   }
 
