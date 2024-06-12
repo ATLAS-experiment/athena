@@ -21,6 +21,34 @@
 #include "TClass.h"
 #include "TKey.h"
 
+namespace{
+  void
+  writeIfValid(TH1F * pH){
+    if(pH) pH->Write("",TObject::kOverwrite);
+  }
+  
+  void
+  fillIfValid(TH1F * pH, float val){
+	  if(pH) pH->Fill(val);
+	  return;
+	}
+	
+	float
+	getBinContentIfValid(TH1F * pH, int binIdx){
+	     float result = -9999;;
+	     if (pH) result = pH->GetBinContent(binIdx);
+	     return result;
+	}
+	
+  float
+  getBinErrorIfValid(TH1F * pH, int binIdx){
+    float result = -1;;
+    if (pH) result = pH->GetBinError(binIdx);
+    return result;
+  }
+
+}
+
 namespace dqutils {
 
 void 
@@ -173,6 +201,11 @@ MonitoringFile::RPCPostProcess( const std::string & inFilename, bool /* isIncrem
 	
 	  int nb = hist_METracks->GetNbinsX() ;
 	  double  Ly_eff, Ly_effErr ;
+	  auto calculateErr = [](float hitOn, float trPrj)->double{
+	    return std::sqrt( std::abs( hitOn) / trPrj ) *
+	  		   std::sqrt( 1. - std::abs( hitOn) / trPrj ) /
+	  		   std::sqrt( trPrj );
+	  };
 	  for ( int ib=0; ib!=nb; ib++ ) {
 	     float n_Ly_hitOn = hist_MuctpiThr0->GetBinContent(ib+1) ;  
 	     float n_Ly_TrPrj = hist_METracks  ->GetBinContent(ib+1) ;
@@ -182,163 +215,126 @@ MonitoringFile::RPCPostProcess( const std::string & inFilename, bool /* isIncrem
 	       //MuctpiThr0
 	       Ly_eff    = float(n_Ly_hitOn)/float(n_Ly_TrPrj);
 	       
-	       Ly_effErr = sqrt( fabs( n_Ly_hitOn) / n_Ly_TrPrj ) *
-	  		   sqrt( 1. - fabs( n_Ly_hitOn) / n_Ly_TrPrj ) /
-	  		   sqrt( n_Ly_TrPrj ) ;
+	       Ly_effErr = calculateErr(n_Ly_hitOn, n_Ly_TrPrj) ;
 	       hist_MuctpiThr_eff0->SetBinContent(ib+1, Ly_eff)    ;
 	       hist_MuctpiThr_eff0->SetBinError  (ib+1, Ly_effErr) ;
 	    
 	       //MuctpiThr1
 	       n_Ly_hitOn = hist_MuctpiThr1->GetBinContent(ib+1) ;  
 	       Ly_eff    = float(n_Ly_hitOn)/float(n_Ly_TrPrj);
-	       
-	       Ly_effErr = sqrt( fabs( n_Ly_hitOn) / n_Ly_TrPrj ) *
-	  	 	    sqrt( 1. - fabs( n_Ly_hitOn) / n_Ly_TrPrj ) /
-	  		    sqrt( n_Ly_TrPrj ) ;
+	       Ly_effErr = calculateErr(n_Ly_hitOn, n_Ly_TrPrj) ;
 	       hist_MuctpiThr_eff1->SetBinContent(ib+1, Ly_eff)    ;
 	       hist_MuctpiThr_eff1->SetBinError  (ib+1, Ly_effErr) ;
 	       //MuctpiThr2
 	       n_Ly_hitOn = hist_MuctpiThr2->GetBinContent(ib+1) ;  
 	       Ly_eff    = float(n_Ly_hitOn)/float(n_Ly_TrPrj);
 	       
-	       Ly_effErr = sqrt( fabs( n_Ly_hitOn) / n_Ly_TrPrj ) *
-	  	 	    sqrt( 1. - fabs( n_Ly_hitOn) / n_Ly_TrPrj ) /
-	  		    sqrt( n_Ly_TrPrj ) ;
+	       Ly_effErr = calculateErr(n_Ly_hitOn, n_Ly_TrPrj) ;
 	       hist_MuctpiThr_eff2->SetBinContent(ib+1, Ly_eff)    ;
 	       hist_MuctpiThr_eff2->SetBinError  (ib+1, Ly_effErr) ;
 	       //MuctpiThr3
 	       n_Ly_hitOn = hist_MuctpiThr3->GetBinContent(ib+1) ;  
 	       Ly_eff    = float(n_Ly_hitOn)/float(n_Ly_TrPrj);
 	       
-	       Ly_effErr = sqrt( fabs( n_Ly_hitOn) / n_Ly_TrPrj ) *
-	  	 	    sqrt( 1. - fabs( n_Ly_hitOn) / n_Ly_TrPrj ) /
-	  		    sqrt( n_Ly_TrPrj ) ;
+	       Ly_effErr = calculateErr(n_Ly_hitOn, n_Ly_TrPrj) ;
 	       hist_MuctpiThr_eff3->SetBinContent(ib+1, Ly_eff)    ;
 	       hist_MuctpiThr_eff3->SetBinError  (ib+1, Ly_effErr) ;
 	       //MuctpiThr4
 	       n_Ly_hitOn = hist_MuctpiThr4->GetBinContent(ib+1) ;  
 	       Ly_eff    = float(n_Ly_hitOn)/float(n_Ly_TrPrj);
 	       
-	       Ly_effErr = sqrt( fabs( n_Ly_hitOn) / n_Ly_TrPrj ) *
-	  	 	    sqrt( 1. - fabs( n_Ly_hitOn) / n_Ly_TrPrj ) /
-	  		    sqrt( n_Ly_TrPrj ) ;
+	       Ly_effErr = calculateErr(n_Ly_hitOn, n_Ly_TrPrj) ;
 	       hist_MuctpiThr_eff4->SetBinContent(ib+1, Ly_eff)    ;
 	       hist_MuctpiThr_eff4->SetBinError  (ib+1, Ly_effErr) ;
 	       //MuctpiThr5
 	       n_Ly_hitOn = hist_MuctpiThr5->GetBinContent(ib+1) ;  
 	       Ly_eff    = float(n_Ly_hitOn)/float(n_Ly_TrPrj);
 	       
-	       Ly_effErr = sqrt( fabs( n_Ly_hitOn) / n_Ly_TrPrj ) *
-	  	 	    sqrt( 1. - fabs( n_Ly_hitOn) / n_Ly_TrPrj ) /
-	  		    sqrt( n_Ly_TrPrj ) ;
+	       Ly_effErr = calculateErr(n_Ly_hitOn, n_Ly_TrPrj) ;
 	       hist_MuctpiThr_eff5->SetBinContent(ib+1, Ly_eff)    ;
 	       hist_MuctpiThr_eff5->SetBinError  (ib+1, Ly_effErr) ;
 	       //PadThr0
 	       n_Ly_hitOn = hist_PadThr0->GetBinContent(ib+1) ;
 	       Ly_eff    = float(n_Ly_hitOn)/float(n_Ly_TrPrj);
 	       
-	       Ly_effErr = sqrt( fabs( n_Ly_hitOn) / n_Ly_TrPrj ) *
-	  		   sqrt( 1. - fabs( n_Ly_hitOn) / n_Ly_TrPrj ) /
-	  		   sqrt( n_Ly_TrPrj ) ;
+	       Ly_effErr = calculateErr(n_Ly_hitOn, n_Ly_TrPrj) ;
 	       hist_PadThr_eff0->SetBinContent(ib+1, Ly_eff)    ;
 	       hist_PadThr_eff0->SetBinError  (ib+1, Ly_effErr) ;
 	       //PadThr1
 	       n_Ly_hitOn = hist_PadThr1->GetBinContent(ib+1) ;  
 	       Ly_eff    = float(n_Ly_hitOn)/float(n_Ly_TrPrj);
 	       
-	       Ly_effErr = sqrt( fabs( n_Ly_hitOn) / n_Ly_TrPrj ) *
-	  	 	    sqrt( 1. - fabs( n_Ly_hitOn) / n_Ly_TrPrj ) /
-	  		    sqrt( n_Ly_TrPrj ) ;
+	       Ly_effErr = calculateErr(n_Ly_hitOn, n_Ly_TrPrj) ;
 	       hist_PadThr_eff1->SetBinContent(ib+1, Ly_eff)    ;
 	       hist_PadThr_eff1->SetBinError  (ib+1, Ly_effErr) ;
 	       //PadThr2
 	       n_Ly_hitOn = hist_PadThr2->GetBinContent(ib+1) ;  
 	       Ly_eff    = float(n_Ly_hitOn)/float(n_Ly_TrPrj);
 	       
-	       Ly_effErr = sqrt( fabs( n_Ly_hitOn) / n_Ly_TrPrj ) *
-	  	 	    sqrt( 1. - fabs( n_Ly_hitOn) / n_Ly_TrPrj ) /
-	  		    sqrt( n_Ly_TrPrj ) ;
+	       Ly_effErr = calculateErr(n_Ly_hitOn, n_Ly_TrPrj) ;
 	       hist_PadThr_eff2->SetBinContent(ib+1, Ly_eff)    ;
 	       hist_PadThr_eff2->SetBinError  (ib+1, Ly_effErr) ;
 	       //PadThr3
 	       n_Ly_hitOn = hist_PadThr3->GetBinContent(ib+1) ;  
 	       Ly_eff    = float(n_Ly_hitOn)/float(n_Ly_TrPrj);
 	       
-	       Ly_effErr = sqrt( fabs( n_Ly_hitOn) / n_Ly_TrPrj ) *
-	  	 	    sqrt( 1. - fabs( n_Ly_hitOn) / n_Ly_TrPrj ) /
-	  		    sqrt( n_Ly_TrPrj ) ;
+	       Ly_effErr = calculateErr(n_Ly_hitOn, n_Ly_TrPrj) ;
 	       hist_PadThr_eff3->SetBinContent(ib+1, Ly_eff)    ;
 	       hist_PadThr_eff3->SetBinError  (ib+1, Ly_effErr) ;
 	       //PadThr4
 	       n_Ly_hitOn = hist_PadThr4->GetBinContent(ib+1) ;  
 	       Ly_eff    = float(n_Ly_hitOn)/float(n_Ly_TrPrj);
 	       
-	       Ly_effErr = sqrt( fabs( n_Ly_hitOn) / n_Ly_TrPrj ) *
-	  	 	    sqrt( 1. - fabs( n_Ly_hitOn) / n_Ly_TrPrj ) /
-	  		    sqrt( n_Ly_TrPrj ) ;
+	       Ly_effErr = calculateErr(n_Ly_hitOn, n_Ly_TrPrj) ;
 	       hist_PadThr_eff4->SetBinContent(ib+1, Ly_eff)    ;
 	       hist_PadThr_eff4->SetBinError  (ib+1, Ly_effErr) ;
 	       //PadThr5
 	       n_Ly_hitOn = hist_PadThr5->GetBinContent(ib+1) ;  
 	       Ly_eff    = float(n_Ly_hitOn)/float(n_Ly_TrPrj);
 	       
-	       Ly_effErr = sqrt( fabs( n_Ly_hitOn) / n_Ly_TrPrj ) *
-	  	 	    sqrt( 1. - fabs( n_Ly_hitOn) / n_Ly_TrPrj ) /
-	  		    sqrt( n_Ly_TrPrj ) ;
+	       Ly_effErr = calculateErr(n_Ly_hitOn, n_Ly_TrPrj) ;
 	       hist_PadThr_eff5->SetBinContent(ib+1, Ly_eff)    ;
 	       hist_PadThr_eff5->SetBinError  (ib+1, Ly_effErr) ;
 	       //PhiEtaCoinThr0
 	       n_Ly_hitOn = hist_PhiEtaCoinThr0->GetBinContent(ib+1) ;  
 	       Ly_eff    = float(n_Ly_hitOn)/float(n_Ly_TrPrj);
 	       
-	       Ly_effErr = sqrt( fabs( n_Ly_hitOn) / n_Ly_TrPrj ) *
-	  		   sqrt( 1. - fabs( n_Ly_hitOn) / n_Ly_TrPrj ) /
-	  		   sqrt( n_Ly_TrPrj ) ;
+	       Ly_effErr = calculateErr(n_Ly_hitOn, n_Ly_TrPrj) ;
 	       hist_PhiEtaCoinThr_eff0->SetBinContent(ib+1, Ly_eff)    ;
 	       hist_PhiEtaCoinThr_eff0->SetBinError  (ib+1, Ly_effErr) ;
 	       //PhiEtaCoinThr1
 	       n_Ly_hitOn = hist_PhiEtaCoinThr1->GetBinContent(ib+1) ;  
 	       Ly_eff    = float(n_Ly_hitOn)/float(n_Ly_TrPrj);
 	       
-	       Ly_effErr = sqrt( fabs( n_Ly_hitOn) / n_Ly_TrPrj ) *
-	  	 	    sqrt( 1. - fabs( n_Ly_hitOn) / n_Ly_TrPrj ) /
-	  		    sqrt( n_Ly_TrPrj ) ;
+	       Ly_effErr = calculateErr(n_Ly_hitOn, n_Ly_TrPrj) ;
 	       hist_PhiEtaCoinThr_eff1->SetBinContent(ib+1, Ly_eff)    ;
 	       hist_PhiEtaCoinThr_eff1->SetBinError  (ib+1, Ly_effErr) ;
 	       //PhiEtaCoinThr2
 	       n_Ly_hitOn = hist_PhiEtaCoinThr2->GetBinContent(ib+1) ;  
 	       Ly_eff    = float(n_Ly_hitOn)/float(n_Ly_TrPrj);
 	       
-	       Ly_effErr = sqrt( fabs( n_Ly_hitOn) / n_Ly_TrPrj ) *
-	  	 	    sqrt( 1. - fabs( n_Ly_hitOn) / n_Ly_TrPrj ) /
-	  		    sqrt( n_Ly_TrPrj ) ;
+	       Ly_effErr = calculateErr(n_Ly_hitOn, n_Ly_TrPrj) ;
 	       hist_PhiEtaCoinThr_eff2->SetBinContent(ib+1, Ly_eff)    ;
 	       hist_PhiEtaCoinThr_eff2->SetBinError  (ib+1, Ly_effErr) ;
 	       //PhiEtaCoinThr3
 	       n_Ly_hitOn = hist_PhiEtaCoinThr3->GetBinContent(ib+1) ;  
 	       Ly_eff    = float(n_Ly_hitOn)/float(n_Ly_TrPrj);
 	       
-	       Ly_effErr = sqrt( fabs( n_Ly_hitOn) / n_Ly_TrPrj ) *
-	  	 	    sqrt( 1. - fabs( n_Ly_hitOn) / n_Ly_TrPrj ) /
-	  		    sqrt( n_Ly_TrPrj ) ;
+	       Ly_effErr = calculateErr(n_Ly_hitOn, n_Ly_TrPrj) ;
 	       hist_PhiEtaCoinThr_eff3->SetBinContent(ib+1, Ly_eff)    ;
 	       hist_PhiEtaCoinThr_eff3->SetBinError  (ib+1, Ly_effErr) ;
 	       //PhiEtaCoinThr4
 	       n_Ly_hitOn = hist_PhiEtaCoinThr4->GetBinContent(ib+1) ;  
 	       Ly_eff    = float(n_Ly_hitOn)/float(n_Ly_TrPrj);
 	       
-	       Ly_effErr = sqrt( fabs( n_Ly_hitOn) / n_Ly_TrPrj ) *
-	  	 	    sqrt( 1. - fabs( n_Ly_hitOn) / n_Ly_TrPrj ) /
-	  		    sqrt( n_Ly_TrPrj ) ;
+	       Ly_effErr = calculateErr(n_Ly_hitOn, n_Ly_TrPrj) ;
 	       hist_PhiEtaCoinThr_eff4->SetBinContent(ib+1, Ly_eff)    ;
 	       hist_PhiEtaCoinThr_eff4->SetBinError  (ib+1, Ly_effErr) ;
 	       //PhiEtaCoinThr5
 	       n_Ly_hitOn = hist_PhiEtaCoinThr5->GetBinContent(ib+1) ;  
 	       Ly_eff    = float(n_Ly_hitOn)/float(n_Ly_TrPrj);
 	       
-	       Ly_effErr = sqrt( fabs( n_Ly_hitOn) / n_Ly_TrPrj ) *
-	  	 	    sqrt( 1. - fabs( n_Ly_hitOn) / n_Ly_TrPrj ) /
-	  		    sqrt( n_Ly_TrPrj ) ;
+	       Ly_effErr = calculateErr(n_Ly_hitOn, n_Ly_TrPrj) ;
 	       hist_PhiEtaCoinThr_eff5->SetBinContent(ib+1, Ly_eff)    ;
 	       hist_PhiEtaCoinThr_eff5->SetBinError  (ib+1, Ly_effErr) ;
 	     }
@@ -521,87 +517,72 @@ MonitoringFile::RPCPostProcess( const std::string & inFilename, bool /* isIncrem
 	std::string AverageTime_C_name		= dir_sideC_track   + "Time_Distribution_sideC"	    		;
 	std::string AverageTime_A_name		= dir_sideA_track   + "Time_Distribution_sideA"	    		;
 	
-	TH1F* h_AverageEff_C		        = NULL;
-	TH1F* h_AverageEff_A		        = NULL;
-	TH1F* h_AverageGapEff_C		        = NULL;
-	TH1F* h_AverageGapEff_A		        = NULL;
-	TH1F* h_AverageNoiseCorr_C	        = NULL;
-	TH1F* h_AverageNoiseCorr_A	        = NULL;
-	TH1F* h_AverageNoiseTot_C 	        = NULL;
-	TH1F* h_AverageNoiseTot_A	        = NULL;
-	TH1F* h_AverageCS_C		        = NULL;
-	TH1F* h_AverageCS_A		        = NULL;
-	TH1F* h_AverageRes_CS1_C  	        = NULL;
-	TH1F* h_AverageRes_CS1_A  	        = NULL;
-	TH1F* h_AverageRes_CS2_C  	        = NULL;
-	TH1F* h_AverageRes_CS2_A  	        = NULL;
-	TH1F* h_AverageRes_CSmore2_C	        = NULL;
-	TH1F* h_AverageRes_CSmore2_A	        = NULL;
-	TH1F* h_AverageRes_CS1rms_C	        = NULL;
-	TH1F* h_AverageRes_CS1rms_A	        = NULL;
-	TH1F* h_AverageRes_CS2rms_C	        = NULL;
-	TH1F* h_AverageRes_CS2rms_A	        = NULL;
-	TH1F* h_AverageRes_CSmore2rms_C	        = NULL;
-	TH1F* h_AverageRes_CSmore2rms_A	        = NULL;
-	TH1F* h_AverageOccupancy_C	        = NULL;
-	TH1F* h_AverageOccupancy_A	        = NULL;
-	TH1F* h_AverageTime_C		        = NULL;
-	TH1F* h_AverageTime_A		        = NULL;
+	
+	auto initialiseHisto = [f](const std::string & name)->TH1F* {
+	  TH1F* result =  (TH1F*) (f->Get(name.c_str()));
+	  return result;
+	};
+	
+	TH1F* h_AverageEff_C		        = initialiseHisto(AverageEff_C_name);
+	TH1F* h_AverageEff_A		        =initialiseHisto(AverageEff_A_name);
+	TH1F* h_AverageGapEff_C		        =initialiseHisto(AverageGapEff_C_name);
+	TH1F* h_AverageGapEff_A		        =initialiseHisto(AverageGapEff_A_name);
+	TH1F* h_AverageNoiseCorr_C	        =initialiseHisto(AverageNoiseCorr_C_name);
+	TH1F* h_AverageNoiseCorr_A	        = initialiseHisto(AverageNoiseCorr_A_name);
+	TH1F* h_AverageNoiseTot_C 	        = initialiseHisto(AverageNoiseTot_C_name);
+	TH1F* h_AverageNoiseTot_A	        = initialiseHisto(AverageNoiseTot_A_name);
+	TH1F* h_AverageCS_C		        = initialiseHisto(AverageCS_C_name);
+	TH1F* h_AverageCS_A		        = initialiseHisto(AverageCS_A_name);
+	TH1F* h_AverageRes_CS1_C  	        = initialiseHisto(AverageRes_CS1_C_name);
+	TH1F* h_AverageRes_CS1_A  	        = initialiseHisto(AverageRes_CS1_A_name);
+	TH1F* h_AverageRes_CS2_C  	        = initialiseHisto(AverageRes_CS2_C_name);
+	TH1F* h_AverageRes_CS2_A  	        = initialiseHisto(AverageRes_CS2_A_name);
+	TH1F* h_AverageRes_CSmore2_C	        = initialiseHisto(AverageRes_CSmore2_C_name);
+	TH1F* h_AverageRes_CSmore2_A	        = initialiseHisto(AverageRes_CSmore2_A_name);
+	TH1F* h_AverageRes_CS1rms_C	        = initialiseHisto(AverageRes_CS1rms_C_name);
+	TH1F* h_AverageRes_CS1rms_A	        = initialiseHisto(AverageRes_CS1rms_A_name);
+	TH1F* h_AverageRes_CS2rms_C	        = initialiseHisto(AverageRes_CS2rms_C_name);
+	TH1F* h_AverageRes_CS2rms_A	        = initialiseHisto(AverageRes_CS2rms_A_name);
+	TH1F* h_AverageRes_CSmore2rms_C	        = initialiseHisto(AverageRes_CSmore2rms_C_name);
+	TH1F* h_AverageRes_CSmore2rms_A	        = initialiseHisto(AverageRes_CSmore2rms_A_name);
+	TH1F* h_AverageOccupancy_C	        = initialiseHisto(AverageOccupancy_C_name);
+	TH1F* h_AverageOccupancy_A	        = initialiseHisto(AverageOccupancy_A_name);
+	TH1F* h_AverageTime_C		        = initialiseHisto(AverageTime_C_name);
+	TH1F* h_AverageTime_A		        = initialiseHisto(AverageTime_A_name);
+	
+	auto resetIfValid = [](TH1F * pH)->void{
+	  if (pH) pH->Reset();
+	  return;
+	};
 	
 	
-	if ( RPCCheckHistogram( f, AverageEff_C_name.c_str()	      	) ){ h_AverageEff_C 	   	= (TH1F*) ( f->Get( AverageEff_C_name.c_str()  	  	 ) );}
-	if ( RPCCheckHistogram( f, AverageEff_A_name.c_str()	      	) ){ h_AverageEff_A 	   	= (TH1F*) ( f->Get( AverageEff_A_name.c_str()  	  	 ) );}
-	if ( RPCCheckHistogram( f, AverageGapEff_C_name.c_str()       	) ){ h_AverageGapEff_C	   	= (TH1F*) ( f->Get( AverageGapEff_C_name.c_str()	 ) );}
-	if ( RPCCheckHistogram( f, AverageGapEff_A_name.c_str()       	) ){ h_AverageGapEff_A	   	= (TH1F*) ( f->Get( AverageGapEff_A_name.c_str()	 ) );}
-	if ( RPCCheckHistogram( f, AverageNoiseCorr_C_name.c_str()    	) ){ h_AverageNoiseCorr_C  	= (TH1F*) ( f->Get( AverageNoiseCorr_C_name.c_str()	 ) );}
-	if ( RPCCheckHistogram( f, AverageNoiseCorr_A_name.c_str()    	) ){ h_AverageNoiseCorr_A  	= (TH1F*) ( f->Get( AverageNoiseCorr_A_name.c_str()	 ) );}
-	if ( RPCCheckHistogram( f, AverageNoiseTot_C_name.c_str()     	) ){ h_AverageNoiseTot_C	= (TH1F*) ( f->Get( AverageNoiseTot_C_name.c_str()	 ) );}
-	if ( RPCCheckHistogram( f, AverageNoiseTot_A_name.c_str()     	) ){ h_AverageNoiseTot_A	= (TH1F*) ( f->Get( AverageNoiseTot_A_name.c_str()	 ) );}
-	if ( RPCCheckHistogram( f, AverageCS_C_name.c_str()	      	) ){ h_AverageCS_C  	   	= (TH1F*) ( f->Get( AverageCS_C_name.c_str()		 ) );}
-	if ( RPCCheckHistogram( f, AverageCS_A_name.c_str()	      	) ){ h_AverageCS_A  	   	= (TH1F*) ( f->Get( AverageCS_A_name.c_str()		 ) );}
-	if ( RPCCheckHistogram( f, AverageRes_CS1_C_name.c_str()      	) ){ h_AverageRes_CS1_C	   	= (TH1F*) ( f->Get( AverageRes_CS1_C_name.c_str()	 ) );}
-	if ( RPCCheckHistogram( f, AverageRes_CS1_A_name.c_str()      	) ){ h_AverageRes_CS1_A	   	= (TH1F*) ( f->Get( AverageRes_CS1_A_name.c_str()	 ) );}
-	if ( RPCCheckHistogram( f, AverageRes_CS2_C_name.c_str()      	) ){ h_AverageRes_CS2_C	   	= (TH1F*) ( f->Get( AverageRes_CS2_C_name.c_str()	 ) );}
-	if ( RPCCheckHistogram( f, AverageRes_CS2_A_name.c_str()      	) ){ h_AverageRes_CS2_A	   	= (TH1F*) ( f->Get( AverageRes_CS2_A_name.c_str()	 ) );}
-	if ( RPCCheckHistogram( f, AverageRes_CSmore2_C_name.c_str()    ) ){ h_AverageRes_CSmore2_C    	= (TH1F*) ( f->Get( AverageRes_CSmore2_C_name.c_str()    ) );}
-	if ( RPCCheckHistogram( f, AverageRes_CSmore2_A_name.c_str()    ) ){ h_AverageRes_CSmore2_A    	= (TH1F*) ( f->Get( AverageRes_CSmore2_A_name.c_str()    ) );}
-        if ( RPCCheckHistogram( f, AverageRes_CS1rms_C_name.c_str()     ) ){ h_AverageRes_CS1rms_C     	= (TH1F*) ( f->Get( AverageRes_CS1rms_C_name.c_str()	 ) );}
-	if ( RPCCheckHistogram( f, AverageRes_CS1rms_A_name.c_str()     ) ){ h_AverageRes_CS1rms_A     	= (TH1F*) ( f->Get( AverageRes_CS1rms_A_name.c_str()	 ) );}
-	if ( RPCCheckHistogram( f, AverageRes_CS2rms_C_name.c_str()     ) ){ h_AverageRes_CS2rms_C     	= (TH1F*) ( f->Get( AverageRes_CS2rms_C_name.c_str()	 ) );}
-	if ( RPCCheckHistogram( f, AverageRes_CS2rms_A_name.c_str()     ) ){ h_AverageRes_CS2rms_A     	= (TH1F*) ( f->Get( AverageRes_CS2rms_A_name.c_str()	 ) );}
-	if ( RPCCheckHistogram( f, AverageRes_CSmore2rms_C_name.c_str() ) ){ h_AverageRes_CSmore2rms_C 	= (TH1F*) ( f->Get( AverageRes_CSmore2rms_C_name.c_str() ) );}
-	if ( RPCCheckHistogram( f, AverageRes_CSmore2rms_A_name.c_str() ) ){ h_AverageRes_CSmore2rms_A 	= (TH1F*) ( f->Get( AverageRes_CSmore2rms_A_name.c_str() ) );}
-	if ( RPCCheckHistogram( f, AverageOccupancy_C_name.c_str()      ) ){ h_AverageOccupancy_C	= (TH1F*) ( f->Get( AverageOccupancy_C_name.c_str()	 ) );}
-	if ( RPCCheckHistogram( f, AverageOccupancy_A_name.c_str()      ) ){ h_AverageOccupancy_A	= (TH1F*) ( f->Get( AverageOccupancy_A_name.c_str()	 ) );}
-	if ( RPCCheckHistogram( f, AverageTime_C_name.c_str()	      	) ){ h_AverageTime_C	   	= (TH1F*) ( f->Get( AverageTime_C_name.c_str() 	  	 ) );}
-	if ( RPCCheckHistogram( f, AverageTime_A_name.c_str()	      	) ){ h_AverageTime_A	   	= (TH1F*) ( f->Get( AverageTime_A_name.c_str() 	  	 ) );}
 	
-	if ( h_AverageEff_C	       ) h_AverageEff_C 	  ->Reset() ;
-	if ( h_AverageEff_A	       ) h_AverageEff_A 	  ->Reset() ;
-	if ( h_AverageGapEff_C	       ) h_AverageGapEff_C	  ->Reset() ;
-	if ( h_AverageGapEff_A	       ) h_AverageGapEff_A	  ->Reset() ;
-	if ( h_AverageNoiseCorr_C      ) h_AverageNoiseCorr_C	  ->Reset() ;
-	if ( h_AverageNoiseCorr_A      ) h_AverageNoiseCorr_A	  ->Reset() ;
-	if ( h_AverageNoiseTot_C       ) h_AverageNoiseTot_C	  ->Reset() ;
-	if ( h_AverageNoiseTot_A       ) h_AverageNoiseTot_A	  ->Reset() ;
-	if ( h_AverageCS_C	       ) h_AverageCS_C  	  ->Reset() ;
-	if ( h_AverageCS_A	       ) h_AverageCS_A  	  ->Reset() ;
-	if ( h_AverageRes_CS1_C	       ) h_AverageRes_CS1_C	  ->Reset() ;
-	if ( h_AverageRes_CS1_A	       ) h_AverageRes_CS1_A	  ->Reset() ;
-	if ( h_AverageRes_CS2_C	       ) h_AverageRes_CS2_C	  ->Reset() ;
-	if ( h_AverageRes_CS2_A	       ) h_AverageRes_CS2_A	  ->Reset() ;
-	if ( h_AverageRes_CSmore2_C    ) h_AverageRes_CSmore2_C	  ->Reset() ;
-	if ( h_AverageRes_CSmore2_A    ) h_AverageRes_CSmore2_A	  ->Reset() ;
-	if ( h_AverageRes_CS1rms_C     ) h_AverageRes_CS1rms_C	  ->Reset() ;
-	if ( h_AverageRes_CS1rms_A     ) h_AverageRes_CS1rms_A	  ->Reset() ;
-	if ( h_AverageRes_CS2rms_C     ) h_AverageRes_CS2rms_C	  ->Reset() ;
-	if ( h_AverageRes_CS2rms_A     ) h_AverageRes_CS2rms_A	  ->Reset() ;
-	if ( h_AverageRes_CSmore2rms_C ) h_AverageRes_CSmore2rms_C->Reset() ;
-	if ( h_AverageRes_CSmore2rms_A ) h_AverageRes_CSmore2rms_A->Reset() ;
-	if ( h_AverageOccupancy_C      ) h_AverageOccupancy_C     ->Reset() ;
-	if ( h_AverageOccupancy_A      ) h_AverageOccupancy_A     ->Reset() ;
-	if ( h_AverageTime_C	       ) h_AverageTime_C  	  ->Reset() ;
-	if ( h_AverageTime_A	       ) h_AverageTime_A  	  ->Reset() ;
+	resetIfValid(h_AverageEff_C);
+	resetIfValid(h_AverageEff_A	       );
+	resetIfValid(h_AverageGapEff_C	       );
+	resetIfValid(h_AverageGapEff_A	       );
+	resetIfValid(h_AverageNoiseCorr_C      );
+	resetIfValid(h_AverageNoiseCorr_A      );
+	resetIfValid(h_AverageNoiseTot_C       );
+	resetIfValid(h_AverageNoiseTot_A       );
+	resetIfValid(h_AverageCS_C	       );
+	resetIfValid(h_AverageCS_A	       );
+	resetIfValid(h_AverageRes_CS1_C	       );
+	resetIfValid(h_AverageRes_CS1_A	       );
+	resetIfValid(h_AverageRes_CS2_C	       );
+	resetIfValid(h_AverageRes_CS2_A	       );
+	resetIfValid(h_AverageRes_CSmore2_C    );
+	resetIfValid(h_AverageRes_CSmore2_A    );
+	resetIfValid(h_AverageRes_CS1rms_C     );
+	resetIfValid(h_AverageRes_CS1rms_A     );
+	resetIfValid(h_AverageRes_CS2rms_C     );
+	resetIfValid(h_AverageRes_CS2rms_A     );
+	resetIfValid(h_AverageRes_CSmore2rms_C );
+	resetIfValid(h_AverageRes_CSmore2rms_A );
+	resetIfValid(h_AverageOccupancy_C      );
+	resetIfValid(h_AverageOccupancy_A      );
+	resetIfValid(h_AverageTime_C	       );
+	resetIfValid(h_AverageTime_A	       );
 	 
 	// summary plots
 	int countpanelindb = 0 ;
@@ -662,117 +643,77 @@ MonitoringFile::RPCPostProcess( const std::string & inFilename, bool /* isIncrem
 	  std::string Res_CSmore2_rmsSecDist_name	= dir_sum_track + "SummaryRes_CSmore2rmsDistriPerSector"+ sector_name ;
 	  std::string TimeSecDist_name			= dir_sum_track + "SummaryTimeDistriPerSector"		+ sector_name ;
 	  std::string OccupancySecDist_name		= dir_sum_track + "SummaryOccupancyDistriPerSector"	+ sector_name ;
+	  //
+	  auto initialiseHisto = [f](const std::string & name)->TH1F* {
+	    TH1F* result =  (TH1F*) (f->Get(name.c_str()));
+	    return result;
+	  };
+	  TH1F* h_TrackProj	      	  = initialiseHisto(TrackProj_name);
+	  TH1F* h_HitOnTrack          	  = initialiseHisto(HitOnTrack_name);
+	  TH1F* h_HitOnTrackCross     	  = initialiseHisto(HitOnTrackCross_name);
+	  TH1F* h_Eff	      	      	  = initialiseHisto(Eff_name);
+	  TH1F* h_GapEff	      	  = initialiseHisto(GapEff_name);
+	  TH1F* h_NoiseCorr           	  = initialiseHisto(NoiseCorr_name);
+	  TH1F* h_NoiseCorr_s          	  = initialiseHisto(NoiseCorr_s_name);
+	  TH1F* h_NoiseTot            	  = initialiseHisto(NoiseTot_name);
+	  TH1F* h_NoiseTot_s           	  = initialiseHisto(NoiseTot_s_name);
+	  TH1F* h_Res_CS1                 = initialiseHisto(Res_CS1_name);   
+	  TH1F* h_Res_CS1_s               = initialiseHisto(Res_CS1_s_name);
+	  TH1F* h_Res_CS1_square          = initialiseHisto(Res_CS1_square_name);   
+	  TH1F* h_Res_CS1_entries     	  = initialiseHisto(Res_CS1_entries_name);  
+	  TH1F* h_Res_CS2  	      	  = initialiseHisto(Res_CS2_name); 
+	  TH1F* h_Res_CS2_s  	      	  = initialiseHisto(Res_CS2_s_name); 
+	  TH1F* h_Res_CS2_square          = initialiseHisto(Res_CS2_square_name);   
+	  TH1F* h_Res_CS2_entries     	  = initialiseHisto(Res_CS2_entries_name);  
+	  TH1F* h_Res_CSmore2	      	  = initialiseHisto(Res_CSmore2_name);
+	  TH1F* h_Res_CSmore2_s	      	  = initialiseHisto(Res_CSmore2_s_name); 
+	  TH1F* h_Res_CSmore2_square  	  = initialiseHisto(Res_CSmore2_square_name);
+	  TH1F* h_Res_CSmore2_entries 	  = initialiseHisto(Res_CSmore2_entries_name);
+	  TH1F* h_CS                  	  = initialiseHisto(CS_name);
+	  TH1F* h_CS_s                 	  = initialiseHisto(CS_s_name);
+	  TH1F* h_CS_square           	  = initialiseHisto(CS_square_name);
+	  TH1F* h_CS_entries          	  = initialiseHisto(CS_square_name);
+	  TH1F* h_CS1_entries          	  = initialiseHisto(CS1_entries_name);
+	  TH1F* h_CS2_entries          	  = initialiseHisto(CS2_entries_name);
+	  TH1F* h_Time                	  = initialiseHisto(Time_name);
+	  TH1F* h_Time_s               	  = initialiseHisto(Time_s_name);
+	  TH1F* h_Time_square         	  = initialiseHisto(Time_square_name);
+	  TH1F* h_Occupancy           	  = initialiseHisto(Occupancy_name);
+	  TH1F* h_Occupancy_s          	  = initialiseHisto(Occupancy_s_name);
+	  TH1F* h_PanelId		  = initialiseHisto(PanelId_name);
 	  
-	  TH1F* h_TrackProj	      	  = NULL;
-	  TH1F* h_HitOnTrack          	  = NULL;
-	  TH1F* h_HitOnTrackCross     	  = NULL;
-	  TH1F* h_Eff	      	      	  = NULL;
-	  TH1F* h_GapEff	      	  = NULL;
-	  TH1F* h_NoiseCorr           	  = NULL;
-	  TH1F* h_NoiseCorr_s          	  = NULL;
-	  TH1F* h_NoiseTot            	  = NULL;
-	  TH1F* h_NoiseTot_s           	  = NULL;
-	  TH1F* h_Res_CS1                 = NULL;   
-	  TH1F* h_Res_CS1_s               = NULL;
-	  TH1F* h_Res_CS1_square          = NULL;   
-	  TH1F* h_Res_CS1_entries     	  = NULL;  
-	  TH1F* h_Res_CS2  	      	  = NULL; 
-	  TH1F* h_Res_CS2_s  	      	  = NULL; 
-	  TH1F* h_Res_CS2_square          = NULL;   
-	  TH1F* h_Res_CS2_entries     	  = NULL;  
-	  TH1F* h_Res_CSmore2	      	  = NULL;
-	  TH1F* h_Res_CSmore2_s	      	  = NULL; 
-	  TH1F* h_Res_CSmore2_square  	  = NULL;
-	  TH1F* h_Res_CSmore2_entries 	  = NULL;
-	  TH1F* h_CS                  	  = NULL;
-	  TH1F* h_CS_s                 	  = NULL;
-	  TH1F* h_CS_square           	  = NULL;
-	  TH1F* h_CS_entries          	  = NULL;
-	  TH1F* h_CS1_entries          	  = NULL;
-	  TH1F* h_CS2_entries          	  = NULL;
-	  TH1F* h_Time                	  = NULL;
-	  TH1F* h_Time_s               	  = NULL;
-	  TH1F* h_Time_square         	  = NULL;
-	  TH1F* h_Occupancy           	  = NULL;
-	  TH1F* h_Occupancy_s          	  = NULL;
-	  TH1F* h_PanelId		  = NULL;
-	  
-	  TH1F* h_EffSecDist	          = NULL;
-	  TH1F* h_GapEffSecDist	          = NULL;
-	  TH1F* h_NoiseCorrSecDist        = NULL;  
-	  TH1F* h_NoiseTotSecDist         = NULL; 
-	  TH1F* h_CSSecDist	          = NULL;
-	  TH1F* h_Res_CS1SecDist	  = NULL;    
-	  TH1F* h_Res_CS2SecDist	  = NULL;    
-	  TH1F* h_Res_CSmore2SecDist      = NULL;
-	  TH1F* h_Res_CS1_rmsSecDist      = NULL; 
-	  TH1F* h_Res_CS2_rmsSecDist      = NULL;
-	  TH1F* h_Res_CSmore2_rmsSecDist  = NULL;
-	  TH1F* h_TimeSecDist	          = NULL; 
-	  TH1F* h_OccupancySecDist        = NULL;
-	  
-	  if ( RPCCheckHistogram( f, TrackProj_name.c_str()	     	) ){ h_TrackProj	      = (TH1F*) ( f->Get( TrackProj_name.c_str()	      ) );}
-	  if ( RPCCheckHistogram( f, HitOnTrack_name.c_str()	     	) ){ h_HitOnTrack	      = (TH1F*) ( f->Get( HitOnTrack_name.c_str()	      ) );}
-	  if ( RPCCheckHistogram( f, HitOnTrackCross_name.c_str()    	) ){ h_HitOnTrackCross        = (TH1F*) ( f->Get( HitOnTrackCross_name.c_str()        ) );}
-	  if ( RPCCheckHistogram( f, Eff_name.c_str()		     	) ){ h_Eff		      = (TH1F*) ( f->Get( Eff_name.c_str()		      ) );}
-	  if ( RPCCheckHistogram( f, GapEff_name.c_str()	     	) ){ h_GapEff		      = (TH1F*) ( f->Get( GapEff_name.c_str()		      ) );}
-	  if ( RPCCheckHistogram( f, NoiseCorr_name.c_str()	     	) ){ h_NoiseCorr	      = (TH1F*) ( f->Get( NoiseCorr_name.c_str()	      ) );}
-	  if ( RPCCheckHistogram( f, NoiseCorr_s_name.c_str()	     	) ){ h_NoiseCorr_s	      = (TH1F*) ( f->Get( NoiseCorr_s_name.c_str()	      ) );}
-	  if ( RPCCheckHistogram( f, NoiseTot_name.c_str()	     	) ){ h_NoiseTot 	      = (TH1F*) ( f->Get( NoiseTot_name.c_str() 	      ) );}
-	  if ( RPCCheckHistogram( f, NoiseTot_s_name.c_str()	     	) ){ h_NoiseTot_s 	      = (TH1F*) ( f->Get( NoiseTot_s_name.c_str() 	      ) );}
-	  if ( RPCCheckHistogram( f, Res_CS1_name.c_str()	     	) ){ h_Res_CS1  	      = (TH1F*) ( f->Get( Res_CS1_name.c_str()  	      ) );}
-	  if ( RPCCheckHistogram( f, Res_CS1_s_name.c_str()	     	) ){ h_Res_CS1_s  	      = (TH1F*) ( f->Get( Res_CS1_s_name.c_str()  	      ) );}
-	  if ( RPCCheckHistogram( f, Res_CS1_square_name.c_str()     	) ){ h_Res_CS1_square	      = (TH1F*) ( f->Get( Res_CS1_square_name.c_str()	      ) );}
-	  if ( RPCCheckHistogram( f, Res_CS1_entries_name.c_str()    	) ){ h_Res_CS1_entries        = (TH1F*) ( f->Get( Res_CS1_entries_name.c_str()        ) );}
-	  if ( RPCCheckHistogram( f, Res_CS2_name.c_str()	     	) ){ h_Res_CS2  	      = (TH1F*) ( f->Get( Res_CS2_name.c_str()  	      ) );} 
-	  if ( RPCCheckHistogram( f, Res_CS2_s_name.c_str()	     	) ){ h_Res_CS2_s  	      = (TH1F*) ( f->Get( Res_CS2_s_name.c_str()  	      ) );} 
-	  if ( RPCCheckHistogram( f, Res_CS2_square_name .c_str()    	) ){ h_Res_CS2_square	      = (TH1F*) ( f->Get( Res_CS2_square_name .c_str()        ) );} 
-	  if ( RPCCheckHistogram( f, Res_CS2_entries_name.c_str()    	) ){ h_Res_CS2_entries        = (TH1F*) ( f->Get( Res_CS2_entries_name.c_str()        ) );} 
-	  if ( RPCCheckHistogram( f, Res_CSmore2_name.c_str()	     	) ){ h_Res_CSmore2	      = (TH1F*) ( f->Get( Res_CSmore2_name.c_str()	      ) );} 
-	  if ( RPCCheckHistogram( f, Res_CSmore2_s_name.c_str()	     	) ){ h_Res_CSmore2_s	      = (TH1F*) ( f->Get( Res_CSmore2_s_name.c_str()	      ) );} 
-	  if ( RPCCheckHistogram( f, Res_CSmore2_square_name.c_str() 	) ){ h_Res_CSmore2_square     = (TH1F*) ( f->Get( Res_CSmore2_square_name.c_str()     ) );}
-	  if ( RPCCheckHistogram( f, Res_CSmore2_entries_name.c_str()	) ){ h_Res_CSmore2_entries    = (TH1F*) ( f->Get( Res_CSmore2_entries_name.c_str()    ) );}
-	  if ( RPCCheckHistogram( f, CS_name.c_str()	 		) ){ h_CS	              = (TH1F*) ( f->Get( CS_name.c_str()		      ) );}
-	  if ( RPCCheckHistogram( f, CS_s_name.c_str()	 		) ){ h_CS_s	              = (TH1F*) ( f->Get( CS_s_name.c_str()		      ) );}
-	  if ( RPCCheckHistogram( f, CS_square_name .c_str()   		) ){ h_CS_square    	      = (TH1F*) ( f->Get( CS_square_name .c_str()	      ) );}
-	  if ( RPCCheckHistogram( f, CS_entries_name.c_str()  		) ){ h_CS_entries  	      = (TH1F*) ( f->Get( CS_entries_name.c_str()	      ) );}
-	  if ( RPCCheckHistogram( f, CS1_entries_name.c_str()  		) ){ h_CS1_entries  	      = (TH1F*) ( f->Get( CS1_entries_name.c_str()	      ) );}
-	  if ( RPCCheckHistogram( f, CS2_entries_name.c_str()  		) ){ h_CS2_entries  	      = (TH1F*) ( f->Get( CS2_entries_name.c_str()	      ) );}
-	  if ( RPCCheckHistogram( f, Time_name.c_str()    		) ){ h_Time        	      = (TH1F*) ( f->Get( Time_name.c_str()		      ) );}
-	  if ( RPCCheckHistogram( f, Time_s_name.c_str()    		) ){ h_Time_s        	      = (TH1F*) ( f->Get( Time_s_name.c_str()		      ) );}
-	  if ( RPCCheckHistogram( f, Time_square_name.c_str() 		) ){ h_Time_square  	      = (TH1F*) ( f->Get( Time_square_name.c_str()	      ) );}
-	  if ( RPCCheckHistogram( f, Occupancy_name.c_str()  		) ){ h_Occupancy   	      = (TH1F*) ( f->Get( Occupancy_name.c_str()	      ) );}
-	  if ( RPCCheckHistogram( f, Occupancy_s_name.c_str()  		) ){ h_Occupancy_s   	      = (TH1F*) ( f->Get( Occupancy_s_name.c_str()	      ) );}
-	  if ( RPCCheckHistogram( f, PanelId_name.c_str()               ) ){ h_PanelId                = (TH1F*) ( f->Get( PanelId_name.c_str()                ) );}
-	  
-	  if ( RPCCheckHistogram( f, EffSecDist_name.c_str()	     	) ){ h_EffSecDist	      = (TH1F*) ( f->Get( EffSecDist_name.c_str()	      ) );}   
-	  if ( RPCCheckHistogram( f, GapEffSecDist_name.c_str()       	) ){ h_GapEffSecDist	      = (TH1F*) ( f->Get( GapEffSecDist_name.c_str()	      ) );}  
-	  if ( RPCCheckHistogram( f, NoiseCorrSecDist_name.c_str()      ) ){ h_NoiseCorrSecDist       = (TH1F*) ( f->Get( NoiseCorrSecDist_name.c_str()       ) );}  
-	  if ( RPCCheckHistogram( f, NoiseTotSecDist_name.c_str()       ) ){ h_NoiseTotSecDist        = (TH1F*) ( f->Get( NoiseTotSecDist_name.c_str()        ) );}  
-	  if ( RPCCheckHistogram( f, CSSecDist_name.c_str()	        ) ){ h_CSSecDist	      = (TH1F*) ( f->Get( CSSecDist_name.c_str()	      ) );}  
-	  if ( RPCCheckHistogram( f, Res_CS1SecDist_name.c_str()        ) ){ h_Res_CS1SecDist	      = (TH1F*) ( f->Get( Res_CS1SecDist_name.c_str()	      ) );}  
-	  if ( RPCCheckHistogram( f, Res_CS2SecDist_name.c_str()        ) ){ h_Res_CS2SecDist	      = (TH1F*) ( f->Get( Res_CS2SecDist_name.c_str()	      ) );}	   
-	  if ( RPCCheckHistogram( f, Res_CSmore2SecDist_name.c_str()    ) ){ h_Res_CSmore2SecDist     = (TH1F*) ( f->Get( Res_CSmore2SecDist_name.c_str()     ) );}	 
-	  if ( RPCCheckHistogram( f, Res_CS1_rmsSecDist_name.c_str()    ) ){ h_Res_CS1_rmsSecDist     = (TH1F*) ( f->Get( Res_CS1_rmsSecDist_name.c_str()     ) );}   
-	  if ( RPCCheckHistogram( f, Res_CS2_rmsSecDist_name.c_str()    ) ){ h_Res_CS2_rmsSecDist     = (TH1F*) ( f->Get( Res_CS2_rmsSecDist_name.c_str()     ) );}   
-	  if ( RPCCheckHistogram( f, Res_CSmore2_rmsSecDist_name.c_str()) ){ h_Res_CSmore2_rmsSecDist = (TH1F*) ( f->Get( Res_CSmore2_rmsSecDist_name.c_str() ) );}  
-	  if ( RPCCheckHistogram( f, TimeSecDist_name.c_str()	     	) ){ h_TimeSecDist	      = (TH1F*) ( f->Get( TimeSecDist_name.c_str()	      ) );}	 
-	  if ( RPCCheckHistogram( f, OccupancySecDist_name.c_str()  	) ){ h_OccupancySecDist       = (TH1F*) ( f->Get( OccupancySecDist_name.c_str()       ) );}	    
-	  
-	  if ( h_EffSecDist	        ) h_EffSecDist  	  ->Reset() ;
-	  if ( h_GapEffSecDist          ) h_GapEffSecDist	  ->Reset() ;
-	  if ( h_NoiseCorrSecDist       ) h_NoiseCorrSecDist	  ->Reset() ;
-	  if ( h_NoiseTotSecDist        ) h_NoiseTotSecDist	  ->Reset() ;
-	  if ( h_CSSecDist	        ) h_CSSecDist		  ->Reset() ;
-	  if ( h_Res_CS1SecDist         ) h_Res_CS1SecDist	  ->Reset() ;
-	  if ( h_Res_CS2SecDist         ) h_Res_CS2SecDist	  ->Reset() ;
-	  if ( h_Res_CSmore2SecDist     ) h_Res_CSmore2SecDist    ->Reset() ;
-	  if ( h_Res_CS1_rmsSecDist     ) h_Res_CS1_rmsSecDist    ->Reset() ;
-	  if ( h_Res_CS2_rmsSecDist     ) h_Res_CS2_rmsSecDist    ->Reset() ;
-	  if ( h_Res_CSmore2_rmsSecDist ) h_Res_CSmore2_rmsSecDist->Reset() ;
-	  if ( h_TimeSecDist	        ) h_TimeSecDist 	  ->Reset() ;
-	  if ( h_OccupancySecDist       ) h_OccupancySecDist	  ->Reset() ;
-	  if ( h_Eff    	        ) h_Eff         	  ->Reset() ;
+	  TH1F* h_EffSecDist	          = initialiseHisto(EffSecDist_name);
+	  TH1F* h_GapEffSecDist	          = initialiseHisto(GapEffSecDist_name);
+	  TH1F* h_NoiseCorrSecDist        = initialiseHisto(NoiseCorrSecDist_name);  
+	  TH1F* h_NoiseTotSecDist         = initialiseHisto(NoiseTotSecDist_name); 
+	  TH1F* h_CSSecDist	          = initialiseHisto(CSSecDist_name);
+	  TH1F* h_Res_CS1SecDist	  = initialiseHisto(Res_CS1SecDist_name);    
+	  TH1F* h_Res_CS2SecDist	  = initialiseHisto(Res_CS2SecDist_name);    
+	  TH1F* h_Res_CSmore2SecDist      = initialiseHisto(Res_CSmore2SecDist_name);
+	  TH1F* h_Res_CS1_rmsSecDist      = initialiseHisto(Res_CS1_rmsSecDist_name); 
+	  TH1F* h_Res_CS2_rmsSecDist      = initialiseHisto(Res_CS2_rmsSecDist_name);
+	  TH1F* h_Res_CSmore2_rmsSecDist  = initialiseHisto(Res_CSmore2_rmsSecDist_name);
+	  TH1F* h_TimeSecDist	          = initialiseHisto(TimeSecDist_name); 
+	  TH1F* h_OccupancySecDist        = initialiseHisto(OccupancySecDist_name);
+	 
+	  auto resetIfValid = [](TH1F * pH)->void{
+	    if (pH) pH->Reset();
+	    return;
+	  };
+	  resetIfValid( h_EffSecDist	        );
+	  resetIfValid( h_GapEffSecDist          );
+	  resetIfValid( h_NoiseCorrSecDist       );
+	  resetIfValid( h_NoiseTotSecDist        );
+	  resetIfValid( h_CSSecDist	        );
+	  resetIfValid( h_Res_CS1SecDist         );
+	  resetIfValid( h_Res_CS2SecDist         );
+	  resetIfValid( h_Res_CSmore2SecDist     );
+	  resetIfValid( h_Res_CS1_rmsSecDist     );
+	  resetIfValid( h_Res_CS2_rmsSecDist     );
+	  resetIfValid( h_Res_CSmore2_rmsSecDist );
+	  resetIfValid( h_TimeSecDist	        );
+	  resetIfValid( h_OccupancySecDist       );
+	  resetIfValid( h_Eff    	        );
 	  
 	  // efficiency
 	  if ( h_TrackProj && h_HitOnTrack && h_Eff ) {
@@ -794,8 +735,8 @@ MonitoringFile::RPCPostProcess( const std::string & inFilename, bool /* isIncrem
 	      h_Eff -> SetBinContent(ib+1, panel_eff) 	        ;
 	      h_Eff -> SetBinError  (ib+1, panel_err_eff)	;
 	      if ( h_EffSecDist ) h_EffSecDist->Fill(panel_eff) ;
-	      if ( ib>( h_TrackProj->GetNbinsX()/2 ) ) { if ( h_AverageEff_A ) h_AverageEff_A->Fill(panel_eff) ; } 
-	      else                                     { if ( h_AverageEff_C ) h_AverageEff_C->Fill(panel_eff) ; }
+	      if ( ib>( h_TrackProj->GetNbinsX()/2 ) ) { fillIfValid(h_AverageEff_A, panel_eff); } 
+	      else                                     { fillIfValid(h_AverageEff_C, panel_eff); }
 	    //}
 	  }
 	    // write out histogram
@@ -803,7 +744,7 @@ MonitoringFile::RPCPostProcess( const std::string & inFilename, bool /* isIncrem
 	    if ( dir != 0 ) {
 	      dir->cd() ;
 	      h_Eff -> Write("",TObject::kOverwrite);
-	      if ( h_EffSecDist ) h_EffSecDist ->Write("",TObject::kOverwrite) ;
+	      writeIfValid(h_EffSecDist);
 	    }
 	  }
 	  
@@ -817,8 +758,7 @@ MonitoringFile::RPCPostProcess( const std::string & inFilename, bool /* isIncrem
 	    for ( int ib = 0; ib !=h_TrackProj->GetNbinsX(); ib++ ) {
 	      if ( h_PanelId ) { if ( (h_PanelId->GetBinContent(ib+1) )==0 ) { continue; } }
 	      if ( (bmin + ib )%2 != 0 ) continue; // Phi panel
-	      if ( (bmin + ib )<0     ) { sign=-1; } 
-	      else                      { sign= 1; }
+	      sign = std::copysign(1, (bmin + ib ));
 	      
 	      nEta    = h_HitOnTrack     ->GetBinContent( ib+1	      ) ;
 	      nPhi    = h_HitOnTrack     ->GetBinContent( ib+1 + sign ) ;
@@ -827,22 +767,18 @@ MonitoringFile::RPCPostProcess( const std::string & inFilename, bool /* isIncrem
 	      
 	      if ( n_tr_p>0 ) { 
 	        gapEff    = (nEta+nPhi-nEtaPhi) / n_tr_p  ; 
-                //std::cout << " gapEff " << gapEff <<"  nEta  "<<nEta<<"  nPhi  "<<nPhi<< "  nEtaPhi  "<<nEtaPhi <<"  n_tr_p  "<<n_tr_p <<std::endl;
-	
-		gapErrEff = sqrt( fabs( nEta+nPhi-nEtaPhi)/n_tr_p ) *
+		      gapErrEff = sqrt( fabs( nEta+nPhi-nEtaPhi)/n_tr_p ) *
 	                    sqrt( 1. - fabs( nEta+nPhi-nEtaPhi)/n_tr_p ) /
-		            sqrt( n_tr_p ) ;
-                //std::cout <<"sqrt( fabs( nEta+nPhi-nEtaPhi -0.5)/n_tr_p )"<<sqrt( fabs( nEta+nPhi-nEtaPhi -0.5)/n_tr_p )<<"sqrt( 1. - fabs( nEta+nPhi-nEtaPhi -0.5)/n_tr_p )"<<sqrt( 1. - fabs( nEta+nPhi-nEtaPhi -0.5)/n_tr_p )<< " gapErrEff " << gapErrEff <<std::endl;
-              }
-	      else  { 
+		                  sqrt( n_tr_p ) ;
+        } else  { 
 	        gapEff    = 0.; 
 	        gapErrEff = 0.;
-              }
+        }
 	      h_GapEff -> SetBinContent(ib+1, gapEff    );
 	      h_GapEff -> SetBinError  (ib+1, gapErrEff );
-	      if ( h_GapEffSecDist ) h_GapEffSecDist->Fill(gapEff);
-	      if ( ib>( h_TrackProj->GetNbinsX()/2 )  ) { if ( h_AverageGapEff_A ) h_AverageGapEff_A->Fill(gapEff); }
-	      else                                      { if ( h_AverageGapEff_C ) h_AverageGapEff_C->Fill(gapEff); }
+	      fillIfValid(h_GapEffSecDist, gapEff);
+	      if ( ib>( h_TrackProj->GetNbinsX()/2 )  ) { fillIfValid(h_AverageGapEff_A, gapEff); }
+	      else                                      { fillIfValid(h_AverageGapEff_C,  gapEff); }
 	    }
 	    TDirectory* dir = f->GetDirectory( dir_sum_track.c_str() ) ;
 	    if ( dir != 0 ) {
@@ -855,6 +791,7 @@ MonitoringFile::RPCPostProcess( const std::string & inFilename, bool /* isIncrem
 	  
 	  //residuals CS = 1
 	  res_mean=0; res2_mean=0; res_RMS=0; 
+	  
 	  if ( h_Res_CS1 && h_Res_CS1_s && h_Res_CS1_square && h_Res_CS1_entries ) {
 	    for ( int ib = 0; ib != h_Res_CS1->GetNbinsX(); ib++ ) {
 	      if ( h_PanelId ) { if ( (h_PanelId->GetBinContent(ib+1) )==0 ) { continue; }  }
@@ -865,24 +802,23 @@ MonitoringFile::RPCPostProcess( const std::string & inFilename, bool /* isIncrem
 	      
 	        h_Res_CS1->SetBinContent(ib+1, res_mean);
 	        h_Res_CS1->SetBinError(  ib+1, res_RMS );
-		if ( h_Res_CS1SecDist     ) h_Res_CS1SecDist    ->Fill( res_mean );
-		if ( h_Res_CS1_rmsSecDist ) h_Res_CS1_rmsSecDist->Fill( res_RMS  );
-		if ( ib>( h_Res_CS1->GetNbinsX()/2 ) ) {
-		  if ( h_AverageRes_CS1_A    ) h_AverageRes_CS1_A    ->Fill( res_mean );
-		  if ( h_AverageRes_CS1rms_A ) h_AverageRes_CS1rms_A ->Fill( res_RMS  );
-		}
-		else {
-		  if ( h_AverageRes_CS1_C     ) h_AverageRes_CS1_C   ->Fill( res_mean );
-		  if ( h_AverageRes_CS1rms_C  ) h_AverageRes_CS1rms_C->Fill( res_RMS  );
-		}
+		      fillIfValid( h_Res_CS1SecDist, res_mean);
+		      fillIfValid( h_Res_CS1_rmsSecDist, res_RMS );
+          if ( ib>( h_Res_CS1->GetNbinsX()/2 ) ) {
+            fillIfValid( h_AverageRes_CS1_A, res_mean    );
+            fillIfValid( h_AverageRes_CS1rms_A , res_RMS);
+          } else {
+            fillIfValid( h_AverageRes_CS1_C,  res_mean    );
+            fillIfValid( h_AverageRes_CS1rms_C, res_RMS  );
+          }
 	      }
 	    } // end for bins
 	    TDirectory* dirRes1 = f->GetDirectory( dir_sum_track.c_str() ) ;
 	    if ( dirRes1 != 0 ) {
 	      dirRes1->cd() ;
 	      h_Res_CS1->Write("",TObject::kOverwrite);
-              if ( h_Res_CS1SecDist     ) h_Res_CS1SecDist    ->Write("",TObject::kOverwrite);
-	      if ( h_Res_CS1_rmsSecDist ) h_Res_CS1_rmsSecDist->Write("",TObject::kOverwrite);
+        writeIfValid( h_Res_CS1SecDist );
+        writeIfValid(h_Res_CS1_rmsSecDist);
 	    }
 	  }
 	  
@@ -899,24 +835,23 @@ MonitoringFile::RPCPostProcess( const std::string & inFilename, bool /* isIncrem
 	      
 	        h_Res_CS2->SetBinContent(ib+1, res_mean);
 	        h_Res_CS2->SetBinError(  ib+1, res_RMS );
-		if ( h_Res_CS2SecDist     ) h_Res_CS2SecDist    ->Fill( res_mean );
-		if ( h_Res_CS2_rmsSecDist ) h_Res_CS2_rmsSecDist->Fill( res_RMS  );
-		if ( ib >( h_Res_CS2->GetNbinsX()/2 ) ) {
-		  if ( h_AverageRes_CS2_A     ) h_AverageRes_CS2_A    ->Fill( res_mean );
-		  if ( h_AverageRes_CS2rms_A  ) h_AverageRes_CS2rms_A ->Fill( res_RMS  );
-		}
-		else {
-		  if ( h_AverageRes_CS2_C     ) h_AverageRes_CS2_C    ->Fill( res_mean );
-		  if ( h_AverageRes_CS2rms_C  ) h_AverageRes_CS2rms_C ->Fill( res_RMS  );
-		}
+	        fillIfValid(h_Res_CS2SecDist, res_mean);
+	        fillIfValid(h_Res_CS2_rmsSecDist, res_RMS);
+          if ( ib >( h_Res_CS2->GetNbinsX()/2 ) ) {
+            fillIfValid(h_AverageRes_CS2_A, res_mean);
+            fillIfValid(h_AverageRes_CS2rms_A, res_RMS);
+		      } else {
+		        fillIfValid(h_AverageRes_CS2_C, res_mean);
+		        fillIfValid(h_AverageRes_CS2rms_C, res_RMS);
+		      }
 	      }
 	    }
 	    TDirectory* dirRes2 = f->GetDirectory( dir_sum_track.c_str() ) ;
 	    if ( dirRes2 != 0 ) {
 	      dirRes2->cd() ;
 	      h_Res_CS2->Write("",TObject::kOverwrite);
-	      if ( h_Res_CS2SecDist     ) h_Res_CS2SecDist    ->Write("",TObject::kOverwrite);
-	      if ( h_Res_CS2_rmsSecDist ) h_Res_CS2_rmsSecDist->Write("",TObject::kOverwrite);
+	      writeIfValid( h_Res_CS2SecDist     );
+	      writeIfValid ( h_Res_CS2_rmsSecDist );
 	    }
 	  }
 	  
@@ -933,24 +868,23 @@ MonitoringFile::RPCPostProcess( const std::string & inFilename, bool /* isIncrem
 	      
 	        h_Res_CSmore2->SetBinContent(ib+1, res_mean);
 	        h_Res_CSmore2->SetBinError(  ib+1, res_RMS );
-		if ( h_Res_CSmore2SecDist     ) h_Res_CSmore2SecDist    ->Fill( res_mean );
-		if ( h_Res_CSmore2_rmsSecDist ) h_Res_CSmore2_rmsSecDist->Fill( res_RMS  );
-		if ( ib > (h_Res_CSmore2->GetNbinsX()/2 ) ) {
-          	  if ( h_AverageRes_CSmore2_A     )  h_AverageRes_CSmore2_A    ->Fill( res_mean );
-		  if ( h_AverageRes_CSmore2rms_A  )  h_AverageRes_CSmore2rms_A ->Fill( res_RMS  );
-		}
-		else {
-		  if ( h_AverageRes_CSmore2_C     )  h_AverageRes_CSmore2_C    ->Fill( res_mean );
-		  if ( h_AverageRes_CSmore2rms_C  )  h_AverageRes_CSmore2rms_C ->Fill( res_RMS  );
-		}
+	        fillIfValid(h_Res_CSmore2SecDist, res_mean);
+	        fillIfValid(h_Res_CSmore2_rmsSecDist, res_RMS);
+		      if ( ib > (h_Res_CSmore2->GetNbinsX()/2 ) ) {
+		        fillIfValid(h_AverageRes_CSmore2_A, res_mean);
+		        fillIfValid(h_AverageRes_CSmore2rms_A, res_RMS);
+		      } else {
+		        fillIfValid(h_AverageRes_CSmore2_C, res_mean);
+		        fillIfValid(h_AverageRes_CSmore2rms_C, res_RMS);
+		      }
 	      }
 	    }
 	    TDirectory* dirResp2 = f->GetDirectory( dir_sum_track.c_str() ) ;
 	    if ( dirResp2 != 0 ) {
 	      dirResp2->cd() ;
 	      h_Res_CSmore2->Write("",TObject::kOverwrite);
-	      if ( h_Res_CSmore2SecDist     ) h_Res_CSmore2SecDist    ->Write("",TObject::kOverwrite);
-	      if ( h_Res_CSmore2_rmsSecDist ) h_Res_CSmore2_rmsSecDist->Write("",TObject::kOverwrite);
+	      writeIfValid ( h_Res_CSmore2SecDist     );
+	      writeIfValid ( h_Res_CSmore2_rmsSecDist );
 	    }
 	  }
 	  
@@ -970,9 +904,9 @@ MonitoringFile::RPCPostProcess( const std::string & inFilename, bool /* isIncrem
 	      else {
 	        panel_occ = -10 ;
 	      }
-	      if ( h_OccupancySecDist ) h_OccupancySecDist->Fill( panel_occ );
-	      if ( h_PanelId and (ib>( h_PanelId->GetNbinsX()/2)) ) { if ( h_AverageOccupancy_A ) h_AverageOccupancy_A->Fill( panel_occ ); }
-	      else 				    { if ( h_AverageOccupancy_C ) h_AverageOccupancy_C->Fill( panel_occ ); }
+	      fillIfValid ( h_OccupancySecDist, panel_occ );
+	      if ( h_PanelId and (ib>( h_PanelId->GetNbinsX()/2)) ) { fillIfValid ( h_AverageOccupancy_A,  panel_occ); }
+	      else 				    { fillIfValid ( h_AverageOccupancy_C, panel_occ); }
 	    }
 	    // write occupancy histograms
 	    TDirectory* dirOcc = f->GetDirectory( dir_sum_track.c_str() ) ;
@@ -999,9 +933,9 @@ MonitoringFile::RPCPostProcess( const std::string & inFilename, bool /* isIncrem
 		h_CS->SetBinContent( ib+1, panelCS_mean ) ;
 		h_CS->SetBinError  ( ib+1, panelCS_RMS  ) ;
 		
-		if ( h_CSSecDist ) h_CSSecDist->Fill( panelCS_mean );
-		if ( ib > ( h_CS->GetNbinsX()/2 ) ) { if ( h_AverageCS_A ) h_AverageCS_A->Fill( panelCS_mean ); }
-		else                                { if ( h_AverageCS_C ) h_AverageCS_C->Fill( panelCS_mean ); }
+		fillIfValid ( h_CSSecDist,panelCS_mean );
+		if ( ib > ( h_CS->GetNbinsX()/2 ) ) { fillIfValid ( h_AverageCS_A, panelCS_mean ); }
+		else                                { fillIfValid ( h_AverageCS_C,  panelCS_mean); }
 	      }
 	    }
 	    // write CS histograms
@@ -1009,9 +943,8 @@ MonitoringFile::RPCPostProcess( const std::string & inFilename, bool /* isIncrem
 	    if ( dirCS!=0 ) {
 	      dirCS->cd();
 	      h_CS->Write("",TObject::kOverwrite) ;
-	      if ( h_CSSecDist ) h_CSSecDist->Write("",TObject::kOverwrite) ;
+	      writeIfValid ( h_CSSecDist );
 	    }
-	     
 	  }
 	  
 	  // time
@@ -1026,9 +959,9 @@ MonitoringFile::RPCPostProcess( const std::string & inFilename, bool /* isIncrem
 	        h_Time->SetBinContent(ib+1, Time_mean);
 	        h_Time->SetBinError(  ib+1, Time_RMS );
 	      
-	        if ( h_TimeSecDist ) h_TimeSecDist->Fill( Time_mean );
-		if ( ib>( h_Time->GetNbinsX()/2 )  ) { if ( h_AverageTime_A ) h_AverageTime_A->Fill( Time_mean ); }
-		else                                 { if ( h_AverageTime_C ) h_AverageTime_C->Fill( Time_mean ); }
+	        fillIfValid ( h_TimeSecDist,  Time_mean);
+		if ( ib>( h_Time->GetNbinsX()/2 )  ) { fillIfValid ( h_AverageTime_A, Time_mean ); }
+		else                                 { fillIfValid ( h_AverageTime_C, Time_mean ); }
 	      }
 	    }
 	    // write time histograms
@@ -1036,17 +969,11 @@ MonitoringFile::RPCPostProcess( const std::string & inFilename, bool /* isIncrem
 	    if ( dirTime != 0 ) {
 	      dirTime->cd();
 	      h_Time->Write("",TObject::kOverwrite) ;
-	      if ( h_TimeSecDist ) h_TimeSecDist->Write("",TObject::kOverwrite) ;
+	      writeIfValid(h_TimeSecDist);
 	    }
 	  }
 	  // noise	      
-          noiseErrNorm = 18257.42 ;
-	  // noiseErr = sqrt( counts ) / ( area * T * events )
-	  // noiseErr = sqrt(noise_bin * area* 0.2 ) / ( area * time * events )
-	  // noiseErr = sqrt( noise_bin ) * noiseErrNorm / events
-	  // noiseErrNorm = sqrt(0.2) / sqrt( time * area )
-	  // assuming average area of RPC panels = 15000 cm2
-	  // noiseErrNorm = 18257.42 
+    noiseErrNorm = 18257.42 ;
 	  if ( (rpc_eventstotal>0) && h_NoiseCorr && h_NoiseCorr_s && h_NoiseTot && h_NoiseTot_s && h_CS_entries) {
 	    //std::cout << " Taglio Eventi " << std::endl;
 	    for ( int ib = 0; ib != h_NoiseCorr->GetNbinsX(); ib++ ) {
@@ -1057,7 +984,7 @@ MonitoringFile::RPCPostProcess( const std::string & inFilename, bool /* isIncrem
 	      noiseCorr = (noiseCorr*1000000)/float(rpc_eventstotal) ;
 	      h_NoiseCorr->SetBinContent(ib+1, noiseCorr);
 	      h_NoiseCorr->SetBinError(ib+1, noiseCorrErr);
-	      if ( h_NoiseCorrSecDist ) h_NoiseCorrSecDist->Fill( noiseCorr );
+	      fillIfValid ( h_NoiseCorrSecDist,  noiseCorr);
 	      
 	      noiseTot    = h_NoiseTot_s->GetBinContent(ib+1)   ;
 	      noiseTotErr = sqrt( noiseTot ) * noiseErrNorm / float(rpc_eventstotal) ;
@@ -1065,15 +992,14 @@ MonitoringFile::RPCPostProcess( const std::string & inFilename, bool /* isIncrem
 	      h_NoiseTot->SetBinContent(ib+1, noiseTot    ) ;
 	      h_NoiseTot->SetBinError(ib+1, noiseTotErr )   ;
 	      
-	      if ( h_NoiseTotSecDist ) h_NoiseTotSecDist->Fill( noiseTot );	      
+	      fillIfValid ( h_NoiseTotSecDist, noiseTot );	      
 	      
 	      if ( ib > ( h_NoiseCorr->GetNbinsX()/2 ) ) { 
-	        if ( h_AverageNoiseTot_A  ) h_AverageNoiseTot_A->Fill ( noiseTot  ); 
-		if ( h_AverageNoiseCorr_A ) h_AverageNoiseCorr_A->Fill( noiseCorr );
-              }
-	      else { 
-	        if ( h_AverageNoiseTot_C  ) h_AverageNoiseTot_C ->Fill( noiseTot  ); 
-		if ( h_AverageNoiseCorr_C ) h_AverageNoiseCorr_C->Fill( noiseCorr );
+	        fillIfValid ( h_AverageNoiseTot_A, noiseTot); 
+		      fillIfValid ( h_AverageNoiseCorr_A, noiseCorr );
+        } else { 
+	        fillIfValid ( h_AverageNoiseTot_C, noiseTot ); 
+		      fillIfValid ( h_AverageNoiseCorr_C, noiseCorr);
 	      }
 	    }
 	    TDirectory* dirNoise = f->GetDirectory( dir_sum_track.c_str() ) ;
@@ -1082,30 +1008,30 @@ MonitoringFile::RPCPostProcess( const std::string & inFilename, bool /* isIncrem
 	      h_NoiseCorr->Write("",TObject::kOverwrite) ;
 	      h_NoiseTot ->Write("",TObject::kOverwrite) ;
 	      
-	      if ( h_NoiseCorrSecDist ) h_NoiseCorrSecDist->Write("",TObject::kOverwrite) ;
-	      if ( h_NoiseTotSecDist  ) h_NoiseTotSecDist ->Write("",TObject::kOverwrite) ;
+	      writeIfValid ( h_NoiseCorrSecDist );
+	      writeIfValid ( h_NoiseTotSecDist  );
 	    }
 	  }
 	  
 	  
 	 ///create and insert entries in SQLite DB 
          //  bool do_asciiCoolFile1  = true;
-	   float effeta            = -9999;	  float effphi  	  = -9999;  	 char arr_effeta  	  [10]={};      char arr_effphi	      [10]={};	    
-           float erreffeta         = -1; 	  float erreffphi	  =-1;  	 char arr_erreffeta	  [10]={};      char arr_erreffphi	      [10]={};	    
-	   float reseta_cs1        = -9999;	  float resphi_cs1	  = -9999;  	 char arr_reseta_cs1	  [10]={};      char arr_resphi_cs1        [10]={};	    
-           float errreseta_cs1     = -1; 	  float errresphi_cs1	  =-1;  	 char arr_errreseta_cs1	  [10]={};      char arr_errresphi_cs1     [10]={};	    
-	   float reseta_cs2        = -9999;	  float resphi_cs2	  = -9999;  	 char arr_reseta_cs2	  [10]={};      char arr_resphi_cs2        [10]={};	    
-           float errreseta_cs2     = -1; 	  float errresphi_cs2	  =-1;  	 char arr_errreseta_cs2	  [10]={};      char arr_errresphi_cs2     [10]={};	    
-	   float reseta_csother    = -9999;	  float resphi_csother	  = -9999;  	 char arr_reseta_csother    [10]={};      char arr_resphi_csother    [10]={};	    
-           float errreseta_csother = -1; 	  float errresphi_csother =-1;  	 char arr_errreseta_csother [10]={};      char arr_errresphi_csother [10]={};	    
-	   float timeeta           = -9999;	  float timephi 	  = -9999;  	 char arr_timeeta 	  [10]={};      char arr_timephi	      [10]={};	    
-           float errtimeeta        = -1; 	  float errtimephi	  =-1;  	 char arr_errtimeeta	  [10]={};      char arr_errtimephi        [10]={};	    
-	   float noiseeta          = -9999;	  float noisephi	  = -9999;  	 char arr_noiseeta	  [10]={};      char arr_noisephi	      [10]={};	    
-           float errnoiseeta       = -1; 	  float errnoisephi	  =-1;  	 char arr_errnoiseeta	  [10]={};      char arr_errnoisephi       [10]={};	    
-	   float noiseeta_cor      = -9999;	  float noisephi_cor	  = -9999;  	 char arr_noiseeta_cor	  [10]={};      char arr_noisephi_cor      [10]={};	    
-           float errnoiseeta_cor   = -1; 	  float errnoisephi_cor   =-1;  	 char arr_errnoiseeta_cor   [10]={};      char arr_errnoisephi_cor   [10]={};	    
-	   float cl_sizeeta        = -9999;	  float cl_sizephi	  = -9999;  	 char arr_cl_sizeeta	  [10]={};      char arr_cl_sizephi        [10]={};	    
-           float errcl_sizeeta     = -1; 	  float errcl_sizephi	  =-1;  	 char arr_errcl_sizeeta	  [10]={};      char arr_errcl_sizephi     [10]={};	    
+	   float effeta            = -9999;	  float effphi  	  = -9999;  	 char arr_effeta  	  [14]={};      char arr_effphi	      [14]={};	    
+           float erreffeta         = -1; 	  float erreffphi	  =-1;  	 char arr_erreffeta	  [14]={};      char arr_erreffphi	      [14]={};	    
+	   float reseta_cs1        = -9999;	  float resphi_cs1	  = -9999;  	 char arr_reseta_cs1	  [14]={};      char arr_resphi_cs1        [14]={};	    
+           float errreseta_cs1     = -1; 	  float errresphi_cs1	  =-1;  	 char arr_errreseta_cs1	  [14]={};      char arr_errresphi_cs1     [14]={};	    
+	   float reseta_cs2        = -9999;	  float resphi_cs2	  = -9999;  	 char arr_reseta_cs2	  [14]={};      char arr_resphi_cs2        [14]={};	    
+           float errreseta_cs2     = -1; 	  float errresphi_cs2	  =-1;  	 char arr_errreseta_cs2	  [14]={};      char arr_errresphi_cs2     [14]={};	    
+	   float reseta_csother    = -9999;	  float resphi_csother	  = -9999;  	 char arr_reseta_csother    [14]={};      char arr_resphi_csother    [14]={};	    
+           float errreseta_csother = -1; 	  float errresphi_csother =-1;  	 char arr_errreseta_csother [14]={};      char arr_errresphi_csother [14]={};	    
+	   float timeeta           = -9999;	  float timephi 	  = -9999;  	 char arr_timeeta 	  [14]={};      char arr_timephi	      [14]={};	    
+           float errtimeeta        = -1; 	  float errtimephi	  =-1;  	 char arr_errtimeeta	  [14]={};      char arr_errtimephi        [14]={};	    
+	   float noiseeta          = -9999;	  float noisephi	  = -9999;  	 char arr_noiseeta	  [14]={};      char arr_noisephi	      [14]={};	    
+           float errnoiseeta       = -1; 	  float errnoisephi	  =-1;  	 char arr_errnoiseeta	  [14]={};      char arr_errnoisephi       [14]={};	    
+	   float noiseeta_cor      = -9999;	  float noisephi_cor	  = -9999;  	 char arr_noiseeta_cor	  [14]={};      char arr_noisephi_cor      [14]={};	    
+           float errnoiseeta_cor   = -1; 	  float errnoisephi_cor   =-1;  	 char arr_errnoiseeta_cor   [14]={};      char arr_errnoisephi_cor   [14]={};	    
+	   float cl_sizeeta        = -9999;	  float cl_sizephi	  = -9999;  	 char arr_cl_sizeeta	  [14]={};      char arr_cl_sizephi        [14]={};	    
+           float errcl_sizeeta     = -1; 	  float errcl_sizephi	  =-1;  	 char arr_errcl_sizeeta	  [14]={};      char arr_errcl_sizephi     [14]={};	    
   		
            float eta_effphi        =  0;          float phi_effeta        = 0;      		
 	 
@@ -1119,10 +1045,16 @@ MonitoringFile::RPCPostProcess( const std::string & inFilename, bool /* isIncrem
 	   
 
  
-           coolrpc.coolDbFolder("sqlite://;schema=RPCDQMFOFFLINE.db;dbname=RPC_DQA","/OFFLINE/OFFLINE_DQMF");
+     coolrpc.coolDbFolder("sqlite://;schema=RPCDQMFOFFLINE.db;dbname=RPC_DQA","/OFFLINE/OFFLINE_DQMF");
 	   int nbin = 0;
 	   if ( h_Eff ) nbin = h_Eff ->GetNbinsX() ;
-	   for(int ibin=1 ; ibin!=nbin+1 ; ibin++){
+	   auto writeToCString = [](float val, char* array0)->void{
+	     //following two lines reproduce original behaviour
+	     sprintf(array0,  "%f ", val);   //unsafe!
+	     array0[5] = 0; //ugh!
+	   };
+	   
+    for(int ibin=1 ; ibin!=nbin+1 ; ibin++){
 	    if ( h_PanelId )PanelCode = (int)h_PanelId-> GetBinContent(ibin) ;
 	    if(PanelCode ==0)continue;
   	     if(ibin%2==0){ 
@@ -1130,75 +1062,89 @@ MonitoringFile::RPCPostProcess( const std::string & inFilename, bool /* isIncrem
 	      if (h_TrackProj) n_tr_pphi  =(int)h_TrackProj   -> GetBinContent(ibin) ;
 	      if(n_tr_pphi <1000 ) continue;
 
-	      if ( h_Eff	 )effphi	      = h_Eff		  ->GetBinContent(ibin) ;    
-	      sprintf(arr_effphi		,    "%f ", effphi	      ) ;   arr_effphi	       [5]   =0;
-	      if ( h_Eff	 )erreffphi	      = h_Eff		  ->GetBinError  (ibin) ;    
-	      sprintf(arr_erreffphi	,    "%f ", erreffphi	      ) ;   arr_erreffphi        [5]   =0;
-	      if ( h_Res_CS1	 )resphi_cs1	      = h_Res_CS1	  ->GetBinContent(ibin) ;    
-	      sprintf(arr_resphi_cs1	,    "%f ", resphi_cs1        ) ;   arr_resphi_cs1       [5]   =0;
-	      if ( h_Res_CS1	 )errresphi_cs1       = h_Res_CS1	  ->GetBinError  (ibin) ;    
-	      sprintf(arr_errresphi_cs1	,    "%f ", errresphi_cs1     ) ;   arr_errresphi_cs1    [5]   =0;
-	      if ( h_Res_CS2	 )resphi_cs2	      = h_Res_CS2	  ->GetBinContent(ibin) ;    
-	      sprintf(arr_resphi_cs2	,    "%f ", resphi_cs2        ) ;   arr_resphi_cs2       [5]   =0;
-	      if ( h_Res_CS2	 )errresphi_cs2       = h_Res_CS2	  ->GetBinError  (ibin) ;    
-	      sprintf(arr_errresphi_cs2	,    "%f ", errresphi_cs2     ) ;   arr_errresphi_cs2    [5]   =0;
-	      if ( h_Res_CSmore2 )resphi_csother      = h_Res_CSmore2	  ->GetBinContent(ibin) ;    
-	      sprintf(arr_resphi_csother	,    "%f ", resphi_csother    ) ;   arr_resphi_csother   [5]   =0;
-	      if ( h_Res_CSmore2 )errresphi_csother   = h_Res_CSmore2	  ->GetBinError  (ibin) ;    
-	      sprintf(arr_errresphi_csother,    "%f ", errresphi_csother ) ;   arr_errresphi_csother[5]   =0;
-	      if ( h_Time	 )timephi	      = h_Time  	  ->GetBinContent(ibin) ;    
-	      sprintf(arr_timephi  	,    "%f ", timephi	      ) ;   arr_timephi	       [5]   =0;
-              if ( h_Time	 )errtimephi	      = h_Time  	  ->GetBinError  (ibin) ;    
-	      sprintf(arr_errtimephi	,    "%f ", errtimephi        ) ;   arr_errtimephi       [5]   =0;
-	      if ( h_NoiseTot	 )noisephi	      = h_NoiseTot	  ->GetBinContent(ibin) ;    
-	      sprintf(arr_noisephi 	,    "%f ", noisephi	      ) ;   arr_noisephi         [5]   =0;
-	      if ( h_NoiseTot	 )errnoisephi	      = h_NoiseTot	  ->GetBinError  (ibin) ;    
-	      sprintf(arr_errnoisephi	,    "%f ", errnoisephi       ) ;   arr_errnoisephi      [5]   =0;
-	      if ( h_NoiseCorr   )noisephi_cor        = h_NoiseCorr	  ->GetBinContent(ibin) ;    
-	      sprintf(arr_noisephi_cor	,    "%f ", noisephi_cor      ) ;   arr_noisephi_cor     [5]   =0;
-	      if ( h_NoiseCorr   )errnoisephi_cor     = h_NoiseCorr	  ->GetBinError  (ibin) ;    
-	      sprintf(arr_errnoisephi_cor  ,    "%f ", errnoisephi_cor   ) ;   arr_errnoisephi_cor  [5]   =0;
-	      if ( h_CS 	 )cl_sizephi	      = h_CS		  ->GetBinContent(ibin) ;    
-	      sprintf(arr_cl_sizephi	,    "%f ", cl_sizephi        ) ;   arr_cl_sizephi       [5]   =0;
-	      if ( h_CS 	 )errcl_sizephi       = h_CS		  ->GetBinError  (ibin) ;    
-	      sprintf(arr_errcl_sizephi	,    "%f ", errcl_sizephi     ) ;   arr_errcl_sizephi    [5]   =0;
+	      effphi = getBinContentIfValid(h_Eff, ibin) ;    
+	      writeToCString(effphi, arr_effphi);
+	      erreffphi = getBinErrorIfValid(h_Eff, ibin);
+	      writeToCString(erreffphi, arr_erreffphi);
+	      
+	      resphi_cs1 = getBinContentIfValid(h_Res_CS1, ibin);
+	      writeToCString(resphi_cs1, arr_resphi_cs1);
+	      errresphi_cs1 = getBinErrorIfValid(h_Res_CS1, ibin);
+	      writeToCString(errresphi_cs1,arr_errresphi_cs1);
+	      
+        resphi_cs2 = getBinContentIfValid(h_Res_CS2, ibin);
+        writeToCString(resphi_cs2,arr_resphi_cs2);
+        errresphi_cs2 = getBinErrorIfValid(h_Res_CS2, ibin);
+        writeToCString(errresphi_cs2,arr_errresphi_cs2);
+        
+        resphi_csother = getBinContentIfValid(h_Res_CSmore2, ibin);
+        writeToCString(resphi_csother,arr_resphi_csother);
+        errresphi_csother = getBinErrorIfValid(h_Res_CSmore2, ibin);
+        writeToCString(errresphi_csother, arr_errresphi_csother);
+        
+	      timephi = getBinContentIfValid(h_Time, ibin);
+	      writeToCString(timephi,arr_timephi);
+	      errtimephi = getBinErrorIfValid(h_Time, ibin);
+	      writeToCString(errtimephi,arr_errtimephi);
+        
+        noisephi = getBinContentIfValid(h_NoiseTot, ibin);
+        writeToCString(noisephi,arr_noisephi);
+        errnoisephi = getBinErrorIfValid(h_NoiseTot, ibin);
+        writeToCString(errnoisephi,arr_errnoisephi);
+        
+        noisephi_cor = getBinContentIfValid(h_NoiseCorr, ibin);
+        writeToCString(noisephi_cor, arr_noisephi_cor);
+        errnoisephi_cor = getBinErrorIfValid(h_NoiseCorr, ibin);
+        writeToCString(errnoisephi_cor, arr_errnoisephi_cor);
+        
+        cl_sizephi = getBinContentIfValid(h_CS, ibin);
+        writeToCString(cl_sizephi, arr_cl_sizephi);
+        errcl_sizephi = getBinErrorIfValid(h_CS, ibin);
+        writeToCString(errcl_sizephi,arr_errcl_sizephi);
 	     
 	     }else{
 	      if (h_TrackProj) {n_tr_peta  =(int)h_TrackProj   -> GetBinContent(ibin) ;}
               if(n_tr_peta <1000) continue;
 
- 	      if ( h_Eff	)effeta 	     = h_Eff		 ->GetBinContent(ibin) ;      
-	      sprintf(arr_effeta  	 ,    "%f ", effeta	       ) ;   arr_effeta		[5]   =0;
-	      if ( h_Eff	)erreffeta	     = h_Eff		 ->GetBinError  (ibin) ;      
-	      sprintf(arr_erreffeta	 ,    "%f ", erreffeta         ) ;   arr_erreffeta	[5]   =0;
-	      if ( h_Res_CS1	)reseta_cs1	     = h_Res_CS1	 ->GetBinContent(ibin) ;      
-	      sprintf(arr_reseta_cs1	 ,    "%f ", reseta_cs1        ) ;   arr_reseta_cs1	[5]   =0;
-	      if ( h_Res_CS1	)errreseta_cs1       = h_Res_CS1	 ->GetBinError  (ibin) ;      
-	      sprintf(arr_errreseta_cs1	 ,    "%f ", errreseta_cs1     ) ;   arr_errreseta_cs1	[5]   =0;
-	      if ( h_Res_CS2	)reseta_cs2	     = h_Res_CS2	 ->GetBinContent(ibin) ;      
-	      sprintf(arr_reseta_cs2	 ,    "%f ", reseta_cs2        ) ;   arr_reseta_cs2	[5]   =0;
-	      if ( h_Res_CS2	)errreseta_cs2       = h_Res_CS2	 ->GetBinError  (ibin) ;      
-	      sprintf(arr_errreseta_cs2	 ,    "%f ", errreseta_cs2     ) ;   arr_errreseta_cs2	[5]   =0;
-              if ( h_Res_CSmore2)reseta_csother      = h_Res_CSmore2	 ->GetBinContent(ibin) ;      
-	      sprintf(arr_reseta_csother   ,    "%f ", reseta_csother    ) ;   arr_reseta_csother	[5]   =0;
-	      if ( h_Res_CSmore2)errreseta_csother   = h_Res_CSmore2	 ->GetBinError  (ibin) ;      
-	      sprintf(arr_errreseta_csother,    "%f ", errreseta_csother ) ;   arr_errreseta_csother[5]   =0;
-	      if ( h_Time	)timeeta	     = h_Time		 ->GetBinContent(ibin) ;      
-	      sprintf(arr_timeeta 	 ,    "%f ", timeeta	       ) ;   arr_timeeta  	[5]   =0;
-	      if ( h_Time	)errtimeeta	     = h_Time		 ->GetBinError  (ibin) ;      
-	      sprintf(arr_errtimeeta	 ,    "%f ", errtimeeta        ) ;   arr_errtimeeta	[5]   =0;
-	      if ( h_NoiseTot	)noiseeta	     = h_NoiseTot	 ->GetBinContent(ibin) ;      
-	      sprintf(arr_noiseeta	 ,    "%f ", noiseeta	       ) ;   arr_noiseeta 	[5]   =0;
-	      if ( h_NoiseTot	)errnoiseeta	     = h_NoiseTot	 ->GetBinError  (ibin) ;      
-	      sprintf(arr_errnoiseeta	 ,    "%f ", errnoiseeta       ) ;   arr_errnoiseeta	[5]   =0;
-	      if ( h_NoiseCorr  )noiseeta_cor	     = h_NoiseCorr	 ->GetBinContent(ibin) ;      
-	      sprintf(arr_noiseeta_cor	 ,    "%f ", noiseeta_cor      ) ;   arr_noiseeta_cor	[5]   =0;
-	      if ( h_NoiseCorr  )errnoiseeta_cor     = h_NoiseCorr	 ->GetBinError  (ibin) ;      
-	      sprintf(arr_errnoiseeta_cor  ,    "%f ", errnoiseeta_cor   ) ;   arr_errnoiseeta_cor  [5]   =0;
-	      if ( h_CS 	)cl_sizeeta	     = h_CS		 ->GetBinContent(ibin) ;      
-	      sprintf(arr_cl_sizeeta	 ,    "%f ", cl_sizeeta        ) ;   arr_cl_sizeeta	[5]   =0;
-	      if ( h_CS 	)errcl_sizeeta       = h_CS		 ->GetBinError  (ibin) ;      
-	      sprintf(arr_errcl_sizeeta	 ,    "%f ", errcl_sizeeta     ) ;   arr_errcl_sizeeta	[5]   =0;	     
+ 	      effeta 	     = getBinContentIfValid(h_Eff,ibin) ;      
+	      writeToCString(effeta,arr_effeta);
+	      erreffeta	     = getBinErrorIfValid(h_Eff,ibin) ;      
+	      writeToCString(erreffeta,arr_erreffeta);
+	      
+	      reseta_cs1	     = getBinContentIfValid(h_Res_CS1,ibin) ;      
+	      writeToCString(reseta_cs1,arr_reseta_cs1);
+	      errreseta_cs1       = getBinErrorIfValid(h_Res_CS1,ibin) ;      
+	      writeToCString(errreseta_cs1,arr_errreseta_cs1);
+	      
+	      reseta_cs2	     = getBinContentIfValid(h_Res_CS2,ibin) ;      
+	      writeToCString(reseta_cs2,arr_reseta_cs2);
+	      errreseta_cs2       = getBinErrorIfValid(h_Res_CS2,ibin) ;      
+	      writeToCString(errreseta_cs2,arr_errreseta_cs2);
+	      
+        reseta_csother      = getBinContentIfValid(h_Res_CSmore2,ibin) ;      
+	      writeToCString(reseta_csother,arr_reseta_csother);
+	      errreseta_csother   = getBinErrorIfValid(h_Res_CSmore2,ibin) ;      
+	      writeToCString(errreseta_csother,arr_errreseta_csother);
+	      
+	      timeeta	     = getBinContentIfValid(h_Time,ibin) ;      
+	      writeToCString(timeeta,arr_timeeta);
+	      errtimeeta	     = getBinErrorIfValid(h_Time,ibin) ;      
+	      writeToCString(errtimeeta,arr_errtimeeta);
+	      
+	      noiseeta	     = getBinContentIfValid(h_NoiseTot,ibin) ;      
+	      writeToCString(noiseeta,arr_noiseeta);
+	      errnoiseeta	     = getBinErrorIfValid(h_NoiseTot,ibin) ;      
+	      writeToCString(errnoiseeta,arr_errnoiseeta);
+	      
+	      noiseeta_cor	     = getBinContentIfValid(h_NoiseCorr,ibin) ;      
+	      writeToCString(noiseeta_cor, arr_noiseeta_cor	);
+	      errnoiseeta_cor     = getBinErrorIfValid(h_NoiseCorr,ibin) ;      
+	      writeToCString(errnoiseeta_cor, arr_errnoiseeta_cor);
+	      
+	      cl_sizeeta	     = getBinContentIfValid(h_CS,ibin) ;      
+	      writeToCString(cl_sizeeta,arr_cl_sizeeta);
+	      errcl_sizeeta       = getBinErrorIfValid(h_CS,ibin) ;      
+	      writeToCString(errcl_sizeeta,arr_errcl_sizeeta);	     
 	     
 	    
               //std::cout<<"PanelCode  "<<PanelCode<<" etaprimo "<<"\n";
@@ -1209,11 +1155,19 @@ MonitoringFile::RPCPostProcess( const std::string & inFilename, bool /* isIncrem
  	      char recPhi2  [4000]; //eff_phi, res_cs1, res_cs2, res_csother, time, only rms
 	      char detPhi1  [4000]; //noise, noise_corr, cs, mean and rms
 	      char detPhi2  [4000];
-	      sprintf(recEta,  "%5d %5d %5d %5d %s %s %s %s %s %s %s %s %s %s ", TableVersion,  n_tr_peta, NumberOfInfo, StripCluster, arr_effeta, arr_erreffeta, arr_reseta_cs1, arr_errreseta_cs1, arr_reseta_cs2, arr_errreseta_cs2, arr_reseta_csother, arr_errreseta_csother, arr_timeeta, arr_errtimeeta) ;  
-	      sprintf(detEta,  "%s %s %s %s %s %s ", arr_noiseeta, arr_errnoiseeta, arr_noiseeta_cor, arr_errnoiseeta_cor, arr_cl_sizeeta, arr_errcl_sizeeta) ;  
-	      sprintf(recPhi1, "%5d %5d %5d %s %s %s %s %s ", n_tr_pphi, NumberOfInfo, StripCluster, arr_effphi, arr_resphi_cs1, arr_resphi_cs2, arr_resphi_csother, arr_timephi) ;  
-	      sprintf(recPhi2, "%s %s %s %s %s ", arr_erreffphi, arr_errresphi_cs1, arr_errresphi_cs2, arr_errresphi_csother, arr_errtimephi) ;  
-	      sprintf(detPhi1, "%s %s %s %s %s %s ", arr_noisephi, arr_errnoisephi, arr_noisephi_cor, arr_errnoisephi_cor, arr_cl_sizephi, arr_errcl_sizephi) ;  
+	      sprintf(recEta,  "%5d %5d %5d %5d %s %s %s %s %s %s %s %s %s %s ", TableVersion,  
+	        n_tr_peta, NumberOfInfo, StripCluster, arr_effeta, arr_erreffeta, arr_reseta_cs1, 
+	        arr_errreseta_cs1, arr_reseta_cs2, arr_errreseta_cs2, arr_reseta_csother, 
+	        arr_errreseta_csother, arr_timeeta, arr_errtimeeta) ;  
+	      sprintf(detEta,  "%s %s %s %s %s %s ", arr_noiseeta, arr_errnoiseeta, 
+	        arr_noiseeta_cor, arr_errnoiseeta_cor, arr_cl_sizeeta, arr_errcl_sizeeta) ;  
+	      sprintf(recPhi1, "%5d %5d %5d %s %s %s %s %s ", n_tr_pphi, NumberOfInfo, 
+	        StripCluster, arr_effphi, arr_resphi_cs1, arr_resphi_cs2, arr_resphi_csother, 
+	        arr_timephi) ;  
+	      sprintf(recPhi2, "%s %s %s %s %s ", arr_erreffphi, arr_errresphi_cs1, 
+	        arr_errresphi_cs2, arr_errresphi_csother, arr_errtimephi) ;  
+	      sprintf(detPhi1, "%s %s %s %s %s %s ", arr_noisephi, arr_errnoisephi, 
+	        arr_noisephi_cor, arr_errnoisephi_cor, arr_cl_sizephi, arr_errcl_sizephi) ;  
 	      sprintf(detPhi2, "0 ") ;  
  	      std::string cool_tag="Reco";		        
               coolrpc.setSince(0U,0U);		
@@ -1270,7 +1224,6 @@ MonitoringFile::RPCPostProcess( const std::string & inFilename, bool /* isIncrem
 		sprintf(coolName, "Sector%.2d_%s_dblPhi%d", i_sec+1, (*iter).c_str(), i_dblPhi+1 );
 		std::string stripId_name       = dir_cool_raw + coolName + "_PanelId" ;
 	        std::string stripProfile_name  = dir_cool_raw + coolName + "_Profile" ;
-		//std::cout <<stripProfile_name << std::endl;
 		TH1F* h_stripId      = NULL;
 	        TH1F* h_stripProfile = NULL;
 	        
@@ -1319,172 +1272,175 @@ MonitoringFile::RPCPostProcess( const std::string & inFilename, bool /* isIncrem
 		     std::reverse(PanelStripsStatusOK.begin(), PanelStripsStatusOK.end());		
 		    }
                        
-		      for(int ibin=1 ; ibin!=nbin+1 ; ibin++){
-                        if ( h_PanelId )PanelCode = (int)h_PanelId-> GetBinContent(ibin) ;
-	                if(PanelCode !=PanelStripId)continue;
-			  if(ibin%2!=0){
-			    if (h_TrackProj) {n_tr_peta  =(int)h_TrackProj   -> GetBinContent(ibin) ;}
+        for(int ibin=1 ; ibin!=nbin+1 ; ibin++){
+          if ( h_PanelId )PanelCode = (int)h_PanelId-> GetBinContent(ibin) ;
+	        if(PanelCode !=PanelStripId)continue;
+			    if(ibin%2!=0){
+			      if (h_TrackProj) {n_tr_peta  =(int)h_TrackProj   -> GetBinContent(ibin) ;
+			    }
 			      //if(n_tr_peta >0){				
-				if ( h_PanelId )Binposition = (int)h_PanelId-> GetBinCenter(ibin) ;
-				int ibin_perp=0;
-	                        if(Binposition>0){ 
-				 ibin_perp=ibin+1;
-			         if ( h_Eff 	)eta_effphi 	     = h_Eff		 ->GetBinContent(ibin+1) ;
-			        }else{
-				 ibin_perp=ibin-1;
-			         if ( h_Eff 	)eta_effphi 	     = h_Eff		 ->GetBinContent(ibin-1) ;
- 			        }
-			    	if ( h_GapEff	  )gapeff	       = h_GapEff	   ->GetBinContent(ibin) ;
-			    	if ( h_GapEff	  )errgapeff	       = h_GapEff	   ->GetBinError  (ibin) ;				
- 			    	if ( h_Eff	  )effeta	       = h_Eff  	   ->GetBinContent(ibin) ;
- 			    	if ( h_Eff	  )erreffeta	       = h_Eff  	   ->GetBinError  (ibin) ;
-				
-				gapeffeta   =               gapeff;
-				errgapeffeta=            errgapeff;
-				EffThreshold = (effeta<Minimum_efficiency)|| (eta_effphi<Minimum_efficiency);
-				
-				
-				if ( h_Res_CS1    )reseta_cs1	       = h_Res_CS1	   ->GetBinContent(ibin) ;
- 			    	if ( h_Res_CS1    )errreseta_cs1       = h_Res_CS1	   ->GetBinError  (ibin) ;
- 			    	if ( h_Res_CS2    )reseta_cs2	       = h_Res_CS2	   ->GetBinContent(ibin) ;
- 			    	if ( h_Res_CS2    )errreseta_cs2       = h_Res_CS2	   ->GetBinError  (ibin) ;
- 			    	if ( h_Res_CSmore2)reseta_csother      = h_Res_CSmore2     ->GetBinContent(ibin) ;
- 			    	if ( h_Res_CSmore2)errreseta_csother   = h_Res_CSmore2     ->GetBinError  (ibin) ;
-			    	if ( h_NoiseTot   )noiseeta	       = h_NoiseTot	   ->GetBinContent(ibin) ;
- 			    	if ( h_NoiseTot   )errnoiseeta         = h_NoiseTot	   ->GetBinError  (ibin) ;	     
-				if ( h_NoiseCorr  )noiseeta_cor	       = h_NoiseCorr	   ->GetBinContent(ibin) ;      
-	                        if ( h_NoiseCorr  )errnoiseeta_cor     = h_NoiseCorr	   ->GetBinError  (ibin) ;      
- 			    	if ( h_CS	  )cl_sizeeta	       = h_CS		   ->GetBinContent(ibin) ;
- 			    	if ( h_CS	  )errcl_sizeeta       = h_CS		   ->GetBinError  (ibin) ;
- 			    	if ( h_CS_entries )entriesCSeta        = h_CS_entries      ->GetBinContent(ibin) ;
-  			    	if ( h_CS_entries )entriesCS1eta       = h_CS1_entries     ->GetBinContent(ibin) ;
-			    	if ( h_CS_entries )entriesCS2eta       = h_CS2_entries     ->GetBinContent(ibin) ;
-                                //std::cout << " entriesCSeta " << entriesCSeta <<std::endl;
-				if (entriesCSeta>0){
-				 //std::cout << " entriesCS1eta " << entriesCS1eta <<std::endl;
-                                 rateCS1eta     =entriesCS1eta/entriesCSeta;
-                                 rateCS2eta     =entriesCS2eta/entriesCSeta;
-                                 rateCSmore2eta =(entriesCSeta-(entriesCS1eta+entriesCS2eta))/entriesCSeta;
-                                }
-
-				if (applyEffThreshold){ 
-				 if(effeta<Minimum_efficiency&&eta_effphi<Minimum_efficiency){
-				   effeta      =Minimum_efficiency;
-				   gapeffeta   =Minimum_efficiency;
-				   erreffeta   =                 0.1;
-				   errgapeffeta=                 0.1;
-				   PanelStripsStatus   = PanelStripsStatusOK;
-				   cl_sizeeta     =   1;
-				   errcl_sizeeta  = 0.1,
-			           rateCS1eta     =   1;
-                                   rateCS2eta     =   0;
-                                   rateCSmore2eta =   0; 
-				 }
-				 else if(effeta<Minimum_efficiency&&eta_effphi>Minimum_efficiency){
-				   effeta      = Minimum_efficiency;
-				   gapeffeta   =            eta_effphi;
-				   erreffeta   =                   0.1;
-				   errgapeffeta=                   0.1;
-				   PanelStripsStatus   = PanelStripsStatusOK;
-				   cl_sizeeta     =   1;
-				   errcl_sizeeta  = 0.1,
-			           rateCS1eta     = 1;
-                                   rateCS2eta     = 0;
-                                   rateCSmore2eta = 0;
-				 }
-				 else if(effeta>Minimum_efficiency&&eta_effphi<Minimum_efficiency){
-				   gapeffeta   =              effeta;
-				   errgapeffeta=                 0.1;
-				 }
-				}
-        		        //std::cout << "  erreffeta  "<<erreffeta << "  effeta  "<<effeta <<"  errgapeff  "<<errgapeff << "  gapeff  "<<gapeff <<" rateCS1eta  "<<  rateCS1eta << " rateCS2eta " << rateCS2eta <<std::endl;
-	
-			    	sprintf(arr_effeta	   ,	"%f ", effeta		 ) ;   arr_effeta 	  [5]	=0;
-			    	sprintf(arr_erreffeta	   ,	"%f ", erreffeta	 ) ;   arr_erreffeta	  [5]	=0;
-			    	sprintf(arr_gapeffeta	   ,	"%f ", gapeffeta	 ) ;   arr_gapeffeta	  [5]	=0;
-			    	sprintf(arr_errgapeffeta     ,	"%f ", errgapeffeta	 ) ;   arr_errgapeffeta	  [5]	=0;
-			    	sprintf(arr_reseta_cs1	   ,	"%f ", reseta_cs1	 ) ;   arr_reseta_cs1	  [5]	=0;
-			    	sprintf(arr_errreseta_cs1    ,	"%f ", errreseta_cs1	 ) ;   arr_errreseta_cs1    [5]	=0;
-			    	sprintf(arr_reseta_cs2	   ,	"%f ", reseta_cs2	 ) ;   arr_reseta_cs2	  [5]	=0;
-			    	sprintf(arr_errreseta_cs2    ,	"%f ", errreseta_cs2	 ) ;   arr_errreseta_cs2    [5]	=0;
-			    	sprintf(arr_reseta_csother   ,	"%f ", reseta_csother	 ) ;   arr_reseta_csother   [5]	=0;
-			    	sprintf(arr_errreseta_csother,	"%f ", errreseta_csother ) ;   arr_errreseta_csother[5]	=0;
-			    	sprintf(arr_noiseeta	   ,	"%f ", noiseeta 	 ) ;   arr_noiseeta	  [5]	=0;
-			    	sprintf(arr_errnoiseeta	   ,	"%f ", errnoiseeta	 ) ;   arr_errnoiseeta	  [5]	=0;
-				sprintf(arr_noiseeta_cor	   ,    "%f ", noiseeta_cor      ) ;   arr_noiseeta_cor	  [5]   =0;
-                                sprintf(arr_errnoiseeta_cor  ,    "%f ", errnoiseeta_cor   ) ;   arr_errnoiseeta_cor  [5]   =0;
-			    	sprintf(arr_cl_sizeeta	   ,	"%f ", cl_sizeeta	 ) ;   arr_cl_sizeeta	  [5]	=0;
-			    	sprintf(arr_errcl_sizeeta    ,	"%f ", errcl_sizeeta	 ) ;   arr_errcl_sizeeta    [5]	=0;
-			    	sprintf(arr_rateCS1eta       ,	"%f ", rateCS1eta	 ) ;   arr_rateCS1eta       [5]	=0;
-			    	sprintf(arr_rateCS2eta       ,	"%f ", rateCS2eta	 ) ;   arr_rateCS2eta       [5]	=0;
-			    	sprintf(arr_rateCSmore2eta   ,	"%f ", rateCSmore2eta	 ) ;   arr_rateCSmore2eta   [5]	=0;
-	
-			        char PanelRes   [255]; //eff_eta, res_cs1, res_cs2, res_csother, time, mean and rms
-			        char StripStatus   [4096]; //strips status 0 to 9 for dead noisy strips
-				
- 			        sprintf(PanelRes,  "%d %d %d %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s", TableVersionCondDB,  n_tr_peta, StripsOnPanel,  arr_effeta, arr_erreffeta,  arr_gapeffeta, arr_errgapeffeta, arr_reseta_cs1, arr_errreseta_cs1, arr_reseta_cs2, arr_errreseta_cs2, arr_reseta_csother, arr_errreseta_csother, arr_noiseeta, arr_errnoiseeta, arr_noiseeta_cor, arr_errnoiseeta_cor, arr_cl_sizeeta, arr_errcl_sizeeta, arr_rateCS1eta, arr_rateCS2eta, arr_rateCSmore2eta) ;
- 			        sprintf(StripStatus, "%s", PanelStripsStatus.c_str()) ;
-				std::string cool_tagCondDB="RecoCondDB";		        
-                                coolrpc.setSince(0U,0U);		
-                                coolrpc.setUntil(4294967295U,0U);	
- 			        coolrpc.insertCondDB_withTag(run_number*0+429496729U,PanelCode,PanelRes, StripStatus,cool_tagCondDB);
-			        if(printout and EffThreshold and h_GapEff)std::cout << stripProfile_name << " under THR "<< EffThreshold <<" "<< PanelCode << " ibin " << ibin << " h_EffEta " << h_Eff->GetBinContent(ibin) <<" h_EffPhi " << h_Eff->GetBinContent(ibin_perp) << " h_GapEffEta " << h_GapEff->GetBinContent(ibin) <<" h_GapEffPhi " << h_GapEff->GetBinContent(ibin_perp) << " cool_EtaEff "<< effeta <<" cool_GapEffEta "<< gapeffeta <<" --- Eta Summary " << PanelRes<< " --- StripStatus " << StripStatus << std::endl;
-				if(printout&&EffThreshold)std::cout<<"inCOOL_ETA_id_ntrk_panelEff_gapEff "<<PanelCode<<" "<<n_tr_peta<<" "<<(int)(n_tr_peta*effeta)<<" "<<(int)(n_tr_peta*gapeffeta)<<std::endl;	
-			        countpanelindb++;
-			        if(effeta==0.0)countpaneleff0++;
-			        if(n_tr_peta==0)countpaneltrack0++;
-			      
+				  if ( h_PanelId )Binposition = (int)h_PanelId-> GetBinCenter(ibin) ;
+				  int ibin_perp=0;
+	        if(Binposition>0){ 
+				    ibin_perp=ibin+1;
+				    eta_effphi = getBinContentIfValid(h_Eff, ibin+1);
 			    }else{
-			     if (h_TrackProj) n_tr_pphi  =(int)h_TrackProj   -> GetBinContent(ibin) ;
- 			     //if(n_tr_pphi >0){
- 
-			     if ( h_PanelId )Binposition = (int)h_PanelId-> GetBinCenter(ibin) ;
-			     int ibin_perp=0;
-			     if(Binposition>0){
-			       ibin_perp=ibin-1;
-			       if ( h_GapEff	)gapeff 	     = h_GapEff 	 ->GetBinContent(ibin-1) ;
-			       if ( h_GapEff	)errgapeff	     = h_GapEff 	 ->GetBinError  (ibin-1) ;
-			       if ( h_Eff 	)phi_effeta 	     = h_Eff		 ->GetBinContent(ibin-1) ;
-			       
-			     }else{
-			       ibin_perp=ibin+1;
-			       if ( h_GapEff	)gapeff 	     = h_GapEff 	 ->GetBinContent(ibin+1) ;
- 			       if ( h_GapEff	)errgapeff	     = h_GapEff 	 ->GetBinError  (ibin+1) ;
-			       if ( h_Eff 	)phi_effeta 	     = h_Eff		 ->GetBinContent(ibin+1) ;
- 			     }
-			     if ( h_Eff 	)effphi 	     = h_Eff		 ->GetBinContent(ibin) ;
- 			     if ( h_Eff 	)erreffphi	     = h_Eff		 ->GetBinError  (ibin) ;
-			     
+				    ibin_perp=ibin-1;
+				    eta_effphi = getBinContentIfValid(h_Eff, ibin-1);
+ 			    }
+ 			    gapeff = getBinContentIfValid(h_GapEff, ibin);
+ 			    errgapeff = getBinErrorIfValid(h_GapEff, ibin);
+ 			    effeta = getBinContentIfValid(h_Eff, ibin);
+ 			    erreffeta = getBinErrorIfValid(h_Eff, ibin);
+				
+          gapeffeta   =               gapeff;
+          errgapeffeta=            errgapeff;
+          EffThreshold = (effeta<Minimum_efficiency)|| (eta_effphi<Minimum_efficiency);
+          
+          reseta_cs1 = getBinContentIfValid(h_Res_CS1, ibin);
+          errreseta_cs1 = getBinErrorIfValid(h_Res_CS1, ibin);
+          
+          reseta_cs2 = getBinContentIfValid(h_Res_CS2,ibin) ;
+          errreseta_cs2 = getBinErrorIfValid(h_Res_CS2,ibin) ;
+          
+          reseta_csother      = getBinContentIfValid( h_Res_CSmore2,ibin) ;
+          errreseta_csother   = getBinErrorIfValid(h_Res_CSmore2,ibin) ;
+          
+          noiseeta	       = getBinContentIfValid( h_NoiseTot,ibin) ;
+          errnoiseeta          = getBinErrorIfValid( h_NoiseTot,ibin) ;
+          	     
+				  noiseeta_cor	       = getBinContentIfValid( h_NoiseCorr,ibin) ;      
+          errnoiseeta_cor     = getBinErrorIfValid(h_NoiseCorr,ibin) ; 
+               
+          cl_sizeeta	       = getBinContentIfValid( h_CS,ibin) ;
+          errcl_sizeeta       = getBinErrorIfValid( h_CS,ibin) ;
+          
+          entriesCSeta        = getBinContentIfValid( h_CS_entries,ibin) ;
+          entriesCS1eta       = getBinContentIfValid( h_CS1_entries,ibin) ;
+          entriesCS2eta       = getBinContentIfValid(h_CS2_entries,ibin) ;
+          
+				  if (entriesCSeta>0){
+            rateCS1eta     =entriesCS1eta/entriesCSeta;
+            rateCS2eta     =entriesCS2eta/entriesCSeta;
+            rateCSmore2eta =(entriesCSeta-(entriesCS1eta+entriesCS2eta))/entriesCSeta;
+          }
 
-			     gapeffphi   =               gapeff;
-			     errgapeffphi=            errgapeff;
-			     EffThreshold = (effphi<Minimum_efficiency)|| (phi_effeta<Minimum_efficiency);
+				  if (applyEffThreshold){ 
+				    if(effeta<Minimum_efficiency&&eta_effphi<Minimum_efficiency){
+               effeta      =Minimum_efficiency;
+               gapeffeta   =Minimum_efficiency;
+               erreffeta   =                 0.1;
+               errgapeffeta=                 0.1;
+               PanelStripsStatus   = PanelStripsStatusOK;
+               cl_sizeeta     =   1;
+               errcl_sizeeta  = 0.1,
+			         rateCS1eta     =   1;
+               rateCS2eta     =   0;
+               rateCSmore2eta =   0; 
+				     } else if(effeta<Minimum_efficiency&&eta_effphi>Minimum_efficiency){
+               effeta      = Minimum_efficiency;
+               gapeffeta   =            eta_effphi;
+               erreffeta   =                   0.1;
+               errgapeffeta=                   0.1;
+               PanelStripsStatus   = PanelStripsStatusOK;
+               cl_sizeeta     =   1;
+               errcl_sizeeta  = 0.1,
+			         rateCS1eta     = 1;
+               rateCS2eta     = 0;
+               rateCSmore2eta = 0;
+				     } else if(effeta>Minimum_efficiency&&eta_effphi<Minimum_efficiency){
+				       gapeffeta   =              effeta;
+				       errgapeffeta=                 0.1;
+				     }
+				  }	
+          sprintf(arr_effeta	   ,	"%f ", effeta		 ) ;   arr_effeta 	  [5]	=0;
+          sprintf(arr_erreffeta	   ,	"%f ", erreffeta	 ) ;   arr_erreffeta	  [5]	=0;
+          sprintf(arr_gapeffeta	   ,	"%f ", gapeffeta	 ) ;   arr_gapeffeta	  [5]	=0;
+          sprintf(arr_errgapeffeta     ,	"%f ", errgapeffeta	 ) ;   arr_errgapeffeta	  [5]	=0;
+          sprintf(arr_reseta_cs1	   ,	"%f ", reseta_cs1	 ) ;   arr_reseta_cs1	  [5]	=0;
+          sprintf(arr_errreseta_cs1    ,	"%f ", errreseta_cs1	 ) ;   arr_errreseta_cs1    [5]	=0;
+          sprintf(arr_reseta_cs2	   ,	"%f ", reseta_cs2	 ) ;   arr_reseta_cs2	  [5]	=0;
+          sprintf(arr_errreseta_cs2    ,	"%f ", errreseta_cs2	 ) ;   arr_errreseta_cs2    [5]	=0;
+          sprintf(arr_reseta_csother   ,	"%f ", reseta_csother	 ) ;   arr_reseta_csother   [5]	=0;
+          sprintf(arr_errreseta_csother,	"%f ", errreseta_csother ) ;   arr_errreseta_csother[5]	=0;
+          sprintf(arr_noiseeta	   ,	"%f ", noiseeta 	 ) ;   arr_noiseeta	  [5]	=0;
+          sprintf(arr_errnoiseeta	   ,	"%f ", errnoiseeta	 ) ;   arr_errnoiseeta	  [5]	=0;
+          sprintf(arr_noiseeta_cor	   ,    "%f ", noiseeta_cor      ) ;   arr_noiseeta_cor	  [5]   =0;
+          sprintf(arr_errnoiseeta_cor  ,    "%f ", errnoiseeta_cor   ) ;   arr_errnoiseeta_cor  [5]   =0;
+          sprintf(arr_cl_sizeeta	   ,	"%f ", cl_sizeeta	 ) ;   arr_cl_sizeeta	  [5]	=0;
+          sprintf(arr_errcl_sizeeta    ,	"%f ", errcl_sizeeta	 ) ;   arr_errcl_sizeeta    [5]	=0;
+          sprintf(arr_rateCS1eta       ,	"%f ", rateCS1eta	 ) ;   arr_rateCS1eta       [5]	=0;
+          sprintf(arr_rateCS2eta       ,	"%f ", rateCS2eta	 ) ;   arr_rateCS2eta       [5]	=0;
+          sprintf(arr_rateCSmore2eta   ,	"%f ", rateCSmore2eta	 ) ;   arr_rateCSmore2eta   [5]	=0;
+	
+          char PanelRes   [255]; //eff_eta, res_cs1, res_cs2, res_csother, time, mean and rms
+          char StripStatus   [4096]; //strips status 0 to 9 for dead noisy strips
+				
+          sprintf(PanelRes,  "%d %d %d %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s", TableVersionCondDB,  n_tr_peta, StripsOnPanel,  arr_effeta, arr_erreffeta,  arr_gapeffeta, arr_errgapeffeta, arr_reseta_cs1, arr_errreseta_cs1, arr_reseta_cs2, arr_errreseta_cs2, arr_reseta_csother, arr_errreseta_csother, arr_noiseeta, arr_errnoiseeta, arr_noiseeta_cor, arr_errnoiseeta_cor, arr_cl_sizeeta, arr_errcl_sizeeta, arr_rateCS1eta, arr_rateCS2eta, arr_rateCSmore2eta) ;
+          sprintf(StripStatus, "%s", PanelStripsStatus.c_str()) ;
+				  std::string cool_tagCondDB="RecoCondDB";		        
+          coolrpc.setSince(0U,0U);		
+          coolrpc.setUntil(4294967295U,0U);	
+          coolrpc.insertCondDB_withTag(run_number*0+429496729U,PanelCode,PanelRes, StripStatus,cool_tagCondDB);
+          if(printout and EffThreshold and h_GapEff)std::cout << stripProfile_name << " under THR "<< EffThreshold <<" "<< PanelCode << " ibin " << ibin << " h_EffEta " << h_Eff->GetBinContent(ibin) <<" h_EffPhi " << h_Eff->GetBinContent(ibin_perp) << " h_GapEffEta " << h_GapEff->GetBinContent(ibin) <<" h_GapEffPhi " << h_GapEff->GetBinContent(ibin_perp) << " cool_EtaEff "<< effeta <<" cool_GapEffEta "<< gapeffeta <<" --- Eta Summary " << PanelRes<< " --- StripStatus " << StripStatus << std::endl;
+          if(printout&&EffThreshold)std::cout<<"inCOOL_ETA_id_ntrk_panelEff_gapEff "<<PanelCode<<" "<<n_tr_peta<<" "<<(int)(n_tr_peta*effeta)<<" "<<(int)(n_tr_peta*gapeffeta)<<std::endl;	
+          countpanelindb++;
+          if(effeta==0.0)countpaneleff0++;
+          if(n_tr_peta==0)countpaneltrack0++;
+			  }else{
+         if (h_TrackProj) n_tr_pphi  =(int)h_TrackProj   -> GetBinContent(ibin) ;
+         //if(n_tr_pphi >0){
+
+         if ( h_PanelId )Binposition = (int)h_PanelId-> GetBinCenter(ibin) ;
+         int ibin_perp=0;
+         if(Binposition>0){
+           ibin_perp=ibin-1;
+           gapeff = getBinContentIfValid(h_GapEff, ibin-1);
+           errgapeff = getBinErrorIfValid(h_GapEff,ibin-1);
+           phi_effeta = getBinContentIfValid(h_Eff, ibin-1);           
+         }else{
+           ibin_perp=ibin+1;
+           gapeff = getBinContentIfValid(h_GapEff, ibin+1);
+           errgapeff = getBinErrorIfValid(h_GapEff,ibin+1);
+           phi_effeta = getBinContentIfValid(h_Eff, ibin+1);    
+         }
+         effphi 	     = getBinContentIfValid(h_Eff, ibin);
+         erreffphi	     = getBinErrorIfValid(h_Eff,ibin);
+         gapeffphi   =               gapeff;
+         errgapeffphi=            errgapeff;
+         EffThreshold = (effphi<Minimum_efficiency)|| (phi_effeta<Minimum_efficiency);
 			     
 			     
-			     if ( h_Res_CS1	)resphi_cs1	     = h_Res_CS1	 ->GetBinContent(ibin) ;
-			     if ( h_Res_CS1	)errresphi_cs1       = h_Res_CS1	 ->GetBinError  (ibin) ;
- 			     if ( h_Res_CS2	)resphi_cs2	     = h_Res_CS2	 ->GetBinContent(ibin) ;
- 			     if ( h_Res_CS2	)errresphi_cs2       = h_Res_CS2	 ->GetBinError  (ibin) ;
- 			     if ( h_Res_CSmore2 )resphi_csother      = h_Res_CSmore2	 ->GetBinContent(ibin) ;
- 			     if ( h_Res_CSmore2 )errresphi_csother   = h_Res_CSmore2	 ->GetBinError  (ibin) ;
- 			     if ( h_NoiseTot	)noisephi	     = h_NoiseTot	 ->GetBinContent(ibin) ;
- 			     if ( h_NoiseTot	)errnoisephi	     = h_NoiseTot	 ->GetBinError  (ibin) ;
-			     if ( h_NoiseCorr   )noisephi_cor        = h_NoiseCorr	 ->GetBinContent(ibin) ;    
-	                     if ( h_NoiseCorr   )errnoisephi_cor     = h_NoiseCorr	 ->GetBinError  (ibin) ;    
- 			     if ( h_CS  	)cl_sizephi	     = h_CS		 ->GetBinContent(ibin) ;
- 			     if ( h_CS  	)errcl_sizephi       = h_CS		 ->GetBinError  (ibin) ;
- 			     if ( h_CS_entries  )entriesCSphi	     = h_CS_entries	 ->GetBinContent(ibin) ;
-  			     if ( h_CS_entries  )entriesCS1phi	     = h_CS1_entries	 ->GetBinContent(ibin) ;
-			     if ( h_CS_entries  )entriesCS2phi	     = h_CS2_entries	 ->GetBinContent(ibin) ;
-                             if(entriesCSphi>0){
-			      rateCS1phi     =entriesCS1phi/entriesCSphi;
-                              rateCS2phi     =entriesCS2phi/entriesCSphi;
-                              rateCSmore2phi =(entriesCSphi-(entriesCS1phi+entriesCS2phi))/entriesCSphi;
- 			     }	
+         resphi_cs1 = getBinContentIfValid ( h_Res_CS1, ibin	);
+         errresphi_cs1 = getBinErrorIfValid(h_Res_CS1, ibin);
+         
+         resphi_cs2	     = getBinContentIfValid(h_Res_CS2,ibin) ;
+         errresphi_cs2       = getBinErrorIfValid(h_Res_CS2,ibin) ;
+         
+         resphi_csother      = getBinContentIfValid(h_Res_CSmore2,ibin) ;
+         errresphi_csother   = getBinErrorIfValid(h_Res_CSmore2,ibin) ;
+         
+         noisephi	     = getBinContentIfValid(h_NoiseTot,ibin) ;
+         errnoisephi	     = getBinErrorIfValid(h_NoiseTot,ibin) ;
+         
+         noisephi_cor        = getBinContentIfValid(h_NoiseCorr,ibin) ;    
+         errnoisephi_cor     = getBinErrorIfValid(h_NoiseCorr,ibin) ; 
+            
+         cl_sizephi	     = getBinContentIfValid(h_CS,ibin) ;
+         errcl_sizephi       = getBinErrorIfValid(h_CS,ibin) ;
+         
+         entriesCSphi	     = getBinContentIfValid(h_CS_entries,ibin) ;
+         entriesCS1phi	     = getBinContentIfValid(h_CS1_entries,ibin) ;
+         entriesCS2phi	     = getBinContentIfValid(h_CS2_entries,ibin) ;
+         if(entriesCSphi>0){
+            rateCS1phi     =entriesCS1phi/entriesCSphi;
+            rateCS2phi     =entriesCS2phi/entriesCSphi;
+            rateCSmore2phi =(entriesCSphi-(entriesCS1phi+entriesCS2phi))/entriesCSphi;
+         }	
 			     
 			     
-			     if (applyEffThreshold){ 
-			      if(effphi<Minimum_efficiency&&phi_effeta<Minimum_efficiency){
+			    if (applyEffThreshold){ 
+			       if(effphi<Minimum_efficiency&&phi_effeta<Minimum_efficiency){
 				  effphi      =Minimum_efficiency;
 				  gapeffphi   =Minimum_efficiency;
 				  erreffphi   =                 0.1;
@@ -1514,16 +1470,7 @@ MonitoringFile::RPCPostProcess( const std::string & inFilename, bool /* isIncrem
 				  PanelStripsStatus   = PanelStripsStatusOK;
 			      }  
 			     }
-			     
-			     
-			     
-			     
-			     
-			     
-			     	    
-        		     //std::cout << "  erreffphi  "<<erreffphi << "  effphi  "<<effphi <<"  errgapeff  "<<errgapeff << "  gapeff  "<<gapeff << "  rateCS1phi  "<<rateCS1phi<< " rateCS2phi   "<<rateCS2phi<<std::endl;
-			     
-			     
+
 			     sprintf(arr_effphi		,    "%f ", effphi	      ) ;   arr_effphi	       [5]   =0;
 			     sprintf(arr_erreffphi	,    "%f ", erreffphi	      ) ;   arr_erreffphi        [5]   =0;
  			     sprintf(arr_gapeffphi	,    "%f ", gapeffphi	      ) ;   arr_gapeffphi        [5]   =0;
@@ -1546,14 +1493,21 @@ MonitoringFile::RPCPostProcess( const std::string & inFilename, bool /* isIncrem
 			    		
 			     char PanelRes   [255]; //eff_eta, res_cs1, res_cs2, res_csother, time, mean and rms
 			     char StripStatus   [4096]; //strips status 0 to 9 for dead noisy strips
- 			     sprintf(PanelRes,  "%d %d %d %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s", TableVersionCondDB,  n_tr_pphi, StripsOnPanel,  arr_effphi, arr_erreffphi,  arr_gapeffphi, arr_errgapeffphi, arr_resphi_cs1, arr_errresphi_cs1, arr_resphi_cs2, arr_errresphi_cs2, arr_resphi_csother, arr_errresphi_csother, arr_noisephi, arr_errnoisephi, arr_noisephi_cor, arr_errnoisephi_cor, arr_cl_sizephi, arr_errcl_sizephi, arr_rateCS1phi, arr_rateCS2phi, arr_rateCSmore2phi) ;
+ 			     sprintf(PanelRes,  "%d %d %d %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s", TableVersionCondDB,  n_tr_pphi, 
+ 			     StripsOnPanel,  arr_effphi, arr_erreffphi,  arr_gapeffphi, arr_errgapeffphi, arr_resphi_cs1, arr_errresphi_cs1, arr_resphi_cs2, 
+ 			       arr_errresphi_cs2, arr_resphi_csother, arr_errresphi_csother, arr_noisephi, arr_errnoisephi, arr_noisephi_cor, arr_errnoisephi_cor, 
+ 			       arr_cl_sizephi, arr_errcl_sizephi, arr_rateCS1phi, arr_rateCS2phi, arr_rateCSmore2phi) ;
  			     sprintf(StripStatus, "%s", PanelStripsStatus.c_str()) ;
  			     std::string cool_tag="RecoCondDB";		        
                              coolrpc.setSince(0U,0U);		
                              coolrpc.setUntil(4294967295U,0U);	
  			     coolrpc.insertCondDB_withTag(run_number*0+429496729U,PanelCode,PanelRes, StripStatus,cool_tag);
-			     if(printout&&EffThreshold)std::cout << stripProfile_name << " under THR "<< EffThreshold <<" " << PanelCode << " ibin " << ibin << " h_EffPhi " << h_Eff->GetBinContent(ibin) <<" h_EffEta " << h_Eff->GetBinContent(ibin_perp) << " h_GapEffPhi " << h_GapEff->GetBinContent(ibin) <<" h_GapEffEta " << h_GapEff->GetBinContent(ibin_perp) << " cool_PhiEff "<< effphi <<" cool_GapEffPhi "<< gapeffphi <<" --- Phi Summary " << PanelRes<< " --- StripStatus " << StripStatus << std::endl;
-			     if(printout&&EffThreshold)std::cout<<"inCOOL_PHI_id_ntrk_panelEff_gapEff "<<PanelCode<<" "<<n_tr_pphi<<" "<<(int)(n_tr_pphi*effphi)<<" "<<(int)(n_tr_pphi*gapeffphi)<<std::endl;
+ 			     
+			     if(printout&&EffThreshold) std::cout << stripProfile_name << " under THR "<< EffThreshold <<" " << PanelCode << " ibin " << ibin << " h_EffPhi " << h_Eff->GetBinContent(ibin) 
+			       <<" h_EffEta " << h_Eff->GetBinContent(ibin_perp) << " h_GapEffPhi " << h_GapEff->GetBinContent(ibin) <<" h_GapEffEta " << h_GapEff->GetBinContent(ibin_perp) << " cool_PhiEff "
+			       << effphi <<" cool_GapEffPhi "<< gapeffphi <<" --- Phi Summary " << PanelRes<< " --- StripStatus " << StripStatus << std::endl;
+			       
+			     if(printout&&EffThreshold) std::cout<<"inCOOL_PHI_id_ntrk_panelEff_gapEff "<<PanelCode<<" "<<n_tr_pphi<<" "<<(int)(n_tr_pphi*effphi)<<" "<<(int)(n_tr_pphi*gapeffphi)<<std::endl;
 			    countpanelindb++;
 			    if(effphi==0.0)countpaneleff0++;
 			    if(n_tr_pphi==0)countpaneltrack0++;
@@ -1562,7 +1516,6 @@ MonitoringFile::RPCPostProcess( const std::string & inFilename, bool /* isIncrem
 	      	          PanelStripsStatus.clear();
 	      	          PanelStripsStatusOK.clear();
  		        }
-			//if(StripsOnPanel>1) std::cout<<stripProfile_name<< " bin " << Nstrips << " Not found PanelStripId " << PanelStripId<< std::endl;		
 	    	        StripsOnPanel=1;
 	      	        PanelStripsStatus.clear();
 	      	        PanelStripsStatusOK.clear();			
@@ -1577,38 +1530,39 @@ MonitoringFile::RPCPostProcess( const std::string & inFilename, bool /* isIncrem
 	  std::cout <<"Count RC panels in DB " << countpanelindb << " Count RPCpanels in DB with zero efficiency "<< countpaneleff0 <<" Count RPCpanels in DB with zero track "<<countpaneltrack0 <<std::endl;
 	// write distribution plots all ATLAS
 	TDirectory* dirA = f->GetDirectory( dir_sideA_track.c_str() ) ;
+	
 	if ( dirA != 0 ) {
 	  dirA->cd();
-	  if ( h_AverageEff_A            ) h_AverageEff_A	     ->Write("",TObject::kOverwrite) ;
-	  if ( h_AverageGapEff_A         ) h_AverageGapEff_A         ->Write("",TObject::kOverwrite) ;
-	  if ( h_AverageRes_CS1_A        ) h_AverageRes_CS1_A        ->Write("",TObject::kOverwrite) ;
-	  if ( h_AverageRes_CS1rms_A     ) h_AverageRes_CS1rms_A     ->Write("",TObject::kOverwrite) ;
-	  if ( h_AverageRes_CS2_A        ) h_AverageRes_CS2_A        ->Write("",TObject::kOverwrite) ;
-	  if ( h_AverageRes_CS2rms_A     ) h_AverageRes_CS2rms_A     ->Write("",TObject::kOverwrite) ;
-	  if ( h_AverageRes_CSmore2_A    ) h_AverageRes_CSmore2_A    ->Write("",TObject::kOverwrite) ;
-	  if ( h_AverageRes_CSmore2rms_A ) h_AverageRes_CSmore2rms_A ->Write("",TObject::kOverwrite) ;
-	  if ( h_AverageOccupancy_A      ) h_AverageOccupancy_A      ->Write("",TObject::kOverwrite) ;
-	  if ( h_AverageCS_A             ) h_AverageCS_A             ->Write("",TObject::kOverwrite) ;
-	  if ( h_AverageTime_A           ) h_AverageTime_A           ->Write("",TObject::kOverwrite) ;
-	  if ( h_AverageNoiseCorr_A      ) h_AverageNoiseCorr_A      ->Write("",TObject::kOverwrite) ;
-	  if ( h_AverageNoiseTot_A       ) h_AverageNoiseTot_A       ->Write("",TObject::kOverwrite) ;
+	  writeIfValid( h_AverageEff_A            );
+	  writeIfValid ( h_AverageGapEff_A         );
+	  writeIfValid( h_AverageRes_CS1_A        );
+	  writeIfValid ( h_AverageRes_CS1rms_A     );
+	  writeIfValid ( h_AverageRes_CS2_A        );
+	  writeIfValid ( h_AverageRes_CS2rms_A     );
+	  writeIfValid ( h_AverageRes_CSmore2_A    );
+	  writeIfValid ( h_AverageRes_CSmore2rms_A );
+	  writeIfValid ( h_AverageOccupancy_A      ) ;
+	  writeIfValid ( h_AverageCS_A             );
+	  writeIfValid ( h_AverageTime_A           );
+	  writeIfValid ( h_AverageNoiseCorr_A      );
+	  writeIfValid( h_AverageNoiseTot_A       );
 	}
 	TDirectory* dirC = f->GetDirectory( dir_sideC_track.c_str() ) ;
 	if ( dirC != 0 ) {
 	  dirC->cd();
-	  if ( h_AverageEff_C            ) h_AverageEff_C	     ->Write("",TObject::kOverwrite) ;
-	  if ( h_AverageGapEff_C         ) h_AverageGapEff_C         ->Write("",TObject::kOverwrite) ;
-	  if ( h_AverageRes_CS1_C        ) h_AverageRes_CS1_C        ->Write("",TObject::kOverwrite) ;
-	  if ( h_AverageRes_CS1rms_C     ) h_AverageRes_CS1rms_C     ->Write("",TObject::kOverwrite) ;
-	  if ( h_AverageRes_CS2_C        ) h_AverageRes_CS2_C        ->Write("",TObject::kOverwrite) ;
-	  if ( h_AverageRes_CS2rms_C     ) h_AverageRes_CS2rms_C     ->Write("",TObject::kOverwrite) ;
-	  if ( h_AverageRes_CSmore2_C    ) h_AverageRes_CSmore2_C    ->Write("",TObject::kOverwrite) ;
-	  if ( h_AverageRes_CSmore2rms_C ) h_AverageRes_CSmore2rms_C ->Write("",TObject::kOverwrite) ;
-	  if ( h_AverageOccupancy_C      ) h_AverageOccupancy_C      ->Write("",TObject::kOverwrite) ;
-	  if ( h_AverageCS_C             ) h_AverageCS_C             ->Write("",TObject::kOverwrite) ;
-	  if ( h_AverageTime_C           ) h_AverageTime_C           ->Write("",TObject::kOverwrite) ;
-	  if ( h_AverageNoiseCorr_C      ) h_AverageNoiseCorr_C      ->Write("",TObject::kOverwrite) ;
-	  if ( h_AverageNoiseTot_C       ) h_AverageNoiseTot_C       ->Write("",TObject::kOverwrite) ;
+	  writeIfValid( h_AverageEff_C           );
+	  writeIfValid ( h_AverageGapEff_C        );
+	  writeIfValid( h_AverageRes_CS1_C       );
+	  writeIfValid ( h_AverageRes_CS1rms_C    );
+	  writeIfValid ( h_AverageRes_CS2_C       );
+	  writeIfValid ( h_AverageRes_CS2rms_C    );
+	  writeIfValid ( h_AverageRes_CSmore2_C   );
+	  writeIfValid ( h_AverageRes_CSmore2rms_C);
+	  writeIfValid ( h_AverageOccupancy_C     ) ;
+	  writeIfValid ( h_AverageCS_C            );
+	  writeIfValid ( h_AverageTime_C          );
+	  writeIfValid ( h_AverageNoiseCorr_C     );
+	  writeIfValid( h_AverageNoiseTot_C      );
 	}
 	
 		 
@@ -1620,8 +1574,6 @@ MonitoringFile::RPCPostProcess( const std::string & inFilename, bool /* isIncrem
   }
   f->Close();
   delete f;
-  //std::cout << "\n";
-  //std::cout << "Finish RPC analysis"<<std::endl;
 }
 
 
@@ -1634,7 +1586,6 @@ MonitoringFile::
 RPCCheckHistogram(TFile* f,const char* HistoName)
  {
   if (!(f->Get(HistoName))) {
-    //std::cerr << "RPC PostProcessing: no such histogram \""<< HistoName << "\"\n"; 
     return false;
   }
   else return true;
