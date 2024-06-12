@@ -13,6 +13,10 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import MetadataCategory
 from AthenaConfiguration.Enums import LHCPeriod
 
+from DerivationFrameworkEGamma.ElectronsCPDetailedContent import (
+    ElectronsCPDetailedContent
+)
+
 
 # Main algorithm config
 def FTAG1KernelCfg(flags, name='FTAG1Kernel', **kwargs):
@@ -130,6 +134,8 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
                 "JetAssociatedSCTClusters",
                 ]
 
+    # Add additional e/gamma variables
+    FTAG1SlimmingHelper.ExtraVariables += ElectronsCPDetailedContent
 
     # update AppendToDictionary
     extra_AppendToDictionary = {} #only add those items specifically for FTAG1 here!

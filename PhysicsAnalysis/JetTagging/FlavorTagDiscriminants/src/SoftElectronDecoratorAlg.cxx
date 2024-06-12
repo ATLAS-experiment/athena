@@ -116,10 +116,6 @@ namespace FlavorTagDiscriminants {
                                                                         std::pow(track->parameterPZ(index), 2));
             el_dpop = 1 - el_qoverp / (refittedTrack_LMqoverp);
         }
-        else {
-            ATH_MSG_ERROR("No track parameters for the last measurement");
-            return StatusCode::FAILURE;
-        }
 
         // kinematic var
         dec_electron_et(*el) = el_et;
