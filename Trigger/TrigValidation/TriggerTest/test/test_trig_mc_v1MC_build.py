@@ -15,7 +15,8 @@ ex.type = 'athena'
 ex.job_options = 'TriggerJobOpts/runHLT.py'
 ex.input = 'ttbar'
 ex.threads = 1
-ex.flags = ['Trigger.triggerMenuSetup="MC_pp_run3_v1"']
+ex.flags = ['Trigger.triggerMenuSetup="MC_pp_run3_v1"',
+            'IOVDb.GlobalTag="OFLCOND-MC23-SDR-RUN3-05"']
 
 test = Test.Test()
 test.art_type = 'build'

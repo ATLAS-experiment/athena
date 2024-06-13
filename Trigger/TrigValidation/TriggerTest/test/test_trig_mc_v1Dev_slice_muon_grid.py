@@ -30,6 +30,7 @@ ex.threads = 4
 ex.concurrent_events = 4
 ex.imf = False
 ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1"',
+            'IOVDb.GlobalTag="OFLCOND-MC23-SDR-RUN3-05"',
             'Trigger.enabledSignatures=[\\\"Muon\\\"]']
 
 test = Test.Test()
