@@ -441,6 +441,17 @@ StatusCode SCT_RodDecoder::addRODError(uint32_t rodID, SCT_ByteStreamErrors::Err
       continue;
     }
 
+    // Skip disabled modules
+    if(!m_configTool->isGood(hash)) {
+      continue;
+    }
+
+    // Skip bad links
+    const auto & [link0Good, link1Good] = m_configTool->badLinks(hash);
+    int side{m_sctID->side(m_sctID->wafer_id(hash))};
+    const bool result{side==0 ? not link0Good : not link1Good};
+    if (result) continue;
+
     ATH_CHECK(addSingleError(hash, error, errs));
   }
   return StatusCode::SUCCESS;
