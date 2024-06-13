@@ -14,7 +14,7 @@ from AthenaConfiguration.Enums import HIMode
 import logging
 logger = logging.getLogger('TrigHLTMonitoring')
 
-RAWonlySignatureList = ['Egamma', 'Calo', 'MET']
+RAWonlySignatureList = ['Calo', 'MET']
 
 def createHLTDQConfigFlags():
     from AthenaConfiguration.AthConfigFlags import AthConfigFlags
