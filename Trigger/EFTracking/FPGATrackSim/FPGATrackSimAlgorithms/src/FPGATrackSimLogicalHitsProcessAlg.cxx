@@ -24,7 +24,6 @@
 #include "FPGATrackSimMaps/FPGATrackSimRegionMap.h"
 
 #include "GaudiKernel/IEventProcessor.h"
-#include "TGraphAsymmErrors.h"
 
 #ifdef BENCHMARK_LOGICALHITSALG
 #define TIME(name) \
