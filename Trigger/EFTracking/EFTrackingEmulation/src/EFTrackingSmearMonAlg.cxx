@@ -108,7 +108,7 @@ StatusCode EFTrackingSmearMonAlg::execute(const EventContext& ctx) {
                       <<" z0="   << z0Acc(*part)
                       <<" pT="   << part->pt()
                       <<" PDGID=" << part->pdgId()
-                      <<" status=" << part->status()                                        
+                      <<" status=" << HepMC::status(part)
                       ); 
       if (part->parent(0)) ATH_MSG_DEBUG (" parent pdgId=" << part->parent(0)->pdgId()); 
     }
@@ -134,7 +134,7 @@ StatusCode EFTrackingSmearMonAlg::execute(const EventContext& ctx) {
                       <<" z0="   << z0Acc(*part)
                       <<" pT="   << ptAcc(*part)
                       <<" PDGID=" << part->pdgId()
-                      <<" status=" << part->status()                                        
+                      <<" status=" << HepMC::status(part)
                       ); 
       if (part->parent(0)) ATH_MSG_DEBUG (" parent pdgId=" << part->parent(0)->pdgId()); 
     }

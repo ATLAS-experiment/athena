@@ -6,6 +6,7 @@
 #include "EFTrackingSmearingAlg.h"
 #include "xAODTracking/VertexContainer.h" 
 #include "AthContainers/ConstAccessor.h"
+#include "TruthUtils/MagicNumbers.h"
 
 #include "TH1.h"
 
@@ -251,7 +252,7 @@ StatusCode EFTrackingSmearingAlg::smearTruthParticles(const EventContext& ctx) {
                       <<" z0="   << z0Acc(*part)
                       <<" pT="   << part->pt()  
                       <<" PDGID=" << part->pdgId()
-                      <<" status=" << part->status()                       
+                      <<" status=" << HepMC::status(part)
                       );        
       if (part->parent(0)) ATH_MSG_DEBUG (" parent status=" << part->parent(0)->pdgId());
       
@@ -295,7 +296,7 @@ StatusCode EFTrackingSmearingAlg::smearTruthParticles(const EventContext& ctx) {
                       <<" z0="   << z0Acc(*newtrk)
                       <<" pT="   << newpt
                       <<" PDGID=" << newtrk->pdgId()
-                      <<" status=" << newtrk->status()                      
+                      <<" status=" << HepMC::status(newtrk)
                   );
                 if (newtrk->parent(0)) ATH_MSG_DEBUG (" parent status=" << newtrk->parent(0)->pdgId());
                 

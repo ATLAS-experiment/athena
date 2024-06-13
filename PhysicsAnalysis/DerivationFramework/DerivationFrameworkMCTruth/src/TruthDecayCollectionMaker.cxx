@@ -130,7 +130,7 @@ int DerivationFramework::TruthDecayCollectionMaker::addTruthParticle( const Even
     // Fill with numerical content
     xTruthParticle->setPdgId(old_part.pdgId());
     xTruthParticle->setUid(HepMC::uniqueID(&old_part));
-    xTruthParticle->setStatus(old_part.status());
+    xTruthParticle->setStatus(HepMC::status(old_part));
     xTruthParticle->setM(old_part.m());
     xTruthParticle->setPx(old_part.px());
     xTruthParticle->setPy(old_part.py());

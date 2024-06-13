@@ -34,14 +34,14 @@ StatusCode xAODParticleDecayFilter::filterEvent(const EventContext& ctx)
     }
 
     ATH_MSG_DEBUG("xAODParticleDecayFilter::filterEvent(const EventContext& ctx)");
-// Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and
-// duplicated barcode ones
-  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey, ctx};
-  CHECK(xTruthParticleContainer.isValid());
+    // Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and
+    // duplicated barcode ones
+    SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey, ctx};
+    CHECK(xTruthParticleContainer.isValid());
 
-  // Loop over all particles in the event 
-  for (const xAOD::TruthParticle* particle : *xTruthParticleContainer) {
-            ATH_MSG_DEBUG("pdg code of this particle in the event is " << particle->pdgId() << " with status " << particle->status());
+    // Loop over all particles in the event
+    for (const xAOD::TruthParticle* particle : *xTruthParticleContainer) {
+            ATH_MSG_DEBUG("pdg code of this particle in the event is " << particle->pdgId() << " with status " << HepMC::status(particle));
             //maps with key pdgId and value of number of particles with that pdgId
             std::map<int, unsigned int> childCounters;
             //counter for any children not in the specified list of children

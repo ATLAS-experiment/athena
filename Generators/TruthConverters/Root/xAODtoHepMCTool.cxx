@@ -216,7 +216,7 @@ HepMC::GenParticlePtr xAODtoHepMCTool::createHepMCParticle(const xAOD::TruthPart
 {
   ATH_MSG_VERBOSE("Creating GenParticle for uniqueID " << HepMC::uniqueID(particle));
   const HepMC::FourVector fourVec(m_momFac * particle->px(), m_momFac * particle->py(), m_momFac * particle->pz(), m_momFac * particle->e());
-  auto hepmcParticle = HepMC::newGenParticlePtr(fourVec, particle->pdgId(), particle->status());
+  auto hepmcParticle = HepMC::newGenParticlePtr(fourVec, particle->pdgId(), HepMC::status(particle));
   hepmcParticle->set_generated_mass(m_momFac * particle->m());
   return hepmcParticle;
 }
@@ -255,7 +255,7 @@ void xAODtoHepMCTool::printxAODEvent(const xAOD::TruthEvent *event, const xAOD::
     if (HepMC::generations(part) > 0) continue;
     int id = part->pdgId();
     if (id != 25) continue;
-    int stat = part->status();
+    int stat = HepMC::status(part);
     float px = part->px() / 1000.;
     float py = part->py() / 1000.;
     float pz = part->pz() / 1000.;

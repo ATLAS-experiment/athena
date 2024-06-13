@@ -427,7 +427,7 @@ void DerivationFramework::HardTruthThinning::printxAODTruth(long long evnum,
     if (HepMC::is_simulation_particle(tpItr)) continue;
     int uid = HepMC::uniqueID(tpItr);
     int id = tpItr->pdgId();
-    int stat = tpItr->status();
+    int stat = HepMC::status(tpItr);
     float px = tpItr->px()/GeV;
     float py = tpItr->py()/GeV;
     float pz = tpItr->pz()/GeV;

@@ -245,13 +245,13 @@ namespace xAODReader {
       if ( particle->hasDecayVtx() ) {
         if ( HepMC::uniqueID(particle->decayVtx()) != HepMC::UNDEFINED_ID ) {
           cout.width(3);
-          cout << particle->status() << " ";
+          cout << HepMC::status(particle) << " ";
           cout.width(9);
           cout << HepMC::uniqueID(particle->decayVtx());
         }
       } else {
         cout.width(3);
-        cout << particle->status();
+        cout << HepMC::status(particle);
       }
     }
     cout << endl;

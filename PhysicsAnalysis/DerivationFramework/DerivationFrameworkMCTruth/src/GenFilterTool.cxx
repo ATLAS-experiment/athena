@@ -149,7 +149,7 @@ namespace DerivationFramework {
         ATH_MSG_VERBOSE("Adding neutrino from W/Z/Tau with pt " << tp->pt()
                         << ", eta " << tp->eta()
                         << ", phi " << tp->phi()
-                        << ", status " << tp->status()
+                        << ", status " << HepMC::status(tp)
                         << ", pdgId " << pdgid);
         genFiltHTinclNu += tp->pt();
       }
@@ -158,7 +158,7 @@ namespace DerivationFramework {
         ATH_MSG_VERBOSE("Found prompt nonInteracting particle with pt " << tp->pt()
                         << ", eta " << tp->eta()
                         << ", phi " << tp->phi()
-                        << ", status " << tp->status()
+                        << ", status " << HepMC::status(tp)
                         << ", pdgId " << pdgid);
         MEx += tp->px();
         MEy += tp->py();
