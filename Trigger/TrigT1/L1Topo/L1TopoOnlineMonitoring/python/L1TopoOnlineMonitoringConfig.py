@@ -57,10 +57,10 @@ def getMultiplicityLabels(flags,topoModule):
     return topo_trigline_labels
 
 
-def getL1TopoPhase1OnlineMonitor(flags, name='L1TopoOnlineMonitor', doSimMon=True, doHwMonCtp=False, doHwMon=False, doComp=False, doMultComp=False, forceCtp=False, logLevel = None):
+def getL1TopoPhase1OnlineMonitor(flags, name='L1TopoOnlineMonitor', doSimMon=True, doHwMonCtp=False, doHwMon=False, doComp=False, doMultComp=False, forceCtp=False, logLevel = None, toolName="L1TopoMonitoringTool"):
     # Placeholder for phase-1 implementation
     #raise RuntimeError('L1Topo phase-1 online monitoring not yet implemented')
-    alg = CompFactory.L1TopoOnlineMonitor("L1TopoMonitoringTool",
+    alg = CompFactory.L1TopoOnlineMonitor(toolName,
                                           doHwMon = doHwMon,
                                           doSimMon = doSimMon,
                                           doHwMonCTP = doHwMonCtp,
