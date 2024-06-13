@@ -32,6 +32,11 @@ class TriggerAnalysisBlock (ConfigBlock):
         self.addOption ('prescaleLumiCalcFiles', [], type=None,
             info="a list of lumical files (list of strings) to calculate "
             "trigger prescales. The default is [] (empty list).")
+        self.addOption ('prescaleTriggersFormula', '', type=str,
+            info="a formula used in (un)prescaling, producing overall prescale "
+            "factor instead of prescale per trigger.")
+        self.addOption ('prescaleMC', False, type=bool,
+            info="prescale MC instead of unprescaling of data.")
         self.addOption ('noFilter', False, type=bool,
             info="do not apply an event filter. The default is False, i.e. "
             "remove events not passing trigger selection and matching.")
@@ -69,18 +74,23 @@ class TriggerAnalysisBlock (ConfigBlock):
             config.addOutputVar ('EventInfo', 'trigPassed_' + t, 'trigPassed_' + t, noSys=True)
 
         # Calculate trigger prescales
-        if config.dataType() is DataType.Data and self.prescaleLumiCalcFiles:
+        if ((config.dataType() is DataType.Data) != self.prescaleMC) and self.prescaleLumiCalcFiles:
+
             alg = config.createAlgorithm( 'CP::TrigPrescalesAlg', 'TrigPrescalesAlg' )
             config.addPrivateTool( 'pileupReweightingTool', 'CP::PileupReweightingTool' )
             alg.pileupReweightingTool.LumiCalcFiles = self.prescaleLumiCalcFiles
             alg.pileupReweightingTool.TrigDecisionTool = '%s/%s' % \
                     ( decisionTool.getType(), decisionTool.getName() )
-            alg.triggers = [lumicalc.split(':')[-1] for lumicalc in self.prescaleLumiCalcFiles if ':' in lumicalc]
-            alg.triggersAll = self.triggerChainsForSelection
+            if self.prescaleTriggersFormula != '':
+                alg.prescaleTriggersFormula = self.prescaleTriggersFormula
+            else:
+                alg.triggers = [lumicalc.split(':')[-1] for lumicalc in self.prescaleLumiCalcFiles if ':' in lumicalc]
+                alg.triggersAll = self.triggerChainsForSelection
+            alg.prescaleMC = self.prescaleMC
             alg.prescaleDecoration = 'prescale'
 
         return
-        
+ 
 
     def makeAlgs (self, config) :
         
