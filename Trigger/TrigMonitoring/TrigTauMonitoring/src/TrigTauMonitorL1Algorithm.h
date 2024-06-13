@@ -11,9 +11,17 @@ class TrigTauMonitorL1Algorithm : public TrigTauMonitorBaseAlgorithm {
 public:
     TrigTauMonitorL1Algorithm(const std::string& name, ISvcLocator* pSvcLocator);
 
+    virtual StatusCode initialize() override;
+
 private:
     // Require at least 1 offline Tau per event (will bias the variable distributions for background events)
     Gaudi::Property<bool> m_requireOfflineTaus{this, "RequireOfflineTaus", true, "Require at leat 1 offline tau per event"};
+
+    // We need access to the xTOB-based RoI container to retrieve the BDT score
+    SG::ReadHandleKey<xAOD::eFexTauRoIContainer> m_phase1l1eTauxRoIKey{this, "Phase1L1eTauxRoIKey", "L1_eTauxRoI", "eTau Phase1 L1 xRoI key"};
+
+    std::vector<const xAOD::eFexTauRoI*> getL1xTOBeTAUs() const;
+    unsigned int getBDTScore(const xAOD::eFexTauRoI* roi, const std::vector<const xAOD::eFexTauRoI*>& xtob_rois) const;
 
     virtual StatusCode processEvent(const EventContext& ctx) const override;
 
@@ -59,9 +67,9 @@ private:
         ATH_MSG_DEBUG("After fill L1 efficiencies: " << trigger);
     } 
 
-    void fillL1eTauVars(const std::string& trigger, const std::vector<const xAOD::eFexTauRoI*>& rois) const;
+    void fillL1eTauVars(const std::string& trigger, const std::vector<const xAOD::eFexTauRoI*>& rois, const std::vector<const xAOD::eFexTauRoI*>& xtob_rois) const;
     void fillL1jTauVars(const std::string& trigger, const std::vector<const xAOD::jFexTauRoI*>& rois) const;
-    void fillL1cTauVars(const std::string& trigger, const std::vector<std::pair<const xAOD::eFexTauRoI*, const xAOD::jFexTauRoI*>>& rois) const;
+    void fillL1cTauVars(const std::string& trigger, const std::vector<std::pair<const xAOD::eFexTauRoI*, const xAOD::jFexTauRoI*>>& rois, const std::vector<const xAOD::eFexTauRoI*>& xtob_rois) const;
     void fillL1LegacyVars(const std::string& trigger, const std::vector<const xAOD::EmTauRoI*>& rois) const;
 };
 
