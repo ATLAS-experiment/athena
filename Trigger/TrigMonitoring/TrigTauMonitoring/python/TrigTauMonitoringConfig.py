@@ -304,9 +304,14 @@ class TrigTauMonAlgBuilder:
 
 
   def configureAlgorithmL1(self):
+    has_xtob_etau_rois = 'L1_eTauxRoI' in self.helper.flags.Input.Collections
+
     self.mon_alg_L1 = self._configureAlgorithm(CompFactory.TrigTauMonitorL1Algorithm, 'TrigTauMonAlgL1')
     self.mon_alg_L1.TriggerList = self.L1_items
     self.mon_alg_L1.RequireOfflineTaus = self.require_offline_taus
+    if not has_xtob_etau_rois:
+      self.logger.info('  |- No L1_eTauxRoI container is available: e/cTAU BDT scores will be set to 0')
+      self.mon_alg_L1.Phase1L1eTauxRoIKey = ''
 
     self.logger.info('  |- Booking all histograms')
     for trigger in self.L1_items:
@@ -319,6 +324,9 @@ class TrigTauMonAlgBuilder:
       self.mon_alg_L1_no_offline.TriggerList = self.L1_items
       self.mon_alg_L1_no_offline.RequireOfflineTaus = False
       self.mon_alg_L1_no_offline.DoEfficiencyPlots = False
+      if not has_xtob_etau_rois:
+        self.logger.info('  |- No L1_eTauxRoI container is available: e/cTAU BDT scores will be set to 0')
+        self.mon_alg_L1_no_offline.Phase1L1eTauxRoIKey = ''
 
       self.logger.info('  |- Booking all histograms')
       path = f'{self.base_path}/OnlineOnlyVars'
@@ -330,6 +338,7 @@ class TrigTauMonAlgBuilder:
       self.mon_alg_L1_alt.Phase1L1eTauRoIKey = 'L1_eTauRoIAltSim' # Use alternative RoIs (with heuristic eTAU algorithm simulation)
       self.mon_alg_L1_alt.SelectL1ByETOnly = True # We don't have threshold patterns for the Alt RoIs, so we match by ET only
       self.mon_alg_L1_alt.RequireOfflineTaus = False
+      self.mon_alg_L1_alt.Phase1L1eTauxRoIKey = ''
 
       l1_items = [item for item in self.L1_items if 'eTAU' in item and not self.getTriggerInfo(item).isL1TauIsolated()] # Only non-isolated eTAU items
       self.mon_alg_L1_alt.TriggerList = l1_items
@@ -678,7 +687,7 @@ class TrigTauMonAlgBuilder:
     if 'eTAU' in trigger:
         mon_group.defineHistogram('L1eFexRoIRCore', title='L1 eTAU RoI rCore Isolation; rCore Isolation; RoIs', xbins=250, xmin=0, xmax=1, opt='kAlwaysCreate')
         mon_group.defineHistogram('L1eFexRoIRHad' , title='L1 eTAU RoI rHad Isolation; rHad Isolation; RoIs', xbins=250, xmin=0, xmax=1, opt='kAlwaysCreate')
-        mon_group.defineHistogram('L1eFexRoIBDTScore' , title='L1 eTAU RoI BDT score; BDT Score; RoIs', xbins=250, xmin=0, xmax=4096, opt='kAlwaysCreate')
+        mon_group.defineHistogram('L1eFexRoIBDTScore' , title='L1 eTAU RoI BDT score; BDT Score; RoIs', xbins=128, xmin=512, xmax=1024, opt='kAlwaysCreate')
 
     elif 'cTAU' in trigger:
         mon_group.defineHistogram('L1eFexRoIRCore', title='L1 eTAU RoI rCore Isolation; eTAU rCore Isolation; RoIs', xbins=250, xmin=0, xmax=1, opt='kAlwaysCreate')
@@ -687,7 +696,7 @@ class TrigTauMonAlgBuilder:
         mon_group.defineHistogram('L1jFexRoIIso', title='L1 jTAU RoI Isolation; E_{T}^{jTAU Iso} [GeV]; RoIs', xbins=25, xmin=0, xmax=50, opt='kAlwaysCreate')
         mon_group.defineHistogram('L1cTauMatchedRoIIso', title='L1 cTAU Isolation score; E_{T}^{jTAU Iso}/E_{T}^{eTAU}; RoIs', xbins=50, xmin=0, xmax=5, opt='kAlwaysCreate')
         mon_group.defineHistogram('L1RoIcTauMatchedEtRatio', title='Et ratio between matched eTAU and jTAU RoIs; E_{T}^{jTAU}/E_{T}^{eTAU}; RoIs', xbins=40, xmin=0, xmax=4, opt='kAlwaysCreate')
-        mon_group.defineHistogram('L1eFexRoIBDTScore' , title='L1 eTAU RoI BDT score; BDT Score; RoIs', xbins=250, xmin=0, xmax=4096, opt='kAlwaysCreate')
+        mon_group.defineHistogram('L1eFexRoIBDTScore' , title='L1 eTAU RoI BDT score; BDT Score; RoIs', xbins=128, xmin=512, xmax=1024, opt='kAlwaysCreate')
 
     elif 'jTAU' in trigger:
         mon_group.defineHistogram('L1jFexRoIIso', title='L1 jTAU RoI Isolation; jTAU Isolation [GeV]; N RoI', xbins=25, xmin=0, xmax=50, opt='kAlwaysCreate')
