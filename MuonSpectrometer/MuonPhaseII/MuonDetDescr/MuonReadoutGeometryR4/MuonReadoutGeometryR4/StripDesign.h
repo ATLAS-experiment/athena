@@ -198,10 +198,13 @@ namespace MuonGMR4 {
             double m_shortHalfY{0.};
             double m_longHalfY{0.};
             double m_halfX{0.};
+            
 
-        /// sTGC Diamond Variables                       
             /// Stores the diamond cutout length from the SQLite DB file 
             double m_yCutout{0.}; 
+            /// Lenght of the line segment that's cut from the long edge to 
+            /// make the trapezoid diamond shaped
+            double m_cutLongEdge{0.};
         public:
             /// Defines the edges of the sTGC diamond L3 sector
             void defineDiamond(double HalfShortY, double HalfLongY, double HalfHeight, double yCutout);

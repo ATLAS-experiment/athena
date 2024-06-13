@@ -81,12 +81,13 @@ namespace MuonGMR4{
 
     }
     void StripDesign::defineDiamond(double HalfShortY, double HalfLongY, 
-                                        double HalfHeight, double yCutout) {
+                                    double HalfHeight, double yCutout) {
         /// define a trapezoid region to preserve the functionality of intersect functions in StripDesign class
-        double HalfLongY_uncut = HalfLongY + yCutout * (HalfLongY - HalfShortY)/(2*HalfHeight - yCutout);
-        defineTrapezoid(HalfShortY, HalfLongY_uncut, HalfHeight);
+        double HalfLongYuncut = HalfLongY + yCutout * (HalfLongY - HalfShortY)/(2*HalfHeight - yCutout);
+        defineTrapezoid(HalfShortY, HalfLongYuncut, HalfHeight);
         m_yCutout = yCutout;
         m_longHalfY = HalfLongY;
+        m_cutLongEdge = m_yCutout * (m_longHalfY - m_shortHalfY)/(2*m_halfX - m_yCutout);
     }
     void StripDesign::flipTrapezoid() {
         if (m_isFlipped) {
@@ -97,8 +98,10 @@ namespace MuonGMR4{
 
         m_bottomLeft = Amg::Vector2D{-m_shortHalfY, -m_halfX};
         m_bottomRight = Amg::Vector2D{m_shortHalfY, -m_halfX};
-        m_topLeft = Amg::Vector2D{-m_longHalfY, m_halfX};
-        m_topRight = Amg::Vector2D{m_longHalfY, m_halfX};
+        /// yCutOut defined for the sTGC detectors. Move the edges to the uncut trapezoid version
+        /// Deal with the cutOut in the intersect       
+        m_topLeft = Amg::Vector2D{-m_longHalfY - m_cutLongEdge, m_halfX};
+        m_topRight = Amg::Vector2D{m_longHalfY + m_cutLongEdge, m_halfX};
         resetDirCache();
     }
 

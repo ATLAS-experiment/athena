@@ -78,7 +78,7 @@ void testBoundaries(const StripDesign& design, TFile& outFile, const std::string
     const unsigned nBinY = (highY -lowY) / 0.25*Gaudi::Units::mm;
 
     std::unique_ptr<TH2I> histo = std::make_unique<TH2I>(histoName.c_str(),
-                                                         "boundaties:x[mm];y[mm];isInside", 
+                                                         "boundaries;x[mm];y[mm];isInside", 
                                                           nBinX, lowX, highX,
                                                           nBinY, lowY, highY);
     Eigen::Rotation2D stereoRot{design.stereoAngle()};
@@ -170,7 +170,7 @@ bool testChamberBackForthMapping(const MuonGMR4::StripDesign& design) {
 
         auto testAdjecent = [&](const int adjacentCh) -> bool {
             const CheckVector2D adjacentStrip = design.center(adjacentCh);
-            /// Probably we're iether at 1 or nChannels
+            /// Probably we're either at 1 or nChannels
             if (!adjacentCh) {
                 return true;
             }
@@ -184,7 +184,8 @@ bool testChamberBackForthMapping(const MuonGMR4::StripDesign& design) {
             const int backAdjacent = design.stripNumber(adjacentShift);
             if (backAdjacent != ch) {
                 std::cerr<<"runStripDesignDump() "<<__LINE__<<"  -- the point "<<Amg::toString(adjacentShift)
-                     <<" should be assigned to "<<ch<<" "<<Amg::toString(stripCentVal)
+                     <<" should be assigned to "<<ch<<". Ref strip: "<<Amg::toString(stripCentVal)
+                     <<", adjacent: "<<Amg::toString(adjacentVal)
                      <<" but the design decided that it's gonna be "<<backAdjacent<<std::endl;
                 return false;
             }
@@ -319,6 +320,30 @@ int main(int argc, char** argv) {
     testChannelNumber(rotatedDesign, *file, "StereoFlippedNumbers");
     if (!testChamberBackForthMapping(rotatedDesignNeg)) {
         std::cerr<<"runStripDesignDump() "<<__LINE__<<"  --  Rotated flipped design channel mapping failed "<<std::endl;
+        return EXIT_FAILURE;
+    }
+
+    StripDesign diamondDesign{};
+    diamondDesign.defineDiamond(shortEdge, longEdge, halfHeight, halfHeight);
+    diamondDesign.defineStripLayout(Amg::Vector2D{-longEdge + 0.5*stripPitch,0},
+                                        stripPitch, stripWidth, numStrips+ 25, 1);
+
+    createGraph(diamondDesign, *file, "Diamond");
+    testChannelNumber(diamondDesign, *file, "DiamondNumbers");
+    testBoundaries(diamondDesign, *file, "DiamondBoundaries");
+
+ 
+    StripDesign flippedDiamond{};
+    flippedDiamond.defineDiamond(shortEdge, longEdge, halfHeight, halfHeight);
+    flippedDiamond.defineStripLayout(Amg::Vector2D{-longEdge + 0.5*stripPitch,0},
+                                        stripPitch, stripWidth, numStrips, 1);
+    flippedDiamond.flipTrapezoid();
+    createGraph(flippedDiamond, *file, "FlippedDiamond");
+    testChannelNumber(flippedDiamond, *file, "FlippedDiamondNumbers");
+    testBoundaries(flippedDiamond, *file, "FlippedDiamondBoundaries");
+
+    if (!testChamberBackForthMapping(diamondDesign)) {
+        std::cerr<<"runStripDesignDump() "<<__LINE__<<"  --- Diamond design forth and back mapping failed."<<std::endl;
         return EXIT_FAILURE;
     }
 
