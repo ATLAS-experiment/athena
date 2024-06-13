@@ -196,7 +196,7 @@ namespace ChainNameParser {
 
     std::string legHeadPattern()
     {
-        return "(\\d*)("+join(allSignatures(), "|")+")(\\d*)"+"(noL1)?";
+        return "(\\d*)("+join(allSignatures(), "|")+")(\\d*)"+"(noL1|c|f|a)?";
     }
 
     std::vector<int> multiplicities(const std::string &chain)
