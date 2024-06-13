@@ -49,7 +49,7 @@
 // Methods registering historgrams
 // Ownership passed to Gaudi
 template <typename T>
-void TilePaterMonTool::regHist(const std::string& subDir, T* hist, Interval_t interval, MgmtAttr_t attribute,  std::string trigChain, std::string mergeAlgo)
+void TilePaterMonTool::regHist(const std::string& subDir, T* hist, Interval_t interval, MgmtAttr_t attribute,  const std::string & trigChain, const std::string & mergeAlgo)
 {
 
   std::string path(m_path);
@@ -62,7 +62,7 @@ void TilePaterMonTool::regHist(const std::string& subDir, T* hist, Interval_t in
 }
 
 template <typename T>
-void TilePaterMonTool::regGraph(const std::string& subDir, T* graph, Interval_t interval, MgmtAttr_t attribute,  std::string trigChain, std::string mergeAlgo)
+void TilePaterMonTool::regGraph(const std::string& subDir, T* graph, Interval_t interval, MgmtAttr_t attribute,  const std::string & trigChain, const std::string & mergeAlgo)
 {
 
   std::string path(m_path);
