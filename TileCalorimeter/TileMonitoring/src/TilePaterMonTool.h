@@ -212,12 +212,12 @@ protected:
   template <typename T>
   void regHist(const std::string& subDir, T* hist,
                Interval_t interval = run, MgmtAttr_t attribute = ATTRIB_MANAGED, 
-               std::string trigChain = "", std::string mergeAlgo = "" );
+               const std::string &trigChain = "", const std::string & mergeAlgo = "" );
 
   template <typename T>
   void regGraph(const std::string& subDir, T* graph,
                 Interval_t interval = run, MgmtAttr_t attribute = ATTRIB_MANAGED, 
-                std::string trigChain = "", std::string mergeAlgo = "" );
+                const std::string & trigChain = "", const std::string & mergeAlgo = "" );
   
 
   const TileID* m_tileID{};
