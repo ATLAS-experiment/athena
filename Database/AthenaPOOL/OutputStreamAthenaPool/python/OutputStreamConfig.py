@@ -90,9 +90,6 @@ def OutputStreamCfg(flags, streamName, ItemList=[], MetadataItemList=[],
 
    result.addService(CompFactory.StoreGateSvc("MetaDataStore"))
    outputStream.MetadataStore = result.getService("MetaDataStore")
-   outputStream.MetadataItemList += [
-      "IOVMetaDataContainer#*",
-   ]
 
    # Support for MT thinning.
    thinningCacheTool = CompFactory.Athena.ThinningCacheTool(f"ThinningCacheTool_Stream{streamName}",

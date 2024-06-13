@@ -15,14 +15,21 @@ from StoreGateTests.Lib import PyClidsTestWriter
 cfg.addEventAlgo( PyClidsTestWriter() )
 
 from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-cfg.merge( OutputStreamCfg(flags,
-                           streamName = "Stl",
-                           disableEventTag = True,
-                           ItemList = ["EventInfo#*",
-                                       "std::vector<int>#*",
-                                       "std::vector<unsigned int>#*",
-                                       "std::vector<float>#*",
-                                       "std::vector<double>#*"]) )
+cfg.merge(
+    OutputStreamCfg(
+        flags,
+        streamName="Stl",
+        disableEventTag=True,
+        ItemList=[
+            "EventInfo#*",
+            "std::vector<int>#*",
+            "std::vector<unsigned int>#*",
+            "std::vector<float>#*",
+            "std::vector<double>#*",
+        ],
+        MetadataItemList=["IOVMetaDataContainer#*"],
+    )
+)
 
 import sys
 sys.exit( cfg.run().isFailure() )
