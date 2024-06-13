@@ -1,6 +1,8 @@
 
 
 #include "TrigEgammaMonitorAnalysisAlgorithm.h"
+#include "AthContainers/Decorator.h"
+
 
 
 TrigEgammaMonitorAnalysisAlgorithm::TrigEgammaMonitorAnalysisAlgorithm( const std::string& name, ISvcLocator* pSvcLocator ):
@@ -89,7 +91,8 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillEfficiencies( const std::vector< st
             continue;
         } 
         emu_accept_vec.push_back( acceptData );
-        if( pairObj.first->auxdecor<bool>("Isolated") ){
+        static const SG::Decorator<bool> IsolatedDec("Isolated");
+        if( IsolatedDec(*pairObj.first) ){
             emu_accept_iso_vec.push_back(acceptData);
         }
     }
@@ -99,7 +102,8 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillEfficiencies( const std::vector< st
         pair_vec.push_back(pairObj);
         auto acceptData = setAccept( pairObj.second, info );
         accept_vec.push_back(acceptData);
-        if( pairObj.first->auxdecor<bool>("Isolated") ){
+        static const SG::Decorator<bool> IsolatedDec("Isolated");
+        if( IsolatedDec(*pairObj.first) ){
             pair_iso_vec.push_back(pairObj);
             accept_iso_vec.push_back(acceptData);
         }
@@ -215,6 +219,7 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillEfficiency( const std::string &subg
  
     unsigned iObj=0;
 
+    SG::Decorator<bool> pidwordDec("is"+pidword);
     for( auto pairObj : pairObjs ){
         
         bool pid=true;
@@ -228,7 +233,7 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillEfficiency( const std::string &subg
         if(xAOD::EgammaHelpers::isElectron(eg)){
             ATH_MSG_DEBUG("Offline Electron with pidword " << pidword);
             const xAOD::Electron* el =static_cast<const xAOD::Electron*> (eg);
-            pid=el->auxdecor<bool>("is"+pidword);
+            pid=pidwordDec(*el);
             ATH_MSG_DEBUG("Electron pid " << pid);
             et = getEt(el)/Gaudi::Units::GeV;
             if (el->pt() > 0) {
@@ -244,8 +249,8 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillEfficiency( const std::string &subg
         float pt = eg->pt()/Gaudi::Units::GeV;
         float avgmu=lbAverageInteractionsPerCrossing( Gaudi::Hive::currentContext() );
         float npvtx=0.0;
-
-        ATH_MSG_DEBUG("PID decision efficiency " << eg->auxdecor<bool>("is"+pidword));
+        
+        ATH_MSG_DEBUG("PID decision efficiency " << pidwordDec(*eg));
         
         if(pid){  
             et_vec.push_back( et );
@@ -364,6 +369,7 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillInefficiency( const std::string &pi
 {
     auto monGroup = getGroup(info.trigger+"_Inefficiency");
     unsigned iObj=0;
+    SG::Decorator<bool> pidwordDec("is"+pidword);
     for( auto pairObj : pairObjs ){
         
         bool pid=true;
@@ -377,7 +383,7 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillInefficiency( const std::string &pi
         if(xAOD::EgammaHelpers::isElectron(eg)){
             ATH_MSG_DEBUG("Offline Electron with pidword " << pidword);
             const xAOD::Electron* el =static_cast<const xAOD::Electron*> (eg);
-            pid=el->auxdecor<bool>("is"+pidword);
+            pid=pidwordDec(*el);
             ATH_MSG_DEBUG("Electron pid " << pid);
         }
         if(pid){
@@ -913,6 +919,7 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillResolutions( const std::vector< std
   std::vector< std::pair< const xAOD::Egamma*, const TrigCompositeUtils::Decision * >> pair_eg_vec;
   const std::string trigger = info.trigger;
 
+  SG::Decorator<bool> pidnameDec("is"+info.pidname);
   for( auto pairObj : pairObjs ){
 
     const xAOD::Egamma* eg = pairObj.first;
@@ -928,7 +935,7 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillResolutions( const std::vector< std
         const xAOD::Electron* el = static_cast<const xAOD::Electron*>(eg);
         float et = getEt(el)/Gaudi::Units::GeV;
         if( et < info.etthr-5.0) continue;
-        if(!eg->auxdecor<bool>("is"+info.pidname)) continue;
+        if(!pidnameDec(*eg)) continue;
         pair_eg_vec.emplace_back(el,feat);
         if(l1)  pair_l1_vec.emplace_back(eg,l1 );
       }

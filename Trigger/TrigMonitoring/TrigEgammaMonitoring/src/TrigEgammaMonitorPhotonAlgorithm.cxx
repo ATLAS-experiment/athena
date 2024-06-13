@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigEgammaMonitorPhotonAlgorithm.h"
 #include "LArRecEvent/LArEventBitInfo.h"
 #include "StoreGate/ReadDecorHandle.h"
+#include "AthContainers/ConstAccessor.h"
 
 
 using namespace Trig;
@@ -133,7 +134,7 @@ StatusCode TrigEgammaMonitorPhotonAlgorithm::executeNavigation( const EventConte
   const std::string trigItem = info.trigger;
   const float etthr = info.etthr;
   const std::string pidName = info.pidname;
-  const std::string decor="is"+pidName;
+  const std::string decorName="is"+pidName;
 
   for(const auto *const eg : *offPhotons ){
       const TrigCompositeUtils::Decision *dec=nullptr; 
@@ -163,7 +164,8 @@ StatusCode TrigEgammaMonitorPhotonAlgorithm::executeNavigation( const EventConte
           }
       }
       const auto ph = std::make_shared<const xAOD::Photon>(*eg);
-      ph->auxdecor<bool>(decor)=static_cast<bool>(true);
+      SG::Decorator<bool> decor (decorName);
+      decor(*ph)=static_cast<bool>(true);
       match()->match(ph.get(), trigItem, dec, TrigDefs::includeFailedDecisions);
       //match()->match(ph, trigItem, dec);
       pairObjs.emplace_back(ph, dec);

@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigEgammaMonitorElectronAlgorithm.h"
 #include "LArRecEvent/LArEventBitInfo.h"
 #include "StoreGate/ReadDecorHandle.h"
+#include "AthContainers/ConstAccessor.h"
 
 using namespace Trig;
 
@@ -117,7 +118,7 @@ StatusCode TrigEgammaMonitorElectronAlgorithm::executeNavigation( const EventCon
   }
 
 
-  const std::string decor="is"+pidName;
+  const std::string decorName="is"+pidName;
   for(const auto *const eg : *offElectrons ){
 
       const TrigCompositeUtils::Decision *dec=nullptr; 
@@ -157,7 +158,8 @@ StatusCode TrigEgammaMonitorElectronAlgorithm::executeNavigation( const EventCon
       }
 
       const auto el = std::make_shared<const xAOD::Electron>(*eg);
-      el->auxdecor<bool>(decor)=static_cast<bool>(true);
+      SG::Decorator<bool> decor (decorName);
+      decor(*el)=static_cast<bool>(true);
 
       match()->match(el.get(), trigItem, dec, TrigDefs::includeFailedDecisions);
       //match()->match(el, trigItem, dec);
