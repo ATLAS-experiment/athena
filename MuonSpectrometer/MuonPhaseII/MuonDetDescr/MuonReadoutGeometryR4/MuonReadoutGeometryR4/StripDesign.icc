@@ -30,10 +30,12 @@ namespace MuonGMR4 {
     SET_DIRECTION(edgeDirLeft, m_dirLeftEdge, m_topLeft, m_bottomLeft)
     SET_DIRECTION(edgeDirRight, m_dirRightEdge, m_topRight, m_bottomRight)
 
-    inline double StripDesign::lenTopEdge() const { return isFlipped() ? 2* longHalfHeight() :  m_lenSlopEdge; }
-    inline double StripDesign::lenLeftEdge() const {return isFlipped() ? m_lenSlopEdge : 2* shortHalfHeight();}
-    inline double StripDesign::lenBottomEdge() const { return isFlipped() ? 2* shortHalfHeight() : m_lenSlopEdge; }
-    inline double StripDesign::lenRightEdge() const{ return isFlipped() ? m_lenSlopEdge  : 2 * longHalfHeight(); }
+    inline double StripDesign::lenTopEdge() const {
+        return isFlipped() ? 2.*(longHalfHeight()  + m_cutLongEdge):  m_lenSlopEdge;
+    }
+    inline double StripDesign::lenLeftEdge() const {return isFlipped() ? m_lenSlopEdge : 2.* shortHalfHeight();}
+    inline double StripDesign::lenBottomEdge() const { return isFlipped() ? 2.* shortHalfHeight() : m_lenSlopEdge; }
+    inline double StripDesign::lenRightEdge() const{ return isFlipped() ? m_lenSlopEdge  : 2.* longHalfHeight(); }
 
     inline double StripDesign::stripPitch() const { return m_stripPitch; }
     inline double StripDesign::stripWidth() const { return m_stripWidth; }
@@ -54,6 +56,10 @@ namespace MuonGMR4 {
         return leftInterSect(stripPosition(stripCh), uncapped);
     }
     inline CheckVector2D StripDesign::leftInterSect(const Amg::Vector2D& stripPos, bool uncapped) const {
+        /// Flipped diamonds may not exceed the halfLength along the x-coordinate
+        if (yCutout() && isFlipped() && std::abs(stripPos.x()) > longHalfHeight()) {
+            return std::nullopt;
+        }
         /// We expect lambda to be positive
         const std::optional<double> lambda = Amg::intersect<2>(stripPos, m_stripDir, cornerTopLeft(), edgeDirTop());
         if (!lambda) {
@@ -77,7 +83,12 @@ namespace MuonGMR4 {
             }
             return std::make_optional<Amg::Vector2D>(edgePos + (*top_line) * edgeDir);
        }
-       return std::make_optional<Amg::Vector2D>(cornerTopLeft() + (*lambda) * edgeDirTop());
+       Amg::Vector2D isect = cornerTopLeft() + (*lambda) * edgeDirTop();
+        /// In case of diamonds, ensure that the trapezoid is cut on the upper half
+       if (!uncapped && yCutout() && !isFlipped()) {
+            isect.y() = std::min(isect.y(), longHalfHeight());
+       }
+       return std::make_optional<Amg::Vector2D>(std::move(isect));
     }
     inline CheckVector2D StripDesign::rightInterSect(const Amg::Vector2D& stripPos, bool uncapped) const {
         std::optional<double> lambda = Amg::intersect<2>(stripPos, m_stripDir, cornerBotLeft(), edgeDirBottom());
@@ -101,7 +112,12 @@ namespace MuonGMR4 {
             }
             return std::make_optional<Amg::Vector2D>(edgePos + (*bottom_line) * edgeDir);
         }
-        return std::make_optional<Amg::Vector2D>(cornerBotLeft() + (*lambda) * edgeDirBottom());
+        Amg::Vector2D isect = cornerBotLeft() + (*lambda) * edgeDirBottom();
+        /// In case of diamonds, ensure that the trapezoid is cut on the upper half
+        if (!uncapped && yCutout() && !isFlipped()) {
+            isect.y() = std::max(isect.y(), -longHalfHeight());
+        }
+        return std::make_optional<Amg::Vector2D>(std::move(isect));
     }
     //============================================================================
     inline double StripDesign::stripLength(int stripNumber) const {
@@ -119,10 +135,6 @@ namespace MuonGMR4 {
         }
         const Amg::Vector2D delta = (*bottomIsect) - (*topIsect);
         double stripLen = std::hypot(delta.x(), delta.y());
-        /// Condition to limit the stripLength to a maximum length of long base of the sTGC L3 sector
-        if(yCutout() && stripLen > 2*longHalfHeight()) {
-            stripLen = 2*longHalfHeight();
-        }
         ATH_MSG_VERBOSE("Strip "<<stripNumber<<" right edge: "<<Amg::toString((*bottomIsect), 2)
                      <<" left edge: "<<Amg::toString( (*topIsect),2)<<" length: "<<stripLen);
         return stripLen;
