@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "eflowRec/PFLCCalibTool.h"
@@ -96,8 +96,10 @@ void PFLCCalibTool::applyLocalWeight(eflowRecCluster* theEFRecClusters, const Ca
   for (;cellIter != theCluster->cell_end(); ++cellIter) {
     const CaloCell* pCell = *cellIter;
     IdentifierHash myHashId = calo_id->calo_cell_hash(pCell->ID());
-    double weight = weightMap.find(myHashId)->second;
-    theCluster->reweightCell(cellIter, weight);
+    if (const auto pWeight = weightMap.find(myHashId); pWeight!=weightMap.end()){
+      const double weight = pWeight->second;
+      theCluster->reweightCell(cellIter, weight);
+    }
   }
 
   CaloClusterKineHelper::calculateKine(theCluster, true, false);

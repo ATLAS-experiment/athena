@@ -33,7 +33,6 @@ class eflowRingSubtractionManager {
  public:
 
   eflowRingSubtractionManager();
-  ~eflowRingSubtractionManager() {}
 
   double fudgeMean() const    {return m_fudgeMean;}
   double fudgeStdDev() const  {return m_fudgeStdDev;}
@@ -59,8 +58,8 @@ class eflowRingSubtractionManager {
 
   std::map<double,RingId> m_rankMap;
   std::vector<double> m_ringThickness;
-  double m_fudgeMean;
-  double m_fudgeStdDev;
+  double m_fudgeMean{};
+  double m_fudgeStdDev{};
 
   static constexpr double m_rMax = 0.75;
   static constexpr double m_weightRange = 1.0e6;
