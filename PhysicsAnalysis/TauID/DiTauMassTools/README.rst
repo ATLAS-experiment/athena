@@ -8,17 +8,16 @@ DiTauMassTools: Package holding the Missing Mass Calculator (MMC)
 Introduction
 ------------
 
-This package holds two versions of the MMC. The original version and a refactored version (V2) that aims at being more comprehensible, faster and easier to re-tune by reading in the used PDFs from a root-file.
+This package holds the refactored version (V2) that aims to be more comprehensible, faster and easier to re-tune by reading in the used PDFs from a root-file.
 The documentation of the original package can be found here:
 `original MMC <doc/README-old.rst>`_.
 
 Please note that the description on how to set up the tool is still valid for the old version and for the most part also for the new version.
 
-CAUTION: The plan is to phase out the original version of the MMC and to be completely replaced by the new version around 2020/06/30. If your analysis needs the original version after that, please contact michael.huebner@cern.ch or the maintainer of this package ahead of time.
+CAUTION: If your analysis needs the original version, please contact ATLAS TauCP group conveners  or the maintainer of this package ahead of time.
 
 Useful links:
 
-* `Twiki <https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/MissingMassCalculator>`_
 * `Michael Hübner, refactored MMC performance <https://indico.cern.ch/event/858190/contributions/3615217/attachments/1931095/3198553/mmc_hleptons.pdf>`_
 * Older tutorials:
 
@@ -35,16 +34,14 @@ Please have a look into this `tutorial <https://atlassoftwaredocs.web.cern.ch/AB
 
 A vanilla version of DiTauMassTools comes with AnalysisBase and AthAnalysis releases. These can be set up with e.g.::
 
-        asetup 21.2.101,AnalysisBase or
-        asetup 21.2.101,AthAnalysis
+        asetup 25.2.14,AnalysisBase or
+        asetup 25.2.14,AthAnalysis
 
-21.2.101 is the first release containing V2 of the MMC.
-
-The latest releases and changes are documented on the `AnalysisRelease page <https://twiki.cern.ch/twiki/bin/view/AtlasProtected/AnalysisBaseReleaseNotes21_2>`_.
+The latest releases and changes are documented on the `AnalysisRelease page <https://twiki.cern.ch/twiki/bin/view/AtlasProtected/AnalysisBaseReleaseNotes25pt2>`_.
 If you plan to contribute to DiTauMassTools, please refer to the `ATLAS Git Workflow Tutorial <https://atlassoftwaredocs.web.cern.ch/gittutorial/>`_. This tutorial describes how to get your own copy of the offline code from GitLab and how to prepare a merge request that asks for your code to be added to the main repository. For such developments it is recommended to set up the latest nightly with::
 
-        asetup 21.2,AnalysisBase,latest or
-        asetup 21.2,AthAnalysis,latest
+        asetup main,AnalysisBase,latest or
+        asetup main,AthAnalysis,latest
 
 The general settings of the tool are handled via properties. The most important ones being:
 
