@@ -75,6 +75,10 @@ namespace ActsTrk
 
   StatusCode TrackToTruthAssociationAlg::finalize()
   {
+     if (m_nIncompatibleMeasurementContainer>0) {
+        ATH_MSG_WARNING( "Encountered measurements not compaible with provided association maps in "
+                         << m_nIncompatibleMeasurementContainer << " of " << (m_nCcompatibleMeasurementContainer+m_nIncompatibleMeasurementContainer) << " cases.");
+     }
      if (msgLvl(MSG::INFO)) {
         msg(MSG::INFO) << "-- Statistics:" << std::endl;
         unsigned int idx=0;
@@ -138,6 +142,12 @@ namespace ActsTrk
                  );
     unsigned int track_i=0;
     std::array<unsigned int,s_NCounterForAssociatedTruth> tracks_with_associated_truth{};
+    std::pair<unsigned int, unsigned int> compatible_assoc_container_counts{};
+    if (m_nIncompatibleMeasurementContainer>0) {
+       // used to suppress reoccurring error messages
+       --m_nIncompatibleMeasurementContainer;
+       ++compatible_assoc_container_counts.second;
+    }
 
     std::vector<unsigned int> counted_truth_particles;
     counted_truth_particles.reserve(10);
@@ -159,7 +169,8 @@ namespace ActsTrk
            &truth_particle_counts,
            &reco_hits,
            &noise_hits,
-           &counted_truth_particles
+           &counted_truth_particles,
+           &compatible_assoc_container_counts
            ](const typename ActsTrk::TrackStateBackend::ConstTrackStateProxy &state) -> void
           {
             if (!state.typeFlags().test(Acts::TrackStateFlag::OutlierFlag) && state.hasUncalibratedSourceLink()) {
@@ -170,6 +181,17 @@ namespace ActsTrk
 
               const ActsTrk::MeasurementToTruthParticleAssociation *association_map = measurement_to_truth_association_maps.at(to_underlying(uncalibMeas.type()));
               if (association_map) {
+                 if (!association_map->isCompatibleWith(dynamic_cast< const xAOD::UncalibratedMeasurementContainer *>(uncalibMeas.container()))) {
+                    if (compatible_assoc_container_counts.second==0) {
+                       ATH_MSG_ERROR("MeasurementToTruthParticleAssociation for measurement type " << to_underlying(uncalibMeas.type())
+                                     << " is not compatible with the measurement on track.");
+                    }
+                    ++compatible_assoc_container_counts.second;
+                    return;
+                 }
+                 else {
+                    ++compatible_assoc_container_counts.first;
+                 }
                  ++n_measurements;
                  counted_truth_particles.clear();
                  for (const xAOD::TruthParticle *truth_particle : association_map->at(uncalibMeas.index()) ) {
@@ -215,6 +237,8 @@ namespace ActsTrk
        m_nTracksWithAssociatedTruth[idx] += elm;
        ++idx;
     }
+    m_nIncompatibleMeasurementContainer += compatible_assoc_container_counts.second;
+    m_nCcompatibleMeasurementContainer += compatible_assoc_container_counts.first;
 
     SG::WriteHandle<TrackToTruthParticleAssociation> associationOutHandle(m_trackToTruthOut, ctx);
     if (associationOutHandle.record( std::move(track_association)).isFailure()) {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRKFINDING_TRACKTOTRUTHASSOCIATIONALG_H
@@ -99,6 +99,8 @@ namespace ActsTrk
      AssociationCounter<TrackToTruthParticleAssociationDebugHists> m_associationCounter;
      static constexpr unsigned int s_NCounterForAssociatedTruth = 4;
      mutable std::array<std::atomic<std::size_t>,s_NCounterForAssociatedTruth> m_nTracksWithAssociatedTruth ATLAS_THREAD_SAFE {};
+     mutable std::atomic<std::size_t> m_nIncompatibleMeasurementContainer{};
+     mutable std::atomic<std::size_t> m_nCcompatibleMeasurementContainer{};
   };
 
 } // namespace
