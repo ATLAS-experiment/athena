@@ -44,7 +44,7 @@ def L1LegacyTopoSimulationCfg(flags):
     acc.addEventAlgo(topoSimAlg)
     return acc
 
-def L1TopoSimulationCfg(flags, doMonitoring=True, readMuCTPI=False):
+def L1TopoSimulationCfg(flags, doMonitoring=True, readMuCTPI=False, name="L1TopoSimulation"):
 
     acc = ComponentAccumulator()
 
@@ -95,7 +95,7 @@ def L1TopoSimulationCfg(flags, doMonitoring=True, readMuCTPI=False):
         energyProvider.gMETComponentsRmsKey = ""
         energyProvider.gScalarEJwojKey = ""
 
-    topoSimAlg = CompFactory.LVL1.L1TopoSimulation("L1TopoSimulation",
+    topoSimAlg = CompFactory.LVL1.L1TopoSimulation(name,
                                                     MuonInputProvider = muProvider,
                                                     EMTAUInputProvider = emtauProvider,
                                                     JetInputProvider = jetProvider,
@@ -105,12 +105,19 @@ def L1TopoSimulationCfg(flags, doMonitoring=True, readMuCTPI=False):
                                                     EnableInputDump = flags.Trigger.enableL1TopoDump,
                                                     UseBitwise = flags.Trigger.enableL1TopoBWSimulation
                                                     )
+    if name!="L1TopoSimulation":
+        topoSimAlg.MonHistBaseDir = "L1/OnlineL1TopoAlgorithms"
 
     acc.addEventAlgo(topoSimAlg)
 
+        
     if doMonitoring:
         from L1TopoOnlineMonitoring import L1TopoOnlineMonitoringConfig as TopoMonConfig
-        acc.addEventAlgo(TopoMonConfig.getL1TopoPhase1OnlineMonitor(flags,'L1/L1TopoSimDecisions'))
+        if name=="L1TopoSimulation":
+            acc.addEventAlgo(TopoMonConfig.getL1TopoPhase1OnlineMonitor(flags,'L1/L1TopoSimDecisions'))
+        else:
+            acc.addEventAlgo(TopoMonConfig.getL1TopoPhase1OnlineMonitor(flags,'L1/OnlineL1TopoSimDecisions',
+                                                                        toolName=name+"_Monitor"))
 
     return acc
 
