@@ -89,7 +89,7 @@ public:
   };
 
 private:
-  void actsTrackParameterPositionCheck(
+  bool actsTrackParameterPositionCheck(
      const Acts::BoundTrackParameters& actsParameter,
      const Trk::TrackParameters& tsos, const Acts::GeometryContext& gctx) const;
 
