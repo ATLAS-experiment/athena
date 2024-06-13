@@ -108,12 +108,10 @@ if hasattr(GaudiSequencerConf, 'AthRetrySequencer'):
     pass # monkey-patching AthRetrySequencer
 
 
-### sequence of Gaudi configurables
-class AlgSequence( AthSequencer ):
-    __slots__ = ()
-    def __init__( self, name="TopAlg", **kwargs ):
-        # call base class __init__ to pass new name
-        super( AlgSequence, self ).__init__( name, **kwargs )
+### default algorithm sequence
+def AlgSequence( name="TopAlg", **kwargs ):
+    """Convenience method to get the default sequence for algorithms"""
+    return AthSequencer( name, **kwargs )
 
 
 ### helper functions ----------------------------------------------------------
@@ -170,7 +168,7 @@ def dumpMasterSequence():
     dumpSequence( AthSequencer ("AthMasterSeq"), indent=0 )
     dumpSequence( AthSequencer ("athAlgEvtSeq"), indent=1 )
     dumpSequence( AthSequencer ("athBeginSeq"),  indent=2 )
-    dumpSequence( AlgSequence  ("athAllAlgSeq"), indent=2 )
+    dumpSequence( AthSequencer ("athAllAlgSeq"), indent=2 )
     dumpSequence( AthSequencer ("athCondSeq"),   indent=3 )
     dumpSequence( AthSequencer ("athAlgSeq"),    indent=3 )
     dumpSequence( AthSequencer ("athEndSeq"),    indent=2 )
