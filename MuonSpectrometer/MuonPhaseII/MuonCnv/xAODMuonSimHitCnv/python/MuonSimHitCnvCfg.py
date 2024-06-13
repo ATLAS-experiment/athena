@@ -56,7 +56,28 @@ def xAODSimHitToMmMeasCnvAlgCfg(flags, name = "SimHitToMmMeasurementCnvAlg",**kw
     return result
 
 
+def RpcFastDigitizationCfg(flags, name="RpcFastDigitizer", **kwargs):
+    result = ComponentAccumulator()
+    kwargs.setdefault("StreamName", "RpcSimForklift")
+    kwargs.setdefault("OutputSDOName", "RPC_SDO")
+    kwargs.setdefault("SimHitKey", "xRpcSimHits")
+    kwargs.setdefault("EffiDataKey", "")
+    from RngComps.RngCompsConfig import AthRNGSvcCfg
+    kwargs.setdefault("RndmSvc", result.getPrimaryAndMerge(AthRNGSvcCfg(flags)))
+    the_tool = CompFactory.MuonR4.RpcFastDigiTool(name="RpcDigitizationTool", **kwargs)
+    the_alg = CompFactory.MuonDigitizer(name,
+                                        DigitizationTool = the_tool)
+    result.addEventAlgo(the_alg, primary = True)
+    return result
+def RpcDigitToMeasCnvAlgCfg(flags, name ="RpcDigitToMeasCnvAlg", **kwargs):
+    result = ComponentAccumulator()
+    from xAODMuonMeasViewAlgs.ViewAlgsConfig import RpcMeasViewAlgCfg
+    result.merge(RpcMeasViewAlgCfg(flags))
+    the_alg = CompFactory.MuonR4.RpcDigitToRpcMeasCnvAlg(name, **kwargs)
+    result.addEventAlgo(the_alg, primary = True)
 
+
+    return result
 ###
 ###  Configuration snippet to go from xAOD::MuonSimHit to xAOD::MuonPrepData    
 ###
@@ -69,7 +90,9 @@ def MuonSimHitToMeasurementCfg(flags):
         result.merge(MDT_DigitizationDigitToRDOCfg(flags))
         result.merge(MdtRDODecodeCfg(flags))
     if flags.Detector.GeometryRPC:
-        result.merge(xAODSimHitToRpcMeasCnvAlgCfg(flags))
+        #result.merge(xAODSimHitToRpcMeasCnvAlgCfg(flags))
+        result.merge(RpcFastDigitizationCfg(flags))
+        result.merge(RpcDigitToMeasCnvAlgCfg(flags))
     if flags.Detector.GeometryTGC:
         result.merge(xAODSimHitToTgcMeasCnvAlgCfg(flags))
     if flags.Detector.GeometrysTGC:

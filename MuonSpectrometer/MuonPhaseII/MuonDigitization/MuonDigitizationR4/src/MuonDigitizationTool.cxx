@@ -66,6 +66,9 @@ namespace MuonR4{
                 }); 
         return StatusCode::SUCCESS;
     }
+    double MuonDigitizationTool::hitTime(const TimedHit& hit) {
+        return hit.eventTime() + hit->globalTime();
+    }
     StatusCode MuonDigitizationTool::processAllSubEvents(const EventContext& ctx) {
         const MuonDigitizationTool* digiTool = this;
         return digiTool->processAllSubEvents(ctx);

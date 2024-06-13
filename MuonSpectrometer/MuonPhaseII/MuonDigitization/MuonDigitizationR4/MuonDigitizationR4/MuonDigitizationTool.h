@@ -113,7 +113,10 @@ namespace MuonR4 {
                                                    OutDigitCache_t<DigitColl>&& digitCache,
                                                    unsigned int hashMax) const;
 
-            
+            /** @brief Returns the global time of the hit which is the sum of eventTime & individual hit time */
+            static double hitTime(const TimedHit& hit);
+
+
             const MuonGMR4::MuonDetectorManager* m_detMgr{nullptr};
 
             ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", 
@@ -137,7 +140,7 @@ namespace MuonR4 {
 
             SG::WriteHandleKey<xAOD::MuonSimHitContainer> m_sdoKey{this, "OutputSDOName", ""};
 
-            Gaudi::Property<bool> m_onlyUseContainerName{this, "OnlyUseContainerName", true,
+            Gaudi::Property<bool> m_onlyUseContainerName{this, "OnlyUseContainerName", false,
                                                          "Don't use the ReadHandleKey directly. Just extract the container name from it."};
 
             Gaudi::Property<bool> m_includePileUpTruth{this, "IncludePileUpTruth", true, "Include pile-up truth info"};

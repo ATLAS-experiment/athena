@@ -123,10 +123,10 @@ class RpcReadoutElement : public MuonReadoutElement {
 #ifndef SIMULATIONBASE
     std::map<Identifier, std::shared_ptr<Acts::Surface>> getSurfaces() const override final;
 #endif
-   private:
+
         /// Access to the StripLayer associated to a given measurement Hash
         const StripLayer& sensorLayout(const IdentifierHash& measHash) const;
-
+    private:
         static unsigned int stripNumber(const IdentifierHash& measHash);
         static unsigned int gasGapNumber(const IdentifierHash& measHash);
         static unsigned int doubletPhiNumber(const IdentifierHash& measHash);
