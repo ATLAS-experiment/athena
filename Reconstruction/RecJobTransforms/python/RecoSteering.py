@@ -247,6 +247,7 @@ def RecoSteering(flags):
                     MetadataCategory.ByteStreamMetaData,
                     MetadataCategory.LumiBlockMetaData,
                     MetadataCategory.TruthMetaData,
+                    MetadataCategory.IOVMetaData,
                 ],
             )
         )
@@ -266,6 +267,7 @@ def RecoSteering(flags):
                     MetadataCategory.ByteStreamMetaData,
                     MetadataCategory.LumiBlockMetaData,
                     MetadataCategory.TruthMetaData,
+                    MetadataCategory.IOVMetaData,
                 ],
             )
         )

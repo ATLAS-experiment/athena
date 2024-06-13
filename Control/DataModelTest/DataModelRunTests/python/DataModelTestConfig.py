@@ -118,6 +118,7 @@ def TestOutputCfg (flags, stream, itemList, typeNames = [], metaItemList = []):
     itemList = ['xAOD::EventInfo#EventInfo',
                 'xAOD::EventAuxInfo#EventInfoAux.'] + itemList
     helperTools = []
+    metaItemList = ["IOVMetaDataContainer#*"]
     if typeNames:
         helperTools = [ CompFactory.xAODMaker.EventFormatStreamHelperTool(
             f'{stream}_EventFormatStreamHelperTool',

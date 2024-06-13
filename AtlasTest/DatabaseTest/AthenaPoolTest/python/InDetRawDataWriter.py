@@ -28,12 +28,21 @@ acc.addEventAlgo( CompFactory.InDetRawDataFakeWriter(OutputLevel = DEBUG),
                   sequenceName = 'AthAlgSeq' )
 
 from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-acc.merge( OutputStreamCfg(flags, "InDetRDO", disableEventTag = True,
-                           ItemList = ["PixelRDO_Container#*",
-                                       "SCT_RDO_Container#*",
-                                       "TRT_RDO_Container#*",
-                                       "EventInfo#*",
-                                       "PixelRDOElemLinkVec#*"]) )
+acc.merge(
+    OutputStreamCfg(
+        flags,
+        "InDetRDO",
+        disableEventTag=True,
+        ItemList=[
+            "PixelRDO_Container#*",
+            "SCT_RDO_Container#*",
+            "TRT_RDO_Container#*",
+            "EventInfo#*",
+            "PixelRDOElemLinkVec#*",
+        ],
+        MetadataItemList=["IOVMetaDataContainer#*"],
+    )
+)
 
 # Run
 import sys

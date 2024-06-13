@@ -62,7 +62,14 @@ acc.merge(TagInfoMgrCfg(flags))
 acc.addEventAlgo(CompFactory.EventInfoWriter(),sequenceName = 'AthAlgSeq')
 
 from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-acc.merge(OutputStreamCfg(flags, StreamName, ItemList=[]))
+acc.merge(
+    OutputStreamCfg(
+        flags,
+        StreamName,
+        ItemList=[],
+        MetadataItemList=["IOVMetaDataContainer#*"],
+    )
+)
 
 # Change output file catalog to avoid races.
 acc.getService("PoolSvc").WriteCatalog = 'file:EventInfoTests_catalog.xml'

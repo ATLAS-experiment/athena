@@ -14,7 +14,7 @@ acc = IOVDbTestAlgReadCfg(flags)
 from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
 acc.merge( OutputStreamCfg(flags, "Stream1",
                            disableEventTag = True,
-                           MetadataItemList = ['xAOD::EventFormat#EventFormatStream1']) )
+                           MetadataItemList = ['xAOD::EventFormat#EventFormatStream1', "IOVMetaDataContainer#*"]) )
 
 from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoCnvAlgCfg
 acc.merge( EventInfoCnvAlgCfg(flags, disableBeamSpot = True) )

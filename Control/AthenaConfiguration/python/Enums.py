@@ -105,6 +105,7 @@ class MetadataCategory(FlagEnum):
     LumiBlockMetaData = auto()
     TriggerMenuMetaData = auto()
     TruthMetaData = auto()
+    IOVMetaData = auto()
 
 
 class HIMode(FlagEnum):

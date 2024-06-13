@@ -1,6 +1,7 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from dataclasses import dataclass, field
+from functools import wraps
 
 from AthenaCommon.Logging import logging
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -29,9 +30,26 @@ class MetaDataHelperLists:
         return self
 
 
-def createCutFlowMetaData(flags):
-    tools = MetaDataHelperLists()
-    result = ComponentAccumulator()
+def metadata_creator(func):
+    """
+    Decorator function which:
+    - creates default MetaDataHelperLists() and ComponentAccumulator() instances
+    - passes them to wrapped create*MetaData functions responsible for configuration of helper lists and CA, specific to metadata category
+    - returns configured instances of MetaDataHelperLists() (used by MetaDataSvc and AthenaOutputStream) and CA
+    """
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        tools = MetaDataHelperLists()
+        result = ComponentAccumulator()
+        func(tools, result, *args, **kwargs)
+        return tools, result
+
+    return wrapper
+
+
+@metadata_creator
+def createCutFlowMetaData(tools, result, flags):
     from EventBookkeeperTools.EventBookkeeperToolsConfig import (
         CutFlowOutputList,
         CutFlowSvcCfg,
@@ -39,23 +57,19 @@ def createCutFlowMetaData(flags):
 
     result.merge(CutFlowSvcCfg(flags))
     tools.mdItems += CutFlowOutputList(flags)
-    return tools, result
 
 
-def createByteStreamMetaData(flags):
-    tools = MetaDataHelperLists()
-    result = ComponentAccumulator()
+@metadata_creator
+def createByteStreamMetaData(tools, result, flags):
     tools.mdItems += ["ByteStreamMetadataContainer#*"]
     if flags.Input.Format == Format.BS and not flags.Common.isOnline:
         from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
 
         result.merge(ByteStreamReadCfg(flags))
-    return tools, result
 
 
-def createLumiBlockMetaData(flags):
-    tools = MetaDataHelperLists()
-    result = ComponentAccumulator()
+@metadata_creator
+def createLumiBlockMetaData(tools, result, flags):
     if flags.Input.Format == Format.BS and not flags.Common.isOnline:
         from LumiBlockComps.CreateLumiBlockCollectionFromFileConfig import (
             CreateLumiBlockCollectionFromFileCfg,
@@ -66,12 +80,10 @@ def createLumiBlockMetaData(flags):
             "xAOD::LumiBlockRangeContainer#*",
             "xAOD::LumiBlockRangeAuxContainer#*",
         ]
-    return tools, result
 
 
-def createTriggerMenuMetaData(flags):
-    tools = MetaDataHelperLists()
-    result = ComponentAccumulator()
+@metadata_creator
+def createTriggerMenuMetaData(tools, result, flags):
     tools.mdTools.append(
         CompFactory.xAODMaker.TriggerMenuMetaDataTool("TriggerMenuMetaDataTool")
     )
@@ -81,18 +93,20 @@ def createTriggerMenuMetaData(flags):
         "xAOD::TriggerMenuJsonContainer#*",
         "xAOD::TriggerMenuJsonAuxContainer#*",
     ]
-    return tools, result
 
 
-def createTruthMetaData(flags):
-    tools = MetaDataHelperLists()
-    result = ComponentAccumulator()
+@metadata_creator
+def createTruthMetaData(tools, result, flags):
     tools.mdItems += [
         "xAOD::TruthMetaDataContainer#TruthMetaData",
         "xAOD::TruthMetaDataAuxContainer#TruthMetaDataAux.",
     ]
     tools.mdTools.append(CompFactory.xAODMaker.TruthMetaDataTool("TruthMetaDataTool"))
-    return tools, result
+
+
+@metadata_creator
+def createIOVMetaData(tools, result, flags):
+    tools.mdItems += ["IOVMetaDataContainer#*"]
 
 
 def propagateMetaData(flags, streamName="", category=None, *args, **kwargs):
@@ -125,7 +139,8 @@ def propagateMetaData(flags, streamName="", category=None, *args, **kwargs):
             Key=outputStreamName(streamName),
             DataHeaderKey=outputStreamName(streamName),
             EventInfoKey=f"{flags.Overlay.BkgPrefix}EventInfo"
-            if flags.Common.ProductionStep in [ProductionStep.PileUpPresampling, ProductionStep.PileUpPretracking]
+            if flags.Common.ProductionStep
+            in [ProductionStep.PileUpPresampling, ProductionStep.PileUpPretracking]
             else "EventInfo",
         )
         tools.mdItems += [
@@ -189,6 +204,9 @@ def propagateMetaData(flags, streamName="", category=None, *args, **kwargs):
                 "xAOD::LumiBlockRangeContainer#*",
                 "xAOD::LumiBlockRangeAuxContainer#*",
             ]
+    elif category == MetadataCategory.IOVMetaData:
+        if "IOVMetaDataContainer" in flags.Input.MetadataItems.values():
+            tools.mdItems += ["IOVMetaDataContainer#*"]
 
     else:
         log.warning(f"Requested metadata category: {category} could not be configured")
@@ -219,9 +237,9 @@ def SetupMetaDataForStreamCfg(
     result = ComponentAccumulator()
     if not isinstance(streamName, str) or not streamName:
         return result
-    if not AcceptAlgs:
+    if AcceptAlgs is None:
         AcceptAlgs = []
-    if not createMetadata:
+    if createMetadata is None:
         createMetadata = []
 
     helperLists = MetaDataHelperLists()
@@ -242,11 +260,11 @@ def SetupMetaDataForStreamCfg(
         try:
             lists, caConfig = globals()[f"create{md.name}"](
                 flags,
-                *args,
-                **kwargs,
             )
         except KeyError:
-            log.warning(f"Requested metadata category: {md.name} could not be configured")
+            log.warning(
+                f"Requested metadata category: {md.name} could not be configured"
+            )
             continue
         helperLists += lists
         result.merge(caConfig)
@@ -259,7 +277,7 @@ def SetupMetaDataForStreamCfg(
             itemOrList=helperLists.mdItems,
             AcceptAlgs=AcceptAlgs,
             HelperTools=helperLists.helperTools,
-            **kwargs
+            **kwargs,
         )
     )
     # Configure the MetaDataSvc and pass the relevant tools
