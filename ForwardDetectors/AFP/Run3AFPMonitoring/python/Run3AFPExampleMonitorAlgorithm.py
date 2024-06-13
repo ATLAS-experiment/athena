@@ -144,11 +144,6 @@ def Run3AFPExampleMonitoringConfig(inputFlags):
     AFPToFGroup.defineHistogram('lbCToF_T2_End', title='(End) Number of hits per train (side C, train2) divided by <mu>; lb; hits/<mu>', type='TH1F', path='ToF/ToFHitsVsLb/sideC/End/', xbins=2000, xmin=-0.5, xmax=1999.5, weight='lbCToF_TEnd_Weight')
     AFPToFGroup.defineHistogram('lbCToF_T3_End', title='(End) Number of hits per train (side C, train3) divided by <mu>; lb; hits/<mu>', type='TH1F', path='ToF/ToFHitsVsLb/sideC/End/', xbins=2000, xmin=-0.5, xmax=1999.5, weight='lbCToF_TEnd_Weight')
 
-    AFPToFSiTGroup.defineHistogram('lqBar_A,fsp0_rows_A;ToFSiTCorrXA', title='LQBar vs FSP0 rows Side A;Train;FSP0 x-pix [50 um]', type='TH2F', path='ToFSiTCorr/', xbins=20, xmin=-1, xmax=4, ybins=346, ymin=-10.5, ymax=335.5)
-    AFPToFSiTGroup.defineHistogram('lqBar_C,fsp0_rows_C;ToFSiTCorrXC', title='LQBar vs FSP0 rows Side C;Train;FSP0 x-pix [50 um]', type='TH2F', path='ToFSiTCorr/', xbins=20, xmin=-1, xmax=4, ybins=346, ymin=-10.5, ymax=335.5)
-    AFPToFSiTGroup.defineHistogram('lqBar_A,fsp0_columns_A;ToFSiTCorrYA', title='LQBar vs FSP0 columns Side A;Train;FSP0 y-pix [250 um]', type='TH2F', path='ToFSiTCorr/', xbins=20, xmin=-1, xmax=4, ybins=85, ymin=-5.5, ymax=79.5)
-    AFPToFSiTGroup.defineHistogram('lqBar_C,fsp0_columns_C;ToFSiTCorrYC', title='LQBar vs FSP0 columns Side C;Train;FSP0 y-pix [250 um]', type='TH2F', path='ToFSiTCorr/', xbins=20, xmin=-1, xmax=4, ybins=85, ymin=-5.5, ymax=79.5)
-
     AFPToFSiTGroup.defineHistogram('lqBar_tight_A,fsp0_rows_tight_A;ToFSiTCorrTightXA', title='LQBar vs FSP0 X dim with FSP2 Side A;Train;FSP0 x-pix [50 um]', type='TH2I', path='ToFSiTCorr/', xbins=20, xmin=-1, xmax=4, ybins=34, ymin=-0.05, ymax=335.5)
     AFPToFSiTGroup.defineHistogram('lqBar_tight_C,fsp0_rows_tight_C;ToFSiTCorrTightXC', title='LQBar vs FSP0 X dim with FSP2 Side C;Train;FSP0 x-pix [50 um]', type='TH2I', path='ToFSiTCorr/', xbins=20, xmin=-1, xmax=4, ybins=34, ymin=-0.05, ymax=335.5)
     AFPToFSiTGroup.defineHistogram('lqBar_tight_A,fsp0_columns_tight_A;ToFSiTCorrTightYA', title='LQBar vs FSP0 columns with FSP2 hit Side A;Train;FSP0 y-pix [250 um]', type='TH2I', path='ToFSiTCorr/', xbins=20, xmin=-1, xmax=4, ybins=80, ymin=-0.5, ymax=79.5)
@@ -164,6 +159,17 @@ def Run3AFPExampleMonitoringConfig(inputFlags):
 
     AFPToFSiTGroup.defineHistogram('tof_eff_OFF_passed_A, tof_eff_OFF_bars_A, tof_eff_OFF_trains_A ;Efficiency_A', title='Efficiency ToF Side A;Bar;Train;Efficiency', type='TEfficiency', path='ToFSiT/Efficiency/', xbins=5, xmin=0, xmax=5, ybins=4, ymin=0, ymax=4, xlabels=xLabelsToFEff, ylabels=yLabelsToFEff)
     AFPToFSiTGroup.defineHistogram('tof_eff_OFF_passed_C, tof_eff_OFF_bars_C, tof_eff_OFF_trains_C ;Efficiency_C', title='Efficiency ToF Side C;Bar;Train;Efficiency', type='TEfficiency', path='ToFSiT/Efficiency/', xbins=5, xmin=0, xmax=5, ybins=4, ymin=0, ymax=4, xlabels=xLabelsToFEff, ylabels=yLabelsToFEff)
+
+    AFPToFSiTGroup.defineHistogram('lqBar_A,fs_rows_full_A;ToFSiTCorr_FullXA', title='LQBar vs FS rows Full Side A;Train;FSP x-pix [50 um]', type='TH2F', path='ToFSiTCorr/', xbins=20, xmin=-1, xmax=4, ybins=346, ymin=-10.5, ymax=335.5)
+    AFPToFSiTGroup.defineHistogram('lqBar_C,fs_rows_full_C;ToFSiTCorr_FullXC', title='LQBar vs FS rows Full Side C;Train;FSP x-pix [50 um]', type='TH2F', path='ToFSiTCorr/', xbins=20, xmin=-1, xmax=4, ybins=346, ymin=-10.5, ymax=335.5)
+    
+    planeList = ['P0', 'P1', 'P2', 'P3'] 
+    array_corr = helper.addArray([planeList], afpToFSiTAlgorithm, 'AFPToFSiTTool', topPath='AFP/ToFSiTCorr/')
+    array_corr.defineHistogram('lqBar_A,fs_rows_A;ToFSiTCorrXA_{0}', type='TH2F', title='LQBar vs FS{0} rows Side A;Train;FS{0} x-pix [50 um]', xbins=20, xmin=-1, xmax=4, ybins=346, ymin=-10.5, ymax=335.5)
+    array_corr.defineHistogram('lqBar_C,fs_rows_C;ToFSiTCorrXC_{0}', type='TH2F', title='LQBar vs FS{0} rows Side C;Train;FS{0} x-pix [50 um]', xbins=20, xmin=-1, xmax=4, ybins=346, ymin=-10.5, ymax=335.5)
+    array_corr.defineHistogram('lqBar_A,fs_columns_A;ToFSiTCorrYA_{0}', type='TH2F', title='LQBar vs FS{0} columns Side A;Train;FS{0} y-pix [250 um]', xbins=20, xmin=-1, xmax=4, ybins=85, ymin=-5.5, ymax=79.5)
+    array_corr.defineHistogram('lqBar_C,fs_columns_C;ToFSiTCorrYC_{0}', type='TH2F', title='LQBar vs FS{0} columns Side C;Train;FS{0} y-pix [250 um]', xbins=20, xmin=-1, xmax=4, ybins=85, ymin=-5.5, ymax=79.5)
+
 
     # Using a map of groups
     layerList = ['P0','P1', 'P2', 'P3'] ## TODO XXX adapt to the enum/xAOD namespace names
@@ -253,9 +259,10 @@ if __name__=='__main__':
     # Set the Athena configuration flags
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
-    flags.Input.Files = ['/eos/user/v/vlysenko/AOD_testing/AOD_data22_13p6TeV_DS_429142/data22_13p6TeV.00429142.physics_Main.merge.AOD.f1253_m2112._lb0521._0001.1']
+    #flags.Input.Files = ['/eos/user/v/vlysenko/AOD_testing/AOD_data22_13p6TeV_DS_429142/data22_13p6TeV.00429142.physics_Main.merge.AOD.f1253_m2112._lb0521._0001.1']
+    flags.Input.Files = ['/eos/user/v/vlysenko/AOD_testing/AOD_data24_13p6TeV_473095/data24_13p6TeV.00473095.physics_Main.merge.AOD.f1444_m2248._lb0603._0003.1']
     flags.Input.isMC = False
-    flags.Output.HISTFileName = 'AFPTest-337176-10k-FMETrains-MU.root'
+    flags.Output.HISTFileName = 'AFPTest-10k-mon-3.root'
     
 
     flags.Concurrency.NumThreads=10
