@@ -331,9 +331,9 @@ class PhotonWorkingPointConfig (ConfigBlock) :
                                    'AsgPhotonEfficiencyCorrectionTool' )
             alg.scaleFactorDecoration = 'ph_id_effSF' + postfix + '_%SYS%'
             if config.dataType() is DataType.FastSim:
-                print("WARNING! No AFII ID SFs are available for now for photon efficiency")
-                alg.efficiencyCorrectionTool.ForceDataType = \
-                    PATCore.ParticleDataType.Full
+                alg.efficiencyCorrectionTool.ForceDataType = (
+                    PATCore.ParticleDataType.Full if self.forceFullSimConfig else
+                    PATCore.ParticleDataType.Fast)
             elif config.dataType() is DataType.FullSim:
                 alg.efficiencyCorrectionTool.ForceDataType = \
                     PATCore.ParticleDataType.Full
@@ -353,9 +353,9 @@ class PhotonWorkingPointConfig (ConfigBlock) :
                                    'AsgPhotonEfficiencyCorrectionTool' )
             alg.scaleFactorDecoration = 'ph_isol_effSF' + postfix + '_%SYS%'
             if config.dataType() is DataType.FastSim:
-                print("WARNING! No AFII ID SFs are available for now for photon efficiency")
-                alg.efficiencyCorrectionTool.ForceDataType = \
-                    PATCore.ParticleDataType.Full
+                alg.efficiencyCorrectionTool.ForceDataType = (
+                    PATCore.ParticleDataType.Full if self.forceFullSimConfig else
+                    PATCore.ParticleDataType.Fast)
             elif config.dataType() is DataType.FullSim:
                 alg.efficiencyCorrectionTool.ForceDataType = \
                     PATCore.ParticleDataType.Full
