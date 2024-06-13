@@ -5,6 +5,7 @@
 # art-include: main/Athena
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
+# art-memory: 2999
 # art-output: test.HITS.pool.root
 
 # RUN3 setup - Frozen Showers currently off by default

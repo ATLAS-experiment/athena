@@ -7,6 +7,7 @@
 # art-include: main/AthSimulation
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
+# art-memory: 2999
 # art-output: hitsFull.ttbar.pool.root
 # art-output: hitsHalf1.ttbar.pool.root
 # art-output: hitsHalf2.ttbar.pool.root

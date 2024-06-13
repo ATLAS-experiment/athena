@@ -5,6 +5,7 @@
 # art-include: main/Athena
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
+# art-memory: 3999
 # art-output: *.HITS.pool.root
 # art-output: log.*
 # art-output: Config*.pkl
