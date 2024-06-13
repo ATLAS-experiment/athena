@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -26,7 +26,7 @@ Base class which sets up some of the infrastructure to store the e/p reference v
 class eflowEEtaBinBase {
  public:
 
-  eflowEEtaBinBase() { m_useAbsEta = true; }
+  eflowEEtaBinBase() = default;
   virtual ~eflowEEtaBinBase();
   
   bool binExists(double e, double eta) const  { return (getEBinIndex(e) >= 0 && getEtaBinIndex(eta) >= 0); }
@@ -45,7 +45,7 @@ class eflowEEtaBinBase {
 
   static const double m_errorReturnValue;
 
-  bool m_useAbsEta;
+  bool m_useAbsEta{true};
   std::vector<double> m_eBinBounds;
   std::vector<double> m_etaBinBounds;
 };

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -12,15 +12,15 @@
 #ifndef EFLOWUTIL_H_
 #define EFLOWUTIL_H_
 
-#include <sstream>
-#include <math.h>
+#include <cmath>
+#include <string>
 
 /**
  eflowAzimuth represents phi and has kinematic functions which correctly deal with phi wraparound etc. 
 */
 class eflowAzimuth {
 public:
-eflowAzimuth(double phi): m_value(phi) { if (phi != -999. && !isnan(phi)) adjustRange(); }
+eflowAzimuth(double phi): m_value(phi) { if (phi != -999. && !std::isnan(phi)) adjustRange(); }
   eflowAzimuth(const eflowAzimuth& other): m_value(other.m_value) { }
   eflowAzimuth& operator=(const eflowAzimuth& other) { if (this == &other) return *this; else { m_value = other.m_value; return *this; } }
   ~eflowAzimuth() { }
@@ -44,7 +44,7 @@ eflowAzimuth(double phi): m_value(phi) { if (phi != -999. && !isnan(phi)) adjust
   }
 
   inline double getAbsDifference(const eflowAzimuth& other) const {
-    double plainAbsDifference = fabs(m_value - other.m_value);
+    double plainAbsDifference = std::abs(m_value - other.m_value);
     return plainAbsDifference <= M_PI ? plainAbsDifference : 2*M_PI - plainAbsDifference;
   }
 
@@ -65,18 +65,18 @@ private:
 
   inline double adjustRange(double a) {
     if (a <= -M_PI) {
-      return a+(2*M_PI*floor(-(a-M_PI)/(2*M_PI)));
+      return a+(2*M_PI*std::floor(-(a-M_PI)/(2*M_PI)));
     } else if (a > M_PI) {
-      return a-(2*M_PI*floor((a+M_PI)/(2*M_PI)));
+      return a-(2*M_PI*std::floor((a+M_PI)/(2*M_PI)));
     } else {
       return a;
     }
   }
   inline void adjustRange() {
     if (m_value <= -M_PI) {
-      m_value+=(2*M_PI*floor(-(m_value-M_PI)/(2*M_PI)));
+      m_value+=(2*M_PI*std::floor(-(m_value-M_PI)/(2*M_PI)));
     } else if (m_value > M_PI) {
-      m_value-=(2*M_PI*floor((m_value+M_PI)/(2*M_PI)));
+      m_value-=(2*M_PI*std::floor((m_value+M_PI)/(2*M_PI)));
     }
   }
 
@@ -84,13 +84,9 @@ private:
 
 class eflowEtaPhiPosition {
 public:
-  eflowEtaPhiPosition(): m_eta(NAN), m_phi(NAN) {}
+  eflowEtaPhiPosition() = default;
   eflowEtaPhiPosition(double eta, double phi): m_eta(eta), m_phi(phi) {}
-  eflowEtaPhiPosition(const eflowEtaPhiPosition& other) :
-      m_eta(other.m_eta), m_phi(other.m_phi) { }
-  eflowEtaPhiPosition& operator=(const eflowEtaPhiPosition& other) {  if (this == &other) return *this; else { m_eta = other.m_eta; m_phi = other.m_phi; return *this; } }
-  ~eflowEtaPhiPosition() { }
-
+ 
   inline double getEta() const { return m_eta; }
   inline eflowAzimuth getPhi() const { return m_phi; }
   inline double getPhiD() const { return m_phi(); }
@@ -100,11 +96,11 @@ public:
     double dPhi(m_phi.getAbsDifference(other.m_phi));
     return dEta*dEta + dPhi*dPhi;
   }
-  inline double dR(const eflowEtaPhiPosition& other) const { return sqrt(this->dRSq(other)); }
+  inline double dR(const eflowEtaPhiPosition& other) const { return std::sqrt(this->dRSq(other)); }
 
 private:
-  double m_eta;
-  eflowAzimuth m_phi;
+  double m_eta{NAN};
+  eflowAzimuth m_phi{NAN};
 };
 
 /**
@@ -113,9 +109,8 @@ eflowRangeBase is an object to represent a length in eta or phi, and this is use
 template <class T>
 class eflowRangeBase{
 public:
-  eflowRangeBase(): m_min(NAN), m_max(NAN) { }
+  eflowRangeBase() = default;
   eflowRangeBase(const T& min, const T& max): m_min(min), m_max(max) { }
-  ~eflowRangeBase() { }
 
   inline void setCenterAndWidth(T center, double width) { m_min = center - width/2; m_max = m_min + width; }
   inline void shift(double shift) { m_min += shift; m_max += shift; }
@@ -129,14 +124,17 @@ public:
   bool contains(const T& x) { return ( (m_min < x) && (m_max > x) ); }
 
   std::string print() const {
-    std::stringstream result;
-    result << "[" << m_min << ", " << m_max << "]";
-    return result.str();
+    std::string result = "[";
+    result += std::to_string(m_min);
+    result += ", ";
+    result += std::to_string(m_max);
+    result += ']';
+    return result;
   }
 
 private:
-  T m_min;
-  T m_max;
+  T m_min{NAN};
+  T m_max{NAN};
 };
 typedef eflowRangeBase<double> eflowRange;
 

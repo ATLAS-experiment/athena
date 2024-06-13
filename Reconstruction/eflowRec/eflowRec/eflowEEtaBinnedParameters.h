@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EFLOWBINNEDPARAMETERS_H
@@ -19,13 +19,13 @@ CREATED:  18th Aug, 2005
 #include "eflowRec/eflowEEtaBinBase.h"
 #include "eflowRec/eflowCaloRegions.h"
 
+
+#include "eflowRec/eflowFirstIntParameters.h"
 //C++ Headers
 #include <vector>
-
+#include <memory>
 class eflowRingSubtractionManager;
 class eflowEEtaBinnedParameters;
-#include "eflowRec/eflowFirstIntParameters.h"
-
 
 class eflowParameters {
  public:
@@ -37,8 +37,6 @@ class eflowParameters {
       m_FirstIntParameters[i] = std::make_unique<eflowFirstIntParameters>();
     }
   }
-
-  ~eflowParameters() {}
 
   const eflowFirstIntParameters* getFirstIntBin(eflowFirstIntENUM j1st) const {
     return (eflowFirstIntRegions::Unknown != j1st) ? m_FirstIntParameters[j1st].get() : nullptr;
@@ -58,8 +56,7 @@ Inherits from eflowEEtaBinBase. This class adds the infrastructure to store data
 class eflowEEtaBinnedParameters :  public eflowEEtaBinBase {
  public:
 
-  eflowEEtaBinnedParameters()  {}
-  ~eflowEEtaBinnedParameters();
+  eflowEEtaBinnedParameters() = default;
 
   void initialise(const std::vector<double>& eBinBounds, const std::vector<double>& etaBinBounds, bool useAbsEta = true);
 

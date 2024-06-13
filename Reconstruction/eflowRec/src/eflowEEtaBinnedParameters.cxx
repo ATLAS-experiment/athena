@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -22,16 +22,13 @@ CREATED:  18th Aug, 2005
 //C++ Headers
 #include <float.h>
 #include <cmath>
-#include <fstream>
-#include <iostream>
-#include <vector>
+#include <stdexcept>
 
 using namespace std;
 ///////////////////////////////////
 //   eflowEEtaBinnedParameters   //
 ///////////////////////////////////
 
-eflowEEtaBinnedParameters::~eflowEEtaBinnedParameters() = default;
 
 void eflowEEtaBinnedParameters::initialise(const std::vector<double>& eBinBounds, const std::vector<double>& etaBinBounds, bool useAbsEta) {
   m_useAbsEta = useAbsEta;
@@ -88,7 +85,13 @@ void eflowEEtaBinnedParameters::initialise(const std::vector<double>& eBinBounds
     } else {
       lowEBin = eBin - 1;
     }
-
+    auto outOfRange = [this](int bin)->bool{
+      return (bin<0) or (bin>=std::ssize(m_bins));
+    };
+    
+    if (outOfRange(lowEBin) or outOfRange(highEBin)){
+      throw std::out_of_range("Attempt to access element out of range in eflowEEtaBinnedParameters::getInterpolation");
+    }
     *bin1 = m_bins[lowEBin][etaBin].get();
     *bin2 = m_bins[highEBin][etaBin].get();
 
@@ -102,7 +105,8 @@ void eflowEEtaBinnedParameters::initialise(const std::vector<double>& eBinBounds
   return weight;
 }
 
-eflowFirstIntENUM eflowEEtaBinnedParameters::adjustLFI(double e, double eta,
+eflowFirstIntENUM 
+eflowEEtaBinnedParameters::adjustLFI(double e, double eta,
                                                    eflowFirstIntENUM j1st, bool useLegacyEnergyBinIndexing) const {
 
 

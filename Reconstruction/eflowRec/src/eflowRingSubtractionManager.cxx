@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -19,7 +19,8 @@ CREATED:  18th Aug, 2005
 #include "eflowRec/eflowRingThicknesses.h"
 
 #include <cmath>
-#include <vector>
+#include <list>
+
 
 using std::vector;
 
@@ -84,7 +85,7 @@ void eflowRingSubtractionManager::setParameters(const eflowFirstIntParameters& p
   m_rankMap.clear();
   double weight;
   double weightMax = ringMeanRank(param.getShapeParameters(orderedLayers[0]), 0.0, ringThickness[orderedLayers[0]])/m_weightRange;
-  for (auto layer : orderedLayers) {
+  for (const auto & layer : orderedLayers) {
     /* Add weights to map (map does the ordering) */
     const int nRings = (int)(m_rMax / ringThickness[layer]);
 
@@ -93,8 +94,7 @@ void eflowRingSubtractionManager::setParameters(const eflowFirstIntParameters& p
       if (weight == 0 || weight < weightMax) {
         break;                    // only add weights within a factor (range) of weightMax (say 10^6)
       } else {
-        RingId id(layer, iRing);
-        m_rankMap[1.0/weight] = id;
+        m_rankMap[1.0/weight] = RingId(layer, iRing);
       }
     }
   }
