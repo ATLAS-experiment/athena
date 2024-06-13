@@ -6,6 +6,7 @@
 #include "MuonByteStream/MdtRawDataProvider.h"
 #include "MuonByteStream/RpcPadContByteStreamCnv.h"
 #include "MuonByteStream/RpcRawDataProvider.h"
+#include "MuonByteStream/NrpcRawDataProvider.h"
 #include "MuonByteStream/TgcRawDataProvider.h"
 #include "MuonByteStream/TgcRdoContByteStreamCnv.h"
 #include "MuonByteStream/sTgcRawDataProvider.h"
@@ -13,6 +14,7 @@
 
 DECLARE_COMPONENT(Muon::MdtRawDataProvider)
 DECLARE_COMPONENT(Muon::RpcRawDataProvider)
+DECLARE_COMPONENT(Muon::NrpcRawDataProvider)
 DECLARE_COMPONENT(Muon::TgcRawDataProvider)
 DECLARE_COMPONENT(Muon::CscRawDataProvider)
 DECLARE_COMPONENT(Muon::sTgcRawDataProvider)

@@ -8,13 +8,17 @@ def NRPCCablingConfigCfg(flags, name = "MuonNRPC_CablingAlg", **kwargs):
     if not flags.Muon.enableNRPC:
         return result
 
+    ### Add DB folder
     from IOVDbSvc.IOVDbSvcConfig import addFolders
     dbName = 'RPC_OFL' if flags.Input.isMC else 'RPC'
-    cablingFolder = " /RPC/NCABLING/JSON"
-    cablingTag = "RpcNcablingJson-RUN3-01"
+    cablingFolder = "/RPC/NCABLING/JSON" if flags.Input.isMC else "/RPC/Onl/NCABLING/JSON"
+    cablingTag = "RpcNcablingJson-RUN3-02" 
     result.merge(addFolders(flags, [cablingFolder], detDb=dbName, className='CondAttrListCollection', tag=cablingTag))
-    ### Add the database configuration here
+    
+    ### Cabling algorithm setup
     NRPCCablingAlg = CompFactory.MuonNRPC_CablingAlg(name, **kwargs)
+    NRPCCablingAlg.MapFolders = cablingFolder
+
     result.addCondAlgo( NRPCCablingAlg, primary= True)
     return result
 

@@ -84,7 +84,7 @@ def L1CaloFEXSimCfg(flags, eFexTowerInputs = ["L1_eFexDataTowers","L1_eFexEmulat
 
     log = logging.getLogger('L1CaloFEXSimCfg')
 
-    
+
     # Configure SCell inputs
     sCellType = flags.Trigger.L1.L1CaloSuperCellContainerName
     if flags.Input.Format is Format.POOL:
@@ -145,17 +145,9 @@ def L1CaloFEXSimCfg(flags, eFexTowerInputs = ["L1_eFexDataTowers","L1_eFexEmulat
         # load noise cuts and dm corrections when running on data
         from IOVDbSvc.IOVDbSvcConfig import addFolders#, addFoldersSplitOnline
 
-        acc.merge(addFolders(flags,"/TRIGGER/L1Calo/V1/Calibration/EfexNoiseCuts",
-                                 "TRIGGER_OFL" if flags.Input.isMC else "TRIGGER_ONL",
-                                 tag="EfexNoiseCuts-RUN3-MCDEFAULT-TEST-00" if flags.Input.isMC else None,
-                                 className="CondAttrListCollection"))
+        acc.merge(addFolders(flags,"/TRIGGER/L1Calo/V1/Calibration/EfexNoiseCuts","TRIGGER_OFL" if flags.Input.isMC else "TRIGGER_ONL",className="CondAttrListCollection"))
         eFEXInputs.NoiseCutsKey = "/TRIGGER/L1Calo/V1/Calibration/EfexNoiseCuts"
-        
-        
-        acc.merge(addFolders(flags,"/TRIGGER/L1Calo/V1/Calibration/EfexEnergyCalib",
-                             "TRIGGER_OFL" if flags.Input.isMC else "TRIGGER_ONL",
-                             tag="EfexEnergyCalib-RUN3-MCDEFAULT-TEST-00" if flags.Input.isMC else None,
-                             className="CondAttrListCollection")) # dmCorr from DB!
+        acc.merge(addFolders(flags,"/TRIGGER/L1Calo/V1/Calibration/EfexEnergyCalib","TRIGGER_OFL" if flags.Input.isMC else "TRIGGER_ONL",className="CondAttrListCollection")) # dmCorr from DB!
         eFEX.eFEXSysSimTool.eFEXSimTool.eFEXFPGATool.eFEXegAlgoTool.DMCorrectionsKey = "/TRIGGER/L1Calo/V1/Calibration/EfexEnergyCalib"
 
         acc.addEventAlgo(eFEXInputs)
@@ -352,6 +344,8 @@ if __name__ == '__main__':
         flags.GeoModel.AtlasVersion = defaultGeometryTags.autoconfigure(flags)
         from AthenaConfiguration.Enums import LHCPeriod
         flags.IOVDb.GlobalTag = 'CONDBR2-HLTP-2023-01' if flags.GeoModel.Run is LHCPeriod.Run3 else 'CONDBR2-HLTP-2018-04'
+    else:
+        flags.IOVDb.GlobalTag = 'OFLCOND-MC23-SDR-RUN3-05'
     flags.Output.AODFileName = 'AOD.pool.root'
     flags.Exec.MaxEvents = args.nevents
     flags.Concurrency.NumThreads = 1

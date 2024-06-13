@@ -17,21 +17,14 @@ if [ -z ${ATLAS_REFERENCE_DATA+x} ]; then
 fi
 
 Events=50
-DigiOutFileName="mc23d_presampling.VarBS.RDO.pool.root"
+DigiOutFileName="mc23d_presampling.SingleBS.RDO.pool.root"
 HSHitsFile="${ATLAS_REFERENCE_DATA}/CampaignInputs/mc21/HITS/mc21_13p6TeV.900149.PG_single_nu_Pt50.simul.HITS.e8453_s3864/HITS.29241942._001453.pool.root.1" # TODO update?
 HighPtMinbiasHitsFiles1="${ATLAS_REFERENCE_DATA}/CampaignInputs/mc23/HITS/mc23_13p6TeV.800831.Py8EG_minbias_inelastic_highjetphotonlepton.merge.HITS.e8514_e8528_s4154_s4120/*"
-HighPtMinbiasHitsFiles2="${ATLAS_REFERENCE_DATA}/CampaignInputs/mc23/HITS/mc23_13p6TeV.800831.Py8EG_minbias_inelastic_highjetphotonlepton.merge.HITS.e8514_e8528_s4155_s4120/*"
-HighPtMinbiasHitsFiles3="${ATLAS_REFERENCE_DATA}/CampaignInputs/mc23/HITS/mc23_13p6TeV.800831.Py8EG_minbias_inelastic_highjetphotonlepton.merge.HITS.e8514_e8528_s4156_s4120/*"
-HighPtMinbiasHitsFiles4="${ATLAS_REFERENCE_DATA}/CampaignInputs/mc23/HITS/mc23_13p6TeV.800831.Py8EG_minbias_inelastic_highjetphotonlepton.merge.HITS.e8514_e8528_s4157_s4120/*"
 LowPtMinbiasHitsFiles1="${ATLAS_REFERENCE_DATA}/CampaignInputs/mc23/HITS/mc23_13p6TeV.900311.Epos_minbias_inelastic_lowjetphoton.merge.HITS.e8514_e8528_s4154_s4120/*"
-LowPtMinbiasHitsFiles2="${ATLAS_REFERENCE_DATA}/CampaignInputs/mc23/HITS/mc23_13p6TeV.900311.Epos_minbias_inelastic_lowjetphoton.merge.HITS.e8514_e8528_s4155_s4120/*"
-LowPtMinbiasHitsFiles3="${ATLAS_REFERENCE_DATA}/CampaignInputs/mc23/HITS/mc23_13p6TeV.900311.Epos_minbias_inelastic_lowjetphoton.merge.HITS.e8514_e8528_s4156_s4120/*"
-LowPtMinbiasHitsFiles4="${ATLAS_REFERENCE_DATA}/CampaignInputs/mc23/HITS/mc23_13p6TeV.900311.Epos_minbias_inelastic_lowjetphoton.merge.HITS.e8514_e8528_s4157_s4120/*"
 
 Digi_tf.py \
     --CA \
     --multiprocess \
-    --splitConfig 'HITtoRDO:Campaigns.BeamspotSplitMC23d' \
     --PileUpPresampling True \
     --conditionsTag default:OFLCOND-MC23-SDR-RUN3-02 \
     --digiSeedOffset1 170 --digiSeedOffset2 170 \
@@ -39,13 +32,7 @@ Digi_tf.py \
     --geometryVersion default:ATLAS-R3S-2021-03-02-00 \
     --inputHITSFile ${HSHitsFile} \
     --inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles1} \
-    --inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles2} \
-    --inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles3} \
-    --inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles4} \
     --inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles1} \
-    --inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles2} \
-    --inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles3} \
-    --inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles4} \
     --jobNumber 568 \
     --maxEvents ${Events} \
     --outputRDOFile ${DigiOutFileName} \

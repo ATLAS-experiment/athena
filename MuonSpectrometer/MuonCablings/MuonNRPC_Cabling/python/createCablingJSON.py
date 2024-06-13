@@ -9,7 +9,7 @@ station_name = 1 #BIS
 eta_index = 7  # To represent BIS78 (Station eta, always 7 for BIS78)
 doubletR = 1   # Chamber mounted below the Mdts (Always 1 for BIS78)
 doubletPhi = 1  # Single phi module (Always 1 for BIS78)
-sub_detector = 666 #
+sub_detector = 101 # 0x65 (same as the RPCs)
 json_dict = []
 for sector in range(1, 9):
     for doubZ in [1, 2]:
@@ -27,7 +27,7 @@ for sector in range(1, 9):
                     "gasGap": gasGap,
                     ### Online part
                     "subDetector": sub_detector,
-                    "tdcSector" : sector,                    
+                    "tdcSector" : sector*2+16, # sector A2 -> 0x0012, sector A4 -> 0x0014, ..., sector A12 -> 0x001c, ...,           
                 }
                 ### TDC 
                 if measPhi == 0:   # Eta
