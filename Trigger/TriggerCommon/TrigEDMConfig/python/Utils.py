@@ -103,7 +103,7 @@ def getEDMListFromWriteHandles(configurables):
     def formatItem(containerType, containerKey):
         auxType = containerType.replace('Container','AuxContainer')
         return [f'{containerType}#{containerKey}',
-                f'{auxType}#{containerKey}Aux.']
+                f'{auxType}#{containerKey}Aux.-']
 
     def containerTypedef(containerType):
         if containerType.startswith('xAOD::') and containerType.endswith('Container'):
