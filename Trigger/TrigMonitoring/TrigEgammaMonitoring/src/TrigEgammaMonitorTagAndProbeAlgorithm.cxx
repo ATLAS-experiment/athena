@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**********************************************************************
@@ -26,6 +26,7 @@
 #include <boost/tokenizer.hpp>
 #include "LArRecEvent/LArEventBitInfo.h"
 #include "StoreGate/ReadHandle.h"
+#include "AthContainers/Decorator.h"
 
 //**********************************************************************
 using namespace Trig;
@@ -466,19 +467,23 @@ void TrigEgammaMonitorTagAndProbeAlgorithm::dressPid(const xAOD::Electron *eg) c
     for(int ipid=0;ipid<3;ipid++){
         bool accept = (bool) this->m_electronIsEMTool[ipid]->accept(ctx,eg);
         const std::string pidname="is"+m_isemname[ipid];
-        eg->auxdecor<bool>(pidname)=static_cast<bool>(accept);
+        SG::Decorator<bool> decor(pidname);
+        decor(*eg)=static_cast<bool>(accept);
     }
     for(int ipid=0;ipid<4;ipid++){
         bool accept = (bool) this->m_electronLHTool[ipid]->accept(ctx,eg);
         const std::string pidname="is"+m_lhname[ipid];
-        eg->auxdecor<bool>(pidname)=static_cast<bool>(accept);
+        SG::Decorator<bool> decor(pidname);
+        decor(*eg)=static_cast<bool>(accept);
     }
     for(int ipid=0;ipid<3;ipid++){
         bool accept = (bool) this->m_electronDNNTool[ipid]->accept(ctx,eg);
         const std::string pidname="is"+m_dnnname[ipid];
-        eg->auxdecor<bool>(pidname)=static_cast<bool>(accept);
+        SG::Decorator<bool> decor(pidname);
+        decor(*eg)=static_cast<bool>(accept);
     }
-    eg->auxdecor<bool>("Isolated")=isIsolated(eg, m_offProbeIsolation);
+    static const SG::Decorator<bool> IsolatedDec("Isolated");
+    IsolatedDec(*eg)=isIsolated(eg, m_offProbeIsolation);
 }
 
 
