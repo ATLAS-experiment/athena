@@ -25,6 +25,7 @@ rdo2aod.args = '--outputAODFile=AOD.pool.root --steering "doRDO_TRIG" --valid=Tr
 rdo2aod.args += ' --CA "all:True"'
 rdo2aod.args += ' --preExec="all:{:s};"'.format(preExec)
 rdo2aod.args += ' --preInclude "all:Campaigns.MC23c"'
+rdo2aod.args += ' --conditionsTag "default:OFLCOND-MC23-SDR-RUN3-05"'
 
 dq = ExecStep.ExecStep('Run3DQ')
 dq.type = 'other'

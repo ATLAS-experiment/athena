@@ -30,6 +30,7 @@ ex.input = 'ttbar'
 ex.threads = 4
 ex.concurrent_events = 4
 ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1_TriggerValidation_prescale"',
+            'IOVDb.GlobalTag="OFLCOND-MC23-SDR-RUN3-05"',
             'Trigger.writeBS=True',
             'Trigger.doRuntimeNaviVal=True']
 
