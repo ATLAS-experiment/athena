@@ -82,13 +82,9 @@ def TRTMonitoringRun3ESD_AlgConfig(flags):
                     nBarrelModules = i + 1 - 32
                     oss = 'TRT/EndcapC/Sector{0}'.format(nBarrelModules)
 
-            trackGroup.defineHistogram('HitTronTMapS_x,HitTronTMapS_y;hHitTronTMapS',type='TProfile',title='Mean Trailing Edge on Track: Straws;Straw Number in Stack;Time (ns)',path=oss,xbins=strawMax[ibe],xmin=0,xmax=strawMax[ibe],duration='run',opt='kAlwaysCreate')
-            trackGroup.defineHistogram('HitToTonTMapS_x,HitToTonTMapS_y;hHitToTonTMapS',type='TProfile',title='Mean ToT on Track: Straws;Straw Number in Stack;Time (ns)',path=oss,xbins=strawMax[ibe],xmin=0,xmax=strawMax[ibe],duration='run',opt='kAlwaysCreate')
             trackGroup.defineHistogram('ValidRawDriftTimeonTrkS_x,ValidRawDriftTimeonTrkS_y;hValidRawDriftTimeonTrkS',type='TProfile',title='Valid Raw Drift Time on Track: Straws;Straw Number in Stack;Time (ns)',path=oss,xbins=strawMax[ibe],xmin=0,xmax=strawMax[ibe],duration='run',opt='kAlwaysCreate')
             trackGroup.defineHistogram('HitTronTwEPCMapS_x,HitTronTwEPCMapS_y;hHitTronTwEPCMapS',type='TProfile',title='Mean Trailing Edge on Track (with Event Phase Correction): Straws;Straw Number in Stack;Time (ns)',path=oss,xbins=strawMax[ibe],xmin=0,xmax=strawMax[ibe],duration='run',opt='kAlwaysCreate')
 
-            trackGroup.defineHistogram('HitTronTMapC_x,HitTronTMapC_y;hHitTronTMapC',type='TProfile',title='Mean Trailing Edge on Track: Chips;Chip Number in Stack;Time (ns)',path=oss,xbins=iChipMax[ibe],xmin=0,xmax=iChipMax[ibe],duration='run',opt='kAlwaysCreate')
-            trackGroup.defineHistogram('HitToTonTMapC_x,HitToTonTMapC_y;hHitToTonTMapC',type='TProfile',title='Chip Number in Stack;Time (ns);Chip Number in Stack;Time (ns)',path=oss,xbins=iChipMax[ibe],xmin=0,xmax=iChipMax[ibe],duration='run',opt='kAlwaysCreate')
             trackGroup.defineHistogram('ValidRawDriftTimeonTrkC_x,ValidRawDriftTimeonTrkC_y;hValidRawDriftTimeonTrkC',type='TProfile',title='Valid Raw Drift Time on Track: Chips;Chip Number in Stack;Time (ns)',path=oss,xbins=iChipMax[ibe],xmin=0,xmax=iChipMax[ibe],duration='run',opt='kAlwaysCreate')
             trackGroup.defineHistogram('HitTronTwEPCMapC_x,HitTronTwEPCMapC_y;hHitTronTwEPCMapC',type='TProfile',title='Mean Trailing Edge on Track (with Event Phase Correction): Chips;Chip Number in Stack;Time (ns)',path=oss,xbins=iChipMax[ibe],xmin=0,xmax=iChipMax[ibe],duration='run',opt='kAlwaysCreate')
 
