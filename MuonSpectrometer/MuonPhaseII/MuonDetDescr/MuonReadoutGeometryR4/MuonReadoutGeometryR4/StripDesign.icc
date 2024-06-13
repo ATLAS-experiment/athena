@@ -191,22 +191,23 @@ namespace MuonGMR4 {
     }
     inline int StripDesign::stripNumber(const Amg::Vector2D& extPos) const {
         const Amg::Vector2D pos = m_stereoToEta * extPos;
-        std::optional<double> stripPitches = Amg::intersect<2>(m_firstStripPos, stripDir(),
-                                                               pos, - Amg::Vector2D::UnitX());
-        if (!stripPitches) {
+        std::optional<double> stripDist = Amg::intersect<2>(m_firstStripPos, stripDir(),
+                                                            pos, -Amg::Vector2D::UnitX());
+        if (!stripDist) {
             return -1;
         }
-        const double xMid = (*stripPitches);  
-        if (xMid < - 0.5*stripPitch()) {
-            ATH_MSG_VERBOSE("Object "<<Amg::toString(pos)<<" is way before the first strip "<<xMid<<".");
+        if ((*stripDist) < -0.5*stripPitch()) {
+            ATH_MSG_VERBOSE("Object "<<Amg::toString(pos)<<" is way before the first strip "<<Amg::toString(m_firstStripPos)
+                        <<" distance: "<<(*stripDist)<<", half-pitch: "<<0.5*stripPitch()<<".");
             return -1;
         }
-        const int chNum = static_cast<int>(std::round(std::abs(xMid / stripPitch())));
-        if (chNum > numStrips()) {
+        const double stripPitches = std::abs((*stripDist) / stripPitch());
+        if (stripPitches > (1.*numStrips() + 0.5)) {
             ATH_MSG_VERBOSE("Object "<<Amg::toString(pos)<<" is not covered by any strip."
-                          <<" Virtual channel number: "<<chNum<<" max strips: "<<numStrips());
-            return -1;
+                          <<" Virtual strip pitches: "<<stripPitches<<" max strips: "<<numStrips());
+             return -1;
         }
+        const int chNum = std::min(static_cast<int>(std::round(stripPitches)), numStrips());       
         if (!insideBoundaries(pos)){
             ATH_MSG_VERBOSE("Object "<<Amg::toString(pos)<<" is outside the active area of the trapezoid. "
                           <<"Distance to strip: "<<stripNormal().dot(pos - (*stripCenter(chNum)))
