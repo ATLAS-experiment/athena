@@ -183,9 +183,9 @@ def ActsSiSpacePointsSeedMakerToolCfg(flags,
     if 'SeedToolPixel' not in kwargs:
         if flags.Acts.SeedingStrategy is SeedingStrategy.Orthogonal:
             if flags.Tracking.doITkFastTracking:
-                seedTool_pixel = acc.popToolsAndMerge(ActsPixelOrthogonalSeedingToolCfg(flags))
-            else:
                 seedTool_pixel = acc.popToolsAndMerge(ActsFastPixelOrthogonalSeedingToolCfg(flags))
+            else:
+                seedTool_pixel = acc.popToolsAndMerge(ActsPixelOrthogonalSeedingToolCfg(flags))
         else:
             if flags.Tracking.doITkFastTracking:
                 kwargs.setdefault("useFastTracking", True)
@@ -252,9 +252,9 @@ def ActsPixelSeedingAlgCfg(flags,
     if "SeedTool" not in kwargs:
         if flags.Acts.SeedingStrategy is SeedingStrategy.Orthogonal:
             if flags.Tracking.doITkFastTracking:
-                kwargs.setdefault('SeedTool', acc.popToolsAndMerge(ActsPixelOrthogonalSeedingToolCfg(flags)))
-            else:
                 kwargs.setdefault('SeedTool', acc.popToolsAndMerge(ActsFastPixelOrthogonalSeedingToolCfg(flags)))
+            else:
+                kwargs.setdefault('SeedTool', acc.popToolsAndMerge(ActsPixelOrthogonalSeedingToolCfg(flags)))
         else:
             if flags.Tracking.doITkFastTracking:
                 kwargs.setdefault('SeedTool', acc.popToolsAndMerge(ActsFastPixelSeedingToolCfg(flags)))
