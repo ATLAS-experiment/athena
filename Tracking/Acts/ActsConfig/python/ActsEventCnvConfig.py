@@ -74,7 +74,7 @@ def ActsToTrkConvertorAlgCfg(flags,
     acc.addEventAlgo(CompFactory.ActsTrk.ActsToTrkConvertorAlg(name, **kwargs))
     return acc
 
-def RunTrackConversion(flags, track_collections = []):
+def RunTrackConversion(flags, track_collections = [], outputfile='dump.json'):
     from TrkConfig.TrackCollectionReadConfig import TrackCollectionReadCfg
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
@@ -118,7 +118,7 @@ def RunTrackConversion(flags, track_collections = []):
         MuonContainerKeys=[""],
         JetContainerKeys=[""],
         TrackParticleContainerKeys=[""],
-        OutputLocation="dump.json",
+        OutputLocation=outputfile,
     )
     cfg.merge(acc)
     cfg.printConfig(withDetails=True, summariseProps=True)

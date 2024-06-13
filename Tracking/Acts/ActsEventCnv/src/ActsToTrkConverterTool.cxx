@@ -186,7 +186,7 @@ ActsTrk::ActsToTrkConverterTool::trkTrackParametersToActsParameters(
       actsSurface = trkSurfaceToActsSurface(atlasParameter.associatedSurface())
                         .getSharedPtr();
     } catch (const std::exception &e) {
-      ATH_MSG_ERROR("Could not find ACTS surface for this TrackParameter:");
+      ATH_MSG_ERROR("Could not find ACTS detector surface for this TrackParameter:");
       ATH_MSG_ERROR(atlasParameter);
       throw;  // Nothing we can do, so just pass exception on...
     }
@@ -195,11 +195,24 @@ ActsTrk::ActsToTrkConverterTool::trkTrackParametersToActsParameters(
   else {
     ATH_MSG_VERBOSE(
         "trkTrackParametersToActsParameters:: No associated surface found (owner: "<<atlasParameter.associatedSurface().owner()<<
-        "). Creating a perigee surface. Trk parameters:");
+        "). Creating a free surface. Trk parameters:");
     ATH_MSG_VERBOSE(atlasParameter);
-    actsSurface = Acts::Surface::makeShared<const Acts::PerigeeSurface>(
-        Acts::Vector3(0., 0., 0.));
-        // atlasParameter.position()); // FIXME! Dramatically better for Muons, but worse for ITK. 
+
+    switch (atlasParameter.associatedSurface().type()){
+      case Trk::SurfaceType::Plane:
+        actsSurface = Acts::Surface::makeShared<const Acts::PlaneSurface>(
+            atlasParameter.associatedSurface().transform());
+        break;
+      case Trk::SurfaceType::Perigee:
+        actsSurface = Acts::Surface::makeShared<const Acts::PerigeeSurface>(
+            atlasParameter.associatedSurface().transform());
+        break;
+      // TODO - implement the missing types?
+      default:
+        ATH_MSG_WARNING("No surface type found for this Trk::Surface. Creating a perigee surface.");
+        actsSurface = Acts::Surface::makeShared<const Acts::PerigeeSurface>(
+            atlasParameter.associatedSurface().center());
+    }
   }
 
   // Construct track parameters
@@ -424,6 +437,7 @@ void ActsTrk::ActsToTrkConverterTool::trkTrackCollectionToActsTrackContainer(
   ATH_MSG_VERBOSE("Calling trkTrackCollectionToActsTrackContainer with "
                   << trackColl.size() << " tracks.");
   unsigned int trkCount = 0;
+  std::vector<Identifier> failedIds; // Keep track of Identifiers of failed conversions
   for (auto trk : trackColl) {
     // Do conversions!
     const Trk::TrackStates *trackStates =
@@ -478,7 +492,9 @@ void ActsTrk::ActsToTrkConverterTool::trkTrackCollectionToActsTrackContainer(
               trkTrackParametersToActsParameters(*(tsos->trackParameters()), gctx);
           ATH_MSG_VERBOSE("Track parameters: " << parameters.parameters());
           // Sanity check on positions
-          actsTrackParameterPositionCheck(parameters, *(tsos->trackParameters()), gctx);
+          if (!actsTrackParameterPositionCheck(parameters, *(tsos->trackParameters()), gctx)){
+            failedIds.push_back(tsos->trackParameters()->associatedSurface().associatedDetectorElementIdentifier());
+          }
 
           if (first_tsos) {
             // This is the first track state, so we need to set the track
@@ -537,10 +553,17 @@ void ActsTrk::ActsToTrkConverterTool::trkTrackCollectionToActsTrackContainer(
                                  << " track states on surfaces.");
   }
   ATH_MSG_VERBOSE("Finished converting " << trackColl.size() << " tracks.");
+
+  if (!failedIds.empty()){
+    ATH_MSG_WARNING("Failed to convert "<<failedIds.size()<<" track parameters.");
+    for (auto id : failedIds){
+      ATH_MSG_WARNING("-> Failed for Identifier "<<m_idHelperSvc->toString(id));
+    }
+  }
   ATH_MSG_VERBOSE("ACTS Track container has " << tc.size() << " tracks.");
 }
 
-void ActsTrk::ActsToTrkConverterTool::actsTrackParameterPositionCheck(
+bool ActsTrk::ActsToTrkConverterTool::actsTrackParameterPositionCheck(
     const Acts::BoundTrackParameters &parameters,
     const Trk::TrackParameters &trkparameters,
     const Acts::GeometryContext &gctx) const {
@@ -552,11 +575,11 @@ void ActsTrk::ActsToTrkConverterTool::actsTrackParameterPositionCheck(
   // ATH_MSG_VERBOSE("GeometryId "<<parameters.referenceSurface().geometryId().value());  
 
   if (std::fabs(actsPos.x() - trkparameters.position().x()) >
-          0.01 ||
+          0.1 ||
       std::fabs(actsPos.y() - trkparameters.position().y()) >
-          0.01 ||
+          0.1 ||
       std::fabs(actsPos.z() - trkparameters.position().z()) >
-          0.01) {
+          0.1) {
     ATH_MSG_WARNING("Parameter position mismatch. Acts \n"
                     << actsPos << " vs Trk \n"
                     << trkparameters.position());
@@ -564,7 +587,9 @@ void ActsTrk::ActsToTrkConverterTool::actsTrackParameterPositionCheck(
     ATH_MSG_WARNING(parameters.referenceSurface().toString(gctx));
     ATH_MSG_WARNING("Trk surface:");
     ATH_MSG_WARNING(trkparameters.associatedSurface());
+    return false;
   }
+  return true;
 }
 
 // Local functions to check/debug Annulus bounds

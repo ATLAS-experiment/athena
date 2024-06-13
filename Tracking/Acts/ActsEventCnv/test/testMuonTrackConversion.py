@@ -53,8 +53,9 @@ if "__main__" == __name__:
         import sys
         sys.exit(1)
     
+    outputfile = 'muon_dump.json'
     track_collections = ['MuonSpectrometerTracks']
-    RunTrackConversion(flags, track_collections)
+    RunTrackConversion(flags, track_collections, outputfile=outputfile)
 
     tolerance = 0.001
     def _valuesEqual(acts, trk):
@@ -72,13 +73,13 @@ if "__main__" == __name__:
     # Now compare outputs
     import json
     success = False
-    with open('dump.json') as f:
+    with open(outputfile) as f:
         print('--- Dumping dump.json')
         print(f.read())
 
-    with open('dump.json') as f:
+    with open(outputfile) as f:
 
-        print('--- Processing dump.json')
+        print('--- Processing',outputfile)
         data = json.load(f)
         for event in data:
             found_ni_differences = 0
@@ -124,9 +125,8 @@ if "__main__" == __name__:
         print('INFO: Found', found_ni_differences, 'tracks which have minor (possibly insignificant) differences.')
     if not success:
         print('ERROR: the output of the conversion is not correct with a positional tolerance of {tol}%'.format(tol=tolerance*100))
-        # import sys
-        # sys.exit(1)
-        # Do not fail until we have this working.
+        import sys
+        sys.exit(1)
     else:
         print ('SUCCESS: the output of the conversion is correct (at least, to the precision we check, currently {tol}%)'.format(tol=tolerance*100))
 
