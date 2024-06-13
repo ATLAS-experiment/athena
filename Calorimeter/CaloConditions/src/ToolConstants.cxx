@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  ToolConstants.cxx
@@ -41,9 +41,9 @@ ToolConstants::newrep (const std::string& context,
                        const std::string& key,
                        const std::string& val)
 {
-  Maptype::const_iterator i = m_map.find (key);
-  if (i != m_map.end())
+  if (m_map.contains(key)) {
     error (context, key, "Duplicate key");
+  }
   return m_map[key] = CxxUtils::Arrayrep (val, context+":"+key);
 }
  
@@ -100,7 +100,7 @@ void ToolConstants::setrep (const std::string& key,
  */
 bool ToolConstants::hasrep (const std::string& key) const
 {
-  return m_map.find (key) != m_map.end();
+  return m_map.contains(key);
 }
 
 
