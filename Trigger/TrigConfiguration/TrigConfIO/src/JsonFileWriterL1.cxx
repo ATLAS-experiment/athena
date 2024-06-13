@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #include "TrigConfIO/JsonFileWriterL1.h"
 
@@ -65,7 +65,7 @@ TrigConf::JsonFileWriterL1::writeJsonFile(const std::string & filename, const L1
 
          // MU
          try {
-            auto muThr = dynamic_cast<const TrigConf::L1Threshold_MU &>(*thr);
+            const auto & muThr = dynamic_cast<const TrigConf::L1Threshold_MU &>(*thr);
             jThr["baThr"] = muThr.ptBarrel();
             jThr["ecThr"] = muThr.ptEndcap();
             jThr["fwThr"] = muThr.ptForward(); 
@@ -82,7 +82,7 @@ TrigConf::JsonFileWriterL1::writeJsonFile(const std::string & filename, const L1
 
          // TAU
          try {
-            auto tauThr = dynamic_cast<const TrigConf::L1Threshold_TAU &>(*thr);
+            const auto & tauThr = dynamic_cast<const TrigConf::L1Threshold_TAU &>(*thr);
             std::string isobits = "00000";
             auto isomask = tauThr.isolationMask();
             for(size_t b=0; b<5; ++b) {
@@ -104,7 +104,7 @@ TrigConf::JsonFileWriterL1::writeJsonFile(const std::string & filename, const L1
 
          // EM
          try {
-            auto EMThr = dynamic_cast<const TrigConf::L1Threshold_EM &>(*thr);
+            const auto & EMThr = dynamic_cast<const TrigConf::L1Threshold_EM &>(*thr);
             jThr["thrValues"] = json::array_t({});
             for(auto & rv : EMThr.thrValues()) {
                json jRV({});
@@ -126,7 +126,7 @@ TrigConf::JsonFileWriterL1::writeJsonFile(const std::string & filename, const L1
 
          // JET
          try {
-            auto JThr = dynamic_cast<const TrigConf::L1Threshold_JET &>(*thr);
+            const auto & JThr = dynamic_cast<const TrigConf::L1Threshold_JET &>(*thr);
             jThr["thrValues"] = json::array_t({});
             for(auto & rv : JThr.thrValues()) {
                json jRV({});
@@ -143,7 +143,7 @@ TrigConf::JsonFileWriterL1::writeJsonFile(const std::string & filename, const L1
 
          // TE
          try {
-            auto teThr = dynamic_cast<const TrigConf::L1Threshold_TE &>(*thr);
+            const auto & teThr = dynamic_cast<const TrigConf::L1Threshold_TE &>(*thr);
             //jThr["thrValues"] = json::array_t({});
             for(auto & rv : teThr.thrValues()) {
                json jRV({});
@@ -157,7 +157,7 @@ TrigConf::JsonFileWriterL1::writeJsonFile(const std::string & filename, const L1
 
          // ZB
          try {
-            auto zbThr = dynamic_cast<const TrigConf::L1Threshold_ZB &>(*thr);
+            const auto & zbThr = dynamic_cast<const TrigConf::L1Threshold_ZB &>(*thr);
             jThr["seed"] = zbThr.seed();
             jThr["seedBcdelay"] = zbThr.seedBcdelay();
             jThr["seedMultiplicity"] = zbThr.seedMultiplicity();
@@ -165,7 +165,7 @@ TrigConf::JsonFileWriterL1::writeJsonFile(const std::string & filename, const L1
 
          // ZBTopo
          try {
-            auto zbTopoThr = dynamic_cast<const TrigConf::L1Threshold_ZBTopo &>(*thr);
+            const auto & zbTopoThr = dynamic_cast<const TrigConf::L1Threshold_ZBTopo &>(*thr);
             jThr["mask0"] = zbTopoThr.mask0();
             jThr["mask0"] = zbTopoThr.mask0();
             jThr["mask0"] = zbTopoThr.mask0();
@@ -178,7 +178,7 @@ TrigConf::JsonFileWriterL1::writeJsonFile(const std::string & filename, const L1
          
          // eEM
          try {
-            auto eEMThr = dynamic_cast<const TrigConf::L1Threshold_eEM &>(*thr);
+            const auto & eEMThr = dynamic_cast<const TrigConf::L1Threshold_eEM &>(*thr);
             jThr["reta"] = TrigConf::Selection::wpToString(eEMThr.reta());
             jThr["rhad"] = TrigConf::Selection::wpToString(eEMThr.rhad());
             jThr["wstot"] = TrigConf::Selection::wpToString(eEMThr.wstot());
@@ -195,7 +195,7 @@ TrigConf::JsonFileWriterL1::writeJsonFile(const std::string & filename, const L1
 
          // jEM
          try {
-            auto jEMThr = dynamic_cast<const TrigConf::L1Threshold_jEM &>(*thr);
+            const auto & jEMThr = dynamic_cast<const TrigConf::L1Threshold_jEM &>(*thr);
             jThr["iso"] = TrigConf::Selection::wpToString(jEMThr.iso());
             jThr["frac"] = TrigConf::Selection::wpToString(jEMThr.frac());
             jThr["frac2"] = TrigConf::Selection::wpToString(jEMThr.frac2());
@@ -212,7 +212,7 @@ TrigConf::JsonFileWriterL1::writeJsonFile(const std::string & filename, const L1
 
          // eTAU
          try {
-            auto eTAUThr = dynamic_cast<const TrigConf::L1Threshold_eTAU &>(*thr);
+            const auto & eTAUThr = dynamic_cast<const TrigConf::L1Threshold_eTAU &>(*thr);
             jThr["rCore"] = TrigConf::Selection::wpToString(eTAUThr.rCore());
             jThr["rHad"] = TrigConf::Selection::wpToString(eTAUThr.rHad());
             jThr["thrValues"] = json::array_t({});
@@ -230,7 +230,7 @@ TrigConf::JsonFileWriterL1::writeJsonFile(const std::string & filename, const L1
          
          // jTAU
          try {
-            auto jTAUThr = dynamic_cast<const TrigConf::L1Threshold_jTAU &>(*thr);
+            const auto & jTAUThr = dynamic_cast<const TrigConf::L1Threshold_jTAU &>(*thr);
             jThr["isolation"] = TrigConf::Selection::wpToString(jTAUThr.isolation());
             jThr["thrValues"] = json::array_t({});
             for(auto & rv : jTAUThr.thrValues()) {
@@ -247,7 +247,7 @@ TrigConf::JsonFileWriterL1::writeJsonFile(const std::string & filename, const L1
 
          // cTAU
          try {
-            auto cTAUThr = dynamic_cast<const TrigConf::L1Threshold_cTAU &>(*thr);
+            const auto & cTAUThr = dynamic_cast<const TrigConf::L1Threshold_cTAU &>(*thr);
             jThr["isolation"] = TrigConf::Selection::wpToString(cTAUThr.isolation());
             jThr["thrValues"] = json::array_t({});
             for(auto & rv : cTAUThr.thrValues()) {
@@ -264,7 +264,7 @@ TrigConf::JsonFileWriterL1::writeJsonFile(const std::string & filename, const L1
 
          // jJ
          try {
-            auto jJThr = dynamic_cast<const TrigConf::L1Threshold_jJ &>(*thr);
+            const auto & jJThr = dynamic_cast<const TrigConf::L1Threshold_jJ &>(*thr);
             jThr["thrValues"] = json::array_t({});
             for(auto & rv : jJThr.thrValues()) {
                json jRV({});
@@ -278,7 +278,7 @@ TrigConf::JsonFileWriterL1::writeJsonFile(const std::string & filename, const L1
 
          // jLJ
          try {
-            auto jLJThr = dynamic_cast<const TrigConf::L1Threshold_jLJ &>(*thr);
+            const auto & jLJThr = dynamic_cast<const TrigConf::L1Threshold_jLJ &>(*thr);
             jThr["thrValues"] = json::array_t({});
             for(auto & rv : jLJThr.thrValues()) {
                json jRV({});
@@ -292,37 +292,37 @@ TrigConf::JsonFileWriterL1::writeJsonFile(const std::string & filename, const L1
 
          // gJ
          try {
-            auto gJThr = dynamic_cast<const TrigConf::L1Threshold_gJ &>(*thr);
+            const auto & gJThr = dynamic_cast<const TrigConf::L1Threshold_gJ &>(*thr);
             jThr["value"] = int(gJThr.thrValue());
          } catch(std::bad_cast&) {};
 
          // gLJ
          try {
-            auto gLJThr = dynamic_cast<const TrigConf::L1Threshold_gLJ &>(*thr);
+            const auto & gLJThr = dynamic_cast<const TrigConf::L1Threshold_gLJ &>(*thr);
             jThr["value"] = int(gLJThr.thrValue());
          } catch(std::bad_cast&) {};         
 
          // jXE
          try {
-            auto jXEThr = dynamic_cast<const TrigConf::L1Threshold_jXE &>(*thr);
+            const auto & jXEThr = dynamic_cast<const TrigConf::L1Threshold_jXE &>(*thr);
             jThr["value"] = int(jXEThr.thrValue());
          } catch(std::bad_cast&) {};
 
          // jTE
          try {
-            auto jTEThr = dynamic_cast<const TrigConf::L1Threshold_jTE &>(*thr);
+            const auto & jTEThr = dynamic_cast<const TrigConf::L1Threshold_jTE &>(*thr);
             jThr["value"] = int(jTEThr.thrValue());
          } catch(std::bad_cast&) {};         
          
          // gXE
          try {
-            auto gXEThr = dynamic_cast<const TrigConf::L1Threshold_gXE &>(*thr);
+            const auto & gXEThr = dynamic_cast<const TrigConf::L1Threshold_gXE &>(*thr);
             jThr["value"] = int(gXEThr.thrValue());
          } catch(std::bad_cast&) {};         
 
          // gTE
          try {
-            auto gTEThr = dynamic_cast<const TrigConf::L1Threshold_gTE &>(*thr);
+            const auto & gTEThr = dynamic_cast<const TrigConf::L1Threshold_gTE &>(*thr);
             jThr["value"] = int(gTEThr.thrValue());
          } catch(std::bad_cast&) {};
 
@@ -436,7 +436,7 @@ TrigConf::JsonFileWriterL1::writeJsonFile(const std::string & filename, const L1
          auto & eeminfo = l1menu.thrExtraInfo().eEM();
          jThrType["maxEt"] = (int)eeminfo.maxEt();
          for( auto wp : {TrigConf::Selection::WP::LOOSE, TrigConf::Selection::WP::MEDIUM, TrigConf::Selection::WP::TIGHT} ) {
-            auto wpstr = TrigConf::Selection::wpToString(wp);
+            const auto & wpstr = TrigConf::Selection::wpToString(wp);
             jThrType["workingPoints"][wpstr] = json::array_t({});
             for(auto & iso : eeminfo.isolation(wp)) {
                json jWPIso({});
@@ -472,7 +472,7 @@ TrigConf::JsonFileWriterL1::writeJsonFile(const std::string & filename, const L1
          jThrType["ptMinxTOB2"] = (int)jeminfo.ptMinxTOB("2A");
          jThrType["ptMinxTOB3"] = (int)jeminfo.ptMinxTOB("3A");
          for( auto wp : {TrigConf::Selection::WP::LOOSE, TrigConf::Selection::WP::MEDIUM, TrigConf::Selection::WP::TIGHT} ) {
-            auto wpstr = TrigConf::Selection::wpToString(wp);
+            const auto & wpstr = TrigConf::Selection::wpToString(wp);
             jThrType["workingPoints"][wpstr] = json::array_t({});
             for(auto & iso : jeminfo.isolation(wp)) {
                json jWPIso({});
@@ -505,7 +505,7 @@ TrigConf::JsonFileWriterL1::writeJsonFile(const std::string & filename, const L1
          jThrType["algoVersion"] = (int)eeminfo.algoVersion();
          for( auto wp : {TrigConf::Selection::WP::LOOSE, TrigConf::Selection::WP::MEDIUM, TrigConf::Selection::WP::TIGHT, 
                          TrigConf::Selection::WP::HADLOOSE, TrigConf::Selection::WP::HADMEDIUM, TrigConf::Selection::WP::HADTIGHT} ) {
-            auto wpstr = TrigConf::Selection::wpToString(wp);
+            const auto & wpstr = TrigConf::Selection::wpToString(wp);
             jThrType["workingPoints"][wpstr] = json::array_t({});
             for(auto & iso : eeminfo.isolation(wp)) {
                json jWPIso({});
@@ -533,7 +533,7 @@ TrigConf::JsonFileWriterL1::writeJsonFile(const std::string & filename, const L1
          jThrType["ptMinxTOB2"] = (int)jtauinfo.ptMinxTOB("2A");
          jThrType["ptMinxTOB3"] = (int)jtauinfo.ptMinxTOB("3A");
          for( auto wp : {TrigConf::Selection::WP::LOOSE, TrigConf::Selection::WP::MEDIUM, TrigConf::Selection::WP::TIGHT} ) {
-            auto wpstr = TrigConf::Selection::wpToString(wp);
+            const auto & wpstr = TrigConf::Selection::wpToString(wp);
             jThrType["workingPoints"][wpstr] = json::array_t({});
             for(auto & iso : jtauinfo.isolation(wp)) {
                json jWPIso({});
@@ -549,7 +549,7 @@ TrigConf::JsonFileWriterL1::writeJsonFile(const std::string & filename, const L1
       if(thrType == "cTAU") {
          auto & eeminfo = l1menu.thrExtraInfo().cTAU();
          for( auto wp : {TrigConf::Selection::WP::LOOSE, TrigConf::Selection::WP::MEDIUM, TrigConf::Selection::WP::TIGHT} ) {
-            auto wpstr = TrigConf::Selection::wpToString(wp);
+            const auto & wpstr = TrigConf::Selection::wpToString(wp);
             jThrType["workingPoints"][wpstr] = json::array_t({});
             for(auto & iso : eeminfo.isolation(wp)) {
                json jWPIso({});
@@ -797,8 +797,8 @@ TrigConf::JsonFileWriterL1::writeJsonFile(const std::string & filename, const L1
                   }
                }
             } else {
-               auto ds = alg.generics();
-               for(auto & gpname : ds.getKeys()) {
+               const auto & ds = alg.generics();
+               for(const auto & gpname : ds.getKeys()) {
                   auto gp = ds.getObject(gpname);
                   {
                      if(gp.hasAttribute("position")) {
@@ -858,7 +858,7 @@ TrigConf::JsonFileWriterL1::writeJsonFile(const std::string & filename, const Tr
 
    json groups;
    for (size_t i = 0 ; i< l1bgs.size(); ++i) {
-      auto group = l1bgs.getBunchGroup(i);
+      const auto & group = l1bgs.getBunchGroup(i);
       json jgroup({});
       jgroup["name"] = group->name();
       jgroup["id"] = group->id();
@@ -885,7 +885,7 @@ bool TrigConf::JsonFileWriterL1::writeJsonFile(const std::string & filename, con
    j["filetype"] = "l1prescale";
    j["name"]  = l1ps.name();
    json cuts;
-   for ( auto [itemName, ps]: l1ps.prescales()){
+   for ( const auto & [itemName, ps]: l1ps.prescales()){
       json cut;
       cut["cut"] = ps.cut;
       cut["enabled"] = ps.enabled;
