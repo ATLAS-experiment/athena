@@ -12,7 +12,7 @@ from L1TopoOnlineMonitoring import L1TopoOnlineMonitoringConfig as TopoMonConfig
 from L1TopoSimulation import L1TopoSimulationConfig as TopoSimConfig
 from TrigHypoCommonTools.TrigHypoCommonTools import TrigGenericHypoToolFromDict
 from TrigEDMConfig.TriggerEDM import recordable
-from AthenaConfiguration.Enums import Format
+from AthenaCommon.CFElements import seqAND
 
 #----------------------------------------------------------------
 # fragments generating configuration will be functions in New JO, 
@@ -48,14 +48,8 @@ def L1TopoOnlineMonitorSequenceCfg(flags):
 
         reco = InEventRecoCA('L1TopoPhase1OnlineMonitor_reco',inputMaker=inputMaker)
 
-        # if running on data without L1Sim, need to add L1TopoSim
-        if flags.Input.Format is Format.BS and not flags.Trigger.doLVL1:
-            topoSimCA = TopoSimConfig.L1TopoSimulationCfg(flags,doMonitoring=True,readMuCTPI=True)
-            reco.mergeReco(topoSimCA)
-        # in other hand, we only need to add the L1TopoPhase1OnlineMonitor
-        else:
-            recoAlg= TopoMonConfig.getL1TopoPhase1OnlineMonitor(flags,'L1/L1TopoSimDecisions')
-            reco.addEventAlgo(recoAlg)
+        reco.addSequence(seqAND('L1TopoSimSeq'))
+        reco.merge(TopoSimConfig.L1TopoSimulationCfg(flags,doMonitoring=True,readMuCTPI=False,name="L1OnlineTopoSimulation"), sequenceName='L1TopoSimSeq')
     
         selAcc =  SelectionCA("L1TopoOnlineMonitorSequence")
         selAcc.mergeReco(reco)
@@ -116,9 +110,7 @@ class MonitorChainConfiguration(ChainConfigurationBase):
         if monType == 'timeburner':
             chainSteps.append(self.getTimeBurnerStep(flags))
         elif monType == 'l1topoPh1debug':
-            #Deactivated by default at the moment
-            if False and not flags.Trigger.doLVL1 and flags.Input.Format is Format.BS and flags.Trigger.L1.doMuonTopoInputs and flags.Trigger.L1.doMuon and flags.enableL1MuonPhase1 and flags.enableL1TopoBWSimulation and flags.enableL1CaloPhase1:
-                chainSteps.append(self.getL1TopoOnlineMonitorStep(flags))
+            chainSteps.append(self.getL1TopoOnlineMonitorStep(flags))
         elif monType == 'mistimemonj400':
             chainSteps.append(self.getMistimeMonStep(flags))
         else:

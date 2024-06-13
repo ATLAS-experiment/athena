@@ -38,6 +38,7 @@ ex.args = '--outputRDO_TRIGFile=RDO_TRIG.pool.root'
 ex.args += ' --preExec="all:{:s};"'.format(preExec)
 ex.args += ' --preInclude "all:Campaigns.MC23c"'
 ex.args += ' --CA "all:True"'
+ex.args += ' --conditionsTag "default:OFLCOND-MC23-SDR-RUN3-05"'
 
 test = Test.Test()
 test.art_type = 'grid'

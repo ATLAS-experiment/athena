@@ -15,7 +15,8 @@ ex.type = 'athena'
 ex.job_options = 'TriggerJobOpts/runHLT.py'
 ex.input = 'ttbar_pu80'
 ex.threads = 1
-ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1_TriggerValidation_prescale"']
+ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1_TriggerValidation_prescale"',
+            'IOVDb.GlobalTag="OFLCOND-MC23-SDR-RUN3-05"']
 # the conditions override is needed because the RDO was produced with a single beamspot
 ex.args += ' --postExec \'from IOVDbSvc.IOVDbSvcConfig import addOverride; cfg.merge(addOverride(flags, "/Indet/Beampos", "IndetBeampos-RunDep-MC21-BestKnowledge-002"));\''
 

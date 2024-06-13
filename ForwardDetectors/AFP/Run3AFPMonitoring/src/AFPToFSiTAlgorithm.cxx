@@ -27,6 +27,11 @@ AFPToFSiTAlgorithm::AFPToFSiTAlgorithm( const std::string& name, ISvcLocator* pS
 AFPToFSiTAlgorithm::~AFPToFSiTAlgorithm() {}
 
 StatusCode AFPToFSiTAlgorithm::initialize() {
+
+    using namespace Monitored;
+
+	m_GroupToFSiTCorr = buildToolMap<int>(m_tools, "AFPToFSiTTool", m_planes);
+
     // We must declare to the framework in initialize what SG objects we are going to use
     SG::ReadHandleKey<xAOD::AFPSiHitContainer> afpSiHitContainerKey( "AFPSiHits" );
     ATH_CHECK( m_afpSiHitContainerKey.initialize() );
@@ -62,10 +67,6 @@ StatusCode AFPToFSiTAlgorithm::fillHistograms( const EventContext& ctx ) const {
 
     Monitored::Scalar<float> lqbar[ 2 ] = { Monitored::Scalar<float>( "lqBar_A", 0.0 ),
                                             Monitored::Scalar<float>( "lqBar_C", 0.0 ) };
-    Monitored::Scalar<float> fsp0_rows[ 2 ] = { Monitored::Scalar<float>( "fsp0_rows_A", 0.0 ),
-                                                Monitored::Scalar<float>( "fsp0_rows_C", 0.0 ) };
-    Monitored::Scalar<float> fsp0_columns[ 2 ] = { Monitored::Scalar<float>( "fsp0_columns_A", 0.0 ),
-                                                   Monitored::Scalar<float>( "fsp0_columns_C", 0.0 ) };
 
     Monitored::Scalar<float> lqbar_tight[ 2 ] = { Monitored::Scalar<float>( "lqBar_tight_A", 0.0 ),
                                                   Monitored::Scalar<float>( "lqBar_tight_C", 0.0 ) };
@@ -82,11 +83,25 @@ StatusCode AFPToFSiTAlgorithm::fillHistograms( const EventContext& ctx ) const {
     Monitored::Scalar<float> fsp0Hits[ 2 ] = { Monitored::Scalar<float>( "fsp0Hits_A", 0.0 ),
                                                Monitored::Scalar<float>( "fsp0Hits_C", 0.0 ) };
 
+    Monitored::Scalar<float> fs_rows_full[ 2 ] = { Monitored::Scalar<float>( "fs_rows_full_A", 0.0 ),
+                                                Monitored::Scalar<float>( "fs_rows_full_C", 0.0 ) };
+    Monitored::Scalar<float> fs_rows[ 2 ] = { Monitored::Scalar<float>( "fs_rows_A", 0.0 ),
+                                                Monitored::Scalar<float>( "fs_rows_C", 0.0 ) };
+    Monitored::Scalar<float> fs_columns[ 2 ] = { Monitored::Scalar<float>( "fs_columns_A", 0.0 ),
+                                                   Monitored::Scalar<float>( "fs_columns_C", 0.0 ) };
+
+
     std::vector<std::pair<int, int>> fsp[ 2 ][ 2 ] = {};
+    std::vector<std::pair<int, int>> fsp_full[ 4 ][ 2 ] = {};
 
     for ( const xAOD::AFPSiHit* hitsItr : *afpSiHitContainer ) {
         if ( hitsItr->stationID() != 0 && hitsItr->stationID() != 3 ) continue;
         int side = hitsItr->stationID() / 2;
+        if ( hitsItr->pixelLayerID() >= 0 && hitsItr->pixelLayerID() < 4 )
+        {
+            int plane_full = hitsItr->pixelLayerID();
+            fsp_full[ plane_full ][ side ].emplace_back( hitsItr->pixelRowIDChip(), hitsItr->pixelColIDChip() );
+        }           
 
         if ( hitsItr->pixelLayerID() != 0 && hitsItr->pixelLayerID() != 2 ) continue;
         int plane = hitsItr->pixelLayerID() / 2;
@@ -101,13 +116,6 @@ StatusCode AFPToFSiTAlgorithm::fillHistograms( const EventContext& ctx ) const {
         int side = hitsItr->stationID() / 2;
         float bar = hitsItr->trainID() + hitsItr->barInTrainID() / 4.0;
         for ( auto& coord : fsp[ 0 ][ side ] ) {
-            lqbar[ side ] = bar;
-            fsp0_rows[ side ] = coord.first;
-            fsp0_columns[ side ] = coord.second;
-
-            fill( "AFPToFSiTTool", lqbar[ side ], fsp0_rows[ side ] );
-            fill( "AFPToFSiTTool", lqbar[ side ], fsp0_columns[ side ] );
-
             bool match = false;
             if ( fsp[ 0 ][ side ].size() == 2 && fsp[ 1 ][ side ].size() == 2 ) {
                 for ( auto& coord2 : fsp[ 1 ][ side ] ) {
@@ -128,16 +136,34 @@ StatusCode AFPToFSiTAlgorithm::fillHistograms( const EventContext& ctx ) const {
                 fill( "AFPToFSiTTool", lqbar_tight[ side ], fsp0_columns_tight[ side ] );
             }
         }
-
-        if ( fsp[ 0 ][ side ].empty() ) {
-            lqbar[ side ] = bar;
-            fsp0_columns[ side ] = -5;
-            for ( int k = -10; k < -1; ++k ) {
-                fsp0_rows[ side ] = k;
-                fill( "AFPToFSiTTool", lqbar[ side ], fsp0_rows[ side ] );
+        //additional TofSitCorr hists 
+        for (int j = 0; j < 4; j++)
+            for ( auto& coord : fsp_full[ j ][ side ] )
+            {
+                lqbar[ side ] = bar;
+                fs_rows[ side ] = coord.first;
+                fs_columns[ side ] = coord.second;
+                fs_rows_full[ side ] = coord.first;
+                fill(m_tools[m_GroupToFSiTCorr.at(m_planes.at(j))], lqbar[ side ], fs_rows[ side ]);
+                fill(m_tools[m_GroupToFSiTCorr.at(m_planes.at(j))], lqbar[ side ], fs_columns[ side ]);
+                fill( "AFPToFSiTTool", lqbar[ side ], fs_rows_full[ side ] );
             }
-            fill( "AFPToFSiTTool", lqbar[ side ], fsp0_columns[ side ] );
-        }
+        
+        for (int j = 0; j < 4; j++)
+        {
+            if ( fsp_full[ j ][ side ].empty() )
+            {
+                lqbar[ side ] = bar;
+                fs_columns[ side ] = -5;
+                for ( int k = -10; k < -1; ++k ) 
+                {
+                    fs_rows[ side ] = k;
+                    fs_rows_full[ side ] = k;
+                    fill(m_tools[m_GroupToFSiTCorr.at(m_planes.at(j))], lqbar[ side ], fs_rows[ side ]);
+                }
+                fill(m_tools[m_GroupToFSiTCorr.at(m_planes.at(j))], lqbar[ side ], fs_columns[ side ]);
+            }
+        } 
 
         ++numToFHitsTrain[ hitsItr->trainID() ][ side ];
         ToFHasHit = true;
@@ -178,13 +204,6 @@ StatusCode AFPToFSiTAlgorithm::fillHistograms( const EventContext& ctx ) const {
 
         if ( !ToFHasHit ) {
             for ( auto& coord : fsp[ 0 ][ side ] ) {
-                lqbar[ side ] = -1;
-                fsp0_rows[ side ] = coord.first;
-                fsp0_columns[ side ] = coord.second;
-
-                fill( "AFPToFSiTTool", lqbar[ side ], fsp0_rows[ side ] );
-                fill( "AFPToFSiTTool", lqbar[ side ], fsp0_columns[ side ] );
-
                 if ( wasMatch ) {
                     lqbar_tight[ side ] = -1;
                     fsp0_rows_tight[ side ] = coord.first;
@@ -194,6 +213,15 @@ StatusCode AFPToFSiTAlgorithm::fillHistograms( const EventContext& ctx ) const {
                     fill( "AFPToFSiTTool", lqbar_tight[ side ], fsp0_columns_tight[ side ] );
                 }
             }
+            for (int j = 0; j < 4; j++)
+                for ( auto& coord : fsp_full[ j ][ side ] )
+                {
+                    lqbar[ side ] = -1;
+                    fs_rows[ side ] = coord.first;
+                    fs_columns[ side ] = coord.second;
+                    fill(m_tools[m_GroupToFSiTCorr.at(m_planes.at(j))], lqbar[ side ], fs_rows[ side ]);
+                    fill(m_tools[m_GroupToFSiTCorr.at(m_planes.at(j))], lqbar[ side ], fs_columns[ side ]);
+                }
         }
 
         fsp0Hits[ side ] = fsp[ 0 ][ side ].size();

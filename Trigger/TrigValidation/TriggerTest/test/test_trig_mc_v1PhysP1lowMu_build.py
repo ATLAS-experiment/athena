@@ -16,6 +16,7 @@ ex.job_options = 'TriggerJobOpts/runHLT.py'
 ex.input = 'minbias'
 ex.threads = 1
 ex.flags = ['Trigger.triggerMenuSetup="PhysicsP1_pp_lowMu_run3_v1"',
+            'IOVDb.GlobalTag="OFLCOND-MC23-SDR-RUN3-05"',
             'Trigger.doRuntimeNaviVal=True']
 
 test = Test.Test()
