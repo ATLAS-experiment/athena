@@ -201,18 +201,22 @@ inline IdentifierHash sTgcReadoutElement::layerHash(const Identifier& measId) co
     return createHash(m_idHelper.gasGap(measId), m_idHelper.channelType(measId), 0);
 }
 
-inline Amg::Vector2D sTgcReadoutElement::localChannelPosition(const Identifier& measId) const { return localChannelPosition(measurementHash(measId)); }
+inline Amg::Vector2D sTgcReadoutElement::localChannelPosition(const Identifier& measId) const { 
+    return localChannelPosition(measurementHash(measId)); }
 
 inline Amg::Vector3D sTgcReadoutElement::globalChannelPosition(const ActsGeometryContext& ctx, const Identifier& measId) const {
-        return globalChannelPosition(ctx, measurementHash(measId));
+    return globalChannelPosition(ctx, measurementHash(measId));
 }
 
 inline const StripLayer& sTgcReadoutElement::stripLayer(const IdentifierHash& measHash) const {
     unsigned int gasGap = gasGapNumber(measHash);
     return m_pars.stripLayers[gasGap];
 }
- inline const StripLayer& sTgcReadoutElement::stripLayer(const Identifier& measId) const {
+inline const StripLayer& sTgcReadoutElement::stripLayer(const Identifier& measId) const {
     return stripLayer(measurementHash(measId));
+}
+inline int sTgcReadoutElement::padNumber(const Amg::Vector2D& hitPos, const Identifier& measId) const {
+    return padNumber(hitPos, measurementHash(measId));
 }
 
 }  // namespace MuonGMR4

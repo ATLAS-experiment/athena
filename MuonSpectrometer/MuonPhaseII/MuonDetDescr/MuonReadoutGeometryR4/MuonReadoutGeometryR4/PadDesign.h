@@ -81,6 +81,12 @@ class PadDesign: public StripDesign {
         localCornerArray padCorners(const std::pair<int, int>& padEtaPhi) const;
         /// Override from stripDesign. This function will give the center of the pad by taking the sequential channel number as input
         Amg::Vector2D stripPosition(int stripNum) const override final;
+        /// Function to retrieve the pad eta and phi given a local position coordinate
+        std::pair<int, int> channelNumber(const Amg::Vector2D& hitPos) const;
+        /// Function gives the maximum active area length available in the local x for the given hit local y
+        double maxActiveX(const double locY) const;
+        /// Function gives the angular width of the sector
+        double sectorAngle() const;
 
     private:
         void print(std::ostream& ostr) const override final; 
@@ -102,6 +108,10 @@ class PadDesign: public StripDesign {
         int m_maxPadEta{18};
         /// Stores the beamline radius extracted from the local to global transformation
         double m_radius{0.};
+        /// Large sector opening angle
+        static constexpr double m_largeSectorAngle{28.};
+        /// Small sector opening angle
+        static constexpr double m_smallSectorAngle{17.};       
 };
 
 struct PadDesignSorter{

@@ -243,6 +243,11 @@ StatusCode GeoModelsTgcTest::dumpToTree(const EventContext& ctx,
                         m_localPadCornerTL.push_back(localPadCorners[2]);
                         m_localPadCornerTR.push_back(localPadCorners[3]);
 
+                        Amg::Vector2D hitCorrection{-.1, -.1};
+                        Amg::Vector2D hitPos = localPadCorners[3] + hitCorrection;
+                        m_hitPosition.push_back(hitPos);
+                        m_padNumber.push_back(reElement->padNumber(hitPos, padID));
+
                         globalPadPos = reElement->globalChannelPosition(gctx, padID);
                         globalPadCorners = reElement->globalPadCorners(gctx, padID);
                    

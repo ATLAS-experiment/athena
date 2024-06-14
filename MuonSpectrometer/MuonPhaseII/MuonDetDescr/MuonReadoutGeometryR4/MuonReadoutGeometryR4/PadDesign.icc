@@ -57,5 +57,93 @@ namespace MuonGMR4 {
         Amg::Vector2D padCenter = 0.25 * (Corners[botLeft] + Corners[botRight] + Corners[topLeft] + Corners[topRight]);
         return padCenter;
     }
+    inline std::pair<int, int> PadDesign::channelNumber(const Amg::Vector2D& hitPos) const {
+        /// distance from the short edge to the hit. No change for L3 since the center is at the center of the gas gap.
+        double hitY = halfWidth() + hitPos.y();
+        /// Variables to store padEta information
+        double padEtaDouble{0.};
+        int padEta{0};
+        /// Applying neagtive of staggering to the hit in Phi direction
+        double locPhi = std::atan2(-hitPos.x(), (beamlineRadius() + hitPos.y())) / Gaudi::Units::deg;
+        double locMaxPhi = std::atan2(maxActiveX(hitPos.y()), (beamlineRadius() + hitPos.y())) / Gaudi::Units::deg;
+        double shiftedX = hitPos.x() - padPhiShift() * std::cos(locPhi * Gaudi::Units::deg);
+        double shiftedLocPhi = std::atan2(-shiftedX, (beamlineRadius() + hitPos.y())) / Gaudi::Units::deg;
+        /// Booleans to define bounds
+        bool bottomHalf = (hitY < 0);
+        bool outsidePhiRange = (std::abs(locPhi) > locMaxPhi) || (std::abs(shiftedLocPhi) > locMaxPhi);
+        /// Evaluating Eta of the pad where the hit is contained
+        if(insideBoundaries(hitPos) && !bottomHalf) {
+            if (hitY > firstPadHeight()) {
+            /// + 1 for ignoring the firstPadRow and another + 1 because remainder means hit is in the next row (eg. 3.1 = 4)
+                padEtaDouble = ((hitY - firstPadHeight()) / padHeight()) + 2;
+                padEta = padEtaDouble;
+            }
+            else if (hitY > 0) {
+                padEta = 1;
+            }
+        }
+        else {
+            ATH_MSG_WARNING("The failed Hit: "<< Amg::toString(hitPos, 2) << " is outside the trapezoid bounds. "<< "HitY: " << hitY);
+        }
+        /// Variables to store padPhi information
+        double padPhiDouble{0.};
+        int padPhi{0};
+        /// Hits on the pads near the side edges of the trapezoid are shifted but 
+        /// the pads are not hence, those hits must be corrected.
+        if (outsidePhiRange) {
+            padPhiDouble = (locPhi - firstPadPhiDiv()) / anglePadPhi();
+            ATH_MSG_DEBUG("The Hit: "<< Amg::toString(hitPos, 2) << " is out of bounds." << " maxActive X: " << maxActiveX(hitPos.y()));
+            ATH_MSG_DEBUG("HitPhi: "<< locPhi << " MaxPhi: " << locMaxPhi << " Staggered Hit phi: " << shiftedLocPhi);
+        }
+        else {
+            padPhiDouble = (shiftedLocPhi - firstPadPhiDiv()) / anglePadPhi();
+        }
+        /// +1 for the firstPadColumn to be 1, and another +1 because remainder means hit is in the next column (eg. 2.1 = 3)
+        padPhi = padPhiDouble + 2;
+        /// Adjusting the padEta and padPhi bounds
+        if (padEta == numPadEta() + 1) { padEta -= 1; } 
+        if (padPhi == 0) { padPhi = 1; }
+        if (padPhi == numPadPhi() + 1) { padPhi = numPadPhi(); }
+        /// Final check on bounds
+        bool etaOutsideRange = (padEta > numPadEta());
+        bool phiOutsideRange = (padPhi < 0 || padPhi > numPadPhi() + 1);
+        if(etaOutsideRange or phiOutsideRange) {
+            ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" "<<__func__<<"() Given hit: "<<Amg::toString(hitPos, 2)<< " gives pad (Eta, Phi): ("
+                            <<padEta<<", "<<padPhi<<") out of range. Maximum Range: ("<< numPadEta()<<", "<<numPadPhi()<<").");
+            return std::make_pair(0, 0);
+        }
+        else {
+            return std::make_pair(padEta, padPhi);
+        }
+    }
+    inline double PadDesign::maxActiveX(const double locY) const {
+        if (std::abs(locY) > halfWidth()) {
+            ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" Local Y of the hit: "<<locY
+                            <<" is out of range. Maximum range: "<<halfWidth());
+            return -1;
+        }
+        double halfSectorAngle = 0.5 * sectorAngle() * Gaudi::Units::deg;
+        if(yCutout()) {
+            if (locY > (halfWidth() - yCutout())) {
+                return longHalfHeight();
+            }
+            return longHalfHeight() + locY * std::tan(halfSectorAngle);
+        }
+        return longHalfHeight() - (halfWidth() - locY) * std::tan(halfSectorAngle); 
+    }
+    inline double PadDesign::sectorAngle() const {
+        double sectorAngle = 2 * std::atan2(shortHalfHeight(), (beamlineRadius() - halfWidth())) / Gaudi::Units::deg;;
+        if (sectorAngle > (m_largeSectorAngle - 5) && sectorAngle < (m_largeSectorAngle + 5)) {
+            return m_largeSectorAngle;
+        }
+        else if (sectorAngle > (m_smallSectorAngle - 5) && sectorAngle < (m_smallSectorAngle + 5)) {
+            return m_smallSectorAngle;
+        }
+        else {
+            ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" Dimensions of the given gasGap result into invalid sector opening angle: "<<
+                            sectorAngle<<" angle should be around 17 for small and 28 for large sector.");
+            return 0; 
+        }
+    }
 }
 #endif

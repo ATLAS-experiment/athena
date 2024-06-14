@@ -59,7 +59,7 @@ namespace MuonGMR4 {
         /// Flipped diamonds may not exceed the halfLength along the x-coordinate
         if (yCutout() && isFlipped() && std::abs(stripPos.x()) > longHalfHeight()) {
             return std::nullopt;
-        }
+        }        
         /// We expect lambda to be positive
         const std::optional<double> lambda = Amg::intersect<2>(stripPos, m_stripDir, cornerTopLeft(), edgeDirTop());
         if (!lambda) {
