@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUON_MUONINSIDEOUTVALIDATIONNTUPLE_H
@@ -73,10 +73,10 @@ namespace Muon {
     MuonValidationTruthBlock();
 
     std::vector<int>*   pdg = nullptr;     // pdg id
-    std::vector<int>*   barcode = nullptr; // barcode
+    std::vector<int>*   barcode = nullptr; // barcode // FIXME barcode-based
     std::vector<float>* beta = nullptr;    // beta
 
-    void fill( int pdg_, int barcode_, float beta_=1. ) { pdg->push_back(pdg_); barcode->push_back(barcode_);beta->push_back(beta_); }
+    void fill( int pdg_, int barcode_, float beta_=1. ) { pdg->push_back(pdg_); barcode->push_back(barcode_);beta->push_back(beta_); } // FIXME barcode-based
       
   };
 

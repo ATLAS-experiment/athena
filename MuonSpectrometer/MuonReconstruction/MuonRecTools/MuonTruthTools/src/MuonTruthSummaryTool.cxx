@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTruthSummaryTool.h"
@@ -93,9 +93,9 @@ namespace Muon {
                 for (; it != it_end; ++it) {
                     const HepMcParticleLink& link = it->second;
                     if (link.cptr() && (std::abs(link.cptr()->pdg_id()) == m_selectedPdgId || std::abs(link.cptr()->pdg_id()) == 13)) {
-                        int bc = link.barcode();
-                        m_truthHits[it->first] = bc;
-                        m_pdgIdLookupFromBarcode[bc] = link.cptr()->pdg_id();
+                      int bc = HepMC::barcode(link); // FIXME barcode-based
+                        m_truthHits[it->first] = bc; // FIXME barcode-based
+                        m_pdgIdLookupFromBarcode[bc] = link.cptr()->pdg_id(); // FIXME barcode-based
 
                     }
                 }
@@ -105,7 +105,7 @@ namespace Muon {
         }
     }
 
-    int MuonTruthSummaryTool::getPdgId(int barcode) const {
+  int MuonTruthSummaryTool::getPdgId(int barcode) const { // FIXME barcode-based
         init();
         std::scoped_lock lock(m_mutex);
         auto pos = m_pdgIdLookupFromBarcode.find(barcode);
@@ -113,7 +113,7 @@ namespace Muon {
         return pos->second;
     }
 
-    int MuonTruthSummaryTool::getBarcode(const Identifier& id) const {
+    int MuonTruthSummaryTool::getBarcode(const Identifier& id) const { // FIXME barcode-based
         init();
         std::scoped_lock lock(m_mutex);
         auto pos = m_truthHits.find(id);

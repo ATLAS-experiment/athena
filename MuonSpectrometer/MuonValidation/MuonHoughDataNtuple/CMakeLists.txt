@@ -5,7 +5,7 @@ atlas_subdir( MuonHoughDataNtuple )
 atlas_add_component( MuonHoughDataNtuple
                      src/*.cxx src/components/*.cxx
                      LINK_LIBRARIES AthenaKernel StoreGateLib GaudiKernel AthenaBaseComps
-                                    xAODMuon xAODTruth MuonRecToolInterfaces MuonTesterTreeLib)
+                                    xAODMuon xAODTruth MuonRecToolInterfaces MuonTesterTreeLib TruthUtils)
 
 
 # Install files from the package:

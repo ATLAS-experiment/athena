@@ -125,17 +125,17 @@ StatusCode MuonTruthAssociationAlg::execute(const EventContext& ctx) const {
             }
            
             if (truthLink.isValid()) {
-                ATH_MSG_VERBOSE(" Got valid truth link for muon author " << muon->author() << " barcode " << (*truthLink)->barcode());
+                ATH_MSG_VERBOSE(" Got valid truth link for muon author " << muon->author() << " uniqueID " << HepMC::uniqueID(*truthLink));
                 // loop over truth particles
                 for (const xAOD::TruthParticle* truthParticle : *muonTruthContainer) {
                     if (!MC::isStable(truthParticle)) continue;
-                    ATH_MSG_DEBUG("Got truth muon with barcode " << truthParticle->barcode() << " pt " << truthParticle->pt());
+                    ATH_MSG_DEBUG("Got truth muon with uniqueID " << HepMC::uniqueID(truthParticle) << " pt " << truthParticle->pt());
                     if ( !HepMC::is_sim_descendant(*truthLink, truthParticle)) {
-                        ATH_MSG_VERBOSE("Barcode truth link: " << (*truthLink)->barcode() 
-                                                               << " is not decendant of " << truthParticle->barcode());
+                        ATH_MSG_VERBOSE("UniqueID truth link: " << HepMC::uniqueID(*truthLink) 
+                                                               << " is not decendant of " << HepMC::uniqueID(truthParticle));
                         continue;
                     }
-                    ATH_MSG_VERBOSE("Truth muon barcode matches -> creating link with truth particle " << (*truthLink)->barcode());
+                    ATH_MSG_VERBOSE("Truth muon uniqueID matches -> creating link with truth particle " << HepMC::uniqueID(*truthLink));
                     foundTruth = true;
                     /// Link the truth particle to the muon
                     ElementLink<xAOD::TruthParticleContainer> muonTruthLink{*muonTruthContainer, 

@@ -141,7 +141,7 @@ namespace Muon {
             // only use segment that are matched
             ATH_MSG_DEBUG("Match reco segment " << m_printer->print(*(result.first)) << " truth " << result.second.truthTrack);
             if (!result.second.truthTrack) continue;
-            int barcode = result.second.truthTrack->barcode(); // FIXME barcode-based
+            const int barcode = HepMC::barcode(result.second.truthTrack); // FIXME barcode-based - requires TrackRecords to be migrated to uniqueID
 
             // get chamber Identifier
             Identifier id;
@@ -215,7 +215,7 @@ namespace Muon {
                     continue;
                 }
                 // match barcodes
-                if (HepMC::is_sim_descendant(result.second.truthTrack,truthParticle)) {
+                if (HepMC::is_sim_descendant(result.second.truthTrack,truthParticle)) { // comparing TrackRecord to xAOD::TruthParticle
                     ATH_MSG_DEBUG("Matched reconstructed segment: barcode " << barcode << " layer "
                                                                             << Muon::MuonStationIndex::chName(chIndex));
                     recoLink.toPersistent();
@@ -223,7 +223,7 @@ namespace Muon {
                     muonTruthSegments(*truthSegment) = recoLink;
                     segments(*recoSegment) = truthSegLink;
                 } else {
-                    ATH_MSG_DEBUG("barcode mismatch " << barcode << " truthParticle->barcode " << truthParticle->barcode());
+                  ATH_MSG_DEBUG("barcode mismatch " << barcode << " truthParticle->barcode " << HepMC::barcode(truthParticle));
                 }
             }
         }
