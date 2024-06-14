@@ -18,7 +18,7 @@ namespace {
 }
 
 #define IMPLEMENT_SETTER_GETTER( DTYPE, GETTER, SETTER)                          \
-      DTYPE MuonSimHit_v1::GETTER() const {                                  \
+      DTYPE MuonSimHit_v1::GETTER() const {                                      \
          static const SG::AuxElement::Accessor<DTYPE> acc{preFixStr + #GETTER};  \
          return acc(*this);                                                      \
       }                                                                          \
@@ -46,8 +46,12 @@ IMPLEMENT_SETTER_GETTER(float, globalTime, setGlobalTime)
 IMPLEMENT_SETTER_GETTER(int, pdgId, setPdgId)
 IMPLEMENT_SETTER_GETTER(float, energyDeposit, setEnergyDeposit)
 IMPLEMENT_SETTER_GETTER(float, kineticEnergy, setKineticEnergy)
-IMPLEMENT_SETTER_GETTER(float, stepLength, setStepLength)
+IMPLEMENT_SETTER_GETTER(float, mass, setMass)
 
+float MuonSimHit_v1::beta() const{
+   const float e = kineticEnergy();
+   return std::sqrt(1. - std::min(std::pow(mass() / (e > std::numeric_limits<float>::epsilon() ? e : 1.f), 2),1.));
+}
 void MuonSimHit_v1::setLocalPosition(MeasVector<3> vec) {
    VectorMap<3> lPos{acc_localPos(*this).data()};
    lPos = vec;   

@@ -31,12 +31,17 @@ class MuonSimHit_v1 : public SG::AuxElement {
     ///@brief Returns the local direction of the traversing particle
     ConstVectorMap<3> localDirection() const;
 
-    ///@brief Returns the spatial length of the corresponding Geant4 simulation step
-    float stepLength() const;
-    ///@brief Sets the spatial length of the corresponding Geant4 simulation step
-    void setStepLength(const float length);
-
-    ///@brief Returns the time of the traversing particle
+    /// @brief Returns the rest-mass of the traversing particle
+    float mass() const;
+    /// @brief set the rest-mass of the traversing particle
+    void setMass(const float m);
+    ///@brief Returns the kinetic energy of the traversing particle
+    float kineticEnergy() const;
+    ///@brief Sets the kinetic energy of the traversing particle
+    void setKineticEnergy(const float energy);
+    /// @brief returns beta (fraction of speed of light)
+    float beta() const;
+    ///@brief Returns the time ellapsed since the collision of the traversing particle
     float globalTime() const;
     ///@brief Sets the time of the traversing particle
     void setGlobalTime(const float time);
@@ -56,10 +61,7 @@ class MuonSimHit_v1 : public SG::AuxElement {
     ///@brief Sets the energy deposited by the traversing particle inside the gas volume
     void setEnergyDeposit(const float deposit);
 
-    ///@brief Returns the kinetic energy of the traversing particle
-    float kineticEnergy() const;
-    ///@brief Sets the kinetic energy of the traversing particle
-    void setKineticEnergy(const float energy);
+
     
     ///@brief Returns the link to the HepMC particle producing this hit
     const HepMcParticleLink& genParticleLink() const;

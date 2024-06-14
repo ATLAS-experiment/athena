@@ -20,7 +20,7 @@ MuonSimHitAuxContainer_v1::MuonSimHitAuxContainer_v1()
     : AuxContainerBase() {
     AUX_MEASUREMENTVAR(localPosition, 3);
     AUX_MEASUREMENTVAR(localDirection, 3);
-    SIM_AUXVARIABLE(stepLength);
+    SIM_AUXVARIABLE(mass);
     SIM_AUXVARIABLE(globalTime);
     SIM_AUXVARIABLE(pdgId);
     SIM_AUXVARIABLE(identifier);

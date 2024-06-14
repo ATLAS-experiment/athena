@@ -126,7 +126,7 @@ G4bool sTgcSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
   hit->setIdentifier(etaHitID); 
   hit->setLocalPosition(xAOD::toStorage(locHitPos));  
   hit->setLocalDirection(xAOD::toStorage(locHitDir));
-  hit->setStepLength(aStep->GetStepLength());
+  hit->setMass(currentTrack->GetDefinition()->GetPDGMass());
   hit->setGlobalTime(globalTime);
   hit->setPdgId(currentTrack->GetDefinition()->GetPDGEncoding());
   hit->setEnergyDeposit(aStep->GetTotalEnergyDeposit());

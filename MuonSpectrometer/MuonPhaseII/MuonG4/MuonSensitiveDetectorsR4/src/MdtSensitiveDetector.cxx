@@ -136,7 +136,7 @@ G4bool MdtSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory* /*ROH
     hit->setIdentifier(HitID); 
     hit->setLocalPosition(xAOD::toStorage(driftHit));  
     hit->setLocalDirection(xAOD::toStorage(trackLocDir));
-    hit->setStepLength(aStep->GetStepLength());
+    hit->setMass(currentTrack->GetDefinition()->GetPDGMass());
     hit->setGlobalTime(globalTime);
     hit->setPdgId(currentTrack->GetDefinition()->GetPDGEncoding());
     hit->setEnergyDeposit(aStep->GetTotalEnergyDeposit());
