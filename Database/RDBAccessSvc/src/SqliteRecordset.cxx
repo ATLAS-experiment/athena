@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -42,7 +42,7 @@ void SqliteRecordset::getData(sqlite3* db, const std::string& nodeName)
   sqlite3_stmt* stTable{nullptr};
   int rc = sqlite3_prepare_v2(db, sql.str().c_str(), -1, &stTable, NULL);
   if(rc!=SQLITE_OK) {
-    ATH_MSG_WARNING(m_nodeName << " table is not found in the database");
+    ATH_MSG_INFO(m_nodeName << " table is not found in the database");
     return;
   }
 
