@@ -13,6 +13,7 @@
 /// EDM includes
 #include "xAODTruth/TruthVertex.h"
 #include "TrkParameters/TrackParameters.h" // Contains typedef to Trk::CurvilinearParameters
+#include "TruthUtils/MagicNumbers.h"
 
 /// ROOT includes
 #include "TDatabasePDG.h"
@@ -75,6 +76,7 @@ StatusCode IDTPM::TruthHitDecoratorAlg::execute(
           *ptruth, m_decor, ctx, msgLvl(MSG::DEBUG) ) );
 
   /// truthbarcode-cluster maps to be pre-stored at event level
+  // FIXME barcode-based requires xAOD::TrackMeasurementValidation to be migrated to use unique ID
   std::unordered_map< int, float > barcodeSCTclustercount;
   std::unordered_map< int, float > barcodePIXclustercount;
   
@@ -166,8 +168,8 @@ StatusCode IDTPM::TruthHitDecoratorAlg::decorateTruth(
    
   /// Retrieve the cluster count from the pre-filled maps   
   std::unordered_map< int, float >::iterator it1, it2;
-  it1 = pixelMap.find( particle.barcode() );
-  it2 = sctMap.find( particle.barcode() );
+  it1 = pixelMap.find( HepMC::barcode(particle) ); // FIXME barcode-based
+  it2 = sctMap.find( HepMC::barcode(particle) ); // FIXME barcode-based
   float nSiHits = 0;
   if( it1 !=pixelMap.end() )  nSiHits += (*it1).second; 
   if( it2 !=sctMap.end() )    nSiHits += (*it2).second; 

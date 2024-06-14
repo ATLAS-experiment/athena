@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "egammaTruthAssociationAlg.h"
@@ -41,7 +41,7 @@ xAOD::TruthParticle* getEgammaTruthParticle(
     return nullptr;
   }
   for (auto egammaTruth : egammaTruthContainer) {
-    if (truth->barcode() == egammaTruth->barcode()) {
+    if (HepMC::uniqueID(truth) == HepMC::uniqueID(*egammaTruth)) {
       return egammaTruth;
     }
   }
@@ -241,7 +241,7 @@ egammaTruthAssociationAlg::getNewTruthParticle(
 {
   auto *truthParticle = egammaTruthContainer.push_back(std::make_unique<xAOD::TruthParticle>());
   truthParticle->setPdgId(truth->pdgId());
-  truthParticle->setBarcode(truth->barcode());
+  truthParticle->setBarcode(HepMC::barcode(truth)); // FIXME barcode-based
   truthParticle->setStatus(truth->status());
   truthParticle->setPx(truth->px());
   truthParticle->setPy(truth->py());

@@ -63,7 +63,7 @@ namespace VKalVrtAthena {
     m_ntupleVars->addNewVar< vector<int> >    ( "RecoTrk_TRTHits"          );
     m_ntupleVars->addNewVar< vector<int> >    ( "RecoTrk_PixBar1"          );
     m_ntupleVars->addNewVar< vector<int> >    ( "RecoTrk_PixBar2"          );
-    m_ntupleVars->addNewVar< vector<int> >    ( "RecoTrk_barcode"          );
+    m_ntupleVars->addNewVar< vector<int> >    ( "RecoTrk_barcode"          ); // FIXME barcode-based
     m_ntupleVars->addNewVar< vector<double> > ( "RecoTrk_matchPr"          );
     m_ntupleVars->addNewVar< vector<double> > ( "RecoTrk_2dIPErr"          );
     m_ntupleVars->addNewVar< vector<double> > ( "RecoTrk_ZIPErr"           );
@@ -72,7 +72,7 @@ namespace VKalVrtAthena {
     m_ntupleVars->addNewVar< vector<int> >    ( "RecoTrk_TrkAuth"          );
     m_ntupleVars->addNewVar< vector<int> >    ( "RecoTrk_TrkLowPt"         );
     
-    m_ntupleVars->addNewVar< vector<int> >    ( "SelTrk_barcode"           );
+    m_ntupleVars->addNewVar< vector<int> >    ( "SelTrk_barcode"           ); // FIXME barcode-based
     
     m_ntupleVars->addNewVar< vector<int> >    ( "SVTrk_id"                 );
     m_ntupleVars->addNewVar< vector<double> > ( "SVTrk_pT"                 );
@@ -89,7 +89,7 @@ namespace VKalVrtAthena {
     m_ntupleVars->addNewVar< vector<int> >    ( "SVTrk_PixHits"            );
     m_ntupleVars->addNewVar< vector<int> >    ( "SVTrk_SCTHits"            );
     m_ntupleVars->addNewVar< vector<int> >    ( "SVTrk_TRTHits"            );
-    m_ntupleVars->addNewVar< vector<int> >    ( "SVTrk_barcode"            );
+    m_ntupleVars->addNewVar< vector<int> >    ( "SVTrk_barcode"            ); // FIXME barcode-based
     m_ntupleVars->addNewVar< vector<double> > ( "SVTrk_matchPr"            );
     m_ntupleVars->addNewVar< vector<int> >    ( "SVTrk_TrkAuth"            );
     m_ntupleVars->addNewVar< vector<int> >    ( "SVTrk_TrkLowPt"           );
@@ -309,26 +309,26 @@ namespace VKalVrtAthena {
         m_ntupleVars->get< vector<double> >( "SVTrk_ZIP" )  .emplace_back(perigee.parameters()[Trk::z0]);
       
         double matchProb = -1;
-        int barcode = 0;
+        int barcode = 0; // FIXME barcode-based
         if(m_jp.doTruth) 
           {  
             const xAOD::TruthParticle* aTemp_truth = getTrkGenParticle( trk );
             if( aTemp_truth )
               {
-                barcode = aTemp_truth->barcode();
+                barcode = HepMC::barcode(aTemp_truth); // FIXME barcode-based
                 static const SG::ConstAccessor<float> truthMatchProbabilityAcc( "truthMatchProbability" ); 
                 matchProb= truthMatchProbabilityAcc( *trk );
               }
           }
       
-        m_ntupleVars->get< vector<int>    >( "SVTrk_barcode" ) .emplace_back( barcode );
+        m_ntupleVars->get< vector<int>    >( "SVTrk_barcode" ) .emplace_back( barcode ); // FIXME barcode-based
         m_ntupleVars->get< vector<double> >( "SVTrk_matchPr" ) .emplace_back( matchProb );
       
         ATH_MSG_DEBUG(" > fillAANT_SelectedBaseTracks: Sel Trk d0/pT/eta/match bc/pr "
                       << d0      << ","
                       << pT      << ","
                       << trketa  << ","
-                      << barcode << ","
+                      << barcode << "," // FIXME barcode-based
                       << matchProb );
       
         double errp = ptrk*ptrk*errqOverP;

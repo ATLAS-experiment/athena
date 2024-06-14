@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -292,7 +292,7 @@ InDetPerfPlot_Resolution::fill(const xAOD::TrackParticle& trkprt, const xAOD::Tr
   if (HepMC::is_simulation_particle(&truthprt)) {
     isSecdTrk = 1;
   } else {
-    if (truthprt.barcode()>0) isPrimTrk = 1;
+    if (HepMC::uniqueID(truthprt) > 0) isPrimTrk = 1;
   } 
 
   // Move on to the next track incase the wrong track category

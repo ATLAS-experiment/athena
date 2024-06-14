@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaKernel/errorcheck.h"
@@ -63,7 +63,7 @@ namespace xAODMaker {
 	    }
 	    // Create link between HepMC and xAOD truth
 	    /// @todo AB: Truth particle links should only be made to the signal event... hence the 0. Right?
-	    truthLinkVec->push_back(new xAODTruthParticleLink(HepMcParticleLink((*par)->barcode(), 0, HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_BARCODE), par)); // FIXME is barcode-based
+	    truthLinkVec->push_back(new xAODTruthParticleLink(HepMcParticleLink(HepMC::barcode(*par), 0, HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_BARCODE), par)); // FIXME is barcode-based - using barcodes until xAOD::TruthParticle::id() is available
 	  }
 	}
         

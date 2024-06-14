@@ -15,11 +15,6 @@
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenVertex.h"
-#else
-namespace HepMC {
-  template <class T>  inline int barcode(const T& p){ return p->barcode();}
-  template <>  inline int barcode(const int& p){ return p;}
-}
 #endif
 namespace xAOD {
   // Temporarily specialize for xAOD::Truth classes ahead of the barcode migration - TODO remove this
@@ -51,14 +46,45 @@ namespace HepMC {
   /// @brief This barcode is used by objects matched to particles from pile-up interactions in standard MC Production
   constexpr int SUPPRESSED_PILEUP_BARCODE(std::numeric_limits<int32_t>::max());
 
-  constexpr int UNDEFINED_ID = 0;
-
   constexpr int INVALID_PARTICLE_BARCODE = -1;
 
   constexpr int SINGLE_PARTICLE = 10001;
 
+  constexpr int UNDEFINED_ID = 0;
+  constexpr int INVALID_PARTICLE_ID = -1;
+  constexpr int INVALID_VERTEX_ID = 1;
+
+  // TODO The definitions of is_smart_ptr and remove_smart_pointer
+  // below are probably too generic for this header, but putting them
+  // here initially.
+  template<typename T> struct is_smart_ptr : std::false_type {};
+  template<typename T> struct is_smart_ptr<std::shared_ptr<T>> : std::true_type {};
+  template<typename T> struct is_smart_ptr<std::unique_ptr<T>> : std::true_type {};
+  template<typename T> struct is_smart_ptr<std::weak_ptr<T>> : std::true_type {};
+  template< class T >
+  inline constexpr bool is_smart_ptr_v = is_smart_ptr<T>::value;
+
+  template<class T> struct remove_smart_pointer { typedef T type; };
+  template<class T> struct remove_smart_pointer<std::shared_ptr<T>> { typedef T type; };
+  template<class T> struct remove_smart_pointer<std::unique_ptr<T>> { typedef T type; };
+  template<class T> struct remove_smart_pointer<std::weak_ptr<T>> { typedef T type; };
+  template< class T >
+  using remove_smart_pointer_t = typename remove_smart_pointer<T>::type;
+
+#if defined(XAOD_STANDALONE)
+  // Needed as we can't pick up the helper functions from AtlasHepMC in this case
+  template <class T>  inline int barcode(const T& p){
+    if constexpr (std::is_pointer_v<T> || is_smart_ptr_v<T>){ //T is ptr
+      return p->barcode();
+    }
+    else {
+      return p.barcode();
+    }
+  }
+  template <>  inline int barcode(const int& p){ return p;}
+#endif
   // Temporarily specialize uniqueID for xAOD::Truth classes ahead of the barcode migration - TODO remove this
-#if  defined(HEPMC3)
+#if defined(HEPMC3)
   template <typename T>
   inline int uniqueID(const T&  p) {
     if constexpr (std::is_integral_v<T>) {
@@ -70,10 +96,10 @@ namespace HepMC {
     else if constexpr (std::is_same_v<T, xAOD::TruthParticle_v1> || std::is_same_v<T, xAOD::TruthVertex_v1>) {
       return p.barcode();
     }
-    else if constexpr (std::is_same_v<std::remove_const_t<std::remove_pointer_t<T>>, xAOD::TruthParticle_v1> || std::is_same_v<std::remove_const_t<std::remove_pointer_t<T>>, xAOD::TruthVertex_v1>) {
+    else if constexpr (std::is_same_v<std::remove_const_t<remove_smart_pointer_t<std::remove_pointer_t<T>>>, xAOD::TruthParticle_v1> || std::is_same_v<std::remove_const_t<remove_smart_pointer_t<std::remove_pointer_t<T>>>, xAOD::TruthVertex_v1>) {
       return p->barcode();
     }
-    else if constexpr (std::is_pointer_v<T>){ //T is ptr
+    else if constexpr (std::is_pointer_v<T> || is_smart_ptr_v<T>){ //T is ptr
       return p->id();
     }
     else {
@@ -89,7 +115,7 @@ namespace HepMC {
     else if constexpr (std::is_integral_v<std::remove_pointer_t<T>>) {
       return *p;
     }
-    else if constexpr (std::is_pointer_v<T>){ //T is ptr
+    else if constexpr (std::is_pointer_v<T> || is_smart_ptr_v<T>){ //T is ptr
       return p->barcode();
     }
     else {
@@ -97,11 +123,7 @@ namespace HepMC {
     }
   }
 #endif
-#if defined(HEPMC3) && !defined(XAOD_STANDALONE)
-  template <>  inline int uniqueID(const ConstGenParticlePtr& p1){ return p1->id();}
-  template <>  inline int uniqueID(const GenParticlePtr& p1){ return p1->id();}
-#endif
-  // Temporarily specialize status for xAOD::Truth classes ahead of the barcode migration - TODO remove this
+ // Temporarily specialize status for xAOD::Truth classes ahead of the barcode migration - TODO remove this
   template <typename T>
   inline int status(const T&  p) {
     if constexpr (std::is_integral_v<T>) {
@@ -113,10 +135,10 @@ namespace HepMC {
     else if constexpr (std::is_same_v<T, xAOD::TruthVertex_v1>) {
       return p.id();
     }
-    else if constexpr (std::is_same_v<std::remove_const_t<std::remove_pointer_t<T>>, xAOD::TruthVertex_v1>) {
+    else if constexpr (std::is_same_v<std::remove_const_t<remove_smart_pointer_t<std::remove_pointer_t<T>>>, xAOD::TruthVertex_v1>) {
       return p->id();
     }
-    else if constexpr (std::is_pointer_v<T>){ //T is ptr
+    else if constexpr (std::is_pointer_v<T> || is_smart_ptr_v<T>){ //T is ptr
       return p->status();
     }
     else {
