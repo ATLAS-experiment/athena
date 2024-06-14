@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AnalysisJiveXML/AODJetRetriever.h"
@@ -240,41 +240,41 @@ namespace JiveXML {
     }
 
     // Start with mandatory entries
-    DataMap["phi"] = phi;
-    DataMap["eta"] = eta;
-    DataMap["et"] = et;
-    DataMap["pt"] = pt;
-    DataMap["id"] = idVec;
+    DataMap["phi"] = std::move(phi);
+    DataMap["eta"] = std::move(eta);
+    DataMap["et"] = std::move(et);
+    DataMap["pt"] = std::move(pt);
+    DataMap["id"] = std::move(idVec);
 
-    DataMap["bTagName multiple=\"9\""] = bTagName; // assigned by hand !
-    DataMap["bTagValue multiple=\"9\""] = bTagValue;
+    DataMap["bTagName multiple=\"9\""] = std::move(bTagName); // assigned by hand !
+    DataMap["bTagValue multiple=\"9\""] = std::move(bTagValue);
 	
     // basic jet quality
-    DataMap["quality"] = quality;
-    DataMap["isGood"] = isGood;
-    DataMap["isBad"] = isBad;
-    DataMap["isUgly"] = isUgly;
-    DataMap["emfrac"] = emfrac;
+    DataMap["quality"] = std::move(quality);
+    DataMap["isGood"] = std::move(isGood);
+    DataMap["isBad"] = std::move(isBad);
+    DataMap["isUgly"] = std::move(isUgly);
+    DataMap["emfrac"] = std::move(emfrac);
 
-    DataMap["jvf"] = jvf;
+    DataMap["jvf"] = std::move(jvf);
 
     if (m_writeJetQuality){ // extended jet quality
-      DataMap["qualityLAr"] = qualityLAr;
-      DataMap["qualityTile"] = qualityTile;
-      DataMap["time"] = time;
-      DataMap["timeClusters"] = timeClusters;
-      DataMap["n90cells"] = n90cells;
-      DataMap["n90const"] = n90const;
-      DataMap["hecf"] = hecf;
-      DataMap["tileGap3f"] = tileGap3f;
-      DataMap["fcorCell"] = fcorCell;
-      DataMap["fcorDotx"] = fcorDotx;
-      DataMap["fcorJet"] = fcorJet;
-      DataMap["fcorJetForCell"] = fcorJetForCell;
-      DataMap["nbadcells"] = nbadcells;
-      DataMap["fracSamplingMax"] = fracSamplingMax;
-      DataMap["sMax"] = sMax;
-      DataMap["OutOfTimeEfrac"] = OutOfTimeEfrac;
+      DataMap["qualityLAr"] = std::move(qualityLAr);
+      DataMap["qualityTile"] = std::move(qualityTile);
+      DataMap["time"] = std::move(time);
+      DataMap["timeClusters"] = std::move(timeClusters);
+      DataMap["n90cells"] = std::move(n90cells);
+      DataMap["n90const"] = std::move(n90const);
+      DataMap["hecf"] = std::move(hecf);
+      DataMap["tileGap3f"] = std::move(tileGap3f);
+      DataMap["fcorCell"] = std::move(fcorCell);
+      DataMap["fcorDotx"] = std::move(fcorDotx);
+      DataMap["fcorJet"] = std::move(fcorJet);
+      DataMap["fcorJetForCell"] = std::move(fcorJetForCell);
+      DataMap["nbadcells"] = std::move(nbadcells);
+      DataMap["fracSamplingMax"] = std::move(fracSamplingMax);
+      DataMap["sMax"] = std::move(sMax);
+      DataMap["OutOfTimeEfrac"] = std::move(OutOfTimeEfrac);
     } // writeJetQuality
  
     // further details
@@ -283,11 +283,11 @@ namespace JiveXML {
     DataMap["charge"] = charge;
     DataMap["flavourTagWeight"] = flavourTagWeight;
 */
-    DataMap["mass"] = mass;
-    DataMap["px"] = px;
-    DataMap["py"] = py;
-    DataMap["pz"] = pz;
-    DataMap["energy"] = energy;
+    DataMap["mass"] = std::move(mass);
+    DataMap["px"] = std::move(px);
+    DataMap["py"] = std::move(py);
+    DataMap["pz"] = std::move(pz);
+    DataMap["energy"] = std::move(energy);
 
     if (msgLvl(MSG::DEBUG)) {
       msg(MSG::DEBUG) << dataTypeName() << " (AOD, no cells), collection: " << dataTypeName();
