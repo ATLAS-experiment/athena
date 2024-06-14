@@ -84,7 +84,7 @@ Amg::Vector3D MmReadoutElement::stripPosition(const ActsGeometryContext& ctx, co
 Amg::Vector3D MmReadoutElement::leftStripEdge(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const {
     const IdentifierHash lHash = layerHash(measHash);
     if (static_cast<unsigned int>(lHash) < m_pars.layers.size()) {
-       return localToGlobalTrans(ctx, lHash) * stripLayer(lHash).localStripRightEdge(stripNumber(measHash));
+       return localToGlobalTrans(ctx, lHash) * stripLayer(lHash).localStripLeftEdge(stripNumber(measHash));
     }
     ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The layer hash "<<static_cast<unsigned int>(lHash)
                  <<" is out of range. Maximum range "<<m_pars.layers.size());
@@ -94,7 +94,7 @@ Amg::Vector3D MmReadoutElement::leftStripEdge(const ActsGeometryContext& ctx, co
 Amg::Vector3D MmReadoutElement::rightStripEdge(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const{
     const IdentifierHash lHash = layerHash(measHash);
     if (static_cast<unsigned int>(lHash) < m_pars.layers.size()) {
-       return localToGlobalTrans(ctx, lHash) * stripLayer(lHash).localStripLeftEdge(stripNumber(measHash));
+       return localToGlobalTrans(ctx, lHash) * stripLayer(lHash).localStripRightEdge(stripNumber(measHash));
     }
     ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The layer hash "<<static_cast<unsigned int>(lHash)
                  <<" is out of range. Maximum range "<<m_pars.layers.size());
