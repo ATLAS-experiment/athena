@@ -9,9 +9,6 @@
 #include "AGDDControl/AGDD2GeoModelBuilder.h"
 #include "AGDDKernel/AliasStore.h"
 
-#ifndef SIMULATIONBASE
-#include "AmdcAth/AmdcsimrecAthenaSvc.h"
-#endif
 
 #include <fstream>
 
@@ -19,9 +16,6 @@ MuonAGDDTool::MuonAGDDTool(const std::string& type, const std::string& name, con
     AGDDToolBase(type,name,parent),
     m_structuresFromFlags(),
     m_outPREsqlName("")
-#ifndef SIMULATIONBASE
-    ,p_AmdcsimrecAthenaSvc("AmdcsimrecAthenaSvc",name)
-#endif
 {}
 
 StatusCode MuonAGDDTool::initialize ATLAS_NOT_THREAD_SAFE ()
@@ -34,10 +28,6 @@ StatusCode MuonAGDDTool::initialize ATLAS_NOT_THREAD_SAFE ()
 	if (m_DBFileName.empty()) {
 		m_DBFileName = "Generated_" + m_outFileType + "_pool.txt";
 	}
-
-#ifndef SIMULATIONBASE
-	if(m_writeDBfile && !m_xmlFiles.size()) ATH_CHECK(p_AmdcsimrecAthenaSvc.retrieve());
-#endif
 
 	if (m_buildNSW) 
 	{
@@ -79,9 +69,6 @@ StatusCode MuonAGDDTool::construct  ATLAS_NOT_THREAD_SAFE  ()
 	    ATH_MSG_INFO(" now reading AGDD blob ");
 
 	    std::string AGDDfile=theHelper.GetAGDD(m_dumpAGDD, m_outFileType, m_DBFileName);
-#ifndef SIMULATIONBASE
-	    if(m_writeDBfile && !m_xmlFiles.size()) AGDDfile = p_AmdcsimrecAthenaSvc->GetAgddString();
-#endif
 	    if( AGDDfile.empty() ) {
 		    ATH_MSG_ERROR("\t-- empty AGDDfile - this cannot be correct " );
 		    return StatusCode::FAILURE;
@@ -183,18 +170,6 @@ bool MuonAGDDTool::WritePREsqlFile() const
 	}
 
 	std::string TheAmdcName = m_amdcName;
-	// The following is only needed for creating AGDD muon (passive material) layouts
-    // *IF* the AGDD xml block is still stored in the amdb file (https://twiki.cern.ch/twiki/bin/viewauth/Atlas/AmdbSimrecFiles)
-    // Note that this was the case until amdb_simrec.r.08.01, from amdb_simrec.r.08.02 onwards, the AGDD xml is stored independently
-    // of the amdb file in MuonSpectrometer/MuonG4/MuonPassiveMaterials.
-    // Thus, this retrieval of the AmdcName is only kept for backwards compatibility (in case someone wants to create muon layouts 
-    // from amdb files older than amdb_simrec.r.08.02) to be fully consistent with previous table generations.
-#ifndef SIMULATIONBASE
-    if (!m_xmlFiles.size()) {
-        Amdcsimrec* pAmdcsimrec = p_AmdcsimrecAthenaSvc->GetAmdcsimrec();
-        TheAmdcName = pAmdcsimrec->AmdcName();
-    }
-#endif
 
 	std::ofstream prefile;
 	prefile.open (m_outPREsqlName.c_str());
