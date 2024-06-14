@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( InDetTrackPerfMon )
@@ -16,7 +16,7 @@ atlas_add_library( InDetTrackPerfMonLib
                    PUBLIC_HEADERS InDetTrackPerfMon
                    PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
                    LINK_LIBRARIES AthenaBaseComps AthenaKernel AthenaMonitoringLib CxxUtils GaudiKernel InDetIdentifier TrkValHistUtils xAODBase xAODEventInfo xAODJet xAODTracking xAODTruth InDetTrackSystematicsToolsLib InDetRecToolInterfaces TrigDecisionToolLib AsgServicesLib 
-                   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} AsgTools AthContainers PATCoreAcceptLib PathResolver StoreGateLib TrkEventPrimitives TrkExInterfaces TrkParameters TrkSurfaces TrkToolInterfaces TrkTrack nlohmann_json::nlohmann_json )
+                   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} AsgTools AthContainers PATCoreAcceptLib PathResolver StoreGateLib TrkEventPrimitives TrkExInterfaces TrkParameters TrkSurfaces TrkToolInterfaces TrkTrack TruthUtils nlohmann_json::nlohmann_json )
 
 ## TODO - To be included in later MRs (if needed)
 #atlas_add_library( InDetTrackPerfMonLib

@@ -199,7 +199,7 @@ bool TTbarPlusHeavyFlavorFilterTool::isFinalHadron(const xAOD::TruthParticle* pa
   int type = std::abs(MC::leadingQuark(part));
   for(unsigned j = 0; j < part->nChildren(); j++){
     const xAOD::TruthParticle* child = part->child(j);
-    if( HepMC::barcode(part) > child->barcode() ) continue; /// protection for sherpa // FIXME barcode-based
+    if( HepMC::barcode(part) > HepMC::barcode(child) ) continue; /// protection for sherpa // FIXME barcode-based
     int childtype = std::abs(MC::leadingQuark(child));
     if( childtype == type ){
       return false;

@@ -1,14 +1,15 @@
 /*
-  Copyright (C) 2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "InDetPerfNtuple_TruthToReco.h" 
+#include "InDetPerfNtuple_TruthToReco.h"
+#include "TruthUtils/MagicNumbers.h"
 
 InDetPerfNtuple_TruthToReco::InDetPerfNtuple_TruthToReco(InDetPlotBase* pParent, const std::string & dirName, const std::string & treeName):
     InDetPerfNtuple(pParent, dirName, treeName), 
     m_truth_selectedByPileupSwitch("truth_selectedByPileupSwitch",0,*this),
     m_truth_pdgId("truth_pdgId",m_undefinedValue,*this),
-    m_truth_barcode("truth_barcode",m_undefinedValue,*this),
+    m_truth_barcode("truth_barcode",m_undefinedValue,*this), // FIXME barcode-based
     m_truth_charge("truth_charge",m_undefinedValue,*this),
     m_truth_eta("truth_eta",m_undefinedValue,*this),
     m_truth_pt("truth_pt",m_undefinedValue,*this),
@@ -98,7 +99,7 @@ void InDetPerfNtuple_TruthToReco::fillTruth(const xAOD::TruthParticle& truth) {
     m_truth_selectedByPileupSwitch = (m_acc_selectedByPileupSwitch.isAvailable(truth) ? (int)m_acc_selectedByPileupSwitch(truth) : 0);
 
     m_truth_pdgId   = truth.pdgId(); 
-    m_truth_barcode = truth.barcode(); 
+    m_truth_barcode = HepMC::barcode(truth); // FIXME barcode-based
     m_truth_charge  = truth.charge();
     m_truth_eta     = truth.eta();
     m_truth_pt      = truth.pt();

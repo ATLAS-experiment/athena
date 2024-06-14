@@ -559,8 +559,8 @@ CaloCalibClusterMomentsMaker2::execute(const EventContext& ctx,
           CaloDmDescrElement* myCDDE(nullptr);
           myCDDE = m_caloDmDescrManager->get_element(myId);
           if ( myCDDE ) {
-            int pid(0);
-            if(useParticleID) pid = hit->particleID();
+            int pid(0); // FIXME barcode-based
+            if(useParticleID) pid = hit->particleID(); // FIXME barcode-based - requires migrating CaloCalibrationHits away from barcodes
 
             int jeO = (int)floor(m_n_eta_out*(myCDDE->eta()/m_out_eta_max));
             if ( jeO >= -m_n_eta_out && jeO < m_n_eta_out ) {
@@ -585,7 +585,7 @@ CaloCalibClusterMomentsMaker2::execute(const EventContext& ctx,
                 MyClusInfo& clusInfo = clusInfoVec[iClus];
                 // getting access to calibration energy inside cluster caused by same particleID (barcode)
                 // as given OOC hit
-                std::map<int, MyClusInfo::ClusCalibEnergy>::iterator pos = clusInfo.engCalibParticle.find(pid);
+                std::map<int, MyClusInfo::ClusCalibEnergy>::iterator pos = clusInfo.engCalibParticle.find(pid); // FIXME barcode-based
                 if(pos!=clusInfo.engCalibParticle.end()) {
                   double engClusPidCalib = pos->second.engTot;
 
@@ -650,7 +650,7 @@ CaloCalibClusterMomentsMaker2::execute(const EventContext& ctx,
   std::vector<double> engCalibFrac;
   engCalibFrac.resize(kCalibFracMax, 0.0);
 
-  std::map<unsigned int,int> truthBarcodeToPdgCodeMap;
+  std::map<unsigned int,int> truthBarcodeToPdgCodeMap; // FIXME barcode-based - requires CaloCalibrationHit migration
   
   //loop on truth particle container is slow, so put needed information in a map for faster key lookup in later loops
   for ( const auto *thisTruthParticle : *truthParticleContainerReadHandle){	  
@@ -660,7 +660,7 @@ CaloCalibClusterMomentsMaker2::execute(const EventContext& ctx,
       continue;
     }
     
-    truthBarcodeToPdgCodeMap[thisTruthParticle->barcode()] = thisTruthParticle->pdgId();    
+    truthBarcodeToPdgCodeMap[HepMC::barcode(thisTruthParticle)] = thisTruthParticle->pdgId();    // FIXME barcode-based
   }//truth particle loop
   
   // assign moments
@@ -814,9 +814,9 @@ void CaloCalibClusterMomentsMaker2::get_calib_frac(const std::map<unsigned int,i
   if(clusInfo.engCalibIn.engTot <= 0.0) return;
   // each MyClusInfo has a map of particle's barcode and particle calibration deposits in given cluster
   for (const std::pair<const int, MyClusInfo::ClusCalibEnergy>& p : clusInfo.engCalibParticle) {
-    unsigned int barcode = p.first;
+    unsigned int barcode = p.first; // FIXME barcode-based
     int pdg_id = 0;
-    try { pdg_id = truthBarcodeToPdgCodeMap.at(barcode); }
+    try { pdg_id = truthBarcodeToPdgCodeMap.at(barcode); } // FIXME barcode-based
     catch (const std::out_of_range& e){
       ATH_MSG_WARNING("truthBarcodeToPdgCodeMap cannot find an entry with barcode " << barcode);
       continue;

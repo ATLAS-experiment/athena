@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -267,9 +267,9 @@ StatusCode SCT_PrepDataToxAOD::execute(const EventContext& ctx) const
              // @TODO provide possibility to move tp_indices to its final destination
              AUXDATA(xprd, std::vector<unsigned int>, truth_index) = tp_indices;
           }
-          std::vector<int> barcodes;
+          std::vector<int> barcodes; // FIXME  barcode-based - requires xAOD::TrackMeasurementValidation to be migrated away from barcodes
           for (auto& i{range.first}; i!=range.second; ++i) {
-             barcodes.push_back(i->second.barcode());
+            barcodes.push_back(HepMC::barcode(i->second));
           }
           // @TODO move vector
           AUXDATA(xprd, std::vector<int>, truth_barcode) = barcodes;
@@ -317,10 +317,10 @@ void SCT_PrepDataToxAOD::addSDOInformation(xAOD::TrackMeasurementValidation* xpr
     std::vector<float> sdoDepEnergy(pos->second.getdeposits().size());
     unsigned int nDepos{0};
     for (auto& deposit: pos->second.getdeposits()) {
-        if (deposit.first) sdoDepBC[nDepos] = deposit.first.barcode();
-        ATH_MSG_DEBUG(" SDO Energy Deposit " << deposit.second);
-        sdoDepEnergy[nDepos] = deposit.second;
-        nDepos++;
+      if (deposit.first) sdoDepBC[nDepos] = HepMC::barcode(deposit.first);
+      ATH_MSG_DEBUG(" SDO Energy Deposit " << deposit.second);
+      sdoDepEnergy[nDepos] = deposit.second;
+      nDepos++;
     }
     sdo_depositsBarcode.push_back(sdoDepBC);
     sdo_depositsEnergy.push_back(sdoDepEnergy);
@@ -358,7 +358,7 @@ void SCT_PrepDataToxAOD::addSiHitInformation(xAOD::TrackMeasurementValidation* x
     for (const SiHit& sihit : matchingHits) {
       sihit_energyDeposit[hitNumber] = sihit.energyLoss();
       sihit_meanTime[hitNumber] = sihit.meanTime();
-      sihit_barcode[hitNumber] = sihit.particleLink().barcode();
+      sihit_barcode[hitNumber] = HepMC::barcode(sihit.particleLink());
     
       // Convert Simulation frame into reco frame
       const HepGeom::Point3D<double>& startPos{sihit.localStartPosition()};
@@ -435,10 +435,10 @@ void SCT_PrepDataToxAOD::findAllHitsCompatibleWithCluster(const InDet::SCT_Clust
     ajoiningHits.push_back(*siHitIter);
   
     siHitIter2 = siHitIter+1;
-    auto bc = (*siHitIter)->particleLink().barcode();
+    auto bc = HepMC::barcode((*siHitIter)->particleLink());
     while (siHitIter2 != multiMatchingHits.end()) {
       // Need to come from the same truth particle
-      if ( bc != (*siHitIter2)->particleLink().barcode()) {
+      if ( bc != HepMC::barcode((*siHitIter2)->particleLink())) {
         ++siHitIter2;
         continue;
       }
@@ -485,7 +485,7 @@ void SCT_PrepDataToxAOD::findAllHitsCompatibleWithCluster(const InDet::SCT_Clust
             highestXPos->localEndPosition(),
             energyDep,
             time,
-            (*siHitIter)->particleLink().barcode(),
+            HepMC::barcode((*siHitIter)->particleLink()),
             1, // 0 for pixel 1 for SCT
             (*siHitIter)->getBarrelEndcap(),
             (*siHitIter)->getLayerDisk(),

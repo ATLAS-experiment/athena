@@ -60,19 +60,19 @@ namespace MCTruthPartClassifier {
 
     const xAOD::TruthParticle* mother = nullptr;
     long motherStatus = 0;
-    long motherBarcode = 0;
+    long motherBarcode = 0; // FIXME barcode-based
     int motherPDG = 0;
     const xAOD::TruthParticle* Mother() const { return mother;}
     inline void setMotherProperties(const xAOD::TruthParticle* from) {
       mother = from;
       if (!from) return; 
-      motherStatus = from->status(); 
-      motherBarcode = from->barcode(); 
+      motherStatus = HepMC::status(from);
+      motherBarcode = HepMC::barcode(from); // FIXME barcode-based
       motherPDG = from->pdg_id(); 
     }
-    inline void resetMotherProperties() { mother = nullptr; motherStatus = 0; motherBarcode = 0; motherPDG = 0; }
+    inline void resetMotherProperties() { mother = nullptr; motherStatus = 0; motherBarcode = 0; motherPDG = 0; } // FIXME barcode-based
 
-    long photonMotherBarcode = 0;
+    long photonMotherBarcode = 0; // FIXME barcode-based
     long photonMotherStatus = 0;
     int photonMotherPDG = 0;
     const xAOD::TruthParticle* PhotonMother() const { return photonMother;}

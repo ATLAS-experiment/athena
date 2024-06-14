@@ -34,6 +34,8 @@
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "IOVDbDataModel/IOVMetaDataContainer.h"
 
+#include "AtlasHepMC/GenVertex.h"
+#include "AtlasHepMC/GenParticle.h"
 #include "TruthUtils/MagicNumbers.h"
 
 bool isSeparatorGenEvent(const HepMC::GenEvent *genEvt) {
@@ -376,39 +378,39 @@ namespace xAODMaker {
         genEvt_valid_beam_particles=(beamParticles_vec.size()>1);
         if (genEvt_valid_beam_particles){beamParticles.first=beamParticles_vec[0]; beamParticles.second=beamParticles_vec[1]; }
         // We want to process particles in barcode order.
-        auto bcmapatt = genEvt->attribute<HepMC::GenEventBarcodes>("barcodes");
-        if (!bcmapatt) ATH_MSG_ERROR("TruthParticleCnvTool.cxx: Event does not contain barcodes attribute"); 
+        auto bcmapatt = genEvt->attribute<HepMC::GenEventBarcodes>("barcodes"); // FIXME barcode-based
+        if (!bcmapatt) ATH_MSG_ERROR("TruthParticleCnvTool.cxx: Event does not contain barcodes attribute");
         std::map<int, HepMC3::ConstGenParticlePtr> bcmap = bcmapatt->barcode_to_particle_map();
         xTruthParticleContainer->reserve(bcmap.size());
-        for (const auto &[k,part]: bcmap) {
+        for (const auto &[genPartBarcode,part]: bcmap) {
 #else
         genEvt_valid_beam_particles=genEvt->valid_beam_particles();
         if ( genEvt_valid_beam_particles ) beamParticles = genEvt->beam_particles();
         xTruthParticleContainer->reserve(genEvt->particles_size());
         for (auto part: *genEvt) {
-            int k = part->barcode();
+          int genPartBarcode = HepMC::barcode(part); // FIXME barcode-based
 #endif
-            // (a) create TruthParticle
-            xAOD::TruthParticle* xTruthParticle = new xAOD::TruthParticle();
-      // (b) Put particle into container;
-            xTruthParticleContainer->push_back( xTruthParticle );
-            fillParticle(xTruthParticle, part); // (c) Copy HepMC info into the new particle
-            // (d) Build Event<->Particle element link
-            const ElementLink<xAOD::TruthParticleContainer> eltp(*xTruthParticleContainer, xTruthParticleContainer->size()-1);
-            if (isSignalProcess) xTruthEvent->addTruthParticleLink(eltp);
-            if (!isSignalProcess) xTruthPileupEvent->addTruthParticleLink(eltp);
-                    
-            // Create link between HepMC and xAOD truth
-            if (isSignalProcess) truthLinkVec->push_back(new xAODTruthParticleLink(HepMcParticleLink(k,0,HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_BARCODE), eltp)); // FIXME barcode-based
-            if (!isSignalProcess) truthLinkVec->push_back(new xAODTruthParticleLink(HepMcParticleLink(k,genEvt->event_number(), HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE), eltp)); // FIXME barcode-based
-                    
-            // Is this one of the beam particles?
-            if (genEvt_valid_beam_particles) {
-              if (isSignalProcess) {
-          if (part == beamParticles.first) xTruthEvent->setBeamParticle1Link(eltp);
-          if (part == beamParticles.second) xTruthEvent->setBeamParticle2Link(eltp);
-              }
+          // (a) create TruthParticle
+          xAOD::TruthParticle* xTruthParticle = new xAOD::TruthParticle();
+          // (b) Put particle into container;
+          xTruthParticleContainer->push_back( xTruthParticle );
+          fillParticle(xTruthParticle, part); // (c) Copy HepMC info into the new particle
+          // (d) Build Event<->Particle element link
+          const ElementLink<xAOD::TruthParticleContainer> eltp(*xTruthParticleContainer, xTruthParticleContainer->size()-1);
+          if (isSignalProcess) xTruthEvent->addTruthParticleLink(eltp);
+          if (!isSignalProcess) xTruthPileupEvent->addTruthParticleLink(eltp);
+
+          // Create link between HepMC and xAOD truth
+          if (isSignalProcess) truthLinkVec->push_back(new xAODTruthParticleLink(HepMcParticleLink(genPartBarcode,0,HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_BARCODE), eltp)); // FIXME barcode-based
+          if (!isSignalProcess) truthLinkVec->push_back(new xAODTruthParticleLink(HepMcParticleLink(genPartBarcode,genEvt->event_number(), HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE), eltp)); // FIXME barcode-based
+
+          // Is this one of the beam particles?
+          if (genEvt_valid_beam_particles) {
+            if (isSignalProcess) {
+              if (part == beamParticles.first) xTruthEvent->setBeamParticle1Link(eltp);
+              if (part == beamParticles.second) xTruthEvent->setBeamParticle2Link(eltp);
             }
+          }
             // (e) Particle's production vertex
             auto productionVertex = part->production_vertex();
             // Skip the dummy vertex that HepMC3 adds
@@ -526,25 +528,21 @@ namespace xAODMaker {
 
     // A helper to set up a TruthVertex (without filling the ELs)
     void xAODTruthCnvAlg::fillVertex(xAOD::TruthVertex* tv, const HepMC::ConstGenVertexPtr& gv) {
-        // id was renamed to status in HepMC3.
-#ifdef HEPMC3
-        tv->setId(HepMC::old_vertex_status_from_new(gv->status())); // For now convert the status back to the old scheme
-#else
-        tv->setId(HepMC::old_vertex_status_from_new(gv->id())); // For now convert the status back to the old scheme
-#endif
-        tv->setBarcode(HepMC::barcode(gv));
-        tv->setX(gv->position().x());
-        tv->setY(gv->position().y());
-        tv->setZ(gv->position().z());
-        tv->setT(gv->position().t());
+      // id was renamed to status in HepMC3.
+      tv->setId(HepMC::old_vertex_status_from_new(HepMC::status(gv))); // For now convert the status back to the old scheme
+      tv->setBarcode(HepMC::barcode(gv)); // FIXME barcode-based
+      tv->setX(gv->position().x());
+      tv->setY(gv->position().y());
+      tv->setZ(gv->position().z());
+      tv->setT(gv->position().t());
     }
     
     
     // A helper to set up a TruthParticle (without filling the ELs)
     void xAODTruthCnvAlg::fillParticle(xAOD::TruthParticle* tp, const HepMC::ConstGenParticlePtr& gp) {
         tp->setPdgId(gp->pdg_id());
-        tp->setBarcode(HepMC::barcode(gp));
-        tp->setStatus(HepMC::old_particle_status_from_new(gp->status())); // For now convert the status back to the old scheme
+        tp->setBarcode(HepMC::barcode(gp)); // FIXME barcode-based
+        tp->setStatus(HepMC::old_particle_status_from_new(HepMC::status(gp))); // For now convert the status back to the old scheme
         
         auto pol = HepMC::polarization(gp);
         if (pol.is_defined()) {

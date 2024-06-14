@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaKernel/errorcheck.h"
@@ -18,7 +18,7 @@
 #include "xAODTruth/TruthPileupEvent.h"
 #include "xAODTruth/TruthPileupEventContainer.h"
 #include "xAODTruth/TruthPileupEventAuxContainer.h"
-
+#include "TruthUtils/MagicNumbers.h"
 
 #include "xAODTruthReader.h"
 
@@ -106,7 +106,7 @@ namespace xAODReader {
     cout << " Entries this event: " << event->nTruthVertices() << " vertices, " << event->nTruthParticles() << " particles.\n";
     cout << "                                    GenParticle Legend\n";
     if (do4momPtEtaPhi) cout << "        Barcode   PDG ID      ( pt,      eta,      phi,     E ) Stat  DecayVtx\n";
-    else                cout << "        Barcode   PDG ID      ( Px,       Py,       Pz,     E ) Stat  DecayVtx\n";    
+    else                cout << "        Barcode   PDG ID      ( Px,       Py,       Pz,     E ) Stat  DecayVtx\n";    // FIXME barcode-based
     cout << "--------------------------------------------------------------------------------\n";
     for (unsigned int iv = 0; iv < event->nTruthVertices(); ++iv) {
       printVertex(event->truthVertex(iv), do4momPtEtaPhi);
@@ -120,13 +120,13 @@ namespace xAODReader {
     std::ios::fmtflags f( cout.flags() ); 
     if (vertex) {
       cout << "TruthVertex:";
-      if (vertex->barcode() != 0) {
+      if (HepMC::uniqueID(vertex) != HepMC::UNDEFINED_ID) {
         if (vertex->x() != 0.0 && vertex->y() != 0.0 && vertex->z() != 0.0) {
           cout.width(9);
-          cout << vertex->barcode();
+          cout << HepMC::barcode(vertex); // FIXME barcode-based
           cout << " ID:";
           cout.width(5);
-          cout << vertex->id();
+          cout << HepMC::status(vertex);
           cout << " (X,cT)=";
           cout.width(9);
           cout.precision(2);
@@ -147,10 +147,10 @@ namespace xAODReader {
           cout << endl;
         } else {
           cout.width(9);
-          cout << vertex->barcode();
+          cout << HepMC::barcode(vertex); // FIXME barcode-based
           cout << " ID:";
           cout.width(5);
-          cout << vertex->id();
+          cout << HepMC::status(vertex);
           cout << " (X,cT): 0";
           cout << endl;
         }
@@ -163,7 +163,7 @@ namespace xAODReader {
           cout << (void*)vertex;
           cout << " ID:";
           cout.width(5);
-          cout << vertex->id();
+          cout << HepMC::status(vertex);
           cout << " (X,cT)=";
           cout.width(9);
           cout.precision(2);
@@ -187,7 +187,7 @@ namespace xAODReader {
           cout << (void*)vertex;
           cout << " ID:";
           cout.width(5);
-          cout << vertex->id();
+          cout << HepMC::status(vertex);
           cout << " (X,cT):0";
           cout << endl;
         }
@@ -220,7 +220,7 @@ namespace xAODReader {
     if (particle) {
       cout << " ";
       cout.width(9);
-      cout << particle->barcode();
+      cout << HepMC::barcode(particle); // FIXME barcode-based
       cout.width(9);
       cout << particle->pdgId() << " ";
       cout.width(9);
@@ -243,11 +243,11 @@ namespace xAODReader {
       cout.setf(ios::fmtflags(0), ios::floatfield);
       cout.unsetf(ios_base::showpos);
       if ( particle->hasDecayVtx() ) {
-        if ( particle->decayVtx()->barcode()!=0 ) {
+        if ( HepMC::uniqueID(particle->decayVtx()) != HepMC::UNDEFINED_ID ) {
           cout.width(3);
           cout << particle->status() << " ";
           cout.width(9);
-          cout << particle->decayVtx()->barcode();
+          cout << HepMC::barcode(particle->decayVtx()); // FIXME barcode-based
         }
       } else {
         cout.width(3);
