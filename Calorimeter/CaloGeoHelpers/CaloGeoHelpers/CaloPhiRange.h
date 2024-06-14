@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -7,14 +7,12 @@
  *
  * @brief CaloPhiRange class declaration
  *
- * $Id: CaloPhiRange.h 587585 2014-03-14 08:32:57Z krasznaa $
  */
 
 #ifndef CALOGEOHELPER_CALOPHIRANGE_H
 #define CALOGEOHELPER_CALOPHIRANGE_H
 
-#include <cmath>
-
+#include <numbers>
 /** @class CaloPhiRange
  *
  *  @brief This class defines the phi convention for Calorimeters
@@ -39,20 +37,10 @@ public:
      */
     static double diff ( double phi1,  double phi2 );
 
-    static void print();
-
 private:
-    
-    // This is the real hard-coded choice :
-#if 0
-    // Doesn't work yet with all the compilers we're supporting.
-    static CONSTEXPR double m_phi_min = -M_PI;
-    static CONSTEXPR double m_twopi = 2*M_PI;
-    static CONSTEXPR double m_phi_max = M_PI;
-#endif
-    static const double m_phi_min;
-    static const double m_twopi;
-    static const double m_phi_max;
+    constexpr static const double m_phi_min = -std::numbers::pi;
+    constexpr static const double m_twopi = 2*std::numbers::pi;
+    constexpr static const double m_phi_max = std::numbers::pi;
 };
 
 inline double CaloPhiRange::twopi()

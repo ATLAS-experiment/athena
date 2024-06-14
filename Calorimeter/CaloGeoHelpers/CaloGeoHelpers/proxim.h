@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOGEOHELPER_PROXIM
@@ -9,20 +9,24 @@
 //
 
 #include <math.h> 
+#include <numbers>
 #include "CxxUtils/AthUnlikelyMacros.h"
+
+
 
 inline double proxim(double b,double a)
 {
-  const double aplus = a + M_PI;
-  const double aminus = a - M_PI;
+  using std::numbers::pi;
+  const double aplus = a + pi;
+  const double aminus = a - pi;
   if (ATH_UNLIKELY(b > aplus)) {
     do {
-      b -= 2*M_PI;
+      b -= 2*pi;
     } while(b > aplus);
   }
   else if (ATH_UNLIKELY(b < aminus)) {
     do {
-      b += 2*M_PI;
+      b += 2*pi;
     } while(b < aminus);
   }
   return b;

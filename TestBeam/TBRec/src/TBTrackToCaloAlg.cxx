@@ -67,7 +67,6 @@ StatusCode TBTrackToCaloAlg::initialize()
   ATH_MSG_DEBUG ( "TBTrackToCaloAlg::initialize()" );
 
   ATH_CHECK(detStore()->retrieve(m_calo_id,"CaloCell_ID"));
-  CaloPhiRange::print();
 
   // General access to Tools :
   IToolSvc* p_toolSvc = 0;
