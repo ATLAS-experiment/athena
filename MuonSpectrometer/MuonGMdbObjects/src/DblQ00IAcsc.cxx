@@ -9,35 +9,27 @@
 
 #include "MuonGMdbObjects/DblQ00IAcsc.h"
 #include "RDBAccessSvc/IRDBRecordset.h"
+#include "RDBAccessSvc/IRDBRecord.h"
 #include "RDBAccessSvc/IRDBAccessSvc.h"
-#include "AmdcDb/AmdcDb.h"
-#include "AmdcDb/AmdcDbRecord.h"
 
 #include <algorithm>
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
 
-namespace MuonGM
-{
-DblQ00IAcsc::DblQ00IAcsc()
-{
-    m_nObj = 0;
-}
+namespace MuonGM{
 
-  DblQ00IAcsc::DblQ00IAcsc(IRDBAccessSvc *pAccessSvc, const std::string & GeoTag, const std::string & GeoNode):
-    m_nObj(0) {
+  DblQ00IAcsc::DblQ00IAcsc(IRDBAccessSvc *pAccessSvc, const std::string & GeoTag, const std::string & GeoNode) {
 
     IRDBRecordset_ptr iacsc = pAccessSvc->getRecordsetPtr(getName(),GeoTag, GeoNode);
 
     if(iacsc->size()>0) {
     
-    m_nObj = iacsc->size();
-    m_d.resize (m_nObj);
-    if (m_nObj == 0) std::cerr<<"NO IAcsc banks in the MuonDD Database"<<std::endl;
+      m_nObj = iacsc->size();
+      m_d.resize (m_nObj);
+      if (m_nObj == 0) std::cerr<<"NO IAcsc banks in the MuonDD Database"<<std::endl;
 
-    size_t i=0;
-    while(i<iacsc->size()) {
+      for (size_t i =0; i<iacsc->size(); ++i) {
 	
         m_d[i].version        = (*iacsc)[i]->getInt("VERS");    
         m_d[i].line           = i; 
@@ -51,8 +43,7 @@ DblQ00IAcsc::DblQ00IAcsc()
         m_d[i].rots           = (*iacsc)[i]->getFloat("ROTS");
         m_d[i].rotz           = (*iacsc)[i]->getFloat("ROTZ");
         m_d[i].rott           = (*iacsc)[i]->getFloat("ROTT");
-        sprintf(m_d[i].type,"%s",(*iacsc)[i]->getString("TYP").c_str());
-        i++;
+        m_d[i].type           = (*iacsc)[i]->getString("TYP");
     }
   }
   else {
@@ -60,53 +51,6 @@ DblQ00IAcsc::DblQ00IAcsc()
   }
 }
 
-DblQ00IAcsc::DblQ00IAcsc(AmdcDb* iacsc) :
-    m_nObj(0) {
-  IRDBRecordset_ptr pIRDBRecordset = iacsc->getRecordsetPtr("ISZT","Amdc");
-  std::vector<IRDBRecord*>::const_iterator it = pIRDBRecordset->begin();
-
-  m_nObj = pIRDBRecordset->size();
-  m_d.resize (m_nObj);
-  if (m_nObj == 0) std::cerr<<"NO IAcsc banks in the AmdcDbRecord"<<std::endl;
-
-  const AmdcDbRecord* pAmdcDbRecord = dynamic_cast<const AmdcDbRecord*>((*it));
-  if (pAmdcDbRecord == nullptr){
-    std::cerr << "No way to cast in AmdcDbRecord for " << getObjName() << std::endl;
-    return;
-  }
-
-  std::vector< std::string> VariableList = pAmdcDbRecord->getVariableList();
-  int ItemTot = VariableList.size() ;
-  for(int Item=0 ; Item<ItemTot ; Item++){
-    std::string DbVar = VariableList[Item];
-  }
-
-  int i = -1;
-  it = pIRDBRecordset->begin();
-  for( ; it<pIRDBRecordset->end(); ++it){
-     pAmdcDbRecord = dynamic_cast<const AmdcDbRecord*>((*it));
-     if(pAmdcDbRecord == nullptr){
-       std::cerr << "No way to cast in AmdcDbRecord for " << getObjName() << std::endl;
-       return;
-     }
-
-     i = i + 1;
-
-     m_d[i].version = (*it)->getInt("VERS");    
-     m_d[i].line = i; 
-     m_d[i].jff = (*it)->getInt("JFF");
-     m_d[i].jzz = (*it)->getInt("JZZ");
-     m_d[i].job = (*it)->getInt("JOB");
-     m_d[i].wireLayer = (*it)->getInt("JLAY");
-     m_d[i].tras = 10.*(*it)->getFloat("TRAS");
-     m_d[i].traz = 10.*(*it)->getFloat("TRAZ");
-     m_d[i].trat = 10.*(*it)->getFloat("TRAT");
-     m_d[i].rots = (*it)->getFloat("ROTS");
-     m_d[i].rotz = (*it)->getFloat("ROTZ");
-     m_d[i].rott = (*it)->getFloat("ROTT");
-     sprintf(m_d[i].type,"%s",(*it)->getString("TYP").c_str());
-  }
-}
 
 DblQ00IAcsc::DblQ00IAcsc(const std::string& asciiFileName) {
   std::cerr<<"IAcsc with asciiFileName = : <"<<asciiFileName<<"> "<<std::endl;
@@ -159,10 +103,6 @@ DblQ00IAcsc::DblQ00IAcsc(const std::string& asciiFileName) {
     std::cerr<<"problem with DblQ00IAcsc: j="<<j<<" m_nObj="<<(int)m_nObj<<std::endl; 
   }  
 
-}
-
-DblQ00IAcsc::~DblQ00IAcsc()
-{
 }
 
 void DblQ00IAcsc::WriteIAcscToAsciiFile(const std::string& filename)

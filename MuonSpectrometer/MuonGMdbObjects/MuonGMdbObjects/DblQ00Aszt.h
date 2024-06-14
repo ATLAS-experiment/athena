@@ -18,48 +18,47 @@
 class IRDBAccessSvc;
 #include <string>
 #include <vector>
-
-class AmdcDb;
+#include <array>
 
 namespace MuonGM {
 class DblQ00Aszt {
 public:
-    DblQ00Aszt();
-    ~DblQ00Aszt();
+    DblQ00Aszt() = default;
+    ~DblQ00Aszt() = default;
     DblQ00Aszt(IRDBAccessSvc *pAccessSvc, const std::string & GeoTag="", const std::string & GeoNode="");
+    DblQ00Aszt & operator=(const DblQ00Aszt &right) = delete;
+    DblQ00Aszt(const DblQ00Aszt&) = delete;
+
     DblQ00Aszt(const std::string& asciiFileName);
-    DblQ00Aszt(AmdcDb* aszt);
     
     void WriteAsztToAsciiFile(const std::string& filename);
 
     // data members for DblQ00/ASZT fields
     struct ASZT {
-        int version; // VERSION
-        int line; // LINE NUMBER
-        char type[8]; // STATION TYPE
-        int jff; // PHI POSITION
-        int jzz; // Z POSITION
-        int job; // JOB POSITION
-        float tras; // S TRANSLATION [MM]
-        float traz; // Z TRANSLATION
-        float trat; // T TRANSLATION
-        float rots; // S ROTATION [RAD]
-        float rotz; // Z ROTATION
-        float rott; // T ROTATION
-        int i; // STATION AMDB INDEX
+        int version{0}; // VERSION
+        int line{0}; // LINE NUMBER
+        std::string type{}; // STATION TYPE
+        int jff{0}; // PHI POSITION
+        int jzz{0}; // Z POSITION
+        int job{0}; // JOB POSITION
+        float tras{0.f}; // S TRANSLATION [MM]
+        float traz{0.f}; // Z TRANSLATION
+        float trat{0.f}; // T TRANSLATION
+        float rots{0.f}; // S ROTATION [RAD]
+        float rotz{0.f}; // Z ROTATION
+        float rott{0.f}; // T ROTATION
+        int i{0}; // STATION AMDB INDEX
     };
 
     const ASZT* data() const { return m_d.data(); };
     unsigned int size() const { return m_nObj; };
-    const char* getName() const { return "ASZT"; };
-    const char* getDirName() const { return "DblQ00"; };
-    const char* getObjName() const { return "ASZT"; };
+    std::string getName() const { return "ASZT"; };
+    std::string getDirName() const { return "DblQ00"; };
+    std::string getObjName() const { return "ASZT"; };
 
 private:
-    std::vector<ASZT> m_d;
-    unsigned int m_nObj; // > 1 if array; 0 if error in retrieve.
-    DblQ00Aszt & operator=(const DblQ00Aszt &right);
-    DblQ00Aszt(const DblQ00Aszt&);
+    std::vector<ASZT> m_d{};
+    unsigned int m_nObj{0}; // > 1 if array; 0 if error in retrieve.
 };
 
 

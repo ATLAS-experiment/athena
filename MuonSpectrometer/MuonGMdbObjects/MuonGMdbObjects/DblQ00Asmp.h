@@ -15,38 +15,37 @@
 
 #include <string>
 #include <vector>
-
 class IRDBAccessSvc;
 
-class AmdcDb;
 
 namespace MuonGM {
 class DblQ00Asmp {
 public:
-    DblQ00Asmp(){};
-    ~DblQ00Asmp();
+    DblQ00Asmp() = default;
+    ~DblQ00Asmp() = default;
     DblQ00Asmp(IRDBAccessSvc *pAccessSvc, const std::string & GeoTag="", const std::string & GeoNode="");
-    DblQ00Asmp(AmdcDb* asmp);
+    
+    DblQ00Asmp & operator=(const DblQ00Asmp &right) = default;
+    DblQ00Asmp(const DblQ00Asmp&) = default;
+
 
     // data members for DblQ00/ASMP fields
     struct ASMP {
-        int version; // VERSION
-        int indx; // STATION NUMBER (INSIDE TYPE)
-        int n; // NUMBER OF ELEMENTS
-        int jtyp; // AMDB STATION TYPE
+        int version{0}; // VERSION
+        int indx{0}; // STATION NUMBER (INSIDE TYPE)
+        int n{0}; // NUMBER OF ELEMENTS
+        int jtyp{0}; // AMDB STATION TYPE
     };
     
     const ASMP* data() const { return m_d.data(); };
     unsigned int size() const { return m_nObj; };
-    const char* getName() const { return "ASMP"; };
-    const char* getDirName() const { return "DblQ00"; };
-    const char* getObjName() const { return "ASMP"; };
+    std::string getName() const { return "ASMP"; };
+    std::string getDirName() const { return "DblQ00"; };
+    std::string getObjName() const { return "ASMP"; };
 
 private:
-  std::vector<ASMP> m_d;
-  unsigned int m_nObj; // > 1 if array; 0 if error in retrieve.
-  DblQ00Asmp & operator=(const DblQ00Asmp &right);
-  DblQ00Asmp(const DblQ00Asmp&);
+  std::vector<ASMP> m_d{};
+  unsigned int m_nObj{0}; // > 1 if array; 0 if error in retrieve.
 };
 } // end of MuonGM namespace
 

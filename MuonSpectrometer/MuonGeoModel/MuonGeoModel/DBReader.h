@@ -959,7 +959,7 @@ namespace MuonGM {
                         break;
                 }
                 // name is the station name (type+subtype) BML2, BIS1, EOL2, T1F1, etc
-                if (strcmp(atyp[type_ind].type, "!") != 0) {
+                if (strcmp(atyp[type_ind].type.c_str(), "!") != 0) {
                     type_name = std::string(atyp[type_ind].type, 0, 3);
                     name = type_name + MuonGM::buildString(almn[icomp].indx, -1);
                 } else {
@@ -1153,7 +1153,7 @@ namespace MuonGM {
                             break;
                     }
 
-                    if (strcmp(atyp[type_ind].type, "!") != 0) {
+                    if (strcmp(atyp[type_ind].type.c_str(), "!") != 0) {
                         type_name = std::string(atyp[type_ind].type, 0, 3);
                         name = type_name + MuonGM::buildString(alin[ialin].indx, -1);
                         Station *stat = mysql.GetStation(name);

@@ -18,37 +18,34 @@
 
 class IRDBAccessSvc;
 
-class AmdcDb;
-
 namespace MuonGM {
 class DblQ00Awln {
 public:
-    DblQ00Awln(){};
-    ~DblQ00Awln();
+    DblQ00Awln() = default;
+    ~DblQ00Awln() = default;
     DblQ00Awln(IRDBAccessSvc *pAccessSvc, const std::string & GeoTag="", const std::string & GeoNode="");
-    DblQ00Awln(AmdcDb* awln);
     
     // data members for DblQ00/AWLN fields
     struct AWLN {
-        int version; // VERSION
-        int jsta; // JSTA TYPE NUMBER
-        float spitch; // S-STRIPS PITCH
-        float zpitch; // Z-STRIPS PITCH
-        float dedstr; // DEAD REAGION BETWEEN STRIP
-        int nsrest; // NBER OF S STRIPS READOUTS
-        int nzrest; // NBER OF S GAS GAPS
-        float sfirst; // S-PHI STRIP OFFSET
-        float zfirst; // Z-ETA STRIP OFFSET
-        float dedsep; // DEAD SEPARATION
-        int nsrost; // NUMBER OF S-PHI READOUT STRIPS
-        int nzrost; // NUMBER OF Z-ETA READOUT STRIPS
+        int version{0};     // VERSION
+        int jsta{0};        // JSTA TYPE NUMBER
+        float spitch{0.f};  // S-STRIPS PITCH
+        float zpitch{0.f};  // Z-STRIPS PITCH
+        float dedstr{0.f};  // DEAD REAGION BETWEEN STRIP
+        int nsrest{0};      // NBER OF S STRIPS READOUTS
+        int nzrest{0};      // NBER OF S GAS GAPS
+        float sfirst{0};    // S-PHI STRIP OFFSET
+        float zfirst{0};    // Z-ETA STRIP OFFSET
+        float dedsep{0.f};  // DEAD SEPARATION
+        int nsrost{0};      // NUMBER OF S-PHI READOUT STRIPS
+        int nzrost{0};      // NUMBER OF Z-ETA READOUT STRIPS
     };
     
     const AWLN* data() const { return m_d.data(); };
     unsigned int size() const { return m_nObj; };
-    const char* getName() const { return "AWLN"; };
-    const char* getDirName() const { return "DblQ00"; };
-    const char* getObjName() const { return "AWLN"; };
+    std::string getName() const { return "AWLN"; };
+    std::string getDirName() const { return "DblQ00"; };
+    std::string getObjName() const { return "AWLN"; };
 
 private:
     std::vector<AWLN> m_d;

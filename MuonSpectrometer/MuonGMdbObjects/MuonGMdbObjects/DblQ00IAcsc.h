@@ -19,48 +19,48 @@ class IRDBAccessSvc;
 #include <string>
 #include <vector>
 
-class AmdcDb;
 
 namespace MuonGM {
 class DblQ00IAcsc {
 public:
-    DblQ00IAcsc();
-    ~DblQ00IAcsc();
+    DblQ00IAcsc() = default;
+    ~DblQ00IAcsc() = default;
     DblQ00IAcsc(IRDBAccessSvc *pAccessSvc, const std::string & GeoTag="", const std::string & GeoNode="");
     DblQ00IAcsc(const std::string& asciiFileName);
-    DblQ00IAcsc(AmdcDb* iacsc);
+
+    DblQ00IAcsc & operator=(const DblQ00IAcsc &right) = delete;
+    DblQ00IAcsc(const DblQ00IAcsc&) = delete;
+
     
     void WriteIAcscToAsciiFile(const std::string& filename);
 
     // data members for DblQ00/IACSC fields
     struct IACSC {
-        int version; // VERSION
-        int line; // LINE NUMBER
-        char type[8]; // STATION TYPE
-        int jff; // PHI POSITION
-        int jzz; // Z POSITION
-        int job; // JOB POSITION
-        int wireLayer; // JOB POSITION
-        float tras; // S TRANSLATION [MM]
-        float traz; // Z TRANSLATION
-        float trat; // T TRANSLATION
-        float rots; // S ROTATION [RAD]
-        float rotz; // Z ROTATION
-        float rott; // T ROTATION
-        int i; // STATION AMDB INDEX
+        int version{0}; // VERSION
+        int line{0}; // LINE NUMBER
+        std::string type{}; // STATION TYPE
+        int jff{0}; // PHI POSITION
+        int jzz{0}; // Z POSITION
+        int job{0}; // JOB POSITION
+        int wireLayer{0}; // JOB POSITION
+        float tras{0.f}; // S TRANSLATION [MM]
+        float traz{0.f}; // Z TRANSLATION
+        float trat{0.f}; // T TRANSLATION
+        float rots{0.f}; // S ROTATION [RAD]
+        float rotz{0.f}; // Z ROTATION
+        float rott{0.f}; // T ROTATION
+        int i{0}; // STATION AMDB INDEX
     };
 
     const IACSC* data() const { return m_d.data(); };
     unsigned int size() const { return m_nObj; };
-    const char* getName() const { return "IACSC"; };
-    const char* getDirName() const { return "DblQ00"; };
-    const char* getObjName() const { return "IACSC"; };
+    std::string getName() const { return "IACSC"; };
+    std::string getDirName() const { return "DblQ00"; };
+    std::string getObjName() const { return "IACSC"; };
 
 private:
-    std::vector<IACSC> m_d;
-    unsigned int m_nObj; // > 1 if array; 0 if error in retrieve.
-    DblQ00IAcsc & operator=(const DblQ00IAcsc &right);
-    DblQ00IAcsc(const DblQ00IAcsc&);
+    std::vector<IACSC> m_d{};
+    unsigned int m_nObj{0}; // > 1 if array; 0 if error in retrieve.
 };
 
 

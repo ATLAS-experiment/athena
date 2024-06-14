@@ -18,37 +18,33 @@
 
 class IRDBAccessSvc;
 
-class AmdcDb;
 
 namespace MuonGM {
 class DblQ00Wcmi {
 public:
-    DblQ00Wcmi(){};
-    ~DblQ00Wcmi();
+    DblQ00Wcmi() = default;
+    ~DblQ00Wcmi() = default;
     DblQ00Wcmi(IRDBAccessSvc *pAccessSvc, const std::string & GeoTag="", const std::string & GeoNode="");
-    DblQ00Wcmi(AmdcDb* wcmi);
 
     // data members for DblQ00/WCMI fields
     struct WCMI {
-        int version; // VERSION
-        int jsta; // INDEX
-        int num; // NUMBER OF OBJECTS
-        float heightness; // HEIGHT
-        float largeness; // T-SHAPE LARGENESS
-        float thickness; // T-SHAPE THICKNESS
+        int version{0}; // VERSION
+        int jsta{0}; // INDEX
+        int num{0}; // NUMBER OF OBJECTS
+        float heightness{0.f}; // HEIGHT
+        float largeness{0.f}; // T-SHAPE LARGENESS
+        float thickness{0.f}; // T-SHAPE THICKNESS
     };
     
     const WCMI* data() const { return m_d.data(); };
     unsigned int size() const { return m_nObj; };
-    const char* getName() const { return "WCMI"; };
-    const char* getDirName() const { return "DblQ00"; };
-    const char* getObjName() const { return "WCMI"; };
+    std::string getName() const { return "WCMI"; };
+    std::string getDirName() const { return "DblQ00"; };
+    std::string getObjName() const { return "WCMI"; };
 
 private:
-    std::vector<WCMI> m_d;
-    unsigned int m_nObj; // > 1 if array; 0 if error in retrieve.
-    DblQ00Wcmi & operator=(const DblQ00Wcmi &right);
-    DblQ00Wcmi(const DblQ00Wcmi&);
+    std::vector<WCMI> m_d{};
+    unsigned int m_nObj{0}; // > 1 if array; 0 if error in retrieve.
 };
 } // end of MuonGM namespace
     

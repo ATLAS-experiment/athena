@@ -18,37 +18,37 @@
 
 class IRDBAccessSvc;
 
-class AmdcDb;
 
 namespace MuonGM {
 class DblQ00Wchv {
 public:
-    DblQ00Wchv(){};
-    ~DblQ00Wchv();
+    DblQ00Wchv() = default;
+    ~DblQ00Wchv() = default;
     DblQ00Wchv(IRDBAccessSvc *pAccessSvc, const std::string & GeoTag="", const std::string & GeoNode="");
-    DblQ00Wchv(AmdcDb* wchv);
+
+    DblQ00Wchv & operator=(const DblQ00Wchv &right) = default;
+    DblQ00Wchv(const DblQ00Wchv&) = default;
+
     
     // data members for DblQ00/WCHV fields
     struct WCHV {
-        int version; // VERSION
-        int jsta; // INDEX
-        int num; // NUMBER OF OBJECTS
-        float heightness; // HEIGHT
-        float largeness; // T-SHAPE LARGENESS
-        float thickness; // T-SHAPE THICKNESS
+        int version{0}; // VERSION
+        int jsta{0}; // INDEX
+        int num{0}; // NUMBER OF OBJECTS
+        float heightness{0.f}; // HEIGHT
+        float largeness{0.f}; // T-SHAPE LARGENESS
+        float thickness{0.f}; // T-SHAPE THICKNESS
     };
     
     const WCHV* data() const { return m_d.data(); };
     unsigned int size() const { return m_nObj; };
-    const char* getName() const { return "WCHV"; };
-    const char* getDirName() const { return "DblQ00"; };
-    const char* getObjName() const { return "WCHV"; };
+    std::string getName() const { return "WCHV"; };
+    std::string getDirName() const { return "DblQ00"; };
+    std::string getObjName() const { return "WCHV"; };
 
 private:
-    std::vector<WCHV> m_d;
-    unsigned int m_nObj; // > 1 if array; 0 if error in retrieve.
-    DblQ00Wchv & operator=(const DblQ00Wchv &right);
-    DblQ00Wchv(const DblQ00Wchv&);
+    std::vector<WCHV> m_d{};
+    unsigned int m_nObj{0}; // > 1 if array; 0 if error in retrieve.
 };
 } // end of MuonGM namespace
 

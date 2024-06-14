@@ -18,37 +18,37 @@
 
 class IRDBAccessSvc;
 
-class AmdcDb;
 
 namespace MuonGM {
 class DblQ00Wlbi {
 public:
-    DblQ00Wlbi(){};
-    ~DblQ00Wlbi();
+    DblQ00Wlbi() = default;
+    ~DblQ00Wlbi() = default;
     DblQ00Wlbi(IRDBAccessSvc *pAccessSvc, const std::string & GeoTag="", const std::string & GeoNode="");
-    DblQ00Wlbi(AmdcDb* wlbi);
+
+    DblQ00Wlbi & operator=(const DblQ00Wlbi &right) = default;
+    DblQ00Wlbi(const DblQ00Wlbi&) = default;
+
 
     struct WLBI {
-        int version; // VERSION
-        int jsta; // INDEX
-        int num; // NUMBER OF OBJECTS
-        float height; // HEIGHT
-        float thickness; // WALL THICKNESS
-        float lowerThickness; // 
-        float yShift; // 
+        int version{0};       // VERSION
+        int jsta{0};          // INDEX
+        int num{0};           // NUMBER OF OBJECTS
+        float height{0.f};    // HEIGHT
+        float thickness{0.f}; // WALL THICKNESS
+        float lowerThickness{0.f}; // 
+        float yShift{0.f}; // 
     };
 
     const WLBI* data() const { return m_d.data(); };
     unsigned int size() const { return m_nObj; };
-    const char* getName() const { return "WLBI"; };
-    const char* getDirName() const { return "DblQ00"; };
-    const char* getObjName() const { return "WLBI"; };
+    std::string getName() const { return "WLBI"; };
+    std::string getDirName() const { return "DblQ00"; };
+    std::string getObjName() const { return "WLBI"; };
 
 private:
-    std::vector<WLBI> m_d;
-    unsigned int m_nObj; // > 1 if array; 0 if error in retrieve.
-    DblQ00Wlbi & operator=(const DblQ00Wlbi &right);
-    DblQ00Wlbi(const DblQ00Wlbi&);
+    std::vector<WLBI> m_d{};
+    unsigned int m_nObj{0}; // > 1 if array; 0 if error in retrieve.
 };
 } // end of MuonGM namespace
 
