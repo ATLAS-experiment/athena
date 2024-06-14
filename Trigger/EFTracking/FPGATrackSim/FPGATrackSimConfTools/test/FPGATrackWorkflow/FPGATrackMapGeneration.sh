@@ -8,7 +8,7 @@ echo "... Maps Making"
 python -m FPGATrackSimConfTools.FPGATrackSimMapMakerConfig \
     --filesInput=${WRAPPER} \
     OutFileName="MyMaps_" \
-    region=0 \
+    Trigger.FPGATrackSim.region=0 \
     GeoModel.AtlasVersion=${GEO_TAG}
 ls -l
 echo "... Maps Making, this part is done ..."

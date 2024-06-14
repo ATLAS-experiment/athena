@@ -23,6 +23,7 @@ def createFPGATrackSimConfigFlags():
     cf.addFlag('tracking', False)
     cf.addFlag('clustering', True)
     cf.addFlag('bankDir', '')
+    cf.addFlag('spacePoints', True)
 
     def __httHough1DFlags():
         """Additional function delays import"""
@@ -56,7 +57,6 @@ def createBasicFPGATrackSimConfigFlags():
     cf.addFlag('firstInputToolN', 1)
     cf.addFlag('realHitsOverlay', False)
     cf.addFlag('hitFiltering', False)
-    cf.addFlag('spacePoints', True)
     cf.addFlag('spacePointFiltering', False)
     cf.addFlag('writeOutputData', True)
 
