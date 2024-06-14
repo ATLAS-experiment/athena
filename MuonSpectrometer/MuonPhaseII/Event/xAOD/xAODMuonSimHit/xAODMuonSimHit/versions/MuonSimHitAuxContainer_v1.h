@@ -24,7 +24,7 @@ class MuonSimHitAuxContainer_v1 : public AuxContainerBase {
     /// @{
     std::vector<std::array<float, 3>> localPosition{};
     std::vector<std::array<float, 3>> localDirection{};
-    std::vector<float> stepLength{};
+    std::vector<float> mass{};
     std::vector<float> globalTime{};
     std::vector<int> pdgId{};
     std::vector<Identifier::value_type> identifier{};
