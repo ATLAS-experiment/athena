@@ -342,6 +342,8 @@ TriggerHLTListRun3 = [
     ('xAOD::eFexEMRoIAuxContainer#L1_eEMRoIAux.thresholdPatterns',                  'BS ESD AODFULL AODSLIM PhysicsTLA EgammaPEBTLA', 'L1'),
     ('xAOD::eFexTauRoIContainer#L1_eTauRoI',                                        'BS ESD AODFULL AODSLIM', 'L1'),
     ('xAOD::eFexTauRoIAuxContainer#L1_eTauRoIAux.thresholdPatterns',                'BS ESD AODFULL AODSLIM', 'L1'),
+    ('xAOD::eFexTauRoIContainer#L1_eTauxRoI',                                       'ESD AODFULL AODSLIM', 'L1'),
+    ('xAOD::eFexTauRoIAuxContainer#L1_eTauxRoIAux.',                                'ESD AODFULL AODSLIM', 'L1'),
     ('xAOD::eFexTauRoIContainer#L1_cTauRoI',                                        'BS ESD AODFULL AODSLIM', 'L1'),
     ('xAOD::eFexTauRoIAuxContainer#L1_cTauRoIAux.thresholdPatterns.jTauLink',       'BS ESD AODFULL AODSLIM', 'L1'),
 

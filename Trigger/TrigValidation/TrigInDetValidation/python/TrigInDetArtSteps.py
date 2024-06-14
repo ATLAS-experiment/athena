@@ -52,7 +52,7 @@ class TrigInDetReco(ExecStep):
         self._isCA = useCA_Reco
 
         self.preexec_all = ';'.join([
-            'ConfigFlags.Trigger.AODEDMSet=\'ESD\'',
+            'flags.Trigger.AODEDMSet=\'ESD\'',
         ])
         if self._isCA:
             self.postexec_trig = ''
@@ -62,6 +62,8 @@ class TrigInDetReco(ExecStep):
         #self.postexec_reco = "from AthenaCommon.AppMgr import ServiceMgr; ServiceMgr.AthenaPoolCnvSvc.MaxFileSizes=['tmp.ESD=100000000000']"
         self.postexec_reco = ''
         self.args = '--outputAODFile=AOD.pool.root --steering "doRDO_TRIG"'
+        # temporary global conditions override until input RDOs are migrated to MC23e
+        self.args += ' --conditionsTag "default:OFLCOND-MC23-SDR-RUN3-05"'
         self.args += ' --CA'
         if not self._isCA:
             self.args += ' "default:True"'

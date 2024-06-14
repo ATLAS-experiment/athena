@@ -10,6 +10,15 @@ TrigTauMonitorL1Algorithm::TrigTauMonitorL1Algorithm(const std::string& name, IS
 {}
 
 
+StatusCode TrigTauMonitorL1Algorithm::initialize()
+{
+    ATH_CHECK( TrigTauMonitorBaseAlgorithm::initialize() );
+
+    ATH_CHECK( m_phase1l1eTauxRoIKey.initialize(SG::AllowEmpty) );
+
+    return StatusCode::SUCCESS;
+}
+
 StatusCode TrigTauMonitorL1Algorithm::processEvent(const EventContext& ctx) const
 {
     constexpr float threshold_offset = 10.0;
@@ -18,6 +27,10 @@ StatusCode TrigTauMonitorL1Algorithm::processEvent(const EventContext& ctx) cons
     auto offline_taus_all = getOfflineTausAll(ctx, 0.0);
 
     if(m_requireOfflineTaus && offline_taus_all.empty()) return StatusCode::SUCCESS;
+
+    // xTOB-based eTAU RoIs
+    // If the container is not in SG, it'll return an empty vector
+    const std::vector<const xAOD::eFexTauRoI*> xtob_etau_rois = getL1xTOBeTAUs();
 
     for(const std::string& trigger : m_triggers) {
         const TrigTauInfo& info = getTrigInfo(trigger);
@@ -35,7 +48,7 @@ StatusCode TrigTauMonitorL1Algorithm::processEvent(const EventContext& ctx) cons
         if(info.getL1TauType() == "eTAU") {
             std::vector<const xAOD::eFexTauRoI*> rois = getL1eTAUs(ctx, info.getL1TauItem());
 
-            if(m_do_variable_plots) fillL1eTauVars(trigger, rois);
+            if(m_do_variable_plots) fillL1eTauVars(trigger, rois, xtob_etau_rois);
 	    if(m_do_efficiency_plots) {
                 fillL1Efficiencies(ctx, offline_taus_1p, "1P", trigger, rois);
                 fillL1Efficiencies(ctx, offline_taus_3p, "3P", trigger, rois);
@@ -57,7 +70,7 @@ StatusCode TrigTauMonitorL1Algorithm::processEvent(const EventContext& ctx) cons
             eTau_rois.reserve(rois.size());
 for(const auto& [eTau_roi, jTau_roi] : rois) eTau_rois.push_back(eTau_roi);
 
-            if(m_do_variable_plots) fillL1cTauVars(trigger, rois);
+            if(m_do_variable_plots) fillL1cTauVars(trigger, rois, xtob_etau_rois);
 	    if(m_do_efficiency_plots) {
                 fillL1Efficiencies(ctx, offline_taus_1p, "1P", trigger, eTau_rois);
                 fillL1Efficiencies(ctx, offline_taus_3p, "3P", trigger, eTau_rois);
@@ -78,7 +91,7 @@ for(const auto& [eTau_roi, jTau_roi] : rois) eTau_rois.push_back(eTau_roi);
 }
 
 
-void TrigTauMonitorL1Algorithm::fillL1eTauVars(const std::string& trigger, const std::vector<const xAOD::eFexTauRoI*>& rois)  const
+void TrigTauMonitorL1Algorithm::fillL1eTauVars(const std::string& trigger, const std::vector<const xAOD::eFexTauRoI*>& rois, const std::vector<const xAOD::eFexTauRoI*>& xtob_rois) const
 {
     ATH_MSG_DEBUG("Fill L1 variables: " << trigger);
 
@@ -89,7 +102,7 @@ void TrigTauMonitorL1Algorithm::fillL1eTauVars(const std::string& trigger, const
     auto L1RoIPhi       = Monitored::Collection("L1RoIPhi"      , rois, [](const xAOD::eFexTauRoI* L1roi){ return L1roi->phi(); });
     auto L1RoIRCore     = Monitored::Collection("L1eFexRoIRCore", rois, [](const xAOD::eFexTauRoI* L1roi){ return L1roi->rCore(); });
     auto L1RoIRHad      = Monitored::Collection("L1eFexRoIRHad" , rois, [](const xAOD::eFexTauRoI* L1roi){ return L1roi->rHad(); });
-    auto L1RoIBDTScore  = Monitored::Collection("L1eFexRoIBDTScore" , rois, [](const xAOD::eFexTauRoI* L1roi){ return L1roi->bdtScore(); });
+    auto L1RoIBDTScore  = Monitored::Collection("L1eFexRoIBDTScore" , rois, [this, &xtob_rois](const xAOD::eFexTauRoI* L1roi){ return getBDTScore(L1roi, xtob_rois); });
     fill(monGroup, L1RoIEt, L1RoIEta, L1RoIPhi, L1RoIRCore, L1RoIRHad, L1RoIBDTScore);
 
     ATH_MSG_DEBUG("After fill L1 variables: " << trigger);
@@ -114,7 +127,7 @@ void TrigTauMonitorL1Algorithm::fillL1jTauVars(const std::string& trigger, const
 
 
 
-void TrigTauMonitorL1Algorithm::fillL1cTauVars(const std::string& trigger, const std::vector<std::pair<const xAOD::eFexTauRoI*, const xAOD::jFexTauRoI*>>& rois)  const
+void TrigTauMonitorL1Algorithm::fillL1cTauVars(const std::string& trigger, const std::vector<std::pair<const xAOD::eFexTauRoI*, const xAOD::jFexTauRoI*>>& rois, const std::vector<const xAOD::eFexTauRoI*>& xtob_rois) const
 {
     ATH_MSG_DEBUG("Fill L1 variables: " << trigger);
 
@@ -125,7 +138,7 @@ void TrigTauMonitorL1Algorithm::fillL1cTauVars(const std::string& trigger, const
     auto L1RoIPhi       = Monitored::Collection("L1RoIPhi"      , rois, [](const auto L1roi){ return L1roi.first->phi(); });
     auto L1eFexRoIRCore = Monitored::Collection("L1eFexRoIRCore", rois, [](const auto L1roi){ return L1roi.first->rCore(); });
     auto L1eFexRoIRHad  = Monitored::Collection("L1eFexRoIRHad" , rois, [](const auto L1roi){ return L1roi.first->rHad(); });
-    auto L1RoIBDTScore  = Monitored::Collection("L1eFexRoIBDTScore" , rois, [](const auto L1roi){ return L1roi.first->bdtScore(); });
+    auto L1RoIBDTScore  = Monitored::Collection("L1eFexRoIBDTScore" , rois, [this, &xtob_rois](const auto L1roi){ return getBDTScore(L1roi.first, xtob_rois); });
 
     std::vector<bool> jFex_isMatched;
     std::vector<float> jFex_eFex_et_ratio;
@@ -171,3 +184,35 @@ void TrigTauMonitorL1Algorithm::fillL1LegacyVars(const std::string& trigger, con
 
     ATH_MSG_DEBUG("After fill L1 variables: " << trigger);
 }
+
+
+std::vector<const xAOD::eFexTauRoI*> TrigTauMonitorL1Algorithm::getL1xTOBeTAUs() const
+{
+    std::vector<const xAOD::eFexTauRoI*> roi_vec;
+
+    if(m_phase1l1eTauxRoIKey.empty()) return roi_vec;
+
+    SG::ReadHandle<xAOD::eFexTauRoIContainer> rois(m_phase1l1eTauxRoIKey);
+    if(!rois.isValid()) {
+        ATH_MSG_WARNING("The L1_eTauxRoI container is not available! No e/cTAU BDT score will be retrieved");
+        return roi_vec;
+    }
+    
+    for(const xAOD::eFexTauRoI* roi : *rois) roi_vec.push_back(roi);
+    return roi_vec;
+}
+
+unsigned int TrigTauMonitorL1Algorithm::getBDTScore(const xAOD::eFexTauRoI* roi, const std::vector<const xAOD::eFexTauRoI*>& xtob_rois) const
+{
+    if(xtob_rois.empty()) return 0;
+
+    for(const xAOD::eFexTauRoI* xroi : xtob_rois) {
+        if(xroi->eta() == roi->eta() && xroi->phi() == roi->phi()) return xroi->bdtScore();
+    }
+    ATH_MSG_DEBUG("Unmatched RoI! et=" << roi->et() << ", eta=" << roi->eta() << ", phi=" << roi->phi());
+    for(const xAOD::eFexTauRoI* xroi : xtob_rois) {
+        ATH_MSG_DEBUG(" - xRoI et=" << xroi->et() << ", eta=" << xroi->eta() << ", phi=" << xroi->phi());
+    }
+    return 0;
+}
+

@@ -70,8 +70,7 @@ if __name__ == '__main__':
     flags.Exec.MaxEvents = 5
     flags.Concurrency.NumThreads = 1
     flags.Trigger.triggerMenuSetup = 'Dev_pp_run3_v1'
-    flags.Trigger.enableL1MuonPhase1 = True
-    flags.Trigger.enableL1CaloPhase1 = True
+    flags.IOVDb.GlobalTag="OFLCOND-MC23-SDR-RUN3-05" # temporary override until the input RDO is updated to a MC23e setup
     flags.Trigger.doHLT = True # this is necessary so that the simulation of L1Calo (if running on MC) gets output with keys that Topo sim expects
     flags.fillFromArgs()
     flags.lock()

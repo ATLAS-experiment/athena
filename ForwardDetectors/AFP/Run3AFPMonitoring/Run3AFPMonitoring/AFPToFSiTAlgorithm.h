@@ -28,9 +28,13 @@ class AFPToFSiTAlgorithm : public AthMonitorAlgorithm {
     SG::ReadHandleKey<xAOD::AFPSiHitContainer> m_afpSiHitContainerKey;
     SG::ReadHandleKey<xAOD::AFPToFHitContainer> m_afpToFHitContainerKey;
     SG::ReadHandleKey<xAOD::AFPTrackContainer> m_afpTrackContainerKey;
+    std::map<std::string,int> m_GroupToFSiTCorr;
 
     const std::vector<float> m_tofTrainsCoordinates[2] = {{-1.9, -4.9, -8.0, -13.0, -15.0},{-1.9, -5.3, -8.4, -13.4, -15.0}};
     const float m_tofTrainGapSize = 0.1;
+
+  protected:
+    std::vector<std::string> m_planes = { "P0", "P1" , "P2" , "P3" };
 };
 
 #endif

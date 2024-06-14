@@ -30,8 +30,7 @@ ex.threads = 4
 ex.concurrent_events = 4
 ex.max_events = 500
 ex.flags = ['Trigger.triggerMenuSetup="Dev_HI_run3_v1_TriggerValidation_prescale"',
-            'Trigger.doLVL1=True',
-            'Output.RDOFileName="RDO_TRIG.pool.root"',
+            'IOVDb.GlobalTag="OFLCOND-MC23-SDR-RUN3-05"',
             'Trigger.doRuntimeNaviVal=True',
             'Trigger.L1.Menu.doHeavyIonTobThresholds=True'            
             ]
