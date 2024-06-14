@@ -37,8 +37,7 @@ class MuonDetectorTool final : public GeoModelTool {
     Gaudi::Property<std::string> m_layout{this, "LayoutName", "R.08" };
     Gaudi::Property<bool> m_accessCondDb{this,"UseConditionDb", true};
     Gaudi::Property<bool> m_asciiCondData{this,"UseAsciiConditionData", false};
-    Gaudi::Property<int> m_amdcDb{this, "BuildFromAmdcDb", 0, "Build the geometry from AMDB file (expert only!)"};
- 
+  
     Gaudi::Property<bool> m_includeCutouts{this, "IncludeCutouts", false};
     Gaudi::Property<bool> m_includeCutoutsBog{this, "IncludeCutoutsBog", false };
     Gaudi::Property<bool> m_includeCtbBis{this, "IncludeCtbBis" , false };
