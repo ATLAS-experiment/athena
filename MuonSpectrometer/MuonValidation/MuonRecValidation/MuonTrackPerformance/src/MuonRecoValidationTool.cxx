@@ -22,6 +22,7 @@
 #include "TrkTrack/Track.h"
 #include "xAODTruth/TruthParticle.h"
 #include "xAODTruth/TruthParticleContainer.h"
+#include "TruthUtils/MagicNumbers.h"
 #include "AthContainers/ConstAccessor.h"
 
 namespace {
@@ -109,7 +110,7 @@ namespace Muon {
         m_ntuple.trackParticleBlock.eta->push_back(indetTrackParticle.eta());
         m_ntuple.trackParticleBlock.phi->push_back(indetTrackParticle.phi());
         int pdg = 0;
-        int barcode = -1;
+        int barcode = -1; // FIXME barcode-based
         float beta = 1.;
         // set truth
         typedef ElementLink<xAOD::TruthParticleContainer> ElementTruthLink_t;
@@ -119,11 +120,11 @@ namespace Muon {
             const ElementTruthLink_t link = truthParticleLinkAcc(indetTrackParticle);
             if (link.isValid()) {
                 pdg = (*link)->pdgId();
-                barcode = (*link)->barcode();
+                barcode = HepMC::barcode(*link);
                 beta = (*link)->p4().Beta();
             }
         }
-        m_ntuple.trackParticleBlock.truth.fill(pdg, barcode, beta);
+        m_ntuple.trackParticleBlock.truth.fill(pdg, barcode, beta); // FIXME barcode-based
 
         // try to find the pointer of the indetTrackParticle
         bool found = false;
@@ -151,26 +152,26 @@ namespace Muon {
     }
 
     int MuonRecoValidationTool::getBarcode(const std::set<Identifier>& ids) const {
-        if (!m_isMC) return -1;
+      if (!m_isMC) return HepMC::INVALID_PARTICLE_ID;
 
-        // count how often a barcode occurs
-        std::map<int, int> counters;
-        for (std::set<Identifier>::const_iterator it = ids.begin(); it != ids.end(); ++it) {
-            int bc = m_truthSummaryTool->getBarcode(*it);
-            if (bc != -1) ++counters[bc];
+      // count how often a barcode occurs
+      std::map<int, int> counters;
+      for (std::set<Identifier>::const_iterator it = ids.begin(); it != ids.end(); ++it) {
+        const int bc = m_truthSummaryTool->getBarcode(*it); // FIXME barcode-based
+        if (bc != -1) ++counters[bc];
+      }
+
+      // pick the most frequent
+      int barcode = -1;
+      int max = -1;
+      for (std::map<int, int>::iterator it = counters.begin(); it != counters.end(); ++it) {
+        if (it->second > max) {
+          barcode = it->first; // FIXME barcode-based
+          max = it->second;
         }
+      }
 
-        // pick the most frequent
-        int barcode = -1;
-        int max = -1;
-        for (std::map<int, int>::iterator it = counters.begin(); it != counters.end(); ++it) {
-            if (it->second > max) {
-                barcode = it->first;
-                max = it->second;
-            }
-        }
-
-        return barcode;
+      return barcode;
     }
 
     bool MuonRecoValidationTool::addTimeMeasurements(const xAOD::TrackParticle& indetTrackParticle,

@@ -4,6 +4,7 @@
 
 #include "MuonHoughDataNtuple.h"
 #include "MuonTesterTree/EventInfoBranch.h"
+#include "TruthUtils/MagicNumbers.h"
 #include <unordered_set>
 
 struct HitTruthMatching{
@@ -245,7 +246,7 @@ StatusCode MuonHoughDataNtuple::execute()
   // filling truth values 
   for(const xAOD::TruthParticle* truthMu: *truthMuonContainer){
     m_truth_pdgId = truthMu->pdgId();
-    m_truth_barcode = truthMu->barcode();
+    m_truth_barcode = HepMC::barcode(truthMu); // FIXME barcode-based
 
     m_truth_pt = truthMu->pt();
     m_truth_eta = truthMu->eta();

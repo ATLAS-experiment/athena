@@ -110,7 +110,7 @@ namespace Muon {
             xAOD::TruthParticle* truthParticle = new xAOD::TruthParticle();
             muonTruthContainer->push_back(truthParticle);
             truthParticle->setPdgId(truth->pdgId());
-            truthParticle->setBarcode(truth->barcode());
+            truthParticle->setBarcode(HepMC::barcode(truth)); // FIXME barcode-based
             truthParticle->setStatus(truth->status());
             truthParticle->setPx(truth->px());
             truthParticle->setPy(truth->py());
@@ -121,9 +121,9 @@ namespace Muon {
             ElementLink<xAOD::TruthParticleContainer> truthLink(*muonTruthContainer, muonTruthContainer->size() - 1);
             truthLink.toPersistent();
             ATH_MSG_DEBUG("Found stable muon: " << truth->pt() << " eta " << truth->eta() << " phi " << truth->phi() << " mass "
-                                                << truth->m() << " barcode " << truth->barcode() << " truthParticle->barcode "
-                                                << truthParticle->barcode() << " (*truthLink)->barcode " << (*truthLink)->barcode() << " "
-                                                << truthLink);
+                          << truth->m() << " barcode " << HepMC::barcode(truth) << " truthParticle->barcode "
+                          << HepMC::barcode(truthParticle) << " (*truthLink)->barcode " << HepMC::barcode(*truthLink) << " "
+                                                << truthLink); // FIXME barcode-based
             int iType = 0;
             int iOrigin = 0;
 
@@ -300,7 +300,7 @@ namespace Muon {
                 nprecLayers = precLayers.size();
                 ATH_MSG_DEBUG(" total counts: precision " << static_cast<int>(nprecLayers) << " phi layers " << static_cast<int>(nphiLayers)
                                                           << " eta trig layers " << static_cast<int>(ntrigEtaLayers)
-                                                          << " associated reco muon " << index << " barcode " << (*truthLink)->barcode()
+                                                          << " associated reco muon " << index << " barcode " << HepMC::barcode(*truthLink) // FIXME barcode-based
                                                           << " truthLink " << truthLink);
                 xAOD::MuonSegment* segment = new xAOD::MuonSegment();
                 segmentContainer->push_back(segment);
@@ -490,7 +490,6 @@ namespace Muon {
     StatusCode MuonTruthDecorationAlg::addHitCounts(const EventContext& ctx,
                                                     xAOD::TruthParticle& truthParticle,
                                                     ChamberIdMap& ids) const {
-        int barcode = truthParticle.barcode();
 
         std::vector<unsigned int> nprecHitsPerChamberLayer;
         nprecHitsPerChamberLayer.resize(Muon::MuonStationIndex::ChIndexMax);
@@ -498,8 +497,8 @@ namespace Muon {
         nphiHitsPerChamberLayer.resize(Muon::MuonStationIndex::PhiIndexMax);
         std::vector<unsigned int> ntrigEtaHitsPerChamberLayer;
         ntrigEtaHitsPerChamberLayer.resize(Muon::MuonStationIndex::PhiIndexMax);
-        ATH_MSG_DEBUG("addHitCounts: barcode " << barcode);
-        auto truthParticleHistory = HepMC::simulation_history(&truthParticle, -1);
+        ATH_MSG_DEBUG("addHitCounts: barcode " << HepMC::barcode(truthParticle)); // FIXME barcode-based
+        auto truthParticleHistory = HepMC::simulation_history(&truthParticle, -1); // Returns a list of uniqueIDs (currently for xAOD::TruthParticle these would be barcodes)
         // loop over detector technologies
         for (SG::ReadHandle<PRD_MultiTruthCollection>& col : m_PRD_TruthNames.makeHandles(ctx)) {
             if (!col.isPresent()) {
@@ -509,7 +508,7 @@ namespace Muon {
             // loop over trajectories
             for (const auto& trajectory : *col) {
                 // check if gen particle same as input
-                if (std::find(truthParticleHistory.begin(),truthParticleHistory.end(), trajectory.second.barcode()) == truthParticleHistory.end()) continue;
+              if (std::find(truthParticleHistory.begin(),truthParticleHistory.end(), HepMC::barcode(trajectory.second)) == truthParticleHistory.end()) continue; // FIXME barcode-based TrackRecords read in from existing inputs will not have valid id values.
 
                 const Identifier& id = trajectory.first;
                 bool measPhi = m_idHelperSvc->measuresPhi(id);

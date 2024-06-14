@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonHoughPatternTools/MuonLayerHoughTool.h"
@@ -1499,9 +1499,9 @@ namespace Muon {
             } else {
                 const HepMcParticleLink& link = i->second;
                 if (link.cptr() && abs(link.cptr()->pdg_id()) == 13) {
-                    debug.barcode = link.barcode();
-                    debug.pdgId = link.cptr()->pdg_id();
-                    truthHits.insert(id);
+                  debug.barcode = HepMC::barcode(link); // FIXME barcode-based - requires MuonHough::HitDebugInfo to be migrated to uniqueID
+                  debug.pdgId = link.cptr()->pdg_id();
+                  truthHits.insert(id);
                 }
             }
         }
@@ -1788,7 +1788,7 @@ namespace Muon {
                 float phiMin = std::min(phi1c, phi2c);
                 float phiMax = std::max(phi1c, phi2c);
                 ATH_MSG_VERBOSE("Phi hit " << m_idHelperSvc->toString(id) << " r " << r << " phi min " << phiMin << " phi max "
-                                           << phiMax << " bc " << debug->barcode << " chw " << chWidth << " trigC "
+                                           << phiMax << " bc " << debug->barcode << " chw " << chWidth << " trigC " // FIXME barcode-based - requires MuonHough::HitDebugInfo to be migrated to uniqueID
                                            << debug->trigConfirm << " g phi " << phi1 << " " << phi2);
                 MuonHough::PhiHit* phiHit =
                     new MuonHough::PhiHit(sublayer, r, phiMin, phiMax, 1, debug.release(), prd);

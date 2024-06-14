@@ -52,10 +52,10 @@ namespace Muon {
         void init() const;
 
         /** get the associated barcode for the identifier, return -1 if the channel was not hit by a muon */
-        int getBarcode(const Identifier& id) const;
+      int getBarcode(const Identifier& id) const; // FIXME barcode-based
 
         /** get the associated pdgId for a given barcode */
-        int getPdgId(int barcode) const;
+        int getPdgId(int barcode) const; // FIXME barcode-based
 
         /** add identifier */
         void add(const Identifier& id, int level) const;
@@ -105,10 +105,10 @@ namespace Muon {
         SG::ReadHandleKeyArray<PRD_MultiTruthCollection> m_TruthNames{
             this, "TruthNames", {"RPC_TruthMap", "TGC_TruthMap", "MDT_TruthMap"}, "truth names"};
 
-        mutable std::unordered_map<int, int> m_pdgIdLookupFromBarcode ATLAS_THREAD_SAFE;  // protected by mutex
+        mutable std::unordered_map<int, int> m_pdgIdLookupFromBarcode ATLAS_THREAD_SAFE;  // protected by mutex// FIXME barcode-based
         mutable std::unordered_map<Identifier, int, IdentifierHash> m_truthHits
             ATLAS_THREAD_SAFE;  // protected by mutex. map containing truth hits associated with muons, stores barcode as
-                                // second element
+                                // second element // FIXME barcode-based
         mutable std::unordered_map<int, std::unordered_set<Identifier, IdentifierHash>> m_truthDataPerLevel
             ATLAS_THREAD_SAFE;  // protected by mutex
         std::unordered_map<int, unsigned int> m_lossesPerLevel;

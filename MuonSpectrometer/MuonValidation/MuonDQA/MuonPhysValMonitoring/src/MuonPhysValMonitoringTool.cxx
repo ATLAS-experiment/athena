@@ -1092,7 +1092,7 @@ namespace MuonPhysValMonitoring {
             if (type ==
                 xAOD::Muon::InnerDetectorTrackParticle) {  // don't fill histograms for any ID track, only for muons; buys a lot of time
                 if ((*truthLink)->absPdgId() != 13 || !MC::isStable(*truthLink)) return;     // not a muon
-                if ((*truthLink)->barcode() == 0 || HepMC::is_simulation_particle((*truthLink))) return;  // must have valid barcode
+                if (HepMC::uniqueID(*truthLink) == HepMC::UNDEFINED_ID || HepMC::is_simulation_particle((*truthLink))) return;  // must have valid barcode
             }
 
             if (!passesAcceptanceCuts(*truthLink)) return;
@@ -1398,12 +1398,12 @@ namespace MuonPhysValMonitoring {
         if (truthMuSeg->isAvailable<TruthLink>("truthParticleLink")) {
             truthLink = truthMuSeg->auxdata<TruthLink>("truthParticleLink");
             if (truthLink.isValid()) {
-                int theBarcode = (*truthLink)->barcode();
-                if (std::abs((*truthLink)->pdgId()) != 13) return REST;
+              const int theUniqueID = HepMC::uniqueID(*truthLink);
+              if (std::abs((*truthLink)->pdgId()) != 13) return REST;
 
-                for (const auto muTruthPart : *muonTruthContainer) {
-                    if (muTruthPart->barcode() == theBarcode) { return getMuonTruthCategory(muTruthPart); }
-                }
+              for (const auto muTruthPart : *muonTruthContainer) {
+                if ( HepMC::uniqueID(muTruthPart) == theUniqueID ) { return getMuonTruthCategory(muTruthPart); }
+              }
             }
         } else
             ATH_MSG_WARNING("No truth link available for muon truth segment");

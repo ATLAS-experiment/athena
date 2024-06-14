@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONHOUGH_HIT_H
@@ -37,7 +37,7 @@ namespace MuonHough {
         Muon::MuonStationIndex::LayerIndex layer{Muon::MuonStationIndex::LayerUnknown};  /// layer (inner/middle/outer)
         int sublayer{UNINITIALIZED};                                                     /// sublayer within layer
         int pdgId{UNINITIALIZED};                                                        /// pdgId of the associated truth particle (if any)
-        int barcode{UNINITIALIZED};                                                      /// barcode of truth particle
+        int barcode{UNINITIALIZED};                                                      /// barcode of truth particle - FIXME barcode-based
         int muonIndex{UNINITIALIZED};                                                    /// index of reconstructed muon
         int clusterSize{UNINITIALIZED};                                                  /// cluster size
         int clusterLayers{UNINITIALIZED};                                                /// number of layers in the cluster

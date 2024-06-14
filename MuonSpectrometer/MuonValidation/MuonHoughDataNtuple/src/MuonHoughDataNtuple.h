@@ -133,7 +133,7 @@ private:
   MuonVal::MuonTesterTree m_truth_tree{"TruthHoughData","MuonHoughDataNtuple"}; 
   // muon truth info
   MuonVal::ScalarBranch<int>& m_truth_pdgId{m_truth_tree.newScalar<int>("pdgId", -999)}; 
-  MuonVal::ScalarBranch<int>& m_truth_barcode{m_truth_tree.newScalar<int>("barcode", -999)}; 
+  MuonVal::ScalarBranch<int>& m_truth_barcode{m_truth_tree.newScalar<int>("barcode", -999)};  // FIXME barcode-based
 
   MuonVal::ScalarBranch<float>& m_truth_pt{m_truth_tree.newScalar<float>("truth_Pt", -999)}; 
   MuonVal::ScalarBranch<float>& m_truth_eta{m_truth_tree.newScalar<float>("truth_Eta", -999)}; 

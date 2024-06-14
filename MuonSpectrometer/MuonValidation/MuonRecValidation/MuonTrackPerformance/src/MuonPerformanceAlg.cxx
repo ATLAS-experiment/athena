@@ -14,6 +14,7 @@
 #include "xAODTruth/TruthParticle.h"
 #include "xAODTruth/TruthParticleAuxContainer.h"
 #include "xAODTruth/TruthParticleContainer.h"
+#include "TruthUtils/MagicNumbers.h"
 #include "AthContainers/ConstAccessor.h"
 
 MuonPerformanceAlg::MuonPerformanceAlg(const std::string& name, ISvcLocator* pSvcLocator) :
@@ -573,13 +574,13 @@ StatusCode MuonPerformanceAlg::execute() {
 }
 void MuonPerformanceAlg::print(const std::string& txt, const xAOD::TruthParticle* muon) {
     // Truth: r  4251 z   3147 theta 0.91843 phi -0.781 q*p(GeV)  1.081e+02 pt(Gev) 8.589e+01
-    // barcode 1489 mother 23 production vertex: r  1.06363 z -102.414
+    // uniqueID 1489 mother 23 production vertex: r  1.06363 z -102.414
     int q = 1;
     if (muon->pdgId() > 0) q = -1;
     double p = sqrt(muon->e() * muon->e() - muon->m() * muon->m());
     static const SG::ConstAccessor<uint8_t> nprecLayersAcc("nprecLayers");
     ATH_MSG_DEBUG(txt << " run " << m_runNumber << " event " << m_eventNumber << std::endl
-                      << " Truth:  pdgId " << muon->pdgId() << " barcode " << muon->barcode() << " eta " << muon->eta() << " phi "
+                  << " Truth:  pdgId " << muon->pdgId() << " uniqueID " << HepMC::uniqueID(muon) << " eta " << muon->eta() << " phi "
                       << muon->phi() << " q*p (GeV) " << q * p / 1000. << " pt (GeV) " << muon->pt() / 1000. << " precisionLayers "
                       << static_cast<int>(nprecLayersAcc(*muon)));
 }
