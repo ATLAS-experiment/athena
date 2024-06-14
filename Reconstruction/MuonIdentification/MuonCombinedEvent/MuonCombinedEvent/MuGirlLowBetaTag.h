@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCOMBINEDEVENT_MUGIRLLOWBETATAG_H
 #define MUONCOMBINEDEVENT_MUGIRLLOWBETATAG_H
 
 #include <vector>
+#include <memory>
 
 #include "MuonCombinedEvent/CandidateSummary.h"
 #include "MuonCombinedEvent/TagBase.h"
@@ -27,14 +28,15 @@ namespace MuonCombined {
     public:
         /** Constructor a combined track and a list of segments as input
          */
-        MuGirlLowBetaTag(const ElementLink<TrackCollection>& combLink, const std::vector<ElementLink<Trk::SegmentCollection> >& segments);
+        MuGirlLowBetaTag(const ElementLink<TrackCollection>& combLink, 
+                         const std::vector<ElementLink<Trk::SegmentCollection> >& segments);
 
         /** Constructor taking a list of segments
          */
         MuGirlLowBetaTag(const std::vector<ElementLink<Trk::SegmentCollection> >& segments);
 
         /** destructor */
-        ~MuGirlLowBetaTag();
+        ~MuGirlLowBetaTag() = default;
 
         /** access combined track */
         const Trk::Track* combinedTrack() const;
@@ -54,17 +56,14 @@ namespace MuonCombined {
 
         /* stau Dressing */
         void setMuBeta(float muBeta);
-        float getMuBeta();
+        float getMuBeta() const;
 
-        void setStauSummary(MuGirlNS::CandidateSummary* stauSummary);
-        MuGirlNS::CandidateSummary* getStauSummary();
+    
 
-        void setStauExtras(MuGirlNS::StauExtras* stauExtras);
+        void setStauExtras(std::unique_ptr<MuGirlNS::StauExtras> stauExtras);
         MuGirlNS::StauExtras* getStauExtras();
         const MuGirlNS::StauExtras* getStauExtras() const;
 
-        void setRHExtras(MuGirlNS::RHExtras* rhExtras);
-        MuGirlNS::RHExtras* getRHExtras();
 
         /** name string */
         std::string name() const override { return "MuGirlLowBetaTag"; }
@@ -87,9 +86,7 @@ namespace MuonCombined {
 
         // dressing
         float m_muBeta{-9999.};
-        std::unique_ptr<MuGirlNS::CandidateSummary> m_stauSummary{};
         std::unique_ptr<MuGirlNS::StauExtras> m_stauExtras{};
-        std::unique_ptr<MuGirlNS::RHExtras> m_rhExtras{};
     };
     inline bool operator<(const MuGirlLowBetaTag& t1, const MuGirlLowBetaTag& t2) {
         const Trk::FitQuality* t1FQ = t1.combinedTrack() ? t1.combinedTrack()->fitQuality() : nullptr;

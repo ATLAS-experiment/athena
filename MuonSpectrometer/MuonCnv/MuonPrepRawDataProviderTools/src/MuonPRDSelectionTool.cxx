@@ -81,14 +81,12 @@ namespace Muon {
     const Amg::Vector3D& direction = intersection.trackParameters->momentum();
     Amg::Vector3D intersect = intersectMDT(mdt,intersection.trackParameters->position(),direction,true);
 
-    // get the error in the precision plane
-    double err_precision = Amg::error(*intersection.trackParameters->covariance(),Trk::locX);
 
     // calculate local position of the intersection in tube frame
     const Identifier& id = mdt.identify();
     const MuonGM::MdtReadoutElement* detEl = mdt.detectorElement();
     const Trk::Surface& surface = mdt.detectorElement()->surface(id);
-    Amg::Vector2D localPosition;
+    Amg::Vector2D localPosition{Amg::Vector2D::Zero()};
     if( !surface.globalToLocal(intersect,direction,localPosition) ){
       ATH_MSG_VERBOSE(" globalToLocal failed for " << m_idHelperSvc->toString(id) );
       return nullptr;
@@ -98,9 +96,11 @@ namespace Muon {
     double tubeHalfLen = 0.5*detEl->getActiveTubeLength( m_idHelperSvc->mdtIdHelper().tubeLayer(id),m_idHelperSvc->mdtIdHelper().tube(id) );
     double distanceAlongTube = localPosition[Trk::locZ];
 
-    if( msgLvl(MSG::VERBOSE) ) msg(MSG::VERBOSE) << " Intersected " << m_idHelperSvc->toString(id) << " distance to wire " << localPosition[Trk::locR] 
-                                                 << " error " << err_precision << " along tube (%) " << distanceAlongTube/tubeHalfLen;
+    if( msgLvl(MSG::VERBOSE) ) {
+        msg(MSG::VERBOSE) << " Intersected " << m_idHelperSvc->toString(id) << " distance to wire " << localPosition[Trk::locR] 
+                                                 << " error " << Amg::error(*intersection.trackParameters->covariance(),Trk::locX) << " along tube (%) " << distanceAlongTube/tubeHalfLen;
 
+    } 
     if( std::abs(distanceAlongTube) > tubeHalfLen + m_secondCoordinateCut ) {
       if( msgLvl(MSG::VERBOSE) ) msg(MSG::VERBOSE) << " outside tube second coordinate range, dropping " << endmsg;
       return nullptr;
