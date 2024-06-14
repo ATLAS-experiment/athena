@@ -4,7 +4,6 @@
 
 #include "MuonGeoModel/MuonDetectorTool.h"
 
-#include "AmdcDb/AmdcDb.h"
 #include "AthenaKernel/ClassID_traits.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "GeoModelInterfaces/IGeoModelSvc.h"
@@ -247,23 +246,14 @@ StatusCode MuonDetectorTool::createFactory(MuonGM::MuonDetectorManager * & mgr, 
 
     if (nullptr == m_detector) {
         IRDBAccessSvc *access = nullptr;
-        if (m_amdcDb)
-            ATH_CHECK(service("AmdcDb", access));
-        else
-            ATH_CHECK(service("RDBAccessSvc", access));
+        ATH_CHECK(service("RDBAccessSvc", access));
 
-        bool isAmdcDb = false;
-        if (dynamic_cast<AmdcDb *>(access) && m_amdcDb) {
-            ATH_MSG_INFO("AmdcDb is used instead of RDBAccessSvc");
-            isAmdcDb = true;
-            ATH_MSG_INFO("AmdcDb->InitializedSvc() is true");
-        }
+    
 
         theFactory.setDBAtlasVersion(AtlasVersion);
         theFactory.setDBMuonVersion(MuonVersion);
         theFactory.setDBkey(detectorKey);
         theFactory.setDBnode(detectorNode);       
-        theFactory.setAmdcDb(isAmdcDb);
         theFactory.setLayout(tempLayout);
         theFactory.setCutoutsFlag(m_includeCutouts);
         theFactory.setCutoutsBogFlag(m_includeCutoutsBog);

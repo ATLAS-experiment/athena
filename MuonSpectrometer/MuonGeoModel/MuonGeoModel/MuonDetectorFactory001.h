@@ -42,7 +42,6 @@ namespace MuonGM {
         inline void setDBkey(const std::string&v);
         inline void setDBnode(const std::string&v);
 
-        inline void setAmdcDb(bool value);
         inline void setLayout(const std::string& str);
         inline void setCutoutsFlag(int);
         inline void setCutoutsBogFlag(int);
@@ -78,7 +77,6 @@ namespace MuonGM {
         std::string m_DBkey{};
         std::string m_DBnode{};
 
-        bool m_isAmdcDb{false};
         std::string m_layout{};
         int m_includeCutouts{0};
         int m_includeCutoutsBog{0};
@@ -109,8 +107,6 @@ namespace MuonGM {
     void MuonDetectorFactory001::setDBMuonVersion(const std::string&v) { m_DBMuonVersion = v; }
     void MuonDetectorFactory001::setDBkey(const std::string&v) { m_DBkey = v; }
     void MuonDetectorFactory001::setDBnode(const std::string&v) { m_DBnode = v; }
-
-    void MuonDetectorFactory001::setAmdcDb(bool value) { m_isAmdcDb = value; }
     void MuonDetectorFactory001::setLayout(const std::string&str) { m_layout = str; }
     void MuonDetectorFactory001::setCutoutsFlag(int flag) { m_includeCutouts = flag; }
     void MuonDetectorFactory001::setCutoutsBogFlag(int flag) { m_includeCutoutsBog = flag; }

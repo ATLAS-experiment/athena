@@ -1,10 +1,9 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonGeoModel/RDBReaderAtlas.h"
 
-#include "AmdcDb/AmdcDb.h"
 #include "GaudiKernel/SystemOfUnits.h"
 #include "MuonGeoModel/MdtComponent.h"
 #include "MuonGeoModel/StationSelector.h"
@@ -29,144 +28,79 @@ namespace MuonGM {
             m_geoTag(geoTag), m_geoNode(geoNode), m_pRDBAccess(pRDBAccess) {
         m_SCdbaccess = StatusCode::FAILURE;
 
-        AmdcDb *theAmdcDb = dynamic_cast<AmdcDb *>(m_pRDBAccess);
-        if (theAmdcDb) {
-            ATH_MSG_INFO("You are now using tables provided by the AmdcDb!!");
-        } else {
-            ATH_MSG_INFO("Start retriving dbObjects with tag = <" << geoTag << "> node <" << geoNode << ">");
-        }
-        // here putting RDB data in private "objects" form
-        if (theAmdcDb) {
-            m_dhatyp = std::make_unique<DblQ00Atyp>(theAmdcDb);
-        } else {
-            m_dhatyp = std::make_unique<DblQ00Atyp>(m_pRDBAccess, geoTag, geoNode);
-        }
+      
+        ATH_MSG_INFO("Start retriving dbObjects with tag = <" << geoTag << "> node <" << geoNode << ">");
+        
+        // here putting RDB data in private "objects" form       
+        m_dhatyp = std::make_unique<DblQ00Atyp>(m_pRDBAccess, geoTag, geoNode);        
         m_atyp = m_dhatyp->data();
 
-        if (theAmdcDb) {
-            m_dhasmp = std::make_unique<DblQ00Asmp>(theAmdcDb);
-        } else {
-            m_dhasmp = std::make_unique<DblQ00Asmp>(m_pRDBAccess, geoTag, geoNode);   
-        }
+       
+        m_dhasmp = std::make_unique<DblQ00Asmp>(m_pRDBAccess, geoTag, geoNode);      
         m_asmp = m_dhasmp->data();
 
-        if (theAmdcDb) {
-            m_dhalmn = std::make_unique<DblQ00Almn>(theAmdcDb);
-        } else {
-            m_dhalmn = std::make_unique<DblQ00Almn>(m_pRDBAccess, geoTag, geoNode);   
-        }
+       
+        m_dhalmn = std::make_unique<DblQ00Almn>(m_pRDBAccess, geoTag, geoNode); 
         m_almn = m_dhalmn->data();
 
-        if (theAmdcDb) {
-            m_dhaptp = std::make_unique<DblQ00Aptp>(theAmdcDb);
-        } else {
-            m_dhaptp = std::make_unique<DblQ00Aptp>(m_pRDBAccess, geoTag, geoNode);   
-        }
+        
+        m_dhaptp = std::make_unique<DblQ00Aptp>(m_pRDBAccess, geoTag, geoNode);   
         m_aptp = m_dhaptp->data();
 
-        if (theAmdcDb) {
-            m_dhacut = std::make_unique<DblQ00Acut>(theAmdcDb);
-        } else {
-            m_dhacut = std::make_unique<DblQ00Acut>(m_pRDBAccess, geoTag, geoNode);   
-        }
+       
+        m_dhacut = std::make_unique<DblQ00Acut>(m_pRDBAccess, geoTag, geoNode);
         m_acut = m_dhacut->data();
 
-        if (theAmdcDb) {
-            m_dhalin = std::make_unique<DblQ00Alin>(theAmdcDb);
-        } else {
-            m_dhalin = std::make_unique<DblQ00Alin>(m_pRDBAccess, geoTag, geoNode);   
-        }
+        m_dhalin = std::make_unique<DblQ00Alin>(m_pRDBAccess, geoTag, geoNode);
         m_alin = m_dhalin->data();
 
-        if (theAmdcDb) {
-            m_dhdbam = std::make_unique<DblQ00Dbam>(theAmdcDb);
-        } else {
-            m_dhdbam = std::make_unique<DblQ00Dbam>(m_pRDBAccess, geoTag, geoNode);   
-        }
+        m_dhdbam = std::make_unique<DblQ00Dbam>(m_pRDBAccess, geoTag, geoNode);
         m_dbam = m_dhdbam->data();
 
-        if (theAmdcDb) {
-            m_dhwrpc = std::make_unique<DblQ00Awln>(theAmdcDb);
-        } else {
-            m_dhwrpc = std::make_unique<DblQ00Awln>(m_pRDBAccess, geoTag, geoNode);   
-        }
+       
+        m_dhwrpc = std::make_unique<DblQ00Awln>(m_pRDBAccess, geoTag, geoNode);
         m_wrpc = m_dhwrpc->data();
 
-        if (theAmdcDb) {
-            m_dhwtgc = std::make_unique<DblQ00Atln>(theAmdcDb);
-        } else {
-            m_dhwtgc = std::make_unique<DblQ00Atln>(m_pRDBAccess, geoTag, geoNode);   
-        }
+        m_dhwtgc = std::make_unique<DblQ00Atln>(m_pRDBAccess, geoTag, geoNode);
         m_wtgc = m_dhwtgc->data();
 
-        if (theAmdcDb) {
-            m_dhwmdt = std::make_unique<DblQ00Wmdt>(theAmdcDb);
-        } else {
-            m_dhwmdt = std::make_unique<DblQ00Wmdt>(m_pRDBAccess, geoTag, geoNode);   
-        }
+        m_dhwmdt = std::make_unique<DblQ00Wmdt>(m_pRDBAccess, geoTag, geoNode);
         m_wmdt = m_dhwmdt->data();
 
-        if (theAmdcDb) {
-            m_dhwcsc = std::make_unique<DblQ00Wcsc>(theAmdcDb);
-        } else {
-            m_dhwcsc = std::make_unique<DblQ00Wcsc>(m_pRDBAccess, geoTag, geoNode);   
-        }
+        m_dhwcsc = std::make_unique<DblQ00Wcsc>(m_pRDBAccess, geoTag, geoNode); 
         m_wcsc = m_dhwcsc->data();
 
-        if (theAmdcDb) {
-            m_dhwrpcall = std::make_unique<DblQ00Wrpc>(theAmdcDb);
-        } else {
-            m_dhwrpcall = std::make_unique<DblQ00Wrpc>(m_pRDBAccess, geoTag, geoNode);   
-        }
+      
+        m_dhwrpcall = std::make_unique<DblQ00Wrpc>(m_pRDBAccess, geoTag, geoNode);   
         m_wrpcall = m_dhwrpcall->data();
 
-        if (theAmdcDb) {
-            m_dhwtgcall = std::make_unique<DblQ00Wtgc>(theAmdcDb);
-        } else {
-            m_dhwtgcall = std::make_unique<DblQ00Wtgc>(m_pRDBAccess, geoTag, geoNode);   
-        }
+        m_dhwtgcall = std::make_unique<DblQ00Wtgc>(m_pRDBAccess, geoTag, geoNode); 
         m_wtgcall = m_dhwtgcall->data();
 
-        if (theAmdcDb) {
-            m_dhwspa = std::make_unique<DblQ00Wspa>(theAmdcDb);
-        } else {
-            m_dhwspa = std::make_unique<DblQ00Wspa>(m_pRDBAccess, geoTag, geoNode);   
-        }
+        m_dhwspa = std::make_unique<DblQ00Wspa>(m_pRDBAccess, geoTag, geoNode);
         m_wspa = m_dhwspa->data();
 
-        if (theAmdcDb) {
-            m_dhwded = std::make_unique<DblQ00Wded>(theAmdcDb);
-        } else {
-            m_dhwded = std::make_unique<DblQ00Wded>(m_pRDBAccess, geoTag, geoNode);   
-        }
+       
+        m_dhwded = std::make_unique<DblQ00Wded>(m_pRDBAccess, geoTag, geoNode);
         m_wded = m_dhwded->data();
 
-        if (theAmdcDb) {
-            m_dhwsup = std::make_unique<DblQ00Wsup>(theAmdcDb);
-        } else {
-            m_dhwsup = std::make_unique<DblQ00Wsup>(m_pRDBAccess, geoTag, geoNode);   
-        }
+       
+        m_dhwsup = std::make_unique<DblQ00Wsup>(m_pRDBAccess, geoTag, geoNode);   
         m_wsup = m_dhwsup->data();
 
-        // Mdt AsBuilt parameters
-        if (theAmdcDb) {
-            ATH_MSG_INFO("skipping XtomoData");
+        if (m_pRDBAccess->getRecordsetPtr("XtomoData", geoTag, geoNode)->size()!=0) {
+            m_dhxtomo= std::make_unique<DblQ00Xtomo>(pRDBAccess, geoTag, geoNode);
+            ATH_MSG_INFO("XtomoData table found in Oracle");
         } else {
-	    if (m_pRDBAccess->getRecordsetPtr("XtomoData", geoTag, geoNode)->size()!=0) {
-	        m_dhxtomo= std::make_unique<DblQ00Xtomo>(pRDBAccess, geoTag, geoNode);
-	        ATH_MSG_INFO("XtomoData table found in Oracle");
-	    }
-	    else {
-	        m_dhxtomo= std::make_unique<DblQ00Xtomo>();
-	        ATH_MSG_INFO("No XtomoData table in Oracle");
-	     }
+            m_dhxtomo= std::make_unique<DblQ00Xtomo>();
+            ATH_MSG_INFO("No XtomoData table in Oracle");
         }
+        
         if (m_dhxtomo)
             m_xtomo = m_dhxtomo->data();
 
         // ASZT
         if (asciiFileDBMap.find("ASZT") != asciiFileDBMap.end()) {
-
             ATH_MSG_INFO( "getting aszt from ascii file - named <" << asciiFileDBMap.find("ASZT")->second << ">");
             ATH_MSG_INFO( "Ascii aszt input has priority over A-lines in ORACLE; A-lines from Oracle will not be read");
             // dbdata = 0;
@@ -180,18 +114,13 @@ namespace MuonGM {
 
         if (!m_dhaszt || m_dhaszt->size() == 0) {
             ATH_MSG_INFO( "No Ascii aszt input found: looking for A-lines in ORACLE");
-
-            if (theAmdcDb) {
-                m_dhaszt = std::make_unique<DblQ00Aszt>(theAmdcDb);
+            if (m_pRDBAccess->getRecordsetPtr("ASZT",geoTag,geoNode)->size()==0) {
+                m_dhaszt = std::make_unique<DblQ00Aszt>();
+                ATH_MSG_INFO("No ASZT table in Oracle");
             } else {
-  	        if (m_pRDBAccess->getRecordsetPtr("ASZT",geoTag,geoNode)->size()==0) {
-                    m_dhaszt = std::make_unique<DblQ00Aszt>();
-                    ATH_MSG_INFO("No ASZT table in Oracle");
-                } else {
-                    ATH_MSG_INFO("ASZT table found in Oracle");
-                    m_dhaszt = std::make_unique<DblQ00Aszt>(m_pRDBAccess, geoTag, geoNode);   
-                    ATH_MSG_INFO("ASZT size is " << m_dhaszt->size());
-                }
+                ATH_MSG_INFO("ASZT table found in Oracle");
+                m_dhaszt = std::make_unique<DblQ00Aszt>(m_pRDBAccess, geoTag, geoNode);   
+                ATH_MSG_INFO("ASZT size is " << m_dhaszt->size());
             }
         } else {
             ATH_MSG_INFO( "ASZT table in Oracle, if any, will not be read" );
@@ -214,17 +143,13 @@ namespace MuonGM {
         }
         if (!m_dhiacsc || m_dhiacsc->size() == 0) {
             ATH_MSG_INFO( "No Ascii iacsc input found: looking for A-lines in ORACLE" );
-            if (theAmdcDb) {
-                ATH_MSG_INFO( "skipping ISZT" );
-                m_dhiacsc = nullptr;
+            if (m_pRDBAccess->getRecordsetPtr("IZST", geoTag,geoNode)->size()==0) {
+                m_dhiacsc = std::make_unique<DblQ00IAcsc>();
+                ATH_MSG_INFO( "No ISZT table in Oracle" );
             } else {
-	      if (m_pRDBAccess->getRecordsetPtr("IZST", geoTag,geoNode)->size()==0) {
-                    m_dhiacsc = std::make_unique<DblQ00IAcsc>();
-                    ATH_MSG_INFO( "No ISZT table in Oracle" );
-                } else {
-		  ATH_MSG_INFO( "ISZT table found in Oracle" );
-		  m_dhiacsc = std::make_unique<DblQ00IAcsc>(m_pRDBAccess, geoTag, geoNode);                   }
-            }
+                ATH_MSG_INFO( "ISZT table found in Oracle" );
+                m_dhiacsc = std::make_unique<DblQ00IAcsc>(m_pRDBAccess, geoTag, geoNode);                   
+            }            
         } else {
             ATH_MSG_INFO( "ISZT table in Oracle, if any, will not be read" );
         }
@@ -232,32 +157,17 @@ namespace MuonGM {
             m_iacsc = m_dhiacsc->data();
 
 
-        if (theAmdcDb) {
-            m_dhwchv = std::make_unique<DblQ00Wchv>(theAmdcDb);
-        } else {
-            m_dhwchv = std::make_unique<DblQ00Wchv>(m_pRDBAccess, geoTag, geoNode);   
-        }
+        m_dhwchv = std::make_unique<DblQ00Wchv>(m_pRDBAccess, geoTag, geoNode);   
         m_wchv = m_dhwchv->data();
 
-        if (theAmdcDb) {
-            m_dhwcro = std::make_unique<DblQ00Wcro>(theAmdcDb);
-        } else {
-            m_dhwcro = std::make_unique<DblQ00Wcro>(m_pRDBAccess, geoTag, geoNode);   
-        }
+        m_dhwcro = std::make_unique<DblQ00Wcro>(m_pRDBAccess, geoTag, geoNode); 
         m_wcro = m_dhwcro->data();
 
-        if (theAmdcDb) {
-            m_dhwcmi = std::make_unique<DblQ00Wcmi>(theAmdcDb);
-        } else {
-            m_dhwcmi = std::make_unique<DblQ00Wcmi>(m_pRDBAccess, geoTag, geoNode);   
-        }
+        m_dhwcmi = std::make_unique<DblQ00Wcmi>(m_pRDBAccess, geoTag, geoNode);
         m_wcmi = m_dhwcmi->data();
 
-        if (theAmdcDb) {
-            m_dhwlbi = std::make_unique<DblQ00Wlbi>(theAmdcDb);
-        } else {
-             m_dhwlbi = std::make_unique<DblQ00Wlbi>(m_pRDBAccess, geoTag, geoNode);   
-        }
+       
+        m_dhwlbi = std::make_unique<DblQ00Wlbi>(m_pRDBAccess, geoTag, geoNode);
         m_wlbi = m_dhwlbi->data();
 
         // everything fetched
@@ -410,8 +320,7 @@ namespace MuonGM {
             //
             // in case of layout Q and following
             //
-            AmdcDb *theAmdcDb = dynamic_cast<AmdcDb *>(m_pRDBAccess);
-            IRDBRecordset_ptr ggln = theAmdcDb ? theAmdcDb->getRecordsetPtr("GGLN", "Amdc") : m_pRDBAccess->getRecordsetPtr("GGLN", m_geoTag, m_geoNode);
+            IRDBRecordset_ptr ggln = m_pRDBAccess->getRecordsetPtr("GGLN", m_geoTag, m_geoNode);
 
             int version(0);
             float wirespacing(0);
