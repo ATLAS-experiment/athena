@@ -44,15 +44,15 @@ namespace MuonPRDTest{
         ScalarBranch<unsigned int>& m_NSWMM_nPRD{parent().newScalar<unsigned int>("N_PRD_MM")};
         VectorBranch<int>& m_NSWMM_PRD_time{parent().newVector<int>("PRD_MM_time")};
         VectorBranch<float>& m_NSWMM_PRD_covMatrix_1_1{parent().newVector<float>("PRD_MM_covMatrix_1_1")};
-        VectorBranch<int>& m_NSWMM_PRD_nRdos{parent().newVector<int>("PRD_MM_nRdos")};
+        VectorBranch<int>& m_NSWMM_PRD_nStrips{parent().newVector<int>("PRD_MM_nStrips")};
         TwoVectorBranch m_NSWMM_PRD_localPos{parent(), "PRD_MM_localPos"};
         ThreeVectorBranch m_NSWMM_PRD_globalPos{parent(), "PRD_MM_globalPos"};
-        VectorBranch<float>& m_NSWMM_PRD_uTPCAngle{parent().newVector<float>("PRD_MM_uTPCAngle")};
-        VectorBranch<float>& m_NSWMM_PRD_uTPCChiSqProb{parent().newVector<float>("PRD_MM_uTPCChiSqProb")};
         MatrixBranch<short unsigned>& m_NSWMM_PRD_stripNumbers{parent().newMatrix<short unsigned>("PRD_MM_stripNumbers")}; //numbers of strips associated to the PRD cluster
         MatrixBranch<short int>& m_NSWMM_PRD_stripTimes{parent().newMatrix<short int>("PRD_MM_stripTimes")};                       //times of strips associated to the PRD cluster
         MatrixBranch<int>& m_NSWMM_PRD_stripCharges{parent().newMatrix<int>("PRD_MM_stripCharges")};                   //times of strips associated to the PRD cluster
         MmIdentifierBranch m_NSWMM_PRD_id{parent(), "PRD_MM"};
+        VectorBranch<short>& m_NSWMM_PRD_author{parent().newVector<short>("PRD_MM_author")};
+        VectorBranch<uint8_t>& m_NSWMM_PRD_quality{parent().newVector<uint8_t>("PRD_MM_quality")};
 
         /// Set of chambers to be dumped
         std::unordered_set<Identifier> m_filteredChamb{};
