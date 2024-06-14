@@ -32,7 +32,7 @@ namespace ActsTrk
       // convenience methods to convert "data-links" to derived measurement container
       template <class T_MeasurementContainer>
       void setSourceContainer(const T_MeasurementContainer &source, const EventContext &ctx) {
-         m_sourceMeasurements = std::move(DataLink<xAOD::UncalibratedMeasurementContainer>(source, ctx ));
+         m_sourceMeasurements = DataLink<xAOD::UncalibratedMeasurementContainer>(source, ctx );
       }
       template <class T_MeasurementContainer>
       void setSourceContainer(const DataLink<T_MeasurementContainer> &source) {

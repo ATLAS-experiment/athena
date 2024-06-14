@@ -100,8 +100,6 @@ namespace Muon {
 
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
-        unsigned int m_maxhashtoUse = 0U;
-
         // Rob Data Provider handle
         ServiceHandle<IROBDataProviderSvc> m_robDataProvider{this, "ROBDataProviderSvc", "ROBDataProviderSvc"};
 
