@@ -78,7 +78,6 @@ namespace MuonGMR4{
         m_lenSlopEdge = std::hypot(2.*HalfHeight, HalfShortY - HalfLongY);
         resetDirCache();
         m_isFlipped = false;
-
     }
     void StripDesign::defineDiamond(double HalfShortY, double HalfLongY, 
                                     double HalfHeight, double yCutout) {

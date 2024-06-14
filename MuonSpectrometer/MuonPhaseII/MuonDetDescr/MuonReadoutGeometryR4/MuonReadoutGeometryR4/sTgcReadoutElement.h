@@ -216,6 +216,9 @@ class sTgcReadoutElement : public MuonReadoutElement {
     using globalCornerArray = std::array<Amg::Vector3D, 4>;
     globalCornerArray globalPadCorners(const ActsGeometryContext& ctx, const Identifier& measId) const;
     globalCornerArray globalPadCorners(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const;  
+    /// Returns the pad Number given local position of hit and Identifier/Hash
+    int padNumber(const Amg::Vector2D& hitPos, const Identifier& measId) const;
+    int padNumber(const Amg::Vector2D& hitPos, const IdentifierHash& measHash) const;
        
     /// Retrieves the readoutElement Layer given the Identifier/Hash
     const StripDesign& stripDesign(const Identifier& measId) const;

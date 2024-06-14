@@ -240,7 +240,7 @@ StatusCode GeoModelsTgcTest::dumpToTree(const EventContext& ctx, const sTgcReado
         double firstPadPhiDiv = readoutEle->getPadDesign(layPadID)->firstPhiPos;
         double anglePadPhi = readoutEle->getPadDesign(layPadID)->inputPhiPitch;
         double beamlineRadius = readoutEle->getPadDesign(layPadID)->radialDistance;
-                
+
         m_numPads.push_back(numPads);
         m_numPadEta.push_back(numPadEta);
         m_numPadPhi.push_back(numPadPhi);
@@ -264,7 +264,7 @@ StatusCode GeoModelsTgcTest::dumpToTree(const EventContext& ctx, const sTgcReado
                 Amg::Vector3D globalPadPos(Amg::Vector3D::Zero());
                 std::array<Amg::Vector2D,4> localPadCorners{make_array<Amg::Vector2D, 4>(Amg::Vector2D::Zero())};
                 std::array<Amg::Vector3D,4> globalPadCorners{make_array<Amg::Vector3D, 4>(Amg::Vector3D::Zero())};
-                
+
                 readoutEle->padPosition(padID, localPadPos);
                 readoutEle->padGlobalPosition(padID, globalPadPos);
                 readoutEle->padCorners(padID, localPadCorners);
@@ -275,7 +275,12 @@ StatusCode GeoModelsTgcTest::dumpToTree(const EventContext& ctx, const sTgcReado
                 m_localPadCornerBR.push_back(localPadCorners[1]);
                 m_localPadCornerTL.push_back(localPadCorners[2]);
                 m_localPadCornerTR.push_back(localPadCorners[3]);
-               
+
+                Amg::Vector2D hitCorrection{-.1, -.1};
+                Amg::Vector2D hitPos = localPadCorners[3] + hitCorrection;
+                m_hitPosition.push_back(hitPos);
+                m_padNumber.push_back(readoutEle->padNumber(hitPos, padID));
+
                 m_globalPadPos.push_back(globalPadPos);
                 m_globalPadCornerBR.push_back(globalPadCorners[0]);
                 m_globalPadCornerBL.push_back(globalPadCorners[1]);

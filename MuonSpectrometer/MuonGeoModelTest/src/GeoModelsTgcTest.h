@@ -127,6 +127,8 @@ class GeoModelsTgcTest : public AthHistogramAlgorithm {
     MuonVal::TwoVectorBranch m_localPadCornerBL{m_tree, "localPadCornerBL"};
     MuonVal::TwoVectorBranch m_localPadCornerTR{m_tree, "localPadCornerTR"};
     MuonVal::TwoVectorBranch m_localPadCornerTL{m_tree, "localPadCornerTL"};
+    MuonVal::TwoVectorBranch m_hitPosition{m_tree, "hitPosition"};
+    MuonVal::VectorBranch<int>& m_padNumber{m_tree.newVector<int>("padNumber")};
 
     MuonVal::ThreeVectorBranch m_globalPadPos{m_tree, "globalPadPos"};
     MuonVal::ThreeVectorBranch m_globalPadCornerBR{m_tree, "globalPadCornerBR"};

@@ -110,7 +110,8 @@ struct sTgcChamber{
     double lPadLength{0.f};
     double anglePadPhi{0.f};
     double beamlineRadius{0.f};
-
+    
+    std::vector<int> padNumber;
     std::vector<uint> numPads;
     std::vector<uint> numPadEta;
     std::vector<uint> numPadPhi;
@@ -135,6 +136,10 @@ struct sTgcChamber{
         Amg::Vector3D globalPadCornerBR{Amg::Vector3D::Zero()};
         Amg::Vector3D globalPadCornerTL{Amg::Vector3D::Zero()};
         Amg::Vector3D globalPadCornerTR{Amg::Vector3D::Zero()};
+        /// @brief hitPosition that is fed in to evaluate padNumber
+        Amg::Vector2D hitPosition{Amg::Vector2D::Zero()};
+        /// @brief padNumber given the hit position
+        int padNumber{0};
         /// @brief  Pad  Eta number
         short padEta{0};
         /// @brief  Pad  Phi number
@@ -330,6 +335,10 @@ std::set<sTgcChamber> readTreeDump(const std::string& inputFile) {
     TTreeReaderValue<std::vector<float>> localPadPosX{treeReader, "localPadPosX"};
     TTreeReaderValue<std::vector<float>> localPadPosY{treeReader, "localPadPosY"};
 
+    TTreeReaderValue<std::vector<float>> hitPositionX{treeReader, "hitPositionX"};
+    TTreeReaderValue<std::vector<float>> hitPositionY{treeReader, "hitPositionY"};
+    TTreeReaderValue<std::vector<int>> padNumber{treeReader, "padNumber"};
+
     TTreeReaderValue<std::vector<uint8_t>> padGasGap{treeReader, "padGasGap"};
     TTreeReaderValue<std::vector<uint>> padEta{treeReader, "padEtaNumber"};
     TTreeReaderValue<std::vector<uint>> padPhi{treeReader, "padPhiNumber"};
@@ -462,7 +471,7 @@ std::set<sTgcChamber> readTreeDump(const std::string& inputFile) {
             newWireGroup.channelNumber = (*wireGroupNum)[wg];
             newWireGroup.channelType = 2;
             ///Uncomment to avoid wireGroupPositions dump
-            //if (newWireGroup.channelNumber > 0) continue;
+            if (newWireGroup.channelNumber > 0) continue;
             newchamber.channels.insert(std::move(newWireGroup));
         }
 
@@ -476,7 +485,7 @@ std::set<sTgcChamber> readTreeDump(const std::string& inputFile) {
             newStrip.channelType = 1;
             newStrip.channelLen = (*stripLengths)[s];
             ///Uncomment to avoid stripPositions dump
-            //if (newStrip.channelNumber > 0) continue;
+            if (newStrip.channelNumber > 0) continue;
             newchamber.channels.insert(std::move(newStrip));
         }
 
@@ -497,11 +506,13 @@ std::set<sTgcChamber> readTreeDump(const std::string& inputFile) {
             newPad.localPadCornerTR = Amg::Vector2D{(*localPadCornerTRX)[p], (*localPadCornerTRY)[p]};
             newPad.localPadCornerTL = Amg::Vector2D{(*localPadCornerTLX)[p], (*localPadCornerTLY)[p]};
 
+            newPad.hitPosition = Amg::Vector2D{(*hitPositionX)[p], (*hitPositionY)[p]};
+            newPad.padNumber = (*padNumber)[p];
             newPad.gasGap = (*padGasGap)[p];
             newPad.padEta = (*padEta)[p];
             newPad.padPhi = (*padPhi)[p];
             ///Uncomment to avoid padPositions dump
-            //if (newPad.padEta > 0 || newPad.padPhi > 0) continue;
+            if (newPad.padEta > 1 || newPad.padPhi > 6) continue;
             newchamber.pads.insert(std::move(newPad));
         }
 
@@ -628,7 +639,6 @@ int main( int argc, char** argv ) {
         TEST_BASICPROP(numStrips, "number of strips in a chamber");
         TEST_BASICPROP(stripPitch, "pitch of a normal strip");
         TEST_BASICPROP(stripWidth, "width of a normal strip");
-
         TEST_BASICPROP(sPadLength, "gasGap length on the short side for pads and wires");
         TEST_BASICPROP(lPadLength, "gasGap length on the long side for pads and wires");
         TEST_BASICPROP(anglePadPhi, "angular width of a pad in phi direction");
@@ -660,11 +670,11 @@ int main( int argc, char** argv ) {
             TEST_BASICPROP(firstPadPhiDiv[c], "angular position of the outer edge of the first pad in the layer "<< c + 1 << " are ");
             ++c;
           ///Uncomment to dump the local to global layer transformation
-/*            
+            
             std::cout <<"runsTgcGeoComparison() "<<__LINE__<<": in chamber "<<test<<" "
                       << "The test layer transform for layer "<< c << " is: " << Amg::toString(testLayer.transform) 
                       << " and the reference layer transform is: " << Amg::toString(refLayer.transform) <<std::endl;
-*/
+
             if (!Amg::doesNotDeform(layAlignment)) {
                 std::cerr<<"runsTgcGeoComparison() "<<__LINE__<<": in chamber "<<test<<" "
                          <<"the layer "<<testLayer<<" is misaligned w.r.t. reference by "
@@ -812,11 +822,29 @@ int main( int argc, char** argv ) {
                             <<Amg::toString(testPad.globalPadCornerTR, 2)<<"  should be located at "<<Amg::toString(refPad.globalPadCornerTR, 2)
                             <<" displacement: "<<Amg::toString(diffGlobalPadCornerTR,2)<<std::endl;
                 chamberOkay = false;
-            }  
-        }
+            }
+            ///Hit Position used to evaluate padNumber
+            const Amg::Vector2D diffHitPosition{testPad.hitPosition - refPad.hitPosition};
+            if (diffHitPosition.mag() > tolerance) {
+                std::cerr<<"runsTgcGeoComparison() "<<__LINE__<<": in chamber "<<test<<" "<<"pad (gasGap/(padEta, padPhi)): "
+                            <<testPad.gasGap<<"/("<<testPad.padEta<<", "<<testPad.padPhi<<"), "<< " Hit Position: "
+                            <<Amg::toString(testPad.hitPosition, 2) <<"  should be "<<Amg::toString(refPad.hitPosition, 2) <<" displacement: "<< Amg::toString(diffHitPosition, 2) <<std::endl;
+                chamberOkay = false;
+            }
+            ///padNumber given the hit position
+            const int diffPadNumber{testPad.padNumber - refPad.padNumber};
+            if (std::abs(diffPadNumber) > 0 || testPad.padNumber < 0 || refPad.padNumber < 0) {
+                std::cerr<<"runsTgcGeoComparison() "<<__LINE__<<": in chamber "<<test<<" "<<"pad (gasGap/(padEta, padPhi)): "
+                            <<testPad.gasGap<<"/("<<testPad.padEta<<", "<<testPad.padPhi<<"), "<< " padNumber: "
+                            <<testPad.padNumber <<"  should be "<<refPad.padNumber <<" displacement: "<< diffPadNumber 
+                            << " Hit Position: "<< Amg::toString(testPad.hitPosition, 2) << " BL Corner: " 
+                            << Amg::toString(testPad.localPadCornerBL, 2) << std::endl;
+                chamberOkay = false;
+            }
 
-        if (!chamberOkay) {
-            return_code = EXIT_FAILURE;
+            if (!chamberOkay) {
+                return_code = EXIT_FAILURE;
+            }
         }
     }
     return return_code;

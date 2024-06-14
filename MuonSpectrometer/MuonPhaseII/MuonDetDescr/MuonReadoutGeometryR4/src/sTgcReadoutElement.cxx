@@ -229,6 +229,15 @@ Amg::Vector3D sTgcReadoutElement::chamberStripPos(const IdentifierHash& measHash
                  <<" is out of range. Maximum range "<<m_pars.stripLayers.size());
    return Amg::Vector3D::Zero();
 }
+int sTgcReadoutElement::padNumber(const Amg::Vector2D& hitPos, const IdentifierHash& measHash) const {
+   int padEta = padDesign(measHash).channelNumber(hitPos).first;
+   int padPhi = padDesign(measHash).channelNumber(hitPos).second;
+   bool is_valid{true};
+   const Identifier padID = m_idHelper.padID(identify(), multilayer(), gasGapNumber(measHash) + 1, chType(measHash),
+                                                padEta, padPhi, is_valid);
+   int channel = m_idHelper.channel(padID);
+   return channel;   
+}
 
 #ifndef SIMULATIONBASE
 std::map<Identifier, std::shared_ptr<Acts::Surface>> sTgcReadoutElement::getSurfaces() const {
