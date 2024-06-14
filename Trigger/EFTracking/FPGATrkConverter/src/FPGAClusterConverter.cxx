@@ -240,7 +240,6 @@ StatusCode FPGAClusterConverter::createPixelCluster(const FPGATrackSimHit& h, co
   }
  
   // *** Get cell from id
-  Identifier id = pDE->identify();
   Identifier wafer_id = m_pixelId->wafer_id(hash);
   Identifier hit_id = m_pixelId->pixel_id(wafer_id, phiIndex, etaIndex); 
   InDetDD::SiCellId cell =  pDE->cellIdFromIdentifier(hit_id);
@@ -312,7 +311,6 @@ StatusCode FPGAClusterConverter::createPixelCluster(const FPGATrackSimHit& h,con
   }
  
   // *** Get cell from id
-  Identifier id = pDE->identify();
   Identifier wafer_id = m_pixelId->wafer_id(hash);
   Identifier hit_id = m_pixelId->pixel_id(wafer_id, phiIndex, etaIndex); 
   InDetDD::SiCellId cell =  pDE->cellIdFromIdentifier(hit_id);
@@ -408,8 +406,6 @@ StatusCode FPGAClusterConverter::createSCTCluster(const FPGATrackSimHit& h, cons
   ATH_MSG_DEBUG("\t\tcell: " << cell);
   ATH_MSG_DEBUG("\t\tstrip_id " << strip_id);
   ATH_MSG_DEBUG("\t\tstrip: " << cell);
-  
-  Identifier id = pDE->identify();
   ATH_MSG_DEBUG("\t\tStrip from idHelper: " << m_SCTId->strip(strip_id) );
 
   const InDetDD::SCT_ModuleSideDesign* design; 
@@ -504,10 +500,6 @@ StatusCode FPGAClusterConverter::createSCTCluster(const FPGATrackSimHit& h, cons
   ATH_MSG_DEBUG("\t\tcell: " << cell);
   ATH_MSG_DEBUG("\t\tstrip_id " << strip_id);
   ATH_MSG_DEBUG("\t\tstrip: " << cell);
-
-
-  
-  Identifier id = pDE->identify();
   ATH_MSG_DEBUG("\t\tStrip from idHelper: " << m_SCTId->strip(strip_id) );
 
   const InDetDD::SCT_ModuleSideDesign* design; 
