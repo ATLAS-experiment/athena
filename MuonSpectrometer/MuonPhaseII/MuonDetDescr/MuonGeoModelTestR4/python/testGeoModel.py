@@ -84,6 +84,7 @@ def GeoModelMmTestCfg(flags, name = "GeoModelMmTest", **kwargs):
 
 def NswGeoPlottingAlgCfg(flags, name="NswGeoPlotting", **kwargs):
     result = ComponentAccumulator()
+    kwargs.setdefault("TestActsSurface", False)
     the_alg = CompFactory.MuonGMR4.NswGeoPlottingAlg(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
