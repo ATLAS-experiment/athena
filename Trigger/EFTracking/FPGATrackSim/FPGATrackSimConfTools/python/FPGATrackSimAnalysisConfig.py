@@ -146,7 +146,7 @@ def FPGATrackSimRoadUnionToolCfg(flags):
         HoughTransform.threshold = flags.Trigger.FPGATrackSim.ActiveConfig.threshold
         HoughTransform.traceHits = True
         HoughTransform.IdealGeoRoads = flags.Trigger.FPGATrackSim.ActiveConfig.IdealGeoRoads
-        HoughTransform.useSpacePoints = flags.Trigger.FPGATrackSim.ActiveConfig.spacePoints
+        HoughTransform.useSpacePoints = flags.Trigger.FPGATrackSim.spacePoints
 
         tools.append(HoughTransform)
 
@@ -187,7 +187,7 @@ def FPGATrackSimRoadUnionTool1DCfg(flags):
             tool.FPGATrackSimBankSvc = result.getPrimaryAndMerge(FPGATrackSimBankSvcCfg(flags))
             tool.FPGATrackSimMappingSvc = FPGATrackSimMapping
             tool.IdealGeoRoads = flags.Trigger.FPGATrackSim.ActiveConfig.IdealGeoRoads
-            tool.useSpacePoints = flags.Trigger.FPGATrackSim.ActiveConfig.spacePoints
+            tool.useSpacePoints = flags.Trigger.FPGATrackSim.spacePoints
 
             tools.append(tool)
 
@@ -441,7 +441,7 @@ def FPGATrackSimLogicalHistProcessAlgCfg(inputFlags):
     theFPGATrackSimLogicalHistProcessAlg.TrackFitter_2nd = result.getPrimaryAndMerge(FPGATrackSimTrackFitterTool_2ndCfg(flags))
 
     # Create SPRoadFilterTool if spacepoints are turned on. TODO: make things configurable?
-    if flags.Trigger.FPGATrackSim.ActiveConfig.spacePoints:
+    if flags.Trigger.FPGATrackSim.spacePoints:
         SPRoadFilter = CompFactory.FPGATrackSimSpacepointRoadFilterTool()
         SPRoadFilter.filtering = flags.Trigger.FPGATrackSim.ActiveConfig.spacePointFiltering
         SPRoadFilter.minSpacePlusPixel = flags.Trigger.FPGATrackSim.minSpacePlusPixel

@@ -10,7 +10,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from FPGATrackSimConfTools.FPGATrackSimAnalysisConfig import FPGATrackSimRoadUnionToolCfg,FPGATrackSimRoadUnionTool1DCfg
+from FPGATrackSimConfTools.FPGATrackSimAnalysisConfig import FPGATrackSimRoadUnionToolCfg,FPGATrackSimRoadUnionTool1DCfg,FPGATrackSimRawLogicCfg
 from AthenaCommon.SystemOfUnits import GeV
 
 
@@ -37,7 +37,7 @@ def FPGATrackSimSGToRawHitsToolCfg(flags):
     from TrkConfig.TrkTruthCreatorToolsConfig import TruthToTrackToolCfg
     MyTruthToTrack = result.popToolsAndMerge(TruthToTrackToolCfg(flags))
 
-    FPGATrackSimSGInputTool = CompFactory.FPGATrackSimSGToRawHitsTool(maxEta=3.2, minPt=0.8 * GeV,
+    FPGATrackSimSGInputTool = CompFactory.FPGATrackSimSGToRawHitsTool(maxEta=5.0, minPt=0.8 * GeV,
         dumpHitsOnTracks=False,
         dumpTruthIntersections=False,
         ReadOfflineClusters=False,
@@ -70,7 +70,9 @@ def FPGATrackSimBankGenCfg(flags, **kwargs):
 
     # Override this. It gets set somewhere from bank_tag.
     theFPGATrackSimMatrixGenAlg.WCmax = 2
-    
+ 
+    theFPGATrackSimMatrixGenAlg.FPGATrackSimRawToLogicalHitsTool = acc.getPrimaryAndMerge(FPGATrackSimRawLogicCfg(flags))
+
     if (flags.Trigger.FPGATrackSim.ActiveConfig.hough1D):
       theFPGATrackSimMatrixGenAlg.RoadFinder = acc.getPrimaryAndMerge(FPGATrackSimRoadUnionTool1DCfg(flags))
     else:
