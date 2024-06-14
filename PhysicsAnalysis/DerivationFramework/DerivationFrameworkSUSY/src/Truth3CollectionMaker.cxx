@@ -1,10 +1,7 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-/////////////////////////////////////////////////////////////////
-// Truth3CollectionMaker.cxx, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 // Author: James Catmore (James.Catmore@cern.ch) with modifications by Benjamin Nachman (bnachman@cern.ch)
 // Removes all truth particles/vertices which do not pass a user-defined cut
 
@@ -111,7 +108,7 @@ StatusCode DerivationFramework::Truth3CollectionMaker::addBranches() const
     // Set up decorators
     static const SG::AuxElement::Decorator< ElementLink<xAOD::TruthParticleContainer> > linkDecorator("originalTruthParticle");
     static const SG::AuxElement::Decorator< int > originDecorator("particleMotherPdgId");
-    static const SG::AuxElement::Decorator< int > typeDecorator("particleOriginBarcode");
+    static const SG::AuxElement::Decorator< int > typeDecorator("particleOriginBarcode"); // FIXME barcode-based
     static const SG::AuxElement::Decorator< float > typeDecoratorMass("particleOriginMass");
     static const SG::AuxElement::Decorator< int > tauprongDecorator("nprong");
     static const SG::AuxElement::Decorator< int > tautypeDecorator("islep");
@@ -140,15 +137,15 @@ StatusCode DerivationFramework::Truth3CollectionMaker::addBranches() const
 		bool drop = false;
 		if (!theParticle->hasProdVtx()) drop = true;
 		else{
-		  int parentid = abs(theParticle->prodVtx()->incomingParticle(0)->pdgId());
-		  double parentmass = theParticle->prodVtx()->incomingParticle(0)->p4().M()/1000.;
-		  if (parentid==24 && parentmass < 20){ //semi-leptonic b-decays in Herwig++ where the off-shell W is saved
+		  const int parentPDGID = abs(theParticle->prodVtx()->incomingParticle(0)->pdgId());
+		  const double parentMass = theParticle->prodVtx()->incomingParticle(0)->p4().M()/1000.;
+		  if (parentPDGID==24 && parentMass < 20){ //semi-leptonic b-decays in Herwig++ where the off-shell W is saved
 		    drop = true;
 		  } 
-		  else if (parentid!=24 && parentid!=15){ //what about W decays in Sherpa?
+		  else if (parentPDGID!=24 && parentPDGID!=15){ //what about W decays in Sherpa?
 		    drop = true;
 		  }
-		  else if (parentid==15){//check to make sure the tau came from a W
+		  else if (parentPDGID==15){//check to make sure the tau came from a W
 		    if (theParticle->prodVtx()->incomingParticle(0)->hasProdVtx()){
 		      const xAOD::TruthParticle * mother_hold = theParticle->prodVtx()->incomingParticle(0)->prodVtx()->incomingParticle(0);
 		      int mcount = 0;
@@ -180,16 +177,15 @@ StatusCode DerivationFramework::Truth3CollectionMaker::addBranches() const
 	      xAOD::TruthParticle* xTruthParticle = new xAOD::TruthParticle();
 	      newParticleCollection->push_back( xTruthParticle );
 	      
-	      int motherBarcode = -1;
+	      int motherBarcode = HepMC::INVALID_PARTICLE_ID;
 	      int motherPDGid = 0;
 	      float mothermass = 0.;
 	      if (theParticle->hasProdVtx()){
-		int parentid = abs(theParticle->prodVtx()->incomingParticle(0)->pdgId());
-		xTruthParticle->setBarcode(parentid); // FIXME barcode-based - This is wrong - sets the Barcode equal to the PDG Code!!
-		motherBarcode = HepMC::barcode(theParticle->prodVtx()->incomingParticle(0));
 		const xAOD::TruthParticle * mother_hold = theParticle->prodVtx()->incomingParticle(0);
+		motherBarcode = HepMC::barcode(mother_hold);
 		motherPDGid = mother_hold->pdgId();
 		mothermass = mother_hold->p4().M()/1000.;
+		xTruthParticle->setBarcode(motherBarcode); // FIXME barcode-based
 		int mcount = 0;
 		//Let's find the first mother of mothers that has a different PDGid
 		while (mother_hold->hasProdVtx() && mother_hold->pdgId()==theParticle->pdgId()){
@@ -198,16 +194,16 @@ StatusCode DerivationFramework::Truth3CollectionMaker::addBranches() const
 		    break; //should not come in here, but just in case we have a closed loop from a bug
 		  }
 		  mother_hold = mother_hold->prodVtx()->incomingParticle(0);
-		  motherBarcode = HepMC::barcode(mother_hold);
+		  motherBarcode = HepMC::barcode(mother_hold); // FIXME barcode-based
 		  motherPDGid = mother_hold->pdgId();
 		  mothermass = mother_hold->p4().M()/1000.;
 		}
 	      }
 
           *xTruthParticle=*theParticle;
-          xTruthParticle->setBarcode(motherBarcode);
+          xTruthParticle->setBarcode(motherBarcode); // FIXME barcode-based
           originDecorator(*xTruthParticle) = motherPDGid;
-	      typeDecorator(*xTruthParticle) = motherBarcode;
+          typeDecorator(*xTruthParticle) = motherBarcode; // FIXME barcode-based
 	      typeDecoratorMass(*xTruthParticle) = mothermass;
 	      
 	      //Check for tau decays
