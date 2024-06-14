@@ -250,21 +250,26 @@ StatusCode MuonHoughDataNtuple::execute()
     m_truth_pt = truthMu->pt();
     m_truth_eta = truthMu->eta();
     m_truth_phi = truthMu->phi();
+    // access the truth segment from truth particle
+    static const SG::AuxElement::ConstAccessor<ElementLink<xAOD::TruthParticleContainer>> truthMuLink("truthParticleLink");
+    // filling truth segment values
+    for(const xAOD::MuonSegment* truthSeg: *truthSegContainer){
+      if(!truthMuLink.isAvailable(*truthSeg)) { continue; } // if segment isn't linked to truth muon, skip
+      ElementLink<xAOD::TruthParticleContainer> truthLink = truthMuLink(*truthSeg);
+      const xAOD::TruthParticle* truthParticle = *truthLink;
+      if(truthParticle!=truthMu) { continue; } // i have no idea if this works
+      m_truth_seg_pos.push_back(truthSeg->x(), truthSeg->y(), truthSeg->z());
+      m_truth_seg_p.push_back(truthSeg->px(), truthSeg->py(), truthSeg->pz());
+
+      m_truth_seg_nPrecisionHits.push_back(truthSeg->nPrecisionHits());
+      m_truth_seg_sector.push_back(truthSeg->sector());
+
+      int nTriggerHits = truthSeg->nPhiLayers() + truthSeg->nTrigEtaLayers();
+      m_truth_seg_nTriggerHits.push_back(nTriggerHits);
+    }
     ATH_CHECK(m_truth_tree.fill(context));
   }
 
-  // filling truth segment values
-  for(const xAOD::MuonSegment* truthSeg: *truthSegContainer){
-    m_truth_seg_pos.push_back(truthSeg->x(), truthSeg->y(), truthSeg->z());
-    m_truth_seg_p.push_back(truthSeg->px(), truthSeg->py(), truthSeg->pz());
-
-    m_truth_seg_nPrecisionHits.push_back(truthSeg->nPrecisionHits());
-    m_truth_seg_sector.push_back(truthSeg->sector());
-
-    int nTriggerHits = truthSeg->nPhiLayers() + truthSeg->nTrigEtaLayers();
-    m_truth_seg_nTriggerHits.push_back(nTriggerHits);
-    ATH_CHECK(m_truth_tree.fill(context));
-  }
 
   return StatusCode::SUCCESS;
 }
