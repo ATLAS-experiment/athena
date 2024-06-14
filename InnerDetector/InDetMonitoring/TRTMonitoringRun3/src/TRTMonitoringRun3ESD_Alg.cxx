@@ -418,16 +418,10 @@ StatusCode TRTMonitoringRun3ESD_Alg::fillTRTTracks(const xAOD::TrackParticleCont
     ATH_MSG_VERBOSE("Filling TRT Tracks Histos");
 
     // TProfile
-    auto HitToTonTMapS_x                = Monitored::Scalar<float>("HitToTonTMapS_x", 0.0);
-    auto HitToTonTMapS_y                = Monitored::Scalar<float>("HitToTonTMapS_y", 0.0);
-    auto HitToTonTMapC_x                = Monitored::Scalar<float>("HitToTonTMapC_x", 0.0);
-    auto HitToTonTMapC_y                = Monitored::Scalar<float>("HitToTonTMapC_y", 0.0);
     auto ValidRawDriftTimeonTrkS_x      = Monitored::Scalar<float>("ValidRawDriftTimeonTrkS_x", 0.0);
     auto ValidRawDriftTimeonTrkS_y      = Monitored::Scalar<float>("ValidRawDriftTimeonTrkS_y", 0.0);
     auto ValidRawDriftTimeonTrkC_x      = Monitored::Scalar<float>("ValidRawDriftTimeonTrkC_x", 0.0);
     auto ValidRawDriftTimeonTrkC_y      = Monitored::Scalar<float>("ValidRawDriftTimeonTrkC_y", 0.0);
-    auto HitTronTMapS_x                 = Monitored::Scalar<float>("HitTronTMapS_x", 0.0);
-    auto HitTronTMapS_y                 = Monitored::Scalar<float>("HitTronTMapS_y", 0.0);
     auto HitTronTMapC_x                 = Monitored::Scalar<float>("HitTronTMapC_x", 0.0);
     auto HitTronTMapC_y                 = Monitored::Scalar<float>("HitTronTMapC_y", 0.0);
     auto HitTronTwEPCMapS_x             = Monitored::Scalar<float>("HitTronTwEPCMapS_x", 0.0);
@@ -760,20 +754,7 @@ for (; p_trk != trackCollection.end(); ++p_trk) {
             bool isTubeHit = (mesb->localCovariance()(Trk::locX, Trk::locX) > 1.0) ? 1 : 0;
             if (RawDriftCircle) {
                 nTRTHits_side[ibe][iside]++;
-                float timeOverThreshold = RawDriftCircle->timeOverThreshold();
                 double t0 = m_TRTCalDbTool->getT0(DCoTId, TRTCond::ExpandedIdentifier::STRAW);
-
-                if (m_doExpert && m_doStraws) {
-                    HitToTonTMapS_x = thisStrawNumber[ibe];
-                    HitToTonTMapS_y = timeOverThreshold;
-                    fill("TRTTrackHistograms"+std::to_string(ibe)+std::to_string(iphi_module), HitToTonTMapS_x, HitToTonTMapS_y);
-                }
-
-                if (m_doExpert && m_doChips) {
-                    HitToTonTMapC_x = chip[ibe] - 1;
-                    HitToTonTMapC_y = timeOverThreshold;
-                    fill("TRTTrackHistograms"+std::to_string(ibe)+std::to_string(iphi_module), HitToTonTMapC_x, HitToTonTMapC_y);
-                }
 
                 const bool driftTimeValid = RawDriftCircle->driftTimeValid();
 
@@ -1021,11 +1002,6 @@ for (; p_trk != trackCollection.end(); ++p_trk) {
                 if ((trailingEdge < 23) &&
                     !(RawDriftCircle->lastBinHigh()) &&
                     !(RawDriftCircle->firstBinHigh())) {
-                        if (m_doExpert && m_doStraws) {
-                            HitTronTMapS_x = thisStrawNumber[ibe];
-                            HitTronTMapS_y = trailingEdgeScaled;
-                            fill("TRTTrackHistograms"+std::to_string(ibe)+std::to_string(iphi_module), HitTronTMapS_x, HitTronTMapS_y);
-                        }
 
                         if (m_doExpert && m_doChips) {
                             HitTronTMapC_x = chip[ibe] - 1;

@@ -334,11 +334,10 @@ NswDcsDbAlg::buildChannelIdForHv(Identifier& channelId, const DcsTechType tech0,
 		const std::string stationName   = sector%2==0 ? "STS" : "STL";
 		int radius        = std::stoi(res[5]);
 		int stationEta    = wheel*(radius<=2 ? 1 : radius-1);
-		int channel       = radius==2 ? 100 : 1; // DCS has two HV channels for first board; store this info in channel number
 		int stationPhi    = (sector-1)/2+1;
 		int multiLayer    = res[4]=="IP" ? 1 : 2;
 		int gasGap        = std::stoi(res[3]);
-		Identifier chnlId = m_idHelperSvc->stgcIdHelper().channelID(stationName, stationEta, stationPhi, multiLayer, gasGap, 1, channel, isValid);
+		Identifier chnlId = m_idHelperSvc->stgcIdHelper().hvID(stationName, stationEta, stationPhi, multiLayer, gasGap, radius == 1 /*radius 1 is the inner hv section*/ , isValid);
 		if(!isValid){
 			ATH_MSG_DEBUG("Could not extract valid channelId for STG channel "<<chanName);
 			ATH_MSG_DEBUG("Fields: "<< wheel << " "<<sector<<" " << stationName<< " " << stationEta<<" "<<stationPhi<<" "<<multiLayer);

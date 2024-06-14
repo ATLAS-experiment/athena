@@ -13,3 +13,6 @@ atlas_add_component( GeometryJiveXML
                      src/components/*.cxx
                      INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
                      LINK_LIBRARIES ${CLHEP_LIBRARIES} ${GEOMODEL_LIBRARIES} AthenaBaseComps CaloDetDescrLib CaloDetDescrUtils GaudiKernel InDetIdentifier InDetReadoutGeometry JiveXMLLib LArReadoutGeometry MuonIdHelpersLib MuonReadoutGeometry PixelReadoutGeometryLib SCT_ReadoutGeometry StoreGateLib TRT_ReadoutGeometry TileDetDescr )
+
+# Install python modules
+atlas_install_python_modules( python/*.py)

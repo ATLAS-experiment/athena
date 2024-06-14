@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigJiveXML/LVL1ResultRetriever.h"
@@ -21,17 +21,9 @@ namespace JiveXML {
    * Gaudi default constructor
    */
   LVL1ResultRetriever::LVL1ResultRetriever(const std::string& type, const std::string& name, const IInterface* parent):
-    AthAlgTool(type, name, parent),
-    m_typeName("LVL1Result"),m_trigDec("Trig::TrigDecisionTool/TrigDecisionTool"),
-    m_all(nullptr),
-    m_allL1(nullptr),
-    m_allL2(nullptr),
-    m_allEF(nullptr),
-    m_allHLT(nullptr)
+    AthAlgTool(type, name, parent)
   {
-
     declareInterface<IDataRetriever>(this);
-    declareProperty("TrigDecisionTool", m_trigDec, "Tool to access TrigDecision");
   }
 
   /**
@@ -42,11 +34,11 @@ namespace JiveXML {
   StatusCode LVL1ResultRetriever::initialize() {
 
     //be verbose
-    if (msgLvl(MSG::VERBOSE)) msg(MSG::VERBOSE) << "initialize()" << endmsg;
+    ATH_MSG_VERBOSE("initialize()");
 
     //Try to retrieve the trig decision tool
-    if ( !m_trigDec.retrieve() ) {
-      if (msgLvl(MSG::FATAL)) msg(MSG::FATAL) << "Could not retrieve TrigDecisionTool!" << endmsg;
+    if ( !m_trigDecTool.retrieve() ) {
+      ATH_MSG_FATAL("Could not retrieve TrigDecisionTool!");
       return StatusCode::FAILURE;
     }
 
@@ -54,11 +46,11 @@ namespace JiveXML {
     // items start their name from "L1_", etc) In principle we would not have to do
     // so as the TrigDecisionTool jobOptions defines these as public chain
     // groups. This way, we are independant of jobOptions
-    m_all   = m_trigDec->getChainGroup(".*");
-    m_allL1 = m_trigDec->getChainGroup("L1_.*");
-    m_allL2 = m_trigDec->getChainGroup("L2_.*");
-    m_allEF = m_trigDec->getChainGroup("EF_.*");
-    m_allHLT = m_trigDec->getChainGroup("HLT_.*");
+    m_all   = m_trigDecTool->getChainGroup(".*");
+    m_allL1 = m_trigDecTool->getChainGroup("L1_.*");
+    m_allL2 = m_trigDecTool->getChainGroup("L2_.*");
+    m_allEF = m_trigDecTool->getChainGroup("EF_.*");
+    m_allHLT = m_trigDecTool->getChainGroup("HLT_.*");
 
     return StatusCode::SUCCESS;
   }
@@ -67,57 +59,60 @@ namespace JiveXML {
    * Get a long strong with all the item lists and prescales that are passed by
    * the given chain group
    **/
-  StatusCode LVL1ResultRetriever::getItemLists(const Trig::ChainGroup* chains, 
+  StatusCode LVL1ResultRetriever::getItemLists(const Trig::ChainGroup* chains,
       std::string& itemList, std::string& prescaleList) {
 
     std::string sig_name;
 
     //Get a list of L1 items
     std::vector<std::string> chainList = chains->getListOfTriggers();
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "Number of items in chain is " << chainList.size() << endmsg;
+    ATH_MSG_DEBUG("Number of items in chain is " << chainList.size());
 
-    for (std::vector<std::string>::iterator itemItr = chainList.begin();
-         itemItr != chainList.end(); ++itemItr) {
-      
+    for (auto &trigName : chainList){
       // Make sure the item is not empty
       // (can this actually happen ?!?
-      if ( (*itemItr).empty() ) continue;
-    
-      // too many triggers in data15, write only non-prescaled
-      if ( m_trigDec->getPrescale(*itemItr) != 1. ){  continue; }
+      if ( trigName.empty() ) continue;
 
-      std::string myItem = (*itemItr);
+      auto trigChain = m_trigDecTool->getChainGroup(trigName);
+      // getPrescale() returns 0.0 for the first event: trigger decision tool needs
+      // to internally cache the values prior to the event, but running from RAW the
+      // conditions algorithm only runs during the event. Hence the "live" loading of
+      // prescales are 1 event late - No trigger decisions for the first event
+      if ( std::abs(trigChain->getPrescale()-1.0) > 1e-5 ) continue;
+
       //Output debug info
-      if (msgLvl(MSG::VERBOSE)) msg(MSG::VERBOSE) << "  * item : name=" << myItem 
-	  << "; result = " << (m_trigDec->isPassed((*itemItr)) ? "passed" : "failed") 
-	  << "; prescale = " <<  m_trigDec->getPrescale((*itemItr))  << endmsg ;
+      std::string myItem = trigName;
+      ATH_MSG_VERBOSE("  * item : name=" << myItem
+                      << "; result = " << (trigChain->isPassed() ? "passed" : "failed")
+                      << "; prescale = " <<  trigChain->getPrescale());
+
       // replace HLT with EF (as AtlantisJava doesn't know 'HLT'):
-      if ( myItem.find("HLT",0) != std::string::npos){ 
-	myItem.replace(0,4,"EF_");
-        if (msgLvl(MSG::VERBOSE)) msg(MSG::VERBOSE) << (*itemItr) << " renamed into: " << myItem
-   	  << endmsg ;
+      if ( myItem.find("HLT",0) != std::string::npos){
+        myItem.replace(0,4,"EF_");
+        ATH_MSG_VERBOSE(trigName << " renamed into: " << myItem);
       }
 
       // prescale: see TWiki page TrigDecisionTool15
 
       //Only add passed items
-      if ( m_trigDec->isPassed((*itemItr)) ) { 
+      if ( trigChain->isPassed() ) {
 
         //Add item to list
-        itemList += "-" + myItem; 
+        itemList += "-" + myItem;
 
         // prescale factor
-        prescaleList += "-" + DataType(  m_trigDec->getPrescale(*itemItr) ).toString(); 
+        prescaleList += "-" + DataType(  trigChain->getPrescale() ).toString();
       }
     }
+
 
     //Mark empty item lists
     if ( itemList.empty() ){ itemList = "empty"; }
     if ( prescaleList.empty() ){ prescaleList = "empty"; }
 
     //print debug information
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << " itemList: " << itemList << endmsg;
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << " prescaleList: " << prescaleList << endmsg;
+    ATH_MSG_DEBUG(" itemList: " << itemList);
+    ATH_MSG_DEBUG(" prescaleList: " << prescaleList);
 
     return StatusCode::SUCCESS;
   }
@@ -131,7 +126,7 @@ namespace JiveXML {
   StatusCode LVL1ResultRetriever::retrieve(ToolHandle<IFormatTool> &FormatTool) {
 
     //be verbose
-    if (msgLvl(MSG::VERBOSE)) msg(MSG::VERBOSE) << "retrieve()" << endmsg;
+    ATH_MSG_VERBOSE("retrieve()");
 
     //Get the item and prescale lists for all levels
     std::string itemListL1="";
@@ -147,43 +142,43 @@ namespace JiveXML {
     getItemLists( m_allL1, itemListL1, prescaleListL1 ).ignore();
     //Summarize L1 result
     int flagL1Passed = m_allL1->isPassed();
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "Decision : Level-1 " << ((flagL1Passed)? "passed":"failed") << endmsg;
+    ATH_MSG_DEBUG("Decision : Level-1 " << ((flagL1Passed)? "passed":"failed"));
 
     //Get L2
     getItemLists( m_allL2, itemListL2, prescaleListL2 ).ignore();
     //Summarize L2 result
     int flagL2Passed = m_allL2->isPassed();
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "Decision : Level-2 " << ((flagL2Passed)? "passed":"failed") << endmsg;
+    ATH_MSG_DEBUG("Decision : Level-2 " << ((flagL2Passed)? "passed":"failed"));
 
     //Get EF
     getItemLists( m_allEF, itemListEF, prescaleListEF ).ignore();
     //Summarize EF result
     int flagEFPassed = m_allEF->isPassed();
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "Decision : EventFilter " << ((flagEFPassed)? "passed":"failed") << endmsg;
+    ATH_MSG_DEBUG("Decision : EventFilter " << ((flagEFPassed)? "passed":"failed"));
 
     //Get HLT
     getItemLists( m_allHLT, itemListHLT, prescaleListHLT ).ignore();
     //Summarize HLT result
     int flagHLTPassed = m_allHLT->isPassed();
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "Decision : HLT " << ((flagHLTPassed)? "passed":"failed") << endmsg;
+    ATH_MSG_DEBUG("Decision : HLT " << ((flagHLTPassed)? "passed":"failed"));
 
     //Do not write trigger info if we failed to obtain any of it
     if ((itemListL1=="empty") && (itemListL2=="empty") && (itemListEF=="empty") && (itemListHLT=="empty") ){
-      if (msgLvl(MSG::INFO)) msg(MSG::INFO) << "All item lists empty, will not write out any data" << endmsg;
+      ATH_MSG_INFO("All item lists empty, will not write out any data");
       return StatusCode::SUCCESS;
     }
     
     //Store results in data list
-    DataVect itemListL1Vec;        itemListL1Vec.push_back( DataType( itemListL1 )); 
-    DataVect prescaleListL1Vec;    prescaleListL1Vec.push_back( DataType( prescaleListL1 )); 
+    DataVect itemListL1Vec;        itemListL1Vec.push_back( DataType( itemListL1 ));
+    DataVect prescaleListL1Vec;    prescaleListL1Vec.push_back( DataType( prescaleListL1 ));
     DataVect itemListL2Vec;        itemListL2Vec.push_back( DataType( itemListL2 ));
     DataVect prescaleListL2Vec;    prescaleListL2Vec.push_back( DataType( prescaleListL2 ));
     DataVect itemListEFVec;        itemListEFVec.push_back( DataType( itemListEF ));
     DataVect prescaleListEFVec;    prescaleListEFVec.push_back( DataType( prescaleListEF ));
-    DataVect itemListHLTVec;       itemListHLTVec.push_back( DataType( itemListHLT )); 
+    DataVect itemListHLTVec;       itemListHLTVec.push_back( DataType( itemListHLT ));
     DataVect prescaleListHLTVec;   prescaleListHLTVec.push_back( DataType( prescaleListHLT ));
     DataVect passedTrigger;        passedTrigger.push_back(DataType( flagHLTPassed )); //this is just a duplicate
-    DataVect passedL1;             passedL1.push_back(DataType( flagL1Passed )); 
+    DataVect passedL1;             passedL1.push_back(DataType( flagL1Passed ));
     DataVect passedL2;             passedL2.push_back(DataType( flagL2Passed ));
     DataVect passedEF;             passedEF.push_back(DataType( flagHLTPassed )); // temporary.
     DataVect passedHLT;            passedHLT.push_back(DataType( flagHLTPassed ));
@@ -210,9 +205,8 @@ namespace JiveXML {
     dataMap["energyEx"] = energyEx;
     dataMap["energyEy"] = energyEy;
     dataMap["energyEtMiss"] = energyEtMiss;
-    
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << dataTypeName() << ": "<< itemListL1Vec.size() 
-                                            << endmsg; 
+
+    ATH_MSG_DEBUG(dataTypeName() << ": "<< itemListL1Vec.size());
     //forward data to formating tool
     return FormatTool->AddToEvent(dataTypeName(), "TrigDecision", &dataMap);
   }

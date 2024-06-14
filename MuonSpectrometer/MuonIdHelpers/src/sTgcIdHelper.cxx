@@ -335,6 +335,43 @@ Identifier sTgcIdHelper::febID(const Identifier& channelId) const{
 }
 
 
+Identifier sTgcIdHelper::hvID(int stationName, int stationEta, int stationPhi, int multilayer, int gasGap, bool isInnerQ1)const{
+    int channel = 1;
+    if(!isInnerQ1 && std::abs(stationEta)==1) channel = 100;
+    return channelID(stationName, stationEta, stationPhi, multilayer, gasGap, sTgcChannelTypes::Strip, channel);
+}
+
+Identifier sTgcIdHelper::hvID(int stationName, int stationEta, int stationPhi, int multilayer, int gasGap, bool isInnerQ1, bool& isValid)const{
+    int channel = 1;
+    if(!isInnerQ1 && std::abs(stationEta)==1) channel = 100;
+    return channelID(stationName, stationEta, stationPhi, multilayer, gasGap, sTgcChannelTypes::Strip, channel, isValid);
+}
+
+Identifier sTgcIdHelper::hvID(const std::string& stationName, int stationEta, int stationPhi, int multilayer, int gasGap, bool isInnerQ1)const{
+    int channel = 1;
+    if(!isInnerQ1 && std::abs(stationEta)==1) channel = 100;
+    return channelID(stationName, stationEta, stationPhi, multilayer, gasGap, sTgcChannelTypes::Strip, channel);
+}
+
+Identifier sTgcIdHelper::hvID(const std::string& stationName, int stationEta, int stationPhi, int multilayer, int gasGap, bool isInnerQ1, bool& isValid)const{
+    int channel = 1;
+    if(!isInnerQ1 && std::abs(stationEta)==1) channel = 100;
+    return channelID(stationName, stationEta, stationPhi, multilayer, gasGap, sTgcChannelTypes::Strip, channel, isValid);
+}
+
+Identifier sTgcIdHelper::hvID(const Identifier& channelId, bool isInnerQ1)const{
+    int channel = 1;
+    if(std::abs(stationEta(channelId))==1 && !isInnerQ1) channel = 100;
+    return channelID(channelId, multilayer(channelId), gasGap(channelId), sTgcChannelTypes::Strip, channel);  
+}
+
+
+Identifier sTgcIdHelper::hvID(const Identifier& channelId, bool isInnerQ1, bool& isValid)const{
+    int channel = 1;
+    if(std::abs(stationEta(channelId))==1 && !isInnerQ1) channel = 100;
+    return channelID(channelId, multilayer(channelId), gasGap(channelId), sTgcChannelTypes::Strip, channel, isValid);  
+}
+
 
 
 
