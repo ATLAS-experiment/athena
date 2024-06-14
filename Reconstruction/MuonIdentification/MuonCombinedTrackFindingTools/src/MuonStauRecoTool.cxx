@@ -88,14 +88,16 @@ namespace MuonCombined {
         for (const InDetCandidate* it : inDetCandidates) { handleCandidate(ctx, *it, tagMap, combTracks, segments); }
     }
 
-    MuonStauRecoTool::TruthInfo* MuonStauRecoTool::getTruth(const xAOD::TrackParticle& indetTrackParticle) const {
+    std::unique_ptr<MuonStauRecoTool::TruthInfo> 
+        MuonStauRecoTool::getTruth(const xAOD::TrackParticle& indetTrackParticle) const {
         // in case we are using the truth, check if the truth link is set and create the TruthInfo object
         static const SG::ConstAccessor<ElementLink<xAOD::TruthParticleContainer> >
           truthParticleLinkAcc("truthParticleLink");
-        if (m_doTruth && truthParticleLinkAcc.isAvailable(indetTrackParticle)) {
-            const ElementLink<xAOD::TruthParticleContainer>& truthLink =
-                truthParticleLinkAcc(indetTrackParticle);
-            if (truthLink.isValid()) { return new TruthInfo((*truthLink)->pdgId(), (*truthLink)->m(), (*truthLink)->p4().Beta()); }
+        if (m_doTruth && truthParticleLinkAcc.isAvailable(indetTrackParticle)) {            
+            const ElementLink<xAOD::TruthParticleContainer>& truthLink = truthParticleLinkAcc(indetTrackParticle);
+            if (truthLink.isValid()) { 
+                return std::make_unique<TruthInfo>((*truthLink)->pdgId(), (*truthLink)->m(), (*truthLink)->p4().Beta()); 
+            }
         }
         return nullptr;
     }
@@ -256,7 +258,9 @@ namespace MuonCombined {
         return !candidates.empty();
     }
 
-    void MuonStauRecoTool::extractTimeMeasurementsFromTrack(const EventContext& ctx, MuonStauRecoTool::Candidate& candidate) const {
+    void MuonStauRecoTool::extractTimeMeasurementsFromTrack(const EventContext& ctx, 
+                                                            Candidate& candidate) const {
+        
         SG::ReadCondHandle<MuonCalib::MdtCalibDataContainer> mdtCalibConstants{m_calibDbKey, ctx};
         if (!mdtCalibConstants.isValid()) {
             ATH_MSG_FATAL("Failed to retrieve calibration constants "<<m_calibDbKey.fullKey());
@@ -677,8 +681,11 @@ namespace MuonCombined {
         candidate.finalBetaFitResult = betaFitResult;
     }
 
-    void MuonStauRecoTool::addTag(const InDetCandidate& indetCandidate, MuonStauRecoTool::Candidate& candidate,
-                                  InDetCandidateToTagMap* tagMap, TrackCollection* combTracks, Trk::SegmentCollection* segments) const {
+    void MuonStauRecoTool::addTag(const InDetCandidate& indetCandidate, 
+                                  MuonStauRecoTool::Candidate& candidate,
+                                  InDetCandidateToTagMap* tagMap, 
+                                  TrackCollection* combTracks, 
+                                  Trk::SegmentCollection* segments) const {
         // get combined track and the segments
         combTracks->push_back(candidate.combinedTrack.release());
         ElementLink<TrackCollection> comblink(*combTracks, combTracks->size() - 1);
@@ -698,25 +705,11 @@ namespace MuonCombined {
         tag->setMuBeta(candidate.betaFitResult.beta);
 
         // add StauExtras
-        MuGirlNS::StauExtras* stauExtras = new MuGirlNS::StauExtras();
+        std::unique_ptr<MuGirlNS::StauExtras> stauExtras = std::make_unique<MuGirlNS::StauExtras>();
         stauExtras->betaAll = candidate.betaFitResult.beta;
-        stauExtras->betaAllt = candidate.finalBetaFitResult.beta;
-        stauExtras->numRpcHitsInSeg = 0;
-        stauExtras->numCaloCells = 0;
-        stauExtras->rpcBetaAvg = 0;
-        stauExtras->rpcBetaRms = 0;
-        stauExtras->rpcBetaChi2 = 0;
-        stauExtras->rpcBetaDof = 0;
-        stauExtras->mdtBetaAvg = 0;
-        stauExtras->mdtBetaRms = 0;
-        stauExtras->mdtBetaChi2 = 0;
-        stauExtras->mdtBetaDof = 0;
-        stauExtras->caloBetaAvg = 0;
-        stauExtras->caloBetaRms = 0;
-        stauExtras->caloBetaChi2 = 0;
-        stauExtras->caloBetaDof = 0;
+        stauExtras->betaAllt = candidate.finalBetaFitResult.beta;      
         stauExtras->hits = candidate.stauHits;
-        tag->setStauExtras(stauExtras);
+        tag->setStauExtras(std::move(stauExtras));
 
         // print results afer refineCandidate
         if (m_doSummary || msgLvl(MSG::DEBUG)) {
@@ -843,8 +836,8 @@ namespace MuonCombined {
         return !candidates.empty();
     }
 
-    bool MuonStauRecoTool::createCandidates(const MuonStauRecoTool::AssociatedData& associatedData,
-                                            MuonStauRecoTool::CandidateVec& candidates) const {
+    bool MuonStauRecoTool::createCandidates(const AssociatedData& associatedData,
+                                            CandidateVec& candidates) const {
         // loop over layers and select seed maxima
         MaximumDataVec seedMaximumDataVec;
         LayerDataVec::const_iterator it = associatedData.layerData.begin();
@@ -951,7 +944,7 @@ namespace MuonCombined {
                     if (nextensions == 0)
                         theCandidate = candidate.get();
                     else {
-                        std::shared_ptr<Candidate> newCandidate(new Candidate(candidate->betaSeed));
+                        std::shared_ptr<Candidate> newCandidate = std::make_unique<Candidate>(candidate->betaSeed);
                         newCandidate->layerDataVec = layerDataVec;
                         newCandidate->hits = hits;
                         newCandidates.push_back(newCandidate);
@@ -985,17 +978,15 @@ namespace MuonCombined {
         if (it != it_end) extendCandidates(candidates, usedMaximumData, it, it_end);
     }
 
-    bool MuonStauRecoTool::extractTimeMeasurements(const EventContext& ctx, const Muon::MuonSystemExtension& muonSystemExtension,
-                                                   MuonStauRecoTool::AssociatedData& associatedData) const {
+    bool MuonStauRecoTool::extractTimeMeasurements(const EventContext& ctx, 
+                                                   const Muon::MuonSystemExtension& muonSystemExtension,
+                                                   AssociatedData& associatedData) const {
         // get layer intersections
-        const std::vector<Muon::MuonSystemExtension::Intersection>& layerIntersections = muonSystemExtension.layerIntersections();
-
         // find RPC time measurements and segments to seed the beta fit using t0 fitting
-        for (std::vector<Muon::MuonSystemExtension::Intersection>::const_iterator it = layerIntersections.begin();
-             it != layerIntersections.end(); ++it) {
+        for (const Muon::MuonSystemExtension::Intersection& iSect: muonSystemExtension.layerIntersections()) {
             // create layer data object and add maxima
-            LayerData layerData(*it);
-            associateHoughMaxima(layerData);
+            LayerData layerData{iSect};
+            associateHoughMaxima(ctx, layerData);
 
             // skip layer of not maxima are associated
             if (layerData.maximumDataVec.empty()) continue;
@@ -1005,15 +996,15 @@ namespace MuonCombined {
             // loop over associated maxima
             for (auto& maximum : layerData.maximumDataVec) {
                 // extract RPC timing
-                extractRpcTimingFromMaximum(*it, *maximum);
+                extractRpcTimingFromMaximum(iSect, *maximum);
 
                 // find segments for intersection
                 std::vector<std::shared_ptr<const Muon::MuonSegment>> t0fittedSegments;
-                findSegments(*it, *maximum, t0fittedSegments, m_muonPRDSelectionTool, m_segmentMakerT0Fit);
+                findSegments(iSect, *maximum, t0fittedSegments, m_muonPRDSelectionTool, m_segmentMakerT0Fit);
                 if (t0fittedSegments.empty()) continue;
 
                 // match segments to intersection, store the ones that match
-                m_segmentMatchingTool->select(ctx, *it, t0fittedSegments, maximum->t0fittedSegments);
+                m_segmentMatchingTool->select(ctx, iSect, t0fittedSegments, maximum->t0fittedSegments);
 
                 // get beta seeds for Maximum
                 getBetaSeeds(*maximum);
@@ -1182,7 +1173,7 @@ namespace MuonCombined {
         // require at least 2 MDT hits
         if (mdts.size() > 2) {
             // run segment finder
-            std::unique_ptr<Trk::SegmentCollection> segColl(new Trk::SegmentCollection(SG::VIEW_ELEMENTS));
+            auto segColl = std::make_unique<Trk::SegmentCollection>(SG::VIEW_ELEMENTS);
             segmentMaker->find(intersection.trackParameters->position(), intersection.trackParameters->momentum(), mdts, clusters,
                                !clusters.empty(), segColl.get(), intersection.trackParameters->momentum().mag());
             if (segColl) {
@@ -1288,7 +1279,8 @@ namespace MuonCombined {
         }
     }
 
-    void MuonStauRecoTool::associateHoughMaxima(MuonStauRecoTool::LayerData& layerData) const {
+    void MuonStauRecoTool::associateHoughMaxima(const EventContext& ctx,
+                                                MuonStauRecoTool::LayerData& layerData) const {
         
         if (m_houghDataPerSectorVecKey.empty()) return;
         // get intersection and layer identifiers
@@ -1298,7 +1290,7 @@ namespace MuonCombined {
         Muon::MuonStationIndex::LayerIndex layerIndex = intersection.layerSurface.layerIndex;
 
         // get hough data
-        SG::ReadHandle<Muon::MuonLayerHoughTool::HoughDataPerSectorVec> houghDataPerSectorVec{m_houghDataPerSectorVecKey};
+        SG::ReadHandle<Muon::MuonLayerHoughTool::HoughDataPerSectorVec> houghDataPerSectorVec{m_houghDataPerSectorVecKey,ctx};
         if (!houghDataPerSectorVec.isValid()) {
             ATH_MSG_ERROR("Hough data per sector vector not found");
             return;
@@ -1334,7 +1326,8 @@ namespace MuonCombined {
                              : intersection.trackParameters->parameters()[Trk::locX];
 
         float z = intersection.trackParameters->position().z();
-        float errx = Amg::error(*intersection.trackParameters->covariance(), Trk::locX);
+        float errx = intersection.trackParameters->covariance() ?
+                     Amg::error(*intersection.trackParameters->covariance(), Trk::locX) : 0.;
         float x = barrelLike ? z : r;
         float y = barrelLike ? r : z;
         float theta = std::atan2(y, x);

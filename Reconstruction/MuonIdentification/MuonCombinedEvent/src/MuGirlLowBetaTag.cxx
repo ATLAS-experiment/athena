@@ -16,10 +16,7 @@ namespace MuonCombined {
     MuGirlLowBetaTag::MuGirlLowBetaTag(const std::vector<ElementLink<Trk::SegmentCollection> >& segments) :
         TagBase(TagBase::Author::MuGirlLowBeta, TagBase::Type::SegmentTagged), m_segments{segments} {}
 
-    MuGirlLowBetaTag::~MuGirlLowBetaTag() = default;
-
     const Trk::Track* MuGirlLowBetaTag::combinedTrack() const { return m_combLink.isValid() ? *m_combLink : nullptr; }
-
     const Trk::Track* MuGirlLowBetaTag::updatedExtrapolatedTrack() const { return m_meLink.isValid() ? *m_meLink : nullptr; }
 
     void MuGirlLowBetaTag::setUpdatedExtrapolatedTrack(const ElementLink<TrackCollection>& meLink) { m_meLink = meLink; }
@@ -37,16 +34,12 @@ namespace MuonCombined {
     }
     // stau dressing
     void MuGirlLowBetaTag::setMuBeta(float muBeta) { m_muBeta = muBeta; }
-    float MuGirlLowBetaTag::getMuBeta() { return m_muBeta; }
+    float MuGirlLowBetaTag::getMuBeta() const { return m_muBeta; }
 
-    void MuGirlLowBetaTag::setStauSummary(MuGirlNS::CandidateSummary* stauSummary) { m_stauSummary.reset(stauSummary); }
-    MuGirlNS::CandidateSummary* MuGirlLowBetaTag::getStauSummary() { return m_stauSummary.get(); }
-
-    void MuGirlLowBetaTag::setStauExtras(MuGirlNS::StauExtras* stauExtras) { m_stauExtras.reset(stauExtras); }
+    void MuGirlLowBetaTag::setStauExtras(std::unique_ptr<MuGirlNS::StauExtras> stauExtras) {
+         m_stauExtras= std::move(stauExtras); 
+    }
     MuGirlNS::StauExtras* MuGirlLowBetaTag::getStauExtras() { return m_stauExtras.get(); }
     const MuGirlNS::StauExtras* MuGirlLowBetaTag::getStauExtras() const { return m_stauExtras.get(); }
-
-    void MuGirlLowBetaTag::setRHExtras(MuGirlNS::RHExtras* rhExtras) { m_rhExtras.reset(rhExtras); }
-    MuGirlNS::RHExtras* MuGirlLowBetaTag::getRHExtras() { return m_rhExtras.get(); }
 
 }  // namespace MuonCombined

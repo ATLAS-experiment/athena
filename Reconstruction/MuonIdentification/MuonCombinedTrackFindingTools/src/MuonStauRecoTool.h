@@ -72,7 +72,8 @@ namespace MuonCombined {
         typedef std::vector<RpcTimeMeasurement> RpcTimeMeasurementVec;
 
         struct MaximumData {
-            MaximumData(const Muon::MuonSystemExtension::Intersection& intersection_, const MuonHough::MuonLayerHough::Maximum* maximum_,
+            MaximumData(const Muon::MuonSystemExtension::Intersection& intersection_, 
+                        const MuonHough::MuonLayerHough::Maximum* maximum_,
                         const std::vector<std::shared_ptr<const Muon::MuonClusterOnTrack>> & phiClusterOnTracks_) :
                 intersection(intersection_), maximum(maximum_), phiClusterOnTracks(phiClusterOnTracks_) {}
             Muon::MuonSystemExtension::Intersection intersection;
@@ -120,9 +121,9 @@ namespace MuonCombined {
 
         struct TruthInfo {
             TruthInfo(int pdgId_, float mass_, float beta_) : pdgId(pdgId_), mass(mass_), beta(beta_) {}
-            int pdgId;
-            float mass;
-            float beta;
+            int pdgId{0};
+            float mass{0.f};
+            float beta{0.f};
             std::string toString() const {
                 std::ostringstream sout;
                 sout << " pdgId " << pdgId << " mass " << mass << " beta " << beta;
@@ -149,7 +150,7 @@ namespace MuonCombined {
                              TrackCollection* combTracks, Trk::SegmentCollection* segments) const;
 
         /** associate Hough maxima to intersection */
-        void associateHoughMaxima(LayerData& layerData) const;
+        void associateHoughMaxima(const EventContext& ctx, LayerData& layerData) const;
 
         /** extract RPC hit timing */
         void extractRpcTimingFromMaximum(const Muon::MuonSystemExtension::Intersection& intersection, MaximumData& maximumData) const;
@@ -199,7 +200,7 @@ namespace MuonCombined {
         void extractTimeMeasurementsFromTrack(const EventContext& ctx, Candidate& candidate) const;
 
         /** extract truth from the indetTrackParticle */
-        TruthInfo* getTruth(const xAOD::TrackParticle& indetTrackParticle) const;
+        std::unique_ptr<TruthInfo> getTruth(const xAOD::TrackParticle& indetTrackParticle) const;
 
         /** if truth tracking is enabled, return whether the pdg is selected */
         bool selectTruth(const TruthInfo* truthInfo) const {
@@ -255,24 +256,6 @@ namespace MuonCombined {
                                                                        "Conditions object containing the calibrations"};
 
         Muon::MuonSectorMapping m_muonSectorMapping;
-
-        struct TruthMatchingCounters {
-            TruthMatchingCounters() : ntruth(0) {}
-            unsigned int ntruth;
-            std::map<int, int> nrecoPerStage;
-
-            void fillTruth() { ++ntruth; }
-            void fillStage(int stage) { ++nrecoPerStage[stage]; }
-            std::string summary() const {
-                std::ostringstream sout;
-                float scale = ntruth != 0 ? 1. / ntruth : 1.;
-                sout << " Truth " << ntruth;
-                for (auto& stage : nrecoPerStage) {
-                    sout << std::endl << " stage " << stage.first << " reco " << stage.second << " eff " << stage.second * scale;
-                }
-                return sout.str();
-            }
-        };
 
         Gaudi::Property<bool> m_doSummary{this, "DoSummary", false, "enable summary output"};
         Gaudi::Property<bool> m_useTruthMatching{this, "UseTruthMatching", false, "enable usage of truth info for reconstruction"};

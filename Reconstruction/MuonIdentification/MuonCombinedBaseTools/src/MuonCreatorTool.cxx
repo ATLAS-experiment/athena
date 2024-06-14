@@ -517,7 +517,10 @@ namespace MuonCombined {
         ATH_MSG_DEBUG("Done adding Combined Fit Muon  " << tag->author() << " type " << tag->type());
     }
 
-    void MuonCreatorTool::addMuGirlLowBeta(const EventContext& ctx, xAOD::Muon& muon, const MuGirlLowBetaTag* tag, xAOD::SlowMuon* slowMuon,
+    void MuonCreatorTool::addMuGirlLowBeta(const EventContext& ctx, 
+                                           xAOD::Muon& muon, 
+                                           const MuGirlLowBetaTag* tag, 
+                                           xAOD::SlowMuon* slowMuon,
                                            OutputData& outputData) const {
         if (!tag) {
             // init variables if necessary.
@@ -529,7 +532,7 @@ namespace MuonCombined {
         // get stauExtras and write to slowMuon
         const MuGirlNS::StauExtras* stauExtras = tag->getStauExtras();
         if (slowMuon && stauExtras) {
-            ATH_MSG_DEBUG("StauSummary beta " << stauExtras->betaAll);
+            ATH_MSG_VERBOSE("StauSummary beta " << stauExtras->betaAll<<" "<<stauExtras->betaAllt);
             slowMuon->setBeta(stauExtras->betaAll);
             slowMuon->setBetaT(stauExtras->betaAllt);
             slowMuon->setAnn(stauExtras->ann);
