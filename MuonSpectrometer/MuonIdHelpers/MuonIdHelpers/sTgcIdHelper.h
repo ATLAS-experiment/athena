@@ -125,6 +125,17 @@ public:
     Identifier febID(const Identifier& channelID, int channelType, bool& isValid) const;
     Identifier febID(const Identifier& channelID) const;
 
+
+    /*
+    One layer of sTGCs is segmented into 4 high voltage sections. Eta station 1 is divided into two hv sections while eta stations 2 and 3 consist of one HV section each. The HV sections are numbered from 1-4. The following functions introduce an identifier that is mapping to these HV sections. For eta stations 2 and 3 it returns the gas gap id, e.g. channel 1 on a give gas gap. For station eta 1, the channel is set sto one for the inner HV section while it is set to 100 for the outer HV section. This is an arbitary mapping, channel 100 does not correspond to the transition between the two HV section (the location is different depending on the module type and the gas gap). The hv identifier is arbitrily set to be a strip type channel.
+    */
+    Identifier hvID(int stationName, int stationEta, int stationPhi, int multilayer, int gasGap, bool isInnerQ1) const;
+    Identifier hvID(int stationName, int stationEta, int stationPhi, int multilayer, int gasGap, bool isInnerQ1, bool& isValid) const;
+    Identifier hvID(const std::string& stationName, int stationEta, int stationPhi, int multilayer, int gasGap, bool isInnerQ1) const;
+    Identifier hvID(const std::string& stationName, int stationEta, int stationPhi, int multilayer, int gasGap, bool isInnerQ1, bool& isValid) const;
+    Identifier hvID(const Identifier& channelId, bool isInnerQ1)const;
+    Identifier hvID(const Identifier& channelId, bool isInnerQ1, bool& isValid) const;
+
     // for an Identifier id, get the list of the daughter readout channel ids
     void idChannels(const Identifier& id, std::vector<Identifier>& vect) const;
 
