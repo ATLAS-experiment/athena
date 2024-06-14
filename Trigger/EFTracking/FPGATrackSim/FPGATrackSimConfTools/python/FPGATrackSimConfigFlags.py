@@ -42,6 +42,12 @@ def createFPGATrackSimConfigFlags():
         return createDev21_02_15_FPGATrackSimConfigFlags()
     cf.addFlagsCategory("Dev21_02_15", __httDev21_02_15Flags, prefix=True )
 
+
+    # EDM conversion
+    cf.addFlag('doEDMConversion', False)
+    cf.addFlag('convertUnmappedHits', False)
+    cf.addFlag('writeToAOD', False)
+
     return cf
 
 

@@ -34,6 +34,7 @@ class FPGATrackSimTrack : public TObject {
   float getPhi() const { return m_phi; }
   float getZ0() const { return m_z0; }
   float getEta() const { return m_eta; }
+  float getTheta() const { return 2*std::atan(std::exp(-m_eta)); }
   float getChi2() const { return m_chi2; }
   float getOrigChi2() const { return m_origchi2; }
   float getChi2ndof() const { return m_chi2 / (getNCoords() - m_nmissing - 5); }
