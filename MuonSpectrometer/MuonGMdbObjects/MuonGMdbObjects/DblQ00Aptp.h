@@ -15,48 +15,47 @@
 
 #include <string> 
 #include <vector> 
-
+#include <array>
 class IRDBAccessSvc;
 
-class AmdcDb;
 
 namespace MuonGM {
 class DblQ00Aptp {
 public:
-    DblQ00Aptp(){};
-    ~DblQ00Aptp();
+    DblQ00Aptp() = default;
+    ~DblQ00Aptp() = default;
     DblQ00Aptp(IRDBAccessSvc *pAccessSvc, const std::string & GeoTag="", const std::string & GeoNode="");
-    DblQ00Aptp(AmdcDb* aptp);
+
+    DblQ00Aptp & operator=(const DblQ00Aptp &right) = delete;
+    DblQ00Aptp(const DblQ00Aptp&) = delete;
 
     // data members for DblQ00/APTP fields
     struct APTP {
-        int   version;   // VERSION
-        int   line;      // LINE NUMBER
-        char  type[8];   // STATION TYPE
-        int   i;         // STATION AMDB INDEX
-        int   icut;      // CUT-OUT INDEX,ZERO IF MISSING
-        int   iphi[8];   // PHI INDICATES OF OCTANTS
-        int   iz;        // Z (FOR BARREL) OR R (FOR END-CAPS) POS.
-        float dphi;      // RELATIVE PHI POSITION OF THE STATION IN
-        float z;         // Z POSITION OF THE LOWEST Z EDGE OF THE S
-        float r;         // RADIAL POSITION OF ITS INNERMOST EDGE
-        float s;         // ORTHO-RADIAL POSITION OF THE CENTER OF T
-        float alfa;       // ALFA ANGLE DEFINING THE DEVIATION [GRAD]
-        float beta;       // BETA ANGLE DEFINING THE DEVIATION
-        float gamma;      // GAMMA ANGLE DEFINING THE DEVIATION
+        int   version{0};           // VERSION
+        int   line{0};              // LINE NUMBER
+        std::string type{};         // STATION TYPE
+        int   i{0};                 // STATION AMDB INDEX
+        int   icut{0};              // CUT-OUT INDEX,ZERO IF MISSING
+        std::string iphi{};         // PHI INDICATES OF OCTANTS
+        int   iz{0};                // Z (FOR BARREL) OR R (FOR END-CAPS) POS.
+        float dphi{0.f};            // RELATIVE PHI POSITION OF THE STATION IN
+        float z{0.f};               // Z POSITION OF THE LOWEST Z EDGE OF THE S
+        float r{0.f};               // RADIAL POSITION OF ITS INNERMOST EDGE
+        float s{0.f};               // ORTHO-RADIAL POSITION OF THE CENTER OF T
+        float alfa{0.f};            // ALFA ANGLE DEFINING THE DEVIATION [GRAD]
+        float beta{0.f};            // BETA ANGLE DEFINING THE DEVIATION
+        float gamma{0.f};           // GAMMA ANGLE DEFINING THE DEVIATION
     };
 
     const APTP* data() const { return m_d.data(); };
     unsigned int size() const { return m_nObj; };
-    const char* getName() const { return "APTP"; };
-    const char* getDirName() const { return "DblQ00"; };
-    const char* getObjName() const { return "APTP"; };
+    std::string getName() const { return "APTP"; };
+    std::string getDirName() const { return "DblQ00"; };
+    std::string getObjName() const { return "APTP"; };
 
 private:
-    std::vector<APTP> m_d;
-    unsigned int m_nObj; // > 1 if array; 0 if error in retrieve.
-    DblQ00Aptp & operator=(const DblQ00Aptp &right);
-    DblQ00Aptp(const DblQ00Aptp&);
+    std::vector<APTP> m_d{};
+    unsigned int m_nObj{0}; // > 1 if array; 0 if error in retrieve.
 };
 }// end of MuonGM namespace
 

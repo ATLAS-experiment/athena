@@ -14,52 +14,50 @@
 #define DBLQ00_WRPC_H
 #include <string>
 #include <vector>
-
+#include <array>
 class IRDBAccessSvc;
 
-class AmdcDb;
 
 namespace MuonGM {
 class DblQ00Wrpc {
 public:
-    DblQ00Wrpc(){};
-    ~DblQ00Wrpc();
+    DblQ00Wrpc() = default;
+    ~DblQ00Wrpc() = default;
     DblQ00Wrpc(IRDBAccessSvc *pAccessSvc,const std::string & GeoTag="", const std::string & GeoNode="");
-    DblQ00Wrpc(AmdcDb* wrpc);
-    
+    DblQ00Wrpc & operator=(const DblQ00Wrpc &right) = delete;
+    DblQ00Wrpc(const DblQ00Wrpc&) = delete;
     // data members for DblQ00/WRPC fields
     struct WRPC {
-        int version; // VERSION
-        int nvrs; // VERSION OF RPC TECHNOLOGY
-        int layrpc; // LAYERS NUMBER
-        float tckrla; // THICK. OF AN RPC LAYER
-        float tottck; // TOTAL THICKNESS
-        float tckfsp; // THICK. OF FOAM SPACER
-        float ackfsp; // THICK. OF AL PLATE OF FOAM SPACER
-        float tlohcb; // THICK. OF LOWER HONEYCOMB
-        float alohcb; // THICK. OF AL PLATE OF LOWER HONEYCOMB
-        float tckbak; // THICK. OF BAKELITE
-        float tckgas; // THICK. OF GAS GAP
-        float tckssu; // THICK. OF STRIPS SUPPORT
-        float tckstr; // THICK. OF STRIPS
-        float sdedmi; // S INTERNAL MID-CHBER DEAD REGION
-        float zdedmi; // Z INTERNAL MID-CHBER DEAD REGION
-        float spdiam; // SPACER DIAMETER
-        float sppitc; // SPACER PITCH
-        float stroff[3]; // STRIP OFFSET S, FIRST Z, SECOND Z
+        int version{0}; // VERSION
+        int nvrs{0}; // VERSION OF RPC TECHNOLOGY
+        int layrpc{0}; // LAYERS NUMBER
+        float tckrla{0.f}; // THICK. OF AN RPC LAYER
+        float tottck{0.f}; // TOTAL THICKNESS
+        float tckfsp{0.f}; // THICK. OF FOAM SPACER
+        float ackfsp{0.f}; // THICK. OF AL PLATE OF FOAM SPACER
+        float tlohcb{0.f}; // THICK. OF LOWER HONEYCOMB
+        float alohcb{0.f}; // THICK. OF AL PLATE OF LOWER HONEYCOMB
+        float tckbak{0.f}; // THICK. OF BAKELITE
+        float tckgas{0.f}; // THICK. OF GAS GAP
+        float tckssu{0.f}; // THICK. OF STRIPS SUPPORT
+        float tckstr{0.f}; // THICK. OF STRIPS
+        float sdedmi{0.f}; // S INTERNAL MID-CHBER DEAD REGION
+        float zdedmi{0.f}; // Z INTERNAL MID-CHBER DEAD REGION
+        float spdiam{0.f}; // SPACER DIAMETER
+        float sppitc{0.f}; // SPACER PITCH
+        std::array<float, 3> stroff{}; // STRIP OFFSET S, FIRST Z, SECOND Z
     };
     
     const WRPC* data() const { return m_d.data(); };
     unsigned int size() const { return m_nObj; };
-    const char* getName() const { return "WRPC"; };
-    const char* getDirName() const { return "DblQ00"; };
-    const char* getObjName() const { return "WRPC"; };
+    std::string getName() const { return "WRPC"; };
+    std::string getDirName() const { return "DblQ00"; };
+    std::string getObjName() const { return "WRPC"; };
 
 private:
-    std::vector<WRPC> m_d;
-    unsigned int m_nObj; // > 1 if array; 0 if error in retrieve.
-    DblQ00Wrpc & operator=(const DblQ00Wrpc &right);
-    DblQ00Wrpc(const DblQ00Wrpc&);
+    std::vector<WRPC> m_d{};
+    unsigned int m_nObj{0}; // > 1 if array; 0 if error in retrieve.
+
 };
 } // end of MuonGM namespace
 

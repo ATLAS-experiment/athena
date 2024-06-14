@@ -12,7 +12,7 @@ find_package( CORAL COMPONENTS CoralBase CoralKernel RelationalAccess )
 atlas_add_library( MuonGMdbObjects
                    src/*.cxx
                    PUBLIC_HEADERS MuonGMdbObjects
-                   LINK_LIBRARIES RDBAccessSvcLib AmdcDbLib
+                   LINK_LIBRARIES RDBAccessSvcLib
                    PRIVATE_INCLUDE_DIRS ${CORAL_INCLUDE_DIRS}
                    PRIVATE_LINK_LIBRARIES ${CORAL_LIBRARIES} )
 

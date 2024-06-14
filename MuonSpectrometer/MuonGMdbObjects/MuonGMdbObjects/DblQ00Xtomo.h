@@ -16,67 +16,67 @@
 class IRDBAccessSvc;
 
 #include <string>
-
-class AmdcDb;
+#include <vector>
 
 namespace MuonGM {
 class DblQ00Xtomo {
 public:
-    DblQ00Xtomo();
-    ~DblQ00Xtomo();
+    DblQ00Xtomo() = default;
+    ~DblQ00Xtomo() = default;
     DblQ00Xtomo(IRDBAccessSvc *pAccessSvc,const std::string & GeoTag="", const std::string & GeoNode="");
-    DblQ00Xtomo(AmdcDb* xtomo);
+
+    DblQ00Xtomo & operator=(const DblQ00Xtomo &right) = default;
+    DblQ00Xtomo(const DblQ00Xtomo&) = default;
+
 
     // data members for DblQ00/XTOMO fields
     struct XTOMO {
-          int line; // LINE NUMBER
-          std::string XTOMOCHBERNAME; 
-	  std::string XTOMOSITE;     
-	  int XTOMOSITEID;     
-	  int XTOMOTIME; 
-	  int XTOMOPASSED;     
-	  std::string XTOMOSIDE; 
-	  int XTOMONBERTUBE1;  
-	  int XTOMONBERTUBE2;  
-	  int XTOMONBERML;     
-	  int XTOMONBERLAYER;  
-	  int XTOMOML1STAGG;
-	  int XTOMOML2STAGG;
-	  float XTOMOD1;
-	  int XTOMONMEZ;
-	  float XTOMOML1NYTUB;   
-	  float XTOMOML1NZTUB;   
-	  float XTOMOML1NDELA;   
-	  float XTOMOML1NYPIT;   
-	  float XTOMOML1NZPIT;   
-	  float XTOMOML1PYTUB;   
-	  float XTOMOML1PZTUB;   
-	  float XTOMOML1PDELA;   
-	  float XTOMOML1PYPIT;   
-	  float XTOMOML1PZPIT;   
-	  float XTOMOML2NYTUB;   
-	  float XTOMOML2NZTUB;   
-	  float XTOMOML2NDELA;   
-	  float XTOMOML2NYPIT;   
-	  float XTOMOML2NZPIT;   
-	  float XTOMOML2PYTUB;   
-	  float XTOMOML2PZTUB;   
-	  float XTOMOML2PDELA;   
-	  float XTOMOML2PYPIT;   
-	  float XTOMOML2PZPIT;
-    };
-
-    const XTOMO* data() const { return m_d; };
+          int line{0}; // LINE NUMBER
+          std::string XTOMOCHBERNAME{}; 
+          std::string XTOMOSITE{};     
+          int XTOMOSITEID{0};     
+          int XTOMOTIME{0}; 
+          int XTOMOPASSED{0};     
+          std::string XTOMOSIDE{}; 
+          int XTOMONBERTUBE1{0};  
+          int XTOMONBERTUBE2{0};  
+          int XTOMONBERML{0};     
+          int XTOMONBERLAYER{0};  
+          int XTOMOML1STAGG{0};
+          int XTOMOML2STAGG{0};
+          float XTOMOD1{0.f};
+          int XTOMONMEZ{0};
+          float XTOMOML1NYTUB{0.f};   
+          float XTOMOML1NZTUB{0.f};   
+          float XTOMOML1NDELA{0.f};   
+          float XTOMOML1NYPIT{0.f};   
+          float XTOMOML1NZPIT{0.f};   
+          float XTOMOML1PYTUB{0.f};   
+          float XTOMOML1PZTUB{0.f};   
+          float XTOMOML1PDELA{0.f};   
+          float XTOMOML1PYPIT{0.f};   
+          float XTOMOML1PZPIT{0.f};   
+          float XTOMOML2NYTUB{0.f};   
+          float XTOMOML2NZTUB{0.f};   
+          float XTOMOML2NDELA{0.f};   
+          float XTOMOML2NYPIT{0.f};   
+          float XTOMOML2NZPIT{0.f};   
+          float XTOMOML2PYTUB{0.f};   
+          float XTOMOML2PZTUB{0.f};   
+          float XTOMOML2PDELA{0.f};   
+          float XTOMOML2PYPIT{0.f};   
+          float XTOMOML2PZPIT{0.f};
+    };    
+    
+    const XTOMO* data() const { return m_d.data(); };
     unsigned int size() const { return m_nObj; };
-    const char* getName() const { return "XTOMO"; };
-    const char* getDirName() const { return "DblQ00"; };
-    const char* getObjName() const { return "XTOMO"; };
+    std::string getName() const { return "XTOMO"; };
+    std::string getDirName() const { return "DblQ00"; };
+    std::string getObjName() const { return "XTOMO"; };
 
 private:
-    XTOMO* m_d;
-    unsigned int m_nObj; // > 1 if array; 0 if error in retrieve.
-    DblQ00Xtomo & operator=(const DblQ00Xtomo &right);
-    DblQ00Xtomo(const DblQ00Xtomo&);
+    std::vector<XTOMO> m_d{};
+    unsigned int m_nObj{0}; // > 1 if array; 0 if error in retrieve.
 };
 
 

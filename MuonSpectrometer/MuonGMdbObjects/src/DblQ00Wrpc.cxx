@@ -10,25 +10,21 @@
 #include "MuonGMdbObjects/DblQ00Wrpc.h"
 #include "RDBAccessSvc/IRDBAccessSvc.h"
 #include "RDBAccessSvc/IRDBRecordset.h"
-#include "AmdcDb/AmdcDb.h"
-#include "AmdcDb/AmdcDbRecord.h"
+#include "RDBAccessSvc/IRDBRecord.h"
 
 #include <iostream>
 #include <sstream>
 
-namespace MuonGM
-{
+namespace MuonGM {
 
-  DblQ00Wrpc::DblQ00Wrpc(IRDBAccessSvc *pAccessSvc, const std::string & GeoTag, const std::string & GeoNode) :
-    m_nObj(0) {
+  DblQ00Wrpc::DblQ00Wrpc(IRDBAccessSvc *pAccessSvc, const std::string & GeoTag, const std::string & GeoNode) {
   IRDBRecordset_ptr wrpc = pAccessSvc->getRecordsetPtr(getName(),GeoTag, GeoNode);
   if(wrpc->size()>0) {
     m_nObj = wrpc->size();
     m_d.resize (m_nObj);
     if (m_nObj == 0) std::cerr<<"NO Wrpc banks in the MuonDD Database"<<std::endl;
 
-    size_t i=0;
-    while(i<wrpc->size()) {
+    for(size_t i =0; i<wrpc->size();++i) {
         m_d[i].version     = (*wrpc)[i]->getInt("VERS");    
         m_d[i].nvrs        = (*wrpc)[i]->getInt("NVRS");
         m_d[i].layrpc      = (*wrpc)[i]->getInt("LAYRPC");
@@ -49,71 +45,11 @@ namespace MuonGM
         m_d[i].stroff[0]   = (*wrpc)[i]->getFloat("STROFF_0");
         m_d[i].stroff[1]   = (*wrpc)[i]->getFloat("STROFF_1");
         m_d[i].stroff[2]   = (*wrpc)[i]->getFloat("STROFF_2");
-        i++;
     }
   }
   else {
     std::cerr<<"NO Wrpc banks in the MuonDD Database"<<std::endl;
   }
-}
-
-DblQ00Wrpc::DblQ00Wrpc(AmdcDb* wrpc) :
-    m_nObj(0) {
-  IRDBRecordset_ptr pIRDBRecordset = wrpc->getRecordsetPtr(std::string(getObjName()),"Amdc");
-  std::vector<IRDBRecord*>::const_iterator it = pIRDBRecordset->begin();
-
-  m_nObj = pIRDBRecordset->size();
-  m_d.resize (m_nObj);
-  if (m_nObj == 0) std::cerr<<"NO Wrpc banks in the AmdcDbRecord"<<std::endl;
-
-  const AmdcDbRecord* pAmdcDbRecord = dynamic_cast<const AmdcDbRecord*>((*it));
-  if (pAmdcDbRecord == nullptr){
-    std::cerr << "No way to cast in AmdcDbRecord for " << getObjName() << std::endl;
-    return;
-  }
-  
-  std::vector< std::string> VariableList = pAmdcDbRecord->getVariableList();
-  int ItemTot = VariableList.size() ;
-  for(int Item=0 ; Item<ItemTot ; Item++){
-    std::string DbVar = VariableList[Item];
-  }
-
-  int i = -1;
-  it = pIRDBRecordset->begin();
-  for( ; it<pIRDBRecordset->end(); ++it){
-     pAmdcDbRecord = dynamic_cast<const AmdcDbRecord*>((*it));
-     if(pAmdcDbRecord == nullptr){
-       std::cerr << "No way to cast in AmdcDbRecord for " << getObjName() << std::endl;
-       return;
-     }
-
-     i = i + 1;
-
-     m_d[i].version = (*it)->getInt("VERS");    
-     m_d[i].nvrs = (*it)->getInt("NVRS");
-     m_d[i].layrpc = (*it)->getInt("LAYRPC");
-     m_d[i].tckrla = (*it)->getFloat("TCKRLA");
-     m_d[i].tottck = (*it)->getFloat("TOTTCK");
-     m_d[i].tckfsp = (*it)->getFloat("TCKFSP");
-     m_d[i].ackfsp = (*it)->getFloat("ACKFSP");
-     m_d[i].tlohcb = (*it)->getFloat("TLOHCB");
-     m_d[i].alohcb = (*it)->getFloat("ALOHCB");
-     m_d[i].tckbak = (*it)->getFloat("TCKBAK");
-     m_d[i].tckgas = (*it)->getFloat("TCKGAS");
-     m_d[i].tckssu = (*it)->getFloat("TCKSSU");
-     m_d[i].tckstr = (*it)->getFloat("TCKSTR");
-     m_d[i].sdedmi = (*it)->getFloat("SDEDMI");
-     m_d[i].zdedmi = (*it)->getFloat("ZDEDMI");
-     m_d[i].spdiam = (*it)->getFloat("SPDIAM");
-     m_d[i].sppitc = (*it)->getFloat("SPPITC");
-     m_d[i].stroff[0] = (*it)->getFloat("STROFF_0");
-     m_d[i].stroff[1] = (*it)->getFloat("STROFF_1");
-     m_d[i].stroff[2] = (*it)->getFloat("STROFF_2");
-  }
-}
-
-DblQ00Wrpc::~DblQ00Wrpc()
-{
 }
 
 } // end of namespace MuonGM

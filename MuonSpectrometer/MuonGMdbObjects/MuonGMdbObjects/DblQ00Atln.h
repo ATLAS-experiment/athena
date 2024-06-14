@@ -15,41 +15,39 @@
 
 #include <string>
 #include <vector>
-
+#include <array>
 class IRDBAccessSvc;
 
-class AmdcDb;
 
 namespace MuonGM {
 class DblQ00Atln {
 public:
-    DblQ00Atln(){};
-    ~DblQ00Atln();
+    DblQ00Atln() = default;
+    ~DblQ00Atln() = default;
     DblQ00Atln(IRDBAccessSvc *pAccessSvc, const std::string & GeoTag="", const std::string & GeoNode="");
-    DblQ00Atln(AmdcDb* atln);
+    DblQ00Atln & operator=(const DblQ00Atln &right) = delete;
+    DblQ00Atln(const DblQ00Atln&) = delete;
 
     // data members for DblQ00/ATLN fields
     struct ATLN {
-        int version; // VERSION
-        int i; // INDEX
-        int icovol; // MATERIAL CODE
-        float zpovol; // RELATIVE Z POSITION
-        float widvol; // Z WIDTH
-        char namvol[8]; // MATERIAL NAME
-        int jsta; // 
+        int version{0};     // VERSION
+        int i{0};           // INDEX
+        int icovol{0};      // MATERIAL CODE
+        float zpovol{0.f}; // RELATIVE Z POSITION
+        float widvol{0.f}; // Z WIDTH
+        std::string namvol{}; // MATERIAL NAME
+        int jsta{0}; // 
     };
 
     const ATLN* data() const { return m_d.data(); };
     unsigned int size() const { return m_nObj; };
-    const char* getName() const { return "ATLN"; };
-    const char* getDirName() const { return "DblQ00"; };
-    const char* getObjName() const { return "ATLN"; };
+    std::string getName() const { return "ATLN"; };
+    std::string getDirName() const { return "DblQ00"; };
+    std::string getObjName() const { return "ATLN"; };
 
 private:
-    std::vector<ATLN> m_d;
-    unsigned int m_nObj; // > 1 if array; 0 if error in retrieve.
-    DblQ00Atln & operator=(const DblQ00Atln &right);
-    DblQ00Atln(const DblQ00Atln&);
+    std::vector<ATLN> m_d{};
+    unsigned int m_nObj{0}; // > 1 if array; 0 if error in retrieve.
 };
 } // end of MuonGM namespace
 

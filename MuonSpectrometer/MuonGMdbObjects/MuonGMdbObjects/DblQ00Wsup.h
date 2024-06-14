@@ -14,43 +14,43 @@
 #define DBLQ00_WSUP_H
 #include <string>
 #include <vector>
+#include <array>
 
 
 class IRDBAccessSvc;
 
-class AmdcDb;
 
 namespace MuonGM {
 class DblQ00Wsup {
 public:
-    DblQ00Wsup(){};
-    ~DblQ00Wsup();
+    DblQ00Wsup() = default;
+    ~DblQ00Wsup() = default;
     DblQ00Wsup(IRDBAccessSvc *pAcccessSvc, const std::string & GeoTag="", const std::string & GeoNode="");
-    DblQ00Wsup(AmdcDb* wsup);
+    DblQ00Wsup & operator=(const DblQ00Wsup &right) = delete;
+    DblQ00Wsup(const DblQ00Wsup&)= delete;
 
     // data members for DblQ00/WSUP fields
     struct WSUP {
-        int version; // VERSION
-        int jsta; // INDEX
-        int nxxsup; // MAX NB. FOR X FRAGMENTS
-        int nzzsup; // MAX NB. FOR Z FRAGMENTS
-        float x0; // X0
-        float thickn; // THICKNESS
-        float xxsup[4]; // X DIMENSION
-        float zzsup[4]; // Z DIMENSION
+        int version{0}; // VERSION
+        int jsta{0}; // INDEX
+        int nxxsup{0}; // MAX NB. FOR X FRAGMENTS
+        int nzzsup{0}; // MAX NB. FOR Z FRAGMENTS
+        float x0{0.f}; // X0
+        float thickn{0.f}; // THICKNESS
+        std::array<float,4> xxsup{}; // X DIMENSION
+        std::array<float,4> zzsup{}; // Z DIMENSION
     };
     
     const WSUP* data() const { return m_d.data(); };
     unsigned int size() const { return m_nObj; };
-    const char* getName() const { return "WSUP"; };
-    const char* getDirName() const { return "DblQ00"; };
-    const char* getObjName() const { return "WSUP"; };
+    std::string getName() const { return "WSUP"; };
+    std::string getDirName() const { return "DblQ00"; };
+    std::string getObjName() const { return "WSUP"; };
 
 private:
-    std::vector<WSUP> m_d;
-    unsigned int m_nObj; // > 1 if array; 0 if error in retrieve.
-    DblQ00Wsup & operator=(const DblQ00Wsup &right);
-    DblQ00Wsup(const DblQ00Wsup&);
+    std::vector<WSUP> m_d{};
+    unsigned int m_nObj{0}; // > 1 if array; 0 if error in retrieve.
+
 };
 } // end of MuonGM namespace
 

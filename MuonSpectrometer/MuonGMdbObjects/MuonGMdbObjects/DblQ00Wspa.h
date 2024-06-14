@@ -17,36 +17,35 @@
 
 class IRDBAccessSvc;
 
-class AmdcDb;
 
 namespace MuonGM {
 class DblQ00Wspa {
 public:
-    DblQ00Wspa(){};
-    ~DblQ00Wspa();
+    DblQ00Wspa() = default;
+    ~DblQ00Wspa() = default;
     DblQ00Wspa(IRDBAccessSvc *pAccessSvc, const std::string & GeoTag="", const std::string & GeoNode="");
-    DblQ00Wspa(AmdcDb* wspa);
+    DblQ00Wspa & operator=(const DblQ00Wspa &right) = delete;
+    DblQ00Wspa(const DblQ00Wspa&)= delete;
 
     // data members for DblQ00/WSPA fields
     struct WSPA {
-        int version; // VERSION
-        int jsta; // JSTA INDEX
-        int nb; // NUMBER OF DETAILS
-        float x0; // X0
-        float tckspa; // THICKNESS OF SPACER
+        int version{0}; // VERSION
+        int jsta{0}; // JSTA INDEX
+        int nb{0}; // NUMBER OF DETAILS
+        float x0{0.f}; // X0
+        float tckspa{0.f}; // THICKNESS OF SPACER
     };
     
     const WSPA* data() const { return m_d.data(); };
     unsigned int size() const { return m_nObj; };
-    const char* getName() const { return "WSPA"; };
-    const char* getDirName() const { return "DblQ00"; };
-    const char* getObjName() const { return "WSPA"; };
+    std::string getName() const { return "WSPA"; };
+    std::string getDirName() const { return "DblQ00"; };
+    std::string getObjName() const { return "WSPA"; };
 
 private:
-  std::vector<WSPA> m_d;
-  unsigned int m_nObj; // > 1 if array; 0 if error in retrieve.
-  DblQ00Wspa & operator=(const DblQ00Wspa &right);
-  DblQ00Wspa(const DblQ00Wspa&);
+  std::vector<WSPA> m_d{};
+  unsigned int m_nObj{0}; // > 1 if array; 0 if error in retrieve.
+
 };
 } // end of MuonGM namespace
 

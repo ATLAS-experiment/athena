@@ -18,22 +18,23 @@
 
 class IRDBAccessSvc;
 
-class AmdcDb;
 
 namespace MuonGM {
 class DblQ00Acut {
 public:
-    DblQ00Acut(){};
-    ~DblQ00Acut();
+    DblQ00Acut() = default;
+    DblQ00Acut & operator=(const DblQ00Acut &right) = delete;
+    DblQ00Acut(const DblQ00Acut&) = delete;
+
+    ~DblQ00Acut() = default;
     DblQ00Acut(IRDBAccessSvc *pAccessSvc, const std::string & GeoTag="", const std::string & GeoNode="");
-    DblQ00Acut(AmdcDb* acut);
 
     // data members for DblQ00/ACUT fields
     struct ACUT {
-        int version; // VERSION
-        int i; // INDEX
-        int icut; // CUT-OUT INDEX
-        int n; // NUMBER OF SUB-CUTS IN THE STATION
+        int version{0}; // VERSION
+        int i{0}; // INDEX
+        int icut{0}; // CUT-OUT INDEX
+        int n{0}; // NUMBER OF SUB-CUTS IN THE STATION
     };
     
     const ACUT* data() const { return m_d.data(); };
@@ -45,8 +46,6 @@ public:
 private:
     std::vector<ACUT> m_d;
     unsigned int m_nObj; // > 1 if array; 0 if error in retrieve.
-    DblQ00Acut & operator=(const DblQ00Acut &right);
-    DblQ00Acut(const DblQ00Acut&);
 };
 } // end of MuonGM namespace
 

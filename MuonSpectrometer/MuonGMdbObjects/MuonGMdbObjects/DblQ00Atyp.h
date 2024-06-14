@@ -14,38 +14,40 @@
 #define DBLQ00_ATYP_H
 #include <string>
 #include <vector>
-
+#include <array>
 
 class IRDBAccessSvc;
-class AmdcDb;
+
 namespace MuonGM {
+
 class DblQ00Atyp {
 public:
-    DblQ00Atyp(){};
-    ~DblQ00Atyp();
+    DblQ00Atyp() = default;
+    ~DblQ00Atyp() = default;
     DblQ00Atyp(IRDBAccessSvc *pAccessSvc,const std::string & GeoTag="", const std::string & GeoNode="" );
-    DblQ00Atyp(AmdcDb* atyp);
     
+    DblQ00Atyp & operator=(const DblQ00Atyp &right) = delete;
+    DblQ00Atyp(const DblQ00Atyp&) = delete;
+
     // data members for DblQ00/ATYP fields
     struct ATYP {
-        int version; // VERSION
-        int jtyp; // AMDB STATION TYPE
-        char type[8]; // AMDB STATION NAME
-        int nsta; // NUMBER OF STATIONS OF THIS TYPE
+        int version{0}; // VERSION
+        int jtyp{0}; // AMDB STATION TYPE
+        std::string type{}; // AMDB STATION NAME
+        int nsta{0}; // NUMBER OF STATIONS OF THIS TYPE
     };
     
     const ATYP* data() const { return m_d.data(); };
     unsigned int size() const { return m_nObj; };
-    const char* getName() const { return "ATYP"; };
     unsigned int getNObj() const { return m_nObj; };
-    const char* getDirName() const { return "DblQ00"; };
-    const char* getObjName() const { return "ATYP"; };
+
+    std::string getName() const { return "ATYP"; };
+    std::string getDirName() const { return "DblQ00"; };
+    std::string getObjName() const { return "ATYP"; };
 
 private:
-    std::vector<ATYP> m_d;
-    unsigned int m_nObj; // > 1 if array; 0 if error in retrieve.
-    DblQ00Atyp & operator=(const DblQ00Atyp &right);
-    DblQ00Atyp(const DblQ00Atyp&);
+    std::vector<ATYP> m_d{0};
+    unsigned int m_nObj{0}; // > 1 if array; 0 if error in retrieve.
 };
     
 } // end of MuonGM namespace
