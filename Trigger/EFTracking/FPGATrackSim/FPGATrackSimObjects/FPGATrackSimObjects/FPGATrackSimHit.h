@@ -62,6 +62,7 @@ public:
     bool isStrip() const { return m_detType == SiliconTech::strip; }
     bool isBarrel() const { return m_detectorZone == DetectorZone::barrel; }
     unsigned getDim() const { return isPixel() ? 2 : 1; } // TODO all calls of this should be replaced with a call to plane map
+    int getRoadID() const { return m_roadID; }
 
     // --- Unmapped Location ---
     void setIdentifierHash(unsigned v) { m_identifierHash = v; }
@@ -87,6 +88,7 @@ public:
     void setSection(unsigned v) { m_section = v; }
     unsigned getLayer() const;
     unsigned getSection() const;
+    void setRoadID(int roadID) { m_roadID = roadID; }
 
     // --- Local Coordinates ---
     // The local coordinate is stored as an unsigned int, as in the hardware.
@@ -202,6 +204,9 @@ protected:
     // geant truth data (clusters only). filled during clustering using the m_barcode and
     // m_barcode_frac data for each raw hit in the cluster.
 
+
+    int m_roadID = 0;
+    
     ClassDef(FPGATrackSimHit, 5);
 };
 
@@ -224,3 +229,4 @@ std::ostream& operator<<(std::ostream& os, HitType t);
 std::string to_string(HitType t);
 
 #endif // FPGATrackSimHIT_H
+

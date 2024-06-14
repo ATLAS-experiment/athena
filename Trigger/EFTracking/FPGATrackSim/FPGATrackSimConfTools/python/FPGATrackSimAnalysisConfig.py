@@ -4,6 +4,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.Logging import AthenaLogger
 from PathResolver import PathResolver
+
 log = AthenaLogger(__name__)
 
 def getBaseName(flags):
@@ -28,14 +29,13 @@ def getBaseName(flags):
     else:
         return 'default'
 
-    
+
 def getNSubregions(filePath):
     with open(PathResolver.FindCalibFile(filePath), 'r') as f:
         fields = f.readline()
         assert(fields.startswith('towers'))
         n = fields.split()[1] 
         return int(n)
-
 
 def FPGATrackSimEventSelectionCfg(flags):
     result=ComponentAccumulator()
@@ -342,8 +342,6 @@ def FPGATrackSimTrackFitterTool_2ndCfg(flags):
     result.setPrivateTools(TF_2nd)
     return result
 
-
-
 def FPGATrackSimReadInputCfg(flags):
     result=ComponentAccumulator()
     InputTool = CompFactory.FPGATrackSimInputHeaderTool(name="FPGATrackSimReadInput",
@@ -351,17 +349,30 @@ def FPGATrackSimReadInputCfg(flags):
     result.addPublicTool(InputTool, primary=True)
     return result
 
-
 def prepareFlagsForFPGATrackSimLogicalHistProcessAlg(flags):
     newFlags = flags.cloneAndReplace("Trigger.FPGATrackSim.ActiveConfig", "Trigger.FPGATrackSim." + flags.Trigger.FPGATrackSim.algoTag)
     return newFlags
 
+def FPGAClusterConverterCfg(flags):
+    result=ComponentAccumulator()
+    FPGAClusterConverter = CompFactory.FPGAClusterConverter()
+    result.setPrivateTools(FPGAClusterConverter)
+
+    return result
+
+def FPGAActsTrkConverterCfg(flags):
+    result=ComponentAccumulator()
+    FPGAActsTrkConverter = CompFactory.FPGAActsTrkConverter()
+    result.setPrivateTools(FPGAActsTrkConverter)
+
+    return result
 
 def FPGATrackSimLogicalHistProcessAlgCfg(inputFlags):
+
     flags = prepareFlagsForFPGATrackSimLogicalHistProcessAlg(inputFlags)
    
     result=ComponentAccumulator()
-
+   
     theFPGATrackSimLogicalHistProcessAlg=CompFactory.FPGATrackSimLogicalHitsProcessAlg()
     theFPGATrackSimLogicalHistProcessAlg.HitFiltering = flags.Trigger.FPGATrackSim.ActiveConfig.hitFiltering
     theFPGATrackSimLogicalHistProcessAlg.writeOutputData = flags.Trigger.FPGATrackSim.ActiveConfig.writeOutputData
@@ -469,6 +480,63 @@ def FPGATrackSimLogicalHistProcessAlgCfg(inputFlags):
     theFPGATrackSimLogicalHistProcessAlg.MonTool = result.getPrimaryAndMerge(FPGATrackSimLogicalHitsProcessAlgMonitoringCfg(flags))
 
     result.addEventAlgo(theFPGATrackSimLogicalHistProcessAlg)
+
+    return result
+
+
+def FPGAConversionAlgCfg(inputFlags, name = 'FPGAConversionAlg', stage = '', **kwargs):
+
+    flags = prepareFlagsForFPGATrackSimLogicalHistProcessAlg(inputFlags)
+   
+    result=ComponentAccumulator()
+
+    kwargs.setdefault("FPGATrackSimClusterKey", "FPGAClusters%s" %(stage))
+    kwargs.setdefault("FPGATrackSimHitKey", "FPGAHits%s" %(stage))
+    kwargs.setdefault("FPGATrackSimHitInRoadsKey", "FPGAHitsInRoads%s" %(stage))
+    kwargs.setdefault("FPGATrackSimRoadKey", "FPGARoads%s" %(stage))
+    kwargs.setdefault("FPGATrackSimTrackKey", "FPGATracks%s" %(stage))
+    kwargs.setdefault("xAODPixelClusterFromFPGAClusterKey", "xAODPixelClusters%sFromFPGACluster" %(stage))
+    kwargs.setdefault("xAODStripClusterFromFPGAClusterKey", "xAODStripClusters%sFromFPGACluster" %(stage))
+    kwargs.setdefault("xAODPixelClusterFromFPGAHitKey", "xAODPixelClusters%sFromFPGAHit" %(stage))
+    kwargs.setdefault("xAODStripClusterFromFPGAHitKey", "xAODStripClusters%sFromFPGAHit" %(stage))
+    kwargs.setdefault("ActsProtoTrackFromFPGARoadKey", "ActsProtoTracks%sFromFPGARoad" %(stage))
+    kwargs.setdefault("ActsProtoTrackFromFPGATrackKey", "ActsProtoTracks%sFromFPGATrack" %(stage))
+    kwargs.setdefault("doHits", True)
+    kwargs.setdefault("doClusters", True)
+    kwargs.setdefault("doActsTrk", False)
+    kwargs.setdefault("ClusterConverter", result.popToolsAndMerge(FPGAClusterConverterCfg(flags)))
+    kwargs.setdefault("ActsTrkConverter", result.popToolsAndMerge(FPGAActsTrkConverterCfg(flags)))
+    
+    result.addEventAlgo(CompFactory.FPGAConversionAlgorithm(name, **kwargs))
+
+    return result
+
+
+def convertInDetToXAOD(flags):
+    acc = ComponentAccumulator()
+    from InDetConfig.InDetPrepRawDataFormationConfig import ITkInDetToXAODClusterConversionCfg
+    additional_kwargs = {
+                        'InputPixelClustersName' : "FPGAInDetPixelClusterContainer",
+                        'OutputPixelClustersName': "FPGAxAODPixelClusters",
+                        'InputStripClustersName' : "FPGAInDetStripsClusterContainer",
+                        'OutputStripClustersName': "FPGAxAODSctClusters"
+                        }
+    
+    acc.merge(ITkInDetToXAODClusterConversionCfg(flags, name="FPGAITkInDetToXAODClusterConversion", **additional_kwargs))
+    return acc
+
+
+
+def WriteToAOD(flags, stage = ''): #  store xAOD containers in AOD file
+    from OutputStreamAthenaPool.OutputStreamConfig import addToAOD
+    toAOD = []
+    toAOD += [f"xAOD::PixelClusterContainer#xAODPixelClusters{stage}FromFPGACluster",f"xAOD::PixelClusterAuxContainer#xAODPixelClusters{stage}FromFPGAClusterAux.",
+              f"xAOD::StripClusterContainer#xAODStripClusters{stage}FromFPGACluster",f"xAOD::StripClusterAuxContainer#xAODStripClusters{stage}FromFPGAClusterAux.",
+            ]
+
+    result = ComponentAccumulator()
+    result.merge(addToAOD(flags, toAOD))
+
     return result
 
 
@@ -509,7 +577,15 @@ if __name__ == "__main__":
             from InDetConfig.TrackRecoConfig import InDetTrackRecoCfg
             acc.merge(InDetTrackRecoCfg(flags))
 
-    acc.merge(FPGATrackSimLogicalHistProcessAlgCfg(flags)) 
+    acc.merge(FPGATrackSimLogicalHistProcessAlgCfg(flags))
+    if flags.Trigger.FPGATrackSim.doEDMConversion:
+        acc.merge(FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlg_1st', stage = '_1st', doActsTrk=True))
+        if flags.Trigger.FPGATrackSim.writeToAOD: acc.merge(WriteToAOD(flags, stage = '_1st'))
+        if flags.Trigger.FPGATrackSim.Hough.secondStage : acc.merge(FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlg_2nd', stage = '_2nd')) # Default disabled, doesn't work if enabled
+        if flags.Trigger.FPGATrackSim.convertUnmappedHits: acc.merge(FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlgUnmapped_1st', stage = 'Unmapped_1st', doClusters = False))
+        if flags.Trigger.FPGATrackSim.Hough.hitFiltering : acc.merge(FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlgFiltered_1st', stage = 'Filtered_1st', doHits = False)) # Default disabled, works if enabled
+        #if flags.Trigger.FPGATrackSim.Hough.spacePoints : acc.merge(FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlgSpacePoints_1st', stage = 'SpacePoints_1st')) # TODO
+
     acc.store(open('AnalysisConfig.pkl','wb'))
     
     statusCode = acc.run(flags.Exec.MaxEvents)

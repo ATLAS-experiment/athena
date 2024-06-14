@@ -30,6 +30,15 @@
 
 #include <fstream>
 
+#include "StoreGate/StoreGateSvc.h"
+#include "FPGATrackSimObjects/FPGATrackSimClusterCollection.h"
+#include "FPGATrackSimObjects/FPGATrackSimHitCollection.h"
+#include "FPGATrackSimObjects/FPGATrackSimHitContainer.h"
+#include "FPGATrackSimObjects/FPGATrackSimRoadCollection.h"
+#include "FPGATrackSimObjects/FPGATrackSimTrackCollection.h"
+#include "StoreGate/WriteHandleKey.h"
+#include "StoreGate/WriteHandleKeyArray.h"
+
 class FPGATrackSimDataFlowTool;
 class FPGATrackSimHoughRootOutputTool;
 class FPGATrackSimLLPRoadFilterTool;
@@ -40,12 +49,11 @@ class FPGATrackSimEtaPatternFilterTool;
 
 class FPGATrackSimCluster;
 class FPGATrackSimHit;
+class FPGATrackSimRoad;
 class FPGATrackSimLogicalEventInputHeader;
 class FPGATrackSimLogicalEventOutputHeader;
-class FPGATrackSimRoad;
 class FPGATrackSimTrack;
 class FPGATrackSimDataFlowInfo;
-
 
 class FPGATrackSimLogicalHitsProcessAlg : public AthAlgorithm
 {
@@ -121,6 +129,7 @@ class FPGATrackSimLogicalHitsProcessAlg : public AthAlgorithm
         std::vector<FPGATrackSimCluster> m_spacepoints_1st, m_spacepoints_2nd;
         std::vector<FPGATrackSimHit>     m_hits_1st_miss, m_hits_2nd_miss;
         std::vector<FPGATrackSimTrack>   m_tracks_1st_guessedcheck, m_tracks_1st_nomiss, m_tracks_2nd_guessedcheck, m_tracks_2nd_nomiss;
+        std::vector<FPGATrackSimRoad>   m_roads_1st;
 
         // internal counters
         double m_evt = 0; // number of events passing event selection, independent of truth
@@ -149,6 +158,17 @@ class FPGATrackSimLogicalHitsProcessAlg : public AthAlgorithm
         void printHitSubregions(std::vector<FPGATrackSimHit> const & hits);
 
         ToolHandle<GenericMonitoringTool> m_monTool{this,"MonTool", "", "Monitoring tool"};
+
+        SG::WriteHandleKeyArray<FPGATrackSimClusterCollection> m_FPGAClusterKey{this, "FPGATrackSimClusterKey",{"FPGAClusters_1st","FPGAClusters_2nd"},"FPGATrackSim Clusters key"};
+        SG::WriteHandleKey<FPGATrackSimClusterCollection> m_FPGAClusterFilteredKey{this, "FPGATrackSimClusterFilteredKey","FPGAClustersFiltered_1st","FPGATrackSim Filtered Clusters key"};
+        SG::WriteHandleKeyArray<FPGATrackSimClusterCollection> m_FPGASpacePointsKey{this, "FPGATrackSimSpacePoints1stKey",{"FPGASpacePoints_1st","FPGASpacePoints_1st"},"FPGATrackSim SpacePoints key"};
+        SG::WriteHandleKeyArray<FPGATrackSimHitCollection> m_FPGAHitKey{this, "FPGATrackSimHitKey",{"FPGAHits_1st","FPGAHits_2nd"},"FPGATrackSim Hits key"};
+        SG::WriteHandleKey<FPGATrackSimHitCollection> m_FPGAHitUnmappedKey{this, "FPGATrackSimHitUnmappedKey","FPGAHitsUnmapped_1st","FPGATrackSim Unmapped Hits 1st stage key"};
+        SG::WriteHandleKey<FPGATrackSimHitCollection> m_FPGAHitFilteredKey{this, "FPGATrackSimHitFiltered1stKey","FPGAHitsFiltered_1st","FPGATrackSim Filtered Hits 1st stage key"};
+        SG::WriteHandleKey<FPGATrackSimHitContainer> m_FPGAHitInRoadsKey{this, "FPGATrackSimHitInRoads1stKey","FPGAHitsInRoads_1st","FPGATrackSim Hits in 1st stage roads key"};
+        SG::WriteHandleKey<FPGATrackSimRoadCollection> m_FPGARoadKey{this, "FPGATrackSimRoad1stKey","FPGARoads_1st","FPGATrackSim Roads 1st stage key"};
+        SG::WriteHandleKey<FPGATrackSimTrackCollection> m_FPGATrackKey{this, "FPGATrackSimTrack1stKey","FPGATracks_1st","FPGATrackSim Tracks 1st stage key"};
 };
+
 
 #endif // FPGATrackSimLOGICALHITSTOALGORITHMS_h
