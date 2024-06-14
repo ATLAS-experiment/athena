@@ -1200,7 +1200,7 @@ void TRTDetectorFactory_Lite::setEndcapTransformField(size_t w) {
 
 
 // These methods update the gas.
-void  TRTDetectorFactory_Lite::refreshGasEndcap(int strawStatusHT, GeoVPhysVol *strawPlane) const{
+void  TRTDetectorFactory_Lite::refreshGasEndcap(int strawStatusHT, GeoVPhysVol *strawPlane) {
   
   const GeoMaterial *material = m_xenonGas.get();
 
@@ -1214,13 +1214,13 @@ void  TRTDetectorFactory_Lite::refreshGasEndcap(int strawStatusHT, GeoVPhysVol *
     const GeoVPhysVol *v1=cursor0.getVolume().get();
     GeoVolumeCursor cursor1(v1);
     if (!cursor1.atEnd()) {
-      ATH_MSG_INFO("ENDCAP: REFRESHING GAS MIXTURE " << strawPlane->getLogVol()->getName() << " -->" << material->getName());
+      ATH_MSG_DEBUG("ENDCAP: REFRESHING GAS MIXTURE " << strawPlane->getLogVol()->getName() << " -->" << material->getName());
       cursor1.getVolume()->getLogVol()->setMaterial(material);
     }
   }
 } 
   
-void  TRTDetectorFactory_Lite::refreshGasBarrel(int strawStatusHT, GeoVPhysVol *shell) const{
+void  TRTDetectorFactory_Lite::refreshGasBarrel(int strawStatusHT, GeoVPhysVol *shell) {
 
   const GeoMaterial *material = m_xenonGas.get();
 
@@ -1246,7 +1246,7 @@ void  TRTDetectorFactory_Lite::refreshGasBarrel(int strawStatusHT, GeoVPhysVol *
 	  while (!cursor2.atEnd()) {
 	    std::string regionName=cursor2.getVolume()->getLogVol()->getName();
 	    if (regionName=="GasMA" || regionName=="DeadRegion" || regionName=="InnerDeadRegion") {
-	      ATH_MSG_INFO("BARREL: REFRESHING GAS MIXTURE " << cursor2.getVolume()->getLogVol()->getName() << " -->" << material->getName());
+	      ATH_MSG_DEBUG("BARREL: REFRESHING GAS MIXTURE " << cursor2.getVolume()->getLogVol()->getName() << " -->" << material->getName());
 	      cursor2.getVolume()->getLogVol()->setMaterial(material);
 	    }
 	    cursor2.next();

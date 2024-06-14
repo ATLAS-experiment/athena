@@ -63,8 +63,8 @@ private:
   void setEndcapTransformField(size_t w);
 
   // These methods update the gas.
-  void refreshGasEndcap(int strawStatusHT, GeoVPhysVol *strawPlane) const;
-  void refreshGasBarrel(int strawStatusHT, GeoVPhysVol *shell) const;
+  void refreshGasEndcap(int strawStatusHT, GeoVPhysVol *strawPlane);
+  void refreshGasBarrel(int strawStatusHT, GeoVPhysVol *shell);
   
   // private member data:
   GeoModelIO::ReadGeoModel                      *m_sqliteReader{};
