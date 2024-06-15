@@ -76,13 +76,14 @@ namespace MuonPRDTest {
         m_NSWMM_PRD_globalPos.push_back(pos);
         m_NSWMM_PRD_localPos.push_back(loc_pos);
         m_NSWMM_PRD_covMatrix_1_1.push_back(cov(0,0));
-        m_NSWMM_PRD_nRdos.push_back((prd.rdoList()).size());
-        m_NSWMM_PRD_uTPCAngle.push_back(prd.angle());  
-        m_NSWMM_PRD_uTPCChiSqProb.push_back(prd.chisqProb());
+        m_NSWMM_PRD_nStrips.push_back((prd.rdoList()).size());
 
         m_NSWMM_PRD_stripNumbers.push_back(prd.stripNumbers());
         m_NSWMM_PRD_stripTimes.push_back(prd.stripTimes());
         m_NSWMM_PRD_stripCharges.push_back(prd.stripCharges());
+
+        m_NSWMM_PRD_author.push_back(static_cast<short>(prd.author()));
+        m_NSWMM_PRD_quality.push_back(static_cast<int8_t>(prd.quality()));
 
         unsigned idx = m_filteredPRDs.size();
         if (m_externalPush) {

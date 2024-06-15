@@ -168,6 +168,9 @@ JetChainParts = {
        # Multijets
        'presel2j180',
        'presel2j225',
+       'presel3c30',
+       'presel3c40',
+       'presel3c45',
        'presel3j45',
        'presel3j150',
        'presel4j20',
@@ -183,6 +186,7 @@ JetChainParts = {
        'presel4j45',
        'presel4j50',
        'presel4j85',
+       'presel5c20',
        'presel5j25',
        'presel5j50',
        'presel5j55',
@@ -197,6 +201,7 @@ JetChainParts = {
        'presel2j180XXj80',
        # Nonstandard eta regions
        'presel5c55',
+       'presel6c20',
        'presel6c25',
        'presel6c45',
        'preselj45XX2f40',
@@ -287,7 +292,9 @@ JetChainParts = {
        'preselZ128XX4c20XX1j20',
        'preselZ128XX3c20XX1c20bg85',
        'preselZ116XX3c20XX1c20bg85',
-       'preselZ128XX4c85'
+       'preselZ128XX4c85',
+       'preselZ219XX6c20',
+       'preselZ142XX5c20'
      ],
     # Hypo information
     #   If hypoScenario is 'simple', then hypo configuration is handled based on the
@@ -361,7 +368,9 @@ JetChainParts = {
                       'Z128XX4c20',
                       'Z120XX5c70',
                       'Z120XX6c55',
-                      'Z120XX10c40'
+                      'Z120XX10c40',
+                      'Z219XX6c20',
+                      'Z142XX5c20',
                       ],
 
     'exotHypo' : ['emergingPTF0p2dR1p2', 'emergingPTF0p1dR1p2', 'emergingPTF0p09dR1p2', 'emergingPTF0p08dR1p2', 'emergingPTF0p075dR1p2', 'emergingPTF0p07dR1p2', 'emergingPTF0p0dR1p2',

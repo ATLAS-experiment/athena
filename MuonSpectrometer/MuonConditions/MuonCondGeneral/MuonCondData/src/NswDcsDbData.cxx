@@ -166,7 +166,7 @@ NswDcsDbData::getDataForChannelHv(const DcsTechType tech, const Identifier& chan
         
         // the parameter issTgcQ1OuterHv is only relevant for the Q1s of the stgcs. So set it to false if we are not in Q1, just in case
         if(std::abs(m_stgcIdHelper.stationEta(channelId))!= 1) {issTgcQ1OuterHv=false;}
-        Identifier dcsChannelId = m_stgcIdHelper.channelID(channelId,m_stgcIdHelper.multilayer(channelId), m_stgcIdHelper.gasGap(channelId), 1, (issTgcQ1OuterHv ? 100:1));
+        Identifier dcsChannelId = m_stgcIdHelper.hvID(channelId, !issTgcQ1OuterHv /* the function take isInnerQ1 therefore invert the isOuterQ1 variable*/);
         const ChannelDcsMap& dcsMap = m_data_hv_stg;
         const unsigned int array_idx = identToModuleIdx(dcsChannelId);
         const unsigned int channel = m_stgcIdHelper.channel(dcsChannelId) -1;
