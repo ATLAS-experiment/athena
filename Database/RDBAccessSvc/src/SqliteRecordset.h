@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -33,9 +33,6 @@ class SqliteRecordset final : public IRDBRecordset, public AthMessaging
   /// Construct empty recordset
   SqliteRecordset();
   
-  /// Destructor, deletes all records
-  ~SqliteRecordset() override;
-
   /// Constructs SQL query and retrieves data from the DB
   /// @param taginfo [IN] object holding information about the node tag
   void getData(sqlite3* db, const std::string& nodeName);
@@ -60,7 +57,7 @@ class SqliteRecordset final : public IRDBRecordset, public AthMessaging
   IRDBRecordset::const_iterator end() const override;
 
  private:
-  std::string       m_nodeName;
+  std::string       m_nodeName{};
   SqliteInpDef_ptr  m_def;
   RecordsVector     m_records;
 };

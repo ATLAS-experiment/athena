@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -12,14 +12,16 @@
  * $Id: IRDBRecordset.h,v 1.7 2008-12-16 14:05:40 dquarrie Exp $
  */
 
-#ifndef _IRDBRECORDSET_H_
-#define _IRDBRECORDSET_H_
+#ifndef RDBACCESSSVC_IRDBRECORDSET_H
+#define RDBACCESSSVC_IRDBRECORDSET_H
 
 #include <string>
 #include <vector>
+#include <memory>
 
-class IRDBRecord;
-typedef std::vector<IRDBRecord*> RecordsVector;
+#include "RDBAccessSvc/IRDBRecord.h"
+using IRDBRecord_ptr = std::unique_ptr<IRDBRecord>;
+using RecordsVector = std::vector<IRDBRecord_ptr>;
 
 /**
  * @class IRDBRecordset
@@ -32,8 +34,7 @@ typedef std::vector<IRDBRecord*> RecordsVector;
 class IRDBRecordset
 {
  public:
-  /// Destructor, deletes all records
-  virtual ~IRDBRecordset() {}
+  virtual ~IRDBRecordset() = default;
 
   /// @return number of records
   virtual unsigned int size() const = 0;

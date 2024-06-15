@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef _IRDBQUERY_H_
-#define _IRDBQUERY_H_
+#ifndef RDBACCESSSVC_IRDBQUERY_H
+#define RDBACCESSSVC_IRDBQUERY_H
 
 #include "CoralBase/AttributeList.h"
 #include "CoralBase/Attribute.h"
@@ -12,8 +12,8 @@
 class IRDBQuery
 {
  public:
-  IRDBQuery():m_attrList(0) {}
-  virtual ~IRDBQuery() {}
+  IRDBQuery() = default;
+  virtual ~IRDBQuery() = default;
 
   virtual void execute() = 0;
   virtual long size() = 0;
@@ -29,7 +29,7 @@ class IRDBQuery
   bool isNull(unsigned int);
 
  protected:
-  const coral::AttributeList* m_attrList;
+  const coral::AttributeList* m_attrList{nullptr};
 };
 
 template<typename T> const T& IRDBQuery::data(const std::string& field)

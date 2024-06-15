@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -12,13 +12,10 @@
  * $Id: IRDBRecord.h,v 1.8 2006-10-23 15:24:05 tsulaia Exp $
  */
 
-
 #ifndef RDBACCESSSVC_IRDBRECORD_H
 #define RDBACCESSSVC_IRDBRECORD_H
 
-
 #include <string>
-
 
 /**
  * @class IRDBRecord
@@ -29,7 +26,7 @@
 class IRDBRecord
 {
  public:
-  virtual ~IRDBRecord() {}
+  virtual ~IRDBRecord() = default;
 
   /// Check if the field value is NULL
   /// @param fieldName [IN] field name
