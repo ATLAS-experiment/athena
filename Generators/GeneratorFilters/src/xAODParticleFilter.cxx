@@ -20,7 +20,6 @@ StatusCode xAODParticleFilter::filterInitialize()
   ATH_MSG_INFO("Etacut=" << m_EtaRange);
   ATH_MSG_INFO("Energycut=" << m_EnergyRange);
   ATH_MSG_INFO("PDG=" << m_PDGID);
-  ATH_MSG_INFO("StatusReq=" << m_StatusReq);
   ATH_MSG_INFO("MinParts=" << m_MinParts);
   ATH_MSG_INFO("Exclusive=" << m_Exclusive);
   return StatusCode::SUCCESS;
@@ -43,8 +42,7 @@ StatusCode xAODParticleFilter::filterEvent()
   for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
       const xAOD::TruthParticle* pitr =  (*xTruthParticleContainer)[iPart];
 
-      if (std::abs(pitr->pdgId()) != m_PDGID ||
-          !(m_StatusReq == -1 || pitr->status() == m_StatusReq))
+      if (std::abs(pitr->pdgId()) != m_PDGID)
         continue;
       if (pitr->pt() >= m_Ptmin && std::abs(pitr->eta()) <= m_EtaRange &&
           pitr->e() <= m_EnergyRange)

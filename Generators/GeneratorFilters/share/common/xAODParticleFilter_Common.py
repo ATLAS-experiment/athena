@@ -12,4 +12,3 @@ if not hasattr(filtSeq, "xAODParticleFilter"):
 #xAODParticleFilter.Etacut = 10.0
 #xAODParticleFilter.PDG = 1000022
 #xAODParticleFilter.MinParts = 2
-#xAODParticleFilter.StatusReq = 11

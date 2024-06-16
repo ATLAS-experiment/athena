@@ -12,4 +12,3 @@ if not hasattr(filtSeq, "xAODParticleDecayFilter"):
 #xAODParticleDecayFilter.Etacut = 10.0
 #xAODParticleDecayFilter.PDG = 1000022
 #xAODParticleDecayFilter.MinParts = 2
-#xAODParticleDecayFilter.StatusReq = 11
