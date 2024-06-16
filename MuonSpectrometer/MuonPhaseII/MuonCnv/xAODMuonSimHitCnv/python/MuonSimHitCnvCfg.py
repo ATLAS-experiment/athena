@@ -75,8 +75,20 @@ def RpcDigitToMeasCnvAlgCfg(flags, name ="RpcDigitToMeasCnvAlg", **kwargs):
     result.merge(RpcMeasViewAlgCfg(flags))
     the_alg = CompFactory.MuonR4.RpcDigitToRpcMeasCnvAlg(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
+    return result
 
-
+def TgcFastDigitizationCfg(flags, name = "TgcFastDigitizer", **kwargs):
+    result = ComponentAccumulator()
+    kwargs.setdefault("StreamName", "TgcSimForklift")
+    kwargs.setdefault("OutputSDOName", "TGC_SDO")
+    kwargs.setdefault("SimHitKey", "xTgcSimHits")
+    kwargs.setdefault("EffiDataKey", "")
+    from RngComps.RngCompsConfig import AthRNGSvcCfg
+    kwargs.setdefault("RndmSvc", result.getPrimaryAndMerge(AthRNGSvcCfg(flags)))
+    the_tool = CompFactory.MuonR4.TgcFastDigiTool(name="TgcDigitizationTool", **kwargs)
+    the_alg = CompFactory.MuonDigitizer(name,
+                                        DigitizationTool = the_tool)
+    result.addEventAlgo(the_alg, primary = True)
     return result
 ###
 ###  Configuration snippet to go from xAOD::MuonSimHit to xAOD::MuonPrepData    
@@ -94,7 +106,16 @@ def MuonSimHitToMeasurementCfg(flags):
         result.merge(RpcFastDigitizationCfg(flags))
         result.merge(RpcDigitToMeasCnvAlgCfg(flags))
     if flags.Detector.GeometryTGC:
-        result.merge(xAODSimHitToTgcMeasCnvAlgCfg(flags))
+        #result.merge(xAODSimHitToTgcMeasCnvAlgCfg(flags))
+        result.merge(TgcFastDigitizationCfg(flags))
+        from MuonConfig.MuonByteStreamCnvTestConfig import TgcDigitToTgcRDOCfg
+        from MuonConfig.MuonCablingConfig import TGCCablingConfigCfg
+        result.merge(TGCCablingConfigCfg(flags))
+        result.merge(TgcDigitToTgcRDOCfg(flags))
+        from MuonConfig.MuonRdoDecodeConfig import TgcRDODecodeCfg
+        result.merge(TgcRDODecodeCfg(flags))
+
+
     if flags.Detector.GeometrysTGC:
         result.merge(xAODSimHitTosTGCMeasCnvAlgCfg(flags))
     if flags.Detector.GeometryMM:    
