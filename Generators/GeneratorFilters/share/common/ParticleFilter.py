@@ -8,4 +8,3 @@ if not hasattr(filtSeq, "ParticleFilter"):
 #ParticleFilter.Etacut = 10.0
 #ParticleFilter.PDG = 1000022
 #ParticleFilter.MinParts = 2
-#ParticleFilter.StatusReq = 11

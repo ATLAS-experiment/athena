@@ -24,7 +24,6 @@ private:
   Gaudi::Property<double> m_EtaRange{this, "Etacut", 10.0};
   Gaudi::Property<double> m_EnergyRange{this, "Energycut", 100000000.0};
   Gaudi::Property<int>    m_PDGID{this, "PDG", 11};
-  Gaudi::Property<int>    m_StatusReq{this, "StatusReq", 1};
   Gaudi::Property<int>    m_MinParts{this, "MinParts", 1};
   Gaudi::Property<bool>   m_Exclusive{this, "Exclusive", false};
 };

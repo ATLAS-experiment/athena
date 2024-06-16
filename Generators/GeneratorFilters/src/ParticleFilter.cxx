@@ -17,7 +17,6 @@ StatusCode ParticleFilter::filterInitialize() {
   ATH_MSG_INFO("Etacut=" << m_EtaRange);
   ATH_MSG_INFO("Energycut=" << m_EnergyRange);
   ATH_MSG_INFO("PDG=" << m_PDGID);
-  ATH_MSG_INFO("StatusReq=" << m_StatusReq);
   ATH_MSG_INFO("MinParts=" << m_MinParts);
   ATH_MSG_INFO("Exclusive=" << m_Exclusive);
   return StatusCode::SUCCESS;
@@ -29,7 +28,7 @@ StatusCode ParticleFilter::filterEvent() {
   for (McEventCollection::const_iterator itr = events()->begin(); itr != events()->end(); ++itr) {
     const HepMC::GenEvent* genEvt = (*itr);
     for (const auto& pitr: *genEvt) {
-      if (std::abs(pitr->pdg_id()) != m_PDGID || !(m_StatusReq == -1 || pitr->status() == m_StatusReq)) continue;
+      if (std::abs(pitr->pdg_id()) != m_PDGID ) continue;
       if (pitr->momentum().perp() >= m_Ptmin && std::abs(pitr->momentum().pseudoRapidity()) <= m_EtaRange && pitr->momentum().e() <= m_EnergyRange) {
       if ((!m_Exclusive)&&(m_MinParts == 1))  return StatusCode::SUCCESS; // Found at least one particle and we have an inclusive requirement
               
