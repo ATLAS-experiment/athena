@@ -49,13 +49,13 @@ namespace MuonR4 {
             RpcDigitCollection* digiColl = fetchCollection(hitId, digitCache);
             if (m_idHelperSvc->stationName(hitId) != m_stIdxBIL) {
                 /// Standard digitization path
-                if (digitizeHit(hitId, false, readOutEle->getParameters().etaDesign, 
-                                hitTime(simHit), locPos.x(), 
-                                efficiencyMap, *digiColl, rndEngine) ||
-
-                    digitizeHit(hitId, true, readOutEle->getParameters().phiDesign,  
-                                hitTime(simHit), locPos.y(),
-                                efficiencyMap, *digiColl, rndEngine)) {
+                bool digitized = digitizeHit(hitId, false, readOutEle->getParameters().etaDesign, 
+                                             hitTime(simHit), locPos.x(), 
+                                             efficiencyMap, *digiColl, rndEngine);
+                digitized |=  digitizeHit(hitId, true, readOutEle->getParameters().phiDesign,  
+                                          hitTime(simHit), locPos.y(),
+                                          efficiencyMap, *digiColl, rndEngine);
+                if (digitized) {
                     addSDO(simHit, sdoContainer);
                 }
             } else if (digitizeHit(hitId, readOutEle->getParameters().etaDesign, 
