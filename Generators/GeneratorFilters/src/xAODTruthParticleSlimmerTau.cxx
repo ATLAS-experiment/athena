@@ -46,7 +46,7 @@ StatusCode xAODTruthParticleSlimmerTau::initialize()
 CLHEP::HepLorentzVector xAODTruthParticleSlimmerTau::sumDaughterNeutrinos(const xAOD::TruthParticle *part)
 {
   CLHEP::HepLorentzVector nu(0, 0, 0, 0);
-  if (((std::abs(part->pdgId()) == 12) || (std::abs(part->pdgId()) == 14) || (std::abs(part->pdgId()) == 16)) && part->status() != 3)
+  if (((std::abs(part->pdgId()) == 12) || (std::abs(part->pdgId()) == 14) || (std::abs(part->pdgId()) == 16)) && MC::isPhysical(part))
   {
     nu.setPx(part->px());
     nu.setPy(part->py());

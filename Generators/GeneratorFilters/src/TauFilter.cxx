@@ -85,7 +85,7 @@ StatusCode TauFilter::filterFinalize() {
 CLHEP::HepLorentzVector TauFilter::sumDaughterNeutrinos(const HepMC::ConstGenParticlePtr& part ) {
   CLHEP::HepLorentzVector nu( 0, 0, 0, 0);
   if ( ( (std::abs( part->pdg_id() ) == 12 ) || ( std::abs( part->pdg_id() ) == 14 ) || ( std::abs( part->pdg_id() ) == 16 )) 
-       && part->status() != 3) {
+       && MC::isPhysical(part) ) {
     nu.setPx(part->momentum().px());
     nu.setPy(part->momentum().py());
     nu.setPz(part->momentum().pz());
@@ -145,8 +145,8 @@ StatusCode TauFilter::filterEvent() {
     weight = wgtsC.size() > 0 ? wgtsC[0] : 1;
 
     for (const auto& pitr: *genEvt) {
-      // Look for the first tau with genstat != 3
-      if (MC::isTau(pitr) && (pitr)->status() != 3) {
+      // Look for the first decayed/stable tau
+      if (MC::isTau(pitr) && MC::isPhysical(pitr)) {
         tau = pitr;
         ATH_MSG_DEBUG("found tau " << tau );
         ATH_MSG_DEBUG("pT\t\teta\tphi\tid");

@@ -107,7 +107,7 @@ StatusCode VBFMjjIntervalFilter::filterEvent() {
       }
       if (m_taujetoverlap==true) {
 	// tau - copied from VBFForwardJetsFilter.cxx
-	if ( MC::isTau(pitr) && pitr->status() != 3 ) {
+	if ( MC::isTau(pitr) && MC::isPhysical(pitr) ) {
 	   auto tau = pitr;
 	  int leptonic = 0;
 	  for (const auto& beg:  *(tau->end_vertex()) ) {

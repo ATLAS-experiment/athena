@@ -9,6 +9,7 @@
 #include "AsgDataHandles/WriteDecorHandle.h"
 #include "AsgTools/CurrentContext.h"
 #include "AthContainers/ConstAccessor.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 JetTruthLabelingTool::JetTruthLabelingTool(const std::string& name) :
   asg::AsgTool(name)
@@ -603,8 +604,8 @@ void JetTruthLabelingTool::getTLVs( std::vector<std::pair<TLorentzVector,int> > 
 
       const xAOD::TruthParticle* part1 = truthBosons->at(ipart);
 
-      /// Skip particles without status == 3
-      if ( part1->status() != 3 ) continue;
+      /// Skip decayed/stable
+      if ( MC::isPhysical(part1) ) continue;
 
       /// Skip anything that isn't a light quark
       if ( std::abs(part1->pdgId()) > 5 ) continue;
@@ -620,8 +621,8 @@ void JetTruthLabelingTool::getTLVs( std::vector<std::pair<TLorentzVector,int> > 
 
         const xAOD::TruthParticle* part2 = truthBosons->at(jpart);
 
-        /// Skip particles without status == 3
-        if ( part2->status() != 3 ) continue;
+        /// Skip decayed/stable
+        if (  MC::isPhysical(part2) ) continue;
 
         /// Skip anything that isn't a light quark
         if ( std::abs(part2->pdgId()) > 5 ) continue;
