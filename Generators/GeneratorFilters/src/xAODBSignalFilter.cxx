@@ -200,8 +200,7 @@ if (LVL1Passed && (m_localLVL2MuonCutOn || m_localLVL2ElectronCutOn))
                 bool motherIsB = false;
                 bool newBChain = false;
 
-                if ((MC::isBottomMeson(particleID) || MC::isBottomBaryon(particleID)) && part->status() != 3) // p->status()!=3 excludes the partons
-                                                                                                                        // including immediate decays of resonances.
+                if ((MC::isBottomMeson(particleID) || MC::isBottomBaryon(particleID)) && MC::isPhysical(part) )
                 {
                     // ** Reject whole event if any of B-hadrons in the event is not decayed **
                     if (MC::isStable(part) || part->status() == HepMC::EVTGENUNDECAYEDSTATUS)

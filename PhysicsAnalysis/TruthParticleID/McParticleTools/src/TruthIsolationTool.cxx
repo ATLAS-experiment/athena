@@ -207,7 +207,7 @@ TruthIsolationTool::buildEtIsolations( const std::string& mcEvtName,
     // Not for documentation particle
     const bool doComputeIso = ( ( ida == 22 && pt > m_ptGamMin ) ||
                                 ida == 11 || ida == 13 || ida == 15 ) &&
-                                i->status() != 3 && MC::isSimInteracting(i);
+                                 MC::isPhysical(i) && MC::isSimInteracting(i);
     if ( doComputeIso ) {
       computeIso( particles, i, etIsols, partSel );
     }

@@ -135,8 +135,8 @@ StatusCode xAODTauFilter::filterEvent() {
 
   
   for (const auto * truthtau : *vtruth) {
-   // Look for the first tau with genstat != 3
-    if (MC::isTau(truthtau) && truthtau->status() != 3) {
+   // Look for the first physical tau
+    if (MC::isTau(truthtau) && MC::isPhysical(truthtau)) {
         const xAOD::TruthParticle* tau = truthtau;
         ATH_MSG_DEBUG("found tau " << tau);
         ATH_MSG_DEBUG("pT\t\teta\tphi\tid");

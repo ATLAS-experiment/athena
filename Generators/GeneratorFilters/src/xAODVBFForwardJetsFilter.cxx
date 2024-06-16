@@ -124,7 +124,7 @@ StatusCode xAODVBFForwardJetsFilter::filterEvent()
                 ATH_MSG_INFO("electron pt(Gaudi::Units::GeV) = " << pitr->pt() / Gaudi::Units::GeV << " eta = " << pitr->eta());
             }
             // tau
-            if (MC::isTau(pitr) && pitr->status() != 3)
+            if (MC::isTau(pitr) && MC::isPhysical(pitr))
             {
                 auto tau = pitr;
                 int leptonic = 0;

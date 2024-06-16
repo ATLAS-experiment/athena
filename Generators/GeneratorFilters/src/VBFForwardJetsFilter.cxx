@@ -111,7 +111,7 @@ StatusCode VBFForwardJetsFilter::filterEvent() {
         ATH_MSG_INFO("electron pt(Gaudi::Units::GeV) = " << pitr->momentum().perp()/Gaudi::Units::GeV << " eta = " << pitr->momentum().pseudoRapidity());
       }
       // tau
-      if ( MC::isTau(pitr) && pitr->status() != 3 ) {
+      if ( MC::isTau(pitr) && MC::isPhysical(pitr) ) {
         auto& tau = pitr;
         int leptonic = 0;
         for (const auto& beg: tau->end_vertex()->particles_out() ) {
@@ -149,7 +149,7 @@ StatusCode VBFForwardJetsFilter::filterEvent() {
         ATH_MSG_INFO("electron pt(Gaudi::Units::GeV) = " << (*pitr)->momentum().perp()/Gaudi::Units::GeV << " eta = " << (*pitr)->momentum().pseudoRapidity());
       }
       // tau
-      if ( MC::isTau(*pitr) && (*pitr)->status() != 3 ) {
+      if ( MC::isTau(*pitr) && MC::isPhysical(*pitr) ) {
         HepMC::GenParticle *tau = (*pitr);
         HepMC::GenVertex::particles_out_const_iterator begin = tau->end_vertex()->particles_out_const_begin();
         HepMC::GenVertex::particles_out_const_iterator end = tau->end_vertex()->particles_out_const_end();
