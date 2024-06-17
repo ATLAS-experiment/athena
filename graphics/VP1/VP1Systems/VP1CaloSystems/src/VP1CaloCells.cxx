@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VP1CaloSystems/VP1CaloCells.h"
@@ -76,7 +76,7 @@ bool VP1CaloCell::cutPassed(const VP1CC_GlobalCuts& globalCuts)
   if(!passed) return false;
   // Check Phi Cut
   passed = false;
-  for(VP1Interval i : globalCuts.allowedPhi){
+  for(const VP1Interval& i : globalCuts.allowedPhi){
     if(i.contains(m_caloCell->phi()) 
        ||i.contains(m_caloCell->phi()+2*M_PI)
        ||i.contains(m_caloCell->phi()-2*M_PI)) {
