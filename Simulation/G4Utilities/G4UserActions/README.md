@@ -1,17 +1,13 @@
-/*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
-*/
+# G4UserActions
+Author Andrea.Di.Simone@cern.ch, Andrea.Dellacqua@cern.ch
+Converted from packagedoc.h
 
-/**
-@page G4UserActions_page G4UserActions
-@author Andrea.Di.Simone@cern.ch, Andrea.Dellacqua@cern.ch
-
-@section G4UserActions_G4UserActionsIntro Introduction
+## Introduction
 
 This package includes various utility classes for Geant4 simulation.  Some are always activated by 
 default, and some are for very specific cases.
 
-@section G4UserActions_G4UserActionsOverview Class Overview
+## Class Overview
   The G4UserActions package contains of following classes:
 
   - FastIDKiller : Removes some particles prior to their entry into the calorimeter
@@ -33,6 +29,3 @@ default, and some are for very specific cases.
 
   - VerboseSelector : Sets the verbosity level for several Geant actions
 
-
-
-*/

@@ -1,17 +1,13 @@
-/*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
-*/
+# G4AtlasTEsts
+Author Andrea.Dellacqua@cern.ch
+Converted from packagedoc.h
 
-/**
-@page G4AtlasTests_page G4AtlasTEsts
-@author Andrea.Dellacqua@cern.ch
-
-@section G4AtlasTests_G4AtlasTests Introduction
+## Introduction
 
 This package provides basic tests of the G4 Atlas simulation,
 including both subdetector specific and general functionality tests.
 
-@section G4AtlasTests_G4AtlasTests Class Overview
+## Class Overview
   The G4AtlasTests package contains of following classes:
 
   - AtlasTestAlg : Provides minimal tests for each subsystem and overview tests
@@ -42,7 +38,3 @@ including both subdetector specific and general functionality tests.
   - TestAlgInterface : The interface to all test classes
 
 All histograms are booked in BookHistograms.cxx - this file contains all limits for the histos.
-
-
-
-*/

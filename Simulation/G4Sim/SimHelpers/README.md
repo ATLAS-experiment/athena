@@ -1,16 +1,12 @@
-/*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
-*/
+# SinHelpers
+Author Andrea Dell'Acqua (dellacqu@mail.cern.ch)
+Converted from packagedoc.h
 
-/**
-@page SimHelpers_page SinHelpers
-@author Andrea Dell'Acqua (dellacqu@mail.cern.ch)
-
-@section SimHelpers_SinHelpers Introduction
+## Introduction
 
 This package includes several helpers for use during simulation.  Running simulation uses these, whether you realize it or not...
 
-@section SimHelpers_SinHelpers Class Overview
+## Class Overview
 
 The helpers in this package are:
 
@@ -22,7 +18,3 @@ The helpers in this package are:
  - ServiceAccessor : Helper for getting services
  - StepHelper : Set of functions for dealing with G4Steps
  - TrackVisualizationHelper : Set of functions for dealing with the visualization of tracks
-
-
-
-*/
