@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGTOOLS_TRIG_VSI_KDPOINT
 #define TRIGTOOLS_TRIG_VSI_KDPOINT
@@ -122,7 +122,7 @@ class KDPoint {
       //! @name Member Accessors
       //! @{
       //! Return position of the point.
-      inline std::array<T,D> getPos() const { return m_point; };
+      inline const std::array<T,D>& getPos() const { return m_point; };
 
       //! Return i-th element. If given i exceeds the size, return NaN.
       inline T  at(size_t i) const { return (i < D)? m_point[i] : TMath::QuietNaN(); };
