@@ -102,8 +102,9 @@ std::vector<const xAOD::TauJet*> TrigTauMonitorBaseAlgorithm::getOfflineTausAll(
         // Consider only offline taus which pass RNN medium WP 
         if(!tau->isTau(xAOD::TauJetParameters::JetRNNSigMedium)) continue;
 
-        // Consider only offline taus which pass thinning 
-        if(tau->isAvailable<char>("passThinning") && !tau->auxdata<char>("passThinning") ) continue;
+        // Consider only offline taus which pass thinning
+        static const SG::ConstAccessor<char> passThinningAcc("passThinning");
+        if(!passThinningAcc.withDefault(*tau, true)) continue;
 
         int nTracks = -1;
         tau->detail(xAOD::TauJetParameters::nChargedTracks, nTracks);

@@ -5,6 +5,8 @@
 #include "TruthUtils/HepMCHelpers.h"
 
 #include "TrigTauMonitorTruthAlgorithm.h"
+#include "AthContainers/ConstAccessor.h"
+#include "AthContainers/Decorator.h"
 
 
 TrigTauMonitorTruthAlgorithm::TrigTauMonitorTruthAlgorithm(const std::string& name, ISvcLocator* pSvcLocator)
@@ -46,17 +48,21 @@ std::pair<std::vector<std::shared_ptr<xAOD::TruthParticle>>, std::vector<std::sh
             if(examineTruthTau(xTruthTau).isFailure()) continue;
 
             // Keep only the hadronic decay mode
-            if(xTruthTau->auxdata<char>("IsLeptonicTau")) continue;
+            static const SG::ConstAccessor<char> IsLeptonicTauAcc("IsLeptonicTau");
+            if(IsLeptonicTauAcc(*xTruthTau)) continue;
 
-            float pt = xTruthTau->auxdata<double>("pt_vis");
-            float eta = xTruthTau->auxdata<double>("eta_vis");
+            static const SG::ConstAccessor<double> pt_visAcc("pt_vis");
+            static const SG::ConstAccessor<double> eta_visAcc("eta_vis");
+            float pt = pt_visAcc(*xTruthTau);
+            float eta = eta_visAcc(*xTruthTau);
             ATH_MSG_DEBUG("True Tau visible pt: " << pt << ", eta: " << eta);
 
             // Keep only truth taus in the barrel region, with a pT > 20 GeV (offline minimum threshold)
             if(pt < threshold || std::abs(eta) > 2.47) continue;
 
-            if(xTruthTau->auxdata<int>("nTracks") == 1) true_taus_1p.push_back(xTruthTau);
-            else if(xTruthTau->auxdata<int>("nTracks") == 3) true_taus_3p.push_back(xTruthTau);
+            static const SG::ConstAccessor<int> nTracksAcc("nTracks");
+            if(nTracksAcc(*xTruthTau) == 1) true_taus_1p.push_back(xTruthTau);
+            else if(nTracksAcc(*xTruthTau) == 3) true_taus_3p.push_back(xTruthTau);
         }
     }
 
@@ -68,15 +74,22 @@ StatusCode TrigTauMonitorTruthAlgorithm::examineTruthTau(const std::shared_ptr<x
 {
     if(!xTruthTau->hasDecayVtx()) return StatusCode::FAILURE;
 
-    xTruthTau->auxdecor<char>("IsLeptonicTau") = false;
+    static const SG::Decorator<char> IsLeptonicTauDec("IsLeptonicTau");
+    IsLeptonicTauDec(*xTruthTau) = false;
         
     TLorentzVector VisSumTLV;
-    xTruthTau->auxdecor<double>("pt_vis") = 0;
-    xTruthTau->auxdecor<double>("eta_vis") = 0;
-    xTruthTau->auxdecor<double>("phi_vis") = 0;
-    xTruthTau->auxdecor<double>("mvis") = 0;
-    xTruthTau->auxdecor<int>("childChargeSum") = 0;
-    xTruthTau->auxdecor<int>("nTracks") = 0;
+    static const SG::Decorator<double> pt_visDec("pt_vis");
+    static const SG::Decorator<double> eta_visDec("eta_vis");
+    static const SG::Decorator<double> phi_visDec("phi_vis");
+    static const SG::Decorator<double> mvisDec("mvis");
+    static const SG::Decorator<int> childChargeSumDec("childChargeSum");
+    static const SG::Decorator<int> nTracksDec("nTracks");
+    pt_visDec(*xTruthTau) = 0;
+    eta_visDec(*xTruthTau) = 0;
+    phi_visDec(*xTruthTau) = 0;
+    mvisDec(*xTruthTau) = 0;
+    childChargeSumDec(*xTruthTau) = 0;
+    nTracksDec(*xTruthTau) = 0;
     
     const xAOD::TruthVertex* decayvtx = xTruthTau->decayVtx();
     if(decayvtx) {
@@ -87,21 +100,21 @@ StatusCode TrigTauMonitorTruthAlgorithm::examineTruthTau(const std::shared_ptr<x
                 if(MC::isSMNeutrino(child)) continue;
                 if(child->status() == 3) continue;
                 ATH_MSG_DEBUG("Child " << child->pdgId() << ", status " << child->status() << ", charge " << child->charge());
-                if(MC::isSMLepton(child)) xTruthTau->auxdecor<char>("IsLeptonicTau") = true; // Just selects charged SM Leptons as we have already skipped SM neutrinos
+                if(MC::isSMLepton(child)) IsLeptonicTauDec(*xTruthTau) = true; // Just selects charged SM Leptons as we have already skipped SM neutrinos
                 VisSumTLV += child->p4();
-                xTruthTau->auxdecor<int>("childChargeSum") += child->charge();
-                xTruthTau->auxdecor<int>("nTracks") += std::abs(child->charge());
+                childChargeSumDec(*xTruthTau) += child->charge();
+                nTracksDec(*xTruthTau) += std::abs(child->charge());
             }
         }
     }
 
-    xTruthTau->auxdecor<double>("pt_vis") = VisSumTLV.Pt();
-    xTruthTau->auxdecor<double>("eta_vis") = VisSumTLV.Eta();
-    xTruthTau->auxdecor<double>("phi_vis") = VisSumTLV.Phi();
-    xTruthTau->auxdecor<double>("mvis") = VisSumTLV.M();
+    pt_visDec(*xTruthTau) = VisSumTLV.Pt();
+    eta_visDec(*xTruthTau) = VisSumTLV.Eta();
+    phi_visDec(*xTruthTau) = VisSumTLV.Phi();
+    mvisDec(*xTruthTau) = VisSumTLV.M();
 
-    if(xTruthTau->auxdecor<int>("childChargeSum") != xTruthTau->charge() || xTruthTau->auxdecor<int>("nTracks")%2 == 0) { 
-        ATH_MSG_WARNING("Strange tau: charge " << xTruthTau->auxdecor<int>("childChargeSum") << " and " << xTruthTau->auxdecor<int>("nTracks")  << " tracks");
+    if(childChargeSumDec(*xTruthTau) != xTruthTau->charge() || nTracksDec(*xTruthTau)%2 == 0) { 
+        ATH_MSG_WARNING("Strange tau: charge " << childChargeSumDec(*xTruthTau) << " and " << nTracksDec(*xTruthTau)  << " tracks");
         const std::size_t nChildren = decayvtx->nOutgoingParticles();
         for(std::size_t iChild = 0; iChild != nChildren; ++iChild) {
         const xAOD::TruthParticle * child = decayvtx->outgoingParticle(iChild);
@@ -156,10 +169,13 @@ void TrigTauMonitorTruthAlgorithm::fillTruthEfficiency(const std::vector<const x
     auto HLT_truth_match_highPt = Monitored::Scalar<bool>("HLT_pass_highPt", false);  
 
     bool hlt_fires = m_trigDecTool->isPassed(trigger, TrigDefs::Physics | TrigDefs::allowResurrectedDecision);
+    static const SG::ConstAccessor<double> pt_visAcc("pt_vis");
+    static const SG::ConstAccessor<double> eta_visAcc("eta_vis");
+    static const SG::ConstAccessor<double> phi_visAcc("phi_vis");
     for(const std::shared_ptr<xAOD::TruthParticle>& true_tau : true_taus) {
-        pt_vis = true_tau->auxdata<double>("pt_vis")/Gaudi::Units::GeV;
-        eta_vis = true_tau->auxdata<double>("eta_vis");
-        phi_vis = true_tau->auxdata<double>("phi_vis");
+        pt_vis = pt_visAcc(*true_tau)/Gaudi::Units::GeV;
+        eta_vis = eta_visAcc(*true_tau);
+        phi_vis = phi_visAcc(*true_tau);
 
         HLT_truth_match = matchObjects(true_tau.get(), online_tau_vec, 0.2) && hlt_fires;
 
@@ -195,16 +211,23 @@ void TrigTauMonitorTruthAlgorithm::fillTruthVars(const std::vector<const xAOD::T
     float matchedRatio = -999, matchedptvis = -999, matchedetavis = 999, matchedphivis = 999, matchedmvis = -999;
 
     // Visible-Truth Tau matching to HLT Tau
+    static const SG::ConstAccessor<double> pt_visAcc("pt_vis");
+    static const SG::ConstAccessor<double> eta_visAcc("eta_vis");
+    static const SG::ConstAccessor<double> phi_visAcc("phi_vis");
+    static const SG::ConstAccessor<double> mvisAcc("mvis");
     for(auto& HLTTau : ef_taus) {
         for(const std::shared_ptr<xAOD::TruthParticle>& true_tau : true_taus) {
             TLorentzVector true_tau4V;
-            true_tau4V.SetPtEtaPhiM(true_tau->auxdata<double>("pt_vis"), true_tau->auxdata<double>("eta_vis"), true_tau->auxdata<double>("phi_vis"), true_tau->auxdata<double>("mvis"));
+            true_tau4V.SetPtEtaPhiM(pt_visAcc(*true_tau),
+                                    eta_visAcc(*true_tau),
+                                    phi_visAcc(*true_tau),
+                                    mvisAcc(*true_tau));
             if(true_tau4V.DeltaR(HLTTau->p4()) < 0.2) {
-                matchedptvis = (true_tau->auxdata<double>("pt_vis")/Gaudi::Units::GeV);
-                matchedetavis = true_tau->auxdata<double>("eta_vis");
-                matchedphivis = true_tau->auxdata<double>("phi_vis");
-                matchedmvis = true_tau->auxdata<double>("mvis");
-                matchedRatio = (HLTTau->p4().Pt() - true_tau->auxdata<double>("pt_vis"))/true_tau->auxdata<double>("pt_vis");
+                matchedptvis = (pt_visAcc(*true_tau)/Gaudi::Units::GeV);
+                matchedetavis = eta_visAcc(*true_tau);
+                matchedphivis = phi_visAcc(*true_tau);
+                matchedmvis = mvisAcc(*true_tau);
+                matchedRatio = (HLTTau->p4().Pt() - pt_visAcc(*true_tau))/pt_visAcc(*true_tau);
             }
         }
 

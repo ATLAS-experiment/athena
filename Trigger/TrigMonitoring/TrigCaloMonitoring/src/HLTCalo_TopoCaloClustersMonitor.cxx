@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HLTCalo_TopoCaloClustersMonitor.h"
 #include "StoreGate/ReadDecorHandle.h"
 #include "LArRecEvent/LArEventBitInfo.h"
+#include "AthContainers/ConstAccessor.h"
 
 struct clus_kin {
   double et;
@@ -165,9 +166,9 @@ StatusCode HLTCalo_TopoCaloClustersMonitor::fillHistograms( const EventContext& 
   auto HLT_phi = Monitored::Collection("HLT_phi", vec_hlt_clusters, &clus_kin::phi);
   auto HLT_type = Monitored::Collection("HLT_type", vec_hlt_clusters, []( const clus_kin& clus) { return clus.parent->clusterSize(); } );
   // nCells is a decorated variable not available for older input files
-  auto HLT_size = Monitored::Collection("HLT_size", vec_hlt_clusters, []( const clus_kin& clus) { 
-	if (clus.parent->isAvailable<int>("nCells")) return clus.parent->auxdata<int>("nCells"); 
-	return 0;
+  auto HLT_size = Monitored::Collection("HLT_size", vec_hlt_clusters, []( const clus_kin& clus) {
+	static const SG::ConstAccessor<int> nCellsAcc("nCells");
+	return nCellsAcc.withDefault(*clus.parent, 0);
   });
   auto HLT_time = Monitored::Collection("HLT_time", vec_hlt_clusters, []( const clus_kin& clus) { return clus.parent->time(); } );
 
