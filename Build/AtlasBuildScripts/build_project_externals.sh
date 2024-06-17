@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 # Script that is used by the build_externals.sh scripts of the individual
 # projects.
@@ -25,9 +25,8 @@ usage() {
    echo "Options:"
    echo " -t: Build type, by default set to '${ATLAS_BUILDTYPE}'"
    echo " -b: 'Main build directory' to use for the code checkout and build"
-   echo " -f: Force rebuild of externals from scratch, otherwise if script"
-   echo "     finds an external build present it will only do an incremental"
-   echo "     build"
+   echo " -i: Do an incremental build of the externals instead of a full build."
+   echo "     This is an expert option since not all externals support this."
    echo " -c: Build the externals for the continuous integration (CI) system,"
    echo "     skipping the build of the externals RPMs."
    echo " -x: Extra cmake argument(s) to provide for the build(configuration)"
@@ -40,9 +39,9 @@ usage() {
 
 # Parse the command line arguments.
 ATLAS_BUILD_DIR=""
-ATLAS_FORCE_REBUILD=""
+ATLAS_FORCE_REBUILD="1"
 ATLAS_CI_BUILD=""
-while getopts ":t:b:x:k:fch" opt; do
+while getopts ":t:b:x:k:ich" opt; do
    case ${opt} in
       t)
          ATLAS_BUILDTYPE=${OPTARG}
@@ -50,8 +49,8 @@ while getopts ":t:b:x:k:fch" opt; do
       b)
          ATLAS_BUILD_DIR=${OPTARG}
          ;;
-      f)
-         ATLAS_FORCE_REBUILD="1"
+      i)
+         ATLAS_FORCE_REBUILD="0"
          ;;
       c)
          ATLAS_CI_BUILD="1"
@@ -107,14 +106,6 @@ ATLAS_BUILD_DIR=$(cd "${ATLAS_BUILD_DIR}" && pwd)
 # Greet the user.
 echo "Building ${ATLAS_EXT_PROJECT_NAME} in: ${ATLAS_BUILD_DIR}"
 
-# Clean the build directory, if necessary.
-if [ "$ATLAS_FORCE_REBUILD" = "1" ]; then
-   echo "Force deleting existing build area..."
-   rm -rf "${ATLAS_BUILD_DIR}/install/${ATLAS_EXT_PROJECT_NAME}"
-   rm -rf "${ATLAS_BUILD_DIR}/src/${ATLAS_EXT_PROJECT_NAME}"
-   rm -rf "${ATLAS_BUILD_DIR}/build/${ATLAS_EXT_PROJECT_NAME}"
-fi
-
 # Figure out the version of the main project.
 ATLAS_PROJECT_VERSION=$(cat ${ATLAS_PROJECT_DIR}/version.txt)
 # Figure out what tag/branch to use for the "externals project".
@@ -136,10 +127,20 @@ create_stamp_file() {
 externals_stamp="${ATLAS_BUILD_DIR}/build/${ATLAS_EXT_PROJECT_NAME}/externals-${ATLAS_PROJECT_VERSION}.stamp"
 if [ -f "${externals_stamp}" ]; then
    create_stamp_file "${externals_stamp}.tmp"
-   if diff -q "${externals_stamp}" "${externals_stamp}.tmp"; then
+   if diff -qs "${externals_stamp}" "${externals_stamp}.tmp"; then
       echo "Correct version of externals already available in ${ATLAS_BUILD_DIR}"
       exit 0
    fi
+fi
+
+# Clean the build directory (unless incremental requested)
+if [ "$ATLAS_FORCE_REBUILD" = "1" ]; then
+   echo "Deleting existing build area..."
+   rm -rf "${ATLAS_BUILD_DIR}/install/${ATLAS_EXT_PROJECT_NAME}"
+   rm -rf "${ATLAS_BUILD_DIR}/src/${ATLAS_EXT_PROJECT_NAME}"
+   rm -rf "${ATLAS_BUILD_DIR}/build/${ATLAS_EXT_PROJECT_NAME}"
+else
+   echo "Reusing existing build area..."
 fi
 
 # Create some directories.
@@ -188,17 +189,6 @@ fi
 # Exit with the error count taken into account.
 if [ ${ERROR_COUNT} -ne 0 ]; then
     echo "${ATLAS_EXT_PROJECT_NAME} build encountered ${ERROR_COUNT} error(s)"
-    # Clean out remnants of the externals from the build directory in a CI build
-    # if there was an error. While this does make it harder to diagnose issues
-    # in the CI, it should avoid CI build nodes getting "tainted" because of
-    # infrastructure glitches.
-    if [ "${ATLAS_CI_BUILD}" = "1" ]; then
-        echo "Removing external project artifacts..."
-        rm -rf "${ATLAS_BUILD_DIR}/build/${ATLAS_EXT_PROJECT_NAME}/src"
-        rm -rf "${ATLAS_BUILD_DIR}/build/${ATLAS_EXT_PROJECT_NAME}/tmp"
-        rm -rf "${ATLAS_BUILD_DIR}/build/${ATLAS_EXT_PROJECT_NAME}/External"
-        rm -rf "${ATLAS_BUILD_DIR}/build/${ATLAS_EXT_PROJECT_NAME}/${BINARY_TAG}"
-    fi
 else
     create_stamp_file "${externals_stamp}"
 fi
