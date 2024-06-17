@@ -7,6 +7,13 @@
 
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 
+# Deduce CREST tag
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
+from TriggerJobOpts.TriggerConfigFlags import trigGlobalTag
+flags = initConfigFlags()
+flags.Input.isMC = False
+globalTag = trigGlobalTag(flags).replace('CONDBR2','CREST')
+
 ex = ExecStep.ExecStep()
 ex.type = 'athenaHLT'
 ex.job_options = 'TriggerJobOpts.runHLT'
@@ -17,7 +24,7 @@ ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1_HLTReprocessing_prescale"'
             'Trigger.L1MuonSim.doMMTrigger=False',
             'Trigger.L1MuonSim.doPadTrigger=False',
             'Trigger.L1MuonSim.doStripTrigger=False',
-            'IOVDb.GlobalTag="CREST-HLTP-2023-01"',  # FIXME: update to CREST-HLTP-2024-02 once available
+            f'IOVDb.GlobalTag="{globalTag}"',
             'IOVDb.CrestServer="http://crest.cern.ch:80/api-v4.0"']
 
 test = Test.Test()
