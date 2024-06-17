@@ -13,6 +13,7 @@
 #include "xAODTruth/TruthVertex.h"
 #include "xAODMuon/Muon.h"
 #include "xAODMuon/MuonContainer.h"
+#include "AthContainers/ConstAccessor.h"
 
 #include <stdexcept>
 #include <utility>
@@ -829,7 +830,8 @@ namespace JetTagDQA{
 
       // SV1 Lxy for light jets
       else if(truth_label == 0){
-        Lxy = btag->auxdata<float>("SV1_Lxy");
+        static const SG::ConstAccessor<float> SV1_LxyAcc("SV1_Lxy");
+        Lxy = SV1_LxyAcc(*btag);
       }
     }
 
@@ -840,9 +842,11 @@ namespace JetTagDQA{
     bool has_muon = false;
     
     // get the muon link
-    ElementLink<xAOD::MuonContainer> muonLink; 
-    if(btag->isAvailable< ElementLink<xAOD::MuonContainer> >("softMuon_link")){
-      muonLink = btag->auxdata< ElementLink<xAOD::MuonContainer> >("softMuon_link"); 
+    ElementLink<xAOD::MuonContainer> muonLink;
+    static const SG::ConstAccessor< ElementLink<xAOD::MuonContainer> >
+      softMuon_linkAcc("softMuon_link");
+    if(softMuon_linkAcc.isAvailable(*btag)) {
+      muonLink = softMuon_linkAcc(*btag); 
     }
 
     // fill bool and pT frac if there is a muon
@@ -868,7 +872,10 @@ namespace JetTagDQA{
     jet_tlv.SetPtEtaPhiE(jet->pt(), jet->eta(), jet->phi(), jet->e());
 
     // get the assocated tracks
-    std::vector< ElementLink< xAOD::TrackParticleContainer > > assocTracks = btag->auxdata<std::vector<ElementLink<xAOD::TrackParticleContainer> > >("BTagTrackToJetAssociator");
+    static const SG::ConstAccessor< std::vector<ElementLink<xAOD::TrackParticleContainer> > >
+      BTagTrackToJetAssociatorAcc("BTagTrackToJetAssociator");
+    std::vector< ElementLink< xAOD::TrackParticleContainer > > assocTracks =
+      BTagTrackToJetAssociatorAcc(*btag);
 
     int numTracks_perJet = 0;
     int numTracks_fromB = 0;
@@ -1012,7 +1019,10 @@ namespace JetTagDQA{
     jet_tlv.SetPtEtaPhiE(jet->pt(), jet->eta(), jet->phi(), jet->e());
 
     // get the assocated tracks
-    std::vector< ElementLink< xAOD::IParticleContainer > > ghostTracks = jet->auxdata<std::vector<ElementLink<xAOD::IParticleContainer> > >("GhostTrack");
+    static const SG::ConstAccessor<std::vector<ElementLink<xAOD::IParticleContainer> > >
+      GhostTrackAcc("GhostTrack");
+    std::vector< ElementLink< xAOD::IParticleContainer > > ghostTracks =
+      GhostTrackAcc(*jet);
 
     int numTracks_perJet = 0;
 
@@ -1108,19 +1118,24 @@ namespace JetTagDQA{
     catch(std::exception& exception){ SV1_efracsvx = -1; }
 
     // SV1 deltaR jex axis - PV-SV
-    float SV1_deltaR = btag->auxdata<float>("SV1_deltaR");
+    static const SG::ConstAccessor<float> SV1_deltaRAcc("SV1_deltaR");
+    float SV1_deltaR = SV1_deltaRAcc(*btag);
 
     // SV1 significance 3d
-    float SV1_significance3d = btag->auxdata<float>("SV1_significance3d");
+    static const SG::ConstAccessor<float> SV1_significance3dAcc("SV1_significance3d");
+    float SV1_significance3d = SV1_significance3dAcc(*btag);
 
     // SV1 energyTrkInJet
-    float SV1_energyTrkInJet = btag->auxdata<float>("SV1_energyTrkInJet");
+    static const SG::ConstAccessor<float> SV1_energyTrkInJetAcc("SV1_energyTrkInJet");
+    float SV1_energyTrkInJet = SV1_energyTrkInJetAcc(*btag);
 
     // SV1 NGTinSvx 
-    int SV1_NGTinSvx = btag->auxdata<int>("SV1_NGTinSvx");
+    static const SG::ConstAccessor<int> SV1_NGTinSvxAcc("SV1_NGTinSvx");
+    int SV1_NGTinSvx = SV1_NGTinSvxAcc(*btag);
 
     // SV1 Lxy 
-    float SV1_Lxy = btag->auxdata<float>("SV1_Lxy");
+    static const SG::ConstAccessor<float> SV1_LxyAcc("SV1_Lxy");
+    float SV1_Lxy = SV1_LxyAcc(*btag);
 
     // SV1 track origing related variables (have them double such that taking a fraction doesn't result in an int)
     double SV1_numTracks = 0;
@@ -1141,7 +1156,10 @@ namespace JetTagDQA{
     double SV1_numTracks_OtherOrigin = 0; 
 
     // get the SV1 vertex
-    std::vector< ElementLink< xAOD::VertexContainer > > SV1_vertex = btag->auxdata<std::vector< ElementLink< xAOD::VertexContainer > > >("SV1_vertices");
+    static const SG::ConstAccessor<std::vector< ElementLink< xAOD::VertexContainer > > >
+      SV1_verticesAcc("SV1_vertices");
+    std::vector< ElementLink< xAOD::VertexContainer > > SV1_vertex =
+      SV1_verticesAcc(*btag);
 
     if(SV1_vertex.size() >= 1) contains_SV = true;
     else contains_SV = false;
@@ -1231,28 +1249,38 @@ namespace JetTagDQA{
     // JetFitter
 
     // JetFitter N2Tpair
-    int JetFitter_N2Tpair = btag->auxdata<int>("JetFitter_N2Tpair");
+    static const SG::ConstAccessor<int> JetFitter_N2TpairAcc("JetFitter_N2Tpair");
+    int JetFitter_N2Tpair = JetFitter_N2TpairAcc(*btag);
 
-    // JetFitter nVTX 
-    int JetFitter_nVTX = btag->auxdata<int>("JetFitter_nVTX");
+    // JetFitter nVTX
+    static const SG::ConstAccessor<int> JetFitter_nVTXAcc("JetFitter_nVTX");
+    int JetFitter_nVTX = JetFitter_nVTXAcc(*btag);
 
     // JetFitter nSingleTracks
-    int JetFitter_nSingleTracks = btag->auxdata<int>("JetFitter_nSingleTracks");
+    static const SG::ConstAccessor<int> JetFitter_nSingleTracksAcc("JetFitter_nSingleTracks");
+    int JetFitter_nSingleTracks = JetFitter_nSingleTracksAcc(*btag);
 
-    // JetFitter nTracksAtVtx 
-    int JetFitter_nTracksAtVtx = btag->auxdata<int>("JetFitter_nTracksAtVtx");
+    // JetFitter nTracksAtVtx
+    static const SG::ConstAccessor<int> JetFitter_nTracksAtVtxAcc("JetFitter_nTracksAtVtx");
+    int JetFitter_nTracksAtVtx = JetFitter_nTracksAtVtxAcc(*btag);
 
     // JetFitter mass
-    float JetFitter_mass = btag->auxdata<float>("JetFitter_mass");
+    static const SG::ConstAccessor<float> JetFitter_massAcc("JetFitter_mass");
+    float JetFitter_mass = JetFitter_massAcc(*btag);
 
-    // JetFitter energyFraction 
-    float JetFitter_energyFraction = btag->auxdata<float>("JetFitter_energyFraction");
+    // JetFitter energyFraction
+    static const SG::ConstAccessor<float> JetFitter_energyFractionAcc("JetFitter_energyFraction");
+    float JetFitter_energyFraction = JetFitter_energyFractionAcc(*btag);
 
-    // JetFitter significance3d 
-    float JetFitter_significance3d = btag->auxdata<float>("JetFitter_significance3d");
+    // JetFitter significance3d
+    static const SG::ConstAccessor<float> JetFitter_significance3dAcc("JetFitter_significance3d");
+    float JetFitter_significance3d = JetFitter_significance3dAcc(*btag);
 
     // get JetFitter vertices
-    std::vector< ElementLink< xAOD::BTagVertexContainer > > JetFitter_vertices = btag->auxdata<std::vector< ElementLink< xAOD::BTagVertexContainer > > >("JetFitter_JFvertices");
+    static const SG::ConstAccessor<std::vector< ElementLink< xAOD::BTagVertexContainer > > >
+      JetFitter_JFverticesAcc("JetFitter_JFvertices");
+    std::vector< ElementLink< xAOD::BTagVertexContainer > > JetFitter_vertices =
+      JetFitter_JFverticesAcc(*btag);
     std::vector<double> JetFitter_purity_perVertex;
 
     // loop over the JetFitter vertices
@@ -1337,18 +1365,26 @@ namespace JetTagDQA{
     //// IPxD variables
 
     // grade of tracks
-    std::vector<int> IP3D_gradeOfTracks = btag->auxdata<std::vector<int> >("IP3D_gradeOfTracks");
-    std::vector<int> IP2D_gradeOfTracks = btag->auxdata<std::vector<int> >("IP2D_gradeOfTracks");
+    static const SG::ConstAccessor<std::vector<int> > IP3D_gradeOfTracksAcc("IP3D_gradeOfTracks");
+    static const SG::ConstAccessor<std::vector<int> > IP2D_gradeOfTracksAcc("IP2D_gradeOfTracks");
+    std::vector<int> IP3D_gradeOfTracks = IP3D_gradeOfTracksAcc(*btag);
+    std::vector<int> IP2D_gradeOfTracks = IP2D_gradeOfTracksAcc(*btag);
     // loop over the elements (i.e. tracks) and fill the histogram
     for( unsigned int i=0; i<IP3D_gradeOfTracks.size(); i++){
       BTaggingValidationPlots::fillHistoWithTruthCases(IP3D_gradeOfTracks.at(i), m_IP3D_gradeOfTracks_incl, m_IP3D_gradeOfTracks_b, m_IP3D_gradeOfTracks_c, m_IP3D_gradeOfTracks_l, m_IP3D_gradeOfTracks_muon, truth_label, has_muon, event);
     }
 
     // d0, z0 and significances
-    std::vector<float> tmpD0       = btag->auxdata<std::vector<float> >("IP3D_valD0wrtPVofTracks");
-    std::vector<float> tmpZ0       = btag->auxdata<std::vector<float> >("IP3D_valZ0wrtPVofTracks");
-    std::vector<float> tmpD0sig    = btag->auxdata<std::vector<float> >("IP3D_sigD0wrtPVofTracks");
-    std::vector<float> tmpZ0sig    = btag->auxdata<std::vector<float> >("IP3D_sigZ0wrtPVofTracks");
+    static const SG::ConstAccessor<std::vector<float> > IP3D_valD0wrtPVofTracksAcc("IP3D_valD0wrtPVofTracks");
+    static const SG::ConstAccessor<std::vector<float> > IP3D_valZ0wrtPVofTracksAcc("IP3D_valZ0wrtPVofTracks");
+    static const SG::ConstAccessor<std::vector<float> > IP3D_sigD0wrtPVofTracksAcc("IP3D_sigD0wrtPVofTracks");
+    static const SG::ConstAccessor<std::vector<float> > IP3D_sigZ0wrtPVofTracksAcc("IP3D_sigZ0wrtPVofTracks");
+
+    std::vector<float> tmpD0       = IP3D_valD0wrtPVofTracksAcc(*btag);
+    std::vector<float> tmpZ0       = IP3D_valZ0wrtPVofTracksAcc(*btag);
+    std::vector<float> tmpD0sig    = IP3D_sigD0wrtPVofTracksAcc(*btag);
+    std::vector<float> tmpZ0sig    = IP3D_sigZ0wrtPVofTracksAcc(*btag);
+
     // loop over the elements (i.e. tracks) and fill the histogram
     for( unsigned int i=0; i<tmpD0   .size(); i++) m_tmpD0   ->Fill(tmpD0.at(i), event->beamSpotWeight());
     for( unsigned int i=0; i<tmpZ0   .size(); i++) m_tmpZ0   ->Fill(tmpZ0.at(i), event->beamSpotWeight());
@@ -1357,13 +1393,22 @@ namespace JetTagDQA{
   
     // weight b and weight u of tracks
     // IP3D
-    std::vector<float> IP3D_weightBofTracks = btag->auxdata<std::vector<float> >("IP3D_weightBofTracks");
-    std::vector<float> IP3D_weightCofTracks = btag->auxdata<std::vector<float> >("IP3D_weightCofTracks");
-    std::vector<float> IP3D_weightUofTracks = btag->auxdata<std::vector<float> >("IP3D_weightUofTracks");
+    static const SG::ConstAccessor<std::vector<float> > IP3D_weightBofTracksAcc("IP3D_weightBofTracks");
+    static const SG::ConstAccessor<std::vector<float> > IP3D_weightCofTracksAcc("IP3D_weightCofTracks");
+    static const SG::ConstAccessor<std::vector<float> > IP3D_weightUofTracksAcc("IP3D_weightUofTracks");
+
+    std::vector<float> IP3D_weightBofTracks = IP3D_weightBofTracksAcc(*btag);
+    std::vector<float> IP3D_weightCofTracks = IP3D_weightCofTracksAcc(*btag);
+    std::vector<float> IP3D_weightUofTracks = IP3D_weightUofTracksAcc(*btag);
+
     // IP2D
-    std::vector<float> IP2D_weightBofTracks = btag->auxdata<std::vector<float> >("IP2D_weightBofTracks");
-    std::vector<float> IP2D_weightCofTracks = btag->auxdata<std::vector<float> >("IP2D_weightCofTracks");
-    std::vector<float> IP2D_weightUofTracks = btag->auxdata<std::vector<float> >("IP2D_weightUofTracks");
+    static const SG::ConstAccessor<std::vector<float> > IP2D_weightBofTracksAcc("IP2D_weightBofTracks");
+    static const SG::ConstAccessor<std::vector<float> > IP2D_weightCofTracksAcc("IP2D_weightCofTracks");
+    static const SG::ConstAccessor<std::vector<float> > IP2D_weightUofTracksAcc("IP2D_weightUofTracks");
+    std::vector<float> IP2D_weightBofTracks = IP2D_weightBofTracksAcc(*btag);
+    std::vector<float> IP2D_weightCofTracks = IP2D_weightCofTracksAcc(*btag);
+    std::vector<float> IP2D_weightUofTracks = IP2D_weightUofTracksAcc(*btag);
+
     // loop over the elements (i.e. tracks) and fill the histogram
     // IP3D
     for( unsigned int i=0; i<IP3D_weightBofTracks.size(); i++) m_IP3D_weightBofTracks->Fill(IP3D_weightBofTracks.at(i), event->beamSpotWeight());
@@ -1383,21 +1428,15 @@ namespace JetTagDQA{
 
     // Get IP3D pb, pu, pc 
     double IP3D_pb, IP3D_pc, IP3D_pu;
-    if (btag->isAvailable<float>("IP3D_pb")){
-        IP3D_pb = btag->auxdata<float>("IP3D_pb");
-    } else {
-	IP3D_pb = -1;
-    }
-    if (btag->isAvailable<float>("IP3D_pu")){
-        IP3D_pu = btag->auxdata<float>("IP3D_pu");
-    } else {
-	IP3D_pu = -1;
-    }
-    if (btag->isAvailable<float>("IP3D_pc")){
-        IP3D_pc = btag->auxdata<float>("IP3D_pc");
-    } else {
-	IP3D_pc = -1;
-    }
+    static const SG::ConstAccessor<float> IP3D_pbAcc("IP3D_pb");
+    IP3D_pb = IP3D_pbAcc.withDefault(*btag, -1);
+
+    static const SG::ConstAccessor<float> IP3D_puAcc("IP3D_pu");
+    IP3D_pu = IP3D_puAcc.withDefault(*btag, -1);
+
+    static const SG::ConstAccessor<float> IP3D_pcAcc("IP3D_pc");
+    IP3D_pc = IP3D_pcAcc.withDefault(*btag, -1);
+
     m_IP3D_pb->Fill(IP3D_pb, event->beamSpotWeight());
     m_IP3D_pc->Fill(IP3D_pc, event->beamSpotWeight());
     m_IP3D_pu->Fill(IP3D_pu, event->beamSpotWeight());
@@ -1406,21 +1445,14 @@ namespace JetTagDQA{
     //// RNNIP variables
     // pb, pu, pc 
     double RNNIP_pb, RNNIP_pu, RNNIP_pc;
-    if (btag->isAvailable<float>("rnnip_pb")){
-        RNNIP_pb = btag->auxdata<float>("rnnip_pb");
-    } else {
-	RNNIP_pb = -1;
-    }
-    if (btag->isAvailable<float>("rnnip_pu")){
-        RNNIP_pu = btag->auxdata<float>("rnnip_pu");
-    } else {
-	RNNIP_pu = -1;
-    }
-    if (btag->isAvailable<float>("rnnip_pc")){
-        RNNIP_pc = btag->auxdata<float>("rnnip_pc");
-    } else {
-	RNNIP_pc = -1;
-    }
+    static const SG::ConstAccessor<float> rnnip_pbAcc("rnnip_pb");
+    RNNIP_pb = rnnip_pbAcc.withDefault(*btag, -1);
+
+    static const SG::ConstAccessor<float> rnnip_puAcc("rnnip_pu");
+    RNNIP_pu = rnnip_puAcc.withDefault(*btag, -1);
+
+    static const SG::ConstAccessor<float> rnnip_pcAcc("rnnip_pc");
+    RNNIP_pc = rnnip_pcAcc.withDefault(*btag, -1);
 
     double weight_RNNIP = log( RNNIP_pb / ( RNNIP_pc * m_RNNIP_fc + RNNIP_pu * (1-m_RNNIP_fc) ) );
 
@@ -1428,21 +1460,15 @@ namespace JetTagDQA{
 
     // pb, pu, pc 
     double DIPS_pb, DIPS_pu, DIPS_pc;
-    if (btag->isAvailable<float>(m_dipsName + "_pb")){
-        DIPS_pb = btag->auxdata<float>(m_dipsName + "_pb");
-    } else {
-	DIPS_pb = -1;
-    }
-    if (btag->isAvailable<float>(m_dipsName + "_pu")){
-        DIPS_pu = btag->auxdata<float>(m_dipsName + "_pu");
-    } else {
-	DIPS_pu = -1;
-    }
-    if (btag->isAvailable<float>(m_dipsName + "_pc")){
-        DIPS_pc = btag->auxdata<float>(m_dipsName + "_pc");
-    } else {
-	DIPS_pc = -1;
-    }
+    SG::ConstAccessor<float> DIPS_pbAcc(m_dipsName + "_pb");
+    DIPS_pb = DIPS_pbAcc.withDefault(*btag, -1);
+
+    SG::ConstAccessor<float> DIPS_puAcc(m_dipsName + "_pu");
+    DIPS_pu = DIPS_puAcc.withDefault(*btag, -1);
+
+    SG::ConstAccessor<float> DIPS_pcAcc(m_dipsName + "_pc");
+    DIPS_pc = DIPS_pcAcc.withDefault(*btag, -1);
+
     m_DIPS_pb->Fill(DIPS_pb, event->beamSpotWeight());
     m_DIPS_pu->Fill(DIPS_pu, event->beamSpotWeight());
     m_DIPS_pc->Fill(DIPS_pc, event->beamSpotWeight());
@@ -1459,21 +1485,15 @@ namespace JetTagDQA{
 
     /// Get SV1 scores
     double SV1_pb, SV1_pc, SV1_pu;
-    if (btag->isAvailable<float>("SV1_pb")){
-        SV1_pb = btag->auxdata<float>("SV1_pb");
-    } else {
-	SV1_pb = -1;
-    }
-    if (btag->isAvailable<float>("SV1_pu")){
-        SV1_pu = btag->auxdata<float>("SV1_pu");
-    } else {
-	SV1_pu = -1;
-    }
-    if (btag->isAvailable<float>("SV1_pc")){
-        SV1_pc = btag->auxdata<float>("SV1_pc");
-    } else {
-	SV1_pc = -1;
-    }
+    static const SG::ConstAccessor<float> SV1_pbAcc("SV1_pb");
+    SV1_pb = SV1_pbAcc.withDefault(*btag, -1);
+
+    static const SG::ConstAccessor<float> SV1_puAcc("SV1_pu");
+    SV1_pu = SV1_puAcc.withDefault(*btag, -1);
+
+    static const SG::ConstAccessor<float> SV1_pcAcc("SV1_pc");
+    SV1_pc = SV1_pcAcc.withDefault(*btag, -1);
+
     m_SV1_pb->Fill(SV1_pb, event->beamSpotWeight());
     m_SV1_pc->Fill(SV1_pc, event->beamSpotWeight());
     m_SV1_pu->Fill(SV1_pu, event->beamSpotWeight());
@@ -1482,64 +1502,46 @@ namespace JetTagDQA{
     //// high level tagger variables
     // get the DL1x vars
     double DL1dv01_pb, DL1dv01_pu, DL1dv01_pc;
-    if (btag->isAvailable<float>(m_DL1dv01Name +"_pb")){
-        DL1dv01_pb = btag->auxdata<float>(m_DL1dv01Name + "_pb");
-    } else {
-	DL1dv01_pb = -1;
-    }
-    if (btag->isAvailable<float>(m_DL1dv01Name + "_pu")){
-        DL1dv01_pu = btag->auxdata<float>(m_DL1dv01Name + "_pu");
-    } else {
-	DL1dv01_pu = -1;
-    }
-    if (btag->isAvailable<float>(m_DL1dv01Name + "_pc")){
-        DL1dv01_pc = btag->auxdata<float>(m_DL1dv01Name +"_pc");
-    } else {
-	DL1dv01_pc = -1;
-    }
+    SG::ConstAccessor<float> DLpbAcc(m_DL1dv01Name +"_pb");
+    DL1dv01_pb = DLpbAcc.withDefault(*btag, -1);
+
+    SG::ConstAccessor<float> DLpuAcc(m_DL1dv01Name + "_pu");
+    DL1dv01_pu = DLpuAcc.withDefault(*btag, -1);
+
+    SG::ConstAccessor<float> DLpcAcc(m_DL1dv01Name +"_pc");
+    DL1dv01_pc = DLpcAcc.withDefault(*btag, -1);
+
     m_DL1dv01_pb->Fill(DL1dv01_pb, event->beamSpotWeight());
     m_DL1dv01_pu->Fill(DL1dv01_pu, event->beamSpotWeight());
     m_DL1dv01_pc->Fill(DL1dv01_pc, event->beamSpotWeight());
 
     double DL1r_pb, DL1r_pu, DL1r_pc;
-    if (btag->isAvailable<float>("DL1r_pb")){
-        DL1r_pb = btag->auxdata<float>("DL1r_pb");
-    } else {
-	DL1r_pb = -1;
-    }
-    if (btag->isAvailable<float>("DL1r_pu")){
-        DL1r_pu = btag->auxdata<float>("DL1r_pu");
-    } else {
-	DL1r_pu = -1;
-    }
-    if (btag->isAvailable<float>("DL1r_pc")){
-        DL1r_pc = btag->auxdata<float>("DL1r_pc");
-    } else {
-	DL1r_pc = -1;
-    }
+    static const SG::ConstAccessor<float> DL1r_pbAcc("DL1r_pb");
+    DL1r_pb = DL1r_pbAcc.withDefault(*btag, -1);
+
+    static const SG::ConstAccessor<float> DL1r_puAcc("DL1r_pu");
+    DL1r_pu = DL1r_puAcc.withDefault(*btag, -1);
+
+    static const SG::ConstAccessor<float> DL1r_pcAcc("DL1r_pc");
+    DL1r_pc = DL1r_pcAcc.withDefault(*btag, -1);
 
     // get the GN2v01 vars
     double GN2v01_pb, GN2v01_pu, GN2v01_pc, GN2v01_ptau;
-    if (btag->isAvailable<float>(m_GN2v01Name + "_pb")){
-        GN2v01_pb = btag->auxdata<float>(m_GN2v01Name + "_pb");
+    SG::ConstAccessor<float> GN2pbAcc(m_GN2v01Name + "_pb");
+    if (GN2pbAcc.isAvailable(*btag)) {
+        GN2v01_pb = GN2pbAcc(*btag);
     } else {
 	GN2v01_pb = -1;
     }
-    if (btag->isAvailable<float>(m_GN2v01Name + "_pu")){
-        GN2v01_pu = btag->auxdata<float>(m_GN2v01Name + "_pu");
-    } else {
-	GN2v01_pu = -1;
-    }
-    if (btag->isAvailable<float>(m_GN2v01Name + "_pc")){
-        GN2v01_pc = btag->auxdata<float>(m_GN2v01Name + "_pc");
-    } else {
-	GN2v01_pc = -1;
-    }
-    if (btag->isAvailable<float>(m_GN2v01Name + "_ptau")){
-        GN2v01_ptau = btag->auxdata<float>(m_GN2v01Name + "_ptau");
-    } else {
-	GN2v01_ptau = -1;
-    }
+    SG::ConstAccessor<float> GN2puAcc(m_GN2v01Name + "_pu");
+    GN2v01_pu = GN2puAcc.withDefault(*btag, -1);
+
+    SG::ConstAccessor<float> GN2pcAcc(m_GN2v01Name + "_pc");
+    GN2v01_pc = GN2pcAcc.withDefault(*btag, -1);
+
+    SG::ConstAccessor<float> GN2ptauAcc(m_GN2v01Name + "_ptau");
+    GN2v01_ptau = GN2ptauAcc.withDefault(*btag, -1);
+
     m_GN2v01_pb->Fill(GN2v01_pb, event->beamSpotWeight());
     m_GN2v01_pu->Fill(GN2v01_pu, event->beamSpotWeight());
     m_GN2v01_pc->Fill(GN2v01_pc, event->beamSpotWeight());
@@ -1593,26 +1595,18 @@ namespace JetTagDQA{
   void BTaggingValidationPlots::fillDiscriminantVariables_for_largeRjet(const xAOD::Jet* jet, const int& truth_label, const bool& onZprime, std::map<std::string, int>& nJetsThatPassedWPCuts, const xAOD::EventInfo* event){
     // get the GN2Xv01 vars
     double GN2Xv01_phbb, GN2Xv01_phcc, GN2Xv01_ptop, GN2Xv01_pqcd;
-    if (jet->isAvailable<float>(m_GN2Xv01Name + "_phbb")){
-        GN2Xv01_phbb = jet->auxdata<float>(m_GN2Xv01Name + "_phbb");
-    } else {
-        GN2Xv01_phbb = -1;
-    }
-    if (jet->isAvailable<float>(m_GN2Xv01Name + "_phcc")){
-        GN2Xv01_phcc = jet->auxdata<float>(m_GN2Xv01Name + "_phcc");
-    } else {
-        GN2Xv01_phcc = -1;
-    }
-    if (jet->isAvailable<float>(m_GN2Xv01Name + "_ptop")){
-        GN2Xv01_ptop = jet->auxdata<float>(m_GN2Xv01Name + "_ptop");
-    } else {
-        GN2Xv01_ptop = -1;
-    }
-    if (jet->isAvailable<float>(m_GN2Xv01Name + "_pqcd")){
-        GN2Xv01_pqcd = jet->auxdata<float>(m_GN2Xv01Name + "_pqcd");
-    } else {
-        GN2Xv01_pqcd = -1;
-    }
+    SG::ConstAccessor<float> GN2phbbAcc(m_GN2Xv01Name + "_phbb");
+    GN2Xv01_phbb = GN2phbbAcc.withDefault(*jet, -1);
+
+    SG::ConstAccessor<float> GN2phccAcc(m_GN2Xv01Name + "_phcc");
+    GN2Xv01_phcc = GN2phccAcc.withDefault(*jet, -1);
+
+    SG::ConstAccessor<float> GN2ptopAcc(m_GN2Xv01Name + "_ptop");
+    GN2Xv01_ptop = GN2ptopAcc.withDefault(*jet, -1);
+
+    SG::ConstAccessor<float> GN2pqcdAcc(m_GN2Xv01Name + "_pqcd");
+    GN2Xv01_pqcd = GN2pqcdAcc.withDefault(*jet, -1);
+
     m_GN2Xv01_phbb->Fill(GN2Xv01_phbb, event->beamSpotWeight());
     m_GN2Xv01_phcc->Fill(GN2Xv01_phcc, event->beamSpotWeight());
     m_GN2Xv01_ptop->Fill(GN2Xv01_ptop, event->beamSpotWeight());
