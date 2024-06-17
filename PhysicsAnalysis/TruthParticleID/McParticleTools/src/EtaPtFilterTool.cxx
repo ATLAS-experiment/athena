@@ -9,6 +9,7 @@
 /////////////////////////////////////////////////////////////////// 
 
 #include "TruthUtils/MagicNumbers.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 // STL includes
 #include <cmath>
@@ -445,7 +446,17 @@ for ( auto  p = vtx->particles_out_const_begin(), parentEnd = vtx->particles_out
 }
 bool EtaPtFilterTool::isFromHardScattering( const HepMC::ConstGenVertexPtr& vtx ) const
 {
-  return  isPartonVertex(vtx)&&m_ppFilter.isAccepted(vtx) && ! m_showerFilter.isAccepted(vtx);
+  int partonsin = 0;
+  int showerout = 0;
+#ifdef HEPMC3  
+  for (auto& p: vtx->particles_in()) if (MC::isQuark(p) || MC::isGluon(p)) partonsin++;
+  for (auto& p: vtx->particles_out()) if (p->pdg_id() == 91||p->pdg_id() == 92||p->pdg_id() == 94)  showerout++;
+#else
+  for (auto p = vtx->particles_in_begin();p!=vtx->particles_in_end();++p ) if (MC::isQuark(*p) || MC::isGluon(*p)) partonsin++;
+  for (auto p = vtx->particles_out_begin();p!=vtx->particles_out_end();++p ) if (*p->pdg_id() == 91||*p->pdg_id() == 92||*p->pdg_id() == 94)  showerout++;
+#endif
+  
+  return isPartonVertex(vtx) && (partonsin >= 2) &&  (showerout == 0);
 }
 
 /////////////////////////////////////////////////////////////////// 
@@ -472,13 +483,6 @@ StatusCode EtaPtFilterTool::initializeTool()
        << " |etaMin| |etaMax| ptMin");
     return StatusCode::FAILURE;
   }
-
-  // configure hard-scattering vertices
-  m_ppFilter.setDecayPattern( "-1|-2|-3|-4|-5|-6|21 + 1|2|3|4|5|6|21 -> " );
-  
-  // filter which will be used to not select shower vertices while
-  // looking for hard-scattering vertices
-  m_showerFilter.setDecayPattern( "-> 91|92|94" );
 
   ATH_MSG_INFO
     ("Inner Eta region cuts : nCuts = " 

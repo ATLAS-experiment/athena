@@ -5,7 +5,6 @@
 #include "../OldSpclMcFilterTool.h"
 #include "../PileupFilterTool.h"
 #include "../EtaPtFilterTool.h"
-#include "../VtxBasedFilterTool.h"
 
 #include "../TruthIsolationTool.h"
 
@@ -26,7 +25,6 @@ DECLARE_COMPONENT( NoopFilterTool )
 DECLARE_COMPONENT( OldSpclMcFilterTool )
 DECLARE_COMPONENT( PileupFilterTool )
 DECLARE_COMPONENT( EtaPtFilterTool )
-DECLARE_COMPONENT( VtxBasedFilterTool )
 
 DECLARE_COMPONENT( TruthIsolationTool )
 

@@ -18,9 +18,6 @@
 // FrameWork includes
 #include "GaudiKernel/ToolHandle.h"
 
-// McParticleUtils includes
-#include "McParticleUtils/McVtxFilter.h"
-
 // McParticleTools includes
 #include "TruthParticleValidationBaseTool.h"
 
@@ -133,18 +130,6 @@ class GenAodValidationTool : public TruthParticleValidationBaseTool
    */
   std::ofstream * m_outFile;
 
-  /** Predicate to select pp->X vertices where p is a parton (q,g)
-   *  This will select vertices:
-   *    q+q' -> X
-   *    q+g  -> X
-   *    g+g  -> X
-   */
-  McVtxFilter m_ppFilter;
-
-  /** Predicate to remove shower vertices: X -> 92 | 94
-   */
-  McVtxFilter m_showerFilter;
-  
   /** shorthand for lazy people (good coders are lazy people, aren't they ?)
    */
   typedef ToolHandle<IIOHepMcTool> HepMcTool_t;
