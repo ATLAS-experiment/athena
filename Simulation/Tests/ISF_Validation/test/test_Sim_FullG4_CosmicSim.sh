@@ -43,6 +43,7 @@ then
     art.py compare grid --entries 10 ${ArtPackage} ${ArtJobName} --mode=semi-detailed --file=test.HITS.pool.root --file=test.TR.pool.root
     rc2=$?
     if [ $status -eq 0 ]
+    then
         status=$rc2
     fi
 fi
