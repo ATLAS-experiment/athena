@@ -44,7 +44,8 @@ dq = ExecStep.ExecStep('Run3DQ')
 dq.type = 'other'
 dq.executable = 'Run3DQTestingDriver.py'
 dq.input = ''
-dq.args = '--threads=4'
+# very bad scaling vs number of threads, the more threads, the slower...
+dq.args = '--threads=2'
 dq.args += ' --dqOffByDefault'
 dq.args += ' Input.Files="[\'AOD.pool.root\']" DQ.Steering.doHLTMon=True Trigger.triggerMenuSetup=\'Dev_pp_run3_v1_TriggerValidation_prescale\''
 
