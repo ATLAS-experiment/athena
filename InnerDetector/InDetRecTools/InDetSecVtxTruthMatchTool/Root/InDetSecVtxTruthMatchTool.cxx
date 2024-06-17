@@ -119,10 +119,10 @@ StatusCode InDetSecVtxTruthMatchTool::matchVertices( std::vector<const xAOD::Ver
         const int truthVertexUniqueID =  checkProduction(truthPart, truthVerticesToMatch);
 
         //check if the truth particle is "good"
-        if ( truthVertexUniqueID != -1 ) { // FIXME -1 is valid vertex barcode!! Compare with HepMC::INVALID_VERTEX_ID instead.
+        if ( truthVertexUniqueID != HepMC::INVALID_VERTEX_ID ) {
           //track in vertex is linked to LLP descendant
           //create link to truth vertex and add to matchInfo
-          auto it = std::find_if(truthVerticesToMatch.begin(), truthVerticesToMatch.end(), 
+          auto it = std::find_if(truthVerticesToMatch.begin(), truthVerticesToMatch.end(),
                                  [&](const auto& ele){ return HepMC::uniqueID(ele) == truthVertexUniqueID;} );
 
           if(it == truthVerticesToMatch.end()) {
@@ -361,13 +361,13 @@ int InDetSecVtxTruthMatchTool::checkProduction( const xAOD::TruthParticle & trut
 
   if (truthPart.nParents() == 0){
     ATH_MSG_DEBUG("Particle has no parents (end of loop)");
-    return -1; // FIXME -1 is valid vertex barcode!! Return HepMC::INVALID_VERTEX_ID instead.
-  } 
+    return HepMC::INVALID_VERTEX_ID;
+  }
   else{
     const xAOD::TruthParticle * parent = truthPart.parent(0);
     if(not parent) {
       ATH_MSG_DEBUG("Particle parent is null");
-      return -1; // FIXME -1 is valid vertex barcode!! Return HepMC::INVALID_VERTEX_ID instead.
+      return HepMC::INVALID_VERTEX_ID;
     }
     ATH_MSG_DEBUG("Parent ID: " << parent->pdgId());
 
@@ -379,7 +379,7 @@ int InDetSecVtxTruthMatchTool::checkProduction( const xAOD::TruthParticle & trut
     // recurse on parent
     return checkProduction(*parent, truthVerticesToMatch);
   }
-  return -1; // FIXME -1 is a valid vertex barcode!! Return HepMC::INVALID_VERTEX_ID instead.
+  return HepMC::INVALID_VERTEX_ID;
 }
 
 void InDetSecVtxTruthMatchTool::countReconstructibleDescendentParticles(const xAOD::TruthVertex& signalTruthVertex,
