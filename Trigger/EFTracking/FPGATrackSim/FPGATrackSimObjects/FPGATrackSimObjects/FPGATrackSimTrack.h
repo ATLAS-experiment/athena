@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGFPGATrackSimOBJECTS_FPGATrackSimTRACK_H
@@ -11,6 +11,7 @@
 #include <vector>
 #include <TObject.h>
 #include <iosfwd>
+#include <cmath>
 
 class FPGATrackSimTrack : public TObject {
 
@@ -29,7 +30,7 @@ class FPGATrackSimTrack : public TObject {
   float getHoughX() const { return m_houghX; }
   float getHoughY() const { return m_houghY; }
   float getQOverPt() const { return m_qoverpt; }
-  float getPt() const { return m_qoverpt != 0 ? abs(1 / m_qoverpt) : 99999999.; }
+  float getPt() const { return m_qoverpt != 0 ? std::abs(1 / m_qoverpt) : 99999999.; }
   float getD0() const { return m_d0; }
   float getPhi() const { return m_phi; }
   float getZ0() const { return m_z0; }
