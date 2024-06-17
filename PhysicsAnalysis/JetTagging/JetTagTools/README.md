@@ -1,20 +1,15 @@
-/*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
-*/
-
-/**
-@page JetTagTools_page JetTagTools
+# JetTagTools
 
 Package for tag tool and helper tools for jet tagging.
 
-@author Andreas.Wildauer@cern.ch
+Author Andreas.Wildauer@cern.ch
 
-@section JetTagTools_introductionJetTagTools Introduction:
+## Introduction:
 JetTagTools is a package which contains algtool(s) to calculate variables relevant
 for jet-tagging and also helper tools for easier handling of histograms and likelihood calculations. 
 
-@section JetTagTools_implementedtoolsJetTagTools Algtools:
-@subsection tagToolsJetTagTools Jet Tag Tools
+## Algtools:
+### Jet Tag Tools
 Different jet tag tools are implemented:<br>
 <ul>
   <li>LifetimeTag1D to 3D</li>
@@ -23,7 +18,7 @@ Different jet tag tools are implemented:<br>
 All taggers inherit from an ITagTool interface class which specifies the basic interfaces (e.g. the tagJet(...)
 method. For more information have a look at the different tag classes.
 
-@subsection helperToolJetTagTools Helper Tools
+### Helper Tools
 These helper tools are implemented:
 <ul>
   <li>HistoHelper</li>
@@ -38,7 +33,7 @@ The LikelihoodTool helps to calculate a likelihood per tag tool. In addition in 
 care of reading in the histograms (signal + N background)
 
 
-\subsection bjetlifetimeTag LifetimeTag
+### LifetimeTag
 The %B lifetime tag method is based on the fact that tracks coming
 from long lived particles (as %B's) have a substantially bigger impact
 parameter than the ones coming from the primary vertex. The variable to
@@ -88,7 +83,7 @@ mode it also calculates the b-jet likelihood and the so called NTrack probabilit
   </li>
 </ul>
 
-@section JetTagTools_packagecontentJetTagTools Package Contents:
+## Package Contents:
 JetTagTools contains the following files/classes:
 - LifetimeTag ... algtool to calculate b-tag lifetime variables 
 - SecVtxTag ... algtool to calculate b-tag secondary vertex variables 
@@ -97,10 +92,6 @@ JetTagTools contains the following files/classes:
 - share/Bkg.ref ... background reference histos for analysis mode (H->uu)
 - share/Sig.ref ... signal reference histos for analysis mode (H->bb)
 
-@section JetTagTools_jobOptionsJetTagTools The jobOptions file:
+## The jobOptions file:
 There are no jobOptions files for this package. Examples how to use these
 algtools are given in the package BTaggingAlgs.
-
-
-
-*/

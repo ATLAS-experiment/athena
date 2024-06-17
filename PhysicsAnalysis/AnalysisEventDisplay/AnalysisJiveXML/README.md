@@ -1,11 +1,6 @@
-/*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
-*/
-
-/**
-@page AnalysisJiveXML_page 
-@author Nikos.Konstantinidis -at- cern.ch, Eric.Jansen -at- hef.ru.nl, Juergen.Thomas -at- cern.ch
-@section AnalysisJiveXML_IntroCaloJiveXML Introduction
+# AnalysisJiveXML_page 
+Author Nikos.Konstantinidis -at- cern.ch, Eric.Jansen -at- hef.ru.nl, Juergen.Thomas -at- cern.ch
+## Introduction
 
 This package contains the AlgToos that produce the XML fragments of AOD related datatypes for the XML files read by atlantis.
 The AlgTools, all inheriting from JiveXML::DataRetriever, are the following:
@@ -40,8 +35,3 @@ The AlgTools, all inheriting from JiveXML::DataRetriever, are the following:
 
    - JiveXML::TrackParticleRetriever : m_storeGate->retrieveRec::TrackParticleContainer(, m_sgKey). Property:
       - StoreGateKey : ( default "TrackParticleCandidate" ) the StoreGate location of the Rec::TrackParticleContainer.
-
-
-
-
-*/

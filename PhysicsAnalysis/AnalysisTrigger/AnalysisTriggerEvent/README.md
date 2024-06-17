@@ -1,20 +1,15 @@
-/*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
-*/
+# AnalysisTriggerEvent
 
-/**
-@page AnalysisTriggerEvent_page AnalysisTriggerEvent
+   Author Tadashi.Maeno <Tadashi.Maeno@cern.ch>
+   Author Attila Kraznahorkay Jr. <Attila.Krasznahorkay@cern.ch>
+   Author Alan Watson <Alan.Watson@cern.ch>
+   Author Wolfgang Ehrenfeld <Wolfgang.Ehrenfeld@desy.de>
 
-   @author Tadashi.Maeno <Tadashi.Maeno@cern.ch>
-   @author Attila Kraznahorkay Jr. <Attila.Krasznahorkay@cern.ch>
-   @author Alan Watson <Alan.Watson@cern.ch>
-   @author Wolfgang Ehrenfeld <Wolfgang.Ehrenfeld@desy.de>
-
-@section AnalysisTriggerEvent_introductionAnalysisTriggerEvent Introduction
+## Introduction
 
    AnalysisTriggerEvent contains ESD/AOD classes to store LVL1 trigger information.
 
-@section AnalysisTriggerEvent_packagecontentAnalysisTriggerEvent Package Contents
+## Contents
 
    AnalysisTriggerEvent contains the following files/classes:
    - CTP_Decision ... LVL1 result decided by Central Trigger Processor (legacy object)
@@ -26,6 +21,5 @@
    - Muon_ROI ... ROI from Muon trigger
    - FakeHLTWord ... result of HLT system, which is used for DC2 and should retire near future. This is needed for streaming.
 
-@section AnalysisTriggerEvent_AnalysisTriggerEvent Extra Pages
+## Extra Pages
 
-*/

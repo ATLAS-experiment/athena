@@ -1,14 +1,9 @@
-/*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
-*/
+# ParticleEventAthenaPool
 
-/**
-@page ParticleEventAthenaPool_page ParticleEventAthenaPool
-
-@section ParticleEventAthenaPool_introductionParticleEventAthenaPool Introduction
+## Introduction
 This package contains POOL converters for Particles and jobOs for AOD making.
 
-@section ParticleEventAthenaPool_packagecontentParticleEventAthenaPool Package Contents
+## Package Contents
 ParticleEventAthenaPool contains the following topOs and jobOs:
 
 - RecExToAOD_topOptions.py : topO for RecEx -> AOD
@@ -26,7 +21,3 @@ ParticleEventAthenaPool contains the following topOs and jobOs:
 - AOD_PoolCnv_jobOptions.py : lists POOL converters needed for AOD making
 
 - AODFlags.py : flags for AOD making
-
-
-
-*/
