@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Teng Jian Khoo
@@ -17,7 +17,8 @@ namespace CP
                                   ISvcLocator *pSvcLocator)
       : EL::AnaReentrantAlgorithm(name, pSvcLocator)
   {
-  
+
+    // cppcheck-suppress missingReturn; false positive
   }
 
   template<class T, class C>
