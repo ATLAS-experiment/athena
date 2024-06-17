@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -65,6 +65,23 @@ namespace dqutils {
     TDirectory *dir0= dynamic_cast<TDirectory*> (key0->ReadObj());
     if (dir0 == 0) return;
     dir0->cd();
+    
+    auto getHPointer ATLAS_THREAD_SAFE  = [&mf] ATLAS_NOT_THREAD_SAFE (const TString & hname)->TH1F*{
+      TH1F * pH{};
+      mf.get(hname, pH); 
+      if (!pH and fdbg) {
+	      std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< hname << std::endl;
+	    }
+	    return pH;
+    }; 
+    auto getH2Pointer ATLAS_THREAD_SAFE  = [&mf] ATLAS_NOT_THREAD_SAFE (const TString & hname)->TH2F*{
+      TH2F * pH{};
+      mf.get(hname, pH); 
+      if (!pH and fdbg) {
+	      std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< hname << std::endl;
+	    }
+	    return pH;
+    }; 
     ///
 
     // 110728: removing the iteration of searching run directory according to the new MDT code
@@ -84,27 +101,17 @@ namespace dqutils {
     {
       //run_dir = dir0->GetName();
       if (fdbg) {
-	std::cout << "HLTMuon: run directory is " << run_dir << std::endl;
+	      std::cout << "HLTMuon: run directory is " << run_dir << std::endl;
       }
       std::string run_dir2 = run_dir.Data();
-      //int run_number = atoi( (run_dir2.substr(4, run_dir2.size()-4 )).c_str() );
-      //run_number=run_number;
 
       //===HLTMuon
 
       TH1F* hHI_PP_Flag(0);
       TString hi_pp_flag = run_dir + "/HLT/MuonMon/Common/HI_PP_Flag";
-      mf.get(hi_pp_flag, hHI_PP_Flag);
-      if (!hHI_PP_Flag) {
-	std::cerr<<"HLTMuon:unable to find hist : HI_PP_Flag"<<std::endl;	
-      }else{
-	//std::cout<<"HI_PP_Flag :found "<<std::endl;
-	//std::cout<<"bin content "<<hHI_PP_Flag->GetBinContent(0)<<"/"<<hHI_PP_Flag->GetBinContent(1)<<"/"<<hHI_PP_Flag->GetBinContent(2)<<std::endl;
-	if(hHI_PP_Flag->GetBinContent(1) > 0){
-	  HI_pp_key = true;
-	}else{
-	  HI_pp_key = false;
-	}
+      hHI_PP_Flag = getHPointer(hi_pp_flag);
+      if (hHI_PP_Flag) {
+        HI_pp_key = hHI_PP_Flag->GetBinContent(1) > 0;
       }
 
       TString muon_dir = run_dir + "/HLT/MuonMon/";
@@ -160,24 +167,12 @@ namespace dqutils {
 	sden = mf_dir + (*it) + "_denom";
 	stmp = (*it);
 
-	h1num = 0;
-	mf.get(snum, h1num);
-	if (!h1num) {
-	  if (fdbg) {
-	    std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< snum << std::endl;
-	  }
-	  continue;
-	}
-	h1den = 0;
-	mf.get(sden, h1den);
-	if (!h1den) {
-	  if (fdbg) {
-	    std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< sden << std::endl;
-	  }
-	  continue;
-	}
+	h1num = getHPointer(snum);
+	if (not h1num) continue;
+  //
+	h1den = getHPointer(sden);
+	if (not h1den) continue;
 
-	if(h1num && h1den){
 	  h1tmp = (TH1F*)h1den->Clone();
 	  h1tmp->SetName(stmp);
 	  std::string stcar = h1tmp->GetTitle();
@@ -188,7 +183,6 @@ namespace dqutils {
 	  h1tmp->Divide(h1num, h1den, 1., 1., "B");
 	  dir->cd();
 	  h1tmp->Write();                                                           	
-	}
 
       }//effnames
       mf.Write();
@@ -207,24 +201,11 @@ namespace dqutils {
 	sden = mc_dir + (*it) + "_denom";
 	stmp = (*it);
 
-	h1num = 0;
-	mf.get(snum, h1num);
-	if (!h1num) {
-	  if (fdbg) {
-	    std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< snum << std::endl;
-	  }
-	  continue;
-	}
-	h1den = 0;
-	mf.get(sden, h1den);
-	if (!h1den) {
-	  if (fdbg) {
-	    std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< sden << std::endl;
-	  }
-	  continue;
-	}
+	h1num = getHPointer(snum);
+	if (!h1num) continue;
+	h1den = getHPointer(sden);
+	if (!h1den) continue;
 
-	if(h1num && h1den){
 	  h1tmp = (TH1F*)h1den->Clone();
 	  h1tmp->SetName(stmp);
 	  std::string stcar = h1tmp->GetTitle();
@@ -235,7 +216,6 @@ namespace dqutils {
 	  h1tmp->Divide(h1num, h1den, 1., 1., "B");
 	  dir->cd();
 	  h1tmp->Write();
-	}
 
       }//effnames
       mf.Write();
@@ -250,24 +230,11 @@ namespace dqutils {
 	sden = mi_dir + (*it) + "_denom";
 	stmp = (*it);
 
-	h1num = 0;
-	mf.get(snum, h1num);
-	if (!h1num) {
-	  if (fdbg) {
-	    std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< snum << std::endl;
-	  }
-	  continue;
-	}
-	h1den = 0;
-	mf.get(sden, h1den);
-	if (!h1den) {
-	  if (fdbg) {
-	    std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< sden << std::endl;
-	  }
-	  continue;
-	}
+	h1num = getHPointer(snum);
+	if (!h1num) continue;
+	h1den = getHPointer(sden);
+	if (!h1den) continue;
 
-	if(h1num && h1den){
 	  h1tmp = (TH1F*)h1den->Clone();
 	  h1tmp->SetName(stmp);
 	  std::string stcar = h1tmp->GetTitle();
@@ -278,7 +245,6 @@ namespace dqutils {
 	  h1tmp->Divide(h1num, h1den, 1., 1., "B");
 	  dir->cd();
 	  h1tmp->Write();
-	}
       }//effnames
       mf.Write();
 
@@ -308,24 +274,11 @@ namespace dqutils {
 	sden   = tm_dir + dennames.at(i);
 	stmp = effnames.at(i);
 
-	h1num = 0;
-	mf.get(snum, h1num);
-	if (!h1num) {
-	  if (fdbg) {
-	    std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< snum << std::endl;
-	  }
-	  continue;
-	}
-	h1den = 0;
-	mf.get(sden, h1den);
-	if (!h1den) {
-	  if (fdbg) {
-	    std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< sden << std::endl;
-	  }
-	  continue;
-	}
+	h1num = getHPointer(snum);
+	if (!h1num) continue;
+	h1den = getHPointer(sden);
+	if (!h1den) continue;
 
-	if( h1num && h1den){
 	  h1tmp = (TH1F*)h1den->Clone();
 	  h1tmp->SetName(stmp);
 	  std::istringstream iss(stmp.Data());
@@ -351,7 +304,6 @@ namespace dqutils {
 	  h1tmp->Divide(h1num, h1den, 1., 1., "B");
 	  dir->cd();
 	  h1tmp->Write();
-	}
       }//effnames
       mf.Write();
 
@@ -371,24 +323,11 @@ namespace dqutils {
 	sden = ef_dir + (*it) + "_denom";
 	stmp = (*it);
 
-	h1num = 0;
-	mf.get(snum, h1num);
-	if (!h1num) {
-	  if (fdbg) {
-	    std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< snum << std::endl;
-	  }
-	  continue;
-	}
-	h1den = 0;
-	mf.get(sden, h1den);
-	if (!h1den) {
-	  if (fdbg) {
-	    std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< sden << std::endl;
-	  }
-	  continue;
-	}
+	h1num = getHPointer(snum);
+	if (!h1num) continue;
+	h1den = getHPointer(sden);
+	if (!h1den) continue;
 
-	if(h1num && h1den){
 	  h1tmp = (TH1F*)h1den->Clone();
 	  h1tmp->SetName(stmp);
 	  std::string stcar = h1tmp->GetTitle();
@@ -399,7 +338,6 @@ namespace dqutils {
 	  h1tmp->Divide(h1num, h1den, 1., 1., "B");                                 	
 	  dir->cd();                                                               	
 	  h1tmp->Write();                                                           	
-	}
       }//effnames
       mf.Write();
 
@@ -413,25 +351,20 @@ namespace dqutils {
       std::vector<TString> chainsEFFS;
 
       // Generic (EFsuper etc.)
-      // chainsGeneric.push_back("mu36_tight");             // v4 primary
-      //chainsGeneric.push_back("mu4_cosmic_L1MU4_EMPTY");   // LS1
-      //chainsGeneric.push_back("mu4_cosmic_L1MU11_EMPTY");  // LS1
+     
       chainsGeneric.push_back("muChain1");   // MAM 
       chainsGeneric.push_back("muChain2");  // MAM
 
       // Generic (Isolated muons)
-      // chainsEFiso.push_back("mu24i_tight")  ;            // v4 primary
       chainsEFiso.push_back("muChainEFiso1")  ;            // MAM 
       chainsEFiso.push_back("muChainEFiso2")  ;            // MAM 
 
       // MSonly
-      // chainsMSonly.push_back("mu50_MSonly_barrel_tight");    // v4 primary
-      //chainsMSonly.push_back("mu4_msonly_cosmic_L1MU11_EMPTY");    // LS1
+     
       chainsMSonly.push_back("muChainMSonly1");    // MAM 
       chainsMSonly.push_back("muChainMSonly2");    // MAM 
 
       // EFFS triggers (L. Yuan)
-      // chainsEFFS.push_back("mu18_tight_mu8_EFFS");
       chainsEFFS.push_back("muChainEFFS");  // MAM
 
       enum indexINDEP { INDORTH, INDEGAMMA, INDMET, INDJET, INDTAU, INDMBIAS };
@@ -537,6 +470,15 @@ namespace dqutils {
 	};
 
 	bool for_mydebug = false;
+	auto getHPointerQuietly ATLAS_THREAD_SAFE  = [&mf, for_mydebug] ATLAS_NOT_THREAD_SAFE (const TString & hname)->TH1F*{
+      TH1F * pH{};
+      mf.get(hname, pH); 
+      if (!pH and for_mydebug) {
+	      std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< hname << std::endl;
+	    }
+	    return pH;
+  }; 
+	
 	for(int iROI = 0; iROI < 9; iROI++){
 	  sden = nd_dir + hists_str[iROI] + "_Denominator";
 	  snum = nd_dir + hists_str[iROI] + "_Numerator";
@@ -545,43 +487,29 @@ namespace dqutils {
 
 	  stmp  = hists_str[iROI];
 	  stmpg = hists_str[iROI] + "_Fit";
-	  h1num = 0;
-	  mf.get(snum, h1num);
-	  if (!h1num) {
-	    if (for_mydebug) {
-	      std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< snum << std::endl;
-	    }
-	    continue;
-	  }
-	  h1den = 0;
-	  mf.get(sden, h1den);
-	  if (!h1den) {
-	    if (for_mydebug) {
-	      std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< sden << std::endl;
-	    }
-	    continue;
-	  }
+	  h1num = getHPointerQuietly(snum);
+	  if (!h1num) continue;
+	  h1den = getHPointerQuietly(sden);
+	  if (!h1den) continue;
 
-	  if(h1num && h1den){
-	    h1tmp = (TH1F*)h1den->Clone();
-	    h1tmp->SetName(stmp);                          						
-	    h1tmp->SetTitle(stmp);                         						  
-	    h1tmp->GetYaxis()->SetTitle("Efficiency");     						  
-	    h1tmp->Reset();                                						  
-	    h1tmp->Divide(h1num, h1den, 1., 1., "B");      						  
-	    dir->cd();
-	    h1tmp->Write(); 
-	    h1tmpg = new TGraphAsymmErrors();
-	    h1tmpg->SetMarkerStyle(20);
-	    h1tmpg->SetMinimum(0.0);
-	    h1tmpg->SetMaximum(1.05);
-	    h1tmpg->BayesDivide(h1num, h1den);
-	    h1tmpg->GetYaxis()->SetTitle("Efficiency");     				  
-	    h1tmpg->GetXaxis()->SetTitle(h1den->GetXaxis()->GetTitle());     				  
-	    h1tmpg->SetName(stmpg);
-	    h1tmpg->Write();
-	    delete h1tmpg;
-	  }
+    h1tmp = (TH1F*)h1den->Clone();
+    h1tmp->SetName(stmp);                          						
+    h1tmp->SetTitle(stmp);                         						  
+    h1tmp->GetYaxis()->SetTitle("Efficiency");     						  
+    h1tmp->Reset();                                						  
+    h1tmp->Divide(h1num, h1den, 1., 1., "B");      						  
+    dir->cd();
+    h1tmp->Write(); 
+    h1tmpg = new TGraphAsymmErrors();
+    h1tmpg->SetMarkerStyle(20);
+    h1tmpg->SetMinimum(0.0);
+    h1tmpg->SetMaximum(1.05);
+    h1tmpg->BayesDivide(h1num, h1den);
+    h1tmpg->GetYaxis()->SetTitle("Efficiency");     				  
+    h1tmpg->GetXaxis()->SetTitle(h1den->GetXaxis()->GetTitle());     				  
+    h1tmpg->SetName(stmpg);
+    h1tmpg->Write();
+    delete h1tmpg;
 
 	} // end the loop on individual turn-on curves
 
@@ -593,44 +521,31 @@ namespace dqutils {
 	stmp = L1_TP_str;
 	stmpg=L1_TP_str + "_Fit";
 
-	h1num = 0;
-	mf.get(snum, h1num);
-	if (!h1num) {
-	  if (for_mydebug) {
-	    std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< snum << std::endl;
-	  }
-	  continue;
-	}
-	h1den = 0;
-	mf.get(sden, h1den);
-	if (!h1den) {
-	  if (for_mydebug) {
-	    std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< sden << std::endl;
-	  }
-	  continue;
-	}
+	h1num = getHPointerQuietly(snum);
+	if (!h1num) continue;
 
-	if( h1num && h1den){
-	  h1tmp = (TH1F*)h1den->Clone();
-	  h1tmp->SetName(stmp);                          				
-	  h1tmp->SetTitle(stmp);                         			  
-	  h1tmp->GetYaxis()->SetTitle("Efficiency");     				  
-	  h1tmp->Reset();                                				  
-	  h1tmp->Divide(h1num, h1den, 1., 1., "B");      				  
-	  dir->cd();                                    				  
-	  h1tmp->Write();                                				  
-	  h1tmpg = new TGraphAsymmErrors();
-	  h1tmpg->SetMarkerStyle(20);
-	  h1tmpg->SetMinimum(0.0);
-	  h1tmpg->SetMaximum(1.05);
-	  h1tmpg->BayesDivide(h1num, h1den);
-	  h1tmpg->GetYaxis()->SetTitle("Efficiency");     				  
-	  h1tmpg->GetXaxis()->SetTitle(h1den->GetXaxis()->GetTitle());     				  
-	  dir->cd();
-	  h1tmpg->SetName(stmpg);
-	  h1tmpg->Write();
-	  delete h1tmpg;
-	}
+	h1den = getHPointerQuietly(sden);
+	if (!h1den) continue;
+
+  h1tmp = (TH1F*)h1den->Clone();
+  h1tmp->SetName(stmp);                          				
+  h1tmp->SetTitle(stmp);                         			  
+  h1tmp->GetYaxis()->SetTitle("Efficiency");     				  
+  h1tmp->Reset();                                				  
+  h1tmp->Divide(h1num, h1den, 1., 1., "B");      				  
+  dir->cd();                                    				  
+  h1tmp->Write();                                				  
+  h1tmpg = new TGraphAsymmErrors();
+  h1tmpg->SetMarkerStyle(20);
+  h1tmpg->SetMinimum(0.0);
+  h1tmpg->SetMaximum(1.05);
+  h1tmpg->BayesDivide(h1num, h1den);
+  h1tmpg->GetYaxis()->SetTitle("Efficiency");     				  
+  h1tmpg->GetXaxis()->SetTitle(h1den->GetXaxis()->GetTitle());     				  
+  dir->cd();
+  h1tmpg->SetName(stmpg);
+  h1tmpg->Write();
+  delete h1tmpg;
 
 	//**** summargy plot **********//
 
@@ -640,55 +555,27 @@ namespace dqutils {
 	TString histDenE = nd_dir + chainName +"_tagEFFSpre_Turn_On_Curve_wrt_probe_MuidCB_Endcap_Denominator"; 
 	TString histL1sum = eff_dir + chainName + "_EFplateau_wrtOffline";
 
-	TH1F *h1numb = 0; mf.get(histNumB, h1numb);
-	if (!h1numb) {
-	  if (for_mydebug) {
-	    std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< histNumB << std::endl;
-	  }
-	  continue;
-	}
-	TH1F *h1nume = 0; mf.get(histNumE, h1nume);
-	if (!h1nume) {
-	  if (for_mydebug) {
-	    std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< histNumE << std::endl;
-	  }
-	  continue;
-	}
-	TH1F *h1denb = 0; mf.get(histDenB, h1denb);
-	if (!h1denb) {
-	  if (for_mydebug) {
-	    std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< histDenB << std::endl;
-	  }
-	  continue;
-	}
-	TH1F *h1dene = 0; mf.get(histDenE, h1dene);
-	if (!h1dene) {
-	  if (for_mydebug) {
-	    std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< histDenE << std::endl;
-	  }
-	  continue;
-	}
-	TH1F *h1sumL = 0; mf.get(histL1sum, h1sumL);
-	if (!h1sumL) {
-	  if (for_mydebug) {
-	    std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< histL1sum << std::endl;
-	  }
-	  continue;
-	}
-
+	TH1F *h1numb = getHPointerQuietly(histNumB); 
+	if (!h1numb) continue;
+	TH1F *h1nume = getHPointerQuietly(histNumE);
+	if (!h1nume) continue;
+	TH1F *h1denb = getHPointerQuietly(histDenB);
+	if (!h1denb) continue;
+	TH1F *h1dene = getHPointerQuietly(histDenE);
+	if (!h1dene) continue;
+	TH1F *h1sumL = getHPointerQuietly(histL1sum); 
+	if (!h1sumL) continue;
+	//
 	int iSTDL = 75;//25GeV
 	int iSTDH = 120;
 	if(HI_pp_key){//HI run 4-25GeV
 	  iSTDL = 17;
 	  iSTDH = 75;				
 	}
-	double sumeff, sumerr;
+	double sumeff{}, sumerr{};
 	double sumn = h1numb->Integral(iSTDL, iSTDH); // 60-100 GeV
 	double sumd = h1denb->Integral(iSTDL, iSTDH);
-	if (sumd == 0.) {
-	  sumeff = 0.;
-	  sumerr = 0.;
-	} else {
+	if (sumd != 0.){
 	  sumeff = (double)sumn / (double) sumd;
 	  sumerr = sqrt((double)sumn * (1.-sumeff)) / (double)sumd;
 	}
@@ -722,61 +609,26 @@ namespace dqutils {
 	TString histDen_mu20 = nd_dir + chainName +"_tagEFFSpre_mu20_Turn_On_Curve_wrt_probe_MuidCB_Denominator"; 
 	TString histEFsum_mu = eff_dir + chainName + "_EFplateau_wrtOffline_mu_dependence";
 
-	TH1F *h1num_mu0_15 = 0; mf.get(histNum_mu0_15, h1num_mu0_15);
-	if (!h1num_mu0_15) {
-	  if (for_mydebug) {
-	    std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< histNum_mu0_15 << std::endl;
-	  }
-	  continue;
-	}
+	TH1F *h1num_mu0_15 = getHPointerQuietly(histNum_mu0_15);
+	if (!h1num_mu0_15) continue;
 
-	TH1F *h1num_mu15_20 = 0; mf.get(histNum_mu15_20, h1num_mu15_20);
-	if (!h1num_mu15_20) {
-	  if (for_mydebug) {
-	    std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< histNum_mu15_20 << std::endl;
-	  }
-	  continue;
-	}
+	TH1F *h1num_mu15_20 = getHPointerQuietly(histNum_mu15_20); 
+	if (!h1num_mu15_20) continue;
 
-	TH1F *h1num_mu20 = 0; mf.get(histNum_mu20, h1num_mu20);
-	if (!h1num_mu20) {
-	  if (for_mydebug) {
-	    std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< histNum_mu20 << std::endl;
-	  }
-	  continue;
-	}
+	TH1F *h1num_mu20 = getHPointerQuietly(histNum_mu20);
+	if (!h1num_mu20) continue;
 
-	TH1F *h1den_mu0_15 = 0; mf.get(histDen_mu0_15, h1den_mu0_15);
-	if (!h1den_mu0_15) {
-	  if (for_mydebug) {
-	    std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< histDen_mu0_15 << std::endl;
-	  }
-	  continue;
-	}
+	TH1F *h1den_mu0_15 = getHPointerQuietly(histDen_mu0_15);
+	if (!h1den_mu0_15) continue;
 
-	TH1F *h1den_mu15_20 = 0; mf.get(histDen_mu15_20, h1den_mu15_20);
-	if (!h1den_mu15_20) {
-	  if (for_mydebug) {
-	    std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< histDen_mu15_20 << std::endl;
-	  }
-	  continue;
-	}
+	TH1F *h1den_mu15_20 = getHPointerQuietly(histDen_mu15_20);
+	if (!h1den_mu15_20) continue;
 
-	TH1F *h1den_mu20 = 0; mf.get(histDen_mu20, h1den_mu20);
-	if (!h1den_mu20) {
-	  if (for_mydebug) {
-	    std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< histDen_mu20 << std::endl;
-	  }
-	  continue;
-	}
+	TH1F *h1den_mu20 = getHPointerQuietly(histDen_mu20);
+	if (!h1den_mu20) continue;
 
-	TH1F *h1sum_mu = 0; mf.get(histEFsum_mu, h1sum_mu);
-	if (!h1sum_mu) {
-	  if (for_mydebug) {
-	    std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< histEFsum_mu << std::endl;
-	  }
-	  continue;
-	}
+	TH1F *h1sum_mu = getHPointerQuietly(histEFsum_mu);
+	if (!h1sum_mu) continue;
 
 	sumn = h1num_mu0_15->Integral(iSTDL, iSTDH); // 25-100 GeV
 	sumd = h1den_mu0_15->Integral(iSTDL, iSTDH);
@@ -842,54 +694,38 @@ namespace dqutils {
 	    stmp = chainName + alg2[alg] + "_Turn_On_Curve_wrt_MuidSA" + trigger[trg] +"_Triggered";
 	    stmpg = chainName + alg2[alg] + "_Turn_On_Curve_wrt_MuidSA" + trigger[trg] +"_Triggered" + "_Fit";
 
-	    h1num = 0;
-	    mf.get(snum, h1num);
-	    if (!h1num) {
-	      if (fdbg) {
-		std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< snum << std::endl;
-	      }
-	      continue;
-	    }
-	    h1den = 0;
-	    mf.get(sden, h1den);
-	    if (!h1den) {
-	      if (fdbg) {
-		std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< sden << std::endl;
-	      }
-	      continue;
-	    }
+	    h1num = getHPointer(snum);
+	    if (!h1num) continue;
+	    h1den = getHPointer(sden);
+	    if (!h1den) continue;
 
-	    if( h1num && h1den){
-	      h1tmp = (TH1F*)h1den->Clone();
-	      h1tmp->SetName(stmp);                          				
-	      h1tmp->SetTitle(stmp);                         			  
-	      h1tmp->GetYaxis()->SetTitle("Efficiency");     				  
-	      h1tmp->Reset();                                				  
-	      h1tmp->Divide(h1num, h1den, 1., 1., "B");      				  
-	      dir->cd();                                    				  
-	      h1tmp->Write();                                				  
-	      h1tmpg = new TGraphAsymmErrors();
-	      h1tmpg->SetName(stmpg);
-	      h1tmpg->SetMarkerStyle(20);
-	      h1tmpg->SetMinimum(0.0);
-	      h1tmpg->SetMaximum(1.05);
-	      h1tmpg->BayesDivide(h1num, h1den);
-	      h1tmpg->GetYaxis()->SetTitle("Efficiency");     				  
-	      h1tmpg->GetXaxis()->SetTitle(h1den->GetXaxis()->GetTitle());     				  
-	      dir->cd();
-	      h1tmpg->Write();
-	      delete h1tmpg;
+      h1tmp = (TH1F*)h1den->Clone();
+      h1tmp->SetName(stmp);                          				
+      h1tmp->SetTitle(stmp);                         			  
+      h1tmp->GetYaxis()->SetTitle("Efficiency");     				  
+      h1tmp->Reset();                                				  
+      h1tmp->Divide(h1num, h1den, 1., 1., "B");      				  
+      dir->cd();                                    				  
+      h1tmp->Write();                                				  
+      h1tmpg = new TGraphAsymmErrors();
+      h1tmpg->SetName(stmpg);
+      h1tmpg->SetMarkerStyle(20);
+      h1tmpg->SetMinimum(0.0);
+      h1tmpg->SetMaximum(1.05);
+      h1tmpg->BayesDivide(h1num, h1den);
+      h1tmpg->GetYaxis()->SetTitle("Efficiency");     				  
+      h1tmpg->GetXaxis()->SetTitle(h1den->GetXaxis()->GetTitle());     				  
+      dir->cd();
+      h1tmpg->Write();
+      delete h1tmpg;
 
 	      // summary for jet trigger
 	      if (0 == alg || 2 == alg) {
 		if (3 == trg) { // jet
-		  double sumeff, sumerr;
+		  double sumeff{}, sumerr{};
 		  double sumn = h1num->Integral(iMSL, iMSH);
 		  double sumd = h1den->Integral(iMSL, iMSH);
-		  if (sumd == 0.) {
-		    sumeff = 0.;
-		    sumerr = 0.;
-		  } else {
+		  if (sumd != 0.) {
 		    sumeff = (double)sumn / (double)sumd;
 		    sumerr = sqrt((double)sumn * (1.-sumeff)) / (double)sumd;
 		  }
@@ -902,14 +738,9 @@ namespace dqutils {
 
 		  if (iholx >= 0) {
 		    TString s = eff_dir + chainName + "_highpt_effsummary_by" + vectkwd.at(2);
-		    // std::cerr << "hist summary: " << s << " n: " << sumn << " d: " << sumd << " eff: " << sumeff << " err: " << sumerr << std::endl;
-		    mf.get(s, h1sumeff);
-		    if (!h1sumeff) {
-		      if (fdbg) {
-			std::cerr << "HLTMuon PostProcessing: no such histogram!! " << s << std::endl;
-		      }
-		      continue;
-		    }
+		    h1sumeff = getHPointer(s);
+		    if (!h1sumeff) continue;
+		    
 		    h1sumeff->SetBinContent(iholx+1, sumeff);
 		    h1sumeff->SetBinError(iholx+1, sumerr);
                     h1sumeff->GetYaxis()->SetTitleOffset(1.3);
@@ -921,7 +752,7 @@ namespace dqutils {
 		  }
 		}
 	      }
-	    }
+	    
 
 	  }//alg
 	}//trg
@@ -936,54 +767,39 @@ namespace dqutils {
 	  stmp = chainName + alg2[alg] + "_Turn_On_Curve_wrt_MuidSA";
 	  stmpg = chainName + alg2[alg] + "_Turn_On_Curve_wrt_MuidSA"+"_Fit";
 
-	  h1num = 0;
-	  mf.get(snum, h1num);
-	  if (!h1num) {
-	    if (fdbg) {
-	      std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< snum << std::endl;
-	    }
-	    continue;
-	  }
-	  h1den = 0;
-	  mf.get(sden, h1den);
-	  if (!h1den) {
-	    if (fdbg) {
-	      std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< sden << std::endl;
-	    }
-	    continue;
-	  }
+	  h1num = getHPointer(snum);
+	  if (!h1num) continue;
+	  
+	  h1den = getHPointer(sden);
+	  if (!h1den) continue;
 
-	  if(h1num && h1den){
-	    h1tmp = (TH1F*)h1den->Clone();
-	    h1tmp->SetName(stmp);                          				
-	    h1tmp->SetTitle(stmp);                         			  
-	    h1tmp->GetYaxis()->SetTitle("Efficiency");     				  
-	    h1tmp->Reset();                                				  
-	    h1tmp->Divide(h1num, h1den, 1., 1., "B");      				  
-	    dir->cd();                                    				  
-	    h1tmp->Write(); 
-	    h1tmpg = new TGraphAsymmErrors();
-	    h1tmpg->SetName(stmpg);
-	    h1tmpg->SetMarkerStyle(20);
-	    h1tmpg->SetMinimum(0.0);
-	    h1tmpg->SetMaximum(1.05);
-	    h1tmpg->BayesDivide(h1num, h1den);
-	    h1tmpg->GetYaxis()->SetTitle("Efficiency");     				  
-	    h1tmpg->GetXaxis()->SetTitle(h1den->GetXaxis()->GetTitle());     				  
-	    dir->cd();
-	    h1tmpg->Write();
-	    delete h1tmpg;
+    h1tmp = (TH1F*)h1den->Clone();
+    h1tmp->SetName(stmp);                          				
+    h1tmp->SetTitle(stmp);                         			  
+    h1tmp->GetYaxis()->SetTitle("Efficiency");     				  
+    h1tmp->Reset();                                				  
+    h1tmp->Divide(h1num, h1den, 1., 1., "B");      				  
+    dir->cd();                                    				  
+    h1tmp->Write(); 
+    h1tmpg = new TGraphAsymmErrors();
+    h1tmpg->SetName(stmpg);
+    h1tmpg->SetMarkerStyle(20);
+    h1tmpg->SetMinimum(0.0);
+    h1tmpg->SetMaximum(1.05);
+    h1tmpg->BayesDivide(h1num, h1den);
+    h1tmpg->GetYaxis()->SetTitle("Efficiency");     				  
+    h1tmpg->GetXaxis()->SetTitle(h1den->GetXaxis()->GetTitle());     				  
+    dir->cd();
+    h1tmpg->Write();
+    delete h1tmpg;
 
 	    if (0 == alg || 2 == alg) { // no condition on ES bits = all events
-	      double sumeff, sumerr;
+	      double sumeff{}, sumerr{};
 	      double sumn = h1num->Integral(iMSL, iMSH);
 	      double sumd = h1den->Integral(iMSL, iMSH);
-	      if (sumd == 0.) {
-		sumeff = 0.;
-		sumerr = 0.;
-	      } else {
-		sumeff = (double)sumn / (double)sumd;
-		sumerr = sqrt((double)sumn * (1.-sumeff)) / (double)sumd;
+	      if (sumd != 0.) {
+		      sumeff = (double)sumn / (double)sumd;
+		      sumerr = sqrt((double)sumn * (1.-sumeff)) / (double)sumd;
 	      }
 	      int iholx = -1;
 	      if (0 == alg) {
@@ -995,14 +811,9 @@ namespace dqutils {
 	      if (iholx >= 0) {
 		TString s = eff_dir + chainName + "_highpt_effsummary_by" + vectkwd.at(3);
 		// std::cerr << "hist summary: " << s << " n: " << sumn << " d: " << sumd << " eff: " << sumeff << " err: " << sumerr << std::endl;
-		mf.get(s, h1sumeff);
-		if (!h1sumeff) {
-		  if (fdbg) {
-		    std::cerr << "HLTMuon PostProcessing: no such histogram!! " << s << std::endl;
-		  }
-		  continue;
-		}
-                h1sumeff->GetYaxis()->SetTitleOffset(1.3);
+		h1sumeff = getHPointer(s);
+		if (!h1sumeff) continue;
+    h1sumeff->GetYaxis()->SetTitleOffset(1.3);
 		h1sumeff->SetBinContent(iholx+1, sumeff);
 		h1sumeff->SetBinError(iholx+1, sumerr);
   	        h1sumeff->SetMinimum(0.0);
@@ -1011,7 +822,7 @@ namespace dqutils {
 		dir->cd();
 		h1sumeff->Write("", TObject::kOverwrite);
 	      }
-	    }
+	    
 	  }
 	  //wrt MuidSA
 
@@ -1028,44 +839,31 @@ namespace dqutils {
 	      stmp = chainName + triggerES[alg] + "_L1"+"_Turn_On_Curve_wrt_MuidSA";
 	      stmpg= chainName + triggerES[alg] + "_L1"+"_Turn_On_Curve_wrt_MuidSA" + "_Fit";
 
-	      h1num = 0;
-	      mf.get(snum, h1num);
-	      if (!h1num) {
-		if (fdbg) {
-		  std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< snum << std::endl;
-		}
-		continue;
-	      }
-	      h1den = 0;
-	      mf.get(sden, h1den);
-	      if (!h1den) {
-		if (fdbg) {
-		  std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< sden << std::endl;
-		}
-		continue;
-	      }
+	      h1num = getHPointer(snum);
+	      if (!h1num) continue;
+	      h1den = getHPointer(sden);
+	      if (!h1den) continue;
 
-	      if( h1num && h1den){
-		h1tmp = (TH1F*)h1den->Clone();
-		h1tmp->SetName(stmp);                          				
-		h1tmp->SetTitle(stmp);                         			  
-		h1tmp->GetYaxis()->SetTitle("Efficiency");     				  
-		h1tmp->Reset();                                				  
-		h1tmp->Divide(h1num, h1den, 1., 1., "B");      				  
-		dir->cd();                                    				  
-		h1tmp->Write();                                				  
-		h1tmpg = new TGraphAsymmErrors();
-		h1tmpg->SetName(stmpg);
-		h1tmpg->SetMarkerStyle(20);
-		h1tmpg->SetMinimum(0.0);
-		h1tmpg->SetMaximum(1.05);
-		h1tmpg->BayesDivide(h1num, h1den);
-		h1tmpg->GetYaxis()->SetTitle("Efficiency");     				  
-		h1tmpg->GetXaxis()->SetTitle(h1den->GetXaxis()->GetTitle());     				  
-		dir->cd();
-		h1tmpg->Write();
-		delete h1tmpg;
-	      }
+        h1tmp = (TH1F*)h1den->Clone();
+        h1tmp->SetName(stmp);                          				
+        h1tmp->SetTitle(stmp);                         			  
+        h1tmp->GetYaxis()->SetTitle("Efficiency");     				  
+        h1tmp->Reset();                                				  
+        h1tmp->Divide(h1num, h1den, 1., 1., "B");      				  
+        dir->cd();                                    				  
+        h1tmp->Write();                                				  
+        h1tmpg = new TGraphAsymmErrors();
+        h1tmpg->SetName(stmpg);
+        h1tmpg->SetMarkerStyle(20);
+        h1tmpg->SetMinimum(0.0);
+        h1tmpg->SetMaximum(1.05);
+        h1tmpg->BayesDivide(h1num, h1den);
+        h1tmpg->GetYaxis()->SetTitle("Efficiency");     				  
+        h1tmpg->GetXaxis()->SetTitle(h1den->GetXaxis()->GetTitle());     				  
+        dir->cd();
+        h1tmpg->Write();
+        delete h1tmpg;
+	      
 
 	      for (int be = 0; be < 2; be++) {
 		sden = nd_dir + chainName + triggerES[ies] + "_Turn_On_Curve_wrt_MuidSA" + bestr[be] + "_Denominator";
@@ -1075,44 +873,30 @@ namespace dqutils {
 		stmp = chainName + triggerES[ies] + "_L1" + bestr[be] + "_Turn_On_Curve_wrt_MuidSA";
 		stmpg = chainName + triggerES[ies] + "_L1" + bestr[be] + "_Turn_On_Curve_wrt_MuidSA"+"_Fit";
 
-		h1num = 0;
-		mf.get(snum, h1num);
-		if (!h1num) {
-		  if (fdbg) {
-		    std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< snum << std::endl;
-		  }
-		  continue;
-		}
-		h1den = 0;
-		mf.get(sden, h1den);
-		if (!h1den) {
-		  if (fdbg) {
-		    std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< sden << std::endl;
-		  }
-		  continue;
-		}
+		h1num = getHPointer(snum);
+		if (!h1num) continue;
+		h1den = getHPointer(sden);
+		if (!h1den) continue;
 
-		if( h1num && h1den){
-		  h1tmp = (TH1F*)h1den->Clone();                                            		
-		  h1tmp->SetName(stmp);                          						
-		  h1tmp->SetTitle(stmp);                         			   		
-		  h1tmp->GetYaxis()->SetTitle("Efficiency");     				  		
-		  h1tmp->Reset();                                				  		
-		  h1tmp->Divide(h1num, h1den, 1., 1., "B");      				  		
-		  dir->cd();                                    				  		
-		  h1tmp->Write();                                				  		
-		  h1tmpg = new TGraphAsymmErrors();
-		  h1tmpg->SetName(stmpg);
-		  h1tmpg->SetMarkerStyle(20);                                               		
-		  h1tmpg->SetMinimum(0.0);
-		  h1tmpg->SetMaximum(1.05);
-		  h1tmpg->BayesDivide(h1num, h1den);                                        		
-		  h1tmpg->GetYaxis()->SetTitle("Efficiency");     				  
-		  h1tmpg->GetXaxis()->SetTitle(h1den->GetXaxis()->GetTitle());     				  
-		  dir->cd();                                                                		
-		  h1tmpg->Write();                                                          		
-		  delete h1tmpg;
-		}
+    h1tmp = (TH1F*)h1den->Clone();                                            		
+    h1tmp->SetName(stmp);                          						
+    h1tmp->SetTitle(stmp);                         			   		
+    h1tmp->GetYaxis()->SetTitle("Efficiency");     				  		
+    h1tmp->Reset();                                				  		
+    h1tmp->Divide(h1num, h1den, 1., 1., "B");      				  		
+    dir->cd();                                    				  		
+    h1tmp->Write();                                				  		
+    h1tmpg = new TGraphAsymmErrors();
+    h1tmpg->SetName(stmpg);
+    h1tmpg->SetMarkerStyle(20);                                               		
+    h1tmpg->SetMinimum(0.0);
+    h1tmpg->SetMaximum(1.05);
+    h1tmpg->BayesDivide(h1num, h1den);                                        		
+    h1tmpg->GetYaxis()->SetTitle("Efficiency");     				  
+    h1tmpg->GetXaxis()->SetTitle(h1den->GetXaxis()->GetTitle());     				  
+    dir->cd();                                                                		
+    h1tmpg->Write();                                                          		
+    delete h1tmpg;
 	      }
 	    }
 
@@ -1124,24 +908,12 @@ namespace dqutils {
 	    stmp = chainName + triggerES[ies] + alg2[alg] + "_Turn_On_Curve_wrt_MuidSA";
 	    stmpg = chainName + triggerES[ies] + alg2[alg] + "_Turn_On_Curve_wrt_MuidSA" +"_Fit";
 
-	    h1num = 0;
-	    mf.get(snum, h1num);
-	    if (!h1num) {
-	      if (fdbg) {
-		std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< snum << std::endl;
-	      }
-	      continue;
-	    }
-	    h1den = 0;
-	    mf.get(sden, h1den);
-	    if (!h1den) {
-	      if (fdbg) {
-		std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< sden << std::endl;
-	      }
-	      continue;
-	    }
+	    h1num = getHPointer(snum);
+	    if (!h1num) continue;
+	    
+	    h1den = getHPointer(sden);
+	    if (!h1den) continue;
 
-	    if(h1num && h1den){
 	      h1tmp = (TH1F*)h1den->Clone();
 	      h1tmp->SetName(stmp);                          											
 	      h1tmp->SetTitle(stmp);                         			   							  
@@ -1184,14 +956,9 @@ namespace dqutils {
 		  if (iholx >= 0) {
 		    TString s = eff_dir + chainName + "_highpt_effsummary_by" + triggerES[ies];
 		    // std::cerr << "hist summary: " << s << " n: " << sumn << " d: " << sumd << " eff: " << sumeff << " err: " << sumerr << std::endl;
-		    mf.get(s, h1sumeff);
-		    if (!h1sumeff) {
-		      if (fdbg) {
-			std::cerr << "HLTMuon PostProcessing: no such histogram!! " << s << std::endl;
-		      }
-		      continue;
-		    }
-                    h1sumeff->GetYaxis()->SetTitleOffset(1.3);
+		    h1sumeff= getHPointer(s);
+		    if (!h1sumeff) continue;
+        h1sumeff->GetYaxis()->SetTitleOffset(1.3);
 		    h1sumeff->SetBinContent(iholx+1, sumeff);
 		    h1sumeff->SetBinError(iholx+1, sumerr);
                     h1sumeff->SetMinimum(0.0);
@@ -1201,7 +968,6 @@ namespace dqutils {
 		    h1sumeff->Write("", TObject::kOverwrite);
 		  }
 		}
-	      }
 	    }
 	  }
 	  // for ES: end ----------------------------------------------------------------
@@ -1216,45 +982,32 @@ namespace dqutils {
 	      stmp = chainName + alg2[alg] + bestr[be] + "_Turn_On_Curve_wrt_MuidSA";
 	      stmpg = chainName + alg2[alg] + bestr[be] + "_Turn_On_Curve_wrt_MuidSA" + "_Fit";
 
-	      h1num = 0;
-	      mf.get(snum, h1num);
-	      if (!h1num) {
-		if (fdbg) {
-		  std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< snum << std::endl;
-		}
-		continue;
-	      }
-	      h1den = 0;
-	      mf.get(sden, h1den);
-	      if (!h1den) {
-		if (fdbg) {
-		  std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< sden << std::endl;
-		}
-		continue;
-	      }
+	      h1num = getHPointer(snum);
+	      if (!h1num) continue;
+	      h1den = getHPointer(sden);
+	      if (!h1den) continue;
 
-	      if( h1num && h1den){
-		h1tmp = (TH1F*)h1den->Clone();
-		h1tmp->SetName(stmp);                          				
-		h1tmp->SetTitle(stmp);                         			  
-		h1tmp->GetYaxis()->SetTitle("Efficiency");     				  
-		h1tmp->Reset();                                				  
-		h1tmp->Divide(h1num, h1den, 1., 1., "B");      				  
-		dir->cd();                                    				  
-		h1tmp->Write();                                				  
-		h1tmpg = new TGraphAsymmErrors();
-		h1tmpg->SetName(stmpg);
-		h1tmpg->SetMarkerStyle(20);
-		h1tmpg->SetMinimum(0.0);
-		h1tmpg->SetMaximum(1.05);
-		h1tmpg->BayesDivide(h1num, h1den);
-		h1tmpg->GetYaxis()->SetTitle("Efficiency");     				  
-		h1tmpg->GetXaxis()->SetTitle(h1den->GetXaxis()->GetTitle());     				  
-		dir->cd();
-		h1tmpg->Write();
-		delete h1tmpg;
+        h1tmp = (TH1F*)h1den->Clone();
+        h1tmp->SetName(stmp);                          				
+        h1tmp->SetTitle(stmp);                         			  
+        h1tmp->GetYaxis()->SetTitle("Efficiency");     				  
+        h1tmp->Reset();                                				  
+        h1tmp->Divide(h1num, h1den, 1., 1., "B");      				  
+        dir->cd();                                    				  
+        h1tmp->Write();                                				  
+        h1tmpg = new TGraphAsymmErrors();
+        h1tmpg->SetName(stmpg);
+        h1tmpg->SetMarkerStyle(20);
+        h1tmpg->SetMinimum(0.0);
+        h1tmpg->SetMaximum(1.05);
+        h1tmpg->BayesDivide(h1num, h1den);
+        h1tmpg->GetYaxis()->SetTitle("Efficiency");     				  
+        h1tmpg->GetXaxis()->SetTitle(h1den->GetXaxis()->GetTitle());     				  
+        dir->cd();
+        h1tmpg->Write();
+        delete h1tmpg;
 
-	      }
+	      
 	    }
 	  }
 
@@ -1266,44 +1019,31 @@ namespace dqutils {
 	  stmp =  chainName + alg2[alg] + "_Turn_On_Curve_wrt" + wrtalg2[alg];
 	  stmpg =  chainName + alg2[alg] + "_Turn_On_Curve_wrt" + wrtalg2[alg]+"_Fit";
 
-	  h1num = 0;
-	  mf.get(snum, h1num);
-	  if (!h1num) {
-	    if (fdbg) {
-	      std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< snum << std::endl;
-	    }
-	    continue;
-	  }
-	  h1den = 0;
-	  mf.get(sden, h1den);
-	  if (!h1den) {
-	    if (fdbg) {
-	      std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< sden << std::endl;
-	    }
-	    continue;
-	  }
+	  h1num = getHPointer(snum);
+	  if (!h1num) continue;
+	  h1den = getHPointer(sden);
+	  if (!h1den) continue;
 
-	  if(h1num && h1den){
-	    h1tmp = (TH1F*)h1den->Clone();
-	    h1tmp->SetName(stmp);                          				
-	    h1tmp->SetTitle(stmp);                         			  
-	    h1tmp->GetYaxis()->SetTitle("Efficiency");     				  
-	    h1tmp->Reset();                                				  
-	    h1tmp->Divide(h1num, h1den, 1., 1., "B");      				  
-	    dir->cd();                                    				  
-	    h1tmp->Write(); 
-	    h1tmpg = new TGraphAsymmErrors();
-	    h1tmpg->SetName(stmpg);
-	    h1tmpg->SetMarkerStyle(20);
-	    h1tmpg->SetMinimum(0.0);
-	    h1tmpg->SetMaximum(1.05);
-	    h1tmpg->BayesDivide(h1num, h1den);
-	    h1tmpg->GetYaxis()->SetTitle("Efficiency");     				  
-	    h1tmpg->GetXaxis()->SetTitle(h1den->GetXaxis()->GetTitle());     				  
-	    dir->cd();
-	    h1tmpg->Write();
-	    delete h1tmpg;
-	  }
+    h1tmp = (TH1F*)h1den->Clone();
+    h1tmp->SetName(stmp);                          				
+    h1tmp->SetTitle(stmp);                         			  
+    h1tmp->GetYaxis()->SetTitle("Efficiency");     				  
+    h1tmp->Reset();                                				  
+    h1tmp->Divide(h1num, h1den, 1., 1., "B");      				  
+    dir->cd();                                    				  
+    h1tmp->Write(); 
+    h1tmpg = new TGraphAsymmErrors();
+    h1tmpg->SetName(stmpg);
+    h1tmpg->SetMarkerStyle(20);
+    h1tmpg->SetMinimum(0.0);
+    h1tmpg->SetMaximum(1.05);
+    h1tmpg->BayesDivide(h1num, h1den);
+    h1tmpg->GetYaxis()->SetTitle("Efficiency");     				  
+    h1tmpg->GetXaxis()->SetTitle(h1den->GetXaxis()->GetTitle());     				  
+    dir->cd();
+    h1tmpg->Write();
+    delete h1tmpg;
+	  
 
 	  //wrt upstream
 	  // for ES --------------------------------------------------------------------
@@ -1316,45 +1056,31 @@ namespace dqutils {
 	    stmp = chainName + triggerES[ies] + alg2[alg] + "_Turn_On_Curve_wrt" + wrtalg2[alg];
 	    stmpg = chainName + triggerES[ies] + alg2[alg] + "_Turn_On_Curve_wrt" + wrtalg2[alg]+"_Fit";
 
-	    h1num = 0;
-	    mf.get(snum, h1num);
-	    if (!h1num) {
-	      if (fdbg) {
-		std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< snum << std::endl;
-	      }
-	      continue;
-	    }
-	    h1den = 0;
-	    mf.get(sden, h1den);
-	    if (!h1den) {
-	      if (fdbg) {
-		std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< sden << std::endl;
-	      }
-	      continue;
-	    }
+	    h1num = getHPointer(snum);
+	    if (!h1num) continue;
+	    h1den = getHPointer(sden);
+	    if (!h1den) continue;
 
-	    if(h1num && h1den){
-	      h1tmp = (TH1F*)h1den->Clone();
-	      h1tmp->SetName(stmp);                          				
-	      h1tmp->SetTitle(stmp);                         			  
-	      h1tmp->GetYaxis()->SetTitle("Efficiency");     				  
-	      h1tmp->Reset();                                				  
-	      h1tmp->Divide(h1num, h1den, 1., 1., "B");      				  
-	      dir->cd();                                    				  
-	      h1tmp->Write();    
-	      h1tmpg = new TGraphAsymmErrors();
-	      h1tmpg->SetName(stmpg);
-	      h1tmpg->SetMarkerStyle(20);
-	      h1tmpg->SetMinimum(0.0);
-	      h1tmpg->SetMaximum(1.05);
-	      h1tmpg->BayesDivide(h1num, h1den);
-	      h1tmpg->GetYaxis()->SetTitle("Efficiency");     				  
-	      h1tmpg->GetXaxis()->SetTitle(h1den->GetXaxis()->GetTitle());     				  
-	      dir->cd();
-	      h1tmpg->Write();
-	      delete h1tmpg;
-	    }
-	  }
+      h1tmp = (TH1F*)h1den->Clone();
+      h1tmp->SetName(stmp);                          				
+      h1tmp->SetTitle(stmp);                         			  
+      h1tmp->GetYaxis()->SetTitle("Efficiency");     				  
+      h1tmp->Reset();                                				  
+      h1tmp->Divide(h1num, h1den, 1., 1., "B");      				  
+      dir->cd();                                    				  
+      h1tmp->Write();    
+      h1tmpg = new TGraphAsymmErrors();
+      h1tmpg->SetName(stmpg);
+      h1tmpg->SetMarkerStyle(20);
+      h1tmpg->SetMinimum(0.0);
+      h1tmpg->SetMaximum(1.05);
+      h1tmpg->BayesDivide(h1num, h1den);
+      h1tmpg->GetYaxis()->SetTitle("Efficiency");     				  
+      h1tmpg->GetXaxis()->SetTitle(h1den->GetXaxis()->GetTitle());     				  
+      dir->cd();
+      h1tmpg->Write();
+      delete h1tmpg;
+    }
 	  // for ES: end --------------------------------------------------------------------
 
 	  if (0 == alg || 2 == alg) {
@@ -1367,24 +1093,11 @@ namespace dqutils {
 	      stmp =  chainName + alg2[alg] + "_Turn_On_Curve_wrt" + wrtalg2[alg] + bestr[be];
 	      stmpg =  chainName + alg2[alg] + "_Turn_On_Curve_wrt" + wrtalg2[alg] + bestr[be]+"_Fit";
 
-	      h1num = 0;
-	      mf.get(snum, h1num);
-	      if (!h1num) {
-		if (fdbg) {
-		  std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< snum << std::endl;
-		}
-		continue;
-	      }
-	      h1den = 0;
-	      mf.get(sden, h1den);
-	      if (!h1den) {
-		if (fdbg) {
-		  std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< sden << std::endl;
-		}
-		continue;
-	      }
+	      h1num = getHPointer(snum);
+	      if (!h1num) continue;
+	      h1den = getHPointer(sden);
+	      if (!h1den) continue;
 
-	      if( h1num && h1den){
 		h1tmp = (TH1F*)h1den->Clone();
 		h1tmp->SetName(stmp);                          				
 		h1tmp->SetTitle(stmp);                         			  
@@ -1406,7 +1119,6 @@ namespace dqutils {
 		delete h1tmpg;
 	      }
 	    }
-	  }
 	}//alg
 	mf.Write();
       }//i
@@ -1433,24 +1145,11 @@ namespace dqutils {
 	  stmp = "EF_" + type[itype] + "Over_" + off[itype] + cut[icut] + "GeV_Cut";
 	  stmpg = "EF_" + type[itype] + "Over_" + off[itype] + cut[icut] + "GeV_Cut"+"_Fit";
 
-	  h1num = 0;
-	  mf.get(snum, h1num);
-	  if (!h1num) {
-	    if (fdbg) {
-	      std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< snum << std::endl;
-	    }
-	    continue;
-	  }
-	  h1den = 0;
-	  mf.get(sden, h1den);
-	  if (!h1den) {
-	    if (fdbg) {
-	      std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< sden << std::endl;
-	    }
-	    continue;
-	  }
+	  h1num = getHPointer(snum);
+	  if (!h1num) continue;
+	  h1den = getHPointer(sden);
+	  if (!h1den) continue;
 
-	  if( h1num && h1den){
 	    h1tmp = (TH1F*)h1den->Clone();
 	    h1tmp->SetName(stmp);                          				
 	    h1tmp->SetTitle(stmp);                         			  
@@ -1459,7 +1158,6 @@ namespace dqutils {
 	    h1tmp->Divide(h1num, h1den, 1., 1., "B");      				  
 	    dir->cd();                                    				  
 	    h1tmp->Write();                                				  
-	  }
 	}//icut
       }//itype
       mf.Write();
@@ -1471,9 +1169,6 @@ namespace dqutils {
       {
 	std::map<std::string, std::string> ztpmap;
 
-	//// cosmic menu items for ZTP
-	//ztpmap["mu4_cosmic_L1MU4_EMPTY"] = "L1_MU4";  
-	//ztpmap["mu24_imedium"] = "L1_MU15";
 	ztpmap["muChain1"] = "L1_MU15";
 	ztpmap["muChain2"] = "L1_MU15";
 	ztpmap["muChainEFiso1"] = "L1_MU15";
@@ -1490,29 +1185,6 @@ namespace dqutils {
 	ztp_isomap["muChainEFiso2"] = 1;
 	ztp_isomap["muChainMSonly1"] = 0;
 	ztp_isomap["muChainMSonly2"] = 0;
-
-	//// pp_v4 menu items for ZTP
-	//ztpmap["mu36_tight"] = "L1_MU15";
-	//ztpmap["mu24i_tight"] = "L1_MU15";
-	//ztpmap["mu50_MSonly_barrel_tight"] = "L1_MU15";
-
-	//std::map<std::string, int> ztp_isomap;
-	//ztp_isomap["mu36_tight"] = 0;
-	//ztp_isomap["mu24i_tight"] = 1;
-	//ztp_isomap["mu50_MSonly_barrel_tight"] = 0;
-
-	// old menu pp_v3 for ZTP
-	// ztpmap["mu15"]="L1_MU10";
-	// ztpmap["mu15i"]="L1_MU10";
-	// ztpmap["mu20i_medium"]="L1_MU11";
-	// ztpmap["mu20"]="L1_MU10";
-	// ztpmap["mu20_MG"]="L1_MU10";
-	// ztpmap["mu22_medium"]="L1_MU11"; // YY
-	// ztpmap["mu22_MG_medium"]="L1_MU11";
-	// ztpmap["mu40_MSonly_barrel"]="L1_MU10";
-	// ztpmap["mu40_MSonly_barrel_medium"]="L1_MU11";
-	// ztpmap["mu40_MSonly_tight"]="L1_MU10";
-	// ztpmap["mu40_MSonly_tighter"]="L1_MU10";
 
 	for(std::map<std::string, std::string>::iterator itmap=ztpmap.begin();itmap!=ztpmap.end();++itmap){
 	  TString histdirmuztp = run_dir + "/HLT/MuonMon/MuZTP/"+itmap->first;
@@ -1545,24 +1217,11 @@ namespace dqutils {
 	      stmpg = "muZTP_eff_"+level[j]+var[k] + itmap->first;
 
 	      // for debugging
-	      h1num = 0;
-	      mf.get(snum, h1num);
-	      if (!h1num) {
-		if (fdbg) {
-		  std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< snum << std::endl;
-		}
-		continue;
-	      }
-	      h1den = 0;
-	      mf.get(sden, h1den);
-	      if (!h1den) {
-		if (fdbg) {
-		  std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< sden << std::endl;
-		}
-		continue;
-	      }
+	      h1num = getHPointer(snum);
+	      if (!h1num) continue;
+	      h1den = getHPointer(sden);
+	      if (!h1den) continue;
 
-	      if(h1num && h1den){
 		h1tmpg = new TGraphAsymmErrors();
 		h1tmpg->SetName(stmpg);
 		h1tmpg->SetMarkerStyle(20);
@@ -1574,7 +1233,6 @@ namespace dqutils {
 		ztpdir->cd();
 		h1tmpg->Write();
 		delete h1tmpg;
-	      }
 	      mf.Write();
 
 	      seffg = histdirmuztp + "/muZTP_eff_"+level[j]+"_Eta_1bin_"+itmap->first;
@@ -1582,24 +1240,11 @@ namespace dqutils {
 	      sden = histdirmuztp + "/muZTP_Eta_1bin_"+itmap->first;
 	      stmpg= "muZTP_eff_"+level[j]+"_Eta_1bin_"+itmap->first;
 
-	      h1num = 0;
-	      mf.get(snum, h1num);
-	      if (!h1num) {
-		if (fdbg) {
-		  std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< snum << std::endl;
-		}
-		continue;
-	      }
-	      h1den = 0;
-	      mf.get(sden, h1den);
-	      if (!h1den) {
-		if (fdbg) {
-		  std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< sden << std::endl;
-		}
-		continue;
-	      }
+	      h1num = getHPointer(snum);
+	      if (!h1num) continue;
+	      h1den = getHPointer(sden);
+	      if (!h1den) continue;
 
-	      if(h1num && h1den){
 		h1tmpg = new TGraphAsymmErrors();
 		h1tmpg->SetName(stmpg);
 		h1tmpg->SetMarkerStyle(20);
@@ -1611,7 +1256,6 @@ namespace dqutils {
 		ztpdir->cd();
 		h1tmpg->Write();
 		delete h1tmpg;
-	      }
 	      mf.Write();
 
 	      seffg = histdirmuztp + "/muZTP_eff_"+level[j]+"_Eta_2bins_"+itmap->first;
@@ -1619,24 +1263,11 @@ namespace dqutils {
 	      sden = histdirmuztp + "/muZTP_Eta_2bins_"+itmap->first;
 	      stmpg = "muZTP_eff_" + level[j] +"_Eta_2bins_"+itmap->first;
 
-	      h1num = 0;
-	      mf.get(snum, h1num);
-	      if (!h1num) {
-		if (fdbg) {
-		  std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< snum << std::endl;
-		}
-		continue;
-	      }
-	      h1den = 0;
-	      mf.get(sden, h1den);
-	      if (!h1den) {
-		if (fdbg) {
-		  std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< sden << std::endl;
-		}
-		continue;
-	      }
+	      h1num = getHPointer(snum);
+	      if (!h1num) continue;
+	      h1den = getHPointer(sden);
+	      if (!h1den) continue;
 
-	      if(h1num && h1den){
 		h1tmpg = new TGraphAsymmErrors();
 		h1tmpg->SetName(stmp);
 		h1tmpg->SetMarkerStyle(20);
@@ -1648,7 +1279,6 @@ namespace dqutils {
 		ztpdir->cd();
 		h1tmpg->Write();
 		delete h1tmpg;
-	      }
 	      mf.Write();
 
 	      seffg = histdirmuztp + "/muZTP_eff_"+level[j]+"_Eta_1bin_cut_"+itmap->first;
@@ -1656,24 +1286,11 @@ namespace dqutils {
 	      sden = histdirmuztp + "/muZTP_Eta_1bin_cut_"+itmap->first;
 	      stmpg = "muZTP_eff_"+level[j]+"_Eta_1bin_cut_"+itmap->first;
 
-	      h1num = 0;
-	      mf.get(snum, h1num);
-	      if (!h1num) {
-		if (fdbg) {
-		  std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< snum << std::endl;
-		}
-		continue;
-	      }
-	      h1den = 0;
-	      mf.get(sden, h1den);
-	      if (!h1den) {
-		if (fdbg) {
-		  std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< sden << std::endl;
-		}
-		continue;
-	      }
+	      h1num = getHPointer(snum);
+	      if (!h1num) continue;
+	      h1den = getHPointer(sden);
+	      if (!h1den) continue;
 
-	      if(h1num && h1den){
 		h1tmpg = new TGraphAsymmErrors();
 		h1tmpg->SetName(stmpg);
 		h1tmpg->SetMarkerStyle(20);
@@ -1685,7 +1302,6 @@ namespace dqutils {
 		ztpdir->cd();
 		h1tmpg->Write();
 		delete h1tmpg;
-	      }
 	      mf.Write();
 
 	      seffg = histdirmuztp + "/muZTP_eff_"+level[j]+"_Eta_2bins_cut_"+itmap->first;
@@ -1693,24 +1309,11 @@ namespace dqutils {
 	      sden = histdirmuztp + "/muZTP_Eta_2bins_cut_"+itmap->first;
 	      stmpg = "muZTP_eff_"+level[j]+"_Eta_2bins_cut_"+itmap->first;
 
-	      h1num = 0;
-	      mf.get(snum, h1num);
-	      if (!h1num) {
-		if (fdbg) {
-		  std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< snum << std::endl;
-		}
-		continue;
-	      }
-	      h1den = 0;
-	      mf.get(sden, h1den);
-	      if (!h1den) {
-		if (fdbg) {
-		  std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< sden << std::endl;
-		}
-		continue;
-	      }
+	      h1num = getHPointer(snum);
+	      if (!h1num) continue;
+	      h1den = getHPointer(sden);
+	      if (!h1den) continue;
 
-	      if(h1num && h1den){
 		h1tmpg = new TGraphAsymmErrors();
 		h1tmpg->SetName(stmpg);
 		h1tmpg->SetMarkerStyle(20);
@@ -1722,7 +1325,6 @@ namespace dqutils {
 		ztpdir->cd();
 		h1tmpg->Write();
 		delete h1tmpg;
-	      }
 	      mf.Write();
 
 	      //2D ETA_PHI
@@ -1735,24 +1337,11 @@ namespace dqutils {
 	      TH2F *h2den(0);
 	      TH2F *h2tmp(0);
 
-	      h2num = 0;
-	      mf.get(snum, h2num);
-	      if(!h2num){
-		if (fdbg) {
-		  std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< snum << std::endl;
-		}
-		continue;
-	      }
-	      h2den = 0;
-	      mf.get(sden, h2den);
-	      if(!h2den) {
-		if (fdbg) {
-		  std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< sden << std::endl;
-		}
-		continue;
-	      }
+	      h2num = getH2Pointer(snum);
+	      if(!h2num) continue;
+	      h2den = getH2Pointer(sden);
+	      if(!h2den) continue;
 
-	      if( h2num && h2den){
 		h2tmp = (TH2F*)h1den->Clone();
 		h2tmp->SetName(stmp);
 		h2tmp->SetTitle(stmp);
@@ -1761,7 +1350,6 @@ namespace dqutils {
 		h2tmp->Divide(h1num, h1den, 1., 1., "B");
 		dir->cd();
 		h2tmp->Write();
-	      }
 	      mf.Write();
 	    }//level
 
@@ -1771,32 +1359,11 @@ namespace dqutils {
 	    sden = histdirmuztp + "/muZTP"+var[k]+"L2fired_"+itmap->first;
 	    stmpg =  "muZTP_eff_EFwrtL2" + var[k]+itmap->first;
 
-	    h1num = 0;
-	    mf.get(snum, h1num);
-	    if (!h1num) {
-	      if (fdbg) {
-		std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< snum << std::endl;
-	      }
-	      continue;
-	    }
-	    h1den = 0;
-	    mf.get(sden, h1den);
-	    if (!h1den) {
-	      if (fdbg) {
-		std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< sden << std::endl;
-	      }
-	      continue;
-	    }
-
-	    if(h1num && h1den){
-	     // h1tmp = (TH1F*)h1den->Clone();
-	     // h1tmp->SetName(stmp);                          				
-	     // h1tmp->SetTitle(stmp);                         			  
-	    //  h1tmp->GetYaxis()->SetTitle("Efficiency");     				  
-	    //  h1tmp->Reset();                                				  
-	    //  h1tmp->Divide(h1num, h1den, 1., 1., "B");      				  
-	    //  dir->cd();                                    				  
-	    //  h1tmp->Write();
+	    h1num = getHPointer(snum);
+	    if (!h1num) continue;
+	    h1den = getHPointer(sden);
+	    if (!h1den) continue;
+	   
 	      h1tmpg = new TGraphAsymmErrors();
 	      h1tmpg->SetName(stmpg);
 	      h1tmpg->SetMarkerStyle(20);
@@ -1808,7 +1375,6 @@ namespace dqutils {
 	      ztpdir->cd();
 	      h1tmpg->Write();
 	      delete h1tmpg;
-	    }
 	    mf.Write();
 
 	    seffg = histdirmuztp + "/muZTP_eff_EFwrtL1"+var[k]+itmap->first;
@@ -1816,24 +1382,11 @@ namespace dqutils {
 	    sden = histdirmuztp + "/muZTP"+var[k]+"L1fired_"+itmap->first;
 	    stmpg = "muZTP_eff_EFwrtL1"+var[k]+itmap->first;
 
-	    h1num = 0;
-	    mf.get(snum, h1num);
-	    if (!h1num) {
-	      if (fdbg) {
-		std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< snum << std::endl;
-	      }
-	      continue;
-	    }
-	    h1den = 0;
-	    mf.get(sden, h1den);
-	    if (!h1den) {
-	      if (fdbg) {
-		std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< sden << std::endl;
-	      }
-	      continue;
-	    }
+	    h1num = getHPointer(snum);
+	    if (!h1num) continue;
+	    h1den = getHPointer(sden);
+	    if (!h1den) continue;
 
-	    if(h1num && h1den){
 	      h1tmpg = new TGraphAsymmErrors();
 	      h1tmpg->SetName(stmpg);
 	      h1tmpg->SetMarkerStyle(20);
@@ -1845,7 +1398,6 @@ namespace dqutils {
 	      ztpdir->cd();
 	      h1tmpg->Write();
 	      delete h1tmpg;
-	    }
 	    mf.Write();
 
 	    seffg = histdirmuztp + "/muZTP_eff_L2wrtL1"+var[k]+itmap->first;
@@ -1853,24 +1405,11 @@ namespace dqutils {
 	    sden = histdirmuztp + "/muZTP"+var[k]+"L1fired_"+itmap->first;
 	    stmpg = "muZTP_eff_L2wrtL1"+var[k]+itmap->first;
 
-	    h1num = 0;
-	    mf.get(snum, h1num);
-	    if (!h1num) {
-	      if (fdbg) {
-		std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< snum << std::endl;
-	      }
-	      continue;
-	    }
-	    h1den = 0;
-	    mf.get(sden, h1den);
-	    if (!h1den) {
-	      if (fdbg) {
-		std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< sden << std::endl;
-	      }
-	      continue;
-	    }
+	    h1num = getHPointer(snum);
+	    if (!h1num) continue;
+	    h1den = getHPointer(sden);
+	    if (!h1den)  continue;
 
-	    if(h1num && h1den){
 	      h1tmpg = new TGraphAsymmErrors();
 	      h1tmpg->SetName(stmpg);
 	      h1tmpg->SetMarkerStyle(20);
@@ -1882,7 +1421,6 @@ namespace dqutils {
 	      ztpdir->cd();
 	      h1tmpg->Write();
 	      delete h1tmpg;
-	    }
 	    mf.Write();
 
 	    if(isefisochain){
@@ -1891,24 +1429,11 @@ namespace dqutils {
 	      sden = histdirmuztp + "/muZTP"+var[k]+"EFfired_"+itmap->first;
 	      stmpg = "muZTP_eff_EFIsowrtEF"+var[k]+itmap->first;
 
-	      h1num = 0;
-	      mf.get(snum, h1num);
-	      if (!h1num) {
-		if (fdbg) {
-		  std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< snum << std::endl;
-		}
-		continue;
-	      }
-	      h1den = 0;
-	      mf.get(sden, h1den);
-	      if (!h1den) {
-		if (fdbg) {
-		  std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< sden << std::endl;
-		}
-		continue;
-	      }
+	      h1num = getHPointer(snum);
+	      if (!h1num) continue;
+	      h1den = getHPointer(sden);
+	      if (!h1den) continue;
 
-	      if(h1num && h1den){
 		h1tmpg = new TGraphAsymmErrors();
 		h1tmpg->SetName(stmpg);
 		h1tmpg->SetMarkerStyle(20);
@@ -1920,7 +1445,6 @@ namespace dqutils {
 		ztpdir->cd();
 		h1tmpg->Write();
 		delete h1tmpg;
-	      }
 	      mf.Write();
 	    }
 	  }//var
@@ -1937,17 +1461,6 @@ namespace dqutils {
 	  }
 	  return;
 	}
-
-	// procChainDQA_HighPt
-	// pp_v4
-	//const int MAXARR = 3;
-	//std::string charr[MAXARR] = {"mu36_tight", "mu24i_tight", "mu50_MSonly_barrel_tight"};
-	//std::string monarr[MAXARR] = {"_EFmuon", "_EFmuon", "_MuonEFSA"};
-	//std::string monL2arr[MAXARR] = {"_L2MuonSA", "_L2MuonSA", "_L2MuonSA"};
-	//bool isBarrelMon[MAXARR] = {false, false, true}; // enable MSonly
-	//bool isMSbMon[MAXARR] = {true, false, false}; // Skip isol and MSonly
-	//bool monL1[MAXARR] = {true, true, false}; // Skip MSonly
-	//bool isefIsolation[MAXARR] = {false, true, false}; // EF isolation  add by Yuan
 
 	// MAM 
 	const int MAXARR = 6;
@@ -1978,43 +1491,24 @@ namespace dqutils {
 	  if(isefIsolation[ialg]) histZtpNum = hdirztp + "muZTP_Pt_4bins_EFIsofired_" + chainName;  // add by Yuan
 	  TString histZtpEff = eff_dir + chainName + "_highpt3bins_effwrtL1";
 
-	  h1num = 0; mf.get(histZtpNum, h1num);
-	  if (!h1num) {
-	    if (fdbg) {
-	      std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< histZtpNum << std::endl;
-	    }
-	    continue;
-	  }
-	  h1den = 0; mf.get(histZtpDen, h1den);
-	  if (!h1den) {
-	    if (fdbg) {
-	      std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< histZtpDen << std::endl;
-	    }
-	    continue;
-	  }
-	  h1eff = 0; mf.get(histZtpEff, h1eff);
-	  if (!h1eff) {
-	    if (fdbg) {
-	      std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< histZtpEff << std::endl;
-	    }
-	    continue;
-	  }
+	  h1num = getHPointer(histZtpNum);
+	  if (!h1num) continue;
+	  h1den = getHPointer(histZtpDen);
+	  if (!h1den) continue;
+	  h1eff =getHPointer(histZtpEff);
+	  if (!h1eff) continue;
 
 	  /* 2. Filling summary histogram from ZTP values */
-	  if (h1num && h1den && h1eff) {
 	    for (int ibin = 2; ibin <= 3; ibin++) {
 	      // at the moment it is not correct if we run the algorithm # 4: mu40_MSonly_barrel .
-	      double sumeff, sumerr;
+	      double sumeff{}, sumerr{};
 	      double sumn = h1num->Integral(ibin, ibin); ////
 	      if(isBarrelMon[ialg] || isMSbMon[ialg]) sumn = h1num->Integral(ibin+1, ibin+1);
 	      double sumd = h1den->Integral(ibin, ibin); ////
 	      if(isBarrelMon[ialg] || isMSbMon[ialg]) sumd = h1den->Integral(ibin+1, ibin+1);
-	      if (sumd == 0.) {
-		sumeff = 0.;
-		sumerr = 0.;
-	      } else {
-		sumeff = (double)sumn / (double) sumd;
-		sumerr = sqrt((double)sumn * (1.-sumeff)) / (double)sumd;
+	      if (sumd != 0.) {
+		      sumeff = (double)sumn / (double) sumd;
+		      sumerr = sqrt((double)sumn * (1.-sumeff)) / (double)sumd;
 	      }
 	      h1eff->GetYaxis()->SetTitle("Efficiency");     				  
 	      h1eff->SetBinContent(ibin-1, sumeff);  ////
@@ -2022,46 +1516,9 @@ namespace dqutils {
 	      h1eff->SetMinimum(0.0);
 	      h1eff->SetMaximum(1.05);
 	    }
-	  }
+	  
 
-	  /* 3. Picking up chainDQ MSonly graph   abandoned !!!*/
-	  /* EF efficiency wrt L1, as for the ztp graph = overall HLT efficiency wrt L1: not possible, wrt offline 
-	     if (isMSbMon[ialg]) {  // skip muIso and MSonly !!!
-	     TString histChNum = nd_dir + chainName + MSchainName + MoniAlg + "_Turn_On_Curve_Numerator";
-	     TString histChDen = nd_dir + chainName + MSchainName + MoniL2Alg + "_Turn_On_Curve_wrt_L1_Denominator";
-
-	     h1num = 0; mf.get(histChNum, h1num);
-	     if (!h1num) {
-	     if (fdbg) {
-	     std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< histZtpNum << std::endl;
-	     }
-	     continue;
-	     }
-	     h1den = 0; mf.get(histChDen, h1den);
-	     if (!h1den) {
-	     if (fdbg) {
-	     std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< histZtpDen << std::endl;
-	     }
-	     continue;
-	     }
-
-	     if (h1num && h1den) {
-	  // Integrate 100-300 GeV
-	  double sumeff, sumerr;
-	  double sumn = h1num->Integral(21, 28);  ////
-	  double sumd = h1den->Integral(21, 28);  ////
-	  if (sumd == 0.) {
-	  sumeff = 0.;
-	  sumerr = 0.;
-	  } else {
-	  sumeff = (double)sumn / (double) sumd;
-	  sumerr = sqrt((double)sumn * (1.-sumeff)) / (double)sumd;
-	  }
-	  h1eff->SetBinContent(3, sumeff);   ////
-	  h1eff->SetBinError(3, sumerr);     ////
-	  }
-	  }
-	  */
+	 
 	  efdir->cd();
 	  h1eff->Write("",TObject::kOverwrite);
 
@@ -2073,41 +1530,16 @@ namespace dqutils {
 	    TString histZtpDenE = hdirztp + "muZTP_Pt_EC_" + chainName;
 	    TString histZtpL1sum = eff_dir + chainName + "_highptL1plateau_wrtOffline";
 
-	    TH1F *h1numb = 0; mf.get(histZtpNumB, h1numb);
-	    if (!h1numb) {
-	      if (fdbg) {
-		std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< histZtpNumB << std::endl;
-	      }
-	      continue;
-	    }
-	    TH1F *h1nume = 0; mf.get(histZtpNumE, h1nume);
-	    if (!h1nume) {
-	      if (fdbg) {
-		std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< histZtpNumE << std::endl;
-	      }
-	      continue;
-	    }
-	    TH1F *h1denb = 0; mf.get(histZtpDenB, h1denb);
-	    if (!h1denb) {
-	      if (fdbg) {
-		std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< histZtpDenB << std::endl;
-	      }
-	      continue;
-	    }
-	    TH1F *h1dene = 0; mf.get(histZtpDenE, h1dene);
-	    if (!h1dene) {
-	      if (fdbg) {
-		std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< histZtpDenE << std::endl;
-	      }
-	      continue;
-	    }
-	    TH1F *h1sumL = 0; mf.get(histZtpL1sum, h1sumL);
-	    if (!h1sumL) {
-	      if (fdbg) {
-		std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< histZtpL1sum << std::endl;
-	      }
-	      continue;
-	    }
+	    TH1F *h1numb = getHPointer(histZtpNumB);
+	    if (!h1numb) continue;
+	    TH1F *h1nume = getHPointer(histZtpNumE);
+	    if (!h1nume) continue;
+	    TH1F *h1denb = getHPointer(histZtpDenB);
+	    if (!h1denb) continue;
+	    TH1F *h1dene = getHPointer(histZtpDenE);
+	    if (!h1dene) continue;
+	    TH1F *h1sumL = getHPointer(histZtpL1sum);
+	    if (!h1sumL) continue;
 
 	    double sumeff, sumerr;
 	    double sumn = h1numb->Integral(13, 25); // 12-25 GeV
@@ -2221,45 +1653,25 @@ namespace dqutils {
 		effi  = chainName + triggerES[i] + "_L1" + bestr[be] + "_Turn_On_Curve_wrt_MuidCB";
 		HLTMuonHDiv(mf, histdireff, numer, denom, effi, "_Fit");
 
-		h1num = 0;
-		mf.get(nd_dir + numer, h1num);
-		if (!h1num) {
-		  if (fdbg) {
-		    std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< snum << std::endl;
-		  }
-		  continue;
-		}
-		h1den = 0;
-		mf.get(nd_dir + denom, h1den);
-		if (!h1den) {
-		  if (fdbg) {
-		    std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< sden << std::endl;
-		  }
-		  continue;
-		}
+		h1num = getHPointer(nd_dir + numer);
+		if (!h1num) continue;
+		h1den = getHPointer(nd_dir + denom);
+		if (!h1den) continue;
 
 		if (ESINDEP == i) {
 		  // integrating over and fill in a summary histogram
-		  double sumeff, sumerr;
+		  double sumeff{}, sumerr{};
 		  double sumn = h1num->Integral(iSTDL, iSTDH); // 60-100 GeV
 		  double sumd = h1den->Integral(iSTDL, iSTDH);
-		  if (sumd == 0.) {
-		    sumeff = 0.;
-		    sumerr = 0.;
-		  } else {
+
+		  if (sumd != 0.) {
 		    sumeff = (double)sumn / (double)sumd;
 		    sumerr = sqrt((double)sumn * (1.-sumeff)) / (double)sumd;
 		  }
 
 		  TString s = histdireff + chainName + "_L1plateau_wrtOffline_by_ESindep";
-		  TH1F *h1effL1 = 0;
-		  mf.get(s, h1effL1);
-		  if (!h1effL1) {
-		    if (fdbg) {
-		      std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< sden << std::endl;
-		    }
-		    continue;
-		  }
+		  TH1F *h1effL1 = getHPointer(s);
+		  if (!h1effL1) continue;
 		  h1effL1->SetBinContent(be+1, sumeff);
 		  h1effL1->SetBinError(be+1, sumerr);
 		  h1eff->SetMinimum(0.0);
@@ -2276,33 +1688,19 @@ namespace dqutils {
 	    HLTMuonHDiv(mf, histdireff, numer, denom, effi, "_Fit");
 
 	    // Summary ESid and ESindep
-	    h1num = 0;
-	    mf.get(nd_dir + numer, h1num);
-	    if (!h1num) {
-	      if (fdbg) {
-		std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< snum << std::endl;
-	      }
-	      continue;
-	    }
-	    h1den = 0;
-	    mf.get(nd_dir + denom, h1den);
-	    if (!h1den) {
-	      if (fdbg) {
-		std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< sden << std::endl;
-	      }
-	      continue;
-	    }
+	    h1num = getHPointer(nd_dir + numer);
+	    if (!h1num) continue;
+	    h1den = getHPointer(nd_dir + denom);
+	    if (!h1den) continue;
 	    if (0 == alg || 1 == alg || 2 == alg) {
 	      // if (ESID == i || ESINDEP == i) {
-	      double sumd, sumn, sumeff, sumerr;
+	      double sumd{}, sumn{}, sumeff{}, sumerr{};
 	      sumn = h1num->Integral(iSTDL, iSTDH);
 	      sumd = h1den->Integral(iSTDL, iSTDH);
-	      if (sumd == 0.) {
-		sumeff = 0.;
-		sumerr = 0.;
-	      } else {
+
+	      if (sumd != 0.) {
 		sumeff = (double)sumn / (double)sumd;
-		sumerr = sqrt((double)sumn * (1.-sumeff)) / (double)sumd;
+		sumerr = std::sqrt((double)sumn * (1.-sumeff)) / (double)sumd;
 	      }
 	      int iholx = -1;
 	      if (0 == alg) {
@@ -2314,14 +1712,10 @@ namespace dqutils {
 	      }
 
 	      TString s = histdireff + chainName + "_highpt_effsummary_by" + triggerES[i];
-	      mf.get(s, h1effsum);
-	      if (!h1effsum) {
-		if (fdbg) {
-		  std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< s << std::endl;
-		}
-		continue;
-	      }
-              h1effsum->GetYaxis()->SetTitleOffset(1.3);
+	      h1effsum = getHPointer(s);
+	      if (!h1effsum) continue;
+	      //
+        h1effsum->GetYaxis()->SetTitleOffset(1.3);
 	      h1effsum->SetBinContent(iholx+1, sumeff);
 	      h1effsum->SetBinError(iholx+1, sumerr);
 	      h1effsum->SetMinimum(0.0);
@@ -2379,31 +1773,26 @@ namespace dqutils {
     void MonitoringFile::HLTMuonHDiv(PostProcessorFileWrapper& mf,
 	TString sdir, TString snum, TString sden, TString seff, TString seffg)
     {
+    auto getHPointer ATLAS_THREAD_SAFE  = [&mf] ATLAS_NOT_THREAD_SAFE (const TString & hname)->TH1F*{
+      TH1F * pH{};
+      mf.get(hname, pH); 
+      if (!pH and fdbg) {
+	      std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< hname << std::endl;
+	    }
+	    return pH;
+    }; 
       TH1F* h1tmpf(0);
       TH1F* h1num(0);
       TH1F* h1den(0);
       TGraphAsymmErrors* h1tmpfg = new TGraphAsymmErrors();;
       TString stmp = seff + seffg;
-      h1num = 0;
-      mf.get(sdir + "NumDenom/" + snum, h1num);
-      if (!h1num) {
-	if (fdbg) {
-	  std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< snum << std::endl;
-	}
-	return;
-      }
-      h1den = 0;
-      mf.get(sdir + "NumDenom/" + sden, h1den);
-      if (!h1den) {
-	if (fdbg) {
-	  std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< sden << std::endl;
-	}
-	return;
-      }
+      h1num = getHPointer(sdir + "NumDenom/" + snum);
+      if (!h1num) return;
+      h1den = getHPointer(sdir + "NumDenom/" + sden);
+      if (!h1den) return;
 
       TDirectory* dir = mf.GetDirectory(sdir);
 
-      if(h1num && h1den){
 	h1tmpf = (TH1F*)h1den->Clone();
 	h1tmpf->SetName(stmp);                          				
 	h1tmpf->SetTitle(stmp);                         			  
@@ -2426,7 +1815,6 @@ namespace dqutils {
 	h1tmpfg->SetName(stmp);
         h1tmpfg->Write();
 	delete h1tmpfg;
-      }
     }
 
   }//namespace
