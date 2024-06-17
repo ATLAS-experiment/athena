@@ -27,6 +27,7 @@ ex.input = 'ttbar'
 ex.threads = 1
 ex.job_options = 'TriggerJobOpts/runHLT.py'
 ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1_TriggerValidation_prescale"',
+            'IOVDb.GlobalTag="OFLCOND-MC23-SDR-RUN3-05"',
             'Trigger.doRuntimeNaviVal=True',
             'Trigger.InDetTracking.doGPU=True' ]
 
