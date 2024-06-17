@@ -371,8 +371,10 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     }
 
     // Calculate data flow quantities
-    ATH_CHECK(m_dataFlowTool->calculateDataFlow(dataFlowInfo.get(), m_logicEventHeader_1st, m_clusters_1st, roads_1st, tracks_1st, roads_2nd, tracks_2nd));
-
+    if (m_writeOutputData)  {
+      ATH_CHECK(m_dataFlowTool->calculateDataFlow(dataFlowInfo.get(), m_logicEventHeader_1st, m_clusters_1st, roads_1st, tracks_1st, roads_2nd, tracks_2nd));
+    }
+    
     // Write the output and reset
     ATH_CHECK(writeOutputData(roads_1st, tracks_1st, roads_2nd, tracks_2nd, dataFlowInfo.get()));
 
@@ -639,7 +641,6 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::writeOutputData(std::vector<FPGATr
   ATH_MSG_DEBUG("NFPGATrackSimRoads_1st = " << roads_1st.size() << ", NFPGATrackSimTracks_1st = " << tracks_1st.size() << ", NFPGATrackSimRoads_2nd = " << roads_2nd.size() << ", NFPGATrackSimTracks_2nd = " << tracks_2nd.size());
   
   if (!m_writeOutputData) return StatusCode::SUCCESS;
-  
   m_logicEventOutputHeader->reserveFPGATrackSimRoads_1st(roads_1st.size());
   m_logicEventOutputHeader->addFPGATrackSimRoads_1st(roads_1st);
   if (m_doTracking) {
