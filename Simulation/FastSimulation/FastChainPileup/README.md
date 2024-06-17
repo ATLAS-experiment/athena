@@ -1,18 +1,12 @@
-/*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
-*/
+# FastChainPileup
 
-// Mainpage for doxygen
-
-/**
-@page FastChainPileup_page package FastChainPileup
-
-@author Richard Hawkings, Vladimir Lyubushkin
+Author Richard Hawkings, Vladimir Lyubushkin
+Converted from packagedoc.h
 
 This package provides code related to pileup emulation in the fast simulation
 chain.
 
-@section FastChainPileup_MultiPy8Pileup 
+## FastChainPileup_MultiPy8Pileup 
 
 This algorithm runs Pythia8 to generate multiple pileup events into a 
 single McEventCollection with a specified key. It inherits from Pythia8_i
@@ -45,6 +39,3 @@ be compatible with the input profile) and generatedEvents, which shows the
 distribution of number of pileup events - equivalent to the mu profile but
 with the additional Poisson fluctuations, filled for nevt values for each 
 BCID (but before multiplying by the R values).
-
-
-*/

@@ -1,16 +1,12 @@
-/*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
-*/
+# G4FastSimulation
+Author Vakho Tsulaia (tsulaia@mail.cern.ch)
+Converted from packagedoc.h
 
-/**
-@page G4FastSimulation_page G4FastSimulation
-@author Vakho Tsulaia (tsulaia@mail.cern.ch)
-
-@section G4FastSimulation_G4FastSimulation Introduction
+## Introduction
 
 This package provides some very basic interface to G4FastSimulations
 
-@section G4FastSimulation_G4FastSimulationOverview Class Overview
+## Class Overview
 
 The classes included in this package are:
 
@@ -18,7 +14,3 @@ The classes included in this package are:
  - FastSimModelCatalog : A list of all available fast simulations
  - FastSimModel : A base class for fast simulations
  - FastSimModelProxy : A type for fast simulations to use for inclusion in the catalog
-
-
-
-*/

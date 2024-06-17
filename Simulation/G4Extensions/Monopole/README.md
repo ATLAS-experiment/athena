@@ -1,16 +1,12 @@
-/*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
-*/
+# Monopole
+Author Andrea Dell'Acqua andrea.Dellacqua@cern.ch
+Converted from packagedoc.h
 
-/**
-@page Monopole_page Monopole
-@author Andrea Dell'Acqua andrea.Dellacqua@cern.ch
-
-@section Monopole_Monopole Introduction
+## Introduction
 
 This package allows users to introduce magnetic monopoles into the Geant4 simulation.
 
-@section Monopole_MonopoleOverview Class Overview
+## Class Overview
   The Monopole package contains the following classes:
 
   - G4Monopole : Defines the magnetic monopole particle itself
@@ -23,4 +19,4 @@ doc/mainpage.h
 Monopole/G4Monopole.h
 Monopole/G4mplTransportation.h
 Monopole/MonopoleProcessDefinition.h
-*/
+

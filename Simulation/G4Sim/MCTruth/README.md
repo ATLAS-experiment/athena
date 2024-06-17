@@ -1,16 +1,12 @@
-/*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
-*/
+#MCTruth
+Author Andrea Dell'Acqua (dellacqu@mail.cern.ch)
+Converted from packagedoc.h
 
-/**
-@page MCTruth_page MCTruth
-@author Andrea Dell'Acqua (dellacqu@mail.cern.ch)
-
-@section MCTruth_MCTruth Introduction
+## Introduction
 
 This package provides many helper classes for dealing with Monte Carlo Truth.  Most of it is "core" simulation code and can be safely ignored by users.  This is where the truth really comes from.
 
-@section MCTruth_MCTruth Class Overview
+## Class Overview
 
 The MCTruth package includes the following classes:
 
@@ -28,6 +24,3 @@ The MCTruth package includes the following classes:
  - TruthStrategyManager : The manager that keeps track of the truth strategies and where they are to be applied.
  - TruthStrategyManagerMessenger : An obsolete messenger for the TruthStrategyManager
 
-
-
-*/

@@ -1,11 +1,7 @@
-/*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
-*/
+# MCTruthAlgs
+Converted from packagedoc.h
 
-/**
-@page MCTruthAlgs_page MCTruthAlgs
-
-@section MCTruthAlgs_introduction Description:
+## Description:
 These are a collection of algorithms which work on the 
 TrackRecordCollection. In the standard G4 simulation, all the particles 
 that pass through a layer in front of the muon spectrometer are 
@@ -18,7 +14,7 @@ is used to reduce the size of the ESD and AOD files
 output when running pileup
 
  
-@section MCTruthAlgs_content Content:
+# Content:
 Given below is a list of the parameters and their names (for usage in root, e.g).<br>
 <table>
   <tr>
@@ -79,6 +75,3 @@ Given below is a list of the parameters and their names (for usage in root, e.g)
 </table>
 
 
-
-
-*/

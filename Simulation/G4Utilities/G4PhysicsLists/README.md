@@ -1,12 +1,8 @@
-/*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
-*/
+#G4PhysicsLists
+Author Andrea Dell'Acqua (dellacqu@mail.cern.ch)
+Converted from packagedoc.h
 
-/**
-@page G4PhysicsLists_page G4PhysicsLists
-@author Andrea Dell'Acqua (dellacqu@mail.cern.ch)
-
-@section G4PhysicsLists_G4PhysicsLists Introduction
+## Introduction
 
 This package provides an interface to all the Geant4 physics lists to be included in the simulation.  The lists currently supported are:
   
@@ -97,10 +93,6 @@ This package provides an interface to all the Geant4 physics lists to be include
          These lists use an alternate string model, the FRITIOF model.  C again is
         for CHIPS, BERT for the Bertini cascade, and BIC for the binary cascade.
 
-@section G4PhysicsLists_G4PhysicsLists Class Overview
+## Class Overview
 
 This package is only an interface, so it has no classes!
-
-
-
-*/
