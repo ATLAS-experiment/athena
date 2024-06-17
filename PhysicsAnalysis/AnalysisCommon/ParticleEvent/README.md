@@ -1,16 +1,11 @@
-/*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
-*/
-
-/**
-@page MuonIDEvent_page MuonIDEvent Package
+# ParticleEvent Package
 
 The package which defines the AOD particle classes.
 
-@authors Ketevi Assamagan, Sebastien Binet, Kyle Cranmer, Tadashi Maeno
+Authors Ketevi Assamagan, Sebastien Binet, Kyle Cranmer, Tadashi Maeno
 
 
-@section MuonIDEvent_MuonIDEventIntro Introduction
+## Introduction
 
 The AOD particle classes are the basic objects to be used in physics
 analysis, and are the bulk of the AOD.  Each particle class has some
@@ -36,28 +31,29 @@ so that you do not try and use information that does not exist in the
 fast simulation.  To find out if a particle was created from fast or
 full simulation use the IParticle::dataType() method.  
 
-Here only the Muon AOD EDM is described.
 
-@section MuonIDEvent_MuonIDEventOverview Class Overview
 
-  The MuonIDEvent package contains of following classes:
+## Class Overview
+
+  The ParticleEvent package contains of following classes:
  
-  - Analysis::Muon: built from and navigable to a CombinedMuon in the ESD, with a collection of 
-MuonContainer saved in the AOD for MOORE/MuID/MuIDLowPt and a separate one Muonboy/STACO/MuTag
+  - ParticleBase: common implementation for all Particles
 
-@section MuonIDEvent_MuonIDEventBuilders Muon Builders
+  - Neutrino: not built from ESD, but created during analysis either
+    by hand or by one of the SpecialUtils.
+
+
+## Particle Builders
 
   Each of the particles is built by an algorithm in the
   PhysicsAnalysis package.  If you want to know what pre-selection is
   applied or what exactly is going into the AOD particles, then follow
   the links below.
 
+  - Neutrino: not built from ESD, but created during analysis either
+    by hand or by one of the SpecialUtils.
 
-  - Analysis::Muon: built by MuonBuilder and MuonBuilderTool.  Muons are also
-    converted from their atlfast equivalents by the AtlfastMuonBuilder
-    and AtlfastMuonBuilderTool.
-
-@section MuonIDEvent_MuonIDEventStoreGateKeys StoreGate Keys
+## StoreGate Keys
 
   The storegate keys for the particle containers is defined in the
   jobOptions files of the builder algorithms above.  It is tempting to
@@ -66,20 +62,24 @@ MuonContainer saved in the AOD for MOORE/MuID/MuIDLowPt and a separate one Muonb
   https://uimon.cern.ch/twiki/bin/view/Atlas/StoregateKeysForAOD 
 
 
-@section MuonIDEvent_MuonIDEventSeeAlso See also
+## See also
 
 You may also be interested in:
 
+   - Electron and Photon
+
+   - Muon
+
+   - TauJet
+
+   - ParticleJet
+
    - CompositeParticle
+
+   - Analysis::JetTag and Analysis::TagInfo
 
    - MissingET objects in MissingETEvent
 
    - Rec::TrackParticle
 
    - TruthParticle in TruthParticleID/McParticleEvent
-
-   - The rest of the AOD EDM classes
-
-
-
-*/

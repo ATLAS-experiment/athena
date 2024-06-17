@@ -1,18 +1,13 @@
-/*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
-*/
-
-/**
-@page AnalysisUtils_page AnalysisUtils Package
+# AnalysisUtils Package
 
 The package which provides some utils for the AOD objects.
 
-@authors Sebastien Binet, Tadashi Maeno
+Authors Sebastien Binet, Tadashi Maeno
 
 
-@section AnalysisUtils_AnalysisUtilsIntro Introduction
+## Introduction
 
-@section AnalysisUtils_AnalysisUtilsOverview Class Overview
+## Class Overview
 
   The AnalysisUtils package contains of following classes:
  
@@ -90,7 +85,3 @@ You may also be interested in:
    - \ref AnalysisAssociation
 
    - \ref AnalysisExamples to see how these classes may be used : FilterExample
-
-
-
-*/

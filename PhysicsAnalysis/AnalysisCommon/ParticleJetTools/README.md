@@ -1,14 +1,8 @@
-/*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
-*/
-
-/**
-
-@page ParticleJetTools_page The ParticleJetTools package
+# The ParticleJetTools package
 
 This package contains tools which work on ParticleJet.
 
-@section ParticleJetTools_ParticleJetToolsIntroduction Introduction
+## Introduction
 
 For the moment there are following tools (in development):
 <table>
@@ -29,9 +23,7 @@ For the moment there are following tools (in development):
 
 </table>
 
-@section ParticleJetTools_ParticleJetToolsComments Comments
+## Comments
 
 Please let me know of any errors, or if anything is unclear.
 Andreas.Wildauer@cern.ch
-
-*/
