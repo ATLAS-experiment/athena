@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // PhysValBTag.cxx
@@ -22,6 +22,7 @@
 #include "xAODTracking/Vertex.h"
 #include "xAODBTagging/BTagging.h"
 #include "xAODBTagging/BTaggingUtilities.h"
+#include "AthContainers/ConstAccessor.h"
 
 #include "AthenaBaseComps/AthCheckMacros.h"
 #include "ParticleJetTools/JetFlavourInfo.h"
@@ -232,7 +233,9 @@ namespace JetTagDQA {
       bool muon_info_available = false;
       if(jets->size() > 0){
         const xAOD::BTagging* btag = xAOD::BTaggingUtilities::getBTagging( *(jets->at(0)) );
-        if(btag && btag->isAvailable< ElementLink<xAOD::MuonContainer> >("softMuon_link") ){
+        static const SG::ConstAccessor< ElementLink<xAOD::MuonContainer> >
+          softMuon_linkAcc("softMuon_link");
+        if(btag && softMuon_linkAcc.isAvailable(*btag) ){
           muon_info_available = true;
         }
       }
@@ -263,7 +266,8 @@ namespace JetTagDQA {
         // get the jet truth label
         int truth_label(1000);
         if(!m_isData){
-	  if(jet->isAvailable<int>(label_name)) jet->getAttribute(label_name, truth_label);
+	  SG::ConstAccessor<int> acc(label_name);
+	  if(acc.isAvailable(*jet)) jet->getAttribute(label_name, truth_label);
         }
 
         // fill the jet related histograms
@@ -336,8 +340,11 @@ namespace JetTagDQA {
     // define the return vector
     std::map<const xAOD::TrackParticle*, int> truthValues;
 
-    // get the track links from te btag
-    std::vector< ElementLink< xAOD::TrackParticleContainer > > assocTracks = btag->auxdata<std::vector<ElementLink<xAOD::TrackParticleContainer> > >("BTagTrackToJetAssociator");
+    // get the track links from the btag
+    static const SG::ConstAccessor<std::vector<ElementLink<xAOD::TrackParticleContainer> > >
+      BTagTrackToJetAssociatorAcc("BTagTrackToJetAssociator");
+    std::vector< ElementLink< xAOD::TrackParticleContainer > > assocTracks =
+      BTagTrackToJetAssociatorAcc(*btag);
 
     // loop over the tracks associated to the btag and get the truth values
     for(unsigned int i = 0; i < assocTracks.size(); i++) {
@@ -359,7 +366,9 @@ namespace JetTagDQA {
     // also loop over the tracks associated to the MSV vertices -> can be missing in the other track list
     // get the MSV vertices
     std::vector< ElementLink< xAOD::VertexContainer > > MSV_vertices;
-    try { MSV_vertices = btag->auxdata<std::vector< ElementLink< xAOD::VertexContainer > > >("MSV_vertices"); }
+    static const SG::ConstAccessor<std::vector< ElementLink< xAOD::VertexContainer > > >
+      MSV_verticesAcc("MSV_vertices");
+    try { MSV_vertices = MSV_verticesAcc(*btag); }
     catch(std::exception& exception) {  }
 
     // loop over the MSV vertices
