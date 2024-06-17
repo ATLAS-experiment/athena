@@ -31,7 +31,7 @@ def TTVAToolCfg(flags, name, addDecoAlg=True, VertexContName="PrimaryVertices", 
     acc.setPrivateTools(getTTVAToolForReco(name, **kwargs))
 
     if addDecoAlg:
-        from InDetConfig.UsedInVertexFitTrackDecoratorConfig import (
+        from InDetUsedInFitTrackDecoratorTool.UsedInVertexFitTrackDecoratorConfig import (
             UsedInVertexFitTrackDecoratorCfg)
         acc.merge(UsedInVertexFitTrackDecoratorCfg(
             flags, kwargs["TrackContName"], VertexContName))

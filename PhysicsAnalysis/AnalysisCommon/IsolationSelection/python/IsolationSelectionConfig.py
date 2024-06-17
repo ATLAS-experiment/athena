@@ -17,7 +17,7 @@ def IsoCloseByCorrectionToolCfg(flags, name="IsoCloseByCorrectionTool", ttva_wp 
     from InDetConfig.InDetTrackSelectionToolConfig import isoTrackSelectionToolCfg
     kwargs.setdefault("TrackSelectionTool", acc.popToolsAndMerge(isoTrackSelectionToolCfg(flags, minPt=500)) )
     if len(ttva_wp):
-        from InDetConfig.TrackVertexAssociationToolConfig import isoTTVAToolCfg
+        from TrackVertexAssociationTool.TrackVertexAssociationToolConfig import isoTTVAToolCfg
         kwargs.setdefault("TTVASelectionTool", acc.popToolsAndMerge(isoTTVAToolCfg(flags, WorkingPoint = ttva_wp)))
     from TrackToCalo.TrackToCaloConfig import ParticleCaloExtensionToolCfg
     kwargs.setdefault("ParticleCaloExtensionTool", acc.popToolsAndMerge(ParticleCaloExtensionToolCfg(flags)))   

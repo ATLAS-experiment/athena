@@ -118,7 +118,7 @@ def JETM12AugmentationToolsForSkimmingCfg(flags):
                                                                                               minPt = 1000.))
 
     #Nonprompt_All_MaxWeight TTVA
-    from InDetConfig.TrackVertexAssociationToolConfig import isoTTVAToolCfg
+    from TrackVertexAssociationTool.TrackVertexAssociationToolConfig import isoTTVAToolCfg
     toolkwargs['TTVATool'] = acc.popToolsAndMerge(isoTTVAToolCfg(flags))
 
     toolkwargs["name"] = "TrackIsolationToolPt1000"
@@ -147,7 +147,7 @@ def JETM12AugmentationToolsCfg(flags):
                                                                                               name = "TrackSelectionTool500_JETM12",
                                                                                               minPt = 500.))
     #Nonprompt_All_MaxWeight TTVA
-    from InDetConfig.TrackVertexAssociationToolConfig import isoTTVAToolCfg
+    from TrackVertexAssociationTool.TrackVertexAssociationToolConfig import isoTTVAToolCfg
     toolkwargs['TTVATool'] = acc.popToolsAndMerge(isoTTVAToolCfg(flags))
 
     toolkwargs["name"] = "TrackIsolationToolPt500"

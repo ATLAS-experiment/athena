@@ -14,7 +14,7 @@ def TrackIsolationToolCfg(flags, **kwargs):
         from InDetConfig.InDetTrackSelectionToolConfig import isoTrackSelectionToolCfg
         kwargs['TrackSelectionTool'] = acc.popToolsAndMerge(isoTrackSelectionToolCfg(flags))
     if 'TTVATool' not in kwargs:
-        from InDetConfig.TrackVertexAssociationToolConfig import isoTTVAToolCfg
+        from TrackVertexAssociationTool.TrackVertexAssociationToolConfig import isoTTVAToolCfg
         kwargs['TTVATool'] = acc.popToolsAndMerge(isoTTVAToolCfg(flags))
     if flags.Beam.Type is BeamType.Cosmics:
         kwargs['VertexLocation'] = ''

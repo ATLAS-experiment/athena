@@ -483,11 +483,11 @@ def getJetRecGroomAlg(groomdef,monTool=None):
         "jetrecalg_"+jetname,
         Provider = groomer,
         Modifiers = mods,
-        OutputContainer = jetname,
-        MonTool = monTool)
-    
-    
-    
+        OutputContainer = jetname)
+
+    if not isAnalysisRelease():
+        jra.MonTool = monTool
+
     return jra
 
 
@@ -521,8 +521,9 @@ def getJetCopyAlg(jetsin, jetsoutdef, decorations=[], shallowcopy=True, shallowI
         "jetrecalg_copy_"+jetsoutname,
         Provider = jcopy,
         Modifiers = mods,
-        OutputContainer = jetsoutname,
-        MonTool = monTool)
+        OutputContainer = jetsoutname)
+    if not isAnalysisRelease():
+        jra.MonTool = monTool
 
 
     return jra
