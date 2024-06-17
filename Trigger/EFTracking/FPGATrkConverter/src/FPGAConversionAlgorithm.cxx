@@ -10,7 +10,6 @@ FPGAConversionAlgorithm::FPGAConversionAlgorithm(const std::string& name, ISvcLo
   StatusCode FPGAConversionAlgorithm::initialize() {
 
     ATH_CHECK(m_ClusterConverter.retrieve());
-    ATH_CHECK( m_ClusterConverter->initialize() );
 
     ATH_CHECK(m_FPGAClusterKey.initialize(m_doClusters));
     ATH_CHECK(m_FPGAHitKey.initialize(m_doHits));
