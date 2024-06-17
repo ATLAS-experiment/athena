@@ -75,7 +75,6 @@ class FPGAClusterConverter : public extends<AthAlgTool,IFPGAClusterConverter>
 
   private:
 
-    const AtlasDetectorID* m_idHelper{nullptr};
     const PixelID* m_pixelId{nullptr};
     const SCT_ID* m_SCTId{nullptr};
     const InDetDD::PixelDetectorManager* m_pixelManager{nullptr};

@@ -3,7 +3,7 @@
 */
 
 #ifndef IFPGAHITCONVERTER_H
-#define IFPGAHITCONVERTER__H
+#define IFPGAHITCONVERTER_H
 
 // Include Files
 #include <string>
