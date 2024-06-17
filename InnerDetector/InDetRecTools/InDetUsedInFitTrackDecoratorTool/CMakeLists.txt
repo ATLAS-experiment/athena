@@ -3,6 +3,8 @@
 # Declare the package name:
 atlas_subdir( InDetUsedInFitTrackDecoratorTool )
 
+atlas_install_python_modules( python/*.py )
+
 # Libraries in the package:
 atlas_add_library( InDetUsedInFitTrackDecoratorToolLib
     Root/*.cxx

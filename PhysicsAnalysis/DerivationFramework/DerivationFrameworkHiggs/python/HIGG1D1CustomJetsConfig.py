@@ -124,7 +124,7 @@ def HIGG1D1CustomJetsCfg(ConfigFlags):
         """ Create the alg  to decorate the used-in-fit information for AMVF """
         context  = jetdef._contextDic
 
-        from InDetConfig.UsedInVertexFitTrackDecoratorConfig import getUsedInVertexFitTrackDecoratorAlg
+        from InDetUsedInFitTrackDecoratorTool.UsedInVertexFitTrackDecoratorConfig import getUsedInVertexFitTrackDecoratorAlg
         alg = getUsedInVertexFitTrackDecoratorAlg(context['Tracks'], context['Vertices'],
                                                   vertexDeco='TTVA_AMVFVertices_forHiggs',
                                                   weightDeco='TTVA_AMVFWeights_forHiggs')

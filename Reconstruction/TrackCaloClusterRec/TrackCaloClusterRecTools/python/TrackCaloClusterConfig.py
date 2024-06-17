@@ -50,7 +50,7 @@ def setupTrackCaloAssoc(flags, caloClusterName="CaloCalTopoClusters",detectorEta
 
     components.merge(caloExtAlg)    #since its a stack of algorithms
 
-    from InDetConfig.TrackVertexAssociationToolConfig import TTVAToolCfg
+    from TrackVertexAssociationTool.TrackVertexAssociationToolConfig import TTVAToolCfg
     TrackVertexAssoTool = components.popToolsAndMerge(
         TTVAToolCfg(flags, "tvaTool", WorkingPoint="Nonprompt_All_MaxWeight"))
 
@@ -115,7 +115,7 @@ def runTCCReconstruction(flags, caloClusterName="CaloCalTopoClusters", detectorE
     # and a list of tools to build the various TCC types.
     tccTools = []
 
-    from InDetConfig.TrackVertexAssociationToolConfig import TTVAToolCfg
+    from TrackVertexAssociationTool.TrackVertexAssociationToolConfig import TTVAToolCfg
     commonArgs=dict(
         TrackVertexAssoTool = components.popToolsAndMerge(
             TTVAToolCfg(flags,"tvaTool",WorkingPoint="Nonprompt_All_MaxWeight")),
@@ -172,7 +172,7 @@ def runUFOReconstruction(flags, constits, caloClusterName="CaloCalTopoClusters",
     )
     
 
-    from InDetConfig.TrackVertexAssociationToolConfig import TTVAToolCfg
+    from TrackVertexAssociationTool.TrackVertexAssociationToolConfig import TTVAToolCfg
     commonArgs=dict(
         TrackVertexAssoTool = components.popToolsAndMerge(
             TTVAToolCfg(flags,"tvaTool",WorkingPoint="Nonprompt_All_MaxWeight")),

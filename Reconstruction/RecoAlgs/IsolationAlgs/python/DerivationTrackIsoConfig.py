@@ -31,7 +31,7 @@ def DerivationTrackIsoCfg(flags,**jwarg):
         WP = jwarg['WP']
         # TrackIsolationTool need a specific track-vertex association tool
         #   if WP is not Nonprompt_All_MaxWeight
-        from InDetConfig.TrackVertexAssociationToolConfig import isoTTVAToolCfg
+        from TrackVertexAssociationTool.TrackVertexAssociationToolConfig import isoTTVAToolCfg
         ttvaCA = acc.popToolsAndMerge(
             isoTTVAToolCfg(flags, WorkingPoint = WP))
 

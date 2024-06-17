@@ -28,7 +28,7 @@ def MuonTrackIsolationDecorAlgCfg(
         ttvaWP = "Nonprompt_All_MaxWeight", trackPt=500., **kwargs):
 
     result = ComponentAccumulator()
-    from InDetConfig.TrackVertexAssociationToolConfig import isoTTVAToolCfg
+    from TrackVertexAssociationTool.TrackVertexAssociationToolConfig import isoTTVAToolCfg
     ttvaTool = result.popToolsAndMerge(
         isoTTVAToolCfg(ConfigFlags, WorkingPoint=ttvaWP))
     from InDetConfig.InDetTrackSelectionToolConfig import isoTrackSelectionToolCfg

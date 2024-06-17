@@ -93,6 +93,44 @@ def standardReco(input):
 ########################################################################
 ## List of standard input sources for jets.
 
+# Functions to check if upstream containers should exist. These are
+# implemented as lambda functions in the simpler cases.
+
+def _trackParticleInputsExist(flags):
+    warning = "Tracking is disabled and no InDetTrackParticles in input"
+    if "InDetTrackParticles" in flags.Input.Collections:
+        return True, warning
+    if isAnalysisRelease():
+        # we can't check reco flags in analysis release (and would not
+        # be building tracks anyway)
+        return False, warning
+    return flags.Reco.EnableTracking, warning
+
+def _muonSegmentInputsExist(flags):
+    warning = "Muon reco is disabled"
+    if "MuonSegments" in flags.Input.Collections:
+        return True, warning
+    if isAnalysisRelease():
+        # reco flags don't exist in analysis relase
+        return False, warning
+    return flags.Reco.EnableCombinedMuon, warning
+
+def _largeRTracksExist(flags):
+    warning = "Large radius tracking did not run"
+    if "InDetLargeD0TrackParticles" in flags.Input.Collections:
+        # the conditions here weren't the same as above: apparently we
+        # require _both_ the input condition _and_ the tracking
+        # flag. I don't know if this is what we want but it keeps with
+        # the existing behavior.
+        #
+        # Again, the isAnalysisRelease function is needed to short
+        # circuit the flag check, since flags.Tracking doesn't exist
+        # in analysis releases.
+        if isAnalysisRelease() or flags.Tracking.doLargeD0:
+            return True, warning
+    return False, warning
+
+
 _stdInputList = [
     # Format is :
     # JetInputExternal( containername , containerType, ...optionnal parameters... )
@@ -132,7 +170,7 @@ _stdInputList = [
     # *****************************
     JetInputExternal("InDetTrackParticles",   xAODType.TrackParticle,
                      algoBuilder = standardReco("Tracks"),
-                     filterfn = lambda flags : (flags.Reco.EnableTracking or "InDetTrackParticles" in flags.Input.Collections, "Tracking is disabled and no InDetTrackParticles in input")
+                     filterfn = _trackParticleInputsExist
                      ),
     # alternative ID tracks for AntiKt4LCTopo_EleRM jets used for the electron removed tau reconstruction  
     JetInputExternal("InDetTrackParticles_EleRM",   xAODType.TrackParticle),
@@ -218,7 +256,7 @@ _stdInputList = [
     # *****************************
     JetInputExternal("MuonSegments", "MuonSegment", algoBuilder=standardReco("Muons"),
                      prereqs = [inputsFromContext("Tracks")], # most likely wrong : what exactly do we need to build muon segments ?? (and not necessarily full muons ...)
-                     filterfn = lambda flags : (flags.Reco.EnableCombinedMuon or "MuonSegments" in flags.Input.Collections, "Muon reco is disabled"),
+                     filterfn = _muonSegmentInputsExist
                      ),
 
 
@@ -417,7 +455,7 @@ _stdSeqList = [
 
     # LRT. Only used as ghosts
     JetInputConstit("TrackLRT", xAODType.TrackParticle, "InDetLargeD0TrackParticles", 
-                    filterfn = lambda flags : (flags.Tracking.doLargeD0 and "InDetLargeD0TrackParticles" in flags.Input.Collections, "Large radius tracking did not run")),
+                    filterfn = _largeRTracksExist),
 
     # *****************************
     # Muon segments. Only used as ghosts

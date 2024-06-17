@@ -34,7 +34,7 @@ def TauVertexFinderCfg(flags):
     _name = flags.Tau.ActiveConfig.prefix + 'TauVertexFinder'
 
     from InDetConfig.InDetTrackSelectionToolConfig import Tau_InDetTrackSelectionToolForTJVACfg
-    from InDetConfig.TrackVertexAssociationToolConfig import TauTTVAToolCfg
+    from TrackVertexAssociationTool.TrackVertexAssociationToolConfig import TauTTVAToolCfg
 
     # Algorithm that overwrites numTrack() and charge() of tauJets in container
     # from tauRecTools.tauRecToolsConf import TauVertexFinder

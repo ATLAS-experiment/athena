@@ -51,6 +51,9 @@
 + InnerDetector/InDetRecTools/InDetTrackSelectionTool
 + InnerDetector/InDetRecTools/TrackVertexAssociationTool
 + InnerDetector/InDetRecTools/InDetSecVtxTruthMatchTool
++ InnerDetector/InDetRecTools/InDetUsedInFitTrackDecoratorTool
++ InnerDetector/InDetRecTools/InDetRecToolInterfaces
++ InnerDetector/InDetRecAlgs/InDetUsedInVertexFitTrackDecorator
 + MuonSpectrometer/MuonStationIndex
 - PhysicsAnalysis/Algorithms/StandaloneAnalysisAlgorithms
 + PhysicsAnalysis/Algorithms/.*
@@ -94,10 +97,13 @@
 + PhysicsAnalysis/TauID/TauAnalysisTools
 + PhysicsAnalysis/TrackingID/.*
 + Reconstruction/EventShapes/EventShapeInterface
++ Reconstruction/EventShapes/EventShapeTools
 - Reconstruction/Jet/JetEvent.*
 - Reconstruction/Jet/JetMonitoring
 - Reconstruction/Jet/JetInputsMonitoring
 + Reconstruction/Jet/JetReclustering
++ Reconstruction/Jet/JetRecConfig
++ Reconstruction/Jet/JetRecTools
 - Reconstruction/Jet/JetRec.+
 - Reconstruction/Jet/JetSimTools
 - Reconstruction/Jet/JetValidation

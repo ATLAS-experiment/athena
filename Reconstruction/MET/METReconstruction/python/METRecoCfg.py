@@ -226,7 +226,7 @@ class METConfig:
                                                                   maxD0=2,
                                                                   minPt=500)
             #
-            from InDetConfig.TrackVertexAssociationToolConfig import TTVAToolCfg
+            from TrackVertexAssociationTool.TrackVertexAssociationToolConfig import TTVAToolCfg
             self.trkvxtool = self.accumulator.popToolsAndMerge(
                 TTVAToolCfg(inputFlags, "TrackVertexAssociationTool_MET", addDecoAlg=True,
                             WorkingPoint="Nonprompt_All_MaxWeight", HardScatterLinkDeco=""))

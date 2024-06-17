@@ -28,7 +28,7 @@ from ..Jet.JetRecoCommon import (
 from ..Jet.JetRecoSequencesConfig import JetRecoDataDeps, JetRecoCfg
 from ..Jet.JetTrackingConfig import JetFSTrackingCfg
 from .StepOutput import StepOutput
-from InDetConfig.TrackVertexAssociationToolConfig import CVF_TTVAToolCfg
+from TrackVertexAssociationTool.TrackVertexAssociationToolConfig import CVF_TTVAToolCfg
 
 
 def jetRecoDictForMET(**recoDict) -> dict[str, Any]:
