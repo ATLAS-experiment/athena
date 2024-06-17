@@ -13,8 +13,6 @@
 
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
 #include "SCT_ReadoutGeometry/SCT_ModuleSideDesign.h"
-#include "SCT_ReadoutGeometry/SCT_ForwardModuleSideDesign.h"
-#include "SCT_ReadoutGeometry/SCT_BarrelModuleSideDesign.h"
 #include "SCT_ReadoutGeometry/StripStereoAnnulusDesign.h"
 
 FPGAClusterConverter::FPGAClusterConverter(const std::string& type, const std::string& name, const IInterface* parent):
@@ -451,9 +449,9 @@ StatusCode FPGAClusterConverter::createSCTCluster(const FPGATrackSimHit& h, cons
   const double col_y = siWidth.colRow().y();
 
   double scale_factor = 1.;
-  if ( fabs(col_x-1) < std::numeric_limits<double>::epsilon() )
+  if ( std::abs(col_x-1) < std::numeric_limits<double>::epsilon() )
     scale_factor = 1.05;
-  else if ( fabs(col_x-2) < std::numeric_limits<double>::epsilon() )
+  else if ( std::abs(col_x-2) < std::numeric_limits<double>::epsilon() )
     scale_factor = 0.27;
 
   auto cov = Amg::MatrixX(2,2);

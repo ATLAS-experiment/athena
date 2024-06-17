@@ -129,7 +129,6 @@ class FPGATrackSimLogicalHitsProcessAlg : public AthAlgorithm
         std::vector<FPGATrackSimCluster> m_spacepoints_1st, m_spacepoints_2nd;
         std::vector<FPGATrackSimHit>     m_hits_1st_miss, m_hits_2nd_miss;
         std::vector<FPGATrackSimTrack>   m_tracks_1st_guessedcheck, m_tracks_1st_nomiss, m_tracks_2nd_guessedcheck, m_tracks_2nd_nomiss;
-        std::vector<FPGATrackSimRoad>   m_roads_1st;
 
         // internal counters
         double m_evt = 0; // number of events passing event selection, independent of truth
