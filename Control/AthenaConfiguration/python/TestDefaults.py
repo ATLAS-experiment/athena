@@ -61,3 +61,29 @@ class defaultGeometryTags:
             return defaultGeometryTags.RUN3
         if flags.GeoModel.Run is LHCPeriod.Run4:
             return defaultGeometryTags.RUN4
+
+
+class defaultConditionsTags:
+    RUN2_DATA = "CONDBR2-BLKPA-2022-13"
+    RUN2_MC = "OFLCOND-MC16-SDR-RUN2-11"
+    # RUN3_DATA = "CONDBR2-BLKPA-2024-04"  # TODO: switch to proper global tag once available
+    RUN3_MC = "OFLCOND-MC23-SDR-RUN3-05"
+    RUN4_MC = "OFLCOND-MC21-SDR-RUN4-01"
+
+    @staticmethod
+    def autoconfigure(flags):
+        # TODO: uncomment when defaults are removed
+        # if flags.IOVDb.GlobalTag:
+        #     return flags.IOVDb.GlobalTag
+
+        from AthenaConfiguration.Enums import LHCPeriod
+        if flags.GeoModel.Run is LHCPeriod.Run1:
+            raise ValueError("No default conditions tags for Run 1")
+        if flags.GeoModel.Run is LHCPeriod.Run2:
+            return defaultConditionsTags.RUN2_MC if flags.Input.isMC else defaultConditionsTags.RUN2_DATA
+        if flags.GeoModel.Run is LHCPeriod.Run3:
+            if flags.Input.isMC:
+                return defaultConditionsTags.RUN3_MC
+            raise ValueError("No default data conditions tag for Run 3")
+        if flags.GeoModel.Run is LHCPeriod.Run4:
+            return defaultConditionsTags.RUN4_MC
