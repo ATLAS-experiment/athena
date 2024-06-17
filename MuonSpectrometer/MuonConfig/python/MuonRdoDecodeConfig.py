@@ -182,7 +182,7 @@ def MMRdoToPrepDataToolCfg(flags, name="MmRdoToPrepDataTool", **kwargs):
     kwargs.setdefault("ClusterBuilderTool",result.popToolsAndMerge(SimpleMMClusterBuilderToolCfg(flags)))
     from MuonConfig.MuonCalibrationConfig import NSWCalibToolCfg
     kwargs.setdefault("NSWCalibTool", result.popToolsAndMerge(NSWCalibToolCfg(flags)))   
-    kwargs["xAODKey"] =  "MM_Clusters" if flags.Muon.writexAODPRD else ""
+    kwargs["xAODKey"] =  "xAODMMClusters" if flags.Muon.writexAODPRD or flags.Muon.usePhaseIIGeoSetup else ""
  
     the_tool = CompFactory.Muon.MmRdoToPrepDataToolMT(name, **kwargs)
     result.setPrivateTools(the_tool)
