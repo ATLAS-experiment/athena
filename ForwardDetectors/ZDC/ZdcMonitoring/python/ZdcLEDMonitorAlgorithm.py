@@ -32,16 +32,41 @@ def ZdcLEDMonitoringConfig(inputFlags, run_type):
     n_sample_bins_default = 25
     lumi_block_max = 2000
     bcid_max = 3564
+    l1TriggerType_max = 256
     adc_sum_max = 8192.0
     max_adc_max = 4096.0
     nsamples_max = 25.0
     time_max = 75.0
 
 # --------------------------------------------------------------------------------------------------
+    zdcLEDAllEventsDiagMonTool = helper.addGroup(zdcLEDMonAlg, 'ZdcLEDAllEventsDiagnosis','ZDC/AllLEDEventsDiagnosis/')
 
     zdcModLEDMonToolArr = helper.addArray([nLEDs,nSides,nModules],zdcLEDMonAlg,'ZdcModLEDMonitor', topPath='ZDC/ZDCLED/')
     rpdChanLEDMonToolArr = helper.addArray([nLEDs,nSides,nChannels],zdcLEDMonAlg,'RPDChanLEDMonitor', topPath='ZDC/RPDLED/')
 
+# ------------------------- All-event (including bad events) diagnostic histograms -------------------------
+
+
+    zdcLEDAllEventsDiagMonTool.defineHistogram('bcid', title=';BCID;Events',
+                            path='BCID',
+                            xbins=bcid_max,xmin=0.0,xmax=bcid_max)
+
+    zdcLEDAllEventsDiagMonTool.defineHistogram('l1TriggerType', title=';L1TriggerType;Events',
+                            path='L1TriggerType',
+                            xbins=l1TriggerType_max,xmin=0.0,xmax=l1TriggerType_max)
+
+    zdcLEDAllEventsDiagMonTool.defineHistogram('lumiBlock, bcid', type='TH2F', title=';lumi block;BCID',
+                            path='BCID',
+                            xbins=int(lumi_block_max/10),xmin=0.0,xmax=lumi_block_max,
+                            ybins=bcid_max,ymin=0.0,ymax=bcid_max)
+
+    zdcLEDAllEventsDiagMonTool.defineHistogram('lumiBlock, l1TriggerType', type='TH2F', title=';lumi block;L1TriggerType',
+                            path='L1TriggerType',
+                            xbins=int(lumi_block_max/10),xmin=0.0,xmax=lumi_block_max,
+                            ybins=l1TriggerType_max,ymin=0.0,ymax=l1TriggerType_max)
+
+
+# -------------------------------------------- Observables ------------------------------------------------------
  
     zdcModLEDMonToolArr.defineHistogram('zdcLEDADCSum', title='LED ADC Sum [ADC Counts];Events',
                             path='zdcLEDADCSum',
