@@ -119,6 +119,7 @@ private:
 
   StringProperty m_beam1{this, "Beam1", "PROTON"};
   StringProperty m_beam2{this, "Beam2", "PROTON"};
+  bool m_override_transform_beamenergy{false};
 
   StringProperty m_lheFile{this, "LHEFile", ""};
 

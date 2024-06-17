@@ -181,7 +181,17 @@ StatusCode Pythia8_i::genInitialize() {
   for(const std::string &cmd : m_commands){
 
     if(cmd.compare("")==0) continue;
-
+    else if (cmd.find("Beams:id") != std::string::npos ) {
+      ATH_MSG_ERROR("With command '" << cmd << "' you are trying to set a beam different from p: please use the Beam1/Beam2 properties instead:"); 
+      ATH_MSG_ERROR("                               example:  genSeq.Pythia8.Beam1 = 'LEAD'");
+      ATH_MSG_ERROR("                                         genSeq.Pythia8.Beam2 = 'ANTINEUTRON'");
+      return StatusCode::FAILURE;
+    }
+    else if (cmd.find("Beams:frameType") != std::string::npos ) {
+      m_override_transform_beamenergy = true;
+      ATH_MSG_WARNING(" Found an explicit 'Beams:frameType' command: this will override transform beams momenta/energy parameters, regardless of its requested value. ");
+    }
+    
     bool read = m_pythia->readString(cmd);
 
     if(!read){
@@ -290,10 +300,12 @@ StatusCode Pythia8_i::genInitialize() {
       ATH_MSG_ERROR("Pythia 8 initialisation will FAIL!");
     }
   }else{
-    canInit = canInit && m_pythia->readString("Beams:frameType = 1");
+    if (!m_override_transform_beamenergy){
+      canInit = canInit && m_pythia->readString("Beams:frameType = 1");
+      canInit = canInit && m_pythia->readString("Beams:eCM = " + std::to_string(m_collisionEnergy));
+    }
     canInit = canInit && m_pythia->readString("Beams:idA = " + std::to_string(beam1));
     canInit = canInit && m_pythia->readString("Beams:idB = " + std::to_string(beam2));
-    canInit = canInit && m_pythia->readString("Beams:eCM = " + std::to_string(m_collisionEnergy));
   }
 
   if(m_procPtr){
