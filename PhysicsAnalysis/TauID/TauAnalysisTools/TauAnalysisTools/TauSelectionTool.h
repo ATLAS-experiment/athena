@@ -41,6 +41,7 @@ class TauSelectionCutAbsCharge;
 class TauSelectionCutNTracks;
 class TauSelectionCutJetIDWP;
 class TauSelectionCutRNNJetScoreSigTrans;
+class TauSelectionCutGNTauScoreSigTrans;
 class TauSelectionCutRNNEleScore;
 class TauSelectionCutEleIDWP;
 class TauSelectionCutMuonOLR;
@@ -59,6 +60,7 @@ class TauSelectionTool : public virtual IAsgSelectionTool,
   friend class TauSelectionCutNTracks;
   friend class TauSelectionCutJetIDWP;
   friend class TauSelectionCutRNNJetScoreSigTrans;
+  friend class TauSelectionCutGNTauScoreSigTrans;
   friend class TauSelectionCutRNNEleScore;
   friend class TauSelectionCutEleIDWP;
   friend class TauSelectionCutMuonOLR;
@@ -123,6 +125,8 @@ private:
   std::vector<unsigned> m_vNTracks;
   // vector of JetRNNSigTrans cut regions
   std::vector<float> m_vJetRNNSigTransRegion;
+  // vector of GNTauSigTrans cut regions
+  std::vector<float> m_vGNTauSigTransRegion;
   // JetID working point
   std::string m_sJetIDWP;
   int m_iJetIDWP;
@@ -143,6 +147,8 @@ private:
   float m_iNTrack;
   float m_dJetRNNSigTransMin;
   float m_dJetRNNSigTransMax;
+  float m_dGNTauSigTransMin;
+  float m_dGNTauSigTransMax;
   float m_dEleRNNMin;
   float m_dEleRNNMax;
 
@@ -156,6 +162,7 @@ private:
   SG::ReadHandleKey<xAOD::MuonContainer> m_muonContainerKey {this, "MuonContainerName", "Muons", "Muon container name"};
   SG::ReadHandleKey<xAOD::TauJetContainer> m_tauContainerKey {this, "TauContainerName", "TauJets", "Tau container name"};
   SG::ReadDecorHandleKey<xAOD::TauJetContainer> m_eVetoDecorKey {this, "eVetoDecorName", "", "Name of eVeto decoration"};
+  SG::ReadDecorHandleKey<xAOD::TauJetContainer> m_GNTauDecorKey {this, "GNTauDecorName", "", "Name of GnTauID decoration"};
 
   std::map<SelectionCuts, std::unique_ptr<TauAnalysisTools::TauSelectionCut>> m_cMap;
 

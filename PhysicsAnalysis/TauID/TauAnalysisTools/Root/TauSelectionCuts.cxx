@@ -295,6 +295,46 @@ bool TauSelectionCutRNNJetScoreSigTrans::accept(const xAOD::TauJet& xTau,
   return false;
 }
 
+//___________________________SelectionCutGNTauScoreSigTrans____________________________
+//______________________________________________________________________________
+TauSelectionCutGNTauScoreSigTrans::TauSelectionCutGNTauScoreSigTrans(TauSelectionTool* tTST)
+  : TauSelectionCut("CutGNTauScoreSigTrans", tTST)
+{
+  m_hHistCutPre = CreateControlPlot("hGNTauSigTrans_pre","GNTauSigTrans_pre;GNTauSigTransScore; events",100,0,1);
+  m_hHistCut = CreateControlPlot("hGNTauSigTrans_cut","GNTauSigTrans_cut;GNTauSigTransScore; events",100,0,1);
+}
+//______________________________________________________________________________
+void TauSelectionCutGNTauScoreSigTrans::fillHistogram(const xAOD::TauJet& xTau, TH1F& hHist) const
+{
+  SG::ConstAccessor<float> acc ("GNTauScoreSigTrans_v0");
+  hHist.Fill(acc(xTau));
+}
+//______________________________________________________________________________
+void TauSelectionCutGNTauScoreSigTrans::setAcceptInfo(asg::AcceptInfo& info) const
+{
+  info.addCut( "GNTauScoreSigTrans",
+               "Selection of taus according to their GNTauScore" );
+}
+//______________________________________________________________________________
+bool TauSelectionCutGNTauScoreSigTrans::accept(const xAOD::TauJet& xTau,
+                                             asg::AcceptData& acceptData)
+{
+  // check GNTau score, if tau has a GNTau score in one of the regions requiered then return true; false otherwise
+  SG::ConstAccessor<float> acc ("GNTauScoreSigTrans_v0");
+  double dGNTauScoreSigTrans = acc(xTau); 
+  unsigned int iNumGNTauSigTransRegion = m_tTST->m_vGNTauSigTransRegion.size()/2;
+  for( unsigned int iGNTauSigTransRegion = 0; iGNTauSigTransRegion < iNumGNTauSigTransRegion; iGNTauSigTransRegion++ )
+  {
+    if ( dGNTauScoreSigTrans >= m_tTST->m_vGNTauSigTransRegion.at(iGNTauSigTransRegion*2) and dGNTauScoreSigTrans <= m_tTST->m_vGNTauSigTransRegion.at(iGNTauSigTransRegion*2+1))
+    {
+      acceptData.setCutResult( "GNTauScoreSigTrans", true );
+      return true;
+    }
+  }
+  m_tTST->msg() << MSG::VERBOSE << "Tau failed GNTauScore requirement, tau GNTauScore: " << dGNTauScoreSigTrans << endmsg;
+  return false;
+}
+
 //_____________________________SelectionCutJetIDWP______________________________
 //______________________________________________________________________________
 TauSelectionCutJetIDWP::TauSelectionCutJetIDWP(TauSelectionTool* tTST)
