@@ -143,7 +143,7 @@ class MuonSegmentReader : public AthHistogramAlgorithm
         VectorBranch<int>& m_trk_nTgcEtaHits{m_tree.newVector<int>("trk_nTgcEtaHits")}; 
 
         // Muon Track Hit branches (MDT)
-        VectorBranch<int>& m_trkHit_nMdtHits{m_tree.newVector<int>("trkHit_nMdtHits")};
+        ScalarBranch<int>& m_trkHit_nMdtHits{m_tree.newScalar<int>("trkHit_nMdtHits")};    // total MDT track hits
         VectorBranch<int>& m_trkHit_trackIndex{m_tree.newVector<int>("trkHit_trackIndex")};        
         ThreeVectorBranch m_trkHit_gPos{m_tree,"trkHit_gPos"} ;
         ThreeVectorBranch m_trkHit_pos{m_tree,"trkHit_pos"} ;
@@ -178,7 +178,7 @@ class MuonSegmentReader : public AthHistogramAlgorithm
         VectorBranch<int>& m_trkHit_calibStatus{m_tree.newVector<int>("trkHit_calibStatus")}; 
 
         // Muon Track Hole branches (MDT)
-        VectorBranch<int>& m_trkHole_nHoles{m_tree.newVector<int>("trkHole_nHoles")};
+        ScalarBranch<int>& m_trkHole_nHoles{m_tree.newScalar<int>("trkHole_nHoles")};  // total holes
         VectorBranch<int>& m_trkHole_trackIndex{m_tree.newVector<int>("trkHole_trackIndex")};        
         VectorBranch<int>& m_trkHole_type{m_tree.newVector<int>("trkHole_type")};       // 1 MDT, 2 RPC, 3 TGC
         ThreeVectorBranch m_trkHole_gPos{m_tree,"trkHole_gPos"} ;  
@@ -186,7 +186,7 @@ class MuonSegmentReader : public AthHistogramAlgorithm
         VectorBranch<float>& m_trkHole_driftRadius{m_tree.newVector<float>("trkHole_driftRadius")};   
 
         // Muon Track trigger hit branches (RPC & TGC)
-        VectorBranch<int>& m_trkTriggerHit_nHits{m_tree.newVector<int>("trkTriggerHit_nHits")};
+        ScalarBranch<int>& m_trkTriggerHit_nHits{m_tree.newScalar<int>("trkTriggerHit_nHits")};  // total trigger hits
         VectorBranch<int>& m_trkTriggerHit_trackIndex{m_tree.newVector<int>("trkTriggerHit_trackIndex")};        
         VectorBranch<int>& m_trkTriggerHit_type{m_tree.newVector<int>("trkTriggerHit_type")};      // 0 unknown, 1 RPC rot, 2 RPC crot, 3 TGC rot, 4 TGC strip, 5 TGC wire   
         ThreeVectorBranch m_trkTriggerHit_gPos{m_tree,"trkTriggerHit_gPos"} ;  
