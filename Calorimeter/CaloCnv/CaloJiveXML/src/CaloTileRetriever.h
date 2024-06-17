@@ -1,21 +1,18 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JIVEXML_CALOTILERETRIEVER_H
 #define JIVEXML_CALOTILERETRIEVER_H
 
-#include <string>
-#include <vector>
-#include <cstddef>
-#include <map>
+
+
 
 #include "TileConditions/TileCondToolTiming.h"
 #include "TileConditions/TileCondToolEmscale.h"
 #include "TileConditions/ITileBadChanTool.h"
 
 #include "CaloEvent/CaloCellContainer.h"
-#include "CaloIdentifier/CaloCell_ID.h"
 
 #include "TileEvent/TileDigitsContainer.h"
 #include "TileEvent/TileRawChannelContainer.h"
@@ -23,11 +20,10 @@
 #include "JiveXML/IDataRetriever.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
+#include <string>
 
-class IToolSvc;
-
+class CaloCell_ID;
 class Identifier;
-class CaloCellContainer;
 
 namespace JiveXML{
   
