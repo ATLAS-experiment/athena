@@ -122,6 +122,17 @@ private:
   virtual void fillHistogram(const xAOD::TauJet& xTau, TH1F& hHist) const override;
 };
 
+class TauSelectionCutGNTauScoreSigTrans
+  : public TauSelectionCut
+{
+public:
+  TauSelectionCutGNTauScoreSigTrans(TauSelectionTool* tTST);
+  virtual void setAcceptInfo (asg::AcceptInfo& info) const override;
+  virtual bool accept(const xAOD::TauJet& xTau,
+                      asg::AcceptData& accept) override;
+private:
+  virtual void fillHistogram(const xAOD::TauJet& xTau, TH1F& hHist) const override;
+};
 
 class TauSelectionCutJetIDWP
   : public TauSelectionCut
