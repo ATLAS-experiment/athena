@@ -15,9 +15,6 @@
 #include <string>
 #include <map>
 
-// McParticleUtils includes
-#include "McParticleUtils/McVtxFilter.h"
-
 // McParticleTools includes
 #include "TruthParticleFilterBaseTool.h"
 
@@ -170,17 +167,6 @@ class EtaPtFilterTool : public TruthParticleFilterBaseTool
    */
   BooleanProperty m_keepAllLeptons;
 
-  /** Predicate to select pp->X vertices where p is a parton (q,g)
-   *  This will select vertices:
-   *    q+q' -> X
-   *    q+g  -> X
-   *    g+g  -> X
-   */
-  McVtxFilter m_ppFilter;
-
-  /** Predicate to remove shower vertices: X -> 92 | 94
-   */
-  McVtxFilter m_showerFilter;
   
   /* For the isolation */
   std::map<int,double> m_isol_energies;

@@ -25,6 +25,9 @@
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/Flow.h"
 #include "AtlasHepMC/Polarization.h"
+
+#include "TruthUtils/HepMCHelpers.h"
+
 // McParticleKernel includes
 #include "McParticleKernel/IIOHepMcTool.h"
 
@@ -111,14 +114,6 @@ StatusCode GenAodValidationTool::initializeTool()
     }
     return StatusCode::FAILURE;
   }
-
-  // configure hard-scattering vertices
-  m_ppFilter.setDecayPattern( "-1|-2|-3|-4|-5|-6|21 + 1|2|3|4|5|6|21 -> " );
-  
-  // filter which will be used to not select shower vertices while
-  // looking for hard-scattering vertices
-  m_showerFilter.setDecayPattern( "-> 91|92|94" );
-
 
   // retrieve and configure HepMC writer tools
   if ( setupHepMcWriterTools().isFailure() ) {
@@ -236,7 +231,12 @@ GenAodValidationTool::executeTool( const HepMC::GenEvent* refMcEvts,
   std::map<int,int> ref_bc_to_id;
   const auto& refvertices = refMcEvts->vertices();
   for ( const auto&  vtx: refvertices) {
-    if ( m_ppFilter.isAccepted(vtx) &&  !m_showerFilter.isAccepted(vtx) ) {
+    // AV: this algorthm is not very correct
+    int partonsin = 0;
+    int showerout = 0;
+    for (auto& p: vtx->particles_in()) if (MC::isQuark(p) || MC::isGluon(p)) partonsin++;
+    for (auto& p: vtx->particles_out()) if (p->pdg_id() == 91||p->pdg_id() == 92||p->pdg_id() == 94)  showerout++;
+    if ( partonsin >= 2 &&  showerout == 0 ) {
       ref_bc_to_id[HepMC::barcode(vtx)] = vtx->id();
    }
   }
@@ -269,7 +269,11 @@ GenAodValidationTool::executeTool( const HepMC::GenEvent* refMcEvts,
   std::set<int> ref_bc;
   for ( auto vtxIt = refMcEvts->vertices_begin(); vtxIt != refMcEvts->vertices_end(); ++vtxIt ) {
     auto vtx =*vtxIt;
-    if ( m_ppFilter.isAccepted(vtx) &&  !m_showerFilter.isAccepted(vtx) ) {
+    int partonsin = 0;
+    int showerout = 0;
+    for (auto p = vtx->particles_in_begin();p!=vtx->particles_in_end();++p ) if (MC::isQuark(*p) || MC::isGluon(*p)) partonsin++;
+    for (auto p = vtx->particles_out_begin();p!=vtx->particles_out_end();++p ) if (*p->pdg_id() == 91||*p->pdg_id() == 92||*p->pdg_id() == 94)  showerout++;
+    if ( partonsin >= 2 &&  showerout == 0 ) {
       ref_bc.insert(vtx->barcode());
    }
   }
