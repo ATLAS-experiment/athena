@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetSimTools/JetTruthParticleSelectorTool.h"
@@ -20,9 +20,6 @@
 #include "TruthUtils/HepMCHelpers.h"
 
 namespace {
-  // TEMPORARY recopy some helper from TruthHelper and GeneratorUtils packages. 
-  // We'll have to use this package when they work properly with xAOD.
-
 
   bool isWZDecay(const xAOD::TruthParticle* p) {
     int pdg_id = std::abs(p->pdgId() );
@@ -54,9 +51,8 @@ namespace {
     // This suppresses fave Z's from conversions
     if (vprod && vprod->nIncomingParticles() >1)
       {
-	//std::cout << "Looping over vertex daughters: "<< vprod->particles_out_size() << std::endl;
 	for( const auto& elTruth : vprod->outgoingParticleLinks() ){
-	  if ((abs((*elTruth)->pdgId())>10 && abs((*elTruth)->pdgId())<17) ) nDecay++;
+	  if (MC::isSMLepton(*elTruth)) nDecay++;
 	}
       }
 
@@ -77,23 +73,14 @@ namespace {
         //  Save lepton reference for comparison to FSR photons (only for muons and electrons)
         if(MC::isStable(p) && (  (pdg_id==11) || (pdg_id==13) ) ) {
 	  wzLeptons.push_back(p);
-	  // std::cout << "isWZDecay found pdgId: " << pdg_id << " status: " << p->status() << std::endl;
-	  // std::cout << "isWZDecay: have " << wzLeptons.size() << " W/Z leptons" << std::endl;
 	}
  
         // Only exclude photons within deltaR of leptons (if m_photonCone<0, exclude all photons)
         if( pdg_id == 22 && photonCone2>0)
           {
-            if(MC::isStable(p) && MC::isPhoton(p)) {
-	      // std::cout << "isWZDecay: found pdgId: " << p->pdgId() << " status: " << p->status() << std::endl;
-	      // std::cout << "isWZDecay: have " << wzLeptons.size() << " W/Z leptons" << std::endl;
-	    }
             for( const auto *lep: wzLeptons) {
               double deltaR2 = jet::JetDistances::deltaR2(*p, *lep);
-	      // std::cout << "Photon/lepton dR = " << sqrt(deltaR2) << std::endl;
               if( deltaR2 < photonCone2 ) {
-		// std::cout << "  isWZDecay: Killed a photon with pt " << p->pt()
-		// 	  << " near to a " << lep->pdgId() << " with pt " << lep->pt() << std::endl;
 		return true;
 	      }
             }
@@ -101,7 +88,7 @@ namespace {
         else // not a photon so exclude
           return true;
       }
-    }// if(vprod && vprod>nIncomingParticles>0)
+    }
     return false;
   }
 
@@ -115,13 +102,10 @@ namespace {
     if(!part->hasProdVtx()) return false;
     const xAOD::TruthVertex* prod = part->prodVtx();
     if(!prod) return false; // no parent.
-
     
     for( const auto& elParent : prod->incomingParticleLinks() ){
       int parentId = (*elParent)->pdgId();
       if(abs(parentId) == 15 && isWZDecay(*elParent)) {
-	// std::cout << "isLeptonFromTau: particle " << pdg << " with pt " << part->pt()
-	// 	  << " has tau parent!" << std::endl;
         return true; // Has tau parent
       }
 
@@ -149,8 +133,6 @@ JetTruthParticleSelectorTool::JetTruthParticleSelectorTool(const std::string& n)
   m_minEta(-5),
   m_maxEta( 5),
   m_wzPhotonCone(0.1),
-  // m_includeMuons(false),
-  // m_useOnlyInteracting(true),
   m_useOnlyCharged(false),
   m_listPDGofStables(false),
   m_selectionModeName("StableNoMuonNoNu"),

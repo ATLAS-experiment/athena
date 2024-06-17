@@ -404,7 +404,7 @@ std::unique_ptr<HepMC::GenEvent> Rivet_i::checkEvent(const HepMC::GenEvent& even
     // remove particles incorrectly labelled as beam particles
     std::vector<HepMC::GenParticlePtr> notBeams;
     for (const HepMC::GenParticlePtr& p : modEvent->beams()) {
-      if (p->status() != 4)  notBeams.push_back(p);
+      if (!MC::isBeam(p))  notBeams.push_back(p);
     }
     //AV: the loop is over shared pointers! Should be const auto&
     for (const auto& bp : notBeams)  bp->production_vertex()->remove_particle_out(bp);

@@ -132,13 +132,12 @@ StatusCode xAODTruthParticleSlimmerTau::execute()
 
     float this_abseta = theParticle->abseta();
     float this_pt = theParticle->pt();
-    int this_status = theParticle->status();
 
 
     //Save Taus above 0.001 GeV, & with any eta (may be changed on JOs level eg. to dectector acceptance of eta 4.5)
     // see GeneratorFilters/share/common/xAODTauFilter_Common.py
     // we want to avoid status 3 taus
-    if (this_status != 3 && MC::isTau(theParticle) && this_pt >= m_tau_pt_selection && this_abseta < m_abseta_selection)
+    if (MC::isPhysical(theParticle) && MC::isTau(theParticle) && this_pt >= m_tau_pt_selection && this_abseta < m_abseta_selection)
     {
       xAOD::TruthParticle *xTruthParticle = new xAOD::TruthParticle();
 

@@ -17,6 +17,7 @@
 // To look up which generator is being used
 #include "StoreGate/StoreGateSvc.h"
 #include "xAODTruth/TruthMetaDataContainer.h"
+#include "TruthUtils/HepMCHelpers.h"
 // STL Includes
 #include <vector>
 #include <string>
@@ -195,7 +196,7 @@ StatusCode DerivationFramework::TruthCollectionMaker::addBranches() const
                     // Nullptr check
                     if (!truthParticles->at(i)) continue;
                     // Only collect leptons
-                    if (truthParticles->at(i)->absPdgId()<11 || truthParticles->at(i)->absPdgId()>16) continue;
+                    if (!MC::isSMLepton(truthParticles->at(i))) continue;
                     // Gather by status
                     if (truthParticles->at(i)->status()==20) status20.push_back( truthParticles->at(i) );
                     if (truthParticles->at(i)->status()== 3) status3.push_back(  truthParticles->at(i) );

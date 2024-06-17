@@ -800,7 +800,7 @@ namespace DerivationFramework{
     for(unsigned int i=0; i<part->nParents(); ++i){
       const xAOD::TruthParticle* parent = part->parent(i);
       if( HepMC::barcode(part) < HepMC::barcode(parent) &&  looping ) continue; /// protection for sherpa FIXME barcode-based
-      if( abs(parent->pdgId())== 2212 && part->status()!=3) return true;
+      if( abs(parent->pdgId())== 2212 && MC::isPhysical(part)) return true;
 
     }
 

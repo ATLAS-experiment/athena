@@ -81,11 +81,6 @@ namespace JiveXML {
      statusList += std::to_string((*mcpartItr)->status()) + "_";
 
      if ( (*mcpartItr)->et()/CLHEP::GeV < m_truthPtCut ){ continue; }
-/*
-     if ((*mcpartItr)->hasPdgId() == false) { continue; }
-///// status is pythia only. May fail for other MCs     
-     if ( (*mcpartItr)->status() != 2 ){ continue; } 
-*/     
      if ( abs( (*mcpartItr)->pdgId()) > m_truthMaximumPdgId ){ continue; }
 
      pdgId2 = (*mcpartItr)->pdgId();
