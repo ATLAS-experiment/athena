@@ -121,27 +121,3 @@ QStringList PRDHandle_MM::clicked() const
 
     return l;
 }
-
-// //____________________________________________________________________
-// QString PRDHandle_MM::driftCircleStatus() const
-// {
-//   QString status;
-//   switch (m_prd->status()){
-//     case  Muon::MdtStatusMasked:
-//       status+="Masked"; 
-//       break;
-//     case Muon::MdtStatusDriftTime:
-//       status+="Drift Time";
-//       break;
-//     case Muon::MdtStatusBeforeSpectrum:
-//       status+="Before Spectrum";
-//       break;    
-//     case Muon::MdtStatusAfterSpectrum:
-//       status+="After Spectrum";
-//       break;
-//     default:
-//       status+=" Unknown with value = "+m_prd->status();
-//   }
-//   return status;
-// }
-

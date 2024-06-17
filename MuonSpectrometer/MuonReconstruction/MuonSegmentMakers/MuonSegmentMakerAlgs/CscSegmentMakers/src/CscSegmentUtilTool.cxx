@@ -2116,7 +2116,7 @@ void CscSegmentUtilTool::getRios(const ICscSegmentFinder::Segment& seg, ICscSegm
 
         if (pclu != nullptr) {
             // if this cluster is picked up as outlier cluster
-            if (seg.outlierid == iclu) {  // && pclu->status() == Muon::CscStatusUnspoiled) {
+            if (seg.outlierid == iclu) {
                 Identifier id = pclu->identify();
 
                 // get prep raw data.
