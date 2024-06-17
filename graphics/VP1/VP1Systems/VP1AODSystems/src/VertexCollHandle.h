@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -121,9 +121,9 @@ public Q_SLOTS:
   void setVertexSize(int);
 
   //getters
-  VP1Interval getCutAllowedY() {return m_cut_allowedY; };
-  VP1Interval getCutAllowedZ() {return m_cut_allowedZ; };
-  VP1Interval getCutAllowedR() {return m_cut_allowedR; };
+  const VP1Interval& getCutAllowedY() {return m_cut_allowedY; };
+  const VP1Interval& getCutAllowedZ() {return m_cut_allowedZ; };
+  const VP1Interval& getCutAllowedR() {return m_cut_allowedR; };
   bool        getYAllowall() {return m_cut_y_allowall; };
   bool        getZAllowall() {return m_cut_z_allowall; };
   bool        getRAllowall() {return m_cut_r_allowall; };
