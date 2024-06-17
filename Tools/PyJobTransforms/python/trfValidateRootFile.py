@@ -143,6 +143,9 @@ def checkNTuplePageWise(ntuple):
 
 def checkDirectory(directory, the_type, requireTree):
 
+    from PyUtils import PoolFile
+    eventData = False
+
     msg.debug('Checking directory %s ...', directory.GetName())
 
     listOfKeys=directory.GetListOfKeys()
@@ -166,6 +169,9 @@ def checkDirectory(directory, the_type, requireTree):
         if isinstance(the_object,TTree):
 
             msg.debug('Checking tree %s ...', the_object.GetName())
+
+            if not eventData and PoolFile.PoolOpts.TTreeNames.EventData == the_object.GetName():
+                eventData = True
             
             if the_type=='event':
                 if checkTreeEventWise(the_object)==1:
@@ -180,6 +186,15 @@ def checkDirectory(directory, the_type, requireTree):
 
             msg.debug('Checking ntuple of key %s ...', key.GetName())
 
+            try:
+                reader=RNTupleReader.Open(the_object)
+            except Exception as err:
+                msg.warning('Could not open ntuple %s: %s', the_object, err)
+                return 1
+
+            if not eventData and PoolFile.PoolOpts.RNTupleNames.EventData == reader.GetDescriptor().GetName():
+                eventData = True
+
             if the_type=='event':
                 if checkNTupleEventWise(the_object)==1:
                     return 1
@@ -190,11 +205,17 @@ def checkDirectory(directory, the_type, requireTree):
             msg.debug('NTuple of key %s looks ok.', key.GetName())
             
         if isinstance(the_object, TDirectory):
-            if checkDirectory(the_object, the_type, requireTree)==1:
+            if (rc := checkDirectory(the_object, the_type, requireTree))==1:
                 return 1
+            elif not eventData and rc == 0:
+                eventData = True
 
-    msg.debug('Directory %s looks ok.', directory.GetName())
-    return 0
+    if eventData:
+        msg.debug('Directory %s looks ok.', directory.GetName())
+        return 0
+    else:
+        msg.warning('Directory %s does not contain event data.', directory.GetName())
+        return 2
 
 
 def checkFile(fileName, the_type, requireTree):
@@ -227,8 +248,11 @@ def checkFile(fileName, the_type, requireTree):
         file_handle.Close()
         return 1
 
-    if checkDirectory(file_handle, the_type, requireTree)==1:
+    if (rc := checkDirectory(file_handle, the_type, requireTree))==1:
         msg.warning("File %s is corrupted.", fileName)
+    elif rc == 2:
+        msg.warning('File %s does not contain event data.', fileName)
+    if rc != 0:
         file_handle.Close()
         return 1
 
