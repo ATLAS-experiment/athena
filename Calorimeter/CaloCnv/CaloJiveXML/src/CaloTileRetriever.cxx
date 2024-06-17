@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloTileRetriever.h"
@@ -19,6 +19,10 @@
 #include "TileConditions/TileInfo.h"
 #include "TileConditions/TileCablingService.h"
 #include "TileCalibBlobObjs/TileCalibUtils.h"
+#include <vector>
+#include <cstddef>
+#include <map>
+#include <stdexcept>
 
 using Athena::Units::GeV;
 
@@ -361,7 +365,10 @@ namespace JiveXML {
       if (m_doTileCellDetails) {
 
         const TileCell* theTileCell = dynamic_cast<const TileCell *>(*it1);
-
+        if (not theTileCell) {
+          //should never happen
+          throw std::runtime_error("Could not cast pointer to TileCell in CaloTileRetriever::getCaloTileData");
+        }
         int  gain1  = theTileCell->gain1();
         int  qual1  = theTileCell->qual1();
         bool badch1 = theTileCell->badch1();
@@ -493,47 +500,48 @@ namespace JiveXML {
     if ( !pmt2digit.empty() ) pmt2digit.clear();
 
     // write values into DataMap
-    DataMap["phi"] = phi;
-    DataMap["eta"] = eta;
+    auto n =  phi.size();
+    DataMap["phi"] = std::move(phi);
+    DataMap["eta"] = std::move(eta);
     DataMap["sub"] = m_sub;
-    DataMap["id"] = idVec;
-    DataMap["energy"] = energyVec;
+    DataMap["id"] = std::move(idVec);
+    DataMap["energy"] = std::move(energyVec);
 
 
     //BadCells
     if (m_doBadTile==true) {
-      DataMap["BadCell"]= BadCell;
+      DataMap["BadCell"]= std::move(BadCell);
     }
 
     if (m_doTileCellDetails) {
-      DataMap["pmt1Energy"] = pmt1Energy;
-      DataMap["pmt1Time"] = pmt1Time;
-      DataMap["pmt1Chi2"] = pmt1Chi2;
-      DataMap["pmt1Gain"] = pmt1Gain;
+      DataMap["pmt1Energy"] = std::move(pmt1Energy);
+      DataMap["pmt1Time"] = std::move(pmt1Time);
+      DataMap["pmt1Chi2"] = std::move(pmt1Chi2);
+      DataMap["pmt1Gain"] = std::move(pmt1Gain);
 
-      DataMap["pmt2Energy"] = pmt2Energy;
-      DataMap["pmt2Time"] = pmt2Time;
-      DataMap["pmt2Chi2"] = pmt2Chi2;
-      DataMap["pmt2Gain"] = pmt2Gain;
+      DataMap["pmt2Energy"] = std::move(pmt2Energy);
+      DataMap["pmt2Time"] = std::move(pmt2Time);
+      DataMap["pmt2Chi2"] = std::move(pmt2Chi2);
+      DataMap["pmt2Gain"] = std::move(pmt2Gain);
 
-      DataMap["pmt1RawAmplitude"] = pmt1RawAmplitude;
-      DataMap["pmt1RawTime"] = pmt1RawTime;
-      DataMap["pmt1ADCStatus"] = pmt1ADCStatus;
-      DataMap["pmt1Number"] = pmt1Number;
-      DataMap["pmt1Pedestal"] = pmt1Pedestal;
+      DataMap["pmt1RawAmplitude"] = std::move(pmt1RawAmplitude);
+      DataMap["pmt1RawTime"] = std::move(pmt1RawTime);
+      DataMap["pmt1ADCStatus"] = std::move(pmt1ADCStatus);
+      DataMap["pmt1Number"] = std::move(pmt1Number);
+      DataMap["pmt1Pedestal"] = std::move(pmt1Pedestal);
 
-      DataMap["pmt2RawAmplitude"] = pmt2RawAmplitude;
-      DataMap["pmt2RawTime"] = pmt2RawTime;
-      DataMap["pmt2ADCStatus"] = pmt2ADCStatus;
-      DataMap["pmt2Number"] = pmt2Number;
-      DataMap["pmt2Pedestal"] = pmt2Pedestal;
+      DataMap["pmt2RawAmplitude"] = std::move(pmt2RawAmplitude);
+      DataMap["pmt2RawTime"] = std::move(pmt2RawTime);
+      DataMap["pmt2ADCStatus"] = std::move(pmt2ADCStatus);
+      DataMap["pmt2Number"] = std::move(pmt2Number);
+      DataMap["pmt2Pedestal"] = std::move(pmt2Pedestal);
     }
 
-    DataMap[adcCounts1Str] = adcCounts1Vec;
-    DataMap[adcCounts2Str] = adcCounts2Vec;
+    DataMap[adcCounts1Str] = std::move( adcCounts1Vec);
+    DataMap[adcCounts2Str] = std::move(adcCounts2Vec);
 
     //Be verbose
-    ATH_MSG_DEBUG( dataTypeName() << " retrieved with " << phi.size() << " entries" );
+    ATH_MSG_DEBUG( dataTypeName() << " retrieved with " << n << " entries" );
 
     //All collections retrieved okay
     return DataMap;
