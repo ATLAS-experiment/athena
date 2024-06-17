@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -108,8 +108,8 @@ public Q_SLOTS:
   void setCutAllowedPhi(const QList<VP1Interval>&);
 
   //getters
-  VP1Interval getCutAllowedPt() {return m_cut_allowedPtSq; };
-  VP1Interval getCutAllowedEta() {return m_cut_allowedEta; };
+  const VP1Interval& getCutAllowedPt() {return m_cut_allowedPtSq; };
+  const VP1Interval& getCutAllowedEta() {return m_cut_allowedEta; };
   QList<VP1Interval> getCutAllowedPhi() {return m_cut_allowedPhi; };
   bool getPtAllowall() {return m_cut_pt_allowall; };
   bool getEtaAllowall() {return m_cut_eta_allowall; };
