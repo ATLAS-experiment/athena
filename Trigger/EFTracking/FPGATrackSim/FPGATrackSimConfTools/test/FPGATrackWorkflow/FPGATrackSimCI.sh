@@ -2,7 +2,7 @@
 set -e
 
 RDO=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/ATLAS-P2-RUN4-03-00-00/RDO/reg0_singlemu.root
-RDO_EVT=-1
+RDO_EVT=150
 GEO_TAG="ATLAS-P2-RUN4-03-00-00"
 COMBINED_MATRIX='/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/ATLAS-P2-RUN4-03-00-00/banks_9L/combined_matrix.root'
 
@@ -90,11 +90,37 @@ python -m FPGATrackSimConfTools.FPGATrackSimAnalysisConfig \
 Trigger.FPGATrackSim.mapsDir=./maps \
 Trigger.FPGATrackSim.tracking=True \
 Trigger.FPGATrackSim.sampleType='singleMuons' \
-Trigger.FPGATrackSim.bankDir=./banks/
+Trigger.FPGATrackSim.bankDir=./banks/ \
+Trigger.FPGATrackSim.doEDMConversion=True \
+Trigger.FPGATrackSim.writeToAOD=True \
+Output.AODFileName="FPGATrackSimCITestAOD.root"
+
+
 ls -l
 echo "... analysis on RDO, this part is done ..."
  
 root -b -q monitoring.root checkHist.C
 echo "... rdo analysis output verification, this part is done ..."
 
+cat << EOF > checkConvertedClusters.py
+import ROOT
+import numpy as np 
+
+rootFile = ROOT.TFile.Open("FPGATrackSimCITestAOD.root")
+clustersToCheck = ['xAODPixelClusters_1stFromFPGACluster',
+                   'xAODStripClusters_1stFromFPGACluster']
+tree = rootFile.Get("CollectionTree")
+
+for branch in clustersToCheck:
+    averageClustersPerEvent = np.mean([getattr(evt,branch).size() for evt in tree])
+    if np.isclose(averageClustersPerEvent,0):
+        raise ValueError(f"no recorded clusters in {branch}")
+    else:
+        print(f"there are on average {averageClustersPerEvent} clusters per event in {branch}")
+EOF
+
+echo "... verification of FPGATrackSim --> xAOD conversion"
+python3 checkConvertedClusters.py
+
+echo "...verification of FPGATrackSim --> xAOD conversion, this part is done ..."
 echo "... all done ..."
