@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 __author__  = 'Javier Montejo'
 __version__="$Revision: 2.0 $"
@@ -35,8 +35,19 @@ class TriggerType(IntEnum):
     ALL         = el | mu | j | bj | tau | g | xe | ht | mu_bphys | exotics | afp
     UNDEFINED  = 0
 
+    @classmethod
+    def toStr(cls, val):
+        out = []
+        for e in cls:
+            if val == e.value: return e.name # perfect matches returned as-is
+            if bin(e.value).count('1')!=1: continue # will only express in terms of fundamental types
+            if e.value & val: out += [e.name]
+        if not out: return "undefined"
+        return "|".join(out)
+
 
 class TriggerPeriod(IntEnum):
+    customGRL = 0
     y2015             = 1 << 0
     y2016periodA      = 1 << 1
     y2016periodBD3    = 1 << 2

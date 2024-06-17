@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 __author__  = 'Javier Montejo'
 __version__="$Revision: 2.0 $"
@@ -117,7 +117,7 @@ class TriggerPeriodData:
         self.grl = {}
         if customGRL:
             self.loadGRL(customGRL)
-        elif TriggerPeriod.isRunNumber(period): #run number assume 2018
+        elif TriggerPeriod.isRunNumber(period) and period != TriggerPeriod.customGRL: #run number assume 2018
             self.loadGRL(self.y2018grlpath)
         elif period & TriggerPeriod.y2015: 
             self.loadGRL(self.y2015grlpath)
@@ -131,12 +131,19 @@ class TriggerPeriodData:
             self.loadGRL(self.y2018lowmugrlpath)
         elif period & TriggerPeriod.y2018: 
             self.loadGRL(self.y2018grlpath)
-        self.skimPeriod(period)
+        if period != TriggerPeriod.customGRL:
+            self.skimPeriod(period)
 
     def loadGRL(self, grlpath):
-        grlroot = ET.parse(grlpath).getroot()
-        for run in grlroot.findall('NamedLumiRange/LumiBlockCollection'):
-            self.grl[ int(run.find('Run').text)] = [(int(x.get('Start')), int(x.get('End'))) for x in run.findall('LBRange')]
+        if type(grlpath)==list:
+            for grl in grlpath: self.loadGRL(grl)
+        else:
+            grlroot = ET.parse(grlpath).getroot()
+            for run in grlroot.findall('NamedLumiRange/LumiBlockCollection'):
+                runNum = int(run.find('Run').text)
+                if runNum not in self.grl:
+                    self.grl[runNum] = []
+                self.grl[runNum] += [(int(x.get('Start')), int(x.get('End'))) for x in run.findall('LBRange')]
 
     @classmethod
     def testCustomGRL(cls, grlpath):
