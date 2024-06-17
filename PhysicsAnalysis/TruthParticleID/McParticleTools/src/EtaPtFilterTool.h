@@ -26,29 +26,6 @@
 class EtaPtFilterTool : public TruthParticleFilterBaseTool
 { 
 
-  /////////////////////////////////////////////////////////////////// 
-  // Public enum: 
-  /////////////////////////////////////////////////////////////////// 
- public: 
-  
-  /** Enum which holds the definition of status codes as given by the
-   *  standard HEPEVT (the so-called FORTRAN standard for event generator 
-   *  output).
-   */
- public: 	 
-  struct HepEvt { 	 
-    enum StatusCode { 	 
-      Unknown = -1, 	 
-      NullEntry = 0, 	 
-      NotDecayed = 1,
-      Decayed    = 2,
-      DocLine    = 3  // -> this is Pythia specific !
-    }; 	 
-  }; 	 
-
-  /////////////////////////////////////////////////////////////////// 
-  // Public methods: 
-  /////////////////////////////////////////////////////////////////// 
  public: 
 
   // Copy constructor: 
