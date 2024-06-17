@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // ParticleSortingTool.cxx
@@ -310,7 +310,6 @@ bool ParticleSortingTool::compareRapidity( const xAOD::IParticle* partA,
 bool ParticleSortingTool::compareAuxData( const xAOD::IParticle* partA,
                                        const xAOD::IParticle* partB ) const
 {
-  const double a = partA->auxdata<float>( this->m_sortVar.value() );
-  const double b = partB->auxdata<float>( this->m_sortVar.value() );
-  return this->compareDouble(a,b);
+  SG::ConstAccessor<float> acc( this->m_sortVar.value() );
+  return this->compareDouble(acc(*partA),acc(*partB));
 }

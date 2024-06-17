@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ElectronEfficiencyCorrection/ElectronEfficiencyHelpers.h"
 #include "AsgMessaging/AsgMessaging.h"
+#include "AthContainers/ConstAccessor.h"
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Get type and charge of the truth electron
@@ -16,13 +17,14 @@ CP::CorrectionCode ElectronEfficiencyHelpers::getEleTruthCharge( const xAOD::Ele
   // Define an AsgMessaging instance
   static const asg::AsgMessaging msg("ElectronEfficiencyHelpers");
 
-  if ( !(ele.isAvailable<int>("firstEgMotherPdgId")) ) {
+  static const SG::ConstAccessor<int> firstEgMotherPdgIdAcc("firstEgMotherPdgId");
+  if ( !(firstEgMotherPdgIdAcc.isAvailable(ele)) ) {
     msg.msg(MSG::ERROR) << "Link not available for firstEgMotherPdgId...BAD!!!" << endmsg;
     msg.msg(MSG::ERROR) << "Need to have present: ( !(ele.isAvailable<int>('firstEgMotherPdgId')) )" << endmsg;
     return CP::CorrectionCode::OutOfValidityRange;
   }
 
-  truthcharge = (-1)*ele.auxdata<int>("firstEgMotherPdgId");
+  truthcharge = (-1)*firstEgMotherPdgIdAcc(ele);
   // Make truthcharge -1, 0, +1
   truthcharge = (0 < truthcharge) - (truthcharge < 0);
 
@@ -43,13 +45,14 @@ CP::CorrectionCode ElectronEfficiencyHelpers::isGoodEle( const xAOD::Electron& e
   // Define an AsgMessaging instance
   static const asg::AsgMessaging msg("ElectronEfficiencyHelpers");
 
-  if ( !(ele.isAvailable<int>("firstEgMotherPdgId")) ) {
+  static const SG::ConstAccessor<int> firstEgMotherPdgIdAcc("firstEgMotherPdgId");
+  if ( !(firstEgMotherPdgIdAcc.isAvailable(ele)) ) {
     msg.msg(MSG::ERROR) << "firstEgMotherPdgId IS NOT AVAILABLE!!" << endmsg;
     return CP::CorrectionCode::OutOfValidityRange;
   }
   else {
 
-    firstEgPdgId = ele.auxdata<int>("firstEgMotherPdgId");
+    firstEgPdgId = firstEgMotherPdgIdAcc(ele);
 
     if ( std::abs(firstEgPdgId) != 11) {
 
