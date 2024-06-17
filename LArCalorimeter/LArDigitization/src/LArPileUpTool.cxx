@@ -25,12 +25,13 @@
 #include "LArSimEvent/LArHit.h"
 #include "CaloIdentifier/CaloIdManager.h"
 #include "EventInfoUtils/EventIDFromStore.h"
-#include "GeneratorObjects/McEventCollection.h"
 
 #include "AthenaKernel/RNGWrapper.h"
 #include "CLHEP/Random/RandomEngine.h"
 
 #include <CLHEP/Random/Randomize.h>
+
+#include  <utility>
 
 using CLHEP::RandFlat;
 using CLHEP::RandGaussZiggurat;
@@ -42,9 +43,7 @@ LArPileUpTool::LArPileUpTool(const std::string& type, const std::string& name, c
 
 LArPileUpTool::~LArPileUpTool() = default;
 
-
-StatusCode LArPileUpTool::initialize()
-{
+StatusCode LArPileUpTool::initialize() {
 
   //
   // ........ Check for inconsistent configuration
@@ -62,7 +61,7 @@ StatusCode LArPileUpTool::initialize()
     return StatusCode::FAILURE;
   }
   if (!m_PileUp && m_onlyUseContainerName) {
-     ATH_MSG_FATAL("If PileUp==False then OnlyUserContainerName must also be False. Fix your configuration. Bailing out.");
+    ATH_MSG_FATAL("If PileUp==False then OnlyUserContainerName must also be False. Fix your configuration. Bailing out.");
     return StatusCode::FAILURE;
   }
   //
@@ -70,77 +69,74 @@ StatusCode LArPileUpTool::initialize()
   //
   if (m_RndmEvtOverlay) {
     ATH_MSG_INFO(" pileup and/or noise added by overlaying digits of random events");
-    if (m_isMcOverlay) { ATH_MSG_INFO("   random events are from MC "); }
-    else { ATH_MSG_INFO("   random events are from data "); }
-  }
-  else {
+    if (m_isMcOverlay) {
+      ATH_MSG_INFO("   random events are from MC ");
+    } else {
+      ATH_MSG_INFO("   random events are from data ");
+    }
+  } else {
     ATH_MSG_INFO(" No overlay of random events");
   }
 
   if (m_onlyUseContainerName) {
     ATH_CHECK(m_mergeSvc.retrieve());
-    ATH_MSG_INFO( "PileUpMergeSvc successfully initialized");
+    ATH_MSG_INFO("PileUpMergeSvc successfully initialized");
   }
 
   //
   // ......... print the noise flag
   //
-  if ( m_NoiseOnOff )
-  {
-    ATH_MSG_INFO(" Electronic noise will be added in each cell " );
-  }
-  else
-  {
+  if (m_NoiseOnOff) {
+    ATH_MSG_INFO(" Electronic noise will be added in each cell ");
+  } else {
     ATH_MSG_INFO(" No electronic noise added.");
 
-    //not useful (see MakeDigit), but in case of...
-    m_NoiseInEMB= false;
-    m_NoiseInEMEC=false;
-    m_NoiseInHEC= false;
-    m_NoiseInFCAL=false;
+    // not useful (see MakeDigit), but in case of...
+    m_NoiseInEMB = false;
+    m_NoiseInEMEC = false;
+    m_NoiseInHEC = false;
+    m_NoiseInFCAL = false;
   }
-
   //
   // ............ print cross-talk configuration
   //
-  if (m_CrossTalk )
-  {
+  if (m_CrossTalk) {
     ATH_MSG_INFO(" Cross-talk in EM barrel will be taken into account : ");
     ATH_MSG_INFO("     Cross talk strip strip included ");
-    if (m_CrossTalk2Strip) ATH_MSG_INFO("     Cross talk strip-2nd strip included ");
+    if (m_CrossTalk2Strip)
+      ATH_MSG_INFO("     Cross talk strip-2nd strip included ");
     ATH_MSG_INFO("     Cross talk strip middle included ");
-    if (m_CrossTalkStripMiddle) ATH_MSG_INFO("     Cross talk strip middle included ");
-    if (m_CrossTalkMiddle)      ATH_MSG_INFO("     Cross talk middle middle included");
-  }
-  else
-  {
+    if (m_CrossTalkStripMiddle)
+      ATH_MSG_INFO("     Cross talk strip middle included ");
+    if (m_CrossTalkMiddle)
+      ATH_MSG_INFO("     Cross talk middle middle included");
+  } else {
     ATH_MSG_INFO(" no Cross-Talk simulated");
   }
 
   if (m_onlyUseContainerName) {
-      m_hitContainerNames = m_inputKeys.value();
-  }
-  else {
+    m_hitContainerNames = m_inputKeys.value();
+  } else {
     if (m_useLArHitFloat) {
       ATH_CHECK(m_hitFloatContainerKeys.assign(m_inputKeys.value()));
-      }
-    else {
+    } else {
       ATH_CHECK(m_hitContainerKeys.assign(m_inputKeys.value()));
     }
   }
   ATH_MSG_DEBUG("Input objects in these containers : '" << m_hitContainerNames << "'");
 
   // Initialize ReadHandleKey
-  ATH_CHECK(m_hitContainerKeys.initialize(!m_onlyUseContainerName && !m_hitContainerKeys.empty() ));
-  ATH_CHECK(m_hitFloatContainerKeys.initialize(!m_onlyUseContainerName && !m_hitFloatContainerKeys.empty() ));
-  ATH_CHECK(m_inputDigitContainerKey.initialize(!m_onlyUseContainerName && !m_inputDigitContainerKey.empty() ));
+  ATH_CHECK(m_hitContainerKeys.initialize(!m_onlyUseContainerName && !m_hitContainerKeys.empty()));
+  ATH_CHECK(m_hitFloatContainerKeys.initialize(!m_onlyUseContainerName && !m_hitFloatContainerKeys.empty()));
+  ATH_CHECK(m_inputDigitContainerKey.initialize(!m_onlyUseContainerName && !m_inputDigitContainerKey.empty()));
+
+  ATH_CHECK(m_mcEventColl.initialize(m_Windows));
+
 
   ATH_CHECK(m_caloMgrKey.initialize());
-  
 
-  //retrieve ID helpers
-  ATH_CHECK(detStore()->retrieve(m_calocell_id,"CaloCell_ID"));
-
+  // retrieve ID helpers
+  ATH_CHECK(detStore()->retrieve(m_calocell_id, "CaloCell_ID"));
 
   const CaloIdManager* caloIdMgr = nullptr;
   StatusCode sc = detStore()->retrieve(caloIdMgr);
@@ -148,8 +144,8 @@ StatusCode LArPileUpTool::initialize()
     ATH_MSG_ERROR(" Unable to retrieve CaloIdManager from DetectoreStore");
     return StatusCode::FAILURE;
   }
-  m_larem_id   = caloIdMgr->getEM_ID();
-  m_larhec_id  = caloIdMgr->getHEC_ID();
+  m_larem_id = caloIdMgr->getEM_ID();
+  m_larhec_id = caloIdMgr->getHEC_ID();
   m_larfcal_id = caloIdMgr->getFCAL_ID();
 
   sc = detStore()->retrieve(m_laronline_id);
@@ -159,20 +155,19 @@ StatusCode LArPileUpTool::initialize()
   }
 
   if (m_useTriggerTime) {
-     if (m_triggerTimeTool.retrieve().isFailure()) {
-        ATH_MSG_ERROR(" Unable to find Trigger Time Tool");
-        return StatusCode::FAILURE;
-     }
-  }
-  else {
+    if (m_triggerTimeTool.retrieve().isFailure()) {
+      ATH_MSG_ERROR(" Unable to find Trigger Time Tool");
+      return StatusCode::FAILURE;
+    }
+  } else {
     m_triggerTimeTool.disable();
   }
 
   ATH_CHECK(m_rndmGenSvc.retrieve());
 
-// register data handle for conditions data
+  // register data handle for conditions data
 
-  ATH_CHECK(m_xtalkKey.initialize() );
+  ATH_CHECK(m_xtalkKey.initialize());
 
   ATH_CHECK(m_cablingKey.initialize());
 
@@ -182,109 +177,93 @@ StatusCode LArPileUpTool::initialize()
   ATH_MSG_DEBUG("Initialization completed successfully");
 
   return StatusCode::SUCCESS;
-
 }
-
 // ----------------------------------------------------------------------------------------------------------------------------------
 
 StatusCode LArPileUpTool::prepareEvent(const EventContext& ctx, unsigned int /*nInputEvents */)
 {
 
-  SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey, ctx};
-  m_cabling=*cablingHdl;
-  if(!m_cabling) {
+  //Clear per-event data:
+  m_data.m_energySum.clear();
+  m_data.m_energySum_DigiHSTruth.clear();
+  m_data.m_hitmap=nullptr;
+  m_data.m_hitmap_DigiHSTruth=nullptr;
+  m_data.m_trigtime=0;
+  m_data.m_weights=nullptr;
+
+  SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey,ctx};
+  auto* cabling=*cablingHdl;
+  if(!cabling) {
      ATH_MSG_ERROR("Failed to retrieve LAr Cabling map with key " << m_cablingKey.key() );
      return StatusCode::FAILURE;
   }
-
   SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey,ctx};
   const CaloDetDescrManager* caloDDMgr = *caloMgrHandle;
-
-
-  m_hitmap=SG::makeHandle(m_hitMapKey, ctx);
-  auto hitMapPtr=std::make_unique<LArHitEMap>(m_cabling,m_calocell_id,caloDDMgr,m_RndmEvtOverlay);
-  ATH_CHECK(m_hitmap.record(std::move(hitMapPtr)));
-  ATH_MSG_DEBUG(" Number of created  cells in Map " << m_hitmap->GetNbCells());
-
-  if (!m_useMBTime) m_energySum.assign(m_hitmap->GetNbCells(),0.);
+  auto hitmap=SG::makeHandle(m_hitMapKey, ctx);
+  auto hitMapPtr=std::make_unique<LArHitEMap>(cabling,m_calocell_id,caloDDMgr,m_RndmEvtOverlay);
+  ATH_CHECK(hitmap.record(std::move(hitMapPtr)));
+  m_data.m_hitmap=hitmap.ptr();
+  ATH_MSG_DEBUG(" Number of created  cells in Map " << hitmap->GetNbCells());
+  if (!m_useMBTime) m_data.m_energySum.assign(m_data.m_hitmap->GetNbCells(),0.);
 
   
   if (m_doDigiTruth) {
-    m_hitmap_DigiHSTruth=SG::makeHandle(m_hitMapKey_DigiHSTruth, ctx);
-    auto hitMapPtr=std::make_unique<LArHitEMap>(m_cabling,m_calocell_id,caloDDMgr,m_RndmEvtOverlay);
-    ATH_CHECK(m_hitmap_DigiHSTruth.record(std::move(hitMapPtr)));
-    if (!m_useMBTime) m_energySum_DigiHSTruth.assign(m_hitmap_DigiHSTruth->GetNbCells(),0.);
+    auto hitmap_DigiHSTruth=SG::makeHandle(m_hitMapKey_DigiHSTruth, ctx);
+    auto hitMapPtr=std::make_unique<LArHitEMap>(cabling,m_calocell_id,caloDDMgr,m_RndmEvtOverlay);
+    ATH_CHECK(hitmap_DigiHSTruth.record(std::move(hitMapPtr)));
+    m_data.m_hitmap_DigiHSTruth=hitmap_DigiHSTruth.ptr();
+    if (!m_useMBTime) m_data.m_energySum_DigiHSTruth.assign(m_data.m_hitmap_DigiHSTruth->GetNbCells(),0.);
   }
-
   // get the trigger time if requested
-
-  m_trigtime=0;
+  m_data.m_trigtime=0;
   if (m_useTriggerTime && m_triggerTimeTool) {
-     m_trigtime = m_triggerTimeTool->time();
-     ATH_MSG_DEBUG(" Trigger time used : " << m_trigtime);
+     m_data.m_trigtime = m_triggerTimeTool->time();
+     ATH_MSG_DEBUG(" Trigger time used : " << m_data.m_trigtime);
   }
-
   ATHRNG::RNGWrapper* rngWrapper = m_rndmGenSvc->getEngine(this, m_randomStreamName);
   ATHRNG::RNGWrapper::SeedingOptionType seedingmode=m_useLegacyRandomSeeds ? ATHRNG::RNGWrapper::MC16Seeding : ATHRNG::RNGWrapper::SeedingDefault;
   rngWrapper->setSeedLegacy( m_randomStreamName, ctx, m_randomSeedOffset, seedingmode );
-
   // add random phase (i.e subtract it from trigtime)
   if (m_addPhase) {
-    m_trigtime = m_trigtime - (m_phaseMin + (m_phaseMax-m_phaseMin)*RandFlat::shoot(rngWrapper->getEngine(ctx))  );
-  }
+    m_data.m_trigtime -= (m_phaseMin + (m_phaseMax-m_phaseMin)*RandFlat::shoot(rngWrapper->getEngine(ctx))  );
+  } 
 
   if (m_Windows) {
     ATH_MSG_DEBUG(" redefine windows list ");
-
-    // FIXME: Use a ReadHandle.
-    const McEventCollection* mcCollptr = nullptr;
+    SG::ReadHandle<McEventCollection> mcColl{m_mcEventColl,ctx};
+    const McEventCollection* mcCollptr=mcColl.cptr();
     if ( evtStore()->retrieve(mcCollptr).isFailure() ) {
       ATH_MSG_WARNING ("LArHitEMap:cannot retrieve McEventCollection  (keyless)");
     }
-    
-    m_hitmap->BuildWindows(mcCollptr,
-                           m_WindowsEtaSize,m_WindowsPhiSize,
-                           m_WindowsPtCut);
-    if(m_doDigiTruth) {
-      m_hitmap_DigiHSTruth->BuildWindows(mcCollptr,
-                                         m_WindowsEtaSize,m_WindowsPhiSize, m_WindowsPtCut);
+
+    m_data.m_hitmap->BuildWindows(mcCollptr, m_WindowsEtaSize, m_WindowsPhiSize, m_WindowsPtCut);
+    if (m_doDigiTruth) {
+      m_data.m_hitmap_DigiHSTruth->BuildWindows(mcCollptr, m_WindowsEtaSize, m_WindowsPhiSize, m_WindowsPtCut);
     }
-
   }
-
-  //
-  // ....... create the LAr Digit Container
-  //
   
-
-  m_nhit_tot = 0;
   return StatusCode::SUCCESS;
-
 }
+
 
 //----------------------------------------------------------------------------------------------------------------------------
 
-StatusCode LArPileUpTool::processBunchXing(int bunchXing,
-                                           SubEventIterator bSubEvents,
-                                           SubEventIterator eSubEvents)
-{
-  ATH_MSG_VERBOSE ( "processBunchXing()" );
+StatusCode LArPileUpTool::processBunchXing(int bunchXing, SubEventIterator bSubEvents, SubEventIterator eSubEvents) {
+
+  ATH_MSG_VERBOSE("processBunchXing()");
   float tbunch = (float)(bunchXing);
   const EventContext& ctx = Gaudi::Hive::currentContext();
   SG::ReadCondHandle<LArXTalkWeightGlobal> weightHdl(m_xtalkKey, ctx);
-  const LArXTalkWeightGlobal& weights = **weightHdl;
+  m_data.m_weights = *weightHdl;
 
-//
-// ............ loop over the wanted hit containers
-//
   SubEventIterator iEvt(bSubEvents);
   while (iEvt != eSubEvents) {
 
     // do we deal with the MC signal event ?
-    bool isSignal = ( (iEvt->type()==xAOD::EventInfo_v1::PileUpType::Signal) || m_RndmEvtOverlay);
+    bool isSignal = ((iEvt->type() == xAOD::EventInfo_v1::PileUpType::Signal) || m_RndmEvtOverlay);
 
     // fill LArHits in map
-    if (this->fillMapFromHit(iEvt, tbunch,isSignal, weights).isFailure()) {
+    if (this->fillMapFromHit(iEvt, tbunch, isSignal, m_data).isFailure()) {
 
       ATH_MSG_ERROR(" cannot fill map from hits ");
       return StatusCode::FAILURE;
@@ -294,43 +273,108 @@ StatusCode LArPileUpTool::processBunchXing(int bunchXing,
     if (m_RndmEvtOverlay) {
       const LArDigitContainer* rndm_digit_container;
       if (m_mergeSvc->retrieveSingleSubEvtData(m_inputDigitContainerKey.key(), rndm_digit_container, bunchXing, iEvt).isSuccess()) {
-	int ndigit=0;
-	for (const LArDigit* digit : *rndm_digit_container) {
-	  if (m_hitmap->AddDigit(digit)) ndigit++;
-	}
-	ATH_MSG_INFO(" Number of digits stored for RndmEvt Overlay " << ndigit);
+        int ndigit = 0;
+        for (const LArDigit* digit : *rndm_digit_container) {
+          if (m_data.m_hitmap->AddDigit(digit))
+            ndigit++;
+        }
+        ATH_MSG_INFO(" Number of digits stored for RndmEvt Overlay " << ndigit);
       }
     }
 
     ++iEvt;
-
   }
 
   if (!m_useMBTime) {
-      if (!this->fillMapfromSum(tbunch)) {
-         ATH_MSG_ERROR(" error in FillMapFromSum ");
-         return StatusCode::FAILURE;
-      }
+    if (!this->fillMapfromSum(tbunch, m_data)) {
+      ATH_MSG_ERROR(" error in FillMapFromSum ");
+      return StatusCode::FAILURE;
+    }
   }
 
-
   return StatusCode::SUCCESS;
-
 }
 
 // ---------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode LArPileUpTool::processAllSubEvents(const EventContext& ctx)
-{
+StatusCode LArPileUpTool::processAllSubEvents(const EventContext& ctx) {
+    return const_cast<const LArPileUpTool*>(this)->processAllSubEvents(ctx); //refer to const-version
+}
 
-  if (this->prepareEvent(ctx, 0).isFailure()) {
-     ATH_MSG_ERROR("error in prepareEvent");
+StatusCode LArPileUpTool::processAllSubEvents(const EventContext& ctx) const  {
+
+
+  perEventData_t data;
+  
+  SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey, ctx};
+  if(!cablingHdl.isValid()) {
+     ATH_MSG_ERROR("Failed to retrieve LAr Cabling map with key " << m_cablingKey.key() );
      return StatusCode::FAILURE;
   }
+  const LArOnOffIdMapping* cabling=*cablingHdl; 
+  SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey,ctx};
+  const CaloDetDescrManager* caloDDMgr = *caloMgrHandle;
 
-  SG::ReadCondHandle<LArXTalkWeightGlobal> weightHdl(m_xtalkKey, ctx);
-  const LArXTalkWeightGlobal& weights = **weightHdl;
 
+  SG::WriteHandle<LArHitEMap> hitmap=SG::makeHandle(m_hitMapKey, ctx);
+  auto hitMapPtr=std::make_unique<LArHitEMap>(cabling,m_calocell_id,caloDDMgr,m_RndmEvtOverlay);
+  ATH_CHECK(hitmap.record(std::move(hitMapPtr)));
+  data.m_hitmap=hitmap.ptr();
+  ATH_MSG_DEBUG(" Number of created  cells in Map " << hitmap->GetNbCells());
+
+  if (!m_useMBTime) data.m_energySum.assign(hitmap->GetNbCells(),0.);
+
+  
+  if (m_doDigiTruth) {
+    SG::WriteHandle<LArHitEMap> hitmap_DigiHSTruth;
+    hitmap_DigiHSTruth=SG::makeHandle(m_hitMapKey_DigiHSTruth, ctx);
+    auto hitMapPtr=std::make_unique<LArHitEMap>(cabling,m_calocell_id,caloDDMgr,m_RndmEvtOverlay);
+    ATH_CHECK(hitmap_DigiHSTruth.record(std::move(hitMapPtr)));
+    if (!m_useMBTime) data.m_energySum_DigiHSTruth.assign(hitmap_DigiHSTruth->GetNbCells(),0.);
+    data.m_hitmap_DigiHSTruth=hitmap_DigiHSTruth.ptr();
+  }
+
+  // get the trigger time if requested
+
+  data.m_trigtime=0;
+  /*
+  if (m_useTriggerTime && m_triggerTimeTool) {
+     trigtime = m_triggerTimeTool->time();
+     ATH_MSG_DEBUG(" Trigger time used : " << m_trigtime);
+  }
+  */
+  ATHRNG::RNGWrapper* rngWrapper = m_rndmGenSvc->getEngine(this, m_randomStreamName);
+  ATHRNG::RNGWrapper::SeedingOptionType seedingmode=m_useLegacyRandomSeeds ? ATHRNG::RNGWrapper::MC16Seeding : ATHRNG::RNGWrapper::SeedingDefault;
+  rngWrapper->setSeedLegacy( m_randomStreamName, ctx, m_randomSeedOffset, seedingmode );
+
+  // add random phase (i.e subtract it from trigtime)
+  if (m_addPhase) {
+    data.m_trigtime -= (m_phaseMin + (m_phaseMax-m_phaseMin)*RandFlat::shoot(rngWrapper->getEngine(ctx))  );
+  }
+
+  if (m_Windows) {
+    ATH_MSG_DEBUG(" redefine windows list ");
+    SG::ReadHandle<McEventCollection> mcColl{m_mcEventColl,ctx};
+    const McEventCollection* mcCollptr=mcColl.cptr();
+    data.m_hitmap->BuildWindows(mcCollptr,
+                           m_WindowsEtaSize,m_WindowsPhiSize,
+                           m_WindowsPtCut);
+    if(m_doDigiTruth) {
+      data.m_hitmap_DigiHSTruth->BuildWindows(mcCollptr,
+                                         m_WindowsEtaSize,m_WindowsPhiSize, m_WindowsPtCut);
+    }
+
+  }
+
+  //
+  // ....... create the LAr Digit Container
+  //
+
+  if (m_CrossTalk) {
+    SG::ReadCondHandle<LArXTalkWeightGlobal> weightHdl(m_xtalkKey, ctx);
+    data.m_weights=weightHdl.cptr();
+  }
+  
   if(!m_onlyUseContainerName && m_RndmEvtOverlay) {
     auto hitVectorHandles = m_hitContainerKeys.makeHandles(ctx);
     for (auto & inputHits : hitVectorHandles) {
@@ -342,16 +386,15 @@ StatusCode LArPileUpTool::processAllSubEvents(const EventContext& ctx)
       double SubEvtTimOffset(0.0);
       double timeCurrBunch=-9999999.;
       for (const LArHit* hit : *inputHits) {
-        m_nhit_tot++;
         float energy = (float) (hit->energy());
         float time;
         if (m_ignoreTime && isSignal) time=0.;
-        else time = (float) (SubEvtTimOffset+ hit->time() -m_trigtime);
+        else time = (float) (SubEvtTimOffset+ hit->time() - data.m_trigtime);
         Identifier cellId = hit->cellID();
         if (!m_useMBTime) {
           if (std::fabs(SubEvtTimOffset-timeCurrBunch)>1.) {
             if (timeCurrBunch>-9999.) {
-              if (!this->fillMapfromSum(timeCurrBunch)) {
+              if (!this->fillMapfromSum(timeCurrBunch,data)) {
                 ATH_MSG_ERROR(" error in FillMapFromSum ");
                 return(StatusCode::FAILURE);
               }
@@ -359,14 +402,14 @@ StatusCode LArPileUpTool::processAllSubEvents(const EventContext& ctx)
             timeCurrBunch = SubEvtTimOffset;
           }
         }
-        if (this->AddHit(cellId,energy,time,isSignal,weights).isFailure()) return StatusCode::FAILURE;
+        if (this->AddHit(cellId,energy,time,isSignal,data).isFailure()) return StatusCode::FAILURE;
       } // End of loop over LArHitContainer
     } // End of loop over SG::ReadHandles
   }
 
   if (!m_PileUp) {
     float time=0.;
-    if (this->fillMapFromHit(ctx, time,true,weights).isFailure()) {
+    if (this->fillMapFromHit(ctx, time,true,data).isFailure()) {
       ATH_MSG_ERROR("error in fillMapFromHit");
       return StatusCode::FAILURE;
     }
@@ -411,17 +454,16 @@ StatusCode LArPileUpTool::processAllSubEvents(const EventContext& ctx)
           const LArHitContainer& firstCont = *(iFirstCont->second);
           // Loop over cells in this LArHitContainer
           for (const LArHit* hit : firstCont) {
-            m_nhit_tot++;
             float energy = (float) (hit->energy());
             float time;
             if (m_ignoreTime && isSignal) time=0.;
-            else time = (float) (SubEvtTimOffset+ hit->time() -m_trigtime);
+            else time = (float) (SubEvtTimOffset+ hit->time() - data.m_trigtime);
             Identifier cellId = hit->cellID();
 
             if (!m_useMBTime) {
               if (std::fabs(SubEvtTimOffset-timeCurrBunch)>1.) {
                  if (timeCurrBunch>-9999.) {
-                    if (!this->fillMapfromSum(timeCurrBunch)) {
+                    if (!this->fillMapfromSum(timeCurrBunch,data)) {
                         ATH_MSG_ERROR(" error in FillMapFromSum ");
                         return(StatusCode::FAILURE);
                     }
@@ -429,7 +471,7 @@ StatusCode LArPileUpTool::processAllSubEvents(const EventContext& ctx)
                   timeCurrBunch = SubEvtTimOffset;
               }
             }
-            if (this->AddHit(cellId,energy,time,isSignal,weights).isFailure()) return StatusCode::FAILURE;
+            if (this->AddHit(cellId,energy,time,isSignal,data).isFailure()) return StatusCode::FAILURE;
           }              //  loop over  hits
           ++iFirstCont;
         }                 // loop over subevent list
@@ -467,17 +509,16 @@ StatusCode LArPileUpTool::processAllSubEvents(const EventContext& ctx)
           const LArHitFloatContainer& firstCont = *(iFirstCont->second);
           // Loop over cells in this LArHitContainer
           for (const LArHitFloat& hit : firstCont) {
-            m_nhit_tot++;
             float energy = (float)( hit.energy());
             float time;
             if (m_ignoreTime && isSignal) time=0.;
-            else time = (float) (SubEvtTimOffset+ hit.time() - m_trigtime);
+            else time = (float) (SubEvtTimOffset+ hit.time() - data.m_trigtime);
             Identifier cellId = hit.cellID();
 
             if (!m_useMBTime) {
               if (std::fabs(SubEvtTimOffset-timeCurrBunch)>1.) {
                  if (timeCurrBunch>-9999.) {
-                    if (!this->fillMapfromSum(timeCurrBunch)) {
+                    if (!this->fillMapfromSum(timeCurrBunch,data)) {
                         ATH_MSG_ERROR(" error in FillMapFromSum ");
                         return(StatusCode::FAILURE);
                     }
@@ -485,7 +526,7 @@ StatusCode LArPileUpTool::processAllSubEvents(const EventContext& ctx)
                   timeCurrBunch = SubEvtTimOffset;
               }
             }
-            if (this->AddHit(cellId,energy,time,isSignal,weights).isFailure()) return StatusCode::FAILURE;
+            if (this->AddHit(cellId,energy,time,isSignal,data).isFailure()) return StatusCode::FAILURE;
           }              //  loop over  hits
           ++iFirstCont;
         }                 // loop over subevent list
@@ -493,7 +534,7 @@ StatusCode LArPileUpTool::processAllSubEvents(const EventContext& ctx)
       }  // LArHitFloat vs LArHit useage
 
       if (!m_useMBTime) {
-        if (!this->fillMapfromSum(timeCurrBunch)) {
+        if (!this->fillMapfromSum(timeCurrBunch,data)) {
              ATH_MSG_ERROR(" error in FillMapFromSum ");
              return(StatusCode::FAILURE);
         }
@@ -516,7 +557,7 @@ StatusCode LArPileUpTool::processAllSubEvents(const EventContext& ctx)
 
         size_t ndigit{};
         for (const LArDigit* digit : *digitCollection) {
-          if (m_hitmap->AddDigit(digit)) ndigit++;
+          if (hitmap->AddDigit(digit)) ndigit++;
         }
         ATH_MSG_DEBUG(" Number of digits stored for RndmEvt Overlay " << ndigit);
       }
@@ -545,7 +586,7 @@ StatusCode LArPileUpTool::processAllSubEvents(const EventContext& ctx)
         const LArDigitContainer& rndm_digit_container =  *(iTzeroDigitCont->second);
         int ndigit=0;
         for (const LArDigit* digit : rndm_digit_container) {
-        if (m_hitmap->AddDigit(digit)) ndigit++;
+        if (hitmap->AddDigit(digit)) ndigit++;
         }
         ATH_MSG_INFO(" Number of digits stored for RndmEvt Overlay " << ndigit);
       }
@@ -559,7 +600,7 @@ StatusCode LArPileUpTool::processAllSubEvents(const EventContext& ctx)
 
 // ============================================================================================
 
-StatusCode LArPileUpTool::fillMapFromHit(const EventContext& ctx, float bunchTime, bool isSignal, const LArXTalkWeightGlobal& weights)
+StatusCode LArPileUpTool::fillMapFromHit(const EventContext& ctx, float bunchTime, bool isSignal, perEventData_t& data) const
 {
   if (m_useLArHitFloat) {
     auto hitVectorHandles = m_hitFloatContainerKeys.makeHandles(ctx);
@@ -567,14 +608,13 @@ StatusCode LArPileUpTool::fillMapFromHit(const EventContext& ctx, float bunchTim
       if (hit_container.isValid()) {
         for (const LArHitFloat& hit : *hit_container)
           {
-            m_nhit_tot++;
             Identifier cellId = hit.cellID();
             float energy = (float) hit.energy();
             float time;
             if (m_ignoreTime) time=0.;
-            else time   = (float) (hit.time() - m_trigtime);
+            else time   = (float) (hit.time() - data.m_trigtime);
             time = time + bunchTime;
-            if (this->AddHit(cellId,energy,time,isSignal,weights).isFailure()) return StatusCode::FAILURE;
+            if (this->AddHit(cellId,energy,time,isSignal,data).isFailure()) return StatusCode::FAILURE;
           }
       }
       else {
@@ -590,14 +630,13 @@ StatusCode LArPileUpTool::fillMapFromHit(const EventContext& ctx, float bunchTim
       if (hit_container.isValid()) {
         for (const LArHit* hit : *hit_container)
           {
-            m_nhit_tot++;
             Identifier cellId = hit->cellID();
             float energy = (float) hit->energy();
             float time;
             if (m_ignoreTime) time=0.;
-            else time   = (float) (hit->time() - m_trigtime);
+            else time   = (float) (hit->time() - data.m_trigtime);
             time = time + bunchTime;
-            if (this->AddHit(cellId,energy,time,isSignal,weights).isFailure()) return StatusCode::FAILURE;
+            if (this->AddHit(cellId,energy,time,isSignal,data).isFailure()) return StatusCode::FAILURE;
           }
       }
       else {
@@ -612,7 +651,7 @@ StatusCode LArPileUpTool::fillMapFromHit(const EventContext& ctx, float bunchTim
 }
 
 // ============================================================================================
-StatusCode LArPileUpTool::fillMapFromHit(SubEventIterator iEvt, float bunchTime, bool isSignal, const LArXTalkWeightGlobal& weights)
+StatusCode LArPileUpTool::fillMapFromHit(SubEventIterator iEvt, float bunchTime, bool isSignal, perEventData_t& data) const
 {
   for (const std::string& containerName : m_hitContainerNames) {
 
@@ -632,17 +671,16 @@ StatusCode LArPileUpTool::fillMapFromHit(SubEventIterator iEvt, float bunchTime,
 	return StatusCode::FAILURE;
       }
 
-      for (const LArHitFloat& hit : *hit_container)
-	{
-	  m_nhit_tot++;
+      for (const LArHitFloat& hit : *hit_container){
+
 	  Identifier cellId = hit.cellID();
 	  float energy = (float) hit.energy();
 	  float time;
 	  if (m_ignoreTime) time=0.;
-	  else time   = (float) (hit.time() - m_trigtime);
+	  else time   = (float) (hit.time() - data.m_trigtime);
 	  time = time + bunchTime;
 
-         if (this->AddHit(cellId,energy,time,isSignal,weights).isFailure()) return StatusCode::FAILURE;
+         if (this->AddHit(cellId,energy,time,isSignal,data).isFailure()) return StatusCode::FAILURE;
 	}
     }
     else {
@@ -659,15 +697,14 @@ StatusCode LArPileUpTool::fillMapFromHit(SubEventIterator iEvt, float bunchTime,
       for(hititer=hit_container->begin();
 	  hititer != hit_container->end();++hititer)
 	{
-	  m_nhit_tot++;
 	  Identifier cellId = (*hititer)->cellID();
 	  float energy = (float) (*hititer)->energy();
 	  float time;
 	  if (m_ignoreTime) time=0.;
-	  else time   = (float) ((*hititer)->time() - m_trigtime);
+	  else time   = (float) ((*hititer)->time() - data.m_trigtime);
 	  time = time + bunchTime;
 
-         if (this->AddHit(cellId,energy,time,isSignal,weights).isFailure()) return StatusCode::FAILURE;
+         if (this->AddHit(cellId,energy,time,isSignal,data).isFailure()) return StatusCode::FAILURE;
 	}
     }
   }   // end loop over containers
@@ -677,7 +714,7 @@ StatusCode LArPileUpTool::fillMapFromHit(SubEventIterator iEvt, float bunchTime,
 
 // ----------------------------------------------------------------------------------------------------------------------
 
-StatusCode LArPileUpTool::AddHit(const Identifier cellId, const float energy, const float time, const bool isSignal, const LArXTalkWeightGlobal& weights)
+StatusCode LArPileUpTool::AddHit(const Identifier cellId, const float energy, const float time, const bool isSignal, perEventData_t& data) const
 {
 
   // remove pathological energies...
@@ -701,23 +738,23 @@ StatusCode LArPileUpTool::AddHit(const Identifier cellId, const float energy, co
        //if (energy>200. || m_larem_id->sampling(cellId)==3) dump=true;
        //if(dump) std::cout << " Input cell energy " << m_larem_id->show_to_string(cellId) << " " << energy  << std::endl;
        this->cross_talk(idHash,cellId,energy,  //FIXME -> Needs to work with full hash! 
-                        neighbourList,energyList, weights);
+                        neighbourList,energyList, *data.m_weights);
        //if(dump) std::cout <<" After cross-talk " ;
        for (unsigned int icell=0;icell<neighbourList.size();icell++)
        {
          //unsigned int index=neighbourList[icell];
-	 //Turn sub-calo hash in neighbour list into gloabl calo-cell hash:
-	 const IdentifierHash index=m_calocell_id->calo_cell_hash(m_calocell_id->sub_calo(cellId),neighbourList[icell]);
+         //Turn sub-calo hash in neighbour list into gloabl calo-cell hash:
+         const IdentifierHash index=m_calocell_id->calo_cell_hash(m_calocell_id->sub_calo(cellId),neighbourList[icell]);
          float e = energyList[icell];
          //Identifier id2=m_larem_id->channel_id(neighbourList[icell]);
          //if(dump) std::cout << "Cell/E " <<  m_larem_id->show_to_string(id2) << " " << e << " ";
-         if ( !m_hitmap->AddEnergy(index,e,time) )
+         if ( !data.m_hitmap->AddEnergy(index,e,time) )
          {
              ATH_MSG_ERROR("  Cell " << m_larem_id->show_to_string(cellId) << " could not add the energy= " << energy  << " (GeV)");
              return(StatusCode::FAILURE);
          }
          if ( m_doDigiTruth){ 
-           if(!m_hitmap_DigiHSTruth->AddEnergy(index,e,time) ) {
+           if(!data.m_hitmap_DigiHSTruth->AddEnergy(index,e,time) ) {
              ATH_MSG_ERROR("  Cell " << m_larem_id->show_to_string(cellId) << " could not add the energy= " << energy  << " (GeV)");
              return(StatusCode::FAILURE);
            }
@@ -729,13 +766,13 @@ StatusCode LArPileUpTool::AddHit(const Identifier cellId, const float energy, co
   {
       if (isSignal || m_useMBTime)
       {
-        if ( !m_hitmap->AddEnergy(idHash,energy,time) )
+        if ( !data.m_hitmap->AddEnergy(idHash,energy,time) )
         {
           ATH_MSG_ERROR("  Cell " << m_larem_id->show_to_string(cellId) << " could not add the energy= " << energy  << " (GeV)");
           return(StatusCode::FAILURE);
          }
          if ( m_doDigiTruth){ 
-          if(!m_hitmap_DigiHSTruth->AddEnergy(idHash,energy,time) ) {
+          if(!data.m_hitmap_DigiHSTruth->AddEnergy(idHash,energy,time) ) {
              ATH_MSG_ERROR("  Cell " << m_larem_id->show_to_string(cellId) << " could not add the energy= " << energy  << " (GeV)");
              return(StatusCode::FAILURE);
           }
@@ -743,7 +780,7 @@ StatusCode LArPileUpTool::AddHit(const Identifier cellId, const float energy, co
       }
       else
       {
-        if (idHash<m_energySum.size()) m_energySum[idHash] += energy;
+        if (idHash<data.m_energySum.size()) data.m_energySum[idHash] += energy;
       }
   }     // end if cross-talk
   return StatusCode::SUCCESS;
@@ -756,7 +793,7 @@ void LArPileUpTool::cross_talk(const IdentifierHash& hashId,
                                 const float& energy,
                                 std::vector<IdentifierHash>& neighbourList,
                                 std::vector<float>& energyList,
-				const LArXTalkWeightGlobal& weights)
+                                const LArXTalkWeightGlobal& weights) const
 {
   neighbourList.clear();
   energyList.clear();
@@ -1032,22 +1069,22 @@ void LArPileUpTool::cross_talk(const IdentifierHash& hashId,
 //
 // take accumulated energy in cell vector for a given bunch time and push that in the hit map
 
-bool LArPileUpTool::fillMapfromSum(float bunchTime)  {
+bool LArPileUpTool::fillMapfromSum(float bunchTime, perEventData_t& data) const  {
 
-  for (unsigned int i=0;i<m_energySum.size();i++) {
-     float e = m_energySum[i];
+  for (unsigned int i=0;i<data.m_energySum.size();i++) {
+     float e = data.m_energySum[i];
      if (e>1e-6) {
-        if (!m_hitmap->AddEnergy(i,e,bunchTime)) return false;
+        if (!data.m_hitmap->AddEnergy(i,e,bunchTime)) return false;
      }
-     m_energySum[i]=0.;
+     data.m_energySum[i]=0.;
   }
   if(m_doDigiTruth){
-    for (unsigned int i=0;i<m_energySum_DigiHSTruth.size();i++) {
-       float e = m_energySum_DigiHSTruth[i];
+    for (unsigned int i=0;i<data.m_energySum_DigiHSTruth.size();i++) {
+       float e = data.m_energySum_DigiHSTruth[i];
        if (e>1e-6) {
-         if (!m_hitmap_DigiHSTruth->AddEnergy(i,e,bunchTime)) return false;
+         if (!data.m_hitmap_DigiHSTruth->AddEnergy(i,e,bunchTime)) return false;
        }
-       m_energySum_DigiHSTruth[i]=0.;
+       data.m_energySum_DigiHSTruth[i]=0.;
     }
   }
 

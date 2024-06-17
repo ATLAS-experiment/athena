@@ -1,6 +1,6 @@
 //Dear emacs, this is -*-c++-*-
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARDIGITIZATION_LARPILEUPTOOL_H
@@ -41,6 +41,8 @@
 #include "LArSimEvent/LArHitFloatContainer.h"
 #include "LArRecConditions/LArXTalkWeightGlobal.h"
 
+#include "GeneratorObjects/McEventCollection.h"
+
 class StoreGateSvc;
 class ITriggerTime;
 class LArOnlineID;
@@ -75,18 +77,33 @@ class LArPileUpTool : public PileUpToolBase
                                       SubEventIterator bSubEvents,
                                       SubEventIterator eSubEvents) override final;
 
+
+  //non-const version, (for backward compatiblity), calls teh const version
   virtual StatusCode processAllSubEvents(const EventContext& ctx) override final;
 
-  virtual StatusCode fillMapFromHit(const EventContext& ctx,float tbunch,bool isSignal, const LArXTalkWeightGlobal& weights);
 
-  virtual StatusCode fillMapFromHit(SubEventIterator iEvt, float bunchTime, bool isSignal, const LArXTalkWeightGlobal& weights);
+  //const method, reentrant 
+  StatusCode processAllSubEvents(const EventContext& ctx) const;
 
- private:
+private:
+  struct perEventData_t {
+    std::vector<float> m_energySum;
+    std::vector<float> m_energySum_DigiHSTruth;
+    LArHitEMap* m_hitmap;
+    LArHitEMap* m_hitmap_DigiHSTruth;
+    float m_trigtime=0;
+    const LArXTalkWeightGlobal* m_weights=nullptr;
+  };
+
+  StatusCode fillMapFromHit(const EventContext& ctx,float tbunch,bool isSignal, perEventData_t& data) const;
+
+  StatusCode fillMapFromHit(SubEventIterator iEvt, float bunchTime, bool isSignal, perEventData_t& data) const;
+
 
 #define MAXADC 4096       // Maximal Adc count + 1 ( used for the overflows)
 
 
-  StatusCode AddHit(const Identifier cellId, const float energy, const float time, const bool iSignal, const LArXTalkWeightGlobal& weights);
+  StatusCode AddHit(const Identifier cellId, const float energy, const float time, const bool iSignal, perEventData_t& data) const;
 
 
   void   cross_talk(const IdentifierHash& idHash,
@@ -94,8 +111,9 @@ class LArPileUpTool : public PileUpToolBase
                     const float& energy,
                     std::vector<IdentifierHash>& neighbourList,
                     std::vector<float>& energyList,
-                    const LArXTalkWeightGlobal& weights);
-  bool  fillMapfromSum(float bunchTime);
+                    const LArXTalkWeightGlobal& weights) const;
+
+  bool  fillMapfromSum(float bunchTime, perEventData_t& data) const;
 
 //
 // >>>>>>>> private data parts
@@ -104,9 +122,7 @@ class LArPileUpTool : public PileUpToolBase
 
 
   SG::WriteHandleKey<LArHitEMap> m_hitMapKey{this,"LArHitEMapKey","LArHitEMap"};
-  SG::WriteHandle<LArHitEMap> m_hitmap; //Set in perpareEvent, used in subsequent methods (mergeEvent, fillMapFromHit)
   SG::WriteHandleKey<LArHitEMap> m_hitMapKey_DigiHSTruth{this,"LArHitEMap_DigiHSTruthKey","LArHitEMap_DigiHSTruth"};
-  SG::WriteHandle<LArHitEMap> m_hitmap_DigiHSTruth; //Set in perpareEvent, used in subsequent methods (mergeEvent, fillMapFromHit)
 
   Gaudi::Property<bool> m_onlyUseContainerName{this, "OnlyUseContainerName", true, "Don't use the ReadHandleKey directly. Just extract the container name from it."};
   StringArrayProperty m_inputKeys{this, "InputHitContainers", {"LArHitEMB", "LArHitEMEC", "LArHitHEC", "LArHitFCAL"},
@@ -116,6 +132,8 @@ class LArPileUpTool : public PileUpToolBase
   SG::ReadHandleKey<LArDigitContainer> m_inputDigitContainerKey{this, "InputDigitContainer", "",
       "Name of input digit container"}; // input digit container name 
   std::vector <std::string> m_hitContainerNames; // hit container name list
+
+  SG::ReadHandleKey<McEventCollection> m_mcEventColl{this, "McEventCollectionKey", "TruthEvent", "McEventCollection"};
 
 //
 // ........ Algorithm properties
@@ -191,7 +209,6 @@ class LArPileUpTool : public PileUpToolBase
       "if true add random number [0:1[ in no noise case before rounding ADC to integer, if false add only 0.5 average"};  // flag used in NoNoise case: if true add random number [0;1[ in ADC count, if false add only average of 0.5
  
   SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKey{this,"CablingKey","LArOnOffIdMap","SG Key of LArOnOffIdMapping object"};
-  const LArOnOffIdMapping* m_cabling{}; //Set in perpareEvent, used also in mergeEvent
 
   SG::ReadCondHandleKey<LArXTalkWeightGlobal>  m_xtalkKey{this,"LArXTalkWeightGlobal","LArXTalkWeightGlobal","SG Key of XTalk vector of object"};
 
@@ -221,14 +238,9 @@ class LArPileUpTool : public PileUpToolBase
   Gaudi::Property<bool> m_doDigiTruth{this, "DoDigiTruthReconstruction", false,
       "Also create information about reconstructed digits for HS hits"};
 
-  std::vector<double> m_Samples;
-  std::vector<double> m_Samples_DigiHSTruth;
-  std::vector<double> m_Noise;
-  std::vector<bool> m_SubDetFlag;
-  std::vector<float> m_energySum;
-  std::vector<float> m_energySum_DigiHSTruth;
-  int m_nhit_tot{0};
-  float m_trigtime{0};
+
+  //Backward compatiblity: Keep per-event data as class-member
+  perEventData_t m_data;
 
 };
 
