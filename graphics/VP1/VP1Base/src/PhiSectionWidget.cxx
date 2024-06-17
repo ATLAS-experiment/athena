@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VP1Base/PhiSectionWidget.h"
@@ -693,7 +693,7 @@ bool PhiSectionWidget::virtualSectorEnabled(int iSector,int nSectors) const
   VP1Interval phirange(dphi*iSector+epsilon,dphi*(iSector+1)-epsilon);
 
   //Compare with enabled ranges:
-  for(VP1Interval enabledrange : m_d->cachedRanges) {
+  for(const VP1Interval& enabledrange : m_d->cachedRanges) {
     if (phirange.hasOverlap(enabledrange,2*M_PI))
       return true;
   }
@@ -805,7 +805,7 @@ void PhiSectionWidget::Imp::approximateSectorStatusFromRanges( QList<VP1Interval
   const double epsilon(dphi*1.0e-9);
   for (unsigned i = 0; i < n; ++i) {
     VP1Interval phirange(dphi*i+epsilon,dphi*(i+1)-epsilon);
-    for(VP1Interval oldrange : oldEnabledRanges) {
+    for(const VP1Interval& oldrange : oldEnabledRanges) {
       if (phirange.hasOverlap(oldrange,2*M_PI)) {
 	target[i]=true;
 	break;

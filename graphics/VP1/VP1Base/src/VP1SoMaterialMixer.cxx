@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////
@@ -18,8 +18,8 @@
 class VP1SoMaterialMixer::Imp {
 public:
   VP1SoMaterialMixer * theclass;
-  void setMaterialFieldsAsAverageOfMatList(SoMaterial*mat, std::set<SoMaterial*> matlist );
-  void setMaterialFieldsAsAverageOfMatList(SoMaterial*mat, std::map<SoMaterial*,double> matlist );
+  void setMaterialFieldsAsAverageOfMatList(SoMaterial*mat, const std::set<SoMaterial*>& matlist );
+  void setMaterialFieldsAsAverageOfMatList(SoMaterial*mat, const std::map<SoMaterial*,double>& matlist );
   static float norm(const float& x) { return (x<0.0f?0.0f:(x>1.0f?1.0f:x));}
 
   //Callback used to monitor changes in materials:
@@ -185,7 +185,7 @@ void VP1SoMaterialMixer::Imp::materialChanged( SoMaterial * mat )
 }
 
 //____________________________________________________________________
-void VP1SoMaterialMixer::Imp::setMaterialFieldsAsAverageOfMatList(SoMaterial*mat, std::set<SoMaterial*> matlist )
+void VP1SoMaterialMixer::Imp::setMaterialFieldsAsAverageOfMatList(SoMaterial*mat, const std::set<SoMaterial*>& matlist )
 {
   float ambient_r(0.0f), ambient_g(0.0f), ambient_b(0.0f);
   float diffuse_r(0.0f), diffuse_g(0.0f), diffuse_b(0.0f);
@@ -225,7 +225,7 @@ void VP1SoMaterialMixer::Imp::setMaterialFieldsAsAverageOfMatList(SoMaterial*mat
 }
 
 //____________________________________________________________________
-void VP1SoMaterialMixer::Imp::setMaterialFieldsAsAverageOfMatList(SoMaterial*mat, std::map<SoMaterial*,double> matlist )
+void VP1SoMaterialMixer::Imp::setMaterialFieldsAsAverageOfMatList(SoMaterial*mat, const std::map<SoMaterial*,double>& matlist )
 {
   float w, totweight(0.0f);
   float ambient_r(0.0f), ambient_g(0.0f), ambient_b(0.0f);
