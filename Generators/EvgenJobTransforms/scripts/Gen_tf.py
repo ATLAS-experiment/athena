@@ -35,9 +35,8 @@ class EvgenExecutor(athenaExecutor):
             "Function to expand a file if it is a zip archive or tarball"
             if ".tar" in filename:
                 import tarfile
-                tf = tarfile.open(filename)
-                tf.extractall()
-                tf.close()
+                with tarfile.open(filename) as tf:
+                    tf.extractall()
             elif filename.endswith(".zip"):
                 import zipfile
                 zf = zipfile.ZipFile(filename)
@@ -131,8 +130,6 @@ class EvgenExecutor(athenaExecutor):
         confFile=None
         if len(configFiles) == 1:
             confFile =  os.path.join(FIRST_DIR, configFiles[0])
-            expand_if_archive(confFile)
-            msg.info('Configuration input found: %s' % confFile)
         elif len(configFiles) >1:
             msg.info("more then one gridpack ! ")
             if "--ecmEnergy" in str(sys.argv[1:]):
