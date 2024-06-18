@@ -75,8 +75,8 @@ BPHY23JpsiFinder = Analysis__JpsiFinder(
     TrackAndTrack               = False,
     assumeDiMuons               = True,  # If true, will assume dimu hypothesis and use PDG value for mu mass
     trackThresholdPt            = 2400.,
-    invMassLower                = Phi_lo,
-    invMassUpper                = Upsi2S_hi,
+    invMassLower                = Jpsi_lo,
+    invMassUpper                = Upsi_hi,
     Chi2Cut                     = 10.,
     oppChargesOnly	        = True,
     atLeastOneComb              = True,
@@ -130,7 +130,7 @@ BPHY23PsiX3872_Jpsi2Trk = Analysis__JpsiPlus2Tracks(
     pionpionHypothesis                  = True,
     kaonpionHypothesis                  = False,
     kaonprotonHypothesis                = False,
-    trkThresholdPt			= 380.,
+    trkThresholdPt			= 480.,
     trkMaxEta		 	        = 2.6,
     oppChargesOnly                      = False,
     JpsiMassLower                       = Jpsi_lo,
@@ -147,29 +147,6 @@ BPHY23PsiX3872_Jpsi2Trk = Analysis__JpsiPlus2Tracks(
     UseMassConstraint		        = False)
 ToolSvc += BPHY23PsiX3872_Jpsi2Trk
 
-from JpsiUpsilonTools.JpsiUpsilonToolsConf import Analysis__JpsiPlus1Track
-
-# Zc(3900)+ -> J/psi pi
-BPHY23Zc3900_Jpsi1Trk = Analysis__JpsiPlus1Track(
-    name                                = "BPHY23Zc3900_Jpsi1Trk",
-    pionHypothesis                      = True,
-    kaonHypothesis                      = False,
-    trkThresholdPt                      = 380.,
-    trkMaxEta                           = 2.6,
-    JpsiMassLower                       = Jpsi_lo,
-    JpsiMassUpper                       = Jpsi_hi,
-    TrkTrippletMassLower                = Zc_lo,
-    TrkTrippletMassUpper                = Zc_hi,
-    Chi2Cut                             = 10.0,
-    JpsiContainerKey                    = "BPHY23OniaCandidates",
-    TrackParticleCollection             = "InDetTrackParticles",
-    MuonsUsedInJpsi                     = "Muons",
-    ExcludeJpsiMuonsOnly                = True,
-    TrkVertexFitterTool                 = BPHY23VertexFit,
-    TrackSelectorTool                   = BPHY23_VertexTools.InDetTrackSelectorTool,
-    UseMassConstraint                   = False)
-ToolSvc += BPHY23Zc3900_Jpsi1Trk
-
 ## 6/ setup the combined augmentation/skimming tool
 from DerivationFrameworkBPhys.DerivationFrameworkBPhysConf import DerivationFramework__Reco_dimuTrkTrk
 BPHY23FourTrackReco_PsiX3872 = DerivationFramework__Reco_dimuTrkTrk(
@@ -180,16 +157,6 @@ BPHY23FourTrackReco_PsiX3872 = DerivationFramework__Reco_dimuTrkTrk(
     RefitPV                  = False,
     DoVertexType             = 0)
 ToolSvc += BPHY23FourTrackReco_PsiX3872
-
-from DerivationFrameworkBPhys.DerivationFrameworkBPhysConf import DerivationFramework__Reco_dimuTrk
-BPHY23ThreeTrackReco_Zc3900 = DerivationFramework__Reco_dimuTrk(
-    name                     = "BPHY23ThreeTrackReco_Zc3900",
-    Jpsi1PlusTrackName       = BPHY23Zc3900_Jpsi1Trk,
-    OutputVtxContainerName   = "BPHY23ThreeTrack_Zc3900",
-    PVContainerName          = "PrimaryVertices",
-    RefitPV                  = False,
-    DoVertexType             = 0)
-ToolSvc += BPHY23ThreeTrackReco_Zc3900
 
 # revertex with mass constraints to reduce combinatorics
 # Psi(2S) -> J/psi pi pi
@@ -209,42 +176,8 @@ BPHY23Rev_Psi4Body = DerivationFramework__ReVertex(
     OutputVtxContainerName     = "BPHY23Revtx_Psi4Body")
 ToolSvc += BPHY23Rev_Psi4Body
 
-# X(3872) -> J/psi pi pi
-BPHY23Rev_X3872 = DerivationFramework__ReVertex(
-    name                       = "BPHY23Rev_X3872",
-    InputVtxContainerName      = "BPHY23FourTrack_PsiX3872",
-    TrackIndices               = [ 0, 1, 2, 3 ],
-    SubVertexTrackIndices      = [ 1, 2 ],
-    RefitPV                    = False,
-    UseMassConstraint          = True,
-    VertexMass                 = X3872mass,
-    SubVertexMass              = Jpsimass,
-    MassInputParticles         = [Mumass, Mumass, Pimass, Pimass],
-    Chi2Cut                    = 25.,
-    TrkVertexFitterTool	       = BPHY23VertexFit,
-    OutputVtxContainerName     = "BPHY23Revtx_X3872")
-ToolSvc += BPHY23Rev_X3872
-
-# Zc3900 -> J/psi pi
-BPHY23Rev_Zc3900 = DerivationFramework__ReVertex(
-    name                       = "BPHY23Rev_Zc3900",
-    InputVtxContainerName      = "BPHY23ThreeTrack_Zc3900",
-    TrackIndices               = [ 0, 1, 2 ],
-    SubVertexTrackIndices      = [ 1, 2 ],
-    RefitPV                    = False,
-    UseMassConstraint          = True,
-    SubVertexMass              = Jpsimass,
-    MassInputParticles         = [Mumass, Mumass, Pimass],
-    Chi2Cut                    = 25.,
-    BMassLower                 = Zc_lo,
-    BMassUpper                 = Zc_hi,
-    TrkVertexFitterTool	       = BPHY23VertexFit,
-    OutputVtxContainerName     = "BPHY23Revtx_Zc3900")
-ToolSvc += BPHY23Rev_Zc3900
-
 
 from DerivationFrameworkBPhys.DerivationFrameworkBPhysConf import DerivationFramework__Select_onia2mumu
-
 BPHY23Select_Jpsi              = DerivationFramework__Select_onia2mumu(
     name                       = "BPHY23Select_Jpsi",
     HypothesisName             = "Jpsi",
@@ -322,17 +255,14 @@ ToolSvc += BPHY23Rev_Upsi
 ###  2 trks + 0 trk  ###
 ########################
 
-list_2trk0trk_hypo = ["Psi2Jpsi0", "Psi2Psi0", "Psi2Upsi0",
-                       "X3872Jpsi0", "X3872Psi0", "X3872Upsi0"]
-list_2trk0trk_psi1Input = ["BPHY23Revtx_Psi4Body", "BPHY23Revtx_Psi4Body", "BPHY23Revtx_Psi4Body",
-                            "BPHY23Revtx_X3872", "BPHY23Revtx_X3872", "BPHY23Revtx_X3872"]
-list_2trk0trk_psi2Input = ["BPHY23Revtx_Jpsi", "BPHY23Revtx_Psi", "BPHY23Revtx_Upsi",
-                            "BPHY23Revtx_Jpsi", "BPHY23Revtx_Psi", "BPHY23Revtx_Upsi"]
-list_2trk0trk_jpsi2lo = [Jpsi_lo, Psi_lo, Upsi_lo, Jpsi_lo, Psi_lo, Upsi_lo]
-list_2trk0trk_jpsi2hi = [Jpsi_hi, Psi_hi, Upsi_hi, Jpsi_hi, Psi_hi, Upsi_hi]
-list_2trk0trk_jpsi1mass = [Jpsimass, Jpsimass, Jpsimass, Jpsimass, Jpsimass, Jpsimass]
-list_2trk0trk_psi1mass = [Psi2Smass, Psi2Smass, Psi2Smass, X3872mass, X3872mass, X3872mass]
-list_2trk0trk_jpsi2mass = [Jpsimass, Psi2Smass, Upsimass, Jpsimass, Psi2Smass, Upsimass]
+list_2trk0trk_hypo = ["Psi2Jpsi0", "Psi2Psi0"]
+list_2trk0trk_psi1Input = ["BPHY23Revtx_Psi4Body", "BPHY23Revtx_Psi4Body"]
+list_2trk0trk_psi2Input = ["BPHY23Revtx_Jpsi", "BPHY23Revtx_Psi"]
+list_2trk0trk_jpsi2lo = [Jpsi_lo, Psi_lo]
+list_2trk0trk_jpsi2hi = [Jpsi_hi, Psi_hi]
+list_2trk0trk_jpsi1mass = [Jpsimass, Jpsimass]
+list_2trk0trk_psi1mass = [Psi2Smass, Psi2Smass]
+list_2trk0trk_jpsi2mass = [Jpsimass, Psi2Smass]
 
 from DerivationFrameworkBPhys.DerivationFrameworkBPhysConf import DerivationFramework__PsiPlusPsiSingleVertex
 
@@ -372,170 +302,17 @@ for i in range(len(list_2trk0trk_obj)):
     list_2trk0trk_obj[i].RefitPV                  = True
     list_2trk0trk_obj[i].MaxnPV                   = 100
 
-#######################
-###  1 trk + 0 trk  ###
-#######################
-
-list_1trk0trk_hypo = ["Zc3900Jpsi0", "Zc3900Psi0", "Zc3900Upsi0"]
-list_1trk0trk_psi1Input = ["BPHY23Revtx_Zc3900", "BPHY23Revtx_Zc3900", "BPHY23Revtx_Zc3900"]
-list_1trk0trk_psi2Input = ["BPHY23Revtx_Jpsi", "BPHY23Revtx_Psi", "BPHY23Revtx_Upsi"]
-list_1trk0trk_jpsi2lo = [Jpsi_lo, Psi_lo, Upsi_lo]
-list_1trk0trk_jpsi2hi = [Jpsi_hi, Psi_hi, Upsi_hi]
-list_1trk0trk_jpsi1mass = [Jpsimass, Jpsimass, Jpsimass]
-list_1trk0trk_psi1mass = [Zcmass, Zcmass, Zcmass]
-list_1trk0trk_jpsi2mass = [Jpsimass, Psi2Smass, Upsimass]
-
-list_1trk0trk_obj = []
-for hypo in list_1trk0trk_hypo:
-    list_1trk0trk_obj.append( DerivationFramework__PsiPlusPsiSingleVertex("BPHY23_"+hypo) )
-
-ToolSvc += list_1trk0trk_obj
-
-for i in range(len(list_1trk0trk_obj)):
-    list_1trk0trk_obj[i].HypothesisName           = list_1trk0trk_hypo[i]
-    list_1trk0trk_obj[i].Psi1Vertices             = list_1trk0trk_psi1Input[i]
-    list_1trk0trk_obj[i].Psi2Vertices             = list_1trk0trk_psi2Input[i]
-    list_1trk0trk_obj[i].MaxCandidates            = 15
-    list_1trk0trk_obj[i].NumberOfPsi1Daughters    = 3
-    list_1trk0trk_obj[i].NumberOfPsi2Daughters    = 2
-    list_1trk0trk_obj[i].Jpsi1MassLowerCut        = Jpsi_lo
-    list_1trk0trk_obj[i].Jpsi1MassUpperCut        = Jpsi_hi
-    list_1trk0trk_obj[i].Psi1MassLowerCut         = Zc_lo
-    list_1trk0trk_obj[i].Psi1MassUpperCut         = Zc_hi
-    list_1trk0trk_obj[i].Jpsi2MassLowerCut        = list_1trk0trk_jpsi2lo[i]
-    list_1trk0trk_obj[i].Jpsi2MassUpperCut        = list_1trk0trk_jpsi2hi[i]
-    list_1trk0trk_obj[i].MassLowerCut             = 0.
-    list_1trk0trk_obj[i].MassUpperCut             = X_hi
-    list_1trk0trk_obj[i].Jpsi1Mass                = list_1trk0trk_jpsi1mass[i]
-    list_1trk0trk_obj[i].Psi1Mass                 = list_1trk0trk_psi1mass[i]
-    list_1trk0trk_obj[i].Jpsi2Mass                = list_1trk0trk_jpsi2mass[i]
-    list_1trk0trk_obj[i].ApplyJpsi1MassConstraint = True
-    list_1trk0trk_obj[i].ApplyPsi1MassConstraint  = True
-    list_1trk0trk_obj[i].ApplyJpsi2MassConstraint = True
-    list_1trk0trk_obj[i].Chi2Cut                  = 30.
-    list_1trk0trk_obj[i].TrkVertexFitterTool      = BPHY23VertexFit
-    list_1trk0trk_obj[i].VxPrimaryCandidateName   = "PrimaryVertices"
-    list_1trk0trk_obj[i].OutputVertexCollections  = ["BPHY23_"+list_1trk0trk_hypo[i]+"_SubVtx1","BPHY23_"+list_1trk0trk_hypo[i]+"_SubVtx2","BPHY23_"+list_1trk0trk_hypo[i]+"_MainVtx"]
-    list_1trk0trk_obj[i].VxPrimaryCandidateName   = "PrimaryVertices"
-    list_1trk0trk_obj[i].RefPVContainerName       = "BPHY23_"+list_1trk0trk_hypo[i]+"_RefPrimaryVertices"
-    list_1trk0trk_obj[i].RefitPV                  = True
-    list_1trk0trk_obj[i].MaxnPV                   = 100
-
-#######################
-###  1 trk + 1 trk  ###
-#######################
-
-list_1trk1trk_hypo = ["Zc3900Zc3900"]
-list_1trk1trk_psi1Input = ["BPHY23Revtx_Zc3900"]
-list_1trk1trk_psi2Input = ["BPHY23Revtx_Zc3900"]
-list_1trk1trk_jpsi1mass = [Jpsimass]
-list_1trk1trk_psi1mass = [Zcmass]
-list_1trk1trk_jpsi2mass = [Jpsimass]
-list_1trk1trk_psi2mass = [Zcmass]
-
-list_1trk1trk_obj = []
-for hypo in list_1trk1trk_hypo:
-    list_1trk1trk_obj.append( DerivationFramework__PsiPlusPsiSingleVertex("BPHY23_"+hypo) )
-
-ToolSvc += list_1trk1trk_obj
-
-for i in range(len(list_1trk1trk_obj)):
-    list_1trk1trk_obj[i].HypothesisName           = list_1trk1trk_hypo[i]
-    list_1trk1trk_obj[i].Psi1Vertices             = list_1trk1trk_psi1Input[i]
-    list_1trk1trk_obj[i].Psi2Vertices             = list_1trk1trk_psi2Input[i]
-    list_1trk1trk_obj[i].MaxCandidates            = 15
-    list_1trk1trk_obj[i].NumberOfPsi1Daughters    = 3
-    list_1trk1trk_obj[i].NumberOfPsi2Daughters    = 3
-    list_1trk1trk_obj[i].Jpsi1MassLowerCut        = Jpsi_lo
-    list_1trk1trk_obj[i].Jpsi1MassUpperCut        = Jpsi_hi
-    list_1trk1trk_obj[i].Psi1MassLowerCut         = Zc_lo
-    list_1trk1trk_obj[i].Psi1MassUpperCut         = Zc_hi
-    list_1trk1trk_obj[i].Jpsi2MassLowerCut        = Jpsi_lo
-    list_1trk1trk_obj[i].Jpsi2MassUpperCut        = Jpsi_hi
-    list_1trk1trk_obj[i].Psi2MassLowerCut         = Zc_lo
-    list_1trk1trk_obj[i].Psi2MassUpperCut         = Zc_hi
-    list_1trk1trk_obj[i].MassLowerCut             = 0.
-    list_1trk1trk_obj[i].MassUpperCut             = X_hi
-    list_1trk1trk_obj[i].Jpsi1Mass                = list_1trk1trk_jpsi1mass[i]
-    list_1trk1trk_obj[i].Psi1Mass                 = list_1trk1trk_psi1mass[i]
-    list_1trk1trk_obj[i].Jpsi2Mass                = list_1trk1trk_jpsi2mass[i]
-    list_1trk1trk_obj[i].Psi2Mass                 = list_1trk1trk_psi2mass[i]
-    list_1trk1trk_obj[i].ApplyJpsi1MassConstraint = True
-    list_1trk1trk_obj[i].ApplyPsi1MassConstraint  = True
-    list_1trk1trk_obj[i].ApplyJpsi2MassConstraint = True
-    list_1trk1trk_obj[i].ApplyPsi2MassConstraint  = True
-    list_1trk1trk_obj[i].Chi2Cut                  = 30.
-    list_1trk1trk_obj[i].TrkVertexFitterTool      = BPHY23VertexFit
-    list_1trk1trk_obj[i].VxPrimaryCandidateName   = "PrimaryVertices"
-    list_1trk1trk_obj[i].OutputVertexCollections  = ["BPHY23_"+list_1trk1trk_hypo[i]+"_SubVtx1","BPHY23_"+list_1trk1trk_hypo[i]+"_SubVtx2","BPHY23_"+list_1trk1trk_hypo[i]+"_MainVtx"]
-    list_1trk1trk_obj[i].VxPrimaryCandidateName   = "PrimaryVertices"
-    list_1trk1trk_obj[i].RefPVContainerName       = "BPHY23_"+list_1trk1trk_hypo[i]+"_RefPrimaryVertices"
-    list_1trk1trk_obj[i].RefitPV                  = True
-    list_1trk1trk_obj[i].MaxnPV                   = 100
-
-########################
-###  2 trks + 1 trk  ###
-########################
-
-list_2trk1trk_hypo = ["Psi2Zc3900", "X3872Zc3900"]
-list_2trk1trk_psi1Input = ["BPHY23Revtx_Psi4Body", "BPHY23Revtx_X3872"]
-list_2trk1trk_psi2Input = ["BPHY23Revtx_Zc3900", "BPHY23Revtx_Zc3900"]
-list_2trk1trk_jpsi1mass = [Jpsimass, Jpsimass]
-list_2trk1trk_psi1mass = [Psi2Smass, X3872mass]
-list_2trk1trk_jpsi2mass = [Jpsimass, Jpsimass]
-list_2trk1trk_psi2mass = [Zcmass, Zcmass]
-
-list_2trk1trk_obj = []
-for hypo in list_2trk1trk_hypo:
-    list_2trk1trk_obj.append( DerivationFramework__PsiPlusPsiSingleVertex("BPHY23_"+hypo) )
-
-ToolSvc += list_2trk1trk_obj
-
-for i in range(len(list_2trk1trk_obj)):
-    list_2trk1trk_obj[i].HypothesisName           = list_2trk1trk_hypo[i]
-    list_2trk1trk_obj[i].Psi1Vertices             = list_2trk1trk_psi1Input[i]
-    list_2trk1trk_obj[i].Psi2Vertices             = list_2trk1trk_psi2Input[i]
-    list_2trk1trk_obj[i].MaxCandidates            = 15
-    list_2trk1trk_obj[i].NumberOfPsi1Daughters    = 4
-    list_2trk1trk_obj[i].NumberOfPsi2Daughters    = 3
-    list_2trk1trk_obj[i].Jpsi1MassLowerCut        = Jpsi_lo
-    list_2trk1trk_obj[i].Jpsi1MassUpperCut        = Jpsi_hi
-    list_2trk1trk_obj[i].Psi1MassLowerCut         = Psi_lo
-    list_2trk1trk_obj[i].Psi1MassUpperCut         = Psi_hi
-    list_2trk1trk_obj[i].Jpsi2MassLowerCut        = Jpsi_lo
-    list_2trk1trk_obj[i].Jpsi2MassUpperCut        = Jpsi_hi
-    list_2trk1trk_obj[i].Psi2MassLowerCut         = Zc_lo
-    list_2trk1trk_obj[i].Psi2MassUpperCut         = Zc_hi
-    list_2trk1trk_obj[i].MassLowerCut             = 0.
-    list_2trk1trk_obj[i].MassUpperCut             = X_hi
-    list_2trk1trk_obj[i].Jpsi1Mass                = list_2trk1trk_jpsi1mass[i]
-    list_2trk1trk_obj[i].Psi1Mass                 = list_2trk1trk_psi1mass[i]
-    list_2trk1trk_obj[i].Jpsi2Mass                = list_2trk1trk_jpsi2mass[i]
-    list_2trk1trk_obj[i].Psi2Mass                 = list_2trk1trk_psi2mass[i]
-    list_2trk1trk_obj[i].ApplyJpsi1MassConstraint = True
-    list_2trk1trk_obj[i].ApplyPsi1MassConstraint  = True
-    list_2trk1trk_obj[i].ApplyJpsi2MassConstraint = True
-    list_2trk1trk_obj[i].ApplyPsi2MassConstraint  = True
-    list_2trk1trk_obj[i].Chi2Cut                  = 30.
-    list_2trk1trk_obj[i].TrkVertexFitterTool      = BPHY23VertexFit
-    list_2trk1trk_obj[i].VxPrimaryCandidateName   = "PrimaryVertices"
-    list_2trk1trk_obj[i].OutputVertexCollections  = ["BPHY23_"+list_2trk1trk_hypo[i]+"_SubVtx1","BPHY23_"+list_2trk1trk_hypo[i]+"_SubVtx2","BPHY23_"+list_2trk1trk_hypo[i]+"_MainVtx"]
-    list_2trk1trk_obj[i].VxPrimaryCandidateName   = "PrimaryVertices"
-    list_2trk1trk_obj[i].RefPVContainerName       = "BPHY23_"+list_2trk1trk_hypo[i]+"_RefPrimaryVertices"
-    list_2trk1trk_obj[i].RefitPV                  = True
-    list_2trk1trk_obj[i].MaxnPV                   = 100
-
 #########################
 ###  2 trks + 2 trks  ###
 #########################
 
-list_2trk2trk_hypo = ["Psi2Psi2", "Psi2X3872", "X3872X3872"]
-list_2trk2trk_psi1Input = ["BPHY23Revtx_Psi4Body", "BPHY23Revtx_Psi4Body", "BPHY23Revtx_X3872"]
-list_2trk2trk_psi2Input = ["BPHY23Revtx_Psi4Body", "BPHY23Revtx_X3872", "BPHY23Revtx_X3872"]
-list_2trk2trk_jpsi1mass = [Jpsimass, Jpsimass, Jpsimass]
-list_2trk2trk_psi1mass = [Psi2Smass, Psi2Smass, X3872mass]
-list_2trk2trk_jpsi2mass = [Jpsimass, Jpsimass, Jpsimass]
-list_2trk2trk_psi2mass = [Psi2Smass, X3872mass, X3872mass]
+list_2trk2trk_hypo = ["Psi2Psi2"]
+list_2trk2trk_psi1Input = ["BPHY23Revtx_Psi4Body"]
+list_2trk2trk_psi2Input = ["BPHY23Revtx_Psi4Body"]
+list_2trk2trk_jpsi1mass = [Jpsimass]
+list_2trk2trk_psi1mass = [Psi2Smass]
+list_2trk2trk_jpsi2mass = [Jpsimass]
+list_2trk2trk_psi2mass = [Psi2Smass]
 
 list_2trk2trk_obj = []
 for hypo in list_2trk2trk_hypo:
@@ -578,27 +355,28 @@ for i in range(len(list_2trk2trk_obj)):
     list_2trk2trk_obj[i].MaxnPV                   = 100
 
 from DerivationFrameworkBPhys.DerivationFrameworkBPhysConf import DerivationFramework__JpsiPlusEtacSingleVertex
-BPHY23_JpsiEtac = DerivationFramework__JpsiPlusEtacSingleVertex(
-    name                     = "BPHY23_JpsiEtac",
-    HypothesisName           = "JpsiEtac",
+BPHY23_JpsiEtac4T = DerivationFramework__JpsiPlusEtacSingleVertex(
+    name                     = "BPHY23_JpsiEtac4T",
+    HypothesisName           = "JpsiEtac4T",
     JpsiVertices             = "BPHY23OniaCandidates",
     JpsiVtxHypoNames         = [ "Jpsi" ],
     JpsiMassLowerCut         = 2600.0,
     JpsiMassUpperCut         = 3500.0,
-    TrackMinPtTrk1           = 2500.,
-    TrackMinPtTrk2           = 2000.,
-    TrackMinPtTrk3           = 1500.,
-    TrackMinPtTrk4           = 1100.,
+    NumberOfEtacDaughters    = 4,
+    TrackMinPtTrk1           = 1850.,
+    TrackMinPtTrk2           = 1550.,
+    TrackMinPtTrk3           = 1250.,
+    TrackMinPtTrk4           = 1050.,
     Vtx0Daug1MassHypo        = Mumass,
     Vtx0Daug2MassHypo        = Mumass,
     Vtx1Daug1MassHypo        = Pimass,
     Vtx1Daug2MassHypo        = Pimass,
     Vtx2Daug1MassHypo        = Pimass,
     Vtx2Daug2MassHypo        = Pimass,
-    Rho1MassLowerCut         = 300.,
-    Rho1MassUpperCut         = 3000.,
-    Rho2MassLowerCut         = 300.,
-    Rho2MassUpperCut         = 3000.,
+    Rho1MassLowerCut         = 0.,
+    Rho1MassUpperCut         = 3300.,
+    Rho2MassLowerCut         = 0.,
+    Rho2MassUpperCut         = 3300.,
     EtacMassLowerCut         = 2300.,
     EtacMassUpperCut         = 4400.,
     MassLowerCut             = 0.0,
@@ -613,41 +391,314 @@ BPHY23_JpsiEtac = DerivationFramework__JpsiPlusEtacSingleVertex(
     TrkVertexFitterTool      = BPHY23_VertexTools.TrkVKalVrtFitter,
     TrackSelectorTool        = BPHY23_VertexTools.InDetTrackSelectorTool,
     VertexPointEstimator     = BPHY23_VertexTools.VtxPointEstimator,
-    OutputVertexCollection   = "BPHY23_JpsiEtacVertices",
+    OutputVertexCollection   = "BPHY23_JpsiEtac4TVertices",
     TrackContainerName       = "InDetTrackParticles",
     VxPrimaryCandidateName   = "PrimaryVertices",
-    RefPVContainerName       = "BPHY23_JpsiEtac_RefPrimaryVertices",
+    RefPVContainerName       = "BPHY23_JpsiEtac4T_RefPrimaryVertices",
     RefitPV                  = True,
     MaxnPV                   = 100,
     DoVertexType             = 7)
-ToolSvc += BPHY23_JpsiEtac
+ToolSvc += BPHY23_JpsiEtac4T
 
-BPHY23Rev_Etac = DerivationFramework__ReVertex(
-    name                       = "BPHY23Rev_Etac",
-    InputVtxContainerName      = "BPHY23_JpsiEtacVertices",
-    TrackIndices               = [ 2, 3, 4, 5 ],
-    RefitPV                    = True,
-    RefPVContainerName         = "BPHY23_JpsiEtac_RefPrimaryVertices", # use existing refitted PVs
-    UseMassConstraint          = True,
-    VertexMass                 = etacmass,
-    MassInputParticles         = [Pimass, Pimass, Pimass, Pimass],
-    TrkVertexFitterTool        = BPHY23VertexFit,
-    OutputVtxContainerName     = "BPHY23Revtx_Etac",
-    MaxPVrefit                 = 100,
-    DoVertexType               = 7)
-ToolSvc += BPHY23Rev_Etac
+BPHY23_JpsiEtac6T = DerivationFramework__JpsiPlusEtacSingleVertex(
+    name                     = "BPHY23_JpsiEtac6T",
+    HypothesisName           = "JpsiEtac6T",
+    JpsiVertices             = "BPHY23OniaCandidates",
+    JpsiVtxHypoNames         = [ "Jpsi" ],
+    JpsiMassLowerCut         = 2600.0,
+    JpsiMassUpperCut         = 3500.0,
+    NumberOfEtacDaughters    = 6,
+    TrackMinPtTrk1           = 1750.,
+    TrackMinPtTrk2           = 1550.,
+    TrackMinPtTrk3           = 1350.,
+    TrackMinPtTrk4           = 1150.,
+    TrackMinPtTrk5           = 950.,
+    TrackMinPtTrk6           = 850.,
+    Vtx0Daug1MassHypo        = Mumass,
+    Vtx0Daug2MassHypo        = Mumass,
+    Vtx1Daug1MassHypo        = Pimass,
+    Vtx1Daug2MassHypo        = Pimass,
+    Vtx2Daug1MassHypo        = Pimass,
+    Vtx2Daug2MassHypo        = Pimass,
+    Vtx3Daug1MassHypo        = Pimass,
+    Vtx3Daug2MassHypo        = Pimass,
+    Rho1MassLowerCut         = 0.,
+    Rho1MassUpperCut         = 3000.,
+    Rho2MassLowerCut         = 0.,
+    Rho2MassUpperCut         = 3000.,
+    Rho3MassLowerCut         = 0.,
+    Rho3MassUpperCut         = 3000.,
+    EtacMassLowerCut         = 2300.,
+    EtacMassUpperCut         = 4400.,
+    MassLowerCut             = 0.0,
+    MassUpperCut             = 31000.0,
+    MaxDR                    = 0.6,
+    MaxCandidates            = 1000,
+    JpsiMass                 = 3096.916,
+    ApplyJpsiMassConstraint  = True,
+    Chi2CutJpsi              = 4.,
+    Chi2CutRho               = 4.,
+    Chi2Cut                  = 4.,
+    TrkVertexFitterTool      = BPHY23_VertexTools.TrkVKalVrtFitter,
+    TrackSelectorTool        = BPHY23_VertexTools.InDetTrackSelectorTool,
+    VertexPointEstimator     = BPHY23_VertexTools.VtxPointEstimator,
+    OutputVertexCollection   = "BPHY23_JpsiEtac6TVertices",
+    TrackContainerName       = "InDetTrackParticles",
+    VxPrimaryCandidateName   = "PrimaryVertices",
+    RefPVContainerName       = "BPHY23_JpsiEtac6T_RefPrimaryVertices",
+    RefitPV                  = True,
+    MaxnPV                   = 100,
+    DoVertexType             = 7)
+ToolSvc += BPHY23_JpsiEtac6T
+
+from DerivationFrameworkBPhys.DerivationFrameworkBPhysConf import DerivationFramework__DiJpsiPlusTracksSingleVertex
+BPHY23_JpsiJpsi1T = DerivationFramework__DiJpsiPlusTracksSingleVertex(
+    name                     = "BPHY23_JpsiJpsi1T",
+    HypothesisName           = "JpsiJpsi1T",
+    Jpsi1Vertices            = "BPHY23OniaCandidates",
+    Jpsi2Vertices            = "BPHY23OniaCandidates",
+    Jpsi1VtxHypoNames        = [ "Jpsi" ],
+    Jpsi2VtxHypoNames        = [ "Jpsi" ],
+    Jpsi1MassLowerCut        = 2600.0,
+    Jpsi1MassUpperCut        = 3500.0,
+    Jpsi2MassLowerCut        = 2600.0,
+    Jpsi2MassUpperCut        = 3500.0,
+    NumberOfTracks           = 1,
+    TrackMinPtTrk1           = 480.,
+    Vtx0Daug1MassHypo        = Mumass,
+    Vtx0Daug2MassHypo        = Mumass,
+    Vtx0Daug3MassHypo        = Mumass,
+    Vtx0Daug4MassHypo        = Mumass,
+    Vtx1Daug1MassHypo        = Pimass,
+    MassLowerCut             = 0.0,
+    MassUpperCut             = 31000.0,
+    MaxDR                    = 0.6,
+    MaxCandidates            = 1000,
+    Jpsi1Mass                = 3096.916,
+    Jpsi2Mass                = 3096.916,
+    ApplyJpsi1MassConstraint = True,
+    ApplyJpsi2MassConstraint = True,
+    Chi2CutJpsi1             = 4.,
+    Chi2CutJpsi2             = 4.,
+    Chi2Cut                  = 4.,
+    TrkVertexFitterTool      = BPHY23_VertexTools.TrkVKalVrtFitter,
+    TrackSelectorTool        = BPHY23_VertexTools.InDetTrackSelectorTool,
+    VertexPointEstimator     = BPHY23_VertexTools.VtxPointEstimator,
+    OutputVertexCollection   = "BPHY23_JpsiJpsi1TVertices",
+    TrackContainerName       = "InDetTrackParticles",
+    VxPrimaryCandidateName   = "PrimaryVertices",
+    RefPVContainerName       = "BPHY23_JpsiJpsi1T_RefPrimaryVertices",
+    RefitPV                  = True,
+    MaxnPV                   = 100,
+    DoVertexType             = 7)
+ToolSvc += BPHY23_JpsiJpsi1T
+
+BPHY23_JpsiJpsi2T = DerivationFramework__DiJpsiPlusTracksSingleVertex(
+    name                     = "BPHY23_JpsiJpsi2T",
+    HypothesisName           = "JpsiJpsi2T",
+    Jpsi1Vertices            = "BPHY23OniaCandidates",
+    Jpsi2Vertices            = "BPHY23OniaCandidates",
+    Jpsi1VtxHypoNames        = [ "Jpsi" ],
+    Jpsi2VtxHypoNames        = [ "Jpsi" ],
+    Jpsi1MassLowerCut        = 2600.0,
+    Jpsi1MassUpperCut        = 3500.0,
+    Jpsi2MassLowerCut        = 2600.0,
+    Jpsi2MassUpperCut        = 3500.0,
+    NumberOfTracks           = 2,
+    TrackMinPtTrk1           = 550.,
+    TrackMinPtTrk2           = 480.,
+    Vtx0Daug1MassHypo        = Mumass,
+    Vtx0Daug2MassHypo        = Mumass,
+    Vtx0Daug3MassHypo        = Mumass,
+    Vtx0Daug4MassHypo        = Mumass,
+    Vtx1Daug1MassHypo        = Pimass,
+    Vtx1Daug2MassHypo        = Pimass,
+    Rho1MassLowerCut         = 0.,
+    Rho1MassUpperCut         = 4000.,
+    MassLowerCut             = 0.0,
+    MassUpperCut             = 31000.0,
+    MaxDR                    = 0.6,
+    MaxCandidates            = 1000,
+    Jpsi1Mass                = 3096.916,
+    Jpsi2Mass                = 3096.916,
+    ApplyJpsi1MassConstraint = True,
+    ApplyJpsi2MassConstraint = True,
+    Chi2CutJpsi1             = 4.,
+    Chi2CutJpsi2             = 4.,
+    Chi2CutRho               = 4.,
+    Chi2Cut                  = 4.,
+    TrkVertexFitterTool      = BPHY23_VertexTools.TrkVKalVrtFitter,
+    TrackSelectorTool        = BPHY23_VertexTools.InDetTrackSelectorTool,
+    VertexPointEstimator     = BPHY23_VertexTools.VtxPointEstimator,
+    OutputVertexCollection   = "BPHY23_JpsiJpsi2TVertices",
+    TrackContainerName       = "InDetTrackParticles",
+    VxPrimaryCandidateName   = "PrimaryVertices",
+    RefPVContainerName       = "BPHY23_JpsiJpsi2T_RefPrimaryVertices",
+    RefitPV                  = True,
+    MaxnPV                   = 100,
+    DoVertexType             = 7)
+ToolSvc += BPHY23_JpsiJpsi2T
+
+BPHY23_JpsiJpsi4T = DerivationFramework__DiJpsiPlusTracksSingleVertex(
+    name                     = "BPHY23_JpsiJpsi4T",
+    HypothesisName           = "JpsiJpsi4T",
+    Jpsi1Vertices            = "BPHY23OniaCandidates",
+    Jpsi2Vertices            = "BPHY23OniaCandidates",
+    Jpsi1VtxHypoNames        = [ "Jpsi" ],
+    Jpsi2VtxHypoNames        = [ "Jpsi" ],
+    Jpsi1MassLowerCut        = 2600.0,
+    Jpsi1MassUpperCut        = 3500.0,
+    Jpsi2MassLowerCut        = 2600.0,
+    Jpsi2MassUpperCut        = 3500.0,
+    NumberOfTracks           = 4,
+    TrackMinPtTrk1           = 950.,
+    TrackMinPtTrk2           = 800.,
+    TrackMinPtTrk3           = 650.,
+    TrackMinPtTrk4           = 480.,
+    Vtx0Daug1MassHypo        = Mumass,
+    Vtx0Daug2MassHypo        = Mumass,
+    Vtx0Daug3MassHypo        = Mumass,
+    Vtx0Daug4MassHypo        = Mumass,
+    Vtx1Daug1MassHypo        = Pimass,
+    Vtx1Daug2MassHypo        = Pimass,
+    Vtx2Daug1MassHypo        = Pimass,
+    Vtx2Daug2MassHypo        = Pimass,
+    Rho1MassLowerCut         = 0.,
+    Rho1MassUpperCut         = 3300.,
+    Rho2MassLowerCut         = 0.,
+    Rho2MassUpperCut         = 3300.,
+    EtacMassLowerCut         = 2300.,
+    EtacMassUpperCut         = 4400.,
+    MassLowerCut             = 0.0,
+    MassUpperCut             = 31000.0,
+    MaxDR                    = 0.6,
+    MaxCandidates            = 1000,
+    Jpsi1Mass                = 3096.916,
+    Jpsi2Mass                = 3096.916,
+    ApplyJpsi1MassConstraint = True,
+    ApplyJpsi2MassConstraint = True,
+    Chi2CutJpsi1             = 4.,
+    Chi2CutJpsi2             = 4.,
+    Chi2CutRho               = 4.,
+    Chi2Cut                  = 4.,
+    TrkVertexFitterTool      = BPHY23_VertexTools.TrkVKalVrtFitter,
+    TrackSelectorTool        = BPHY23_VertexTools.InDetTrackSelectorTool,
+    VertexPointEstimator     = BPHY23_VertexTools.VtxPointEstimator,
+    OutputVertexCollection   = "BPHY23_JpsiJpsi4TVertices",
+    TrackContainerName       = "InDetTrackParticles",
+    VxPrimaryCandidateName   = "PrimaryVertices",
+    RefPVContainerName       = "BPHY23_JpsiJpsi4T_RefPrimaryVertices",
+    RefitPV                  = True,
+    MaxnPV                   = 100,
+    DoVertexType             = 7)
+ToolSvc += BPHY23_JpsiJpsi4T
+
+BPHY23_JpsiJpsi6T = DerivationFramework__DiJpsiPlusTracksSingleVertex(
+    name                     = "BPHY23_JpsiJpsi6T",
+    HypothesisName           = "JpsiJpsi6T",
+    Jpsi1Vertices            = "BPHY23OniaCandidates",
+    Jpsi2Vertices            = "BPHY23OniaCandidates",
+    Jpsi1VtxHypoNames        = [ "Jpsi" ],
+    Jpsi2VtxHypoNames        = [ "Jpsi" ],
+    Jpsi1MassLowerCut        = 2600.0,
+    Jpsi1MassUpperCut        = 3500.0,
+    Jpsi2MassLowerCut        = 2600.0,
+    Jpsi2MassUpperCut        = 3500.0,
+    NumberOfTracks           = 6,
+    TrackMinPtTrk1           = 1250.,
+    TrackMinPtTrk2           = 1100.,
+    TrackMinPtTrk3           = 950.,
+    TrackMinPtTrk4           = 800.,
+    TrackMinPtTrk5           = 650.,
+    TrackMinPtTrk6           = 480.,
+    Vtx0Daug1MassHypo        = Mumass,
+    Vtx0Daug2MassHypo        = Mumass,
+    Vtx0Daug3MassHypo        = Mumass,
+    Vtx0Daug4MassHypo        = Mumass,
+    Vtx1Daug1MassHypo        = Pimass,
+    Vtx1Daug2MassHypo        = Pimass,
+    Vtx2Daug1MassHypo        = Pimass,
+    Vtx2Daug2MassHypo        = Pimass,
+    Vtx3Daug1MassHypo        = Pimass,
+    Vtx3Daug2MassHypo        = Pimass,
+    Rho1MassLowerCut         = 0.,
+    Rho1MassUpperCut         = 3000.,
+    Rho2MassLowerCut         = 0.,
+    Rho2MassUpperCut         = 3000.,
+    Rho3MassLowerCut         = 0.,
+    Rho3MassUpperCut         = 3000.,
+    EtacMassLowerCut         = 2300.,
+    EtacMassUpperCut         = 4400.,
+    MassLowerCut             = 0.0,
+    MassUpperCut             = 31000.0,
+    MaxDR                    = 0.6,
+    MaxCandidates            = 1000,
+    Jpsi1Mass                = 3096.916,
+    Jpsi2Mass                = 3096.916,
+    ApplyJpsi1MassConstraint = True,
+    ApplyJpsi2MassConstraint = True,
+    Chi2CutJpsi1             = 4.,
+    Chi2CutJpsi2             = 4.,
+    Chi2CutRho               = 4.,
+    Chi2Cut                  = 4.,
+    TrkVertexFitterTool      = BPHY23_VertexTools.TrkVKalVrtFitter,
+    TrackSelectorTool        = BPHY23_VertexTools.InDetTrackSelectorTool,
+    VertexPointEstimator     = BPHY23_VertexTools.VtxPointEstimator,
+    OutputVertexCollection   = "BPHY23_JpsiJpsi6TVertices",
+    TrackContainerName       = "InDetTrackParticles",
+    VxPrimaryCandidateName   = "PrimaryVertices",
+    RefPVContainerName       = "BPHY23_JpsiJpsi6T_RefPrimaryVertices",
+    RefitPV                  = True,
+    MaxnPV                   = 100,
+    DoVertexType             = 7)
+ToolSvc += BPHY23_JpsiJpsi6T
 
 #Track isolation for vertices
 from DerivationFrameworkBPhys.DerivationFrameworkBPhysConf import DerivationFramework__VertexTrackIsolation
-BPHY23_VtxTrackIsolationDecor = DerivationFramework__VertexTrackIsolation(
-  name                  = "BPHY23_VtxTrackIsolationDecor",
+BPHY23_JpsiEtac4T_VtxTrkIso = DerivationFramework__VertexTrackIsolation(
+  name                  = "BPHY23_JpsiEtac4T_VtxTrkIso",
   TrackContainer        = "InDetTrackParticles",
-  InputVertexContainer  = "BPHY23_JpsiEtacVertices",
+  InputVertexContainer  = "BPHY23_JpsiEtac4TVertices",
   DoVertexTypes         = 7)
-ToolSvc += BPHY23_VtxTrackIsolationDecor
+ToolSvc += BPHY23_JpsiEtac4T_VtxTrkIso
+
+BPHY23_JpsiEtac6T_VtxTrkIso = DerivationFramework__VertexTrackIsolation(
+  name                  = "BPHY23_JpsiEtac6T_VtxTrkIso",
+  TrackContainer        = "InDetTrackParticles",
+  InputVertexContainer  = "BPHY23_JpsiEtac6TVertices",
+  DoVertexTypes         = 7)
+ToolSvc += BPHY23_JpsiEtac6T_VtxTrkIso
+
+BPHY23_JpsiJpsi1T_VtxTrkIso = DerivationFramework__VertexTrackIsolation(
+  name                  = "BPHY23_JpsiJpsi1T_VtxTrkIso",
+  TrackContainer        = "InDetTrackParticles",
+  InputVertexContainer  = "BPHY23_JpsiJpsi1TVertices",
+  DoVertexTypes         = 7)
+ToolSvc += BPHY23_JpsiJpsi1T_VtxTrkIso
+
+BPHY23_JpsiJpsi2T_VtxTrkIso = DerivationFramework__VertexTrackIsolation(
+  name                  = "BPHY23_JpsiJpsi2T_VtxTrkIso",
+  TrackContainer        = "InDetTrackParticles",
+  InputVertexContainer  = "BPHY23_JpsiJpsi2TVertices",
+  DoVertexTypes         = 7)
+ToolSvc += BPHY23_JpsiJpsi2T_VtxTrkIso
+
+BPHY23_JpsiJpsi4T_VtxTrkIso = DerivationFramework__VertexTrackIsolation(
+  name                  = "BPHY23_JpsiJpsi4T_VtxTrkIso",
+  TrackContainer        = "InDetTrackParticles",
+  InputVertexContainer  = "BPHY23_JpsiJpsi4TVertices",
+  DoVertexTypes         = 7)
+ToolSvc += BPHY23_JpsiJpsi4T_VtxTrkIso
+
+BPHY23_JpsiJpsi6T_VtxTrkIso = DerivationFramework__VertexTrackIsolation(
+  name                  = "BPHY23_JpsiJpsi6T_VtxTrkIso",
+  TrackContainer        = "InDetTrackParticles",
+  InputVertexContainer  = "BPHY23_JpsiJpsi6TVertices",
+  DoVertexTypes         = 7)
+ToolSvc += BPHY23_JpsiJpsi6T_VtxTrkIso
 
 
-list_all_obj = list_2trk0trk_obj + list_1trk0trk_obj + list_1trk1trk_obj + list_2trk1trk_obj + list_2trk2trk_obj
+list_all_obj = list_2trk0trk_obj + list_2trk2trk_obj
 
 OutputCollections = []
 RefPVContainers = []
@@ -658,13 +709,25 @@ for obj in list_all_obj:
     OutputCollections += obj.OutputVertexCollections
     RefPVContainers += ["xAOD::VertexContainer#BPHY23_" + obj.HypothesisName + "_RefPrimaryVertices"]
     RefPVAuxContainers += ["xAOD::VertexAuxContainer#BPHY23_" + obj.HypothesisName + "_RefPrimaryVerticesAux."]
-    expression += "count(BPHY23_" + obj.HypothesisName + "_MainVtx.passed_" + obj.HypothesisName + ")+"
+    expression += "count(BPHY23_" + obj.HypothesisName + "_MainVtx.passed_" + obj.HypothesisName + ") + "
 
-OutputCollections += [ "BPHY23_JpsiEtacVertices", "BPHY23Revtx_Etac" ]
-RefPVContainers += ["xAOD::VertexContainer#BPHY23_JpsiEtac_RefPrimaryVertices"]
-RefPVAuxContainers += ["xAOD::VertexAuxContainer#BPHY23_JpsiEtac_RefPrimaryVerticesAux."]
-expression += "count(BPHY23_JpsiEtacVertices.passed_JpsiEtac)"
-        
+OutputCollections += ["BPHY23_JpsiEtac4TVertices", "BPHY23_JpsiEtac6TVertices",
+                      "BPHY23_JpsiJpsi1TVertices", "BPHY23_JpsiJpsi2TVertices",
+                      "BPHY23_JpsiJpsi4TVertices", "BPHY23_JpsiJpsi6TVertices"]
+RefPVContainers += ["xAOD::VertexContainer#BPHY23_JpsiEtac4T_RefPrimaryVertices",
+                    "xAOD::VertexContainer#BPHY23_JpsiEtac6T_RefPrimaryVertices",
+                    "xAOD::VertexContainer#BPHY23_JpsiJpsi1T_RefPrimaryVertices",
+                    "xAOD::VertexContainer#BPHY23_JpsiJpsi2T_RefPrimaryVertices",
+                    "xAOD::VertexContainer#BPHY23_JpsiJpsi4T_RefPrimaryVertices",
+                    "xAOD::VertexContainer#BPHY23_JpsiJpsi6T_RefPrimaryVertices"]
+RefPVAuxContainers += ["xAOD::VertexAuxContainer#BPHY23_JpsiEtac4T_RefPrimaryVerticesAux.",
+                       "xAOD::VertexAuxContainer#BPHY23_JpsiEtac6T_RefPrimaryVerticesAux.",
+                       "xAOD::VertexAuxContainer#BPHY23_JpsiJpsi1T_RefPrimaryVerticesAux.",
+                       "xAOD::VertexAuxContainer#BPHY23_JpsiJpsi2T_RefPrimaryVerticesAux.",
+                       "xAOD::VertexAuxContainer#BPHY23_JpsiJpsi4T_RefPrimaryVerticesAux.",
+                       "xAOD::VertexAuxContainer#BPHY23_JpsiJpsi6T_RefPrimaryVerticesAux."]
+expression += "count(BPHY23_JpsiEtac4TVertices.passed_JpsiEtac4T) + count(BPHY23_JpsiEtac6TVertices.passed_JpsiEtac6T) + count(BPHY23_JpsiJpsi1TVertices.passed_JpsiJpsi1T) + count(BPHY23_JpsiJpsi2TVertices.passed_JpsiJpsi2T) + count(BPHY23_JpsiJpsi4TVertices.passed_JpsiJpsi4T) + count(BPHY23_JpsiJpsi6TVertices.passed_JpsiJpsi6T)"
+
 expression += ") > 0"
 
 #--------------------------------------------------------------------
@@ -689,7 +752,7 @@ ToolSvc += BPHY23_SelectEvent
 
 # The name of the kernel (BPHY23Kernel in this case) must be unique to this derivation
 from DerivationFrameworkCore.DerivationFrameworkCoreConf import DerivationFramework__DerivationKernel
-augmentation_tools = [BPHY23_Reco_mumu, BPHY23FourTrackReco_PsiX3872, BPHY23ThreeTrackReco_Zc3900, BPHY23Rev_Psi4Body, BPHY23Rev_X3872, BPHY23Rev_Zc3900, BPHY23Select_Jpsi, BPHY23Select_Psi, BPHY23Select_Upsi, BPHY23Rev_Jpsi, BPHY23Rev_Psi, BPHY23Rev_Upsi] + list_all_obj + [ BPHY23_JpsiEtac, BPHY23Rev_Etac, BPHY23_VtxTrackIsolationDecor ]
+augmentation_tools = [BPHY23_Reco_mumu, BPHY23FourTrackReco_PsiX3872, BPHY23Rev_Psi4Body, BPHY23Select_Jpsi, BPHY23Select_Psi, BPHY23Rev_Jpsi, BPHY23Rev_Psi] + list_all_obj + [ BPHY23_JpsiEtac4T, BPHY23_JpsiEtac6T, BPHY23_JpsiJpsi1T, BPHY23_JpsiJpsi2T, BPHY23_JpsiJpsi4T, BPHY23_JpsiJpsi6T, BPHY23_JpsiEtac4T_VtxTrkIso, BPHY23_JpsiEtac6T_VtxTrkIso, BPHY23_JpsiJpsi1T_VtxTrkIso, BPHY23_JpsiJpsi2T_VtxTrkIso, BPHY23_JpsiJpsi4T_VtxTrkIso, BPHY23_JpsiJpsi6T_VtxTrkIso]
 
 DerivationFrameworkJob += CfgMgr.DerivationFramework__DerivationKernel(
     "BPHY23Kernel",
