@@ -100,7 +100,8 @@ def createBasicFPGATrackSimConfigFlags():
     cf.addFlag('yBins', 216)
     cf.addFlag('xBufferBins', 6)
     cf.addFlag('yBufferBins', 2)
-    cf.addFlag('threshold', [8])
+    #cf.addFlag('threshold', [5])#TODO change to 4 #CODER This is eddited from 8 to 5 to match bin number
+    cf.addFlag('threshold', [8])#TODO change to 4 #CODER This is eddited from 8 to 5 to match bin number
     cf.addFlag('IdealGeoRoads', True)
     cf.addFlag('convolution', [])
     cf.addFlag('convSizeX', 0)
@@ -266,3 +267,4 @@ if __name__ == "__main__":
 
 
 
+    

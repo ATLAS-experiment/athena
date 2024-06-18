@@ -59,7 +59,7 @@ StatusCode FPGATrackSimRawToLogicalHitsTool::convert(unsigned stage, const FPGAT
   const FPGATrackSimRegionMap *rmap = nullptr;
   if (stage == 1)
   {
-      pmap = m_FPGATrackSimMapping->PlaneMap_1st();
+      pmap = m_FPGATrackSimMapping->PlaneMap_1st(0);
       rmap = m_FPGATrackSimMapping->RegionMap_1st();
   }
   else if (stage == 2)
@@ -84,7 +84,7 @@ StatusCode FPGATrackSimRawToLogicalHitsTool::convert(unsigned stage, const FPGAT
   m_missing_hit_codes.clear();
 
 
-  // fill the towers with mapped hits
+  // fill the towers/slices with mapped hits
   for (auto hit: eventHeader.hits()) { // hit loop
       // map to the logical hit, copying across the truth
       pmap->map(hit);
@@ -155,7 +155,7 @@ StatusCode FPGATrackSimRawToLogicalHitsTool::getUnmapped(std::vector<FPGATrackSi
     return StatusCode::SUCCESS;
 }
 
-const FPGATrackSimPlaneMap* FPGATrackSimRawToLogicalHitsTool::getPlaneMap_1st() {
-  return m_FPGATrackSimMapping->PlaneMap_1st();
+const FPGATrackSimPlaneMap* FPGATrackSimRawToLogicalHitsTool::getPlaneMap_1st(int sliceNum) {
+  return m_FPGATrackSimMapping->PlaneMap_1st(sliceNum);
 }
 

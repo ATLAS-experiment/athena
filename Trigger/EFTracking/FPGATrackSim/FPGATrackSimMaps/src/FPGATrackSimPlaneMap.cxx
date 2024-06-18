@@ -301,10 +301,12 @@ void FPGATrackSimPlaneMap::readLayers(ifstream & fin, uint32_t stage)
 // Interface Functions
 ///////////////////////////////////////////////////////////////////////////////
 
+// TODO WW HERE
 
 void FPGATrackSimPlaneMap::map(FPGATrackSimHit & hit) const
 {
-    if (hit.isMapped()) return;
+    //TODO WW check of isMapped commented out this might work?
+    //if (hit.isMapped()) return;
     
     // re-assign layers in the pixel endcap to be each individual disk
     // technically this returns a success/fail but I'm not sure we need it?
@@ -312,7 +314,20 @@ void FPGATrackSimPlaneMap::map(FPGATrackSimHit & hit) const
 
     const LayerSection &pinfo = getLayerSection(hit.getDetType(), hit.getDetectorZone(), hit.getPhysLayer());
     hit.setSection(pinfo.section);
+    std::cout<<"\n before L:"<<pinfo.layer;
+    if (hit.isMapped()){
+        std::cout<<"\n before L:"<<pinfo.layer<<","<<hit.getLayer();
+    }
+    else{
+        std::cout<<"\n before L:"<<pinfo.layer<<",~";
+    }
     hit.setLayer(pinfo.layer);
+    if (hit.isMapped()){
+        std::cout<<"  AfterSet:"<<pinfo.layer<<", "<<hit.getLayer()<<"\n \n";
+    }
+    else{
+        std::cout<<"  AfterSet:"<<pinfo.layer<<", ~"<<"\n \n";
+    }
     if (!hit.isMapped()) // failsafe if for some reason someone calls this on a clustered hit again, or something
         hit.setHitType(HitType::mapped);
 }

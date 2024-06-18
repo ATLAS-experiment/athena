@@ -39,8 +39,9 @@ class FPGATrackSimHit;
 class IFPGATrackSimRoadFinderTool : virtual public IAlgTool
 {
     public:
-        DeclareInterfaceID(IFPGATrackSimRoadFinderTool, 1, 0);
+        DeclareInterfaceID(IFPGATrackSimRoadFinderTool, 2, 0);
         virtual StatusCode getRoads(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads) = 0;
+        virtual int getSubRegion() const = 0;
 };
 
 

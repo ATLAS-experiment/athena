@@ -32,6 +32,10 @@ StatusCode FPGATrackSimMappingSvc::checkAllocs()
     {
         ATH_MSG_FATAL("Error using 1st stage plane map no elements of vector made: " << m_pmap_vector_1st);
     }
+    if (!m_numberOfPmaps)
+        ATH_MSG_FATAL("Error with declared number of plane maps: " << m_pmap_path);
+    if (m_numberOfPmaps != m_pmap_vector_1st.size())
+        ATH_MSG_FATAL("Error using number of declared plane maps does not equal number of loaded plane maps: " << m_pmap_path<<"=/="<<m_pmap_vector_1st.size());
     for (int a = 0 ; a < m_pmap_vector_1st.size() ;a++)
     {
         if(!m_pmap_vector_1st.at(a))
@@ -53,7 +57,7 @@ StatusCode FPGATrackSimMappingSvc::checkAllocs()
 
 int FPGATrackSimMappingSvc::readPmapSize(std::ifstream& fileIn)
 {
-    int numberOfPmaps;  
+    //int numberOfPmaps;  
     std::string line;
     std::cout<<"~~PMAP"<<'\n';
     //const std::string & filepath, 
@@ -78,13 +82,13 @@ int FPGATrackSimMappingSvc::readPmapSize(std::ifstream& fileIn)
     */
     getline(fileIn, line);
     std::istringstream sline(line);
-    sline >> numberOfPmaps;
-    std::cout<<"\n ~~~NUM"<< numberOfPmaps<<'\n';
-    if ( !(numberOfPmaps>0) ){
-        std::cout<<"\n ~~IN~i div seekmi ti "<< numberOfPmaps<<'\n';
-        ATH_MSG_FATAL("Number of Pmaps is set to" << numberOfPmaps);
+    sline >> m_numberOfPmaps;
+    std::cout<<"\n ~~~NUM"<< m_numberOfPmaps<<'\n';
+    if ( !(m_numberOfPmaps>0) ){
+        std::cout<<"\n ~~IN~i div seekmi ti "<< m_numberOfPmaps<<'\n';
+        ATH_MSG_FATAL("Number of Pmaps is set to" << m_numberOfPmaps);
     }
-    return numberOfPmaps;
+    return m_numberOfPmaps;
 }
 StatusCode FPGATrackSimMappingSvc::initialize()
 {
@@ -101,7 +105,8 @@ StatusCode FPGATrackSimMappingSvc::initialize()
             //ANA_MSG_FATAL("Couldn't open " << filepath);
             throw ("FPGATrackSimPlaneMap Couldn't open " + filepath);
         }
-        int pmapNumber = readPmapSize(fin);
+        //int pmapNumber = readPmapSize(fin);
+        readPmapSize(fin);
         //TODO KILL USELESS COMMENTS
         //readTest(fin);
         //readTest(fin);
@@ -116,7 +121,7 @@ StatusCode FPGATrackSimMappingSvc::initialize()
         ATH_MSG_DEBUG("Creating the 1st stage plane map");
         std::cout<<"\n line 131 \n";
         //m_pmap_1st = std::unique_ptr<FPGATrackSimPlaneMap>(new FPGATrackSimPlaneMap(PathResolverFindCalibFile(m_pmap_path.value()), m_EvtSel->getRegionID(), 1, m_layerOverrides));
-        for (int i = 0; i<pmapNumber; i++)
+        for (int i = 0; i<m_numberOfPmaps; i++)
         {
             std::cout<<"\n test \n";
             m_pmap_vector_1st.push_back(std::unique_ptr<FPGATrackSimPlaneMap>(new FPGATrackSimPlaneMap(fin, m_EvtSel->getRegionID(), 1, m_layerOverrides)));

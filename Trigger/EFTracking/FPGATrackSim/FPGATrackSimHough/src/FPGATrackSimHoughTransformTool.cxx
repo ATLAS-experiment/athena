@@ -59,7 +59,7 @@ StatusCode FPGATrackSimHoughTransformTool::initialize()
   // Retrieve info
   if (m_idealGeoRoads || m_useSectors) ATH_CHECK(m_FPGATrackSimBankSvc.retrieve());
   ATH_CHECK(m_FPGATrackSimMapping.retrieve());
-  m_nLayers = m_FPGATrackSimMapping->PlaneMap_1st()->getNLogiLayers();
+  m_nLayers = m_FPGATrackSimMapping->PlaneMap_1st(0)->getNLogiLayers();
 
   // Error checking
   // TODO check bounds are set correctly
@@ -170,9 +170,10 @@ FPGATrackSimHoughTransformTool::Image FPGATrackSimHoughTransformTool::createLaye
       if (m_subRegion >= 0) {
         // NOTE: uncomment middle piece if we port over 2nd stage functionality.
         auto* subrmap = /*(m_2ndStage) ? m_FPGATrackSimMapping->SubRegionMap_2nd() :*/ m_FPGATrackSimMapping->SubRegionMap();
-        if (!(subrmap->isInRegion(m_subRegion, *hit))) {
-          continue;
-        }
+        //if (!(subrmap->isInRegion(m_subRegion, *hit))) {
+        //  continue;
+        //}
+        //NOTE WW REGION CHECK REMOVED
       }
 
       // This scans over y (pT) because that is more efficient in memory, in C.
@@ -418,7 +419,7 @@ void FPGATrackSimHoughTransformTool::matchIdealGeoSector(FPGATrackSimRoad & r) c
       std::shared_ptr<FPGATrackSimHit> wcHit = std::make_shared<FPGATrackSimHit>();
       wcHit->setHitType(HitType::wildcard);
       wcHit->setLayer(il);
-      wcHit->setDetType(m_FPGATrackSimMapping->PlaneMap_1st()->getDetType(il));
+      wcHit->setDetType(m_FPGATrackSimMapping->PlaneMap_1st(0)->getDetType(il));
       std::vector<std::shared_ptr<const FPGATrackSimHit>> wcHits;
       wcHits.push_back(wcHit);
       r.setHits(il,wcHits);
@@ -489,8 +490,8 @@ void FPGATrackSimHoughTransformTool::addRoad(const std::vector<std::shared_ptr<c
   layer_bitmask_t hitLayers = 0;
   for (const auto & hit : hits)
     {
-      if (m_subRegion >= 0 && !m_FPGATrackSimMapping->SubRegionMap()->isInRegion(m_subRegion, *hit)) continue;
-
+      //if (m_subRegion >= 0 && !m_FPGATrackSimMapping->SubRegionMap()->isInRegion(m_subRegion, *hit)) continue;
+      //NOTE WW REGION check remoeved
       // Find the min/max y bins (after scaling)
       unsigned int y_bin_min = (y / m_binScale[hit->getLayer()]) * m_binScale[hit->getLayer()];
       unsigned int y_bin_max = y_bin_min + m_binScale[hit->getLayer()];

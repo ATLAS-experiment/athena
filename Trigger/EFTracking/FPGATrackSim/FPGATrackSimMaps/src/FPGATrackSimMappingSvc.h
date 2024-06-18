@@ -28,6 +28,7 @@ class FPGATrackSimMappingSvc : public extends<AthService, IFPGATrackSimMappingSv
 
         virtual const FPGATrackSimPlaneMap* PlaneMap_1st()       const override { return m_pmap_vector_1st.at(0).get(); }
         virtual const FPGATrackSimPlaneMap* PlaneMap_1st(int slice)       const override { return m_pmap_vector_1st.at(slice).get(); }
+        //virtual const FPGATrackSimPlaneMap* PlaneMap_1st(int slice)       const { return m_pmap_vector_1st.at(slice).get(); }
         virtual const FPGATrackSimPlaneMap* PlaneMap_2nd()       const override { return m_pmap_2nd.get(); }
         virtual const FPGATrackSimRegionMap* RegionMap_1st()     const override { return m_rmap_1st.get(); }
         virtual const FPGATrackSimRegionMap* RegionMap_2nd()     const override { return m_rmap_2nd.get(); }
@@ -61,11 +62,12 @@ class FPGATrackSimMappingSvc : public extends<AthService, IFPGATrackSimMappingSv
         std::unique_ptr<FPGATrackSimRegionMap> m_subrmap = nullptr;
         std::unique_ptr<FPGATrackSimNNMap>     m_NNmap = nullptr;
 
+        //TODO cahnge to a nullptr or somthing kie that?
+        int m_numberOfPmaps = 0;
         // Helpers
         //TODO KILL readPmapSize with bad arg in the commented 
         //int readPmapSize(const std::string & filepath);
         int readPmapSize(std::ifstream& fileIn);
-        int readTest(std::ifstream& fileIn);
         StatusCode checkInputs();
         StatusCode checkAllocs();
 };

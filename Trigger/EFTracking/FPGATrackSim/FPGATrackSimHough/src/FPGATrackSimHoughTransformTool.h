@@ -110,7 +110,7 @@ class FPGATrackSimHoughTransformTool : public extends <AthAlgTool, IFPGATrackSim
         double getMinY() const { return m_parMin[m_par_y]; }
         double getMaxY() const { return m_parMax[m_par_y]; }
         unsigned getThreshold() const { return m_threshold[m_threshold.size() / 2]; }
-        int getSubRegion() const { return m_subRegion; }
+        virtual int getSubRegion() const override{return m_subRegion;}
 
         // Apply correction due to B != 2T everywhere. This correction should be ADDED to
         // phi_track.

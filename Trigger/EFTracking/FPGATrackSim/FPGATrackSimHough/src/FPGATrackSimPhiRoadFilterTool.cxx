@@ -42,7 +42,7 @@ StatusCode FPGATrackSimPhiRoadFilterTool::initialize()
 {
   // Retrieve info
   ATH_CHECK(m_FPGATrackSimMapping.retrieve());
-  m_nLayers = m_FPGATrackSimMapping->PlaneMap_1st()->getNLogiLayers();
+  m_nLayers = m_FPGATrackSimMapping->PlaneMap_1st(0)->getNLogiLayers();
   return StatusCode::SUCCESS;
 }
 
@@ -108,7 +108,7 @@ FPGATrackSimRoad FPGATrackSimPhiRoadFilterTool::buildRoad(std::shared_ptr<const 
     if (road_hits.size() == 0) {
       std::unique_ptr<FPGATrackSimHit> wcHit = std::make_unique<FPGATrackSimHit>();
       wcHit->setHitType(HitType::wildcard);
-      wcHit->setDetType(m_FPGATrackSimMapping->PlaneMap_1st()->getDetType(lyr));
+      wcHit->setDetType(m_FPGATrackSimMapping->PlaneMap_1st(0)->getDetType(lyr));
       wcHit->setLayer(lyr);
       road_hits.push_back(std::move(wcHit));
     }
