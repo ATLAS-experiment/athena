@@ -1,6 +1,6 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
-*/
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ */
 
 #ifndef dqutilsHanOutputFile_h
 #define dqutilsHanOutputFile_h
@@ -28,8 +28,7 @@ class TEfficiency;
 
 namespace dqutils
 {
-
-  class ATLAS_NOT_THREAD_SAFE HanOutputFile : public TObject
+  class ATLAS_NOT_THREAD_SAFE HanOutputFile: public TObject
   {
   public:
     HanOutputFile();
@@ -43,7 +42,7 @@ namespace dqutils
     typedef std::map<std::string, std::string> AssMap_t;
     typedef std::map<std::string, AssMap_t*> DirToAssMap_t;
 
-    static void getAllGroupDirs(DirMap_t& dirmap, TDirectory* dir, const std::string & dirName);
+    static void getAllGroupDirs(DirMap_t& dirmap, TDirectory* dir, const std::string& dirName);
     /**
      * @brief Same as getAllGroupDirs, but works with Version 2.3 files
      *
@@ -51,18 +50,18 @@ namespace dqutils
      * getAllGroupDirs_V2 works also with TObjstring, as they are JSON
      */
     static void getAllGroupDirs_V2(DirStrMap_t& dirstrmap, TObject* obj,  // For Version 2 files
-      const std::string & objName);
+                                   const std::string& objName);
     static void getAllAssessments(AssMap_t& dirmap, TDirectory* dir);
 
     /**
      * @brief Print path - and name of Assessment, represented as JSON TObjString
      */
-    static void printDQGroupJSON(const nlohmann::json & j, const std::string& location, const char* path_to_file);
+    static void printDQGroupJSON(const nlohmann::json& j, const std::string& location, const char* path_to_file);
 
     static std::string getStringName(const std::string& location, int file_version);
     static std::string getInfo(const std::string& location, int file_version);
     static std::string getInfo(const std::string& JSON_str);
-    static std::string processJSON_ingetInfo(const nlohmann::ordered_json & j);
+    static std::string processJSON_ingetInfo(const nlohmann::ordered_json& j);
 
     static std::string getIndentation(const std::string& pathName, const std::string& leadingSpace = "");
 
@@ -95,7 +94,8 @@ namespace dqutils
      */
     const static int GENERATE_PNG = 1;   // Make PNG with TImage
     const static int GENERATE_JSON = 2;  // Make JSON
-    virtual int saveAllHistograms(const std::string & location, bool drawRefs, const std::string & run_min_LB, int cnvsType = 1);
+    virtual int saveAllHistograms(const std::string& location, bool drawRefs, const std::string& run_min_LB,
+                                  int cnvsType = 1);
     //manipulation of dirname and maindir prevents const ref passing; could be done better
     static bool containsDir(std::string dirname, std::string maindir);
     /**
@@ -112,41 +112,48 @@ namespace dqutils
     static std::optional<std::string> containsKeyInJSON(
       const std::string& pathInJSON, const std::string& jsonName, const std::string& path_to_JSON);
 
-    virtual bool saveHistogramToFile(const std::string & nameHis, std::string location, TDirectory* groupDir, bool drawRefs,
-      const std::string & run_min_LB, const std::string & pathName, int cnvsType = 1);
-      
-    virtual std::pair<std::string, std::string> getHistogram(const std::string & nameHis, TDirectory* groupDir, bool drawRefs,
-      const std::string & run_min_LB, const std::string & pathName, int cnvsType = 1);
-      
+    virtual bool saveHistogramToFile(const std::string& nameHis, std::string location, TDirectory* groupDir,
+                                     bool drawRefs,
+                                     const std::string& run_min_LB, const std::string& pathName, int cnvsType = 1);
+
+    virtual std::pair<std::string, std::string> getHistogram(const std::string& nameHis, TDirectory* groupDir,
+                                                             bool drawRefs,
+                                                             const std::string& run_min_LB, const std::string& pathName,
+                                                             int cnvsType = 1);
+
     virtual std::string getHistogramPNG(
-      const std::string & nameHis, TDirectory* groupDir, bool drawRefs, const std::string & run_min_LB, const std::string & pathName);
-      
+      const std::string& nameHis, TDirectory* groupDir, bool drawRefs, const std::string& run_min_LB,
+      const std::string& pathName);
+
     virtual std::pair<std::string, std::string> getHistogramJSON(
-      const std::string & nameHis, TDirectory* groupDir, bool drawRefs, const std::string & run_min_LB, const std::string & pathName);
-      
-    virtual bool saveHistogramToFileSuperimposed(const std::string & nameHis, std::string location, TDirectory* groupDir1,
-      TDirectory* groupDir2, bool drawRefs, const std::string & run_min_LB, const std::string & pathName, int cnvsType = 1);  //!!!
-      
+      const std::string& nameHis, TDirectory* groupDir, bool drawRefs, const std::string& run_min_LB,
+      const std::string& pathName);
+
+    virtual bool saveHistogramToFileSuperimposed(const std::string& nameHis, std::string location,
+                                                 TDirectory* groupDir1,
+                                                 TDirectory* groupDir2, bool drawRefs, const std::string& run_min_LB,
+                                                 const std::string& pathName, int cnvsType = 1);  //!!!
+
 
     virtual bool drawH2(TCanvas* canv, TH2* hist, std::string& drawopt, std::string& display);
-    
+
     virtual bool drawH1(
       TCanvas* canv, TH1* hist, TH1* reference, std::string& drawopt, std::string& display, std::string& AlgoName);
-      
+
     virtual bool drawReference(
       TCanvas* canv, TH1* hRef, TH1* h, std::string& drawopt, std::string& display, std::string& AlgoName);
     // virtual bool drawGraph(TCanvas* canv,TGraph* g,std::string &drawopt,std::string &display);
-    
+
     virtual void ratioplot(TCanvas* myC_main, TH1* h, TH1* href, std::string str);
-    
+
     virtual void ratioplot2D(TCanvas* canvas, TH2* h2, TH2* h2Ref, std::string display);
-    
+
     virtual void attachFits(TH1* hist, std::string& drawopt, std::string& display);
 
     virtual void setupCanvas(std::string& drawopt, std::string& display);
     virtual void polynomial(TCanvas* c, std::string str, TH1* h);
 
-    virtual void displayExtra(TCanvas* c, const std::string & str);
+    virtual void displayExtra(TCanvas* c, const std::string& str);
     virtual void axisOption(std::string str, TH1* h);
 
     virtual void formatTH1(TCanvas* c, TH1* h) const;
@@ -156,17 +163,17 @@ namespace dqutils
 
     virtual double getNEntries(std::string location, std::string histname);
     virtual double getNEntries(const TObject* obj);
-
   protected:
     virtual void clearData();
     virtual void convertToGraphics(
-      int cnvsType, TCanvas* myC, std::string &json, TImage** img = 0, char** x = 0, int* y = 0);
-    virtual void convertToGraphics(int cnvsType, TCanvas* myC, const std::string & namePNG, const std::string & nameJSON);
-    
-    virtual bool saveFile(
-      int cnvsType, const std::string &pngfName, const std::string & pngContent, const std::string & jsonfName, const std::string & jsonfContent);
+      int cnvsType, TCanvas* myC, std::string& json, TImage** img = 0, char** x = 0, int* y = 0);
+    virtual void convertToGraphics(int cnvsType, TCanvas* myC, const std::string& namePNG, const std::string& nameJSON);
 
-    virtual bool writeToFile(const std::string & fName, const std::string & content);
+    virtual bool saveFile(
+      int cnvsType, const std::string& pngfName, const std::string& pngContent, const std::string& jsonfName,
+      const std::string& jsonfContent);
+
+    virtual bool writeToFile(const std::string& fName, const std::string& content);
 
     TFile* m_file;
     DirMap_t m_indirMap;
@@ -176,7 +183,6 @@ namespace dqutils
 
     ClassDef(HanOutputFile, 0)  // Provides functions to manipulate and analyze data-quality monitoring files
   };
-
 }  // namespace dqutils
 
 #endif

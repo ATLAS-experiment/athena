@@ -1,20 +1,20 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
-*/
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ */
 
 #ifndef dqutilsStatusFlagCOOLBase_h
 #define dqutilsStatusFlagCOOLBase_h
 
 // Protect CINT from some system definitions that cause problems
 #ifndef __CINT__
-  //COOL API include files (CoolKernel)
+//COOL API include files (CoolKernel)
   #include "CoolKernel/pointers.h"
   #include "CoolKernel/ValidityKey.h"
 #else
-  namespace cool {
-    class IDatabasePtr;
-    class IFolderPtr;
-  }
+namespace cool {
+  class IDatabasePtr;
+  class IFolderPtr;
+}
 #endif
 
 
@@ -48,10 +48,8 @@ namespace cool {
 
 
 namespace dqutils {
-
-class StatusFlagCOOLBase : public cool::Application, public TObject {
-protected:
-
+  class StatusFlagCOOLBase: public cool::Application, public TObject {
+  protected:
 // Protect CINT from some system definitions that cause problems
 // CINT does not need to know about these private variables
 #ifndef __CINT__
@@ -61,16 +59,15 @@ protected:
     cool::IFolderPtr m_coolFolder;
 #endif
 
-    void insert_helper(cool::ChannelId channelId, 
-		       coral::AttributeList& payload,
-		       const std::string& tag_name);
-    void Initialize(const std::string& dbStr, const std::string& folderStr, 
-		    int runS, int lumiS, int runU, int lumiU);
-
-public:
+    void insert_helper(cool::ChannelId channelId,
+                       coral::AttributeList& payload,
+                       const std::string& tag_name);
+    void Initialize(const std::string& dbStr, const std::string& folderStr,
+                    int runS, int lumiS, int runU, int lumiU);
+  public:
     // Connects to the database. Throws a "DatabaseDoesNotExist" exception if database does not exist.
     cool::IDatabasePtr coolDbInstance(const std::string& dbStr, bool readOnly);
-    
+
     // Browses the COOL folder. Throws a "FolderNotFound" exception if folder does not exist.
     cool::IFolderPtr coolFolderInstance(const std::string& folderStr);
 
@@ -83,9 +80,10 @@ public:
 
     // to flush after insertions!
     void flush();
-   
+
     // Constructors and Destructors.
-    StatusFlagCOOLBase(const std::string& dbStr, const std::string& folderStr, int runS, int lumiS, int runU, int lumiU);
+    StatusFlagCOOLBase(const std::string& dbStr, const std::string& folderStr, int runS, int lumiS, int runU,
+                       int lumiU);
     StatusFlagCOOLBase(int runS, int lumiS, int runU, int lumiU);
     StatusFlagCOOLBase();
     virtual ~StatusFlagCOOLBase ();
@@ -102,9 +100,8 @@ public:
 
 
     // Needed for the ROOT interface.
-    ClassDef( StatusFlagCOOLBase, 0 ) // A class for modifying DQ info in the COOL database
-};
-
+    ClassDef(StatusFlagCOOLBase, 0) // A class for modifying DQ info in the COOL database
+  };
 }
 
 #endif

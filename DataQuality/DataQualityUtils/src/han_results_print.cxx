@@ -1,6 +1,6 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
-*/
+   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ */
 
 #include <cstdlib>
 #include <filesystem>
@@ -12,7 +12,6 @@
 
 namespace
 {
-
   int usage(const std::string& command_name, int exit_code);
 
   class CmdLineArgs
@@ -23,19 +22,17 @@ namespace
     std::string command;
     std::string hresults;
   };
-
 }  // unnamed namespace
 
-int main ATLAS_NOT_THREAD_SAFE(int argc, char* argv[])
-{
+int main ATLAS_NOT_THREAD_SAFE(int argc, char* argv[]) {
   CmdLineArgs arg;
   int rc = arg.parse(argc, argv);
+
   if (rc != 0) return rc;
 
   std::string resultsName(arg.hresults);
 
-  if (!std::filesystem::exists(resultsName))
-  {
+  if (!std::filesystem::exists(resultsName)) {
     std::cerr << "File " << resultsName << " does not seem to exist. Exiting" << std::endl;
     return 1;
   }
@@ -52,9 +49,7 @@ int main ATLAS_NOT_THREAD_SAFE(int argc, char* argv[])
 
 namespace
 {
-
-  int usage(const std::string& command_name, int exit_code)
-  {
+  int usage(const std::string& command_name, int exit_code) {
     std::string message;
     message += "\n";
     message += "This program takes as an argument the name of a \'han\' results\n";
@@ -70,14 +65,13 @@ namespace
     return exit_code;
   }
 
-  int CmdLineArgs::parse(int argc, char* argv[])
-  {
+  int CmdLineArgs::parse(int argc, char* argv[]) {
     command = argv[0];
     if (argc > 2) return usage(command, 1);
+
     if (argc < 2) return usage(command, 0);
 
     hresults = argv[1];
     return 0;
   }
-
 }  // unnamed namespace

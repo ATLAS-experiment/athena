@@ -1,6 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
-*/
+   Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+ */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //Methods to Process HLTMuon Histograms after merging.
@@ -35,35 +35,32 @@
 
 
 namespace dqutils {
-
   static const bool fpdbg = false;
   // static const bool fpdbg = true;
 
-  void 
-  MonitoringFile::HLTMuonPostProcess( const std::string & inFilename, bool /* isIncremental */ ) 
-  {
+  void
+  MonitoringFile::HLTMuonPostProcess(const std::string& inFilename, bool /* isIncremental */) {
     if (fpdbg) std::cout << "Start HLTMuon post-processing" << std::endl;
 
     //start postprocessing
     TString run_dir;
-    HLTMuonHistogramDivision(inFilename , run_dir);
+    HLTMuonHistogramDivision(inFilename, run_dir);
 
     //trigger overlap matrix
-    HLTMuonTriggerOverlapMatrix(inFilename , run_dir);
+    HLTMuonTriggerOverlapMatrix(inFilename, run_dir);
 
-    if (fpdbg) std::cout << "Finish HLTMuon post-processing"<<std::endl;
+    if (fpdbg) std::cout << "Finish HLTMuon post-processing" << std::endl;
 
     return;
   }//MonitoringFile::HLTMuonPostProcess
 
   bool
-  MonitoringFile::HLTMuonCheckHistogram(TFile* f, TString& hname)
-  {
+  MonitoringFile::HLTMuonCheckHistogram(TFile* f, TString& hname) {
     if (!(f->Get(hname))) {
       if (fpdbg) {
-	std::cerr << "HLTMuon PostProcessing: no such histogram!! : "<< hname << std::endl;
-	gDirectory->pwd();
-	gDirectory->ls();
+        std::cerr << "HLTMuon PostProcessing: no such histogram!! : " << hname << std::endl;
+        gDirectory->pwd();
+        gDirectory->ls();
       }
       return false;
     }
@@ -71,42 +68,43 @@ namespace dqutils {
   }//MonitoringFile::HLTMuonCheckHistogram
 
   void
-  MonitoringFile::HLTMuonTriggerOverlapMatrix(const std::string & inFilename, TString& run_dir)
-  {
+  MonitoringFile::HLTMuonTriggerOverlapMatrix(const std::string& inFilename, TString& run_dir) {
     if (fpdbg) std::cout << "  Start to fill HLTMuon Trigger Overlap Matrix" << std::endl;
 
-    PostProcessorFileWrapper mf( inFilename , "HLT Trigger Overlap Matrix");
+    PostProcessorFileWrapper mf(inFilename, "HLT Trigger Overlap Matrix");
     if (!mf.IsOpen()) {
       std::cerr << "HLTMuonPostProcess(): "
-		<< "Input file not opened \n";
+                << "Input file not opened \n";
       return;
     }
-    if(mf.GetSize()<1000.) {
+    if (mf.GetSize() < 1000.) {
       std::cerr << "HLTMuonPostProcess(): "
-		<< "Input file empty \n";
-      return; 
+                << "Input file empty \n";
+      return;
     }
     // get run directory name
     //Seemingly unnecessary lines are necessary
     TIter nextcd0(gDirectory->GetListOfKeys());
-    TKey *key0 = (TKey*)nextcd0();
-    TDirectory *dir0= dynamic_cast<TDirectory*> (key0->ReadObj());
-    if (not dir0){
-      std::cerr<< "nullptr for dynamic cast in HLTMuonTriggerOverlapMatrix"<<std::endl;
+    TKey* key0 = (TKey*) nextcd0();
+    TDirectory* dir0 = dynamic_cast<TDirectory*> (key0->ReadObj());
+    if (not dir0) {
+      std::cerr << "nullptr for dynamic cast in HLTMuonTriggerOverlapMatrix" << std::endl;
       return;
     }
     dir0->cd();
     ///
 
-    TIter next_run (mf.GetListOfKeys());
+    TIter next_run(mf.GetListOfKeys());
     TKey* key_run(0);
-    while ((key_run = dynamic_cast<TKey*> ( next_run() )) !=0 ) { //== the while commented out at$
+    while ((key_run = dynamic_cast<TKey*> (next_run())) != 0) { //== the while commented out at$
       if (!key_run->IsFolder()) continue;
       run_dir = key_run->GetName();
-      if (!run_dir.Contains("run") )  { continue;}
+      if (!run_dir.Contains("run")) {
+        continue;
+      }
       break;
     }
-    if (! run_dir.Contains("run") ) {
+    if (!run_dir.Contains("run")) {
       std::cerr << "HLTMuon: unable to find run directory ..." << std::endl;
       return;
     }
@@ -114,7 +112,7 @@ namespace dqutils {
     while (times--) {  // just once
       //run_dir = dir0->GetName();
       if (fpdbg) {
-	std::cout << "HLTMuon: run directory is " << run_dir << std::endl;
+        std::cout << "HLTMuon: run directory is " << run_dir << std::endl;
       }
 
       std::string run_dir2 = run_dir.Data();
@@ -140,91 +138,84 @@ namespace dqutils {
       //Matrix
       TDirectory* dir = mf.GetDirectory(cm_dir);
       // if (fpdbg) { std::cerr << "matrix directory: " << cm_dir << std::endl; }
-      if(!dir){
-	if (fpdbg) {
-	  std::cerr<< "HLTMuonTriggerOverlapMatrix: directory "<<cm_dir<<" not found"<<std::endl;
-	}
+      if (!dir) {
+        if (fpdbg) {
+          std::cerr << "HLTMuonTriggerOverlapMatrix: directory " << cm_dir << " not found" << std::endl;
+        }
         return;
       }
-      
-      mf.get( sol, hol );
+
+      mf.get(sol, hol);
       // if (fpdbg) { std::cerr << "matrix file: " << sol << std::endl; }
       if (!hol) {
-	if (fpdbg) {
-	  std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< sol << std::endl;
-	}
-	continue;
+        if (fpdbg) {
+          std::cerr << "HLTMuon PostProcessing: no such histogram!! " << sol << std::endl;
+        }
+        continue;
       }
-      mf.get( solpt, holpt );
+      mf.get(solpt, holpt);
       if (!holpt) {
-	if (fpdbg) {
-	  std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< solpt << std::endl;
-	}
-	continue;
+        if (fpdbg) {
+          std::cerr << "HLTMuon PostProcessing: no such histogram!! " << solpt << std::endl;
+        }
+        continue;
       }
-      mf.get( solf, holf );
+      mf.get(solf, holf);
       if (!holf) {
-	if (fpdbg) {
-	  std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< solf << std::endl;
-	}
-	continue;
+        if (fpdbg) {
+          std::cerr << "HLTMuon PostProcessing: no such histogram!! " << solf << std::endl;
+        }
+        continue;
       }
-      mf.get( solfpt, holfpt );
+      mf.get(solfpt, holfpt);
       if (!holfpt) {
-	if (fpdbg) {
-	  std::cerr <<"HLTMuon PostProcessing: no such histogram!! "<< solfpt << std::endl;
-	}
-	continue;
+        if (fpdbg) {
+          std::cerr << "HLTMuon PostProcessing: no such histogram!! " << solfpt << std::endl;
+        }
+        continue;
       }
 
-      if( hol && holpt && holf && holfpt ){
+      if (hol && holpt && holf && holfpt) {
         holf->Reset();
         holfpt->Reset();
 
-        for( int i = 0 ; i < hol->GetXaxis()->GetNbins(); i ++ ){
+        for (int i = 0; i < hol->GetXaxis()->GetNbins(); i++) {
+          Float_t diag = hol->GetBinContent(i + 1, i + 1);
+          Float_t diagpt = holpt->GetBinContent(i + 1, i + 1);
 
-          Float_t diag   = hol->GetBinContent(i+1, i+1);
-          Float_t diagpt = holpt->GetBinContent(i+1, i+1);
-          
-          for( int j = 0 ; j < hol->GetXaxis()->GetNbins(); j ++ ){
+          for (int j = 0; j < hol->GetXaxis()->GetNbins(); j++) {
+            Float_t offdiag = hol->GetBinContent(i + 1, j + 1);
+            Float_t offdiagpt = holpt->GetBinContent(i + 1, j + 1);
 
-            Float_t offdiag   = hol->GetBinContent(i+1, j+1);
-            Float_t offdiagpt = holpt->GetBinContent(i+1, j+1);
-
-            Float_t frac  = 0.;
+            Float_t frac = 0.;
             Float_t efrac = 0.;
 
-            if( diag != 0. ){
-              frac = offdiag/diag;
-              efrac = sqrt(frac*(1.-frac)/diag);
+            if (diag != 0.) {
+              frac = offdiag / diag;
+              efrac = sqrt(frac * (1. - frac) / diag);
             }
 
-            Float_t fracpt  = 0.;
+            Float_t fracpt = 0.;
             Float_t efracpt = 0.;
 
-            if( diagpt != 0. ){
-              fracpt  = offdiagpt/diagpt;
-              efracpt = sqrt(fracpt*(1.-fracpt)/diagpt);
+            if (diagpt != 0.) {
+              fracpt = offdiagpt / diagpt;
+              efracpt = sqrt(fracpt * (1. - fracpt) / diagpt);
             }
 
-            holf->SetBinContent(i+1,j+1, frac);
-            holf->SetBinError(i+1,j+1, efrac);
-      
-            holfpt->SetBinContent(i+1,j+1, fracpt);
-            holfpt->SetBinError(i+1,j+1, efracpt);
-      
+            holf->SetBinContent(i + 1, j + 1, frac);
+            holf->SetBinError(i + 1, j + 1, efrac);
+
+            holfpt->SetBinContent(i + 1, j + 1, fracpt);
+            holfpt->SetBinError(i + 1, j + 1, efracpt);
           }//j
         }//i
 
         dir->cd();
-        holf->Write("",TObject::kOverwrite);
-        holfpt->Write("",TObject::kOverwrite);
-
+        holf->Write("", TObject::kOverwrite);
+        holfpt->Write("", TObject::kOverwrite);
       }//if
       mf.Write();
-
     }//while
   }//HLTMuonTriggerOverlapMatrix
-
 }//namespace
-

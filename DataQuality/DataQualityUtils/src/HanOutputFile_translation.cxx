@@ -1,6 +1,6 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
-*/
+   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ */
 
 #include <iostream>           //input-output
 #include <nlohmann/json.hpp>  //If you run this code as part of Athena
@@ -17,11 +17,11 @@
 #include <cstring>  //to convert string to char array (to save json file as TObjString)
 
 /** Instructions:
-    * COMPILE
+ * COMPILE
        g++ -std=c++11 HanOutputFile_translation.cxx -O2 `root-config --cflags` `root-config --libs --glibs` -o
-HanOutputFile_translation
+   HanOutputFile_translation
 
-    * RUN
+ * RUN
        ./HanOutputFile_translation
        or
        ./HanOutputFile_translation <input_file_name>
@@ -29,7 +29,7 @@ HanOutputFile_translation
        ./HanOutputFile_translation <input_file_name> <output_dir_path>
        or
        ./HanOutputFile_translation <input_dir_path> <input_file_name> <output_dir_path>
-**/
+ **/
 
 /** Declarations of functions protoypes **/
 // Function, that checks, if the directory includes histogram in it or in any subdirectories
@@ -57,25 +57,21 @@ int work_with_results_dir(TObject* obj_in, TObject* obj_to);
 // Converts from old format to new format
 int convert_file(TObject* obj_in, TObject* obj_to);
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char* argv[]) {
   using namespace std;
   // ATLAS Data Quality space
   TString input_file_path = "/eos/atlas/atlascerngroupdisk/data-dqm/examples/han_output_translation_example/";
   TString input_file_name = "run_364030_lowStat_LB121-140_han.root";  // Example file
   TString output_file_path = "./";
 
-  if (argc == 2)
-  {
+  if (argc == 2) {
     input_file_name = argv[1];
   }
-  if (argc == 3)
-  {
+  if (argc == 3) {
     input_file_name = argv[1];
     output_file_path = argv[2];
   }
-  if (argc == 4)
-  {
+  if (argc == 4) {
     input_file_path = argv[1];
     input_file_name = argv[2];
     output_file_path = argv[3];
@@ -135,17 +131,13 @@ int main(int argc, char* argv[])
 }
 
 //---------Functions description--------------
-int convert_file(TObject* obj_input, TObject* obj_outout)
-{
+int convert_file(TObject* obj_input, TObject* obj_outout) {
   TString obj_input_type = obj_input->ClassName();
   bool is_file;
 
-  if (obj_input_type == "TFile")
-  {
+  if (obj_input_type == "TFile") {
     is_file = true;
-  }
-  else
-  {
+  } else {
     is_file = false;
   }
 
@@ -153,28 +145,20 @@ int convert_file(TObject* obj_input, TObject* obj_outout)
   TDirectory* save_to = dynamic_cast<TDirectory*>(obj_outout);
   TString name = obj_input->GetName();
 
-  if (dir = dynamic_cast<TDirectory*>(obj_input))
-  {  // obj_input is a TDirectory
+  if (dir = dynamic_cast<TDirectory*>(obj_input)) { // obj_input is a TDirectory
     TString name = dir->GetName();
-    if (name == "Results")
-    {  // From Results folder should be extracted Reference histogrma (in an upper level), and Results --> JSON
+    if (name == "Results") { // From Results folder should be extracted Reference histogrma (in an upper level), and
+                             // Results --> JSON
       work_with_results_dir(dir, save_to);
-    }
-    else if (name == "Config")
-    {  // Config --> JSON
+    } else if (name == "Config") { // Config --> JSON
       work_with_no_hist_dir(dir, save_to);
-    }
-    else
-    {
+    } else {
       // Treat as TDirectory
       // 1-st, lets create this dir
       TDirectory* copy_dir;
-      if (is_file == false)
-      {
+      if (is_file == false) {
         copy_dir = save_to->mkdir(name);
-      }
-      else
-      {
+      } else {
         copy_dir = save_to;
       }
       // All files in this dir should be saved in the created one
@@ -183,37 +167,31 @@ int convert_file(TObject* obj_input, TObject* obj_outout)
       TIter next(dir->GetListOfKeys());
       TKey* key;
       // 3-rd, Analyse, from which elements this dir consists of
-      while ((key = (TKey*)next()))
-      {
+      while ((key = (TKey*) next())) {
         TObject* next_level_obj;
         TString key_name = key->GetName();
         next_level_obj = dir->GetKey(key_name)->ReadObj();
         convert_file(next_level_obj, copy_dir);
       }
     }
-  }
-  else
-  {  // If the object is not a Tdirectory (a histogram or TObjsStrin)
-    // just save it as it is where it should be
+  } else { // If the object is not a Tdirectory (a histogram or TObjsStrin)
+           // just save it as it is where it should be
     save_to->cd();
     obj_input->Write(name);
   }
   return 1;
 }
 
-int work_with_results_dir(TObject* obj_input, TObject* obj_outout)
-{
-  TDirectory* dir = (TDirectory*)obj_input;
-  TDirectory* save_to = (TDirectory*)obj_outout;
+int work_with_results_dir(TObject* obj_input, TObject* obj_outout) {
+  TDirectory* dir = (TDirectory*) obj_input;
+  TDirectory* save_to = (TDirectory*) obj_outout;
 
-  if (include_hist(dir))
-  {
+  if (include_hist(dir)) {
     TKey* key;
     TString key_type;
     TString key_name;
     TIter next(dir->GetListOfKeys());
-    while ((key = (TKey*)next()))
-    {
+    while ((key = (TKey*) next())) {
       TObject* obj_inside;
       key_name = key->GetName();
       obj_inside = dir->GetKey(key_name)->ReadObj();
@@ -221,8 +199,7 @@ int work_with_results_dir(TObject* obj_input, TObject* obj_outout)
       // If an element in "Results" directory is a hist, we will save it in higher level
       if (key_type == "TH1I" || key_type == "TH2I" || key_type == "TH1F" || key_type == "TH2F" ||
           key_type == "TProfile2D" || key_type == "TProfile" || key_type == "TGraphAsymmErrors" ||
-          key_type == "TGraphErrors" || key_type == "TH1D" || key_type == "TH2S")
-      {
+          key_type == "TGraphErrors" || key_type == "TH1D" || key_type == "TH2S") {
         save_to->cd();
         obj_inside->Write(key_name);
       }
@@ -231,16 +208,15 @@ int work_with_results_dir(TObject* obj_input, TObject* obj_outout)
     work_with_no_hist_dir(obj_input, obj_outout);
   }
   // If "Results" has no histograms inside, we will work with it as with the usual directory
-  else
-  {
+  else {
     work_with_no_hist_dir(obj_input, obj_outout);
   }
   return 1;
 }
 
-int work_with_no_hist_dir(TObject* obj, TObject* destination_to_save)
-{
-  TDirectory* save_place = (TDirectory*)destination_to_save;
+int work_with_no_hist_dir(TObject* obj, TObject* destination_to_save) {
+  TDirectory* save_place = (TDirectory*) destination_to_save;
+
   // If directory has no hists in it, we convert it to JSON
   //  histogram_ Tdirectory is an exception. It will always be a Tdirectory
   save_place->cd();
@@ -252,12 +228,9 @@ int work_with_no_hist_dir(TObject* obj, TObject* destination_to_save)
 
   TObjString string_to_tfile;
   // string_to_tfile.SetString(cstr);//Original
-  if (j.is_null())
-  {
+  if (j.is_null()) {
     string_to_tfile.SetString("{}");  // Content of a JSON string
-  }
-  else
-  {
+  } else {
     string_to_tfile.SetString(string.data());  // Content of a JSON string
   }
   TString key_name = obj->GetName();
@@ -265,19 +238,17 @@ int work_with_no_hist_dir(TObject* obj, TObject* destination_to_save)
   return 0;
 }
 
-int include_hist(TObject* obj)
-{
+int include_hist(TObject* obj) {
   using namespace std;
 
-  TDirectory* dir = (TDirectory*)obj;
+  TDirectory* dir = (TDirectory*) obj;
   TKey* key;
   TString key_type;
   TString key_name;
   // Look, what the directory stores
   dir->cd();
   TIter next(dir->GetListOfKeys());
-  while ((key = (TKey*)next()))
-  {
+  while ((key = (TKey*) next())) {
     TObject* obj_inside;
     key_name = key->GetName();
     obj_inside =
@@ -287,15 +258,12 @@ int include_hist(TObject* obj)
     // If the object is histogram
     if (key_type == "TH1I" || key_type == "TH2I" || key_type == "TH1F" || key_type == "TH2F" ||
         key_type == "TProfile2D" || key_type == "TProfile" || key_type == "TGraphAsymmErrors" ||
-        key_type == "TGraphErrors" || key_type == "TH1D" || key_type == "TH2S")
-    {
+        key_type == "TGraphErrors" || key_type == "TH1D" || key_type == "TH2S") {
       return 1;
     }
     // Also check all the subdirectories
-    if (key_type == "TDirectoryFile")
-    {
-      if (include_hist(obj_inside) == 1)
-      {
+    if (key_type == "TDirectoryFile") {
+      if (include_hist(obj_inside) == 1) {
         return 1;
       }
     }
@@ -303,33 +271,29 @@ int include_hist(TObject* obj)
   return 0;
 }
 
-int number_of_objects_in_dir(TIter next)
-{
+int number_of_objects_in_dir(TIter next) {
   const TCollection* next_coll = next.GetCollection();
   Int_t level_size = next_coll->Capacity();
 
   return level_size;
 }
 
-nlohmann::ordered_json to_JSON(TObject* obj)
-{
+nlohmann::ordered_json to_JSON(TObject* obj) {
   using json = nlohmann::ordered_json;
   TString obj_type = obj->ClassName();
   json j;
 
-  if (obj_type == "TObjString")
-  {  // If the object type, that were passed to this function is TObjString (should be
-    //  impossible), this means, that there is a TObjString, that is not a single file in a
-    //  directory (not a usual case)
+  if (obj_type == "TObjString") { // If the object type, that were passed to this function is TObjString (should be
+                                  //  impossible), this means, that there is a TObjString, that is not a single file in
+                                  // a
+                                  //  directory (not a usual case)
     std::cout << "WARNING: Strange case: TObjString is not a single object in a dir" << std::endl;
-  }
-  else if (obj_type != "TDirectoryFile" && obj_type != "TFile")
-  {  // No other type than TDirectory or TFile should be
-    //  passed to this function normally
+  } else if (obj_type != "TDirectoryFile" && obj_type != "TFile") { // No other type than TDirectory or TFile should be
+                                                                    //  passed to this function normally
     std::cout << "WARNING: Strange type: " << obj_type << std::endl;
   }
 
-  TDirectory* dir = (TDirectory*)obj;
+  TDirectory* dir = (TDirectory*) obj;
   TString dir_name = dir->GetName();
   TIter next(dir->GetListOfKeys());
   TKey* key;
@@ -338,8 +302,7 @@ nlohmann::ordered_json to_JSON(TObject* obj)
   int size_next = number_of_objects_in_dir(next);
 
   // We should write to JSON all the objects
-  while ((key = (TKey*)next()))
-  {
+  while ((key = (TKey*) next())) {
     TObject* next_level_obj;
     key_name = key->GetName();
     next_level_obj =
@@ -347,12 +310,10 @@ nlohmann::ordered_json to_JSON(TObject* obj)
     //  names with "/"
     TString key_type = next_level_obj->ClassName();
 
-    if (size_next == 1 && key_type == "TObjString")
-    {  // If this is a directory just before the leaf (the TObjString
-      //  file)
+    if (size_next == 1 && key_type == "TObjString") { // If this is a directory just before the leaf (the TObjString
+                                                      //  file)
       j = key_name;  // This is the leaf
-      if (key_name == dir_name)
-      {
+      if (key_name == dir_name) {
         std::cout << "WARNING: The names of Directory and TObjstring inside this directory are the same: " << dir_name
                   << std::endl;
       }
@@ -360,15 +321,13 @@ nlohmann::ordered_json to_JSON(TObject* obj)
     // We will ignore Hists in "Results" directory, since we have already written them in a higher level
     else if ((dir_name == "Results") &&
              (key_type == "TH1I" || key_type == "TH2I" || key_type == "TH1F" || key_type == "TH2F" ||
-               key_type == "TProfile2D" || key_type == "TProfile" || key_type == "TGraphAsymmErrors" ||
-               key_type == "TGraphErrors" || key_type == "TH1D" || key_type == "TH2S"))
-    {
+              key_type == "TProfile2D" || key_type == "TProfile" || key_type == "TGraphAsymmErrors" ||
+              key_type == "TGraphErrors" || key_type == "TH1D" || key_type == "TH2S")) {
       continue;
     }
     // If inside this directory other subdirrectory
-    else
-    {  // Write Directory_names as keys and content of the dirrectories as a values
-      // Convert TString to string
+    else { // Write Directory_names as keys and content of the dirrectories as a values
+           // Convert TString to string
       std::string key_name_string(key_name.Data());
       // Write JSON to rootFile
       j.emplace(key_name_string, to_JSON(next_level_obj));
