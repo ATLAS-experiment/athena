@@ -76,7 +76,7 @@ template <class ContType>StatusCode MuonSpacePointMakerAlg::loadContainerAndSort
                 measPhi = prd->measuresPhi();
             }
             EtaPhiHits& hitsPerLayer = hitsPerChamb[gapIdx];
-            if (measPhi) {
+            if (!measPhi) {
                 hitsPerLayer.first.push_back(prd);
             } else {
                 hitsPerLayer.second.push_back(prd);
