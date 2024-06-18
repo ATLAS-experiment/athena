@@ -26,9 +26,10 @@ class JSSWTopTaggerANN :
 
       /// Decorate single jet with tagging info
       virtual StatusCode tag(const xAOD::Jet& jet) const override;
+      virtual StatusCode decorate(  const xAOD::JetContainer& jets  ) const override;
 
     private:
-      
+
       /// ANN tools
       std::unique_ptr<lwt::LightweightGraph> m_lwnn;
       std::map<std::string, std::map<std::string,double>> m_ANN_inputValues;   // variables for ANN

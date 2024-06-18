@@ -92,6 +92,8 @@ StatusCode JSSTaggerBase::initialize() {
   /// Initialize decorators
   ATH_MSG_INFO( "Decorators that will be attached to jet :" );
 
+  ATH_CHECK( m_jetContainer_key.initialize() );
+
   m_decTaggedKey = m_containerName + "." + m_decorationName + "_" + m_decTaggedKey.key();
   m_decValidPtRangeHighKey = m_containerName + "." + m_decorationName + "_" + m_decValidPtRangeHighKey.key();
   m_decValidPtRangeLowKey = m_containerName + "." + m_decorationName + "_" + m_decValidPtRangeLowKey.key();
