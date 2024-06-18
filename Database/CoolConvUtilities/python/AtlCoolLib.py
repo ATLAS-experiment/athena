@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 # AtlCoolLib.py
 # module defining utilities for ATLAS command line tool use of COOL
 # Richard Hawkings, started 5/2/07
@@ -11,6 +11,9 @@ Module defining utilities for ATLAS command line/python use of COOL
 from __future__ import print_function
 import sys,os,getopt,time,calendar
 from PyCool import cool
+# Work around pyroot issue with long long --- see ATEAM-997.
+import ROOT
+ROOT.gInterpreter
 
 def transConn(conn):
     """

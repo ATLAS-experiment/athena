@@ -1,6 +1,8 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 from PyCool import cool
 import ROOT
+# Work around pyroot issue with long long --- see ATEAM-997.
+ROOT.gInterpreter
 import os
 
 
