@@ -872,6 +872,84 @@ class TestEgammaCalibrationAndSmearingTool(unittest.TestCase):
             self.assertGreater(e_es2015c_summer, 0)
 
 
+    def test_apply_correction_to_cherrypicked_electrons_mc_nominal(self):
+        """
+        check energy application to cherrypicked electrons for nominal mc (e.g. only MVA + smearing)
+        This test involves the MC smearing, which means the generation of random numbers,
+        in particular the re-seeding procedure.
+        """
+
+        tool = ROOT.CP.EgammaCalibrationAndSmearingTool("tool")
+        tool.setProperty("ESModel", "es2022_R22_PRE").ignore()
+        tool.setProperty['bool']("doSmearing", 1).ignore()
+        tool.setProperty["int"]("randomRunNumber", RUN2022).ignore()
+        tool.setProperty("decorrelationModel", "1NP_v1").ignore()
+        tool.setProperty("useFastSim", False).ignore()
+        tool.msg().setLevel(ROOT.MSG.WARNING)
+        self.assertTrue(tool.initialize().isSuccess())
+
+        # Create event info (simulation)
+        ei = self.factory.create_eventinfo(True, 100000)
+        # Define input-output data pairs for testing
+        input_output_data = [(self.factory.create_electron(0.1, 0.1, 100E3), 101053.4674736316),
+                             (self.factory.create_electron(0.2, 0.2, 100E3), 100540.24199785857),
+                             (self.factory.create_electron(0.2, 0.3, 100E3), 100332.9293682001),
+                             (self.factory.create_electron(-0.3, 0.4, 10E3), 9499.888427826565),
+                             (self.factory.create_electron(1.4, 0.5, 50E3), 53255.52231154057),
+                             (self.factory.create_electron(1.5, 0.0, 50E3), 62729.97046978042),
+                             ]
+
+        for electron, expected_energy in input_output_data:
+            tool.applyCorrection(electron, ei)
+
+            # check stupid things
+            self.assertFalse(math.isnan(electron.e()), "Electron energy is NaN")
+            self.assertTrue(electron.e() > 0, "Electron energy is not positive")
+            self.assertAlmostEqual(electron.e(), expected_energy, msg=f"Electron energy {electron.e()} does not match expected {expected_energy}")
+            # Reapply the correction to check idempotency
+            tool.applyCorrection(electron, ei)
+            self.assertAlmostEqual(electron.e(), expected_energy, msg="Reapplying correction changed the electron energy")
+
+
+    def test_apply_correction_to_cherrypicked_photons_mc_nominal(self):
+        """
+        check energy application to cherrypicked photons for nominal mc (e.g. only MVA + smearing)
+        This test involves the MC smearing, which means the generation of random numbers,
+        in particular the re-seeding procedure.
+        """
+
+        tool = ROOT.CP.EgammaCalibrationAndSmearingTool("tool")
+        tool.setProperty("ESModel", "es2022_R22_PRE").ignore()
+        tool.setProperty['bool']("doSmearing", 1).ignore()
+        tool.setProperty["int"]("randomRunNumber", RUN2022).ignore()
+        tool.setProperty("decorrelationModel", "1NP_v1").ignore()
+        tool.setProperty("useFastSim", False).ignore()
+        tool.msg().setLevel(ROOT.MSG.WARNING)
+        self.assertTrue(tool.initialize().isSuccess())
+
+        # Create event info (simulation)
+        ei = self.factory.create_eventinfo(True, 100000)
+        # Define input-output data pairs for testing
+        input_output_data = [(self.factory.create_photon(0.1, 0.1, 100E3, 0.), 101125.15253656683),
+                             (self.factory.create_photon(0.2, 0.2, 100E3, 0.), 100592.67980454545),
+                             (self.factory.create_photon(0.2, 0.3, 100E3, 0.), 100302.71785981864),
+                             (self.factory.create_photon(-0.3, 0.4, 10E3, 20.), 9390.334092817911),
+                             (self.factory.create_photon(1.4, 0.5, 50E3, 50.), 51803.838117959145),
+                             (self.factory.create_photon(1.5, 0.0, 50E3, 50.), 62380.22413241412),
+                             ]
+
+        for photon, expected_energy in input_output_data:
+            tool.applyCorrection(photon, ei)
+
+            # check stupid things
+            self.assertFalse(math.isnan(photon.e()), "Photon energy is NaN")
+            self.assertTrue(photon.e() > 0, "Photon energy is not positive")
+            self.assertAlmostEqual(photon.e(), expected_energy, msg=f"Photon energy {photon.e()} does not match expected {expected_energy}")
+            # Reapply the correction to check idempotency
+            tool.applyCorrection(photon, ei)
+            self.assertAlmostEqual(photon.e(), expected_energy, msg="Reapplying correction changed the photon energy")
+
+
 if __name__ == '__main__':
     ROOT.PyConfig.IgnoreCommandLineOptions = True
 #    from ROOT import EgammaCalibPeriodRunNumbersExample
