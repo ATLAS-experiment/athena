@@ -47,6 +47,7 @@
 #include "DerivationFrameworkBPhys/JpsiXPlus2V0.h"
 #include "DerivationFrameworkBPhys/PsiPlusPsiSingleVertex.h"
 #include "DerivationFrameworkBPhys/JpsiPlusEtacSingleVertex.h"
+#include "DerivationFrameworkBPhys/DiJpsiPlusTracksSingleVertex.h"
 
 using namespace DerivationFramework;
 
@@ -98,6 +99,7 @@ DECLARE_TOOL_FACTORY( JpsiXPlusDisplaced )
 DECLARE_TOOL_FACTORY( JpsiXPlus2V0 )
 DECLARE_TOOL_FACTORY( PsiPlusPsiSingleVertex )
 DECLARE_TOOL_FACTORY( JpsiPlusEtacSingleVertex )
+DECLARE_TOOL_FACTORY( DiJpsiPlusTracksSingleVertex )
 
 DECLARE_FACTORY_ENTRIES( DerivationFrameworkBPhys ) {
    DECLARE_TOOL( Reco_mumu )
@@ -148,4 +150,5 @@ DECLARE_FACTORY_ENTRIES( DerivationFrameworkBPhys ) {
    DECLARE_TOOL( JpsiXPlus2V0 )
    DECLARE_TOOL( PsiPlusPsiSingleVertex )
    DECLARE_TOOL( JpsiPlusEtacSingleVertex )
+   DECLARE_TOOL( DiJpsiPlusTracksSingleVertex )
 }
