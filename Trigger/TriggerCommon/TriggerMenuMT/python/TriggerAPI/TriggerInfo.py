@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 __author__  = 'Javier Montejo'
 __version__="$Revision: 2.0 $"
@@ -19,16 +19,31 @@ class TriggerInfo:
         self.triggerChains = []
         self.period = period
         self.totalLB = 0
+        self.totalLBByRun = {}
 
-        if not period: return
+        if not period and not customGRL: return
         from .TriggerDataAccess import getHLTlist
-        HLTlist, totalLB = getHLTlist(period, customGRL, release, flags)
-        self.totalLB = totalLB
-        for hlt, l1, livefraction, activeLB, hasRerun in HLTlist:
-            self.triggerChains.append( TriggerChain(hlt, l1, livefraction, activeLB, hasRerun))
+        HLTlist, self.totalLB, self.totalLBByRun = getHLTlist(period, customGRL, release, flags)
+        for hlt, l1, livefraction, activeLB, hasRerun, activeLBByRun in HLTlist:
+            self.triggerChains.append( TriggerChain(hlt, l1, livefraction, activeLB, hasRerun, activeLBByRun))
+
+    def setRunRange(self,start=0,end=999999):
+        if not self.totalLBByRun:
+            # empty dict means either loaded from trigger menu or from old json
+            totalLB = self.totalLB
+        else:
+            totalLB = 0
+            for run,efflb in self.totalLBByRun.items():
+                if int(run)<int(start) or int(run)>int(end): continue
+                totalLB += efflb
+        for tc in self.triggerChains:
+            tc.setRunRange(start,end,totalLB)
+
+    def __str__(self):
+        return f"<TriggerMenuMT.TriggerAPI.TriggerInfo.TriggerInfo object with {len(self.triggerChains)} triggerChains, period={self.period}, totalLB={self.totalLB}>"
 
     def toJSON(self):
-        return dict(period= TriggerPeriod.toName(self.period), totalLB=self.totalLB,triggerChains=self.triggerChains)
+        return dict(period= TriggerPeriod.toName(self.period), totalLB=self.totalLB,triggerChains=self.triggerChains,totalLBByRun=self.totalLBByRun)
 
     @classmethod
     def merge(cls,listofTI):
@@ -38,9 +53,16 @@ class TriggerInfo:
         for ti in listofTI:
             mergedTI.period |= ti.period
             mergedTI.totalLB += ti.totalLB
+            for run,lb in ti.totalLBByRun.items():
+                if run not in mergedTI.totalLBByRun: mergedTI.totalLBByRun[run] = 0
+                mergedTI.totalLBByRun[run] += lb
             for tc in ti.triggerChains:
                 if tc.name not in mergedHLTmap: mergedHLTmap[tc.name] = deepcopy(tc)
                 else: mergedHLTmap[tc.name].activeLB += tc.activeLB
+                # copy activeLBByRun values too
+                for run,lb in tc.activeLBByRun.items():
+                    if run not in mergedHLTmap[tc.name].activeLBByRun: mergedHLTmap[tc.name].activeLBByRun = 0
+                    mergedHLTmap[tc.name].activeLBByRun += lb
         for tc in six.itervalues (mergedHLTmap):
             tc.livefraction = tc.activeLB/float(mergedTI.totalLB)
         mergedTI.triggerChains = list(mergedHLTmap.values())
@@ -108,7 +130,7 @@ class TriggerLeg:
     types          = ('e','j','mu','tau','xe','g','ht')
     legpattern     = re.compile('([0-9]*)(%s)([0-9]+)(noL1)?' % '|'.join(types))
     detailpattern  = re.compile(r'(?:-?\d+)|(?:[^0-9 -]+)') #split into text-only vs number-only
-    bjetpattern    = re.compile('bmv|bhmv|btight|bmedium|bloose|bld1')
+    bjetpattern    = re.compile('bmv|bhmv|btight|bmedium|bloose|bld1|bgn1|bgn2|bdl1')
     bphyspattern   = re.compile('b[A-Z]')
     exoticspattern = re.compile('llp|LLP|muvtx|hiptrt|LATE|NOMATCH')
     afppattern     = re.compile('afp|AFP')
@@ -146,7 +168,7 @@ class TriggerLeg:
                 elif legtype == 'ht':
                     self.legtype = TriggerType.ht
                 else:
-                    log.info("Unknown trigger type:",legtype)
+                    log.info("Unknown trigger type: %s",legtype)
                 if noL1: details.append(noL1)
             else:
                 if self.bjetpattern.match(token):
@@ -189,11 +211,11 @@ class TriggerLeg:
         '''
         if debug:
             log.info("DEBUG LEGS --------")
-            log.info(self.legname, other.legname)
-            log.info(self.legtype, other.legtype)
-            log.info(self.l1seed, other.l1seed)
-            log.info(self.details, other.details)
-            log.info(self.thr, other.thr)
+            log.info(f"{self.legname} {other.legname}")
+            log.info(f"{self.legtype} {other.legtype}")
+            log.info(f"{self.l1seed} {other.l1seed}")
+            log.info(f"{self.details} {other.details}")
+            log.info(f"{self.thr} {other.thr}")
             log.info(self.compareDetails(other, is2015, debug=True))
             log.info(self.details == other.details)
             log.info("DEBUG LEGS END --------")
@@ -216,7 +238,7 @@ class TriggerLeg:
         '''
         from copy import deepcopy
 
-        if debug: log.info("compareDetails:",len(self.details), len(other.details),(self.l1seed == other.l1seed),(self.details == other.details) )
+        if debug: log.info(f"compareDetails: {len(self.details)} {len(other.details)} {(self.l1seed == other.l1seed)} {(self.details == other.details)}")
         if len(self.details) != len(other.details): 
             if not is2015 and any([x.startswith("noL1") for x in self.details]):
                 cloneself = deepcopy(self)
@@ -259,11 +281,11 @@ class TriggerLeg:
         compdetails = self.compareTags(" ".join(self.details), " ".join(other.details), debug=debug )
         if self.l1seed == other.l1seed:
             if self.details == other.details: return -1
-            if debug: log.info("compareTags 1:",compdetails)
+            if debug: log.info(f"compareTags 1: {compdetails}")
             return compdetails
 
         if self.details == other.details:
-            if debug: log.info("compareTags 2:",compl1seed)
+            if debug: log.info(f"compareTags 2: {compl1seed}")
             return compl1seed
 
         if compl1seed == compdetails:
@@ -306,7 +328,7 @@ class TriggerLeg:
 
         if len(reself) != len(reother): return -9
         thecomp = [mycomp(a,b) for a,b in zip(reself,reother)]
-        if debug: log.info("thecomp:",thecomp,reself,reother)
+        if debug: log.info(f"thecomp: {thecomp} {reself} {reother}")
         if any([x == -9 for x in thecomp]): return -9
         if all([x !=0 for x in thecomp]) and any([x == 1 for x in thecomp]): return 1
         if all([x !=1 for x in thecomp]) and any([x == 0 for x in thecomp]): return 0
@@ -331,7 +353,7 @@ class TriggerChain:
     l1types        = ('EM','J','MU','TAU','XE','XS','HT')
     l1pattern      = re.compile('([0-9]*)(%s)([0-9]+)' % '|'.join(l1types))
 
-    def __init__(self,name,l1seed,livefraction,activeLB=1,hasRerun=False):
+    def __init__(self,name,l1seed,livefraction,activeLB=1,hasRerun=False, activeLBByRun={}):
         self.name = name
         self.l1seed = l1seed
         tmplegs = TriggerLeg.parse_legs(name,l1seed,name)
@@ -339,10 +361,30 @@ class TriggerChain:
         self.livefraction = livefraction
         self.activeLB = activeLB
         self.hasRerun = hasRerun
+        self.activeLBByRun = activeLBByRun
         self.triggerType = self.getTriggerType(self.legs, l1seed)
 
+    def setRunRange(self,start,end,totalLB):
+        """
+        This method is called by the owning TriggerInfo method to adjust the livefractions and activeLB
+        to only the given runs
+        :param start:
+        :param end:
+        :param totalLB:
+        :return:
+        """
+        if not self.activeLBByRun:
+            # empty dict means either loaded from trigger menu or from old json
+            return
+        self.activeLB = 0
+        for run,efflb in self.activeLBByRun.items():
+            if int(run)<int(start) or int(run)>int(end): continue
+            self.activeLB += efflb
+        self.livefraction = self.activeLB/totalLB
+        pass
+
     def toJSON(self):
-        return dict(name=self.name, l1seed=self.l1seed, livefraction=self.livefraction, activeLB=self.activeLB, hasRerun=self.hasRerun)
+        return dict(name=self.name, l1seed=self.l1seed, livefraction=self.livefraction, activeLB=self.activeLB, hasRerun=self.hasRerun,activeLBByRun=self.activeLBByRun)
 
     def splitAndOrderLegs(self, legs):
         from copy import deepcopy
@@ -374,8 +416,43 @@ class TriggerChain:
                     newLegs.append(tmp)
         return newLegs
 
+
+    # def getChainGroupTriggerType(self):
+    #     """
+    #     :return: triggerType determined by chainGroup information
+    #     """
+    #     mtype = TriggerType.UNDEFINED
+    #
+    #     # decide trigger type on chainGroup's "RATE:" group if present
+    #     for group in self.chainGroups:
+    #         if not group.startswith("RATE:"): continue
+    #         rateGroup = group[5:] # strip prefix
+    #         if rateGroup=="SingleElectron": mtype |= TriggerType.el_single
+    #         elif rateGroup=="SingleMuon": mtype |= TriggerType.mu_single
+    #         elif rateGroup=="MultiElectron": mtype |= TriggerType.el_multi
+    #         elif rateGroup=="MultiMuon": mtype |= TriggerType.mu_multi
+    #         elif rateGroup=="SinglePhoton": mtype |= TriggerType.g_single
+    #         elif rateGroup=="MultiPhoton": mtype |= TriggerType.g_multi
+    #         elif rateGroup=="SingleJet": mtype |= TriggerType.j_single
+    #         elif rateGroup=="MultiJet": mtype |= TriggerType.j_multi
+    #         elif rateGroup=="SingleBJet": mtype |= TriggerType.bj_single
+    #         elif rateGroup=="MultiBJet": mtype |= TriggerType.bj_multi
+    #         elif rateGroup=="SingleTau": mtype |= TriggerType.tau_single
+    #         elif rateGroup=="MultiTau": mtype |= TriggerType.tau_multi
+    #         else:
+    #             if "Bphysics" in rateGroup: mtype |= TriggerType.mu_bphys
+    #             if "MET" in rateGroup: mtype |= TriggerType.xe
+    #             if "Muon" in rateGroup: mtype |= TriggerType.mu
+    #             if "Electron" in rateGroup: mtype |= TriggerType.el
+    #             if "Bjet" in rateGroup: mtype |= TriggerType.bj
+    #             if "Jet" in rateGroup: mtype |= TriggerType.j
+    #             if "Tau" in rateGroup: mtype |= TriggerType.tau
+    #
+    #     return mtype
+
     def getTriggerType(self, legs, l1seed):
         mtype = TriggerType.UNDEFINED
+
         for l in legs:
             if mtype & TriggerType.el and l.legtype & TriggerType.el:
                 mtype |=  TriggerType.el_multi
@@ -463,8 +540,7 @@ class TriggerChain:
         return tmpType == TriggerType.UNDEFINED #After matches nothing remains
 
     def __repr__(self):
-        log.info(self.name, self.legs, "{0:b}".format(self.triggerType), self.livefraction, self.activeLB)
-        return ""
+        return repr((self.name, self.legs, "{0:b}".format(self.triggerType), self.livefraction, self.activeLB))
 
     def isSubsetOf(self, other):
         ''' Returns -1 if none of them is a strict subset of the other
