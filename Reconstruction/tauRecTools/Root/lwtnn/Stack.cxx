@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "tauRecTools/lwtnn/Stack.h"
@@ -424,7 +424,7 @@ namespace lwtDev {
   // __________________________________________________________________
   // Recurrent layers
 
-  EmbeddingLayer::EmbeddingLayer(int var_row_index, MatrixXd W):
+  EmbeddingLayer::EmbeddingLayer(int var_row_index, const MatrixXd & W):
     m_var_row_index(var_row_index),
     m_W(W)
   {
@@ -470,14 +470,14 @@ namespace lwtDev {
 
 
   // LSTM layer
-  LSTMLayer::LSTMLayer(ActivationConfig activation,
-                       ActivationConfig inner_activation,
-                       MatrixXd W_i, MatrixXd U_i, VectorXd b_i,
-                       MatrixXd W_f, MatrixXd U_f, VectorXd b_f,
-                       MatrixXd W_o, MatrixXd U_o, VectorXd b_o,
-                       MatrixXd W_c, MatrixXd U_c, VectorXd b_c,
-                       bool go_backwards,
-                       bool return_sequence):
+  LSTMLayer::LSTMLayer(const ActivationConfig & activation,
+              const ActivationConfig & inner_activation,
+              const MatrixXd & W_i, const MatrixXd & U_i, const VectorXd & b_i,
+              const MatrixXd & W_f, const MatrixXd & U_f, const VectorXd & b_f,
+              const MatrixXd & W_o, const MatrixXd & U_o, const VectorXd & b_o,
+              const MatrixXd & W_c, const MatrixXd & U_c, const VectorXd & b_c,
+              bool go_backwards,
+              bool return_sequence):
     m_W_i(W_i),
     m_U_i(U_i),
     m_b_i(b_i),
@@ -547,11 +547,11 @@ namespace lwtDev {
 
 
   // GRU layer
-  GRULayer::GRULayer(ActivationConfig activation,
-                     ActivationConfig inner_activation,
-                     MatrixXd W_z, MatrixXd U_z, VectorXd b_z,
-                     MatrixXd W_r, MatrixXd U_r, VectorXd b_r,
-                     MatrixXd W_h, MatrixXd U_h, VectorXd b_h):
+  GRULayer::GRULayer(const ActivationConfig & activation,
+                     const ActivationConfig & inner_activation,
+                     const MatrixXd & W_z, const  MatrixXd & U_z, const VectorXd & b_z,
+                     const MatrixXd & W_r, const MatrixXd & U_r, const VectorXd & b_r,
+                     const MatrixXd & W_h, const MatrixXd & U_h, const VectorXd & b_h):
     m_W_z(W_z),
     m_U_z(U_z),
     m_b_z(b_z),
@@ -621,8 +621,8 @@ namespace lwtDev {
   }
 
   MatrixXd BidirectionalLayer::scan( const MatrixXd& x) const{
-    MatrixXd forward = m_forward_layer->scan(x);
-    MatrixXd backward = m_backward_layer->scan(x);
+    const MatrixXd & forward = m_forward_layer->scan(x);
+    const MatrixXd & backward = m_backward_layer->scan(x);
     MatrixXd backward_rev;
     if (m_return_sequence){
       backward_rev = backward.rowwise().reverse();
