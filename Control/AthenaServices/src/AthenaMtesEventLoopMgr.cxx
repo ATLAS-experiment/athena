@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaMtesEventLoopMgr.h"
@@ -131,6 +131,8 @@ AthenaMtesEventLoopMgr::AthenaMtesEventLoopMgr(const std::string& nam
   declareProperty("FakeTimestampInterval", m_timeStampInt = 1,
                   "timestamp interval between events when creating Events "
                   "without an EventSelector");
+  declareProperty("RequireInputAttributeList", m_requireInputAttributeList = false,
+                    "Require valid input attribute list to be present");
   declareProperty("UseSecondaryEventNumber", m_useSecondaryEventNumber = false,
                   "In case of DoubleEventSelector use event number from secondary input");
 
@@ -1115,6 +1117,9 @@ int AthenaMtesEventLoopMgr::declareEventRootAddress(EventContext& ctx){
         pEvent = pEventPtr.release();
       } catch (...) {
       }
+    } else if (m_requireInputAttributeList) {
+      fatal() << "Valid input attribute list required but not present!";
+      return -1;
     }
     
     if (!pEvent) {

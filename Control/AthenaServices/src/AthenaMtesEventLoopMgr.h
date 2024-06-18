@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENASERVICES_ATHENAMTESEVENTLOOPMGR_H
@@ -28,7 +28,6 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include <functional>
 
 #ifndef EVENTINFO_EVENTID_H
 # include "EventInfo/EventID.h"  /* number_type */
@@ -116,8 +115,10 @@ protected:
   /// Default is to clear the store at the end of the event
   StringProperty m_clearStorePolicy;
 
+  /// require input attribute list
+  bool m_requireInputAttributeList{};
   /// read event number from secondary input
-  bool m_useSecondaryEventNumber;
+  bool m_useSecondaryEventNumber{};
 
   /// property update handler:set the clear-store policy value and check its
   /// value.

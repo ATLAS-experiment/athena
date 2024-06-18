@@ -25,6 +25,8 @@ def CommonTestArgumentParser(prog):
                         help="The number of events to run. 0 skips execution")
     parser.add_argument("-t", "--threads", default=1, type=int,
                         help="The number of concurrent threads to run. 0 uses serial Athena.")
+    parser.add_argument("-p", "--processes", default=0, type=int,
+                        help="The number of concurrent processes to run. 0 uses serial Athena.")
     parser.add_argument("-c", "--concurrent", default=0, type=int,
                         help="The number of concurrent events to run. 0 uses the same as number of threads.")
     parser.add_argument("-V", "--verboseAccumulators", default=False, action="store_true",
@@ -114,9 +116,8 @@ def overlayTestFlags(flags, args):
 
 def postprocessAndLockFlags(flags, args):
     """Postprocess and lock config flags for overlay"""
-
-    # Flags relating to multithreaded execution
     flags.Concurrency.NumThreads = args.threads
+    flags.Concurrency.NumProcs = args.processes
     if args.threads > 0:
         flags.Scheduler.ShowDataDeps = True
         flags.Scheduler.ShowDataFlow = True
