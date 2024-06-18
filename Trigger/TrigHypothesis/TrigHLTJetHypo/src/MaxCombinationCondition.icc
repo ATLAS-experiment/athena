@@ -1,11 +1,13 @@
-#include "MaxCombinationCondition.h"
+#ifndef MAXCOMBINATIONCONDITION_ICC
+#define MAXCOMBINATIONCONDITION_ICC
+
 #include "CombinationsIterator.h"
 #include <algorithm>
 
 template<typename T>
 MaxCombinationCondition<T>::MaxCombinationCondition(std::size_t k,
-						    std::unique_ptr<ICondition> cond):
-  m_k{k},m_acceptingCondition{std::move(cond)} {
+						    std::unique_ptr<ICondition> cond, const T& cmp):
+  m_k{k},m_acceptingCondition{std::move(cond)}, m_cmp{cmp} {
 }
 
 template<typename T>
@@ -20,7 +22,7 @@ MaxCombinationCondition<T>::isSatisfied(const HypoJetVector& hjv,
   
   return m_acceptingCondition->isSatisfied(*std::max_element(begin,
 							     end,
-							     T(hjv)), c);
+                   m_cmp), c);
 }
 
 
@@ -29,9 +31,10 @@ std::string MaxCombinationCondition<T>::toString() const {
   std::stringstream ss;
   ss <<  "MaxCombinationCondition:"
      << " k " << m_k
-     << " capacity " << s_capacity 
+     << " capacity " << m_k 
      << " accepting condition " << m_acceptingCondition->toString()
      << '\n';
   return ss.str();
   
 }
+#endif

@@ -16,6 +16,7 @@
 #include "../TrigJetConditionConfig_et.h"
 #include "../TrigJetConditionConfig_pt.h"
 #include "../TrigJetConditionConfig_htfr.h"
+#include "../TrigJetConditionConfig_htdipz.h"
 #include "../TrigJetConditionConfig_dipzmlpl.h"
 #include "../TrigJetConditionConfig_dijet_mass.h"
 #include "../TrigJetConditionConfig_dijet_dphi.h"
@@ -58,6 +59,7 @@ DECLARE_COMPONENT(TrigJetConditionConfig_et)
 DECLARE_COMPONENT(TrigJetConditionConfig_pt)
 DECLARE_COMPONENT(TrigJetConditionConfig_emf)
 DECLARE_COMPONENT(TrigJetConditionConfig_htfr)
+DECLARE_COMPONENT(TrigJetConditionConfig_htdipz)
 DECLARE_COMPONENT(TrigJetConditionConfig_dipzmlpl)
 DECLARE_COMPONENT(TrigJetConditionConfig_dijet_mass)
 DECLARE_COMPONENT(TrigJetConditionConfig_dijet_deta)
