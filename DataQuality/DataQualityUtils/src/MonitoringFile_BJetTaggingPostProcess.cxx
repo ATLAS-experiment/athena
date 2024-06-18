@@ -1,6 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
-*/
+   Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+ */
 
 /* Methods to perform post-processing on run_nnnnnn/HLT/JetMon* histograms
  * Mainly to adjust the impact parameter ranges according to the recorded lumi blocks.
@@ -35,58 +35,53 @@
 
 namespace dqutils
 {
+  void
+  MonitoringFile::BJetTaggingPostProcess(const std::string& inFilename, bool isIncremental) {
+    if (isIncremental == true) {
+      return;
+    }
 
-	void
-	MonitoringFile::BJetTaggingPostProcess(const std::string & inFilename, bool isIncremental) {
+    int debugLevel = MonitoringFile::getDebugLevel();
+    if (debugLevel > 1) {
+      std::cout << "--> JetTaggingPostProcess: Begin JetTagging post-processing" << std::endl;
+    }
+    //open root file
+    TFile* f = TFile::Open(inFilename.c_str(), "UPDATE");
 
-		if (isIncremental == true) {
-			return;
-		}
+    //check files are loaded.
+    if (f == 0 || !f->IsOpen()) {
+      std::cerr << "--> BJetTaggingPostProcess: Input file not opened" << std::endl;
+      return;
+    }
 
-		int debugLevel = MonitoringFile::getDebugLevel();
-		if (debugLevel > 1) {
-			std::cout << "--> JetTaggingPostProcess: Begin JetTagging post-processing" << std::endl;
-		}
-		//open root file
-		TFile* f = TFile::Open(inFilename.c_str(), "UPDATE");
+    if (f->IsZombie()) {
+      std::cerr << "--> BJetTaggingPostProcess: Input file " << inFilename
+                << " cannot be opened. " << std::endl;
+      return;
+    }
 
-		//check files are loaded.
-		if (f == 0 || !f->IsOpen()) {
-			std::cerr << "--> BJetTaggingPostProcess: Input file not opened" << std::endl;
-			return;
-		}
+    //check file size is not too small.
+    if (f->GetSize() < 1000.) {
+      std::cerr << "--> BJetTaggingPostProcess: Input file empty" << std::endl;
+      f->Close();
+      return;
+    }
 
-		if (f->IsZombie()) {
-			std::cerr << "--> BJetTaggingPostProcess: Input file " << inFilename
-					<< " cannot be opened. " << std::endl;
-			return;
-		}
+    //start postprocessing
 
-		//check file size is not too small.
-		if (f->GetSize() < 1000.) {
-			std::cerr << "--> BJetTaggingPostProcess: Input file empty" << std::endl;
-			f->Close();
-			return;
-		}
+    //here impact parameter histograms get a range in which they are actually filled
+    BJetTaggingAdjustRanges(f);
 
-		//start postprocessing
+    //this will normalise some 2D histograms to the track/jet number
+    BJetTaggingNormalise(f);
 
-		//here impact parameter histograms get a range in which they are actually filled
-		BJetTaggingAdjustRanges(f);
+    //close root file
+    f->Close();
+    //delete f;
 
-		//this will normalise some 2D histograms to the track/jet number
-		BJetTaggingNormalise(f);
-
-		//close root file
-		f->Close();
-		//delete f;
-
-		if (debugLevel > 1) {
-			std::cout << "--> BJetTaggingPostProcess: End JetTagging post-processing " << std::endl;
-		}
-		return;
-
-	}
-
+    if (debugLevel > 1) {
+      std::cout << "--> BJetTaggingPostProcess: End JetTagging post-processing " << std::endl;
+    }
+    return;
+  }
 }//namespace
-

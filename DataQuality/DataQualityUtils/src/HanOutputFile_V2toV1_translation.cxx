@@ -23,8 +23,7 @@ void conversion_back(TObject* obj_in, TObject* obj_to);
 // Function, that checks, if "dirname" TDirectory exists inside obj_in or not
 int dir_exists(TString dirname, TObject* obj_in);
 
-int main()
-{
+int main() {
   TFile* f = new TFile("run_364030_lowStat_LB121-140_han_converted.root");
   TFile* f_output = new TFile("run_364030_lowStat_LB121-140_han_converted_back.root", "recreate");
   // Find a TObjString with JSON inside
@@ -40,62 +39,49 @@ int main()
   return 0;
 }
 
-void conversion_back(TObject* obj_in, TObject* obj_to)
-{
+void conversion_back(TObject* obj_in, TObject* obj_to) {
   TObjString* TOS_w_JSON;  // JSON string
+
   std::string content;
   TString obj_input_type = obj_in->ClassName();
   bool is_file;
-  if (obj_input_type == "TFile")
-  {
+  if (obj_input_type == "TFile") {
     is_file = true;
-  }
-  else
-  {
+  } else {
     is_file = false;
   }
-  TDirectory* obj_in_dir = (TDirectory*)obj_in;
-  TDirectory* obj_to_dir = (TDirectory*)obj_to;
+  TDirectory* obj_in_dir = (TDirectory*) obj_in;
+  TDirectory* obj_to_dir = (TDirectory*) obj_to;
   TString name = obj_in->GetName();
   TDirectory* copy_dir;
-  if (is_file == false)
-  {
+  if (is_file == false) {
     copy_dir = obj_to_dir->mkdir(name);
-  }
-  else
-  {
+  } else {
     copy_dir = obj_to_dir;
   }
   copy_dir->cd();
 
   TIter next(obj_in_dir->GetListOfKeys());
   TKey* key;
-  while ((key = (TKey*)next()))
-  {
+  while ((key = (TKey*) next())) {
     TObject* obj_inside;
     TString key_name = key->GetName();
     TString key_type = key->GetClassName();
-    if (key_type == "TObjString")
-    {
-      if (key_name == "File_version")
-      {  // File version is a flag of new version of files
+    if (key_type == "TObjString") {
+      if (key_name == "File_version") { // File version is a flag of new version of files
         continue;
-      }
-      else
-      {
+      } else {
         obj_in_dir->GetObject(key_name, TOS_w_JSON);
         // Get JSON from TObjString
         content = TOS_w_JSON->GetString();
         TDirectoryFile* idir;
-        if (dir_exists(key_name, copy_dir) == 0)
-        {  // When Reference hist should be saved to Results dir
-          // there is no Results dir at that moment and we created it. So, when it's time to process
-          // JOSN string "Results", we shouldn't create Results directory again
+        if (dir_exists(key_name, copy_dir) == 0) { // When Reference hist should be saved to Results dir
+                                                   // there is no Results dir at that moment and we created it. So, when
+                                                   // it's time to process
+                                                   // JOSN string "Results", we shouldn't create Results directory again
           copy_dir->cd();
           idir = new TDirectoryFile(key_name, "");
-        }
-        else
-        {
+        } else {
           copy_dir->GetObject(key_name, idir);
         }
         using json = nlohmann::json;
@@ -111,14 +97,11 @@ void conversion_back(TObject* obj_in, TObject* obj_to)
     // We process hist another way, than TObjstrings and TDirectories
     else if (key_type == "TH1I" || key_type == "TH2I" || key_type == "TH1F" || key_type == "TH2F" ||
              key_type == "TProfile2D" || key_type == "TProfile" || key_type == "TGraphAsymmErrors" ||
-             key_type == "TGraphErrors" || key_type == "TH1D" || key_type == "TH2S")
-    {
+             key_type == "TGraphErrors" || key_type == "TH1D" || key_type == "TH2S") {
       obj_inside = obj_in_dir->GetKey(key_name)->ReadObj();
       copy_dir->cd();
-      if (key_name == "Reference")
-      {  // We should place "Reference" hists to result in old-version files
-        if (!dir_exists("Results", copy_dir))
-        {
+      if (key_name == "Reference") { // We should place "Reference" hists to result in old-version files
+        if (!dir_exists("Results", copy_dir)) {
           copy_dir->mkdir("Results");
         }
         copy_dir->cd("Results");
@@ -126,9 +109,7 @@ void conversion_back(TObject* obj_in, TObject* obj_to)
       obj_inside->Write(key_name);
       copy_dir->cd();
       delete obj_inside;
-    }
-    else if (key_type == "TDirectoryFile")
-    {
+    } else if (key_type == "TDirectoryFile") {
       obj_inside = obj_in_dir->GetKey(key_name)->ReadObj();
       conversion_back(obj_inside, copy_dir);
       delete obj_inside;
@@ -136,37 +117,31 @@ void conversion_back(TObject* obj_in, TObject* obj_to)
   }
 }
 
-void from_JSON_to_TDirectory(nlohmann::json str_content, TDirectory* place_to_save)
-{
+void from_JSON_to_TDirectory(nlohmann::json str_content, TDirectory* place_to_save) {
   using json = nlohmann::json;
   // Get the size of JSON
   int size = str_content.size();
   int num_of_key = 0;
-  for (json::iterator it = str_content.begin(); it != str_content.end(); ++it)
-  {
+  for (json::iterator it = str_content.begin(); it != str_content.end(); ++it) {
     // Create array of subdirectories
     TDirectory* nextLevelDirs[size];
     // Keyname of json will become subdirectory name
     const char* keyname = it.key().c_str();
     auto valuestring = it.value();
     // Now lets make subdir in our dir
-    if (dir_exists(keyname, place_to_save) == 0)
-    {
+    if (dir_exists(keyname, place_to_save) == 0) {
       place_to_save->mkdir(keyname);
     }
     place_to_save->cd(keyname);
     nextLevelDirs[num_of_key] = gDirectory;
-    if (strncmp(valuestring.type_name(), "string", 6) == 0)
-    {
+    if (strncmp(valuestring.type_name(), "string", 6) == 0) {
       TObjString leaf;
       nextLevelDirs[num_of_key]->cd();
       TString string_name = valuestring.dump();
       leaf.SetString(string_name);
       nextLevelDirs[num_of_key]->WriteTObject(&leaf, string_name);
       // leaf.Write();
-    }
-    else
-    {
+    } else {
       from_JSON_to_TDirectory(valuestring, nextLevelDirs[num_of_key]);
     }
     num_of_key++;
@@ -174,17 +149,14 @@ void from_JSON_to_TDirectory(nlohmann::json str_content, TDirectory* place_to_sa
   return;
 }
 
-int dir_exists(TString dirname, TObject* obj_in)
-{
-  TDirectory* obj_in_dir = (TDirectory*)obj_in;
+int dir_exists(TString dirname, TObject* obj_in) {
+  TDirectory* obj_in_dir = (TDirectory*) obj_in;
   TList* keys = obj_in_dir->GetListOfKeys();
-  TKey* k = (TKey*)keys->FindObject(dirname);
-  if (k && !strcmp(k->GetClassName(), "TDirectoryFile"))
-  {
+  TKey* k = (TKey*) keys->FindObject(dirname);
+
+  if (k && !strcmp(k->GetClassName(), "TDirectoryFile")) {
     return 1;
-  }
-  else
-  {
+  } else {
     return 0;
   }
   return 0;

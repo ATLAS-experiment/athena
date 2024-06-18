@@ -1,6 +1,6 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
-*/
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ */
 
 //*************************************************
 // Class for the TGC interface with the COOL DB
@@ -13,14 +13,14 @@
 
 // Protect CINT from some system definitions that cause problems
 #ifndef __CINT__
-  //COOL API include files (CoolKernel)
+//COOL API include files (CoolKernel)
   #include "CoolKernel/pointers.h"
   #include "CoolKernel/ValidityKey.h"
 #else
-  namespace cool {
-    class IDatabasePtr{};
-    class IFolderPtr{};
-  }
+namespace cool {
+  class IDatabasePtr {};
+  class IFolderPtr {};
+}
 #endif
 
 
@@ -75,30 +75,25 @@ namespace cool {
 
 
 namespace dqutils {
-
-class CoolTgc : public cool::Application, public TObject {
-private:
-
-
+  class CoolTgc: public cool::Application, public TObject {
+  private:
 // Protect CINT from some system definitions that cause problems
 // CINT does not need to know about these private variables
 #ifndef __CINT__
-    cool::ValidityKey m_since{};
-    cool::ValidityKey m_until{};
-    cool::IDatabasePtr m_coolDb{};
-    cool::IFolderPtr m_coolFolder{};
+    cool::ValidityKey m_since {};
+    cool::ValidityKey m_until {};
+    cool::IDatabasePtr m_coolDb {};
+    cool::IFolderPtr m_coolFolder {};
 #endif
-
-public:
-
+  public:
     // Connects to the database. Throws a "DatabaseDoesNotExis" exception if database does not exist.
     cool::IDatabasePtr coolDbInstance(const std::string& dbStr, bool readOnly);
-        
-    
+
+
     // Browses the COOL folder. Throws a "FolderNotFound" exception if folder does not exist.
     cool::IFolderPtr coolFolderInstance(const std::string& folderStr);
     // Various methods to set and print the intervall of validity.
-    
+
     void coolDbFolder(const std::string& dbStr, const std::string& folderStr);
     void setSince(cool::Int64 run, cool::Int64 lumi);
     void setUntil(cool::Int64 run, cool::Int64 lumi);
@@ -109,14 +104,14 @@ public:
     // Methods needed to come up to COOL framework.
     cool::RecordSpecification createSpecDataDead();
     cool::RecordSpecification createSpecDataNoisy();
-    coral::AttributeList  createPayloadDataNoisy(const std::string& ChamberName,
-                                                 const std::string& NoisyMultilayer,
-                                                 const std::string& NoisyTube,
-                                                 const cool::RecordSpecification& spec); 
-    coral::AttributeList  createPayloadDataDead(const std::string& ChamberName,
-                                                const std::string& DeadMultilayer,
-                                                const std::string& DeadTube,
-                                                const cool::RecordSpecification& spec); 
+    coral::AttributeList createPayloadDataNoisy(const std::string& ChamberName,
+                                                const std::string& NoisyMultilayer,
+                                                const std::string& NoisyTube,
+                                                const cool::RecordSpecification& spec);
+    coral::AttributeList createPayloadDataDead(const std::string& ChamberName,
+                                               const std::string& DeadMultilayer,
+                                               const std::string& DeadTube,
+                                               const cool::RecordSpecification& spec);
 
     // Constructors and Destructors.
     void CoolOpen(const std::string& dbStr);
@@ -128,7 +123,7 @@ public:
     void dump(cool::ChannelSelection selection);
     std::string dumpField(cool::ChannelId channelId, std::string field);
     int dumpCode(const std::string& channelName);
-    
+
     void dumpall();
 
     void insertNoisyFlag(cool::Int64 run,
@@ -139,7 +134,7 @@ public:
     void insertNoisyFlag_withTag(cool::Int64 run,
                                  cool::ChannelId channelId,
                                  const std::string& ChamberName,
-                                 const std::string&  NoisyMultilayer,
+                                 const std::string& NoisyMultilayer,
                                  const std::string& NoisyTube,
                                  const std::string& cool_tag);
 
@@ -160,9 +155,8 @@ public:
 
 
     // Needed for the ROOT interface.
-    ClassDef( CoolTgc, 0 ) // A class for modifying DQ info in the COOL database
-};
-
+    ClassDef(CoolTgc, 0) // A class for modifying DQ info in the COOL database
+  };
 }
 
 #endif

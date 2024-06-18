@@ -1,20 +1,20 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
-*/
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ */
 
 #ifndef dqutilsStatusFlagCOOL_h
 #define dqutilsStatusFlagCOOL_h
 
 // Protect CINT from some system definitions that cause problems
 #ifndef __CINT__
-  //COOL API include files (CoolKernel)
+//COOL API include files (CoolKernel)
   #include "CoolKernel/pointers.h"
   #include "CoolKernel/ValidityKey.h"
 #else
-  namespace cool {
-    class IDatabasePtr;
-    class IFolderPtr;
-  }
+namespace cool {
+  class IDatabasePtr;
+  class IFolderPtr;
+}
 #endif
 
 
@@ -39,15 +39,13 @@
 #include "DataQualityUtils/StatusFlagCOOLBase.h"
 
 namespace dqutils {
-
-class StatusFlagCOOL : public StatusFlagCOOLBase {
-
-public:
+  class StatusFlagCOOL: public StatusFlagCOOLBase {
+  public:
     // Methods needed to come up to COOL framework.
     cool::RecordSpecification createSpec();
-    coral::AttributeList createPayload(int colourCode, float dfrac, float thrust, const 
+    coral::AttributeList createPayload(int colourCode, float dfrac, float thrust, const
                                        cool::RecordSpecification& spec);
-   
+
     // Constructors and Destructors.
     StatusFlagCOOL(const std::string& dbStr, const std::string& folderStr, int runS, int lumiS, int runU, int lumiU);
     StatusFlagCOOL(int runS, int lumiS, int runU, int lumiU);
@@ -59,9 +57,8 @@ public:
     void insert(std::string channelName, int code, float dfrac, float thrust, std::string tag_name);
 
     // Needed for the ROOT interface.
-    ClassDef( StatusFlagCOOL, 0 ) // A class for modifying DQ info in the COOL database
-};
-
+    ClassDef(StatusFlagCOOL, 0) // A class for modifying DQ info in the COOL database
+  };
 }
 
 #endif
