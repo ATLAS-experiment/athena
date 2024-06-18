@@ -98,6 +98,31 @@ AuxContainerTest::AuxContainerTest()
 }
 
 
+class AuxContainerLinkTest
+  : public xAOD::AuxContainerBase
+{
+public:
+  AuxContainerLinkTest();
+
+  std::vector<int> ltest1;
+  std::vector<float> ltest2;
+};
+
+
+AuxContainerLinkTest::AuxContainerLinkTest()
+{
+  SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
+  SG::auxid_t id1 = getAuxID( "ltest1", ltest1, SG::AuxVarFlags::Linked );
+  SG::auxid_t id2 = getAuxID( "ltest2", ltest2, SG::AuxVarFlags::None, id1 );
+
+  regAuxVar (id1, "ltest1", ltest1);
+  regAuxVar (id2, "ltest2", ltest2);
+
+  assert (id1 == r.findAuxID ("ltest1"));
+  assert (id2 == r.findAuxID ("ltest2"));
+}
+
+
 // Test insertMove.
 void test1()
 {
@@ -248,10 +273,35 @@ void test2()
 }
 
 
+// Test handling of linked variables.
+void test_linked()
+{
+  std::cout << "test_linked\n";
+
+  SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
+  AuxContainerLinkTest s;
+  SG::auxid_t auxid1 = r.findAuxID ("ltest1");
+  SG::auxid_t auxid2 = r.findAuxID ("ltest2");
+  assert (r.isLinked (auxid1));
+  assert (!r.isLinked (auxid2));
+
+  assert (s.linkedVector (auxid2)->size() == 0);
+
+  [[maybe_unused]]
+  int* vp1 = reinterpret_cast<int*> (s.getData (auxid1, 10, 10));
+  [[maybe_unused]]
+  float* vp2 = reinterpret_cast<float*> (s.getData (auxid2, 3, 3));
+
+  const AuxContainerLinkTest& cs = s;
+  assert (cs.linkedVector (auxid2)->size() == 10);
+}
+
+
 int main()
 {
   std::cout << "ut_xaodcore_auxcontainerbase_test\n";
   test1();
   test2();
+  test_linked();
   return 0;
 }

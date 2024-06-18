@@ -226,6 +226,9 @@ AuxTypeRegistry::makeVector (SG::auxid_t auxid,
 /**
  * @brief Construct an @c IAuxTypeVector object from a vector.
  * @param data The vector object.
+ * @param linkedVector The interface for another variable linked to this one,
+ *                     or nullptr if there isn't one.
+ *                     (We do not take ownership.)
  * @param isPacked If true, @c data is a @c PackedContainer.
  * @param ownFlag If true, the newly-created IAuxTypeVector object
  *                will take ownership of @c data.
@@ -240,12 +243,13 @@ AuxTypeRegistry::makeVector (SG::auxid_t auxid,
 std::unique_ptr<IAuxTypeVector>
 AuxTypeRegistry::makeVectorFromData (SG::auxid_t auxid,
                                      void* data,
+                                     IAuxTypeVector* linkedVector,
                                      bool isPacked,
                                      bool ownMode) const
 {
   const SG::IAuxTypeVectorFactory* factory = getFactory (auxid);
   assert (factory != 0);
-  return factory->createFromData (auxid, data,
+  return factory->createFromData (auxid, data, linkedVector,
                                   isPacked, ownMode, isLinked (auxid));
 }
 

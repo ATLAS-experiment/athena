@@ -6,4 +6,5 @@ test_move
 test_setoption
 test_storelink
 test_setcache
+test_linked
 test_threading

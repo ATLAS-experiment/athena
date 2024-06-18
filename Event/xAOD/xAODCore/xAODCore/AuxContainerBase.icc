@@ -21,20 +21,24 @@ namespace xAOD {
    AuxContainerBase::auxid_t
    AuxContainerBase::getAuxID( const std::string& name,
                                std::vector< T, ALLOC >& /*vec*/,
-                               SG::AuxTypeRegistry::Flags flags ) {
+                               SG::AuxVarFlags flags,
+                               const SG::auxid_t linkedVariable ) {
 
       return SG::AuxTypeRegistry::instance().template getAuxID< T >( name, "",
-                                                                     flags );
+                                                                     flags,
+                                                                     linkedVariable );
    }
 
    template< typename T >
    AuxContainerBase::auxid_t
    AuxContainerBase::getAuxID( const std::string& name,
                                SG::PackedContainer< T >& /*vec*/,
-                               SG::AuxVarFlags flags ) {
+                               SG::AuxVarFlags flags,
+                               const SG::auxid_t linkedVariable ) {
 
       return SG::AuxTypeRegistry::instance().template getAuxID< T >( name, "",
-                                                                     flags );
+                                                                     flags,
+                                                                     linkedVariable );
    }
 
    /// Common code between vector and PackedContainer cases.
@@ -57,7 +61,7 @@ namespace xAOD {
 
       // Register the variable:
       const SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
-      m_vecs[ auxid ] = new AuxPersVector< ELT, CONT >( auxid, vec, r.isLinked( auxid ) );
+      m_vecs[ auxid ] = new AuxPersVector< ELT, CONT >( auxid, vec, r.isLinked( auxid ), this );
 
       // Remember that we are now handling this variable:
       m_auxids.insert( auxid );

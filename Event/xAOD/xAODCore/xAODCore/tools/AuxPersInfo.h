@@ -35,7 +35,7 @@ namespace xAOD {
       typedef T& info_type;
 
       /// Constructor
-      AuxPersInfo( SG::auxid_t auxid, info_type info ) :
+      AuxPersInfo( SG::auxid_t auxid, info_type info, SG::IAuxStore* /*store*/ ) :
          IAuxTypeVector( auxid, false ), m_info( info ) {}
 
       virtual std::unique_ptr<SG::IAuxTypeVector> clone() const override {

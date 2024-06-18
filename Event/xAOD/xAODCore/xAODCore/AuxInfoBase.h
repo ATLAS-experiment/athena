@@ -108,6 +108,9 @@ namespace xAOD {
       /// Lock a decoration.
       virtual void lockDecoration (SG::auxid_t auxid) override;
 
+      /// @brief Return interface for a linked variable.
+      virtual const SG::IAuxTypeVector* linkedVector (SG::auxid_t auxid) const override;
+
       /// @}
 
       /// @name Functions implementing the SG::IAuxStore interface
@@ -132,6 +135,9 @@ namespace xAOD {
                                const SG::auxid_set_t& ignore) override;
       /// Make an option setting on an aux variable.
       virtual bool setOption( auxid_t id, const SG::AuxDataOption& option ) override;
+
+      /// @brief Return interface for a linked variable.
+      virtual SG::IAuxTypeVector* linkedVector (SG::auxid_t auxid) override;
 
       /// @}
 
@@ -165,13 +171,16 @@ namespace xAOD {
       /// Declare how to wrap variables for this sort of base.
       template <class T, class ALLOC = std::allocator<T> >
       using AuxVariable_t = T;
+      template <class T, class ALLOC = std::allocator<T> >
+      using LinkedVariable_t = std::vector<T, ALLOC>;
 
       /// Get the auxiliary ID for one of the persistent variables
       template< typename T >
       auxid_t getAuxID( const std::string& name,
                         T& /*info*/,
                         SG::AuxVarFlags flags =
-                        SG::AuxVarFlags::None );
+                        SG::AuxVarFlags::None,
+                        const SG::auxid_t linkedVariable = SG::null_auxid );
       /// Register one of the persistent variables internally
       template< typename T >
       void regAuxVar( auxid_t auxid, const std::string& name,

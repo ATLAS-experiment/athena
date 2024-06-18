@@ -1,10 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id: IConstAuxStore.h 612954 2014-08-21 19:25:01Z ssnyder $
 /**
  * @file AthContainersInterfaces/IConstAuxStore.h
  * @author scott snyder <snyder@bnl.gov>
@@ -22,6 +19,9 @@
 
 
 namespace SG {
+
+
+class IAuxTypeVector;
 
 
 /**
@@ -160,6 +160,19 @@ public:
    * to the variable are not permitted after this call.
    */
   virtual void lockDecoration (SG::auxid_t auxid) = 0;
+
+
+  /**
+   * @brief Return interface for a linked variable.
+   * @param auxid The ID of the parent variable.
+   *
+   * If @c auxid has a linked variable, then return the @c IAuxTypeVector
+   * describing it.  Otherwise, return @c nullptr.
+   * May return @c nullptr unconditionally if this store does not
+   * support linked variables.
+   */
+  virtual const IAuxTypeVector* linkedVector (SG::auxid_t /*auxid*/) const
+  { return nullptr; }
 };
 
 

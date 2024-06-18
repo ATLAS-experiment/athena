@@ -48,8 +48,13 @@ namespace xAOD {
          delete m_staticVecs[ auxid ];
       }
 
+      const SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
+      if (r.isLinked(auxid)) {
+         throw std::runtime_error ("ERROR xAOD::ByteStreamAuxContainer_v1 doesn't implement linked variables");
+      }
+
       // Register the variable:
-      m_staticVecs[ auxid ] = new AuxPersVector< T >( auxid, vec, false );
+      m_staticVecs[ auxid ] = new AuxPersVector< T >( auxid, vec, false, this );
 
       // Remember that we are now handling this variable:
       m_auxids.insert( auxid );

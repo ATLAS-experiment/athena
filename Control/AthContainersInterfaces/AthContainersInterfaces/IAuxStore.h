@@ -1,10 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id: IAuxStore.h 793731 2017-01-24 19:41:13Z ssnyder $
 /**
  * @file AthContainersInterfaces/IAuxStore.h
  * @author scott snyder <snyder@bnl.gov>
@@ -176,6 +173,19 @@ public:
   virtual bool setOption (auxid_t /*auxid*/, const AuxDataOption& /*option*/)
   { return false; }
 
+
+  /**
+   * @brief Return interface for a linked variable.
+   * @param auxid The ID of the parent variable.
+   *
+   * If @c auxid has a linked variable, then return the @c IAuxTypeVector
+   * describing it.  Otherwise, return @c nullptr.
+   * May return @c nullptr unconditionally if this store does not
+   * support linked variables.
+   */
+  using IConstAuxStore::linkedVector;
+  virtual IAuxTypeVector* linkedVector (SG::auxid_t /*auxid*/)
+  { return nullptr; }
 
   /// Mark that this type supports thinning operations.
   /// See AthContainers/supportsThinning.h and

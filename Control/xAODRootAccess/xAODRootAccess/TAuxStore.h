@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef XAODROOTACCESS_TAUXSTORE_H
 #define XAODROOTACCESS_TAUXSTORE_H
@@ -131,6 +131,9 @@ namespace xAOD {
       /// Return the number of elements in the store
       virtual size_t size() const override;
 
+      /// Return interface for a linked variable.
+      virtual const SG::IAuxTypeVector* linkedVector( SG::auxid_t auxid ) const override;
+      virtual SG::IAuxTypeVector* linkedVector( SG::auxid_t auxid ) override;
       /// @}
 
       /// @name Functions implementing the SG::IAuxStore interface

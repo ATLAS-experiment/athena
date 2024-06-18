@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <sstream>
@@ -525,7 +525,7 @@ IHolder::deserializeDynVars (const std::vector<uint32_t>& dataBlob,
 
     bool isPacked = (strncmp (tname.c_str(), packed_pref, packed_preflen) == 0);
     std::unique_ptr<SG::IAuxTypeVector> vec
-      (r.makeVectorFromData (id, obj, isPacked, true));
+      (r.makeVectorFromData (id, obj, nullptr, isPacked, true));
     store->addVector (std::move(vec), false);
   }
 

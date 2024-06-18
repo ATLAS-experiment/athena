@@ -470,7 +470,7 @@ void test5()
   vec1->push_back(3);
   vec1->push_back(2);
   vec1->push_back(1);
-  std::unique_ptr<SG::IAuxTypeVector> v1 = fac.createFromData (1, vec1, false, true, false);
+  std::unique_ptr<SG::IAuxTypeVector> v1 = fac.createFromData (1, vec1, nullptr, false, true, false);
   assert (v1->size() == 3);
   assert (v1->auxid() == 1);
   assert (!v1->isLinked());
@@ -482,7 +482,7 @@ void test5()
   std::vector<int>* vec2 = new std::vector<int>;
   vec2->push_back(4);
   vec2->push_back(5);
-  std::unique_ptr<SG::IAuxTypeVector> v2 = fac.createFromData (1, vec2, false, false, true);
+  std::unique_ptr<SG::IAuxTypeVector> v2 = fac.createFromData (1, vec2, nullptr, false, false, true);
   assert (v2->size() == 2);
   assert (v2->auxid() == 1);
   assert (v2->isLinked());

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/src/AuxVectorData.cxx
@@ -298,8 +298,14 @@ void* AuxVectorData::getDataOol (SG::auxid_t auxid, bool allowMissing)
   // Fetch the pointer from the store, or raise an exception if we don't
   // have a non-const store.
   void* ptr = 0;
-  if (m_store)
-    ptr = m_store->getData (auxid, this->size_v(), this->capacity_v());
+  if (m_store) {
+    if (SG::AuxTypeRegistry::instance().isLinked (auxid)) {
+      ptr = m_store->getData (auxid, 0, 0);
+    }
+    else {
+      ptr = m_store->getData (auxid, this->size_v(), this->capacity_v());
+    }
+  }
   else if (getConstStore())
     throw SG::ExcConstAuxData ("fetch item", auxid);
   else
@@ -383,7 +389,12 @@ void* AuxVectorData::getDecorationOol (SG::auxid_t auxid) const
   if (m_store) {
     // Avoid warning about calling non-const function.  OK here.
     IAuxStore* store ATLAS_THREAD_SAFE = m_store;
-    ptr = store->getDecoration (auxid, this->size_v(), this->capacity_v());
+    if (SG::AuxTypeRegistry::instance().isLinked (auxid)) {
+      ptr = store->getDecoration (auxid, 0, 0);
+    }
+    else {
+      ptr = store->getDecoration (auxid, this->size_v(), this->capacity_v());
+    }
   }
   else if (getConstStore()) {
     // The whole point of decorations is to allow adding information to
@@ -392,7 +403,12 @@ void* AuxVectorData::getDecorationOol (SG::auxid_t auxid) const
     // modification is really allowed or not.
     IConstAuxStore* store ATLAS_THREAD_SAFE =
        const_cast<IConstAuxStore*> (getConstStore());
-    ptr = store->getDecoration (auxid, this->size_v(), this->capacity_v());
+    if (SG::AuxTypeRegistry::instance().isLinked (auxid)) {
+      ptr = store->getDecoration (auxid, 0, 0);
+    }
+    else {
+      ptr = store->getDecoration (auxid, this->size_v(), this->capacity_v());
+    }
   }
   else
     throw SG::ExcNoAuxStore (auxid);
