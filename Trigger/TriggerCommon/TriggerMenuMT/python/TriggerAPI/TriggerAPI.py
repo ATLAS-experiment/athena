@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 __author__  = 'Javier Montejo'
 __version__="$Revision: 2.0 $"
@@ -17,6 +17,14 @@ class TriggerAPI:
     flags     = None
     release   = None
     cacheread = False
+
+    @classmethod
+    def reset(cls):
+        cls.dbQueries = {}
+        cls.customGRL = None
+        cls.flags     = None
+        cls.release   = None
+        cls.cacheread = False
 
     @classmethod
     def init(cls):
@@ -86,7 +94,6 @@ class TriggerAPI:
         ''' Returns a list of always-unprescaled HLT chains, including backup items with higher thresholds.
             See getLowestUnprescaled for a detailed description of the options
         '''
-        cls._loadTriggerPeriod(period,reparse)
         return cls.dbQueries[(period,cls.customGRL)]._getUnprescaled(triggerType, additionalTriggerType, matchPattern, livefraction)
     
     @classmethod
@@ -143,7 +150,7 @@ class TriggerAPI:
         
     @classmethod
     def _loadTriggerPeriod(cls, period, reparse):
-        if not period & TriggerPeriod.future: cls.init()
+        if period != TriggerPeriod.customGRL and not period & TriggerPeriod.future: cls.init()
         if (period,cls.customGRL) not in cls.dbQueries:
             if TriggerPeriod.isRunNumber(period) or (isinstance(period,TriggerPeriod) and period.isBasePeriod()):
                 cls.dbQueries[(period,cls.customGRL)] = TriggerInfo(period,cls.customGRL,cls.release,cls.flags)
@@ -162,6 +169,7 @@ class TriggerAPI:
                 del cls.dbQueries[(period,grl)]
         SerializeAPI.dump(cls.dbQueries)
         cls.log.info(sorted(cls.dbQueries.keys()))
+
 
 def main(dumpFullAPI=False):
     ''' Run some tests or dump the full pickle/json for CalibPath '''

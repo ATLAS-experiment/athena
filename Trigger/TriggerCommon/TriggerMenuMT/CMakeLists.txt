@@ -10,7 +10,7 @@ atlas_install_python_modules( python/*.py
                               python/TriggerAPI
                               python/CFtest
                               scripts/menu_config_tests.py
-                              POST_BUILD_CMD ${ATLAS_FLAKE8} --extend-extensions=ATL900,ATL901 )
+                              POST_BUILD_CMD ${ATLAS_FLAKE8} --extend-extensions=ATL900,ATL901 --extend-ignore=F401 )
 
 atlas_install_scripts( scripts/generateL1MenuRun3.py
                        scripts/verify_menu_config.py
@@ -101,3 +101,6 @@ atlas_test_l1defined_menu( Dev_pp_run4_v1 )
 atlas_add_test( test_menu_dump
   SCRIPT test_menu_dump.py -p
   POST_EXEC_SCRIPT noerror.sh )
+
+# TriggerAPI tests
+atlas_add_test( TriggerAPISessionTest SCRIPT test/testTriggerAPISession.py POST_EXEC_SCRIPT noerror.sh )

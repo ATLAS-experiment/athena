@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 __author__  = 'Javier Montejo'
 __version__="$Revision: 2.0 $"
@@ -16,12 +16,13 @@ privateJsonFile = "TriggerInfo.json"
 def dump(db, f=privateJsonFile):
     dumpJson(db, f)
 
-def load():
-    centralJsonFile = PathResolver.FindCalibFile("TriggerMenu/TriggerInfo_20210302.json")
-    if centralJsonFile: 
-        log.info("Found json file:"+centralJsonFile)
-        centralJsonFile = os.path.realpath(centralJsonFile)
-    else: log.error("Couldn't find central json file")
+def load(centralFile="TriggerMenu/TriggerInfo_20210302.json"):
+    if centralFile:
+        centralJsonFile = PathResolver.FindCalibFile(centralFile)
+        if centralJsonFile:
+            log.info("Found json file:"+centralJsonFile)
+            centralJsonFile = os.path.realpath(centralJsonFile)
+        else: log.error("Couldn't find central json file")
 
     if centralJsonFile:
         try:
@@ -63,9 +64,10 @@ def fromJsonDump(thelist):
         #key and internal period value should be consistent
         assert triggerinfo.period==pk, (triggerinfo.period, pk)
         triggerinfo.totalLB = thedict["totalLB"]
+        triggerinfo.totalLBByRun = thedict.get("totalLBByRun",{})
         triggerinfo.triggerChains = []
         for tc in thedict["triggerChains"]:
-            tc = TriggerChain(tc["name"],tc["l1seed"],tc["livefraction"],tc["activeLB"],tc["hasRerun"])
+            tc = TriggerChain(tc["name"],tc["l1seed"],tc["livefraction"],tc["activeLB"],tc["hasRerun"],tc.get("activeLBByRun",{}))
             triggerinfo.triggerChains.append(tc)
         toret[key] = triggerinfo
     return toret

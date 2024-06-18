@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 __author__  = 'Javier Montejo'
 __version__="$Revision: 2.0 $"
@@ -12,6 +12,7 @@ from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
 
 import six
+import os
 
 def getRunLBFromU64(runlb):
     run = runlb >> 32
@@ -53,7 +54,6 @@ def getReadyForPhysicsInRange(period):
         else:
             runsWithReady[sincerun] = [ (sincelb, untillb) ]
 
-    log.info(runsWithReady)
 
     return runsWithReady
 
@@ -68,12 +68,14 @@ def getKeys( listOfRuns, doPrint = False ):
     myL1pskReader = CoolDataReader('COOLONL_TRIGGER/CONDBR2', '/TRIGGER/LVL1/Lvl1ConfigKey')
     myHltpskReader = CoolDataReader('COOLONL_TRIGGER/CONDBR2', '/TRIGGER/HLT/PrescaleKey')
     #myBgskReader = CoolDataReader('COOLONL_TRIGGER/CONDBR2', '/TRIGGER/LVL1/BunchGroupKey')
-    
-    for run in sorted(listOfRuns):
+
+    import tqdm
+    pbar = tqdm.tqdm(sorted(listOfRuns),unit=" runs",bar_format='{l_bar}{bar:10}{r_bar}{bar:-10b}')
+    for run in pbar:
 
         listOfReadyBlocks = listOfRuns[run]
 
-        log.info("Getting keys for run %i, lbs %r",run, listOfReadyBlocks)
+        pbar.set_description(f"Getting keys for run {run}")
 
         since = (run << 32) 
         until = ((run+1) << 32)
@@ -165,24 +167,57 @@ def queryHLTPrescaleTableRun2(connection,psk):
 def fillHLTmap( info, hltMap_prev , lbCount, run, grlblocks):
     from TrigConfigSvc.TrigConfigSvcUtils import getL1Items, getL1Prescales
 
-    items = getL1Items('TRIGGERDB', info['smk']) # returs map item name => CTP ID
-    chainsHLT = getChainsWithL1seed('TRIGGERDB', info['smk']) # returns map HLT ID => (HLT name, L1 seed)
-    chainsHLT = {k:v for (k,v) in six.iteritems (chainsHLT) if "L1" in v[1]}
+    from TrigConfIO.L1TriggerConfigAccess import L1MenuAccess,L1PrescalesSetAccess # run3 menu access
+    from TrigConfIO.HLTTriggerConfigAccess import HLTMenuAccess,HLTPrescalesSetAccess # run3 menu access
+
+    from collections import defaultdict
+
+    lvl = int(logging.root.level)
+    logging.root.setLevel(logging.WARNING)
+
+    # obtain map l1 item name => CTP ID
+    # obtain map hltid => (hltname, l1seed)
+    if run > 400000:
+        items = {}; chainsHLT = {}
+        for name,value in L1MenuAccess(dbalias = 'TRIGGERDB_RUN3', smkey = info['smk']).items().items():
+            items[name] = value["ctpid"]
+        for name,value in HLTMenuAccess(dbalias = 'TRIGGERDB_RUN3', smkey = info['smk']).chains().items():
+            if "L1" not in value["l1item"]: continue # filtering
+            chainsHLT[value["nameHash"]] = (name,value["l1item"])
+    else:
+        items = getL1Items('TRIGGERDB', info['smk'])
+        chainsHLT = getChainsWithL1seed('TRIGGERDB', info['smk']) # returns map HLT ID => (HLT name, L1 seed)
+        chainsHLT = {k:v for (k,v) in six.iteritems (chainsHLT) if "L1" in v[1]} # filtering
+
+
 
     tmphltList = []
     for lbrange in info['hltpsk']:
         lbstart, lbend = lbrange[2], lbrange[4]
         if lbend ==-1: lbend = 2000
-        hltprescales = getHLTPrescalesRun2('TRIGGERDB', lbrange[0])
+        if run > 400000:
+            hltprescales = {}
+            for name,value in HLTPrescalesSetAccess(dbalias='TRIGGERDB_RUN3',hltpskey=lbrange[0]).prescales().items():
+                rerun=-1.0 # how to determine?
+                # key seems to be a float (from looking at type(list(getHLTPrescalesRun2("TRIGGERDB",3000).keys())[0]))
+                hltprescales[value["hash"]] = (value["prescale"],rerun)
+        else:
+            hltprescales = getHLTPrescalesRun2('TRIGGERDB', lbrange[0])
         tmphltList.append(( lbstart, lbend,hltprescales) )
 
     tmpl1List = []
     for lbrange in info['l1psk']:
         lbstart, lbend = lbrange[2], lbrange[4]
         if lbend ==-1: lbend = 2000
-        l1psname, l1prescales = getL1Prescales('TRIGGERDB', lbrange[0])
-        l1prescales    = {l1name: l1prescales[int(l1id)] for (l1name, l1id) in six.iteritems (items)}
+        if run > 400000:
+            l1ps = L1PrescalesSetAccess(dbalias='TRIGGERDB_RUN3',l1pskey=lbrange[0])
+            l1prescales    = {name: l1ps.prescale(name) for name in l1ps.itemNames()}
+        else:
+            l1psname, l1prescales = getL1Prescales('TRIGGERDB', lbrange[0])
+            l1prescales    = {l1name: l1prescales[int(l1id)] for (l1name, l1id) in six.iteritems (items)}
         tmpl1List.append(( lbstart, lbend,l1prescales) )
+
+    logging.root.setLevel(lvl)
 
     #merge the lb ranges of HLT and L1
     hltindex, l1index = 0,0
@@ -202,43 +237,48 @@ def fillHLTmap( info, hltMap_prev , lbCount, run, grlblocks):
             mergedList.append((lbstart, lbend,tmphltList[hltindex][2],tmpl1List[l1index][2]))
             hltindex += 1
 
+    # if user does a "touch liveFractions.txt" then we will populate info to that file for further debugging
+    f = open("liveFractions.txt","a") if os.path.exists("liveFractions.txt") else None
+
     hltMap = {}
     for lbstart, lbend, hltprescales, l1prescales in mergedList:
-        lboverlap = max([min(lbend,grllbend) - max(lbstart,grllbstart) for (grllbstart,grllbend) in grlblocks])+1
-        if lboverlap <= 0:
-            #log.info("Rejected:",(lboverlap, lbstart, lbend, grlblocks))
-            continue
         if run in LBexceptions.exceptions:
             if any([lbstart>=exc_start and lbstart<=exc_end for exc_start, exc_end in LBexceptions.exceptions[run]]): continue
             if any([lbend>=exc_start and lbend<=exc_end for exc_start, exc_end in LBexceptions.exceptions[run]]): continue
 
-        #log.info("Accepted:",(lboverlap, lbstart, lbend, grlblocks))
-        lbCount += lboverlap
-        for hltid, (hltps, hltrerun) in six.iteritems (hltprescales):
-            if hltid not in chainsHLT: continue
-            if hltps < 1: hltps = 1e99
-            l1seeds = chainsHLT[hltid][1]
-            l1ps = 1e99
-            for l1seed in l1seeds.split(","): #protect 'L1_MU20,L1_MU21'
-                if l1seed not in l1prescales and len(l1seeds) > 10: continue #Protection against buggy HLT_noalg_Standby
-                tmpl1ps = l1prescales[l1seed] 
-                if tmpl1ps < 1: tmpl1ps = 1e99
-                l1ps = min(l1ps, tmpl1ps)
-            
-            #if hltps*l1ps!=1 and chainsHLT[hltid][0]=="HLT_mu60_0eta105_msonly": #muon primary since 2015 as standard candle to find problematic LBs
-            #    log.info("WARNING: Prescaled HLT_mu60_0eta105_msonly",l1ps,hltps,lbstart, lbend, grlblocks)
+        for grllbstart,grllbend in grlblocks:
+            lboverlap = (min(lbend,grllbend) - max(lbstart,grllbstart))+1
+            if lboverlap <= 0: continue
 
-            if hltps*l1ps < 1e99: efflb = lboverlap/(hltps*l1ps)
-            else:                 efflb = 0
-            if not chainsHLT[hltid][0] in hltMap: hltMap[chainsHLT[hltid][0]] = [l1seeds, 0, hltrerun>0]
-            hltMap[chainsHLT[hltid][0]][1] += efflb
+            lbCount += lboverlap
+            for hltid, (hltps, hltrerun) in six.iteritems (hltprescales):
+                if hltid not in chainsHLT: continue
+                if hltps < 1: hltps = 1e99
+                l1seeds = chainsHLT[hltid][1]
+                l1ps = 1e99
+                for l1seed in l1seeds.split(","): #protect 'L1_MU20,L1_MU21'
+                    if l1seed not in l1prescales and len(l1seeds) > 10: continue #Protection against buggy HLT_noalg_Standby
+                    tmpl1ps = l1prescales[l1seed]
+                    if tmpl1ps < 1: tmpl1ps = 1e99
+                    l1ps = min(l1ps, tmpl1ps)
+
+
+                if hltps*l1ps < 1e99: efflb = lboverlap/(hltps*l1ps)
+                else:                 efflb = 0
+                if not chainsHLT[hltid][0] in hltMap: hltMap[chainsHLT[hltid][0]] = [l1seeds, 0, hltrerun>0, defaultdict(int)]
+                hltMap[chainsHLT[hltid][0]][1] += efflb
+                hltMap[chainsHLT[hltid][0]][3][run] += efflb
+                if f: f.write(f"{chainsHLT[hltid][0]},{run},{lbstart},{lbend},{grllbstart},{grllbend},{lboverlap},{l1ps},{hltps}\n")
+
+    if f: f.close()
     
-    for hlt,(l1,efflb,rerun) in six.iteritems (hltMap_prev):
+    for hlt,(l1,efflb,rerun,efflbByRun) in six.iteritems (hltMap_prev):
         if hlt in hltMap: 
             hltMap[hlt][1] += efflb
             hltMap[hlt][2] |= rerun
-        else: hltMap[hlt] = [l1, efflb,rerun]
-
+            for run,runefflb in efflbByRun.items():
+                hltMap[hlt][3][run] += runefflb
+        else: hltMap[hlt] = [l1, efflb,rerun, efflbByRun]
     return hltMap, lbCount
 
 
@@ -285,11 +325,16 @@ def getHLTmap_fromDB(period, customGRL):
     
     hltMap = {}
     lbCount = 0
-    for run in keys:
-        log.info("Filling run: %d",run)
+    lbByRun = {}
+    import tqdm
+    pbar = tqdm.tqdm(keys,unit=" runs",bar_format='{l_bar}{bar:10}{r_bar}{bar:-10b}')
+    for run in pbar:
+        pbar.set_description(f"Getting prescales for run {run}")
+        prev_lbCount = int(lbCount)
         hltMap, lbCount = fillHLTmap( keys[run], hltMap, lbCount , run, triggerPeriod[run])
+        lbByRun[run] = (lbCount - prev_lbCount)
 
-    return hltMap, lbCount
+    return hltMap, lbCount, lbByRun
 
 def getHLTmap_fromTM(flags, period, release):
     ''' Return a map of HLT chain: (L1 seed, active LBs, is-rerun) for a given period
@@ -310,9 +355,8 @@ def getHLTmap_fromTM(flags, period, release):
         l1seed  = chain.name[chain.name.rfind("_L1")+3:] #surely a better way to do this
         primary = any('Primary' in g or 'TagAndProbe' in g for g in chain.groups)
         ps = 1 if primary else 0
-        hltMap[hltname] = (l1seed, dummyfutureLBs*ps, False)  #hasRerun=False
-        
-    return hltMap, dummyfutureLBs
+        hltMap[hltname] = (l1seed, dummyfutureLBs*ps, False, {})  #third arg is hasRerun=False
+    return hltMap, dummyfutureLBs, {}
 
 def getMenuPathFromRelease(release):
     if release: #already format-proofed in TriggerAPI
@@ -328,27 +372,34 @@ def getHLTlist(period, customGRL, release, flags=None):
         For "future" periods, the average livefraction is 1 for items flagged as primary in TM and 0 for non-primaries
     '''
     if not period & TriggerPeriod.future or TriggerPeriod.isRunNumber(period): 
-        hltmap, totalLB = getHLTmap_fromDB(period, customGRL)
+        hltmap, totalLB, totalLBByRun = getHLTmap_fromDB(period, customGRL)
+        # # add empty chainGroups list to every item
+        # for name,vals in hltmap.items():
+        #     hltmap[name] = vals + [[],]
     else:
         if flags is None:
             raise RuntimeError('ConfigFlags need to be provided via TriggerAPI.setConfigFlags for "future" periods.')
-        hltmap, totalLB = getHLTmap_fromTM(flags, period, release)
+        hltmap, totalLB, totalLBByRun = getHLTmap_fromTM(flags, period, release)
     
     hltlist = cleanHLTmap(hltmap, totalLB)
-    return (hltlist, totalLB)
+    return (hltlist, totalLB, totalLBByRun)
 
 def cleanHLTmap(hltmap, totalLB):
 
     from copy import deepcopy
-    for  name, (l1seed, activeLB, hasRerun) in six.iteritems (deepcopy(hltmap)): #since it will modify on the fly
+    for  name, (l1seed, activeLB, hasRerun,activLBByRun) in six.iteritems (deepcopy(hltmap)): #since it will modify on the fly
         for pair in TriggerRenaming.pairs:
-            if name==pair[0] and     pair[1] in hltmap: hltmap[pair[1]][1] += activeLB
+            if name==pair[0] and     pair[1] in hltmap:
+                hltmap[pair[1]][1] += activeLB
+                for run,efflb in activLBByRun.items(): hltmap[pair[1]][3][run] += efflb
             #if name==pair[0] and not pair[1] in hltmap: hltmap[pair[1]]     = [l1seed, activeLB, hasRerun]
-            if name==pair[1] and     pair[0] in hltmap: hltmap[pair[0]][1] += activeLB
+            if name==pair[1] and     pair[0] in hltmap:
+                hltmap[pair[0]][1] += activeLB
+                for run,efflb in activLBByRun.items(): hltmap[pair[0]][3][run] += efflb
             #if name==pair[1] and not pair[0] in hltmap: hltmap[pair[0]]     = [l1seed, activeLB, hasRerun]
 
     vetoes = ['calib','noise','noalg','satmon','peb']
-    hltlist = [(name, l1seed, activeLB/totalLB, activeLB, hasRerun) for name, (l1seed, activeLB, hasRerun) in six.iteritems (hltmap) if not any(v in name for v in vetoes)]
+    hltlist = [(name, l1seed, activeLB/totalLB, activeLB, hasRerun,activLBByRun) for name, (l1seed, activeLB, hasRerun,activLBByRun) in six.iteritems (hltmap) if not any(v in name for v in vetoes)]
     return hltlist
 
 def test():
