@@ -17,6 +17,22 @@ def setupTestOutputCfg(flags,**kwargs):
                        "McEventCollection#"] + OutputSimContainersCfg(flags)
 
    
+   
+    from xAODMetaDataCnv.InfileMetaDataConfig import propagateMetaData, MetaDataHelperLists
+    from AthenaConfiguration.Enums import MetadataCategory
+
+    mdLists = MetaDataHelperLists()
+    for mdCategory in (MetadataCategory.FileMetaData, MetadataCategory.EventStreamInfo):
+        lists, caConfig = propagateMetaData(flags, kwargs["streamName"], mdCategory)
+        mdLists += lists
+        result.merge(caConfig)
+    kwargs.setdefault("MetadataItemList" , mdLists.mdItems)
+    kwargs.setdefault("HelperTools", mdLists.helperTools)
+    from AthenaServices.MetaDataSvcConfig import MetaDataSvcCfg
+
+    result.merge(MetaDataSvcCfg(flags, 
+                                tools=mdLists.mdTools, 
+                                toolNames=mdLists.mdToolNames))
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     kwargs.setdefault("ItemList", container_items)
     result.merge(OutputStreamCfg(flags, **kwargs))
