@@ -1,0 +1,285 @@
+/*
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
+#include "sTgcFastDigiTool.h"
+#include "CLHEP/Random/RandGaussZiggurat.h"
+#include "CLHEP/Random/RandFlat.h"
+namespace {
+    constexpr double percentage(unsigned int numerator, unsigned int denom) {
+        return 100. * numerator / std::max(denom, 1u);
+    }
+    using channelType = sTgcIdHelper::sTgcChannelTypes;
+}
+namespace MuonR4 {
+    
+    sTgcFastDigiTool::sTgcFastDigiTool(const std::string& type, const std::string& name, const IInterface* pIID):
+        MuonDigitizationTool{type,name, pIID} {}
+
+    StatusCode sTgcFastDigiTool::initialize() {
+        ATH_CHECK(MuonDigitizationTool::initialize());
+        ATH_CHECK(m_writeKey.initialize());
+        ATH_CHECK(m_effiDataKey.initialize(!m_effiDataKey.empty()));
+        ATH_CHECK(m_uncertCalibKey.initialize());
+        return StatusCode::SUCCESS;
+    }
+    StatusCode sTgcFastDigiTool::finalize() {
+        ATH_MSG_INFO("Tried to convert "<<m_allHits[channelType::Strip]<<"/"
+                                        <<m_allHits[channelType::Wire]<<"/"
+                                        <<m_allHits[channelType::Pad]<<" strip/wire/pad hits. In, "
+                    <<percentage(m_acceptedHits[channelType::Strip], m_allHits[channelType::Strip]) <<"/"
+                    <<percentage(m_acceptedHits[channelType::Wire], m_allHits[channelType::Wire])<<"/"
+                    <<percentage(m_acceptedHits[channelType::Pad], m_allHits[channelType::Pad])
+                    <<"% of the cases, the conversion was successful");
+        return StatusCode::SUCCESS;
+    }
+    StatusCode sTgcFastDigiTool::digitize(const EventContext& ctx,
+                                          const TimedHits& hitsToDigit,
+                                          xAOD::MuonSimHitContainer* sdoContainer) const {
+        const sTgcIdHelper& idHelper{m_idHelperSvc->stgcIdHelper()};
+        // Prepare the temporary cache
+        DigiCache digitCache{};
+        /// Fetch the conditions for efficiency calculations
+        const Muon::DigitEffiData* efficiencyMap{nullptr};
+        ATH_CHECK(retrieveConditions(ctx, m_effiDataKey, efficiencyMap));
+        const NswErrorCalibData* nswUncertDB{nullptr};
+        ATH_CHECK(retrieveConditions(ctx, m_uncertCalibKey, nswUncertDB));
+        
+        CLHEP::HepRandomEngine* rndEngine = getRandomEngine(ctx);
+        for (const TimedHit& simHit : hitsToDigit) {
+            /// ignore radiation for now
+            if (std::abs(simHit->pdgId()) != 13) continue;
+            
+            sTgcDigitCollection* digiColl = fetchCollection(simHit->identify(), digitCache);
+            bool digitized{false};
+            digitized |= digitizeStrip(ctx, simHit, nswUncertDB, efficiencyMap, rndEngine, *digiColl);
+            digitized |= digitizeWire(ctx, simHit, efficiencyMap, rndEngine, *digiColl);
+            digitized |= digitizePad(ctx, simHit, efficiencyMap, rndEngine, *digiColl);
+
+            if (digitized) {
+                addSDO(simHit, sdoContainer);
+            }
+        }
+        /// Write everything at the end into the final digit container
+        ATH_CHECK(writeDigitContainer(ctx, m_writeKey, std::move(digitCache), 
+                                      idHelper.module_hash_max()));
+        return StatusCode::SUCCESS;
+    } 
+    bool sTgcFastDigiTool::digitizeStrip(const EventContext& ctx,
+                                         const TimedHit& timedHit,
+                                         const NswErrorCalibData* errorCalibDB,
+                                         const Muon::DigitEffiData* efficiencyMap,
+                                         CLHEP::HepRandomEngine* rndEngine,
+                                         sTgcDigitCollection& outCollection) const {
+   
+        if (!m_digitizeStrip) {
+            return false;
+        }
+        ++m_allHits[channelType::Strip];
+        const Identifier hitId{timedHit->identify()};
+        /// Check efficiencies
+        if (efficiencyMap && efficiencyMap->getEfficiency(hitId) < CLHEP::RandFlat::shoot(rndEngine,0.,1.)){
+            ATH_MSG_VERBOSE("Simulated strip hit "<<xAOD::toEigen(timedHit->localPosition())
+                            << m_idHelperSvc->toString(hitId) <<" is rejected because of efficency modelling");
+            return false;
+        }
+        const MuonGMR4::sTgcReadoutElement* readOutEle{m_detMgr->getsTgcReadoutElement(hitId)};
+        
+        const sTgcIdHelper& idHelper{m_idHelperSvc->stgcIdHelper()};
+
+        const int gasGap = idHelper.gasGap(hitId);
+        const MuonGMR4::StripDesign& design{readOutEle->stripDesign(hitId)};
+
+        const Amg::Vector2D stripPos{xAOD::toEigen(timedHit->localPosition()).block<2,1>(0,0)};
+
+        const int stripNum = design.stripNumber(stripPos);
+        if (stripNum < 0) {
+            ATH_MSG_VERBOSE("Strip hit "<<Amg::toString(stripPos)<<" "<<m_idHelperSvc->toStringGasGap(hitId)
+                          <<" is out of range "<<std::endl<<design);
+            return false;
+        }
+
+        bool isValid{false};
+        const Identifier stripId = idHelper.channelID(hitId, readOutEle->multilayer(),
+                                                      gasGap, channelType::Strip, stripNum, isValid);
+        
+        if (!isValid) {
+            ATH_MSG_WARNING("Failed to deduce a valid identifier from "
+                            <<m_idHelperSvc->toStringGasGap(hitId)<<" strip: "<<stripNum);
+            return false;
+        } 
+
+        NswErrorCalibData::Input errorCalibInput{};
+        errorCalibInput.stripId= stripId;
+        errorCalibInput.locTheta = M_PI - timedHit->localDirection().theta();
+        errorCalibInput.clusterAuthor = 3; // centroid
+    
+        const double uncert = errorCalibDB->clusterUncertainty(errorCalibInput);
+        const double smearedX = CLHEP::RandGaussZiggurat::shoot(rndEngine, stripPos.x(), uncert);
+        
+        const Amg::Vector2D digitPos{smearedX * Amg::Vector2D::UnitX()};
+
+        const int digitStrip = design.stripNumber(digitPos);
+        if (digitStrip < 0) {
+            ATH_MSG_VERBOSE("Smeared strip hit "<<Amg::toString(digitPos)<<" "<<m_idHelperSvc->toStringGasGap(hitId)
+                          <<" is out of range "<<std::endl<<design);
+            return false;
+        }
+        const Identifier digitId = idHelper.channelID(hitId, readOutEle->multilayer(),
+                                                      gasGap, channelType::Strip, digitStrip, isValid);
+  
+        if (!isValid) {
+            ATH_MSG_WARNING("Failed to deduce a valid identifier from "
+                            <<m_idHelperSvc->toStringGasGap(hitId)<<" digit: "<<digitStrip);
+            return false;
+        }
+        outCollection.push_back(std::make_unique<sTgcDigit>(digitId,
+                                                            associateBCIdTag(ctx, timedHit), 
+                                                            hitTime(timedHit), 666, false, false));
+
+        ++m_acceptedHits[channelType::Strip];
+        return true;
+    }
+            
+    bool sTgcFastDigiTool::digitizeWire(const EventContext& ctx,
+                                        const TimedHit& timedHit,
+                                        const Muon::DigitEffiData* efficiencyMap,
+                                        CLHEP::HepRandomEngine* rndEngine,
+                                        sTgcDigitCollection& outCollection) const {
+
+        if (!m_digitizeWire) {
+            return false;
+        }
+
+        ++m_allHits[channelType::Wire];
+
+        const Identifier hitId{timedHit->identify()};
+        /// Check efficiencies
+        if (efficiencyMap && efficiencyMap->getEfficiency(hitId) < CLHEP::RandFlat::shoot(rndEngine,0.,1.)){
+            ATH_MSG_VERBOSE("Simulated wire hit "<<xAOD::toEigen(timedHit->localPosition())
+                            << m_idHelperSvc->toString(hitId) <<" is rejected because of efficency modelling");
+            return false;
+        }
+        const sTgcIdHelper& idHelper{m_idHelperSvc->stgcIdHelper()};
+        const MuonGMR4::sTgcReadoutElement* readOutEle = m_detMgr->getsTgcReadoutElement(hitId);
+        const int gasGap = idHelper.gasGap(hitId);
+
+        
+        /// Sim hits are always expressed in the eta view of the gasGap...
+        //  Rotate the sim hit into the wire view 
+        const IdentifierHash stripLayHash{readOutEle->createHash(gasGap, channelType::Strip, 0)};
+        const IdentifierHash wireLayHash{readOutEle->createHash(gasGap, channelType::Wire, 0)};
+        
+        const ActsGeometryContext& gctx{getGeoCtx(ctx)};
+        const Amg::Transform3D toWire{readOutEle->globalToLocalTrans(gctx, wireLayHash) *
+                                      readOutEle->localToGlobalTrans(gctx, stripLayHash)};
+        
+        const Amg::Vector2D wirePos{(toWire*xAOD::toEigen(timedHit->localPosition())).block<2,1>(0,0)};
+        /// 
+        const MuonGMR4::WireGroupDesign& design{readOutEle->wireDesign(gasGap)};
+        
+        const int wireGrpNum = design.stripNumber(wirePos);
+        if (wireGrpNum < 0) {
+            ATH_MSG_VERBOSE("The wire "<<Amg::toString(wirePos)<<" in "<<m_idHelperSvc->toStringGasGap(hitId)
+                        <<" is outside of the acceptance of "<<std::endl<<design);
+            return false;
+        }
+        const double uncert = design.stripPitch() * design.numWiresInGroup(wireGrpNum);
+
+        const double smearedX = CLHEP::RandGaussZiggurat::shoot(rndEngine, wirePos.x(), uncert);
+        
+        const Amg::Vector2D digitPos{smearedX * Amg::Vector2D::UnitX()};
+
+        const int digitWire = design.stripNumber(digitPos);
+        if (digitWire < 0) {
+            ATH_MSG_VERBOSE("Strip hit "<<Amg::toString(digitPos)<<" "<<m_idHelperSvc->toStringGasGap(hitId)
+            <<" is out of range "<<std::endl<<design);
+            return false;
+        }
+        bool isValid{false};
+        const Identifier digitId = idHelper.channelID(hitId, readOutEle->multilayer(),
+                                                      gasGap, channelType::Wire, digitWire, isValid);
+  
+        if (!isValid) {
+            ATH_MSG_WARNING("Failed to deduce a valid identifier from "
+                            <<m_idHelperSvc->toStringGasGap(hitId)<<" digit: "<<digitWire);
+            return false;
+        }
+        outCollection.push_back(std::make_unique<sTgcDigit>(digitId,
+                                                            associateBCIdTag(ctx, timedHit), 
+                                                            hitTime(timedHit), 666, false, false));
+
+
+        ++m_acceptedHits[channelType::Wire];
+        return true;
+    }
+    int sTgcFastDigiTool::associateBCIdTag(const EventContext& /*ctx*/,
+                                           const TimedHit& /*timedHit*/) const {
+        /// To be implemented
+        return 0;
+    }
+
+    bool sTgcFastDigiTool::digitizePad(const EventContext& ctx,
+                                       const TimedHit& timedHit,
+                                       const Muon::DigitEffiData* efficiencyMap,
+                                       CLHEP::HepRandomEngine* rndEngine,
+                                       sTgcDigitCollection& outCollection) const {
+        
+        if (!m_digitizePads) {
+            return false;
+        }
+
+        ++m_allHits[channelType::Pad];
+
+        const Identifier hitId{timedHit->identify()};
+        /// Check efficiencies
+        if (efficiencyMap && efficiencyMap->getEfficiency(hitId) < CLHEP::RandFlat::shoot(rndEngine,0.,1.)){
+            ATH_MSG_VERBOSE("Simulated pad hit "<<xAOD::toEigen(timedHit->localPosition())
+                            << m_idHelperSvc->toString(hitId) <<" is rejected because of efficency modelling");
+            return false;
+        }
+        const sTgcIdHelper& idHelper{m_idHelperSvc->stgcIdHelper()};
+        const MuonGMR4::sTgcReadoutElement* readOutEle = m_detMgr->getsTgcReadoutElement(hitId);
+        const int gasGap = idHelper.gasGap(hitId);
+
+        
+        /// Sim hits are always expressed in the eta view of the gasGap...
+        //  Rotate the sim hit into the wire view 
+        const IdentifierHash stripLayHash{readOutEle->createHash(gasGap, channelType::Strip, 0)};
+        const IdentifierHash padLayerHash{readOutEle->createHash(gasGap, channelType::Pad, 0)};
+        
+        const ActsGeometryContext& gctx{getGeoCtx(ctx)};
+        const Amg::Transform3D toPad{readOutEle->globalToLocalTrans(gctx, padLayerHash) *
+                                      readOutEle->localToGlobalTrans(gctx, stripLayHash)};
+        
+        const Amg::Vector2D padPos{(toPad*xAOD::toEigen(timedHit->localPosition())).block<2,1>(0,0)};
+        /// 
+        const MuonGMR4::PadDesign& design{readOutEle->padDesign(gasGap)};
+        
+        const auto [padEta, padPhi] = design.channelNumber(padPos);
+        if (padEta < 0 || padPhi < 0) {
+            ATH_MSG_VERBOSE("The wire "<<Amg::toString(padPos)<<" in "<<m_idHelperSvc->toStringGasGap(hitId)
+                        <<" is outside of the acceptance of "<<std::endl<<design);
+            return false;
+        }
+        bool isValid{false};
+        const Identifier padId = idHelper.padID(hitId, readOutEle->multilayer(),
+                                                gasGap, channelType::Pad, padEta, padPhi, isValid);
+
+
+        if (!isValid) {
+            ATH_MSG_WARNING("Failed to decuce a valid pad Identifier from "<<Amg::toString(padPos)
+                            <<" in "<<m_idHelperSvc->toStringGasGap(hitId));
+            return false;
+        }
+
+        outCollection.push_back(std::make_unique<sTgcDigit>(padId,
+                                                            associateBCIdTag(ctx, timedHit), 
+                                                            hitTime(timedHit), 666, false, false));
+    
+        ++m_acceptedHits[channelType::Pad];
+
+        return true;
+    }
+  
+
+}

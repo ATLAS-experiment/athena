@@ -148,9 +148,15 @@ def TgcPrepDataAllBCto3BCCfg(flags, name="TgcPrepDataAllTo3Replicator", **kwargs
 def StgcRdoToPrepDataToolCfg(flags, name="STGC_PrepDataProviderTool", **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("PrdCacheKey" , MuonPrdCacheNames.sTgcCache if flags.Muon.MuonTrigger else "")
-    kwargs.setdefault("xAODStripKey", "sTGCStrips" if flags.Muon.writexAODPRD else "")
-    kwargs.setdefault("xAODWireKey", "sTGCWires" if flags.Muon.writexAODPRD else "")
-    kwargs.setdefault("xAODPadKey", "sTGCPads" if flags.Muon.writexAODPRD else "")
+    kwargs.setdefault("UseR4DetMgr", flags.Muon.usePhaseIIGeoSetup)
+    if flags.Muon.writexAODPRD or flags.Muon.usePhaseIIGeoSetup:
+        kwargs.setdefault("xAODStripKey", "xAODsTgcStrips")
+        kwargs.setdefault("xAODWireKey", "xAODsTgcWires")
+        kwargs.setdefault("xAODPadKey", "xAODsTgcPads")
+        from xAODMuonMeasViewAlgs.ViewAlgsConfig import sTgcMeasViewAlgCfg
+        result.merge(sTgcMeasViewAlgCfg(flags))
+
+
     from MuonConfig.MuonRecToolsConfig import SimpleSTgcClusterBuilderToolCfg
     kwargs.setdefault("ClusterBuilderTool",result.popToolsAndMerge(SimpleSTgcClusterBuilderToolCfg(flags)))
     from MuonConfig.MuonCalibrationConfig import NSWCalibToolCfg
