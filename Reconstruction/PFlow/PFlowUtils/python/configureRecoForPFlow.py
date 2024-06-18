@@ -45,5 +45,28 @@ def configureRecoForPFlowCfg(cfgFlags):
     metCA.addEventAlgo(getMETMakerAlg('AntiKt4EMPFlow'))
     cfg.merge(metCA)
 
+    #This is needed to ensure the convertor is correctly configured for each LHC period
+    #Otherwise a default convertor is provided that is not correctly configured for e.g Run4
+    from TrkEventCnvTools.TrkEventCnvToolsConfig import TrkEventCnvSuperToolCfg
+    cfg.merge(TrkEventCnvSuperToolCfg(cfgFlags))
+
+    #Add metadata data to xAOD such that we can create physval.root from the output AOD
+    from AthenaConfiguration.Enums import MetadataCategory
+    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
+
+    cfg.merge(
+        SetupMetaDataForStreamCfg(
+            cfgFlags,
+            "AOD",
+            createMetadata=[
+                MetadataCategory.ByteStreamMetaData,
+                MetadataCategory.LumiBlockMetaData,
+                MetadataCategory.TruthMetaData,
+                MetadataCategory.IOVMetaData,
+            ],
+        )
+    )
+
+
     return cfg
 
