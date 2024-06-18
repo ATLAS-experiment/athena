@@ -127,7 +127,7 @@ if __name__ == '__main__':
     log.setLevel(INFO)
 
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    from AthenaConfiguration.TestDefaults import defaultTestFiles
+    from AthenaConfiguration.TestDefaults import defaultConditionsTags, defaultGeometryTags, defaultTestFiles
 
     flags = initConfigFlags()
     parser = flags.getArgumentParser()
@@ -135,7 +135,8 @@ if __name__ == '__main__':
     args, _ = parser.parse_known_args()
 
     flags.Exec.MaxEvents = 3
-    flags.GeoModel.AtlasVersion = 'ATLAS-R2-2015-04-00-00'
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2
+    flags.IOVDb.GlobalTag = defaultConditionsTags.RUN2_DATA
     flags.Tile.doFit = False
     flags.Tile.doOpt2 = False
     flags.Tile.RunType = TileRunType.PHY

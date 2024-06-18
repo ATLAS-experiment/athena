@@ -106,7 +106,7 @@ if __name__ == '__main__':
 
     # Set the Athena configuration flags
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    from AthenaConfiguration.TestDefaults import defaultTestFiles
+    from AthenaConfiguration.TestDefaults import defaultConditionsTags, defaultGeometryTags, defaultTestFiles
 
     flags = initConfigFlags()
     parser = flags.getArgumentParser()
@@ -116,9 +116,9 @@ if __name__ == '__main__':
 
     flags.Exec.MaxEvents = 3
     flags.Common.isOnline = True
-    flags.GeoModel.AtlasVersion = 'ATLAS-R2-2015-04-00-00'
-    flags.Input.Files = defaultTestFiles.RAW_RUN2
-    flags.IOVDb.GlobalTag = 'CONDBR2-BLKPA-2023-01'
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
+    flags.Input.Files = defaultTestFiles.RAW_RUN3
+    flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_DATA
 
     flags.Tile.doFit = True
     flags.Tile.useDCS = False

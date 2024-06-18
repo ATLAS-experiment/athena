@@ -126,7 +126,7 @@ def TilePulseForTileMuonReceiverOutputCfg(flags, **kwargs):
 if __name__ == "__main__":
 
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    from AthenaConfiguration.TestDefaults import defaultTestFiles
+    from AthenaConfiguration.TestDefaults import defaultConditionsTags, defaultTestFiles
     from AthenaCommon.Logging import log
     from AthenaCommon.Constants import DEBUG
 
@@ -136,7 +136,7 @@ if __name__ == "__main__":
     flags = initConfigFlags()
     flags.Input.Files = defaultTestFiles.HITS_RUN2
     flags.Output.RDOFileName = 'myRDO-TileMuonReceiver.pool.root'
-    flags.IOVDb.GlobalTag = 'OFLCOND-MC16-SDR-16'
+    flags.IOVDb.GlobalTag = defaultConditionsTags.RUN2_MC
     flags.Digitization.PileUp = False
     flags.Exec.MaxEvents = 3
 
