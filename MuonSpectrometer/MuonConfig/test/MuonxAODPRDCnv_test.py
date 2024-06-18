@@ -6,7 +6,15 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
 
-flags = initConfigFlags()    
+flags = initConfigFlags() 
+flags.Scheduler.ShowDataDeps = True
+flags.Scheduler.CheckDependencies = True
+flags.Scheduler.ShowDataFlow = True
+flags.Scheduler.ShowControlFlow = True
+flags.Concurrency.NumThreads  = 1
+flags.Concurrency.NumConcurrentEvents = 1
+flags.Exec.FPE= 500
+
 args = flags.fillFromArgs()
 flags.Muon.writexAODPRD = True # This is the flag that tells the convertors to produce xAOD PRDs
 flags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4149_r14700/RDO.33629020._000047.pool.root.1']

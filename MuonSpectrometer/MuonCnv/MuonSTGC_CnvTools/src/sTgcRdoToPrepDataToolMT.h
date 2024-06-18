@@ -21,6 +21,7 @@
 #include "xAODMuonPrepData/sTgcStripContainer.h"
 #include "xAODMuonPrepData/sTgcWireContainer.h"
 #include "xAODMuonPrepData/sTgcPadContainer.h"
+#include "MuonReadoutGeometryR4/MuonDetectorManager.h"
 
 namespace Muon 
 {
@@ -54,36 +55,26 @@ namespace Muon
       virtual void printInputRdo(const EventContext& ctx) const override;
       
     protected:
-      struct xAODContainers {
-        xAOD::sTgcStripContainer* strip {nullptr};
-        xAOD::sTgcWireContainer* wire {nullptr};
-        xAOD::sTgcPadContainer* pad {nullptr};
-        Muon::sTgcPrepDataContainer* prd{nullptr};
+      struct outputCache {
+        SG::WriteHandle<xAOD::sTgcStripContainer> strip{};
+        SG::WriteHandle<xAOD::sTgcWireContainer> wire{};
+        SG::WriteHandle<xAOD::sTgcPadContainer> pad{};
+        SG::WriteHandle<Muon::sTgcPrepDataContainer> prd{};
+        bool isValid{false};
       };
       
       StatusCode processCollection(const EventContext& ctx, 
-                                   xAODContainers& xAODcontainers,
+                                   outputCache& xAODcontainers,
                                    const STGC_RawDataCollection *rdoColl, 
                                    std::vector<IdentifierHash>& idWithDataVect) const;
             
-      virtual Muon::sTgcPrepDataContainer* setupSTGC_PrepDataContainer(const EventContext& ctx) const;
-      
-
-
-      /// Creates the xAOD PRD containers to be written
-      xAODContainers setupxAODPrepDataContainers(
-          SG::WriteHandle<xAOD::sTgcStripContainer>& stripOutputContainer,
-          SG::WriteHandle<xAOD::sTgcWireContainer>& wireOutputContainer,
-          SG::WriteHandle<xAOD::sTgcPadContainer>& padOutputContainer) const;
-
+      outputCache setupOutputContainers(const EventContext& ctx) const;
       const STGC_RawDataContainer* getRdoContainer(const EventContext& ctx) const;
 
       void processRDOContainer(const EventContext& ctx,
-                               xAODContainers& xAODcontainers,
+                               outputCache& xAODcontainers,
                                const std::vector<IdentifierHash>& idsToDecode,
                                std::vector<IdentifierHash>& idWithDataVect) const;
-      template<class T>
-      void setxAODCommonValues(T& xprd, const MuonGMR4::sTgcReadoutElement* re, uint8_t gasGap, uint16_t channelNumber, short int time, int charge) const;
 
       SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_muDetMgrKey {this, "DetectorManagerKey", "MuonDetectorManager", "Key of input MuonDetectorManager condition data"}; 
 
@@ -101,10 +92,15 @@ namespace Muon
       SG::UpdateHandleKey<sTgcPrepDataCollection_Cache> m_prdContainerCacheKey{this, "PrdCacheKey", "", "Optional external cache for the sTGC PRD container"};
 
       // xAOD output containers keys
-      bool m_outputxAOD{false};
-      SG::WriteHandleKey<xAOD::sTgcStripContainer>   m_xAODStripKey  {this, "xAODStripKey", "", "If empty, do not produce xAOD, otherwise this is the key of the output xAOD MDT PRD container"};
-      SG::WriteHandleKey<xAOD::sTgcPadContainer>   m_xAODPadKey  {this, "xAODPadKey", "", "If empty, do not produce xAOD, otherwise this is the key of the output xAOD MDT PRD container"};
-      SG::WriteHandleKey<xAOD::sTgcWireContainer>   m_xAODWireKey  {this, "xAODWireKey", "", "If empty, do not produce xAOD, otherwise this is the key of the output xAOD MDT PRD container"};
+      SG::WriteHandleKey<xAOD::sTgcStripContainer> m_xAODStripKey{this, "xAODStripKey", "", "If empty, do not produce xAOD, otherwise this is the key of the output xAOD MDT PRD container"};
+      SG::WriteHandleKey<xAOD::sTgcPadContainer>  m_xAODPadKey{this, "xAODPadKey", "", "If empty, do not produce xAOD, otherwise this is the key of the output xAOD MDT PRD container"};
+      SG::WriteHandleKey<xAOD::sTgcWireContainer> m_xAODWireKey{this, "xAODWireKey", "", "If empty, do not produce xAOD, otherwise this is the key of the output xAOD MDT PRD container"};
+
+      Gaudi::Property<bool> m_useNewGeo{this, "UseR4DetMgr", false,
+                                         "Switch between the legacy and the new geometry"};
+
+      const MuonGMR4::MuonDetectorManager* m_detMgrR4{nullptr};
+
 
    }; 
 } // end of namespace
