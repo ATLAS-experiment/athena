@@ -12,6 +12,7 @@
 
 #include "xAODJet/Jet.h"
 #include "xAODJet/JetContainer.h"
+#include "xAODJet/JetAuxContainer.h"
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODTracking/VertexContainer.h"
 #include "xAODEventInfo/EventInfo.h"
@@ -24,6 +25,7 @@
 
 #include "AsgDataHandles/WriteDecorHandle.h"
 #include "AsgDataHandles/ReadDecorHandle.h"
+#include "AsgDataHandles/ReadDecorHandleKey.h"
 
 #include <TFile.h>
 #include <TEnv.h>
@@ -61,6 +63,9 @@ class JSSTaggerBase :   public asg::AsgTool ,
 
     /// Object that stores the results for a jet
     asg::AcceptInfo m_acceptInfo;
+
+    // Wro
+    SG::ReadHandleKey<xAOD::JetContainer> m_jetContainer_key{this, "JetContainer", "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets", "SG key for input jet container"};
 
     /// WriteDecorHandle keys for tagging bools
     SG::WriteDecorHandleKey<xAOD::JetContainer> m_decTaggedKey{this, "TaggedName", "Tagged", "SG key for Tagged"};
@@ -233,6 +238,7 @@ class JSSTaggerBase :   public asg::AsgTool ,
     SG::WriteDecorHandleKey<xAOD::JetContainer> m_decEfficiencyKey{this, "efficiencyName", "efficiency", "SG key for efficiency"};
     SG::WriteDecorHandleKey<xAOD::JetContainer> m_decEffSFKey{this, "effSFName", "effSF", "SG key for effSF"};
     SG::WriteDecorHandleKey<xAOD::JetContainer> m_decSigeffSFKey{this, "sigeffSFName", "sigeffSF", "SG key for effSF"};
+
 
     /// Get configReader StatusCode
     StatusCode getConfigReader();
