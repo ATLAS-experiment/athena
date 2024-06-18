@@ -247,7 +247,7 @@ void test_makeVector (const std::string& name)
   vec1->push_back (makeT(1));
   vec1->push_back (makeT(2));
   vec1->push_back (makeT(3));
-  std::unique_ptr<SG::IAuxTypeVector> v1 = r.makeVectorFromData (auxid, vec1, false, true);
+  std::unique_ptr<SG::IAuxTypeVector> v1 = r.makeVectorFromData (auxid, vec1, nullptr, false, true);
   assert (v1->size() == 3);
   T* ptr1 = reinterpret_cast<T*> (v1->toPtr());
   assert (ptr1[0] == makeT(1));
@@ -258,7 +258,7 @@ void test_makeVector (const std::string& name)
   vec2->push_back (makeT(3));
   vec2->push_back (makeT(2));
   vec2->push_back (makeT(1));
-  std::unique_ptr<SG::IAuxTypeVector> v2 = r.makeVectorFromData (auxid, vec2, true, true);
+  std::unique_ptr<SG::IAuxTypeVector> v2 = r.makeVectorFromData (auxid, vec2, nullptr, true, true);
   assert (v2->size() == 3);
   T* ptr2 = reinterpret_cast<T*> (v2->toPtr());
   assert (ptr2[0] == makeT(3));

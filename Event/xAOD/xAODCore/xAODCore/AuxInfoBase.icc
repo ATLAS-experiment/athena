@@ -13,6 +13,7 @@
 
 // Local include(s):
 #include "xAODCore/tools/AuxPersInfo.h"
+#include "xAODCore/tools/AuxPersVector.h"
 #include "xAODCore/tools/AuxVariable.h"
 
 namespace xAOD {
@@ -21,10 +22,30 @@ namespace xAOD {
    AuxInfoBase::auxid_t
    AuxInfoBase::getAuxID( const std::string& name,
                           T& /*info*/,
-                          SG::AuxVarFlags flags ) {
+                          SG::AuxVarFlags flags,
+                          const SG::auxid_t linkedVariable ) {
 
       return SG::AuxTypeRegistry::instance().template getAuxID< T >( name, "",
-                                                                     flags );
+                                                                     flags,
+                                                                     linkedVariable );
+   }
+
+   template< typename T >
+   SG::IAuxTypeVector* makeVector( SG::auxid_t auxid, T& info, bool isLinked, SG::IAuxStore* store ) {
+      if( isLinked ) {
+         throw std::runtime_error( "Non-vector linked variable" );
+      }
+      return new AuxPersInfo< T >( auxid, info, store );
+   }
+
+   template< typename T >
+   SG::IAuxTypeVector* makeVector( SG::auxid_t auxid, std::vector<T>& info, bool isLinked, SG::IAuxStore* store ) {
+      if( isLinked ) {
+         return new AuxPersVector< T >( auxid, info, true, store );
+      }
+      else {
+         return new AuxPersInfo< std::vector<T> >( auxid, info, store );
+      }
    }
 
    /// The user is expected to use this function inside the constructor of
@@ -51,7 +72,8 @@ namespace xAOD {
       }
 
       // Register the variable:
-      m_vecs[ auxid ] = new AuxPersInfo< T >( auxid, info );
+      const SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
+      m_vecs[ auxid ] = makeVector( auxid, info, r.isLinked( auxid ), this );
 
       // Remember that we are now handling this variable:
       m_auxids.insert( auxid );

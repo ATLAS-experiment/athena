@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id: AuxInfoBase.cxx 793737 2017-01-24 20:11:10Z ssnyder $
 
 // System include(s):
 #include <iostream>
@@ -19,6 +17,7 @@
 #include "xAODCore/tools/IOStats.h"
 #include "xAODCore/tools/ReadStats.h"
 
+#include "CxxUtils/as_const_ptr.h"
 #include "CxxUtils/checker_macros.h"
 
 namespace xAOD {
@@ -205,6 +204,11 @@ namespace xAOD {
                auxid_set_t& auxids_nc ATLAS_THREAD_SAFE =
                  const_cast<auxid_set_t&> (m_auxids);
                auxids_nc.insert( auxid );
+               const SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
+               auxid_t linked_id = r.linkedVariable( auxid );
+               if (linked_id != SG::null_auxid) {
+                  auxids_nc.insert( linked_id );
+               }
             }
             return result;
          } else {
@@ -251,7 +255,12 @@ namespace xAOD {
          if( m_store ) {
            void* result = m_store->getDecoration( auxid, size, capacity );
            if( result ) {
-             m_auxids.insert( auxid );
+              m_auxids.insert( auxid );
+              const SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
+              auxid_t linked_id = r.linkedVariable( auxid );
+              if (linked_id != SG::null_auxid) {
+                 m_auxids.insert( linked_id );
+              }
            }
            return result;
          }
@@ -327,6 +336,40 @@ namespace xAOD {
        m_store->lockDecoration (auxid);
      }
    }
+
+   const SG::IAuxTypeVector* AuxInfoBase::linkedVector (SG::auxid_t auxid) const
+   {
+      const SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
+      auxid_t linked_id = r.linkedVariable( auxid );
+      if (linked_id != SG::null_auxid) {
+         guard_t guard( m_mutex );
+         if (linked_id < m_vecs.size() && m_vecs[ linked_id ]) {
+            return m_vecs[ linked_id ];
+         }
+         if (m_store) {
+            return CxxUtils::as_const_ptr(m_store)->linkedVector( auxid );
+         }
+      }
+      return nullptr;
+   }
+
+
+   SG::IAuxTypeVector* AuxInfoBase::linkedVector (SG::auxid_t auxid)
+   {
+      const SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
+      auxid_t linked_id = r.linkedVariable( auxid );
+      if (linked_id != SG::null_auxid) {
+         guard_t guard( m_mutex );
+         if (linked_id < m_vecs.size() && m_vecs[ linked_id ]) {
+            return m_vecs[ linked_id ];
+         }
+         if (m_store) {
+            return m_store->linkedVector( auxid );
+         }
+      }
+      return nullptr;
+   }
+
 
    size_t AuxInfoBase::size() const {
 

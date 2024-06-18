@@ -446,7 +446,8 @@ namespace xAOD {
       // Private method --- should hold lock before calling this.
 
       // Look up the name of the variable:
-      const std::string name = SG::AuxTypeRegistry::instance().getName( auxid );
+      const SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
+      const std::string name = r.getName( auxid );
 
       // Try to find the variable:
       typename std::map< std::string, std::vector< T > >::iterator itr =
@@ -464,6 +465,12 @@ namespace xAOD {
 
          if (m_locked && !forDecor)
            throw SG::ExcStoreLocked ("getData");
+
+         if (r.isLinked(auxid)) {
+             std::cerr << "ERROR xAOD::ByteStreamAuxContainer_v1 doesn't implement linked variables"
+                       << std::endl;
+           return nullptr;
+         }
 
          // Create the variable.
          itr = pers.insert (std::make_pair (name, std::vector<T>())).first;
@@ -485,7 +492,7 @@ namespace xAOD {
       }
 
       // Register the variable:
-      m_dynamicVecs[ auxid ] = new AuxPersVector< T >( auxid, var, false );
+      m_dynamicVecs[ auxid ] = new AuxPersVector< T >( auxid, var, false, nullptr );
 
       if (capacity > 0) {
         // Set it to the right size:

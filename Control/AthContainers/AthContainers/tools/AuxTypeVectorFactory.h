@@ -63,6 +63,9 @@ public:
    * @brief Create a vector object of this type from a data blob.
    * @param auxid ID for the variable being created.
    * @param data The vector object.
+   * @param linkedVector The interface for another variable linked to this one,
+   *                     or nullptr if there isn't one.
+   *                     (We do not take ownership.)
    * @param isPacked If true, @c data is a @c PackedContainer.
    * @param ownFlag If true, the newly-created IAuxTypeVector object
    *                will take ownership of @c data.
@@ -78,6 +81,7 @@ public:
   virtual
   std::unique_ptr<IAuxTypeVector> createFromData (SG::auxid_t auxid,
                                                   void* data,
+                                                  IAuxTypeVector* linkedVector,
                                                   bool isPacked,
                                                   bool ownFlag,
                                                   bool isLinked) const override;

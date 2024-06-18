@@ -32,7 +32,7 @@ namespace xAOD {
       typedef VEC& vector_type;
 
       /// Constructor
-      AuxPersVector( SG::auxid_t auxid, vector_type vec, bool isLinked )
+      AuxPersVector( SG::auxid_t auxid, vector_type vec, bool isLinked, SG::IAuxStore* /*store*/ )
         : SG::AuxTypeVectorHolder<T, VEC> (auxid, &vec, false, isLinked) {}
 
       virtual std::unique_ptr<SG::IAuxTypeVector> clone() const override {

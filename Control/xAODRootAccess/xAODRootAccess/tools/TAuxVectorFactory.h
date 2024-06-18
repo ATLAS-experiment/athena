@@ -48,7 +48,9 @@ namespace xAOD {
 
       /// Create a vector object of this type from a data blob
       virtual std::unique_ptr< SG::IAuxTypeVector >
-      createFromData( SG::auxid_t auxid, void* data, bool isPacked,
+      createFromData( SG::auxid_t auxid, void* data,
+                      SG::IAuxTypeVector* linkedVector,
+                      bool isPacked,
                       bool ownFlag,
                       bool isLinked ) const override;
 

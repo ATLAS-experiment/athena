@@ -186,8 +186,18 @@ AuxStoreInternal::getDecoration (auxid_t auxid, size_t size, size_t capacity)
   if (m_vecs[auxid] == 0) {
     m_vecs[auxid] = AuxTypeRegistry::instance().makeVector (auxid, size, capacity);
     addAuxID (auxid);
+    std::unique_ptr<IAuxTypeVector> linked = m_vecs[auxid]->linkedVector();
+    auxid_t linked_id = null_auxid;
+    if (linked) {
+      linked_id = linked->auxid();
+      m_vecs[linked_id] = std::move (linked);
+      addAuxID (linked_id);
+    }
     if (m_locked) {
       m_decorations.insert (auxid);
+      if (linked_id != null_auxid) {
+        m_decorations.insert (linked_id);
+      }
     }
   }
   if (m_locked && !m_decorations.test (auxid)) {
@@ -641,8 +651,15 @@ void* AuxStoreInternal::getDataInternal_noLock (auxid_t auxid,
   if (m_vecs[auxid] == 0) {
     if (m_locked && !no_lock_check)
       throw ExcStoreLocked (auxid);
-    m_vecs[auxid] = AuxTypeRegistry::instance().makeVector (auxid, size, capacity);
+    const AuxTypeRegistry& r = AuxTypeRegistry::instance();
+    m_vecs[auxid] = r.makeVector (auxid, size, capacity);
     addAuxID (auxid);
+    std::unique_ptr<IAuxTypeVector> linked = m_vecs[auxid]->linkedVector();
+    if (linked) {
+      auxid_t linked_id = linked->auxid();
+      m_vecs[linked_id] = std::move (linked);
+      addAuxID (linked_id);
+    }
   }
   else {
     // Make sure the vector has at least the requested size.
@@ -696,6 +713,46 @@ void AuxStoreInternal::lockDecoration (SG::auxid_t auxid)
 {
   guard_t guard (m_mutex);
   m_decorations.reset (auxid);
+}
+
+
+/**
+ * @brief Return interface for a linked variable.
+ * @param auxid The ID of the parent variable.
+ *
+ * If @c auxid has a linked variable, then return the @c IAuxTypeVector
+ * describing it.  Otherwise, return @c nullptr.
+ * May return @c nullptr unconditionally if this store does not
+ * support linked variables.
+ */
+IAuxTypeVector* AuxStoreInternal::linkedVector (SG::auxid_t auxid)
+{
+  const AuxTypeRegistry& r = AuxTypeRegistry::instance();
+  auxid_t linked_id = r.linkedVariable (auxid);
+  guard_t guard (m_mutex);
+  if (linked_id < m_vecs.size())
+    return m_vecs[linked_id].get();
+  return nullptr;
+}
+
+
+/**
+ * @brief Return interface for a linked variable.
+ * @param auxid The ID of the parent variable.
+ *
+ * If @c auxid has a linked variable, then return the @c IAuxTypeVector
+ * describing it.  Otherwise, return @c nullptr.
+ * May return @c nullptr unconditionally if this store does not
+ * support linked variables.
+ */
+const IAuxTypeVector* AuxStoreInternal::linkedVector (SG::auxid_t auxid) const
+{
+  const AuxTypeRegistry& r = AuxTypeRegistry::instance();
+  auxid_t linked_id = r.linkedVariable (auxid);
+  guard_t guard (m_mutex);
+  if (linked_id < m_vecs.size())
+    return m_vecs[linked_id].get();
+  return nullptr;
 }
 
 

@@ -132,7 +132,7 @@ void test_vector()
   vec3->push_back (makeT(3));
   vec3->push_back (makeT(2));
   vec3->push_back (makeT(1));
-  std::unique_ptr<SG::IAuxTypeVector> v3 = fac.createFromData (1, vec3, false, true, false);
+  std::unique_ptr<SG::IAuxTypeVector> v3 = fac.createFromData (1, vec3, nullptr, false, true, false);
   assert (v3->auxid() == 1);
   assert (v3->size() == 3);
   assert (!v3->isLinked());
@@ -142,7 +142,7 @@ void test_vector()
   assert (ptr3[2] == makeT(1));
 
   vector_type* vec4 = new vector_type;
-  std::unique_ptr<SG::IAuxTypeVector> v4 = fac.createFromData (1, vec4, false, true, true);
+  std::unique_ptr<SG::IAuxTypeVector> v4 = fac.createFromData (1, vec4, nullptr, false, true, true);
   assert (v4->auxid() == 1);
   assert (v4->isLinked());
 
@@ -195,7 +195,7 @@ void test_vector2()
   vec4->push_back (makeT(3));
   vec4->push_back (makeT(2));
   vec4->push_back (makeT(1));
-  std::unique_ptr<SG::IAuxTypeVector> v4 = fac.createFromData (1, vec4, true, true, false);
+  std::unique_ptr<SG::IAuxTypeVector> v4 = fac.createFromData (1, vec4, nullptr, true, true, false);
   assert (v4->auxid() == 1);
   assert (v4->size() == 4);
   T* ptr4 = reinterpret_cast<T*> (v4->toPtr());

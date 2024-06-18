@@ -457,7 +457,7 @@ StatusCode TriggerEDMDeserialiserAlg::deserialiseDynAux( const std::string& tran
       id = SG::getDynamicAuxID ( *elt_tinfo, decorationName, elementTypeName, transientTypeName, false );
   }        
   ATH_MSG_DEBUG( "Unstreaming decoration \"" << decorationName << "\" of type " << transientTypeName  << " aux ID " << id << " class " << persistentTypeName << " packed " << isPacked  );  
-  std::unique_ptr<SG::IAuxTypeVector> vec( registry.makeVectorFromData (id, obj, isPacked, true) ); 
+  std::unique_ptr<SG::IAuxTypeVector> vec( registry.makeVectorFromData (id, obj, nullptr, isPacked, true) ); 
   ATH_CHECK( vec.get() != nullptr );
   ATH_MSG_DEBUG("Size for \"" << decorationName << "\" " << vec->size() << " interface " << interfaceContainer->size_v() );
   ATH_CHECK( vec->size() == interfaceContainer->size_v() );

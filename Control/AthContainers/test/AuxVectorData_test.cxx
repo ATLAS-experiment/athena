@@ -45,6 +45,14 @@ public:
 } // namespace SG
 
 
+class AuxStoreInternalTest
+  : public SG::AuxStoreInternal
+{
+public:
+  using SG::AuxStoreInternal::addVector;
+};
+
+
 
 using SG::AuxVectorData;
 using SG::AuxVectorData_test;
@@ -471,6 +479,35 @@ void test_setcache()
   }
 }
 
+
+void test_linked()
+{
+  std::cout << "test_linked\n";
+
+  SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
+  SG::auxid_t foo_links_id = r.getAuxID<int>
+    ("foo_linked", "", SG::AuxVarFlags::Linked);
+  SG::auxid_t foo_id = r.getAuxID<float>
+    ("foo", "", SG::AuxVarFlags::None, foo_links_id);
+
+  {
+    AuxVectorData_test b1;
+    AuxStoreInternalTest store;
+    b1.setStore (&store);
+
+    std::unique_ptr<SG::IAuxTypeVector> linkedVec = r.makeVector (foo_links_id, 0, 0);
+    std::unique_ptr<SG::IAuxTypeVector> pvup = r.makeVector (foo_id, 2, 2);
+    std::unique_ptr<SG::IAuxTypeVector> dvup = r.makeVector (foo_links_id, 1, 1);
+    SG::IAuxTypeVector* pv = pvup.get();
+    SG::IAuxTypeVector* dv = dvup.get();
+    assert (pv->size() == 2);
+    assert (dv->size() == 1);
+    store.addVector (std::move (pvup), false);
+    store.addVector (std::move (dvup), false);
+  }
+}
+
+
 void test_threading()
 {
   std::cout << "test_threading\n";
@@ -507,6 +544,7 @@ int main()
   test_setoption();
   test_storelink();
   test_setcache();
+  test_linked();
   test_threading();
   return 0;
 }

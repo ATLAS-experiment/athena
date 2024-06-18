@@ -198,6 +198,21 @@ public:
 
 
   /**
+   * @brief Return @c IAuxTypeVector of a linked variable, if there is one.
+   *
+   * If the variable represented by this vector has a linked variable,
+   * then return its @c IAuxTypeVector.  Otherwise, return nullptr.
+   * Beware of potential threading issues: the returned object is not locked,
+   * so it should not be modified in contexts where the parent container
+   * cannot be modified.
+   *
+   * This returns a @c unique_ptr, so it can generally be called only once
+   * on a given instance.  After that, it will return nullptr.
+   */
+  virtual std::unique_ptr<IAuxTypeVector> linkedVector() { return nullptr; }
+
+
+  /**
    * @brief Return true if this variable is linked from another one.
    *
    * This is inlined here rather than being a virtual function because

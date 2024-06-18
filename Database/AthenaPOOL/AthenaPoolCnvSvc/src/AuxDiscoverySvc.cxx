@@ -76,7 +76,7 @@ bool AuxDiscoverySvc::setData(SG::auxid_t auxid, void* data, const RootType& typ
       }
    } else {
       // Move the data to the dynamic store.
-      std::unique_ptr<SG::IAuxTypeVector> vec(registry.makeVectorFromData(auxid, data, false, true));
+      std::unique_ptr<SG::IAuxTypeVector> vec(registry.makeVectorFromData(auxid, data, nullptr, false, true));
       m_storeInt->addVector(std::move(vec), false);
    }
    return true;

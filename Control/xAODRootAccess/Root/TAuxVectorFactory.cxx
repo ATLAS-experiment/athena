@@ -69,7 +69,9 @@ namespace xAOD {
 
    std::unique_ptr< SG::IAuxTypeVector >
    TAuxVectorFactory::createFromData( SG::auxid_t /*auxid*/,
-                                      void* /*data*/, bool /*isPacked*/,
+                                      void* /*data*/,
+                                      SG::IAuxTypeVector* /*linkedVector*/,
+                                      bool /*isPacked*/,
                                       bool /*ownFlag*/,
                                       bool /*isLinked*/ ) const {
 

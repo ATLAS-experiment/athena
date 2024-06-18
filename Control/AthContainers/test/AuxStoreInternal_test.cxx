@@ -461,6 +461,29 @@ void test5()
 }
 
 
+// Test handling of linked variables.
+void test_linked()
+{
+  std::cout << "test_linked\n";
+
+  SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
+  SG::auxid_t auxid1 = r.getAuxID<int> ("ltest1", "",
+                                        SG::AuxVarFlags::Linked);
+  SG::auxid_t auxid2 = r.getAuxID<float> ("ltest2", "",
+                                          SG::AuxVarFlags::None,
+                                          auxid1);
+  SG::AuxStoreInternal s;
+  int* vp1 = reinterpret_cast<int*> (s.getData (auxid1, 10, 10));
+  [[maybe_unused]]
+  float* vp2 = reinterpret_cast<float*> (s.getData (auxid2, 3, 3));
+
+  assert (s.linkedVector (auxid2)->isLinked());
+  assert (s.linkedVector (auxid2)->auxid() == auxid1);
+  assert (s.linkedVector (auxid2)->toPtr() == vp1);
+
+}
+
+
 class ThreadingTest
 {
 public:
@@ -568,6 +591,7 @@ int main()
   test3();
   test4();
   test5();
+  test_linked();
   test_threading();
   return 0;
 }

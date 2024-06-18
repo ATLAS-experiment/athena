@@ -23,6 +23,7 @@
 #include "AthContainers/AuxStoreInternal.h"
 #include "AthContainers/tools/AuxVectorInterface.h"
 #include "AthContainers/exceptions.h"
+#include "CxxUtils/as_const_ptr.h"
 #include "CxxUtils/checker_macros.h"
 #include "xAODCore/tools/IOStats.h"
 #include "xAODCore/tools/ReadStats.h"
@@ -483,6 +484,32 @@ namespace xAOD {
 
       // Apparently the store is empty:
       return 0;
+   }
+
+   const SG::IAuxTypeVector* TAuxStore::linkedVector( SG::auxid_t auxid ) const {
+      const SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
+      auxid_t linked_id = r.linkedVariable( auxid );
+      guard_t guard( m_mutex1 );
+      if ( linked_id < m_vecs.size() ) {
+         return m_vecs[ linked_id ];
+      }
+      if ( m_transientStore ) {
+         return CxxUtils::as_const_ptr(m_transientStore)->linkedVector( auxid );
+      }
+      return nullptr;
+   }
+
+   SG::IAuxTypeVector* TAuxStore::linkedVector( SG::auxid_t auxid ) {
+      const SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
+      auxid_t linked_id = r.linkedVariable( auxid );
+      guard_t guard( m_mutex1 );
+      if ( linked_id < m_vecs.size() ) {
+         return m_vecs[ linked_id ];
+      }
+      if ( m_transientStore ) {
+         return m_transientStore->linkedVector( auxid );
+      }
+      return nullptr;
    }
 
    void* TAuxStore::getData( auxid_t auxid, size_t size,
