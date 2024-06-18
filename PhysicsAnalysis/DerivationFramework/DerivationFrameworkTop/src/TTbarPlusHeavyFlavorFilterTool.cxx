@@ -63,13 +63,13 @@ int TTbarPlusHeavyFlavorFilterTool::filterFlag() const{
       // nullptr check is supposed to catch these truth particles,
       // unfortunately however, there's no way to check whether this truth
       // particle would have had an impact on what we do further down.
-      if (not part){
+      if ( !part){
           // We could possibly also use break since the thinned truth particles
           // in principle should have no simulation particles.
           continue;
       }
 
-      if(HepMC::is_simulation_particle(part)) break;
+      if (HepMC::is_simulation_particle(part)) break;
 
       bool isbquark=false;
       bool iscquark=false;
@@ -81,45 +81,44 @@ int TTbarPlusHeavyFlavorFilterTool::filterFlag() const{
 
       //// don't loose time checking all if one found
       if(pdgid == 5 ){
-	isbquark=true;
+        isbquark=true;
       }
       else if(pdgid == 4 ){
-	iscquark=true;
+        iscquark=true;
       }
       else if ( MC::isBottomHadron(part) && !HepMC::is_simulation_particle(part)){
-	isbhadron=true;
+        isbhadron=true;
       }
       else if ( MC::isCharmHadron(part) && !HepMC::is_simulation_particle(part)){
-	ischadron=true;
+        ischadron=true;
       }
-      else{
-	continue;
+      else {
+        continue;
       }
 
       if( (isbquark || isbhadron) && !passBSelection(part) ) continue;
       if( (iscquark || ischadron) && !passCSelection(part) ) continue;
 
       if(isbhadron || ischadron){
-	if(!isInitialHadron(part) && !m_useFinalStateHadrons) continue;
-	if(!isFinalHadron(part) && m_useFinalStateHadrons) continue;
+        if(!isInitialHadron(part) && !m_useFinalStateHadrons) continue;
+        if(!isFinalHadron(part) && m_useFinalStateHadrons) continue;
       }
 
       if(m_excludeBFromTop && isbquark){
-	bool islooping = isLooping(part);
-	if(isDirectlyFromTop(part, islooping))++nBtop;
-	if(isDirectlyFromWTop(part, islooping))++nBtop;
+        bool islooping = isLooping(part);
+        if (isDirectlyFromTop(part)) ++nBtop;
+        if (isDirectlyFromWTop(part, islooping)) ++nBtop;
       }
       if(m_excludeCFromTop && iscquark){
-	bool islooping = isLooping(part);
-	if(isDirectlyFromTop(part, islooping))++nCtop;
-	if(isDirectlyFromWTop(part, islooping))++nCtop;
+        bool islooping = isLooping(part);
+        if(isDirectlyFromTop(part))++nCtop;
+        if(isDirectlyFromWTop(part, islooping))++nCtop;
       }
 
       bool ischadronfromb = isCHadronFromB(part);
 
       if(isbhadron) ++nB;
       if(ischadron && !ischadronfromb) ++nC;
-
 
     } /// loop on particles
 
@@ -160,8 +159,8 @@ bool TTbarPlusHeavyFlavorFilterTool::passBSelection(const xAOD::TruthParticle* p
   double pt = part->pt();
   double eta = fabs(part->eta());
 
-  if(pt<m_bPtMinCut) return false;
-  if(eta>m_bEtaMaxCut) return false;
+  if(pt <m_bPtMinCut) return false;
+  if(eta > m_bEtaMaxCut) return false;
 
   return true;
 
@@ -171,22 +170,20 @@ bool TTbarPlusHeavyFlavorFilterTool::passCSelection(const xAOD::TruthParticle* p
 
   double pt = part->pt();
   double eta = fabs(part->eta());
-
-  if(pt<m_cPtMinCut) return false;
-  if(eta>m_cEtaMaxCut) return false;
-
+  if (pt < m_cPtMinCut) return false;
+  if (eta > m_cEtaMaxCut) return false;
   return true;
 }
 
 bool TTbarPlusHeavyFlavorFilterTool::isInitialHadron(const xAOD::TruthParticle* part) const{
 
-  int type = std::abs(MC::leadingQuark(part));
+  int qtype = std::abs(MC::leadingQuark(part));
   for(unsigned int i=0; i<part->nParents(); ++i){
     const xAOD::TruthParticle* parent = part->parent(i);
-      if( HepMC::barcode(part) < HepMC::barcode(parent) ) continue; /// protection for sherpa // FIXME barcode-based
+      if (HepMC::uniqueID(part) == HepMC::uniqueID(parent) ) continue; /// protection for sherpa 
       int mothertype = std::abs(MC::leadingQuark(parent));
-      if( mothertype == type ){
-	return false;
+      if (mothertype == qtype ){
+        return false;
       }
     }
 
@@ -194,121 +191,98 @@ bool TTbarPlusHeavyFlavorFilterTool::isInitialHadron(const xAOD::TruthParticle* 
 }
 
 
-bool TTbarPlusHeavyFlavorFilterTool::isFinalHadron(const xAOD::TruthParticle* part) const{
+bool TTbarPlusHeavyFlavorFilterTool::isFinalHadron(const xAOD::TruthParticle* part) const {
 
-  int type = std::abs(MC::leadingQuark(part));
+  int qtype = std::abs(MC::leadingQuark(part));
   for(unsigned j = 0; j < part->nChildren(); j++){
     const xAOD::TruthParticle* child = part->child(j);
-    if( HepMC::barcode(part) > HepMC::barcode(child) ) continue; /// protection for sherpa // FIXME barcode-based
+    if (HepMC::uniqueID(part) == HepMC::uniqueID(child) ) continue; /// protection for sherpa
     int childtype = std::abs(MC::leadingQuark(child));
-    if( childtype == type ){
+    if (childtype == qtype ){
       return false;
     }
   }
-
   return true;
-
 }
 
-bool TTbarPlusHeavyFlavorFilterTool::isQuarkFromHadron(const xAOD::TruthParticle* part) const{
+bool TTbarPlusHeavyFlavorFilterTool::isQuarkFromHadron(const xAOD::TruthParticle* part) const {
 
   for(unsigned int i=0; i<part->nParents(); ++i){
     const xAOD::TruthParticle* parent = part->parent(i);
-    if( HepMC::barcode(part) < HepMC::barcode(parent) ) continue; /// protection for sherpa // FIXME barcode-based
+    if (HepMC::uniqueID(part) == HepMC::uniqueID(parent) ) continue; /// protection for sherpa
     int mothertype = std::abs(MC::leadingQuark(parent));
-    if( 4 == mothertype || 5 == mothertype ){
+    if (4 == mothertype || 5 == mothertype ){
       return true;
     }
-    if(isQuarkFromHadron(parent))return true;
+    if (isQuarkFromHadron(parent)) return true;
   }
-
   return false;
-
 }
 
-bool TTbarPlusHeavyFlavorFilterTool::isCHadronFromB(const xAOD::TruthParticle* part) const{
+bool TTbarPlusHeavyFlavorFilterTool::isCHadronFromB(const xAOD::TruthParticle* part) const {
 
   if(!MC::isCharmHadron(part)||HepMC::is_simulation_particle(part)) return false;
 
   for(unsigned int i=0; i<part->nParents(); ++i){
     const xAOD::TruthParticle* parent = part->parent(i);
-    if( HepMC::barcode(part) < HepMC::barcode(parent) ) continue; /// protection for sherpa // FIXME barcode-based
-    if( MC::isBottomHadron(parent)&&!HepMC::is_simulation_particle(parent) ){
+    if (HepMC::uniqueID(part) == HepMC::uniqueID(parent) ) continue; /// protection for sherpa
+    if (MC::isBottomHadron(parent)&&!HepMC::is_simulation_particle(parent) ){
       return true;
     }
-    if(MC::isCharmHadron(parent)&&!HepMC::is_simulation_particle(parent)){
-      if(isCHadronFromB(parent))return true;
+    if (MC::isCharmHadron(parent)&&!HepMC::is_simulation_particle(parent)){
+      if(isCHadronFromB(parent)) return true;
     }
   }
 
   return false;
 }
 
-bool TTbarPlusHeavyFlavorFilterTool::isLooping(const xAOD::TruthParticle* part, std::set<const xAOD::TruthParticle*> init_part) const{
-
-  if(!part->nParents()) return false;
-
+bool TTbarPlusHeavyFlavorFilterTool::isLooping(const xAOD::TruthParticle* part, std::set<const xAOD::TruthParticle*> init_part) const {
   init_part.insert(part);
-
   for(unsigned int i=0; i<part->nParents(); ++i){
     const xAOD::TruthParticle* parent = part->parent(i);
-    if( init_part.find(parent) != init_part.end() ) return true;
-    if( isLooping(parent, init_part) ) return true;
+    if (init_part.find(parent) != init_part.end()) return true;
+    if (isLooping(parent, init_part)) return true;
   }
-
   return false;
-
 }
 
-const xAOD::TruthParticle*  TTbarPlusHeavyFlavorFilterTool::findInitial(const xAOD::TruthParticle* part, bool looping) const{
-
-
-  if(!part->nParents()) return part;
+const xAOD::TruthParticle*  TTbarPlusHeavyFlavorFilterTool::findInitial(const xAOD::TruthParticle* part, bool looping) const {
 
   for(unsigned int i=0; i<part->nParents(); ++i){
     const xAOD::TruthParticle* parent = part->parent(i);
-    if( HepMC::barcode(part) < HepMC::barcode(parent) &&  looping) continue; /// protection for sherpa // FIXME barcode-based
-    if( part->pdgId() == parent->pdgId() ){
+    if (HepMC::uniqueID(part) == HepMC::uniqueID(parent)) continue; /// protection for sherpa
+    if (part->pdgId() == parent->pdgId() ){
       return findInitial(parent, looping);
     }
   }
-
   return part;
-
 }
 
 bool TTbarPlusHeavyFlavorFilterTool::isFromTop(const xAOD::TruthParticle* part, bool looping) const{
-
   const xAOD::TruthParticle* initpart = findInitial(part, looping);
-  return isDirectlyFromTop(initpart, looping);
-
+  return isDirectlyFromTop(initpart);
 }
 
-bool TTbarPlusHeavyFlavorFilterTool::isDirectlyFromTop(const xAOD::TruthParticle* part, bool looping) const{
-
-  if(!part->nParents()) return false;
+bool TTbarPlusHeavyFlavorFilterTool::isDirectlyFromTop(const xAOD::TruthParticle* part) const{
 
   for(unsigned int i=0; i<part->nParents(); ++i){
     const xAOD::TruthParticle* parent = part->parent(i);
-    if( HepMC::barcode(part) < HepMC::barcode(parent) &&  looping ) continue; /// protection for sherpa // FIXME barcode-based
-    if( abs( parent->pdgId() ) == 6 ) return true;
+    if (HepMC::uniqueID(part) == HepMC::uniqueID(parent) ) continue; /// protection for sherpa
+    if (std::abs( parent->pdgId() ) == 6 ) return true;
   }
-
   return false;
 }
 
 bool TTbarPlusHeavyFlavorFilterTool::isDirectlyFromWTop(const xAOD::TruthParticle * part, bool looping) const{
 
-  if(!part->nParents()) return false;
-
   for(unsigned int i=0; i<part->nParents(); ++i){
     const xAOD::TruthParticle* parent = part->parent(i);
-    if( HepMC::barcode(part) < HepMC::barcode(parent) &&  looping ) continue; /// protection for sherpa // FIXME barcode-based
-    if( MC::isW(parent) ){
-      if( isFromTop(parent, looping) ) return true;
+    if (HepMC::uniqueID(part) == HepMC::uniqueID(parent)) continue; /// protection for sherpa
+    if (MC::isW(parent) ){
+      if (isFromTop(parent, looping) ) return true;
     }
   }
-
   return false;
 }
 

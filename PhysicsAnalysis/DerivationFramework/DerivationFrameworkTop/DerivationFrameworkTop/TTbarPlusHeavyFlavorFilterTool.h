@@ -72,7 +72,7 @@ private:
   const xAOD::TruthParticle* findInitial(const xAOD::TruthParticle* part, bool looping) const;
 
   bool isFromTop(const xAOD::TruthParticle* part, bool looping) const;
-  bool isDirectlyFromTop(const xAOD::TruthParticle* part, bool looping) const;
+  bool isDirectlyFromTop(const xAOD::TruthParticle* part) const;
   bool isDirectlyFromWTop(const xAOD::TruthParticle* part, bool looping) const;
 
 };

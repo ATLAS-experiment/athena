@@ -495,29 +495,17 @@ StatusCode MergeMcEventCollTool::processUnfilteredEvent(const McEventCollection 
 }
 
 bool MergeMcEventCollTool::isInitialCollisionVertex(const HepMC::ConstGenVertexPtr&  pCurrentVertex) const {
-//AV: The claims below about this code corectness for the Pythia (which one?) minbias 
-//    event could be outdated as of 2021, e.g. the comparison of barcodes could be incorrect 
+//AV: The olde version was too generator specific. 
 #ifdef HEPMC3
-for (const auto& pCurrentVertexParticle: pCurrentVertex->particles_in())
-      {  
-         if (4==pCurrentVertexParticle->status()) return true;
-      }
+  for (const auto& pCurrentVertexParticle: pCurrentVertex->particles_in()) {
 #else
-  HepMC::GenVertex::particles_in_const_iterator currentVertexParticleIter(pCurrentVertex->particles_in_const_begin());
-  const HepMC::GenVertex::particles_in_const_iterator endOfListOfParticlesFromCurrentVertex(pCurrentVertex->particles_in_const_end());
-  while(currentVertexParticleIter != endOfListOfParticlesFromCurrentVertex) {
-    const HepMC::GenParticlePtr  pCurrentVertexParticle(*currentVertexParticleIter);
-    // FIXME: Nasty kludge will only work for Pythia minbias currently
-    // Eventually just look for beam particles with status 4, but this
-    // requires an update to the HepMC version used by ATLAS.
-    if ( (4==pCurrentVertexParticle->status()) ||
-         (2212==pCurrentVertexParticle->pdg_id()
-          && (1==HepMC::barcode(pCurrentVertexParticle) || 2==HepMC::barcode(pCurrentVertexParticle)) ) ) { // FIXME barcode-based
-      return true;
-    }
-    ++currentVertexParticleIter;
-  }
+  auto currentVertexParticleIter = pCurrentVertex->particles_in_const_begin();
+  auto  endOfListOfParticlesFromCurrentVertex = pCurrentVertex->particles_in_const_end();
+  for( ;currentVertexParticleIter != endOfListOfParticlesFromCurrentVertex; ++currentVertexParticleIter ) {
+    auto pCurrentVertexParticle = *pCurrentVertexParticleIter;
 #endif
+    if (MC::isBeam(pCurrentVertexParticle)) return true;
+  }
   return false;
 }
 
