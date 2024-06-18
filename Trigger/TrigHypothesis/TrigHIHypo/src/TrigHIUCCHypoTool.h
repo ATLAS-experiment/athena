@@ -27,8 +27,8 @@ public:
   virtual StatusCode initialize() override { return StatusCode::SUCCESS; }
   virtual StatusCode finalize() override  { return StatusCode::SUCCESS; }
   
-  virtual StatusCode decide(const xAOD::HIEventShapeContainer*, bool&) const = 0;
-  virtual const HLT::Identifier& getId() const = 0;
+  virtual StatusCode decide(const xAOD::HIEventShapeContainer*, bool&) const override;
+  virtual const HLT::Identifier& getId() const override;
 
 private:
   HLT::Identifier m_decisionId;
