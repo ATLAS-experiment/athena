@@ -104,12 +104,11 @@ def AthenaHiveEventLoopMgrCfg(flags):
 
 def AthenaMpEventLoopMgrCfg(flags):
     cfg = ComponentAccumulator()
-    if flags.Common.isOverlay:
-        if not flags.Overlay.DataOverlay:
-            elmgr = CompFactory.AthenaEventLoopMgr(EventPrintoutInterval = flags.Exec.EventPrintoutInterval)
-            elmgr.RequireInputAttributeList = True
-            elmgr.UseSecondaryEventNumber = True
-            cfg.addService( elmgr )
+    if flags.Common.isOverlay and not flags.Overlay.DataOverlay:
+        elmgr = CompFactory.AthenaEventLoopMgr(EventPrintoutInterval = flags.Exec.EventPrintoutInterval)
+        elmgr.RequireInputAttributeList = True
+        elmgr.UseSecondaryEventNumber = True
+        cfg.addService( elmgr )
 
     from AthenaMP.AthenaMPConfig import AthenaMPCfg
     mploop = AthenaMPCfg(flags)
@@ -135,6 +134,10 @@ def AthenaMtesEventLoopMgrCfg(flags, mtEs=False, channel=''):
         SchedulerSvc = scheduler.getName(),
         EventRangeChannel = channel,
         EventPrintoutInterval = flags.Exec.EventPrintoutInterval)
+
+    if flags.Common.isOverlay and not flags.Overlay.DataOverlay:
+        elmgr.RequireInputAttributeList = True
+        elmgr.UseSecondaryEventNumber = True
 
     if mtEs:
         from AthenaServices.OutputStreamSequencerSvcConfig import OutputStreamSequencerSvcCfg

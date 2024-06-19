@@ -30,6 +30,7 @@ print()
 print("Overlay: {}".format("MC+data" if args.data else "MC+MC"))
 print(f"Run: {args.run}")
 print(f"Number of threads: {args.threads}")
+print(f"Number of processes: {args.processes}")
 if not args.detectors:
     print("Running complete detector")
 else:
