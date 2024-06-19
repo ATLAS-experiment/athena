@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTrackMonitoring/RecoMuonPlots.h"
@@ -7,6 +7,7 @@
 
 #include "xAODMuon/MuonContainer.h"
 #include "xAODTracking/TrackingPrimitives.h" //for MuonSummaryType enum
+#include "AthContainers/ConstAccessor.h"
 
 #include <TH2.h>
 #include <vector>
@@ -123,7 +124,9 @@ void RecoMuonPlots::fill(const xAOD::Muon& mu, xAOD::Muon::Quality my_quality){
   const xAOD::TrackParticle* primaryTrk = mu.trackParticle(xAOD::Muon::Primary);
   const xAOD::TrackParticle* inDetTrk = mu.trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
   int correctEnum = (int) xAOD::Muon::MuonSpectrometerTrackParticle;
-  if (mu.isAvailable< ElementLink<xAOD::TrackParticleContainer> >("extrapolatedMuonSpectrometerTrackParticleLink") && (mu.auxdata< ElementLink<xAOD::TrackParticleContainer> >("extrapolatedMuonSpectrometerTrackParticleLink")).isValid()) correctEnum+=2; //check correct numbering in Muon.h
+  static const SG::ConstAccessor< ElementLink<xAOD::TrackParticleContainer> >
+    extrapMSTPLinkAcc("extrapolatedMuonSpectrometerTrackParticleLink");
+  if (extrapMSTPLinkAcc.isAvailable(mu) && extrapMSTPLinkAcc(mu).isValid()) correctEnum+=2; //check correct numbering in Muon.h
   const xAOD::TrackParticle* msExtrapTrk = mu.trackParticle((xAOD::Muon::TrackParticleType) correctEnum);
 
   //fill the ndof and chi2 as eta phi map; to calculate efficiencies in post processing
