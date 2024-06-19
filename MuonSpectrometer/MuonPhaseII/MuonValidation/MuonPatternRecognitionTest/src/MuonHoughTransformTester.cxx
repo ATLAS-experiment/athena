@@ -5,6 +5,9 @@
 #include "MuonHoughTransformTester.h"
 #include "GaudiKernel/SystemOfUnits.h"
 #include "MuonReadoutGeometryR4/MuonChamber.h"
+#include "MuonPatternHelpers/SegmentFitHelperFunctions.h"
+#include "MuonPatternEvent/MuonHoughDefs.h"
+#include "MuonPatternHelpers/HoughHelperFunctions.h"
 #include "StoreGate/ReadCondHandle.h"
 #include "GeoModelHelpers/throwExcept.h"
 #include "TCanvas.h"
@@ -30,6 +33,7 @@ namespace MuonValR4 {
         ATH_CHECK(m_inSimHitKeys.initialize());
         ATH_CHECK(m_inHoughMaximaKey.initialize());
         ATH_CHECK(m_inHoughSegmentSeedKey.initialize());
+        ATH_CHECK(m_inSegmentKey.initialize());
         ATH_CHECK(m_spacePointKey.initialize());
         ATH_CHECK(m_tree.init(this));
         ATH_CHECK(m_idHelperSvc.retrieve());
@@ -75,6 +79,9 @@ namespace MuonValR4 {
         
         SG::ReadHandle<MuonR4::StationHoughSegmentSeedContainer> readSegmentSeeds(m_inHoughSegmentSeedKey, ctx);
         ATH_CHECK(readSegmentSeeds.isPresent());        
+        
+        SG::ReadHandle<MuonR4::MuonSegmentContainer> readMuonSegments(m_inSegmentKey, ctx);
+        ATH_CHECK(readMuonSegments.isPresent());        
 
         ATH_MSG_DEBUG("Succesfully retrieved input collections");
 
@@ -129,7 +136,7 @@ namespace MuonValR4 {
             for (const xAOD::MuonSimHit* hit : hits){
                 nMdt += m_idHelperSvc->isMdt(hit->identify()); 
                 nRpc += m_idHelperSvc->isRpc(hit->identify()); 
-                nTgc += m_idHelperSvc->isTgc(hit->identify());
+                nTgc += m_idHelperSvc->isTgc(hit->identify()); 
                 nMm  += m_idHelperSvc->isMM(hit->identify());
                 nsTgc += m_idHelperSvc->issTgc(hit->identify());
             }
@@ -156,9 +163,13 @@ namespace MuonValR4 {
             }
             const MuonR4::HoughSegmentSeed* foundMax = nullptr; 
             // find the best hough maximum
-            size_t max_hits{0}, max_etaHits{0}, max_phiHits{0};
+            size_t max_hits{0};
+            size_t max_etaHits{0};
+            size_t max_phiHits{0};
             for (const MuonR4::HoughSegmentSeed & max : houghMaxima){                
-                size_t nFound{0}, nEta{0}, nPhi{0}; 
+                size_t nFound{0}; 
+                size_t nEta{0};
+                size_t nPhi{0}; 
                 for (const xAOD::MuonSimHit* simHit : hits) {
 
                     for (const MuonR4::HoughHitType & hitOnMax : max.getHitsInMax()) {
@@ -171,8 +182,8 @@ namespace MuonValR4 {
                         ///  the hit is in the same gas gap
                         else if (m_idHelperSvc->gasGapId(hitOnMax->identify()) == simHit->identify()) {
                             ++nFound;
-                            nEta+=hitOnMax->measuresEta(); 
-                            nPhi+=hitOnMax->measuresPhi(); 
+                            if (hitOnMax->measuresEta()) ++nEta; 
+                            if (hitOnMax->measuresPhi()) ++nPhi; 
                         }
                     }
                 }
@@ -196,7 +207,7 @@ namespace MuonValR4 {
                 m_out_max_nHits = max_hits; 
                 m_out_max_nEtaHits = max_etaHits; 
                 m_out_max_nPhiHits = max_phiHits; 
-                unsigned int nMdt{0}, nRpc{0}, nTgc{0}, nMm{0}, nsTgc{0}; 
+                unsigned int nMdtMax{0}, nRpcMax{0}, nTgcMax{0}, nMmMax{0}, nsTgcMax{0}; 
                 for (const MuonR4::HoughHitType & houghSP: foundMax->getHitsInMax()){
                     /// Skip all space points that don' contain any phi measurement
                     
@@ -208,7 +219,7 @@ namespace MuonValR4 {
                             m_max_driftCirclRadius.push_back(houghSP->driftRadius());
                             m_max_driftCircleDriftUncert.push_back(houghSP->uncertainty()[0]);
                             m_max_driftCircleTubeLength.push_back(houghSP->uncertainty()[1]);
-                             ++nMdt;
+                             ++nMdtMax;
                             break;
                         case xAOD::UncalibMeasType::RpcStripType:
                             m_max_rpcHitId.push_back(houghSP->identify());
@@ -216,7 +227,7 @@ namespace MuonValR4 {
                             m_max_rpcHitHasPhiMeas.push_back(houghSP->measuresPhi());
                             m_max_rpcHitErrorX.push_back(houghSP->uncertainty()[0]);
                             m_max_rpcHitErrorY.push_back(houghSP->uncertainty()[1]);
-                            ++nRpc;
+                            ++nRpcMax;
                             break;
                         case xAOD::UncalibMeasType::TgcStripType:
                             m_max_tgcHitId.push_back(houghSP->identify());
@@ -224,7 +235,7 @@ namespace MuonValR4 {
                             m_max_tgcHitHasPhiMeas.push_back(houghSP->measuresPhi());
                             m_max_tgcHitErrorX.push_back(houghSP->uncertainty()[0]);
                             m_max_tgcHitErrorY.push_back(houghSP->uncertainty()[1]);
-                            ++nTgc;
+                            ++nTgcMax;
                             break;
                         case xAOD::UncalibMeasType::sTgcStripType:
                             m_max_stgcHitId.push_back(houghSP->identify());
@@ -232,7 +243,7 @@ namespace MuonValR4 {
                             m_max_stgcHitHasPhiMeas.push_back(houghSP->measuresPhi());
                             m_max_stgcHitErrorX.push_back(houghSP->uncertainty()[0]);
                             m_max_stgcHitErrorY.push_back(houghSP->uncertainty()[1]);
-                            ++nsTgc;
+                            ++nsTgcMax;
                             break;
                         case xAOD::UncalibMeasType::MMClusterType:
                             m_max_MmHitId.push_back(houghSP->identify());
@@ -240,20 +251,69 @@ namespace MuonValR4 {
                             m_max_MmHitIsStero.push_back(m_idHelperSvc->mmIdHelper().isStereo(houghSP->identify()));
                             m_max_MmHitErrorX.push_back(houghSP->uncertainty()[0]);
                             m_max_MmHitErrorY.push_back(houghSP->uncertainty()[1]);
-                            ++nMm;
-                            break;                            
+                            ++nMmMax;
+                            break;
                         default:
                             ATH_MSG_WARNING("Technology "<<m_idHelperSvc->toString(houghSP->identify())
                                         <<" not yet implemented");                        
                     }                    
                 }
-                m_out_max_nMdt = nMdt;
-                m_out_max_nRpc = nRpc;
-                m_out_max_nTgc = nTgc;
-                m_out_max_nsTgc = nsTgc;
-                m_out_max_nMm = nMm;
+                m_out_max_nMdt = nMdtMax;
+                m_out_max_nRpc = nRpcMax;
+                m_out_max_nTgc = nTgcMax;
+                m_out_max_nsTgc = nsTgcMax;
+                m_out_max_nMm = nMmMax;
+
+                bool foundSegment = false; 
+                const MuonR4::MuonSegment* theSegment = nullptr; 
+                max_hits = 0;
+                max_etaHits = 0;
+                max_phiHits = 0; 
+                for (const MuonR4::MuonSegment & segment : *readMuonSegments){             
+                    size_t nFound{0}; 
+                    size_t nEta{0};
+                    size_t nPhi{0}; 
+                    for (const xAOD::MuonSimHit* simHit : hits) {
+                        for (const xAOD::UncalibratedMeasurement* hitOnMax : segment.measurements()) {
+                            if(hitOnMax->type() == xAOD::UncalibMeasType::MdtDriftCircleType &&
+                                hitOnMax->identifier() == simHit->identify().get_compact()){
+                                ++nFound;
+                                break;
+                            } 
+                            //// Sim hits are expressed w.r.t to the gas gap Id. Check whether
+                            ///  the hit is in the same gas gap
+                            else if (m_idHelperSvc->gasGapId(Identifier(Identifier::value_type(hitOnMax->identifier()))) == simHit->identify()) {
+                                ++nFound;
+                                if (m_idHelperSvc->measuresPhi(Identifier(Identifier::value_type(hitOnMax->identifier())))) ++nPhi;
+                                else ++nEta; 
+                            }
+                        }
+                    }
+                    if (nFound > max_hits){
+                        max_hits = nFound;
+                        max_etaHits = nEta;
+                        max_phiHits = nPhi; 
+                        foundSegment = true;
+                        theSegment = &segment; 
+                    }
+                }
+                if (foundSegment){
+                    m_out_hasSegment = true; 
+                    m_out_segment_chi2 = theSegment->chi2();
+                    for (auto & c2 : theSegment->chi2PerMeasurement()){
+                        m_out_segment_chi2_measurement.push_back(c2); 
+                    }
+                    m_out_segment_tanphi = theSegment->tanPhi();
+                    m_out_segment_tantheta = theSegment->tanTheta();
+                    m_out_segment_z0 = theSegment->y0();
+                    m_out_segment_x0 = theSegment->x0();
+                }
+
                 if (m_drawEvtDisplaySuccess) {
                     ATH_CHECK(drawEventDisplay(ctx, hits, foundMax));
+                    ATH_CHECK(drawChi2(ctx, hits, foundMax, theSegment ,"ValidMin"));
+                   
+
                 }
             } else if (m_drawEvtDisplayFailure) {
                 ATH_CHECK(drawEventDisplay(ctx, hits, nullptr));          
@@ -402,6 +462,192 @@ namespace MuonValR4 {
         myCanvas.SaveAs(m_allCanName.value().c_str());
         primitives.clear();
         return StatusCode::SUCCESS;
+    }    
+    
+    double evalX2(const double* pars,  std::function<double(double, double, const ActsGeometryContext &, const std::vector<const xAOD::MuonSimHit*>&, const MuonR4::HoughSegmentSeed*)> fcn, const ActsGeometryContext & gctx, const std::vector<const xAOD::MuonSimHit*>& simHits,  const MuonR4::HoughSegmentSeed* seed){
+        return fcn(pars[0],pars[1],gctx,simHits,seed);
+    }
+    #define XXX std::cout << __LINE__ << std::endl; 
+    StatusCode MuonHoughTransformTester::drawChi2(const EventContext& ctx,
+                                const std::vector<const xAOD::MuonSimHit*>& simHits,
+                                const MuonR4::HoughSegmentSeed* foundMax,
+                                const MuonR4::MuonSegment* foundSegment,
+                                const std::string & label) const{
+        
+        if (simHits.size() < 4) return StatusCode::SUCCESS;
+        std::vector<std::pair<double,double>> shPos{}, shDir{};
+
+        const MuonGMR4::MuonChamber* refChamber = m_r4DetMgr->getChamber(simHits[0]->identify());
+        std::cout <<" ref chamber = "<<refChamber<<std::endl;
+
+        double true_y0 = m_out_gen_z0.getVariable(); 
+        double true_x0 = m_out_gen_x0.getVariable(); 
+        double true_tanTheta = m_out_gen_tantheta.getVariable(); 
+        double true_tanPhi = m_out_gen_tanphi.getVariable(); 
+
+        TCanvas myCanvas("can","can",800,600); 
+        myCanvas.cd();
+
+
+        TH2D hChi2("chi2","chi2;y0;tan(theta)",200,true_y0 - 100,true_y0 + 100 , 200,true_tanTheta - 0.2,true_tanTheta + 0.2); 
+
+        std::vector<double>pars(4,0.); 
+        std::vector<double> chi2PerLayer(foundMax->getHitsInMax().size()); 
+        pars[(int)MuonR4::MuonSegmentFitterEventData::parameterIndices::x0] = true_x0;
+        pars[(int)MuonR4::MuonSegmentFitterEventData::parameterIndices::y0] = true_y0;
+        pars[(int)MuonR4::MuonSegmentFitterEventData::parameterIndices::tanPhi] = true_tanPhi;
+        pars[(int)MuonR4::MuonSegmentFitterEventData::parameterIndices::tanTheta] = true_tanTheta;
+        for (int bx =1 ; bx < hChi2.GetXaxis()->GetNbins()+1; ++bx){
+            for (int by =1 ; by < hChi2.GetYaxis()->GetNbins()+1; ++by){
+                double y = hChi2.GetXaxis()->GetBinCenter(bx); 
+                double t = hChi2.GetYaxis()->GetBinCenter(by); 
+                pars[(int)MuonR4::MuonSegmentFitterEventData::parameterIndices::y0] = y;
+                pars[(int)MuonR4::MuonSegmentFitterEventData::parameterIndices::tanTheta] = t;
+                hChi2.Fill(y,t,MuonR4::SegmentFitHelpers::segmentChiSquare(pars.data(),foundMax->getHitsInMax(),chi2PerLayer));
+            }
+        }
+        int mx,my,mz = 0;
+        auto mbin = hChi2.GetMinimumBin(mx, my, mz); 
+        double minChi2 = hChi2.GetBinContent(mbin); 
+        double ygx2 = hChi2.GetXaxis()->GetBinCenter(mx); 
+        double tgx2 = hChi2.GetYaxis()->GetBinCenter(my); 
+        std::vector<double> contourLevels{minChi2 + 0.1,minChi2 + 1.0,minChi2 + 4.0,minChi2 + 9.0,minChi2 + 50.}; 
+        myCanvas.SetLogz();
+        hChi2.SetMinimum(1.e-1);
+        hChi2.SetContour(100000);
+        hChi2.GetXaxis()->SetTitle("y0[mm]");
+        hChi2.GetYaxis()->SetTitle("tan #Theta");
+        hChi2.Draw("COLZ");
+        std::shared_ptr<TH2D> hClone (dynamic_cast<TH2D*>(hChi2.Clone("leeeeeak"))); 
+        hClone->SetContour(5, contourLevels.data()); 
+        hClone->SetFillStyle(0);
+        hClone->Draw("CONT2SAME");
+
+        TMarker mark(true_y0, true_tanTheta, kFullDotLarge);
+        mark.SetMarkerColor(kAzure+10);
+        mark.SetMarkerSize(1);
+        mark.Draw();
+
+        
+        TMarker houghMin(foundMax->interceptY(), foundMax->tanTheta(), kOpenSquare);
+        houghMin.SetMarkerColor(kOrange-3);
+        houghMin.SetMarkerSize(1);
+        houghMin.Draw();
+
+        
+        TMarker th2min(ygx2, tgx2, kOpenDiamond);
+        th2min.SetMarkerColor(kGray+1);
+        th2min.SetMarkerSize(1);
+        th2min.Draw();
+        TMarker gx2Min(-99999,-9999999, kFullDiamond);
+        gx2Min.SetMarkerColor(kRed+1);
+        gx2Min.SetMarkerSize(1);
+        if (foundSegment){
+            gx2Min.SetX(foundSegment->y0());
+            gx2Min.SetY(foundSegment->tanTheta());
+            gx2Min.Draw();
+        }
+            
+        std::stringstream legendLabel{};
+        legendLabel<<"Method "<<label<<" Evt "<<ctx.evt()<<" station: "<<m_idHelperSvc->mdtIdHelper().stationNameString(refChamber->stationName());
+        legendLabel<<"eta: "<<refChamber->stationEta()<<", phi: "<<refChamber->stationPhi();
+        legendLabel<<", found maximum: "<<( foundMax ? "si" : "no");
+
+
+        TLatex tl( 0.15,0.8,legendLabel.str().c_str());
+        tl.SetNDC();
+        tl.SetTextFont(53); 
+        tl.SetTextSize(18); 
+        tl.Draw();
+        static std::atomic<unsigned int> pdfCounter{0};
+        std::stringstream pdfName{};
+        pdfName<<"Chi2_Eta_"<<label<<"_"<<ctx.evt()<<"_"<<(++pdfCounter)
+                <<m_idHelperSvc->mdtIdHelper().stationNameString(refChamber->stationName())<<"_"
+                <<refChamber->stationEta()<<"_"<<refChamber->stationPhi()<<".pdf"; 
+        
+        std::cout << "try to save "<<pdfName.str()<<", this might go poof"<<std::endl;
+        myCanvas.SaveAs(pdfName.str().c_str());
+        myCanvas.SaveAs(m_allCanName.value().c_str());
+        // primitives.clear();
+        hChi2.Reset();
+        myCanvas.Clear();
+        TH2D hChi3("chi3","chi2;x0;tan(phi)",500,true_x0 - 200,true_x0 + 200 , 500,true_tanPhi - 0.3,true_tanPhi + 0.3); 
+        pars[(int)MuonR4::MuonSegmentFitterEventData::parameterIndices::x0] = true_x0;
+        pars[(int)MuonR4::MuonSegmentFitterEventData::parameterIndices::y0] = true_y0;
+        pars[(int)MuonR4::MuonSegmentFitterEventData::parameterIndices::tanPhi] = true_tanPhi;
+        pars[(int)MuonR4::MuonSegmentFitterEventData::parameterIndices::tanTheta] = true_tanTheta;
+        for (int bx =1 ; bx < hChi3.GetXaxis()->GetNbins()+1; ++bx){
+            for (int by =1 ; by < hChi3.GetYaxis()->GetNbins()+1; ++by){
+                double y = hChi3.GetXaxis()->GetBinCenter(bx); 
+                double t = hChi3.GetYaxis()->GetBinCenter(by); 
+                pars[(int)MuonR4::MuonSegmentFitterEventData::parameterIndices::x0] = y;
+                pars[(int)MuonR4::MuonSegmentFitterEventData::parameterIndices::tanPhi] = t;
+                hChi3.Fill(y,t,MuonR4::SegmentFitHelpers::segmentChiSquare(pars.data(),foundMax->getHitsInMax(),chi2PerLayer));
+            }
+        }
+        mbin = hChi3.GetMinimumBin(mx, my, mz); 
+        minChi2 = hChi3.GetBinContent(mbin); 
+        ygx2 = hChi3.GetXaxis()->GetBinCenter(mx); 
+        tgx2 = hChi3.GetYaxis()->GetBinCenter(my); 
+        myCanvas.SetLogz();
+        hChi3.SetMinimum(1.e-1);
+        hChi3.GetXaxis()->SetTitle("x0[mm]");
+        hChi3.GetYaxis()->SetTitle("tan #Phi");
+        hChi3.SetContour(100000);
+        hChi3.Draw("COLZ");
+        hClone.reset (dynamic_cast<TH2D*>(hChi3.Clone("leeeeeak"))); 
+        hClone->SetContour(5, contourLevels.data()); 
+        hClone->SetFillStyle(0);
+        hClone->Draw("CONT2SAME");
+
+        TMarker mark2(true_x0, true_tanPhi, kFullDotLarge);
+        mark2.SetMarkerColor(kAzure+10);
+        mark2.SetMarkerSize(1);
+        mark2.Draw();
+
+        
+        TMarker houghMin2(foundMax->interceptX(), foundMax->tanPhi(), kOpenSquare);
+        houghMin2.SetMarkerColor(kOrange-3);
+        houghMin2.SetMarkerSize(1);
+        houghMin2.Draw();
+
+        
+        TMarker th2min2(ygx2, tgx2, kOpenDiamond);
+        th2min2.SetMarkerColor(kGray+1);
+        th2min2.SetMarkerSize(1);
+        th2min2.Draw();
+        TMarker gx2Min2(-99999,-9999999, kFullDiamond);
+        gx2Min2.SetMarkerColor(kRed+1);
+        gx2Min2.SetMarkerSize(1);
+        if (foundSegment){
+            gx2Min2.SetX(foundSegment->x0());
+            gx2Min2.SetY(foundSegment->tanPhi());
+            gx2Min2.Draw();
+        }
+            
+        std::stringstream legendLabel2{};
+        legendLabel2<<"Method "<<label<<" Evt "<<ctx.evt()<<" station: "<<m_idHelperSvc->mdtIdHelper().stationNameString(refChamber->stationName());
+        legendLabel2<<"eta: "<<refChamber->stationEta()<<", phi: "<<refChamber->stationPhi();
+        legendLabel2<<", found maximum: "<<( foundMax ? "si" : "no");
+
+
+        TLatex tl2( 0.15,0.8,legendLabel2.str().c_str());
+        tl2.SetNDC();
+        tl2.SetTextFont(53); 
+        tl2.SetTextSize(18); 
+        tl2.Draw();
+        std::stringstream pdfName2{};
+        pdfName2<<"Chi2_Phi_"<<label<<"_"<<ctx.evt()<<"_"<<(++pdfCounter)
+                <<m_idHelperSvc->mdtIdHelper().stationNameString(refChamber->stationName())<<"_"
+                <<refChamber->stationEta()<<"_"<<refChamber->stationPhi()<<".pdf"; 
+        
+        std::cout << "try to save "<<pdfName2.str()<<", this might go poof"<<std::endl;
+        myCanvas.SaveAs(pdfName2.str().c_str());
+        myCanvas.SaveAs(m_allCanName.value().c_str());
+
+
+        return StatusCode::SUCCESS;
+
     }
 
 }  // namespace MuonValR4

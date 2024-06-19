@@ -17,6 +17,7 @@
 #include "xAODMuonPrepData/RpcStripContainer.h"
 #include "xAODMuonPrepData/TgcStripContainer.h"
 #include "MuonPatternEvent/StationHoughMaxContainer.h"
+#include "MuonPatternEvent/MuonSegment.h"
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
 
 // muon includes
@@ -47,12 +48,19 @@ namespace MuonValR4{
     StatusCode drawEventDisplay(const EventContext& ctx,
                                 const std::vector<const xAOD::MuonSimHit*>& simHits,
                                 const MuonR4::HoughSegmentSeed* foundMax) const;
+
+    StatusCode drawChi2(        const EventContext& ctx,
+                                const std::vector<const xAOD::MuonSimHit*>& simHits,
+                                const MuonR4::HoughSegmentSeed* foundMax,
+                                const MuonR4::MuonSegment* foundSegment,
+                                const std::string & label) const;
     
     // MDT sim hits in xAOD format 
     SG::ReadHandleKeyArray<xAOD::MuonSimHitContainer> m_inSimHitKeys {this, "SimHitKeys",{ "xMdtSimHits","xRpcSimHits","xTgcSimHits"}, "xAOD  SimHit collections"};
                                                           
     SG::ReadHandleKey<MuonR4::StationHoughMaxContainer> m_inHoughMaximaKey{this, "StationHoughMaxContainer", "MuonHoughStationMaxima"};
     SG::ReadHandleKey<MuonR4::StationHoughSegmentSeedContainer> m_inHoughSegmentSeedKey{this, "StationHoughSegmentSeedContainer", "MuonHoughStationSegmentSeeds"};
+    SG::ReadHandleKey<MuonR4::MuonSegmentContainer> m_inSegmentKey{this, "MuonSegmentContainer", "R4MuonSegments"};
     SG::ReadHandleKey<MuonR4::MuonSpacePointContainer> m_spacePointKey{this, "SpacePointContainer", "MuonSpacePoints"};
     
     SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
@@ -76,7 +84,6 @@ namespace MuonValR4{
     MuonVal::ScalarBranch<unsigned int>&   m_out_gen_nsTGCHits{m_tree.newScalar<unsigned int>("genNsTgcHits",0)};
     MuonVal::ScalarBranch<unsigned int>&   m_out_gen_nMMits{m_tree.newScalar<unsigned int>("genNMmHits",0)};
     
-    
     MuonVal::ScalarBranch<float>& m_out_gen_tantheta{m_tree.newScalar<float>("genTanTheta", 0.0)}; 
     MuonVal::ScalarBranch<float>& m_out_gen_z0{m_tree.newScalar<float>("genZ0", 0.0)}; 
     MuonVal::ScalarBranch<float>& m_out_gen_tanphi{m_tree.newScalar<float>("genTanPhi", 0.0)}; 
@@ -93,7 +100,7 @@ namespace MuonValR4{
     MuonVal::ScalarBranch<unsigned int>& m_out_max_nPhiHits{m_tree.newScalar<unsigned int>("maxNPhiHits", 0)}; 
     MuonVal::ScalarBranch<unsigned int>& m_out_max_nMdt{m_tree.newScalar<unsigned int>("maxNMdtHits", 0)}; 
     MuonVal::ScalarBranch<unsigned int>& m_out_max_nRpc{m_tree.newScalar<unsigned int>("maxNRpcHits", 0)}; 
-    MuonVal::ScalarBranch<unsigned int>& m_out_max_nTgc{m_tree.newScalar<unsigned int>("maxNTgcHits", 0)};
+    MuonVal::ScalarBranch<unsigned int>& m_out_max_nTgc{m_tree.newScalar<unsigned int>("maxNTgcHits", 0)}; 
     MuonVal::ScalarBranch<unsigned int>& m_out_max_nsTgc{m_tree.newScalar<unsigned int>("maxNsTgcHits", 0)};
     MuonVal::ScalarBranch<unsigned int>& m_out_max_nMm{m_tree.newScalar<unsigned int>("maxNMmHits", 0)};
     
@@ -130,7 +137,15 @@ namespace MuonValR4{
     MuonVal::VectorBranch<float>&   m_max_MmHitErrorX{m_tree.newVector<float>("maxMmEtaMeasError")};
     MuonVal::VectorBranch<float>&   m_max_MmHitErrorY{m_tree.newVector<float>("maxMmPhiMeasError")};
 
-
+    
+    MuonVal::ScalarBranch<bool>&  m_out_hasSegment {m_tree.newScalar<bool>("hasSegment", false)}; 
+    MuonVal::ScalarBranch<float>& m_out_segment_chi2{m_tree.newScalar<float>("segmentChi2", 0.0)}; 
+    MuonVal::ScalarBranch<float>& m_out_segment_tantheta{m_tree.newScalar<float>("segmentTanTheta", 0.0)}; 
+    MuonVal::ScalarBranch<float>& m_out_segment_z0{m_tree.newScalar<float>("segmentZ0", 0.0)}; 
+    MuonVal::ScalarBranch<float>& m_out_segment_tanphi{m_tree.newScalar<float>("segmentTanPhi", 0.0)}; 
+    MuonVal::ScalarBranch<float>& m_out_segment_x0{m_tree.newScalar<float>("segmentX0", 0.0)}; 
+    MuonVal::VectorBranch<double>& m_out_segment_chi2_measurement{m_tree.newVector<double>("segmentChi2Measurements", 0.0)}; 
+    
     /// Draw the event display for the cases where the hough transform did not find any hough maximum
     Gaudi::Property<bool> m_drawEvtDisplayFailure{this, "drawDisplayFailed", false};
     /// Draw the event dispalty for the successful cases

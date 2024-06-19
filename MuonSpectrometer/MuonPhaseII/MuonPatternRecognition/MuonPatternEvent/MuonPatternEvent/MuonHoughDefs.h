@@ -9,6 +9,7 @@
 #include "MuonHoughEventData.h"
 #include "HoughMaximum.h"
 #include "HoughSegmentSeed.h"
+#include "MuonSegmentFitterEventData.h"
 
 /// This header ties the generic definitions in this package 
 //  to concrete types for representations of the hit, 
@@ -21,6 +22,7 @@ namespace MuonR4{
   using HoughMaximum = HoughMaximum_impl<HoughHitType>;
   // and of the segment seed
   using HoughSegmentSeed = HoughSegmentSeed_impl<HoughHitType>;
+  using MuonSegmentFitterEventData = MuonSegmentFitterEventData_impl<HoughHitType>;
   // ACTS representation of the hough accumulator
   using HoughPlane = Acts::HoughTransformUtils::HoughPlane<HoughHitType> ; 
   // configuration class for the accumulator

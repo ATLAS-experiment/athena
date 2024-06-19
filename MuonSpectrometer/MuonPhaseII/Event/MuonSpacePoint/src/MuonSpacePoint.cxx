@@ -9,6 +9,7 @@
 #include "xAODMuonPrepData/TgcStrip.h"
 #include "xAODMuonPrepData/MMCluster.h"
 #include "xAODMuonPrepData/sTgcMeasurement.h"
+#include "EventPrimitives/EventPrimitivesHelpers.h"
 
 
 namespace MuonR4{
@@ -83,10 +84,7 @@ namespace MuonR4{
             uvcov = xAOD::toEigen(primaryMeas->localCovariance<2>());
             m_secondaryMeas = m_primaryMeas;
         }
-
-        AmgSymMatrix(2) cov = Jac * uvcov * Jac.transpose();
-        m_measUncerts =  Amg::Vector2D(std::sqrt(cov(0,0)), std::sqrt(cov(1,1)));
-
+        m_measCovariance = Jac * uvcov * Jac.transpose();
     }
             
     const xAOD::UncalibratedMeasurement* MuonSpacePoint::primaryMeasurement() const {
@@ -113,8 +111,11 @@ namespace MuonR4{
     double MuonSpacePoint::driftRadius() const { 
         return m_driftR; 
     }
-    const Amg::Vector2D& MuonSpacePoint::uncertainty() const {
-        return m_measUncerts;
+    Amg::Vector2D MuonSpacePoint::uncertainty() const {
+        return Amg::Vector2D{ Amg::error(m_measCovariance,0),Amg::error(m_measCovariance,1)  };
+    }
+    const AmgSymMatrix(2)&  MuonSpacePoint::covariance() const {
+        return m_measCovariance;
     }
 
 }

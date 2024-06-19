@@ -44,7 +44,8 @@ namespace MuonR4 {
             /** @brief: Returns the size of the drift radius */
             double driftRadius() const;
             /** @brief: Returns the uncertainties on the space point */
-            const Amg::Vector2D& uncertainty() const;
+            Amg::Vector2D uncertainty() const;
+            const AmgSymMatrix(2)& covariance() const; 
             /** @brief: Equality check by checking the prd pointers */
             bool operator==(const MuonSpacePoint& other) const {
                 return primaryMeasurement() == other.primaryMeasurement() &&
@@ -58,12 +59,12 @@ namespace MuonR4 {
             const MuonGMR4::MuonChamber* m_chamber{xAOD::readoutElement(m_primaryMeas)->getChamber()};
 
             Amg::Vector3D m_pos{Amg::Vector3D::Zero()};
-            /** @brief: Measurement unceratinty 
+            /** @brief: Measurement covariance 
              *          If the spacePoint represents an 1D measurement the second coordinate is the length of the
              *          channel (e.g halfLength of the wire or of the associated strip)
              *          the uncertainty of the other coordinate, otherwise
             */
-            Amg::Vector2D m_measUncerts{Amg::Vector2D::Zero()};
+            AmgSymMatrix(2) m_measCovariance{AmgSymMatrix(2)::Identity()}; 
             /// Drift radius of the associated drift circle - if there's any in the space point
             double m_driftR{0.};
     };

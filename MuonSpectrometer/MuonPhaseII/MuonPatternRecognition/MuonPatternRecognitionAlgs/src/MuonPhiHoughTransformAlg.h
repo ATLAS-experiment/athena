@@ -99,13 +99,13 @@ namespace MuonR4{
             SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
 
             // steers the target resolution in tan(phi) 
-            DoubleProperty m_targetResoTanPhi{this, "ResolutionTargetTanAngle", 0.02};
+            DoubleProperty m_targetResoTanPhi{this, "ResolutionTargetTanAngle", 0.01};
             // steers the target resolution in the x-axis intercept
             DoubleProperty m_targetResoIntercept{this, "ResolutionTargetIntercept", 10.};
             // number of accumulator bins in tan(phi)
-            IntegerProperty m_nBinsTanPhi{this, "nBinsTanAngle", 15};
+            IntegerProperty m_nBinsTanPhi{this, "nBinsTanAngle", 10};
             // number of accumulator bins in the x-axis intercept
-            IntegerProperty m_nBinsIntercept{this, "nBinsIntercept", 30};
+            IntegerProperty m_nBinsIntercept{this, "nBinsIntercept", 50};
             // maximum number of eta measurements allowed to be discarded by 
             // a valid phi-extension
             IntegerProperty m_maxEtaHolesOnMax{this, "maxEtaHoles", 1};
