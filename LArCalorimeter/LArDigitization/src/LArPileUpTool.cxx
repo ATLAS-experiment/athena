@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // +==========================================================================+
@@ -743,8 +743,13 @@ StatusCode LArPileUpTool::AddHit(const Identifier cellId, const float energy, co
        for (unsigned int icell=0;icell<neighbourList.size();icell++)
        {
          //unsigned int index=neighbourList[icell];
-         //Turn sub-calo hash in neighbour list into gloabl calo-cell hash:
-         const IdentifierHash index=m_calocell_id->calo_cell_hash(m_calocell_id->sub_calo(cellId),neighbourList[icell]);
+         //Turn sub-calo hash in neighbour list into global calo-cell hash:
+         const auto subCalo = m_calocell_id->sub_calo(cellId);
+         if (subCalo == CaloCell_Base_ID::NOT_VALID){
+           ATH_MSG_ERROR("subCalo value is invalid in LArPileUpTool::AddHit");
+           return StatusCode::FAILURE;
+         }
+         const IdentifierHash index=m_calocell_id->calo_cell_hash(subCalo,neighbourList[icell]);
          float e = energyList[icell];
          //Identifier id2=m_larem_id->channel_id(neighbourList[icell]);
          //if(dump) std::cout << "Cell/E " <<  m_larem_id->show_to_string(id2) << " " << e << " ";
