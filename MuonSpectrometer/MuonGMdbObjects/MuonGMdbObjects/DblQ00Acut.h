@@ -45,7 +45,7 @@ public:
     
 private:
     std::vector<ACUT> m_d;
-    unsigned int m_nObj; // > 1 if array; 0 if error in retrieve.
+    unsigned int m_nObj{}; // > 1 if array; 0 if error in retrieve.
 };
 } // end of MuonGM namespace
 

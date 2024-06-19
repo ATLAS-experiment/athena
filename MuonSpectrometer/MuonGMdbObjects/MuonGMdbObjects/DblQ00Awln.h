@@ -49,7 +49,7 @@ public:
 
 private:
     std::vector<AWLN> m_d;
-    unsigned int m_nObj; // > 1 if array; 0 if error in retrieve.
+    unsigned int m_nObj{}; // > 1 if array; 0 if error in retrieve.
     DblQ00Awln & operator=(const DblQ00Awln &right);
     DblQ00Awln(const DblQ00Awln&);
 };
