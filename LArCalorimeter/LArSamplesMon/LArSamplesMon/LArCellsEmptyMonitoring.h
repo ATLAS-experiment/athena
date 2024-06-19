@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -14,6 +14,9 @@
 #include "LArSamplesMon/LArIdTranslatorHelper.h"
 #include "TString.h"
 #include "CxxUtils/checker_macros.h"
+#include <vector>
+#include <memory>
+#include <string>
 
 namespace LArSamples {
 
