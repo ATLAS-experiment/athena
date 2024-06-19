@@ -205,9 +205,9 @@ StatusCode Muon::MmRdoToPrepDataToolMT::processCollection(
     // positions and errors, but I think this is probably wrong
 
     // Lambda to fill xprd from prd
-    auto fillxAOD = [](MMPrepData& prd, xAOD::MMCluster& xprd,
-                       const MmIdHelper& id_helper, const IdentifierHash hash) {
-      xprd.setIdentifier(prd.identify().get_identifier32().get_compact());
+    auto fillxAOD = [&id_helper](const MMPrepData& prd, xAOD::MMCluster& xprd,
+                                 const IdentifierHash hash) {
+      xprd.setIdentifier(prd.identify().get_compact());
       xprd.setMeasurement(hash, xAOD::MeasVector<1>{prd.localPosition().x()},
                           xAOD::MeasMatrix<1>{prd.localCovariance()(0, 0)});
       xprd.setGasGap(id_helper.gasGap(prd.identify()));
@@ -234,9 +234,8 @@ StatusCode Muon::MmRdoToPrepDataToolMT::processCollection(
       mpd->setAuthor(Muon::MMPrepData::Author::RDOTOPRDConverter);
 
       if (!m_xAODKey.empty()) {
-        auto xprd = new xAOD::MMCluster();
-        xAODContainer->push_back(xprd);
-        fillxAOD(*mpd, *xprd, id_helper, hash);
+        auto xprd = xAODContainer->push_back(std::make_unique<xAOD::MMCluster>());
+        fillxAOD(*mpd, *xprd, hash);
       }
 
       prdColl->push_back(std::move(mpd));
@@ -252,9 +251,8 @@ StatusCode Muon::MmRdoToPrepDataToolMT::processCollection(
       mpd.setHashAndIndex(hash, 0);
       mpd.setAuthor(Muon::MMPrepData::Author::RDOTOPRDConverter);
       if (!m_xAODKey.empty()) {
-        auto xprd = new xAOD::MMCluster();
-        xAODContainer->push_back(xprd);
-        fillxAOD(mpd, *xprd, id_helper, hash);
+        auto xprd = xAODContainer->push_back(std::make_unique<xAOD::MMCluster>());
+        fillxAOD(mpd, *xprd, hash);
       }
       MMprds.push_back(std::move(mpd));
     }
