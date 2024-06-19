@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "G4InitTool.h"
@@ -49,12 +49,12 @@ G4InitTool::initThread() {
 
   // Assign the thread id
   // TODO: implement a better solution.
-#ifdef SYS_gettid
   // WARNING: not portable!
-  pid_t tid = syscall(SYS_gettid);
+#ifdef __USE_GNU
+  pid_t tid = gettid();
   wThreadContext->SetThreadId( tid );
 #else
-  #error "SYS_gettid unavailable on this system"
+  #error "gettid() unavailable on this system"
 #endif
   //wThreadContext->SetThreadId( pthread_self() );
   G4int thisID = wThreadContext->GetThreadId();
