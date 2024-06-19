@@ -292,7 +292,6 @@ EgammaCalibrationAndSmearingTool::EgammaCalibrationAndSmearingTool(const std::st
   declareProperty("useIntermoduleCorrection", m_useIntermoduleCorrection = AUTO);
   declareProperty("usePhiUniformCorrection", m_usePhiUniformCorrection = AUTO);
   declareProperty("useGainCorrection", m_useGainCorrection = AUTO);
-  declareProperty("autoReseed", m_auto_reseed = true);
   declareProperty("MVAfolder", m_MVAfolder = "");
   declareProperty("layerRecalibrationTune", m_layer_recalibration_tune = "");
   declareProperty("useEPCombination", m_use_ep_combination = false);
@@ -588,9 +587,6 @@ StatusCode EgammaCalibrationAndSmearingTool::initialize() {
   return StatusCode::SUCCESS;
 }
 
-void EgammaCalibrationAndSmearingTool::setRandomSeed(unsigned seed) {
-  m_rootTool->setRandomSeed(seed);
-}
 
 PATCore::ParticleType::Type EgammaCalibrationAndSmearingTool::xAOD2ptype(const xAOD::Egamma& particle) const
 {
@@ -685,9 +681,8 @@ CP::CorrectionCode EgammaCalibrationAndSmearingTool::applyCorrection(xAOD::Egamm
    */
   PATCore::ParticleDataType::DataType dataType = (event_info.eventType(xAOD::EventInfo::IS_SIMULATION)) ? m_simulation : PATCore::ParticleDataType::Data;
 
-  if (event_info.eventType(xAOD::EventInfo::IS_SIMULATION) and m_auto_reseed) {
-    setRandomSeed(m_set_seed_function(*this, input, event_info));
-  }
+  // only used in simulation (for the smearing)
+  RandomNumber seed = m_set_seed_function(*this, input, event_info);
 
   static const SG::ConstAccessor<double> Es0Acc ("correctedcl_Es0");
   static const SG::ConstAccessor<double> Es1Acc ("correctedcl_Es1");
@@ -819,6 +814,7 @@ CP::CorrectionCode EgammaCalibrationAndSmearingTool::applyCorrection(xAOD::Egamm
              energy,
              Es2Acc.isAvailable(*input.caloCluster()) ? Es2Acc(*input.caloCluster()) : input.caloCluster()->energyBE(2),
              eraw,
+             seed,
              oldtool_scale_flag_this_event(input, event_info),
              oldtool_resolution_flag_this_event(input, event_info),
              m_TResolutionType,

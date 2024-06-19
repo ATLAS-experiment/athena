@@ -1234,6 +1234,7 @@ namespace AtlasRoot {
                                                          double energy,
                                                          double energyS2,
                                                          double eraw,
+                                                         RandomNumber random_seed,
                                                          egEnergyCorr::Scale::Variation scaleVar,
                                                          egEnergyCorr::Resolution::Variation resVar,
                                                          egEnergyCorr::Resolution::resolutionType resType,
@@ -1312,7 +1313,7 @@ namespace AtlasRoot {
 
       // Do the resolution correction
       if ( resVar != egEnergyCorr::Resolution::None )
-      fullyCorrectedEnergy *= getSmearingCorrection(cl_eta, cl_etaCalo, fullyCorrectedEnergy, ptype, dataType, resVar, resType);
+      fullyCorrectedEnergy *= getSmearingCorrection(cl_eta, cl_etaCalo, fullyCorrectedEnergy, random_seed, ptype, dataType, resVar, resType);
 
       ATH_MSG_DEBUG("after resolution correction = " << boost::format("%.2f") % fullyCorrectedEnergy);
     }
@@ -2032,6 +2033,7 @@ namespace AtlasRoot {
   // derive smearing correction
 
   double egammaEnergyCorrectionTool::getSmearingCorrection(double cl_eta, double cl_etaCalo, double energy,
+                                                           RandomNumber seed,
                                                            PATCore::ParticleType::Type ptype,
                                                            PATCore::ParticleDataType::DataType dataType,
                                                            egEnergyCorr::Resolution::Variation value,
@@ -2075,12 +2077,12 @@ namespace AtlasRoot {
 
     const double sigma = sqrt(sigma2);
 
-    ATH_MSG_DEBUG("seed before = " << m_random3.GetSeed());
+    TRandom3 rng(seed);
 
-    const double DeltaE0 = m_random3.Gaus(0, sigma);
+    const double DeltaE0 = rng.Gaus(0, sigma);
     const double cor0 = (energyGeV + DeltaE0) / energyGeV;
 
-    ATH_MSG_DEBUG("sigma|DeltaE0|cor0|seed = " << sigma << "|" << DeltaE0 << "|" << cor0 << "|" << m_random3.GetSeed());
+    ATH_MSG_DEBUG("sigma|DeltaE0|cor0|seed = " << sigma << "|" << DeltaE0 << "|" << cor0 << "|" << rng.GetSeed());
 
     return cor0;  // TODO: why not returning DeltaE0 and apply E -> E + DeltaE0 ?
 

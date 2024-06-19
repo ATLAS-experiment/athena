@@ -116,9 +116,9 @@ public:
   virtual CP::SystematicSet recommendedSystematics() const override;
   //Use specific systematic
   virtual StatusCode applySystematicVariation(const CP::SystematicSet& systConfig) override;
-  virtual void setRandomSeed(unsigned seed=0) override;
+  virtual void setRandomSeed(unsigned) override { ATH_MSG_ERROR("setRandomSeed is not implemented for this tool"); }
   virtual void setRandomSeedFunction(const IdFunction&& function) { m_set_seed_function = function; }
-  const IdFunction getRandomSeedFuction() const { return m_set_seed_function; }
+  const IdFunction getRandomSeedFunction() const { return m_set_seed_function; }
 
   virtual double resolution(double energy, double cl_eta, double cl_etaCalo,
 			    PATCore::ParticleType::Type ptype = PATCore::ParticleType::Electron,
