@@ -21,6 +21,8 @@ namespace xAOD {
   class TruthParticle_v1;
   class TruthVertex_v1;
 }
+class TrackRecord;
+
 namespace HepMC {
 
   /// @brief Constant defining the barcode threshold for simulated particles, eg. can be used to separate generator event record entries from simulated particles
@@ -150,6 +152,38 @@ namespace HepMC {
   template <>  inline int status(const GenVertexPtr& v1){ return v1->id();}
 #endif
 
+  /// @brief Function to calculate all the descendants(direction=1)/ancestors(direction=-1) of the particle.
+  template <class T> inline void get_particle_history(const T& p, std::deque<int>& out, int direction=0) {
+    if (direction < 0) {
+      if (p->status()>SIM_STATUS_INCREMENT) {
+        auto pv = p->production_vertex();
+        if (pv) {
+          for (auto pa: pv->particles_in()) {
+            if (pa->pdg_id() != p->pdg_id()) continue;
+            out.push_front(uniqueID(p));
+            get_particle_history(pa,out,-1);
+            break;
+          }
+        }
+      }
+    }
+    if (direction > 0) {
+      if (p->status()>SIM_STATUS_INCREMENT) {
+        auto pv = p->end_vertex();
+        if (pv) {
+          for (auto pa: pv->particles_out()) {
+            if (pa->pdg_id() != p->pdg_id()) continue;
+            out.push_back(uniqueID(p));
+            get_particle_history(pa,out,1);
+            break;
+          }
+        }
+      }
+    }
+  }
+  /// @brief Function to calculate all the descendants(direction=1)/ancestors(direction=-1) of the particle.
+  template <class T>  inline std::deque<int> simulation_history(const T& p, int direction ) { std::deque<int> res; res.push_back(uniqueID(p)); get_particle_history(p, res, direction); return res;}
+
   namespace BarcodeBased {
     /// @brief Method to establish if a particle (or barcode) corresponds to truth-suppressed pile-up
     template <class T>  inline bool is_truth_suppressed_pileup(const T& p){ return (barcode(p) == SUPPRESSED_PILEUP_BARCODE);}
@@ -204,10 +238,52 @@ namespace HepMC {
     template <class T>  inline bool is_simulation_vertex(const T& v){ return (status(v)>SIM_STATUS_THRESHOLD);}
 
     /// @brief Method to establish if two particles in the GenEvent actually represent the same generated particle
-    // TODO implement a non-barcode-based version of is_same_generator_particle
+    template <class T1,class T2>
+    inline bool is_same_generator_particle(const T1& p1,const T2& p2) {
+      const int id1 = uniqueID(p1);
+      const int id2 = uniqueID(p2);
+      if (id1 == id2) { return true;} // simplest case
+      const int generations1 = generations(p1);
+      const int generations2 = generations(p2);
+      if (generations1 == generations2) { return false; } // if the id values don't match and the particles have the same generation number then they cannot be the same particle.
+      if constexpr (std::is_same_v<std::remove_const_t<remove_smart_pointer_t<std::remove_pointer_t<T1>>>, TrackRecord>) {
+        // No choice, but to get the history of one of the particles:
+        const int direction = (generations2 > generations1) ? -1 : 1;
+        std::deque<int> history2 = simulation_history( p2, direction );
+        if (std::find(history2.begin(),history2.end(), id1) == history2.end()) { return false; }
+      }
+      else {
+        // No choice, but to get the history of one of the particles:
+        const int direction = (generations1 > generations2) ? -1 : 1;
+        std::deque<int> history1 = simulation_history( p1, direction );
+        if (std::find(history1.begin(),history1.end(), id2) == history1.end()) { return false; }
+      }
+      return true;
+    }
 
     /// @brief Method to check if the first particle is a descendant of the second in the simulation, i.e. particle p1 was produced simulations particle p2.
-    // TODO implement a non-barcode-based version of is_sim_descendant
+    template <class T1,class T2>
+    inline bool is_sim_descendant(const T1& p1,const T2& p2) {
+      const int id1 = uniqueID(p1);
+      const int id2 = uniqueID(p2);
+      if (id1 == id2) { return true;} // simplest case
+      const int generations1 = generations(p1);
+      const int generations2 = generations(p2);
+      if (generations1 == generations2) { return false; } // if the id values don't match and the particles have the same generation number then they cannot be the same particle.
+      if constexpr (std::is_same_v<std::remove_const_t<remove_smart_pointer_t<std::remove_pointer_t<T1>>>, TrackRecord>) {
+        // No choice, but to get the descendents of p2
+        constexpr int descendents = 1;
+        std::deque<int> history2 = simulation_history( p2, descendents );
+        if (std::find(history2.begin(),history2.end(), id1) == history2.end()) { return false; }
+       }
+      else {
+        // No choice, but to get the history of p1
+        constexpr int ancestors = -1;
+        std::deque<int> history1 = simulation_history( p1, ancestors );
+        if (std::find(history1.begin(),history1.end(), id2) == history1.end()) { return false; }
+      }
+      return true;
+    }
   }
 
   /// @brief Method to establish if a particle (or barcode) corresponds to truth-suppressed pile-up (TODO update to be status based)
@@ -235,38 +311,6 @@ namespace HepMC {
   /// @brief Method to check if the first particle is a descendant of the second in the simulation, i.e. particle p1 was produced simulations particle p2.
   template <class T1,class T2>
   inline bool is_sim_descendant(const T1& p1,const T2& p2) { return BarcodeBased::is_sim_descendant(p1, p2);}
-
-  /// @brief Function to calculate all the descendants(direction=1)/ancestors(direction=-1) of the particle.
-  template <class T> inline void get_particle_history(const T& p, std::deque<int>& out, int direction=0) {
-    if (direction < 0) {
-      if (p->status()>SIM_STATUS_INCREMENT) {
-        auto pv = p->production_vertex();
-        if (pv) {
-          for (auto pa: pv->particles_in()) {
-            if (pa->pdg_id() != p->pdg_id()) continue;
-            out.push_front(uniqueID(p));
-            get_particle_history(pa,out,-1);
-            break;
-          }
-        }
-      }
-    }
-    if (direction > 0) {
-      if (p->status()>SIM_STATUS_INCREMENT) {
-        auto pv = p->end_vertex();
-        if (pv) {
-          for (auto pa: pv->particles_out()) {
-            if (pa->pdg_id() != p->pdg_id()) continue;
-            out.push_back(uniqueID(p));
-            get_particle_history(pa,out,1);
-            break;
-          }
-        }
-      }
-    }
-  }
-  /// @brief Function to calculate all the descendants(direction=1)/ancestors(direction=-1) of the particle.
-  template <class T>  inline std::deque<int> simulation_history(const T& p, int direction ) { std::deque<int> res; res.push_back(uniqueID(p)); get_particle_history(p, res, direction); return res;}
 
   /// @brief Function that converts the old scheme of labeling the simulation particles (barcodes) into the new scheme (statuses).
   template <class T> void old_to_new_simulation_scheme(T& evt) {
