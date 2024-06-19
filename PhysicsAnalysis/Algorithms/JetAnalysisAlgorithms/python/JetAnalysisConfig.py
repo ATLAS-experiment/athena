@@ -400,7 +400,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
                 if config.geometry() is LHCPeriod.Run2:
                     alg.efficiencyTool.SFFile = "JetJvtEfficiency/May2024/fJvtSFFile_Run2_EMPFlow.root"
                 else:
-                    alg.efficiencyTool.SFFile = "JetJvtEfficiency/May2024/fvtSFFile_Run3_EMPFlow.root"
+                    alg.efficiencyTool.SFFile = "JetJvtEfficiency/May2024/fJvtSFFile_Run3_EMPFlow.root"
                 alg.selection = 'fjvt_selection,as_char'
                 alg.scaleFactorDecoration = 'fjvt_effSF_%SYS%'
                 alg.outOfValidity = 2
