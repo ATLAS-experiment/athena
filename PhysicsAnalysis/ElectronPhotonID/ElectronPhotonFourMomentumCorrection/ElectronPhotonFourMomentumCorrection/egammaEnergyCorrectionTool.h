@@ -279,6 +279,7 @@ namespace AtlasRoot {
   class egammaEnergyCorrectionTool : public asg::AsgMessaging {
 
   public:
+    typedef unsigned int RandomNumber;
     egammaEnergyCorrectionTool();
     virtual ~egammaEnergyCorrectionTool();
 
@@ -296,9 +297,6 @@ namespace AtlasRoot {
 
     // ... set input file
     inline void setFileName ( const std::string& val ){ m_rootFileName = val; }
-
-    // ... set a seed for the random number generator
-    void setRandomSeed( unsigned seed=0 ) { m_random3.SetSeed(seed); }
 
     void useStatErrorScaling(bool flag) { m_use_stat_error_scaling = flag; }
 
@@ -328,6 +326,7 @@ namespace AtlasRoot {
 			       double energy,
 			       double energyS2,
 			       double eraw,
+             RandomNumber seed,
 			       egEnergyCorr::Scale::Variation scaleVar = egEnergyCorr::Scale::None,
 			       egEnergyCorr::Resolution::Variation resVar = egEnergyCorr::Resolution::None,
                                egEnergyCorr::Resolution::resolutionType resType = egEnergyCorr::Resolution::SigmaEff90,
@@ -378,6 +377,7 @@ namespace AtlasRoot {
     // Note : energies in MeV
 
     double getSmearingCorrection( double eta, double etaCalo, double energy,
+          RandomNumber seed,
 				  PATCore::ParticleType::Type ptype = PATCore::ParticleType::Electron,
 				  PATCore::ParticleDataType::DataType dataType = PATCore::ParticleDataType::Full,
                                   egEnergyCorr::Resolution::Variation value = egEnergyCorr::Resolution::Nominal,
@@ -469,8 +469,6 @@ namespace AtlasRoot {
   private:
 
     std::string m_rootFileName;
-
-    TRandom3   m_random3;
 
     unsigned int  m_begRunNumber;
     unsigned int  m_endRunNumber;
