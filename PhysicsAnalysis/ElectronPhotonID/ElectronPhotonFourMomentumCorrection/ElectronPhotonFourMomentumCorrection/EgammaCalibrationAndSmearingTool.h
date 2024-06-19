@@ -137,7 +137,6 @@ private:
   egEnergyCorr::ESModel m_TESModel;
   int m_doScaleCorrection;
   int m_doSmearing;
-  bool m_auto_reseed;
   double m_varSF;
   std::string m_ResolutionType;
   egEnergyCorr::Resolution::resolutionType m_TResolutionType;
