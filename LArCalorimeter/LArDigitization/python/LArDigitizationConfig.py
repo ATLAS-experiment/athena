@@ -110,8 +110,7 @@ def LArPileUpToolCfg(flags, name="LArPileUpTool", **kwargs):
     # cosmics digitization
     if flags.Beam.Type is BeamType.Cosmics:
         kwargs.setdefault("UseTriggerTime", True)
-        CosmicTriggerTimeTool = CompFactory.CosmicTriggerTimeTool
-        kwargs.setdefault("TriggerTimeToolName", CosmicTriggerTimeTool())
+        acc.addEventAlgo(CompFactory.CosTriggerTimeAlg())
     if flags.Digitization.PileUp or flags.Common.isOverlay:
         kwargs.setdefault("PileUp", True)
     kwargs.setdefault("useLArFloat", useLArFloat(flags))
