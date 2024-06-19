@@ -48,10 +48,12 @@ class DynamicallyLoadMetadata:
     def keys(self):
         return self.metadata.keys()
 
-def GetFileMD(filenames):
+def GetFileMD(filenames, allowEmpty=True):
     if not filenames:
-        msg.info("Running an input-less job. Will have empty metadata.")
-        return {}
+        if allowEmpty:
+            msg.info("Running an input-less job. Will have empty metadata.")
+            return {}
+        raise RuntimeError("Metadata can not be read in an input-less job.")
     if isinstance(filenames, str):
         filenames = [filenames]
     if '_ATHENA_GENERIC_INPUTFILE_NAME_' in filenames:
