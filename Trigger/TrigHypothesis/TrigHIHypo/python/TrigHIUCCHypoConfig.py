@@ -14,6 +14,6 @@ def TrigHIUCCHypoToolFromDict(chainDict):
             "Th2":  4080*GeV,
             "Th3":  4450*GeV }
 
-  tool.FCalEtThreshold = UCC_th[UCCInfo.strip('ucc')]
+  tool.FCalEtThreshold = UCC_th[UCCInfo.removeprefix('ucc')]
 
   return tool
