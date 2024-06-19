@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-/* Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration */
+/* Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration */
 
 // $Id: EventFormatMetaDataTool.h 651874 2015-03-05 14:16:19Z krasznaa $
 #ifndef XAODEVENTFORMATCNV_EVENTFORMATMETADATATOOL
@@ -13,7 +13,7 @@
 // Gaudi/Athena include(s):
 #include "Gaudi/Property.h"
 #include "GaudiKernel/ServiceHandle.h"
-#include "AthenaKernel/IMetaDataSvc.h"
+#include "AthenaKernel/IAthMetaDataSvc.h"
 #include "AthenaKernel/IMetaDataTool.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "StoreGate/StoreGateSvc.h"
@@ -74,7 +74,7 @@ class EventFormatMetaDataTool : public virtual ::IMetaDataTool, public ::AthAlgT
     "StoreGateSvc/InputMetaDataStore", name()};
 
   /// Connection to the output metadata store
-  ServiceHandle< IMetaDataSvc > m_outputMetaStore{this, "MetaDataSvc",
+  ServiceHandle< IAthMetaDataSvc > m_outputMetaStore{this, "MetaDataSvc",
     "MetaDataSvc", name()};
 
   /// (optional) list of keys to copy, all if empty, default: empty

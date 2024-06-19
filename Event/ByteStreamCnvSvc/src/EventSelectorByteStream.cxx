@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "EventSelectorByteStream.h"
@@ -19,7 +19,7 @@
 #include "GaudiKernel/IIoComponentMgr.h"
 
 #include "AthenaKernel/IAthenaIPCTool.h"
-#include "AthenaKernel/IMetaDataSvc.h"
+#include "AthenaKernel/IAthMetaDataSvc.h"
 
 // EventInfoAttributeList includes
 #include "AthenaPoolUtilities/AthenaAttributeList.h"
@@ -165,7 +165,7 @@ StatusCode EventSelectorByteStream::initialize() {
    }
 
    // Make sure MetaDataSvc is initialized before the first file is opened
-   ServiceHandle<IMetaDataSvc> metaDataSvc("MetaDataSvc", name());
+   ServiceHandle<IAthMetaDataSvc> metaDataSvc("MetaDataSvc", name());
    ATH_CHECK(metaDataSvc.retrieve());
 
    // Must happen before trying to open a file

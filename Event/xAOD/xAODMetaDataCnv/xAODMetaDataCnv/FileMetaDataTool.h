@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAODMETADATACNV_FILEMETADATATOOL_H
 #define XAODMETADATACNV_FILEMETADATATOOL_H
@@ -13,7 +13,7 @@
 #include "AsgTools/AsgMetadataTool.h"
 #ifndef XAOD_STANDALONE
 # include "GaudiKernel/ServiceHandle.h"
-# include "AthenaKernel/IMetaDataSvc.h"
+# include "AthenaKernel/IAthMetaDataSvc.h"
 # include "AthenaKernel/IMetaDataTool.h"
 #endif
 
@@ -76,7 +76,7 @@ class FileMetaDataTool
 
 #ifndef XAOD_STANDALONE
   /// Get a handle on the metadata store for the job
-  ServiceHandle< IMetaDataSvc > m_metaDataSvc{"MetaDataSvc", name()};
+  ServiceHandle< IAthMetaDataSvc > m_metaDataSvc{"MetaDataSvc", name()};
 #endif
 
   // To lock/unlock the tool

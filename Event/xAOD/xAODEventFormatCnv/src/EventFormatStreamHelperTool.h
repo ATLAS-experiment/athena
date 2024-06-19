@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-/* Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration */
+/* Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration */
 #ifndef XAODEVENTFORMATCNV_EVENTFORMATSTREAMHELPERTOOL
 #define XAODEVENTFORMATCNV_EVENTFORMATSTREAMHELPERTOOL
 
@@ -13,7 +13,7 @@
 #include "GaudiKernel/ServiceHandle.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "AthenaKernel/IAthenaOutputTool.h"
-#include "AthenaKernel/IMetaDataSvc.h"
+#include "AthenaKernel/IAthMetaDataSvc.h"
 #include "CxxUtils/checker_macros.h"
 
 namespace xAODMaker {
@@ -63,7 +63,7 @@ class EventFormatStreamHelperTool : public extends< AthAlgTool, IAthenaOutputToo
 
  private:
   /// Use the metadata tool interface to store the EventFormat object
-  ServiceHandle< IMetaDataSvc > m_metadataStore{ this, "MetaDataSvc",
+  ServiceHandle< IAthMetaDataSvc > m_metadataStore{ this, "MetaDataSvc",
     "MetaDataSvc", "The metadata service use to record the xAOD::EventFormat" };
 
   /// Connection to the CLID service

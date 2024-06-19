@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef COPYEVENTSTREAMINFO_H
@@ -15,7 +15,7 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 
 #include "AthenaKernel/IMetaDataTool.h"
-#include "AthenaKernel/IMetaDataSvc.h"
+#include "AthenaKernel/IAthMetaDataSvc.h"
 
 #include <string>
 
@@ -51,7 +51,7 @@ private:
       "(optional) list of keys to copy, all if empty. default: empty"};
 
    /// Access to output MetaDataStore through MetaDataSvc (using MetaContainers)
-   ServiceHandle<IMetaDataSvc> m_metaDataSvc;
+   ServiceHandle<IAthMetaDataSvc> m_metaDataSvc;
    /// MetaDataStore for input
    ServiceHandle<StoreGateSvc> m_inputMetaDataStore;
 };
