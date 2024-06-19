@@ -1,8 +1,9 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "dRMatchingTool.h"
+#include "AthContainers/ConstAccessor.h"
 
 // InDetPhysValMonitoring include(s)
 #include "../src/TrackTruthSelectionTool.h" /* to perform dynamic_cast */
@@ -23,8 +24,8 @@ namespace { // Placing utility functions in anonymous namespace.
   template<class U>
   float
   phi(const U* p) {
-    return(p->template isAvailable<float>("phi") ?
-           p->template auxdata<float>("phi") : p->phi());
+    static const SG::ConstAccessor<float> phiAcc("phi");
+    return(phiAcc.isAvailable(*p) ? phiAcc(*p) : p->phi());
   }
 
 // Accessor utility function, for getting the best available value of eta.
@@ -33,8 +34,8 @@ namespace { // Placing utility functions in anonymous namespace.
   template<class U>
   float
   eta(const U* p) {
-    return(p->template isAvailable<float>("eta") ?
-           p->template auxdata<float>("eta") : p->eta());
+    static const SG::ConstAccessor<float> etaAcc("eta");
+    return(etaAcc.isAvailable(*p) ? etaAcc(*p) : p->eta());
   }
 
 // Function to compute dPhi-separation using best available parameter values.

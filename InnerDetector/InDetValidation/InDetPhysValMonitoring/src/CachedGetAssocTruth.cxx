@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -10,6 +10,7 @@
 
  #include "CachedGetAssocTruth.h"
  #include "xAODTruth/TruthParticleContainer.h"
+ #include "AthContainers/ConstAccessor.h"
 
 namespace IDPVM {
   void
@@ -28,10 +29,11 @@ namespace IDPVM {
     }
     using ElementTruthLink_t = ElementLink<xAOD::TruthParticleContainer>;
     const xAOD::TruthParticle* result(nullptr);
+    static const SG::ConstAccessor<ElementTruthLink_t> truthParticleLinkAcc("truthParticleLink");
     // 0. is there any truth?
-    if (trackParticle->isAvailable<ElementTruthLink_t>("truthParticleLink")) {
+    if (truthParticleLinkAcc.isAvailable(*trackParticle)) {
       // 1. ..then get link
-      const ElementTruthLink_t ptruthContainer = trackParticle->auxdata<ElementTruthLink_t>("truthParticleLink");
+      const ElementTruthLink_t ptruthContainer = truthParticleLinkAcc(*trackParticle);
       if (ptruthContainer.isValid()) {
         result = *ptruthContainer;
       }

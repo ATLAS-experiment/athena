@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -11,6 +11,7 @@
 #include "InDetPhysValMonitoringUtilities.h"
 
 #include "InDetPerfPlot_TrackParameters.h"
+#include "AthContainers/ConstAccessor.h"
 #include <cmath>
 using namespace IDPVM;
 
@@ -73,13 +74,19 @@ InDetPerfPlot_TrackParameters::fill(const xAOD::TruthParticle& particle, float w
   float pt = particle.pt() / Gaudi::Units::GeV;
   float phi = particle.phi();
 
-  float d0 = (particle.isAvailable<float>("d0")) ? particle.auxdata<float>("d0") : -9999.;
-  float z0 = (particle.isAvailable<float>("z0")) ? particle.auxdata<float>("z0") : -9999.;
-  float theta = (particle.isAvailable<float>("theta")) ? particle.auxdata<float>("theta") : -9999.;
-  float z0sin = (particle.isAvailable<float>("z0") && particle.auxdata<float>("theta")) ? z0 * std::sin(theta) : -9999.;
-  float qOverP = (particle.isAvailable<float>("qOverP")) ? particle.auxdata<float>("qOverP") : -9999.;
-  float prodR = (particle.isAvailable<float>("prodR")) ? particle.auxdata<float>("prodR") : -9999.;
-  float prodZ = (particle.isAvailable<float>("prodZ")) ? particle.auxdata<float>("prodZ") : -9999.;
+  static const SG::ConstAccessor<float> d0Acc("d0");
+  static const SG::ConstAccessor<float> z0Acc("z0");
+  static const SG::ConstAccessor<float> thetaAcc("theta");
+  static const SG::ConstAccessor<float> qOverPAcc("qOverP");
+  static const SG::ConstAccessor<float> prodRAcc("prodR");
+  static const SG::ConstAccessor<float> prodZAcc("prodZ");
+  float d0 = d0Acc.isAvailable(particle) ? d0Acc(particle) : -9999.;
+  float z0 = z0Acc.isAvailable(particle) ? z0Acc(particle) : -9999.;
+  float theta = thetaAcc.isAvailable(particle) ? thetaAcc(particle) : -9999.;
+  float z0sin = (z0Acc.isAvailable(particle) && z0Acc(particle)) ? z0 * std::sin(theta) : -9999.;
+  float qOverP = qOverPAcc.isAvailable(particle) ? qOverPAcc(particle) : -9999.;
+  float prodR = prodRAcc.isAvailable(particle) ? prodRAcc(particle) : -9999.;
+  float prodZ = prodZAcc.isAvailable(particle) ? prodZAcc(particle) : -9999.;
 
   if(d0 > -9000.) fillHisto(m_truth_d0, d0, weight);
   if(z0 > -9000.) fillHisto(m_truth_z0, z0, weight);
@@ -143,8 +150,8 @@ InDetPerfPlot_TrackParameters::fill(const xAOD::TrackParticle& particle, float w
     if(patternInfo.test(i)) fillHisto(m_reco_author, i, weight);
   }
 
-  static const SG::AuxElement::Accessor< uint8_t > accValidTime("hasValidTime");
-  static const SG::AuxElement::Accessor< float > accTime("time");
+  static const SG::Accessor< uint8_t > accValidTime("hasValidTime");
+  static const SG::Accessor< float > accTime("time");
   if( accValidTime.isAvailable(particle) && accTime.isAvailable(particle) ) {
     if (particle.hasValidTime()) {
       fillHisto(m_reco_time, particle.time(), weight);

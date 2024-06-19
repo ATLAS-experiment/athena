@@ -28,6 +28,7 @@
 #include "xAODTruth/TruthVertex.h"
 #include "xAODTruth/TruthPileupEvent.h"
 #include "xAODTruth/TruthPileupEventAuxContainer.h"
+#include "AthContainers/ConstAccessor.h"
 
 #include "TrkTrack/TrackCollection.h"
 //
@@ -48,8 +49,9 @@ namespace { // utility functions used here
   getMatchingProbability(const xAOD::TrackParticle& trackParticle) {
     float result(std::numeric_limits<float>::quiet_NaN());
 
-    if (trackParticle.isAvailable<float>("truthMatchProbability")) {
-      result = trackParticle.auxdata<float>("truthMatchProbability");
+    static const SG::ConstAccessor<float> truthMatchProbabilityAcc("truthMatchProbability");
+    if (truthMatchProbabilityAcc.isAvailable(trackParticle)) {
+      result = truthMatchProbabilityAcc(trackParticle);
     }
     return result;
   }
@@ -593,7 +595,7 @@ InDetPhysValMonitoringTool::fillHistograms() {
         m_monPlots->fillEfficiency(*thisTruth, matchedTrack, isEfficient, truthMu, actualMu, beamSpotWeight);
         if (m_fillTechnicalEfficiency) {
           ATH_MSG_DEBUG("Filling technical efficiency plots info monitoring plots");
-          static const SG::AuxElement::ConstAccessor< float > nSilHitsAcc("nSilHits");
+          static const SG::ConstAccessor< float > nSilHitsAcc("nSilHits");
           if (nSilHitsAcc.isAvailable(*thisTruth)) {
             if (nSilHitsAcc(*thisTruth) >= m_minHits.value().at(getIndexByEta(*thisTruth))){
               m_monPlots->fillTechnicalEfficiency(*thisTruth, isEfficient,
@@ -920,8 +922,8 @@ StatusCode InDetPhysValMonitoringTool::fillHistogramsTrackingInDenseEnvironment(
 										const xAOD::Vertex* primaryvertex,
 										float beamSpotWeight) {
   // Define accessors
-  static const SG::AuxElement::ConstAccessor<std::vector<ElementLink<xAOD::IParticleContainer> > > ghosttruth("GhostTruth");
-  static const SG::AuxElement::ConstAccessor<int> btagLabel("HadronConeExclTruthLabelID");
+  static const SG::ConstAccessor<std::vector<ElementLink<xAOD::IParticleContainer> > > ghosttruth("GhostTruth");
+  static const SG::ConstAccessor<int> btagLabel("HadronConeExclTruthLabelID");
 
   if (truthParticles.empty()) {
     ATH_MSG_WARNING("No entries in TruthParticles truth particle container. Skipping jet plots.");

@@ -4,6 +4,7 @@
 
 #include "InDetPerfNtuple_TruthToReco.h"
 #include "TruthUtils/MagicNumbers.h"
+#include "AthContainers/ConstAccessor.h"
 
 InDetPerfNtuple_TruthToReco::InDetPerfNtuple_TruthToReco(InDetPlotBase* pParent, const std::string & dirName, const std::string & treeName):
     InDetPerfNtuple(pParent, dirName, treeName), 
@@ -104,10 +105,16 @@ void InDetPerfNtuple_TruthToReco::fillTruth(const xAOD::TruthParticle& truth) {
     m_truth_eta     = truth.eta();
     m_truth_pt      = truth.pt();
     m_truth_phi     = truth.phi();
-    m_truth_d0      = (truth.isAvailable<float>("d0")     ? truth.auxdata<float>("d0")     : m_undefinedValue);
-    m_truth_z0      = (truth.isAvailable<float>("z0")     ? truth.auxdata<float>("z0")     : m_undefinedValue);
-    m_truth_theta   = (truth.isAvailable<float>("theta")  ? truth.auxdata<float>("theta")  : m_undefinedValue);
-    m_truth_qOverP  = (truth.isAvailable<float>("qOverP") ? truth.auxdata<float>("qOverP") : m_undefinedValue);
+
+    static const SG::ConstAccessor<float> d0Acc("d0");
+    static const SG::ConstAccessor<float> z0Acc("z0");
+    static const SG::ConstAccessor<float> thetaAcc("theta");
+    static const SG::ConstAccessor<float> qOverPAcc("qOverP");
+    m_truth_d0      = d0Acc.isAvailable(truth)     ? d0Acc(truth)     : m_undefinedValue;
+    m_truth_z0      = z0Acc.isAvailable(truth)     ? z0Acc(truth)     : m_undefinedValue;
+    m_truth_theta   = thetaAcc.isAvailable(truth)  ? thetaAcc(truth)  : m_undefinedValue;
+    m_truth_qOverP  = qOverPAcc.isAvailable(truth) ? qOverPAcc(truth) : m_undefinedValue;
+
     m_truth_qOverPt = (((m_truth_theta() != m_undefinedValue) && (m_truth_qOverP() != m_undefinedValue)) ? m_truth_qOverP() * (1 / std::sin(m_truth_theta())) : m_undefinedValue);
     m_truth_z0sin   = (((m_truth_theta() != m_undefinedValue) && (m_truth_z0()     != m_undefinedValue)) ? m_truth_z0() * std::sin(m_truth_theta())           : m_undefinedValue);
 }
@@ -136,7 +143,8 @@ void InDetPerfNtuple_TruthToReco::fillTrack(const xAOD::TrackParticle& track, co
     }
     m_track_truthMatchRanking = truthMatchRanking;
 
-    float prob = (track.isAvailable<float>("truthMatchProbability") ? track.auxdata<float>("truthMatchProbability") : m_undefinedValue);
+    static const SG::ConstAccessor<float> truthMatchProbabilityAcc("truthMatchProbability");
+    float prob = (truthMatchProbabilityAcc.isAvailable(track) ? truthMatchProbabilityAcc(track) : m_undefinedValue);
     m_track_truthMatchProb = (!std::isnan(prob) ? prob : m_undefinedValue);
 
     m_track_charge  = track.charge();

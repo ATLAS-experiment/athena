@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -8,6 +8,7 @@
  **/
 
 #include "InDetPerfPlot_HitResidual.h"
+#include "AthContainers/ConstAccessor.h"
 
 using namespace TMath;
 
@@ -127,25 +128,37 @@ InDetPerfPlot_HitResidual::initializePlots() {
 
 void
 InDetPerfPlot_HitResidual::fill(const xAOD::TrackParticle& trkprt, float weight) {
-  const static bool hitDetailsAvailable = trkprt.isAvailable<std::vector<int> >("measurement_region");
+  static const SG::ConstAccessor<std::vector<int> >
+    measurement_regionAcc("measurement_region");
+  const static bool hitDetailsAvailable = measurement_regionAcc.isAvailable(trkprt);
 
   if (!hitDetailsAvailable) {
     if (m_warnCount++ < 10) {
       ATH_MSG_WARNING("The hit res plots dont see any data (note:only 10 warnings issued)");
     }
   } else {
-    const std::vector<int>& result_det = trkprt.auxdata< std::vector<int> >("measurement_det");
+    static const SG::ConstAccessor< std::vector<int> > measurement_detAcc("measurement_det");
+    const std::vector<int>& result_det = measurement_detAcc(trkprt);
 
     if (!result_det.empty()) {
-      const std::vector<int>& result_measureType = trkprt.auxdata< std::vector<int> >("measurement_type");
-      const std::vector<int>& result_region = trkprt.auxdata< std::vector<int> >("measurement_region");
+      static const SG::ConstAccessor< std::vector<int> > measurement_typeAcc("measurement_type");
+      static const SG::ConstAccessor< std::vector<int> > measurement_regionAcc("measurement_region");
+      static const SG::ConstAccessor< std::vector<float> > hitResiduals_residualLocXAcc("hitResiduals_residualLocX");
+      static const SG::ConstAccessor< std::vector<float> > hitResiduals_pullLocXAcc("hitResiduals_pullLocX");
+      static const SG::ConstAccessor< std::vector<float> > hitResiduals_residualLocYAcc("hitResiduals_residualLocY");
+      static const SG::ConstAccessor< std::vector<float> > hitResiduals_pullLocYAcc("hitResiduals_pullLocY");
+      static const SG::ConstAccessor< std::vector<int> > hitResiduals_phiWidthAcc("hitResiduals_phiWidth");
+      static const SG::ConstAccessor< std::vector<int> > hitResiduals_etaWidthAcc("hitResiduals_etaWidth");
+
+      const std::vector<int>& result_measureType = measurement_typeAcc(trkprt);
+      const std::vector<int>& result_region = measurement_regionAcc(trkprt);
       // const std::vector<int> &result_iLayer = trkprt.auxdata< std::vector<int> >("HitResiduals_iLayer");
-      const std::vector<float>& result_residualLocX = trkprt.auxdata< std::vector<float> >("hitResiduals_residualLocX");
-      const std::vector<float>& result_pullLocX = trkprt.auxdata< std::vector<float> >("hitResiduals_pullLocX");
-      const std::vector<float>& result_residualLocY = trkprt.auxdata< std::vector<float> >("hitResiduals_residualLocY");
-      const std::vector<float>& result_pullLocY = trkprt.auxdata< std::vector<float> >("hitResiduals_pullLocY");
-      const std::vector<int>& result_phiWidth = trkprt.auxdata< std::vector<int> >("hitResiduals_phiWidth");
-      const std::vector<int>& result_etaWidth = trkprt.auxdata< std::vector<int> >("hitResiduals_etaWidth");
+      const std::vector<float>& result_residualLocX = hitResiduals_residualLocXAcc(trkprt);
+      const std::vector<float>& result_pullLocX = hitResiduals_pullLocXAcc(trkprt);
+      const std::vector<float>& result_residualLocY = hitResiduals_residualLocYAcc(trkprt);
+      const std::vector<float>& result_pullLocY = hitResiduals_pullLocYAcc(trkprt);
+      const std::vector<int>& result_phiWidth = hitResiduals_phiWidthAcc(trkprt);
+      const std::vector<int>& result_etaWidth = hitResiduals_etaWidthAcc(trkprt);
 
       const float eta = trkprt.eta();
 

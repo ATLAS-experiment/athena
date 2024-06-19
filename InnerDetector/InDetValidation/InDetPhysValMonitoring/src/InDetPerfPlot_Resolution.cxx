@@ -13,6 +13,7 @@
 #include <cmath>
 #include "logLinearBinning.h"
 #include "TruthUtils/MagicNumbers.h"
+#include "AthContainers/ConstAccessor.h"
 
 namespace{
   constexpr float undefinedValue{-9999.};
@@ -426,8 +427,9 @@ InDetPerfPlot_Resolution::getTrackParameters(const xAOD::TruthParticle& truthprt
   // Perigee for truth particles are in aux container
   for (int iParams = 0; iParams < NPARAMS; iParams++) {
     m_truetrkP[iParams] = undefinedValue;
-    if (truthprt.isAvailable<float>(m_paramProp[iParams])) {
-      m_truetrkP[iParams] = (truthprt.auxdata<float>(m_paramProp[iParams]));
+    SG::ConstAccessor<float> acc(m_paramProp[iParams]);
+    if (acc.isAvailable(truthprt)) {
+      m_truetrkP[iParams] = acc(truthprt);
     }
   }
   //rescale Pt 
@@ -435,7 +437,8 @@ InDetPerfPlot_Resolution::getTrackParameters(const xAOD::TruthParticle& truthprt
   //special cases
   //need both theta and qOverP for qOverPT
   //we didnt check qOverP yet, since the closest named variable (strangely; see header) is ptqopt
-  const float qOverP = truthprt.isAvailable<float>("qOverP") ? truthprt.auxdata<float>("qOverP") : undefinedValue;
+  static const SG::ConstAccessor<float> qOverPAcc("qOverP");
+  const float qOverP = qOverPAcc.isAvailable(truthprt) ? qOverPAcc(truthprt) : undefinedValue;
   if ((qOverP != undefinedValue) and (m_truetrkP[THETA] != undefinedValue)){
     const float sinTheta =std::sin(m_truetrkP[THETA]);
     if (std::abs(sinTheta) > smallestAllowableSin){

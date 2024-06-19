@@ -13,6 +13,7 @@
 #include "xAODTruth/TruthParticle.h"
 #include "xAODTruth/TruthVertex.h"
 #include "TruthUtils/MagicNumbers.h"
+#include "AthContainers/ConstAccessor.h"
 #include <cmath> // std::isnan()
 #include <limits>
 
@@ -98,8 +99,9 @@ InDetRttPlots::fill(const xAOD::TrackParticle& particle, const xAOD::TruthPartic
   // fill measurement bias, resolution, and pull plots
 
   // fill ITK resolutions (bias / resolutions)
-  if (particle.isAvailable<float>(m_trackParticleTruthProbKey)) {
-    const float prob = particle.auxdata<float>(m_trackParticleTruthProbKey);
+  SG::ConstAccessor<float> tpTruthProbKeyAcc(m_trackParticleTruthProbKey);
+  if (tpTruthProbKeyAcc.isAvailable(particle)) {
+    const float prob = tpTruthProbKeyAcc(particle);
     int uniqueID = HepMC::uniqueID(truthParticle);
     if (!HepMC::is_simulation_particle(&truthParticle) && uniqueID != HepMC::UNDEFINED_ID && prob > 0.5) {
         if (m_resolutionPlotPrim) m_resolutionPlotPrim->fill(particle, truthParticle, weight);
