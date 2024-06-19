@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include "../CscRdoToCscDigit.h"
 #include "../MM_DigitToRDO.h"
@@ -9,21 +9,13 @@
 #include "../STGC_DigitToRDO.h"
 #include "../STGC_RdoToDigit.h"
 #include "../TgcRdoToTgcDigit.h"
-#include "MuonByteStreamCnvTest/CscDigitToCscRDO.h"
-#include "MuonByteStreamCnvTest/MdtDigitToMdtRDO.h"
-#include "MuonByteStreamCnvTest/MuonRdoToMuonDigit.h"
-#include "MuonByteStreamCnvTest/MuonRdoToMuonDigitTool.h"
-#include "MuonByteStreamCnvTest/ReadCscDigit.h"
-#include "MuonByteStreamCnvTest/ReadMdtDigit.h"
-#include "MuonByteStreamCnvTest/ReadMdtPRD.h"
-#include "MuonByteStreamCnvTest/ReadMdtRDO.h"
-#include "MuonByteStreamCnvTest/ReadRpcDigit.h"
-#include "MuonByteStreamCnvTest/ReadRpcRDO.h"
-#include "MuonByteStreamCnvTest/ReadTgcDigit.h"
-#include "MuonByteStreamCnvTest/ReadTgcRDO.h"
-#include "MuonByteStreamCnvTest/RpcDigitToRpcRDO.h"
-#include "MuonByteStreamCnvTest/NrpcDigitToNrpcRDO.h"
-#include "MuonByteStreamCnvTest/TgcDigitToTgcRDO.h"
+#include "../CscDigitToCscRDO.h"
+#include "../MdtDigitToMdtRDO.h"
+#include "../MuonRdoToMuonDigit.h"
+#include "../MuonRdoToMuonDigitTool.h"
+#include "../RpcDigitToRpcRDO.h"
+#include "../NrpcDigitToNrpcRDO.h"
+#include "../TgcDigitToTgcRDO.h"
 
 DECLARE_COMPONENT(RpcDigitToRpcRDO)
 DECLARE_COMPONENT(NrpcDigitToNrpcRDO)
@@ -33,15 +25,6 @@ DECLARE_COMPONENT(CscDigitToCscRDO)
 DECLARE_COMPONENT(STGC_DigitToRDO)
 DECLARE_COMPONENT(MM_DigitToRDO)
 
-DECLARE_COMPONENT(ReadRpcRDO)
-DECLARE_COMPONENT(ReadMdtRDO)
-DECLARE_COMPONENT(ReadTgcRDO)
-
-DECLARE_COMPONENT(ReadRpcDigit)
-DECLARE_COMPONENT(ReadMdtDigit)
-DECLARE_COMPONENT(ReadTgcDigit)
-DECLARE_COMPONENT(ReadCscDigit)
-DECLARE_COMPONENT(ReadMdtPRD)
 DECLARE_COMPONENT(CscRdoToCscDigit)
 DECLARE_COMPONENT(MdtRdoToMdtDigit)
 DECLARE_COMPONENT(RpcRdoToRpcDigit)

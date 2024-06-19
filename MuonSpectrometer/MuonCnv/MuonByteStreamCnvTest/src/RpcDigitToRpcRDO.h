@@ -7,7 +7,7 @@
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ServiceHandle.h"
-#include "MuonByteStreamCnvTest/RpcByteStreamDecoder.h"
+#include "RpcByteStreamDecoder.h"
 #include "MuonDigitContainer/RpcDigitContainer.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonRDO/RpcPad.h"

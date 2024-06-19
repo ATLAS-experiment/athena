@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "MuonByteStreamCnvTest/RpcByteStreamEncoder.h"
+#include "RpcByteStreamEncoder.h"
 
 RpcByteStreamEncoder::RpcByteStreamEncoder(const RpcPadContainer* padContainer) :
     m_padContainer(padContainer), m_byteStream(), m_byteStreamWord(0), m_highest(true) {}

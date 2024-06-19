@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "MuonByteStreamCnvTest/RpcByteStreamDecoder.h"
+#include "RpcByteStreamDecoder.h"
 
 namespace {
-    constexpr unsigned int const& rpcRawHitWordLength = 7;
+    constexpr unsigned int const rpcRawHitWordLength = 7;
 }
 
 RpcByteStreamDecoder::RpcByteStreamDecoder(const RPCbytestream* p_bytestream, const RpcCablingCondData* readCdo, const RpcIdHelper* rpcId,

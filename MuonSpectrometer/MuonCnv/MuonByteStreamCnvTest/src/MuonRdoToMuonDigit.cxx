@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "MuonByteStreamCnvTest/MuonRdoToMuonDigit.h"
+#include "MuonRdoToMuonDigit.h"
 
 MuonRdoToMuonDigit::MuonRdoToMuonDigit(const std::string& name, ISvcLocator* pSvcLocator) : AthAlgorithm(name, pSvcLocator) {}
 
