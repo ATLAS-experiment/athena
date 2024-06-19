@@ -18,6 +18,7 @@ class ElectronCalibrationConfig (ConfigBlock) :
 
     def __init__ (self, containerName='') :
         super (ElectronCalibrationConfig, self).__init__ ()
+        self.setBlockName('Electrons')
         self.addOption ('containerName', containerName, type=str,
             noneAction='error',
             info="the name of the output container after calibration.")
