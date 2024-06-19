@@ -14,6 +14,7 @@ Reco_tf.py --CA \
   --AMI q454 \
   --outputAODFile myAOD.pool.root \
   --preExec 'flags.Exec.FPE=10' \
+  --conditionsTag "OFLCOND-MC23-SDR-RUN3-05" \
   --runNumber=601229 \
   --DataRunNumber=450000 \
   --maxEvents 1000
