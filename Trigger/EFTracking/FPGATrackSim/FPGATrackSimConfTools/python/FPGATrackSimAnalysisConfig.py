@@ -554,7 +554,29 @@ if __name__ == "__main__":
         flags.Trigger.FPGATrackSim.wrapperFileName = [flags.Trigger.FPGATrackSim.wrapperFileName]
         flags.Input.Files = lambda f: [f.Trigger.FPGATrackSim.wrapperFileName]
     
+    ############################################
+    # Flags used in the prototrack chain
+    FinalProtoTrackChainxAODTracksKey="xAODFPGAProtoTracks"
+    flags.Detector.EnableCalo = False
+
+    # ensure that the xAOD SP and cluster containers are available
+    flags.Tracking.ITkMainPass.doAthenaToActsSpacePoint=True
+    flags.Tracking.ITkMainPass.doAthenaToActsCluster=True
+
+    flags.Acts.doRotCorrection = False
+
+    # IDPVM flags
+    flags.PhysVal.IDPVM.doExpertOutput   = True
+    flags.PhysVal.IDPVM.doPhysValOutput  = True
+    flags.PhysVal.IDPVM.doHitLevelPlots = True
+    flags.PhysVal.IDPVM.runDecoration = True
+    flags.PhysVal.IDPVM.validateExtraTrackCollections = [f"{FinalProtoTrackChainxAODTracksKey}TrackParticles"]
+    flags.PhysVal.IDPVM.doTechnicalEfficiency = False # should figure out if 'True' is needed and what's missing to enable it
+    flags.PhysVal.OutputFileName = "IDPVM.root"
+    ############################################
+    
     flags.lock()
+    flags = flags.cloneAndReplace("Tracking.ActiveConfig","Tracking.MainPass")
     acc=MainServicesCfg(flags)
 
     acc.addService(CompFactory.THistSvc(Output = ["EXPERT DATAFILE='monitoring.root', OPT='RECREATE'"]))
@@ -576,16 +598,28 @@ if __name__ == "__main__":
         if not flags.Reco.EnableTrackOverlay:
             from InDetConfig.TrackRecoConfig import InDetTrackRecoCfg
             acc.merge(InDetTrackRecoCfg(flags))
-
+    
     acc.merge(FPGATrackSimLogicalHistProcessAlgCfg(flags))
     if flags.Trigger.FPGATrackSim.doEDMConversion:
         acc.merge(FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlg_1st', stage = '_1st', doActsTrk=True))
+        
+        from FPGATrackSimPrototrackFitter.FPGATrackSimPrototrackFitterConfig import FPGAPrototrackFitAndMonitoringCfg
+        acc.merge(FPGAPrototrackFitAndMonitoringCfg(flags,FinalProtoTrackChainxAODTracksKey=FinalProtoTrackChainxAODTracksKey,stage='_1st')) # Run ACTS KF + IDPVM for 1st stage
+            
         if flags.Trigger.FPGATrackSim.writeToAOD: acc.merge(WriteToAOD(flags, stage = '_1st'))
         if flags.Trigger.FPGATrackSim.Hough.secondStage : acc.merge(FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlg_2nd', stage = '_2nd')) # Default disabled, doesn't work if enabled
         if flags.Trigger.FPGATrackSim.convertUnmappedHits: acc.merge(FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlgUnmapped_1st', stage = 'Unmapped_1st', doClusters = False))
         if flags.Trigger.FPGATrackSim.Hough.hitFiltering : acc.merge(FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlgFiltered_1st', stage = 'Filtered_1st', doHits = False)) # Default disabled, works if enabled
         #if flags.Trigger.FPGATrackSim.Hough.spacePoints : acc.merge(FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlgSpacePoints_1st', stage = 'SpacePoints_1st')) # TODO
 
+        # Add the truth decorators
+        from InDetPhysValMonitoring.InDetPhysValDecorationConfig import AddDecoratorCfg
+        acc.merge(AddDecoratorCfg(flags))
+
+        # IDPVM running
+        from InDetPhysValMonitoring.InDetPhysValMonitoringConfig import InDetPhysValMonitoringCfg
+        acc.merge(InDetPhysValMonitoringCfg(flags))
+    
     acc.store(open('AnalysisConfig.pkl','wb'))
     
     statusCode = acc.run(flags.Exec.MaxEvents)
