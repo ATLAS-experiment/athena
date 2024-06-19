@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -11,6 +11,7 @@
 #include "InDetPhysValMonitoringUtilities.h"
 
 #include "InDetPerfPlot_TRTExtension.h"
+#include "AthContainers/ConstAccessor.h"
 
 #include <cmath>
 
@@ -160,8 +161,10 @@ InDetPerfPlot_TRTExtension::fill(const xAOD::TrackParticle& particle, const xAOD
   float track_qopt = saneSineValue ? particle.qOverP()*inverseSinTheta : undefinedValue;
   const float qopterr = std::sqrt(particle.definingParametersCovMatrix()(4, 4)) * inverseSinTheta;
 
-  const float truth_qop = truthParticle.isAvailable<float>("qOverP") ? truthParticle.auxdata<float>("qOverP") : undefinedValue;
-  const float truth_theta = truthParticle.isAvailable<float>("theta") ? truthParticle.auxdata<float>("theta") : undefinedValue;
+  static const SG::ConstAccessor<float> qOverPAcc("qOverP");
+  static const SG::ConstAccessor<float> thetaAcc("theta");
+  const float truth_qop = qOverPAcc.isAvailable(truthParticle) ? qOverPAcc(truthParticle) : undefinedValue;
+  const float truth_theta = thetaAcc.isAvailable(truthParticle) ? thetaAcc(truthParticle) : undefinedValue;
   float truth_qopt = std::abs(truth_theta) > 0 ? truth_qop * 1/(std::sin(truth_theta)) : undefinedValue;
 
   float ptres = (track_qopt - truth_qopt) * ( 1 / truth_qopt);

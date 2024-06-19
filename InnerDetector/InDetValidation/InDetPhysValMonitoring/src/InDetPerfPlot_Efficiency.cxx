@@ -4,6 +4,7 @@
 
 #include "InDetPerfPlot_Efficiency.h"
 #include "xAODTruth/TruthVertex.h"
+#include "AthContainers/ConstAccessor.h"
 #include "logLinearBinning.h"
 #include "GaudiKernel/SystemOfUnits.h" //for Gaudi::Units
 using namespace IDPVM;
@@ -117,10 +118,14 @@ InDetPerfPlot_Efficiency::fill(const xAOD::TruthParticle& truth, const bool isGo
   fillHisto(m_efficiency_vs_pt_log, pt, isGood, weight);
   fillHisto(m_efficiency_vs_lowpt, pt, isGood, weight);
 
-  double d0 = truth.auxdata<float>("d0");
-  double z0 = truth.auxdata<float>("z0");
-  double R = truth.auxdata<float>("prodR");
-  double Z = truth.auxdata<float>("prodZ");
+  static const SG::ConstAccessor<float> d0Acc("d0");
+  static const SG::ConstAccessor<float> z0Acc("z0");
+  static const SG::ConstAccessor<float> prodRAcc("prodR");
+  static const SG::ConstAccessor<float> prodZAcc("prodZ");
+  double d0 = d0Acc(truth);
+  double z0 = z0Acc(truth);
+  double R = prodRAcc(truth);
+  double Z = prodZAcc(truth);
   fillHisto(m_efficiency_vs_d0, d0, isGood, weight);
   fillHisto(m_efficiency_vs_d0_abs, std::abs(d0), isGood, weight);
   fillHisto(m_efficiency_vs_z0, z0, isGood, weight);
@@ -168,8 +173,10 @@ InDetPerfPlot_Efficiency::fillTechnicalEfficiency(const xAOD::TruthParticle& tru
   fillHisto(m_technical_efficiency_vs_pt, pt, isGood, weight);
   fillHisto(m_technical_efficiency_vs_phi, phi, isGood, weight);
 
-  double d0 = truth.auxdata<float>("d0");
-  double z0 = truth.auxdata<float>("z0");
+  static const SG::ConstAccessor<float> d0Acc("d0");
+  static const SG::ConstAccessor<float> z0Acc("z0");
+  double d0 = d0Acc(truth);
+  double z0 = z0Acc(truth);
   fillHisto(m_technical_efficiency_vs_d0, d0, isGood, weight);
   fillHisto(m_technical_efficiency_vs_z0, z0, isGood, weight);
   fillHisto(m_technical_efficiency_vs_truthMu, truthMu, isGood, weight);

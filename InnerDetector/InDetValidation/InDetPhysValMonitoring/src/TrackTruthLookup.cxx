@@ -1,8 +1,9 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrackTruthLookup.h"
+#include "AthContainers/ConstAccessor.h"
 
 namespace IDPVM {
 // Utility function to get the linked truth particle from a track.
@@ -13,10 +14,11 @@ namespace IDPVM {
     const xAOD::TruthParticle* result(nullptr);
 
     // Check whether truthParticleLink exists.
-    if (track.isAvailable<ElementTruthLink_t>("truthParticleLink")) {
+    static const SG::ConstAccessor<ElementTruthLink_t> truthParticleLinkAcc("truthParticleLink");
+    if (truthParticleLinkAcc.isAvailable(track)) {
       // If so, get linked xAOD::TruthParticle.
       const ElementTruthLink_t ptruthContainer =
-        track.auxdata<ElementTruthLink_t>("truthParticleLink");
+        truthParticleLinkAcc(track);
       if (ptruthContainer.isValid()) {
         result = *ptruthContainer;
       }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -10,6 +10,7 @@
 #include "InDetPerfPlot_HitEfficiency.h"
 #include "InDetPhysHitDecoratorAlg.h"
 #include "xAODTracking/TrackParticle.h"
+#include "AthContainers/ConstAccessor.h"
 #include "TProfile.h"
 #include "TEfficiency.h"
 #include <vector>
@@ -54,16 +55,19 @@ InDetPerfPlot_HitEfficiency::fill(const xAOD::TrackParticle& trkprt, float weigh
     ATH_MSG_INFO("Filling HitEfficiency");
   }
 
-  const bool hitDetailsAvailable = trkprt.isAvailable<std::vector<int> >("measurement_region");
+  static const SG::ConstAccessor< std::vector<int> > measurement_regionAcc("measurement_region");
+  const bool hitDetailsAvailable = measurement_regionAcc.isAvailable(trkprt);
   if (!hitDetailsAvailable) {
     if (m_warnCount++ < 10) {
       ATH_MSG_WARNING("The HitEff plots dont see any data (note: only 10 warnings issued)");
     }
   } else {
-    const std::vector<int>& result_det = trkprt.auxdata< std::vector<int> >("measurement_det");
+    static const SG::ConstAccessor< std::vector<int> > measurement_detAcc("measurement_det");
+    const std::vector<int>& result_det = measurement_detAcc(trkprt);
     if (!result_det.empty()) {
-      const std::vector<int>& result_measureType = trkprt.auxdata< std::vector<int> >("measurement_type");
-      const std::vector<int>& result_region = trkprt.auxdata< std::vector<int> >("measurement_region");
+      static const SG::ConstAccessor< std::vector<int> > measurement_typeAcc("measurement_type");
+      const std::vector<int>& result_measureType = measurement_typeAcc(trkprt);
+      const std::vector<int>& result_region = measurement_regionAcc(trkprt);
       // const std::vector<int> &result_iLayer = trkprt.auxdata< std::vector<int> >("hitResiduals_iLayer");
       // NP: this should be fine... residual filled with -1 if not hit
 
