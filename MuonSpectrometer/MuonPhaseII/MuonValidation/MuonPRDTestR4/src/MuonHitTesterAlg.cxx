@@ -1,0 +1,64 @@
+/*
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
+#include "MuonHitTesterAlg.h"
+
+#include "MuonTesterTree/EventInfoBranch.h"
+#include "MuonPRDTestR4/SimHitTester.h"
+using namespace MuonVal;
+namespace MuonValR4 {
+    MuonHitTesterAlg::MuonHitTesterAlg(const std::string& alg_name,
+                                    ISvcLocator* pSvcLocator):
+        AthHistogramAlgorithm{alg_name, pSvcLocator}{} 
+            
+    StatusCode MuonHitTesterAlg::initialize(){
+        int evOpts{0};
+        if (m_isMC) evOpts |= EventInfoBranch::isMC;
+        
+        m_tree.addBranch(std::make_shared<EventInfoBranch>(m_tree, evOpts));
+        ATH_CHECK(setupSimHits());
+        ATH_CHECK(m_tree.init(this));
+        return StatusCode::SUCCESS;
+    }
+        StatusCode MuonHitTesterAlg::setupSimHits() {
+        if (!m_writeSimHits || !m_isMC){
+            return StatusCode::SUCCESS;
+        }
+        if (m_writeMdtSim) {
+            m_tree.addBranch(std::make_shared<SimHitTester>(m_tree, m_mdtSimHitKey, 
+                                                            ActsTrk::DetectorType::Mdt,
+                                                            msgLevel()));
+        }
+        if (m_writeRpcSim) {
+            m_tree.addBranch(std::make_shared<SimHitTester>(m_tree, m_rpcSimHitKey, 
+                                                            ActsTrk::DetectorType::Rpc,
+                                                            msgLevel()));
+        }
+        if (m_writeTgcSim) {
+            m_tree.addBranch(std::make_shared<SimHitTester>(m_tree, 
+                                                            m_tgcSimHitKey, 
+                                                            ActsTrk::DetectorType::Tgc,                                  
+                                                            msgLevel()));
+        }
+        if (m_writesTgcSim) {
+            m_tree.addBranch(std::make_shared<SimHitTester>(m_tree, m_sTgcSimHitKey, 
+                                                            ActsTrk::DetectorType::sTgc,
+                                                            msgLevel()));
+        }
+        if (m_writeMmSim) {
+            m_tree.addBranch(std::make_shared<SimHitTester>(m_tree, m_mmSimHitKey, 
+                                                            ActsTrk::DetectorType::Mm, 
+                                                            msgLevel()));
+        }
+        return StatusCode::SUCCESS;
+    }
+
+    StatusCode MuonHitTesterAlg::finalize(){
+        ATH_CHECK(m_tree.write());
+        return StatusCode::SUCCESS;
+    }
+    StatusCode MuonHitTesterAlg::execute(){
+        const EventContext& ctx{Gaudi::Hive::currentContext()};
+        return m_tree.fill(ctx) ? StatusCode::SUCCESS : StatusCode::FAILURE;
+    }
+}
