@@ -1,8 +1,9 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTrackMonitoring/RecoVertexPlots.h"
+#include "AthContainers/ConstAccessor.h"
 
 
 RecoVertexPlots::RecoVertexPlots(PlotBase *pParent, const std::string& sDir):PlotBase(pParent, sDir),
@@ -26,9 +27,12 @@ void RecoVertexPlots::initializePlots(){
 
 void RecoVertexPlots::fill(const xAOD::Vertex& msVx){    
     TVector3 tmp_vx; tmp_vx.SetXYZ(msVx.x(),msVx.y(),msVx.z());
-    m_nMDT->Fill(msVx.auxdata< int >( "nMDT" ));
-    m_nRPC->Fill(msVx.auxdata< int >( "nRPC" ));
-    m_nTGC->Fill(msVx.auxdata< int >( "nTGC" ));
+    static const SG::ConstAccessor< int > nMDTAcc( "nMDT" );
+    static const SG::ConstAccessor< int > nRPCAcc( "nRPC" );
+    static const SG::ConstAccessor< int > nTGCAcc( "nTGC" );
+    m_nMDT->Fill(nMDTAcc(msVx));
+    m_nRPC->Fill(nRPCAcc(msVx));
+    m_nTGC->Fill(nTGCAcc(msVx));
     m_nTracklets->Fill(msVx.numberDoF()+1.);
     m_VertexEtaPhi->Fill(tmp_vx.Eta(),tmp_vx.Phi());
 }
