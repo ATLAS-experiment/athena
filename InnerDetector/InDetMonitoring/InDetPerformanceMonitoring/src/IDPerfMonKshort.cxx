@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // **********************************************************************
@@ -40,6 +40,7 @@
 #include "GaudiKernel/IInterface.h"
 
 #include "InDetPerformanceMonitoring/IDPerfMonKshort.h"
+#include "AthContainers/ConstAccessor.h"
 
 
 namespace{ //utility functions
@@ -424,11 +425,16 @@ StatusCode IDPerfMonKshort::fillHistograms()
   //
   for (const auto* secVx_elem : *SecVxContainer) {
    ATH_MSG_DEBUG("Looping over SecVxContainer name : "<< m_VxContainerName);
-   double ksMass = secVx_elem->auxdata< float >("Kshort_mass");
-   double ksPt = secVx_elem->auxdata< float >("pT");
-   double ksPx = secVx_elem->auxdata< float >("px");
-   double ksPy = secVx_elem->auxdata< float >("py");
-   double ksPz = secVx_elem->auxdata< float >("pz");
+   static const SG::ConstAccessor< float > Kshort_massAcc("Kshort_mass");
+   static const SG::ConstAccessor< float > pTAcc("pT");
+   static const SG::ConstAccessor< float > pxAcc("px");
+   static const SG::ConstAccessor< float > pyAcc("py");
+   static const SG::ConstAccessor< float > pzAcc("pz");
+   double ksMass = Kshort_massAcc(*secVx_elem);
+   double ksPt = pTAcc(*secVx_elem);
+   double ksPx = pxAcc(*secVx_elem);
+   double ksPy = pyAcc(*secVx_elem);
+   double ksPz = pzAcc(*secVx_elem);
    ATH_MSG_DEBUG( " mass : "<<ksMass << " pt : "<< ksPt << " px : "<< ksPx <<  " py : "<< ksPy << " pz : "<< ksPz);
    CLHEP::Hep3Vector ksMomentumVector = CLHEP::Hep3Vector(ksPx,ksPy,ksPz);
    double ksMomentum = ksMomentumVector.mag();
@@ -513,7 +519,8 @@ StatusCode IDPerfMonKshort::fillHistograms()
     ATH_MSG_DEBUG( "ksTau = " << properDecayTime << " Lxy = " <<transverseFlightDistance<< " cosTheta = " << cosThetaPointing );
     ATH_MSG_DEBUG( "trackPos nSVThits = " << trackPos_nSVTHits << " trackNeg nSVThits = " << trackNeg_nSVTHits );
     ATH_MSG_DEBUG( "ksPt = " << ksPt );
-    double secVertex_radius = secVx_elem->auxdata< float >("Rxy");
+    static const SG::ConstAccessor< float > RxyAcc("Rxy");
+    double secVertex_radius = RxyAcc(*secVx_elem);
     ATH_MSG_DEBUG("secondary vertex radius : " << secVertex_radius);
     m_radius_secVertices->Fill(secVertex_radius);
     m_radiusVsZ_secVertex->Fill(secVxPosition.z(),secVertex_radius);
@@ -582,7 +589,7 @@ StatusCode IDPerfMonKshort::fillHistograms()
     quickBin -= 500;
     quickBin /= 100;
     m_massVPtBinHistos[quickBin]->Fill(fillValue);
-    double radius = secVx_elem->auxdata< float >("Rxy");
+    double radius = RxyAcc(*secVx_elem);
     m_radius->Fill(radius);
     if (radius>=0.){
       auto radiusIdx = findLevel(radiusBinning.begin(), radiusBinning.end(), radius, std::less_equal<double>());

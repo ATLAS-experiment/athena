@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //==================================================================================
@@ -23,6 +23,7 @@
 
 #include "xAODMuon/Muon.h"
 #include "xAODMuon/MuonContainer.h"
+#include "AthContainers/Decorator.h"
 
 #include "CLHEP/Units/SystemOfUnits.h"
 #include "CLHEP/Units/PhysicalConstants.h"
@@ -135,8 +136,10 @@ bool ZmumuEvent::Reco (int theLumiBlock)
       idtrk = muon->trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
       metrk = muon->trackParticle(xAOD::Muon::ExtrapolatedMuonSpectrometerTrackParticle);
       if (idtrk && metrk) {
-	muon->auxdecor<float>("InnerDetectorPt") = idtrk->pt();      
-	muon->auxdecor<float>("MuonSpectrometerPt") = metrk->pt();
+	static const SG::Decorator<float> InnerDetectorPtAcc("InnerDetectorPt");
+	static const SG::Decorator<float> MuonSpectrometerPtAcc("MuonSpectrometerPt");
+	InnerDetectorPtAcc(*muon) = idtrk->pt();
+	MuonSpectrometerPtAcc(*muon) = metrk->pt();
       }
     }
   }

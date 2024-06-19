@@ -39,6 +39,7 @@
 /** missing ET */
 #include "xAODMissingET/MissingET.h"
 #include "xAODMissingET/MissingETContainer.h"
+#include "AthContainers/ConstAccessor.h"
 
 //==================================================================================
 // Public Methods
@@ -2078,11 +2079,10 @@ StatusCode IDPerfMonZmumu::FillTruthParameters(const xAOD::TrackParticle* trackP
     return StatusCode::FAILURE;
   }
 
-  float result(std::numeric_limits<float>::quiet_NaN());
-  if (trackParticle->isAvailable<float>("truthMatchProbability")){
-    result = trackParticle->auxdata<float>("truthMatchProbability" );
-    ATH_MSG_DEBUG(" -- FillTruthParameters -- TruthMatchProbablity of trackpartile : > " << result); 
-  }
+  static const SG::ConstAccessor<float> truthMatchProbabilityAcc("truthMatchProbability");
+  float result = truthMatchProbabilityAcc.withDefault(*trackParticle,
+                                                      std::numeric_limits<float>::quiet_NaN());
+  ATH_MSG_DEBUG(" -- FillTruthParameters -- TruthMatchProbablity of trackpartile : > " << result);
 
 
   const xAOD::TruthParticle* particle = getTruthParticle( *trackParticle );
@@ -2113,13 +2113,15 @@ StatusCode IDPerfMonZmumu::FillTruthParameters(const xAOD::TrackParticle* trackP
 
 
   if (particle->parent(0) != nullptr) {
-    if (particle->isAvailable<int>("truthType")) {
+    static const SG::ConstAccessor<int> truthTypeAcc("truthType");
+    static const SG::ConstAccessor<int> truthOriginAcc("truthOrigin");
+    if (truthTypeAcc.isAvailable(*particle)) {
       ATH_MSG_DEBUG(" -- FillTruthParameters -- truth particle is good. pdg: " << particle->pdgId() 
 		    << "  type: " << particle->type()
 		    << "  nparents " << particle->nParents()
 		    << "  parent->pdg: " << particle->parent(0)->pdgId()
-		    << "  truthType: " << particle->auxdata<int>("truthType")
-		    << "  truthOrigin: " << const_cast<xAOD::TruthParticle*>(particle)->auxdata<int>("truthOrigin")
+		    << "  truthType: " << truthTypeAcc(*particle)
+		    << "  truthOrigin: " << truthOriginAcc(*particle)
 		    );
 
     }
@@ -2264,7 +2266,7 @@ const xAOD::TruthParticle* IDPerfMonZmumu::getTruthParticle( const xAOD::IPartic
   /// A convenience type declaration
   typedef ElementLink< xAOD::TruthParticleContainer > Link_t;
   /// A static accessor for the information
-  static const SG::AuxElement::ConstAccessor< Link_t > acc( "truthParticleLink" );
+  static const SG::ConstAccessor< Link_t > acc( "truthParticleLink" );
   // Check if such a link exists on the object:
   if( ! acc.isAvailable( p ) ) {
     return nullptr;
