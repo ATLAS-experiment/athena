@@ -62,9 +62,9 @@ namespace LArSamples {
 
     TVectorD m_xi, m_xip;
     CovMatrix m_xiErr, m_xipErr;
-    double m_tbar;
-    int m_n;
-    ShapeErrorType m_shapeErrorType;
+    double m_tbar{};
+    int m_n{};
+    ShapeErrorType m_shapeErrorType{CellShapeError};
   };
 }
 

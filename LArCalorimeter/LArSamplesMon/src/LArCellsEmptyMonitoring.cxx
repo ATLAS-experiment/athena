@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArCellsEmptyMonitoring
@@ -12,12 +12,7 @@
 //
 
 // Base includes
-#include <map>
-#include <utility>
 
-#include <vector>
-#include <fstream>
-#include <iostream>
 // Package includes
 #include "LArSamplesMon/LArCellsEmptyMonitoring.h"
 #include "LArSamplesMon/Data.h"
@@ -46,20 +41,14 @@
 #include "TAxis.h"
 #include "TKey.h"
 
-// forward declarations
+#include <array>
+#include <map>
+#include <cstdio>//fopen, fprintf
+#include <iostream>
+
 using namespace std;
 using namespace LArSamples;
-/*namespace LArSamples { 
-  struct Definitions;
-  class Data;
-  class Interface;
-  class HistoryIterator;
-  class History;
-  class CellInfo;
-  class ShapeInfo;
-  class EventData;
-  enum CaloId;
-}*/
+
 
 LArCellsEmptyMonitoring::LArCellsEmptyMonitoring()
   : m_LarIdTranslator (std::make_unique<LArIdTranslatorHelper>("LarIdTree.root"))
@@ -195,10 +184,10 @@ void LArCellsEmptyMonitoring::TestRun(const TString& inputfile)
   // create individual cell histos
   // -------------------------------------------------------------------------
   printf("Creating histograms (nEbins = %d, nQbins = %d, nLBbins = %d)... ",ne,nq,nlb);
-  TH1F* hene   = new TH1F("hEne","",ne,emin,emax); hene->SetXTitle("Energy [GeV]"); hene->SetYTitle("Events");
-  TH1F* hqua   = new TH1F("hQua","",nq/100.,qmin,qmax); hqua->SetXTitle("Quality"); hqua->SetYTitle("Events");
-  TH1F* hlb    = new TH1F("hLB","",nlb,lbmin,lbmax); hlb->SetXTitle("LB"); hlb->SetYTitle("Events");
-  TH2F* henelb = new TH2F("hEnelb","",nlb,lbmin,lbmax,ne,emin,emax); henelb->SetXTitle("LB"); henelb->SetYTitle("Energy [GeV]");
+  TH1F hene   = TH1F("hEne","",ne,emin,emax); hene.SetXTitle("Energy [GeV]"); hene.SetYTitle("Events");
+  TH1F hqua   = TH1F("hQua","",nq/100.,qmin,qmax); hqua.SetXTitle("Quality"); hqua.SetYTitle("Events");
+  TH1F hlb    = TH1F("hLB","",nlb,lbmin,lbmax); hlb.SetXTitle("LB"); hlb.SetYTitle("Events");
+  TH2F henelb = TH2F("hEnelb","",nlb,lbmin,lbmax,ne,emin,emax); henelb.SetXTitle("LB"); henelb.SetYTitle("Energy [GeV]");
   // -------------------------------------------------------------------------
   printf("Done.\n");
 
@@ -206,25 +195,25 @@ void LArCellsEmptyMonitoring::TestRun(const TString& inputfile)
   // New test histos:
   // -------------------------------------------------------------------------
   printf("Creating cut test histograms...");
-  int npl=4;
-  TH2F* tempHist = new TH2F("tempNEvLB","",1000,0,1000.,1000,0.,1000.);
-  TH1F** hNoise = new TH1F*[npl];
-  TH1F** hCellsPerLB = new TH1F*[npl];
-  TH2F** hNEvVsEMean = new TH2F*[npl];
-  TH2F** hNEvVsECum = new TH2F*[npl];
-  TH2F** hECumVsEMean = new TH2F*[npl];
+  static constexpr int npl=4;
+  TH2F tempHist = TH2F("tempNEvLB","",1000,0,1000.,1000,0.,1000.);
+  std::array<TH1F*, npl> hNoise{};
+  std::array<TH1F*, npl> hCellsPerLB{};
+  std::array<TH2F*, npl> hNEvVsEMean{};
+  std::array<TH2F*, npl> hNEvVsECum{};
+  std::array<TH2F*, npl> hECumVsEMean{};
   
   for (int i=0;i<npl;i++){
     hname.Form("hNEvVsEMean_Layer%i",i);
-    hNEvVsEMean[i] = (TH2F*)tempHist->Clone(hname);
+    hNEvVsEMean[i] = (TH2F*)tempHist.Clone(hname);
     hNEvVsEMean[i]->GetXaxis()->SetTitle("Number of Events (E > 10 #sigma) / LB");    hNEvVsEMean[i]->GetYaxis()->SetTitle("E_{mean} per Event / LB [GeV]");
     
     hname.Form("hNEvVsECum_Layer%i",i);
-    hNEvVsECum[i] = (TH2F*)tempHist->Clone(hname);
+    hNEvVsECum[i] = (TH2F*)tempHist.Clone(hname);
     hNEvVsECum[i]->GetXaxis()->SetTitle("Number of Events (E > 10 #sigma) / LB");     hNEvVsECum[i]->GetYaxis()->SetTitle("E_{cumulative} per Cell / LB [GeV]");
     
     hname.Form("hECumVsEMean_Layer%i",i);
-    hECumVsEMean[i] = (TH2F*)tempHist->Clone(hname);
+    hECumVsEMean[i] = (TH2F*)tempHist.Clone(hname);
     hECumVsEMean[i]->GetXaxis()->SetTitle("E_{cumulative} per Cell / LB [GeV]");     hECumVsEMean[i]->GetYaxis()->SetTitle("E_{mean} per Event / LB [GeV]");
     
     hname.Form("hNoise_Layer%i",i);
@@ -232,7 +221,7 @@ void LArCellsEmptyMonitoring::TestRun(const TString& inputfile)
     hNoise[i]->GetXaxis()->SetTitle("Noise [GeV]");     hNoise[i]->GetYaxis()->SetTitle("Number Of Cells");
     
     hname.Form("hCellsPerLB_Layer%i",i);
-    hCellsPerLB[i] = (TH1F*)hlb->Clone(hname);
+    hCellsPerLB[i] = (TH1F*)hlb.Clone(hname);
     hCellsPerLB[i]->GetXaxis()->SetTitle("LB");     hNoise[i]->GetYaxis()->SetTitle("Number Of Cells");
   }
   printf("Done\n");
@@ -265,17 +254,17 @@ void LArCellsEmptyMonitoring::TestRun(const TString& inputfile)
     if(m_SaveTextFile || m_SaveRootFile){
       // set individual cell histos
       hname.Form("h0x%x_Energy",onlid);
-      h1_e = (TH1F*)hene->Clone(hname);
+      h1_e = (TH1F*)hene.Clone(hname);
       hname.Form("h0x%x_Quality",onlid);
-      h1_q = (TH1F*)hqua->Clone(hname);
+      h1_q = (TH1F*)hqua.Clone(hname);
       hname.Form("h0x%x_LB",onlid);
-      h1_lb = (TH1F*)hlb->Clone(hname);
+      h1_lb = (TH1F*)hlb.Clone(hname);
       hname.Form("h0x%x_hNEvVsEMean",onlid);
-      h1_elb = (TH1F*)hlb->Clone(hname);
+      h1_elb = (TH1F*)hlb.Clone(hname);
       hname.Form("h0x%x_Energy_LB",onlid);
-      h2_elb = (TH2F*)henelb->Clone(hname);
+      h2_elb = (TH2F*)henelb.Clone(hname);
       hname.Form("h0x%x_Quality_LB",onlid);
-      h1_qlb = (TH1F*)hlb->Clone(hname);
+      h1_qlb = (TH1F*)hlb.Clone(hname);
     }
     
     // loop on the events for each cell
@@ -371,8 +360,9 @@ void LArCellsEmptyMonitoring::TestRun(const TString& inputfile)
 	  }
 	}
       }
-      
-      fr_q4k = (double)qcount/(double)EventCount;
+      if (EventCount!=0){
+        fr_q4k = (double)qcount/(double)EventCount;
+      }
     }
     // Write bad channel quantities to text file
     if (m_SaveTextFile){
@@ -383,12 +373,12 @@ void LArCellsEmptyMonitoring::TestRun(const TString& inputfile)
       }
     }      
     
-    if(h1_e)        delete h1_e;
-    if(h1_q)        delete h1_q;
-    if(h1_lb)       delete h1_lb;
-    if(h1_elb)      delete h1_elb;
-    if(h2_elb)      delete h2_elb;
-    if(h1_qlb)      delete h1_qlb;
+    delete h1_e;
+    delete h1_q;
+    delete h1_lb;
+    delete h1_elb;
+    delete h2_elb;
+    delete h1_qlb;
     qcount = 0.;
     EventCount = 0.;
   } // end of cell loop
@@ -410,7 +400,9 @@ void LArCellsEmptyMonitoring::TestRun(const TString& inputfile)
     }
   }
 
-    fout->Close(); delete fout;
+    fout->Close(); 
+    delete fout;
+    fclose(pFile);
     return;
   
 }
@@ -496,7 +488,7 @@ void LArCellsEmptyMonitoring::Run(const TString& inputfile)
     nBadLBs = BadLBList.size();
   }
   else if (m_ReadDefectLBList){
-    BadLBList = DQLBList;
+    BadLBList = std::move(DQLBList);
     nBadLBs = BadLBList.size();
   }
   
@@ -666,14 +658,14 @@ printf("Set threshold at %4.3f counts per cell for LB range. \n",(MeanHits+(nsig
   // create individual cell histos
   // -------------------------------------------------------------------------
   printf("Creating histograms (nEbins = %d, nQbins = %d, nLBbins = %d)... ",ne,nq,nlb);
-  TH1F* hene   = new TH1F("hEne","",ne,emin,emax); hene->SetXTitle("Energy [GeV]"); hene->SetYTitle("Events");
-  TH1F* hqua   = new TH1F("hQua","",nq/100.,qmin,qmax); hqua->SetXTitle("Quality"); hqua->SetYTitle("Events");
-  TH1F* hlb    = new TH1F("hLB","",nlb,lbmin,lbmax); hlb->SetXTitle("LB"); hlb->SetYTitle("Events");
-  TH2F* henelb = new TH2F("hEnelb","",nlb,lbmin,lbmax,ne,emin,emax); henelb->SetXTitle("LB"); henelb->SetYTitle("Energy [GeV]");
-  TH2D* hpulse = new TH2D("hPulse","",100,-200,200,400, -10,10); hpulse->SetXTitle("Time [ns]"); hpulse->SetYTitle("Value [ADC counts] / ADCmax");
-  TProfile* TProfpulse = new TProfile("", "",5, 0, 5, "s"); TProfpulse->SetXTitle("Sample Number"); TProfpulse->SetYTitle("Value [ADC counts]");
-  TH2D* ht_LB=new TH2D("ht_LB","",nlb,lbmin,lbmax,400,-200,200); ht_LB->GetXaxis()->SetTitle("LB"); ht_LB->GetYaxis()->SetTitle("Time(maxSample) + ofcTime [ns]");  
-  TH1F* hADCmax = new TH1F("","",110,-200,2000); hADCmax->SetXTitle("ADCmax [ADC counts]"); hADCmax->SetYTitle("Events");
+  TH1F hene   =  TH1F("hEne","",ne,emin,emax); hene.SetXTitle("Energy [GeV]"); hene.SetYTitle("Events");
+  TH1F hqua   =  TH1F("hQua","",nq/100.,qmin,qmax); hqua.SetXTitle("Quality"); hqua.SetYTitle("Events");
+  TH1F hlb    =  TH1F("hLB","",nlb,lbmin,lbmax); hlb.SetXTitle("LB"); hlb.SetYTitle("Events");
+  TH2F henelb = TH2F("hEnelb","",nlb,lbmin,lbmax,ne,emin,emax); henelb.SetXTitle("LB"); henelb.SetYTitle("Energy [GeV]");
+  TH2D hpulse =  TH2D("hPulse","",100,-200,200,400, -10,10); hpulse.SetXTitle("Time [ns]"); hpulse.SetYTitle("Value [ADC counts] / ADCmax");
+  TProfile TProfpulse =  TProfile("", "",5, 0, 5, "s"); TProfpulse.SetXTitle("Sample Number"); TProfpulse.SetYTitle("Value [ADC counts]");
+  TH2D ht_LB= TH2D("ht_LB","",nlb,lbmin,lbmax,400,-200,200); ht_LB.GetXaxis()->SetTitle("LB"); ht_LB.GetYaxis()->SetTitle("Time(maxSample) + ofcTime [ns]");  
+  TH1F hADCmax = TH1F("","",110,-200,2000); hADCmax.SetXTitle("ADCmax [ADC counts]"); hADCmax.SetYTitle("Events");
   // -------------------------------------------------------------------------
   printf("Done.\n");
  
@@ -716,21 +708,21 @@ printf("Set threshold at %4.3f counts per cell for LB range. \n",(MeanHits+(nsig
     if(m_SaveTextFile || m_SaveRootFile){
       // set individual cell histos
       hname.Form("h0x%x_Energy",onlid);
-      h1_e = (TH1F*)hene->Clone(hname);
+      h1_e = (TH1F*)hene.Clone(hname);
       hname.Form("h0x%x_Quality",onlid);
-      h1_q = (TH1F*)hqua->Clone(hname);
+      h1_q = (TH1F*)hqua.Clone(hname);
       hname.Form("h0x%x_LB",onlid);
-      h1_lb = (TH1F*)hlb->Clone(hname);
+      h1_lb = (TH1F*)hlb.Clone(hname);
       hname.Form("h0x%x_Energy_LB",onlid);
-      h2_elb = (TH2F*)henelb->Clone(hname);
+      h2_elb = (TH2F*)henelb.Clone(hname);
       hname.Form("h0x%x_Pulse",onlid);
-      h2_pulse = (TH2D*)hpulse->Clone(hname);
+      h2_pulse = (TH2D*)hpulse.Clone(hname);
       hname.Form("TProf0x%x_Pulse",onlid);
-      TProf_pulse = (TProfile*)TProfpulse->Clone(hname);
+      TProf_pulse = (TProfile*)TProfpulse.Clone(hname);
       hname.Form("h0x%x_ADCmax",onlid);
-      h1_ADCmax = (TH1F*)hADCmax->Clone(hname);
+      h1_ADCmax = (TH1F*)hADCmax.Clone(hname);
       hname.Form("h0x%x_t_LB",onlid);
-      h2_t_LB = (TH2D*)ht_LB->Clone(hname);
+      h2_t_LB = (TH2D*)ht_LB.Clone(hname);
     }
     
     bool CellInList = false;    
@@ -881,7 +873,9 @@ printf("Set threshold at %4.3f counts per cell for LB range. \n",(MeanHits+(nsig
 	  nbrLB = (double)nLB;
 	  meanECell = h1_e->GetMean();
 	  n_ensig = EventCount;
-	  fr_q4k = (double)qcount/(double)EventCount;
+	  if (EventCount!=0){
+	    fr_q4k = (double)qcount/(double)EventCount;
+	  }
 	  n_ecut = nEvents_E_gt_ecut;
 	}
 	
@@ -894,7 +888,9 @@ printf("Set threshold at %4.3f counts per cell for LB range. \n",(MeanHits+(nsig
 	  nbrLB = (double)nLB;
 	  meanECell = h1_e->GetMean();
 	  n_ensig = EventCount;
-	  fr_q4k = (double)qcount/(double)EventCount;
+	  if (EventCount!=0){
+	    fr_q4k = (double)qcount/(double)EventCount;
+	  }
 	  n_ecut = nEvents_E_gt_ecut;
 	  Cellmaps[index]->Fill(eta,phi,meanECell);
 	  Eeta->Fill(eta,meanECell);
