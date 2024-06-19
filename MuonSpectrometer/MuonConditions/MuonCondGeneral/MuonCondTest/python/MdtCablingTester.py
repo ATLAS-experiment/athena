@@ -9,6 +9,7 @@ def SetupArgParser():
     parser.add_argument("--inputFile", "-i", default=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/data17_13TeV.00330470.physics_Main.daq.RAW._lb0310._SFO-1._0001.data"], 
                         help="Input file to run on ", nargs="+")
     parser.add_argument("--geometry", default="ATLAS-R2-2016-01-00-01", help="Geometry tag")
+    parser.add_argument("--conditionsTag", default="CONDBR2-BLKPA-RUN2-11", help="conditionsTag")
     parser.add_argument("--mezzMap", default="", help="External JSON file containing the internal mapping of the mezzanine cards")
     parser.add_argument("--cablingMap", default="", help="External JSON file containing the cabling map of each channel")
     return parser
