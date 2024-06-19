@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # https://twiki.cern.ch/twiki/bin/viewauth/AtlasComputing/AthenaJobConfigRun3
 
@@ -41,9 +41,9 @@ if __name__=="__main__":
     flags.Input.RunNumbers = [300000]
     flags.Input.TimeStamps = [1500000000]
     # https://twiki.cern.ch/twiki/bin/viewauth/AtlasComputing/ConditionsRun1RunNumbers
-    flags.IOVDb.GlobalTag = "OFLCOND-RUN12-SDR-25"
-    from AthenaConfiguration.TestDefaults import defaultGeometryTags
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags, defaultConditionsTags
     flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2
+    flags.IOVDb.GlobalTag = defaultConditionsTags.autoconfigure(flags)
     flags.Detector.GeometrySCT = True
     flags.lock()
 

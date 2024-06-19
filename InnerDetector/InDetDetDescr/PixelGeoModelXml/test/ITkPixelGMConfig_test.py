@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 """Run tests on PixelGeoModelXml configuration
 
-Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 """
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.Enums import Project
-
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags
     flags = initConfigFlags()
-    flags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/HITS/ttbar.HITS.pool.root"]
-    flags.IOVDb.GlobalTag = "OFLCOND-MC16-SDR-16"
+    flags.Input.Files = []
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN4
     flags.GeoModel.Align.Dynamic = False
     flags.lock()
 
