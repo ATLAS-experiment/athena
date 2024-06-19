@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef ATHENAKERNEL_IMETADATASVC_H
-#define ATHENAKERNEL_IMETADATASVC_H
+#ifndef ATHENAKERNEL_IATHMETADATASVC_H
+#define ATHENAKERNEL_IATHMETADATASVC_H
 
-/** @file IMetaDataSvc.h
- *  @brief This file contains the class definition for the IMetaDataSvc class.
+/** @file IAthMetaDataSvc.h
+ *  @brief This file contains the class definition for the IAthMetaDataSvc class.
  *  @author Marcin Nowak
  *  @author Frank Berghaus
  **/
@@ -20,12 +20,15 @@
 #include <mutex>
 #include <typeinfo>
 
-/** @class IMetaDataSvc
+/** @class IAthMetaDataSvc
  *  @brief This class provides the interface for MetaDataSvc
+ *
+ * Note that Gaudi has an IMetaDataSvc, so we don't want to use that name.
  **/
-class IMetaDataSvc : virtual public ::INamedInterface {
+class IAthMetaDataSvc : virtual public ::INamedInterface {
 
 public: // Non-static members
+   DeclareInterfaceID(IAthMetaDataSvc, 1, 0);
 
    
    /// used by AthenaPoolCnvSvc
@@ -63,9 +66,6 @@ public: // Non-static members
    /// rangeID for the current EventContext - used to index MetaContainers - 
    virtual const std::string currentRangeID() const = 0;
 
-   /// Gaudi boilerplate
-   static const InterfaceID& interfaceID();
-
    /// Hook for implementation to react to recording an object
    virtual void recordHook(const std::type_info&) {}
 
@@ -77,14 +77,9 @@ private: // Data
 };
 
  
-inline const InterfaceID& IMetaDataSvc::interfaceID() {
-   static const InterfaceID IID("IMetaDataSvc", 1, 0);
-   return(IID);
-}
-
 /// default implementation that maps a key to itself - overwritten in MetaDataSvc
 inline std::set<std::string>
-IMetaDataSvc::getPerStreamKeysFor(const std::string& key ) const {
+IAthMetaDataSvc::getPerStreamKeysFor(const std::string& key ) const {
    return std::set<std::string>( {key} );
 }
 
@@ -94,7 +89,7 @@ IMetaDataSvc::getPerStreamKeysFor(const std::string& key ) const {
  * @param key The key to use for the lookup.
  **/
 template <typename T, class TKEY>
-T* IMetaDataSvc::tryRetrieve (const TKEY& key) const
+T* IAthMetaDataSvc::tryRetrieve (const TKEY& key) const
 {
    const MetaCont<T>* container = outputDataStore()->tryRetrieve< MetaCont<T> >(key);
    if( container ) {
@@ -104,7 +99,7 @@ T* IMetaDataSvc::tryRetrieve (const TKEY& key) const
 }
 
 template <typename T, class TKEY>
-const T* IMetaDataSvc::tryConstRetrieve (const TKEY& key) const
+const T* IAthMetaDataSvc::tryConstRetrieve (const TKEY& key) const
 {
    const MetaCont<T>* container = outputDataStore()->tryRetrieve< MetaCont<T> >(key);
    if( container ) {
@@ -114,7 +109,7 @@ const T* IMetaDataSvc::tryConstRetrieve (const TKEY& key) const
 }
 
 template <typename T, typename TKEY> 
-StatusCode IMetaDataSvc::record(T* pObject, const TKEY& key)
+StatusCode IAthMetaDataSvc::record(T* pObject, const TKEY& key)
 {
    std::lock_guard lock(m_mutex);
    MetaCont<T>* container = outputDataStore()->tryRetrieve< MetaCont<T> >(key);
@@ -132,7 +127,7 @@ StatusCode IMetaDataSvc::record(T* pObject, const TKEY& key)
 
 
 template <typename T, typename TKEY> 
-StatusCode IMetaDataSvc::record(std::unique_ptr<T> pUnique, const TKEY& key)
+StatusCode IAthMetaDataSvc::record(std::unique_ptr<T> pUnique, const TKEY& key)
 {
    if( this->record( pUnique.get(), key ).isSuccess() ) {
       (void)pUnique.release();
@@ -144,7 +139,7 @@ StatusCode IMetaDataSvc::record(std::unique_ptr<T> pUnique, const TKEY& key)
 
 
 template <typename T, class TKEY>
-StatusCode IMetaDataSvc::remove(const TKEY& key, bool ignoreIfAbsent)
+StatusCode IAthMetaDataSvc::remove(const TKEY& key, bool ignoreIfAbsent)
 {
    std::lock_guard lock(m_mutex);
    // change erase to setting nullptr?
@@ -157,7 +152,7 @@ StatusCode IMetaDataSvc::remove(const TKEY& key, bool ignoreIfAbsent)
 }
 
 template <typename T, typename TKEY>
-bool IMetaDataSvc::contains(const TKEY& key) {
+bool IAthMetaDataSvc::contains(const TKEY& key) {
   if (!outputDataStore()->contains< MetaCont<T> >(key))
     return false;
   const MetaCont<T>* container =

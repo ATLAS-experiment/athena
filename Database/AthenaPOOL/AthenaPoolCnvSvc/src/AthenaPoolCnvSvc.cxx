@@ -18,7 +18,7 @@
 
 #include "AthenaKernel/IAthenaSerializeSvc.h"
 #include "AthenaKernel/IAthenaOutputStreamTool.h"
-#include "AthenaKernel/IMetaDataSvc.h"
+#include "AthenaKernel/IAthMetaDataSvc.h"
 #include "PersistentDataModel/Placement.h"
 #include "PersistentDataModel/Token.h"
 #include "PersistentDataModel/TokenAddress.h"
@@ -477,7 +477,7 @@ StatusCode AthenaPoolCnvSvc::commitOutput(const std::string& outputConnectionSpe
                      m_metadataClient = num;
                   }
                   // Retrieve MetaDataSvc
-                  ServiceHandle<IMetaDataSvc> metadataSvc("MetaDataSvc", name());
+                  ServiceHandle<IAthMetaDataSvc> metadataSvc("MetaDataSvc", name());
                   ATH_CHECK(metadataSvc.retrieve());
                   sc = metadataSvc->shmProxy(std::string(placementStr) + "[NUM=" + oss2.str() + "]");
                   if (sc.isRecoverable()) {

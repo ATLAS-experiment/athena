@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef XAODEVENTFORMATCNV_TEST_EVENTFORMATPRINTERALG_H
 #define XAODEVENTFORMATCNV_TEST_EVENTFORMATPRINTERALG_H
@@ -9,7 +9,7 @@
 #include "Gaudi/Property.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "AthenaBaseComps/AthAlgorithm.h"
-#include "AthenaKernel/IMetaDataSvc.h"
+#include "AthenaKernel/IAthMetaDataSvc.h"
 #include "xAODEventFormat/EventFormat.h"
 
 // System include(s).
@@ -46,7 +46,7 @@ namespace xAODMakerTest {
         "EventFormat", "Key to retrieve xAOD::EventFormat, default: EventFormat"
       };
 
-      ServiceHandle< IMetaDataSvc > m_metaDataStore{this, "MetaDataSvc",
+      ServiceHandle< IAthMetaDataSvc > m_metaDataStore{this, "MetaDataSvc",
         "MetaDataSvc", name()
       };
    };  // class EventFormatPrinterAlg

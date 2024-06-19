@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENASERVICES_METADATASVC_H
@@ -16,7 +16,7 @@
 
 #include "AthenaBaseComps/AthService.h"
 #include "AthenaKernel/IAddressProvider.h"
-#include "AthenaKernel/IMetaDataSvc.h"
+#include "AthenaKernel/IAthMetaDataSvc.h"
 #include "AthenaKernel/IMetaDataTool.h"
 #include "Gaudi/Property.h"  // no forward decl: typedef
 #include "GaudiKernel/IClassIDSvc.h"
@@ -87,11 +87,12 @@ class SvcFactory;
  * @see IMetaDataTool
  * @see AthenaPoolCnvSvc
  **/
-class MetaDataSvc : public ::AthService,
-                    virtual public IAddressProvider,
-                    virtual public IIncidentListener,
-                    virtual public IMetaDataSvc,
-                    virtual public IIoComponent {
+class MetaDataSvc : public extends<::AthService,
+                                    IAddressProvider,
+                                    IIncidentListener,
+                                    IAthMetaDataSvc,
+                                    IIoComponent>
+{
   // Allow the factory class access to the constructor
   friend class SvcFactory<MetaDataSvc>;  // <-- obsolete, remove
 

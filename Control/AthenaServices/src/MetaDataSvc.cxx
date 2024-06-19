@@ -49,7 +49,7 @@ namespace {
 
 
 //________________________________________________________________________________
-MetaDataSvc::MetaDataSvc(const std::string& name, ISvcLocator* pSvcLocator) : ::AthService(name, pSvcLocator),
+MetaDataSvc::MetaDataSvc(const std::string& name, ISvcLocator* pSvcLocator) : base_class(name, pSvcLocator),
 	m_inputDataStore("StoreGateSvc/InputMetaDataStore", name),
 	m_outputDataStore("StoreGateSvc/MetaDataStore", name),
 	m_addrCrtr("AthenaPoolCnvSvc", name),
@@ -195,11 +195,9 @@ StatusCode MetaDataSvc::stop() {
 StatusCode MetaDataSvc::queryInterface(const InterfaceID& riid, void** ppvInterface) {
    if (riid == this->interfaceID()) {
       *ppvInterface = this;
-   } else if (riid == IMetaDataSvc::interfaceID()) {
-     *ppvInterface = dynamic_cast<IMetaDataSvc*>(this);
    } else {
       // Interface is not directly available: try out a base class
-      return(::AthService::queryInterface(riid, ppvInterface));
+      return(base_class::queryInterface(riid, ppvInterface));
    }
    addRef();
    return(StatusCode::SUCCESS);

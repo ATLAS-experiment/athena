@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAODMETADATACNV_FILEMETADATACREATORTOOL_H
 #define XAODMETADATACNV_FILEMETADATACREATORTOOL_H
@@ -16,7 +16,7 @@
 #include "GaudiKernel/ServiceHandle.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "AthenaKernel/IAthenaOutputTool.h"
-#include "AthenaKernel/IMetaDataSvc.h"
+#include "AthenaKernel/IAthMetaDataSvc.h"
 #include "IOVDbDataModel/IOVMetaDataContainer.h"
 #include "CoralBase/AttributeList.h"
 #include "StoreGate/ReadHandleKey.h"
@@ -130,7 +130,7 @@ class FileMetaDataCreatorTool
   ServiceHandle< StoreGateSvc > m_eventStore{"StoreGateSvc", name()};
 
   /// Use MetaDataSvc store interface to support output in EventService
-  ServiceHandle< IMetaDataSvc > m_metaDataSvc{"MetaDataSvc", name()};
+  ServiceHandle< IAthMetaDataSvc > m_metaDataSvc{"MetaDataSvc", name()};
 
   /// Access to the input metadata store
   ServiceHandle< StoreGateSvc > m_inputMetaDataStore{
