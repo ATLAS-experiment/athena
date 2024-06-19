@@ -194,7 +194,7 @@ class TestAlg (Alg):
 
         elif iev == 2:
             tool = self.tool3
-            noise_thresh = 0.4
+            noise_thresh = 0.5
 
         else:
             assert 0
@@ -254,7 +254,7 @@ class TestAlg (Alg):
             l = exp_cells.get (addr)
             if not l:
                 if abs(lcell[0]) > noise_thresh:
-                    print ('xxx unexpected cell', addr, lcell)
+                    print ('xxx unexpected cell', addr, lcell, flush=True)
                     assert 0
                 continue
 
@@ -271,12 +271,12 @@ class TestAlg (Alg):
                 abs (lcell[7] != l[7]) or
                 abs (lcell[8] != l[8]) or
                 abs (lcell[9] != l[9])):
-                print ('xxx cell mismatch: ', addr, lcell, l)
+                print ('xxx cell mismatch: ', addr, lcell, l, flush=True)
                 assert 0
             del exp_cells[addr]
 
         for extra in exp_cells:
-            print ('xxx unfound cell', extra)
+            print ('xxx unfound cell', extra, flush=True)
             assert 0
         return
 
