@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloCellVolumes.h"
@@ -70,7 +70,7 @@ CaloCellVolumes::CaloCellVolumes(ISvcLocator* svcLocator
     }
   }
 
-  for(const IRDBRecord* rec : *fcalModRec) {
+  for(const IRDBRecord_ptr& rec : *fcalModRec) {
     m_fcalTubeSpacings[rec->getInt("FCALSAMPLING")] = rec->getDouble("TUBESPACING");
   }
   
@@ -89,7 +89,7 @@ CaloCellVolumes::CaloCellVolumes(ISvcLocator* svcLocator
   }
   
   // Initialize m_cellVolumes vector
-  for(const IRDBRecord* rec : *cellVolRec) {
+  for(const IRDBRecord_ptr& rec : *cellVolRec) {
     
     int subcalo = rec->getInt("SUBCALO");
     int posneg = rec->getInt("POSNEG");

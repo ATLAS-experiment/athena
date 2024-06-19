@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // BarrelCryostatConstruction
@@ -625,7 +625,7 @@ GeoIntrusivePtr<GeoFullPhysVol> LArGeo::BarrelCryostatConstruction::GetEnvelope(
 							      larVersionKey.node());
     if (extraCones->size() > 0 ) {
       int nextra=0;
-      for(auto *cone : *extraCones) {
+      for(const IRDBRecord_ptr& cone : *extraCones) {
 	const std::string& conName = cone->getString("CONE");
 	if (conName.find("ExtraInCryo") != std::string::npos) {
 	  nextra++;

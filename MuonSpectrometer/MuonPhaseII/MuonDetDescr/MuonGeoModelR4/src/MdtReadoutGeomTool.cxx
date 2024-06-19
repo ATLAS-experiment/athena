@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <MuonGeoModelR4/MdtReadoutGeomTool.h>
@@ -181,7 +181,7 @@ StatusCode MdtReadoutGeomTool::readParameterBook(FactoryCache& cache) const {
     ATH_MSG_VERBOSE("Found the " << paramTable->nodeName() << " ["
                                 << paramTable->tagName() << "] table with "
                                 << paramTable->size() << " records");
-    for (IRDBRecord* record : *paramTable) {
+    for (const IRDBRecord_ptr& record : *paramTable) {
         parameterBook pars{};
         pars.tubeWall = record->getDouble("TUBWAL") * Gaudi::Units::cm;
         pars.tubePitch = record->getDouble("TUBPIT") * Gaudi::Units::cm;
@@ -203,7 +203,7 @@ StatusCode MdtReadoutGeomTool::readParameterBook(FactoryCache& cache) const {
     ATH_MSG_VERBOSE("Found the " << paramTable->nodeName() << " ["
                                 << paramTable->tagName() << "] table with "
                                 << paramTable->size() << " records");
-    for (IRDBRecord* record : *paramTable) {
+    for (const IRDBRecord_ptr& record : *paramTable) {
         const std::string stName = record->getString("stationName");
         const int stEta = record->getInt("stationEta");
         const int stPhi = record->getInt("stationPhi");

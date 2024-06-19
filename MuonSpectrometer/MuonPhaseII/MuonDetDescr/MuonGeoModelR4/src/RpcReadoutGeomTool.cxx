@@ -284,7 +284,7 @@ StatusCode RpcReadoutGeomTool::readParameterBook(FactoryCache& cache) {
                                 << paramTable->tagName() << "] table with "
                                 << paramTable->size() << " records");
     
-    for (const IRDBRecord* record : *paramTable) {
+    for (const IRDBRecord_ptr& record : *paramTable) {
         const std::string chambType = record->getString("WRPC_TYPE");
         wRPCTable& parBook = cache.parameterBook[record->getString("WRPC_TYPE")];
         parBook.stripPitchEta = record->getDouble("etaStripPitch") * Gaudi::Units::cm;

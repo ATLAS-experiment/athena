@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //#define ARTRU          // Choice of TR generator
@@ -150,7 +150,7 @@ void TRTTransitionRadiation::Initialize() {
     std::map<std::string,G4Material*> materialMap;
     IRDBRecordset_ptr materialsRec = pAccessSvc->getRecordsetPtr("TRMaterials","","");
     // Step #1. Count elements per material
-    for(auto material : *materialsRec) {
+    for(const IRDBRecord_ptr& material : *materialsRec) {
       std::string key = material->getString("NAME");
       auto mapIt = materialComponentsMap.find(key);
       if(mapIt == materialComponentsMap.end()) {
@@ -161,7 +161,7 @@ void TRTTransitionRadiation::Initialize() {
       }
     }
     // Step #2. Build materials
-    for(auto material :*materialsRec) {
+    for(const IRDBRecord_ptr& material :*materialsRec) {
       std::string key = material->getString("NAME");
       G4Material* g4Material{nullptr};
       if(materialMap.find(key)==materialMap.end()) {

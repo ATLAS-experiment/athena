@@ -225,7 +225,7 @@ StatusCode TgcReadoutGeomTool::readParameterBook(FactoryCache& cache) {
         ATH_MSG_FATAL("Empty parameter book table found");
         return StatusCode::FAILURE;
     }
-    for (const IRDBRecord* record : *paramTable) {
+    for (const IRDBRecord_ptr& record : *paramTable) {
         const std::string chambType = record->getString("technology");
         const int gasGap = record->getInt("gasGap");
         const std::vector<int> wireGangs{tokenizeInt(record->getString("wireGangs"),",")};
