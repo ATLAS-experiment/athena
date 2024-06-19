@@ -102,5 +102,8 @@ atlas_add_test( test_menu_dump
   SCRIPT test_menu_dump.py -p
   POST_EXEC_SCRIPT noerror.sh )
 
+atlas_install_scripts( python/TriggerAPI/TriggerAPISession.py )
+atlas_add_alias( tapis "TriggerAPISession.py" )
+
 # TriggerAPI tests
 atlas_add_test( TriggerAPISessionTest SCRIPT test/testTriggerAPISession.py POST_EXEC_SCRIPT noerror.sh )
