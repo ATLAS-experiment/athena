@@ -2,5 +2,5 @@
 
 DiTauJetsLowPtCPContent = [
 "DiTauJetsLowPt",
-"DiTauJetsLowPtAux.pt.eta.phi.m.TauJetVtxFraction.subjet_pt.subjet_phi.subjet_e.subjet_f_core.subjet_eta.isoTrackLinks.jetLink.vertexLink.trackLinks"
+"DiTauJetsLowPtAux.pt.eta.phi.m.TauJetVtxFraction.subjet_pt.subjet_phi.subjet_e.subjet_f_core.subjet_eta.isoTrackLinks.jetLink.vertexLink.trackLinks.f_cluster_core"
 ]
