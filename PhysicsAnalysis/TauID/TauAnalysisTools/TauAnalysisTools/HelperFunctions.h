@@ -22,6 +22,7 @@
 
 // EDM include(s):
 #include "xAODTau/TauJet.h"
+#include "xAODTau/TauJetContainer.h"
 #include "xAODTau/TauxAODHelpers.h"
 #include "xAODTau/DiTauJet.h"
 #include "xAODTruth/TruthParticle.h"
@@ -98,6 +99,8 @@ void truthHadrons(const xAOD::TauJet* xTau, std::vector<const xAOD::TruthParticl
 TruthMatchedParticleType getTruthParticleType(const xAOD::TauJet& xTau);
 /** return DiTauJet match type*/
 TruthMatchedParticleType getTruthParticleType(const xAOD::DiTauJet& xDiTau); 
+/** combine the standard taujets container with the muon removal container **/
+std::vector<const xAOD::TauJet*> combineTauJetsWithMuonRM(const xAOD::TauJetContainer* taus_std, const xAOD::TauJetContainer* taus_muonRM);
 }
 
 #endif // not TAUANALYSISTOOLS_HELPERFUNCTIONS_H

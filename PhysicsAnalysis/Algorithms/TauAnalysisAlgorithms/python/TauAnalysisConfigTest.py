@@ -7,7 +7,7 @@ from AnaAlgorithm.DualUseConfig import createService
 from AnalysisAlgorithmsConfig.ConfigSequence import ConfigSequence
 from AnalysisAlgorithmsConfig.ConfigAccumulator import ConfigAccumulator
 
-def makeSequence (dataType) :
+def makeSequence (dataType, EXPERIMENTAL_CombineMuonRemovalTaus = False) :
 
     algSeq = AlgSequence()
 
@@ -23,8 +23,20 @@ def makeSequence (dataType) :
     # Include, and then set up the tau analysis algorithm sequence:
     from TauAnalysisAlgorithms.TauAnalysisConfig import makeTauCalibrationConfig, makeTauWorkingPointConfig
 
-    makeTauCalibrationConfig (configSeq, 'AnalysisTauJets')
-    makeTauWorkingPointConfig (configSeq, 'AnalysisTauJets', workingPoint='Tight', postfix='tight')
+    if EXPERIMENTAL_CombineMuonRemovalTaus:
+        from TauAnalysisAlgorithms.TauAnalysisConfig import EXPERIMENTAL_makeTauCombineMuonRemovalConfig
+        EXPERIMENTAL_makeTauCombineMuonRemovalConfig (
+            configSeq, 
+            inputTaus = 'TauJets', 
+            inputTausMuRM = 'TauJets_MuonRM', 
+            outputTaus = 'TauJets_MuonRmCombined', 
+        )
+        tau_container = 'TauJets_MuonRmCombined'
+    else:
+        tau_container = 'AnalysisTauJets'
+        
+    makeTauCalibrationConfig (configSeq, tau_container, tau_container)
+    makeTauWorkingPointConfig (configSeq, tau_container, workingPoint='Tight', selectionName='tight')
 
 
     # temporarily disabled until di-taus are supported in R22

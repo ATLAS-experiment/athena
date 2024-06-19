@@ -15,6 +15,7 @@
 #include "TauAnalysisTools/ITauSelectionTool.h"
 #include "TauAnalysisTools/ITauSmearingTool.h"
 #include "TauAnalysisTools/ITauEfficiencyCorrectionsTool.h"
+#include "TauAnalysisTools/HelperFunctions.h"
 
 namespace TauAnalysisTools
 {
@@ -32,8 +33,13 @@ public:
   virtual StatusCode execute();
 
 private:
-  /// StoreGate key for the muon container to investigate
-  std::string m_sgKey;
+  /// StoreGate key for the tau container to investigate
+  std::string m_sgKey_TauJets;
+  //! Special StoreGate key for the muon-removed taus. 
+  //! This can impact your MET calculation and OLR.
+  //! You will know if you need this, otherwise leave empty.
+  std::string m_sgKey_TauJets_MuonRM;
+  bool m_useMuonRemovalTaus = false;
 
   /// Connection to the selection tool
   ToolHandle< ITauSelectionTool > m_selTool;

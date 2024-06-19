@@ -87,8 +87,6 @@ class TauCalibrationConfig (ConfigBlock):
         config.addOutputVar (self.containerName, 'NNDecayMode', 'NNDecayMode', noSys=True)
 
 
-
-
 class TauWorkingPointConfig (ConfigBlock) :
     """the ConfigBlock for the tau working point
 
@@ -181,6 +179,56 @@ class TauWorkingPointConfig (ConfigBlock) :
             alg.taus = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, self.selectionName)
             config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'effSF' + postfix)
+
+class EXPERIMENTAL_TauCombineMuonRemovalConfig (ConfigBlock) :
+    def __init__ (self, inputTaus = 'TauJets', inputTausMuRM = 'TauJets_MuonRM', outputTaus = 'TauJets_MuonRmCombined', postfix = '') :
+        super (EXPERIMENTAL_TauCombineMuonRemovalConfig, self).__init__ ()
+        self.addOption (
+            'inputTaus', inputTaus, type=str,
+            noneAction='error',
+            info="the name of the input tau container."
+        )
+        self.addOption (
+            'inputTausMuRM', inputTausMuRM, type=str,
+            noneAction='error',
+            info="the name of the input tau container with muon removal applied."
+        )
+        self.addOption ('postfix', postfix, type=str,
+            info="a postfix to apply to decorations and algorithm names. "
+            "Typically not needed here as selectionName is used internally."
+        )
+        self.addOption (
+            'outputTaus', outputTaus, type=str,
+            noneAction='error',
+            info="the name of the output tau container."
+        )
+
+    def makeAlgs (self, config) :
+
+        postfix = self.postfix
+        if postfix != '' and postfix[0] != '_' :
+            postfix = '_' + postfix
+
+        if config.isPhyslite() :
+            raise(RuntimeError("Muon removal taus is not available in Physlite mode"))
+
+        alg = config.createAlgorithm( 'CP::TauCombineMuonRMTausAlg', 'TauCombineMuonRMTausAlg' + postfix )
+        alg.taus = self.inputTaus
+        alg.muonrm_taus = self.inputTausMuRM
+        alg.combined_taus = self.outputTaus
+
+
+def EXPERIMENTAL_makeTauCombineMuonRemovalConfig( seq, inputTaus = 'TauJets', 
+                                                 inputTausMuRM = 'TauJets_MuonRM', 
+                                                 outputTaus = 'TauJets_MuonRmCombined', 
+                                                 postfix = ''):
+    config = EXPERIMENTAL_TauCombineMuonRemovalConfig (
+        inputTaus = inputTaus,
+        inputTausMuRM = inputTausMuRM,
+        outputTaus = outputTaus,
+        postfix = postfix,
+    )
+    seq.append (config)
 
 
 def makeTauCalibrationConfig( seq, containerName, inputContainer='TauJets',
