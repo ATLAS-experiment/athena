@@ -17,6 +17,7 @@ class PhotonCalibrationConfig (ConfigBlock) :
 
     def __init__ (self, containerName='') :
         super (PhotonCalibrationConfig, self).__init__ ()
+        self.setBlockName('Photons')
         self.addOption ('containerName', containerName, type=str,
             noneAction='error',
             info="the name of the output container after calibration.")

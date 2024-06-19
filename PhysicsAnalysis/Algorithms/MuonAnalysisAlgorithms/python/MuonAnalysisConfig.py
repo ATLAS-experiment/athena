@@ -13,6 +13,7 @@ class MuonCalibrationConfig (ConfigBlock):
 
     def __init__ (self, containerName='') :
         super (MuonCalibrationConfig, self).__init__ ()
+        self.setBlockName('Muons')
         self.addOption ('containerName', containerName, type=str,
             noneAction='error',
             info="the name of the output container after calibration.")
