@@ -17,9 +17,6 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "TrkEventCnvTools/IEventCnvSuperTool.h"
 
-#include "GaudiKernel/ToolHandle.h"
-#include "TrkEventCnvTools/IEventCnvSuperTool.h"
-
 class MsgStream;
 class StoreGateSvc;
 class CscIdHelper;
