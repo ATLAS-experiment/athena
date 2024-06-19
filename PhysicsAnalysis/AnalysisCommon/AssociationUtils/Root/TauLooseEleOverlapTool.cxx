@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // System includes
@@ -125,8 +125,9 @@ namespace ORUtils
     }
     // Workaround for derivations with "int" type ID flags.
     catch(const SG::ExcAuxTypeMismatch& e) {
-      if(electron.isAvailable<int>(m_eleID)) {
-        pass = electron.auxdata<int>(m_eleID);
+      SG::ConstAccessor<int> acc(m_eleID);
+      if(acc.isAvailable(electron)) {
+        pass = acc(electron);
       }
       else {
         throw;

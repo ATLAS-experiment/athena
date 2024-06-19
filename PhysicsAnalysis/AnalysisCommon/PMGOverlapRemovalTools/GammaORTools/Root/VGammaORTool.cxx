@@ -296,8 +296,9 @@ std::vector<TLorentzVector> VGammaORTool::getLeptonP4s(const xAOD::TruthParticle
   // determine lepton origins
   std::vector<TLorentzVector> lepton_p4s;
   std::vector<int> lepton_origins;
+  static const SG::ConstAccessor<unsigned int> classifierParticleOriginAcc("classifierParticleOrigin");
   for (const auto& p : lepton_candidates) {
-    const unsigned int origin = p->auxdata<unsigned int>("classifierParticleOrigin");
+    const unsigned int origin = classifierParticleOriginAcc(*p);
     lepton_origins.push_back(origin);
     lepton_p4s.push_back(p->p4());
   }
@@ -319,7 +320,8 @@ std::vector<TLorentzVector> VGammaORTool::getPhotonP4s(const xAOD::TruthParticle
       continue;
     }
     // determine photon origin
-    const unsigned int origin = p->auxdata<unsigned int>("classifierParticleOrigin");
+    static const SG::ConstAccessor<unsigned int> classifierParticleOriginAcc("classifierParticleOrigin");
+    const unsigned int origin = classifierParticleOriginAcc(*p);
     photon_origins.push_back(origin);
     photon_p4s.push_back(p->p4());
   }
