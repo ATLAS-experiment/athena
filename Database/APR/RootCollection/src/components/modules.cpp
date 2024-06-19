@@ -3,9 +3,10 @@
 */
 
 #include "../RootCollection.h"
+#include "../RNTCollection.h"
+
 using pool::RootCollection::RootCollection;
 DECLARE_COMPONENT_WITH_ID(RootCollection, "RootCollection")
 
-#include "../RNTCollection.h"
 using pool::RootCollection::RNTCollection;
 DECLARE_COMPONENT_WITH_ID(RNTCollection, "RNTCollection")
