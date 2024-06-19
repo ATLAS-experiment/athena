@@ -28,19 +28,18 @@
  *   combination exceeds a threshold value.
  */
 
-
 template<typename T>
 class MaxCombinationCondition: public ICondition {
   
 public:
-  MaxCombinationCondition(std::size_t k, std::unique_ptr<ICondition> cond);
+  MaxCombinationCondition(std::size_t k, std::unique_ptr<ICondition> cond, const T& cmp);
   ~MaxCombinationCondition() override = default;
 
   virtual bool
   isSatisfied(const HypoJetVector&,
 	      const std::unique_ptr<ITrigJetHypoInfoCollector>&) const override;
-
-  virtual unsigned int capacity() const override  {return s_capacity;}
+        
+  virtual unsigned int capacity() const override {return m_k;}
 
   virtual std::string toString() const override;
 
@@ -52,8 +51,10 @@ private:
   // set  of jets  choosen my the maximising function passes.
   std::unique_ptr<ICondition> m_acceptingCondition;
 
-  // number of jets unspecified - signalled by 0.
-  const static  unsigned int s_capacity{0};
+  T m_cmp;
 };
 
 #endif
+
+
+#include "MaxCombinationCondition.icc"

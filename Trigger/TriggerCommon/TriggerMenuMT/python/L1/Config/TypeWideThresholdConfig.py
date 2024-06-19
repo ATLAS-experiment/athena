@@ -474,25 +474,25 @@ class L1Config_cTAU:
     #cTAU12M (Medium12)
     isolation_fw_medium12: int = 400
     isolation_jTAUCoreScale_fw_medium12: int = 0
-    eTAU_rCoreMin_WP_fw_medium12: eTAUWP = eTAUWP.Loose
+    eTAU_rCoreMin_WP_fw_medium12: eTAUWP = eTAUWP.NoSelection
     eTAU_rHadMin_WP_fw_medium12: eTAUWP = eTAUWP.NoSelection
 
     #cTAU20M (Medium20)
-    isolation_fw_medium20: int = 600 + 600
-    isolation_jTAUCoreScale_fw_medium20: int = 600
-    eTAU_rCoreMin_WP_fw_medium20: eTAUWP = eTAUWP.Loose
+    isolation_fw_medium20: int = 600 + 550
+    isolation_jTAUCoreScale_fw_medium20: int = 550
+    eTAU_rCoreMin_WP_fw_medium20: eTAUWP = eTAUWP.NoSelection
     eTAU_rHadMin_WP_fw_medium20: eTAUWP = eTAUWP.NoSelection
 
     #cTAU30M (Medium30)
-    isolation_fw_medium30: int = 500 + 600
-    isolation_jTAUCoreScale_fw_medium30: int = 600
-    eTAU_rCoreMin_WP_fw_medium30: eTAUWP = eTAUWP.Medium
+    isolation_fw_medium30: int = 600 + 550
+    isolation_jTAUCoreScale_fw_medium30: int = 550
+    eTAU_rCoreMin_WP_fw_medium30: eTAUWP = eTAUWP.NoSelection
     eTAU_rHadMin_WP_fw_medium30: eTAUWP = eTAUWP.NoSelection
 
     #cTAU35M (Medium35)
-    isolation_fw_medium35: int = 450 + 450
-    isolation_jTAUCoreScale_fw_medium35: int = 450
-    eTAU_rCoreMin_WP_fw_medium35: eTAUWP = eTAUWP.Medium
+    isolation_fw_medium35: int = 600 + 550
+    isolation_jTAUCoreScale_fw_medium35: int = 550
+    eTAU_rCoreMin_WP_fw_medium35: eTAUWP = eTAUWP.NoSelection
     eTAU_rHadMin_WP_fw_medium35: eTAUWP = eTAUWP.NoSelection
 
     def __post_init__(self):

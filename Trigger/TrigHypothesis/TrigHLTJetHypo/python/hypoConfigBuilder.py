@@ -6,6 +6,7 @@ from TrigHLTJetHypo.FastReductionAlgToolFactory import toolfactory
 # from a scenario string
 from TrigHLTJetHypo.scenario_ht import scenario_ht
 from TrigHLTJetHypo.scenario_dipz import scenario_dipz
+from TrigHLTJetHypo.scenario_htdipz import scenario_htdipz
 from TrigHLTJetHypo.scenario_dijet import scenario_dijet
 from TrigHLTJetHypo.scenario_fbdjnoshared import scenario_fbdjnoshared
 from TrigHLTJetHypo.scenario_fbdjshared import scenario_fbdjshared
@@ -167,6 +168,19 @@ def process_ht(scenario, chainPartInd):
                            
     return helperconfigobjs
 
+def process_htdipz(scenario, chainPartInd):
+    """Obtain the paramters needed to build an AlgTool
+    to initialise a jet hypo HelperAlgTool"""
+
+    # obtain a list of parameter objects that will be used
+    # to build a helper config AlgTools
+    helper_params = scenario_htdipz(scenario, chainPartInd)
+
+    # build the helper config AlgTools
+    helperconfigobjs = [buildHypoHelperConfigTool(params) for params in
+                        helper_params]
+                           
+    return helperconfigobjs
 
 def process_dijet(scenario, chainPartInd):
     """Obtain the paramters needed to build an AlgTool
@@ -222,8 +236,9 @@ def process_nonsimple(scenario, chainPartInd):
     if scenario in aliasesDict.keys(): scenario = aliasesDict[scenario]
 
     router = {
-        'HT': process_ht,
         'Z': process_dipz,
+        'HTZ': process_htdipz,
+        'HT': process_ht,
         'DIJET': process_dijet,
         'FBDJSHARED': process_fbdjshared,
         'FBDJNOSHARED': process_fbdjnoshared,

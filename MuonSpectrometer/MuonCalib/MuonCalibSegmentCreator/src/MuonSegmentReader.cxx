@@ -209,11 +209,12 @@ StatusCode MuonSegmentReader::execute()
     nMeasurement ++;
     } // end of track hit loop
     ATH_MSG_DEBUG("Total recorded hits in the track "<<itrk<<" #Mesurement "<<nMeasurement<<" #Hole "<<nHole) ; 
-    ATH_MSG_DEBUG("Total recorded "<<m_trkHit_type.size()<<" MDT hits and "<<m_trkTriggerHit_type.size()<<" Trigger hits in the track!") ; 
-    m_trkHit_nMdtHits.push_back(m_trkHit_type.size());
-    m_trkTriggerHit_nHits.push_back(m_trkTriggerHit_type.size());
-    m_trkHole_nHoles.push_back(nHole);
   } // end of track loop
+  m_trkHit_nMdtHits=m_trkHit_type.size();
+  m_trkTriggerHit_nHits=m_trkTriggerHit_type.size();
+  m_trkHole_nHoles=m_trkHole_type.size();
+  ATH_MSG_DEBUG("Total recorded "<<m_trkHit_type.size()<<" MDT hits, "<<m_trkTriggerHit_type.size()<<" Trigger hits and "<<m_trkHole_type.size()<<" hole hits in all tracks!") ; 
+
 
   if (!m_tree.fill(ctx)) return StatusCode::FAILURE;
   return StatusCode::SUCCESS;
@@ -328,9 +329,14 @@ void MuonSegmentReader::storeMeasurement(const EventContext& ctx, const MuonGM::
       float distRo_det = detEl->distanceFromRO(trkHitPos, id);
       m_trkHit_distRO.push_back(distRo_det) ;
 
-      // save the local postion of hit center for refitting
-      Amg::Vector3D hitCenter = detEl->localTubePos(id);
-      m_trkHit_center.push_back(hitCenter);      
+      // save the local postion of hit center for local refitting, set x = 0, y = coordinator along the Ntube, z = coordinator along the Nlayer
+      Amg::Vector3D wireCenter = gToStation*detEl->tubePos(id);
+      wireCenter.x() = 0;
+      ATH_MSG_DEBUG(m_MuonIdHelper->mdtIdHelper().stationNameString(int(m_MuonIdHelper->mdtIdHelper().stationName(id)))<<" "<<m_MuonIdHelper->stationEta(id)<<" "<<m_MuonIdHelper->stationPhi(id)
+            <<" "<<"ml: "<<m_MuonIdHelper->mdtIdHelper().multilayer(id)<<" lb: "<<m_MuonIdHelper->mdtIdHelper().tubeLayer(id)<<" tube: "<<m_MuonIdHelper->mdtIdHelper().tube(id)
+            << " detEl wireLocalCenter " << " x : "<<wireCenter.x()<< " y : " << wireCenter.y()<< " z : "<<wireCenter.z());
+
+      m_trkHit_center.push_back(wireCenter);      
       m_trkHit_gPos.push_back(mrot_gPos);
       m_trkHit_pos.push_back(mrot_pos);
 
@@ -354,11 +360,9 @@ void MuonSegmentReader::storeMeasurement(const EventContext& ctx, const MuonGM::
 
       // debugging printout
       ATH_MSG_DEBUG("trackHit distRO " << distRo_det<<" positionAlongWire "<<mrot->positionAlongWire()<<" tubeLength "<<detEl->tubeLength(id));
-      //ATH_MSG_DEBUG("detEl tubeLocalCenter " << " x : "<<hitCenter.x()<< " y : " << hitCenter.y()<< " z : "<<hitCenter.z());
       ATH_MSG_DEBUG("prd hit global position measurement " <<" x : "<< prd_pos.x()<<" y : "<< prd_pos.y()<<" z : "<<prd_pos.z());
       ATH_MSG_DEBUG("MdtDriftCircleOnTrack hit global position measurement " << " x : " <<mrot_gPos.x()<<" y : "<< mrot_gPos.y() <<" z : "<<mrot_gPos.z());
       ATH_MSG_DEBUG("trackHitPos from trackPars " << " x : "<<trkHitPos.x() <<" y : "<<trkHitPos.y() <<" z : "<< trkHitPos.z() );
-      //ATH_MSG_DEBUG("trackHit Local Pos from trackPars " <<" x : "<< x <<" y : "<< y <<" z : "<< positionAlongWire);
       ATH_MSG_DEBUG("trackHit Local Pos from globaltolocalCoords " <<" x : "<< trkHitPosLoc.x() <<" y : "<< trkHitPosLoc.y() <<" z : "<< trkHitPosLoc.z());
       ATH_MSG_DEBUG("mrod Local Pos from globaltolocalCoords " <<" x : "<< mrot_pos.x() <<" y : "<< mrot_pos.y() <<" z : "<< mrot_pos.z());
       ATH_MSG_DEBUG("TrackIndex "<<itrk<<" station " << fixid.stationNumberToFixedStationString(fixid.stationName()) << " eta " << fixid.eta() << " phi " << fixid.phi() << " ML " << fixid.mdtMultilayer() << " Layer " << fixid.mdtTubeLayer()

@@ -58,7 +58,7 @@ def getAllSequenceNames(seq, depth=0):
            \\__ seq2 (seq: SEQ AND)
     """
 
-    seqNameList = [(seq.name, depth)]
+    seqNameList = [(seq.getName(), depth)]
     for c in getSequenceChildren(seq):
       if isSequence(c):
         seqNameList +=  getAllSequenceNames(c, depth+1)
@@ -74,14 +74,14 @@ def checkSequenceConsistency( seq ):
         seen.add (s)
         for c in getSequenceChildren( s ):
             if c in seen:
-                raise RuntimeError(f"Sequence {c.name} contains itself")
+                raise RuntimeError(f"Sequence {c.getName()} contains itself")
             if isSequence( c ):
-                if c.name == n:
+                if c.getName() == n:
                     raise RuntimeError(f"Sequence {n} contains sub-sequence of the same name")
-                __noSubSequenceOfName( c, c.name, seen ) # check each sequence for repetition as well
+                __noSubSequenceOfName( c, c.getName(), seen ) # check each sequence for repetition as well
                 __noSubSequenceOfName( c, n, seen )
 
-    __noSubSequenceOfName( seq, seq.name )
+    __noSubSequenceOfName( seq, seq.getName() )
     for c in getSequenceChildren( seq ):
         checkSequenceConsistency(c)
 
@@ -99,11 +99,11 @@ def isSequence( obj ):
 
 def findSubSequence( start, nameToLookFor ):
     """ Traverse sequences tree to find a sequence of a given name. The first one is returned. """
-    if start.name == nameToLookFor:
+    if start.getName() == nameToLookFor:
         return start
     for c in getSequenceChildren(start):
         if isSequence( c ):
-            if  c.name == nameToLookFor:
+            if  c.getName() == nameToLookFor:
                 return c
             found = findSubSequence( c, nameToLookFor )
             if found:
@@ -114,7 +114,7 @@ def findSubSequence( start, nameToLookFor ):
 def findOwningSequence( start, nameToLookFor ):
     """ find sequence that owns the sequence nameTooLookFor"""
     for c in getSequenceChildren(start):
-        if c.name == nameToLookFor:
+        if c.getName() == nameToLookFor:
             return start
         if isSequence( c ):
             found = findOwningSequence( c, nameToLookFor )
@@ -147,7 +147,7 @@ def findAlgorithm( startSequence, nameToLookFor, depth = 1000000 ):
 
     The name() method is used to obtain the algorithm name, that one has to match to the request.
     """
-    return findAlgorithmByPredicate( startSequence, lambda alg: alg.name == nameToLookFor, depth )
+    return findAlgorithmByPredicate( startSequence, lambda alg: alg.getName() == nameToLookFor, depth )
 
 
 def findAllAlgorithms(sequence, nameToLookFor=None):
@@ -159,7 +159,7 @@ def findAllAlgorithms(sequence, nameToLookFor=None):
         if isSequence(child):
             algorithms += findAllAlgorithms(child, nameToLookFor)
         else:
-            if nameToLookFor is None or child.name == nameToLookFor:
+            if nameToLookFor is None or child.getName() == nameToLookFor:
                 algorithms.append(child)
     return algorithms
 
@@ -175,15 +175,15 @@ def findAllAlgorithmsByName(sequence, namesToLookFor=None):
     """
     algorithms = collections.defaultdict(list)
     for idx, child in enumerate(getSequenceChildren(sequence)):
-        if child.name == sequence.name:
-            raise RuntimeError(f"Recursively-nested sequence: {child.name} contains itself")
+        if child.getName() == sequence.getName():
+            raise RuntimeError(f"Recursively-nested sequence: {child.getName()} contains itself")
         if isSequence(child):
             childAlgs = findAllAlgorithmsByName(child, namesToLookFor)
             for algName in childAlgs:
                 algorithms[algName] += childAlgs[algName]
         else:
-            if namesToLookFor is None or child.name in namesToLookFor:
-                algorithms[child.name].append( (child, sequence, idx) )
+            if namesToLookFor is None or child.getName() in namesToLookFor:
+                algorithms[child.getName()].append( (child, sequence, idx) )
     return algorithms
 
 
@@ -193,7 +193,7 @@ def flatAlgorithmSequences( start ):
 
     def __inner( seq, collector ):
         for c in getSequenceChildren(seq):
-            collector[seq.name].append( c )
+            collector[seq.getName()].append( c )
             if isSequence( c ):
                 __inner( c, collector )
 
@@ -238,17 +238,17 @@ class TestCF( unittest.TestCase ):
     def test_findTop( self ):
         f = findSubSequence( self.top, "top")
         self.assertIsNotNone( f, "Can not find sequence at start" )
-        self.assertEqual( f.name, "top", "Wrong sequence" )
+        self.assertEqual( f.getName(), "top", "Wrong sequence" )
         # a one level deep search
         nest2 = findSubSequence( self.top, "nest2" )
         self.assertIsNotNone( nest2, "Can not find sub sequence" )
-        self.assertEqual( nest2.name, "nest2", "Sub sequence incorrect" )
+        self.assertEqual( nest2.getName(), "nest2", "Sub sequence incorrect" )
 
     def test_findDeep( self ):
         # deeper search
         d = findSubSequence( self.top, "deep_nest2")
         self.assertIsNotNone( d, "Deep searching for sub seqeunce fails" )
-        self.assertEqual( d.name, "deep_nest2", "Wrong sub sequence in deep search" )
+        self.assertEqual( d.getName(), "deep_nest2", "Wrong sub sequence in deep search" )
 
     def test_findMissing( self ):
         # algorithm is not a sequence
@@ -265,16 +265,16 @@ class TestCF( unittest.TestCase ):
 
     def test_findRespectingScope( self ):
         owner = findOwningSequence( self.top, "deep_nest1")
-        self.assertEqual( owner.name, "nest2", "Wrong owner %s" % owner.name )
+        self.assertEqual( owner.getName(), "nest2", "Wrong owner %s" % owner.getName() )
 
         owner = findOwningSequence( self.top, "deep_nest2")
-        self.assertEqual( owner.name, "nest2", "Wrong owner %s" % owner.name )
+        self.assertEqual( owner.getName(), "nest2", "Wrong owner %s" % owner.getName() )
 
         owner = findOwningSequence( self.top, "SomeAlg1")
-        self.assertEqual( owner.name, "nest2", "Wrong owner %s" % owner.name )
+        self.assertEqual( owner.getName(), "nest2", "Wrong owner %s" % owner.getName() )
 
         owner = findOwningSequence( self.top, "SomeAlg0")
-        self.assertEqual( owner.name , "top", "Wrong owner %s" % owner.name )
+        self.assertEqual( owner.getName() , "top", "Wrong owner %s" % owner.getName() )
 
     def test_iterSequences( self ):
         # Traverse from top

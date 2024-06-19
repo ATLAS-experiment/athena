@@ -2,7 +2,7 @@
 
 from AthenaCommon.SystemOfUnits import GeV, TeV
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags, isGaudiEnv
-from AthenaConfiguration.AutoConfigFlags import GetFileMD, getInitialTimeStampsFromRunNumbers, getRunToTimestampDict, getSpecialConfigurationMetadata
+from AthenaConfiguration.AutoConfigFlags import GetFileMD, getInitialTimeStampsFromRunNumbers, getRunToTimestampDict, getSpecialConfigurationMetadata, getGeneratorsInfo
 from AthenaConfiguration.Enums import BeamType, Format, ProductionStep, BunchStructureSource, Project
 from Campaigns.Utils import Campaign
 from PyUtils.moduleExists import moduleExists
@@ -86,9 +86,8 @@ def initConfigFlags():
                                                           else GetFileMD(prevFlags.Input.Files).get("triggerStreamOfFile", ""), help='trigger stream name')
     acf.addFlag('Input.Format', lambda prevFlags : Format.BS if GetFileMD(prevFlags.Input.Files).get("file_type", "BS") == "BS" else Format.POOL, type=Format, help='input format type')
     acf.addFlag('Input.ProcessingTags', lambda prevFlags : GetFileMD(prevFlags.Input.Files).get("processingTags", []), help='list of stream names in this file')
-    from GeneratorConfig.Versioning import generatorsGetFromMetadata
-    acf.addFlag('Input.GeneratorsInfo', lambda prevFlags : generatorsGetFromMetadata( GetFileMD(prevFlags.Input.Files).get("generators", "") ), help='generator version')
-    acf.addFlag('Input.SpecialConfiguration', lambda prevFlags : getSpecialConfigurationMetadata(prevFlags.Input.Files, prevFlags.Input.SecondaryFiles), help='special configuration options read from input file metadata')
+    acf.addFlag('Input.GeneratorsInfo', lambda prevFlags : getGeneratorsInfo(prevFlags), help='generator version')
+    acf.addFlag('Input.SpecialConfiguration', lambda prevFlags : getSpecialConfigurationMetadata(prevFlags), help='special configuration options read from input file metadata')
 
     def _inputCollections(inputFile):
         rawCollections = [type_key[1] for type_key in GetFileMD(inputFile).get("itemList", [])]
