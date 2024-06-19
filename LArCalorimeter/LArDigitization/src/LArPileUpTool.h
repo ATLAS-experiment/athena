@@ -40,6 +40,7 @@
 #include "LArSimEvent/LArHitContainer.h"
 #include "LArSimEvent/LArHitFloatContainer.h"
 #include "LArRecConditions/LArXTalkWeightGlobal.h"
+#include "CommissionEvent/CosTrigTime.h"
 
 #include "GeneratorObjects/McEventCollection.h"
 
@@ -130,7 +131,8 @@ private:
   SG::ReadHandleKeyArray<LArHitContainer> m_hitContainerKeys;
   SG::ReadHandleKeyArray<LArHitFloatContainer> m_hitFloatContainerKeys;
   SG::ReadHandleKey<LArDigitContainer> m_inputDigitContainerKey{this, "InputDigitContainer", "",
-      "Name of input digit container"}; // input digit container name 
+      "Name of input digit container"}; // input digit container name
+  SG::ReadHandleKey<CosTrigTime> m_timeKey{this,"CosTimeKey","CosTrigTime"};
   std::vector <std::string> m_hitContainerNames; // hit container name list
 
   SG::ReadHandleKey<McEventCollection> m_mcEventColl{this, "McEventCollectionKey", "TruthEvent", "McEventCollection"};
@@ -214,8 +216,7 @@ private:
 
  
   SG::ReadCondHandleKey<CaloDetDescrManager> m_caloMgrKey{this,"CaloDetDescrManager", "CaloDetDescrManager"};
-  
-  PublicToolHandle<ITriggerTime> m_triggerTimeTool{this, "TriggerTimeToolName", "CosmicTriggerTimeTool", "Trigger Tool Name"};
+ 
 
   const CaloCell_ID*     m_calocell_id{};
   const LArEM_ID*        m_larem_id{};

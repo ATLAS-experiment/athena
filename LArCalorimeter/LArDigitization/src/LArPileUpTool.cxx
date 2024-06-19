@@ -130,6 +130,7 @@ StatusCode LArPileUpTool::initialize() {
   ATH_CHECK(m_hitFloatContainerKeys.initialize(!m_onlyUseContainerName && !m_hitFloatContainerKeys.empty()));
   ATH_CHECK(m_inputDigitContainerKey.initialize(!m_onlyUseContainerName && !m_inputDigitContainerKey.empty()));
 
+  ATH_CHECK(m_timeKey.initialize(m_useTriggerTime));
   ATH_CHECK(m_mcEventColl.initialize(m_Windows));
 
 
@@ -152,15 +153,6 @@ StatusCode LArPileUpTool::initialize() {
   if (sc.isFailure()) {
     ATH_MSG_ERROR(" Unable to retrieve LArOnlineId from DetectoreStore");
     return StatusCode::FAILURE;
-  }
-
-  if (m_useTriggerTime) {
-    if (m_triggerTimeTool.retrieve().isFailure()) {
-      ATH_MSG_ERROR(" Unable to find Trigger Time Tool");
-      return StatusCode::FAILURE;
-    }
-  } else {
-    m_triggerTimeTool.disable();
   }
 
   ATH_CHECK(m_rndmGenSvc.retrieve());
@@ -216,10 +208,12 @@ StatusCode LArPileUpTool::prepareEvent(const EventContext& ctx, unsigned int /*n
   }
   // get the trigger time if requested
   m_data.m_trigtime=0;
-  if (m_useTriggerTime && m_triggerTimeTool) {
-     m_data.m_trigtime = m_triggerTimeTool->time();
-     ATH_MSG_DEBUG(" Trigger time used : " << m_data.m_trigtime);
+  if (m_useTriggerTime) {
+    SG::ReadHandle<CosTrigTime> cosTimeHdl(m_timeKey,ctx);
+    m_data.m_trigtime = cosTimeHdl->time();
+    ATH_MSG_DEBUG(" Trigger time used : " << m_data.m_trigtime);
   }
+  
   ATHRNG::RNGWrapper* rngWrapper = m_rndmGenSvc->getEngine(this, m_randomStreamName);
   ATHRNG::RNGWrapper::SeedingOptionType seedingmode=m_useLegacyRandomSeeds ? ATHRNG::RNGWrapper::MC16Seeding : ATHRNG::RNGWrapper::SeedingDefault;
   rngWrapper->setSeedLegacy( m_randomStreamName, ctx, m_randomSeedOffset, seedingmode );
@@ -337,12 +331,12 @@ StatusCode LArPileUpTool::processAllSubEvents(const EventContext& ctx) const  {
   // get the trigger time if requested
 
   data.m_trigtime=0;
-  /*
-  if (m_useTriggerTime && m_triggerTimeTool) {
-     trigtime = m_triggerTimeTool->time();
-     ATH_MSG_DEBUG(" Trigger time used : " << m_trigtime);
+  if (m_useTriggerTime) {
+    SG::ReadHandle<CosTrigTime> cosTimeHdl(m_timeKey,ctx);
+    data.m_trigtime = cosTimeHdl->time();
+    ATH_MSG_DEBUG(" Trigger time used : " << m_data.m_trigtime);
   }
-  */
+  
   ATHRNG::RNGWrapper* rngWrapper = m_rndmGenSvc->getEngine(this, m_randomStreamName);
   ATHRNG::RNGWrapper::SeedingOptionType seedingmode=m_useLegacyRandomSeeds ? ATHRNG::RNGWrapper::MC16Seeding : ATHRNG::RNGWrapper::SeedingDefault;
   rngWrapper->setSeedLegacy( m_randomStreamName, ctx, m_randomSeedOffset, seedingmode );
