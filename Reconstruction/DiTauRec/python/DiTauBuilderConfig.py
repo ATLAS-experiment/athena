@@ -1,7 +1,7 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from DiTauRec.DiTauToolsConfig import SeedJetBuilderCfg, SubjetBuilderCfg, JetAlgCfg, VertexFinderCfg, DiTauTrackFinderCfg, CellFinderCfg, IDVarCalculatorCfg
+from DiTauRec.DiTauToolsConfig import SeedJetBuilderCfg, SubjetBuilderCfg, JetAlgCfg, VertexFinderCfg, DiTauTrackFinderCfg, CellFinderCfg, ClusterFinderCfg, IDVarCalculatorCfg
 
 def DiTauBuilderCfg(flags, name="DiTauBuilder", **kwargs):
     acc = ComponentAccumulator()
@@ -37,7 +37,7 @@ def DiTauBuilderLowPtCfg(flags, name="DiTauLowPtBuilder", **kwargs):
     acc = ComponentAccumulator()
 
     tools = [
-        acc.popToolsAndMerge(SeedJetBuilderCfg(flags, JetCollection=flags.DiTau.SeedJetCollection[1])),
+        acc.popToolsAndMerge(SeedJetBuilderCfg(flags, JetCollection=flags.DiTau.SeedJetCollection[0])),
         acc.popToolsAndMerge(SubjetBuilderCfg(flags))
     ]
 
@@ -47,11 +47,12 @@ def DiTauBuilderLowPtCfg(flags, name="DiTauLowPtBuilder", **kwargs):
 
     tools.append(acc.popToolsAndMerge(DiTauTrackFinderCfg(flags)))
     # No CellFinder as run in derivation
+    tools.append(acc.popToolsAndMerge(ClusterFinderCfg(flags)))
     tools.append(acc.popToolsAndMerge(IDVarCalculatorCfg(flags)))
 
     kwargs.setdefault("DiTauContainer", flags.DiTau.DiTauContainer[1])
     kwargs.setdefault("Tools", tools)
-    kwargs.setdefault("SeedJetName", flags.DiTau.SeedJetCollection[1])
+    kwargs.setdefault("SeedJetName", flags.DiTau.SeedJetCollection[0])
     kwargs.setdefault("minPt", flags.DiTau.JetSeedPt[1])
     
     acc.merge(DiTauBuilderCfg(flags, name, **kwargs))

@@ -88,9 +88,7 @@ def AddDiTauLowPtCfg(flags, **kwargs):
 
     from JetRecConfig.JetRecConfig import JetRecCfg
     from JetRecConfig.StandardLargeRJets import AntiKt10LCTopo
-    from JetRecConfig.StandardJetConstits import stdConstitDic as cst
-    AntiKt10EMPFlow = AntiKt10LCTopo.clone(inputdef = cst.GPFlow)
-    acc.merge(JetRecCfg(flags,AntiKt10EMPFlow))
+    acc.merge(JetRecCfg(flags,AntiKt10LCTopo))
 
     from DiTauRec.DiTauBuilderConfig import DiTauBuilderLowPtCfg
     acc.merge(DiTauBuilderLowPtCfg(flags, name="DiTauLowPtBuilder"))

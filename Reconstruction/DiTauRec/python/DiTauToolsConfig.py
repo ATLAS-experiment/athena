@@ -73,6 +73,17 @@ def DiTauTrackFinderCfg(flags, name="DiTauRec_DiTauTrackFinder", **kwargs):
     acc.setPrivateTools(CompFactory.DiTauTrackFinder(name, **kwargs))
     return acc
 
+def ClusterFinderCfg(flags, name="DiTauRec_ClusterFinder", **kwargs):
+    """Configure the cluster finder"""
+    acc = ComponentAccumulator()
+
+    kwargs.setdefault("ClusterContainer", "CaloCalTopoClusters")
+    kwargs.setdefault("Rsubjet", 0.2)
+
+    ClusterFinder = CompFactory.ClusterFinder(name, **kwargs)
+    acc.setPrivateTools(ClusterFinder)
+    return acc
+
 def CellFinderCfg(flags, name="DiTauRec_CellFinder", **kwargs):
     """Configure the cell finder"""
     acc = ComponentAccumulator()
