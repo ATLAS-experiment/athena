@@ -616,3 +616,35 @@ TruthMatchedParticleType TauAnalysisTools::getTruthParticleType(const xAOD::DiTa
 
   return eTruthMatchedParticleType;
 }
+
+std::vector<const xAOD::TauJet*> TauAnalysisTools::combineTauJetsWithMuonRM(const xAOD::TauJetContainer* taus_std, const xAOD::TauJetContainer* taus_muonRM){
+  //! Special function to combine the muon-removed taus with the standard taus. 
+  //! This can impact your MET calculation and OLR.
+  //! You will know if you need this, otherwise please consult TauCP group.
+  // std::string message = "found " + std::to_string(taus_muonRM->size()) + " muon-removal taus";
+  // Info("TauAnalysisTools::getTauJetsWithMuonRM", message.c_str());
+  std::vector<const xAOD::TauJet*> taus_murm_vec(taus_muonRM->begin(), taus_muonRM->end());
+  std::vector<const xAOD::TauJet*> taus_combined;
+  for(const xAOD::TauJet* tau_std : *taus_std){
+    auto replacement_itr = std::find_if(taus_murm_vec.begin(), taus_murm_vec.end(), 
+      [=](const xAOD::TauJet* tau_murm){
+        auto link_to_ori_tau = tau_murm->auxdata<ElementLink<xAOD::TauJetContainer>>("originalTauJet");
+        if (!link_to_ori_tau.isValid()) { return false; }
+        if (*link_to_ori_tau == tau_std){ return true;  }
+        return false;
+      }
+    );
+    if (replacement_itr == taus_murm_vec.end()) { taus_combined.push_back(tau_std); }
+    else { 
+      // message = "replacement found at TauJets_MuonRM index " + std::to_string((*replacement_itr)->index()) + " for TauJets index " +  std::to_string(tau_std->index());
+      // Info("TauAnalysisTools::getTauJetsWithMuonRM", message.c_str());
+      taus_combined.push_back(*replacement_itr); 
+      taus_murm_vec.erase(replacement_itr);
+      // message = std::to_string(taus_murm_vec.size()) + " muon-removal taus left";
+      // Info("TauAnalysisTools::getTauJetsWithMuonRM", message.c_str());
+    }
+  }
+  // Every muon-removal tau should have been used, otherwise there is a problem.
+  assert(taus_murm_vec.empty());
+  return taus_combined;
+}

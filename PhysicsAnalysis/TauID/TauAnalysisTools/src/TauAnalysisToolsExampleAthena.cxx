@@ -17,8 +17,9 @@ TauAnalysisToolsExampleAthena::TauAnalysisToolsExampleAthena( const std::string&
   , m_smearTool( "TauAnalysisTools::TauSmearingTool/TauSmearingTool", this )
   , m_effTool( "TauAnalysisTools::TauEfficiencyCorrectionsTool/TauEfficiencyCorrectionsTool", this )
 {
-  declareProperty( "SGKey", m_sgKey = "TauRecContainer" );
-
+  declareProperty( "SGKey", m_sgKey_TauJets        = "TauJets" );
+  declareProperty( "SGKey_MuonRM", m_sgKey_TauJets_MuonRM = "TauJets_MuonRM" );
+  declareProperty( "UseMuonRemovalTaus", m_useMuonRemovalTaus = false );
   declareProperty( "TauSelectionTool", m_selTool );
   declareProperty( "TauSmearingTool", m_smearTool );
   declareProperty( "TauEfficiencyTool", m_effTool );
@@ -28,7 +29,10 @@ StatusCode TauAnalysisToolsExampleAthena::initialize()
 {
   // Greet the user:
   ATH_MSG_INFO( "Initialising" );
-  ATH_MSG_DEBUG( "SGKey = " << m_sgKey );
+  ATH_MSG_DEBUG( "TauJets SGKey = " << m_sgKey_TauJets );
+  if (m_useMuonRemovalTaus){ 
+    ATH_MSG_DEBUG( "TauJets_MuonRM SGKey = " << m_sgKey_TauJets_MuonRM );
+  }
   ATH_MSG_DEBUG( "TauSelectionTool  = " << m_selTool );
   ATH_MSG_DEBUG( "TauSmearingTool   = " << m_smearTool );
   ATH_MSG_DEBUG( "TauEfficiencyTool = " << m_effTool );
@@ -45,32 +49,40 @@ StatusCode TauAnalysisToolsExampleAthena::initialize()
 StatusCode TauAnalysisToolsExampleAthena::execute()
 {
   // Retrieve the taus:
-  const xAOD::TauJetContainer* taus = 0;
-  ATH_CHECK( evtStore()->retrieve( taus, m_sgKey ) );
-  ATH_MSG_INFO( "Number of taus: " << taus->size() );
-
+  std::vector<const xAOD::TauJet*> taus_to_calibrate;
+  const xAOD::TauJetContainer* taus_std = 0;
+  ATH_CHECK( evtStore()->retrieve( taus_std, m_sgKey_TauJets ) );
+  ATH_MSG_INFO( "Number of taus: " << taus_std->size() );
+  const xAOD::TauJetContainer* taus_muonRM = 0;
+  if (m_useMuonRemovalTaus){
+    ATH_CHECK( evtStore()->retrieve( taus_muonRM, m_sgKey_TauJets_MuonRM ) );
+    ATH_MSG_INFO( "Number of muon removal taus: " << taus_muonRM->size() );
+    taus_to_calibrate = TauAnalysisTools::combineTauJetsWithMuonRM(taus_std, taus_muonRM);
+  }
+  else {
+    for (const xAOD::TauJet* tau : *taus_std){
+      taus_to_calibrate.push_back(tau);
+    }
+  }
   // Loop over them:
-  xAOD::TauJetContainer::const_iterator tau_itr = taus->begin();
-  xAOD::TauJetContainer::const_iterator tau_end = taus->end();
-  for( ; tau_itr != tau_end; ++tau_itr )
+  for(const xAOD::TauJet* tau_uncali : taus_to_calibrate)
   {
-
-    ATH_MSG_DEBUG( "  current tau: eta = " << ( *tau_itr )->eta()
-                   << ", phi = " << ( *tau_itr )->phi()
-                   << ", pt = " << ( *tau_itr )->pt() );
+    ATH_MSG_DEBUG( "  current tau: eta = " << tau_uncali->eta()
+                   << ", phi = " << tau_uncali->phi()
+                   << ", pt = " << tau_uncali->pt() );
 
     // Select "good" taus:
-    if( ! m_selTool->accept( **tau_itr ) ) continue;
+    if( ! m_selTool->accept( *tau_uncali ) ) continue;
 
     // Print some info about the selected tau:
-    ATH_MSG_INFO( "  Selected tau: eta = " << ( *tau_itr )->eta()
-                  << ", phi = " << ( *tau_itr )->phi()
-                  << ", pt = " << ( *tau_itr )->pt() );
+    ATH_MSG_INFO( "  Selected tau: eta = " << tau_uncali->eta()
+                  << ", phi = " << tau_uncali->phi()
+                  << ", pt = " << tau_uncali->pt() );
 
     // copy constant objects to non-constant
     xAOD::TauJet* tau = 0;
     tau = new xAOD::TauJet();
-    tau->makePrivateStore( **tau_itr );
+    tau->makePrivateStore( *tau_uncali );
 
     ATH_CHECK (m_effTool->applyEfficiencyScaleFactor(*tau));
 

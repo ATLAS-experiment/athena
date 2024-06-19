@@ -15,5 +15,5 @@
 #include <TauAnalysisAlgorithms/TauSmearingAlg.h>
 #include <TauAnalysisAlgorithms/TauTruthMatchingAlg.h>
 #include <TauAnalysisAlgorithms/DiTauMassCalculatorAlg.h>
-
+#include <TauAnalysisAlgorithms/TauCombineMuonRMTausAlg.h>
 #endif
