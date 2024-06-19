@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LAREMSAMPLINGFRACTION_H
@@ -23,7 +23,6 @@
 #include <string>
 #include "TTree.h"
 
-using namespace std;
 
 class LarEMSamplingFraction  : public ::AthAlgorithm
 {
@@ -58,25 +57,25 @@ class LarEMSamplingFraction  : public ::AthAlgorithm
   std::vector<float>*    m_cell_eta{nullptr};
   std::vector<float>*    m_cell_phi{nullptr};
 
-  vector<float> *m_energy_reco{nullptr};
-  vector<float> *m_energy_hit{nullptr};
+  std::vector<float> *m_energy_reco{nullptr};
+  std::vector<float> *m_energy_hit{nullptr};
 
-  vector<float> *m_energy_inactive_total{nullptr};
-  vector<float> *m_energy_inactive_em{nullptr};
-  vector<float> *m_energy_inactive_nonem{nullptr};
-  vector<float> *m_energy_inactive_inv{nullptr};
-  vector<float> *m_energy_inactive_esc{nullptr};
+  std::vector<float> *m_energy_inactive_total{nullptr};
+  std::vector<float> *m_energy_inactive_em{nullptr};
+  std::vector<float> *m_energy_inactive_nonem{nullptr};
+  std::vector<float> *m_energy_inactive_inv{nullptr};
+  std::vector<float> *m_energy_inactive_esc{nullptr};
   
-  vector<float> *m_energy_active_total_corrected{nullptr};
-  vector<float> *m_energy_active_total{nullptr};
-  vector<float> *m_energy_active_em{nullptr};
-  vector<float> *m_energy_active_nonem{nullptr};
-  vector<float> *m_energy_active_inv{nullptr};
-  vector<float> *m_energy_active_esc{nullptr};
+  std::vector<float> *m_energy_active_total_corrected{nullptr};
+  std::vector<float> *m_energy_active_total{nullptr};
+  std::vector<float> *m_energy_active_em{nullptr};
+  std::vector<float> *m_energy_active_nonem{nullptr};
+  std::vector<float> *m_energy_active_inv{nullptr};
+  std::vector<float> *m_energy_active_esc{nullptr};
   
   TTree* m_mytree{nullptr};
 
-  vector<string> m_CalibrationHitContainerNames;
+  std::vector<std::string> m_CalibrationHitContainerNames;
 
   SG::ReadCondHandleKey<CaloDetDescrManager> m_caloMgrKey { this
       , "CaloDetDescrManager"
