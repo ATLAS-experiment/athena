@@ -74,7 +74,6 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
     FtagBaseContent.add_baseline_slimming_smartcollections(FTAG1SlimmingHelper)
 
     FTAG1SlimmingHelper.SmartCollections += [
-                                           "AntiKt4UFOCSSKJets",
                                            "BTagging_AntiKt4UFOCSSK",
                                            "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
                                           ]
@@ -98,6 +97,7 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
     FTAG1SlimmingHelper.AllVariables += [
             "InDetLargeD0TrackParticles",
             "AntiKt4EMPFlowJets",
+            "AntiKt4UFOCSSKJets",
             "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
             "UFOCSSK",
             "GlobalChargedParticleFlowObjects",
