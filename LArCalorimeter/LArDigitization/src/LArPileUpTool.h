@@ -89,8 +89,8 @@ private:
   struct perEventData_t {
     std::vector<float> m_energySum;
     std::vector<float> m_energySum_DigiHSTruth;
-    LArHitEMap* m_hitmap;
-    LArHitEMap* m_hitmap_DigiHSTruth;
+    LArHitEMap* m_hitmap{};
+    LArHitEMap* m_hitmap_DigiHSTruth{};
     float m_trigtime=0;
     const LArXTalkWeightGlobal* m_weights=nullptr;
   };
