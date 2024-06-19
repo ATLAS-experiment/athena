@@ -11,7 +11,7 @@ find_package( Acts COMPONENTS Core )
 atlas_add_component( MuonPatternRecognitionAlgs
                      src/components/*.cxx src/*.cxx
                      LINK_LIBRARIES  MuonPatternEvent ActsCore AthenaKernel StoreGateLib MuonTesterTreeLib
-                                    xAODMuonPrepData MuonSpacePoint )
+                                    xAODMuonPrepData MuonSpacePoint MuonPatternHelpers )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

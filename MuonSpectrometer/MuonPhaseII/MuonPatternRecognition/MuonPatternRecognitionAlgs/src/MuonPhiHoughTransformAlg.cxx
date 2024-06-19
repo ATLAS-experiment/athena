@@ -7,7 +7,7 @@
 #include <MuonReadoutGeometryR4/MuonChamber.h>
 #include <StoreGate/ReadCondHandle.h>
 
-#include "MuonHoughHelpers.h"
+#include "MuonPatternHelpers/HoughHelperFunctions.h"
 
 using namespace MuonR4;
 

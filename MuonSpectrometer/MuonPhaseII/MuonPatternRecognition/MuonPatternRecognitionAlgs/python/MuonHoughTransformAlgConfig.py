@@ -16,12 +16,19 @@ def MuonEtaHoughTransformAlgCfg(flags, name = "MuonEtaHoughTransformAlg", **kwar
     result.addEventAlgo(theAlg, primary=True)
     return result
 
-def MuonPatternRecognitionCfg(flags):
+def MuonSegmentFittingAlgCfg(flags, name = "MuonSegmentFittingAlg", **kwargs):
+    result = ComponentAccumulator()
+    theAlg = CompFactory.MuonR4.MuonSegmentFittingAlg(name, **kwargs)
+    result.addEventAlgo(theAlg, primary=True)
+    return result
+
+def MuonPatternRecognitionCfg(flags): 
     result = ComponentAccumulator()
     from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
     result.merge(ActsGeometryContextAlgCfg(flags))
     result.merge(MuonEtaHoughTransformAlgCfg(flags))
     result.merge(MuonPhiHoughTransformAlgCfg(flags))
+    result.merge(MuonSegmentFittingAlgCfg(flags))
     return result
 
 
@@ -42,4 +49,9 @@ if __name__=="__main__":
     cfg.merge(MuonSpacePointFormationCfg(flags))
     cfg.merge(MuonPatternRecognitionCfg(flags))
 
+    # output spam reduction
+    cfg.getService("AthenaHiveEventLoopMgr").EventPrintoutInterval=500
+
+
     executeTest(cfg, args.nEvents)
+    

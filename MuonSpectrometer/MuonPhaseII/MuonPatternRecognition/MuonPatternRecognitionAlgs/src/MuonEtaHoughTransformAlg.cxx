@@ -7,7 +7,7 @@
 #include <MuonReadoutGeometryR4/MuonChamber.h>
 #include <StoreGate/ReadCondHandle.h>
 
-#include "MuonHoughHelpers.h"
+#include "MuonPatternHelpers/HoughHelperFunctions.h"
 
 using namespace MuonR4;
 
@@ -192,5 +192,5 @@ void MuonEtaHoughTransformAlg::extendWithPhiHits(
     std::vector<HoughHitType>& hitList, HoughSetupForBucket& bucket) const {
     std::copy_if(bucket.bucket->begin(), bucket.bucket->end(),
                  std::back_inserter(hitList),
-                 [](MuonR4::HoughHitType hit) { return !hit->measuresPhi(); });
+                 [](MuonR4::HoughHitType hit) { return !hit->measuresEta(); });
 }

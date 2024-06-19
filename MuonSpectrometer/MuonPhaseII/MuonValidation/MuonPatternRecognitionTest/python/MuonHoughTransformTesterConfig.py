@@ -6,7 +6,6 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 def MuonHoughTransformTesterCfg(flags, name = "MuonHoughTransformTester", **kwargs):
     result = ComponentAccumulator()
-    theAlg = CompFactory.MuonValR4.MuonHoughTransformTester(name, **kwargs)
     containerNames = []
     if flags.Detector.EnableMDT:
         containerNames+=["xMdtSimHits"]
@@ -19,6 +18,8 @@ def MuonHoughTransformTesterCfg(flags, name = "MuonHoughTransformTester", **kwar
     if flags.Detector.EnablesTGC:
         containerNames+=["xStgcSimHits"] 
     kwargs.setdefault("SimHitKeys", containerNames)
+    theAlg = CompFactory.MuonValR4.MuonHoughTransformTester(name, **kwargs)    
+
     result.addEventAlgo(theAlg, primary=True)
     return result
 
@@ -39,24 +40,28 @@ if __name__=="__main__":
     args = parser.parse_args()
     flags, cfg = setupGeoR4TestCfg(args)
     
-
     from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
     # from PerfMonVTune.PerfMonVTuneConfig import VTuneProfilerServiceCfg
     cfg.merge(setupHistSvcCfg(flags,out_file=args.outRootFile,out_stream="MuonEtaHoughTransformTest"))
-    
+
     from xAODMuonSimHitCnv.MuonSimHitCnvCfg import MuonSimHitToMeasurementCfg
     cfg.merge(MuonSimHitToMeasurementCfg(flags))
-    
-    from MuonSpacePointFormation.SpacePointFormationConfig import MuonSpacePointFormationCfg
+
+    from MuonSpacePointFormation.SpacePointFormationConfig import MuonSpacePointFormationCfg 
     cfg.merge(MuonSpacePointFormationCfg(flags))
 
     from MuonPatternRecognitionAlgs.MuonHoughTransformAlgConfig import MuonPatternRecognitionCfg
     cfg.merge(MuonPatternRecognitionCfg(flags))
-    
+
     cfg.merge(MuonHoughTransformTesterCfg(flags,
                                        drawDisplayFailed =args.displayFailedSeeds,
                                        drawDisplaySuccss = args.displayGoodSeeds))
     cfg.merge(PerfMonMTSvcCfg(flags))
     # cfg.merge(VTuneProfilerServiceCfg(flags, ProfiledAlgs=["MuonHoughTransformAlg"]))
 
+    # output spam reduction
+    cfg.getService("AthenaHiveEventLoopMgr").EventPrintoutInterval=500
+
+
     executeTest(cfg, args.nEvents)
+    
