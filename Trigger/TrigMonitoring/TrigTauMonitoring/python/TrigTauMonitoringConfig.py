@@ -204,7 +204,7 @@ class TrigTauMonAlgBuilder:
 
     if self.activate_truth:
       # We add all chains to the Truth monitoring
-      self.HLT_truth_items = self.HLT_single_items + self.HLT_ditau_items + self.HLT_tag_and_probe_items
+      self.HLT_truth_items = self.HLT_single_items 
       self.logger.info(f'Configuring HLT truth tau monitored chains: {self.HLT_truth_items}')
       if not self.HLT_truth_items:
         self.logger.warning('Empty trigger list, disabling the truth tau monitoring')
