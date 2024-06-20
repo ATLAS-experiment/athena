@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -10,17 +10,20 @@
 #define TRKDIGTOOLS_PLANARMODULESTEPPER_H
 
 // Amg
-#include "GeoPrimitives/GeoPrimitives.h"
+#include "GeoPrimitives/GeoPrimitives.h" //Amg:: typedefs
 // Trk
 #include "TrkDigInterfaces/IModuleStepper.h"
-#include "TrkDigEvent/DigitizationCell.h"
 
 // Gaudi & Athena
 #include "AthenaBaseComps/AthAlgTool.h"
+//
+#include <vector>
+
 
 namespace Trk {
 
     class DigitizationModule;
+    class DigitizationStep;
     
     /** @class PlanarModuleStepper
 
