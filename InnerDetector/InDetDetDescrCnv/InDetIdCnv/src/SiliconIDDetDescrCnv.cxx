@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -111,7 +111,7 @@ SiliconIDDetDescrCnv::createObj(IOpaqueAddress* pAddr, DataObject*& pObj)
     } else {}
  
     // Get the dictionary manager from the detector store
-    const IdDictManager* idDictMgr;
+    const IdDictManager* idDictMgr = nullptr;
     status = detStore->retrieve(idDictMgr, "IdDict");
     if (status.isFailure()) {
 	log << MSG::FATAL << "Could not get IdDictManager !" << endmsg;
@@ -122,7 +122,7 @@ SiliconIDDetDescrCnv::createObj(IOpaqueAddress* pAddr, DataObject*& pObj)
     }
 
     // Get both Pixel and SCT id helpers
-    const PixelID* pixelID;
+    const PixelID* pixelID = nullptr;
     status = detStore->retrieve(pixelID, "PixelID");
     if (status.isFailure()) {
 	log << MSG::FATAL << "Could not get PixelID helper !" << endmsg;
@@ -132,7 +132,7 @@ SiliconIDDetDescrCnv::createObj(IOpaqueAddress* pAddr, DataObject*& pObj)
 	log << MSG::DEBUG << " Found the PixelID. " << endmsg;
     }
 
-    const SCT_ID* sctID;
+    const SCT_ID* sctID = nullptr;
     status = detStore->retrieve(sctID, "SCT_ID");
     if (status.isFailure()) {
 	log << MSG::FATAL << "Could not get SCT_ID helper !" << endmsg;
