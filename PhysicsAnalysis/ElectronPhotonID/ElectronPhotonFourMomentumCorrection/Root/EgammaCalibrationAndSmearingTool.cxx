@@ -1407,7 +1407,7 @@ void EgammaCalibrationAndSmearingTool::setupSystematics() {
       int i = 0;
       const TAxis& axis_statistical_error(m_rootTool->get_ZeeStat_eta_axis());
       for (int ibin = 1; ibin <= axis_statistical_error.GetNbins(); ++ibin) {
-        auto p = AbsEtaCaloPredicateFactory(axis_statistical_error.GetBinLowEdge(ibin),
+        auto p = EtaCaloPredicateFactory(axis_statistical_error.GetBinLowEdge(ibin),
         axis_statistical_error.GetBinLowEdge(ibin + 1));
         m_syst_description[CP::SystematicVariation("EG_SCALE_ZEESTAT__ETABIN" + std::to_string(i), +1)] = SysInfo{p, egEnergyCorr::Scale::ZeeStatUp};
         m_syst_description[CP::SystematicVariation("EG_SCALE_ZEESTAT__ETABIN" + std::to_string(i), -1)] = SysInfo{p, egEnergyCorr::Scale::ZeeStatDown};
