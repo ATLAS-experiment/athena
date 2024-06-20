@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloCellNoiseAlg.h"
@@ -271,7 +271,7 @@ StatusCode CaloCellNoiseAlg::execute()
   } 
 
 
-  const CaloCellContainer* cell_container;
+  const CaloCellContainer* cell_container = nullptr;
   if(evtStore()->retrieve(cell_container,"AllCalo").isFailure()) {
     ATH_MSG_WARNING( " Could not get pointer to Cell Container " );
     return StatusCode::SUCCESS;
