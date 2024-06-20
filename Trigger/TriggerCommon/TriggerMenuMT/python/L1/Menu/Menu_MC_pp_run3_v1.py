@@ -110,6 +110,8 @@ def defineMenu():
 
         #ATR-28679 - legacy XE
         'L1_XE35', 'L1_XE40', 'L1_XE45', 'L1_XE50','L1_XE55', 'L1_XE60',
+        # ATR-29609
+        'L1_XE30', 'L1_XE300',
 
         # Legacy combined em - jet moved by ATR-28761
         'L1_EM18VHI_3J20',

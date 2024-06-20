@@ -120,7 +120,6 @@ class MonitorDef:
                 # L1Calo
                 "L1_TAU8","L1_TAU20IM",
                 "L1_J15","L1_J400",
-                "L1_XE30","L1_XE300",
   
                 ## Phase-I
                 # L1Calo
