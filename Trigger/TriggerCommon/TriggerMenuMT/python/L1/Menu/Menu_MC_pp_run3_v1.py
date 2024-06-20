@@ -226,7 +226,7 @@ def defineMenu():
         'L1_MU8EOF':'',
         'L1_MU9VF':'',
         'L1_MU9VFC':'',
-        'L1_MU12FCH':'',
+        #'L1_MU12FCH':'',
         'L1_MU14EOF':'',
         'L1_MU15VFCHR':'',
         #'L1_MU18VFCH':'',
