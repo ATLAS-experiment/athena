@@ -196,7 +196,7 @@ def defineMenu():
         'L1_eEM15':'',
         #'L1_eEM18':'',
         'L1_eEM22M':'',
-        'L1_eEM24VM':'',
+        #'L1_eEM24VM':'',
         'L1_3eEM12L':'',
 
         # non-primary TAU
