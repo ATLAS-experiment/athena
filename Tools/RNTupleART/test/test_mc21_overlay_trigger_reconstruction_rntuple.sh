@@ -16,7 +16,6 @@ NEVENTS="50"
 ATHENA_CORE_NUMBER=8 \
 timeout 64800 \
 Reco_tf.py \
-  --CA="True" \
   --inputHITSFile="${HITS_File}" \
   --inputRDO_BKGFile="${RDO_BKG_File}" \
   --outputRDOFile="myRDO.pool.root" \
@@ -40,7 +39,6 @@ echo "art-result: $? overlay";
 ATHENA_CORE_NUMBER=8 \
 timeout 64800 \
 Reco_tf.py \
-  --CA="True" \
   --inputRDOFile="myRDO.pool.root" \
   --outputRDO_TRIGFile="myRDO_TRIG.pool.root" \
   --multithreaded="True" \
@@ -59,7 +57,6 @@ echo "art-result: $? trigger";
 ATHENA_CORE_NUMBER=8 \
 timeout 64800 \
 Reco_tf.py \
-  --CA="True" \
   --inputRDOFile="myRDO_TRIG.pool.root" \
   --outputAODFile="myAOD.pool.root" \
   --multithreaded="True" \

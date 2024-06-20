@@ -14,7 +14,6 @@ NEVENTS="2000"
 ATHENA_CORE_NUMBER=8 \
 timeout 64800 \
 Derivation_tf.py \
-  --CA="True" \
   --maxEvents="${NEVENTS}" \
   --multiprocess="True" \
   --sharedWriter="True" \
@@ -30,7 +29,6 @@ echo "art-result: $? ttree";
 ATHENA_CORE_NUMBER=8 \
 timeout 64800 \
 Derivation_tf.py \
-  --CA="True" \
   --maxEvents="${NEVENTS}" \
   --multiprocess="True" \
   --sharedWriter="True" \
@@ -45,7 +43,6 @@ echo "art-result: $? rntuple";
 # RNTuple to TTree
 timeout 64800 \
 Merge_tf.py \
-  --CA="True" \
   --inputAODFile="DAOD_PHYS.rntuple.pool.root" \
   --outputAOD_MRGFile="DAOD_PHYS.rntuple-to-ttree.pool.root";
 
@@ -53,7 +50,6 @@ echo "art-result: $? conversion (PHYS)";
 
 timeout 64800 \
 Merge_tf.py \
-  --CA="True" \
   --inputAODFile="DAOD_PHYSLITE.rntuple.pool.root" \
   --outputAOD_MRGFile="DAOD_PHYSLITE.rntuple-to-ttree.pool.root";
 
