@@ -11,6 +11,7 @@
  *
  * This class is implemented by
  *      - FPGATrackSimEtaPatternFilterTool
+ *      - add other LRT ones
  */
 
 #include "GaudiKernel/IAlgTool.h"

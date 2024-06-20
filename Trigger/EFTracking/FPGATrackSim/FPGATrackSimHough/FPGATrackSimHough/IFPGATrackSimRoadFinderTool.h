@@ -15,6 +15,7 @@
  *      - FPGATrackSimSectorMatchTool
  *      - FPGATrackSimHoughTransformTool
  *      - FPGATrackSimHough1DShiftTool
+ *      - and other LRT ones
  */
 
 #include "GaudiKernel/IAlgTool.h"
