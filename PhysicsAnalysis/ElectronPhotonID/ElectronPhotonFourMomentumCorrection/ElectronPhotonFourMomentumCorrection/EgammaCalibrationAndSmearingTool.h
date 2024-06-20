@@ -97,15 +97,15 @@ public:
   StatusCode initialize() override;
 
   // Apply the correction on a modifyable egamma object
-  virtual CP::CorrectionCode applyCorrection(xAOD::Egamma&) override;
-  virtual CP::CorrectionCode applyCorrection(xAOD::Egamma & input, const xAOD::EventInfo& event_info);
+  virtual CP::CorrectionCode applyCorrection(xAOD::Egamma&) const override;
+  virtual CP::CorrectionCode applyCorrection(xAOD::Egamma & input, const xAOD::EventInfo& event_info) const;
 
   // Create a corrected copy from a constant egamma object
   //  virtual CP::CorrectionCode correctedCopy(const xAOD::Egamma&, xAOD::Egamma*&);
-  virtual CP::CorrectionCode correctedCopy(const xAOD::Electron&, xAOD::Electron*&) override;
-  virtual CP::CorrectionCode correctedCopy(const xAOD::Photon&, xAOD::Photon*&) override;
-  double getEnergy(const xAOD::Photon&);     // for python usage
-  double getEnergy(const xAOD::Electron&);   // for python usage
+  virtual CP::CorrectionCode correctedCopy(const xAOD::Electron&, xAOD::Electron*&) const override;
+  virtual CP::CorrectionCode correctedCopy(const xAOD::Photon&, xAOD::Photon*&) const override;
+  double getEnergy(const xAOD::Photon&) const;    // for python usage
+  double getEnergy(const xAOD::Electron&) const;  // for python usage
 
   //systematics
   //Which systematics have an effect on the tool's behaviour?
@@ -116,7 +116,6 @@ public:
   virtual CP::SystematicSet recommendedSystematics() const override;
   //Use specific systematic
   virtual StatusCode applySystematicVariation(const CP::SystematicSet& systConfig) override;
-  virtual void setRandomSeed(unsigned) override { ATH_MSG_ERROR("setRandomSeed is not implemented for this tool"); }
   virtual void setRandomSeedFunction(const IdFunction&& function) { m_set_seed_function = function; }
   const IdFunction getRandomSeedFunction() const { return m_set_seed_function; }
 

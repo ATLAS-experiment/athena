@@ -622,7 +622,7 @@ EgammaCalibrationAndSmearingTool::resolution(double energy, double cl_eta, doubl
 }
 
 
-CP::CorrectionCode EgammaCalibrationAndSmearingTool::applyCorrection(xAOD::Egamma & input)
+CP::CorrectionCode EgammaCalibrationAndSmearingTool::applyCorrection(xAOD::Egamma & input) const
 {
   // Retrieve the event information:
   const xAOD::EventInfo* event_info = nullptr;
@@ -634,7 +634,7 @@ CP::CorrectionCode EgammaCalibrationAndSmearingTool::applyCorrection(xAOD::Egamm
 }
 
 
-CP::CorrectionCode EgammaCalibrationAndSmearingTool::correctedCopy(const xAOD::Electron& input, xAOD::Electron*& output)
+CP::CorrectionCode EgammaCalibrationAndSmearingTool::correctedCopy(const xAOD::Electron& input, xAOD::Electron*& output) const
 {
   // A sanity check:
   if (output) ATH_MSG_WARNING( "Non-null pointer received. " "There's a possible memory leak!" );
@@ -644,7 +644,7 @@ CP::CorrectionCode EgammaCalibrationAndSmearingTool::correctedCopy(const xAOD::E
   return applyCorrection(*output);
 }
 
-CP::CorrectionCode EgammaCalibrationAndSmearingTool::correctedCopy(const xAOD::Photon& input, xAOD::Photon*& output)
+CP::CorrectionCode EgammaCalibrationAndSmearingTool::correctedCopy(const xAOD::Photon& input, xAOD::Photon*& output) const
 {
   // A sanity check:
   if (output) ATH_MSG_WARNING( "Non-null pointer received. " "There's a possible memory leak!" );
@@ -654,7 +654,7 @@ CP::CorrectionCode EgammaCalibrationAndSmearingTool::correctedCopy(const xAOD::P
   return applyCorrection(*output);
 }
 
-double EgammaCalibrationAndSmearingTool::getEnergy(const xAOD::Photon& input)
+double EgammaCalibrationAndSmearingTool::getEnergy(const xAOD::Photon& input) const
 {
   xAOD::Photon* new_particle = nullptr;
   ANA_CHECK_THROW(correctedCopy(input, new_particle));
@@ -663,7 +663,7 @@ double EgammaCalibrationAndSmearingTool::getEnergy(const xAOD::Photon& input)
   return e;
 }
 
-double EgammaCalibrationAndSmearingTool::getEnergy(const xAOD::Electron& input)
+double EgammaCalibrationAndSmearingTool::getEnergy(const xAOD::Electron& input) const
 {
   xAOD::Electron* new_particle = nullptr;
   ANA_CHECK_THROW(correctedCopy(input, new_particle));
@@ -673,7 +673,7 @@ double EgammaCalibrationAndSmearingTool::getEnergy(const xAOD::Electron& input)
 }
 
 
-CP::CorrectionCode EgammaCalibrationAndSmearingTool::applyCorrection(xAOD::Egamma & input, const xAOD::EventInfo& event_info)
+CP::CorrectionCode EgammaCalibrationAndSmearingTool::applyCorrection(xAOD::Egamma & input, const xAOD::EventInfo& event_info) const
 {
   /*
    * Here we check for each event the kind of data DATA vs FullSim

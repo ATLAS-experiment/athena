@@ -330,7 +330,7 @@ namespace AtlasRoot {
 			       egEnergyCorr::Scale::Variation scaleVar = egEnergyCorr::Scale::None,
 			       egEnergyCorr::Resolution::Variation resVar = egEnergyCorr::Resolution::None,
                                egEnergyCorr::Resolution::resolutionType resType = egEnergyCorr::Resolution::SigmaEff90,
-			       double varSF = 1.0 );
+			       double varSF = 1.0 ) const;
 
 
     double resolution(double energy, double cl_eta, double cl_etaCalo,
@@ -381,7 +381,7 @@ namespace AtlasRoot {
 				  PATCore::ParticleType::Type ptype = PATCore::ParticleType::Electron,
 				  PATCore::ParticleDataType::DataType dataType = PATCore::ParticleDataType::Full,
                                   egEnergyCorr::Resolution::Variation value = egEnergyCorr::Resolution::Nominal,
-                                  egEnergyCorr::Resolution::resolutionType resType = egEnergyCorr::Resolution::SigmaEff90 );
+                                  egEnergyCorr::Resolution::resolutionType resType = egEnergyCorr::Resolution::SigmaEff90 ) const;
 
     /// MC calibration corrections
 
@@ -486,8 +486,8 @@ namespace AtlasRoot {
     std::unique_ptr<TH1>         m_zeeNom_data2016;
     std::unique_ptr<TH1>         m_zeeNom_data2017;
     std::unique_ptr<TH1>         m_zeeNom_data2018;
-    std::unique_ptr<TH1>         m_zeeFwdk;
-    std::unique_ptr<TH1>         m_zeeFwdb;
+    std::unique_ptr<const TH1>         m_zeeFwdk;
+    std::unique_ptr<const TH1>         m_zeeFwdb;
 
     std::unique_ptr<TH1>         m_zeeSyst;
     std::unique_ptr<TH1>         m_zeeSystOFC;

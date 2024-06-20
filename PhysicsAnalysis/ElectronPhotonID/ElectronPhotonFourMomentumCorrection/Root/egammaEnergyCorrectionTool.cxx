@@ -1238,7 +1238,7 @@ namespace AtlasRoot {
                                                          egEnergyCorr::Scale::Variation scaleVar,
                                                          egEnergyCorr::Resolution::Variation resVar,
                                                          egEnergyCorr::Resolution::resolutionType resType,
-                                                         double varSF ) {
+                                                         double varSF ) const {
     double fullyCorrectedEnergy = energy;
 
     // Correct fast sim flavours
@@ -1266,9 +1266,9 @@ namespace AtlasRoot {
 	fullyCorrectedEnergy /= (1 + alpha);
         // apply additional k.E+b corrections if histograms exist (like in es2017_R21_v1)
 	if (m_zeeFwdk &&  m_zeeFwdb && std::abs(cl_eta)>2.5){ //  calo eta?
-	  int ieta_k = m_zeeFwdk->GetXaxis()->FindBin(cl_eta);
+	  int ieta_k = m_zeeFwdk->GetXaxis()->FindFixBin(cl_eta);
 	  double value_k = m_zeeFwdk->GetBinContent(ieta_k);
-	  int ieta_b = m_zeeFwdb->GetXaxis()->FindBin(cl_eta);
+	  int ieta_b = m_zeeFwdb->GetXaxis()->FindFixBin(cl_eta);
           double value_b = m_zeeFwdb->GetBinContent(ieta_b);
 	  fullyCorrectedEnergy = value_k*fullyCorrectedEnergy + value_b*GeV;   // value is stored in GeV in the histogram file
 	}
@@ -2037,7 +2037,7 @@ namespace AtlasRoot {
                                                            PATCore::ParticleType::Type ptype,
                                                            PATCore::ParticleDataType::DataType dataType,
                                                            egEnergyCorr::Resolution::Variation value,
-                                                           egEnergyCorr::Resolution::resolutionType resType) {
+                                                           egEnergyCorr::Resolution::resolutionType resType) const {
 
     if (dataType == PATCore::ParticleDataType::Data) { ATH_MSG_FATAL("Trying to compute smearing correction on data"); }
 
