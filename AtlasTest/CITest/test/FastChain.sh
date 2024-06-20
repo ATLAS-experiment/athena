@@ -1,8 +1,7 @@
 #!/usr/bin/bash
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 FastChain_tf.py \
-    --CA \
     --simulator ATLFAST3F_G4MS \
     --useISF True \
     --randomSeed 123 \
