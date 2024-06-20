@@ -40,6 +40,17 @@ StatusCode IDTPM::TrackParametersPlots::bookPlots()
 
   ATH_CHECK( retrieveAndBook( m_pt,   m_trackType+"_pt" ) );
   ATH_CHECK( retrieveAndBook( m_eta,  m_trackType+"_eta" ) );
+  ATH_CHECK( retrieveAndBook( m_phi,  m_trackType+"_phi" ) );
+  ATH_CHECK( retrieveAndBook( m_d0,  m_trackType+"_d0" ) );
+  ATH_CHECK( retrieveAndBook( m_z0,  m_trackType+"_z0" ) );
+  ATH_CHECK( retrieveAndBook( m_R, m_trackType+"_R" ) );
+  ATH_CHECK( retrieveAndBook( m_Z, m_trackType+"_Z" ) );
+  ATH_CHECK( retrieveAndBook( m_prodR, m_trackType+"_prodR" ) );
+  ATH_CHECK( retrieveAndBook( m_prodZ, m_trackType+"_prodZ" ) );
+  ATH_CHECK( retrieveAndBook( m_chi2, m_trackType+"_chi2" ) );
+  ATH_CHECK( retrieveAndBook( m_ndof, m_trackType+"_ndof" ) );
+  ATH_CHECK( retrieveAndBook( m_chi2OverNdof, m_trackType+"_chi2OverNdof" ) );
+
 
   return StatusCode::SUCCESS;
 }
@@ -55,10 +66,30 @@ StatusCode IDTPM::TrackParametersPlots::fillPlots(
   /// Compute track parameters - TODO: add more...
   float ppt    = pT( particle ) / Gaudi::Units::GeV;
   float peta   = eta( particle );
+  float pphi   = phi( particle );
+  float pd0    = d0( particle );
+  float pz0    = z0( particle );
+  float pR     = R( particle );
+  float pZ     = Z( particle );
+  float pprodR = prodR( particle );
+  float pprodZ = prodZ( particle );
+  float pchi2 = chiSquared( particle );
+  float pndof = ndof( particle );
+  float pchi2OverNdof = pchi2/pndof;
 
   /// Fill the histograms
   ATH_CHECK( fill( m_pt,  ppt,   weight ) );
   ATH_CHECK( fill( m_eta, peta,  weight ) );
+  ATH_CHECK( fill( m_phi, pphi,  weight ) );
+  ATH_CHECK( fill( m_d0, pd0, weight ) );
+  ATH_CHECK( fill( m_z0, pz0, weight ) );
+  ATH_CHECK( fill( m_prodR, pprodR, weight ) );
+  ATH_CHECK( fill( m_prodZ, pprodZ, weight ) );
+  ATH_CHECK( fill( m_R, pR, weight ) );
+  ATH_CHECK( fill( m_Z, pZ, weight ) );
+  ATH_CHECK( fill( m_chi2, pchi2, weight ) );
+  ATH_CHECK( fill( m_ndof, pndof, weight ) );
+  ATH_CHECK( fill( m_chi2OverNdof, pchi2OverNdof, weight ) );
 
   return StatusCode::SUCCESS;
 }

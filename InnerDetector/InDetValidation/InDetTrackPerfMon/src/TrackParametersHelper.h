@@ -17,6 +17,7 @@
 /// xAOD includes
 #include "xAODTracking/TrackParticle.h"
 #include "xAODTruth/TruthParticle.h"
+#include "xAODTruth/TruthVertex.h"
 
 /// STD includes
 #include <cmath> // std::fabs, std::copysign
@@ -60,6 +61,42 @@ namespace IDTPM {
   template< class U >
   inline float d0( const U& p ) { return getD0( p ); }
 
+  /// Accessor utility function for getting the value of R
+  inline float getProdR( const xAOD::TrackParticle& ) { return -9999.; } //FIXME
+  inline float getProdR( const xAOD::TruthParticle& p ) {
+    return ( p.isAvailable<float>("prodR") ) ?
+           p.auxdata<float>("prodR") : -9999.;
+  }
+  template< class U >
+  inline float prodR( const U& p ) { return getProdR( p ); }
+
+  /// Accessor utility function for getting the value of Z
+  inline float getProdZ( const xAOD::TrackParticle& ) { return -9999.; } //FIXME
+  inline float getProdZ( const xAOD::TruthParticle& p ) {
+    return ( p.isAvailable<float>("prodZ") ) ?
+           p.auxdata<float>("prodZ") : -9999.;
+  }
+  template< class U >
+  inline float prodZ( const U& p ) { return getProdZ( p ); }
+
+  /// Accessor utility function for getting the value of prodR
+  inline float getR( const xAOD::TrackParticle& ) { return -9999.; } //FIXME
+  inline float getR( const xAOD::TruthParticle& p ) {
+    return ( p.hasProdVtx() ) ?
+           (*p.prodVtx()).perp() : -9999.;
+  }
+  template< class U >
+  inline float R( const U& p ) { return getR( p ); }
+
+  /// Accessor utility function for getting the value of prodZ
+  inline float getZ( const xAOD::TrackParticle& ) { return -9999.; } //FIXME
+  inline float getZ( const xAOD::TruthParticle& p ) {
+    return ( p.hasProdVtx() ) ?
+           (*p.prodVtx()).z() : -9999.;
+  }
+  template< class U >
+  inline float Z( const U& p ) { return getZ( p ); }
+
   /// Accessor utility function for getting the value of qOverP
   inline float getQoverP( const xAOD::TrackParticle& p ) { return p.qOverP(); }
   inline float getQoverP( const xAOD::TruthParticle& p ) {
@@ -76,6 +113,18 @@ namespace IDTPM {
   /// Accessor utility function for getting the value of Tranverse energy
   template< class U >
   inline float eT( const U& p ) { return p.p4().Et(); }
+
+  /// Accessor utility function for getting the value of chi^2
+  inline float getChiSquared( const xAOD::TrackParticle& p ) { return p.chiSquared(); }
+  inline float getChiSquared( const xAOD::TruthParticle& ) { return -9999; }
+  template< class U >
+  inline float chiSquared( const U& p ) { return getChiSquared(p); }
+
+  /// Accessor utility function for getting the value of #dof
+  inline float getNdof( const xAOD::TrackParticle& p ) { return p.numberDoF(); }
+  inline float getNdof( const xAOD::TruthParticle& ) { return -9999; }
+  template< class U >
+  inline float ndof( const U& p ) { return getNdof(p); }
 
   /// Accessor utility function for getting the DeltaPhi betwen two tracks
   template< class U1, class U2=U1 >

@@ -8,5 +8,55 @@
         "type" : "TH1F",
         "xAxis" : { "title" : "$TRKTYPE #eta", "nBins" : "100", "low" : "-$ETAMAX", "high" : "$ETAMAX" },
         "yAxis" : { "title" : "Entries" }
+    },
+    "$TRKTAG_phi" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "$TRKTYPE #phi", "nBins" : "100", "low" : "-$PI", "high" : "$PI" },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$TRKTAG_d0" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "$TRKTYPE d_{0}", "nBins" : "100", "low" : "-$D0MAX", "high" : "$D0MAX" },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$TRKTAG_z0" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "$TRKTYPE z_{0}", "nBins" : "100", "low" : "-$Z0MAX", "high" : "$Z0MAX" },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$TRKTAG_R" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "$TRKTYPE R", "nBins" : "100", "low" : "0", "high" : "$RMAX" },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$TRKTAG_Z" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "$TRKTYPE Z", "nBins" : "100", "low" : "-$ZMAX", "high" : "$ZMAX" },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$TRKTAG_prodR" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "$TRKTYPE prodR", "nBins" : "100", "low" : "0", "high" : "$RMAX" },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$TRKTAG_prodZ" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "$TRKTYPE prodZ", "nBins" : "100", "low" : "-$ZMAX", "high" : "$ZMAX" },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$TRKTAG_chi2" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "$TRKTYPE #chi^2", "nBins" : "100", "low" : "0", "high" : "150" },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$TRKTAG_ndof" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "$TRKTYPE Number of DoF", "nBins" : "100", "low" : "0", "high" : "100" },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$TRKTAG_chi2OverNdof" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "$TRKTYPE #chi^2/DoF", "nBins" : "100", "low" : "0", "high" : "5" },
+        "yAxis" : { "title" : "Entries" }
     }
 }

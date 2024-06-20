@@ -8,5 +8,40 @@
         "type" : "TEfficiency",
         "xAxis" : { "title" : "$TRKTYPE #eta", "nBins" : "100", "low" : "-$ETAMAX", "high" : "$ETAMAX" },
         "yAxis" : { "title" : "Efficiency" }
+    },
+    "eff_vs_$TRKTAG_phi" : {
+        "type" : "TEfficiency",
+        "xAxis" : { "title" : "$TRKTYPE #phi", "nBins" : "100", "low" : "-$PI", "high" : "$PI" },
+        "yAxis" : { "title" : "Efficiency" }
+    },
+    "eff_vs_$TRKTAG_d0" : {
+        "type" : "TEfficiency",
+        "xAxis" : { "title" : "$TRKTYPE d_{0}", "nBins" : "100", "low" : "-$D0MAX", "high" : "$D0MAX" },
+        "yAxis" : { "title" : "Efficiency" }
+    },
+    "eff_vs_$TRKTAG_z0" : {
+        "type" : "TEfficiency",
+        "xAxis" : { "title" : "$TRKTYPE z_{0}", "nBins" : "100", "low" : "-$Z0MAX", "high" : "$Z0MAX" },
+        "yAxis" : { "title" : "Efficiency" }
+    },
+    "eff_vs_$TRKTAG_R" : {
+        "type" : "TEfficiency",
+        "xAxis" : { "title" : "$TRKTYPE R", "nBins" : "100", "low" : "0", "high" : "$RMAX" },
+        "yAxis" : { "title" : "Efficiency" }
+    },
+    "eff_vs_$TRKTAG_Z" : {
+        "type" : "TEfficiency",
+        "xAxis" : { "title" : "$TRKTYPE Z", "nBins" : "100", "low" : "-$ZMAX", "high" : "$ZMAX" },
+        "yAxis" : { "title" : "Efficiency" }
+    },
+    "eff_vs_$TRKTAG_prodR" : {
+        "type" : "TEfficiency",
+        "xAxis" : { "title" : "$TRKTYPE prodR", "nBins" : "100", "low" : "0", "high" : "$RMAX" },
+        "yAxis" : { "title" : "Efficiency" }
+    },
+    "eff_vs_$TRKTAG_prodZ" : {
+        "type" : "TEfficiency",
+        "xAxis" : { "title" : "$TRKTYPE prodZ", "nBins" : "100", "low" : "-$ZMAX", "high" : "$ZMAX" },
+        "yAxis" : { "title" : "Efficiency" }
     }
 }
