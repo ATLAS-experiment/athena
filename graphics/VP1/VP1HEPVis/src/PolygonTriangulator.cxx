@@ -700,8 +700,8 @@ namespace internal_poltrig {
     BTreeNode<T, KeyType>* Right(BTreeNode<T, KeyType> *node) { return node->m_right; }
 
   private:
-    BTreeNode<T, KeyType> *m_root;
-    long int              m_size;
+    BTreeNode<T, KeyType> *m_root{};
+    long int              m_size{};
 
     void reclaimMemory( BTreeNode<T, KeyType> * t ) const;
     BTreeNode<T, KeyType> * clone( BTreeNode<T, KeyType> *t ) const;
@@ -996,6 +996,7 @@ namespace internal_poltrig {
       {
 	MakeEmpty( );
 	m_root = clone( rhs.m_root );
+	m_size = rhs.m_size;
       }
 
     return *this;
