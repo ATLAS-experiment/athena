@@ -11,7 +11,7 @@ import re
 # - MuonCalibFlags - looks like we need this
 
 # MuonByteStream
-# - MuonByteStreamFlags.py - AFAICS this is only used here MuonCablings/MuonCablingServers/python/MuonCablingServersConfig.py, MuonCnv/MuonCnvExample/python/MuonCablingConfig.py & duplicates global flag functionality.
+# - MuonByteStreamFlags.py - AFAICS this is only used here, MuonCnv/MuonCnvExample/python/MuonCablingConfig.py & duplicates global flag functionality.
 
 # MuonRecExample
 # - MuonAlignFlags.py - looks necessary
