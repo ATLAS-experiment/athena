@@ -20833,6 +20833,34 @@ HLT_mu14_tau25_mediumRNN_tracktwoMVA_xe50_cell_03dRAB_L1MU8F_cTAU20M_jXE70:
     5: 1
 HLT_mu15_msonly_L1jMJJ-500-NFF:
   eventCount: 0
+HLT_mu16_ivarmedium_L1MU12FCH:
+  eventCount: 4
+  stepCounts:
+    0: 8
+    1: 6
+    2: 6
+    3: 6
+    4: 4
+  stepFeatures:
+    0: 8
+    1: 6
+    2: 6
+    3: 6
+    4: 4
+HLT_mu18_ivarmedium_L1MU12FCH:
+  eventCount: 4
+  stepCounts:
+    0: 8
+    1: 5
+    2: 5
+    3: 5
+    4: 4
+  stepFeatures:
+    0: 8
+    1: 5
+    2: 5
+    3: 5
+    4: 4
 HLT_mu20_2mu4noL1_L1MU14FCH:
   eventCount: 0
   stepCounts:
@@ -20998,6 +21026,20 @@ HLT_mu20_ivarloose_tau20_mediumRNN_tracktwoMVA_03dRAB_L1MU14FCH:
     1: 24
     2: 16
     3: 16
+    4: 4
+HLT_mu20_ivarmedium_L1MU12FCH:
+  eventCount: 4
+  stepCounts:
+    0: 8
+    1: 5
+    2: 5
+    3: 5
+    4: 4
+  stepFeatures:
+    0: 8
+    1: 5
+    2: 5
+    3: 5
     4: 4
 HLT_mu20_ivarmedium_mu4noL1_10invmAB70_L1MU14FCH:
   eventCount: 1
