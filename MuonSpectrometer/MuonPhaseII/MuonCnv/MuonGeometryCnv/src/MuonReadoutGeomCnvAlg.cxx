@@ -667,12 +667,12 @@ StatusCode MuonReadoutGeomCnvAlg::buildMdt(const ActsGeometryContext& gctx,
             newElement->m_firstwire_x[lay-1] = locTube.z() + xOffSet;
             newElement->m_firstwire_y[lay-1] = locTube.x() + yOffSet;
         }
+        newElement->geoInitDone();
         MdtAlignmentStore::chamberDistortions distort = alignStore ? alignStore->getDistortion(reId) : 
                                                         MdtAlignmentStore::chamberDistortions{};
         
         newElement->setBLinePar(distort.bLine);
         station->setMdtAsBuiltParams(distort.asBuilt);
-        newElement->geoInitDone();
         newElement->fillCache();
         /// Add the readout element to the manager
         ATH_CHECK(dumpAndCompare(gctx, *copyMe, *newElement));

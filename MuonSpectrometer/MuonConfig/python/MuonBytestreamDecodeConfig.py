@@ -405,38 +405,37 @@ def MuonByteStreamDecodersCfg(flags):
     cfg.merge(ByteStreamReadCfg(flags ))
 
     # Schedule Rpc data decoding
-    rpcdecodingAcc = RpcBytestreamDecodeCfg( flags ) 
-    cfg.merge( rpcdecodingAcc )
+    if flags.Detector.EnableRPC:
+        cfg.merge(RpcBytestreamDecodeCfg(flags))
 
     if flags.Muon.enableNRPC:
         # Schedule Nrpc data decoding
-        nrpcdecodingAcc = NrpcBytestreamDecodeCfg( flags )
-        cfg.merge( nrpcdecodingAcc )
+        cfg.merge(NrpcBytestreamDecodeCfg(flags))
 
     # Schedule Tgc data decoding
-    tgcdecodingAcc = TgcBytestreamDecodeCfg( flags ) 
-    cfg.merge( tgcdecodingAcc )
+    if flags.Detector.EnableTGC:
+        cfg.merge(TgcBytestreamDecodeCfg(flags))
 
     # Schedule Mdt data decoding
-    mdtdecodingAcc  = MdtBytestreamDecodeCfg( flags )
-    cfg.merge( mdtdecodingAcc )
+    if flags.Detector.EnableMDT:
+        cfg.merge(MdtBytestreamDecodeCfg(flags))
 
-
+    # Schedule Csc data decoding
     if flags.Detector.GeometryCSC:
-        # Schedule Csc data decoding
-        cscdecodingAcc = CscBytestreamDecodeCfg( flags ) 
-        cfg.merge( cscdecodingAcc )
+        cfg.merge(CscBytestreamDecodeCfg(flags))
 
-    if (flags.Detector.GeometrysTGC and flags.Detector.GeometryMM):
+    if flags.Detector.GeometryMM:
         # Schedule MM and MMTP data decoding
         cfg.merge( MmBytestreamDecodeCfg( flags ) )
         cfg.merge( NswMMTPByteStreamDecodeCfg(flags) )
 
-        # Schedule sTGC data decoding
-        cfg.merge( sTgcBytestreamDecodeCfg( flags )  )
-
+    # Schedule sTGC data decoding
+    if flags.Detector.GeometrysTGC:
+        cfg.merge(sTgcBytestreamDecodeCfg(flags))
         # Schedule sTGC Pad Trigger data decoding
-        cfg.merge( sTgcPadTriggerBytestreamDecodeCfg( flags ) )
+        cfg.merge( sTgcPadTriggerBytestreamDecodeCfg(flags))
+    
+    if flags.Detector.GeometrysTGC and flags.Detector.GeometryMM:  
         cfg.merge(NswTrigProcByteStreamDecodeCfg(flags))
 
     return cfg

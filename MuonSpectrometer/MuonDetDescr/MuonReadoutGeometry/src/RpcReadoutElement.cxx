@@ -420,14 +420,8 @@ namespace MuonGM {
     }
 
     bool RpcReadoutElement::containsId(const Identifier& id) const {
-        if (m_idHelper.doubletR(id) != getDoubletR() ||
-            m_idHelper.doubletZ(id) != getDoubletZ()) return false;
-
-      
-        int doubletPhi = m_idHelper.doubletPhi(id);
-        if (doubletPhi != getDoubletPhi() && NphiStripPanels() == 1) { return false; }
-        if (doubletPhi < 1 || doubletPhi > NphiStripPanels()) {
-            if (doubletPhi != 2 || !inTheRibs()) { return false; }
+        if (idHelperSvc()->detElementHash(id) != detectorElementHash()) {
+            return false;
         }
         int gasgap = m_idHelper.gasGap(id);
         if (gasgap < 1 || gasgap > m_nlayers) return false;
