@@ -124,7 +124,7 @@ bool SoftLeptonInJetFilter::isElectron(const HepMC::ConstGenParticlePtr& p) cons
 }
 
 bool SoftLeptonInJetFilter::isParton(const HepMC::ConstGenParticlePtr& p) const {
-  return (std::abs(p->pdg_id()) == m_part_ID && p->status()==3 &&
+  return (std::abs(p->pdg_id()) == m_part_ID && !MC::isPhysical(p) &&
           p->momentum().perp() >= m_part_Ptmin  &&
           std::abs(p->momentum().pseudoRapidity()) <= m_part_EtaRange);
 }
