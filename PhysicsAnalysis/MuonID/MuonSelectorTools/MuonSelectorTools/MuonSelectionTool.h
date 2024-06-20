@@ -137,7 +137,8 @@ namespace CP {
         Gaudi::Property<bool> m_recalcPrecisionLayerswNSW{this, "RecalcPrecisionLayerswNSW", true, "Recalculate nprecisionlayers with internal criteria for NSW"};
         Gaudi::Property<bool> m_useCaloScore{this, "UseCaloScore", true, "Use CaloScore for calo-tags in the Loose working point. False will revert back to CaloMuonIDTag (not recommended in Rel.22)"};
         Gaudi::Property<int>  m_caloScoreWP{this, "CaloScoreWP", 4,"Currently there are 4 CaloScore WPs for testing; WP4 is the recommended one"};
-        
+        Gaudi::Property<bool> m_useLRT{this, "UseLRT", false, "Enable support for LRT muons"};
+
         // Expert development options
         Gaudi::Property<bool> m_turnOffMomCorr{this, "TurnOffMomCorr", false};
         Gaudi::Property<bool> m_disablePtCuts{this, "DisablePtCuts", false};

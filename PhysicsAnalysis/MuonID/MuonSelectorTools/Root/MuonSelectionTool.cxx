@@ -87,6 +87,10 @@ namespace CP {
                             << "Please set UseMVALowPt=true if you want to try the UseSegmentTaggedLowPt=true option.");
             m_useSegmentTaggedLowPt = false;
         }
+        if (m_useLRT) { 
+            ATH_MSG_INFO("MuonSelectionTool will assume both Standard and LRT Muons are being used, and that the necessary information is available to identify the type (standard or LRT).");
+            if (m_quality!=1) ATH_MSG_WARNING("Currently, only Medium quality is supported for LRT muons. Your chosen WP will be applied (w/o ID cuts), but no recommendations are available for this quality.");
+        }
 
         // Set up the TAccept object:
         m_acceptInfo.addCut("Eta", "Selection of muons according to their pseudorapidity");
@@ -596,6 +600,24 @@ namespace CP {
     void MuonSelectionTool::setPassesHighPtCuts(xAOD::Muon& mu) const { mu.setPassesHighPtCuts(passedHighPtCuts(mu)); }
 
     bool MuonSelectionTool::passedIDCuts(const xAOD::Muon& mu) const {
+        if (m_useLRT) {
+            static const SG::AuxElement::Accessor<char> isLRTmuon("isLRT");
+            if (isLRTmuon.isAvailable(mu)) {
+                if (isLRTmuon(mu)) return true; /// No ID cuts should be applied on LRT muons, so always set this flag to true.
+            }
+            else { /// If the isLRT decor is not available, try to see if patternRecoInfo is available for the corresponding ID track.
+                static const SG::AuxElement::Accessor<uint64_t> patternAcc("patternRecoInfo");
+                const xAOD::TrackParticle* idtrack = mu.trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
+                if(idtrack) { /// All LRT muons should have ID tracks. The muons without ID tracks have to come from the standard muon container.
+                    if(!patternAcc.isAvailable(*idtrack)) {
+                        ATH_MSG_FATAL("No information available to tell if the muon is LRT or standard. Either run MuonLRTMergingAlg to decorate with `isLRT` flag, or supply the patternRecoInfo for the original ID track.");
+                        throw std::runtime_error("MuonSelectionTool() - isLRT decor and patternRecoInfo both unavailable for a muon.");
+                    }
+                    std::bitset<xAOD::NumberOfTrackRecoInfo> patternBitSet(patternAcc(*idtrack));
+                    if (patternBitSet.test(xAOD::SiSpacePointsSeedMaker_LargeD0)) return true;
+                }
+            }
+        }
         // do not apply the ID hit requirements for SA muons for |eta| > 2.5
         if (mu.author() == xAOD::Muon::MuidSA && std::abs(mu.eta()) > 2.5) {
             return true;

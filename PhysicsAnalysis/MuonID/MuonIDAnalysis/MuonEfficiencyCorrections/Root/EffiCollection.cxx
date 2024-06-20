@@ -21,6 +21,8 @@ namespace CP {
             m_forward_eff(),
             m_lowpt_central_eff(),
             m_lowpt_calo_eff(),
+            m_lrt_central_eff(),
+            m_lrt_lowpt_central_eff(),
             m_syst_set(std::make_unique<SystematicSet>()){
 
         m_central_eff = std::make_shared<CollectionContainer>(m_ref_tool, CollectionType::Central);
@@ -39,6 +41,29 @@ namespace CP {
          if (m_ref_tool.lowPtTransition() > 0  && m_ref_tool.filename_LowPtCalo() != m_ref_tool.filename_Central()){
             m_lowpt_calo_eff = std::make_shared<CollectionContainer>(m_ref_tool, CollectionType::CaloLowPt);
         } else m_lowpt_calo_eff = m_central_eff;
+
+        if(m_ref_tool.use_lrt()) {
+            if (m_ref_tool.filename_LRTCentral() != m_ref_tool.filename_Central()) {
+                m_lrt_central_eff = std::make_shared<CollectionContainer>(m_ref_tool,CollectionType::Central);
+            }
+            else {
+                m_lrt_central_eff = m_central_eff;
+            }
+            if (m_ref_tool.lowPtTransition() > 0 ) {
+                if (m_ref_tool.filename_LRTLowPt() == m_ref_tool.filename_LowPt()) {
+                    m_lrt_lowpt_central_eff = m_lowpt_central_eff;
+                }
+                else if (m_ref_tool.filename_LRTLowPt() == m_ref_tool.filename_Central()) {
+                    m_lrt_lowpt_central_eff = m_central_eff;
+                }
+                else {
+                    m_lrt_lowpt_central_eff = std::make_shared<CollectionContainer>(m_ref_tool,CollectionType::CentralLowPt);
+                }
+            }
+            else {
+                m_lrt_lowpt_central_eff = m_central_eff;
+            }
+        }
     }
     
     EffiCollection::EffiCollection(const EffiCollection* Nominal, const MuonEfficiencyScaleFactors& ref_tool, const std::string& syst, int syst_bit_map, bool is_up):
@@ -48,6 +73,8 @@ namespace CP {
             m_forward_eff(),
             m_lowpt_central_eff(),
             m_lowpt_calo_eff(),
+            m_lrt_central_eff(),
+            m_lrt_lowpt_central_eff(),
             m_syst_set() {
     
         if (is_up) syst_bit_map |= EffiCollection::UpVariation;
@@ -66,6 +93,10 @@ namespace CP {
         m_calo_eff = make_variation(CollectionType::Calo);
         m_lowpt_central_eff = make_variation(CollectionType::CentralLowPt);
         m_lowpt_calo_eff = make_variation(CollectionType::CaloLowPt);
+        if (m_ref_tool.use_lrt()) {
+            m_lrt_central_eff = make_variation(CollectionType::Central);
+            m_lrt_lowpt_central_eff = make_variation(CollectionType::CentralLowPt);
+        }
         
         
     }
@@ -99,6 +130,16 @@ namespace CP {
             Error("EffiCollection()", "Consistency check for low-pt calo file failed"); 
             return false;
         }
+        if (m_ref_tool.use_lrt()) {
+            if (!m_lrt_central_eff || !m_lrt_central_eff->CheckConsistency()) {
+                Error("EffiCollection()", "Consistency check for LRT central file failed");
+                return false;
+            }
+            if (!m_lrt_lowpt_central_eff || !m_lrt_lowpt_central_eff->CheckConsistency()) {
+                Error("EffiCollection()", "Consistency check for LRT low-pt file failed");    
+                return false;
+            }
+        }
         /// At this stage we know that all efficiencies have been loaded 
         /// successfully. We need to now to order the maps to make global
         /// bin numbers
@@ -116,6 +157,10 @@ namespace CP {
      
         assign_mapping(m_forward_eff.get());
        
+        if (m_ref_tool.use_lrt()) {
+            assign_mapping(m_lrt_central_eff.get());
+            assign_mapping(m_lrt_lowpt_central_eff.get());
+        }
         /// Systematic constructor has been called. We can now assemble
         /// the systematic variations
         if (!m_syst_set){
@@ -147,6 +192,23 @@ namespace CP {
     }
 
     CollectionContainer* EffiCollection::FindContainer(const xAOD::Muon& mu) const {
+        if (m_ref_tool.use_lrt()) {
+            static const SG::AuxElement::Accessor<char> isLRTmuon("isLRT");
+            if (isLRTmuon.isAvailable(mu)) {
+                if (isLRTmuon(mu)) return FindLRTContainer(mu);
+            }
+            else { /// If the isLRT decor is not available, try to see if patternRecoInfo is available for the corresponding ID track.
+                static const SG::AuxElement::Accessor<uint64_t> patternAcc("patternRecoInfo");
+                const xAOD::TrackParticle* idtrack = mu.trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
+                if(idtrack) { /// All LRT muons should have ID tracks. The muons without ID tracks have to come from the standard muon container.
+                    if(!patternAcc.isAvailable(*idtrack)) {
+                        Error("CollectionContainer", "No information available to tell if the muon is LRT or standard. Either run MuonLRTMergingAlg to decorate with `isLRT` flag, or supply the patternRecoInfo for the original ID track.");
+                    }
+                    std::bitset<xAOD::NumberOfTrackRecoInfo> patternBitSet(patternAcc(*idtrack));
+                    if (patternBitSet.test(xAOD::SiSpacePointsSeedMaker_LargeD0)) return FindLRTContainer(mu);
+                }
+            }
+        }
         if (mu.pt() <  m_ref_tool.lowPtTransition()) {
             if (std::abs(mu.eta()) >= 2.5) {
                 return m_forward_eff.get();
@@ -170,9 +232,16 @@ namespace CP {
         if (m_calo_eff->isBinInMap(bin)) return m_calo_eff.get();
         if (m_lowpt_central_eff->isBinInMap(bin)) return m_lowpt_central_eff.get();
         if (m_lowpt_calo_eff->isBinInMap(bin)) return m_lowpt_calo_eff.get();
+        if (m_ref_tool.use_lrt()) {
+            if (m_lrt_central_eff->isBinInMap(bin)) return m_lrt_central_eff.get();
+            if (m_lrt_lowpt_central_eff->isBinInMap(bin)) return m_lrt_lowpt_central_eff.get();
+        }
         return nullptr;
     }
-            
+    CollectionContainer* EffiCollection::FindLRTContainer(const xAOD::Muon& mu) const {
+        if (mu.pt() <  m_ref_tool.lowPtTransition()) return m_lrt_lowpt_central_eff.get();
+        else return m_lrt_central_eff.get();
+    }
     EfficiencyScaleFactor* EffiCollection::retrieveSF(const xAOD::Muon& mu, unsigned int RunNumber) const {
         CollectionContainer* Cont = FindContainer(mu);
         if (Cont != nullptr) return Cont->retrieve(RunNumber);
@@ -195,6 +264,14 @@ namespace CP {
         }
         if (m_lowpt_calo_eff != m_central_eff) {
             Nbins += m_lowpt_calo_eff->nBins();
+        }
+        if (m_ref_tool.use_lrt()) {
+            if (m_lrt_central_eff) {
+                Nbins += m_lrt_central_eff->nBins();
+            }
+            if (m_lrt_lowpt_central_eff) {
+                Nbins += m_lrt_lowpt_central_eff->nBins();
+            }
         }
         return Nbins;
     }

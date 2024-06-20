@@ -106,6 +106,9 @@ namespace CP {
             /// measurement using the J/Psi or Upsilon resonance
             std::string filename_LowPt()const;
             std::string filename_LowPtCalo()const;
+            /// LRT muons have their own efficiency maps
+            std::string filename_LRTCentral() const;
+            std::string filename_LRTLowPt() const;
             
             /// If the pt of the muon is below that threshold the J/Psi or Upsilon
             /// map is used given that it's available.
@@ -144,6 +147,8 @@ namespace CP {
             const std::string& close_by_jet_decoration() const;
             /// option to set if we want to use 1D or 2D isolation SFs
             bool use_2D_iso_corrections() const;
+            /// option to set if we want to use LRT muons
+            bool use_lrt() const;
             
        
     private:
@@ -166,6 +171,8 @@ namespace CP {
             std::string m_custom_file_HighEta;
             std::string m_custom_file_LowPt;
             std::string m_custom_file_LowPtCalo;
+            std::string m_custom_file_LRTCombined;
+            std::string m_custom_file_LRTLowPt;
    
             // Decorate the data-monteCarlo & scale-factors
             // to the muon. Decoration names can be set flexile
@@ -191,6 +198,9 @@ namespace CP {
             bool m_seperateSystBins;
             bool m_breakDownSyst;
             bool m_applyKineDepSys;
+            /// Turn on if using LRT objects
+            bool m_useLRT;
+
             CP::MuonEfficiencyType m_Type;
     };
 
