@@ -35,7 +35,7 @@ def HIFwdGapMenuSequenceGenCfg(flags):
   from AthenaConfiguration.ComponentFactory import CompFactory
   from TrigHIHypo.TrigHIFwdGapHypoConfig import TrigHIFwdGapHypoToolFromDict
 
-  recoAcc = InEventRecoCA("HIFwdGapReco")
+  recoAcc = InEventRecoCA("HIEventShapeReco")
   recoAcc.mergeReco(egammaFSHIEventShapeMakerCfg(flags))
 
   selAcc = SelectionCA("HLFwdGapSel")
@@ -43,3 +43,17 @@ def HIFwdGapMenuSequenceGenCfg(flags):
   selAcc.addHypoAlgo(CompFactory.TrigHIEventShapeHypoAlg())
 
   return MenuSequenceCA(flags, selAcc, HypoToolGen = TrigHIFwdGapHypoToolFromDict)
+
+def HIUCCMenuSequenceGenCfg(flags):
+  from ..Config.MenuComponents import InEventRecoCA, SelectionCA, MenuSequenceCA
+  from AthenaConfiguration.ComponentFactory import CompFactory
+  from TrigHIHypo.TrigHIUCCHypoConfig import TrigHIUCCHypoToolFromDict
+
+  recoAcc = InEventRecoCA("HIEventShapeReco")
+  recoAcc.mergeReco(egammaFSHIEventShapeMakerCfg(flags))
+
+  selAcc = SelectionCA("HIUCCSel")
+  selAcc.mergeReco(recoAcc)
+  selAcc.addHypoAlgo(CompFactory.TrigHIEventShapeHypoAlg())
+
+  return MenuSequenceCA(flags, selAcc, HypoToolGen = TrigHIUCCHypoToolFromDict)

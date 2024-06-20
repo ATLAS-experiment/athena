@@ -255,7 +255,7 @@ namespace FlavorTagDiscriminants {
         // current flavor tagging developments and AFT-438.
         {"IP[23]D(Neg)?_[pbc](b|c|u|tau)"_r, EDMType::FLOAT},
         {"SV1(Flip)?_[pbc](b|c|u|tau)"_r, EDMType::FLOAT},
-        {"(rnnip|iprnn|dips[^_]*)(flip)?_p(b|c|u|tau)"_r, EDMType::FLOAT},
+        {"(rnnip|iprnn|(?:dips|DIPS)[^_]*)(flip)?_p(b|c|u|tau)"_r, EDMType::FLOAT},
         {"(JetFitter|SV1|JetFitterSecondaryVertex)(Flip)?_[Nn].*"_r, EDMType::INT},
         {"(JetFitter|SV1|JetFitterSecondaryVertex).*"_r, EDMType::FLOAT},
         {"(log_)?pt|abs_eta|eta|phi|energy|mass"_r, EDMType::CUSTOM_GETTER},
@@ -275,7 +275,7 @@ namespace FlavorTagDiscriminants {
         {"JetFitterSecondaryVertex_.*"_r, "JetFitterSecondaryVertex_isDefaults"},
         {"JetFitterSecondaryVertexFlip_.*"_r, "JetFitterSecondaryVertexFlip_isDefaults"},
         {"rnnip_.*"_r, "rnnip_isDefaults"},
-        {"(dips[^_]*)_.*"_r, "$1_isDefaults"},
+        {"((?:dips|DIPS)[^_]*)_.*"_r, "$1_isDefaults"},
         {"rnnipflip_.*"_r, "rnnipflip_isDefaults"},
         {"iprnn_.*"_r, ""},
         {"smt_.*"_r, "softMuon_isDefaults"},
