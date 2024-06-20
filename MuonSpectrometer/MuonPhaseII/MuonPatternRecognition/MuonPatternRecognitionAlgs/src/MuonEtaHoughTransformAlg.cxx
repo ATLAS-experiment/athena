@@ -106,7 +106,7 @@ StatusCode MuonEtaHoughTransformAlg::prepareHoughPlane(
     cfg.nBinsX = m_nBinsTanTheta;
     cfg.nBinsY = m_nBinsIntercept;
     ActsPeakFinderForMuonCfg peakFinderCfg;
-    peakFinderCfg.fractionCutoff = 0.7;
+    peakFinderCfg.fractionCutoff = 0.6;
     peakFinderCfg.threshold = 3;
     peakFinderCfg.minSpacingBetweenPeaks = {0., 30.};
     data.houghPlane = std::make_unique<HoughPlane>(cfg);
@@ -129,10 +129,12 @@ StatusCode MuonEtaHoughTransformAlg::processBucket(
         chamberCenter + 0.5 * data.houghPlane->nBinsY() * m_targetResoIntercept;
     // Protection for very wide buckets - if the search space does not cover all
     // of the bucket, widen the bin size so that we cover everything
+
+
     searchStart = std::min(searchStart, bucket.searchWindowIntercept.first -
-                                            2. * m_targetResoIntercept);
+                                            m_minSigmasSearchIntercept * m_targetResoIntercept);
     searchEnd = std::max(searchEnd, bucket.searchWindowIntercept.second +
-                                        2. * m_targetResoIntercept);
+                                        m_minSigmasSearchIntercept * m_targetResoIntercept);
     // also treat tan(theta)
     double tanThetaMean = 0.5 * (bucket.searchWindowTanAngle.first +
                                  bucket.searchWindowTanAngle.second);
@@ -142,10 +144,10 @@ StatusCode MuonEtaHoughTransformAlg::processBucket(
         tanThetaMean + 0.5 * data.houghPlane->nBinsX() * m_targetResoTanTheta;
     searchStartTanTheta =
         std::min(searchStartTanTheta,
-                 bucket.searchWindowTanAngle.first - 2. * m_targetResoTanTheta);
+                 bucket.searchWindowTanAngle.first - m_minSigmasSearchTanTheta * m_targetResoTanTheta);
     searchEndTanTheta =
         std::max(searchEndTanTheta, bucket.searchWindowTanAngle.second +
-                                        2. * m_targetResoTanTheta);
+                                        m_minSigmasSearchTanTheta * m_targetResoTanTheta);
 
     data.currAxisRanges = Acts::HoughTransformUtils::HoughAxisRanges{
         searchStartTanTheta, searchEndTanTheta, searchStart, searchEnd};

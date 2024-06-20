@@ -79,13 +79,19 @@ namespace MuonR4{
             void extendWithPhiHits(std::vector<HoughHitType> & hitList, HoughSetupForBucket& bucket) const ;  
 
             // target resolution in the angle
-            DoubleProperty m_targetResoTanTheta{this, "ResolutionTargetAnTanAngle", 0.02};
+            DoubleProperty m_targetResoTanTheta{this, "ResolutionTargetTanTheta", 0.02};
             // target resolution in the y intercept
             DoubleProperty m_targetResoIntercept{this, "ResolutionTargetIntercept", 10.};
+            // minimum search window half width, tan(theta) 
+            // - in multiples of the target resolution
+            DoubleProperty m_minSigmasSearchTanTheta{this, "minSigmasSearchTanTheta", 3.};
+            // minimum search window half width, intercept 
+            // - in multiples of the target resolution
+            DoubleProperty m_minSigmasSearchIntercept{this, "minSigmasSearchIntercept", 3.};
             // number of accumulator bins for the angle 
-            IntegerProperty m_nBinsTanTheta{this, "nBinsAnTanAngle", 10};
+            IntegerProperty m_nBinsTanTheta{this, "nBinsTanTheta", 20};
             // number of accumulator bins for the intercept 
-            IntegerProperty m_nBinsIntercept{this, "nBinsIntercept", 100};
+            IntegerProperty m_nBinsIntercept{this, "nBinsIntercept", 200};
 
             // input space points from SG
             SG::ReadHandleKey<MuonR4::MuonSpacePointContainer> m_spacePointKey{this, "SpacePointContainer", "MuonSpacePoints"};

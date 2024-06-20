@@ -47,8 +47,8 @@ StatusCode MuonPhiHoughTransformAlg::prepareHoughPlane(
     // configure the peak finder for the phi-extension. 
     // Expect "shallow" maxima with 2-3 hits. 
     ActsPeakFinderForMuonCfg peakFinderCfg;
-    peakFinderCfg.fractionCutoff = 0.5;
-    peakFinderCfg.threshold = 3;    // 2D spacepoints receive a weight of 2
+    peakFinderCfg.fractionCutoff = 0.4;
+    peakFinderCfg.threshold = 2;    // 2D spacepoints receive a weight of 2
     peakFinderCfg.minSpacingBetweenPeaks = {0., 30.};
     data.houghPlane = std::make_unique<HoughPlane>(cfg);
     data.peakFinder = std::make_unique<ActsPeakFinderForMuon>(peakFinderCfg);
@@ -122,14 +122,14 @@ StatusCode MuonPhiHoughTransformAlg::preProcessMaximum(MuonHoughEventData & even
     double searchEnd = chamberCenter + 0.5 * eventData.houghPlane->nBinsY()  * m_targetResoIntercept; 
     // Protection for very wide buckets - if the search space does not cover all of the bucket, widen the bin size 
     // so that we cover everything  
-    searchStart = std::min(searchStart, eventData.searchSpaceIntercept.first- 2. * m_targetResoIntercept); 
-    searchEnd = std::max(searchEnd, eventData.searchSpaceIntercept.second + 2. * m_targetResoIntercept); 
+    searchStart = std::min(searchStart, eventData.searchSpaceIntercept.first- m_minSigmasSearchIntercept * m_targetResoIntercept); 
+    searchEnd = std::max(searchEnd, eventData.searchSpaceIntercept.second + m_minSigmasSearchIntercept * m_targetResoIntercept); 
     // also treat tan(phi) 
     double tanPhiMean = 0.5 * (eventData.searchSpaceTanAngle.first + eventData.searchSpaceTanAngle.second); 
     double searchStartTanPhi = tanPhiMean - 0.5 *  eventData.houghPlane->nBinsX() * m_targetResoTanPhi; 
     double searchEndTanPhi = tanPhiMean + 0.5* eventData.houghPlane->nBinsX() * m_targetResoTanPhi; 
-    searchStartTanPhi = std::min(searchStartTanPhi, eventData.searchSpaceTanAngle.first- 2. * m_targetResoTanPhi); 
-    searchEndTanPhi = std::max(searchEndTanPhi, eventData.searchSpaceTanAngle.second + 2. * m_targetResoTanPhi); 
+    searchStartTanPhi = std::min(searchStartTanPhi, eventData.searchSpaceTanAngle.first- m_minSigmasSearchTanPhi * m_targetResoTanPhi); 
+    searchEndTanPhi = std::max(searchEndTanPhi, eventData.searchSpaceTanAngle.second + m_minSigmasSearchTanPhi * m_targetResoTanPhi); 
 
     // and update the axis ranges for the search space according to our results
     eventData.currAxisRanges =
@@ -152,7 +152,7 @@ std::vector<MuonR4::ActsPeakFinderForMuon::Maximum> MuonPhiHoughTransformAlg::fi
             MuonR4::HoughHelpers::Phi::houghWidthStrip, hit, 0, 
             // up-weigh 2D spacepoints w.r.t 1D phi hits to prevent 
             // discarding measurements known to be compatible in eta 
-            hit->measuresEta() + 1.
+            (hit->measuresEta() ? 2.0 : 1.0)
             );
     }
     // run the peak finder 

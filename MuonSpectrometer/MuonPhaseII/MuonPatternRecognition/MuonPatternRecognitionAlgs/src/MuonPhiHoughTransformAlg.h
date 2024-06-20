@@ -102,10 +102,18 @@ namespace MuonR4{
             DoubleProperty m_targetResoTanPhi{this, "ResolutionTargetTanAngle", 0.01};
             // steers the target resolution in the x-axis intercept
             DoubleProperty m_targetResoIntercept{this, "ResolutionTargetIntercept", 10.};
+            // minimum search window half width, tan(phi) 
+            // - in multiples of the target resolution
+            DoubleProperty m_minSigmasSearchTanPhi{this, "minSigmasSearchTanPhi", 3.};
+            // minimum search window half width, intercept 
+            // - in multiples of the target resolution
+            DoubleProperty m_minSigmasSearchIntercept{this, "minSigmasSearchIntercept", 3.};
+            
             // number of accumulator bins in tan(phi)
-            IntegerProperty m_nBinsTanPhi{this, "nBinsTanAngle", 10};
+            // target resolution in the angle
+            IntegerProperty m_nBinsTanPhi{this, "nBinsTanAngle", 15};
             // number of accumulator bins in the x-axis intercept
-            IntegerProperty m_nBinsIntercept{this, "nBinsIntercept", 50};
+            IntegerProperty m_nBinsIntercept{this, "nBinsIntercept", 100};
             // maximum number of eta measurements allowed to be discarded by 
             // a valid phi-extension
             IntegerProperty m_maxEtaHolesOnMax{this, "maxEtaHoles", 1};
