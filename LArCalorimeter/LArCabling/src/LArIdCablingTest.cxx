@@ -30,15 +30,15 @@ StatusCode LArIdCablingTest::execute() {
   SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey};
   const LArOnOffIdMapping* cabling=(*cablingHdl);
 
-  const LArOnlineID_Base* larOnlineID;
+  const LArOnlineID_Base* larOnlineID = nullptr;
   if (m_isSC) {
-    const LArOnline_SuperCellID* ll;
+    const LArOnline_SuperCellID* ll = nullptr;
     ATH_CHECK(detStore()->retrieve(ll, "LArOnline_SuperCellID"));
     larOnlineID = ll;
     ATH_MSG_DEBUG("Found the LArOnlineID helper");
 
   } else {  // m_isSC
-    const LArOnlineID* ll;
+    const LArOnlineID* ll= nullptr;
     ATH_CHECK(detStore()->retrieve(ll, "LArOnlineID"));
     larOnlineID = ll;
     ATH_MSG_DEBUG(" Found the LArOnlineID helper. ");
@@ -46,11 +46,11 @@ StatusCode LArIdCablingTest::execute() {
 
   const CaloCell_Base_ID* caloId;
   if (m_isSC) {
-    const CaloCell_SuperCell_ID* cs;
+    const CaloCell_SuperCell_ID* cs = nullptr;
     ATH_CHECK(detStore()->retrieve(cs, "CaloCell_SuperCell_ID"));
     caloId = cs;
   } else {  // m_isSC
-    const CaloCell_ID* cc;
+    const CaloCell_ID* cc = nullptr;
     ATH_CHECK(detStore()->retrieve(cc, "CaloCell_ID"));
     caloId = cc;
   }
