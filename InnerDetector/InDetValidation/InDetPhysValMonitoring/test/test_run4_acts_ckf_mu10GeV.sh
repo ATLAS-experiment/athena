@@ -3,6 +3,7 @@
 # art-type: grid
 # art-include: main/Athena
 # art-output: *.root
+# art-output: ref-*/idpvm*.root
 # art-output: *.xml
 # art-output: dcube*
 # art-html: dcube_ambi_last
@@ -96,8 +97,9 @@ if [ $reco_rc != 0 ]; then
 fi
 
 echo "download latest result..."
-art.py download --user=artprod --dst="$lastref_dir" "$ArtPackage" "$ArtJobName"
-ls -la "$lastref_dir"
+art.py download --user=artprod "$ArtPackage" "$ArtJobName"
+lastref_dir=ref-20??-??-??T????
+ls -la $lastref_dir
 
 run "dcube-ckf-last" \
     $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
