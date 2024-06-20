@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArRecUtils/LArParabolaPeakRecoTool.h"
@@ -129,7 +129,7 @@ std::vector<float> LArParabolaPeakRecoTool::peak (const std::vector<float>& samp
       alpha[i][j]=pow(-1+i,j);
     }
   
-  float retval, tmax, traw, trec;
+  float retval=0, tmax=0, traw=0, trec=0;
   if(!m_correctBias){
 
     HepVector comp=solve(alpha,beta);
