@@ -434,7 +434,7 @@ namespace MuonGM {
     const Amg::Transform3D& MdtReadoutElement::fromIdealToDeformed(const int tubeLayer, const int tube) const {
         size_t itube = (tubeLayer - 1) * m_ntubesperlayer + tube - 1;
         if (itube >= m_deformTransf.size()) {
-            ATH_MSG_WARNING( " geoInfo called with tubeLayer or tube out of range in chamber "
+            ATH_MSG_WARNING(__func__<<"() :"<<__LINE__<< " called with tubeLayer or tube out of range in chamber "
                 << idHelperSvc()->toStringDetEl(identify()) << " : layer " << tubeLayer << " max " << m_nlayers << " tube " << tube
                 << " max " << m_ntubesperlayer << " will compute deformation for first tube in this chamber" );
             ATH_MSG_WARNING( "Please run in DEBUG mode to get extra diagnostic" );
@@ -794,7 +794,7 @@ namespace MuonGM {
     const MdtReadoutElement::GeoInfo& MdtReadoutElement::geoInfo(const int tubeLayer, const int tube) const {
         size_t itube = (tubeLayer - 1) * m_ntubesperlayer + tube - 1;
         if (itube >= m_tubeGeo.size()) {
-           ATH_MSG_WARNING( " geoInfo called with tubeLayer or tube out of range in chamber "
+           ATH_MSG_WARNING(__func__<<"() :"<<__LINE__<<"  called with tubeLayer or tube out of range in chamber "
                 << idHelperSvc()->toStringDetEl(identify()) << " : layer " << tubeLayer << " max " << m_nlayers << " tube " << tube
                 << " max " << m_ntubesperlayer << " will compute transform for first tube in this chamber" );
             ATH_MSG_WARNING( "Please run in DEBUG mode to get extra diagnostic" );

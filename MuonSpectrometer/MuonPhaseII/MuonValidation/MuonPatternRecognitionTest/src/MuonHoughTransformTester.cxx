@@ -4,6 +4,7 @@
 
 #include "MuonHoughTransformTester.h"
 #include "GaudiKernel/SystemOfUnits.h"
+#include "MuonTesterTree/EventInfoBranch.h"
 #include "MuonReadoutGeometryR4/MuonChamber.h"
 #include "MuonPatternHelpers/SegmentFitHelperFunctions.h"
 #include "MuonPatternEvent/MuonHoughDefs.h"
@@ -31,10 +32,10 @@ namespace MuonValR4 {
     StatusCode MuonHoughTransformTester::initialize() {
         ATH_CHECK(m_geoCtxKey.initialize());
         ATH_CHECK(m_inSimHitKeys.initialize());
-        ATH_CHECK(m_inHoughMaximaKey.initialize());
         ATH_CHECK(m_inHoughSegmentSeedKey.initialize());
         ATH_CHECK(m_inSegmentKey.initialize());
         ATH_CHECK(m_spacePointKey.initialize());
+        m_tree.addBranch(std::make_shared<MuonVal::EventInfoBranch>(m_tree,0));
         ATH_CHECK(m_tree.init(this));
         ATH_CHECK(m_idHelperSvc.retrieve());
         ATH_CHECK(detStore()->retrieve(m_r4DetMgr));
@@ -74,9 +75,6 @@ namespace MuonValR4 {
 
         auto simHitCollections = m_inSimHitKeys.makeHandles(ctx);
         
-        SG::ReadHandle<MuonR4::StationHoughMaxContainer> readHoughPeaks(m_inHoughMaximaKey, ctx);
-        ATH_CHECK(readHoughPeaks.isPresent());        
-        
         SG::ReadHandle<MuonR4::StationHoughSegmentSeedContainer> readSegmentSeeds(m_inHoughSegmentSeedKey, ctx);
         ATH_CHECK(readSegmentSeeds.isPresent());        
         
@@ -85,6 +83,7 @@ namespace MuonValR4 {
 
         ATH_MSG_DEBUG("Succesfully retrieved input collections");
 
+        std::set<const MuonR4::HoughSegmentSeed*> matchedSeeds{};
         // map the drift circles to identifiers. 
         // The fast digi should only generate one circle per tube. 
         std::map<std::pair<const MuonGMR4::MuonChamber*, HepMC::ConstGenParticlePtr>, std::vector<const xAOD::MuonSimHit*>> simHitMap{};
@@ -113,7 +112,7 @@ namespace MuonValR4 {
             HepMC::ConstGenParticlePtr genParticlePtr = stationAndParticle.second;
             const xAOD::MuonSimHit* simHit = hits.front();
             const Identifier ID = simHit->identify();
-            const MuonGMR4::MuonReadoutElement* reElement = m_r4DetMgr->getReadoutElement(ID);
+            const MuonGMR4::MuonChamber* chamber = m_r4DetMgr->getReadoutElement(ID)->getChamber();
                        
             const Amg::Transform3D toChamber{toChamberTrf(gctx, ID)};
             const Amg::Vector3D localPos{toChamber * xAOD::toEigen(simHit->localPosition())};
@@ -123,10 +122,9 @@ namespace MuonValR4 {
             const std::optional<double> lambda = Amg::intersect<3>(localPos, chamberDir, Amg::Vector3D::UnitZ(), 0.);
             Amg::Vector3D chamberPos = localPos + (*lambda)*chamberDir;
 
-            m_evtNumber = ctx.eventID().event_number();
-            m_out_stationName = reElement->stationName();
-            m_out_stationEta = reElement->stationEta();
-            m_out_stationPhi = reElement->stationPhi();
+            m_out_stationName = chamber->stationName();
+            m_out_stationEta = chamber->stationEta();
+            m_out_stationPhi = chamber->stationPhi();
             /// Global coordinates
             m_out_gen_Eta   = genParticlePtr->momentum().eta();
             m_out_gen_Phi= genParticlePtr->momentum().phi();
@@ -151,7 +149,7 @@ namespace MuonValR4 {
             m_out_gen_z0 = chamberPos.y(); 
             m_out_gen_x0 = chamberPos.x(); 
 
-            const std::vector<MuonR4::HoughSegmentSeed>& houghMaxima = houghPeakMap[reElement->getChamber()];
+            const std::vector<MuonR4::HoughSegmentSeed>& houghMaxima = houghPeakMap[chamber];
             if (houghMaxima.empty()){
                 if (!m_tree.fill(ctx)) {
                     return StatusCode::FAILURE;
@@ -163,13 +161,9 @@ namespace MuonValR4 {
             }
             const MuonR4::HoughSegmentSeed* foundMax = nullptr; 
             // find the best hough maximum
-            size_t max_hits{0};
-            size_t max_etaHits{0};
-            size_t max_phiHits{0};
+            size_t max_hits{0}, max_etaHits{0}, max_phiHits{0};
             for (const MuonR4::HoughSegmentSeed & max : houghMaxima){                
-                size_t nFound{0}; 
-                size_t nEta{0};
-                size_t nPhi{0}; 
+                size_t nFound{0}, nEta{0}, nPhi{0}; 
                 for (const xAOD::MuonSimHit* simHit : hits) {
 
                     for (const MuonR4::HoughHitType & hitOnMax : max.getHitsInMax()) {
@@ -196,83 +190,17 @@ namespace MuonValR4 {
             }
             /// Maximum could be associated to the hit
             if (foundMax != nullptr){
-                m_out_hasMax = true; 
-                m_out_max_hasPhiExtension = foundMax->hasPhiExtension(); 
-                m_out_max_tantheta = foundMax->tanTheta();
-                m_out_max_z0 = foundMax->interceptY();
-                if (m_out_max_hasPhiExtension.getVariable()){
-                    m_out_max_tanphi = foundMax->tanPhi();
-                    m_out_max_x0 = foundMax->interceptX(); 
-                }
+                matchedSeeds.insert(foundMax);
+                fillMaximum(foundMax);
                 m_out_max_nHits = max_hits; 
                 m_out_max_nEtaHits = max_etaHits; 
                 m_out_max_nPhiHits = max_phiHits; 
-                unsigned int nMdtMax{0}, nRpcMax{0}, nTgcMax{0}, nMmMax{0}, nsTgcMax{0}; 
-                for (const MuonR4::HoughHitType & houghSP: foundMax->getHitsInMax()){
-                    /// Skip all space points that don' contain any phi measurement
-                    
-                    const xAOD::UncalibratedMeasurement* meas = houghSP->primaryMeasurement();
-                    switch (meas->type()) {
-                        case xAOD::UncalibMeasType::MdtDriftCircleType: 
-                            m_max_driftCircleId.push_back(houghSP->identify());
-                            m_max_driftCircleTubePos.push_back(houghSP->positionInChamber());
-                            m_max_driftCirclRadius.push_back(houghSP->driftRadius());
-                            m_max_driftCircleDriftUncert.push_back(houghSP->uncertainty()[0]);
-                            m_max_driftCircleTubeLength.push_back(houghSP->uncertainty()[1]);
-                             ++nMdtMax;
-                            break;
-                        case xAOD::UncalibMeasType::RpcStripType:
-                            m_max_rpcHitId.push_back(houghSP->identify());
-                            m_max_rpcHitPos.push_back(houghSP->positionInChamber());
-                            m_max_rpcHitHasPhiMeas.push_back(houghSP->measuresPhi());
-                            m_max_rpcHitErrorX.push_back(houghSP->uncertainty()[0]);
-                            m_max_rpcHitErrorY.push_back(houghSP->uncertainty()[1]);
-                            ++nRpcMax;
-                            break;
-                        case xAOD::UncalibMeasType::TgcStripType:
-                            m_max_tgcHitId.push_back(houghSP->identify());
-                            m_max_tgcHitPos.push_back(houghSP->positionInChamber());
-                            m_max_tgcHitHasPhiMeas.push_back(houghSP->measuresPhi());
-                            m_max_tgcHitErrorX.push_back(houghSP->uncertainty()[0]);
-                            m_max_tgcHitErrorY.push_back(houghSP->uncertainty()[1]);
-                            ++nTgcMax;
-                            break;
-                        case xAOD::UncalibMeasType::sTgcStripType:
-                            m_max_stgcHitId.push_back(houghSP->identify());
-                            m_max_stgcHitPos.push_back(houghSP->positionInChamber());
-                            m_max_stgcHitHasPhiMeas.push_back(houghSP->measuresPhi());
-                            m_max_stgcHitErrorX.push_back(houghSP->uncertainty()[0]);
-                            m_max_stgcHitErrorY.push_back(houghSP->uncertainty()[1]);
-                            ++nsTgcMax;
-                            break;
-                        case xAOD::UncalibMeasType::MMClusterType:
-                            m_max_MmHitId.push_back(houghSP->identify());
-                            m_max_MmHitPos.push_back(houghSP->positionInChamber());
-                            m_max_MmHitIsStero.push_back(m_idHelperSvc->mmIdHelper().isStereo(houghSP->identify()));
-                            m_max_MmHitErrorX.push_back(houghSP->uncertainty()[0]);
-                            m_max_MmHitErrorY.push_back(houghSP->uncertainty()[1]);
-                            ++nMmMax;
-                            break;
-                        default:
-                            ATH_MSG_WARNING("Technology "<<m_idHelperSvc->toString(houghSP->identify())
-                                        <<" not yet implemented");                        
-                    }                    
-                }
-                m_out_max_nMdt = nMdtMax;
-                m_out_max_nRpc = nRpcMax;
-                m_out_max_nTgc = nTgcMax;
-                m_out_max_nsTgc = nsTgcMax;
-                m_out_max_nMm = nMmMax;
 
                 bool foundSegment = false; 
                 const MuonR4::MuonSegment* theSegment = nullptr; 
-                max_hits = 0;
-                max_etaHits = 0;
-                max_phiHits = 0; 
+                max_hits =  max_etaHits = max_phiHits; 
                 for (const MuonR4::MuonSegment & segment : *readMuonSegments){             
-                    size_t nFound{0}; 
-                    size_t nEta{0};
-                    size_t nPhi{0}; 
+                    size_t nFound{0}, nEta{0}, nPhi{0}; 
                     for (const xAOD::MuonSimHit* simHit : hits) {
                         for (const xAOD::UncalibratedMeasurement* hitOnMax : segment.measurements()) {
                             if(hitOnMax->type() == xAOD::UncalibMeasType::MdtDriftCircleType &&
@@ -320,7 +248,104 @@ namespace MuonValR4 {
             }
             if (!m_tree.fill(ctx)) return StatusCode::FAILURE;
         }
+        ATH_CHECK(dumpUnMatched(ctx, *readSegmentSeeds, matchedSeeds));
         return StatusCode::SUCCESS;
+    }
+    void MuonHoughTransformTester::fillMaximum(const MuonR4::HoughSegmentSeed* foundMax) {
+        if (!foundMax) return;
+        m_out_hasMax = true; 
+        m_out_max_hasPhiExtension = foundMax->hasPhiExtension(); 
+        m_out_max_tantheta = foundMax->tanTheta();
+        m_out_max_z0 = foundMax->interceptY();
+        if (m_out_max_hasPhiExtension.getVariable()){
+            m_out_max_tanphi = foundMax->tanPhi();
+            m_out_max_x0 = foundMax->interceptX(); 
+        }
+        unsigned int nMdtMax{0}, nRpcMax{0}, nTgcMax{0}, nMmMax{0}, nsTgcMax{0}; 
+        for (const MuonR4::HoughHitType & houghSP: foundMax->getHitsInMax()){
+            /// Skip all space points that don' contain any phi measurement
+            
+            const xAOD::UncalibratedMeasurement* meas = houghSP->primaryMeasurement();
+            switch (meas->type()) {
+                case xAOD::UncalibMeasType::MdtDriftCircleType: 
+                    m_max_driftCircleId.push_back(houghSP->identify());
+                    m_max_driftCircleTubePos.push_back(houghSP->positionInChamber());
+                    m_max_driftCirclRadius.push_back(houghSP->driftRadius());
+                    m_max_driftCircleDriftUncert.push_back(houghSP->uncertainty()[0]);
+                    m_max_driftCircleTubeLength.push_back(houghSP->uncertainty()[1]);
+                        ++nMdtMax;
+                    break;
+                case xAOD::UncalibMeasType::RpcStripType:
+                    m_max_rpcHitId.push_back(houghSP->identify());
+                    m_max_rpcHitPos.push_back(houghSP->positionInChamber());
+                    m_max_rpcHitHasPhiMeas.push_back(houghSP->measuresPhi());
+                    m_max_rpcHitErrorX.push_back(houghSP->uncertainty()[0]);
+                    m_max_rpcHitErrorY.push_back(houghSP->uncertainty()[1]);
+                    ++nRpcMax;
+                    break;
+                case xAOD::UncalibMeasType::TgcStripType:
+                    m_max_tgcHitId.push_back(houghSP->identify());
+                    m_max_tgcHitPos.push_back(houghSP->positionInChamber());
+                    m_max_tgcHitHasPhiMeas.push_back(houghSP->measuresPhi());
+                    m_max_tgcHitErrorX.push_back(houghSP->uncertainty()[0]);
+                    m_max_tgcHitErrorY.push_back(houghSP->uncertainty()[1]);
+                    ++nTgcMax;
+                    break;
+                case xAOD::UncalibMeasType::sTgcStripType:
+                    m_max_stgcHitId.push_back(houghSP->identify());
+                    m_max_stgcHitPos.push_back(houghSP->positionInChamber());
+                    m_max_stgcHitHasPhiMeas.push_back(houghSP->measuresPhi());
+                    m_max_stgcHitErrorX.push_back(houghSP->uncertainty()[0]);
+                    m_max_stgcHitErrorY.push_back(houghSP->uncertainty()[1]);
+                    ++nsTgcMax;
+                    break;
+                case xAOD::UncalibMeasType::MMClusterType:
+                    m_max_MmHitId.push_back(houghSP->identify());
+                    m_max_MmHitPos.push_back(houghSP->positionInChamber());
+                    m_max_MmHitIsStero.push_back(m_idHelperSvc->mmIdHelper().isStereo(houghSP->identify()));
+                    m_max_MmHitErrorX.push_back(houghSP->uncertainty()[0]);
+                    m_max_MmHitErrorY.push_back(houghSP->uncertainty()[1]);
+                    ++nMmMax;
+                    break;
+                default:
+                    ATH_MSG_WARNING("Technology "<<m_idHelperSvc->toString(houghSP->identify())
+                                <<" not yet implemented");                        
+            }                    
+        }
+        m_out_max_nMdt = nMdtMax;
+        m_out_max_nRpc = nRpcMax;
+        m_out_max_nTgc = nTgcMax;
+        m_out_max_nsTgc = nsTgcMax;
+        m_out_max_nMm = nMmMax;
+
+    }
+    StatusCode MuonHoughTransformTester::dumpUnMatched(const EventContext& ctx,
+                                                       const MuonR4::StationHoughSegmentSeedContainer& seedContainer,
+                                                       const std::set<const MuonR4::HoughSegmentSeed*>& matchedSeeds) {
+        if (!m_dumpUnmatchedSeeds){
+            return StatusCode::SUCCESS;
+        }
+        for (const auto& maxInStation : seedContainer) {            
+            
+            const MuonGMR4::MuonChamber* chamber = maxInStation.chamber();
+            for (const MuonR4::HoughSegmentSeed& dumpMeMayBe : maxInStation.getMaxima()) {
+               if (matchedSeeds.count(&dumpMeMayBe)) {
+                  ATH_MSG_VERBOSE("Do not dump the seed twice");
+                  continue;
+               }
+               fillMaximum(&dumpMeMayBe);
+               m_out_gen_Eta = -666;
+               m_out_gen_Phi = -666;
+               m_out_gen_Pt = -1;
+               m_out_gen_nHits = 0;
+               m_out_stationName = chamber->stationName();
+               m_out_stationEta = chamber->stationEta();
+               m_out_stationPhi = chamber->stationPhi();
+
+               if (!m_tree.fill(ctx)) return StatusCode::FAILURE;
+            }
+        }
+        return StatusCode::SUCCESS;                     
     }
     StatusCode MuonHoughTransformTester::drawEventDisplay(const EventContext& ctx,
                                                        const std::vector<const xAOD::MuonSimHit*>& simHits,

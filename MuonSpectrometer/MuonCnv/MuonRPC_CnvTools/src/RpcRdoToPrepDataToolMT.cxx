@@ -12,7 +12,7 @@
 #include "MuonTrigCoinData/RpcCoinDataContainer.h"
 #include "TrkSurfaces/Surface.h"
 #include "xAODMuonPrepData/RpcStripAuxContainer.h"
-
+#include "GeoModelHelpers/throwExcept.h"
 using namespace MuonGM;
 using namespace Trk;
 
@@ -24,13 +24,11 @@ Muon::RpcRdoToPrepDataToolMT::State::State(
     : m_rpcIdHelper{idHelper} {
   if (!key.empty()) {
     m_xaodHandle = SG::WriteHandle<xAOD::RpcStripContainer>(key, ctx);
-    if (m_xaodHandle
-            .record(std::make_unique<xAOD::RpcStripContainer>(),
-                    std::make_unique<xAOD::RpcStripAuxContainer>())
-            .isFailure()) {
+    if (m_xaodHandle.record(std::make_unique<xAOD::RpcStripContainer>(),
+                            std::make_unique<xAOD::RpcStripAuxContainer>()).isFailure()) {
       // Throwing exceptions in a ctor is not nice, but on the other hand, this
       // should never happen and we need to handle the StatusCode
-      throw std::runtime_error("Unable to record ");
+      THROW_EXCEPTION("Unable to record ");
     };
   }
 }
@@ -102,9 +100,9 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::initialize() {
   ATH_CHECK(m_readKey.initialize(m_RPCInfoFromDb));
   ATH_CHECK(m_rdoContainerKey.initialize());
   ATH_CHECK(m_rdoNrpcContainerKey.initialize(!m_rdoNrpcContainerKey.empty()));
-  ATH_CHECK(m_nRpcCablingKey.initialize(
-      !m_rdoNrpcContainerKey.empty()));  // If we don't configure the NRPC RDO
-                                         // key, the cabling is needed either.
+  ATH_CHECK(m_nRpcCablingKey.initialize(!m_rdoNrpcContainerKey.empty()));  
+  // If we don't configure the NRPC RDO
+  // key, the cabling is needed either.
   ATH_CHECK(m_rpcPrepDataContainerKey.initialize());
   ATH_CHECK(m_rpcCoinDataContainerKey.initialize());
   ATH_CHECK(m_eventInfo.initialize());
@@ -1064,6 +1062,8 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::processPad(
         idWithDataVect,  // filled with IDs of created PrepRawData collections
     bool doingSecondLoopAmbigColls) const {
 
+  const RpcIdHelper& idHelper = m_idHelperSvc->rpcIdHelper();
+
   std::set<IdentifierHash>& ambiguousCollections{state.m_ambiguousCollections};
   ATH_MSG_DEBUG("***************** Start of processPad eta/phiview "
                 << processingetaview << "/" << processingphiview
@@ -1083,8 +1083,7 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::processPad(
   RpcCoinDataCollection* collectionTrg{nullptr};
   IdentifierHash rpcHashId{0};
 
-  SG::ReadCondHandle<RpcCablingCondData> cablingCondData{m_rpcReadKey, ctx};
-  const RpcCablingCondData* rpcCabling{*cablingCondData};
+  SG::ReadCondHandle<RpcCablingCondData> rpcCabling{m_rpcReadKey, ctx};
 
   // For each pad, loop on the coincidence matrices
   RpcPad::const_iterator itCM = rdoColl->begin();
@@ -1185,7 +1184,7 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::processPad(
       // here decode (get offline ids for the online indices of this hit)
       double time = 0.;
       std::vector<Identifier> digitVec{m_rpcRdoDecoderTool->getOfflineData(
-          rpcChan, sectorId, padId, cmaId, time, rpcCabling)};
+          rpcChan, sectorId, padId, cmaId, time, rpcCabling.cptr())};
       time += (double)m_timeShift;
 
       int nMatchingEtaHits = 0;
@@ -1212,31 +1211,21 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::processPad(
         for (const Identifier& channelId : digitVec) {
           // Prepare the prepdata for this identifier
           // channel Id
-          Identifier parentId =
-              m_idHelperSvc->rpcIdHelper().elementID(channelId);
-          if (m_idHelperSvc->rpcIdHelper().get_module_hash(parentId,
-                                                           rpcHashId)) {
-            ATH_MSG_WARNING("Unable to get RPC hash id from RPC collection "
-                            << m_idHelperSvc->toString(parentId));
-          }
+          rpcHashId = m_idHelperSvc->moduleHash(channelId);
+          const Identifier parentId = idHelper.parentID(channelId);
 
           // There is some ambiguity in the channel/sectorId's, so need to
           // explicitly filter out hashIDs outside of the RoI in seeded decoding
           // mode
-          if (!idVect.empty()) {
-            if (std::find(idVect.begin(), idVect.end(), rpcHashId) ==
-                idVect.end())
+          if (!idVect.empty() && 
+               std::find(idVect.begin(), idVect.end(), rpcHashId) == idVect.end()) {
               continue;
           }
-          if (msgLvl(MSG::DEBUG)) {
-            ATH_MSG_DEBUG("CM Hit decoded into offline Id "
+          ATH_MSG_DEBUG("CM Hit decoded into offline Id "
                           << m_idHelperSvc->toString(channelId) << " time "
                           << time);
-            ATH_MSG_DEBUG("           Parent collection   "
-                          << m_idHelperSvc->toString(parentId) << " oldID = "
-                          << m_idHelperSvc->toString(oldId) << " oldIDtrg = "
-                          << m_idHelperSvc->toString(oldIdTrg));
-          }
+          ATH_MSG_DEBUG(" oldID = " << m_idHelperSvc->toString(oldId) << 
+                          " oldIDtrg = " << m_idHelperSvc->toString(oldIdTrg));
           bool hasAMatchingEtaHit = 0;
           // current collection has Id "parentId"; get it from the container !
           if (triggerHit) {
@@ -1410,12 +1399,8 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::processPad(
                   }
                 }
               }
-              SG::ReadCondHandle<MuonGM::MuonDetectorManager> muDetMgrHandle{
-                  m_muDetMgrKey, ctx};
-              const MuonGM::MuonDetectorManager* muDetMgr =
-                  muDetMgrHandle.cptr();
-              const RpcReadoutElement* descriptor =
-                  muDetMgr->getRpcReadoutElement(channelId);
+              SG::ReadCondHandle<MuonGM::MuonDetectorManager> muDetMgr{m_muDetMgrKey, ctx};
+              const RpcReadoutElement* descriptor = muDetMgr->getRpcReadoutElement(channelId);
 
               // here check validity
               // if invalid, reset flags
@@ -1541,12 +1526,11 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::processPad(
                 nPrepRawData++;
               }
               if (!m_xAODKey.empty()) {
-                const RpcIdHelper& idHelper = m_idHelperSvc->rpcIdHelper();
                 auto xprd = new xAOD::RpcStrip();
                 state.m_xaodHandle->push_back(xprd);
-                xprd->setIdentifier(channelId.get_identifier32().get_compact());
+                xprd->setIdentifier(channelId.get_compact());
                 xAOD::MeasVector<1> locpos{pointLocPos[0]};
-                xAOD::MeasMatrix<1> cov{};
+                xAOD::MeasMatrix<1> cov{xAOD::MeasMatrix<1>::Identity()};
                 (cov)(0, 0) = mat(0, 0);
                 xprd->setMeasurement(rpcHashId, locpos, cov);
                 xprd->setStripNumber(idHelper.strip(channelId));
@@ -1557,15 +1541,6 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::processPad(
                 xprd->setTriggerInfo(rpcChan->ijk());
                 xprd->setAmbiguityFlag(ambiguityFlag);
                 xprd->setTimeOverThreshold(threshold);
-                // xprd->setReadoutElement();
-                // const Amg::Vector3D strip3D  = locpos.x() *
-                // Amg::Vector3D::UnitX(); const Amg::Transform3D
-                // globToCenter{readOutEle->getChamber()->globalToLocalTrans(gctx)};
-                // xprd->setStripPosInStation(xAOD::toStorage(globToCenter *
-                // readOutEle->localToGlobalTrans(gctx,prd->layerHash()) *
-                // strip3D));
-                // TODO: ^ once RE is available (keeping as placeholder for now)
-
               }  // end of to be stored now for RpcPrepData
             }    // end of to be stored now
           }      // this hit was not yet recorded

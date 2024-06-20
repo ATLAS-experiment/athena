@@ -15,8 +15,11 @@ def SetupArgParser():
     parser.add_argument("--geoTag", default="ATLAS-R3S-2021-03-02-00", help="Geometry tag to use", choices=["ATLAS-R3S-2021-03-02-00",
                                                                                                             "ATLAS-P2-RUN4-01-00-00"])
     parser.add_argument("--condTag", default="OFLCOND-MC23-SDR-RUN3-02", help="Conditions tag to use",
-                                                                         choices= ["OFLCOND-MC23-SDR-RUN3-02"])
-    parser.add_argument("--inputFile", "-i", default=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/EVGEN_ParticleGun_FourMuon_Pt10to500.root"], 
+                                                                         choices= ["OFLCOND-MC23-SDR-RUN3-02", "CONDBR2-BLKPA-2023-02"])
+    parser.add_argument("--inputFile", "-i", default=[
+                                                      #"/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00431493.physics_Main.daq.RAW._lb0525._SFO-16._0001.data"
+                                                      "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/EVGEN_ParticleGun_FourMuon_Pt10to500.root"
+                                                      ], 
                         help="Input file to run on ", nargs="+")
     parser.add_argument("--geoModelFile", default = geoModelFileDefault(), help="GeoModel SqLite file containing the muon geometry.")
     parser.add_argument("--chambers", default=["all"], nargs="+", help="Chambers to check. If string is all, all chambers will be checked")
@@ -38,6 +41,12 @@ def setupServicesCfg(flags):
     if flags.Input.Format is Format.POOL:
         from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
         result.merge(PoolReadCfg(flags))
+    elif flags.Input.Format == Format.BS:
+        print ("Stonjek...")
+        from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
+        result.merge(ByteStreamReadCfg(flags)) 
+    print("Was hast du denn wieder ",flags.Input.Format )
+
     from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
     result.merge(PerfMonMTSvcCfg(flags))
     from MuonConfig.MuonGeometryConfig import MuonIdHelperSvcCfg
