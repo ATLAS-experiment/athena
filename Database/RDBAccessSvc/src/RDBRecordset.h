@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -13,12 +13,14 @@
  */
 
 
-#ifndef _RDBRECORDSET_H_
-#define _RDBRECORDSET_H_
+#ifndef RDBACCESSSVC_RDBRECORDSET_H
+#define RDBACCESSSVC_RDBRECORDSET_H
 
 #include "RDBAccessSvc/IRDBRecordset.h"
+#include "RDBVersionAccessor.h"
 #include <string>
 
+class RDBAccessSvc;
 class IRDBQuery;
 
 namespace coral
@@ -33,19 +35,13 @@ namespace coral
  *
  */
 
-class RDBAccessSvc;
-
-#include "RDBVersionAccessor.h" 
-
 class RDBRecordset final: public IRDBRecordset
 {
  public:
   /// Construct empty recordset
-  RDBRecordset(RDBAccessSvc* accessSvc);
+  RDBRecordset(RDBAccessSvc* accessSvc)
+    : m_accessSvc(accessSvc) {}
   
-  /// Destructor, deletes all records
-  ~RDBRecordset() override;
-
   /// Constructs SQL query and retrieves the data from DB
   /// @param session [IN] active relational session
   /// @param taginfo [IN] object holding information about the node tag
@@ -84,10 +80,10 @@ class RDBRecordset final: public IRDBRecordset
   void setNodeName(const std::string& nodeName);
 
  private:
-  std::string                m_tableName;
-  std::string                m_tagName;
+  std::string                m_tableName{};
+  std::string                m_tagName{};
   RecordsVector              m_records;
-  RDBAccessSvc*              m_accessSvc;
+  RDBAccessSvc*              m_accessSvc{nullptr};
 };
 
 #endif

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // EMECConstruction
@@ -257,7 +257,7 @@ GeoIntrusivePtr<GeoFullPhysVol> LArGeo::EMECConstruction::GetEnvelope(bool bPos)
   double zMSTrans = 0.*Gaudi::Units::mm;
 
   GeoPcon* emecMotherShape = new GeoPcon(phiPosition - phiSize, 2.*phiSize);  //start phi,total phi
-  for(auto *currentRecord : *cryoPcons) {
+  for(const IRDBRecord_ptr& currentRecord : *cryoPcons) {
     if(currentRecord->getString("PCON") == "EMEC::Mother"){
       if(!refSystemTransform){
         if(m_isTB){
@@ -510,7 +510,7 @@ GeoIntrusivePtr<GeoFullPhysVol> LArGeo::EMECConstruction::GetEnvelope(bool bPos)
         double front_shift = 0.*Gaudi::Units::mm;
         double back_shift = 0.*Gaudi::Units::mm;
         try {
-	    for(auto *dmPcon : *DMpcons) {
+	    for(const IRDBRecord_ptr& dmPcon : *DMpcons) {
                 const std::string& object = dmPcon->getString("PCONNAME");
                 if(object == "FrontSupportMother"){
                     int zplane = dmPcon->getInt("NZPLANE");

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -35,21 +35,6 @@
 #include <stdexcept>
 #include <iostream>
 #include <set>
-
-RDBRecordset::RDBRecordset(RDBAccessSvc* accessSvc)
-  : m_tableName("")
-  , m_tagName("")
-  , m_accessSvc(accessSvc)
-{
-}
-
-RDBRecordset::~RDBRecordset()
-{
-  for(auto record : m_records) {
-    delete record;
-  }
-  m_records.clear();
-}
 
 void RDBRecordset::getData(coral::ISessionProxy* session
 			   , const std::string& nodeName
@@ -116,7 +101,7 @@ void RDBRecordset::getData(coral::ISessionProxy* session
     // Process Query results
     while(cursorStructure.next()) {
       const coral::AttributeList& row = cursorStructure.currentRow();
-      m_records.push_back(new RDBRecord(row,upperName + "_DATA"));
+      m_records.push_back(IRDBRecord_ptr(new RDBRecord(row,upperName + "_DATA")));
     }
 
     delete queryStructure;
@@ -150,7 +135,7 @@ std::string RDBRecordset::tagName() const
 
 const IRDBRecord* RDBRecordset::operator[](unsigned int index) const 
 {
-  return m_records[index];
+  return m_records[index].get();
 }
 IRDBRecordset::const_iterator RDBRecordset::begin() const
 {
@@ -167,8 +152,8 @@ bool RDBRecordset::operator!=(const RDBRecordset& rhs) const
   if(m_records.size()!=rhs.m_records.size()) return true;
 
   for(size_t i=0; i<m_records.size(); ++i) {
-    RDBRecord* rec1 = dynamic_cast<RDBRecord*>(m_records[i]);
-    RDBRecord* rec2 = dynamic_cast<RDBRecord*>(rhs.m_records[i]);
+    RDBRecord* rec1 = dynamic_cast<RDBRecord*>(m_records[i].get());
+    RDBRecord* rec2 = dynamic_cast<RDBRecord*>(rhs.m_records[i].get());
     if(rec1!=0
        && rec2!=0
        && *rec1!=*rec2) return true;
@@ -222,8 +207,8 @@ void RDBRecordset::compare(const RDBRecordset& rec, std::ostream& os) const
       }
     }
     if(found) {
-      RDBRecord* record0 = dynamic_cast<RDBRecord*>(m_records[i]);
-      RDBRecord* record1 = dynamic_cast<RDBRecord*>(rec.m_records[i1]);
+      RDBRecord* record0 = dynamic_cast<RDBRecord*>(m_records[i].get());
+      RDBRecord* record1 = dynamic_cast<RDBRecord*>(rec.m_records[i1].get());
       if(record0!=0
 	 && record1!=0
 	 && *record0!=*record1) {

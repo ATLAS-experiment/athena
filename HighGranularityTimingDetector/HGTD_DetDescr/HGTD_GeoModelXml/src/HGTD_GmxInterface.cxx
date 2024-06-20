@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HGTD_GmxInterface.h"
@@ -200,7 +200,7 @@ void HGTD_GmxInterface::buildReadoutGeometryFromSqlite(IRDBAccessSvc * rdbAccess
     const std::array<std::string,7> LGAD_moduleParamNames({"thickness","xPitch","yPitch","circuitsPerColumn","circuitsPerRow","padColumns","padRows"});
 
     if(LGAD_module->size() !=0){
-       for (IRDBRecord* typeParams:*LGAD_module){
+       for (const IRDBRecord_ptr& typeParams:*LGAD_module){
             std::map<std::string,std::string> LGAD_moduleMap;
             for(const std::string& paramName:LGAD_moduleParamNames){
                 std::string paramValue = typeParams->getString(paramName);

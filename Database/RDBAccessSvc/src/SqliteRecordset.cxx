@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -18,16 +18,8 @@
 
 SqliteRecordset::SqliteRecordset()
   : AthMessaging("SqliteRecordset")
-  , m_nodeName("")
   , m_def(std::make_shared<SqliteInpDef>())
 {
-}
-
-SqliteRecordset::~SqliteRecordset()
-{
-  for(auto record : m_records) {
-    delete record;
-  }
 }
 
 void SqliteRecordset::getData(sqlite3* db, const std::string& nodeName)
@@ -42,7 +34,7 @@ void SqliteRecordset::getData(sqlite3* db, const std::string& nodeName)
   sqlite3_stmt* stTable{nullptr};
   int rc = sqlite3_prepare_v2(db, sql.str().c_str(), -1, &stTable, NULL);
   if(rc!=SQLITE_OK) {
-    ATH_MSG_WARNING(m_nodeName << " table is not found in the database");
+    ATH_MSG_INFO(m_nodeName << " table is not found in the database");
     return;
   }
 
@@ -57,12 +49,13 @@ void SqliteRecordset::getData(sqlite3* db, const std::string& nodeName)
   int ctotal = sqlite3_column_count(st);
 
   bool all_ok{true};
-  SqliteRecord* record{nullptr};
 
   while(true) {
     rc = sqlite3_step(st);
+
     if(rc == SQLITE_ROW) {
-      record = new SqliteRecord(m_def);
+      SqliteRecord* rec = new SqliteRecord(m_def);
+      IRDBRecord_ptr record{rec};
 
       // Loop throug the fields of the retrieved record
       for(int i=0; i<ctotal; ++i) {
@@ -112,9 +105,9 @@ void SqliteRecordset::getData(sqlite3* db, const std::string& nodeName)
 	if(extendDef) {
 	  (*m_def)[columnName] = inpType;
 	}
-	record->addValue(columnName,val);
+	rec->addValue(columnName,val);
       }
-      m_records.push_back(record);
+      m_records.push_back(std::move(record));
     }
     else if(rc == SQLITE_DONE) {
       break;
@@ -129,10 +122,6 @@ void SqliteRecordset::getData(sqlite3* db, const std::string& nodeName)
 
   if(!all_ok) {
     // Do memory cleanup
-    delete record;
-    for(auto rec : m_records) {
-      delete rec;
-    }
     m_records.clear();
   }
 }
@@ -149,7 +138,7 @@ std::string SqliteRecordset::nodeName() const
 
 const IRDBRecord* SqliteRecordset::operator[](unsigned int index) const 
 {
-  return m_records[index];
+  return m_records[index].get();
 }
 IRDBRecordset::const_iterator SqliteRecordset::begin() const
 {

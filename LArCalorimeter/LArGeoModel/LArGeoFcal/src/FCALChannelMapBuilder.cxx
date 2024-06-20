@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArGeoFcal/FCALChannelMapBuilder.h"
@@ -23,11 +23,7 @@ StatusCode LArGeo::buildFcalChannelMap(StoreGateSvc* detStore
       , paramSvc->getRecordsetPtr("FCalElecMod3","") };
 
   for(const IRDBRecordset_ptr& recordset : recordsets) {
-    auto itStart = recordset->begin();
-    auto itEnd = recordset->end();
-
-    for(;itStart!=itEnd;++itStart) {
-      const IRDBRecord* rec = *itStart;
+    for(const IRDBRecord_ptr& rec : *recordset) {
       cmap->add_tube(rec->getString("TILENAME")
 		     , rec->getInt("MODNUMBER")
 		     , rec->getInt("IDENTIFIER")

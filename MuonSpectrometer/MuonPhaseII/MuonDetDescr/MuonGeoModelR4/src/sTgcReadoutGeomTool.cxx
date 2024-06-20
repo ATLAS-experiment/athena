@@ -297,7 +297,7 @@ StatusCode sTgcReadoutGeomTool::readParameterBook(FactoryCache& cache) {
     ATH_MSG_VERBOSE("Found the " << paramTable->nodeName() << " ["
                                 << paramTable->tagName() << "] table with "
                                 << paramTable->size() << " records");
-    for (const IRDBRecord* record : *paramTable) {
+    for (const IRDBRecord_ptr& record : *paramTable) {
         // parameterBook pars{};
         const std::string key = record-> getString("WSTGC_TYPE");
         wSTGCTable& parBook = cache.parameterBook[key];

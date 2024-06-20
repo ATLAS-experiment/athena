@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <MuonGeoModelR4/MmReadoutGeomTool.h>
@@ -241,7 +241,7 @@ StatusCode MmReadoutGeomTool::readParameterBook(FactoryCache& cache) {
     
 
     
-    for (const IRDBRecord* record : *paramTable) {
+    for (const IRDBRecord_ptr& record : *paramTable) {
         const std::string chambType = record->getString("WMM_TYPE");
         wMMTable& parBook = cache.parameterBook[chambType];
         parBook.stripPitch = record->getDouble("stripPitch") ;

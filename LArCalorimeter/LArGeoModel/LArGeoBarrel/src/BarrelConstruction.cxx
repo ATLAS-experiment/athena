@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -761,7 +761,7 @@ void LArGeo::BarrelConstruction::MakeEnvelope()
 							      larVersionKey.tag(),   
 							      larVersionKey.node()); 
     if (extraCones->size() > 0 ) {
-      for(auto *cone : *extraCones) {
+      for(const IRDBRecord_ptr& cone : *extraCones) {
         const std::string& conName = cone->getString("CONE");
         if (conName=="ExtraInBar") {
 	  double extra_dz = 0.5*( cone->getDouble("DZ") );
