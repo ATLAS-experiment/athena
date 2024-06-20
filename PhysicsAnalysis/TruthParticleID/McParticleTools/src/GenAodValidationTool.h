@@ -20,9 +20,9 @@
 
 // McParticleTools includes
 #include "TruthParticleValidationBaseTool.h"
+#include "TruthIO/IIOHepMcTool.h"
 
 // Forward declaration
-class IIOHepMcTool;
 class McEventCollection;
 #include "AtlasHepMC/GenParticle_fwd.h"
 #include "AtlasHepMC/GenVertex_fwd.h"

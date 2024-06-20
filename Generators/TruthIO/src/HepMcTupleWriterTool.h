@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // HepMcTupleWriterTool.h 
@@ -20,7 +20,7 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 
 // McParticleKernel includes
-#include "McParticleKernel/IIOHepMcTool.h"
+#include "TruthIO/IIOHepMcTool.h"
 
 // Forward declaration
 class ITHistSvc;
