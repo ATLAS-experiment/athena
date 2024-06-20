@@ -1,4 +1,8 @@
 {
     "PI"      : [ "3.1415926",    "pi value" ],
-    "ETAMAX"  : [ "2.5",          "eta coverage of the tracker" ]
+    "ETAMAX"  : [ "2.5",          "eta coverage of the tracker" ],
+    "D0MAX"   : [ "10",           "d_{0} range"],
+    "Z0MAX"   : [ "250",          "z_{0} range"],
+    "RMAX"    : [ "650",          "R range"],
+    "ZMAX"    : [ "300",          "Z range"] 
 }

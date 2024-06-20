@@ -40,7 +40,13 @@ StatusCode IDTPM::EfficiencyPlots::bookPlots()
 
   ATH_CHECK( retrieveAndBook( m_eff_vs_pt,  "eff_vs_"+m_trackType+"_pt" ) );
   ATH_CHECK( retrieveAndBook( m_eff_vs_eta, "eff_vs_"+m_trackType+"_eta" ) );
-
+  ATH_CHECK( retrieveAndBook( m_eff_vs_phi, "eff_vs_"+m_trackType+"_phi" ) );
+  ATH_CHECK( retrieveAndBook( m_eff_vs_d0, "eff_vs_"+m_trackType+"_d0" ) );
+  ATH_CHECK( retrieveAndBook( m_eff_vs_z0, "eff_vs_"+m_trackType+"_z0" ) );
+  ATH_CHECK( retrieveAndBook( m_eff_vs_prodR, "eff_vs_"+m_trackType+"_prodR" ) );
+  ATH_CHECK( retrieveAndBook( m_eff_vs_prodZ, "eff_vs_"+m_trackType+"_prodZ" ) );
+  ATH_CHECK( retrieveAndBook( m_eff_vs_R, "eff_vs_"+m_trackType+"_R" ) );
+  ATH_CHECK( retrieveAndBook( m_eff_vs_Z, "eff_vs_"+m_trackType+"_Z" ) );
   return StatusCode::SUCCESS;
 }
 
@@ -55,10 +61,24 @@ StatusCode IDTPM::EfficiencyPlots::fillPlots(
   /// Compute track parameters - TODO: add more...
   float ppt    = pT( particle ) / Gaudi::Units::GeV;
   float peta   = eta( particle );
+  float pphi   = phi( particle );
+  float pd0    = d0( particle );
+  float pz0    = z0( particle );
+  float pR     = R( particle );
+  float pZ     = Z( particle );
+  float pprodR = prodR( particle );
+  float pprodZ = prodZ( particle );
 
   /// Fill the histograms
   ATH_CHECK( fill( m_eff_vs_pt,  ppt,  isMatched, weight ) );
   ATH_CHECK( fill( m_eff_vs_eta, peta, isMatched, weight ) );
+  ATH_CHECK( fill( m_eff_vs_phi, pphi, isMatched, weight ) );
+  ATH_CHECK( fill( m_eff_vs_d0, pd0, isMatched, weight ) );
+  ATH_CHECK( fill( m_eff_vs_z0, pz0, isMatched, weight ) );
+  ATH_CHECK( fill( m_eff_vs_R, pR, isMatched, weight ) );
+  ATH_CHECK( fill( m_eff_vs_Z, pZ, isMatched, weight ) );
+  ATH_CHECK( fill( m_eff_vs_prodR, pprodR, isMatched, weight ) );
+  ATH_CHECK( fill( m_eff_vs_prodZ, pprodZ, isMatched, weight ) );
 
   return StatusCode::SUCCESS;
 }

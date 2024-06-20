@@ -49,6 +49,13 @@ namespace IDTPM {
 
     TEfficiency* m_eff_vs_pt;
     TEfficiency* m_eff_vs_eta;
+    TEfficiency* m_eff_vs_phi;
+    TEfficiency* m_eff_vs_d0;
+    TEfficiency* m_eff_vs_z0;
+    TEfficiency* m_eff_vs_R;
+    TEfficiency* m_eff_vs_Z;
+    TEfficiency* m_eff_vs_prodR;
+    TEfficiency* m_eff_vs_prodZ;
     /// TODO - include more plots
 
   }; // class EfficiencyPlots
