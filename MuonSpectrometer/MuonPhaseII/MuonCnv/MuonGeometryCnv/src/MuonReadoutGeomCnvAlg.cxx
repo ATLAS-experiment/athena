@@ -109,6 +109,14 @@ StatusCode MuonReadoutGeomCnvAlg::execute(const EventContext& ctx) const {
     ATH_CHECK(buildMM(geoContext, detMgr.get(), world));
     ATH_CHECK(buildTgc(geoContext, detMgr.get(), world));
     ATH_CHECK(buildRpc(geoContext, detMgr.get(), world));
+    /// Final check that all elements are cached properly
+    if (m_checkGeo) {
+        const std::vector<const MuonGMR4::MuonReadoutElement*> refEles{m_detMgr->getAllReadoutElements()};
+        for (const MuonGMR4::MuonReadoutElement* refEle : refEles) {
+            ATH_CHECK(checkIdCompability(*refEle, *detMgr->getReadoutElement(refEle->identify())));
+        }
+    }
+
     ATH_CHECK(writeHandle.record(std::move(detMgr)));
     return StatusCode::SUCCESS;
 }
@@ -275,9 +283,12 @@ StatusCode MuonReadoutGeomCnvAlg::buildRpc(const ActsGeometryContext& gctx,
 StatusCode MuonReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
                                                  const MuonGMR4::MmReadoutElement& refEle,
                                                  const MuonGM::MMReadoutElement& testEle) const {
+
     if (!m_checkGeo) {
         return StatusCode::SUCCESS;
     }
+    ATH_CHECK(checkIdCompability(refEle, testEle));
+
     ATH_MSG_VERBOSE("Compare basic readout transforms"<<std::endl
                 <<GeoTrf::toString(testEle.absTransform(),true)<<std::endl
                 <<GeoTrf::toString(refEle.localToGlobalTrans(gctx), true));
@@ -670,12 +681,32 @@ StatusCode MuonReadoutGeomCnvAlg::buildMdt(const ActsGeometryContext& gctx,
     return StatusCode::SUCCESS;
 }
 
+StatusCode MuonReadoutGeomCnvAlg::checkIdCompability(const MuonGMR4::MuonReadoutElement& refEle,
+                                                     const MuonGM::MuonReadoutElement& testEle) const{
+    
+    if (refEle.identify() != testEle.identify()) {
+        ATH_MSG_FATAL("Two different elements are compared "
+                    <<m_idHelperSvc->toString(refEle.identify())<<" vs. "
+                    <<m_idHelperSvc->toString(testEle.identify()));
+        return StatusCode::FAILURE;
+    }
+    if (refEle.identHash() != testEle.detectorElementHash()) {
+        ATH_MSG_FATAL("The hashes of the two detector elements "<<m_idHelperSvc->toString(refEle.identify())
+                    <<" are completely different "<<refEle.identHash()<<" vs. "<<testEle.detectorElementHash());
+        return StatusCode::FAILURE;
+    }
+    return StatusCode::SUCCESS;
+}
+
+
 StatusCode MuonReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
                                                  const MuonGMR4::MdtReadoutElement& refEle,
                                                  const MuonGM::MdtReadoutElement& testEle) const {
+    
     if (!m_checkGeo) {
         return StatusCode::SUCCESS;
     }
+    ATH_CHECK(checkIdCompability(refEle, testEle));
     
     ATH_MSG_VERBOSE("Detector element "<<m_idHelperSvc->toString(refEle.identify())
                 <<std::endl<<GeoTrf::toString(refEle.localToGlobalTrans(gctx))                        
@@ -725,9 +756,12 @@ StatusCode MuonReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx
 StatusCode MuonReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
                                                  const MuonGMR4::RpcReadoutElement& refEle,
                                                  const MuonGM::RpcReadoutElement& testEle) const {
+    
     if (!m_checkGeo) {
         return StatusCode::SUCCESS;
     }
+    ATH_CHECK(checkIdCompability(refEle, testEle));
+
     ATH_MSG_VERBOSE("Compare basic readout transforms"<<std::endl
                 <<GeoTrf::toString(testEle.absTransform(),true)<<std::endl
                 <<GeoTrf::toString(refEle.localToGlobalTrans(gctx), true));
@@ -773,6 +807,8 @@ StatusCode MuonReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx
     if (!m_checkGeo) {
         return StatusCode::SUCCESS;
     }
+    ATH_CHECK(checkIdCompability(refEle, testEle));
+
     const TgcIdHelper& idHelper{m_idHelperSvc->tgcIdHelper()};
     
     ATH_MSG_VERBOSE("Detector element "<<m_idHelperSvc->toString(refEle.identify())

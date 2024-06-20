@@ -60,7 +60,8 @@ namespace MuonGM {
     , m_ml(mL) {
 
         std::string fixName = (stName[1] == 'L') ? "STL" : "STS";
-        Identifier id = mgr->stgcIdHelper()->channelID(fixName, zi, fi, mL, 1, 2, 1);
+        Identifier id = mgr->stgcIdHelper()->channelID(fixName, zi, fi, mL, 1, 
+                                                       sTgcIdHelper::sTgcChannelTypes::Strip, 1);
 
         setStationName(fixName);       
         setChamberLayer(mL);

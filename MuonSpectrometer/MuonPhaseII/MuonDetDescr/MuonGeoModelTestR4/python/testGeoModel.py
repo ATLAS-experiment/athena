@@ -193,11 +193,15 @@ if __name__=="__main__":
     cfg.getService("MessageSvc").setVerbose = []
     cfg.getService("MessageSvc").verboseLimit = 10000000
     
+    from TrackingGeometryCondAlg.AtlasTrackingGeometryCondAlgConfig import TrackingGeometryCondAlgCfg
+    cfg.merge(TrackingGeometryCondAlgCfg(flags))
     if flags.Detector.GeometryMDT:
         cfg.merge(GeoModelMdtTestCfg(flags, 
                                      TestStations = [ch for ch in chambToTest if ch[0] == "B" or ch[0] == "E"],
                                      ReadoutSideXML="ReadoutSides.xml",
-                                     ExtraInputs=[( 'MuonGM::MuonDetectorManager' , 'ConditionStore+MuonDetectorManager' )]))
+                                     ExtraInputs=[( 'MuonGM::MuonDetectorManager' , 'ConditionStore+MuonDetectorManager' ),
+                                                  #( 'Trk::TrackingGeometry' , 'ConditionStore+AtlasTrackingGeometry' ) 
+                                                ]))
 
     if flags.Detector.GeometryRPC: 
         cfg.merge(GeoModelRpcTestCfg(flags, TestStations = [ch for ch in chambToTest if ch[0] == "B"],

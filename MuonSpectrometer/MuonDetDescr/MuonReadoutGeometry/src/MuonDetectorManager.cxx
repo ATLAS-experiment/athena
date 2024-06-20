@@ -81,6 +81,34 @@ namespace MuonGM {
         ::fillCache(m_mmcArray);
         ::fillCache(m_stgArray);
     }
+    const MuonReadoutElement* MuonDetectorManager::getReadoutElement(const Identifier& id) const {
+        const MuonReadoutElement* reEle{nullptr};
+        using TechIndex = Muon::MuonStationIndex::TechnologyIndex;
+        switch (m_idHelperSvc->technologyIndex(id)){
+            case TechIndex::MDT:
+                reEle = getMdtReadoutElement(id);
+                break;
+            case TechIndex::RPC:
+                reEle = getRpcReadoutElement(id);
+                break;
+            case TechIndex::TGC:
+                reEle = getTgcReadoutElement(id);
+                break;
+            case TechIndex::CSCI:
+                reEle = getCscReadoutElement(id);
+                break;
+            case TechIndex::MM:
+                reEle = getMMReadoutElement(id);
+                break;
+            case TechIndex::STGC:
+                reEle = getsTgcReadoutElement(id);
+                break;
+            default:
+                ATH_MSG_WARNING("Invalid technology ");
+        };
+        if (!reEle) ATH_MSG_WARNING("No readout element retrieved "<<m_idHelperSvc->toString(id));
+        return reEle;
+    }
 
     unsigned int MuonDetectorManager::getNumTreeTops() const { return m_envelope.size(); }
 

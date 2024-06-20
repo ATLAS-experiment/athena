@@ -11,6 +11,7 @@
 #include <StoreGate/CondHandleKeyArray.h>
 
 #include <MuonReadoutGeometry/MuonDetectorManager.h>
+#include <MuonReadoutGeometry/MuonReadoutElement.h>
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
 #include <ActsGeometryInterfaces/ActsGeometryContext.h>
@@ -73,6 +74,9 @@ class MuonReadoutGeomCnvAlg : public AthReentrantAlgorithm {
                                   const MuonGMR4::TgcReadoutElement& refEle,
                                   const MuonGM::TgcReadoutElement& testEle) const;
 
+        StatusCode checkIdCompability(const MuonGMR4::MuonReadoutElement& refEle,
+                                      const MuonGM::MuonReadoutElement& testEle) const;
+        
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
         SG::WriteCondHandleKey<MuonGM::MuonDetectorManager> m_writeKey{this, "WriteKey", "MuonDetectorManager"};
