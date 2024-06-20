@@ -111,8 +111,9 @@ constexpr double tolerance = 10 * Gaudi::Units::micrometer;
           
 #define TEST_TUBEPROP(attribute, propName) \
     if (std::abs(1.*refTube.attribute - 1.*testTube.attribute) > tolerance) {         \
-        std::cerr<<"runMdtGeoComparision() "<<__LINE__<<": The tubes ("<<layer<<","   \
-                 <<tube<<") in "<<test<<" differ w.r.t "<<propName<<". "              \
+        std::cerr<<"runMdtGeoComparision() "<<__LINE__<<": In "<<test<<" the tubes (" \
+                 <<layer<<","<<std::setfill('0')<<std::setw(3)<<tube<<")"             \
+                 <<" differ w.r.t "<<propName<<". "                                   \
                  << refTube.attribute <<" (ref) vs. " <<testTube.attribute            \
                  << " (test)" << std::endl;                                           \
         chamberOkay = false;                                                          \
@@ -305,20 +306,21 @@ int main( int argc, char** argv ) {
                 bool flippedTube{reference.id.eta < 0 && Amg::doesNotDeform(tubeDistortion * Amg::getRotateX3D(M_PI))};
         
                 if (!alignFailure && !(Amg::doesNotDeform(tubeDistortion)  || flippedTube)) {
-                    std::cerr<<"runMdtGeoComparision() "<<__LINE__<<": In chamber "<<reference<<" the tube reference systems for ("<<layer<<", "<<tube
-                             <<") are not exactly aligned. "<<Amg::toString(tubeDistortion)<<std::endl;                   
+                    std::cerr<<"runMdtGeoComparision() "<<__LINE__<<": In chamber "<<reference<<" the tube reference systems for ("<<layer<<", "
+                             <<std::setfill('0')<<std::setw(3)<<tube<<") are not exactly aligned. "<<Amg::toString(tubeDistortion)<<std::endl;                   
                     alignFailure = true;
                 }
                 /// Remember the tube staggering is in the (x-y) plane. Allow for
                 /// deviations in the z-axis due to different cutouts
                 if (!stagFailure && tubeDistortion.translation().perp() > tolerance) {
-                    std::cerr<<"runMdtGeoComparision() "<<__LINE__<<": Misplaced staggering found in chamber "<<reference<<" the tube ("<<layer<<", "<<tube<<") "
+                    std::cerr<<"runMdtGeoComparision() "<<__LINE__<<": Misplaced staggering found in "<<reference<<" the tube ("<<layer
+                             <<", "<<std::setfill('0')<<std::setw(3)<<tube<<") "
                              << Amg::toString(refTube.localToGlobal.translation() - 
                                               testTube.localToGlobal.translation(), 3)<<std::endl;                    
                     stagFailure = true;
                 }
                 
-                TEST_TUBEPROP(tubeLength, "tube length");
+                // TEST_TUBEPROP(tubeLength, "tube length");
                 // TEST_TUBEPROP(wireLength, "wire length");
                 TEST_TUBEPROP(activeLength, "active length");
                 /// In cases where the tube coordinate systems are not aligned, 
@@ -330,7 +332,8 @@ int main( int argc, char** argv ) {
                 const Amg::Vector3D testRO = refSystem* testTube.readoutPos;
                 if (refRO.z()* testRO.z() < 0.){
                     std::cerr<<"runMdtGeoComparision() "<<__LINE__<<": The readout is on different sites for chamber: "<<reference<<
-                             ", layer "<<layer<<", tube: "<<tube<<". " <<Amg::toString(refRO, 2)<<" vs. "<<Amg::toString(testRO)<<std::endl;
+                             ", layer "<<layer<<", tube: "<<std::setfill('0')<<std::setw(3)<<tube<<". " 
+                             <<Amg::toString(refRO, 2)<<" vs. "<<Amg::toString(testRO)<<std::endl;
                     readoutOrient = true;
                 }
 
@@ -341,6 +344,12 @@ int main( int argc, char** argv ) {
         }
         if (!chamberOkay) return_code = EXIT_FAILURE;
         else std::cout<<"runMdtGeoComparision() "<<__LINE__<<": Found perfect agreement between new & old geometry for "<<reference<<std::endl;       
+    }
+    for (const MdtChamber& test : testChambers) {
+        if (!refChambers.count(test)) {
+            std::cerr<<"runMdtGeoComparision() "<<__LINE__<<": "<<test<<" is only in the test set."<<std::endl;
+            return_code = EXIT_FAILURE;
+        }
     }
     return return_code;
 

@@ -27,8 +27,8 @@
 
 namespace MuonGM {
 
-    constexpr bool optimRE = true;
 
+    class MuonReadoutElement;
     class CscReadoutElement;
     class TgcReadoutElement;
     class RpcReadoutElement;
@@ -74,13 +74,14 @@ namespace MuonGM {
 
 
         // access to Readout Elements
-        const MdtReadoutElement* getMdtReadoutElement(const Identifier&) const;    //!< access via extended identifier (requires unpacking)
-        const RpcReadoutElement* getRpcReadoutElement(const Identifier&) const;    //!< access via extended identifier (requires unpacking)
-        const TgcReadoutElement* getTgcReadoutElement(const Identifier&) const;    //!< access via extended identifier (requires unpacking)
-        const CscReadoutElement* getCscReadoutElement(const Identifier&) const;    //!< access via extended identifier (requires unpacking)
-        const MMReadoutElement* getMMReadoutElement(const Identifier&) const;      //!< access via extended identifier (requires unpacking)
-        const sTgcReadoutElement* getsTgcReadoutElement(const Identifier&) const;  //!< access via extended identifier (requires unpacking)
-
+        const MdtReadoutElement* getMdtReadoutElement(const Identifier& id) const;    //!< access via extended identifier (requires unpacking)
+        const RpcReadoutElement* getRpcReadoutElement(const Identifier& id) const;    //!< access via extended identifier (requires unpacking)
+        const TgcReadoutElement* getTgcReadoutElement(const Identifier& id) const;    //!< access via extended identifier (requires unpacking)
+        const CscReadoutElement* getCscReadoutElement(const Identifier& id) const;    //!< access via extended identifier (requires unpacking)
+        const MMReadoutElement* getMMReadoutElement(const Identifier& id) const;      //!< access via extended identifier (requires unpacking)
+        const sTgcReadoutElement* getsTgcReadoutElement(const Identifier& id) const;  //!< access via extended identifier (requires unpacking)
+        /// Get any read out element
+        const MuonReadoutElement* getReadoutElement(const Identifier& id) const; 
         //// Non const version
         MdtReadoutElement* getMdtReadoutElement(const Identifier& id);
         CscReadoutElement* getCscReadoutElement(const Identifier& id);
