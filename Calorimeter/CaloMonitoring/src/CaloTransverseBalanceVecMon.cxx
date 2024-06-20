@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************
@@ -280,7 +280,7 @@ StatusCode CaloTransverseBalanceVecMon::fillHistograms() {
      return StatusCode::SUCCESS;
   }
   
-  const JetCollection* jetTES;
+  const JetCollection* jetTES = nullptr;
   sc = evtStore()->retrieve( jetTES,m_JetContainerName);
   if( sc.isFailure()  ||  !photonTES ) {
     ATH_MSG_WARNING( "No ESD jet collection found in TDS" );
