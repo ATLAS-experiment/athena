@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BLM_GeoModel/BLM_Builder.h"
@@ -13,6 +13,8 @@
 #include "GeoModelKernel/GeoIdentifierTag.h"
 #include "GeoModelKernel/GeoTransform.h"
 #include "GeoModelKernel/GeoVPhysVol.h"
+#include "GeoModelKernel/GeoPhysVol.h"
+
 #include "GeoModelKernel/GeoFullPhysVol.h"
 
 #include "RDBAccessSvc/IRDBAccessSvc.h"
@@ -44,7 +46,7 @@ InDetDD::BLM_Builder::BLM_Builder(const std::string& t,
   m_moduleX.push_back(-3383.5);    m_moduleX.push_back(62.825);    m_moduleX.push_back(225);   m_moduleX.push_back(0);     m_moduleX.push_back(0);    m_moduleX.push_back(315);    m_moduleX.push_back(0);    m_moduleX.push_back(0);    m_moduleX.push_back(0);
   m_moduleXI.push_back(-3383.5);   m_moduleXI.push_back(62.825);   m_moduleXI.push_back(253);  m_moduleXI.push_back(0);    m_moduleXI.push_back(0);   m_moduleXI.push_back(343);   m_moduleXI.push_back(0);   m_moduleXI.push_back(0);   m_moduleXI.push_back(0);
 
-  //  template for property decalration
+  //  template for property declaration
   declareProperty("Modul0", m_module0);
   declareProperty("ModulI", m_moduleI);
   declareProperty("ModulII", m_moduleII);

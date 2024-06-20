@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -8,16 +8,13 @@
 #ifndef BLMGEOMODEL_BLMMODULE_H
 #define BLMGEOMODEL_BLMMODULE_H
 
-#include "BLM_GeoModel/BLM_Wall.h"
-#include "BLM_GeoModel/BLM_ModuleParameters.h"
-#include "GaudiKernel/MsgStream.h"
-#include <iostream>
-
+class BLM_ModuleParameters;
 class StoredMaterialManager;
+class MsgStream;
+class GeoPhysVol;
 
   /** @class BLM_Module
-
-  Beam Loss Monitor module builder
+      @brief Beam Loss Monitor module builder
       @author  Bostjan Macek <bostjan.macek@cern.ch>
   */
 
