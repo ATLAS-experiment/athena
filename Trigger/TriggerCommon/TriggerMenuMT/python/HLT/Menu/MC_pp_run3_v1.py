@@ -683,6 +683,11 @@ def getMCSignatures():
     ]
 
     chains['Egamma'] = [
+
+        #ATR-29567
+        ChainProp(name='HLT_e24_lhtight_ivarloose_L1eEM24VM', groups=PrimaryPhIGroup+SingleElectronGroup),
+        ChainProp(name='HLT_e26_lhtight_ivarloose_L1eEM24VM', groups=PrimaryPhIGroup+SingleElectronGroup),
+        
         ChainProp(name='HLT_e5_lhtight_L1EM3', groups=SingleElectronGroup),
         ChainProp(name='HLT_e5_lhtight_noringer_L1EM3', groups=SingleElectronGroup),
         ChainProp(name='HLT_e26_lhtight_L1eEM26', groups=SingleElectronGroup),
