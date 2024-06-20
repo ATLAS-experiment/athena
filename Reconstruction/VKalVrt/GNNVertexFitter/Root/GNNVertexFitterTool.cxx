@@ -22,11 +22,12 @@ GNNVertexFitterTool::GNNVertexFitterTool(const std::string &type, const std::str
       m_deco_deltaR("deltaR"),
       m_deco_ntrk("ntrk"),
       m_deco_lxyz("Lxyz"),
-      m_deco_eFrac("efracsv"){
+      m_deco_eFrac("efracsv"),
+      m_deco_nHFTracks("nHFtrk"){
   declareInterface<IGNNVertexFitterInterface>(this);
-  declareProperty("JetTrackLinks", m_trackLinksKey = "BTagging_AntiKt4EMPFlow."+m_gnnModel+"_TrackLinks");
-  declareProperty("JetTrackOrigins", m_trackOriginsKey = "BTagging_AntiKt4EMPFlow."+m_gnnModel+"_TrackOrigin");
-  declareProperty("JetVertexLinks", m_vertexLinksKey = "BTagging_AntiKt4EMPFlow."+m_gnnModel+"_VertexIndex");
+  declareProperty("JetTrackLinks", m_trackLinksKey = "AntiKt4EMPFlow."+m_gnnModel+"_TrackLinks");
+  declareProperty("JetTrackOrigins", m_trackOriginsKey = "AntiKt4EMPFlow."+m_gnnModel+"_TrackOrigin");
+  declareProperty("JetVertexLinks", m_vertexLinksKey = "AntiKt4EMPFlow."+m_gnnModel+"_VertexIndex");
   declareProperty("VertexFitterTool", m_vertexFitterTool, "Vertex fitting tool");
   m_massPi = 139.5702 * Gaudi::Units::MeV;
 }
@@ -43,7 +44,9 @@ StatusCode GNNVertexFitterTool::initialize() {
   ATH_CHECK(m_trackOriginsKey.initialize());
   ATH_CHECK(m_vertexLinksKey.initialize());
 
-  m_jetWriteDecorKeyVertexLink = m_jetCollection + "."+m_gnnModel+"VerticesLink";
+  std::string linkNameMod = "";
+  if (m_doInclusiveVertexing) linkNameMod = "Inclusive";
+  m_jetWriteDecorKeyVertexLink = m_jetCollection + "."+linkNameMod+"GNNVerticesLink";
   ATH_CHECK(m_jetWriteDecorKeyVertexLink.initialize());
 
   // Retrieve tools
@@ -103,70 +106,106 @@ StatusCode GNNVertexFitterTool::fitAllVertices(const xAOD::JetContainer *inJetCo
   using TL = ElementLink<DataVector<xAOD::TrackParticle_v1>>;
 
   // Read Decor Handle for Track links and Vertex links
-  SG::ReadDecorHandle<xAOD::BTaggingContainer, TLC> trackLinksHandle(m_trackLinksKey, ctx);
-  SG::ReadDecorHandle<xAOD::BTaggingContainer, std::vector<char>> trackOriginsHandle(m_trackOriginsKey, ctx);
-  SG::ReadDecorHandle<xAOD::BTaggingContainer, std::vector<char>> vertexLinksHandle(m_vertexLinksKey, ctx);
+  SG::ReadDecorHandle<xAOD::JetContainer, TLC> trackLinksHandle(m_trackLinksKey, ctx);
+  SG::ReadDecorHandle<xAOD::JetContainer, std::vector<char>> trackOriginsHandle(m_trackOriginsKey, ctx);
+  SG::ReadDecorHandle<xAOD::JetContainer, std::vector<char>> vertexLinksHandle(m_vertexLinksKey, ctx);
   SG::WriteDecorHandle<xAOD::JetContainer, std::vector<ElementLink<xAOD::VertexContainer>>>
       jetWriteDecorHandleVertexLink(m_jetWriteDecorKeyVertexLink, ctx);
 
-  static const SG::AuxElement::ConstAccessor<ElementLink<xAOD::BTaggingContainer> > btagLinkAcc 
-    = SG::AuxElement::ConstAccessor<ElementLink<xAOD::BTaggingContainer> >("btaggingLink");
-
   // Loop over the jets
   for (const auto &jet : *inJetContainer) {
-    const xAOD::BTagging* btag = *btagLinkAcc(*jet);
 
     // Retrieve the Vertex and Track Collections
-    auto vertexCollection = vertexLinksHandle(*btag);
-    auto trackCollection = trackLinksHandle(*btag);
-    auto trackOriginCollection = trackOriginsHandle(*btag);
+    auto vertexCollection = vertexLinksHandle(*jet);
+    auto trackCollection = trackLinksHandle(*jet);
+    auto trackOriginCollection = trackOriginsHandle(*jet);
 
     using indexList = std::vector<int>;
-    using vertexHFMap = std::map<char, bool>;
     using trackCountMap = std::map<char, std::set<TL>>;
 
     indexList iList(vertexCollection.size());
 
-    vertexHFMap HeavyFlavourTracksMap;   // Map with does a vertex contain at least 1 heavy flavour track
-    trackCountMap AllTracksMap;          // All the vertices and the corresponding track links
-    trackCountMap HeavyFlavourVertexMap; // All Heavy Flavour Tracks associated with a vertex
-    trackCountMap FittingMap;            // Map filled with vertices to be fitted
+    trackCountMap allTracksMap;          // All the vertices and the corresponding track links
+    trackCountMap heavyFlavourVertexMap; // All Heavy Flavour Tracks associated with a vertex
+    trackCountMap primaryVertexMap; // All Primary Tracks associated with a vertex
+    trackCountMap fittingMap;            // Map filled with vertices to be fitted
 
-    FittingMap.clear();
-    HeavyFlavourVertexMap.clear();
-    HeavyFlavourTracksMap.clear();
-    AllTracksMap.clear();
+    fittingMap.clear();
+    heavyFlavourVertexMap.clear();
+    primaryVertexMap.clear();
+    allTracksMap.clear();
 
-    for (int index=0; index<int(vertexCollection.size()); index++){
+    // Fill the map of predicted vertex indices -> tracks
+    for (int index=0; index < int(vertexCollection.size()); index++){
     
       auto vertex = vertexCollection[index];
       auto trackOrigin = trackOriginCollection[index];
       auto trackLink   = trackCollection[index];
 
-      AllTracksMap[vertex].insert(trackLink);
+      allTracksMap[vertex].insert(trackLink);
 
-      // Checking if vertex has a heavy flavour track
+      // Add heavy flavour tracks associated to each vertex to the map
       if (InDet::ExclusiveOrigin::FromB == trackOrigin || InDet::ExclusiveOrigin::FromBC == trackOrigin ||
           InDet::ExclusiveOrigin::FromC == trackOrigin) {
-        HeavyFlavourTracksMap[vertex] = (true);
-        HeavyFlavourVertexMap[vertex].insert(trackLink);
+        heavyFlavourVertexMap[vertex].insert(trackLink);
       }
-      };
-
-    auto HFRatioFunc = [&HeavyFlavourVertexMap, &HFRatio = m_HFRatioThres, &FittingMap](const auto &d) {
-      const auto &[vertex, tcm] = d;
-      if (HeavyFlavourVertexMap.find(vertex) != HeavyFlavourVertexMap.end() &&
-          (static_cast<float>(HeavyFlavourVertexMap[vertex].size()) / tcm.size()) >= HFRatio) {
-        FittingMap.insert(std::pair<char, std::set<TL>>(vertex, tcm));
-      };
+      // Add primary tracks associated to each vertex to the map
+      else if (InDet::ExclusiveOrigin::Primary == trackOrigin) { 
+        primaryVertexMap[vertex].insert(trackLink);
+      }
     };
 
-    if (m_HFRatioThres > 0) {
-      ATH_MSG_DEBUG("Vertex with HF Ratio ");
-      std::for_each(AllTracksMap.cbegin(), AllTracksMap.cend(), HFRatioFunc);
-    } else {
-      ATH_MSG_DEBUG("No Requirement on Track Origins");
-      std::for_each(AllTracksMap.cbegin(), AllTracksMap.cend(), HFRatioFunc);
+    // determine the vertex with the largest number of primary tracks
+    auto pvCandidate = std::max_element(
+        primaryVertexMap.begin(), primaryVertexMap.end(),
+        [](const auto& a, const auto& b) { return a.second.size() < b.second.size(); }
+    )->first;
+
+    // filter the vertices according to the configurable options
+    for (const auto &vertexTrackPair : allTracksMap) {
+      // unpack vertexTrackPair
+      const auto &[vertex, trackLinks] = vertexTrackPair;
+      // remove the primary vertex unless requested
+      if(!m_includePrimaryVertex) {
+        if(vertex == pvCandidate) {
+          continue;
+        }
+      }
+      // remove vertices which do not contain any heavy flavour tracks if requested
+      if(m_removeNonHFVertices) {
+        if (heavyFlavourVertexMap.find(vertex) == heavyFlavourVertexMap.end()) {
+          continue;
+        }
+      }
+      // remove vertices which contain insufficient heavy flavour tracks if requested
+      if(m_HFRatioThres > 0) {
+        if (heavyFlavourVertexMap.find(vertex) != heavyFlavourVertexMap.end() &&
+            (static_cast<float>(heavyFlavourVertexMap[vertex].size()) / trackLinks.size()) < m_HFRatioThres) {
+          continue;
+        }
+      }
+      // now we've passed all vertex filtering, add the vertex to the fittingMap
+      fittingMap.insert(std::pair<char, std::set<TL>>(vertex, trackLinks));
+    }
+    // If inclusive vertexing is requested, merge the vertices
+    if (m_doInclusiveVertexing) {
+      // Define the key for the merged vertex
+      const char mergedVertexKey = 0;
+      std::set<TL> mergedSet;
+      std::set<TL> combinedHFTracks;
+
+      // Iterate over the fittingMap to merge all sets into a single set
+      for (const auto &vertexTrackPair : fittingMap) {
+        // Insert all elements from trackLinks into mergedSet
+        mergedSet.insert(vertexTrackPair.second.begin(), vertexTrackPair.second.end());
+        combinedHFTracks.insert(heavyFlavourVertexMap[vertexTrackPair.first].begin(), heavyFlavourVertexMap[vertexTrackPair.first].end());
+      }
+
+      // Clear fittingMap and insert the merged set under the mergedVertexKey
+      fittingMap.clear();
+      fittingMap[mergedVertexKey] = std::move(mergedSet);
+      heavyFlavourVertexMap.clear();
+      heavyFlavourVertexMap[mergedVertexKey] = std::move(combinedHFTracks);
     }
 
     // Working xAOD   
@@ -187,9 +226,9 @@ StatusCode GNNVertexFitterTool::fitAllVertices(const xAOD::JetContainer *inJetCo
     std::vector<const xAOD::NeutralParticle *> neutralPartDummy(0);
     Amg::Vector3D IniVrt(0., 0., 0.);
 
-    for (const auto &pair : FittingMap) {
+    for (const auto &pair : fittingMap) {
+      // Need at least 2 tracks to perform a fit
       if (pair.second.size() >= 2) {
-        // Need at least 2 tracks to perform a fit
         int NTRKS = pair.second.size();
         std::vector<double> InpMass(NTRKS, m_massPi);
         m_vertexFitterTool->setMassInputParticles(InpMass, *state);
@@ -208,12 +247,12 @@ StatusCode GNNVertexFitterTool::fitAllVertices(const xAOD::JetContainer *inJetCo
 
         if (sc.isFailure() || FitVertex.perp() > m_maxLxy) { /* No initial estimation */
           IniVrt = primVrt.position();
-          if (m_multiWithPrimary)
+          if (m_includePrimaryVertex)
             IniVrt.setZero();
         } else {
           vDist = FitVertex - primVrt.position();
           double JetVrtDir = jetDir.Px() * vDist.x() + jetDir.Py() * vDist.y() + jetDir.Pz() * vDist.z();
-          if (m_multiWithPrimary)
+          if (m_includePrimaryVertex)
             JetVrtDir = fabs(JetVrtDir); /* Always positive when primary vertex is seeked for*/
           if (JetVrtDir > 0.)
             IniVrt = FitVertex; /* Good initial estimation */
@@ -258,17 +297,20 @@ StatusCode GNNVertexFitterTool::fitAllVertices(const xAOD::JetContainer *inJetCo
 
         double eRatio = MomentumVtx.E() / jet->p4().E();
         double signif3D;
-        double distToPV = vrtVrtDist(primVrt, newvrt.vertex, newvrt.vertexCov, signif3D);
+        [[maybe_unused]] double distToPV = vrtVrtDist(primVrt, newvrt.vertex, newvrt.vertexCov, signif3D);
         
         // apply quality cuts
-        if (ntrk < m_minNTrack)
-          continue;
-        if (distToPV < m_minSig3D && newvrt.vertex.perp() > 24.0)
-          continue;
-        if (Lxy <= m_minLxy ) 
-          continue;
-        if ( newvrt.vertex.perp() < m_minPerp)
-          continue;
+        if (m_applyCuts) {
+          // cut on minimum number of tracks in the vertex
+          if (ntrk < m_minNTrack)
+            continue;
+          // cut on 3D significance
+          if (signif3D < m_minSig3D)
+            continue;
+          // cut on minumum transverse displacement from the PV
+          if (Lxy < m_minLxy ) 
+            continue;
+        }
         
         // Register Container
         auto* GNNvertex = outVertexContainer->emplace_back(new xAOD::Vertex);
@@ -284,6 +326,7 @@ StatusCode GNNVertexFitterTool::fitAllVertices(const xAOD::JetContainer *inJetCo
         GNNvertex->setVertexType(xAOD::VxType::SecVtx);
         GNNvertex->setPosition(newvrt.vertex);
         GNNvertex->setFitQuality(newvrt.chi2, NDOF);
+
         m_deco_mass(*GNNvertex)            = newvrt.vertexMom.M();
         m_deco_pt(*GNNvertex)              = newvrt.vertexMom.Perp();
         m_deco_charge(*GNNvertex)          = newvrt.vertexCharge;
@@ -294,6 +337,7 @@ StatusCode GNNVertexFitterTool::fitAllVertices(const xAOD::JetContainer *inJetCo
         m_deco_ntrk(*GNNvertex)            = ntrk;
         m_deco_deltaR(*GNNvertex)          = drJPVSV;
         m_deco_eFrac(*GNNvertex)           = eRatio;
+        m_deco_nHFTracks(*GNNvertex)       = heavyFlavourVertexMap[pair.first].size();
         
         ElementLink<xAOD::VertexContainer> linkVertex;
         linkVertex.setElement(GNNvertex);

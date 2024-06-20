@@ -185,6 +185,8 @@ def MultifoldGNNCfg(
         FlipConfig="STANDARD",
         nnFilePaths=None,
         remapping={},
+        useBTaggingObject=True,
+        JetCollection=None
 ):
     if nnFilePaths is None:
         raise ValueError('nnFilePaths must be specified')
@@ -192,12 +194,25 @@ def MultifoldGNNCfg(
     nn_name = '_'.join(PurePath(common).with_suffix('').parts)
     algname = f'{nn_name}_{FlipConfig}'
     veto_list = getStaticTrackVars(TrackCollection)
-    veto_list += getUndeclaredBtagVars(BTaggingCollection)
     acc = ComponentAccumulator()
+
+    if useBTaggingObject:
+        Alg = CompFactory.FlavorTagDiscriminants.BTagDecoratorAlg
+        trackLinkType = 'TRACK_PARTICLE'
+        veto_list += getUndeclaredBtagVars(BTaggingCollection)
+        container = BTaggingCollection
+    else:
+        if JetCollection is None:
+            raise ValueError('JetCollection must be specified if useBTaggingObject is set to False')
+        Alg = CompFactory.FlavorTagDiscriminants.JetTagDecoratorAlg
+        trackLinkType = 'IPARTICLE'
+        algname += '_Jet'
+        container = JetCollection
+
     acc.addEventAlgo(
-        CompFactory.FlavorTagDiscriminants.BTagDecoratorAlg(
+        Alg(
             name=algname,
-            container=BTaggingCollection,
+            container=container,
             constituentContainer=TrackCollection,
             decorator=CompFactory.FlavorTagDiscriminants.MultifoldGNNTool(
                 name=f'{algname}_tool',
@@ -205,9 +220,11 @@ def MultifoldGNNCfg(
                 nnFiles=nnFilePaths,
                 flipTagConfig=FlipConfig,
                 variableRemapping=remapping,
-                nnSharingService=addAndReturnSharingSvc(flags, acc)
+                nnSharingService=addAndReturnSharingSvc(flags, acc),
+                trackLinkType=trackLinkType,
             ),
             undeclaredReadDecorKeys=veto_list,
         )
     )
+
     return acc

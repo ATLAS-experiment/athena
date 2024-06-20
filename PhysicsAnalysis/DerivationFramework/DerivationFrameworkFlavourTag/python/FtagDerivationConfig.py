@@ -67,7 +67,8 @@ def FtagJetCollectionsCfg(cfgFlags, jet_cols, pv_cols=None,
     
     if cfgFlags.BTagging.GNNVertexFitter:
       from GNNVertexFitter.GNNVertexFitterConfig import GNNVertexFitterAlgCfg
-      acc.merge(GNNVertexFitterAlgCfg(cfgFlags, name="GNNVertexFitterAlg"))
+      acc.merge(GNNVertexFitterAlgCfg(cfgFlags))
+      acc.merge(GNNVertexFitterAlgCfg(cfgFlags, inclusive=True))
     
     return acc
 

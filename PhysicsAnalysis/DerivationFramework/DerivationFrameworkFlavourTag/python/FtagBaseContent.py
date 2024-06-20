@@ -40,7 +40,7 @@ PHYSVAL_FTAG1_FTAG2_ExtraVariables = [
     "Photons.TruthLink",
     "AntiKt2PV0TrackJets.pt.eta.phi.m",
     "AntiKt4EMTopoJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.PartonTruthLabelID.GhostBHadronsFinalPt",
-    "AntiKt4EMPFlowJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.DFCommonJets_fJvt.GhostBHadronsFinalPt.SumPtChargedPFOPt1000.SumPtTrkPt1000.TrackSumMass.TrackSumPt.TrackWidthPt500.TracksForBTagging.TruthLabelDeltaR_B.TruthLabelDeltaR_C.TruthLabelDeltaR_T.JetEMScaleMomentum_pt.JetEMScaleMomentum_eta.HECQuality.GhostHBosonsPt.GNNVerticesLink",
+    "AntiKt4EMPFlowJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.DFCommonJets_fJvt.GhostBHadronsFinalPt.SumPtChargedPFOPt1000.SumPtTrkPt1000.TrackSumMass.TrackSumPt.TrackWidthPt500.TracksForBTagging.TruthLabelDeltaR_B.TruthLabelDeltaR_C.TruthLabelDeltaR_T.JetEMScaleMomentum_pt.JetEMScaleMomentum_eta.HECQuality.GhostHBosonsPt.GNNVerticesLink.InclusiveGNNVerticesLink",
     "TruthPrimaryVertices.t.x.y.z",
     "TauNeutralParticleFlowObjects.pt.eta.phi.m.bdtPi0Score.nPi0Proto",
     "TauChargedParticleFlowObjects.pt.eta.phi.m.bdtPi0Score",
@@ -70,8 +70,11 @@ def update_AppendToDictionary_in_SlimmingHelper(SlimmingHelper, flags, extra_App
 def add_static_content_to_SlimmingHelper(SlimmingHelper, flags, extra_StaticContent=[]):
     all_StaticContent = PHYSVAL_FTAG1_FTAG2_StaticContent
     excludedVertexAuxData = "-vxTrackAtVertex.-MvfFitInfo.-isInitialized.-VTAV"
-    all_StaticContent += ["xAOD::VertexContainer#GNNVertices"]
-    all_StaticContent += ["xAOD::VertexAuxContainer#GNNVerticesAux."+excludedVertexAuxData]
+    if flags.BTagging.GNNVertexFitter:
+        all_StaticContent += ["xAOD::VertexContainer#GNNVertices"]
+        all_StaticContent += ["xAOD::VertexAuxContainer#GNNVerticesAux."+excludedVertexAuxData]
+        all_StaticContent += ["xAOD::VertexContainer#InclusiveGNNVertices"]
+        all_StaticContent += ["xAOD::VertexAuxContainer#InclusiveGNNVerticesAux."+excludedVertexAuxData]
     if flags.BTagging.RunNewVrtSecInclusive:
         excludedVertexAuxData = "-vxTrackAtVertex.-MvfFitInfo.-isInitialized.-VTAV"
         all_StaticContent += ["xAOD::VertexContainer#NVSI_SecVrt_Loose", "xAOD::VertexContainer#NVSI_SecVrt_Medium", "xAOD::VertexContainer#NVSI_SecVrt_Tight"]
@@ -89,10 +92,12 @@ def add_truth_to_SlimmingHelper(SlimmingHelper):
     addTruth3ContentToSlimmerTool(SlimmingHelper)
     SlimmingHelper.AllVariables += ['TruthHFWithDecayParticles','TruthHFWithDecayVertices','TruthCharm','TruthPileupParticles','InTimeAntiKt4TruthJets','OutOfTimeAntiKt4TruthJets']
 
-def add_ExtraVariables_to_SlimmingHelper(SlimmingHelper):
+def add_ExtraVariables_to_SlimmingHelper(SlimmingHelper, flags):
     SlimmingHelper.ExtraVariables += PHYSVAL_FTAG1_FTAG2_ExtraVariables
     from DerivationFrameworkEGamma.ElectronsCPDetailedContent import GSFTracksCPDetailedContent
     SlimmingHelper.ExtraVariables += GSFTracksCPDetailedContent
+    if flags.BTagging.GNNVertexFitter:
+        SlimmingHelper.ExtraVariables += ["AntiKt4EMPFlowJets.GNNVerticesLink.InclusiveGNNVerticesLink"]
 
 ## Common function used in FTAG1 and FTAG2
 def trigger_setup(SlimmingHelper, option=''):
