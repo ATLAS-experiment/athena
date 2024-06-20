@@ -4,6 +4,13 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from TrkConfig.TrkVKalVrtFitterConfig import TrkVKalVrtFitterCfg
 from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
+from FlavorTagDiscriminants.FlavorTagNNConfig import MultifoldGNNCfg
+from os.path import commonpath
+from pathlib import PurePath
+from ParticleJetTools.JetParticleAssociationAlgConfig import (
+    JetParticleAssociationAlgCfg,
+)
+from BTagging.BTagTrackAugmenterAlgConfig import BTagTrackAugmenterAlgCfg
 
 def GNNVertexFitterToolCfg(flags, name="GNNVertexFitterTool", **kwargs):
     acc = ComponentAccumulator()
@@ -12,38 +19,77 @@ def GNNVertexFitterToolCfg(flags, name="GNNVertexFitterTool", **kwargs):
     kwargs.setdefault("VertexFitterTool", acc.popToolsAndMerge(TrkVKalVrtFitterCfg(flags)))
     kwargs.setdefault("GNNModel", "GN2v01")
     kwargs.setdefault("JetCollection", "AntiKt4EMPFlowJets")
-    kwargs.setdefault("multiPrimary", False)
-    kwargs.setdefault("minLxy", 2)
-    kwargs.setdefault("minPerp", 2)
-    kwargs.setdefault("maxLxy", 300)
-    kwargs.setdefault("minSig3D", 20)
+    kwargs.setdefault("includePrimaryVertex", False)
+    kwargs.setdefault("removeNonHFVertices", False)
+    kwargs.setdefault("doInclusiveVertexing", False)
     kwargs.setdefault("maxChi2", 20)
-    kwargs.setdefault("HFRatio", 0.3)
-    kwargs.setdefault("minNTrk", 2)
+    kwargs.setdefault("HFRatio", 0)
+    kwargs.setdefault("applyCuts", False)
     acc.setPrivateTools(CompFactory.Rec.GNNVertexFitterTool(**kwargs))
 
     return acc
       
-def GNNVertexFitterAlgCfg(flags, jet_col="AntiKt4EMPFlowJets",  **kwargs):
+def GNNVertexFitterAlgCfg(flags, jetcol="AntiKt4EMPFlowJets", inclusive=False, **kwargs):
     acc = ComponentAccumulator()
     
-    tool = acc.popToolsAndMerge(GNNVertexFitterToolCfg(flags)) 
-    acc.addEventAlgo(CompFactory.Rec.GNNVertexFitterAlg(VtxTool=tool, inputJetContainer=jet_col, **kwargs))
+    trackCollection = 'InDetTrackParticles'
+    JetTrackAssociator = "TracksForBTagging"
+
+    #Track Augmenter
+    acc.merge(BTagTrackAugmenterAlgCfg(flags))
+
+    acc.merge(JetParticleAssociationAlgCfg(
+        flags,
+        JetCollection=jetcol,
+        InputParticleCollection=trackCollection,
+        OutputParticleDecoration=JetTrackAssociator,
+    ))
+
+    # decorate b-tagging directly to the jets
+    for networks in flags.BTagging.NNs.get(jetcol, []):
+        assert len(networks['folds']) > 1
+
+        nnFilePaths=networks['folds']
+        common = commonpath(nnFilePaths)
+        nn_name = '_'.join(PurePath(common).with_suffix('').parts)
+        algname = f'{nn_name}_Jet'
+
+        remapping=networks.get('remapping', {})
+        remapping['BTagTrackToJetAssociator'] = JetTrackAssociator 
+
+        args = dict(
+            flags=flags,
+            BTaggingCollection=None,
+            TrackCollection=trackCollection,
+            nnFilePaths=nnFilePaths,
+            remapping=remapping,
+            useBTaggingObject=False,
+            JetCollection=jetcol,
+        )
+
+        acc.merge(MultifoldGNNCfg(**args))
+
+        tool = acc.popToolsAndMerge(
+            GNNVertexFitterToolCfg(
+                flags,
+                name=f'{algname}_VertexFitterTool',
+                GNNModel=algname,
+                doInclusiveVertexing=inclusive,
+                removeNonHFVertices=inclusive, # if running inclusive vertexing, remove vertices with no HF tracks
+            )
+        )
+
+        name = f'{algname}_VertexFitterAlg{"Incl" if inclusive else ""}'
+        outcol = f'{"Inclusive" if inclusive else ""}GNNVertices'
+
+        acc.addEventAlgo(
+            CompFactory.Rec.GNNVertexFitterAlg(
+                name = name,
+                VtxTool=tool, 
+                inputJetContainer=jetcol, 
+                outputVertexContainer=outcol,
+                **kwargs
+            )
+        )
         
     return acc
-
-def main():
-    algClass = CompFactory.Rec.GNNVertexFitterAlg
-    help(algClass)
-
-    toolClass = CompFactory.Rec.GNNVertexFitterTool
-    help(toolClass)
-    
-    gnntoolClass = CompFactory.FlavorTagDiscriminants.GNNTool
-    help(gnntoolClass)
-    
-    VrtFitClass=CompFactory.Trk.TrkVKalVrtFitter
-    help(VrtFitClass)
-
-if "__main__" == __name__:
-    main()

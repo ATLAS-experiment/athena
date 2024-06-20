@@ -124,7 +124,7 @@ def FTAG2Cfg(flags):
             acc.merge(HLTJetFTagDecorationCfg(flags))
 
     # Add ExtraVariables
-    FtagBaseContent.add_ExtraVariables_to_SlimmingHelper(FTAG2SlimmingHelper)
+    FtagBaseContent.add_ExtraVariables_to_SlimmingHelper(FTAG2SlimmingHelper, flags)
    
     # Trigger content
     FtagBaseContent.trigger_setup(FTAG2SlimmingHelper, 'FTAG2')
