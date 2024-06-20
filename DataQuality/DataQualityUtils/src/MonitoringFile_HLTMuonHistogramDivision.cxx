@@ -74,6 +74,15 @@ namespace dqutils {
       }
       return pH;
     };
+    auto getHistogramPair  = [&mf, &getHPointer] (const TString &numeratorName, const TString &denominatorName)->std::pair<TH1F *, TH1F *>  {
+      TH1F* pH2 {};
+      TH1F* pH1 = getHPointer(numeratorName);
+      if (pH1){
+        pH2 = getHPointer(denominatorName);
+      }
+      return std::pair{pH1, pH2};
+    };
+    
     auto getH2Pointer ATLAS_THREAD_SAFE = [&mf] ATLAS_NOT_THREAD_SAFE(const TString &hname)->TH2F * {
       TH2F* pH {};
       mf.get(hname, pH);
@@ -82,6 +91,8 @@ namespace dqutils {
       }
       return pH;
     };
+    
+    
     ///
 
     // 110728: removing the iteration of searching run directory according to the new MDT code
@@ -101,7 +112,6 @@ namespace dqutils {
       return;
     }
     {
-      //run_dir = dir0->GetName();
       if (fdbg) {
         std::cout << "HLTMuon: run directory is " << run_dir << std::endl;
       }
@@ -124,7 +134,6 @@ namespace dqutils {
       TString mi_dir = muon_dir + "muIso/";
       TString tm_dir = muon_dir + "TileMu/";
       TString ef_dir = muon_dir + "MuonEF/";
-      //TString mg_dir = muon_dir + "MuGirl/";  // removed, Yuan
       // YY added
       TString ztp_dir = muon_dir + "MuZTP/";
 
@@ -142,8 +151,6 @@ namespace dqutils {
 
       TH1F* h1tmp(0);
       TH1F* h1eff(0);
-      TH1F* h1num(0);
-      TH1F* h1den(0);
       TH1F* h1sumeff(0); // new YY
       TH1F* h1effsum(nullptr);
       TGraphAsymmErrors* h1tmpg;
@@ -168,13 +175,9 @@ namespace dqutils {
         snum = mf_dir + (*it) + "_numer";
         sden = mf_dir + (*it) + "_denom";
         stmp = (*it);
-
-        h1num = getHPointer(snum);
+        const auto & [h1num, h1den] = getHistogramPair(snum, sden);
         if (not h1num) continue;
         //
-        h1den = getHPointer(sden);
-        if (not h1den) continue;
-
         h1tmp = (TH1F*) h1den->Clone();
         h1tmp->SetName(stmp);
         std::string stcar = h1tmp->GetTitle();
@@ -201,12 +204,9 @@ namespace dqutils {
         snum = mc_dir + (*it) + "_numer";
         sden = mc_dir + (*it) + "_denom";
         stmp = (*it);
-
-        h1num = getHPointer(snum);
+        const auto & [h1num, h1den] = getHistogramPair(snum, sden);
         if (!h1num) continue;
-        h1den = getHPointer(sden);
-        if (!h1den) continue;
-
+        //
         h1tmp = (TH1F*) h1den->Clone();
         h1tmp->SetName(stmp);
         std::string stcar = h1tmp->GetTitle();
@@ -229,12 +229,9 @@ namespace dqutils {
         snum = mi_dir + (*it) + "_numer";
         sden = mi_dir + (*it) + "_denom";
         stmp = (*it);
-
-        h1num = getHPointer(snum);
+        const auto & [h1num, h1den] = getHistogramPair(snum, sden);
         if (!h1num) continue;
-        h1den = getHPointer(sden);
-        if (!h1den) continue;
-
+        //
         h1tmp = (TH1F*) h1den->Clone();
         h1tmp->SetName(stmp);
         std::string stcar = h1tmp->GetTitle();
@@ -273,11 +270,8 @@ namespace dqutils {
         snum = tm_dir + numnames.at(i);
         sden = tm_dir + dennames.at(i);
         stmp = effnames.at(i);
-
-        h1num = getHPointer(snum);
+        const auto & [h1num, h1den] = getHistogramPair(snum, sden);
         if (!h1num) continue;
-        h1den = getHPointer(sden);
-        if (!h1den) continue;
 
         h1tmp = (TH1F*) h1den->Clone();
         h1tmp->SetName(stmp);
@@ -321,11 +315,8 @@ namespace dqutils {
         snum = ef_dir + (*it) + "_numer";
         sden = ef_dir + (*it) + "_denom";
         stmp = (*it);
-
-        h1num = getHPointer(snum);
+        const auto & [h1num, h1den] = getHistogramPair(snum, sden);
         if (!h1num) continue;
-        h1den = getHPointer(sden);
-        if (!h1den) continue;
 
         h1tmp = (TH1F*) h1den->Clone();
         h1tmp->SetName(stmp);
@@ -487,6 +478,15 @@ namespace dqutils {
           }
           return pH;
         };
+        auto getHistogramPairQuietly = [&mf, &getHPointerQuietly] (const TString &numeratorName, const TString &denominatorName)->std::pair<TH1F *, TH1F *>  {
+          TH1F* pH2 {};
+          TH1F* pH1 = getHPointerQuietly(numeratorName);
+          if (pH1){
+            pH2 = getHPointerQuietly(denominatorName);
+          }
+          return std::pair{pH1, pH2};
+        };
+        
 
         for (int iROI = 0; iROI < 9; iROI++) {
           sden = nd_dir + hists_str[iROI] + "_Denominator";
@@ -496,10 +496,8 @@ namespace dqutils {
 
           stmp = hists_str[iROI];
           stmpg = hists_str[iROI] + "_Fit";
-          h1num = getHPointerQuietly(snum);
+          const auto & [h1num, h1den] = getHistogramPairQuietly(snum, sden);
           if (!h1num) continue;
-          h1den = getHPointerQuietly(sden);
-          if (!h1den) continue;
 
           h1tmp = (TH1F*) h1den->Clone();
           h1tmp->SetName(stmp);
@@ -528,12 +526,8 @@ namespace dqutils {
         seffg = seff + "_Fit";
         stmp = L1_TP_str;
         stmpg = L1_TP_str + "_Fit";
-
-        h1num = getHPointerQuietly(snum);
+        const auto & [h1num, h1den] = getHistogramPairQuietly(snum, sden);
         if (!h1num) continue;
-
-        h1den = getHPointerQuietly(sden);
-        if (!h1den) continue;
 
         h1tmp = (TH1F*) h1den->Clone();
         h1tmp->SetName(stmp);
@@ -562,15 +556,12 @@ namespace dqutils {
         TString histNumE = nd_dir + chainName + "_tagEFFSpre_Turn_On_Curve_wrt_probe_MuidCB_Endcap_Numerator";
         TString histDenE = nd_dir + chainName + "_tagEFFSpre_Turn_On_Curve_wrt_probe_MuidCB_Endcap_Denominator";
         TString histL1sum = eff_dir + chainName + "_EFplateau_wrtOffline";
-
-        TH1F* h1numb = getHPointerQuietly(histNumB);
+        const auto & [h1numb, h1denb] = getHistogramPairQuietly(histNumB, histDenB);
         if (!h1numb) continue;
-        TH1F* h1nume = getHPointerQuietly(histNumE);
+        
+        const auto & [h1nume, h1dene] = getHistogramPairQuietly(histNumE, histDenE);
         if (!h1nume) continue;
-        TH1F* h1denb = getHPointerQuietly(histDenB);
-        if (!h1denb) continue;
-        TH1F* h1dene = getHPointerQuietly(histDenE);
-        if (!h1dene) continue;
+
         TH1F* h1sumL = getHPointerQuietly(histL1sum);
         if (!h1sumL) continue;
         //
@@ -705,11 +696,8 @@ namespace dqutils {
             seffg = seff + "_Fit"; // YY added 20.04.10
             stmp = chainName + alg2[alg] + "_Turn_On_Curve_wrt_MuidSA" + trigger[trg] + "_Triggered";
             stmpg = chainName + alg2[alg] + "_Turn_On_Curve_wrt_MuidSA" + trigger[trg] + "_Triggered" + "_Fit";
-
-            h1num = getHPointer(snum);
+            const auto & [h1num, h1den] = getHistogramPair(snum, sden);
             if (!h1num) continue;
-            h1den = getHPointer(sden);
-            if (!h1den) continue;
 
             h1tmp = (TH1F*) h1den->Clone();
             h1tmp->SetName(stmp);
@@ -776,19 +764,15 @@ namespace dqutils {
           seffg = seff + "_Fit"; // YY added 20.04.10
           stmp = chainName + alg2[alg] + "_Turn_On_Curve_wrt_MuidSA";
           stmpg = chainName + alg2[alg] + "_Turn_On_Curve_wrt_MuidSA" + "_Fit";
+          const auto & [pNum, pDen] = getHistogramPair(snum, sden);
+          if (!pNum) continue;
 
-          h1num = getHPointer(snum);
-          if (!h1num) continue;
-
-          h1den = getHPointer(sden);
-          if (!h1den) continue;
-
-          h1tmp = (TH1F*) h1den->Clone();
+          h1tmp = (TH1F*) pDen->Clone();
           h1tmp->SetName(stmp);
           h1tmp->SetTitle(stmp);
           h1tmp->GetYaxis()->SetTitle("Efficiency");
           h1tmp->Reset();
-          h1tmp->Divide(h1num, h1den, 1., 1., "B");
+          h1tmp->Divide(pNum, pDen, 1., 1., "B");
           dir->cd();
           h1tmp->Write();
           h1tmpg = new TGraphAsymmErrors();
@@ -796,17 +780,17 @@ namespace dqutils {
           h1tmpg->SetMarkerStyle(20);
           h1tmpg->SetMinimum(0.0);
           h1tmpg->SetMaximum(1.05);
-          h1tmpg->BayesDivide(h1num, h1den);
+          h1tmpg->BayesDivide(pNum, pDen);
           h1tmpg->GetYaxis()->SetTitle("Efficiency");
-          h1tmpg->GetXaxis()->SetTitle(h1den->GetXaxis()->GetTitle());
+          h1tmpg->GetXaxis()->SetTitle(pDen->GetXaxis()->GetTitle());
           dir->cd();
           h1tmpg->Write();
           delete h1tmpg;
 
           if (0 == alg || 2 == alg) { // no condition on ES bits = all events
             double sumeff {}, sumerr {};
-            double sumn = h1num->Integral(iMSL, iMSH);
-            double sumd = h1den->Integral(iMSL, iMSH);
+            double sumn = pNum->Integral(iMSL, iMSH);
+            double sumd = pDen->Integral(iMSL, iMSH);
             if (sumd != 0.) {
               sumeff = (double) sumn / (double) sumd;
               sumerr = sqrt((double) sumn * (1. - sumeff)) / (double) sumd;
@@ -820,8 +804,6 @@ namespace dqutils {
 
             if (iholx >= 0) {
               TString s = eff_dir + chainName + "_highpt_effsummary_by" + vectkwd.at(3);
-              // std::cerr << "hist summary: " << s << " n: " << sumn << " d: " << sumd << " eff: " << sumeff << " err:
-              // " << sumerr << std::endl;
               h1sumeff = getHPointer(s);
               if (!h1sumeff) continue;
               h1sumeff->GetYaxis()->SetTitleOffset(1.3);
@@ -847,11 +829,8 @@ namespace dqutils {
               seffg = seff + "_Fit";
               stmp = chainName + triggerES[alg] + "_L1" + "_Turn_On_Curve_wrt_MuidSA";
               stmpg = chainName + triggerES[alg] + "_L1" + "_Turn_On_Curve_wrt_MuidSA" + "_Fit";
-
-              h1num = getHPointer(snum);
+              const auto & [h1num, h1den] = getHistogramPair(snum, sden);
               if (!h1num) continue;
-              h1den = getHPointer(sden);
-              if (!h1den) continue;
 
               h1tmp = (TH1F*) h1den->Clone();
               h1tmp->SetName(stmp);
@@ -882,11 +861,8 @@ namespace dqutils {
                 seffg = seff + "_Fit";
                 stmp = chainName + triggerES[ies] + "_L1" + bestr[be] + "_Turn_On_Curve_wrt_MuidSA";
                 stmpg = chainName + triggerES[ies] + "_L1" + bestr[be] + "_Turn_On_Curve_wrt_MuidSA" + "_Fit";
-
-                h1num = getHPointer(snum);
+                const auto & [h1num, h1den] = getHistogramPair(snum, sden);
                 if (!h1num) continue;
-                h1den = getHPointer(sden);
-                if (!h1den) continue;
 
                 h1tmp = (TH1F*) h1den->Clone();
                 h1tmp->SetName(stmp);
@@ -917,12 +893,8 @@ namespace dqutils {
             seffg = seff + "_Fit"; // YY added 20.04.10
             stmp = chainName + triggerES[ies] + alg2[alg] + "_Turn_On_Curve_wrt_MuidSA";
             stmpg = chainName + triggerES[ies] + alg2[alg] + "_Turn_On_Curve_wrt_MuidSA" + "_Fit";
-
-            h1num = getHPointer(snum);
+            const auto & [h1num, h1den] = getHistogramPair(snum, sden);
             if (!h1num) continue;
-
-            h1den = getHPointer(sden);
-            if (!h1den) continue;
 
             h1tmp = (TH1F*) h1den->Clone();
             h1tmp->SetName(stmp);
@@ -965,8 +937,6 @@ namespace dqutils {
 
                 if (iholx >= 0) {
                   TString s = eff_dir + chainName + "_highpt_effsummary_by" + triggerES[ies];
-                  // std::cerr << "hist summary: " << s << " n: " << sumn << " d: " << sumd << " eff: " << sumeff << "
-                  // err: " << sumerr << std::endl;
                   h1sumeff = getHPointer(s);
                   if (!h1sumeff) continue;
                   h1sumeff->GetYaxis()->SetTitleOffset(1.3);
@@ -992,11 +962,8 @@ namespace dqutils {
               seffg = seff + "_Fit"; // YY added 20.04.10
               stmp = chainName + alg2[alg] + bestr[be] + "_Turn_On_Curve_wrt_MuidSA";
               stmpg = chainName + alg2[alg] + bestr[be] + "_Turn_On_Curve_wrt_MuidSA" + "_Fit";
-
-              h1num = getHPointer(snum);
+              const auto & [h1num, h1den] = getHistogramPair(snum, sden);
               if (!h1num) continue;
-              h1den = getHPointer(sden);
-              if (!h1den) continue;
 
               h1tmp = (TH1F*) h1den->Clone();
               h1tmp->SetName(stmp);
@@ -1027,11 +994,8 @@ namespace dqutils {
           seffg = seff + "_Fit"; // YY added 20.04.10
           stmp = chainName + alg2[alg] + "_Turn_On_Curve_wrt" + wrtalg2[alg];
           stmpg = chainName + alg2[alg] + "_Turn_On_Curve_wrt" + wrtalg2[alg] + "_Fit";
-
-          h1num = getHPointer(snum);
+          const auto & [h1num, h1den] = getHistogramPair(snum, sden);
           if (!h1num) continue;
-          h1den = getHPointer(sden);
-          if (!h1den) continue;
 
           h1tmp = (TH1F*) h1den->Clone();
           h1tmp->SetName(stmp);
@@ -1065,11 +1029,8 @@ namespace dqutils {
             seffg = seff + "_Fit"; // YY added 20.04.10
             stmp = chainName + triggerES[ies] + alg2[alg] + "_Turn_On_Curve_wrt" + wrtalg2[alg];
             stmpg = chainName + triggerES[ies] + alg2[alg] + "_Turn_On_Curve_wrt" + wrtalg2[alg] + "_Fit";
-
-            h1num = getHPointer(snum);
+            const auto & [h1num, h1den] = getHistogramPair(snum, sden);
             if (!h1num) continue;
-            h1den = getHPointer(sden);
-            if (!h1den) continue;
 
             h1tmp = (TH1F*) h1den->Clone();
             h1tmp->SetName(stmp);
@@ -1102,11 +1063,8 @@ namespace dqutils {
               seffg = seff + "_Fit"; // YY added 20.04.10
               stmp = chainName + alg2[alg] + "_Turn_On_Curve_wrt" + wrtalg2[alg] + bestr[be];
               stmpg = chainName + alg2[alg] + "_Turn_On_Curve_wrt" + wrtalg2[alg] + bestr[be] + "_Fit";
-
-              h1num = getHPointer(snum);
+              const auto & [h1num, h1den] = getHistogramPair(snum, sden);
               if (!h1num) continue;
-              h1den = getHPointer(sden);
-              if (!h1den) continue;
 
               h1tmp = (TH1F*) h1den->Clone();
               h1tmp->SetName(stmp);
@@ -1160,11 +1118,8 @@ namespace dqutils {
           sden = rate_dir + "Number_Of_" + off[itype] + "Muons_" + cut[icut] + "GeV_Cut";
           stmp = "EF_" + type[itype] + "Over_" + off[itype] + cut[icut] + "GeV_Cut";
           stmpg = "EF_" + type[itype] + "Over_" + off[itype] + cut[icut] + "GeV_Cut" + "_Fit";
-
-          h1num = getHPointer(snum);
+          const auto & [h1num, h1den] = getHistogramPair(snum, sden);
           if (!h1num) continue;
-          h1den = getHPointer(sden);
-          if (!h1den) continue;
 
           h1tmp = (TH1F*) h1den->Clone();
           h1tmp->SetName(stmp);
@@ -1193,8 +1148,6 @@ namespace dqutils {
         ztpmap["muChainMSonly2"] = "L1_MU15";
 
         std::map<std::string, int> ztp_isomap;
-        //ztp_isomap["mu4_cosmic_L1MU4_EMPTY"] = 0;
-        //ztp_isomap["mu24_imedium"] = 1;
         ztp_isomap["muChain1"] = 0;
         ztp_isomap["muChain2"] = 0;
         ztp_isomap["muChainEFiso1"] = 1;
@@ -1231,12 +1184,8 @@ namespace dqutils {
               sden = histdirmuztp + "/muZTP" + var[k] + itmap->first;
               stmp = "muZTP_eff_" + level[j] + var[k] + itmap->first;
               stmpg = "muZTP_eff_" + level[j] + var[k] + itmap->first;
-
-              // for debugging
-              h1num = getHPointer(snum);
+              const auto & [h1num, h1den] = getHistogramPair(snum, sden);
               if (!h1num) continue;
-              h1den = getHPointer(sden);
-              if (!h1den) continue;
 
               h1tmpg = new TGraphAsymmErrors();
               h1tmpg->SetName(stmpg);
@@ -1255,20 +1204,17 @@ namespace dqutils {
               snum = histdirmuztp + "/muZTP_Eta_1bin_" + level[j] + "fired_" + itmap->first;
               sden = histdirmuztp + "/muZTP_Eta_1bin_" + itmap->first;
               stmpg = "muZTP_eff_" + level[j] + "_Eta_1bin_" + itmap->first;
-
-              h1num = getHPointer(snum);
-              if (!h1num) continue;
-              h1den = getHPointer(sden);
-              if (!h1den) continue;
+              const auto & [h1num2, h1den2] = getHistogramPair(snum, sden);
+              if (!h1num2) continue;
 
               h1tmpg = new TGraphAsymmErrors();
               h1tmpg->SetName(stmpg);
               h1tmpg->SetMarkerStyle(20);
               h1tmpg->SetMinimum(0.0);
               h1tmpg->SetMaximum(1.05);
-              h1tmpg->BayesDivide(h1num, h1den);
+              h1tmpg->BayesDivide(h1num2, h1den2);
               h1tmpg->GetYaxis()->SetTitle("Efficiency");
-              h1tmpg->GetXaxis()->SetTitle(h1den->GetXaxis()->GetTitle());
+              h1tmpg->GetXaxis()->SetTitle(h1den2->GetXaxis()->GetTitle());
               ztpdir->cd();
               h1tmpg->Write();
               delete h1tmpg;
@@ -1278,20 +1224,21 @@ namespace dqutils {
               snum = histdirmuztp + "/muZTP_Eta_2bins_" + level[j] + "fired_" + itmap->first;
               sden = histdirmuztp + "/muZTP_Eta_2bins_" + itmap->first;
               stmpg = "muZTP_eff_" + level[j] + "_Eta_2bins_" + itmap->first;
+              const auto & [h1num3, h1den3] = getHistogramPair(snum, sden);
 
-              h1num = getHPointer(snum);
-              if (!h1num) continue;
-              h1den = getHPointer(sden);
-              if (!h1den) continue;
+              //h1num = getHPointer(snum);
+              if (!h1num3) continue;
+              //h1den = getHPointer(sden);
+              //if (!h1den) continue;
 
               h1tmpg = new TGraphAsymmErrors();
               h1tmpg->SetName(stmp);
               h1tmpg->SetMarkerStyle(20);
               h1tmpg->SetMinimum(0.0);
               h1tmpg->SetMaximum(1.05);
-              h1tmpg->BayesDivide(h1num, h1den);
+              h1tmpg->BayesDivide(h1num3, h1den3);
               h1tmpg->GetYaxis()->SetTitle("Efficiency");
-              h1tmpg->GetXaxis()->SetTitle(h1den->GetXaxis()->GetTitle());
+              h1tmpg->GetXaxis()->SetTitle(h1den3->GetXaxis()->GetTitle());
               ztpdir->cd();
               h1tmpg->Write();
               delete h1tmpg;
@@ -1301,20 +1248,17 @@ namespace dqutils {
               snum = histdirmuztp + "/muZTP_Eta_1bin_cut_" + level[j] + "fired_" + itmap->first;
               sden = histdirmuztp + "/muZTP_Eta_1bin_cut_" + itmap->first;
               stmpg = "muZTP_eff_" + level[j] + "_Eta_1bin_cut_" + itmap->first;
-
-              h1num = getHPointer(snum);
-              if (!h1num) continue;
-              h1den = getHPointer(sden);
-              if (!h1den) continue;
+              const auto & [h1num4, h1den4] = getHistogramPair(snum, sden);
+              if (!h1num4) continue;
 
               h1tmpg = new TGraphAsymmErrors();
               h1tmpg->SetName(stmpg);
               h1tmpg->SetMarkerStyle(20);
               h1tmpg->SetMinimum(0.0);
               h1tmpg->SetMaximum(1.05);
-              h1tmpg->BayesDivide(h1num, h1den);
+              h1tmpg->BayesDivide(h1num4, h1den4);
               h1tmpg->GetYaxis()->SetTitle("Efficiency");
-              h1tmpg->GetXaxis()->SetTitle(h1den->GetXaxis()->GetTitle());
+              h1tmpg->GetXaxis()->SetTitle(h1den4->GetXaxis()->GetTitle());
               ztpdir->cd();
               h1tmpg->Write();
               delete h1tmpg;
@@ -1324,20 +1268,17 @@ namespace dqutils {
               snum = histdirmuztp + "/muZTP_Eta_2bins_cut_" + level[j] + "fired_" + itmap->first;
               sden = histdirmuztp + "/muZTP_Eta_2bins_cut_" + itmap->first;
               stmpg = "muZTP_eff_" + level[j] + "_Eta_2bins_cut_" + itmap->first;
-
-              h1num = getHPointer(snum);
-              if (!h1num) continue;
-              h1den = getHPointer(sden);
-              if (!h1den) continue;
+              const auto & [h1num5, h1den5] = getHistogramPair(snum, sden);
+              if (!h1num5) continue;
 
               h1tmpg = new TGraphAsymmErrors();
               h1tmpg->SetName(stmpg);
               h1tmpg->SetMarkerStyle(20);
               h1tmpg->SetMinimum(0.0);
               h1tmpg->SetMaximum(1.05);
-              h1tmpg->BayesDivide(h1num, h1den);
+              h1tmpg->BayesDivide(h1num5, h1den5);
               h1tmpg->GetYaxis()->SetTitle("Efficiency");
-              h1tmpg->GetXaxis()->SetTitle(h1den->GetXaxis()->GetTitle());
+              h1tmpg->GetXaxis()->SetTitle(h1den5->GetXaxis()->GetTitle());
               ztpdir->cd();
               h1tmpg->Write();
               delete h1tmpg;
@@ -1374,11 +1315,8 @@ namespace dqutils {
             snum = histdirmuztp + "/muZTP" + var[k] + "EFL2fired_" + itmap->first;
             sden = histdirmuztp + "/muZTP" + var[k] + "L2fired_" + itmap->first;
             stmpg = "muZTP_eff_EFwrtL2" + var[k] + itmap->first;
-
-            h1num = getHPointer(snum);
+            const auto & [h1num, h1den] = getHistogramPair(snum, sden);
             if (!h1num) continue;
-            h1den = getHPointer(sden);
-            if (!h1den) continue;
 
             h1tmpg = new TGraphAsymmErrors();
             h1tmpg->SetName(stmpg);
@@ -1397,20 +1335,17 @@ namespace dqutils {
             snum = histdirmuztp + "/muZTP" + var[k] + "EFfired_" + itmap->first;
             sden = histdirmuztp + "/muZTP" + var[k] + "L1fired_" + itmap->first;
             stmpg = "muZTP_eff_EFwrtL1" + var[k] + itmap->first;
-
-            h1num = getHPointer(snum);
-            if (!h1num) continue;
-            h1den = getHPointer(sden);
-            if (!h1den) continue;
+            const auto & [h1num2, h1den2] = getHistogramPair(snum, sden);
+            if (!h1num2) continue;
 
             h1tmpg = new TGraphAsymmErrors();
             h1tmpg->SetName(stmpg);
             h1tmpg->SetMarkerStyle(20);
             h1tmpg->SetMinimum(0.0);
             h1tmpg->SetMaximum(1.05);
-            h1tmpg->BayesDivide(h1num, h1den);
+            h1tmpg->BayesDivide(h1num2, h1den2);
             h1tmpg->GetYaxis()->SetTitle("Efficiency");
-            h1tmpg->GetXaxis()->SetTitle(h1den->GetXaxis()->GetTitle());
+            h1tmpg->GetXaxis()->SetTitle(h1den2->GetXaxis()->GetTitle());
             ztpdir->cd();
             h1tmpg->Write();
             delete h1tmpg;
@@ -1420,20 +1355,17 @@ namespace dqutils {
             snum = histdirmuztp + "/muZTP" + var[k] + "L2fired_" + itmap->first;
             sden = histdirmuztp + "/muZTP" + var[k] + "L1fired_" + itmap->first;
             stmpg = "muZTP_eff_L2wrtL1" + var[k] + itmap->first;
-
-            h1num = getHPointer(snum);
-            if (!h1num) continue;
-            h1den = getHPointer(sden);
-            if (!h1den) continue;
+            const auto & [h1num3, h1den3] = getHistogramPair(snum, sden);
+            if (!h1num3) continue;
 
             h1tmpg = new TGraphAsymmErrors();
             h1tmpg->SetName(stmpg);
             h1tmpg->SetMarkerStyle(20);
             h1tmpg->SetMinimum(0.0);
             h1tmpg->SetMaximum(1.05);
-            h1tmpg->BayesDivide(h1num, h1den);
+            h1tmpg->BayesDivide(h1num3, h1den3);
             h1tmpg->GetYaxis()->SetTitle("Efficiency");
-            h1tmpg->GetXaxis()->SetTitle(h1den->GetXaxis()->GetTitle());
+            h1tmpg->GetXaxis()->SetTitle(h1den3->GetXaxis()->GetTitle());
             ztpdir->cd();
             h1tmpg->Write();
             delete h1tmpg;
@@ -1444,11 +1376,8 @@ namespace dqutils {
               snum = histdirmuztp + "/muZTP" + var[k] + "EFIsofired_" + itmap->first;
               sden = histdirmuztp + "/muZTP" + var[k] + "EFfired_" + itmap->first;
               stmpg = "muZTP_eff_EFIsowrtEF" + var[k] + itmap->first;
-
-              h1num = getHPointer(snum);
+              const auto & [h1num, h1den] = getHistogramPair(snum, sden);
               if (!h1num) continue;
-              h1den = getHPointer(sden);
-              if (!h1den) continue;
 
               h1tmpg = new TGraphAsymmErrors();
               h1tmpg->SetName(stmpg);
@@ -1520,11 +1449,8 @@ namespace dqutils {
           }
           if (isefIsolation[ialg]) histZtpNum = hdirztp + "muZTP_Pt_4bins_EFIsofired_" + chainName; // add by Yuan
           TString histZtpEff = eff_dir + chainName + "_highpt3bins_effwrtL1";
-
-          h1num = getHPointer(histZtpNum);
+          const auto & [h1num, h1den] = getHistogramPair(histZtpNum, histZtpDen);
           if (!h1num) continue;
-          h1den = getHPointer(histZtpDen);
-          if (!h1den) continue;
           h1eff = getHPointer(histZtpEff);
           if (!h1eff) continue;
 
@@ -1574,10 +1500,8 @@ namespace dqutils {
             double sumeff, sumerr;
             double sumn = h1numb->Integral(13, 25); // 12-25 GeV
             if (HI_pp_key) sumn = h1numb->Integral(13, 20); // 60-100 GeV
-            //if(HI_pp_key)sumn = h1numb->Integral(7, 10); // 30-50 GeV
             double sumd = h1denb->Integral(13, 25);
             if (HI_pp_key) sumd = h1denb->Integral(13, 20);
-            //if(HI_pp_key)sumd = h1denb->Integral(7, 10);
             if (sumd == 0.) {
               sumeff = 0.;
               sumerr = 0.;
@@ -1590,10 +1514,8 @@ namespace dqutils {
 
             sumn = h1nume->Integral(13, 25);
             if (HI_pp_key) sumn = h1numb->Integral(13, 20); // 60-100 GeV
-            //if(HI_pp_key)sumn = h1numb->Integral(7, 10); // 30-50 GeV
             sumd = h1dene->Integral(13, 25);
             if (HI_pp_key) sumd = h1denb->Integral(13, 20);
-            //if(HI_pp_key)sumd = h1denb->Integral(7, 10);
             if (sumd == 0.) {
               sumeff = 0.;
               sumerr = 0.;
@@ -1686,11 +1608,8 @@ namespace dqutils {
                         "_Denominator";
                 effi = chainName + triggerES[i] + "_L1" + bestr[be] + "_Turn_On_Curve_wrt_MuidCB";
                 HLTMuonHDiv(mf, histdireff, numer, denom, effi, "_Fit");
-
-                h1num = getHPointer(nd_dir + numer);
+                const auto & [h1num, h1den] = getHistogramPair(nd_dir + numer, nd_dir + denom);
                 if (!h1num) continue;
-                h1den = getHPointer(nd_dir + denom);
-                if (!h1den) continue;
 
                 if (ESINDEP == i) {
                   // integrating over and fill in a summary histogram
@@ -1720,14 +1639,12 @@ namespace dqutils {
             numer = chainName + triggerES[i] + monalg[alg] + "_Turn_On_Curve_Numerator";
             effi = chainName + triggerES[i] + monalg[alg] + "_Turn_On_Curve_wrt_MuidCB";
             HLTMuonHDiv(mf, histdireff, numer, denom, effi, "_Fit");
+            const auto & [h1num, h1den] = getHistogramPair(nd_dir + numer, nd_dir + denom);
 
             // Summary ESid and ESindep
-            h1num = getHPointer(nd_dir + numer);
+
             if (!h1num) continue;
-            h1den = getHPointer(nd_dir + denom);
-            if (!h1den) continue;
             if (0 == alg || 1 == alg || 2 == alg) {
-              // if (ESID == i || ESINDEP == i) {
               double sumd {}, sumn {}, sumeff {}, sumerr {};
               sumn = h1num->Integral(iSTDL, iSTDH);
               sumd = h1den->Integral(iSTDL, iSTDH);
