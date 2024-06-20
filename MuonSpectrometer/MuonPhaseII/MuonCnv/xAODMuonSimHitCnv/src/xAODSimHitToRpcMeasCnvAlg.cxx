@@ -41,15 +41,17 @@ StatusCode xAODSimHitToRpcMeasCnvAlg::initialize(){
     
     ATH_CHECK(m_idHelperSvc.retrieve());
     m_stIdxBIL = m_idHelperSvc->rpcIdHelper().stationNameIndex("BIL");
-    ATH_CHECK(detStore()->retrieve(m_DetMgr));
+    ATH_CHECK(detStore()->retrieve(m_DetMgr)); 
     return StatusCode::SUCCESS;
 }
+
 StatusCode xAODSimHitToRpcMeasCnvAlg::finalize() {
-    ATH_MSG_INFO("Tried to convert "<<m_allHits[0]<<"/"<<m_allHits[1]<<" hits. In, "
-                <<percentage(m_acceptedHits[0], m_allHits[0]) <<"/"
+    ATH_MSG_INFO("Tried to convert "<<m_allHits[0]<<" | "<<m_allHits[1]<<" hits. In, "
+                <<percentage(m_acceptedHits[0], m_allHits[0]) <<" | "
                 <<percentage(m_acceptedHits[1], m_allHits[1]) <<" cases, the conversion was successful");
     return StatusCode::SUCCESS;
 }
+
 void xAODSimHitToRpcMeasCnvAlg::digitizeHit(const double hitTime,
                                             const double locPosOnStrip,
                                             const MuonGMR4::StripDesignPtr& designPtr,
@@ -127,11 +129,48 @@ void xAODSimHitToRpcMeasCnvAlg::digitizeHit(const double hitTime,
         return;
     }
     const MuonGMR4::StripDesign& design{*designPtr};
-
-    const double uncert = design.stripPitch() / std::sqrt(12.);
-    const double smearedX = CLHEP::RandGaussZiggurat::shoot(rndEngine, locPosOnStrip.x(), uncert);
-    const Amg::Vector2D locHitPos{smearedX, locPosOnStrip.y()};
     ++(m_allHits[false]);
+
+    // Smear the Eta coordinate
+    const double uncertX = design.stripPitch() / std::sqrt(12.);
+    const double smearedX = CLHEP::RandGaussZiggurat::shoot(rndEngine, locPosOnStrip.x(), uncertX);
+
+    // Smear the Phi Coordinate
+    const double propagationVelocity = 0.5 * Gaudi::Units::c_light; // in mm/ns
+    const double stripTimeResolution = 0.6; // in nanoseconds
+    const double stripLength = design.lenLeftEdge(); // in mm, assuming lenLeftEdge() == lenRightEdge() i.e. rectangular strip
+
+    // Distance in mm along strip to y=-stripLength/2 (L) and y=stripLength/2 (R)
+    const double stripLeft = -(stripLength / 2);     
+    const double stripRight = (stripLength / 2);     
+    double distToL = std::abs( stripLeft  - locPosOnStrip.y() );  
+    double distToR = std::abs( stripRight - locPosOnStrip.y() ); 
+    
+    // True propagation time in nanoseconds along strip to y=-stripLength/2 (L) and y=stripLength/2 (R)
+    double propagationTimeL = distToL / propagationVelocity; 
+    double propagationTimeR = distToR / propagationVelocity; 
+
+    // Smeared propagation time in nanoseconds along strip to y=-stripLength/2 (L) and y=stripLength/2 (R)
+    const double smearedTimeL = CLHEP::RandGaussZiggurat::shoot(rndEngine, propagationTimeL, stripTimeResolution); 
+    const double smearedTimeR = CLHEP::RandGaussZiggurat::shoot(rndEngine, propagationTimeR, stripTimeResolution);     
+    const double smearedDeltaT = smearedTimeR - smearedTimeL;
+
+    /*
+        |--- d1, t1 ---||--- d1, t1 ---||-- d --|                      For t2 > t1: 
+	||||||||||||||||X|||||||||||||||||||||||| <- RPC strip,        	deltaT = t2 - t1,  d1 = v_prop * t1 (likewise for d2), 
+	                |-------- d2, t2 -------|    X is a hit                l = d1 + d2, d = d2 - d1 -> d = l - 2d1 = v_prop * deltaT                         
+	|----------------- l -------------------|
+								       	Hence, d1 = 0.5 * (l - d) = 0.5 * (l - v_prop * deltaT)
+
+									Then converting to coordinate system where  0 -> -0.5*l to match strip local coordinates
+									d1 -> d1 = -0.5*l + 0.5* (l-d) = -0.5*d = -0.5 * v_pro*deltaT
+     */
+
+    const double uncertY = 0.5 * propagationVelocity * sqrt(2)*stripTimeResolution; //in mm
+    const double smearedY =  -0.5 * propagationVelocity * smearedDeltaT; //in mm
+    //If smearedDeltaT == 0 position is in the centre of the strip (0).
+
+    const Amg::Vector2D locHitPos{smearedX, smearedY};
     if (!design.insideTrapezoid(locHitPos)) {
         ATH_MSG_VERBOSE("The 2D hit "<<Amg::toString(locHitPos)<<" is outside of the trapezoid bounds for "
                         <<m_idHelperSvc->toStringGasGap(gasGapId));
@@ -167,9 +206,8 @@ void xAODSimHitToRpcMeasCnvAlg::digitizeHit(const double hitTime,
     prd->setIdentifier(prdId.get_compact());
     xAOD::MeasVector<2> lPos{};
     xAOD::MeasMatrix<2> cov{xAOD::MeasMatrix<2>::Identity()};
-    cov(0,0) = uncert * uncert;
-    /// Dummy value for the moment
-    cov(1,1) = 1.;
+    cov(0,0) = uncertX * uncertX;
+    cov(1,1) = uncertY * uncertY;
     prd->setMeasurement<2>(m_idHelperSvc->detElementHash(prdId), 
                            xAOD::toStorage(locHitPos), std::move(cov));
     const MuonGMR4::RpcReadoutElement* readOutEle = m_DetMgr->getRpcReadoutElement(prdId);
@@ -241,6 +279,7 @@ StatusCode xAODSimHitToRpcMeasCnvAlg::execute(const EventContext& ctx) const {
                         *prd2DContainer, rndEngine);
         }
     }
+
     return StatusCode::SUCCESS;
 }
 
