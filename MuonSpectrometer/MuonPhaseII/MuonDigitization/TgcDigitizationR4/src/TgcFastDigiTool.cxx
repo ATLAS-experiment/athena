@@ -29,7 +29,7 @@ namespace MuonR4 {
 
     int TgcFastDigiTool::associateBCIdTag(const EventContext& /*ctx*/,
                                           const TimedHit& /*timedHit*/) const {
-        return 0;
+        return TgcDigit::BC_CURRENT;
     }
 
     bool TgcFastDigiTool::digitizeWireHit(const EventContext& ctx,
@@ -92,7 +92,7 @@ namespace MuonR4 {
             ATH_MSG_WARNING("Invalid channel "<< m_idHelperSvc->toStringGasGap(hitId)<<", channel: "<<prdWireNum);
             return false;
         }
-        ATH_MSG_VERBOSE("Convert simulated hit "<<m_idHelperSvc->toStringGasGap(hitId)<<" located in gas gap at "
+        ATH_MSG_VERBOSE("Convert simulated hit "<<m_idHelperSvc->toString(digitId)<<" located at "
                       <<Amg::toString(locSimHitPos, 2)<<" wire group number: "<<prdWireNum
                       <<" wiregroup pos "<<Amg::toString(design.center(prdWireNum).value_or(Amg::Vector2D::Zero()), 2));
 
@@ -178,8 +178,8 @@ namespace MuonR4 {
             ATH_MSG_WARNING("Invalid channel "<< m_idHelperSvc->toStringGasGap(hitId)<<", channel: "<<digitStripNum);
             return false;
         }
-        ATH_MSG_VERBOSE("Convert simulated hit "<<m_idHelperSvc->toStringGasGap(hitId)<<" located in gas gap at "
-                        <<Amg::toString(locSimHitPos, 2)<<" eta strip number: "<<digitStripNum
+        ATH_MSG_VERBOSE("Convert simulated hit "<<m_idHelperSvc->toString(digitId)<<" located at "
+                        <<Amg::toString(locSimHitPos, 2)<<" phi strip number: "<<digitStripNum
                         <<" strip position "<<Amg::toString(design.center(digitStripNum).value_or(Amg::Vector2D::Zero()), 2));
 
         outColl.push_back(std::make_unique<TgcDigit>(digitId, associateBCIdTag(ctx, timedHit)));

@@ -13,7 +13,14 @@
                          <<firstStripNumber()<<";"<<(firstStripNumber() +numStrips())<<"]");  \
            return Amg::Vector2D::Zero();                                                      \
     }
-    
+#define CHECK_STRIPRANGESCAL(STRIP_NUM)                                                      \
+    const int stripCh = (STRIP_NUM - firstStripNumber());                                    \
+        if (stripCh < 0 ||  stripCh >= numStrips()) {                                        \
+            ATH_MSG_WARNING(__func__<<"() -- Invalid strip number given "                    \
+                         <<STRIP_NUM<<" allowed range ["                                     \
+                         <<firstStripNumber()<<";"<<(firstStripNumber() +numStrips())<<"]"); \
+            return 0.;                                                                       \
+        }                                                                                    \
 
 namespace MuonGMR4{
     using CheckVector2D = RadialStripDesign::CheckVector2D;
@@ -33,13 +40,7 @@ namespace MuonGMR4{
     }
 
     inline double RadialStripDesign::stripLength(int stripNumb) const {
-        const int stripCh = (stripNumb - firstStripNumber());
-        if (stripCh < 0 ||  stripCh >= numStrips()) {
-            ATH_MSG_WARNING(__func__<<"() -- Invalid strip number given "
-                         <<stripNumb<<" allowed range [" 
-                         <<firstStripNumber()<<";"<<(firstStripNumber() +numStrips())<<"]");
-            return 0.;
-        }
+        CHECK_STRIPRANGESCAL(stripNumb);
         return m_strips[stripCh].fromBottomToTop().mag();
     }
     inline Amg::Vector2D RadialStripDesign::stripLeftEdge(int stripNumber) const{
@@ -68,7 +69,9 @@ namespace MuonGMR4{
     inline Amg::Vector2D RadialStripDesign::stripEdges::fromBottomToTop() const {
         return topMounting() - bottomMounting();
     }
-
+    inline Amg::Vector2D RadialStripDesign::stripEdges::center() const {
+        return 0.5*(topMounting() + bottomMounting());
+    }
     inline Amg::Vector2D RadialStripDesign::stripLeftBottom(int stripNumber) const{
         CHECK_STRIPRANGE(stripNumber);
         return m_strips[stripCh].bottomMounting();
@@ -85,7 +88,12 @@ namespace MuonGMR4{
         CHECK_STRIPRANGE(stripNumber);
         return m_strips[stripCh+1].topMounting();
     }
+    inline double RadialStripDesign::stripPitch(int stripNumb) const {
+        CHECK_STRIPRANGESCAL(stripNumb);
 
+        return 0.5*(m_strips[stripCh].center() - m_strips[stripCh+1].center()).mag();
+
+    }
     inline int RadialStripDesign::stripNumber(const Amg::Vector2D& extPos) const {        
         if (!insideTrapezoid(extPos)) {
             ATH_MSG_VERBOSE("The point "<<Amg::toString(extPos)<<" is outside the active trapezoid area");
@@ -107,4 +115,5 @@ namespace MuonGMR4{
     }
 } 
 #undef CHECK_STRIPRANGE
+#undef CHECK_STRIPRANGESCAL
 #endif

@@ -58,6 +58,8 @@ class RadialStripDesign: public StripDesign {
         int stripNumber(const Amg::Vector2D& extPos) const override final;
         /// Returns the length of the associated strip
         double stripLength(int stripNumb) const override;
+        /// Returns the pitch of the radial strip evaluated at the strip center
+        double stripPitch(int stripNumb) const;
     private:
         CheckVector2D leftInterSect(int stripNum, bool uncapped = false) const override final;
         CheckVector2D rightInterSect(int stripNum, bool uncapped = false) const override final;
@@ -82,6 +84,8 @@ class RadialStripDesign: public StripDesign {
             Amg::Vector2D bottomMounting() const;
             /* Returns the top mounting point */
             Amg::Vector2D topMounting() const;
+            /* Returns the center point between bottom & top*/
+            Amg::Vector2D center() const;
             /* Returns the connecting vector from bottom top */
             Amg::Vector2D fromBottomToTop() const;
 
