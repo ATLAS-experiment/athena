@@ -36,15 +36,13 @@ namespace CP {
     virtual StatusCode initialize() = 0;
     
     //Apply the correction on a modifyable egamma object (xAOD::Electron or xAOD::Photon)
-    virtual CP::CorrectionCode applyCorrection(xAOD::Egamma &) = 0;
+    virtual CP::CorrectionCode applyCorrection(xAOD::Egamma &) const = 0;
     
     //Create a corrected copy from a constant egamma object
-    virtual CP::CorrectionCode correctedCopy(const xAOD::Electron&, xAOD::Electron*&) = 0;
-    virtual CP::CorrectionCode correctedCopy(const xAOD::Photon&, xAOD::Photon*&) = 0;
-    
-    //functions to be used per-event
-    virtual void setRandomSeed(unsigned seed) = 0;
-    
+    virtual CP::CorrectionCode correctedCopy(const xAOD::Electron&, xAOD::Electron*&) const = 0;
+    virtual CP::CorrectionCode correctedCopy(const xAOD::Photon&, xAOD::Photon*&) const = 0;
+
+
     virtual double resolution( double energy, double cl_eta, double cl_etaCalo,
 			       PATCore::ParticleType::Type ptype = PATCore::ParticleType::Electron, bool withCT=false) const = 0;
     virtual double getResolution(const xAOD::Egamma& particle, bool withCT=true) const = 0;
