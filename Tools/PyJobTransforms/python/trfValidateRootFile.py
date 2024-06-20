@@ -141,10 +141,10 @@ def checkNTuplePageWise(ntuple):
 
     return 0
 
-def checkDirectory(directory, the_type, requireTree):
+def checkDirectory(directory, the_type, requireTree, depth):
 
     from PyUtils import PoolFile
-    eventData = False
+    nentries = None
 
     msg.debug('Checking directory %s ...', directory.GetName())
 
@@ -170,8 +170,9 @@ def checkDirectory(directory, the_type, requireTree):
 
             msg.debug('Checking tree %s ...', the_object.GetName())
 
-            if not eventData and PoolFile.PoolOpts.TTreeNames.EventData == the_object.GetName():
-                eventData = True
+            if depth == 0 and PoolFile.PoolOpts.TTreeNames.EventData == the_object.GetName():
+                nentries = the_object.GetEntries()
+                msg.debug(f'  contains {nentries} events')
             
             if the_type=='event':
                 if checkTreeEventWise(the_object)==1:
@@ -192,8 +193,9 @@ def checkDirectory(directory, the_type, requireTree):
                 msg.warning('Could not open ntuple %s: %s', the_object, err)
                 return 1
 
-            if not eventData and PoolFile.PoolOpts.RNTupleNames.EventData == reader.GetDescriptor().GetName():
-                eventData = True
+            if depth == 0 and PoolFile.PoolOpts.RNTupleNames.EventData == reader.GetDescriptor().GetName():
+                nentries = reader.GetNEntries()
+                msg.debug(f'  contains {nentries} events')
 
             if the_type=='event':
                 if checkNTupleEventWise(the_object)==1:
@@ -205,17 +207,14 @@ def checkDirectory(directory, the_type, requireTree):
             msg.debug('NTuple of key %s looks ok.', key.GetName())
             
         if isinstance(the_object, TDirectory):
-            if (rc := checkDirectory(the_object, the_type, requireTree))==1:
+            if checkDirectory(the_object, the_type, requireTree, depth + 1)==1:
                 return 1
-            elif not eventData and rc == 0:
-                eventData = True
 
-    if eventData:
+    if depth == 0 and checkNEvents(directory.GetName(), nentries)==1:
+        return 1
+    else:
         msg.debug('Directory %s looks ok.', directory.GetName())
         return 0
-    else:
-        msg.warning('Directory %s does not contain event data.', directory.GetName())
-        return 2
 
 
 def checkFile(fileName, the_type, requireTree):
@@ -248,11 +247,8 @@ def checkFile(fileName, the_type, requireTree):
         file_handle.Close()
         return 1
 
-    if (rc := checkDirectory(file_handle, the_type, requireTree))==1:
+    if checkDirectory(file_handle, the_type, requireTree, 0)==1:
         msg.warning("File %s is corrupted.", fileName)
-    elif rc == 2:
-        msg.warning('File %s does not contain event data.', fileName)
-    if rc != 0:
         file_handle.Close()
         return 1
 
@@ -264,6 +260,35 @@ def checkFile(fileName, the_type, requireTree):
 
     return 0
 
+
+def checkNEvents(fileName, nEntries):
+    """Check consistency of number of events in file with metadata.
+
+    fileName   name of file to check consistency of
+    nEntries   number of events in fileName (e.g., obtained by examining event data object)
+    return     0 in case of consistency, 1 otherwise
+    """
+    from PyUtils.MetaReader import read_metadata
+
+    from AthenaCommon.Logging import logging as athlogging
+    from PyUtils.MetaReader import msg as metamsg
+
+    if msg.getEffectiveLevel() != logging.DEBUG:
+        metamsg.setLevel(athlogging.ERROR)
+
+    msg.debug('Checking number of events in file %s ...', fileName)
+
+    meta = read_metadata(fileName, mode='lite')[fileName]
+    msg.debug('  according to metadata: {0}'.format(meta["nentries"]))
+    msg.debug('  according to event data: {0}'.format(nEntries))
+    if meta["nentries"] and nEntries and meta["nentries"] != nEntries \
+       or meta["nentries"] and not nEntries \
+       or not meta["nentries"] and nEntries:
+        msg.warning(f'  number of events ({nEntries}) inconsistent with metadata ({meta["nentries"]}) in file {fileName!r}.')
+        return 1
+    else:
+        msg.debug("  looks ok.")
+        return 0
 
 def usage():
     print("Usage: validate filename type requireTree verbosity")
