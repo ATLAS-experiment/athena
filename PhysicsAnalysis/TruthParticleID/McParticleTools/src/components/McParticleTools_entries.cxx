@@ -11,10 +11,6 @@
 #include "../GenAodValidationTool.h"
 #include "../SpclMcValidationTool.h"
 
-#include "../HepMcTupleWriterTool.h"
-#include "../HepMcFloatWriterTool.h"
-#include "../HepMcWriterTool.h"
-#include "../HepMcReaderTool.h"
 #include "../McAodWriterTool.h"
 #include "../McAodTupleWriterTool.h"
 
@@ -31,10 +27,6 @@ DECLARE_COMPONENT( TruthIsolationTool )
 DECLARE_COMPONENT( GenAodValidationTool )
 DECLARE_COMPONENT( SpclMcValidationTool )
 
-DECLARE_COMPONENT( HepMcTupleWriterTool )
-DECLARE_COMPONENT( HepMcFloatWriterTool )
-DECLARE_COMPONENT( HepMcWriterTool )
-DECLARE_COMPONENT( HepMcReaderTool )
 DECLARE_COMPONENT( McAodWriterTool )
 DECLARE_COMPONENT( McAodTupleWriterTool )
 

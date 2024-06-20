@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////// 
@@ -11,7 +11,7 @@
 // Framework includes
 
 // McParticleKernel includes
-#include "McParticleKernel/IIOHepMcTool.h"
+#include "TruthIO/IIOHepMcTool.h"
 
 /////////////////////////////////////////////////////////////////// 
 // Public methods: 

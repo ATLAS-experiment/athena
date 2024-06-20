@@ -28,8 +28,6 @@
 
 #include "TruthUtils/HepMCHelpers.h"
 
-// McParticleKernel includes
-#include "McParticleKernel/IIOHepMcTool.h"
 
 // McParticleTools includes
 #include "GenAodValidationTool.h"

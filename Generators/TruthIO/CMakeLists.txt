@@ -7,11 +7,15 @@ atlas_subdir( TruthIO )
 find_package( HepPDT )
 
 # Component(s) in the package:
-atlas_add_component( TruthIO
+atlas_add_Library( TruthIOLib
                      src/*.cxx
-                     src/components/*.cxx
+                     PUBLIC_HEADERS TruthIO
                      INCLUDE_DIRS ${HEPPDT_INCLUDE_DIRS} 
                      LINK_LIBRARIES ${HEPPDT_LIBRARIES} AtlasHepMCLib AtlasHepMCfioLib AthenaBaseComps GaudiKernel GeneratorModulesLib StoreGateLib xAODEventInfo GeneratorObjects )
+
+atlas_add_component( TruthIO
+                     src/components/*.cxx
+                     LINK_LIBRARIES TruthIOLib )
 
 # Install files from the package:
 atlas_install_joboptions( share/common/*.py )

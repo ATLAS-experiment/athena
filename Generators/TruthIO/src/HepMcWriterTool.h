@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // HepMcWriterTool.h 
@@ -17,7 +17,7 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 
 // McParticleKernel includes
-#include "McParticleKernel/IIOHepMcTool.h"
+#include "TruthIO/IIOHepMcTool.h"
 
 // Forward declaration
 #include "AtlasHepMC/GenEvent_fwd.h"
