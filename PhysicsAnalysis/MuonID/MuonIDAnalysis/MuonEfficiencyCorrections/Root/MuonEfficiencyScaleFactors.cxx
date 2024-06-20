@@ -28,6 +28,8 @@ namespace CP {
                 m_custom_file_HighEta(),
                 m_custom_file_LowPt(),
                 m_custom_file_LowPtCalo(),
+                m_custom_file_LRTCombined(),
+                m_custom_file_LRTLowPt(),
                 m_efficiency_decoration_name_data(),
                 m_efficiency_decoration_name_mc(),
                 m_sf_decoration_name(),
@@ -41,6 +43,7 @@ namespace CP {
                 m_seperateSystBins(false),
                 m_breakDownSyst(false),
                 m_applyKineDepSys(true),
+                m_useLRT(false),
                 m_Type(CP::MuonEfficiencyType::Undefined) {
 
         declareProperty("WorkingPoint", m_wp);
@@ -52,6 +55,8 @@ namespace CP {
         declareProperty("CustomFileHighEta", m_custom_file_HighEta);
         declareProperty("CustomFileLowPt", m_custom_file_LowPt);
         declareProperty("CustomFileLowPtCalo", m_custom_file_LowPtCalo);
+        declareProperty("CustomFileLRTCombined", m_custom_file_LRTCombined);
+        declareProperty("CustomFileLRTLowPt", m_custom_file_LRTLowPt);
         
         // Apply additional systematics to account for negelected pt dependency
         // in the maps themselves or for non-closure
@@ -72,6 +77,8 @@ namespace CP {
         /// next what ever jet (AntiKt4EMTopo,....)
         declareProperty("CloseJetDRDecorator", m_iso_jet_dR);
         declareProperty("Use2DIsoCorrections", m_use2DIsoCorr);
+        /// Turn on if using LRT muons
+        declareProperty("UseLRT", m_useLRT);
     }
     std::string MuonEfficiencyScaleFactors::close_by_jet_decoration() const{
         return m_iso_jet_dR;
@@ -115,6 +122,9 @@ namespace CP {
     size_t MuonEfficiencyScaleFactors::getNCollections() const{
         return m_sf_sets.size();
     }
+    bool MuonEfficiencyScaleFactors::use_lrt() const{
+        return m_useLRT;
+    }
     StatusCode MuonEfficiencyScaleFactors::initialize() {
         if (m_init) {
             ATH_MSG_INFO("The tool using working point " << m_wp << " is already initialized.");
@@ -131,6 +141,10 @@ namespace CP {
             m_Type = CP::MuonEfficiencyType::TTVA;
         } else {
             m_Type = CP::MuonEfficiencyType::Reco;
+            if (m_useLRT && m_wp!="Medium") {
+                ATH_MSG_FATAL(Form("Only Medium identification WP is supported for LRT muons. You chose %s.", m_wp.c_str()));
+                return StatusCode::FAILURE;
+            }
         }
         ATH_MSG_INFO("Efficiency type is = " << EfficiencyTypeName(m_Type));
 
@@ -175,6 +189,8 @@ namespace CP {
         if (!m_custom_file_HighEta.empty()) ATH_MSG_WARNING("Note: setting up with user specified High Eta input file " << m_custom_file_HighEta << " - this is not encouraged! ");
         if (!m_custom_file_LowPt.empty()) ATH_MSG_WARNING("Note: setting up with user specified Low Pt input file " << m_custom_file_LowPt << " - this is not encouraged! ");
         if (!m_custom_file_LowPtCalo.empty()) ATH_MSG_WARNING("Note: setting up with user specified Low Pt CaloTag input file " << m_custom_file_LowPtCalo << " - this is not encouraged! ");
+        if (!m_custom_file_LRTCombined.empty()) ATH_MSG_WARNING("Note: setting up with user specified Central LRT muon input file " << m_custom_file_LRTCombined << " - this is not encouraged! ");
+        if (!m_custom_file_LRTLowPt.empty()) ATH_MSG_WARNING("Note: setting up with user specified Low Pt LRT muon input file " << m_custom_file_LowPt << " - this is not encouraged! ");
         if (m_custom_dir.empty()) ATH_MSG_INFO("Trying to initialize, with working point " << m_wp << ", using calibration release " << m_calibration_version);
 
         ATH_CHECK(LoadInputs());
@@ -328,7 +344,6 @@ namespace CP {
         }
         return fullPathToFile;
     }
-
     std::string MuonEfficiencyScaleFactors::filename_Central() const{
         if (!m_custom_file_Combined.empty()) return (resolve_file_location(m_custom_file_Combined));
         else if (m_Type == CP::MuonEfficiencyType::Iso) {
@@ -339,6 +354,23 @@ namespace CP {
             return resolve_file_location("BadMuonVeto_HighPt_Z.root");
         } else if (m_Type == CP::MuonEfficiencyType::Reco) {
             return resolve_file_location(Form("Reco_%s_Z.root", m_wp.c_str()));
+        }
+        ATH_MSG_ERROR("What?");
+        return "";
+    }
+    std::string MuonEfficiencyScaleFactors::filename_LRTCentral() const{
+        if (!m_custom_file_LRTCombined.empty()) return (resolve_file_location(m_custom_file_LRTCombined));
+        else if (m_Type == CP::MuonEfficiencyType::Iso) {
+            ATH_MSG_WARNING("Using standard isolation SF for LRT muons");
+            return resolve_file_location(Form("Iso_%s_Z.root", m_wp.c_str()));
+        } else if (m_Type == CP::MuonEfficiencyType::TTVA) {
+            ATH_MSG_WARNING("Using standard TTVA SF for LRT muons");
+            return resolve_file_location("TTVA_Z.root");
+        } else if (m_Type == CP::MuonEfficiencyType::BadMuonVeto) {
+            ATH_MSG_WARNING("Using standard BadMuonVeto SF for LRT muons");
+            return resolve_file_location("BadMuonVeto_HighPt_Z.root");
+        } else if (m_Type == CP::MuonEfficiencyType::Reco) {
+            return resolve_file_location(Form("Reco_%sNoID_Z.root", m_wp.c_str()));
         }
         ATH_MSG_ERROR("What?");
         return "";
@@ -364,6 +396,12 @@ namespace CP {
         else if (m_Type != CP::MuonEfficiencyType::Reco || m_lowpt_threshold < 0) {
             return filename_Central();
         } else return resolve_file_location(Form("Reco_%s_JPsi.root", m_wp.c_str()));
+    }
+    std::string MuonEfficiencyScaleFactors::filename_LRTLowPt()const {
+
+        if (!m_custom_file_LRTLowPt.empty()) return resolve_file_location(m_custom_file_LRTLowPt);
+        // for LRT muons, we currently use the existing Z SF also for the low pt regime
+        else return filename_LRTCentral();
     }
     std::string MuonEfficiencyScaleFactors::filename_LowPtCalo() const{
 
@@ -430,11 +468,19 @@ namespace CP {
             filename_LowPt(),
             filename_LowPtCalo()
         };
+        if (m_useLRT) { 
+            files_to_look_up.insert(filename_LRTCentral());
+            files_to_look_up.insert(filename_LRTLowPt());
+        }
         std::function<int(const std::string&)> get_bit = [this](const std::string& file_name){
                 if (file_name == filename_Central()) return EffiCollection::Central;
                 if (file_name == filename_LowPt()) return EffiCollection::CentralLowPt;
                 if (file_name == filename_Calo()) return EffiCollection::Calo;
                 if (file_name == filename_LowPtCalo()) return EffiCollection::CaloLowPt;
+                if (this->use_lrt()) {
+                    if (file_name == filename_LRTCentral()) return EffiCollection::Central;
+                    if (file_name == filename_LRTLowPt()) return EffiCollection::CentralLowPt;
+                }
                 // last file which remains is forward
                 return EffiCollection::Forward;
         };

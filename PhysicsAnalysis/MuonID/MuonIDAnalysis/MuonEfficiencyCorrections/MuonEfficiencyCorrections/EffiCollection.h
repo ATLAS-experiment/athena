@@ -101,6 +101,7 @@ namespace CP {
         private:
             CollectionContainer* FindContainer(unsigned int bin) const;
             CollectionContainer* FindContainer(const xAOD::Muon& mu) const;
+            CollectionContainer* FindLRTContainer(const xAOD::Muon& mu) const;
             
             const MuonEfficiencyScaleFactors& m_ref_tool;
             
@@ -112,6 +113,8 @@ namespace CP {
             std::shared_ptr<CollectionContainer> m_forward_eff;
             std::shared_ptr<CollectionContainer> m_lowpt_central_eff;
             std::shared_ptr<CollectionContainer> m_lowpt_calo_eff;
+            std::shared_ptr<CollectionContainer> m_lrt_central_eff;
+            std::shared_ptr<CollectionContainer> m_lrt_lowpt_central_eff;
 
             /// The systematic set is returned back to the MuonEfficiencyScaleFactors instance to register
             /// The known systematics to the global service
