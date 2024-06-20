@@ -13,7 +13,6 @@ NEVENTS="1000"
 ATHENA_CORE_NUMBER=8 \
 timeout 64800 \
 Derivation_tf.py \
-  --CA="True" \
   --maxEvents="${NEVENTS}" \
   --multiprocess="True" \
   --sharedWriter="True" \
