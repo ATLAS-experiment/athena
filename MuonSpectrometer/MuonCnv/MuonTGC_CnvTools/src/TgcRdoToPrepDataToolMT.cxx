@@ -930,9 +930,8 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decodeHits(State& state,
    
     if (!m_xAODKey.empty()){
       const TgcIdHelper& id_helper = m_idHelperSvc->tgcIdHelper();
-      xAOD::TgcStrip* xprd = new xAOD::TgcStrip();
-      state.m_xaodHandle->push_back(xprd);
-      xprd->setIdentifier(channelId.get_identifier32().get_compact());
+      xAOD::TgcStrip* xprd = state.m_xaodHandle->push_back(std::make_unique<xAOD::TgcStrip>());
+      xprd->setIdentifier(channelId.get_compact());
       xprd->setMeasurement(collection->identifyHash(), xAOD::MeasVector<1>{hitPos.x()},
                           xAOD::MeasMatrix<1>{errHitPos(0, 0)});
       // xprd->setBcBitMap(uint16_t); // Not sure how to do this?

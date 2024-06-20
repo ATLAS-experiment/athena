@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TgcDigitToTgcRDO.h"
@@ -13,11 +13,16 @@
 
 /////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
+namespace {
+    static const TgcRdoIdHash hashF;
+
+    static uint16_t identifyFragment(const TgcRawData& rawData) {
+        return TgcRdo::identifyRawData(rawData);
+    }
+}
 
 TgcDigitToTgcRDO::TgcDigitToTgcRDO(const std::string& name, ISvcLocator* pSvcLocator) :
-    AthReentrantAlgorithm(name, pSvcLocator), m_tgc_cabling_server("TGCcablingServerSvc", name), m_cabling(nullptr) {
-    declareProperty("isNewTgcDigit", m_isNewTgcDigit = true);
-}
+    AthReentrantAlgorithm(name, pSvcLocator){}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
@@ -43,147 +48,92 @@ StatusCode TgcDigitToTgcRDO::initialize() {
 
 StatusCode TgcDigitToTgcRDO::execute(const EventContext& ctx) const {
     ATH_MSG_DEBUG("in execute()");
-
-    if (fill_TGCdata(ctx).isFailure()) { ATH_MSG_WARNING("Fail to create TGC RDO"); }
-
-    ATH_MSG_DEBUG("done execute()");
-    return StatusCode::SUCCESS;
-}
-
-StatusCode TgcDigitToTgcRDO::fill_TGCdata(const EventContext& ctx) const {
-    ATH_MSG_DEBUG("fill_TGCdata");
-
+ 
     SG::WriteHandle<TgcRdoContainer> rdoContainer(m_rdoContainerKey, ctx);
-    ATH_CHECK(rdoContainer.record((std::make_unique<TgcRdoContainer>())));
+    ATH_CHECK(rdoContainer.record(std::make_unique<TgcRdoContainer>()));
     ATH_MSG_DEBUG("Recorded TgcRdoContainer called " << rdoContainer.name() << " in store " << rdoContainer.store());
     SG::ReadHandle<TgcDigitContainer> container(m_digitContainerKey, ctx);
-    if (!container.isValid()) {
-        ATH_MSG_ERROR("Could not find TgcDigitContainer called " << container.name() << " in store " << container.store());
-        return StatusCode::SUCCESS;
-    }
+    ATH_CHECK(container.isPresent());
     ATH_MSG_DEBUG("Found TgcDigitContainer called " << container.name() << " in store " << container.store());
 
-    std::map<uint16_t, TgcRdo*> tgcRdoMap;
+    std::map<uint16_t, std::unique_ptr<TgcRdo>> tgcRdoMap{};
 
-    typedef TgcDigitContainer::const_iterator collection_iterator;
-    typedef TgcDigitCollection::const_iterator digit_iterator;
 
     // loop over collections
-    collection_iterator it_coll = container->begin();
-    collection_iterator it_coll_e = container->end();
-    for (; it_coll != it_coll_e; ++it_coll) {
-        const TgcDigitCollection* tgcCollection = *it_coll;
+    for (const TgcDigitCollection* tgcCollection : *container) {
 
         // Iterate on the digits of the collection
-        digit_iterator it_dig = tgcCollection->begin();
-        digit_iterator it_dig_e = tgcCollection->end();
-        for (; it_dig != it_dig_e; ++it_dig) {
-            const TgcDigit* tgcDigit = *it_dig;
-            Identifier channelId = tgcDigit->identify();
-            uint16_t bctag;
-            if (m_isNewTgcDigit) {
-                bctag = tgcDigit->bcTag();
-            } else {
-                bctag = 0;
-            }
+        for (const TgcDigit* tgcDigit : *tgcCollection) {
+            const Identifier channelId = tgcDigit->identify();
+            const uint16_t bctag = m_isNewTgcDigit ?  tgcDigit->bcTag() : 0;
 
-            if (m_idHelperSvc->tgcIdHelper().valid(channelId)) {
-                // Get the online Id of the channel
-                int subDetectorID;
-                int rodID;
-                int sswID;
-                int slbID;
-                int channelID;
+            // Get the online Id of the channel
+            int subDetectorID{0}, rodID{0}, sswID{0}, slbID{0}, channelID{0};
 
-                // repeat two times for Adjacent Channel
-                for (int iAd = 0; iAd < 2; ++iAd) {
-                    bool adFlag = false;
+            // repeat two times for Adjacent Channel
+            for (int iAd = 0; iAd < 2; ++iAd) {
+                bool adFlag = false;
 
-                    // check if this channel has Adjacent partner only when 2nd time
-                    if (iAd != 0) {
-                        bool a_found = m_cabling->hasAdjacentChannel(channelId);
+                // check if this channel has Adjacent partner only when 2nd time
+                if (iAd != 0) {
+                    bool a_found = m_cabling->hasAdjacentChannel(channelId);
 
-                        // set Adjacent flag
-                        if (a_found)
-                            adFlag = true;
-                        else
-                            continue;
-                    }
-
-                    // get Online ID
-                    bool status = m_cabling->getReadoutIDfromOfflineID(channelId, subDetectorID, rodID, sswID, slbID, channelID, adFlag);
-
-                    if (!status) {
-                        ATH_MSG_DEBUG("ITGCcablingSvc can't return an online ID for the channel : "
-                                      << MSG::dec << " N_" << m_idHelperSvc->tgcIdHelper().stationName(channelId) << " E_"
-                                      << m_idHelperSvc->tgcIdHelper().stationEta(channelId) << " P_"
-                                      << m_idHelperSvc->tgcIdHelper().stationPhi(channelId) << " G_"
-                                      << m_idHelperSvc->tgcIdHelper().gasGap(channelId) << " C_"
-                                      << m_idHelperSvc->tgcIdHelper().channel(channelId));
-                        continue;
-                    }
-
-                    // Create the new Tgc RawData
-                    bool isStrip = m_idHelperSvc->tgcIdHelper().isStrip(channelId);
-                    std::string name = m_idHelperSvc->tgcIdHelper().stationNameString(m_idHelperSvc->tgcIdHelper().stationName(channelId));
-                    TgcRawData::SlbType type = TgcRawData::SLB_TYPE_UNKNOWN;
-                    if (name[1] == '4')
-                        type = isStrip ? TgcRawData::SLB_TYPE_INNER_STRIP : TgcRawData::SLB_TYPE_INNER_WIRE;
-                    else if (name[1] == '1')
-                        type = isStrip ? TgcRawData::SLB_TYPE_TRIPLET_STRIP : TgcRawData::SLB_TYPE_TRIPLET_WIRE;
+                    // set Adjacent flag
+                    if (a_found)
+                        adFlag = true;
                     else
-                        type = isStrip ? TgcRawData::SLB_TYPE_DOUBLET_STRIP : TgcRawData::SLB_TYPE_DOUBLET_WIRE;
-                    TgcRawData* rawData = new TgcRawData(bctag, subDetectorID, rodID, sswID, slbID, 0, 0, type, adFlag, 0, channelID);
-
-                    ATH_MSG_DEBUG("Adding a new RawData");
-                    ATH_MSG_DEBUG(MSG::hex << " Sub : " << subDetectorID << " ROD : " << rodID << " SSW : " << sswID << " SLB : " << slbID
-                                           << " Ch  : " << channelID);
-
-                    // Add the RawData to the RDO
-                    TgcRdo* tgcRdo = getTgcRdo(rawData, tgcRdoMap);
-                    tgcRdo->push_back(rawData);
+                        continue;
                 }
-            }
+
+                // get Online ID
+                bool status = m_cabling->getReadoutIDfromOfflineID(channelId, subDetectorID, rodID, sswID, slbID, channelID, adFlag);
+
+                if (!status) {
+                    ATH_MSG_DEBUG("ITGCcablingSvc can't return an online ID for the channel : "
+                                << MSG::dec << " N_" << m_idHelperSvc->toString(channelId) );
+                    continue;
+                }
+
+                // Create the new Tgc RawData
+                bool isStrip = m_idHelperSvc->tgcIdHelper().isStrip(channelId);
+                std::string name = m_idHelperSvc->tgcIdHelper().stationNameString(m_idHelperSvc->tgcIdHelper().stationName(channelId));
+                TgcRawData::SlbType type = TgcRawData::SLB_TYPE_UNKNOWN;
+                if (name[1] == '4')
+                    type = isStrip ? TgcRawData::SLB_TYPE_INNER_STRIP : TgcRawData::SLB_TYPE_INNER_WIRE;
+                else if (name[1] == '1')
+                    type = isStrip ? TgcRawData::SLB_TYPE_TRIPLET_STRIP : TgcRawData::SLB_TYPE_TRIPLET_WIRE;
+                else
+                    type = isStrip ? TgcRawData::SLB_TYPE_DOUBLET_STRIP : TgcRawData::SLB_TYPE_DOUBLET_WIRE;
+
+                auto rawData = std::make_unique<TgcRawData>(bctag, subDetectorID, rodID, sswID, slbID, 0, 0, type, adFlag, 0, channelID);
+
+                ATH_MSG_DEBUG("Adding a new RawData");
+                ATH_MSG_DEBUG(MSG::hex << " Sub : " << subDetectorID << " ROD : " << rodID << " SSW : " << sswID << " SLB : " << slbID
+                                       << " Ch  : " << channelID);
+
+                // Add the RawData to the RDO
+                const uint16_t rdoId = identifyFragment(*rawData);
+                std::unique_ptr<TgcRdo>& tgcRdo = tgcRdoMap[rdoId];
+                if(!tgcRdo) {
+                    // create new TgcRdo
+                    const  IdentifierHash hashId = hashF(rdoId);
+                    tgcRdo = std::make_unique<TgcRdo>(rdoId, hashId);
+                    tgcRdo->setOnlineId(rawData->subDetectorId(), rawData->rodId());
+                }
+                tgcRdo->push_back(std::move(rawData));
+            }            
         }
     }
 
     ATH_MSG_DEBUG("Add RDOs to the RdoContainer");
     // Add RDOs to the RdoContainer
-
-    TgcRdoIdHash hashF;
-
-    std::map<uint16_t, TgcRdo*>::iterator itM = tgcRdoMap.begin();
-    std::map<uint16_t, TgcRdo*>::iterator itM_e = tgcRdoMap.end();
-    for (; itM != itM_e; ++itM) {
-        unsigned int elementHash = hashF((itM->second)->identify());
-        // const TgcRdo* rdo = itM->second;
-        StatusCode sc = rdoContainer->addCollection(itM->second, elementHash);
-        if (sc.isFailure()) ATH_MSG_WARNING("Unable to record TGC RDO in IDC");
+    for (auto&[onlineId, rdo] : tgcRdoMap) {
+        unsigned int elementHash = hashF(onlineId);
+        ATH_CHECK(rdoContainer->addCollection(rdo.release(), elementHash));
     }
     ATH_MSG_DEBUG("Added RDOs to the RdoContainer XXXXXX");
 
     return StatusCode::SUCCESS;
-}
-
-TgcRdo* TgcDigitToTgcRDO::getTgcRdo(const TgcRawData* rawData, std::map<uint16_t, TgcRdo*>& tgcRdoMap) {
-    TgcRdoIdHash hashF;
-
-    // Get Online collection ID
-    uint16_t onlineColId = TgcRdo::identifyRawData(*rawData);
-
-    std::map<uint16_t, TgcRdo*>::iterator it = tgcRdoMap.find(onlineColId);
-    if (it != tgcRdoMap.end()) return (*it).second;
-
-    // create new TgcRdo
-    IdentifierHash hashId = hashF(onlineColId);
-
-    TgcRdo* rdo = new TgcRdo(onlineColId, hashId);
-    tgcRdoMap[onlineColId] = rdo;
-
-    // set SubDetectorID and ROD ID
-    rdo->setOnlineId(rawData->subDetectorId(), rawData->rodId());
-
-    return rdo;
 }
 
 // NOTE: although this function has no clients in release 22, currently the Run2 trigger simulation is still run in

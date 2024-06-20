@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TGCDIGITTOTGCRDO_H
@@ -32,14 +32,13 @@ private:
     //       RDOs produced in release 22. The fillTagInfo() function thus needs to stay in release 22 until the workflow changes
     StatusCode fillTagInfo() const;
 
-    StatusCode fill_TGCdata(const EventContext& ctx) const;
-    static TgcRdo* getTgcRdo(const TgcRawData* rawData, std::map<uint16_t, TgcRdo*>& tgcRdoMap) ;
+    static uint16_t getRdoId(const TgcRawData& rawData);
 
-    BooleanProperty m_isNewTgcDigit;  // to select new TgcDigit (bcTag added)
+    BooleanProperty m_isNewTgcDigit{this, "isNewTgcDigit",  true};  // to select new TgcDigit (bcTag added)
 
 protected:
-    ServiceHandle<ITGCcablingServerSvc> m_tgc_cabling_server;
-    const ITGCcablingSvc* m_cabling;
+    ServiceHandle<ITGCcablingServerSvc> m_tgc_cabling_server{this, "CablingServer", "TGCcablingServerSvc"};
+    const ITGCcablingSvc* m_cabling{nullptr};
 
     SG::WriteHandleKey<TgcRdoContainer> m_rdoContainerKey{this, "OutputObjectName", "TGCRDO", "WriteHandleKey for Output TgcRdoContainer"};
     SG::ReadHandleKey<TgcDigitContainer> m_digitContainerKey{this, "InputObjectName", "TGC_DIGITS",
