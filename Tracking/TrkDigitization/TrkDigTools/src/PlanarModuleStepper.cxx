@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 ///////////////////////////////////////////////////////////////////
 // PlanarModuleStepper.cxx, (c) ATLAS Detector software
@@ -8,10 +8,11 @@
 // Trk include
 #include "TrkDigTools/PlanarModuleStepper.h"
 #include "TrkDigEvent/DigitizationModule.h"
+#include "TrkDigEvent/DigitizationCell.h" //DigitizationStep, typedef DigitizationCell
+
 #include "TrkDetDescrUtils/Intersection.h"
 #include "TrkSurfaces/Surface.h"
 // Amg
-#include "GeoPrimitives/GeoPrimitives.h"
 #include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
 
 // constructor
@@ -119,7 +120,7 @@ std::vector<Trk::DigitizationStep> Trk::PlanarModuleStepper::cellSteps(const Trk
     if (boundaryIntersections.size() > 2){
         ATH_MSG_VERBOSE("More than 2 Boundary Surfaces intersected, this is an edge case, resolving ... ");
         std::sort(boundaryIntersections.begin(),boundaryIntersections.end());
-        if (boundaryIntersections[0].pathLength*boundaryIntersections[1].pathLength < 0.) boundaryIntersections.erase(boundaryIntersections.end());
+        if (boundaryIntersections[0].pathLength*boundaryIntersections[1].pathLength < 0.) boundaryIntersections.pop_back();
         else boundaryIntersections.erase(boundaryIntersections.begin());
     }
     // return 
