@@ -121,6 +121,11 @@ StatusCode TrigTauMonitorTruthAlgorithm::processEvent(const EventContext& ctx) c
     std::vector<std::shared_ptr<xAOD::TruthParticle>> true_taus_3p = true_taus.second;
 
     for(const std::string& trigger : m_triggers) {
+
+	// skip ditau and T&P chains:
+	const TrigTauInfo& info = getTrigInfo(trigger);
+	if( info.isHLTTandP() || info.isHLTDiTau()) continue;
+
         // Online taus
         std::vector<const xAOD::TauJet*> hlt_taus = getOnlineTausAll(trigger, true);
 
@@ -164,8 +169,7 @@ void TrigTauMonitorTruthAlgorithm::fillTruthEfficiency(const std::vector<const x
         HLT_truth_match = matchObjects(true_tau.get(), online_tau_vec, 0.2) && hlt_fires;
 
         bool is_highPt = false;
-        if(info.isHLTSingleTau() || info.isHLTTandP()) is_highPt = pt_vis > info.getHLTTauThreshold() + 20.0;
-        else if (info.isHLTDiTau()) is_highPt = pt_vis > info.getHLTTauThresholds().at(0) + 20.0 || pt_vis > info.getHLTTauThresholds().at(1) + 20.0;
+        if(info.isHLTSingleTau())  is_highPt = pt_vis > info.getHLTTauThreshold() + 20.0;
 
         fill(monGroup, pt_vis, eta_vis, phi_vis, HLT_truth_match);
 
