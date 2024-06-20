@@ -57,7 +57,7 @@ StatusCode xAODMultiElecMuTauFilter::filterEvent() {
        if (!m_incHadTau) continue;
        const xAOD::TruthParticle *tau= nullptr;
        const xAOD::TruthParticle *taunu= nullptr;
-       if (std::abs(pitr->pdgId()) != 15 || pitr->status() == 3) continue;
+       if (!MC::isTau(pitr) || !MC::isPhysical(pitr)) continue;
          tau = pitr;
          if(!tau->decayVtx()) continue;
          // Loop over children and:

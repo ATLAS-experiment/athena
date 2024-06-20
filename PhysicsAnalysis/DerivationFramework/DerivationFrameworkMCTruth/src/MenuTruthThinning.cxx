@@ -319,8 +319,7 @@ bool DerivationFramework::MenuTruthThinning::isAccepted(const xAOD::TruthParticl
     // hadron range
     int motherPDGID = 999999999;
     // AV: dropped the HepMC::PHOTOSMIN condition
-    if(!HepMC::is_simulation_particle(p) &&
-       p->hasProdVtx() )
+    if ( !HepMC::is_simulation_particle(p) && p->hasProdVtx() )
     {
         const xAOD::TruthVertex* vprod = p->prodVtx();
         if (vprod->nIncomingParticles() > 0) {
@@ -532,7 +531,7 @@ bool DerivationFramework::MenuTruthThinning::isLeptonFromTau(const xAOD::TruthPa
     unsigned int nIncoming = prod->nIncomingParticles();
     for(unsigned int itr = 0; itr<nIncoming; ++itr){
         int parentId = prod->incomingParticle(itr)->pdgId();
-        if(abs(parentId) == 15) {
+        if( MC::isTau(parentId) ) {
             ATH_MSG_DEBUG("Particle with pdgId = " << pdg << ", matched to tau");
             return true; // Has tau parent
         }

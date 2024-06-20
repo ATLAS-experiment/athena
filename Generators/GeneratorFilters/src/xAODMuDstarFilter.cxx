@@ -40,7 +40,7 @@
 
 #include "TLorentzVector.h"
 
-#include "TruthUtils/AtlasPID.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 #include "xAODTruth/TruthParticle.h"
 #include "xAODTruth/TruthVertex.h"
@@ -123,7 +123,7 @@ StatusCode xAODMuDstarFilter::filterEvent()
   // Loop over all particles in the event
     for (const xAOD::TruthParticle* pitr : *xTruthParticleContainer) {
 
-      if (pitr->status() == 4){
+      if (MC::isBeam(pitr)){
         const xAOD::TruthVertex *vprim = (pitr)->decayVtx();    
         primx = vprim->x();
         primy = vprim->y();
@@ -131,7 +131,7 @@ StatusCode xAODMuDstarFilter::filterEvent()
         ATH_MSG_DEBUG("xAODMuDstarFilter: PV x, y = " << primx << " , " << primy);
         }
   
-      if (pitr->status() == 3)
+      if (!MC::isPhysical(pitr))
         continue; // photos history line
    
       // muons
@@ -155,11 +155,11 @@ StatusCode xAODMuDstarFilter::filterEvent()
     ATH_MSG_DEBUG("xAODMuDstarFilter: NumMuons = " << NumMuons );
 
     for (const xAOD::TruthParticle* pitr : *xTruthParticleContainer) {     
-      if (pitr->status() == 3)
+      if (!MC::isPhysical(pitr))
         continue; // photos history line
      
       // Dstars
-      if (std::abs(pitr->pdgId()) == DSTAR)
+      if (std::abs(pitr->pdgId()) == MC::DSTAR)
       {
         if ((pitr->pt() >= m_PtMinDstar) &&
             (pitr->pt() < m_PtMaxDstar) &&
@@ -192,10 +192,10 @@ StatusCode xAODMuDstarFilter::filterEvent()
           {
 
             auto thisChild = pitr->decayVtx()->outgoingParticle(thisChild_id);
-            if (thisChild->status() == 3)
+            if (!MC::isPhysical(thisChild))
               continue; // photos history line
 
-            if (std::abs(thisChild->pdgId()) == PIPLUS)
+            if (std::abs(thisChild->pdgId()) == MC::PIPLUS)
             {
               if ((thisChild->pt() >= m_PtMinPis) &&
                   (thisChild->pt() < m_PtMaxPis) &&
@@ -229,21 +229,21 @@ StatusCode xAODMuDstarFilter::filterEvent()
           for (size_t thisChild_id = 0; thisChild_id < pitr->decayVtx()->nOutgoingParticles(); thisChild_id++)
           {
             auto thisChild = pitr->decayVtx()->outgoingParticle(thisChild_id);
-            if (thisChild->status() == 3)
+            if (!MC::isPhysical(thisChild))
               continue; // photos history line
 
-            if (std::abs(thisChild->pdgId()) == D0)
+            if (std::abs(thisChild->pdgId()) == MC::D0)
             {
               if (! thisChild->decayVtx()) continue; 
               
               for (size_t thisChild1_id = 0; thisChild1_id < thisChild->decayVtx()->nOutgoingParticles(); thisChild1_id++)
                 {
                   auto thisChild1 = thisChild->decayVtx()->outgoingParticle(thisChild1_id);
-                  if (thisChild1->status() == 3)
+                  if (!MC::isPhysical(thisChild1))
                     continue; // photos history line
 
                   if (thisChild1->isElectron() || thisChild1->isMuon() ||
-                      std::abs(thisChild1->pdgId()) == PIPLUS || std::abs(thisChild1->pdgId()) == KPLUS)
+                      std::abs(thisChild1->pdgId()) == MC::PIPLUS || std::abs(thisChild1->pdgId()) == MC::KPLUS)
                   {
 
                     NumChildD0++;
@@ -268,16 +268,16 @@ StatusCode xAODMuDstarFilter::filterEvent()
                         NumChildD0mu++;
                         D0ChildMu = thisChild1;
                       }
-                      if (std::abs(thisChild1->pdgId()) == PIPLUS)
+                      if (std::abs(thisChild1->pdgId()) == MC::PIPLUS)
                         NumChildD0pi++;
-                      if (std::abs(thisChild1->pdgId()) == KPLUS)
+                      if (std::abs(thisChild1->pdgId()) == MC::KPLUS)
                       {
                         NumChildD0K++;
                         K_pdg = thisChild1->pdgId();
                       }
                     }
                   }
-                  else if (std::abs(thisChild1->pdgId()) == PI0)
+                  else if (std::abs(thisChild1->pdgId()) == MC::PI0)
                   {
                     NumChildD0++;
                   }
@@ -289,8 +289,8 @@ StatusCode xAODMuDstarFilter::filterEvent()
                   {
                     NumChildD0gammas++;
                   }
-                  else if (std::abs(thisChild1->pdgId()) == K0 || std::abs(thisChild1->pdgId()) == K0L ||
-                           std::abs(thisChild1->pdgId()) == K0S)
+                  else if (std::abs(thisChild1->pdgId()) == MC::K0 || std::abs(thisChild1->pdgId()) == MC::K0L ||
+                           std::abs(thisChild1->pdgId()) == MC::K0S)
                   {
                     NumChildD0++;
                     NumChildD0++;
@@ -301,11 +301,11 @@ StatusCode xAODMuDstarFilter::filterEvent()
                     {
 
                       auto thisChild2 = thisChild1->decayVtx()->outgoingParticle(thisChild2_id);
-                      if (thisChild2->status() == 3)
+                      if (!MC::isPhysical(thisChild2))
                         continue; // photos history line
 
                       if (thisChild2->isElectron() || thisChild2->isMuon() ||
-                          std::abs(thisChild2->pdgId()) == PIPLUS || std::abs(thisChild2->pdgId()) == KPLUS)
+                          std::abs(thisChild2->pdgId()) == MC::PIPLUS || std::abs(thisChild2->pdgId()) == MC::KPLUS)
                       {
                         NumChildD0++;
 
@@ -332,7 +332,7 @@ StatusCode xAODMuDstarFilter::filterEvent()
                           }
                         }
                       }
-                      else if (std::abs(thisChild2->pdgId()) == PI0)
+                      else if (std::abs(thisChild2->pdgId()) == MC::PI0)
                       {
                         NumChildD0++;
                       }
@@ -344,8 +344,8 @@ StatusCode xAODMuDstarFilter::filterEvent()
                       {
                         NumChildD0gammas++;
                       }
-                      else if (std::abs(thisChild2->pdgId()) == K0 || std::abs(thisChild2->pdgId()) == K0L ||
-                               std::abs(thisChild2->pdgId()) == K0S)
+                      else if (std::abs(thisChild2->pdgId()) == MC::K0 || std::abs(thisChild2->pdgId()) == MC::K0L ||
+                               std::abs(thisChild2->pdgId()) == MC::K0S)
                       {
                         NumChildD0++;
                         NumChildD0++;
