@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 
 // STL include(s):
 #include <algorithm>
@@ -140,7 +138,7 @@ StatusCode CaloCellFilterAlg::execute() {
    // typedef ObjectVector<CaloCell> CONTAINER; 
    typedef CaloCellContainer CONTAINER; 
 
-   const CONTAINER* cellcoll;
+   const CONTAINER* cellcoll = nullptr;
    CHECK( evtStore()->retrieve( cellcoll, m_cellsName ) ); 
 
    ConstDataVector<CONTAINER>* outputCont = new ConstDataVector<CaloCellContainer>( SG::VIEW_ELEMENTS );
