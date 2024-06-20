@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -116,7 +116,7 @@ StatusCode TileCellToNtuple::execute()
   if (m_scinCells) {
 
     // step1: read Cells from TDS
-    const TileCellContainer* CellCnt;
+    const TileCellContainer* CellCnt = nullptr;
     CHECK( evtStore()->retrieve(CellCnt, m_cellContainer) );
 
     // step2: to fill items in ntuple
