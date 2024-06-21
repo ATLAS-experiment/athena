@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "tauMonitorAlgorithm.h"
 
 #include "GaudiKernel/SystemOfUnits.h"
 #include "xAODCore/ShallowCopy.h"
+#include "AthContainers/ConstAccessor.h"
 #include <algorithm>
 
 using Gaudi::Units::GeV;
@@ -284,7 +285,8 @@ StatusCode tauMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
 
     // TauB/Identification/EleVetoBDTinputs
     PSSFrac = tau->detail<float>(xAOD::TauJetParameters::PSSFraction);
-    EMFrac = tau->auxdata<float>("EMFracFixed");
+    static const SG::ConstAccessor<float> EMFracFixedAcc("EMFracFixed");
+    EMFrac = EMFracFixedAcc(*tau);
 
     // TauB/SubStructure
     EMFracTrk = tau->detail<float>(xAOD::TauJetParameters::ChPiEMEOverCaloEME);
@@ -367,14 +369,16 @@ StatusCode tauMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
         trFlightPathSig =
             tau->detail<float>(xAOD::TauJetParameters::trFlightPathSig);
 
-	if (tau->track(0)->isAvailable<float>("d0SigTJVA")) {
+        static const SG::ConstAccessor<float> d0SigTJVAAcc("d0SigTJVA");
+	if (d0SigTJVAAcc.isAvailable(*tau->track(0))) {
 	  ipSigLeadTrk = tau->track(0)->d0SigTJVA();
 	}
 	else {
 	  ipSigLeadTrk = tau->detail<float>(xAOD::TauJetParameters::ipSigLeadTrk);
 	}
 
-	if (tau->track(0)->isAvailable<float>("z0sinthetaSigTJVA")) {
+        static const SG::ConstAccessor<float> z0sinthetaSigTJVAAcc("z0sinthetaSigTJVA");
+	if (z0sinthetaSigTJVAAcc.isAvailable(*tau->track(0))) {
 	  ipZ0SinThetaSigLeadTrk = tau->track(0)->z0sinthetaSigTJVA();
 	}
 	else {
@@ -458,14 +462,14 @@ StatusCode tauMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
 
       fill(tool, trackLogSeedJetPt);
 
-      static const SG::AuxElement::ConstAccessor<float> acc_trackScoreCharged("rnn_chargedScore");
-      static const SG::AuxElement::ConstAccessor<float> acc_trackScoreIso("rnn_isolationScore");
-      static const SG::AuxElement::ConstAccessor<float> acc_trackScoreConv("rnn_conversionScore");
+      static const SG::ConstAccessor<float> acc_trackScoreCharged("rnn_chargedScore");
+      static const SG::ConstAccessor<float> acc_trackScoreIso("rnn_isolationScore");
+      static const SG::ConstAccessor<float> acc_trackScoreConv("rnn_conversionScore");
       // rnn_fakeScore may not be available (it is not provided by the TauJets smart slimming list), it can be obtained from unitarity
 
       for (const xAOD::TauTrack *track : tau->allTracks()) {
 
-        static const SG::AuxElement::Accessor<
+        static const SG::Accessor<
             xAOD::TauTrack::TrackParticleLinks_t>
             trackAcc("trackLinks");
         if (!trackAcc(*track)[0]) {
@@ -480,7 +484,8 @@ StatusCode tauMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
         trackZ0sinthetaSigTJVA = 999.;
         float rConv = 999.;
         float rConvII = 999.;
-        if (track->isAvailable<float>("z0sinthetaTJVA")) {
+        static const SG::ConstAccessor<float> z0sinthetaTJVAAcc("z0sinthetaTJVA");
+        if (z0sinthetaTJVAAcc.isAvailable(*track)) {
           d0TJVA = track->d0TJVA();
           trackZ0SinthetaTJVA = track->z0sinthetaTJVA();
           trackD0SigTJVA = track->d0SigTJVA();
@@ -515,9 +520,8 @@ StatusCode tauMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
         trackParticle->summaryValue(numberOfSCTHoles, xAOD::numberOfSCTHoles);
         float eProbabilityHT = 0.;
         trackParticle->summaryValue(eProbabilityHT, xAOD::eProbabilityHT);
-        float eProbabilityNN = -1.;
-        if (trackParticle->isAvailable<float>("eProbabilityNN"))
-	  eProbabilityNN = trackParticle->auxdata<float>("eProbabilityNN");
+        static const SG::ConstAccessor<float> eProbabilityNNAcc("eProbabilityNN");
+        float eProbabilityNN = eProbabilityNNAcc.withDefault(*trackParticle, -1);
         // hybrid variable (eProbabilityNN is not computed for tracks with pt
         // < 2 GeV)
         trackeProbabilityHTorNN =
