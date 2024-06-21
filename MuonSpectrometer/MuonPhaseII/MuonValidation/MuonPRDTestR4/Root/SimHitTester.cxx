@@ -60,7 +60,7 @@ namespace MuonValR4{
 
             const Amg::Transform3D& locToGlobal{re->localToGlobalTrans(gctx, trfHash)};
             m_globPos.push_back(locToGlobal*locPos);
-            m_globDir.push_back(locToGlobal.linear()* locDir);
+            m_globDir.push_back(Amg::Vector3D(locToGlobal.linear()* locDir));
             m_locPos.push_back(locPos);
             m_locDir.push_back(locDir);
             m_globTime.push_back(simHit->globalTime());
