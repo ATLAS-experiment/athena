@@ -1,5 +1,5 @@
  /*
- Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 /////////////////////////////////////////////////////////////////
@@ -13,6 +13,7 @@
 #include "xAODTracking/TrackParticlexAODHelpers.h"
 #include "xAODBTagging/BTaggingContainer.h"
 #include "xAODBTagging/BTaggingUtilities.h"
+#include "AthContainers/ConstAccessor.h"
 
 
 // Constructor
@@ -268,7 +269,8 @@ bool DerivationFramework::VHLowTrackJetFilterTool::eventPassesFilter() const
       ATH_MSG_WARNING("Btag info unavailable");
       continue;
     }
-    TrackLinks assocTracks = bjet->auxdata<TrackLinks>("BTagTrackToJetAssociator");
+    static const SG::ConstAccessor<TrackLinks> BTagTrackToJetAssociatorAcc("BTagTrackToJetAssociator");
+    TrackLinks assocTracks = BTagTrackToJetAssociatorAcc(*bjet);
     
     std::vector<const xAOD::TrackParticle*> goodTracks;
     for (auto track : assocTracks) {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthAnalysisBaseComps/AthAnalysisHelper.h"
@@ -74,7 +74,10 @@ void AthAnalysisHelper::printAuxElement(const SG::AuxElement& ae) {
       std::cout << "    " << name << " = ";
       const std::type_info& typeinfo = *reg.getType(aux);
 #define PRINT_AE( TYPE ) \
-if(typeinfo==typeid(TYPE) && ae.isAvailable<TYPE>(name)) std::cout << ae.auxdata<TYPE>(name) << " (" << #TYPE << ")" << std::endl;
+      if(typeinfo==typeid(TYPE)) {         \
+        SG::ConstAccessor<TYPE> acc (aux);                              \
+        if (acc.isAvailable(ae)) std::cout << acc(ae) << " (" << #TYPE << ")" << std::endl; \
+      }
 
       PRINT_AE( bool )
       else PRINT_AE(uint)
