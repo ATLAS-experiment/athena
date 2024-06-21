@@ -12,6 +12,19 @@ FPGAActsTrkConverter::FPGAActsTrkConverter(const std::string& type,
 		const std::string& name,
 		const IInterface* parent): base_class(type,name,parent) { }
 
+
+StatusCode FPGAActsTrkConverter::initialize() {
+
+  ATH_MSG_DEBUG("Initializing FPGAActsTrkConverter...");
+
+  // Get SCT & pixel Identifier helpers
+  ATH_CHECK(detStore()->retrieve(m_pixelId, "PixelID"));
+  ATH_CHECK(detStore()->retrieve(m_SCTId, "SCT_ID"));
+
+  return StatusCode::SUCCESS;
+
+}
+
 StatusCode FPGAActsTrkConverter::findProtoTracks(const EventContext& ctx,
                   const xAOD::PixelClusterContainer & pixelContainer,
                   const xAOD::StripClusterContainer & stripContainer,
@@ -30,15 +43,21 @@ StatusCode FPGAActsTrkConverter::findProtoTracks(const EventContext& ctx,
         // TODO: move from loops over cluster container to links 
           for(const FPGATrackSimHit& h : hitsInRoads.at(roadIndex)){
             IdentifierHash hash = h.getIdentifierHash();
-            
-            if (h.isPixel()){
-              for (const xAOD::PixelCluster *cl : pixelContainer){
-                if (hash == cl->identifierHash()) points.push_back(ActsTrk::makeATLASUncalibSourceLink(&pixelContainer,cl->index(),ctx));
+            if (h.isReal()) {
+              if (h.isPixel()){
+                Identifier wafer_id = m_pixelId->wafer_id(hash);
+                Identifier id = m_pixelId->pixel_id(wafer_id, h.getPhiIndex(), h.getEtaIndex()); 
+                for (const xAOD::PixelCluster *cl : pixelContainer){
+                  if (id == cl->rdoList().front()) points.push_back(ActsTrk::makeATLASUncalibSourceLink(&pixelContainer,cl->index(),ctx));
+                }
               }
-            }
-            if (h.isStrip()) {
-              for (const xAOD::StripCluster *cl : stripContainer){
-                if (hash == cl->identifierHash()) points.push_back(ActsTrk::makeATLASUncalibSourceLink(&stripContainer,cl->index(),ctx)); 
+              if (h.isStrip()) {
+                int strip = static_cast<int>(h.getPhiCoord());
+                Identifier wafer_id = m_SCTId->wafer_id(hash);
+                Identifier id = m_SCTId->strip_id(wafer_id, strip);
+                for (const xAOD::StripCluster *cl : stripContainer){
+                  if (id == cl->rdoList().front()) points.push_back(ActsTrk::makeATLASUncalibSourceLink(&stripContainer,cl->index(),ctx)); 
+                }
               }
             }
           }
@@ -63,7 +82,6 @@ StatusCode FPGAActsTrkConverter::findProtoTracks(const EventContext& ctx,
     ATH_MSG_INFO("Creating Acts proto-tracks from FPGA tracks...");
 
     if (tracks.size()>1){
-
       for(const FPGATrackSimTrack& track: tracks) { 
         std::vector<ActsTrk::ATLASUncalibSourceLink> points;  
         const std::vector <FPGATrackSimHit>& hits = track.getFPGATrackSimHits();
@@ -73,18 +91,24 @@ StatusCode FPGAActsTrkConverter::findProtoTracks(const EventContext& ctx,
           // TODO: move from loops over cluster container to links 
 
           for(const FPGATrackSimHit& h : hits){
-              IdentifierHash hash = h.getIdentifierHash();
-              
+            IdentifierHash hash = h.getIdentifierHash();
+            if (h.isReal()){
               if (h.isPixel()){
+                Identifier wafer_id = m_pixelId->wafer_id(hash);
+                Identifier id = m_pixelId->pixel_id(wafer_id, h.getPhiIndex(), h.getEtaIndex()); 
                 for (const xAOD::PixelCluster *cl : pixelContainer){
-                  if (hash == cl->identifierHash()) points.push_back(ActsTrk::makeATLASUncalibSourceLink(&pixelContainer,cl->index(),ctx));
+                  if (id == cl->rdoList().front()) points.push_back(ActsTrk::makeATLASUncalibSourceLink(&pixelContainer,cl->index(),ctx));
                 }
               }
               if (h.isStrip()) {
+                int strip = static_cast<int>(h.getPhiCoord());
+                Identifier wafer_id = m_SCTId->wafer_id(hash);
+                Identifier id = m_SCTId->strip_id(wafer_id, strip); 
                 for (const xAOD::StripCluster *cl : stripContainer){
-                  if (hash == cl->identifierHash()) points.push_back(ActsTrk::makeATLASUncalibSourceLink(&stripContainer,cl->index(),ctx)); 
+                  if (id == cl->rdoList().front()) points.push_back(ActsTrk::makeATLASUncalibSourceLink(&stripContainer,cl->index(),ctx)); 
                 }
               }
+            }
           }
           ATH_MSG_INFO("\tMade a proto-track with " <<points.size()<<" clusters");
         

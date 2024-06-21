@@ -8,6 +8,12 @@
 #include "FPGATrkConverterInterface/IFPGAActsTrkConverter.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 
+#include "InDetIdentifier/PixelID.h"
+#include "InDetIdentifier/SCT_ID.h"
+
+class PixelID;
+class SCT_ID;
+
 class FPGAActsTrkConverter : public extends<AthAlgTool,IFPGAActsTrkConverter> {
   public:
     
@@ -15,6 +21,7 @@ class FPGAActsTrkConverter : public extends<AthAlgTool,IFPGAActsTrkConverter> {
 		const std::string& name,
 		const IInterface* parent);
     virtual ~FPGAActsTrkConverter() = default;
+    virtual StatusCode initialize() override final;
     virtual StatusCode findProtoTracks(const EventContext& ctx,
                   const xAOD::PixelClusterContainer & pixelContainer,
                   const xAOD::StripClusterContainer & stripContainer,
@@ -29,6 +36,10 @@ class FPGAActsTrkConverter : public extends<AthAlgTool,IFPGAActsTrkConverter> {
     protected:
     std::unique_ptr<Acts::BoundTrackParameters> makeParams (const FPGATrackSimRoad &road) const;
     std::unique_ptr<Acts::BoundTrackParameters> makeParams (const FPGATrackSimTrack &track) const;
+
+    private:
+    const PixelID* m_pixelId{nullptr};
+    const SCT_ID* m_SCTId{nullptr};
 
   };
 
