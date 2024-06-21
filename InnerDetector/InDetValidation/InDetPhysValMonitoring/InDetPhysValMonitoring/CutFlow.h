@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -59,13 +59,13 @@ public:
 
 
   ///Return cut name
-  std::string
+  const std::string&
   name() const {
     return m_name;
   }
 
   ///Return cut description
-  std::string
+  const std::string&
   description() const {
     return m_desc;
   }

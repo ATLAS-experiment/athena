@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -97,10 +97,10 @@ namespace IDPVM {
     static std::string reportUOBinVal(const std::string& p_histName, const std::vector< std::pair<unsigned int,double> >& p_vecBinVal);
     ///return accumulated messages
     //@{
-    std::vector<std::string> getDebugs() { return m_debugs; };
-    std::vector<std::string> getInfos() { return m_infos; };
-    std::vector<std::string> getWarnings() { return m_warnings; };
-    std::vector<std::string> getErrors() { return m_errors; };
+    const std::vector<std::string>& getDebugs() { return m_debugs; };
+    const std::vector<std::string>& getInfos() { return m_infos; };
+    const std::vector<std::string>& getWarnings() { return m_warnings; };
+    const std::vector<std::string>& getErrors() { return m_errors; };
     //@}
   private:
     // use gaussian fit, return 0 in case of successful fit
