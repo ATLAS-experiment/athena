@@ -5,6 +5,7 @@
 #include "ParticleJetTools/ParticleJetDeltaRLabelTool.h"
 #include "ParticleJetTools/ParticleJetLabelCommon.h"
 #include "xAODJet/JetContainer.h"
+#include "xAODTruth/TruthVertexContainer.h"
 #include "AsgDataHandles/ReadHandle.h"
 #include "AsgMessaging/Check.h"
 
@@ -24,11 +25,6 @@ ParticleJetDeltaRLabelTool::ParticleJetDeltaRLabelTool(const std::string& name)
             "In the case that a particle matches two jets, the closest (MatchMode=MinDR) or highest-pT (MatchMode=MaxPt) jet will be labeled");
 }
 
-namespace {
-
-
-}
-
 
 StatusCode ParticleJetDeltaRLabelTool::initialize(){
 
@@ -38,6 +34,7 @@ StatusCode ParticleJetDeltaRLabelTool::initialize(){
   ATH_CHECK(m_tauPartCollectionKey.initialize());
   ATH_CHECK(m_bottomPartCollectionKey.initialize());
   ATH_CHECK(m_charmPartCollectionKey.initialize());
+  ATH_CHECK(m_truthEventsKey.initialize());
 
   // get the keys to the containers we just read, to build element
   // links later
@@ -55,25 +52,33 @@ StatusCode ParticleJetDeltaRLabelTool::initialize(){
 
 StatusCode ParticleJetDeltaRLabelTool::decorate(const JetContainer& jets) const {
 
+  namespace pjt = ParticleJetTools;
+
   ATH_MSG_VERBOSE("In " << name() << "::modify()");
 
     // Retrieve the particle and jet containers
     SG::ReadHandle<xAOD::TruthParticleContainer> truthtausReadHandle(m_tauPartCollectionKey);
     SG::ReadHandle<xAOD::TruthParticleContainer> truthbsReadHandle(m_bottomPartCollectionKey);
     SG::ReadHandle<xAOD::TruthParticleContainer> truthcsReadHandle(m_charmPartCollectionKey);
+    SG::ReadHandle<xAOD::TruthEventContainer> truthEventsHandle(m_truthEventsKey);
 
     if (!truthtausReadHandle.isValid()){
-      ATH_MSG_DEBUG(" Invalid ReadHandle for xAOD::ParticleContainer with key: " << truthtausReadHandle.key());
+      ATH_MSG_ERROR(" Invalid ReadHandle for xAOD::ParticleContainer with key: " << truthtausReadHandle.key());
       return StatusCode::FAILURE;
     }
 
     if (!truthbsReadHandle.isValid()){
-      ATH_MSG_DEBUG(" Invalid ReadHandle for xAOD::ParticleContainer with key: " << truthbsReadHandle.key());
+      ATH_MSG_ERROR(" Invalid ReadHandle for xAOD::ParticleContainer with key: " << truthbsReadHandle.key());
       return StatusCode::FAILURE;
     }
 
     if (!truthcsReadHandle.isValid()){
-      ATH_MSG_DEBUG(" Invalid ReadHandle for xAOD::ParticleContainer with key: " << truthcsReadHandle.key());
+      ATH_MSG_ERROR(" Invalid ReadHandle for xAOD::ParticleContainer with key: " << truthcsReadHandle.key());
+      return StatusCode::FAILURE;
+    }
+
+    if (!truthEventsHandle.isValid()){
+      ATH_MSG_ERROR(" Invalid ReadHandle for TruthEvents with key: " << truthEventsHandle.key());
       return StatusCode::FAILURE;
     }
 
@@ -81,6 +86,7 @@ StatusCode ParticleJetDeltaRLabelTool::decorate(const JetContainer& jets) const 
     vector<vector<const TruthParticle*> > jetlabelpartsc = match(*truthcsReadHandle, jets);
     vector<vector<const TruthParticle*> > jetlabelpartstau = match(*truthtausReadHandle, jets);
 
+    Amg::Vector3D origin = pjt::signalProcessP3(*truthEventsHandle);
 
     for (unsigned int iJet = 0; iJet < jets.size(); iJet++) {
         // remove children whose parent hadrons are also in the jet.
@@ -108,10 +114,12 @@ StatusCode ParticleJetDeltaRLabelTool::decorate(const JetContainer& jets) const 
 
         // set truth label for jets above pt threshold
         // hierarchy: b > c > tau > light
-        ParticleJetTools::Particles particles;
-        particles.b = jetlabelpartsb.at(iJet);
-        particles.c = jetlabelpartsc.at(iJet);
-        particles.tau = jetlabelpartstau.at(iJet);
+        ParticleJetTools::Particles particles {
+          .b = jetlabelpartsb.at(iJet),
+          .c = jetlabelpartsc.at(iJet),
+          .tau = jetlabelpartstau.at(iJet),
+          .origin = origin
+        };
         ParticleJetTools::setJetLabels(jet, particles, *m_labeldecs);
     }
 

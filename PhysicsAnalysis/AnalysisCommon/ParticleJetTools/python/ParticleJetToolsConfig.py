@@ -113,10 +113,14 @@ def _getCommonLabelNames(prefix):
         LabelLxyName=f"{prefix}TruthLabelLxy",
         LabelDRName=f"{prefix}TruthLabelDR",
         LabelPdgIdName=f"{prefix}TruthLabelPdgId",
+        LabelPositionDPhiName=f"{prefix}TruthLabelPositionDPhi",
+        LabelPositionDEtaName=f"{prefix}TruthLabelPositionDEta",
         LabelBarcodeName=f"{prefix}TruthLabelBarcode",
         ChildLxyName=f"{prefix}TruthLabelChildLxy",
         ChildPtName=f"{prefix}TruthLabelChildPt",
         ChildPdgIdName=f"{prefix}TruthLabelChildPdgId",
+        ChildPositionDPhiName=f"{prefix}TruthLabelChildPositionDPhi",
+        ChildPositionDEtaName=f"{prefix}TruthLabelChildPositionDEta",
     )
 
 

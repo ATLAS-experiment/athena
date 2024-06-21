@@ -52,6 +52,18 @@ namespace ParticleJetTools {
     return false;
   }
 
+  Amg::Vector3D p3(const xAOD::TruthVertex* p) {
+    if (!p) return {NAN, NAN, NAN};
+    return {p->x(), p->y(), p->z()};
+  }
+  Amg::Vector3D p3(const xAOD::Jet& j) {
+    return {j.px(), j.py(), j.pz()};
+  }
+  Amg::Vector3D signalProcessP3(const xAOD::TruthEventContainer& events) {
+    if (events.empty()) return {NAN, NAN, NAN};
+    return p3(events.at(0)->signalProcessVertex());
+  }
+
 
   void childrenRemoved
   ( const std::vector<const xAOD::TruthParticle*>& parents
@@ -95,10 +107,14 @@ namespace ParticleJetTools {
     CHECK(Lxy);
     CHECK(dr);
     CHECK(pdgId);
+    CHECK(positionDPhi);
+    CHECK(positionDEta);
     CHECK(barcode); // FIXME barcode-based
     CHECK(childLxy);
     CHECK(childPt);
     CHECK(childPdgId);
+    CHECK(childPositionDPhi);
+    CHECK(childPositionDEta);
 #undef CHECK
   }
 
@@ -109,10 +125,14 @@ namespace ParticleJetTools {
     Lxy(n.Lxy),
     dr(n.dr),
     pdgId(n.pdgId),
+    positionDPhi(n.positionDPhi),
+    positionDEta(n.positionDEta),
     barcode(n.barcode), // FIXME barcode-based
     childLxy(n.childLxy),
     childPt(n.childPt),
-    childPdgId(n.childPdgId)
+    childPdgId(n.childPdgId),
+    childPositionDPhi(n.childPositionDPhi),
+    childPositionDEta(n.childPositionDEta)
   {
   }
 
@@ -175,6 +195,8 @@ namespace ParticleJetTools {
       labelling_particle = getMaxPtPart(particles.tau);
     }
 
+    const Amg::Vector3D& origin = particles.origin;
+
     // decorate info about the labelling particle
     decs.singleint(jet) = label;
     if (label == 0) {
@@ -182,20 +204,28 @@ namespace ParticleJetTools {
       decs.Lxy(jet) = NAN;
       decs.dr(jet) = NAN;
       decs.pdgId(jet) = 0;
+      decs.positionDPhi(jet) = NAN;
+      decs.positionDEta(jet) = NAN;
       decs.barcode(jet) = HepMC::INVALID_PARTICLE_BARCODE; // FIXME barcode-based
       decs.childLxy(jet) = NAN;
       decs.childPt(jet) = NAN;
       decs.childPdgId(jet) = 0;
+      decs.childPositionDPhi(jet) = NAN;
+      decs.childPositionDEta(jet) = NAN;
     } else {
       decs.pt(jet) = partPt(labelling_particle);
-      decs.Lxy(jet) = partLxy(labelling_particle);
+      decs.Lxy(jet) = partLxy(labelling_particle, origin);
       decs.dr(jet) = partDR(labelling_particle, jet);
       decs.pdgId(jet) = partPdgId(labelling_particle);
+      decs.positionDPhi(jet) = positionDPhi(labelling_particle, jet, origin);
+      decs.positionDEta(jet) = positionDEta(labelling_particle, jet, origin);
       decs.barcode(jet) = labelling_particle ?
         HepMC::barcode(labelling_particle) : HepMC::INVALID_PARTICLE_BARCODE; // FIXME barcode-based
-      decs.childLxy(jet) = partLxy(child_particle);
+      decs.childLxy(jet) = partLxy(child_particle, origin);
       decs.childPt(jet) = partPt(child_particle);
       decs.childPdgId(jet) = partPdgId(child_particle);
+      decs.childPositionDPhi(jet) = positionDPhi(child_particle, jet, origin);
+      decs.childPositionDEta(jet) = positionDEta(child_particle, jet, origin);
     }
 
     // extended flavour label
@@ -262,10 +292,10 @@ namespace ParticleJetTools {
     if (!part) return NAN;
     return part->pt();
   }
-  float partLxy(const xAOD::TruthParticle* part) {
+  float partLxy(const xAOD::TruthParticle* part, const Amg::Vector3D& origin) {
     if (!part) return NAN;
-    if ( part->decayVtx() ) { return part->decayVtx()->perp(); }
-    else return INFINITY;
+    if (const auto* vx = part->decayVtx() ) return (p3(vx) - origin).perp();
+    return INFINITY;
   }
   float partDR(const xAOD::TruthParticle* part, const xAOD::Jet& jet) {
     if (!part) return NAN;
@@ -274,6 +304,26 @@ namespace ParticleJetTools {
   int partPdgId(const xAOD::TruthParticle* part) {
     if (!part) return 0;
     return part->pdgId();
+  }
+  float positionDPhi(const xAOD::TruthParticle* part,
+                     const xAOD::Jet& jet,
+                     const Amg::Vector3D& origin) {
+    if (!part) return NAN;
+    if (const auto* vx = part->decayVtx() ) {
+      Amg::Vector3D displacement = p3(vx) - origin;
+      return p3(jet).deltaPhi(displacement);
+    }
+    return INFINITY;
+  }
+  float positionDEta(const xAOD::TruthParticle* part,
+                     const xAOD::Jet& jet,
+                     const Amg::Vector3D& origin) {
+    if (!part) return NAN;
+    if (const auto* vx = part->decayVtx() ) {
+      Amg::Vector3D displacement = p3(vx) - origin;
+      return displacement.eta() - jet.eta();
+    }
+    return INFINITY;
   }
 
 }

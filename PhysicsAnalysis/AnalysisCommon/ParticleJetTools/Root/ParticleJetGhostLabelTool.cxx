@@ -6,6 +6,7 @@
 #include "ParticleJetTools/ParticleJetLabelCommon.h"
 #include "xAODJet/JetContainer.h"
 #include "AsgMessaging/Check.h"
+#include "AsgDataHandles/ReadHandle.h"
 
 using namespace std;
 using namespace xAOD;
@@ -22,6 +23,7 @@ ParticleJetGhostLabelTool::ParticleJetGhostLabelTool(const std::string& name)
 StatusCode ParticleJetGhostLabelTool::initialize()
 {
   m_labelnames.check();
+  ATH_CHECK(m_truthEventsKey.initialize());
   return StatusCode::SUCCESS;
 }
 
@@ -30,8 +32,18 @@ StatusCode ParticleJetGhostLabelTool::decorate(const JetContainer& jets) const
 
   using namespace std;
   using namespace xAOD;
+  namespace pjt = ParticleJetTools;
 
   ATH_MSG_VERBOSE("In " << name() << "::modify()");
+
+
+  SG::ReadHandle<xAOD::TruthEventContainer> truthEventsHandle(m_truthEventsKey);
+  if (!truthEventsHandle.isValid()){
+    ATH_MSG_ERROR(" Invalid ReadHandle for TruthEvents with key: " << truthEventsHandle.key());
+    return StatusCode::FAILURE;
+  }
+
+  Amg::Vector3D origin = pjt::signalProcessP3(*truthEventsHandle);
 
   for (const xAOD::Jet* jetptr: jets) {
 
@@ -51,10 +63,12 @@ StatusCode ParticleJetGhostLabelTool::decorate(const JetContainer& jets) const
 
     // set truth label for jets above pt threshold
     // hierarchy: b > c > tau > light
-    ParticleJetTools::Particles particles;
-    particles.b = jetlabelpartsb;
-    particles.c = jetlabelpartsc;
-    particles.tau = jetlabelpartstau;
+    ParticleJetTools::Particles particles {
+      .b = jetlabelpartsb,
+      .c = jetlabelpartsc,
+      .tau = jetlabelpartstau,
+      .origin = origin
+    };
     ParticleJetTools::setJetLabels(jet, particles, m_labelnames);
   }
 
