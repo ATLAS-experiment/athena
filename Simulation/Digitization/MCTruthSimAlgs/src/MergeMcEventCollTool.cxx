@@ -502,7 +502,7 @@ bool MergeMcEventCollTool::isInitialCollisionVertex(const HepMC::ConstGenVertexP
   auto currentVertexParticleIter = pCurrentVertex->particles_in_const_begin();
   auto  endOfListOfParticlesFromCurrentVertex = pCurrentVertex->particles_in_const_end();
   for( ;currentVertexParticleIter != endOfListOfParticlesFromCurrentVertex; ++currentVertexParticleIter ) {
-    auto pCurrentVertexParticle = *pCurrentVertexParticleIter;
+    auto pCurrentVertexParticle = *currentVertexParticleIter;
 #endif
     if (MC::isBeam(pCurrentVertexParticle)) return true;
   }
