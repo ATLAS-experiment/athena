@@ -9,6 +9,7 @@
 #include "JetInterface/IJetDecorator.h"
 #include "xAODTruth/TruthParticle.h"
 #include "xAODTruth/TruthParticleContainer.h"
+#include "xAODTruth/TruthEventContainer.h"
 
 #include "ParticleJetTools/ParticleJetLabelCommon.h"
 
@@ -23,6 +24,11 @@ public:
   StatusCode decorate(const xAOD::JetContainer& jets) const override;
 
 protected:
+
+  SG::ReadHandleKey<xAOD::TruthEventContainer> m_truthEventsKey{
+    this, "TruthEventCollection", "TruthEvents",
+    "Truth event collection"
+  };
 
   std::vector<const xAOD::TruthParticle*> match(
     const xAOD::Jet&, const std::string& ghostname

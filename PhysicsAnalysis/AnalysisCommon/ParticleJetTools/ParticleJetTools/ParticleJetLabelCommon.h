@@ -9,7 +9,11 @@
 #include "xAODTruth/TruthParticle.h"
 #include "xAODJet/Jet.h"
 #include "xAODTruth/TruthVertex.h"
+#include "xAODTruth/TruthEventContainer.h"
 #include "AsgDataHandles/ReadHandleKey.h"
+
+// Eigen needed for Vector3D
+#include "GeoPrimitives/GeoPrimitives.h"
 
 #include <vector>
 
@@ -22,10 +26,14 @@ namespace ParticleJetTools {
     std::string Lxy;
     std::string dr;
     std::string pdgId;
+    std::string positionDPhi;
+    std::string positionDEta;
     std::string barcode; // FIXME barcode-based
     std::string childLxy;
     std::string childPt;
     std::string childPdgId;
+    std::string childPositionDPhi;
+    std::string childPositionDEta;
     void check();
   };
 
@@ -37,10 +45,14 @@ namespace ParticleJetTools {
     SG::AuxElement::Decorator<float> Lxy;
     SG::AuxElement::Decorator<float> dr;
     SG::AuxElement::Decorator<int> pdgId;
+    SG::AuxElement::Decorator<float> positionDPhi;
+    SG::AuxElement::Decorator<float> positionDEta;
     SG::AuxElement::Decorator<int> barcode; // FIXME barcode-based
     SG::AuxElement::Decorator<float> childLxy;
     SG::AuxElement::Decorator<float> childPt;
     SG::AuxElement::Decorator<int> childPdgId;
+    SG::AuxElement::Decorator<float> childPositionDPhi;
+    SG::AuxElement::Decorator<float> childPositionDEta;
   };
 
   class IParticleLinker {
@@ -58,7 +70,12 @@ namespace ParticleJetTools {
     std::vector<const xAOD::TruthParticle*> b;
     std::vector<const xAOD::TruthParticle*> c;
     std::vector<const xAOD::TruthParticle*> tau;
+    Amg::Vector3D origin;
   };
+
+  Amg::Vector3D p3(const xAOD::TruthVertex* p);
+  Amg::Vector3D p3(const xAOD::Jet& j);
+  Amg::Vector3D signalProcessP3(const xAOD::TruthEventContainer&);
 
   void setJetLabels(const xAOD::Jet& jet,
                     const Particles& particles,
@@ -68,9 +85,16 @@ namespace ParticleJetTools {
                     const LabelDecorators& decs);
 
   float partPt(const xAOD::TruthParticle* part);
-  float partLxy(const xAOD::TruthParticle* part);
+  float partLxy(const xAOD::TruthParticle* part, const Amg::Vector3D& origin);
   float partDR(const xAOD::TruthParticle* part, const xAOD::Jet& jet);
   int partPdgId(const xAOD::TruthParticle* part);
+  float positionDPhi(const xAOD::TruthParticle* part,
+                     const xAOD::Jet& jet,
+                     const Amg::Vector3D& origin);
+  float positionDEta(const xAOD::TruthParticle* part,
+                     const xAOD::Jet& jet,
+                     const Amg::Vector3D& origin);
+
 
   void childrenRemoved
   ( const std::vector<const xAOD::TruthParticle*>& parents
@@ -85,10 +109,14 @@ namespace ParticleJetTools {
     tool.declareProperty("LabelLxyName", n->Lxy="", "Attribute for Lxy of labelling particle");
     tool.declareProperty("LabelDRName", n->dr="", "Attribute for dR(part, jet) for labelling particle");
     tool.declareProperty("LabelPdgIdName", n->pdgId="", "Attribute for pdgID of labelling particle");
+    tool.declareProperty("LabelPositionDPhiName", n->positionDPhi="", "Attribute for the position dPhi of the labeling particle ");
+    tool.declareProperty("LabelPositionDEtaName", n->positionDEta="", "Attribute for the position dEta of the labeling particle ");
     tool.declareProperty("LabelBarcodeName", n->barcode="", "Attribute for barcode of labeling particle"); // FIXME barcode-based
     tool.declareProperty("ChildLxyName", n->childLxy="", "Attribute for the labeling particle child Lxy");
     tool.declareProperty("ChildPtName", n->childPt="", "Attribute for the labeling particle child Pt");
     tool.declareProperty("ChildPdgIdName", n->childPdgId="", "Attribute for the labeling particle child pdg ID");
+    tool.declareProperty("ChildPositionDPhiName", n->childPositionDPhi="", "Attribute for the position dPhi of the labeling particle child");
+    tool.declareProperty("ChildPositionDEtaName", n->childPositionDEta="", "Attribute for the position dEta of the labeling particle child");
   }
 
 }

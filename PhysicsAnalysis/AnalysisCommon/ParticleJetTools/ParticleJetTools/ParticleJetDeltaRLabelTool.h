@@ -10,6 +10,7 @@
 #include "JetInterface/IJetDecorator.h"
 #include "xAODTruth/TruthParticle.h"
 #include "xAODTruth/TruthParticleContainer.h"
+#include "xAODTruth/TruthEventContainer.h"
 
 #include "ParticleJetTools/ParticleJetLabelCommon.h"
 
@@ -42,6 +43,10 @@ protected:
   SG::ReadHandleKey<xAOD::TruthParticleContainer> m_tauPartCollectionKey{this,"TauParticleCollection","","ReadHandleKey for tauPartCollection"};
   SG::ReadHandleKey<xAOD::TruthParticleContainer> m_bottomPartCollectionKey{this,"BParticleCollection","","ReadHandleKey for bottomPartCollection"};
   SG::ReadHandleKey<xAOD::TruthParticleContainer> m_charmPartCollectionKey{this,"CParticleCollection","","ReadHandleKey for charmPartCollection"};
+  SG::ReadHandleKey<xAOD::TruthEventContainer> m_truthEventsKey{
+    this, "TruthEventCollection", "TruthEvents",
+    "Truth event collection"
+  };
 
   // linkers to the truth particles
   std::unique_ptr<ParticleJetTools::IParticleLinker> m_blinker;
