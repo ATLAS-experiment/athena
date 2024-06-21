@@ -193,7 +193,7 @@ class DerivationTest(WorkflowTest):
 
         # could also use p5503
         self.command = \
-            (f"ATHENA_CORE_NUMBER={threads} Derivation_tf.py --CA"
+            (f"ATHENA_CORE_NUMBER={threads} Derivation_tf.py"
              f" --formats {' '.join(formats)}"
              " --multiprocess --multithreadedFileValidation True"
              " --athenaMPMergeTargetSize 'DAOD_*:0'"
