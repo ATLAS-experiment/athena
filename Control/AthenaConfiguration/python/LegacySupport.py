@@ -111,8 +111,8 @@ def _mergeSequences( currentConfigurableSeq, conf2Sequence, _log, indent="" ):
             toadd = conf2toConfigurable( el, indent=_indent( indent ))
             if (
                 toadd is not None
-                # SGInputLoader has to be in TopAlg but doesn't have to be anywhere else
-                and not ( toadd.name()=='SGInputLoader' and sequence.name() not in ['TopAlg','HLTBeginSeq'])
+                # SGInputLoader has to be in AthAlgSeq but doesn't have to be anywhere else
+                and not ( toadd.name()=='SGInputLoader' and sequence.name() not in ['AthAlgSeq','HLTBeginSeq'])
             ):  
                 sequence += toadd
                 _log.debug( "%sAlgorithm %s and added to the sequence %s",
@@ -487,13 +487,6 @@ def appendCAtoAthena(ca):
     preconfigured = [athCondSeq,athOutSeq,athAlgSeq,topSequence]
 
     for seq in ca._allSequences:
-
-        # For legacy (serial) support, the AthAlgSeq needs to be mapped into TopAlg
-        # because that's where old-style job options add their algorithms.
-        # Otherwise we can end up with the wrong order, see e.g. ATLASRECTS-7078.
-        if seq.getName() == "AthAlgSeq":
-            seq.name = "TopAlg"
-
         merged = False
         for pre in preconfigured:
             if seq.getName() == pre.getName():

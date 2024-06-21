@@ -255,7 +255,6 @@ class Configurable(metaclass=ConfigurableMeta.ConfigurableMeta ):
       return d
 
    def __setstate__( self, dct ):
-      #print dct
     # flags are set to neutral, not from pickle except for lockedness
       self._flags = 0
       self._flags |= self._fInitOk
@@ -268,15 +267,6 @@ class Configurable(metaclass=ConfigurableMeta.ConfigurableMeta ):
          del dct['_fIsLocked']
       self._flags &= ~self._fIsPrinting
       for (n, v) in dct.items():
-
-         # Don't overwrite these objects.  In py3, the TopAlg object
-         # gets unpicked before AppMgr (it's the other way round with py2),
-         # so otherwise the child lists can be overwritten due to the
-         # special cases in AppMgr.__setattr__.
-         if ((n == 'TopAlg' or n == 'OutStream') and
-             len(v) == 0 and
-             len(getattr(self, n)) > 0):
-            continue
          setattr( self, n, v )
 
       return
@@ -473,7 +463,6 @@ class Configurable(metaclass=ConfigurableMeta.ConfigurableMeta ):
          raise TypeError("Configurable.__init__ not called in %s override" % self.__class__.__name__)
 
     # setup self: this collects all values on the python side
-      self.__setupServices()
       self.__setupDlls()
       self.__setupDefaults()
 
@@ -621,23 +610,6 @@ class Configurable(metaclass=ConfigurableMeta.ConfigurableMeta ):
 
    def _isInSetDefaults( self ):
       return self._flags & self._fInSetDefaults
-
-   def __setupServices( self ):
-      #svcs = self.getServices()
-      #if not svcs:
-      svcs = []
-      #elif type(svcs) == types.StringType:
-      #   svcs = [ svcs ]
-
-      from AthenaCommon import OldStyleConfig
-      for svc in svcs:
-         handle = OldStyleConfig.Service( svc )  # noqa: F841
-       # services should be configurables as well, but aren't for now
-       # handle.setup()
-
-       # allow Configurable to make some changes
-         if hasattr( self, 'configure' + svc ):
-            eval( 'self.configure' + svc + '( handle )' )
 
    def __setupDlls( self ):
       dlls = self.getDlls()

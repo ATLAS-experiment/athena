@@ -15,7 +15,6 @@ allowPtrace()
 
 ### athena/gaudi -------------------------------------------------------------
 from AthenaCommon.Configurable import *
-from AthenaCommon.OldStyleConfig import Algorithm, AlgTool, Service
 
 ### some useful constants ----------------------------------------------------
 from AthenaCommon.Constants import *

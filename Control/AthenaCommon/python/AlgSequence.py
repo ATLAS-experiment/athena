@@ -109,7 +109,7 @@ if hasattr(GaudiSequencerConf, 'AthRetrySequencer'):
 
 
 ### default algorithm sequence
-def AlgSequence( name="TopAlg", **kwargs ):
+def AlgSequence( name="AthAlgSeq", **kwargs ):
     """Convenience method to get the default sequence for algorithms"""
     return AthSequencer( name, **kwargs )
 
