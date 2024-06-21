@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 //
 //  SingleHistogramDefinition.cpp
@@ -35,13 +35,12 @@ SingleHistogramDefinition::SingleHistogramDefinition(Titles_t thename, Titles_t 
 						     Titles_t xName, Titles_t yName,
 						     Titles_t thefolder) :
   name(thename), histoType(thehistoType), title(thetitle), 
-  nBinsX(nbinsX), nBinsY(0), nBinsZ(0), 
+  nBinsX(nbinsX), nBinsY(0), nBinsZ(0),
+  xAxis(xLo, xHi),
+  yAxis(std::numeric_limits<float>::quiet_NaN(), std::numeric_limits<float>::quiet_NaN()),
+  zAxis(std::numeric_limits<float>::quiet_NaN(), std::numeric_limits<float>::quiet_NaN()),
   xTitle(xName), yTitle(yName), zTitle(""), 
   folder(thefolder), m_empty(false) {
-  // should do sanity checks here
-  xAxis = std::make_pair(xLo, xHi);
-  yAxis = std::make_pair(std::numeric_limits<float>::quiet_NaN(), std::numeric_limits<float>::quiet_NaN());
-  zAxis = std::make_pair(std::numeric_limits<float>::quiet_NaN(), std::numeric_limits<float>::quiet_NaN());
   
   allTitles = titleDigest();
 }
@@ -52,12 +51,12 @@ SingleHistogramDefinition::SingleHistogramDefinition(Titles_t thename, Titles_t 
 						     Titles_t xName, Titles_t yName, Titles_t thefolder) :
   name(thename), histoType(thehistoType), title(thetitle), 
   nBinsX(nbinsX), nBinsY(nbinsY), nBinsZ(0),
+  xAxis(xLo, xHi),
+  yAxis(yLo, yHi),
+  zAxis(std::numeric_limits<float>::quiet_NaN(), std::numeric_limits<float>::quiet_NaN()),
   xTitle(xName), yTitle(yName), zTitle(""),
   folder(thefolder), m_empty(false) {
   // should do sanity checks here
-  xAxis = std::make_pair(xLo, xHi);
-  yAxis = std::make_pair(yLo, yHi);
-  zAxis = std::make_pair(std::numeric_limits<float>::quiet_NaN(), std::numeric_limits<float>::quiet_NaN());
   
   allTitles = titleDigest();
 }
@@ -68,12 +67,12 @@ SingleHistogramDefinition::SingleHistogramDefinition(Titles_t thename, Titles_t 
 						     Titles_t xName, Titles_t yName, Titles_t zName, Titles_t thefolder) :
   name(thename), histoType(thehistoType), title(thetitle), 
   nBinsX(nbinsX), nBinsY(nbinsY), nBinsZ(nbinsZ),
+  xAxis(xLo, xHi),
+  yAxis(yLo, yHi),
+  zAxis(zLo, zHi),
   xTitle(xName), yTitle(yName), zTitle(zName), 
   folder(thefolder), m_empty(false) {
   // should do sanity checks here
-  xAxis = std::make_pair(xLo, xHi);
-  yAxis = std::make_pair(yLo, yHi);
-  zAxis = std::make_pair(zLo, zHi);
   
   allTitles = titleDigest();
 }
