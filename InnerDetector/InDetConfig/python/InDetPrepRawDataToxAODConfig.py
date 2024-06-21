@@ -87,6 +87,12 @@ def InDetSCT_PrepDataToxAODCfg(flags, name='InDetSCTPrepDataToxAOD', **kwargs):
     acc.addEventAlgo(CompFactory.SCT_PrepDataToxAOD(name, **kwargs))
     return acc
 
+def InDetSCT_RawDataToxAODCfg(flags, name='InDetSCTRawDataToxAOD', **kwargs):
+    from SCT_GeoModel.SCT_GeoModelConfig import SCT_ReadoutGeometryCfg
+    acc = SCT_ReadoutGeometryCfg(flags)
+    acc.addEventAlgo(CompFactory.SCT_RawDataToxAOD(name, **kwargs))
+    return acc
+
 def InDetSCT_PrepDataToxAOD_ExtraTruthCfg(flags, name='InDetSCTPrepDataToxAOD_ExtraTruth', **kwargs):
     kwargs.setdefault("WriteSDOs", True)
     kwargs.setdefault("WriteSiHits", True)
