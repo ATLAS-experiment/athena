@@ -141,7 +141,7 @@ def indirectOpen(coolstr,readOnly=True,debug=False):
     forceSQLite='ATLAS_COOL_FORCESQLITE' in os.environ
     if (debug and forceSQLite):
         print ("ATLAS_COOL_FORCESQLITE: Force consideration of SQLite replicas")
-    if (len(splitname)!=2 or readOnly is False):
+    if (len(splitname)!=2 or readOnly is False or forceSQLite):
         try:
             db=dbSvc.openDatabase(connstr,readOnly)
         except Exception as e:
