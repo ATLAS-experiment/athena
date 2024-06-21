@@ -368,7 +368,7 @@ StatusCode FPGAClusterConverter::createPixelCluster(const FPGATrackSimHit& h,con
   Eigen::Matrix<float,3,1> globalPosition(globalPos.x(), globalPos.y(), globalPos.z()); // TODO: or positionShift?
 
   cl.setMeasurement<2>(hash, localPosition, localCovariance);
-  cl.setIdentifier( pDE->identifierOfPosition(localPos).get_compact() );
+  cl.setIdentifier( rdoList.front().get_compact() );
   cl.setRDOlist(rdoList);
   cl.globalPosition() = globalPosition; 
   cl.setChannelsInPhiEta(siWidth.colRow()[0], siWidth.colRow()[1]);
@@ -558,7 +558,7 @@ StatusCode FPGAClusterConverter::createSCTCluster(const FPGATrackSimHit& h, cons
   Eigen::Matrix<float,3,1> globalPosition(globalPos.x(), globalPos.y(), globalPos.z()); 
 
   cl.setMeasurement<1>(hash, localPosition, localCovariance);
-  cl.setIdentifier( pDE->identifierOfPosition(localPos).get_compact() );
+  cl.setIdentifier( rdoList.front().get_compact() );
   cl.setRDOlist(rdoList);
   cl.globalPosition() = globalPosition;
   cl.setChannelsInPhi(siWidth.colRow()[0]);
