@@ -14,8 +14,6 @@
 /////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
 namespace {
-    static const TgcRdoIdHash hashF;
-
     static uint16_t identifyFragment(const TgcRawData& rawData) {
         return TgcRdo::identifyRawData(rawData);
     }
@@ -58,6 +56,7 @@ StatusCode TgcDigitToTgcRDO::execute(const EventContext& ctx) const {
 
     std::map<uint16_t, std::unique_ptr<TgcRdo>> tgcRdoMap{};
 
+     const TgcRdoIdHash hashF;
 
     // loop over collections
     for (const TgcDigitCollection* tgcCollection : *container) {
@@ -114,6 +113,7 @@ StatusCode TgcDigitToTgcRDO::execute(const EventContext& ctx) const {
                 // Add the RawData to the RDO
                 const uint16_t rdoId = identifyFragment(*rawData);
                 std::unique_ptr<TgcRdo>& tgcRdo = tgcRdoMap[rdoId];
+
                 if(!tgcRdo) {
                     // create new TgcRdo
                     const  IdentifierHash hashId = hashF(rdoId);
