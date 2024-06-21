@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.Enums import BeamType
@@ -63,5 +63,9 @@ def createInDetConfigFlags():
     icf.addFlag("InDet.saveSCTSiHits", lambda prevFlags:
                 prevFlags.BTagging.Trackless or
                 prevFlags.BTagging.saveSCTHits)
+
+    # SCT prescale flags
+    icf.addFlag("InDet.SCTxAODPrescale", 
+                lambda prevFlags: 50 if prevFlags.Input.TriggerStream == 'express' else (10 if prevFlags.Input.TriggerStream == 'IDprescaledL1' else 1))
 
     return icf
