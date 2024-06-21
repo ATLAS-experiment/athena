@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 import logging
 def setupArgParser():
     from argparse import ArgumentParser
@@ -17,7 +17,7 @@ if __name__ == "__main__":
 
     resolvedInFile = resolver.find_file(args.inFile, "DATAPATH")
     if not resolvedInFile or len(resolvedInFile) == 0:
-        logging.error("Failed to find file {fileName}".format(fileName = resolvedInFile))
+        logging.error("Failed to find file {fileName}".format(fileName = args.inFile))
         exit(1)
     ### translate the station name indices into the string staiton name
     stationNameDict = {41:"T1F", 42:"T1E", 43:"T2F", 44:"T2E", 45:"T3F", 46:"T3E", 47:"T4F", 48:"T4E"}
