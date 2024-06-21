@@ -77,7 +77,7 @@ def TGCCablingConfigCfg(flags):
     # No ServiceHandle in TGCcablingServerSvc
     acc.merge(MuonTGC_CablingSvcCfg(flags))
 
-    TGCcablingServerSvc = CompFactory.Muon.TGCcablingServerSvc
+    TGCcablingServerSvc=CompFactory.TGCcablingServerSvc
     TGCCablingSvc = TGCcablingServerSvc()
     acc.addService( TGCCablingSvc, primary=True )
 
