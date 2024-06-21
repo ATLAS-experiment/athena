@@ -87,7 +87,7 @@ def LArDigitalTriggMonConfig(flags,larLATOMEBuilderAlg, nsamples=32, streamTypes
 
     if (hasAdc and hasAdcBas): #prefer Raw Adc if both in recipe
         hasAdc = False
-        larDigitalTriggMonAlg.usADCBas=False
+        larDigitalTriggMonAlg.isADCBas=False
 
     mlog.info("Mux settings from COOL:")
     mlog.info("has ET Id: "+str(hasEtId))

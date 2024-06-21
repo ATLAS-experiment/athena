@@ -606,3 +606,38 @@ def IDTRKVALIDTruthThinningToolCfg(
     from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import (
         MenuTruthThinningCfg)
     return MenuTruthThinningCfg(flags, name, **kwargs)
+
+def EventInfoBSErrDecoratorCfg(
+        flags, name="EventInfoBSErrDecorator", **kwargs):
+    acc = ComponentAccumulator()
+    acc.addPublicTool(CompFactory.DerivationFramework.EventInfoBSErrDecorator(
+        name, **kwargs), primary=True)
+    return acc
+
+def UnassociatedHitsGetterToolCfg(
+        flags, name="UnassociatedHitsGetterTool", **kwargs):
+    acc = ComponentAccumulator()
+
+    if "AssociationTool" not in kwargs:
+        from InDetConfig.InDetAssociationToolsConfig import (
+            InDetPRDtoTrackMapToolGangedPixelsCfg)
+        kwargs.setdefault("AssociationTool", acc.popToolsAndMerge(
+            InDetPRDtoTrackMapToolGangedPixelsCfg(flags)))
+
+    acc.setPrivateTools(
+        CompFactory.DerivationFramework.UnassociatedHitsGetterTool(name, **kwargs))
+    return acc
+
+def UnassociatedHitsDecoratorCfg(
+        flags, name="UnassociatedHitsDecorator", **kwargs):
+    acc = ComponentAccumulator()
+
+    if "UnassociatedHitsGetter" not in kwargs:
+        from DerivationFrameworkInDet.InDetToolsConfig import (
+            UnassociatedHitsGetterToolCfg)
+        kwargs.setdefault("UnassociatedHitsGetter", acc.popToolsAndMerge(
+            UnassociatedHitsGetterToolCfg(flags)))
+
+    acc.addPublicTool(CompFactory.DerivationFramework.UnassociatedHitsDecorator(
+        name, **kwargs), primary=True)
+    return acc

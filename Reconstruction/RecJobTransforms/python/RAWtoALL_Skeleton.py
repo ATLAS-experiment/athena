@@ -103,6 +103,13 @@ def fromRunArgs(runArgs):
         flags.addFlag('Output.doWriteDAOD_IDTRKVALID', True)
         log.info("---------- Configured DAOD_IDTRKVALID output")
 
+    if hasattr(runArgs, 'outputDAOD_SCTVALIDFile'):
+        flagString = 'Output.DAOD_SCTVALIDFileName'
+        flags.addFlag(flagString, runArgs.outputDAOD_SCTVALIDFile)
+        flags.Output.doWriteDAOD = True
+        flags.addFlag('Output.doWriteDAOD_SCTVALID', True)
+        log.info("---------- Configured DAOD_SCTVALID output")
+
     if hasattr(runArgs, 'outputDESDM_MCPFile'):
         flagString = 'Output.DESDM_MCPFileName'
         flags.addFlag(flagString, runArgs.outputDESDM_MCPFile)
@@ -216,6 +223,12 @@ def fromRunArgs(runArgs):
         from DerivationFrameworkInDet.PIXELVALID import PixelVALIDCfg
         cfg.merge(PixelVALIDCfg(flags))
         log.info("---------- Configured PixelVALID perfDPD")
+    
+    # SCTVALID
+    for flag in [key for key in flags._flagdict.keys() if ("Output.DAOD_SCTVALIDFileName" in key)]:
+        from InDetPrepRawDataToxAOD.SCTVALID import SCTVALIDCfg
+        cfg.merge(SCTVALIDCfg(flags))
+        log.info("---------- Configured SCTVALID perfDPD")
 
     # IDTRKVALID
     for flag in [key for key in flags._flagdict.keys() if ("Output.DAOD_IDTRKVALIDFileName" in key)]:

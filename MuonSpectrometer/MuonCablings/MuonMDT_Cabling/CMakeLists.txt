@@ -4,7 +4,7 @@
 atlas_subdir( MuonMDT_Cabling )
 
 # External dependencies:
-find_package( CORAL COMPONENTS CoralBase )
+find_package( CORAL COMPONENTS CoralBase CoralKernel RelationalAccess )
 
 # Component(s) in the package:
 atlas_add_component( MuonMDT_Cabling
@@ -12,5 +12,5 @@ atlas_add_component( MuonMDT_Cabling
                      src/components/*.cxx
                      INCLUDE_DIRS ${CORAL_INCLUDE_DIRS}
                      LINK_LIBRARIES ${CORAL_LIBRARIES} AthenaBaseComps AthenaKernel GaudiKernel StoreGateLib MuonIdHelpersLib 
-                                    MuonCablingData AthenaPoolUtilities MuonCondSvcLib PathResolver SGTools )
+                                    MuonCablingData AthenaPoolUtilities MuonCondSvcLib PathResolver SGTools CoralUtilitiesLib )
 

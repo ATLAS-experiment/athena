@@ -16,6 +16,9 @@
 #include "PathResolver/PathResolver.h"
 #include "SGTools/TransientAddress.h"
 
+#include <CoralBase/Blob.h>
+#include <CoralUtilities/blobaccess.h>
+
 
 using DataSource = MuonMDT_CablingMap::DataSource;
 
@@ -52,6 +55,27 @@ StatusCode MuonMDT_CablingAlg::execute(const EventContext& ctx) const {
     ATH_MSG_INFO("recorded new " << writeHandle.key() << " with range " << writeHandle.getRange() << " into Conditions Store");
     return StatusCode::SUCCESS;
 }
+
+StatusCode MuonMDT_CablingAlg::dbPayloadToJson(SG::ReadCondHandle<CondAttrListCollection>& readHandle, nlohmann::json& json) const {
+    for (CondAttrListCollection::const_iterator itr = readHandle->begin(); 
+                                                itr != readHandle->end(); ++itr) {
+        const coral::AttributeList& atr = itr->second;
+        std::string data{};
+        if (atr["data"].specification().type() == typeid(coral::Blob)) {
+
+            ATH_MSG_VERBOSE("Loading data as a BLOB, uncompressing...");
+            if (!CoralUtilities::readBlobAsString(atr["data"].data<coral::Blob>(), data)) {
+                ATH_MSG_FATAL("Cannot uncompress BLOB! Aborting...");
+                return StatusCode::FAILURE;
+            }
+        } else {
+            data = *(static_cast<const std::string*>((atr["data"]).addressOfData()));
+        }
+        json = nlohmann::json::parse(data);
+    }
+    return StatusCode::SUCCESS;
+}
+
 StatusCode MuonMDT_CablingAlg::loadCablingSchema(const EventContext& ctx, SG::WriteCondHandle<MuonMDT_CablingMap>& writeHandle,
                                                  MuonMDT_CablingMap& cabling_map)  const {
     
@@ -78,8 +102,10 @@ StatusCode MuonMDT_CablingAlg::loadCablingSchema(const EventContext& ctx, SG::Wr
    
     ATH_MSG_VERBOSE("Collection CondAttrListCollection CLID " << readHandleMap->clID());
     if (m_useJSONFormat) {
-        ATH_MSG_FATAL("Mechanism to read the JSON database needs to be implemented...");
-        return StatusCode::FAILURE;
+        nlohmann::json json;
+        ATH_CHECK(dbPayloadToJson(readHandleMap, json));
+        ATH_CHECK(loadCablingSchemaFromJSON(std::move(json),cabling_map));
+        return StatusCode::SUCCESS;
     }
     // access to Map Schema Table to obtained the Map
     CondAttrListCollection::const_iterator itrMap;
@@ -287,8 +313,10 @@ StatusCode MuonMDT_CablingAlg::loadMezzanineSchema(const EventContext& ctx,SG::W
                   << " readCdoMez->size()= " << readHandleMez->size());
     
     if (m_useJSONFormat) {
-        ATH_MSG_FATAL("The reading of the JSON file from the database needs to come");
-        return StatusCode::FAILURE;
+        nlohmann::json json;
+        ATH_CHECK(dbPayloadToJson(readHandleMez, json));
+        ATH_CHECK(loadMezzanineFromJSON(std::move(json),cabling_map));
+        return StatusCode::SUCCESS;
     }
     CondAttrListCollection::const_iterator itrMez;
     for (itrMez = readHandleMez->begin(); itrMez != readHandleMez->end(); ++itrMez) {

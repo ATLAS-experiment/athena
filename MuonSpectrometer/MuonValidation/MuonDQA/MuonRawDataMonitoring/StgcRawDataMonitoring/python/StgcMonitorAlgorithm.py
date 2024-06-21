@@ -3,6 +3,7 @@
 #
 
 from AthenaConfiguration.ComponentFactory import CompFactory
+from StgcRawDataMonitoring.StgcMonitorUtils import columnLabels_AL, columnLabels_CL, columnLabels_AS, columnLabels_CS, rowLabels, wireGroupNumberLabel
 import math
 
 def sTgcMonitoringConfig(inputFlags,NSW_PadTrigKey=''):
@@ -35,7 +36,7 @@ def sTgcMonitoringConfig(inputFlags,NSW_PadTrigKey=''):
 
     globalPath = 'Muon/MuonRawDataMonitoring/STG/'
 
-    #Shifter
+    # Shifter
     sTgcOverviewGroup  = helper.addGroup(sTgcMonAlg, 'sTgcOverview', globalPath + 'Shifter')
     sTgcQuadOccupancyGroupPad = helper.addGroup(sTgcMonAlg, 'sTgcQuadOccupancyPad', globalPath + 'Shifter/Occupancy')
     sTgcQuadOccupancyGroupStrip = helper.addGroup(sTgcMonAlg, 'sTgcQuadOccupancyStrip', globalPath + 'Shifter/Occupancy')
@@ -44,7 +45,7 @@ def sTgcMonitoringConfig(inputFlags,NSW_PadTrigKey=''):
     sTgcPadTriggerShifterGroup = helper.addGroup(sTgcMonAlg, 'padTriggerShifter', globalPath + 'Shifter/')
     sTgcLBshifterGroup = helper.addGroup(sTgcMonAlg, 'sTgcLumiblock', globalPath + 'Shifter/Lumiblock/')
         
-    #Expert
+    # Expert
     sTgcOccupancyGroup = helper.addGroup(sTgcMonAlg, 'sTgcOccupancy', globalPath + 'Expert/Occupancy')
     sTgcPadTriggerExpertGroup = helper.addGroup(sTgcMonAlg, 'padTriggerExpert', globalPath + 'Expert/')
     padTriggerOccupancyGroup = helper.addGroup(sTgcMonAlg, 'padTriggerOccupancy', globalPath + 'Expert/PadTrigger/Hits/')
@@ -55,6 +56,11 @@ def sTgcMonitoringConfig(inputFlags,NSW_PadTrigKey=''):
     stationEtaMax = 3
     sectorMax     = 16
     layerMax      = 8
+
+    # Custom labels
+    # Pad trigger occupancy
+    columnLabels = [columnLabels_AL, columnLabels_AS, columnLabels_CL, columnLabels_CS]
+    columnLabelsCounter = 0
     
     titleEtaPhiEffMap = '; #eta (reco); #phi (reco); Pad trigger efficiency wrt. reco. muon'
     varEtaPhiEffMap   = 'muonRecoTriggerMatch,etaRecoMuonEff,phiRecoMuonEff;padTrigger_Efficiency_per_etaPhi'
@@ -177,12 +183,13 @@ def sTgcMonitoringConfig(inputFlags,NSW_PadTrigKey=''):
             titlePhiVsIds = f'{sideIndex}{sizeIndex}; Trigger phiID; Trigger bandID; Pad Trigger hits'
             varPhiVsIds   = f'phiIds_{sideIndex}_{sizeIndex},bandIds_{sideIndex}_{sizeIndex};bandIds_vs_phiIds_Side{sideIndex}_Size{sizeIndex}'
             sTgcPadTriggerShifterGroup.defineHistogram(varPhiVsIds, type = 'TH2F', title = titlePhiVsIds, path = 'PadTrigger/Triggers', xbins = 65, xmin = -32.5, xmax = 32.5, ybins = 101, ymin = -0.5, ymax = 100.5, opt = 'kAlwaysCreate')
-            
+
             for layerIndex in range(1, layerMax + 1):
                 titleEtaPhiOcc = f'{layerIndex}{sideIndex}{sizeIndex}; Pad column; Pad row; Hits'
                 varEtaPhiOcc = f'padPhi_{sideIndex}_{sizeIndex}_layer_{layerIndex},padEta_{sideIndex}_{sizeIndex}_layer_{layerIndex};padEtaPhiOcc_{layerIndex}{sideIndex}{sizeIndex}'
-                padTriggerOccupancyGroup.defineHistogram(varEtaPhiOcc, type = 'TH2F', title = titleEtaPhiOcc, path = 'padTriggerOccupancy', xbins = 71, xmin = 0.5, xmax = 71.5, ybins = 56, ymin = 0.5, ymax = 56.5, opt = 'kAlwaysCreate')
+                padTriggerOccupancyGroup.defineHistogram(varEtaPhiOcc, type = 'TH2F', title = titleEtaPhiOcc, path = 'padTriggerOccupancy', xbins = 71, xmin = 0.5, xmax = 71.5, xlabels = columnLabels[columnLabelsCounter], ybins = 56, ymin = 0.5, ymax = 56.5, ylabels = rowLabels, opt = 'kAlwaysCreate')
 
+            columnLabelsCounter += 1
         for sectorIndex in range(1, sectorMax + 1):
             titleBandIdVersusLBperSector = f'{sideIndex}' + f'{sectorIndex}'.zfill(2) + '; LB; Trigger bandID; number of triggers'
             varBandIdVersusLBperSector = f'lb_{sideIndex}_sector_{sectorIndex},bandIds_{sideIndex}_sector_{sectorIndex};OccupancyBandId_vs_LB_Side{sideIndex}_Sector{sectorIndex}'
@@ -275,7 +282,7 @@ def sTgcMonitoringConfig(inputFlags,NSW_PadTrigKey=''):
             
         titleWireGroupOccupancyPerQuad  = f'L{layerIndex}; Wire Group Number; Quad; Hits'
         varWireGroupOccupancyPerQuad    = f'wireGroupNumber_layer_{layerIndex},stationEta_layer_{layerIndex};Wire_ch_occupancy_per_sector_Layer{layerIndex}'
-        sTgcOccupancyGroup.defineHistogram(varWireGroupOccupancyPerQuad, type = 'TH2F', title = titleWireGroupOccupancyPerQuad, path = 'Wire', xbins = 58*sectorMax + 1, xmin = -0.5, xmax = 58*sectorMax + 0.5, ybins = 2*stationEtaMax + 1, ymin = -stationEtaMax - 0.5, ymax = stationEtaMax + 0.5, opt = 'kAlwaysCreate')
+        sTgcOccupancyGroup.defineHistogram(varWireGroupOccupancyPerQuad, type = 'TH2F', title = titleWireGroupOccupancyPerQuad, path = 'Wire', xbins = 58*sectorMax + 1, xmin = -0.5, xmax = 58*sectorMax + 0.5, xlabels = wireGroupNumberLabel, ybins = 2*stationEtaMax + 1, ymin = -stationEtaMax - 0.5, ymax = stationEtaMax + 0.5, opt = 'kAlwaysCreate')
 
     acc = helper.result()
     result.merge(acc)

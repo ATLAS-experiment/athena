@@ -127,7 +127,7 @@ def getEBnoL1PSSeed(l1items, l1seedname):
         ],
         'PhysicsVeryHigh':
         [
-            'L1_XE300', 'L1_J400'
+             'L1_J400', 'L1_jXE500'
         ],
         'EMPTY': 
         [

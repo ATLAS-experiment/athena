@@ -25,6 +25,7 @@ if __name__ == "__main__":
     flags.Output.ESDFileName = args.output
     flags.Input.Files = args.inputFile
     flags.GeoModel.AtlasVersion = args.geometry
+    flags.IOVDb.GlobalTag = args.conditionsTag
     flags.lock()   
     
     cfg = MdtCablMezzAlgCfg(flags,

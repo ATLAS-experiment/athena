@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 __author__  = 'Will Buttinger'
@@ -7,7 +8,8 @@ __doc__="Provides a helper class for managing a session of interactions with the
 from TriggerMenuMT.TriggerAPI import SerializeAPI
 from TriggerMenuMT.TriggerAPI.TriggerAPI import TriggerAPI
 from TriggerMenuMT.TriggerAPI.TriggerEnums import TriggerPeriod,TriggerType
-
+from AthenaCommon.Logging import logging
+log = logging.getLogger(__name__)
 
 class TriggerAPISession:
     """
@@ -62,9 +64,11 @@ class TriggerAPISession:
     """
 
 
-    def __init__(self, *, grl=None, flags=None, json=None, menu=None, period=None):
+    def __init__(self, input=None, *, grl=None, flags=None, json=None, menu=None, period=None):
         """
         Specify one and only one of the following parameters to construct your API session:
+
+        :param input: If specified, will try to auto-infer which of the things below it is:
 
         :param grl: Path to a GRL file, locatable by PathResolver
         :param flags: flag container, used if reading triggers from the trigger menu
@@ -72,6 +76,21 @@ class TriggerAPISession:
         :param menu: Specify a menu to use, such as "Physics_pp_run3_v1". This is otherwise taken from flags
         :param period: Legacy option, can specify a TriggerPeriod and will load through the hardcoded GRLs (TriggerPeriodData)
         """
+
+        if input is not None:
+            if type(input)==str:
+                if input.endswith(".xml"):
+                    log.info("Loading session for GRL:" + input)
+                    grl = input
+                elif input.endswith(".json"):
+                    log.info("Loading saved session from:" + input)
+                    json = input
+                else:
+                    log.info("Loading session for menu:" + input)
+                    menu = input
+            else:
+                raise RuntimeError("Unsupported input type:" + type(input).__name__)
+
 
         # the following represents the complete "state" of the TriggerAPI
         self.dbQueries = {}
@@ -179,6 +198,18 @@ class TriggerAPISession:
         for ti in self.dbQueries.values():
             out.update(ti._getLowestUnprescaled(triggerType, additionalTriggerType, "", livefraction))
         self.setRunRange() # reset to include all ranges
+
+        if not out and livefraction==1.0 and list(self.dbQueries.keys())[0][1]:
+            log.warning("No triggers found that are fully unprescaled in your GRL ... checking for livefractions per run:")
+            # check result by-run to see if there are problems with individual runs (possibly lumiblocks included in each)
+            for run in sorted(list(self.runs())):
+                liveFractions = self.getLiveFractions(triggerType=triggerType,additionalTriggerType=additionalTriggerType,runStart=run,runEnd=run)
+                lf = max(liveFractions.values())
+                if lf < 1 and lf > 0.9:
+                    log.warning(f"run {run} has maximum livefraction {lf} - prescaled LBs may have been included in your GRL accidentally. Please report this to Data Preparation")
+                elif lf==1.0:
+                    log.info(f"run {run} is unprescaled")
+
         return out
 
     def getLowestUnprescaledByRun(self,*,triggerType=TriggerType.ALL,additionalTriggerType=TriggerType.UNDEFINED,livefraction=1.0,runStart=0,runEnd=999999):
@@ -242,4 +273,38 @@ class TriggerAPISession:
         return out
 
 
+if __name__ == "__main__":
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        prog='tapis',
+        description="Example usage: tapis --triggerType el_single path/to/grl.xml",
+        epilog='',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+
+    parser.add_argument("--triggerType",choices=[x.name for x in TriggerType],default=TriggerType.ALL)
+    parser.add_argument("--additionalTriggerType",choices=[x.name for x in TriggerType],default=TriggerType.UNDEFINED)
+    parser.add_argument("input",metavar="grl/menu/json",help="Either a GRL, a menu name, or a json session cache file. PathResolve paths supported")
+    parser.add_argument("--runStart",type=int,default=0,help="First runNumber to consider")
+    parser.add_argument("--runEnd",type=int,default=999999,help="Last runNumber to consider")
+    parser.add_argument("--save",default=None,help="If specified, the path to save the session to as a json file")
+    parser.add_argument("--livefraction",type=float,default=1.0,help="EXPERT OPTION: lower the livefraction threshold for trigger to be considered unprescaled")
+
+    args = parser.parse_args()
+
+    s = TriggerAPISession(args.input)
+    if args.save: s.save(args.save)
+
+    # convert triggerTypes into required enums
+    for t in TriggerType:
+        if t.name == args.triggerType:
+            args.triggerType = t
+        if t.name == args.additionalTriggerType:
+            args.additionalTriggerType = t
+
+    result = s.getLowestUnprescaled(triggerType=args.triggerType,
+                                    additionalTriggerType=args.additionalTriggerType,
+                                    livefraction=args.livefraction,
+                                    runStart=args.runStart,runEnd=args.runEnd)
+    log.info(result)
 
