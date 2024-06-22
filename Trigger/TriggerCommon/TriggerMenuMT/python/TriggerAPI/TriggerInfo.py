@@ -128,11 +128,12 @@ class TriggerInfo:
 
 class TriggerLeg:
     types          = ('e','j','mu','tau','xe','g','ht')
-    legpattern     = re.compile('([0-9]*)(%s)([0-9]+)(noL1)?' % '|'.join(types))
+    uctTypes       = ('isotrk', 'fslrt', 'dedxtrk', 'hitdvjet', 'fsvsi', 'distrk', 'dispjet', 'dispvtx') # unconventional tracking types
+    legpattern     = re.compile('([0-9]*)(%s)([0-9]+)(noL1)?' % '|'.join(types+uctTypes))
     detailpattern  = re.compile(r'(?:-?\d+)|(?:[^0-9 -]+)') #split into text-only vs number-only
     bjetpattern    = re.compile('bmv|bhmv|btight|bmedium|bloose|bld1|bgn1|bgn2|bdl1')
     bphyspattern   = re.compile('b[A-Z]')
-    exoticspattern = re.compile('llp|LLP|muvtx|hiptrt|LATE|NOMATCH')
+    exoticspattern = re.compile('llp|LLP|muvtx|hiptrt|LATE|NOMATCH|distrk|hitdvjet')
     afppattern     = re.compile('afp|AFP')
 
     def __init__(self,legname, chainseed, chainname=None):
@@ -167,6 +168,10 @@ class TriggerLeg:
                     self.legtype = TriggerType.xe
                 elif legtype == 'ht':
                     self.legtype = TriggerType.ht
+                elif legtype in self.uctTypes:
+                    self.legtype = TriggerType.exotics
+                    # all these leg types are actually distinct, so include legtype in the detail list too
+                    details.append(legtype)
                 else:
                     log.info("Unknown trigger type: %s",legtype)
                 if noL1: details.append(noL1)
@@ -201,7 +206,7 @@ class TriggerLeg:
         return hash((self.l1seed,self.count,self.thr,self.legtype,self.details))
 
     def __repr__(self):
-        return "{0} {1} {2} {3} {4} {5:b}".format(self.legname,self.l1seed,self.count,self.thr,self.details,self.legtype)
+        return "{0} l1seed={1} count={2} thr={3} details={4} legtype={5}".format(self.legname,self.l1seed,self.count,self.thr,self.details,TriggerType.toStr(self.legtype))
 
     def isLegLowerThan(self, other, is2015, debug=False):
         ''' Returns -9 if none of them is lower than the other (e.g. different met flavour).
@@ -311,6 +316,10 @@ class TriggerLeg:
                 if y == x.replace("vloose","loose"): return 1
                 if y == x.replace("vloose","loose").replace("loose","medium"): return 1
                 if y == x.replace("vloose","loose").replace("loose","medium").replace("medium","tight"): return 1
+                l1ThresholdLevels = ["L","M","T"]
+                if x in l1ThresholdLevels and y in l1ThresholdLevels:
+                    if l1ThresholdLevels.index(x) > l1ThresholdLevels.index(y): return 0
+                    return 1 # don't need to check for equality, that was done above
                 if stringSubset:
                     if x in y: return 1
                     if y in x: return 0
@@ -350,7 +359,7 @@ class TriggerLeg:
         return [TriggerLeg(l,l1seed,chainname) for l in legsname]
 
 class TriggerChain:
-    l1types        = ('EM','J','MU','TAU','XE','XS','HT')
+    l1types        = ('EM','J','MU','TAU','XE','XS','HT','eEM','eTAU','jJ','jTAU','jXE','gXEJWOJ','gJ','gLJ','jEM')
     l1pattern      = re.compile('([0-9]*)(%s)([0-9]+)' % '|'.join(l1types))
 
     def __init__(self,name,l1seed,livefraction,activeLB=1,hasRerun=False, activeLBByRun={}):
@@ -490,19 +499,19 @@ class TriggerChain:
             if m:
                 count,legtype,thr = m.groups()
                 count = int(count) if count else 1
-                if legtype == 'EM' or legtype == 'TAU':
+                if 'EM' in legtype or 'TAU' in legtype:
                     pass
-                elif legtype == 'MU':
+                elif 'MU' in legtype:
                     if not mtype & TriggerType.mu_bphys:
                         if count > 1: mtype |= TriggerType.mu_multi
                         elif not mtype & TriggerType.mu_multi: mtype |= TriggerType.mu_single
-                elif legtype == 'J':
+                elif 'J' in legtype:
                     if not mtype & TriggerType.bj and not mtype & TriggerType.j and not mtype & TriggerType.tau and not mtype & TriggerType.ht:
                         if count > 1: mtype |= TriggerType.j_multi
                         elif not mtype & TriggerType.j_multi: mtype |= TriggerType.j_single
-                elif legtype == 'XE' or legtype == 'XS':
+                elif 'XE' in legtype or 'XS' in legtype:
                     mtype |= TriggerType.xe
-                elif legtype == 'HT':
+                elif 'HT' in legtype:
                     mtype |= TriggerType.ht
                 else:
                     log.info("Unknown trigger type:",(legtype, mtype, token, self.name))
@@ -540,7 +549,7 @@ class TriggerChain:
         return tmpType == TriggerType.UNDEFINED #After matches nothing remains
 
     def __repr__(self):
-        return repr((self.name, self.legs, "{0:b}".format(self.triggerType), self.livefraction, self.activeLB))
+        return repr({"name":self.name, "legs":self.legs, "triggerType":TriggerType.toStr(self.triggerType), "livefraction":self.livefraction, "activeLB":self.activeLB})
 
     def isSubsetOf(self, other):
         ''' Returns -1 if none of them is a strict subset of the other

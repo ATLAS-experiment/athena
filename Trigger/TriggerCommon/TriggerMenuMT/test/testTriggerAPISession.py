@@ -26,11 +26,11 @@ class TriggerAPISessionTest(unittest.TestCase):
         # here are results of triggers by type for this GRL, for a livefraction of 0.98 (b.c there were a few lb where things got prescaled):
         # results were generated with code at bottom of this test
         triggersByType = {}
-        triggersByType[TriggerType.el_single] = 7
+        triggersByType[TriggerType.el_single] = 6
         triggersByType[TriggerType.el_multi] = 6
         triggersByType[TriggerType.mu_single] = 5
         triggersByType[TriggerType.mu_multi] = 23
-        triggersByType[TriggerType.j_single] = 26
+        triggersByType[TriggerType.j_single] = 22
         triggersByType[TriggerType.j_multi] = 20
         triggersByType[TriggerType.bj_single] = 6
         triggersByType[TriggerType.bj_multi] = 8
@@ -38,18 +38,18 @@ class TriggerAPISessionTest(unittest.TestCase):
         triggersByType[TriggerType.tau_multi] = 5
         triggersByType[TriggerType.g_single] = 2
         triggersByType[TriggerType.g_multi] = 9
-        triggersByType[TriggerType.xe] = 7
+        triggersByType[TriggerType.xe] = 3
         triggersByType[TriggerType.ht] = 0
         triggersByType[TriggerType.mu_bphys] = 40
         triggersByType[TriggerType.exotics] = 2
         triggersByType[TriggerType.afp] = 0
-        triggersByType[TriggerType.el] = 13
+        triggersByType[TriggerType.el] = 12
         triggersByType[TriggerType.mu] = 29
-        triggersByType[TriggerType.j] = 46
+        triggersByType[TriggerType.j] = 42
         triggersByType[TriggerType.bj] = 14
         triggersByType[TriggerType.tau] = 6
         triggersByType[TriggerType.g] = 11
-        triggersByType[TriggerType.ALL] = 302
+        triggersByType[TriggerType.ALL] = 301
         triggersByType[TriggerType.UNDEFINED] = 0
 
 
