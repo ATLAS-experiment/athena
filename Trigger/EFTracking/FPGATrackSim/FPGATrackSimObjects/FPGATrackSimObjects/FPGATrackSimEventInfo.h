@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGFPGATrackSimOBJECTS_FPGATrackSimEVENTINFO_H
@@ -49,7 +49,7 @@ public:
   int BCID() const { return m_BCID; }
   unsigned int extendedLevel1ID() const { return m_extendedLevel1ID; }
   unsigned int level1TriggerType() const { return m_level1TriggerType; }
-  std::vector<unsigned int> level1TriggerInfo() const { return m_level1TriggerInfo; }
+  const std::vector<unsigned int>& level1TriggerInfo() const { return m_level1TriggerInfo; }
 
   //set
   void setRunNumber(const unsigned long& val) { m_run_number = val; }
