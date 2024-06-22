@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////// 
@@ -450,11 +450,10 @@ bool EtaPtFilterTool::isFromHardScattering( const HepMC::ConstGenVertexPtr& vtx 
   int showerout = 0;
 #ifdef HEPMC3  
   for (auto& p: vtx->particles_in()) if (MC::isQuark(p) || MC::isGluon(p)) partonsin++;
-  for (auto& p: vtx->particles_out()) if (p->pdg_id() == 91||p->pdg_id() == 92||p->pdg_id() == 94)  showerout++;
 #else
-  for (auto p = vtx->particles_in_begin();p!=vtx->particles_in_end();++p ) if (MC::isQuark(*p) || MC::isGluon(*p)) partonsin++;
-  for (auto p = vtx->particles_out_begin();p!=vtx->particles_out_end();++p ) if (*p->pdg_id() == 91||*p->pdg_id() == 92||*p->pdg_id() == 94)  showerout++;
+  for (auto p = vtx->particles_in_const_begin();p!=vtx->particles_in_const_end();++p ) if (MC::isQuark(*p) || MC::isGluon(*p)) partonsin++;
 #endif
+  for (auto& p: *vtx) if (p->pdg_id() == 91||p->pdg_id() == 92||p->pdg_id() == 94)  showerout++;
   
   return isPartonVertex(vtx) && (partonsin >= 2) &&  (showerout == 0);
 }
