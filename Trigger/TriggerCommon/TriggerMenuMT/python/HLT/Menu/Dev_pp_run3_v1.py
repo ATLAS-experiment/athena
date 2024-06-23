@@ -876,11 +876,11 @@ def getDevSignatures():
         ChainProp(name="HLT_tau25_tightRNN_trackLRT_L1TAU12IM", groups=DevGroup),
         ChainProp(name="HLT_tau25_mediumRNN_trackLRT_L1cTAU20M", groups=DevGroup),
         ChainProp(name="HLT_tau25_mediumRNN_trackLRT_L1eTAU20", groups=DevGroup),
-        ChainProp(name="HLT_tau80_mediumRNN_trackLRT_L1eTAU80", groups=DevGroup, monGroups=['tauMon:t0']),
+        ChainProp(name="HLT_tau80_mediumRNN_trackLRT_L1eTAU80", groups=DevGroup),
         ChainProp(name="HLT_tau160_mediumRNN_trackLRT_L1eTAU140", groups=DevGroup, monGroups=['tauMon:t0']),
         ChainProp(name="HLT_tau25_idperf_trackLRT_L1TAU12IM", groups=DevGroup, monGroups=['tauMon:t0']),
         ChainProp(name="HLT_tau25_idperf_tracktwoLLP_L1TAU12IM", groups=DevGroup),
-        ChainProp(name="HLT_tau80_idperf_trackLRT_L1eTAU80", groups=DevGroup, monGroups=['tauMon:t0']),
+        ChainProp(name="HLT_tau80_idperf_trackLRT_L1eTAU80", groups=DevGroup),
         ChainProp(name="HLT_tau160_idperf_trackLRT_L1eTAU140", groups=DevGroup, monGroups=['tauMon:t0']), 
 
         

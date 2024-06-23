@@ -212,6 +212,9 @@ def quantize_iovs(lbtime, iovs, quantizer=default_quantizing_function):
             emit_needed = lb_n.run != last_lb_n.run
             if emit_needed:
                 need_evaluation = lb_n + 2
+            elif lb_n.lumi - last_lb_n.lumi > 1:
+                need_evaluation = lb_n + 1
+                log.warning(f"Missing LB range [{last_lb_n + 1}, {lb_n})")
                 
             last_lb_n = lb_n
             
@@ -299,6 +302,9 @@ def quantize_iovs_slow_interm(lbtime, iovs,
                 lb_n = RunLumi(iov.Run, iov.LumiBlock)
                 if lb_n.run != last_lb_n.run:
                     evaluate_until = lb_n + 2
+                elif lb_n.lumi - last_lb_n.lumi > 1:
+                    evaluate_until = lb_n + 1
+                    log.warning(f"Missing LB range [{last_lb_n + 1}, {lb_n})")
                 last_lb_n = lb_n
                     
                 if evaluate_until >= lb_n:
@@ -347,12 +353,19 @@ def quantize_iovs_slow_mc(lbtime, iovs, quantizer=default_quantizing_function):
             else:
                 #lb_n = RunLumi(iov.Run, iov.LumiBlock)
                 lb_n = iov.Run << 32 | iov.LumiBlock
-                
+
                 if last_lbn >> 32 != lb_n >> 32:
                     # We passed a run boundary. Need to evaluate everything for
                     # the next run or two.
                     for channel in current_events:
                         evaluate_until[channel] = lb_n + 2
+
+                elif lb_n - last_lbn > 1:
+                    # There is a gap in LB counting. Need to evaluate
+                    # everything because of ended events.
+                    log.warning(f"Missing LB range [{RunLumiType(last_lbn + 1)}, {RunLumiType(lb_n)})")
+                    for channel in current_events:
+                        evaluate_until[channel] = lb_n + 1
                 
                 for channel, active_events in current_events.items():
                     

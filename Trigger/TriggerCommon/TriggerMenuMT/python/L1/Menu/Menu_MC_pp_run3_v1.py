@@ -110,6 +110,8 @@ def defineMenu():
 
         #ATR-28679 - legacy XE
         'L1_XE35', 'L1_XE40', 'L1_XE45', 'L1_XE50','L1_XE55', 'L1_XE60',
+        # ATR-29609
+        'L1_XE30', 'L1_XE300',
 
         # Legacy combined em - jet moved by ATR-28761
         'L1_EM18VHI_3J20',
@@ -196,7 +198,7 @@ def defineMenu():
         'L1_eEM15':'',
         #'L1_eEM18':'',
         'L1_eEM22M':'',
-        'L1_eEM24VM':'',
+        #'L1_eEM24VM':'',
         'L1_3eEM12L':'',
 
         # non-primary TAU
@@ -226,7 +228,7 @@ def defineMenu():
         'L1_MU8EOF':'',
         'L1_MU9VF':'',
         'L1_MU9VFC':'',
-        'L1_MU12FCH':'',
+        #'L1_MU12FCH':'',
         'L1_MU14EOF':'',
         'L1_MU15VFCHR':'',
         #'L1_MU18VFCH':'',

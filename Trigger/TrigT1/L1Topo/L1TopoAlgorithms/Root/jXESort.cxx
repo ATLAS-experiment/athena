@@ -41,15 +41,11 @@ TCS::jXESort::sortBitCorrect(const InputTOBArray & input, TOBArray & output) {
    }
 
    const jXETOBArray & jxes = dynamic_cast<const jXETOBArray&>(input);
-   // BW calculation of missing Et and phi
-   int EtBW = quadraticSumBW(jxes[0].Ex(), jxes[0].Ey());
-   int phiBW = TSU::Trigo::atan2(jxes[0].Ex(),jxes[0].Ey());
 
-   if (phiBW < 0) { phiBW += 128; }
-
-   TRG_MSG_DEBUG("jXE phi values " << phiBW << " " );
-   output.push_back( GenericTOB( EtBW, 0, phiBW ) );
-
+   for(jXETOBArray::const_iterator jxe = jxes.begin(); jxe!= jxes.end(); ++jxe ) { 
+     output.push_back( GenericTOB(**jxe) );
+   }
+	
    return TCS::StatusCode::SUCCESS;
 }
 
@@ -61,16 +57,11 @@ TCS::jXESort::sort(const InputTOBArray & input, TOBArray & output) {
    }
 
    const jXETOBArray & jxes = dynamic_cast<const jXETOBArray&>(input);
-   // NonBW calculation of missing Et and phi
-   int EtNonBW = std::sqrt(jxes[0].Ex()*jxes[0].Ex() + jxes[0].Ey()*jxes[0].Ey());
-   int phiNonBW = std::round(20*atan2(jxes[0].Ey(),jxes[0].Ex()));
 
-   // Convert phi from (-pi,pi) to (0,2pi) if necessary
-   if (phiNonBW < 0) { phiNonBW += 128; }
-
-   TRG_MSG_DEBUG("jXE phi values " << phiNonBW << " " );
-   output.push_back( GenericTOB( EtNonBW, 0, phiNonBW ) );
-   
+   for(jXETOBArray::const_iterator jxe = jxes.begin(); jxe!= jxes.end(); ++jxe ) { 
+     output.push_back( GenericTOB(**jxe) );
+   }
+	
    return TCS::StatusCode::SUCCESS;
 }
 

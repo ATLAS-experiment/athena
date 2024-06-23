@@ -77,6 +77,12 @@ def getMCSignatures():
         ChainProp(name="HLT_mu14_L1MU8VFC", groups=SingleMuonGroup),
         ChainProp(name='HLT_2mu4_L12MU3V',  groups=MultiMuonGroup),
 
+        #ATR-29567
+        ChainProp(name='HLT_mu16_ivarmedium_L1MU12FCH', l1SeedThresholds=['MU12FCH'], groups=PrimaryPhIGroup+SingleMuonGroup),
+        ChainProp(name='HLT_mu18_ivarmedium_L1MU12FCH', l1SeedThresholds=['MU12FCH'], groups=PrimaryPhIGroup+SingleMuonGroup),
+        ChainProp(name='HLT_mu20_ivarmedium_L1MU12FCH', l1SeedThresholds=['MU12FCH'], groups=PrimaryPhIGroup+SingleMuonGroup),
+
+        
         #-- nscan ATR-19376, TODO: to be moved to physics once debugged to a resaonable rate
         ChainProp(name='HLT_mu20_msonly_iloosems_mu6noL1_msonly_nscan_L1MU14FCH_J40', l1SeedThresholds=['MU14FCH','FSNOSEED'], groups=PrimaryLegGroup+MultiMuonGroup),
         ChainProp(name='HLT_mu20_msonly_iloosems_mu6noL1_msonly_nscan_L1MU14FCH_jJ80', l1SeedThresholds=['MU14FCH','FSNOSEED'], groups=PrimaryPhIGroup+MultiMuonGroup),
@@ -683,6 +689,11 @@ def getMCSignatures():
     ]
 
     chains['Egamma'] = [
+
+        #ATR-29567
+        ChainProp(name='HLT_e24_lhtight_ivarloose_L1eEM24VM', groups=PrimaryPhIGroup+SingleElectronGroup),
+        ChainProp(name='HLT_e26_lhtight_ivarloose_L1eEM24VM', groups=PrimaryPhIGroup+SingleElectronGroup),
+        
         ChainProp(name='HLT_e5_lhtight_L1EM3', groups=SingleElectronGroup),
         ChainProp(name='HLT_e5_lhtight_noringer_L1EM3', groups=SingleElectronGroup),
         ChainProp(name='HLT_e26_lhtight_L1eEM26', groups=SingleElectronGroup),
@@ -958,6 +969,9 @@ def getMCSignatures():
     chains['Streaming'] += [
         ChainProp(name='HLT_noalg_L1J100',    l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=['PS:NoBulkMCProd']+JetStreamersGroup+SupportLegGroup, monGroups=['jetMon:t0']),
         ChainProp(name='HLT_noalg_L1All', l1SeedThresholds=['FSNOSEED'], groups=['Primary:CostAndRate', 'RATE:SeededStreamers', 'BW:Other']), # ATR-22072, for rates in MC.
+        
+        ChainProp(name='HLT_noalg_L1XE300', l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=['PS:NoBulkMCProd']+PrimaryLegGroup+METStreamersGroup),
+        ChainProp(name='HLT_noalg_L1XE30',  l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=['PS:NoBulkMCProd']+SupportLegGroup+METStreamersGroup),
 
         ChainProp(name='HLT_noalg_L1TAU60', l1SeedThresholds=['FSNOSEED'], groups=['PS:NoBulkMCProd']+TauStreamersGroup+SupportLegGroup),
         ChainProp(name='HLT_noalg_L1TAU8_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=['CosmicCalo'], groups=['RATE:Cosmic_Calo','RATE:Calibration','BW:Jet']+SupportLegGroup),

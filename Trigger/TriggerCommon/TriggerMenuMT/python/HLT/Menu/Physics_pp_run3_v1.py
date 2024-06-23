@@ -1475,9 +1475,9 @@ def setupMenu(menu_name):
 
         # displaced tau (ATR-21754)
         ChainProp(name='HLT_tau180_mediumRNN_tracktwoLLP_L1eTAU140', stream=[PhysicsStream,'express'], groups=PrimaryPhIGroup+SingleTauGroup, monGroups=['tauMon:shifter']),
-        ChainProp(name="HLT_tau200_mediumRNN_tracktwoLLP_L1eTAU140", groups=PrimaryPhIGroup+SingleTauGroup, monGroups=['tauMon:online','tauMon:t0']),
+        ChainProp(name="HLT_tau200_mediumRNN_tracktwoLLP_L1eTAU140", groups=PrimaryPhIGroup+SingleTauGroup),
         ChainProp(name="HLT_tau180_tightRNN_tracktwoLLP_L1eTAU140", groups=PrimaryPhIGroup+SingleTauGroup),
-        ChainProp(name="HLT_tau200_tightRNN_tracktwoLLP_L1eTAU140", groups=PrimaryPhIGroup+SingleTauGroup, monGroups=['tauMon:t0']),
+        ChainProp(name="HLT_tau200_tightRNN_tracktwoLLP_L1eTAU140", groups=PrimaryPhIGroup+SingleTauGroup),
 
         # ATR-21797
         ChainProp(name='HLT_tau80_mediumRNN_tracktwoMVA_tau60_mediumRNN_tracktwoMVA_03dRAB_L1eTAU80_2eTAU60', l1SeedThresholds=['eTAU80', 'eTAU60'], groups=PrimaryPhIGroup+MultiTauGroup, monGroups=['tauMon:t0']),
@@ -1532,22 +1532,22 @@ def setupMenu(menu_name):
 
         #------- 
         # Single tau support chains
-        ChainProp(name="HLT_tau0_ptonly_L1TAU8", stream=[PhysicsStream,'express'], groups=SingleTauGroup+SupportLegGroup+['RATE:CPS_TAU8'], monGroups=['tauMon:t0']),
+        ChainProp(name="HLT_tau0_ptonly_L1TAU8", stream=[PhysicsStream,'express'], groups=SingleTauGroup+SupportLegGroup+['RATE:CPS_TAU8']),
         ChainProp(name='HLT_tau20_mediumRNN_tracktwoMVA_L1TAU8', groups=SupportLegGroup+SingleTauGroup+['RATE:CPS_TAU8'], monGroups=['tauMon:online','tauMon:shifter']),
         ChainProp(name="HLT_tau20_idperf_tracktwoMVA_L1TAU8", stream=[PhysicsStream,'express'], groups=SingleTauGroup+SupportLegGroup+['RATE:CPS_TAU8'], monGroups=['tauMon:online','tauMon:shifter','idMon:shifter']), #ATR-27013
-        ChainProp(name="HLT_tau20_perf_tracktwoMVA_L1TAU8", stream=[PhysicsStream,'express'], groups=SingleTauGroup+SupportLegGroup+['RATE:CPS_TAU8'], monGroups=['tauMon:online','tauMon:shifter']), #ATR-27013
+        ChainProp(name="HLT_tau20_perf_tracktwoMVA_L1TAU8", stream=[PhysicsStream,'express'], groups=SingleTauGroup+SupportLegGroup+['RATE:CPS_TAU8']), #ATR-27013
         ChainProp(name="HLT_tau25_idperf_tracktwoMVA_L1TAU12IM", stream=[PhysicsStream], groups=SingleTauGroup+SupportLegGroup+['RATE:CPS_TAU12IM'], monGroups=['tauMon:online','tauMon:shifter','idMon:shifter']), #ATR-27013
-        ChainProp(name="HLT_tau25_perf_tracktwoMVA_L1TAU12IM", stream=[PhysicsStream], groups=SingleTauGroup+SupportLegGroup+['RATE:CPS_TAU12IM'], monGroups=['tauMon:online','tauMon:shifter']), #ATR-27013
+        ChainProp(name="HLT_tau25_perf_tracktwoMVA_L1TAU12IM", stream=[PhysicsStream], groups=SingleTauGroup+SupportLegGroup+['RATE:CPS_TAU12IM']), #ATR-27013
         ChainProp(name="HLT_tau25_mediumRNN_tracktwoMVA_L1TAU12IM", stream=[PhysicsStream,'express'], groups=SingleTauGroup+SupportLegGroup+['RATE:CPS_TAU12IM'], monGroups=['tauMon:online','tauMon:shifter', 'caloMon:t0']),
-        ChainProp(name="HLT_tau25_mediumRNN_tracktwoLLP_L1TAU12IM", groups=SingleTauGroup+SupportLegGroup+['RATE:CPS_TAU12IM'], monGroups=['tauMon:online']),
+        ChainProp(name="HLT_tau25_mediumRNN_tracktwoLLP_L1TAU12IM", groups=SingleTauGroup+SupportLegGroup+['RATE:CPS_TAU12IM']),
         ChainProp(name="HLT_tau35_idperf_tracktwoMVA_L1TAU20IM", stream=[PhysicsStream,'express'], groups=SupportLegGroup+SingleTauGroup+['RATE:CPS_TAU20IM'], monGroups=['tauMon:t0','idMon:shifter']),
-        ChainProp(name="HLT_tau35_perf_tracktwoMVA_L1TAU20IM", groups=SupportLegGroup+SingleTauGroup+['RATE:CPS_TAU20IM'], monGroups=['tauMon:t0']),
+        ChainProp(name="HLT_tau35_perf_tracktwoMVA_L1TAU20IM", groups=SupportLegGroup+SingleTauGroup+['RATE:CPS_TAU20IM']),
         ChainProp(name="HLT_tau35_mediumRNN_tracktwoMVA_L1TAU20IM", groups=SupportLegGroup+SingleTauGroup+['RATE:CPS_TAU20IM'], monGroups=['tauMon:t0']),
         ChainProp(name='HLT_tau60_mediumRNN_tracktwoMVA_L1TAU40', groups=SupportLegGroup+SingleTauGroup, monGroups=['tauMon:t0']),
 
         #------ Phase-I
-        ChainProp(name="HLT_tau0_ptonly_L1eTAU12", stream=[PhysicsStream,'express'], groups=SingleTauGroup+SupportPhIGroup+['RATE:CPS_eTAU12'], monGroups=['tauMon:t0']),
-        ChainProp(name="HLT_tau0_ptonly_L1eTAU80", stream=[PhysicsStream,'express'], groups=SingleTauGroup+SupportPhIGroup+['RATE:CPS_eTAU80'], monGroups=['tauMon:online','tauMon:shifter']),
+        ChainProp(name="HLT_tau0_ptonly_L1eTAU12", stream=[PhysicsStream,'express'], groups=SingleTauGroup+SupportPhIGroup+['RATE:CPS_eTAU12']),
+        ChainProp(name="HLT_tau0_ptonly_L1eTAU80", stream=[PhysicsStream,'express'], groups=SingleTauGroup+SupportPhIGroup+['RATE:CPS_eTAU80'], monGroups=['tauMon:online']),
         ChainProp(name='HLT_tau20_mediumRNN_tracktwoMVA_L1eTAU12', stream=[PhysicsStream, 'express'], groups=SupportPhIGroup+SingleTauGroup+['RATE:CPS_eTAU12'], monGroups=['tauMon:online','tauMon:shifter']),
         ChainProp(name="HLT_tau20_idperf_tracktwoMVA_L1eTAU12", stream=[PhysicsStream, 'express'], groups=SingleTauGroup+SupportPhIGroup+['RATE:CPS_eTAU12'], monGroups=['tauMon:online','tauMon:shifter','idMon:shifter']), #ATR-27013
         ChainProp(name="HLT_tau20_perf_tracktwoMVA_L1eTAU12", stream=[PhysicsStream, 'express'], groups=SingleTauGroup+SupportPhIGroup+['RATE:CPS_eTAU12'], monGroups=['tauMon:online','tauMon:shifter']), #ATR-27013
@@ -2075,7 +2075,7 @@ def setupMenu(menu_name):
         ChainProp(name='HLT_mu26_ivarmedium_tau35_mediumRNN_tracktwoMVA_probe_L1cTAU30M_03dRAB_L1MU14FCH', l1SeedThresholds=['MU14FCH','PROBEcTAU30M'], stream=[PhysicsStream], groups=TagAndProbePhIGroup+SingleMuonGroup),
         ChainProp(name='HLT_mu26_ivarmedium_tau40_mediumRNN_tracktwoMVA_probe_L1cTAU35M_03dRAB_L1MU14FCH', l1SeedThresholds=['MU14FCH','PROBEcTAU35M'], stream=[PhysicsStream], groups=TagAndProbePhIGroup+SingleMuonGroup),
         ChainProp(name='HLT_mu26_ivarmedium_tau60_mediumRNN_tracktwoMVA_probe_L1eTAU60_03dRAB_L1MU14FCH', l1SeedThresholds=['MU14FCH','PROBEeTAU60'], stream=[PhysicsStream], groups=TagAndProbePhIGroup+SingleMuonGroup),
-        ChainProp(name='HLT_mu26_ivarmedium_tau80_mediumRNN_tracktwoMVA_probe_L1eTAU80_03dRAB_L1MU14FCH', l1SeedThresholds=['MU14FCH','PROBEeTAU80'], stream=[PhysicsStream], groups=TagAndProbePhIGroup+SingleMuonGroup, monGroups=['tauMon:t0']),
+        ChainProp(name='HLT_mu26_ivarmedium_tau80_mediumRNN_tracktwoMVA_probe_L1eTAU80_03dRAB_L1MU14FCH', l1SeedThresholds=['MU14FCH','PROBEeTAU80'], stream=[PhysicsStream], groups=TagAndProbePhIGroup+SingleMuonGroup),
         ChainProp(name='HLT_mu26_ivarmedium_tau160_mediumRNN_tracktwoMVA_probe_L1eTAU140_03dRAB_L1MU14FCH', l1SeedThresholds=['MU14FCH','PROBEeTAU140'], stream=[PhysicsStream], groups=TagAndProbePhIGroup+SingleMuonGroup),
         ChainProp(name='HLT_mu26_ivarmedium_tau60_mediumRNN_tracktwoLLP_probe_L1eTAU60_03dRAB_L1MU14FCH', l1SeedThresholds=['MU14FCH','PROBEeTAU60'], stream=[PhysicsStream], groups=TagAndProbePhIGroup+SingleMuonGroup),
         ChainProp(name='HLT_mu26_ivarmedium_tau80_mediumRNN_tracktwoLLP_probe_L1eTAU80_03dRAB_L1MU14FCH', l1SeedThresholds=['MU14FCH','PROBEeTAU80'], stream=[PhysicsStream], groups=TagAndProbePhIGroup+SingleMuonGroup),
@@ -2092,7 +2092,7 @@ def setupMenu(menu_name):
         ChainProp(name='HLT_mu26_ivarmedium_tau35_mediumRNN_tracktwoMVA_probe_L1cTAU30M_03dRAB_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','PROBEcTAU30M'], stream=[PhysicsStream], groups=TagAndProbePhIGroup+SingleMuonGroup),
         ChainProp(name='HLT_mu26_ivarmedium_tau40_mediumRNN_tracktwoMVA_probe_L1cTAU35M_03dRAB_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','PROBEcTAU35M'], stream=[PhysicsStream], groups=TagAndProbePhIGroup+SingleMuonGroup),
         ChainProp(name='HLT_mu26_ivarmedium_tau60_mediumRNN_tracktwoMVA_probe_L1eTAU60_03dRAB_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','PROBEeTAU60'], stream=[PhysicsStream], groups=TagAndProbePhIGroup+SingleMuonGroup),
-        ChainProp(name='HLT_mu26_ivarmedium_tau80_mediumRNN_tracktwoMVA_probe_L1eTAU80_03dRAB_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','PROBEeTAU80'], stream=[PhysicsStream], groups=TagAndProbePhIGroup+SingleMuonGroup, monGroups=['tauMon:t0']),
+        ChainProp(name='HLT_mu26_ivarmedium_tau80_mediumRNN_tracktwoMVA_probe_L1eTAU80_03dRAB_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','PROBEeTAU80'], stream=[PhysicsStream], groups=TagAndProbePhIGroup+SingleMuonGroup),
         ChainProp(name='HLT_mu26_ivarmedium_tau160_mediumRNN_tracktwoMVA_probe_L1eTAU140_03dRAB_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','PROBEeTAU140'], stream=[PhysicsStream], groups=TagAndProbePhIGroup+SingleMuonGroup),
         ChainProp(name='HLT_mu26_ivarmedium_tau60_mediumRNN_tracktwoLLP_probe_L1eTAU60_03dRAB_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','PROBEeTAU60'], stream=[PhysicsStream], groups=TagAndProbePhIGroup+SingleMuonGroup),
         ChainProp(name='HLT_mu26_ivarmedium_tau80_mediumRNN_tracktwoLLP_probe_L1eTAU80_03dRAB_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','PROBEeTAU80'], stream=[PhysicsStream], groups=TagAndProbePhIGroup+SingleMuonGroup),
@@ -2107,7 +2107,7 @@ def setupMenu(menu_name):
         ChainProp(name='HLT_mu24_ivarmedium_tau35_mediumRNN_tracktwoMVA_probe_L1cTAU30M_03dRAB_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','PROBEcTAU30M'], stream=[PhysicsStream], groups=TagAndProbePhIGroup+SingleMuonGroup),
         ChainProp(name='HLT_mu24_ivarmedium_tau40_mediumRNN_tracktwoMVA_probe_L1cTAU35M_03dRAB_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','PROBEcTAU35M'], stream=[PhysicsStream], groups=TagAndProbePhIGroup+SingleMuonGroup),
         ChainProp(name='HLT_mu24_ivarmedium_tau60_mediumRNN_tracktwoMVA_probe_L1eTAU60_03dRAB_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','PROBEeTAU60'], stream=[PhysicsStream], groups=TagAndProbePhIGroup+SingleMuonGroup),
-        ChainProp(name='HLT_mu24_ivarmedium_tau80_mediumRNN_tracktwoMVA_probe_L1eTAU80_03dRAB_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','PROBEeTAU80'], stream=[PhysicsStream], groups=TagAndProbePhIGroup+SingleMuonGroup, monGroups=['tauMon:t0']),
+        ChainProp(name='HLT_mu24_ivarmedium_tau80_mediumRNN_tracktwoMVA_probe_L1eTAU80_03dRAB_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','PROBEeTAU80'], stream=[PhysicsStream], groups=TagAndProbePhIGroup+SingleMuonGroup),
         ChainProp(name='HLT_mu24_ivarmedium_tau160_mediumRNN_tracktwoMVA_probe_L1eTAU140_03dRAB_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','PROBEeTAU140'], stream=[PhysicsStream], groups=TagAndProbePhIGroup+SingleMuonGroup),
         ChainProp(name='HLT_mu24_ivarmedium_tau60_mediumRNN_tracktwoLLP_probe_L1eTAU60_03dRAB_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','PROBEeTAU60'], stream=[PhysicsStream], groups=TagAndProbePhIGroup+SingleMuonGroup),
         ChainProp(name='HLT_mu24_ivarmedium_tau80_mediumRNN_tracktwoLLP_probe_L1eTAU80_03dRAB_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','PROBEeTAU80'], stream=[PhysicsStream], groups=TagAndProbePhIGroup+SingleMuonGroup),
@@ -2124,7 +2124,7 @@ def setupMenu(menu_name):
         ChainProp(name='HLT_mu24_ivarmedium_tau35_mediumRNN_tracktwoMVA_probe_L1cTAU30M_03dRAB_L1MU14FCH', l1SeedThresholds=['MU14FCH','PROBEcTAU30M'], stream=[PhysicsStream], groups=TagAndProbePhIGroup+SingleMuonGroup),
         ChainProp(name='HLT_mu24_ivarmedium_tau40_mediumRNN_tracktwoMVA_probe_L1cTAU35M_03dRAB_L1MU14FCH', l1SeedThresholds=['MU14FCH','PROBEcTAU35M'], stream=[PhysicsStream], groups=TagAndProbePhIGroup+SingleMuonGroup),
         ChainProp(name='HLT_mu24_ivarmedium_tau60_mediumRNN_tracktwoMVA_probe_L1eTAU60_03dRAB_L1MU14FCH', l1SeedThresholds=['MU14FCH','PROBEeTAU60'], stream=[PhysicsStream], groups=TagAndProbePhIGroup+SingleMuonGroup),
-        ChainProp(name='HLT_mu24_ivarmedium_tau80_mediumRNN_tracktwoMVA_probe_L1eTAU80_03dRAB_L1MU14FCH', l1SeedThresholds=['MU14FCH','PROBEeTAU80'], stream=[PhysicsStream], groups=TagAndProbePhIGroup+SingleMuonGroup, monGroups=['tauMon:t0']),
+        ChainProp(name='HLT_mu24_ivarmedium_tau80_mediumRNN_tracktwoMVA_probe_L1eTAU80_03dRAB_L1MU14FCH', l1SeedThresholds=['MU14FCH','PROBEeTAU80'], stream=[PhysicsStream], groups=TagAndProbePhIGroup+SingleMuonGroup),
         ChainProp(name='HLT_mu24_ivarmedium_tau160_mediumRNN_tracktwoMVA_probe_L1eTAU140_03dRAB_L1MU14FCH', l1SeedThresholds=['MU14FCH','PROBEeTAU140'], stream=[PhysicsStream], groups=TagAndProbePhIGroup+SingleMuonGroup),
         ChainProp(name='HLT_mu24_ivarmedium_tau60_mediumRNN_tracktwoLLP_probe_L1eTAU60_03dRAB_L1MU14FCH', l1SeedThresholds=['MU14FCH','PROBEeTAU60'], stream=[PhysicsStream], groups=TagAndProbePhIGroup+SingleMuonGroup),
         ChainProp(name='HLT_mu24_ivarmedium_tau80_mediumRNN_tracktwoLLP_probe_L1eTAU80_03dRAB_L1MU14FCH', l1SeedThresholds=['MU14FCH','PROBEeTAU80'], stream=[PhysicsStream], groups=TagAndProbePhIGroup+SingleMuonGroup),
@@ -2159,7 +2159,7 @@ def setupMenu(menu_name):
         ChainProp(name='HLT_e26_lhtight_ivarloose_tau35_mediumRNN_tracktwoMVA_probe_L1cTAU30M_03dRAB_L1eEM26M', l1SeedThresholds=['eEM26M','PROBEcTAU30M'], stream=[PhysicsStream], groups=TagAndProbePhIGroup+SingleElectronGroup),
         ChainProp(name='HLT_e26_lhtight_ivarloose_tau40_mediumRNN_tracktwoMVA_probe_L1cTAU35M_03dRAB_L1eEM26M', l1SeedThresholds=['eEM26M','PROBEcTAU35M'], stream=[PhysicsStream], groups=TagAndProbePhIGroup+SingleElectronGroup),
         ChainProp(name='HLT_e26_lhtight_ivarloose_tau60_mediumRNN_tracktwoMVA_probe_L1eTAU60_03dRAB_L1eEM26M', l1SeedThresholds=['eEM26M','PROBEeTAU60'], stream=[PhysicsStream], groups=TagAndProbePhIGroup+SingleElectronGroup),
-        ChainProp(name='HLT_e26_lhtight_ivarloose_tau80_mediumRNN_tracktwoMVA_probe_L1eTAU80_03dRAB_L1eEM26M', l1SeedThresholds=['eEM26M','PROBEeTAU80'], stream=[PhysicsStream], groups=TagAndProbePhIGroup+SingleElectronGroup, monGroups=['tauMon:t0']),
+        ChainProp(name='HLT_e26_lhtight_ivarloose_tau80_mediumRNN_tracktwoMVA_probe_L1eTAU80_03dRAB_L1eEM26M', l1SeedThresholds=['eEM26M','PROBEeTAU80'], stream=[PhysicsStream], groups=TagAndProbePhIGroup+SingleElectronGroup),
         ChainProp(name='HLT_e26_lhtight_ivarloose_tau160_mediumRNN_tracktwoMVA_probe_L1eTAU140_03dRAB_L1eEM26M', l1SeedThresholds=['eEM26M','PROBEeTAU140'], stream=[PhysicsStream], groups=TagAndProbePhIGroup+SingleElectronGroup),
         ChainProp(name='HLT_e26_lhtight_ivarloose_tau60_mediumRNN_tracktwoLLP_probe_L1eTAU60_03dRAB_L1eEM26M', l1SeedThresholds=['eEM26M','PROBEeTAU60'], stream=[PhysicsStream], groups=TagAndProbePhIGroup+SingleElectronGroup),
         ChainProp(name='HLT_e26_lhtight_ivarloose_tau80_mediumRNN_tracktwoLLP_probe_L1eTAU80_03dRAB_L1eEM26M', l1SeedThresholds=['eEM26M','PROBEeTAU80'], stream=[PhysicsStream], groups=TagAndProbePhIGroup+SingleElectronGroup),
@@ -2175,7 +2175,7 @@ def setupMenu(menu_name):
         ChainProp(name='HLT_e28_lhtight_ivarloose_tau35_mediumRNN_tracktwoMVA_probe_L1cTAU30M_03dRAB_L1eEM28M', l1SeedThresholds=['eEM28M','PROBEcTAU30M'], stream=[PhysicsStream], groups=TagAndProbePhIGroup+SingleElectronGroup),
         ChainProp(name='HLT_e28_lhtight_ivarloose_tau40_mediumRNN_tracktwoMVA_probe_L1cTAU35M_03dRAB_L1eEM28M', l1SeedThresholds=['eEM28M','PROBEcTAU35M'], stream=[PhysicsStream], groups=TagAndProbePhIGroup+SingleElectronGroup),
         ChainProp(name='HLT_e28_lhtight_ivarloose_tau60_mediumRNN_tracktwoMVA_probe_L1eTAU60_03dRAB_L1eEM28M', l1SeedThresholds=['eEM28M','PROBEeTAU60'], stream=[PhysicsStream], groups=TagAndProbePhIGroup+SingleElectronGroup),
-        ChainProp(name='HLT_e28_lhtight_ivarloose_tau80_mediumRNN_tracktwoMVA_probe_L1eTAU80_03dRAB_L1eEM28M', l1SeedThresholds=['eEM28M','PROBEeTAU80'], stream=[PhysicsStream], groups=TagAndProbePhIGroup+SingleElectronGroup, monGroups=['tauMon:t0']),
+        ChainProp(name='HLT_e28_lhtight_ivarloose_tau80_mediumRNN_tracktwoMVA_probe_L1eTAU80_03dRAB_L1eEM28M', l1SeedThresholds=['eEM28M','PROBEeTAU80'], stream=[PhysicsStream], groups=TagAndProbePhIGroup+SingleElectronGroup),
         ChainProp(name='HLT_e28_lhtight_ivarloose_tau160_mediumRNN_tracktwoMVA_probe_L1eTAU140_03dRAB_L1eEM28M', l1SeedThresholds=['eEM28M','PROBEeTAU140'], stream=[PhysicsStream], groups=TagAndProbePhIGroup+SingleElectronGroup),
         ChainProp(name='HLT_e28_lhtight_ivarloose_tau60_mediumRNN_tracktwoLLP_probe_L1eTAU60_03dRAB_L1eEM28M', l1SeedThresholds=['eEM28M','PROBEeTAU60'], stream=[PhysicsStream], groups=TagAndProbePhIGroup+SingleElectronGroup),
         ChainProp(name='HLT_e28_lhtight_ivarloose_tau80_mediumRNN_tracktwoLLP_probe_L1eTAU80_03dRAB_L1eEM28M', l1SeedThresholds=['eEM28M','PROBEeTAU80'], stream=[PhysicsStream], groups=TagAndProbePhIGroup+SingleElectronGroup),
@@ -2892,8 +2892,6 @@ def setupMenu(menu_name):
         # Streamers already active in MC for jet/MET monitoring
 
         ChainProp(name='HLT_noalg_L1J400',  l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=['PS:NoBulkMCProd']+PrimaryLegGroup+JetStreamersGroup+['BW:Other'], monGroups=['jetMon:t0']), # catch all high-Et
-        ChainProp(name='HLT_noalg_L1XE300', l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=['PS:NoBulkMCProd']+PrimaryLegGroup+METStreamersGroup),
-        ChainProp(name='HLT_noalg_L1XE30',  l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=['PS:NoBulkMCProd']+SupportLegGroup+METStreamersGroup),
 
         # Phase I jet inputs ATR-24411
         ChainProp(name='HLT_noalg_L1jJ500', l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=['PS:NoBulkMCProd']+PrimaryPhIGroup+JetStreamersGroup+['BW:Other'], monGroups=['jetMon:t0']), # catch all high-Et
