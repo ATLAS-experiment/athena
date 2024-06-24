@@ -6,7 +6,7 @@
 # art-include: 24.0/Athena
 # art-athena-mt: 8
 
-timeout 64800 Reco_tf.py --CA \
+timeout 64800 Reco_tf.py \
   --inputBSFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00431493.physics_Main.daq.RAW._lb0525._SFO-16._0001.data \
   --outputAODFile=myAOD.pool.root \
   --outputHISTFile=myHIST.root \

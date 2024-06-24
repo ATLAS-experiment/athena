@@ -10,7 +10,7 @@
 # art-html: dcube_physlite
 
 export ATHENA_CORE_NUMBER=8
-Reco_tf.py --CA \
+Reco_tf.py \
   --AMI q445 \
   --inputHITSFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc21/HITS/mc21_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.simul.HITS.e8453_s3873/1000events_singleBS.HITS.pool.root \
   --sharedWriter True \
@@ -27,7 +27,6 @@ rc1=$?
 echo "art-result: ${rc1} Reco_tf_q445_phys_physlite_mt_mp" 
 
 Derivation_tf.py \
-  --CA \
   --inputAODFile myAOD.pool.root \
   --outputDAODFile art.pool.root \
   --sharedWriter True \
