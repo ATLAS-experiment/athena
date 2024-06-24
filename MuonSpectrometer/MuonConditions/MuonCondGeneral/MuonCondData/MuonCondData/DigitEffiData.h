@@ -26,11 +26,11 @@ namespace Muon{
             /// efficiency for cases wher the map doesn't know about the channel
             DigitEffiData(const Muon::IMuonIdHelperSvc* idHelperSvc, double defaultEffi);
             /// Returns the signal generation efficiency of the sTgc channel
-            double getEfficiency(const Identifier& channelId) const;
+            double getEfficiency(const Identifier& channelId, bool isInnerQ1 = false /* needed for the sTGCs*/) const;
             /// Sets the efficiency for a given minimal section of the dector
             StatusCode setEfficiency(const Identifier& sectionId, const double effi);
         private:
-            Identifier getLookUpId(const Identifier& channelId) const;
+            Identifier getLookUpId(const Identifier& channelId, bool isInnerQ1 = false /*needed for the sTGCs*/) const;
             const Muon::IMuonIdHelperSvc* m_idHelperSvc{nullptr};
             using EffiMap = std::unordered_map<Identifier, double>; 
             EffiMap m_effiData{};

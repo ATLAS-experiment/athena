@@ -10,7 +10,7 @@ namespace Muon{
         m_idHelperSvc{idHelperSvc},
         m_defaultEffi{defaultEffi}{}
 
-    Identifier DigitEffiData::getLookUpId(const Identifier& channelId) const {
+    Identifier DigitEffiData::getLookUpId(const Identifier& channelId, bool isInnerQ1 /*=false*/) const {
         Identifier lookUpId{};
         using TechIndex = Muon::MuonStationIndex::TechnologyIndex;
         switch (m_idHelperSvc->technologyIndex(channelId)){
@@ -26,15 +26,15 @@ namespace Muon{
                 lookUpId = m_idHelperSvc->mmIdHelper().pcbID(channelId);
                 break;
             case TechIndex::STGC:
-                lookUpId = m_idHelperSvc->stgcIdHelper().febID(channelId);
+                lookUpId = m_idHelperSvc->stgcIdHelper().hvID(channelId, isInnerQ1);
                 break;
             default:
                 THROW_EXCEPTION("Invalid muon technology");
         };
         return lookUpId;
     }
-    double DigitEffiData::getEfficiency(const Identifier& channelId) const {
-        EffiMap::const_iterator effi_itr = m_effiData.find(getLookUpId(channelId));
+    double DigitEffiData::getEfficiency(const Identifier& channelId, bool isInnerQ1 /*=false*/) const {
+        EffiMap::const_iterator effi_itr = m_effiData.find(getLookUpId(channelId, isInnerQ1));
         if (effi_itr != m_effiData.end()) {
             ATH_MSG_VERBOSE("Channel "<<m_idHelperSvc->toString(channelId) <<" has an efficiency of "<<effi_itr->second);
             return effi_itr->second;
