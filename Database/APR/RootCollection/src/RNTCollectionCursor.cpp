@@ -49,7 +49,7 @@ RNTCollectionCursor::RNTCollectionCursor(
 
 RNTCollectionCursor::~RNTCollectionCursor()
 {
-   close();
+   RNTCollectionCursor::close();
 }
 
 
