@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #define TRUTHTOTRACK_IMP
@@ -48,7 +48,7 @@ StatusCode Trk::TruthToTrack::initialize() {
     ATH_MSG_FATAL("Failed to retrieve tool " << m_extrapolator);
     return StatusCode::FAILURE;
   }
-    ATH_MSG_INFO("Retrieved tool " << m_extrapolator);
+
   return StatusCode::SUCCESS;
 }
 

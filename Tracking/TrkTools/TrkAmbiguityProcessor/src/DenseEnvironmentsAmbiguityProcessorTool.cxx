@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DenseEnvironmentsAmbiguityProcessorTool.h"
@@ -91,16 +91,16 @@ Trk::DenseEnvironmentsAmbiguityProcessorTool::initialize(){
 
   // brem fitting enabled ?
   if (m_tryBremFit)
-    ATH_MSG_INFO( "Try brem fit and recovery for electron like tracks." );
+    ATH_MSG_DEBUG( "Try brem fit and recovery for electron like tracks." );
 
   if (m_etaBounds.size() != Counter::nRegions) {
      ATH_MSG_FATAL("There must be exactly " << (Counter::nRegions) << " eta bounds but "
                    << m_etaBounds.size() << " are set." );
      return StatusCode::FAILURE;
   }
-  ATH_MSG_INFO(m_fitterTool.size()<<" fitters was/were input");
+  ATH_MSG_DEBUG(m_fitterTool.size()<<" fitters was/were input");
   for(const auto & i:m_fitterTool){
-    ATH_MSG_INFO(i.name());
+    ATH_MSG_DEBUG(i.name());
   }
   return sc;
 }

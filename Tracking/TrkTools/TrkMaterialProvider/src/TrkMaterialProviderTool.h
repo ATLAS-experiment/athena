@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrkMaterialProviderTool_H
@@ -32,15 +32,16 @@
 
 #include "RecoToolInterfaces/IMuonCaloEnergyTool.h"
 
+#include "MuidInterfaces/IMuidCaloEnergyMeas.h"
+#include "MuidInterfaces/IMuidCaloEnergyParam.h"
+#include "MuidInterfaces/IMuidTrackIsolation.h"
+
 namespace Trk {
   class Surface;
 }
 
 namespace Rec {
   class CaloMeas;
-  class IMuidCaloEnergyMeas;
-  class IMuidCaloEnergyParam;
-  class IMuidTrackIsolation;
 }
 
 class AtlasDetectorID;
@@ -58,7 +59,7 @@ namespace Trk{
     TrkMaterialProviderTool(const std::string&,const std::string&,const IInterface*);
     
     /**Virtual destructor*/
-    virtual ~TrkMaterialProviderTool();
+    virtual ~TrkMaterialProviderTool() = default;
     
     /** AlgTool initailize method.*/
     StatusCode initialize();
@@ -189,17 +190,23 @@ namespace Trk{
        {this,"Extrapolator","Trk::Extrapolator/AtlasExtrapolator",""};
     PublicToolHandle<Trk::IEnergyLossUpdator>           m_elossupdator
        {this,"EnergyLossUpdator","Trk::EnergyLossUpdator/AtlasEnergyLossUpdator",""};
-    ServiceHandle<Trk::ITrackingVolumesSvc>       m_trackingVolumesSvc;
-    ServiceHandle<ITrackingGeometrySvc> m_trackingGeometrySvc {this, "TrackingGeometrySvc", "",""};
+    ServiceHandle<Trk::ITrackingVolumesSvc> m_trackingVolumesSvc
+      {this, "TrackingVolumeSvc", "TrackingVolumesSvc/TrackingVolumesSvc"};
+    ServiceHandle<ITrackingGeometrySvc> m_trackingGeometrySvc {this, "TrackingGeometrySvc", "", ""};
 
     SG::ReadCondHandleKey<TrackingGeometry>   m_trackingGeometryReadKey
        {this, "TrackingGeometryReadKey", "", "Key of the TrackingGeometry conditions data."};
 
-    ToolHandle< Trk::IMultipleScatteringUpdator > m_scattool;
+    ToolHandle< Trk::IMultipleScatteringUpdator > m_scattool
+      {this, "MultipleScatteringTool",
+       "Trk::MultipleScatteringUpdator/AtlasMultipleScatteringUpdator"};
 
-    ToolHandle<Rec::IMuidCaloEnergyMeas>  m_caloMeasTool;
-    ToolHandle<Rec::IMuidCaloEnergyParam> m_caloParamTool;
-    ToolHandle<Rec::IMuidTrackIsolation>  m_trackIsolationTool;
+    ToolHandle<Rec::IMuidCaloEnergyMeas>  m_caloMeasTool
+      {this, "CaloMeasTool", "Rec::MuidCaloEnergyMeas/MuidCaloEnergyMeas"};
+    ToolHandle<Rec::IMuidCaloEnergyParam> m_caloParamTool
+      {this, "CaloParamTool", "Rec::MuidCaloEnergyParam/MuidCaloEnergyParam"};
+    ToolHandle<Rec::IMuidTrackIsolation>  m_trackIsolationTool
+      {this, "TrackIsolationTool", "Rec::MuidTrackIsolation/MuidTrackIsolation"};
     ToolHandle<Rec::IMuonCaloEnergyTool>  m_muonCaloEnergyTool {this, 
 	"MuonCaloEnergyTool", ""};
 
@@ -221,7 +228,6 @@ namespace Trk{
     bool m_useCaloEnergyMeasurement;
     bool m_useMuonCaloEnergyTool;
     bool m_overwriteElossParam;
-    bool m_infoExtrapolation; 
 
   };
 } // end namespace
