@@ -374,7 +374,6 @@ class EventSelectionConfig(ConfigBlock):
         alg.particles = particles
         alg.objectSelection = f'{selection}&&{self.btagDecoration},as_char'
         alg.eventPreselection = self.checkDecorationName(self.currentDecoration)
-        alg.minPt = 25000.
         if len(items) == 3:
             alg.sign  = self.check_sign(items[1])
             alg.count = self.check_int(items[2])
