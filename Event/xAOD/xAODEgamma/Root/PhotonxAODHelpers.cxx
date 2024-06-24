@@ -12,8 +12,15 @@
 
 // ==================================================================
 
-bool xAOD::EgammaHelpers::isConvertedPhoton(const xAOD::Photon *ph){
-  return (ph && (ph->nVertices()>0) );
+bool xAOD::EgammaHelpers::isConvertedPhoton(const xAOD::Photon *ph, bool excludeTRT){
+
+	bool isConv = ph && (ph->nVertices()>0);
+	if(excludeTRT) {
+  		bool isTRTConv = xAOD::EgammaHelpers::conversionType(ph) == 2 || xAOD::EgammaHelpers::conversionType(ph) == 4;
+  		bool isNewConv = isConv && (std::abs(ph->eta()) > 0.8 || !isTRTConv); 
+  		return isNewConv;
+  	}
+  	return isConv;
 }
 
 xAOD::EgammaParameters::ConversionType xAOD::EgammaHelpers::conversionType(const xAOD::Photon *ph){

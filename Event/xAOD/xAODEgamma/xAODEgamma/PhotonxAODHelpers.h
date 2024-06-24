@@ -21,7 +21,7 @@ namespace xAOD {
   namespace EgammaHelpers{
 
     ///@brief is the object a converted photon
-    bool isConvertedPhoton(const xAOD::Photon *ph);
+    bool isConvertedPhoton(const xAOD::Photon *ph, bool excludeTRT = false);
 
     ///@brief return the photon conversion type (see EgammaEnums)
     xAOD::EgammaParameters::ConversionType conversionType(const xAOD::Photon *ph);
