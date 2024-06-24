@@ -27,11 +27,7 @@ namespace {
 // constants
 const Trk::ProjectionMatricesSet s_reMatrices(5);
 constexpr double s_thetaGainDampingValue = 0.1;
-const AmgVector(5) s_cov0Vec = [] {
-  AmgVector(5) tmp;
-  tmp << 250., 250., 0.25, 0.25, 0.000001;
-  return tmp;
-}();
+const AmgVector(5) s_cov0Vec {250., 250., 0.25, 0.25, 0.000001};
 const AmgMatrix(5, 5) s_unitMatrix(AmgMatrix(5, 5)::Identity());
 const AmgVector(2) s_thetaMin(0.0, -M_PI);
 enum RangeCheckDef
@@ -53,16 +49,13 @@ struct componentsCache
 
 /** Get the Measurememnt Co-ordinate for the 1D case */
 int measurementCoord_1D(int paramKey) {
-  int mk = 0;
-  if (paramKey != 1) {
-    for (int i = 0; i < 5; ++i) {
-      if (paramKey & (1 << i)) {
-        mk = i;
-        break;
-      }
+  for (int i = 0; i < 5; ++i) {
+    if (paramKey & (1 << i)) {
+      return i;
     }
   }
-  return mk;
+
+  return 0;
 }
 
 /** Absolute phi values should be in [-pi, pi]
@@ -97,8 +90,10 @@ correctThetaPhiRange_5D(AmgVector(5) & V,
   if (V(Trk::theta) < s_thetaMin((int)rcd) || V(Trk::theta) > M_PI) {
     // absolute theta: repair if between -pi and +2pi.
     // differential theta: repair if between -pi and +pi
-    if ((V(Trk::theta) < -M_PI) ||
-        (V(Trk::theta) > (rcd == differentialCheck ? M_PI : 2 * M_PI))) {
+    if (V(Trk::theta) < -M_PI) {
+      return false;
+    }
+    if (V(Trk::theta) > (rcd == differentialCheck ? M_PI : 2 * M_PI)) {
       return false;
     }
     if (V(Trk::theta) > M_PI) {
@@ -135,22 +130,23 @@ AmgSymMatrix(DIM) projection_T(const AmgSymMatrix(5) & M, int key)
   if (key == 3 || key == 7 || key == 15) { // shortcuts for the most common use
                                            // cases
     return M.topLeftCorner<DIM, DIM>();
-  } else {
-    Eigen::Matrix<int, DIM, 1, 0, DIM, 1> iv;
-    iv.setZero();
-    for (int i = 0, k = 0; i < 5; ++i) {
-      if (key & (1 << i))
-        iv[k++] = i;
-    }
-    AmgSymMatrix(DIM) covSubMatrix;
-    covSubMatrix.setZero();
-    for (int i = 0; i < DIM; ++i) {
-      for (int j = 0; j < DIM; ++j) {
-        covSubMatrix(i, j) = M(iv(i), iv(j));
-      }
-    }
-    return covSubMatrix;
   }
+
+  Eigen::Matrix<int, DIM, 1, 0, DIM, 1> iv;
+  iv.setZero();
+  for (int i = 0, k = 0; i < 5; ++i) {
+    iv[k++] = key & (1 << i) ? i : 0;
+  }
+
+  AmgSymMatrix(DIM) covSubMatrix;
+  covSubMatrix.setZero();
+  for (int i = 0; i < DIM; ++i) {
+    for (int j = 0; j < DIM; ++j) {
+      covSubMatrix(i, j) = M(iv(i), iv(j));
+    }
+  }
+
+  return covSubMatrix;
 }
 
 /**
@@ -207,9 +203,8 @@ calculateFilterStep_1D(Trk::TrackParameters& TP,
   AmgSymMatrix(5) newCov =
     trkCov.similarity(M) + K * measCov * K.transpose();
 
-  if ((!thetaPhiWithinRange_5D(newPar, absoluteCheck))
-        ? !correctThetaPhiRange_5D(newPar, newCov, absoluteCheck)
-        : false) {
+  if (!thetaPhiWithinRange_5D(newPar, absoluteCheck) && 
+      !correctThetaPhiRange_5D(newPar, newCov, absoluteCheck)) {
     return false;
   }
 
@@ -689,17 +684,17 @@ bool
 invalidComponent(const Trk::TrackParameters* trackParameters)
 {
   const auto* measuredCov = trackParameters->covariance();
-  bool rebuildCov = false;
   if (!measuredCov) {
-    rebuildCov = true;
-  } else {
-    for (int i(0); i < 5; ++i) {
-      if ((*measuredCov)(i, i) <= 0.) {
-        rebuildCov = true;
-      }
+    return true;
+  }
+
+  for (int i = 0; i < 5; ++i) {
+    if ((*measuredCov)(i, i) <= 0.) {
+      return true;
     }
   }
-  return rebuildCov;
+
+  return false;
 }
 
 Trk::MultiComponentState
@@ -778,8 +773,7 @@ calculateFilterStep(Trk::MultiComponentState&& stateBeforeUpdate,
       continue;
     }
 
-    double componentChi2 = componentFitQuality.chiSquared();
-    chiSquared += component.weight * componentChi2;
+    chiSquared += component.weight * componentFitQuality.chiSquared();
 
     // The same measurement is included in each update
     // so we can update the degree of freedom only
@@ -854,17 +848,15 @@ Trk::GsfMeasurementUpdator::fitQuality(const MultiComponentState& updatedState,
   double chi2 = 0;
   Trk::FitQualityOnSurface componentFitQuality;
   for (const Trk::ComponentParameters& component: updatedState) {
-    const Trk::TrackParameters* trackParameters = component.params.get();
     stateFitQuality(componentFitQuality,
-                    *trackParameters,
+                    *component.params.get(),
                     measurement.localParameters(),
                     measurement.localCovariance());
 
-    double componentChi2 = componentFitQuality.chiSquared();
-    chi2 += component.weight * componentChi2;
+    chi2 += component.weight * componentFitQuality.chiSquared();
   }
+  
   //The same measurement is included
-  int degreesOfFreedom = componentFitQuality.numberDoF();
-  return { chi2, degreesOfFreedom };
+  return { chi2, componentFitQuality.numberDoF() };
 }
 
