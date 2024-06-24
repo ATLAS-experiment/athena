@@ -74,7 +74,7 @@ StatusCode VertexTimeAlg::execute(const EventContext& ctx) const {
     m_vxTimeRes_key, ctx);
 
 
-  for (const auto& vx : *primVxCont) {
+  for (const auto vx : *primVxCont) {
 
     if (vx->vertexType() == xAOD::VxType::VertexType::PriVtx) {
 
@@ -125,7 +125,7 @@ VertexTimeAlg::vertexAssociatedHGTDTracks(
 
   std::vector<const xAOD::TrackParticle*> good_tracks { };
 
-  for (const auto& trk : *tracks) {
+  for (const auto trk : *tracks) {
     if (std::abs(trk->eta()) < 2.4 || std::abs(trk->eta()) > 4.0) {
       // Track is not within HGTD acceptance
       continue;
