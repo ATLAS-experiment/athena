@@ -6,7 +6,7 @@ input_rdo=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/A
 n_events=1
 
 export ATHENA_CORE_NUMBER=1
-Reco_tf.py --CA \
+Reco_tf.py \
   --preExec "flags.Exec.FPE=-1;" \
   --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateSpacePointsFlags" \
   --inputRDOFile ${input_rdo} \
