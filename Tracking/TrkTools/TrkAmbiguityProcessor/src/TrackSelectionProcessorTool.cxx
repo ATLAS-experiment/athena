@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrackSelectionProcessorTool.h"
@@ -45,7 +45,7 @@ Trk::TrackSelectionProcessorTool::initialize(){
   ATH_CHECK(m_clusterSplitProbContainerIn.initialize(!m_clusterSplitProbContainerIn.key().empty()));
   ATH_CHECK(m_clusterSplitProbContainerOut.initialize(!m_clusterSplitProbContainerOut.key().empty()));
 
-  if (m_disableSorting) ATH_MSG_INFO( "Internal sorting disabled, using external ordering!" );    
+  if (m_disableSorting) ATH_MSG_DEBUG( "Internal sorting disabled, using external ordering!" );
   return sc;
 }
 //==================================================================================================

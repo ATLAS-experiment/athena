@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -25,8 +25,6 @@ Trk::TrackSlimmer::~TrackSlimmer() = default;
 StatusCode
 Trk::TrackSlimmer::initialize()
 {
-
-  ATH_MSG_INFO(name() << " initialize()");
   if (m_slimTool.retrieve().isFailure()) {
     ATH_MSG_ERROR("Failed to retrieve TrkTrackSlimmingTool tool "
                   << m_slimTool);

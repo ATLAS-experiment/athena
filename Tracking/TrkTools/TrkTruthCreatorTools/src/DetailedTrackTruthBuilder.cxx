@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkTruthCreatorTools/DetailedTrackTruthBuilder.h"
@@ -89,9 +89,7 @@ StatusCode DetailedTrackTruthBuilder::initialize() {
   if ( m_truthTrajBuilder.retrieve().isFailure() ) {
     ATH_MSG_FATAL("Failed to retrieve TruthTrajectory building tool " << m_truthTrajBuilder);
     return StatusCode::FAILURE;
-  } 
-    ATH_MSG_INFO("Retrieved TruthTrajectory building tool " << m_truthTrajBuilder);
-  
+  }
   
   if(!detStore()->retrieve(m_idHelper, "AtlasID").isSuccess()) {
     ATH_MSG_FATAL("Unable to initialize ID helper.");

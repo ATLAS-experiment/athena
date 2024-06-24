@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -52,9 +52,9 @@ StatusCode Trk::KalmanUpdatorSMatrix::initialize()
     }
     m_cov0 = SParVector5(&m_cov_stdvec[0],5);
     if (m_useFruehwirth8a) {
-      ATH_MSG_INFO( "Fast computation will be used for track state cov matrices (Fruehwirth-1987 eq. 8a)." );
+      ATH_MSG_DEBUG( "Fast computation will be used for track state cov matrices (Fruehwirth-1987 eq. 8a)." );
     } else{
-      ATH_MSG_INFO( "Track state cov matrix will be calculated according to Gelb-1975 p305." );
+      ATH_MSG_DEBUG( "Track state cov matrix will be calculated according to Gelb-1975 p305." );
     }
 
     const SParVector5 IV(1.0, 1.0, 1.0, 1.0, 1.0);
@@ -682,7 +682,7 @@ Trk::KalmanUpdatorSMatrix::calculateFilterStep_1D (const TrackParameters& TP,
     // for both signs (add/remove) the chi2 is now calculated like for updated states
     double chiSquared = measCov(0,0) - updatedCov(mk,mk);
     if (chiSquared == 0.0)
-        ATH_MSG_INFO( "division by zero in 1D chi2, set chi2 to 0.0 instead" );
+        ATH_MSG_DEBUG( "division by zero in 1D chi2, set chi2 to 0.0 instead" );
     else {
       // get chi2 = r.T() * R^-1 * r
       chiSquared = predictedResidual*predictedResidual/chiSquared;
@@ -1309,7 +1309,6 @@ bool Trk::KalmanUpdatorSMatrix::consistentParamDimensions(const Trk::LocalParame
   if (P.dimension() != dimCov ) {
     ATH_MSG_WARNING ("Inconsistency in dimension of local coord - problem with LocalParameters object?");
     ATH_MSG_WARNING ("dim of local parameters: "<<P.dimension()<<" vs. dim of error matrix: "<<dimCov);
-    ATH_MSG_INFO    ("==> refuse update or chi2 calculation");
     return false;
   } return true;
 }
