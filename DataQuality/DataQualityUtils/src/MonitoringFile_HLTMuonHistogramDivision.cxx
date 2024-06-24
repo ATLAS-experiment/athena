@@ -74,7 +74,7 @@ namespace dqutils {
       }
       return pH;
     };
-    auto getHistogramPair  = [&mf, &getHPointer] (const TString &numeratorName, const TString &denominatorName)->std::pair<TH1F *, TH1F *>  {
+    auto getHistogramPair  = [&getHPointer] (const TString &numeratorName, const TString &denominatorName)->std::pair<TH1F *, TH1F *>  {
       TH1F* pH2 {};
       TH1F* pH1 = getHPointer(numeratorName);
       if (pH1){
@@ -478,7 +478,7 @@ namespace dqutils {
           }
           return pH;
         };
-        auto getHistogramPairQuietly = [&mf, &getHPointerQuietly] (const TString &numeratorName, const TString &denominatorName)->std::pair<TH1F *, TH1F *>  {
+        auto getHistogramPairQuietly = [&getHPointerQuietly] (const TString &numeratorName, const TString &denominatorName)->std::pair<TH1F *, TH1F *>  {
           TH1F* pH2 {};
           TH1F* pH1 = getHPointerQuietly(numeratorName);
           if (pH1){

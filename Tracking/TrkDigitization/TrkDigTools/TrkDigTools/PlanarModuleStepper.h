@@ -23,7 +23,7 @@
 namespace Trk {
 
     class DigitizationModule;
-    class DigitizationStep;
+    struct DigitizationStep;
     
     /** @class PlanarModuleStepper
 
