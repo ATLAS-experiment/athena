@@ -30,6 +30,8 @@ def createGeoModelConfigFlags(analysis=False):
                 period = LHCPeriod.Run2
             elif prevFlags.GeoModel.AtlasVersion.startswith("ATLAS-R3"):
                 period = LHCPeriod.Run3
+            elif prevFlags.GeoModel.AtlasVersion.startswith("ATLAS-P2-RUN4"):
+                period = LHCPeriod.Run4
             else:
                 raise ValueError(f'Can not deduct LHC Run period from "{prevFlags.GeoModel.AtlasVersion}", please set "flags.GeoModel.Run" manually.')
 
