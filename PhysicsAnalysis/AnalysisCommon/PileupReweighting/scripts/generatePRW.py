@@ -169,7 +169,7 @@ def main():
         print("... finished. Please monitor your job on the grid, and when it is finished, download the files!")
     
     if len(ntupDatasets):
-      frucio_fn = 'prw_rucio_downloads.sh'
+      frucio_fn = 'prw_rucio_downloads_%s.sh' % args.inDsTxt
       print("Please download (and merge) existing config files from these datasets (see also output file %s):" % frucio_fn)
       with open(frucio_fn, 'w') as frucio:
         for ds in ntupDatasets:
