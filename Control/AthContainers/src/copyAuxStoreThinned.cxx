@@ -96,10 +96,14 @@ void copyAuxStoreThinned NO_SANITIZE_UNDEFINED
     // Skip null auxids (happens if we don't have the dictionary)
     if(auxid == SG::null_auxid) continue;
 
+    // Skip linked variables (they'll be handled when we copy the variable
+    // from which they're linked).
+    if (r.isLinked (auxid)) continue;
+
     // Skip non-selected dynamic variables.
     // Handle variable vetoes requested via ThinningInfo.
     // We want to allow vetoing a variable if it's defined
-    // as a dyamic variable in the source source, or if it doesn't
+    // as a dynamic variable in the source source, or if it doesn't
     // exist in the destination source (in which case it will be
     // dynamic there).  The latter case happens for example when
     // we save a static store object as the AuxContainerBaseClass
@@ -148,6 +152,16 @@ void copyAuxStoreThinned NO_SANITIZE_UNDEFINED
 
     // Create the target variable:
     void* dst = copy.getData (auxid, nremaining, nremaining);
+
+    // Also create a linked variable if needed.
+    SG::auxid_t linked_auxid = r.linkedVariable (auxid);
+    if (linked_auxid != null_auxid) {
+      const IAuxTypeVector* v = orig.linkedVector (auxid);
+      if (v) {
+        size_t sz = v->size();
+        copy.getData (linked_auxid, 0, sz);
+      }
+    }
 
     TempInterface srciface (orig.size());
     srciface.setStore (&orig);

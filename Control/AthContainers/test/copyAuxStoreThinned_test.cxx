@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -76,6 +76,7 @@ void compare (const SG::AuxStoreInternal& a,
   const SG::AuxTypeRegistry& reg = SG::AuxTypeRegistry::instance();
 
   for (SG::auxid_t id : a.getAuxIDs()) {
+    if (reg.isLinked (id)) continue;
     if (id == suppressed) {
       assert (b.getAuxIDs().count(id) == 0);
       continue;
@@ -90,6 +91,13 @@ void compare (const SG::AuxStoreInternal& a,
         assert (memcmp (aptr + ia*sz , bptr + ib*sz, sz) == 0);
         ++ib;
       }
+    }
+
+    SG::auxid_t linked_auxid = reg.linkedVariable (id);
+    if (linked_auxid != SG::null_auxid) {
+      assert (b.getAuxIDs().count (linked_auxid) == 1);
+      assert (b.linkedVector (id) != nullptr);
+      assert (b.linkedVector (id)->size() == 0);
     }
 
     assert (a.getIOType(id) == b.getIOType(id));
@@ -127,15 +135,26 @@ void test1()
   copyAuxStoreThinned (src, dst, &info);
   compare (src, dst);
 
-  SG::auxid_t ityp = SG::AuxTypeRegistry::instance().getAuxID<int> ("anInt");
-  SG::auxid_t ftyp = SG::AuxTypeRegistry::instance().getAuxID<float> ("aFloat");
-  SG::auxid_t pityp = SG::AuxTypeRegistry::instance().getAuxID<int> ("pInt");
-  SG::auxid_t pftyp = SG::AuxTypeRegistry::instance().getAuxID<float> ("pFloat");
+  SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
+  SG::auxid_t ityp = r.getAuxID<int> ("anInt");
+  SG::auxid_t ftyp = r.getAuxID<float> ("aFloat");
+  SG::auxid_t pityp = r.getAuxID<int> ("pInt");
+  SG::auxid_t pftyp = r.getAuxID<float> ("pFloat");
+
+  SG::auxid_t foo_links_id = r.getAuxID<float>
+    ("foo_links", "",
+       SG::AuxVarFlags::Linked);
+  SG::auxid_t foo_id = r.getAuxID<int>
+    ("foo", "",
+     SG::AuxVarFlags::None,
+     foo_links_id);
 
   int* iptr = reinterpret_cast<int*> (src.getData (ityp, 10, 10));
   float* fptr = reinterpret_cast<float*> (src.getData (ftyp, 10, 10));
   int* piptr = reinterpret_cast<int*> (src.getData (pityp, 10, 10));
   float* pfptr = reinterpret_cast<float*> (src.getData (pftyp, 10, 10));
+  float* foo_linksptr = reinterpret_cast<float*> (src.getData (foo_links_id, 2, 2));
+  int* fooptr = reinterpret_cast<int*> (src.getData (foo_id, 10, 10));
 
   src.setOption (pityp, SG::AuxDataOption ("nbits", 10));
   src.setOption (pityp, SG::AuxDataOption ("signed", false));
@@ -150,6 +169,10 @@ void test1()
     fptr[i] = 10*i + 0.5;
     piptr[i] = i + 13;
     pfptr[i] = 10*i + 0.5 + 13;
+    fooptr[i] = i+7;
+  }
+  for (int i=0; i < 2; i++) {
+    foo_linksptr[i] = i + 0.5;
   }
 
   dec.resize (10);
@@ -175,8 +198,8 @@ void test1()
   src.suppress (ftyp);
   copyAuxStoreThinned (src, dst2, &info);
   compare (src, dst2, true, ftyp);
-
 }
+
 
 void test2()
 {
@@ -231,7 +254,7 @@ void test2()
     return (s.substr(0,1) + " " + s.substr(1,8) + " " + s.substr(9,32));
   };
 
-  // Check the compresion results
+  // Check the compression results
   for (int i = 0; i < 5; i++) {
     std::cout << "Iteration [" << i << "]" << std::endl;
     std::cout << std::endl;

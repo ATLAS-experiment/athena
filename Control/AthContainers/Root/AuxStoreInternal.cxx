@@ -142,9 +142,11 @@ AuxStoreInternal::addVector (std::unique_ptr<IAuxTypeVector> vec,
   if (m_vecs[auxid]) std::abort();
 
   // Make sure the length is consistent with the rest of the store.
-  size_t sz = this->size_noLock();
-  if (vec->size() < sz)
-    vec->resize (sz);
+  if (!vec->isLinked()) {
+    size_t sz = this->size_noLock();
+    if (vec->size() < sz)
+      vec->resize (sz);
+  }
 
   // Add it to the store.
   m_vecs[auxid] = std::move (vec);
@@ -229,7 +231,7 @@ bool AuxStoreInternal::resize (size_t sz)
     throw ExcStoreLocked ("resize");
   bool nomoves = true;
   for (std::unique_ptr<IAuxTypeVector>& v : m_vecs) {
-    if (v) {
+    if (v && !v->isLinked()) {
       if (!v->resize (sz))
         nomoves = false;
     }
@@ -252,7 +254,7 @@ void AuxStoreInternal::reserve (size_t sz)
   if (m_locked)
     throw ExcStoreLocked ("reserve");
   for (std::unique_ptr<IAuxTypeVector>& v : m_vecs) {
-    if (v)
+    if (v && !v->isLinked())
       v->reserve (sz);
   }
 }
@@ -286,7 +288,7 @@ void AuxStoreInternal::shift (size_t pos, ptrdiff_t offs)
   if (m_locked)
     throw ExcStoreLocked ("shift");
   for (std::unique_ptr<IAuxTypeVector>& v : m_vecs) {
-    if (v)
+    if (v && !v->isLinked())
       v->shift (pos, offs);
   }
 }
@@ -328,7 +330,8 @@ bool AuxStoreInternal::insertMove (size_t pos,
     SG::IAuxTypeVector* v_dst = nullptr;
     if (id < m_vecs.size())
       v_dst = m_vecs[id].get();
-    if (v_dst) {
+    // Skip linked vars --- they should be taken care of by the parent var.
+    if (v_dst && !v_dst->isLinked()) {
       if (other.getData (id)) {
         void* src_ptr = other.getData (id, other_size, other_size);
         if (src_ptr) {
@@ -350,6 +353,7 @@ bool AuxStoreInternal::insertMove (size_t pos,
   for (SG::auxid_t id : other.getAuxIDs()) {
     if (!m_auxids.test(id) && !ignore.test(id))
     {
+      if (r.isLinked (id)) continue;
       if (other.getData (id)) {
         void* src_ptr = other.getData (id, other_size, other_size);
         if (src_ptr) {
@@ -431,8 +435,10 @@ const void* AuxStoreInternal::getIODataInternal (auxid_t auxid, bool quiet) cons
     return 0;
   }
 
-  if (m_standalone)
-    return m_vecs[auxid]->toPtr();
+  if (m_standalone) {
+    if (!SG::AuxTypeRegistry::instance().isLinked (auxid))
+      return m_vecs[auxid]->toPtr();
+  }
   return m_vecs[auxid]->toVector();
 }
 
@@ -462,8 +468,10 @@ void* AuxStoreInternal::getIODataInternal (auxid_t auxid, bool quiet)
     return 0;
   }
 
-  if (m_standalone)
-    return m_vecs[auxid]->toPtr();
+  if (m_standalone) {
+    if (!SG::AuxTypeRegistry::instance().isLinked (auxid))
+      return m_vecs[auxid]->toPtr();
+  }
   return m_vecs[auxid]->toVector();
 }
 
@@ -497,8 +505,11 @@ const void* AuxStoreInternal::getIOData (auxid_t auxid) const
  */
 const std::type_info* AuxStoreInternal::getIOType (auxid_t auxid) const
 {
-  if (m_standalone)
-    return SG::AuxTypeRegistry::instance().getType (auxid);
+  if (m_standalone) {
+    const SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
+    if (!r.isLinked (auxid))
+      return r.getType (auxid);
+  }
   guard_t guard (m_mutex);
   if (auxid < m_vecs.size() && m_vecs[auxid]) {
     const std::type_info* ret = m_vecs[auxid]->objType();
@@ -577,8 +588,11 @@ size_t AuxStoreInternal::size() const
 size_t AuxStoreInternal::size_noLock() const
 {
   for (SG::auxid_t id : m_auxids) {
-    if (id < m_vecs.size() && m_vecs[id] && m_vecs[id]->size() > 0)
+    if (id < m_vecs.size() && m_vecs[id] && !m_vecs[id]->isLinked() &&
+        m_vecs[id]->size() > 0)
+    {
       return m_vecs[id]->size();
+    }
   }
   return 0;
 }

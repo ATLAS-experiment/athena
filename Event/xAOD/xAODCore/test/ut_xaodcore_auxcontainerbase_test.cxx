@@ -287,13 +287,62 @@ void test_linked()
 
   assert (s.linkedVector (auxid2)->size() == 0);
 
-  [[maybe_unused]]
   int* vp1 = reinterpret_cast<int*> (s.getData (auxid1, 10, 10));
-  [[maybe_unused]]
   float* vp2 = reinterpret_cast<float*> (s.getData (auxid2, 3, 3));
 
   const AuxContainerLinkTest& cs = s;
   assert (cs.linkedVector (auxid2)->size() == 10);
+
+  auto v1 = reinterpret_cast<const std::vector<int>*> (s.getIOData (auxid1));
+  auto v2 = reinterpret_cast<const std::vector<float>*> (s.getIOData (auxid2));
+  assert (v1->size() == 10);
+  assert (v1->capacity() == 10);
+  assert (v2->size() == 3);
+  assert (v2->capacity() == 3);
+  assert (s.size() == 3);
+
+  s.resize (7);
+  assert (s.size() == 7);
+  assert (v1->size() == 10);
+  assert (v1->capacity() == 10);
+  assert (v2->size() == 7);
+
+  s.reserve (50);
+  assert (s.size() == 7);
+  assert (v1->size() == 10);
+  assert (v1->capacity() == 10);
+  assert (v2->size() == 7);
+  assert (v2->capacity() == 50);
+
+  std::vector<int> vv1 { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+  std::vector<float> vv2 { 11.5, 12.5, 13.5, 14.5, 15.5, 16.5, 17.5 };
+
+  vp2 = reinterpret_cast<float*> (s.getData (auxid2, 7, 50));
+
+  std::copy (vv1.begin(), vv1.end(), vp1);
+  std::copy (vv2.begin(), vv2.end(), vp2);
+
+  s.shift (3, 1);
+  assert (s.size() == 8);
+  assert (v1->size() == 10);
+  assert (v2->size() == 8);
+  assert (*v1 == vv1);
+  assert (*v2 == (std::vector<float> { 11.5, 12.5, 13.5, 0, 14.5, 15.5, 16.5, 17.5 }) );
+
+  AuxContainerLinkTest s2;
+  (void)s2.getData (auxid2, 6, 6);
+  (void)s2.getData (auxid1, 4, 4);
+  auto v3 = reinterpret_cast<const std::vector<int>*> (s2.getIOData (auxid1));
+  auto v4 = reinterpret_cast<const std::vector<float>*> (s2.getIOData (auxid2));
+  assert (v3->size() == 4);
+  assert (v4->size() == 6);
+
+  SG::auxid_set_t ignore;
+  s.insertMove (3, s2, ignore);
+  assert (s.size() == 14);
+  assert (v1->size() == 10);
+  assert (v2->size() == 14);
+  assert (*v1 == vv1);
 }
 
 

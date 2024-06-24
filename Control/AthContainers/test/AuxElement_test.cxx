@@ -395,6 +395,8 @@ void test_copy()
 {
   std::cout << "test_copy\n";
 
+  SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
+
   Elt::Accessor<int> ityp2 ("anotherInt");
 
   Elt elt1;
@@ -422,10 +424,15 @@ void test_copy()
   elt3.ityp1() = 10;
   elt3.ftyp1() = 10.5;
 
+  SG::auxid_t linked_id = r.getAuxID<int> ("linked", "", SG::AuxVarFlags::Linked);
+  (void)store3.getData (linked_id, 1, 1);
+  assert (store3.getAuxIDs().find (linked_id) != store3.getAuxIDs().end());
+
   SG::AuxVectorBase::copyAux (elt2, elt3);
   assert (elt2.ityp1() == 10);
   assert (elt2.ftyp1() == 10.5);
   assert (ityp2(elt2) == 0);
+  assert (store1.getAuxIDs().find (linked_id) == store1.getAuxIDs().end());
 
   const Elt& celt2 = elt2;
   Elt::Accessor<int> ityp3 ("yetAnotherInt");
@@ -434,7 +441,6 @@ void test_copy()
   dv5.set (elt5, 1);
   ConstAuxStoreTest store5;
   dv5.setStore (&store5);
-  SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
   SG::auxid_t ityp1_id = r.getAuxID<int> ("anInt");
   SG::auxid_t ftyp1_id = r.getAuxID<float> ("aFloat");
   SG::auxid_t ityp3_id = ityp3.auxid();

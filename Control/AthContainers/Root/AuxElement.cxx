@@ -579,7 +579,9 @@ void AuxElement::copyAux (const ConstAuxElement& other)
 
   SG::AuxVectorData& cont = *container();
   for (SG::auxid_t auxid : other_ids) {
-    r.copy (auxid, cont, index(), *ocont, oindex, 1);
+    if (!r.isLinked (auxid)) {
+      r.copy (auxid, cont, index(), *ocont, oindex, 1);
+    }
   }
 
   for (SG::auxid_t auxid : m_container->getWritableAuxIDs()) {
@@ -624,7 +626,9 @@ void AuxElement::copyAux (const AuxElement& other)
 
   AuxVectorData& cont = *container();
   for (SG::auxid_t auxid : other_ids) {
-    r.copy (auxid, cont, index(), *ocont, oindex, 1);
+    if (!r.isLinked (auxid)) {
+      r.copy (auxid, cont, index(), *ocont, oindex, 1);
+    }
   }
 
   for (SG::auxid_t auxid : m_container->getWritableAuxIDs()) {

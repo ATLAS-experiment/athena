@@ -380,7 +380,7 @@ namespace xAOD {
 
       // Try to find a variable:
       for (SG::auxid_t i : m_auxids) {
-         if( ( i < m_vecs.size() ) && m_vecs[ i ] ) {
+         if( ( i < m_vecs.size() ) && m_vecs[ i ] && !m_vecs[ i ]->isLinked()) {
             size_t sz = m_vecs[ i ]->size();
             if( sz > 0 ) {
                return sz;
@@ -414,6 +414,11 @@ namespace xAOD {
             void* result = m_store->getData( auxid, size, capacity );
             if( result ) {
                m_auxids.insert( auxid );
+               const SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
+               auxid_t linked_id = r.linkedVariable( auxid );
+               if (linked_id != SG::null_auxid) {
+                  m_auxids.insert( linked_id );
+               }
             }
             return result;
          } else {
@@ -425,7 +430,9 @@ namespace xAOD {
          }
       }
       m_vecs[ auxid ]->reserve( capacity );
-      m_vecs[ auxid ]->resize( size );
+      if (m_vecs[ auxid ]->size() < size) {
+         m_vecs[ auxid ]->resize( size );
+      }
 
       return m_vecs[ auxid ]->toPtr();
    }
@@ -457,10 +464,10 @@ namespace xAOD {
       // Do the operation on the static variables:
       bool nomoves = true;
       for (SG::IAuxTypeVector* v : m_vecs) {
-        if(v) {
-          if (!v->resize( size ))
-            nomoves = false;
-        }
+         if(v && !v->isLinked()) {
+           if (!v->resize( size ))
+             nomoves = false;
+         }
       }
 
       // Do the operation on the dynamic variables:
@@ -489,10 +496,10 @@ namespace xAOD {
       }
 
       // Do the operation on the static variables:
-      std::vector< SG::IAuxTypeVector* >::iterator itr = m_vecs.begin();
-      std::vector< SG::IAuxTypeVector* >::iterator end = m_vecs.end();
-      for( ; itr != end; ++itr ) {
-         if( *itr ) ( *itr )->reserve( size );
+      for (SG::IAuxTypeVector* v : m_vecs) {
+         if(v && !v->isLinked()) {
+            v->reserve( size );
+         }
       }
 
       // Do the operation on the dynamic variables:
@@ -577,7 +584,10 @@ namespace xAOD {
       // its own variable accesses.
       IOStats::instance().stats().readBranch( m_name, auxid );
 
-      return m_vecs[ auxid ]->toPtr();
+      if( m_vecs[ auxid ]->isLinked() )
+         return m_vecs[ auxid ]->toVector();
+      else
+         return m_vecs[ auxid ]->toPtr();
    }
 
    const std::type_info* AuxInfoBase::getIOType( auxid_t auxid ) const {
@@ -597,7 +607,10 @@ namespace xAOD {
          }
       }
 
-      return SG::AuxTypeRegistry::instance().getType( auxid );
+      if( m_vecs[ auxid ]->isLinked() )
+         return SG::AuxTypeRegistry::instance().getType( auxid );
+      else
+         return SG::AuxTypeRegistry::instance().getVecType( auxid );
    }
 
    const AuxInfoBase::auxid_set_t&
