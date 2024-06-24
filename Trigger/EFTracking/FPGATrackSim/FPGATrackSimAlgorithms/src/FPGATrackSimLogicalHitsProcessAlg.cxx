@@ -180,11 +180,13 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     // If and when we set up code to run over more than one region/tower at a time this will need to be updated
     std::vector<FPGATrackSimHit> const & hits_1st = m_logicEventHeader_1st->towers().at(0).hits();
 
-    for (FPGATrackSimHit const & h : hits_1st) phits_1st.push_back(&h);
+    for (FPGATrackSimHit const& h : hits_1st) { 
+        if (h.isReal()) phits_1st.push_back(&h);
+    }
 
     SG::WriteHandle<FPGATrackSimHitCollection> FPGAHits_1st (m_FPGAHitKey.at(0), ctx);
     ATH_CHECK( FPGAHits_1st.record (std::make_unique<FPGATrackSimHitCollection>()));
-    for (const FPGATrackSimHit* Hit : phits_1st) FPGAHits_1st->push_back(*Hit); 
+    for (const FPGATrackSimHit* Hit : phits_1st) FPGAHits_1st->push_back(*Hit);
  
     auto mon_nhits_1st = Monitored::Scalar<unsigned>("nHits_1st", hits_1st.size());
     auto mon_nhits_1st_unmapped = Monitored::Scalar<unsigned>("nHits_1st_unmapped", m_hits_1st_miss.size());
