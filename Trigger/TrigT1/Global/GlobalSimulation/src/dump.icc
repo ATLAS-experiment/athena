@@ -1,0 +1,11 @@
+//  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#include "dump.h"
+#include <fstream>
+
+namespace GlobalSim {
+  template<typename T>
+  void dump(const std::string& fn, const T& t) {
+    auto out = std::ofstream(fn);
+    out << t;
+  }
+}

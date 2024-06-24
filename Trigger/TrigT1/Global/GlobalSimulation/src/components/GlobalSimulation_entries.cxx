@@ -1,9 +1,35 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "../GlobalL1TopoSimulation.h"
 
+#include "../L1TopoAlgs/cTauMultiplicityAlgTool.h"
+#include "../L1TopoAlgs/EnergyThresholdAlgTool_jXE.h"
+#include "../L1TopoAlgs/eEmSelectAlgTool.h"
+#include "../L1TopoAlgs/jJetSelectAlgTool.h"
+#include "../L1TopoAlgs/DeltaRSqrIncl2AlgTool.h"
+#include "../L1TopoAlgs/SimpleConeAlgTool.h"
 
-DECLARE_COMPONENT( GlobalSim::GlobalL1TopoSimulation )
+#include "../L1TopoAlgs/jJetInputAlgTool.h"
+#include "../L1TopoAlgs/eEmInputAlgTool.h"
+#include "../L1TopoAlgs/cTauInputAlgTool.h"
+#include "../L1TopoAlgs/jXEInputAlgTool.h"
+
+
+DECLARE_COMPONENT(GlobalSim::GlobalL1TopoSimulation)
+
+DECLARE_COMPONENT(GlobalSim::cTauMultiplicityAlgTool)
+DECLARE_COMPONENT(GlobalSim::EnergyThresholdAlgTool_jXE)
+DECLARE_COMPONENT(GlobalSim::eEmSelectAlgTool)
+DECLARE_COMPONENT(GlobalSim::jJetSelectAlgTool)
+DECLARE_COMPONENT(GlobalSim::DeltaRSqrIncl2AlgTool)
+DECLARE_COMPONENT(GlobalSim::SimpleConeAlgTool)
+
+DECLARE_COMPONENT(GlobalSim::jJetInputAlgTool)
+DECLARE_COMPONENT(GlobalSim::eEmInputAlgTool)
+DECLARE_COMPONENT(GlobalSim::cTauInputAlgTool)
+DECLARE_COMPONENT(GlobalSim::jXEInputAlgTool)
+
+
 
