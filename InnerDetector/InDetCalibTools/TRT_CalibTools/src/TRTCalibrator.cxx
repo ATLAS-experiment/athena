@@ -1,3 +1,4 @@
+
 /*
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
@@ -329,12 +330,10 @@ int TRTCalibrator::GetSubLevels(const std::string& key, int lev, std::set<int>* 
   if(sl.find('t')!=std::string::npos){
     int min,max;
     sscanf(sl.substr(0,sl.find('t')).data(),"%i",&min);
-    ATH_MSG_INFO("min=" << min);
-    // std::cout << "min=" << min << std::endl;
+    ATH_MSG_INFO( "min=" << min );
     sl=sl.substr(sl.find('t')+1);
     sscanf(sl.data(),"%i",&max);
     ATH_MSG_INFO("max=" << max);
-    // std::cout << "max=" << max << std::endl;
     for (int imod=min; imod<=max; imod++){
       levels->insert(imod);
     }
@@ -367,7 +366,7 @@ void TRTCalibrator::MakeBDKeys(int bec, int low, int mod, int brd, int chp, int 
 
 bool TRTCalibrator::calibrate ATLAS_NOT_THREAD_SAFE () {
 
-  float run,evt,trk,r,dr,t,rtrack,ttrack,t0,ephase,sid;
+  float sid;
   Identifier ident;
   const InDetDD::TRT_BaseElement* strawelement;
   const InDetDD::TRT_BarrelElement* barrelelement;
@@ -492,56 +491,59 @@ bool TRTCalibrator::calibrate ATLAS_NOT_THREAD_SAFE () {
   if(m_calsub!="user") m_selstring = '_' + TRT.GetSelString() + '_' + Detector.GetSelString() + '_' + Layer.GetSelString() + '_' + Module.GetSelString() + '_' + Board.GetSelString() + '_' + Chip.GetSelString() + '_' + Straw.GetSelString();
   
   //print some info
-  msg(MSG::INFO) << endmsg;
-  msg(MSG::INFO) << "INPUT FILE       : " << infile << endmsg; 
-  msg(MSG::INFO) << "OUTPUT FILE      : " << outfile << endmsg; 
-  msg(MSG::INFO) << "SELECTION STRING : " << m_selstring << endmsg; 
-  msg(MSG::INFO) << "OPTION STRING    : " << m_options << endmsg; 
-  msg(MSG::INFO) << "RT RELATION      : " << m_rtrel << endmsg; 
-  msg(MSG::INFO) << "MIN STATISTICS   : RT=" << m_minrt << ", T0=" << m_mint0 << endmsg; 
-  msg(MSG::INFO) << "T0 OFFSET        : " << m_t0offset << endmsg; 
-  msg(MSG::INFO) << endmsg;
-  msg(MSG::INFO) << TRT.PrintInfo() << endmsg;
-  msg(MSG::INFO) << Detector.PrintInfo() << endmsg;
-  msg(MSG::INFO) << Layer.PrintInfo() << endmsg;
-  msg(MSG::INFO) << Module.PrintInfo() << endmsg;
-  msg(MSG::INFO) << Board.PrintInfo() << endmsg;
-  msg(MSG::INFO) << Chip.PrintInfo() << endmsg;
-  msg(MSG::INFO) << Straw.PrintInfo() << endmsg;
-  msg(MSG::INFO) << endmsg;
+  ATH_MSG_INFO(" ");
+  ATH_MSG_INFO( "INPUT FILE       : " << infile ); 
+  ATH_MSG_INFO( "OUTPUT FILE      : " << outfile ); 
+  ATH_MSG_INFO( "SELECTION STRING : " << m_selstring ); 
+  ATH_MSG_INFO( "OPTION STRING    : " << m_options ); 
+  ATH_MSG_INFO( "RT RELATION      : " << m_rtrel ); 
+  ATH_MSG_INFO( "MIN STATISTICS   : RT=" << m_minrt << ", T0=" << m_mint0 ); 
+  ATH_MSG_INFO( "T0 OFFSET        : " << m_t0offset ); 
+  ATH_MSG_INFO(" ");
+  ATH_MSG_INFO( TRT.PrintInfo() );
+  ATH_MSG_INFO( Detector.PrintInfo() );
+  ATH_MSG_INFO( Layer.PrintInfo() );
+  ATH_MSG_INFO( Module.PrintInfo() );
+  ATH_MSG_INFO( Board.PrintInfo() );
+  ATH_MSG_INFO( Chip.PrintInfo() );
+  ATH_MSG_INFO( Straw.PrintInfo() );
+  ATH_MSG_INFO(" ");
 
   if (m_DoArXenonSep){
   //print some info
-        msg(MSG::INFO) << endmsg;
-        msg(MSG::INFO) << "Setup for the ARGON Straws: " <<endmsg;
-        msg(MSG::INFO) << "INPUT FILE       : " << infile << endmsg;
-        msg(MSG::INFO) << "OUTPUT FILE      : " << outfile << endmsg;
-        msg(MSG::INFO) << "SELECTION STRING : " << m_selstring << endmsg;
-        msg(MSG::INFO) << "OPTION STRING    : " << m_options << endmsg;
-        msg(MSG::INFO) << "RT RELATION      : " << m_rtrel << endmsg;
-        msg(MSG::INFO) << "MIN STATISTICS   : RT=" << m_minrt << ", T0=" << m_mint0 << endmsg;
-        msg(MSG::INFO) << "T0 OFFSET        : " << m_t0offset << endmsg;
-        msg(MSG::INFO) << endmsg;
-        msg(MSG::INFO) << TRT_Ar.PrintInfo() << endmsg;
-        msg(MSG::INFO) << Detector_Ar.PrintInfo() << endmsg;
-        msg(MSG::INFO) << Layer_Ar.PrintInfo() << endmsg;
-        msg(MSG::INFO) << Module_Ar.PrintInfo() << endmsg;
-        msg(MSG::INFO) << Board_Ar.PrintInfo() << endmsg;
-        msg(MSG::INFO) << Chip_Ar.PrintInfo() << endmsg;
-        msg(MSG::INFO) << Straw_Ar.PrintInfo() << endmsg;
-        msg(MSG::INFO) << endmsg;
+    ATH_MSG_INFO(" ");
+    ATH_MSG_INFO( "Setup for the ARGON Straws: " );
+    ATH_MSG_INFO( "INPUT FILE       : " << infile );
+    ATH_MSG_INFO( "OUTPUT FILE      : " << outfile );
+    ATH_MSG_INFO( "SELECTION STRING : " << m_selstring );
+    ATH_MSG_INFO( "OPTION STRING    : " << m_options );
+    ATH_MSG_INFO( "RT RELATION      : " << m_rtrel );
+    ATH_MSG_INFO( "MIN STATISTICS   : RT=" << m_minrt << ", T0=" << m_mint0 );
+    ATH_MSG_INFO( "T0 OFFSET        : " << m_t0offset );
+    ATH_MSG_INFO( " ");
+    ATH_MSG_INFO( TRT_Ar.PrintInfo() );
+    ATH_MSG_INFO( Detector_Ar.PrintInfo() );
+    ATH_MSG_INFO( Layer_Ar.PrintInfo() );
+    ATH_MSG_INFO( Module_Ar.PrintInfo() );
+    ATH_MSG_INFO( Board_Ar.PrintInfo() );
+    ATH_MSG_INFO( Chip_Ar.PrintInfo() );
+    ATH_MSG_INFO( Straw_Ar.PrintInfo() );
+    ATH_MSG_INFO(" ");
   }
   //read the chip reference t0 values from finedelays.txt
   int rbrd, rchp, rdet, dum;
   float rt0;
   std::map<std::string,float> reft0map;
   std::ifstream t0ref("finedelays.txt",std::ios::in);
+  if(t0ref.is_open()) ATH_MSG_INFO(" Opened finedelays.txt ");
   for(int iref=0;iref<208;iref++){
     t0ref >> rbrd >> rchp >> rdet >> dum >> rt0;
     reft0map[std::string(Form("_%i_%i_%i",rdet,rbrd,rchp))]=rt0;
   }
+
   t0ref.close();
 
+  
   //set type of rt-relation
   bool isdines = m_rtrel.find("dines")!=std::string::npos;
   bool isbinned = m_rtrel.find("binned")!=std::string::npos;
@@ -549,28 +551,11 @@ bool TRTCalibrator::calibrate ATLAS_NOT_THREAD_SAFE () {
   if (isdines) rtint=2;
   else if (isbinned) rtint=1;
   else rtint=0;
+  ATH_MSG_INFO(" Rt relation is: " << rtint);
   
   int npop,isid;
   std::map<std::string,epdata> ephasemap;
-
-  //determine the input file type
-  char filetype[5];
-  std::ifstream myFile (infile.data(), std::ios::in | std::ios::binary);
-  bool isntuple=false;
-  if(myFile.is_open()){
-    myFile.read ((char*)filetype, 4); filetype[4]=0;
-    if (strcmp(filetype,"root")==0) isntuple=true;
-    ATH_MSG_INFO(" TRTCalibrator determined type of input file " << infile.data() << " to be " << filetype);
-    // std::cout << " TRTCalibrator determined type of input file " << infile.data() << " to be " << filetype << std::endl;
-    myFile.close();
-  }
-  else{
-    ATH_MSG_INFO("INPUT FILE NOT FOUND!  " << infile);
-    // std::cout << "INPUT FILE NOT FOUND!  " << infile << std::endl;
-  }
-
-    
-
+ 
   // open the output histogram file
    std::unique_ptr<TFile> histfile(TFile::Open("calibout.root","RECREATE"));
 
@@ -581,9 +566,6 @@ bool TRTCalibrator::calibrate ATLAS_NOT_THREAD_SAFE () {
       ATH_MSG_INFO ("Opened calibout.root ");
   }
 
-
-  if(!isntuple){  // LOOP OVER STRAW HISTOGRAMS IN CASE OF BINARY HISTOGRAMS =====================================
-    
     std::ifstream myFile (infile.data(), std::ios::in | std::ios::binary);
     ATH_MSG_INFO( " Opened " << infile << " as binary histogram file " );        
     int ihist=0;
@@ -797,16 +779,16 @@ bool TRTCalibrator::calibrate ATLAS_NOT_THREAD_SAFE () {
 
 
     if ((ihist%10000==9999) | (ihist==m_nevents-1)){
-      msg(MSG::INFO)  << Form("%7i HISTOGRAMS READ, UNITS ADDED: %i %i %2i %3i %3i %4i %6i",ihist+1,nTRThist, ndethist, nlayhist, nmodhist, nbrdhist, nchphist, nstwhist) << endmsg;
-      if(m_DoArXenonSep) msg(MSG::INFO)  << Form("%7i Ar HISTOGRAMS READ, UNITS ADDED: %i %i %2i %3i %3i %4i %6i",ihistAr+1,nTRThistAr, ndethistAr, nlayhistAr, nmodhistAr, nbrdhistAr, nchphistAr, nstwhistAr) << endmsg;
+      ATH_MSG_INFO( Form("%7i HISTOGRAMS READ, UNITS ADDED: %i %i %2i %3i %3i %4i %6i",ihist+1,nTRThist, ndethist, nlayhist, nmodhist, nbrdhist, nchphist, nstwhist) );
+      if(m_DoArXenonSep) ATH_MSG_INFO( Form("%7i Ar HISTOGRAMS READ, UNITS ADDED: %i %i %2i %3i %3i %4i %6i",ihistAr+1,nTRThistAr, ndethistAr, nlayhistAr, nmodhistAr, nbrdhistAr, nchphistAr, nstwhistAr) );
     }
       
       ihist++;
       delete [] chist;
     } // Finish Straw Loop
    
-    msg(MSG::INFO)  << Form("%7i HISTOGRAMS READ, UNITS ADDED: %i %i %2i %3i %3i %4i %6i",ihist+1,nTRThist, ndethist, nlayhist, nmodhist, nbrdhist, nchphist, nstwhist) << endmsg;
-    if(m_DoArXenonSep) msg(MSG::INFO)  << Form("%7i Ar HISTOGRAMS READ, UNITS ADDED: %i %i %2i %3i %3i %4i %6i",ihistAr+1,nTRThistAr, ndethistAr, nlayhistAr, nmodhistAr, nbrdhistAr, nchphistAr, nstwhistAr) << endmsg;
+    ATH_MSG_INFO( Form("%7i HISTOGRAMS READ, UNITS ADDED: %i %i %2i %3i %3i %4i %6i",ihist+1,nTRThist, ndethist, nlayhist, nmodhist, nbrdhist, nchphist, nstwhist) );
+    if(m_DoArXenonSep) ATH_MSG_INFO( Form("%7i Ar HISTOGRAMS READ, UNITS ADDED: %i %i %2i %3i %3i %4i %6i",ihistAr+1,nTRThistAr, ndethistAr, nlayhistAr, nmodhistAr, nbrdhistAr, nchphistAr, nstwhistAr) );
 
     TRT.UpdateOldConstants();
     Detector.UpdateOldConstants();
@@ -826,174 +808,28 @@ bool TRTCalibrator::calibrate ATLAS_NOT_THREAD_SAFE () {
 
     myFile.close();
 
-  } else { // LOOP OVER HITS IN CASE OF ROOT NTUPLE =====================================
-
-    msg(MSG::INFO)  <<  " READING basic NTUPLE is HIGHLY DEPRECATED!!! Do NOT use it!!!" << endmsg;
-    
-    //open the ntuple
-    TFile* ntfile=new TFile(infile.data());
-    if (!(ntfile->IsZombie())){
-      TNtuple* hittuple=(TNtuple*)ntfile->Get("ntuple");
-      
-      hittuple->SetBranchAddress("run",&run);
-      hittuple->SetBranchAddress("evt",&evt);
-      hittuple->SetBranchAddress("trk",&trk);
-      hittuple->SetBranchAddress("sid",&sid);
-      hittuple->SetBranchAddress("r",&r);
-      hittuple->SetBranchAddress("dr",&dr);
-      hittuple->SetBranchAddress("t",&t);
-      hittuple->SetBranchAddress("rtrack",&rtrack);
-      hittuple->SetBranchAddress("ttrack",&ttrack);
-      hittuple->SetBranchAddress("t0",&t0);
-      hittuple->SetBranchAddress("ephase",&ephase);
-      
-      if (m_nevents==-1) m_nevents = hittuple->GetEntries();
-      
-      //loop a 1st time over the hittuple and calculate event phase and other track related data;
-      msg(MSG::INFO)  << "CALCULATING TRACK DATA!" << endmsg;
-      for (int ievt=0;ievt<m_nevents;ievt++){
-
-        if ((ievt%1000000==999999) | (ievt==m_nevents-1)) {
-          msg(MSG::INFO) << ievt+1 << " HITS READ! " << endmsg; 
-        }
-
-        hittuple->GetEntry(ievt);
-
-        std::string epkey=std::string(Form("_%i_%i_%i",(int)run,(int)evt,(int)trk));
-
-        if (ephasemap.find(epkey) == ephasemap.end()){
-          ephasemap[epkey].run=run;
-          ephasemap[epkey].event=evt;
-          ephasemap[epkey].track=trk;
-          ephasemap[epkey].ephase1=(t+ephase)-t0-ttrack;
-          ephasemap[epkey].ephase2=ephase;
-          ephasemap[epkey].nhits=1.0;
-          ephasemap[epkey].t=t;
-          ephasemap[epkey].ttrack=ttrack;
-          ephasemap[epkey].t0=t0;
-        }
-        else {
-          ephasemap[epkey].ephase1+=(t+ephase)-t0-ttrack;
-          ephasemap[epkey].t+=t;
-          ephasemap[epkey].ttrack+=ttrack;
-          ephasemap[epkey].t0+=t0;
-          ephasemap[epkey].nhits++;
-        }
-      }
-      
-      //loop a 2nd time over the hittuple and add hits to the Calibrators
-      msg(MSG::INFO)  << "READING AND ADDING HITS!" << endmsg;
-      for (int ievt=0;ievt<m_nevents;ievt++){
-
-        if ((ievt%100000==99999) | (ievt==m_nevents-1)){
-          msg(MSG::INFO)  << ievt+1 << " HITS READ! " << " " << nTRThist << " " << ndethist << " " << nlayhist << " " << nmodhist << " " << nbrdhist << " " << nchphist << " " << nstwhist << endmsg;
-          nTRThist=ndethist=nlayhist=nmodhist=nbrdhist=nchphist=nstwhist=0;
-        }
-
-        hittuple->GetEntry(ievt);
-
-        //get the straw address (barrel/ec, layer, module, ...) based on the straw identifier
-        ident=(Identifier)((int)sid);
-        int chip=0,board=-1;
-        m_neighbourSvc->getChip(ident,chip); 
-        if(abs(m_TRTID->barrel_ec(ident))<2){
-          board=m_neighbourSvc->chipToBoardBarrel(chip,m_TRTID->layer_or_wheel(ident));
-        }
-        else
-          if (chip<12)
-            board=0;
-          else {
-            chip=chip-20;
-            board=1;
-          }
-        hitdata.det=(int)m_TRTID->barrel_ec(ident); 
-        hitdata.lay=(int)m_TRTID->layer_or_wheel(ident); 
-        hitdata.mod=(int)m_TRTID->phi_module(ident); 
-        hitdata.brd=board; 
-        hitdata.chp=chip; 
-        hitdata.stl=(int)m_TRTID->straw_layer(ident); 
-        hitdata.stw=(int)m_TRTID->straw(ident); 
-        hitdata.sid=(int)sid;
-
-        //only add the hit if the straw is included in the part of the TRT that is supposed to be calibrated
-        if (Detector.CheckSelection(hitdata.det) && Layer.CheckSelection(hitdata.lay)){
-
-          //build map keys
-          MakeBDKeys(hitdata.det, hitdata.lay, hitdata.mod, hitdata.brd, hitdata.chp, hitdata.sid);
-
-          //make the level hierachy dictionary
-          m_trt.t[m_Tkey].d[m_Dkey].l[m_Lkey].m[m_Mkey].b[m_Bkey].c[m_Ckey].s[m_Skey].z=0;
-
-          //populate the hit data structure to be added 
-          strawelement = m_trtmanager->getElement(ident);
-          hitdata.ievt=ievt; 
-          hitdata.tres=t-ttrack-t0; 
-          hitdata.weight=1.0;
-          hitdata.res=r-rtrack; 
-          hitdata.t=t-t0; 
-          hitdata.r=std::abs(rtrack);
-          hitdata.t0=m_trtcaldbTool->getT0(ident);
-          hitdata.rt0=reft0map[std::string(Form("_%i_%i_%i",hitdata.det,hitdata.brd,hitdata.chp))];
-          if(hitdata.det==1 || hitdata.det==-1) {
-   	    barrelelement=(InDetDD::TRT_BarrelElement*)strawelement;
-            hitdata.x=(barrelelement->center(ident)).x();
-            hitdata.y=(barrelelement->center(ident)).y();
-            hitdata.z=(barrelelement->center(ident)).z();
-          }else{
-	    endcapelement=(InDetDD::TRT_EndcapElement*)strawelement;
-            hitdata.x=(endcapelement->center(ident)).x();
-            hitdata.y=(endcapelement->center(ident)).y();
-            hitdata.z=(endcapelement->center(ident)).z();
-          }
-
-          //add the hit to the Calibrators on all levelels 
-          nTRThist += TRT.AddHit(m_Tkey,hitdata,nullptr,true);
-          ndethist += Detector.AddHit(m_Dkey,hitdata,nullptr,true);
-          nlayhist += Layer.AddHit(m_Lkey,hitdata,nullptr,true);
-          nmodhist += Module.AddHit(m_Mkey,hitdata,nullptr,true);    
-          nbrdhist += Board.AddHit(m_Bkey,hitdata,nullptr,true);    
-          nchphist += Chip.AddHit(m_Ckey,hitdata,nullptr,true);    
-          nstwhist += Straw.AddHit(m_Skey,hitdata,nullptr,true);   
-
-          if (msgLvl(MSG::DEBUG)) msg() << hitdata.sid << endmsg;
-          if (msgLvl(MSG::DEBUG)) msg() << m_TRTID->barrel_ec(ident) << endmsg;
-          if (msgLvl(MSG::DEBUG)) msg() << m_TRTID->layer_or_wheel(ident) << endmsg;
-          if (msgLvl(MSG::DEBUG)) msg() << m_TRTID->phi_module(ident) << endmsg;
-          if (msgLvl(MSG::DEBUG)) msg() << m_TRTID->straw_layer(ident) << endmsg;
-          if (msgLvl(MSG::DEBUG)) msg() << m_TRTID->straw(ident) << endmsg;
-          if (msgLvl(MSG::DEBUG)) msg() << chip << endmsg;
-          if (msgLvl(MSG::DEBUG)) msg() << board << endmsg;
-          if (msgLvl(MSG::DEBUG)) msg() << hitdata.x << endmsg;
-          if (msgLvl(MSG::DEBUG)) msg() << hitdata.y << endmsg;
-          if (msgLvl(MSG::DEBUG)) msg() << hitdata.z << endmsg;
-
-        }
-
-      }// for .. event loop
-    }// if .. file ok
-  }// if .. binhist or ntuple
-
-  msg(MSG::INFO) << endmsg;
-  msg(MSG::INFO) << TRT.PrintStat() << endmsg;
-  msg(MSG::INFO) << Detector.PrintStat() << endmsg;
-  msg(MSG::INFO) << Layer.PrintStat() << endmsg;
-  msg(MSG::INFO) << Module.PrintStat() << endmsg;
-  msg(MSG::INFO) << Board.PrintStat() << endmsg;
-  msg(MSG::INFO) << Chip.PrintStat() << endmsg;
-  msg(MSG::INFO) << Straw.PrintStat() << endmsg;
-  msg(MSG::INFO) << endmsg;
+ 
+  ATH_MSG_INFO(" ");
+  ATH_MSG_INFO( TRT.PrintStat() );
+  ATH_MSG_INFO( Detector.PrintStat() );
+  ATH_MSG_INFO( Layer.PrintStat() );
+  ATH_MSG_INFO( Module.PrintStat() );
+  ATH_MSG_INFO( Board.PrintStat() );
+  ATH_MSG_INFO( Chip.PrintStat() );
+  ATH_MSG_INFO( Straw.PrintStat() );
+  ATH_MSG_INFO(" ");
 
 
   if(m_DoArXenonSep){
-          msg(MSG::INFO) << endmsg;
-          msg(MSG::INFO) << TRT_Ar.PrintStat() << endmsg;
-          msg(MSG::INFO) << Detector_Ar.PrintStat() << endmsg;
-          msg(MSG::INFO) << Layer_Ar.PrintStat() << endmsg;
-          msg(MSG::INFO) << Module_Ar.PrintStat() << endmsg;
-          msg(MSG::INFO) << Board_Ar.PrintStat() << endmsg;
-          msg(MSG::INFO) << Chip_Ar.PrintStat() << endmsg;
-          msg(MSG::INFO) << Straw_Ar.PrintStat() << endmsg;
-          msg(MSG::INFO) << endmsg;
+    ATH_MSG_INFO(" ");
+    ATH_MSG_INFO( TRT_Ar.PrintStat() );
+    ATH_MSG_INFO( Detector_Ar.PrintStat() );
+    ATH_MSG_INFO( Layer_Ar.PrintStat() );
+    ATH_MSG_INFO( Module_Ar.PrintStat() );
+    ATH_MSG_INFO( Board_Ar.PrintStat() );
+    ATH_MSG_INFO( Chip_Ar.PrintStat() );
+    ATH_MSG_INFO( Straw_Ar.PrintStat() );
+    ATH_MSG_INFO(" ");
   }
 
 
@@ -1001,8 +837,6 @@ bool TRTCalibrator::calibrate ATLAS_NOT_THREAD_SAFE () {
   //caldata startdata(true,tbins,rbins);
   caldata startdata(true,55,100);
   //caldata startdata(true,64,64);
-
-  // This is the start if the timing histogram (lower edge). 
   startdata.t0=5.0;
   std::map<std::string,TDirectory*> dirmap;
   TDirectory* trtdir=gDirectory;
