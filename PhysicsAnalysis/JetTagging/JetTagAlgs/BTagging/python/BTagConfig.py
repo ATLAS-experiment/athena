@@ -165,7 +165,7 @@ def BTagRecoSplitCfg(inputFlags, JetCollection=['AntiKt4EMTopo','AntiKt4EMPFlow'
         )
 
     # By default, in Run3 we don't write out BTagging containers in AOD or ESD
-    # following allows to write them out when using Reco_tf.py --CA run 3 style configuration
+    # following allows to write them out when using Reco_tf.py run 3 CA-style configuration
     if inputFlags.Output.doWriteAOD and inputFlags.Jet.WriteToAOD:
      result.merge(addBTagToOutput(inputFlags, JetCollection, toAOD=True, toESD=False))
     if inputFlags.Output.doWriteESD:
