@@ -11,7 +11,6 @@ ignore_pattern="ActsTrackFindingAlg.+ERROR.+Propagation.+reached.+the.+step.+cou
 # Run the job
 export TRF_ECHO=1;
 ATHENA_CORE_NUMBER=${NTHREADS} Reco_tf.py \
-    --CA 'all:True' \
     --maxEvents  ${NEVENTS} \
     --perfmon 'fullmonmt' \
     --multithreaded 'True' \

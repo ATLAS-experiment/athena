@@ -8,7 +8,7 @@ n_events=1
 # Run Athena
 export ATHENA_CORE_NUMBER=1
 Reco_tf.py \
-    --CA \
+    \
     --inputRDOFile  ${input_rdo} \
     --outputAODFile AOD.athena.pool.root \
     --outputESDFile ESD.athena.pool.root \
@@ -25,7 +25,7 @@ fi
 
 # Run Acts
 Reco_tf.py \
-    --CA \
+    \
     --inputRDOFile  ${input_rdo} \
     --outputAODFile AOD.acts.pool.root \
     --outputESDFile ESD.acts.pool.root \

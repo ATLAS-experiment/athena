@@ -9,7 +9,7 @@ n_events=5
 ignore_pattern="ActsReFitterAlg.+ERROR.+Propagation.+reached.+the.+step.+count.+limit"
 
 export ATHENA_CORE_NUMBER=1
-Reco_tf.py --CA \
+Reco_tf.py \
    --preExec "flags.Exec.FPE=-1;" \
    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateGSFFlags" \
    --postInclude "ActsConfig.ActsTrackFittingConfig.ActsReFitterAlgCfg" \

@@ -8,7 +8,7 @@ n_events=5
 ignore_pattern="ActsTrackFindingAlg.+ERROR.+Propagation.+reached.+the.+step.+count.+limit,ActsTrackFindingAlg.+ERROR.+Propagation.+failed:.+PropagatorError:3.+Propagation.+reached.+the.+configured.+maximum.+number.+of.+steps.+with.+the.+initial.+parameters,ActsTrackFindingAlg.Acts.+ERROR.+CombinatorialKalmanFilter.+failed:.+CombinatorialKalmanFilterError:5.+Propagation.+reaches.+max.+steps.+before.+track.+finding.+is.+finished.+with.+the.+initial.+parameters"
 
 export ATHENA_CORE_NUMBER=1
-Reco_tf.py --CA \
+Reco_tf.py \
   --preExec "flags.Exec.FPE=-1;" "from Campaigns import PhaseIINoPileUp; PhaseIINoPileUp(flags);" \
   --preInclude "all:InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" "all:ActsConfig.ActsCIFlags.actsHeavyIonFlags" \
   --postInclude "all:PyJobTransforms.UseFrontier" \

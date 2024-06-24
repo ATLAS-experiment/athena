@@ -10,7 +10,7 @@ n_events=5
 #  2) in addition to only use the --postInclude option:  ActsConfig.ActsTrackFittingConfig.forceITkActsReFitterAlgCfg
 
 export ATHENA_CORE_NUMBER=1
-Reco_tf.py --CA \
+Reco_tf.py \
    --preExec "flags.Exec.FPE=-1;" \
    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
    --postInclude "ActsConfig.ActsTrackFittingConfig.ActsReFitterAlgCfg" \
