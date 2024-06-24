@@ -1,13 +1,19 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
-
-# Generate run3 L1 menu
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import (ComponentAccumulator,)
 from AthenaConfiguration.ComponentFactory import CompFactory
 from libpyeformat_helper import SourceIdentifier, SubDetector
 
-import sys
+from getAlgData import algdata_from_menu
+from toolFromAlgData import toolFromAlgData
+
+from AthenaCommon.Logging import logging
+logger = logging.getLogger(__name__)
+from AthenaCommon.Constants import VERBOSE
+logger.setLevel(VERBOSE)
+
+import sys, os
 
 def GlobalL1TopoSimulationCfg(flags, algLogLevel):
 
@@ -15,11 +21,31 @@ def GlobalL1TopoSimulationCfg(flags, algLogLevel):
 
     globalSimAlg = CompFactory.GlobalSim.GlobalL1TopoSimulation("GlobalSimTest")
     globalSimAlg.OutputLevel = algLogLevel
-    globalSimAlg.JetInputProvider = CompFactory.LVL1.jFexInputProvider(
-        "jFexInputProvider"
-    )
-    acc.addEventAlgo(globalSimAlg)
+ 
+    if 'GSDEBUG' in os.environ:
+        globalSimAlg.enableDumps = True
 
+    # for now, only run a small sub graph corresponding to
+    # existing L1Topo Algorithms.
+    root_names = [
+        'SC111-CjJ40abpETA26',
+        '0DR03-eEM9ab-CjJ40ab',    
+        'Mult_jXESPARE8', # cTauMultiplicity COUNT
+        'Mult_cTAU30M',
+        'Mult_cTAU35M',
+        'Mult_cTAUSPARE2',
+    ]
+
+    alg_data_list = algdata_from_menu(flags, root_names=root_names, do_dot=True)
+    logger.info("number of alg_data " + str(len(alg_data_list)))
+  
+    [globalSimAlg.topo_algs.append(toolFromAlgData(flags, ad)) for
+     ad in alg_data_list]
+
+    acc.addEventAlgo(globalSimAlg)
+    
+    histSvc = CompFactory.THistSvc(Output =["EXPERT DATAFILE='expert-monitoring.root', OPT='RECREATE'"])
+    acc.addService(histSvc)
     return acc
 
 def add_subsystems(subsystems, acc, args):
@@ -190,7 +216,7 @@ def add_subsystems(subsystems, acc, args):
 if __name__ == '__main__':
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaCommon.Logging import logging
-    # from AthenaCommon.Constants import VERBOSE,DEBUG,WARNING
+
     from AthenaCommon.Constants import DEBUG
 
     log = logging.getLogger('globalSim')
@@ -209,8 +235,8 @@ if __name__ == '__main__':
         "--inputs",
         nargs='*',
         action="store",
-        dest="inputs",
-        help="Inputs will be used in commands",
+        dest="inputFiles",
+        help="files to process",
         required=True)
     
 
@@ -239,22 +265,27 @@ if __name__ == '__main__':
         type=int,
         action="store",
         dest="skipEvents",
-        help="How many events will be skipped.",
+        help="Number of  events to skip.",
         default=0,
         required=False)
 
     args = parser.parse_args()
 
-    print('args:')
+    logger.debug('args:')
 
-    print(args)
+    logger.debug(args)
     
     flags = initConfigFlags()
     
     if(args.nevent > 0):
         flags.Exec.MaxEvents = args.nevent
 
-    flags.Input.Files = args.inputs
+    if args.inputFiles:
+        flags.Input.Files = args.inputFiles
+    else:
+        flags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/data23/RAW/data23_13p6TeV.00452463.physics_Main.daq.RAW/540events.data23_13p6TeV.00452463.physics_Main.daq.RAW._lb0514._SFO-16._0004.data']
+        
+  
     flags.Concurrency.NumThreads = 1
     flags.Concurrency.NumConcurrentEvents = 1
     flags.Exec.SkipEvents = args.skipEvents
@@ -263,6 +294,8 @@ if __name__ == '__main__':
     flags.Trigger.triggerMenuSetup = 'PhysicsP1_pp_run3_v1'
 
     flags.GeoModel.AtlasVersion="ATLAS-R3S-2021-03-01-00"
+
+    
 
     print (flags.dump())
 
@@ -274,11 +307,6 @@ if __name__ == '__main__':
     from TriggerJobOpts.TriggerByteStreamConfig import ByteStreamReadCfg
     acc.merge(ByteStreamReadCfg(flags, type_names=['CTP_RDO/CTP_RDO']))
 
-    # Produce xAOD L1 RoIs from RoIBResult
-    from AnalysisTriggerAlgs.AnalysisTriggerAlgsConfig import RoIBResultToxAODCfg
-    xRoIBResultAcc, xRoIBResultOutputs = RoIBResultToxAODCfg(flags)
-    acc.merge(xRoIBResultAcc)
-  
     # Generate run3 L1 menu
     from TrigConfigSvc.TrigConfigSvcCfg import L1ConfigSvcCfg, generateL1Menu
     acc.merge(L1ConfigSvcCfg(flags))
@@ -288,8 +316,8 @@ if __name__ == '__main__':
     add_subsystems(subsystems, acc, args)
 
     acc.merge(GlobalL1TopoSimulationCfg(flags, algLogLevel))
-
-  
+      
+    
     roib2topo = CompFactory.LVL1.RoiB2TopoInputDataCnv(
         name='RoiB2TopoInputDataCnv')
     
