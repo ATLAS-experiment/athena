@@ -18,11 +18,6 @@ from PyJobTransforms.trfLogger import msg
 msg.info('logging set in %s', sys.argv[0])
 
 
-# Prodsys hack...
-# Not clear what this is for.... maybe not needed?
-#ListOfDefaultPositionalKeys = ['--AMIConfig', '--AMITag', '--CA', '--DBRelease', '--argJSON', '--asetup', '--athena', '--athenaMPEventsBeforeFork', '--athenaMPMergeTargetSize', '--athenaMPStrategy', '--athenaMPUseEventOrders', '--athenaopts', '--attempt', '--beamType', '--checkEventCount', '--command', '--conditionsTag', '--detectors', '--dumpJSON', '--dumpPickle', '--env', '--eventAcceptanceEfficiency', '--eventService', '--execOnly', '--fileValidation', '--geometryVersion', '--ignoreErrors', '--ignoreFiles', '--ignorePatterns', '--imf', '--inputBS_SKIMFile', '--inputFileValidation', '--inputHITSFile', '--inputRDO_BKGFile', '--jobid', '--maxEvents', '--multiprocess', '--multithreaded', '--outputFileValidation', '--outputRDOFile', '--outputRDO_FILTFile', '--outputRDO_SGNLFile', '--parallelFileValidation', '--postExec', '--postInclude', '--preExec', '--preInclude', '--reportName', '--reportType', '--runNumber', '--samplingFractionDbTag', '--sharedWriter', '--showGraph', '--showPath', '--showSteps', '--skipEvents', '--steering', '--taskid', '--tcmalloc', '--triggerConfig', '--valgrind', '--valgrindDefaultOpts', '--valgrindExtraOpts']
-
-
 @stdTrfExceptionHandler
 @sigUsrStackTrace
 def main():

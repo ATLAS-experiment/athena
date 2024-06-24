@@ -4,7 +4,7 @@ This package contains a series of examples showing how each aspect of the DAOD b
 
 The examples are run as follows:
 
-`Derivation_tf.py --CA --inputAODFile aod.pool.root --outputDAODFile test.pool.root --formats TEST1 TEST3 ...`
+`Derivation_tf.py --inputAODFile aod.pool.root --outputDAODFile test.pool.root --formats TEST1 TEST3 ...`
 
 The examples are as follows:
 
