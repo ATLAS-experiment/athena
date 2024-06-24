@@ -9,13 +9,6 @@ datapath=$(echo $LHAPDF_DATA_PATH | cut -d':' -f1)
 exec_prefix=${prefix}
 version=$LHAPDFVER
 
-#find boost
-boost=@Boost_INCLUDE_PATH@
-if [ -z $boost ]
-then
-    echo "WARNING: lhapdf-config could not find boost headers"
-fi
-
 if [[ $# -eq 0 || -n $( echo $* | egrep -- "--help|-h" ) ]]; then
     echo "lhapdf-config: configuration tool for the LHAPDF"
     echo "               parton density function evolution library"
@@ -44,7 +37,7 @@ tmp=$( echo "$*" | egrep -- '--\<incdir\>')
 test -n "$tmp" && OUT="$OUT ${prefix}/include"
 
 tmp=$( echo "$*" | egrep -- '--\<cflags|cppflags|cxxflags\>')
-test -n "$tmp" && OUT="$OUT -I${prefix}/include -I$boost"
+test -n "$tmp" && OUT="$OUT -I${prefix}/include"
 
 tmp=$( echo "$*" | egrep -- '--\<libdir\>')
 test -n "$tmp" && OUT="$OUT ${exec_prefix}/lib"
