@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 
@@ -13,6 +13,7 @@
 
 #include "xAODHIEvent/HIEventShapeContainer.h"
 #include "xAODEgamma/PhotonContainer.h"
+#include "AthContainers/ConstAccessor.h"
 
 #include "LWHists/TH1D_LW.h"
 #include "LWHists/TH2D_LW.h"
@@ -197,9 +198,12 @@ StatusCode HIMonitoringPhotonsTool::fillHistograms() {
       m_h_photon_eta_phi_ptCut_tight->Fill(eta, phi);
     }
 
-    float etcone20 = (*photons_itr)->auxdata< float >("etcone20") * 1e-3;
-    float etcone30 = (*photons_itr)->auxdata< float >("etcone30") * 1e-3;
-    float etcone40 = (*photons_itr)->auxdata< float >("etcone40") * 1e-3;
+    static const SG::ConstAccessor< float > etcone20Acc("etcone20");
+    static const SG::ConstAccessor< float > etcone30Acc("etcone30");
+    static const SG::ConstAccessor< float > etcone40Acc("etcone40");
+    float etcone20 = etcone20Acc(**photons_itr) * 1e-3;
+    float etcone30 = etcone30Acc(**photons_itr) * 1e-3;
+    float etcone40 = etcone40Acc(**photons_itr) * 1e-3;
 
     m_h_photon_fcal_etcone20_ptCut->Fill(m_FCalEt, etcone20);
     m_h_photon_fcal_etcone30_ptCut->Fill(m_FCalEt, etcone30);
@@ -243,18 +247,28 @@ StatusCode HIMonitoringPhotonsTool::fillHistograms() {
       if (tight_MC15) m_h_photon_etcone30_ptCut_fcal2_tight->Fill(etcone30);
     }
 
-    float reta = (*photons_itr)->auxdata< float >("Reta");
-    float rphi = (*photons_itr)->auxdata< float >("Rphi");
-    float weta2 = (*photons_itr)->auxdata< float >("weta2");
+    static const SG::ConstAccessor<float> RetaAcc("Reta");
+    static const SG::ConstAccessor<float> RphiAcc("Rphi");
+    static const SG::ConstAccessor< float > weta2Acc("weta2");
+    float reta = RetaAcc(**photons_itr);
+    float rphi = RphiAcc(**photons_itr);
+    float weta2 = weta2Acc(**photons_itr);
 
-    float rhad = (*photons_itr)->auxdata< float >("Rhad");
-    float rhad1 = (*photons_itr)->auxdata< float >("Rhad1");
-    float wtots1 = (*photons_itr)->auxdata< float >("wtots1");
-    float fracs1 = (*photons_itr)->auxdata< float >("fracs1");
+    static const SG::ConstAccessor< float > RhadAcc("Rhad");
+    static const SG::ConstAccessor< float > Rhad1Acc("Rhad1");
+    static const SG::ConstAccessor< float > wtots1Acc("wtots1");
+    static const SG::ConstAccessor< float > fracs1Acc("fracs1");
+    float rhad = RhadAcc(**photons_itr);
+    float rhad1 = Rhad1Acc(**photons_itr);
+    float wtots1 = wtots1Acc(**photons_itr);
+    float fracs1 = fracs1Acc(**photons_itr);
 
-    float deltae = (*photons_itr)->auxdata< float >("DeltaE") * 1e-3;
-    float eratio = (*photons_itr)->auxdata< float >("Eratio");
-    float f1 = (*photons_itr)->auxdata< float >("f1");
+    static const SG::ConstAccessor< float > DeltaEAcc("DeltaE");
+    static const SG::ConstAccessor< float > EratioAcc("Eratio");
+    static const SG::ConstAccessor< float > f1Acc("f1");
+    float deltae = DeltaEAcc(**photons_itr) * 1e-3;
+    float eratio = EratioAcc(**photons_itr);
+    float f1 = f1Acc(**photons_itr);
 
     if (fabs(eta) < 1.37) {
       m_h_photon_reta_fcal_ptCut_eta0->Fill(m_FCalEt, reta);
