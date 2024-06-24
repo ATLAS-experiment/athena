@@ -58,8 +58,8 @@ def TRT_CalibrationMgrCfg(flags,name='TRT_CalibrationMgr',calibconstants='',**kw
         kwargs.setdefault("TrackFitter", acc.popToolsAndMerge(InDetTrackFitterCfg(flags))) 
     
     if "TrackSelectorTool" not in kwargs:
-        from InDetConfig.InDetTrackSelectorToolConfig import InDetDetailedTrackSelectorToolCfg
-        kwargs.setdefault("TrackSelectorTool", acc.popToolsAndMerge(InDetDetailedTrackSelectorToolCfg(flags)))
+        from InDetConfig.InDetTrackSelectorToolConfig import TRT_InDetDetailedTrackSelectorToolCfg
+        kwargs.setdefault("TrackSelectorTool", acc.popToolsAndMerge(TRT_InDetDetailedTrackSelectorToolCfg(flags)))
     
     # FIXME! Let all straws participate in trackfinding as default - SERGI This is wrong and needs to be UPDATED @peter    
         # acc.merge(addOverride('/TRT/Cond/Status','TRTCondStatus-empty-00-00'))
@@ -99,15 +99,29 @@ def TRT_StrawStatusCfg(flags,name='InDet_TRT_StrawStatus',**kwargs) :
 
 if __name__ == '__main__':
     
+    import glob, argparse
+    parser = argparse.ArgumentParser(prog='python -m TRT_CalibAlgs.TRTCalibrationMgrConfig',
+                                   description="""Run R-t TRT calibration.\n\n
+                                   Example: python -m TRT_CalibAlgs.TRTCalibrationMgrConfig --filesInput "/path/to/files/data22*" --evtMax 10""")
+    
+    parser.add_argument('--evtMax',type=int,default=10,help="Number of events. Default 10 (Run all events)")
+    parser.add_argument('--filesInput',nargs='+', default=[],help="Input files. RAW data")
+    args = parser.parse_args()
+    
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
     
-    from AthenaConfiguration.TestDefaults import defaultTestFiles, defaultGeometryTags 
-    flags.Input.Files = defaultTestFiles.RAW_RUN3
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags, defaultTestFiles
+    if not args.filesInput:
+        flags.Input.Files = defaultTestFiles.RAW_RUN3
+    else:
+        flags.Input.Files = [file for x in args.filesInput for file in glob.glob(x)]
+        
+    flags.Exec.MaxEvents = args.evtMax
     flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
     
     flags.IOVDb.GlobalTag = "CONDBR2-BLKPA-2023-03"
-    flags.Exec.MaxEvents = 10 
+    
     
     from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
     setupDetectorFlags(flags, ['ID'], toggle_geometry=True)
@@ -115,7 +129,12 @@ if __name__ == '__main__':
     flags.fillFromArgs()
     
     # Reason why we need to clone and replace: https://gitlab.cern.ch/atlas/athena/-/merge_requests/68616#note_7614858
-    flags = flags.cloneAndReplace( "Tracking.ActiveConfig", f"Tracking.{flags.Tracking.PrimaryPassConfig.value}Pass")    
+    flags = flags.cloneAndReplace(
+        "Tracking.ActiveConfig",
+        f"Tracking.{flags.Tracking.PrimaryPassConfig.value}Pass",
+        # Keep original flags as some of the subsequent passes use
+        # lambda functions relying on them
+        keepOriginal=True)   
     flags.lock()
     
     # Set up the main service "acc"
