@@ -24,10 +24,9 @@ namespace LVL1 {
   StatusCode TrigT1TGCRecRoiTool::initialize() {
     ATH_CHECK(m_DetectorManagerKey.initialize());
     ATH_CHECK( m_idHelperSvc.retrieve() );
-    ServiceHandle<ITGCcablingServerSvc> tgcCabGet ("TGCcablingServerSvc", name());
+    ServiceHandle<ITGCcablingServerSvc> tgcCabGet("Muon::TGCCablingServerSvc", name());
     ATH_CHECK( tgcCabGet.retrieve() );
     ATH_CHECK( tgcCabGet->giveCabling(m_cabling) );
-    m_isAtlas = tgcCabGet->isAtlas();
     if(m_useRun3Config){
       ATH_MSG_INFO("update to Run 3 bit mask");
       updateBitMask( Run3 );
@@ -429,11 +428,7 @@ namespace LVL1 {
       if (s_asdout!=nullptr) {
 	EdgeType stripEdge = NonEdge;
 	// Logic to know the relation between phi and strip channel directions
-	if(!m_isAtlas) { // 8-fold
-	  stripEdge = ((i==0) ^ (sectorID%2==0)) ? LowerPhiEdge : UpperPhiEdge;
-	} else { // 12-fold
-	  stripEdge = ((i==0) ^ ((s_asdout->isAside()) ^ (!(s_asdout->isBackward())))) ? LowerPhiEdge : UpperPhiEdge;
-	}
+	stripEdge = ((i==0) ^ ((s_asdout->isAside()) ^ (!(s_asdout->isBackward())))) ? LowerPhiEdge : UpperPhiEdge;
 	
 	getStripInfo(s_eta,s_phi,stripId,std::move(s_asdout),stripEdge);
 	if (i==0) phiMin=s_phi;

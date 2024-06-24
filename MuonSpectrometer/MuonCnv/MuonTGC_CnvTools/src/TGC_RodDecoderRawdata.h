@@ -65,8 +65,7 @@ class TGC_RodDecoderRawdata : public extends<AthAlgTool, ITGC_RodDecoder>
       /** Flag for showStatusWords */
       bool m_showStatusWords;
 
-      ServiceHandle<ITGCcablingServerSvc> m_cablingSvc
-        { this, "TGCCablingServiceSvc", "TGCcablingServerSvc", "" };
+      ServiceHandle<ITGCcablingServerSvc> m_cablingSvc{this, "TGCCablingServiceSvc", "Muon::TGCcablingServerSvc", ""};
     };
 
 } // end of namespace 

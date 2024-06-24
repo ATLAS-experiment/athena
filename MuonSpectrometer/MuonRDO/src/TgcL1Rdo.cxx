@@ -1,9 +1,8 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonRDO/TgcL1Rdo.h"
-#include "TGCcablingInterface/ITGCcablingServerSvc.h"
 #include "AthenaKernel/errorcheck.h"
 
 // Default constructor
@@ -48,19 +47,10 @@ uint16_t TgcL1Rdo::identifyRawData(const TgcL1RawData &rawData)
     return calculateOnlineId(rawData.subDetectorId(), rawData.srodId());
 }
 
-std::pair<int, int> TgcL1Rdo::initOnlineId()
-{
-  const char* name = "TgcRdo::calculateOnlineId";
-  ServiceHandle<ITGCcablingServerSvc> tgcCabGet ("TGCcablingServerSvc", name);
-  if (tgcCabGet.retrieve().isFailure()) {
-    REPORT_ERROR_WITH_CONTEXT (StatusCode::FAILURE, name)
-      << "Could not get TGCcablingServerSvc! " ;
-    return std::make_pair (-1, -1);
-  }
-
-  int offset = -1; // 0 start 
-  int MAX_N_SROD = 3;
-  return std::make_pair (offset, MAX_N_SROD);
+std::pair<int, int> TgcL1Rdo::initOnlineId() {
+  static constexpr int offset = -1;  // 0 start 
+  static constexpr int MAX_N_SROD = 3;
+  return std::make_pair(offset, MAX_N_SROD);
 }
 
 // online ID calculator

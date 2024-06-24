@@ -1240,19 +1240,11 @@ StatusCode LVL1TGCTrigger::getCabling()
     // TGCcablingSvc
     // get Cabling Server Service
     const ITGCcablingServerSvc* TgcCabGet = 0;
-    StatusCode sc = service("TGCcablingServerSvc", TgcCabGet);
-    if (sc.isFailure()){
-      ATH_MSG_FATAL("Can't get TGCcablingServerSvc.");
-      return StatusCode::FAILURE;
-    }
+    ATH_CHECK(service("Muon::TGCCablingServerSvc", TgcCabGet));
 
     // get Cabling Service
-    sc = TgcCabGet->giveCabling(m_cabling);
-    if (sc.isFailure()){
-      ATH_MSG_FATAL("Can't get TGCcablingSvc Server");
-      return StatusCode::FAILURE;
-    }
-    
+    ATH_CHECK(TgcCabGet->giveCabling(m_cabling));
+
     int maxRodId, maxSRodId, maxSswId, maxSbloc,minChannelId, maxChannelId;
     m_cabling->getReadoutIDRanges( maxRodId, maxSRodId, maxSswId, maxSbloc,minChannelId, maxChannelId);
     if (maxRodId ==12) {
@@ -1271,7 +1263,7 @@ StatusCode LVL1TGCTrigger::getCabling()
 
     ATH_MSG_DEBUG("finished LVL1TGCTrigger::getCabling()");
 
-    return sc;
+    return StatusCode::SUCCESS;
 }
 
 

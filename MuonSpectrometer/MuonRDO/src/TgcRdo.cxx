@@ -1,9 +1,8 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonRDO/TgcRdo.h"
-#include "TGCcablingInterface/ITGCcablingServerSvc.h"
 #include "AthenaKernel/errorcheck.h"
 
 // Default constructor
@@ -49,19 +48,9 @@ uint16_t TgcRdo::identifyRawData(const TgcRawData &rawData)
 }
 
 // Returns offset, MAX_N_ROD
-std::pair<int, int> TgcRdo::initOnlineId()
-{
-  const char* name = "TgcRdo::calculateOnlineId";
-  ServiceHandle<ITGCcablingServerSvc> tgcCabGet ("TGCcablingServerSvc", name);
-  if (tgcCabGet.retrieve().isFailure()) {
-    REPORT_ERROR_WITH_CONTEXT (StatusCode::FAILURE, name)
-      << "Could not get TGCcablingServerSvc! " ;
-    return std::make_pair (-1, -1);
-  }
-
-  bool isAtlas = tgcCabGet->isAtlas();
-  int offset = isAtlas ? -1 : 0;
-  int MAX_N_ROD = isAtlas ? 12 : 8;
+std::pair<int, int> TgcRdo::initOnlineId() {
+  static constexpr int offset = -1;
+  static constexpr int MAX_N_ROD = 12;
   return std::make_pair (offset, MAX_N_ROD);
 }
 

@@ -1,93 +1,46 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonRDO/TgcRdoIdHash.h" 
 #include "MuonRDO/TgcRdo.h" 
-#include "GaudiKernel/Bootstrap.h"
-#include "GaudiKernel/IMessageSvc.h"
-#include "GaudiKernel/MsgStream.h"
-#include "TGCcablingInterface/ITGCcablingServerSvc.h"
 
 // default contructor 
-TgcRdoIdHash::TgcRdoIdHash()
-{
+TgcRdoIdHash::TgcRdoIdHash() {
   m_size=0;
 
-  static const bool isAtlas = getIsAtlas();
-  
-  if(isAtlas){
-  
-      // loop over all RODs
-      for (uint16_t id=0; id<30; ++id){
-        if ( id < 24) {
-          // map
-          m_lookup[id]=m_size;
-          m_int2id.push_back(id);
-          ++m_size;
-          
-          // SubDetectorID
-          if (id < 12) // A-side
-            m_int2subDetectorId.push_back(0x67);
-          else
-            m_int2subDetectorId.push_back(0x68);
-          
-          // ROD ID
-          m_int2rodId.push_back( (id % 12) + 1);
-        }else{ // SROD
-          // map
-          m_lookup[id]=m_size;
-          m_int2id.push_back(id);
-          ++m_size;
-          
-          // SubDetectorID
-          if (id < 27) // A-side
-            m_int2subDetectorId.push_back(0x67);
-          else
-            m_int2subDetectorId.push_back(0x68);
-          
-          // SROD ID
-          m_int2rodId.push_back( (id - 24) % 3 + 17 ); // 17-19
-        }
-      }
+  // loop over all RODs
+  for (uint16_t id=0; id<30; ++id){
+    if (id < 24) {
+      // map
+      m_lookup[id]=m_size;
+      m_int2id.push_back(id);
+      ++m_size;
 
-  } else {
-      
-     // throw GaudiException("Code not prepared for working with the old TGccabling",
-     //                      "TgcRdoIdHash::TgcRdoIdHash()", StatusCode::FAILURE);
-      // loop over all RODs
-      for (uint16_t id=0; id<16; ++id)
-      {
-          // map
-          m_lookup[id]=m_size;
-          m_int2id.push_back(id);
-          ++m_size;
+      // SubDetectorID
+      if (id < 12) // A-side
+        m_int2subDetectorId.push_back(0x67);
+      else
+        m_int2subDetectorId.push_back(0x68);
 
-          // SubDetectorID
-          if (id < 8) // A-side
-	      m_int2subDetectorId.push_back(0x67);
-          else
-	      m_int2subDetectorId.push_back(0x68);
+      // ROD ID
+      m_int2rodId.push_back( (id % 12) + 1);
+    } else {  // SROD
+      // map
+      m_lookup[id]=m_size;
+      m_int2id.push_back(id);
+      ++m_size;
 
-          // ROD ID
-          m_int2rodId.push_back(id % 8);
-      }
+      // SubDetectorID
+      if (id < 27) // A-side
+        m_int2subDetectorId.push_back(0x67);
+      else
+        m_int2subDetectorId.push_back(0x68);
+
+      // SROD ID
+      m_int2rodId.push_back( (id - 24) % 3 + 17 ); // 17-19
+    }
   }
-    
-}
-
-
-bool TgcRdoIdHash::getIsAtlas() 
-{
-  const char* name = "TgcRdoIdHash::TgcRdoIdHash";
-  ServiceHandle<ITGCcablingServerSvc> tgcCabGet ("TGCcablingServerSvc", name);
-  if (tgcCabGet.retrieve().isFailure()) {
-    REPORT_ERROR_WITH_CONTEXT (StatusCode::FAILURE, name)
-      << "Could not get TGCcablingServerSvc! ";
-    return false;
-  }
-    
-  return tgcCabGet->isAtlas();
 }
 
 

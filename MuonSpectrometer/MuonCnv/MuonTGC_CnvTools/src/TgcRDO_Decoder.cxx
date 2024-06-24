@@ -27,7 +27,7 @@ StatusCode Muon::TgcRDO_Decoder::initialize()
   //try to configure the cabling service
   StatusCode sc = getCabling();
   if(sc.isFailure()) {
-      ATH_MSG_INFO( "TGCcablingServer not yet configured; postone TGCcabling initialization at first event. " );
+      ATH_MSG_INFO( "TGCCablingServer not yet configured; postone TGCcabling initialization at first event. " );
   }
 
   return StatusCode::SUCCESS;
@@ -155,9 +155,9 @@ StatusCode Muon::TgcRDO_Decoder::getCabling() {
   // get TGC cablingSvc
 
   const ITGCcablingServerSvc* TgcCabGet = nullptr;
-  StatusCode sc = service("TGCcablingServerSvc", TgcCabGet);
+  StatusCode sc = service("Muon::TGCCablingServerSvc", TgcCabGet);
   if(!sc.isSuccess()) {
-    msg(sc.isFailure() ? MSG::FATAL : MSG::ERROR) << "Could not get TGCcablingServerSvc !" << endmsg;
+    msg(sc.isFailure() ? MSG::FATAL : MSG::ERROR) << "Could not get TGCCablingServerSvc !" << endmsg;
     return sc;
   }
   

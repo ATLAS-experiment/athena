@@ -29,7 +29,7 @@ private:
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
     Gaudi::Property<bool> m_show_warning_level_invalid_TGC_A09_SSW6_hit{this, "show_warning_level_invalid_TGC_A09_SSW6_hit", false, ""};
 
-    ServiceHandle<ITGCcablingServerSvc> m_tgcCablingServerSvc{this, "TGCcablingServerSvc", "TGCcablingServerSvc", ""};
+    ServiceHandle<ITGCcablingServerSvc> m_tgcCablingServerSvc{this, "TGCCablingServerSvc", "Muon::TGCCablingServerSvc", ""};
     const ITGCcablingSvc* m_tgcCabling{};
     /** Flag to distinguish 12-fold TGC cabling and 8-fold TGC cabling */
     bool m_is12foldTgc{true};

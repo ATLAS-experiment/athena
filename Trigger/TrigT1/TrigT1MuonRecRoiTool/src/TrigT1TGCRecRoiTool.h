@@ -90,7 +90,6 @@ namespace LVL1 {
       ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc {this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
       SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_DetectorManagerKey {this, "DetectorManagerKey","MuonDetectorManager","Key of input MuonDetectorManager condition data"};
       const ITGCcablingSvc* m_cabling{nullptr};
-      bool m_isAtlas{true};
       
     }; // end of TrigT1TGCRecRoiTool
 } // namespace LVL1
