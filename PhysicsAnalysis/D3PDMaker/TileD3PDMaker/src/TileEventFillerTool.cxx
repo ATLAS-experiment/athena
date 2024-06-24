@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -331,7 +331,7 @@ StatusCode TileEventFillerTool::fill(const xAOD::EventInfo& p){
     // MISSING ENERGY ARE STORED.
     if(m_LevelOfDetails > 3 && m_isMissingEtAvailable){
       // SET WHICH MISSING ENERGY VARIABLES SHOULD BE ADDED TO D3PD
-      const xAOD::MissingETContainer* missingEtContainer; 
+      const xAOD::MissingETContainer* missingEtContainer = nullptr;
       if(!m_storeGate->retrieve(missingEtContainer, m_metContainer).isFailure()) {
 
         const MissingET* finalClus = (*missingEtContainer)["FinalClus"]; 
