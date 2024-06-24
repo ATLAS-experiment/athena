@@ -78,14 +78,14 @@ StatusCode sTgcDigitEffiCondAlg::parseDataFromJSON(const nlohmann::json& lines,
         const int stationEta = line["eta"];
         const int multiLayer = line["multiLayer"];
         const int gasGap = line["gasGap"];
-        const int feb = line["frontEndBoard"];
+        const int isInnerQ1 = line["isInnerQ1"];
         const double efficiency = line["efficiency"];
         bool is_valid{false};
-        const Identifier id = m_idHelperSvc->stgcIdHelper().febID(stationType, stationEta, stationPhi, 
-                                                                  multiLayer, gasGap, feb, is_valid);
+        const Identifier id = m_idHelperSvc->stgcIdHelper().hvID(stationType, stationEta, stationPhi, 
+                                                                  multiLayer, gasGap, isInnerQ1, is_valid);
         if (!is_valid) {
             ATH_MSG_FATAL("The Identifier identifier "<<stationType<<", "<<stationEta<<", "<<stationPhi
-                        << ", "<<multiLayer<<", "<<gasGap<<", "<<feb<<" is invalid");
+                        << ", "<<multiLayer<<", "<<gasGap<<", "<< isInnerQ1<<" is invalid");
             return StatusCode::FAILURE;
         }
         ATH_CHECK(effiData.setEfficiency(id, efficiency));
