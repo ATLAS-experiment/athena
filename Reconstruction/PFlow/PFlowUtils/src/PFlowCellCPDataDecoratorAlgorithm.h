@@ -34,11 +34,11 @@ public:
 private:
     
     /** Write handle key to decorate PFO with threeN leading truth particle barcode and energy */
-    SG::WriteDecorHandleKey<xAOD::FlowElementContainer> m_cellListWriteDecorHandleKey{this,"PFOWriteDecorHandleKey_CellCPData","GlobalPFlowChargedParticleFlowObjects.cellCPData",
+    SG::WriteDecorHandleKey<xAOD::FlowElementContainer> m_cellListWriteDecorHandleKey{this,"PFOWriteDecorHandleKey_CellCPData","JetETMissChargedParticleFlowObjects.cellCPData",
     "Decorate PFO with list of cells removed from the cluster during PFlow reconstruction"};
 
     /** Read handle key to read in the neutral particle flow objects */
-    SG::ReadHandleKey<xAOD::FlowElementContainer> m_neutralPFOReadHandleKey{this,"NeutralPFOReadHandleKey","GlobalPFlowNeutralParticleFlowObjects","Read handle key for neutral particle flow objects"};
+    SG::ReadHandleKey<xAOD::FlowElementContainer> m_neutralPFOReadHandleKey{this,"NeutralPFOReadHandleKey","JetETMissNeutralParticleFlowObjects","Read handle key for neutral particle flow objects"};
     
 };
 
