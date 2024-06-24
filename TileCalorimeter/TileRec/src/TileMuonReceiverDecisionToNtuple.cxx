@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -131,7 +131,7 @@ StatusCode TileMuonReceiverDecisionToNtuple::execute()
 {
   // step1: read container and declare temporary vectors
   //
-  const TileMuonReceiverContainer *TileMuRcvCnt ; 
+  const TileMuonReceiverContainer *TileMuRcvCnt = nullptr;
   CHECK( evtStore()->retrieve(TileMuRcvCnt, m_TileMuRcvContainer) );
 
   // step2: to fill items in ntuple

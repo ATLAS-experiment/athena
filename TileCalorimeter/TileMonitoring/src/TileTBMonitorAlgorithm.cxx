@@ -132,7 +132,7 @@ StatusCode TileTBMonitorAlgorithm::initialize() {
   }
 
 
-  const CaloCell_ID* caloID;
+  const CaloCell_ID* caloID = nullptr;
   ATH_CHECK( detStore()->retrieve(caloID) );
 
   unsigned int minCellTower = 1;

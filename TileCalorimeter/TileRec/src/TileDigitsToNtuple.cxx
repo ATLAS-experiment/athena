@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -124,7 +124,7 @@ StatusCode TileDigitsToNtuple::initialize() {
 StatusCode TileDigitsToNtuple::execute() {
 
   // step1: read TileDigitss from TDS
-  const TileDigitsContainer* digitsContainer; 
+  const TileDigitsContainer* digitsContainer = nullptr;
   CHECK( evtStore()->retrieve(digitsContainer, m_digitsContainer) );
 
   m_nChannel = 0;

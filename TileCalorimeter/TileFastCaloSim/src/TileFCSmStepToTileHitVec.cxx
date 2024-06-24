@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -137,7 +137,7 @@ StatusCode TileFCSmStepToTileHitVec::execute()
   // size is amaller than master plate and there is a gap between modules
   const double size_correction = 2.75 + 1.5/2.;
 
-  const ISF_FCS_Parametrization::FCS_StepInfoCollection* inCollect;
+  const ISF_FCS_Parametrization::FCS_StepInfoCollection* inCollect = nullptr;
   std::unique_ptr<TileHitVector> FCS_hits = std::make_unique<TileHitVector>();
 
   // Get FCS_StepInfo from FCS_StepInfoCollection
