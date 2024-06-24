@@ -579,7 +579,7 @@ class ElectronTriggerAnalysisSFBlock (ConfigBlock):
                 years = ['2018']
             elif config.campaign() in [Campaign.MC21a, Campaign.MC23a]:
                 years = ['2022']
-            elif config.campaign() is Campaign.MC23c:
+            elif config.campaign() in [Campaign.MC23c, Campaign.MC23d]:
                 years = ['2023']
 
             triggerConfigs = {}
