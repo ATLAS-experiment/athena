@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 
@@ -8,6 +8,7 @@
 #include "AthenaMonitoring/AthenaMonManager.h"
 #include "HIMonitoringElectronsTool.h"
 #include "ElectronPhotonSelectorTools/AsgElectronLikelihoodTool.h"
+#include "AthContainers/ConstAccessor.h"
 
 #include "LWHists/TH2D_LW.h"
 
@@ -201,17 +202,25 @@ StatusCode HIMonitoringElectronsTool::fillHistograms() {
     bool medium_LH = (bool) m_electronMediumLHTool->accept(*electrons_itr);
     bool tight_LH = (bool) m_electronTightLHTool->accept(*electrons_itr);
 
-    float etcone20 = (*electrons_itr)->auxdata<float>("etcone20") * 1.e-3;
+    static const SG::ConstAccessor< float > etcone20Acc("etcone20");
+    float etcone20 = etcone20Acc(**electrons_itr) * 1.e-3;
 
-    float reta = (*electrons_itr)->auxdata<float>("Reta");
-    float rphi = (*electrons_itr)->auxdata<float>("Rphi");
-    float weta2 = (*electrons_itr)->auxdata< float >("weta2");
+    static const SG::ConstAccessor<float> RetaAcc("Reta");
+    static const SG::ConstAccessor<float> RphiAcc("Rphi");
+    static const SG::ConstAccessor< float > weta2Acc("weta2");
+    float reta = RetaAcc(**electrons_itr);
+    float rphi = RphiAcc(**electrons_itr);
+    float weta2 = weta2Acc(**electrons_itr);
 
-    float rhad = (*electrons_itr)->auxdata<float>("Rhad");
+    static const SG::ConstAccessor<float> RhadAcc("Rhad");
+    float rhad = RhadAcc(**electrons_itr);
 
-    float eratio = (*electrons_itr)->auxdata<float>("Eratio");
-    float f1 = (*electrons_itr)->auxdata<float>("f1");
-    float f3 = (*electrons_itr)->auxdata<float>("f3");
+    static const SG::ConstAccessor<float> EratioAcc("Eratio");
+    static const SG::ConstAccessor<float> f1Acc("f1");
+    static const SG::ConstAccessor<float> f3Acc("f3");
+    float eratio = EratioAcc(**electrons_itr);
+    float f1 = f1Acc(**electrons_itr);
+    float f3 = f3Acc(**electrons_itr);
 
     float deltaeta1;
     (*electrons_itr)->trackCaloMatchValue(deltaeta1, xAOD::EgammaParameters::deltaEta1);
