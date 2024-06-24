@@ -78,6 +78,8 @@ AsgPhotonEfficiencyCorrectionTool::AsgPhotonEfficiencyCorrectionTool( const std:
                                         "Set if use RandomRunNumber from eventinfo");
   declareProperty("DefaultRandomRunNumber",  m_defaultRandomRunNumber = 999999,
                                         "Set default run number manually");
+  declareProperty("removeTRTConversion", m_removeTRTConversion = true, 
+  		  "boolean to treat barrel standalone TRT conversion as unconverted for Run3 ");   
 										
 
 }
@@ -157,7 +159,7 @@ StatusCode AsgPhotonEfficiencyCorrectionTool::initialize()
       ATH_MSG_ERROR("Property ForceDataType is set to "<< m_dataTypeOverwrite << ", while it should be 1 for FullSim");
       return StatusCode::FAILURE;
   }  
-  
+
   // We need to initialize the underlying ROOT TSelectorTool
   if ( (0 == m_rootTool_con->initialize()) || (0 == m_rootTool_unc->initialize()) )
     {
@@ -276,8 +278,12 @@ CP::CorrectionCode AsgPhotonEfficiencyCorrectionTool::calculate( const xAOD::Ega
   if (m_dataTypeOverwrite >= 0)
     dataType = (PATCore::ParticleDataType::DataType)m_dataTypeOverwrite;
 
+
+   //exclude TRT 
+   bool excludeTRT = false;
+   if(runnumber >= 410000 && m_removeTRTConversion) excludeTRT = true;
   // check if converted
-  const bool isConv = xAOD::EgammaHelpers::isConvertedPhoton(egam);
+  const bool isConv = xAOD::EgammaHelpers::isConvertedPhoton(egam, excludeTRT);
 
   // Call the ROOT tool to get an answer (for photons we need just the total)
   const int status = isConv ? m_rootTool_con->calculate(dataType, runnumber,

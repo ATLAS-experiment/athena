@@ -39,7 +39,7 @@ namespace xAOD {
     bool isPhoton(const xAOD::Egamma *eg);
 
     ///@brief is the object a converted photon
-    bool isConvertedPhoton(const xAOD::Egamma *eg);
+    bool isConvertedPhoton(const xAOD::Egamma *eg, bool excludeTRT = false);
 
     ///@brief return true if the cluster is in the barrel
     bool isBarrel(const xAOD::Egamma *eg);

@@ -73,6 +73,9 @@ AsgPhotonIsEMSelector::AsgPhotonIsEMSelector(const std::string& myname)
 
   declareProperty("skipAmbiguityCut",m_skipAmbiguityCut = false,
 		  "If true, it will skip the ambiguity cut. This is useful for HLT photon emulation");
+
+  declareProperty("removeTRTConversion", m_removeTRTConversion = true, 
+  		  "boolean to treat barrel standalone TRT conversion as unconverted for Run3 ");
 }
 
 // =================================================================
@@ -200,7 +203,7 @@ AsgPhotonIsEMSelector::initialize()
     !m_rootTool->m_cutBinMu_photonsConverted.empty() ||
     !m_rootTool->m_cutBinMuStrips_photonsNonConverted.empty() ||
     !m_rootTool->m_cutBinMuStrips_photonsConverted.empty();
-  ATH_CHECK(m_EvtInfoKey.initialize(m_isMuDep));
+  ATH_CHECK(m_EvtInfoKey.initialize());
   if (m_isMuDep)
     ATH_MSG_INFO("Running a mu-dependent photon ID menu");
 
@@ -416,6 +419,13 @@ AsgPhotonIsEMSelector::execute(const EventContext& ctx,
 
   // pileup
   float mu = m_isMuDep ? this->getMu(ctx) : -999;
+  
+  //runnumber
+  int runnumber = this->RunNumber(ctx);
+  bool excludeTRT = false;
+  
+  if(runnumber >= 410000 && m_removeTRTConversion) excludeTRT = true; // exclude TRT converted photons only for Run-3
+  
 
   // apply calorimeter selection for photons
   isEM = m_rootTool->calcIsEm(eta2,
@@ -434,7 +444,7 @@ AsgPhotonIsEMSelector::execute(const EventContext& ctx,
                               fracm,
                               f3,
                               ep,
-                              xAOD::EgammaHelpers::isConvertedPhoton(eg),
+                              xAOD::EgammaHelpers::isConvertedPhoton(eg, excludeTRT),
                               mu);
 
   // Add ambiguity resolution cut for photon (vs electron)
@@ -458,4 +468,13 @@ float AsgPhotonIsEMSelector::getMu(const EventContext& ctx) const {
     return -999;
   }
   return evtI->actualInteractionsPerCrossing();
+}
+
+int AsgPhotonIsEMSelector::RunNumber(const EventContext& ctx) const {
+	SG::ReadHandle<xAOD::EventInfo> evtI(m_EvtInfoKey, ctx);
+	 if (!evtI.isValid()) {
+    		ATH_MSG_WARNING("Cannot find EventInfo, returning -999.");
+    		return -999;
+  	}
+  	return evtI->runNumber();	
 }

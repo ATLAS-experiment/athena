@@ -149,6 +149,10 @@ AsgElectronIsEMSelector::initialize()
   m_rootTool->m_cutEProbabilityHT =
     AsgConfigHelper::HelperFloat("CutEProbabilityHT", env);
 
+  ATH_MSG_INFO("operating point : " << this->getOperatingPointName()
+                                    << " with mask: "
+                                    << m_rootTool->m_isEMMask);
+
   // Get the message level and set the underlying ROOT tool message level
   // accordingly
   m_rootTool->msg().setLevel(this->msg().level());
@@ -534,4 +538,3 @@ AsgElectronIsEMSelector::TrackCut(const xAOD::Electron* eg,
                               ep,
                               iflag);
 }
-

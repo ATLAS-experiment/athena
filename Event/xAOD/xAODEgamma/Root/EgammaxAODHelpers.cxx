@@ -23,12 +23,12 @@ bool xAOD::EgammaHelpers::isPhoton(const xAOD::Egamma *eg){
   return (eg->type()==xAOD::Type::Photon);
 }
 // ==================================================================
-bool xAOD::EgammaHelpers::isConvertedPhoton(const xAOD::Egamma *eg){
+bool xAOD::EgammaHelpers::isConvertedPhoton(const xAOD::Egamma *eg, bool excludeTRT){
   if (!eg || eg->type()!=xAOD::Type::Photon){
     return false;
   }
   const xAOD::Photon *ph = static_cast<const xAOD::Photon*>(eg);
-  return (ph->nVertices()>0);
+  return xAOD::EgammaHelpers::isConvertedPhoton(ph,excludeTRT);
 }
 // ==================================================================
 bool xAOD::EgammaHelpers::isBarrel(const xAOD::Egamma *eg){

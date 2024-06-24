@@ -135,6 +135,9 @@ private:
   //use RandomRun Number
   bool m_useRandomRunNumber;
   int m_defaultRandomRunNumber;
+
+  // remove TRT converted photon for Run-3
+  bool m_removeTRTConversion;
  
 
 }; // End: class definition

@@ -99,9 +99,13 @@ private:
   // Skip amboguyity check when emulating the HLT 
   bool m_skipAmbiguityCut;
 
+  // remove TRT converted photon for Run-3
+  bool m_removeTRTConversion;
+
   // To retrieve mu
   bool m_isMuDep = false;
   float getMu(const EventContext& ctx) const;
+  int RunNumber(const EventContext& ctx) const;
   SG::ReadHandleKey<xAOD::EventInfo> m_EvtInfoKey{ this,
       "EventInfo", "EventInfo", "The event info object key" };
 
