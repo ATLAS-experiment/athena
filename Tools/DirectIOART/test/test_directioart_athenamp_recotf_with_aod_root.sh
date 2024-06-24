@@ -8,7 +8,7 @@
 
 set -e
 
-Derivation_tf.py --CA \
+Derivation_tf.py \
   --multiprocess True \
   --athenaMPMergeTargetSize 'DAOD_*:0' \
   --inputAODFile root://lcg-lrz-rootd.grid.lrz.de:1094/pnfs/lrz-muenchen.de/data/atlas/dq2/atlasdatadisk/rucio/data18_13TeV/4e/57/data18_13TeV.00349263.physics_Main.merge.AOD.f937_m1972._lb0149._0001.1 \
