@@ -78,39 +78,54 @@ def GetTaggerTrainingMap(inputFlags, jet_col):
 
 
 def RetagRenameInputContainerCfg(suffix, JetCollectionShort, tracksKey='InDetTrackParticles', addRenameMaps=None):
-    
+
     acc=ComponentAccumulator()
-    AddressRemappingSvc, ProxyProviderSvc=CompFactory.getComps("AddressRemappingSvc","ProxyProviderSvc",)
-    AddressRemappingSvc = AddressRemappingSvc("AddressRemappingSvc")
-    AddressRemappingSvc.TypeKeyRenameMaps += ['xAOD::JetAuxContainer#' + JetCollectionShort + 'Jets.BTagTrackToJetAssociator->' + JetCollectionShort + 'Jets.BTagTrackToJetAssociator_' + suffix]
-    AddressRemappingSvc.TypeKeyRenameMaps += ['xAOD::JetAuxContainer#' + JetCollectionShort + 'Jets.JFVtx->' + JetCollectionShort + 'Jets.JFVtx_' + suffix]
-    AddressRemappingSvc.TypeKeyRenameMaps += ['xAOD::JetAuxContainer#' + JetCollectionShort + 'Jets.SecVtx->' + JetCollectionShort + 'Jets.SecVtx_' + suffix]
-    AddressRemappingSvc.TypeKeyRenameMaps += ['xAOD::JetAuxContainer#' + JetCollectionShort + 'Jets.btaggingLink->' + JetCollectionShort + 'Jets.btaggingLink_' + suffix]
-    AddressRemappingSvc.TypeKeyRenameMaps += ['xAOD::BTaggingContainer#BTagging_' + JetCollectionShort + '->BTagging_' + JetCollectionShort + '_' + suffix]
-    AddressRemappingSvc.TypeKeyRenameMaps += ['xAOD::BTaggingAuxContainer#BTagging_' + JetCollectionShort + 'Aux.->BTagging_' + JetCollectionShort + '_' + suffix+"Aux."]
-    AddressRemappingSvc.TypeKeyRenameMaps += ['xAOD::VertexContainer#BTagging_' + JetCollectionShort + 'SecVtx->BTagging_' + JetCollectionShort + 'SecVtx_' + suffix]
-    AddressRemappingSvc.TypeKeyRenameMaps += ['xAOD::VertexAuxContainer#BTagging_' + JetCollectionShort + 'SecVtxAux.->BTagging_' + JetCollectionShort + 'SecVtx_' + suffix+"Aux."]
-    AddressRemappingSvc.TypeKeyRenameMaps += ['xAOD::BTagVertexContainer#BTagging_' + JetCollectionShort + 'JFVtx->BTagging_' + JetCollectionShort + 'JFVtx_' + suffix]
-    AddressRemappingSvc.TypeKeyRenameMaps += ['xAOD::BTagVertexAuxContainer#BTagging_' + JetCollectionShort + 'JFVtxAux.->BTagging_' + JetCollectionShort + 'JFVtx_' + suffix+"Aux."]
-    AddressRemappingSvc.TypeKeyRenameMaps += ['xAOD::TrackParticleAuxContainer#' + tracksKey + '.TrackCompatibility->' + tracksKey + '.TrackCompatibility_' + suffix]
-    AddressRemappingSvc.TypeKeyRenameMaps += ['xAOD::TrackParticleAuxContainer#' + tracksKey + '.btagIp_d0->' + tracksKey + '.btagIp_d0_' + suffix]
-    AddressRemappingSvc.TypeKeyRenameMaps += ['xAOD::TrackParticleAuxContainer#' + tracksKey + '.btagIp_z0SinTheta->' + tracksKey + '.btagIp_z0SinTheta_' + suffix]
-    AddressRemappingSvc.TypeKeyRenameMaps += ['xAOD::TrackParticleAuxContainer#' + tracksKey + '.btagIp_d0Uncertainty->' + tracksKey + '.btagIp_d0Uncertainty_' + suffix]
-    AddressRemappingSvc.TypeKeyRenameMaps += ['xAOD::TrackParticleAuxContainer#' + tracksKey + '.btagIp_z0SinThetaUncertainty->' + tracksKey + '.btagIp_z0SinThetaUncertainty_' + suffix]
-    AddressRemappingSvc.TypeKeyRenameMaps += ['xAOD::TrackParticleAuxContainer#' + tracksKey + '.btagIp_trackMomentum->' + tracksKey + '.btagIp_trackMomentum_' + suffix]
-    AddressRemappingSvc.TypeKeyRenameMaps += ['xAOD::TrackParticleAuxContainer#' + tracksKey + '.btagIp_trackDisplacement->' + tracksKey + '.btagIp_trackDisplacement_' + suffix]
-    AddressRemappingSvc.TypeKeyRenameMaps += ['xAOD::TrackParticleAuxContainer#' + tracksKey + '.JetFitter_TrackCompatibility_antikt4empflow->' + tracksKey + '.JetFitter_TrackCompatibility_antikt4empflow_' + suffix]
-    AddressRemappingSvc.TypeKeyRenameMaps += ['xAOD::JetAuxContainer#' + JetCollectionShort + 'Jets.TracksForBTagging->' + JetCollectionShort + 'Jets.TracksForBTagging' + suffix]
-    AddressRemappingSvc.TypeKeyRenameMaps += ['xAOD::JetAuxContainer#' + JetCollectionShort + 'Jets.TracksForBTaggingOverPtThreshold->' + JetCollectionShort + 'Jets.TracksForBTaggingOverPtThreshold' + suffix]
-    AddressRemappingSvc.TypeKeyRenameMaps += ['xAOD::JetAuxContainer#' + JetCollectionShort + 'Jets.MuonsForBTagging->' + JetCollectionShort + 'Jets.MuonsForBTagging' + suffix]
-    AddressRemappingSvc.TypeKeyRenameMaps += ['xAOD::JetAuxContainer#' + JetCollectionShort + 'Jets.MuonsForBTaggingOverPtThreshold->' + JetCollectionShort + 'Jets.MuonsForBTaggingOverPtThreshold' + suffix]
-    
+    remapSvc = CompFactory.AddressRemappingSvc("AddressRemappingSvc")
+    jc = JetCollectionShort
+    s = suffix
+    tc = tracksKey
+    jac = 'xAOD::JetAuxContainer'
+    bc = 'xAOD::BTaggingContainer'
+    bac = 'xAOD::BTaggingAuxContainer'
+    tpac = 'xAOD::TrackParticleAuxContainer'
+    remapSvc.TypeKeyRenameMaps += [
+        f'{jac}#{jc}Jets.BTagTrackToJetAssociator->{jc}Jets.BTagTrackToJetAssociator_{s}',
+        f'{jac}#{jc}Jets.JFVtx->{jc}Jets.JFVtx_{s}',
+        f'{jac}#{jc}Jets.JFVtxFlip->{jc}Jets.JFVtxFlip_{s}',
+        f'{jac}#{jc}Jets.SecVtx->{jc}Jets.SecVtx_{s}',
+        f'{jac}#{jc}Jets.SecVtxFlip->{jc}Jets.SecVtxFlip_{s}',
+        f'{jac}#{jc}Jets.btaggingLink->{jc}Jets.btaggingLink_{s}',
+        f'{bc}#BTagging_{jc}->BTagging_{jc}_{s}',
+        f'{bac}#BTagging_{jc}Aux.->BTagging_{jc}_{s}Aux.',
+        f'xAOD::VertexContainer#BTagging_{jc}SecVtx->BTagging_{jc}SecVtx_{s}',
+        f'xAOD::VertexAuxContainer#BTagging_{jc}SecVtxAux.->BTagging_{jc}SecVtx_{s}Aux.',
+        f'xAOD::BTagVertexContainer#BTagging_{jc}JFVtx->BTagging_{jc}JFVtx_{s}'
+        f'xAOD::BTagVertexAuxContainer#BTagging_{jc}JFVtxAux.->BTagging_{jc}JFVtx_{s}Aux.',
+        f'{tpac}#{tc}.TrackCompatibility->{tc}.TrackCompatibility_{s}',
+        f'{tpac}#{tc}.btagIp_d0->{tc}.btagIp_d0_{s}',
+        f'{tpac}#{tc}.btagIp_z0SinTheta->{tc}.btagIp_z0SinTheta_{s}',
+        f'{tpac}#{tc}.btagIp_d0Uncertainty->{tc}.btagIp_d0Uncertainty_{s}',
+        f'{tpac}#{tc}.btagIp_z0SinThetaUncertainty->{tc}.btagIp_z0SinThetaUncertainty_{s}',
+        f'{tpac}#{tc}.btagIp_trackMomentum->{tc}.btagIp_trackMomentum_{s}',
+        f'{tpac}#{tc}.btagIp_trackDisplacement->{tc}.btagIp_trackDisplacement_{s}',
+        f'{tpac}#{tc}.btagIp_invalidIp->{tc}.btagIp_invalidIp_' + '_retag',
+        f'{tpac}#{tc}.JetFitter_TrackCompatibility_antikt4empflow->{tc}.JetFitter_TrackCompatibility_antikt4empflow_{s}',
+        f'{jac}#{jc}Jets.TracksForBTagging->{jc}Jets.TracksForBTagging{s}',
+        f'{jac}#{jc}Jets.TracksForBTaggingOverPtThreshold->{jc}Jets.TracksForBTaggingOverPtThreshold{s}',
+        f'{jac}#{jc}Jets.MuonsForBTagging->{jc}Jets.MuonsForBTagging{s}',
+        f'{jac}#{jc}Jets.MuonsForBTaggingOverPtThreshold->{jc}Jets.MuonsForBTaggingOverPtThreshold{s}',
+    ]
+
     # add extra mappings if present
     if addRenameMaps:
-        AddressRemappingSvc.TypeKeyRenameMaps += addRenameMaps
-    
-    acc.addService(AddressRemappingSvc)
-    acc.addService(ProxyProviderSvc(ProviderNames = [ "AddressRemappingSvc" ]))
+        remapSvc.TypeKeyRenameMaps += addRenameMaps
+
+    acc.addService(remapSvc)
+    acc.addService(
+        CompFactory.ProxyProviderSvc(
+            ProviderNames = [ "AddressRemappingSvc" ]
+        )
+    )
 
     return acc
 
