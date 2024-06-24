@@ -147,6 +147,7 @@ class Step(object):
         self.log.debug('Starting prmon for pid %d', os.getpid())
         prmon_cmd = 'prmon --pid {:d} --interval {:d}'.format(os.getpid(), self.prmon_interval)
         prmon_cmd +=' --filename prmon.{name:s}.txt --json-summary prmon.summary.{name:s}.json'.format(name=self.name)
+        prmon_cmd +=' --log-filename prmon.{name:s}.log'.format(name=self.name)
         return subprocess.Popen(prmon_cmd, shell=True)
 
     def __stop_prmon(self, prmon_proc):
