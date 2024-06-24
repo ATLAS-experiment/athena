@@ -307,6 +307,7 @@ if __name__ == "__main__":
 
     parser_getLowerUnprescaled = subparsers.add_parser('getLowerUnprescaled',help='get chains that are deemed to be of same type but lower and also unprescaled compared to a given chain')
     parser_getLowerUnprescaled.add_argument('chainName',type=str,help="name of chain")
+    parser_getLowerUnprescaled.add_argument("--livefraction",type=float,default=1.0,help="EXPERT OPTION: lower the livefraction threshold for trigger to be considered unprescaled")
 
 
     for p in [parser_getLowestUnprescaled,parser_chains,parser_runs,parser_getLowerUnprescaled]:
@@ -328,21 +329,37 @@ if __name__ == "__main__":
     if "triggerType" in args:
         args.triggerType = [TriggerType[t] for t in args.triggerType]
 
+    pandasPrint=False
 
     if args.command == "getLowestUnprescaled":
         result = s.getLowestUnprescaled(triggerType=args.triggerType,
                                     livefraction=args.livefraction,
                                     runStart=args.runStart,runEnd=args.runEnd)
+        s.setRunRange(args.runStart,args.runEnd)
+        chains = s.chains(triggerType=args.triggerType)
+        result = [{"name":chains[c].name,"triggerType":TriggerType.toStr(chains[c].triggerType),"livefraction":chains[c].livefraction} for c in result]
+        pandasPrint=True
     elif args.command == "chains":
         s.setRunRange(args.runStart,args.runEnd)
         import fnmatch
         result = {k: v for k,v in s.chains(triggerType=args.triggerType).items() if fnmatch.fnmatch(k,args.chainName)}
+        result = [{"name":c.name,"triggerType":TriggerType.toStr(c.triggerType),"livefraction":c.livefraction} for c in result.values()]
+        pandasPrint = True
     elif args.command == "runs":
         s.setRunRange(args.runStart,args.runEnd)
         result = sorted(list(s.runs()))
     elif args.command == "getLowerUnprescaled":
-        s.getLowerUnprescaled(chainName=args.chainName,triggerType=args.triggerType,livefraction=args.livefraction,runStart=args.runStart,runEnd=args.runEnd)
+        result = s.getLowerUnprescaled(chainName=args.chainName,triggerType=args.triggerType,livefraction=args.livefraction,runStart=args.runStart,runEnd=args.runEnd)
+        result = [{"name":c.name,"triggerType":TriggerType.toStr(c.triggerType),"livefraction":c.livefraction} for c in result]
+        pandasPrint=True
+    if pandasPrint:
+        import pandas as pd
+        #pd.options.display.max_colwidth = None
+        df = pd.DataFrame(result)
+        print(df.sort_values(by=['triggerType','livefraction','name'],ascending=[True,False,True]).to_string(index=False))
+        result = None # so we don't print again below
 
-    import pprint
-    pprint.pp(result)
+    if result is not None:
+        import pprint
+        pprint.pp(result)
 
