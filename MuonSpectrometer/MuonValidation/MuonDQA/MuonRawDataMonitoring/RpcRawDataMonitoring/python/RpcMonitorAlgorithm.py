@@ -182,8 +182,23 @@ def RpcMonitoringConfig(inputFlags):
                             type='TEfficiency',
                             path=trackPath,
                             xbins=8592, xmin=-0.5, xmax=8591.5)
-    myGroup_track.defineHistogram('muon_passExtrap_signalhit_gap,panelInd_hM;Detection_Efficiency_MuonFromZ_signalHit_EtaORPhi', 
+    myGroup_track.defineHistogram('muon_passExtrap_or,panelInd_hM;Detection_Efficiency_MuonFromZ_EtaORPhi', 
+                            title='Panels(eta or phi) detection efficiency for muons decayed from Z candidates;Panel Index;Efficiency',
+                            type='TEfficiency',
+                            path=trackPath,
+                            xbins=8592, xmin=-0.5, xmax=8591.5)
+    myGroup_track.defineHistogram('muon_passExtrap_and,panelInd_hM;Detection_Efficiency_MuonFromZ_EtaANDPhi', 
+                            title='Panels(eta and phi) detection efficiency for muons decayed from Z candidates;Panel Index;Efficiency',
+                            type='TEfficiency',
+                            path=trackPath,
+                            xbins=8592, xmin=-0.5, xmax=8591.5)
+    myGroup_track.defineHistogram('muon_passExtrap_signalhit_or,panelInd_hM;Detection_Efficiency_MuonFromZ_signalHit_EtaORPhi', 
                             title='Panels(eta or phi) detection efficiency for muons decayed from Z candidates(Signal hits);Panel Index;Efficiency',
+                            type='TEfficiency',
+                            path=trackPath,
+                            xbins=8592, xmin=-0.5, xmax=8591.5)
+    myGroup_track.defineHistogram('muon_passExtrap_signalhit_and,panelInd_hM;Detection_Efficiency_MuonFromZ_signalHit_EtaANDPhi', 
+                            title='Panels(eta and phi) detection efficiency for muons decayed from Z candidates(Signal hits);Panel Index;Efficiency',
                             type='TEfficiency',
                             path=trackPath,
                             xbins=8592, xmin=-0.5, xmax=8591.5)
