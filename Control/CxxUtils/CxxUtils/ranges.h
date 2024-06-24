@@ -16,12 +16,6 @@
 #define CXXUTILS_RANGES_H
 
 
-#include "CxxUtils/features.h"
-
-
-#if HAVE_STD_RANGES
-
-
 #include <ranges>
 
 
@@ -44,6 +38,26 @@ CONT to (RANGE&& r)
 
 } // namespace CxxUtils
 
+
+#ifdef __CLING__
+
+
+// Allow begin/end functions to be findable by ADL.
+// Needed to work around problems seen with cling (as of 6.32.00 at least)
+// and gcc14
+namespace std { namespace ranges {
+template <class RANGE, class XFORM>
+auto begin (transform_view<RANGE, XFORM>& s) { return s.begin(); }
+template <class RANGE, class XFORM>
+auto begin (const transform_view<RANGE, XFORM>& s) { return s.begin(); }
+template <class RANGE, class XFORM>
+auto end (transform_view<RANGE, XFORM>& s) { return s.end(); }
+template <class RANGE, class XFORM>
+auto end (const transform_view<RANGE, XFORM>& s) { return s.end(); }
+}} // namespace std::ranges
+
+
 #endif
+
 
 #endif // not CXXUTILS_RANGES_H
