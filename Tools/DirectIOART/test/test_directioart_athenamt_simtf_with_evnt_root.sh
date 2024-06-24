@@ -9,7 +9,6 @@
 set -e
 
 Sim_tf.py \
-    --CA \
     --multithreaded="True" \
     --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
     --simulator 'FullG4MT' \
