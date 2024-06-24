@@ -10,7 +10,7 @@
 # art-html: dcube_physlite
 
 export ATHENA_CORE_NUMBER=8
-Reco_tf.py --CA \
+Reco_tf.py \
   --AMI q442 \
   --outputAODFile myAOD.pool.root \
   --athenaopts "RAWtoALL:--threads=${ATHENA_CORE_NUMBER} --nprocs=0" "AODtoDAOD:--threads=0 --nprocs=${ATHENA_CORE_NUMBER}" \
@@ -21,7 +21,6 @@ rc1=$?
 echo "art-result: ${rc1} Reco_tf_q442_phys_physlite_mt_mp" 
 
 Derivation_tf.py \
-  --CA \
   --inputAODFile myAOD.pool.root \
   --outputDAODFile art.pool.root \
   --sharedWriter True \

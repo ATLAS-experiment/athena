@@ -26,7 +26,7 @@ echo "art-result: ${rc1} Reco_tf_q443_phys_physlite_mt_mp"
 
 # Fail-over if 21.0/RDOtoRDOTrigger container within a container does not work switch it off
 if [ "$rc1" -ne "0" ]; then
-Reco_tf.py --CA \
+Reco_tf.py \
   --AMI q443 \
   --steering doRAWtoALL \
   --outputAODFile myAOD.pool.root \
@@ -40,7 +40,6 @@ Reco_tf.py --CA \
 fi
 
 Derivation_tf.py \
-  --CA \
   --inputAODFile myAOD.pool.root \
   --outputDAODFile art.pool.root \
   --sharedWriter True \

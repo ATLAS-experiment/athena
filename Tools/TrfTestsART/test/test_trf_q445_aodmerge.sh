@@ -7,14 +7,13 @@
 # art-athena-mt: 8
 
 export ATHENA_CORE_NUMBER=8
-Reco_tf.py --CA \
+Reco_tf.py \
     --AMI q445 \
     --maxEvents 100 \
     --multithreaded="True" \
     --outputAODFile myAOD.MT.pool.root
 rc1=$?
 AODMerge_tf.py \
-    --CA 'True' \
     --autoConfiguration 'everything' \
     --inputAODFile myAOD.MT.pool.root \
     --outputAODFile Merged.MT.AOD.pool.root \

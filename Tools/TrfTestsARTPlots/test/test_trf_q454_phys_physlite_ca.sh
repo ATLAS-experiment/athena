@@ -10,7 +10,7 @@
 # art-html: dcube_physlite
 
 export ATHENA_CORE_NUMBER=8
-Reco_tf.py --CA \
+Reco_tf.py \
   --AMI q454 \
   --outputAODFile myAOD.pool.root \
   --preExec 'flags.Exec.FPE=10' \
@@ -23,7 +23,6 @@ rc1=$?
 echo "art-result: ${rc1} Reco_tf_q454_phys_physlite_mt_mp" 
 
 Derivation_tf.py \
-  --CA \
   --inputAODFile myAOD.pool.root \
   --outputDAODFile art.pool.root \
   --sharedWriter True \

@@ -11,7 +11,7 @@
 # art-html: ecube
 
 export ATHENA_CORE_NUMBER=8
-Reco_tf.py --CA \
+Reco_tf.py \
   --AMI q449 \
   --inputBSFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00431493.physics_Main.daq.RAW._lb0525._SFO-16._0001.data \
   --outputAODFile myAOD.pool.root \
@@ -23,7 +23,6 @@ rc1=$?
 echo "art-result: ${rc1} Reco_tf_q449_mt" 
 
 Derivation_tf.py \
-  --CA \
   --inputAODFile myAOD.pool.root \
   --outputDAODFile art.pool.root \
   --sharedWriter True \
