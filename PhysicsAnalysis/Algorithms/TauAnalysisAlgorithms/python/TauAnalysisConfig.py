@@ -11,6 +11,7 @@ class TauCalibrationConfig (ConfigBlock):
 
     def __init__ (self, containerName='') :
         super (TauCalibrationConfig, self).__init__ ()
+        self.setBlockName('Taus')
         self.containerName = containerName
         self.addOption ('inputContainer', 'TauJets', type=str, 
             info="select tau input container, by default set to TauJets")     
