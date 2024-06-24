@@ -57,9 +57,10 @@ if __name__=='__main__':
     from AthenaCommon.Constants import INFO
     log.setLevel(INFO)
 
-    from AthenaConfiguration.TestDefaults import defaultGeometryTags, defaultTestFiles
+    from AthenaConfiguration.TestDefaults import defaultConditionsTags, defaultGeometryTags, defaultTestFiles
     flags.Input.Files = defaultTestFiles.RAW_RUN2
     flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2
+    flags.IOVDb.GlobalTag = defaultConditionsTags.RUN2_DATA
     flags.Exec.MaxEvents = 3
     flags.fillFromArgs(parser=parser)
 

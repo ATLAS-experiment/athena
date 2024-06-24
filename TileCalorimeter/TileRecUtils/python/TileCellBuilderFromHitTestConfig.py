@@ -443,7 +443,7 @@ def TileRawChannelBuilderFromHitTestCfg(flags):
 if __name__ == "__main__":
 
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    from AthenaConfiguration.TestDefaults import defaultTestFiles
+    from AthenaConfiguration.TestDefaults import defaultConditionsTags, defaultTestFiles
     from AthenaCommon.Logging import log
     from AthenaCommon.Constants import INFO
 
@@ -454,7 +454,7 @@ if __name__ == "__main__":
     flags.Input.Files = defaultTestFiles.HITS_RUN2
     flags.Input.ConditionsRunNumber = 1
     flags.Input.OverrideRunNumber = True
-    flags.IOVDb.GlobalTag = 'OFLCOND-RUN12-SDR-35'
+    flags.IOVDb.GlobalTag = defaultConditionsTags.RUN2_MC
     flags.Tile.RunType = TileRunType.PHY
     flags.Exec.MaxEvents = 3
     flags.fillFromArgs()

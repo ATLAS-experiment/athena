@@ -222,7 +222,9 @@ if __name__ == '__main__':
     flags.DQ.enableLumiAccess = False
     flags.DQ.FileKey = 'Tile'
     flags.Common.isOnline = True
-    flags.GeoModel.AtlasVersion = 'ATLAS-R2-2015-04-00-00'
+    from AthenaConfiguration.TestDefaults import defaultConditionsTags, defaultGeometryTags
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2
+    flags.IOVDb.GlobalTag = defaultConditionsTags.RUN2_DATA
 
     flags.Tile.doFit = True
     flags.Tile.useDCS = False

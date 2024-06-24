@@ -39,7 +39,7 @@ def TileRawChannelToHitCfg(flags, **kwargs):
 if __name__ == "__main__":
 
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    from AthenaConfiguration.TestDefaults import defaultTestFiles, defaultGeometryTags
+    from AthenaConfiguration.TestDefaults import defaultConditionsTags, defaultGeometryTags, defaultTestFiles
     from AthenaCommon.Logging import log
     from AthenaCommon.Constants import INFO
 
@@ -49,7 +49,7 @@ if __name__ == "__main__":
     flags = initConfigFlags()
     flags.Input.Files = defaultTestFiles.RAW_RUN3
     flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
-    flags.IOVDb.GlobalTag = 'CONDBR2-ES1PA-2018-02'
+    flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_DATA
     flags.Tile.RunType = TileRunType.PHY
     flags.Exec.MaxEvents = 3
     flags.fillFromArgs()

@@ -95,7 +95,7 @@ def TileRawChannelToL2OutputCfg(flags, streamName = 'RDO', **kwargs):
 if __name__ == "__main__":
 
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    from AthenaConfiguration.TestDefaults import defaultGeometryTags, defaultTestFiles
+    from AthenaConfiguration.TestDefaults import defaultConditionsTags, defaultGeometryTags, defaultTestFiles
     from AthenaCommon.Logging import log
     from AthenaCommon.Constants import DEBUG
 
@@ -105,6 +105,7 @@ if __name__ == "__main__":
     flags = initConfigFlags()
     flags.Input.Files = defaultTestFiles.RAW_RUN2
     flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2
+    flags.IOVDb.GlobalTag = defaultConditionsTags.RUN2_DATA
     flags.fillFromArgs()
     flags.Output.ESDFileName = "myESD.pool.root"
     flags.lock()

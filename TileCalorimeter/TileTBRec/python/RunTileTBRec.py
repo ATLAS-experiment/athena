@@ -95,7 +95,8 @@ if __name__ == '__main__':
     # =======>>> Set the Athena configuration flags to defaults (can be overriden via comand line)
     flags.Exec.MaxEvents = 3
     flags.Common.isOnline = True
-    flags.GeoModel.AtlasVersion = 'ATLAS-R2-2015-04-00-00'
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2
     flags.DQ.useTrigger = False
     flags.DQ.enableLumiAccess = False
     flags.Exec.PrintAlgsSequence = True
