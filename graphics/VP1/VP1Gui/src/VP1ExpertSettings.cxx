@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////
@@ -25,7 +25,15 @@
 #include <QDir>
 #include <QKeyEvent>
 
+#if __GNUC__ >= 14
+// suppress warning seen in qfutureinterface.h
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wtemplate-id-cdtor"
+#endif
 #include <QtWidgets>
+#if __GNUC__ >= 14
+# pragma GCC diagnostic pop
+#endif
 
 
 template <typename... Args> inline void unused(Args&&...) {} // to declare variables as 'unused'
