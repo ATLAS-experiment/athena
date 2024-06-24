@@ -1,12 +1,10 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TgcRODReadOut.h"
 #include "TgcSlbData.h"
 #include "TgcSlbDataHelper.h"
-
-#include "TGCcablingInterface/ITGCcablingServerSvc.h"
 
 #include "AthenaKernel/getMessageSvc.h"
 

@@ -11,7 +11,7 @@ atlas_add_library (MuonPRDTestLib
                    MuonPRDTest/*.h Root/*.cxx
                    PUBLIC_HEADERS MuonPRDTest
                    LINK_LIBRARIES AthenaBaseComps GeneratorObjects MuonDigitContainer MuonIdHelpersLib MuonReadoutGeometry MuonSimData MuonSimEvent 
-                                 MuonPrepRawData MuonRDO MuonCSC_CnvToolsLib MuonTesterTreeLib StoreGateLib TrackRecordLib
+				  MuonPrepRawData MuonRDO MuonCSC_CnvToolsLib MuonTesterTreeLib StoreGateLib TrackRecordLib TGCcablingInterfaceLib
                    PRIVATE_LINK_LIBRARIES AthenaKernel AtlasHepMCLib )
 
 # Component(s) in the package:

@@ -65,7 +65,7 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::initialize()
   //try to configure the cabling service
   if (!getCabling()) {
     // ??? Is this delayed initialization still needed?
-    ATH_MSG_INFO("TGCcablingServerSvc not yet configured; postpone TGCcabling initialization at first event.");
+    ATH_MSG_INFO("TGCCablingServerSvc not yet configured; postpone TGCcabling initialization at first event.");
   }
 
   // Build names for the keys same as done for output containers
@@ -3617,9 +3617,9 @@ Muon::TgcRdoToPrepDataToolMT::getCabling() const
   }
 
   // get TGC cablingSvc
-  ServiceHandle<ITGCcablingServerSvc> TgcCabGet ("TGCcablingServerSvc", name());
+  ServiceHandle<ITGCcablingServerSvc> TgcCabGet ("Muon::TGCCablingServerSvc", name());
   if (TgcCabGet.retrieve().isFailure()) {
-    ATH_MSG_ERROR ("Could not get TGCcablingServerSvc !");
+    ATH_MSG_ERROR ("Could not get TGCCablingServerSvc !");
     return nullptr;
   }
 

@@ -39,7 +39,7 @@ StatusCode Muon::TGC_RawDataProviderToolCore::initialize()
   //try to configure the cabling service
   if (!getCabling()) {
     // ??? Is deferred initialization still needed here?
-    ATH_MSG_INFO( "TGCcablingServerSvc not yet configured; postpone TGCcabling initialization at first event. " );
+    ATH_MSG_INFO( "TGCCablingServerSvc not yet configured; postpone TGCcabling initialization at first event. " );
   }
 
   m_hid2re.fillAllRobIds();
@@ -79,9 +79,9 @@ const ITGCcablingSvc*  Muon::TGC_RawDataProviderToolCore::getCabling() const
     return cabling;
   }
 
-  ServiceHandle<ITGCcablingServerSvc> TgcCabGet ("TGCcablingServerSvc", name());
+  ServiceHandle<ITGCcablingServerSvc> TgcCabGet("Muon::TGCCablingServerSvc", name());
   if (TgcCabGet.retrieve().isFailure()) {
-    ATH_MSG_FATAL( "Could not get TGCcablingServerSvc !" );
+    ATH_MSG_FATAL( "Could not get TGCCablingServerSvc !" );
     return nullptr;
   }
 

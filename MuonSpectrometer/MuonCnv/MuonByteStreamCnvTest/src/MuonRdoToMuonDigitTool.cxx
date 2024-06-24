@@ -665,7 +665,7 @@ StatusCode MuonRdoToMuonDigitTool::decodeMM(const EventContext& ctx,
 
 StatusCode MuonRdoToMuonDigitTool::getTgcCabling() {
     // get TGC cablingSvc
-    ServiceHandle<ITGCcablingServerSvc> TgcCabGet("TGCcablingServerSvc", name());
+    ServiceHandle<ITGCcablingServerSvc> TgcCabGet("Muon::TGCCablingServerSvc", name());
     ATH_CHECK(TgcCabGet.retrieve());
     ATH_CHECK(TgcCabGet->giveCabling(m_tgcCabling));
 

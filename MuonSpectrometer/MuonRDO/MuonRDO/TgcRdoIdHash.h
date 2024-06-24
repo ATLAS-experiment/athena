@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONRDO_TGCRDOIDHASH_H
@@ -39,9 +39,7 @@ public:
   // return value definition
   enum {INVALID_ID = 0xFFFF};
 
-private:
-  static bool getIsAtlas() ;
-
+ private:
   /** total number of IDs */
   int m_size;
 

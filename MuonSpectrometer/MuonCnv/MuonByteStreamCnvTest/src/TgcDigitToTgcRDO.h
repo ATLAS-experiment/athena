@@ -37,7 +37,7 @@ private:
     BooleanProperty m_isNewTgcDigit{this, "isNewTgcDigit",  true};  // to select new TgcDigit (bcTag added)
 
 protected:
-    ServiceHandle<ITGCcablingServerSvc> m_tgc_cabling_server{this, "CablingServer", "TGCcablingServerSvc"};
+    ServiceHandle<ITGCcablingServerSvc> m_tgc_cabling_server{this, "CablingServer", "Muon::TGCCablingServerSvc"};
     const ITGCcablingSvc* m_cabling{nullptr};
 
     SG::WriteHandleKey<TgcRdoContainer> m_rdoContainerKey{this, "OutputObjectName", "TGCRDO", "WriteHandleKey for Output TgcRdoContainer"};

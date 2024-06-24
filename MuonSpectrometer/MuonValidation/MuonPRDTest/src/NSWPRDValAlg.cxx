@@ -79,7 +79,7 @@ StatusCode NSWPRDValAlg::initialize() {
     if (m_doTGCDigit) { m_tree.addBranch(std::make_unique<TgcDigitVariables>(m_tree, m_TGC_DigitContainerName.value(), msgLevel())); }
     if (m_doTGCRDO) {
         const ITGCcablingServerSvc* TgcCabGet = nullptr;
-        ATH_CHECK(service("TGCcablingServerSvc", TgcCabGet, true));
+        ATH_CHECK(service("Muon::TGCCablingServerSvc", TgcCabGet, true));
         ATH_CHECK(TgcCabGet->giveCabling(m_tgcCabling));
         m_tree.addBranch(std::make_unique<TGCRDOVariables>(m_tree, m_TGC_RDOContainerName.value(), msgLevel(), m_tgcCabling));
     }
