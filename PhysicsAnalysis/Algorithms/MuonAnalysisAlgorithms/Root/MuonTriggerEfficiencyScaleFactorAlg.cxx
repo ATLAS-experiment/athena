@@ -64,7 +64,8 @@ namespace CP
       const xAOD::EventInfo *eventInfo = nullptr;
       ANA_CHECK (m_eventInfoHandle.retrieve (eventInfo, sys));
 
-      unsigned int randomRunNumber = eventInfo->auxdecor<unsigned int>("RandomRunNumber");
+      static const SG::AuxElement::ConstAccessor<unsigned int> acc_rnd("RandomRunNumber");
+      unsigned int randomRunNumber = acc_rnd(*eventInfo);
       bool validEvent = m_minRunNumber <= randomRunNumber && m_maxRunNumber >= randomRunNumber;
 
       for (const xAOD::Muon *muon : *muons)
