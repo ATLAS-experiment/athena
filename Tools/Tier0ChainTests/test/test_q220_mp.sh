@@ -15,7 +15,6 @@
 
 Reco_tf.py \
 --AMI=q220 \
---CA \
 --athenaopts='--nprocs=2' \
 --maxEvents=500 \
 --preExec='pass' \

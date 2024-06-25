@@ -7,7 +7,7 @@
 # art-include: 24.0/Athena
 # art-athena-mt: 8
 
-Reco_tf.py --CA \
+Reco_tf.py \
 --AMI f1328  \
 --inputBSFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00437548.physics_Main.daq.RAW._lb1044._SFO-15._0002.data" \
 --maxEvents=700 \

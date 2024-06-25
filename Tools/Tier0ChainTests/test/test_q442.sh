@@ -12,7 +12,6 @@
 Reco_tf.py \
 --AMI=q442 \
 --conditionsTag 'all:CONDBR2-BLKPA-RUN2-11' \
---CA "True" \
 --preExec "all:flags.DQ.Steering.doHLTMon=False" \
 --athenaopts='--threads=8' \
 --maxEvents=500 \

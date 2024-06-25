@@ -14,7 +14,6 @@
 # art-athena-mt: 8         
 
 Reco_tf.py \
---CA \
 --AMI=q220 \
 --conditionsTag 'all:CONDBR2-BLKPA-RUN2-11' \
 --athenaopts='--threads=8' \
