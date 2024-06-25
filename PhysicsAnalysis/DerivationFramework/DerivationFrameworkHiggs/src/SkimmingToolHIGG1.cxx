@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -16,6 +16,7 @@
 #include "xAODTracking/TrackingPrimitives.h"
 #include "PhotonVertexSelection/IPhotonVertexSelectionTool.h"
 #include "EgammaAnalysisInterfaces/IAsgElectronIsEMSelector.h"
+#include "AthContainers/ConstAccessor.h"
 
 // Constructor
 DerivationFramework::SkimmingToolHIGG1::SkimmingToolHIGG1(const std::string& t,
@@ -300,9 +301,10 @@ bool DerivationFramework::SkimmingToolHIGG1::PhotonPreselect(const xAOD::Photon 
   bool val(false);
   bool defined(false);
 
-  if(ph->isAvailable<char>("DFCommonPhotonsIsEMLoose")){
+  static const SG::ConstAccessor<char> DFCommonPhotonsIsEMLooseAcc("DFCommonPhotonsIsEMLoose");
+  if(DFCommonPhotonsIsEMLooseAcc.isAvailable(*ph)){
     defined = true;
-    val = static_cast<bool>(ph->auxdata<char>("DFCommonPhotonsIsEMLoose"));
+    val = static_cast<bool>(DFCommonPhotonsIsEMLooseAcc(*ph));
   }
   else{
     defined = ph->passSelection(val, "Loose");
@@ -768,16 +770,18 @@ bool DerivationFramework::SkimmingToolHIGG1::ElectronPreselect(const xAOD::Elect
   bool val(false);
   bool defined(false);
 
-  if(el->isAvailable<char>("DFCommonElectronsLoose")){
+  static const SG::ConstAccessor<char> DFCommonElectronsLooseAcc("DFCommonElectronsLoose");
+  if(DFCommonElectronsLooseAcc.isAvailable(*el)){
     defined = true;
-    val = val || static_cast<bool>(el->auxdata<char>("DFCommonElectronsLoose"));
+    val = val || static_cast<bool>(DFCommonElectronsLooseAcc(*el));
   }else{
     defined = el->passSelection(val, "Loose");
   } 
 
-  if(el->isAvailable<char>("DFCommonElectronsLHLoose")){
+  static const SG::ConstAccessor<char> DFCommonElectronsLHLooseAcc("DFCommonElectronsLHLoose");
+  if(DFCommonElectronsLHLooseAcc.isAvailable(*el)){
     defined = true;
-    val = val || static_cast<bool>(el->auxdata<char>("DFCommonElectronsLHLoose"));
+    val = val || static_cast<bool>(DFCommonElectronsLHLooseAcc(*el));
   }
 
   if(!defined || !val) return false;
@@ -812,12 +816,14 @@ bool DerivationFramework::SkimmingToolHIGG1::MuonPreselect(const xAOD::Muon *mu)
 
   if (!mu) return false;
 
-  if(mu->isAvailable<char>("DFCommonGoodMuon"))
-    if( !static_cast<bool>(mu->auxdata<char>("DFCommonGoodMuon")) )
+  static const SG::ConstAccessor<char> DFCommonGoodMuonAcc("DFCommonGoodMuon");
+  if(DFCommonGoodMuonAcc.isAvailable(*mu))
+    if( !static_cast<bool>(DFCommonGoodMuonAcc(*mu)) )
       return false;
   
-  if(mu->isAvailable<char>("DFCommonMuonsPreselection"))
-    if( !static_cast<bool>(mu->auxdata<char>("DFCommonMuonsPreselection")) )
+  static const SG::ConstAccessor<char> DFCommonMuonsPreselectionAcc("DFCommonMuonsPreselection");
+  if(DFCommonMuonsPreselectionAcc.isAvailable(*mu))
+    if( !static_cast<bool>(DFCommonMuonsPreselectionAcc(*mu)) )
       return false;
 
   double eta = std::abs(mu->eta());
