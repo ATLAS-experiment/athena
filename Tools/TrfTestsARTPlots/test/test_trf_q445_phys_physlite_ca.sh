@@ -11,6 +11,7 @@
 
 export ATHENA_CORE_NUMBER=8
 Reco_tf.py \
+  --CA \
   --AMI q445 \
   --inputHITSFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc21/HITS/mc21_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.simul.HITS.e8453_s3873/1000events_singleBS.HITS.pool.root \
   --sharedWriter True \
