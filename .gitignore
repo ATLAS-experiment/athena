@@ -26,3 +26,4 @@ tmp.*
 *.pkl
 .cache
 compile_commands.json
+docs/html/*
