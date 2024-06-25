@@ -10,15 +10,15 @@ def GfexSimMonitoringConfig(flags, UseOfflineCopy = True):
     helper = L1CaloMonitorCfgHelper(flags,CompFactory.GfexSimMonitorAlgorithm,'GfexSimMonAlg')
 
 
-    helper.defineHistogram('LBNString,Signature;h_mismatched_SimReady',
+    helper.defineHistogram('LBN,Signature;h_mismatched_SimReady',
                            fillGroup="mismatches",
                            paths=['Shifter/Sim','Expert/Sim'],
-                           hanConfig={"algorithm":"Histogram_Empty"},
+                           hanConfig={"algorithm":"Histogram_Empty","description":"Number of events with a mismatch, per LB (x-axis), per signature (y-axis) for signatures that are deemed simulation-ready"},
                            type='TH2I', cutmask='SimulationReady',
-                           title='Mismatched Simulation-Ready Events;LB:FirstEvtNum;Signature;Events',
+                           title='Mismatched Simulation-Ready Events;LB;Signature;Events',
                            xbins=1,xmin=0,xmax=1,
                            ylabels=["gJ","gLJ","jJ","jTAU","jXE","jTE","eTAU","eEM"],
-                           opt=['kCanRebin','kAlwaysCreate'],merge='merge')
+                           opt=['kAddBinsDynamically','kCanRebin','kAlwaysCreate'],merge='merge')
     helper.defineHistogram('EventType,Signature,tobMismatched;h_simSummary',title='Sim-HW Mismatches (percentage);Event Type;Signature',
                            fillGroup="mismatches",
                            path='Expert/Sim/detail', # place summary plot in the detail path in Expert audience

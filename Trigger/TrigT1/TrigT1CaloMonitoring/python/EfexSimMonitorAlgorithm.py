@@ -32,15 +32,28 @@ def EfexSimMonitoringConfig(flags):
                             xlabels=["DataTowers","EmulatedTowers"],
                             ymin=0,ymax=len(L1CaloMonitorCfgHelper.SIGNATURES),ylabels=L1CaloMonitorCfgHelper.SIGNATURES,
                             opt=['kCanRebin','kAlwaysCreate'],merge="merge")
-    helper.defineHistogram('LBNString,Signature;h_mismatched_SimReady',
+    helper.defineHistogram('LBN,Signature;h_mismatched_SimReady',
                            fillGroup="mismatches",
                            paths=['Shifter/Sim','Expert/Sim'],
-                           hanConfig={"algorithm":"Histogram_Empty"},
+                           hanConfig={"algorithm":"Histogram_Empty","description":"Number of events with a mismatch, per LB (x-axis), per signature (y-axis) for signatures that are deemed simulation-ready"},
                            type='TH2I', cutmask='SimulationReady',
-                           title='Mismatched Simulation-Ready Events;LB:FirstEvtNum;Signature;Events',
+                           title='Mismatched Simulation-Ready Events;LB;Signature;Events',
                            xbins=1,xmin=0,xmax=1,
                            ylabels=["gJ","gLJ","jJ","jTAU","jXE","jTE","eTAU","eEM"],
-                           opt=['kCanRebin','kAlwaysCreate'],merge='merge')
+                           opt=['kAddBinsDynamically','kCanRebin','kAlwaysCreate'],merge='merge')
+    # when there are mismatches, would be useful to know where they occurred (might be a single module gone bad)
+    # so register a location-vs-lbn histogram
+    locIdxs = []
+    for phiOct in range(0,8):
+        for etaIdx in range(-25,25):
+            locIdxs += [str(phiOct) + ":" + str(etaIdx)]
+    for sig in ["eEM","eTAU"]:
+        helper.defineHistogram("LBN,locIdx;h_"+sig+"_mismatches_posLbnMap", title = "Mismatched " + sig + " [DataTower evts];LB;Position (Octant:Eta);TOBs",
+                           fillGroup = sig + "_mismatches", cutmask='SimulationReady',
+                           path = "Expert/Sim/detail",
+                           hanConfig={"description":"Location of mismatched " + sig + " TOBs in simulation-ready events. Use this plot to identify any localized eFEX issues."},
+                           type="TH2I",
+                           xbins=1,xmin=0,xmax=1, ylabels=locIdxs, opt=['kAddBinsDynamically'])
     helper.defineHistogram('LBNString,Signature;h_mismatched_DataTowerEvts',
                            fillGroup="mismatches",
                            type='TH2I', cutmask='IsDataTowers',

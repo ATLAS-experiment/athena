@@ -4,8 +4,8 @@
 ## Script for Running the L1Calo Athena Simulation and/or Monitoring for Phase1
 ## can be run offline on raw or POOL files (for rerunning simulation)
 ## run through athena
-##    offline: athena TrigT1CaloPhase1Monitoring/L1CaloPhase1Monitoring.py --filesInput path/to/raw.data --evtMax 10
-##    online:  athena TrigT1CaloPhase1Monitoring/L1CaloPhase1Monitoring.py
+##    offline: athena TrigT1CaloMonitoring/L1CaloPhase1Monitoring.py --filesInput path/to/raw.data --evtMax 10
+##    online:  athena TrigT1CaloMonitoring/L1CaloPhase1Monitoring.py
 ## Author: Will Buttinger
 
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -370,9 +370,11 @@ if cfg.getService("StoreGateSvc").Dump:
   cfg.getService("StoreGateSvc").OutputLevel=3
 
 
-from TrigT1CaloMonitoring.LVL1CaloMonitoringConfig import L1CaloMonitorCfgHelper
-L1CaloMonitorCfgHelper.printHanConfig()
-
+if flags.Exec.MaxEvents==0:
+  # create a han config file if running in config-only mode
+  from TrigT1CaloMonitoring.LVL1CaloMonitoringConfig import L1CaloMonitorCfgHelper
+  L1CaloMonitorCfgHelper.printHanConfig()
+  sys.exit(0)
 
 if cfg.run().isFailure():
   import sys

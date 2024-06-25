@@ -231,6 +231,8 @@ def L1CaloFEXSimCfg(flags, eFexTowerInputs = ["L1_eFexDataTowers","L1_eFexEmulat
         acc.addEventAlgo(gFEX)
 
     if flags.Trigger.doHLT:
+        # This will be the case when the offline simulation is actually being run as part of MC
+        # as opposed to running another pass of the simulation on either an MC or data file (e.g in DAOD)
         # Check the RoI EDM containers are registered in HLT outputs
         from TrigEDMConfig.TriggerEDM import recordable
         def check(key):
