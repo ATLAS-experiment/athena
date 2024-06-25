@@ -139,44 +139,9 @@ StatusCode TgcRawDataMonitorAlgorithm::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode TgcRawDataMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
-  ATH_MSG_DEBUG("fillHistograms()");
-
-  if( !m_GoodRunsListSelectorTool.empty() ){
-    int runNumber   = GetEventInfo(ctx)->runNumber();
-    int lumiBlockNr = GetEventInfo(ctx)->lumiBlock();
-    if(m_GoodRunsListSelectorTool->getGRLCollection()->IsEmpty()){
-      ATH_MSG_ERROR("Empty GRL");
-      return StatusCode::FAILURE;
-    }
-    bool pass = m_GoodRunsListSelectorTool->getGRLCollection()->HasRunLumiBlock(runNumber,lumiBlockNr);
-    if(pass){
-      ATH_MSG_DEBUG("passing GRL: run=" << runNumber << " lb=" << lumiBlockNr);
-    }else{
-      ATH_MSG_DEBUG("failed GRL: run=" << runNumber << " lb=" << lumiBlockNr);
-      return StatusCode::SUCCESS;
-    }
-  }
-
-  if( !m_streamerFilter.empty() ) {
-    if(m_doExpressProcessing){
-      const unsigned int passBits = getTrigDecisionTool()->isPassedBits(m_streamerFilter);
-      const bool expressPass = passBits & TrigDefs::Express_passed;
-      if(!expressPass){
-	ATH_MSG_DEBUG("failed expressPass");
-	return StatusCode::SUCCESS;
-      }
-    }
-    bool pass = getTrigDecisionTool()->isPassed(m_streamerFilter,TrigDefs::Physics);
-    if(pass){
-      ATH_MSG_DEBUG("passing StreamerFilter: " << m_streamerFilter );
-    }else{
-      ATH_MSG_DEBUG("failed StreamerFilter: " << m_streamerFilter );
-      return StatusCode::SUCCESS;
-    }
-  }
-
-  // Print out all available muon triggers
+StatusCode 
+TgcRawDataMonitorAlgorithm::printOutAvailableMuonTriggers() const{
+ // Print out all available muon triggers
   // This is to be used when making a list of triggers
   // to be monitored, and writted in .py config file
   // The defult should be FALSE
@@ -189,46 +154,48 @@ StatusCode TgcRawDataMonitorAlgorithm::fillHistograms(const EventContext &ctx) c
       std::set<std::string> available_muon_triggers;
       auto chainGroup = getTrigDecisionTool()->getChainGroup(".*");
       if( chainGroup != nullptr ){
-	auto triggerList = chainGroup->getListOfTriggers();
-	if( !triggerList.empty() ){
-	  for(const auto &trig : triggerList) {
-	    std::string thisTrig = trig;
-	    if( thisTrig.find("mu")==std::string::npos && thisTrig.find("MU")==std::string::npos)continue;
-	    if(getTrigDecisionTool()->getNavigationFormat() == "TriggerElement") { // run 2 access
-	      auto fc = getTrigDecisionTool()->features(thisTrig.data(),TrigDefs::alsoDeactivateTEs);
-	      for(const auto& comb : fc.getCombinations()){
-		auto initRoIs = comb.get<TrigRoiDescriptor>("initialRoI",TrigDefs::alsoDeactivateTEs);
-		for(const auto& roi : initRoIs){
-		  if( roi.empty() )continue;
-		  if( roi.cptr()==nullptr ) continue;
-		  // found an available muon trigger here
-		  available_muon_triggers.insert(thisTrig);
-		}
-	      }
-	    }else{ // run 3 access
-	      auto initialRoIs = getTrigDecisionTool()->features<TrigRoiDescriptorCollection>(thisTrig.data(), TrigDefs::includeFailedDecisions, "", TrigDefs::lastFeatureOfType, "initialRoI");
-	      for(const auto& roiLinkInfo : initialRoIs) {
-		if( !roiLinkInfo.isValid() )continue;
-		auto roiEL = roiLinkInfo.link;
-		if( !roiEL.isValid() )continue;
-		auto roi = *roiEL;
-		if( roi==nullptr ) continue;
-		// found an available muon trigger here
-		available_muon_triggers.insert(thisTrig);
-	      }
-	    }
-	  }
-	}
+	      auto triggerList = chainGroup->getListOfTriggers();
+	      if( !triggerList.empty() ){
+	        for(const auto &trig : triggerList) {
+            std::string thisTrig = trig;
+            if( thisTrig.find("mu")==std::string::npos && thisTrig.find("MU")==std::string::npos)continue;
+            if(getTrigDecisionTool()->getNavigationFormat() == "TriggerElement") { // run 2 access
+              auto fc = getTrigDecisionTool()->features(thisTrig.data(),TrigDefs::alsoDeactivateTEs);
+              for(const auto& comb : fc.getCombinations()){
+                auto initRoIs = comb.get<TrigRoiDescriptor>("initialRoI",TrigDefs::alsoDeactivateTEs);
+                for(const auto& roi : initRoIs){
+                  if( roi.empty() )continue;
+                  if( roi.cptr()==nullptr ) continue;
+                  // found an available muon trigger here
+                  available_muon_triggers.insert(thisTrig);
+                }
+	            }
+	          }else{ // run 3 access
+              auto initialRoIs = getTrigDecisionTool()->features<TrigRoiDescriptorCollection>(thisTrig.data(), TrigDefs::includeFailedDecisions, "", TrigDefs::lastFeatureOfType, "initialRoI");
+              for(const auto& roiLinkInfo : initialRoIs) {
+                if( !roiLinkInfo.isValid() )continue;
+                auto roiEL = roiLinkInfo.link;
+                if( !roiEL.isValid() )continue;
+                auto roi = *roiEL;
+                if( roi==nullptr ) continue;
+                // found an available muon trigger here
+                available_muon_triggers.insert(thisTrig);
+              }
+            }
+          }
+        }
       }
       for(const auto& trig : available_muon_triggers){
-	ATH_MSG_INFO("Available Muon Trigger: " << trig);
+	      ATH_MSG_INFO("Available Muon Trigger: " << trig);
       }
-      return StatusCode::SUCCESS;
     }
   } ///////////////End of printing out available muon triggers
+  return StatusCode::SUCCESS;
+}
 
-
-  ///////////////// Preparation: check trigger information /////////////////////
+std::set<std::string>
+TgcRawDataMonitorAlgorithm::checkTriggerInfo() const{
+///////////////// Preparation: check trigger information /////////////////////
   ATH_MSG_DEBUG("Preparing trigger information");
   std::set<std::string> list_of_single_muon_triggers;
   if ( !getTrigDecisionTool().empty() ){
@@ -236,42 +203,40 @@ StatusCode TgcRawDataMonitorAlgorithm::fillHistograms(const EventContext &ctx) c
     if( chainGroup != nullptr ){
       auto triggerList = chainGroup->getListOfTriggers();
       if( !triggerList.empty() ){
-	for(const auto &trig : triggerList) {
-	  if( trig.find("HLT_mu") != 0 )continue; // muon trigger
-	  if( trig.find('-') != std::string::npos )continue; // vetoing topo item
-	  if( trig.find("L1MU") == std::string::npos )continue; // RoI-seedeed L1 muon trigger
-	  if( trig.find("mu") !=  trig.rfind("mu") )continue;  // mu occurrence only once -> single muon trigger
-	  if( trig.find("MU") !=  trig.rfind("MU") )continue;  // MU occurrence only once -> single muon trigger
-	  list_of_single_muon_triggers.insert( trig );
-	}
+        for(const auto &trig : triggerList) {
+          if( trig.find("HLT_mu") != 0 )continue; // muon trigger
+          if( trig.find('-') != std::string::npos )continue; // vetoing topo item
+          if( trig.find("L1MU") == std::string::npos )continue; // RoI-seedeed L1 muon trigger
+          if( trig.find("mu") !=  trig.rfind("mu") )continue;  // mu occurrence only once -> single muon trigger
+          if( trig.find("MU") !=  trig.rfind("MU") )continue;  // MU occurrence only once -> single muon trigger
+          list_of_single_muon_triggers.insert( trig );
+        }
       }
     }
   }
-  ///////////////// End preparation: check trigger information /////////////////////
+  return list_of_single_muon_triggers;
+}
 
+const xAOD::Vertex* 
+TgcRawDataMonitorAlgorithm::getPrimaryVertex( const EventContext& ctx) const{
   const xAOD::Vertex* primVertex = nullptr;
   if(!m_PrimaryVertexContainerKey.empty()){
     SG::ReadHandle <xAOD::VertexContainer> primVtxContainer(m_PrimaryVertexContainerKey, ctx);
     if(primVtxContainer.isValid()){
       for(const auto vtx : *primVtxContainer){
-	if(vtx->vertexType() == xAOD::VxType::VertexType::PriVtx){
-	  primVertex = vtx;
-	  break;
-	}
+        if(vtx->vertexType() == xAOD::VxType::VertexType::PriVtx){
+          primVertex = vtx;
+          break;
+        }
       }
     }
   }
-  double primaryVertexZ = (primVertex!=nullptr)?(primVertex->z()):(-999);
-  // define common monitoring variables //
-  auto mon_bcid = Monitored::Scalar<int>("mon_bcid", GetEventInfo(ctx)->bcid());
-  auto mon_pileup = Monitored::Scalar<int>("mon_pileup", lbAverageInteractionsPerCrossing(ctx));
-  auto mon_lb = Monitored::Scalar<int>("mon_lb", GetEventInfo(ctx)->lumiBlock());
-  auto mon_primvtx_z=Monitored::Scalar<double>("mon_primvtx_z",primaryVertexZ);
+  return primVertex;
+}
 
-  fill(m_packageName+"_Common", mon_bcid, mon_pileup, mon_lb, mon_primvtx_z);
-
-  ///////////////// Extract MuonRoI /////////////////
-  std::vector<TimedMuonRoI> AllBCMuonRoIs;
+std::vector<TgcRawDataMonitorAlgorithm::TimedMuonRoI>
+TgcRawDataMonitorAlgorithm::getRegionsOfInterest( const EventContext& ctx) const {
+std::vector<TimedMuonRoI> AllBCMuonRoIs;
   if (m_anaMuonRoI) {
     ATH_MSG_DEBUG("Getting MuonRoI pointer");
     /* raw LVL1MuonRoIs distributions */
@@ -279,54 +244,59 @@ StatusCode TgcRawDataMonitorAlgorithm::fillHistograms(const EventContext &ctx) c
     if (!m_MuonRoIContainerKey.empty()){
       SG::ReadHandle<xAOD::MuonRoIContainer > handle( m_MuonRoIContainerKey, ctx);
       if(handle.isValid()) {
-	for(const auto roi : *handle.cptr()){
-	  isRun3 = roi->isRun3();
-	  TimedMuonRoI myMuonRoI(roi);// current BC
-	  AllBCMuonRoIs.push_back(myMuonRoI);
-	}
+        for(const auto roi : *handle.cptr()){
+          isRun3 = roi->isRun3();
+          TimedMuonRoI myMuonRoI(roi);// current BC
+          AllBCMuonRoIs.push_back(myMuonRoI);
+        }
       }
     }
     if(isRun3){
       if(!m_MuonRoIContainerBCm2Key.empty()){
-	SG::ReadHandle<xAOD::MuonRoIContainer > handle( m_MuonRoIContainerBCm2Key, ctx);
-	if(handle.isValid()) {
-	  for(const auto roi : *handle.cptr()){
-	    TimedMuonRoI myMuonRoI(roi,-2);
-	    AllBCMuonRoIs.push_back(myMuonRoI);
-	  }
-	}
+        SG::ReadHandle<xAOD::MuonRoIContainer > handle( m_MuonRoIContainerBCm2Key, ctx);
+        if(handle.isValid()) {
+          for(const auto roi : *handle.cptr()){
+            TimedMuonRoI myMuonRoI(roi,-2);
+            AllBCMuonRoIs.push_back(myMuonRoI);
+          }
+        }
       }
       if(!m_MuonRoIContainerBCm1Key.empty()){
-	SG::ReadHandle<xAOD::MuonRoIContainer > handle( m_MuonRoIContainerBCm1Key, ctx);
-	if(handle.isValid()) {
-	  for(const auto roi : *handle.cptr()){
-	    TimedMuonRoI myMuonRoI(roi,-1);
-	    AllBCMuonRoIs.push_back(myMuonRoI);
-	  }
-	}
+        SG::ReadHandle<xAOD::MuonRoIContainer > handle( m_MuonRoIContainerBCm1Key, ctx);
+        if(handle.isValid()) {
+          for(const auto roi : *handle.cptr()){
+            TimedMuonRoI myMuonRoI(roi,-1);
+            AllBCMuonRoIs.push_back(myMuonRoI);
+          }
+        }
       }
       if(!m_MuonRoIContainerBCp1Key.empty()){
-	SG::ReadHandle<xAOD::MuonRoIContainer > handle( m_MuonRoIContainerBCp1Key, ctx);
-	if(handle.isValid()) {
-	  for(const auto roi : *handle.cptr()){
-	    TimedMuonRoI myMuonRoI(roi,+1);
-	    AllBCMuonRoIs.push_back(myMuonRoI);
-	  }
-	}
+        SG::ReadHandle<xAOD::MuonRoIContainer > handle( m_MuonRoIContainerBCp1Key, ctx);
+        if(handle.isValid()) {
+          for(const auto roi : *handle.cptr()){
+            TimedMuonRoI myMuonRoI(roi,+1);
+            AllBCMuonRoIs.push_back(myMuonRoI);
+          }
+        }
       }
       if(!m_MuonRoIContainerBCp2Key.empty()){
-	SG::ReadHandle<xAOD::MuonRoIContainer > handle( m_MuonRoIContainerBCp2Key, ctx);
-	if(handle.isValid()) {
-	  for(const auto roi : *handle.cptr()){
-	    const TimedMuonRoI myMuonRoI(roi,+2);
-	    AllBCMuonRoIs.push_back(myMuonRoI);
-	  }
-	}
+        SG::ReadHandle<xAOD::MuonRoIContainer > handle( m_MuonRoIContainerBCp2Key, ctx);
+        if(handle.isValid()) {
+          for(const auto roi : *handle.cptr()){
+            const TimedMuonRoI myMuonRoI(roi,+2);
+            AllBCMuonRoIs.push_back(myMuonRoI);
+          }
+        }
       }
     }
   }
-  ///////////////// Filling MuonRoI-only histograms  /////////////////
-  if( AllBCMuonRoIs.size() > 0 ){
+  return AllBCMuonRoIs;
+}
+
+void 
+TgcRawDataMonitorAlgorithm::fillRoiHistograms(const std::vector<TgcRawDataMonitorAlgorithm::TimedMuonRoI> & roiVec, const EventContext& ctx) const{
+ ///////////////// Filling MuonRoI-only histograms  /////////////////
+  if( not roiVec.empty() ){
     ATH_MSG_DEBUG("Filling MuonRoI-only histograms");
     MonVariables  roi_variables;
     auto roi_bcid = Monitored::Scalar<int>("roi_bcid", GetEventInfo(ctx)->bcid());
@@ -335,282 +305,283 @@ StatusCode TgcRawDataMonitorAlgorithm::fillHistograms(const EventContext &ctx) c
     roi_variables.push_back(roi_pileup);
     auto roi_lumiBlock = Monitored::Scalar<int>("roi_lumiBlock", GetEventInfo(ctx)->lumiBlock());
     roi_variables.push_back(roi_lumiBlock);
-    auto roi_timing = Monitored::Collection("roi_timing", AllBCMuonRoIs, [](const TimedMuonRoI& m) {
+    auto roi_timing = Monitored::Collection("roi_timing", roiVec, [](const TimedMuonRoI& m) {
 	return m.timing;
       });
     roi_variables.push_back(roi_timing);
-    auto roi_currentBC = Monitored::Collection("roi_currentBC", AllBCMuonRoIs, [](const TimedMuonRoI& m) {
+    auto roi_currentBC = Monitored::Collection("roi_currentBC", roiVec, [](const TimedMuonRoI& m) {
 	return m.timing==0;
       });
     roi_variables.push_back(roi_currentBC);
-    auto roi_previousBC = Monitored::Collection("roi_previousBC", AllBCMuonRoIs, [](const TimedMuonRoI& m) {
+    auto roi_previousBC = Monitored::Collection("roi_previousBC", roiVec, [](const TimedMuonRoI& m) {
 	return m.timing==-1;
       });
     roi_variables.push_back(roi_previousBC);
-    auto roi_nextBC = Monitored::Collection("roi_nextBC", AllBCMuonRoIs, [](const TimedMuonRoI& m) {
+    auto roi_nextBC = Monitored::Collection("roi_nextBC", roiVec, [](const TimedMuonRoI& m) {
 	return m.timing==+1;
       });
     roi_variables.push_back(roi_nextBC);
-    auto roi_roiNumber = Monitored::Collection("roi_roiNumber", AllBCMuonRoIs, [](const TimedMuonRoI& m) {
+    auto roi_roiNumber = Monitored::Collection("roi_roiNumber", roiVec, [](const TimedMuonRoI& m) {
 	return m.muonRoI->getRoI();
       });
     roi_variables.push_back(roi_roiNumber);
-    auto roi_sector = Monitored::Collection("roi_sector", AllBCMuonRoIs, [](const TimedMuonRoI& m) {
+    auto roi_sector = Monitored::Collection("roi_sector", roiVec, [](const TimedMuonRoI& m) {
 	return (m.muonRoI->getHemisphere() == xAOD::MuonRoI::Positive)?(m.muonRoI->getSectorID()+1):(-1 * m.muonRoI->getSectorID()-1);
       });
     roi_variables.push_back(roi_sector);
-    auto roi_sectorAbs = Monitored::Collection("roi_sectorAbs", AllBCMuonRoIs, [](const TimedMuonRoI& m) {
+    auto roi_sectorAbs = Monitored::Collection("roi_sectorAbs", roiVec, [](const TimedMuonRoI& m) {
 	return m.muonRoI->getSectorID()+1;
       });
     roi_variables.push_back(roi_sectorAbs);
-    auto roi_sector_wBW3Coin = Monitored::Collection("roi_sector_wBW3Coin", AllBCMuonRoIs, [](const TimedMuonRoI& m) {
+    auto roi_sector_wBW3Coin = Monitored::Collection("roi_sector_wBW3Coin", roiVec, [](const TimedMuonRoI& m) {
 	return (m.muonRoI->getBW3Coincidence()) ? ((m.muonRoI->getHemisphere() == xAOD::MuonRoI::Positive)?(m.muonRoI->getSectorID()+1):(-1 * m.muonRoI->getSectorID()-1)) : (-999);
       });
     roi_variables.push_back(roi_sector_wBW3Coin);
-    auto roi_sector_wInnerCoin = Monitored::Collection("roi_sector_wInnerCoin", AllBCMuonRoIs, [](const TimedMuonRoI& m) {
+    auto roi_sector_wInnerCoin = Monitored::Collection("roi_sector_wInnerCoin", roiVec, [](const TimedMuonRoI& m) {
 	return (m.muonRoI->getInnerCoincidence()) ? ((m.muonRoI->getHemisphere() == xAOD::MuonRoI::Positive)?(m.muonRoI->getSectorID()+1):(-1 * m.muonRoI->getSectorID()-1)) : (-999);
       });
     roi_variables.push_back(roi_sector_wInnerCoin);
-    auto roi_eta = Monitored::Collection("roi_eta", AllBCMuonRoIs, [](const TimedMuonRoI& m) {
+    auto roi_eta = Monitored::Collection("roi_eta", roiVec, [](const TimedMuonRoI& m) {
 	return m.muonRoI->eta();
       });
     roi_variables.push_back(roi_eta);
-    auto roi_eta_rpc = Monitored::Collection("roi_eta_rpc", AllBCMuonRoIs, [](const TimedMuonRoI& m) {
+    auto roi_eta_rpc = Monitored::Collection("roi_eta_rpc", roiVec, [](const TimedMuonRoI& m) {
 	return (m.muonRoI->getSource() == xAOD::MuonRoI::Barrel)?(m.muonRoI->eta()):(-10);
       });
     roi_variables.push_back(roi_eta_rpc);
-    auto roi_eta_tgc = Monitored::Collection("roi_eta_tgc", AllBCMuonRoIs, [](const TimedMuonRoI& m) {
+    auto roi_eta_tgc = Monitored::Collection("roi_eta_tgc", roiVec, [](const TimedMuonRoI& m) {
 	return (m.muonRoI->getSource() != xAOD::MuonRoI::Barrel)?(m.muonRoI->eta()):(-10);
       });
     roi_variables.push_back(roi_eta_tgc);
-    auto roi_wInnerCoinEtaUpTo1p3 = Monitored::Collection("roi_wInnerCoinEtaUpTo1p3", AllBCMuonRoIs, [](const TimedMuonRoI& m) {
+    auto roi_wInnerCoinEtaUpTo1p3 = Monitored::Collection("roi_wInnerCoinEtaUpTo1p3", roiVec, [](const TimedMuonRoI& m) {
 	return (m.muonRoI->getSource() != xAOD::MuonRoI::Barrel && std::abs(m.muonRoI->eta()) < 1.3 && m.muonRoI->getInnerCoincidence());
       });
     roi_variables.push_back(roi_wInnerCoinEtaUpTo1p3);
-    auto roi_wInnerCoinEtaBeyond1p3 = Monitored::Collection("roi_wInnerCoinEtaBeyond1p3", AllBCMuonRoIs, [](const TimedMuonRoI& m) {
+    auto roi_wInnerCoinEtaBeyond1p3 = Monitored::Collection("roi_wInnerCoinEtaBeyond1p3", roiVec, [](const TimedMuonRoI& m) {
 	return (m.muonRoI->getSource() != xAOD::MuonRoI::Barrel && std::abs(m.muonRoI->eta()) > 1.3 && m.muonRoI->getInnerCoincidence());
       });
     roi_variables.push_back(roi_wInnerCoinEtaBeyond1p3);
-    auto roi_eta_wInnerCoin = Monitored::Collection("roi_eta_wInnerCoin", AllBCMuonRoIs, [](const TimedMuonRoI& m) {
+    auto roi_eta_wInnerCoin = Monitored::Collection("roi_eta_wInnerCoin", roiVec, [](const TimedMuonRoI& m) {
 	return (m.muonRoI->getInnerCoincidence() && m.muonRoI->getSource() != xAOD::MuonRoI::Barrel)?(m.muonRoI->eta()):(-10);
       });
     roi_variables.push_back(roi_eta_wInnerCoin);
-    auto roi_eta_wBW3Coin = Monitored::Collection("roi_eta_wBW3Coin", AllBCMuonRoIs, [](const TimedMuonRoI& m) {
+    auto roi_eta_wBW3Coin = Monitored::Collection("roi_eta_wBW3Coin", roiVec, [](const TimedMuonRoI& m) {
 	return (m.muonRoI->getBW3Coincidence() && m.muonRoI->getSource() != xAOD::MuonRoI::Barrel)?(m.muonRoI->eta()):(-10);
       });
     roi_variables.push_back(roi_eta_wBW3Coin);
-    auto roi_eta_wInnerCoinVeto = Monitored::Collection("roi_eta_wInnerCoinVeto", AllBCMuonRoIs, [](const TimedMuonRoI& m) {
+    auto roi_eta_wInnerCoinVeto = Monitored::Collection("roi_eta_wInnerCoinVeto", roiVec, [](const TimedMuonRoI& m) {
 	return (!m.muonRoI->getInnerCoincidence() && m.muonRoI->getSource() != xAOD::MuonRoI::Barrel)?(m.muonRoI->eta()):(-10);
       });
     roi_variables.push_back(roi_eta_wInnerCoinVeto);
-    auto roi_eta_wBW3CoinVeto = Monitored::Collection("roi_eta_wBW3CoinVeto", AllBCMuonRoIs, [](const TimedMuonRoI& m) {
+    auto roi_eta_wBW3CoinVeto = Monitored::Collection("roi_eta_wBW3CoinVeto", roiVec, [](const TimedMuonRoI& m) {
 	return (!m.muonRoI->getBW3Coincidence() && m.muonRoI->getSource() != xAOD::MuonRoI::Barrel)?(m.muonRoI->eta()):(-10);
       });
     roi_variables.push_back(roi_eta_wBW3CoinVeto);
-    auto roi_phi = Monitored::Collection("roi_phi", AllBCMuonRoIs, [](const TimedMuonRoI& m) {
+    auto roi_phi = Monitored::Collection("roi_phi", roiVec, [](const TimedMuonRoI& m) {
 	return m.muonRoI->phi();
       });
     roi_variables.push_back(roi_phi);
-    auto roi_phi_sideA = Monitored::Collection("roi_phi_sideA", AllBCMuonRoIs, [](const TimedMuonRoI& m) {
+    auto roi_phi_sideA = Monitored::Collection("roi_phi_sideA", roiVec, [](const TimedMuonRoI& m) {
 	return ( (m.muonRoI->getHemisphere() == xAOD::MuonRoI::Positive)?(m.muonRoI->phi()):(-10) );
       });
     roi_variables.push_back(roi_phi_sideA);
-    auto roi_phi_sideC = Monitored::Collection("roi_phi_sideC", AllBCMuonRoIs, [](const TimedMuonRoI& m) {
+    auto roi_phi_sideC = Monitored::Collection("roi_phi_sideC", roiVec, [](const TimedMuonRoI& m) {
 	return ( (m.muonRoI->getHemisphere() == xAOD::MuonRoI::Negative)?(m.muonRoI->phi()):(-10) );
       });
     roi_variables.push_back(roi_phi_sideC);
-    auto roi_phi_rpc = Monitored::Collection("roi_phi_rpc", AllBCMuonRoIs, [](const TimedMuonRoI& m) {
+    auto roi_phi_rpc = Monitored::Collection("roi_phi_rpc", roiVec, [](const TimedMuonRoI& m) {
 	return (m.muonRoI->getSource() == xAOD::MuonRoI::Barrel) ? m.muonRoI->phi() : -10;
       });
     roi_variables.push_back(roi_phi_rpc);
-    auto roi_phi_tgc = Monitored::Collection("roi_phi_tgc", AllBCMuonRoIs, [](const TimedMuonRoI& m) {
+    auto roi_phi_tgc = Monitored::Collection("roi_phi_tgc", roiVec, [](const TimedMuonRoI& m) {
 	return (m.muonRoI->getSource() != xAOD::MuonRoI::Barrel) ? m.muonRoI->phi() : -10;
       });
     roi_variables.push_back(roi_phi_tgc);
-    auto roi_phi_wInnerCoin = Monitored::Collection("roi_phi_wInnerCoin", AllBCMuonRoIs, [](const TimedMuonRoI& m) {
+    auto roi_phi_wInnerCoin = Monitored::Collection("roi_phi_wInnerCoin", roiVec, [](const TimedMuonRoI& m) {
 	return (m.muonRoI->getInnerCoincidence() && m.muonRoI->getSource() != xAOD::MuonRoI::Barrel)?(m.muonRoI->phi()):(-10);;
       });
     roi_variables.push_back(roi_phi_wInnerCoin);
-    auto roi_phi_wBW3Coin = Monitored::Collection("roi_phi_wBW3Coin", AllBCMuonRoIs, [](const TimedMuonRoI& m) {
+    auto roi_phi_wBW3Coin = Monitored::Collection("roi_phi_wBW3Coin", roiVec, [](const TimedMuonRoI& m) {
 	return (m.muonRoI->getBW3Coincidence() && m.muonRoI->getSource() != xAOD::MuonRoI::Barrel)?(m.muonRoI->phi()):(-10);;
       });
     roi_variables.push_back(roi_phi_wBW3Coin);
-    auto roi_phi_wInnerCoinVeto = Monitored::Collection("roi_phi_wInnerCoinVeto", AllBCMuonRoIs, [](const TimedMuonRoI& m) {
+    auto roi_phi_wInnerCoinVeto = Monitored::Collection("roi_phi_wInnerCoinVeto", roiVec, [](const TimedMuonRoI& m) {
 	return (!m.muonRoI->getInnerCoincidence() && m.muonRoI->getSource() != xAOD::MuonRoI::Barrel)?(m.muonRoI->phi()):(-10);;
       });
     roi_variables.push_back(roi_phi_wInnerCoinVeto);
-    auto roi_phi_wBW3CoinVeto = Monitored::Collection("roi_phi_wBW3CoinVeto", AllBCMuonRoIs, [](const TimedMuonRoI& m) {
+    auto roi_phi_wBW3CoinVeto = Monitored::Collection("roi_phi_wBW3CoinVeto", roiVec, [](const TimedMuonRoI& m) {
 	return (!m.muonRoI->getBW3Coincidence() && m.muonRoI->getSource() != xAOD::MuonRoI::Barrel)?(m.muonRoI->phi()):(-10);;
       });
     roi_variables.push_back(roi_phi_wBW3CoinVeto);
-    auto roi_phi_wBW3Coin_sideA = Monitored::Collection("roi_phi_wBW3Coin_sideA", AllBCMuonRoIs, [](const TimedMuonRoI& m) {
+    auto roi_phi_wBW3Coin_sideA = Monitored::Collection("roi_phi_wBW3Coin_sideA", roiVec, [](const TimedMuonRoI& m) {
 	return (m.muonRoI->getBW3Coincidence() && m.muonRoI->getHemisphere() == xAOD::MuonRoI::Positive)?(m.muonRoI->phi()):(-10);;
       });
     roi_variables.push_back(roi_phi_wBW3Coin_sideA);
-    auto roi_phi_wBW3Coin_sideC = Monitored::Collection("roi_phi_wBW3Coin_sideC", AllBCMuonRoIs, [](const TimedMuonRoI& m) {
+    auto roi_phi_wBW3Coin_sideC = Monitored::Collection("roi_phi_wBW3Coin_sideC", roiVec, [](const TimedMuonRoI& m) {
 	return (m.muonRoI->getBW3Coincidence() && m.muonRoI->getHemisphere() == xAOD::MuonRoI::Negative)?(m.muonRoI->phi()):(-10);;
       });
     roi_variables.push_back(roi_phi_wBW3Coin_sideC);
-    auto roi_phi_wBW3CoinVeto_sideA = Monitored::Collection("roi_phi_wBW3CoinVeto_sideA", AllBCMuonRoIs, [](const TimedMuonRoI& m) {
+    auto roi_phi_wBW3CoinVeto_sideA = Monitored::Collection("roi_phi_wBW3CoinVeto_sideA", roiVec, [](const TimedMuonRoI& m) {
 	return (!m.muonRoI->getBW3Coincidence() && m.muonRoI->getHemisphere() == xAOD::MuonRoI::Positive)?(m.muonRoI->phi()):(-10);;
       });
     roi_variables.push_back(roi_phi_wBW3CoinVeto_sideA);
-    auto roi_phi_wBW3CoinVeto_sideC = Monitored::Collection("roi_phi_wBW3CoinVeto_sideC", AllBCMuonRoIs, [](const TimedMuonRoI& m) {
+    auto roi_phi_wBW3CoinVeto_sideC = Monitored::Collection("roi_phi_wBW3CoinVeto_sideC", roiVec, [](const TimedMuonRoI& m) {
 	return (!m.muonRoI->getBW3Coincidence() && m.muonRoI->getHemisphere() == xAOD::MuonRoI::Negative)?(m.muonRoI->phi()):(-10);;
       });
     roi_variables.push_back(roi_phi_wBW3CoinVeto_sideC);
-    auto roi_thr = Monitored::Collection("roi_thr", AllBCMuonRoIs, [](const TimedMuonRoI& m) {
+    auto roi_thr = Monitored::Collection("roi_thr", roiVec, [](const TimedMuonRoI& m) {
 	return m.muonRoI->getThrNumber();
       });
     roi_variables.push_back(roi_thr);
-    auto roi_rpc = Monitored::Collection("roi_rpc", AllBCMuonRoIs, [](const TimedMuonRoI& m) {
+    auto roi_rpc = Monitored::Collection("roi_rpc", roiVec, [](const TimedMuonRoI& m) {
 	return m.muonRoI->getSource() == xAOD::MuonRoI::Barrel;
       });
     roi_variables.push_back(roi_rpc);
-    auto roi_tgc = Monitored::Collection("roi_tgc", AllBCMuonRoIs, [](const TimedMuonRoI& m) {
+    auto roi_tgc = Monitored::Collection("roi_tgc", roiVec, [](const TimedMuonRoI& m) {
 	return m.muonRoI->getSource() != xAOD::MuonRoI::Barrel;
       });
     roi_variables.push_back(roi_tgc);
-    auto roi_barrel = Monitored::Collection("roi_barrel", AllBCMuonRoIs, [](const TimedMuonRoI& m) {
+    auto roi_barrel = Monitored::Collection("roi_barrel", roiVec, [](const TimedMuonRoI& m) {
 	return m.muonRoI->getSource() == xAOD::MuonRoI::Barrel;
       });
     roi_variables.push_back(roi_barrel);
-    auto roi_endcap = Monitored::Collection("roi_endcap", AllBCMuonRoIs, [](const TimedMuonRoI& m) {
+    auto roi_endcap = Monitored::Collection("roi_endcap", roiVec, [](const TimedMuonRoI& m) {
 	return m.muonRoI->getSource() == xAOD::MuonRoI::Endcap;
       });
     roi_variables.push_back(roi_endcap);
-    auto roi_forward = Monitored::Collection("roi_forward", AllBCMuonRoIs, [](const TimedMuonRoI& m) {
+    auto roi_forward = Monitored::Collection("roi_forward", roiVec, [](const TimedMuonRoI& m) {
 	return m.muonRoI->getSource() == xAOD::MuonRoI::Forward;
       });
     roi_variables.push_back(roi_forward);
-    auto roi_phi_barrel = Monitored::Collection("roi_phi_barrel", AllBCMuonRoIs, [](const TimedMuonRoI& m) {
+    auto roi_phi_barrel = Monitored::Collection("roi_phi_barrel", roiVec, [](const TimedMuonRoI& m) {
 	return (m.muonRoI->getSource() == xAOD::MuonRoI::Barrel) ? m.muonRoI->phi() : -10;
       });
     roi_variables.push_back(roi_phi_barrel);
-    auto roi_phi_endcap = Monitored::Collection("roi_phi_endcap", AllBCMuonRoIs, [](const TimedMuonRoI& m) {
+    auto roi_phi_endcap = Monitored::Collection("roi_phi_endcap", roiVec, [](const TimedMuonRoI& m) {
 	return (m.muonRoI->getSource() == xAOD::MuonRoI::Endcap) ? m.muonRoI->phi() : -10;
       });
     roi_variables.push_back(roi_phi_endcap);
-    auto roi_phi_forward = Monitored::Collection("roi_phi_forward", AllBCMuonRoIs, [](const TimedMuonRoI& m) {
+    auto roi_phi_forward = Monitored::Collection("roi_phi_forward", roiVec, [](const TimedMuonRoI& m) {
 	return (m.muonRoI->getSource() == xAOD::MuonRoI::Forward) ? m.muonRoI->phi() : -10;
       });
     roi_variables.push_back(roi_phi_forward);
-    auto roi_sideA = Monitored::Collection("roi_sideA", AllBCMuonRoIs, [](const TimedMuonRoI& m) {
+    auto roi_sideA = Monitored::Collection("roi_sideA", roiVec, [](const TimedMuonRoI& m) {
 	return m.muonRoI->getHemisphere() == xAOD::MuonRoI::Positive;
       });
     roi_variables.push_back(roi_sideA);
-    auto roi_sideC = Monitored::Collection("roi_sideC", AllBCMuonRoIs, [](const TimedMuonRoI& m) {
+    auto roi_sideC = Monitored::Collection("roi_sideC", roiVec, [](const TimedMuonRoI& m) {
 	return m.muonRoI->getHemisphere() == xAOD::MuonRoI::Negative;
       });
     roi_variables.push_back(roi_sideC);
-    auto thrmask1 = Monitored::Collection("thrmask1", AllBCMuonRoIs, [](const TimedMuonRoI& m) {
+    auto thrmask1 = Monitored::Collection("thrmask1", roiVec, [](const TimedMuonRoI& m) {
 	return m.muonRoI->getThrNumber() == 1;
       });
     roi_variables.push_back(thrmask1);
-    auto thrmask2 = Monitored::Collection("thrmask2", AllBCMuonRoIs, [](const TimedMuonRoI& m) {
+    auto thrmask2 = Monitored::Collection("thrmask2", roiVec, [](const TimedMuonRoI& m) {
 	return m.muonRoI->getThrNumber() == 2;
       });
     roi_variables.push_back(thrmask2);
-    auto thrmask3 = Monitored::Collection("thrmask3", AllBCMuonRoIs, [](const TimedMuonRoI& m) {
+    auto thrmask3 = Monitored::Collection("thrmask3", roiVec, [](const TimedMuonRoI& m) {
 	return m.muonRoI->getThrNumber() == 3;
       });
     roi_variables.push_back(thrmask3);
-    auto thrmask4 = Monitored::Collection("thrmask4", AllBCMuonRoIs, [](const TimedMuonRoI& m) {
+    auto thrmask4 = Monitored::Collection("thrmask4", roiVec, [](const TimedMuonRoI& m) {
 	return m.muonRoI->getThrNumber() == 4;
       });
     roi_variables.push_back(thrmask4);
-    auto thrmask5 = Monitored::Collection("thrmask5", AllBCMuonRoIs, [](const TimedMuonRoI& m) {
+    auto thrmask5 = Monitored::Collection("thrmask5", roiVec, [](const TimedMuonRoI& m) {
 	return m.muonRoI->getThrNumber() == 5;
       });
     roi_variables.push_back(thrmask5);
-    auto thrmask6 = Monitored::Collection("thrmask6", AllBCMuonRoIs, [](const TimedMuonRoI& m) {
+    auto thrmask6 = Monitored::Collection("thrmask6", roiVec, [](const TimedMuonRoI& m) {
 	return m.muonRoI->getThrNumber() == 6;
       });
     roi_variables.push_back(thrmask6);
-    auto thrmask7 = Monitored::Collection("thrmask7", AllBCMuonRoIs, [](const TimedMuonRoI& m) {
+    auto thrmask7 = Monitored::Collection("thrmask7", roiVec, [](const TimedMuonRoI& m) {
 	return m.muonRoI->getThrNumber() == 7;
       });
     roi_variables.push_back(thrmask7);
-    auto thrmask8 = Monitored::Collection("thrmask8", AllBCMuonRoIs, [](const TimedMuonRoI& m) {
+    auto thrmask8 = Monitored::Collection("thrmask8", roiVec, [](const TimedMuonRoI& m) {
 	return m.muonRoI->getThrNumber() == 8;
       });
     roi_variables.push_back(thrmask8);
-    auto thrmask9 = Monitored::Collection("thrmask9", AllBCMuonRoIs, [](const TimedMuonRoI& m) {
+    auto thrmask9 = Monitored::Collection("thrmask9", roiVec, [](const TimedMuonRoI& m) {
 	return m.muonRoI->getThrNumber() == 9;
       });
     roi_variables.push_back(thrmask9);
-    auto thrmask10 = Monitored::Collection("thrmask10", AllBCMuonRoIs, [](const TimedMuonRoI& m) {
+    auto thrmask10 = Monitored::Collection("thrmask10", roiVec, [](const TimedMuonRoI& m) {
 	return m.muonRoI->getThrNumber() == 10;
       });
     roi_variables.push_back(thrmask10);
-    auto thrmask11 = Monitored::Collection("thrmask11", AllBCMuonRoIs, [](const TimedMuonRoI& m) {
+    auto thrmask11 = Monitored::Collection("thrmask11", roiVec, [](const TimedMuonRoI& m) {
 	return m.muonRoI->getThrNumber() == 11;
       });
     roi_variables.push_back(thrmask11);
-    auto thrmask12 = Monitored::Collection("thrmask12", AllBCMuonRoIs, [](const TimedMuonRoI& m) {
+    auto thrmask12 = Monitored::Collection("thrmask12", roiVec, [](const TimedMuonRoI& m) {
 	return m.muonRoI->getThrNumber() == 12;
       });
     roi_variables.push_back(thrmask12);
-    auto thrmask13 = Monitored::Collection("thrmask13", AllBCMuonRoIs, [](const TimedMuonRoI& m) {
+    auto thrmask13 = Monitored::Collection("thrmask13", roiVec, [](const TimedMuonRoI& m) {
 	return m.muonRoI->getThrNumber() == 13;
       });
     roi_variables.push_back(thrmask13);
-    auto thrmask14 = Monitored::Collection("thrmask14", AllBCMuonRoIs, [](const TimedMuonRoI& m) {
+    auto thrmask14 = Monitored::Collection("thrmask14", roiVec, [](const TimedMuonRoI& m) {
 	return m.muonRoI->getThrNumber() == 14;
       });
     roi_variables.push_back(thrmask14);
-    auto thrmask15 = Monitored::Collection("thrmask15", AllBCMuonRoIs, [](const TimedMuonRoI& m) {
+    auto thrmask15 = Monitored::Collection("thrmask15", roiVec, [](const TimedMuonRoI& m) {
 	return m.muonRoI->getThrNumber() == 15;
       });
     roi_variables.push_back(thrmask15);
-    auto roi_charge = Monitored::Collection("roi_charge", AllBCMuonRoIs, [](const TimedMuonRoI& m) {
+    auto roi_charge = Monitored::Collection("roi_charge", roiVec, [](const TimedMuonRoI& m) {
 	return (m.muonRoI->getCharge()==xAOD::MuonRoI::Neg)?(-1):((m.muonRoI->getCharge()==xAOD::MuonRoI::Pos)?(+1):(0));
       });
     roi_variables.push_back(roi_charge);
-    auto roi_bw3coin = Monitored::Collection("roi_bw3coin",AllBCMuonRoIs,[](const TimedMuonRoI& m) {
+    auto roi_bw3coin = Monitored::Collection("roi_bw3coin",roiVec,[](const TimedMuonRoI& m) {
 	return m.muonRoI->getBW3Coincidence();
       });
     roi_variables.push_back(roi_bw3coin);
-    auto roi_bw3coinveto = Monitored::Collection("roi_bw3coinveto",AllBCMuonRoIs,[](const TimedMuonRoI& m) {
+    auto roi_bw3coinveto = Monitored::Collection("roi_bw3coinveto",roiVec,[](const TimedMuonRoI& m) {
 	return !m.muonRoI->getBW3Coincidence() && m.muonRoI->getSource()!=xAOD::MuonRoI::Barrel;
       });
     roi_variables.push_back(roi_bw3coinveto);
-    auto roi_innercoin = Monitored::Collection("roi_innercoin",AllBCMuonRoIs,[](const TimedMuonRoI& m) {
+    auto roi_innercoin = Monitored::Collection("roi_innercoin",roiVec,[](const TimedMuonRoI& m) {
 	return m.muonRoI->getInnerCoincidence();
       });
     roi_variables.push_back(roi_innercoin);
-    auto roi_innveto = Monitored::Collection("roi_innveto",AllBCMuonRoIs,[](const TimedMuonRoI& m) {
+    auto roi_innveto = Monitored::Collection("roi_innveto",roiVec,[](const TimedMuonRoI& m) {
 	return !m.muonRoI->getInnerCoincidence() && m.muonRoI->getSource()!=xAOD::MuonRoI::Barrel;
       });
     roi_variables.push_back(roi_innveto);
-    auto roi_goodmf = Monitored::Collection("roi_goodmf",AllBCMuonRoIs,[](const TimedMuonRoI& m) {
+    auto roi_goodmf = Monitored::Collection("roi_goodmf",roiVec,[](const TimedMuonRoI& m) {
 	return m.muonRoI->getGoodMF();
       });
     roi_variables.push_back(roi_goodmf);
-    auto roi_badmf = Monitored::Collection("roi_badmf",AllBCMuonRoIs,[](const TimedMuonRoI& m){
+    auto roi_badmf = Monitored::Collection("roi_badmf",roiVec,[](const TimedMuonRoI& m){
 	return !m.muonRoI->getGoodMF() && m.muonRoI->getSource()!=xAOD::MuonRoI::Barrel;
       });
     roi_variables.push_back(roi_badmf);
-    auto roi_ismorecand = Monitored::Collection("roi_ismorecand",AllBCMuonRoIs,[](const TimedMuonRoI& m){
+    auto roi_ismorecand = Monitored::Collection("roi_ismorecand",roiVec,[](const TimedMuonRoI& m){
 	return m.muonRoI->isMoreCandInRoI();
       });
     roi_variables.push_back(roi_ismorecand);
-    auto roi_posCharge = Monitored::Collection("roi_posCharge",AllBCMuonRoIs,[](const TimedMuonRoI& m){
+    auto roi_posCharge = Monitored::Collection("roi_posCharge",roiVec,[](const TimedMuonRoI& m){
 	return m.muonRoI->getCharge()==xAOD::MuonRoI::Pos;
       });
     roi_variables.push_back(roi_posCharge);
-    auto roi_negCharge = Monitored::Collection("roi_negCharge",AllBCMuonRoIs,[](const TimedMuonRoI& m){
+    auto roi_negCharge = Monitored::Collection("roi_negCharge",roiVec,[](const TimedMuonRoI& m){
 	return m.muonRoI->getCharge()==xAOD::MuonRoI::Neg;
       });
     roi_variables.push_back(roi_negCharge);
     fill(m_packageName, roi_variables);
     ATH_MSG_DEBUG("End filling MuonRoI-only histograms");
   }
-  ///////////////// End filling MuonRoI-only histograms  /////////////////
+}
 
-
-  ///////////////// Filling histograms for MuonRoIs after trigger decision /////////////////
-  if ( !getTrigDecisionTool().empty() && AllBCMuonRoIs.size()>0 && m_monitorTriggerMultiplicity ) {
+void
+TgcRawDataMonitorAlgorithm::fillHistogramsAfterTriggerDecision(std::vector<TgcRawDataMonitorAlgorithm::TimedMuonRoI> & roiVec) const {
+///////////////// Filling histograms for MuonRoIs after trigger decision /////////////////
+  if ( !getTrigDecisionTool().empty() && roiVec.size()>0 && m_monitorTriggerMultiplicity ) {
     ATH_MSG_DEBUG("Filling histograms for MuonRoIs after trigger decision");
     for(const auto& monObj : m_CtpDecMonObj){
       std::set<unsigned int> allCands;
@@ -645,7 +616,7 @@ StatusCode TgcRawDataMonitorAlgorithm::fillHistograms(const EventContext &ctx) c
       }
       // collecting roiWords out of RPC/TGC
       bool isRun3 = false;
-      for(const auto& allBcMuonRoI : AllBCMuonRoIs){
+      for(const auto& allBcMuonRoI : roiVec){
 	const xAOD::MuonRoI* roi = allBcMuonRoI.muonRoI;
 	isRun3 = roi->isRun3();
 	if(roi->getSource()==xAOD::MuonRoI::Barrel){
@@ -686,7 +657,7 @@ StatusCode TgcRawDataMonitorAlgorithm::fillHistograms(const EventContext &ctx) c
       std::vector<bool> roi_inOk_outNg;
       std::vector<bool> roi_inNg_outOk;
 
-      for(const auto& allBcMuonRoI : AllBCMuonRoIs){ // scan all MuonRoIs
+      for(const auto& allBcMuonRoI : roiVec){ // scan all MuonRoIs
 	const xAOD::MuonRoI* roi = allBcMuonRoI.muonRoI;
 	bool ctp_in  = inputMuonCands.find(roi->roiWord())!=inputMuonCands.end();
 	bool ctp_out = ctpMuonCands.find(roi->roiWord())!=ctpMuonCands.end();
@@ -695,7 +666,7 @@ StatusCode TgcRawDataMonitorAlgorithm::fillHistograms(const EventContext &ctx) c
 	roiMatching_CTPout.push_back(ctp_out?1:0);
 	double dRmin = 1000;
 	double pTdiff = -15;
-	for(const auto& allBcMuonRoI2 : AllBCMuonRoIs){ // scan all the other MuonRoIs to check the isolation
+	for(const auto& allBcMuonRoI2 : roiVec){ // scan all the other MuonRoIs to check the isolation
 	  const xAOD::MuonRoI* roi2 = allBcMuonRoI2.muonRoI;
 	  if(roi == roi2)continue;
 	  double dr = xAOD::P4Helpers::deltaR(roi->eta(),roi->phi(),roi2->eta(),roi2->phi());
@@ -776,52 +747,71 @@ StatusCode TgcRawDataMonitorAlgorithm::fillHistograms(const EventContext &ctx) c
     ATH_MSG_DEBUG("End filling histograms for MuonRoIs after trigger decision");
   }
   ///////////////// End filling histograms for MuonRoIs after trigger decision /////////////////
+}
+
+
+StatusCode TgcRawDataMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
+  ATH_MSG_DEBUG("fillHistograms()");
+
+  if( !m_GoodRunsListSelectorTool.empty() ){
+    int runNumber   = GetEventInfo(ctx)->runNumber();
+    int lumiBlockNr = GetEventInfo(ctx)->lumiBlock();
+    if(m_GoodRunsListSelectorTool->getGRLCollection()->IsEmpty()){
+      ATH_MSG_ERROR("Empty GRL");
+      return StatusCode::FAILURE;
+    }
+    bool pass = m_GoodRunsListSelectorTool->getGRLCollection()->HasRunLumiBlock(runNumber,lumiBlockNr);
+    if(pass){
+      ATH_MSG_DEBUG("passing GRL: run=" << runNumber << " lb=" << lumiBlockNr);
+    }else{
+      ATH_MSG_DEBUG("failed GRL: run=" << runNumber << " lb=" << lumiBlockNr);
+      return StatusCode::SUCCESS;
+    }
+  }
+
+  if( !m_streamerFilter.empty() ) {
+    if(m_doExpressProcessing){
+      const unsigned int passBits = getTrigDecisionTool()->isPassedBits(m_streamerFilter);
+      const bool expressPass = passBits & TrigDefs::Express_passed;
+      if(!expressPass){
+        ATH_MSG_DEBUG("failed expressPass");
+        return StatusCode::SUCCESS;
+      }
+    }
+    bool pass = getTrigDecisionTool()->isPassed(m_streamerFilter,TrigDefs::Physics);
+    if(pass){
+      ATH_MSG_DEBUG("passing StreamerFilter: " << m_streamerFilter );
+    }else{
+      ATH_MSG_DEBUG("failed StreamerFilter: " << m_streamerFilter );
+      return StatusCode::SUCCESS;
+    }
+  }
+  if (auto sc = printOutAvailableMuonTriggers();not sc.isSuccess()) return sc;
+  auto list_of_single_muon_triggers = checkTriggerInfo();
+  
+  ///////////////// End preparation: check trigger information /////////////////////
+
+  const xAOD::Vertex* primVertex = getPrimaryVertex(ctx);
+ 
+  double primaryVertexZ = (primVertex!=nullptr)?(primVertex->z()):(-999);
+  // define common monitoring variables //
+  auto mon_bcid = Monitored::Scalar<int>("mon_bcid", GetEventInfo(ctx)->bcid());
+  auto mon_pileup = Monitored::Scalar<int>("mon_pileup", lbAverageInteractionsPerCrossing(ctx));
+  auto mon_lb = Monitored::Scalar<int>("mon_lb", GetEventInfo(ctx)->lumiBlock());
+  auto mon_primvtx_z=Monitored::Scalar<double>("mon_primvtx_z",primaryVertexZ);
+  
+  fill(m_packageName+"_Common", mon_bcid, mon_pileup, mon_lb, mon_primvtx_z);
+  ///////////////// Extract MuonRoI /////////////////
+  std::vector<TimedMuonRoI> AllBCMuonRoIs = getRegionsOfInterest(ctx);
+  fillRoiHistograms(AllBCMuonRoIs, ctx);
+  ///////////////// End filling MuonRoI-only histograms  /////////////////
+  fillHistogramsAfterTriggerDecision(AllBCMuonRoIs);
+
 
   ///////////////// Filling histograms for MuonRoIs in thresholdPattern /////////////////
   std::map<const xAOD::MuonRoI*,std::set<std::string>> roiAndMenu;
   std::map<std::string,std::vector<const xAOD::MuonRoI*>> menuAndRoIs;
-  if(m_monitorThresholdPatterns && AllBCMuonRoIs.size()>0 ){
-    ATH_MSG_DEBUG("Filling histograms for MuonRoIs in thresholdPattern");
-    SG::ReadHandle<TrigConf::L1Menu> l1Menu = SG::makeHandle(m_L1MenuKey, ctx);
-    SG::ReadDecorHandle<xAOD::MuonRoIContainer,uint64_t> thrPatternAcc = SG::makeHandle<uint64_t>(m_thresholdPatternsKey, ctx);
-    if(l1Menu.isValid() && thrPatternAcc.isPresent() && thrPatternAcc.isAvailable()){
-      for(const auto& item : m_thrMonList){
-	ATH_MSG_DEBUG("Item = " << item);
-	bool ok = false;
-	for(const auto& m : l1Menu->thresholdNames()){
-	  ATH_MSG_DEBUG("item = " << m);
-	  if( m == item ){
-	    ok = true;
-	    break;
-	  }
-	}
-	if(!ok){
-	  ATH_MSG_DEBUG("skipping " << item);
-	  continue;
-	}
-	ATH_MSG_DEBUG("continue checking " << item);
-	const TrigConf::L1Threshold& thr = l1Menu->threshold(item.data());
-	std::vector<const xAOD::MuonRoI*> passed_rois;
-	for(const auto& allBcMuonRoI : AllBCMuonRoIs){
-	  if(allBcMuonRoI.timing!=0)continue; // only current BC
-	  const xAOD::MuonRoI* roi = allBcMuonRoI.muonRoI;
-	  const uint64_t thrPattern = thrPatternAcc(*roi);
-	  bool passed = ( thrPattern & (1 << thr.mapping()) );
-	  if(passed){
-	    passed_rois.push_back(roi);
-	    ATH_MSG_DEBUG("This RoI passed "<< item <<", roiWord=" << roi->roiWord() << ", thrNumber=" << roi->getThrNumber() << " eta=" << roi->eta() << " phi=" << roi->phi());
-	    if(roiAndMenu.count(roi)==0){
-	      std::set<std::string> items;
-	      roiAndMenu.insert(std::make_pair(roi,items));
-	    }
-	    roiAndMenu[roi].insert(item);
-	  }
-	}
-	menuAndRoIs.insert(std::make_pair(item,passed_rois));
-      }
-    }
-    ATH_MSG_DEBUG("End filling histograms for MuonRoIs in thresholdPattern");
-  }
+  fillMuonRoisInThresholdPattern(roiAndMenu, menuAndRoIs, AllBCMuonRoIs, ctx);
   ///////////////// End filling histograms for MuonRoIs in thresholdPattern /////////////////
 
   ///////////////// Filling offline muon-related histograms /////////////////
@@ -847,7 +837,6 @@ StatusCode TgcRawDataMonitorAlgorithm::fillHistograms(const EventContext &ctx) c
     for (const auto muon : *muons) {
       // skip if muon is empty
       if (muon == nullptr) continue;
-
       // standard quality cuts for muons
       if (muon->pt() < 1000.) continue;
       // minimum requirements
@@ -858,131 +847,125 @@ StatusCode TgcRawDataMonitorAlgorithm::fillHistograms(const EventContext &ctx) c
       // selectable requirements
       double dz=-999,dca=-999;
       if( dataType() != DataType_t::cosmics ){
-	if(m_useMuonSelectorTool && !m_muonSelectionTool->accept(*muon)) continue;
-	if(m_useOnlyCombinedMuons && muon->muonType()!=xAOD::Muon::MuonType::Combined) continue;
-	if(m_useOnlyMuidCoStacoMuons && (muon->author()!=xAOD::Muon::Author::MuidCo && muon->author()!=xAOD::Muon::Author::STACO)) continue;
-
-	if(!m_PrimaryVertexContainerKey.empty()){
-	  if(primVertex==nullptr)continue;
-	  auto trackParticle = muon->primaryTrackParticle();
-	  if(trackParticle!=nullptr){
-	    dz = trackParticle->z0() - primVertex->z();
-	    dca = trackParticle->d0();
-	  }
-	  muon2pv_dz.push_back(dz);
-	  muon2pv_dca.push_back(dca);
-	  if( std::abs(dz-m_muonToPVdzOffset) > m_muonToPVdz )continue;
-	  if( std::abs(dca) > m_muonToPVdca )continue;
-	}
-
+        if(m_useMuonSelectorTool && !m_muonSelectionTool->accept(*muon)) continue;
+        if(m_useOnlyCombinedMuons && muon->muonType()!=xAOD::Muon::MuonType::Combined) continue;
+        if(m_useOnlyMuidCoStacoMuons && (muon->author()!=xAOD::Muon::Author::MuidCo && muon->author()!=xAOD::Muon::Author::STACO)) continue;
+        if(!m_PrimaryVertexContainerKey.empty()){
+          if(primVertex==nullptr)continue;
+          auto trackParticle = muon->primaryTrackParticle();
+          if(trackParticle!=nullptr){
+            dz = trackParticle->z0() - primVertex->z();
+            dca = trackParticle->d0();
+          }
+          muon2pv_dz.push_back(dz);
+          muon2pv_dca.push_back(dca);
+          if( std::abs(dz-m_muonToPVdzOffset) > m_muonToPVdz )continue;
+          if( std::abs(dca) > m_muonToPVdca )continue;
+        }
       }
-
       // initialize for muon-isolation check
       bool isolated = true;
-
       // initialize for tag-and-probe check
       bool probeOK = true;
       if( m_TagAndProbe ) probeOK = false; // t&p should be performed
       if( dataType() == DataType_t::cosmics ) probeOK = true; // won't performa t&p for cosmics because no enough muons
-
       // OK, let's start looking at the second muons
       for(const auto muon2 : *muons){
-
-	// skip if muon is empty
-	if (muon2 == nullptr) continue;
-
-	// skip the same muon candidate
-	if( muon == muon2 )continue;
-
-	// skip possible mismeasured muons
-	if( muon2->pt() < 1000. ) continue;
-
-	// minimum requirements on muon quality
-	if ( muon2->author() > xAOD::Muon::Author::MuidSA )continue;
-	if ( muon2->muonType() > xAOD::Muon::MuonType::MuonStandAlone )continue;
-
-	// tag muon to be only in the other region, barrel or endcap, to remove possible bias from the same region
-	if( m_tagMuonInDifferentSystem &&
-	    ( (std::abs(muon->eta()) < barrel_end && std::abs(muon2->eta()) < barrel_end) ||
-	      (std::abs(muon->eta()) > barrel_end && std::abs(muon2->eta()) > barrel_end) ) )continue;
-
-	// isolation calculation
-	double dr_muons = xAOD::P4Helpers::deltaR(muon,muon2,false);
-	deltaR_muons.push_back(dr_muons);
-	if( dr_muons < m_isolationWindow ) isolated = false;
-
-	// no need to check further if probeOK is already True
-	// 0) if muon-orthogonal triggers are avaialble/fired
-	// 1) if we don't use tag-and-probe
-	// 2) if TrigDecTool is not available
-	// 3) if the second muon matches the trigger requirement
-	if(probeOK)continue;
-
-	// loop over the single muon triggers if at least one of them matches this second muon
-	for (const auto &trigName : list_of_single_muon_triggers) {
-	  if(m_doExpressProcessing){ // check the express_express bit
-	    const unsigned int passBits = getTrigDecisionTool()->isPassedBits(trigName.data());
-	    const bool expressPass = passBits & TrigDefs::Express_passed;
-	    if(!expressPass)continue;
-	  }
-	  // check if this particular tirgger has fired in this event
-	  if (!getTrigDecisionTool()->isPassed(trigName.data(),TrigDefs::Physics)) continue;
-	  ATH_MSG_DEBUG("This muon trigger, " << trigName << ", is fired in this event!!");
-	  // check if this second muon matches the HLT muon trigger
-	  if(getTrigDecisionTool()->getNavigationFormat() == "TriggerElement") { // run 2 access
-	    ATH_MSG_DEBUG("Trying Run2-style feature access");
-	    auto fc = getTrigDecisionTool()->features(trigName.data(),TrigDefs::Physics);
-	    for(const auto& comb : fc.getCombinations()){
-	      if(!comb.active())continue;
-	      auto MuFeatureContainers = comb.get<xAOD::MuonContainer>("MuonEFInfo",TrigDefs::Physics);
-	      for(const auto& mucont : MuFeatureContainers){
-		if(mucont.empty())continue;
-		if(mucont.te()==nullptr)continue;
-		if(!mucont.te()->getActiveState())continue;
-		for(const auto hltmu : *mucont.cptr()){
-		  if (hltmu == nullptr) continue; // skip if hltmu is empty
-		  if (hltmu->pt() < 1000.)continue; // skip if pT is very small
-		  double dr = xAOD::P4Helpers::deltaR(muon2,hltmu,false);
-		  deltaR_muons_hlt.push_back(dr);
-		  if( dr < m_trigMatchWindow ){
-		    probeOK = true;
-		    ATH_MSG_DEBUG("Trigger matched: "<<trigName<<" dR=" << dr );
-		    biasedMuons.insert(muon2);
-		  }
-		}// end loop of mucont.cptr()
-	      }// end loop of MuonFeatureContainers
-	    }//end loop of Combinations
-	  }else{ // run 3 access
-	    ATH_MSG_DEBUG("Trying Run3-style feature access");
-	    auto features = getTrigDecisionTool()->features < xAOD::MuonContainer > (trigName.data(), TrigDefs::Physics, "HLT_MuonsCB_RoI");
-	    for (const auto& aaa : features) {
-	      if (!aaa.isValid()) continue;
-	      auto hltmu_link = aaa.link;
-	      if (!hltmu_link.isValid()) continue;
-	      auto hltmu = *hltmu_link;
-	      if (hltmu == nullptr) continue; // skip if hltmu is empty
-	      if (hltmu->pt() < 1000.)continue; // skip if pT is very small
-	      double dr = xAOD::P4Helpers::deltaR(muon2,hltmu,false);
-	      deltaR_muons_hlt.push_back(dr);
-	      if( dr < m_trigMatchWindow ){
-		probeOK = true;
-		ATH_MSG_DEBUG("Trigger matched: "<<trigName<<" dR=" << dr );
-		biasedMuons.insert(muon2);
-	      }
-	    } // end loop of features
-	  } // end IF Run2 or Run3 feature access
-	} // end loop of single muon triggers
-	// check if the second muon matches the single muon trigger
-	if(!probeOK) continue;
-	ATH_MSG_DEBUG("Basic Tag-and-Probe is OK");
-	// check further if this muon pair satisfies Z->mumu criteria
-	if( m_TagAndProbeZmumu && muon->charge() != muon2->charge() ){
-	  double m2 = 2. * muon->pt() * muon2->pt() * ( std::cosh(muon->eta() - muon2->eta()) - std::cos(muon->phi() - muon2->phi()) );
-	  double m = (m2>0.) ? ( std::sqrt(m2) ) : (0.);
-	  double mdiff = std::abs( m - m_zMass );
-	  probeOK = mdiff < m_zMassWindow;
-	  ATH_MSG_DEBUG("Checking Zmumu cut: " << probeOK);
-	}
+        // skip if muon is empty
+        if (muon2 == nullptr) continue;
+      
+        // skip the same muon candidate
+        if( muon == muon2 )continue;
+      
+        // skip possible mismeasured muons
+        if( muon2->pt() < 1000. ) continue;
+      
+        // minimum requirements on muon quality
+        if ( muon2->author() > xAOD::Muon::Author::MuidSA )continue;
+        if ( muon2->muonType() > xAOD::Muon::MuonType::MuonStandAlone )continue;
+      
+        // tag muon to be only in the other region, barrel or endcap, to remove possible bias from the same region
+        if( m_tagMuonInDifferentSystem &&
+            ( (std::abs(muon->eta()) < barrel_end && std::abs(muon2->eta()) < barrel_end) ||
+              (std::abs(muon->eta()) > barrel_end && std::abs(muon2->eta()) > barrel_end) ) )continue;
+      
+        // isolation calculation
+        double dr_muons = xAOD::P4Helpers::deltaR(muon,muon2,false);
+        deltaR_muons.push_back(dr_muons);
+        if( dr_muons < m_isolationWindow ) isolated = false;
+      
+        // no need to check further if probeOK is already True
+        // 0) if muon-orthogonal triggers are avaialble/fired
+        // 1) if we don't use tag-and-probe
+        // 2) if TrigDecTool is not available
+        // 3) if the second muon matches the trigger requirement
+        if(probeOK)continue;
+      
+        // loop over the single muon triggers if at least one of them matches this second muon
+        for (const auto &trigName : list_of_single_muon_triggers) {
+          if(m_doExpressProcessing){ // check the express_express bit
+            const unsigned int passBits = getTrigDecisionTool()->isPassedBits(trigName.data());
+            const bool expressPass = passBits & TrigDefs::Express_passed;
+            if(!expressPass)continue;
+          }
+          // check if this particular tirgger has fired in this event
+          if (!getTrigDecisionTool()->isPassed(trigName.data(),TrigDefs::Physics)) continue;
+          ATH_MSG_DEBUG("This muon trigger, " << trigName << ", is fired in this event!!");
+          // check if this second muon matches the HLT muon trigger
+          if(getTrigDecisionTool()->getNavigationFormat() == "TriggerElement") { // run 2 access
+            ATH_MSG_DEBUG("Trying Run2-style feature access");
+            auto fc = getTrigDecisionTool()->features(trigName.data(),TrigDefs::Physics);
+            for(const auto& comb : fc.getCombinations()){
+              if(!comb.active())continue;
+              auto MuFeatureContainers = comb.get<xAOD::MuonContainer>("MuonEFInfo",TrigDefs::Physics);
+              for(const auto& mucont : MuFeatureContainers){
+                if(mucont.empty())continue;
+                if(mucont.te()==nullptr)continue;
+                if(!mucont.te()->getActiveState())continue;
+                for(const auto hltmu : *mucont.cptr()){
+                  if (hltmu == nullptr) continue; // skip if hltmu is empty
+                  if (hltmu->pt() < 1000.)continue; // skip if pT is very small
+                  double dr = xAOD::P4Helpers::deltaR(muon2,hltmu,false);
+                  deltaR_muons_hlt.push_back(dr);
+                  if( dr < m_trigMatchWindow ){
+                    probeOK = true;
+                    ATH_MSG_DEBUG("Trigger matched: "<<trigName<<" dR=" << dr );
+                    biasedMuons.insert(muon2);
+                  }
+                }// end loop of mucont.cptr()
+              }// end loop of MuonFeatureContainers
+            }//end loop of Combinations
+          }else{ // run 3 access
+            ATH_MSG_DEBUG("Trying Run3-style feature access");
+            auto features = getTrigDecisionTool()->features < xAOD::MuonContainer > (trigName.data(), TrigDefs::Physics, "HLT_MuonsCB_RoI");
+            for (const auto& aaa : features) {
+              if (!aaa.isValid()) continue;
+              auto hltmu_link = aaa.link;
+              if (!hltmu_link.isValid()) continue;
+              auto hltmu = *hltmu_link;
+              if (hltmu == nullptr) continue; // skip if hltmu is empty
+              if (hltmu->pt() < 1000.)continue; // skip if pT is very small
+              double dr = xAOD::P4Helpers::deltaR(muon2,hltmu,false);
+              deltaR_muons_hlt.push_back(dr);
+              if( dr < m_trigMatchWindow ){
+                probeOK = true;
+                ATH_MSG_DEBUG("Trigger matched: "<<trigName<<" dR=" << dr );
+                biasedMuons.insert(muon2);
+              }
+            } // end loop of features
+          } // end IF Run2 or Run3 feature access
+        } // end loop of single muon triggers
+        // check if the second muon matches the single muon trigger
+        if(!probeOK) continue;
+        ATH_MSG_DEBUG("Basic Tag-and-Probe is OK");
+        // check further if this muon pair satisfies Z->mumu criteria
+        if( m_TagAndProbeZmumu && muon->charge() != muon2->charge() ){
+          double m2 = 2. * muon->pt() * muon2->pt() * ( std::cosh(muon->eta() - muon2->eta()) - std::cos(muon->phi() - muon2->phi()) );
+          double m = (m2>0.) ? ( std::sqrt(m2) ) : (0.);
+          double mdiff = std::abs( m - m_zMass );
+          probeOK = mdiff < m_zMassWindow;
+          ATH_MSG_DEBUG("Checking Zmumu cut: " << probeOK);
+        }
 	ATH_MSG_DEBUG("Final condition of probleOK for this muon is: " << probeOK);
 	if(probeOK) break; // no need to check further if probeOK is already True
       } // end loop of the second muons
@@ -997,50 +980,50 @@ StatusCode TgcRawDataMonitorAlgorithm::fillHistograms(const EventContext &ctx) c
       /* fill extrapolation info (only to TGC) */
       if ( std::abs(muon->eta()) > 0.5 // only endcap region
 	   && muon->pt() > m_pTCutOnExtrapolation ) { // only reasonably-high pT muons
-	for (const auto &z : m_extZposition) {
-	  if( muon->eta()<0 && z>0 )continue;
-	  if( muon->eta()>0 && z<0 )continue;
-	  xAOD::Muon::TrackParticleType trkPtclType;
-	  if(m_useIDTrackForExtrapolation){ trkPtclType = xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle;
-	  }else if(m_useMSTrackForExtrapolation){trkPtclType = xAOD::Muon::TrackParticleType::MuonSpectrometerTrackParticle;
-	  }else if(m_useCBTrackForExtrapolation){trkPtclType = xAOD::Muon::TrackParticleType::CombinedTrackParticle;
-	  }else if(m_useExtMSTrackForExtrapolation){trkPtclType = xAOD::Muon::TrackParticleType::ExtrapolatedMuonSpectrometerTrackParticle;
-	  }else if(m_useMSOnlyExtMSTrackForExtrapolation){trkPtclType = xAOD::Muon::TrackParticleType::MSOnlyExtrapolatedMuonSpectrometerTrackParticle;
-	  }else{ trkPtclType = xAOD::Muon::TrackParticleType::Primary; } // default is Primary (i.e. same as muonType )
-	  auto trackParticle = (m_useDirectPrimaryTrackForExtrapolation) ? muon->primaryTrackParticle() : muon->trackParticle( trkPtclType );
-	  if(trackParticle==nullptr)continue;
-	  auto matrix = std::make_unique<Amg::Transform3D>();
-	  matrix->setIdentity();
-	  matrix->translation().z() = z;
-	  auto disc = std::make_unique < Trk::DiscSurface > (*matrix,
-							     m_endcapPivotPlaneMinimumRadius,
-							     m_endcapPivotPlaneMaximumRadius);
-	  const Trk::BoundaryCheck boundaryCheck = true;
-	  const auto extTrkParams = m_extrapolator->extrapolate(ctx,
-								trackParticle->perigeeParameters(),
-								*disc,
-								Trk::alongMomentum,
-								boundaryCheck,
-								Trk::muon);
-	  if(extTrkParams != nullptr){
-	    if( std::abs(extTrkParams->position().z() - z) > 10. )continue; // wrong extrapolation
-	    ExtPos ext;
-	    ext.extPosZ = z;
-	    ext.extPos = extTrkParams->position();
-	    ext.extVec = extTrkParams->momentum();
-	    Amg::Vector3D extVec(extTrkParams->position().x(),extTrkParams->position().y(),z);
-	    ext.passedChambers = m_tgcMonTool->getPassedChambers(extVec);
-	    ext.muon = muon;
-	    if( std::abs( std::abs(z) - m_M3_Z ) < 10. &&  // trigger pivot plane (i.e. M3)
-		std::abs( muon->eta() ) > 1.05 &&
-		std::abs( muon->eta() ) < 2.40){ // only endcap
-	      extpositions_pivot.push_back(ext);
-	    }
-	    for(const auto& cham : ext.passedChambers){
-	      extpositions[cham].push_back(ext);
-	    }
-	  }
-	}
+        for (const auto &z : m_extZposition) {
+          if( muon->eta()<0 && z>0 )continue;
+          if( muon->eta()>0 && z<0 )continue;
+          xAOD::Muon::TrackParticleType trkPtclType;
+          if(m_useIDTrackForExtrapolation){ trkPtclType = xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle;
+          }else if(m_useMSTrackForExtrapolation){trkPtclType = xAOD::Muon::TrackParticleType::MuonSpectrometerTrackParticle;
+          }else if(m_useCBTrackForExtrapolation){trkPtclType = xAOD::Muon::TrackParticleType::CombinedTrackParticle;
+          }else if(m_useExtMSTrackForExtrapolation){trkPtclType = xAOD::Muon::TrackParticleType::ExtrapolatedMuonSpectrometerTrackParticle;
+          }else if(m_useMSOnlyExtMSTrackForExtrapolation){trkPtclType = xAOD::Muon::TrackParticleType::MSOnlyExtrapolatedMuonSpectrometerTrackParticle;
+          }else{ trkPtclType = xAOD::Muon::TrackParticleType::Primary; } // default is Primary (i.e. same as muonType )
+          auto trackParticle = (m_useDirectPrimaryTrackForExtrapolation) ? muon->primaryTrackParticle() : muon->trackParticle( trkPtclType );
+          if(trackParticle==nullptr)continue;
+          auto matrix = std::make_unique<Amg::Transform3D>();
+          matrix->setIdentity();
+          matrix->translation().z() = z;
+          auto disc = std::make_unique < Trk::DiscSurface > (*matrix,
+                         m_endcapPivotPlaneMinimumRadius,
+                         m_endcapPivotPlaneMaximumRadius);
+          const Trk::BoundaryCheck boundaryCheck = true;
+          const auto extTrkParams = m_extrapolator->extrapolate(ctx,
+                      trackParticle->perigeeParameters(),
+                      *disc,
+                      Trk::alongMomentum,
+                      boundaryCheck,
+                      Trk::muon);
+          if(extTrkParams != nullptr){
+            if( std::abs(extTrkParams->position().z() - z) > 10. )continue; // wrong extrapolation
+            ExtPos ext;
+            ext.extPosZ = z;
+            ext.extPos = extTrkParams->position();
+            ext.extVec = extTrkParams->momentum();
+            Amg::Vector3D extVec(extTrkParams->position().x(),extTrkParams->position().y(),z);
+            ext.passedChambers = m_tgcMonTool->getPassedChambers(extVec);
+            ext.muon = muon;
+            if( std::abs( std::abs(z) - m_M3_Z ) < 10. &&  // trigger pivot plane (i.e. M3)
+          std::abs( muon->eta() ) > 1.05 &&
+          std::abs( muon->eta() ) < 2.40){ // only endcap
+              extpositions_pivot.push_back(ext);
+            }
+            for(const auto& cham : ext.passedChambers){
+              extpositions[cham].push_back(ext);
+            }
+          }
+        }
       }
       /* L1Muon RoI matching */
       mymuon.matchedL1Charge=false;
@@ -1050,51 +1033,44 @@ StatusCode TgcRawDataMonitorAlgorithm::fillHistograms(const EventContext &ctx) c
       mymuon.passIsMoreCandInRoI=false;
       double max_dr = getMatchingWindow(mymuon.muon);
       if (AllBCMuonRoIs.size()==0) {
-	ATH_MSG_DEBUG("No RoI matching possible as no container has been retrieved");
-	mymuons.push_back(mymuon);
-	continue;
+        ATH_MSG_DEBUG("No RoI matching possible as no container has been retrieved");
+        mymuons.push_back(mymuon);
+        continue;
       }
       for(const auto& allBcMuonRoI : AllBCMuonRoIs){
-	const xAOD::MuonRoI* roi = allBcMuonRoI.muonRoI;
-	double dr = xAOD::P4Helpers::deltaR(*muon,roi->eta(),roi->phi(),false);
-	deltaR_muons_roi.push_back(dr);
-	if( dr < max_dr ){
-	  if(roiAndMenu.count(roi)>0)mymuon.matchedL1Items.insert( roiAndMenu[roi].begin(), roiAndMenu[roi].end() );
-	  mymuon.matchedL1ThrExclusive.insert( roi->getThrNumber() );
-	  if(roi->getSource()!=xAOD::MuonRoI::Barrel)mymuon.matchedL1ThrExclusiveTGC.insert( roi->getThrNumber() );
-	  if(muon->charge()<0 && roi->getCharge()==xAOD::MuonRoI::Neg)mymuon.matchedL1Charge|=true;
-	  else if(muon->charge()>0 && roi->getCharge()==xAOD::MuonRoI::Pos)mymuon.matchedL1Charge|=true;
-	  mymuon.passBW3Coin|=roi->getBW3Coincidence();
-	  mymuon.passInnerCoin|=roi->getInnerCoincidence();
-	  mymuon.passGoodMF|=roi->getGoodMF();
-	  mymuon.passIsMoreCandInRoI|=roi->isMoreCandInRoI();
-	}
+        const xAOD::MuonRoI* roi = allBcMuonRoI.muonRoI;
+        double dr = xAOD::P4Helpers::deltaR(*muon,roi->eta(),roi->phi(),false);
+        deltaR_muons_roi.push_back(dr);
+        if( dr < max_dr ){
+          if(roiAndMenu.count(roi)>0)mymuon.matchedL1Items.insert( roiAndMenu[roi].begin(), roiAndMenu[roi].end() );
+          mymuon.matchedL1ThrExclusive.insert( roi->getThrNumber() );
+          if(roi->getSource()!=xAOD::MuonRoI::Barrel)mymuon.matchedL1ThrExclusiveTGC.insert( roi->getThrNumber() );
+          if(muon->charge()<0 && roi->getCharge()==xAOD::MuonRoI::Neg)mymuon.matchedL1Charge|=true;
+          else if(muon->charge()>0 && roi->getCharge()==xAOD::MuonRoI::Pos)mymuon.matchedL1Charge|=true;
+          mymuon.passBW3Coin|=roi->getBW3Coincidence();
+          mymuon.passInnerCoin|=roi->getInnerCoincidence();
+          mymuon.passGoodMF|=roi->getGoodMF();
+          mymuon.passIsMoreCandInRoI|=roi->isMoreCandInRoI();
+        }
       }
-
       for (int ithr = 1; ithr <= 15 ; ++ithr) { // TGC thresholds from 1 up to 15
-
-	for (const auto &thr : mymuon.matchedL1ThrExclusive) {
-	  if (thr >= ithr) {
-	    mymuon.matchedL1ThrInclusive.insert(ithr);
-	    break;
-	  }
-	}
-
-	for (const auto &thr : mymuon.matchedL1ThrExclusiveTGC) {
-	  if (thr >= ithr) {
-	    mymuon.matchedL1ThrInclusiveTGC.insert(ithr);
-	    break;
-	  }
-	}
-
+        for (const auto &thr : mymuon.matchedL1ThrExclusive) {
+          if (thr >= ithr) {
+            mymuon.matchedL1ThrInclusive.insert(ithr);
+            break;
+          }
+        }
+        for (const auto &thr : mymuon.matchedL1ThrExclusiveTGC) {
+          if (thr >= ithr) {
+            mymuon.matchedL1ThrInclusiveTGC.insert(ithr);
+            break;
+          }
+        }
       }
-
       /* store TimedMuon */
       mymuons.push_back(mymuon);
-
       mymuon2pv_dz.push_back(dz);
       mymuon2pv_dca.push_back(dca);
-
     }
 
 
@@ -1374,546 +1350,10 @@ return (m.muon->charge()>0);
     ATH_MSG_DEBUG("End filling offline muon-related histograms");
   }
   ///////////////// End filling offline muon-related histograms /////////////////
-
-
-  ///////////////// Filling thresholdPattern histograms /////////////////////
-  if(m_monitorThresholdPatterns){
-    for(const auto& item : m_thrMonList){
-
-      std::vector<bool> passed;
-      passed.reserve(mymuons.size());
-      for(const auto& mymuon : mymuons){
-    	passed.push_back( mymuon.matchedL1Items.find(item) != mymuon.matchedL1Items.end() );
-      }
-      auto passed_rois = menuAndRoIs[item];
-
-      MonVariables thrMonVariables;
-
-      auto lumiBlock_l1item = Monitored::Scalar<int>(Form("lumiBlock_l1item_%s",item.data()),GetEventInfo(ctx)->lumiBlock());
-      thrMonVariables.push_back(lumiBlock_l1item);
-
-      auto muon_passed_l1item = Monitored::Collection(Form("muon_passed_l1item_%s",item.data()),passed);
-      thrMonVariables.push_back(muon_passed_l1item);
-
-      auto muon_eta_l1item=Monitored::Collection(Form("muon_eta_l1item_%s",item.data()),mymuons,[](const TimedMuon&m){
-	  return (m.muon->pt() > pt_30_cut) ? m.muon->eta() : -10;
-	});
-      thrMonVariables.push_back(muon_eta_l1item);
-      auto muon_phi_l1item=Monitored::Collection(Form("muon_phi_l1item_%s",item.data()),mymuons,[](const TimedMuon&m){
-	  return (m.muon->pt() > pt_30_cut) ? m.muon->phi() : -10;
-	});
-      thrMonVariables.push_back(muon_phi_l1item);
-      auto muon_pt_rpc_l1item=Monitored::Collection(Form("muon_pt_rpc_l1item_%s",item.data()),mymuons,[](const TimedMuon&m){
-	  return (std::abs(m.muon->eta()) < barrel_end) ? m.muon->pt() / Gaudi::Units::GeV : -10;
-	});
-      thrMonVariables.push_back(muon_pt_rpc_l1item);
-      auto muon_pt_tgc_l1item=Monitored::Collection(Form("muon_pt_tgc_l1item_%s",item.data()),mymuons,[](const TimedMuon&m){
-	  return (std::abs(m.muon->eta()) > barrel_end && std::abs(m.muon->eta()) < trigger_end) ? m.muon->pt() / Gaudi::Units::GeV : -10;
-	});
-      thrMonVariables.push_back(muon_pt_tgc_l1item);
-      auto muon_phi_rpc_l1item=Monitored::Collection(Form("muon_phi_rpc_l1item_%s",item.data()),mymuons,[](const TimedMuon&m){
-	  return (std::abs(m.muon->eta()) < barrel_end && m.muon->pt() > pt_30_cut) ? m.muon->phi() : -10;
-	});
-      thrMonVariables.push_back(muon_phi_rpc_l1item);
-      auto muon_phi_tgc_l1item=Monitored::Collection(Form("muon_phi_tgc_l1item_%s",item.data()),mymuons,[](const TimedMuon&m){
-	  return (std::abs(m.muon->eta()) > barrel_end && std::abs(m.muon->eta()) < trigger_end && m.muon->pt() > pt_30_cut) ? m.muon->phi() : -10;
-	});
-      thrMonVariables.push_back(muon_phi_tgc_l1item);
-
-      auto l1item_roi_eta=Monitored::Collection(Form("l1item_roi_eta_%s",item.data()),passed_rois,[](const xAOD::MuonRoI*m){return m->eta();});
-      thrMonVariables.push_back(l1item_roi_eta);
-      auto l1item_roi_phi=Monitored::Collection(Form("l1item_roi_phi_%s",item.data()),passed_rois,[](const xAOD::MuonRoI*m){return m->phi();});
-      thrMonVariables.push_back(l1item_roi_phi);
-      auto l1item_roi_phi_rpc=Monitored::Collection(Form("l1item_roi_phi_rpc_%s",item.data()),passed_rois,[](const xAOD::MuonRoI*m){
-	  return (m->getSource()==xAOD::MuonRoI::Barrel)?(m->phi()):(-10);
-	});
-      auto l1item_roi_phi_tgc=Monitored::Collection(Form("l1item_roi_phi_tgc_%s",item.data()),passed_rois,[](const xAOD::MuonRoI*m){
-	  return (m->getSource()!=xAOD::MuonRoI::Barrel)?(m->phi()):(-10);
-	});
-      thrMonVariables.push_back(l1item_roi_phi_tgc);
-
-      auto l1item_roi_phi_barrel=Monitored::Collection(Form("l1item_roi_phi_barrel_%s",item.data()),passed_rois,[](const xAOD::MuonRoI*m){
-	  return (m->getSource() == xAOD::MuonRoI::Barrel) ? m->phi() : -10;
-	});
-      thrMonVariables.push_back(l1item_roi_phi_barrel);
-      auto l1item_roi_phi_endcap=Monitored::Collection(Form("l1item_roi_phi_endcap_%s",item.data()),passed_rois,[](const xAOD::MuonRoI*m){
-	  return (m->getSource() == xAOD::MuonRoI::Endcap) ? m->phi() : -10;
-	});
-      thrMonVariables.push_back(l1item_roi_phi_endcap);
-      auto l1item_roi_phi_forward=Monitored::Collection(Form("l1item_roi_phi_forward_%s",item.data()),passed_rois,[](const xAOD::MuonRoI*m){
-	  return (m->getSource() == xAOD::MuonRoI::Forward) ? m->phi() : -10;
-	});
-      thrMonVariables.push_back(l1item_roi_phi_forward);
-      auto l1item_roi_sideA=Monitored::Collection(Form("l1item_roi_sideA_%s",item.data()),passed_rois,[](const xAOD::MuonRoI*m){
-	  return m->getHemisphere() == xAOD::MuonRoI::Positive;
-	});
-      thrMonVariables.push_back(l1item_roi_sideA);
-      auto l1item_roi_sideC=Monitored::Collection(Form("l1item_roi_sideC_%s",item.data()),passed_rois,[](const xAOD::MuonRoI*m){
-	  return m->getHemisphere() == xAOD::MuonRoI::Negative;
-	});
-      thrMonVariables.push_back(l1item_roi_sideC);
-
-      auto l1item_roi_roiNumber=Monitored::Collection(Form("l1item_roi_roiNumber_%s",item.data()),passed_rois,[](const xAOD::MuonRoI*m){
-	  return m->getRoI();
-	});
-      thrMonVariables.push_back(l1item_roi_roiNumber);
-
-      auto l1item_roi_sector = Monitored::Collection(Form("l1item_roi_sector_%s",item.data()),passed_rois,[](const xAOD::MuonRoI*m) {
-	  return (m->getHemisphere() == xAOD::MuonRoI::Positive)?(m->getSectorID()+1):(-1 * m->getSectorID()-1);
-	});
-      thrMonVariables.push_back(l1item_roi_sector);
-      auto l1item_roi_barrel = Monitored::Collection(Form("l1item_roi_barrel_%s",item.data()),passed_rois,[](const xAOD::MuonRoI*m) {
-	  return m->getSource() == xAOD::MuonRoI::Barrel;
-	});
-      thrMonVariables.push_back(l1item_roi_barrel);
-      auto l1item_roi_endcap = Monitored::Collection(Form("l1item_roi_endcap_%s",item.data()),passed_rois,[](const xAOD::MuonRoI*m) {
-	  return m->getSource() == xAOD::MuonRoI::Endcap;
-	});
-      thrMonVariables.push_back(l1item_roi_endcap);
-      auto l1item_roi_forward = Monitored::Collection(Form("l1item_roi_forward_%s",item.data()),passed_rois,[](const xAOD::MuonRoI*m) {
-	  return m->getSource() == xAOD::MuonRoI::Forward;
-	});
-      thrMonVariables.push_back(l1item_roi_forward);
-      auto l1item_roi_thrNumber=Monitored::Collection(Form("l1item_roi_thrNumber_%s",item.data()),passed_rois,[](const xAOD::MuonRoI*m){
-	  return m->getThrNumber();
-	});
-      thrMonVariables.push_back(l1item_roi_thrNumber);
-
-      auto l1item_roi_ismorecand=Monitored::Collection(Form("l1item_roi_ismorecand_%s",item.data()),passed_rois,[](const xAOD::MuonRoI*m){
-	  return (m->getSource()==xAOD::MuonRoI::Barrel)?(m->isMoreCandInRoI()):(-1);
-	});
-      thrMonVariables.push_back(l1item_roi_ismorecand);
-      auto l1item_roi_bw3coin=Monitored::Collection(Form("l1item_roi_bw3coin_%s",item.data()),passed_rois,[](const xAOD::MuonRoI*m){
-	  return (m->getSource()!=xAOD::MuonRoI::Barrel)?(m->getBW3Coincidence()):(-1);
-	});
-      thrMonVariables.push_back(l1item_roi_bw3coin);
-      auto l1item_roi_innercoin=Monitored::Collection(Form("l1item_roi_innercoin_%s",item.data()),passed_rois,[](const xAOD::MuonRoI*m){
-	  return (m->getSource()!=xAOD::MuonRoI::Barrel)?(m->getInnerCoincidence()):(-1);
-	});
-      thrMonVariables.push_back(l1item_roi_innercoin);
-      auto l1item_roi_goodmf=Monitored::Collection(Form("l1item_roi_goodmf_%s",item.data()),passed_rois,[](const xAOD::MuonRoI*m){
-	  return (m->getSource()!=xAOD::MuonRoI::Barrel)?(m->getGoodMF()):(-1);
-	});
-      thrMonVariables.push_back(l1item_roi_goodmf);
-
-      fill(m_packageName + item.data(), thrMonVariables);
-    }
-  }
-  ///////////////// End filling thresholdPattern histograms /////////////////
-
-
+  fillThresholdPatternHistograms(menuAndRoIs, mymuons, ctx);
 
   ///////////////// Filling TGC PRD histograms /////////////////
-  if (m_anaTgcPrd) {
-    ATH_MSG_DEBUG("m_anaTgcPrd = True");
-    SG::ReadCondHandle<MuonGM::MuonDetectorManager> DetectorManagerHandle{m_DetectorManagerKey,ctx};
-    const MuonGM::MuonDetectorManager* muonMgr = DetectorManagerHandle.cptr();
-    SG::ReadHandle < Muon::TgcPrepDataContainer > tgcPrd(m_TgcPrepDataContainerKey, ctx);
-    std::map<const xAOD::Muon*, std::set<std::string>> map_muon_and_tgchits;
-    if(tgcPrd.isValid() && muonMgr!=nullptr){
-      ATH_MSG_DEBUG("Filling TGC PRD histograms");
-      const TgcIdHelper &tgcIdHelper = m_idHelperSvc->tgcIdHelper();
-      std::vector < TGC::TgcHit > tgcHits;
-      std::map<std::string, std::vector<TGC::TgcHit>> tgcHitsMap;
-      for (const auto tgccnt : *tgcPrd) {
-	for (const auto data : *tgccnt) {
-	  const MuonGM::TgcReadoutElement *element = data->detectorElement();
-	  const Identifier id = data->identify();
-	  const int gasGap = tgcIdHelper.gasGap(id);
-	  const int channel = tgcIdHelper.channel(id);
-	  const bool isStrip = tgcIdHelper.isStrip(id);
-	  const Amg::Vector3D &pos = isStrip ? element->stripPos(gasGap, channel) : element->wireGangPos(gasGap, channel);
-	  const double shortWidth = (isStrip)?(element->stripShortWidth(gasGap, channel)):(element->gangShortWidth(gasGap, channel));
-	  const double longWidth = (isStrip)?(element->stripLongWidth(gasGap, channel)):(element->gangLongWidth(gasGap, channel));
-	  const double length = (isStrip)?(element->stripLength()):(element->gangRadialLength(gasGap, channel));
-	  const int bcmask = data->getBcBitMap();
-	  TGC::TgcHit tgcHit(pos[0],pos[1],pos[2],
-			     shortWidth,longWidth, length,
-			     isStrip,gasGap,channel,tgcIdHelper.stationEta(id),tgcIdHelper.stationPhi(id),tgcIdHelper.stationName(id),
-			     bcmask);
-	  if(extpositions.find(tgcHit.cham_name())!=extpositions.end()){
-	    for(auto& cham : extpositions[tgcHit.cham_name()]){
-	      double newX = cham.extPos.x() + cham.extVec.x() / cham.extVec.z() * ( tgcHit.Z() - cham.extPos.z() );
-	      double newY = cham.extPos.y() + cham.extVec.y() / cham.extVec.z() * ( tgcHit.Z() - cham.extPos.z() );
-	      Identifier id2 = muonMgr->tgcIdHelper()->elementID(tgcHit.StationName(), tgcHit.StationEta(), tgcHit.StationPhi());
-	      
-	      auto detEle = muonMgr->getTgcReadoutElement(id2);
-	      double chamPhi = detEle->center().phi();
-	      TVector2 extPos(newX,newY);
-	      TVector2 hitPos(tgcHit.X(),tgcHit.Y());
-	      TVector2 rot_extPos  = extPos.Rotate(-chamPhi + M_PI/2.);
-	      TVector2 rot_hitPos  = hitPos.Rotate(-chamPhi + M_PI/2.);
-	      double res = (tgcHit.isStrip())
-		? std::sin( rot_extPos.DeltaPhi( rot_hitPos ) ) * rot_extPos.Mod()
-		: rot_hitPos.Y() - rot_extPos.Y();
-	      tgcHit.addResidual( cham.muon, res );
-	      if( std::abs(res) < m_residualWindow ){
-		cham.chambersHasHit.insert(tgcHit.type_name());
-		map_muon_and_tgchits[cham.muon].insert(tgcHit.channel_name());
-	      }
-	    }
-	  }
-
-	  tgcHits.push_back(tgcHit);
-	  tgcHitsMap[tgcHit.cham_name() + ( (tgcHit.isStrip())?("S"):("W") )].push_back(tgcHit); // <- chamber-by-chamber residual plots
-	  tgcHitsMap[tgcHit.type_name()].push_back(tgcHit); // <- gap-by-gap channel occupancy plots
-
-	}
-      }
-
-      std::map<std::string, std::vector<int>> tgcHitPhiMap;
-      std::map<std::string, std::vector<int>> tgcHitEtaMap;
-      std::map<std::string, std::vector<int>> tgcHitPhiMapGlobal;
-      std::map<std::string, std::vector<int>> tgcHitTiming;
-      std::map<std::string, std::vector<int>> tgcHitPhiMapGlobalWithTrack;
-      std::map<std::string, std::vector<int>> tgcHitTimingWithTrack;
-      std::map<const std::string, std::vector<TGC::TgcHit>> tgcHitBCMaskMap;
-      std::vector <int> vec_bw24sectors; // 1..12 BW-A, -1..-12 BW-C
-      std::vector <int> vec_bw24sectors_wire;
-      std::vector <int> vec_bw24sectors_strip;
-      std::vector <int> vec_bwfulleta; // 0(Forward), 1..4(M1), 1..5(M2,M3)
-      std::vector <int> vec_bwfulleta_wire;
-      std::vector <int> vec_bwfulleta_strip;
-      std::vector <int> vec_bwtiming;
-      std::vector <int> vec_bwtiming_wire;
-      std::vector <int> vec_bwtiming_strip;
-      std::vector <int> vec_bw24sectors_wTrack; // 1..12 BW-A, -1..-12 BW-C
-      std::vector <int> vec_bw24sectors_wire_wTrack;
-      std::vector <int> vec_bw24sectors_strip_wTrack;
-      std::vector <int> vec_bwfulleta_wTrack; // 0(Forward), 1..4(M1), 1..5(M2,M3)
-      std::vector <int> vec_bwfulleta_wire_wTrack;
-      std::vector <int> vec_bwfulleta_strip_wTrack;
-      std::vector <int> vec_bwtiming_wTrack;
-      std::vector <int> vec_bwtiming_wire_wTrack;
-      std::vector <int> vec_bwtiming_strip_wTrack;
-      for(const auto& tgcHit : tgcHits){
-	bool hasAssociatedGoodMuonTrack = false;
-	for(const auto& res : tgcHit.residuals()){
-	  const xAOD::Muon* muon = res.first;
-	  if(map_muon_and_tgchits[muon].find(tgcHit.channel_name()) == map_muon_and_tgchits[muon].end())continue;
-	  int nWhits = 0;
-	  int nShits = 0;
-	  for(const auto& chamHasHit : map_muon_and_tgchits[muon]){
-	    if( chamHasHit.find(tgcHit.gap_name()) != std::string::npos ) continue; // skipping the same gap
-	    if( chamHasHit.find("M04") != std::string::npos ) continue; // skipping EI/FI
-	    if( chamHasHit.find('W') != std::string::npos ) nWhits++;
-	    if( chamHasHit.find('S') != std::string::npos ) nShits++;
-	  }
-	  if(nWhits < m_nHitsInOtherBWTGCWire)continue;
-	  if(nShits < m_nHitsInOtherBWTGCStrip)continue;
-	  hasAssociatedGoodMuonTrack = true;
-	  break;
-	}
-
-	// debugging purpose: should be False by default
-	if(m_dumpFullChannelList)ATH_MSG_INFO("TGCHIT: " << tgcHit.channel_name());
-
-	// BCID analysis for TGC TTCrx delay scan
-	if(hasAssociatedGoodMuonTrack) tgcHitBCMaskMap[tgcHit.channel_name()].push_back(tgcHit);
-
-	std::string station_name = Form("%sM%02d%s",(tgcHit.iSide()==TGC::TGCSIDE::TGCASIDE)?("A"):("C"),tgcHit.iM(),(tgcHit.isStrip())?("S"):("W"));
-	int phimap_index = 0;
-	int etamap_index = 0;
-	int phimap_global_index = 0; // no empty bins compare to the above index
-	m_tgcMonTool->getMapIndex(tgcHit,etamap_index,phimap_index,phimap_global_index );
-	for(int bunch = -1 ; bunch <= +1 ; bunch++){
-	  if(bunch==-1 && (tgcHit.bcmask()&Muon::TgcPrepData::BCBIT_PREVIOUS)==0)continue;
-	  if(bunch== 0 && (tgcHit.bcmask()&Muon::TgcPrepData::BCBIT_CURRENT)==0)continue;
-	  if(bunch==+1 && (tgcHit.bcmask()&Muon::TgcPrepData::BCBIT_NEXT)==0)continue;
-	  tgcHitPhiMap[station_name].push_back(phimap_index);
-	  tgcHitEtaMap[station_name].push_back(etamap_index);
-	  tgcHitPhiMapGlobal[station_name].push_back(phimap_global_index);
-	  tgcHitTiming[station_name].push_back(bunch);
-	  if(hasAssociatedGoodMuonTrack){
-	    tgcHitPhiMapGlobalWithTrack[station_name].push_back(phimap_global_index);
-	    tgcHitTimingWithTrack[station_name].push_back(bunch);
-	  }
-
-	  if(tgcHit.iM()!=4){
-	    vec_bw24sectors.push_back((tgcHit.iSide()==TGC::TGCSIDE::TGCASIDE)?(tgcHit.iSec()):(-tgcHit.iSec()));
-	    vec_bwfulleta.push_back(tgcHit.iEta());
-	    vec_bwtiming.push_back(bunch);
-	    if(hasAssociatedGoodMuonTrack){
-	      vec_bw24sectors_wTrack.push_back((tgcHit.iSide()==TGC::TGCSIDE::TGCASIDE)?(tgcHit.iSec()):(-tgcHit.iSec()));
-	      vec_bwfulleta_wTrack.push_back(tgcHit.iEta());
-	      vec_bwtiming_wTrack.push_back(bunch);
-	    }
-	    if(tgcHit.isStrip()){
-	      vec_bw24sectors_strip.push_back((tgcHit.iSide()==TGC::TGCSIDE::TGCASIDE)?(tgcHit.iSec()):(-tgcHit.iSec()));
-	      vec_bwfulleta_strip.push_back(tgcHit.iEta());
-	      vec_bwtiming_strip.push_back(bunch);
-	      if(hasAssociatedGoodMuonTrack){
-		vec_bw24sectors_strip_wTrack.push_back((tgcHit.iSide()==TGC::TGCSIDE::TGCASIDE)?(tgcHit.iSec()):(-tgcHit.iSec()));
-		vec_bwfulleta_strip_wTrack.push_back(tgcHit.iEta());
-		vec_bwtiming_strip_wTrack.push_back(bunch);
-	      }
-	    }else{
-	      vec_bw24sectors_wire.push_back((tgcHit.iSide()==TGC::TGCSIDE::TGCASIDE)?(tgcHit.iSec()):(-tgcHit.iSec()));
-	      vec_bwfulleta_wire.push_back(tgcHit.iEta());
-	      vec_bwtiming_wire.push_back(bunch);
-	      if(hasAssociatedGoodMuonTrack){
-		vec_bw24sectors_wire_wTrack.push_back((tgcHit.iSide()==TGC::TGCSIDE::TGCASIDE)?(tgcHit.iSec()):(-tgcHit.iSec()));
-		vec_bwfulleta_wire_wTrack.push_back(tgcHit.iEta());
-		vec_bwtiming_wire_wTrack.push_back(bunch);
-	      }
-	    }
-	  }
-	}
-      }
-      
-      ATH_MSG_DEBUG("filling hit_variables");
-      
-      MonVariables  hit_variables;
-      hit_variables.push_back(mon_bcid);
-      hit_variables.push_back(mon_pileup);
-      hit_variables.push_back(mon_lb);
-
-      auto hit_n = Monitored::Scalar<int>("hit_n", tgcHits.size());
-      hit_variables.push_back(hit_n);
-
-      auto hit_bcmask=Monitored::Collection("hit_bcmask",tgcHits,[](const TGC::TgcHit&m){return m.bcmask();});
-      hit_variables.push_back(hit_bcmask);
-
-      auto hit_sideA=Monitored::Collection("hit_sideA",tgcHits,[](const TGC::TgcHit&m){return m.Z()>0;});
-      hit_variables.push_back(hit_sideA);
-
-      auto hit_sideC=Monitored::Collection("hit_sideC",tgcHits,[](const TGC::TgcHit&m){return m.Z() < 0;});
-      hit_variables.push_back(hit_sideC);
-
-      auto hit_bw24sectors=Monitored::Collection("hit_bw24sectors",vec_bw24sectors,[](const int&m){return m;});
-      hit_variables.push_back(hit_bw24sectors);
-      auto hit_bw24sectors_strip=Monitored::Collection("hit_bw24sectors_strip",vec_bw24sectors_strip,[](const int&m){return m;});
-      hit_variables.push_back(hit_bw24sectors_strip);
-      auto hit_bw24sectors_wire=Monitored::Collection("hit_bw24sectors_wire",vec_bw24sectors_wire,[](const int&m){return m;});
-      hit_variables.push_back(hit_bw24sectors_wire);
-      auto hit_bwfulleta=Monitored::Collection("hit_bwfulleta",vec_bwfulleta,[](const int&m){return m;});
-      hit_variables.push_back(hit_bwfulleta);
-      auto hit_bwfulleta_strip=Monitored::Collection("hit_bwfulleta_strip",vec_bwfulleta_strip,[](const int&m){return m;});
-      hit_variables.push_back(hit_bwfulleta_strip);
-      auto hit_bwfulleta_wire=Monitored::Collection("hit_bwfulleta_wire",vec_bwfulleta_wire,[](const int&m){return m;});
-      hit_variables.push_back(hit_bwfulleta_wire);
-      auto hit_bwtiming=Monitored::Collection("hit_bwtiming",vec_bwtiming,[](const int&m){return m;});
-      hit_variables.push_back(hit_bwtiming);
-      auto hit_bwtiming_strip=Monitored::Collection("hit_bwtiming_strip",vec_bwtiming_strip,[](const int&m){return m;});
-      hit_variables.push_back(hit_bwtiming_strip);
-      auto hit_bwtiming_wire=Monitored::Collection("hit_bwtiming_wire",vec_bwtiming_wire,[](const int&m){return m;});
-      hit_variables.push_back(hit_bwtiming_wire);
-
-      auto hit_bw24sectors_wTrack=Monitored::Collection("hit_bw24sectors_wTrack",vec_bw24sectors_wTrack,[](const int&m){return m;});
-      hit_variables.push_back(hit_bw24sectors_wTrack);
-      auto hit_bw24sectors_strip_wTrack=Monitored::Collection("hit_bw24sectors_strip_wTrack",vec_bw24sectors_strip_wTrack,[](const int&m){return m;});
-      hit_variables.push_back(hit_bw24sectors_strip_wTrack);
-      auto hit_bw24sectors_wire_wTrack=Monitored::Collection("hit_bw24sectors_wire_wTrack",vec_bw24sectors_wire_wTrack,[](const int&m){return m;});
-      hit_variables.push_back(hit_bw24sectors_wire_wTrack);
-      auto hit_bwfulleta_wTrack=Monitored::Collection("hit_bwfulleta_wTrack",vec_bwfulleta_wTrack,[](const int&m){return m;});
-      hit_variables.push_back(hit_bwfulleta_wTrack);
-      auto hit_bwfulleta_strip_wTrack=Monitored::Collection("hit_bwfulleta_strip_wTrack",vec_bwfulleta_strip_wTrack,[](const int&m){return m;});
-      hit_variables.push_back(hit_bwfulleta_strip_wTrack);
-      auto hit_bwfulleta_wire_wTrack=Monitored::Collection("hit_bwfulleta_wire_wTrack",vec_bwfulleta_wire_wTrack,[](const int&m){return m;});
-      hit_variables.push_back(hit_bwfulleta_wire_wTrack);
-      auto hit_bwtiming_wTrack=Monitored::Collection("hit_bwtiming_wTrack",vec_bwtiming_wTrack,[](const int&m){return m;});
-      hit_variables.push_back(hit_bwtiming_wTrack);
-      auto hit_bwtiming_strip_wTrack=Monitored::Collection("hit_bwtiming_strip_wTrack",vec_bwtiming_strip_wTrack,[](const int&m){return m;});
-      hit_variables.push_back(hit_bwtiming_strip_wTrack);
-      auto hit_bwtiming_wire_wTrack=Monitored::Collection("hit_bwtiming_wire_wTrack",vec_bwtiming_wire_wTrack,[](const int&m){return m;});
-      hit_variables.push_back(hit_bwtiming_wire_wTrack);
-
-      std::vector<Monitored::ObjectsCollection<std::vector<int>, double>> varowner;
-      varowner.reserve(tgcHitPhiMap.size() * 2 + tgcHitPhiMapGlobal.size() * 2 + tgcHitPhiMapGlobalWithTrack.size() * 2);
-      for (const auto &phimap : tgcHitPhiMap) {
-	varowner.push_back(Monitored::Collection(Form("hit_x_%s",phimap.first.data()),tgcHitEtaMap[phimap.first],[](const int&m){return m;}));
-      	hit_variables.push_back(varowner.back());
-	varowner.push_back(Monitored::Collection(Form("hit_y_%s", phimap.first.data()),phimap.second,[](const int&m){return m;}));
-      	hit_variables.push_back(varowner.back());
-      }
-      for (const auto &phimap : tgcHitPhiMapGlobal) {
-	varowner.push_back(Monitored::Collection(Form("hit_glblphi_%s", phimap.first.data()),phimap.second,[](const int&m){return m;}));
-	hit_variables.push_back(varowner.back());
-	varowner.push_back(Monitored::Collection(Form("hit_bunch_%s", phimap.first.data()),tgcHitTiming[phimap.first],[](const int&m){return m;}));
-	hit_variables.push_back(varowner.back());
-      }
-      for (const auto &phimap : tgcHitPhiMapGlobalWithTrack) {
-	varowner.push_back(Monitored::Collection(Form("hit_glblphi_wTrack_%s", phimap.first.data()),phimap.second,[](const int&m){return m;}));
-	hit_variables.push_back(varowner.back());
-	varowner.push_back(Monitored::Collection(Form("hit_bunch_wTrack_%s", phimap.first.data()),tgcHitTimingWithTrack[phimap.first],[](const int&m){return m;}));
-	hit_variables.push_back(varowner.back());
-      }
-      
-      // BCMask plots (for TTCrx gate delay scan)
-      std::map<std::string, std::vector<int>> tgcHitBCMaskGlobalIndex;
-      std::map<std::string, std::vector<int>> tgcHitBCMask;
-      std::map<std::string, std::vector<int>> tgcHitBCMaskBWSectors;
-      std::map<std::string, std::vector<int>> tgcHitBCMaskForBWSectors;
-      for(const auto& channelNameAndBCMask : tgcHitBCMaskMap){
-	if(m_maskChannelList.find(channelNameAndBCMask.first)!=m_maskChannelList.end())continue; // skipping problematic channels
-	std::string chamberNameWithWS = channelNameAndBCMask.first.substr(0,16); // e.g. A01M01f01E01L01W
-	int thisChannel = std::atoi( channelNameAndBCMask.first.substr(18,3).data() ); // e.g. 001 of "Ch001"
-	std::string prev1ChannelName = Form("%sCh%03d",chamberNameWithWS.data(),thisChannel-1);
-	std::string next1ChannelName = Form("%sCh%03d",chamberNameWithWS.data(),thisChannel+1);
-	// vetoing if neighboring channels have hits to avoid cross-talk effect
-	if(tgcHitBCMaskMap.find(prev1ChannelName)!=tgcHitBCMaskMap.end())continue;
-	if(tgcHitBCMaskMap.find(next1ChannelName)!=tgcHitBCMaskMap.end())continue;
-	std::string cham_name = channelNameAndBCMask.first.substr(0,12); // e.g. A01M01f01E01
-	int iLay = std::atoi( channelNameAndBCMask.first.substr(13,2).data() );
-	TGC::TgcChamber cham; cham.initChamber(cham_name);
-	int phimap_index = 0;
-	int etamap_index = 0;
-	int phimap_global_index = 0;
-	if(!m_tgcMonTool->getMapIndex(cham,iLay,etamap_index,phimap_index,phimap_global_index ))continue;
-	std::string station_name = Form("%sM%02d%s",(cham.iSide()==TGC::TGCSIDE::TGCASIDE)?("A"):("C"),cham.iM(),channelNameAndBCMask.first.substr(15,1).data());
-	for(const auto& tgcHit : channelNameAndBCMask.second){
-	  tgcHitBCMaskGlobalIndex[station_name].push_back(phimap_global_index);
-	  tgcHitBCMask[station_name].push_back(tgcHit.bcmask());
-	  if(cham.iM()!=4){
-	    tgcHitBCMaskBWSectors["All"].push_back( (cham.iSide()==TGC::TGCSIDE::TGCASIDE)?( +1 * cham.iSec() ):(-1 * cham.iSec()) );
-	    tgcHitBCMaskForBWSectors["All"].push_back(tgcHit.bcmask());
-	    if(chamberNameWithWS.find('W')!=std::string::npos){
-	      tgcHitBCMaskBWSectors["Wire"].push_back( (cham.iSide()==TGC::TGCSIDE::TGCASIDE)?( +1 * cham.iSec() ):(-1 * cham.iSec()) );
-	      tgcHitBCMaskForBWSectors["Wire"].push_back(tgcHit.bcmask());
-	    }else{
-	      tgcHitBCMaskBWSectors["Strip"].push_back( (cham.iSide()==TGC::TGCSIDE::TGCASIDE)?( +1 * cham.iSec() ):(-1 * cham.iSec()) );
-	      tgcHitBCMaskForBWSectors["Strip"].push_back(tgcHit.bcmask());
-	    }
-	  }
-	}
-      }
-      std::vector<Monitored::ObjectsCollection<std::vector<int>, double>> varowner_bcmask;
-      varowner_bcmask.reserve(tgcHitBCMask.size() * 2 + tgcHitBCMaskBWSectors.size() * 2);
-      for(const auto& chamType : tgcHitBCMaskBWSectors){
-	varowner_bcmask.push_back(Monitored::Collection(Form("hit_bcmask_bw24sectors_%s",chamType.first.data()),chamType.second,[](const int&m){return m;}));
-	hit_variables.push_back(varowner_bcmask.back());
-	varowner_bcmask.push_back(Monitored::Collection(Form("hit_bcmask_for_bw24sectors_%s",chamType.first.data()),tgcHitBCMaskForBWSectors[chamType.first],[](const int&m){return m;}));
-	hit_variables.push_back(varowner_bcmask.back());
-      }
-      for(const auto& stationNameAndBCMask : tgcHitBCMask){
-	varowner_bcmask.push_back(Monitored::Collection(Form("hit_bcmask_glblphi_%s",stationNameAndBCMask.first.data()),tgcHitBCMaskGlobalIndex[stationNameAndBCMask.first],[](const int&m){return m;}));
-	hit_variables.push_back(varowner_bcmask.back());
-	varowner_bcmask.push_back(Monitored::Collection(Form("hit_bcmask_%s",stationNameAndBCMask.first.data()),stationNameAndBCMask.second,[](const int&m){return m;}));
-	hit_variables.push_back(varowner_bcmask.back());
-      }
-
-      // gap-by-gap efficiency by track extrapolation
-      ATH_MSG_DEBUG("preparing for efficiency plots");
-      std::map<std::string, std::vector<double>> tgcEffPhiMap_Denominator;
-      std::map<std::string, std::vector<double>> tgcEffEtaMap_Denominator;
-      std::map<std::string, std::vector<double>> tgcEffPhiMapGlobal_Denominator;
-      std::map<std::string, std::vector<double>> tgcEffPhiMap_Numerator;
-      std::map<std::string, std::vector<double>> tgcEffEtaMap_Numerator;
-      std::map<std::string, std::vector<double>> tgcEffPhiMapGlobal_Numerator;
-      std::map<std::string, std::vector<double>> tgcEffMapExtX;
-      std::map<std::string, std::vector<double>> tgcEffMapExtY;
-      std::map<std::string, std::vector<double>> tgcEffMapHasHit;
-      for(const auto& exts : extpositions){
-	const std::string& cham_name = exts.first;
-	TGC::TgcChamber cham; cham.initChamber(cham_name);
-	// local-coordinate x'-y'
-	Identifier id2 = muonMgr->tgcIdHelper()->elementID(cham.StationName(), cham.StationEta(), cham.StationPhi());
-	auto detEle = muonMgr->getTgcReadoutElement(id2);
-	for(const auto& ext : exts.second){ // how often tracks are extrapolated to this chamber surface,e.i. denominator
-	  Amg::Vector3D extPosLocal = detEle->transform().inverse() * ext.extPos;
-	  Amg::Vector3D extVecLocal = detEle->transform().inverse() * ext.extVec;
-	  for(int iLay = 1 ; iLay <= 3 ; iLay++){
-	    int phimap_index = 0;
-	    int etamap_index = 0;
-	    int phimap_global_index = 0;
-	    if(!m_tgcMonTool->getMapIndex(cham,iLay,etamap_index,phimap_index,phimap_global_index ))continue;
-
-	    double newX = extPosLocal.x() - extVecLocal.x() / extVecLocal.z() * extPosLocal.z();
-	    double newY = extPosLocal.y() - extVecLocal.y() / extVecLocal.z() * extPosLocal.z();
-	    for(int iSorW = 0 ; iSorW < 2 ; iSorW++){
-	      if(cham.iM()==1 && iLay==2 && iSorW==0)continue;
-	      std::string gap_name = Form("%sL%02d",cham_name.data(),iLay);
-	      std::string type_name = Form("%sL%02d%s",cham_name.data(),iLay,(iSorW==0)?("S"):("W"));
-	      int nWhits = 0;
-	      int nShits = 0;
-	      for(const auto& chamHasHit : map_muon_and_tgchits[ext.muon]){
-		if( chamHasHit.find(gap_name) != std::string::npos ) continue; // skipping the same gap
-		if( chamHasHit.find("M04") != std::string::npos ) continue; // skipping EI/FI
-		if( chamHasHit.find('W') != std::string::npos ) nWhits++;
-		if( chamHasHit.find('S') != std::string::npos ) nShits++;
-	      }
-	      if(nWhits < m_nHitsInOtherBWTGCWire)continue;
-	      if(nShits < m_nHitsInOtherBWTGCStrip)continue;
-	      std::string station_name = Form("%sM%02d%s",(cham.iSide()==TGC::TGCSIDE::TGCASIDE)?("A"):("C"),cham.iM(),(iSorW==0)?("S"):("W"));
-	      tgcEffPhiMap_Denominator[station_name].push_back(phimap_index);
-	      tgcEffEtaMap_Denominator[station_name].push_back(etamap_index);
-	      tgcEffPhiMapGlobal_Denominator[station_name].push_back(phimap_global_index);
-	      tgcEffMapExtX[type_name].push_back(newX);
-	      tgcEffMapExtY[type_name].push_back(newY);
-	      double hitExist = 0;
-	      if( ext.chambersHasHit.find(type_name) != ext.chambersHasHit.end()) hitExist=1;
-	      tgcEffPhiMap_Numerator[station_name].push_back(hitExist);
-	      tgcEffEtaMap_Numerator[station_name].push_back(hitExist);
-	      tgcEffPhiMapGlobal_Numerator[station_name].push_back(hitExist);
-	      tgcEffMapHasHit[type_name].push_back(hitExist);
-
-	    }
-	  }
-	}
-      }
-
-      std::vector<Monitored::ObjectsCollection<std::vector<double>, double>> varowner_hiteff;
-      std::vector<Monitored::ObjectsCollection<std::vector<TGC::TgcHit>, double>> varowner_eachchamber;
-      std::vector<Monitored::ObjectsCollection<std::vector<double>, double>> varowner_eachchamber_double;
-      std::map<std::string,std::vector<double>> cham_and_res;
-
-      if(m_fillGapByGapHistograms){
-
-	ATH_MSG_DEBUG("hit efficiency plots");
-	varowner_hiteff.reserve(tgcEffPhiMap_Denominator.size() * 4 + tgcEffPhiMapGlobal_Denominator.size() * 2 + tgcEffMapHasHit.size() * 3);
-	for (const auto &phimap : tgcEffPhiMap_Denominator) {
-	  varowner_hiteff.push_back(Monitored::Collection(Form("hit_effden_x_%s",phimap.first.data()),tgcEffEtaMap_Denominator[phimap.first],[](const double&m){return m;}));
-	  hit_variables.push_back(varowner_hiteff.back());
-	  varowner_hiteff.push_back(Monitored::Collection(Form("hit_effden_y_%s", phimap.first.data()),tgcEffPhiMap_Denominator[phimap.first],[](const double&m){return m;}));
-	  hit_variables.push_back(varowner_hiteff.back());
-	  varowner_hiteff.push_back(Monitored::Collection(Form("hit_effnum_x_%s",phimap.first.data()),tgcEffEtaMap_Numerator[phimap.first],[](const double&m){return m;}));
-	  hit_variables.push_back(varowner_hiteff.back());
-	  varowner_hiteff.push_back(Monitored::Collection(Form("hit_effnum_y_%s", phimap.first.data()),tgcEffPhiMap_Numerator[phimap.first],[](const double&m){return m;}));
-	  hit_variables.push_back(varowner_hiteff.back());
-	}
-	for (const auto &phimap : tgcEffPhiMapGlobal_Denominator) {
-	  varowner_hiteff.push_back(Monitored::Collection(Form("hit_glblphi_effden_%s", phimap.first.data()),tgcEffPhiMapGlobal_Denominator[phimap.first],[](const double&m){return m;}));
-	  hit_variables.push_back(varowner_hiteff.back());
-	  varowner_hiteff.push_back(Monitored::Collection(Form("hit_glblphi_effnum_%s", phimap.first.data()),tgcEffPhiMapGlobal_Numerator[phimap.first],[](const double&m){return m;}));
-	  hit_variables.push_back(varowner_hiteff.back());
-	}
-	for(const auto& hiteffmap : tgcEffMapHasHit){
-	  varowner_hiteff.push_back(Monitored::Collection(Form("hit_localX_effden_%s", hiteffmap.first.data()),tgcEffMapExtX[hiteffmap.first],[](const double&m){return m;}));
-	  hit_variables.push_back(varowner_hiteff.back());
-	  varowner_hiteff.push_back(Monitored::Collection(Form("hit_localY_effden_%s", hiteffmap.first.data()),tgcEffMapExtY[hiteffmap.first],[](const double&m){return m;}));
-	  hit_variables.push_back(varowner_hiteff.back());
-	  varowner_hiteff.push_back(Monitored::Collection(Form("hit_effnum_%s", hiteffmap.first.data()),tgcEffMapHasHit[hiteffmap.first],[](const double&m){return m;}));
-	  hit_variables.push_back(varowner_hiteff.back());
-	}
-
-	ATH_MSG_DEBUG("gap-by-gap occupancy plots and residual plots");
-	varowner_eachchamber.reserve(tgcHitsMap.size());
-	varowner_eachchamber_double.reserve(tgcHitsMap.size());
-      	for (const auto &tgcHitMap : tgcHitsMap) {
-	  auto chanName = tgcHitMap.first;
-	  if(chanName.find('L')!=std::string::npos){ // individual gaps
-	    varowner_eachchamber.push_back(Monitored::Collection(Form("hit_on_%s",chanName.data()),tgcHitMap.second,[](const TGC::TgcHit&m){return m.channel();}));
-	    hit_variables.push_back(varowner_eachchamber.back());
-	  }else{ // only summed over the gaps
-	    for(const auto&tgcHit:tgcHitMap.second){
-	      for(const auto&tgcRes:tgcHit.residuals()){
-		cham_and_res[chanName].push_back(tgcRes.second);
-	      }
-	    }
-	    varowner_eachchamber_double.push_back(Monitored::Collection(Form("hit_residual_on_%s",chanName.data()),cham_and_res[chanName],[](const double&m){return m;}));
-	    hit_variables.push_back(varowner_eachchamber_double.back());
-	  }
-      	}
-
-      }
-
-      ATH_MSG_DEBUG("before fill for hits");
-      fill(m_packageName+"_TgcHit", hit_variables);
-      ATH_MSG_DEBUG("End filling TGC PRD histograms");
-    }else{
-      ATH_MSG_WARNING("Couldn't get TGC PRD");
-    }
-  }
+  fillTgcPrdHistograms(mon_bcid, mon_pileup, mon_lb, extpositions,ctx);
   ///////////////// End filling TGC PRD histograms /////////////////
 
 
@@ -3130,3 +2570,589 @@ double TgcRawDataMonitorAlgorithm::getMatchingWindow(const xAOD::Muon* muon) con
   else max_dr = m_l1trigMatchWindowPt0a + m_l1trigMatchWindowPt0b * pt / Gaudi::Units::GeV;
   return max_dr;
 }
+
+void 
+TgcRawDataMonitorAlgorithm::fillThresholdPatternHistograms(std::map<std::string,std::vector<const xAOD::MuonRoI*>> & menuAndRoIs, const std::vector < TimedMuon > & mymuons, const EventContext & ctx) const {
+  if(m_monitorThresholdPatterns){
+    for(const auto& item : m_thrMonList){
+      std::vector<bool> passed;
+      passed.reserve(mymuons.size());
+      for(const auto& mymuon : mymuons){
+    	  passed.push_back( mymuon.matchedL1Items.find(item) != mymuon.matchedL1Items.end() );
+      }
+      auto passed_rois = menuAndRoIs[item];
+
+      MonVariables thrMonVariables;
+
+      auto lumiBlock_l1item = Monitored::Scalar<int>(Form("lumiBlock_l1item_%s",item.data()),GetEventInfo(ctx)->lumiBlock());
+      thrMonVariables.push_back(lumiBlock_l1item);
+
+      auto muon_passed_l1item = Monitored::Collection(Form("muon_passed_l1item_%s",item.data()),passed);
+      thrMonVariables.push_back(muon_passed_l1item);
+
+      auto muon_eta_l1item=Monitored::Collection(Form("muon_eta_l1item_%s",item.data()),mymuons,[](const TimedMuon&m){
+        return (m.muon->pt() > pt_30_cut) ? m.muon->eta() : -10;
+      });
+      thrMonVariables.push_back(muon_eta_l1item);
+      auto muon_phi_l1item=Monitored::Collection(Form("muon_phi_l1item_%s",item.data()),mymuons,[](const TimedMuon&m){
+        return (m.muon->pt() > pt_30_cut) ? m.muon->phi() : -10;
+      });
+      thrMonVariables.push_back(muon_phi_l1item);
+      auto muon_pt_rpc_l1item=Monitored::Collection(Form("muon_pt_rpc_l1item_%s",item.data()),mymuons,[](const TimedMuon&m){
+        return (std::abs(m.muon->eta()) < barrel_end) ? m.muon->pt() / Gaudi::Units::GeV : -10;
+      });
+      thrMonVariables.push_back(muon_pt_rpc_l1item);
+      auto muon_pt_tgc_l1item=Monitored::Collection(Form("muon_pt_tgc_l1item_%s",item.data()),mymuons,[](const TimedMuon&m){
+        return (std::abs(m.muon->eta()) > barrel_end && std::abs(m.muon->eta()) < trigger_end) ? m.muon->pt() / Gaudi::Units::GeV : -10;
+      });
+      thrMonVariables.push_back(muon_pt_tgc_l1item);
+      auto muon_phi_rpc_l1item=Monitored::Collection(Form("muon_phi_rpc_l1item_%s",item.data()),mymuons,[](const TimedMuon&m){
+        return (std::abs(m.muon->eta()) < barrel_end && m.muon->pt() > pt_30_cut) ? m.muon->phi() : -10;
+      });
+      thrMonVariables.push_back(muon_phi_rpc_l1item);
+      auto muon_phi_tgc_l1item=Monitored::Collection(Form("muon_phi_tgc_l1item_%s",item.data()),mymuons,[](const TimedMuon&m){
+        return (std::abs(m.muon->eta()) > barrel_end && std::abs(m.muon->eta()) < trigger_end && m.muon->pt() > pt_30_cut) ? m.muon->phi() : -10;
+      });
+      thrMonVariables.push_back(muon_phi_tgc_l1item);
+
+      auto l1item_roi_eta=Monitored::Collection(Form("l1item_roi_eta_%s",item.data()),passed_rois,[](const xAOD::MuonRoI*m){return m->eta();});
+      thrMonVariables.push_back(l1item_roi_eta);
+      auto l1item_roi_phi=Monitored::Collection(Form("l1item_roi_phi_%s",item.data()),passed_rois,[](const xAOD::MuonRoI*m){return m->phi();});
+      thrMonVariables.push_back(l1item_roi_phi);
+      auto l1item_roi_phi_rpc=Monitored::Collection(Form("l1item_roi_phi_rpc_%s",item.data()),passed_rois,[](const xAOD::MuonRoI*m){
+        return (m->getSource()==xAOD::MuonRoI::Barrel)?(m->phi()):(-10);
+      });
+      auto l1item_roi_phi_tgc=Monitored::Collection(Form("l1item_roi_phi_tgc_%s",item.data()),passed_rois,[](const xAOD::MuonRoI*m){
+        return (m->getSource()!=xAOD::MuonRoI::Barrel)?(m->phi()):(-10);
+      });
+      thrMonVariables.push_back(l1item_roi_phi_tgc);
+
+      auto l1item_roi_phi_barrel=Monitored::Collection(Form("l1item_roi_phi_barrel_%s",item.data()),passed_rois,[](const xAOD::MuonRoI*m){
+        return (m->getSource() == xAOD::MuonRoI::Barrel) ? m->phi() : -10;
+      });
+      thrMonVariables.push_back(l1item_roi_phi_barrel);
+      auto l1item_roi_phi_endcap=Monitored::Collection(Form("l1item_roi_phi_endcap_%s",item.data()),passed_rois,[](const xAOD::MuonRoI*m){
+        return (m->getSource() == xAOD::MuonRoI::Endcap) ? m->phi() : -10;
+      });
+      thrMonVariables.push_back(l1item_roi_phi_endcap);
+      auto l1item_roi_phi_forward=Monitored::Collection(Form("l1item_roi_phi_forward_%s",item.data()),passed_rois,[](const xAOD::MuonRoI*m){
+        return (m->getSource() == xAOD::MuonRoI::Forward) ? m->phi() : -10;
+      });
+      thrMonVariables.push_back(l1item_roi_phi_forward);
+      auto l1item_roi_sideA=Monitored::Collection(Form("l1item_roi_sideA_%s",item.data()),passed_rois,[](const xAOD::MuonRoI*m){
+        return m->getHemisphere() == xAOD::MuonRoI::Positive;
+      });
+      thrMonVariables.push_back(l1item_roi_sideA);
+      auto l1item_roi_sideC=Monitored::Collection(Form("l1item_roi_sideC_%s",item.data()),passed_rois,[](const xAOD::MuonRoI*m){
+	  return m->getHemisphere() == xAOD::MuonRoI::Negative;
+	});
+      thrMonVariables.push_back(l1item_roi_sideC);
+
+      auto l1item_roi_roiNumber=Monitored::Collection(Form("l1item_roi_roiNumber_%s",item.data()),passed_rois,[](const xAOD::MuonRoI*m){
+	  return m->getRoI();
+	});
+      thrMonVariables.push_back(l1item_roi_roiNumber);
+
+      auto l1item_roi_sector = Monitored::Collection(Form("l1item_roi_sector_%s",item.data()),passed_rois,[](const xAOD::MuonRoI*m) {
+	  return (m->getHemisphere() == xAOD::MuonRoI::Positive)?(m->getSectorID()+1):(-1 * m->getSectorID()-1);
+	});
+      thrMonVariables.push_back(l1item_roi_sector);
+      auto l1item_roi_barrel = Monitored::Collection(Form("l1item_roi_barrel_%s",item.data()),passed_rois,[](const xAOD::MuonRoI*m) {
+	  return m->getSource() == xAOD::MuonRoI::Barrel;
+	});
+      thrMonVariables.push_back(l1item_roi_barrel);
+      auto l1item_roi_endcap = Monitored::Collection(Form("l1item_roi_endcap_%s",item.data()),passed_rois,[](const xAOD::MuonRoI*m) {
+	  return m->getSource() == xAOD::MuonRoI::Endcap;
+	});
+      thrMonVariables.push_back(l1item_roi_endcap);
+      auto l1item_roi_forward = Monitored::Collection(Form("l1item_roi_forward_%s",item.data()),passed_rois,[](const xAOD::MuonRoI*m) {
+	  return m->getSource() == xAOD::MuonRoI::Forward;
+	});
+      thrMonVariables.push_back(l1item_roi_forward);
+      auto l1item_roi_thrNumber=Monitored::Collection(Form("l1item_roi_thrNumber_%s",item.data()),passed_rois,[](const xAOD::MuonRoI*m){
+	  return m->getThrNumber();
+	});
+      thrMonVariables.push_back(l1item_roi_thrNumber);
+
+      auto l1item_roi_ismorecand=Monitored::Collection(Form("l1item_roi_ismorecand_%s",item.data()),passed_rois,[](const xAOD::MuonRoI*m){
+	  return (m->getSource()==xAOD::MuonRoI::Barrel)?(m->isMoreCandInRoI()):(-1);
+	});
+      thrMonVariables.push_back(l1item_roi_ismorecand);
+      auto l1item_roi_bw3coin=Monitored::Collection(Form("l1item_roi_bw3coin_%s",item.data()),passed_rois,[](const xAOD::MuonRoI*m){
+	  return (m->getSource()!=xAOD::MuonRoI::Barrel)?(m->getBW3Coincidence()):(-1);
+	});
+      thrMonVariables.push_back(l1item_roi_bw3coin);
+      auto l1item_roi_innercoin=Monitored::Collection(Form("l1item_roi_innercoin_%s",item.data()),passed_rois,[](const xAOD::MuonRoI*m){
+	  return (m->getSource()!=xAOD::MuonRoI::Barrel)?(m->getInnerCoincidence()):(-1);
+	});
+      thrMonVariables.push_back(l1item_roi_innercoin);
+      auto l1item_roi_goodmf=Monitored::Collection(Form("l1item_roi_goodmf_%s",item.data()),passed_rois,[](const xAOD::MuonRoI*m){
+	  return (m->getSource()!=xAOD::MuonRoI::Barrel)?(m->getGoodMF()):(-1);
+	});
+      thrMonVariables.push_back(l1item_roi_goodmf);
+
+      fill(m_packageName + item.data(), thrMonVariables);
+    }
+  }
+  ///////////////// End filling thresholdPattern histograms /////////////////
+}
+
+void 
+TgcRawDataMonitorAlgorithm::fillTgcPrdHistograms(Monitored::Scalar<int> & mon_bcid, Monitored::Scalar<int> & mon_pileup, Monitored::Scalar<int> & mon_lb,std::map <std::string, std::vector< ExtPos>> & extpositions, const EventContext & ctx) const{
+  if (m_anaTgcPrd) {
+    ATH_MSG_DEBUG("m_anaTgcPrd = True");
+    SG::ReadCondHandle<MuonGM::MuonDetectorManager> DetectorManagerHandle{m_DetectorManagerKey,ctx};
+    const MuonGM::MuonDetectorManager* muonMgr = DetectorManagerHandle.cptr();
+    SG::ReadHandle < Muon::TgcPrepDataContainer > tgcPrd(m_TgcPrepDataContainerKey, ctx);
+    std::map<const xAOD::Muon*, std::set<std::string>> map_muon_and_tgchits;
+    if(tgcPrd.isValid() && muonMgr!=nullptr){
+      ATH_MSG_DEBUG("Filling TGC PRD histograms");
+      const TgcIdHelper &tgcIdHelper = m_idHelperSvc->tgcIdHelper();
+      std::vector < TGC::TgcHit > tgcHits;
+      std::map<std::string, std::vector<TGC::TgcHit>> tgcHitsMap;
+      for (const auto tgccnt : *tgcPrd) {
+        for (const auto data : *tgccnt) {
+          const MuonGM::TgcReadoutElement *element = data->detectorElement();
+          const Identifier id = data->identify();
+          const int gasGap = tgcIdHelper.gasGap(id);
+          const int channel = tgcIdHelper.channel(id);
+          const bool isStrip = tgcIdHelper.isStrip(id);
+          const Amg::Vector3D &pos = isStrip ? element->stripPos(gasGap, channel) : element->wireGangPos(gasGap, channel);
+          const double shortWidth = (isStrip)?(element->stripShortWidth(gasGap, channel)):(element->gangShortWidth(gasGap, channel));
+          const double longWidth = (isStrip)?(element->stripLongWidth(gasGap, channel)):(element->gangLongWidth(gasGap, channel));
+          const double length = (isStrip)?(element->stripLength()):(element->gangRadialLength(gasGap, channel));
+          const int bcmask = data->getBcBitMap();
+          TGC::TgcHit tgcHit(pos[0],pos[1],pos[2],
+                 shortWidth,longWidth, length,
+                 isStrip,gasGap,channel,tgcIdHelper.stationEta(id),tgcIdHelper.stationPhi(id),tgcIdHelper.stationName(id),
+                 bcmask);
+          if(extpositions.find(tgcHit.cham_name())!=extpositions.end()){
+            for(auto& cham : extpositions[tgcHit.cham_name()]){
+              double newX = cham.extPos.x() + cham.extVec.x() / cham.extVec.z() * ( tgcHit.Z() - cham.extPos.z() );
+              double newY = cham.extPos.y() + cham.extVec.y() / cham.extVec.z() * ( tgcHit.Z() - cham.extPos.z() );
+              Identifier id2 = muonMgr->tgcIdHelper()->elementID(tgcHit.StationName(), tgcHit.StationEta(), tgcHit.StationPhi());
+              
+              auto detEle = muonMgr->getTgcReadoutElement(id2);
+              double chamPhi = detEle->center().phi();
+              TVector2 extPos(newX,newY);
+              TVector2 hitPos(tgcHit.X(),tgcHit.Y());
+              TVector2 rot_extPos  = extPos.Rotate(-chamPhi + M_PI/2.);
+              TVector2 rot_hitPos  = hitPos.Rotate(-chamPhi + M_PI/2.);
+              double res = (tgcHit.isStrip())? std::sin( rot_extPos.DeltaPhi( rot_hitPos ) ) * rot_extPos.Mod(): rot_hitPos.Y() - rot_extPos.Y();
+              tgcHit.addResidual( cham.muon, res );
+              if( std::abs(res) < m_residualWindow ){
+                cham.chambersHasHit.insert(tgcHit.type_name());
+                map_muon_and_tgchits[cham.muon].insert(tgcHit.channel_name());
+              }
+            }
+          }
+          tgcHits.push_back(tgcHit);
+          tgcHitsMap[tgcHit.cham_name() + ( (tgcHit.isStrip())?("S"):("W") )].push_back(tgcHit); // <- chamber-by-chamber residual plots
+          tgcHitsMap[tgcHit.type_name()].push_back(tgcHit); // <- gap-by-gap channel occupancy plots
+        }
+      }
+
+      std::map<std::string, std::vector<int>> tgcHitPhiMap;
+      std::map<std::string, std::vector<int>> tgcHitEtaMap;
+      std::map<std::string, std::vector<int>> tgcHitPhiMapGlobal;
+      std::map<std::string, std::vector<int>> tgcHitTiming;
+      std::map<std::string, std::vector<int>> tgcHitPhiMapGlobalWithTrack;
+      std::map<std::string, std::vector<int>> tgcHitTimingWithTrack;
+      std::map<const std::string, std::vector<TGC::TgcHit>> tgcHitBCMaskMap;
+      std::vector <int> vec_bw24sectors; // 1..12 BW-A, -1..-12 BW-C
+      std::vector <int> vec_bw24sectors_wire;
+      std::vector <int> vec_bw24sectors_strip;
+      std::vector <int> vec_bwfulleta; // 0(Forward), 1..4(M1), 1..5(M2,M3)
+      std::vector <int> vec_bwfulleta_wire;
+      std::vector <int> vec_bwfulleta_strip;
+      std::vector <int> vec_bwtiming;
+      std::vector <int> vec_bwtiming_wire;
+      std::vector <int> vec_bwtiming_strip;
+      std::vector <int> vec_bw24sectors_wTrack; // 1..12 BW-A, -1..-12 BW-C
+      std::vector <int> vec_bw24sectors_wire_wTrack;
+      std::vector <int> vec_bw24sectors_strip_wTrack;
+      std::vector <int> vec_bwfulleta_wTrack; // 0(Forward), 1..4(M1), 1..5(M2,M3)
+      std::vector <int> vec_bwfulleta_wire_wTrack;
+      std::vector <int> vec_bwfulleta_strip_wTrack;
+      std::vector <int> vec_bwtiming_wTrack;
+      std::vector <int> vec_bwtiming_wire_wTrack;
+      std::vector <int> vec_bwtiming_strip_wTrack;
+      for(const auto& tgcHit : tgcHits){
+        bool hasAssociatedGoodMuonTrack = false;
+        for(const auto& res : tgcHit.residuals()){
+          const xAOD::Muon* muon = res.first;
+          if(map_muon_and_tgchits[muon].find(tgcHit.channel_name()) == map_muon_and_tgchits[muon].end()) continue;
+          int nWhits = 0;
+          int nShits = 0;
+          for(const auto& chamHasHit : map_muon_and_tgchits[muon]){
+            if( chamHasHit.find(tgcHit.gap_name()) != std::string::npos ) continue; // skipping the same gap
+            if( chamHasHit.find("M04") != std::string::npos ) continue; // skipping EI/FI
+            if( chamHasHit.find('W') != std::string::npos ) nWhits++;
+            if( chamHasHit.find('S') != std::string::npos ) nShits++;
+          }
+          if(nWhits < m_nHitsInOtherBWTGCWire) continue;
+          if(nShits < m_nHitsInOtherBWTGCStrip) continue;
+          hasAssociatedGoodMuonTrack = true;
+          break;
+        }
+      
+        // debugging purpose: should be False by default
+        if(m_dumpFullChannelList)ATH_MSG_INFO("TGCHIT: " << tgcHit.channel_name());
+      
+        // BCID analysis for TGC TTCrx delay scan
+        if(hasAssociatedGoodMuonTrack) tgcHitBCMaskMap[tgcHit.channel_name()].push_back(tgcHit);
+      
+        std::string station_name = Form("%sM%02d%s",(tgcHit.iSide()==TGC::TGCSIDE::TGCASIDE)?("A"):("C"),tgcHit.iM(),(tgcHit.isStrip())?("S"):("W"));
+        int phimap_index = 0;
+        int etamap_index = 0;
+        int phimap_global_index = 0; // no empty bins compare to the above index
+        m_tgcMonTool->getMapIndex(tgcHit,etamap_index,phimap_index,phimap_global_index );
+        for(int bunch = -1 ; bunch <= +1 ; bunch++){
+          if(bunch==-1 && (tgcHit.bcmask()&Muon::TgcPrepData::BCBIT_PREVIOUS)==0)continue;
+          if(bunch== 0 && (tgcHit.bcmask()&Muon::TgcPrepData::BCBIT_CURRENT)==0)continue;
+          if(bunch==+1 && (tgcHit.bcmask()&Muon::TgcPrepData::BCBIT_NEXT)==0)continue;
+          tgcHitPhiMap[station_name].push_back(phimap_index);
+          tgcHitEtaMap[station_name].push_back(etamap_index);
+          tgcHitPhiMapGlobal[station_name].push_back(phimap_global_index);
+          tgcHitTiming[station_name].push_back(bunch);
+          if(hasAssociatedGoodMuonTrack){
+            tgcHitPhiMapGlobalWithTrack[station_name].push_back(phimap_global_index);
+            tgcHitTimingWithTrack[station_name].push_back(bunch);
+          }
+      
+          if(tgcHit.iM()!=4){
+            vec_bw24sectors.push_back((tgcHit.iSide()==TGC::TGCSIDE::TGCASIDE)?(tgcHit.iSec()):(-tgcHit.iSec()));
+            vec_bwfulleta.push_back(tgcHit.iEta());
+            vec_bwtiming.push_back(bunch);
+            if(hasAssociatedGoodMuonTrack){
+              vec_bw24sectors_wTrack.push_back((tgcHit.iSide()==TGC::TGCSIDE::TGCASIDE)?(tgcHit.iSec()):(-tgcHit.iSec()));
+              vec_bwfulleta_wTrack.push_back(tgcHit.iEta());
+              vec_bwtiming_wTrack.push_back(bunch);
+            }
+            if(tgcHit.isStrip()){
+              vec_bw24sectors_strip.push_back((tgcHit.iSide()==TGC::TGCSIDE::TGCASIDE)?(tgcHit.iSec()):(-tgcHit.iSec()));
+              vec_bwfulleta_strip.push_back(tgcHit.iEta());
+              vec_bwtiming_strip.push_back(bunch);
+              if(hasAssociatedGoodMuonTrack){
+          vec_bw24sectors_strip_wTrack.push_back((tgcHit.iSide()==TGC::TGCSIDE::TGCASIDE)?(tgcHit.iSec()):(-tgcHit.iSec()));
+          vec_bwfulleta_strip_wTrack.push_back(tgcHit.iEta());
+          vec_bwtiming_strip_wTrack.push_back(bunch);
+              }
+            }else{
+              vec_bw24sectors_wire.push_back((tgcHit.iSide()==TGC::TGCSIDE::TGCASIDE)?(tgcHit.iSec()):(-tgcHit.iSec()));
+              vec_bwfulleta_wire.push_back(tgcHit.iEta());
+              vec_bwtiming_wire.push_back(bunch);
+              if(hasAssociatedGoodMuonTrack){
+          vec_bw24sectors_wire_wTrack.push_back((tgcHit.iSide()==TGC::TGCSIDE::TGCASIDE)?(tgcHit.iSec()):(-tgcHit.iSec()));
+          vec_bwfulleta_wire_wTrack.push_back(tgcHit.iEta());
+          vec_bwtiming_wire_wTrack.push_back(bunch);
+              }
+            }
+          }
+        }
+      }
+      
+      ATH_MSG_DEBUG("filling hit_variables");
+      
+      MonVariables  hit_variables;
+      hit_variables.push_back(mon_bcid);
+      hit_variables.push_back(mon_pileup);
+      hit_variables.push_back(mon_lb);
+
+      auto hit_n = Monitored::Scalar<int>("hit_n", tgcHits.size());
+      hit_variables.push_back(hit_n);
+
+      auto hit_bcmask=Monitored::Collection("hit_bcmask",tgcHits,[](const TGC::TgcHit&m){return m.bcmask();});
+      hit_variables.push_back(hit_bcmask);
+
+      auto hit_sideA=Monitored::Collection("hit_sideA",tgcHits,[](const TGC::TgcHit&m){return m.Z()>0;});
+      hit_variables.push_back(hit_sideA);
+
+      auto hit_sideC=Monitored::Collection("hit_sideC",tgcHits,[](const TGC::TgcHit&m){return m.Z() < 0;});
+      hit_variables.push_back(hit_sideC);
+
+      auto hit_bw24sectors=Monitored::Collection("hit_bw24sectors",vec_bw24sectors,[](const int&m){return m;});
+      hit_variables.push_back(hit_bw24sectors);
+      auto hit_bw24sectors_strip=Monitored::Collection("hit_bw24sectors_strip",vec_bw24sectors_strip,[](const int&m){return m;});
+      hit_variables.push_back(hit_bw24sectors_strip);
+      auto hit_bw24sectors_wire=Monitored::Collection("hit_bw24sectors_wire",vec_bw24sectors_wire,[](const int&m){return m;});
+      hit_variables.push_back(hit_bw24sectors_wire);
+      auto hit_bwfulleta=Monitored::Collection("hit_bwfulleta",vec_bwfulleta,[](const int&m){return m;});
+      hit_variables.push_back(hit_bwfulleta);
+      auto hit_bwfulleta_strip=Monitored::Collection("hit_bwfulleta_strip",vec_bwfulleta_strip,[](const int&m){return m;});
+      hit_variables.push_back(hit_bwfulleta_strip);
+      auto hit_bwfulleta_wire=Monitored::Collection("hit_bwfulleta_wire",vec_bwfulleta_wire,[](const int&m){return m;});
+      hit_variables.push_back(hit_bwfulleta_wire);
+      auto hit_bwtiming=Monitored::Collection("hit_bwtiming",vec_bwtiming,[](const int&m){return m;});
+      hit_variables.push_back(hit_bwtiming);
+      auto hit_bwtiming_strip=Monitored::Collection("hit_bwtiming_strip",vec_bwtiming_strip,[](const int&m){return m;});
+      hit_variables.push_back(hit_bwtiming_strip);
+      auto hit_bwtiming_wire=Monitored::Collection("hit_bwtiming_wire",vec_bwtiming_wire,[](const int&m){return m;});
+      hit_variables.push_back(hit_bwtiming_wire);
+
+      auto hit_bw24sectors_wTrack=Monitored::Collection("hit_bw24sectors_wTrack",vec_bw24sectors_wTrack,[](const int&m){return m;});
+      hit_variables.push_back(hit_bw24sectors_wTrack);
+      auto hit_bw24sectors_strip_wTrack=Monitored::Collection("hit_bw24sectors_strip_wTrack",vec_bw24sectors_strip_wTrack,[](const int&m){return m;});
+      hit_variables.push_back(hit_bw24sectors_strip_wTrack);
+      auto hit_bw24sectors_wire_wTrack=Monitored::Collection("hit_bw24sectors_wire_wTrack",vec_bw24sectors_wire_wTrack,[](const int&m){return m;});
+      hit_variables.push_back(hit_bw24sectors_wire_wTrack);
+      auto hit_bwfulleta_wTrack=Monitored::Collection("hit_bwfulleta_wTrack",vec_bwfulleta_wTrack,[](const int&m){return m;});
+      hit_variables.push_back(hit_bwfulleta_wTrack);
+      auto hit_bwfulleta_strip_wTrack=Monitored::Collection("hit_bwfulleta_strip_wTrack",vec_bwfulleta_strip_wTrack,[](const int&m){return m;});
+      hit_variables.push_back(hit_bwfulleta_strip_wTrack);
+      auto hit_bwfulleta_wire_wTrack=Monitored::Collection("hit_bwfulleta_wire_wTrack",vec_bwfulleta_wire_wTrack,[](const int&m){return m;});
+      hit_variables.push_back(hit_bwfulleta_wire_wTrack);
+      auto hit_bwtiming_wTrack=Monitored::Collection("hit_bwtiming_wTrack",vec_bwtiming_wTrack,[](const int&m){return m;});
+      hit_variables.push_back(hit_bwtiming_wTrack);
+      auto hit_bwtiming_strip_wTrack=Monitored::Collection("hit_bwtiming_strip_wTrack",vec_bwtiming_strip_wTrack,[](const int&m){return m;});
+      hit_variables.push_back(hit_bwtiming_strip_wTrack);
+      auto hit_bwtiming_wire_wTrack=Monitored::Collection("hit_bwtiming_wire_wTrack",vec_bwtiming_wire_wTrack,[](const int&m){return m;});
+      hit_variables.push_back(hit_bwtiming_wire_wTrack);
+
+      std::vector<Monitored::ObjectsCollection<std::vector<int>, double>> varowner;
+      varowner.reserve(tgcHitPhiMap.size() * 2 + tgcHitPhiMapGlobal.size() * 2 + tgcHitPhiMapGlobalWithTrack.size() * 2);
+      for (const auto &phimap : tgcHitPhiMap) {
+	varowner.push_back(Monitored::Collection(Form("hit_x_%s",phimap.first.data()),tgcHitEtaMap[phimap.first],[](const int&m){return m;}));
+      	hit_variables.push_back(varowner.back());
+	varowner.push_back(Monitored::Collection(Form("hit_y_%s", phimap.first.data()),phimap.second,[](const int&m){return m;}));
+      	hit_variables.push_back(varowner.back());
+      }
+      for (const auto &phimap : tgcHitPhiMapGlobal) {
+	varowner.push_back(Monitored::Collection(Form("hit_glblphi_%s", phimap.first.data()),phimap.second,[](const int&m){return m;}));
+	hit_variables.push_back(varowner.back());
+	varowner.push_back(Monitored::Collection(Form("hit_bunch_%s", phimap.first.data()),tgcHitTiming[phimap.first],[](const int&m){return m;}));
+	hit_variables.push_back(varowner.back());
+      }
+      for (const auto &phimap : tgcHitPhiMapGlobalWithTrack) {
+	varowner.push_back(Monitored::Collection(Form("hit_glblphi_wTrack_%s", phimap.first.data()),phimap.second,[](const int&m){return m;}));
+	hit_variables.push_back(varowner.back());
+	varowner.push_back(Monitored::Collection(Form("hit_bunch_wTrack_%s", phimap.first.data()),tgcHitTimingWithTrack[phimap.first],[](const int&m){return m;}));
+	hit_variables.push_back(varowner.back());
+      }
+      
+      // BCMask plots (for TTCrx gate delay scan)
+      std::map<std::string, std::vector<int>> tgcHitBCMaskGlobalIndex;
+      std::map<std::string, std::vector<int>> tgcHitBCMask;
+      std::map<std::string, std::vector<int>> tgcHitBCMaskBWSectors;
+      std::map<std::string, std::vector<int>> tgcHitBCMaskForBWSectors;
+      for(const auto& channelNameAndBCMask : tgcHitBCMaskMap){
+	if(m_maskChannelList.find(channelNameAndBCMask.first)!=m_maskChannelList.end())continue; // skipping problematic channels
+	std::string chamberNameWithWS = channelNameAndBCMask.first.substr(0,16); // e.g. A01M01f01E01L01W
+	int thisChannel = std::atoi( channelNameAndBCMask.first.substr(18,3).data() ); // e.g. 001 of "Ch001"
+	std::string prev1ChannelName = Form("%sCh%03d",chamberNameWithWS.data(),thisChannel-1);
+	std::string next1ChannelName = Form("%sCh%03d",chamberNameWithWS.data(),thisChannel+1);
+	// vetoing if neighboring channels have hits to avoid cross-talk effect
+	if(tgcHitBCMaskMap.find(prev1ChannelName)!=tgcHitBCMaskMap.end())continue;
+	if(tgcHitBCMaskMap.find(next1ChannelName)!=tgcHitBCMaskMap.end())continue;
+	std::string cham_name = channelNameAndBCMask.first.substr(0,12); // e.g. A01M01f01E01
+	int iLay = std::atoi( channelNameAndBCMask.first.substr(13,2).data() );
+	TGC::TgcChamber cham; cham.initChamber(cham_name);
+	int phimap_index = 0;
+	int etamap_index = 0;
+	int phimap_global_index = 0;
+	if(!m_tgcMonTool->getMapIndex(cham,iLay,etamap_index,phimap_index,phimap_global_index ))continue;
+	std::string station_name = Form("%sM%02d%s",(cham.iSide()==TGC::TGCSIDE::TGCASIDE)?("A"):("C"),cham.iM(),channelNameAndBCMask.first.substr(15,1).data());
+	for(const auto& tgcHit : channelNameAndBCMask.second){
+	  tgcHitBCMaskGlobalIndex[station_name].push_back(phimap_global_index);
+	  tgcHitBCMask[station_name].push_back(tgcHit.bcmask());
+	  if(cham.iM()!=4){
+	    tgcHitBCMaskBWSectors["All"].push_back( (cham.iSide()==TGC::TGCSIDE::TGCASIDE)?( +1 * cham.iSec() ):(-1 * cham.iSec()) );
+	    tgcHitBCMaskForBWSectors["All"].push_back(tgcHit.bcmask());
+	    if(chamberNameWithWS.find('W')!=std::string::npos){
+	      tgcHitBCMaskBWSectors["Wire"].push_back( (cham.iSide()==TGC::TGCSIDE::TGCASIDE)?( +1 * cham.iSec() ):(-1 * cham.iSec()) );
+	      tgcHitBCMaskForBWSectors["Wire"].push_back(tgcHit.bcmask());
+	    }else{
+	      tgcHitBCMaskBWSectors["Strip"].push_back( (cham.iSide()==TGC::TGCSIDE::TGCASIDE)?( +1 * cham.iSec() ):(-1 * cham.iSec()) );
+	      tgcHitBCMaskForBWSectors["Strip"].push_back(tgcHit.bcmask());
+	    }
+	  }
+	}
+      }
+      std::vector<Monitored::ObjectsCollection<std::vector<int>, double>> varowner_bcmask;
+      varowner_bcmask.reserve(tgcHitBCMask.size() * 2 + tgcHitBCMaskBWSectors.size() * 2);
+      for(const auto& chamType : tgcHitBCMaskBWSectors){
+        varowner_bcmask.push_back(Monitored::Collection(Form("hit_bcmask_bw24sectors_%s",chamType.first.data()),chamType.second,[](const int&m){return m;}));
+        hit_variables.push_back(varowner_bcmask.back());
+        varowner_bcmask.push_back(Monitored::Collection(Form("hit_bcmask_for_bw24sectors_%s",chamType.first.data()),tgcHitBCMaskForBWSectors[chamType.first],[](const int&m){return m;}));
+        hit_variables.push_back(varowner_bcmask.back());
+      }
+      for(const auto& stationNameAndBCMask : tgcHitBCMask){
+        varowner_bcmask.push_back(Monitored::Collection(Form("hit_bcmask_glblphi_%s",stationNameAndBCMask.first.data()),tgcHitBCMaskGlobalIndex[stationNameAndBCMask.first],[](const int&m){return m;}));
+        hit_variables.push_back(varowner_bcmask.back());
+        varowner_bcmask.push_back(Monitored::Collection(Form("hit_bcmask_%s",stationNameAndBCMask.first.data()),stationNameAndBCMask.second,[](const int&m){return m;}));
+        hit_variables.push_back(varowner_bcmask.back());
+      }
+
+      // gap-by-gap efficiency by track extrapolation
+      ATH_MSG_DEBUG("preparing for efficiency plots");
+      std::map<std::string, std::vector<double>> tgcEffPhiMap_Denominator;
+      std::map<std::string, std::vector<double>> tgcEffEtaMap_Denominator;
+      std::map<std::string, std::vector<double>> tgcEffPhiMapGlobal_Denominator;
+      std::map<std::string, std::vector<double>> tgcEffPhiMap_Numerator;
+      std::map<std::string, std::vector<double>> tgcEffEtaMap_Numerator;
+      std::map<std::string, std::vector<double>> tgcEffPhiMapGlobal_Numerator;
+      std::map<std::string, std::vector<double>> tgcEffMapExtX;
+      std::map<std::string, std::vector<double>> tgcEffMapExtY;
+      std::map<std::string, std::vector<double>> tgcEffMapHasHit;
+      for(const auto& exts : extpositions){
+	const std::string& cham_name = exts.first;
+	TGC::TgcChamber cham; cham.initChamber(cham_name);
+	// local-coordinate x'-y'
+	Identifier id2 = muonMgr->tgcIdHelper()->elementID(cham.StationName(), cham.StationEta(), cham.StationPhi());
+	auto detEle = muonMgr->getTgcReadoutElement(id2);
+	for(const auto& ext : exts.second){ // how often tracks are extrapolated to this chamber surface,e.i. denominator
+	  Amg::Vector3D extPosLocal = detEle->transform().inverse() * ext.extPos;
+	  Amg::Vector3D extVecLocal = detEle->transform().inverse() * ext.extVec;
+	  for(int iLay = 1 ; iLay <= 3 ; iLay++){
+	    int phimap_index = 0;
+	    int etamap_index = 0;
+	    int phimap_global_index = 0;
+	    if(!m_tgcMonTool->getMapIndex(cham,iLay,etamap_index,phimap_index,phimap_global_index ))continue;
+
+	    double newX = extPosLocal.x() - extVecLocal.x() / extVecLocal.z() * extPosLocal.z();
+	    double newY = extPosLocal.y() - extVecLocal.y() / extVecLocal.z() * extPosLocal.z();
+	    for(int iSorW = 0 ; iSorW < 2 ; iSorW++){
+	      if(cham.iM()==1 && iLay==2 && iSorW==0)continue;
+	      std::string gap_name = Form("%sL%02d",cham_name.data(),iLay);
+	      std::string type_name = Form("%sL%02d%s",cham_name.data(),iLay,(iSorW==0)?("S"):("W"));
+	      int nWhits = 0;
+	      int nShits = 0;
+	      for(const auto& chamHasHit : map_muon_and_tgchits[ext.muon]){
+		if( chamHasHit.find(gap_name) != std::string::npos ) continue; // skipping the same gap
+		if( chamHasHit.find("M04") != std::string::npos ) continue; // skipping EI/FI
+		if( chamHasHit.find('W') != std::string::npos ) nWhits++;
+		if( chamHasHit.find('S') != std::string::npos ) nShits++;
+	      }
+	      if(nWhits < m_nHitsInOtherBWTGCWire)continue;
+	      if(nShits < m_nHitsInOtherBWTGCStrip)continue;
+	      std::string station_name = Form("%sM%02d%s",(cham.iSide()==TGC::TGCSIDE::TGCASIDE)?("A"):("C"),cham.iM(),(iSorW==0)?("S"):("W"));
+	      tgcEffPhiMap_Denominator[station_name].push_back(phimap_index);
+	      tgcEffEtaMap_Denominator[station_name].push_back(etamap_index);
+	      tgcEffPhiMapGlobal_Denominator[station_name].push_back(phimap_global_index);
+	      tgcEffMapExtX[type_name].push_back(newX);
+	      tgcEffMapExtY[type_name].push_back(newY);
+	      double hitExist = 0;
+	      if( ext.chambersHasHit.find(type_name) != ext.chambersHasHit.end()) hitExist=1;
+	      tgcEffPhiMap_Numerator[station_name].push_back(hitExist);
+	      tgcEffEtaMap_Numerator[station_name].push_back(hitExist);
+	      tgcEffPhiMapGlobal_Numerator[station_name].push_back(hitExist);
+	      tgcEffMapHasHit[type_name].push_back(hitExist);
+
+	    }
+	  }
+	}
+      }
+
+      std::vector<Monitored::ObjectsCollection<std::vector<double>, double>> varowner_hiteff;
+      std::vector<Monitored::ObjectsCollection<std::vector<TGC::TgcHit>, double>> varowner_eachchamber;
+      std::vector<Monitored::ObjectsCollection<std::vector<double>, double>> varowner_eachchamber_double;
+      std::map<std::string,std::vector<double>> cham_and_res;
+
+      if(m_fillGapByGapHistograms){
+
+	ATH_MSG_DEBUG("hit efficiency plots");
+	varowner_hiteff.reserve(tgcEffPhiMap_Denominator.size() * 4 + tgcEffPhiMapGlobal_Denominator.size() * 2 + tgcEffMapHasHit.size() * 3);
+	for (const auto &phimap : tgcEffPhiMap_Denominator) {
+	  varowner_hiteff.push_back(Monitored::Collection(Form("hit_effden_x_%s",phimap.first.data()),tgcEffEtaMap_Denominator[phimap.first],[](const double&m){return m;}));
+	  hit_variables.push_back(varowner_hiteff.back());
+	  varowner_hiteff.push_back(Monitored::Collection(Form("hit_effden_y_%s", phimap.first.data()),tgcEffPhiMap_Denominator[phimap.first],[](const double&m){return m;}));
+	  hit_variables.push_back(varowner_hiteff.back());
+	  varowner_hiteff.push_back(Monitored::Collection(Form("hit_effnum_x_%s",phimap.first.data()),tgcEffEtaMap_Numerator[phimap.first],[](const double&m){return m;}));
+	  hit_variables.push_back(varowner_hiteff.back());
+	  varowner_hiteff.push_back(Monitored::Collection(Form("hit_effnum_y_%s", phimap.first.data()),tgcEffPhiMap_Numerator[phimap.first],[](const double&m){return m;}));
+	  hit_variables.push_back(varowner_hiteff.back());
+	}
+	for (const auto &phimap : tgcEffPhiMapGlobal_Denominator) {
+	  varowner_hiteff.push_back(Monitored::Collection(Form("hit_glblphi_effden_%s", phimap.first.data()),tgcEffPhiMapGlobal_Denominator[phimap.first],[](const double&m){return m;}));
+	  hit_variables.push_back(varowner_hiteff.back());
+	  varowner_hiteff.push_back(Monitored::Collection(Form("hit_glblphi_effnum_%s", phimap.first.data()),tgcEffPhiMapGlobal_Numerator[phimap.first],[](const double&m){return m;}));
+	  hit_variables.push_back(varowner_hiteff.back());
+	}
+	for(const auto& hiteffmap : tgcEffMapHasHit){
+	  varowner_hiteff.push_back(Monitored::Collection(Form("hit_localX_effden_%s", hiteffmap.first.data()),tgcEffMapExtX[hiteffmap.first],[](const double&m){return m;}));
+	  hit_variables.push_back(varowner_hiteff.back());
+	  varowner_hiteff.push_back(Monitored::Collection(Form("hit_localY_effden_%s", hiteffmap.first.data()),tgcEffMapExtY[hiteffmap.first],[](const double&m){return m;}));
+	  hit_variables.push_back(varowner_hiteff.back());
+	  varowner_hiteff.push_back(Monitored::Collection(Form("hit_effnum_%s", hiteffmap.first.data()),tgcEffMapHasHit[hiteffmap.first],[](const double&m){return m;}));
+	  hit_variables.push_back(varowner_hiteff.back());
+	}
+
+	ATH_MSG_DEBUG("gap-by-gap occupancy plots and residual plots");
+	varowner_eachchamber.reserve(tgcHitsMap.size());
+	varowner_eachchamber_double.reserve(tgcHitsMap.size());
+      	for (const auto &tgcHitMap : tgcHitsMap) {
+	  auto chanName = tgcHitMap.first;
+	  if(chanName.find('L')!=std::string::npos){ // individual gaps
+	    varowner_eachchamber.push_back(Monitored::Collection(Form("hit_on_%s",chanName.data()),tgcHitMap.second,[](const TGC::TgcHit&m){return m.channel();}));
+	    hit_variables.push_back(varowner_eachchamber.back());
+	  }else{ // only summed over the gaps
+	    for(const auto&tgcHit:tgcHitMap.second){
+	      for(const auto&tgcRes:tgcHit.residuals()){
+          cham_and_res[chanName].push_back(tgcRes.second);
+        }
+      }
+      varowner_eachchamber_double.push_back(Monitored::Collection(Form("hit_residual_on_%s",chanName.data()),cham_and_res[chanName],[](const double&m){return m;}));
+      hit_variables.push_back(varowner_eachchamber_double.back());
+    }
+      	}
+
+      }
+
+      ATH_MSG_DEBUG("before fill for hits");
+      fill(m_packageName+"_TgcHit", hit_variables);
+      ATH_MSG_DEBUG("End filling TGC PRD histograms");
+    }else{
+      ATH_MSG_WARNING("Couldn't get TGC PRD");
+    }
+  }
+}
+
+void
+TgcRawDataMonitorAlgorithm::fillMuonRoisInThresholdPattern(std::map<const xAOD::MuonRoI*,std::set<std::string>> &roiAndMenu, std::map<std::string,std::vector<const xAOD::MuonRoI*>> & menuAndRoIs, std::vector<TimedMuonRoI> & AllBCMuonRoIs, const EventContext & ctx) const {
+
+  if(m_monitorThresholdPatterns && AllBCMuonRoIs.size()>0 ){
+    ATH_MSG_DEBUG("Filling histograms for MuonRoIs in thresholdPattern");
+    SG::ReadHandle<TrigConf::L1Menu> l1Menu = SG::makeHandle(m_L1MenuKey, ctx);
+    SG::ReadDecorHandle<xAOD::MuonRoIContainer,uint64_t> thrPatternAcc = SG::makeHandle<uint64_t>(m_thresholdPatternsKey, ctx);
+    if(l1Menu.isValid() && thrPatternAcc.isPresent() && thrPatternAcc.isAvailable()){
+      for(const auto& item : m_thrMonList){
+        ATH_MSG_DEBUG("Item = " << item);
+        bool ok = false;
+        for(const auto& m : l1Menu->thresholdNames()){
+          ATH_MSG_DEBUG("item = " << m);
+          if( m == item ){
+            ok = true;
+            break;
+          }
+        }
+        if(!ok){
+          ATH_MSG_DEBUG("skipping " << item);
+          continue;
+        }
+        ATH_MSG_DEBUG("continue checking " << item);
+        const TrigConf::L1Threshold& thr = l1Menu->threshold(item.data());
+        std::vector<const xAOD::MuonRoI*> passed_rois;
+        for(const auto& allBcMuonRoI : AllBCMuonRoIs){
+          if(allBcMuonRoI.timing!=0)continue; // only current BC
+          const xAOD::MuonRoI* roi = allBcMuonRoI.muonRoI;
+          const uint64_t thrPattern = thrPatternAcc(*roi);
+          bool passed = ( thrPattern & (1 << thr.mapping()) );
+          if(passed){
+            passed_rois.push_back(roi);
+            ATH_MSG_DEBUG("This RoI passed "<< item <<", roiWord=" << roi->roiWord() << ", thrNumber=" << roi->getThrNumber() << " eta=" << roi->eta() << " phi=" << roi->phi());
+            if(roiAndMenu.count(roi)==0){
+              std::set<std::string> items;
+              roiAndMenu.insert(std::make_pair(roi,items));
+            }
+            roiAndMenu[roi].insert(item);
+          }
+        }
+        menuAndRoIs.insert(std::make_pair(item,passed_rois));
+      }
+    }
+    ATH_MSG_DEBUG("End filling histograms for MuonRoIs in thresholdPattern");
+  }
+}
+
+
+
