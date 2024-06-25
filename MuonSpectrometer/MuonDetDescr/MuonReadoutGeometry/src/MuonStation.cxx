@@ -39,6 +39,21 @@ namespace MuonGM {
 
     MuonStation::~MuonStation() = default;
 
+    void MuonStation::setEtaPhiIndices(int eta, int phi) {
+        m_statEtaIndex = eta;
+        m_statPhiIndex = phi;
+    }
+
+    void MuonStation::setTransform(GeoAlignableTransform* xf) { m_transform = xf; }
+
+    void MuonStation::setxAmdbCRO(double xpos) { m_xAmdbCRO = xpos; }
+
+    void MuonStation::setNativeToAmdbLRS(Amg::Transform3D xf) {
+        m_native_to_amdbl = std::move(xf);
+        ATH_MSG_VERBOSE("stationName/Jff/Jzz " << getStationType() << " " << getPhiIndex() << " "<< getEtaIndex()
+                        <<"setNativeToAmdbLRS: "<<Amg::toString(m_native_to_amdbl));
+    }
+
     void MuonStation::setNominalAmdbLRSToGlobal(Amg::Transform3D xf) {
         m_amdbl_to_global = std::move(xf);
         ATH_MSG_DEBUG("setNominalAmdbLRSToGlobal: stationName/Jff/Jzz " << getStationType() << " " << getPhiIndex() << " "<< getEtaIndex() 
@@ -253,15 +268,11 @@ namespace MuonGM {
     }
 
     void MuonStation::setBline(const BLinePar* bline) {
+        if (!bline) return;
         m_hasBLines = true;
         for (auto& [jobId, readAlignPair] : m_REwithAlTransfInStation) {
             ATH_MSG_DEBUG("fillCache cache .... for RE ... iteration n. " << jobId);
             MuonReadoutElement* re = readAlignPair.first;
-            if (!re) {                
-                ATH_MSG_WARNING(" in setBLine " << getStationType() << " at zi/fi " << getEtaIndex() << "/" << getPhiIndex()
-                             << " trying to get a null MuonReadoutElement, skipping");
-                continue;
-            }
             if (re->detectorType() !=Trk::DetectorElemType::Mdt) {
                 continue;
             }

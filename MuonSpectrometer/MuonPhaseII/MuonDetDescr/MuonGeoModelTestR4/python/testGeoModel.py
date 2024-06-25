@@ -42,10 +42,8 @@ def setupServicesCfg(flags):
         from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
         result.merge(PoolReadCfg(flags))
     elif flags.Input.Format == Format.BS:
-        print ("Stonjek...")
         from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
         result.merge(ByteStreamReadCfg(flags)) 
-    print("Was hast du denn wieder ",flags.Input.Format )
 
     from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
     result.merge(PerfMonMTSvcCfg(flags))

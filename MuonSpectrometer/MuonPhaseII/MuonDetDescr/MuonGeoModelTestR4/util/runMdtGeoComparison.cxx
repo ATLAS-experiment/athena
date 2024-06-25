@@ -9,9 +9,9 @@
  *        for the Mdt subdetectors
  *  
 */
-#include <GeoPrimitives/GeoPrimitives.h>
 #include <GeoPrimitives/GeoPrimitivesHelpers.h>
 #include <GeoPrimitives/GeoPrimitivesToStringConverter.h>
+#include "GeoModelHelpers/TransformToStringConverter.h"
 #include <MuonCablingData/MdtCablingData.h>
 #include <MuonReadoutGeometryR4/MuonDetectorDefs.h>
 #include "CxxUtils/starts_with.h"
@@ -33,6 +33,7 @@ struct MdtChamber{
     /// Identifier of the mdt chamber
     using chamberIdentifier = MdtCablingOffData;
     chamberIdentifier id{};
+    std::string design{};
 
     /// Sorting operator to insert the object into std::set
     bool operator<(const MdtChamber& other) const {
@@ -41,6 +42,8 @@ struct MdtChamber{
 
     /// Transformation of the underlying GeoModel element
     Amg::Transform3D geoModelTransform{Amg::Transform3D::Identity()};
+    /// Transformation of the underlying Alignable node
+    Amg::Transform3D alignableTransform{Amg::Transform3D::Identity()};
     /// Number of tube layers
     unsigned int numLayers{0};
     /// Number of tubes
@@ -95,7 +98,7 @@ std::ostream& operator<<(std::ostream& ostr, const MdtChamber& chamb) {
         {17, "EML"}, {18, "EMS"}, 
         {20, "EOL"}, {21, "EOS"}
     };
-    ostr<<"Mdt chamber "<<stationDict.at(chamb.id.stationIndex)<<" "<<chamb.id;    
+    ostr<<stationDict.at(chamb.id.stationIndex)<<" "<<chamb.design<<" "<<chamb.id;    
     return ostr;
 } 
 
@@ -103,7 +106,7 @@ constexpr double tolerance = 10 * Gaudi::Units::micrometer;
  
 #define TEST_BASICPROP(attribute, propName) \
     if (std::abs(1.*test.attribute - 1.*reference.attribute) > tolerance) {           \
-        std::cerr<<"runMdtGeoComparision() "<<__LINE__<<": The chamber "<<test        \
+        std::cerr<<"runMdtGeoComparision() "<<__LINE__<<": "<<test                    \
                  <<" differs w.r.t "<<propName<<" "<< reference.attribute             \
                  <<" (ref) vs. " <<test.attribute << " (test)" << std::endl;          \
         chamberOkay = false;                                                          \
@@ -137,6 +140,7 @@ std::set<MdtChamber> readTreeDump(const std::string& inputFile) {
     TTreeReaderValue<short> stationEta{treeReader, "stationEta"};
     TTreeReaderValue<short> stationPhi{treeReader, "stationPhi"};
     TTreeReaderValue<short> stationML{treeReader, "stationMultiLayer"};
+    TTreeReaderValue<std::string> chamberDesign{treeReader,"chamberDesign"};
     
     TTreeReaderValue<double> tubeRadius{treeReader, "tubeRadius"};
     TTreeReaderValue<double> tubePitch{treeReader, "tubePitch"}; 
@@ -146,6 +150,11 @@ std::set<MdtChamber> readTreeDump(const std::string& inputFile) {
     TTreeReaderValue<std::vector<float>> geoModelTransformX{treeReader, "GeoModelTransformX"};
     TTreeReaderValue<std::vector<float>> geoModelTransformY{treeReader, "GeoModelTransformY"};
     TTreeReaderValue<std::vector<float>> geoModelTransformZ{treeReader, "GeoModelTransformZ"};
+
+    TTreeReaderValue<std::vector<float>> alignableNodeX{treeReader, "AlignableNodeX"};
+    TTreeReaderValue<std::vector<float>> alignableNodeY{treeReader, "AlignableNodeY"};
+    TTreeReaderValue<std::vector<float>> alignableNodeZ{treeReader, "AlignableNodeZ"};
+
 
     /// Information to access each tube individually
     TTreeReaderValue<std::vector<unsigned short>> tubeLayer{treeReader, "tubeLayer"}; 
@@ -182,6 +191,7 @@ std::set<MdtChamber> readTreeDump(const std::string& inputFile) {
         newchamber.id.eta = (*stationEta);
         newchamber.id.phi = (*stationPhi);
         newchamber.id.multilayer = (*stationML);
+        newchamber.design = (*chamberDesign);
 
         newchamber.tubeRadius = (*tubeRadius);
         newchamber.tubePitch = (*tubePitch);
@@ -195,6 +205,14 @@ std::set<MdtChamber> readTreeDump(const std::string& inputFile) {
         geoRot.col(2) = Amg::Vector3D((*geoModelTransformX)[3], (*geoModelTransformY)[3], (*geoModelTransformZ)[3]);       
         Amg::Vector3D geoTrans{(*geoModelTransformX)[0], (*geoModelTransformY)[0], (*geoModelTransformZ)[0]};
         newchamber.geoModelTransform = Amg::getTransformFromRotTransl(std::move(geoRot), std::move(geoTrans));       
+
+        geoRot.col(0) = Amg::Vector3D((*alignableNodeX)[1], (*alignableNodeY)[1], (*alignableNodeZ)[1]);
+        geoRot.col(1) = Amg::Vector3D((*alignableNodeX)[2], (*alignableNodeY)[2], (*alignableNodeZ)[2]);
+        geoRot.col(2) = Amg::Vector3D((*alignableNodeX)[3], (*alignableNodeY)[3], (*alignableNodeZ)[3]);       
+        geoTrans = Amg::Vector3D{(*alignableNodeX)[0], (*alignableNodeY)[0], (*alignableNodeZ)[0]};
+        newchamber.alignableTransform = Amg::getTransformFromRotTransl(std::move(geoRot), std::move(geoTrans));
+
+       
         /// Readout the information of each tube specifically
         for (size_t t = 0; t < tubeLayer->size(); ++t){
             using TubePositioning = MdtChamber::TubePositioning;
@@ -278,7 +296,13 @@ int main( int argc, char** argv ) {
         TEST_BASICPROP(tubePitch, "tube pitch");
         TEST_BASICPROP(tubeRadius, "tube radius");
         
-
+        const Amg::Transform3D alignableDistort = test.alignableTransform.inverse()*(reference.alignableTransform );
+        if (!Amg::doesNotDeform(alignableDistort) || alignableDistort.translation().mag() > tolerance) {
+            std::cerr<<"runMdtGeoComparision() "<<__LINE__<<": The alignable nodes are at differnt places for  "
+                     <<test<<". " <<GeoTrf::toString(alignableDistort, true)<<" chamber length: "<<
+                      (reference.tubePitch * (1.*reference.numTubes + 0.5))<<std::endl;
+            chamberOkay = false; 
+        }
         const Amg::Transform3D distortion = test.geoModelTransform.inverse() * reference.geoModelTransform;
         /// We do not care whether the orientation of the coordinate system along the wire flips for negative
         /// chambers or not

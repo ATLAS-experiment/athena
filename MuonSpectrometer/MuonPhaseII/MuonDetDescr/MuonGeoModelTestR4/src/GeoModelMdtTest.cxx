@@ -146,6 +146,7 @@ StatusCode GeoModelMdtTest::dumpToTree(const EventContext& ctx,
    m_stEta = readoutEle->stationEta();
    m_stPhi = readoutEle->stationPhi();
    m_stML = readoutEle->multilayer();
+   m_chamberDesign = readoutEle->chamberDesign();
    
    m_numLayers = readoutEle->numLayers();
    m_numTubes = readoutEle->numTubesInLay();
@@ -156,6 +157,7 @@ StatusCode GeoModelMdtTest::dumpToTree(const EventContext& ctx,
    /// Dump the local to global transformation of the readout element
    const Amg::Transform3D& transform {readoutEle->localToGlobalTrans(gctx)};
    m_readoutTransform = transform;
+   m_alignableNode  = readoutEle->alignableTransform()->getDefTransform();
    
    /// Loop over the tubes
    for (unsigned int lay = 1; lay <= readoutEle->numLayers(); ++lay) {

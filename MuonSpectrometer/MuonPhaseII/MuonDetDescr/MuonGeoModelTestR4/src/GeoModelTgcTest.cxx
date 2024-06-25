@@ -133,6 +133,7 @@ StatusCode GeoModelTgcTest::dumpToTree(const EventContext& ctx,
    m_nGasGaps   = reElement->nGasGaps();
    m_readoutTransform = reElement->localToGlobalTrans(gctx);
 
+  m_alignableNode  = reElement->alignableTransform()->getDefTransform();
 
    m_shortWidth = reElement->moduleWidthS();
    m_longWidth = reElement->moduleWidthL();

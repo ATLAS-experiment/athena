@@ -58,13 +58,16 @@ class GeoModelMdtTest : public AthHistogramAlgorithm {
     MuonVal::ScalarBranch<short>& m_stEta{m_tree.newScalar<short>("stationEta")};
     MuonVal::ScalarBranch<short>& m_stPhi{m_tree.newScalar<short>("stationPhi")};
     MuonVal::ScalarBranch<short>& m_stML{m_tree.newScalar<short>("stationMultiLayer")};
+    MuonVal::ScalarBranch<std::string>& m_chamberDesign{m_tree.newScalar<std::string>("chamberDesign")};
 
     MuonVal::ScalarBranch<double>& m_tubeRad{m_tree.newScalar<double>("tubeRadius")};
     MuonVal::ScalarBranch<double>& m_tubePitch{m_tree.newScalar<double>("tubePitch")};
 
 
     /// Transformation of the underlying GeoModel element (Translation, ColX, ColY, ColZ)
-    MuonVal::CoordTransformBranch m_readoutTransform{m_tree, "GeoModelTransform"};   
+    MuonVal::CoordTransformBranch m_readoutTransform{m_tree, "GeoModelTransform"};
+    MuonVal::CoordTransformBranch m_alignableNode {m_tree, "AlignableNode"};
+
     /// Number of tubes per layer
     MuonVal::ScalarBranch<unsigned short>& m_numTubes{m_tree.newScalar<unsigned short>("numTubes")};
     /// Number of tubes per layer

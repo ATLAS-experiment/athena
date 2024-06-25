@@ -76,6 +76,8 @@ class GeoModelRpcTest : public AthHistogramAlgorithm {
     MuonVal::ScalarBranch<uint8_t>& m_numPhiPanels{m_tree.newScalar<uint8_t>("numPhiPanels")};
     /// Transformation of the readout element (Translation, ColX, ColY, ColZ)
     MuonVal::CoordTransformBranch m_readoutTransform{m_tree, "GeoModelTransform"};
+    MuonVal::CoordTransformBranch m_alignableNode {m_tree, "AlignableNode"};
+
     
     /// Alignment parameters
     MuonVal::ScalarBranch<float>& m_ALineTransS{m_tree.newScalar<float>("ALineTransS", 0.)};

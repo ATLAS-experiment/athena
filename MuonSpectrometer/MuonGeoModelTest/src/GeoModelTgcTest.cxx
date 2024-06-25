@@ -186,6 +186,9 @@ StatusCode GeoModelTgcTest::dumpToTree(const EventContext& ctx, const TgcReadout
     m_stLayout = readoutEle->getTechnologyName();
 
     const MuonGM::MuonStation* station = readoutEle->parentMuonStation();
+    m_alignableNode = station->getGeoTransform()->getDefTransform() *
+                      station->getNativeToAmdbLRS().inverse();
+
     if (station->hasALines()){ 
         m_ALineTransS = station->getALine_tras();
         m_ALineTransT = station->getALine_traz();

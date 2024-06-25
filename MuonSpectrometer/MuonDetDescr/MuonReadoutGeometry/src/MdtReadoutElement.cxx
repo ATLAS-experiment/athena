@@ -17,7 +17,8 @@
 #include "GeoModelUtilities/GeoGetIds.h"
 #include "GeoPrimitives/GeoPrimitivesHelpers.h"
 #include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
-
+#include "GeoModelHelpers/throwExcept.h"
+#include "GeoModelHelpers/TransformToStringConverter.h"
 
 #include "MuonAlignmentData/BLinePar.h"
 #include "MuonIdHelpers/MdtIdHelper.h"
@@ -340,12 +341,11 @@ namespace MuonGM {
                 constexpr double maxtol = 0.0000001;
 
                 if (std::abs(xtube - tubeTrans(0, 3)) > maxtol || std::abs(ztube - tubeTrans(2, 3)) > maxtol) {
-                    ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" "<<__func__<<"("<<tubeLayer<<","<<tube<<")"<<" - mismatch between local from tube-id/pitch/cutout position"<<
+                    THROW_EXCEPTION(__func__<<"("<<tubeLayer<<","<<tube<<")"<<" - mismatch between local from tube-id/pitch/cutout position"<<
                            Amg::toString(tubePos)<<" and GeoModel "<< Amg::toString(tubeTrans.linear().col(3))<<" for detector element "<<
                             idHelperSvc()->toStringDetEl(identify()) <<"There are "<<nGrandchildren<<" child volumes and "<<
                                        (m_ntubesperlayer * m_nlayers)<<" are expected. There should be "<<m_nlayers<<" and "<<
                                            m_ntubesperlayer<<" tubes per layer");
-                    throw std::runtime_error("Bad tube match");
                 }
                 if (tubeTrans(1, 3) > maxtol) {
 
@@ -353,12 +353,11 @@ namespace MuonGM {
                                          << "/" << tubeLayer << "/" << tube);
                     // check only for tubes actually shifted
                     if (std::abs(m_cutoutShift - tubeTrans(1, 3)) > maxtol) {
-                        ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" "<<__func__<<"("<<tubeLayer<<","<<tube<<")"<<" - mismatch between local from tube-id/pitch/cutout position"<<
+                        THROW_EXCEPTION(__func__<<"("<<tubeLayer<<","<<tube<<")"<<" - mismatch between local from tube-id/pitch/cutout position"<<
                            Amg::toString(tubePos)<<" and GeoModel "<< Amg::toString(tubeTrans.linear().col(3))<<" for detector element "<<
                             idHelperSvc()->toStringDetEl(identify()) <<"There are "<<nGrandchildren<<" child volumes and "<<
                                        (m_ntubesperlayer * m_nlayers)<<" are expected. There should be "<<m_nlayers<<" and "<<
                                            m_ntubesperlayer<<" tubes per layer");
-                         throw std::runtime_error("Bad tube match");
                     }
                 }
 
@@ -734,14 +733,17 @@ namespace MuonGM {
                 xref = -m_Zsize / 2. + m_firstwire_y[ref_layer - 1] + y_offset;
                 zref = -m_Rsize / 2. + xmin;
             }
-            Amg::Vector3D reference_point(xref, yref, zref);
-            Amg::Transform3D toAMDB = parentMuonStation()->getNativeToAmdbLRS() * toParentStation();
+            const Amg::Transform3D toAMDB = parentMuonStation()->getNativeToAmdbLRS() * toParentStation();
+            Amg::Vector3D reference_point{xref, yref, zref};
+            ATH_MSG_VERBOSE("AMDB transform "<<" "<<idHelperSvc()->toStringDetEl(identify())<<
+                          " "<<GeoTrf::toString(toAMDB, true)<<", reference point: "<<Amg::toString(reference_point));
+
             reference_point = toAMDB * reference_point;
+
             if (isid == 0)
                 reference_point = reference_point + 0.5 * getNominalTubeLengthWoCutouts(ref_layer, 1) * Amg::Vector3D::UnitX();
             else
                 reference_point = reference_point -0.5 * getNominalTubeLengthWoCutouts(ref_layer, 1) * Amg::Vector3D::UnitX();
-
             int layer_delta = tubeLayer;
             if (ml == multilayer_t::ML1) layer_delta = m_nlayers + 1 - tubeLayer;
 
@@ -774,7 +776,6 @@ namespace MuonGM {
             // Warn if result of calculation is too far off
             // BIL1A13 has as-built parameters up to 3mm off, giving the size of the cut
             if ((ret - wireEnd[isid]).mag() > 3. * CLHEP::mm) {
-
                 ATH_MSG_WARNING( "Large as-built correction for chamber " << idHelperSvc()->toStringDetEl(identify()) << ", side "
                     << isid << ", Delta " << Amg::toString(ret - wireEnd[isid]) );
             }
@@ -854,9 +855,8 @@ namespace MuonGM {
             }
         }
         if ((unsigned int)istep >= m_tubeBounds.size()) {
-            ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" "<<__func__<<"("<<tubeLayer<<","<<tube<<") but m_tubeBounds.size()="<<m_tubeBounds.size()<<" for "<<
+            THROW_EXCEPTION(__func__<<"("<<tubeLayer<<","<<tube<<") but m_tubeBounds.size()="<<m_tubeBounds.size()<<" for "<<
                              idHelperSvc()->toStringDetEl(identify()));
-            throw std::runtime_error("Out of bounds access");
         }
         const CxxUtils::CachedUniquePtr<Trk::CylinderBounds>& ptr = m_tubeBounds.at(istep);
         if (!ptr) {
