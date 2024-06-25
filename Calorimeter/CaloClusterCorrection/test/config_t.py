@@ -28,7 +28,11 @@ class TestTool:
         assert self.name == config.getName()
         props = config._properties.copy()
         for k, v in self.args.items():
-            assert k in props
+            if k == 'CacheAlign':
+                # This one depends on the environment.
+                if k in props: del props[k]
+                continue
+            assert k in props, (k, v)
             if isinstance (v, TestTool):
                 v.check (props[k])
             else:
@@ -48,7 +52,7 @@ class TestTool:
             if (k, props[k]) in defaults:
                 del props[k]
 
-        assert not props
+        assert not props, props
         return
 
 
