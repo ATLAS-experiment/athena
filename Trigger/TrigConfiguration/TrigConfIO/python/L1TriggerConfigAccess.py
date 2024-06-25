@@ -48,12 +48,18 @@ class L1MenuAccess(TriggerConfigAccess):
             thrTypes += list(self._config["thresholds"]["legacyCalo"].keys())
         return thrTypes
 
-    def thresholds(self, thresholdType = None):
+    def thresholds(self, thresholdType = None, fulldict = False):
+        """
+        When setting fulldict the full dictionary is returned, else just thresholds
+        """
         if thresholdType:
             if thresholdType == "internal":
                 return {}
             if thresholdType in self["thresholds"]:
-                return self["thresholds"][thresholdType]["thresholds"]
+                if fulldict:
+                    return self["thresholds"][thresholdType]
+                else:
+                    return self["thresholds"][thresholdType]["thresholds"]
             if thresholdType in self["thresholds"]["legacyCalo"]:
                 return self["thresholds"]["legacyCalo"][thresholdType]["thresholds"]
             raise RuntimeError("Threshold type %s not known in thresholds section of the menu" % thresholdType)
