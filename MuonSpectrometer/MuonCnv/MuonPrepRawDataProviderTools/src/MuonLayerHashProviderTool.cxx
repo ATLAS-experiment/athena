@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonPrepRawDataProviderTools/MuonLayerHashProviderTool.h"
@@ -59,7 +59,7 @@ namespace Muon {
   bool MuonLayerHashProviderTool::insertTgcs(){
     
     // the tgc's can be in multiple sectors so we need to do something special here
-    const MuonGM::MuonDetectorManager* detMgr;
+    const MuonGM::MuonDetectorManager* detMgr = nullptr;
     if( detStore()->retrieve( detMgr ).isFailure() || !detMgr ){
       ATH_MSG_ERROR("Failed to initialize detector manager" );
       return false;
