@@ -15,8 +15,9 @@ Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #include "GaudiKernel/ServiceHandle.h"
 #include "PixelReadoutGeometry/IPixelReadoutManager.h"
 #include "InDetRawData/PixelRDO_Container.h"
-#include "InDetIdentifier/PixelID.h"
 #include "ITkPixLayout.h"
+
+class PixelID;
 
 class ITkPixelHitSortingTool: public AthAlgTool {
     public:

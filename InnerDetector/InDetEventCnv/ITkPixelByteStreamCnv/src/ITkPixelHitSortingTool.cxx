@@ -3,6 +3,9 @@ Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ITkPixelHitSortingTool.h"
+#include "InDetIdentifier/PixelID.h"
+
+
 
 ITkPixelHitSortingTool::ITkPixelHitSortingTool(const std::string& type,const std::string& name,const IInterface* parent) : 
   AthAlgTool(type,name,parent)
