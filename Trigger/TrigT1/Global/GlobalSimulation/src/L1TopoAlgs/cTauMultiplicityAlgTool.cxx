@@ -13,7 +13,7 @@
 #include "AthenaMonitoringKernel/Monitored.h"
 #include "AthenaMonitoringKernel/MonitoredCollection.h"
 
-#include <fstream>
+#include <sstream>
 
 
 namespace GlobalSim {
@@ -53,7 +53,7 @@ namespace GlobalSim {
 
     auto count = std::make_unique<GlobalSim::Count>();
 
-    auto threshold =
+    const auto & threshold =
       dynamic_cast<const TrigConf::L1Threshold_cTAU&>(m_l1MenuResources->threshold());
     
     auto alg =  
@@ -82,37 +82,37 @@ namespace GlobalSim {
   StatusCode
   cTauMultiplicityAlgTool::monitor(const cTauMultiplicity& alg) const {
 
-    auto accept_eta_data = alg.accept_eta();
+    const auto & accept_eta_data = alg.accept_eta();
     
     auto accept_eta_moncol = Monitored::Collection("accept_eta",
 						   accept_eta_data);
-    auto accept_et_data = alg.accept_et();
+    const auto & accept_et_data = alg.accept_et();
     auto accept_et_moncol = Monitored::Collection("accept_et",
 						  accept_et_data);
     
-    auto counts_data = alg.counts();
+    const auto & counts_data = alg.counts();
     auto counts_moncol = Monitored::Collection("counts", counts_data);
 
     auto TOBet_data = alg.TOB_et();
     auto TOBet_moncol = Monitored::Collection("Et", TOBet_data);
 
        
-    auto TOBeta_data = alg.TOB_eta();
+    const auto & TOBeta_data = alg.TOB_eta();
     auto TOBeta_moncol = Monitored::Collection("eta", TOBeta_data);
  
     
-    auto TOBphi_data = alg.TOB_phi();
+    const auto & TOBphi_data = alg.TOB_phi();
     auto TOBphi_moncol = Monitored::Collection("phi", TOBphi_data);
        
-    auto TOBisolation_partial_loose_data = alg.TOB_isolation_partial_loose();
+    const auto & TOBisolation_partial_loose_data = alg.TOB_isolation_partial_loose();
     auto TOBisolation_partial_loose_moncol =
       Monitored::Collection("iso_loose", TOBisolation_partial_loose_data);
  
-    auto TOBisolation_partial_medium_data = alg.TOB_isolation_partial_medium();
+    const auto & TOBisolation_partial_medium_data = alg.TOB_isolation_partial_medium();
     auto TOBisolation_partial_medium_moncol =
       Monitored::Collection("iso_medium", TOBisolation_partial_medium_data);
 
-    auto TOBisolation_partial_tight_data = alg.TOB_isolation_partial_tight();
+    const auto & TOBisolation_partial_tight_data = alg.TOB_isolation_partial_tight();
     auto TOBisolation_partial_tight_moncol =
       Monitored::Collection("iso_tight", TOBisolation_partial_tight_data);
 
@@ -134,7 +134,7 @@ namespace GlobalSim {
   std::string cTauMultiplicityAlgTool::toString() const {
 
     std::stringstream ss;
-    auto threshold =
+    const auto & threshold =
       dynamic_cast<const TrigConf::L1Threshold_cTAU&>(m_l1MenuResources->threshold());
     ss << "cTauMultiplicityAlgTool. name: "  << name() << '\n'
        << m_cTauTOBArrayReadKey << '\n'

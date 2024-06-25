@@ -87,8 +87,8 @@ namespace GlobalSim {
 	
       std::string label_fail = m_algInstanceName +
 	"_fail_by_bit_" + std::to_string(i);
-      auto pass = Monitored::Collection(label_pass, passValues);
-      auto fail = Monitored::Collection(label_fail, failValues);
+      auto pass = Monitored::Collection(std::move(label_pass), passValues);
+      auto fail = Monitored::Collection(std::move(label_fail), failValues);
       auto group = Monitored::Group(m_monTool, pass, fail);
     }
     

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 //  Decision.cxx
 //  TopoCore
@@ -10,7 +10,9 @@
 
 #include "Decision.h"
 
+#include <ostream>
 #include <sstream>
+#include <stdexcept>
 
 namespace GlobalSim {
   void
@@ -58,7 +60,7 @@ std::ostream & operator<<(std::ostream& os, const GlobalSim::Decision& d){
      << std::boolalpha
      << " overflow : " << d.overflow() 
      << " ambiguity : " << d.ambiguity() 
-     <<'\n';
+     <<'\n'<< std::noboolalpha; //restore stream state
   return os;
 }
 
