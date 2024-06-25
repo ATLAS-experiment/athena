@@ -112,7 +112,7 @@ namespace GlobalSim {
   std::string L1MenuResources::to_string() const {
     
     auto& l1alg = m_l1menu.algorithm(m_confAlgName, m_confAlgTypeLabel);
-    auto a_name = l1alg.name();
+    const auto & a_name = l1alg.name();
     auto parameters = l1alg.parameters();
     std::stringstream ss;
     ss<< "L1Menu resources for alg " << a_name;
