@@ -235,7 +235,7 @@ ElectronJetDRAssociator::findSignedIPAndPTRelEleJetPair (const xAOD::Electron* e
 
   const xAOD::Vertex* vx = 0;
   {
-    const xAOD::VertexContainer * vxcontainer;  
+    const xAOD::VertexContainer * vxcontainer = nullptr;
     if ( evtStore()->retrieve(vxcontainer, m_vertexContainerName).isFailure() )
       REPORT_MESSAGE (MSG::WARNING)
         << "Vertex container " << m_vertexContainerName 
