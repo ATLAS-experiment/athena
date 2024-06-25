@@ -87,6 +87,10 @@ void eFexByteStreamTool::MonitoredLogging::err(const std::string& location, cons
                      Monitored::Scalar("efexDecoderErrorLocation",std::string("lb=") + std::to_string(Gaudi::Hive::currentContext().eventID().lumi_block()) + "," + (location.empty() ? std::string("UNKNOWN") : location)),
                      Monitored::Scalar("efexDecoderErrorTitle",title.empty() ? std::string("UNKNOWN") : title)
                      );
+
+    Monitored::Group(m_monTool, Monitored::Scalar("lbn",Gaudi::Hive::currentContext().eventID().lumi_block()),
+                     Monitored::Scalar("decoderError",(title.empty() ? std::string("UNKNOWN") : title) + ":" + (location.empty() ? std::string("UNKNOWN") : location))
+    );
 }
 
 // BS->xAOD conversion

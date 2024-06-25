@@ -13,8 +13,11 @@ class L1CaloMonitorCfgHelper(object):
 
     from collections import defaultdict
     hanConfigs = {} # nested structure as required, keys will be either "dir XXX" or "hist YYY"
+    hanAlgConfigs = {}
+    hanThresholdConfigs = {}
 
-    SIGNATURES = ["gJ","gLJ","gLJRho","gXEJWOJ","gTEJWOJ","gXENC","gTENC","gXERHO","gTERHO","jJ","jLJ","jEM","jTAU","jXE","jTE","eTAU","eEM"]
+    SIGNATURES = ["gJ","gLJ","gLJRho","gXEJWOJ","gTEJWOJ","gXENC","gTENC","gXERHO","gTERHO","jJ","jEM","jTAU","jXE","jTE","eTAU","eEM"]
+    HELPURL = "https://codimd.web.cern.ch/s/678H65Tk9"
 
     @staticmethod
     def printHanConfig(filename="collisions_run.config"):
@@ -71,6 +74,13 @@ algorithm AnyNonZeroBinIsError {
   BinThreshold = 0.
   thresholds = th_AnyBinIsError
 }
+""")
+                for algName,algProps in L1CaloMonitorCfgHelper.hanAlgConfigs.items():
+                    print(f"algorithm {algName} {{")
+                    for propName,propVal in algProps.items():
+                        print(f"  {propName} = {propVal}")
+                    print("  }")
+                print("""
 #thresholds
 thresholds th_AnyBinIsError {
     limits NBins {
@@ -79,7 +89,14 @@ thresholds th_AnyBinIsError {
     }
 }
 """)
-
+                for threshName,threshProps in L1CaloMonitorCfgHelper.hanThresholdConfigs.items():
+                    print(f"thresholds {threshName} {{")
+                    for parName,parLims in threshProps.items():
+                        print(f"  limits {parName} {{")
+                        for limName,limVal in parLims.items():
+                            print(f"    {limName} = {limVal}")
+                        print("  }")
+                    print("}")
 
 
 
@@ -96,6 +113,40 @@ thresholds th_AnyBinIsError {
         self.alg = self.helper.addAlgorithm(algClassOrObj,name,*args, **kwargs) if algClassOrObj is not None else None
         self.fillGroups = {}
         self.dqEnv = flags.DQ.Environment # used to decide if should defineTree or not ...
+
+    def defineDQAlgorithm(self,name,hanConfig,thresholdConfig=None):
+
+        """
+
+        :param name: name of algorithm
+        :param hanConfig: dict of algo properties
+        :param thresholdConfig: dict of thresholds, keys in form of ParName.level
+        :return:
+        """
+
+        # note: this method will replace any existing alg definition
+
+        thresNum = len(self.hanThresholdConfigs)
+        if thresholdConfig is not None:
+            hanConfig["thresholds"] = f"L1CaloThreshold{thresNum}"
+            threshDict = {}
+            for parName,limVals in thresholdConfig.items():
+                if len(limVals) != 2:
+                    raise Exception("must specify two limits: warning and error")
+                if parName not in threshDict: threshDict[parName] = {}
+                threshDict[parName]["warning"] = limVals[0]
+                threshDict[parName]["error"] = limVals[1]
+            # see if any existing thresholds are identical, if so we can reuse
+            for threshName,thresh in self.hanThresholdConfigs.items():
+                if str(thresh)==str(threshDict):
+                    threshDict = None
+                    hanConfig["thresholds"] = threshName
+                    break
+            if threshDict is not None: self.hanThresholdConfigs[hanConfig["thresholds"]] = threshDict
+        self.hanAlgConfigs[name] = hanConfig
+
+        return
+
 
     def defineHistogram(self,*args,fillGroup=None,hanConfig={},paths=[],**kwargs):
         '''
@@ -128,8 +179,12 @@ thresholds th_AnyBinIsError {
             raise Exception("Path of histogram invalid, does not start with one of the allowed audiences (Shifter,Expert,Developer)")
 
         # require a hanConfig not in Developer or a detail dir
-        if splitPath[0] != "Developer" and splitPath[-1] != "detail" and "algorithm" not in hanConfig:
-            raise Exception("Must specify a hanConfig for a Shifter or Expert (non-detail) histogram")
+        if splitPath[0] != "Developer" and splitPath[-1] != "detail" and ("algorithm" not in hanConfig):
+            # will default to using GatherData as long as there is a description
+            if "description" not in hanConfig:
+                raise Exception("Must specify a hanConfig for a Shifter or Expert (non-detail) histogram")
+            else:
+                hanConfig["algorithm"] = "GatherData" # must have an algo, otherwise wont be valid han config
 
 
         if fillGroup is None: fillGroup = self.alg.name + "_fillGroup"
@@ -140,6 +195,13 @@ thresholds th_AnyBinIsError {
             kwargs["merge"] = "merge" # ensures we don't get a warning about not specifying merge method
         out = self.fillGroups[fillGroup].defineHistogram(*argsCopy,**kwargs)
         histName = argsCopy[0].split(";")[-1]
+
+        # add help link for all expert plots
+        if splitPath[0] == "Expert":
+            linkUrl = self.HELPURL + "#" + "".join(splitPath[1:]+[histName])
+            linkUrl = f"<a href=\"{linkUrl}\">Help</a>"
+            if "description" not in hanConfig: hanConfig["description"] = linkUrl
+            else: hanConfig["description"] += " - " + linkUrl
 
         splitPathWithHist = splitPath + [histName]
         x = L1CaloMonitorCfgHelper.hanConfigs
@@ -375,5 +437,11 @@ if __name__ == '__main__':
     h.defineHistogram("x,y;h_myHist",type='TH2D',path="Shifter/Blah",hanConfig={"algorithm":"blah"})
     h.defineHistogram("x,y;h_myHis2t",type='TH2D',path="Shifter/Blah",hanConfig={"algorithm":"blah2"})
     h.defineHistogram("x;anotherHist",type='TH1D',path="Developer/whatever",hanConfig={"aaa":2})
-    h.defineTree("x,y,z,a,b;myTree","x/i,y/i,z/i,a/I,b/I",path="Developer/whatever")
+    h.defineTree("x,y,z,a,b;myTree","x/i:y/i:z/i:a/I:b/I",path="Developer/whatever")
+
+    # example of an algorithm requiring all bins to be empty
+    h.defineDQAlgorithm("MyAlgo",
+                        hanConfig={"libname":"libdqm_summaries.so","name":"Bins_NotEqual_Threshold","BinThreshold":"0."},
+                        thresholdConfig={"NBins":[1,1]}) # first number if warning threshold, second is error threshold
+
     L1CaloMonitorCfgHelper.printHanConfig()

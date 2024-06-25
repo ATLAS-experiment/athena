@@ -54,10 +54,10 @@ def EfexMonitoringHistConfig(flags, eFexAlg):
     # mainDir = 'L1Calo'
     trigPath = 'Developer/Efex/' # Directory trigger path for output histos
     # Map from the key name to the output directory substructure.
-    keyDirPathMap = {'L1_eEMRoI' : 'TOB/eEM',
-                     'L1_eEMxRoI' : 'xTOB/eEM', 'L1_eEMRoISim' : 'TOBSim/eEM', 'L1_eEMxRoISim' : 'xTOBSim/eEM',
-                     'L1_eTauRoI' : 'TOB/eTau', 
-                     'L1_eTauxRoI' : 'xTOB/eTau', 'L1_eTauRoISim' : 'TOBSim/eTau', 
+    keyDirPathMap = {'L1_eEMRoI' : 'eEM',
+                     'L1_eEMxRoI' : 'eEMx', 'L1_eEMRoISim' : 'TOBSim/eEM', 'L1_eEMxRoISim' : 'xTOBSim/eEM',
+                     'L1_eTauRoI' : 'eTAU',
+                     'L1_eTauxRoI' : 'eTAUx', 'L1_eTauRoISim' : 'TOBSim/eTau',
                      'L1_eTauxRoISim' : 'xTOBSim/eTau'} 
     cut_names = ["LowPtCut", "HiPtCut"] # List of cut names, for looping over to separate out histograms into directories
     cut_vals = [EfexMonAlg.LowPtCut, EfexMonAlg.HiPtCut] # List of values, for looping over to add to histogram titles
@@ -70,51 +70,27 @@ def EfexMonitoringHistConfig(flags, eFexAlg):
         for etaIdx in range(-25,25):
             locIdxs += [str(phiOct) + ":" + str(etaIdx)]
 
-    for containerKey in EfexMonAlg.eFexEMTobKeyList:
-        tobTypeStr = "xTOB" if ('xRoI' in containerKey) else "TOB"
-        tobTypeStr += "copy" if 'Copy' in containerKey else ""
-        simStr = "Sim" if ('Sim' in containerKey) else ""
-        tobStr = tobTypeStr + simStr
-        helper.defineHistogram(containerKey + '_nEMTOBs_nocut;h_nEmTOBs_nocut', title='Number of eFex EM '+tobStr+'s;Number of EM '+tobStr+'s;Events',
+    for containerKey in (list(EfexMonAlg.eFexEMTobKeyList) + list(EfexMonAlg.eFexTauTobKeyList)):
+        helper.defineHistogram(containerKey + '_nTOBs_nocut;h_n'+containerKey+'_nocut', title='Number of '+containerKey+';Number of '+containerKey+';Events',
                                fillGroup = baseGroupName,
-                                type='TH1I', path=trigPath+tobStr, xbins=100,xmin=-0.5,xmax=99.5)
-        helper.defineHistogram(containerKey + "_seedMax;h_emTob_seedMax", title='EM TOB Seedmax bit;Seedmax bit;Number of TOBs',
-                               fillGroup = baseGroupName,
-                                   type='TH1I',path=trigPath+tobStr, xbins=2,xmin=-0.5,xmax=1.5)
+                               type='TH1I', xbins=100,xmin=-0.5,xmax=99.5)
+        if "Sim" not in containerKey:
+            # don't make these expensive plots for simulation
+            helper.defineHistogram("LBN,locIdx,tobEt;h_"+containerKey+"_et_posLbnMap", title = "Average " + containerKey + " ET;LB;Position (Octant:Eta)",
+                                fillGroup = baseGroupName + "_" + containerKey,
+                                   path = ("Expert/Outputs/" if "x" not in containerKey else trigPath)+keyDirPathMap[containerKey],
+                                   hanConfig={"description":"Check for horizontal anomalies (hotspot/coldspot) or vertical anomalies (whole-system hot/cold)"},
+                                   type="TProfile2D",
+                                   xbins=1,xmin=0,xmax=1, ylabels=locIdxs, opt=['kAddBinsDynamically'])
+            helper.defineHistogram(f"LBN,{containerKey}_nTOBs_nocut;h_"+containerKey+"_nTOBs", title = "Average # of " + containerKey + " TOBs;LBN",
+                                   fillGroup = baseGroupName,
+                                   type="TH2I",
+                                   xbins=1,xmin=0,xmax=1,ybins=20,ymin=-0.5,ymax=19.5, opt=['kAddBinsDynamically'])
 
-        helper.defineHistogram("LBN,locIdx,tobEt;h_"+containerKey+"_et_posLbnMap", title = "Average " + containerKey + " ET;LBN;Position (Octant:Eta)",
-                            fillGroup = baseGroupName + "_" + containerKey,
-                               type="TProfile2D",
-                               xbins=1,xmin=0,xmax=1, ylabels=locIdxs, opt=['kAddBinsDynamically'])
-        helper.defineHistogram(f"LBN,{containerKey}_nEMTOBs_nocut;h_"+containerKey+"_nTOBs", title = "Average # of " + containerKey + " TOBs;LBN",
-                               fillGroup = baseGroupName,
-                               type="TH2I",
-                               xbins=1,xmin=0,xmax=1,ybins=20,ymin=-0.5,ymax=19.5, opt=['kAddBinsDynamically'])
-
-    for containerKey in EfexMonAlg.eFexTauTobKeyList:
-        tobTypeStr = "xTOB" if ('xRoI' in containerKey) else "TOB"
-        tobTypeStr += "copy" if 'Copy' in containerKey else ""
-        simStr = "Sim" if ('Sim' in containerKey) else ""
-        tobStr = tobTypeStr + simStr
-        helper.defineHistogram(containerKey + '_nTauTOBs_nocut;h_nTauTOBs_nocut', title='Number of eFex Tau '+tobStr+'s;Number of Tau '+tobStr+'s;Events',
-                               fillGroup = baseGroupName,
-                                type='TH1I', path=trigPath+tobStr, xbins=100,xmin=-0.5,xmax=99.5)
-        helper.defineHistogram(containerKey + "_seedMax;h_tauTob_seedMax", title='Tau TOB SeedMax;Seedmax bit;Number of TOBs',
-                               fillGroup = baseGroupName,
-                                   type='TH1I',path=trigPath+tobStr, xbins=2,xmin=-0.5,xmax=1.5)
-
-        helper.defineHistogram("LBN,locIdx,tobEt;h_"+containerKey+"_et_posLbnMap", title = "Average " + containerKey + " ET;LBN;Position (Octant:Eta)",
-                               fillGroup = baseGroupName + "_" + containerKey,
-                               type="TProfile2D",
-                               xbins=1,xmin=0,xmax=1, ylabels=locIdxs, opt=['kAddBinsDynamically'])
-        helper.defineHistogram(f"LBN,{containerKey}_nTauTOBs_nocut;h_"+containerKey+"_nTOBs", title = "Average # of " + containerKey + " TOBs;LBN",
-                               fillGroup = baseGroupName,
-                               type="TH2I",
-                               xbins=1,xmin=0,xmax=1,ybins=20,ymin=-0.5,ymax=19.5, opt=['kAddBinsDynamically'])
 
     # Now define the histograms with low/hi Pt cut
     for cut_name, cut_val in zip(cut_names, cut_vals):
-        cut_title_addition = '' if (cut_val == 0.0) else ' (Et>=' + '%.1f'%(cut_val/1000) + 'GeV cut)'
+        cut_title_addition = '' if (cut_val == 0.0) else ' [Et>=' + '%.1f'%(cut_val/1000) + 'GeV]'
         # Em first
         for containerKey in EfexMonAlg.eFexEMTobKeyList:
             fillGroup = baseGroupName+'_'+containerKey+'_'+cut_name
@@ -138,9 +114,12 @@ def EfexMonitoringHistConfig(flags, eFexAlg):
                                    fillGroup=fillGroup,
                                     type='TH1F', path=trigPath+keyDirPathMap[containerKey]+cut_name, xbins=64,xmin=-math.pi,xmax=math.pi)
 
-            helper.defineHistogram('TOBEta,TOBPhi;h_TOBEtaPhiMap', title='eFex '+tobStr+' EM Eta vs Phi'+cut_title_addition+';#eta;#phi',
+            helper.defineHistogram(f"tauTOBEta,tauTOBPhi;h_{containerKey}_{cut_name}_EtaPhiMap", title='eEM '+tobStr+' Count'+cut_title_addition+';#eta;#phi',
                                    fillGroup=fillGroup,
-                                    type='TH2F',path=trigPath+keyDirPathMap[containerKey]+cut_name, xbins=50,xmin=-2.5,xmax=2.5,ybins=64,ymin=-math.pi,ymax=math.pi)
+                                   hanConfig={"description":"Inspect for hot/cold spots - check help for list of known hot/coldspots"},
+                                    type='TH2F',
+                                    path=(("Expert/Outputs/"+keyDirPathMap[containerKey]) if "Sim" not in containerKey and "x" not in containerKey else trigPath+keyDirPathMap[containerKey]+cut_name),
+                                    xbins=50,xmin=-2.5,xmax=2.5,ybins=64,ymin=-math.pi,ymax=math.pi)
 
             helper.defineHistogram('TOBshelfNumber;h_TOBshelfNumber', title='eFex '+tobStr+' EM Shelf Number'+cut_title_addition,
                                    fillGroup=fillGroup,
@@ -206,9 +185,12 @@ def EfexMonitoringHistConfig(flags, eFexAlg):
                                     fillGroup = fillGroup,
                                     type='TH1F', path=trigPath+keyDirPathMap[containerKey]+cut_name, xbins=100,xmin=-math.pi,xmax=math.pi)
 
-            helper.defineHistogram('tauTOBEta,tauTOBPhi;h_tauTOBEtaPhiMap', title='eFex '+tobStr+' Tau Eta vs Phi'+cut_title_addition+';#eta;#phi',
+            helper.defineHistogram(f"tauTOBEta,tauTOBPhi;h_{containerKey}_{cut_name}_EtaPhiMap", title='eTAU '+tobStr+' Count'+cut_title_addition+';#eta;#phi',
                                     fillGroup = fillGroup,
-                                    type='TH2F',path=trigPath+keyDirPathMap[containerKey]+cut_name, xbins=50,xmin=-2.5,xmax=2.5,ybins=64,ymin=-math.pi,ymax=math.pi)
+                                   hanConfig={"description":"Inspect for hot/cold spots - check help for list of known hot/cold spots</a>"},
+                                   type='TH2F',
+                                   path=(("Expert/Outputs/"+keyDirPathMap[containerKey]) if "Sim" not in containerKey and "x" not in containerKey else (trigPath+keyDirPathMap[containerKey]+cut_name)),
+                                   xbins=50,xmin=-2.5,xmax=2.5,ybins=64,ymin=-math.pi,ymax=math.pi)
 
             helper.defineHistogram('tauTOBshelfNumber;h_tauTOBshelfNumber', title='eFex '+tobStr+' Tau Shelf Number'+cut_title_addition,
                                     fillGroup = fillGroup,
