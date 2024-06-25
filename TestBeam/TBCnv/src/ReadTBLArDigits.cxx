@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TBCnv/ReadTBLArDigits.h"
@@ -97,7 +97,7 @@ StatusCode ReadTBLArDigits::execute()
  StatusCode sc; 
  log << MSG::DEBUG << "======== executing event "<< m_count << " ========" << endmsg;
  log << MSG::DEBUG << "Retrieving TBLArDigitContainer. Key= " << m_containerKey << endmsg; 
- TBLArDigitContainer* larDigitCont;
+ TBLArDigitContainer* larDigitCont = nullptr;
  if (m_containerKey.size())
    sc = evtStore()->retrieve(larDigitCont ,m_containerKey);
  else
