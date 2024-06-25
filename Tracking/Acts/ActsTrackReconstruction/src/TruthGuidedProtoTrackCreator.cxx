@@ -72,7 +72,7 @@ StatusCode ActsTrk::TruthGuidedProtoTrackCreator::findProtoTracks(const EventCon
     // Now loop over the pixel and strip container and make collectiong
     std::map<HepMC::ConstGenParticlePtr, std::vector<ActsTrk::ATLASUncalibSourceLink>> trackCollections;
 
-    for(const auto& cluster: pixelContainer)
+    for(const auto cluster: pixelContainer)
     {
         // Get the idetifier list for the RDOs
         auto identifierList = cluster->rdoList();
@@ -89,7 +89,7 @@ StatusCode ActsTrk::TruthGuidedProtoTrackCreator::findProtoTracks(const EventCon
         }
     }
 
-    for(const auto& cluster: stripContainer)
+    for(const auto cluster: stripContainer)
     {
         // Get the idetifier list for the RDOs
         auto identifierList = cluster->rdoList();

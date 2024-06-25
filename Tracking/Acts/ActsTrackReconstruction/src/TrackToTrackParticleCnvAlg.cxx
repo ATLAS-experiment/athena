@@ -242,7 +242,7 @@ namespace ActsTrk
     
     using namespace Acts::UnitLiterals;
     for (const ActsTrk::TrackContainer *tracksContainer : trackContainers) {
-      for (const typename ActsTrk::TrackContainer::ConstTrackProxy &track : *tracksContainer) {
+      for (const typename ActsTrk::TrackContainer::ConstTrackProxy track : *tracksContainer) {
 	track_particles->push_back( new xAOD::TrackParticle );
 	xAOD::TrackParticle *track_particle=track_particles->back();
 	
