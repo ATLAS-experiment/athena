@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -220,7 +220,7 @@ StatusCode ReadData::execute() {
   // Get the list of links, print out its contents
   
   typedef ElementLink<std::vector<float> > VecElemLink;
-  const std::list<VecElemLink>*  pList;
+  const std::list<VecElemLink>* pList = nullptr;
 
   if (!(evtStore()->retrieve(pList)).isSuccess() ) {
     ATH_MSG_ERROR ("Could not find list of links");
