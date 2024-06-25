@@ -57,7 +57,7 @@ StatusCode TrackRecordGenerator::callGenerator() {
   const EventContext& ctx = Gaudi::Hive::currentContext();
   CLHEP::HepRandomEngine* rndmEngine = this->getRandomEngine(name(), ctx);
 
-  const TrackRecordCollection* coll;
+  const TrackRecordCollection* coll = nullptr;
   CHECK( evtStore()->retrieve(coll,m_recordName) );
 
   ATH_MSG_INFO("retrieved "<<coll->size()<<" TTR hits; will smear position by "<< (m_smearTR>0?m_smearTR:0.) <<" mm and momentum by "<< (m_smearTRp>0?m_smearTRp:0.) <<" radians");
