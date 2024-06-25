@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // AthAnalysisAlgorithm.h 
@@ -73,7 +73,7 @@ class AthAnalysisAlgorithm : public ::AthHistogramAlgorithm, virtual public IInc
 
     /// Helper function to access IOVMetaDataContainer information held in InputMetaDataStore, but will check IOVTime. Also can give a channel (leave as -1 to take first available)
     /// IOVTime(runNumber, eventNumber) is a valid constructor for example
-    template<typename T> StatusCode retrieveMetadata(const std::string& folder, const std::string& key, T& out, IOVTime time, int channel=-1) {
+    template<typename T> StatusCode retrieveMetadata(const std::string& folder, const std::string& key, T& out, const IOVTime& time, int channel=-1) {
         try {
             return AthAnalysisHelper::retrieveMetadata(folder,key,out,inputMetaStore(),time,channel);
         } catch(std::exception& e) {
