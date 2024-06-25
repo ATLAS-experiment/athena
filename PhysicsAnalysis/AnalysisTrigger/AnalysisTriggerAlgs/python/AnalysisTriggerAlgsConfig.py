@@ -67,10 +67,11 @@ def RoIBResultToxAODCfg(flags):
 if __name__ == "__main__":
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    from AthenaConfiguration.TestDefaults import defaultTestFiles, defaultGeometryTags
+    from AthenaConfiguration.TestDefaults import defaultConditionsTags, defaultTestFiles, defaultGeometryTags
     flags = initConfigFlags()
     flags.Input.Files = defaultTestFiles.RAW_RUN2
     flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2
+    flags.IOVDb.GlobalTag = defaultConditionsTags.RUN2_DATA
     flags.Exec.MaxEvents = 20
     flags.fillFromArgs()
     flags.lock()

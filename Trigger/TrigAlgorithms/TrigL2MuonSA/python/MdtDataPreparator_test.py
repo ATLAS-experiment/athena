@@ -51,11 +51,12 @@ def testCfg (configFlags):
 
 
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
-from AthenaConfiguration.TestDefaults import defaultTestFiles, defaultGeometryTags
+from AthenaConfiguration.TestDefaults import defaultConditionsTags, defaultGeometryTags, defaultTestFiles
 
 flags = initConfigFlags()
 flags.Input.Files = defaultTestFiles.RAW_RUN2
 flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2
+flags.IOVDb.GlobalTag = defaultConditionsTags.RUN2_DATA
 flags.lock()
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg 
 acc=MainServicesCfg(flags)
