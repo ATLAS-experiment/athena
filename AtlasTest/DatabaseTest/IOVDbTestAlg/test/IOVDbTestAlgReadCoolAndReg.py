@@ -1,3 +1,4 @@
+#!/usr/bin/env athena.py
 # Copyright (C) 2002-2024 by CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -6,6 +7,7 @@ from IOVDbTestAlg.IOVDbTestAlgConfig import IOVDbTestAlgFlags, IOVDbTestAlgReadC
 
 flags = IOVDbTestAlgFlags()
 flags.Exec.MaxEvents = 30
+flags.fillFromArgs()
 flags.lock()
 
 acc = IOVDbTestAlgReadCfg(flags)
