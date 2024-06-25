@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // AthAnalysisHelper.h 
@@ -347,7 +347,7 @@ public:
       return StatusCode::SUCCESS;
    }
 
-  template<typename T> static StatusCode retrieveMetadata(const std::string& folder, const std::string& key, T& out, IOVTime time, int channel=-1) {
+  template<typename T> static StatusCode retrieveMetadata(const std::string& folder, const std::string& key, T& out, const IOVTime& time, int channel=-1) {
       ServiceHandle<StoreGateSvc> inputMetaStore("StoreGateSvc/InputMetaDataStore", "AthAnalysisHelper");
       if(inputMetaStore.retrieve().isFailure()) return StatusCode::FAILURE; //must remember to release
       StatusCode result = retrieveMetadata(folder,key,out,inputMetaStore,time,channel);
