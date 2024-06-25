@@ -13,6 +13,7 @@
 #include "xAODTruth/TruthParticleAuxContainer.h"
 #include "xAODTruth/TruthVertexContainer.h"
 #include "xAODTruth/TruthVertexAuxContainer.h"
+#include "AthContainers/ConstAccessor.h"
 
 #include "TruthUtils/HepMCHelpers.h"
 
@@ -82,11 +83,16 @@ int DerivationFramework::CollectionMakerHelpers::addTruthParticle( const xAOD::T
 
 xAOD::TruthParticle* DerivationFramework::CollectionMakerHelpers::setupTruthParticle(const xAOD::TruthParticle& oldPart, xAOD::TruthParticleContainer* partCont){
     // Set up decorators
-    const static SG::AuxElement::Decorator< unsigned int > originDecorator("classifierParticleOrigin");
-    const static SG::AuxElement::Decorator< unsigned int > typeDecorator("classifierParticleType");
-    const static SG::AuxElement::Decorator< unsigned int > outcomeDecorator("classifierParticleOutCome");
-    const static SG::AuxElement::Decorator< int > motherIDDecorator("motherID");
-    const static SG::AuxElement::Decorator< int > daughterIDDecorator("daughterID");
+    const static SG::Decorator< unsigned int > originDecorator("classifierParticleOrigin");
+    const static SG::Decorator< unsigned int > typeDecorator("classifierParticleType");
+    const static SG::Decorator< unsigned int > outcomeDecorator("classifierParticleOutCome");
+    const static SG::Decorator< int > motherIDDecorator("motherID");
+    const static SG::Decorator< int > daughterIDDecorator("daughterID");
+
+    static const SG::ConstAccessor<unsigned int> classifierParticleTypeAcc("classifierParticleType");
+    static const SG::ConstAccessor<unsigned int> classifierParticleOriginAcc("classifierParticleOrigin");
+    static const SG::ConstAccessor<unsigned int> classifierParticleOutComeAcc("classifierParticleOutCome");
+
     // Make a truth particle and add it to the container
     xAOD::TruthParticle* xTruthParticle = new xAOD::TruthParticle();
     partCont->push_back( xTruthParticle );
@@ -105,14 +111,8 @@ xAOD::TruthParticle* DerivationFramework::CollectionMakerHelpers::setupTruthPart
         xTruthParticle->setPolarizationParameter( oldPart.polarizationParameter( xAOD::TruthParticle::polarizationTheta ) , xAOD::TruthParticle::polarizationTheta );
     }
     // Copy over the decorations if they are available
-    if (oldPart.isAvailable<unsigned int>("classifierParticleType")) {
-        typeDecorator(*xTruthParticle) = oldPart.auxdata< unsigned int >( "classifierParticleType" );
-    } else {typeDecorator(*xTruthParticle) = 0;}
-    if (oldPart.isAvailable<unsigned int>("classifierParticleOrigin")) {
-        originDecorator(*xTruthParticle) = oldPart.auxdata< unsigned int >( "classifierParticleOrigin" );
-    } else {originDecorator(*xTruthParticle) = 0;}
-    if (oldPart.isAvailable<unsigned int>("classifierParticleOutCome")) {
-        outcomeDecorator(*xTruthParticle) = oldPart.auxdata< unsigned int >( "classifierParticleOutCome" );
-    } else {outcomeDecorator(*xTruthParticle) = 0;}
+    typeDecorator(*xTruthParticle) = classifierParticleTypeAcc.withDefault(oldPart, 0);
+    originDecorator(*xTruthParticle) = classifierParticleOriginAcc.withDefault(oldPart, 0);
+    outcomeDecorator(*xTruthParticle) = classifierParticleOutComeAcc.withDefault(oldPart, 0);
     return xTruthParticle;
 }

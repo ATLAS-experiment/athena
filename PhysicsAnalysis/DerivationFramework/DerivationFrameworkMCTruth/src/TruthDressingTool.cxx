@@ -12,6 +12,7 @@
 #include "xAODTruth/TruthEventContainer.h"
 #include "StoreGate/WriteDecorHandle.h"
 #include "StoreGate/ReadDecorHandle.h"
+#include "AthContainers/ConstAccessor.h"
 
 #include "TruthUtils/MagicNumbers.h"
 
@@ -22,7 +23,7 @@
 #include <algorithm>
 #include <memory>
 namespace {
-  static const SG::AuxElement::ConstAccessor<unsigned int> acc_origin("Classification");    
+  static const SG::ConstAccessor<unsigned int> acc_origin("Classification");    
 }
 // Constructor
 DerivationFramework::TruthDressingTool::TruthDressingTool(const std::string& t,
@@ -147,6 +148,11 @@ StatusCode DerivationFramework::TruthDressingTool::addBranches() const
       ATH_MSG_WARNING("Cannot construct the list of final state particles "<<m_truthClassKey.fullKey());
     }
 
+    static const SG::ConstAccessor<double> pt_visAcc("pt_vis");
+    static const SG::ConstAccessor<double> eta_visAcc("eta_vis");
+    static const SG::ConstAccessor<double> phi_visAcc("phi_vis");
+    static const SG::ConstAccessor<double> mvisAcc("m_vis");
+
     // Do dR-based photon dressing (default)
     if (!m_useAntiKt){
       //loop over photons, uniquely associate each to nearest bare particle
@@ -166,18 +172,18 @@ StatusCode DerivationFramework::TruthDressingTool::addBranches() const
           xAOD::TruthParticle::FourMom_t bare_part;
           if(listOfParticlesToDress[i]->isTau()) {
   
-            if( !listOfParticlesToDress[i]->isAvailable<double>("pt_vis") ||
-                !listOfParticlesToDress[i]->isAvailable<double>("eta_vis") ||
-                !listOfParticlesToDress[i]->isAvailable<double>("phi_vis") ||
-                !listOfParticlesToDress[i]->isAvailable<double>("m_vis")) {
+            if( !pt_visAcc.isAvailable(*listOfParticlesToDress[i]) ||
+                !eta_visAcc.isAvailable(*listOfParticlesToDress[i]) ||
+                !phi_visAcc.isAvailable(*listOfParticlesToDress[i]) ||
+                !mvisAcc.isAvailable(*listOfParticlesToDress[i])) {
               ATH_MSG_ERROR("Visible momentum not available for truth taus, cannot perform dressing!");
               return StatusCode::FAILURE;
             }
   
-            bare_part.SetPtEtaPhiM(listOfParticlesToDress[i]->auxdata<double>("pt_vis"),
-                                   listOfParticlesToDress[i]->auxdata<double>("eta_vis"),
-                                   listOfParticlesToDress[i]->auxdata<double>("phi_vis"),
-                                   listOfParticlesToDress[i]->auxdata<double>("m_vis"));
+            bare_part.SetPtEtaPhiM(pt_visAcc(*listOfParticlesToDress[i]),
+                                   eta_visAcc(*listOfParticlesToDress[i]),
+                                   phi_visAcc(*listOfParticlesToDress[i]),
+                                   mvisAcc(*listOfParticlesToDress[i]));
           }
           else {
             bare_part = listOfParticlesToDress[i]->p4();
@@ -228,17 +234,17 @@ StatusCode DerivationFramework::TruthDressingTool::addBranches() const
       for (const auto& part : listOfParticlesToDress) {
 
         if(part->isTau()) {
-          if(!part->isAvailable<double>("pt_vis") || !part->isAvailable<double>("eta_vis")
-              || !part->isAvailable<double>("phi_vis") || !part->isAvailable<double>("m_vis")) {
+          if(!pt_visAcc.isAvailable(*part) || !eta_visAcc.isAvailable(*part)
+             || !phi_visAcc.isAvailable(*part) || !mvisAcc.isAvailable(*part)) {
             ATH_MSG_ERROR("Visible momentum not available for truth taus, cannot perform dressing!");
             return StatusCode::FAILURE;
           }
 
           TLorentzVector tauvis;
-          tauvis.SetPtEtaPhiM(part->auxdata<double>("pt_vis"), 
-                              part->auxdata<double>("eta_vis"), 
-                              part->auxdata<double>("phi_vis"), 
-                              part->auxdata<double>("m_vis"));
+          tauvis.SetPtEtaPhiM(pt_visAcc(*part),
+                              eta_visAcc(*part),
+                              phi_visAcc(*part),
+                              mvisAcc(*part));
           fj_particles.emplace_back(tauvis.Px(), tauvis.Py(), tauvis.Pz(), tauvis.E());
         }
         else {

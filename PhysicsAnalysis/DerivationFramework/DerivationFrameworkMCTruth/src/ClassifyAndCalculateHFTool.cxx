@@ -11,6 +11,7 @@
 ////////////////////////////////////////////////////////////////////////// 
 
 #include "DerivationFrameworkMCTruth/ClassifyAndCalculateHFTool.h"
+#include "AthContainers/ConstAccessor.h"
 
 namespace DerivationFramework {
 
@@ -115,9 +116,9 @@ namespace DerivationFramework {
                                             const std::map<const xAOD::TruthParticle*, DerivationFramework::HadronOriginClassifier::HF_id>&  hadronMap,
                                             const std::string& hfDecorationName) const{
 
-    SG::AuxElement::Decorator< int > decorator_flav(hfDecorationName + "_flav");
-    SG::AuxElement::Decorator< int > decorator_id(hfDecorationName + "_id");
-    SG::AuxElement::Decorator< int > decorator_count(hfDecorationName + "_count");
+    SG::Decorator< int > decorator_flav(hfDecorationName + "_flav");
+    SG::Decorator< int > decorator_id(hfDecorationName + "_id");
+    SG::Decorator< int > decorator_count(hfDecorationName + "_count");
 
     for(const xAOD::Jet* jet : *jets){
 
@@ -306,22 +307,25 @@ namespace DerivationFramework {
       int id    = 0;
       int count = 0;
 
-      if(jet->isAvailable<int>(hfDecorationName + "_flav")){
-        flav=jet->auxdataConst<int>(hfDecorationName + "_flav");
+      SG::ConstAccessor<int> hfflavAcc(hfDecorationName + "_flav");
+      if(hfflavAcc.isAvailable(*jet)){
+        flav=hfflavAcc(*jet);
       }else{
         ATH_MSG_WARNING("variable '" + hfDecorationName + "_flav' not found.");
         continue;
       }
 
-      if(jet->isAvailable<int>(hfDecorationName + "_id")){
-        id=jet->auxdataConst<int>(hfDecorationName + "_id");
+      SG::ConstAccessor<int> hfidAcc(hfDecorationName + "_id");
+      if(hfidAcc.isAvailable(*jet)){
+        id=hfidAcc(*jet);
       }else{
         ATH_MSG_WARNING("variable '" + hfDecorationName + "_id' not found.");
         continue;
       }
 
-      if(jet->isAvailable<int>(hfDecorationName + "_count")){
-        count=jet->auxdataConst<int>(hfDecorationName + "_count");
+      SG::ConstAccessor<int> hfcountAcc(hfDecorationName + "_count");
+      if(hfcountAcc.isAvailable(*jet)){
+        count=hfcountAcc(*jet);
       }else{
         ATH_MSG_WARNING("variable '" + hfDecorationName + "_count' not found.");
         continue;

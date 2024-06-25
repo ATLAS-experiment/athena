@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -11,6 +11,7 @@
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
 #include "StoreGate/WriteDecorHandle.h"
+#include "AthContainers/ConstAccessor.h"
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODTruth/TruthParticleAuxContainer.h"
 #include "xAODTruth/TruthVertexContainer.h"
@@ -170,18 +171,16 @@ int DerivationFramework::TruthDecayCollectionMaker::addTruthParticle( const Even
         (*vert_cont)[vert_index]->addIncomingParticleLink( eltp );
     }
     // Copy over the decorations if they are available
-    if (old_part.isAvailable<unsigned int>("classifierParticleType")) {
-        typeDecorator(*xTruthParticle) = old_part.auxdata< unsigned int >( "classifierParticleType" );
-    } else {typeDecorator(*xTruthParticle) = 0;}
-    if (old_part.isAvailable<unsigned int>("classifierParticleOrigin")) {
-        originDecorator(*xTruthParticle) = old_part.auxdata< unsigned int >( "classifierParticleOrigin" );
-    } else {originDecorator(*xTruthParticle) = 0;}
-    if (old_part.isAvailable<unsigned int>("classifierParticleOutCome")) {
-        outcomeDecorator(*xTruthParticle) = old_part.auxdata< unsigned int >( "classifierParticleOutCome" );
-    } else {outcomeDecorator(*xTruthParticle) = 0;}
-    if (old_part.isAvailable<unsigned int>("Classification")) {
-        classificationDecorator(*xTruthParticle) = old_part.auxdata< unsigned int >( "Classification" );
-    } else {classificationDecorator(*xTruthParticle) = 0;}
+    static const SG::ConstAccessor<unsigned int> classifierParticleTypeAcc("classifierParticleType");
+    static const SG::ConstAccessor<unsigned int> classifierParticleOriginAcc("classifierParticleOrigin");
+    static const SG::ConstAccessor<unsigned int> classifierParticleOutComeAcc("classifierParticleOutCome");
+    static const SG::ConstAccessor<unsigned int> ClassificationAcc("Classification");
+
+    typeDecorator(*xTruthParticle) = classifierParticleTypeAcc.withDefault (old_part, 0);
+    originDecorator(*xTruthParticle) = classifierParticleOriginAcc.withDefault (old_part, 0);
+    outcomeDecorator(*xTruthParticle) = classifierParticleOutComeAcc.withDefault (old_part, 0);
+    classificationDecorator(*xTruthParticle) = ClassificationAcc.withDefault (old_part, 0);
+
     // Return a link to this particle
     return my_index;
 }

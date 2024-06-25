@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -18,6 +18,7 @@
 #include "StoreGate/StoreGateSvc.h"
 #include "xAODTruth/TruthMetaDataContainer.h"
 #include "TruthUtils/HepMCHelpers.h"
+#include "AthContainers/ConstAccessor.h"
 // STL Includes
 #include <vector>
 #include <string>
@@ -327,26 +328,22 @@ StatusCode DerivationFramework::TruthCollectionMaker::addBranches() const
                     // Fill with numerical content
                     *xTruthParticle=*theParticle;
                     // Copy over the decorations if they are available
-                    if (typeReadDecor.isAvailable()) {
-                        typeDecorator(*xTruthParticle) = typeReadDecor(*theParticle);
-                    } else {typeDecorator(*xTruthParticle) = 0;}
+                    typeDecorator(*xTruthParticle) =
+                      typeReadDecor.withDefault(*theParticle, 0);
 
-                    if (originReadDecor.isAvailable()) {
-                        originDecorator(*xTruthParticle) = originReadDecor(*theParticle);
-                    } else {originDecorator(*xTruthParticle) = 0;}
+                    originDecorator(*xTruthParticle) =
+                      originReadDecor.withDefault(*theParticle, 0);
 
-                    if (outcomeReadDecor.isAvailable()) {
-                        outcomeDecorator(*xTruthParticle) = outcomeReadDecor(*theParticle);
-                    } else {outcomeDecorator(*xTruthParticle) = 0;}
+                    outcomeDecorator(*xTruthParticle) =
+                      outcomeReadDecor.withDefault(*theParticle, 0);
 
-                    if (classificationReadDecor.isAvailable()) {
-                        classificationDecorator(*xTruthParticle) = classificationReadDecor(*theParticle);
-                    } else {classificationDecorator(*xTruthParticle) = 0;}
+                    classificationDecorator(*xTruthParticle) =
+                      classificationReadDecor.withDefault(*theParticle, 0);
 
                     if (m_outputParticlesKey.key()=="TruthHFHadrons"){
-                        if (theParticle->isAvailable<int>("TopHadronOriginFlag")) {
-                            hadronOriginDecorator(*xTruthParticle) = theParticle->auxdata< int >( "TopHadronOriginFlag" );
-                        } else {hadronOriginDecorator(*xTruthParticle) = 0;}
+                        static const SG::ConstAccessor<int> TopHadronOriginFlagAcc("TopHadronOriginFlag");
+                        hadronOriginDecorator(*xTruthParticle) =
+                          TopHadronOriginFlagAcc.withDefault (*theParticle, 0);
                     }
 
                     if(m_keep_navigation_info) linkDecorator(*xTruthParticle) = eltp;

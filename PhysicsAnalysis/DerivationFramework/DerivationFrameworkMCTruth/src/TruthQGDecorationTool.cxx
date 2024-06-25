@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -9,6 +9,7 @@
 #include "DerivationFrameworkMCTruth/TruthQGDecorationTool.h"
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteDecorHandle.h"
+#include "AthContainers/ConstAccessor.h"
 #include "xAODJet/JetContainer.h"
 #include <string>
 
@@ -47,14 +48,16 @@ StatusCode DerivationFramework::TruthQGDecorationTool::addBranches() const
     return StatusCode::FAILURE;
   }
 
-  SG::WriteDecorHandle<xAOD::JetContainer,int> output_decorator(m_decOutput, ctx); 
+  SG::WriteDecorHandle<xAOD::JetContainer,int> output_decorator(m_decOutput, ctx);
+  static const SG::ConstAccessor<int> PartonTruthLabelIDAcc("PartonTruthLabelID");
+  static const SG::ConstAccessor<int> HadronConeExclTruthLabelIDAcc("HadronConeExclTruthLabelID");
 
   for (const auto *ajet : *inputJets){
-    if (!ajet->isAvailable<int>("PartonTruthLabelID") ){
+    if (!PartonTruthLabelIDAcc.isAvailable(*ajet) ){
       ATH_MSG_ERROR("Did not have input PartonTruthLabelID decorations available");
       return StatusCode::FAILURE;
     }
-    else if (!ajet->isAvailable<int>("HadronConeExclTruthLabelID") ){
+    else if (!HadronConeExclTruthLabelIDAcc.isAvailable(*ajet) ){
       ATH_MSG_ERROR("Did not have input HadronConeExclTruthLabelID decorations available");
       return StatusCode::FAILURE;
     } // Now we have the input decorations
@@ -64,15 +67,16 @@ StatusCode DerivationFramework::TruthQGDecorationTool::addBranches() const
         - In the case that the two disagree (e.g. Jet/MET says b and HF says light),
            multiply the Jet/MET label by 100 to ensure this case is kept separate
     */
-    if (ajet->auxdata<int>("HadronConeExclTruthLabelID")!=0){
-      output_decorator(*ajet) = ajet->auxdata<int>("HadronConeExclTruthLabelID");
+    if (HadronConeExclTruthLabelIDAcc(*ajet)!=0){
+      output_decorator(*ajet) = HadronConeExclTruthLabelIDAcc(*ajet);
     } else {
-      if (std::abs(ajet->auxdata<int>("PartonTruthLabelID"))!=5 &&
-          std::abs(ajet->auxdata<int>("PartonTruthLabelID"))!=4 &&
-          std::abs(ajet->auxdata<int>("PartonTruthLabelID"))!=15){
-        output_decorator(*ajet) = ajet->auxdata<int>("PartonTruthLabelID");
+      int labelid = PartonTruthLabelIDAcc(*ajet);
+      if (std::abs(labelid)!=5 &&
+          std::abs(labelid)!=4 &&
+          std::abs(labelid)!=15){
+        output_decorator(*ajet) = labelid;
       } else {
-        output_decorator(*ajet) = ajet->auxdata<int>("PartonTruthLabelID")*100;
+        output_decorator(*ajet) = labelid*100;
       }
     }
   } // Loop over jets

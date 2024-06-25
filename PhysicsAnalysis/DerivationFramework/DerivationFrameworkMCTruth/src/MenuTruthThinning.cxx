@@ -22,6 +22,7 @@
 #include "GaudiKernel/SystemOfUnits.h"
 #include "StoreGate/ThinningHandle.h"
 #include "GaudiKernel/ThreadLocalContext.h"
+#include "AthContainers/ConstAccessor.h"
 #include <vector>
 #include <string>
 
@@ -610,9 +611,10 @@ bool DerivationFramework::MenuTruthThinning::isFromTau(const xAOD::TruthParticle
 bool DerivationFramework::MenuTruthThinning::isttHFHadron(const xAOD::TruthParticle* part) {
     
     int ttHFClassification=6;
-    
-    if (part->isAvailable<int>("TopHadronOriginFlag")){
-        ttHFClassification = part->auxdata< int >( "TopHadronOriginFlag" );
+
+    static const SG::ConstAccessor<int> TopHadronOriginFlagAcc("TopHadronOriginFlag");
+    if (TopHadronOriginFlagAcc.isAvailable(*part)){
+        ttHFClassification = TopHadronOriginFlagAcc(*part);
     }
     else{
         return false;
