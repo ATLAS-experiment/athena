@@ -229,14 +229,11 @@ StatusCode tauMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
 
   nTauCandidates = 0;
 
+  static const SG::ConstAccessor<char> passThinningAcc("passThinning");
+
   for (const auto tau : *shallowTaus) {
-    // avoid unphysical tau calibration
-    if (std::abs(tau->etaFinalCalib()) < 5) {
-      TLorentzVector calibratedVec =
-          tau->p4(xAOD::TauJetParameters::FinalCalib);
-      tau->setP4(calibratedVec.Pt(), calibratedVec.Eta(), calibratedVec.Phi(),
-                 calibratedVec.M());
-    }
+
+    if (!passThinningAcc.withDefault(*tau, true)) continue;
 
     tauEta = tau->eta();
     tauPhi = tau->phi();
