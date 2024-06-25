@@ -778,9 +778,6 @@ def collToRecordable(flags,name):
 def addGlobalFlags(flags: AthConfigFlags, category : str):
   flags.addFlag(f'{category}.RoiZedWidthDefault', 180.0 * Units.mm)
   flags.addFlag(f'{category}.doGPU', False)
-  flags.addFlag(f'{category}.UseTrigTrackFollowing', False)
-  flags.addFlag(f'{category}.UseTrigRoadPredictor', False)
-  flags.addFlag(f'{category}.UseTracklets', False)
 
   flags.addFlag(f'{category}.PixelClusterCacheKey',    "PixelTrigClustersCache")
   flags.addFlag(f'{category}.SCTClusterCacheKey',      "SCT_ClustersCache")

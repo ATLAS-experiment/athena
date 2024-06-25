@@ -313,7 +313,7 @@ def ITkTrigSpacePointConversionToolCfg(flags: AthConfigFlags, **kwargs) -> Compo
 
   return acc
 
-def ITkTrigSiTrackMaker_FTF_Cfg(flags, signature) -> ComponentAccumulator:
+def ITkTrigSiTrackMaker_FTF_Cfg(flags, signature, layerNumberingTool) -> ComponentAccumulator:
   acc = ComponentAccumulator()
   
   from InDetConfig.SiCombinatorialTrackFinderToolConfig import ITkSiCombinatorialTrackFinder_xkCfg
@@ -329,6 +329,16 @@ def ITkTrigSiTrackMaker_FTF_Cfg(flags, signature) -> ComponentAccumulator:
                                   CombinatorialTrackFinder = CombinatorialTrackFinderTool)
   )
   
+  acc.addPublicTool( CompFactory.TrigInDetTrackFollowingTool( name = "TrigTrackFollowingTool_FTF_"+signature,
+                                                              PixelClusterContainer='ITkTrigPixelClusters',
+                                                              SCT_ClusterContainer='ITkTrigStripClusters' ) )
+  trackMaker.useTrigTrackFollowingTool = True
+  trackMaker.TrigTrackFollowingTool = acc.getPublicTool("TrigTrackFollowingTool_FTF_"+signature)
+
+  acc.addPublicTool( CompFactory.TrigInDetRoadPredictorTool( name = "TrigRoadPredictorTool_FTF"+signature, LayerNumberTool = layerNumberingTool ) )
+  trackMaker.useTrigInDetRoadPredictorTool = True
+  trackMaker.TrigInDetRoadPredictorTool = acc.getPublicTool("TrigRoadPredictorTool_FTF"+signature)
+
   acc.addPublicTool(trackMaker)
   return acc
 
@@ -369,7 +379,7 @@ def TrigFastTrackFinderCfg(flags: AthConfigFlags, name: str, RoIs: str, inputTra
     spTool = acc.popToolsAndMerge(ITkTrigSpacePointConversionToolCfg(flags))
     numberingTool = acc.popToolsAndMerge(ITkTrigL2LayerNumberToolCfg(flags))
 
-    acc.merge(ITkTrigSiTrackMaker_FTF_Cfg(flags, signature))
+    acc.merge(ITkTrigSiTrackMaker_FTF_Cfg(flags, signature, numberingTool))
     TrackMaker_FTF = acc.getPublicTool("ITkTrigSiTrackMaker_FTF_"+signature)
 
     acc.addPublicTool( CompFactory.TrigInDetTrackFitter( "TrigInDetTrackFitter_"+signature ) )
@@ -454,7 +464,8 @@ def TrigFastTrackFinderCfg(flags: AthConfigFlags, name: str, RoIs: str, inputTra
         MonTool = monTool,
         Extrapolator = acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags)),
         RoIs = RoIs,
-        ITkMode = True if flags.Detector.GeometryITk else False,
+        ITkMode = flags.Detector.GeometryITk,
+        UseTracklets = flags.Detector.GeometryITk,
     )
     
   ftf.LRT_D0Min = flags.Tracking.ActiveConfig.LRT_D0Min
