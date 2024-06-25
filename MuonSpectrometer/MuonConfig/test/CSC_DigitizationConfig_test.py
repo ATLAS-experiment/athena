@@ -6,7 +6,7 @@ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 import sys
 from AthenaCommon.Logging import log
 from AthenaCommon.Constants import DEBUG
-from AthenaConfiguration.TestDefaults import defaultTestFiles
+from AthenaConfiguration.TestDefaults import defaultConditionsTags, defaultTestFiles
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
@@ -17,8 +17,8 @@ log.setLevel(DEBUG)
 # Configure
 flags = initConfigFlags()
 flags.Input.Files = defaultTestFiles.HITS_RUN2
+flags.IOVDb.GlobalTag = defaultConditionsTags.RUN2_MC
 flags.Output.RDOFileName = "myRDO.pool.root"
-flags.IOVDb.GlobalTag = "OFLCOND-MC16-SDR-16"
 flags.lock()
 # Function tests
 # Construct our accumulator to run

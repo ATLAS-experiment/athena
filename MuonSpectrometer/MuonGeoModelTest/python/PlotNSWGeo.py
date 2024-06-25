@@ -28,9 +28,9 @@ if __name__ == "__main__":
     flags.Output.ESDFileName = args.output
     flags.Input.Files = args.inputFile
     flags.Muon.applyMMPassivation = True
-    from AthenaConfiguration.TestDefaults import defaultGeometryTags
+    from AthenaConfiguration.TestDefaults import defaultConditionsTags, defaultGeometryTags
     flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
-    flags.IOVDb.GlobalTag = "OFLCOND-MC23-SDR-RUN3-02"
+    flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_MC
     flags.lock()
     #### 
     from MuonCondTest.MdtCablingTester import setupServicesCfg

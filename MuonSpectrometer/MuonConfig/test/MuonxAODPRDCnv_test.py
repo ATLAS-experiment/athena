@@ -2,7 +2,6 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 from MuonConfig.MuonConfigUtils import SetupMuonStandaloneOutput, SetupMuonStandaloneCA
 from MuonConfig.MuonSegmentFindingConfig import MuonSegmentFindingCfg
-from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
 
