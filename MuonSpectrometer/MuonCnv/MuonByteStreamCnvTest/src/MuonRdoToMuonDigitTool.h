@@ -139,9 +139,6 @@ private:
     */
     bool m_show_warning_level_invalid_TGC_A09_SSW6_hit;
 
-    /** Flag to distinguish 12-fold TGC cabling and 8-fold TGC cabling */
-    bool m_is12foldTgc;
-
     SG::ReadHandleKey<MdtCsmContainer> m_mdtRdoKey{this, "MdtRdoContainer", "MDTCSM", "Mdt RDO Input"};
     SG::WriteHandleKey<MdtDigitContainer> m_mdtDigitKey{this, "MdtDigitContainer", "MDT_DIGITS", "Mdt Digit Output"};
     
