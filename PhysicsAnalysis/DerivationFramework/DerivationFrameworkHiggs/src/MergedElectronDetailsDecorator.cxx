@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -15,6 +15,7 @@
 #include "FourMomUtils/P4Helpers.h"
 #include "xAODTruth/xAODTruthHelpers.h"
 #include "ElectronPhotonSelectorTools/ElectronSelectorHelpers.h"
+#include "AthContainers/Decorator.h"
 
 #include "GaudiKernel/EventContext.h"
 
@@ -258,17 +259,28 @@ namespace DerivationFramework {
       }
     }
 
-    el->auxdecor<std::vector<float>>("TrackMatchingP_dEta1") = trkMatchTrkP_dEta1;
-    el->auxdecor<std::vector<float>>("TrackMatchingP_dEta2") = trkMatchTrkP_dEta2;
-    el->auxdecor<std::vector<float>>("TrackMatchingP_dPhi1") = trkMatchTrkP_dPhi1;
-    el->auxdecor<std::vector<float>>("TrackMatchingP_dPhi2") = trkMatchTrkP_dPhi2;
-    el->auxdecor<std::vector<float>>("TrackMatchingLM_dEta1") = trkMatchTrkLM_dEta1;
-    el->auxdecor<std::vector<float>>("TrackMatchingLM_dEta2") = trkMatchTrkLM_dEta2;
-    el->auxdecor<std::vector<float>>("TrackMatchingLM_dPhi1") = trkMatchTrkLM_dPhi1;
-    el->auxdecor<std::vector<float>>("TrackMatchingLM_dPhi2") = trkMatchTrkLM_dPhi2;
-    el->auxdecor<std::vector<float>>("TrackMatchingR_dPhi2")  = trkMatchTrkR_dPhi2;
-    el->auxdecor<std::vector<float>>("TrackMatchingTrue_dEta2") = trueMatch_dEta2;
-    el->auxdecor<std::vector<float>>("TrackMatchingTrue_dPhi2") = trueMatch_dPhi2;
+    static const SG::Decorator<std::vector<float> > TrackMatchingP_dEta1Dec("TrackMatchingP_dEta1");
+    static const SG::Decorator<std::vector<float> > TrackMatchingP_dEta2Dec("TrackMatchingP_dEta2");
+    static const SG::Decorator<std::vector<float> > TrackMatchingP_dPhi1Dec("TrackMatchingP_dPhi1");
+    static const SG::Decorator<std::vector<float> > TrackMatchingP_dPhi2Dec("TrackMatchingP_dPhi2");
+    static const SG::Decorator<std::vector<float> > TrackMatchingLM_dEta1Dec("TrackMatchingLM_dEta1");
+    static const SG::Decorator<std::vector<float> > TrackMatchingLM_dEta2Dec("TrackMatchingLM_dEta2");
+    static const SG::Decorator<std::vector<float> > TrackMatchingLM_dPhi1Dec("TrackMatchingLM_dPhi1");
+    static const SG::Decorator<std::vector<float> > TrackMatchingLM_dPhi2Dec("TrackMatchingLM_dPhi2");
+    static const SG::Decorator<std::vector<float> > TrackMatchingR_dPhi2Dec("TrackMatchingR_dPhi2");
+    static const SG::Decorator<std::vector<float> > TrackMatchingTrue_dEta2Dec("TrackMatchingTrue_dEta2");
+    static const SG::Decorator<std::vector<float> > TrackMatchingTrue_dPhi2Dec("TrackMatchingTrue_dPhi2");
+    TrackMatchingP_dEta1Dec(*el) = trkMatchTrkP_dEta1;
+    TrackMatchingP_dEta2Dec(*el) = trkMatchTrkP_dEta2;
+    TrackMatchingP_dPhi1Dec(*el) = trkMatchTrkP_dPhi1;
+    TrackMatchingP_dPhi2Dec(*el) = trkMatchTrkP_dPhi2;
+    TrackMatchingLM_dEta1Dec(*el) = trkMatchTrkLM_dEta1;
+    TrackMatchingLM_dEta2Dec(*el) = trkMatchTrkLM_dEta2;
+    TrackMatchingLM_dPhi1Dec(*el) = trkMatchTrkLM_dPhi1;
+    TrackMatchingLM_dPhi2Dec(*el) = trkMatchTrkLM_dPhi2;
+    TrackMatchingR_dPhi2Dec(*el) = trkMatchTrkR_dPhi2;
+    TrackMatchingTrue_dEta2Dec(*el) = trueMatch_dEta2;
+    TrackMatchingTrue_dPhi2Dec(*el) = trueMatch_dPhi2;
   }
 
   void DerivationFramework::MergedElectronDetailsDecorator::fillClusterDetails(const xAOD::Electron* el)
@@ -279,7 +291,7 @@ namespace DerivationFramework {
     std::vector<float> subCluster_dEta;
     std::vector<float> subCluster_dPhi;
 
-    static const SG::AuxElement::Accessor<std::vector<ElementLink<xAOD::CaloClusterContainer> > > clusterLinksAcc("constituentClusterLinks");
+    static const SG::Accessor<std::vector<ElementLink<xAOD::CaloClusterContainer> > > clusterLinksAcc("constituentClusterLinks");
     if(caloCluster && clusterLinksAcc.isAvailable(*caloCluster) ){
       std::vector<ElementLink<xAOD::CaloClusterContainer> >  clusterLinks = clusterLinksAcc(*caloCluster);
       for( const auto& link : clusterLinks){
@@ -291,9 +303,12 @@ namespace DerivationFramework {
         }
       }
     }
-    el->auxdecor<std::vector<float>>("SubCluster_E") = subCluster_E;
-    el->auxdecor<std::vector<float>>("SubCluster_dEta") = subCluster_dEta;
-    el->auxdecor<std::vector<float>>("SubCluster_dPhi") = subCluster_dPhi;
+    static const SG::Decorator<std::vector<float> > SubCluster_EDec("SubCluster_E");
+    static const SG::Decorator<std::vector<float> > SubCluster_dEtaDec("SubCluster_dEta");
+    static const SG::Decorator<std::vector<float> > SubCluster_dPhiDec("SubCluster_dPhi");
+    SubCluster_EDec(*el) = subCluster_E;
+    SubCluster_dEtaDec(*el) = subCluster_dEta;
+    SubCluster_dPhiDec(*el) = subCluster_dPhi;
   }
 
 
@@ -422,27 +437,50 @@ namespace DerivationFramework {
         }
       }
     }
-    el->auxdecor<float>("vtxR")    = vtxR;
-    el->auxdecor<float>("vtxRerr") = vtxRerr;
-    el->auxdecor<float>("vtxZ")    = vtxZ;
-    el->auxdecor<float>("vtxZerr") = vtxZerr;
-    el->auxdecor<float>("vtxM")    = vtxM;
-    el->auxdecor<float>("vtxMerr") = vtxMerr;
-    el->auxdecor<float>("vtxPt")   = vtxP;
-    el->auxdecor<float>("vtxPterr")= vtxPerr;
-    el->auxdecor<float>("vtxE")    = vtxE;
-    el->auxdecor<float>("vtxEta")  = vtxEta;
-    el->auxdecor<float>("vtxPhi")  = vtxPhi;
-    el->auxdecor<int>("vtxTrkParticleIndex1") = vtxTrkParticleIndex1;
-    el->auxdecor<int>("vtxTrkParticleIndex2") = vtxTrkParticleIndex2;
-    el->auxdecor<float>("vtxTrkParticle1_dPhi2") = vtxTrkParticle1_dPhi2;
-    el->auxdecor<float>("vtxTrkParticle1_dEta2") = vtxTrkParticle1_dEta2;
-    el->auxdecor<float>("vtxTrkParticle2_dPhi2") = vtxTrkParticle2_dPhi2;
-    el->auxdecor<float>("vtxTrkParticle2_dEta2") = vtxTrkParticle2_dEta2;
-    el->auxdecor<float>("vtxChi2") = vtxChi2;
-    el->auxdecor<int>("vtxNdof")   = vtxNdof;
-    el->auxdecor<float>("vtxdEta") = vtxdEta;
-    el->auxdecor<float>("vtxdPhi") = vtxdPhi;
+
+    static const SG::Decorator<float> vtxRDec("vtxR");
+    static const SG::Decorator<float> vtxRerrDec("vtxRerr");
+    static const SG::Decorator<float> vtxZDec("vtxZ");
+    static const SG::Decorator<float> vtxZerrDec("vtxZerr");
+    static const SG::Decorator<float> vtxMDec("vtxM");
+    static const SG::Decorator<float> vtxMerrDec("vtxMerr");
+    static const SG::Decorator<float> vtxPtDec("vtxPt");
+    static const SG::Decorator<float> vtxPterrDec("vtxPterr");
+    static const SG::Decorator<float> vtxEDec("vtxE");
+    static const SG::Decorator<float> vtxEtaDec("vtxEta");
+    static const SG::Decorator<float> vtxPhiDec("vtxPhi");
+    static const SG::Decorator<int> vtxTrkParticleIndex1Dec("vtxTrkParticleIndex1");
+    static const SG::Decorator<int> vtxTrkParticleIndex2Dec("vtxTrkParticleIndex2");
+    static const SG::Decorator<float> vtxTrkParticle1_dPhi2Dec("vtxTrkParticle1_dPhi2");
+    static const SG::Decorator<float> vtxTrkParticle1_dEta2Dec("vtxTrkParticle1_dEta2");
+    static const SG::Decorator<float> vtxTrkParticle2_dPhi2Dec("vtxTrkParticle2_dPhi2");
+    static const SG::Decorator<float> vtxTrkParticle2_dEta2Dec("vtxTrkParticle2_dEta2");
+    static const SG::Decorator<float> vtxChi2Dec("vtxChi2");
+    static const SG::Decorator<int> vtxNdofDec("vtxNdof");
+    static const SG::Decorator<float> vtxdEtaDec("vtxdEta");
+    static const SG::Decorator<float> vtxdPhiDec("vtxdPhi");
+
+    vtxRDec(*el)    = vtxR;
+    vtxRerrDec(*el) = vtxRerr;
+    vtxZDec(*el)    = vtxZ;
+    vtxZerrDec(*el) = vtxZerr;
+    vtxMDec(*el)    = vtxM;
+    vtxMerrDec(*el) = vtxMerr;
+    vtxPtDec(*el)   = vtxP;
+    vtxPterrDec(*el)= vtxPerr;
+    vtxEDec(*el)    = vtxE;
+    vtxEtaDec(*el)  = vtxEta;
+    vtxPhiDec(*el)  = vtxPhi;
+    vtxTrkParticleIndex1Dec(*el)  = vtxTrkParticleIndex1;
+    vtxTrkParticleIndex2Dec(*el)  = vtxTrkParticleIndex2;
+    vtxTrkParticle1_dPhi2Dec(*el) = vtxTrkParticle1_dPhi2;
+    vtxTrkParticle1_dEta2Dec(*el) = vtxTrkParticle1_dEta2;
+    vtxTrkParticle2_dPhi2Dec(*el) = vtxTrkParticle2_dPhi2;
+    vtxTrkParticle2_dEta2Dec(*el) = vtxTrkParticle2_dEta2;
+    vtxChi2Dec(*el) = vtxChi2;
+    vtxNdofDec(*el) = vtxNdof;
+    vtxdEtaDec(*el) = vtxdEta;
+    vtxdPhiDec(*el) = vtxdPhi;
   }
 
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -16,6 +16,7 @@
 
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODTracking/TrackingPrimitives.h"
+#include "AthContainers/ConstAccessor.h"
 
 
 // Constructor
@@ -250,9 +251,10 @@ bool DerivationFramework::SkimmingToolHIGG2::checkElectronQuality(const xAOD::El
       // Use Derivation Framework variable to pickup possible new correction result
       // If the same electron likelihood configuration is used in AOD creation and DAOD creation, 
       // DFCommonElectronsLHLoose and LHLoose are identical.
-      if(el->isAvailable<char>(electronQual)) {
+      SG::ConstAccessor<char> qualAcc(electronQual);
+      if(qualAcc.isAvailable(*el)) {
 	defined = true;
-	value = static_cast<bool>(el->auxdata<char>(electronQual));
+	value = static_cast<bool>(qualAcc(*el));
       }
     } else {
       // Electron menu is defined in http://acode-browser.usatlas.bnl.gov/lxr/source/atlas/Reconstruction/egamma/egammaTools/python/EMPIDBuilderBase.py
@@ -314,13 +316,17 @@ bool DerivationFramework::SkimmingToolHIGG2::checkMuonQuality(const xAOD::Muon *
   } else if(muonQual=="inMS") {
     if(mu->muonType()==xAOD::Muon::MuonStandAlone and fabs(fabs(mu->eta())-2.6)>0.12) return false;
   } else if(muonQual=="DFCommonGoodMuon") { // Derivation Framework variable
-    if(!mu->isAvailable<char>("DFCommonGoodMuon") or !mu->auxdata<char>("DFCommonGoodMuon")) return false;
+    static const SG::ConstAccessor<char> DFCommonGoodMuonAcc("DFCommonGoodMuon");
+    if(!DFCommonGoodMuonAcc.withDefault(*mu, false)) return false;
   } else if(muonQual=="DFCommonMuonsLoose") { // Derivation Framework variable
-    if(!mu->isAvailable<char>("DFCommonMuonsLoose") or !mu->auxdata<char>("DFCommonMuonsLoose")) return false;
+    static const SG::ConstAccessor<char> DFCommonMuonsLooseAcc("DFCommonMuonsLoose");
+    if(!DFCommonMuonsLooseAcc.withDefault(*mu, false)) return false;
   } else if(muonQual=="DFCommonMuonsMedium") { // Derivation Framework variable
-    if(!mu->isAvailable<char>("DFCommonMuonsMedium") or !mu->auxdata<char>("DFCommonMuonsMedium")) return false;
+    static const SG::ConstAccessor<char> DFCommonMuonsMediumAcc("DFCommonMuonsMedium");
+    if(!DFCommonMuonsMediumAcc.withDefault(*mu, false)) return false;
   } else if(muonQual=="DFCommonMuonsTight") { // Derivation Framework variable
-    if(!mu->isAvailable<char>("DFCommonMuonsTight") or !mu->auxdata<char>("DFCommonMuonsTight")) return false;
+    static const SG::ConstAccessor<char> DFCommonMuonsTightAcc("DFCommonMuonsTight");
+    if(!DFCommonMuonsTightAcc.withDefault(*mu, false)) return false;
   } else {
     ATH_MSG_WARNING("Muon quality " << muonQual << "is not defined");
     return false; 
@@ -468,9 +474,10 @@ bool DerivationFramework::SkimmingToolHIGG2::check4L(const DerivationFramework::
       // Use Derivation Framework variable to pickup possible new correction result
       // If the same electron likelihood configuration is used in AOD creation and DAOD creation, 
       // DFCommonElectronsLHLoose and LHLoose are identical.
-      if(el->isAvailable<char>(m_primaryElectronQual4L)) {
+      SG::ConstAccessor<char> primEleAcc(m_primaryElectronQual4L);
+      if(primEleAcc.isAvailable(*el)) {
 	defined = true;
-	value = static_cast<bool>(el->auxdata<char>(m_primaryElectronQual4L));
+	value = static_cast<bool>(primEleAcc(*el));
       }
     } else {
       // Electron menu is defined in http://acode-browser.usatlas.bnl.gov/lxr/source/atlas/Reconstruction/egamma/egammaTools/python/EMPIDBuilderBase.py
@@ -789,10 +796,15 @@ TLorentzVector DerivationFramework::SkimmingToolHIGG2::jetFourMomentum(const xAO
 {
   TLorentzVector tlv;
   if(m_DFCommonJetFourMomentum) {
-    const float& pt =jet->auxdata<float> ("DFCommonJets_Calib_pt");
-    const float& eta=jet->auxdata<float> ("DFCommonJets_Calib_eta");
-    const float& phi=jet->auxdata<float> ("DFCommonJets_Calib_phi");
-    const float& m  =jet->auxdata<float> ("DFCommonJets_Calib_m");
+    static const SG::ConstAccessor<float> DFCommonJets_Calib_ptAcc("DFCommonJets_Calib_pt");
+    static const SG::ConstAccessor<float> DFCommonJets_Calib_etaAcc("DFCommonJets_Calib_eta");
+    static const SG::ConstAccessor<float> DFCommonJets_Calib_phiAcc("DFCommonJets_Calib_phi");
+    static const SG::ConstAccessor<float> DFCommonJets_Calib_mAcc("DFCommonJets_Calib_m");
+
+    const float& pt =DFCommonJets_Calib_ptAcc(*jet);
+    const float& eta=DFCommonJets_Calib_etaAcc(*jet);
+    const float& phi=DFCommonJets_Calib_phiAcc(*jet);
+    const float& m  =DFCommonJets_Calib_mAcc(*jet);
     tlv.SetPtEtaPhiM(pt, eta, phi, m);
   }
   else

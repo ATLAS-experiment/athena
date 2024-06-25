@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -9,6 +9,7 @@
 // Based on DerivationFramework::SkimmingToolExample and DerivationFramework::SkimmingToolHIGG2
 
 #include "DerivationFrameworkHiggs/SkimmingToolHIGG5VBF.h"
+#include "AthContainers/ConstAccessor.h"
 #include <vector>
 #include <string>
 
@@ -195,11 +196,15 @@ DerivationFramework::SkimmingToolHIGG5VBF::getCalibedJets(const xAOD::Jet* jet) 
   TLorentzVector rc;
   
   if(!jet) return rc;
-  
-  const float& pt =jet->auxdata<float> (m_calibedJetMomKey+"_pt");
-  const float& eta=jet->auxdata<float> (m_calibedJetMomKey+"_eta");
-  const float& phi=jet->auxdata<float> (m_calibedJetMomKey+"_phi");
-  const float& m  =jet->auxdata<float> (m_calibedJetMomKey+"_m");
+
+  SG::ConstAccessor<float> ptAcc(m_calibedJetMomKey+"_pt");
+  SG::ConstAccessor<float> etaAcc(m_calibedJetMomKey+"_eta");
+  SG::ConstAccessor<float> phiAcc(m_calibedJetMomKey+"_phi");
+  SG::ConstAccessor<float> mAcc(m_calibedJetMomKey+"_m");
+  const float& pt =ptAcc(*jet);
+  const float& eta=etaAcc(*jet);
+  const float& phi=phiAcc(*jet);
+  const float& m  =mAcc(*jet);
   
   rc.SetPtEtaPhiM(pt, eta, phi, m);
   

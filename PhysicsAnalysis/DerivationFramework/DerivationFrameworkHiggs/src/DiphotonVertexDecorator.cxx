@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -21,6 +21,7 @@
 #include "AthContainers/ConstDataVector.h"
 // For DeltaR
 #include "FourMomUtils/xAODP4Helpers.h"
+#include "AthContainers/Decorator.h"
 
 typedef ElementLink<xAOD::PhotonContainer> phlink_t;
 
@@ -101,7 +102,8 @@ StatusCode DerivationFramework::DiphotonVertexDecorator::addBranches() const
   const xAOD::Vertex *newPV = nullptr;
 
   SG::ReadHandle<xAOD::FlowElementContainer> FEHandle(m_FEContainerHandleKey);
-  for(const auto *const fe : *FEHandle) fe->auxdecor<char>("passOR") = true;
+  SG::Decorator<char> passORDec("passOR");
+  for(const auto *const fe : *FEHandle) passORDec(*fe) = true;
   
   if (ph1 and ph2)
   {
@@ -124,6 +126,12 @@ StatusCode DerivationFramework::DiphotonVertexDecorator::addBranches() const
                                            std::unique_ptr< xAOD::ShallowAuxContainer >(HggPV.second)));
 
 
+  static const SG::Accessor<float> vertexScoreAcc("vertexScore");
+  static const SG::Accessor<int> vertexFailTypeAcc("vertexFailType");
+  static const SG::Accessor<int> vertexCaseAcc("vertexCase");
+  static const SG::Accessor<phlink_t> leadingPhotonLinkAcc("leadingPhotonLink");
+  static const SG::Accessor<phlink_t> subleadingPhotonLinkAcc("subleadingPhotonLink");
+
   if (newPV) {
     //loop over vertex container; shallow copy has the same order
     for (unsigned int iPV=0; iPV<PV->size(); iPV++) {
@@ -141,11 +149,11 @@ StatusCode DerivationFramework::DiphotonVertexDecorator::addBranches() const
       for (const auto& vxR: vxResult) {
         //find vertex in output from photonVertexSelectionTool
         if ( vx == vxR.first ) {
-          yyvx->auxdata<float>("vertexScore") = vxR.second;
-          yyvx->auxdata<int>("vertexFailType") = vertexFailType;
-          yyvx->auxdata<int>("vertexCase") = yyvertexVtxType;
-          yyvx->auxdata<phlink_t>("leadingPhotonLink") = phlink_t(*photons, ph1->index());
-          yyvx->auxdata<phlink_t>("subleadingPhotonLink") = phlink_t(*photons, ph2->index());
+          vertexScoreAcc(*yyvx) = vxR.second;
+          vertexFailTypeAcc(*yyvx) = vertexFailType;
+          vertexCaseAcc(*yyvx) = yyvertexVtxType;
+          leadingPhotonLinkAcc(*yyvx) = phlink_t(*photons, ph1->index());
+          subleadingPhotonLinkAcc(*yyvx) = phlink_t(*photons, ph2->index());
           break;
         }
       }
@@ -157,11 +165,11 @@ StatusCode DerivationFramework::DiphotonVertexDecorator::addBranches() const
     xAOD::VertexContainer::iterator yyvx_end = (HggPV.first)->end();
     for(yyvx_itr = (HggPV.first)->begin(); yyvx_itr != yyvx_end; ++yyvx_itr ) {
       if ( (*yyvx_itr)->vertexType()==xAOD::VxType::PriVtx ) {
-        (*yyvx_itr)->auxdata<float>("vertexScore") = -9999;
-        (*yyvx_itr)->auxdata<int>("vertexFailType") = vertexFailType;
-        (*yyvx_itr)->auxdata<int>("vertexCase") = yyvertexVtxType;
-        (*yyvx_itr)->auxdata<phlink_t>("leadingPhotonLink") = (phlink_t()) ;
-        (*yyvx_itr)->auxdata<phlink_t>("subleadingPhotonLink") = (phlink_t());
+        vertexScoreAcc(**yyvx_itr) = -9999;
+        vertexFailTypeAcc(**yyvx_itr) = vertexFailType;
+        vertexCaseAcc(**yyvx_itr) = yyvertexVtxType;
+        leadingPhotonLinkAcc(**yyvx_itr) = (phlink_t()) ;
+        subleadingPhotonLinkAcc(**yyvx_itr) = (phlink_t());
       }
     }
   }
@@ -184,9 +192,10 @@ bool DerivationFramework::DiphotonVertexDecorator::PhotonPreselect(const xAOD::P
   bool val(false);
   bool defined(false);
 
-  if(ph->isAvailable<char>("DFCommonPhotonsIsEMLoose")){
+  static const SG::ConstAccessor<char> DFCommonPhotonsIsEMLooseAcc("DFCommonPhotonsIsEMLoose");
+  if(DFCommonPhotonsIsEMLooseAcc.isAvailable(*ph)){
     defined = true;
-    val = static_cast<bool>(ph->auxdata<char>("DFCommonPhotonsIsEMLoose"));
+    val = static_cast<bool>(DFCommonPhotonsIsEMLooseAcc(*ph));
   }
   else{
     defined = ph->passSelection(val, "Loose");
@@ -222,6 +231,8 @@ StatusCode DerivationFramework::DiphotonVertexDecorator::matchFlowElement(const 
     } // DeltaR check
   } // FE loop
 
+  SG::Decorator<char> passORDec("passOR");
+
   double eg_cl_e = swclus->e();
   bool doSum = true;
   double sumE_fe = 0.;
@@ -240,13 +251,13 @@ StatusCode DerivationFramework::DiphotonVertexDecorator::matchFlowElement(const 
 
     ATH_MSG_VERBOSE("E match with new nFE: " << std::abs(sumE_fe+fe_e - eg_cl_e) / eg_cl_e);
     if( (doSum = std::abs(sumE_fe+fe_e-eg_cl_e) < std::abs(sumE_fe - eg_cl_e)) ) {
-      fe->auxdecor<char>("passOR") = false;
+       passORDec(*fe) = false;
       sumE_fe += fe_e;
     } // if we will retain the topocluster
     else {break;}
   } // loop over nearby clusters
   if(sumE_fe<FLT_MIN && bestbadmatch) {
-    bestbadmatch->auxdecor<char>("passOR") = false;
+    passORDec(*bestbadmatch) = false;
   }
 
   return StatusCode::SUCCESS;
