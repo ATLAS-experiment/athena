@@ -18,6 +18,7 @@
 // To look up which generator is being used
 #include "StoreGate/StoreGateSvc.h"
 #include "xAODTruth/TruthMetaDataContainer.h"
+#include "AthContainers/ConstAccessor.h"
 // STL includes
 #include <string>
 #include "TruthUtils/HepMCHelpers.h"
@@ -124,6 +125,11 @@ StatusCode DerivationFramework::TruthBornLeptonCollectionMaker::addBranches() co
   SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int > outcomeDecorator(m_outcomeDecoratorKey, ctx);
   SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int > classificationDecorator(m_classificationDecoratorKey, ctx);
 
+  static const SG::ConstAccessor<unsigned int> classifierParticleTypeAcc("classifierParticleType");
+  static const SG::ConstAccessor<unsigned int> classifierParticleOriginAcc("classifierParticleOrigin");
+  static const SG::ConstAccessor<unsigned int> classifierParticleOutComeAcc("classifierParticleOutCome");
+  static const SG::ConstAccessor<unsigned int> ClassificationAcc("Classification");
+
   // add relevant particles to new collection
   int sherpLepParentUniqueID = HepMC::UNDEFINED_ID;
   for (unsigned int i=0; i<truthParticles->size(); ++i) {
@@ -193,18 +199,10 @@ StatusCode DerivationFramework::TruthBornLeptonCollectionMaker::addBranches() co
     // Fill with numerical content
     *xTruthParticle=*theParticle;
     // Copy over the decorations if they are available
-    if (theParticle->isAvailable<unsigned int>("classifierParticleType")) {
-      typeDecorator(*xTruthParticle) = theParticle->auxdata< unsigned int >( "classifierParticleType" );
-    } else {typeDecorator(*xTruthParticle) = 0;}
-    if (theParticle->isAvailable<unsigned int>("classifierParticleOrigin")) {
-      originDecorator(*xTruthParticle) = theParticle->auxdata< unsigned int >( "classifierParticleOrigin" );
-    } else {originDecorator(*xTruthParticle) = 0;}
-    if (theParticle->isAvailable<unsigned int>("classifierParticleOutCome")) {
-      outcomeDecorator(*xTruthParticle) = theParticle->auxdata< unsigned int >( "classifierParticleOutCome" );
-    } else {outcomeDecorator(*xTruthParticle) = 0;}
-    if (theParticle->isAvailable<unsigned int>("Classification")) {
-      classificationDecorator(*xTruthParticle) = theParticle->auxdata< unsigned int >( "Classification" );
-    } else {classificationDecorator(*xTruthParticle) = 0;}
+    typeDecorator(*xTruthParticle) = classifierParticleTypeAcc.withDefault(*theParticle, 0);
+    originDecorator(*xTruthParticle) = classifierParticleOriginAcc.withDefault(*theParticle, 0);
+    outcomeDecorator(*xTruthParticle) = classifierParticleOutComeAcc.withDefault(*theParticle, 0);
+    classificationDecorator(*xTruthParticle) = ClassificationAcc.withDefault(*theParticle, 0);
   } // Loop over alll particles
 
   return StatusCode::SUCCESS;
