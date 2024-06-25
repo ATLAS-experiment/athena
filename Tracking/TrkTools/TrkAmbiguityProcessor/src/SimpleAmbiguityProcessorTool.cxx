@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SimpleAmbiguityProcessorTool.h"
@@ -62,14 +62,14 @@ StatusCode Trk::SimpleAmbiguityProcessorTool::initialize(){
   }
   // Print out memo that tracks have to be fitted
   if (!m_forceRefit) {
-    ATH_MSG_INFO( "The forced refit of Tracks is switched off." );
-    ATH_MSG_INFO( "Ensure that the tracks are fitted after the ambiguity processing!");
+    ATH_MSG_DEBUG( "The forced refit of Tracks is switched off." );
+    ATH_MSG_DEBUG( "Ensure that the tracks are fitted after the ambiguity processing!");
   }
   // Configuration of the material effects
   m_particleHypothesis = Trk::ParticleSwitcher::particle[m_matEffects];
   // brem fitting enabled ?
   if (m_tryBremFit) {
-     ATH_MSG_INFO( "Try brem fit and recovery for electron like tracks.");
+     ATH_MSG_DEBUG( "Try brem fit and recovery for electron like tracks.");
   }
 
   // statistics
@@ -90,8 +90,8 @@ StatusCode Trk::SimpleAmbiguityProcessorTool::finalize(){
 }
 
 void Trk::SimpleAmbiguityProcessorTool::statistics(){
-  if (msgLvl(MSG::INFO)) {
-     MsgStream &out=msg(MSG::INFO);
+  if (msgLvl(MSG::DEBUG)) {
+     MsgStream &out=msg(MSG::DEBUG);
      out << " -- statistics:" << "\n";
      std::lock_guard<std::mutex> lock( m_statMutex );
      dumpStat(out);

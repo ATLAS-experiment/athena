@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -668,7 +668,6 @@ bool Trk::KalmanUpdator::consistentParamDimensions(const Trk::LocalParameters& P
   if (P.dimension() != dimCov ) {
     ATH_MSG_WARNING( "Inconsistency in dimension of local coord - problem with LocalParameters object?"  );
     ATH_MSG_WARNING( "dim of local parameters: "<< P.dimension()<< " vs. dim of error matrix: "<<dimCov  );
-    ATH_MSG_INFO( "==> refuse update or chi2 calculation"  );
     return false;
   }
   if ( (dimCov < 1) || (dimCov > 5 ) ) {

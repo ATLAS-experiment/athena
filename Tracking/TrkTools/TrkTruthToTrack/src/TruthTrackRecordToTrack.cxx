@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkTruthToTrack/TruthTrackRecordToTrack.h"
@@ -49,8 +49,6 @@ StatusCode Trk::TruthTrackRecordToTrack::initialize() {
     ATH_MSG_FATAL ("Failed to retrieve tool " << m_extrapolator );
     return StatusCode::FAILURE;
   }
-    ATH_MSG_INFO("Retrieved tool " << m_extrapolator);
-
 
   ATH_CHECK( m_reccollkey.initialize() );
 

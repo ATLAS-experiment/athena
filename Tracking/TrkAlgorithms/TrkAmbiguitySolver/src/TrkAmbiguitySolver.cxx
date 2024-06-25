@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkAmbiguitySolver/TrkAmbiguitySolver.h"
@@ -66,6 +66,6 @@ Trk::TrkAmbiguitySolver::finalize(){
   if (m_ambiTool.isEnabled()) {
       m_ambiTool->statistics();
   }
-  ATH_MSG_INFO( "Finalizing with "<< m_trackInCount << " tracks input, and "<< m_trackOutCount<< " output");
+  ATH_MSG_DEBUG( "Finalizing with "<< m_trackInCount << " tracks input, and "<< m_trackOutCount<< " output");
   return StatusCode::SUCCESS;
 }

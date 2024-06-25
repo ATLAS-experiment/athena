@@ -1250,7 +1250,10 @@ StatusCode RpcTrackAnaAlg::readHitsPerGasgap(const EventContext& ctx,
             auto hitMulti = Scalar<int>("hitMulti", 0);
             auto i_panelIndex = Scalar<int>("panelInd_hM", -1);
             auto i_passExtrap = Scalar<bool>("muon_passExtrap", false);
-            auto i_passExtrap_sig_gap = Scalar<bool>("muon_passExtrap_signalhit_gap", false);
+            auto i_passExtrap_or  = Scalar<bool>("muon_passExtrap_or", false);
+            auto i_passExtrap_and = Scalar<bool>("muon_passExtrap_and", false);
+            auto i_passExtrap_sig_or  = Scalar<bool>("muon_passExtrap_signalhit_or", false);
+            auto i_passExtrap_sig_and = Scalar<bool>("muon_passExtrap_signalhit_and", false);
             auto i_passExtrap_sig     = Scalar<bool>("muon_passExtrap_signalhit", false);
             auto i_LB = Scalar<int>("LB_detEff", lumiBlock);
 
@@ -1258,9 +1261,17 @@ StatusCode RpcTrackAnaAlg::readHitsPerGasgap(const EventContext& ctx,
 
             //
             // Eta OR Phi panel
+            if (NHitnoCut_perMuon_eta > 0 || NHitnoCut_perMuon_phi > 0)
+                i_passExtrap_or = true;
             if (NHitwithCut_perMuon_eta > 0 || NHitwithCut_perMuon_phi > 0)
-                i_passExtrap_sig_gap = true;
-
+                i_passExtrap_sig_or = true;
+                       
+            //
+            // Eta AND Phi panel
+            if (NHitnoCut_perMuon_eta > 0 && NHitnoCut_perMuon_phi > 0)
+                i_passExtrap_and = true;
+            if (NHitwithCut_perMuon_eta > 0 && NHitwithCut_perMuon_phi > 0)
+                i_passExtrap_sig_and = true;
             //
             // Eta panel
             hitMulti = NHitwithCut_perMuon_eta;
@@ -1272,7 +1283,8 @@ StatusCode RpcTrackAnaAlg::readHitsPerGasgap(const EventContext& ctx,
             if (NHitwithCut_perMuon_eta > 0)
                 i_passExtrap_sig = true;
 
-            fill(tool, hitMulti, i_panelIndex, i_passExtrap, i_passExtrap_sig, i_passExtrap_sig_gap, i_LB);
+            fill(tool, hitMulti, i_panelIndex, i_passExtrap, i_passExtrap_sig, 
+                    i_passExtrap_or, i_passExtrap_and, i_passExtrap_sig_or, i_passExtrap_sig_and, i_LB);
             ATH_CHECK(fillClusterSize(view_hits_eta, etaPanel_ind, lumiBlock,
                                       sector, 0));  // isPhi = 0
 
@@ -1291,7 +1303,8 @@ StatusCode RpcTrackAnaAlg::readHitsPerGasgap(const EventContext& ctx,
             if (NHitwithCut_perMuon_phi > 0)
                 i_passExtrap_sig = true; 
 
-            fill(tool, hitMulti, i_panelIndex, i_passExtrap, i_passExtrap_sig, i_passExtrap_sig_gap, i_LB);
+            fill(tool, hitMulti, i_panelIndex, i_passExtrap, i_passExtrap_sig, 
+                    i_passExtrap_or, i_passExtrap_and, i_passExtrap_sig_or, i_passExtrap_sig_and, i_LB);
             ATH_CHECK(fillClusterSize(view_hits_phi, phiPanel_ind, lumiBlock,
                                       sector, 1));  // isPhi = 1
 
@@ -1304,23 +1317,23 @@ StatusCode RpcTrackAnaAlg::readHitsPerGasgap(const EventContext& ctx,
         // 
         // All muon
         // 
-        auto i_panelIndex = Scalar<int>("panelInd_hM_allMu", -1);
-        auto i_passExtrap = Scalar<bool>("muon_passExtrap_allMu", false);
+        auto i_panelIndex_allMu = Scalar<int>("panelInd_hM_allMu", -1);
+        auto i_passExtrap_allMu = Scalar<bool>("muon_passExtrap_allMu", false);
 
         //
         // Eta panel
-        i_panelIndex = etaPanel_ind;
+        i_panelIndex_allMu = etaPanel_ind;
         if (NHitwithCut_perMuon_eta > 0)
-            i_passExtrap = true;
-        fill(tool, i_panelIndex, i_passExtrap);
+            i_passExtrap_allMu = true;
+        fill(tool, i_panelIndex_allMu, i_passExtrap_allMu);
 
         //
         // Phi panel
-        i_panelIndex = phiPanel_ind;
+        i_panelIndex_allMu = phiPanel_ind;
         if (NHitwithCut_perMuon_phi > 0)
-            i_passExtrap = true;
+            i_passExtrap_allMu = true;
 
-        fill(tool, i_panelIndex, i_passExtrap);
+        fill(tool, i_panelIndex_allMu, i_passExtrap_allMu);
     }
 
     return StatusCode::SUCCESS;
