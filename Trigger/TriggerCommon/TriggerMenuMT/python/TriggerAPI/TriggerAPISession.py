@@ -356,7 +356,7 @@ if __name__ == "__main__":
         import pandas as pd
         #pd.options.display.max_colwidth = None
         df = pd.DataFrame(result)
-        print(df.sort_values(by=['triggerType','livefraction','name'],ascending=[True,False,True]).to_string(index=False))
+        print(df.sort_values(by=['triggerType','livefraction','name'],ascending=[True,False,True]).to_string(index=False)) # noqa ATL901
         result = None # so we don't print again below
 
     if result is not None:
