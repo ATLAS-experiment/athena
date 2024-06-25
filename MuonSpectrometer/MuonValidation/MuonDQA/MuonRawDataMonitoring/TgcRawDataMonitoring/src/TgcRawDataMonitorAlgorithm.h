@@ -329,6 +329,14 @@ class TgcRawDataMonitorAlgorithm : public AthMonitorAlgorithm {
   ToolHandle<ITgcRawDataMonitorTool> m_tgcMonTool{this,"TgcRawDataMonitorTool","TgcDawDataMonitorTool","TgcRawDataMonitorTool"};
   ToolHandle<CP::IMuonSelectionTool> m_muonSelectionTool{this,"MuonSelectionTool","CP::MuonSelectionTool/MuonSelectionTool","MuonSelectionTool"};
   SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_DetectorManagerKey {this, "DetectorManagerKey","MuonDetectorManager","Key of input MuonDetectorManager condition data"}; 
-
+  StatusCode printOutAvailableMuonTriggers() const;
+  std::set<std::string> checkTriggerInfo() const;
+  const xAOD::Vertex* getPrimaryVertex( const EventContext& ctx) const ;
+  std::vector<TgcRawDataMonitorAlgorithm::TimedMuonRoI> getRegionsOfInterest( const EventContext& ctx) const;
+  void fillRoiHistograms(const std::vector<TgcRawDataMonitorAlgorithm::TimedMuonRoI> & roiVec, const EventContext& ctx) const;
+  void fillHistogramsAfterTriggerDecision(std::vector<TgcRawDataMonitorAlgorithm::TimedMuonRoI> & roiVec) const;
+  void fillThresholdPatternHistograms(std::map<std::string,std::vector<const xAOD::MuonRoI*>> & menuAndRoIs, const std::vector < TimedMuon > & mymuons, const EventContext& ctx) const;
+  void fillTgcPrdHistograms(Monitored::Scalar<int> & mon_bcid, Monitored::Scalar<int> & mon_pileup, Monitored::Scalar<int> & mon_lb, std::map < std::string, std::vector< ExtPos > > & extpositions, const EventContext & ctx) const;
+  void fillMuonRoisInThresholdPattern(std::map<const xAOD::MuonRoI*,std::set<std::string>> &, std::map<std::string,std::vector<const xAOD::MuonRoI*>> &, std::vector<TimedMuonRoI> & AllBCMuonRoIs, const EventContext & ctx) const;
 };
 #endif
