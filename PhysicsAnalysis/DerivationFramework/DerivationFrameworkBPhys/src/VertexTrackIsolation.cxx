@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DerivationFrameworkBPhys/VertexTrackIsolation.h"
@@ -13,6 +13,7 @@
 #include "xAODEgamma/ElectronxAODHelpers.h"
 #include "xAODPrimitives/IsolationHelpers.h"  //For the definition of Iso::conesize
 #include "xAODTracking/VertexContainer.h"
+#include "AthContainers/ConstAccessor.h"
 
 using namespace std;
 namespace DerivationFramework {
@@ -161,7 +162,7 @@ StatusCode VertexTrackIsolation::addBranches() const {
     bool passed = false;
     for (std::vector<std::string>::const_iterator flagItr = m_passFlags.begin(); flagItr != m_passFlags.end();
          ++flagItr) {
-      SG::AuxElement::Accessor<Char_t> flagAcc(*flagItr);
+      SG::Accessor<Char_t> flagAcc(*flagItr);
       if (flagAcc.isAvailable(*vertex) && flagAcc(*vertex) != 0) {
         passed = true;
         break;
@@ -200,7 +201,9 @@ StatusCode VertexTrackIsolation::addBranches() const {
 
       // Add in V0->XX particles
       if (m_includeV0) {
-        auto V0VertLink = vertex->auxdata<std::vector<ElementLink<DataVector<xAOD::Vertex_v1> > > >("V0VertexLinks");
+        static const SG::ConstAccessor<std::vector<ElementLink<DataVector<xAOD::Vertex_v1> > > >
+          V0VertexLinksAcc("V0VertexLinks");
+        auto V0VertLink = V0VertexLinksAcc(*vertex);
         const xAOD::Vertex* V0Vert = V0VertLink.at(0).getDataPtr()->at(0);
         for (auto part : V0Vert->trackParticleLinks()) {
           candidate += (*part)->p4();
@@ -254,7 +257,7 @@ StatusCode VertexTrackIsolation::addBranches() const {
             string variableName = xAOD::Iso::toString(xAOD::Iso::IsolationType(cones[i]));
             variableName += vtxType_name[vertex_type];
 
-            SG::AuxElement::Decorator<float> isolation(variableName);
+            SG::Decorator<float> isolation(variableName);
             isolation(*vertex) = result.ptcones[i];
           }
         } else {
@@ -267,7 +270,7 @@ StatusCode VertexTrackIsolation::addBranches() const {
               variableName += vtxType_name[vertex_type];
               variableName += "_trk";
               variableName += std::to_string(i + 1);
-              SG::AuxElement::Decorator<float> isolation(variableName);
+              SG::Decorator<float> isolation(variableName);
               isolation(*vertex) = result.ptcones[j];
             }
           }
