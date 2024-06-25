@@ -90,7 +90,10 @@ def SetupLocalSqliteGeometryDb(geometryFilePath,geometryTag):
 
     import os
     if not os.path.exists("Geometry"):
-        os.mkdir("Geometry")
+        try:
+            os.mkdir("Geometry")
+        except FileExistsError:
+            pass
     linkName = geometryTag + ".db"
     linkPath = os.path.join("Geometry",linkName)
     if not os.path.exists(linkPath):
