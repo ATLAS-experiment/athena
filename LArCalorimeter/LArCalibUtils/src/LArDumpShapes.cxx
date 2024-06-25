@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: LArDumpShapes.cxx,v 1.3 2007-12-03 10:02:56 wlampl Exp $
@@ -58,7 +58,7 @@ StatusCode LArDumpShapes::execute()
     return StatusCode::SUCCESS;
 
   // Get the shapes from the detector store.
-  const ILArShape* dd_shape;
+  const ILArShape* dd_shape = nullptr;
   CHECK( detStore()->retrieve (dd_shape) );
 
   SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey};

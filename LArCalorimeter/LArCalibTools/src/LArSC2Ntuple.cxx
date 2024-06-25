@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibTools/LArSC2Ntuple.h"
@@ -592,7 +592,7 @@ StatusCode LArSC2Ntuple::execute()
 
   }
   if(m_fillCaloTT){
-    const DataVector<LVL1::TriggerTower>* TTVector;
+    const DataVector<LVL1::TriggerTower>* TTVector = nullptr;
     if ( evtStore()->retrieve(TTVector,m_triggerTowerKey).isFailure() ) {
        ATH_MSG_WARNING("Could not get the Calo TTs, will not fill...");
     } else {

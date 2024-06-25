@@ -651,7 +651,7 @@ StatusCode LArCompleteToFlat::stop() {
   StatusCode sc;
     if(m_isSC){
       flatName += "SC";
-      const LArOnline_SuperCellID* ll;
+      const LArOnline_SuperCellID* ll = nullptr;
       sc = detStore()->retrieve(ll, "LArOnline_SuperCellID");
       if (sc.isFailure()) {
 	ATH_MSG_ERROR( "Could not get LArOnlineID helper !" );
@@ -662,7 +662,7 @@ StatusCode LArCompleteToFlat::stop() {
 	ATH_MSG_DEBUG("Found the LArOnlineID helper");
       }
     }else{
-      const LArOnlineID* ll;
+      const LArOnlineID* ll = nullptr;
       sc = detStore()->retrieve(ll, "LArOnlineID");
       if (sc.isFailure()) {
 	ATH_MSG_ERROR( "Could not get LArOnlineID helper !" );
@@ -678,7 +678,7 @@ StatusCode LArCompleteToFlat::stop() {
   m_hashMax=m_onlineID->channelHashMax();
   
   if (!m_uA2MeVInput.empty()) {
-    const ILAruA2MeV* uA2MeVComplete;
+    const ILAruA2MeV* uA2MeVComplete = nullptr;
     sc=detStore()->retrieve(uA2MeVComplete,m_uA2MeVInput);
     if (sc.isFailure()) {
       if(m_forceStop) { 
@@ -709,7 +709,7 @@ StatusCode LArCompleteToFlat::stop() {
   }//end if have m_DAC2uAInput
 
   if (!m_MphysOverMcalInput.empty()) {
-    const LArMphysOverMcalComplete* MphysOverMcalComplete;
+    const LArMphysOverMcalComplete* MphysOverMcalComplete = nullptr;
     sc=detStore()->retrieve(MphysOverMcalComplete,m_MphysOverMcalInput);
     if (sc.isFailure()) {
       if(m_forceStop) { 
@@ -797,7 +797,7 @@ StatusCode LArCompleteToFlat::stop() {
     }
   }//end have m_OFCInput
   if (!m_OFCCaliInput.empty()) {
-    const LArOFCComplete* ofcComplete;
+    const LArOFCComplete* ofcComplete = nullptr;
     sc=detStore()->retrieve(ofcComplete,m_OFCCaliInput);
     if (sc.isFailure()) {
       if(m_forceStop) { 

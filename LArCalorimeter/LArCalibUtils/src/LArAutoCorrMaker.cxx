@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -91,7 +91,7 @@ StatusCode LArAutoCorrMaker::execute()
 {
   StatusCode sc;
   if (m_bunchCrossingsFromFront>0) {
-    const xAOD::EventInfo* eventInfo;
+    const xAOD::EventInfo* eventInfo = nullptr;
     sc=evtStore()->retrieve( eventInfo ); 
     if (sc.isFailure()) {
       ATH_MSG_ERROR( "Failed to retrieve EventInfo object!" );
