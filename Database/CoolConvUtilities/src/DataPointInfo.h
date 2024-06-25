@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef COOLCONVUTILS_DATAPOINTINFO_H
@@ -15,8 +15,8 @@ class DataPointInfo {
  public:
   DataPointInfo(const std::string& folder, const std::string& column,
   const int channel,const cool::RecordSpecification& atrspec);
-  const std::string folder() const;
-  const std::string column() const;
+  const std::string& folder() const;
+  const std::string& column() const;
   const int channel() const;
   const cool::IRecordSpecification& atrspec() const;
 
@@ -27,8 +27,8 @@ class DataPointInfo {
   const cool::RecordSpecification m_atrspec;
 };
 
-inline const std::string DataPointInfo::folder() const {return m_folder;}
-inline const std::string DataPointInfo::column() const {return m_column;}
+inline const std::string& DataPointInfo::folder() const {return m_folder;}
+inline const std::string& DataPointInfo::column() const {return m_column;}
 inline const int DataPointInfo::channel() const { return m_channel;}
 inline const cool::IRecordSpecification& DataPointInfo::atrspec() const 
    { return m_atrspec;}
