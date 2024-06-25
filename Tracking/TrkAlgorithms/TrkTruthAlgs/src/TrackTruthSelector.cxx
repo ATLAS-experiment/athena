@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkTruthAlgs/TrackTruthSelector.h"
@@ -27,15 +27,8 @@ TrackTruthSelector::TrackTruthSelector(const std::string &name,ISvcLocator *pSvc
 // -----------------------------------------------------------------------------------------------------
 StatusCode TrackTruthSelector::initialize()
 {
-  ATH_MSG_INFO ("TrackTruthSelector::initialize()");
   ATH_CHECK( m_detailedTrackTruthName.initialize() );
   ATH_CHECK( m_outputName.initialize() );
-  return StatusCode::SUCCESS;
-}
-
-// -----------------------------------------------------------------------------------------------------
-StatusCode TrackTruthSelector::finalize() {
-  ATH_MSG_INFO ("TrackTruthSelector finalized");
   return StatusCode::SUCCESS;
 }
 

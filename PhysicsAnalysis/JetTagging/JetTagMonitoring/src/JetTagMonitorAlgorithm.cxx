@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetTagMonitorAlgorithm.h"
@@ -1185,7 +1185,10 @@ JetTagMonitorAlgorithm::Jet_t JetTagMonitorAlgorithm::getQualityLabel(const xAOD
   TLorentzVector jet_TLV;
   jet_TLV.SetPtEtaPhiE(jet->pt(), jet->eta(), jet->phi(), jet->e());
 
-  std::vector<ElementLink<xAOD::TrackParticleContainer>> assocTracks = bTaggingObject->auxdata< std::vector< ElementLink<xAOD::TrackParticleContainer > > >("BTagTrackToJetAssociator");
+  static const SG::AuxElement::ConstAccessor< std::vector< ElementLink<xAOD::TrackParticleContainer > > >
+    BTagTrackToJetAssociatorAcc("BTagTrackToJetAssociator");
+  std::vector<ElementLink<xAOD::TrackParticleContainer>> assocTracks =
+    BTagTrackToJetAssociatorAcc(*bTaggingObject);
 
   nTracks = assocTracks.size();
 

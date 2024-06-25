@@ -82,8 +82,6 @@ namespace Trk {
   StatusCode DetailedTrackTruthBuilder::initialize()
   {
     ATH_CHECK( m_truthTrajBuilder.retrieve() );
-    ATH_MSG_INFO("Retrieved TruthTrajectory building tool " << m_truthTrajBuilder);
-
     ATH_CHECK( detStore()->retrieve(m_idHelper, "AtlasID") );
 
     return StatusCode::SUCCESS;

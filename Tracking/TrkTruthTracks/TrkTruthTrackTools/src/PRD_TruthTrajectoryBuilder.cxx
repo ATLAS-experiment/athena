@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////
@@ -31,8 +31,7 @@ Trk::PRD_TruthTrajectoryBuilder::PRD_TruthTrajectoryBuilder(const std::string& t
 // Athena algtool's Hooks - initialize
 StatusCode  Trk::PRD_TruthTrajectoryBuilder::initialize()
 {
-    
-    ATH_MSG_INFO("Initializing ...");
+
     // Set up ATLAS ID helper to be able to identify the PRD's det-subsystem
     if (detStore()->retrieve(m_idHelper, "AtlasID").isFailure()) {
          ATH_MSG_ERROR ("Could not get AtlasDetectorID helper. Arborting ...");
@@ -175,7 +174,6 @@ StatusCode  Trk::PRD_TruthTrajectoryBuilder::finalize()
 {
     // clear the cache a last time
     m_prdMultiTruthCollections.clear();
-    ATH_MSG_INFO("Finalizing ...");
     return StatusCode::SUCCESS;
 }
 
