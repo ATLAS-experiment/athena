@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -76,12 +76,10 @@ StatusCode DerivationFramework::VSITrackParticleThinning::doThinning() const
     // Set elements in the mask to true if associated with a DV
     for ( const auto trkIt: *importedTrackParticles ) {
       for ( const auto &augVerString: m_augVerStrings) {
-        if(trkIt->isAvailable<char> ("is_svtrk_final" + augVerString)) {
-          bool isSV = trkIt->auxdecor<char> ("is_svtrk_final" + augVerString);
-          if ( isSV ) {
-            int index = trkIt->index();
-            mask[index] = true;
-          }
+        SG::ConstAccessor<char> acc("is_svtrk_final" + augVerString);
+        if (acc.withDefault (*trkIt, false)) {
+          int index = trkIt->index();
+          mask[index] = true;
         }
       }
     }
