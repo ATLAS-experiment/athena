@@ -33,7 +33,6 @@ checkstep () {
 export ATHENA_CORE_NUMBER=1
 
 run "AODtoDAOD_PHYSVAL" Derivation_tf.py \
-  --CA "all:True" \
   --athenaMPMergeTargetSize "DAOD_*:0" \
   --formats "PHYSVAL" \
   --multiprocess "True" \
@@ -45,7 +44,6 @@ run "AODtoDAOD_PHYSVAL" Derivation_tf.py \
 checkstep "AODtoDAOD_PHYSVAL"
 
 run "NTUP_BTAG_PHYSVAL" Derivation_tf.py \
-  --CA \
   --inputDAOD_PHYSVALFile "DAOD_PHYSVAL.OUT.root" \
   --outputNTUP_PHYSVALFile "NTUP_BTAG_PHYSVAL.root" \
   --validationFlags doBtag \

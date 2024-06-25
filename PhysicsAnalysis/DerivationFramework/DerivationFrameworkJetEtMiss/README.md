@@ -6,7 +6,7 @@ In Run 3 the derivation framework moved to the component accumulator. The config
 
 ## How to run: 
 
-`Derivation_tf.py --CA --inputAODFile aod.pool.root --outputDAODFile test.pool.root --formats JETM1 JETM2 ...`
+`Derivation_tf.py --inputAODFile aod.pool.root --outputDAODFile test.pool.root --formats JETM1 JETM2 ...`
 
 Test file: /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/DerivationFrameworkART/mc20\_13TeV.410470.PhPy8EG\_A14\_ttbar\_hdamp258p75\_nonallhad.recon.AOD.e6337\_s3681\_r13167/AOD.27162646.\_000001.pool.root.1
 
