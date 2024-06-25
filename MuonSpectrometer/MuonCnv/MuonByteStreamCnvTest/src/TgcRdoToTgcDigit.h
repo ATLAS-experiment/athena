@@ -31,8 +31,6 @@ private:
 
     ServiceHandle<ITGCcablingServerSvc> m_tgcCablingServerSvc{this, "TGCCablingServerSvc", "Muon::TGCCablingServerSvc", ""};
     const ITGCcablingSvc* m_tgcCabling{};
-    /** Flag to distinguish 12-fold TGC cabling and 8-fold TGC cabling */
-    bool m_is12foldTgc{true};
 
     SG::ReadHandleKey<TgcRdoContainer> m_tgcRdoKey{this, "TgcRdoContainer", "TGCRDO", "Tgc RDO Input"};
     SG::WriteHandleKey<TgcDigitContainer> m_tgcDigitKey{this, "TgcDigitContainer", "TGC_DIGITS", "Tgc Digit Output"};

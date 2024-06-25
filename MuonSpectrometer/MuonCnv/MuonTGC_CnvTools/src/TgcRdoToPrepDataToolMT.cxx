@@ -684,7 +684,7 @@ void Muon::TgcRdoToPrepDataToolMT::selectDecoder(State& state,
     if(!status.isSuccess()) {
       ATH_MSG_WARNING("Cannot decode TGC Hits");
     }
-  } else if(rd.isCoincidence() && m_fillCoinData && cinfo->m_is12fold) { // coincidence start
+  } else if(rd.isCoincidence() && m_fillCoinData) {  // coincidence start
 
     if((rd.type()==TgcRawData::TYPE_TRACKLET)) {
       if((rd.slbType()==TgcRawData::SLB_TYPE_DOUBLET_WIRE) || 
@@ -771,43 +771,43 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decodeHits(State& state,
                                                          rd.bitpos(), 
                                                          orFlag);
     if(!e_found) {
-      if(!orFlag && cinfo->m_is12fold) {
-    bool show_warning_level = true;
+      if(!orFlag) {
+        bool show_warning_level = true;
 
-    /* One invalid channel in sector A09: 
-       sub=103 rod=9 ssw=6 slb=20 bitpos=151 +offset=0 orFlag=0
-       was always seen in 2008 data, at least run 79772 - 91800.
-       bug #48828 */
-    /* One invalid channel in sector A11: 
-       sub=103 rod=11 ssw=2 slb=8 bitpos=41 orFlag=0 
-       was seen 5 times in 1,059,867 events of run 159179. */ 
-    /* EIFI of MC ByteStream without correction issue : bug 57051 */ 
-    if((rd.subDetectorId()==103 &&
-        rd.rodId()==9 &&
-        rd.sswId()==6 && 
-        rd.slbId()==20 && 
-        rd.bitpos()==151) || 
-       (rd.subDetectorId()==103 &&
+        /* One invalid channel in sector A09: 
+           sub=103 rod=9 ssw=6 slb=20 bitpos=151 +offset=0 orFlag=0
+           was always seen in 2008 data, at least run 79772 - 91800.
+           bug #48828 */
+        /* One invalid channel in sector A11: 
+           sub=103 rod=11 ssw=2 slb=8 bitpos=41 orFlag=0 
+           was seen 5 times in 1,059,867 events of run 159179. */ 
+        /* EIFI of MC ByteStream without correction issue : bug 57051 */ 
+        if((rd.subDetectorId()==103 &&
+            rd.rodId()==9 &&
+            rd.sswId()==6 && 
+            rd.slbId()==20 && 
+            rd.bitpos()==151) || 
+           (rd.subDetectorId()==103 &&
             rd.rodId()==11 &&
             rd.sswId()==2 &&
             rd.slbId()==8 &&
             rd.bitpos()==41) ||
-       (rd.rodId()%3==2 &&
-        rd.sswId()==8)
-       ) {
-      show_warning_level = m_show_warning_level_invalid_A09_SSW6_hit;
-      isInvalid = true; 
-    } 
+           (rd.rodId()%3==2 &&
+            rd.sswId()==8)
+        ) {
+          show_warning_level = m_show_warning_level_invalid_A09_SSW6_hit;
+          isInvalid = true; 
+        } 
 
-    msg(show_warning_level ? MSG::WARNING : MSG::DEBUG) 
-      << "ElementID not found for "
-      << " sub=" << rd.subDetectorId()
-      << " rod=" << rd.rodId()
-      << " ssw=" << rd.sswId()
-      << " slb=" << rd.slbId()
-      << " bitpos=" << rd.bitpos() 
-      << " orFlag=" << orFlag 
-      << endmsg;
+        msg(show_warning_level ? MSG::WARNING : MSG::DEBUG) 
+          << "ElementID not found for "
+          << " sub=" << rd.subDetectorId()
+          << " rod=" << rd.rodId()
+          << " ssw=" << rd.sswId()
+          << " slb=" << rd.slbId()
+          << " bitpos=" << rd.bitpos() 
+          << " orFlag=" << orFlag 
+          << endmsg;
       }
       continue;
     }
@@ -3630,18 +3630,7 @@ Muon::TgcRdoToPrepDataToolMT::getCabling() const
     return nullptr;
   }
 
-  cinfo.m_is12fold = TgcCabGet->isAtlas();
-
-  if(cinfo.m_is12fold) {  
-    ATH_MSG_DEBUG(cinfo.m_tgcCabling->name() << " is OK");  
-  } else {  
-    ATH_MSG_DEBUG("TGCcablingSvc (octant segmentation) OK");  
-  }
-
-  if(m_fillCoinData && !cinfo.m_is12fold) { 
-    ATH_MSG_INFO("Input RDO is produced with 8-fold TGC cabling, m_fillCoinData considered false " <<
-         "to disable the conversion from TGC coincidence RDO to TGC coincidence PRD."); 
-  }
+  ATH_MSG_DEBUG(cinfo.m_tgcCabling->name() << " is OK");  
 
   // check the relation between hash and onlineId (onlineId depends on cabling)  
   unsigned int hashId_max = m_idHelperSvc->tgcIdHelper().module_hash_max();  
@@ -3662,7 +3651,7 @@ Muon::TgcRdoToPrepDataToolMT::getCabling() const
   } 
 
   // initialize with false  
-  cinfo.m_MAX_N_ROD = (cinfo.m_is12fold ? 2*12 : 2*8);
+  cinfo.m_MAX_N_ROD = 2*12;
 
   m_cablingInfo.set (std::move (cinfo));
   return m_cablingInfo.ptr();

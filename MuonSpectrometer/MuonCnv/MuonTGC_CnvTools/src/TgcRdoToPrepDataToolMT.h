@@ -98,8 +98,6 @@ namespace Muon
 
       struct CablingInfo {
         const ITGCcablingSvc* m_tgcCabling = nullptr;
-        /** Flag to distinguish 12-fold cabling and 8-fold cabling */
-        bool m_is12fold = true;
         /** Conversion from hash to onlineId */  
         std::vector<uint16_t> m_hashToOnlineId;
         int m_MAX_N_ROD = 0;

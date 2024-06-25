@@ -28,7 +28,7 @@ namespace {
     constexpr double inverseSpeedOfLight = 1 / Gaudi::Units::c_light; 
 }
 MuonRdoToMuonDigitTool::MuonRdoToMuonDigitTool(const std::string& type, const std::string& name, const IInterface* pIID) :
-    AthAlgTool(type, name, pIID), m_tgcCabling(nullptr), m_is12foldTgc(true) {
+    AthAlgTool(type, name, pIID), m_tgcCabling(nullptr) {
     declareInterface<IMuonDigitizationTool>(this);
 
    
@@ -440,93 +440,86 @@ StatusCode MuonRdoToMuonDigitTool::decodeTgc(const TgcRdo& rdoColl, TgcDigitMap_
     TgcRdo::const_iterator itDe = rdoColl.end();
 
     std::map<std::array<uint16_t, 5>, uint16_t> stripMap;
-    if (m_is12foldTgc) {  // Only when 12-fold TGC cabling is used
-        // TGC2 Endcap Strip OR channel treatement preparation start
-        // Signals are ORed as follows:
-        // |stationEta|=5, T9, E1 - slbId=16, bit0 of stripSlbBits in this code
+    // TGC2 Endcap Strip OR channel treatement preparation start
+    // Signals are ORed as follows:
+    // |stationEta|=5, T9, E1 - slbId=16, bit0 of stripSlbBits in this code
+    //                        /
+    // |stationEta|=4, T8, E2 - slbId=17, bit1 of stripSlbBits in this code
+    //                        /
+    // |stationEta|=3, T7, E3 - slbId=18, bit2 of stripSlbBits in this code
+    //                        /
+    // |stationEta|=2, T6, E4 - slbId=19, bit3 of stripSlbBits in this code
+    //                        /
+    // |stationEta|=1, T4, E5 - slbId=20, bit4 of stripSlbBits in this code
+    for (; itD != itDe; ++itD) {
+        if ((*itD)->isCoincidence()) continue;                                  // Require hits
+        if ((*itD)->slbType() != TgcRawData::SLB_TYPE_DOUBLET_STRIP) continue;  // Require TGC2 or TGC3
+        if ((*itD)->sswId() == 7) continue;                                     // Exclude Forward
+        if ((*itD)->bitpos() < 112 || (*itD)->bitpos() > 199) continue;         // Require C, D-input
 
-        //                        /
-        // |stationEta|=4, T8, E2 - slbId=17, bit1 of stripSlbBits in this code
-        //                        /
-        // |stationEta|=3, T7, E3 - slbId=18, bit2 of stripSlbBits in this code
-        //                        /
-        // |stationEta|=2, T6, E4 - slbId=19, bit3 of stripSlbBits in this code
-        //                        /
-        // |stationEta|=1, T4, E5 - slbId=20, bit4 of stripSlbBits in this code
-        for (; itD != itDe; ++itD) {
-            if ((*itD)->isCoincidence()) continue;                                  // Require hits
-            if ((*itD)->slbType() != TgcRawData::SLB_TYPE_DOUBLET_STRIP) continue;  // Require TGC2 or TGC3
-            if ((*itD)->sswId() == 7) continue;                                     // Exclude Forward
-            if ((*itD)->bitpos() < 112 || (*itD)->bitpos() > 199) continue;         // Require C, D-input
+        std::array<uint16_t, 5> stripId{};
+        stripId[0] = (*itD)->subDetectorId();
+        stripId[1] = (*itD)->rodId();
+        stripId[2] = (*itD)->sswId();
+        stripId[3] = (*itD)->bitpos();
+        stripId[4] = (*itD)->bcTag();
+        uint16_t stripSlbBits = 0x1 << ((*itD)->slbId() - 16);
+        std::map<std::array<uint16_t, 5>, uint16_t>::iterator itMap = stripMap.find(stripId);  // Find correspond channel
+        if (itMap == stripMap.end()) {                                                         // This is new one
+            stripMap.emplace(stripId, stripSlbBits);
+        } else {  // This already exists
+            itMap->second |= stripSlbBits;
+        }
+    }
+    // Covert to original hit patterns
+    for (auto& jtPair : stripMap) {
+        if (jtPair.second <= 31) {
+            // x    : 5-bit variable
+            // f(x) : OR function above, Digit->RDO conversion
+            // g(x) : originalHitBits which satisfies f(g(f(x))) = f(x), RDO->Digit conversion
+            static const uint16_t originalHitBits[32] = {//  0   1   2   3   4   5   6   7
+                                                         0, 1, 0, 3, 0, 0, 4, 7,
+                                                         //  8   9  10  11  12  13  14  15
+                                                         0, 0, 0, 0, 8, 9, 12, 15,
+                                                         // 16  17  18  19  20  21  22  23
+                                                         0, 0, 0, 0, 0, 0, 0, 0,
+                                                         // 24  25  26  27  28  29  30  31
+                                                         16, 17, 0, 19, 24, 25, 28, 31};
+            jtPair.second = originalHitBits[jtPair.second];
+        } else {
+            jtPair.second = 0;
+        }
+    }
+    // TGC2 Endcap Strip OR channel treatement preparation end
+    itD = rdoColl.begin();
 
+    for (; itD != itDe; ++itD) {
+        // check Hit or Coincidence
+        if ((*itD)->isCoincidence()) continue;
+
+        // TGC2 Endcap Strip OR channel treatement start
+        if ((*itD)->slbType() == TgcRawData::SLB_TYPE_DOUBLET_STRIP &&  // Require TGC2 or TGC3
+            (*itD)->sswId() != 7 &&                                     // Exclude Forward
+            (*itD)->bitpos() >= 112 && (*itD)->bitpos() <= 199          // Require C, D-input
+        ) {
             std::array<uint16_t, 5> stripId{};
             stripId[0] = (*itD)->subDetectorId();
             stripId[1] = (*itD)->rodId();
             stripId[2] = (*itD)->sswId();
             stripId[3] = (*itD)->bitpos();
             stripId[4] = (*itD)->bcTag();
-            uint16_t stripSlbBits = 0x1 << ((*itD)->slbId() - 16);
-            std::map<std::array<uint16_t, 5>, uint16_t>::iterator itMap = stripMap.find(stripId);  // Find correspond channel
-            if (itMap == stripMap.end()) {                                                         // This is new one
-                stripMap.emplace(stripId, stripSlbBits);
-            } else {  // This already exists
-                itMap->second |= stripSlbBits;
+            std::map<std::array<uint16_t, 5>, uint16_t>::iterator itMap = stripMap.find(stripId);  // Find correspond hit
+            if (itMap != stripMap.end()) {
+                uint16_t stripSlbBits = 0x1 << ((*itD)->slbId() - 16);
+                if (!(itMap->second & stripSlbBits)) continue;  // This hit is additional.
             }
         }
-        // Covert to original hit patterns
-        for (auto& jtPair : stripMap) {
-            if (jtPair.second <= 31) {
-                // x    : 5-bit variable
-                // f(x) : OR function above, Digit->RDO conversion
-                // g(x) : originalHitBits which satisfies f(g(f(x))) = f(x), RDO->Digit conversion
-                static const uint16_t originalHitBits[32] = {//  0   1   2   3   4   5   6   7
-                                                             0, 1, 0, 3, 0, 0, 4, 7,
-                                                             //  8   9  10  11  12  13  14  15
-                                                             0, 0, 0, 0, 8, 9, 12, 15,
-                                                             // 16  17  18  19  20  21  22  23
-                                                             0, 0, 0, 0, 0, 0, 0, 0,
-                                                             // 24  25  26  27  28  29  30  31
-                                                             16, 17, 0, 19, 24, 25, 28, 31};
-                jtPair.second = originalHitBits[jtPair.second];
-            } else {
-                jtPair.second = 0;
-            }
-        }
-        // TGC2 Endcap Strip OR channel treatement preparation end
-        itD = rdoColl.begin();
-    }
-
-    for (; itD != itDe; ++itD) {
-        // check Hit or Coincidence
-        if ((*itD)->isCoincidence()) continue;
-
-        if (m_is12foldTgc) {  // Only when 12-fold TGC cabling is used
-            // TGC2 Endcap Strip OR channel treatement start
-            if ((*itD)->slbType() == TgcRawData::SLB_TYPE_DOUBLET_STRIP &&  // Require TGC2 or TGC3
-                (*itD)->sswId() != 7 &&                                     // Exclude Forward
-                (*itD)->bitpos() >= 112 && (*itD)->bitpos() <= 199          // Require C, D-input
-            ) {
-                std::array<uint16_t, 5> stripId{};
-                stripId[0] = (*itD)->subDetectorId();
-                stripId[1] = (*itD)->rodId();
-                stripId[2] = (*itD)->sswId();
-                stripId[3] = (*itD)->bitpos();
-                stripId[4] = (*itD)->bcTag();
-                std::map<std::array<uint16_t, 5>, uint16_t>::iterator itMap = stripMap.find(stripId);  // Find correspond hit
-                if (itMap != stripMap.end()) {
-                    uint16_t stripSlbBits = 0x1 << ((*itD)->slbId() - 16);
-                    if (!(itMap->second & stripSlbBits)) continue;  // This hit is additional.
-                }
-            }
-            // TGC2 Endcap Strip OR channel treatement end
-        }
+        // TGC2 Endcap Strip OR channel treatement end
 
         // repeat two times for ORed channel
         for (int iOr = 0; iOr < 2; ++iOr) {
-            if (m_is12foldTgc) {  // Only when 12-fold TGC cabling is used
-                // TGC2 Endcap Strip OR channel is not converted.
-                if (iOr && (*itD)->slbType() == TgcRawData::SLB_TYPE_DOUBLET_STRIP) continue;
-            }
+            // TGC2 Endcap Strip OR channel is not converted.
+            if (iOr && (*itD)->slbType() == TgcRawData::SLB_TYPE_DOUBLET_STRIP) continue;
 
             bool orFlag = false;
 
@@ -668,8 +661,6 @@ StatusCode MuonRdoToMuonDigitTool::getTgcCabling() {
     ServiceHandle<ITGCcablingServerSvc> TgcCabGet("Muon::TGCCablingServerSvc", name());
     ATH_CHECK(TgcCabGet.retrieve());
     ATH_CHECK(TgcCabGet->giveCabling(m_tgcCabling));
-
-    m_is12foldTgc = TgcCabGet->isAtlas();
 
     return StatusCode::SUCCESS;
 }
