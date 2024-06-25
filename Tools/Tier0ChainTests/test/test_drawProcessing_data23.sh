@@ -7,7 +7,7 @@
 # art-include: 24.0/Athena
 # art-athena-mt: 8
 
-Reco_tf.py --CA \
+Reco_tf.py \
 --AMI f1350  \
 --inputBSFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/data23/DRAW_EGZ/data23_13p6TeV.00456714.physics_Main.merge.DRAW_EGZ.f1370_m2193/312events.data23_13p6TeV.00456714.physics_Main.merge.DRAW_EGZ.f1370_m2193._0602.1" \
 --outputDESDM_ALLCELLSFile="myDESDM_EGZ.pool.root" \
@@ -17,7 +17,7 @@ Reco_tf.py --CA \
 rc1=$?
 echo "art-result: $rc1 Reco DRAW_EGZ"
 
-Reco_tf.py --CA \
+Reco_tf.py \
 --AMI f1350  \
 --inputBSFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/data23/DRAW_ZMUMU/data23_13p6TeV.00456386.physics_Main.merge.DRAW_ZMUMU.f1369_m2193/540events.data23_13p6TeV.00456386.physics_Main.merge.DRAW_ZMUMU.f1369_m2193._0042.1" \
 --outputAODFile="myDAOD_ZMUMU.pool.root" \

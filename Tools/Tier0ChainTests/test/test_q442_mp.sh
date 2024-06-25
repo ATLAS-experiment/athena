@@ -10,7 +10,6 @@
 # art-athena-mt: 8
 
 Reco_tf.py \
---CA "True" \
 --AMI=q442 \
 --conditionsTag 'all:CONDBR2-BLKPA-RUN2-11' \
 --athenaopts='--nprocs=2' \

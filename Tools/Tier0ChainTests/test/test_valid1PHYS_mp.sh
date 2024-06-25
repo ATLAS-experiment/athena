@@ -11,7 +11,7 @@
 
 set -e
 
-Derivation_tf.py --CA --athenaopts='--nprocs=2' --athenaMPMergeTargetSize 'DAOD_*:0' --inputAODFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/valid1.361107.PowhegPythia8EvtGen_AZNLOCTEQ6L1_Zmumu.recon.AOD.e5112_s3227_r13145/AOD.27253804._000061.pool.root.1 --outputDAODFile art.pool.root --formats PHYS --maxEvents -1
+Derivation_tf.py --athenaopts='--nprocs=2' --athenaMPMergeTargetSize 'DAOD_*:0' --inputAODFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/valid1.361107.PowhegPythia8EvtGen_AZNLOCTEQ6L1_Zmumu.recon.AOD.e5112_s3227_r13145/AOD.27253804._000061.pool.root.1 --outputDAODFile art.pool.root --formats PHYS --maxEvents -1
 
 echo "art-result: $? reco"
 

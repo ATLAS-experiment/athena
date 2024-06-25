@@ -23,7 +23,6 @@
 Reco_tf.py \
 --athenaopts='--threads=8' \
 --AMI=q223 \
---CA \
 --preExec  'pass' \
 --postExec 'pass' \
 --inputBSFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/q223_input_data18/data18_comm.00353055.physics_MinBias.daq.RAW._lb0062._SFO-2._0001.data \

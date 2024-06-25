@@ -11,7 +11,7 @@
 
 Reco_tf.py \
 --AMI=q444 \
---CA "Overlay,RAWtoALL:True" \
+--CA "all:True" "RDOtoRDOTrigger:False" \
 --preExec="RAWtoALL:flags.Exec.FPE=500" \
 --postExec="" \
 --conditionsTag 'all:OFLCOND-MC16-SDR-RUN2-11' \
