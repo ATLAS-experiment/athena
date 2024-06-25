@@ -333,6 +333,7 @@ else
            diffStatus=$?
            if [ $diffStatus != 0 ] ; then
                echo "$RED post.sh> ERROR: ${reflog} and ${joblog} differ $RESET"
+               echo  " post.sh> Please check ${PWD}/$joblog"
                # Return with failure in this case:
                exit 1
            fi
