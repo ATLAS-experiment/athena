@@ -101,13 +101,14 @@ def trigCaloDataAccessSvcCfg( flags ):
 
 
 if __name__ == "__main__":
-    from AthenaConfiguration.TestDefaults import defaultTestFiles, defaultGeometryTags
+    from AthenaConfiguration.TestDefaults import defaultConditionsTags, defaultGeometryTags, defaultTestFiles
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     import sys
 
     flags = initConfigFlags()
     flags.Input.Files = defaultTestFiles.RAW_RUN2
     flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2
+    flags.IOVDb.GlobalTag = defaultConditionsTags.RUN2_DATA
     flags.Input.isMC=False
     flags.lock()
 
