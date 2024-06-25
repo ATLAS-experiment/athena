@@ -65,7 +65,7 @@ namespace Monitored {
     Scalar(std::string name, const T& defaultValue, std::function<double(const T&)> valueTransform) :
         IMonitoredVariable(std::move(name)),
         m_value(defaultValue),
-        m_valueTransform(valueTransform)
+        m_valueTransform(std::move(valueTransform))
     {}
 
     /**
@@ -79,7 +79,7 @@ namespace Monitored {
      */
     Scalar(std::string name, std::function<T()> generator) :
       IMonitoredVariable(std::move(name)),
-      m_valueGenerator( generator )
+      m_valueGenerator(std::move(generator))
     {}
 
     ///@}
