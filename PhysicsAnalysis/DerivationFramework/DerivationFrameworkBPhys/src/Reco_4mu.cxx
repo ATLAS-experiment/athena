@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -13,6 +13,7 @@
 #include "TrkVertexAnalysisUtils/V0Tools.h"
 #include "DerivationFrameworkBPhys/BPhysPVTools.h"
 #include "xAODBPhys/BPhysHypoHelper.h"
+#include "AthContainers/ConstAccessor.h"
 
 namespace DerivationFramework {
     
@@ -183,7 +184,8 @@ namespace DerivationFramework {
             if(doA0) ProcessVertex(pairHelper, xAOD::BPhysHelper::PV_MIN_A0, muonPairMasses);
             if(doZ0) ProcessVertex(pairHelper, xAOD::BPhysHelper::PV_MIN_Z0, muonPairMasses);
             if(doZ0BA) ProcessVertex(pairHelper, xAOD::BPhysHelper::PV_MIN_Z0_BA, muonPairMasses);
-            ATH_MSG_DEBUG((*pairItr)->auxdata<std::string>("CombinationCode") << " : " << pairHelper.mass() << " +/- " << pairHelper.massErr());
+            static const SG::ConstAccessor<std::string> CombinationCodeAcc("CombinationCode");
+            ATH_MSG_DEBUG(CombinationCodeAcc(**pairItr) << " : " << pairHelper.mass() << " +/- " << pairHelper.massErr());
         }
         
         // loop over quadruplets
@@ -208,7 +210,8 @@ namespace DerivationFramework {
             if(doA0) ProcessVertex(quadHelper, xAOD::BPhysHelper::PV_MIN_A0, muonQuadMasses);
             if(doZ0) ProcessVertex(quadHelper, xAOD::BPhysHelper::PV_MIN_Z0, muonQuadMasses);
             if(doZ0BA) ProcessVertex(quadHelper, xAOD::BPhysHelper::PV_MIN_Z0_BA, muonQuadMasses);
-            ATH_MSG_DEBUG((*quadItr)->auxdata<std::string>("CombinationCode") << " : " << quadHelper.mass() << " +/- " << quadHelper.massErr());
+            static const SG::ConstAccessor<std::string> CombinationCodeAcc("CombinationCode");
+            ATH_MSG_DEBUG(CombinationCodeAcc(**quadItr) << " : " << quadHelper.mass() << " +/- " << quadHelper.massErr());
         }
         
         //----------------------------------------------------

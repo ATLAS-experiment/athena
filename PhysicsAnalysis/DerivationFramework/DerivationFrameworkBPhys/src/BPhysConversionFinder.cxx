@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /////////////////////////////////////////////////////////////////
 // BPhysConversionFinder.cxx, (c) ATLAS Detector software
@@ -15,6 +15,7 @@
 #include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
 #include "TrkVKalVrtFitter/VxCascadeInfo.h"
 #include "TLorentzVector.h"
+#include "AthContainers/ConstAccessor.h"
 
 namespace DerivationFramework {
 
@@ -116,7 +117,8 @@ namespace DerivationFramework {
             bool passedHypothesis = false;
 
             for(const auto &flag : m_passFlagsToCheck) {
-                bool pass = vertex->auxdata<Char_t>(flag);
+                SG::ConstAccessor<Char_t> acc(flag);
+                bool pass = acc(*vertex);
                 if(pass) passedHypothesis = true;
             }
 
@@ -283,9 +285,12 @@ namespace DerivationFramework {
 
                       const xAOD::Vertex* oniaVertex = (*vtxItr);
 
-                      std::vector<float> diMuon_Px = oniaVertex->auxdata< std::vector<float> >("RefTrackPx");
-                      std::vector<float> diMuon_Py = oniaVertex->auxdata< std::vector<float> >("RefTrackPy");
-                      std::vector<float> diMuon_Pz = oniaVertex->auxdata< std::vector<float> >("RefTrackPz");
+                      static const SG::ConstAccessor<std::vector<float> > RefTrackPxAcc("RefTrackPx");
+                      static const SG::ConstAccessor<std::vector<float> > RefTrackPyAcc("RefTrackPy");
+                      static const SG::ConstAccessor<std::vector<float> > RefTrackPzAcc("RefTrackPz");
+                      std::vector<float> diMuon_Px = RefTrackPxAcc(*oniaVertex);
+                      std::vector<float> diMuon_Py = RefTrackPyAcc(*oniaVertex);
+                      std::vector<float> diMuon_Pz = RefTrackPzAcc(*oniaVertex);
 
                       TLorentzVector muon1, muon2;
                       muon1.SetXYZM(diMuon_Px.at(0),diMuon_Py.at(0),diMuon_Pz.at(0),105.658);
@@ -347,8 +352,10 @@ namespace DerivationFramework {
                       //------------------------------------
 
                       // Check which mass window this di-muon passed
-                      bool passed_Psi = (*vtxItr)->auxdata<Char_t>("passed_Psi");
-                      bool passed_Upsi = (*vtxItr)->auxdata<Char_t>("passed_Upsi");
+                      static const SG::ConstAccessor<Char_t> passed_PsiAcc("passed_Psi");
+                      static const SG::ConstAccessor<Char_t> passed_UpsiAcc("passed_Upsi");
+                      bool passed_Psi = passed_PsiAcc(**vtxItr);
+                      bool passed_Upsi = passed_UpsiAcc(**vtxItr);
 
                       //------------------------------------
                       // Cascade fit with J/psi mass hypothesis
@@ -447,49 +454,83 @@ namespace DerivationFramework {
                   //------------------------------------
                   ATH_MSG_DEBUG("Decorating conversion vertices");
 
-                  convVertexCandidate->auxdata< std::vector< ElementLink<xAOD::VertexContainer> > >("DiMuonLinks") = diMuonLinks;
+                  static const SG::Accessor< std::vector< ElementLink<xAOD::VertexContainer> > > DiMuonLinksAcc("DiMuonLinks");
+                  DiMuonLinksAcc(*convVertexCandidate) = diMuonLinks;
 
-                  convVertexCandidate->auxdata< std::vector<float> >("CascadeFit_Psi1S_Px") = fit_Psi1S_Px;
-                  convVertexCandidate->auxdata< std::vector<float> >("CascadeFit_Psi1S_Py") = fit_Psi1S_Py;
-                  convVertexCandidate->auxdata< std::vector<float> >("CascadeFit_Psi1S_Pz") = fit_Psi1S_Pz;
-                  convVertexCandidate->auxdata< std::vector<float> >("CascadeFit_Psi1S_M") = fit_Psi1S_M;
-                  convVertexCandidate->auxdata< std::vector<float> >("CascadeFit_Psi1S_ChiSq") = fit_Psi1S_ChiSq;
+                  static const SG::Accessor< std::vector<float> > CascadeFit_Psi1S_PxAcc("CascadeFit_Psi1S_Px");
+                  static const SG::Accessor< std::vector<float> > CascadeFit_Psi1S_PyAcc("CascadeFit_Psi1S_Py");
+                  static const SG::Accessor< std::vector<float> > CascadeFit_Psi1S_PzAcc("CascadeFit_Psi1S_Pz");
+                  static const SG::Accessor< std::vector<float> > CascadeFit_Psi1S_MAcc("CascadeFit_Psi1S_M");
+                  static const SG::Accessor< std::vector<float> > CascadeFit_Psi1S_ChiSqAcc("CascadeFit_Psi1S_ChiSq");
+                  CascadeFit_Psi1S_PxAcc(*convVertexCandidate) = fit_Psi1S_Px;
+                  CascadeFit_Psi1S_PyAcc(*convVertexCandidate) = fit_Psi1S_Py;
+                  CascadeFit_Psi1S_PzAcc(*convVertexCandidate) = fit_Psi1S_Pz;
+                  CascadeFit_Psi1S_MAcc(*convVertexCandidate) = fit_Psi1S_M;
+                  CascadeFit_Psi1S_ChiSqAcc(*convVertexCandidate) = fit_Psi1S_ChiSq;
 
-                  convVertexCandidate->auxdata< std::vector<float> >("CascadeFit_Psi2S_Px") = fit_Psi2S_Px;
-                  convVertexCandidate->auxdata< std::vector<float> >("CascadeFit_Psi2S_Py") = fit_Psi2S_Py;
-                  convVertexCandidate->auxdata< std::vector<float> >("CascadeFit_Psi2S_Pz") = fit_Psi2S_Pz;
-                  convVertexCandidate->auxdata< std::vector<float> >("CascadeFit_Psi2S_M") = fit_Psi2S_M;
-                  convVertexCandidate->auxdata< std::vector<float> >("CascadeFit_Psi2S_ChiSq") = fit_Psi2S_ChiSq;
+                  static const SG::Accessor< std::vector<float> > CascadeFit_Psi2S_PxAcc("CascadeFit_Psi2S_Px");
+                  static const SG::Accessor< std::vector<float> > CascadeFit_Psi2S_PyAcc("CascadeFit_Psi2S_Py");
+                  static const SG::Accessor< std::vector<float> > CascadeFit_Psi2S_PzAcc("CascadeFit_Psi2S_Pz");
+                  static const SG::Accessor< std::vector<float> > CascadeFit_Psi2S_MAcc("CascadeFit_Psi2S_M");
+                  static const SG::Accessor< std::vector<float> > CascadeFit_Psi2S_ChiSqAcc("CascadeFit_Psi2S_ChiSq");
+                  CascadeFit_Psi2S_PxAcc(*convVertexCandidate) = fit_Psi2S_Px;
+                  CascadeFit_Psi2S_PyAcc(*convVertexCandidate) = fit_Psi2S_Py;
+                  CascadeFit_Psi2S_PzAcc(*convVertexCandidate) = fit_Psi2S_Pz;
+                  CascadeFit_Psi2S_MAcc(*convVertexCandidate) = fit_Psi2S_M;
+                  CascadeFit_Psi2S_ChiSqAcc(*convVertexCandidate) = fit_Psi2S_ChiSq;
 
-                  convVertexCandidate->auxdata< std::vector<float> >("CascadeFit_Upsi1S_Px") = fit_Upsi1S_Px;
-                  convVertexCandidate->auxdata< std::vector<float> >("CascadeFit_Upsi1S_Py") = fit_Upsi1S_Py;
-                  convVertexCandidate->auxdata< std::vector<float> >("CascadeFit_Upsi1S_Pz") = fit_Upsi1S_Pz;
-                  convVertexCandidate->auxdata< std::vector<float> >("CascadeFit_Upsi1S_M") = fit_Upsi1S_M;
-                  convVertexCandidate->auxdata< std::vector<float> >("CascadeFit_Upsi1S_ChiSq") = fit_Upsi1S_ChiSq;
+                  static const SG::Accessor< std::vector<float> > CascadeFit_Upsi1S_PxAcc("CascadeFit_Upsi1S_Px");
+                  static const SG::Accessor< std::vector<float> > CascadeFit_Upsi1S_PyAcc("CascadeFit_Upsi1S_Py");
+                  static const SG::Accessor< std::vector<float> > CascadeFit_Upsi1S_PzAcc("CascadeFit_Upsi1S_Pz");
+                  static const SG::Accessor< std::vector<float> > CascadeFit_Upsi1S_MAcc("CascadeFit_Upsi1S_M");
+                  static const SG::Accessor< std::vector<float> > CascadeFit_Upsi1S_ChiSqAcc("CascadeFit_Upsi1S_ChiSq");
+                  CascadeFit_Upsi1S_PxAcc(*convVertexCandidate) = fit_Upsi1S_Px;
+                  CascadeFit_Upsi1S_PyAcc(*convVertexCandidate) = fit_Upsi1S_Py;
+                  CascadeFit_Upsi1S_PzAcc(*convVertexCandidate) = fit_Upsi1S_Pz;
+                  CascadeFit_Upsi1S_MAcc(*convVertexCandidate) = fit_Upsi1S_M;
+                  CascadeFit_Upsi1S_ChiSqAcc(*convVertexCandidate) = fit_Upsi1S_ChiSq;
 
-                  convVertexCandidate->auxdata< std::vector<float> >("CascadeFit_Upsi2S_Px") = fit_Upsi2S_Px;
-                  convVertexCandidate->auxdata< std::vector<float> >("CascadeFit_Upsi2S_Py") = fit_Upsi2S_Py;
-                  convVertexCandidate->auxdata< std::vector<float> >("CascadeFit_Upsi2S_Pz") = fit_Upsi2S_Pz;
-                  convVertexCandidate->auxdata< std::vector<float> >("CascadeFit_Upsi2S_M") = fit_Upsi2S_M;
-                  convVertexCandidate->auxdata< std::vector<float> >("CascadeFit_Upsi2S_ChiSq") = fit_Upsi2S_ChiSq;
+                  static const SG::Accessor< std::vector<float> > CascadeFit_Upsi2S_PxAcc("CascadeFit_Upsi2S_Px");
+                  static const SG::Accessor< std::vector<float> > CascadeFit_Upsi2S_PyAcc("CascadeFit_Upsi2S_Py");
+                  static const SG::Accessor< std::vector<float> > CascadeFit_Upsi2S_PzAcc("CascadeFit_Upsi2S_Pz");
+                  static const SG::Accessor< std::vector<float> > CascadeFit_Upsi2S_MAcc("CascadeFit_Upsi2S_M");
+                  static const SG::Accessor< std::vector<float> > CascadeFit_Upsi2S_ChiSqAcc("CascadeFit_Upsi2S_ChiSq");
+                  CascadeFit_Upsi2S_PxAcc(*convVertexCandidate) = fit_Upsi2S_Px;
+                  CascadeFit_Upsi2S_PyAcc(*convVertexCandidate) = fit_Upsi2S_Py;
+                  CascadeFit_Upsi2S_PzAcc(*convVertexCandidate) = fit_Upsi2S_Pz;
+                  CascadeFit_Upsi2S_MAcc(*convVertexCandidate) = fit_Upsi2S_M;
+                  CascadeFit_Upsi2S_ChiSqAcc(*convVertexCandidate) = fit_Upsi2S_ChiSq;
 
-                  convVertexCandidate->auxdata< std::vector<float> >("CascadeFit_Upsi3S_Px") = fit_Upsi3S_Px;
-                  convVertexCandidate->auxdata< std::vector<float> >("CascadeFit_Upsi3S_Py") = fit_Upsi3S_Py;
-                  convVertexCandidate->auxdata< std::vector<float> >("CascadeFit_Upsi3S_Pz") = fit_Upsi3S_Pz;
-                  convVertexCandidate->auxdata< std::vector<float> >("CascadeFit_Upsi3S_M") = fit_Upsi3S_M;
-                  convVertexCandidate->auxdata< std::vector<float> >("CascadeFit_Upsi3S_ChiSq") = fit_Upsi3S_ChiSq;
+                  static const SG::Accessor< std::vector<float> > CascadeFit_Upsi3S_PxAcc("CascadeFit_Upsi3S_Px");
+                  static const SG::Accessor< std::vector<float> > CascadeFit_Upsi3S_PyAcc("CascadeFit_Upsi3S_Py");
+                  static const SG::Accessor< std::vector<float> > CascadeFit_Upsi3S_PzAcc("CascadeFit_Upsi3S_Pz");
+                  static const SG::Accessor< std::vector<float> > CascadeFit_Upsi3S_MAcc("CascadeFit_Upsi3S_M");  
+                  static const SG::Accessor< std::vector<float> > CascadeFit_Upsi3S_ChiSqAcc("CascadeFit_Upsi3S_ChiSq");
+                  CascadeFit_Upsi3S_PxAcc(*convVertexCandidate) = fit_Upsi3S_Px;
+                  CascadeFit_Upsi3S_PyAcc(*convVertexCandidate) = fit_Upsi3S_Py;
+                  CascadeFit_Upsi3S_PzAcc(*convVertexCandidate) = fit_Upsi3S_Pz;
+                  CascadeFit_Upsi3S_MAcc(*convVertexCandidate) = fit_Upsi3S_M;
+                  CascadeFit_Upsi3S_ChiSqAcc(*convVertexCandidate) = fit_Upsi3S_ChiSq;
 
-                  convVertexCandidate->auxdata<float>("px") = momentum.x();
-                  convVertexCandidate->auxdata<float>("py") = momentum.y();
-                  convVertexCandidate->auxdata<float>("pz") = momentum.z();
+                  static const SG::Accessor<float> pxAcc("px");
+                  static const SG::Accessor<float> pyAcc("py");
+                  static const SG::Accessor<float> pzAcc("pz");
+                  pxAcc(*convVertexCandidate) = momentum.x();
+                  pyAcc(*convVertexCandidate) = momentum.y();
+                  pzAcc(*convVertexCandidate) = momentum.z();
 
-                  convVertexCandidate->auxdata<float>("deltaCotThetaTrk") = deltaCotTheta;
-                  convVertexCandidate->auxdata<float>("minimumDistanceTrk") = distance;
+                  static const SG::Accessor<float> deltaCotThetaTrkAcc("deltaCotThetaTrk");
+                  static const SG::Accessor<float> minimumDistanceTrkAcc("minimumDistanceTrk");
+                  deltaCotThetaTrkAcc(*convVertexCandidate) = deltaCotTheta;
+                  minimumDistanceTrkAcc(*convVertexCandidate) = distance;
 
-                  convVertexCandidate->auxdata<float>("deltaPhiTracks") = vertexOutput["deltaPhiTracks"];
-                  convVertexCandidate->auxdata<float>("DR1R2") = vertexOutput["DR1R2"];
+                  static const SG::Accessor<float> deltaPhiTracksAcc("deltaPhiTracks");
+                  static const SG::Accessor<float> DR1R2Acc("DR1R2");
+                  deltaPhiTracksAcc(*convVertexCandidate) = vertexOutput["deltaPhiTracks"];
+                  DR1R2Acc(*convVertexCandidate) = vertexOutput["DR1R2"];
 
-                  convVertexCandidate->auxdata<Char_t>("passed") = true; // Used in event skimming
+                  static const SG::Accessor<Char_t> passedAcc("passed");
+                  passedAcc(*convVertexCandidate) = true; // Used in event skimming
 
                   conversionContainer->push_back(convVertexCandidate.release());
 

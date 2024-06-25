@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DerivationFrameworkBPhys/BPhysBGammaFinder.h"
@@ -10,6 +10,7 @@
 #include "GaudiKernel/IPartPropSvc.h"
 #include "TrkVertexFitterInterfaces/IVertexFitter.h"
 #include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
+#include "AthContainers/ConstAccessor.h"
 
 
 using VertexLink = ElementLink<xAOD::VertexContainer>;
@@ -116,7 +117,7 @@ StatusCode BPhysBGammaFinder::addBranches() const {
     CHECK( evtStore()->retrieve(BVtxContainer, *itr));
     ATH_MSG_DEBUG( "Vertex Container (" << *itr << ") contains " << BVtxContainer->size() << " vertices" );
 
-    static const SG::AuxElement::Decorator< std::vector< VertexLink > > BGammaLinks( "BGammaLinks" );
+    static const SG::Decorator< std::vector< VertexLink > > BGammaLinks( "BGammaLinks" );
     static const std::vector< VertexLink > vertexLinks;
 
     for (const xAOD::Vertex* vertex : *BVtxContainer) {
@@ -126,7 +127,8 @@ StatusCode BPhysBGammaFinder::addBranches() const {
       BVertexTracks.clear();
 
       for (const auto &flag : m_passFlagsToCheck) {
-        bool pass = vertex->auxdata<Char_t>(flag);
+        SG::ConstAccessor<Char_t> acc(flag);
+        bool pass = acc(*vertex);
         if (pass) passedHypothesis = true;
       }
 
@@ -223,9 +225,12 @@ StatusCode BPhysBGammaFinder::addBranches() const {
             ph.SetXYZM(momentum.x(), momentum.y(), momentum.z(), 0.);
 
             // Use to keep track of which dimuon(s) gave a chi_c/b candidate
-            std::vector<float> B_Px = vertex->auxdata<std::vector<float>>("RefTrackPx");
-            std::vector<float> B_Py = vertex->auxdata<std::vector<float>>("RefTrackPy");
-            std::vector<float> B_Pz = vertex->auxdata<std::vector<float>>("RefTrackPz");
+            static const SG::Accessor<std::vector<float> > RefTrackPxAcc("RefTrackPx");
+            static const SG::Accessor<std::vector<float> > RefTrackPyAcc("RefTrackPy");
+            static const SG::Accessor<std::vector<float> > RefTrackPzAcc("RefTrackPz");
+            std::vector<float> B_Px = RefTrackPxAcc(*vertex);
+            std::vector<float> B_Py = RefTrackPyAcc(*vertex);
+            std::vector<float> B_Pz = RefTrackPzAcc(*vertex);
 
             TLorentzVector muon1, muon2, muon3;
             muon1.SetXYZM(B_Px.at(0), B_Py.at(0), B_Pz.at(0), Trk::muon);
@@ -277,23 +282,34 @@ StatusCode BPhysBGammaFinder::addBranches() const {
             // Decorate selected conversions
             ATH_MSG_DEBUG( "Decorating conversion vertices" );
 
-            convVertexCandidate->auxdata<float>("px") = momentum.x();
-            convVertexCandidate->auxdata<float>("py") = momentum.y();
-            convVertexCandidate->auxdata<float>("pz") = momentum.z();
+            static const SG::Accessor<float> pxAcc("px");
+            static const SG::Accessor<float> pyAcc("py");
+            static const SG::Accessor<float> pzAcc("pz");
+            pxAcc(*convVertexCandidate) = momentum.x();
+            pyAcc(*convVertexCandidate) = momentum.y();
+            pzAcc(*convVertexCandidate) = momentum.z();
 
-            convVertexCandidate->auxdata<float>("deltaQ") = deltaQ;
-            convVertexCandidate->auxdata<float>("gamma_mass") = mass;
-            convVertexCandidate->auxdata< std::vector<float> >("RefTrackPx") = RefTrackPx;
-            convVertexCandidate->auxdata< std::vector<float> >("RefTrackPy") = RefTrackPy;
-            convVertexCandidate->auxdata< std::vector<float> >("RefTrackPz") = RefTrackPz;
-            convVertexCandidate->auxdata< std::vector<float> >("RefTrackE") = RefTrackE;
+            static const SG::Accessor<float> deltaQAcc("deltaQ");
+            static const SG::Accessor<float> gamma_massAcc("gamma_mass");
+            static const SG::Accessor< std::vector<float> > RefTrackEAcc("RefTrackE");
+            deltaQAcc(*convVertexCandidate) = deltaQ;
+            gamma_massAcc(*convVertexCandidate) = mass;
+            RefTrackPxAcc(*convVertexCandidate) = RefTrackPx;
+            RefTrackPyAcc(*convVertexCandidate) = RefTrackPy;
+            RefTrackPzAcc(*convVertexCandidate) = RefTrackPz;
+            RefTrackEAcc(*convVertexCandidate) = RefTrackE;
 
-            convVertexCandidate->auxdata< std::vector<float> >("OrigTrackPx") = OrigTrackPx;
-            convVertexCandidate->auxdata< std::vector<float> >("OrigTrackPy") = OrigTrackPy;
-            convVertexCandidate->auxdata< std::vector<float> >("OrigTrackPz") = OrigTrackPz;
-            convVertexCandidate->auxdata< std::vector<float> >("OrigTrackE") = OrigTrackE;
+            static const SG::Accessor< std::vector<float> > OrigTrackPxAcc("OrigTrackPx");
+            static const SG::Accessor< std::vector<float> > OrigTrackPyAcc("OrigTrackPy");
+            static const SG::Accessor< std::vector<float> > OrigTrackPzAcc("OrigTrackPz");
+            static const SG::Accessor< std::vector<float> > OrigTrackEAcc("OrigTrackE");
+            OrigTrackPxAcc(*convVertexCandidate) = OrigTrackPx;
+            OrigTrackPyAcc(*convVertexCandidate) = OrigTrackPy;
+            OrigTrackPzAcc(*convVertexCandidate) = OrigTrackPz;
+            OrigTrackEAcc(*convVertexCandidate) = OrigTrackE;
 
-            convVertexCandidate->auxdata<Char_t>("passed_Gamma") = true; // Used in event skimming
+            static const SG::Accessor<Char_t> passed_GammaAcc("passed_Gamma");
+            passed_GammaAcc(*convVertexCandidate) = true; // Used in event skimming
 
             conversionContainer->push_back( convVertexCandidate );
 

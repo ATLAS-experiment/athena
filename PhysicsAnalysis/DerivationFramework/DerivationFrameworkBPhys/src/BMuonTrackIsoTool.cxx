@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //============================================================================
@@ -36,6 +36,7 @@
 #include "xAODBPhys/BPhysHelper.h"
 #include "InDetTrackSelectionTool/IInDetTrackSelectionTool.h"
 #include "EventPrimitives/EventPrimitivesHelpers.h"
+#include "AthContainers/Decorator.h"
 
 #include "boost/format.hpp"
 #include "TVector3.h"
@@ -327,9 +328,9 @@ namespace DerivationFramework {
 	for (unsigned int ic = 0; ic < nCones; ++ic) {
 	  for (unsigned int itt = 0; itt < nTrackTypes; ++itt) {
 	    MuIsoItem result = m_results[ic][its][ipv][itt];
-	    SG::AuxElement::Decorator< std::vector<float> >
+	    SG::Decorator< std::vector<float> >
 	      dv_iso_values(result.muIsoName());
-	    SG::AuxElement::Decorator< std::vector<int> >
+	    SG::Decorator< std::vector<int> >
 	      dv_iso_ntracks(result.nTracksName());
 	    dv_iso_values(*vtx)  = result.vIsoValues;
 	    dv_iso_ntracks(*vtx) = result.vNTracks; 
@@ -352,7 +353,8 @@ namespace DerivationFramework {
 				<< " *muon == NULL -- EL not saved!");
 	      }
 	    }
-	    vtx->auxdecor<MuonLinkVector_t>(result.muLinkName()) = links;
+            SG::Decorator<MuonLinkVector_t> decor(result.muLinkName());
+	    decor(*vtx) = links;
 	    ATH_MSG_DEBUG("BMuonTrackIsoTool::saveIsolation() -- muLinks: "
 			  << "N_saved = " << links.size() );
 	  } // for itt

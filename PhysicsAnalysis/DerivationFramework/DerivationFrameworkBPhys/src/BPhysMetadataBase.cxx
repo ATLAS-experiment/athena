@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //============================================================================
@@ -37,6 +37,7 @@
 #include "DerivationFrameworkBPhys/BPhysMetadataBase.h"
 #include "xAODMetaData/FileMetaData.h"
 #include "xAODMetaData/FileMetaDataAuxInfo.h"
+#include "AthContainers/Accessor.h"
 
 namespace DerivationFramework {
 
@@ -96,7 +97,8 @@ namespace DerivationFramework {
   //--------------------------------------------------------------------------
 #define SET_VALUES_IMP( TYPE, MAP )					\
   for (auto const &ent : MAP) {						\
-    fm->auxdata< TYPE >( m_prefix + ent.first ) = ent.second;		\
+    SG::Accessor< TYPE > acc( m_prefix + ent.first );                   \
+    acc( *fm ) = ent.second;                                            \
   }
   
   StatusCode BPhysMetadataBase::saveMetaDataBPhys() const {
@@ -117,10 +119,11 @@ namespace DerivationFramework {
       fm->setStore( fmAux.get() );
       
       // fill it
-      fm->auxdata< std::string >(m_prefix+"DerivationName"    ) =
-	m_derivationName;
-      fm->auxdata< std::string >(m_prefix+"MetaDataFolderName") = 
-	m_mdFolderName;
+      SG::Accessor<std::string> DerivationNameAcc(m_prefix+"DerivationName");
+      DerivationNameAcc(*fm) = m_derivationName;
+
+      SG::Accessor<std::string> MetaDatafolderNameAcc(m_prefix+"MetaDataFolderName");
+      MetaDatafolderNameAcc(*fm) = m_mdFolderName;
 
       // fill it with contents of maps
       SET_VALUES_IMP( int                     , m_propInt     );
