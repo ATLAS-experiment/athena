@@ -23,17 +23,17 @@ class TriggerAPISession:
 
     Set of triggers of a given type that are unprescaled for an entire GRL:
 
-      s = TriggerAPISession(grl="path/to/grl.xml") # can be a PathResolver path as well
+      s = TriggerAPISession("path/to/grl.xml") # can be a PathResolver path as well
       triggers = s.getLowestUnprescaled(triggerType=TriggerType.el_single)
 
     Dictionary of sets of triggers of a given type that are unprescaled, for each run in the GRL:
 
-      s = TriggerAPISession(grl="path/to/grl.xml")
+      s = TriggerAPISession("path/to/grl.xml")
       triggersByRun = s.getLowestUnprescaledByRun(triggerType=TriggerType.el_single)
 
     Set of triggers that are unprescaled for all runs between two run numbers (inclusive), in a GRL:
 
-      s = TriggerAPISession(grl="path/to/grl.xml")
+      s = TriggerAPISession("path/to/grl.xml")
       triggers = s.getLowestUnprescaledByRun(triggerType=TriggerType.el_single,runStart=123456,runEnd=234567)
 
     Other helpful methods are:
@@ -49,7 +49,7 @@ class TriggerAPISession:
     Each method accepts an "additionalTriggerType" parameter that is used for multi-leg triggers of different type
     (e.g. e-mu triggers).
 
-    Instead of passing a GRL you can pass a menu name (menu="menu_name") in the constructor, and the unprescaled
+    Instead of passing a GRL you can pass a menu name ("menu_name") in the constructor, and the unprescaled
     triggers will be the Primary|TagAndProbe triggers from the menu.
 
 
@@ -152,17 +152,22 @@ class TriggerAPISession:
         return SerializeAPI.dump(self.dbQueries,path)
 
 
-    def chains(self,*,triggerType=TriggerType.ALL,additionalTriggerType=TriggerType.UNDEFINED):
+    def chains(self,*,triggerType=TriggerType.ALL):
         """
         :param triggerType: you can list available types with "[x.name for x in TriggerType]"
-        :param additionalTriggerType:
         :return: dictionary of triggerChain objects of given types, key = chain Name
         """
         if len(self.dbQueries)>1:
             raise RuntimeError("Unsupported in multi-period TriggerAPI sessions (should only happen if using a period enum or an old json cache)")
+
+        if not isinstance(triggerType,list): triggerType = [triggerType,TriggerType.UNDEFINED]
+        if len(triggerType)==1: triggerType += [TriggerType.UNDEFINED]
+        elif len(triggerType) > 2:
+            raise RuntimeError("More than two trigger types not currently supported")
+
         out = {}
         for tc in self.triggerInfo().triggerChains:
-            if not tc.passType(triggerType,additionalTriggerType): continue
+            if not tc.passType(triggerType[0],triggerType[1]): continue
             out[tc.name] = tc
         return out
 
@@ -184,26 +189,32 @@ class TriggerAPISession:
         for ti in self.dbQueries.values():
             ti.setRunRange(start,end)
 
-    def getLowestUnprescaled(self,*, triggerType=TriggerType.ALL,additionalTriggerType=TriggerType.UNDEFINED,livefraction=1.0,runStart=0,runEnd=999999):
+    def getLowestUnprescaled(self,*, triggerType=TriggerType.ALL,livefraction=1.0,runStart=0,runEnd=999999):
         """
-        :param triggerType: primary trigger type. you can list available types with "[x.name for x in TriggerType]"
-        :param additionalTriggerType: optional additional trigger type, for multileg triggers
+        :param triggerType: list available types with "[x.name for x in TriggerType] .. provide a list of length 2 for multi-leg types"
         :param livefraction: threshold to be considered unprescaled
         :param runStart:
         :param runEnd:
         :return: set of lowest unprescaled (according to livefraction) triggers of given type
         """
+
+        
+        if not isinstance(triggerType,list): triggerType = [triggerType,TriggerType.UNDEFINED]
+        if len(triggerType)==1: triggerType += [TriggerType.UNDEFINED]
+        elif len(triggerType) > 2:
+            raise RuntimeError("More than two trigger types not currently supported")
+
         self.setRunRange(runStart,runEnd)
         out = set()
         for ti in self.dbQueries.values():
-            out.update(ti._getLowestUnprescaled(triggerType, additionalTriggerType, "", livefraction))
+            out.update(ti._getLowestUnprescaled(triggerType[0], triggerType[1], "", livefraction))
         self.setRunRange() # reset to include all ranges
 
         if not out and livefraction==1.0 and list(self.dbQueries.keys())[0][1]:
             log.warning("No triggers found that are fully unprescaled in your GRL ... checking for livefractions per run:")
             # check result by-run to see if there are problems with individual runs (possibly lumiblocks included in each)
             for run in sorted(list(self.runs())):
-                liveFractions = self.getLiveFractions(triggerType=triggerType,additionalTriggerType=additionalTriggerType,runStart=run,runEnd=run)
+                liveFractions = self.getLiveFractions(triggerType=triggerType,runStart=run,runEnd=run)
                 lf = max(liveFractions.values())
                 if lf < 1 and lf > 0.9:
                     log.warning(f"run {run} has maximum livefraction {lf} - prescaled LBs may have been included in your GRL accidentally. Please report this to Data Preparation")
@@ -212,51 +223,50 @@ class TriggerAPISession:
 
         return out
 
-    def getLowestUnprescaledByRun(self,*,triggerType=TriggerType.ALL,additionalTriggerType=TriggerType.UNDEFINED,livefraction=1.0,runStart=0,runEnd=999999):
+    def getLowestUnprescaledByRun(self,*,triggerType=TriggerType.ALL,livefraction=1.0,runStart=0,runEnd=999999):
         """
 
         :param triggerType:
-        :param additionalTriggerType:
         :param livefraction:
         :param runStart:
         :param runEnd:
         :return: lowest unprescaled trigger by run. If this session does not have per-run info, all triggers will be listed under a dummy key of ""
         """
         if not self.runs(): # case where loaded from trigger menu, for example
-            return {"":self.getLowestUnprescaled(triggerType=triggerType,additionalTriggerType=additionalTriggerType,livefraction=livefraction,runStart=runStart,runEnd=runEnd)}
+            return {"":self.getLowestUnprescaled(triggerType=triggerType,livefraction=livefraction,runStart=runStart,runEnd=runEnd)}
         out = {}
         for run in self.runs():
             if int(run)<runStart or int(run)>runEnd: continue
-            out[run] = self.getLowestUnprescaled(triggerType=triggerType,additionalTriggerType=additionalTriggerType,livefraction=livefraction,runStart=run,runEnd=run)
+            out[run] = self.getLowestUnprescaled(triggerType=triggerType,livefraction=livefraction,runStart=run,runEnd=run)
         return out
 
-    def getLowestUnprescaledAnyRun(self,*,triggerType=TriggerType.ALL,additionalTriggerType=TriggerType.UNDEFINED,livefraction=1.0,runStart=0,runEnd=999999):
+    def getLowestUnprescaledAnyRun(self,*,triggerType=TriggerType.ALL,livefraction=1.0,runStart=0,runEnd=999999):
         out = set()
-        for tc in self.getLowestUnprescaledByRun(triggerType=triggerType,additionalTriggerType=additionalTriggerType,livefraction=livefraction,runStart=runStart,runEnd=runEnd).values():
+        for tc in self.getLowestUnprescaledByRun(triggerType=triggerType,livefraction=livefraction,runStart=runStart,runEnd=runEnd).values():
             out.update(tc)
         return out
-    def getLiveFractions(self,*,triggerType=TriggerType.ALL,additionalTriggerType=TriggerType.UNDEFINED,runStart=0,runEnd=999999):
+    def getLiveFractions(self,*,triggerType=TriggerType.ALL,runStart=0,runEnd=999999):
         """
-        :param triggerType:
-        :param additionalTriggerType:
+        :param triggerType: can be a single type or a list of types
         :param runStart:
         :param runEnd:
         :return: a dictionary of live fractions for triggers matching given trigger types
         """
         out = {}
         self.setRunRange(runStart,runEnd)
-        for x in self.chains(triggerType=triggerType, additionalTriggerType=additionalTriggerType).values():
+        for x in self.chains(triggerType=triggerType).values():
             out[x.name] = x.livefraction
         self.setRunRange()
         return out
 
-    def getLowerUnprescaled(self,*,chainName,triggerType=TriggerType.ALL,additionalTriggerType=TriggerType.UNDEFINED,livefraction=1.0,runStart=0,runEnd=999999):
+    def getLowerUnprescaled(self,*,chainName,triggerType=TriggerType.ALL,livefraction=1.0,runStart=0,runEnd=999999):
         """
         :param chainName:
+        :param triggerType:
         :param livefraction:
         :param runStart:
         :param runEnd:
-        :return: set of chainNames of unprescaled triggers that were lower than the given chain
+        :return: set of chains of unprescaled triggers that were lower than the given chain
         """
 
         chains = self.chains()
@@ -265,10 +275,10 @@ class TriggerAPISession:
         chain = chains[chainName]
         self.setRunRange(runStart,runEnd)
         out = set()
-        for x in self.chains(triggerType=triggerType, additionalTriggerType=additionalTriggerType).values():
+        for x in self.chains(triggerType=triggerType).values():
             if x.name==chain.name: continue
             if not x.isUnprescaled(livefraction): continue
-            if x.isLowerThan(chain,period=self.triggerInfo().period)==1: out.add(x.name)
+            if x.isLowerThan(chain,period=self.triggerInfo().period)==1: out.add(x)
         self.setRunRange()
         return out
 
@@ -278,33 +288,79 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(
         prog='tapis',
-        description="Example usage: tapis --triggerType el_single path/to/grl.xml",
-        epilog='',
+        description="Example usage: tapis path/to/grl.xml getLowestUnprescaled --triggerType el_single",
+        epilog='General structure is: tapis [constructor arg] [command] [--commandOpt1] [--commandOpt2] ...',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-    parser.add_argument("--triggerType",choices=[x.name for x in TriggerType],default=TriggerType.ALL)
-    parser.add_argument("--additionalTriggerType",choices=[x.name for x in TriggerType],default=TriggerType.UNDEFINED)
-    parser.add_argument("input",metavar="grl/menu/json",help="Either a GRL, a menu name, or a json session cache file. PathResolve paths supported")
-    parser.add_argument("--runStart",type=int,default=0,help="First runNumber to consider")
-    parser.add_argument("--runEnd",type=int,default=999999,help="Last runNumber to consider")
     parser.add_argument("--save",default=None,help="If specified, the path to save the session to as a json file")
-    parser.add_argument("--livefraction",type=float,default=1.0,help="EXPERT OPTION: lower the livefraction threshold for trigger to be considered unprescaled")
+
+    parser.add_argument("input",metavar="grl/menu/json",help="Either a GRL, a menu name, or a json session cache file. PathResolve paths supported")
+    subparsers = parser.add_subparsers(help="Available subcommands",dest="command")
+
+
+    parser_getLowestUnprescaled = subparsers.add_parser('getLowestUnprescaled',help='get lowest unprescaled chain names')
+    parser_getLowestUnprescaled.add_argument("--livefraction",type=float,default=1.0,help="EXPERT OPTION: lower the livefraction threshold for trigger to be considered unprescaled")
+
+    parser_chains = subparsers.add_parser('chains',help='Show info about a chain or selection of chains')
+    parser_chains.add_argument('--chainName',type=str,help="name of chain or wildcarded string",default="*",nargs='?')
+
+    parser_runs = subparsers.add_parser('runs',help='List runs available in the session')
+
+    parser_getLowerUnprescaled = subparsers.add_parser('getLowerUnprescaled',help='get chains that are deemed to be of same type but lower and also unprescaled compared to a given chain')
+    parser_getLowerUnprescaled.add_argument('chainName',type=str,help="name of chain")
+    parser_getLowerUnprescaled.add_argument("--livefraction",type=float,default=1.0,help="EXPERT OPTION: lower the livefraction threshold for trigger to be considered unprescaled")
+
+
+    for p in [parser_getLowestUnprescaled,parser_chains,parser_runs,parser_getLowerUnprescaled]:
+        #p.add_argument("input",metavar="grl/menu/json",help="Either a GRL, a menu name, or a json session cache file. PathResolve paths supported")
+        p.add_argument("--triggerType",choices=[x.name for x in TriggerType],nargs='+',default=["ALL"],help="can specify up to two trigger types")
+        p.add_argument("--runStart",type=int,default=0,help="First runNumber to consider")
+        p.add_argument("--runEnd",type=int,default=999999,help="Last runNumber to consider")
+
+
 
     args = parser.parse_args()
+
+    if args.command is None: args.command = "getLowestUnprescaled"
 
     s = TriggerAPISession(args.input)
     if args.save: s.save(args.save)
 
     # convert triggerTypes into required enums
-    for t in TriggerType:
-        if t.name == args.triggerType:
-            args.triggerType = t
-        if t.name == args.additionalTriggerType:
-            args.additionalTriggerType = t
+    if "triggerType" in args:
+        args.triggerType = [TriggerType[t] for t in args.triggerType]
 
-    result = s.getLowestUnprescaled(triggerType=args.triggerType,
-                                    additionalTriggerType=args.additionalTriggerType,
+    pandasPrint=False
+
+    if args.command == "getLowestUnprescaled":
+        result = s.getLowestUnprescaled(triggerType=args.triggerType,
                                     livefraction=args.livefraction,
                                     runStart=args.runStart,runEnd=args.runEnd)
-    log.info(result)
+        s.setRunRange(args.runStart,args.runEnd)
+        chains = s.chains(triggerType=args.triggerType)
+        result = [{"name":chains[c].name,"triggerType":TriggerType.toStr(chains[c].triggerType),"livefraction":chains[c].livefraction} for c in result]
+        pandasPrint=True
+    elif args.command == "chains":
+        s.setRunRange(args.runStart,args.runEnd)
+        import fnmatch
+        result = {k: v for k,v in s.chains(triggerType=args.triggerType).items() if fnmatch.fnmatch(k,args.chainName)}
+        result = [{"name":c.name,"triggerType":TriggerType.toStr(c.triggerType),"livefraction":c.livefraction} for c in result.values()]
+        pandasPrint = True
+    elif args.command == "runs":
+        s.setRunRange(args.runStart,args.runEnd)
+        result = sorted(list(s.runs()))
+    elif args.command == "getLowerUnprescaled":
+        result = s.getLowerUnprescaled(chainName=args.chainName,triggerType=args.triggerType,livefraction=args.livefraction,runStart=args.runStart,runEnd=args.runEnd)
+        result = [{"name":c.name,"triggerType":TriggerType.toStr(c.triggerType),"livefraction":c.livefraction} for c in result]
+        pandasPrint=True
+    if pandasPrint:
+        import pandas as pd
+        #pd.options.display.max_colwidth = None
+        df = pd.DataFrame(result)
+        print(df.sort_values(by=['triggerType','livefraction','name'],ascending=[True,False,True]).to_string(index=False)) # noqa: ATL901
+        result = None # so we don't print again below
+
+    if result is not None:
+        import pprint
+        pprint.pp(result)
 

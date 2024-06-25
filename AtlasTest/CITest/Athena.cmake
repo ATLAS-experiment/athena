@@ -45,20 +45,20 @@ atlas_add_citest( PileUpPresamplingRun4FullTruth
    SCRIPT RunWorkflowTests_Run4.py --CI -p -w PileUpPresampling -e '--maxEvents 5' )
 
 atlas_add_citest( OverlayRun2MC
-   SCRIPT RunWorkflowTests_Run2.py --CI -o -w MCOverlay -e '--CA True --conditionsTag OFLCOND-MC16-SDR-RUN2-11' )
+   SCRIPT RunWorkflowTests_Run2.py --CI -o -w MCOverlay -e '--conditionsTag OFLCOND-MC16-SDR-RUN2-11' )
 
 atlas_add_citest( OverlayRun2Data
    SCRIPT RunWorkflowTests_Run2.py --CI -o -w DataOverlay )
 
 atlas_add_citest( OverlayRun3MC
-   SCRIPT RunWorkflowTests_Run3.py --CI -o -w MCOverlay -e '--CA True' )
+   SCRIPT RunWorkflowTests_Run3.py --CI -o -w MCOverlay )
 
 #################################################################################
 # Standard reconstruction workflows
 #################################################################################
 
 atlas_add_citest( RecoRun2Data
-   SCRIPT RunWorkflowTests_Run2.py --CI -r -w DataReco -e '--CA True --maxEvents 25 --conditionsTag CONDBR2-BLKPA-RUN2-11 --preExec pass' )
+   SCRIPT RunWorkflowTests_Run2.py --CI -r -w DataReco -e '--maxEvents 25 --conditionsTag CONDBR2-BLKPA-RUN2-11 --preExec pass' )
 
 atlas_add_citest( RecoRun2MC
    SCRIPT RunWorkflowTests_Run2.py --CI -r -w MCReco --threads 0 -e '--maxEvents 25' )
@@ -68,7 +68,7 @@ atlas_add_citest( RecoRun2MC_PileUp
    DEPENDS_SUCCESS PileUpPresamplingRun2 )
 
 atlas_add_citest( RecoRun3Data
-   SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a q449 --threads 8 -e '--CA True --maxEvents 100 --preExec="flags.Exec.FPE=500;"' --run-only
+   SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a q449 --threads 8 -e '--maxEvents 100 --preExec="flags.Exec.FPE=500;"' --run-only
    PROPERTIES PROCESSORS 8 )
 
 atlas_add_citest( RecoRun3Data_Checks
@@ -76,7 +76,7 @@ atlas_add_citest( RecoRun3Data_Checks
    DEPENDS_SUCCESS RecoRun3Data )
 
 atlas_add_citest( RecoRun3Data_Bulk
-    SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a f1333 --threads 8  -e ' --CA True --skipEvents 100 --maxEvents 500 --inputBSFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00431493.physics_Main.daq.RAW._lb0525._SFO-16._0001.data'  --run-only --no-output-checks
+    SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a f1333 --threads 8  -e '--skipEvents 100 --maxEvents 500 --inputBSFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00431493.physics_Main.daq.RAW._lb0525._SFO-16._0001.data'  --run-only --no-output-checks
    PROPERTIES PROCESSORS 8 )
 
 atlas_add_citest( RecoRun3Data_Bulk_Checks
@@ -84,16 +84,16 @@ atlas_add_citest( RecoRun3Data_Bulk_Checks
    DEPENDS_SUCCESS RecoRun3Data_Bulk )
 
 atlas_add_citest( RecoRun3Data_Express
-    SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a x785 -e ' --CA True --maxEvents 25 --inputBSFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00428353.express_express.merge.RAW._lb0800._SFO-ALL._0001.1  ' --no-output-checks
+    SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a x785 -e '--maxEvents 25 --inputBSFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00428353.express_express.merge.RAW._lb0800._SFO-ALL._0001.1  ' --no-output-checks
     LOG_IGNORE_PATTERN "WARNING FPE .*PixelChargeLUTCalibCondAlg"
     # ignore FPEs from PixelChargeLUTCalibCondAlg
   )
 
 atlas_add_citest( RecoRun3Data_Cosmics
-   SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a q450 -e '--CA True --maxEvents 25  --preExec="all:flags.Exec.FPE=500;"'  --no-output-checks )
+   SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a q450 -e '--maxEvents 25  --preExec="all:flags.Exec.FPE=500;"'  --no-output-checks )
 
 atlas_add_citest( RecoRun3Data_Calib
-   SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a q451 -e '--CA True --maxEvents 25  --preExec="all:flags.Exec.FPE=500;"' --no-output-checks )
+   SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a q451 -e '--maxEvents 25  --preExec="all:flags.Exec.FPE=500;"' --no-output-checks )
 
 atlas_add_citest( RecoRun3MC
    SCRIPT RunWorkflowTests_Run3.py --CI -r -w MCReco -e '--maxEvents 25 --conditionsTag OFLCOND-MC23-SDR-RUN3-05' )
@@ -208,7 +208,7 @@ atlas_add_citest( DataQuality_Run3Data_Postprocessing
    DEPENDS_SUCCESS RecoRun3Data )
 
 atlas_add_citest( DataQuality_Run3Data_AODtoHIST
-   SCRIPT Reco_tf.py --AMI=q449 --CA --inputAODFile="../RecoRun3Data/run_q449/myAOD.pool.root" --outputHISTFile=DataQuality_Run3Data_AODtoHIST.root   --preExec="all:flags.Exec.FPE=500;" --athenaopts='--threads=1'
+   SCRIPT Reco_tf.py --AMI=q449 --inputAODFile="../RecoRun3Data/run_q449/myAOD.pool.root" --outputHISTFile=DataQuality_Run3Data_AODtoHIST.root   --preExec="all:flags.Exec.FPE=500;" --athenaopts='--threads=1'
    DEPENDS_SUCCESS RecoRun3Data )
 
 #################################################################################
