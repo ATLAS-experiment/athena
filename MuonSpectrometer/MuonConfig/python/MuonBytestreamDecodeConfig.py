@@ -446,11 +446,11 @@ if __name__=="__main__":
     # python -m MuonConfig.MuonBytestreamDecode [--config-only] flags...
 
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    from AthenaConfiguration.TestDefaults import defaultGeometryTags, defaultTestFiles
+    from AthenaConfiguration.TestDefaults import defaultConditionsTags, defaultGeometryTags, defaultTestFiles
     flags = initConfigFlags()
     # Set some defaults (can be changed on command line)
     flags.Input.Files = defaultTestFiles.RAW_RUN2
-    flags.IOVDb.GlobalTag = "CONDBR2-BLKPA-2018-13"#"CONDBR2-BLKPA-2015-17"
+    flags.IOVDb.GlobalTag = defaultConditionsTags.RUN2_DATA
     flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2
     flags.Concurrency.NumThreads = 1
     flags.Exec.MaxEvents = 5

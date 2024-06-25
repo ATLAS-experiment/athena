@@ -19,7 +19,6 @@ def RunPRDConversion():
 
     flags.Input.Files = [
         '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/ESD/ATLAS-P2-RUN4-03-00-00/ESD.ttbar_mu0.pool.root']
-    flags.IOVDb.GlobalTag = "OFLCOND-MC15c-SDR-14-05"
     flags.Scheduler.ShowDataDeps = True
     flags.Scheduler.ShowDataFlow = True
     flags.Scheduler.CheckDependencies = True
