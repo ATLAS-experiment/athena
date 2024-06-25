@@ -62,6 +62,7 @@ fi
 if [ -n "${matches}" ]; then
     echo "$RED noerror.sh> ERROR: Found the following errors in ${joblog}:$RESET"
     echo "${matches}"
+    echo  " noerror.sh> Please check ${PWD}/${joblog}"
     logStatus=1
 else
     echo " noerror.sh> No errors found in ${joblog}"
