@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -53,6 +53,8 @@
 #include "StoreGate/WriteDecorHandle.h"
 #include "StoreGate/WriteDecorHandleKey.h"
 #include "DerivationFrameworkInDet/DecoratorUtils.h"
+#include "AthContainers/ConstAccessor.h"
+#include "AthContainers/Accessor.h"
 
 #include <vector>
 #include <string>
@@ -618,37 +620,40 @@ namespace DerivationFramework {
 	double lTheta=-1000., lPhi=-1000.;
         //Get the measurement base object
 	const Trk::MeasurementBase* measurement=trackState->measurementOnTrack();
-
-        msos->auxdata<float>("errDC") = -1 ;
+        static const SG::Accessor<float> errDCAcc("errDC");
+        errDCAcc(*msos) = -1 ;
         const Trk::RIO_OnTrack* rotp = dynamic_cast<const Trk::RIO_OnTrack*>(measurement) ;
-        if (rotp) msos->auxdata<float>("errDC") = sqrt(rotp->localCovariance()(Trk::driftRadius, Trk::driftRadius)) ;
+        if (rotp) errDCAcc(*msos) = sqrt(rotp->localCovariance()(Trk::driftRadius, Trk::driftRadius)) ;
 
 	if (m_storeTRT) {
 	  const InDet::TRT_DriftCircleOnTrack *driftcircle = dynamic_cast<const InDet::TRT_DriftCircleOnTrack*>(measurement);
+          static const SG::Accessor<float> HitZAcc("HitZ");
+          static const SG::Accessor<float> HitRAcc("HitR");
+          static const SG::Accessor<float> rTrkWireAcc("rTrkWire");
 	  if (!measurement) {
-	    msos->auxdata<float>("HitZ")=-3000;
-	    msos->auxdata<float>("HitR")=-1;
-	    msos->auxdata<float>("rTrkWire")=-1;
+	    HitZAcc(*msos)=-3000;
+	    HitRAcc(*msos)=-1;
+	    rTrkWireAcc(*msos)=-1;
 	  }
 	  else {
 	    if (!driftcircle) {
-	      msos->auxdata<float>("HitZ")=-3000;
-	      msos->auxdata<float>("HitR")=-1;
-	      msos->auxdata<float>("rTrkWire")=-1;
+	      HitZAcc(*msos)=-3000;
+	      HitRAcc(*msos)=-1;
+	      rTrkWireAcc(*msos)=-1;
 	    }
 	    else {
 	      if (tp) {
 		const Amg::Vector3D& gp = driftcircle->globalPosition();
-		msos->auxdata<float>("HitZ")=gp.z();
-		msos->auxdata<float>("HitR")=gp.perp();
-		msos->auxdata<float>("rTrkWire")= fabs(trackState->trackParameters()->parameters()[Trk::driftRadius]);
+		HitZAcc(*msos)=gp.z();
+		HitRAcc(*msos)=gp.perp();
+		rTrkWireAcc(*msos)= fabs(trackState->trackParameters()->parameters()[Trk::driftRadius]);
 		lTheta = trackState->trackParameters()->parameters()[Trk::theta];
 		lPhi = trackState->trackParameters()->parameters()[Trk::phi];
 	      }
 	      else {
-		msos->auxdata<float>("HitZ") =driftcircle->associatedSurface().center().z();
-		msos->auxdata<float>("HitR") =driftcircle->associatedSurface().center().perp();
-		msos->auxdata<float>("rTrkWire")=0;
+		HitZAcc(*msos) =driftcircle->associatedSurface().center().z();
+		HitRAcc(*msos) =driftcircle->associatedSurface().center().perp();
+		rTrkWireAcc(*msos)=0;
 	      }
 	    }
 	  }
@@ -659,7 +664,8 @@ namespace DerivationFramework {
              const Trk::RIO_OnTrack* hit_trt = measurement ? dynamic_cast<const Trk::RIO_OnTrack*>(measurement) : nullptr;
              if (hit_trt) {
                 if (prd_to_track_map_cptr->isShared(*(hit_trt->prepRawData())) ) isShared=true;
-                msos->auxdata<bool>("isShared") = isShared;
+                static const SG::Accessor<bool> isSharedAcc("isShared");
+                isSharedAcc(*msos) = isShared;
              }
           }
 	}
@@ -754,35 +760,38 @@ namespace DerivationFramework {
         if (isTRT) {
           TRTCond::RtRelation const *rtr = m_trtcaldbTool->getRtRelation(surfaceID);
           if(rtr) {
+            static const SG::Accessor<float> driftTimeAcc("driftTime");
             if (tp){
-              msos->auxdata<float>("driftTime") = rtr->drifttime(fabs(tp->parameters()[0]));
+              driftTimeAcc(*msos) = rtr->drifttime(fabs(tp->parameters()[0]));
             }
             else {
               if (extrap.get()) {
-                msos->auxdata<float>("driftTime") = rtr->drifttime(fabs(extrap->parameters()[0]));
+                driftTimeAcc(*msos) = rtr->drifttime(fabs(extrap->parameters()[0]));
               }
             }
           }
 	}
 
+        static const SG::Accessor<float> TrackError_biasedAcc("TrackError_biased");
+        static const SG::Accessor<float> TrackError_unbiasedAcc("TrackError_unbiased");
         if (m_addPulls) {
 
           std::optional<Trk::ResidualPull> biased;
           std::optional<Trk::ResidualPull> unbiased;
           if (tp) {
             biased= m_residualPullCalculator->residualPull(measurement, tp, Trk::ResidualPull::Biased);
-	    if (m_storeTRT) msos->auxdata<float>("TrackError_biased") = sqrt(fabs((*tp->covariance())(Trk::locX,Trk::locX)));
+            if (m_storeTRT) TrackError_biasedAcc(*msos) = sqrt(fabs((*tp->covariance())(Trk::locX,Trk::locX)));
 
-	    if (m_storeTRT) msos->auxdata<float>("TrackError_biased") = sqrt(fabs((*tp->covariance())(Trk::locX,Trk::locX)));
+	    if (m_storeTRT) TrackError_biasedAcc(*msos) = sqrt(fabs((*tp->covariance())(Trk::locX,Trk::locX)));
             std::unique_ptr<const Trk::TrackParameters> unbiasedTp( m_updator->removeFromState(*tp, measurement->localParameters(), measurement->localCovariance()) );
             if(unbiasedTp.get()) {
-               if (m_storeTRT) msos->auxdata<float>("TrackError_unbiased") = sqrt(fabs((*unbiasedTp.get()->covariance())(Trk::locX,Trk::locX)));
+               if (m_storeTRT) TrackError_unbiasedAcc(*msos) = sqrt(fabs((*unbiasedTp.get()->covariance())(Trk::locX,Trk::locX)));
                unbiased = m_residualPullCalculator->residualPull(measurement, unbiasedTp.get(), Trk::ResidualPull::Unbiased);
             }
           }
           else {
             if (extrap.get()) {
-	      if (m_storeTRT) msos->auxdata<float>("TrackError_unbiased") = sqrt(fabs((*extrap.get()->covariance())(Trk::locX,Trk::locX)));
+	      if (m_storeTRT) TrackError_unbiasedAcc(*msos) = sqrt(fabs((*extrap.get()->covariance())(Trk::locX,Trk::locX)));
               biased = m_residualPullCalculator->residualPull(measurement, extrap.get(), Trk::ResidualPull::Biased);
               unbiased = m_residualPullCalculator->residualPull(measurement, extrap.get(), Trk::ResidualPull::Unbiased);
             }

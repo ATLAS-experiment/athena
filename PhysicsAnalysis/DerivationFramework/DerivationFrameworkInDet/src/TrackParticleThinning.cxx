@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -17,6 +17,7 @@
 #include <vector>
 #include <string>
 #include "ExpressionEvaluation/ExpressionParserUser.icc"
+#include "AthContainers/ConstAccessor.h"
 
 // Constructor
 DerivationFramework::TrackParticleThinning::TrackParticleThinning(const std::string& t,
@@ -263,12 +264,12 @@ void DerivationFramework::TrackParticleThinning::selectTrackHits(const xAOD::Tra
 
     // loop over the TrackStateValidation objects, and add them to the outputStatesMask    
     using StatesOnTrack = std::vector<ElementLink<xAOD::TrackStateValidationContainer>>;
-    static const std::string trackStateNames = "msosLink";
-    if( ! trkIt->isAvailable< StatesOnTrack >( trackStateNames ) ) {
+    static const SG::ConstAccessor< StatesOnTrack > msosLinkAcc( "msosLink" );
+    if( ! msosLinkAcc.isAvailable(*trkIt) ) {
       ATH_MSG_DEBUG("Cannot find TrackState link from xAOD::TrackParticle. Skipping track.");
       continue;
     }
-    const StatesOnTrack& measurementsOnTrack = trkIt->auxdataConst< StatesOnTrack >( trackStateNames );
+    const StatesOnTrack& measurementsOnTrack = msosLinkAcc(*trkIt);
     for( const ElementLink<xAOD::TrackStateValidationContainer>& trkState_el : measurementsOnTrack) {
       if (not trkState_el.isValid()) {
 	ATH_MSG_DEBUG("Cannot find a valid link to TrackStateValidation object for track index: " << trkIndex);

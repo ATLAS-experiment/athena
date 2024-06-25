@@ -8,6 +8,7 @@
 #include "xAODTracking/TrackParticle.h"
 #include "TrkTrack/TrackStateOnSurface.h"
 #include "TrkEventPrimitives/TrackStateDefs.h"
+#include "AthContainers/ConstAccessor.h"
 
 #include <vector>
 #include <string>
@@ -82,7 +83,7 @@ StatusCode DerivationFramework::PixelNtupleMaker::addBranches() const {
   std::vector<float> tmpCov(15,0.);
 
   // StoreGateSvc+InDetTrackParticles.msosLink
-  static const SG::AuxElement::ConstAccessor<MeasurementsOnTrack>  acc_MeasurementsOnTrack("msosLink");
+  static const SG::ConstAccessor<MeasurementsOnTrack>  acc_MeasurementsOnTrack("msosLink");
 
   for (const xAOD::TrackParticle* trk : *tracks) {
     uint8_t nPixHits = 0;             trk->summaryValue(nPixHits,xAOD::numberOfPixelHits); 
@@ -140,21 +141,37 @@ StatusCode DerivationFramework::PixelNtupleMaker::addBranches() const {
 
       const xAOD::TrackMeasurementValidation* msosClus =  *(msos->trackMeasurementValidationLink());        
 
+      static const SG::ConstAccessor<float> chargeAcc("charge");
+      static const SG::ConstAccessor<int> layerAcc("layer");
+      static const SG::ConstAccessor<int> becAcc("bec");
+      static const SG::ConstAccessor<int> phi_moduleAcc("phi_module");
+      static const SG::ConstAccessor<int> eta_moduleAcc("eta_module");
+      static const SG::ConstAccessor<int> ToTAcc("ToT");
+      static const SG::ConstAccessor<int> LVL1AAcc("LVL1A");
+      static const SG::ConstAccessor<char> isSplitAcc("isSplit");
+      static const SG::ConstAccessor<int> nRDOAcc("nRDO");
+      static const SG::ConstAccessor<int> sizePhiAcc("sizePhi");
+      static const SG::ConstAccessor<int> sizeZAcc("sizeZ");
+      static const SG::ConstAccessor<float> LorentzShiftAcc("LorentzShift");
+      static const SG::ConstAccessor<std::vector<int> > rdo_totAcc("rdo_tot");
+      static const SG::ConstAccessor<std::vector<float> > rdo_chargeAcc("rdo_charge");
+
       for (const auto *clus_itr : *pixClusters) {
         if (clus_itr->identifier()!=(msosClus)->identifier()) { continue; }
-        if (clus_itr->auxdata<float>("charge")!=(msosClus)->auxdata<float>("charge")) { continue; }
+        if (chargeAcc(*clus_itr)!=chargeAcc(*msosClus)) { continue; }
 
-        clusterLayer.push_back(clus_itr->auxdata<int>("layer"));
-        clusterBEC.push_back(clus_itr->auxdata<int>("bec"));
-        clusterModulePhi.push_back(clus_itr->auxdata<int>("phi_module"));
-        clusterModuleEta.push_back(clus_itr->auxdata<int>("eta_module"));
-        clusterCharge.push_back(clus_itr->auxdata<float>("charge"));
-        clusterToT.push_back(clus_itr->auxdata<int>("ToT"));
-        clusterL1A.push_back(clus_itr->auxdata<int>("LVL1A"));
-        clusterIsSplit.push_back(clus_itr->auxdata<char>("isSplit"));
-        clusterSize.push_back(clus_itr->auxdata<int>("nRDO"));
-        clusterSizePhi.push_back(clus_itr->auxdata<int>("sizePhi"));
-        clusterSizeZ.push_back(clus_itr->auxdata<int>("sizeZ"));
+        clusterLayer.push_back(layerAcc(*clus_itr));
+        clusterBEC.push_back(becAcc(*clus_itr));
+        clusterModulePhi.push_back(phi_moduleAcc(*clus_itr));
+        clusterModuleEta.push_back(eta_moduleAcc(*clus_itr));
+        clusterCharge.push_back(chargeAcc(*clus_itr));
+        clusterToT.push_back(ToTAcc(*clus_itr));
+        clusterL1A.push_back(LVL1AAcc(*clus_itr));
+        clusterIsSplit.push_back(isSplitAcc(*clus_itr));
+        clusterSize.push_back(nRDOAcc(*clus_itr));
+        clusterSizePhi.push_back(sizePhiAcc(*clus_itr));
+        clusterSizeZ.push_back(sizeZAcc(*clus_itr));
+
         trackPhi.push_back(msos->localPhi());
         trackTheta.push_back(msos->localTheta());
         trackX.push_back(msos->localX());
@@ -166,7 +183,7 @@ StatusCode DerivationFramework::PixelNtupleMaker::addBranches() const {
         globalZ.push_back(clus_itr->globalZ());
         unbiasedResidualX.push_back(msos->unbiasedResidualX());
         unbiasedResidualY.push_back(msos->unbiasedResidualY());
-        moduleLorentzShift.push_back(clus_itr->auxdata<float>("LorentzShift"));
+        moduleLorentzShift.push_back(LorentzShiftAcc(*clus_itr));
 
         // cluster isolation   IBL:50x250um, PIXEL:50x400um
         //    - isolation region 10x2 = 500x500um for IBL,  500x800um for PIXEL
@@ -175,16 +192,16 @@ StatusCode DerivationFramework::PixelNtupleMaker::addBranches() const {
         int nTotalClustersPerModule = 0;
         int nTotalPixelsPerModule = 0;
         for (const auto *clus_neighbor : *pixClusters) {
-          if (clus_neighbor->auxdata<int>("layer")==clus_itr->auxdata<int>("layer")
-              && clus_neighbor->auxdata<int>("bec")==clus_itr->auxdata<int>("bec")
-              && clus_neighbor->auxdata<int>("phi_module")==clus_itr->auxdata<int>("phi_module")
-              && clus_neighbor->auxdata<int>("eta_module")==clus_itr->auxdata<int>("eta_module")) {
+          if (layerAcc(*clus_neighbor)==layerAcc(*clus_itr)
+              && becAcc(*clus_neighbor)==becAcc(*clus_itr)
+              && phi_moduleAcc(*clus_neighbor)==phi_moduleAcc(*clus_itr)
+              && eta_moduleAcc(*clus_neighbor)==eta_moduleAcc(*clus_itr)) {
             float deltaX = std::abs(clus_neighbor->localX()-clus_itr->localX());
             float deltaY = std::abs(clus_neighbor->localY()-clus_itr->localY());
             nTotalClustersPerModule++;
-            nTotalPixelsPerModule += clus_neighbor->auxdata<int>("nRDO");
+            nTotalPixelsPerModule += nRDOAcc(*clus_neighbor);
             if (deltaX>0.0 && deltaY>0.0) {
-              if (clus_itr->auxdata<int>("layer")==0 && clus_itr->auxdata<int>("bec")==0) {  // IBL
+              if (layerAcc(*clus_itr)==0 && becAcc(*clus_itr)==0) {  // IBL
                 if (deltaX<0.500 && deltaY<0.500) { numNeighborCluster10x2++; }
                 if (deltaX<1.000 && deltaY<1.000) { numNeighborCluster20x4++; }
               }
@@ -211,16 +228,17 @@ StatusCode DerivationFramework::PixelNtupleMaker::addBranches() const {
         std::vector<int> tmpPhi;
         std::vector<int> tmpEta;
 
-        int nrdo = clus_itr->isAvailable<std::vector<int>>("rdo_phi_pixel_index") ? clus_itr->auxdata<std::vector<int>>("rdo_phi_pixel_index").size() : -1;
+        static const SG::ConstAccessor<std::vector<int> > rdo_phi_pixel_indexAcc("rdo_phi_pixel_index");
+        int nrdo = rdo_phi_pixel_indexAcc.isAvailable(*clus_itr) ? rdo_phi_pixel_indexAcc(*clus_itr).size() : -1;
         for (int i=0; i<nrdo; i++) {
 
-          int phi = clus_itr->auxdata<std::vector<int>>("rdo_phi_pixel_index")[i];
+          int phi = rdo_phi_pixel_indexAcc(*clus_itr)[i];
           if (phi<5)   { checkEdge=true; }
           if (phi>320) { checkEdge=true; }
 
-          int eta = clus_itr->auxdata<std::vector<int>>("rdo_eta_pixel_index")[i];
-          if (clus_itr->auxdata<int>("layer")==0 && clus_itr->auxdata<int>("bec")==0) {  // IBL
-            if (clus_itr->auxdata<int>("eta_module")>-7 && clus_itr->auxdata<int>("eta_module")<6) { // IBL Planar
+          int eta = rdo_phi_pixel_indexAcc(*clus_itr)[i];
+          if (layerAcc(*clus_itr)==0 && becAcc(*clus_itr)==0) {  // IBL
+            if (eta_moduleAcc(*clus_itr)>-7 && eta_moduleAcc(*clus_itr)<6) { // IBL Planar
               if (eta<5)   { checkEdge=true; }
               if (eta>154) { checkEdge=true; }
             }
@@ -234,18 +252,18 @@ StatusCode DerivationFramework::PixelNtupleMaker::addBranches() const {
             if (eta>154) { checkEdge=true; }
           }
 
-          int tot = clus_itr->auxdata<std::vector<int>>("rdo_tot")[i];
-          if (clus_itr->auxdata<int>("layer")==0 && clus_itr->auxdata<int>("bec")==0) {  // IBL
+          int tot = rdo_totAcc(*clus_itr)[i];
+          if (layerAcc(*clus_itr)==0 && becAcc(*clus_itr)==0) {  // IBL
             if (tot==16) { checkOverflow=true; }
           }
-          else if (clus_itr->auxdata<int>("layer")==1 && clus_itr->auxdata<int>("bec")==0) {  // b-layer
+          else if (layerAcc(*clus_itr)==1 && becAcc(*clus_itr)==0) {  // b-layer
             if (tot==150) { checkOverflow=true; }
           }
           else {
             if (tot==255) { checkOverflow=true; }
           }
 
-          float charge = clus_itr->auxdata<std::vector<float>>("rdo_charge")[i];
+          float charge = rdo_chargeAcc(*clus_itr)[i];
           if (trk->pt()>2000.0) {
             tmpToT.push_back(tot);
             tmpCharge.push_back(charge);
@@ -265,42 +283,42 @@ StatusCode DerivationFramework::PixelNtupleMaker::addBranches() const {
     }
 
     if (m_storeMode==1) {
-      static const SG::AuxElement::Decorator<float> d0err("d0err");
-      static const SG::AuxElement::Decorator<float> z0err("z0err");
-      static const SG::AuxElement::Decorator<std::vector<uint64_t>>   HoleIndex("HoleIndex");
-      static const SG::AuxElement::Decorator<std::vector<int>>   ClusterLayer("ClusterLayer");
-      static const SG::AuxElement::Decorator<std::vector<int>>   ClusterBEC("ClusterBEC");
-      static const SG::AuxElement::Decorator<std::vector<int>>   ClusterModulePhi("ClusterModulePhi");
-      static const SG::AuxElement::Decorator<std::vector<int>>   ClusterModuleEta("ClusterModuleEta");
-      static const SG::AuxElement::Decorator<std::vector<float>> ClusterCharge("ClusterCharge");
-      static const SG::AuxElement::Decorator<std::vector<int>>   ClusterToT("ClusterToT");
-      static const SG::AuxElement::Decorator<std::vector<int>>   ClusterL1A("ClusterL1A");
-      static const SG::AuxElement::Decorator<std::vector<int>>   ClusterIsSplit("ClusterIsSplit");
-      static const SG::AuxElement::Decorator<std::vector<int>>   ClusterSize("ClusterSize");
-      static const SG::AuxElement::Decorator<std::vector<int>>   ClusterSizePhi("ClusterSizePhi");
-      static const SG::AuxElement::Decorator<std::vector<int>>   ClusterSizeZ("ClusterSizeZ");
-      static const SG::AuxElement::Decorator<std::vector<bool>>  ClusterIsEdge("ClusterIsEdge");
-      static const SG::AuxElement::Decorator<std::vector<bool>>  ClusterIsOverflow("ClusterIsOverflow");
-      static const SG::AuxElement::Decorator<std::vector<float>> TrackLocalPhi("TrackLocalPhi");
-      static const SG::AuxElement::Decorator<std::vector<float>> TrackLocalTheta("TrackLocalTheta");
-      static const SG::AuxElement::Decorator<std::vector<float>> TrackLocalX("TrackLocalX");
-      static const SG::AuxElement::Decorator<std::vector<float>> TrackLocalY("TrackLocalY");
-      static const SG::AuxElement::Decorator<std::vector<float>> ClusterLocalX("ClusterLocalX");
-      static const SG::AuxElement::Decorator<std::vector<float>> ClusterLocalY("ClusterLocalY");
-      static const SG::AuxElement::Decorator<std::vector<float>> ClusterGlobalX("ClusterGlobalX");
-      static const SG::AuxElement::Decorator<std::vector<float>> ClusterGlobalY("ClusterGlobalY");
-      static const SG::AuxElement::Decorator<std::vector<float>> ClusterGlobalZ("ClusterGlobalZ");
-      static const SG::AuxElement::Decorator<std::vector<float>> UnbiasedResidualX("UnbiasedResidualX");
-      static const SG::AuxElement::Decorator<std::vector<float>> UnbiasedResidualY("UnbiasedResidualY");
-      static const SG::AuxElement::Decorator<std::vector<int>>   ClusterIsolation10x2("ClusterIsolation10x2");
-      static const SG::AuxElement::Decorator<std::vector<int>>   ClusterIsolation20x4("ClusterIsolation20x4");
-      static const SG::AuxElement::Decorator<std::vector<int>>   NumTotalClustersPerModule("NumTotalClustersPerModule");
-      static const SG::AuxElement::Decorator<std::vector<int>>   NumTotalPixelsPerModule("NumTotalPixelsPerModule");
-      static const SG::AuxElement::Decorator<std::vector<float>> ModuleLorentzShift("ModuleLorentzShift");
-      static const SG::AuxElement::Decorator<std::vector<std::vector<int>>>   RdoToT("RdoToT");
-      static const SG::AuxElement::Decorator<std::vector<std::vector<float>>> RdoCharge("RdoCharge");
-      static const SG::AuxElement::Decorator<std::vector<std::vector<int>>>   RdoPhi("RdoPhi");
-      static const SG::AuxElement::Decorator<std::vector<std::vector<int>>>   RdoEta("RdoEta");
+      static const SG::Decorator<float> d0err("d0err");
+      static const SG::Decorator<float> z0err("z0err");
+      static const SG::Decorator<std::vector<uint64_t>>   HoleIndex("HoleIndex");
+      static const SG::Decorator<std::vector<int>>   ClusterLayer("ClusterLayer");
+      static const SG::Decorator<std::vector<int>>   ClusterBEC("ClusterBEC");
+      static const SG::Decorator<std::vector<int>>   ClusterModulePhi("ClusterModulePhi");
+      static const SG::Decorator<std::vector<int>>   ClusterModuleEta("ClusterModuleEta");
+      static const SG::Decorator<std::vector<float>> ClusterCharge("ClusterCharge");
+      static const SG::Decorator<std::vector<int>>   ClusterToT("ClusterToT");
+      static const SG::Decorator<std::vector<int>>   ClusterL1A("ClusterL1A");
+      static const SG::Decorator<std::vector<int>>   ClusterIsSplit("ClusterIsSplit");
+      static const SG::Decorator<std::vector<int>>   ClusterSize("ClusterSize");
+      static const SG::Decorator<std::vector<int>>   ClusterSizePhi("ClusterSizePhi");
+      static const SG::Decorator<std::vector<int>>   ClusterSizeZ("ClusterSizeZ");
+      static const SG::Decorator<std::vector<bool>>  ClusterIsEdge("ClusterIsEdge");
+      static const SG::Decorator<std::vector<bool>>  ClusterIsOverflow("ClusterIsOverflow");
+      static const SG::Decorator<std::vector<float>> TrackLocalPhi("TrackLocalPhi");
+      static const SG::Decorator<std::vector<float>> TrackLocalTheta("TrackLocalTheta");
+      static const SG::Decorator<std::vector<float>> TrackLocalX("TrackLocalX");
+      static const SG::Decorator<std::vector<float>> TrackLocalY("TrackLocalY");
+      static const SG::Decorator<std::vector<float>> ClusterLocalX("ClusterLocalX");
+      static const SG::Decorator<std::vector<float>> ClusterLocalY("ClusterLocalY");
+      static const SG::Decorator<std::vector<float>> ClusterGlobalX("ClusterGlobalX");
+      static const SG::Decorator<std::vector<float>> ClusterGlobalY("ClusterGlobalY");
+      static const SG::Decorator<std::vector<float>> ClusterGlobalZ("ClusterGlobalZ");
+      static const SG::Decorator<std::vector<float>> UnbiasedResidualX("UnbiasedResidualX");
+      static const SG::Decorator<std::vector<float>> UnbiasedResidualY("UnbiasedResidualY");
+      static const SG::Decorator<std::vector<int>>   ClusterIsolation10x2("ClusterIsolation10x2");
+      static const SG::Decorator<std::vector<int>>   ClusterIsolation20x4("ClusterIsolation20x4");
+      static const SG::Decorator<std::vector<int>>   NumTotalClustersPerModule("NumTotalClustersPerModule");
+      static const SG::Decorator<std::vector<int>>   NumTotalPixelsPerModule("NumTotalPixelsPerModule");
+      static const SG::Decorator<std::vector<float>> ModuleLorentzShift("ModuleLorentzShift");
+      static const SG::Decorator<std::vector<std::vector<int>>>   RdoToT("RdoToT");
+      static const SG::Decorator<std::vector<std::vector<float>>> RdoCharge("RdoCharge");
+      static const SG::Decorator<std::vector<std::vector<int>>>   RdoPhi("RdoPhi");
+      static const SG::Decorator<std::vector<std::vector<int>>>   RdoEta("RdoEta");
 
       d0err(*trk)                = trk->definingParametersCovMatrixVec().at(0);
       z0err(*trk)                = trk->definingParametersCovMatrixVec().at(2);
@@ -522,130 +540,130 @@ StatusCode DerivationFramework::PixelNtupleMaker::addBranches() const {
       tp->makePrivateStore(*trk_maxpt);
       tp->setDefiningParametersCovMatrixVec(tmpCov);
 
-      static const SG::AuxElement::Decorator<std::vector<int>> TrackEtaIBL("TrackEtaIBL");
-      static const SG::AuxElement::Decorator<std::vector<int>> TrackEta3D("TrackEta3D");
-      static const SG::AuxElement::Decorator<std::vector<int>> TrackEtaBL("TrackEtaBL");
-      static const SG::AuxElement::Decorator<std::vector<int>> TrackEtaL1("TrackEtaL1");
-      static const SG::AuxElement::Decorator<std::vector<int>> TrackEtaL2("TrackEtaL2");
-      static const SG::AuxElement::Decorator<std::vector<int>> TrackEtaEA1("TrackEtaEA1");
-      static const SG::AuxElement::Decorator<std::vector<int>> TrackEtaEA2("TrackEtaEA2");
-      static const SG::AuxElement::Decorator<std::vector<int>> TrackEtaEA3("TrackEtaEA3");
-      static const SG::AuxElement::Decorator<std::vector<int>> TrackEtaEC1("TrackEtaEC1");
-      static const SG::AuxElement::Decorator<std::vector<int>> TrackEtaEC2("TrackEtaEC2");
-      static const SG::AuxElement::Decorator<std::vector<int>> TrackEtaEC3("TrackEtaEC3");
-      static const SG::AuxElement::Decorator<std::vector<int>> TrackHitEtaIBL("TrackHitEtaIBL");
-      static const SG::AuxElement::Decorator<std::vector<int>> TrackHitEta3D("TrackHitEta3D");
-      static const SG::AuxElement::Decorator<std::vector<int>> TrackHitEtaBL("TrackHitEtaBL");
-      static const SG::AuxElement::Decorator<std::vector<int>> TrackHitEtaL1("TrackHitEtaL1");
-      static const SG::AuxElement::Decorator<std::vector<int>> TrackHitEtaL2("TrackHitEtaL2");
-      static const SG::AuxElement::Decorator<std::vector<int>> TrackHitEtaEA1("TrackHitEtaEA1");
-      static const SG::AuxElement::Decorator<std::vector<int>> TrackHitEtaEA2("TrackHitEtaEA2");
-      static const SG::AuxElement::Decorator<std::vector<int>> TrackHitEtaEA3("TrackHitEtaEA3");
-      static const SG::AuxElement::Decorator<std::vector<int>> TrackHitEtaEC1("TrackHitEtaEC1");
-      static const SG::AuxElement::Decorator<std::vector<int>> TrackHitEtaEC2("TrackHitEtaEC2");
-      static const SG::AuxElement::Decorator<std::vector<int>> TrackHitEtaEC3("TrackHitEtaEC3");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterChargeIBL("ClusterChargeIBL");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterCharge3D("ClusterCharge3D");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterChargeBL("ClusterChargeBL");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterChargeL1("ClusterChargeL1");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterChargeL2("ClusterChargeL2");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterChargeEA1("ClusterChargeEA1");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterChargeEA2("ClusterChargeEA2");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterChargeEA3("ClusterChargeEA3");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterChargeEC1("ClusterChargeEC1");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterChargeEC2("ClusterChargeEC2");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterChargeEC3("ClusterChargeEC3");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterToTIBL("ClusterToTIBL");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterToT3D("ClusterToT3D");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterToTBL("ClusterToTBL");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterToTL1("ClusterToTL1");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterToTL2("ClusterToTL2");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterToTEA1("ClusterToTEA1");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterToTEA2("ClusterToTEA2");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterToTEA3("ClusterToTEA3");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterToTEC1("ClusterToTEC1");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterToTEC2("ClusterToTEC2");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterToTEC3("ClusterToTEC3");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterdEdxIBL("ClusterdEdxIBL");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterdEdx3D("ClusterdEdx3D");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterdEdxBL("ClusterdEdxBL");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterdEdxL1("ClusterdEdxL1");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterdEdxL2("ClusterdEdxL2");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterdEdxEA1("ClusterdEdxEA1");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterdEdxEA2("ClusterdEdxEA2");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterdEdxEA3("ClusterdEdxEA3");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterdEdxEC1("ClusterdEdxEC1");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterdEdxEC2("ClusterdEdxEC2");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterdEdxEC3("ClusterdEdxEC3");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterSizeXIBL("ClusterSizeXIBL");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterSizeX3D("ClusterSizeX3D");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterSizeXBL("ClusterSizeXBL");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterSizeXL1("ClusterSizeXL1");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterSizeXL2("ClusterSizeXL2");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterSizeXEA1("ClusterSizeXEA1");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterSizeXEA2("ClusterSizeXEA2");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterSizeXEA3("ClusterSizeXEA3");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterSizeXEC1("ClusterSizeXEC1");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterSizeXEC2("ClusterSizeXEC2");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterSizeXEC3("ClusterSizeXEC3");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterSizeZIBL("ClusterSizeZIBL");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterSizeZ3D("ClusterSizeZ3D");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterSizeZBL("ClusterSizeZBL");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterSizeZL1("ClusterSizeZL1");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterSizeZL2("ClusterSizeZL2");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterSizeZEA1("ClusterSizeZEA1");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterSizeZEA2("ClusterSizeZEA2");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterSizeZEA3("ClusterSizeZEA3");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterSizeZEC1("ClusterSizeZEC1");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterSizeZEC2("ClusterSizeZEC2");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterSizeZEC3("ClusterSizeZEC3");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterResidualXIBL("ClusterResidualXIBL");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterResidualX3D("ClusterResidualX3D");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterResidualXBL("ClusterResidualXBL");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterResidualXL1("ClusterResidualXL1");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterResidualXL2("ClusterResidualXL2");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterResidualXEA1("ClusterResidualXEA1");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterResidualXEA2("ClusterResidualXEA2");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterResidualXEA3("ClusterResidualXEA3");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterResidualXEC1("ClusterResidualXEC1");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterResidualXEC2("ClusterResidualXEC2");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterResidualXEC3("ClusterResidualXEC3");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterResidualYIBL("ClusterResidualYIBL");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterResidualY3D("ClusterResidualY3D");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterResidualYBL("ClusterResidualYBL");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterResidualYL1("ClusterResidualYL1");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterResidualYL2("ClusterResidualYL2");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterResidualYEA1("ClusterResidualYEA1");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterResidualYEA2("ClusterResidualYEA2");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterResidualYEA3("ClusterResidualYEA3");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterResidualYEC1("ClusterResidualYEC1");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterResidualYEC2("ClusterResidualYEC2");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterResidualYEC3("ClusterResidualYEC3");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterHoleIBL("ClusterHoleIBL");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterHole3D("ClusterHole3D");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterHoleBL("ClusterHoleBL");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterHoleL1("ClusterHoleL1");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterHoleL2("ClusterHoleL2");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterHoleEA1("ClusterHoleEA1");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterHoleEA2("ClusterHoleEA2");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterHoleEA3("ClusterHoleEA3");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterHoleEC1("ClusterHoleEC1");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterHoleEC2("ClusterHoleEC2");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterHoleEC3("ClusterHoleEC3");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterOccIBL("ClusterOccIBL");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterOcc3D("ClusterOcc3D");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterOccBL("ClusterOccBL");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterOccL1("ClusterOccL1");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterOccL2("ClusterOccL2");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterOccEA1("ClusterOccEA1");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterOccEA2("ClusterOccEA2");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterOccEA3("ClusterOccEA3");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterOccEC1("ClusterOccEC1");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterOccEC2("ClusterOccEC2");
-      static const SG::AuxElement::Decorator<std::vector<int>> ClusterOccEC3("ClusterOccEC3");
-      static const SG::AuxElement::Decorator<std::vector<int>> TrackALL("TrackALL");
-      static const SG::AuxElement::Decorator<std::vector<int>> TrackHOLE("TrackHOLE");
-      static const SG::AuxElement::Decorator<std::vector<int>> TrackdEdx("TrackdEdx");
+      static const SG::Decorator<std::vector<int>> TrackEtaIBL("TrackEtaIBL");
+      static const SG::Decorator<std::vector<int>> TrackEta3D("TrackEta3D");
+      static const SG::Decorator<std::vector<int>> TrackEtaBL("TrackEtaBL");
+      static const SG::Decorator<std::vector<int>> TrackEtaL1("TrackEtaL1");
+      static const SG::Decorator<std::vector<int>> TrackEtaL2("TrackEtaL2");
+      static const SG::Decorator<std::vector<int>> TrackEtaEA1("TrackEtaEA1");
+      static const SG::Decorator<std::vector<int>> TrackEtaEA2("TrackEtaEA2");
+      static const SG::Decorator<std::vector<int>> TrackEtaEA3("TrackEtaEA3");
+      static const SG::Decorator<std::vector<int>> TrackEtaEC1("TrackEtaEC1");
+      static const SG::Decorator<std::vector<int>> TrackEtaEC2("TrackEtaEC2");
+      static const SG::Decorator<std::vector<int>> TrackEtaEC3("TrackEtaEC3");
+      static const SG::Decorator<std::vector<int>> TrackHitEtaIBL("TrackHitEtaIBL");
+      static const SG::Decorator<std::vector<int>> TrackHitEta3D("TrackHitEta3D");
+      static const SG::Decorator<std::vector<int>> TrackHitEtaBL("TrackHitEtaBL");
+      static const SG::Decorator<std::vector<int>> TrackHitEtaL1("TrackHitEtaL1");
+      static const SG::Decorator<std::vector<int>> TrackHitEtaL2("TrackHitEtaL2");
+      static const SG::Decorator<std::vector<int>> TrackHitEtaEA1("TrackHitEtaEA1");
+      static const SG::Decorator<std::vector<int>> TrackHitEtaEA2("TrackHitEtaEA2");
+      static const SG::Decorator<std::vector<int>> TrackHitEtaEA3("TrackHitEtaEA3");
+      static const SG::Decorator<std::vector<int>> TrackHitEtaEC1("TrackHitEtaEC1");
+      static const SG::Decorator<std::vector<int>> TrackHitEtaEC2("TrackHitEtaEC2");
+      static const SG::Decorator<std::vector<int>> TrackHitEtaEC3("TrackHitEtaEC3");
+      static const SG::Decorator<std::vector<int>> ClusterChargeIBL("ClusterChargeIBL");
+      static const SG::Decorator<std::vector<int>> ClusterCharge3D("ClusterCharge3D");
+      static const SG::Decorator<std::vector<int>> ClusterChargeBL("ClusterChargeBL");
+      static const SG::Decorator<std::vector<int>> ClusterChargeL1("ClusterChargeL1");
+      static const SG::Decorator<std::vector<int>> ClusterChargeL2("ClusterChargeL2");
+      static const SG::Decorator<std::vector<int>> ClusterChargeEA1("ClusterChargeEA1");
+      static const SG::Decorator<std::vector<int>> ClusterChargeEA2("ClusterChargeEA2");
+      static const SG::Decorator<std::vector<int>> ClusterChargeEA3("ClusterChargeEA3");
+      static const SG::Decorator<std::vector<int>> ClusterChargeEC1("ClusterChargeEC1");
+      static const SG::Decorator<std::vector<int>> ClusterChargeEC2("ClusterChargeEC2");
+      static const SG::Decorator<std::vector<int>> ClusterChargeEC3("ClusterChargeEC3");
+      static const SG::Decorator<std::vector<int>> ClusterToTIBL("ClusterToTIBL");
+      static const SG::Decorator<std::vector<int>> ClusterToT3D("ClusterToT3D");
+      static const SG::Decorator<std::vector<int>> ClusterToTBL("ClusterToTBL");
+      static const SG::Decorator<std::vector<int>> ClusterToTL1("ClusterToTL1");
+      static const SG::Decorator<std::vector<int>> ClusterToTL2("ClusterToTL2");
+      static const SG::Decorator<std::vector<int>> ClusterToTEA1("ClusterToTEA1");
+      static const SG::Decorator<std::vector<int>> ClusterToTEA2("ClusterToTEA2");
+      static const SG::Decorator<std::vector<int>> ClusterToTEA3("ClusterToTEA3");
+      static const SG::Decorator<std::vector<int>> ClusterToTEC1("ClusterToTEC1");
+      static const SG::Decorator<std::vector<int>> ClusterToTEC2("ClusterToTEC2");
+      static const SG::Decorator<std::vector<int>> ClusterToTEC3("ClusterToTEC3");
+      static const SG::Decorator<std::vector<int>> ClusterdEdxIBL("ClusterdEdxIBL");
+      static const SG::Decorator<std::vector<int>> ClusterdEdx3D("ClusterdEdx3D");
+      static const SG::Decorator<std::vector<int>> ClusterdEdxBL("ClusterdEdxBL");
+      static const SG::Decorator<std::vector<int>> ClusterdEdxL1("ClusterdEdxL1");
+      static const SG::Decorator<std::vector<int>> ClusterdEdxL2("ClusterdEdxL2");
+      static const SG::Decorator<std::vector<int>> ClusterdEdxEA1("ClusterdEdxEA1");
+      static const SG::Decorator<std::vector<int>> ClusterdEdxEA2("ClusterdEdxEA2");
+      static const SG::Decorator<std::vector<int>> ClusterdEdxEA3("ClusterdEdxEA3");
+      static const SG::Decorator<std::vector<int>> ClusterdEdxEC1("ClusterdEdxEC1");
+      static const SG::Decorator<std::vector<int>> ClusterdEdxEC2("ClusterdEdxEC2");
+      static const SG::Decorator<std::vector<int>> ClusterdEdxEC3("ClusterdEdxEC3");
+      static const SG::Decorator<std::vector<int>> ClusterSizeXIBL("ClusterSizeXIBL");
+      static const SG::Decorator<std::vector<int>> ClusterSizeX3D("ClusterSizeX3D");
+      static const SG::Decorator<std::vector<int>> ClusterSizeXBL("ClusterSizeXBL");
+      static const SG::Decorator<std::vector<int>> ClusterSizeXL1("ClusterSizeXL1");
+      static const SG::Decorator<std::vector<int>> ClusterSizeXL2("ClusterSizeXL2");
+      static const SG::Decorator<std::vector<int>> ClusterSizeXEA1("ClusterSizeXEA1");
+      static const SG::Decorator<std::vector<int>> ClusterSizeXEA2("ClusterSizeXEA2");
+      static const SG::Decorator<std::vector<int>> ClusterSizeXEA3("ClusterSizeXEA3");
+      static const SG::Decorator<std::vector<int>> ClusterSizeXEC1("ClusterSizeXEC1");
+      static const SG::Decorator<std::vector<int>> ClusterSizeXEC2("ClusterSizeXEC2");
+      static const SG::Decorator<std::vector<int>> ClusterSizeXEC3("ClusterSizeXEC3");
+      static const SG::Decorator<std::vector<int>> ClusterSizeZIBL("ClusterSizeZIBL");
+      static const SG::Decorator<std::vector<int>> ClusterSizeZ3D("ClusterSizeZ3D");
+      static const SG::Decorator<std::vector<int>> ClusterSizeZBL("ClusterSizeZBL");
+      static const SG::Decorator<std::vector<int>> ClusterSizeZL1("ClusterSizeZL1");
+      static const SG::Decorator<std::vector<int>> ClusterSizeZL2("ClusterSizeZL2");
+      static const SG::Decorator<std::vector<int>> ClusterSizeZEA1("ClusterSizeZEA1");
+      static const SG::Decorator<std::vector<int>> ClusterSizeZEA2("ClusterSizeZEA2");
+      static const SG::Decorator<std::vector<int>> ClusterSizeZEA3("ClusterSizeZEA3");
+      static const SG::Decorator<std::vector<int>> ClusterSizeZEC1("ClusterSizeZEC1");
+      static const SG::Decorator<std::vector<int>> ClusterSizeZEC2("ClusterSizeZEC2");
+      static const SG::Decorator<std::vector<int>> ClusterSizeZEC3("ClusterSizeZEC3");
+      static const SG::Decorator<std::vector<int>> ClusterResidualXIBL("ClusterResidualXIBL");
+      static const SG::Decorator<std::vector<int>> ClusterResidualX3D("ClusterResidualX3D");
+      static const SG::Decorator<std::vector<int>> ClusterResidualXBL("ClusterResidualXBL");
+      static const SG::Decorator<std::vector<int>> ClusterResidualXL1("ClusterResidualXL1");
+      static const SG::Decorator<std::vector<int>> ClusterResidualXL2("ClusterResidualXL2");
+      static const SG::Decorator<std::vector<int>> ClusterResidualXEA1("ClusterResidualXEA1");
+      static const SG::Decorator<std::vector<int>> ClusterResidualXEA2("ClusterResidualXEA2");
+      static const SG::Decorator<std::vector<int>> ClusterResidualXEA3("ClusterResidualXEA3");
+      static const SG::Decorator<std::vector<int>> ClusterResidualXEC1("ClusterResidualXEC1");
+      static const SG::Decorator<std::vector<int>> ClusterResidualXEC2("ClusterResidualXEC2");
+      static const SG::Decorator<std::vector<int>> ClusterResidualXEC3("ClusterResidualXEC3");
+      static const SG::Decorator<std::vector<int>> ClusterResidualYIBL("ClusterResidualYIBL");
+      static const SG::Decorator<std::vector<int>> ClusterResidualY3D("ClusterResidualY3D");
+      static const SG::Decorator<std::vector<int>> ClusterResidualYBL("ClusterResidualYBL");
+      static const SG::Decorator<std::vector<int>> ClusterResidualYL1("ClusterResidualYL1");
+      static const SG::Decorator<std::vector<int>> ClusterResidualYL2("ClusterResidualYL2");
+      static const SG::Decorator<std::vector<int>> ClusterResidualYEA1("ClusterResidualYEA1");
+      static const SG::Decorator<std::vector<int>> ClusterResidualYEA2("ClusterResidualYEA2");
+      static const SG::Decorator<std::vector<int>> ClusterResidualYEA3("ClusterResidualYEA3");
+      static const SG::Decorator<std::vector<int>> ClusterResidualYEC1("ClusterResidualYEC1");
+      static const SG::Decorator<std::vector<int>> ClusterResidualYEC2("ClusterResidualYEC2");
+      static const SG::Decorator<std::vector<int>> ClusterResidualYEC3("ClusterResidualYEC3");
+      static const SG::Decorator<std::vector<int>> ClusterHoleIBL("ClusterHoleIBL");
+      static const SG::Decorator<std::vector<int>> ClusterHole3D("ClusterHole3D");
+      static const SG::Decorator<std::vector<int>> ClusterHoleBL("ClusterHoleBL");
+      static const SG::Decorator<std::vector<int>> ClusterHoleL1("ClusterHoleL1");
+      static const SG::Decorator<std::vector<int>> ClusterHoleL2("ClusterHoleL2");
+      static const SG::Decorator<std::vector<int>> ClusterHoleEA1("ClusterHoleEA1");
+      static const SG::Decorator<std::vector<int>> ClusterHoleEA2("ClusterHoleEA2");
+      static const SG::Decorator<std::vector<int>> ClusterHoleEA3("ClusterHoleEA3");
+      static const SG::Decorator<std::vector<int>> ClusterHoleEC1("ClusterHoleEC1");
+      static const SG::Decorator<std::vector<int>> ClusterHoleEC2("ClusterHoleEC2");
+      static const SG::Decorator<std::vector<int>> ClusterHoleEC3("ClusterHoleEC3");
+      static const SG::Decorator<std::vector<int>> ClusterOccIBL("ClusterOccIBL");
+      static const SG::Decorator<std::vector<int>> ClusterOcc3D("ClusterOcc3D");
+      static const SG::Decorator<std::vector<int>> ClusterOccBL("ClusterOccBL");
+      static const SG::Decorator<std::vector<int>> ClusterOccL1("ClusterOccL1");
+      static const SG::Decorator<std::vector<int>> ClusterOccL2("ClusterOccL2");
+      static const SG::Decorator<std::vector<int>> ClusterOccEA1("ClusterOccEA1");
+      static const SG::Decorator<std::vector<int>> ClusterOccEA2("ClusterOccEA2");
+      static const SG::Decorator<std::vector<int>> ClusterOccEA3("ClusterOccEA3");
+      static const SG::Decorator<std::vector<int>> ClusterOccEC1("ClusterOccEC1");
+      static const SG::Decorator<std::vector<int>> ClusterOccEC2("ClusterOccEC2");
+      static const SG::Decorator<std::vector<int>> ClusterOccEC3("ClusterOccEC3");
+      static const SG::Decorator<std::vector<int>> TrackALL("TrackALL");
+      static const SG::Decorator<std::vector<int>> TrackHOLE("TrackHOLE");
+      static const SG::Decorator<std::vector<int>> TrackdEdx("TrackdEdx");
 
       TrackEtaIBL(*tp)      = std::move(clusEta[0]);
       TrackEta3D(*tp)       = std::move(clusEta[1]);

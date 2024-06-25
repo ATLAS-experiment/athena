@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -17,6 +17,7 @@
 #include "GaudiKernel/MsgStream.h"
 #include "xAODTracking/TrackParticleAuxContainer.h"
 #include "InDetTrackSystematicsTools/InDetTrackTruthOriginDefs.h"
+#include "AthContainers/ConstAccessor.h"
 ///////////////////////////////////////////////////////////////////
 // Constructor
 ///////////////////////////////////////////////////////////////////
@@ -346,7 +347,7 @@ namespace DerivationFramework {
     if((recoTrackParticleCol && !recoTrackParticleCol->empty())){
       ATH_MSG_DEBUG("Size of reco track particle collection " << recoTrackParticleCol->size());
       int n_saved = 0;
-      static const SG::AuxElement::ConstAccessor< float > acc_truthProb("truthMatchProbability");
+      static const SG::ConstAccessor< float > acc_truthProb("truthMatchProbability");
 
       // loop over tracks
       for(const auto *const tp_reco: *recoTrackParticleCol){
@@ -387,12 +388,13 @@ namespace DerivationFramework {
     // if the track doesnt't have a valid truth link, skip to the next track
     // in practice, all tracks seem to have a truth link, but we need to also
     // check whether it's valid
-    if ( !track->isAvailable<TruthLink>("truthParticleLink") ) {
+    static const SG::ConstAccessor<TruthLink> truthParticleLinkAcc("truthParticleLink");
+    if ( !truthParticleLinkAcc.isAvailable(*track) ) {
       return nullptr;
     }
 
     // retrieve the link and check its validity
-    const TruthLink &link = track->auxdata<TruthLink>("truthParticleLink");
+    const TruthLink &link = truthParticleLinkAcc(*track);
 
     // a missing or invalid link implies truth particle has been dropped from
     // the truth record at some stage - probably it was a pileup or low pT GEANT
