@@ -5,7 +5,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 def geoModelFileDefault():
     # If this is changed, remember to also test with other dependent tests 
     # e.g. run ctest with ActsEventCnv
-    return "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/ATLAS-R3-MUONTEST_v2.db"
+    return "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/ATLAS-R3-MUONTEST_v3.db"
 
 def SetupArgParser():
     from argparse import ArgumentParser
