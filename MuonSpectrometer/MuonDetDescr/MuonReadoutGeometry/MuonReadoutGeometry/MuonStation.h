@@ -65,7 +65,7 @@ namespace MuonGM {
 
         inline const  std::string& getStationName() const;  //!< like BMS5, T1F1, CSL1
 
-        inline void setEtaPhiIndices(int eta, int phi);  //!< a la AMDB
+        void setEtaPhiIndices(int eta, int phi);  //!< a la AMDB
 
         inline double Rsize() const;
         inline double Ssize() const;
@@ -79,14 +79,14 @@ namespace MuonGM {
         bool barrel() const;
 
         inline double xAmdbCRO() const;
-        inline void setxAmdbCRO(double xpos);
+        void setxAmdbCRO(double xpos);
 
-        inline void setTransform(GeoAlignableTransform* xf);
+        void setTransform(GeoAlignableTransform* xf);
         void setBlineFixedPointInAmdbLRS(double s0, double z0, double t0);
         const Amg::Vector3D& getBlineFixedPointInAmdbLRS() const;
         const Amg::Vector3D& getUpdatedBlineFixedPointInAmdbLRS() const;
         void updateBlineFixedPointInAmdbLRS();
-        inline void setNativeToAmdbLRS(Amg::Transform3D xf);
+        void setNativeToAmdbLRS(Amg::Transform3D xf);
         void setNominalAmdbLRSToGlobal(Amg::Transform3D xf);
         void setDeltaAmdbLRS(Amg::Transform3D xf);
         //!< set the delta transform in the amdb frame and update the geoModel Delta
@@ -104,7 +104,7 @@ namespace MuonGM {
         void fillCache();
         void refreshCache();
         void setBline(const BLinePar* bline);
-        inline GeoAlignableTransform* getGeoTransform() const;
+        inline const GeoAlignableTransform* getGeoTransform() const;
         inline Amg::Transform3D getTransform() const;
         inline const Amg::Transform3D& getNativeToAmdbLRS() const;
         inline Amg::Transform3D getAmdbLRSToGlobal() const;
@@ -163,14 +163,8 @@ namespace MuonGM {
     int MuonStation::getEtaIndex() const { return m_statEtaIndex; }
     std::string MuonStation::getStationType() const { return m_statname.substr(0, 3); }
     const std::string& MuonStation::getStationName() const { return m_statname; }
-    void MuonStation::setEtaPhiIndices(int eta, int phi) {
-        m_statEtaIndex = eta;
-        m_statPhiIndex = phi;
-    }
 
-    void MuonStation::setTransform(GeoAlignableTransform* xf) { m_transform = xf; }
-
-    GeoAlignableTransform* MuonStation::getGeoTransform() const { return m_transform; }
+    const GeoAlignableTransform* MuonStation::getGeoTransform() const { return m_transform; }
 
     Amg::Transform3D MuonStation::getTransform() const { return m_transform->getTransform(); }
 
@@ -184,12 +178,6 @@ namespace MuonGM {
     double MuonStation::LongZsize() const { return m_LongZsize; }
 
     double MuonStation::xAmdbCRO() const { return m_xAmdbCRO; }
-
-    void MuonStation::setxAmdbCRO(double xpos) { m_xAmdbCRO = xpos; }
-
-    void MuonStation::setNativeToAmdbLRS(Amg::Transform3D xf) {
-        m_native_to_amdbl = std::move(xf);
-    }
 
     const Amg::Transform3D& MuonStation::getNativeToAmdbLRS() const { return m_native_to_amdbl; }
 

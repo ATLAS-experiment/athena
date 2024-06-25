@@ -173,6 +173,8 @@ StatusCode GeoModelRpcTest::dumpToTree(const EventContext& ctx, const RpcReadout
    const Amg::Transform3D& trans{readoutEle->absTransform()};
    m_readoutTransform = trans;
    const MuonGM::MuonStation* station = readoutEle->parentMuonStation();
+   m_alignableNode = station->getGeoTransform()->getDefTransform() *
+                     station->getNativeToAmdbLRS().inverse();
    if (station->hasALines()) { 
         m_ALineTransS = station->getALine_tras();
         m_ALineTransT = station->getALine_traz();

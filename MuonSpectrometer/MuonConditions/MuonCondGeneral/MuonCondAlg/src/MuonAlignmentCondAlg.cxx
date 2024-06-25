@@ -155,22 +155,24 @@ StatusCode MuonAlignmentCondAlg::parseDataFromJSON(const nlohmann::json& lines,
         Identifier id{0};
         /// Micromega case
         if (stationType[0] == 'M') {
-            // micromegas case
-            if(!m_idHelperSvc->hasMM()) {
-                ATH_MSG_WARNING("Micromega alignment parameter is part of the database "<<stationType<<","<<stationEta<<","<<stationPhi<<","<<multiLayer);
-                continue;  // skip if geometry does not include MMs (e.g. RUN1 or RUN2 data or RUN3 muon calibration stream)
+            if (!m_idHelperSvc->hasMM()) {
+                ATH_MSG_VERBOSE("No Mms defined skipping: "<<stationType<<","<<","<<stationEta<<","<<stationPhi<<","<<multiLayer);
+                continue;
             }
             id = m_idHelperSvc->mmIdHelper().channelID(stationType, stationEta, stationPhi, multiLayer, 1, 1);
         } else if (stationType[0] == 'S') {
-            // sTGC case
-            if(!m_idHelperSvc->hasSTGC()) {
-                ATH_MSG_WARNING("sTgc alignment parameter is part of the database "<<stationType<<","<<stationEta<<","<<stationPhi<<","<<multiLayer);
-                continue;  // skip if geometry does not include MMs (e.g. RUN1 or RUN2 data or RUN3 muon calibration stream)
+            if (!m_idHelperSvc->hasTGC()) {
+                ATH_MSG_VERBOSE("No sTgcs defined skipping: "<<stationType<<","<<","<<stationEta<<","<<stationPhi<<","<<multiLayer);
+                continue;
             }
             id = m_idHelperSvc->stgcIdHelper().elementID(stationType, stationEta, stationPhi);
             id = m_idHelperSvc->stgcIdHelper().multilayerID(id, multiLayer);
         } else if (stationType[0] == 'T') {
             /// Tgc case
+            if (!m_idHelperSvc->hasTGC()) {
+                ATH_MSG_VERBOSE("No Tgcs defined skipping: "<<stationType<<","<<","<<stationEta<<","<<stationPhi);
+                continue;
+            }
             int stPhi = MuonGM::stationPhiTGC(stationType, stationPhi, stationEta);
             int stEta = stationEta > 0 ? 1 : -1;
             if (multiLayer != 0) {
@@ -179,17 +181,22 @@ StatusCode MuonAlignmentCondAlg::parseDataFromJSON(const nlohmann::json& lines,
             }
             id = m_idHelperSvc->tgcIdHelper().elementID(stationType, stEta, stPhi);
         } else if (stationType[0] == 'C') {
-            // csc case
-            if(!m_idHelperSvc->hasCSC()) {
-                ATH_MSG_WARNING("Csc alignment parameter is part of the database "<<stationType<<","<<stationEta<<","<<stationPhi<<","<<multiLayer);               
-                continue; //skip if geometry doesn't include CSCs
+            if (!m_idHelperSvc->hasCSC()) {
+                ATH_MSG_VERBOSE("No Cscs defined skipping: "<<stationType<<","<<","<<stationEta<<","<<stationPhi);
+                continue;
             }
             id = m_idHelperSvc->cscIdHelper().elementID(stationType, stationEta, stationPhi);
         } else if (stationType.substr(0, 3) == "BML" && std::abs(stationEta) == 7) {
+            if (!m_idHelperSvc->hasRPC()) {
+                ATH_MSG_VERBOSE("No Rpcs defined skiping "<<stationType<<","<<","<<stationEta<<","<<stationPhi);
+                continue;
+            }
             // rpc case
             id = m_idHelperSvc->rpcIdHelper().elementID(stationType, stationEta, stationPhi, 1);
-        } else {
+        } else if (m_idHelperSvc->hasMDT()) {
             id = m_idHelperSvc->mdtIdHelper().elementID(stationType, stationEta, stationPhi);
+        } else {
+            continue;
         }
         ALinePar newALine{};
         newALine.setIdentifier(id);

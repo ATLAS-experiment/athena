@@ -5,34 +5,40 @@
 #ifndef MUONALIGNMENTDATA_MDTALIGNMENTSTORE_H
 #define MUONALIGNMENTDATA_MDTALIGNMENTSTORE_H
 
+
 #include <MuonAlignmentData/BLinePar.h>
 #include <MuonAlignmentData/MdtAsBuiltPar.h>
 #include <ActsGeometryInterfaces/DetectorAlignStore.h>
+#include <MuonIdHelpers/IMuonIdHelperSvc.h>
+#include <vector>
 /**
  *  Helper struct to cache simulatenously the As-built and the
  *  BLine corrections of the Mdts for fast access within the new
  *  MdtReadout geometry
 */
-class MdtAlignmentStore: public ActsTrk::DetectorAlignStore::InternalAlignStore {
+class MdtAlignmentStore final: public ActsTrk::DetectorAlignStore::InternalAlignStore {
     public:
-        MdtAlignmentStore() = default;
+        MdtAlignmentStore(const Muon::IMuonIdHelperSvc* idHelperSvc);
         /// Helper struct to store the pointer to the 
         /// Mdt distrotion parameters, namely the As-built
         /// and the BLine chamber deformations
         struct chamberDistortions{
             const BLinePar* bLine{nullptr};
             const MdtAsBuiltPar* asBuilt{nullptr};
+            operator bool() const {
+                return bLine || asBuilt;
+            }
         };
-        /// Returns a chamber distortion that's cached for the corresponding Mdt detector element
+        /// Returns a chamber distortion that's cached for the corresponding Mdt chamber element
         chamberDistortions getDistortion(const Identifier& detElId) const {
-            alignMap::const_iterator itr = m_alignMap.find(detElId);
-            return itr != m_alignMap.end() ? itr->second : chamberDistortions{};
-            return chamberDistortions{};
+            const unsigned int idx = m_idHelperSvc->moduleHash(detElId);
+            assert(m_idHelperSvc->technologyIndex(detElId) == Muon::MuonStationIndex::TechnologyIndex::MDT);
+            return  idx < m_alignMap.size() ? m_alignMap[idx] : chamberDistortions{};
         }
         void storeDistortion(const Identifier& detElId, const BLinePar* bline, const MdtAsBuiltPar* asBuilt);
      private:
-        using alignMap = std::unordered_map<Identifier, chamberDistortions>;
-        alignMap m_alignMap{};
+        const Muon::IMuonIdHelperSvc* m_idHelperSvc{nullptr};
+        std::vector<chamberDistortions> m_alignMap{};
 };
 
 #endif

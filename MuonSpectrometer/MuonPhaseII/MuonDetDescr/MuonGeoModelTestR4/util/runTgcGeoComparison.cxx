@@ -26,7 +26,9 @@
 #include <TFile.h>
 #include <TTreeReader.h>
 
-constexpr double tolerance = 100 * Gaudi::Units::micrometer;
+#include "GeoModelHelpers/TransformToStringConverter.h"
+
+constexpr double tolerance = 10 * Gaudi::Units::micrometer;
 
 using namespace MuonGMR4;
 using namespace ActsTrk;
@@ -55,6 +57,8 @@ struct TgcChamber{
     }
     /// Transformation of the underlying GeoModel element
     Amg::Transform3D geoModelTransform{Amg::Transform3D::Identity()};
+    /// Transformation of the underlying Alignable node
+    Amg::Transform3D alignableTransform{Amg::Transform3D::Identity()};
 
     struct WireGang {
         unsigned int numWires{0};
@@ -172,6 +176,10 @@ std::set<TgcChamber> readTreeDump(const std::string& inputFile) {
     TTreeReaderValue<std::vector<float>> geoModelTransformY{treeReader, "GeoModelTransformY"};
     TTreeReaderValue<std::vector<float>> geoModelTransformZ{treeReader, "GeoModelTransformZ"};
 
+    TTreeReaderValue<std::vector<float>> alignableNodeX{treeReader, "AlignableNodeX"};
+    TTreeReaderValue<std::vector<float>> alignableNodeY{treeReader, "AlignableNodeY"};
+    TTreeReaderValue<std::vector<float>> alignableNodeZ{treeReader, "AlignableNodeZ"};
+
 
     TTreeReaderValue<std::vector<float>> gangCenterX{treeReader, "gangCenterX"};
     TTreeReaderValue<std::vector<float>> gangCenterY{treeReader, "gangCenterY"};
@@ -252,6 +260,13 @@ std::set<TgcChamber> readTreeDump(const std::string& inputFile) {
         geoRot.col(2) = Amg::Vector3D((*geoModelTransformX)[3], (*geoModelTransformY)[3], (*geoModelTransformZ)[3]);       
         newchamber.geoModelTransform = Amg::getTransformFromRotTransl(std::move(geoRot), std::move(geoTrans)); 
         
+        geoRot.col(0) = Amg::Vector3D((*alignableNodeX)[1], (*alignableNodeY)[1], (*alignableNodeZ)[1]);
+        geoRot.col(1) = Amg::Vector3D((*alignableNodeX)[2], (*alignableNodeY)[2], (*alignableNodeZ)[2]);
+        geoRot.col(2) = Amg::Vector3D((*alignableNodeX)[3], (*alignableNodeY)[3], (*alignableNodeZ)[3]);       
+        geoTrans = Amg::Vector3D{(*alignableNodeX)[0], (*alignableNodeY)[0], (*alignableNodeZ)[0]};
+        newchamber.alignableTransform = Amg::getTransformFromRotTransl(std::move(geoRot), std::move(geoTrans));
+
+
         for (size_t g  = 0; g < gangGasGap->size(); ++g) {            
             TgcChamber::WireGang newGang{};
             newGang.gasGap = (*gangGasGap)[g];
@@ -394,7 +409,15 @@ int main( int argc, char** argv ) {
         TEST_BASICPROP(thickness, "chamber thickness");
         TEST_BASICPROP(shortWidth, "chamber short width");
         TEST_BASICPROP(longWidth, "chamber long width");
-        TEST_BASICPROP(height, "chamber height");   
+        TEST_BASICPROP(height, "chamber height");
+
+        const Amg::Transform3D alignableDistort = test.alignableTransform.inverse()*(ref.alignableTransform );
+        if (!Amg::doesNotDeform(alignableDistort) || alignableDistort.translation().mag() > tolerance) {
+            std::cerr<<"runTgcComparison() "<<__LINE__<<": The alignable nodes are at differnt places for  "
+                     <<ref<<". " <<GeoTrf::toString(alignableDistort, true)<<std::endl;
+            chambOk = false; 
+        }
+ 
         chambOk = true;     
         /// Check the orientation of the layers
         for (const TgcChamber::LayerTrans& refTrans : ref.transforms) {

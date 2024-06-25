@@ -63,6 +63,9 @@ class GeoModelTgcTest : public AthHistogramAlgorithm {
   
     /// Transformation of the readout element (Translation, ColX, ColY, ColZ)
     MuonVal::CoordTransformBranch m_readoutTransform{m_tree, "GeoModelTransform"};
+    MuonVal::CoordTransformBranch m_alignableNode {m_tree, "AlignableNode"};
+
+
     MuonVal::ScalarBranch<float>& m_shortWidth{m_tree.newScalar<float>("ChamberWidthS")};
     MuonVal::ScalarBranch<float>& m_longWidth{m_tree.newScalar<float>("ChamberWidthL")};
     MuonVal::ScalarBranch<float>& m_height{m_tree.newScalar<float>("ChamberHeight")};

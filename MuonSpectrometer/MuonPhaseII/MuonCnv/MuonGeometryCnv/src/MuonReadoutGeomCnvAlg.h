@@ -13,6 +13,11 @@
 #include <MuonReadoutGeometry/MuonDetectorManager.h>
 #include <MuonReadoutGeometry/MuonReadoutElement.h>
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
+
+#include "GeoModelKernel/GeoTransform.h"
+#include "GeoModelHelpers/TransformSorter.h"
+#include "GeoModelKernel/GeoVFullPhysVol.h"
+
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
 #include <ActsGeometryInterfaces/ActsGeometryContext.h>
 
@@ -32,30 +37,63 @@ class MuonReadoutGeomCnvAlg : public AthReentrantAlgorithm {
         bool isReEntrant() const override { return false; }
     
     private:
-        StatusCode buildStation(const ActsGeometryContext& gctx,
-                                MuonGM::MuonDetectorManager& mgr,
-                                const Identifier& stationId,
-                                PVLink world) const;
+        struct ConstructionCache{
+            public:
+                ConstructionCache() = default;
 
+                /** @brief Transforms an Amg::Transform3D into a GeoModelTransform node
+                 *         If the transform has been shown before to the cache, it returns the 
+                 *         precached node */
+                GeoIntrusivePtr<GeoTransform> makeTransform(const Amg::Transform3D& trf) {
+                    return *m_trfPool.insert(make_intrusive<GeoTransform>(trf)).first;
+                }
+                /** @brief Pointer to the legacy MuonDetectorManager*/
+                std::unique_ptr<MuonGM::MuonDetectorManager> detMgr{};
+                /** @brief Pointer to the world */
+                PVLink world{};
+                /** @brief Set of all translated Physical volumes */
+                std::set<PVConstLink> translatedStations{};
+            private:
+                std::set<GeoIntrusivePtr<GeoTransform>, GeoTrf::TransformSorter> m_trfPool{};
+
+        };
+        
+        /** @brief builds a station object from readout element. The parent PhysVol of the readoutElement
+         *         is interpreted as embedding station volume and all children which are not fullPhysical 
+         *         volumes are attached to the copied clone. 
+         * 
+         */
+        StatusCode buildStation(const ActsGeometryContext& gctx,
+                                const Identifier& stationId,
+                                ConstructionCache& cacheObj) const;
+        /** @brief Clones the fullPhysical volume of the readoutElement and embeds it into the associated station.
+         *         If creations of the needed station fails, failure is returned. The references to the clonedPhysVol
+         *         & to the station are set if the procedure was successful.
+         */
+        StatusCode cloneReadoutVolume(const ActsGeometryContext& gctx,
+                                      const Identifier& stationId,
+                                      ConstructionCache& cacheObj,
+                                      GeoIntrusivePtr<GeoVFullPhysVol>& clonedPhysVol,
+                                      MuonGM::MuonStation* & station) const;
+        /** @brief Clones the fullPhysicalVolume of the  */
+        GeoIntrusivePtr<GeoVFullPhysVol> cloneNswWedge(const ActsGeometryContext& gctx,
+                                                       const MuonGMR4::MuonReadoutElement* nswRE,
+                                                       ConstructionCache& cacheObj) const;
+        
         StatusCode buildMdt(const ActsGeometryContext& gctx,
-                            MuonGM::MuonDetectorManager* mgr,
-                            PVLink world) const;
+                            ConstructionCache& cacheObj) const;
 
         StatusCode buildRpc(const ActsGeometryContext& gctx,
-                            MuonGM::MuonDetectorManager* mgr,
-                            PVLink world) const;
+                            ConstructionCache& cacheObj) const;
 
         StatusCode buildSTGC(const ActsGeometryContext& gctx,
-                             MuonGM::MuonDetectorManager* mgr,
-                             PVLink world) const;
+                             ConstructionCache& cacheObj) const;
 
         StatusCode buildMM(const ActsGeometryContext& gctx,
-                           MuonGM::MuonDetectorManager* mgr,
-                           PVLink world) const;
+                           ConstructionCache& cacheObj) const;
 
         StatusCode buildTgc(const ActsGeometryContext& gctx,
-                           MuonGM::MuonDetectorManager* mgr,
-                           PVLink world) const;
+                            ConstructionCache& cacheObj) const;
 
         
         StatusCode dumpAndCompare(const ActsGeometryContext& gctx,

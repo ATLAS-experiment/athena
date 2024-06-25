@@ -161,6 +161,8 @@ StatusCode GeoModelMmTest::dumpToTree(const EventContext& ctx,
     /// Dump the local to global transformation of the readout element
     const Amg::Transform3D& transform{reElement->localToGlobalTrans(gctx)};
     m_readoutTransform = transform;
+    m_alignableNode  = reElement->alignableTransform()->getDefTransform();
+
     ///
     m_moduleHeight = reElement->moduleHeight();
     m_moduleWidthS = reElement->moduleWidthL();

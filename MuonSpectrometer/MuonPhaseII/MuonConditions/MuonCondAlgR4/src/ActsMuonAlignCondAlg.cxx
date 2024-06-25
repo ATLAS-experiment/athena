@@ -122,7 +122,7 @@ StatusCode ActsMuonAlignCondAlg::loadMdtDeformPars(const EventContext& ctx,
     if (!m_applyMdtAsBuilt  && !m_applyBLines) {
         return StatusCode::SUCCESS;
     }
-    std::unique_ptr<MdtAlignmentStore> internAlign = std::make_unique<MdtAlignmentStore>();
+    std::unique_ptr<MdtAlignmentStore> internAlign = std::make_unique<MdtAlignmentStore>(m_idHelperSvc.get());
     const MdtAsBuiltContainer* asBuiltCont{nullptr};
     const BLineContainer* bLines{nullptr};
     if (m_applyMdtAsBuilt) {
@@ -133,10 +133,9 @@ StatusCode ActsMuonAlignCondAlg::loadMdtDeformPars(const EventContext& ctx,
         CREATE_READHANDLE(BLineContainer, m_readKeyBLines);
         bLines = readHandle.cptr();        
     }
-
-    std::vector<const MdtReadoutElement*> reEles = m_detMgr->getAllMdtReadoutElements();
-    for (const MdtReadoutElement* re : reEles) {
-        const Identifier stationId = alignmentId(re);
+    const MdtIdHelper& idHelper{m_idHelperSvc->mdtIdHelper()};
+    for (auto itr = idHelper.module_begin(); itr != idHelper.module_end(); ++itr) {
+       const Identifier& stationId{*itr};
         const BLinePar* bline{nullptr};
         if (bLines) {
             BLineContainer::const_iterator itr = bLines->find(stationId);
@@ -147,7 +146,7 @@ StatusCode ActsMuonAlignCondAlg::loadMdtDeformPars(const EventContext& ctx,
             MdtAsBuiltContainer::const_iterator itr = asBuiltCont->find(stationId);
             if (itr != asBuiltCont->end()) asBuilt = &(*itr);
         }
-        if (asBuilt || bline) internAlign->storeDistortion(re->identify(), bline, asBuilt);
+        if (asBuilt || bline) internAlign->storeDistortion(stationId, bline, asBuilt);
     }
     // Down cast the alignment pointer
     store.internalAlignment = std::move(internAlign);

@@ -95,6 +95,7 @@ StatusCode GeoModelMdtTest::dumpToTree(const EventContext& ctx, const MdtReadout
     m_stEta = readoutEle->getStationEta();
     m_stPhi = readoutEle->getStationPhi();
     m_stML = readoutEle->getMultilayer();
+    m_chamberDesign = readoutEle->getTechnologyName();
 
     m_numTubes = readoutEle->getNtubesperlayer();
     m_numLayers = readoutEle->getNLayers();
@@ -103,6 +104,8 @@ StatusCode GeoModelMdtTest::dumpToTree(const EventContext& ctx, const MdtReadout
     m_tubePitch = readoutEle->tubePitch();
     
     const MuonGM::MuonStation* station = readoutEle->parentMuonStation();
+    m_alignableNode = station->getGeoTransform()->getDefTransform() *
+                      station->getNativeToAmdbLRS().inverse();
     if (station->hasALines()){ 
         m_ALineTransS = station->getALine_tras();
         m_ALineTransT = station->getALine_traz();

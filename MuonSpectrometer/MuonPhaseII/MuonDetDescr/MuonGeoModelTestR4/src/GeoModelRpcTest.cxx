@@ -166,6 +166,8 @@ StatusCode GeoModelRpcTest::dumpToTree(const EventContext& ctx,
    /// Dump the local to global transformation of the readout element
    const Amg::Transform3D& transform{reElement->localToGlobalTrans(gctx)};
    m_readoutTransform = transform;
+   m_alignableNode  = reElement->alignableTransform()->getDefTransform();
+
    const RpcIdHelper& id_helper{m_idHelperSvc->rpcIdHelper()};
       
    for (unsigned int gasGap = 1; gasGap <= reElement->nGasGaps(); ++gasGap) {
