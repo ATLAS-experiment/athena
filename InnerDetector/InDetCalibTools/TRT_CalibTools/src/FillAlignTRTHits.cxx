@@ -87,7 +87,7 @@ StatusCode FillAlignTRTHits::initialize(){
 	}
 
 	// To extract ToT Corrections:
-	// Get DriftFunction tool servise
+	// Get DriftFunction tool service
 	//
 	if ( m_driftFunctionTool.retrieve().isFailure() ) {
 		msg(MSG::FATAL) << m_driftFunctionTool.propertyName() << ": Failed to retrieve tool " << m_driftFunctionTool.type() << endmsg;
@@ -118,7 +118,7 @@ StatusCode FillAlignTRTHits::initialize(){
 		msg(MSG::INFO) << "Retrieved tool " << m_TRTStrawSummaryTool << endmsg;
 	}
 
-	m_f = new TFile("basic.root","RECREATE");
+	m_f = new TFile(m_ntupleName.value().c_str(),"RECREATE");
 	m_ntuple = new TNtuple("ntuple","TRT calibration ntuple","run:evt:lbn:nvx:trk:det:lay:mod:stl:stw:brd:chp:sid:locx:locy:locz:x:y:z:r:dr:t:rtrack:drrtrack:rtrackunbias:drrtrackunbias:ttrack:ttrackunbias:t0:ephase:phi:theta:pt:qoverp:d0:ToT:HT:ToTCorrection:HTCorrection:isArgonStraw");
 	return StatusCode::SUCCESS;
 }

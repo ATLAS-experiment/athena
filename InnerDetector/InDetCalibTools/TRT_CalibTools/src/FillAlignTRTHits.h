@@ -32,6 +32,10 @@ PURPOSE:  Tool to fill Hit info into the TRT::Hit messenger class
 #include <TFile.h>
 #include "TRT_DriftFunctionTool/ITRT_DriftFunctionTool.h"
 
+// Gaudi includes
+#include "Gaudi/Property.h"
+
+
 class AtlasDetectorID;
 class TRT_ID;
 
@@ -69,6 +73,8 @@ private:
   ToolHandle<ITRT_StrawStatusSummaryTool> m_TRTStrawSummaryTool  {this, "TRTStrawSummaryTool", "InDetTRTStrawStatusSummaryTool", ""};
 
   Trk::IUpdator* m_updator; //!< updator for unbiased states
+
+  Gaudi::Property<std::string> m_ntupleName {this, "NtupleName"  , "basic.root", "Changes the name of the ntuple Output"};
 
   float m_maxDistance ;
   float m_maxTimeResidual ;
