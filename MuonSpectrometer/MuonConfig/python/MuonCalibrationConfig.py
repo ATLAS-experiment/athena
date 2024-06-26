@@ -143,6 +143,8 @@ def NSWCalibToolCfg(flags, name="NSWCalibTool", **kwargs):
     """Return ComponentAccumulator configured for NSW calibration with NSWCalibTool as PrivateTools"""
     result = ComponentAccumulator()
     result.merge(NswCalibDbAlgCfg(flags))
+    from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
+    result.merge(AtlasFieldCacheCondAlgCfg(flags))
     kwargs.setdefault("isData", not flags.Input.isMC)
     kwargs.setdefault("mmPeakTime",200)
     kwargs.setdefault("sTgcPeakTime",0)

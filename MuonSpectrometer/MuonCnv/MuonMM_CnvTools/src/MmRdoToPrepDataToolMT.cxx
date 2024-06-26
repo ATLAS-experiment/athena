@@ -114,6 +114,27 @@ StatusCode Muon::MmRdoToPrepDataToolMT::processCollection(
         "Null pointer to the read MuonDetectorManager conditions object");
     return StatusCode::FAILURE;
   }
+      // Lambda to fill xprd from prd
+  auto fillxAOD = [&id_helper, this](const MMPrepData& prd, xAOD::MMCluster& xprd) {
+    xprd.setIdentifier(prd.identify().get_compact());
+    xprd.setMeasurement(m_idHelperSvc->detElementHash(prd.identify()), 
+                        xAOD::MeasVector<1>{prd.localPosition().x()},
+                        xAOD::MeasMatrix<1>{prd.localCovariance()(0, 0)});
+    xprd.setGasGap(id_helper.gasGap(prd.identify()));
+    // TODO - not sure how best to do setChannelNumber
+    xprd.setTime(prd.time());
+    xprd.setCharge(prd.charge());
+    xprd.setDriftDist(prd.driftDist());
+    xprd.setAngle(prd.angle());
+    xprd.setChiSqProb(prd.chisqProb());
+    xprd.setAuthor(prd.author());
+    xprd.setQuality(prd.quality());
+    xprd.setStripNumbers(prd.stripNumbers());
+    xprd.setStripTimes(prd.stripTimes());
+    xprd.setStripCharges(prd.stripCharges());
+    xprd.setStripDriftDist(prd.stripDriftDist());
+    xprd.setStripDriftErrors(prd.stripDriftErrors());
+  };
 
   std::vector<MMPrepData> MMprds;
   // convert the RDO collection to a PRD collection
@@ -201,31 +222,6 @@ StatusCode Muon::MmRdoToPrepDataToolMT::processCollection(
     (cov)(1, 1) = calibStrip.resLongDistDrift;
     localPos.x() += calibStrip.dx;
 
-    // FIXME - need to check the dimensions. The MMCluster_v1 is expecting 1-dim
-    // positions and errors, but I think this is probably wrong
-
-    // Lambda to fill xprd from prd
-    auto fillxAOD = [&id_helper](const MMPrepData& prd, xAOD::MMCluster& xprd,
-                                 const IdentifierHash hash) {
-      xprd.setIdentifier(prd.identify().get_compact());
-      xprd.setMeasurement(hash, xAOD::MeasVector<1>{prd.localPosition().x()},
-                          xAOD::MeasMatrix<1>{prd.localCovariance()(0, 0)});
-      xprd.setGasGap(id_helper.gasGap(prd.identify()));
-      // TODO - not sure how best to do setChannelNumber
-      xprd.setTime(prd.time());
-      xprd.setCharge(prd.charge());
-      xprd.setDriftDist(prd.driftDist());
-      xprd.setAngle(prd.angle());
-      xprd.setChiSqProb(prd.chisqProb());
-      xprd.setAuthor(prd.author());
-      xprd.setQuality(prd.quality());
-      xprd.setStripNumbers(prd.stripNumbers());
-      xprd.setStripTimes(prd.stripTimes());
-      xprd.setStripCharges(prd.stripCharges());
-      xprd.setStripDriftDist(prd.stripDriftDist());
-      xprd.setStripDriftErrors(prd.stripDriftErrors());
-    };
-
     if (!merge) {
       // storage will be handeled by Store Gate
       std::unique_ptr<MMPrepData> mpd = std::make_unique<MMPrepData>(
@@ -235,7 +231,7 @@ StatusCode Muon::MmRdoToPrepDataToolMT::processCollection(
 
       if (!m_xAODKey.empty()) {
         auto xprd = xAODContainer->push_back(std::make_unique<xAOD::MMCluster>());
-        fillxAOD(*mpd, *xprd, hash);
+        fillxAOD(*mpd, *xprd);
       }
 
       prdColl->push_back(std::move(mpd));
@@ -250,10 +246,6 @@ StatusCode Muon::MmRdoToPrepDataToolMT::processCollection(
       // in case it gets used in SimpleMMClusterBuilderTool::getClusters
       mpd.setHashAndIndex(hash, 0);
       mpd.setAuthor(Muon::MMPrepData::Author::RDOTOPRDConverter);
-      if (!m_xAODKey.empty()) {
-        auto xprd = xAODContainer->push_back(std::make_unique<xAOD::MMCluster>());
-        fillxAOD(mpd, *xprd, hash);
-      }
       MMprds.push_back(std::move(mpd));
     }
   }
@@ -267,6 +259,10 @@ StatusCode Muon::MmRdoToPrepDataToolMT::processCollection(
 
     for (std::unique_ptr<Muon::MMPrepData>& prdN : clusters) {
       prdN->setHashAndIndex(prdColl->identifyHash(), prdColl->size());
+      if (!m_xAODKey.empty()) {
+        auto xprd = xAODContainer->push_back(std::make_unique<xAOD::MMCluster>());
+        fillxAOD(*prdN, *xprd);
+      }
       prdColl->push_back(std::move(prdN));
     }
 
