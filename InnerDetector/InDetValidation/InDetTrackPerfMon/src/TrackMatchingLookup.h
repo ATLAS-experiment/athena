@@ -34,12 +34,9 @@ namespace IDTPM {
   public:
 
     /// useful typedefs
-    typedef std::unordered_map<const T*, const R*> mapTtoR_t;
-    typedef std::unordered_map<const R*, std::vector<const T*>> mapRtoT_t;
-    typedef const T* const_testPtr_t;
-    typedef const R* const_refPtr_t;
-    typedef T test_t;
-    typedef R ref_t;
+    typedef std::unordered_map< const T*, const R* > mapTtoR_t;
+    typedef std::unordered_map< const R*, std::vector<const T*> > mapRtoT_t;
+    typedef std::unordered_map< const T*, float > mapTtoDist_t;
 
     /// Constructor
     TrackMatchingLookupBase( const std::string& anaTag_s );
@@ -53,11 +50,14 @@ namespace IDTPM {
     /// get the overall number of matches
     unsigned getMapsSize() const { return m_mapTestToRef.size(); }
 
-    /// get matched reference matched from map
+    /// get matched reference from map
     const R* getMatchedRef( const T& t ) const;
 
     /// get matched test vector from map
     const std::vector<const T*>& getMatchedTest( const R& r ) const;
+
+    /// get distance parameter for matched test
+    float getDist( const T& t ) const;
 
     /// return true if test is matched 
     bool isTestInMaps( const T& t ) const;
@@ -66,7 +66,7 @@ namespace IDTPM {
     bool isRefInMaps( const R& r ) const;
 
     /// update maps with a new entry
-    StatusCode updateMaps( const T& t, const R& r );
+    StatusCode updateMaps( const T& t, const R& r, float dist = 0. );
 
     /// clear lookup tables
     void clearMaps();
@@ -86,6 +86,9 @@ namespace IDTPM {
 
     /// Mapping reference to its (possibly multiple) associated test(s)
     mapRtoT_t m_mapRefToTest;
+
+    /// Mapping test to its uniquely associated reference
+    mapTtoDist_t m_mapTestToDist;
 
     /// null Vectors
     std::vector<const T*> m_nullTest{};
@@ -168,19 +171,22 @@ namespace IDTPM {
 
     /// update
     virtual StatusCode update( const xAOD::TrackParticle& t,
-                               const xAOD::TrackParticle& r ) override {
-      ATH_CHECK( updateMaps( t, r ) );
+                               const xAOD::TrackParticle& r,
+                               float dist ) override {
+      ATH_CHECK( updateMaps( t, r, dist ) );
       return StatusCode::SUCCESS;
     }
 
     virtual StatusCode update( const xAOD::TrackParticle&,
-                               const xAOD::TruthParticle& ) override {
+                               const xAOD::TruthParticle&,
+                               float ) override {
       ATH_MSG_WARNING( "update: Track->Truth disabled" );
       return StatusCode::SUCCESS;
     }
 
     virtual StatusCode update( const xAOD::TruthParticle&,
-                               const xAOD::TrackParticle& ) override {
+                               const xAOD::TrackParticle&,
+                               float ) override {
       return StatusCode::SUCCESS;
       ATH_MSG_WARNING( "update: Truth->Track disabled" );
     }
@@ -291,19 +297,22 @@ namespace IDTPM {
 
     /// update
     virtual StatusCode update( const xAOD::TrackParticle&,
-                               const xAOD::TrackParticle& ) override {
+                               const xAOD::TrackParticle&,
+                               float ) override {
       ATH_MSG_WARNING( "update: Track->Track disabled" );
       return StatusCode::SUCCESS;
     }
 
     virtual StatusCode update( const xAOD::TrackParticle& t,
-                               const xAOD::TruthParticle& r ) override {
-      ATH_CHECK( updateMaps( t, r ) );
+                               const xAOD::TruthParticle& r,
+                               float dist ) override {
+      ATH_CHECK( updateMaps( t, r, dist ) );
       return StatusCode::SUCCESS;
     }
 
     virtual StatusCode update( const xAOD::TruthParticle&,
-                               const xAOD::TrackParticle& ) override {
+                               const xAOD::TrackParticle&,
+                               float ) override {
       return StatusCode::SUCCESS;
       ATH_MSG_WARNING( "update: Truth->Track disabled" );
     }
@@ -414,20 +423,23 @@ namespace IDTPM {
 
     /// update
     virtual StatusCode update( const xAOD::TrackParticle&,
-                               const xAOD::TrackParticle& ) override {
+                               const xAOD::TrackParticle&,
+                               float ) override {
       return StatusCode::SUCCESS;
       ATH_MSG_WARNING( "update: Track->Track disabled" );
     }
 
     virtual StatusCode update( const xAOD::TrackParticle&,
-                               const xAOD::TruthParticle& ) override {
+                               const xAOD::TruthParticle&,
+                               float ) override {
       ATH_MSG_WARNING( "update: Track->Truth disabled" );
       return StatusCode::SUCCESS;
     }
 
     virtual StatusCode update( const xAOD::TruthParticle& t,
-                               const xAOD::TrackParticle& r ) override {
-      ATH_CHECK( updateMaps( t, r ) );
+                               const xAOD::TrackParticle& r,
+                               float dist ) override {
+      ATH_CHECK( updateMaps( t, r, dist ) );
       return StatusCode::SUCCESS;
     }
 

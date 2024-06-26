@@ -99,8 +99,11 @@ StatusCode IDTPM::TrackTruthMatchingTool::match(
       continue;
     }
 
+    /// Defining test-reference distance as 1-TruthMatchProb
+    float dist = 1 - getTruthMatchProb( *track_particle );
+
     /// Updating lookup table with new match
-    ATH_CHECK( matches.update( *track_particle, *truth_particle ) );
+    ATH_CHECK( matches.update( *track_particle, *truth_particle, dist ) );
   } // loop over vTest
 
   return StatusCode::SUCCESS;

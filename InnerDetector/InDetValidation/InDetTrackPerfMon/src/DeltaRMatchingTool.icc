@@ -30,16 +30,20 @@ StatusCode IDTPM::DeltaRMatchingToolBase<T, R>::matchVectors(
     /// Skip invalid test
     if( not t ) continue;
 
+    /// intialising large distance
+    float dist(999.);
+
     /// Find matched reference
-    const R* r = getMatchedRef( *t, vRef );
+    const R* r = getMatchedRef( *t, vRef, dist );
 
     /// Skip if no reference is found
     if( not r ) continue;
 
-    ATH_MSG_DEBUG( "Found matched reference with pT = " << pT(*r) );
+    ATH_MSG_DEBUG( "Found matched reference with pT = " << pT(*r) <<
+                   " with dist = " << dist );
 
     /// Updating lookup table with new match
-    ATH_CHECK( matches.update( *t, *r ) );
+    ATH_CHECK( matches.update( *t, *r, dist ) );
   } // loop over vTest
 
   return StatusCode::SUCCESS;
@@ -51,7 +55,7 @@ StatusCode IDTPM::DeltaRMatchingToolBase<T, R>::matchVectors(
 /// -------------------------
 template< typename T, typename R >
 const R* IDTPM::DeltaRMatchingToolBase<T, R>::getMatchedRef(
-    const T& t, const std::vector< const R* >& vRef ) const
+    const T& t, const std::vector< const R* >& vRef, float& dist ) const
 {
   ATH_MSG_DEBUG( "Reference vector size before sorting = " << vRef.size() );
 
@@ -216,6 +220,7 @@ const R* IDTPM::DeltaRMatchingToolBase<T, R>::getMatchedRef(
       }
     }
     if( i_pTres_best < 0 ) return nullptr;
+    dist = pTres_best;
     return set.at( i_pTres_best );
   }
 
@@ -231,5 +236,6 @@ const R* IDTPM::DeltaRMatchingToolBase<T, R>::getMatchedRef(
     }
   }
   if( i_dR_best < 0 ) return nullptr;
+  dist = dR_best;
   return set.at(i_dR_best);
 }

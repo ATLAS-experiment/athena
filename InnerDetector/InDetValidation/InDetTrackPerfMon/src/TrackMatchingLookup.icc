@@ -13,6 +13,7 @@
 
 /// STD includes
 #include <sstream>
+#include <algorithm>
 
 
 /// Constructor
@@ -30,7 +31,7 @@ const R* IDTPM::TrackMatchingLookupBase<T, R>::getMatchedRef( const T& t ) const
   typename mapTtoR_t::const_iterator titr = m_mapTestToRef.find( &t );
   if( titr != m_mapTestToRef.end() ) return titr->second;
   return nullptr;
-} 
+}
 
 
 /// getMatchedTest
@@ -41,7 +42,17 @@ IDTPM::TrackMatchingLookupBase<T, R>::getMatchedTest( const R& r ) const
   typename mapRtoT_t::const_iterator titr = m_mapRefToTest.find( &r );
   if( titr != m_mapRefToTest.end() ) return titr->second;
   return m_nullTest;
-} 
+}
+
+
+/// getDist
+template< typename T, typename R >
+float IDTPM::TrackMatchingLookupBase<T, R>::getDist( const T& t ) const
+{
+  typename mapTtoDist_t::const_iterator titr = m_mapTestToDist.find( &t );
+  if( titr != m_mapTestToDist.end() ) return titr->second;
+  return 999.; /// very large distance
+}
 
 
 /// isTestInMaps
@@ -62,7 +73,8 @@ bool IDTPM::TrackMatchingLookupBase<T, R>::isRefInMaps( const R& r ) const
 
 /// updateMaps
 template< typename T, typename R >
-StatusCode IDTPM::TrackMatchingLookupBase<T, R>::updateMaps( const T& t, const R& r )
+StatusCode IDTPM::TrackMatchingLookupBase<T, R>::updateMaps(
+    const T& t, const R& r, float dist )
 {
   ATH_MSG_DEBUG( "Adding new match = test : pT = " << pT(t) <<
                  " -> reference : pT = " << pT(r) );  
@@ -77,12 +89,27 @@ StatusCode IDTPM::TrackMatchingLookupBase<T, R>::updateMaps( const T& t, const R
                    " .\n\t-> New matched reference is not cached!" );
   }
 
+  /// Test->Distance caching (1 to 1)
+  m_mapTestToDist.insert( typename mapTtoDist_t::value_type( &t, dist ) );
+
   /// (Reverse) Reference -> Test(s) caching (1 to 1+)
+  /// The matched test vector is sorted by increasing values of the distance parameter
+  /// i.e. the first element will always be the best-matched test
   if( isRefInMaps(r) ) {
     typename mapRtoT_t::iterator mitr = m_mapRefToTest.find( &r );
     ATH_MSG_DEBUG( "Reference already matched to other " <<
                    mitr->second.size() << " test(s). Adding a new one..." );
-    mitr->second.push_back( &t ); // updating matched test vector in map
+    /// copy of the matched test vector
+    std::vector< const T* > tvec = mitr->second;
+    /// Adding the new test track
+    tvec.push_back( &t );
+    /// sorting the vector by increasing distance
+    std::sort( tvec.begin(), tvec.end(),
+               [&]( const T* t1, const T* t2 ) -> bool{
+                  return ( getDist(*t1) < getDist(*t2) ); } );
+    /// update the vector in the map
+    mitr->second.clear();
+    mitr->second.insert( mitr->second.begin(), tvec.begin(), tvec.end() );
   }
   else {
     std::vector< const T* > tvec; // creating new vector of matched tests
@@ -100,6 +127,7 @@ void IDTPM::TrackMatchingLookupBase<T, R>::clearMaps()
 {
   m_mapTestToRef.clear();
   m_mapRefToTest.clear();
+  m_mapTestToDist.clear();
 }
 
 
@@ -134,7 +162,8 @@ std::string IDTPM::TrackMatchingLookupBase<T, R>::printMaps(
        << " matches with --> ";
     if( isTestInMaps(*t) ) {
       ss << "Reference with pT = "
-         << pT( *(getMatchedRef(*t)) ) << "\n";
+         << pT( *(getMatchedRef(*t)) )
+         << " (dist = " << getDist(*t) << ")\n";
     } else {
       ss << "N/A\n";
     }
