@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "Pythia8B_i/CheckCloningFactor.h"
@@ -33,7 +33,7 @@ StatusCode CheckCloningFactor::execute() {
     ++m_eventCount;
     
     // Read Data from Transient Store
-    const McEventCollection* mcCollptr;
+    const McEventCollection* mcCollptr = nullptr;
     if (evtStore()->retrieve(mcCollptr, m_key).isFailure()) {
         ATH_MSG_ERROR("Could not retrieve McEventCollection");
         return StatusCode::FAILURE;

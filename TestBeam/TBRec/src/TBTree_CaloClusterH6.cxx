@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // class TBTree_CaloClusterH6 // make ROOT Tree for H6 CaloCluster
@@ -522,7 +522,7 @@ StatusCode TBTree_CaloClusterH6::execute()
   }
   // Warm TailCatcher data
   if (m_addWTC) {
-    TBTailCatcher * wtc;
+    TBTailCatcher * wtc = nullptr;
     sc = evtStore()->retrieve(wtc, m_WTCContainerName);
     if (sc.isFailure()){
       ATH_MSG_ERROR ( "Retrieval of WTC data failed" );

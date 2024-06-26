@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkTrack/TrackCollection.h"
@@ -52,7 +52,7 @@ StatusCode AlignTrackCollSplitter::execute()
   m_nevents++;
 
   // loop over tracks
-  const TrackCollection * originalTracks;
+  const TrackCollection * originalTracks = nullptr;
 
   // check if m_inputCol is a TrackCollection and exists for this event
   // perhaps this can be done in a much nicer way on the python side ala PyUtils/checkFile.py

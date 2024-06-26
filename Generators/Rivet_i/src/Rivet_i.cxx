@@ -179,7 +179,7 @@ StatusCode Rivet_i::execute() {
 
   std::unique_ptr<HepMC::GenEvent> checkedEvent;
   if (m_needsConversion) {
-    const xAOD::TruthEventContainer* truthCollection;
+    const xAOD::TruthEventContainer* truthCollection = nullptr;
     if (evtStore()->retrieve(truthCollection, "TruthEvents").isFailure()) {
       ATH_MSG_ERROR("Could not retrieve TruthEvents collection, aborting.");
       return StatusCode::FAILURE;
@@ -198,7 +198,7 @@ StatusCode Rivet_i::execute() {
   else {
     // Get the event collection
     /// @todo Replace with new GenBase functionality
-    const McEventCollection* eventCollection;
+    const McEventCollection* eventCollection = nullptr;
     StatusCode sc = evtStore()->retrieve(eventCollection, m_genEventKey);
     if (sc.isFailure() || eventCollection == 0) {
       ATH_MSG_ERROR("Unable to retrieve event collection from StoreGate with key " << m_genEventKey);

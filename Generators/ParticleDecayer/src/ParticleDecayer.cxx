@@ -297,7 +297,7 @@ StatusCode ParticleDecayer::fillEvt(HepMC::GenEvent* event) {
   StatusCode status = StatusCode::SUCCESS;
 
   // Extract the event from the TES
-  McEventCollection* mcEvtColl;
+  McEventCollection* mcEvtColl = nullptr;
   if (evtStore()->contains<McEventCollection>(m_truthParticleContainerName) && evtStore()->retrieve(mcEvtColl, m_truthParticleContainerName).isSuccess() ) {
     ATH_MSG_DEBUG("ParticleDecayer::fillEvt: -- Found an McEventCollection for ParticleDecayer");
   } else {

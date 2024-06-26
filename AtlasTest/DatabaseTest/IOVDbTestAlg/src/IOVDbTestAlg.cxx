@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "IOVDbTestAlg.h"
@@ -551,7 +551,7 @@ StatusCode IOVDbTestAlg::printCondObjects() const {
 
 //    if (m_readWriteCool) {
 	
-    const IOVDbTestMDTEleMapColl* elemMapColl;
+    const IOVDbTestMDTEleMapColl* elemMapColl = nullptr;
     ATH_CHECK( detStore()->retrieve(elemMapColl, "/IOVDbTest/IOVDbTestMDTEleMapColl") );
     ATH_MSG_INFO( "Retrieved IOVDbTestMDTEleMapColl " );
   

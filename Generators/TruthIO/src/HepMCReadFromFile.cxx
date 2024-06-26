@@ -46,7 +46,7 @@ StatusCode HepMCReadFromFile::initialize() {
 
 StatusCode HepMCReadFromFile::execute() {
 
-  McEventCollection* mcEvtColl;
+  McEventCollection* mcEvtColl = nullptr;
 
   if ( m_sgSvc->contains<McEventCollection>(m_mcEventKey) && m_sgSvc->retrieve(mcEvtColl, m_mcEventKey).isSuccess() ) {
     if (msgLvl(MSG::VERBOSE)) msg(MSG::VERBOSE) << "found an McEventCollecion in store" << endmsg;
