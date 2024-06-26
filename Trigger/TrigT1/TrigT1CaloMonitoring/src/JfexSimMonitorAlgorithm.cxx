@@ -82,10 +82,6 @@ StatusCode JfexSimMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
         EventType = "EmulatedTowers";
     }
 
-    const std::string LB = std::to_string(GetEventInfo(ctx)->lumiBlock());
-    auto lbnString = Monitored::Scalar<std::string>("LBNString",LB);
-    auto evtNumber = Monitored::Scalar<ULong64_t>("EventNumber",GetEventInfo(ctx)->eventNumber());
-
 
     compareRoI("jJ",EventType,m_data_key_jJ, m_simu_key_jJ,ctx,!jFexTowerContainer->empty());
     //compareRoI("jLJ",EventType,m_data_key_jLJ, m_simu_key_jLJ,ctx,false); - commented out b.c. jFEX doesn't produce Large jets now
