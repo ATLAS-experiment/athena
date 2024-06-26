@@ -5,10 +5,7 @@
 #ifndef JIVEXML_LARDIGITRETRIEVER_H
 #define JIVEXML_LARDIGITRETRIEVER_H
 
-#include <string>
-#include <vector>
-#include <cstddef>
-#include <map>
+
 
 #include "CaloEvent/CaloCellContainer.h"
 #include "CaloIdentifier/CaloCell_ID.h"
@@ -20,7 +17,10 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "StoreGate/ReadCondHandleKey.h"
-
+#include <string>
+#include <vector>
+#include <cstddef>
+#include <map>
 class IToolSvc;
 
 class Identifier;
