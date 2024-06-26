@@ -85,18 +85,18 @@ def defineMenu():
         'L1_eEM18M_2eTAU20M_jJ55_3jJ30',
         'L1_MU8F_eTAU30M',
         'L1_MU8F_cTAU30M',
-        'L1_eEM18M_2eTAU20M_4jJ30',
+        'L1_eEM18M_2cTAU20M_4jJ30',
         
         # combined tau - jet
         'L1_TAU20IM_2TAU12IM_4J12p0ETA25',
 
         # combined tau - xe
-        'L1_eEM18M_2eTAU20M_jXE70',
+        'L1_eEM18M_2cTAU20M_jXE70',
         'L1_eTAU30M_2jJ50_jXE90',
         'L1_MU8F_eTAU20M_jXE70',
         'L1_MU8F_cTAU20M_jXE70',
         'L1_eTAU30M_2eTAU20M_jXE70',
-        'L1_eTAU60_2eTAU20M_jXE80',
+        'L1_eTAU60_2cTAU20M_jXE80',
 
 
         # ATR-28761 Phase1 combined em - jet
