@@ -30,7 +30,7 @@ namespace GlobalSim {
       return StatusCode::FAILURE;
     }
 
-    const TrigConf::L1Menu* l1menu;
+    const TrigConf::L1Menu* l1menu = nullptr;
     ATH_CHECK(detStore()->retrieve(l1menu));
     ATH_MSG_INFO("L1Menu name " << l1menu->getAttribute("name"));
     m_l1MenuResources =

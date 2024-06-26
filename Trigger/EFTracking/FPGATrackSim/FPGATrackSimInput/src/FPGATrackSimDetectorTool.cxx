@@ -93,10 +93,10 @@ void FPGATrackSimDetectorTool::dumpGlobalToLocalModuleMap() {
 
 
   /* The modules are store by tower and by logical layer */
-  int nregions(m_FPGATrackSimMapping->RegionMap_2nd()->getNRegions()); // get the number of towers
-  int nplanes(m_FPGATrackSimMapping->PlaneMap_2nd()->getNLogiLayers());
+  unsigned int nregions(m_FPGATrackSimMapping->RegionMap_2nd()->getNRegions()); // get the number of towers
+  unsigned int nplanes(m_FPGATrackSimMapping->PlaneMap_2nd()->getNLogiLayers());
   std::set<unsigned int> **grouped_modules = new std::set<unsigned int>*[nregions];
-  for (int ireg=0;ireg!=nregions;++ireg) grouped_modules[ireg] = new std::set<unsigned int>[nplanes];
+  for (unsigned int ireg=0;ireg!=nregions;++ireg) grouped_modules[ireg] = new std::set<unsigned int>[nplanes];
 
   for (auto& curmodrawhit: CompleteIDModuleList) { // loop over the modules, represente as raw hits
       // verify if accoring the current pmap this is module that has to be mapped
@@ -105,7 +105,7 @@ void FPGATrackSimDetectorTool::dumpGlobalToLocalModuleMap() {
       m_FPGATrackSimMapping->PlaneMap_2nd()->map(curmodrawhit);
 
       bool hasOneRegion(false); // it will become true if at least 1 tower is associated with the module
-      for (int ireg=0;ireg!=nregions;++ireg) { // loop over the regions
+      for (unsigned int ireg=0;ireg!=nregions;++ireg) { // loop over the regions
           if (m_FPGATrackSimMapping->RegionMap_2nd()->isInRegion(ireg,curmodrawhit)) {
               hasOneRegion = true;
               // the module is compatible with the current
@@ -118,8 +118,8 @@ void FPGATrackSimDetectorTool::dumpGlobalToLocalModuleMap() {
 
   // Save the map into the output file and print at screen a small message
   std::ofstream fout(m_global2local_path.value().c_str());
-  for (int ireg=0;ireg!=nregions;++ireg) { // loop over the regions
-      for (int ip=0;ip!=nplanes;++ip) { // loop over the regions
+  for (unsigned int ireg=0;ireg!=nregions;++ireg) { // loop over the regions
+      for (unsigned int ip=0;ip!=nplanes;++ip) { // loop over the regions
 	        ATH_MSG_DEBUG ( "Region " << ireg << ", layer" << ip << " has " << grouped_modules[ireg][ip].size() << " modules");
           unsigned int modnumber(0);
           for (const auto &curhash: grouped_modules[ireg][ip]) {
@@ -134,6 +134,6 @@ void FPGATrackSimDetectorTool::dumpGlobalToLocalModuleMap() {
   fout_sct.close();
 
   // clear the memory
-  for (int ireg=0;ireg!=nregions;++ireg) delete [] grouped_modules[ireg];
+  for (unsigned int ireg=0;ireg!=nregions;++ireg) delete [] grouped_modules[ireg];
   delete [] grouped_modules;
 }
