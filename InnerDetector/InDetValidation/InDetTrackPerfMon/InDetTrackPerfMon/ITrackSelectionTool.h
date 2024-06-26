@@ -17,7 +17,7 @@
 #include "AsgTools/IAsgTool.h"
 
 class TrigRoiDescriptorCollection;
-
+template <typename TrigRoiDescriptorCollection> class ElementLink;
 
 namespace IDTPM {
 

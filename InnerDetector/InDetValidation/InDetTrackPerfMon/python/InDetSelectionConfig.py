@@ -70,5 +70,18 @@ def TrackQualitySelectionToolCfg( flags, name="TrackQualitySelectionTool", **kwa
                TrackObjectSelectionToolCfg( flags,
                    name="TrackObjectSelectionTool" + flags.PhysVal.IDTPM.currentTrkAna.anaTag ) ) )
 
+    if flags.Input.isMC:
+        truthSelectionTool = acc.popToolsAndMerge(TruthTrackQualitySelectionToolCfg(flags))
+        kwargs.setdefault( "TruthTrackSelectionTool" , truthSelectionTool)
     acc.setPrivateTools( CompFactory.IDTPM.TrackQualitySelectionTool( name, **kwargs ) )
+    return acc
+
+
+def TruthTrackQualitySelectionToolCfg( flags, name="TruthQualitySelectionTool", **kwargs):
+    acc = ComponentAccumulator()
+    
+    from InDetPhysValMonitoring.InDetPhysValMonitoringConfig import InDetRttTruthSelectionToolCfg
+    truthSelectionTool = acc.popToolsAndMerge(InDetRttTruthSelectionToolCfg(flags))
+    kwargs.setdefault( "truthTool" , truthSelectionTool)
+    acc.setPrivateTools( CompFactory.IDTPM.TruthTrackQualitySelectionTool( name, **kwargs ) )
     return acc
