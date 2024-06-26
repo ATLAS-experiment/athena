@@ -1,13 +1,12 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONMDT_CABLING_MDTCABLINGDATA_H
 #define MUONMDT_CABLING_MDTCABLINGDATA_H
 
-#include <cmath>
 #include <cstdint>
-#include <iostream>
+#include <iosfwd>
 /*
  * @brief: Helper struct containing all information to convert from the offline
  * identifiers to the online identifiers
