@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from __future__ import with_statement
 
@@ -139,6 +139,10 @@ def go(iov, systems, db, indb, timewise=False, use_flask=False):
                 defect_iovs = list(filter(lambda iov: isinstance(iov, DefectIOV), result_iovs))  # type: ignore
                 defect_iovs_full = [DefectIOVFull(recoverable=False, user='sys:defectcalculator', **_._asdict()) 
                                     for _ in defect_iovs]
+                defect_iovs_full.append(DefectIOVFull(recoverable=False, user='sys:defectcalculator', 
+                                                      channel='GLOBAL_DCS_UNCHECKED', present=False,
+                                                      comment='Calculator did run',
+                                                      since=since, until=until))
                 if len(defect_iovs) > 0:
                     log.warning(f'db {db}, read_only {not use_flask}')
                     ddb = DefectsDB(db, read_only=use_flask, create=not use_flask)
