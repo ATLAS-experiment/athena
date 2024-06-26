@@ -521,7 +521,8 @@ void ActsTrk::ActsToTrkConverterTool::trkTrackCollectionToActsTrackContainer(
             }
           }
         } catch (const std::exception& e){
-          ATH_MSG_ERROR("Unable to convert TrackParameter with exception ["<<e.what()<<"]. Will be missing from ACTS track.");
+          ATH_MSG_ERROR("Unable to convert TrackParameter with exception ["<<e.what()<<"]. Will be missing from ACTS track."
+                        <<(*tsos->trackParameters()));
         }
       }
       if (tsos->measurementOnTrack()) {
