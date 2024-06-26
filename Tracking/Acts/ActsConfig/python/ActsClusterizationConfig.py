@@ -347,12 +347,16 @@ def ActsClusterizationCfg(flags,
             kwargs.setdefault('PixelClusterizationAlg.useCache', flags.Acts.useCache)
             kwargs.setdefault('PixelClusterizationAlg.ClustersKey', pixelClustersName)
             kwargs.setdefault('PixelClusterizationAlg.ClusterCache', f'{flags.Tracking.ActiveConfig.extension}PixelClustersCache')
+            if flags.Tracking.ActiveConfig.isSecondaryPass and previousActsExtension is not None:
+                kwargs.setdefault('PixelClusterizationAlg.ExtraInputs', {('ActsTrk::PrepRawDataAssociation', f'StoreGateSvc+{previousActsExtension}PrdMap')})
 
         if kwargs['processStrips']:
             kwargs.setdefault('StripClusterizationAlg.name', f'{flags.Tracking.ActiveConfig.extension}StripClusterizationAlg')
             kwargs.setdefault('StripClusterizationAlg.useCache', flags.Acts.useCache)
             kwargs.setdefault('StripClusterizationAlg.ClustersKey', stripClustersName)
             kwargs.setdefault('StripClusterizationAlg.ClusterCache', f'{flags.Tracking.ActiveConfig.extension}StripClustersCache')
+            if flags.Tracking.ActiveConfig.isSecondaryPass and previousActsExtension is not None:
+                kwargs.setdefault('StripClusterizationAlg.ExtraInputs', {('ActsTrk::PrepRawDataAssociation', f'StoreGateSvc+{previousActsExtension}PrdMap')})
 
     # Configuration for (3)
     if kwargs['runPreparation']:
