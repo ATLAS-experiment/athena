@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MdtCalibFitters/QuasianalyticLineReconstruction.h"
@@ -122,7 +122,7 @@ MTStraightLine QuasianalyticLineReconstruction::tangent(const Amg::Vector3D& r_w
         tang = MTStraightLine(p1, direction, null_vec, null_vec);
     }
     mx1 = tang.a_x1();
-    bx2 = tang.b_x1();
+    bx1 = tang.b_x1();
     mx2 = tang.a_x2();
     bx2 = tang.b_x2();
     tang = MTStraightLine(mx1, bx1, mx2, bx2, 1.0, 1.0, std::sqrt(r_sigma12 + r_sigma22) / std::abs(p2.z() - p1.z()),
