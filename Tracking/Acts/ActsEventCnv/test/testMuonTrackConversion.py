@@ -46,7 +46,7 @@ if "__main__" == __name__:
     flags.Exec.MaxEvents = 1
 
     flags.lock()
-    flags.dump(evaluate=False)
+    flags.dump(evaluate=True)
 
     if not flags.Muon.usePhaseIIGeoSetup:
         print ("Please make sure that the file you're testing contains the Muon R4 geometry")

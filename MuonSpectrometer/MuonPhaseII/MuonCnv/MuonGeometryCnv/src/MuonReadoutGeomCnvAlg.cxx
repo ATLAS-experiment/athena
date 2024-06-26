@@ -48,6 +48,18 @@
 
 namespace {
     using SubDetAlignment = ActsGeometryContext::AlignmentStorePtr;
+    bool  hasStationVolume(const PVConstLink treeTop,
+                           const std::set<PVConstLink>& translated) {
+        const unsigned int nCh = treeTop->getNChildVols();
+        for (unsigned int ch = 0 ; ch < nCh; ++ch) {
+            PVConstLink child = treeTop->getChildVol(ch);
+            if (translated.count(child) ||
+                hasStationVolume(child, translated)){
+                return true;
+            }            
+        }
+        return false;
+    };
 }
 
 MuonReadoutGeomCnvAlg::MuonReadoutGeomCnvAlg(const std::string& name, ISvcLocator* pSvcLocator):
@@ -110,19 +122,12 @@ StatusCode MuonReadoutGeomCnvAlg::execute(const EventContext& ctx) const {
     ATH_CHECK(buildMM(geoContext, cacheObj));
     /// Finally add the passives
     std::vector<GeoChildNodeWithTrf> treeTops = getChildrenWithRef(m_detMgr->getTreeTop(0), false);
-    auto hasStationVolume = [&cacheObj](const PVConstLink treeTop) {
-        const unsigned int nCh = treeTop->getNChildVols();
-        for (unsigned int ch = 0 ; ch < nCh; ++ch) {
-            if (cacheObj.translatedStations.count(treeTop->getChildVol(ch))){
-                return true;
-            }
-        }
-        return false;
-    };
+  
     /// Move the passives also onto the new world tree...
     for (const GeoChildNodeWithTrf& treeTop : treeTops) {
-        if (hasStationVolume(treeTop.volume)) continue;
+        if (hasStationVolume(treeTop.volume, cacheObj.translatedStations)) continue;
         ATH_MSG_VERBOSE("Detected passive volume "<<treeTop.nodeName);
+
         cacheObj.world->add(const_pointer_cast(treeTop.volume));
     }
     
