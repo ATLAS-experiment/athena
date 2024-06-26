@@ -14,13 +14,8 @@
 
 // Full constructor from Identifier.
 
-RpcDigit::RpcDigit(const Identifier& id, float time, float secTime, float ToT)
-: MuonDigit(id), m_time{time}, m_secTime{secTime}, m_ToT{ToT} { }
-
-
-RpcDigit::RpcDigit(const Identifier& id, float time) :
-   MuonDigit{id}, m_time{time} {}
-//**********************************************************************
+RpcDigit::RpcDigit(const Identifier& id, float time, float ToT, bool stripSide):
+    MuonDigit(id), m_time{time}, m_ToT{ToT}, m_stripSide{stripSide} { }
 
 
 

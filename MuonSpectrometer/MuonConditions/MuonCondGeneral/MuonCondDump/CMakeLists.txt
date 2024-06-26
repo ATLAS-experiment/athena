@@ -14,7 +14,7 @@ atlas_add_component( MuonCondDump
                      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
                      LINK_LIBRARIES ${CORAL_LIBRARIES} ${ROOT_LIBRARIES} AthenaBaseComps AthenaKernel CoralUtilitiesLib GaudiKernel 
                                     GeoPrimitives Identifier MuonAlignmentData MuonCondData MuonCondInterface MuonCondSvcLib MuonIdHelpersLib 
-                                    MuonReadoutGeometry ActsGeoUtils StoreGateLib MuonCablingData)
+                                    MuonReadoutGeometry ActsGeoUtils StoreGateLib MuonCablingData MuonReadoutGeometryR4)
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py )

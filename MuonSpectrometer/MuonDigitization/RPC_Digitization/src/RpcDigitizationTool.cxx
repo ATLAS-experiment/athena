@@ -825,8 +825,7 @@ StatusCode RpcDigitizationTool::doDigitization(const EventContext& ctx,
                 // this is an accepted hit to become digit
                 last_time = (*map_dep_iter).first;
 
-                std::unique_ptr<RpcDigit> newDigit = std::make_unique<RpcDigit>(theId, newDigit_time,
-                                                                                std::numeric_limits<float>::max(), digi_ToT);  
+                std::unique_ptr<RpcDigit> newDigit = std::make_unique<RpcDigit>(theId, newDigit_time, digi_ToT, false);  
                 
                 Identifier elemId = m_idHelper->elementID(theId);
                 RpcDigitCollection* digitCollection = nullptr;

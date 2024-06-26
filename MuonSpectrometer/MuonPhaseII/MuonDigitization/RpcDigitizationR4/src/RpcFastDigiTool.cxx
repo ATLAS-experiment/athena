@@ -121,7 +121,7 @@ namespace MuonR4 {
             ATH_MSG_VERBOSE("Hit is marked as inefficient");
             return false;            
         }
-        outContainer.push_back(std::make_unique<RpcDigit>(digitId, hitTime));
+        outContainer.push_back(std::make_unique<RpcDigit>(digitId, hitTime, timeOverThreshold(rndEngine)));
         ++(m_acceptedHits[measuresPhi]);
         return true;
     }
@@ -134,16 +134,47 @@ namespace MuonR4 {
                                       CLHEP::HepRandomEngine* rndEngine) const {
         
         ++(m_allHits[false]);
-        /// Check whether the digit is actually efficient
-        if (effiMap && effiMap->getEfficiency(gasGapId) < CLHEP::RandFlat::shoot(rndEngine,0.,1.)) {
-            ATH_MSG_VERBOSE("Hit is marked as inefficient");
-            return false;            
-        }        
         const MuonGMR4::StripDesign& design{*designPtr};
+        const RpcIdHelper& id_helper{m_idHelperSvc->rpcIdHelper()};
 
+
+        /// Smeared x coordinate
         const double uncert = design.stripPitch() / std::sqrt(12.);
         const double smearedX = CLHEP::RandGaussZiggurat::shoot(rndEngine, locPos.x(), uncert);
-        const Amg::Vector2D locHitPos{smearedX * Amg::Vector2D::UnitX()};
+
+        /// Smear the Phi Coordinate
+        const double stripLength = design.stripLength(1); // in mm, assuming lenLeftEdge() == lenRightEdge() i.e. rectangular strip
+
+        // Distance in mm along strip to y=-stripLength/2 (L) and y=stripLength/2 (R)
+        const double stripLeft = -(stripLength / 2);     
+        const double stripRight = (stripLength / 2);     
+        const double distToL = std::abs(stripLeft  - locPos.y());  
+        const double distToR = std::abs(stripRight - locPos.y()); 
+    
+        // True propagation time in nanoseconds along strip to y=-stripLength/2 (L) and y=stripLength/2 (R)
+        const double propagationTimeL = distToL / m_propagationVelocity; 
+        const double propagationTimeR = distToR / m_propagationVelocity; 
+
+        /// Smeared propagation time in nanoseconds along strip to y=-stripLength/2 (L) and y=stripLength/2 (R)
+        const double smearedTimeL = CLHEP::RandGaussZiggurat::shoot(rndEngine, propagationTimeL, m_stripTimeResolution); 
+        const double smearedTimeR = CLHEP::RandGaussZiggurat::shoot(rndEngine, propagationTimeR, m_stripTimeResolution);     
+        
+        const double smearedDeltaT = smearedTimeR - smearedTimeL;
+
+        /*
+            |--- d1, t1 ---||--- d1, t1 ---||-- d --|                      For t2 > t1: 
+            ||||||||||||||||X|||||||||||||||||||||||| <- RPC strip,            deltaT = t2 - t1,  d1 = v_prop * t1 (likewise for d2), 
+                        |-------- d2, t2 -------|    X is a hit             l = d1 + d2, d = d2 - d1 -> d = l - 2d1 = v_prop * deltaT                         
+            |----------------- l -------------------|
+                                                    Hence, d1 = 0.5 * (l - d) = 0.5 * (l - v_prop * deltaT)
+
+            Then converting to coordinate system where  0 -> -0.5*l to match strip local coordinates
+                                            d1 -> d1 = -0.5*l + 0.5* (l-d) = -0.5*d = -0.5 * v_pro*deltaT
+        */
+        const double smearedY =  -0.5 * m_propagationVelocity * smearedDeltaT; //in mm
+        //If smearedDeltaT == 0 position is in the centre of the strip (0).
+
+        const Amg::Vector2D locHitPos{smearedX, smearedY};
 
         if (!design.insideTrapezoid(locHitPos)) {
             ATH_MSG_VERBOSE("The hit "<<Amg::toString(locHitPos)<<" is outside of the trapezoid bounds for "
@@ -158,7 +189,6 @@ namespace MuonR4 {
             return false;
         }
 
-        const RpcIdHelper& id_helper{m_idHelperSvc->rpcIdHelper()};
 
         bool isValid{false};
         const Identifier digitId{id_helper.channelID(gasGapId, 
@@ -166,9 +196,44 @@ namespace MuonR4 {
                                                      id_helper.doubletPhi(gasGapId), 
                                                      id_helper.gasGap(gasGapId),
                                                      false, strip, isValid)};
+        if (!isValid) {
+            ATH_MSG_WARNING("Failed to create a valid strip "<<m_idHelperSvc->toStringGasGap(gasGapId)
+                          <<", strip: "<<strip);
+            return false;
+        }
 
-        ++(m_acceptedHits[false]);
-        outContainer.push_back(std::make_unique<RpcDigit>(digitId, hitTime));
-        return true;
+        /// Check whether the digit is actually efficient
+        const bool effiSignal1 = !effiMap ||  effiMap->getEfficiency(gasGapId) >= CLHEP::RandFlat::shoot(rndEngine,0.,1.);
+        const bool effiSignal2 = !effiMap ||  effiMap->getEfficiency(gasGapId) >= CLHEP::RandFlat::shoot(rndEngine,0., 1.);
+        if (effiSignal1) {
+            outContainer.push_back(std::make_unique<RpcDigit>(digitId, hitTime + smearedTimeR, timeOverThreshold(rndEngine)));
+        }
+        if (effiSignal2) {
+            outContainer.push_back(std::make_unique<RpcDigit>(digitId, hitTime + smearedTimeL, timeOverThreshold(rndEngine), true));
+        }
+        if (effiSignal1 || effiSignal2) {
+            ++(m_acceptedHits[false]);
+            return true;
+        }
+        return false;
     }
+    double RpcFastDigiTool::timeOverThreshold(CLHEP::HepRandomEngine* rndmEngine) {
+        //mn Time-over-threshold modeled as a narrow and a wide gaussian
+        //mn based on the fit documented in https://its.cern.ch/jira/browse/ATLASRECTS-7820
+        constexpr double tot_mean_narrow = 16.;
+        constexpr double tot_sigma_narrow = 2.;
+        constexpr double tot_mean_wide = 15.;
+        constexpr double tot_sigma_wide = 4.5;
+
+        double thetot = 0.;
+
+        if (CLHEP::RandFlat::shoot(rndmEngine)<0.75) {
+          thetot = CLHEP::RandGaussZiggurat::shoot(rndmEngine, tot_mean_narrow, tot_sigma_narrow);
+        } else {
+          thetot = CLHEP::RandGaussZiggurat::shoot(rndmEngine, tot_mean_wide, tot_sigma_wide);
+        }
+
+        return std::max(thetot, 0.);
+    }
+
 }
