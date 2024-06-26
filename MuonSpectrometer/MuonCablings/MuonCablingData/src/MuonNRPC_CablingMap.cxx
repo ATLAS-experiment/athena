@@ -37,17 +37,18 @@ bool MuonNRPC_CablingMap::convert(const NrpcCablingData& cabling_data,
                   cabling_data.stationIndex, cabling_data.eta, cabling_data.phi,
                   cabling_data.doubletR, cabling_data.doubletZ,
                   cabling_data.doubletPhi, cabling_data.gasGap,
-                  cabling_data.measPhi, cabling_data.strip, valid)
+                  cabling_data.measuresPhi(), cabling_data.strip, valid)
             : m_rpcIdHelper->channelID(
                   cabling_data.stationIndex, cabling_data.eta, cabling_data.phi,
                   cabling_data.doubletR, cabling_data.doubletZ,
                   cabling_data.doubletPhi, cabling_data.gasGap,
-                  cabling_data.measPhi, cabling_data.strip);
+                  cabling_data.measuresPhi(), cabling_data.strip);
     return valid;
 }
 
 bool MuonNRPC_CablingMap::convert(const Identifier& module_id,
-                                  NrpcCablingData& cabling_data) const {
+                                  NrpcCablingData& cabling_data,
+                                  bool setSideBit) const {
     if (!m_rpcIdHelper->is_rpc(module_id))
         return false;
     cabling_data.stationIndex = m_rpcIdHelper->stationName(module_id);
@@ -57,7 +58,7 @@ bool MuonNRPC_CablingMap::convert(const Identifier& module_id,
     cabling_data.doubletPhi = m_rpcIdHelper->doubletPhi(module_id);
     cabling_data.doubletZ = m_rpcIdHelper->doubletZ(module_id);
     cabling_data.gasGap = m_rpcIdHelper->gasGap(module_id);
-    cabling_data.measPhi = m_rpcIdHelper->measuresPhi(module_id);
+    cabling_data.setMeasPhiAndSide(m_rpcIdHelper->measuresPhi(module_id), setSideBit);
     cabling_data.strip = m_rpcIdHelper->strip(module_id);
     return true;
 }

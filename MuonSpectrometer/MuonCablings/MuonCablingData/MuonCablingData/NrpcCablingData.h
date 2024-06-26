@@ -42,12 +42,32 @@ struct NrpcCablingOfflineID {
     int8_t& doubletPhi{m_cache.cache[4]};  /// doublet Phi -> 1,2
     int8_t& doubletZ{m_cache.cache[5]};    /// doublet Z -> 1,2
     int8_t& gasGap{m_cache.cache[6]};      /// gas gap -> 1-3
-    int8_t& measPhi{m_cache.cache[7]};     /// measures phi -> 0,1
+    /** The BIL-RPC chambers have two strip-layers, both oriented to measure the eta coordinate.
+     *  From a readout perspective, the strips share the same channel, despite that their readout 
+     *  positions are at opposite sides. In order to disentangle the particular sites of the strips,
+     *  the second bit of the measPhi field is set.
+     */
+     static constexpr int8_t measPhiBit = 1 << 0; 
+     static constexpr int8_t stripSideBit = 1 << 1;
+ 
+     /** @brief: Does the channel measure phi */
+     bool measuresPhi() const { return m_measPhiStrip & measPhiBit; }
+     /** @brief: Is the strip readout on the opposite side  */ 
+     bool stripSide() const { return m_measPhiStrip & stripSideBit; }
+     /** Sets the measuresPhi & stripSide fields of the cabling data object
+      * 
+      */
+     void setMeasPhiAndSide(bool measPhi, bool stripSide) {
+        m_measPhiStrip = measPhi * measPhiBit | stripSideBit * stripSide;
+     }
    private:
-    union {
-        long int hash{0};
-        int8_t cache[8];
-    } m_cache{};
+        union {
+            long int hash{0};
+            int8_t cache[8];
+        } m_cache{};
+
+        int8_t& m_measPhiStrip{m_cache.cache[7]};     /// measures phi -> 0,1
+
 };
 
 /// @brief Struct summarizing all the Identifier fields to uniquely Identify a Nrpc TDC chip

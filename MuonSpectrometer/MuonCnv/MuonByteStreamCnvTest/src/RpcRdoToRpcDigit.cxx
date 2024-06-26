@@ -170,7 +170,7 @@ StatusCode RpcRdoToRpcDigit::decodeNRpc(const EventContext& ctx, RpcDigitContain
         const float ToT = m_patch_for_rpc_time ? rdo->timeoverthr() 
                                             + inverseSpeedOfLight * (muonDetMgr->getRpcReadoutElement(chanId)->stripPos(chanId)).mag() : rdo->timeoverthr() ;
         
-        std::unique_ptr<RpcDigit> digit = std::make_unique<RpcDigit>(chanId, digit_time, digit_time, ToT);
+        std::unique_ptr<RpcDigit> digit = std::make_unique<RpcDigit>(chanId, digit_time, ToT, conv_obj.stripSide());
         coll->push_back(std::move(digit));
     }
     

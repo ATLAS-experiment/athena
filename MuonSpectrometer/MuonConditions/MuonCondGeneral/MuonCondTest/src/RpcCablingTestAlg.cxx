@@ -68,7 +68,7 @@ StatusCode RpcCablingTestAlg::execute(){
   
               ++n_elements;
               CablingData cabl_data{};
-              if (!cabling->convert(chanId, cabl_data)){
+              if (!cabling->convert(chanId, cabl_data, false)){
                   ATH_MSG_ERROR("Invalid identifier "<<m_idHelperSvc->toString(chanId));
                   return StatusCode::FAILURE;
               }

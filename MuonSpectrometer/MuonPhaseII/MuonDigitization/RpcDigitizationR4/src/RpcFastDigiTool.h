@@ -9,6 +9,8 @@
 #include "MuonDigitContainer/RpcDigitContainer.h"
 #include "MuonCondData/DigitEffiData.h"
 
+#include "GaudiKernel/PhysicalConstants.h"
+
 namespace MuonR4{
     class RpcFastDigiTool final: public MuonDigitizationTool {
         public:
@@ -61,6 +63,8 @@ namespace MuonR4{
                             RpcDigitCollection& outContainer,
                             CLHEP::HepRandomEngine* rndEngine) const;
 
+            /** @brief Roll the time over threshold for each signal digit */
+            static double timeOverThreshold(CLHEP::HepRandomEngine* rndmEngine) ;
 
             using DigiCache = OutDigitCache_t<RpcDigitCollection>;
             SG::WriteHandleKey<RpcDigitContainer> m_writeKey{this, "OutputObjectName", "RPC_DIGITS"};
@@ -71,7 +75,11 @@ namespace MuonR4{
             mutable std::array<std::atomic<unsigned>, 2> m_allHits ATLAS_THREAD_SAFE{};
             mutable std::array<std::atomic<unsigned>, 2> m_acceptedHits ATLAS_THREAD_SAFE{};
 
-
+            Gaudi::Property<double> m_propagationVelocity{this, "propSpeed", 0.5 * Gaudi::Units::c_light,
+                                                         "Propagation speed of the signal inside the strip"}; // in mm/ns
+    
+            Gaudi::Property<double> m_stripTimeResolution{this, "timeResolution", 0.6 * Gaudi::Units::nanosecond,
+                                                          "Estimated time resolution of the strip readout"};
     };
 }
 #endif
