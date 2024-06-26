@@ -270,10 +270,10 @@
 + MuonSpectrometer/MuonDetDescr/MuonAGDDDescription
 + MuonSpectrometer/MuonDetDescr/MuonDetDescrUtils
 + MuonSpectrometer/MuonDetDescr/MuonReadoutGeometry
++ MuonSpectrometer/MuonDetDescr/MuonGMdbObjects
++ MuonSpectrometer/MuonDetDescr/MuonGeoModel
 + MuonSpectrometer/MuonG4/MuonG4SD
 + MuonSpectrometer/MuonG4/NSW_Sim
-+ MuonSpectrometer/MuonGMdbObjects
-+ MuonSpectrometer/MuonGeoModel
 + MuonSpectrometer/MuonIdHelpers
 + MuonSpectrometer/MuonSimEvent
 + MuonSpectrometer/MuonStationIndex
