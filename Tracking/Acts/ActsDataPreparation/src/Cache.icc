@@ -9,10 +9,6 @@ namespace ActsTrk::Cache{
 				DataVector<OT>* dv,
 				unsigned int range_start,
 				unsigned int range_end) {
-    if( range_start == range_end ) {
-      return StatusCode::SUCCESS;
-    }
-    
     auto ce = std::make_unique<CacheEntry<OT>>(dv, range_start, range_end);    
     return wh.addOrDelete(std::move(ce));
   }
