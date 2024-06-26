@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FPTracker/ConfigData.h"
 #include "FPTracker/DataDumperHelpers.h"
 #include <iostream>
+#include <iomanip>
 #include <string>
 #include <sstream>
 namespace FPTracker{
@@ -33,13 +34,6 @@ namespace FPTracker{
     {
     }
   
-  std::string label(const std::string& l){
-    std::string s(20, ' ');
-    s.replace(0, l.size(), l);
-    return s;
-  }
-  
-
   void ConfigData::setpbeam(double pbeam) {
     pbeam0 = pbeam;
     brho   = pbeam/speedOfLight;
@@ -47,16 +41,16 @@ namespace FPTracker{
 
   std::string ConfigData::toString() const{
     std::ostringstream ost;
-    ost
-      << label("IP")            << IP         << '\n'
-      << label("useaper")       << useaper    << '\n'
-      << label("apermb")        << apermb     << '\n'
-      << label("xcol1")         << xcol1      << '\n'
-      << label("xcol2")         << xcol2      << '\n'
-      << label("Brho")          << brho       << '\n'
-      << label("pbeam0")        << pbeam0     << '\n'
-      << label("endMarker")     << endMarker  << '\n'
-      << label("absZMagMax")    << absZMagMax << '\n';
+    ost << std::left
+      << std::setw(20) << "IP"            << IP         << '\n'
+      << std::setw(20) << "useaper"       << useaper    << '\n'
+      << std::setw(20) << "apermb"        << apermb     << '\n'
+      << std::setw(20) << "xcol1"         << xcol1      << '\n'
+      << std::setw(20) << "xcol2"         << xcol2      << '\n'
+      << std::setw(20) << "Brho"          << brho       << '\n'
+      << std::setw(20) << "pbeam0"        << pbeam0     << '\n'
+      << std::setw(20) << "endMarker"     << endMarker  << '\n'
+      << std::setw(20) << "absZMagMax"    << absZMagMax << '\n';
     return ost.str();
     
   }
