@@ -98,10 +98,11 @@ def HIGlobalRecCfg(flags):
 
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    from AthenaConfiguration.TestDefaults import defaultTestFiles, defaultGeometryTags
+    from AthenaConfiguration.TestDefaults import defaultConditionsTags, defaultGeometryTags, defaultTestFiles
     flags = initConfigFlags()
     flags.Input.Files = [defaultTestFiles.d + "/RecJobTransformTests/data18_hi.00367384.physics_HardProbes.daq.RAW._lb0145._SFO-8._0001.data"]
     flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2
+    flags.IOVDb.GlobalTag = defaultConditionsTags.RUN2_DATA
     flags.Exec.MaxEvents=5
     flags.Concurrency.NumThreads=1
 
