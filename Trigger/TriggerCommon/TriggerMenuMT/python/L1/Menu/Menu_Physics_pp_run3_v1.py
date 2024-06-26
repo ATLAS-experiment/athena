@@ -115,7 +115,9 @@ def defineMenu():
         'L1_MU14FCH_UNPAIRED_ISO',
 
         # Single jet Legacy
-        'L1_J15','L1_J20','L1_J50','L1_J400','L1_J75p31ETA49',
+        'L1_J15','L1_J20','L1_J50','L1_J400','L1_J75p31ETA49', 
+        # Single jet legacy (forward)
+        'L1_J20p31ETA49', 'L1_J30p31ETA49', 'L1_J50p31ETA49', 'L1_J15p31ETA49',
 
         # jJ
         'L1_jJ30', 'L1_jJ30_BGRP12','L1_jJ30_EMPTY','L1_jJ30_FIRSTEMPTY',
