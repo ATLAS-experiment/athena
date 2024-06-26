@@ -241,7 +241,7 @@ StatusCode Muon::sTgcRdoToPrepDataToolMT::processCollection(const EventContext& 
                 lCov(0,0) = prd->localCovariance()(0,0);
                 /// Currently there's no 2D covariance yet
                 // lCov(1,1) = prd->localCovariance()(1,1);                
-                outHit->setMeasurement<2>(prd->collectionHash(), 
+                outHit->setMeasurement<2>(m_idHelperSvc->detElementHash(prdId), 
                                           xAOD::toStorage(prd->localPosition()),
                                           std::move(lCov));
             } else if (chType == sTgcIdHelper::sTgcChannelTypes::Wire && !m_xAODWireKey.empty()) {
@@ -260,7 +260,7 @@ StatusCode Muon::sTgcRdoToPrepDataToolMT::processCollection(const EventContext& 
                xAOD::MeasVector<1> lPos = prd->localPosition().x() * xAOD::MeasVector<1>::UnitX();
                xAOD::MeasMatrix<1> lCov{};
                lCov(0,0) = prd->localCovariance()(0,0);
-               outHit->setMeasurement<1>(prd->collectionHash(),
+               outHit->setMeasurement<1>(m_idHelperSvc->detElementHash(prdId),
                                          std::move(lPos),
                                          std::move(lCov));
 

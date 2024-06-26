@@ -1526,13 +1526,12 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::processPad(
                 nPrepRawData++;
               }
               if (!m_xAODKey.empty()) {
-                auto xprd = new xAOD::RpcStrip();
-                state.m_xaodHandle->push_back(xprd);
+                auto xprd = state.m_xaodHandle->push_back(std::make_unique<xAOD::RpcStrip>());
                 xprd->setIdentifier(channelId.get_compact());
                 xAOD::MeasVector<1> locpos{pointLocPos[0]};
                 xAOD::MeasMatrix<1> cov{xAOD::MeasMatrix<1>::Identity()};
                 (cov)(0, 0) = mat(0, 0);
-                xprd->setMeasurement(rpcHashId, locpos, cov);
+                xprd->setMeasurement(m_idHelperSvc->detElementHash(channelId), locpos, cov);
                 xprd->setStripNumber(idHelper.strip(channelId));
                 xprd->setGasGap(idHelper.gasGap(channelId));
                 xprd->setMeasuresPhi(idHelper.measuresPhi(channelId));
