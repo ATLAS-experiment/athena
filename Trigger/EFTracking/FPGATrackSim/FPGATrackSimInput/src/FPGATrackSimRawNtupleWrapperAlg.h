@@ -31,7 +31,7 @@ private:
 
   // internal pointers
   FPGATrackSimEventInputHeader* m_eventHeader = nullptr;
-  int m_ntowers = 1;
+  unsigned int m_ntowers = 1;
 
   // Tree structure
   TFile *m_outfile = nullptr; // ROOT file descriptor

@@ -43,7 +43,7 @@ StatusCode FPGATrackSimRawNtupleWrapperAlg::initialize()
   m_hittree = new TTree("htthits","Raw hits for the FPGATrackSim simulation");
     // prepare a branch for each tower
   m_original_hits = new std::vector<FPGATrackSimHit>[m_ntowers];
-  for (int ireg=0;ireg!=m_ntowers;++ireg) { // towers loop
+  for (unsigned int ireg=0;ireg!=m_ntowers;++ireg) { // towers loop
     m_hittree->Branch(Form("RawHits%d.",ireg),&m_original_hits[ireg], 32000, 1);
   } // end towers loop
 
@@ -103,7 +103,7 @@ StatusCode FPGATrackSimRawNtupleWrapperAlg::execute() {
 
 
  // reset the branches
-  for (int ireg=0;ireg!=m_ntowers;++ireg) {
+  for (unsigned int ireg=0;ireg!=m_ntowers;++ireg) {
     m_original_hits[ireg].clear();
   }
 
@@ -126,7 +126,7 @@ StatusCode FPGATrackSimRawNtupleWrapperAlg::execute() {
   std::vector<FPGATrackSimHit>::const_iterator ihitE = fulllist.end();
   for (;ihit!=ihitE;++ihit) { // hit loop
     const FPGATrackSimHit &currawhit = *ihit;
-    for (int ireg=0;ireg!=m_ntowers;++ireg) {    
+    for (unsigned int ireg=0;ireg!=m_ntowers;++ireg) {
       // if the equivalent hit is compatible with this tower the hit is saved
       m_original_hits[ireg].push_back(currawhit);
     }
