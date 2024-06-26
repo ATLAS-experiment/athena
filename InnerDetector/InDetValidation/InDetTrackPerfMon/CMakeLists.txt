@@ -15,7 +15,7 @@ atlas_add_library( InDetTrackPerfMonLib
                    src/*.cxx src/plots/*.cxx
                    PUBLIC_HEADERS InDetTrackPerfMon
                    PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                   LINK_LIBRARIES AthenaBaseComps AthenaKernel AthenaMonitoringLib CxxUtils GaudiKernel InDetIdentifier TrkValHistUtils xAODBase xAODEventInfo xAODJet xAODTracking xAODTruth InDetTrackSystematicsToolsLib InDetRecToolInterfaces TrigDecisionToolLib AsgServicesLib 
+                   LINK_LIBRARIES AthenaBaseComps AthenaKernel AthenaMonitoringLib CxxUtils GaudiKernel InDetIdentifier TrkValHistUtils xAODBase xAODEventInfo xAODJet xAODTracking xAODTruth InDetTrackSystematicsToolsLib InDetRecToolInterfaces TrigDecisionToolLib AsgServicesLib InDetTrackSelectionToolLib TrkTruthTrackInterfaces
                    PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} AsgTools AthContainers PATCoreAcceptLib PathResolver StoreGateLib TrkEventPrimitives TrkExInterfaces TrkParameters TrkSurfaces TrkToolInterfaces TrkTrack TruthUtils nlohmann_json::nlohmann_json )
 
 ## TODO - To be included in later MRs (if needed)

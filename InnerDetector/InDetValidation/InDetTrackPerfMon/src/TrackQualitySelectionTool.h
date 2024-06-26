@@ -64,6 +64,9 @@ namespace IDTPM {
         this, "TrackObjectSelectionTool", "IDTPM::InDetTrackPerfMon/ITrackSelectionTool", 
         "Tool to perform track-object selection" };
 
+    ToolHandle< ITrackSelectionTool > m_truthSelectionTool {
+        this, "TruthTrackSelectionTool", "IDTPM::InDetTrackPerfMon/ITrackSelectionTool", 
+        "Tool to perform truth track selection" };
   }; // class InDetGeneralSelectionTool
 
 } // namespace IDTPM

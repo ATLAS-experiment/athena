@@ -118,7 +118,7 @@ def InDetTrackPerfMonToolCfg( flags, name="InDetTrackPerfMonTool", **kwargs ):
     acc.merge( PlotsDefinitionSvcCfg( flags,
                     name="PlotsDefSvc"+flags.PhysVal.IDTPM.currentTrkAna.anaTag ) )
 
-    ## now the sub-tools
+    ## now the sub-tools    
     if "TrackQualitySelectionTool" not in kwargs:
         from InDetTrackPerfMon.InDetSelectionConfig import TrackQualitySelectionToolCfg
         kwargs.setdefault( "TrackQualitySelectionTool", acc.popToolsAndMerge(

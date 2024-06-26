@@ -34,6 +34,7 @@ StatusCode IDTPM::TrackQualitySelectionTool::initialize() {
   ATH_MSG_INFO( "Initializing " << name() );
 
   ATH_CHECK( m_objSelectionTool.retrieve( EnableTool{ m_doObjSelection.value() } ) );
+  ATH_CHECK( m_truthSelectionTool.retrieve( EnableTool{ not m_truthSelectionTool.empty() } ) );
 
   return StatusCode::SUCCESS;
 }
@@ -62,6 +63,7 @@ StatusCode IDTPM::TrackQualitySelectionTool::selectTracks(
     ATH_CHECK( trkAnaColls.fillTruthPartVec(
         trkAnaColls.truthPartVec( TrackAnalysisCollections::FULL ),
         TrackAnalysisCollections::FS ) );
+    ATH_CHECK (m_truthSelectionTool->selectTracks( trkAnaColls ));
   }
 
   /// Debug printout
@@ -73,7 +75,7 @@ StatusCode IDTPM::TrackQualitySelectionTool::selectTracks(
     ATH_CHECK( m_objSelectionTool->selectTracks( trkAnaColls ) );
   }
 
-  /// TODO - put offline and truth selections here...
+  
 
   return StatusCode::SUCCESS;
 }
