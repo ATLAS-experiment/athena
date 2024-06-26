@@ -102,17 +102,18 @@ StatusCode ClusterizationAlg<IClusteringTool, useCache>::execute(const EventCont
           if(cache_wh.OnlineAndPresentInAnotherView()) continue;
         }
 
+        auto prev_len = clusterContainer->size();
+
         // If not already processed, do it now
         const RawDataCollection* rdos = rdoContainer->indexFindPtr(id);
         if (rdos != nullptr && !rdos->empty()) {
-	  m_stat[kNRdo] += rdos->size();
-          auto prev_len = clusterContainer->size();
+          m_stat[kNRdo] += rdos->size();
           ATH_CHECK(m_clusteringTool->clusterize(*rdos, *m_idHelper, ctx,*clusterContainer));
+        }
 
-          if constexpr (useCache) {
-            //add to the cache
-            ATH_CHECK(Cache::Helper<BaseClusterType>::insert(cache_wh, clusterContainer, prev_len, clusterContainer->size()));
-          }
+        if constexpr (useCache) {
+          //add to the cache
+          ATH_CHECK(Cache::Helper<BaseClusterType>::insert(cache_wh, clusterContainer, prev_len, clusterContainer->size()));
         }
       } // loop on ids
     } // loop on rois

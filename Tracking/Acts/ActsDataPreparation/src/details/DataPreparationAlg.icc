@@ -171,6 +171,7 @@ namespace ActsTrk {
       if(ce == nullptr) continue;
 
       for(auto rng: ce->ranges){
+        if(rng.first == rng.second) continue;
         for(unsigned int i = rng.first; i < rng.second; i++){
 
 	  // Check the measurement has not been used previously
