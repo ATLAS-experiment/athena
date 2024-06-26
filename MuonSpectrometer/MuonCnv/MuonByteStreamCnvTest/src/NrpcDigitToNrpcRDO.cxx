@@ -13,11 +13,6 @@
 #include "TrigT1RPClogic/ShowData.h"
 #include "xAODMuonRDO/NRPCRDOAuxContainer.h"
 
-namespace {
-    constexpr double inverseSpeedOfLight = 1 / Gaudi::Units::c_light;  // need 1/299.792458
-   
-}  // namespace
-
 /////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
 
