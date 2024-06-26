@@ -112,8 +112,11 @@ StatusCode IDTPM::TruthTrackMatchingTool::match(
                    pT( *matched_track_particle ) <<
                    " and prob = " << prob );
 
+    /// Defining test-reference distance as 1-TruthMatchProb
+    float dist = 1 - prob;
+
     /// Updating lookup table with new match
-    ATH_CHECK( matches.update( *truth_particle, *matched_track_particle ) );
+    ATH_CHECK( matches.update( *truth_particle, *matched_track_particle, dist ) );
 
   } // loop over vTest
 

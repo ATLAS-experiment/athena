@@ -57,7 +57,7 @@ namespace IDTPM {
 
     /// Get the reference track matched to the given test
     const R* getMatchedRef(
-        const T& t, const std::vector< const R* >& vRef ) const;
+        const T& t, const std::vector< const R* >& vRef, float& dist ) const;
 
   protected:
 

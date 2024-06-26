@@ -69,6 +69,33 @@ namespace IDTPM {
     virtual const std::vector< const xAOD::TruthParticle* >& getMatchedTestTruths(
         const xAOD::TrackParticle& r ) const = 0;
 
+    /// get best matched test,
+    /// i.e. the one with the shortest dist parameter from the reference
+    /// best Track <- Track
+    const xAOD::TrackParticle* getBestMatchedTestTrack(
+        const xAOD::TrackParticle& r ) const
+    {
+      const std::vector< const xAOD::TrackParticle* >& vec =
+        getMatchedTestTracks( r );
+      return vec.empty() ? nullptr : vec[0];
+    }
+    /// best Track <- Truth
+    const xAOD::TrackParticle* getBestMatchedTestTrack(
+        const xAOD::TruthParticle& r ) const
+    {
+      const std::vector< const xAOD::TrackParticle* >& vec =
+        getMatchedTestTracks( r );
+      return vec.empty() ? nullptr : vec[0];
+    }
+    /// best Truth <- Track
+    virtual const xAOD::TruthParticle* getBestMatchedTestTruth(
+        const xAOD::TrackParticle& r ) const
+    {
+      const std::vector< const xAOD::TruthParticle* >& vec =
+        getMatchedTestTruths( r );
+      return vec.empty() ? nullptr : vec[0];
+    }
+
     /// return true if test is matched
     virtual bool isTestMatched( const xAOD::TrackParticle& t ) const = 0;
     virtual bool isTestMatched( const xAOD::TruthParticle& t ) const = 0;
@@ -80,13 +107,16 @@ namespace IDTPM {
     /// update lookup tables with a new entry
     /// Track -> Track
     virtual StatusCode update( const xAOD::TrackParticle& t,
-                               const xAOD::TrackParticle& r ) = 0;
+                               const xAOD::TrackParticle& r,
+                               float dist = 0. ) = 0;
     /// Track -> Truth
     virtual StatusCode update( const xAOD::TrackParticle& t,
-                               const xAOD::TruthParticle& r ) = 0;
+                               const xAOD::TruthParticle& r,
+                               float dist = 0. ) = 0;
     /// Truth -> Track
     virtual StatusCode update( const xAOD::TruthParticle& t,
-                               const xAOD::TrackParticle& r ) = 0;
+                               const xAOD::TrackParticle& r,
+                               float dist = 0. ) = 0;
 
     /// clear lookup tables
     virtual void clear() = 0;
