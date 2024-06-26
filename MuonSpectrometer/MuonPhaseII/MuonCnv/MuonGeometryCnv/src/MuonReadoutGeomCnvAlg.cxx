@@ -4,6 +4,7 @@
 */
 #include "MuonReadoutGeomCnvAlg.h"
 
+#include <GeoModelKernel/GeoVPhysVol.h>
 #include <GeoPrimitives/GeoPrimitivesHelpers.h>
 #include <StoreGate/WriteCondHandle.h>
 #include <StoreGate/ReadCondHandle.h>
@@ -192,13 +193,13 @@ StatusCode MuonReadoutGeomCnvAlg::buildStation(const ActsGeometryContext& gctx,
     const Amg::Transform3D stationTransform = alignTrf->getDefTransform().inverse()*parentVolume->getX();
 
     for (const GeoChildNodeWithTrf& child : children) {
-        PVLink childVol = const_pointer_cast<GeoVPhysVol>(child.volume);
-
         /// Skip the full physical volumes as they represent the readout elements
-        if (typeid(*childVol) == typeid(GeoFullPhysVol)) {
+        const GeoVPhysVol &childVolRef = *child.volume;
+        if (typeid(childVolRef) == typeid(GeoFullPhysVol)) {
             continue;
         }
         // Add the beam lines / foams inside the station volume
+        PVLink childVol = const_pointer_cast<GeoVPhysVol>(child.volume);
         parentPhysVol->add(cacheObj.makeTransform(stationTransform*child.transform));
         parentPhysVol->add(cloneVolume(childVol));
     }
