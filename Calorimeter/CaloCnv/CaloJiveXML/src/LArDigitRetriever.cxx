@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArDigitRetriever.h"
@@ -17,6 +17,8 @@
 #include "CaloIdentifier/TileID.h"
 #include "StoreGate/ReadCondHandle.h"
 #include "GaudiKernel/ThreadLocalContext.h"
+#include <memory>
+#include <array>
 
 using CLHEP::GeV;
 
@@ -195,7 +197,8 @@ namespace JiveXML {
     
     if (LArDigitCnt && m_doDigit==true) {
 
-      int cellIndex[200000] = {0};
+      auto pCellIndex = std::make_unique<std::array<int, 200000>>();
+      pCellIndex->fill(0);
       int nLArSamples = 0;
       HWIdentifier LArHardwareId;
       Identifier LArId;
@@ -212,7 +215,7 @@ namespace JiveXML {
 
         int Index = cellContainer->findIndex(cellhash);  //find Cell Index
         if (Index >= 0)
-          cellIndex[Index] = Index;
+          (*pCellIndex)[Index] = Index;
         
         nLArSamples = digit->nsamples();
         std::vector<short> LArSamples = digit->samples(); 
@@ -355,7 +358,7 @@ namespace JiveXML {
           
           const IdentifierHash cellhash=m_calocell_id->calo_cell_hash(cellid); //fast method to find cell         
           int Index = cellContainer->findIndex(cellhash);  //find Cell Index
-          if (Index >= 0 && cellIndex[Index] == Index)
+          if (Index >= 0 && (*pCellIndex)[Index] == Index)
             continue; //test whether this cell was already retrieved
 
           HWIdentifier LArhwid = cabling->createSignalChannelIDFromHash((*it1)->caloDDE()->calo_hash());
@@ -442,33 +445,33 @@ namespace JiveXML {
 //----------------above lines are trying to get the LAr,HEC and FCAL tags --------------    
 
     // write values into DataMap
-
+    const auto nEntries = phi.size();
     if(!(datatype=="FCAL")){
-      DataMap["phi"] = phi;
-      DataMap["eta"] = eta;
+      DataMap["phi"] = std::move(phi);
+      DataMap["eta"] = std::move(eta);
     } else {
-      DataMap["x"] = x;
-      DataMap["y"] = y;
-      DataMap["dx"] = dx;
-      DataMap["dy"] = dy;
+      DataMap["x"] = std::move(x);
+      DataMap["y"] = std::move(y);
+      DataMap["dx"] = std::move(dx);
+      DataMap["dy"] = std::move(dy);
     }
 
-    DataMap["energy"] = energy;
-    DataMap["id"] = idVec;
-    DataMap["channel"] = channel;
-    DataMap["feedThrough"] = feedThrough;
-    DataMap["slot"] = slotVec;
+    DataMap["energy"] = std::move(energy);
+    DataMap["id"] = std::move(idVec);
+    DataMap["channel"] = std::move(channel);
+    DataMap["feedThrough"] = std::move(feedThrough);
+    DataMap["slot"] = std::move(slotVec);
     
     // adc counts
-    DataMap["cellTime"] = cellTimeVec;
-    DataMap["cellGain"] = cellGain;
-    DataMap["cellPedestal"] = cellPedestal;
-    DataMap["adc2Mev"] = adc2Mev;
+    DataMap["cellTime"] = std::move(cellTimeVec);
+    DataMap["cellGain"] = std::move(cellGain);
+    DataMap["cellPedestal"] = std::move(cellPedestal);
+    DataMap["adc2Mev"] = std::move(adc2Mev);
 
     DataMap[LArSampleIndexStr] = LArSampleIndexVec; // adcCounts
 
     //Be verbose
-    ATH_MSG_DEBUG( dataTypeName() << " retrieved with " << phi.size() << " entries" );
+    ATH_MSG_DEBUG( dataTypeName() << " retrieved with " << nEntries<< " entries" );
 
     //All collections retrieved okay
     return DataMap;
@@ -479,14 +482,11 @@ namespace JiveXML {
   //--------------------------------------------------------------------------
   
   void LArDigitRetriever::calcEMLayerSub(Identifier& cellid)
-  {
-    if(abs(m_calocell_id->pos_neg(cellid))==1)
-      m_sub.push_back(DataType(1));
-    if(abs(m_calocell_id->pos_neg(cellid))==2)
-      m_sub.push_back(DataType(2));
-    if(abs(m_calocell_id->pos_neg(cellid))==3)
-      m_sub.push_back(DataType(0));
-    
+  { 
+    const auto posNeg = std::abs(m_calocell_id->pos_neg(cellid));
+    if (posNeg<1 or posNeg>3) return;
+    static constexpr std::array<int,3> datatypes{2,3,0};
+    m_sub.emplace_back(datatypes[posNeg-1]);
   }
 
   //--------------------------------------------------------------------------
@@ -494,9 +494,9 @@ namespace JiveXML {
   void LArDigitRetriever::calcHECLayerSub(Identifier& cellid)
   {
     if(m_calocell_id->pos_neg(cellid)==2)
-      m_sub.push_back(DataType(1));
+      m_sub.emplace_back(1);
     else
-      m_sub.push_back(DataType(0));
+      m_sub.emplace_back(0);
   }
   
 
