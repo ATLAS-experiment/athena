@@ -22,6 +22,7 @@ def CombinedTrackingPassFlagSets(flags):
         TrackingComponent.ActsValidateSpacePoints : "ActsValidateSpacePoints",
         TrackingComponent.ActsValidateSeeds : "ActsValidateSeeds",
         TrackingComponent.ActsValidateConversionSeeds : "ActsValidateConversionSeeds",
+        TrackingComponent.ActsValidateLargeRadiusSeeds: "ActsValidateLargeRadiusSeeds",
         TrackingComponent.ActsValidateTracks : "ActsValidateTracks",
         TrackingComponent.ActsValidateAmbiguityResolution : "ActsValidateAmbiguityResolution"
     }

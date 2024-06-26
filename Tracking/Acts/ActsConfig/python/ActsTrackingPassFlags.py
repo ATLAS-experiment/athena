@@ -158,6 +158,19 @@ def createActsValidateConversionSeedsTrackingPassFlags():
     icf.isSecondaryPass = False
     return icf
 
+def createActsValidateLargeRadiusSeedsTrackingPassFlags():
+    icf = createActsLargeRadiusTrackingPassFlags()
+    icf.extension = "ActsValidateLargeRadiusSeeds"
+    deactivateAthenaComponents(icf)
+    icf.doAthenaCluster = True
+    icf.doAthenaSpacePoint = True
+    icf.doAthenaToActsSpacePoint = True
+    icf.doActsToAthenaSeed = True
+    icf.doAthenaTrack = True
+    icf.doAthenaAmbiguityResolution = True
+    icf.isSecondaryPass = False
+    return icf
+
 def createActsValidateTracksTrackingPassFlags():
     icf = createITkTrackingPassFlags()
     icf.extension = lambda pcf : "ActsValidateTracks" if not pcf.Acts.doAmbiguityResolution else "ActsValidateResolvedTracks"
