@@ -1,3 +1,7 @@
+/*
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
+
 #ifndef ITKPIXV2QCOREENCODINGLUT_H
 #define ITKPIXV2QCOREENCODINGLUT_H
 #include <cstdint>
@@ -41,7 +45,7 @@ namespace ITkPixEncoding{
     }
 
     //Create LUTs - if argument is true, return length LUT, if it's false return the encoded QCore LUT.
-    //It could be prettified / optimized to fill in both LUTs in one go, but happens at compile time
+    //It could be prettified / optimized to fill in both LUTs in one go, but happens once per job and takes O(ms)
     //so no real gain there.
     static inline auto create_lut_encode_(bool length = false) {
         //std::array<uint32_t, 1 << 16> lut;//[1 << 16];
