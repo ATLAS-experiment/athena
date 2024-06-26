@@ -1,6 +1,6 @@
 
 //
-//  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+//  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 //
 
 #include "xAODJet/Jet.h"
@@ -28,7 +28,7 @@ namespace Athena_test {
   TEST_F( xAODJetTest, jetgetAttribute ) {
     float value( 42.0 );
     jet.setAttribute<float>( "test", value ) ;
-    float testvalue;
+    float testvalue{};
     EXPECT_TRUE( jet.getAttribute<float>( "test", testvalue ) );
     EXPECT_EQ( 42.0, testvalue );
   }
