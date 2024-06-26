@@ -48,7 +48,6 @@ namespace ITkPixEncoding{
     //It could be prettified / optimized to fill in both LUTs in one go, but happens once per job and takes O(ms)
     //so no real gain there.
     static inline auto create_lut_encode_(bool length = false) {
-        //std::array<uint32_t, 1 << 16> lut;//[1 << 16];
         uint32_t lut[1 << 16];
         lut[0] = 0;
         for (uint32_t i = 1; i < 1 << 16; i++) {
@@ -60,9 +59,6 @@ namespace ITkPixEncoding{
     }
 
 
-
-    //static const std::array<uint32_t, 1 << 16> ITkPixV2QCoreEncodingLUT_Tree   = {create_lut_encode_(false)};
-    //static const std::array<uint32_t, 1 << 16> ITkPixV2QCoreEncodingLUT_Length = {create_lut_encode_(true) };
     static const uint32_t ITkPixV2QCoreEncodingLUT_Tree[1 << 16]   = {create_lut_encode_(false)};
     static const uint32_t ITkPixV2QCoreEncodingLUT_Length[1 << 16] = {create_lut_encode_(true) };
 
