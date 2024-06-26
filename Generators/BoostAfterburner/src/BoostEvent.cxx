@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BoostAfterburner/BoostEvent.h"
@@ -31,7 +31,7 @@ StatusCode BoostEvent::initialize()
 
 StatusCode BoostEvent::execute()
 {
-  const McEventCollection* input_collection;
+  const McEventCollection* input_collection = nullptr;
   if ( evtStore()->retrieve(input_collection, m_inkey).isFailure() )
   {
     msg(MSG::ERROR) << "Could not retrieve truth McEventCollection " << m_inkey << endmsg;

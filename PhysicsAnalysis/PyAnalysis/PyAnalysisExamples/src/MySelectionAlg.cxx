@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PyAnalysisExamples/MySelectionAlg.h"
@@ -81,7 +81,7 @@ StatusCode MySelectionAlg::execute()
 
   // retrive ElectronContainer
   ATH_MSG_DEBUG ( "retrive ElectronContainer" );
-  const ElectronContainer *eCon;
+  const ElectronContainer *eCon = nullptr;
   ATH_CHECK( evtStore()->retrieve(eCon, m_ContainerKey) );
 
   auto newCon = std::make_unique<ConstDataVector<ElectronContainer> >(SG::VIEW_ELEMENTS);

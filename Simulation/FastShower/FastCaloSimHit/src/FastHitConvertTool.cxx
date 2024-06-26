@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -60,7 +60,7 @@ StatusCode FastHitConvertTool::initialize()
       CHECK(m_storeGateFastCalo.retrieve());
     }
   ATH_MSG_DEBUG("StoreGateFastCalo Svc structure at Initialisation"<<(*m_storeGateFastCalo).dump());
-  const CaloIdManager* caloIdManager;
+  const CaloIdManager* caloIdManager = nullptr;
   CHECK(detStore()->retrieve(caloIdManager));
   m_larEmID=caloIdManager->getEM_ID();
   if(m_larEmID==0)

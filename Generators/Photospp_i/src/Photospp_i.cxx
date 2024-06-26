@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -142,7 +142,7 @@ StatusCode Photospp_i::execute() {
 
     // Get the event collection
     // FIXME should be using Read/WriteHandles here
-    McEventCollection* eventCollection;
+    McEventCollection* eventCollection = nullptr;
     StatusCode sc = evtStore()->retrieve(eventCollection, m_genEventKey);
     if (sc.isFailure() || eventCollection == 0) {
         ATH_MSG_ERROR("Unable to retrieve event collection from StoreGate with key " << m_genEventKey);
