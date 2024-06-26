@@ -4,8 +4,6 @@
 
 # @brief: This is the dbgEventInfo class for the Debug Stream event analysis
 
-from __future__ import print_function
-
 import eformat
 from ROOT import gStyle, gROOT, addressof, TTree, vector, string
 from TrigByteStreamTools.hltResultMT import get_collections

@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 ## Trig_reco_tf.py
 ## - based on PyJobTransforms/Reco_tf.py
@@ -11,7 +11,7 @@ import time
 
 from PyJobTransforms.transform import transform
 from PyJobTransforms.trfExe import athenaExecutor, DQMergeExecutor
-from PyJobTransforms.trfArgs import addAthenaArguments, addD3PDArguments, addPrimaryDPDArguments, addExtraDPDTypes, addDetectorArguments
+from PyJobTransforms.trfArgs import addAthenaArguments, addDetectorArguments
 from PyJobTransforms.trfDecorators import stdTrfExceptionHandler, sigUsrStackTrace
 from RecJobTransforms.recTransformUtils import addCommonRecTrfArgs, addStandardRecoFiles
 
@@ -84,16 +84,10 @@ def getTransform():
 
     # Other reco steps - not currently used in trigger reprocessings
     # if remove can also remove outputNTUP_TRIGFile
-    executorSet.add(athenaExecutor(name = 'ESDtoDPD',
-                                   substep = 'e2d', inData = ['ESD'], outData = ['NTUP_TRIG'],
-                                   perfMonFile = 'ntuple_ESDtoDPD.pmon.gz'))
-    executorSet.add(athenaExecutor(name = 'AODtoDPD',
-                                   substep = 'a2d', inData = ['AOD', 'EVNT'], outData = ['NTUP_TRIG'],
-                                   perfMonFile = 'ntuple_AODtoDPD.pmon.gz'))
 
-    trf = transform(executor = executorSet, description = 'Trigger transform to run HLT_standalone, followed by'
-                    ' general purpose ATLAS reconstruction transform. Input to HLT_Standalone is inputBS_RDOFile'
-                    ' with outputs of RDO, ESD, AOD or DPDs. For more details see:'
+    trf = transform(executor = executorSet, description = 'Trigger transform to run HLT, followed by'
+                    ' general purpose ATLAS reconstruction transform. Input to HLT is inputBS_RDOFile'
+                    ' with outputs of RDO, ESD or AOD. For more details see:'
                     ' https://twiki.cern.ch/twiki/bin/viewauth/Atlas/TriggerTransform or for reco_tf, see:'
                     ' https://twiki.cern.ch/twiki/bin/viewauth/Atlas/RecoTf')
 
@@ -104,9 +98,6 @@ def getTransform():
     # shortened list from addAllRecoArgs in RecJobTransforms.recTransformUtils
     addCommonRecTrfArgs(trf.parser)
     addStandardRecoFiles(trf.parser)
-    addPrimaryDPDArguments(trf.parser, transform = trf)
-    addD3PDArguments(trf.parser, transform = trf)
-    addExtraDPDTypes(trf.parser, transform = trf)
 
     # Now add specific trigger transform arguments
     # Putting this last makes them appear last in the help so easier to find
@@ -171,10 +162,6 @@ def addTrigCostRateArgs(parser):
     parser.add_argument('--inputDRAW_TRIGCOSTFile', nargs='+',
                         type=trfArgClasses.argFactory(trfArgClasses.argBSFile, io='input', runarg=True),
                         help='Input bytestream file of CostMonitoring stream', group='TrigCost')
-    # NTUP_TRIG is used for COST monitoring - used in the reco release
-    parser.add_argument('--outputNTUP_TRIGFile', nargs='+',
-                        type=trfArgClasses.argFactory(trfArgClasses.argHISTFile, io='output', runarg=True, countable=False),
-                        help='D3PD output NTUP_TRIG file (can be made in substeps e2d,a2d)', group='TrigCost')
     # NTUP_COST is used for COST monitoring - used in the reco release
     parser.add_argument('--outputNTUP_TRIGCOSTFile', nargs='+',
                         type=trfArgClasses.argFactory(trfArgClasses.argHISTFile, io='output', runarg=True, countable=False),
