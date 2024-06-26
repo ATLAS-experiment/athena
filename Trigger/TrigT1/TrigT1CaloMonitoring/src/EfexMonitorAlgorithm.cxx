@@ -49,19 +49,19 @@ StatusCode EfexMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const
       ATH_MSG_WARNING("No eFex EM container found in storegate  "<< key.key());
     }
     else {
-      auto nEmTOBs_total = Monitored::Scalar<int>(key.key() +"_nEMTOBs_nocut",0.0);
+      auto nEmTOBs_total = Monitored::Scalar<int>(key.key() +"_nTOBs_nocut",0.0);
       nEmTOBs_total = eFexContainer->size();
       fill(m_packageName, nEmTOBs_total,lbn);
       // Fill EM histograms for the low/high cuts
       const xAOD::eFexEMRoIContainer* emDataContPtr = eFexContainer.cptr();
       ATH_CHECK(fillEMHistograms(m_packageName+'_'+key.key()+"_LowPtCut", emDataContPtr, m_lowPtCut));
       ATH_CHECK(fillEMHistograms(m_packageName+'_'+key.key()+"_HiPtCut", emDataContPtr, m_hiPtCut));
-      auto seedMax = Monitored::Scalar<int>(key.key() + "_seedMax",0);
-      auto tobType = Monitored::Scalar<std::string>("tobType","em");
-      for(const xAOD::eFexEMRoI* roi : *emDataContPtr){
-          locIdx = std::to_string(roi->iPhi()/8) + ":" + std::to_string(roi->iEta());tobEt = roi->et();
-          seedMax = roi->seedMax();fill(m_packageName, tobType,seedMax);
-          fill(m_packageName+"_"+key.key(),tobEt,lbn,locIdx);
+      if(key.key().find("Sim") == std::string::npos) {
+          for (const xAOD::eFexEMRoI *roi: *emDataContPtr) {
+              locIdx = std::to_string(roi->iPhi() / 8) + ":" + std::to_string(roi->iEta());
+              tobEt = roi->et();
+              fill(m_packageName + "_" + key.key(), tobEt, lbn, locIdx);
+          }
       }
     }
   } // Finished EM loop
@@ -74,19 +74,19 @@ StatusCode EfexMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const
       ATH_MSG_WARNING("No eFex Tau container found in storegate  "<< key.key());
     }
     else {
-      auto nTauTOBs_total = Monitored::Scalar<int>(key.key()+"_nTauTOBs_nocut",0.0);
+      auto nTauTOBs_total = Monitored::Scalar<int>(key.key()+"_nTOBs_nocut",0.0);
       nTauTOBs_total = eFexTauContainer->size();
       fill(m_packageName, nTauTOBs_total,lbn);
       // Fill Tau histograms for the low/high cuts
       const xAOD::eFexTauRoIContainer* tauDataContPtr = eFexTauContainer.cptr();
       ATH_CHECK(fillTauHistograms(m_packageName+'_'+key.key()+"_LowPtCut", tauDataContPtr, m_lowPtCut));
       ATH_CHECK(fillTauHistograms(m_packageName+'_'+key.key()+"_HiPtCut", tauDataContPtr, m_hiPtCut));
-      auto seedMax = Monitored::Scalar<int>(key.key() + "_seedMax",0);
-      auto tobType = Monitored::Scalar<std::string>("tobType","tau");
-      for(const xAOD::eFexTauRoI* roi : *tauDataContPtr){
-        locIdx = std::to_string(roi->iPhi()/8) + ":" + std::to_string(roi->iEta());tobEt = roi->et();
-        seedMax = roi->seedMax();fill(m_packageName, tobType,seedMax);
-        fill(m_packageName+"_"+key.key(),tobEt,lbn,locIdx);
+      if(key.key().find("Sim") == std::string::npos) {
+          for (const xAOD::eFexTauRoI *roi: *tauDataContPtr) {
+              locIdx = std::to_string(roi->iPhi() / 8) + ":" + std::to_string(roi->iEta());
+              tobEt = roi->et();
+              fill(m_packageName + "_" + key.key(), tobEt, lbn, locIdx);
+          }
       }
     }
   } // Finished Tau loop

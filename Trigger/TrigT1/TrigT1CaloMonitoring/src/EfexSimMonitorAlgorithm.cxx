@@ -65,8 +65,9 @@ template <typename T> unsigned int EfexSimMonitorAlgorithm::fillHistos(const SG:
     std::string EventType = "DataTowers";
     if(fexReadout==0) {
         EventType = "EmulatedTowers";
-        if((timeSince>=0&&timeSince<10)) EventType+="+JustAfter";
-        else if((timeUntil>=0&&timeUntil<10)) EventType+="+JustBefore";
+        // removing next two lines until further investigation of cause of mismatches by LATOME
+        //if((timeSince>=0&&timeSince<10)) EventType+="+JustAfter";
+        //else if((timeUntil>=0&&timeUntil<10)) EventType+="+JustBefore";
     }
 
     SG::ReadHandle<T> tobs1{key1, ctx};
@@ -107,7 +108,6 @@ template <typename T> unsigned int EfexSimMonitorAlgorithm::fillHistos(const SG:
             fill("mismatches",signature,tobMismatched,evtType);
         }
     }
-
     if (mismatches) {
         // record all tobs to the debug tree .. one entry in the tree = 1 tobType for 1 event
         auto evtNumber = Monitored::Scalar<ULong64_t>("EventNumber",GetEventInfo(ctx)->eventNumber());
@@ -136,6 +136,28 @@ template <typename T> unsigned int EfexSimMonitorAlgorithm::fillHistos(const SG:
         auto simReady = Monitored::Scalar<bool>("SimulationReady",fexReadout==1); // used to control if filling plot that is actually monitored in DQM
         fillVectors(key2,ctx,detas,dphis,dword0s);
         fillVectors(key1,ctx,setas,sphis,sword0s);
+
+
+        std::set<uint32_t> word0s1;
+        for(const auto tob : *tobs1) {
+            word0s1.insert(tob->word0());
+        }
+
+        auto locIdx = Monitored::Scalar<std::string>("locIdx","");
+        for(size_t i = 0; i < sword0s.size();i++) {
+            if(word0s2.find(sword0s.at(i))==word0s2.end()) {
+                locIdx = std::to_string(tobs1->at(i)->iPhi()/8) + ":" + std::to_string(tobs1->at(i)->iEta());
+                fill(signa + "_mismatches",lbn,locIdx,simReady);
+            }
+        }
+        for(size_t i = 0; i < dword0s.size();i++) {
+            if(word0s1.find(dword0s.at(i))==word0s1.end()) {
+                locIdx = std::to_string(tobs2->at(i)->iPhi()/8) + ":" + std::to_string(tobs2->at(i)->iEta());
+                fill(signa + "_mismatches",lbn,locIdx,simReady);
+            }
+        }
+
+
         fill("mismatches",lbn,lbnString,evtNumber,dtobEtas,dtobPhis,dtobWord0s,stobEtas,stobPhis,stobWord0s,evtType,timeSince,timeUntil,IsDataTowers,IsEmulatedTowers,signature,simReady);
 
 

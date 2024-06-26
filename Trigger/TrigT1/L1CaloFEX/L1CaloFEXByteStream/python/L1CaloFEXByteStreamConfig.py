@@ -47,19 +47,38 @@ def eFexByteStreamToolCfg(flags, name, *, writeBS=False, TOBs=True, xTOBs=False,
       from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
       monTool = GenericMonitoringTool(flags,'MonTool',HistPath = f'HLTFramework/L1BSConverters/{name}')
       topDir = "EXPERT"
+      monTool.defineHistogram('efexDecoderErrorTitle,efexDecoderErrorLocation;errors', path=topDir, type='TH2I',
+                              title='Decoder Errors;Title;Location',
+                              xbins=1,xmin=0,xmax=1,
+                              ybins=1,ymin=0,ymax=1,
+                              opt=['kCanRebin'],merge="merge")
+      tool.MonTool = monTool
     else:
       # if used in offline reconstruction respect DQ convention (ATR-26371)
-      from AthenaMonitoring import AthMonitorCfgHelper
-      helper = AthMonitorCfgHelper(flags, 'HLTFramework')
-      monTool = helper.addGroup(None, f'{name}MonTool', f'/HLT/HLTFramework/L1BSConverters/{name}')
-      topDir = None
+      # use L1Calo's special MonitoringCfgHelper
+      from TrigT1CaloMonitoring.LVL1CaloMonitoringConfig import L1CaloMonitorCfgHelper
+      helper = L1CaloMonitorCfgHelper(flags,None,name)
+
+      # could consider getting rid of this first histogram, since all the info should be accessible in the second
+      # will make decision after gaining experience @ P1
+      helper.defineHistogram('efexDecoderErrorTitle,efexDecoderErrorLocation;h_efex_errors', type='TH2I',
+                             path="Developer/ByteStreamDecoders",
+                             fillGroup = f'{name}MonTool',
+                             title='eFEX Decoder Errors;Title;Location',
+                             xbins=1,xmin=0,xmax=1,
+                             ybins=1,ymin=0,ymax=1,
+                             opt=['kCanRebin','kAlwaysCreate'],merge="merge")
+      helper.defineHistogram('lbn,decoderError;h_efex_errors_vs_lbn', type='TH2I',
+                             path="Expert/ByteStreamDecoders",
+                             hanConfig={"algorithm":"Histogram_Empty","description":"Should be empty. Please report any errors to eFEX software experts."},
+                             fillGroup = f'{name}MonTool',
+                             title='eFEX Decoder Errors;LB;Error',
+                             xbins=1,xmin=0,xmax=1,
+                             ybins=1,ymin=0,ymax=1,
+                             opt=['kAddBinsDynamically','kCanRebin','kAlwaysCreate'],merge="merge")
+      tool.MonTool = helper.fillGroups[f'{name}MonTool']
       acc.merge(helper.result())
-    monTool.defineHistogram('efexDecoderErrorTitle,efexDecoderErrorLocation;errors', path=topDir, type='TH2I',
-                            title='Decoder Errors;Title;Location',
-                            xbins=1, xmin=0, xmax=1, xlabels=["UNKNOWN"],
-                            ybins=1, ymin=0, ymax=1, ylabels=["UNKNOWN"],
-                            opt=['kCanRebin'])
-    tool.MonTool = monTool
+
 
   acc.setPrivateTools(tool)
   return acc
@@ -117,9 +136,9 @@ def jFexRoiByteStreamToolCfg(flags, name, *, writeBS=False, xTOBs=False):
 
     monTool.defineHistogram('jfexDecoderErrorTitle,jfexDecoderErrorLocation;errors', path=topDir, type='TH2I',
                             title='jFEX TOB Decoder Errors;Type;Location',
-                            xbins=1, xmin=0, xmax=1, xlabels=["UNKNOWN"],
-                            ybins=1, ymin=0, ymax=1, ylabels=["UNKNOWN"],
-                            opt=['kCanRebin'])
+                            xlabels=["UNKNOWN"],
+                            ylabels=["UNKNOWN"],
+                            opt=['kCanRebin'],merge="merge")
     tool.MonTool = monTool
 
   acc.setPrivateTools(tool)
@@ -200,9 +219,9 @@ def gFexByteStreamToolCfg(flags, name, *, writeBS=False):
 
     monTool.defineHistogram('gfexDecoderErrorTitle,gfexDecoderErrorLocation;errors', path=topDir, type='TH2I',
                             title='gFEX TOB Decoder Errors;Type;Location',
-                            xbins=1, xmin=0, xmax=1, xlabels=["UNKNOWN"],
-                            ybins=1, ymin=0, ymax=1, ylabels=["UNKNOWN"],
-                            opt=['kCanRebin'])
+                            xlabels=["UNKNOWN"],
+                            ylabels=["UNKNOWN"],
+                            opt=['kCanRebin'],merge="merge")
     tool.MonTool = monTool    
 
 
@@ -243,9 +262,9 @@ def jFexInputByteStreamToolCfg(flags, name, *, writeBS=False):
 
     monTool.defineHistogram('jfexDecoderErrorTitle,jfexDecoderErrorLocation;errors', path=topDir, type='TH2I',
                             title='jFEX InputData Decoder Errors;Type;Location',
-                            xbins=1, xmin=0, xmax=1, xlabels=["UNKNOWN"],
-                            ybins=1, ymin=0, ymax=1, ylabels=["UNKNOWN"],
-                            opt=['kCanRebin'])
+                            xlabels=["UNKNOWN"],
+                            ylabels=["UNKNOWN"],
+                            opt=['kCanRebin'],merge="merge")
     tool.MonTool = monTool    
 
 
@@ -285,9 +304,9 @@ def gFexInputByteStreamToolCfg(flags, name, *, writeBS=False):
 
     monTool.defineHistogram('gfexDecoderErrorTitle,gfexDecoderErrorLocation;errors', path=topDir, type='TH2I',
                             title='gFEX InputData Decoder Errors;Type;Location',
-                            xbins=1, xmin=0, xmax=1, xlabels=["UNKNOWN"],
-                            ybins=1, ymin=0, ymax=1, ylabels=["UNKNOWN"],
-                            opt=['kCanRebin'])
+                            xlabels=["UNKNOWN"],
+                            ylabels=["UNKNOWN"],
+                            opt=['kCanRebin'],merge="merge")
     tool.MonTool = monTool   
 
   acc.setPrivateTools(tool)
