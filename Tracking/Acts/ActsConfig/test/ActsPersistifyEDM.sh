@@ -31,6 +31,7 @@ ActsReadEDM.py \
    readTracks=True \
    tracks="ActsTracks" \
    readTrackParticles=True \
+   redoAmbiguity=True \
    trackParticles="ActsCombinedTracksParticlesAlt"
 
 rc=$?
