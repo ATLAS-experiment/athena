@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // EDM include(s):
@@ -111,24 +111,24 @@ int main(int argc, char* argv[])
   ANA_CHECK(tool.setProperty("OutputLevel", MSG::INFO ));
   ANA_CHECK(tool.retrieve());
 
-  const SG::AuxElement::ConstAccessor<int> truthTypeAcc("truthType");
-  const SG::AuxElement::ConstAccessor<int> truthOriginAcc("truthOrigin");
-  const SG::AuxElement::ConstAccessor<int> truthPdgIdAcc("truthPdgId");
-  const SG::AuxElement::ConstAccessor<int> firstMotherTruthTypeAcc("firstEgMotherTruthType");
-  const SG::AuxElement::ConstAccessor<int> firstMotherTruthOriginAcc("firstEgMotherTruthOrigin");
-  const SG::AuxElement::ConstAccessor<int> firstMotherPdgIdAcc("firstEgMotherPdgId");
-  const SG::AuxElement::ConstAccessor<int> lastMotherTruthTypeAcc("lastEgMotherTruthType");
-  const SG::AuxElement::ConstAccessor<int> lastMotherTruthOriginAcc("lastEgMotherTruthOrigin");
-  const SG::AuxElement::ConstAccessor<int> lastMotherPdgIdAcc("lastEgMotherPdgId");
+  const SG::ConstAccessor<int> truthTypeAcc("truthType");
+  const SG::ConstAccessor<int> truthOriginAcc("truthOrigin");
+  const SG::ConstAccessor<int> truthPdgIdAcc("truthPdgId");
+  const SG::ConstAccessor<int> firstMotherTruthTypeAcc("firstEgMotherTruthType");
+  const SG::ConstAccessor<int> firstMotherTruthOriginAcc("firstEgMotherTruthOrigin");
+  const SG::ConstAccessor<int> firstMotherPdgIdAcc("firstEgMotherPdgId");
+  const SG::ConstAccessor<int> lastMotherTruthTypeAcc("lastEgMotherTruthType");
+  const SG::ConstAccessor<int> lastMotherTruthOriginAcc("lastEgMotherTruthOrigin");
+  const SG::ConstAccessor<int> lastMotherPdgIdAcc("lastEgMotherPdgId");
   // Fallback variables
-  const SG::AuxElement::ConstAccessor<int> fallbackTruthTypeAcc("TruthClassifierFallback_truthType");
-  const SG::AuxElement::ConstAccessor<int> fallbackTruthOriginAcc("TruthClassifierFallback_truthOrigin");
-  const SG::AuxElement::ConstAccessor<float> fallbackDRAcc("TruthClassifierFallback_dR");
+  const SG::ConstAccessor<int> fallbackTruthTypeAcc("TruthClassifierFallback_truthType");
+  const SG::ConstAccessor<int> fallbackTruthOriginAcc("TruthClassifierFallback_truthOrigin");
+  const SG::ConstAccessor<float> fallbackDRAcc("TruthClassifierFallback_dR");
   // Ambiguity flag
-  const SG::AuxElement::ConstAccessor<int> ambiguityAcc("DFCommonAddAmbiguity");
-  const SG::AuxElement::ConstAccessor<char> passDFLooseAcc("DFCommonElectronsLHLoose");
-  const SG::AuxElement::ConstAccessor<char> passDFLooseBLAcc("DFCommonElectronsLHLooseBL");
-  const SG::AuxElement::ConstAccessor<char> passDFTightAcc("DFCommonElectronsLHTight");
+  const SG::ConstAccessor<int> ambiguityAcc("DFCommonAddAmbiguity");
+  const SG::ConstAccessor<char> passDFLooseAcc("DFCommonElectronsLHLoose");
+  const SG::ConstAccessor<char> passDFLooseBLAcc("DFCommonElectronsLHLooseBL");
+  const SG::ConstAccessor<char> passDFTightAcc("DFCommonElectronsLHTight");
 
   // Muon selection tool
   asg::StandaloneToolHandle< CP::IMuonSelectionTool > muonSelectionTool("CP::MuonSelectionTool/MuonSelectionTool");
@@ -189,10 +189,12 @@ int main(int argc, char* argv[])
           float fallbackDR = fallbackDRAcc.isAvailable(*el) ? fallbackDRAcc(*el) : -1;
 
           const xAOD::TruthParticle *truthParticle = xAOD::TruthHelpers::getTruthParticle(*el);
-          int status = (truthParticle != nullptr && truthParticle->isAvailable<int>("status")) ? truthParticle->status() : -1;
+          static const SG::ConstAccessor<int> statusAcc("status");
+          int status = (truthParticle != nullptr && statusAcc.isAvailable(*truthParticle)) ? truthParticle->status() : -1;
+          static const SG::ConstAccessor<int> pdgAcc("pdgId");
           int pdgId = truthPdgIdAcc.isAvailable(*el)
             ? truthPdgIdAcc(*el)
-            : (truthParticle != nullptr && truthParticle->isAvailable<int>("pdgId")) ? truthParticle->pdgId() : 0;
+            : (truthParticle != nullptr && pdgAcc.isAvailable(*truthParticle)) ? truthParticle->pdgId() : 0;
 
           ANA_MSG_WARNING("Unknown electron passing loose selection with "
             << "status = " << status
@@ -270,10 +272,12 @@ int main(int argc, char* argv[])
           float fallbackDR = (fallbackDRAcc.isAvailable(*mu)) ? fallbackDRAcc(*mu) : -1;
 
           const xAOD::TruthParticle *truthParticle = xAOD::TruthHelpers::getTruthParticle(*mu);
-          int status = (truthParticle != nullptr && truthParticle->isAvailable<int>("status")) ? truthParticle->status() : -1;
+          static const SG::ConstAccessor<int> statusAcc("status");
+          int status = (truthParticle != nullptr && statusAcc.isAvailable(*truthParticle)) ? truthParticle->status() : -1;
+          static const SG::ConstAccessor<int> pdgAcc("pdgId");
           int pdgId = truthPdgIdAcc.isAvailable(*mu)
             ? truthPdgIdAcc(*mu)
-            : (truthParticle != nullptr && truthParticle->isAvailable<int>("pdgId")) ? truthParticle->pdgId() : 0;
+            : (truthParticle != nullptr && pdgAcc.isAvailable(*truthParticle)) ? truthParticle->pdgId() : 0;
 
 		      ANA_MSG_WARNING("Unknown muon passing Medium selection with "
             << "status = " << status
