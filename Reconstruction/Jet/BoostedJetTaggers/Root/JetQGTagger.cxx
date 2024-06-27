@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BoostedJetTaggers/JetQGTagger.h"
@@ -11,6 +11,7 @@
 #include "InDetTrackSystematicsTools/InDetTrackTruthFilterTool.h"
 #include "InDetTrackSystematicsTools/InDetTrackTruthOriginTool.h"
 #include "InDetTrackSystematicsTools/JetTrackFilterTool.h"
+#include "AthContainers/ConstAccessor.h"
 
 #include "xAODTracking/VertexContainer.h"
 #include "TruthUtils/MagicNumbers.h"
@@ -549,11 +550,13 @@ namespace CP {
     // getting the associated truth jet
     // FRANCESCO COMMENT
     const xAOD::Jet* tjet;
-    if(jet->isAvailable< ElementLink<xAOD::JetContainer> >("GhostTruthAssociationLink") ){
+    static const SG::ConstAccessor< ElementLink<xAOD::JetContainer> >
+      GhostTruthAssociationLinkAcc("GhostTruthAssociationLink");
+    if(GhostTruthAssociationLinkAcc.isAvailable(*jet)) {
       ATH_MSG_DEBUG("Accessing GhostTruthAssociationLink: is available");
-      if(jet->auxdata< ElementLink<xAOD::JetContainer> >("GhostTruthAssociationLink").isValid() ){
+      ElementLink<xAOD::JetContainer> truthlink = GhostTruthAssociationLinkAcc(*jet);
+      if(truthlink.isValid() ){
         ATH_MSG_DEBUG("Accessing GhostTruthAssociationLink: is valid");
-        ElementLink<xAOD::JetContainer> truthlink = jet->auxdata< ElementLink<xAOD::JetContainer> >("GhostTruthAssociationLink");
         if(truthlink)
           tjet = * truthlink;
         else{
