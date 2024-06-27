@@ -61,6 +61,7 @@ public:
 
   virtual bool plotTrackParameters() const override { return m_plotTrackParameters.value(); };
   virtual bool plotEfficiencies() const override { return m_plotEfficiencies.value(); };
+  virtual bool plotResolutions() const override { return m_plotResolutions.value(); };
   virtual bool plotOfflineElectrons() const override { return m_plotOfflineElectrons.value(); };
 
 private:
@@ -85,9 +86,10 @@ private:
 
   /// histogram properties
   BooleanProperty m_sortPlotsByChain { this, "sortPlotsByChain", false, "Save plots in <mainDir>/<chain>/<subDir/TrkAnaName>/... instead of the default <mainDir>/<subDir/TrkAnaName>/<chain>/..." };
-  BooleanProperty m_plotTrackParameters { this, "plotTrackParameters", true, "Book/fill track parameters histgrams" };
-  BooleanProperty m_plotEfficiencies { this, "plotEfficiencies", true, "Book/fill track parameters histgrams" };
-  BooleanProperty m_plotOfflineElectrons { this, "plotOfflineElectrons", false, "Book/fill reference offline electrons histgrams" };
+  BooleanProperty m_plotTrackParameters { this, "plotTrackParameters", true, "Book/fill track parameters histograms" };
+  BooleanProperty m_plotEfficiencies { this, "plotEfficiencies", true, "Book/fill track parameters histograms" };
+  BooleanProperty m_plotResolutions { this, "plotResolutions", true, "Book/fill track resolutions histograms" };
+  BooleanProperty m_plotOfflineElectrons { this, "plotOfflineElectrons", false, "Book/fill reference offline electrons histograms" };
  
 };
 

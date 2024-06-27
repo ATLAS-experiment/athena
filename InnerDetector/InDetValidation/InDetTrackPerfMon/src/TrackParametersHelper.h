@@ -39,6 +39,15 @@ namespace IDTPM {
   template< class U >
   inline float eta( const U& p ) { return p.eta(); }
 
+  /// Accessor utility function for getting the value of theta
+  inline float getTheta( const xAOD::TrackParticle& p ) { return p.theta(); }
+  inline float getTheta( const xAOD::TruthParticle& p ) {
+    static thread_local SG::ConstAccessor<float> thetaAcc("theta");
+    return (thetaAcc.isAvailable(p)) ? thetaAcc(p) : -9999.;
+  }
+  template< class U >
+  inline float theta( const U& p ) { return getTheta( p ); }
+
   /// Accessor utility function for getting the value of phi
   template< class U >
   inline float phi( const U& p ) { return p.phi(); }
@@ -46,17 +55,20 @@ namespace IDTPM {
   /// Accessor utility function for getting the value of z0
   inline float getZ0( const xAOD::TrackParticle& p ) { return p.z0(); }
   inline float getZ0( const xAOD::TruthParticle& p ) {
-    return ( p.isAvailable<float>("z0") ) ?
-           p.auxdata<float>("z0") : -9999.;
+    static thread_local SG::ConstAccessor<float> z0Acc("z0");
+    return (z0Acc.isAvailable(p)) ? z0Acc(p) : -9999.;
   }
   template< class U >
   inline float z0( const U& p ) { return getZ0( p ); }
 
+  template< class U >
+  inline float z0SinTheta( const U& p ) { return z0( p ) * std::sin( theta( p ) ); }
+
   /// Accessor utility function for getting the value of d0
   inline float getD0( const xAOD::TrackParticle& p ) { return p.d0(); }
   inline float getD0( const xAOD::TruthParticle& p ) {
-    return ( p.isAvailable<float>("d0") ) ?
-           p.auxdata<float>("d0") : -9999.;
+    static thread_local SG::ConstAccessor<float> d0Acc("d0");
+    return (d0Acc.isAvailable(p)) ? d0Acc(p) : -9999.;
   }
   template< class U >
   inline float d0( const U& p ) { return getD0( p ); }
@@ -64,8 +76,8 @@ namespace IDTPM {
   /// Accessor utility function for getting the value of R
   inline float getProdR( const xAOD::TrackParticle& ) { return -9999.; } //FIXME
   inline float getProdR( const xAOD::TruthParticle& p ) {
-    return ( p.isAvailable<float>("prodR") ) ?
-           p.auxdata<float>("prodR") : -9999.;
+    static thread_local SG::ConstAccessor<float> prodRAcc("prodR");
+    return (prodRAcc.isAvailable(p)) ? prodRAcc(p) : -9999.;
   }
   template< class U >
   inline float prodR( const U& p ) { return getProdR( p ); }
@@ -73,8 +85,8 @@ namespace IDTPM {
   /// Accessor utility function for getting the value of Z
   inline float getProdZ( const xAOD::TrackParticle& ) { return -9999.; } //FIXME
   inline float getProdZ( const xAOD::TruthParticle& p ) {
-    return ( p.isAvailable<float>("prodZ") ) ?
-           p.auxdata<float>("prodZ") : -9999.;
+    static thread_local SG::ConstAccessor<float> prodZAcc("prodZ");
+    return (prodZAcc.isAvailable(p)) ? prodZAcc(p) : -9999.;
   }
   template< class U >
   inline float prodZ( const U& p ) { return getProdZ( p ); }
@@ -100,11 +112,14 @@ namespace IDTPM {
   /// Accessor utility function for getting the value of qOverP
   inline float getQoverP( const xAOD::TrackParticle& p ) { return p.qOverP(); }
   inline float getQoverP( const xAOD::TruthParticle& p ) {
-    return ( p.isAvailable<float>("qOverP") ) ?
-           p.auxdata<float>("qOverP") : -9999.;
+    static thread_local SG::ConstAccessor<float> qOverPAcc("qOverP");
+    return (qOverPAcc.isAvailable(p)) ? qOverPAcc(p) : -9999.;
   }
   template< class U >
   inline float qOverP( const U& p ) { return getQoverP( p ); }
+
+  template< class U >
+  inline float qOverPT( const U& p ) { return qOverP( p ) / std::sin( theta( p ) ); }
 
   /// Accessor utility function for getting the value of Energy
   template< class U >
