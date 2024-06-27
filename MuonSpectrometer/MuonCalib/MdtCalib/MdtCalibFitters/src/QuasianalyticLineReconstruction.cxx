@@ -57,7 +57,7 @@ MTStraightLine QuasianalyticLineReconstruction::tangent(const Amg::Vector3D& r_w
     MTStraightLine tang;                                     // tangent to drift circles of a hit pair
     Amg::Vector3D p1(0., 0., 0.), p2(0., 0., 0.);            // hit points defining a tangent
     Amg::Vector3D null_vec(0.0, 0.0, 0.0);                   // auxiliary 0 vector
-    double mx1, bx1, mx2, bx2;                               // auxiliary track parameters
+    double mx1=0, bx1=0, mx2=0, bx2=0;                       // auxiliary track parameters
 
     //::::::::::::::::::::::::::::::::::::::::::::
     //:: CHECK WHETHER THE SELECTED CASE EXISTS ::

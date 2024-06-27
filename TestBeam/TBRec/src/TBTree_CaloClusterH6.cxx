@@ -355,7 +355,7 @@ StatusCode TBTree_CaloClusterH6::execute()
                   << m_clusterContainerName );
 
   // Retrieve Event Info
-  const TBEventInfo* theEventInfo;
+  const TBEventInfo* theEventInfo = nullptr;
   StatusCode sc = evtStore()->retrieve(theEventInfo,"TBEventInfo");
   if ( sc.isFailure() ) {
     ATH_MSG_ERROR
@@ -399,7 +399,7 @@ StatusCode TBTree_CaloClusterH6::execute()
     if (m_addTime) m_cell_time->clear();
     if (m_addQuality) m_cell_quality->clear();
     // Get cell information
-    const CaloCellContainer* cellContainer;
+    const CaloCellContainer* cellContainer = nullptr;
     sc = evtStore()->retrieve(cellContainer, m_caloCellContainerName);
     if (sc.isFailure()) {
       m_nEventRejected++;
@@ -454,7 +454,7 @@ StatusCode TBTree_CaloClusterH6::execute()
     rh->SetZCalo(m_zCalo);
     
     // Get cell information
-    const CaloCellContainer* cellContainer = 0;
+    const CaloCellContainer* cellContainer = nullptr;
     ATH_CHECK( evtStore()->retrieve(cellContainer, m_caloCellContainerName) );
     m_nCells = cellContainer->size();
     ATH_MSG_DEBUG ( "CaloCellContainer container size = " <<  m_nCells );
@@ -503,7 +503,7 @@ StatusCode TBTree_CaloClusterH6::execute()
 
   // Get beam coordinates
   if (m_addBeamTrack && (m_evType == 1 || m_evType == 0)) {
-    TBTrack *track;
+    TBTrack *track = nullptr;
     sc = evtStore()->retrieve(track, "Track");
     if (sc.isFailure()){
       ATH_MSG_ERROR ( "Retrieval of beam track failed" );
@@ -562,7 +562,7 @@ StatusCode TBTree_CaloClusterH6::execute()
 
   // Reject hadrons in 10 GeV electron beam
   if (m_useEMTBCluster && fabs(m_beamMom-10.) < 0.5) {
-    const CaloClusterContainer* clusterContainer;
+    const CaloClusterContainer* clusterContainer = nullptr;
     sc = evtStore()->retrieve(clusterContainer, "EMTBClusters");
     if (sc.isFailure()) {
       ATH_MSG_ERROR
@@ -585,7 +585,7 @@ StatusCode TBTree_CaloClusterH6::execute()
   }
   // Reject muons in 40 GeV pion beam
   if (m_useEMTBCluster && fabs(m_beamMom-40.) < 0.5) {
-    const CaloClusterContainer* clusterContainer;
+    const CaloClusterContainer* clusterContainer = nullptr;
     sc = evtStore()->retrieve(clusterContainer, "EMTBClusters");
     if (sc.isFailure()) {
       ATH_MSG_ERROR
@@ -607,7 +607,7 @@ StatusCode TBTree_CaloClusterH6::execute()
     }
   }
   // Clusters
-  const CaloClusterContainer* clusterContainer;
+  const CaloClusterContainer* clusterContainer = nullptr;
   sc = evtStore()->retrieve(clusterContainer, m_clusterContainerName);
   if (sc.isFailure()) {
     ATH_MSG_ERROR
