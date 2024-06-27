@@ -50,6 +50,12 @@ StatusCode IDTPM::ResolutionPlots::bookPlots()
 				"resolution_vs_"+m_trackType+"_eta_" + m_paramProp[i] ) );
     ATH_CHECK( retrieveAndBook( m_resmean_vs_eta[i],
 				"resmean_vs_"+m_trackType+"_eta_" + m_paramProp[i] ) );
+    ATH_CHECK( retrieveAndBook( m_resHelperPt[i],
+				"resHelper_"+m_trackType+"_pt_" + m_paramProp[i] ) );
+    ATH_CHECK( retrieveAndBook( m_reswidth_vs_pt[i],
+				"resolution_vs_"+m_trackType+"_pt_" + m_paramProp[i] ) );
+    ATH_CHECK( retrieveAndBook( m_resmean_vs_pt[i],
+				"resmean_vs_"+m_trackType+"_pt_" + m_paramProp[i] ) );
   }
 
   return StatusCode::SUCCESS;
@@ -85,6 +91,7 @@ StatusCode IDTPM::ResolutionPlots::fillPlots(
   testP[Z0SIN] = z0SinTheta(track_test);
 
   float eta_ref = eta(particle_ref);
+  float pt_ref = pT(particle_ref) / Gaudi::Units::GeV;
 
   for(unsigned int i=0; i<NPARAMS; i++){
     float residual = testP[i]-refP[i];
@@ -96,6 +103,7 @@ StatusCode IDTPM::ResolutionPlots::fillPlots(
       residual = xAOD::P4Helpers::deltaPhi(testP[i], refP[i]);
     }
     ATH_CHECK( fill( m_resHelperEta[i], eta_ref, residual, weight) );
+    ATH_CHECK( fill( m_resHelperPt[i], pt_ref, residual, weight) );
   }
   
   return StatusCode::SUCCESS;
@@ -124,6 +132,10 @@ void IDTPM::ResolutionPlots::finalizePlots()
   for (unsigned int i = 0; i < NPARAMS; i++) {
     resolutionHelper.makeResolutions(m_resHelperEta[i],
 				     m_reswidth_vs_eta[i], m_resmean_vs_eta[i],
+				     nullptr, false,
+				     IDPVM::ResolutionHelper::iterRMS_convergence);
+    resolutionHelper.makeResolutions(m_resHelperPt[i],
+				     m_reswidth_vs_pt[i], m_resmean_vs_pt[i],
 				     nullptr, false,
 				     IDPVM::ResolutionHelper::iterRMS_convergence);
   }
