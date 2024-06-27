@@ -69,13 +69,7 @@ StatusCode ReFitterAlg::execute(const EventContext &ctx) const {
     const Trk::Track* trackPtr = *track;
     const Trk::TrackParameters* trkPar_perigee =  trackPtr->perigeeParameters() ; 
 
-    if (trackPtr == nullptr){
-      ATH_MSG_ERROR("Track is a nullptr");
-    }
     for (const Trk::TrackStateOnSurface* tsos : *trackPtr->trackStateOnSurfaces() ) {
-      if (tsos == nullptr){
-       ATH_MSG_ERROR("TrackStateOnSurface is a nullptr");
-      }
       //skipping outliers
       if (!tsos->type(Trk::TrackStateOnSurface::Measurement)) continue;
       const Trk::MeasurementBase* mesh = tsos->measurementOnTrack();
