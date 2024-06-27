@@ -82,7 +82,7 @@ NswCalibDbAlg::processTdoPdoData(const EventContext& ctx) const {
     return StatusCode::SUCCESS;
   }
   ATH_MSG_DEBUG("Range of time/charge output is " << wrHdl.getRange());
-  std::unique_ptr<NswCalibDbTimeChargeData> wrCdo{std::make_unique<NswCalibDbTimeChargeData>(m_idHelperSvc->mmIdHelper(), m_idHelperSvc->stgcIdHelper())};
+  std::unique_ptr<NswCalibDbTimeChargeData> wrCdo{std::make_unique<NswCalibDbTimeChargeData>(m_idHelperSvc.get())};
 
   // MM
   ATH_CHECK(loadTimeChargeData(ctx, m_readKey_mm_sidea_tdo  , TimeChargeTech::MM  , TimeChargeType::TDO, wrHdl, wrCdo.get()));
