@@ -124,7 +124,7 @@ CaloCalibClusterMomentsMaker2::CaloCalibClusterMomentsMaker2(const std::string& 
   m_rmaxOut[2] = 0.3;
 
   for( int im=0;im<3;im++) {
-    m_i_phi_eta[im] = new std::vector<CalibHitIPhiIEtaRange> [m_n_eta_out];
+    m_i_phi_eta[im].resize(m_n_eta_out);
   }
   m_doDeadEnergySharing = false;
   m_foundAllContainers = false;
@@ -141,11 +141,6 @@ CaloCalibClusterMomentsMaker2::CaloCalibClusterMomentsMaker2(const std::string& 
   declareProperty( "UseParticleID",m_useParticleID);
 }
 
-
-CaloCalibClusterMomentsMaker2::~CaloCalibClusterMomentsMaker2() {
-  for( int im=0;im<3;im++) 
-    delete[] m_i_phi_eta[im];
-}
 
 
 //###############################################################################
