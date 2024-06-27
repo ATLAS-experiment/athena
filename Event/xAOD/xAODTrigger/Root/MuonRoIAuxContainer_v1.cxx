@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id: MuonRoIAuxContainer_v1.cxx 579914 2014-01-24 10:15:15Z krasznaa $
 
 // Local include(s):
 #include "xAODTrigger/versions/MuonRoIAuxContainer_v1.h"
@@ -17,6 +15,8 @@ namespace xAOD {
       AUX_VARIABLE( roiWord );
       AUX_VARIABLE( thrName );
       AUX_VARIABLE( thrValue );
+      AUX_VARIABLE( roiExtraWord );
+
    }
 
 } // namespace xAOD
