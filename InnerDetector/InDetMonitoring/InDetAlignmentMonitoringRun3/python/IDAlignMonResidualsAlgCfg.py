@@ -23,7 +23,7 @@ def IDAlignMonResidualsAlgCfg(helper, alg, **kwargs):
     m_maxPIXResYFillRange = 0.4
     m_FinerBinningFactor = 1
     strawRadius = 2.5
-    m_EtaModulesPix = [21, 13, 13, 13]
+    m_EtaModulesPix = [20, 13, 13, 13]
     m_EtaModulesMinPix = [-10.5, -6.5, -6.5, -6.5]
     m_EtaModulesMaxPix = [9.5, 6.5, 6.5, 6.5]
     m_PhiModules = [14, 22, 38, 52]
@@ -31,10 +31,12 @@ def IDAlignMonResidualsAlgCfg(helper, alg, **kwargs):
     m_EtaModulesShift_barrel = 92
     m_PhiModulesPerRing = 48
     m_PhiModulesShift_ec = 152
-    m_EtaModulesSCT = 14
+    m_EtaModulesSCT = 13
+    m_EtaModulesSCTEC = 3
     m_EtaModulesMinSCT = -7
     m_EtaModulesMaxSCT = 7
     m_PhiModulesSCT = [32, 40 ,48 ,56]
+    m_PhiModulesSCTEC = 52
     m_PhiModulesShift_sct_barrel = 208
     m_EtaModulesShift_sct_barrel = 84
     m_PhiModulesShift_sct_ec = 500
@@ -229,7 +231,7 @@ def IDAlignMonResidualsAlgCfg(helper, alg, **kwargs):
 
     varName = 'm_layerDisk_si, m_si_barrel_resY;si_barrel_resY'
     title = 'Residual Y vs Silicon Barrel Layer;Layer;Residual [mm]'
-    residualGroup.defineHistogram(varName, type='TH2F', path=pathResiduals, title=title, xbins=m_siliconBarrelLayers, xmin=-0.5, xmax=m_siliconBarrelLayers-0.5, ybins=100 * m_FinerBinningFactor, ymin=m_minSiResFillRange, ymax=m_maxSiResFillRange)
+    residualGroup.defineHistogram(varName, type='TH2F', path=pathResiduals, title=title, xbins=m_siliconBarrelLayers, xmin=-0.5, xmax=m_siliconBarrelLayers-0.5, ybins=100 * m_FinerBinningFactor, ymin=m_minPIXResYFillRange, ymax=m_maxPIXResYFillRange)
 
     varName = 'm_layerDisk_si, m_si_barrel_pullX;si_barrel_pullX'
     title = 'Pull X vs Silicon Barrel Layer;Layer;Pull'
@@ -245,7 +247,7 @@ def IDAlignMonResidualsAlgCfg(helper, alg, **kwargs):
 
     varName = 'm_layerDisk_si, m_si_eca_resY;si_eca_resY'
     title = 'Residual Y vs Silicon ECA Layer;Layer;Residual [mm]'
-    residualGroup.defineHistogram(varName, type='TH2F', path=pathResiduals, title=title, xbins=m_siliconECLayers, xmin=-0.5, xmax=m_siliconECLayers-0.5, ybins=100 * m_FinerBinningFactor, ymin=m_minSiResFillRange, ymax=m_maxSiResFillRange)
+    residualGroup.defineHistogram(varName, type='TH2F', path=pathResiduals, title=title, xbins=m_siliconECLayers, xmin=-0.5, xmax=m_siliconECLayers-0.5, ybins=100 * m_FinerBinningFactor, ymin=m_minPIXResYFillRange, ymax=m_maxPIXResYFillRange)
 
     varName = 'm_layerDisk_si, m_si_eca_pullX;si_eca_pullX'
     title = 'Pull X vs Silicon ECA Layer;Layer;Pull'
@@ -261,7 +263,7 @@ def IDAlignMonResidualsAlgCfg(helper, alg, **kwargs):
 
     varName = 'm_layerDisk_si, m_si_ecc_resY;si_ecc_resY'
     title = 'Residual Y vs Silicon ECC Layer;Layer;Residual [mm]'
-    residualGroup.defineHistogram(varName, type='TH2F', path=pathResiduals, title=title, xbins=m_siliconECLayers, xmin=-0.5, xmax=m_siliconECLayers-0.5, ybins=100 * m_FinerBinningFactor, ymin=m_minSiResFillRange, ymax=m_maxSiResFillRange)
+    residualGroup.defineHistogram(varName, type='TH2F', path=pathResiduals, title=title, xbins=m_siliconECLayers, xmin=-0.5, xmax=m_siliconECLayers-0.5, ybins=100 * m_FinerBinningFactor, ymin=m_minPIXResYFillRange, ymax=m_maxPIXResYFillRange)
 
     varName = 'm_layerDisk_si, m_si_ecc_pullX;si_ecc_pullX'
     title = 'Pull X vs Silicon ECA Layer;Layer;Pull'
@@ -297,8 +299,16 @@ def IDAlignMonResidualsAlgCfg(helper, alg, **kwargs):
         name = 'm_pix_residualsx;pix_b' + layer + '_residualx'
         tool.defineHistogram(name, title = title, type = 'TH1F',
                              xbins = 100 * m_FinerBinningFactor, xmin = m_minSiResFillRange, xmax = m_maxSiResFillRange)
+ 
+    residualYArray = helper.addArray([len(layersPix)], alg, 'PixResidualY', topPath = pathResiduals)
+    for postfix, tool in residualYArray.Tools.items():
+        layer = layersPix[int( postfix.split('_')[1] )]
+        title = ('UnBiased Y Residual Pixel Barrel %s' % layer) 
+        name = 'm_pix_residualsy;pix_b' + layer + '_residualy'
+        tool.defineHistogram(name, title = title, type = 'TH1F',
+                             xbins = 100 * m_FinerBinningFactor, xmin = m_minPIXResYFillRange, xmax = m_maxPIXResYFillRange)
 
-    # Define local X 3D histograms 
+    # Define local X,Y 3D histograms 
     residualX3DArray = helper.addArray([len(layersPix)], alg, 'PixResidualX_3D', topPath = pathResiduals)
     for postfix, tool in residualX3DArray.Tools.items():
         layer = layersPix[int( postfix.split('_')[1] )]
@@ -308,14 +318,15 @@ def IDAlignMonResidualsAlgCfg(helper, alg, **kwargs):
                                                   ybins = m_PhiModules[int(layer)], ymin = -0.5, ymax = m_PhiModules[int(layer)] - 0.5,
                                                   zmin = m_minSiResFillRange, zmax = m_maxSiResFillRange)
 
-    residualYArray = helper.addArray([len(layersPix)], alg, 'PixResidualY', topPath = pathResiduals)
-    for postfix, tool in residualYArray.Tools.items():
+    residualY3DArray = helper.addArray([len(layersPix)], alg, 'PixResidualY_3D', topPath = pathResiduals)
+    for postfix, tool in residualY3DArray.Tools.items():
         layer = layersPix[int( postfix.split('_')[1] )]
-        title = ('UnBiased Y Residual Pixel Barrel %s' % layer) 
-        name = 'm_pix_residualsy;pix_b' + layer + '_residualy'
-        tool.defineHistogram(name, title = title, type = 'TH1F',
-                             xbins = 100 * m_FinerBinningFactor, xmin = m_minPIXResYFillRange, xmax = m_maxPIXResYFillRange)
-
+        title = ('Local Y Residual vs Module Eta-Phi-ID Pixel Barrel layer %s; Mod Eta; Mod Phi; Local Y Residual [mm]' % layer) 
+        name = 'm_modEta,m_modPhi,m_pix_residualsy;pix_b' + layer + '_yresvsmodetaphi_3d'
+        tool.defineHistogram(name, title = title, type = 'TProfile2D', xbins = m_EtaModulesPix[int(layer)], xmin = m_EtaModulesMinPix[int(layer)], xmax = m_EtaModulesMaxPix[int(layer)],
+                                                  ybins = m_PhiModules[int(layer)], ymin = -0.5, ymax = m_PhiModules[int(layer)] - 0.5,
+                                                  zmin = m_minPIXResYFillRange, zmax = m_maxPIXResYFillRange)
+        
     pullXArray = helper.addArray([len(layersPix)], alg, 'PixPullX', topPath = pathResiduals)
     for postfix, tool in pullXArray.Tools.items():
         layer = layersPix[int( postfix.split('_')[1] )]
@@ -400,7 +411,6 @@ def IDAlignMonResidualsAlgCfg(helper, alg, **kwargs):
     residualGroup.defineHistogram(varName, title = title, type = 'TProfile', path=pathResiduals,
                                   xbins = m_EtaModulesShift_barrel, xmin = 0, xmax = m_EtaModulesShift_barrel)
        
-        
     #Pixel EndCap A plots
     layersECPix = ['0', '1', '2']
     varName = 'm_pix_eca_residualx;pix_eca_residualx'
@@ -434,6 +444,26 @@ def IDAlignMonResidualsAlgCfg(helper, alg, **kwargs):
         name = 'm_modPhi,m_pix_eca_residualy;m_pix_eca_unbiased_yresvsmodphi_disk' + layer
         tool.defineHistogram(name, title = title, type = 'TProfile',
                              xbins = m_PhiModulesPerRing, xmin = -0.5, xmax = m_PhiModulesPerRing - 0.5)
+        
+        # Define local X,Y 3D histograms for endcaps A, C
+    endcapsPix = ['a', 'c']
+    residualECX3DArray = helper.addArray([len(endcapsPix)], alg, 'PixResidualXEC_3D', topPath = pathResiduals)
+    for postfix, tool in residualECX3DArray.Tools.items():
+        layer = endcapsPix[int(postfix.split('_')[1])]
+        title = ('Local X Residual vs Module Disk-Phi-ID Pixel Endcap %s; Disk; Mod Phi; Local X Residual [mm]' % layer) 
+        name = 'm_layerDisk,m_modPhi,m_pix_ec_residualx;pix_ec' + layer + '_xresvsmodetaphi_3d'
+        tool.defineHistogram(name, title = title, type = 'TProfile2D', xbins = 3, xmin = - 0.5, xmax = 3 - 0.5,
+                                                  ybins = m_PhiModulesPerRing, ymin = -0.5, ymax = m_PhiModulesPerRing - 0.5,
+                                                  zmin = m_minSiResFillRange, zmax = m_maxSiResFillRange)
+
+    residualECY3DArray = helper.addArray([len(endcapsPix)], alg, 'PixResidualYEC_3D', topPath = pathResiduals)
+    for postfix, tool in residualECY3DArray.Tools.items():
+        layer = endcapsPix[int( postfix.split('_')[1])]
+        title = ('Local Y Residual vs Module Eta-Phi-ID Pixel Endcap %s; Disk; Mod Phi; Local Y Residual [mm]' % layer) 
+        name = 'm_layerDisk,m_modPhi,m_pix_ec_residualy;pix_ec' + layer + '_yresvsmodetaphi_3d'
+        tool.defineHistogram(name, title = title, type = 'TProfile2D', xbins = 3, xmin = - 0.5, xmax = 3 - 0.5,
+                                                  ybins = m_PhiModulesPerRing, ymin = -0.5, ymax = m_PhiModulesPerRing - 0.5,
+                                                  zmin = m_minPIXResYFillRange, zmax = m_maxPIXResYFillRange)
 
     varName = 'm_modPhiShift_eca,m_residualX_eca;pix_eca_xresvsmodphi_2d'
     title = 'X Residual Mean vs (Modified) Module Phi-ID Pixel ECA;(Modified) Phi-ID;Residual [mm]'
@@ -445,7 +475,7 @@ def IDAlignMonResidualsAlgCfg(helper, alg, **kwargs):
     title = 'Y Residual Mean vs (Modified) Module Phi-ID Pixel ECA;(Modified) Phi-ID;Residual [mm]'
     residualGroup.defineHistogram(varName, title = title, type = 'TH2F', path=pathResiduals,
                                   xbins = m_PhiModulesShift_ec, xmin = 0, xmax = m_PhiModulesShift_ec,
-                                  ybins = 100 * m_FinerBinningFactor, ymin = m_minSiResFillRange, ymax = m_maxSiResFillRange)
+                                  ybins = 100 * m_FinerBinningFactor, ymin = m_minPIXResYFillRange, ymax = m_maxPIXResYFillRange)
 
     varName = 'm_modPhiShift_eca,m_residualX_eca;pix_eca_xresvsmodphi_profile'
     title = 'X Residual Mean vs (Modified) Module Phi-ID Pixel ECA;(Modified) Phi-ID;Residual [mm]'
@@ -500,7 +530,7 @@ def IDAlignMonResidualsAlgCfg(helper, alg, **kwargs):
     title = 'Y Residual Distribution vs (Modified) Module Phi-ID Pixel ECC;(Modified) Phi-ID;Residual [mm]'
     residualGroup.defineHistogram(varName, title = title, type = 'TH2F', path=pathResiduals,
                                   xbins = m_PhiModulesShift_ec, xmin = 0, xmax = m_PhiModulesShift_ec,
-                                  ybins = 100 * m_FinerBinningFactor, ymin = m_minSiResFillRange, ymax = m_maxSiResFillRange)
+                                  ybins = 100 * m_FinerBinningFactor, ymin = m_minPIXResYFillRange, ymax = m_maxPIXResYFillRange)
 
     varName = 'm_modPhiShift_ecc,m_residualX_ecc;pix_ecc_xresvsmodphi_profile'
     title = 'X Residual Distribution vs (Modified) Module Phi-ID Pixel ECC;(Modified) Phi-ID;Residual [mm]'
@@ -529,6 +559,16 @@ def IDAlignMonResidualsAlgCfg(helper, alg, **kwargs):
         name = 'm_sct_residualsx;sct_b' + layer + '_residualx'
         tool.defineHistogram(name, title = title, type = 'TH1F',
                              xbins = 100 * m_FinerBinningFactor, xmin = m_minSiResFillRange, xmax = m_maxSiResFillRange)
+
+        # Define local X 3D histograms 
+    residualSCTX3DArray = helper.addArray([len(layersSCTB)], alg, 'SCTResidualX_3D', topPath = pathResiduals)
+    for postfix, tool in residualSCTX3DArray.Tools.items():
+        layer = layersSCTB[int( postfix.split('_')[1] )]
+        title = ('Local X Residual vs Module Eta-Phi-ID SCT Barrel layer %s; Mod Eta; Mod Phi; Local X Residual [mm]' % layer) 
+        name = 'm_modEta,m_modPhi,m_sct_residualsx;sct_b' + layer + '_xresvsmodetaphi_3d'
+        tool.defineHistogram(name, title = title, type = 'TProfile2D', xbins = m_EtaModulesPix[int(layer)], xmin = m_EtaModulesMinPix[int(layer)], xmax = m_EtaModulesMaxPix[int(layer)],
+                                                  ybins = m_PhiModules[int(layer)], ymin = -0.5, ymax = m_PhiModules[int(layer)] - 0.5,
+                                                  zmin = m_minSiResFillRange, zmax = m_maxSiResFillRange)
 
     pullSCTXArray = helper.addArray([len(layersSCTB)], alg, 'SCTPullX', topPath = pathResiduals)
     for postfix, tool in pullSCTXArray.Tools.items():
@@ -574,6 +614,17 @@ def IDAlignMonResidualsAlgCfg(helper, alg, **kwargs):
     title = 'UnBiased X Residual SCT EndCap A;Residual [mm]'
     residualGroup.defineHistogram(varName, type='TH1F', path=pathResiduals, title=title, xbins=100, xmin=m_minSiResFillRange, xmax=m_maxSiResFillRange)
 
+        # Define local X 3D histograms 
+    layersECsct = ['0', '1', '2', '3', '4', '5', '6', '7', '8']
+    residualSCTECAX3DArray = helper.addArray([len(layersECsct)], alg, 'SCTECAResidualX_3D', topPath = pathResiduals)
+    for postfix, tool in residualSCTECAX3DArray.Tools.items():
+        layer = layersECsct[int( postfix.split('_')[1] )]
+        title = ('Local X Residual vs Module Eta-Phi-ID SCT Endcap A Disk %s; Mod Eta; Mod Phi; Local X Residual [mm]' % layer) 
+        name = 'm_modEta,m_modPhi,m_sct_eca_residualx;sct_eca' + layer + '_xresvsmodetaphi_3d'
+        tool.defineHistogram(name, title = title, type = 'TProfile2D', xbins = m_EtaModulesSCTEC, xmin = -0.5, xmax = m_EtaModulesSCTEC - 0.5,
+                                                  ybins = m_PhiModulesSCTEC, ymin = - 0.5, ymax = m_PhiModulesSCTEC - 0.5,
+                                                  zmin = m_minSiResFillRange, zmax = m_maxSiResFillRange)
+
     varName = 'm_sct_eca_pullx;sct_eca_pulllx'
     title = 'UnBiased X Pull SCT EndCap A;Pull'
     residualGroup.defineHistogram(varName, type='TH1F', path=pathResiduals, title=title, xbins=100, xmin=-m_RangeOfPullHistos, xmax=m_RangeOfPullHistos)
@@ -594,6 +645,16 @@ def IDAlignMonResidualsAlgCfg(helper, alg, **kwargs):
     varName = 'm_sct_ecc_residualx;sct_ecc_residualx'
     title = 'UnBiased X Residual SCT EndCap C;Residual [mm]'
     residualGroup.defineHistogram(varName, type='TH1F', path=pathResiduals, title=title, xbins=100, xmin=m_minSiResFillRange, xmax=m_maxSiResFillRange)
+
+        # Define local X 3D histograms 
+    residualSCTECCX3DArray = helper.addArray([len(layersECsct)], alg, 'SCTECCResidualX_3D', topPath = pathResiduals)
+    for postfix, tool in residualSCTECCX3DArray.Tools.items():
+        layer = layersECsct[int( postfix.split('_')[1] )]
+        title = ('Local X Residual vs Module Eta-Phi-ID SCT Endcap C Disk %s; Mod Eta; Mod Phi; Local X Residual [mm]' % layer) 
+        name = 'm_modEta,m_modPhi,m_sct_ecc_residualx;sct_ecc' + layer + '_xresvsmodetaphi_3d'
+        tool.defineHistogram(name, title = title, type = 'TProfile2D', xbins = m_EtaModulesSCTEC, xmin = -0.5, xmax = m_EtaModulesSCTEC - 0.5,
+                                                  ybins = m_PhiModulesSCTEC, ymin = -0.5, ymax = m_PhiModulesSCTEC - 0.5,
+                                                  zmin = m_minSiResFillRange, zmax = m_maxSiResFillRange)
 
     varName = 'm_sct_ecc_pullx;sct_ecc_pulllx'
     title = 'UnBiased X Pull SCT EndCap C;Pull'
