@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCONDDATA_NSWT0DATA_H
@@ -11,38 +11,31 @@
 // Athena includes
 #include "AthenaKernel/CondCont.h" 
 #include "AthenaKernel/BaseInfo.h" 
-
-// Forward declarations
-class Identifier;
-class MmIdHelper;
-class sTgcIdHelper;
-
+#include "MuonIdHelpers/IMuonIdHelperSvc.h"
 
 class NswT0Data {
 
 
 public:
-    NswT0Data(const MmIdHelper&,  const sTgcIdHelper& stgcIdHelper);
+    NswT0Data(const Muon::IMuonIdHelperSvc* idHelperSvc);
      ~NswT0Data() = default;
 
-	// setting functions
-	void setData(const Identifier&, const float);
+    // setting functions
+    void setData(const Identifier& channelId, const float channelT0);
 
-	// retrieval functions
-	bool getT0 (const Identifier&   , float&) const;
+    // retrieval functions
+    bool getT0 (const Identifier&  channelId, float& channelT0) const;
  
 private:
-  using ChannelArray = std::vector<std::vector<float>>;
-    
-	// containers
-  ChannelArray m_data_mmg{};
-  ChannelArray m_data_stg{};
+    unsigned int identToModuleIdx(const Identifier& chan_id) const;
 
-	// ID helpers
-	const MmIdHelper&   m_mmIdHelper;
-	const sTgcIdHelper&   m_stgcIdHelper;
+    // ID helpers
+    const Muon::IMuonIdHelperSvc* m_idHelperSvc{};
+    // containers
+    using ChannelArray = std::vector<std::vector<float>>;
+    ChannelArray m_data_mmg{};
+    ChannelArray m_data_stg{};
 
-  unsigned int identToModuleIdx(const Identifier& chan_id) const;
 
 };
 
