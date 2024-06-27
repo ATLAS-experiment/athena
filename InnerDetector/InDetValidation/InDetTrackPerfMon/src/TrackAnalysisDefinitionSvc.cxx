@@ -43,25 +43,28 @@ StatusCode TrackAnalysisDefinitionSvc::initialize()
 
   /// setting flags
   m_isTestTrigger = m_testTypeStr.value().find("Trigger") != std::string::npos;
+  m_isTestEFTrigger = m_testTypeStr.value().find("EFTrigger") != std::string::npos;
   m_isTestTruth   = m_testTypeStr.value().find("Truth") != std::string::npos;
   m_isTestOffline = m_testTypeStr.value().find("Offline") != std::string::npos;
 
   m_isRefTrigger = m_refTypeStr.value().find("Trigger") != std::string::npos;
+  m_isRefEFTrigger = m_refTypeStr.value().find("EFTrigger") != std::string::npos;
   m_isRefTruth   = m_refTypeStr.value().find("Truth") != std::string::npos;
   m_isRefOffline = m_refTypeStr.value().find("Offline") != std::string::npos;
 
   m_useTrigger = m_isTestTrigger or m_isRefTrigger;
+  m_useEFTrigger = m_isTestEFTrigger or m_isRefEFTrigger;
   m_useTruth   = m_isTestTruth or m_isRefTruth;
   m_useOffline = m_isTestOffline or m_isRefOffline;
 
   /// Looping all requested chains and filling configured chains list (to be processed)
-  if( m_useTrigger ) {
+  if( m_useTrigger and not m_useEFTrigger) {
     for( size_t ic=0 ; ic<m_chainNames.size() ; ic++ ) {
       ATH_MSG_DEBUG( "Input chain : " << m_chainNames[ic] );
       m_configuredChains.push_back( m_chainNames[ic] );
     }
   } else {
-    /// Offline analysis -> process only one "dummy chain" called "Offline"
+    /// Offline analysis (or EFtrigger)-> process only one "dummy chain" called "Offline"
     m_configuredChains.push_back( "Offline" );
   }
 

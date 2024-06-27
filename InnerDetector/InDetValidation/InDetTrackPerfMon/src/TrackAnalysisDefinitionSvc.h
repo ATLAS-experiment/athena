@@ -43,13 +43,16 @@ public:
   virtual std::string plotsFullDir( std::string chain="" ) const override;
 
   virtual bool useTrigger() const override { return m_useTrigger; }
+  virtual bool useEFTrigger() const override { return m_useEFTrigger; }
   virtual bool useTruth() const override { return m_useTruth; }
   virtual bool useOffline() const override { return m_useOffline; }
 
   virtual bool isTestTrigger() const override { return m_isTestTrigger; }
+  virtual bool isTestEFTrigger() const override { return m_isTestEFTrigger; }
   virtual bool isTestTruth() const override { return m_isTestTruth; }
   virtual bool isTestOffline() const override { return m_isTestOffline; }
   virtual bool isReferenceTrigger() const override { return m_isRefTrigger; }
+  virtual bool isReferenceEFTrigger() const override { return m_isRefEFTrigger; }
   virtual bool isReferenceTruth() const override { return m_isRefTruth; }
   virtual bool isReferenceOffline() const override { return m_isRefOffline; }
 
@@ -72,9 +75,9 @@ private:
 
   StringProperty m_testTypeStr { this, "TestType", "Offline", "Type of track collection to be used as test" }; 
   StringProperty m_refTypeStr { this, "RefType", "Truth", "Type of track collection to be used as reference" }; 
-  bool m_useTrigger, m_useTruth, m_useOffline;
-  bool m_isTestTrigger, m_isTestTruth, m_isTestOffline;
-  bool m_isRefTrigger, m_isRefTruth, m_isRefOffline;
+  bool m_useTrigger, m_useEFTrigger, m_useTruth, m_useOffline;
+  bool m_isTestTrigger, m_isTestEFTrigger, m_isTestTruth, m_isTestOffline;
+  bool m_isRefTrigger, m_isRefEFTrigger, m_isRefTruth, m_isRefOffline;
 
   StringProperty m_testTag { this, "TestTag", "offl", "Short label for test track type, used in histo booking" }; 
   StringProperty m_refTag { this, "RefTag", "truth", "Short label for reference track type, used in histo booking" }; 

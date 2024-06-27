@@ -36,13 +36,16 @@ public:
   virtual std::string plotsFullDir( std::string chain="" ) const = 0;
 
   virtual bool useTrigger() const = 0;
+  virtual bool useEFTrigger() const = 0;
   virtual bool useTruth() const = 0;
   virtual bool useOffline() const = 0;
 
   virtual bool isTestTrigger() const = 0;
+  virtual bool isTestEFTrigger() const = 0;
   virtual bool isTestTruth() const = 0;
   virtual bool isTestOffline() const = 0;
   virtual bool isReferenceTrigger() const = 0;
+  virtual bool isReferenceEFTrigger() const = 0;
   virtual bool isReferenceTruth() const = 0;
   virtual bool isReferenceOffline() const = 0;
 
