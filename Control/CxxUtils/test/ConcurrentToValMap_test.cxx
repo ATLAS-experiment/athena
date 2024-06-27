@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/test/ConcurrentToValMap_test.cxx
@@ -220,14 +220,16 @@ public:
 std::atomic<int> Payload::s_count { 0 };
 
 
+// Having an explicit symbol for this avoids parse errors with cppcheck 2.14.
+static constexpr unsigned long minus1 = static_cast<unsigned long>(-1);
 using TestMapu = CxxUtils::ConcurrentToValMap<unsigned long, Payload, TestUpdater,
                                               std::hash<unsigned long>,
                                               std::equal_to<unsigned long>,
-                                              static_cast<unsigned long>(-1)>;
+                                              minus1>;
 using TestMapi = CxxUtils::ConcurrentToValMap<int, Payload, TestUpdater,
                                               std::hash<int>,
                                               std::equal_to<int>,
-                                              static_cast<unsigned long>(-1)>;
+                                              minus1>;
 using TestMapp = CxxUtils::ConcurrentToValMap<int*, Payload, TestUpdater>;
 
 

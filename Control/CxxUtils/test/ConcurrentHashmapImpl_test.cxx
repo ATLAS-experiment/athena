@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/test/ConcurrentHashmapImpl_test.cxx
@@ -367,10 +367,12 @@ void test_erase()
 {
   std::cout << "test_erase\n";
 
+  // Having an explicit symbol for this avoids parse errors with cppcheck 2.14.
+  static constexpr uintptr_t minus1 = static_cast<uintptr_t>(-1);
   using CHMImplDel = CxxUtils::detail::ConcurrentHashmapImpl<TestUpdater,
     TestHash,
     std::equal_to<uintptr_t>,
-    0, static_cast<uintptr_t>(-1)>;
+    0, minus1>;
 
   CHMImplDel chm (CHMImplDel::Updater_t(), 50,
                   CHMImplDel::Hasher_t(),
@@ -456,10 +458,12 @@ void test_swap()
 {
   std::cout << "test_swap\n";
 
+  // Having an explicit symbol for this avoids parse errors with cppcheck 2.14.
+  static constexpr uintptr_t minus1 = static_cast<uintptr_t>(-1);
   using CHMImplDel = CxxUtils::detail::ConcurrentHashmapImpl<TestUpdater,
     TestHash,
     std::equal_to<uintptr_t>,
-    0, static_cast<uintptr_t>(-1)>;
+    0, minus1>;
 
   CHMImplDel chm1 (CHMImplDel::Updater_t(), 50,
                    CHMImplDel::Hasher_t(),

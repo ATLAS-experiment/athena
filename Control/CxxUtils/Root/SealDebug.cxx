@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -339,6 +339,9 @@ void DebugAids::stacktraceLine ATLAS_NOT_THREAD_SAFE (IOFD fd,
   static const char	trailer [] = "]\n";
   Dl_info		info;
 
+  char dembuf[ LINE_MAX ];
+  char line[ LINE_MAX ];
+
   if (dladdr ((void*)addr, &info) && info.dli_fname && info.dli_fname[0])
   {
     const char *libname = info.dli_fname;
@@ -371,8 +374,6 @@ void DebugAids::stacktraceLine ATLAS_NOT_THREAD_SAFE (IOFD fd,
     // need popen for addr2line ...
     int pfd;
     pid_t child_pid;
-    char line[ LINE_MAX ];
-    char dembuf[ LINE_MAX ];
     const char* symname = dembuf;
     size_t demlen = 0;
 
