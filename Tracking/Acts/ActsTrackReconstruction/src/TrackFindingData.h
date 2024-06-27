@@ -445,7 +445,7 @@ namespace
     }
 
     size_t measurementOffset(size_t typeIndex) const { return typeIndex < m_measurementOffsets.size() ? m_measurementOffsets[typeIndex] : 0u; }
-    std::vector<size_t> measurementOffsets() const { return m_measurementOffsets; }
+    const std::vector<size_t>& measurementOffsets() const { return m_measurementOffsets; }
     const std::vector<Acts::GeometryIdentifier> &orderedGeoIds() const { return m_orderedGeoIds; }
     const MeasurementRangeList &measurementRanges() const { return m_measurementRanges; }
     const TrackingSurfaceHelper &trackingSurfaceHelper() const { return m_trackingSurfaceHelper; }

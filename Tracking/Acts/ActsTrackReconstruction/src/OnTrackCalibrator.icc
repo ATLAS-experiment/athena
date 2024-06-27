@@ -34,6 +34,7 @@ OnTrackCalibrator<traj_t>::OnTrackCalibrator(
     if (stripTool.isEnabled()) {
 	stripTool->connect(*this);
     } else {
+        // cppcheck-suppress missingReturn; false positive
 	strip_calibrator.template connect<&OnTrackCalibrator<traj_t>::passthrough<1, xAOD::StripCluster>>(this);
     }
 }

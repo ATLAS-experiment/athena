@@ -341,11 +341,10 @@ namespace ActsTrk
     }
     else
     {
-      const Acts::Surface &surface = m_ATLASConverterTool->trkSurfaceToActsSurface(detElem->surface());
-      surface_ptr = &surface;
+      surface_ptr = &m_ATLASConverterTool->trkSurfaceToActsSurface(detElem->surface());
       std::cout << std::left;
-      std::cout << std::setw(21) << actsSurfaceName(surface) << ' '
-                << std::setw(22) << to_string(surface.geometryId()) << ' ';
+      std::cout << std::setw(21) << actsSurfaceName(*surface_ptr) << ' '
+                << std::setw(22) << to_string(surface_ptr->geometryId()) << ' ';
       std::cout << std::setw(20) << atlasSurfaceName(*detElem);
       std::cout << std::right;
     }
