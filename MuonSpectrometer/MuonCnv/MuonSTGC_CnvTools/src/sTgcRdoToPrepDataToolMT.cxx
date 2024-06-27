@@ -153,7 +153,7 @@ StatusCode Muon::sTgcRdoToPrepDataToolMT::processCollection(const EventContext& 
         }
         
         double width{0.};
-        if (channelType == 0) { // Pads
+        if (channelType == sTgcIdHelper::sTgcChannelTypes::Pad) { // Pads
             const MuonGM::MuonPadDesign* design = detEl->getPadDesign(rdoId);
             if (!design) {
                 ATH_MSG_WARNING("Failed to get design for sTGC pad" );
@@ -235,6 +235,10 @@ StatusCode Muon::sTgcRdoToPrepDataToolMT::processCollection(const EventContext& 
             const int channel = id_helper.channel(prdId);
             const int chType = id_helper.channelType(prdId);
             xAOD::sTgcMeasurement* outHit{nullptr};
+            ATH_MSG_VERBOSE("Convert "
+                    <<m_idHelperSvc->toString(prdId)<<". "<<Amg::toString(prd->localPosition())
+                    <<", cov: "<<prd->localCovariance()(0,0)
+                    <<" global pos: "<<Amg::toString(prd->globalPosition()));
             if (!m_xAODPadKey.empty() && chType == sTgcIdHelper::sTgcChannelTypes::Pad) {
                 outHit = xAODcontainers.pad->push_back(std::make_unique<xAOD::sTgcPadHit>());
                 xAOD::MeasMatrix<2> lCov{xAOD::MeasMatrix<2>::Identity()};

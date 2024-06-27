@@ -132,10 +132,49 @@ namespace MuonR4 {
                             <<m_idHelperSvc->toStringGasGap(hitId)<<" digit: "<<digitStrip);
             return false;
         }
+        constexpr double dummyCharge = 66666;
+        /// We're using the NSW uncertainty DB to smear the truth-hit positions using the best known
+        /// uncertainties. In the process of digit -> RDO -> PRD, the smeared hit position is gonna be lost
+        /// However, recall that the simplest way to generate a sTgc prd strip prd is the clustering by
+        /// means of center of gravity. On average, a muon passage makes 3-4 strips to fire. Assuming 3 strips,
+        /// the smeared position can be written as
+        ///
+        ///             x = w_{1}*(c - p) + w_{2}*c + w_{3}*(c + p),
+        /// 
+        ///  where c is the strip centre, p the pitch and w_{i} are the induced charge fractions on each strip
+        /// 
+        ///            1 =  w_{1} + w_{2} + w_{3}
+        ///            x = (w_{1} + w_{2} + w_{3}) * c + (w_{3} - w_{1})*p
+        ///               --> x = c + (w_{3} - w_{1}) *p
+        ///               --> (x-c) / p = (w_{3} - w_{1})  
+        ///               --> (x-c) / p + w_{1} = w_{3}
+        ///
+        ///                  1 =  2 * w_{1} + w_{2} + (x-c) / p
+        ///                  1 - (x-c) /p - 2*w_{1} = w_{2}
+        ///                
+        ///                  0< w_{1} < 0.5 - (x-c) / 2p 
+        const double pull = (smearedX - (*design.center(digitStrip)).x()) / design.stripPitch();
+        const double w1 = CLHEP::RandFlat::shoot(rndEngine, 0., 0.5 *(1. - pull)); 
+        const double w2 = 1. - pull -2.*w1;
+        const double w3 = pull + w1;
+        const Identifier stripIdB = idHelper.channelID(hitId, readOutEle->multilayer(),
+                                                       gasGap, channelType::Strip, digitStrip -1, isValid);
+        if (isValid) {
+            outCollection.push_back(std::make_unique<sTgcDigit>(digitId,
+                                                                associateBCIdTag(ctx, timedHit), 
+                                                                hitTime(timedHit), dummyCharge * w1, false, false));
+        }
         outCollection.push_back(std::make_unique<sTgcDigit>(digitId,
                                                             associateBCIdTag(ctx, timedHit), 
-                                                            hitTime(timedHit), 666, false, false));
-
+                                                            hitTime(timedHit), dummyCharge * w2, false, false));
+        
+        const Identifier stripIdA = idHelper.channelID(hitId, readOutEle->multilayer(),
+                                                       gasGap, channelType::Strip, digitStrip + 1, isValid);
+        if (isValid) {
+            outCollection.push_back(std::make_unique<sTgcDigit>(digitId,
+                                                                associateBCIdTag(ctx, timedHit), 
+                                                                hitTime(timedHit), dummyCharge * w3, false, false));
+        }
         ++m_acceptedHits[channelType::Strip];
         return true;
     }
