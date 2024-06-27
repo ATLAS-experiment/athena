@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 /**
  * @file FPGATrackSimPhiRoadFilterTool.cxx
@@ -101,9 +101,16 @@ FPGATrackSimRoad FPGATrackSimPhiRoadFilterTool::buildRoad(FPGATrackSimRoad* orig
       float phi_expected = -1.0*asin(fpgatracksim::A * hit->getR() * qPt) + phi;
       if (m_fieldCorrection) phi_expected  -= FPGATrackSimHoughTransformTool::fieldCorrection(m_EvtSel->getRegionID(), qPt, hit->getR());
       if (abs(hit->getGPhi()-phi_expected)< (m_window.value()[lyr]+qPt*m_ptscaling)) {
-	road_hits.push_back(hit);
-	hitLayers |= 1 << hit->getLayer();
+        road_hits.push_back(hit);
+        hitLayers |= 1 << hit->getLayer();
       }
+    }
+    if (road_hits.size() == 0) {
+      FPGATrackSimHit *wcHit = new FPGATrackSimHit();
+      wcHit->setHitType(HitType::wildcard);
+      wcHit->setDetType(m_FPGATrackSimMapping->PlaneMap_1st()->getDetType(lyr));
+      wcHit->setLayer(lyr);
+      road_hits.push_back(wcHit);
     }
     ATH_MSG_DEBUG("PhiRoad Hits " << lyr << " " << road_hits.size() << " " << origr->getHits(lyr).size());
     r.setHits(lyr,road_hits);
