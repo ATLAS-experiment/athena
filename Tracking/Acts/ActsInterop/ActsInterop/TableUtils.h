@@ -44,7 +44,7 @@ namespace TableUtils {
 
       std::size_t size() const { return m_size; }
 
-      operator bool() { return m_ptr != nullptr && m_size>0; }
+      operator bool() const { return m_ptr != nullptr && m_size>0; }
       template <typename T_Other>
       bool equalSize(const T_Other &other_range) {
          return m_size == other_range.m_size;
@@ -102,7 +102,7 @@ namespace TableUtils {
    template <class T_Stream, typename T_Counter>
    T_Stream &dumpTable(T_Stream &out,
                        Range<T_Counter>   counter,
-                       Range<std::string> label,
+                       const Range<std::string>& label,
                        const std::string &label_prefix,
                        const std::size_t column_width,
                        const std::size_t min_label_width,
@@ -150,8 +150,8 @@ namespace TableUtils {
    template <class T_Stream, typename T_Counter>
    T_Stream &dumpTable(T_Stream &out,
                        Range2D<T_Counter>   counter,
-                       Range<std::string> row_label,
-                       Range<std::string> column_label,
+                       const Range<std::string>& row_label,
+                       const Range<std::string>& column_label,
                        const std::string &top_left_label,
                        const std::string &label_prefix,
                        const std::size_t column_width,
