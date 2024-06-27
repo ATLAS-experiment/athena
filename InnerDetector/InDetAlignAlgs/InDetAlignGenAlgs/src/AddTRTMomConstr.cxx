@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // @file AddTRTMomConstr.cxx
@@ -116,7 +116,7 @@ StatusCode AddTRTMomConstr::finalize() {
 
 StatusCode AddTRTMomConstr::execute() {
   if( !m_trackListOutput.empty() && !m_trackListInput.empty() ) {
-    const TrackCollection* inputtracks ;
+    const TrackCollection* inputtracks = nullptr;
     ATH_CHECK(evtStore()->retrieve( inputtracks, m_trackListInput) );
     auto outputtracks = std::make_unique<ConstDataVector<TrackCollection> >( SG::VIEW_ELEMENTS ) ;
     for (const auto it : *inputtracks){

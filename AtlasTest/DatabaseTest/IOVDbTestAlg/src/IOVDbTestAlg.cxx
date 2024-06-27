@@ -407,7 +407,7 @@ StatusCode IOVDbTestAlg::printCondObjects() const {
 
 
     // IOVDbTestAmdbCorrection
-    const IOVDbTestAmdbCorrection* amdbCorr;
+    const IOVDbTestAmdbCorrection* amdbCorr = nullptr;
     ATH_CHECK( detStore()->retrieve(amdbCorr, "/IOVDbTest/IOVDbTestAMDBCorrection") );
     ATH_MSG_INFO ("Retrieved /IOVDbTest/IOVDbTestAMDBCorrection" );
 
@@ -421,7 +421,7 @@ StatusCode IOVDbTestAlg::printCondObjects() const {
     
     if (m_readNewTag) {
         // IOVDbTestAmdbCorrection
-        const IOVDbTestAmdbCorrection* amdbCorr;
+        const IOVDbTestAmdbCorrection* amdbCorr = nullptr;
         ATH_CHECK( detStore()->retrieve(amdbCorr, "/IOVDbTest/IOVDbTestAMDBCorrection-NEWTAG") );
         ATH_MSG_INFO( "Retrieved /IOVDbTest/IOVDbTestAMDBCorrection-NEWTAG" );
 
@@ -434,8 +434,8 @@ StatusCode IOVDbTestAlg::printCondObjects() const {
     }
     
 
-    const AthenaAttributeList*    attrList     = 0;
-    const CondAttrListCollection* attrListColl = 0;
+    const AthenaAttributeList*    attrList     = nullptr;
+    const CondAttrListCollection* attrListColl = nullptr;
 
     if (!m_twoStepWriteReg && m_readWriteCool) {
 	// AttrList
