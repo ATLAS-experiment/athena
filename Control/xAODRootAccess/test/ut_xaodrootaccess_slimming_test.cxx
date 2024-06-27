@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // System include(s):
@@ -163,17 +163,22 @@ int main() {
    // Add an object to it, and set a bunch of variables on it:
    SG::AuxElement* el = new SG::AuxElement();
    dv.push_back( el );
-   el->auxdata< int >( "foo" ) = 2;
-   el->auxdata< float >( "bar" ) = 3.14;
-   el->auxdata< unsigned long long >( "dummy1" ) = 325;
-   el->auxdata< unsigned char >( "dummy2" ) = 6;
-   el->auxdata< double >( "dummy3" ) = 2.123456;
+   SG::Accessor< int > fooAcc( "foo" );
+   fooAcc( *el ) = 2;
+   SG::Accessor< float > barAcc( "bar" );
+   barAcc( *el ) = 3.14;
+   SG::Accessor< unsigned long long >dummy1Acc( "dummy1" );
+   dummy1Acc( *el ) = 325;
+   SG::Accessor< unsigned char >dummy2Acc( "dummy2" );
+   dummy2Acc( *el ) = 6;
+   SG::Accessor< double >dummy3Acc( "dummy3" );
+   dummy3Acc( *el ) = 2.123456;
 
    // Make sure that the variables can be read out, so they are sitting pretty
    // in memory somewhere:
-   SIMPLE_ASSERT( el->auxdataConst< int >( "foo" ) == 2 );
-   SIMPLE_ASSERT( el->auxdataConst< unsigned long long >( "dummy1" ) == 325 );
-   SIMPLE_ASSERT( el->auxdataConst< unsigned char >( "dummy2" ) == 6 );
+   SIMPLE_ASSERT( fooAcc( *el ) == 2 );
+   SIMPLE_ASSERT( dummy1Acc( *el ) == 325 );
+   SIMPLE_ASSERT( dummy2Acc( *el ) == 6 );
 
    // Close the output file:
    ANA_CHECK( event2.finishWritingTo( ofile2.get() ) );

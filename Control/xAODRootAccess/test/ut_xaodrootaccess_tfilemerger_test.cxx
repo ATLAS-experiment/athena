@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -52,6 +52,10 @@ int main() {
    // Initialise the environment:
    R_CHECK( APP_NAME, xAOD::Init() );
 
+   SG::Accessor< float >FloatVarAcc( "FloatVar" );
+   SG::Accessor< int >IntVarAcc( "IntVar" );
+   SG::Accessor< int >IntVar2Acc( "IntVar2" );
+
    // Create the first output file:
    {
       // Open the file:
@@ -76,9 +80,8 @@ int main() {
          dv.setStore( auxC.get() );
          for( Int_t j = 0; j < i; ++j ) {
             dv.push_back( new SG::AuxElement() );
-            dv.back()->auxdata< float >( "FloatVar" ) =
-               static_cast< float >( i + j );
-            dv.back()->auxdata< int >( "IntVar" ) = i + j;
+            FloatVarAcc( *dv.back() ) = static_cast< float >( i + j );
+            IntVarAcc( *dv.back() ) = i + j;
          }
          R_CHECK( APP_NAME, event.record( std::move( auxC ),
                                           "ContainerAux." ) );
@@ -87,8 +90,8 @@ int main() {
          std::unique_ptr< SG::AuxElement > el( new SG::AuxElement() );
          std::unique_ptr< xAOD::AuxInfoBase > auxI( new xAOD::AuxInfoBase() );
          el->setStore( auxI.get() );
-         el->auxdata< float >( "FloatVar" ) = static_cast< float >( i );
-         el->auxdata< int >( "IntVar" ) = i;
+         FloatVarAcc( *el ) = static_cast< float >( i );
+         IntVarAcc( *el ) = i;
          R_CHECK( APP_NAME, event.record( std::move( el ), "Info" ) );
          R_CHECK( APP_NAME, event.record( std::move( auxI ), "InfoAux." ) );
 
@@ -128,10 +131,9 @@ int main() {
          dv.setStore( auxC.get() );
          for( Int_t j = 0; j < i; ++j ) {
             dv.push_back( new SG::AuxElement() );
-            dv.back()->auxdata< float >( "FloatVar" ) =
-               static_cast< float >( i + j );
-            dv.back()->auxdata< int >( "IntVar" ) = i + j;
-            dv.back()->auxdata< int >( "IntVar2" ) = i + j + 1;
+            FloatVarAcc( *dv.back() ) = static_cast< float >( i + j );
+            IntVarAcc( *dv.back() ) = i + j;
+            IntVar2Acc( *dv.back() ) = i + j + 1;
          }
          R_CHECK( APP_NAME, event.record( std::move( auxC ),
                                           "ContainerAux." ) );
@@ -140,9 +142,9 @@ int main() {
          std::unique_ptr< SG::AuxElement > el( new SG::AuxElement() );
          std::unique_ptr< xAOD::AuxInfoBase > auxI( new xAOD::AuxInfoBase() );
          el->setStore( auxI.get() );
-         el->auxdata< float >( "FloatVar" ) = static_cast< float >( i );
-         el->auxdata< int >( "IntVar" ) = i;
-         el->auxdata< int >( "IntVar2" ) = i + 1;
+         FloatVarAcc( *el ) = static_cast< float >( i );
+         IntVarAcc( *el ) = i;
+         IntVar2Acc( *el ) = i + 1;
          R_CHECK( APP_NAME, event.record( std::move( el ), "Info" ) );
          R_CHECK( APP_NAME, event.record( std::move( auxI ), "InfoAux." ) );
 
