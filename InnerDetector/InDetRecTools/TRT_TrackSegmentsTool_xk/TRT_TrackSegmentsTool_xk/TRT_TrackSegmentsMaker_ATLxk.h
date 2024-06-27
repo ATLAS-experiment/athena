@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -97,7 +97,7 @@ namespace InDet{
       {
          friend class TRT_TrackSegmentsMaker_ATLxk;
       public:
-         EventData(const TRT_DriftCircleContainer *trtcontainer, int cirsize) : m_trtcontainer(trtcontainer) {
+         EventData(const TRT_DriftCircleContainer *trtcontainer, unsigned int cirsize) : m_trtcontainer(trtcontainer) {
             m_segiterator      = m_segments.begin();
             m_sizebin_iterator = m_sizebin.rend();
             m_circles  = new TRT_DriftCircleLinkN_xk[cirsize];
