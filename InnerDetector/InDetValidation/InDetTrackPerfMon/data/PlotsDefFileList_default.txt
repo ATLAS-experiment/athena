@@ -1,3 +1,4 @@
 InDetTrackPerfMon/TrkParamPlotsDef.json
 InDetTrackPerfMon/EffPlotsDef.json
+InDetTrackPerfMon/ResPlotsDef.json
 InDetTrackPerfMon/OfflElePlotsDef.json

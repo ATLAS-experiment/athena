@@ -55,6 +55,7 @@ public:
   /// histogram properties
   virtual bool plotTrackParameters() const = 0;
   virtual bool plotEfficiencies() const = 0;
+  virtual bool plotResolutions() const = 0;
   virtual bool plotOfflineElectrons() const = 0;
   
 };

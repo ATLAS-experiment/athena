@@ -23,6 +23,7 @@
 #include "plots/TrackParametersPlots.h"
 #include "plots/EfficiencyPlots.h"
 #include "plots/OfflineElectronPlots.h"
+#include "plots/ResolutionPlots.h"
 
 /// STD includes
 #include <string>
@@ -90,6 +91,8 @@ namespace IDTPM {
     /// plots w.r.t. reference tracks parameters
     std::unique_ptr< TrackParametersPlots >  m_plots_trkParam_vsRef;
     std::unique_ptr< EfficiencyPlots >       m_plots_eff_vsRef;
+    /// resolution plots
+    std::unique_ptr< ResolutionPlots >       m_plots_resolution;
     /// plots w.r.t. reference offline electron
     std::unique_ptr< OfflineElectronPlots >  m_plots_offEle;
     std::unique_ptr< OfflineElectronPlots >  m_plots_eff_vsOffEle;

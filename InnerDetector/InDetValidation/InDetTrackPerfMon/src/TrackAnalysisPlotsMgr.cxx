@@ -60,6 +60,12 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::initialize()
         this, "Tracks/Efficiencies", m_anaTag, m_trkAnaDefSvc->referenceTag() );
   }
 
+  /// Resolution plots
+  if( m_trkAnaDefSvc->plotResolutions() ) {
+    m_plots_resolution = std::make_unique< ResolutionPlots >(
+        this, "Tracks/Resolutions", m_anaTag, m_trkAnaDefSvc->referenceTag() );
+  }
+
   /// Offline electron plots
   if( m_trkAnaDefSvc->plotOfflineElectrons() ) {
     m_plots_offEle = std::make_unique< OfflineElectronPlots >(
@@ -177,6 +183,14 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsReference(
       ATH_CHECK( m_plots_eff_vsRef->fillPlots( *particle, isMatched, weight ) );
     }
 
+    if( m_plots_resolution ) {
+      if( isMatched ) {
+	// Assume that there is some reasonable orgering implemented for the matched tests
+	const auto matchedTests = matches.getMatchedTestTracks( *particle );
+	ATH_CHECK( m_plots_resolution->fillPlots( *particle, *(matchedTests[0]), weight ) );
+      }
+    }
+    
     /// offline electron plots (Offline is always either test or reference)
     if( m_trkAnaDefSvc->isReferenceOffline() ) {
       if( m_plots_offEle ) {
