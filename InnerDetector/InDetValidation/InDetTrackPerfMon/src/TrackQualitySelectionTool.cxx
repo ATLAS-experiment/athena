@@ -36,6 +36,8 @@ StatusCode IDTPM::TrackQualitySelectionTool::initialize() {
   ATH_CHECK( m_objSelectionTool.retrieve( EnableTool{ m_doObjSelection.value() } ) );
   ATH_CHECK( m_truthSelectionTool.retrieve( EnableTool{ not m_truthSelectionTool.empty() } ) );
 
+  ATH_CHECK( m_offlineSelectionTool.retrieve(EnableTool{ not m_offlineSelectionTool.empty() } ));
+
   return StatusCode::SUCCESS;
 }
 
@@ -75,7 +77,9 @@ StatusCode IDTPM::TrackQualitySelectionTool::selectTracks(
     ATH_CHECK( m_objSelectionTool->selectTracks( trkAnaColls ) );
   }
 
-  
+  if ( m_offlineSelectionTool ) {
+    ATH_CHECK(m_offlineSelectionTool->selectTracks(trkAnaColls));
+  }
 
   return StatusCode::SUCCESS;
 }

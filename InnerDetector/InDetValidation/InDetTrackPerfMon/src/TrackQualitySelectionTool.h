@@ -61,8 +61,13 @@ namespace IDTPM {
         this, "DoObjectSelection", false, "Perform track-object selection" };
 
     ToolHandle< ITrackSelectionTool > m_objSelectionTool {
-        this, "TrackObjectSelectionTool", "IDTPM::InDetTrackPerfMon/ITrackSelectionTool", 
+        this, "TrackObjectSelectionTool", "", 
         "Tool to perform track-object selection" };
+
+    ToolHandle< ITrackSelectionTool > m_offlineSelectionTool {
+        this, "OfflineSelectionTool", {}, 
+        "Tool to perform track quality selection selection" };
+
 
     ToolHandle< ITrackSelectionTool > m_truthSelectionTool {
         this, "TruthTrackSelectionTool", "IDTPM::InDetTrackPerfMon/ITrackSelectionTool", 

@@ -57,18 +57,28 @@ def TrackObjectSelectionToolCfg( flags, name="TrackObjectSelectionTool", **kwarg
     acc.setPrivateTools( CompFactory.IDTPM.TrackObjectSelectionTool( name, **kwargs ) )
     return acc
 
+def OfflineQualitySelectionCfg(flags, name):
+    acc = ComponentAccumulator()
+    offlineTool = CompFactory.InDet.InDetTrackSelectionTool(CutLevel=flags.PhysVal.IDTPM.currentTrkAna.OfflineQualityWP)
+    selTool = CompFactory.IDTPM.OfflineTrackQualitySelectionTool(name, offlineTool=offlineTool)
+    acc.setPrivateTools(selTool)
+    return acc    
 
 def TrackQualitySelectionToolCfg( flags, name="TrackQualitySelectionTool", **kwargs ):
     acc = ComponentAccumulator()
 
     ## offline track-object selection
-    if flags.PhysVal.IDTPM.currentTrkAna.SelectOfflineObject:
+    if flags.PhysVal.IDTPM.currentTrkAna.SelectOfflineObject != "":
         kwargs.setdefault( "DoObjectSelection", True )
     
         if "TrackObjectSelectionTool" not in kwargs:
            kwargs.setdefault( "TrackObjectSelectionTool", acc.popToolsAndMerge(
                TrackObjectSelectionToolCfg( flags,
                    name="TrackObjectSelectionTool" + flags.PhysVal.IDTPM.currentTrkAna.anaTag ) ) )
+
+    if flags.PhysVal.IDTPM.currentTrkAna.OfflineQualityWP != "":
+        kwargs.setdefault("OfflineSelectionTool", acc.popToolsAndMerge(
+            OfflineQualitySelectionCfg(flags, name="OfflineSelectionTool"+flags.PhysVal.IDTPM.currentTrkAna.anaTag)))
 
     if flags.Input.isMC:
         truthSelectionTool = acc.popToolsAndMerge(TruthTrackQualitySelectionToolCfg(flags))
