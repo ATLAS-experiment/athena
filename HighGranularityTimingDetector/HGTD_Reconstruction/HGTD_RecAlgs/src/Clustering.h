@@ -58,7 +58,7 @@ public:
   /**
    * @brief Return the objects that are part of the Cluster.
    */
-  std::vector<T> getEntries() const;
+  const std::vector<T>& getEntries() const;
 
   /**
    * @brief The value of a vertex has to be set manually. This is because
@@ -80,7 +80,7 @@ public:
   /**
    * @brief  Return the N-dimensional resolution of the Cluster.
    */
-  std::vector<double> getSigmas() const;
+  const std::vector<double>& getSigmas() const;
 
   /**
    * @brief Return the number of objects stored in the Cluster.
@@ -144,7 +144,7 @@ private:
 public:
   Cluster<T> getMaxEntriesCluster();
   int getMaxClusterSize_Info();
-  std::vector<Cluster<T>> getClusters() const;
+  const std::vector<Cluster<T>>& getClusters() const;
   int getNClusters() const;
   /**
    * @brief Set the distance cut. This allows an update and rerunning of the
@@ -207,7 +207,7 @@ template <class T> void Cluster<T>::addEntry(const T &entry) {
   m_entries.push_back(entry);
 }
 
-template <class T> std::vector<T> Cluster<T>::getEntries() const {
+template <class T> const std::vector<T>& Cluster<T>::getEntries() const {
   return m_entries;
 }
 
@@ -237,7 +237,7 @@ template <class T> std::vector<double> Cluster<T>::getValues() const {
   return m_combined_value_vector;
 }
 
-template <class T> std::vector<double> Cluster<T>::getSigmas() const {
+template <class T> const std::vector<double>& Cluster<T>::getSigmas() const {
   return m_combined_sigma_vector;
 }
 
@@ -503,7 +503,7 @@ template <typename T> int ClusterCollection<T>::getMaxClusterSize_Info() {
 }
 
 template <typename T>
-std::vector<Cluster<T>> ClusterCollection<T>::getClusters() const {
+const std::vector<Cluster<T>>& ClusterCollection<T>::getClusters() const {
   return m_clusters;
 }
 

@@ -76,7 +76,7 @@ namespace MuonGM {
 
         ~TgcReadoutParams();
 
-        inline const std::string GetName() const;
+        inline const std::string& GetName() const;
         int chamberType() const;
         int readoutVersion() const;
         int nPhiChambers() const;
@@ -149,7 +149,7 @@ namespace MuonGM {
     double TgcReadoutParams::stripThickness() const { return m_stripThickness; }
     double TgcReadoutParams::gangThickness() const { return m_gangThickness; }
 
-    const std::string TgcReadoutParams::GetName() const { return m_chamberName; }
+    const std::string& TgcReadoutParams::GetName() const { return m_chamberName; }
 }  // namespace MuonGM
 
 #endif  // MUONREADOUTGEOMETRY_TGCREADOUTPARAMS_H
