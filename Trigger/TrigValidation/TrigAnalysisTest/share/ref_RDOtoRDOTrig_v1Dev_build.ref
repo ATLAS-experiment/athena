@@ -14762,6 +14762,14 @@ HLT_j180_hitdvjet260_tight_L1jJ160:
   stepFeatures:
     0: 5
     1: 2
+HLT_j200_0eta140_emergingPTF0p08dR1p2_a10sd_cssk_pf_jes_ftf_preselj160_L1jJ160:
+  eventCount: 0
+  stepCounts:
+    0: 3
+    1: 2
+  stepFeatures:
+    0: 3
+    1: 2
 HLT_j200_0eta160_emergingPTF0p08dR1p2_a10sd_cssk_pf_jes_ftf_preselj200_L1J100:
   eventCount: 0
   stepCounts:

@@ -385,7 +385,7 @@ JetChainParts = {
       # These atypical explicit values are allowed to be in chain names.
       # Otherwise use ['','a','c','f'] ==> [0eta320, 0eta490, 0eta240, 320eta490]
       # suffix after threshold e.g. j420 == j420_0eta320, 6j55c == 6j55_0eta240
-      ['0eta290', '0eta200', '0eta180', '0eta160']
+      ['0eta290', '0eta200', '0eta180', '0eta160', '0eta140']
       +['320eta490'], # TODO: Kept temporarily for validation
     'jvt'           : # Jet Vertex Tagger pileup discriminant
       ['010jvt', '011jvt', '015jvt', '020jvt', '050jvt', '059jvt'],
