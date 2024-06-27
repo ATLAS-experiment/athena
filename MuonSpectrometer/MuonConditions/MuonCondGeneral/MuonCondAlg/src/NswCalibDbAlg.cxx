@@ -156,7 +156,7 @@ NswCalibDbAlg::processNSWT0Data(const EventContext& ctx) const {
     return StatusCode::SUCCESS;
   }
   ATH_MSG_DEBUG("Range of MmT0 output is " << wrHdl.getRange());
-  std::unique_ptr<NswT0Data> wrCdo{std::make_unique<NswT0Data>(m_idHelperSvc->mmIdHelper(), m_idHelperSvc->stgcIdHelper())};
+  std::unique_ptr<NswT0Data> wrCdo{std::make_unique<NswT0Data>(m_idHelperSvc.get())};
   if(m_loadMmT0Data){
     if(!m_mmT0FilePath.empty()  ){ // let's read the constants from a  file
       wrHdl.addDependency(EventIDRange(IOVInfiniteRange::infiniteTime()));
