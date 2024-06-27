@@ -49,6 +49,7 @@ def createIDTPMTrkAnaConfigFlags():
     icf.addFlag( "ChainLegProbe" , 1 )
     # Offline tracks selection properties
     icf.addFlag( "SelectOfflineObject", "" )
+    icf.addFlag( "OfflineQualityWP"   , "TightPrimary", help="Apply track quality selection cuts to the reconstructed tracks, if blank no selections is done" )
     icf.addFlag( "ObjectQuality"      , "Medium" )
     icf.addFlag( "TauType"            , "RNN" )
     icf.addFlag( "TauNprongs"         , 1 )
