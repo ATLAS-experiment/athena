@@ -1,6 +1,5 @@
 #include "../PerfMonTestNoopAlg.h"
 #include "../PerfMonTestLeakyAlg.h"
-#include "../PerfMonTestBasicAlg.h"
 #include "../PerfMonTestCpuCruncherAlg.h"
 #include "../PerfMonTestMallocAlg.h"
 #include "../PerfMonTestErroneousAlg.h"
@@ -12,7 +11,6 @@
   
 DECLARE_COMPONENT( PerfMonTest::NoopAlg )
 DECLARE_COMPONENT( PerfMonTest::LeakyAlg )
-DECLARE_COMPONENT( PerfMonTest::BasicAlg )
 DECLARE_COMPONENT( PerfMonTest::CpuCruncherAlg )
 DECLARE_COMPONENT( PerfMonTest::MallocAlg )
 DECLARE_COMPONENT( PerfMonTest::ErroneousAlg )
