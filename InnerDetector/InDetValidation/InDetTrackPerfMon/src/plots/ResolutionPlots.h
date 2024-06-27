@@ -56,9 +56,12 @@ namespace IDTPM {
     };
 
     TH2* m_resHelperEta[NPARAMS];
-
     TH1* m_reswidth_vs_eta[NPARAMS];
     TH1* m_resmean_vs_eta[NPARAMS];
+
+    TH2* m_resHelperPt[NPARAMS];
+    TH1* m_reswidth_vs_pt[NPARAMS];
+    TH1* m_resmean_vs_pt[NPARAMS];
 
   };
   
