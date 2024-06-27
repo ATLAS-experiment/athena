@@ -274,7 +274,7 @@ def TRT_InDetDetailedTrackSelectorToolCfg(
     acc = ComponentAccumulator()      
     kwargs.setdefault("pTMin", 1.0*GeV)     
     kwargs.setdefault("fitChi2OnNdfMax",50.0)
-    kwargs.setdefault("z0Max",99999.0*mm)   
+    kwargs.setdefault("z0Max",9999.0*mm)   
     kwargs.setdefault("IPd0Max",10.0*mm)    
     kwargs.setdefault("IPz0Max",300.0*mm)   
     kwargs.setdefault("etaMax",2.1)

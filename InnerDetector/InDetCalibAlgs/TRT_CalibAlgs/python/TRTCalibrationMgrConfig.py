@@ -8,8 +8,8 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 # Tool to process R-t ntuple. Produces histograms and calibration text files.
 def TRTCalibratorCfg(flags, name="TRTCalibrator", **kwargs) :
     acc = ComponentAccumulator()
-    kwargs.setdefault("MinRt",500)
-    kwargs.setdefault("MinT0",1000)
+    kwargs.setdefault("MinRt",10000)
+    kwargs.setdefault("MinT0",500)
     kwargs.setdefault("Hittuple","merged.root")
     kwargs.setdefault("RtRelation","basic")
     kwargs.setdefault("RtBinning","t")
@@ -98,7 +98,42 @@ def TRT_StrawStatusCfg(flags,name='InDet_TRT_StrawStatus',**kwargs) :
     return acc
 
 
+def CalibConfig(flags):
+    
+    from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
+    setupDetectorFlags(flags, ['ID'], toggle_geometry=True)
+    
+    # Reco
+    flags.Reco.EnableTau=False
+    flags.Reco.EnableCombinedMuon=False
+    flags.Reco.EnableMet=False
+    flags.Reco.EnableTrigger = False
+    flags.Reco.EnableEgamma=False
+    flags.Reco.EnableCaloRinger=False
+    flags.Reco.EnableCaloExtension=False
+    
+    # Detector
+    flags.Detector.EnableMuon=False
+    flags.Detector.EnableCalo=False
+    
+    # DQ
+    flags.DQ.doMonitoring=False
+    flags.DQ.Steering.InDet.doPerfMon=False
+    flags.DQ.Steering.InDet.doGlobalMon=False
+    flags.DQ.Steering.doPixelMon=False
+    flags.DQ.Steering.doSCTMon=False
+    
+    # Tracking
+    flags.Tracking.doCaloSeededBrem=False
+    flags.Tracking.doCaloSeededAmbi=False
+    flags.Tracking.doTRTSegments=False
+    flags.Tracking.doTRTStandalone=False
+    flags.Tracking.doBackTracking=False
+    
+    
 
+    
+    
 if __name__ == '__main__':
     
     import glob, argparse
@@ -107,7 +142,8 @@ if __name__ == '__main__':
                                    Example: python -m TRT_CalibAlgs.TRTCalibrationMgrConfig --filesInput "/path/to/files/data22*" --evtMax 10""")
     
     parser.add_argument('--evtMax',type=int,default=10,help="Number of events. Default 10 (Run all events)")
-    parser.add_argument('--filesInput',nargs='+', default=[],help="Input files. RAW data")
+    parser.add_argument('--filesInput', nargs='+', default=[],help="Input files. RAW data")
+    parser.add_argument('--fileOutput', default="basic.root" ,help="Output file name. Flat Ntuple")
     args = parser.parse_args()
     
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
@@ -119,16 +155,15 @@ if __name__ == '__main__':
     else:
         flags.Input.Files = [file for x in args.filesInput for file in glob.glob(x)]
         
+    flags.Output.HISTFileName = args.fileOutput
     flags.Exec.MaxEvents = args.evtMax
+    
     flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
-    
-    flags.IOVDb.GlobalTag = "CONDBR2-BLKPA-2023-03"
-    
-    
-    from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
-    setupDetectorFlags(flags, ['ID'], toggle_geometry=True)
+    flags.IOVDb.GlobalTag = "CONDBR2-BLKPA-2023-03"     
     
     flags.fillFromArgs()
+    
+    CalibConfig(flags)    
     
     # Reason why we need to clone and replace: https://gitlab.cern.ch/atlas/athena/-/merge_requests/68616#note_7614858
     flags = flags.cloneAndReplace(
@@ -138,6 +173,8 @@ if __name__ == '__main__':
         # lambda functions relying on them
         keepOriginal=True)   
     flags.lock()
+    
+    flags.dump()
     
     # Set up the main service "acc"
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
@@ -154,6 +191,11 @@ if __name__ == '__main__':
     
     # Algorithm to generate the straw masking file
     acc.merge(TRT_StrawStatusCfg(flags))
+    
+    with open("TRTCalibConfigCA.pkl", "wb") as f:
+        acc.store(f)
+        f.close()
+
     
     import sys
     sys.exit(not acc.run().isSuccess())

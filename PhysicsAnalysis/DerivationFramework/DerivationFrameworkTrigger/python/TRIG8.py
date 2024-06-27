@@ -107,20 +107,22 @@ def TRIG8KernelCfg(flags, name='TRIG8Kernel', **kwargs):
         StreamName              = kwargs['StreamName'],
         SelectionString         = "InDetLargeD0TrackParticles.pt > 1*GeV",
         InDetTrackParticlesKey  = "InDetLargeD0TrackParticles"))
-    
-    TRIG8JETThinningTool = acc.getPrimaryAndMerge(TriggerGenericThinningCfg(
-        flags,
-        name = "TRIG8JetThinningTool",
-        StreamName = kwargs['StreamName'],
-        ContainerName   = "HLT_AntiKt4EMTopoJets_subjesIS",
-        TriggerListOR = sorted(list(set(displaced_jet_triggers + bjet_triggers)))
-    ))
 
     # Finally the kernel itself
     thinningTools = [TRIG8PhotonsThinningTool,
                      TRIG8TrackParticleThinningTool,
-                     TRIG8LRTTrackParticleThinningTool,
-                     TRIG8JETThinningTool]
+                     TRIG8LRTTrackParticleThinningTool]
+    
+    if((not flags.Input.isMC) or "HLT_AntiKt4EMTopoJets_subjesIS" in flags.Input.Collections):
+        TRIG8JETThinningTool = acc.getPrimaryAndMerge(TriggerGenericThinningCfg(
+            flags,
+            name = "TRIG8JetThinningTool",
+            StreamName = kwargs['StreamName'],
+            ContainerName   = "HLT_AntiKt4EMTopoJets_subjesIS",
+            TriggerListOR = sorted(list(set(displaced_jet_triggers + bjet_triggers)))
+        ))
+
+        thinningTools.append(TRIG8JETThinningTool)
 
     # Skimming
     skimmingTools = []
