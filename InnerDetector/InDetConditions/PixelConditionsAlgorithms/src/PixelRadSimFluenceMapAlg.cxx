@@ -1,16 +1,11 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PixelRadSimFluenceMapAlg.h"
-#include "Identifier/IdentifierHash.h"
 #include "GaudiKernel/EventIDRange.h"
-#include <memory>
-#include <sstream>
-
-#include "PathResolver/PathResolver.h"
 #include "TFile.h"
-
+#include <memory>
 PixelRadSimFluenceMapAlg::PixelRadSimFluenceMapAlg(const std::string& name, ISvcLocator* pSvcLocator):
   ::AthReentrantAlgorithm(name, pSvcLocator)
 {
@@ -103,11 +98,11 @@ StatusCode PixelRadSimFluenceMapAlg::execute(const EventContext& ctx) const {
 
     mapsFile->Close();
   }
-  writeFluenceCdo -> setLorentzMap_e(lorentzMap_e);
-  writeFluenceCdo -> setLorentzMap_h(lorentzMap_h);
-  writeFluenceCdo -> setDistanceMap_e(distanceMap_e);
-  writeFluenceCdo -> setDistanceMap_h(distanceMap_h);
-  writeFluenceCdo -> setRamoPotentialMap(ramoPotentialMap);
+  writeFluenceCdo -> setLorentzMap_e(std::move(lorentzMap_e));
+  writeFluenceCdo -> setLorentzMap_h(std::move(lorentzMap_h));
+  writeFluenceCdo -> setDistanceMap_e(std::move(distanceMap_e));
+  writeFluenceCdo -> setDistanceMap_h(std::move(distanceMap_h));
+  writeFluenceCdo -> setRamoPotentialMap(std::move(ramoPotentialMap));
 
   // Create mapping file for radiation damage simulation for 3D sensor
   std::vector<PixelHistoConverter> ramoPotentialMap3D;
@@ -195,14 +190,14 @@ StatusCode PixelRadSimFluenceMapAlg::execute(const EventContext& ctx) const {
 
     mapsFile3D->Close();
   }
-  writeFluenceCdo -> setRamoPotentialMap3D(ramoPotentialMap3D);
-  writeFluenceCdo -> setEFieldMap3D(eFieldMap3D);
-  writeFluenceCdo -> setXPositionMap3D_e(xPositionMap3D_e);
-  writeFluenceCdo -> setXPositionMap3D_h(xPositionMap3D_h);
-  writeFluenceCdo -> setYPositionMap3D_e(yPositionMap3D_e);
-  writeFluenceCdo -> setYPositionMap3D_h(yPositionMap3D_h);
-  writeFluenceCdo -> setTimeMap3D_e(timeMap3D_e);
-  writeFluenceCdo -> setTimeMap3D_h(timeMap3D_h);
+  writeFluenceCdo -> setRamoPotentialMap3D(std::move(ramoPotentialMap3D));
+  writeFluenceCdo -> setEFieldMap3D(std::move(eFieldMap3D));
+  writeFluenceCdo -> setXPositionMap3D_e(std::move(xPositionMap3D_e));
+  writeFluenceCdo -> setXPositionMap3D_h(std::move(xPositionMap3D_h));
+  writeFluenceCdo -> setYPositionMap3D_e(std::move(yPositionMap3D_e));
+  writeFluenceCdo -> setYPositionMap3D_h(std::move(yPositionMap3D_h));
+  writeFluenceCdo -> setTimeMap3D_e(std::move(timeMap3D_e));
+  writeFluenceCdo -> setTimeMap3D_h(std::move(timeMap3D_h));
   writeFluenceCdo -> setAvgChargeMap3D_e(avgChargeMap3D_e);
   writeFluenceCdo -> setAvgChargeMap3D_h(avgChargeMap3D_h);
 
