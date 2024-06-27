@@ -106,7 +106,7 @@ namespace DerivationFramework {
     SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<float>> decCellEneDiff(m_decCellEneDiffKey, ctx);
     SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<float>> decCellTimeDiff(m_decCellTimeDiffKey, ctx);
 
-    for(const auto& clusterAssociation : *clusterAssociations) {
+    for(const auto clusterAssociation : *clusterAssociations) {
       std::vector<float> trackCellEta(0, 0.);
       std::vector<float> trackCellPhi(0, 0.);
       std::vector<float> trackCellR(0, 0.);
@@ -167,7 +167,7 @@ namespace DerivationFramework {
 	  continue;
 	}
 
-	for(const auto& cell : *cellLinks) {
+	for(const auto cell : *cellLinks) {
 	  const CaloDetDescrElement *caloDDE = cell->caloDDE();
 	  int sampling = -1;
 	  if ( caloDDE ) {

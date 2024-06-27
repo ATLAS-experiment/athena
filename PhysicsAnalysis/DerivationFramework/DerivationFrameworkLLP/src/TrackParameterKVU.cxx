@@ -78,7 +78,7 @@ StatusCode DerivationFramework::TrackParametersKVU::addBranches() const
     SG::WriteDecorHandle<xAOD::TrackParticleContainer, float> decoratorKVUusedPV(m_KVUusedPVKey, ctx);
     SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<float>> decoratorKVUCovMat(m_KVUCovMatKey, ctx);
 
-    for (const auto& track : *tracks) {
+    for (const auto track : *tracks) {
       if(track){
 	const Trk::TrackParameters *tPerigee = &(track->perigeeParameters());
 	// --- list of new variables that will decorate the track
