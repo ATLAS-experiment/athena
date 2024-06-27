@@ -270,8 +270,16 @@ FPGATrackSimRoad FPGATrackSimEtaPatternFilterTool::buildRoad(std::pair<EtaPatter
 
     r.setHitLayers(patt.second);
     r.setEtaPatternID(etaPatternID);
-    for (unsigned lyr = 0; lyr < m_nLayers; lyr++)
+    for (unsigned lyr = 0; lyr < m_nLayers; lyr++) {
         r.setHits(lyr, m_moduleHits[lyr].find(patt.first[lyr])->second.getHits());
+        if (r.getNHits_layer().at(lyr) == 0) {
+            FPGATrackSimHit *wcHit = new FPGATrackSimHit();
+            wcHit->setHitType(HitType::wildcard);
+            wcHit->setDetType(m_FPGATrackSimMapping->PlaneMap_1st()->getDetType(lyr));
+            wcHit->setLayer(lyr);
+            r.setHits(lyr, std::vector<const FPGATrackSimHit*>{wcHit});
+        }
+    }
 
     // Here, if told to do so, we'll reset the road's sector using the eta pattern ID.
     // Perhaps this should also be AND'ed with the "match ideal geometry" setting?
