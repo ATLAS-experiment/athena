@@ -39,6 +39,7 @@ if __name__ == "__main__":
     flags.addFlag("tracks", "")
     flags.addFlag("readTrackParticles", False)
     flags.addFlag("trackParticles", "ActsCombinedTracksParticlesAlt")
+    flags.addFlag("redoAmbiguity", False)
     flags.fillFromArgs()
     
     flags.lock()
@@ -75,8 +76,15 @@ if __name__ == "__main__":
         for track in flags.tracks.split(','):
             acc.merge(ActsTrackAnalysisAlgCfg(flags,
                                               name=f"{track}AnalysisAlg",
-                                              OutputLevel=2,
+                                              OutputLevel=2,     
                                               TracksLocation=track))
+    if flags.redoAmbiguity:
+        from ActsConfig.ActsTrackFindingConfig import ActsMainAmbiguityResolutionAlgCfg
+        for track in flags.tracks.split(','):
+            acc.merge(ActsMainAmbiguityResolutionAlgCfg(flags,
+                                                        name=f"ActsAmbiguityResolutionAlg_{track}",
+                                                        TracksLocation=track,
+                                                        ResolvedTracksLocation=f"Redone{track}ResolvedTracks"))
     if flags.readTrackParticles:
         allTracks = getAllAvailableTracks(flags)
         from ActsConfig.ActsAnalysisConfig import ActsTrackParticleAnalysisAlgCfg
