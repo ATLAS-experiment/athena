@@ -1,0 +1,9 @@
+{
+    "TrkAnaEF" : {
+        "enabled" : true,
+        "TestType"  : "EFTrigger",
+        "RefType"   : "Truth", 
+        "TrigTrkKey": "xAODFPGAProtoTracksTrackParticles",
+        "MatchingType"  : "TruthMatch" 
+    }
+}

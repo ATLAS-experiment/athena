@@ -59,9 +59,9 @@ StatusCode InDetTrackPerfMonTool::initialize() {
 
   ATH_MSG_DEBUG( "Initializing sub-tools" );
 
-  ATH_CHECK( m_trigDecTool.retrieve( EnableTool{ m_trkAnaDefSvc->useTrigger() } ) );
-  ATH_CHECK( m_roiSelectionTool.retrieve( EnableTool{ m_trkAnaDefSvc->useTrigger() } ) );
-  ATH_CHECK( m_trackRoiSelectionTool.retrieve( EnableTool{ m_trkAnaDefSvc->useTrigger() } ) );
+  ATH_CHECK( m_trigDecTool.retrieve( EnableTool{ m_trkAnaDefSvc->useTrigger() and not m_trkAnaDefSvc->useEFTrigger() } ) );
+  ATH_CHECK( m_roiSelectionTool.retrieve( EnableTool{ m_trkAnaDefSvc->useTrigger() and not m_trkAnaDefSvc->useEFTrigger() } ) );
+  ATH_CHECK( m_trackRoiSelectionTool.retrieve( EnableTool{ m_trkAnaDefSvc->useTrigger() and not m_trkAnaDefSvc->useEFTrigger()} ) );
   ATH_CHECK( m_trackMatchingTool.retrieve( EnableTool{ m_doMatch.value() } ) );
 
   ATH_CHECK( m_eventInfoContainerName.initialize() );
@@ -70,7 +70,6 @@ StatusCode InDetTrackPerfMonTool::initialize() {
       m_trkAnaDefSvc->useOffline() and not m_offlineTrkParticleName.key().empty() ) );
   ATH_CHECK( m_triggerTrkParticleName.initialize( 
       m_trkAnaDefSvc->useTrigger() and not m_triggerTrkParticleName.key().empty() ) );
-
   ATH_CHECK( m_truthParticleName.initialize( 
       m_trkAnaDefSvc->useTruth() and not m_truthParticleName.key().empty() ) );
 
@@ -181,7 +180,7 @@ StatusCode InDetTrackPerfMonTool::fillHistograms() {
     unsigned decisionType = TrigDefs::Physics; // TrigDefs::includeFailedDecisions;
 
     /// skipping TrkAnalysis if chain is not passed for this event
-    if( !thisChain.empty() and thisChain != "Offline" and m_trkAnaDefSvc->useTrigger() ) {
+    if( !thisChain.empty() and thisChain != "Offline" and m_trkAnaDefSvc->useTrigger() and not m_trkAnaDefSvc->useEFTrigger() ) {
       if( not m_trigDecTool->isPassed( thisChain, decisionType ) ) { 
         ATH_MSG_DEBUG( "Trigger chain " << thisChain << " is not fired. Skipping" );
         continue;
@@ -194,7 +193,7 @@ StatusCode InDetTrackPerfMonTool::fillHistograms() {
     std::vector< TrigCompositeUtils::LinkInfo< TrigRoiDescriptorCollection > > selectedRois;
     size_t selectedRoisSize(1); // by default only one "dummy" RoI, i.e. for offline analysis
 
-    if( m_trkAnaDefSvc->useTrigger() ) {
+    if( m_trkAnaDefSvc->useTrigger() and not m_trkAnaDefSvc->useEFTrigger() ) {
       selectedRois = m_roiSelectionTool->getRois( thisChain ); 
       selectedRoisSize = selectedRois.size();
     }
@@ -209,10 +208,10 @@ StatusCode InDetTrackPerfMonTool::fillHistograms() {
       thisTrkAnaCollections.clear( IDTPM::TrackAnalysisCollections::InRoI );
 
       ElementLink< TrigRoiDescriptorCollection > thisRoiLink;
-      if( m_trkAnaDefSvc->useTrigger() ) thisRoiLink = selectedRois.at(ir).link;
-      const TrigRoiDescriptor* const* thisRoi = m_trkAnaDefSvc->useTrigger() ? 
+      if( m_trkAnaDefSvc->useTrigger() and not m_trkAnaDefSvc->useEFTrigger() ) thisRoiLink = selectedRois.at(ir).link;
+      const TrigRoiDescriptor* const* thisRoi = m_trkAnaDefSvc->useTrigger() and not m_trkAnaDefSvc->useEFTrigger() ? 
                                                 thisRoiLink.cptr() : nullptr;
-      std::string thisRoiStr = m_trkAnaDefSvc->useTrigger() ?
+      std::string thisRoiStr = m_trkAnaDefSvc->useTrigger() and not m_trkAnaDefSvc->useEFTrigger()?
                                std::string( **thisRoi ) : "Full Scan";
 
       ATH_MSG_DEBUG( "Processing selected RoI : " << thisRoiStr );
@@ -220,7 +219,7 @@ StatusCode InDetTrackPerfMonTool::fillHistograms() {
       /// ----------------------------------
       /// --- Track selection within RoI ---
       /// ----------------------------------
-      if( m_trkAnaDefSvc->useTrigger() ) {
+      if( m_trkAnaDefSvc->useTrigger() and not m_trkAnaDefSvc->useEFTrigger() ) {
         /// Tracks in RoI selection
         ATH_CHECK( m_trackRoiSelectionTool->selectTracksInRoI(
                                 thisTrkAnaCollections, thisRoiLink ) );
@@ -239,7 +238,7 @@ StatusCode InDetTrackPerfMonTool::fillHistograms() {
       /// --- Test/Reference Matching ---
       /// -------------------------------
       std::string chainRoIName = thisChain;
-      if( m_trkAnaDefSvc->useTrigger() ) chainRoIName += "_RoI_"+std::to_string(ir);
+      if( m_trkAnaDefSvc->useTrigger() and not m_trkAnaDefSvc->useEFTrigger() ) chainRoIName += "_RoI_"+std::to_string(ir);
 
       if( m_doMatch.value() ) {
         ATH_MSG_DEBUG( "Doing Test-Reference matching..." );

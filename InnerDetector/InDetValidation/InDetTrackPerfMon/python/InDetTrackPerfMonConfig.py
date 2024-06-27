@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 '''@file InDetTrackPerfMonConfig.py
@@ -84,8 +84,8 @@ def TrackAnalysisDefinitionSvcCfg( flags, name="TrkAnaDefSvc", **kwargs ):
 
     kwargs.setdefault( "MatchingType", flags.PhysVal.IDTPM.currentTrkAna.MatchingType )
 
-    if ( ( "Trigger" in flags.PhysVal.IDTPM.currentTrkAna.TestType ) or
-         ( "Trigger" in flags.PhysVal.IDTPM.currentTrkAna.RefType ) ):
+    if ( ( "Trigger" in flags.PhysVal.IDTPM.currentTrkAna.TestType and  "EFTrigger" not in flags.PhysVal.IDTPM.currentTrkAna.TestType) or
+         ( "Trigger" in flags.PhysVal.IDTPM.currentTrkAna.RefType and "EFTrigger" not in flags.PhysVal.IDTPM.currentTrkAna.RefType ) ):
         kwargs.setdefault( "ChainNames", flags.PhysVal.IDTPM.currentTrkAna.ChainNames )
 
     kwargs.setdefault( "plotTrackParameters", flags.PhysVal.IDTPM.currentTrkAna.plotTrackParameters )
@@ -125,28 +125,29 @@ def InDetTrackPerfMonToolCfg( flags, name="InDetTrackPerfMonTool", **kwargs ):
             TrackQualitySelectionToolCfg( flags,
                 name="TrackQualitySelectionTool"+flags.PhysVal.IDTPM.currentTrkAna.anaTag ) ) )
 
-    if ( ( "Trigger" in flags.PhysVal.IDTPM.currentTrkAna.TestType ) or
-         ( "Trigger" in flags.PhysVal.IDTPM.currentTrkAna.RefType ) ):
+    if ( ( "Trigger" in flags.PhysVal.IDTPM.currentTrkAna.TestType) or
+         ( "Trigger" in flags.PhysVal.IDTPM.currentTrkAna.RefType) ):
 
         kwargs.setdefault( "TriggerTrkParticleContainerName",
                            flags.PhysVal.IDTPM.currentTrkAna.TrigTrkKey )
 
-        if "TrigDecisionTool" not in kwargs:
-            from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg
-            kwargs.setdefault( "TrigDecisionTool", 
-                               acc.getPrimaryAndMerge( TrigDecisionToolCfg(flags) ) )
+        if ( "EFTrigger" not in flags.PhysVal.IDTPM.currentTrkAna.TestType and "EFTrigger" not in flags.PhysVal.IDTPM.currentTrkAna.RefType ):
+            if "TrigDecisionTool" not in kwargs:
+                from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg
+                kwargs.setdefault( "TrigDecisionTool", 
+                                acc.getPrimaryAndMerge( TrigDecisionToolCfg(flags) ) )
 
-        if "RoiSelectionTool" not in kwargs:
-            from InDetTrackPerfMon.InDetSelectionConfig import RoiSelectionToolCfg
-            kwargs.setdefault( "RoiSelectionTool", acc.popToolsAndMerge(
-                RoiSelectionToolCfg( flags,
-                    name="RoiSelectionTool"+flags.PhysVal.IDTPM.currentTrkAna.anaTag ) ) )
+            if "RoiSelectionTool" not in kwargs:
+                from InDetTrackPerfMon.InDetSelectionConfig import RoiSelectionToolCfg
+                kwargs.setdefault( "RoiSelectionTool", acc.popToolsAndMerge(
+                    RoiSelectionToolCfg( flags,
+                        name="RoiSelectionTool"+flags.PhysVal.IDTPM.currentTrkAna.anaTag ) ) )
 
-        if "TrackRoiSelectionTool" not in kwargs:
-            from InDetTrackPerfMon.InDetSelectionConfig import TrackRoiSelectionToolCfg
-            kwargs.setdefault( "TrackRoiSelectionTool", acc.popToolsAndMerge(
-                TrackRoiSelectionToolCfg( flags,
-                    name="TrackRoiSelectionTool"+flags.PhysVal.IDTPM.currentTrkAna.anaTag ) ) )
+            if "TrackRoiSelectionTool" not in kwargs:
+                from InDetTrackPerfMon.InDetSelectionConfig import TrackRoiSelectionToolCfg
+                kwargs.setdefault( "TrackRoiSelectionTool", acc.popToolsAndMerge(
+                    TrackRoiSelectionToolCfg( flags,
+                        name="TrackRoiSelectionTool"+flags.PhysVal.IDTPM.currentTrkAna.anaTag ) ) )
 
     if "TrackMatchingTool" not in kwargs:
         from InDetTrackPerfMon.InDetMatchingConfig import TrackMatchingToolCfg

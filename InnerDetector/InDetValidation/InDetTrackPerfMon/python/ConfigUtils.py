@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 import json
 from AthenaCommon.Utils.unixtools import find_datafile
@@ -189,6 +189,7 @@ def getLabel( flags, key ) :
         if "Truth" not in flags.PhysVal.IDTPM.currentTrkAna.SelectOfflineObject:
             key += flags.PhysVal.IDTPM.currentTrkAna.SelectOfflineObject
     trkLabelsDict = {
+        "EFTrigger"           : [ "EF Trigger track",  "eftrig" ],
         "Trigger"             : [ "Trigger track",  "trig" ],
         "Offline"             : [ "Offline track",              "offl" ],
         "OfflineElectron"     : [ "Offline e^{#pm} track",      "offEle" ],

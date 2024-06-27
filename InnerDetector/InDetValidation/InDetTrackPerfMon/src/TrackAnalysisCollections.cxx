@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -122,7 +122,7 @@ StatusCode IDTPM::TrackAnalysisCollections::fillOfflTrackContainer(
 StatusCode IDTPM::TrackAnalysisCollections::fillTrigTrackContainer(
   const SG::ReadHandleKey<xAOD::TrackParticleContainer>& handleKey )
 {
-  if( m_trkAnaDefSvc->useTrigger() ) {
+  if( m_trkAnaDefSvc->useTrigger()) {
     ATH_MSG_DEBUG( "Loading collection: " << handleKey.key() );
 
     SG::ReadHandle< xAOD::TrackParticleContainer > pColl( handleKey );
@@ -274,7 +274,7 @@ StatusCode IDTPM::TrackAnalysisCollections::fillTrigTrackVec(
   const std::vector< const xAOD::TrackParticle* >& vec,
   IDTPM::TrackAnalysisCollections::Stage stage )
 {
-  if( m_trkAnaDefSvc->useTrigger() ) {
+  if( m_trkAnaDefSvc->useTrigger() or  m_trkAnaDefSvc->useEFTrigger() ) {
     m_trigTrackVec[ stage ].clear();
     m_trigTrackVec[ stage ].insert(
       m_trigTrackVec[ stage ].begin(),
@@ -295,15 +295,17 @@ bool IDTPM::TrackAnalysisCollections::empty(
 {
   /// check if empty disabled for FS trigger
   /// track vector (always empty by construction)
-  bool isTrigEmpty  = m_trkAnaDefSvc->useTrigger() and 
+  bool isTrigEmpty  = m_trkAnaDefSvc->useTrigger() and not m_trkAnaDefSvc->useEFTrigger() and 
                       (stage != IDTPM::TrackAnalysisCollections::FS) ?
+                      m_trigTrackVec[ stage ].empty() : false;
+  bool isEFTrigEmpty  = m_trkAnaDefSvc->useEFTrigger() ?
                       m_trigTrackVec[ stage ].empty() : false;
   bool isOfflEmpty  = m_trkAnaDefSvc->useOffline() ?
                       m_offlTrackVec[ stage ].empty() : false;
   bool isTruthEmpty = m_trkAnaDefSvc->useTruth() ?
                       m_truthPartVec[ stage ].empty() : false;
 
-  if( isTrigEmpty or isOfflEmpty or isTruthEmpty ) return true;
+  if( isTrigEmpty or isEFTrigEmpty or isOfflEmpty or isTruthEmpty ) return true;
 
   return false;
 }
@@ -347,6 +349,15 @@ void IDTPM::TrackAnalysisCollections::copyFS()
     m_truthPartVec[ InRoI ].begin(),
     m_truthPartVec[ FS ].begin(),
     m_truthPartVec[ FS ].end() );
+
+  /// EF trigger copy
+  if (m_trkAnaDefSvc->useEFTrigger()) {
+    m_trigTrackVec[ InRoI ].clear(); 
+    m_trigTrackVec[ InRoI ].insert( 
+      m_trigTrackVec[ InRoI ].begin(),
+      m_trigTrackVec[ FS ].begin(),
+      m_trigTrackVec[ FS ].end() );
+  }
 
   /// Debug printout
   ATH_MSG_DEBUG( "Tracks after in RoI copy: " << printInfo( InRoI ) );
