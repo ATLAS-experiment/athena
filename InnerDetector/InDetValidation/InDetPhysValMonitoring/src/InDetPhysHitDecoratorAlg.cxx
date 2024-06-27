@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -496,8 +496,8 @@ InDetPhysHitDecoratorAlg::decideDetectorRegion(const Identifier& id, Subdetector
 
   // following the logic in the original code, should be reviewed!
   if (m_idHelper->is_pixel(id)) {
-    bec = abs(m_pixelID->barrel_ec(id));
-    if(fabs(bec) < 4) det = PIXEL;
+    bec = std::abs(m_pixelID->barrel_ec(id));
+    if(bec < 4) det = PIXEL;
   }
   if (m_idHelper->is_sct(id)) {
     det = SCT;
