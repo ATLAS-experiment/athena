@@ -121,7 +121,7 @@ StatusCode Muon::MmRdoToPrepDataToolMT::processCollection(
                         xAOD::MeasVector<1>{prd.localPosition().x()},
                         xAOD::MeasMatrix<1>{prd.localCovariance()(0, 0)});
     xprd.setGasGap(id_helper.gasGap(prd.identify()));
-    // TODO - not sure how best to do setChannelNumber
+    xprd.setChannelNumber(id_helper.channel(prd.identify()));
     xprd.setTime(prd.time());
     xprd.setCharge(prd.charge());
     xprd.setDriftDist(prd.driftDist());

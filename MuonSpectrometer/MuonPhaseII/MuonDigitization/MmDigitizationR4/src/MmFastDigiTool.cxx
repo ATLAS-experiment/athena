@@ -4,6 +4,7 @@
 #include "MmFastDigiTool.h"
 #include "CLHEP/Random/RandGaussZiggurat.h"
 #include "CLHEP/Random/RandFlat.h"
+
 namespace {
     constexpr double percentage(unsigned int numerator, unsigned int denom) {
         return 100. * numerator / std::max(denom, 1u);
@@ -86,30 +87,74 @@ namespace MuonR4 {
             const double uncert = errorCalibDB->clusterUncertainty(errorCalibInput);
             ATH_MSG_VERBOSE("mm hit has theta " << errorCalibInput.locTheta / Gaudi::Units::deg << " and uncertainty " << uncert);
 
+            
+            /// Pipe some dummy values to the digit to ensure that the pdo / tdo calibration 
+            /// does not reject any hit downstream. Or in other words how much do you want... All charge
+            constexpr int dummyResponseTime = 100;
+            constexpr float dummyDepositedCharge = 66666;
+            
             const double newLocalX = CLHEP::RandGaussZiggurat::shoot(rndEngine, locPos.x(), uncert);
-
             const int newChannel = design.stripNumber(newLocalX * Amg::Vector2D::UnitX());
             if (newChannel < 0) {                
                 continue;
             }
+
             const Identifier digitId = idHelper.channelID(hitId, 
-                                                         idHelper.multilayer(hitId), 
-                                                         idHelper.gasGap(hitId), 
-                                                         newChannel, isValid);
+                                                          idHelper.multilayer(hitId), 
+                                                          idHelper.gasGap(hitId), 
+                                                          newChannel, isValid);
+
             if(!isValid) {
                 ATH_MSG_WARNING("Invalid strip identifier for layer " << m_idHelperSvc->toStringGasGap(hitId) 
-                             << " channel " << newChannel << " locPos " << Amg::toString(locPos));
+                                << " channel " << newChannel << " locPos " << Amg::toString(locPos));
                 continue;
             }
+            /// We're using the NSW uncertainty DB to smear the truth-hit positions using the best known
+            /// uncertainties. In the process of digit -> RDO -> PRD, the smeared hit position is gonna be lost
+            /// However, recall that the simplest way to generate a MM prd from RAW hits is the clustering by
+            /// means of center of gravity. On average, a muon passage makes 3-4 strips fire. Assuming 3 strips,
+            /// the smeared position can be written as
+            ///
+            ///             x = w_{1}*(c - p) + w_{2}*c + w_{3}*(c + p),
+            /// 
+            ///  where c is the strip centre, p the pitch and w_{i} are the induced charge fractions on each strip
+            /// 
+            ///            1 =  w_{1} + w_{2} + w_{3}
+            ///
+            ///            x = (w_{1} + w_{2} + w_{3}) * c + (w_{3} - w_{1})*p
+
+            ///               --> x = c + (w_{3} - w_{1}) *p
+            ///               --> (x-c) / p = (w_{3} - w_{1})  
+            ///               --> (x-c) / p + w_{1} = w_{3}
+            ///
+            ///                  1 =  2 * w_{1} + w_{2} + (x-c) / p
+            ///                  1 - (x-c) /p - 2*w_{1} = w_{2}
+            ///                
+            ///                  0< w_{1} < 0.5 - (x-c) / 2p 
+            const double pull = (newLocalX - (*design.center(newChannel)).x()) / (design.stripPitch() * std::cos(design.stereoAngle()));
+            const double w1 = CLHEP::RandFlat::shoot(rndEngine, 0., 0.5 *(1. - pull)); 
+            const double w2 = 1 - pull -2*w1;
+            const double w3 = pull + w1;
+            MmDigitCollection* outColl = fetchCollection(hitId, digitCache);
             
-            /// Pipe some dummy values to the digit to ensure that the pdo / tdo calibration 
-            /// does not reject any hit downstream
-            constexpr int dummyResponseTime = 100;
-            constexpr int dummyDepositedCharge = 666;
-            fetchCollection(hitId, digitCache)->push_back(std::make_unique<MmDigit>(digitId, 
-                                                                                    dummyResponseTime, 
-                                                                                    dummyDepositedCharge));
-            
+            const Identifier digitIdB = idHelper.channelID(hitId, 
+                                                           idHelper.multilayer(hitId), 
+                                                           idHelper.gasGap(hitId), 
+                                                           newChannel - 1, isValid);
+
+            if (isValid) {
+                outColl->push_back(std::make_unique<MmDigit>(digitIdB, dummyResponseTime, w1 * dummyDepositedCharge));
+            }
+            outColl->push_back(std::make_unique<MmDigit>(digitId,dummyResponseTime, w2 * dummyDepositedCharge));
+
+            const Identifier digitIdA = idHelper.channelID(hitId, 
+                                                           idHelper.multilayer(hitId), 
+                                                           idHelper.gasGap(hitId), 
+                                                           newChannel + 1, isValid);
+            if (isValid) {
+                outColl->push_back(std::make_unique<MmDigit>(digitIdA, dummyResponseTime, w3 * dummyDepositedCharge));
+            }
+
             addSDO(simHit, sdoContainer);
             ++m_acceptedHits[hitGapInNsw];
         }
