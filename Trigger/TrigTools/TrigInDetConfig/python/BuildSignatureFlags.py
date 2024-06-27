@@ -129,7 +129,7 @@ def defaultITkTrigTrackingFlags() -> AthConfigFlags:
   flags = createITkTrackingPassFlags()
   defaultTrigTrackingFlags(flags)
   
-  flags.minPT               = [flags.pTmin] #ITk flags have eta dependant settings
+  flags.minPT               = [1.0*Units.GeV,0.45*Units.GeV,0.45*Units.GeV] #ITk flags have eta dependant settings
   flags.minClusters         = [9,8,7]       #offline defaults are [9,8,7]
   flags.Xi2max              = [9.]
   flags.Xi2maxNoAdd         = [25.]
