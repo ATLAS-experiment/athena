@@ -34,7 +34,7 @@ if [ $rc != 0 ]; then
 fi
 
 echo "Comparing against reference"
-diff ${refFileAbsPath} countsObjects.txt
+diff -u ${refFileAbsPath} countsObjects.txt
 ret=$?
 if [[ $ret -eq 0 ]]; then
     echo "  -- SUCCESS"

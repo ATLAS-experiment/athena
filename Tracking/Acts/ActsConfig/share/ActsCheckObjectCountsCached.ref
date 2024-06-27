@@ -1,0 +1,133 @@
+ActsPixelClusterizationAlg                                        INFO Clusterization statistics
+|----------|------------|
+| RDOs     |    3423993 |
+| Clusters |    1165578 |
+|----------|------------|
+ActsStripClusterizationAlg                                        INFO Clusterization statistics
+|----------|------------|
+| RDOs     |    1345365 |
+| Clusters |    1081478 |
+|----------|------------|
+ActsPixelSpacePointFormationAlg                                   INFO Space Point Formation statistics
+|--------------|------------|
+| Clusters     |    1165578 |
+| Space Points |    1165578 |
+|--------------|------------|
+ActsStripSpacePointFormationAlg                                   INFO Space Point Formation statistics
+|----------------------|------------|
+| Clusters             |    1081478 |
+| Space Points         |     325456 |
+| Overlap Space Points |      94491 |
+|----------------------|------------|
+ActsPixelSeedingAlg                                               INFO Seed statistics
+|---------------------|------------|
+| Spacepoints         |    1165578 |
+| Seeds               |     123544 |
+| No track parameters |          0 |
+|---------------------|------------|
+ActsStripSeedingAlg                                               INFO Seed statistics
+|---------------------|------------|
+| Spacepoints         |     419947 |
+| Seeds               |      24791 |
+| No track parameters |          0 |
+|---------------------|------------|
+ActsTrackFindingAlg                                               INFO statistics
+|-----------------------------------|------------|------------|------------|
+|                           All eta | PPP        | SSS        | ALL        |
+|-----------------------------------|------------|------------|------------|
+| Input seeds                       |     123544 |      24791 |     148335 |
+| No track parameters               |          0 |          0 |          0 |
+| Used   seeds                      |      78161 |      15294 |      93455 |
+| Cannot find track                 |      64584 |      13663 |      78247 |
+| Duplicate seeds                   |      45383 |       9497 |      54880 |
+| CKF tracks                        |      13577 |       1631 |      15208 |
+| Rejected refined parameters       |          0 |          0 |          0 |
+| selected tracks                   |      12853 |        505 |      13358 |
+| Stopped tracks reaching max holes |      62456 |      14941 |      77397 |
+| Seeds with more than one branch   |          0 |          0 |          0 |
+| Tracks failing second CKF         |       7711 |       1493 |       9204 |
+| Stopped tracks below pT cut       |       3521 |        215 |       3736 |
+| Stopped tracks above max eta      |         25 |          0 |         25 |
+|-----------------------------------|------------|------------|------------|
+ActsTrackFindingAlg                                               INFO Ratios
+|------------------------------------------|------------|------------|------------|
+|                                          | PPP        | SSS        | ALL        |
+|------------------------------------------|------------|------------|------------|
+| failed / seeds                           |   0.522761 |   0.551127 |   0.527502 |
+| duplication / seeds                      |   0.367343 |   0.383083 |   0.369973 |
+| Rejected refined params / seeds          |          0 |          0 |          0 |
+| selected / CKF tracks                    |   0.946675 |   0.309626 |   0.878353 |
+| selected tracks / used seeds             |   0.164443 |  0.0330195 |   0.142935 |
+| branched tracks / used seeds             |          0 |          0 |          0 |
+| no 2nd CKF / CKF tracks                  |   0.567946 |   0.915389 |   0.605208 |
+|------------------------------------------|------------|------------|------------|
+| selected / CKF tracks           0.0- 0.5 |   0.997164 |  0.0358566 |   0.812834 |
+|                                 0.5- 1.0 |   0.999192 |    0.13649 |    0.80526 |
+|                                 1.0- 1.5 |   0.993311 |   0.132841 |   0.834356 |
+|                                 1.5- 2.0 |   0.991779 |   0.631579 |   0.921734 |
+|                                 2.0- 2.5 |   0.988008 |   0.485915 |   0.896758 |
+|                                 2.5- 3.0 |   0.827096 |          0 |   0.826786 |
+|                                 3.0- 3.5 |   0.913021 |          0 |   0.913021 |
+|                                 3.5-+inf |   0.979461 |          0 |   0.979461 |
+|------------------------------------------|------------|------------|------------|
+ActsConversionPixelClusterizationAlg                              INFO Clusterization statistics
+|----------|------------|
+| RDOs     |          0 |
+| Clusters |          0 |
+|----------|------------|
+ActsConversionStripClusterizationAlg                              INFO Clusterization statistics
+|----------|------------|
+| RDOs     |          0 |
+| Clusters |          0 |
+|----------|------------|
+ActsConversionStripSpacePointFormationAlg                         INFO Space Point Formation statistics
+|----------------------|------------|
+| Clusters             |      15530 |
+| Space Points         |          0 |
+| Overlap Space Points |          0 |
+|----------------------|------------|
+ActsConversionStripSeedingAlg                                     INFO Seed statistics
+|---------------------|------------|
+| Spacepoints         |       4506 |
+| Seeds               |         45 |
+| No track parameters |          0 |
+|---------------------|------------|
+ActsConversionTrackFindingAlg                                     INFO statistics
+|-----------------------------------|------------|------------|
+|                           All eta | SSS        | ALL        |
+|-----------------------------------|------------|------------|
+| Input seeds                       |         45 |         45 |
+| No track parameters               |          0 |          0 |
+| Used   seeds                      |         45 |         45 |
+| Cannot find track                 |         45 |         45 |
+| Duplicate seeds                   |          0 |          0 |
+| CKF tracks                        |          0 |          0 |
+| Rejected refined parameters       |          0 |          0 |
+| selected tracks                   |          0 |          0 |
+| Stopped tracks reaching max holes |         41 |         41 |
+| Seeds with more than one branch   |          0 |          0 |
+| Tracks failing second CKF         |          0 |          0 |
+| Stopped tracks below pT cut       |          4 |          4 |
+| Stopped tracks above max eta      |          0 |          0 |
+|-----------------------------------|------------|------------|
+ActsConversionTrackFindingAlg                                     INFO Ratios
+|------------------------------------------|------------|------------|
+|                                          | SSS        | ALL        |
+|------------------------------------------|------------|------------|
+| failed / seeds                           |          1 |          1 |
+| duplication / seeds                      |          0 |          0 |
+| Rejected refined params / seeds          |          0 |          0 |
+| selected / CKF tracks                    |          0 |          0 |
+| selected tracks / used seeds             |          0 |          0 |
+| branched tracks / used seeds             |          0 |          0 |
+| no 2nd CKF / CKF tracks                  |          0 |          0 |
+|------------------------------------------|------------|------------|
+| selected / CKF tracks           0.0- 0.5 |          0 |          0 |
+|                                 0.5- 1.0 |          0 |          0 |
+|                                 1.0- 1.5 |          0 |          0 |
+|                                 1.5- 2.0 |          0 |          0 |
+|                                 2.0- 2.5 |          0 |          0 |
+|                                 2.5- 3.0 |          0 |          0 |
+|                                 3.0- 3.5 |          0 |          0 |
+|                                 3.5-+inf |          0 |          0 |
+|------------------------------------------|------------|------------|
