@@ -82,8 +82,8 @@ def defineMenu():
         #ATR-29523
         'L1_3jJ40p0ETA25',
         
-        #ATR-27252
-        'L1_eTAU60_2cTAU20M_jXE80',
+        # ATR-29651 - Tau+X chains using eTAU20M seeds
+        'L1_eEM18M_2eTAU20M_4jJ30', 'L1_eTAU60_2eTAU20M_jXE80', 'L1_eEM18M_2eTAU20M_jXE70', 
 
         # ART-28443  test eEMX{} + {{3,4jJY{}}} L1 seeds
         'L1_eEM22M_3jJ40p0ETA25',
@@ -139,10 +139,6 @@ def defineMenu():
         "L1_J100",
         "L1_J120",
         "L1_J400_LAR",
-        "L1_J20p31ETA49",
-        "L1_J30p31ETA49",
-        "L1_J50p31ETA49",
-        "L1_J15p31ETA49",
         "L1_J12_EMPTY",
         "L1_J30_EMPTY",
         "L1_J30_FIRSTEMPTY",

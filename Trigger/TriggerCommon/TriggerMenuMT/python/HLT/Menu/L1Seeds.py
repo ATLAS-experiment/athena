@@ -194,10 +194,10 @@ def getL1BKeePrimary():
         'L1_MU8F_cTAU20M_3jJ30',
         'L1_jXE100', # legacy 'L1_XE50',
         #'L1_eTAU60_2cTAU20M_jXE80', # legacy 'L1_TAU40_2TAU12IM_XE40', TriggerMenuMT:L1Seeds ERROR L1 item L1_eTAU60_2cTAU20M_jXE80 from L1_BKeePrimary seeds is not in current L1 menu
-        'L1_eEM18M_2eTAU20M_jXE70', # legacy 'L1_EM15VHI_2TAU12IM_XE35'
+        'L1_eEM18M_2cTAU20M_jXE70', # legacy 'L1_EM15VHI_2TAU12IM_XE35'
         'L1_cTAU35M_2cTAU30M_2jJ55_3jJ50', # legacy 'L1_TAU25IM_2TAU20IM_2J25_3J20'
         'L1_cTAU30M_2cTAU20M_4jJ30p0ETA25', # legacy 'L1_TAU20IM_2TAU12IM_4J12p0ETA25'
-        'L1_eEM18M_2eTAU20M_4jJ30', # legacy 'L1_EM15VHI_2TAU12IM_4J12'
+        'L1_eEM18M_2cTAU20M_4jJ30', # legacy 'L1_EM15VHI_2TAU12IM_4J12'
         'L1_jMJJ-700', # legacy 'L1_MJJ-700'
         'L1_jMJJ-500-NFF', # legacy 'L1_MJJ-500-NFF'
         'L1_jJ140_3jJ60', # legacy 'L1_J85_3J30',

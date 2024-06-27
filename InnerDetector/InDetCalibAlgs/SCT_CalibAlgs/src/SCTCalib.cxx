@@ -1582,20 +1582,26 @@ StatusCode SCTCalib::getEfficiency ATLAS_NOT_THREAD_SAFE () { // Thread unsafe S
                   float eff{static_cast<float>(prof_tmp->GetBinContent(global_bin))};
                   unsigned long long eff_entry{static_cast<unsigned long long>(prof_tmp->GetBinEntries(global_bin))};
 
+                  //--- For calculating average Efficiency
+                  if (stemItr->second==ENDCAP_C) meanEff_ECC[iDisk][iEta] += static_cast<double>(eff);
+                  else if (stemItr->second==ENDCAP_A) meanEff_ECA[iDisk][iEta] += static_cast<double>(eff);
+
                   std::string effmapname_bcid1 = effmapname+"_bcid";
                   TProfile2D* prof_tmp_bcid1 = (TProfile2D*) m_inputHist->Get( effmapname_bcid1.c_str() );
                   int global_bin_bcid1 = prof_tmp_bcid1->GetBin( iEta+1, iPhi+1 );
                   float eff_bcid1 = (float)prof_tmp_bcid1->GetBinContent( global_bin_bcid1 );
+
+                  //--- For calculating average Efficiency (BCID1)
                   if( stemItr->second==ENDCAP_C ) meanEff_ECC_bcid1[iDisk][iEta]+=(double)eff_bcid1;
                   else if( stemItr->second==ENDCAP_A ) meanEff_ECA_bcid1[iDisk][iEta]+=(double)eff_bcid1;
 
-                  //--- For calculating average Efficiency
-                  if (stemItr->second==ENDCAP_C) meanEff_ECC[iDisk][iEta] += static_cast<double>(eff);
-                  else if (stemItr->second==ENDCAP_A) meanEff_ECA[iDisk][iEta] += static_cast<double>(eff);
+                  //--- Write out Efficiency to XML file as -1 if it is 0 due to no entries in histogram (e.g. for disabled links)
+                  float effToXML = (eff_entry == 0 ? -1. : eff);
+
                   //--- For Efficiency _not_ averaged over modules
                   IdentifierHash waferHash{m_pSCTHelper->wafer_hash(waferId)};
                   SCT_SerialNumber sn{m_CablingTool->getSerialNumberFromHash(waferHash)};
-                  outFile << xmlChannelEfficiencyDataString(waferId, eff, sn, iSide) << std::endl;
+                  outFile << xmlChannelEfficiencyDataString(waferId, effToXML, sn, iSide) << std::endl;
 
                   //--- Loop over chips
                   if (m_efficiencyDoChips) {
@@ -1613,13 +1619,17 @@ StatusCode SCTCalib::getEfficiency ATLAS_NOT_THREAD_SAFE () { // Thread unsafe S
                         std::string effchipmapname{stemItr->first + "chip" + std::to_string(iChip) + "/" + streamProfChip.str()};
                         TProfile2D* profChip_tmp{dynamic_cast<TProfile2D*>(m_inputHist->Get(effchipmapname.c_str()))};
                         global_bin = profChip_tmp->GetBin(iEta+1, iPhi+1);
-                        eff = static_cast<float>(profChip_tmp->GetBinContent(global_bin));
+                        float effChip{static_cast<float>(profChip_tmp->GetBinContent(global_bin))};
+                        unsigned long long effChip_entry{static_cast<unsigned long long>(profChip_tmp->GetBinEntries(global_bin))};
+
+                        //--- Write out Efficiency to XML file as -1 if it is 0 due to no entries in histogram (e.g. for disabled links)
+                        effToXML = (effChip_entry == 0 ? -1. : effChip);
 
                         std::string effchipmapname_bcid1 = effchipmapname+"_bcid";
                         TProfile2D* profChip_tmp_bcid1 = (TProfile2D*) m_inputHist->Get( effchipmapname_bcid1.c_str() );
                         global_bin_bcid1 = profChip_tmp_bcid1->GetBin( iEta+1, iPhi+1 );
                         eff_bcid1 = (float)profChip_tmp_bcid1->GetBinContent( global_bin_bcid1 );
-                        outFileChip << xmlChannelEfficiencyDataStringChip(waferId, eff, eff_bcid1, sn, iSide, iChip) << std::endl;
+                        outFileChip << xmlChannelEfficiencyDataStringChip(waferId, effToXML, eff_bcid1, sn, iSide, iChip) << std::endl;
                      }
                   }
 
@@ -1650,6 +1660,7 @@ StatusCode SCTCalib::getEfficiency ATLAS_NOT_THREAD_SAFE () { // Thread unsafe S
                int global_bin{prof_tmp->GetBin(iEta+1, iPhi+1)};
                float eff{static_cast<float>(prof_tmp->GetBinContent(global_bin))};
                unsigned long long eff_entry{static_cast<unsigned long long>(prof_tmp->GetBinEntries(global_bin))};
+
                //--- For calculating average Efficiency
                meanEff_Barrel[iLayer] += static_cast<double>(eff);
 
@@ -1657,12 +1668,17 @@ StatusCode SCTCalib::getEfficiency ATLAS_NOT_THREAD_SAFE () { // Thread unsafe S
                TProfile2D* prof_tmp_bcid1 = (TProfile2D*) m_inputHist->Get( effmapname_bcid1.c_str() );
                int global_bin_bcid1 = prof_tmp_bcid1->GetBin( iEta+1, iPhi+1 );
                float eff_bcid1 = (float)prof_tmp_bcid1->GetBinContent( global_bin_bcid1 );
+
+               //--- For calculating average Efficiency (BCID1)
                meanEff_Barrel_bcid1[iLayer]+=(double)eff_bcid1;
+
+               //--- Write out Efficiency to XML file as -1 if it is 0 due to no entries in histogram (e.g. for disabled links)
+               float effToXML = (eff_entry == 0 ? -1. : eff);
 
                //--- For Efficiency _not_ averaged over modules
                IdentifierHash waferHash{m_pSCTHelper->wafer_hash(waferId)};
                SCT_SerialNumber sn{m_CablingTool->getSerialNumberFromHash(waferHash)};
-               outFile << xmlChannelEfficiencyDataString(waferId, eff, sn, iSide) << std::endl;
+               outFile << xmlChannelEfficiencyDataString(waferId, effToXML, sn, iSide) << std::endl;
 
                //--- Loop over chips
                if (m_efficiencyDoChips) {
@@ -1673,14 +1689,18 @@ StatusCode SCTCalib::getEfficiency ATLAS_NOT_THREAD_SAFE () { // Thread unsafe S
                      std::string effchipmapname{"/run_" + std::to_string(m_runNumber.value()) + "/SCT/SCTB/eff/chip" + std::to_string(iChip) + "/eff_" + streamProfChip.str()};
                      TProfile2D* profChip_tmp{dynamic_cast<TProfile2D*>(m_inputHist->Get(effchipmapname.c_str()))};
                      global_bin = profChip_tmp->GetBin(iEta+1, iPhi+1);
-                     eff = static_cast<float>(profChip_tmp->GetBinContent(global_bin));
+                     float effChip{static_cast<float>(profChip_tmp->GetBinContent(global_bin))};
+                     unsigned long long effChip_entry{static_cast<unsigned long long>(profChip_tmp->GetBinEntries(global_bin))};
+
+                     //--- Write out Efficiency to XML file as -1 if it is 0 due to no entries in histogram (e.g. for disabled links)
+                     effToXML = (effChip_entry == 0 ? -1. : effChip);
 
                      std::string effchipmapname_bcid1 = effchipmapname+"_bcid";
                      TProfile2D* profChip_tmp_bcid1 = (TProfile2D*) m_inputHist->Get( effchipmapname_bcid1.c_str() );
                      int global_bin_bcid1 = profChip_tmp_bcid1->GetBin( iEta+1, iPhi+1 );
                      float eff_bcid1 = (float)profChip_tmp_bcid1->GetBinContent( global_bin_bcid1 );
 
-                     outFileChip << xmlChannelEfficiencyDataStringChip(waferId, eff, eff_bcid1, sn, iSide, iChip) << std::endl;
+                     outFileChip << xmlChannelEfficiencyDataStringChip(waferId, effToXML, eff_bcid1, sn, iSide, iChip) << std::endl;
                   }
                }
 

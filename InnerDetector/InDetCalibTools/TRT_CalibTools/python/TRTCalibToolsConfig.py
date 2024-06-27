@@ -27,6 +27,9 @@ def FillAlignTRTHitsCfg(flags,name='FillAlignTRTHits',**kwargs) :
     kwargs.setdefault("TRTStrawSummaryTool", acc.popToolsAndMerge(TRT_StrawStatusSummaryToolCfg(flags)))
     kwargs.setdefault("NeighbourSvc", acc.getPrimaryAndMerge(TRT_StrawNeighbourSvcCfg(flags)))
     
+    if flags.Output.HISTFileName:
+        kwargs.setdefault("NtupleName", flags.Output.HISTFileName)
+    
     acc.setPrivateTools(CompFactory.FillAlignTRTHits(name, **kwargs))
     
     return acc
