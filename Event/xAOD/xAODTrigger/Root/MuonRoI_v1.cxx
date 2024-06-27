@@ -347,7 +347,12 @@ namespace xAOD{
    /// The indicator whether the RoI is Run-1/2/3 or Run-4+ format.
    /// roiExtraWord exists only in Run-4+.
    bool MuonRoI_v1::isRun4() const {
-     return (roiExtraWord() > 0);
+     static const Accessor<uint32_t> acc{"roiExtraWord"};
+     if (!acc.isAvailable(*this)) {
+       return false;
+     } else {
+       return (roiExtraWord() > 0);
+     }
    }
 
 } // namespace xAOD

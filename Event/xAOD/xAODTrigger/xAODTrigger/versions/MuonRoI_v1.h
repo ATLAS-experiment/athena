@@ -53,7 +53,7 @@ namespace xAOD {
       /// Initialise the object with all its properties
       void initialize( uint32_t roiword, float eta, float phi,
                        const std::string& thrname, float thrvalue,
-                       uint32_t extraword );
+                       uint32_t extraword = 0u );
 
       /// @name Independent properties stored for the muon candidate
       /// @{
