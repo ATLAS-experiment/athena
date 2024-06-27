@@ -17,6 +17,7 @@
 #include "GeoModelKernel/GeoTransform.h"
 #include "GeoModelHelpers/TransformSorter.h"
 #include "GeoModelKernel/GeoVFullPhysVol.h"
+#include "GeoModelKernel/GeoIdentifierTag.h"
 
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
 #include <ActsGeometryInterfaces/ActsGeometryContext.h>
@@ -53,8 +54,13 @@ class MuonReadoutGeomCnvAlg : public AthReentrantAlgorithm {
                 PVLink world{};
                 /** @brief Set of all translated Physical volumes */
                 std::set<PVConstLink> translatedStations{};
+                /** @brief Returns an identifier tag */
+                GeoIntrusivePtr<GeoIdentifierTag> newIdTag() {
+                    return make_intrusive<GeoIdentifierTag>(++m_id);
+                }
             private:
                 std::set<GeoIntrusivePtr<GeoTransform>, GeoTrf::TransformSorter> m_trfPool{};
+                unsigned int m_id{0};
 
         };
         

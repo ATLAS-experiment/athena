@@ -205,6 +205,7 @@ StatusCode MuonReadoutGeomCnvAlg::buildStation(const ActsGeometryContext& gctx,
         }
         // Add the beam lines / foams inside the station volume
         PVLink childVol = const_pointer_cast<GeoVPhysVol>(child.volume);
+        parentPhysVol->add(cacheObj.newIdTag());
         parentPhysVol->add(cacheObj.makeTransform(stationTransform*child.transform));
         parentPhysVol->add(cloneVolume(childVol));
     }
@@ -224,6 +225,7 @@ StatusCode MuonReadoutGeomCnvAlg::buildStation(const ActsGeometryContext& gctx,
     newStation->setPhysVol(parentPhysVol);
     cacheObj.detMgr->addMuonStation(std::move(newStation));
     /// Add the physical volume to the world
+    cacheObj.world->add(cacheObj.newIdTag());
     cacheObj.world->add(cacheObj.makeTransform(alignedTransform));   
     cacheObj.world->add(parentPhysVol);
 
@@ -246,6 +248,7 @@ StatusCode MuonReadoutGeomCnvAlg::cloneReadoutVolume(const ActsGeometryContext& 
     PVLink parentPhysVol{station->getPhysVol()};
     const MuonGMR4::MuonReadoutElement* copyMe = m_detMgr->getReadoutElement(reId);
     GeoIntrusivePtr<const GeoVFullPhysVol> readOutVol{copyMe->getMaterialGeom()};
+    parentPhysVol->add(cacheObj.newIdTag());
     parentPhysVol->add(cacheObj.makeTransform(parentPhysVol->getX().inverse() *
                                               copyMe->localToGlobalTrans(gctx)));
     /// Clone the detector element with all of its subvolumes
@@ -440,6 +443,7 @@ GeoIntrusivePtr<GeoVFullPhysVol> MuonReadoutGeomCnvAlg::cloneNswWedge(const Acts
         
     PVLink clonedVol{cloneVolume(const_pointer_cast<GeoVFullPhysVol>(readOutVol))};
     GeoIntrusivePtr<GeoFullPhysVol> physVol{dynamic_pointer_cast<GeoFullPhysVol>(clonedVol)};
+    cacheObj.world->add(cacheObj.newIdTag());
     cacheObj.world->add(cacheObj.makeTransform(copyMe->localToGlobalTrans(gctx)));
     cacheObj.world->add(physVol);
     return physVol;

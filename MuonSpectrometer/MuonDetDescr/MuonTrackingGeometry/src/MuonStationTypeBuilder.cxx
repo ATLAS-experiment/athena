@@ -1057,13 +1057,14 @@ std::unique_ptr<Trk::TrackingVolume> Muon::MuonStationTypeBuilder::processRpc(co
 
             Trk::HomogeneousLayerMaterial rpcMaterial(rpcMat, 0.);
             auto layer = std::make_unique<Trk::PlaneLayer>(cTr, bounds, rpcMaterial, thickness, std::move(od));
-            layers.push_back(std::move(layer));
+
             // make preliminary identification of active layers
             if ((glv->getName()).compare(0, 3, "Ded") != 0) {
                 layer->setLayerType(1);
             } else {
                 layer->setLayerType(0);
             }
+            layers.push_back(std::move(layer));
         } else if (shape && shape->type() == "Trd") {
             const GeoTrd* trd = dynamic_cast<const GeoTrd*>(shape);
             double xs1 = trd->getXHalfLength1();
