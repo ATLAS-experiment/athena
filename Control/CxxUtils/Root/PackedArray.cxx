@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id: PackedArray.cxx,v 1.2 2008-12-12 04:26:19 ssnyder Exp $
 /**
  * @file CxxUtils/src/PackedArray.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -91,6 +89,8 @@ PackedArray::value_type PackedArray::doget (size_type ndx, int off) const
   // from the next base entry.
   if (m_bitsize > nper - off) {
     int bits = m_bitsize - (nper - off);
+    // cppcheck-suppress shiftTooManyBits; false positive
+    //    m_bitsize <= nper
     v |= ((m_vec[ndx+1] & mask(bits)) << (nper - off));
   }
 

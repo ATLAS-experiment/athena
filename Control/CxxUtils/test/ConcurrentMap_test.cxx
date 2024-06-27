@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/test/ConcurrentMap_test.cxx
@@ -205,26 +205,25 @@ struct Values<T*>
 };
 
 
+// Having explicit symbols for these avoids parse errors with cppcheck 2.14.
+static constexpr unsigned long minus1 = static_cast<unsigned long>(-1);
+static constexpr unsigned long minus2 = static_cast<unsigned long>(-2);
 using TestMapul = CxxUtils::ConcurrentMap<unsigned long, int, TestUpdater,
                                           std::hash<unsigned long>,
                                           std::equal_to<unsigned long>,
-                                          static_cast<unsigned long>(-1),
-                                          static_cast<unsigned long>(-2)>;
+                                          minus1, minus2>;
 using TestMapip = CxxUtils::ConcurrentMap<int, int*, TestUpdater,
                                           std::hash<int>,
                                           std::equal_to<int>,
-                                          static_cast<unsigned long>(-1),
-                                          static_cast<unsigned long>(-2)>;
+                                          minus1, minus2>;
 using TestMappu = CxxUtils::ConcurrentMap<int*, unsigned, TestUpdater,
                                           std::hash<int*>,
                                           std::equal_to<int*>,
-                                          static_cast<unsigned long>(0),
-                                          static_cast<unsigned long>(-1)>;
+                                          0, minus1>;
 using TestMapuf = CxxUtils::ConcurrentMap<unsigned long, float, TestUpdater,
                                           std::hash<unsigned long>,
                                           std::equal_to<unsigned long>,
-                                          static_cast<unsigned long>(-1),
-                                          static_cast<unsigned long>(-2)>;
+                                          minus1, minus2>;
 
 
 template <class MAP>

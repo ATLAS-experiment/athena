@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CxxUtils/src/ClassName.cxx
@@ -226,7 +226,7 @@ void ClassName::setConst()
  *
  * In `A::B<C>`, the root name is `B`.
  */
-std::string ClassName::name() const
+const std::string& ClassName::name() const
 {
   return m_name;
 }

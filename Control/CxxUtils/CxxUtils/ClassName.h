@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CxxUtils/ClassName.h
@@ -260,7 +260,7 @@ public:
    *
    * In `A::B<C>`, the root name is `B`.
    */
-  std::string name() const;
+  const std::string& name() const;
 
   
   /**
