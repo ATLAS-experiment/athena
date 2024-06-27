@@ -43,21 +43,23 @@ namespace CP
     // check that this is actually nothing but a simple char accessor
     EXPECT_NE(selA, nullptr);
     accA->setBool (*jet, false);
-    EXPECT_EQ (jet->auxdata<char> ("a"), 0);
+    static const SG::ConstAccessor<char> aAcc("a");
+    EXPECT_EQ (aAcc(*jet), 0);
     accA->setBool (*jet, true);
-    EXPECT_EQ (jet->auxdata<char> ("a"), 1);
+    EXPECT_EQ (aAcc(*jet), 1);
     accA->setBits (*jet, selectionReject());
-    EXPECT_EQ (jet->auxdata<char> ("a"), 0);
+    EXPECT_EQ (aAcc(*jet), 0);
     accA->setBits (*jet, selectionAccept());
-    EXPECT_EQ (jet->auxdata<char> ("a"), 1);
+    EXPECT_EQ (aAcc(*jet), 1);
 
     // check an implicit char accessor
     std::unique_ptr<ISelectionWriteAccessor> accB;
     ASSERT_SUCCESS (makeSelectionWriteAccessor ("b", accB, true));
     accB->setBool (*jet, false);
-    EXPECT_EQ (jet->auxdata<char> ("b"), 0);
+    static const SG::ConstAccessor<char> bAcc("b");
+    EXPECT_EQ (bAcc(*jet), 0);
     accB->setBool (*jet, true);
-    EXPECT_EQ (jet->auxdata<char> ("b"), 1);
+    EXPECT_EQ (bAcc(*jet), 1);
 
     // check a basic bits accessor
     std::unique_ptr<ISelectionWriteAccessor> accC;
@@ -66,21 +68,23 @@ namespace CP
     auto* selC = dynamic_cast<SelectionWriteAccessorBits*>(accC.get());
     EXPECT_NE(selC, nullptr);
     accC->setBool (*jet, false);
-    EXPECT_EQ (jet->auxdata<SelectionType> ("c"), selectionReject());
+    static const SG::ConstAccessor<SelectionType> cAcc("c");
+    EXPECT_EQ (cAcc(*jet), selectionReject());
     accC->setBool (*jet, true);
-    EXPECT_EQ (jet->auxdata<SelectionType> ("c"), selectionAccept());
+    EXPECT_EQ (cAcc(*jet), selectionAccept());
     accC->setBits (*jet, selectionReject());
-    EXPECT_EQ (jet->auxdata<SelectionType> ("c"), selectionReject());
+    EXPECT_EQ (cAcc(*jet), selectionReject());
     accC->setBits (*jet, selectionAccept());
-    EXPECT_EQ (jet->auxdata<SelectionType> ("c"), selectionAccept());
+    EXPECT_EQ (cAcc(*jet), selectionAccept());
 
     // check an implicit bits accessor
     std::unique_ptr<ISelectionWriteAccessor> accD;
     ASSERT_SUCCESS (makeSelectionWriteAccessor ("d", accD, false));
     accD->setBool (*jet, false);
-    EXPECT_EQ (jet->auxdata<SelectionType> ("d"), selectionReject());
+    static const SG::ConstAccessor<SelectionType> dAcc("d");
+    EXPECT_EQ (dAcc(*jet), selectionReject());
     accD->setBool (*jet, true);
-    EXPECT_EQ (jet->auxdata<SelectionType> ("d"), selectionAccept());
+    EXPECT_EQ (dAcc(*jet), selectionAccept());
 
     // check an and of two accessors
     std::unique_ptr<ISelectionReadAccessor> accAnd;
