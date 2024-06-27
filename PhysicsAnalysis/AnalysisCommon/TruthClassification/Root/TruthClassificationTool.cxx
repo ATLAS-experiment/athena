@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <set>
@@ -345,7 +345,8 @@ StatusCode TruthClassificationTool::classifyElectron(const xAOD::IParticle &elec
   // the reasons for not having origin and status codes might be complex. The
   // main idea is to weed out things we don't have a hope of classifying due to
   // missing or unknown information.
-  bool stable = (truthParticle != nullptr && truthParticle->isAvailable<int>("status")) ? MC::isStable(truthParticle) : false;
+  static const SG::ConstAccessor<int> statusAcc("status");
+  bool stable = (truthParticle != nullptr && statusAcc.isAvailable(*truthParticle)) ? MC::isStable(truthParticle) : false;
 
 
   if (origin == MCTruthPartClassifier::NonDefined && firstMotherOrigin == MCTruthPartClassifier::NonDefined)
@@ -532,7 +533,8 @@ StatusCode TruthClassificationTool::classifyMuon(const xAOD::IParticle &muon,
     return StatusCode::SUCCESS;
   }
   
-  bool stable = (truthParticle != nullptr && truthParticle->isAvailable<int>("status")) ? MC::isStable(truthParticle) : false;
+  static const SG::ConstAccessor<int> statusAcc("status");
+  bool stable = (truthParticle != nullptr && statusAcc.isAvailable(*truthParticle)) ? MC::isStable(truthParticle) : false;
 
   if (!stable) {
     if (type == MCTruthPartClassifier::Unknown && origin == MCTruthPartClassifier::NonDefined)
