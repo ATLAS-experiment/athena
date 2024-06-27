@@ -2,13 +2,10 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-// #include "src/ITkPixelRawDataProviderTool.h"
-// #include "src/ITkPixelRodDecoder.h"
 #include "src/ITkPixelEncodingAlg.h"
-// #include "src/PixelRDOTool.h"
+#include "src/ITkPixelEncodingTool.h"
+#include "src/ITkPixelHitSortingTool.h"
 
-
-// DECLARE_COMPONENT( ITkPixelRawDataProviderTool )  
-// DECLARE_COMPONENT( ITkPixelRodDecoder )
 DECLARE_COMPONENT( ITkPixelEncodingAlg )
-// DECLARE_COMPONENT( PixelRDOTool )
+DECLARE_COMPONENT( ITkPixelEncodingTool )
+DECLARE_COMPONENT( ITkPixelHitSortingTool)

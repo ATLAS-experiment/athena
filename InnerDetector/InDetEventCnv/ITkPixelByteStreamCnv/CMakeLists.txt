@@ -14,7 +14,7 @@ atlas_add_library( ITkPixelByteStreamCnvLib
    LINK_LIBRARIES GaudiKernel ByteStreamData InDetByteStreamErrors InDetRawData )
 
 atlas_add_component( ITkPixelByteStreamCnv
-   src/*.h src/*.cxx src/components/*.cxx
+   src/*.h src/*.cxx src/*.cpp src/components/*.cxx
    INCLUDE_DIRS ${TDAQ-COMMON_INCLUDE_DIRS}
    LINK_LIBRARIES ${TDAQ-COMMON_LIBRARIES} ByteStreamData AthenaKernel EventContainers
    GaudiKernel InDetRawData AthenaBaseComps AthContainers CxxUtils StoreGateLib
