@@ -13,7 +13,8 @@ JetMomentMapCnv_p6::transToPers(const JetMomentMap* transObj,
 				MsgStream &reporter ) const
 {
   reporter << MSG::DEBUG << "JetMomentMapConverterBase toPers() Template _p6" << endmsg;
-  
+
+  persObj->m_momentNum=std::vector<JetMomentMap_p6::mom_num_t>(); //Hack to keep LTO happy
   persObj->m_momentNum.clear();
   size_t njet = transObj->map().size();
   persObj->m_momentNum.resize(njet);
