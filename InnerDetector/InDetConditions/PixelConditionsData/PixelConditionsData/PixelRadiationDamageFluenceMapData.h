@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file PixelConditionsData/PixelRadiationDamageFluenceMapData.h
@@ -12,13 +12,15 @@
 #define PIXELRADIATIONDAMAGEFLUENCEMAPDATA_H
 
 #include "AthenaKernel/CLASS_DEF.h"
-#include <map>
+
 
 #include "AthenaKernel/CondCont.h"
 #include "PixelConditionsData/PixelHistoConverter.h"
 #include "TH1.h"
 #include "TH2.h"
 #include "TH3.h"
+#include <map>
+#include <vector>
 
 class PixelRadiationDamageFluenceMapData {
   public:
