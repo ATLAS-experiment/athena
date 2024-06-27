@@ -1,0 +1,6 @@
+<lcgdict>
+  <!-- Requested dictionary generation -->
+  <class name="AthOnnx::IOnnxRuntimeSvc" />
+  <class name="AthOnnx::IOnnxRuntimeSessionTool" />
+  <class name="AthOnnx::IOnnxRuntimeInferenceTool" />
+</lcgdict>

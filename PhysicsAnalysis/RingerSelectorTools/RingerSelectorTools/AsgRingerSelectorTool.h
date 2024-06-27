@@ -16,8 +16,7 @@
 // xAOD includes:
 #include "RingerSelectorTools/IAsgRingerSelectorTool.h"
 #include "RingerSelectorTools/tools/onnx/RingerSelector.h"
-#include "AthOnnxruntimeService/IONNXRuntimeSvc.h"
-
+#include "AthOnnxInterfaces/IOnnxRuntimeSvc.h"
 
 
 namespace Ringer {
@@ -79,7 +78,7 @@ namespace Ringer {
     onnx::RingerSelector m_selector;
 
     Gaudi::Property<std::vector<std::string>> m_configFiles{this, "ConfigFiles", {}, "Ringer Run3 Calib Path"};  
-    ServiceHandle< AthONNX::IONNXRuntimeSvc > m_onnxSvc{ this, "ONNXRuntimeSvc", "AthONNX::ONNXRuntimeSvc", "Name of the service to use" };
+    ServiceHandle< AthOnnx::IOnnxRuntimeSvc > m_onnxSvc{ this, "ONNXRuntimeSvc", "AthOnnx::OnnxRuntimeSvc", "Name of the service to use" };
     Gaudi::Property<bool> m_useTansigOutput{this, "UseTansigOutput", {}, "Use tansig output."};  
 
 };

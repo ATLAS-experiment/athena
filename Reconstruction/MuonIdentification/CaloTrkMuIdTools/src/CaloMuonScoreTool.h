@@ -8,7 +8,7 @@
 #include <memory>
 #include <vector>
 
-#include "AthOnnxruntimeService/IONNXRuntimeSvc.h"
+#include "AthOnnxInterfaces/IOnnxRuntimeSvc.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
@@ -86,8 +86,8 @@ private:
 
     ToolHandle<Rec::IParticleCaloCellAssociationTool> m_caloCellAssociationTool{this, "ParticleCaloCellAssociationTool", ""};
 
-    /// Handle to @c AthONNX::IONNXRuntimeSvc
-    ServiceHandle<AthONNX::IONNXRuntimeSvc> m_svc{this, "ONNXRuntimeSvc", "AthONNX::ONNXRuntimeSvc", "CaloMuonScoreTool ONNXRuntimeSvc"};
+    /// Handle to @c AthOnnx::IOnnxRuntimeSvc
+    ServiceHandle<AthOnnx::IOnnxRuntimeSvc> m_svc{this, "ONNXRuntimeSvc", "AthOnnx::OnnxRuntimeSvc", "CaloMuonScoreTool ONNXRuntimeSvc"};
 
     std::unique_ptr<Ort::Session> m_session;
 

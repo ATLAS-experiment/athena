@@ -3,10 +3,13 @@
 #ifndef OnnxRuntimeSessionToolCUDA_H
 #define OnnxRuntimeSessionToolCUDA_H
 
-#include "AthenaBaseComps/AthAlgTool.h"
+#include "AsgTools/AsgTool.h"
 #include "AthOnnxInterfaces/IOnnxRuntimeSessionTool.h"
 #include "AthOnnxInterfaces/IOnnxRuntimeSvc.h"
-#include "GaudiKernel/ServiceHandle.h"
+#include "AsgServices/ServiceHandle.h"
+#include "AsgTools/PropertyWrapper.h"
+
+#include <string>
 
 namespace AthOnnx {
     // @class OnnxRuntimeSessionToolCUDA
@@ -14,19 +17,16 @@ namespace AthOnnx {
     // @brief Tool to create Onnx Runtime session with CUDA backend
     //
     // @author Xiangyang Ju <xiangyang.ju@cern.ch>
-    class OnnxRuntimeSessionToolCUDA :  public extends<AthAlgTool, IOnnxRuntimeSessionTool>
+    class OnnxRuntimeSessionToolCUDA :  public asg::AsgTool, virtual public IOnnxRuntimeSessionTool
     {
+        ASG_TOOL_CLASS(OnnxRuntimeSessionToolCUDA, IOnnxRuntimeSessionTool)
         public:
         /// Standard constructor
-        OnnxRuntimeSessionToolCUDA( const std::string& type,
-                                const std::string& name,
-                                const IInterface* parent );
+        OnnxRuntimeSessionToolCUDA( const std::string& name);
         virtual ~OnnxRuntimeSessionToolCUDA() = default;
 
         /// Initialize the tool
         virtual StatusCode initialize() override final;
-        /// Finalize the tool
-        virtual StatusCode finalize() override final;
 
         /// Create Onnx Runtime session
         virtual Ort::Session& session() const override final;
@@ -37,10 +37,10 @@ namespace AthOnnx {
         OnnxRuntimeSessionToolCUDA& operator=(const OnnxRuntimeSessionToolCUDA&) = delete;
 
         private:
-        StringProperty m_modelFileName{this, "ModelFileName", "", "The model file name"};
+        Gaudi::Property<std::string> m_modelFileName{this, "ModelFileName", "", "The model file name"};
         /// The device ID to use.
-        IntegerProperty m_deviceId{this, "DeviceId", 0};
-        BooleanProperty m_enableMemoryShrinkage{this, "EnableMemoryShrinkage", false};
+        Gaudi::Property<int> m_deviceId{this, "DeviceId", 0, "Device ID to use"};
+        Gaudi::Property<bool> m_enableMemoryShrinkage{this, "EnableMemoryShrinkage", false, "Enable automatic memory shrinkage"};
 
         /// runtime service
         ServiceHandle<IOnnxRuntimeSvc> m_onnxRuntimeSvc{"AthOnnx::OnnxRuntimeSvc", "AthOnnx::OnnxRuntimeSvc"};

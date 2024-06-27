@@ -20,7 +20,7 @@ atlas_add_library( TrigEgammaEmulationToolLib
    TrigNavStructure TrigDecisionToolLib TrigEgammaMatchingToolLib 
    xAODBase xAODCaloEvent xAODEgamma xAODTracking xAODTrigCalo 
    xAODTrigRinger xAODTrigger RingerSelectorToolsLib
-   AthOnnxruntimeServiceLib
+   AthOnnxInterfaces
    AthenaMonitoringKernelLib AthenaMonitoringLib 
    )
 

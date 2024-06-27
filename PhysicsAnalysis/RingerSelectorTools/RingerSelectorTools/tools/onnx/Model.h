@@ -7,7 +7,7 @@
 
 #include "AsgMessaging/AsgMessaging.h"
 #include <onnxruntime_cxx_api.h>
-#include "AthOnnxruntimeService/IONNXRuntimeSvc.h"
+#include "AthOnnxInterfaces/IOnnxRuntimeSvc.h"
 #include <assert.h>
 #include <vector>
 
@@ -23,7 +23,7 @@ namespace Ringer{
       public:
 
         /*! Constructor */
-        Model( const std::string& modelPath, AthONNX::IONNXRuntimeSvc *svc,
+        Model( const std::string& modelPath, AthOnnx::IOnnxRuntimeSvc *svc,
                float etmin, float etmax, float etamin, float etamax,
                unsigned barcode);
 

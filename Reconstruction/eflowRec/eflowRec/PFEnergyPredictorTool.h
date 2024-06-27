@@ -7,7 +7,7 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ServiceHandle.h"
-#include "AthOnnxruntimeService/IONNXRuntimeSvc.h"
+#include "AthOnnxInterfaces/IOnnxRuntimeSvc.h"
 #include <fstream>      // std::fstream
 
 static const InterfaceID IID_PFEnergyPredictorTool("PFEnergyPredictorTool", 1, 0);
@@ -36,7 +36,7 @@ private:
   std::vector<const char *> m_output_node_names;
 
   std::vector<int64_t> m_input_node_dims;
-  ServiceHandle<AthONNX::IONNXRuntimeSvc> m_svc{this, "ONNXRuntimeSvc", "AthONNX::ONNXRuntimeSvc", "CaloMuonScoreTool ONNXRuntimeSvc"};
+  ServiceHandle<AthOnnx::IOnnxRuntimeSvc> m_svc{this, "ONNXRuntimeSvc", "AthOnnx::OnnxRuntimeSvc", "CaloMuonScoreTool ONNXRuntimeSvc"};
   Gaudi::Property<std::string> m_model_filepath{this, "ModelPath", "////"};
 
   /** Normalization constants for the inputs to the onnx model */

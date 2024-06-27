@@ -2,13 +2,11 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "OnnxRuntimeSessionToolCPU.h"
+#include "AthOnnxComps/OnnxRuntimeSessionToolCPU.h"
 
-AthOnnx::OnnxRuntimeSessionToolCPU::OnnxRuntimeSessionToolCPU(
-  const std::string& type, const std::string& name, const IInterface* parent )
-  : base_class( type, name, parent )
+AthOnnx::OnnxRuntimeSessionToolCPU::OnnxRuntimeSessionToolCPU(const std::string& name )
+  : asg::AsgTool( name)
 {
-  declareInterface<IOnnxRuntimeSessionTool>(this);
 }
 
 StatusCode AthOnnx::OnnxRuntimeSessionToolCPU::initialize()
@@ -30,13 +28,6 @@ StatusCode AthOnnx::OnnxRuntimeSessionToolCPU::initialize()
     // Create the session.
     m_session = std::make_unique<Ort::Session>(m_onnxRuntimeSvc->env(), m_modelFileName.value().c_str(), sessionOptions);
 
-    return StatusCode::SUCCESS;
-}
-
-StatusCode AthOnnx::OnnxRuntimeSessionToolCPU::finalize()
-{
-    m_session.reset();
-    ATH_MSG_DEBUG( "Ort::Session object deleted" );
     return StatusCode::SUCCESS;
 }
 

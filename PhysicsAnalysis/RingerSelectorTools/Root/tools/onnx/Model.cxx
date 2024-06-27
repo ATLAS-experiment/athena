@@ -11,7 +11,7 @@ namespace Ringer{
 
   namespace onnx{
 
-    Model::Model( const std::string& modelPath, AthONNX::IONNXRuntimeSvc *svc,
+    Model::Model( const std::string& modelPath, AthOnnx::IOnnxRuntimeSvc *svc,
                   float etmin, float etmax, float etamin, float etamax,
                   unsigned barcode):
       m_etmin(etmin),

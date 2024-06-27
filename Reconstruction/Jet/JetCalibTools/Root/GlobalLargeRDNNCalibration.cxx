@@ -33,13 +33,13 @@ namespace{
             ATH_MSG_WARNING("Either in C++ config (see exemple in JetCalibTools_Example.cxx)");
             ATH_MSG_WARNING("Or in python config with");
             ATH_MSG_WARNING("   from AnaAlgorithm.DualUseConfig import createService");
-            ATH_MSG_WARNING("   onnxSvc = createService('AthONNX::ONNXRuntimeSvc', 'AthONNXSvc', myAlgSequence)");
+            ATH_MSG_WARNING("   onnxSvc = createService('AthOnnx::OnnxRuntimeSvc', 'AthONNXSvc', myAlgSequence)");
             serviceName = "AthONNXSvc";
         #else
-            serviceName = "AthONNX::ONNXRuntimeSvc";
+            serviceName = "AthOnnx::OnnxRuntimeSvc";
         #endif
 
-        ServiceHandle< AthONNX::IONNXRuntimeSvc > svc(serviceName, "AthONNX::ONNXRuntimeSvc");
+        ServiceHandle< AthOnnx::IOnnxRuntimeSvc > svc(serviceName, "AthOnnx::OnnxRuntimeSvc");
 
         return std::make_unique<Ort::Session>( svc->env(),
                                                 modelFile.c_str(),

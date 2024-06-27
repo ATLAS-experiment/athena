@@ -13,12 +13,11 @@ atlas_add_component( InDetGNNTracking
     src/components/*.cxx
     INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${EIGEN_INCLUDE_DIRS} ${HEPPDT_INCLUDE_DIRS}
     LINK_LIBRARIES ${HEPPDT_LIBRARIES} ${ROOT_LIBRARIES} AthenaBaseComps GaudiKernel InDetRecToolInterfaces
-    PathResolver AthOnnxruntimeServiceLib AthOnnxruntimeUtilsLib
+    PathResolver AthOnnxInterfaces AthOnnxUtilsLib
     TrkTrack StoreGateLib TrkExInterfaces TrkSpacePoint TrkFitterInterfaces
     PixelReadoutGeometryLib SCT_ReadoutGeometry InDetSimData
     InDetPrepRawData TrkTrack TrkRIO_OnTrack InDetSimEvent
     AtlasHepMCLib InDetRIO_OnTrack InDetRawData TrkTruthData
-    AthOnnxInterfaces AthOnnxUtilsLib 
     SiSPSeededTrackFinderData 
 )
 

@@ -1,7 +1,7 @@
 // Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-#ifndef ATHONNXRUNTIMESERVICE_ONNXRUNTIMESVC_H
-#define ATHONNXRUNTIMESERVICE_ONNXRUNTIMESVC_H
+#ifndef ATHONNX_ONNXRUNTIMESVC_H
+#define ATHONNX_ONNXRUNTIMESVC_H
 
 // Local include(s).
 #include "AthOnnxInterfaces/IOnnxRuntimeSvc.h"
@@ -55,4 +55,4 @@ namespace AthOnnx {
 
 } // namespace AthOnnx
 
-#endif // ATHONNXRUNTIMESERVICE_ONNXRUNTIMESVC_H
+#endif // ATHONNX_ONNXRUNTIMESVC_H

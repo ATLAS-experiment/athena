@@ -2,16 +2,14 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "OnnxRuntimeSessionToolCUDA.h"
+#include "AthOnnxComps/OnnxRuntimeSessionToolCUDA.h"
 
-AthOnnx::OnnxRuntimeSessionToolCUDA::OnnxRuntimeSessionToolCUDA(
-    const std::string& type, const std::string& name, const IInterface* parent )
-    : base_class( type, name, parent )
+AthOnnx::OnnxRuntimeSessionToolCUDA::OnnxRuntimeSessionToolCUDA(const std::string& name )
+    : asg::AsgTool(name)
 {
-  declareInterface<IOnnxRuntimeSessionTool>(this);
 }
 
 StatusCode AthOnnx::OnnxRuntimeSessionToolCUDA::initialize()
@@ -54,13 +52,6 @@ StatusCode AthOnnx::OnnxRuntimeSessionToolCUDA::initialize()
     // Create the session.
     m_session = std::make_unique<Ort::Session>(m_onnxRuntimeSvc->env(),  m_modelFileName.value().c_str(), sessionOptions);
 
-    return StatusCode::SUCCESS;
-}
-
-StatusCode AthOnnx::OnnxRuntimeSessionToolCUDA::finalize()
-{
-    m_session.reset();
-    ATH_MSG_DEBUG( "Ort::Session object deleted" );
     return StatusCode::SUCCESS;
 }
 

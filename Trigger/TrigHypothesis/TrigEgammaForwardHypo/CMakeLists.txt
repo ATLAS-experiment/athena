@@ -7,7 +7,7 @@ atlas_subdir( TrigEgammaForwardHypo )
 atlas_add_component( TrigEgammaForwardHypo
                      src/*.cxx
                      src/components/*.cxx
-                     LINK_LIBRARIES AthViews AthenaBaseComps AthenaMonitoringKernelLib DecisionHandlingLib EgammaAnalysisInterfacesLib GaudiKernel LumiBlockCompsLib RecoToolInterfaces StoreGateLib TrigCompositeUtilsLib TrigSteeringEvent TrkCaloExtension xAODBase xAODCaloEvent xAODEgamma xAODEventInfo xAODTracking xAODTrigCalo xAODTrigEgamma xAODTrigRinger xAODTrigger AthOnnxruntimeServiceLib RingerSelectorToolsLib)
+                     LINK_LIBRARIES AthViews AthenaBaseComps AthenaMonitoringKernelLib DecisionHandlingLib EgammaAnalysisInterfacesLib GaudiKernel LumiBlockCompsLib RecoToolInterfaces StoreGateLib TrigCompositeUtilsLib TrigSteeringEvent TrkCaloExtension xAODBase xAODCaloEvent xAODEgamma xAODEventInfo xAODTracking xAODTrigCalo xAODTrigEgamma xAODTrigRinger xAODTrigger AthOnnxInterfaces RingerSelectorToolsLib)
 
 
 # Install files from the package:
