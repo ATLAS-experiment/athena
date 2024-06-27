@@ -1,7 +1,7 @@
 // Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 // Local include(s).
-#include "OnnxRuntimeSvc.h"
+#include "AthOnnxComps/OnnxRuntimeSvc.h"
 #include <onnxruntime_c_api.h>
 
 namespace AthOnnx {

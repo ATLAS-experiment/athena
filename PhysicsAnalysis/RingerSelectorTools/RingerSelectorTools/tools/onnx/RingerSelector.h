@@ -11,7 +11,7 @@
 #include "AsgMessaging/AsgMessaging.h"
 #include "RingerSelectorTools/tools/onnx/Model.h"
 #include "RingerSelectorTools/tools/onnx/Threshold.h"
-#include "AthOnnxruntimeService/IONNXRuntimeSvc.h"
+#include "AthOnnxInterfaces/IOnnxRuntimeSvc.h"
 #include <onnxruntime_cxx_api.h>
 #include "xAODTrigRinger/TrigRingerRings.h"
 #include "xAODTrigCalo/TrigEMCluster.h"
@@ -39,7 +39,7 @@ namespace Ringer {
         /**
          * @brief read tunings from configuration file
          **/
-        StatusCode read_from( const std::string&, AthONNX::IONNXRuntimeSvc *);
+        StatusCode read_from( const std::string&, AthOnnx::IOnnxRuntimeSvc *);
 
 
         /**

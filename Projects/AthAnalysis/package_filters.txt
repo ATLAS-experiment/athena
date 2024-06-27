@@ -239,7 +239,7 @@
 ### Onnxruntime Service
 #
 
-+ Control/AthOnnxruntimeService
++ Control/AthOnnx/.*
 
 # Don't build anything else:
 - .*

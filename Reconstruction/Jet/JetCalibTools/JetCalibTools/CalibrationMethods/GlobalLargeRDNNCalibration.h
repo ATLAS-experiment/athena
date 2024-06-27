@@ -25,7 +25,7 @@
 
 // Other packages includes
 #include "AsgServices/ServiceHandle.h"
-#include "AthOnnxruntimeService/IONNXRuntimeSvc.h"
+#include "AthOnnxInterfaces/IOnnxRuntimeSvc.h"
 
 // Local includes
 #include "JetCalibTools/IJetCalibrationTool.h"

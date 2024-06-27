@@ -12,5 +12,5 @@ atlas_add_library( AthOnnxUtilsLib
    src/*.cxx
    PUBLIC_HEADERS AthOnnxUtils
    INCLUDE_DIRS ${ONNXRUNTIME_INCLUDE_DIRS}
-   LINK_LIBRARIES ${ONNXRUNTIME_LIBRARIES} AthenaKernel GaudiKernel AsgServicesLib 
+   LINK_LIBRARIES ${ONNXRUNTIME_LIBRARIES} 
 )

@@ -1,10 +1,10 @@
 // Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 // Local include(s).
-#include "../OnnxRuntimeSvc.h"
-#include "../OnnxRuntimeSessionToolCPU.h"
-#include "../OnnxRuntimeSessionToolCUDA.h"
-#include "../OnnxRuntimeInferenceTool.h"
+#include "AthOnnxComps/OnnxRuntimeSvc.h"
+#include "AthOnnxComps/OnnxRuntimeSessionToolCPU.h"
+#include "AthOnnxComps/OnnxRuntimeSessionToolCUDA.h"
+#include "AthOnnxComps/OnnxRuntimeInferenceTool.h"
 
 // Declare the package's components.
 DECLARE_COMPONENT( AthOnnx::OnnxRuntimeSvc )

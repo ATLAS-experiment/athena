@@ -2,14 +2,14 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "OnnxRuntimeInferenceTool.h"
+#include "AthOnnxComps/OnnxRuntimeInferenceTool.h"
 #include "AthOnnxUtils/OnnxUtils.h"
 
-AthOnnx::OnnxRuntimeInferenceTool::OnnxRuntimeInferenceTool(
-  const std::string& type, const std::string& name, const IInterface* parent )
-  : base_class( type, name, parent )
+AthOnnx::OnnxRuntimeInferenceTool::OnnxRuntimeInferenceTool( const std::string& name)
+  : asg::AsgTool ( name )
 {
-  declareInterface<IOnnxRuntimeInferenceTool>(this);
+    declareProperty("OnnxSessionTool", m_onnxSessionTool, "The Onnx session tool");
+    declareProperty("OnnxRuntimeSvc", m_onnxRuntimeSvc, "The Onnx runtime service");
 }
 
 StatusCode AthOnnx::OnnxRuntimeInferenceTool::initialize()
@@ -22,11 +22,6 @@ StatusCode AthOnnx::OnnxRuntimeInferenceTool::initialize()
 
     ATH_CHECK(getNodeInfo());
 
-    return StatusCode::SUCCESS;
-}
-
-StatusCode AthOnnx::OnnxRuntimeInferenceTool::finalize()
-{
     return StatusCode::SUCCESS;
 }
 

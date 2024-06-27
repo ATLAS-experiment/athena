@@ -165,5 +165,5 @@
 ### Onnxruntime Service 
 #
 
-+ Control/AthOnnxruntimeService
++ Control/AthOnnx/.*
 - .*

@@ -54,7 +54,6 @@ def TrigEgammaPrecisionElectronHypoAlgCfg(flags, name, inputElectronCollection )
     hypo_acc = hypo_tuple[1]
     acc.addEventAlgo( hypo_alg )
     acc.merge(hypo_acc)
-    acc.addService( CompFactory.AthONNX.ONNXRuntimeSvc())
     return acc
 
 class TrigEgammaPrecisionElectronHypoToolConfig:

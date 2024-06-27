@@ -3,12 +3,12 @@
 #ifndef OnnxRuntimeInferenceTool_H
 #define OnnxRuntimeInferenceTool_H
 
-#include "AthenaBaseComps/AthAlgTool.h"
+#include "AsgTools/AsgTool.h"
 #include "AthOnnxInterfaces/IOnnxRuntimeInferenceTool.h"
 #include "AthOnnxInterfaces/IOnnxRuntimeSvc.h"
 #include "AthOnnxInterfaces/IOnnxRuntimeSessionTool.h"
-#include "GaudiKernel/ServiceHandle.h"
-#include "GaudiKernel/ToolHandle.h"
+#include "AsgServices/ServiceHandle.h"
+#include "AsgTools/ToolHandle.h"
 
 namespace AthOnnx {
     // @class OnnxRuntimeInferenceTool
@@ -16,19 +16,17 @@ namespace AthOnnx {
     // @brief Tool to create Onnx Runtime session with CPU backend
     //
     // @author Xiangyang Ju <xiangyang.ju@cern.ch>
-    class OnnxRuntimeInferenceTool :  public extends<AthAlgTool, IOnnxRuntimeInferenceTool>
+    class OnnxRuntimeInferenceTool :  public asg::AsgTool, virtual public IOnnxRuntimeInferenceTool
     {
+        ASG_TOOL_CLASS(OnnxRuntimeInferenceTool, IOnnxRuntimeInferenceTool)
         public:
         /// Standard constructor
-        OnnxRuntimeInferenceTool( const std::string& type,
-                                const std::string& name,
-                                const IInterface* parent );
+        OnnxRuntimeInferenceTool( const std::string& name );
         virtual ~OnnxRuntimeInferenceTool() = default;
 
         /// Initialize the tool
         virtual StatusCode initialize() override;
-        /// Finalize the tool
-        virtual StatusCode finalize() override;
+
 
         virtual void setBatchSize(int64_t batchSize) override final;
         virtual int64_t getBatchSize(int64_t inputDataSize, int idx = 0) const override final;

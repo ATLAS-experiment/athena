@@ -22,7 +22,7 @@
 #include "xAODTruth/TruthPileupEventContainer.h"
 //ONNX Runtime include(s)
 #include <onnxruntime_cxx_api.h>
-#include "AthOnnxruntimeService/IONNXRuntimeSvc.h"
+#include "AthOnnxInterfaces/IOnnxRuntimeSvc.h"
 namespace  TrackOverlayDecisionAlg{
   const double M_TWOPI = 2.0 * M_PI;
   // Calculate constants only once for feature scaling
@@ -75,7 +75,7 @@ namespace  TrackOverlayDecisionAlg{
     Gaudi::Property<bool>  m_invertfilter{this, "InvertFilter", false, "Invert filter decision."}; //!< invert filter decision at the end
     Gaudi::Property<float> m_MLthreshold{this, "MLThreshold", 0.74201, "ML threshold for bad/good tracks decision. ML scores larger than this threshold are considered as bad tracks."};
     // Set up the ONNX Runtime session
-    ServiceHandle<AthONNX::IONNXRuntimeSvc> m_svc{this, "ONNXRuntimeSvc", "AthONNX::ONNXRuntimeSvc", "CaloMuonScoreTool ONNXRuntimeSvc"};
+    ServiceHandle<AthOnnx::IOnnxRuntimeSvc> m_svc{this, "ONNXRuntimeSvc", "AthOnnx::OnnxRuntimeSvc", "CaloMuonScoreTool ONNXRuntimeSvc"};
     std::tuple<std::vector<int64_t>, std::vector<char*>> m_inputInfo;
     std::tuple<std::vector<int64_t>, std::vector<char*>> m_outputInfo;
     std::unique_ptr<Ort::Session> m_session;

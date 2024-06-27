@@ -23,7 +23,7 @@ namespace Ringer{
     
 
     //==============================================================================
-    StatusCode RingerSelector::read_from( const std::string& path , AthONNX::IONNXRuntimeSvc *svc )
+    StatusCode RingerSelector::read_from( const std::string& path , AthOnnx::IOnnxRuntimeSvc *svc )
     {
 
       std::string configFile = PathResolverFindCalibFile( path );

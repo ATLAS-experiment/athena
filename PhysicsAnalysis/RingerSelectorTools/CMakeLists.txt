@@ -22,13 +22,13 @@ atlas_add_library( RingerSelectorToolsLib
                    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${ONNXRUNTIME_INCLUDE_DIRS}
                    LINK_LIBRARIES ${ROOT_LIBRARIES} ${ONNXRUNTIME_LIBRARIES} AsgTools CxxUtils xAODCaloRings xAODEgamma xAODTracking 
                    PATCoreLib EgammaAnalysisInterfacesLib xAODTrigRinger xAODTrigCalo xAODTrigEgamma
-                   PRIVATE_LINK_LIBRARIES xAODBase PathResolver TrkTrackSummary AthOnnxruntimeServiceLib AthenaMonitoringKernelLib)
+                   PRIVATE_LINK_LIBRARIES xAODBase PathResolver TrkTrackSummary AthOnnxInterfaces AthenaMonitoringKernelLib)
 
 if( NOT XAOD_STANDALONE )
   atlas_add_component( RingerSelectorTools
                        src/components/*.cxx
                        INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${ONNXRUNTIME_INCLUDE_DIRS}
-                       LINK_LIBRARIES ${ONNXRUNTIME_LIBRARIES} ${ROOT_LIBRARIES} AthenaKernel AthContainers GaudiKernel TrkTrackSummary RingerSelectorToolsLib AthOnnxruntimeServiceLib )
+                       LINK_LIBRARIES ${ONNXRUNTIME_LIBRARIES} ${ROOT_LIBRARIES} AthenaKernel AthContainers GaudiKernel TrkTrackSummary RingerSelectorToolsLib AthOnnxInterfaces)
 endif()
 
 

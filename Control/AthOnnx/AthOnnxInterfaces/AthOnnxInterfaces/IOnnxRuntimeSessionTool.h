@@ -2,8 +2,7 @@
 #ifndef AthOnnx_IOnnxRUNTIMESESSIONTool_H
 #define AthOnnx_IOnnxRUNTIMESESSIONTool_H
 
-// Gaudi include(s).
-#include "GaudiKernel/IAlgTool.h"
+#include "AsgTools/IAsgTool.h"
 
 #include <onnxruntime_cxx_api.h>
 
@@ -15,14 +14,11 @@ namespace AthOnnx {
     //
     // @author Xiangyang Ju <xju@cern.ch>
     //
-    class IOnnxRuntimeSessionTool : virtual public IAlgTool
+    class IOnnxRuntimeSessionTool : virtual public asg::IAsgTool
     {
+        ASG_TOOL_INTERFACE(IOnnxRuntimeSessionTool)
+
         public:
-
-        virtual ~IOnnxRuntimeSessionTool() = default;
-
-        // @name InterfaceID
-        DeclareInterfaceID(IOnnxRuntimeSessionTool, 1, 0);
 
         // Create Onnx Runtime session
         virtual Ort::Session& session() const = 0;

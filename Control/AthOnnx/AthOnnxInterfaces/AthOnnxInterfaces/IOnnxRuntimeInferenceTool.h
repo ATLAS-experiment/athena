@@ -2,9 +2,11 @@
 #ifndef AthOnnx_IOnnxRuntimeInferenceTool_H
 #define AthOnnx_IOnnxRuntimeInferenceTool_H
 
-// Gaudi include(s).
-#include "GaudiKernel/IAlgTool.h"
+#include "AsgTools/IAsgTool.h"
+
 #include <memory>
+#include <numeric>
+#include <utility>
 
 #include <onnxruntime_cxx_api.h>
 
@@ -42,14 +44,11 @@ namespace AthOnnx {
      *
      * @author Xiangyang Ju <xju@cern.ch>
      */
-    class IOnnxRuntimeInferenceTool : virtual public IAlgTool
+    class IOnnxRuntimeInferenceTool : virtual public asg::IAsgTool
     {
+        ASG_TOOL_INTERFACE(IOnnxRuntimeInferenceTool)
+
         public:
-
-        virtual ~IOnnxRuntimeInferenceTool() = default;
-
-        // @name InterfaceID
-        DeclareInterfaceID(IOnnxRuntimeInferenceTool, 1, 0);
 
         /**
          * @brief set batch size.
