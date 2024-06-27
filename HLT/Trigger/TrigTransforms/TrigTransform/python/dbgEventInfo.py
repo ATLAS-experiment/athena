@@ -33,7 +33,7 @@ class dbgEventInfo:
         self.EventStatusNames                      = 'None'
 
         #define the string length 
-        self.strlength = 100
+        self.strlength = 150
 
         self.eventCounter = 0
         self.rootDefinitions(dbgStep, inputFile)
