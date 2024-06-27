@@ -256,12 +256,12 @@ std::unique_ptr<Trk::TrackingVolumeArray>
     volSteps.push_back(-envX);
     for (unsigned i = 0; i < compVol.size(); ++i) {
         bool comp_processed = false;
-        const Trk::CuboidVolumeBounds* compBounds = dynamic_cast<const Trk::CuboidVolumeBounds*>(&(compVol[i]->volumeBounds()));
+        const Trk::VolumeBounds& volBounds = compVol[i]->volumeBounds();
+        const Trk::CuboidVolumeBounds* compBounds = dynamic_cast<const Trk::CuboidVolumeBounds*>(&volBounds);
         // check return to comply with coverity
         if (!compBounds) {
-	    const Trk::VolumeBounds& vBounds = compVol[i]->volumeBounds();
             ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" box station component does not return cuboid shape "
-                            <<typeid(vBounds).name());
+                            <<typeid(volBounds).name());
             continue;
         }
         //
@@ -565,8 +565,9 @@ std::unique_ptr<Trk::TrackingVolumeArray>
     volSteps.push_back(-envelope.halflengthZ());
     for (unsigned i = 0; i < compVol.size(); i++) {
         bool comp_processed = false;
-        const Trk::CuboidVolumeBounds* compCubBounds = dynamic_cast<const Trk::CuboidVolumeBounds*>(&(compVol[i]->volumeBounds()));
-        const Trk::TrapezoidVolumeBounds* compTrdBounds = dynamic_cast<const Trk::TrapezoidVolumeBounds*>(&(compVol[i]->volumeBounds()));
+        const Trk::VolumeBounds& volBounds = compVol[i]->volumeBounds();
+        const Trk::CuboidVolumeBounds* compCubBounds = dynamic_cast<const Trk::CuboidVolumeBounds*>(&volBounds);
+        const Trk::TrapezoidVolumeBounds* compTrdBounds = dynamic_cast<const Trk::TrapezoidVolumeBounds*>(&volBounds);
         if (compCubBounds) {
             lowX = compVol[i]->center().x() - compCubBounds->halflengthX();
             uppX = compVol[i]->center().x() + compCubBounds->halflengthX();           
@@ -583,8 +584,7 @@ std::unique_ptr<Trk::TrackingVolumeArray>
         // low edge of current volume
         Xcurr = lowX;
         if (!compCubBounds && !compTrdBounds) {
-	    const Trk::VolumeBounds& vBounds = compVol[i]->volumeBounds();
-            ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" Unknown volume shape "<<typeid(vBounds).name());
+            ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" Unknown volume shape "<<typeid(volBounds).name());
             return nullptr;
         }
         // close spacer if no further components
