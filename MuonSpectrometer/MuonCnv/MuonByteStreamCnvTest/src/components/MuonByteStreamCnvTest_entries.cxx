@@ -11,8 +11,6 @@
 #include "../TgcRdoToTgcDigit.h"
 #include "../CscDigitToCscRDO.h"
 #include "../MdtDigitToMdtRDO.h"
-#include "../MuonRdoToMuonDigit.h"
-#include "../MuonRdoToMuonDigitTool.h"
 #include "../RpcDigitToRpcRDO.h"
 #include "../NrpcDigitToNrpcRDO.h"
 #include "../TgcDigitToTgcRDO.h"
@@ -31,5 +29,3 @@ DECLARE_COMPONENT(RpcRdoToRpcDigit)
 DECLARE_COMPONENT(TgcRdoToTgcDigit)
 DECLARE_COMPONENT(STGC_RdoToDigit)
 DECLARE_COMPONENT(MM_RdoToDigit)
-DECLARE_COMPONENT(MuonRdoToMuonDigit)
-DECLARE_COMPONENT(MuonRdoToMuonDigitTool)

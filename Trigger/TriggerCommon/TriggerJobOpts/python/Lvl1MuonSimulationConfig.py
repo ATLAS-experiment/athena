@@ -214,6 +214,7 @@ def MuonRdo2DigitConfig(flags):
     TGCRdoName = "TGCRDO"+suffix
     MMRdoName = "MMRDO"+suffix
     sTGCRdoName = "sTGCRDO"+suffix
+    
     if flags.Input.Format is Format.POOL:
         rdoInputs = [
             ('RpcPadContainer','RPCPAD'),
@@ -233,28 +234,18 @@ def MuonRdo2DigitConfig(flags):
         from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
         acc.merge(SGInputLoaderCfg(flags, Load=rdoInputs))
 
-
     from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
     acc.merge(MuonGeoModelCfg(flags))
-    MuonRdoToMuonDigitTool = acc.popToolsAndMerge(MuonRdoToMuonDigitToolCfg(flags,DecodeRpcRDO = True,
-                                                                 DecodeTgcRDO = True,
-                                                                 DecodeCscRDO = False,
-                                                                 DecodeMdtRDO = False,                                                                
-                                                                 RpcRdoContainer = RPCRdoName,
-                                                                 TgcRdoContainer = TGCRdoName,
-                                                                 sTgcRdoContainer = sTGCRdoName,
-                                                                 MmRdoContainer = MMRdoName,
-                                                                 MmDigitContainer = "MM_DIGITS_L1",
-                                                                 sTgcDigitContainer = "sTGC_DIGITS_L1",
-                                                                 RpcDigitContainer = "RPC_DIGITS_L1",
-                                                                 TgcDigitContainer = "TGC_DIGITS_L1"))
+    
+    from MuonConfig.MuonByteStreamCnvTestConfig import RpcRdoToRpcDigitCfg, TgcRdoToTgcDigitCfg, STGC_RdoToDigitCfg, MM_RdoToDigitCfg
 
-
-
-    acc.addPublicTool(MuonRdoToMuonDigitTool)
-    rdo2digit = CompFactory.MuonRdoToMuonDigit( "MuonRdoToMuonDigit",
-                                                MuonRdoToMuonDigitTool = MuonRdoToMuonDigitTool)
-    acc.addEventAlgo(rdo2digit)
+    acc.merge(RpcRdoToRpcDigitCfg(flags, RpcDigitContainer = "RPC_DIGITS_L1", RpcRdoContainer = RPCRdoName ))
+    acc.merge(TgcRdoToTgcDigitCfg(flags, TgcDigitContainer = "TGC_DIGITS_L1", TgcRdoContainer = TGCRdoName ))
+    if flags.Detector.GeometrysTGC:
+        acc.merge(STGC_RdoToDigitCfg(flags, sTgcRdoContainer = sTGCRdoName, sTgcDigitContainer = "sTGC_DIGITS_L1"))
+    if flags.Detector.GeometryMM:
+          acc.merge(MM_RdoToDigitCfg(flags, MmRdoContainer = MMRdoName,  MmDigitContainer = "MM_DIGITS_L1" ))
+    
     return acc
 
 def NSWTriggerConfig(flags):
