@@ -572,7 +572,7 @@ StatusCode  MuonReadoutGeomCnvAlg::buildSTGC(const ActsGeometryContext& gctx,
               phiDesign.inputWidth  = 0.015;
               phiDesign.setFirstPos(copyPhiDesign.firstStripPos().x()); // Position of 1st wire, accounts for staggering
             //   phiDesign.firstPitch = firstWireGroup[il];             // Number of Wires in 1st group, group staggering
-              //phiDesign.groupWidth  = wireGroupWidth;                // Number of Wires normal group
+              phiDesign.groupWidth  = copyPhiDesign.numWiresInGroup(2);                // Number of Wires normal group
               phiDesign.nGroups = copyPhiDesign.numStrips();                           // Number of Wire Groups
               phiDesign.wireCutout = copyPhiDesign.wireCutout();                       // Size of "active" wire region for digits
               phiDesign.nch = copyPhiDesign.nAllWires();

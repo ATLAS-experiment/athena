@@ -5,7 +5,7 @@
 #include "STgcClusterBuilderCommon.h"
 #include "MuonPrepRawData/sTgcPrepData.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
-
+#include "GaudiKernel/SystemOfUnits.h"
 
 Muon::STgcClusterBuilderCommon::STgcClusterBuilderCommon(const sTgcIdHelper& idHelper, const NswErrorCalibData& errorCalibData)
         : AthMessaging("STgcClusterBuilderCommon"),
@@ -91,10 +91,7 @@ std::optional<Muon::STgcClusterPosition> Muon::STgcClusterBuilderCommon::weighte
     return std::nullopt;
   }
 
-  double weightedPosX{0.0};
-  double maxCharge{-1.0};
-  double sumWeight{0.0};
-  double sigmaSq{0.0};
+  double weightedPosX{0.0}, maxCharge{-1.0}, sumWeight{0.0}, sigmaSq{0.0};
   Identifier clusterId;
   Amg::Vector3D clusDir{Amg::Vector3D::Zero()};
 
@@ -130,6 +127,7 @@ std::optional<Muon::STgcClusterPosition> Muon::STgcClusterBuilderCommon::weighte
 
   // Mean position of the cluster
   double reconstructedPosX = weightedPosX / sumWeight;
+  sigmaSq /= sumWeight;
 
   NswErrorCalibData::Input errorCalibIn{};
   errorCalibIn.stripId = clusterId;
@@ -141,10 +139,13 @@ std::optional<Muon::STgcClusterPosition> Muon::STgcClusterBuilderCommon::weighte
 
   const double localUncertainty = m_errorCalibData.clusterUncertainty(errorCalibIn);
 
-  ATH_MSG_DEBUG("Reconstructed a cluster using the weighted average,"
+  ATH_MSG_VERBOSE("Reconstructed a cluster using the weighted average,"
                  << " cluster Id: " << m_stgcIdHelper.print_to_string(clusterId)
+                 <<", direction: "<<Amg::toString(clusDir.unit())
+                 <<", theta: "<<clusDir.theta() / Gaudi::Units::deg
                  << ", mean position = " << reconstructedPosX
-                 << ", uncertainty = " << std::sqrt(sigmaSq));
+                 << ", uncertainty = " << localUncertainty
+                 <<", sigmaSQ: "<<sigmaSq);
 
   return std::make_optional<Muon::STgcClusterPosition>(clusterId, reconstructedPosX, localUncertainty*localUncertainty);
 }
