@@ -39,7 +39,7 @@ class RpdSubtractCentroidTool : public virtual IZdcAnalysisTool, public asg::Asg
     PileupBit                    =  9, // pileup was detected in RPD on this side
     ExcessivePileupBit           = 10, // pileup was detected in RPD on this side and a channel exceeded the fractional limit => analysis is invalid
     ZeroSumBit                   = 11, // sum of subtracted RPD amplitudes on this side was not positive => calculation stopped and analysis is invalid
-    ExcessiveSubtrUnderflowBit   = 12, // a subtracted RPD amplitude on this side was negatibe and exceeded the fractional limit => analysis is invalid
+    ExcessiveSubtrUnderflowBit   = 12, // a subtracted RPD amplitude on this side was negative and exceeded the fractional limit => analysis is invalid
 
     Row0ValidBit                 = 13, // row 0 x centroid is valid
     Row1ValidBit                 = 14, // row 1 x centroid is valid
@@ -286,15 +286,15 @@ class RpdSubtractCentroidTool : public virtual IZdcAnalysisTool, public asg::Asg
   };
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_xRowCentroidKey {
     this, "xRowCentroidKey", "",
-    "Row X centroids after geometry corrections and after average centroid subtraction"
+    "Row X centroids before geometry corrections and before average centroid subtraction (RPD detector coordinates)"
   };
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_yColCentroidKey {
     this, "yColCentroidKey", "",
-    "Column Y centroids after geometry corrections and after average centroid subtraction"
+    "Column Y centroids before geometry corrections and before average centroid subtraction (RPD detector coordinates)"
   };
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_reactionPlaneAngleKey {
     this, "reactionPlaneAngleKey", "",
-    "Reaction plane angle in [-pi, pi) from the positive x axis (angle of centorid on side C, angle of centroid + pi on side A)"
+    "Reaction plane angle in [-pi, pi) from the positive x axis"
   };
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_cosDeltaReactionPlaneAngleKey {
     this, "cosDeltaReactionPlaneAngleKey", "",

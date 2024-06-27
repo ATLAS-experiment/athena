@@ -136,15 +136,10 @@ class RPDDataAnalyzer
 
   /**
    * in the case of pileup, the number of points (above baseline) in baseline samples required to perform fit.
-   * if insufficient points, set InsufficientPileupFitPointsBit and abort pileup subtraction
-   */
-  static unsigned int constexpr s_minPileupFitPoints = 3;
-  /**
-   * in the case of pileup, the number of UNIQUE points (above baseline) in baseline samples required to perform fit.
    * this number must be at least the number of parameters in pileup fits, else inversion of Gram matrix in TLinearFitter
    * will fail and generate ROOT error that propagates to Athena.
    * if insufficient points, set InsufficientPileupFitPointsBit and abort pileup subtraction.
    */
-  static unsigned int constexpr s_minUniquePileupFitPoints = 3;
+  static unsigned int constexpr s_minPileupFitPoints = 3;
 };
 #endif
