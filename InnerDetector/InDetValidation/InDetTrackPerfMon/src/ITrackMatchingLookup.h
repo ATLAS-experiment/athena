@@ -95,6 +95,9 @@ namespace IDTPM {
         getMatchedTestTruths( r );
       return vec.empty() ? nullptr : vec[0];
     }
+    /// best Truth <- Truth // to avoid compilation errors
+    virtual const xAOD::TruthParticle* getBestMatchedTestTruth(
+        const xAOD::TruthParticle& ) const { return nullptr; };
 
     /// return true if test is matched
     virtual bool isTestMatched( const xAOD::TrackParticle& t ) const = 0;

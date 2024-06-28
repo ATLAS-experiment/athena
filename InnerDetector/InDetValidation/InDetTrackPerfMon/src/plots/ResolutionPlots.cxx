@@ -119,6 +119,10 @@ template StatusCode IDTPM::ResolutionPlots::fillPlots< xAOD::TruthParticle, xAOD
 template StatusCode IDTPM::ResolutionPlots::fillPlots< xAOD::TrackParticle, xAOD::TruthParticle >(
     const xAOD::TrackParticle&, const xAOD::TruthParticle&, float weight );
 
+/// N.B.: not a use-case. Just to avoid compilation errors
+template StatusCode IDTPM::ResolutionPlots::fillPlots< xAOD::TruthParticle, xAOD::TruthParticle >(
+    const xAOD::TruthParticle&, const xAOD::TruthParticle&, float weight );
+
 
 /// -------------------------
 /// ----- finalizePlots -----

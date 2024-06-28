@@ -32,9 +32,9 @@ namespace IDTPM {
     /// Dedicated fill method (for tracks and/or truth particles)
     template< typename REF, typename TEST >
     StatusCode fillPlots(
-	const REF& particle_ref,
-	const TEST& track_test,
-        float weight );
+      const REF& particle_ref,
+	    const TEST& track_test,
+      float weight );
 
     /// Book the histograms
     void initializePlots(); // needed to override PlotBase
