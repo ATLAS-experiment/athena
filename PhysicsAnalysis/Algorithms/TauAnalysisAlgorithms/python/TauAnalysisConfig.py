@@ -313,7 +313,7 @@ class TauTriggerAnalysisSFBlock (ConfigBlock):
                 triggers = self.triggerChainsPerYear.get('2018',[])
             elif config.campaign() in [Campaign.MC21a, Campaign.MC23a]:
                 triggers = self.triggerChainsPerYear.get('2022',[])
-            elif config.campaign() is Campaign.MC23c:
+            elif config.campaign() in [Campaign.MC23c, Campaign.MC23d]:
                 triggers = self.triggerChainsPerYear.get('2023',[])
 
             for trig in triggers:
