@@ -61,10 +61,12 @@
 #include "CxxUtils/inline_hints.h"
 #include "CxxUtils/restrict.h"
 #include "CxxUtils/vec.h"
+#include "GaudiKernel/Kernel.h"
 #include "TrkGaussianSumFilterUtils/GsfConstants.h"
 //
 #include <algorithm>
 #include <memory>
+#include <numeric>
 namespace findIdxOfMinDetail {
 
 // index of minimum scalar
@@ -232,90 +234,73 @@ int32_t vecUpdateIdxOnNewMin(const float* distancesIn, int n) {
   return 0;
 }
 
+template <typename T = float, int STRIDE = 16, int VEC_WIDTH = 4>
 ATH_ALWAYS_INLINE
 float vecFindMinimum(const float* distancesIn, int n) {
   using namespace CxxUtils;
   const float* array =
       std::assume_aligned<GSFConstants::alignment>(distancesIn);
-  vec<float, 4> minValues1;
-  vec<float, 4> minValues2;
-  vec<float, 4> minValues3;
-  vec<float, 4> minValues4;
-  vload(minValues1, array);
-  vload(minValues2, array + 4);
-  vload(minValues3, array + 8);
-  vload(minValues4, array + 12);
-  vec<float, 4> values1;
-  vec<float, 4> values2;
-  vec<float, 4> values3;
-  vec<float, 4> values4;
-  for (int i = 16; i < n; i += 16) {
-    // 1
-    vload(values1, array + i);  // 0-3
-    vmin(minValues1, values1, minValues1);
-    // 2
-    vload(values2, array + i + 4);  // 4-7
-    vmin(minValues2, values2, minValues2);
-    // 3
-    vload(values3, array + i + 8);  // 8-11
-    vmin(minValues3, values3, minValues3);
-    // 4
-    vload(values4, array + i + 12);  // 12-15
-    vmin(minValues4, values4, minValues4);
+
+  constexpr int vectorCount = STRIDE / VEC_WIDTH;
+
+  vec<T, VEC_WIDTH> minValues[vectorCount];
+
+  for (int i = 0; i < vectorCount; i++) {
+    vload(minValues[i], array + (VEC_WIDTH * i));
   }
-  // Minimum of 1 and 2 goes to 1
-  vmin(minValues1, minValues1, minValues2);
-  // Minimum of 3 and 4 goes to 3
-  vmin(minValues3, minValues3, minValues4);
-  // Minimum of 1 and 3 goes to 1
-  vmin(minValues1, minValues1, minValues3);
-  //
-  float minValues[4];
-  vstore(minValues, minValues1);
-  // Do the final calculation scalar way
-  float minvalue = minValues[0];
-  for (size_t i = 1; i < 4; ++i) {
-    const float value = minValues[i];
-    if (value < minvalue) {
-      minvalue = value;
+
+  constexpr int totalStride = VEC_WIDTH * vectorCount;
+  vec<T, VEC_WIDTH> values[vectorCount];
+  for (int i = totalStride; i < n; i += totalStride) {
+    GAUDI_LOOP_UNROLL(4)
+    for (int j = 0; j < vectorCount; j++) {
+      vload(values[j], array + i + (VEC_WIDTH * j));
+      vmin(minValues[j], values[j], minValues[j]);
     }
   }
-  return minvalue;
+
+  T finalMinValues[VEC_WIDTH];
+  vstore(finalMinValues, std::reduce(std::begin(minValues), 
+                                     std::end(minValues), 
+                                     minValues[0], 
+                                     [](auto a, auto b){ return a < b ? a : b; }));
+
+  // Do the final calculation scalar way
+  return std::reduce(std::begin(finalMinValues), 
+                     std::end(finalMinValues), 
+                     finalMinValues[0], 
+                     [](auto a, auto b){ return a < b ? a : b; });
 }
 
+template <typename T = float, int STRIDE = 16, int VEC_WIDTH = 4>
 ATH_ALWAYS_INLINE
-int32_t vecIdxOfValue(const float value, const float* distancesIn, int n) {
+int32_t vecIdxOfValue(const T value, const T* distancesIn, int n) {
   using namespace CxxUtils;
   const float* array =
       std::assume_aligned<GSFConstants::alignment>(distancesIn);
 
-  vec<float, 4> values1;
-  vec<float, 4> values2;
-  vec<float, 4> values3;
-  vec<float, 4> values4;
-  vec<float, 4> target;
+  constexpr int vectorCount = STRIDE / VEC_WIDTH;
+
+  vec<T, VEC_WIDTH> values[vectorCount];
+  vec<T, VEC_WIDTH> target;
   vbroadcast(target, value);
-  for (int i = 0; i < n; i += 16) {
-    // 1
-    vload(values1, array + i);  // 0-3
-    vec<int, 4> eq1 = values1 == target;
-    // 2
-    vload(values2, array + i + 4);  // 4-7
-    vec<int, 4> eq2 = values2 == target;
-    // 3
-    vload(values3, array + i + 8);  // 8-11
-    vec<int, 4> eq3 = values3 == target;
-    // 4
-    vload(values4, array + i + 12);  // 12-15
-    vec<int, 4> eq4 = values4 == target;
+  vec<int, VEC_WIDTH> eqs[vectorCount];
+
+  for (int i = 0; i < n; i += STRIDE) {
+    GAUDI_LOOP_UNROLL(4)
+    for (int j = 0; j < vectorCount; j++) {
+      vload(values[j], array + i + (VEC_WIDTH * j));
+      eqs[j] = values[j] == target;
+    }
+    
     // See if we have the value in any
     // of the vectors
-    vec<int, 4> eq12 = eq1 || eq2;
-    vec<int, 4> eq34 = eq3 || eq4;
-    vec<int, 4> eqAny = eq12 || eq34;
     // If yes then use scalar code to locate it
-    if (vany(eqAny)) {
-      for (int32_t idx = i; idx < i + 16; ++idx) {
+    if (vany(std::reduce(std::begin(eqs),
+                         std::end(eqs),
+                         eqs[0],
+                         [](auto a, auto b){ return a || b; }))) {
+      for (int idx = i; idx < i + STRIDE; ++idx) {
         if (distancesIn[idx] == value) {
           return idx;
         }
