@@ -147,6 +147,8 @@ class MuonWorkingPointConfig (ConfigBlock) :
         self.addOption ('qualitySelectionOutput', True, type=bool,
             info="whether to retain only muons satisfying the quality "
             "requirements (bad muon veto). The default is True.")
+        self.addOption ('closeByCorrection', False, type=bool,
+            info="whether to use close-by-corrected isolation working points.")
         self.addOption ('systematicBreakdown', False, type=bool,
             info="enables the full breakdown of efficiency SF systematics "
             "(1 NP per uncertainty source, instead of 1 NP in total). "
@@ -227,7 +229,9 @@ class MuonWorkingPointConfig (ConfigBlock) :
             alg = config.createAlgorithm( 'CP::MuonIsolationAlg',
                                    'MuonIsolationAlg' + postfix )
             config.addPrivateTool( 'isolationTool', 'CP::IsolationSelectionTool' )
-            alg.isolationTool.MuonWP = self.isolation
+            alg.isolationTool.MuonWP = self.isolation 
+            if self.closeByCorrection:
+              alg.isolationTool.IsoDecSuffix = "CloseByCorr"
             alg.isolationDecoration = 'isolated_muon' + postfix + ',as_bits'
             alg.muons = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, self.selectionName)
