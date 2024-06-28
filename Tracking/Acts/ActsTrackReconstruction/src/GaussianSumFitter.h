@@ -113,6 +113,13 @@ private:
 					 const std::vector<Acts::SourceLink>& trackSourceLinks,
 					 const Acts::BoundTrackParameters& initialParams) const;
 
+  std::unique_ptr<Trk::Track> performDirectFit(const EventContext& ctx,
+					       const Acts::GeometryContext& tgContext,
+					       const Acts::GsfOptions<ActsTrk::MutableTrackStateBackend>& gsfOptions,
+					       const std::vector<Acts::SourceLink>& trackSourceLinks,
+					       const Acts::BoundTrackParameters& initialParams,
+					       const std::vector<const Acts::Surface*>& surfaces) const;
+
   // Create a track from the fitter result
   std::unique_ptr<Trk::Track> makeTrack(const EventContext& ctx, 
           const Acts::GeometryContext& tgContext, 
@@ -140,7 +147,22 @@ private:
   Gaudi::Property< int > m_option_maxPropagationStep {this, "MaxPropagationStep", 5000, 
       "Maximum number of steps for one propagate call"};
 
-  Gaudi::Property<bool> m_refitOnly{this, "RefitOnly", false, "Do refit only. Track summary will not be added"};
+  Gaudi::Property< int > m_maxComponents {this, "MaxComponents", 12,
+      "Maximum number of components in GSF"};
+
+  Gaudi::Property<bool> m_useDirectNavigation{this, "UseDirectNavigation", false,
+					      "GSF with direct navigation when refitting measurements"};
+
+  Gaudi::Property<bool> m_refitOnly{this, "RefitOnly", false,
+				    "Do refit only. Track summary will not be added"};
+
+  Gaudi::Property< double > m_weightCutOff {this, "WeightCutOff", 1.e-4,
+					    "component weight cut off"};
+
+  Gaudi::Property<std::string> m_option_componentMergeMethod{this, "ComponentMergeMethod", "eMaxWeight"
+						      , "method to merge components {eMean, eMaxWeight}"};
+
+  Acts::ComponentMergeMethod m_componentMergeMethod;
 
   /// Type erased track fitter function.
   using Fitter = Acts::GaussianSumFitter< Acts::Propagator<Acts::MultiEigenStepperLoop<>, Acts::Navigator>,
@@ -149,6 +171,11 @@ private:
 
   std::unique_ptr<TrkMeasurementCalibrator> m_calibrator;
   std::unique_ptr<Fitter> m_fitter;
+
+  using DirectFitter = Acts::GaussianSumFitter< Acts::Propagator<Acts::MultiEigenStepperLoop<>, Acts::DirectNavigator>,
+                                                        Acts::AtlasBetheHeitlerApprox<6, 5>,
+                                                        ActsTrk::MutableTrackStateBackend>;
+  std::unique_ptr<DirectFitter> m_directFitter;
 
 
   ATLASSourceLinkSurfaceAccessor m_surfaceAccessor{};

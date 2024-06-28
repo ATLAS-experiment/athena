@@ -9,6 +9,10 @@ def ActsGaussianSumFitterCfg(flags,
     acc = ComponentAccumulator()
 
     kwargs.setdefault("RefitOnly", True) # Track summary will be added in the algorithm
+
+    kwargs.setdefault("UseDirectNavigation", False) # direct navigation used for refitting measurements
+    kwargs.setdefault("ComponentMergeMethod", "eMaxWeight") # eMean or eMaxWeight
+    kwargs.setdefault("MaxComponents", 12)
     
     if "TrackingGeometryTool" not in kwargs:
         from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
