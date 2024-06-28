@@ -30,9 +30,18 @@ atlas_add_component( InDetTrackPerfMon
                      src/components/*.cxx
                      LINK_LIBRARIES InDetTrackPerfMonLib )
 
+atlas_add_test ( hdefXmlToJson_test SCRIPT test/xml2Json.sh
+                 POST_EXEC_SCRIPT nopost.sh )
+                 
+atlas_add_test ( validateJson_test SCRIPT test/validateJson.sh
+                 POST_EXEC_SCRIPT nopost.sh )
+
 # Install files from the package:
 atlas_install_python_modules( python/*.py )
 atlas_install_data( data/* )
+atlas_install_data( test/hdef.xml )
+atlas_install_data( test/ref.json )
 atlas_install_runtime( scripts/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
-atlas_install_scripts( test/test*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
+atlas_install_scripts( test/test*.py POST_BUILD_CMD ${ATLAS_FLAKE8})
+atlas_install_data( scripts/hdefXmlToJson.xsl)
 atlas_install_scripts( test/test*.sh )
