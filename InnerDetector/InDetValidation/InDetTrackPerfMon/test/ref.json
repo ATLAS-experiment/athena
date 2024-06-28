@@ -1,0 +1,20 @@
+ {  "include" : { "type" : "TH1F",  "xAxis" : { "title" : "I have been included", "nBins" :
+            "100", "low" : "0", "hi" :
+            "100"} , "yAxis" : { "title" : "Num. entries"} },
+     "002_Al_N_01" : { "type" : "TH1F",  "xAxis" : { "title" : "Num. tracks", "nBins" :
+            "200", "low" : "0", "hi" :
+            "1000"} , "yAxis" : { "title" : "Entries"} },
+     "track_fakerate_vs_eta" : { "type" : "TProfile",  "xAxis" : { "title" : "#eta", "nBins" :
+            "20", "low" : "-2.5", "hi" :
+            "2.5"} },
+     "test2D" : { "type" : "TH2F",  "xAxis" : { "title" : "xAxis", "nBins" :
+            "30", "low" : "-2.5", "hi" :
+            "2.5"} , "yAxis" : { "title" : "yAxis",
+        "nBins" : "20", "low" : "0.0", "high" :
+            "20" } },
+     "test" : { "type" : "TH1F",  "xAxis" : { "title" : "Visible E_{T} (GeV)", "nBins" :
+            "100", "low" : "0", "hi" :
+            "100"} , "yAxis" : { "title" : "Num. entries"} },
+     "testEfficiency" : { "type" : "TEfficiency",  "xAxis" : { "title" : "x variable", "nBins" :
+            "75", "low" : "0", "hi" :
+            "75"} , "yAxis" : { "title" : "Efficiency"} } } 
