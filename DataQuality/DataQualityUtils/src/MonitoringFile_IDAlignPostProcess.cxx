@@ -3146,11 +3146,16 @@ namespace dqutils {
     h->SetBit(TH1::kIsAverage);
 
     int nbins_2d = h2d->GetNbinsX();
-
+    int nbins_y = h2d->GetNbinsY();
     // Removed by Alex
     //int nbins_h = h->GetNbinsX();
     //if(nbins_2d!=nbins_h) std::cout << "Mean/Width Histograms not set up correctly - nbins mismatch for " <<
     // h->GetName() << std::endl;
+
+    // Check if nbins_y is less than 1 and skip if true
+    if (nbins_y <= 1) {
+      return;
+    }
 
     for (int i = 1; i != nbins_2d + 1; i++) {
       //std::cout << "Gaussian: processing bin " << i << std::endl;
@@ -3255,6 +3260,11 @@ namespace dqutils {
     int nbins_3dY = h3d->GetNbinsY();
     int nbins_hX = h->GetNbinsX();
     int nbins_hY = h->GetNbinsY();
+
+    // Check if nbins_3dZ is less than 1 and skip if true
+    if (h3d->GetZaxis()->GetNbins() <= 1) {
+      return;
+    }
 
     if (nbins_3dX != nbins_hX) {
       std::cout << "meanRMSProjections3D: Mean/RMS Histograms not set up correctly - nbins mismatch for " <<
@@ -3383,6 +3393,11 @@ namespace dqutils {
     int nbins_3dX = h3d->GetNbinsX();
     int nbins_3dY = h3d->GetNbinsY();
 
+    // Check if nbins_3dZ is less than 1 and skip if true
+    if (h3d->GetZaxis()->GetNbins() <= 1) {
+      return;
+    }
+
     for (int i = 1; i != nbins_3dX + 1; i++) {
       for (int j = 1; j != nbins_3dY + 1; j++) {
         TH1F* hproj = (TH1F*) h3d->ProjectionZ("proj", i, i, j, j, "e");
@@ -3482,6 +3497,11 @@ namespace dqutils {
     int nbins_3dY = h3d->GetNbinsY();
     int nbins_h = h->GetNbinsX();
     int nbins_3d = 0;//will be overridden
+
+    // Check if nbins_3dZ is less than 1 and skip if true
+    if (h3d->GetZaxis()->GetNbins()<= 1) {
+      return;
+    }
 
     if (iXY == 0) {
       if (nbins_3dX != nbins_h) {

@@ -3,7 +3,6 @@
 #include "TLinearFitter.h"
 #include "TMath.h"
 #include <limits>
-#include <set>
 
 const auto zeroVector = [](std::vector<float>& v){ v.assign(v.size(), 0); };
 const auto zeroVectorVector = [](std::vector<std::vector<float>>& vv){ for (std::vector<float>& v : vv) v.assign(v.size(), 0); };
@@ -13,7 +12,7 @@ const auto zeroPileupFuncVector = [](std::vector<std::function<float(unsigned in
 RPDDataAnalyzer::RPDDataAnalyzer(
   ZDCMsg::MessageFunctionPtr messageFunc_p, const std::string& tag, const RPDConfig& config, std::vector<float> const& calibFactors
 ) :
-  m_msgFunc_p(messageFunc_p),
+  m_msgFunc_p(std::move(messageFunc_p)),
   m_tag(tag),
   m_nRows(config.nRows),
   m_nColumns(config.nColumns),
@@ -174,7 +173,7 @@ bool RPDDataAnalyzer::checkPulses(unsigned int channel) {
   if (hasPostPulse) m_chStatus.at(channel).set(PostPulseBit, true);
   if (hasNoPulse) m_chStatus.at(channel).set(NoPulseBit, true);
 
-  return !hasPrePulse && !hasPostPulse && !hasNoPulse; // true only if there is a good pulse and no other pulse
+  return !hasPrePulse && !hasPostPulse; // true if there is a only good pulse or if there is no pulse
 }
 
 /**
@@ -279,16 +278,13 @@ bool RPDDataAnalyzer::doBaselinePileupSubtraction(unsigned int channel) {
   float nominalBaselineSubtrSum = 0;
   /** points (sample, baseline-subtracted ADC) with ADC above baseline, to be used in fit in case of pileup */
   std::vector<std::pair<unsigned int, float>> pileupFitPoints;
-  /** set of (unique) ADC values in baseline samples above nominal baseline */
-  std::set<float> uniqueBaselineValues;
   for (unsigned int sample = 0; sample < m_nBaselineSamples; sample++) {
     float const& adc = m_chFadcData.at(channel).at(sample);
     float const adcBaselineSubtr = adc - m_nominalBaseline;
     nominalBaselineSubtrSum += adcBaselineSubtr;
     if (adcBaselineSubtr > 0) {
       // this sample is a candidate for pileup fit
-      pileupFitPoints.push_back({sample, adcBaselineSubtr});
-      uniqueBaselineValues.insert(adc);
+      pileupFitPoints.emplace_back(sample, adcBaselineSubtr);
     }
   }
   float baselineStdDev = TMath::RMS(m_chFadcData.at(channel).begin(), std::next(m_chFadcData.at(channel).begin(), m_nBaselineSamples));
@@ -310,7 +306,7 @@ bool RPDDataAnalyzer::doBaselinePileupSubtraction(unsigned int channel) {
   // we suspect that there is pileup - use nominal baseline
   m_chBaseline.at(channel) = m_nominalBaseline;
 
-  if (pileupFitPoints.size() < s_minPileupFitPoints || uniqueBaselineValues.size() < s_minUniquePileupFitPoints) {
+  if (pileupFitPoints.size() < s_minPileupFitPoints) {
     m_chStatus.at(channel).set(InsufficientPileupFitPointsBit, true);
     // there are not enough points to do fit, so just use nominal baseline and call it a day
     for (unsigned int sample = 0; sample < m_nSamples; sample++) {
@@ -359,6 +355,12 @@ bool RPDDataAnalyzer::doBaselinePileupSubtraction(unsigned int channel) {
 */
 void RPDDataAnalyzer::calculateMaxSampleMaxAdc(unsigned int channel)
 {
+  if (m_chStatus.at(channel)[NoPulseBit]) {
+    m_chMaxAdc.at(channel) = 0;
+    m_chMaxAdcCalib.at(channel) = 0;
+    m_chMaxSample.at(channel) = -1;
+    return;
+  }
   float maxAdc = -std::numeric_limits<float>::infinity();
   unsigned int maxSample = 0;
   for (unsigned int sample = m_nBaselineSamples; sample < m_endSignalSample; sample++) {
@@ -377,6 +379,11 @@ void RPDDataAnalyzer::calculateMaxSampleMaxAdc(unsigned int channel)
  * Calculate sum ADC and if there is pileup, calculate fractional pileup.
 */
 void RPDDataAnalyzer::calculateSumAdc(unsigned int channel) {
+  if (m_chStatus.at(channel)[NoPulseBit]) {
+    m_chSumAdc.at(channel) = 0;
+    m_chSumAdcCalib.at(channel) = 0;
+    return;
+  }
   // sum range is after baseline until end of signal
   float signalRangeAdcSum = 0;
   for (unsigned int sample = m_nBaselineSamples; sample < m_endSignalSample; sample++) {
@@ -455,12 +462,14 @@ void RPDDataAnalyzer::analyzeData()
       continue;
     }
     if (!checkPulses(channel)) {
-      // there was no pulse or bad pulse, stop analysis
+      // there was a pre-pulse or post-pulse, stop analysis
       m_chStatus.at(channel).set(ValidBit, false);
       continue;
     }
-    if (!doBaselinePileupSubtraction(channel)) {
-      // there was a problem with baseline/pileup subtraction, stop analysis
+    // there is either only a good pulse or no pulse
+    // only do baseline and pileup subtraction if there is a pulse!
+    if (!m_chStatus.at(channel)[NoPulseBit] /* there is a pulse -> */ && !doBaselinePileupSubtraction(channel)) {
+      // there was a pulse and a problem with baseline/pileup subtraction, stop analysis
       m_chStatus.at(channel).set(ValidBit, false);
       continue;
     }
