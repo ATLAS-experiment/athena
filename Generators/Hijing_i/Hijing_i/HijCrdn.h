@@ -1,14 +1,14 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
 #ifndef HijCrdn_h
 #define HijCrdn_h
 
-#include "CxxUtils/unused.h"
+#include <cstdint>
 
-extern "C" { void* hijcrdn_address_(void); }
+extern "C" { uintptr_t hijcrdn_address_(); }
 /**
 @brief Class definition for HijCrdn, which is used
       to modify the Hijing HIJCRDN common.
@@ -43,8 +43,7 @@ private:
 	float  	yt	[s_lenJ][s_lenI];
     };
 
-    int  ATH_UNUSED_MEMBER(m_dummy);
-    float  ATH_UNUSED_MEMBER(m_realdummy);
+    float  m_realdummy;
 
     static HIJCRDN* s_hijcrdn;
 };
@@ -54,13 +53,12 @@ HijCrdn::HIJCRDN* HijCrdn::s_hijcrdn =0;
 
 inline void
 HijCrdn::init(void)
-{ if (!s_hijcrdn) s_hijcrdn = static_cast<HIJCRDN*>(hijcrdn_address_()); }
+{ if (!s_hijcrdn) s_hijcrdn = reinterpret_cast<HIJCRDN*>(hijcrdn_address_()); }
 
 // Constructor
 inline
 HijCrdn::HijCrdn()
-    : m_dummy		(-999),
-      m_realdummy	(-999.)
+    : m_realdummy	(-999.)
 {}
 
 // Destructor

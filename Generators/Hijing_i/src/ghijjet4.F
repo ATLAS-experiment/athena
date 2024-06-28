@@ -3,9 +3,9 @@
       COMMON/HIJJET4/NDR,IADR(900,2),KFDR(900),PDR(900,5),VDR(900,5)
       SAVE  /HIJJET4/
       EXTERNAL HIDATA ! All that is required to force loading of BLOCK DATA
-      FVOIDP GETADDR
+      FVOIDP GETADDRI
 
-      HIJJET4_ADDRESS = GETADDR(NDR)
+      HIJJET4_ADDRESS = GETADDRI(NDR)
       
       RETURN
       END

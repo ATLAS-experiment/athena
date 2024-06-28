@@ -7,9 +7,9 @@
      &     PJTE(300,500),PJTM(300,500)
       SAVE  /HIJJET1/
       EXTERNAL HIDATA ! All that is required to force loading of BLOCK DATA
-      FVOIDP GETADDR
+      FVOIDP GETADDRI
 
-      HIJJET1_ADDRESS = GETADDR(NPJ)
+      HIJJET1_ADDRESS = GETADDRI(NPJ)
       
       RETURN
       END

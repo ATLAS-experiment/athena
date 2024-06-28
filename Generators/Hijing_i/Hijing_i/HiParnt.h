@@ -1,12 +1,14 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
 #ifndef HiParnt_h
 #define HiParnt_h
 
-extern "C" { void* hiparnt_address_(void); }
+#include <cstdint>
+
+extern "C" { uintptr_t hiparnt_address_(); }
 
 /**
 @class HiParnt
@@ -60,7 +62,7 @@ HiParnt::HIPARNT* HiParnt::s_hiparnt =0;
 
 inline void
 HiParnt::init(void)
-{ if (!s_hiparnt) s_hiparnt = static_cast<HIPARNT*>(hiparnt_address_()); }
+{ if (!s_hiparnt) s_hiparnt = reinterpret_cast<HIPARNT*>(hiparnt_address_()); }
 
 inline 
 HiParnt::HiParnt() 

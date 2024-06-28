@@ -5,9 +5,9 @@
      &     PZSG(900,100),PESG(900,100),PMSG(900,100)
       SAVE  /HIJJET2/
       EXTERNAL HIDATA ! All that is required to force loading of BLOCK DATA
-      FVOIDP GETADDR
+      FVOIDP GETADDRI
 
-      HIJJET2_ADDRESS = GETADDR(NSG)
+      HIJJET2_ADDRESS = GETADDRI(NSG)
       
       RETURN
       END
