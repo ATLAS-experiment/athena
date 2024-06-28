@@ -160,7 +160,7 @@ namespace MuonR4 {
         const Identifier stripIdB = idHelper.channelID(hitId, readOutEle->multilayer(),
                                                        gasGap, channelType::Strip, digitStrip -1, isValid);
         if (isValid) {
-            outCollection.push_back(std::make_unique<sTgcDigit>(digitId,
+            outCollection.push_back(std::make_unique<sTgcDigit>(stripIdB,
                                                                 associateBCIdTag(ctx, timedHit), 
                                                                 hitTime(timedHit), dummyCharge * w1, false, false));
         }
@@ -171,7 +171,7 @@ namespace MuonR4 {
         const Identifier stripIdA = idHelper.channelID(hitId, readOutEle->multilayer(),
                                                        gasGap, channelType::Strip, digitStrip + 1, isValid);
         if (isValid) {
-            outCollection.push_back(std::make_unique<sTgcDigit>(digitId,
+            outCollection.push_back(std::make_unique<sTgcDigit>(stripIdA,
                                                                 associateBCIdTag(ctx, timedHit), 
                                                                 hitTime(timedHit), dummyCharge * w3, false, false));
         }
