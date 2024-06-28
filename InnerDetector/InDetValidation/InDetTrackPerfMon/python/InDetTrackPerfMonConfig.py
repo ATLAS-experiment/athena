@@ -125,8 +125,12 @@ def InDetTrackPerfMonToolCfg( flags, name="InDetTrackPerfMonTool", **kwargs ):
             TrackQualitySelectionToolCfg( flags,
                 name="TrackQualitySelectionTool"+flags.PhysVal.IDTPM.currentTrkAna.anaTag ) ) )
 
-    if ( ( "Trigger" in flags.PhysVal.IDTPM.currentTrkAna.TestType) or
-         ( "Trigger" in flags.PhysVal.IDTPM.currentTrkAna.RefType) ):
+    if "Truth" in flags.PhysVal.IDTPM.currentTrkAna.RefType or "Truth" in flags.PhysVal.IDTPM.currentTrkAna.TestType:
+        from InDetTrackPerfMon.InDetAlgorithmConfig import TruthHitDecoratorAlgCfg
+        acc.merge( TruthHitDecoratorAlgCfg(flags) )
+
+    if ( ( "Trigger" in flags.PhysVal.IDTPM.currentTrkAna.TestType ) or
+         ( "Trigger" in flags.PhysVal.IDTPM.currentTrkAna.RefType ) ):
 
         kwargs.setdefault( "TriggerTrkParticleContainerName",
                            flags.PhysVal.IDTPM.currentTrkAna.TrigTrkKey )
@@ -166,18 +170,6 @@ def InDetTrackPerfMonCfg( flags ):
     '''
     log = logging.getLogger( "InDetTrackPerfMonCfg" )
     acc = ComponentAccumulator()
-
-    ## Truth-hit decorator
-    useTruth = False
-    for trkAnaName in flags.PhysVal.IDTPM.trkAnaNames :
-        if ( ( "Truth" in getattr( flags.PhysVal.IDTPM, trkAnaName+".TestType" ) ) or
-             ( "Truth" in getattr( flags.PhysVal.IDTPM, trkAnaName+".RefType" ) ) ):
-            useTruth = True
-            break
-
-    if useTruth:
-        from InDetTrackPerfMon.InDetAlgorithmConfig import TruthHitDecoratorAlgCfg
-        acc.merge( TruthHitDecoratorAlgCfg(flags) )
 
     ## Offline track-object decorator
     useOfflineObject = False

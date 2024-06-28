@@ -17,6 +17,8 @@ def getTrkAnaDicts( flags, input_file, unpackChains=False ):
 
     ## Getting full input json file path
     dataPath = find_datafile( input_file )
+    if dataPath is None and input_file != "Default":
+        raise Exception(f"Input file with analyses definition: {input_file} could not be found, for files given with absolute path use ./ prefix")
     if dataPath is None:
         return analysesDict
 
