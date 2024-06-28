@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -10,7 +10,9 @@
 #ifndef PyqPar_h
 #define PyqPar_h
 
-extern "C" { void* pyqpar_address_(void); }
+#include <cstdint>
+
+extern "C" { uintptr_t pyqpar_address_(); }
 
 class PyqPar {
 public:
@@ -47,7 +49,7 @@ PyqPar::PYQPAR* PyqPar::s_pyqpar =0;
 
 inline void
 PyqPar::init(void)
-{ if (!s_pyqpar) s_pyqpar = static_cast<PYQPAR*>(pyqpar_address_()); }
+{ if (!s_pyqpar) s_pyqpar = reinterpret_cast<PYQPAR*>(pyqpar_address_()); }
 
 // Constructor
 inline

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -10,7 +10,9 @@
 #ifndef HyfPar_h
 #define HyfPar_h
 
-extern "C" { void* hyfpar_address_(void); }
+#include <cstdint>
+
+extern "C" { uintptr_t hyfpar_address_(); }
 
 class HyfPar {
 public:
@@ -47,7 +49,7 @@ HyfPar::HYFPAR* HyfPar::s_hyfpar =0;
 
 inline void
 HyfPar::init(void)
-{ if (!s_hyfpar) s_hyfpar = static_cast<HYFPAR*>(hyfpar_address_()); }
+{ if (!s_hyfpar) s_hyfpar = reinterpret_cast<HYFPAR*>(hyfpar_address_()); }
 
 // Constructor
 inline

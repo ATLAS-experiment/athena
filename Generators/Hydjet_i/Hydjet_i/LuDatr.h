@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -10,7 +10,9 @@
 #ifndef LuDatr_h
 #define LuDatr_h
 
-extern "C" { void* ludatr_address_(void); }
+#include <cstdint>
+
+extern "C" { uintptr_t ludatr_address_(); }
 
 class LuDatr {
 public:
@@ -51,7 +53,7 @@ LuDatr::LUDATR* LuDatr::s_ludatr =0;
 
 inline void
 LuDatr::init(void)
-{ if (!s_ludatr) s_ludatr = static_cast<LUDATR*>(ludatr_address_()); }
+{ if (!s_ludatr) s_ludatr = reinterpret_cast<LUDATR*>(ludatr_address_()); }
 
 inline 
 LuDatr::LuDatr() 

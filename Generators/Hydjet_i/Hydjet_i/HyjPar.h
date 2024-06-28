@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -10,7 +10,9 @@
 #ifndef HyjPar_h
 #define HyjPar_h
 
-extern "C" { void* hyjpar_address_(void); }
+#include <cstdint>
+
+extern "C" { uintptr_t hyjpar_address_(); }
 
 class HyjPar {
 public:
@@ -49,7 +51,7 @@ HyjPar::HYJPAR* HyjPar::s_hyjpar =0;
 
 inline void
 HyjPar::init(void)
-{ if (!s_hyjpar) s_hyjpar = static_cast<HYJPAR*>(hyjpar_address_()); }
+{ if (!s_hyjpar) s_hyjpar = reinterpret_cast<HYJPAR*>(hyjpar_address_()); }
 
 // Constructor
 inline

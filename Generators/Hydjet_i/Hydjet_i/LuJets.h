@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -10,7 +10,9 @@
 #ifndef LuJets_h
 #define LuJets_h
 
-extern "C" { void* lujets_address_(void); }
+#include <cstdint>
+
+extern "C" { uintptr_t lujets_address_(); }
 
 class LuJets {
 public:
@@ -64,7 +66,7 @@ LuJets::LUJETS* LuJets::s_lujets =0;
 
 inline void
 LuJets::init(void)
-{ if (!s_lujets) s_lujets = static_cast<LUJETS*>(lujets_address_()); }
+{ if (!s_lujets) s_lujets = reinterpret_cast<LUJETS*>(lujets_address_()); }
 
 // Constructor
 inline
