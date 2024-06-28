@@ -140,7 +140,7 @@ def createMuonConfigFlags():
 
     mcf.addFlag("Muon.enableAlignment",lambda flags: (flags.Common.Project is not Project.AthSimulation \
                                                       and (flags.Common.ProductionStep not in [ProductionStep.Simulation, ProductionStep.FastChain] or flags.Overlay.DataOverlay)))
-
+    mcf.addFlag("Muon.enableTrigIDtrackReuse", False)
     # configuration of the DESDM_MCP output format 
 
     mcf.addFlag("Muon.DESDM_MCP.doAlignmentFormat", False) # Flag to stear the DESDM_MCP format which switches to a looser event selection for toroid off runs used for alignment. 

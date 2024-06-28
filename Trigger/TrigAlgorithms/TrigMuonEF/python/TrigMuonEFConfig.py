@@ -64,3 +64,11 @@ def MuonChainFilterAlgCfg(flags, name="MuonChainFilter", **kwargs):
     acc = ComponentAccumulator()
     acc.addEventAlgo(filterAlg(name, **kwargs))
     return acc
+
+def MergeMuonInDetTracksAlgCfg(flags, name="MergeMuonInDetTracksAlg", **kwargs):
+
+    mergeTracks = CompFactory.MergeMuonInDetTracksAlg
+    acc = ComponentAccumulator()
+    acc.addEventAlgo(mergeTracks(name, **kwargs))
+    return acc
+
