@@ -45,9 +45,6 @@ else()
     atlas_add_test( JobProperties SCRIPT test/JobPropertiesUnitTests.py
        POST_EXEC_SCRIPT noerror.sh )
 
-    atlas_add_test( KeyStore SCRIPT test/KeyStoreUnitTests.py
-       POST_EXEC_SCRIPT noerror.sh )
-
     atlas_add_test( CFElements SCRIPT python -m unittest -v AthenaCommon.CFElements
        POST_EXEC_SCRIPT noerror.sh )
 
