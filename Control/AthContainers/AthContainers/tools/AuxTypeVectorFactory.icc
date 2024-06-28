@@ -17,6 +17,7 @@
 namespace SG {
 
 
+#ifndef XAOD_STANDALONE
 /**
  * @brief Apply output thinning to one item.
  *
@@ -24,33 +25,34 @@ namespace SG {
  */
 template <class T>
 inline
-void applyAuxThinning (T*)
+void applyAuxThinning (const SG::ThinningCache*, T*)
 {
 }
 
 
-#ifndef XAOD_STANDALONE
 /**
  * @brief Apply output thinning to an ElementLink.
  * @param p Object being written.
+ * @param tc Thinning cache for the current stream.
  */
 template <class T>
 inline
-void applyAuxThinning (ElementLink<T>* p)
+void applyAuxThinning (const SG::ThinningCache* tc, ElementLink<T>* p)
 {
-  p->thin();
+  p->thin (tc);
 }
 
 
 /**
  * @brief Apply output thinning to a vector of ElementLinks.
  * @param p Object being written.
+ * @param tc Thinning cache for the current stream.
  */
 template <class T>
-void applyAuxThinning (std::vector<ElementLink<T> >* p)
+void applyAuxThinning (const SG::ThinningCache* tc, std::vector<ElementLink<T> >* p)
 {
   for (ElementLink<T>& el : *p) {
-    el.thin();
+    el.thin (tc);
   }
 }
 #endif
@@ -254,10 +256,14 @@ void AuxTypeVectorFactoryImpl<T, ALLOC>::copyForOutput (SG::auxid_t auxid,
                                                         const AuxVectorData& src,  size_t src_index,
                                                         size_t n) const
 {
+  [[maybe_unused]]
   vector_value_type* dstptr = copyImpl (auxid, dst, dst_index, src, src_index, n);
+#ifndef XAOD_STANDALONE
+  const SG::ThinningCache* tc = SG::getThinningCache();
   for (size_t i = 0; i < n; i++) {
-    applyAuxThinning (dstptr + i);
+    applyAuxThinning (tc, dstptr + i);
   }
+#endif
 }
 
 
