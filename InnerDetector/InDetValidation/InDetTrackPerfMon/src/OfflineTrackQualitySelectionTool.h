@@ -29,11 +29,11 @@ public:
   virtual StatusCode initialize() override;
 
   virtual StatusCode selectTracks(
-      TrackAnalysisCollections& trkAnaColls );
+      TrackAnalysisCollections& trkAnaColls ) override;
 
   virtual StatusCode selectTracksInRoI(
       TrackAnalysisCollections& trkAnaColls,
-      const ElementLink< TrigRoiDescriptorCollection >& roiLink );
+      const ElementLink< TrigRoiDescriptorCollection >& roiLink ) override;
 
 private:
   ToolHandle<InDet::IInDetTrackSelectionTool> m_offlineTool{this, "offlineTool", "", "Instance name of track selection tool"};
