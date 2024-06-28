@@ -304,7 +304,32 @@ def parse(legacy_args=False):
         user_opts = sys.argv[dashpos+1:]
 
     parser = getArgumentParser(legacy_args)
-    opts, leftover = parser.parse_known_args(args)
+    
+    # perform a pre-parse without -h or --help
+    # if don't have a script, then will just re-parse with help active
+    # otherwise will effectively let script do the parsing
+    # i.e. this allows the following to work:
+    #   athena MyScript.py --help
+    # to reveal the help messaging determined by MyScript.py
+    if "-h" in args or "--help" in args:
+        if "-h" in args: args.remove("-h")
+        if "--help" in args: args.remove("--help")
+        # need to unrequire any required arguments in order to do a "pre parse"
+        unrequiredActions = []
+        for a in parser._actions:
+            if a.required:
+                unrequiredActions.append(a)
+                a.required = False
+        opts, leftover = parser.parse_known_args(args)
+        for a in unrequiredActions: a.required=True
+        if not opts.scripts:
+            # no script, just run argparsing as normal, with --help as for: athena --help
+            args += ["--help"]
+            opts, leftover = parser.parse_known_args(args)
+    else:
+        opts, leftover = parser.parse_known_args(args)
+
+
     setattr(opts, 'user_opts', user_opts)
 
     # If the argument parser has been extended, the script name(s) may end up
