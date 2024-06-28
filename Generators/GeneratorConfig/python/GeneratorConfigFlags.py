@@ -16,6 +16,9 @@ def createGeneratorConfigFlags():
     # Input Generator File
     gencf.addFlag("Generator.inputGeneratorFile", '')
     
+    # Number of input files per job
+    gencf.addFlag("Generator.inputFilesPerJob", 1)
+    
     # Events per job
     gencf.addFlag("Generator.nEventsPerJob", 10000)
 

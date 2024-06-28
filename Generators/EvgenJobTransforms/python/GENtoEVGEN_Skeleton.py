@@ -13,6 +13,7 @@ evgenLog = logging.getLogger("Gen_tf")
 # Common
 from AthenaCommon.SystemOfUnits import GeV
 from GeneratorConfig.Sequences import EvgenSequence
+from PyUtils.Helpers import release_metadata
 
 # Functions for pre/post-include/exec
 from PyJobTransforms.TransformUtils import processPreExec, processPreInclude, processPostExec, processPostInclude
@@ -51,6 +52,7 @@ def setupSample(runArgs, flags):
     )
     jo = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(jo)
+    evgenLog.info("including file %s", jofile)
 
     # Create instance of Sample(EvgenCAConfig)
     sample = jo.Sample(flags)
@@ -81,7 +83,19 @@ def setupSample(runArgs, flags):
         flags.Generator.nEventsPerJob = sample.nEventsPerJob
 
     # Check if sample attributes have been properly set
-    sample.checkAttributes()
+    for var, value in vars(sample).items():
+       if not value:
+           raise RuntimeError("self.{} should be set in Sample(EvgenConfig)".format(var))
+       else:
+           if var == "generators":
+               from GeneratorConfig.Versioning import generatorsGetInitialVersionedDictionary, generatorsVersionedStringList
+               from GeneratorConfig.GenConfigHelpers import gen_sortkey
+               gennames = sorted(sample.generators, key=gen_sortkey)
+               gendict = generatorsGetInitialVersionedDictionary(gennames)
+               gennamesvers = generatorsVersionedStringList(gendict)
+               evgenLog.info("MetaData: generatorName = {}".format(gennamesvers))
+           else:   
+               evgenLog.info("MetaData: {} = {}".format(var, value))
     
     # Check for other inconsistencies in jO
     if len(sample.generators) > len(set(sample.generators)):
@@ -104,6 +118,10 @@ def setupSample(runArgs, flags):
 
 # Main function
 def fromRunArgs(runArgs):
+    # print release information
+    d = release_metadata()
+    evgenLog.info("using release [%(project name)s-%(release)s] [%(platform)s] [%(nightly name)s/%(nightly release)s] -- built on [%(date)s]", d)
+    
     evgenLog.info("****************** STARTING EVENT GENERATION *****************")
 
     evgenLog.info("**** Transformation run arguments")
@@ -142,7 +160,10 @@ def fromRunArgs(runArgs):
     flags.Output.EVNTFileName = runArgs.outputEVNTFile
 
     flags.Beam.Energy = runArgs.ecmEnergy / 2 * GeV
-
+    
+    flags.PerfMon.doFastMonMT = True
+    flags.PerfMon.doFullMonMT = True
+    
     # Process pre-include
     processPreInclude(runArgs, flags)
 
@@ -176,7 +197,9 @@ def fromRunArgs(runArgs):
 
     # Set up the process
     cfg.merge(sample.setupProcess(flags))
-
+    
+    # Filter
+    
     # Fix non-standard event features
     from EvgenProdTools.EvgenProdToolsConfig import FixHepMCCfg
     cfg.merge(FixHepMCCfg(flags))
@@ -207,10 +230,14 @@ def fromRunArgs(runArgs):
         cfg.merge(PrintMCCfg(flags, 
                              LastEvent=runArgs.printEvts))
 
+    # PerfMon
+    from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
+    cfg.merge(PerfMonMTSvcCfg(flags), sequenceName=EvgenSequence.Post.value)
+
     # Estimate time needed for Simulation
     from EvgenProdTools.EvgenProdToolsConfig import SimTimeEstimateCfg
-    cfg.merge(SimTimeEstimateCfg(flags))
-
+    cfg.merge(SimTimeEstimateCfg(flags))   
+    
     # TODO: Rivet
      
     # Sort the list of generator names into standard form
