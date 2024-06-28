@@ -185,9 +185,13 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsReference(
 
     if( m_plots_resolution ) {
       if( isMatched ) {
-	// Assume that there is some reasonable orgering implemented for the matched tests
-	const auto matchedTests = matches.getMatchedTestTracks( *particle );
-	ATH_CHECK( m_plots_resolution->fillPlots( *particle, *(matchedTests[0]), weight ) );
+        if( m_trkAnaDefSvc->isTestTruth() ) {
+	        ATH_CHECK( m_plots_resolution->fillPlots(
+            *particle, *(matches.getBestMatchedTestTruth( *particle )), weight ) );
+        } else {
+	        ATH_CHECK( m_plots_resolution->fillPlots(
+            *particle, *(matches.getBestMatchedTestTrack( *particle )), weight ) );
+        }
       }
     }
     
