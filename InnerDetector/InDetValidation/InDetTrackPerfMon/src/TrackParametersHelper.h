@@ -141,6 +141,43 @@ namespace IDTPM {
   template< class U >
   inline float ndof( const U& p ) { return getNdof(p); }
 
+  /// Accessor utilify function for track parameter uncertainty
+  inline float getTrackParameterError( const xAOD::TrackParticle& p, Trk::ParamDefs param ) {
+    return std::sqrt(p.definingParametersCovMatrix()(param, param));
+  }
+  inline float getTrackParameterError( const xAOD::TruthParticle&, Trk::ParamDefs ) { return -9999; }
+  template< class U >
+  inline float trackParameterError( const U& p, Trk::ParamDefs param ) { return getTrackParameterError(p, param); }
+
+  inline float getQOverPtError( const xAOD::TrackParticle& p ) {
+    float inverseSinTheta = 1./std::sin(p.theta());
+    float cosTheta = std::cos(p.theta());
+    float qOverPT_err2 =
+      std::pow(trackParameterError(p, Trk::qOverP) * inverseSinTheta, 2)
+      + std::pow(p.qOverP() * cosTheta * trackParameterError(p, Trk::theta) * std::pow(inverseSinTheta, 2), 2)
+      - 2 * p.qOverP() * cosTheta * p.definingParametersCovMatrix()(Trk::qOverP, Trk::theta) * std::pow(inverseSinTheta, 3);
+    return std::sqrt(qOverPT_err2);
+  }
+  inline float getQOverPtError( const xAOD::TruthParticle& ) { return -9999; }
+  template< class U >
+  inline float qOverPtError( const U& p ) { return getQOverPtError(p); }
+
+  template< class U >
+  inline float pTError( const U& p ) { return qOverPtError(p) * std::pow(pT(p), 2); }
+
+  inline float getZ0SinThetaError( const xAOD::TrackParticle& p ) {
+    float sinTheta = std::sin(p.theta());
+    float cosTheta = std::cos(p.theta());
+    float z0SinTheta_err2 =
+      std::pow(trackParameterError(p, Trk::z0) * sinTheta, 2)
+      + std::pow(p.z0() * cosTheta * trackParameterError(p, Trk::theta), 2)
+      + 2 * p.z0() * sinTheta * cosTheta * p.definingParametersCovMatrix()(Trk::z0, Trk::theta);
+    return std::sqrt(z0SinTheta_err2);
+  }
+  inline float getZ0SinThetaError( const xAOD::TruthParticle& ) { return -9999; }
+  template< class U >
+  inline float z0SinThetaError( const U& p ) { return getZ0SinThetaError(p); }
+
   /// Accessor utility function for getting the DeltaPhi betwen two tracks
   template< class U1, class U2=U1 >
   inline float deltaPhi( const U1& p1, const U2& p2 ) {
