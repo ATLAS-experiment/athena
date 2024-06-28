@@ -16,9 +16,16 @@ class TrackFitterType(FlagEnum):
     KalmanFitter = 'KalmanFitter' # default ACTS fitter to choose
     GaussianSumFitter = 'GaussianSumFitter' # new experimental implementation
 
+# Flag for pixel calibration strategy during track finding
+# - use cluster as is (Uncalibrated)
+# - perform AnalogueClustering either before selecting
+#   measurements for extending tracks (AnalogueClustering)
+# - or only apply the AnalogueClustering to selected measurements
+#   (AnalogueClusteringAfterSelection)
 class PixelCalibrationStrategy(FlagEnum):
     Uncalibrated = "Uncalibrated"
     AnalogueClustering = "AnalogueClustering"
+    AnalogueClusteringAfterSelection = "AnalogueClusteringAfterSelection"
 
 def createActsConfigFlags():
     actscf = AthConfigFlags()
@@ -70,5 +77,7 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.trackFitterType', TrackFitterType.KalmanFitter, type=TrackFitterType) # Define Tracking algorithm for refitting
 
     actscf.addFlag("Acts.useActsGsfInEgamma", False)
+
+    actscf.addFlag('Acts.useDefaultActsMeasurementSelector', False)
 
     return actscf

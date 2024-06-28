@@ -15,8 +15,6 @@
 #include "TrkRIO_OnTrack/RIO_OnTrack.h"
 #include "InDetRIO_OnTrack/PixelClusterOnTrack.h"
 #include "InDetRIO_OnTrack/SCT_ClusterOnTrack.h"
-#include "xAODInDetMeasurement/PixelCluster.h"
-#include "xAODInDetMeasurement/StripCluster.h"
 
 // ACTS
 #include "Acts/Definitions/Units.hpp"
@@ -37,6 +35,7 @@
 #include "ActsGeometry/TrackingSurfaceHelper.h"
 #include "ActsInterop/Logger.h"
 #include "ActsInterop/TableUtils.h"
+#include "AtlasMeasurementSelector.h"
 #include "src/OnTrackCalibrator.h"
 
 // STL
@@ -74,6 +73,7 @@ namespace ActsTrk
     ATH_MSG_DEBUG("   " << m_refitSeeds);
     ATH_MSG_DEBUG("   " << m_etaBins);
     ATH_MSG_DEBUG("   " << m_chi2CutOff);
+    ATH_MSG_DEBUG("   " << m_chi2OutlierCutOff);
     ATH_MSG_DEBUG("   " << m_numMeasurementsCutOff);
     ATH_MSG_DEBUG("   " << m_ptMinMeasurements);
     ATH_MSG_DEBUG("   " << m_absEtaMaxMeasurements);
@@ -149,8 +149,9 @@ namespace ActsTrk
 
     std::vector<double> etaBins;
     // m_etaBins (from flags.Tracking.ActiveConfig.etaBins) includes a dummy first and last bin, which we ignore
-    if (m_etaBins.size() > 2)
+    if (m_etaBins.size() > 2) {
       etaBins.assign(m_etaBins.begin() + 1, m_etaBins.end() - 1);
+    }
     Acts::MeasurementSelectorCuts measurementSelectorCuts{etaBins};
 
     if (!m_chi2CutOff.empty())
@@ -207,6 +208,14 @@ namespace ActsTrk
     }
 
     ATH_MSG_INFO(trackSelectorCfg);
+
+    if (!m_useDefaultMeasurementSelector.value()) {
+       // initializer measurement selector and connect it to the delegates of the track finder optins
+       ATH_CHECK( initializeMeasurementSelector());
+    }
+    else if (!m_chi2OutlierCutOff.empty()) {
+       ATH_MSG_DEBUG("chi2OutlierCutOff set but not supported when using the default measurement selector.");
+    }
 
     m_trackFinder.reset(new CKF_pimpl{CKF_config{std::move(extrapolator), {std::move(propagator), logger().cloneWithSuffix("CKF")}, measurementSelector, {}, {}, {}, trackSelectorCfg}});
 
@@ -408,9 +417,10 @@ namespace ActsTrk
     // CalibrationContext converter not implemented yet.
     Acts::CalibrationContext calContext = Acts::CalibrationContext();
 
-    UncalibSourceLinkAccessor slAccessor(ctx,
-                                         measurements.orderedGeoIds(),
-                                         measurements.measurementRanges());
+    using AtlUncalibSourceLinkAccessor = UncalibSourceLinkAccessor;
+
+    AtlUncalibSourceLinkAccessor slAccessor(measurements.orderedGeoIds(),
+                                            measurements.measurementRanges());
     Acts::SourceLinkAccessorDelegate<UncalibSourceLinkAccessor::Iterator> slAccessorDelegate;
     slAccessorDelegate.connect<&UncalibSourceLinkAccessor::range>(&slAccessor);
 
@@ -423,6 +433,9 @@ namespace ActsTrk
                                trackFinder().ckfExtensions,
                                trackFinder().pOptions,
                                pSurface.get());
+    if (!m_useDefaultMeasurementSelector.value()) {
+       m_measurementSelector->connect( &options.trackStateCandidateCreator );
+    }
     std::optional<TrackFinderOptions> secondOptions;
     if (m_doTwoWay) {
       secondOptions.emplace(tgContext,
@@ -433,6 +446,9 @@ namespace ActsTrk
                             trackFinder().pSecondOptions,
                             pSurface.get());
       secondOptions->targetSurface = pSurface.get();
+      if (!m_useDefaultMeasurementSelector.value()) {
+         m_measurementSelector->connect( &secondOptions->trackStateCandidateCreator);
+      }
     }
 
     // ActsTrk::MutableTrackContainer tracksContainerTemp;
@@ -443,15 +459,20 @@ namespace ActsTrk
     // Measurement calibration
     // N.B. OnTrackCalibrator expects disabled tool handles when no calibration is requested.
     // Therefore, passing them without checking if they are enabled is safe.
-    auto calibrator = OnTrackCalibrator<RecoTrackStateContainer>(
-      *m_ATLASConverterTool,
-      measurements.trackingSurfaceHelper(),
-      m_pixelCalibTool,
-      m_stripCalibTool);
 
-    options.extensions.calibrator.connect<&OnTrackCalibrator<RecoTrackStateContainer>::calibrate>(&calibrator);
-    if (m_doTwoWay)
-      secondOptions->extensions.calibrator.connect<&OnTrackCalibrator<RecoTrackStateContainer>::calibrate>(&calibrator);
+    auto calibrator = OnTrackCalibrator<RecoTrackStateContainer>(
+       *m_ATLASConverterTool,
+       measurements.trackingSurfaceHelper(),
+       m_pixelCalibTool,
+       m_stripCalibTool);
+
+    if (m_useDefaultMeasurementSelector.value()) {
+       // for default measurement selector need connect calibrator
+       options.extensions.calibrator.connect<&OnTrackCalibrator<RecoTrackStateContainer>::calibrate>(&calibrator);
+       if (m_doTwoWay) {
+          secondOptions->extensions.calibrator.connect<&OnTrackCalibrator<RecoTrackStateContainer>::calibrate>(&calibrator);
+       }
+    }
 
     const auto &trackSelectorCfg = trackFinder().trackSelector.config();
     auto getCuts = [&trackSelectorCfg](double eta) -> const Acts::TrackSelector::Config & {
@@ -1022,6 +1043,40 @@ namespace ActsTrk
       out += stat[category_i][counter_i];
     }
     return out;
+  }
+
+
+  StatusCode TrackFindingAlg::initializeMeasurementSelector() {
+    std::vector<std::pair<float, float> > chi2CutOffOutlier ;
+    chi2CutOffOutlier .reserve( m_chi2CutOff.size() );
+    if (!m_chi2OutlierCutOff.empty()) {
+       if (m_chi2CutOff.size() !=  m_chi2OutlierCutOff.size()) {
+          ATH_MSG_ERROR("Outlier chi2 cut off provided but number of elements does not agree with"
+                        " chi2 cut off for measurements which however is required: "
+                        << m_chi2CutOff.size() << " != " <<  m_chi2OutlierCutOff.size());
+          return StatusCode::FAILURE;
+       }
+    }
+    unsigned int idx=0;
+    for (const auto &elm : m_chi2CutOff) {
+       chi2CutOffOutlier.push_back( std::make_pair(static_cast<float>(elm),
+                                                   idx < m_chi2OutlierCutOff.size()
+                                                   ? static_cast<float>(m_chi2OutlierCutOff[idx])
+                                                   : std::numeric_limits<float>::max()) );
+       ++idx;
+    }
+    std::vector<float> etaBinsf;
+    if (m_etaBins.size() > 2) {
+      etaBinsf.assign(m_etaBins.begin() + 1, m_etaBins.end() - 1);
+    }
+
+    m_measurementSelector = ActsTrk::getMeasurementSelector(*m_ATLASConverterTool,
+                                                            m_pixelCalibTool.isEnabled() ? &(*m_pixelCalibTool) : nullptr,
+                                                            etaBinsf,
+                                                            chi2CutOffOutlier,
+                                                            m_numMeasurementsCutOff.value());
+
+    return m_measurementSelector ? StatusCode::SUCCESS : StatusCode::FAILURE;
   }
 
 } // namespace

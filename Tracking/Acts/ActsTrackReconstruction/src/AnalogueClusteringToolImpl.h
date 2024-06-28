@@ -34,17 +34,36 @@ public:
 				  const Acts::CalibrationContext&,
 				  const xAOD::PixelCluster&,
 				  const TrackStateProxy&) const;
-    
+
+    std::pair<Pos, Cov> calibrate(const Acts::GeometryContext&,
+				  const Acts::CalibrationContext&,
+				  const xAOD::PixelCluster&,
+				  const Acts::BoundTrackParameters&) const;
+
     virtual void connect(OnTrackCalibrator<traj_t>& calibrator) const override;
+
+    virtual void connectPixelCalibrator(IOnBoundStateCalibratorTool::PixelCalibrator& calibrator) const override;
+
+    virtual bool calibrateAfterMeasurementSelection() const override { return m_postCalibration.value(); }
 
 private:
 
     using error_data_t = typename std::remove_pointer_t<decltype(std::declval<calib_data_t>().getClusterErrorData())>;
 
-    const InDetDD::SiDetectorElement* getDetectorElement(xAOD::DetectorIDHashType id) const;
+    const InDetDD::SiDetectorElement& getDetectorElement(xAOD::DetectorIDHashType id) const;
 
-    std::pair<float, float> anglesOfIncidence(const InDetDD::SiDetectorElement& element,
-					      const TrackStateProxy& state) const;
+    std::pair<typename AnalogueClusteringToolImpl<calib_data_t, traj_t>::Pos,
+              typename AnalogueClusteringToolImpl<calib_data_t, traj_t>::Cov>
+    calibrate(const Acts::GeometryContext& gctx,
+              const Acts::CalibrationContext& cctx,
+              const xAOD::PixelCluster& cluster,
+              const InDetDD::SiDetectorElement& detElement,
+              const std::pair<float, float>& angles) const;
+
+    std::pair<float, float>
+    anglesOfIncidence(const InDetDD::SiDetectorElement& element,
+                      const Acts::Vector3& direction) const;
+
 
     std::pair<float, float> getCentroid(const std::vector<Identifier>& rdos,
 					const InDetDD::SiDetectorElement& element) const;
@@ -88,6 +107,8 @@ private:
 
     // in micrometers
     Gaudi::Property<int> m_thickness {this, "PixelThickness", 250};
+
+    Gaudi::Property<bool> m_postCalibration{this,"CalibrateAfterMeasurementSelection",false,""};
 
     const PixelID* m_pixelid;
 };

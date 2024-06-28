@@ -5,7 +5,7 @@
 #ifndef ACTSTOOLINTERFACES_IONTRACKCALIBRATORTOOL_H
 #define ACTSTOOLINTERFACES_IONTRACKCALIBRATORTOOL_H
 
-#include <GaudiKernel/IAlgTool.h>
+#include "IOnBoundStateCalibratorTool.h"
 
 namespace ActsTrk {
 
@@ -13,7 +13,7 @@ template <typename traj_t>
 class OnTrackCalibrator;
 
 template <typename traj_t>
-class IOnTrackCalibratorTool : virtual public IAlgTool {
+class IOnTrackCalibratorTool : virtual public IOnBoundStateCalibratorTool {
 public:
     DeclareInterfaceID(IOnTrackCalibratorTool, 1, 0);
 
