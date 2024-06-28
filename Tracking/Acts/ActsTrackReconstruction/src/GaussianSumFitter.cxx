@@ -34,6 +34,7 @@
 #include "ActsInterop/Logger.h"
 #include "ActsGeometry/ActsDetectorElement.h"
 #include "ActsGeometryInterfaces/ActsGeometryContext.h"
+#include "Acts/Propagator/DirectNavigator.hpp"
 
 // STL
 #include <vector>
@@ -66,14 +67,27 @@ StatusCode GaussianSumFitter::initialize() {
   auto field = std::make_shared<ATLASMagneticFieldWrapper>();
   Acts::MultiEigenStepperLoop<> stepper(field);
   Acts::Navigator navigator( Acts::Navigator::Config{ m_trackingGeometryTool->trackingGeometry() },
-                             logger().cloneWithSuffix("Navigator") );     
+                             logger().cloneWithSuffix("Navigator") );
   Acts::Propagator<Acts::MultiEigenStepperLoop<>, Acts::Navigator> propagator(std::move(stepper), 
                      std::move(navigator),
                      logger().cloneWithSuffix("Prop"));
-  Acts::AtlasBetheHeitlerApprox<6, 5> bha = Acts::makeDefaultBetheHeitlerApprox();
 
+  Acts::AtlasBetheHeitlerApprox<6, 5> bha = Acts::makeDefaultBetheHeitlerApprox();
   m_fitter = std::make_unique<Fitter>(std::move(propagator), std::move(bha),
               logger().cloneWithSuffix("GaussianSumFitter"));
+  
+  // Direct Fitter
+  if( m_useDirectNavigation ){
+    Acts::DirectNavigator directNavigator( logger().cloneWithSuffix("DirectNavigator") );
+    Acts::MultiEigenStepperLoop<> stepperDirect(field);
+    Acts::Propagator<Acts::MultiEigenStepperLoop<>, Acts::DirectNavigator> directPropagator(std::move(stepperDirect),
+											    std::move(directNavigator),
+											    logger().cloneWithSuffix("DirectPropagator"));
+    Acts::AtlasBetheHeitlerApprox<6, 5> bhaDirect = Acts::makeDefaultBetheHeitlerApprox();
+    m_directFitter = std::make_unique<DirectFitter>(std::move(directPropagator),std::move(bhaDirect),
+						    logger().cloneWithSuffix("DirectGaussianSumFitter"));
+
+  }
 
   m_gsfExtensions.updater.connect<&ActsTrk::FitterHelperFunctions::gainMatrixUpdate<ActsTrk::MutableTrackStateBackend>>();
   m_calibrator = std::make_unique<TrkMeasurementCalibrator>(*m_ATLASConverterTool);
@@ -85,7 +99,15 @@ StatusCode GaussianSumFitter::initialize() {
   
   m_outlierFinder.StateChiSquaredPerNumberDoFCut = m_option_outlierChi2Cut;
   m_gsfExtensions.outlierFinder.connect<&ActsTrk::FitterHelperFunctions::ATLASOutlierFinder::operator()<ActsTrk::MutableTrackStateBackend>>(&m_outlierFinder);
-
+  if(m_option_componentMergeMethod == "eMean")
+    m_componentMergeMethod = Acts::ComponentMergeMethod::eMean;
+  else if(m_option_componentMergeMethod == "eMaxWeight"){
+    m_componentMergeMethod = Acts::ComponentMergeMethod::eMaxWeight;
+  }else{
+    ATH_MSG_ERROR("Unknown option for ComponentMergeMethod: " << m_option_componentMergeMethod );
+  }
+  
+  ATH_MSG_INFO("ACTS GSF  "<< m_useDirectNavigation << m_maxComponents <<  m_option_componentMergeMethod << m_weightCutOff  );
   return StatusCode::SUCCESS;
 }
 
@@ -97,6 +119,8 @@ GaussianSumFitter::fit(const EventContext& ctx,
                        const Trk::RunOutlierRemoval /*runOutlier*/,
                        const Trk::ParticleHypothesis /*prtHypothesis*/) const
 {
+
+  
   std::unique_ptr<Trk::Track> track = nullptr;
   ATH_MSG_VERBOSE ("--> enter GaussianSumFitter::fit(Track,,)    with Track from author = "
        << inputTrack.info().dumpInfo());
@@ -128,6 +152,10 @@ GaussianSumFitter::fit(const EventContext& ctx,
 				mfContext, 
 				calContext, 
 				*pSurface);
+  gsfOptions.maxComponents = m_maxComponents;
+  gsfOptions.weightCutoff = m_weightCutOff;
+  gsfOptions.componentMergeMethod = m_componentMergeMethod;
+  
 
   std::vector<Acts::SourceLink> trackSourceLinks = m_ATLASConverterTool->trkTrackToSourceLinks(tgContext,inputTrack);
   const auto& initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters((*inputTrack.perigeeParameters()), tgContext);
@@ -149,7 +177,6 @@ GaussianSumFitter::fit(const EventContext& ctx,
                        const Trk::ParticleHypothesis /*matEffects*/) const
 {
   std::unique_ptr<Trk::Track> track = nullptr;
-
   // protection against not having measurements on the input track
   if (inputMeasSet.size() < 2) {
     ATH_MSG_DEBUG("called to refit empty measurement set or a measurement set with too little information, reject fit");
@@ -158,7 +185,7 @@ GaussianSumFitter::fit(const EventContext& ctx,
 
   // Construct a perigee surface as the target surface
   std::shared_ptr<Acts::PerigeeSurface> pSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(
-      Acts::Vector3{0., 0., 0.});
+												   Acts::Vector3{0., 0., 0.});
   
   Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
   Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(ctx);
@@ -174,20 +201,41 @@ GaussianSumFitter::fit(const EventContext& ctx,
 
   // Set abortOnError to false, else the refitting crashes if no forward propagation is done. Here, we just skip the event and continue.
   gsfOptions.abortOnError = false;
-
+  
   std::vector< Acts::SourceLink > trackSourceLinks;
   trackSourceLinks.reserve(inputMeasSet.size());
 
   for (auto* measSet : inputMeasSet) {
     trackSourceLinks.push_back(m_ATLASConverterTool->trkMeasurementToSourceLink(tgContext, *measSet));
   }
-  const auto& initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(estimatedStartParameters, tgContext); 
 
-  return performFit(ctx,
-		    tgContext,
-		    gsfOptions,
-                    trackSourceLinks,
-                    initialParams);
+  const auto& initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(estimatedStartParameters, tgContext);
+  
+  if(m_useDirectNavigation){
+    
+    std::vector<const Acts::Surface*> surfaces;
+    surfaces.reserve(inputMeasSet.size());
+    for (auto* measSet : inputMeasSet) {
+      const auto& slink = m_ATLASConverterTool->trkMeasurementToSourceLink(tgContext, *measSet);
+      const auto& sl = slink.get<ATLASSourceLink>();
+      const auto& trkSrf = sl->associatedSurface();
+      const auto& actsSrf = m_ATLASConverterTool->trkSurfaceToActsSurface(trkSrf);
+      surfaces.push_back(&actsSrf);
+    }
+    
+    return performDirectFit(ctx,
+			    tgContext,
+			    gsfOptions,
+			    trackSourceLinks,
+			    initialParams,
+			    surfaces);
+  }else{
+    return performFit(ctx,
+		      tgContext,
+		      gsfOptions,
+		      trackSourceLinks,
+		      initialParams);
+  }
 }
 
 // fit a set of PrepRawData objects
@@ -341,13 +389,13 @@ GaussianSumFitter::fit(const EventContext& ctx,
                     initialParams);
 }
 
-std::unique_ptr<Trk::Track> 
+std::unique_ptr<Trk::Track>
 GaussianSumFitter::makeTrack(const EventContext& ctx,
           const Acts::GeometryContext& tgContext,
           ActsTrk::MutableTrackContainer& tracks,
           Acts::Result<typename ActsTrk::MutableTrackContainer::TrackProxy, std::error_code>& fitResult) const {
   if (not fitResult.ok()) 
-    return nullptr;    
+    return nullptr;
 
   std::unique_ptr<Trk::Track> newtrack = nullptr;
   // Get the fit output object
@@ -376,7 +424,7 @@ GaussianSumFitter::makeTrack(const EventContext& ctx,
     if (not upstreamDetEl) 
       return;
 
-    ATH_MSG_VERBOSE("Try casting to TRT for if");    
+    ATH_MSG_VERBOSE("Try casting to TRT for if");
     if (dynamic_cast<const InDetDD::TRT_BaseElement*>(upstreamDetEl))
       return;
 
@@ -443,7 +491,7 @@ GaussianSumFitter::makeTrack(const EventContext& ctx,
       
       actsSmoothedParam.push_back(std::make_unique<const Acts::BoundTrackParameters>(Acts::BoundTrackParameters(actsParam)));
       parm = m_ATLASConverterTool->actsTrackParametersToTrkParameters(actsParam, tgContext);
-      typePattern.set(Trk::TrackStateOnSurface::Measurement);                                           
+      typePattern.set(Trk::TrackStateOnSurface::Measurement);
     }
 
     std::unique_ptr<Trk::MeasurementBase> measState;
@@ -496,14 +544,14 @@ GaussianSumFitter::makeTrack(const EventContext& ctx,
 const Acts::GsfExtensions<typename ActsTrk::MutableTrackStateBackend>& 
 GaussianSumFitter::getExtensions() const 
 { 
-  return m_gsfExtensions; 
+  return m_gsfExtensions;
 }
 
 /// Private access to the logger
 const Acts::Logger& 
 GaussianSumFitter::logger() const 
 { 
-  return *m_logger; 
+  return *m_logger;
 }
 
 Acts::GsfOptions<typename ActsTrk::MutableTrackStateBackend> 
@@ -520,24 +568,29 @@ GaussianSumFitter::prepareOptions(const Acts::GeometryContext& tgContext,
 
   // Set abortOnError to false, else the refitting crashes if no forward propagation is done. Here, we just skip the event and continue.
   gsfOptions.abortOnError = false;
+  gsfOptions.maxComponents = m_maxComponents;
+  gsfOptions.weightCutoff = m_weightCutOff;
+  gsfOptions.componentMergeMethod = m_componentMergeMethod;
 
   return gsfOptions;
 }
 
-std::unique_ptr<Trk::Track> 
+std::unique_ptr<Trk::Track>
 GaussianSumFitter::performFit(const EventContext& ctx,
 			      const Acts::GeometryContext& tgContext,
 			      const Acts::GsfOptions<ActsTrk::MutableTrackStateBackend>& gsfOptions,
 			      const std::vector<Acts::SourceLink>& trackSourceLinks,
 			      const Acts::BoundTrackParameters& initialParams) const
 {
+  if(m_useDirectNavigation){
+    ATH_MSG_ERROR("ACTS GSF UseDirectNavigation is true, but standard navigation is used");
+  }
   if (trackSourceLinks.empty()) {
     ATH_MSG_DEBUG("input contain measurement but no source link created, probable issue with the converter, reject fit ");
     return nullptr;
   }
 
   ActsTrk::MutableTrackContainer tracks;
-
   // Perform the fit
   auto result = m_fitter->fit(trackSourceLinks.begin(), trackSourceLinks.end(),
 			      initialParams, gsfOptions, tracks);
@@ -546,5 +599,34 @@ GaussianSumFitter::performFit(const EventContext& ctx,
   if (not result.ok()) return nullptr;
   return makeTrack(ctx, tgContext, tracks, result);
 }
+
+
+std::unique_ptr<Trk::Track> 
+GaussianSumFitter::performDirectFit(const EventContext& ctx,
+			      const Acts::GeometryContext& tgContext,
+			      const Acts::GsfOptions<ActsTrk::MutableTrackStateBackend>& gsfOptions,
+			      const std::vector<Acts::SourceLink>& trackSourceLinks,
+			      const Acts::BoundTrackParameters& initialParams,
+			      const std::vector<const Acts::Surface*>& surfaces) const
+{
+  if (trackSourceLinks.empty()) {
+    ATH_MSG_DEBUG("input contain measurement but no source link created, probable issue with the converter, reject fit ");
+    return nullptr;
+  }
+
+  ActsTrk::MutableTrackContainer tracks;
+  auto result = m_directFitter->fit(trackSourceLinks.begin(),
+			      trackSourceLinks.end(),
+			      initialParams,
+			      gsfOptions,
+			      surfaces,
+			      tracks);
+
+  // Convert
+  if (not result.ok()) return nullptr;
+  return makeTrack(ctx, tgContext, tracks, result);
+}
+
+
 
 }
