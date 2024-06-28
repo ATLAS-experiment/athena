@@ -1,29 +1,28 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JIVEXML_CALOFCALRETRIEVER_H
 #define JIVEXML_CALOFCALRETRIEVER_H
 
-#include <string>
-#include <vector>
-#include <cstddef>
-#include <map>
 
-#include "CaloEvent/CaloCellContainer.h"
-#include "CaloIdentifier/CaloCell_ID.h"
-#include "LArCabling/LArOnOffIdMapping.h"
-#include "LArRawConditions/LArADC2MeV.h"
+
+#include "CaloEvent/CaloCellContainer.h"//readhandle template param
+
+#include "LArCabling/LArOnOffIdMapping.h"//readhandle template param
+#include "LArRawConditions/LArADC2MeV.h"//readhandle template param
 
 #include "JiveXML/IDataRetriever.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "StoreGate/ReadCondHandleKey.h"
 
+#include <string>
+#include <vector>
+//
 class IToolSvc;
-
+class CaloCell_ID;
 class Identifier;
-class CaloCellContainer;
 
 namespace JiveXML{
   

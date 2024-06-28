@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloFCalRetriever.h"
@@ -7,7 +7,6 @@
 #include "AthenaKernel/Units.h"
 
 #include "EventContainers/SelectAllObject.h"
-
 #include "CaloDetDescr/CaloDetDescrElement.h"
 #include "LArElecCalib/ILArPedestal.h"
 #include "LArRawEvent/LArDigitContainer.h"
@@ -17,6 +16,7 @@
 #include "Identifier/HWIdentifier.h"
 #include "StoreGate/ReadCondHandle.h"
 #include "GaudiKernel/ThreadLocalContext.h"
+#include "CaloIdentifier/CaloCell_ID.h"
 
 using Athena::Units::GeV;
 
@@ -177,36 +177,36 @@ namespace JiveXML {
 	  }
 
 	  energyGeV = (*it1)->energy()*(1./GeV);
-	  energy.push_back(DataType( gcvt( energyGeV, m_cellEnergyPrec, rndStr) ));
+	  energy.emplace_back( gcvt( energyGeV, m_cellEnergyPrec, rndStr) );
           energyAllLArFcal += energyGeV;
-          idVec.push_back(DataType((Identifier::value_type)(*it1)->ID().get_compact() ));
+          idVec.emplace_back((Identifier::value_type)(*it1)->ID().get_compact() );
         
 	  xmm = (*it1)->x()*0.1;
 	  ymm = (*it1)->y()*0.1;
 	  zmm = (*it1)->z()*0.1;
-	  x.push_back(DataType( gcvt( xmm, 4, rndStr)  ));
-	  y.push_back(DataType( gcvt( ymm, 4, rndStr)  ));
-	  z.push_back(DataType( gcvt( zmm, 4, rndStr)  ));
+	  x.emplace_back( gcvt( xmm, 4, rndStr)  );
+	  y.emplace_back( gcvt( ymm, 4, rndStr)  );
+	  z.emplace_back( gcvt( zmm, 4, rndStr)  );
 	  
-          channel.push_back(DataType(onlineId->channel(LArhwid))); 
-          feedThrough.push_back(DataType(onlineId->feedthrough(LArhwid))); 
-       	  slot.push_back(DataType(onlineId->slot(LArhwid))); 
+          channel.emplace_back(onlineId->channel(LArhwid)); 
+          feedThrough.emplace_back(onlineId->feedthrough(LArhwid)); 
+       	  slot.emplace_back(onlineId->slot(LArhwid)); 
 
 	  if ( m_doFCalCellDetails){
 	    cellTime = (*it1)->time();
-	    cellTimeVec.push_back(DataType( gcvt( cellTime, m_cellTimePrec, rndStr) ) );
-	    cellGain.push_back(DataType( (*it1)->gain() ) ); 
+	    cellTimeVec.emplace_back( gcvt( cellTime, m_cellTimePrec, rndStr)  );
+	    cellGain.emplace_back( (*it1)->gain()  ); 
       	
 	    int fcalgain = (*it1)->gain();
 	    float pedestal=larPedestal->pedestal(LArhwid,fcalgain);
 	    float pedvalue=0;
 	    if (pedestal >= (1.0+LArElecCalib::ERRORCODE)) pedvalue = pedestal;
 	    else pedvalue = 0;
-	    cellPedestal.push_back(DataType(pedvalue));
+	    cellPedestal.emplace_back(pedvalue);
 	         
             LArVectorProxy polynom_adc2mev = adc2mev->ADC2MEV(cellid,fcalgain);
-            if (polynom_adc2mev.size()==0){ adc2Mev.push_back(DataType(-1)); }
-            else{ adc2Mev.push_back(DataType(polynom_adc2mev[1])); }
+            if (polynom_adc2mev.size()==0){ adc2Mev.emplace_back(-1); }
+            else{ adc2Mev.emplace_back(polynom_adc2mev[1]); }
 	  }
 
 	  const CaloDetDescrElement* elt = (*it1)->caloDDE();
@@ -214,41 +214,41 @@ namespace JiveXML {
 	  dxmm = elt->dx()*0.1;
 	  dymm = elt->dy()*0.1;
 	  dzmm = elt->dz()*0.1;
-	  dx.push_back(DataType( gcvt( dxmm, 4, rndStr)  ));
-	  dy.push_back(DataType( gcvt( dymm, 4, rndStr)  ));
-	  dz.push_back(DataType( gcvt( dzmm, 4, rndStr)  ));
+	  dx.emplace_back( gcvt( dxmm, 4, rndStr)  );
+	  dy.emplace_back( gcvt( dymm, 4, rndStr)  );
+	  dz.emplace_back( gcvt( dzmm, 4, rndStr)  );
 	    
 	  if(m_calocell_id->pos_neg(cellid)==2)
-	    sub.push_back(DataType(1));
+	    sub.emplace_back(1);
 	  else
-	    sub.push_back(DataType(0));
+	    sub.emplace_back(0);
       }
 
     ATH_MSG_DEBUG( " Total energy in FCAL (LAr) in GeV : " <<  energyAllLArFcal  );
 
     // write values into DataMap
     DataMap["x"] = x;
-    DataMap["y"] = y;
-    DataMap["z"] = z;
-    DataMap["dx"] = dx;
-    DataMap["dy"] = dy;
-    DataMap["dz"] = dz;
-    DataMap["energy"] = energy;
-    DataMap["id"] = idVec;
-    DataMap["channel"] = channel;
-    DataMap["feedThrough"] = feedThrough;
-    DataMap["slot"] = slot;
+    DataMap["y"] = std::move(y);
+    DataMap["z"] = std::move(z);
+    DataMap["dx"] = std::move(dx);
+    DataMap["dy"] = std::move(dy);
+    DataMap["dz"] = std::move(dz);
+    DataMap["energy"] = std::move(energy);
+    DataMap["id"] = std::move(idVec);
+    DataMap["channel"] = std::move(channel);
+    DataMap["feedThrough"] = std::move(feedThrough);
+    DataMap["slot"] = std::move(slot);
     //Bad Cells
-    if (m_doBadFCal==true) {
-      DataMap["BadCell"] = BadCell;
-    }    DataMap["sub"] = sub;
+    if (m_doBadFCal) {
+      DataMap["BadCell"] = std::move(BadCell);
+    }    DataMap["sub"] = std::move(sub);
 
     // adc counts
     if ( m_doFCalCellDetails){
-       DataMap["cellTime"] = cellTimeVec;
-       DataMap["cellGain"] = cellGain;
-       DataMap["cellPedestal"] = cellPedestal;
-       DataMap["adc2Mev"] = adc2Mev;
+       DataMap["cellTime"] = std::move(cellTimeVec);
+       DataMap["cellGain"] = std::move(cellGain);
+       DataMap["cellPedestal"] = std::move(cellPedestal);
+       DataMap["adc2Mev"] = std::move(adc2Mev);
     }
     //Be verbose
     ATH_MSG_DEBUG( dataTypeName() << " retrieved with " << x.size() << " entries" );
