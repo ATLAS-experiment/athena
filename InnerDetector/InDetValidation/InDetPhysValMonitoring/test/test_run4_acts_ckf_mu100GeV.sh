@@ -2,14 +2,17 @@
 # art-description: Run 4 configuration, ITK only recontruction, Single muon 100GeV, acts activated
 # art-type: grid
 # art-include: main/Athena
-# art-output: *.root
+# art-output: idpvm*.root
+# art-output: acts-*.root
 # art-output: *.xml
 # art-output: dcube*
+# art-output: last_results/idpvm*.root
 # art-html: dcube_ambi_last
 
 lastref_dir=last_results
-dcubeXml=dcube_IDPVMPlots_ACTS_CKF_ITk.xml
+dcubeXml=dcube_IDPVMPlots_ACTS_CKF_ITk_techeff.xml
 rdo=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.900498.PG_single_muonpm_Pt100_etaFlatnp0_43.recon.RDO.e8481_s4149_r14697/RDO.33675668._000016.pool.root.1
+ref_idpvm_athena=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/ReferenceHistograms/physval_run4_mu100GeV_reco_r24.root
 nEvents=1000
 
 # search in $DATAPATH for matching file
@@ -34,11 +37,12 @@ run () {
     return $rc
 }
 
-# Run w/o ambi. resolution
+# Run with Athena ambi. resolution
 run "Reconstruction-ckf" \
     Reco_tf.py --CA \
     --steering doRAWtoALL \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateTracksFlags" \
+    --preExec 'flags.Tracking.writeExtendedSi_PRDInfo=True; flags.Tracking.doStoreSiSPSeededTracks=True; flags.Tracking.ITkActsValidateTracksPass.storeSiSPSeededTracks=True;'
     --inputRDOFile ${rdo} \
     --outputAODFile AOD.ckf.root \
     --maxEvents ${nEvents}
@@ -59,18 +63,22 @@ run "IDPVM" \
     --outputFile idpvm.ckf.root \
     --doTightPrimary \
     --doHitLevelPlots \
-    --HSFlag All
+    --HSFlag All \
+    --doTechnicalEfficiency \
+    --doExpertPlots \
+    --validateExtraTrackCollections "SiSPSeededTracksActsValidateTracksTrackParticles"
 
 reco_rc=$?
 if [ $reco_rc != 0 ]; then
     exit $reco_rc
 fi
 
-# Run w/ ambi. resolution
+# Run with ACTS ambi. resolution
 run "Reconstruction-ambi" \
     Reco_tf.py --CA \
     --steering doRAWtoALL \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateResolvedTracksFlags" \
+    --preExec 'flags.Tracking.writeExtendedSi_PRDInfo=True;'
     --inputRDOFile ${rdo} \
     --outputAODFile AOD.ambi.root \
     --perfmon fullmonmt \
@@ -91,7 +99,9 @@ run "IDPVM" \
     --outputFile idpvm.ambi.root \
     --doTightPrimary \
     --doHitLevelPlots \
-    --HSFlag All
+    --HSFlag All \
+    --doTechnicalEfficiency \
+    --doExpertPlots
 
 reco_rc=$?
 if [ $reco_rc != 0 ]; then
@@ -123,3 +133,11 @@ run "dcube-ckf-ambi" \
     -c ${dcubeXmlAbsPath} \
     -r idpvm.ckf.root \
     idpvm.ambi.root
+
+# Compare performance WRT legacy Athena
+run "dcube-ckf-athena" \
+    $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
+    -p -x dcube_ckf_athena \
+    -c ${dcubeXmlAbsPath} \
+    -r ${ref_idpvm_athena} \
+    idpvm.ckf.root
