@@ -59,14 +59,11 @@ flags.PhysVal.IDTPM.sortPlotsByChain = MyArgs.sortPlotsByChain
 ## (read from trkAnaCfgFile.json) for each TrkAnalysis
 from InDetTrackPerfMon.InDetTrackPerfMonFlags import createIDTPMTrkAnaConfigFlags
 
-# Default TrackAnalysis configuration flags category
-flags.addFlagsCategory( "PhysVal.IDTPM.Default", 
-                        createIDTPMTrkAnaConfigFlags, 
-                        prefix=True )
  
 ## Filling TrkAnalyses setup dictionary
 from InDetTrackPerfMon.ConfigUtils import getTrkAnaDicts
 analysesDict = getTrkAnaDicts( flags, MyArgs.trkAnaCfgFile, MyArgs.unpackTrigChains )
+
 trkAnaNames = []
 
 if analysesDict:
@@ -87,8 +84,13 @@ if analysesDict:
 if trkAnaNames:
     flags.PhysVal.IDTPM.trkAnaNames = trkAnaNames
 
-flags.lock()
+# Default TrackAnalysis configuration flags category
+if not trkAnaNames:
+    flags.addFlagsCategory( "PhysVal.IDTPM.Default", 
+                            createIDTPMTrkAnaConfigFlags, 
+                            prefix=True )
 
+flags.lock()
 flags.dump()
 
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
