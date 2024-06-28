@@ -85,7 +85,6 @@ def EFMuonMonConfig(helper):
                                   title='EFCB Eta vs Phi '+chain+';#eta;#phi', 
                                   type='TH2F', path='',xbins=108,xmin=-2.7,xmax=2.7, ybins=96,ymin=-ROOT.TMath.Pi(),ymax=ROOT.TMath.Pi())
 
-
         # EFIso
         histGroup.defineHistogram(chain+'_PtCone03;EFIso_PtCone03',
                                   title='EFIso sum Pt in 0.3 cone '+chain+';Sum p_{T} [GeV];Events',

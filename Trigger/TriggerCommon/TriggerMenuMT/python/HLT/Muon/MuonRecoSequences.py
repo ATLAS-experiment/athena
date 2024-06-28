@@ -386,8 +386,19 @@ def VDVPrecMuTrkCfg(flags, name):
 
   vdvName = "VDVMuTrkLRT" if "LRT" in name else "VDVMuTrk"
   trkname = "LRT" if "LRT" in name else ''
+  LRT_suffix = "_LRT" if "LRT" in name else ''
   dataObjects = [( 'xAOD::TrackParticleContainer' , 'StoreGateSvc+'+getIDTracks(flags, trkname) ),
                  ( 'xAOD::IParticleContainer' , 'StoreGateSvc+'+ getIDTracks(flags, trkname) )]
+  # phase-ii EFCB muon flag here
+  if not flags.Muon.enableTrigIDtrackReuse:
+    dataObjects += [( 'xAOD::TrackParticleContainer', f'StoreGateSvc+HLT_IDTrack_MuonComb_FTF{LRT_suffix}')]
+  
+  # phase-ii EFCB muon flag here
+  if flags.Muon.enableTrigIDtrackReuse:
+    dataObjects += [( 'xAOD::TrackParticleContainer', 'StoreGateSvc+'+getIDTracks(flags) ),
+                    ( 'xAOD::L2CombinedMuonContainer', 'StoreGateSvc+'+muNames.L2CBName),
+                    ( 'xAOD::L2CombinedMuonContainer', 'StoreGateSvc+'+muNames.L2CBName+'IOmode'),
+                    ( 'xAOD::L2CombinedMuonContainer', 'StoreGateSvc+'+muNames.L2CBName+'l2mtmode')]
 
   if not flags.Input.isMC:
     dataObjects += [( 'IDCInDetBSErrContainer' , 'StoreGateSvc+PixelByteStreamErrs' ),
@@ -427,19 +438,42 @@ def muEFCBRecoSequenceCfg( flags, RoIs, name ):
   #Pass verifier as an argument and it will automatically append necessary DataObjects
   #@NOTE: Don't provide any verifier if loaded in the same view as FTF
   if isCosmic(flags) and 'LRT' not in name:
-    trackParticles = getIDTracks(flags)
+     # phase-ii EFCB muon flag here
+     if flags.Muon.enableTrigIDtrackReuse:
+        trackParticles='HLT_IDTrack_MuonComb_FTF'
+     else:
+        trackParticles=getIDTracks(flags)
   elif 'LRT' in name:
-    muLrtFlags = getFlagsForActiveConfig(flags, "muonLRT", log)
-    acc.merge(trigInDetPrecisionTrackingCfg(muLrtFlags, rois= RoIs, signatureName="muonLRT"))
-    trackParticles = muLrtFlags.Tracking.ActiveConfig.tracks_IDTrig
+     muLrtFlags = getFlagsForActiveConfig(flags, "muonLRT", log)
+     acc.merge(trigInDetPrecisionTrackingCfg(muLrtFlags, rois= RoIs, signatureName="muonLRT"))
+     # phase-ii EFCB muon flag here
+     if flags.Muon.enableTrigIDtrackReuse:
+        trackParticles='HLT_IDTrack_MuonComb_FTF_LRT'
+     else:
+        trackParticles = muLrtFlags.Tracking.ActiveConfig.tracks_IDTrig
   elif 'FS' in name:
-    muFsFlags = getFlagsForActiveConfig(flags, "muonFS", log)
-    acc.merge(trigInDetPrecisionTrackingCfg(muFsFlags, rois= RoIs, signatureName="muonFS", in_view=False))
-    trackParticles = muFsFlags.Tracking.ActiveConfig.tracks_IDTrig
+     muFsFlags = getFlagsForActiveConfig(flags, "muonFS", log)
+     acc.merge(trigInDetPrecisionTrackingCfg(muFsFlags, rois= RoIs, signatureName="muonFS", in_view=False))
+     trackParticles = muFsFlags.Tracking.ActiveConfig.tracks_IDTrig
   else:
-    muFlags = getFlagsForActiveConfig(flags, "muon", log)
-    acc.merge(trigInDetPrecisionTrackingCfg(muFlags, rois= RoIs, signatureName="muon"))
-    trackParticles = muFlags.Tracking.ActiveConfig.tracks_IDTrig
+     muFlags = getFlagsForActiveConfig(flags, "muon", log)
+     acc.merge(trigInDetPrecisionTrackingCfg(muFlags, rois= RoIs, signatureName="muon"))
+     # phase-ii EFCB muon flag here
+     if flags.Muon.enableTrigIDtrackReuse:
+        trackParticles='HLT_IDTrack_MuonComb_FTF'
+     else:
+        trackParticles = muFlags.Tracking.ActiveConfig.tracks_IDTrig
+
+  # phase-ii EFCB muon flag here
+  if flags.Muon.enableTrigIDtrackReuse:
+     from TrigMuonEF.TrigMuonEFConfig import MergeMuonInDetTracksAlgCfg
+     acc.merge(MergeMuonInDetTracksAlgCfg(flags, name="MergeInDetTracks",
+                                      FullIDTrackContainerLocation=getIDTracks(flags),
+                                      MuonCBContainerLocation=muNames.L2CBName, 
+                                      MuonInsideOutContainerLocation=muNames.L2CBName+'IOmode',
+                                      MuonL2mtContainerLocation=muNames.L2CBName+'l2mtmode',
+                                      IDtrackOutputLocation="HLT_IDTrack_MuonComb_FTF"))
+
 
 
   #Make InDetCandidates
