@@ -246,6 +246,8 @@ class PhotonWorkingPointConfig (ConfigBlock) :
         self.addOption ('isolationWP', None, type=str,
             info="the ID WP (string) to use. Supported isolation WPs: "
             "FixedCutLoose, FixedCutTight, TightCaloOnly, NonIso.")
+        self.addOption ('closeByCorrection', False, type=bool,
+            info="whether to use close-by-corrected isolation working points")
         self.addOption ('recomputeIsEM', False, type=bool,
             info="whether to rerun the cut-based selection. The default is "
             "False, i.e. to use derivation flags.")
@@ -319,6 +321,8 @@ class PhotonWorkingPointConfig (ConfigBlock) :
             alg.selectionDecoration = 'isolated' + postfix + ',as_bits'
             config.addPrivateTool( 'selectionTool', 'CP::IsolationSelectionTool' )
             alg.selectionTool.PhotonWP = self.isolationWP
+            if self.closeByCorrection:
+              alg.selectionTool.IsoDecSuffix = "CloseByCorr"
             alg.isPhoton = True
             alg.egammas = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, self.selectionName)

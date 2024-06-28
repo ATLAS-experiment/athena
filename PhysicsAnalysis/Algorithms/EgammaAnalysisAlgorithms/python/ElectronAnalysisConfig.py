@@ -221,6 +221,8 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             info="the isolation WP (string) to use. Supported isolation WPs: "
             "HighPtCaloOnly, Loose_VarRad, Tight_VarRad, TightTrackOnly_"
             "VarRad, TightTrackOnly_FixedRad, NonIso.")
+        self.addOption ('closeByCorrection', False, type=bool,
+            info="whether to use close-by-corrected isolation working points")
         self.addOption ('recomputeLikelihood', False, type=bool,
             info="whether to rerun the LH. The default is False, i.e. to use "
             "derivation flags.")
@@ -370,6 +372,8 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             alg.selectionDecoration = 'isolated' + selectionPostfix + ',as_bits'
             config.addPrivateTool( 'selectionTool', 'CP::IsolationSelectionTool' )
             alg.selectionTool.ElectronWP = self.isolationWP
+            if self.closeByCorrection:
+              alg.selectionTool.IsoDecSuffix = "CloseByCorr"
             alg.egammas = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, self.selectionName)
             config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration)
