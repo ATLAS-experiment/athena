@@ -1,13 +1,12 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "CLHEP/Random/defs.h"
 #include "CLHEP/Random/Random.h"
 #include "AtlasCLHEP_RandomGenerators/dSFMTEngine.h"
 #include "CLHEP/Random/engineIDulong.h"
 #include "CxxUtils/checker_macros.h"
-#include <string.h>
+#include <cstring>
 #include <sstream>
 #include <cmath>	// for ldexp()
 #include <stdlib.h>	// for abs(int)
@@ -145,10 +144,9 @@ void dSFMTEngine::setSeeds(const long *seeds, int) {
   if (*seeds) {
     int i = 0;
     const int numBuff=DSFMT_N;
-    uint32_t buf[numBuff];
+    uint32_t buf[numBuff]{};
     while (i < numBuff && seeds[i]) {
       buf[i]=seeds[i];
-      //cout<<"  seed "<<i<<" = "<<buf[i]<<endl;
       ++i;
     }
     int dum ATLAS_THREAD_SAFE [[maybe_unused]] = wrap_init_by_array(m_dsfmt,buf,i);
@@ -186,15 +184,15 @@ void dSFMTEngine::restoreStatus( const char filename[] )
 
 void dSFMTEngine::showStatus() const
 {
-   std::cout << std::endl;
-   std::cout << "--------- dSFMT engine status ---------" << std::endl;
+   std::cout << "\n";
+   std::cout << "--------- dSFMT engine status ---------\n";
    int pr = std::cout.precision();
    std::cout.precision(20);
-   std::cout << " Current index     = " << m_dsfmt->idx << std::endl;
-   std::cout << " Array status[] = " << std::endl;
+   std::cout << " Current index     = " << m_dsfmt->idx << "\n";
+   std::cout << " Array status[] = \n";
    for (int i=0; i<DSFMT_N + 1; ++i) {
      std::cout << m_dsfmt->status[i].u32[0] << " " << m_dsfmt->status[i].u32[1] << " " 
-               << m_dsfmt->status[i].u32[2] << " " << m_dsfmt->status[i].u32[3] << std::endl;
+               << m_dsfmt->status[i].u32[2] << " " << m_dsfmt->status[i].u32[3] << "\n";
    }
    std::cout << "----------------------------------------" << std::endl;
    std::cout.precision(pr);
