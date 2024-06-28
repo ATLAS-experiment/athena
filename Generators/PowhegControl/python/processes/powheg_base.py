@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon import Logging
 from .configurable import Configurable
@@ -90,7 +90,6 @@ class PowhegBase(Configurable):
         os.environ['LD_LIBRARY_PATH'] = ldpath_new
         logger.info("OpenLoopsPath (after) = {0}".format(os.getenv('OpenLoopsPath')))
         logger.debug("LD_LIBRARY_PATH (after) = {0}".format(os.getenv('LD_LIBRARY_PATH')))
-
 
     def link_madloop_libraries(self):
         '''

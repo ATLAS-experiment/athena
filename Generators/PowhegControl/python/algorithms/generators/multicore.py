@@ -60,19 +60,23 @@ def __multicore_multistage(process, generation_fn):
     shutil.rmtree("multistage_inputs", ignore_errors=True)
     os.mkdir("multistage_inputs")
     shutil.copy("pwgseeds.dat", "multistage_inputs/pwgseeds.dat")
-
-    if process.stage_is_completed(1):
-        logger.info("=> Skipping multi-core generation (V2/RES): stage 1 <=")
-    else:
-        process.modify_parameter(stage = 1)
-        __multicore_multistage_stage_1(generation_fn, process.itmx1)
-    if process.stage_is_completed(2):
-        logger.info("=> Skipping multi-core generation (V2/RES): stage 2 <=")
-    else:
-        process.modify_parameter(stage = 2)
-        __multicore_multistage_stage_2(generation_fn)
-    if process.stage_is_completed(3):
-        logger.info("=> Skipping multi-core generation (V2/RES): stage 3 <=")
+    # bb4l semileptonic events need to be run on top of dileptonic LHE files
+    if(process.executable != "pwhg_semileptonic" ):
+        if process.stage_is_completed(1):
+            logger.info("=> Skipping multi-core generation (V2/RES): stage 1 <=")
+        else:
+            process.modify_parameter(stage = 1)
+            __multicore_multistage_stage_1(generation_fn, process.itmx1)
+        if process.stage_is_completed(2):
+            logger.info("=> Skipping multi-core generation (V2/RES): stage 2 <=")
+        else:
+            process.modify_parameter(stage = 2)
+            __multicore_multistage_stage_2(generation_fn)
+        if process.stage_is_completed(3):
+            logger.info("=> Skipping multi-core generation (V2/RES): stage 3 <=")
+        else:
+            process.modify_parameter(stage = 3)
+            __multicore_multistage_stage_3(generation_fn)
     else:
         process.modify_parameter(stage = 3)
         __multicore_multistage_stage_3(generation_fn)

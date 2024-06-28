@@ -16,6 +16,7 @@ class Registry(metaclass=Singleton):
     __register = {}
 
     def __init__(self):
+
         """! Constructor: initialise the registry."""
        #self.add_default("semileptonic", 0, hidden=True, description="WWj decay mode: W->lnu W->jj [1:enabled]") ## parameter with same same already exists, with different default
         self.add_default("allrad", 0, description="turns on multiple shower scheme. Keeps hardest radiation from production and all resonances. [1:enabled]")
@@ -152,6 +153,7 @@ class Registry(metaclass=Singleton):
         self.add_default("DMphiwidth", 42.494, name="phi_width", description="mediator width")
         self.add_default("DMVmass", 100, name="V_mass", description="mediator mass")
         self.add_default("DMVwidth", 42.494, name="V_width", description="mediator width")
+        self.add_default("dontAdaptWind", 1, description="bb4l")
         self.add_default("dorwgt", 1, description="gg4l do reweighting")
         self.add_default("doublefsr", 0, description="reduce observable spikes by suppressing FSR emissions harder than the emitter. [>0:enabled]")
         self.add_default("doubleresonant", 0, description="double-resonant decay")
@@ -198,6 +200,8 @@ class Registry(metaclass=Singleton):
         self.add_default("foldphi", 1, description="number of folds on phi integration. [allowed: 1, 2, 5, 10, 25, 50]")
         self.add_default("foldy", 1, description="number of folds on y integration. [allowed: 1, 2, 5, 10, 25, 50]")
         self.add_default("for_reweighting", 0, description="run the whole chain without virtual corrections and add these during reweighting. [1:enabled]")
+        self.add_default("fourToFiveMatch", 1, description="[1:enabled]")
+        self.add_default("fourToFiveMatchAS", 0, description="[1:enabled]")
         self.add_default("frensc2min", 2.0, description="value at which the renormalisation scale is frozen (needed with MiNLO)")
         self.add_default("fulloffshell", 1, name="fulloffshell", description="Enable asociated W offshellness in Wt_DR ")
         self.add_default("fullphsp", -1, description="enable ISR/FSR phase space parametrization for process with >=2 jet in the ME. [1:enabled]")
@@ -272,6 +276,7 @@ class Registry(metaclass=Singleton):
         self.add_default("lhans1", 260000, name="PDF", description="PDF set for hadron 1. [LHAPDF numbering]")
         self.add_default("lhans2", 260000, name="PDF", description="PDF set for hadron 2. [LHAPDF numbering]")
         self.add_default("lhapdf6maxsets", 200, description="Maximum number of PDF sets to keep in memory. [<0:default to 10]")
+        self.add_default("lhefuborn", 0, description="semileptonic bb4l")
         self.add_default("lhfm/bmass", powheg_atlas_common.mass.b, name="mass_b", description="b-quark mass in GeV")
         self.add_default("lhfm/cmass", powheg_atlas_common.mass.c, name="mass_c", description="c-quark mass in GeV")
         self.add_default("lhfm/emass", powheg_atlas_common.mass.e, name="mass_e", description="mass of electron in GeV")
@@ -483,6 +488,8 @@ class Registry(metaclass=Singleton):
         self.add_default("renscfact", 1.0, name="mu_R", description="renormalization scale factor: mu_ren = mu_ref * renscfact")
         self.add_default("resc_em_alpha", -1, description="[-1:use Powheg default]")
         self.add_default("rescue_reals", -1, description="")
+        self.add_default("RHWithSingleTops", 1, description="")
+        self.add_default("RHStrategy", 1, description="")
         self.add_default("running_width", 0, description="use running width in propagator. (0:disabled; 1:enabled)")
         self.add_default("runningscale", 1, description="choice for mu_R and mu_F in Bbar integration.")
         self.add_default("runningscales", 0, description="[0:use fixed factorisation/renormalisation scale; 1:use running scale]")
@@ -522,6 +529,9 @@ class Registry(metaclass=Singleton):
         self.add_default("sthw2", powheg_atlas_common.EW_parameters.sin2thetaW, description="sin(theta_W)^2")
         self.add_default("storeinfo_rwgt", 0, frozen=True, description="write out PDF information for reweighting. [0:disabled; 1:enabled]")
         self.add_default("storemintupb", 1, description="cache cross sections (stage2 btilde calls) to speed up construction of upper bounding envelope. [1:enabled]")
+        self.add_default("st_nlight_default", 5, description="")
+        self.add_default("st_nlight_as", 5, description="")
+        self.add_default("st_nlight_ssv", 4, description="")
         self.add_default("sudakovbb", -1, description="[-1:use Powheg default]")
         self.add_default("sudmw2mb", -1, description="[-1:use Powheg default]")
         self.add_default("sudscalevar", 1, description="also apply scale variation to Sudakov form factors in MiNLO. [0:disabled; 1:enabled]")
@@ -587,6 +597,7 @@ class Registry(metaclass=Singleton):
         self.add_default("whichpwhgevent", -1, description="[-1:use Powheg default]")
         self.add_default("whichscale", 4, description="ttj_MiNNLO: set scale of overall two powers of alphas if fixedscale=0 [0:H_T^tt/2, 1:m_tt/2, 2:m_tt, 3:H_T^tt+jets/2, 4:H_T^tt/4, 5:H_T^tt+jets/4]")
         self.add_default("which_as",2, description="gg4l: running of alpha: 1 PWHG, 2 PDF")
+        self.add_default("widthCorrection", 5, description="")
         self.add_default("width_H", powheg_atlas_common.width.H, description="Higgs boson width in GeV")
         self.add_default("width_t", powheg_atlas_common.width.t, description="top quark width in GeV")
         self.add_default("width_W", powheg_atlas_common.width.W, name="width_W", description="W boson width in GeV")
