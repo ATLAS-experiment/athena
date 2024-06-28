@@ -92,11 +92,13 @@ class IDAlignMonResidualsAlg :  public AthMonitorAlgorithm {
 
   static const int m_nSiBlayers{4}; //
   static const int m_nPixEClayers{3}; //
+  static const int m_nSCTEClayers{9}; //
   static const int m_nTRTBlayers{3}; //
   static const int m_nTRTEClayers{2}; //
   std::vector<int> m_pixResidualX;
   std::vector<int> m_pixResidualX_3D;
   std::vector<int> m_pixResidualY;
+  std::vector<int> m_pixResidualY_3D;
   std::vector<int> m_pixPullX;
   std::vector<int> m_pixPullY;
   std::vector<int> m_pixResidualXvsEta;
@@ -105,9 +107,14 @@ class IDAlignMonResidualsAlg :  public AthMonitorAlgorithm {
   std::vector<int> m_pixResidualYvsPhi;
   std::vector<int> m_pixECAResidualX;
   std::vector<int> m_pixECAResidualY;
+  std::vector<int> m_pixECResidualX_3D;
+  std::vector<int> m_pixECResidualY_3D;
   std::vector<int> m_pixECCResidualX;
   std::vector<int> m_pixECCResidualY;
   std::vector<int> m_sctResidualX;
+  std::vector<int> m_sctResidualX_3D;
+  std::vector<int> m_sctECAResidualX_3D;
+  std::vector<int> m_sctECCResidualX_3D;
   std::vector<int> m_sctPullX;
   std::vector<int> m_sctResidualXvsEta;
   std::vector<int> m_sctResidualXvsPhi;

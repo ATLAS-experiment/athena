@@ -23,14 +23,14 @@ RpdSubtractCentroidTool::RpdSubtractCentroidTool(const std::string& name) :
 
   declareProperty("ZdcModuleContainerName", m_zdcModuleContainerName = "ZdcModules", "Location of ZDC processed data");
   declareProperty("ZdcSumContainerName", m_zdcSumContainerName = "ZdcSums", "Location of ZDC processed sums");
-  declareProperty("WriteAux", m_writeAux = true);
-  declareProperty("AuxSuffix", m_auxSuffix = "");
-  declareProperty("MinZdcEnergy", m_minZdcEnergy = {-1.0, -1.0}, "Minimum (calibrated) ZDC energy for valid centriod (negative to disable)");
-  declareProperty("MaxZdcEnergy", m_maxZdcEnergy = {-1.0, -1.0}, "Maximum (calibrated) ZDC energy for valid centriod (negative to disable)");
-  declareProperty("MinEmEnergy", m_minEmEnergy = {-1.0, -1.0}, "Minimum (calibrated) EM energy for valid centriod (negative to disable)");
-  declareProperty("MaxEmEnergy", m_maxEmEnergy = {-1.0, -1.0}, "Minimum (calibrated) EM energy for valid centriod (negative to disable)");
-  declareProperty("PileupMaxFrac", m_pileupMaxFrac = {1.0, 1.0}, "Maximum fractional pileup allowed in an RPD channel for valid centroid");
-  declareProperty("ExcessiveSubtrUnderflowFrac", m_maximumNegativeSubtrAmpFrac = {1.0, 1.0}, "If any RPD channel subtracted amplitude is negative and its fraction of subtracted amplitude sum is greater than or equal to this number, the centroid is invalid");
+  declareProperty("WriteAux", m_writeAux = true, "If true, write AOD decorations");
+  declareProperty("AuxSuffix", m_auxSuffix = "", "Suffix to add to AOD decorations for reading and writing");
+  declareProperty("MinZdcEnergy", m_minZdcEnergy = {-1.0, -1.0}, "Minimum (calibrated) ZDC energy for valid centroid (negative to disable); per side");
+  declareProperty("MaxZdcEnergy", m_maxZdcEnergy = {-1.0, -1.0}, "Maximum (calibrated) ZDC energy for valid centroid (negative to disable); per side");
+  declareProperty("MinEmEnergy", m_minEmEnergy = {-1.0, -1.0}, "Minimum (calibrated) EM energy for valid centroid (negative to disable); per side");
+  declareProperty("MaxEmEnergy", m_maxEmEnergy = {-1.0, -1.0}, "Minimum (calibrated) EM energy for valid centroid (negative to disable); per side");
+  declareProperty("PileupMaxFrac", m_pileupMaxFrac = {1.0, 1.0}, "Maximum fractional pileup allowed in an RPD channel for valid centroid; per side");
+  declareProperty("ExcessiveSubtrUnderflowFrac", m_maximumNegativeSubtrAmpFrac = {1.0, 1.0}, "If any RPD channel subtracted amplitude is negative and its fraction of subtracted amplitude sum is greater than or equal to this number, the centroid is invalid; per side");
   declareProperty("UseRpdSumAdc", m_useRpdSumAdc = true, "If true, use RPD channel sum ADC for centroid calculation, else use RPD channel max ADC");
   declareProperty("UseCalibDecorations", m_useCalibDecorations = true, "If true, use RPD channel sum/max ADC decorations with output calibration factors applied during reconstruction, else use decorations with raw values");
 }
@@ -43,10 +43,10 @@ RpdSubtractCentroidTool::~RpdSubtractCentroidTool()
 StatusCode RpdSubtractCentroidTool::initialize()
 {
   for (unsigned int side : {0, 1}) {
-    if (m_minZdcEnergy[side] < 0) m_minZdcEnergy[side] = -std::numeric_limits<float>::infinity();
-    if (m_maxZdcEnergy[side] < 0) m_maxZdcEnergy[side] = std::numeric_limits<float>::infinity();
-    if (m_minEmEnergy[side] < 0) m_minEmEnergy[side] = -std::numeric_limits<float>::infinity();
-    if (m_maxEmEnergy[side] < 0) m_maxEmEnergy[side] = std::numeric_limits<float>::infinity();
+    if (m_minZdcEnergy.at(side) < 0) m_minZdcEnergy.at(side) = -std::numeric_limits<float>::infinity();
+    if (m_maxZdcEnergy.at(side) < 0) m_maxZdcEnergy.at(side) = std::numeric_limits<float>::infinity();
+    if (m_minEmEnergy.at(side) < 0) m_minEmEnergy.at(side) = -std::numeric_limits<float>::infinity();
+    if (m_maxEmEnergy.at(side) < 0) m_maxEmEnergy.at(side) = std::numeric_limits<float>::infinity();
   }
 
   ATH_CHECK(m_eventInfoKey.initialize());
@@ -182,7 +182,7 @@ bool RpdSubtractCentroidTool::readAOD(xAOD::ZdcModuleContainer const& moduleCont
 
   ATH_MSG_DEBUG("Processing modules");
 
-  for (const auto zdcModule : moduleContainer) {
+  for (auto const& zdcModule : moduleContainer) {
     int side = -1;
     if (zdcModule->zdcSide() == -1) {
       side = 0;
@@ -233,7 +233,7 @@ bool RpdSubtractCentroidTool::readAOD(xAOD::ZdcModuleContainer const& moduleCont
     }
   }
 
-  for (const auto zdcSum: moduleSumContainer) {
+  for (auto const& zdcSum: moduleSumContainer) {
     int side = -1;
     if (zdcSum->zdcSide() == -1) {
       side = 0;
@@ -258,11 +258,11 @@ bool RpdSubtractCentroidTool::checkZdcRpdValidity(unsigned int side)
     m_centroidStatus.at(side).set(ValidBit, false);
   } else {
     // zdc good
-    if (m_zdcFinalEnergy.at(side) < m_minZdcEnergy[side]) {
+    if (m_zdcFinalEnergy.at(side) < m_minZdcEnergy.at(side)) {
       m_centroidStatus.at(side).set(InsufficientZDCEnergyBit, true);
       m_centroidStatus.at(side).set(ValidBit, false);
     }
-    if (m_zdcFinalEnergy.at(side) > m_maxZdcEnergy[side]) {
+    if (m_zdcFinalEnergy.at(side) > m_maxZdcEnergy.at(side)) {
       m_centroidStatus.at(side).set(ExcessiveZDCEnergyBit, true);
       m_centroidStatus.at(side).set(ValidBit, false);
     }
@@ -274,11 +274,11 @@ bool RpdSubtractCentroidTool::checkZdcRpdValidity(unsigned int side)
     m_centroidStatus.at(side).set(ValidBit, false);
   } else {
     // em good
-    if (m_emCalibEnergy.at(side) < m_minEmEnergy[side]) {
+    if (m_emCalibEnergy.at(side) < m_minEmEnergy.at(side)) {
       m_centroidStatus.at(side).set(InsufficientEMEnergyBit, true);
       m_centroidStatus.at(side).set(ValidBit, false);
     }
-    if (m_emCalibEnergy.at(side) > m_maxEmEnergy[side]) {
+    if (m_emCalibEnergy.at(side) > m_maxEmEnergy.at(side)) {
       m_centroidStatus.at(side).set(ExcessiveEMEnergyBit, true);
       m_centroidStatus.at(side).set(ValidBit, false);
     }
@@ -290,7 +290,7 @@ bool RpdSubtractCentroidTool::checkZdcRpdValidity(unsigned int side)
 
   for (unsigned int row = 0; row < m_nRows; row++) {
     for (unsigned int col = 0; col < m_nCols; col++) {
-      if (m_rpdChannelData.at(side).at(row).at(col).pileupFrac > m_pileupMaxFrac[side]) {
+      if (m_rpdChannelData.at(side).at(row).at(col).pileupFrac > m_pileupMaxFrac.at(side)) {
         m_centroidStatus.at(side).set(ExcessivePileupBit, true);
         m_centroidStatus.at(side).set(ValidBit, false);
       }
@@ -328,16 +328,16 @@ bool RpdSubtractCentroidTool::subtractRpdAmplitudes(unsigned int side)
 
   if (m_subtrAmpSum.at(side) <= 0) {
     m_centroidStatus.at(side).set(ZeroSumBit, true);
-    m_centroidStatus.at(side) &= ~(1 << ValidBit);
+    m_centroidStatus.at(side).set(ValidBit, false);
     return false;
   }
 
   for (unsigned int row = 0; row < m_nRows; row++) {
     for (unsigned int col = 0; col < m_nCols; col++) {
       const float &subtrAmp = m_rpdChannelData.at(side).at(row).at(col).subtrAmp;
-      if (subtrAmp < 0 && -subtrAmp/m_subtrAmpSum.at(side) > m_maximumNegativeSubtrAmpFrac[side]) {
+      if (subtrAmp < 0 && -subtrAmp/m_subtrAmpSum.at(side) > m_maximumNegativeSubtrAmpFrac.at(side)) {
         m_centroidStatus.at(side).set(ExcessiveSubtrUnderflowBit, true);
-        m_centroidStatus.at(side) &= ~(1 << ValidBit);
+        m_centroidStatus.at(side).set(ValidBit, false);
       }
     }
   }
@@ -401,6 +401,7 @@ void RpdSubtractCentroidTool::calculateReactionPlaneAngle(unsigned int side)
 
 void RpdSubtractCentroidTool::writeAOD(xAOD::ZdcModuleContainer const& moduleSumContainer) const
 {
+  if (!m_writeAux) return;
   ATH_MSG_DEBUG("Adding variables with suffix=" + m_auxSuffix);
 
   // initialize write handles from write handle keys
@@ -419,7 +420,7 @@ void RpdSubtractCentroidTool::writeAOD(xAOD::ZdcModuleContainer const& moduleSum
   SG::WriteDecorHandle<xAOD::ZdcModuleContainer, float> reactionPlaneAngleHandle(m_reactionPlaneAngleKey);
   SG::WriteDecorHandle<xAOD::ZdcModuleContainer, float> cosDeltaReactionPlaneAngleHandle(m_cosDeltaReactionPlaneAngleKey);
 
-  for (const auto zdcSum: moduleSumContainer) {
+  for (auto const& zdcSum: moduleSumContainer) {
     int side = -1;
     if (zdcSum->zdcSide() == -1) {
       side = 0;
@@ -454,10 +455,8 @@ StatusCode RpdSubtractCentroidTool::recoZdcModules(xAOD::ZdcModuleContainer cons
     // no modules - do nothing
     return StatusCode::SUCCESS;
   }
-
   reset();
   if (!readAOD(moduleContainer, moduleSumContainer)) return StatusCode::FAILURE;
-
   for (unsigned int side : {0, 1}) {
     if (!checkZdcRpdValidity(side)) continue; // rpd invalid -> don't calculate centroid
     if (!subtractRpdAmplitudes(side)) continue; // bad total sum -> don't calculate centroid
@@ -467,19 +466,14 @@ StatusCode RpdSubtractCentroidTool::recoZdcModules(xAOD::ZdcModuleContainer cons
     calculateReactionPlaneAngle(side);
     m_centroidStatus.at(side).set(HasCentroidBit, true);
   }
-
   if (m_centroidStatus.at(0)[HasCentroidBit] && m_centroidStatus.at(1)[HasCentroidBit]) {
     m_cosDeltaReactionPlaneAngle = TMath::Cos(m_reactionPlaneAngle.at(0) - m_reactionPlaneAngle.at(1));
   }
-
   if (m_centroidStatus.at(0)[ValidBit] && m_centroidStatus.at(1)[ValidBit]) {
     m_eventStatus = true; // event is good for analysis
   }
-
   writeAOD(moduleSumContainer);
-
   ATH_MSG_DEBUG("Finishing event processing");
-
   return StatusCode::SUCCESS;
 }
 
@@ -489,17 +483,12 @@ StatusCode RpdSubtractCentroidTool::reprocessZdc()
     ATH_MSG_WARNING("Tool not initialized!");
     return StatusCode::FAILURE;
   }
-
   ATH_MSG_DEBUG("Trying to retrieve " << m_zdcModuleContainerName);
-
   xAOD::ZdcModuleContainer const* zdcModules = nullptr;
   ATH_CHECK(evtStore()->retrieve(zdcModules, m_zdcModuleContainerName));
-
   xAOD::ZdcModuleContainer const* zdcSums = nullptr;
   ATH_CHECK(evtStore()->retrieve(zdcSums, m_zdcSumContainerName));
-
   ATH_CHECK(recoZdcModules(*zdcModules, *zdcSums));
-
   return StatusCode::SUCCESS;
 }
 
