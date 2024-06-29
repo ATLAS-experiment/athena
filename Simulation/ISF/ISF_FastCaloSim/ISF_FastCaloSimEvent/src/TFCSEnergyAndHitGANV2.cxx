@@ -316,13 +316,13 @@ bool TFCSEnergyAndHitGANV2::fillEnergy(
           continue;
         }
 
-        if (fabs(pdgId) == 22 || fabs(pdgId) == 11) {
+        if (std::abs(pdgId) == 22 || std::abs(pdgId) == 11) {
           // maximum 10 MeV per hit, equaly distributed in alpha and r
           int maxHitsInVoxel = energyInVoxel * truth->Ekin() / 10;
           if (maxHitsInVoxel < 1)
             maxHitsInVoxel = 1;
-          nHitsAlpha = sqrt(maxHitsInVoxel);
-          nHitsR = sqrt(maxHitsInVoxel);
+          nHitsAlpha = std::sqrt(maxHitsInVoxel);
+          nHitsR = std::sqrt(maxHitsInVoxel);
         } else {
           // One hit per mm along r
           nHitsR = x->GetBinUpEdge(ix) - x->GetBinLowEdge(ix);

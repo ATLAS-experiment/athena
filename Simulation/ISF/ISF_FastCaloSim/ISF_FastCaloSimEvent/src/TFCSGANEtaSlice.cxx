@@ -178,7 +178,7 @@ TFCSGANEtaSlice::GetNetworkOutputs(const TFCSTruthState *truth,
   NetworkInputs inputs;
 
   int maxExp = 0, minExp = 0;
-  if (m_pid == 22 || fabs(m_pid) == 11) {
+  if (m_pid == 22 || std::abs(m_pid) == 11) {
     if (truth->P() >
         4096) { // This is the momentum, not the energy, because the split is
                 // based on the samples which are produced with the momentum
@@ -188,10 +188,10 @@ TFCSGANEtaSlice::GetNetworkOutputs(const TFCSTruthState *truth,
       maxExp = 12;
       minExp = 6;
     }
-  } else if (fabs(m_pid) == 211) {
+  } else if (std::abs(m_pid) == 211) {
     maxExp = 22;
     minExp = 8;
-  } else if (fabs(m_pid) == 2212) {
+  } else if (std::abs(m_pid) == 2212) {
     maxExp = 22;
     minExp = 10;
   }
@@ -227,7 +227,7 @@ TFCSGANEtaSlice::GetNetworkOutputs(const TFCSTruthState *truth,
                  // regions and added only to the GANs that use it, for now all
                  // GANs have 3 conditioning inputs so filling zeros
       inputs["mycond"].insert(std::pair<std::string, double>(
-          "variable_1", fabs(extrapol->IDCaloBoundary_eta())));
+          "variable_1", std::abs(extrapol->IDCaloBoundary_eta())));
     } else {
       inputs["mycond"].insert(std::pair<std::string, double>("variable_1", 0));
     }
