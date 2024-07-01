@@ -1,8 +1,9 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonValidationPlots.h"
+#include "AthContainers/ConstAccessor.h"
 
 #include <utility>
 
@@ -215,12 +216,11 @@ bool MuonValidationPlots::isGoodTruthTrack(const xAOD::TruthParticle& truthMu) {
     bool hasEnoughPrecHits = false;
 
     for (const auto& hitTypeItr : hitTypes) {
-        if (truthMu.isAvailable<uint8_t>(hitTypeItr)) {
-            nPrecHits += truthMu.auxdata<uint8_t>(hitTypeItr);
-            if (nPrecHits >= minPrecHits) {
-                hasEnoughPrecHits = true;
-                break;
-            }
+        SG::ConstAccessor<uint8_t> acc(hitTypeItr);
+        nPrecHits += acc.withDefault (truthMu, 0);
+        if (nPrecHits >= minPrecHits) {
+            hasEnoughPrecHits = true;
+            break;
         }
     }
     return (hasEnoughPrecHits);
