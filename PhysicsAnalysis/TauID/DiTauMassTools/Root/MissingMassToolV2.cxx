@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // vim: ts=2 sw=2
@@ -109,12 +109,17 @@ CP::CorrectionCode MissingMassToolV2::apply(const xAOD::EventInfo& ei,
 
   if (m_decorate) {
     int aFitStatus = m_MMC->OutputInfo.GetFitStatus();
-    ei.auxdecor<int>("mmc_fit_status") = aFitStatus;
-    ei.auxdecor<double>("mmc_maxw_mass")  = aFitStatus==1 ? m_MMC->OutputInfo.GetFittedMass(MMCFitMethodV2::MAXW) : -1;
-    ei.auxdecor<double>("mmc_mlm_mass")   = aFitStatus==1 ? m_MMC->OutputInfo.GetFittedMass(MMCFitMethodV2::MLM) : -1;
-    ei.auxdecor<double>("mmc_mlnu3p_mass") = aFitStatus==1 ? m_MMC->OutputInfo.GetFittedMass(MMCFitMethodV2::MLNU3P) : -1;
+    static const SG::Decorator<int> dec_mmc_fit_status ("mmc_fit_status");
+    static const SG::Decorator<double> dec_mmc_maxw_mass ("mmc_maxw_mass");
+    static const SG::Decorator<double> dec_mmc_mlm_mass ("mmc_mlm_mass");
+    static const SG::Decorator<double> dec_mmc_mlnu3p_mass ("mmc_mlnu3p_mass");
+    static const SG::Decorator<TLorentzVector> dec_mmc_mlnu3p_4vect ("mmc_mlnu3p_4vect");
+    dec_mmc_fit_status(ei) = aFitStatus;
+    dec_mmc_maxw_mass(ei)  = aFitStatus==1 ? m_MMC->OutputInfo.GetFittedMass(MMCFitMethodV2::MAXW) : -1;
+    dec_mmc_mlm_mass(ei)   = aFitStatus==1 ? m_MMC->OutputInfo.GetFittedMass(MMCFitMethodV2::MLM) : -1;
+    dec_mmc_mlnu3p_mass(ei) = aFitStatus==1 ? m_MMC->OutputInfo.GetFittedMass(MMCFitMethodV2::MLNU3P) : -1;
     TLorentzVector null4V(-1,-1,-1,-1);
-    ei.auxdecor<TLorentzVector>("mmc_mlnu3p_4vect") = aFitStatus==1 ? m_MMC->OutputInfo.GetResonanceVec(MMCFitMethodV2::MLNU3P) : null4V;
+    dec_mmc_mlnu3p_4vect(ei) = aFitStatus==1 ? m_MMC->OutputInfo.GetResonanceVec(MMCFitMethodV2::MLNU3P) : null4V;
   }
 
   return CP::CorrectionCode::Ok;
