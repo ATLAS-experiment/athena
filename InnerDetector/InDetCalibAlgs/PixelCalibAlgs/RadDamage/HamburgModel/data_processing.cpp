@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -249,10 +249,10 @@ public:
   void set_temp(int);
   double get_temp() const;
   void irradiate(leakage_current_consts,Annealing_constants, long int, float, long double);
-  vector<double> get_G_i() const;
-  vector<double> get_leakage_current() const;
-  vector<double> get_alpha_vec() const;
-  vector<double> get_powerconsumption() const;
+  const vector<double>& get_G_i() const;
+  const vector<double>& get_leakage_current() const;
+  const vector<double>& get_alpha_vec() const;
+  const vector<double>& get_powerconsumption() const;
 };
 
 Sensor::Sensor( double a, double b, int c, double d, double e)	//Constructordefinition
@@ -323,22 +323,22 @@ void Sensor::set_Ndonor(double new_value)
   return;
 }
 
-vector<double> Sensor::get_G_i() const
+const vector<double>& Sensor::get_G_i() const
 {
   return G_i;
 }
 
-vector<double> Sensor::get_leakage_current() const
+const vector<double>& Sensor::get_leakage_current() const
 {
   return leakage_current;
 }
 
-vector<double> Sensor::get_alpha_vec() const
+const vector<double>& Sensor::get_alpha_vec() const
 {
   return alpha_vec;
 }
 
-vector<double> Sensor::get_powerconsumption() const
+const vector<double>& Sensor::get_powerconsumption() const
 {
   return powerconsumption;
 }

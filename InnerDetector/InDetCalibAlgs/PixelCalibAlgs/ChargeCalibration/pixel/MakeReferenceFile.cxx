@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /* Standalone application to produce a reference file from the pixel TOT calibration DB */
@@ -120,7 +120,7 @@ public:
     Folder(const DbConnection &theConnection, const FolderSpec &theFolder);
     bool isValid() const;
     std::string description() const;
-    FolderSpec folderSpec() const;
+    const FolderSpec& folderSpec() const;
     cool::RecordSpecification foreignKeySpec();
     cool::RecordSpecification payloadSpec() const; //!< specification of the payload entries
     bool isSingleVersion() const;
@@ -149,7 +149,7 @@ Folder::Folder(const DbConnection &theConnection, const FolderSpec &theFolder)
     }
 }
 
-FolderSpec
+const FolderSpec&
 Folder::folderSpec() const
 {
     return m_folderSpec;
