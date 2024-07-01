@@ -115,9 +115,9 @@ m_removedpart(0)
                     m_writeAllStable = false,
                     "Keep all stable particles");
     
-    declareProperty("WriteStatus3",
-                    m_writeStatus3 = false,
-                    "Save all particles with status code 3");
+    declareProperty("WriteNotPhysical",
+                    m_writeNotPhysical = false,
+                    "Save also non-physical particles");
     
     declareProperty("WriteFirstN",
                     m_writeFirstN = -1,
@@ -296,8 +296,8 @@ bool DerivationFramework::MenuTruthThinning::isAccepted(const xAOD::TruthParticl
     // Do we want to save everything?
     if (m_writeEverything) ok = true;
     
-    // Save status code 3 particles
-    if (m_writeStatus3 && p->status()==3) ok = true;
+    // Save NotPhysical particles
+    if (m_writeNotPhysical && !MC::isPhysical(p)) ok = true;
     
     // OK if we select partons and are at beginning of event record
     if( m_writePartons && !MC::isHadron(pdg_id) &&

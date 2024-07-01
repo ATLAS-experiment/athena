@@ -113,7 +113,7 @@ namespace DerivationFramework {
         bool m_writeAllStable;
         
         /// Parameter: Write particles with status code 3
-        bool m_writeStatus3;
+        bool m_writeNotPhysical;
         
         /// Parameter: Write particles for tt+HF classification
         bool m_writettHFHadrons;

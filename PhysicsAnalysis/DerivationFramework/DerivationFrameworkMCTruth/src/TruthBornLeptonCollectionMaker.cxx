@@ -160,7 +160,7 @@ StatusCode DerivationFramework::TruthBornLeptonCollectionMaker::addBranches() co
       if (sherpLepParentUniqueID > 0 && sherpLepParentUniqueID == puniqueID) continue;
     } else if (is_sherpa == 0) {
       // Some generators, look for leptons  coming from vertices with other leptons
-      bool has_status_n3=false, has_status_3=false, has_V=false;
+      bool physical=false,has_V=false;
       if (!MC::isPhysical(theParticle)){
         // Look for other leptons in the production vertex... carefully
         if (theParticle->hasProdVtx()){
@@ -168,8 +168,7 @@ StatusCode DerivationFramework::TruthBornLeptonCollectionMaker::addBranches() co
           for (size_t p=0;p<prod->nOutgoingParticles();++p){
             if (prod->outgoingParticle(p) &&
               prod->outgoingParticle(p)->isLepton()){
-              has_status_n3 = has_status_n3 || MC::isPhysical(prod->outgoingParticle(p));
-              has_status_3 = has_status_3 || MC::isPhysical(prod->outgoingParticle(p));
+              physical = physical || MC::isPhysical(prod->outgoingParticle(p));
             }
           } // Loop over particles from the same production vertex
           for (size_t p=0;p<prod->nIncomingParticles();++p){
@@ -184,8 +183,7 @@ StatusCode DerivationFramework::TruthBornLeptonCollectionMaker::addBranches() co
       }
 
       // Now we have all the information for the special case of V->l(born) l(bare) l(born) l(bare)
-      if ( !(has_status_3 && has_status_n3 && has_V && !MC::isPhysical(theParticle)) &&
-         theParticle->status()!=23){
+      if ( !(physical && has_V && !MC::isPhysical(theParticle)) && theParticle->status()!=23){
         // If not a special case, deal with the standard: has a boson parent, is a lepton, and has a descendent that is a bare lepton
         if (!theParticle->parent()) continue;
         if (!theParticle->parent()->isZ() && !theParticle->parent()->isW() && !theParticle->parent()->isHiggs()) continue;
