@@ -41,7 +41,7 @@ void TFCSGANXMLParameters::InitialiseFromXML(
                 int regionId = atof(
                     (const char *)xmlGetProp(nodeBin, BAD_CAST "regionId"));
 
-                if (fabs(etaMid) > nodeEtaMin && fabs(etaMid) < nodeEtaMax) {
+                if (std::abs(etaMid) > nodeEtaMin && std::abs(etaMid) < nodeEtaMax) {
 
                   m_symmetrisedAlpha =
                       ReadBooleanAttribute("symmetriseAlpha", nodeParticle);
