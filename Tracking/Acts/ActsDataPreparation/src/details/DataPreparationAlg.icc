@@ -50,20 +50,15 @@ namespace ActsTrk {
     ATH_CHECK( outputHandle.record( std::make_unique<output_collection_t>(SG::VIEW_ELEMENTS) ) );
     output_collection_t *outputCollection = outputHandle.ptr();
 
-    if constexpr (not useCache) {
-      ATH_CHECK( fillFromContainer( ctx, *outputCollection ) );
-    } else {
-      ATH_CHECK( fillFromCache( ctx, *outputCollection ) );
-    }
-    
+    ATH_CHECK( fill( ctx, *outputCollection ) );
     ATH_MSG_DEBUG("Concluded creation of output collection with " << outputCollection->size() << " entries");
     return StatusCode::SUCCESS;
   }
 
   template <typename external_collection_t, bool useCache>
   StatusCode
-  DataPreparationAlg<external_collection_t, useCache>::fillFromContainer(const EventContext& ctx,
-									 output_collection_t& outputCollection) const
+  DataPreparationAlg<external_collection_t, useCache>::fill(const EventContext& ctx,
+							    output_collection_t& outputCollection) const
   {
     ATH_MSG_DEBUG("Filling output collection from container");
     
@@ -142,8 +137,9 @@ namespace ActsTrk {
 
   template <typename external_collection_t, bool useCache>
   StatusCode
-  DataPreparationAlg<external_collection_t, useCache>::fillFromCache(const EventContext& ctx,
-								     output_collection_t& outputCollection) const
+  DataPreparationAlg<external_collection_t, useCache>::fill(const EventContext& ctx,
+							    output_collection_t& outputCollection) const
+    requires (useCache == true)
   {
     ATH_MSG_DEBUG("Filling output collection from cache");
 

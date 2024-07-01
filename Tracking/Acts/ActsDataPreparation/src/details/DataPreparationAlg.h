@@ -49,11 +49,13 @@ namespace ActsTrk {
 
   private:
     // Different ways of filling the output collection
-    StatusCode fillFromContainer(const EventContext& ctx,
-				 output_collection_t& outputCollection) const;
-    StatusCode fillFromCache(const EventContext& ctx,
-			     output_collection_t& outputCollection) const;
+    StatusCode fill(const EventContext& ctx,
+		    output_collection_t& outputCollection) const;
 
+    StatusCode fill(const EventContext& ctx,
+		    output_collection_t& outputCollection) const
+      requires (useCache == true);
+    
     // Common way of fetching the hash ids from the RoI(s)
     StatusCode fetchIdHashes(const EventContext& ctx,
 			     std::set<IdentifierHash>& hashes) const;
