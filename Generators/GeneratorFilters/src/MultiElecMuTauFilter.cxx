@@ -52,7 +52,7 @@ StatusCode MultiElecMuTauFilter::filterEvent() {
       if (!m_incHadTau) continue;
       HepMC::ConstGenParticlePtr   tau= nullptr;
       HepMC::ConstGenParticlePtr   taunu= nullptr;
-      if (MC::isTau(pitr) || pitr->status() == 3) continue;
+      if (MC::isTau(pitr) || !MC::isPhysical(pitr)) continue;
         tau = pitr;
         if(!tau->end_vertex()) continue;
         // Loop over children and:

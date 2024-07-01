@@ -107,9 +107,7 @@ StatusCode BSignalFilter::filterEvent()
   for( itr = events()->begin(); itr != events()->end(); ++itr )
     {
       m_EventCnt++;
-
       bool acceptEvent = true;
-
       const HepMC::GenEvent* genEvt = (*itr);
 
       // ** Check HepMC for particles activating LVL1 trigger, if that is what user wishes **
@@ -117,9 +115,7 @@ StatusCode BSignalFilter::filterEvent()
       bool LVL1Passed = false;
       HepMC::ConstGenParticlePtr  LVL1Muon = nullptr;
       //
-      if ( m_localLVL1MuonCutOn )
-        {
-	  //
+      if ( m_localLVL1MuonCutOn ) {
 	  for(const auto& part: *genEvt){
 	      bool LVL1Result = LVL1_Mu_Trigger( part );
 	      if ( LVL1Result )
@@ -211,11 +207,9 @@ StatusCode BSignalFilter::filterEvent()
 		  auto  firstParent = part->production_vertex()->particles_begin(HepMC::parents);
 		  auto lastParent  = part->production_vertex()->particles_end(HepMC::parents);
 #endif
-		  for (auto  thisParent = firstParent; thisParent != lastParent; ++thisParent )
-                    {
-		      int parentID = (*thisParent)->pdg_id();
-		      if (MC::isBottomMeson(parentID) || MC::isBottomBaryon(parentID) ) motherIsB = true;
-                    }
+          for (auto  thisParent = firstParent; thisParent != lastParent; ++thisParent ) {
+            if (MC::isBottomMeson(*thisParent) || MC::isBottomBaryon(*thisParent) ) motherIsB = true;
+          }
 		  if( motherIsB ){
 		    newBChain = false; // Since the chain is not new
 		  }else{
