@@ -242,11 +242,11 @@ class Hw7ConfigMerging(hw7Config.Hw7Config):
       athMsgLog.warn(hw7Utils.ansi_format_warning("The GoSam installation can't be found from $GOSAMPATH = {}, so don't be surprised if your run crashes in you are using matrix elements from GoSam in Herwig7 / Matchbox. Please ensure that the location exists, that you have permissions to access it and that it contains the script 'bin/gosam.py'".format(GoSam_path)))
 
     try:
-      OpenLoops_path= os.environ['OPENLOOPS_PATH']
+      OpenLoops_path= os.environ['OPENLOOPSPATH']
     except KeyError:
-      raise RuntimeError("OPENLOOPS_PATH environment variable not set")
+      raise RuntimeError("OPENLOOPSPATH environment variable not set")
     if not os.path.isdir(os.path.join(OpenLoops_path, "proclib")):
-      athMsgLog.warn(hw7Utils.ansi_format_warning("The OpenLoops process libraries can't be found from $OPENLOOPS_PATH = {}".format(OpenLoops_path)))
+      athMsgLog.warn(hw7Utils.ansi_format_warning("The OpenLoops process libraries can't be found from $OPENLOOPSPATH = {}".format(OpenLoops_path)))
 
 
       
