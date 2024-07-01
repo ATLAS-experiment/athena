@@ -49,6 +49,9 @@
 
 // Trigger include(s):
 #include "TrigDecisionTool/TrigDecisionTool.h"
+#include "TrigT1Interfaces/TrigT1StoreGateKeys.h"
+#include "TrigT1Result/CTP_RDO.h"
+#include "TrigT1Result/CTP_Decoder.h"
 
 
 class  MistimedStreamMonitorAlgorithm : public AthMonitorAlgorithm {
@@ -90,6 +93,8 @@ private:
 
   // TrigDecisionTool
   PublicToolHandle< Trig::TrigDecisionTool > m_trigDec{this, "TriggerDecisionTool", "Trig::TrigDecisionTool/TrigDecisionTool", ""};
+
+  SG::ReadHandleKey<CTP_RDO> m_ctpRdoReadKey {this, "CTPRDOReadKey", LVL1CTP::DEFAULT_RDOOutputLocation,"Read handle key to CTP_RDO for conversion to ByteStream"};
   
   /// container keys including steering parameter and description
   SG::ReadHandleKey<xAOD::TriggerTowerContainer> m_xAODTriggerTowerContainerName{this, "BS_xAODTriggerTowerContainer",LVL1::TrigT1CaloDefs::xAODTriggerTowerLocation,"Trigger Tower Container"};
@@ -117,6 +122,8 @@ private:
 
   // Properties
   Gaudi::Property<double> m_phiScaleTT{this, "phiScaleTT", 32./M_PI, "Scale factor to convert trigger tower phi to integer binning"};
+  Gaudi::Property<bool> m_uselegacy{this, "UseLegacy", false, "Use legacy system" };
+  Gaudi::Property<bool> m_usephaseI{this, "UsePhase1", false, "Use phaseI system" };
   
   // L1Calo Conditions 
   SG::ReadCondHandleKey<L1CaloRunParametersContainer>  m_runParametersContainer{ this, "InputKeyRunParameters", "L1CaloRunParametersContainer"};
