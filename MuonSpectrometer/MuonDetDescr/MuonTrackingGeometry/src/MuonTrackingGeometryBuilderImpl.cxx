@@ -215,7 +215,6 @@ MuonTrackingGeometryBuilderImpl::trackingGeometryImpl(DetachedVolVec && stations
     std::unique_ptr<Trk::CylinderVolumeBounds> enclosedBounds{};
 
     TrackingVolumePtr barrelZPBuffer{}, barrelZMBuffer{};
-    using TrackingVolumeRawPtr = Trk::TrackingVolume*;
     TrackingVolumePtr barrelZP{}, centralP{}, central{},
                       negativeMuonInnerEndcap{}, positiveMuonInnerEndcap{},
                       negNavOEndcap{}, posNavOEndcap{}, negativeMuonOuterEndcap{},
