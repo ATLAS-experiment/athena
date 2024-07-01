@@ -18,7 +18,6 @@ MassRangeFilter::MassRangeFilter(const std::string& name, ISvcLocator* pSvcLocat
   declareProperty("PartStatus",m_PartStatus=1);
 }
 
-
 StatusCode MassRangeFilter::filterInitialize() {
   ATH_MSG_INFO(" PtCut      " << m_Ptmin <<
                " PtCut2     " << m_Ptmin2 <<
@@ -31,7 +30,6 @@ StatusCode MassRangeFilter::filterInitialize() {
                " PartStatus " << m_PartStatus);
   return StatusCode::SUCCESS;
 }
-
 
 StatusCode MassRangeFilter::filterEvent() {
   double invMassMax = 0.;

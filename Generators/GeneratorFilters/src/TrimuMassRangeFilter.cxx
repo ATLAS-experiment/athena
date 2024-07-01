@@ -24,17 +24,12 @@
 
 #include "GeneratorFilters/TrimuMassRangeFilter.h"
 
-// Framework Related Headers:-
 #include "GaudiKernel/MsgStream.h"
 
-
-// Other classes used by this class:-
 #include <math.h>
 
-//--------------------------------------------------------------------------
 TrimuMassRangeFilter::TrimuMassRangeFilter(const std::string& name, 
                          ISvcLocator* pSvcLocator): GenFilter(name,pSvcLocator) {
-  //----------------------------    
   declareProperty("PtCut1",m_Ptmin1 = 3500.);  
   declareProperty("PtCut2",m_Ptmin2 = 3500.);  
   declareProperty("PtCut3",m_Ptmin3 = 3500.);  
@@ -49,15 +44,9 @@ TrimuMassRangeFilter::TrimuMassRangeFilter(const std::string& name,
   declareProperty("PartStatus",m_PartStatus=1);
 }
 
-//--------------------------------------------------------------------------
-TrimuMassRangeFilter::~TrimuMassRangeFilter(){
-  //--------------------------------------------------------------------------
+TrimuMassRangeFilter::~TrimuMassRangeFilter(){ }
 
-}
-
-//---------------------------------------------------------------------------
 StatusCode TrimuMassRangeFilter::filterInitialize() {
-  //---------------------------------------------------------------------------
   ATH_MSG_INFO( "TrimuMassRangeFilter "   );
   ATH_MSG_INFO( " PtCut1     " << m_Ptmin1 );
   ATH_MSG_INFO( " PtCut2     " << m_Ptmin2 );
@@ -75,16 +64,11 @@ StatusCode TrimuMassRangeFilter::filterInitialize() {
   return StatusCode::SUCCESS;
  }
 
-//---------------------------------------------------------------------------
 StatusCode TrimuMassRangeFilter::filterFinalize() {
-  //---------------------------------------------------------------------------
   return StatusCode::SUCCESS;
 }
 
-
-//---------------------------------------------------------------------------
 StatusCode TrimuMassRangeFilter::filterEvent() {
-  //---------------------------------------------------------------------------
 
   ATH_MSG_INFO( " TEST MESSAGE "  );
 

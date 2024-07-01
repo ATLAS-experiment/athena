@@ -156,7 +156,7 @@ StatusCode MuDstarFilter::filterEvent() {
     const HepMC::GenEvent * genEvt = ( * itr);
     for (const auto & pitr: * genEvt) {
 
-      if (pitr -> status() == 3) continue; // photos history line
+      if (!MC::isPhysical(pitr)) continue; // photos history line
 
       // muons
       if (MC::isMuon(pitr)) {
@@ -174,7 +174,7 @@ StatusCode MuDstarFilter::filterEvent() {
     if (NumMuons == 0) break;
     for (const auto & pitr: * genEvt) {
 
-      if (pitr -> status() == 3) continue; // photos history line
+      if (!MC::isPhysical(pitr)) continue; // photos history line
 
       // Dstars
       if (std::abs(pitr -> pdg_id()) == MC::DSTAR) {
@@ -222,7 +222,7 @@ StatusCode MuDstarFilter::filterEvent() {
 
           for (; thisChild != endChild; ++thisChild) {
 
-            if (( * thisChild) -> status() == 3) continue; // photos history line
+            if (!MC::isPhysical(*thisChild)) continue; // photos history line
 
             if (std::abs(( * thisChild) -> pdg_id()) == MC::PIPLUS) {
               if ((( * thisChild) -> momentum().perp() >= m_PtMinPis) &&
@@ -256,7 +256,7 @@ StatusCode MuDstarFilter::filterEvent() {
 
           for (thisChild = firstChild; thisChild != endChild; ++thisChild) {
 
-            if (( * thisChild) -> status() == 3) continue; // photos history line
+            if (!MC::isPhysical(*thisChild)) continue; // photos history line
 
             if (std::abs(( * thisChild) -> pdg_id()) == MC::D0) {
               if ((( * thisChild) -> end_vertex())) {
@@ -275,7 +275,7 @@ StatusCode MuDstarFilter::filterEvent() {
 
                 for (; thisChild1 != endChild1; ++thisChild1) {
 
-                  if (( * thisChild1) -> status() == 3) continue; // photos history line
+                  if (!MC::isPhysical(*thisChild1))  continue; // photos history line
 
                   if (std::abs(( * thisChild1) -> pdg_id()) == MC::ELECTRON || std::abs(( * thisChild1) -> pdg_id()) == MC::MUON ||
                     std::abs(( * thisChild1) -> pdg_id()) == MC::PIPLUS || std::abs(( * thisChild1) -> pdg_id()) == MC::KPLUS) {
@@ -343,7 +343,7 @@ StatusCode MuDstarFilter::filterEvent() {
                     #endif
                     for (; thisChild2 != endChild2; ++thisChild2) {
 
-                      if (( * thisChild2) -> status() == 3) continue; // photos history line
+                      if (!MC::isPhysical(*thisChild2)) continue; // photos history line
 
                       if (std::abs(( * thisChild2) -> pdg_id()) == MC::ELECTRON || std::abs(( * thisChild2) -> pdg_id()) == MC::MUON ||
                         std::abs(( * thisChild2) -> pdg_id()) == MC::PIPLUS || std::abs(( * thisChild2) -> pdg_id()) == MC::KPLUS) {
