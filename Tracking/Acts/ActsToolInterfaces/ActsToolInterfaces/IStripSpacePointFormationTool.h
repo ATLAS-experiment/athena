@@ -48,7 +48,7 @@ namespace ActsTrk {
 					    std::vector<StripSP>& overlapSpacePoints,
 					    bool processOverlaps,
 					    const std::vector<IdentifierHash>& hashesToProcess,
-					    ContainerAccessor<xAOD::StripCluster, IdentifierHash, 1>& stripAccessor) const = 0;
+					    const ContainerAccessor<xAOD::StripCluster, IdentifierHash, 1>& stripAccessor) const = 0;
 
     };
 

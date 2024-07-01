@@ -55,8 +55,8 @@ namespace ActsTrk
 								  std::vector<StripSP>& spacePoints,
 								  std::vector<StripSP>& overlapSpacePoints,
 								  bool processOverlaps,
-									const std::vector<IdentifierHash>& hashesToProcess,
-									ContainerAccessor<xAOD::StripCluster, IdentifierHash, 1>& stripAccessor) const
+								  const std::vector<IdentifierHash>& hashesToProcess,
+								  const ContainerAccessor<xAOD::StripCluster, IdentifierHash, 1>& stripAccessor) const
   {
     /// Production of ActsTrk::SpacePoint from strip clusters
     /// Strip space points involves a more complex logic since
