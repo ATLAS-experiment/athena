@@ -42,7 +42,7 @@ run "Reconstruction-ckf" \
     Reco_tf.py --CA \
     --steering doRAWtoALL \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateTracksFlags" \
-    --preExec 'flags.Tracking.writeExtendedSi_PRDInfo=True; flags.Tracking.doStoreSiSPSeededTracks=True; flags.Tracking.ITkActsValidateTracksPass.storeSiSPSeededTracks=True;'
+    --preExec 'flags.Tracking.writeExtendedSi_PRDInfo=True; flags.Tracking.doStoreSiSPSeededTracks=True; flags.Tracking.ITkActsValidateTracksPass.storeSiSPSeededTracks=True;' \
     --inputRDOFile ${rdo} \
     --outputAODFile AOD.ckf.root \
     --maxEvents ${nEvents}
@@ -78,7 +78,7 @@ run "Reconstruction-ambi" \
     Reco_tf.py --CA \
     --steering doRAWtoALL \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateResolvedTracksFlags" \
-    --preExec 'flags.Tracking.writeExtendedSi_PRDInfo=True;'
+    --preExec 'flags.Tracking.writeExtendedSi_PRDInfo=True;' \
     --inputRDOFile ${rdo} \
     --outputAODFile AOD.ambi.root \
     --perfmon fullmonmt \
