@@ -1,10 +1,10 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // InDetPhysValMonitoring includes
 #include "TrackTruthSelectionTool.h"
-#include "TruthUtils/MagicNumbers.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include "xAODTruth/TruthVertex.h"
 #include <cmath> // std::fabs
 
@@ -16,13 +16,12 @@ TrackTruthSelectionTool::TrackTruthSelectionTool(const std::string& name) :
   , m_numTruthPassed(0) {
   declareInterface<IAsgSelectionTool>(this);
 
-  // declareProperty( "Property", m_nProperty ); //example property declaration
   declareProperty("maxEta", m_maxEta = 2.5);
   declareProperty("minPt", m_minPt = 400);
   declareProperty("maxPt", m_maxPt = -1);
   declareProperty("requireOnlyPrimary", m_requireOnlyPrimary = true);
   declareProperty("requireCharged", m_requireCharged = true);
-  declareProperty("requireStatus1", m_requireStatus1 = true);
+  declareProperty("requireStable", m_requireStable = true);
   declareProperty("maxProdVertRadius", m_maxProdVertRadius = 110.);
   declareProperty("pdgId", m_pdgId = -1);
 }
@@ -55,8 +54,8 @@ TrackTruthSelectionTool::initialize() {
   if (m_requireCharged) {
     m_cuts.emplace_back("charged", "Require charged particle");
   }
-  if (m_requireStatus1) {
-    m_cuts.emplace_back("status_1", "Particle status=1");
+  if (m_requireStable) {
+    m_cuts.emplace_back("stable", "Particle stable");
   }
 
   if (m_maxProdVertRadius > 0.) {
@@ -126,8 +125,8 @@ TrackTruthSelectionTool::accept(const xAOD::TruthParticle* p) const {
   if (m_requireCharged) {
     acceptData.setCutResult("charged", (not (p->isNeutral())));
   }
-  if (m_requireStatus1) {
-    acceptData.setCutResult("status_1", (p->status() == 1));
+  if (m_requireStable) {
+    acceptData.setCutResult("stable", (MC::isStable(p)));
   }
   if (m_maxProdVertRadius > 0.) {
     acceptData.setCutResult("decay_before_pixel", (!p->hasProdVtx() || p->prodVtx()->perp() < m_maxProdVertRadius));

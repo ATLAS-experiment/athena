@@ -39,7 +39,7 @@ def InDetRttTruthSelectionToolCfg(
         flags, name="InDetRttTruthSelectionTool", **kwargs):
     acc = ComponentAccumulator()
 
-    kwargs.setdefault("requireStatus1", True)
+    kwargs.setdefault("requireStable", True)
     kwargs.setdefault("requireCharged", True)
     kwargs.setdefault("selectedCharge", flags.PhysVal.IDPVM.selectedCharge)
     kwargs.setdefault("requireOnlyPrimary",
