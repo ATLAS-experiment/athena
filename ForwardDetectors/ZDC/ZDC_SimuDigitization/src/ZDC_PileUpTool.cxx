@@ -415,7 +415,8 @@ void ZDC_PileUpTool::createAndStoreWaveform(const ZDC_SimFiberHit &hit, CLHEP::H
   }
 
   //Record the number of photons that lead to this waveform
-  zdc->auxdata<unsigned int>("nPhotons") = hit.getNPhotons();
+  SG::Accessor<unsigned int> nPhotonsAcc ("nPhotons");
+  nPhotonsAcc (*zdc) = hit.getNPhotons();
 
   //Generate in time waveforms
   zdc->setWaveform("g0data", generateWaveform(wfSampler, amplitude, t0));
