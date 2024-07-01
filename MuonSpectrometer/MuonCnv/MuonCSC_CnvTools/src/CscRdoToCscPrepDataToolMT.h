@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCSC_CNVTOOLS_CscRdoToCscPrepDataToolMT_H
@@ -43,22 +43,17 @@ namespace Muon {
         virtual ~CscRdoToCscPrepDataToolMT() = default;
 
         virtual StatusCode initialize() override;
-        // debugging
-        virtual void printInputRdo(const EventContext& ctx) const override;
 
-        virtual StatusCode decode(const EventContext& ctx, std::vector<IdentifierHash>& givenIdhs, std::vector<IdentifierHash>& decodedIdhs) const override;
+        virtual StatusCode decode(const EventContext& ctx, const std::vector<IdentifierHash>& givenIdhs) const override;
         virtual StatusCode decode(const EventContext& ctx, const std::vector<uint32_t>& robIDs) const override;
         virtual StatusCode provideEmptyContainer(const EventContext& ctx) const override;
         
-        virtual void printPrepData(const EventContext& ctx) const override;
 
     protected:
-        void printPrepDataImpl(const Muon::CscStripPrepDataContainer* outputCollection) const;
 
         StatusCode decodeImpl(Muon::CscStripPrepDataContainer* outputCollection, const CscRawDataContainer* rdoContainer,
-                              IdentifierHash givenHashId, std::vector<IdentifierHash>& decodedIdhs) const;
-        StatusCode decodeImpl(Muon::CscStripPrepDataContainer* outputCollection, const CscRawDataContainer* rdoContainer,
-                              std::vector<IdentifierHash>& decodedIdhs) const;
+                              IdentifierHash givenHashId) const;
+        StatusCode decodeImpl(Muon::CscStripPrepDataContainer* outputCollection, const CscRawDataContainer* rdoContainer) const;
 
 
         SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_muDetMgrKey{this, "DetectorManagerKey", "MuonDetectorManager",

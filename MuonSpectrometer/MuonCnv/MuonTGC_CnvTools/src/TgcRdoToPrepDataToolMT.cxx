@@ -174,18 +174,14 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::setupState(const EventContext& ctx, Sta
 
    return StatusCode::SUCCESS;
 }
-StatusCode Muon::TgcRdoToPrepDataToolMT::decode(const EventContext& ctx, std::vector<IdentifierHash>& requestedIdHashVect, 
-  std::vector<IdentifierHash>& selectedIdHashVect) const
-{
+StatusCode Muon::TgcRdoToPrepDataToolMT::decode(const EventContext& ctx, 
+                                                const std::vector<IdentifierHash>& requestedIdHashVect) const {
   // Object to hold the containers for this decode call
   State state;
   ATH_CHECK(setupState(ctx, state));
 
   int sizeVectorRequested = requestedIdHashVect.size();
   ATH_MSG_DEBUG("decode for " << sizeVectorRequested << " offline collections called");
-
-  // clear output vector of selected data collections containing data 
-  selectedIdHashVect.clear(); 
 
   const CablingInfo* cinfo = getCabling();
   if (!cinfo) {
@@ -353,8 +349,6 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decode(const EventContext& ctx, std::ve
       }//loop on collections in the map
     }//loop on BC
 
-    // show the vector of IdentifierHash which contains the data within requested range
-    showIdentifierHashVector(state, selectedIdHashVect);
   } else {
     ATH_MSG_DEBUG("Start loop over rdos - unseeded mode");
 
@@ -472,198 +466,18 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decode(const EventContext& ctx, std::ve
 
   // Fill the hashes with hits or coincidences 
   if (sizeVectorRequested != 0) { // Seeded mode 
-    // Add requestedIdHashVect (input) hashes which have hit or coincidence PRDs to selectedIdHashVect (output) 
+    // Add requestedIdHashVect (input) hashes which have hit or coincidence PRDs 
     // RDO collection is with granularity of a sector (there are 24 sectors in total) 
     // PRD collection is with granularity of a chamber (there are 1578 chambers in total) 
     // One chamber has one IdentifierHash (0 to 1577) 
     for(int iHash=0; iHash<sizeVectorRequested; iHash++) { 
       IdentifierHash hash = requestedIdHashVect.at(iHash); 
       if(isIdentifierHashFoundInAnyTgcPrepDataContainer(state, hash) || isIdentifierHashFoundInAnyTgcCoinDataContainer(state, hash)) { 
-        if(find(selectedIdHashVect.begin(), selectedIdHashVect.end(), hash)==selectedIdHashVect.end()) { 
-          // Avoid duplication 
-          selectedIdHashVect.push_back(hash); 
-        } 
       } 
     } 
-  } else { // Un-seeded mode 
-    // Fill the hashes with hits or coincidences 
-    fillIdentifierHashVector(state, selectedIdHashVect); 
   } 
 
   return StatusCode::SUCCESS;
-}
-
-void Muon::TgcRdoToPrepDataToolMT::printInputRdo(const EventContext& ctx) const
-{
-  ATH_MSG_INFO("***************** Listing input TgcRdo Collections *****************************************");
-
-  /// TGC context
-  IdContext tgcContext = m_idHelperSvc->tgcIdHelper().module_context();
-
-  /// TGC RDO container --- assuming it is available
-  auto rdoContainer = SG::makeHandle(m_rdoContainerKey, ctx);
-  if(!rdoContainer.isValid()) {
-    ATH_MSG_WARNING("*** Retrieval of TGC RDO container for debugging purposes failed !");
-    return;
-  }                                                                
-
-  if(rdoContainer->empty()) {
-    ATH_MSG_INFO("*** No TgcRdo collections were found");
-    return;
-  }
-
-  int ncoll = 0;
-  int nHit = 0;
-  int nTracklet = 0;
-  int nTrackletEIFI = 0;
-  int nHiPt = 0;
-  int nInner = 0;
-  int nSL = 0;
-  int nOthers = 0;
-  int nTgcRawData = 0;
-
-  // loop over all elements of the rdo container 
-  for(const TgcRdo* rdoColl : *rdoContainer) {
-    if(rdoColl->empty()) continue;
-    
-    uint16_t subDetectorId = rdoColl->subDetectorId();
-    uint16_t rodId = rdoColl->rodId();
-    uint16_t onlineId = TgcRdo::calculateOnlineId(subDetectorId, rodId);
-    ATH_MSG_INFO("*** TgcRdo : onlineId=" << onlineId 
-         << " subDetectorId=" << subDetectorId
-         << " rodId="<< rodId
-         << " # of TgcRawData inside is "<< rdoColl->size());
-    
-    IdentifierHash tgcHashId = rdoColl->identifyHash();
-    Identifier rdoId;
-    int code = m_idHelperSvc->tgcIdHelper().get_id(tgcHashId, rdoId, &tgcContext);
-    if(code!=0) { 
-      ATH_MSG_INFO("*** A problem in hash -> id conversion for hashId= " << static_cast<int>(tgcHashId)); 
-    }
-    
-    std::string extIdstring = m_idHelperSvc->toString(rdoId);
-    ATH_MSG_INFO("*** Offine HashId = " << tgcHashId << " extended = " << extIdstring);
-    
-    int iHit = 0;
-    int iTracklet = 0;
-    int iTrackletEIFI = 0;
-    int iHiPt = 0;
-    int iInner = 0;
-    int iSL = 0;
-    int iOthers = 0;
-
-    // For each rdo, loop on the coincidence matrices
-    for (const TgcRawData* rd : *rdoColl) {
-      if(!rd->isCoincidence()) {
-    iHit++;
-      } else {
-    if((rd->type()==TgcRawData::TYPE_TRACKLET)) {
-      if((rd->slbType()==TgcRawData::SLB_TYPE_DOUBLET_WIRE) ||
-         (rd->slbType()==TgcRawData::SLB_TYPE_DOUBLET_STRIP)) {
-        iTracklet++;
-      } else if((rd->slbType()==TgcRawData::SLB_TYPE_INNER_WIRE) || 
-            (rd->slbType()==TgcRawData::SLB_TYPE_INNER_STRIP)) {
-        iTrackletEIFI++; 
-      }
-    } else if((rd->type()==TgcRawData::TYPE_HIPT) && 
-          (rd->isHipt())) {
-      iHiPt++;
-    } else if((rd->type()==TgcRawData::TYPE_INNER_NSW)||
-                  (rd->type()==TgcRawData::TYPE_INNER_BIS)||
-                  (rd->type()==TgcRawData::TYPE_INNER_EIFI)||
-                  (rd->type()==TgcRawData::TYPE_INNER_TMDB)
-                  ) {
-      iInner++;
-    } else if((rd->type()==TgcRawData::TYPE_SL)) {
-      iSL++;
-    } else {
-      iOthers++; 
-    }
-      }
-    } // end loop over TgcRawData
-
-    ATH_MSG_INFO("*** " << ncoll << "-th TgcRdo (onlineId=" << onlineId << ") has " 
-         << iHit          << " Hits / "
-         << iTracklet     << " Tracklets / "
-         << iTrackletEIFI << " TrackletEIFs / "
-         << iHiPt         << " HiPts / "
-         << iInner        << " Inners / "
-         << iSL           << " SLs / " 
-         << iOthers       << " Others");
-    ATH_MSG_INFO("--------------------------------------------------------------------------------------------");
-    
-    ncoll++;
-    nHit          += iHit;
-    nTracklet     += iTracklet;
-    nTrackletEIFI += iTrackletEIFI;
-    nHiPt         += iHiPt;
-    nSL           += iSL;
-    nOthers       += iOthers;
-    nTgcRawData += rdoColl->size();
-  } // end loop over TgcRdo's
-  ATH_MSG_INFO("*** Event Summary: " << ncoll       << " Collections / " << nTgcRawData << " TgcRawData"); 
-  ATH_MSG_INFO("***               (" 
-           << nHit          << " Hits / "
-           << nTracklet     << " Tracklets / "
-           << nTrackletEIFI << " TrackletEIFIs / "
-           << nHiPt         << " HiPts / "
-           << nInner        << " Inners / "
-           << nSL           << " SLs / "
-           << nOthers       << " Others)");
-  ATH_MSG_INFO("********************************************************************************************");
-}
-
-void Muon::TgcRdoToPrepDataToolMT::printPrepDataImpl
-  (const TgcPrepDataContainer* const* tgcPrepDataContainer,
-   const TgcCoinDataContainer* const* tgcCoinDataContainer) const
-{
-  if(!(this->msgLvl(MSG::INFO))) return;
-
-  ATH_MSG_INFO("**************************************************************************************************");
-  ATH_MSG_INFO("************** Listing TgcPrepData collections content *******************************************");
-
-  for (int ibc=0; ibc < NBC_HIT; ibc++) {
-    if (tgcPrepDataContainer[ibc]->empty()) ATH_MSG_INFO("No TgcPrepRawData collections found");
-
-    ATH_MSG_INFO("--------------------------------------------------------------------------------------------");
-    int bc_digit = ibc + 1;
-    for(const TgcPrepDataCollection* tgcColl : *(tgcPrepDataContainer[ibc])) {
-      ATH_MSG_INFO("TgcPrepDataContainer of "
-           << (bc_digit == TgcDigit::BC_PREVIOUS ? "PriorBC" : "")
-           << (bc_digit == TgcDigit::BC_CURRENT ? "CurrentBC" : "")
-           << (bc_digit == TgcDigit::BC_NEXT ? "NextBC" : ""));
-
-      ATH_MSG_INFO("PrepData Collection ID "
-           << m_idHelperSvc->toString(tgcColl->identify()));
-
-      for (const TgcPrepData* tgcPrepData : *tgcColl) {
-    ATH_MSG_INFO("PrepData Offline ID "
-             << m_idHelperSvc->toString(tgcPrepData->identify()));
-      }
-    }
-  }
-
-  for (int ibc=0; ibc < NBC_TRIG; ibc++) {
-    if (tgcCoinDataContainer[ibc]->empty()) ATH_MSG_INFO("No TgcCoinData collections found");
-
-    ATH_MSG_INFO("--------------------------------------------------------------------------------------------");
-    int bc_digit = ibc + 1;
-    for(const TgcCoinDataCollection* tgcCoinColl : *(tgcCoinDataContainer[ibc])) {
-      ATH_MSG_INFO("TgcCoinDataContainer of "
-           << (bc_digit == TgcDigit::BC_PREVIOUS ? "PriorBC" : "")
-           << (bc_digit == TgcDigit::BC_CURRENT ? "CurrentBC" : "")
-           << (bc_digit == TgcDigit::BC_NEXT ? "NextBC" : "")
-           << (bc_digit == TgcDigit::BC_NEXTNEXT ? "NextNextBC" : ""));
-
-      ATH_MSG_INFO("CoinData Collection ID "
-           << m_idHelperSvc->toString(tgcCoinColl->identify()));
-
-      for (const TgcCoinData* tgcCoinData : *tgcCoinColl) {
-    ATH_MSG_INFO("CoinData Offline ID "
-             << m_idHelperSvc->toString(tgcCoinData->identify()));
-      }
-    }
-  }
 }
 
 void Muon::TgcRdoToPrepDataToolMT::selectDecoder(State& state,                                            
@@ -2098,38 +1912,6 @@ bool Muon::TgcRdoToPrepDataToolMT::isOfflineIdOKForTgcReadoutElement(const MuonG
   return true;
 }
 
-void Muon::TgcRdoToPrepDataToolMT::showIdentifierHashVector(const State& state,
-                                                              std::vector<IdentifierHash>& idHashVect) const
-{
-  if(!msgLvl(MSG::DEBUG)) return;
-
-  unsigned int nc = 0;
-  for (IdentifierHash offlineCollHash : idHashVect) {
-    nc++;
-    if(isIdentifierHashFoundInAnyTgcPrepDataContainer(state, offlineCollHash) ||
-       isIdentifierHashFoundInAnyTgcCoinDataContainer(state, offlineCollHash)) {
-      ATH_MSG_DEBUG("A collection exists in the container for offline id hash n. "
-            << nc << " = " << static_cast<int>(offlineCollHash));
-    }
-  }
-}
-
-void Muon::TgcRdoToPrepDataToolMT::fillIdentifierHashVector(const State& state,
-                                                              std::vector<IdentifierHash>& selectedIdHashVect) const
-{  
-  // Fill the hashes with hits or coincidences   
-  unsigned int HashId_max = m_idHelperSvc->tgcIdHelper().module_hash_max();  
-  for(unsigned int HashId=0; HashId<HashId_max; HashId++) {  
-    IdentifierHash offlineCollHash(static_cast<IdentifierHash>(HashId));  
-    if(isIdentifierHashFoundInAnyTgcPrepDataContainer(state, offlineCollHash) ||  
-       isIdentifierHashFoundInAnyTgcCoinDataContainer(state, offlineCollHash)) {  
-      if(find(selectedIdHashVect.begin(), selectedIdHashVect.end(), offlineCollHash)==selectedIdHashVect.end()) {  
-        // Avoid duplication  
-        selectedIdHashVect.push_back(offlineCollHash);  
-      }  
-    }  
-  }  
-}  
 
 void Muon::TgcRdoToPrepDataToolMT::showIdentifierHash(const State& state) const
 {
@@ -3719,25 +3501,5 @@ const Amg::Vector2D* Muon::TgcRdoToPrepDataToolMT::getSLLocalPosition(const Muon
   
   return new Amg::Vector2D(locX, locY); 
 } 
-
-void Muon::TgcRdoToPrepDataToolMT::printPrepData(const EventContext& ctx) const
-{
- 
-  const TgcPrepDataContainer* tgcPrepDataContainer[NBC_HIT+1] = {nullptr};
-  for (int ibc=0; ibc < NBC_HIT+1; ibc++) {
-    SG::ReadHandleKey<TgcPrepDataContainer> k (m_outputprepdataKeys[ibc].key());
-    k.initialize().ignore();
-    tgcPrepDataContainer[ibc] = SG::makeHandle(k, ctx).get();
-  }
-
-  const TgcCoinDataContainer* tgcCoinDataContainer[NBC_TRIG] = {nullptr};
-  for (int ibc=0; ibc<NBC_TRIG; ibc++) {
-    SG::ReadHandleKey<TgcCoinDataContainer> k (m_outputCoinKeys[ibc].key());
-    k.initialize().ignore();
-    tgcCoinDataContainer[ibc] = SG::makeHandle(k, ctx).get();
-  }
-
-  printPrepDataImpl (tgcPrepDataContainer, tgcCoinDataContainer);
-}
 
 const double Muon::TgcRdoToPrepDataToolMT::s_cutDropPrdsWithZeroWidth = 0.1;  // 0.1 mm

@@ -41,23 +41,13 @@ class RpcRdoToPrepDataToolMT
   // setup/teardown functions, similar like those for Algorithm/Service
   virtual StatusCode initialize() override;
 
-  // debugging
-  virtual void printInputRdo(const EventContext& ctx) const override;
-  void printPrepDataImpl(
-      const Muon::RpcPrepDataContainer& rpcPrepDataContainer,
-      const Muon::RpcCoinDataContainer& rpcCoinDataContainer) const;
-  void printCoinDataImpl(
-      const Muon::RpcCoinDataContainer& rpcCoinDataContainer) const;
-
-  virtual StatusCode decode(
-      const EventContext& ctx, std::vector<IdentifierHash>& idVect,
-      std::vector<IdentifierHash>& selectedIdVect) const override;
+  virtual StatusCode decode(const EventContext& ctx, 
+                            const std::vector<IdentifierHash>& idVect) const override;
+ 
   virtual StatusCode decode(const EventContext& ctx,
                             const std::vector<uint32_t>& robIds) const override;
-  virtual StatusCode provideEmptyContainer(
-      const EventContext& ctx) const override;
-  virtual void printPrepData(const EventContext& ctx) const override;
-
+  virtual StatusCode provideEmptyContainer(const EventContext& ctx) const override;
+  
  protected:
   struct State;
 
@@ -75,8 +65,7 @@ class RpcRdoToPrepDataToolMT
 
   // decoding method
   StatusCode decodeImpl(const EventContext& ctx, State& state,
-                        std::vector<IdentifierHash>& idVect,
-                        std::vector<IdentifierHash>& selectedIdVect,
+                        const std::vector<IdentifierHash>& idVect,
                         bool firstTimeInTheEvent) const;
   StatusCode decodeImpl(const EventContext& ctx, State& state,
                         const std::vector<uint32_t>& robIds,
@@ -85,8 +74,7 @@ class RpcRdoToPrepDataToolMT
   StatusCode processPad(const EventContext& ctx, State& state,
                         const RpcPad* rdoColl, bool& processingetaview,
                         bool& processingphiview, int& nPrepRawData,
-                        std::vector<IdentifierHash>& idVect,
-                        std::vector<IdentifierHash>& idWithDataVect,
+                        const std::vector<IdentifierHash>& idVect,
                         bool doingSecondLoopAmbigColls) const;
 
   void processTriggerHitHypothesis(RpcCoinMatrix::const_iterator itD,

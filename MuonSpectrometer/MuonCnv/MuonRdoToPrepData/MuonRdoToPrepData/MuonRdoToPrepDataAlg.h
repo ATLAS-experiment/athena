@@ -36,10 +36,6 @@ private:
     ToolHandle<Muon::IMuonRdoToPrepDataTool> m_tool{this, "DecodingTool", "", "RdoToPrepDataConversionTool"};
     ToolHandle<IRegSelTool> m_regsel{this, "RegSelector", ""};
 
-    Gaudi::Property<bool> m_print_inputRdo{this, "PrintInputRdo", false, 
-                                          "If true, will dump information about the input RDOs."};
-    Gaudi::Property<bool> m_print_prepData{this, "PrintPrepData", false , 
-                                          "If true, will dump information about the resulting PRDs."};
     Gaudi::Property<bool> m_seededDecoding{this, "DoSeededDecoding", false, "If true decode only in RoIs"};
     Gaudi::Property<bool> m_robDecoding{this, "useROBs" , true, "Pipe the ROBS directly to the decoder"};
     SG::ReadHandleKey<TrigRoiDescriptorCollection> m_roiCollectionKey{this, "RoIs", "OutputRoIs", "RoIs to read in "};

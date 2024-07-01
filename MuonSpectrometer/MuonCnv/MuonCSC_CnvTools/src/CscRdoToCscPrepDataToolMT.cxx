@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CscRdoToCscPrepDataToolMT.h"
@@ -35,49 +35,6 @@ StatusCode CscRdoToCscPrepDataToolMT::initialize() {
     return StatusCode::SUCCESS;
 }
 
-void CscRdoToCscPrepDataToolMT::printPrepDataImpl(const Muon::CscStripPrepDataContainer* outputCollection) const {
-    ATH_MSG_INFO("***************************************************************");
-    ATH_MSG_INFO("****** Listing Csc(Strip)PrepData collections content *********");
-
-    if (outputCollection->empty())
-        ATH_MSG_INFO("No Csc(Strip)PrepRawData collections found");
-    else {
-        ATH_MSG_INFO("Number of Csc(Strip)PrepRawData collections found in this event is " << outputCollection->size());
-
-        int ict = 0;
-        int ncoll = 0;
-        ATH_MSG_INFO("-------------------------------------------------------------");
-        for (IdentifiableContainer<Muon::CscStripPrepDataCollection>::const_iterator icscColl = outputCollection->begin();
-             icscColl != outputCollection->end(); ++icscColl) {
-            const Muon::CscStripPrepDataCollection* cscColl = *icscColl;
-
-            if (cscColl->empty()) continue;
-
-            ATH_MSG_INFO("PrepData Collection ID " << m_idHelperSvc->cscIdHelper().show_to_string(cscColl->identify())
-                                                   << " with size = " << cscColl->size());
-            CscStripPrepDataCollection::const_iterator it_cscStripPrepData;
-            int icc = 0;
-            int iccphi = 0;
-            int icceta = 0;
-            for (it_cscStripPrepData = cscColl->begin(); it_cscStripPrepData != cscColl->end(); ++it_cscStripPrepData) {
-                icc++;
-                ict++;
-                if (m_idHelperSvc->cscIdHelper().measuresPhi((*it_cscStripPrepData)->identify()))
-                    iccphi++;
-                else
-                    icceta++;
-
-                ATH_MSG_INFO(ict << " in this coll. " << icc
-                                 << " prepData id = " << m_idHelperSvc->cscIdHelper().show_to_string((*it_cscStripPrepData)->identify()));
-            }
-            ncoll++;
-            ATH_MSG_INFO("*** Collection " << ncoll << " Summary: " << iccphi << " phi hits / " << icceta << " eta hits ");
-            ATH_MSG_INFO("-------------------------------------------------------------");
-        }
-    }
-}
-
-void CscRdoToCscPrepDataToolMT::printInputRdo(const EventContext&) const { }
 StatusCode CscRdoToCscPrepDataToolMT::decode(const EventContext&, const std::vector<uint32_t>&) const { 
    ATH_MSG_FATAL("ROB based decoding is not supported....");
    return StatusCode::FAILURE;
@@ -103,13 +60,11 @@ StatusCode CscRdoToCscPrepDataToolMT::provideEmptyContainer(const EventContext& 
     }
     return StatusCode::SUCCESS;
 }
-StatusCode CscRdoToCscPrepDataToolMT::decode(const EventContext& ctx, std::vector<IdentifierHash>& givenIdhs, std::vector<IdentifierHash>& decodedIdhs) const {
+StatusCode CscRdoToCscPrepDataToolMT::decode(const EventContext& ctx, const std::vector<IdentifierHash>& givenIdhs) const {
     // WARNING : Trigger Part is not finished.
     unsigned int sizeVectorRequested = givenIdhs.size();
     ATH_MSG_DEBUG("decode for " << sizeVectorRequested << " offline collections called");
 
-    // clear output vector of selected data collections containing data
-    decodedIdhs.clear();
 
     /// Recording the PRD container in StoreGate
     SG::WriteHandle<Muon::CscStripPrepDataContainer> outputHandle(m_outputCollectionKey, ctx);
@@ -150,14 +105,14 @@ StatusCode CscRdoToCscPrepDataToolMT::decode(const EventContext& ctx, std::vecto
     if (sizeVectorRequested) {
         // seeded decoding
         for (unsigned int i = 0; i < sizeVectorRequested; ++i) {
-            if (decodeImpl(outputCollection, rdoContainer, givenIdhs[i], decodedIdhs).isFailure()) {
+            if (decodeImpl(outputCollection, rdoContainer, givenIdhs[i]).isFailure()) {
                 ATH_MSG_ERROR("Unable to decode CSC RDO " << i << "th into CSC PrepRawData");
                 return StatusCode::FAILURE;
             }
         }
     } else {
         // unseeded decoding
-        if (decodeImpl(outputCollection, rdoContainer, decodedIdhs).isFailure()) {
+        if (decodeImpl(outputCollection, rdoContainer).isFailure()) {
             ATH_MSG_ERROR("Unable to decode CSC RDO ");
             return StatusCode::FAILURE;
         }
@@ -166,8 +121,9 @@ StatusCode CscRdoToCscPrepDataToolMT::decode(const EventContext& ctx, std::vecto
     return StatusCode::SUCCESS;
 }
 
-StatusCode CscRdoToCscPrepDataToolMT::decodeImpl(Muon::CscStripPrepDataContainer* outputCollection, const CscRawDataContainer* rdoContainer,
-                                                 IdentifierHash givenHashId, std::vector<IdentifierHash>& decodedIdhs) const {
+StatusCode CscRdoToCscPrepDataToolMT::decodeImpl(Muon::CscStripPrepDataContainer* outputCollection, 
+                                                 const CscRawDataContainer* rdoContainer,
+                                                 IdentifierHash givenHashId) const {
     IdContext cscContext = m_idHelperSvc->cscIdHelper().module_context();
     SG::ReadCondHandle<MuonGM::MuonDetectorManager> muDetMgrHandle{m_muDetMgrKey};
     const MuonGM::MuonDetectorManager* muDetMgr = muDetMgrHandle.cptr();
@@ -237,7 +193,6 @@ StatusCode CscRdoToCscPrepDataToolMT::decodeImpl(Muon::CscStripPrepDataContainer
     // Note that if the hash check above works, we should never reach this step where the lock is present
     if (lock.alreadyPresent()) {
         ATH_MSG_DEBUG("CSC PRD collection already exist with collection hash = " << cscHashId << " collection filling is skipped!");
-        decodedIdhs.push_back(givenHashId);
         return StatusCode::SUCCESS;
     } else {
         ATH_MSG_DEBUG("CSC PRD collection does not exist - creating a new one with hash = " << cscHashId);
@@ -325,15 +280,13 @@ StatusCode CscRdoToCscPrepDataToolMT::decodeImpl(Muon::CscStripPrepDataContainer
     if (status_lock.isFailure()) {
         ATH_MSG_ERROR("Could not insert CscStripPrepdataCollection into CscStripPrepdataContainer...");
         return StatusCode::FAILURE;
-    } else {
-        decodedIdhs.push_back(cscHashId);
-    }
+    } 
     return StatusCode::SUCCESS;
 }
 
 //************** Process for all in case of Offline
-StatusCode CscRdoToCscPrepDataToolMT::decodeImpl(Muon::CscStripPrepDataContainer* outputCollection, const CscRawDataContainer* rdoContainer,
-                                                 std::vector<IdentifierHash>& decodedIdhs) const {
+StatusCode CscRdoToCscPrepDataToolMT::decodeImpl(Muon::CscStripPrepDataContainer* outputCollection, 
+                                                 const CscRawDataContainer* rdoContainer) const {
     typedef CscRawDataContainer::const_iterator collection_iterator;
 
     IdContext cscContext = m_idHelperSvc->cscIdHelper().module_context();
@@ -503,14 +456,7 @@ StatusCode CscRdoToCscPrepDataToolMT::decodeImpl(Muon::CscStripPrepDataContainer
                 ATH_MSG_ERROR("Could not insert CscStripPrepdataCollection into CscStripPrepdataContainer...");
                 return StatusCode::FAILURE;
             }
-            decodedIdhs.push_back(cscHashId);
         }
     }
     return StatusCode::SUCCESS;
-}
-
-void CscRdoToCscPrepDataToolMT::printPrepData(const EventContext& ctx) const {
-    SG::ReadHandleKey<Muon::CscStripPrepDataContainer> k(m_prdContainerCacheKey.key());
-    k.initialize().ignore();
-    printPrepDataImpl(SG::makeHandle(k, ctx).get());
 }

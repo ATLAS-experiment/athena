@@ -49,8 +49,7 @@ StatusCode Muon::sTgcRdoToPrepDataToolMT::initialize()
 //============================================================================
 StatusCode Muon::sTgcRdoToPrepDataToolMT::processCollection(const EventContext& ctx,
                                                             outputCache& xAODcontainers,
-                                                            const STGC_RawDataCollection *rdoColl, 
-                                                            std::vector<IdentifierHash>& idWithDataVect) const {
+                                                            const STGC_RawDataCollection *rdoColl) const {
 
     const sTgcIdHelper& id_helper = m_idHelperSvc->stgcIdHelper();
     const IdentifierHash hash = rdoColl->identifyHash();
@@ -70,13 +69,11 @@ StatusCode Muon::sTgcRdoToPrepDataToolMT::processCollection(const EventContext& 
     // Check if collection already exists (via the cache, i.e. in online trigger mode)
     if( lock.OnlineAndPresentInAnotherView() ) {
       ATH_MSG_DEBUG("In processCollection: collection already available in the sTgc PrepData container (via cache)");
-      idWithDataVect.push_back(hash);
       return StatusCode::SUCCESS;
     }
 
     // Make the PRD collection (will be added to container later
     std::unique_ptr<sTgcPrepDataCollection> prdColl = std::make_unique<sTgcPrepDataCollection>(hash);
-    idWithDataVect.push_back(hash);
 
     // set the offline identifier of the collection Id
     IdContext  context = id_helper.module_context();
@@ -307,8 +304,7 @@ const STGC_RawDataContainer* Muon::sTgcRdoToPrepDataToolMT::getRdoContainer(cons
 //============================================================================
 void Muon::sTgcRdoToPrepDataToolMT::processRDOContainer(const EventContext& ctx, 
                                                         outputCache& xAODcontainers,
-                                                        const std::vector<IdentifierHash>& idsToDecode,
-                                                        std::vector<IdentifierHash>& idWithDataVect ) const
+                                                        const std::vector<IdentifierHash>& idsToDecode) const
 {
     ATH_MSG_DEBUG("In processRDOContainer");
     const STGC_RawDataContainer* rdoContainer = getRdoContainer(ctx);
@@ -327,7 +323,7 @@ void Muon::sTgcRdoToPrepDataToolMT::processRDOContainer(const EventContext& ctx,
             continue;
         } else ATH_MSG_DEBUG("Going to decode " << hash);
 
-        if(processCollection(ctx, xAODcontainers, rdoColl, idWithDataVect).isFailure()) {
+        if(processCollection(ctx, xAODcontainers, rdoColl).isFailure()) {
             ATH_MSG_DEBUG("processCsm returns a bad StatusCode - keep going for new data collections in this event");
         }
     } 
@@ -336,18 +332,13 @@ void Muon::sTgcRdoToPrepDataToolMT::processRDOContainer(const EventContext& ctx,
 // methods for ROB-based decoding
 //============================================================================
 StatusCode Muon::sTgcRdoToPrepDataToolMT::decode(const EventContext& ctx,
-                                                   std::vector<IdentifierHash>& idVect, 
-                                                   std::vector<IdentifierHash>& idWithDataVect ) const
-{
+                                                 const std::vector<IdentifierHash>& idVect) const {
     ATH_MSG_DEBUG("Size of the input hash id vector: " << idVect.size());
-
-    // clear the output vector of selected data
-    idWithDataVect.clear();
 
     outputCache outCache = setupOutputContainers(ctx);
     if (!outCache.isValid) return StatusCode::FAILURE;
 
-    processRDOContainer(ctx, outCache, idVect, idWithDataVect);
+    processRDOContainer(ctx, outCache, idVect);
     return StatusCode::SUCCESS;
 } 
 
@@ -360,10 +351,6 @@ StatusCode Muon::sTgcRdoToPrepDataToolMT::decode(const EventContext&, const std:
 StatusCode Muon::sTgcRdoToPrepDataToolMT::provideEmptyContainer(const EventContext& ctx) const {
     return setupOutputContainers(ctx).isValid ? StatusCode::SUCCESS : StatusCode::FAILURE;
 }
-
-// printout methods
-void Muon::sTgcRdoToPrepDataToolMT::printInputRdo(const EventContext&) const { }
-void Muon::sTgcRdoToPrepDataToolMT::printPrepData(const EventContext&) const { }
 
 
 sTgcRdoToPrepDataToolMT::outputCache

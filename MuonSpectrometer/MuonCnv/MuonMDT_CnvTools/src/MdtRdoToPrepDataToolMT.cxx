@@ -64,7 +64,7 @@ namespace Muon {
         newColl->setIdentifier(m_idHelperSvc->chamberId(elementId));
         return addedCols.insert(std::make_pair(mdtHashId, std::move(newColl))).first->second.get();
     }
-    StatusCode MdtRdoToPrepDataToolMT::ConvCache::finalize(std::vector<IdentifierHash>& prdHashes, MsgStream& msg) {
+    StatusCode MdtRdoToPrepDataToolMT::ConvCache::finalize(MsgStream& msg) {
         for (auto& to_insert : addedCols) {
             if (to_insert.second->empty()) continue;
             MdtPrepDataContainer::IDC_WriteHandle lock = legacyPrd->getWriteHandle(to_insert.first);
@@ -72,7 +72,6 @@ namespace Muon {
                 msg << MSG::ERROR << " Failed to add prep data collection " << to_insert.first << endmsg;
                 return StatusCode::FAILURE;
             }
-            prdHashes.emplace_back(to_insert.first);
         }
         if (xAODPrd) xAODPrd->lock();
         return StatusCode::SUCCESS;
@@ -177,25 +176,6 @@ namespace Muon {
         return setupMdtPrepDataContainer(ctx).isValid ? StatusCode::SUCCESS : StatusCode::FAILURE;
     }
 
-    StatusCode MdtRdoToPrepDataToolMT::decode(const EventContext& ctx, const std::vector<IdentifierHash>& multiLayerHashInRobs) const {
-        // setup output container
-        ConvCache mdtPrepDataContainer = setupMdtPrepDataContainer(ctx);
-        if (!mdtPrepDataContainer.isValid) { 
-            return StatusCode::FAILURE; 
-        }
-
-        if (!m_decodeData) {
-            ATH_MSG_DEBUG("Stored empty container. Decoding MDT RDO into MDT PrepRawData is switched off");
-            return StatusCode::SUCCESS;
-        }
-
-        // left unused, needed by other decode function and further down the code.
-        std::vector<IdentifierHash> idWithDataVect;
-        processPRDHashes(ctx, mdtPrepDataContainer, multiLayerHashInRobs);
-        ATH_CHECK(mdtPrepDataContainer.finalize(idWithDataVect, msgStream()));
-        return StatusCode::SUCCESS;
-    }  // end decode
-
     void MdtRdoToPrepDataToolMT::processPRDHashes(const EventContext& ctx, ConvCache& mdtPrepDataContainer,
                                                  const std::vector<IdentifierHash>& multiLayerHashInRobs) const {
         for (const IdentifierHash& hash : multiLayerHashInRobs) {
@@ -225,10 +205,8 @@ namespace Muon {
     }
 
     StatusCode MdtRdoToPrepDataToolMT::decode(const EventContext& ctx, 
-                                              std::vector<IdentifierHash>& idVect, 
-                                              std::vector<IdentifierHash>& idWithDataVect) const {
-        // clear output vector of selected data collections containing data
-        idWithDataVect.clear();
+                                              const std::vector<IdentifierHash>& idVect) const {
+
         ATH_MSG_DEBUG("decodeMdtRDO for " << idVect.size() << " offline collections called");
 
         // setup output container
@@ -255,66 +233,9 @@ namespace Muon {
 
             processPRDHashes(ctx, mdtPrepDataContainer, rdoHashes);
         }
-        ATH_CHECK(mdtPrepDataContainer.finalize(idWithDataVect, msgStream()));
+        ATH_CHECK(mdtPrepDataContainer.finalize(msgStream()));
 
         return StatusCode::SUCCESS;
-    }
-
-    // dump the RDO in input
-    void MdtRdoToPrepDataToolMT::printInputRdo(const EventContext& ctx) const {
-        ATH_MSG_DEBUG("******************************************************************************************");
-        ATH_MSG_DEBUG("***************** Listing MdtCsmContainer collections content ********************************");
-
-        const MdtCsmContainer* rdoContainer = getRdoContainer(ctx);
-
-        if (rdoContainer->empty()) ATH_MSG_DEBUG("MdtCsmContainer is Empty");
-
-        ATH_MSG_DEBUG("-----------------------------------------------------------------------------");
-
-        unsigned int ncsm{0}, namt{0};
-        // loop on the MdtCsm collections
-        for (const MdtCsm* mdtColl : *rdoContainer) {
-            ++ncsm;
-            ATH_MSG_DEBUG("**** MdtCsm with online Id: subdetector: " << MSG::hex << mdtColl->SubDetId() << MSG::dec
-                                                                      << "  mrod: " << MSG::hex << mdtColl->MrodId() << MSG::dec
-                                                                      << "  csmid: " << MSG::hex << mdtColl->CsmId() << MSG::dec);
-            ATH_MSG_DEBUG("  number of mdt hits: " << mdtColl->size());
-
-            // loop on the hits of the CSM
-            for (const MdtAmtHit* amtHit : *mdtColl) {
-                ++namt;
-                ATH_MSG_DEBUG(">> AmtHit in tdc: " << MSG::hex << amtHit->tdcId() << MSG::dec << "  channel: " << MSG::hex
-                                                   << amtHit->channelId() << MSG::dec << "  fine time: " << amtHit->fine()
-                                                   << "  coarse time: " << amtHit->coarse() << "  width: " << amtHit->width());
-            }
-        }
-
-        ATH_MSG_DEBUG("*** Event Summary: csm collections:" << ncsm << "  amt hits: " << namt);
-   }
-
-    void MdtRdoToPrepDataToolMT::printPrepDataImpl(const MdtPrepDataContainer* mdtPrepDataContainer) const {
-        // Dump info about PRDs
-        ATH_MSG_DEBUG("******************************************************************************************");
-        ATH_MSG_DEBUG("***************** Listing MdtPrepData collections content ********************************");
-
-        if (mdtPrepDataContainer->empty()) ATH_MSG_DEBUG("No MdtPrepRawData collections found");
-        int ncoll{0}, nhits{0};
-        ATH_MSG_DEBUG("--------------------------------------------------------------------------------------------");
-        for (const MdtPrepDataCollection* mdtColl : *mdtPrepDataContainer) {
-            int nhitcoll = mdtColl->size();
-            nhits += mdtColl->size();
-            ++ncoll;
-            ATH_MSG_DEBUG("PrepData Collection ID " << m_idHelperSvc->toString(mdtColl->identify()));
-                
-            for (const MdtPrepData* prepData : *mdtColl) {
-                ATH_MSG_DEBUG(" in this coll. " << nhitcoll << " prepData id = " << m_idHelperSvc->toString(prepData->identify())
-                                                << " tdc/adc =" << prepData->tdc() << "/" << prepData->adc());
-            }
-            ATH_MSG_DEBUG("*** Collection " << ncoll << " Summary: N. hits = " << nhitcoll);
-            ATH_MSG_DEBUG("--------------------------------------------------------------------------------------------");
-        }
-        ATH_MSG_DEBUG("*** Event  Summary: " << ncoll << " Collections / " << nhits << " hits  ");
-        ATH_MSG_DEBUG("--------------------------------------------------------------------------------------------");
     }
 
     std::unique_ptr<MdtPrepData> MdtRdoToPrepDataToolMT::createPrepData(const MdtCalibInput& calibInput,
@@ -798,11 +719,4 @@ namespace Muon {
         cache.isValid = true;
         return cache;
     }
-
-    void Muon::MdtRdoToPrepDataToolMT::printPrepData(const EventContext& ctx ) const {
-        SG::ReadHandleKey<Muon::MdtPrepDataContainer> k(m_mdtPrepDataContainerKey.key());
-        k.initialize().ignore();
-        printPrepDataImpl(SG::makeHandle(k, ctx).get());
-    }
-
 }  // namespace Muon

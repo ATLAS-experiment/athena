@@ -30,8 +30,7 @@ class IMuonRdoToPrepDataTool : virtual public IAlgTool {
       @return selectedIdVect This is the subset of idVect which were actually found to contain data (i.e. if you want you can use
                              this vector of hashes to optimise the retrieval of data in subsequent steps.) */
       virtual StatusCode decode(const EventContext& ctx, 
-                                std::vector<IdentifierHash>& idVect,  
-                                std::vector<IdentifierHash>& selectedIdVect) const = 0;
+                                const std::vector<IdentifierHash>& idVect) const = 0;
 
       ///Method for ROB based decoding. Shold decode all chambers asociated with the inputted ROB list. 
       virtual StatusCode decode(const EventContext& ctx,
@@ -39,9 +38,6 @@ class IMuonRdoToPrepDataTool : virtual public IAlgTool {
 
       /// Method to create the empty containers.. Only used for seeded decoding
       virtual StatusCode provideEmptyContainer(const EventContext& ctx) const = 0;
-      /** Method used for debugging*/ 
-      virtual void printPrepData(const EventContext& ctx) const = 0;
-      virtual void printInputRdo(const EventContext& ctx) const = 0;
 };
 }
 

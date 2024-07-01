@@ -32,23 +32,18 @@ class MmRdoToPrepDataToolMT
   virtual StatusCode initialize() override;
 
   /** Decode method - declared in Muon::IMuonRdoToPrepDataTool*/
-  virtual StatusCode decode(
-      const EventContext& ctx, std::vector<IdentifierHash>& idVect,
-      std::vector<IdentifierHash>& selectedIdVect) const override;
+  virtual StatusCode decode(const EventContext& ctx, 
+                            const std::vector<IdentifierHash>& idVect) const override;
   virtual StatusCode decode(const EventContext& ctx,
                             const std::vector<uint32_t>& robIds) const override;
-  virtual StatusCode provideEmptyContainer(
-      const EventContext& ctx) const override;
+  virtual StatusCode provideEmptyContainer(const EventContext& ctx) const override;
   StatusCode processCollection(
       const EventContext& ctx, Muon::MMPrepDataContainer* mmPrepDataContainer,
       xAOD::MMClusterContainer* xAODContainer,
       const std::vector<IdentifierHash>& idsToDecode,
-      const MM_RawDataCollection* rdoColl,
-      std::vector<IdentifierHash>& idWithDataVect) const;
+      const MM_RawDataCollection* rdoColl) const;
 
-  virtual void printInputRdo(const EventContext& ctx) const override;
-  virtual void printPrepData(const EventContext& ctx) const override;
-
+  
  protected:
   Muon::MMPrepDataContainer* setupMM_PrepDataContainer(
       const EventContext& ctx) const;
@@ -60,8 +55,7 @@ class MmRdoToPrepDataToolMT
   void processRDOContainer(const EventContext& ctx,
                            Muon::MMPrepDataContainer* mmPrepDataContainer,
                            xAOD::MMClusterContainer* xAODContainer,
-                           const std::vector<IdentifierHash>& idsToDecode,
-                           std::vector<IdentifierHash>& idWithDataVect) const;
+                           const std::vector<IdentifierHash>& idsToDecode) const;
 
   SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_muDetMgrKey{
       this, "DetectorManagerKey", "MuonDetectorManager",
