@@ -30,6 +30,18 @@ if( NOT SIMULATIONBASE )
                         LINK_LIBRARIES ${ROOT_LIBRARIES} ActsGeoUtils 
                         POST_EXEC_SCRIPT nopost.sh)
     endforeach()
+
+# This test makes heavy use of Eigen and is thus very slow in debug
+# builds.  Set up to allow forcing it to compile with optimization and
+# inlining, even in debug builds.
+if ( "${CMAKE_BUILD_TYPE}" STREQUAL "Debug" )
+  set_source_files_properties(
+     ${CMAKE_CURRENT_SOURCE_DIR}/test/test_AlignStoreAccess.cxx
+     PROPERTIES
+     COMPILE_FLAGS "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}"
+     COMPILE_DEFINITIONS "FLATTEN" )
+endif()
+
 endif()
 
     
