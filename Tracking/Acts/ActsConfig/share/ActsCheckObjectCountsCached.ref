@@ -8,6 +8,16 @@ ActsStripClusterizationAlg                                        INFO Clusteriz
 | RDOs     |    1345365 |
 | Clusters |    1081478 |
 |----------|------------|
+ActsPixelClusterPreparationAlg                                    INFO Clusterization statistics
+|---------|------------|
+| Inputs  |    1165578 |
+| Outputs |    1165578 |
+|---------|------------|
+ActsStripClusterPreparationAlg                                    INFO Clusterization statistics
+|---------|------------|
+| Inputs  |    1081478 |
+| Outputs |    1081478 |
+|---------|------------|
 ActsPixelSpacePointFormationAlg                                   INFO Space Point Formation statistics
 |--------------|------------|
 | Clusters     |    1165578 |
@@ -19,6 +29,21 @@ ActsStripSpacePointFormationAlg                                   INFO Space Poi
 | Space Points         |     325456 |
 | Overlap Space Points |      94491 |
 |----------------------|------------|
+ActsPixelSpacePointPreparationAlg                                 INFO Clusterization statistics
+|---------|------------|
+| Inputs  |    1165578 |
+| Outputs |    1165578 |
+|---------|------------|
+ActsStripSpacePointPreparationAlg                                 INFO Clusterization statistics
+|---------|------------|
+| Inputs  |     325456 |
+| Outputs |     325456 |
+|---------|------------|
+ActsStripOverlapSpacePointPreparationAlg                          INFO Clusterization statistics
+|---------|------------|
+| Inputs  |      94491 |
+| Outputs |      94491 |
+|---------|------------|
 ActsPixelSeedingAlg                                               INFO Seed statistics
 |---------------------|------------|
 | Spacepoints         |    1165578 |
@@ -80,12 +105,27 @@ ActsConversionStripClusterizationAlg                              INFO Clusteriz
 | RDOs     |          0 |
 | Clusters |          0 |
 |----------|------------|
+ActsConversionPixelClusterPreparationAlg                          INFO Clusterization statistics
+|---------|------------|
+| Inputs  |      30471 |
+| Outputs |      27236 |
+|---------|------------|
+ActsConversionStripClusterPreparationAlg                          INFO Clusterization statistics
+|---------|------------|
+| Inputs  |      16420 |
+| Outputs |      15530 |
+|---------|------------|
 ActsConversionStripSpacePointFormationAlg                         INFO Space Point Formation statistics
 |----------------------|------------|
 | Clusters             |      15530 |
 | Space Points         |          0 |
 | Overlap Space Points |          0 |
 |----------------------|------------|
+ActsConversionStripSpacePointPreparationAlg                       INFO Clusterization statistics
+|---------|------------|
+| Inputs  |       4982 |
+| Outputs |       4506 |
+|---------|------------|
 ActsConversionStripSeedingAlg                                     INFO Seed statistics
 |---------------------|------------|
 | Spacepoints         |       4506 |

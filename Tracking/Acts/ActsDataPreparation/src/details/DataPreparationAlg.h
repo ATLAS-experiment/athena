@@ -43,7 +43,8 @@ namespace ActsTrk {
     
     virtual StatusCode initialize() override;
     virtual StatusCode execute(const EventContext& ctx) const override;
-
+    virtual StatusCode finalize() override;
+    
   protected:
     virtual xAOD::DetectorIDHashType retrieveDetectorIDHash(const object_t& obj) const;
 
@@ -84,8 +85,17 @@ namespace ActsTrk {
 
     cache_read_handle_key_t m_inputIdentifiableContainer {this, "InputIDC", "",
       "The input IDC container"};
+    
+  private:
+    enum EStat {
+      kNInputs,
+      kNOutputs,
+      kNStat
+    };
+    
+    mutable std::array<std::atomic<unsigned int>, kNStat> m_stat ATLAS_THREAD_SAFE {};
   };
-
+  
 } // namespace
 
 #include "DataPreparationAlg.icc"

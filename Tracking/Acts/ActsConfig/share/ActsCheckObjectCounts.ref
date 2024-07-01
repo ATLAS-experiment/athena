@@ -70,6 +70,21 @@ ActsTrackFindingAlg                                               INFO Ratios
 |                                 3.0- 3.5 |   0.913021 |          0 |   0.913021 |
 |                                 3.5-+inf |   0.979461 |          0 |   0.979461 |
 |------------------------------------------|------------|------------|------------|
+ActsConversionPixelClusterPreparationAlg                          INFO Clusterization statistics
+|---------|------------|
+| Inputs  |    1165578 |
+| Outputs |      27236 |
+|---------|------------|
+ActsConversionStripClusterPreparationAlg                          INFO Clusterization statistics
+|---------|------------|
+| Inputs  |    1081478 |
+| Outputs |      15530 |
+|---------|------------|
+ActsConversionStripSpacePointPreparationAlg                       INFO Clusterization statistics
+|---------|------------|
+| Inputs  |     325456 |
+| Outputs |       4506 |
+|---------|------------|
 ActsConversionStripSeedingAlg                                     INFO Seed statistics
 |---------------------|------------|
 | Spacepoints         |       4506 |
