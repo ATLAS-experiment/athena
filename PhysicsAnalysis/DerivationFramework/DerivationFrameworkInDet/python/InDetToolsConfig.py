@@ -586,7 +586,7 @@ def IDTIDETruthThinningToolCfg(flags, name="IDTIDETruthThinningTool", **kwargs):
     kwargs.setdefault("WriteEverything", True)
     kwargs.setdefault("WriteAllLeptons", True)
     kwargs.setdefault("WriteLeptonsNotFromHadrons", True)
-    kwargs.setdefault("WriteStatus3", True)
+    kwargs.setdefault("WriteNotPhysical", True)
     kwargs.setdefault("WriteFirstN", -1)
     kwargs.setdefault("PreserveAncestors", True)
     kwargs.setdefault("PreserveGeneratorDescendants", True)
