@@ -63,8 +63,8 @@ class CalibFrontEndInfo {
         //Getters for the parameters - coming soon
         int MODid()         const {return m_MODid;            };
         int FEid()          const {return m_FEid;             };
-        std::string MODid_str()     const {return m_MODid_str;        };
-        std::string FEid_str()      const {return m_RODid_str;        };
+        const std::string& MODid_str() const {return m_MODid_str; };
+        const std::string& FEid_str()  const {return m_RODid_str; };
         
         int normThreshold() const {return m_NormalThreshold; };
         int normRms()       const {return m_NormalRms;       };
