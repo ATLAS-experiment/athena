@@ -212,16 +212,16 @@ namespace DerivationFramework {
 
     //Classification of the event follows (gg, sq...):
 
-    if      (fabs(SUSY_Spart1_pdgId)== 1000022) nchi01++;
-    else if (fabs(SUSY_Spart1_pdgId)== 1000023) nchi02++;
-    else if (fabs(SUSY_Spart1_pdgId)== 1000025) nchi03++;
-    else if (fabs(SUSY_Spart1_pdgId)== 1000035) nchi04++;
-    else if (     SUSY_Spart1_pdgId == 1000024) nch1plus++;
-    else if (     SUSY_Spart1_pdgId ==-1000024) nch1minus++;
-    else if (     SUSY_Spart1_pdgId == 1000037) nch2plus++;
-    else if (     SUSY_Spart1_pdgId ==-1000037) nch2minus++;
-    else if (     SUSY_Spart1_pdgId == 1000021) ngluino++;
-    else if ((fabs(SUSY_Spart1_pdgId)>1000000 && fabs(SUSY_Spart1_pdgId)<= 1000004) || (fabs(SUSY_Spart1_pdgId)>2000000 && fabs(SUSY_Spart1_pdgId)<=2000004)) {
+    if      (std::abs(SUSY_Spart1_pdgId)== 1000022) nchi01++;
+    else if (std::abs(SUSY_Spart1_pdgId)== 1000023) nchi02++;
+    else if (std::abs(SUSY_Spart1_pdgId)== 1000025) nchi03++;
+    else if (std::abs(SUSY_Spart1_pdgId)== 1000035) nchi04++;
+    else if (SUSY_Spart1_pdgId == 1000024) nch1plus++;
+    else if (SUSY_Spart1_pdgId ==-1000024) nch1minus++;
+    else if (SUSY_Spart1_pdgId == 1000037) nch2plus++;
+    else if (SUSY_Spart1_pdgId ==-1000037) nch2minus++;
+    else if (SUSY_Spart1_pdgId == 1000021) ngluino++;
+    else if ((std::abs(SUSY_Spart1_pdgId)>1000000 && std::abs(SUSY_Spart1_pdgId)<= 1000004) || (std::abs(SUSY_Spart1_pdgId)>2000000 && std::abs(SUSY_Spart1_pdgId)<=2000004)) {
       if (SUSY_Spart1_pdgId>0) nsquark++;
       else nantisquark++;
     }
@@ -237,25 +237,25 @@ namespace DerivationFramework {
     else if (SUSY_Spart1_pdgId==-2000011) nselecRplus++;
     else if (SUSY_Spart1_pdgId==1000011) nselecLminus++;
     else if (SUSY_Spart1_pdgId==-1000011) nselecLplus++;
-    else if (fabs(SUSY_Spart1_pdgId)==1000012) nselnuL++;
+    else if (std::abs(SUSY_Spart1_pdgId)==1000012) nselnuL++;
     else if (SUSY_Spart1_pdgId==2000013) nsmuonRminus++;
     else if (SUSY_Spart1_pdgId==-2000013) nsmuonRplus++;
     else if (SUSY_Spart1_pdgId==1000013) nsmuonLminus++;
     else if (SUSY_Spart1_pdgId==-1000013) nsmuonLplus++;
-    else if (fabs(SUSY_Spart1_pdgId)==1000014) nsmunuL++;
+    else if (std::abs(SUSY_Spart1_pdgId)==1000014) nsmunuL++;
     else if (SUSY_Spart1_pdgId==1000015) nstau1minus++;
     else if (SUSY_Spart1_pdgId==-1000015) nstau1plus++;
     else if (SUSY_Spart1_pdgId==2000015) nstau2minus++;
     else if (SUSY_Spart1_pdgId==-2000015) nstau2plus++;
-    else if (fabs(SUSY_Spart1_pdgId)==1000016) nstaunuL++;
+    else if (std::abs(SUSY_Spart1_pdgId)==1000016) nstaunuL++;
 
 
 
 
-    if (fabs(SUSY_Spart2_pdgId)==1000022) nchi01++;
-    else if (fabs(SUSY_Spart2_pdgId)==1000023) nchi02++;
-    else if (fabs(SUSY_Spart2_pdgId)==1000025) nchi03++;
-    else if (fabs(SUSY_Spart2_pdgId)==1000035) nchi04++;
+    if (std::abs(SUSY_Spart2_pdgId)==1000022) nchi01++;
+    else if (std::abs(SUSY_Spart2_pdgId)==1000023) nchi02++;
+    else if (std::abs(SUSY_Spart2_pdgId)==1000025) nchi03++;
+    else if (std::abs(SUSY_Spart2_pdgId)==1000035) nchi04++;
     else if (SUSY_Spart2_pdgId==1000024) nch1plus++;
     else if (SUSY_Spart2_pdgId==-1000024) nch1minus++;
     else if (SUSY_Spart2_pdgId==1000037) nch2plus++;
@@ -279,17 +279,17 @@ namespace DerivationFramework {
     else if (SUSY_Spart2_pdgId==-2000011) nselecRplus++;
     else if (SUSY_Spart2_pdgId==1000011) nselecLminus++;
     else if (SUSY_Spart2_pdgId==-1000011) nselecLplus++;
-    else if (fabs(SUSY_Spart2_pdgId)==1000012) nselnuL++;
+    else if (std::abs(SUSY_Spart2_pdgId)==1000012) nselnuL++;
     else if (SUSY_Spart2_pdgId==2000013) nsmuonRminus++;
     else if (SUSY_Spart2_pdgId==-2000013) nsmuonRplus++;
     else if (SUSY_Spart2_pdgId==1000013) nsmuonLminus++;
     else if (SUSY_Spart2_pdgId==-1000013) nsmuonLplus++;
-    else if (fabs(SUSY_Spart2_pdgId)==1000014) nsmunuL++;
+    else if (std::abs(SUSY_Spart2_pdgId)==1000014) nsmunuL++;
     else if (SUSY_Spart2_pdgId==1000015) nstau1minus++;
     else if (SUSY_Spart2_pdgId==-1000015) nstau1plus++;
     else if (SUSY_Spart2_pdgId==2000015) nstau2minus++;
     else if (SUSY_Spart2_pdgId==-2000015) nstau2plus++;
-    else if (fabs(SUSY_Spart2_pdgId)==1000016) nstaunuL++;
+    else if (std::abs(SUSY_Spart2_pdgId)==1000016) nstaunuL++;
 
 
     ///Final classification
