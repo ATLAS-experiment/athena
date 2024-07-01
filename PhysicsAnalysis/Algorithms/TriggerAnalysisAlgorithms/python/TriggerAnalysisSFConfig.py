@@ -97,7 +97,7 @@ class TriggerAnalysisSFBlock (ConfigBlock):
     def makeTriggerGlobalEffCorrAlg(self, config, matchingTool, noSF,
                                     triggerSuffix=''):
 
-        alg = config.createAlgorithm( 'CP::TrigGlobalEfficiencyAlg', 'TrigGlobalSFAlg' )
+        alg = config.createAlgorithm( 'CP::TrigGlobalEfficiencyAlg', 'TrigGlobalSFAlg' + triggerSuffix )
         if config.geometry() is LHCPeriod.Run3:
             alg.triggers_2022 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in self.triggerChainsPerYear.get('2022',[])]
             alg.triggers_2023 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in self.triggerChainsPerYear.get('2023',[])]
@@ -153,7 +153,7 @@ class TriggerAnalysisSFBlock (ConfigBlock):
     def makeAlgs (self, config) :
 
         if (self.multiTriggerChainsPerYear and self.triggerChainsPerYear and
-            self.triggerChainsPerYear is not self.multiTriggerChainsPerYear.get('')):
+            self.triggerChainsPerYear not in self.multiTriggerChainsPerYear.values()):
             raise Exception('multiTriggerChainsPerYear and triggerChainsPerYear cannot be configured at the same time!')
 
         if self.triggerChainsPerYear and not self.multiTriggerChainsPerYear:
