@@ -22,6 +22,7 @@ class W(PowhegV1):
         @param kwargs          dictionary of arguments from Generate_tf.
         """
         super(W, self).__init__(base_directory, "W", **kwargs)
+        self.is_reweightable = True
 
         # Add parameter validation functions
         self.validation_functions.append("validate_decays")
