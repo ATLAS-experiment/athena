@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -416,7 +416,7 @@ namespace CP
   }
 
   TEST (SelectionExprParser, parser) {
-    auto parse = [](std::string s) -> std::string {
+    auto parse = [](const std::string& s) -> std::string {
       SelectionExprParser p(s, true);
       std::unique_ptr<ISelectionReadAccessor> acc;
       if(!p.build(acc).isSuccess()) {

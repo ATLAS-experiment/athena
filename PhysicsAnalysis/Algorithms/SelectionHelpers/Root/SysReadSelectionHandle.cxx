@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -80,7 +80,7 @@ namespace CP
     return "";
   }
 
-  std::string SysReadSelectionHandle ::
+  const std::string& SysReadSelectionHandle ::
   getSelectionName () const
   {
     return m_selection;
