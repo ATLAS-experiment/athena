@@ -39,7 +39,7 @@ class yj(PowhegV2):
         self.add_keyword("bornktmin", 50.0)
         self.add_keyword("bornonly")
         # According to the authors' example located at (e.g.)
-        # /cvmfs/atlas.cern.ch/repo/sw/Generators/powheg/ATLASOTF-00-04-02/POWHEG-BOX-V2/directphoton/testrun-lhc/powheg.input-save
+        # POWHEG-BOX-V2/directphoton/testrun-lhc/powheg.input-save
         # bornsuppfact=4000 is used "to get photons over a wide range of 100 GeV
         # to over 1 TeV, not for low energy photons":
         self.add_keyword("bornsuppfact", 4000)

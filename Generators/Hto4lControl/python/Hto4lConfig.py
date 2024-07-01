@@ -16,10 +16,6 @@ class Hto4lConfig(object) :
   # for local copy of Hto4l use:
   # __hto4l_directory = os.environ['TestArea']
   # For the lcg version of Hto4l use:
-  # __hto4l_directory = '/cvmfs/sft-nightlies.cern.ch/lcg/views/dev4/Tue/x86_64-slc6-gcc62-opt/bin'
-  # __hto4l_directory = '/cvmfs/sft-nightlies.cern.ch/lcg/views/dev4/Tue/x86_64-slc6-gcc62-opt/bin'
-  # __hto4l_directory = '/cvmfs/sft-nightlies.cern.ch/lcg/nightlies/dev4/Tue/MCGenerators/hto4l/v2.01/x86_64-slc6-gcc62-opt/bin'
-  # __hto4l_directory = '/cvmfs/sft.cern.ch/lcg/releases/LCG_81f/MCGenerators/hto4l/2.01/x86_64-slc6-gcc49-opt/bin'
   # __hto4l_directory = os.environ['HTO4LPATH']
 
   
