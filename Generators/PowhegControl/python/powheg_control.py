@@ -209,7 +209,7 @@ class PowhegControl(object):
                 if parameter.name == "withnegweights" and parameter.value > 0:
                     event_weight_options.append(("negative event weights", "sign"))
                 # PDF variations
-                if parameter.name == "PDF" and isinstance(parameter.value, collections.Iterable):
+                if parameter.name == "PDF" and isinstance(parameter.value, collections.abc.Iterable):
                     if "PDF_variation" not in self.__event_weight_groups.keys(): # skip if this group already exists
                         if len(parameter.value) < 2:
                             logger.error("Use 'PowhegConfig.PDF = {0}' rather than 'PowhegConfig.PDF = [{0}]'".format(parameter.value[0] if len(parameter.value) > 0 else "<value>"))
@@ -218,7 +218,7 @@ class PowhegControl(object):
                         for PDF in map(int, parameter.value[1:]):
                             self.add_weight_to_group("PDF_variation", "MUR1_MUF1_PDF{:d}".format(PDF), [PDF])
                 # Scale variations
-                if parameter.name in ["mu_F", "mu_R"] and isinstance(parameter.value, collections.Iterable):
+                if parameter.name in ["mu_F", "mu_R"] and isinstance(parameter.value, collections.abc.Iterable):
                     pdfs = list(self.process.parameters_by_name("PDF"))[0].value
                     nominal_pdf = pdfs if isinstance(pdfs, int) or isinstance(pdfs, str) else pdfs[0]
                     if "scale_variation" not in self.__event_weight_groups.keys(): # skip if this group already exists
@@ -227,7 +227,7 @@ class PowhegControl(object):
                         if len(parameter.value) < 2:
                             logger.error("Use 'PowhegConfig.{1} = {0}' rather than 'PowhegConfig.{1} = [{0}]'".format(parameter.value[0] if len(parameter.value) > 0 else "<value>", parameter.name))
                             raise TypeError("Use 'PowhegConfig.{1} = {0}' rather than 'PowhegConfig.{1} = [{0}]'".format(parameter.value[0] if len(parameter.value) > 0 else "<value>", parameter.name))
-                        if not isinstance(mu_Rs, collections.Iterable) or not isinstance(mu_Fs, collections.Iterable) or len(mu_Rs) is not len(mu_Fs):
+                        if not isinstance(mu_Rs, collections.abc.Iterable) or not isinstance(mu_Fs, collections.abc.Iterable) or len(mu_Rs) is not len(mu_Fs):
                             logger.error("Number of mu_R and mu_F variations must be the same.")
                             raise ValueError("Number of mu_R and mu_F variations must be the same.")
                         self.define_event_weight_group("scale_variation", ["mu_R", "mu_F"], combination_method="envelope")
