@@ -48,16 +48,11 @@ namespace Muon {
         virtual StatusCode initialize() override;
 
         /** Decode method - declared in Muon::IMuonRdoToPrepDataTool*/
-        virtual StatusCode decode(const EventContext& ctx, std::vector<IdentifierHash>& idVect, std::vector<IdentifierHash>& selectedIdVect) const override;
+        virtual StatusCode decode(const EventContext& ctx, const std::vector<IdentifierHash>& idVect) const override;
         virtual StatusCode provideEmptyContainer(const EventContext& ctx) const override;
         // new decode method for Rob based readout
         virtual StatusCode decode(const EventContext& ctx, const std::vector<uint32_t>& robIds) const override;
 
-        // dump methods for debugging
-        virtual void printInputRdo(const EventContext& ctx) const override;
-
-        virtual void printPrepData(const EventContext& ctx) const override;
- 
     protected:
         void printPrepDataImpl(const Muon::MdtPrepDataContainer* mdtPrepDataContainer) const;
 
@@ -65,8 +60,6 @@ namespace Muon {
         Muon::MdtDriftCircleStatus getMdtTwinPosition(const MdtDigit& prompt_digit, const MdtDigit& twin_digit, double& radius,
                                                       double& errRadius, double& zTwin, double& errZTwin, bool& twinIsPrompt) const;
 
-        // decode method for Rob based readout
-        StatusCode decode(const EventContext& ctx, const std::vector<IdentifierHash>& multiLayerHashInRobs) const;
 
         /// Helper struct to parse the event data around the tool
         struct ConvCache {
@@ -76,9 +69,8 @@ namespace Muon {
             /// and also possible. Nullptr is returned if the collection
             /// cannot be modified
             MdtPrepDataCollection* createCollection(const Identifier& id, MsgStream& msg);
-            /// Copy the non-empty collections into the created prd container. Fill the id_hash vector with
-            /// the corresponding hashes
-            StatusCode finalize(std::vector<IdentifierHash>& id_hash, MsgStream& msg);
+            /// Copy the non-empty collections into the created prd container.
+            StatusCode finalize(MsgStream& msg);
 
             Muon::MdtPrepDataContainer* legacyPrd{nullptr};
             xAOD::MdtDriftCircleContainer* xAODPrd{nullptr};

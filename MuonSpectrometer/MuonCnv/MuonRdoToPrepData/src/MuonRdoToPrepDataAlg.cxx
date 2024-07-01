@@ -23,7 +23,7 @@ StatusCode MuonRdoToPrepDataAlg::execute(const EventContext& ctx)  const {
     ATH_MSG_DEBUG("**************** in MuonRdoToPrepDataAlg::execute() ***********************************************");
     ATH_MSG_DEBUG("in execute()");
 
-    std::vector<IdentifierHash> toDecode{}, toDecodeWithData{};
+    std::vector<IdentifierHash> toDecode{};
     std::vector<uint32_t> robs{};
             
 
@@ -40,17 +40,14 @@ StatusCode MuonRdoToPrepDataAlg::execute(const EventContext& ctx)  const {
                 ATH_CHECK(m_tool->decode(ctx, robs));
                 robs.clear();
             } else if (!toDecode.empty()) {
-                ATH_CHECK(m_tool->decode(ctx, toDecode, toDecodeWithData));
+                ATH_CHECK(m_tool->decode(ctx, toDecode));
             } else {
                 ATH_CHECK(m_tool->provideEmptyContainer(ctx));
             }
         }
               
-    } else
-        ATH_CHECK(m_tool->decode(ctx, toDecode, toDecodeWithData));
-
-    if (m_print_inputRdo) m_tool->printInputRdo(ctx);
-    if (m_print_prepData) m_tool->printPrepData(ctx);
-
+    } else {
+        ATH_CHECK(m_tool->decode(ctx, toDecode));
+    }
     return StatusCode::SUCCESS;
 }

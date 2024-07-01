@@ -44,12 +44,11 @@ StatusCode Muon::MmRdoToPrepDataToolMT::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode Muon::MmRdoToPrepDataToolMT::processCollection(
-    const EventContext& ctx, Muon::MMPrepDataContainer* mmPrepDataContainer,
-    xAOD::MMClusterContainer* xAODContainer,
-    const std::vector<IdentifierHash>& idsToDecode,
-    const MM_RawDataCollection* rdoColl,
-    std::vector<IdentifierHash>& idWithDataVect) const {
+StatusCode Muon::MmRdoToPrepDataToolMT::processCollection(const EventContext& ctx, 
+                                                          Muon::MMPrepDataContainer* mmPrepDataContainer,
+                                                          xAOD::MMClusterContainer* xAODContainer,
+                                                          const std::vector<IdentifierHash>& idsToDecode,
+                                                          const MM_RawDataCollection* rdoColl) const {
   ATH_MSG_DEBUG(" ***************** Start of process MM Collection");
   const MmIdHelper& id_helper = m_idHelperSvc->mmIdHelper();
   bool merge = m_merge;
@@ -70,10 +69,7 @@ StatusCode Muon::MmRdoToPrepDataToolMT::processCollection(
   // check if the collection already exists, otherwise add it
   if (mmPrepDataContainer->indexFindPtr(hash) != nullptr) {
 
-    ATH_MSG_DEBUG(
-        "In processCollection: collection already contained in the MM PrepData "
-        "container");
-    idWithDataVect.push_back(hash);
+    ATH_MSG_DEBUG("In processCollection: collection already contained in the MM PrepData container");
     return StatusCode::SUCCESS;
   }
 
@@ -83,15 +79,10 @@ StatusCode Muon::MmRdoToPrepDataToolMT::processCollection(
   // Check if collection already exists (via the cache, i.e. in online trigger
   // mode)
   if (lock.OnlineAndPresentInAnotherView()) {
-    ATH_MSG_DEBUG(
-        "In processCollection: collection already available in the MM PrepData "
-        "container (via cache)");
-    idWithDataVect.push_back(hash);
+    ATH_MSG_DEBUG("In processCollection: collection already available in the MM PrepData container (via cache)");
     return StatusCode::SUCCESS;
   }
-  std::unique_ptr<MMPrepDataCollection> prdColl =
-      std::make_unique<MMPrepDataCollection>(hash);
-  idWithDataVect.push_back(hash);
+  auto prdColl = std::make_unique<MMPrepDataCollection>(hash);
 
   // set the offline identifier of the collection Id
   IdContext context = id_helper.module_context();
@@ -287,11 +278,10 @@ const MM_RawDataContainer* Muon::MmRdoToPrepDataToolMT::getRdoContainer(
   return nullptr;
 }
 
-void Muon::MmRdoToPrepDataToolMT::processRDOContainer(
-    const EventContext& ctx, Muon::MMPrepDataContainer* mmPrepDataContainer,
-    xAOD::MMClusterContainer* xAODContainer,
-    const std::vector<IdentifierHash>& idsToDecode,
-    std::vector<IdentifierHash>& idWithDataVect) const {
+void Muon::MmRdoToPrepDataToolMT::processRDOContainer(const EventContext& ctx, 
+                                                      Muon::MMPrepDataContainer* mmPrepDataContainer,
+                                                      xAOD::MMClusterContainer* xAODContainer,
+                                                      const std::vector<IdentifierHash>& idsToDecode) const {
   ATH_MSG_DEBUG("In processRDOContainer");
   const MM_RawDataContainer* rdoContainer = getRdoContainer(ctx);
   if (!rdoContainer) {
@@ -306,9 +296,7 @@ void Muon::MmRdoToPrepDataToolMT::processRDOContainer(
       continue;
     ATH_MSG_DEBUG("New RDO collection with " << rdoColl->size() << "MM Hits");
 
-    if (processCollection(ctx, mmPrepDataContainer, xAODContainer, idsToDecode,
-                          rdoColl, idWithDataVect)
-            .isFailure()) {
+    if (processCollection(ctx, mmPrepDataContainer, xAODContainer, idsToDecode, rdoColl).isFailure()) {
       ATH_MSG_DEBUG(
           "processCsm returns a bad StatusCode - keep going for new data "
           "collections in this event");
@@ -317,11 +305,8 @@ void Muon::MmRdoToPrepDataToolMT::processRDOContainer(
 }
 
 // methods for ROB-based decoding
-StatusCode Muon::MmRdoToPrepDataToolMT::decode(
-    const EventContext& ctx, std::vector<IdentifierHash>& idVect,
-    std::vector<IdentifierHash>& idWithDataVect) const {
-  // clear the output vector of selected data
-  idWithDataVect.clear();
+StatusCode Muon::MmRdoToPrepDataToolMT::decode(const EventContext& ctx, 
+                                               const std::vector<IdentifierHash>& idVect) const {
 
   // is idVect a right thing to use here? to be reviewed maybe
   ATH_MSG_DEBUG("Size of the RDO container to be decoded: " << idVect.size());
@@ -338,8 +323,7 @@ StatusCode Muon::MmRdoToPrepDataToolMT::decode(
   }
   auto xAODPrepDataContainer = setupxAODPrepDataContainer(outputContainer);
 
-  processRDOContainer(ctx, mmPrepDataContainer, xAODPrepDataContainer, idVect,
-                      idWithDataVect);
+  processRDOContainer(ctx, mmPrepDataContainer, xAODPrepDataContainer, idVect);
 
   return StatusCode::SUCCESS;
 }
@@ -354,9 +338,6 @@ StatusCode Muon::MmRdoToPrepDataToolMT::provideEmptyContainer(
   return setupMM_PrepDataContainer(ctx) ? StatusCode::SUCCESS
                                         : StatusCode::FAILURE;
 }
-// printout methods
-void Muon::MmRdoToPrepDataToolMT::printInputRdo(const EventContext&) const {}
-void Muon::MmRdoToPrepDataToolMT::printPrepData(const EventContext&) const {}
 
 Muon::MMPrepDataContainer*
 Muon::MmRdoToPrepDataToolMT::setupMM_PrepDataContainer(

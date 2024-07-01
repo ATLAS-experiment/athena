@@ -69,12 +69,9 @@ namespace Muon
        *  @param requestedIdHashVect          Vector of hashes to convert i.e. the hashes of ROD collections in a 'Region of Interest'  
        *  @return selectedIdHashVect This is the subset of requestedIdVect which were actually found to contain data   
        *  (i.e. if you want you can use this vector of hashes to optimise the retrieval of data in subsequent steps.) */ 
-      virtual StatusCode decode(const EventContext& ctx, std::vector<IdentifierHash>& idVect, std::vector<IdentifierHash>& idWithDataVect) const override;
+      virtual StatusCode decode(const EventContext& ctx,
+                                const std::vector<IdentifierHash>& idVect) const override;
 
-      /** Print Input RDO for debugging */ 
-      virtual void printInputRdo(const EventContext& ctx) const override;
-
-      virtual void printPrepData(const EventContext& ctx) const override;      
       
     protected:
       /** The number of recorded Bunch Crossings (BCs) FOR HITS is 3 (Previous, Current, and Next BCs) */
@@ -252,12 +249,7 @@ namespace Muon
       /** Check offline ID is OK for TgcReadoutElement */
       bool isOfflineIdOKForTgcReadoutElement(const MuonGM::TgcReadoutElement* descriptor, const Identifier channelId) const;
 
-      /** Fill selected IdentifierHash vector */  
-      void fillIdentifierHashVector(const State& state,
-                                    std::vector<IdentifierHash>& selectedIdHashVect) const;
 
-      /** Show IdentifierHash vector */ 
-      void showIdentifierHashVector(const State& state, std::vector<IdentifierHash>& idHashVect) const;
       /** Show all IdentifierHash */
       void showIdentifierHash(const State& state) const;
       

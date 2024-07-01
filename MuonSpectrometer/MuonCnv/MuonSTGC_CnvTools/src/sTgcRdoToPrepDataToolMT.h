@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTGC_CNVTOOLS_sTgcRdoToPrepDataToolMT
@@ -47,13 +47,10 @@ namespace Muon
        *  @return selectedIdHashVect This is the subset of requestedIdVect which were actually found to contain data   
        *  (i.e. if you want you can use this vector of hashes to optimise the retrieval of data in subsequent steps.) */
       
-      StatusCode decode(const EventContext& ctx, std::vector<IdentifierHash>& idVect, std::vector<IdentifierHash>& idWithDataVect) const override;      
+      StatusCode decode(const EventContext& ctx, const std::vector<IdentifierHash>& idVect) const override;      
       StatusCode decode(const EventContext& ctx, const std::vector<uint32_t>& robIds) const override;
       StatusCode provideEmptyContainer(const EventContext& ctx) const override;
 
-      virtual void printPrepData(const EventContext& ctx) const override;
-      virtual void printInputRdo(const EventContext& ctx) const override;
-      
     protected:
       struct outputCache {
         SG::WriteHandle<xAOD::sTgcStripContainer> strip{};
@@ -65,16 +62,14 @@ namespace Muon
       
       StatusCode processCollection(const EventContext& ctx, 
                                    outputCache& xAODcontainers,
-                                   const STGC_RawDataCollection *rdoColl, 
-                                   std::vector<IdentifierHash>& idWithDataVect) const;
+                                   const STGC_RawDataCollection *rdoColl) const;
             
       outputCache setupOutputContainers(const EventContext& ctx) const;
       const STGC_RawDataContainer* getRdoContainer(const EventContext& ctx) const;
 
       void processRDOContainer(const EventContext& ctx,
                                outputCache& xAODcontainers,
-                               const std::vector<IdentifierHash>& idsToDecode,
-                               std::vector<IdentifierHash>& idWithDataVect) const;
+                               const std::vector<IdentifierHash>& idsToDecode) const;
 
       SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_muDetMgrKey {this, "DetectorManagerKey", "MuonDetectorManager", "Key of input MuonDetectorManager condition data"}; 
 
