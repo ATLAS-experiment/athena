@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -13,6 +13,9 @@
 
 // For Trigger decision conditions
 #include "TrigDecisionInterface/Conditions.h"
+
+#include "AthContainers/ConstAccessor.h"
+#include "AthContainers/Decorator.h"
 
 #ifndef XAOD_STANDALONE
 #include "GaudiKernel/ITHistSvc.h"
@@ -452,31 +455,39 @@ StatusCode PileupReweightingTool::apply(const xAOD::EventInfo& eventInfo, bool m
       return StatusCode::SUCCESS;
    }
 
+   SG::Decorator<float> corrAvgIntPerXingDec(m_prefix+"corrected_averageInteractionsPerCrossing");
    if(!eventInfo.eventType(xAOD::EventInfo::IS_SIMULATION)){
-      if(!eventInfo.isAvailable<float>(m_prefix+"corrected_averageInteractionsPerCrossing"))
-         eventInfo.auxdecor<float>(m_prefix+"corrected_averageInteractionsPerCrossing") = getCorrectedAverageInteractionsPerCrossing(eventInfo,false);
+      if(!corrAvgIntPerXingDec.isAvailable(eventInfo))
+         corrAvgIntPerXingDec(eventInfo) = getCorrectedAverageInteractionsPerCrossing(eventInfo,false);
       return StatusCode::SUCCESS;
    }
 
    //just copy the value over for MC
-   if(!eventInfo.isAvailable<float>(m_prefix+"corrected_averageInteractionsPerCrossing"))
-      eventInfo.auxdecor<float>(m_prefix+"corrected_averageInteractionsPerCrossing") = eventInfo.averageInteractionsPerCrossing();
+   if(!corrAvgIntPerXingDec.isAvailable(eventInfo))
+      corrAvgIntPerXingDec(eventInfo) = eventInfo.averageInteractionsPerCrossing();
 
    //decorate with random run number etc
-   if(!eventInfo.isAvailable<unsigned int>(m_prefix+"RandomRunNumber")){
+   SG::Decorator<unsigned int> rrnDec(m_prefix+"RandomRunNumber");
+   SG::ConstAccessor<unsigned int> rrnAcc(rrnDec.auxid());
+   if(!rrnDec.isAvailable(eventInfo)){
       unsigned int rrn = getRandomRunNumber( eventInfo, mu_dependent );
-      eventInfo.auxdecor<unsigned int>(m_prefix+"RandomRunNumber") = (rrn==0) ? getRandomRunNumber(eventInfo, false) : rrn;
+      rrnDec(eventInfo) = (rrn==0) ? getRandomRunNumber(eventInfo, false) : rrn;
    }
-   if(!eventInfo.isAvailable<unsigned int>(m_prefix+"RandomLumiBlockNumber"))
-      eventInfo.auxdecor<unsigned int>(m_prefix+"RandomLumiBlockNumber") = (eventInfo.auxdataConst<unsigned int>(m_prefix+"RandomRunNumber")==0) ? 0 : /*m_tool->*/GetRandomLumiBlockNumber(  eventInfo.auxdataConst<unsigned int>(m_prefix+"RandomRunNumber")  );
-   if(!eventInfo.isAvailable<ULong64_t>(m_prefix+"PRWHash"))
-      eventInfo.auxdecor<ULong64_t>(m_prefix+"PRWHash") = getPRWHash( eventInfo );
+   SG::Decorator<unsigned int> rlbnDec(m_prefix+"RandomLumiBlockNumber");
+   SG::Decorator<unsigned int> rlbnAcc(rlbnDec.auxid());
+   if(!rlbnDec.isAvailable(eventInfo))
+      rlbnDec(eventInfo) = (rrnAcc(eventInfo)==0) ? 0 : /*m_tool->*/GetRandomLumiBlockNumber(  rrnAcc(eventInfo)  );
+   SG::Decorator<ULong64_t> prwHashDec(m_prefix+"PRWHash");
+   if(!prwHashDec.isAvailable(eventInfo))
+      prwHashDec(eventInfo) = getPRWHash( eventInfo );
 
    //decorate with standard PileupWeight 
-   if(!m_noWeightsMode && !eventInfo.isAvailable<float>(m_prefix+"PileupWeight"))
-      eventInfo.auxdecor<float>(m_prefix+"PileupWeight") = getCombinedWeight(eventInfo, true);
+   SG::Decorator<float> puWeightDec(m_prefix+"PileupWeight");
+   SG::ConstAccessor<float> puWeightAcc(puWeightDec.auxid());
+   if(!m_noWeightsMode && !puWeightDec.isAvailable(eventInfo))
+      puWeightDec(eventInfo) = getCombinedWeight(eventInfo, true);
       
-   ATH_MSG_VERBOSE("PileupWeight = " << eventInfo.auxdataConst<float>(m_prefix+"PileupWeight") << " RandomRunNumber = " << eventInfo.auxdataConst<unsigned int>(m_prefix+"RandomRunNumber") << " RandomLumiBlockNumber = " << eventInfo.auxdataConst<unsigned int>(m_prefix+"RandomLumiBlockNumber"));
+   ATH_MSG_VERBOSE("PileupWeight = " << puWeightAcc(eventInfo) << " RandomRunNumber = " << rrnAcc(eventInfo) << " RandomLumiBlockNumber = " << rlbnAcc(eventInfo));
 
    return StatusCode::SUCCESS;
 }
@@ -502,7 +513,11 @@ float PileupReweightingTool::getDataWeight(const xAOD::EventInfo& eventInfo, con
 
 float PileupReweightingTool::getPrescaleWeight( const xAOD::EventInfo& eventInfo , const TString& trigger, bool mu_dependent ) {
    //need to use the random run number ... only used to pick the subperiod, but in run2 so far we only have one subperiod
-   unsigned int randomRunNum = (eventInfo.isAvailable<unsigned int>(m_prefix+"RandomRunNumber")) ? eventInfo.auxdataConst<unsigned int>(m_prefix+"RandomRunNumber") : getRandomRunNumber( eventInfo, mu_dependent );
+   SG::ConstAccessor<unsigned int> rrnAcc (m_prefix+"RandomRunNumber");
+   unsigned int randomRunNum = rrnAcc.withDefault (eventInfo, 0);
+   if (randomRunNum == 0) {
+     randomRunNum = getRandomRunNumber( eventInfo, mu_dependent );
+   }
    if(!mu_dependent) return m_activeTool->GetPrescaleWeight(randomRunNum, trigger);
    return m_activeTool->GetPrescaleWeight( randomRunNum, trigger, getCorrectedAverageInteractionsPerCrossing(eventInfo,false) /*use the 'correct' mu instead of the one from the file!!*/, m_useRunDependentPrescaleWeight /*run-dependent*/ );
 }
