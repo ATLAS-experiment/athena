@@ -233,10 +233,31 @@ StatusCode DiTauTruthMatchingTool::checkTruthMatch (const xAOD::DiTauJet& xDiTau
   decClassifierParticleOrigin(xDiTau) = mcTruthOrigin;
   decTruthLeptonLink(xDiTau) = lTruthLeptonLink;
 
+  static const SG::Decorator<float> decTruthLeadPt("TruthVisLeadPt");
+  static const SG::Decorator<float> decTruthLeadEta("TruthVisLeadEta");
+  static const SG::Decorator<float> decTruthLeadPhi("TruthVisLeadPhi");
+  static const SG::Decorator<float> decTruthLeadM("TruthVisLeadM");
+  static const SG::Decorator<float> decTruthSubleadPt("TruthVisSubleadPt");
+  static const SG::Decorator<float> decTruthSubleadEta("TruthVisSubleadEta");
+  static const SG::Decorator<float> decTruthSubleadPhi("TruthVisSubleadPhi");
+  static const SG::Decorator<float> decTruthSubleadM("TruthVisSubleadM");
+  static const SG::Decorator<float> decTruthDeltaR("TruthVisDeltaR");
+  static const SG::Decorator<float> decTruthMass("TruthVisMass");
+
   // the ditau candidate should have at least 2 subjets to be truth matched
   if ( accNSubjets(xDiTau) < 2) {
     decIsTruthMatched(xDiTau) = (char)false;
     decIsTruthHadronic(xDiTau) = (char)false;
+    decTruthLeadPt(xDiTau) = -1234.;
+    decTruthLeadEta(xDiTau) = -1234.;
+    decTruthLeadPhi(xDiTau) = -1234.;
+    decTruthLeadM(xDiTau) = -1234.;
+    decTruthSubleadPt(xDiTau) = -1234.;
+    decTruthSubleadEta(xDiTau) = -1234.;
+    decTruthSubleadPhi(xDiTau) = -1234.;
+    decTruthSubleadM(xDiTau) = -1234.;
+    decTruthDeltaR(xDiTau) = -1234.;
+    decTruthMass(xDiTau) = -1234.;
     return StatusCode::SUCCESS;
   }
 
@@ -249,18 +270,6 @@ StatusCode DiTauTruthMatchingTool::checkTruthMatch (const xAOD::DiTauJet& xDiTau
     }
   else 
     decIsTruthHadronic(xDiTau) = (char)false;
-
- 
-  static const SG::Decorator<double> decTruthLeadPt("TruthVisLeadPt");
-  static const SG::Decorator<double> decTruthLeadEta("TruthVisLeadEta");
-  static const SG::Decorator<double> decTruthLeadPhi("TruthVisLeadPhi");
-  static const SG::Decorator<double> decTruthLeadM("TruthVisLeadM");
-  static const SG::Decorator<double> decTruthSubleadPt("TruthVisSubleadPt");
-  static const SG::Decorator<double> decTruthSubleadEta("TruthVisSubleadEta");
-  static const SG::Decorator<double> decTruthSubleadPhi("TruthVisSubleadPhi");
-  static const SG::Decorator<double> decTruthSubleadM("TruthVisSubleadM");
-  static const SG::Decorator<double> decTruthDeltaR("TruthVisDeltaR");
-  static const SG::Decorator<double> decTruthMass("TruthVisMass");   
 
   if (accIsTruthHadronic(xDiTau))
     {
