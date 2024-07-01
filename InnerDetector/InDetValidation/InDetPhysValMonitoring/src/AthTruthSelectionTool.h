@@ -55,7 +55,7 @@ private:
   bool m_requireOnlyPrimary;
   bool m_requireCharged;
   int m_selectedCharge;
-  bool m_requireStatus1;
+  bool m_requireStable;
   int m_requireSiHit;
   // max decay radius for secondaries [mm];
   // set to within (Run2) pixel by default

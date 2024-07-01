@@ -11,6 +11,7 @@
 
 #include "AthTruthSelectionTool.h"
 #include "TruthUtils/MagicNumbers.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include "xAODTruth/TruthVertex.h"
 
 #include <vector>
@@ -54,7 +55,7 @@ AthTruthSelectionTool::AthTruthSelectionTool(const std::string& type, const std:
   declareProperty("requireOnlyPrimary", m_requireOnlyPrimary = true);
   declareProperty("requireCharged", m_requireCharged = true);
   declareProperty("selectedCharge", m_selectedCharge = 0);
-  declareProperty("requireStatus1", m_requireStatus1 = true);
+  declareProperty("requireStable", m_requireStable = true);
   declareProperty("requireSiHit", m_requireSiHit = 0);
   declareProperty("maxProdVertRadius", m_maxProdVertRadius = 110.);
   declareProperty("pdgId", m_pdgId = -1);
@@ -117,10 +118,10 @@ AthTruthSelectionTool::initialize() {
       else return(not(p.isNeutral()) and p.charge()==m_selectedCharge);
     }, "charged"));
   }
-  if (m_requireStatus1) {
+  if (m_requireStable) {
     m_cutList.add(Accept_t([](const P_t& p) {
-      return(p.status() == 1);
-    }, "status1"));
+      return(MC::isStable(&p));
+    }, "stable"));
   }
   if (m_pdgId > 0) {
     m_cutList.add(Accept_t([&m_pdgId = std::as_const(m_pdgId)](const P_t& p) {

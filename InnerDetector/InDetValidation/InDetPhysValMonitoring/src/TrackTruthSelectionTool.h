@@ -42,7 +42,7 @@ private:
   float m_minPt;
   bool m_requireOnlyPrimary;
   bool m_requireCharged;
-  bool m_requireStatus1;
+  bool m_requireStable;
   // max decay radius for secondaries [mm];
   // set to within (Run2) pixel by default; set to <0 for no cut
   double m_maxProdVertRadius;
