@@ -33,7 +33,10 @@ def generateFRModel(UFOModel, overWriteLocalDir=False):
             shutil.copytree(MGModelDirCVMFS, UFOModel)
 
     # find ufo2herwig command
-    HERWIG7_PATH = os.environ['HERWIG7_PATH']
+    try:
+      HERWIG7_PATH = os.environ['HERWIG7_PATH']
+    except KeyError:
+      raise RuntimeError("HERWIG7_PATH environment variable not set")    
     ufo2herwig   = os.path.join(HERWIG7_PATH, 'bin/ufo2herwig')
     if not ufo2herwig: 
         athMsgLog.error(f'could not find Herwig7 ufo2herwig command: {ufo2herwig}')

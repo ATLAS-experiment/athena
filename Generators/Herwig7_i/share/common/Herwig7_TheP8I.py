@@ -5,14 +5,14 @@ assert hasattr(genSeq, "Herwig7")
 try:
 # This should be a prefix      
       TheP8I_path=os.environ['THEP8I_PATH']
-except:
-      TheP8I_path='/cvmfs/sft.cern.ch/lcg/releases/LCG_88/MCGenerators/thep8i/2.0.0/x86_64-slc6-gcc62-opt'
+except KeyError:
+      raise RuntimeError("THEP8I_PATH environment variable not set")
 os.environ["LD_LIBRARY_PATH"]=TheP8I_path+"/lib64/ThePEG"+":"+TheP8I_path+"/lib/ThePEG"+":"+os.environ["LD_LIBRARY_PATH"]
 
 try:
       TheP8I_PYTHIA8DATA=os.environ['PYTHIA8DATA']
-except:
-      TheP8I_PYTHIA8DATA='/cvmfs/sft.cern.ch/lcg/releases/LCG_88/MCGenerators/pythia8/244/x86_64-slc6-gcc62-opt/share/Pythia8/xmldoc/'
+except KeyError:
+      raise RuntimeError("PYTHIA8DATA environment variable not set")
 os.environ['PYTHIA8DATA']=TheP8I_PYTHIA8DATA
 
 
