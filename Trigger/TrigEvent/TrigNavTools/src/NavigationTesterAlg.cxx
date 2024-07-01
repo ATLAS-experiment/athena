@@ -267,7 +267,7 @@ namespace Trig {
 
     bool NavigationTesterAlg::combinationsEmpty(const CombinationsVector& combs) const {
         size_t counter = 0;
-        for ( auto outerc: combs ) 
+        for ( const std::vector<const xAOD::IParticle*>& outerc: combs ) 
             counter += outerc.size();
         return counter == 0;
     }

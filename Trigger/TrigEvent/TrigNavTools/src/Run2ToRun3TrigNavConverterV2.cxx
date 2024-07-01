@@ -595,7 +595,7 @@ StatusCode Run2ToRun3TrigNavConverterV2::mirrorTEsStructure(ConvProxySet_t &conv
 
 void Run2ToRun3TrigNavConverterV2::printProxies(const ConvProxySet_t& proxies, 
                                                 std::function<bool(const ConvProxy*)> selector,
-                                                std::vector<std::function<void(const ConvProxy*)>> printers) const {
+                                                const std::vector<std::function<void(const ConvProxy*)>>& printers) const {
   ATH_MSG_DEBUG("Printing proxies");
   ATH_MSG_DEBUG("" );
   for ( auto p: proxies) {
@@ -760,7 +760,7 @@ StatusCode Run2ToRun3TrigNavConverterV2::collapseFeaturesProxies(ConvProxySet_t 
       feaToProxyMap[proxy->feaHash].insert(proxy);
 
     ATH_MSG_VERBOSE("TE " << TrigConf::HLTUtils::hash2string(proxy->te->getId()) << " FEA hash " << proxy->feaHash);
-    for (auto fea : proxy->te->getFeatureAccessHelpers())
+    for (const HLT::TriggerElement::FeatureAccessHelper& fea : proxy->te->getFeatureAccessHelpers())
     {
       ATH_MSG_VERBOSE("FEA: " << fea);
     }
@@ -931,7 +931,7 @@ StatusCode Run2ToRun3TrigNavConverterV2::fillRelevantRois(ConvProxySet_t &convPr
 
     mp.clear();
 
-    for (HLT::TriggerElement::FeatureAccessHelper helper : proxy->te->getFeatureAccessHelpers())
+    for (const HLT::TriggerElement::FeatureAccessHelper& helper : proxy->te->getFeatureAccessHelpers())
     {
       auto [sgKey, sgCLID, sgName] = getSgKey(run2Nav, helper);
       if (std::find(m_setRoiName.begin(), m_setRoiName.end(), sgName) == m_setRoiName.end())

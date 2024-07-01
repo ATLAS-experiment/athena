@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGNAVTOOLS_RUN2TORUN3TRIGNAVCONVERTERV2_H
 #define TRIGNAVTOOLS_RUN2TORUN3TRIGNAVCONVERTERV2_H
@@ -142,7 +142,7 @@ private:
   // debugging aid, prints selected proxies
   void printProxies(const ConvProxySet_t& proxies,
                     std::function<bool(const ConvProxy*)> selector=[](const ConvProxy*){return true;},
-                    std::vector<std::function<void(const ConvProxy*)>> printers={}) const;
+                    const std::vector<std::function<void(const ConvProxy*)>>& printers={}) const;
 
   // useful printers
   std::function<void(const ConvProxy*)> m_chainIdsPrinter = [&](const ConvProxy* p){ for (auto id: p->passChains ) ATH_MSG_DEBUG("chain id " << id); };
