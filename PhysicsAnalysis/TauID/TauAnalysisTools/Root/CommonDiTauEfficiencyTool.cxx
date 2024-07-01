@@ -326,7 +326,7 @@ CP::CorrectionCode CommonDiTauEfficiencyTool::getValue(const std::string& sHistN
 double TauAnalysisTools::TruthLeadPt(const xAOD::DiTauJet& xDiTau)
 {
   // return leading truth tau pt in GeV
-  static const SG::ConstAccessor< double > acc( "TruthVisLeadPt" );
+  static const SG::ConstAccessor< float > acc( "TruthVisLeadPt" );
   return acc( xDiTau ) * 0.001;
 }
 
@@ -334,7 +334,7 @@ double TauAnalysisTools::TruthLeadPt(const xAOD::DiTauJet& xDiTau)
 double TauAnalysisTools::TruthSubleadPt(const xAOD::DiTauJet& xDiTau)
 {
   // return subleading truth tau pt in GeV
-  static const SG::ConstAccessor< double > acc( "TruthVisSubleadPt" );
+  static const SG::ConstAccessor< float > acc( "TruthVisSubleadPt" );
   return acc( xDiTau ) * 0.001;
 }
 
@@ -342,6 +342,6 @@ double TauAnalysisTools::TruthSubleadPt(const xAOD::DiTauJet& xDiTau)
 double TauAnalysisTools::TruthDeltaR(const xAOD::DiTauJet& xDiTau)
 {
   // return truth taus distance delta R
-  static const SG::ConstAccessor< double > acc( "TruthVisDeltaR" );
+  static const SG::ConstAccessor< float > acc( "TruthVisDeltaR" );
   return acc( xDiTau );
 }
