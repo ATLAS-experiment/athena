@@ -466,6 +466,7 @@ def TrigFastTrackFinderCfg(flags: AthConfigFlags, name: str, RoIs: str, inputTra
         RoIs = RoIs,
         ITkMode = flags.Detector.GeometryITk,
         UseTracklets = flags.Detector.GeometryITk,
+        doTrackRefit = not flags.Detector.GeometryITk,
     )
     
   ftf.LRT_D0Min = flags.Tracking.ActiveConfig.LRT_D0Min
