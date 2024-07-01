@@ -469,9 +469,6 @@ def generate(process_dir='PROC_mssm_0', grid_pack=False, gridpack_compile=False,
         if 'FC=g' in aline:
             mglog.info('Configuring the fancy gfortran compiler instead of g77 / f77')
             new_opts.write('  FC=gfortran\n')
-        elif 'FFLAGS+= -ffixed-line-length-132' in aline and 'i686' in os.environ['CMTCONFIG']:
-            mglog.info('Setting you up for a 32-bit compilation')
-            new_opts.write('FFLAGS+= -ffixed-line-length-132 -m32\n')
         else:
             new_opts.write(aline)
     old_opts.close()
