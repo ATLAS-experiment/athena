@@ -809,7 +809,7 @@ if __name__ == "__main__":
         '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonCombinedConfig/myESD_q445_unslimmedTracks.pool.root']
     # ConfigFlags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/q221/21.0/v2/myESD.pool.root']
 
-    flags.IOVDb.GlobalTag = "OFLCOND-MC21-SDR-RUN3-07"
+    flags.IOVDb.GlobalTag = "OFLCOND-MC23-SDR-RUN3-05"
 
     flags.Muon.useTGCPriorNextBC = False
     # This fails due to "Hough data per sector vector not found"
