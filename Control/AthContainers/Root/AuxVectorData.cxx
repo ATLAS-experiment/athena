@@ -505,7 +505,7 @@ void AuxVectorData::Cache::clear()
         delete [] m_allcache[i];
       m_allcache[0] = m_allcache.back();
       m_allcache.resize(1);
-}
+    }
     std::fill (m_cache[0], m_cache[0] + m_cache_len, static_cast<void*>(0));
   }
 }
