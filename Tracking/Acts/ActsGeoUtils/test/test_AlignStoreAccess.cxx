@@ -80,6 +80,14 @@ class WorkerTask {
             m_store->geoModelAlignment = std::make_unique<GeoAlignmentStore>(*condAlignment);
             m_store->geoModelAlignment->clearPosCache();
         }
+#if defined(FLATTEN) && defined(__GNUC__)
+// We compile this function with optimization, even in debug builds; otherwise,
+// the heavy use of Eigen makes it too slow.  However, from here we may call
+// to out-of-line Eigen code that is linked from other DSOs; in that case,
+// it would not be optimized.  Avoid this by forcing all Eigen code
+// to be inlined here if possible.
+[[gnu::flatten]]
+#endif
         bool execute() {
             ActsGeometryContext gctx{};
             gctx.setStore(m_store);
