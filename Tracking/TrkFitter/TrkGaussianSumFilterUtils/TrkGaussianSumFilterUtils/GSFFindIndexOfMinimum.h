@@ -236,11 +236,9 @@ int32_t vecUpdateIdxOnNewMin(const float* distancesIn, int n) {
 
 template <typename T = float, int STRIDE = 16, int VEC_WIDTH = 4>
 ATH_ALWAYS_INLINE
-float vecFindMinimum(const float* distancesIn, int n) {
+float vecFindMinimum(const T* distancesIn, int n) {
   using namespace CxxUtils;
-  const float* array =
-      std::assume_aligned<GSFConstants::alignment>(distancesIn);
-
+  const T* array = std::assume_aligned<GSFConstants::alignment>(distancesIn);
   constexpr int vectorCount = STRIDE / VEC_WIDTH;
 
   vec<T, VEC_WIDTH> minValues[vectorCount];
@@ -276,9 +274,7 @@ template <typename T = float, int STRIDE = 16, int VEC_WIDTH = 4>
 ATH_ALWAYS_INLINE
 int32_t vecIdxOfValue(const T value, const T* distancesIn, int n) {
   using namespace CxxUtils;
-  const float* array =
-      std::assume_aligned<GSFConstants::alignment>(distancesIn);
-
+  const T* array = std::assume_aligned<GSFConstants::alignment>(distancesIn);
   constexpr int vectorCount = STRIDE / VEC_WIDTH;
 
   vec<T, VEC_WIDTH> values[vectorCount];
