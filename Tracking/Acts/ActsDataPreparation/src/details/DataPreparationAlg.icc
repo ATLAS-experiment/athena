@@ -37,6 +37,18 @@ namespace ActsTrk {
   }
 
   template <typename external_collection_t, bool useCache>
+  StatusCode DataPreparationAlg<external_collection_t, useCache>::finalize()
+  {
+    ATH_MSG_INFO("Clusterization statistics" << std::endl << makeTable(m_stat,
+								       std::array<std::string, kNStat>{
+									 "Inputs",
+									 "Outputs"
+								       }).columnWidth(10));
+    
+    return StatusCode::SUCCESS;
+  }
+  
+  template <typename external_collection_t, bool useCache>
   StatusCode
   DataPreparationAlg<external_collection_t, useCache>::execute(const EventContext& ctx) const
   {
@@ -51,6 +63,7 @@ namespace ActsTrk {
     output_collection_t *outputCollection = outputHandle.ptr();
 
     ATH_CHECK( fill( ctx, *outputCollection ) );
+    m_stat[kNOutputs] += outputCollection->size();
     ATH_MSG_DEBUG("Concluded creation of output collection with " << outputCollection->size() << " entries");
     return StatusCode::SUCCESS;
   }
@@ -95,6 +108,7 @@ namespace ActsTrk {
 		 [this] (const object_t& coll) -> IdentifierHash 
 		 { return retrieveDetectorIDHash(coll); },
 		 detElements->size());
+    m_stat[kNInputs] += inputCollection->size();
     
     // Get the list of id hashes from the RoI
     std::set<IdentifierHash> hashes;
@@ -165,9 +179,9 @@ namespace ActsTrk {
       //this function will wait if an item is not available
       auto ce = cacheHandle->indexFindPtr(idHash);
       if(ce == nullptr) continue;
-
       for(auto rng: ce->ranges){
         if(rng.first == rng.second) continue;
+	m_stat[kNInputs] += rng.second - rng.first;
         for(unsigned int i = rng.first; i < rng.second; i++){
 
 	  // Check the measurement has not been used previously
