@@ -226,7 +226,10 @@ class Hw7ConfigMerging(hw7Config.Hw7Config):
   def local_pre_commands(self):
 
     # try to locate the MG5_aMC@NLO installation
-    MG5aMC_path = os.environ['MADPATH']
+    try:
+      MG5aMC_path = os.environ['MADPATH']
+    except KeyError:
+      raise RuntimeError("MADPATH environment variable not set")
     if not os.path.isfile(os.path.join(MG5aMC_path, 'bin', 'mg5_aMC')):
       athMsgLog.warn(hw7Utils.ansi_format_warning("The MadGraph5_aMC@NLO installation can't be found from $MADPATH = {}, so don't be surprised if your run crashes in you are using matrix elements from MG5_aMC@NLO in Herwig7 / Matchbox. Please ensure that the location exists, that you have permissions to access it and that it contains the executable 'bin/mg5_aMC'".format(MG5aMC_path)))
 
@@ -234,19 +237,14 @@ class Hw7ConfigMerging(hw7Config.Hw7Config):
     try:
       GoSam_path = os.environ['GOSAM_PATH']
     except KeyError:
-      # \todo Get rid of this and just use the environment variable `GOSAMPATH`
-      GoSam_path = '/cvmfs/sft.cern.ch/lcg/releases/LCG_88/MCGenerators/gosam/2.0.4/x86_64-slc6-gcc62-opt'
-      os.environ["LD_LIBRARY_PATH"]="/cvmfs/sft.cern.ch/lcg/releases/LCG_88/MCGenerators/gosam/2.0.4/x86_64-slc6-gcc62-opt/lib:"+os.environ["LD_LIBRARY_PATH"]
-      athMsgLog.warn(hw7Utils.ansi_format_warning("Falling back to hard-coded GoSam installation location at '{}' - please ensure that the GOSAM_PATH environment variable is correctly set".format(GoSam_path)))
+      raise RuntimeError("GOSAM_PATH environment variable not set")
     if not os.path.isfile(os.path.join(GoSam_path, 'bin', 'gosam.py')):
       athMsgLog.warn(hw7Utils.ansi_format_warning("The GoSam installation can't be found from $GOSAMPATH = {}, so don't be surprised if your run crashes in you are using matrix elements from GoSam in Herwig7 / Matchbox. Please ensure that the location exists, that you have permissions to access it and that it contains the script 'bin/gosam.py'".format(GoSam_path)))
 
     try:
       OpenLoops_path= os.environ['OPENLOOPS_PATH']
     except KeyError:
-      OpenLoops_path = '/cvmfs/sft.cern.ch/lcg/releases/LCG_88/MCGenerators/openloops/2.0.0/x86_64-slc6-gcc62-opt'
-      os.environ["LD_LIBRARY_PATH"]="/cvmfs/sft.cern.ch/lcg/releases/LCG_88/MCGenerators/openloops/2.0.0/x86_64-slc6-gcc62-opt/lib:"+os.environ["LD_LIBRARY_PATH"]
-      athMsgLog.warn(hw7Utils.ansi_format_warning("Falling back to hard-coded OPENLOOPS installation location at '{}' - please ensure that the OPENLOOPS_PATH environment variable is correctly set".format(OpenLoops_path)))
+      raise RuntimeError("OPENLOOPS_PATH environment variable not set")
     if not os.path.isdir(os.path.join(OpenLoops_path, "proclib")):
       athMsgLog.warn(hw7Utils.ansi_format_warning("The OpenLoops process libraries can't be found from $OPENLOOPS_PATH = {}".format(OpenLoops_path)))
 
