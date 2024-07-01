@@ -69,6 +69,7 @@ namespace IDTPM {
     TH1* m_pullwidth_vs_pt[NPARAMS];
     TH1* m_pullmean_vs_pt[NPARAMS];
 
+    TH2* m_corrHelper[NPARAMS]; // 2D correlation plots
   };
   
 }

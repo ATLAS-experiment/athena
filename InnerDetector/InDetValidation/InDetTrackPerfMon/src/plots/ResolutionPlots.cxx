@@ -64,7 +64,8 @@ StatusCode IDTPM::ResolutionPlots::bookPlots()
 				"resolution_vs_"+m_trackType+"_pt_" + m_paramProp[i] ) );
     ATH_CHECK( retrieveAndBook( m_resmean_vs_pt[i],
 				"resmean_vs_"+m_trackType+"_pt_" + m_paramProp[i] ) );
-
+    ATH_CHECK( retrieveAndBook(m_corrHelper[i], 
+        "corr_"+m_trackType+"_"+m_paramProp[i]));
     ATH_CHECK( retrieveAndBook( m_pullHelperPt[i],
 				"pullHelper_"+m_trackType+"_pt_" + m_paramProp[i] ) );
     ATH_CHECK( retrieveAndBook( m_pullwidth_vs_pt[i],
@@ -130,6 +131,7 @@ StatusCode IDTPM::ResolutionPlots::fillPlots(
     ATH_CHECK( fill( m_resHelperPt[i], pt_ref, residual, weight ) );
     ATH_CHECK( fill( m_pullHelperEta[i], eta_ref, pull, weight ) );
     ATH_CHECK( fill( m_pullHelperPt[i], pt_ref, pull, weight ) );
+    ATH_CHECK( fill( m_corrHelper[i], refP[i], testP[i], weight) );
   }
   
   return StatusCode::SUCCESS;

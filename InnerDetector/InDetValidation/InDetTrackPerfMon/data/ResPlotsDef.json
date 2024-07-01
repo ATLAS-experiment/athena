@@ -239,6 +239,46 @@
 	"xAxis" : { "title" : "$TRKTYPE p_{T} [GeV]", "nBins" : "100", "low" : "0", "high" : "100" },
 	"yAxis" : { "title" : "z_{0}sin#theta bias [mm]" }
     },
+    "corr_$TRKTAG_pt" : {
+        "type" : "TH2F",
+        "xAxis" : { "title" : "$TRKTYPE p_{T} [GeV]", "nBins" : "100", "low" : "0", "high" : "100" },
+        "yAxis" : { "title" : "Test p_{T} [GeV]", "nBins" : "100", "low" : "0", "high" : "100" }
+    },
+    "corr_$TRKTAG_qoverp" : {
+        "type" : "TH2F",
+        "xAxis" : { "title" : "$TRKTYPE q/p [1/GeV]", "nBins" : "100", "low" : "-2", "high" : "2" },
+        "yAxis" : { "title" : "Test q/p [1/GeV]", "nBins" : "100", "low" : "-2", "high" : "2" }
+    },
+    "corr_$TRKTAG_ptqopt" : {
+        "type" : "TH2F",
+        "xAxis" : { "title" : "$TRKTYPE q/pT [1/GeV]", "nBins" : "100", "low" : "-2", "high" : "2" },
+        "yAxis" : { "title" : "Test q/pT [1/GeV]", "nBins" : "100", "low" : "-2", "high" : "2" }
+    },
+    "corr_$TRKTAG_theta" : {
+        "type" : "TH2F",
+        "xAxis" : { "title" : "$TRKTYPE #theta", "nBins" : "100", "low" : "-3.2", "high" : "3.2" },
+        "yAxis" : { "title" : "Test #theta", "nBins" : "100", "low" : "-3.2", "high" : "3.2" }
+    },
+    "corr_$TRKTAG_phi" : {
+        "type" : "TH2F",
+        "xAxis" : { "title" : "$TRKTYPE #phi", "nBins" : "100", "low" : "-3.14", "high" : "3.14" },
+        "yAxis" : { "title" : "Test #phi", "nBins" : "100", "low" : "-3.14", "high" : "3.14" }
+    },
+    "corr_$TRKTAG_d0" : {
+        "type" : "TH2F",
+        "xAxis" : { "title" : "$TRKTYPE d_{0} [mm]", "nBins" : "100", "low" : "-20", "high" : "20" },
+        "yAxis" : { "title" : "Test d_{0} [mm]", "nBins" : "100", "low" : "-20", "high" : "20" }
+    },
+    "corr_$TRKTAG_z0" : {
+        "type" : "TH2F",
+        "xAxis" : { "title" : "$TRKTYPE z_{0} [mm]", "nBins" : "100", "low" : "-20", "high" : "20" },
+        "yAxis" : { "title" : "Test z_{0} [mm]", "nBins" : "100", "low" : "-20", "high" : "20" }
+    },
+    "corr_$TRKTAG_z0sin" : {
+        "type" : "TH2F",
+        "xAxis" : { "title" : "$TRKTYPE z_{0}sin(#theta) [mm]", "nBins" : "100", "low" : "-20", "high" : "20" },
+        "yAxis" : { "title" : "Test z_{0}sin(#theta) [mm]", "nBins" : "100", "low" : "-20", "high" : "20" }
+    },
     "pullHelper_$TRKTAG_eta_d0" : {
         "type" : "TH2F",
         "xAxis" : { "title" : "$TRKTYPE #eta", "nBins" : "64", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
