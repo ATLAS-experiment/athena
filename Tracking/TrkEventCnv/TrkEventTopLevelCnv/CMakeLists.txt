@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrkEventTopLevelCnv )
@@ -17,3 +17,8 @@ atlas_add_dictionary( TrkEventTopLevelCnvDict
    LINK_LIBRARIES TrkEventTopLevelCnv
    )
 
+atlas_add_test( GSFCnv_test
+   SOURCES test/GSFCnv_test.cxx
+   LINK_LIBRARIES GeoPrimitives GaudiKernel TrkSurfaces TrkEventPrimitives
+   TrkMaterialOnTrack TrkMeasurementBase TrkPseudoMeasurementOnTrack
+   TrkTrackSummary TestTools AthenaBaseComps CxxUtils TrkEventTPCnv TrkEventTopLevelCnv)

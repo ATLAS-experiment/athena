@@ -81,7 +81,7 @@ foreach( name FitQualityCnv_p1_test LocalDirectionCnv_p1_test
       SOURCES test/${name}.cxx
       LINK_LIBRARIES GeoPrimitives GaudiKernel TrkSurfaces TrkEventPrimitives
       TrkMaterialOnTrack TrkMeasurementBase TrkPseudoMeasurementOnTrack
-      TrkTrackSummary TestTools AthenaBaseComps CxxUtils TrkEventTPCnv TrkEventTopLevelCnv)
+      TrkTrackSummary TestTools AthenaBaseComps CxxUtils TrkEventTPCnv )
 
 endforeach()
 # Needed for the plugin service to see the test components
