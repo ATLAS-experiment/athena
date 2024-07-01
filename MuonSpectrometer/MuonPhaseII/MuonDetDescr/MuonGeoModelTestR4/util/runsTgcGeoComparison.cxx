@@ -669,8 +669,8 @@ int main( int argc, char** argv ) {
             TEST_BASICPROP(padPhiShift[c], "shift of inner pad edges in phi direction in the layer "<< c + 1 << " are ");
             TEST_BASICPROP(firstPadPhiDiv[c], "angular position of the outer edge of the first pad in the layer "<< c + 1 << " are ");
             ++c;
-          ///Uncomment to dump the local to global layer transformation
             
+            ///Uncomment to dump the local to global layer transformation           
             std::cout <<"runsTgcGeoComparison() "<<__LINE__<<": in chamber "<<test<<" "
                       << "The test layer transform for layer "<< c << " is: " << Amg::toString(testLayer.transform) 
                       << " and the reference layer transform is: " << Amg::toString(refLayer.transform) <<std::endl;

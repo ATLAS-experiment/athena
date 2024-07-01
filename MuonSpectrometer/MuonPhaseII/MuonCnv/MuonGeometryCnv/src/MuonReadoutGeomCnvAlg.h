@@ -118,6 +118,10 @@ class MuonReadoutGeomCnvAlg : public AthReentrantAlgorithm {
                                   const MuonGMR4::TgcReadoutElement& refEle,
                                   const MuonGM::TgcReadoutElement& testEle) const;
 
+        StatusCode dumpAndCompare(const ActsGeometryContext& gctx,
+                                  const MuonGMR4::sTgcReadoutElement& refEle,
+                                  const MuonGM::sTgcReadoutElement& testEle) const;
+
         StatusCode checkIdCompability(const MuonGMR4::MuonReadoutElement& refEle,
                                       const MuonGM::MuonReadoutElement& testEle) const;
         

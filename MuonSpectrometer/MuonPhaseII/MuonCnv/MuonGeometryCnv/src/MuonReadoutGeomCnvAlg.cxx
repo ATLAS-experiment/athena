@@ -562,26 +562,43 @@ StatusCode  MuonReadoutGeomCnvAlg::buildSTGC(const ActsGeometryContext& gctx,
                 phiDesign.defineTrapezoid(copyPhiDesign.shortHalfHeight(),
                                           copyPhiDesign.longHalfHeight(),
                                           copyPhiDesign.halfWidth());
-              } else { 
-                phiDesign.defineDiamond(copyPhiDesign.shortHalfHeight(),
-                                        copyPhiDesign.longHalfHeight(),
-                                        copyPhiDesign.halfWidth(), 
-                                        copyPhiDesign.yCutout());
-              }
-              phiDesign.inputPitch  = copyPhiDesign.stripPitch();
-              phiDesign.inputWidth  = 0.015;
-              phiDesign.setFirstPos(copyPhiDesign.firstStripPos().x()); // Position of 1st wire, accounts for staggering
-            //   phiDesign.firstPitch = firstWireGroup[il];             // Number of Wires in 1st group, group staggering
-              phiDesign.groupWidth  = copyPhiDesign.numWiresInGroup(2);                // Number of Wires normal group
-              phiDesign.nGroups = copyPhiDesign.numStrips();                           // Number of Wire Groups
-              phiDesign.wireCutout = copyPhiDesign.wireCutout();                       // Size of "active" wire region for digits
-              phiDesign.nch = copyPhiDesign.nAllWires();
+            } else { 
+            phiDesign.defineDiamond(copyPhiDesign.shortHalfHeight(),
+                                    copyPhiDesign.longHalfHeight(),
+                                    copyPhiDesign.halfWidth(), 
+                                    copyPhiDesign.yCutout());
+            }
+            phiDesign.inputPitch  = copyPhiDesign.stripPitch();
+            phiDesign.inputWidth  = copyPhiDesign.stripWidth();
+            phiDesign.setFirstPos(copyPhiDesign.firstStripPos().x()); // Position of 1st wire, accounts for staggering
+            phiDesign.firstPitch = copyPhiDesign.numWiresInGroup(1);  // Number of Wires in 1st group, group staggering
+            phiDesign.groupWidth  = copyPhiDesign.numWiresInGroup(2);                // Number of Wires normal group
+            phiDesign.nGroups = copyPhiDesign.numStrips();                           // Number of Wire Groups
+            phiDesign.wireCutout = copyPhiDesign.wireCutout();                       // Size of "active" wire region for digits
+            phiDesign.nch = copyPhiDesign.nAllWires();
 
-              const MuonGMR4::PadDesign& copyPadDesign{copyMe->padDesign(layerHash)};
-              MuonGM::MuonPadDesign& padDesign{newRE->m_padDesign[layer-1]};
-              padDesign.sPadWidth = 2.*copyPadDesign.shortHalfHeight();
-              padDesign.lPadWidth = 2.*copyPadDesign.longHalfHeight();
-              padDesign.Size =  2.*copyPadDesign.halfWidth();
+            const MuonGMR4::PadDesign& copyPadDesign{copyMe->padDesign(layerHash)};
+            MuonGM::MuonPadDesign& padDesign{newRE->m_padDesign[layer-1]};
+            padDesign.Length  = copyMe->chamberHeight();
+            padDesign.sWidth  = copyMe->sChamberLength();
+            padDesign.lWidth  = copyMe->lChamberLength();
+            padDesign.Size =  2.*copyPadDesign.halfWidth();
+            padDesign.ysFrame = copyMe->sFrameWidth();
+            padDesign.ylFrame = copyMe->lFrameWidth();
+            padDesign.thickness = copyMe->thickness();
+            padDesign.yCutout = copyPadDesign.yCutout();
+            padDesign.setR(copyPadDesign.beamlineRadius());
+            padDesign.sPadWidth = 2.*copyPadDesign.shortHalfHeight(); 
+            padDesign.lPadWidth = 2.*copyPadDesign.longHalfHeight(); 
+            padDesign.nPadColumns = copyPadDesign.numPadPhi();
+            padDesign.firstPhiPos   = copyPadDesign.firstPadPhiDiv();
+            padDesign.inputPhiPitch = copyPadDesign.anglePadPhi();      
+            padDesign.PadPhiShift   = copyPadDesign.padPhiShift();
+            padDesign.nPadH         = copyPadDesign.numPadEta();
+            padDesign.padEtaMax     = copyPadDesign.maxPadEta();  
+            padDesign.firstRowPos   = copyPadDesign.firstPadHeight();     
+            padDesign.inputRowPitch = copyPadDesign.padHeight();          
+            padDesign.sectorOpeningAngle = copyPadDesign.sectorAngle();
         }     
         newRE->fillCache();
         cacheObj.detMgr->addsTgcReadoutElement(std::move(newRE));
@@ -918,6 +935,97 @@ StatusCode MuonReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx
                 return StatusCode::FAILURE;
             }
 
+        }
+    }
+    return StatusCode::SUCCESS;
+}
+StatusCode MuonReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
+                                                 const MuonGMR4::sTgcReadoutElement& refEle,
+                                                 const MuonGM::sTgcReadoutElement& testEle) const {
+    
+    if (!m_checkGeo) {
+        return StatusCode::SUCCESS;
+    }
+    ATH_CHECK(checkIdCompability(refEle, testEle));
+
+    ATH_MSG_VERBOSE("Compare basic readout transforms"<<std::endl
+                <<GeoTrf::toString(testEle.absTransform(),true)<<std::endl
+                <<GeoTrf::toString(refEle.localToGlobalTrans(gctx), true));
+    const sTgcIdHelper& idHelper{m_idHelperSvc->stgcIdHelper()};
+    for (unsigned int gasGap = 1; gasGap <= refEle.numLayers(); ++gasGap) {
+        for (int chType = sTgcIdHelper::sTgcChannelTypes::Pad; chType <= sTgcIdHelper::sTgcChannelTypes::Wire; ++chType) {
+            unsigned int numChannel = 0;
+            const Identifier layID = idHelper.channelID(refEle.identify(),
+                                                    refEle.multilayer(),
+                                                    gasGap, chType, 1);
+            switch(chType) {
+                case sTgcIdHelper::sTgcChannelTypes::Pad:
+                    numChannel = refEle.numPads(layID);
+                break;
+
+                case sTgcIdHelper::sTgcChannelTypes::Strip:
+                    numChannel = refEle.numStrips(layID);
+                break;
+                
+                case sTgcIdHelper::sTgcChannelTypes::Wire:
+                    numChannel = refEle.numWireGroups(gasGap);
+                break;
+            }
+            for (unsigned int channel = 1; channel < numChannel ; ++channel) {
+                const Identifier chID = idHelper.channelID(refEle.identify(),
+                                                                refEle.multilayer(),
+                                                                gasGap, chType, channel);
+            
+                const Amg::Transform3D& refTrans{refEle.localToGlobalTrans(gctx, chID)};
+                const Amg::Transform3D& testTrans{testEle.transform(chID)};
+                if (channel == 1 && Amg::doesNotDeform(refTrans.inverse()*testTrans)) {
+                    ATH_MSG_ERROR("Transformation for "<<m_idHelperSvc->toString(chID)<<std::endl
+                        <<" *** ref:  "<<GeoTrf::toString(refTrans, true)<<std::endl
+                        <<" *** test: "<<GeoTrf::toString(testTrans, true));
+                        return StatusCode::FAILURE;
+                }
+                if (chType == sTgcIdHelper::sTgcChannelTypes::Pad) {
+                    const Amg::Vector3D refChannelPos = refEle.globalChannelPosition(gctx, chID);
+                    Amg::Vector3D testChannelPos(Amg::Vector3D::Zero()); 
+                    testEle.stripGlobalPosition(chID, testChannelPos);
+                    
+                    const std::array<Amg::Vector3D,4> refPadCorners = refEle.globalPadCorners(gctx, chID);
+                    std::array<Amg::Vector3D,4> testPadCorners{make_array<Amg::Vector3D, 4>(Amg::Vector3D::Zero())};
+                    testEle.padGlobalCorners(chID, testPadCorners);
+                    for (unsigned int cornerIdx = 0; cornerIdx < refPadCorners.size(); ++cornerIdx) {
+                        if ((refPadCorners[cornerIdx] - testPadCorners[cornerIdx]).mag() > 10. * Gaudi::Units::micrometer){
+                            ATH_MSG_ERROR("Mismatch in pad Corner "<<m_idHelperSvc->toString(chID)
+                                    <<" ref: "<<Amg::toString(refPadCorners[cornerIdx])<<" test: "<<Amg::toString(testPadCorners[cornerIdx])
+                                    <<" local coordinates -- ref: "<<Amg::toString(testEle.absTransform().inverse()*refPadCorners[cornerIdx])
+                                    <<" test: "<<Amg::toString(testEle.absTransform().inverse()*testPadCorners[cornerIdx]));
+                            return StatusCode::FAILURE;
+                        }   
+                    }
+                    if ((refChannelPos - testChannelPos).mag() > 10. * Gaudi::Units::micrometer){
+                        ATH_MSG_ERROR("Mismatch in channel positions "<<m_idHelperSvc->toString(chID)
+                                <<" ref: "<<Amg::toString(refChannelPos)<<" test: "<<Amg::toString(testChannelPos)
+                                <<" local coordinates -- ref: "<<Amg::toString(testEle.absTransform().inverse()*refChannelPos)
+                                <<" test: "<<Amg::toString(testEle.absTransform().inverse()*testChannelPos));
+                        return StatusCode::FAILURE;
+                    }
+                    ATH_MSG_VERBOSE("Agreement between new and old geometry for channel "<<m_idHelperSvc->toString(chID)
+                                    <<" channel position "<<Amg::toString(refChannelPos));
+                }
+                else {
+                    const Amg::Vector3D refChannelPos = refEle.globalChannelPosition(gctx, chID);
+                    Amg::Vector3D testChannelPos(Amg::Vector3D::Zero()); 
+                    testEle.stripGlobalPosition(chID, testChannelPos);
+                    if ((refChannelPos - testChannelPos).mag() > 10. * Gaudi::Units::micrometer){
+                        ATH_MSG_ERROR("Mismatch in channel positions "<<m_idHelperSvc->toString(chID)
+                                <<" ref: "<<Amg::toString(refChannelPos)<<" test: "<<Amg::toString(testChannelPos)
+                                <<" local coordinates -- ref: "<<Amg::toString(testEle.absTransform().inverse()*refChannelPos)
+                                <<" test: "<<Amg::toString(testEle.absTransform().inverse()*testChannelPos));
+                        return StatusCode::FAILURE;
+                    }
+                    ATH_MSG_VERBOSE("Agreement between new and old geometry for channel "<<m_idHelperSvc->toString(chID)
+                                    <<" channel position "<<Amg::toString(refChannelPos));
+                }
+            }
         }
     }
     return StatusCode::SUCCESS;
