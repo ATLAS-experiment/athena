@@ -42,7 +42,7 @@ def IOVDbSvcCfg(flags, **kwargs):
         kwargs.setdefault('Folders', ['/TagInfo<metaOnly/>'])
 
     # Select CREST backend if needed
-    if flags.IOVDb.GlobalTag.startswith('CREST-'):
+    if flags.IOVDb.GlobalTag and flags.IOVDb.GlobalTag.startswith('CREST-'):
         kwargs.setdefault('Source', 'CREST')
 
     result.addService(CompFactory.IOVDbSvc(**kwargs), primary=True)

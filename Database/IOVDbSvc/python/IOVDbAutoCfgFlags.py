@@ -4,30 +4,33 @@ from AthenaCommon.Logging import logging
 log = logging.getLogger('IOVDbAutoCfgFlags')
 
 def getLastGlobalTag(prevFlags):
-    from AthenaConfiguration.Enums import ProductionStep
-    if prevFlags.Common.ProductionStep == ProductionStep.Generation:
-        # No global tag should be specified in event generation jobs
-        return ''
+    if not prevFlags.Input.Files:
+        return ""
+
     from AthenaConfiguration.AutoConfigFlags import GetFileMD
-    globaltag = GetFileMD(prevFlags.Input.Files).get("IOVDbGlobalTag",None) or "CONDBR2-BLKPA-RUN2-09"
-    if isinstance(globaltag,list): # if different tags have been used at different steps
+    globaltag = GetFileMD(prevFlags.Input.Files).get("IOVDbGlobalTag", None)
+    if globaltag is None:
+        return ""
+
+    if isinstance(globaltag, list):  # if different tags have been used at different steps
         globaltag = globaltag[-1]
+
     return globaltag
 
-def getDatabaseInstanceDefault(prevFlags):
-    isMC=prevFlags.Input.isMC
-    if (isMC):
+
+def getDatabaseInstanceDefault(flags):
+    # MC
+    if flags.Input.isMC:
         return "OFLP200"
 
     # real-data
-    projectName=prevFlags.Input.ProjectName
     try:
-        year=int(projectName[4:6])
+        year = int(flags.Input.ProjectName[4:6])
     except Exception:
-        log.warning("Failed to extract year from project tag "+ projectName+". Assuming CONDBR2.")
+        log.warning("Failed to extract year from project tag %s. Assuming CONDBR2.", flags.Input.ProjectName)
         return "CONDBR2"
 
-    if (year>13):
+    if year > 13:
         return "CONDBR2"
     else:
         return "COMP200"
