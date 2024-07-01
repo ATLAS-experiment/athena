@@ -25,6 +25,7 @@
 #include "xAODTrigMuon/L2StandAloneMuonContainer.h"
 #include "xAODTrigger/MuonRoI.h"
 #include "xAODTrigger/MuonRoIContainer.h"
+#include "AthContainers/ConstAccessor.h"
 
 #include "xAODTruth/TruthVertexAuxContainer.h"
 #include "xAODTruth/TruthVertexContainer.h"
@@ -54,9 +55,9 @@ namespace MuonPhysValMonitoring {
 
     // utilities
     float getMatchingProbability(const xAOD::TrackParticle& trackParticle) {
-        float result(std::numeric_limits<float>::quiet_NaN());
-        if (trackParticle.isAvailable<float>("truthMatchProbability")) { result = trackParticle.auxdata<float>("truthMatchProbability"); }
-        return result;
+        static const SG::ConstAccessor<float> truthMatchProbabilityAcc("truthMatchProbability");
+        return truthMatchProbabilityAcc.withDefault (trackParticle,
+                                                     std::numeric_limits<float>::quiet_NaN());
     }
 
     // Constructors
@@ -1057,8 +1058,8 @@ namespace MuonPhysValMonitoring {
             return;
         }
 
-        TruthLink truthLink;
-        if (tp->isAvailable<TruthLink>("truthParticleLink")) { truthLink = tp->auxdata<TruthLink>("truthParticleLink"); }
+        static const SG::ConstAccessor<TruthLink> truthParticleLinkAcc("truthParticleLink");
+        TruthLink truthLink = truthParticleLinkAcc.withDefault(*tp, TruthLink());
 
         // int truthType = tp->isAvailable<int>("truthType")? tp->auxdata< int >("truthType") :0;
         // float truthMatchProb = getMatchingProbability(*tp);
@@ -1287,18 +1288,16 @@ namespace MuonPhysValMonitoring {
 
     void MuonPhysValMonitoringTool::printMuonDebug(const xAOD::Muon* mu) {
         const xAOD::TrackParticle* tp = mu->primaryTrackParticle();
+        static const SG::ConstAccessor<TruthLink> truthParticleLinkAcc("truthParticleLink");
         TruthLink truthLink;
         if (tp) {
-            if (!tp->isAvailable<TruthLink>("truthParticleLink"))
-                ATH_MSG_VERBOSE("No truth link found");
-            else
-                truthLink = tp->auxdata<TruthLink>("truthParticleLink");
+            truthLink = truthParticleLinkAcc.withDefault(*tp, TruthLink());
         }
         ATH_MSG_DEBUG("Muon: pt " << mu->pt() << " eta " << mu->eta() << " link " << truthLink.isValid());
     }
 
     const xAOD::Muon* MuonPhysValMonitoringTool::findRecoMuon(const xAOD::TruthParticle* truthMu) {
-        static const SG::AuxElement::ConstAccessor<MuonLink> acc_muon("recoMuonLink");
+        static const SG::ConstAccessor<MuonLink> acc_muon("recoMuonLink");
         if (!acc_muon.isAvailable(*truthMu)) return nullptr;
         MuonLink link = acc_muon(*truthMu);
         if (!link.isValid()) return nullptr;
@@ -1364,11 +1363,12 @@ namespace MuonPhysValMonitoring {
     }//procHistograms*/
 
     const xAOD::MuonSegment* MuonPhysValMonitoringTool::findRecoMuonSegment(const xAOD::MuonSegment* truthMuSeg) {
-        if (!truthMuSeg->isAvailable<MuonSegmentLink>("recoSegmentLink")) {
+        static const SG::ConstAccessor<MuonSegmentLink> recoSegmentLinkAcc("recoSegmentLink");
+        if (!recoSegmentLinkAcc.isAvailable(*truthMuSeg)) {
             ATH_MSG_DEBUG("recoSegmentLink not found");
             return nullptr;
         }
-        MuonSegmentLink link = truthMuSeg->auxdata<MuonSegmentLink>("recoSegmentLink");
+        MuonSegmentLink link = recoSegmentLinkAcc(*truthMuSeg);
         if (!link.isValid()) {
             ATH_MSG_DEBUG("recoSegmentLink not valid");
             return nullptr;
@@ -1394,9 +1394,10 @@ namespace MuonPhysValMonitoring {
 
     MuonPhysValMonitoringTool::MUCATEGORY MuonPhysValMonitoringTool::getMuonSegmentTruthCategory(
         const xAOD::MuonSegment* truthMuSeg, const xAOD::TruthParticleContainer* muonTruthContainer) {
+        static const SG::ConstAccessor<TruthLink> truthParticleLinkAcc("truthParticleLink");
         TruthLink truthLink;
-        if (truthMuSeg->isAvailable<TruthLink>("truthParticleLink")) {
-            truthLink = truthMuSeg->auxdata<TruthLink>("truthParticleLink");
+        if (truthParticleLinkAcc.isAvailable(*truthMuSeg)) {
+            truthLink = truthParticleLinkAcc(*truthMuSeg);
             if (truthLink.isValid()) {
               const int theUniqueID = HepMC::uniqueID(*truthLink);
               if (std::abs((*truthLink)->pdgId()) != 13) return REST;
@@ -1412,10 +1413,12 @@ namespace MuonPhysValMonitoring {
     }
 
     MuonPhysValMonitoringTool::MUCATEGORY MuonPhysValMonitoringTool::getMuonTruthCategory(const xAOD::IParticle* mu) {
-        int truthType = mu->auxdata<int>("truthType");
+        static const SG::ConstAccessor<int> truthTypeAcc("truthType");
+        static const SG::ConstAccessor<int> truthOriginAcc("truthOrigin");
+        int truthType = truthTypeAcc(*mu);
         if (truthType == 6)
             return PROMPT;
-        else if (truthType == 8 && (mu->auxdata<int>("truthOrigin") == 34 || mu->auxdata<int>("truthOrigin") == 35))
+        else if (truthType == 8 && (truthOriginAcc(*mu) == 34 || truthOriginAcc(*mu) == 35))
             return INFLIGHT;
         else if (truthType == 7)
             return NONISO;
@@ -1432,8 +1435,10 @@ namespace MuonPhysValMonitoring {
         const xAOD::TrackParticle* idtrk{mu_c->trackParticle(xAOD::Muon::InnerDetectorTrackParticle)};
         const xAOD::TrackParticle* metrk{mu_c->trackParticle(xAOD::Muon::ExtrapolatedMuonSpectrometerTrackParticle)};
         if (idtrk && metrk) {
-            mu_c->auxdecor<float>("InnerDetectorPt") = idtrk->pt();
-            mu_c->auxdecor<float>("MuonSpectrometerPt") = metrk->pt();
+            const static SG::Decorator<float> InnerDetectorPtDec("InnerDetectorPt");
+            const static SG::Decorator<float> MuonSpectrometerPtDec("MuonSpectrometerPt");
+            InnerDetectorPtDec(*mu_c) = idtrk->pt();
+            MuonSpectrometerPtDec(*mu_c) = metrk->pt();
         }
         m_muonSelectionTool->setQuality(*mu_c);
         m_muonSelectionTool->setPassesHighPtCuts(*mu_c);
