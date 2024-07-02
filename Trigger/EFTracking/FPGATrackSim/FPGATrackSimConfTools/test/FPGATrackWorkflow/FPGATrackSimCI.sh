@@ -111,6 +111,10 @@ clustersToCheck = ['xAODPixelClusters_1stFromFPGACluster',
                    'xAODStripClusters_1stFromFPGACluster']
 tree = rootFile.Get("CollectionTree")
 
+# Work around for ATEAM-1000
+import cppyy.ll
+cppyy.ll.cast["xAOD::PixelClusterContainer_v1"](0)
+
 for branch in clustersToCheck:
     averageClustersPerEvent = np.mean([getattr(evt,branch).size() for evt in tree])
     if np.isclose(averageClustersPerEvent,0):
