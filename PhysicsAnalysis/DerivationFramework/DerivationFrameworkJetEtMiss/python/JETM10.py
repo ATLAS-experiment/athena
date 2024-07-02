@@ -14,7 +14,7 @@ def JETM10MetTrigSkimmingToolCfg(flags):
     acc = ComponentAccumulator()
 
     JETM10MetTrigSkimmingTool = CompFactory.DerivationFramework.TriggerSkimmingTool( name           = "JETM10MetTrigSkimmingTool1",
-                                                                                  TriggerListOR     = ["HLT_noalg_L1XE.*","HLT_noalg_L1jXE.*"] )
+                                                                                  TriggerListOR     = ["HLT_noalg_L1XE.*","HLT_noalg_L1jXE.*","HLT.*ZeroBias","HLT.*zb.*","HLT.*_eb_.*","HLT.*noPS.*","HLT_noalg_L1RD3.*"] )
     acc.addPublicTool(JETM10MetTrigSkimmingTool, primary = True)
 
     return(acc)
