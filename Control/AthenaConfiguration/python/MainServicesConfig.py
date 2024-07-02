@@ -135,6 +135,10 @@ def AthenaMtesEventLoopMgrCfg(flags, mtEs=False, channel=''):
         EventRangeChannel = channel,
         EventPrintoutInterval = flags.Exec.EventPrintoutInterval)
 
+    if flags.Input.OverrideRunNumber:
+        from AthenaKernel.EventIdOverrideConfig import EvtIdModifierSvcCfg
+        elmgr.EvtIdModifierSvc = cfg.getPrimaryAndMerge(EvtIdModifierSvcCfg(flags)).name
+
     if flags.Common.isOverlay and not flags.Overlay.DataOverlay:
         elmgr.RequireInputAttributeList = True
         elmgr.UseSecondaryEventNumber = True
