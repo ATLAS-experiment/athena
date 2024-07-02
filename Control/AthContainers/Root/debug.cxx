@@ -68,6 +68,9 @@ void print_aux_vars (const SG::auxid_set_t& auxids)
     if (flags & SG::AuxVarFlags::Atomic) {
       std::cout << " (atomic)";
     }
+    if (flags & SG::AuxVarFlags::Linked) {
+      std::cout << " (linked)";
+    }
 
     std::cout << "]\n";
   }
@@ -246,10 +249,34 @@ void dump_aux_vars (const SG::IConstAuxStore& store, size_t i)
   std::vector<AuxVarSort> vars (ids.begin(), ids.end());
   std::sort (vars.begin(), vars.end());
   for (const AuxVarSort& v : vars) {
+    if (reg.isLinked (v.id)) continue;
     const void* pbeg = store.getData (v.id);
     size_t eltsz = reg.getEltSize (v.id);
     const char* p = reinterpret_cast<const char*>(pbeg) + eltsz*i;
     std::cout << v.name << " " << aux_var_as_string (v.id, p) << "\n";
+    SG::auxid_t linked_id = reg.linkedVariable (v.id);
+    if (linked_id != SG::null_auxid) {
+      std::cout << "  linked: " << aux_var_name (linked_id) << " ";
+      const SG::IAuxTypeVector* lv = store.linkedVector (v.id);
+      if (!lv) {
+        std::cout << "(missing linkedVector)\n";
+        continue;
+      }
+      size_t sz = lv->size();
+      const char* lbeg = reinterpret_cast<const char*>(lv->toPtr());
+      size_t leltsz = reg.getEltSize (linked_id);
+      std::cout << "[";
+      bool first = true;
+      for (size_t j = 0; j < sz; j++) {
+        if (first)
+          first = false;
+        else
+          std::cout << ", ";
+        const char* p = reinterpret_cast<const char*>(lbeg) + leltsz*j;
+        std::cout << aux_var_as_string (linked_id, p);
+      }
+      std::cout << "]\n";
+    }
   }
 }
 
