@@ -22,7 +22,6 @@ FixHepMC::FixHepMC(const std::string& name, ISvcLocator* pSvcLocator)
   declareProperty("KillLoops", m_killLoops = true, "Remove particles in loops?");
   declareProperty("KillPDG0", m_killPDG0 = true, "Remove particles with PDG ID 0?");
   declareProperty("CleanDecays", m_cleanDecays = true, "Clean decay chains from non-propagating particles?");
-  declareProperty("LoopsByBarcode", m_loopByBC = false, "Detect loops based on barcodes as well as vertices?");
   declareProperty("PIDmap", m_pidmap = std::map<int,int>(), "Map of PDG IDs to replace");
 }
 #ifndef HEPMC3
@@ -93,6 +92,12 @@ StatusCode FixHepMC::execute() {
   for (McEventCollection::const_iterator ievt = events()->begin(); ievt != events()->end(); ++ievt) {
     // FIXME: const_cast
     HepMC::GenEvent* evt = const_cast<HepMC::GenEvent*>(*ievt);
+    m_looper.findLoops(evt,true);
+    ATH_MSG_INFO("Found " << m_looper.loop_vertices().size() << " vertices in loops");
+    ATH_MSG_INFO("Found " << m_looper.loop_particles().size() << " particles in loops");
+    if (m_looper.loop_particles().size() > 0) {
+      ATH_MSG_INFO("Please use MC::Loops::findLoops for this event to obtain all particles and vertices in the loops");
+    }
     if (!m_pidmap.empty()) {
       for (auto ip: *evt) {
         // Skip this particle if (somehow) its pointer is null
@@ -233,7 +238,7 @@ StatusCode FixHepMC::execute() {
       // Flag to declare if a particle should be removed
       bool bad_particle = false;
       // Check for loops
-      if ( m_killLoops && isLoop(ip) ) {
+      if ( m_killLoops && isSimpleLoop(ip) ) {
         bad_particle = true;
         m_loopKilled += 1;
         ATH_MSG_DEBUG( "Found a looper : " );
@@ -396,7 +401,7 @@ StatusCode FixHepMC::execute() {
       bool bad_particle = false;
 
       // Check for loops
-      if ( m_killLoops && isLoop(*ip) ) {
+      if ( m_killLoops && isSimpleLoop(*ip) ) {
         bad_particle = true;
         m_loopKilled += 1;
         ATH_MSG_DEBUG( "Found a looper : " );
@@ -525,19 +530,8 @@ bool FixHepMC::isNonTransportableInDecayChain(const HepMC::ConstGenParticlePtr& 
 }
 
 // Identify internal "loop" particles
-bool FixHepMC::isLoop(const HepMC::ConstGenParticlePtr& p) const {
-  if (p->production_vertex() == p->end_vertex() && p->end_vertex() != NULL) return true;
-  if (m_loopByBC && p->production_vertex()) {
-    /// @todo Use new particle MC::parents(...) tool
-    int barcodep = HepMC::barcode(p);
-    for (auto itrParent: *(p->production_vertex())) {
-      if ( HepMC::barcode(itrParent) >  barcodep) {
-        ATH_MSG_VERBOSE("Found a loop (a la Sherpa sample) via barcode.");
-        return true; // Cannot vectorize, but this is a pretty short loop
-      } // Check on barcodes
-    } // Loop over parent particles
-  } // Has a production vertex
-  return false;
+bool FixHepMC::isSimpleLoop(const HepMC::ConstGenParticlePtr& p) const {
+  return (p->production_vertex() == p->end_vertex() && p->end_vertex() != nullptr);
 }
 
 //@}
