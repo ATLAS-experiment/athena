@@ -353,6 +353,7 @@ class TauTriggerAnalysisSFBlock (ConfigBlock):
                     raise ValueError ("invalid tauID: \"" + self.tauID + "\". Allowed values are loose, medium, tight")
                 alg.efficiencyCorrectionsTool.JetIDLevel = JetIDLevel
                 alg.efficiencyCorrectionsTool.TriggerSFMeasurement = "combined"
+                alg.efficiencyCorrectionsTool.useFastSim = config.dataType() is DataType.FastSim
 
                 alg.scaleFactorDecoration = 'tau_trigEffSF_' + trig + '_%SYS%'
                 alg.outOfValidity = 2 #silent
