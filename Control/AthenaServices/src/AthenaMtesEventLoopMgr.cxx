@@ -46,6 +46,7 @@
 #include <fstream>
 #include <iomanip>
 #include <cstdlib>
+#include <memory>
 #include <unistd.h>
 
 namespace {
@@ -1042,7 +1043,7 @@ int AthenaMtesEventLoopMgr::declareEventRootAddress(EventContext& ctx){
   //-----------------------------------------------------------------------
   // we need an EventInfo Object to fire the incidents. 
   //-----------------------------------------------------------------------
-  const EventInfo* pEvent(0);
+  std::unique_ptr<const EventInfo> pEvent;
   if ( m_evtContext ) {
     // Deal with the case when an EventSelector is provided
 
@@ -1133,21 +1134,24 @@ int AthenaMtesEventLoopMgr::declareEventRootAddress(EventContext& ctx){
 	      eventNumber = eventNumberSecondary;
 	    }
         }
-    
-        auto pEventPtr = std::make_unique<EventInfo>
-          (new EventID(runNumber, eventNumber, eventTime, eventTimeNS, lumiBlock, bunchId), nullptr);
-        pEvent = pEventPtr.release();
+
+        // never recorded in the eventStore
+        pEvent = std::make_unique<EventInfo>(
+            new EventID(runNumber, eventNumber, eventTime, eventTimeNS,
+                        lumiBlock, bunchId),
+            nullptr);
       } catch (...) {
       }
     } else if (m_requireInputAttributeList) {
       fatal() << "Valid input attribute list required but not present!";
       return -1;
     }
-    
-    if (!pEvent) {
+
+    const EventInfo* pEventObserver{pEvent.get()};
+    if (!pEventObserver) {
         // Retrieve the Event object
-        pEvent = eventStore()->tryConstRetrieve<EventInfo>();
-        if( !pEvent ) {
+        pEventObserver = eventStore()->tryConstRetrieve<EventInfo>();
+        if( !pEventObserver ) {
          
           // Try to get the xAOD::EventInfo
           const xAOD::EventInfo* pXEvent{nullptr};
@@ -1158,10 +1162,11 @@ int AthenaMtesEventLoopMgr::declareEventRootAddress(EventContext& ctx){
           }
           consume_modifier_stream = true;
           // Build the old-style Event Info object for those clients that still need it
-          std::unique_ptr<EventInfo> pEventPtr = std::make_unique<EventInfo>(new EventID(eventIDFromxAOD(pXEvent))
-    									      , new EventType(eventTypeFromxAOD(pXEvent)));
-          pEvent = pEventPtr.get();
-          sc = eventStore()->record(std::move(pEventPtr),"");
+          pEvent = std::make_unique<EventInfo>(
+              new EventID(eventIDFromxAOD(pXEvent)),
+              new EventType(eventTypeFromxAOD(pXEvent)));
+          pEventObserver = pEvent.get();
+          sc = eventStore()->record(std::move(pEvent), "");
           if( !sc.isSuccess() )  {
     	error() << "Error declaring event data object" << endmsg;
     	return -1;
@@ -1170,10 +1175,12 @@ int AthenaMtesEventLoopMgr::declareEventRootAddress(EventContext& ctx){
           consume_modifier_stream = false;
         }
     }
-    //the pEventPtr was moved to the eventStore, the object is still 'alive'.
-    //so the raw pEvent pointer is also still valid
-    //cppcheck-suppress invalidLifetime
-    modifyEventContext(ctx,*(pEvent->event_ID()), consume_modifier_stream);
+
+    // the pEvent was moved to the eventStore, the object is still 'alive'.
+    // so the raw pEventObserver pointer is also still valid
+    // cppcheck-suppress invalidLifetime
+    modifyEventContext(ctx, *(pEventObserver->event_ID()),
+                       consume_modifier_stream);
 
   }  else  {
 
@@ -1191,8 +1198,8 @@ int AthenaMtesEventLoopMgr::declareEventRootAddress(EventContext& ctx){
     eid->set_lumi_block( runNmb );
 
     m_timeStamp += m_timeStampInt;
-    
-    pEvent = new EventInfo(eid.release(), new EventType());
+
+    pEvent = std::make_unique<EventInfo>(eid.release(), new EventType());
 
     modifyEventContext(ctx,*(pEvent->event_ID()), true);
 
@@ -1202,7 +1209,7 @@ int AthenaMtesEventLoopMgr::declareEventRootAddress(EventContext& ctx){
 
     debug() << "recording EventInfo " << *pEvent->event_ID() << " in "
             << eventStore()->name() << endmsg;
-    sc = eventStore()->record(pEvent,"McEventInfo");
+    sc = eventStore()->record(std::move(pEvent), "McEventInfo");
     if( !sc.isSuccess() )  {
       error() << "Error declaring event data object" << endmsg;
       return -1;
