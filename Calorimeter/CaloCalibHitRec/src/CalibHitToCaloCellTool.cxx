@@ -134,7 +134,7 @@ StatusCode CalibHitToCaloCellTool::processCalibHitsFromParticle(int barcode) con
   int unknown_nchan = 0 ;
   
   std::vector<Identifier> ID;
-  if (barcode<0) barcode = HepMC::SINGLE_PARTICLE; // if no barcode is specified for this event, use the default
+  if (barcode<0) barcode = HepMC::SINGLE_PARTICLE_BARCODE; // if no barcode is specified for this event, use the default
 
 
   std::vector<CaloCell*> CellsEtot;

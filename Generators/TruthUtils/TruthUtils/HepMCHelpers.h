@@ -25,10 +25,10 @@ namespace MC
   /// @brief Identify if the particle with given PDG ID would produce ID tracks but not shower in the detector if stable
   template <class T> inline  bool isChargedNonShowering(const T& p) { return (isMuon<T>(p) || isSUSY<T>(p)); }
 
-  template <class T> inline bool isBeam(const T& p)  { return p->status()%HepMC::SIM_STATUS_THRESHOLD == 4;}
-  template <class T> inline bool isDecayed(const T& p)  { return p->status()%HepMC::SIM_STATUS_THRESHOLD == 2;}
-  template <class T> inline bool isStable(const T& p)   { return p->status()%HepMC::SIM_STATUS_THRESHOLD == 1;}
-  template <class T> inline bool isFinalState(const T& p)   { return p->status()%HepMC::SIM_STATUS_THRESHOLD == 1 && !p->end_vertex();}
+  template <class T> inline bool isBeam(const T& p)  { return HepMC::status(p)%HepMC::SIM_STATUS_THRESHOLD == 4;}
+  template <class T> inline bool isDecayed(const T& p)  { return HepMC::status(p)%HepMC::SIM_STATUS_THRESHOLD == 2;}
+  template <class T> inline bool isStable(const T& p)   { return HepMC::status(p)%HepMC::SIM_STATUS_THRESHOLD == 1;}
+  template <class T> inline bool isFinalState(const T& p)   { return HepMC::status(p)%HepMC::SIM_STATUS_THRESHOLD == 1 && !p->end_vertex();}
   template <class T> inline bool isPhysical(const T& p) { return isStable<T>(p) || isDecayed<T>(p); }
   template <class T> inline bool isPhysicalHadron(const T& p) { return isHadron<T>(p) && isPhysical<T>(p);}
 
@@ -52,7 +52,7 @@ namespace MC
   /// @brief Identify a photon with zero energy. Probably a workaround for a generator bug.
   template <class T> inline bool isZeroEnergyPhoton(const T&  p) { return isPhoton<T>(p) && p->e() == 0;}
   
-  template <class T> inline bool isSingleParticle(const T&  p) { return p->barcode() == HepMC::SINGLE_PARTICLE;}
+  template <class T> inline bool isSingleParticle(const T&  p) { return HepMC::barcode(p) == HepMC::SINGLE_PARTICLE_BARCODE;} // FIXME barcode-based
 
   template <class T> inline bool isSpecialNonInteracting(const T& p) {
     const int apid = std::abs(p->pdg_id());
@@ -195,7 +195,7 @@ namespace MC
       // sometimes Athena replaces status 2 with HepMC::SPECIALSTATUS, see e.g.
       // PhysicsAnalysis/TruthParticleID/McParticleTools/src/EtaPtFilterTool.cxx#L374
       // not at all clear why and unfortunately there's no documentation in the code
-      if (!isPhysical(parent) && parent->status() != HepMC::SPECIALSTATUS)  return false;
+      if (!isPhysical(parent) && HepMC::status(parent) != HepMC::SPECIALSTATUS)  return false;
       fromTau |= isTau(parent);
       if (isHadron(parent)&&!isBeam(parent)) {
         if (!hadptr)  hadptr = parent; // assumes linear hadron parentage
