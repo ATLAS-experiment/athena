@@ -21,6 +21,7 @@ run.flags = ['Trigger.triggerMenuSetup="MC_pp_run4_v1"',
              'ITk.doTruth=False',
              'Tracking.doTruth=False',
              'Trigger.enableL1CaloPhase1=False',
+             'IOVDb.GlobalTag="OFLCOND-MC21-SDR-RUN4-01"'
              ]
 
 # The full test configuration
