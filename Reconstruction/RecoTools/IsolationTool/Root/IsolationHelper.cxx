@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <IsolationTool/IsolationHelper.h>
@@ -170,7 +170,7 @@ namespace CP {
 		}
 
 		/// get desity
-		const xAOD::EventShape* edShape;
+		const xAOD::EventShape* edShape = nullptr;
 		if (evtStore()->retrieve(edShape,esName).isFailure()) {
 			ATH_MSG_ERROR("Cannot retrieve density container " + esName + " for isolation correction. No ED correction");
 			return false;
