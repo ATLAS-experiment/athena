@@ -39,6 +39,7 @@
 
 // System includes
 #include <filesystem>
+#include <format>
 #include <sstream>
 #include <string>
 
@@ -311,7 +312,6 @@ StatusCode HltEventLoopMgr::prepareForStart(const ptree& pt)
     ATH_CHECK( m_sorHelper->fillSOR(m_currentRunCtx) );  // update SOR in det store
 
     const auto& soral = getSorAttrList();
-    updateInternal(soral);       // update internally kept info
     updateMetadataStore(soral);  // update metadata store
   }
   catch(const std::exception& e) {
@@ -636,35 +636,8 @@ void HltEventLoopMgr::updateDFProps()
 }
 
 // =============================================================================
-void HltEventLoopMgr::updateInternal(const coral::AttributeList & sor_attrlist)
-{
-  auto detMaskFst = sor_attrlist["DetectorMaskFst"].data<unsigned long long>();
-  auto detMaskSnd = sor_attrlist["DetectorMaskSnd"].data<unsigned long long>();
-  updateDetMask({detMaskFst, detMaskSnd});
-
-  if(msgLevel() <= MSG::DEBUG)
-  {
-    // save current stream flags for later reset
-    // cast needed (stream thing returns long, but doesn't take it back)
-    auto previous_stream_flags = static_cast<std::ios::fmtflags>(msgStream().flags());
-    ATH_MSG_DEBUG("Full detector mask (128 bits) = 0x"
-                  << MSG::hex << std::setfill('0')
-                  << std::setw(8) << std::get<3>(m_detector_mask)
-                  << std::setw(8) << std::get<2>(m_detector_mask)
-                  << std::setw(8) << std::get<1>(m_detector_mask)
-                  << std::setw(8) << std::get<0>(m_detector_mask));
-    msgStream().flags(previous_stream_flags);
-  }
-}
-
-// =============================================================================
 void HltEventLoopMgr::updateMetadataStore(const coral::AttributeList & sor_attrlist) const
 {
-  // least significant part is "snd" in sor but "fst" for ByteStreamMetadata
-  auto bs_dm_fst = sor_attrlist["DetectorMaskSnd"].data<unsigned long long>();
-  // most significant part is "fst" in sor but "snd" for ByteStreamMetadata
-  auto bs_dm_snd = sor_attrlist["DetectorMaskFst"].data<unsigned long long>();
-
   auto metadatacont = std::make_unique<ByteStreamMetadataContainer>();
   metadatacont->push_back(std::make_unique<ByteStreamMetadata>(
     sor_attrlist["RunNumber"].data<unsigned int>(),
@@ -672,8 +645,8 @@ void HltEventLoopMgr::updateMetadataStore(const coral::AttributeList & sor_attrl
     0,
     sor_attrlist["RecordingEnabled"].data<bool>(),
     0,
-    bs_dm_fst,
-    bs_dm_snd,
+    sor_attrlist["DetectorMaskSnd"].data<unsigned long long>(),
+    sor_attrlist["DetectorMaskFst"].data<unsigned long long>(),
     0,
     0,
     "",
@@ -744,21 +717,6 @@ StatusCode HltEventLoopMgr::clearTemporaryStores()
 }
 
 // =============================================================================
-void HltEventLoopMgr::updateDetMask(const std::pair<uint64_t, uint64_t>& dm)
-{
-  m_detector_mask = std::make_tuple(
-                      // least significant 4 bytes
-                      static_cast<EventIDBase::number_type>(dm.second),
-                      // next least significant 4 bytes
-                      static_cast<EventIDBase::number_type>(dm.second >> 32),
-                      // next least significant 4 bytes
-                      static_cast<EventIDBase::number_type>(dm.first),
-                      // most significant 4 bytes
-                      static_cast<EventIDBase::number_type>(dm.first >> 32)
-                    );
-}
-
-// =============================================================================
 const coral::AttributeList& HltEventLoopMgr::getSorAttrList() const
 {
   auto sor = m_detectorStore->retrieve<const TrigSORFromPtreeHelper::SOR>(m_sorPath);
@@ -792,20 +750,12 @@ void HltEventLoopMgr::printSORAttrList(const coral::AttributeList& atr) const
   ATH_MSG_INFO("   RunNumber             = " << atr["RunNumber"].data<unsigned int>());
   ATH_MSG_INFO("   SORTime [ns]          = " << sorTime_ns << " (" << sorTime_readable << ") ");
 
-  // Use string stream for fixed-width hex detector mask formatting
   auto dmfst = atr["DetectorMaskFst"].data<unsigned long long>();
   auto dmsnd = atr["DetectorMaskSnd"].data<unsigned long long>();
-  std::ostringstream ss;
-  ss.setf(std::ios_base::hex,std::ios_base::basefield);
-  ss << std::setw(16) << std::setfill('0') << dmfst;
-  ATH_MSG_INFO("   DetectorMaskFst       = 0x" << ss.str());
-  ss.str(""); // reset the string stream
-  ss << std::setw(16) << std::setfill('0') << dmsnd;
-  ATH_MSG_INFO("   DetectorMaskSnd       = 0x" << ss.str());
-  ss.str(""); // reset the string stream
-  ss << std::setw(16) << std::setfill('0') << dmfst;
-  ss << std::setw(16) << std::setfill('0') << dmsnd;
-  ATH_MSG_INFO("   Complete DetectorMask = 0x" << ss.str());
+  ATH_MSG_INFO("   DetectorMaskFst       = 0x" << std::format("{:016x}", dmfst));
+  ATH_MSG_INFO("   DetectorMaskSnd       = 0x" << std::format("{:016x}", dmsnd));
+  ATH_MSG_INFO("   Complete DetectorMask = 0x" << std::format("{:016x}", dmfst)
+                                               << std::format("{:016x}", dmsnd));
 
   ATH_MSG_INFO("   RunType               = " << atr["RunType"].data<std::string>());
   ATH_MSG_INFO("   RecordingEnabled      = " << (atr["RecordingEnabled"].data<bool>() ? "true" : "false"));
