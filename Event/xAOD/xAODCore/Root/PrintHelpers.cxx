@@ -109,8 +109,9 @@ std::ostream& operator<< ( std::ostream& out, const SG::AuxElement& obj ) {
 /// Helper macro to make the code slightly shorter
 #define PRINTER( TYPE )                                           \
       do {                                                        \
-         if( obj.isAvailable< TYPE >( reg.getName( auxid ) ) ) {  \
-            out << obj.auxdata< TYPE >( reg.getName( auxid ) );   \
+         SG::ConstAccessor< TYPE > acc( auxid );                  \
+         if( acc.isAvailable( obj ) ) {                           \
+            out << acc( obj );                                    \
          }                                                        \
       } while( 0 )
 
@@ -127,12 +128,14 @@ std::ostream& operator<< ( std::ostream& out, const SG::AuxElement& obj ) {
           out << "(Unsupported atomic type)\n";
         }
       } else if( *ti == typeid( int8_t ) ) {
-         if( obj.isAvailable< int8_t >( reg.getName( auxid ) ) ) {
-           out << static_cast< int >( obj.auxdata< int8_t >( reg.getName( auxid ) ) );
+         SG::ConstAccessor< int8_t > acc( auxid );
+         if( acc.isAvailable( obj ) ) {
+           out << static_cast< int >( acc( obj ) );
          }
       } else if( *ti == typeid( uint8_t ) ) {
-         if( obj.isAvailable< uint8_t >( reg.getName( auxid ) ) ) {
-           out << static_cast< int >( obj.auxdata< uint8_t >( reg.getName( auxid ) ) );
+         SG::ConstAccessor< uint8_t > acc( auxid );
+         if( acc.isAvailable( obj ) ) {
+           out << static_cast< int >( acc( obj ) );
          }
       } else if( *ti == typeid( int16_t ) ) {
          PRINTER( int16_t );

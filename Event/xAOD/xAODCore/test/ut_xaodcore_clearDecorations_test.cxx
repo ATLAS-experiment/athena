@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: ut_xaodcore_clearDecorations_test.cxx 696772 2015-09-25 08:09:13Z krasznaa $
@@ -11,6 +11,7 @@
 // Core include(s):
 #include "AthContainers/DataVector.h"
 #include "AthContainers/AuxElement.h"
+#include "AthContainers/Accessor.h"
 
 // Local include(s):
 #include "xAODCore/AuxContainerBase.h"
@@ -35,11 +36,13 @@ int main() {
    interface.setStore( &aux );
 
    // Add some simple objects to it:
+   SG::Accessor<int> IntVar1 ("IntVar1");
+   SG::Accessor<float> FloatVar1 ("FloatVar1");
    for( int i = 0; i < 3; ++i ) {
       SG::AuxElement* obj = new SG::AuxElement();
       interface.push_back( obj );
-      obj->auxdata< int >( "IntVar1" ) = i;
-      obj->auxdata< float >( "FloatVar1" ) = static_cast< float >( i );
+      IntVar1( *obj ) = i;
+      FloatVar1( *obj ) = i;
    }
 
    // Print what it looks like now:
@@ -55,10 +58,12 @@ int main() {
    interface.lock();
 
    // Create some decorations:
+   SG::Decorator<int> IntVar2 ("IntVar2");
+   SG::Decorator<float> FloatVar2 ("FloatVar2");
    for( const SG::AuxElement* obj : interface ) {
 
-      obj->auxdecor< int >( "IntVar2" ) = 2;
-      obj->auxdecor< float >( "FloatVar2" ) = 3.141592;
+      IntVar2( *obj ) = 2;
+      FloatVar2( *obj ) = 3.141592;
    }
 
    // Print what it looks like now:
