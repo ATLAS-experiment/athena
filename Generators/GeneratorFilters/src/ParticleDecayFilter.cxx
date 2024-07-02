@@ -52,7 +52,7 @@ StatusCode ParticleDecayFilter::filterEvent(){
 
         // loop over all particles
         for (auto particle : *genEvent){
-            ATH_MSG_DEBUG("pdg code of this particle in the event is " << particle->pdg_id() << " with status " << particle->status());
+            ATH_MSG_DEBUG("particle in the event is " << particle);
 
             //maps with key pdgId and value of number of particles with that pdgId
             std::map<int, unsigned int> childCounters;
@@ -71,7 +71,7 @@ StatusCode ParticleDecayFilter::filterEvent(){
                 for(auto thisChild: *decayVtx) {
                     int childPdgId = thisChild->pdg_id();
                     if (!m_checkCharge) childPdgId = std::abs(childPdgId);
-                    ATH_MSG_DEBUG("Child with id and status " << childPdgId << " " << thisChild->status());
+                    ATH_MSG_DEBUG("Child " << thisChild);
                     if (childTargets.end() != childTargets.find(childPdgId)) childCounters[childPdgId] += 1;
                     else childCounters[nonListValue] += 1;
                 }                

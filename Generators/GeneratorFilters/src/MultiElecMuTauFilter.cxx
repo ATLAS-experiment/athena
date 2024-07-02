@@ -35,10 +35,7 @@ StatusCode MultiElecMuTauFilter::filterEvent() {
       // Electrons and muons
       if (MC::isStable(pitr) && (MC::isElectron(pitr) || MC::isMuon(pitr))) {
         if (pitr->momentum().perp() >= m_minPt && std::abs(pitr->momentum().pseudoRapidity()) <= m_maxEta) {
-          ATH_MSG_DEBUG("Found lepton with PDG ID = " << pitr->pdg_id()
-                        << ", status = " <<  pitr->status()
-                        << ", pt = "     <<  pitr->momentum().perp()
-                        << ", eta = "    <<  pitr->momentum().pseudoRapidity());
+          ATH_MSG_DEBUG("Found lepton " << pitr);
           numLeptons++;
           numLightLeptons++;
           if (numLightLeptons==1) { if (pitr->pdg_id() < 0) { charge1 = -1; } else { charge1 = 1; } } 
@@ -87,10 +84,7 @@ StatusCode MultiElecMuTauFilter::filterEvent() {
                                                         tau->momentum().pz() - taunu->momentum().pz(),
                                                         tau->momentum().e()  - taunu->momentum().e());
           if (tauVisMom.perp() >= m_minVisPtHadTau && std::abs(tauVisMom.pseudoRapidity()) <= m_maxEta) {
-            ATH_MSG_DEBUG("Found hadronic tau decay with PDG ID = " << tau->pdg_id()
-                          << ", status = " << tau->status()
-                          << ", vis pt = " << tauVisMom.perp()
-                          << ", eta = " <<  tauVisMom.pseudoRapidity());
+            ATH_MSG_DEBUG("Found hadronic tau decay " << tau);
             numLeptons++;
             numHadTaus++;
           }

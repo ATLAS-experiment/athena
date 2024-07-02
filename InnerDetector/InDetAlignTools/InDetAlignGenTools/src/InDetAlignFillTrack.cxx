@@ -307,11 +307,7 @@ StatusCode InDetAlignFillTrack::FillTrack() {
                                            genParticle->production_vertex()->position().z());
 
             if (msgLvl(MSG::DEBUG)) {
-              msg(MSG::DEBUG) << nTracks << ". Generated Particle " << endmsg;
-              msg(MSG::DEBUG) << "   * PDG " << genParticle->pdg_id()
-                              << ", Status " << genParticle->status()
-                              << ", mass " << genParticle->momentum().m() << " CLHEP::MeV/c"
-                              << endmsg;
+              msg(MSG::DEBUG) << nTracks << ". Generated Particle " <<  genParticle << endmsg;
             }
 
             float genPt = std::sqrt((genParticle->momentum().x()) * (genParticle->momentum().x())

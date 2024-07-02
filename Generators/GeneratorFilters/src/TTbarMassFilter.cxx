@@ -39,8 +39,8 @@ StatusCode TTbarMassFilter::filterEvent() {
         auto decayVtx = mcpart->end_vertex();
         // Unusual case...
         if (!decayVtx) {
-          ATH_MSG_WARNING("top particle with a status "<<mcpart->status()<<" has no valid decay vertex. ");
-          ATH_MSG_WARNING("It looks like a Pythia history particle if it has a status=3. Skip this particle ");
+          ATH_MSG_WARNING("top particle" << mcpart << " has no valid decay vertex. ");
+          ATH_MSG_WARNING("It looks like a Pythia history particle. Skip this particle ");
           continue;
         }
 
@@ -56,7 +56,7 @@ StatusCode TTbarMassFilter::filterEvent() {
 
         // Store the 'last' top
         if (isLastTop) {
-          ATH_MSG_DEBUG("Top particle with a status " << mcpart->status() << " is found and stored");
+          ATH_MSG_DEBUG("Top particle " << mcpart << " is found and stored");
           tops.push_back(mcpart);
         }
 
@@ -68,7 +68,7 @@ StatusCode TTbarMassFilter::filterEvent() {
           // Retrieve the production vertex of the current 'last' top particle
           auto prodVtx = mcpart->production_vertex();
           if (!prodVtx) {
-            ATH_MSG_WARNING("Top particle with a status " << mcpart->status() << " has no valid production vertex");
+            ATH_MSG_WARNING("Top particle " << mcpart << " has no valid production vertex");
             //save null pointer for consistency
             top_vtxs.emplace_back(nullptr);
           } else {
@@ -81,7 +81,7 @@ StatusCode TTbarMassFilter::filterEvent() {
                   isFirstTop = false;
                   prodVtx = mother_mcpart->production_vertex();
                   if (!prodVtx) {
-                    ATH_MSG_WARNING("mother particle is still a top with a status " << mcpart->status() << ", but has no valid production vertex");
+                    ATH_MSG_WARNING("mother particle is still a top " << mcpart << ", but has no valid production vertex");
                     top_vtxs.emplace_back(nullptr);
                   }
                   break;
@@ -142,8 +142,8 @@ StatusCode TTbarMassFilter::filterEvent() {
         HepMC::GenVertex* decayVtx = mcpart->end_vertex();
         // Unusual case...
         if (!decayVtx) {
-          ATH_MSG_WARNING("top particle with a status "<<mcpart->status()<<" has no valid decay vertex. ");
-          ATH_MSG_WARNING("It looks like a Pythia history particle if it has a status=3. Skip this particle ");
+          ATH_MSG_WARNING("top particle " << mcpart << " has no valid decay vertex. ");
+          ATH_MSG_WARNING("It looks like a Pythia history particle. Skip this particle ");
           continue;
         }
 
@@ -163,7 +163,7 @@ StatusCode TTbarMassFilter::filterEvent() {
 
         // Store the 'last' top
         if (isLastTop) {
-          ATH_MSG_DEBUG("Top particle with a status " << mcpart->status() << " is found and stored");
+          ATH_MSG_DEBUG("Top particle " << mcpart << " is found and stored");
           tops.push_back(mcpart);
         }
 
@@ -175,7 +175,7 @@ StatusCode TTbarMassFilter::filterEvent() {
           // Retrieve the production vertex of the current 'last' top particle
           HepMC::GenVertex* prodVtx = mcpart->production_vertex();
           if (!prodVtx) {
-            ATH_MSG_WARNING("Top particle with a status " << mcpart->status() << " has no valid production vertex");
+            ATH_MSG_WARNING("Top particle " << mcpart << " has no valid production vertex");
             //save null pointer for consistency
             top_vtxs.push_back(NULL);
           } else {
@@ -191,7 +191,7 @@ StatusCode TTbarMassFilter::filterEvent() {
                   isFirstTop = false;
                   prodVtx = mother_mcpart->production_vertex();
                   if (!prodVtx) {
-                    ATH_MSG_WARNING("mother particle is still a top with a status " << mcpart->status() << ", but has no valid production vertex");
+                    ATH_MSG_WARNING("mother particle is still a top " << mcpart << ", but has no valid production vertex");
                     top_vtxs.push_back(NULL);
                   }
                   break;

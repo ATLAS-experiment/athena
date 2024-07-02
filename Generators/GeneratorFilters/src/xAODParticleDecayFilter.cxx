@@ -79,7 +79,7 @@ StatusCode xAODParticleDecayFilter::filterEvent()
                     const xAOD::TruthParticle *thisChild = decayVtx->outgoingParticle(part);
                     int childPdgId = thisChild->pdg_id();
                     if (!m_checkCharge) childPdgId = std::abs(childPdgId);
-                    ATH_MSG_DEBUG("Child with id and status " << childPdgId << " " << thisChild->status());
+                    ATH_MSG_DEBUG("Child " << thisChild);
                     if (childTargets.end() != childTargets.find(childPdgId))  childCounters[childPdgId] += 1;
                     else childCounters[nonListValue] += 1;
                 }

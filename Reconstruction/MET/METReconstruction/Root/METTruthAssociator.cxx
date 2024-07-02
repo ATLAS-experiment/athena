@@ -169,9 +169,7 @@ namespace met {
 	for (const auto& el : cacc_ghosttruth(*jet)) {
 	  if(el.isValid()) {
 	    const xAOD::TruthParticle *truth = static_cast<const xAOD::TruthParticle*>(*el);
-	    ATH_MSG_VERBOSE("Jet contains truth particle with pt " << truth->pt()
-			    << " status " << truth->status()
-			    << " pdgId " << truth->pdgId() );
+	    ATH_MSG_VERBOSE("Jet contains truth particle " << truth);
 	    if(fabs(truth->charge())>1e-6) {
 	      trkvec += *truth;
 	    }

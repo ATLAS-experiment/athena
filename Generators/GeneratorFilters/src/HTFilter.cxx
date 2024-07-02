@@ -131,11 +131,7 @@ return StatusCode::FAILURE;
 	  && (iter)->momentum().perp()>m_MinLepPt*Gaudi::Units::GeV && std::abs(iter->momentum().eta())<m_MaxLepEta) {
 
 	if( Common::fromWZorTau(iter)) {
-	  ATH_MSG_VERBOSE("Adding W/Z/tau lepton with pt " << iter->momentum().perp()
-			  << ", eta " << iter->momentum().eta()
-			  << ", phi " << iter->momentum().phi()
-			  << ", status " << iter->status()
-			  << ", pdgId " << pdgid);
+	  ATH_MSG_VERBOSE("Adding W/Z/tau lepton with pt " << iter);
 	  HT += iter->momentum().perp();
 	}
       }

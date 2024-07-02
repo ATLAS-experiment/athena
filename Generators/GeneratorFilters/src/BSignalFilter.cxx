@@ -177,9 +177,7 @@ StatusCode BSignalFilter::filterEvent()
 	  if ( std::abs(part->pdg_id()) <= 6 && MC::isStable(part) )
             {
 	      acceptEvent = false;
-	      const int pID = part->pdg_id();
-	      ATH_MSG_WARNING(" Undecayed quark " << pID << " found"
-			      << " , status = " << part->status());
+	      ATH_MSG_WARNING(" Undecayed quark "<< part);
             }
         }
 
@@ -233,7 +231,7 @@ StatusCode BSignalFilter::filterEvent()
 		  ATH_MSG_DEBUG(" ------------------------------------------ ");
 		  ATH_MSG_DEBUG("");
                   // cppcheck-suppress shiftNegative; false positive
-		  ATH_MSG_DEBUG(" Event " << m_EventCnt << " --> B-hadron/B-meson id " << particleID << " (" << HadronName << ") , status " << part->status());
+		  ATH_MSG_DEBUG(" Event " << m_EventCnt << " --> B-hadron/B-meson (" << HadronName << ") " << part);
 		  ATH_MSG_DEBUG("");
 
 		  // ** Looping on all children checking if they have passed the selection cuts defined by the user **
@@ -642,8 +640,8 @@ void BSignalFilter::PrintChild(const HepMC::ConstGenParticlePtr& child,
     pName = pData->name();
     if (pID < 0) pName = "anti - " + pName;
   }
-  ATH_MSG_DEBUG("    " << treeIDStr << "   " << "Child id = " << pID << " (" << pName
-		<< ") ,  status = " << (child->status()) << " , from final B = " << fromFinalB);
+  ATH_MSG_DEBUG("    " << treeIDStr << "   " << "Child  (" << pName
+		<< ") " << child<<" , from final B = " << fromFinalB);
 
   return;
 }

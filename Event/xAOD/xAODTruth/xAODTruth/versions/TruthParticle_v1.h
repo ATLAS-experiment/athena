@@ -400,6 +400,22 @@ namespace xAOD {
 
    }; // class TruthParticle_v1
 
+  inline std::ostream& operator<<(std::ostream& os, const TruthParticle_v1* p) {
+    if (!p) { os << "Prt: Empty particle" << std::endl; return os;}
+    os << "Prt: id=";
+    os << p->id() << " pdg_id=";
+    os << p->pdg_id() << " (px,py,pz,e)=";
+    os << p->px() << ",";
+    os << p->py() << ",";
+    os << p->pz() << ",";
+    os << p->e() << ";(pt,eta,phi)=";
+    os << p->pt() << ",";
+    os << p->eta() << ",";
+    os << p->phi() << "; status=";
+    os << p->status();
+    /* os << std::endl; AV:Not clear if we need a new line here */
+    return os;
+  }
 } // namespace xAOD
 
 #endif // XAODTRUTH_VERSIONS_TRUTHPARTICLE_V1_H
