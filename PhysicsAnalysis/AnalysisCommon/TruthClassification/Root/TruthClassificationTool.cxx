@@ -657,7 +657,7 @@ bool TruthClassificationTool::isChargeFlipElectron(const xAOD::IParticle &electr
 
   int type = isTruthParticle ? m_classifierParticleType(electron) : m_truthType(electron);
   int origin = isTruthParticle ? m_classifierParticleOrigin(electron) : m_truthOrigin(electron);
-  int pdgId = isTruthParticle ? truthParticle->pdgId() : m_truthPdgId(electron);
+  int pdgId = isTruthParticle && truthParticle ? truthParticle->pdgId() : m_truthPdgId(electron);
   if (m_useTruthParticleDecorations && !isTruthParticle && truthParticle != nullptr)
   {
     type = m_classifierParticleType(*truthParticle);
