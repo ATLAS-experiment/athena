@@ -1,8 +1,24 @@
 #!/bin/bash
+# art-description: Test running FPGA sim workflow
+# art-type: local
+# art-include: main/Athena
+# art-memory: 4096
+# art-input-nfiles: 2
+# art-output: trk*.txt
 set -e
 
+
 RDO=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/ATLAS-P2-RUN4-03-00-00/RDO/reg0_singlemu.root
-RDO_EVT=150
+
+RDO_EVT=-1
+if [ -z $ArtJobType ]
+then
+    RDO_EVT=50
+fi
+
+echo "Running over " $RDO_EVT " events"
+
+
 GEO_TAG="ATLAS-P2-RUN4-03-00-00"
 COMBINED_MATRIX='/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/ATLAS-P2-RUN4-03-00-00/banks_9L/combined_matrix.root'
 

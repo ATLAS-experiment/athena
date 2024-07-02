@@ -233,7 +233,7 @@ StatusCode FPGAClusterConverter::createPixelCluster(const FPGATrackSimHit& h, co
   const InDetDD::SiDetectorElement* pDE = m_pixelManager->getDetectorElement(hash);
 
   if( !pDE ) {
-    ATH_MSG_ERROR("Detector Element doesn't exist");
+    ATH_MSG_ERROR("Detector Element doesn't exist " << hash);
     return StatusCode::FAILURE;
   }
  
@@ -304,7 +304,7 @@ StatusCode FPGAClusterConverter::createPixelCluster(const FPGATrackSimHit& h,con
   const InDetDD::SiDetectorElement* pDE = m_pixelManager->getDetectorElement(hash);
 
   if( !pDE ) {
-    ATH_MSG_ERROR("Detector Element doesn't exist");
+    ATH_MSG_ERROR("Detector Element doesn't exist " << hash);
     return StatusCode::FAILURE;
   }
  
@@ -389,13 +389,9 @@ StatusCode FPGAClusterConverter::createSCTCluster(const FPGATrackSimHit& h, cons
 
   float phiWidth = h.getPhiWidth();
   int strip = static_cast<int>(h.getPhiCoord());
-
+  ATH_CHECK(strip >= 0);
   const InDetDD::SiDetectorElement* pDE = m_SCTManager->getDetectorElement(hash);
-
-  if( !pDE || strip <= 0) {
-    ATH_MSG_ERROR("Detector Element doesn't exist");
-    return StatusCode::FAILURE;
-  }
+  ATH_CHECK(pDE != nullptr);
 
 
   Identifier wafer_id = m_SCTId->wafer_id(hash);
@@ -485,12 +481,9 @@ StatusCode FPGAClusterConverter::createSCTCluster(const FPGATrackSimHit& h, cons
 
   float phiWidth = h.getPhiWidth();
   int strip = static_cast<int>(h.getPhiCoord());
-
+  ATH_CHECK(strip >= 0);
   const InDetDD::SiDetectorElement* pDE = m_SCTManager->getDetectorElement(hash);
-  if( !pDE || strip <= 0) {
-    ATH_MSG_ERROR("Detector Element doesn't exist");
-    return StatusCode::FAILURE;
-  }
+  ATH_CHECK(pDE != nullptr);
 
   Identifier wafer_id = m_SCTId->wafer_id(hash);
   Identifier strip_id = m_SCTId->strip_id(wafer_id, strip);
