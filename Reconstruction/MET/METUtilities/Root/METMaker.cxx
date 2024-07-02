@@ -368,7 +368,7 @@ namespace met {
         ATH_MSG_WARNING("Shallow copy provided without \"originalObjectLinks\" decoration! "
                         << "Overlap removal cannot be done. "
                         << "Will not compute this term.");
-        ATH_MSG_WARNING("Please apply xAOD::setOriginalObjectLinks() from xAODBase/IParticleHelpers.h");
+        ATH_MSG_WARNING("Please apply xAOD::setOriginalObjectLink() from xAODBase/IParticleHelpers.h");
         return StatusCode::SUCCESS;
       } else {
         ATH_MSG_VERBOSE("Original inputs? " << originalInputs);
@@ -380,7 +380,7 @@ namespace met {
         std::vector<const xAOD::MissingETAssociation*> assocs = xAOD::MissingETComposition::getAssociations(map,orig);
         if(assocs.empty()) {
           std::string message = "Object is not in association map. Did you make a deep copy but fail to set the \"originalObjectLinks\" decoration? "
-                                "If not, Please apply xAOD::setOriginalObjectLinks() from xAODBase/IParticleHelpers.h";
+                                "If not, Please apply xAOD::setOriginalObjectLink() from xAODBase/IParticleHelpers.h";
           // Avoid warnings for leptons with pT below threshold for association map
           if (orig->pt()>m_missObjWarningPtThreshold) {
               ATH_MSG_WARNING(message);
@@ -1336,7 +1336,7 @@ namespace met {
 	std::vector<const xAOD::MissingETAssociation*> assocs = xAOD::MissingETComposition::getAssociations(map,orig);
 	if(assocs.empty()) {
 	  ATH_MSG_WARNING("Object is not in association map. Did you make a deep copy but fail to set the \"originalObjectLinks\" decoration?");
-	  ATH_MSG_WARNING("If not, Please apply xAOD::setOriginalObjectLinks() from xAODBase/IParticleHelpers.h");
+	  ATH_MSG_WARNING("If not, Please apply xAOD::setOriginalObjectLink() from xAODBase/IParticleHelpers.h");
 	}
 	if(MissingETComposition::objSelected(helper,orig)) {
 	  ATH_MSG_DEBUG("Muon with index "<<orig->index() << " is selected. Flag it as non selected before getOverlapRemovedSignals");
