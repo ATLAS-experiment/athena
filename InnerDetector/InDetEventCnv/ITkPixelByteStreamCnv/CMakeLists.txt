@@ -13,6 +13,7 @@ atlas_add_library( ITkPixelByteStreamCnvLib
    PUBLIC_HEADERS ITkPixelByteStreamCnv
    LINK_LIBRARIES GaudiKernel ByteStreamData InDetByteStreamErrors InDetRawData )
 
+
 atlas_add_component( ITkPixelByteStreamCnv
    src/*.h src/*.cxx src/*.cpp src/components/*.cxx
    INCLUDE_DIRS ${TDAQ-COMMON_INCLUDE_DIRS}
@@ -21,18 +22,19 @@ atlas_add_component( ITkPixelByteStreamCnv
    ByteStreamCnvSvcBaseLib InDetIdentifier PixelReadoutGeometryLib IRegionSelector
    xAODEventInfo TrigSteeringEvent InDetByteStreamErrors  ITkPixelByteStreamCnvLib ByteStreamCnvSvcLib )
    
-# atlas_add_test(ITkPixelRodDecoder_test
-#   SOURCES test/ITkPixelRodDecoder_test.cxx 
-#   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} 
-#   LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES}   AthenaBaseComps GaudiKernel IdDictParser StoreGateLib  Identifier ITkPixelByteStreamCnvLib
-#   POST_EXEC_SCRIPT "nopost.sh" )
-  
-# atlas_add_test(ITkPixelRawDataProviderTool_test
-#   SOURCES test/ITkPixelRawDataProviderTool_test.cxx 
-#   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} 
-#   LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES}   AthenaBaseComps GaudiKernel IdDictParser StoreGateLib  Identifier ITkPixelByteStreamCnvLib
-#   POST_EXEC_SCRIPT "nopost.sh" )
 
+atlas_add_test(ITkPixQCoreEncodingLUT_test
+  SOURCES test/ITkPixQCoreEncodingLUT_test.cxx
+  INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
+  LINK_LIBRARIES ${Boost_LIBRARIES}  LINK_LIBRARIES ITkPixelByteStreamCnvLib
+  POST_EXEC_SCRIPT "nopost.sh"
+)
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+  target_compile_options(ITkPixelByteStreamCnvLib INTERFACE -fconstexpr-ops-limit=200000000)
+endif()
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+  target_compile_options(ITkPixelByteStreamCnvLib INTERFACE -fconstexpr-steps=200000000)
+endif()
 # Install files from the package:
 atlas_install_joboptions( share/*.txt )
 
