@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TruthIO )
@@ -7,7 +7,7 @@ atlas_subdir( TruthIO )
 find_package( HepPDT )
 
 # Component(s) in the package:
-atlas_add_Library( TruthIOLib
+atlas_add_library( TruthIOLib
                      src/*.cxx
                      PUBLIC_HEADERS TruthIO
                      INCLUDE_DIRS ${HEPPDT_INCLUDE_DIRS} 
