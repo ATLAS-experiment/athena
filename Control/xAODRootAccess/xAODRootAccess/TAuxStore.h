@@ -190,6 +190,10 @@ namespace xAOD {
       StatusCode setupOutputData( auxid_t auxid );
       /// Scan the input TTree for auxiliary branches
       StatusCode scanInputTree();
+      /// Find the type_info to use as the aux type for a given branch.
+      const std::type_info* auxBranchType( ::TBranch* br, const char* auxName,
+                                           ::Bool_t staticBranch,
+                                           std::string* expectedClassName = nullptr );
       /// Register one input branch as an available auxiliary variable
       StatusCode setupAuxBranch( ::TBranch* br, const char* auxName,
                                   ::Bool_t staticBranch );

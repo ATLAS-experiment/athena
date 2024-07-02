@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -65,6 +65,12 @@ bool TBranchAuxDynStore::readData(SG::auxid_t auxid)
    catch(const std::string& e_str) {
       ATHCONTAINERS_ERROR("TBranchAuxDynStore::getData", e_str);
       return false;
+   }
+
+   SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
+   SG::auxid_t linked_auxid = r.linkedVariable (auxid);
+   if (linked_auxid != SG::null_auxid) {
+     return readData (linked_auxid);
    }
    return true;
 }

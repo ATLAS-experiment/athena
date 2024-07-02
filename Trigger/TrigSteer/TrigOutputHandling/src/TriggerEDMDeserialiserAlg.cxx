@@ -454,7 +454,7 @@ StatusCode TriggerEDMDeserialiserAlg::deserialiseDynAux( const std::string& tran
       const std::type_info* elt_tinfo = getElementType( transientTypeName, elementTypeName );
       ATH_CHECK( elt_tinfo != nullptr );
       ATH_MSG_DEBUG( "Dynamic decoration: \"" << decorationName << "\" of type " << transientTypeName << " will create a dynamic ID, stored type" << elementTypeName );    
-      id = SG::getDynamicAuxID ( *elt_tinfo, decorationName, elementTypeName, transientTypeName, false );
+      id = SG::getDynamicAuxID ( *elt_tinfo, decorationName, elementTypeName, transientTypeName, false, SG::null_auxid );
   }        
   ATH_MSG_DEBUG( "Unstreaming decoration \"" << decorationName << "\" of type " << transientTypeName  << " aux ID " << id << " class " << persistentTypeName << " packed " << isPacked  );  
   std::unique_ptr<SG::IAuxTypeVector> vec( registry.makeVectorFromData (id, obj, nullptr, isPacked, true) ); 

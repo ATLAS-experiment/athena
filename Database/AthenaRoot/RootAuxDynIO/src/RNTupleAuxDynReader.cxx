@@ -100,7 +100,7 @@ getAuxIdForAttribute(const std::string& attr_name, const std::string& attr_type,
    if( !ti )
       return auxid;
 
-   return SG::getDynamicAuxID (*ti, attr_name, element_type, attr_type, standalone);
+   return SG::getDynamicAuxID (*ti, attr_name, element_type, attr_type, standalone, SG::null_auxid);
 }
 
 } // anonymous namespace

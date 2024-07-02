@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TBRANCHAUXDYNREADER_H
@@ -77,6 +77,9 @@ protected:
    std::map<std::string, TBranch*>       m_branchMap;
    // map auxid -> branch info. not sure if it can be different from m_branchMap
    std::map<SG::auxid_t, BranchInfo>     m_branchInfos;
+
+private:
+   SG::auxid_t initBranch (bool standalone, const std::string& attr, TBranch* branch);
 };
 
 

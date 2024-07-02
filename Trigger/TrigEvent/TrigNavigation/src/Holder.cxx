@@ -511,7 +511,7 @@ IHolder::deserializeDynVars (const std::vector<uint32_t>& dataBlob,
       std::string elementTypeName;
       const std::type_info* elt_tinfo = getElementType (vecname, elementTypeName);
       if (elt_tinfo)
-        id = SG::getDynamicAuxID (*elt_tinfo, name, elementTypeName, tname, false);
+        id = SG::getDynamicAuxID (*elt_tinfo, name, elementTypeName, tname, false, SG::null_auxid);
       if (id == SG::null_auxid) {
         ATH_MSG_ERROR("deserialize aux dyn var failed; can't find auxid for:" << name);
         return std::unique_ptr<SG::IAuxStore> (std::move(store));

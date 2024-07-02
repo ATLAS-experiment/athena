@@ -1,1 +1,5 @@
 test1
+test_linked
+Athena::getMessageSvc: WARNING MessageSvc not found, will use std::cout
+getDynamicAuxID      INFO FILE:LINE (FUNC): dynamic ROOT vector factory not implemented for linked types: linked3 std::vector<AthContainersRootTest::L3>
+

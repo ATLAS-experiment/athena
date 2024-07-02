@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainersRoot/getDynamicAuxID.h
@@ -39,7 +39,8 @@ SG::auxid_t getDynamicAuxID (const std::type_info& ti,
                              const std::string& name,
                              const std::string& elementTypeName,
                              const std::string& branch_type_name,
-                             bool standalone);
+                             bool standalone,
+                             SG::auxid_t linked_auxid);
 
 
 } // namespace SG

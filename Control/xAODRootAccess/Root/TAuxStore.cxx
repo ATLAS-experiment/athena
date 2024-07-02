@@ -913,11 +913,11 @@ namespace xAOD {
          return StatusCode::FAILURE;
       }
 
+      const SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
+
       // Get the property name:
-      const TString statBrName = m_prefix +
-         SG::AuxTypeRegistry::instance().getName( auxid ).c_str();
-      const TString dynBrName = m_dynPrefix +
-         SG::AuxTypeRegistry::instance().getName( auxid ).c_str();
+      const TString statBrName = m_prefix + r.getName( auxid ).c_str();
+      const TString dynBrName = m_dynPrefix + r.getName( auxid ).c_str();
 
       // Check if the branch exists:
       Bool_t staticBranch = kTRUE;
@@ -954,7 +954,7 @@ namespace xAOD {
       }
 
       // Check that the branch type makes sense:
-      if( ( containerBranch && ( m_structMode != kContainerStore ) ) ||
+      if( ( containerBranch && ( m_structMode != kContainerStore ) && !r.isLinked( auxid ) ) ||
           ( ( ! containerBranch ) && ( m_structMode != kObjectStore ) ) ) {
          ::Error( "xAOD::TAuxStore::setupInputData",
                   XAOD_MESSAGE( "Branch type and requested structure mode "
@@ -979,8 +979,8 @@ namespace xAOD {
          // Get the type from the auxiliary type registry:
          brType =
             ( containerBranch ?
-              SG::AuxTypeRegistry::instance().getVecType( auxid ) :
-              SG::AuxTypeRegistry::instance().getType( auxid ) );
+              r.getVecType( auxid ) :
+              r.getType( auxid ) );
       } else {
          // Get the type from the input branch itself:
          brType = ( clDummy ? clDummy->GetTypeInfo() :
@@ -1013,7 +1013,7 @@ namespace xAOD {
       // Create the smart object holding this vector:
       if( isRegisteredType( auxid ) ) {
          m_vecs[ auxid ] =
-            SG::AuxTypeRegistry::instance().makeVector( auxid, (size_t)0, (size_t)0 ).release();
+            r.makeVector( auxid, (size_t)0, (size_t)0 ).release();
          if( ! containerBranch ) {
             m_vecs[ auxid ]->resize( 1 );
          }
@@ -1036,7 +1036,7 @@ namespace xAOD {
       if (containerBranch) {
         objType = m_vecs[ auxid ]->objType();
         if (!objType)
-          objType = SG::AuxTypeRegistry::instance().getType( auxid );
+          objType = r.getType( auxid );
       }
       m_branches[ auxid ] = new TBranchHandle( staticBranch, primitiveBranch,
                                                objType,
@@ -1095,8 +1095,7 @@ namespace xAOD {
       // Check if we just replaced a generic object:
       if( isRegisteredType( auxid ) ) {
          // The name of the variable we just created:
-         const std::string auxname =
-            SG::AuxTypeRegistry::instance().getName( auxid );
+         const std::string auxname = r.getName( auxid );
          // Check if there's another variable with this name already:
          for( auxid_t i = 0; i < m_vecs.size(); ++i ) {
             // Check if we have this aux ID:
@@ -1104,8 +1103,7 @@ namespace xAOD {
             // Ingore the object that we *just* created:
             if( i == auxid ) continue;
             // The name of the variable:
-            const std::string testname =
-               SG::AuxTypeRegistry::instance().getName( i );
+            const std::string testname = r.getName( i );
             // Check if it has the same name:
             if( testname != auxname ) continue;
             // Check that the other one is a non-registered type:
@@ -1119,6 +1117,11 @@ namespace xAOD {
             m_vecs[ i ] = 0; m_branches[ i ] = 0;
             m_auxIDs.erase( i );
          }
+      }
+
+      SG::auxid_t linked_auxid = r.linkedVariable( auxid );
+      if (linked_auxid != SG::null_auxid) {
+         return setupInputData( linked_auxid );
       }
 
       // Return gracefully:
@@ -1411,6 +1414,10 @@ namespace xAOD {
          // For top-level stores let's scan the static branches as well:
          if( m_topStore && ( brName == m_prefix ) ) {
 
+            // Make sure the object has been instantiated so that aux data
+            // registrations will have been done.
+            br->SetAddress(0);
+
             // Get a list of its sub-branches:
             TObjArray* sbranches = br->GetListOfBranches();
 
@@ -1480,23 +1487,11 @@ namespace xAOD {
       return StatusCode::SUCCESS;
    }
 
-   /// This function takes care of assigning an auxiliary ID to a given branch.
-   /// It tries its best to find an auxiliary vector factory for the branch's
-   /// type, but if it fails, it still falls back to using
-   /// <code>SG::AuxTypePlaceholder</code> as the type. In which case of course
-   /// only dumb copying will be possible for the given branch. (And no vector
-   /// operations on the branch's payload until the variable of the branch is
-   /// accessed explicitly.)
-   ///
-   /// @param br Pointer to the branch under investigation
-   /// @param auxName The name of the auxiliary property, extracted from the
-   ///                branch's name
-   /// @param staticBranch <code>kTRUE</code> if this is a "static branch", and
-   ///                     <code>kFALSE</code> if it's a dynamic one
-   /// @returns <code>kTRUE</code> if successful, <code>kFALSE</code> if not
-   ///
-   StatusCode TAuxStore::setupAuxBranch( ::TBranch* br, const char* auxName,
-                                          ::Bool_t staticBranch ) {
+   /// Find the type_info to use as the aux type for a given branch.
+   const std::type_info*
+   TAuxStore::auxBranchType( ::TBranch* br, const char* auxName,
+                             ::Bool_t staticBranch,
+                             std::string* expectedClassName ) {
 
       // Get the branch's type:
       ::TClass* expectedClass = 0;
@@ -1518,6 +1513,9 @@ namespace xAOD {
           if (newClass && newClass != expectedClass) {
             expectedClass = newClass;
           }
+        }
+        if (expectedClassName) {
+           *expectedClassName = expectedClass->GetName();
         }
       }
 
@@ -1570,6 +1568,31 @@ namespace xAOD {
          }
       }
 
+      return ti;
+   }
+
+   /// This function takes care of assigning an auxiliary ID to a given branch.
+   /// It tries its best to find an auxiliary vector factory for the branch's
+   /// type, but if it fails, it still falls back to using
+   /// <code>SG::AuxTypePlaceholder</code> as the type. In which case of course
+   /// only dumb copying will be possible for the given branch. (And no vector
+   /// operations on the branch's payload until the variable of the branch is
+   /// accessed explicitly.)
+   ///
+   /// @param br Pointer to the branch under investigation
+   /// @param auxName The name of the auxiliary property, extracted from the
+   ///                branch's name
+   /// @param staticBranch <code>kTRUE</code> if this is a "static branch", and
+   ///                     <code>kFALSE</code> if it's a dynamic one
+   /// @returns <code>kTRUE</code> if successful, <code>kFALSE</code> if not
+   ///
+   StatusCode TAuxStore::setupAuxBranch( ::TBranch* br, const char* auxName,
+                                          ::Bool_t staticBranch ) {
+
+      std::string expectedClassName;
+      const std::type_info* ti = auxBranchType( br, auxName, staticBranch,
+                                                &expectedClassName );
+
       // Get the registry:
       SG::AuxTypeRegistry& registry = SG::AuxTypeRegistry::instance();
 
@@ -1587,9 +1610,35 @@ namespace xAOD {
          return StatusCode::SUCCESS;
       }
 
+      SG::AuxVarFlags flags = SG::AuxVarFlags::SkipNameCheck;
+      SG::auxid_t linked_auxid = SG::null_auxid;
+
+      if ( SG::AuxTypeRegistry::isLinkedName( auxName ) ) {
+         flags |= SG::AuxVarFlags::Linked;
+      }
+      else if ( SG::AuxTypeRegistry::classNameHasLink( expectedClassName) ) {
+         std::string linkedAttr = SG::AuxTypeRegistry::linkedName( auxName );
+         std::string linkedBranch = SG::AuxTypeRegistry::linkedName( br->GetName() );
+         ::TBranch* lbr = m_inTree->GetBranch( linkedBranch.c_str() );
+         const std::type_info* lti = nullptr;
+         if (lbr) {
+            lti = auxBranchType( lbr, linkedAttr.c_str(), staticBranch );
+         }
+         if (lti) {
+            linked_auxid = registry.getAuxID( *lti, linkedAttr, "",
+                                              SG::AuxVarFlags::SkipNameCheck |
+                                              SG::AuxVarFlags::Linked );
+         }
+         if (linked_auxid == SG::null_auxid) {
+           ::Error(  "xAOD::TAuxStore::setupAuxBranch",
+                     "Could not find linked variable for %s type %s",
+                     auxName, expectedClassName.c_str() );
+         }
+      }
+
       // Check for an auxiliary ID for this branch:
       auxid_t auxid = registry.getAuxID( *ti, auxName, "",
-                                         SG::AuxVarFlags::SkipNameCheck );
+                                         flags, linked_auxid );
 
       // First try to find a compiled factory for the vector type:
       if( auxid == SG::null_auxid ) {
@@ -1625,7 +1674,7 @@ namespace xAOD {
                         reinterpret_cast< SG::IAuxTypeVectorFactory* >( tmp );
                      registry.addFactory( *ti, *fac->tiAlloc(), std::unique_ptr<SG::IAuxTypeVectorFactory>( fac ) );
                      auxid = registry.getAuxID( *ti, auxName, "",
-                                                SG::AuxVarFlags::SkipNameCheck );
+                                                flags, linked_auxid );
                   }
                }
             }
@@ -1633,7 +1682,7 @@ namespace xAOD {
       }
 
       // If that didn't succeed, let's assign a generic factory to this type:
-      if( auxid == SG::null_auxid ) {
+      if( auxid == SG::null_auxid && linked_auxid == SG::null_auxid ) {
 
          // Construct the name of the vector type:
          std::string vec_class_name = "std::vector<" +
@@ -1666,10 +1715,18 @@ namespace xAOD {
 
       // Check if we succeeded:
       if( auxid == SG::null_auxid ) {
-         ::Error( "xAOD::TAuxStore::setupAuxBranch",
-                  XAOD_MESSAGE( "Couldn't assign auxiliary ID to branch "
-                                "\"%s\"" ),
-                  br->GetName() );
+         if ( linked_auxid != SG::null_auxid ) {
+            ::Error( "xAOD::TAuxStore::setupAuxBranch",
+                     XAOD_MESSAGE( "Dynamic ROOT vector factory not implemented for linked types; branch "
+                                   "\"%s\"" ),
+                     br->GetName() );
+         }
+         else {
+            ::Error( "xAOD::TAuxStore::setupAuxBranch",
+                     XAOD_MESSAGE( "Couldn't assign auxiliary ID to branch "
+                                   "\"%s\"" ),
+                     br->GetName() );
+         }
          return StatusCode::FAILURE;
       }
 
