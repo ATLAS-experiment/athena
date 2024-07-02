@@ -93,7 +93,7 @@ namespace GlobalSim {
     const auto & counts_data = alg.counts();
     auto counts_moncol = Monitored::Collection("counts", counts_data);
 
-    auto TOBet_data = alg.TOB_et();
+    const auto & TOBet_data = alg.TOB_et();
     auto TOBet_moncol = Monitored::Collection("Et", TOBet_data);
 
        
