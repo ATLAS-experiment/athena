@@ -211,7 +211,7 @@ bool EtaPtFilterTool::isAccepted( const HepMC::ConstGenParticlePtr& mc ) const
   }
 
   if ( m_keepDocumentaries.value() ) {
-    if ( mc->status() == 3 ) {
+    if ( !MC::isPhysical(mc) ) {
       return true;
     }
   }

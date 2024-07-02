@@ -149,7 +149,7 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::Jet* jet, bool DR, MCTrut
   for (const auto& thePart: constituents) {
     MC::findAllJetMothers(thePart, allJetMothers);
     //AV: probably skip ME particles
-    if (thePart->status() == 3) continue;
+    if (!MC::isPhysical(thePart)) continue;
     // determine if hadron and its type
     tempparttype = particleTruthClassifier(thePart, info).first;
     if (tempparttype != Hadron) continue;
@@ -236,7 +236,7 @@ MCTruthClassifier::getGenPart(const xAOD::TrackParticle* trk, MCTruthPartClassif
         for (const auto & theDaugt: EndVrtx->particles_out()) {
           if (!theDaugt) continue;
           if (theDaugt->pdgId() == theGenParticle->pdgId()) theGenPartTmp = theDaugt;
-          if (theDaugt->pdgId() != theGenParticle->pdgId() && theDaugt->pdgId() != 22) theGenPartTmp = nullptr;
+          if (theDaugt->pdgId() != theGenParticle->pdgId() && !MC::isPhoton(theDaugt)) theGenPartTmp = nullptr;
         }
         itr++;
         if (itr > 100) {

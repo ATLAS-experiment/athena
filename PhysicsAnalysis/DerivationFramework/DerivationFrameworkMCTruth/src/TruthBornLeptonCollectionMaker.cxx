@@ -140,14 +140,13 @@ StatusCode DerivationFramework::TruthBornLeptonCollectionMaker::addBranches() co
 
     if (is_sherpa > 0) {
       // For Sherpa, skip is not status 11
-      if (theParticle->status() != 11) continue;
+      if (MC::isPhysical(theParticle)) continue;
       // Sherpa may have two sets of status == 11 leptons. Here we take the first set.
       // To do so, we check the first status == 11 leptons, 
       //   check that it has a child a parent barecode corresponding the the lepton's uniqueID
       // If so, then save this parent uniqueID and skip all status 11 leptons with this parent uniqueID.
 
       if (sherpLepParentUniqueID == HepMC::UNDEFINED_ID) {
-        // Do test on first status 11 lepton
         const xAOD::TruthParticle* thePartchild = theParticle->child();
         if (thePartchild) {
           int cparentUniqueID = (thePartchild->parent()) ? HepMC::uniqueID(thePartchild->parent()) : HepMC::UNDEFINED_ID;

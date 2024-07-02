@@ -209,7 +209,7 @@ egammaTruthAssociationAlg::isPromptEgammaParticle(
 {
 
   if ((truth->pdgId() != 22 && abs(truth->pdgId()) != 11) ||
-      MC::isDecayed(truth) || truth->status() == 3 ||
+      MC::isDecayed(truth) || !MC::isPhysical(truth) ||
       HepMC::is_simulation_particle(truth) || truth->pt() < m_minPt) {
     return false;
   }
