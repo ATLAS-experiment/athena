@@ -405,6 +405,7 @@ class MuonTriggerAnalysisSFBlock (ConfigBlock):
                 years = ['2023']
 
             triggerConfigs = {}
+            triggerConfigYears = {}
             for year in years:
                 triggerChains = self.triggerChainsPerYear.get(year,[])
                 for chain in triggerChains:
@@ -415,11 +416,19 @@ class MuonTriggerAnalysisSFBlock (ConfigBlock):
                         if chain_noHLT.startswith('mu') and chain_noHLT[2].isdigit:
                             # Need to support HLT_mu26_ivarmedium_OR_HLT_mu50
                             triggerConfigs[chain_noHLT] = chain
+                            if chain_noHLT in triggerConfigYears.keys():
+                                triggerConfigYears[chain_noHLT].append(year)
+                            else:
+                                triggerConfigYears[chain_noHLT] = [year]
                     else:
                         for leg in legs:
                             if leg.startswith('mu') and leg[2].isdigit:
                                 # Need to support HLT_mu14_ivarloose
                                 triggerConfigs[leg] = 'HLT_' + leg
+                                if chain_noHLT in triggerConfigYears.keys():
+                                    triggerConfigYears[leg].append(year)
+                                else:
+                                    triggerConfigYears[leg] = [year]
 
             for trig_short, trig in triggerConfigs.items():
                 alg = config.createAlgorithm('CP::MuonTriggerEfficiencyScaleFactorAlg',
@@ -430,6 +439,13 @@ class MuonTriggerAnalysisSFBlock (ConfigBlock):
                 # Reproduce config from TrigGlobalEfficiencyAlg
                 alg.efficiencyScaleFactorTool.MuonQuality = self.muonID
                 alg.efficiencyScaleFactorTool.AllowZeroSF = True
+
+                # Avoid warnings for MC20a 2015-2016 triggers covering a single year
+                if config.campaign() is Campaign.MC20a:
+                    if triggerConfigYears[trig_short] == ['2015']:
+                        alg.maxRunNumber = 290000
+                    elif triggerConfigYears[trig_short] == ['2016']:
+                        alg.minRunNumber = 290000
 
                 alg.trigger = trig
                 alg.scaleFactorDecoration = 'muon_trigEffSF_' + trig_short + '_%SYS%'
