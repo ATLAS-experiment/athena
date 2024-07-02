@@ -29,7 +29,6 @@ else()
 
     # Python scripts checked by flake8:
     atlas_install_scripts( share/athena.py
-                           share/chappy.py
                            POST_BUILD_CMD ${ATLAS_FLAKE8} )
     
     # Aliases:
