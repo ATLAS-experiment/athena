@@ -1,13 +1,9 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigJiveXML/CTPDecisionRetriever.h"
-
-#include <string>
-
 #include "CLHEP/Units/SystemOfUnits.h"
-
 #include "AnalysisTriggerEvent/CTP_Decision.h"
 
 namespace JiveXML {
@@ -79,35 +75,35 @@ namespace JiveXML {
      CTP_Decision::items_type::const_iterator itCTPe = (ctpDecision->getItems()).end();
 
      for (; itCTP != itCTPe; ++itCTP){
-//  if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << " CTP item : " << *itCTP << endmsg;
        itemListL1 += "-"+*itCTP;
        prescaleListL1 += "-0";
      }
 
-    itemListL1Vec.push_back( DataType( itemListL1 )); 
-    itemListL2Vec.push_back( DataType( itemListL2 ));
-    itemListEFVec.push_back( DataType( itemListEF ));
-    prescaleListL1Vec.push_back( DataType( prescaleListL1 ));
-    prescaleListL2Vec.push_back( DataType( prescaleListL2 ));
-    prescaleListEFVec.push_back( DataType( prescaleListEF ));
+    itemListL1Vec.emplace_back( std::move( itemListL1 )); 
+    itemListL2Vec.emplace_back( std::move( itemListL2 ));
+    itemListEFVec.emplace_back( std::move( itemListEF ));
+    prescaleListL1Vec.emplace_back( std::move( prescaleListL1 ));
+    prescaleListL2Vec.emplace_back( std::move( prescaleListL2 ));
+    prescaleListEFVec.emplace_back( std::move( prescaleListEF ));
 
     DataMap myDataMap;
-    myDataMap["ctpItemList"] = itemListL1Vec;
-    myDataMap["prescaleListL1"] = prescaleListL1Vec;
-    myDataMap["itemListL2"] = itemListL2Vec;
-    myDataMap["prescaleListL2"] = prescaleListL2Vec;
-    myDataMap["itemListEF"] = itemListEFVec;
-    myDataMap["prescaleListEF"] = prescaleListEFVec;
-    myDataMap["passedTrigger"] = passedTrigger;
-    myDataMap["passedL1"] = passedL1;
-    myDataMap["passedL2"] = passedL2;
-    myDataMap["passedEF"] = passedEF;
-    myDataMap["energySumEt"] = energySumEt;
-    myDataMap["energyEx"] = energyEx;
-    myDataMap["energyEy"] = energyEy;
-    myDataMap["energyEtMiss"] = energyEtMiss;
+    const int nEntries = itemListL1Vec.size();
+    myDataMap["ctpItemList"] = std::move(itemListL1Vec);
+    myDataMap["prescaleListL1"] = std::move(prescaleListL1Vec);
+    myDataMap["itemListL2"] = std::move(itemListL2Vec);
+    myDataMap["prescaleListL2"] = std::move(prescaleListL2Vec);
+    myDataMap["itemListEF"] = std::move(itemListEFVec);
+    myDataMap["prescaleListEF"] = std::move(prescaleListEFVec);
+    myDataMap["passedTrigger"] = std::move(passedTrigger);
+    myDataMap["passedL1"] = std::move(passedL1);
+    myDataMap["passedL2"] = std::move(passedL2);
+    myDataMap["passedEF"] = std::move(passedEF);
+    myDataMap["energySumEt"] = std::move(energySumEt);
+    myDataMap["energyEx"] = std::move(energyEx);
+    myDataMap["energyEy"] = std::move(energyEy);
+    myDataMap["energyEtMiss"] = std::move(energyEtMiss);
     
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << dataTypeName() << ": "<< itemListL1Vec.size() << endmsg;
+    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << dataTypeName() << ": "<< nEntries << endmsg;
 
     //forward data to formating tool
     return FormatTool->AddToEvent(dataTypeName(), "CTP_Decision", &myDataMap);

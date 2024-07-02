@@ -1,10 +1,8 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigJiveXML/LVL1TrigTowerRetriever.h"
-
-#include <string>
 
 #include "CLHEP/Units/SystemOfUnits.h"
 
@@ -129,11 +127,11 @@ namespace JiveXML {
         // loop again over ADCs to write values out:                  
         std::vector<int>::const_iterator emADCItr = ((*trigTowerIter)->emADC()).begin();
         for (; emADCItr != ((*trigTowerIter)->emADC()).end(); ++emADCItr)
-          emADCVec.push_back(DataType( *emADCItr ));
+          emADCVec.emplace_back( *emADCItr );
 
         std::vector<int>::const_iterator hadADCItr = ((*trigTowerIter)->hadADC()).begin();
         for (; hadADCItr != ((*trigTowerIter)->hadADC()).end(); ++hadADCItr)
-          hadADCVec.push_back(DataType( *hadADCItr ));
+          hadADCVec.emplace_back( *hadADCItr );
       } // end sumEnergy > sumEnergyThr
     }//end trigger tower iterator loop
 
@@ -144,20 +142,21 @@ namespace JiveXML {
     }
 
     DataMap myDataMap;
-    myDataMap["phi"] = phi;
-    myDataMap["eta"] = eta;
-    myDataMap["emEnergy"] = emEnergyVec;
-    myDataMap["hadEnergy"] = hadEnergyVec;
-    myDataMap["sumEnergy"] = sumEnergyVec;
-    myDataMap["emADC"+multiple] = emADCVec;
-    myDataMap["hadADC"+multiple] = hadADCVec;
-    myDataMap["numADC"] = numADCVec;
-    myDataMap["emBCID"] = emBCIDVec;
-    myDataMap["hadBCID"] = hadBCIDVec;
-    myDataMap["isEMSaturated"] = isEMSaturated;
-    myDataMap["isHadSaturated"] = isHadSaturated;
+    const int nEntries = phi.size();
+    myDataMap["phi"] = std::move(phi);
+    myDataMap["eta"] = std::move(eta);
+    myDataMap["emEnergy"] = std::move(emEnergyVec);
+    myDataMap["hadEnergy"] = std::move(hadEnergyVec);
+    myDataMap["sumEnergy"] = std::move(sumEnergyVec);
+    myDataMap["emADC"+multiple] = std::move(emADCVec);
+    myDataMap["hadADC"+multiple] = std::move(hadADCVec);
+    myDataMap["numADC"] = std::move(numADCVec);
+    myDataMap["emBCID"] = std::move(emBCIDVec);
+    myDataMap["hadBCID"] = std::move(hadBCIDVec);
+    myDataMap["isEMSaturated"] = std::move(isEMSaturated);
+    myDataMap["isHadSaturated"] = std::move(isHadSaturated);
 
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << dataTypeName() << ": "<< phi.size() << endmsg;
+    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << dataTypeName() << ": "<< nEntries << endmsg;
 
     //forward data to formating tool
     return FormatTool->AddToEvent(dataTypeName(), m_sgKey, &myDataMap);

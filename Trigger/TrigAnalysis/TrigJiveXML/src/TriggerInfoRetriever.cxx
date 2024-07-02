@@ -13,6 +13,7 @@
 #include "EventInfo/EventInfo.h"
 #include "EventInfo/EventID.h"
 #include "EventInfo/TriggerInfo.h"
+#include <cmath> //std::sqrt
 
 namespace JiveXML {
 
@@ -70,18 +71,10 @@ namespace JiveXML {
     trigInfoStatusVec.push_back(DataType( trigger_info->statusElement() ) );
     trigInfoExtL1IDVec.push_back(DataType( trigger_info->extendedLevel1ID() ) );
     trigInfoLvl1TypeVec.push_back(DataType( trigger_info->level1TriggerType() ) );
-
-/*
-       if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << "Trigger info: status " << trigger_info->statusElement()
-            << " extLvl1ID " << trigger_info->extendedLevel1ID()
-            << " lvl1Type  " << trigger_info->level1TriggerType()
-            << " lvl1Info  ";
-*/
         if ( trigger_info->level1TriggerInfo().size() > 0 ){
 	    triggerInfoStrL1 = "-"; // item seperator
         }
         for (unsigned int i = 0; i < trigger_info->level1TriggerInfo().size(); ++i) {
-//            if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << trigger_info->level1TriggerInfo()[i] << " ";
             triggerInfoStrL1 += DataType( trigger_info->level1TriggerInfo()[i]).toString() + "-";
         }
 
@@ -90,7 +83,6 @@ namespace JiveXML {
 	    triggerInfoStrL2 = "-"; // item seperator
         }
         for (unsigned int i = 0; i < trigger_info->level2TriggerInfo().size(); ++i) {
-//            if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << trigger_info->level2TriggerInfo()[i] << " ";
             triggerInfoStrL2 += DataType( trigger_info->level2TriggerInfo()[i] ).toString() + "-";
         }
 
@@ -99,7 +91,6 @@ namespace JiveXML {
 	    triggerInfoStrEF = "-"; // item seperator
         }
         for (unsigned int i = 0; i < trigger_info->eventFilterInfo().size(); ++i) {
-//            log << MSG::DEBUG << trigger_info->eventFilterInfo()[i] << " " ;
             triggerInfoStrEF += DataType( trigger_info->eventFilterInfo()[i]).toString() + "-";
         }
 
@@ -110,20 +101,6 @@ namespace JiveXML {
            if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << " i " << i << " name " << trigger_info->streamTags()[i].name()
           << " type " << trigger_info->streamTags()[i].type()
           << " ObeysLumi " << trigger_info->streamTags()[i].obeysLumiblock();
-
-            /////// fixed in 15.5.0, but leave in if this resurfaces  jpt 12Aug09 
-            //// problem with stream names: non-char values in string:
-            //// e.g. 'L1<nul><bel>' (visible in nedit)  
-	    ////  https://savannah.cern.ch/bugs/?52139,  jpt 7Jul09
-            //// PATCH: cut all suspiciously short streams names starting 
-            //// with L1 to just L1
-            //std::string myStreamTag = trigger_info->streamTags()[i].name();
-	    //log << MSG::DEBUG << " myStreamTag was: " << myStreamTag << "+++" 
-            //    << " length: " << myStreamTag.size() <<  endmsg;
-            //if (myStreamTag.substr(0,2) == "L1" && myStreamTag.size() < 7 ){ myStreamTag = "L1";}
-	    //log << MSG::DEBUG << " myStreamTag is: " << myStreamTag << "+++" << endmsg;
-            //triggerInfoStreamTag += myStreamTag  + "_" +
-
             //// normal code without mask is this:
 	    triggerInfoStreamTag += trigger_info->streamTags()[i].name() + "_" +
             trigger_info->streamTags()[i].type() + "_";
@@ -146,10 +123,10 @@ namespace JiveXML {
     if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "trigInfoEF: " << triggerInfoStrEF << endmsg;
     if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "triggerInfoStreamTag: " << triggerInfoStreamTag << endmsg;
 
-    trigInfoL1Vec.push_back(DataType( triggerInfoStrL1 ));
-    trigInfoL2Vec.push_back(DataType( triggerInfoStrL2 ));
-    trigInfoEFVec.push_back(DataType( triggerInfoStrEF ));
-    trigInfoStreamTagVec.push_back(DataType( triggerInfoStreamTag ));
+    trigInfoL1Vec.emplace_back(std::move(triggerInfoStrL1));
+    trigInfoL2Vec.emplace_back(std::move(triggerInfoStrL2 ));
+    trigInfoEFVec.emplace_back(std::move( triggerInfoStrEF ));
+    trigInfoStreamTagVec.emplace_back(std::move( triggerInfoStreamTag ));
 
     // Retrieve LVL1_ROI for trigger energies
     // assume that eventInfo->triggerInfo _has_ to be present,
@@ -159,7 +136,6 @@ namespace JiveXML {
     const LVL1_ROI * roi;
     if ( evtStore()->retrieve(roi,"LVL1_ROI").isFailure() ) {
        if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "No LVL1_ROI for Trigger-MissingET found in SG, setting placeholders." << endmsg;
-//       return StatusCode::SUCCESS; // not here.
        // placeholders:
         energySumEtVec.push_back(DataType( -1. ) ); // means n/a
         energyExVec.push_back(DataType( -1. ) );
@@ -195,19 +171,20 @@ namespace JiveXML {
     } // LVL1_ROI available ?
 
     DataMap myDataMap;
-    myDataMap["energySumEt"] = energySumEtVec;
-    myDataMap["energyEx"] = energyExVec;
-    myDataMap["energyEy"] = energyEyVec;
-    myDataMap["energyEtMiss"] = energyEtMissVec;
-    myDataMap["trigInfoStatus"] = trigInfoStatusVec;
-    myDataMap["trigInfoExtL1ID"] = trigInfoExtL1IDVec;
-    myDataMap["trigInfoLvl1Type"] = trigInfoLvl1TypeVec;
-    myDataMap["trigInfoL1"] = trigInfoL1Vec;
-    myDataMap["trigInfoL2"] = trigInfoL2Vec;
-    myDataMap["trigInfoEF"] = trigInfoEFVec;
-    myDataMap["trigInfoStreamTag"] = trigInfoStreamTagVec;
+    const int nEntries = trigInfoStatusVec.size();
+    myDataMap["energySumEt"] = std::move(energySumEtVec);
+    myDataMap["energyEx"] = std::move(energyExVec);
+    myDataMap["energyEy"] = std::move(energyEyVec);
+    myDataMap["energyEtMiss"] = std::move(energyEtMissVec);
+    myDataMap["trigInfoStatus"] = std::move(trigInfoStatusVec);
+    myDataMap["trigInfoExtL1ID"] = std::move(trigInfoExtL1IDVec);
+    myDataMap["trigInfoLvl1Type"] = std::move(trigInfoLvl1TypeVec);
+    myDataMap["trigInfoL1"] = std::move(trigInfoL1Vec);
+    myDataMap["trigInfoL2"] = std::move(trigInfoL2Vec);
+    myDataMap["trigInfoEF"] = std::move(trigInfoEFVec);
+    myDataMap["trigInfoStreamTag"] = std::move(trigInfoStreamTagVec);
 
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << dataTypeName() << ": "<< trigInfoStatusVec.size() << endmsg;
+    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << dataTypeName() << ": "<< nEntries << endmsg;
 
     //forward data to formating tool
     std::string emptyStr=""; // eventInfo has no SGKey
