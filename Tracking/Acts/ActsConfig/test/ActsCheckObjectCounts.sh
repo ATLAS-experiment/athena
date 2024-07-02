@@ -10,7 +10,15 @@ ignore_pattern="ActsTrackFindingAlg.+ERROR.+Propagation.+reached.+the.+step.+cou
 
 export ATHENA_CORE_NUMBER=1
 Reco_tf.py \
-  --preExec "flags.Exec.FPE=-1;" "flags.Acts.doITkConversion=True;flags.Tracking.doTruth=False;flags.Tracking.doITkConversion=False;" "flags.Detector.EnableCalo=True;flags.Detector.GeometryCalo=True;flags.Detector.EnableLAr=True;flags.Detector.EnableTile=True;" \
+  --preExec "flags.Exec.FPE=-1; \
+  	     flags.Acts.doITkConversion=True; \
+	     flags.Tracking.doTruth=False; \
+	     flags.Tracking.doITkConversion=False; \
+	     flags.Detector.EnableCalo=True; \
+	     flags.Detector.GeometryCalo=True; \
+	     flags.Detector.EnableLAr=True; \
+	     flags.Detector.EnableTile=True; \
+	     flags.Acts.doLargeRadius=True;" \
   --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsAloneWorkflowFlags" \
   --ignorePatterns "${ignore_pattern}" \
   --inputRDOFile ${input_rdo} \

@@ -70,6 +70,71 @@ ActsTrackFindingAlg                                               INFO Ratios
 |                                 3.0- 3.5 |   0.913021 |          0 |   0.913021 |
 |                                 3.5-+inf |   0.979461 |          0 |   0.979461 |
 |------------------------------------------|------------|------------|------------|
+ActsLargeRadiusPixelClusterPreparationAlg                         INFO Clusterization statistics
+|---------|------------|
+| Inputs  |    1165578 |
+| Outputs |    1065153 |
+|---------|------------|
+ActsLargeRadiusStripClusterPreparationAlg                         INFO Clusterization statistics
+|---------|------------|
+| Inputs  |    1081478 |
+| Outputs |    1041804 |
+|---------|------------|
+ActsLargeRadiusStripSpacePointPreparationAlg                      INFO Clusterization statistics
+|---------|------------|
+| Inputs  |     325456 |
+| Outputs |     303747 |
+|---------|------------|
+ActsLargeRadiusStripOv...pSpacePointPreparationAlg                INFO Clusterization statistics
+|---------|------------|
+| Inputs  |      94491 |
+| Outputs |      88349 |
+|---------|------------|
+ActsLargeRadiusStripSeedingAlg                                    INFO Seed statistics
+|---------------------|------------|
+| Spacepoints         |     392096 |
+| Seeds               |       8979 |
+| No track parameters |          0 |
+|---------------------|------------|
+ActsLargeRadiusTrackFindingAlg                                    INFO statistics
+|-----------------------------------|------------|------------|
+|                           All eta | SSS        | ALL        |
+|-----------------------------------|------------|------------|
+| Input seeds                       |       8979 |       8979 |
+| No track parameters               |          0 |          0 |
+| Used   seeds                      |       8940 |       8940 |
+| Cannot find track                 |       8812 |       8812 |
+| Duplicate seeds                   |         39 |         39 |
+| CKF tracks                        |        128 |        128 |
+| Rejected refined parameters       |          0 |          0 |
+| selected tracks                   |         25 |         25 |
+| Stopped tracks reaching max holes |       7621 |       7621 |
+| Seeds with more than one branch   |          0 |          0 |
+| Tracks failing second CKF         |        127 |        127 |
+| Stopped tracks below pT cut       |       1318 |       1318 |
+| Stopped tracks above max eta      |          0 |          0 |
+|-----------------------------------|------------|------------|
+ActsLargeRadiusTrackFindingAlg                                    INFO Ratios
+|------------------------------------------|------------|------------|
+|                                          | SSS        | ALL        |
+|------------------------------------------|------------|------------|
+| failed / seeds                           |   0.981401 |   0.981401 |
+| duplication / seeds                      | 0.00434347 | 0.00434347 |
+| Rejected refined params / seeds          |          0 |          0 |
+| selected / CKF tracks                    |   0.195312 |   0.195312 |
+| selected tracks / used seeds             | 0.00279642 | 0.00279642 |
+| branched tracks / used seeds             |          0 |          0 |
+| no 2nd CKF / CKF tracks                  |   0.992188 |   0.992188 |
+|------------------------------------------|------------|------------|
+| selected / CKF tracks           0.0- 0.5 |    0.15625 |    0.15625 |
+|                                 0.5- 1.0 |   0.111111 |   0.111111 |
+|                                 1.0- 1.5 |        0.1 |        0.1 |
+|                                 1.5- 2.0 |   0.583333 |   0.583333 |
+|                                 2.0- 2.5 |  0.0588235 |  0.0588235 |
+|                                 2.5- 3.0 |          0 |          0 |
+|                                 3.0- 3.5 |          0 |          0 |
+|                                 3.5-+inf |          0 |          0 |
+|------------------------------------------|------------|------------|
 ActsConversionPixelClusterPreparationAlg                          INFO Clusterization statistics
 |---------|------------|
 | Inputs  |    1165578 |
