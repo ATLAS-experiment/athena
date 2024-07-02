@@ -9,6 +9,7 @@
 
 #include "GeneratorModules/GenBase.h"
 #include "AtlasHepMC/GenParticle.h"
+#include "TruthUtils/Loops.h"
 #include <set>
 #include <memory>
 
@@ -41,7 +42,7 @@ private:
   //@{
   bool isPID0(const HepMC::ConstGenParticlePtr& p) const;
   bool isNonTransportableInDecayChain(const HepMC::ConstGenParticlePtr& p) const;
-  bool isLoop(const HepMC::ConstGenParticlePtr& p) const;
+  bool isSimpleLoop(const HepMC::ConstGenParticlePtr& p) const;
   bool fromDecay(const HepMC::ConstGenParticlePtr& p, std::shared_ptr<std::set<int> >& storage) const;
   //@}
 
@@ -50,7 +51,6 @@ private:
   bool m_killLoops;   // Kill loops?
   bool m_killPDG0;    // Kill PDG0 particles?
   bool m_cleanDecays; // Clean decays?
-  bool m_loopByBC;    // Detect loops by barcode
   //@}
 
   /// @name Cleaned-particle counters
@@ -63,6 +63,10 @@ private:
   //@}
    
   std::map<int,int> m_pidmap; //!< map of pids to change.
+
+
+  MC::Loops<HepMC::GenEvent,HepMC::ConstGenParticlePtr,HepMC::ConstGenVertexPtr> m_looper; //!< member to detect loops
+
 
 };
 

@@ -6,7 +6,6 @@
 #include "EvgenProdTools/TestHepMC.h"
 #include "GaudiKernel/DataSvc.h"
 #include "TruthUtils/HepMCHelpers.h"
-#include "TruthUtils/HepMCHelpers.h"
 #include "PathResolver/PathResolver.h"
 
 // For find
@@ -18,6 +17,7 @@ TestHepMC::TestHepMC(const std::string& name, ISvcLocator* pSvcLocator)
   : GenBase(name, pSvcLocator),
     m_thistSvc("THistSvc", name)
 {
+  declareProperty("MaxLoops",      m_maxloops = -1); //< Maximal number of particles allowed in the loops. -1 == any number
   declareProperty("PdgToSearch",      m_pdg = 15); //< @todo This test is a bit weirdly specific to taus
   declareProperty("CmEnergy",         m_cm_energy = -1); // in MeV, -1 = get from event
   declareProperty("MaxTransVtxDisp",  m_max_dist_trans = 100.); // mm
@@ -282,6 +282,14 @@ StatusCode TestHepMC::execute() {
     std::vector<HepMC::ConstGenParticlePtr> unstNoEnd;
     std::vector<HepMC::ConstGenParticlePtr> unDecPi0;
     std::vector<HepMC::ConstGenParticlePtr> undisplaceds;
+
+    m_looper.findLoops(evt,true);
+    ATH_MSG_INFO("Found " << m_looper.loop_vertices().size() << " vertices in loops");
+    ATH_MSG_INFO("Found " << m_looper.loop_particles().size() << " particles in loops");
+    if (m_looper.loop_particles().size() > 0) {
+      ATH_MSG_INFO("Please use MC::Loops::findLoops for this event to obtain all particles and vertices in the loops");
+      if (m_maxloops > 0 && m_looper.loop_particles().size() > static_cast<std::size_t>(m_maxloops) ) filter_pass = false;
+    }
 
 #ifdef HEPMC3
     const auto xsec = evt->cross_section();

@@ -13,9 +13,10 @@
 #include "TH1.h"
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/Relatives.h"
-#include<cmath>
+#include "TruthUtils/Loops.h"
+#include <cmath>
 
-#include<fstream>
+#include <fstream>
 
 
 /// Filtering algorithm to sanity check HepMC event features.
@@ -39,6 +40,7 @@ public:
 
  private:
 
+  int         m_maxloops;
   int         m_pdg;
   double      m_cm_energy, m_cme_diff;
   double      m_energy_diff, m_max_energy_diff;
@@ -124,6 +126,9 @@ public:
   TH1F* m_h_beamparticle1_Energy;
   TH1F* m_h_beamparticle2_Energy;
   TH1F* m_h_cmEnergyDiff;
+
+  MC::Loops<HepMC::GenEvent,HepMC::ConstGenParticlePtr,HepMC::ConstGenVertexPtr> m_looper; //!< member to detect loops
+
 
 };
 
