@@ -104,7 +104,7 @@ public:
     IOVDbConn connection(m_cool_con_str, true, m_log);
     IOVDbFolder f(&(connection), parser, m_log, m_clidSvc.get(), nullptr, false, false, "COOL_DATABASE",false,"","",true);
     f.preLoadFolder(tagInfoMgr.get() , 0, 0);
-    f.loadCache(m_vkey, 0,m_gTagCool.c_str(), true);
+    f.loadCache(m_vkey, 0,m_gTagCool, true);
   }
   void startCrest(){
     ServiceHandle<ITagInfoMgr> tagInfoMgr{"TagInfoMgr","TagInfoMgr"};
