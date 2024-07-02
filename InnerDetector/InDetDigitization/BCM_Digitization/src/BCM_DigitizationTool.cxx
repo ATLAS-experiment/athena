@@ -119,7 +119,7 @@ void BCM_DigitizationTool::processSiHit(const SiHit &currentHit, double eventTim
   const int barcode = HepMC::barcode(particleLink); // FIXME barcode-based
   if (
       (barcode == 0 && particleLink.id() == 0) // delta-ray
-      || barcode == HepMC::SINGLE_PARTICLE // FIXME barcode-based - need an id-based equivalent of this check
+      || barcode == HepMC::SINGLE_PARTICLE_BARCODE // FIXME barcode-based - need an id-based equivalent of this check
       ) {
     return;
   }

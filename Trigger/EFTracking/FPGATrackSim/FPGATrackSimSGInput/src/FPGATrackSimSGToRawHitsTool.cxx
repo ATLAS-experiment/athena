@@ -767,7 +767,7 @@ void FPGATrackSimSGToRawHitsTool::getTruthInformation(InDetSimDataCollection::co
     const float genEta = particleLink->momentum().pseudoRapidity();
     const float genPt = particleLink->momentum().perp(); // MeV
     // reject unstable particles
-    if (!MC::isStable(particleLink)) { continue; }
+    if (!MC::isStable(particleLink.cptr())) { continue; }
     // reject secondaries and low pT (<400 MeV) pileup
     if (HepMC::is_simulation_particle(particleLink.cptr()) ||particleLink.barcode() == 0) { continue; }  // FIXME
     // reject far forward particles
