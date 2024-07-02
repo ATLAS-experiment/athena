@@ -7,9 +7,12 @@
 
 #include <TauAnalysisAlgorithms/TauCombineMuonRMTausAlg.h>
 
+#include "xAODBase/IParticleHelpers.h"
+
 // unnamed namespace for helpers
 namespace {
     const static SG::ConstAuxElement::Decorator<char> decSelection("SelectedByMuonRemovalCombination");
+    const static SG::ConstAccessor<ElementLink<xAOD::TauJetContainer>> linkAcc("originalTauJet");
 }
 
 namespace CP
@@ -44,7 +47,11 @@ namespace CP
             for (const xAOD::TauJet* tau : combined_taus_vec){
                 decSelection(*tau) = true;
                 xAOD::TauJet* newTau = new xAOD::TauJet();
-                *newTau = *tau;
+                newTau->makePrivateStore(*tau);
+                if(linkAcc.isAvailable(*tau)){
+                  auto link = linkAcc(*tau);
+                  if(link.isValid()) setOriginalObjectLink(**link, *newTau);
+                }
                 outputTauCont->push_back(newTau);
             }
             ANA_CHECK (evtStore()->record (outputTauCont,    m_outputTauHandle.getName (sys)));
