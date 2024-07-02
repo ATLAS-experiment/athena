@@ -145,7 +145,10 @@ class FPGATrackSimLogicalHitsProcessAlg : public AthAlgorithm
 
 
         StatusCode readInputs(bool & done);
-        StatusCode processInputs();
+        StatusCode processInputs(SG::WriteHandle<FPGATrackSimHitCollection> &FPGAHitUnmapped_1st,       
+                                 SG::WriteHandle<FPGATrackSimClusterCollection> &FPGAClusters_1st,
+                                 SG::WriteHandle<FPGATrackSimClusterCollection> &FPGAClustersFiltered_1st,
+                                 SG::WriteHandle<FPGATrackSimClusterCollection> &FPGASpacePoints_1st);
         StatusCode secondStageProcessing(std::vector<FPGATrackSimTrack> const & tracks_1st,
                                          std::vector<FPGATrackSimRoad*> & roads_2nd, std::vector<FPGATrackSimTrack> & tracks_2nd);
 
