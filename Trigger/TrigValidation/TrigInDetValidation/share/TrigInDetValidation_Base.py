@@ -118,9 +118,11 @@ if GridFiles:
        rdo2aod.input = ''
        rdo2aod.args += ' --inputRDOFile=$ArtInFile '
 
-# temporary conditions override: force MC23e global conditions tag until input RDOs are updated, unless conditionsOverride is False
-if "conditionsOverride" not in locals() or conditionsOverride:
+# temporary conditions override: force MC23e global tag by default and Run4 global tag for Run4 inputs, until input RDOs are updated
+if "conditionsOverride" not in locals():
     rdo2aod.args += ' --conditionsTag "default:OFLCOND-MC23-SDR-RUN3-05"'
+elif conditionsOverride == "Run4":
+    rdo2aod.args += ' --conditionsTag "default:OFLCOND-MC21-SDR-RUN4-01"'
 
 
 if (Malloc):
