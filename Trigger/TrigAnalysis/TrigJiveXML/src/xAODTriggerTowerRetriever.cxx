@@ -1,10 +1,9 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigJiveXML/xAODTriggerTowerRetriever.h"
 
-#include <string>
 
 #include "CLHEP/Units/SystemOfUnits.h"
 
@@ -116,21 +115,22 @@ namespace JiveXML {
     } // end of TT loop
    
     DataMap myDataMap;
-    myDataMap["phi"] = phi;
-    myDataMap["eta"] = eta;
-    myDataMap["emEnergy"] = emEnergyVec;
-    myDataMap["hadEnergy"] = hadEnergyVec;
-    myDataMap["sumEnergy"] = sumEnergyVec;
+    int nEntries = phi.size();
+    myDataMap["phi"] = std::move(phi);
+    myDataMap["eta"] = std::move(eta);
+    myDataMap["emEnergy"] = std::move(emEnergyVec);
+    myDataMap["hadEnergy"] = std::move(hadEnergyVec);
+    myDataMap["sumEnergy"] = std::move(sumEnergyVec);
 
-    myDataMap["emADC"] = emADCVec;
-    myDataMap["hadADC"] = hadADCVec;
-    myDataMap["numADC"] = numADCVec;
-    myDataMap["emBCID"] = emBCIDVec;
-    myDataMap["hadBCID"] = hadBCIDVec;
-    myDataMap["isEMSaturated"] = isEMSaturated;
-    myDataMap["isHadSaturated"] = isHadSaturated;
+    myDataMap["emADC"] = std::move(emADCVec);
+    myDataMap["hadADC"] = std::move(hadADCVec);
+    myDataMap["numADC"] = std::move(numADCVec);
+    myDataMap["emBCID"] = std::move(emBCIDVec);
+    myDataMap["hadBCID"] = std::move(hadBCIDVec);
+    myDataMap["isEMSaturated"] = std::move(isEMSaturated);
+    myDataMap["isHadSaturated"] = std::move(isHadSaturated);
 
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << dataTypeName() << ": "<< phi.size()
+    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << dataTypeName() << ": "<< nEntries
 					    << " from: " << m_sgKey << endmsg;
 
     //forward data to formating tool
