@@ -1,12 +1,14 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
 #ifndef HiStrng_h
 #define HiStrng_h
 
-extern "C" { void* histrng_address_(void); }
+#include <cstdint>
+
+extern "C" { uintptr_t histrng_address_(); }
 /**
 @class HiStrng
 @brief       Class definition for HiStrng, which is used
@@ -56,7 +58,7 @@ HiStrng::HISTRNG* HiStrng::s_histrng =0;
 
 inline void
 HiStrng::init(void)
-{ if (!s_histrng) s_histrng = static_cast<HISTRNG*>(histrng_address_()); }
+{ if (!s_histrng) s_histrng = reinterpret_cast<HISTRNG*>(histrng_address_()); }
 
 // Constructor
 inline

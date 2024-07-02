@@ -1,12 +1,14 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
 #ifndef HiMain2_h
 #define HiMain2_h
 
-extern "C" { void* himain2_address_(void); }
+#include <cstdint>
+
+extern "C" { uintptr_t himain2_address_(); }
 /**
 @class HiMain2
 @brief       Class definition for HiMain2, which is used
@@ -62,7 +64,7 @@ HiMain2::HIMAIN2* HiMain2::s_himain2 =0;
 
 inline void
 HiMain2::init(void)
-{ if (!s_himain2) s_himain2 = static_cast<HIMAIN2*>(himain2_address_()); }
+{ if (!s_himain2) s_himain2 = reinterpret_cast<HIMAIN2*>(himain2_address_()); }
 
 // Constructor
 inline

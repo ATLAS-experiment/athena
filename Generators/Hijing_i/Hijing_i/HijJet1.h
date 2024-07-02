@@ -1,12 +1,14 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
 #ifndef HijJet1_h
 #define HijJet1_h
 
-extern "C" { void* hijjet1_address_(void); }
+#include <cstdint>
+
+extern "C" { uintptr_t hijjet1_address_(); }
 /**
 @brief   Class definition for HijJet1, which is used
       to modify the Hijing HIJJET1 common.
@@ -75,7 +77,7 @@ HijJet1::HIJJET1* HijJet1::s_hijjet1 =0;
 
 inline void
 HijJet1::init(void)
-{ if (!s_hijjet1) s_hijjet1 = static_cast<HIJJET1*>(hijjet1_address_()); }
+{ if (!s_hijjet1) s_hijjet1 = reinterpret_cast<HIJJET1*>(hijjet1_address_()); }
 
 // Constructor
 inline

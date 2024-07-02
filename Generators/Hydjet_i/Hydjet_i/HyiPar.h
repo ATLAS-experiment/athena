@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -10,9 +10,9 @@
 #ifndef HyiPar_h
 #define HyiPar_h
 
-#include "CxxUtils/unused.h"
+#include <cstdint>
 
-extern "C" { void* hyipar_address_(void); }
+extern "C" { uintptr_t hyipar_address_(); }
 
 class HyiPar {
 public:
@@ -53,8 +53,6 @@ private:
       int         ipr;
     };
 
-    int ATH_UNUSED_MEMBER(m_dummy);
-    float ATH_UNUSED_MEMBER(m_realdummy);
     static HYIPAR* s_hyipar;
 };
 
@@ -63,12 +61,10 @@ HyiPar::HYIPAR* HyiPar::s_hyipar =0;
 
 inline void
 HyiPar::initf(void)
-{ if (!s_hyipar) s_hyipar = static_cast<HYIPAR*>(hyipar_address_()); }
+{ if (!s_hyipar) s_hyipar = reinterpret_cast<HYIPAR*>(hyipar_address_()); }
 
 inline 
 HyiPar::HyiPar() 
-    : m_dummy		(-999),
-      m_realdummy	(-999.)
 {}
 
 inline 

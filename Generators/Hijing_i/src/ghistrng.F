@@ -3,9 +3,9 @@
       COMMON/HISTRNG/NFP(300,15),PP(300,15),NFT(300,15),PT(300,15)
       SAVE  /HISTRNG/
       EXTERNAL HIDATA ! All that is required to force loading of BLOCK DATA
-      FVOIDP GETADDR
+      FVOIDP GETADDRI
 
-      HISTRNG_ADDRESS = GETADDR(NFP)
+      HISTRNG_ADDRESS = GETADDRI(NFP)
       
       RETURN
       END

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -10,7 +10,9 @@
 #ifndef HyFlow_h
 #define HyFlow_h
 
-extern "C" { void* hyflow_address_(void); }
+#include <cstdint>
+
+extern "C" { uintptr_t hyflow_address_(); }
 
 class HyFlow {
 public:
@@ -45,7 +47,7 @@ HyFlow::HYFLOW* HyFlow::s_hyflow =0;
 
 inline void
 HyFlow::init(void)
-{ if (!s_hyflow) s_hyflow = static_cast<HYFLOW*>(hyflow_address_()); }
+{ if (!s_hyflow) s_hyflow = reinterpret_cast<HYFLOW*>(hyflow_address_()); }
 
 // Constructor
 inline

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // -------------------------------------------------------------
@@ -59,10 +59,10 @@ extern "C"
               int*,
               int*,
               int*,
-              int,
-              int,
-              int);
-  void hijing_(const char*, float*, float*, int);
+              long int,
+              long int,
+              long int);
+  void hijing_(const char*, float*, float*, long int);
 }
 
 Hijing::Hijing(const std::string& name,

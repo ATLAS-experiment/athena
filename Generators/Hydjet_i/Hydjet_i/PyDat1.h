@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -10,7 +10,9 @@
 #ifndef PyDat1_h
 #define PyDat1_h
 
-extern "C" { void* pydat1_address_(void); }
+#include <cstdint>
+
+extern "C" { uintptr_t pydat1_address_(); }
 
 class PyDat1 {
 public:
@@ -59,7 +61,7 @@ PyDat1::PYDAT1* PyDat1::s_pydat1 =0;
 
 inline void
 PyDat1::init(void)
-{ if (!s_pydat1) s_pydat1 = static_cast<PYDAT1*>(pydat1_address_()); }
+{ if (!s_pydat1) s_pydat1 = reinterpret_cast<PYDAT1*>(pydat1_address_()); }
 
 inline 
 PyDat1::PyDat1() 

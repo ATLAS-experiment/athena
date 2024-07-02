@@ -3,9 +3,9 @@
       COMMON/RANSEED/NSEED
       SAVE  /RANSEED/
       EXTERNAL HIDATA ! All that is required to force loading of BLOCK DATA
-      FVOIDP GETADDR
+      FVOIDP GETADDRI
 
-      RANSEED_ADDRESS = GETADDR(NSEED)
+      RANSEED_ADDRESS = GETADDRI(NSEED)
       
       RETURN
       END

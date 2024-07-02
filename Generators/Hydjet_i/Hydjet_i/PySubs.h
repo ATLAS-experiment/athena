@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -10,7 +10,9 @@
 #ifndef PySubs_h
 #define PySubs_h
 
-extern "C" { void* pysubs_address_(void); }
+#include <cstdint>
+
+extern "C" { uintptr_t pysubs_address_(); }
 
 class PySubs {
 public:
@@ -61,7 +63,7 @@ PySubs::PYSUBS* PySubs::s_pysubs =0;
 
 inline void
 PySubs::init(void)
-{ if (!s_pysubs) s_pysubs = static_cast<PYSUBS*>(pysubs_address_()); }
+{ if (!s_pysubs) s_pysubs = reinterpret_cast<PYSUBS*>(pysubs_address_()); }
 
 inline 
 PySubs::PySubs() 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -10,7 +10,9 @@
 #ifndef PyPars_h
 #define PyPars_h
 
-extern "C" { void* pypars_address_(void); }
+#include <cstdint>
+
+extern "C" { uintptr_t pypars_address_(); }
 
 class PyPars {
 public:
@@ -59,7 +61,7 @@ PyPars::PYPARS* PyPars::s_pypars =0;
 
 inline void
 PyPars::init(void)
-{ if (!s_pypars) s_pypars = static_cast<PYPARS*>(pypars_address_()); }
+{ if (!s_pypars) s_pypars = reinterpret_cast<PYPARS*>(pypars_address_()); }
 
 inline 
 PyPars::PyPars() 

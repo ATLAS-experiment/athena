@@ -1,12 +1,14 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
 #ifndef RanSeed_h
 #define RanSeed_h
 
-extern "C" { void* ranseed_address_(void); }
+#include <cstdint>
+
+extern "C" { uintptr_t ranseed_address_(); }
 
 /**
 @class RanSeed
@@ -48,7 +50,7 @@ RanSeed::~RanSeed()
 inline int&
 RanSeed::nseed	(void)
 {
-    if (!s_ranseed) s_ranseed = static_cast<RANSEED*>(ranseed_address_());
+    if (!s_ranseed) s_ranseed = reinterpret_cast<RANSEED*>(ranseed_address_());
     return s_ranseed->nseed;
 }
 
