@@ -413,13 +413,6 @@ namespace CP {
 
     xAOD::Muon::Quality MuonSelectionTool::getQuality(const xAOD::Muon& mu) const {
         ATH_MSG_VERBOSE("Evaluating muon quality...");
-        static const std::set<int> run3_qual{xAOD::Muon::Loose, xAOD::Muon::Medium, xAOD::Muon::Tight, 4};
-        //currently allow only tight, medium, loose and highpt when not in expert mode for run3
-        if(isRun3() && !m_developMode && !run3_qual.count(m_quality))
-        {
-          ATH_MSG_VERBOSE("tool configured with quality="<<m_quality<<" which is currently only supported in expert mode for run3");
-          return xAOD::Muon::VeryLoose;
-        }
         if (isRun3() && mu.isAuthor(xAOD::Muon::Author::Commissioning) && !m_allowComm) {
             ATH_MSG_VERBOSE("Reject authors from the commissioning chain");
             return xAOD::Muon::VeryLoose;
@@ -990,8 +983,11 @@ namespace CP {
 
             //::: BIS78
             if (isBIS78(etaMS, phiMS)) {
-                ATH_MSG_VERBOSE("Muon is in BIS7/8 eta/phi region - fail high-pT");
-                return false;
+		// No BIS78 chambers for Run2    
+                if (!isRun3()) {
+		    ATH_MSG_VERBOSE("Muon is in BIS7/8 eta/phi region - fail high-pT");
+                    return false;
+	    	}	
             }
             
             //// tentatively removed for r22, to be rechecked
@@ -1005,11 +1001,6 @@ namespace CP {
 
             //::: BEE
             if (isBEE(etaMS, phiMS)) {
-                // in Run3, large mis-alignment on the BEE chamber was found. temporarily mask the BEE region
-                if (isRun3()) {
-                    ATH_MSG_VERBOSE("Muon is in BEE eta/phi region - fail high-pT");
-                    return false;
-                }
                 // Muon falls in the BEE eta-phi region: asking for 4 good precision layers
                 // if( nGoodPrecLayers < 4 ) return false; // postponed (further studies needed)
                 if (summary.nprecisionLayers < 4) {
