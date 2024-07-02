@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: ut_xaodcore_printhelpers_test.cxx 646509 2015-02-12 16:43:18Z krasznaa $
@@ -13,6 +13,7 @@
 #include "AthContainers/AuxElement.h"
 #include "AthContainers/DataVector.h"
 #include "AthContainers/AuxStoreInternal.h"
+#include "AthContainers/Accessor.h"
 
 // Local include(s):
 #include "xAODCore/tools/PrintHelpers.h"
@@ -31,15 +32,18 @@ int main() {
    // Create an object with a private store, and fill it with some variables:
    SG::AuxElement standalone;
    standalone.makePrivateStore();
-   standalone.auxdata< int >( "IntValue" ) = 12;
-   standalone.auxdata< float >( "FloatValue" ) = 3.14;
-   standalone.auxdata< std::vector< int > >( "VecIntValue" ) =
-      std::vector< int >{ 1, 2, 3 };
-   standalone.auxdata< std::vector< float > >( "VecFloatValue" ) =
-      std::vector< float >{ 1.2, 2.3, 3.4 };
-   standalone.auxdata< TypeA >( "TypeAValue" ) = TypeA{ 5 };
-   standalone.auxdata< std::vector< TypeA > >( "VecTypeAValue" ) =
-      std::vector< TypeA >{ TypeA{ 6 }, TypeA{ 7 } };
+   SG::Accessor< int > IntValue( "IntValue" );
+   IntValue( standalone ) = 12;
+   SG::Accessor< float > FloatValue( "FloatValue" );
+   FloatValue( standalone ) = 3.14;
+   SG::Accessor< std::vector< int > > VecIntValue( "VecIntValue" );
+   VecIntValue( standalone ) = std::vector< int >{ 1, 2, 3 };
+   SG::Accessor< std::vector< float > > VecFloatValue( "VecFloatValue" );
+   VecFloatValue( standalone ) = std::vector< float >{ 1.2, 2.3, 3.4 };
+   SG::Accessor< TypeA > TypeAValue( "TypeAValue" );
+   TypeAValue( standalone ) = TypeA{ 5 };
+   SG::Accessor< std::vector< TypeA > > VecTypeAValue( "VecTypeAValue" );
+   VecTypeAValue( standalone ) = std::vector< TypeA >{ TypeA{ 6 }, TypeA{ 7 } };
    std::cout << standalone << std::endl;
 
    // Create a vector, and decorate its first element:
@@ -48,8 +52,10 @@ int main() {
    vec.setStore( &store );
    SG::AuxElement* element = new SG::AuxElement();
    vec.push_back( element );
-   element->auxdata< long >( "LongValue" ) = 234;
-   element->auxdata< uint32_t >( "UInt32Value" ) = 0x123;
+   SG::Accessor< long > LongValue( "LongValue" );
+   LongValue( *element ) = 234;
+   SG::Accessor< uint32_t > UInt32Value( "UInt32Value" );
+   UInt32Value( *element ) = 0x123;
    std::cout << *element << std::endl;
 
    // Finally, do one test with the dump(...) function as well:

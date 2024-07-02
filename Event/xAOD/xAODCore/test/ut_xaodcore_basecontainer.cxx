@@ -10,17 +10,19 @@ int main() {
     
     obj = new SG::AuxElement();
     interface.push_back( obj );
-    obj->auxdata< int >( "AnInt" ) = 7;
-    obj->auxdata< float >( "AFloat" ) = 0.7;
+    SG::Accessor< int > AnInt( "AnInt" );
+    SG::Accessor< float > AFloat( "AFloat" );
+    AnInt( *obj ) = 7;
+    AFloat( *obj ) = 0.7;
 
 
     obj = new SG::AuxElement();
     interface.push_back( obj );
-    obj->auxdata< int >( "AnInt" ) = 9;
-    obj->auxdata< float >( "AFloat" ) = 1.9;
+    AnInt( *obj ) = 9;
+    AFloat( *obj ) = 1.9;
 
     for ( auto el: interface) {
-        std::cout << el->auxdata<int>("AnInt") << " " << el->auxdata<float>("AFloat") << std::endl;
+       std::cout << AnInt( *el ) << " " << AFloat( *el ) << std::endl;
     }
 
 

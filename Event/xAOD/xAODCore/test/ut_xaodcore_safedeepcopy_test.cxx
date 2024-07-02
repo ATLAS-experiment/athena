@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: ut_xaodcore_safedeepcopy_test.cxx 682039 2015-07-10 09:15:16Z krasznaa $
@@ -11,6 +11,7 @@
 // Core include(s):
 #include "AthContainers/AuxElement.h"
 #include "AthContainers/DataVector.h"
+#include "AthContainers/Accessor.h"
 
 // Local include(s):
 #include "xAODCore/AuxContainerBase.h"
@@ -63,15 +64,18 @@ int main() {
    // Fill them with the same data:
    float j = 0.0;
    short k = 0;
+   SG::Accessor< int >   testVar1( "testVar1" );
+   SG::Accessor< float > testVar2( "testVar2" );
+   SG::Accessor< short > testVar3( "testVar3" );
    for( int i = 0; i < 3; ++i, j += 1.5, k += 2 ) {
       healthyCont.push_back( new SG::AuxElement() );
-      healthyCont.back()->auxdata< int >( "testVar1" ) = i;
-      healthyCont.back()->auxdata< float >( "testVar2" ) = j;
-      healthyCont.back()->auxdata< short >( "testVar3" ) = k;
+      testVar1( *healthyCont.back() ) = i;
+      testVar2( *healthyCont.back() ) = j;
+      testVar3( *healthyCont.back() ) = k;
       brokenCont.push_back( new SG::AuxElement() );
-      brokenCont.back()->auxdata< int >( "testVar1" ) = i;
-      brokenCont.back()->auxdata< float >( "testVar2" ) = j;
-      brokenCont.back()->auxdata< short >( "testVar3" ) = k;
+      testVar1( *brokenCont.back() ) = i;
+      testVar2( *brokenCont.back() ) = j;
+      testVar3( *brokenCont.back() ) = k;
    }
 
    // Print their contents:

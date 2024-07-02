@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // System include(s):
@@ -25,6 +25,9 @@
 #endif
 #include "AthContainers/AuxElement.h"
 #include "AthContainers/DataVector.h"
+#include "AthContainers/ConstAccessor.h"
+#include "AthContainers/Accessor.h"
+#include "AthContainers/Decorator.h"
 
 // Local include(s):
 #include "xAODCore/AuxContainerBase.h"
@@ -62,22 +65,31 @@ int testCopy (const DataVector<SG::AuxElement>& origVec,
    SIMPLE_ASSERT( copyAux.getSelectedAuxIDs().size() == 4 );
 
    int index = 0;
+   SG::ConstAccessor< int > IntVarConst( "IntVar" );
+   SG::ConstAccessor< int > Int2VarConst( "Int2Var" );
+   SG::ConstAccessor< int > Int3VarConst( "Int3Var" );
+   SG::ConstAccessor< float > FloatVarConst( "FloatVar" );
+   SG::ConstAccessor< double > DoubleVarConst( "DoubleVar" );
    for( const SG::AuxElement* el : copyVec ) {
-      SIMPLE_ASSERT( el->auxdataConst< int >( "IntVar" ) == index );
-      SIMPLE_ASSERT( el->auxdataConst< int >( "Int2Var" ) == index );
-      SIMPLE_ASSERT( el->auxdataConst< int >( "Int3Var" ) == index );
-      SIMPLE_ASSERT( std::abs( el->auxdataConst< float >( "FloatVar" ) -
+      SIMPLE_ASSERT( IntVarConst( *el ) == index );
+      SIMPLE_ASSERT( Int2VarConst( *el ) == index );
+      SIMPLE_ASSERT( Int3VarConst( *el ) == index );
+      SIMPLE_ASSERT( std::abs( FloatVarConst( *el ) -
                                static_cast< float >( index + 1 ) ) < 0.0001 );
       ++index;
    }
 
    // Create some modifications
+   SG::Accessor< int > IntVar( "IntVar" );
+   SG::Accessor< int > Int2Var( "Int2Var" );
+   SG::Accessor< double > DoubleVar( "DoubleVar" );
    for( size_t i = 0; i < copyVec.size(); ++i ) {
-      copyVec[ i ]->auxdata< int >( "IntVar" ) = i + 2;
-      copyVec[ i ]->auxdata< double >( "DoubleVar" ) = 3.14;
+      IntVar( *copyVec[ i ] ) = i + 2;
+      DoubleVar( *copyVec[ i ] ) = 3.14;
    }
-   copyVec.front()->auxdata< int >( "Int2Var" ) = 5;
-   copyVec.front()->auxdecor< int >( "Int3Var" ) = 6;
+   Int2Var( *copyVec.front() ) = 5;
+   SG::Decorator< int > Int3Decor( "Int3Var" );
+   Int3Decor( *copyVec.front() ) = 6;
 
    // Check what happened:
    copyAux.setShallowIO( true );
@@ -91,19 +103,19 @@ int testCopy (const DataVector<SG::AuxElement>& origVec,
 
    index = 0;
    for( const SG::AuxElement* el : copyVec ) {
-      SIMPLE_ASSERT( el->auxdataConst< int >( "IntVar" ) == index + 2 );
-      SIMPLE_ASSERT( std::abs( el->auxdataConst< float >( "FloatVar" ) -
+      SIMPLE_ASSERT( IntVarConst( *el ) == index + 2 );
+      SIMPLE_ASSERT( std::abs( FloatVarConst( *el ) -
                                static_cast< float >( index + 1 ) ) < 0.0001 );
-      SIMPLE_ASSERT( std::abs( el->auxdataConst< double >( "DoubleVar" ) -
+      SIMPLE_ASSERT( std::abs( DoubleVarConst( *el ) -
                                3.14 ) < 0.0001 );
       if( index > 0 ) {
-         SIMPLE_ASSERT( el->auxdataConst< int >( "Int2Var" ) == index );
-         SIMPLE_ASSERT( el->auxdataConst< int >( "Int3Var" ) == index );
+         SIMPLE_ASSERT( Int2VarConst( *el ) == index );
+         SIMPLE_ASSERT( Int3VarConst( *el ) == index );
       }
       ++index;
    }
-   SIMPLE_ASSERT( copyVec.front()->auxdataConst< int >( "Int2Var" ) == 5 );
-   SIMPLE_ASSERT( copyVec.front()->auxdataConst< int >( "Int3Var" ) == 6 );
+   SIMPLE_ASSERT( Int2VarConst( *copyVec.front() ) == 5 );
+   SIMPLE_ASSERT( Int3VarConst( *copyVec.front() ) == 6 );
 
    // Finally, test variable filtering:
    xAOD::AuxSelection sel;
@@ -123,13 +135,17 @@ int main() {
    xAOD::AuxContainerBase origAux;
    DataVector< SG::AuxElement > origVec;
    origVec.setStore( &origAux );
+   SG::Accessor< int > IntVar( "IntVar" );
+   SG::Accessor< int > Int2Var( "Int2Var" );
+   SG::Accessor< int > Int3Var( "Int3Var" );
+   SG::Accessor< float > FloatVar( "FloatVar" );
    for( int i = 0; i < 10; ++i ) {
       SG::AuxElement* e = new SG::AuxElement();
       origVec.push_back( e );
-      e->auxdata< int >( "IntVar" ) = i;
-      e->auxdata< int >( "Int2Var" ) = i;
-      e->auxdata< int >( "Int3Var" ) = i;
-      e->auxdata< float >( "FloatVar" ) = i + 1;
+      IntVar( *e ) = i;
+      Int2Var( *e ) = i;
+      Int3Var( *e ) = i;
+      FloatVar( *e ) = i + 1;
    }
 
 #ifdef XAOD_STANDALONE
