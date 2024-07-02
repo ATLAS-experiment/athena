@@ -108,6 +108,12 @@ class TauWorkingPointConfig (ConfigBlock) :
         self.addOption ('quality', None, type=str,
             info="the ID WP (string) to use. Supported ID WPs: Tight, Medium, "
             "Loose, VeryLoose, NoID.")
+        self.addOption ('use_eVeto', True, type=bool,
+            info="use selection with or without eVeto combined with tauID "
+            "recommendations: set it to False if electron mis-reconstructed as tau is not large background for your analysis")
+        self.addOption ('useGNTau', False, type=bool,
+            info="use GNTau based ID instead of RNNTau ID "    
+            "recommendations: that's new experimental feature and might come default soon") 
         self.addOption ('legacyRecommendations', False, type=bool,
             info="whether to use legacy tau-jet BDT and electron veto "
             "recommendations. The default is False.")
@@ -146,7 +152,15 @@ class TauWorkingPointConfig (ConfigBlock) :
         if postfix != '' and postfix[0] != '_' :
             postfix = '_' + postfix
 
-        nameFormat = 'TauAnalysisAlgorithms/tau_selection_{}.conf'
+        if self.useGNTau:
+            nameFormat = 'TauAnalysisAlgorithms/tau_selection_gntau_{}.conf'
+            if not self.use_eVeto:
+                nameFormat = 'TauAnalysisAlgorithms/tau_selection_gntau_{}_noeleid.conf'    
+        else:
+            nameFormat = 'TauAnalysisAlgorithms/tau_selection_{}.conf'
+            if not self.use_eVeto:
+                nameFormat = 'TauAnalysisAlgorithms/tau_selection_{}_noeleid.conf'
+
         if self.legacyRecommendations:
             nameFormat = 'TauAnalysisAlgorithms/tau_selection_{}_legacy.conf'
 
