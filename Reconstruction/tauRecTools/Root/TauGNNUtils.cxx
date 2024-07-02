@@ -354,21 +354,21 @@ bool ptJetSeed_log(const xAOD::TauJet &tau, double &out) {
 }
 
 bool absleadTrackEta(const xAOD::TauJet &tau, double &out){
-  static const SG::AuxElement::ConstAccessor<float> acc_absEtaLeadTrack("ABS_ETA_LEAD_TRACK");
+  static const SG::ConstAccessor<float> acc_absEtaLeadTrack("ABS_ETA_LEAD_TRACK");
   float absEtaLeadTrack = acc_absEtaLeadTrack(tau);
   out = std::max(0.f, absEtaLeadTrack);
   return true;
 }
 
 bool leadTrackDeltaEta(const xAOD::TauJet &tau, double &out){
-  static const SG::AuxElement::ConstAccessor<float> acc_absDeltaEta("TAU_ABSDELTAETA");
+  static const SG::ConstAccessor<float> acc_absDeltaEta("TAU_ABSDELTAETA");
   float absDeltaEta = acc_absDeltaEta(tau);
   out = std::max(0.f, absDeltaEta);
   return true;
 }
 
 bool leadTrackDeltaPhi(const xAOD::TauJet &tau, double &out){
-  static const SG::AuxElement::ConstAccessor<float> acc_absDeltaPhi("TAU_ABSDELTAPHI");
+  static const SG::ConstAccessor<float> acc_absDeltaPhi("TAU_ABSDELTAPHI");
   float absDeltaPhi = acc_absDeltaPhi(tau);
   out = std::max(0.f, absDeltaPhi);
   return true;
@@ -387,7 +387,7 @@ bool leadTrackProbNNorHT(const xAOD::TauJet &tau, double &out){
     const xAOD::TauTrack* tauLeadTrack = tracks.at(0);
     const xAOD::TrackParticle* xTrackParticle = tauLeadTrack->track();
     float eProbabilityHT = xTrackParticle->summaryValue(eProbabilityHT, xAOD::eProbabilityHT);
-    static const SG::AuxElement::ConstAccessor<float> acc_eProbabilityNN("eProbabilityNN");
+    static const SG::ConstAccessor<float> acc_eProbabilityNN("eProbabilityNN");
     float eProbabilityNN = acc_eProbabilityNN(*xTrackParticle);
     out = (tauLeadTrack->pt()>2000.) ? eProbabilityNN : eProbabilityHT;
   }
@@ -398,21 +398,21 @@ bool leadTrackProbNNorHT(const xAOD::TauJet &tau, double &out){
 }
 
 bool EMFracFixed(const xAOD::TauJet &tau, double &out){
-  static const SG::AuxElement::ConstAccessor<float> acc_emFracFixed("EMFracFixed");
+  static const SG::ConstAccessor<float> acc_emFracFixed("EMFracFixed");
   float emFracFixed = acc_emFracFixed(tau);
   out = std::max(emFracFixed, 0.0f);
   return true;
 }
 
 bool etHotShotWinOverPtLeadTrk(const xAOD::TauJet &tau, double &out){
-  static const SG::AuxElement::ConstAccessor<float> acc_etHotShotWinOverPtLeadTrk("etHotShotWinOverPtLeadTrk");
+  static const SG::ConstAccessor<float> acc_etHotShotWinOverPtLeadTrk("etHotShotWinOverPtLeadTrk");
   float etHotShotWinOverPtLeadTrk = acc_etHotShotWinOverPtLeadTrk(tau);
   out = std::max(etHotShotWinOverPtLeadTrk, 1e-6f);
   return true;
 }
 
 bool hadLeakFracFixed(const xAOD::TauJet &tau, double &out){
-  static const SG::AuxElement::ConstAccessor<float> acc_hadLeakFracFixed("hadLeakFracFixed");
+  static const SG::ConstAccessor<float> acc_hadLeakFracFixed("hadLeakFracFixed");
   float hadLeakFracFixed = acc_hadLeakFracFixed(tau);
   out = std::max(0.f, hadLeakFracFixed);
   return true;
@@ -586,7 +586,7 @@ bool eProbabilityHT(const xAOD::TauJet& /*tau*/, const xAOD::TauTrack &track, do
 }
 
 bool eProbabilityNN(const xAOD::TauJet& /*tau*/, const xAOD::TauTrack &track, double &out) {  
-    static const SG::AuxElement::ConstAccessor<float> acc_eProbabilityNN("eProbabilityNN");
+    static const SG::ConstAccessor<float> acc_eProbabilityNN("eProbabilityNN");
     out = acc_eProbabilityNN(track);
     return true;
 }
@@ -594,32 +594,32 @@ bool eProbabilityNN(const xAOD::TauJet& /*tau*/, const xAOD::TauTrack &track, do
 bool eProbabilityNNorHT(const xAOD::TauJet& /*tau*/, const xAOD::TauTrack &track, double &out) {  
   auto atrack = track.track();
   float eProbabilityHT = atrack->summaryValue(eProbabilityHT, xAOD::eProbabilityHT);
-  static const SG::AuxElement::ConstAccessor<float> acc_eProbabilityNN("eProbabilityNN");
+  static const SG::ConstAccessor<float> acc_eProbabilityNN("eProbabilityNN");
   float eProbabilityNN = acc_eProbabilityNN(*atrack);
   out = (atrack->pt()>2000.) ? eProbabilityNN : eProbabilityHT;
   return true;
 }
 
 bool chargedScoreRNN(const xAOD::TauJet& /*tau*/, const xAOD::TauTrack &track, double &out) {
-  static const SG::AuxElement::ConstAccessor<float> acc_chargedScoreRNN("rnn_chargedScore");
+  static const SG::ConstAccessor<float> acc_chargedScoreRNN("rnn_chargedScore");
   out = acc_chargedScoreRNN(track);
   return true;
 }
 
 bool isolationScoreRNN(const xAOD::TauJet& /*tau*/, const xAOD::TauTrack &track, double &out) {
-  static const SG::AuxElement::ConstAccessor<float> acc_isolationScoreRNN("rnn_isolationScore");
+  static const SG::ConstAccessor<float> acc_isolationScoreRNN("rnn_isolationScore");
   out = acc_isolationScoreRNN(track);
   return true;
 }
 
 bool conversionScoreRNN(const xAOD::TauJet& /*tau*/, const xAOD::TauTrack &track, double &out) {
-  static const SG::AuxElement::ConstAccessor<float> acc_conversionScoreRNN("rnn_conversionScore");
+  static const SG::ConstAccessor<float> acc_conversionScoreRNN("rnn_conversionScore");
   out = acc_conversionScoreRNN(track);
   return true;
 }
 
 bool fakeScoreRNN(const xAOD::TauJet& /*tau*/, const xAOD::TauTrack &track, double &out) {
-  static const SG::AuxElement::ConstAccessor<float> acc_fakeScoreRNN("rnn_fakeScore");
+  static const SG::ConstAccessor<float> acc_fakeScoreRNN("rnn_fakeScore");
   out = acc_fakeScoreRNN(track);
   return true;
 }
@@ -753,37 +753,32 @@ bool charge(const xAOD::TauJet& /*tau*/, const xAOD::TauTrack &track, double &ou
 }
 
 bool dz0_TV_PV0(const xAOD::TauJet& tau, const xAOD::TauTrack &/*track*/, double &out) {
-    out = 0.;
-    static const SG::AuxElement::ConstAccessor<float> acc_dz0TVPV0("dz0_TV_PV0");
-    if (tau.isAvailable<float>("dz0_TV_PV0")){out = acc_dz0TVPV0(tau);}
+    static const SG::ConstAccessor<float> acc_dz0TVPV0("dz0_TV_PV0");
+    out = acc_dz0TVPV0.withDefault(tau, 0);
     return true;
 }
 
 bool log_sumpt_TV(const xAOD::TauJet& tau, const xAOD::TauTrack &/*track*/, double &out) {
-    out=0.;
-    static const SG::AuxElement::ConstAccessor<float> acc_logsumptTV("log_sumpt_TV");
-    if (tau.isAvailable<float>("log_sumpt_TV")){out=acc_logsumptTV(tau);}
+    static const SG::ConstAccessor<float> acc_logsumptTV("log_sumpt_TV");
+    out = acc_logsumptTV.withDefault(tau, 0);
     return true;
 }
 
 bool log_sumpt2_TV(const xAOD::TauJet& tau, const xAOD::TauTrack &/*track*/, double &out) {
-    out=0.;
-    static const SG::AuxElement::ConstAccessor<float> acc_logsumpt2TV("log_sumpt2_TV");
-    if (tau.isAvailable<float>("log_sumpt2_TV")){out=acc_logsumpt2TV(tau);}
+    static const SG::ConstAccessor<float> acc_logsumpt2TV("log_sumpt2_TV");
+    out = acc_logsumpt2TV.withDefault(tau, 0);
     return true;
 }
 
 bool log_sumpt_PV0(const xAOD::TauJet& tau, const xAOD::TauTrack &/*track*/, double &out) {
-    out=0.;
-    static const SG::AuxElement::ConstAccessor<float> acc_logsumptPV0("log_sumpt_PV0");
-    if (tau.isAvailable<float>("log_sumpt_PV0")){out=acc_logsumptPV0(tau);}
+    static const SG::ConstAccessor<float> acc_logsumptPV0("log_sumpt_PV0");
+    out = acc_logsumptPV0.withDefault(tau, 0);
     return true;
 }
 
 bool log_sumpt2_PV0(const xAOD::TauJet& tau, const xAOD::TauTrack &/*track*/, double &out) {
-    out=0.;
-    static const SG::AuxElement::ConstAccessor<float> acc_logsumpt2PV0("log_sumpt2_PV0");
-    if (tau.isAvailable<float>("log_sumpt2_PV0")){out=acc_logsumpt2PV0(tau);}
+    static const SG::ConstAccessor<float> acc_logsumpt2PV0("log_sumpt2_PV0");
+    out = acc_logsumpt2PV0.withDefault(tau, 0);
     return true;
 }
 
@@ -834,7 +829,7 @@ bool CENTER_LAMBDA(const xAOD::TauJet& /*tau*/, const xAOD::CaloVertexedTopoClus
 }
 
 bool SECOND_LAMBDAOverClustersMeanSecondLambda(const xAOD::TauJet &tau, const xAOD::CaloVertexedTopoCluster &cluster, double &out) {
-  static const SG::AuxElement::ConstAccessor<float> acc_ClustersMeanSecondLambda("ClustersMeanSecondLambda");
+  static const SG::ConstAccessor<float> acc_ClustersMeanSecondLambda("ClustersMeanSecondLambda");
   float ClustersMeanSecondLambda = acc_ClustersMeanSecondLambda(tau);
   double secondLambda(0);
   const auto success = cluster.clust().retrieveMoment(MomentType::SECOND_LAMBDA, secondLambda);
@@ -843,7 +838,7 @@ bool SECOND_LAMBDAOverClustersMeanSecondLambda(const xAOD::TauJet &tau, const xA
 }
 
 bool CENTER_LAMBDAOverClustersMeanCenterLambda(const xAOD::TauJet &tau, const xAOD::CaloVertexedTopoCluster &cluster, double &out) {
-  static const SG::AuxElement::ConstAccessor<float> acc_ClustersMeanCenterLambda("ClustersMeanCenterLambda");
+  static const SG::ConstAccessor<float> acc_ClustersMeanCenterLambda("ClustersMeanCenterLambda");
   float ClustersMeanCenterLambda = acc_ClustersMeanCenterLambda(tau);
   double centerLambda(0);
   const auto success = cluster.clust().retrieveMoment(MomentType::CENTER_LAMBDA, centerLambda);
@@ -867,11 +862,11 @@ bool FirstEngDensOverClustersMeanFirstEngDens(const xAOD::TauJet &tau, const xAO
   bool status = cluster.clust().retrieveMoment(MomentType::FIRST_ENG_DENS, clusterFirstEngDens);
   if (clusterFirstEngDens < 1e-6) clusterFirstEngDens = 1e-6;
 
-  static const SG::AuxElement::ConstAccessor<float> acc_ClusterTotalEnergy("ClusterTotalEnergy");
+  static const SG::ConstAccessor<float> acc_ClusterTotalEnergy("ClusterTotalEnergy");
   float clusterTotalEnergy = acc_ClusterTotalEnergy(tau);
   if (clusterTotalEnergy < 1e-6) clusterTotalEnergy = 1e-6;
 
-  static const SG::AuxElement::ConstAccessor<float> acc_ClustersMeanFirstEngDens("ClustersMeanFirstEngDens");
+  static const SG::ConstAccessor<float> acc_ClustersMeanFirstEngDens("ClustersMeanFirstEngDens");
   float clustersMeanFirstEngDens = acc_ClustersMeanFirstEngDens(tau);
 
   out = std::log10(clusterFirstEngDens/clusterTotalEnergy) - clustersMeanFirstEngDens;
