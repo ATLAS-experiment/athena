@@ -7,6 +7,7 @@
 #include "OutputStreamSequencerSvc.h"
 
 #include "PersistentDataModel/AthenaAttributeList.h"
+#include "AthenaKernel/IEvtIdModifierSvc.h"
 #include "AthenaKernel/IEvtSelectorSeek.h"
 #include "AthenaKernel/ExtendedEventContext.h"
 #include "AthenaKernel/EventContextClid.h"
@@ -79,6 +80,7 @@ AthenaMtesEventLoopMgr::AthenaMtesEventLoopMgr(const std::string& nam
   , m_evtContext{nullptr}
   , m_histoDataMgrSvc( "HistogramDataSvc",         nam )
   , m_histoPersSvc   ( "HistogramPersistencySvc",  nam )
+  , m_evtIdModSvc("", nam)
   , m_currentRun(0)
   , m_firstRun(true)
   , m_tools(this)
@@ -123,6 +125,9 @@ AthenaMtesEventLoopMgr::AthenaMtesEventLoopMgr(const std::string& nam
 		  "Name of the Whiteboard to be used");
 
   declareProperty("EventStore", m_eventStore);
+
+  declareProperty("EvtIdModifierSvc", m_evtIdModSvc,
+                  "ServiceHandle for EvtIdModifierSvc");
 
   declareProperty("FakeLumiBlockInterval", m_flmbi = 0,
                   "Event interval at which to increment lumiBlock# when "
@@ -247,9 +252,24 @@ StatusCode AthenaMtesEventLoopMgr::initialize()
     }
   }
 
-//-------------------------------------------------------------------------
-// Setup EventSelector service
-//-------------------------------------------------------------------------
+  //--------------------------------------------------------------------------
+  // Set up the EventID modifier Service
+  //--------------------------------------------------------------------------
+  if (m_evtIdModSvc.empty()) {
+    debug() << "EventID modifier Service not set. No run number, ... overrides "
+               "will "
+               "be applied."
+            << endmsg;
+  } else if (!m_evtIdModSvc.retrieve().isSuccess()) {
+    debug() << "Could not find EventID modifier Service. No run number, ... "
+               "overrides "
+               "will be applied."
+            << endmsg;
+  }
+
+  //-------------------------------------------------------------------------
+  // Setup EventSelector service
+  //-------------------------------------------------------------------------
   const std::string& selName(m_evtsel.value());
   // the evt sel is usually specified as a property of ApplicationMgr
   if (selName.empty()) {
@@ -551,12 +571,13 @@ StatusCode AthenaMtesEventLoopMgr::executeEvent( EventContext &&ctx )
 
   EventID::event_number_t evtNumber = ctx.eventID().event_number();
   unsigned int conditionsRun = ctx.eventID().run_number();
-  const AthenaAttributeList* attr = nullptr;
-  if (eventStore()->contains<AthenaAttributeList> ("Input") &&
-      eventStore()->retrieve(attr, "Input").isSuccess())
-  {
-    if (attr->exists ("ConditionsRun")) {
-      conditionsRun = (*attr)["ConditionsRun"].data<unsigned int>();
+  if (!m_evtIdModSvc.isSet()) {
+    const AthenaAttributeList* attr = nullptr;
+    if (eventStore()->contains<AthenaAttributeList>("Input") &&
+        eventStore()->retrieve(attr, "Input").isSuccess()) {
+      if (attr->exists("ConditionsRun")) {
+        conditionsRun = (*attr)["ConditionsRun"].data<unsigned int>();
+      }
     }
   }
   Atlas::getExtendedEventContext(ctx).setConditionsRun (conditionsRun);
@@ -1070,7 +1091,7 @@ int AthenaMtesEventLoopMgr::declareEventRootAddress(EventContext& ctx){
       error() << "Error loading Event proxies" << endmsg;
       return -1;
     } 
-    
+    bool consume_modifier_stream = false;
     // Read the attribute list
     const AthenaAttributeList* pAttrList = eventStore()->tryConstRetrieve<AthenaAttributeList>("Input");
     if ( pAttrList != nullptr && pAttrList->size() > 6 ) { // Try making EventID-only EventInfo object from in-file TAG
@@ -1081,7 +1102,8 @@ int AthenaMtesEventLoopMgr::declareEventRootAddress(EventContext& ctx){
         unsigned int eventTimeNS = (*pAttrList)["EventTimeNanoSec"].data<unsigned int>();
         unsigned int lumiBlock = (*pAttrList)["LumiBlockN"].data<unsigned int>();
         unsigned int bunchId = (*pAttrList)["BunchId"].data<unsigned int>();
-    
+
+        consume_modifier_stream = true;
         // an option to override primary eventNumber with the secondary one in case of DoubleEventSelector
         if ( m_useSecondaryEventNumber ) {
 	  unsigned long long eventNumberSecondary{};
@@ -1134,6 +1156,7 @@ int AthenaMtesEventLoopMgr::declareEventRootAddress(EventContext& ctx){
     	error() << "Unable to retrieve Event root object" << endmsg;
     	return -1;
           }
+          consume_modifier_stream = true;
           // Build the old-style Event Info object for those clients that still need it
           std::unique_ptr<EventInfo> pEventPtr = std::make_unique<EventInfo>(new EventID(eventIDFromxAOD(pXEvent))
     									      , new EventType(eventTypeFromxAOD(pXEvent)));
@@ -1143,12 +1166,14 @@ int AthenaMtesEventLoopMgr::declareEventRootAddress(EventContext& ctx){
     	error() << "Error declaring event data object" << endmsg;
     	return -1;
           }
+        } else {
+          consume_modifier_stream = false;
         }
     }
     //the pEventPtr was moved to the eventStore, the object is still 'alive'.
     //so the raw pEvent pointer is also still valid
     //cppcheck-suppress invalidLifetime
-    ctx.setEventID( *((EventIDBase*) pEvent->event_ID()) );
+    modifyEventContext(ctx,*(pEvent->event_ID()), consume_modifier_stream);
 
   }  else  {
 
@@ -1169,7 +1194,7 @@ int AthenaMtesEventLoopMgr::declareEventRootAddress(EventContext& ctx){
     
     pEvent = new EventInfo(eid.release(), new EventType());
 
-    ctx.setEventID( *((EventIDBase*) pEvent->event_ID()) );
+    modifyEventContext(ctx,*(pEvent->event_ID()), true);
 
     debug() << "selecting store: " << ctx.slot() << endmsg;
 
@@ -1183,8 +1208,40 @@ int AthenaMtesEventLoopMgr::declareEventRootAddress(EventContext& ctx){
       return -1;
     } 
   }
-  
   return 1;
+}
+
+//---------------------------------------------------------------------------
+void AthenaMtesEventLoopMgr::modifyEventContext(EventContext& ctx,
+                                                const EventID& eID,
+                                                bool consume_modifier_stream) {
+
+  if (m_evtIdModSvc.isSet()) {
+    EventID new_eID(eID);
+    // In Mtes EventLoopMgr ctx.evt() gets set to m_nevt and *then* m_nevt is
+    // incremented later so it's zero-indexed and we don't need to subtract one
+    m_evtIdModSvc->modify_evtid(new_eID, ctx.evt(), consume_modifier_stream);
+    if (msgLevel(MSG::DEBUG)) {
+      unsigned int oldrunnr = eID.run_number();
+      unsigned int oldLB = eID.lumi_block();
+      unsigned int oldTS = eID.time_stamp();
+      unsigned int oldTSno = eID.time_stamp_ns_offset();
+      debug() << "modifyEventContext: use evtIdModSvc runnr=" << oldrunnr
+              << " -> " << new_eID.run_number() << endmsg;
+      debug() << "modifyEventContext: use evtIdModSvc LB=" << oldLB << " -> "
+              << new_eID.lumi_block() << endmsg;
+      debug() << "modifyEventContext: use evtIdModSvc TimeStamp=" << oldTS
+              << " -> " << new_eID.time_stamp() << endmsg;
+      debug() << "modifyEventContext: use evtIdModSvc TimeStamp ns Offset="
+              << oldTSno << " -> " << new_eID.time_stamp_ns_offset() << endmsg;
+    }
+    ctx.setEventID(new_eID);
+    Atlas::getExtendedEventContext(ctx).setConditionsRun(
+        ctx.eventID().run_number());
+    return;
+  }
+
+  ctx.setEventID(eID);
 }
 
 //---------------------------------------------------------------------------
