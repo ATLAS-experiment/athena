@@ -209,7 +209,7 @@ StatusCode LArSC2Ntuple::execute()
 
   // This should be used for main readout later, once TDAQ fill event headers also in calib. runs properly
   unsigned long thisbcid	  = evt->bcid();
-  unsigned long thisELVL1Id;
+  unsigned long thisELVL1Id = 0;
   unsigned long  thisttype = evt->level1TriggerType();
   //
   /// set it here once and no need to set at each SC/cell
