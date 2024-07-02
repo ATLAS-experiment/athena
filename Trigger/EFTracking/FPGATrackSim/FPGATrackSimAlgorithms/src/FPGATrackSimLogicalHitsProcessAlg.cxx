@@ -146,6 +146,33 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
       return appMgr->stopRun();
     }
 
+    SG::WriteHandle<FPGATrackSimRoadCollection> FPGARoads_1st (m_FPGARoadKey, ctx);
+    SG::WriteHandle<FPGATrackSimHitContainer> FPGAHitsInRoads_1st (m_FPGAHitInRoadsKey, ctx);
+
+    ATH_CHECK( FPGARoads_1st.record (std::make_unique<FPGATrackSimRoadCollection>()));
+    ATH_CHECK( FPGAHitsInRoads_1st.record (std::make_unique<FPGATrackSimHitContainer>()));
+
+    SG::WriteHandle<FPGATrackSimTrackCollection> FPGATracks_1stHandle (m_FPGATrackKey, ctx);
+    ATH_CHECK(FPGATracks_1stHandle.record (std::make_unique<FPGATrackSimTrackCollection>()));
+
+    SG::WriteHandle<FPGATrackSimHitCollection> FPGAHits_1st (m_FPGAHitKey.at(0), ctx);
+    ATH_CHECK( FPGAHits_1st.record (std::make_unique<FPGATrackSimHitCollection>()));
+
+    SG::WriteHandle<FPGATrackSimHitCollection> FPGAHitsFiltered_1st (m_FPGAHitFilteredKey, ctx);
+    ATH_CHECK( FPGAHitsFiltered_1st.record (std::make_unique<FPGATrackSimHitCollection>()));
+
+    SG::WriteHandle<FPGATrackSimHitCollection> FPGAHitUnmapped_1st (m_FPGAHitUnmappedKey, ctx);
+    ATH_CHECK( FPGAHitUnmapped_1st.record (std::make_unique<FPGATrackSimHitCollection>()));
+
+    SG::WriteHandle<FPGATrackSimClusterCollection> FPGAClusters_1st (m_FPGAClusterKey.at(0), ctx);
+    ATH_CHECK( FPGAClusters_1st.record (std::make_unique<FPGATrackSimClusterCollection>()));
+
+    SG::WriteHandle<FPGATrackSimClusterCollection> FPGAClustersFiltered_1st (m_FPGAClusterFilteredKey, ctx);
+    ATH_CHECK( FPGAClustersFiltered_1st.record (std::make_unique<FPGATrackSimClusterCollection>()));
+
+    SG::WriteHandle<FPGATrackSimClusterCollection> FPGASpacePoints_1st (m_FPGASpacePointsKey.at(0), ctx);
+    ATH_CHECK( FPGASpacePoints_1st.record (std::make_unique<FPGATrackSimClusterCollection>()));
+
     // Apply truth track cuts
     if ( m_doEvtSel ){
         if (!m_evtSel->selectEvent(&m_eventHeader))
@@ -163,7 +190,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     m_evt++;
        
     // Map, cluster, and filter hits
-    ATH_CHECK(processInputs());
+    ATH_CHECK(processInputs(FPGAHitUnmapped_1st, FPGAClusters_1st, FPGAClustersFiltered_1st, FPGASpacePoints_1st));
     // Get reference to hits
     unsigned regionID = m_evtSel->getRegionID();
     // Recording Data
@@ -184,8 +211,6 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
         if (h.isReal()) phits_1st.push_back(&h);
     }
 
-    SG::WriteHandle<FPGATrackSimHitCollection> FPGAHits_1st (m_FPGAHitKey.at(0), ctx);
-    ATH_CHECK( FPGAHits_1st.record (std::make_unique<FPGATrackSimHitCollection>()));
     for (const FPGATrackSimHit* Hit : phits_1st) FPGAHits_1st->push_back(*Hit);
  
     auto mon_nhits_1st = Monitored::Scalar<unsigned>("nHits_1st", hits_1st.size());
@@ -193,12 +218,6 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     Monitored::Group(m_monTool, mon_nhits_1st, mon_nhits_1st_unmapped);
     ATH_CHECK(m_roadFinderTool->getRoads(phits_1st, roads_1st));
 
-
-    SG::WriteHandle<FPGATrackSimRoadCollection> FPGARoads_1st (m_FPGARoadKey, ctx);
-    SG::WriteHandle<FPGATrackSimHitContainer> FPGAHitsInRoads_1st (m_FPGAHitInRoadsKey, ctx);
-
-    ATH_CHECK( FPGARoads_1st.record (std::make_unique<FPGATrackSimRoadCollection>()));
-    ATH_CHECK( FPGAHitsInRoads_1st.record (std::make_unique<FPGATrackSimHitContainer>()));
 ;
     for (const FPGATrackSimRoad *road:roads_1st){
         std::vector<FPGATrackSimHit> road_hits;
@@ -328,8 +347,6 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
 	Monitored::Group(m_monTool,passroad,passtrack,truthpT_zoom,truthpT,trutheta,truthphi,truthd0,truthz0,passtrackchi2);
     }
 
-    SG::WriteHandle<FPGATrackSimTrackCollection> FPGATracks_1stHandle (m_FPGATrackKey, ctx);
-    ATH_CHECK(FPGATracks_1stHandle.record (std::make_unique<FPGATrackSimTrackCollection>()));
     for (const FPGATrackSimTrack& track : tracks_1st) FPGATracks_1stHandle->push_back(track);
    
     TIME(m_tOR);
@@ -345,8 +362,6 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
         if (m_doLRTHitFiltering) {
             ATH_MSG_DEBUG("Doing hit filtering based on prompt tracks.");
             ATH_CHECK(m_LRTRoadFilterTool->filterUsedHits(tracks_1st, phits_1st, remainingHits));
-            SG::WriteHandle<FPGATrackSimHitCollection> FPGAHitsFiltered_1st (m_FPGAHitFilteredKey, ctx);
-            ATH_CHECK( FPGAHitsFiltered_1st.record (std::make_unique<FPGATrackSimHitCollection>()));
 
             for (const FPGATrackSimHit* Hit : remainingHits) FPGAHitsFiltered_1st->push_back(*Hit); 
 
@@ -501,13 +516,14 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::readInputs(bool & done)
 
 
 // Applies clustering, mapping, hit filtering, and space points
-StatusCode FPGATrackSimLogicalHitsProcessAlg::processInputs()
+StatusCode FPGATrackSimLogicalHitsProcessAlg::processInputs(SG::WriteHandle<FPGATrackSimHitCollection> &FPGAHitUnmapped_1st,
+                                                            SG::WriteHandle<FPGATrackSimClusterCollection> &FPGAClusters_1st,
+                                                            SG::WriteHandle<FPGATrackSimClusterCollection> &FPGAClustersFiltered_1st,
+                                                            SG::WriteHandle<FPGATrackSimClusterCollection> &FPGASpacePoints_1st)
 {
     m_clusters_1st.clear();
     m_spacepoints_1st.clear();
     m_hits_1st_miss.clear();
-
-    const EventContext& ctx = getContext();
 
     // Map hits
     ATH_MSG_DEBUG("Running hits conversion");
@@ -516,8 +532,6 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::processInputs()
     if (!m_runSecondStage) m_eventHeader.clearHits();
 
     ATH_CHECK(m_hitMapTool->getUnmapped(m_hits_1st_miss));
-    SG::WriteHandle<FPGATrackSimHitCollection> FPGAHitUnmapped_1st (m_FPGAHitUnmappedKey, ctx);
-    ATH_CHECK( FPGAHitUnmapped_1st.record (std::make_unique<FPGATrackSimHitCollection>()));
     for (const FPGATrackSimHit& hit : m_hits_1st_miss) FPGAHitUnmapped_1st->push_back(hit); 
 
 
@@ -538,9 +552,6 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::processInputs()
 
         // I think I also want to pass m_clusters to random removal (but won't work currently)
         if (m_doHitFiltering) ATH_CHECK(m_hitFilteringTool->DoRandomRemoval(*m_logicEventHeader_1st, false));
-
-        SG::WriteHandle<FPGATrackSimClusterCollection> FPGAClusters_1st (m_FPGAClusterKey.at(0), ctx);
-        ATH_CHECK( FPGAClusters_1st.record (std::make_unique<FPGATrackSimClusterCollection>()));
         for (const FPGATrackSimCluster& cluster : m_clusters_1st_original) FPGAClusters_1st->push_back(cluster); 
 
     }
@@ -554,9 +565,6 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::processInputs()
         ATH_CHECK(m_hitFilteringTool->GetPairedStripPhysLayers(planeMap_1st, filter_strip_physLayers));
         m_clusters_1st.clear();
         ATH_CHECK(m_hitFilteringTool->DoHitFiltering(*m_logicEventHeader_1st, filter_pixel_physLayers, filter_strip_physLayers, m_clusters_1st));
- 
-        SG::WriteHandle<FPGATrackSimClusterCollection> FPGAClustersFiltered_1st (m_FPGAClusterFilteredKey, ctx);
-        ATH_CHECK( FPGAClustersFiltered_1st.record (std::make_unique<FPGATrackSimClusterCollection>()));
         for (const FPGATrackSimCluster &cluster : m_clusters_1st) FPGAClustersFiltered_1st->push_back(cluster); 
  
     }
@@ -564,9 +572,6 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::processInputs()
     // Space points
     if (m_doSpacepoints) {
         ATH_CHECK(m_spacepointsTool->DoSpacePoints(*m_logicEventHeader_1st, m_spacepoints_1st));
-
-        SG::WriteHandle<FPGATrackSimClusterCollection> FPGASpacePoints_1st (m_FPGASpacePointsKey.at(0), ctx);
-        ATH_CHECK( FPGASpacePoints_1st.record (std::make_unique<FPGATrackSimClusterCollection>()));
         for (const FPGATrackSimCluster& cluster : m_spacepoints_1st) FPGASpacePoints_1st->push_back(cluster); 
     }
 
