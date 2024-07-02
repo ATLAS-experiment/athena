@@ -98,7 +98,7 @@ StatusCode TrigTauMonitorTruthAlgorithm::examineTruthTau(const std::shared_ptr<x
             const xAOD::TruthParticle* child = decayvtx->outgoingParticle(iChild);
             if(child) {
                 if(MC::isSMNeutrino(child)) continue;
-                if(child->status() == 3) continue;
+                if(!MC::isPhysical(child)) continue;
                 ATH_MSG_DEBUG("Child " << child->pdgId() << ", status " << child->status() << ", charge " << child->charge());
                 if(MC::isSMLepton(child)) IsLeptonicTauDec(*xTruthTau) = true; // Just selects charged SM Leptons as we have already skipped SM neutrinos
                 VisSumTLV += child->p4();

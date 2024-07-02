@@ -14,7 +14,7 @@
  */
 #include "ParticleJetTools/JetQuarkLabel.h"
 #include "ParticleJetTools/HadronUtils.h"
-#include "TruthUtils/MagicNumbers.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 #include "AsgDataHandles/ReadHandle.h"
 #include <algorithm>
@@ -47,8 +47,7 @@ StatusCode JetQuarkLabel::initialize() {
 bool JetQuarkLabel::matchJet(const xAOD::Jet& myJet,
                              MatchInfo* info /*= nullptr*/) const
 {
-  if (info)
-    *info = MatchInfo();
+  if (info) *info = MatchInfo();
 
   SG::ReadHandle<xAOD::TruthEventContainer> truthEventContainerReadHandle(m_truthEventContainerKey);
 
@@ -73,8 +72,7 @@ bool JetQuarkLabel::matchJet(const xAOD::Jet& myJet,
 
 
   int NEventInCollection = truthEventContainer->size();
-  if (info)
-    info->NEventInCollection =NEventInCollection;
+  if (info)  info->NEventInCollection = NEventInCollection;
 
   // Tag only jet in the ID acceptance : not anymore...
   // Labelling might be usefull also outside ID acceptance if (fabs(myJet.eta()) > 2.5) return false;
@@ -132,7 +130,7 @@ bool JetQuarkLabel::matchJet(const xAOD::Jet& myJet,
 	      }
 	      if ((**thisChild)->pdgId() == pdg) afterFSR = false;
 	    }
-	  } else if ( ((*pitr)->status() == 3 && m_noDoc) || ((*pitr)->status() == HepMC::SPECIALSTATUS) ) {
+	  } else if ( (!MC::isPhysical(*pitr) && m_noDoc) || ((*pitr)->status() == HepMC::SPECIALSTATUS) ) {
 	    // do not label by documentary quark 
 	    // (New 27/06/2006, for PYTHIA, with new Shower and maybe dependant on MSTP(128). What a mess !)
 	    afterFSR = false;
