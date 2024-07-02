@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include "Cool2Json.h"
 #include "CoolKernel/IFolderSpecification.h"
@@ -86,7 +86,7 @@ namespace IOVDbNamespace {
     return out;
   }
 
-  std::string 
+  const std::string&
   Cool2Json::payloadSpec() const{
     return m_spec;
   }
@@ -148,7 +148,7 @@ namespace IOVDbNamespace {
     return result;
   }
   
-  std::string 
+  const std::string&
   Cool2Json::tag() const{
     return m_tag;
   }

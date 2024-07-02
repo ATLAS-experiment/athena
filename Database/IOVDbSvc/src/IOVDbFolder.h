@@ -83,7 +83,7 @@ public:
   CLID clid() const;
   unsigned long long bytesRead() const;
   float readTime() const;
-  IOVRange currentRange() const;
+  const IOVRange& currentRange() const;
 
   // set methods - used after folder creation to set properties externally
 
@@ -378,7 +378,7 @@ inline unsigned long long IOVDbFolder::bytesRead() const
 inline float IOVDbFolder::readTime() const 
 { return m_readtime; }
 
-inline IOVRange IOVDbFolder::currentRange() const { return m_currange; }
+inline const IOVRange& IOVDbFolder::currentRange() const { return m_currange; }
 
 inline bool IOVDbFolder::cacheValid(const cool::ValidityKey reftime) const {
   const auto & [cacheStart, cacheStop]=m_iovs.getCacheBounds();
