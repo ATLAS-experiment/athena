@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include "BasicFolder.h"
 #include <iostream>
@@ -107,7 +107,7 @@ static const std::vector<coral::AttributeList> invalidVectorPayload{};
       return getVectorPayload(channel);
     }
   
-    std::vector<cool::ChannelId> 
+    const std::vector<cool::ChannelId>&
     BasicFolder::channelIds(){ 
       return m_channels;
     }
