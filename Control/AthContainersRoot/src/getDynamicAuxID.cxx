@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainersRoot/src/getDynamicAuxID.h
@@ -12,6 +12,7 @@
 #include "AthContainersRoot/getDynamicAuxID.h"
 #include "AthContainersRoot/RootAuxVectorFactory.h"
 #include "AthContainers/AuxTypeRegistry.h"
+#include "AthContainers/tools/error.h"
 #include "TClass.h"
 #include "TROOT.h"
 
@@ -64,12 +65,18 @@ SG::auxid_t getDynamicAuxID (const std::type_info& ti,
                              const std::string& name,
                              const std::string& elementTypeName,
                              const std::string& branchTypeName,
-                             bool standalone)
+                             bool standalone,
+                             SG::auxid_t linked_auxid)
 {
   SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
   SG::auxid_t auxid = SG::null_auxid;
 
-  auxid = r.getAuxID (ti, name, "", SG::AuxTypeRegistry::Flags::SkipNameCheck);
+  SG::AuxVarFlags flags = SG::AuxVarFlags::SkipNameCheck;
+  if (SG::AuxTypeRegistry::isLinkedName (name)) {
+    flags |= SG::AuxVarFlags::Linked;
+  }
+
+  auxid = r.getAuxID (ti, name, "", flags, linked_auxid);
   if (auxid != SG::null_auxid) return auxid;
 
   // Be careful --- if we don't exactly match the name
@@ -96,13 +103,20 @@ SG::auxid_t getDynamicAuxID (const std::type_info& ti,
           SG::IAuxTypeVectorFactory* fac = reinterpret_cast<SG::IAuxTypeVectorFactory*> (reinterpret_cast<unsigned long>(fac_vp) + offs);
           const std::type_info* tiAlloc = fac->tiAlloc();
           r.addFactory (ti, *tiAlloc, std::unique_ptr<SG::IAuxTypeVectorFactory> (fac));
-          auxid = r.getAuxID(*fac->tiAlloc(), ti, name);
+          auxid = r.getAuxID(*fac->tiAlloc(), ti, name, "", flags, linked_auxid);
         }
       }
     }
   }
 
   if (auxid == SG::null_auxid) {
+    if (linked_auxid != SG::null_auxid) {
+      errorcheck::ReportMessage msg (MSG::INFO, ERRORCHECK_ARGS, "getDynamicAuxID");
+      msg << "dynamic ROOT vector factory not implemented for linked types: "
+          << name << " " << branchTypeName << "\n";
+      return SG::null_auxid;
+    }
+
     std::string vec_name = branchTypeName;
     if (standalone) {
       vec_name = "std::vector<" + branchTypeName;
@@ -116,7 +130,7 @@ SG::auxid_t getDynamicAuxID (const std::type_info& ti,
       auto facp = std::make_unique<SG::RootAuxVectorFactory> (vec_class);
       std::string tiAllocName = facp->tiAllocName();
       (void)r.addFactory (ti, tiAllocName, std::move (facp));
-      auxid = r.getAuxID(tiAllocName, ti, name);
+      auxid = r.getAuxID(tiAllocName, ti, name, "", flags);
     }
   }
 

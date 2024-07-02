@@ -100,7 +100,7 @@ SG::auxid_t AuxDiscoverySvc::getAuxID(const std::string& attrName, const std::st
          if (eti == nullptr) {
             return SG::null_auxid;
          }
-         auxid = SG::getDynamicAuxID(*eti, attrName, elemName, typeName, m_storeInt->standalone());
+         auxid = SG::getDynamicAuxID(*eti, attrName, elemName, typeName, m_storeInt->standalone(), SG::null_auxid);
       } catch (const std::runtime_error&) {
          return SG::null_auxid;
       }

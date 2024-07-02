@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthContainersInterfaces/IAuxStoreHolder.h"
@@ -100,7 +100,8 @@ getAuxElementType( TClass *expectedClass, EDataType expectedType, bool standalon
 
 
 SG::auxid_t
-getAuxIdForAttribute(const std::string& attr, TClass *tclass, EDataType edt, bool standalone)
+getAuxIdForAttribute(const std::string& attr, TClass *tclass, EDataType edt, bool standalone,
+                     SG::auxid_t linked_auxid)
 {
    SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
 
@@ -114,7 +115,8 @@ getAuxIdForAttribute(const std::string& attr, TClass *tclass, EDataType edt, boo
    if( !ti )
       return auxid;
 
-   return SG::getDynamicAuxID (*ti, attr, elemen_type_name, branch_type_name, standalone);
+   return SG::getDynamicAuxID (*ti, attr, elemen_type_name, branch_type_name, standalone,
+                               linked_auxid);
 }
 
 } // anonymous namespace
@@ -179,6 +181,49 @@ TBranchAuxDynReader::TBranchAuxDynReader(TTree *tree, TBranch *base_branch)
 }
 
 
+SG::auxid_t TBranchAuxDynReader::initBranch(bool standalone,
+                                            const std::string& attr,
+                                            TBranch* branch)
+{
+  TClass*       expectedClass = 0;
+  EDataType     expectedType = kOther_t;
+  if( branch->GetExpectedType(expectedClass, expectedType) != 0) {
+    // raise hell
+  }
+
+  SG::auxid_t linked_auxid = SG::null_auxid;
+  if (expectedClass) {
+    std::string className = expectedClass->GetName();
+    if (SG::AuxTypeRegistry::classNameHasLink (className)) {
+      std::string linkedAttr = SG::AuxTypeRegistry::linkedName (attr);
+      auto it = m_branchMap.find (linkedAttr);
+      if (it != m_branchMap.end()) {
+        linked_auxid = initBranch (standalone, linkedAttr, it->second);
+      }
+      if (linked_auxid == SG::null_auxid) {
+        errorcheck::ReportMessage msg (MSG::WARNING, ERRORCHECK_ARGS, "TBranchAuxDynReader::initBranch");
+        msg << "Could not find linked variable  for " << branch->GetName()
+            << " type: " << expectedClass->GetName();
+      }
+    }
+  }
+
+  SG::auxid_t auxid = getAuxIdForAttribute(attr, expectedClass, expectedType, standalone,
+                                           linked_auxid);
+
+  // add AuxID to the list
+  // May still be null if we don't have a dictionary for the branch.
+  if (auxid != SG::null_auxid) {
+    m_auxids.insert(auxid);
+  } else {
+    errorcheck::ReportMessage msg (MSG::WARNING, ERRORCHECK_ARGS, "TBranchAuxDynReader::initBranch");
+    msg << "Could not find auxid for " << branch->GetName()
+        << " type: " << expectedClass->GetName();
+
+  }
+  return auxid;
+}
+
 // Has to be a separate method because 'standalone' status is not know at construction time
 // Prepare all branch infos for dynamic attributes (auxids and types)
 void TBranchAuxDynReader::init(bool standalone)
@@ -186,24 +231,7 @@ void TBranchAuxDynReader::init(bool standalone)
    if( m_initialized )  return;
    
    for( const auto& attr2branch: m_branchMap ) {
-      const string& attr = attr2branch.first;
-      TBranch*      branch  = attr2branch.second;
-      TClass*       expectedClass = 0;
-      EDataType     expectedType = kOther_t;
-      if( branch->GetExpectedType(expectedClass, expectedType) != 0) {
-         // raise hell
-      }
-      SG::auxid_t auxid = getAuxIdForAttribute(attr, expectedClass, expectedType, standalone);
-      // add AuxID to the list
-      // May still be null if we don't have a dictionary for the branch.
-      if (auxid != SG::null_auxid) {
-         m_auxids.insert(auxid);
-      } else {
-         errorcheck::ReportMessage msg (MSG::WARNING, ERRORCHECK_ARGS, "TBranchAuxDynReader::init");
-         msg << "Could not find auxid for " << branch->GetName()
-              << " type: " << expectedClass->GetName();
-
-      } 
+      initBranch (standalone, attr2branch.first, attr2branch.second);
    }
    m_initialized = true;
 }

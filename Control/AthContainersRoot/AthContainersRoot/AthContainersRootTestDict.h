@@ -1,10 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file AthContainersRoot/AthContainersRootTestDict.h
  * @author scott snyder <snyder@bnl.gov>
@@ -28,6 +25,9 @@ namespace AthContainersRootTest {
 
 class Bar {};
 class Baz {};
+class L1 {};
+class L2 {};
+class L3 {};
 
 
 } // namespace AthContainersRootTest
@@ -43,8 +43,13 @@ template class ElementLink<std::vector<AthContainersRootTest::Foo> >;
 template class std::vector<ElementLink<std::vector<AthContainersRootTest::Foo> > >;
 template class std::vector<std::vector<ElementLink<std::vector<AthContainersRootTest::Foo> > > >;
 
+template class std::vector<AthContainersRootTest::L1>;
+template class std::vector<AthContainersRootTest::L2>;
+template class std::vector<AthContainersRootTest::L3>;
+
 namespace SG {
 template class AuxTypeVectorFactory<AthContainersRootTest::Foo>;
+template class AuxTypeVectorFactory<AthContainersRootTest::L2>;
 }
 
 
