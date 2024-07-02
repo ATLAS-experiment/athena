@@ -1,24 +1,40 @@
 test1
 bar::foo
+::ltest1
+::ltest2
 test2
 ... set ...
-2 ::xint [int]
-3 ::xfloat [float]
+2 ::ltest1 [int (linked)]
+3 ::ltest2 [float]
+4 ::xint [int]
+5 ::xfloat [float]
 ... store ...
-2 ::xint [int]
-3 ::xfloat [float]
-2 ::xint [int]
-3 ::xfloat [float]
+2 ::ltest1 [int (linked)]
+3 ::ltest2 [float]
+4 ::xint [int]
+5 ::xfloat [float]
+2 ::ltest1 [int (linked)]
+3 ::ltest2 [float]
+4 ::xint [int]
+5 ::xfloat [float]
 ... vec ...
-2 ::xint [int]
-3 ::xfloat [float]
-2 ::xint [int]
-3 ::xfloat [float]
+2 ::ltest1 [int (linked)]
+3 ::ltest2 [float]
+4 ::xint [int]
+5 ::xfloat [float]
+2 ::ltest1 [int (linked)]
+3 ::ltest2 [float]
+4 ::xint [int]
+5 ::xfloat [float]
 ... elt ...
-2 ::xint [int]
-3 ::xfloat [float]
-2 ::xint [int]
-3 ::xfloat [float]
+2 ::ltest1 [int (linked)]
+3 ::ltest2 [float]
+4 ::xint [int]
+5 ::xfloat [float]
+2 ::ltest1 [int (linked)]
+3 ::ltest2 [float]
+4 ::xint [int]
+5 ::xfloat [float]
 test3
 a_int -2
 a_uint 10
@@ -49,80 +65,116 @@ a_boolvec [1, 0, 1]
 a_a <??? A>
 test4
 ... print elt 1 from  store
+::ltest2 2.500
+  linked: ::ltest1 [1]
 ::xfloat 2.500
 ::xint 2
 ::xvint [13, 14, 15]
 ... print elt 0 from  store
+::ltest2 1.500
+  linked: ::ltest1 [1]
 ::xfloat 1.500
 ::xint 1
 ::xvint [10, 11, 12]
 
 ... print entire store
 === Element 0
+::ltest2 1.500
+  linked: ::ltest1 [1]
 ::xfloat 1.500
 ::xint 1
 ::xvint [10, 11, 12]
 === Element 1
+::ltest2 2.500
+  linked: ::ltest1 [1]
 ::xfloat 2.500
 ::xint 2
 ::xvint [13, 14, 15]
 === Element 2
+::ltest2 3.500
+  linked: ::ltest1 [1]
 ::xfloat 3.500
 ::xint 3
 ::xvint [16, 17, 18]
 === Element 0
+::ltest2 1.500
+  linked: ::ltest1 [1]
 ::xfloat 1.500
 ::xint 1
 ::xvint [10, 11, 12]
 === Element 1
+::ltest2 2.500
+  linked: ::ltest1 [1]
 ::xfloat 2.500
 ::xint 2
 ::xvint [13, 14, 15]
 === Element 2
+::ltest2 3.500
+  linked: ::ltest1 [1]
 ::xfloat 3.500
 ::xint 3
 ::xvint [16, 17, 18]
 
 ... print elt 1 from  vec
+::ltest2 2.500
+  linked: ::ltest1 [1]
 ::xfloat 2.500
 ::xint 2
 ::xvint [13, 14, 15]
 ... print elt 0 from  vec
+::ltest2 1.500
+  linked: ::ltest1 [1]
 ::xfloat 1.500
 ::xint 1
 ::xvint [10, 11, 12]
 
 ... print entire vec
 === Element 0
+::ltest2 1.500
+  linked: ::ltest1 [1]
 ::xfloat 1.500
 ::xint 1
 ::xvint [10, 11, 12]
 === Element 1
+::ltest2 2.500
+  linked: ::ltest1 [1]
 ::xfloat 2.500
 ::xint 2
 ::xvint [13, 14, 15]
 === Element 2
+::ltest2 3.500
+  linked: ::ltest1 [1]
 ::xfloat 3.500
 ::xint 3
 ::xvint [16, 17, 18]
 === Element 0
+::ltest2 1.500
+  linked: ::ltest1 [1]
 ::xfloat 1.500
 ::xint 1
 ::xvint [10, 11, 12]
 === Element 1
+::ltest2 2.500
+  linked: ::ltest1 [1]
 ::xfloat 2.500
 ::xint 2
 ::xvint [13, 14, 15]
 === Element 2
+::ltest2 3.500
+  linked: ::ltest1 [1]
 ::xfloat 3.500
 ::xint 3
 ::xvint [16, 17, 18]
 
 ... print elt 1
+::ltest2 2.500
+  linked: ::ltest1 [1]
 ::xfloat 2.500
 ::xint 2
 ::xvint [13, 14, 15]
 ... print elt 0
+::ltest2 1.500
+  linked: ::ltest1 [1]
 ::xfloat 1.500
 ::xint 1
 ::xvint [10, 11, 12]

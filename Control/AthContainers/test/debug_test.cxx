@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file AthContainers/test/debug_test.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -43,10 +41,19 @@ struct A
 void test1()
 {
   std::cout << "test1\n";
-  SG::auxid_t id1 = SG::AuxTypeRegistry::instance().getAuxID<int> ("foo");
-  SG::auxid_t id2 = SG::AuxTypeRegistry::instance().getAuxID<int> ("foo", "bar");
+  SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
+  SG::auxid_t id1 = r.getAuxID<int> ("foo");
+  SG::auxid_t id2 = r.getAuxID<int> ("foo", "bar");
   assert (SGdebug::aux_var_name(id1) == "::foo");
   SGdebug::print_aux_var_name(id2);
+
+  SG::auxid_t ltest1_id = r.getAuxID<int> ("ltest1", "",
+                                           SG::AuxVarFlags::Linked);
+  SG::auxid_t ltest2_id = r.getAuxID<float> ("ltest2", "",
+                                             SG::AuxVarFlags::None,
+                                             ltest1_id);
+  SGdebug::print_aux_var_name(ltest1_id);
+  SGdebug::print_aux_var_name(ltest2_id);
 }
 
 
@@ -68,6 +75,19 @@ void test2()
   dv[0]->xfloat() = 1.5;
   dv[1]->xfloat() = 2.5;
   dv[2]->xfloat() = 3.5;
+
+  SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
+  SG::auxid_t ltest1_id = r.getAuxID<int> ("ltest1", "",
+                                           SG::AuxVarFlags::Linked);
+  SG::auxid_t ltest2_id = r.getAuxID<float> ("ltest2", "",
+                                             SG::AuxVarFlags::None,
+                                             ltest1_id);
+  int* vp1 = reinterpret_cast<int*> (store.getData (ltest1_id, 1, 1));
+  vp1[0] = 1;
+  float* vp2 = reinterpret_cast<float*> (store.getData (ltest2_id, 3, 3));
+  vp2[0] = 1.5;
+  vp2[1] = 2.5;
+  vp2[2] = 3.5;
 
   std::cout << "... set ...\n";
   SGdebug::print_aux_vars (store.getAuxIDs());
@@ -148,6 +168,19 @@ void test4()
   dv[0]->xvint() = std::vector<int> {10, 11, 12};
   dv[1]->xvint() = std::vector<int> {13, 14, 15};
   dv[2]->xvint() = std::vector<int> {16, 17, 18};
+
+  SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
+  SG::auxid_t ltest1_id = r.getAuxID<int> ("ltest1", "",
+                                           SG::AuxVarFlags::Linked);
+  SG::auxid_t ltest2_id = r.getAuxID<float> ("ltest2", "",
+                                             SG::AuxVarFlags::None,
+                                             ltest1_id);
+  int* vp1 = reinterpret_cast<int*> (store.getData (ltest1_id, 1, 1));
+  vp1[0] = 1;
+  float* vp2 = reinterpret_cast<float*> (store.getData (ltest2_id, 3, 3));
+  vp2[0] = 1.5;
+  vp2[1] = 2.5;
+  vp2[2] = 3.5;
 
   SGdebug::dump_aux_vars (store, 10);
 
