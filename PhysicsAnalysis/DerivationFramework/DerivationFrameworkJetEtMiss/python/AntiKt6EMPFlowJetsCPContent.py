@@ -1,0 +1,14 @@
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+
+AntiKt6EMPFlowJetsCPContent = [
+"Kt4EMPFlowEventShape",
+"Kt4EMPFlowEventShapeAux.Density",
+"Kt4EMPFlowPUSBEventShape",
+"Kt4EMPFlowPUSBEventShapeAux.Density",
+"AntiKt6EMPFlowJets",
+"AntiKt6EMPFlowJetsAux.pt.eta.phi.m.JetConstitScaleMomentum_pt.JetConstitScaleMomentum_eta.JetConstitScaleMomentum_phi.JetConstitScaleMomentum_m.NumTrkPt500.SumPtTrkPt500.NumChargedPFOPt500.SumPtChargedPFOPt500.EnergyPerSampling.ActiveArea4vec_eta.ActiveArea4vec_m.ActiveArea4vec_phi.ActiveArea4vec_pt.DetectorEta.DetectorY.FracSamplingMax.FracSamplingMaxIndex.GhostTrack.Jvt.JVFCorr.JvtRpt.NumTrkPt1000.NumChargedPFOPt1000.TrackWidthPt1000.ChargedPFOWidthPt1000.GhostMuonSegmentCount.PartonTruthLabelID.ConeTruthLabelID.HadronConeExclExtendedTruthLabelID.HadronConeExclTruthLabelID.TrueFlavor.Timing.N90Constituents",
+"MET_Track",
+"MET_TrackAux.name.mpx.mpy",
+"PrimaryVertices",
+"PrimaryVerticesAux.vertexType"
+]

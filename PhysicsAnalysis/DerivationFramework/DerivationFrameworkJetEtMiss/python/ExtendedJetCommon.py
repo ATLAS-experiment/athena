@@ -837,6 +837,17 @@ def addRscanJets(jetalg,radius,inputtype,sequence,outputlist):
             addStandardJets(jetalg, radius, "LCTopo", mods="lctopo_ungroomed",
                             ghostArea=0.01, ptmin=2000, ptminFilter=7000, calibOpt="none", algseq=sequence, outputGroup=outputlist)
 
+def addRscanJetsHighThresholds(jetalg,radius,inputtype,sequence,outputlist):
+    jetname = "{0}{1}{2}Jets".format(jetalg,int(radius*10),inputtype)
+    algname = "jetalg"+jetname
+
+    if not hasattr(sequence,algname):
+        if inputtype == "Truth":
+            addStandardJets(jetalg, radius, "Truth", mods="truth_ungroomed", ptmin=25000, algseq=sequence, outputGroup=outputlist)
+        elif inputtype == "EMPFlow":
+            addStandardJets(jetalg, radius, "EMPFlow", mods="pflow_ungroomed",
+                            ghostArea=0.01, ptmin=2000, ptminFilter=100000, calibOpt="none", algseq=sequence, outputGroup=outputlist)
+
 def addConstModJets(jetalg,radius,inputtype,constmods,sequence,outputlist,customVxColl="",
                     addGetters=None, **kwargs):
     if len(constmods)>0:
