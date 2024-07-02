@@ -69,6 +69,15 @@ def ActsMainTrackFindingAlgCfg(flags,
     if flags.Detector.GeometryITk:
         kwargs.setdefault("etaBins", flags.Tracking.ActiveConfig.etaBins)
     kwargs.setdefault("chi2CutOff", tolist(flags.Tracking.ActiveConfig.Xi2maxNoAdd))
+    # @ TODO when using the new measurement selector can chose chi2 cut-off for outliers and measurements
+    # if flags.Acts.useDefaultActsMeasurementSelector is True :
+    #     # only a single chi2 cut-off exist for the default Acts measurement selector
+    #     kwargs.setdefault("chi2CutOff", tolist(flags.Tracking.ActiveConfig.Xi2maxNoAdd))
+    # else :
+    #     # clusters with chi2 above this value will be treated as outliers
+    #     kwargs.setdefault("chi2CutOff", tolist(flags.Tracking.ActiveConfig.Xi2maxNo))
+    #     # clusters with chi2 above this value will be discarded.
+    #     kwargs.setdefault("chi2OutlierCutOff", tolist(flags.Tracking.ActiveConfig.Xi2maxNoAdd))
     kwargs.setdefault("numMeasurementsCutOff", [1])
 
     # there is always an over and underflow bin so the first bin will be 0. - 0.5 the last bin 3.5 - inf.
@@ -143,16 +152,20 @@ def ActsMainTrackFindingAlgCfg(flags,
         from ActsConfig.ActsMeasurementCalibrationConfig import ActsAnalogueClusteringToolCfg
 
         if not (flags.Tracking.doPixelDigitalClustering or flags.Beam.Type is BeamType.Cosmics):
-            if flags.Acts.PixelCalibrationStrategy is PixelCalibrationStrategy.AnalogueClustering:
+            if flags.Acts.PixelCalibrationStrategy in (PixelCalibrationStrategy.AnalogueClustering,
+                                                       PixelCalibrationStrategy.AnalogueClusteringAfterSelection) :
                 kwargs.setdefault(
                     'PixelCalibrator',
-                    acc.popToolsAndMerge(ActsAnalogueClusteringToolCfg(flags))
+                    acc.popToolsAndMerge(ActsAnalogueClusteringToolCfg(flags,
+                                                                       CalibrateAfterMeasurementSelection = flags.Acts.PixelCalibrationStrategy is PixelCalibrationStrategy.AnalogueClusteringAfterSelection))
                 )
         
     if flags.Acts.doMonitoring and 'MonTool' not in kwargs:
         from ActsConfig.ActsMonitoringConfig import ActsTrackFindingMonitoringToolCfg
         kwargs.setdefault('MonTool', acc.popToolsAndMerge(
             ActsTrackFindingMonitoringToolCfg(flags)))
+
+    kwargs.setdefault("UseDefaultActsMeasurementSelector",flags.Acts.useDefaultActsMeasurementSelector)
 
     acc.addEventAlgo(CompFactory.ActsTrk.TrackFindingAlg(name, **kwargs))
     return acc

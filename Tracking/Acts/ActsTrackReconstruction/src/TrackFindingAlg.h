@@ -29,6 +29,7 @@
 #include "ActsGeometry/ATLASSourceLink.h"
 #include "ActsToolInterfaces/IFitterTool.h"
 #include "ActsToolInterfaces/IOnTrackCalibratorTool.h"
+#include "IMeasurementSelector.h"
 
 // Athena
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
@@ -112,6 +113,7 @@ namespace ActsTrk
     Gaudi::Property<std::vector<double>> m_etaBins{this, "etaBins", {}, "bins in |eta| to specify variable selections"};
     // Acts::MeasurementSelector selection cuts for associating measurements with predicted track parameters on a surface.
     Gaudi::Property<std::vector<double>> m_chi2CutOff{this, "chi2CutOff", {}, "MeasurementSelector: maximum local chi2 contribution"};
+    Gaudi::Property<std::vector<double>> m_chi2OutlierCutOff{this, "chi2OutlierCutOff", {}, "MeasurementSelector: maximum local chi2 contribution for outlier"};
     Gaudi::Property<std::vector<size_t>> m_numMeasurementsCutOff{this, "numMeasurementsCutOff", {}, "MeasurementSelector: maximum number of associated measurements on a single surface"};
     Gaudi::Property<std::vector<std::size_t>> m_ptMinMeasurements{this, "ptMinMeasurements", {}, "if specified for the given seed collection, applies ptMin cut in branch stopper once ptMinMinMeasurements have been encountered"};
     Gaudi::Property<std::vector<std::size_t>> m_absEtaMaxMeasurements{this, "absEtaMaxMeasurements", {}, "if specified for the given seed collection, applies absEtaMax cut in branch stopper once absEtaMaxMeasurements have been encountered"};
@@ -139,6 +141,8 @@ namespace ActsTrk
     Gaudi::Property<std::vector<std::string>> m_seedLabels{this, "SeedLabels", {}, "One label per seed key used in outputs"};
     Gaudi::Property<bool> m_dumpAllStatEtaBins{this, "DumpEtaBinsForAll", false, "Dump eta bins of all statistics counter."};
 
+    Gaudi::Property<bool> m_useDefaultMeasurementSelector{this, "UseDefaultActsMeasurementSelector", true, ""};
+
     enum EStat : std::size_t
     {
       kNTotalSeeds,
@@ -157,6 +161,9 @@ namespace ActsTrk
       kNStat
     };
     using EventStats = std::vector<std::array<unsigned int, kNStat>>;
+
+    // initialize measurement selector to be called during initialize
+    StatusCode initializeMeasurementSelector();
 
     /**
      * @brief invoke track finding procedure
@@ -194,6 +201,7 @@ namespace ActsTrk
     CKF_pimpl &trackFinder();
     const CKF_pimpl &trackFinder() const;
 
+    std::unique_ptr<ActsTrk::IMeasurementSelector> m_measurementSelector;
     std::unique_ptr<CKF_pimpl> m_trackFinder;
 
     // statistics

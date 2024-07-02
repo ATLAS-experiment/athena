@@ -32,9 +32,10 @@ StatusCode AnalogueClusteringToolImpl<calib_data_t, traj_t>::initialize()
 }
 
 template <typename calib_data_t, typename traj_t>
-const InDetDD::SiDetectorElement*
+const InDetDD::SiDetectorElement&
 AnalogueClusteringToolImpl<calib_data_t, traj_t>::getDetectorElement(xAOD::DetectorIDHashType id) const
 {
+    const InDetDD::SiDetectorElement* element=nullptr;
     SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> pixelDetEleHandle(
 	m_pixelDetEleCollKey,
 	Gaudi::Hive::currentContext());
@@ -43,27 +44,23 @@ AnalogueClusteringToolImpl<calib_data_t, traj_t>::getDetectorElement(xAOD::Detec
     
     if (!pixelDetEleHandle.isValid() or detElements == nullptr) {
 	ATH_MSG_ERROR(m_pixelDetEleCollKey.fullKey() << " is not available.");
-	return nullptr;
     }
-
-    const InDetDD::SiDetectorElement* element = detElements->getDetectorElement(id);
+    else {
+         element = detElements->getDetectorElement(id);
+    }
     if (element == nullptr) {
 	ATH_MSG_ERROR("No element corresponding to hash " << id << " for " << m_pixelDetEleCollKey.fullKey());
-	return nullptr;
+	throw std::runtime_error("SiDetectorElement is NULL");
     }
 
-    return element;
+    return *element;
 }
 
 template <typename calib_data_t, typename traj_t>
 std::pair<float, float>
 AnalogueClusteringToolImpl<calib_data_t, traj_t>::anglesOfIncidence(const InDetDD::SiDetectorElement& element,
-					  const TrackStateProxy& state) const
+                                                                    const Acts::Vector3& direction) const
 {
-    
-    Acts::Vector3 direction = Acts::makeDirectionFromPhiTheta(
-	state.parameters()[Acts::eBoundPhi],
-	state.parameters()[Acts::eBoundTheta]);
 
     float projPhi = direction.dot(element.phiAxis());
     float projEta = direction.dot(element.etaAxis());
@@ -251,48 +248,97 @@ template <typename calib_data_t, typename traj_t>
 std::pair<typename AnalogueClusteringToolImpl<calib_data_t, traj_t>::Pos,
 	  typename AnalogueClusteringToolImpl<calib_data_t, traj_t>::Cov>
 AnalogueClusteringToolImpl<calib_data_t, traj_t>::calibrate(
+    const Acts::GeometryContext& gctx,
+    const Acts::CalibrationContext& cctx,
+    const xAOD::PixelCluster& cluster,
+    const TrackStateProxy& state) const
+{
+    const InDetDD::SiDetectorElement &detElement = getDetectorElement(cluster.identifierHash());
+    Acts::Vector3 direction = Acts::makeDirectionFromPhiTheta(
+	state.parameters()[Acts::eBoundPhi],
+	state.parameters()[Acts::eBoundTheta]);
+    return calibrate(gctx, cctx, cluster, detElement, anglesOfIncidence(detElement, direction));
+}
+
+template <typename calib_data_t, typename traj_t>
+std::pair<typename AnalogueClusteringToolImpl<calib_data_t, traj_t>::Pos,
+	  typename AnalogueClusteringToolImpl<calib_data_t, traj_t>::Cov>
+AnalogueClusteringToolImpl<calib_data_t, traj_t>::calibrate(
+    const Acts::GeometryContext& gctx,
+    const Acts::CalibrationContext& cctx,
+    const xAOD::PixelCluster& cluster,
+    const Acts::BoundTrackParameters& bound_parameters) const
+{
+    const InDetDD::SiDetectorElement &detElement = getDetectorElement(cluster.identifierHash());
+    Acts::Vector3 direction = Acts::makeDirectionFromPhiTheta(
+	bound_parameters.parameters()[Acts::eBoundPhi],
+	bound_parameters.parameters()[Acts::eBoundTheta]);
+    return calibrate(gctx, cctx, cluster, detElement, anglesOfIncidence(detElement, direction));
+}
+
+template <typename calib_data_t, typename traj_t>
+std::pair<typename AnalogueClusteringToolImpl<calib_data_t, traj_t>::Pos,
+	  typename AnalogueClusteringToolImpl<calib_data_t, traj_t>::Cov>
+AnalogueClusteringToolImpl<calib_data_t, traj_t>::calibrate(
     const Acts::GeometryContext& /*gctx*/,
     const Acts::CalibrationContext& /*cctx*/,
     const xAOD::PixelCluster& cluster,
-    const TrackStateProxy& state) const
+    const InDetDD::SiDetectorElement& detElement,
+    const std::pair<float, float>& angles) const
 {
     Pos pos = cluster.template localPosition<2>();
     Cov cov = cluster.template localCovariance<2>();
 
     assert(!cluster.rdoList().empty());
-    const InDetDD::SiDetectorElement *detElement = getDetectorElement(cluster.identifierHash());
-    if (detElement == nullptr) {
-	throw std::runtime_error("SiDetectorElement is NULL");
-    }
 
     const error_data_t *errorData = getErrorData();
     if (errorData == nullptr) {
 	throw std::runtime_error("PixelClusterErrorData is NULL");
     }
 
-    std::pair<float, float> angles = anglesOfIncidence(*detElement, state);
 
-    auto [posX, posY] = getCorrectedPosition(cluster.rdoList(), *errorData, *detElement, angles, cluster);
+    auto [posX, posY] = getCorrectedPosition(cluster.rdoList(), *errorData, detElement, angles, cluster);
     if (posX.has_value())
 	pos[Acts::eBoundLoc0] = *posX;
     if (posY.has_value())
 	pos[Acts::eBoundLoc1] = *posY;
 
-    auto [errX, errY] = getCorrectedError(*errorData, *detElement, angles, cluster);
+    auto [errX, errY] = getCorrectedError(*errorData, detElement, angles, cluster);
     if (errX.has_value())
 	cov(0, 0) = (*errX) * (*errX);
     if (errY.has_value())
 	cov(1, 1) = (*errY) * (*errY);
-    
+
     return std::make_pair(pos, cov);
 }
 
 template <typename calib_data_t, typename traj_t>
 void AnalogueClusteringToolImpl<calib_data_t, traj_t>::connect(OnTrackCalibrator<traj_t>& calibrator) const
 {
-    calibrator.pixel_calibrator. template connect<&AnalogueClusteringToolImpl<calib_data_t, traj_t>::calibrate>(this);
+   using CalibFuncPtr_t =
+      std::pair<typename AnalogueClusteringToolImpl<calib_data_t, traj_t>::Pos,
+                typename AnalogueClusteringToolImpl<calib_data_t, traj_t>::Cov>
+      (AnalogueClusteringToolImpl<calib_data_t, traj_t>:: *)(const Acts::GeometryContext&,
+                                                             const Acts::CalibrationContext&,
+                                                             const xAOD::PixelCluster&,
+                                                             const TrackStateProxy&) const;
+
+   calibrator.pixel_calibrator. template connect<static_cast<CalibFuncPtr_t>(&AnalogueClusteringToolImpl<calib_data_t, traj_t>::calibrate)>(this);
 }
 
+template <typename calib_data_t, typename traj_t>
+void AnalogueClusteringToolImpl<calib_data_t, traj_t>::connectPixelCalibrator(IOnBoundStateCalibratorTool::PixelCalibrator& pixel_calibrator) const
+{
+   using CalibFuncPtr_t =
+      std::pair<typename AnalogueClusteringToolImpl<calib_data_t, traj_t>::Pos,
+                typename AnalogueClusteringToolImpl<calib_data_t, traj_t>::Cov>
+      (AnalogueClusteringToolImpl<calib_data_t, traj_t>:: *)(const Acts::GeometryContext&,
+                                                             const Acts::CalibrationContext&,
+                                                             const xAOD::PixelCluster&,
+                                                             const Acts::BoundTrackParameters&) const;
+
+   pixel_calibrator. template connect<static_cast<CalibFuncPtr_t>(&AnalogueClusteringToolImpl<calib_data_t, traj_t>::calibrate)>(this);
+}
 
 } // namespace ActsTrk
 

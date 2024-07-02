@@ -26,6 +26,8 @@
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "xAODMeasurementBase/UncalibratedMeasurement.h"
+#include "xAODInDetMeasurement/PixelClusterContainer.h"
+#include "xAODInDetMeasurement/StripClusterContainer.h"
 
 // ActsTrk
 #include "ActsGeometry/ATLASSourceLink.h"
@@ -39,6 +41,8 @@
 #include <vector>
 #include <variant>
 
+#include "AtlasUncalibSourceLinkAccessor.h"
+
 namespace
 {
   /// =========================================================================
@@ -49,148 +53,6 @@ namespace
   // container used during the reconstruction
   using RecoTrackStateContainer = ActsTrk::TrackFindingAlg::RecoTrackStateContainer;
 
-  // Helper class to describe ranges of measurements
-  // the range provides the measurement collection index and  element index range (begin, end)
-  struct MeasurementRange : public std::pair<unsigned int, unsigned int>
-  {
-    MeasurementRange() : std::pair<unsigned int, unsigned int>(std::numeric_limits<unsigned int>::max(), std::numeric_limits<unsigned int>::max()) {}
-    static constexpr unsigned int CONTAINER_IDX_SHIFT = 28;
-    static constexpr unsigned int CONTAINER_IDX_MASK = (1u << 31) | (1u << 30) | (1u << 29) | (1u << 28);
-    static constexpr unsigned int ELEMENT_IDX_MASK = ~CONTAINER_IDX_MASK;
-    static unsigned int createRangeValue(unsigned int container_idx, unsigned int index)
-    {
-      assert(container_idx < (1u << (32 - CONTAINER_IDX_SHIFT)));
-      assert((index & CONTAINER_IDX_MASK) == 0u);
-      return (container_idx << CONTAINER_IDX_SHIFT) | index;
-    }
-    void setRangeBegin(std::size_t container_idx, unsigned int element_idx)
-    {
-      assert(container_idx < (1u << (32 - CONTAINER_IDX_SHIFT)));
-      this->first = MeasurementRange::createRangeValue(container_idx, element_idx);
-    }
-    void setRangeEnd(std::size_t container_idx, unsigned int element_idx)
-    {
-      this->second = MeasurementRange::createRangeValue(container_idx, element_idx);
-    }
-    unsigned int containerIndex() const
-    {
-      assert((this->first & CONTAINER_IDX_MASK) == (this->second & CONTAINER_IDX_MASK));
-      return (this->first & CONTAINER_IDX_MASK) >> CONTAINER_IDX_SHIFT;
-    }
-    unsigned int elementBeginIndex() const
-    {
-      assert((this->first & CONTAINER_IDX_MASK) == (this->second & CONTAINER_IDX_MASK));
-      return this->first & ELEMENT_IDX_MASK;
-    }
-    unsigned int elementEndIndex() const
-    {
-      assert((this->first & CONTAINER_IDX_MASK) == (this->second & CONTAINER_IDX_MASK));
-      return this->second & ELEMENT_IDX_MASK;
-    }
-    bool empty() const { return this->first == this->second; }
-  };
-
-  // List of measurement ranges and the measurement container targeted by the ranges.
-  class MeasurementRangeList : public std::vector<MeasurementRange>
-  {
-  private:
-    std::vector<const xAOD::UncalibratedMeasurementContainer *> m_measurementContainer;
-
-  public:
-    const xAOD::UncalibratedMeasurementContainer *container(unsigned int container_index) const
-    {
-      assert(container_index < m_measurementContainer.size());
-      return m_measurementContainer[container_index];
-    }
-
-    // set container, resizing if necessary. That is just in case we call addMeasurements out of order or not for 2 types of measurements
-    void setContainer(unsigned int container_index, const xAOD::UncalibratedMeasurementContainer *container) {
-      if (!(container_index < m_measurementContainer.size()))
-      {
-        m_measurementContainer.resize(container_index + 1, nullptr);
-      }
-      m_measurementContainer[container_index] = container;
-    }
-
-    std::size_t numContainers() const { return m_measurementContainer.size(); }
-  };
-
-  /// Accessor for the above source link container
-  ///
-  /// It wraps up a few lookup methods to be used in the Combinatorial Kalman
-  /// Filter
-  class UncalibSourceLinkAccessor
-  {
-  private:
-    const EventContext *m_eventContext;
-    const std::vector<Acts::GeometryIdentifier> *m_orderedGeoIds;
-    const MeasurementRangeList *m_measurementRanges;
-
-  public:
-    class BaseIterator
-    {
-    public:
-      BaseIterator([[maybe_unused]] const EventContext &ctx,
-                   const xAOD::UncalibratedMeasurementContainer *container,
-                   unsigned int element_index,
-                   const Acts::GeometryIdentifier &geometry_id)
-          : m_container(container),
-            m_index(element_index),
-            m_geometryId(geometry_id)
-
-      {
-      }
-      BaseIterator &operator++()
-      {
-        ++m_index;
-        return *this;
-      }
-      bool operator==(const BaseIterator &a) const { return m_index == a.m_index && m_container == a.m_container; }
-
-      Acts::SourceLink operator*() const
-      {
-        assert(m_container && m_index < m_container->size());
-        return Acts::SourceLink(ActsTrk::ATLASUncalibSourceLink(m_container->at(m_index)));
-      }
-      using value_type = unsigned int;
-      using difference_type = unsigned int;
-      using pointer = const xAOD::UncalibratedMeasurementContainer **;
-      using reference = const xAOD::UncalibratedMeasurementContainer *;
-      using iterator_category = std::input_iterator_tag;
-
-    private:
-      const xAOD::UncalibratedMeasurementContainer *m_container;
-      unsigned int m_index;
-      Acts::GeometryIdentifier m_geometryId;
-    };
-
-    using Iterator = Acts::SourceLinkAdapterIterator<BaseIterator>;
-    UncalibSourceLinkAccessor(const EventContext &ctx,
-                              const std::vector<Acts::GeometryIdentifier> &ordered_geoIds,
-                              const MeasurementRangeList &measurement_ranges)
-        : m_eventContext(&ctx),
-          m_orderedGeoIds(&ordered_geoIds),
-          m_measurementRanges(&measurement_ranges)
-    {
-    }
-    // get the range of elements with requested geoId
-    std::pair<Iterator, Iterator> range(const Acts::Surface &surface) const
-    {
-      std::vector<Acts::GeometryIdentifier>::const_iterator
-          geo_iter = std::lower_bound(m_orderedGeoIds->begin(), m_orderedGeoIds->end(), surface.geometryId());
-      if (geo_iter == m_orderedGeoIds->end() || *geo_iter != surface.geometryId() || (*m_measurementRanges).at(geo_iter - m_orderedGeoIds->begin()).empty())
-      {
-        return {Iterator(BaseIterator(*m_eventContext, nullptr, 0u, surface.geometryId())),
-                Iterator(BaseIterator(*m_eventContext, nullptr, 0u, surface.geometryId()))};
-      }
-
-      assert(static_cast<std::size_t>(geo_iter - m_orderedGeoIds->begin()) < m_measurementRanges->size());
-      const MeasurementRange &range = (*m_measurementRanges).at(geo_iter - m_orderedGeoIds->begin());
-      const xAOD::UncalibratedMeasurementContainer *container = m_measurementRanges->container(range.containerIndex());
-      return {Iterator(BaseIterator(*m_eventContext, container, range.elementBeginIndex(), surface.geometryId())),
-              Iterator(BaseIterator(*m_eventContext, container, range.elementEndIndex(), surface.geometryId()))};
-    }
-  };
 
   /// Adapted from Acts Examples/Algorithms/TrackFinding/src/TrackFindingAlgorithmFunction.cpp
 
@@ -436,9 +298,12 @@ namespace
       offsets.reserve(m_measurementRanges.numContainers() - 1); // first one usually 0
       for (std::size_t typeIndex = 0; typeIndex < m_measurementRanges.numContainers(); ++typeIndex)
       {
-        if (measurementOffset(typeIndex) > 0 && m_measurementRanges.container(typeIndex) != nullptr)
+        const xAOD::UncalibratedMeasurementContainer *the_container
+           = std::visit( [] (const auto &a) -> const xAOD::UncalibratedMeasurementContainer * { return a.containerPtr();} ,
+                         m_measurementRanges.container(typeIndex));
+        if (measurementOffset(typeIndex) > 0 && the_container != nullptr)
         {
-          offsets.emplace_back(m_measurementRanges.container(typeIndex), measurementOffset(typeIndex));
+          offsets.emplace_back(the_container, measurementOffset(typeIndex));
         }
       }
       return offsets;
@@ -447,7 +312,7 @@ namespace
     size_t measurementOffset(size_t typeIndex) const { return typeIndex < m_measurementOffsets.size() ? m_measurementOffsets[typeIndex] : 0u; }
     const std::vector<size_t>& measurementOffsets() const { return m_measurementOffsets; }
     const std::vector<Acts::GeometryIdentifier> &orderedGeoIds() const { return m_orderedGeoIds; }
-    const MeasurementRangeList &measurementRanges() const { return m_measurementRanges; }
+    const ActsTrk::MeasurementRangeList &measurementRanges() const { return m_measurementRanges; }
     const TrackingSurfaceHelper &trackingSurfaceHelper() const { return m_trackingSurfaceHelper; }
 
   private:
@@ -455,7 +320,7 @@ namespace
     std::vector<size_t> m_measurementOffsets;
     std::vector<Acts::GeometryIdentifier> m_orderedGeoIds;
     TrackingSurfaceHelper m_trackingSurfaceHelper;
-    MeasurementRangeList m_measurementRanges;
+    ActsTrk::MeasurementRangeList m_measurementRanges;
     std::size_t m_measurementsTotal = 0;
     bool m_sorted = false;
   };
