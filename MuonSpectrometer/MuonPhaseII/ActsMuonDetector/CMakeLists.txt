@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 ################################################################################
 # Package: ActsMuonDetector
@@ -9,8 +9,7 @@ atlas_subdir( ActsMuonDetector )
 
 atlas_add_component( ActsMuonDetector
                      src/components/*.cxx src/*.cxx
-                     INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${GEOMODEL_LIBRARIES} AthenaKernel GeoModelUtilities ActsGeometryLib MuonIdHelpersLib
+                     LINK_LIBRARIES AthenaKernel GeoModelUtilities ActsGeometryLib MuonIdHelpersLib
                                     GaudiKernel MuonReadoutGeometryR4 AthenaPoolUtilities)
 
 # Install files from the package:
