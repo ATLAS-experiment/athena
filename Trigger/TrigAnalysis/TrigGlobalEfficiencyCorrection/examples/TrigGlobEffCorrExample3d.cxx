@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// Based on CPToolTester.cxx (A. Kraznahorkay) 
@@ -69,6 +69,8 @@
 #include "xAODMuon/MuonContainer.h"
 #include "PATCore/PATCoreEnums.h"
 #include "AthContainers/AuxElement.h"
+#include "AthContainers/ConstAccessor.h"
+#include "AthContainers/Decorator.h"
 
 // stdlib include(s):
 #include <sstream>
@@ -138,8 +140,8 @@ int main(int argc, char* argv[])
     /// For property 'ElectronLegsPerTag':
     std::map<std::string,std::string> legsPerTag;
     /// To tag electron(s) as 'MyMedium' and 'MyTight'
-    SG::AuxElement::Decorator<char> dec_medium("MyMedium");
-    SG::AuxElement::Decorator<char> dec_tight("MyTight");
+    static const SG::Decorator<char> dec_medium("MyMedium");
+    static const SG::Decorator<char> dec_tight("MyTight");
     /// To emulate PID selection (90% loose-to-medium/medium-to-tight eff.)
     std::bernoulli_distribution bernoulliPdf(0.9);
 
@@ -250,14 +252,15 @@ int main(int argc, char* argv[])
             sizeof(periodRuns)/sizeof(*periodRuns) - 1);
     std::default_random_engine randomEngine;
     
-    SG::AuxElement::ConstAccessor<int> truthType("truthType");
-    SG::AuxElement::ConstAccessor<int> truthOrigin("truthOrigin");
+    static const SG::ConstAccessor<int> truthType("truthType");
+    static const SG::ConstAccessor<int> truthOrigin("truthOrigin");
     
     /* ********************************************************************** */
     
     Info(MSGSOURCE, "Starting the event loop");
     unsigned errors = 0;
     double nSuitableEvents = 0., sumW = 0.;
+    static const SG::Decorator<unsigned> RandomRunNumberDec("RandomRunNumber");
     for(Long64_t entry = 0; entry < entries; ++entry)
     {
         event.getEntry(entry);
@@ -266,7 +269,7 @@ int main(int argc, char* argv[])
         const xAOD::EventInfo* eventInfo = nullptr;
         event.retrieve(eventInfo,"EventInfo").ignore();
         unsigned runNumber = periodRuns[uniformPdf(randomEngine)];
-        eventInfo->auxdecor<unsigned>("RandomRunNumber") = runNumber;
+        RandomRunNumberDec(*eventInfo) = runNumber;
 
         unsigned nTrig_e26 = 0, nTrig_e7 = 0, nTrig_e17 = 0;
         
