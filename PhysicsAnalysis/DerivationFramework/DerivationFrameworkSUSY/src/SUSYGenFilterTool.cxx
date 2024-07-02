@@ -133,21 +133,13 @@ namespace DerivationFramework {
 
       if ((std::abs(pdgid)==11 || std::abs(pdgid)==13) && tp->pt()>m_MinLepPt && std::fabs(tp->eta())<m_MaxLepEta) {
 	if( isPrompt(tp) ) {
-	  ATH_MSG_VERBOSE("Adding prompt lepton with pt " << tp->pt()
-			  << ", eta " << tp->eta()
-			  << ", phi " << tp->phi()
-			  << ", status " << tp->status()
-			  << ", pdgId " << pdgid);
+	  ATH_MSG_VERBOSE("Adding prompt lepton " << tp);
 	  genFiltHT += tp->pt();
 	}
       }
 
       if (MC::isSpecialNonInteracting(tp) && isPrompt(tp) ) {
-	ATH_MSG_VERBOSE("Found prompt nonInteracting particle with pt " << tp->pt()
-			<< ", eta " << tp->eta()
-			<< ", phi " << tp->phi()
-			<< ", status " << tp->status()
-			  << ", pdgId " << pdgid);
+	ATH_MSG_VERBOSE("Found prompt nonInteracting particle " << tp);
 	MEx += tp->px();
 	MEy += tp->py();
       }

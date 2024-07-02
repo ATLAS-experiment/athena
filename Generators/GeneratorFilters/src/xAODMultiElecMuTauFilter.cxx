@@ -42,10 +42,7 @@ StatusCode xAODMultiElecMuTauFilter::filterEvent() {
        const xAOD::TruthParticle* pitr =  (*xTruthParticleContainer)[iPart];
        if (MC::isStable(pitr) && (std::abs(pitr->pdgId()) == 11 || std::abs(pitr->pdgId()) == 13)) {
          if (pitr->pt() >= m_minPt && std::abs(pitr->eta()) <= m_maxEta) {
-           ATH_MSG_DEBUG("Found lepton with PDG ID = " << pitr->pdgId()
-                         << ", status = " <<  pitr->status()
-                         << ", pt = "     <<  pitr->pt()
-                         << ", eta = "    <<  pitr->eta());
+           ATH_MSG_DEBUG("Found lepton" << pitr);
             numLeptons++;
             numLightLeptons++;
             if (numLightLeptons==1) { if (pitr->pdgId() < 0) { charge1 = -1; } else { charge1 = 1; } } 
@@ -90,10 +87,7 @@ StatusCode xAODMultiElecMuTauFilter::filterEvent() {
                                                          tau->pz() - taunu->pz(),
                                                          tau->e()  - taunu->e());
            if (tauVisMom.perp() >= m_minVisPtHadTau && std::abs(tauVisMom.eta()) <= m_maxEta) {
-             ATH_MSG_DEBUG("Found hadronic tau decay with PDG ID = " << tau->pdgId()
-                           << ", status = " << tau->status()
-                           << ", vis pt = " << tauVisMom.perp()
-                           << ", eta = " <<  tauVisMom.eta());
+             ATH_MSG_DEBUG("Found hadronic tau decay" << tau);
              numLeptons++;
              numHadTaus++;
         

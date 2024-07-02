@@ -160,7 +160,15 @@ namespace xAOD {
       void toPersistent();
 
    }; // class TruthVertex_v1
-
+  inline std::ostream& operator<<(std::ostream& os, const TruthVertex_v1* v) {
+    if (!v) { os << "Vtx: Empty vertex" << std::endl; return os;}
+    os << "Vtx: id=";
+    os << v->id() << " status=";
+    os << v->status();
+    os << " (x,y,z,t)=" << v->x() << "," << v->y() << "," << v->z() << "," << v->t();
+    /* os << std::endl; AV:Not clear if we need a new line here */
+    return os;
+  }
 } // namespace xAOD
 
 // Declare the inheritance of the type to StoreGate:

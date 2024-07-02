@@ -181,9 +181,7 @@ if (LVL1Passed && (m_localLVL2MuonCutOn || m_localLVL2ElectronCutOn))
             if (std::abs(part->pdgId()) <= 6 && MC::isStable(part))
             {
                 acceptEvent = false;
-                const int pID = part->pdgId();
-                ATH_MSG_WARNING(" Undecayed quark " << pID << " found"
-                                                    << " , status = " << part->status());
+                ATH_MSG_WARNING(" Undecayed quark "  << part);
             }
         }
 
@@ -246,7 +244,7 @@ if (LVL1Passed && (m_localLVL2MuonCutOn || m_localLVL2ElectronCutOn))
                     ATH_MSG_DEBUG(" ------------------------------------------ ");
                     ATH_MSG_DEBUG("");
                     // cppcheck-suppress shiftNegative; false positive
-                    ATH_MSG_DEBUG(" Event " << m_EventCnt << " --> B-hadron/B-meson id " << particleID << " (" << HadronName << ") , status " << part->status());
+                    ATH_MSG_DEBUG(" Event " << m_EventCnt << " --> B-hadron/B-meson (" << HadronName << ") " << part);
                     ATH_MSG_DEBUG("");
 
                     // ** Looping on all children checking if they have passed the selection cuts defined by the user **
@@ -677,8 +675,8 @@ void xAODBSignalFilter::PrintChild(const xAOD::TruthParticle* child,
             pName = "anti - " + pName;
     }
     ATH_MSG_DEBUG("    " << treeIDStr << "   "
-                         << "Child id = " << pID << " (" << pName
-                         << ") ,  status = " << (child->status()) << " , from final B = " << fromFinalB);
+                         << "Child (" << pName
+                         << ") " << child << " , from final B = " << fromFinalB);
 
     return;
 }
