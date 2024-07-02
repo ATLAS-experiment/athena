@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// Based on CPToolTester.cxx (A. Kraznahorkay) 
@@ -34,6 +34,8 @@
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODEgamma/PhotonContainer.h"
 #include "PATCore/PATCoreEnums.h"
+#include "AthContainers/ConstAccessor.h"
+#include "AthContainers/Decorator.h"
 
 // stdlib include(s):
 #include <random>
@@ -174,6 +176,8 @@ int main(int argc, char* argv[])
     Info(MSGSOURCE, "Starting the event loop");
     unsigned errors = 0;
     double nSuitableEvents = 0., sumW = 0.;
+    static const SG::Decorator<unsigned> RandomRunNumberDec("RandomRunNumber");
+    static const SG::ConstAccessor<int> truthTypeAcc("truthType");
     for(Long64_t entry = 0; entry < entries; ++entry)
     {
         event.getEntry(entry);
@@ -182,7 +186,7 @@ int main(int argc, char* argv[])
         const xAOD::EventInfo* eventInfo = nullptr;
         event.retrieve(eventInfo,"EventInfo").ignore();
         unsigned runNumber = periodRuns[uniformPdf(randomEngine)];
-        eventInfo->auxdecor<unsigned>("RandomRunNumber") = runNumber;
+        RandomRunNumberDec(*eventInfo) = runNumber;
 
         vector<const xAOD::Photon*> myTriggeringPhotons;
         const xAOD::PhotonContainer* photons = nullptr;
@@ -194,7 +198,7 @@ int main(int argc, char* argv[])
             float eta = fabs(photon->caloCluster()->etaBE(2));
             float pt = photon->pt();
             if(pt<10e3f || eta>=2.37 || (eta>1.37 && eta<1.52)) continue;
-            int t = photon->auxdata<int>("truthType");
+            int t = truthTypeAcc(*photon);
             if(t!=14) continue;
             /// photon must be above trigger threshold for the softest leg:
             if(pt < 26e3f) continue;
