@@ -29,7 +29,10 @@ if __name__ == '__main__':
     trf.parser.add_argument('--outputNTUP_TRTCALIBFile', nargs='+',
                             type=trfArgClasses.argFactory(trfArgClasses.argNTUPFile, io='output', treeNames="events"),
                             help='Output TRT calib file')
- 
+    
+    # TODO - Add the option to specify DoCalibrator ( default must be False )
+    # Can also work writing another transform since we will need to change the Input (RAW and ntuple) and output names!
+    
     trf.parseCmdLineArgs(sys.argv[1:])
     
     trf.execute()

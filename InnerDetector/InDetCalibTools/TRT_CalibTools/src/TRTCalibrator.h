@@ -25,6 +25,7 @@ PURPOSE: Tool for calibrating the TRT
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ServiceHandle.h"
+#include "Gaudi/Property.h"
 
 #include <string>
 #include <vector>
@@ -110,55 +111,60 @@ public:
   virtual bool calibrate ATLAS_NOT_THREAD_SAFE () override;
 
 private:
+
+    ToolHandle<ITRT_CalDbTool> m_trtcaldbTool {this, "TRTCalDbTool", "ITRT_CalDbTool", ""};
+    ToolHandle<ITRT_StrawStatusSummaryTool> m_TRTStrawSummaryTool {this, "TRTStrawSummaryTool", "ITRT_StrawStatusSummaryTool", ""};
+    ServiceHandle<ITRT_StrawNeighbourSvc> m_neighbourSvc {this,"NeighbourSvc","ITRT_StrawNeighbourSvc","retrieve barrel and end-cap straw number" };
+    
+
+    // Gaudi Properties
+    Gaudi::Property<float> m_maxDistance             {this, "maxDistance"     , 2.8 , ""};
+    Gaudi::Property<float> m_maxTimeResidual         {this, "maxTimeResidual" , 150.0 , ""};
+    Gaudi::Property<float> m_maxTrackChisquarePerDof {this, "maxTrackChisquarePerDof" , 10.0 , ""};
+    Gaudi::Property<float> m_t0offset                {this, "T0Offset" , -0.3 , ""};
+
+    Gaudi::Property<int> m_minTimebinsOverThreshold {this, "minTimebinsOverThreshold" , 2 , ""};
+    Gaudi::Property<int> m_minrt   {this, "MinRt"   , 10000 , "minimum number of hits required to do R-t calibration"    };
+    Gaudi::Property<int> m_mint0   {this, "MinT0"   , 200   , "minimum number of hits required to do T0 calibration"     };
+    Gaudi::Property<int> m_nevents {this, "Nevents" , -1    , "The number of hits or histograms read from the input file"};
+
+    Gaudi::Property<bool> m_SplitBarrel  {this, "SplitBarrel"  , true  , ""};
+    Gaudi::Property<bool> m_useP0        {this, "UseP0"        , true  , ""};
+    Gaudi::Property<bool> m_floatP3      {this, "FloatP3"      , true  , ""};
+    Gaudi::Property<bool> m_DoArXenonSep {this, "DoArXenonSep" , false , ""};
+    Gaudi::Property<bool> m_DoShortStrawCorrection {this, "DoShortStrawCorrection" , true , ""};
+
+    Gaudi::Property<std::string> m_selstring   {this, "Selstring" , "_*_-_-_-_-_-_-" , ""};
+    Gaudi::Property<std::string> m_calsub      {this, "SubPart"   , "user" , ""};
+    Gaudi::Property<std::string> m_options     {this, "Options"   , "" , ""};
+    Gaudi::Property<std::string> m_hittuple    {this, "Hittuple"  , "merged.root" , ""};
+    Gaudi::Property<std::string> m_rtrel       {this, "RtRel"     , "basic" , "the rt relation to use"};
+    Gaudi::Property<std::string> m_rtbinning   {this, "RtBinning" , "t" , ""};
+    Gaudi::Property<std::string> m_ntrtmanager {this, "TrtManagerLocation" , "TRT" , ""};
+
+    Gaudi::Property< std::vector<std::string> > m_doRt    {this, "CalibrateRt"  , {} , ""};
+    Gaudi::Property< std::vector<std::string> > m_doT0    {this, "CalibrateT0"  , {} , ""};
+    Gaudi::Property< std::vector<std::string> > m_doRes   {this, "FitResidual"  , {} , ""};
+    Gaudi::Property< std::vector<std::string> > m_beQuiet {this, "NoHistograms" , {} , ""};
+    Gaudi::Property< std::vector<std::string> > m_useBoardRef {this, "UseBoardRef" , {} , ""};
+    Gaudi::Property< std::vector<std::string> > m_doLogPrint  {this, "PrintLog"    , {} , ""};
+    Gaudi::Property< std::vector<std::string> > m_doOutPrint  {this, "PrintT0Out"  , {} , ""};
+    Gaudi::Property< std::vector<std::string> > m_doRtPrint   {this, "PrintRtOut"  , {} , ""};
+
   const AtlasDetectorID* m_DetID;
   const TRT_ID* m_TRTID; 
   const InDetDD::TRT_DetectorManager* m_trtmanager;
-  ToolHandle<ITRT_CalDbTool> m_trtcaldbTool ;
-  ServiceHandle<ITRT_StrawNeighbourSvc> m_neighbourSvc ;
-  ToolHandle<ITRT_StrawStatusSummaryTool> m_TRTStrawSummaryTool; //!< The ConditionsSummaryTool
-  float m_maxDistance ;
-  float m_maxTimeResidual ;
-  int m_minTimebinsOverThreshold ;
-  float m_maxTrackChisquarePerDof ;
   unsigned int m_numOfHitsTotal ;
   unsigned int m_numOfHitsAccepted ;
   unsigned int m_numOfProcessedTracks ;
 
-  
   std::string m_comTimeName;
-
-  /**minimum number of hits required to do R-t calibration*/ int m_minrt;
-  /**minimum number of hits required to do T0 calibration*/ int m_mint0;
-  /**The number of hits or histograms read from the input file*/ int m_nevents;
-  /**The t0 offset*/ float m_t0offset;
-
-  std::string m_calsub;
-  std::string m_rtbinning;
-  std::string m_selstring;
-  std::string m_options;
-  std::string m_hittuple;
-  /**the rt relation to use*/ std::string m_rtrel;
-  std::string m_ntrtmanager;
-  std::vector<std::string> m_doRt;
-  std::vector<std::string> m_doT0;
-  std::vector<std::string> m_doRes;
-  std::vector<std::string> m_beQuiet;
-  std::vector<std::string> m_useBoardRef;
-  bool m_SplitBarrel;
-  bool m_useP0;
-  bool m_floatP3;
-  bool m_DoShortStrawCorrection;
-  bool m_DoArXenonSep;
-  std::vector<std::string> m_doLogPrint;
-  std::vector<std::string> m_doOutPrint;
-  std::vector<std::string> m_doRtPrint;
-
   std::string m_Tkey,m_Dkey,m_Lkey,m_Mkey,m_Bkey,m_Ckey,m_Skey,m_Lkey_acc,m_Dkey_acc;
   
   /** dummy dictionary class*/ class BDzero{public: int z;};
-  /** dictionary class for a straw*/ class BDstraw{public: std::map<std::string,BDzero> s;};
-  /** dictionary class for a chip*/ class BDchip{public: std::map<std::string,BDstraw> c;};
-  /** dictionary class for a board*/ class BDboard{public: std::map<std::string,BDchip> b;};
+  /** dictionary class for a straw*/  class BDstraw{public: std::map<std::string,BDzero> s;};
+  /** dictionary class for a chip*/   class BDchip{public: std::map<std::string,BDstraw> c;};
+  /** dictionary class for a board*/  class BDboard{public: std::map<std::string,BDchip> b;};
   /** dictionary class for a module*/ class BDmodule{public: std::map<std::string,BDboard> m;};
   /** dictionary class for a layer*/ class BDlayer{public: std::map<std::string,BDmodule> l;};
   /** dictionary class for a detector*/ class BDdetector{public: std::map<std::string,BDlayer> d;};
