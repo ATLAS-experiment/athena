@@ -1430,19 +1430,19 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_eleEffMapFilePath, "Ele.EffMapFilePath", rEnv, "ElectronEfficiencyCorrection/2015_2025/rel22.2/2022_Summer_Prerecom_v1/map4.txt");
   configFromFile(m_eleAllowRun3TrigSFFallback, "Ele.AllowRun3TrigSFFallback", rEnv, false);
   
-  configFromFile(m_trig2015combination_singleLep, "Trig.Singlelep2015", rEnv, "e24_lhmedium_L1EM20VH_OR_e60_lhmedium_OR_e120_lhloose || mu20_iloose_L1MU15_OR_mu50");
+  configFromFile(m_trig2015combination_singleLep, "Trig.Singlelep2015", rEnv, "e24_lhmedium_L1EM20VH_OR_e60_lhmedium_OR_e120_lhloose || mu20_iloose_L1MU15_OR_mu40");
   configFromFile(m_trig2016combination_singleLep, "Trig.Singlelep2016", rEnv, "e26_lhtight_nod0_ivarloose_OR_e60_lhmedium_nod0_OR_e140_lhloose_nod0 || mu26_ivarmedium_OR_mu50");
   configFromFile(m_trig2017combination_singleLep, "Trig.Singlelep2017", rEnv, "e26_lhtight_nod0_ivarloose_OR_e60_lhmedium_nod0_OR_e140_lhloose_nod0 || mu26_ivarmedium_OR_mu50");
   configFromFile(m_trig2018combination_singleLep, "Trig.Singlelep2018", rEnv, "e26_lhtight_nod0_ivarloose_OR_e60_lhmedium_nod0_OR_e140_lhloose_nod0 || mu26_ivarmedium_OR_mu50");
   configFromFile(m_trig2022combination_singleLep, "Trig.Singlelep2022", rEnv, "e26_lhtight_ivarloose_L1EM22VHI_OR_e60_lhmedium_L1EM22VHI_OR_e140_lhloose_L1EM22VHI || HLT_mu24_ivarmedium_L1MU14FCH_OR_HLT_mu50_L1MU14FCH");
   configFromFile(m_trigNToys_diLep, "Trig.DilepNToys", rEnv, 250); // 0 means calculate from formula instead - needs to be supported for the trigger combination
-  configFromFile(m_trig2015combination_diLep, "Trig.Dilep2015", rEnv, "e24_lhmedium_L1EM20VH_OR_e60_lhmedium_OR_e120_lhloose || mu20_iloose_L1MU15_OR_mu50 || 2e12_lhloose_L12EM10VH || e17_lhloose_mu14 || e7_lhmedium_mu24 || mu18_mu8noL1 || 2mu10");
+  configFromFile(m_trig2015combination_diLep, "Trig.Dilep2015", rEnv, "e24_lhmedium_L1EM20VH_OR_e60_lhmedium_OR_e120_lhloose || mu20_iloose_L1MU15_OR_mu40 || 2e12_lhloose_L12EM10VH || e17_lhloose_mu14 || e7_lhmedium_mu24 || mu18_mu8noL1 || 2mu10");
   configFromFile(m_trig2016combination_diLep, "Trig.Dilep2016", rEnv, "e26_lhtight_nod0_ivarloose_OR_e60_lhmedium_nod0_OR_e140_lhloose_nod0 || mu26_ivarmedium_OR_mu50 || 2e17_lhvloose_nod0 || e17_lhloose_nod0_mu14 || e7_lhmedium_nod0_mu24 || e26_lhmedium_nod0_L1EM22VHI_mu8noL1 || mu22_mu8noL1 || 2mu14");
   configFromFile(m_trig2017combination_diLep, "Trig.Dilep2017", rEnv, "e26_lhtight_nod0_ivarloose_OR_e60_lhmedium_nod0_OR_e140_lhloose_nod0 || mu26_ivarmedium_OR_mu50 || 2e24_lhvloose_nod0 || e17_lhloose_nod0_mu14 || e7_lhmedium_nod0_mu24 || e26_lhmedium_nod0_mu8noL1 || mu22_mu8noL1 || 2mu14");
   configFromFile(m_trig2018combination_diLep, "Trig.Dilep2018", rEnv, "e26_lhtight_nod0_ivarloose_OR_e60_lhmedium_nod0_OR_e140_lhloose_nod0 || mu26_ivarmedium_OR_mu50 || 2e24_lhvloose_nod0 || e17_lhloose_nod0_mu14 || e7_lhmedium_nod0_mu24 || e26_lhmedium_nod0_mu8noL1 || mu22_mu8noL1 || 2mu14");
   // configFromFile(m_trig2022combination_diLep, "Trig.Dilep2022", rEnv, "");
   configFromFile(m_trigNToys_multiLep, "Trig.MultiNToys", rEnv, 250); // 0 means calculate from formula instead - needs to be supported for the trigger combination
-  configFromFile(m_trig2015combination_multiLep, "Trig.Multi2015", rEnv, "e24_lhmedium_L1EM20VH_OR_e60_lhmedium_OR_e120_lhloose || mu20_iloose_L1MU15_OR_mu50 || 2e12_lhloose_L12EM10VH || e17_lhloose_2e9_lhloose || 2e12_lhloose_mu10 || e12_lhloose_2mu10 || e17_lhloose_mu14 || e7_lhmedium_mu24 || mu18_mu8noL1 || 2mu10 || 3mu6");
+  configFromFile(m_trig2015combination_multiLep, "Trig.Multi2015", rEnv, "e24_lhmedium_L1EM20VH_OR_e60_lhmedium_OR_e120_lhloose || mu20_iloose_L1MU15_OR_mu40 || 2e12_lhloose_L12EM10VH || e17_lhloose_2e9_lhloose || 2e12_lhloose_mu10 || e12_lhloose_2mu10 || e17_lhloose_mu14 || e7_lhmedium_mu24 || mu18_mu8noL1 || 2mu10 || 3mu6");
   configFromFile(m_trig2016combination_multiLep, "Trig.Multi2016", rEnv, "e26_lhtight_nod0_ivarloose_OR_e60_lhmedium_nod0_OR_e140_lhloose_nod0 || mu26_ivarmedium_OR_mu50 || 2e17_lhvloose_nod0 || e17_lhloose_nod0_mu14 || e7_lhmedium_nod0_mu24 || e26_lhmedium_nod0_L1EM22VHI_mu8noL1 || e17_lhloose_nod0_2e9_lhloose_nod0 || e12_lhloose_nod0_2mu10 || 2e12_lhloose_nod0_mu10 || mu22_mu8noL1 || 2mu14 || 3mu6");
   configFromFile(m_trig2017combination_multiLep, "Trig.Multi2017", rEnv, "e26_lhtight_nod0_ivarloose_OR_e60_lhmedium_nod0_OR_e140_lhloose_nod0 || mu26_ivarmedium_OR_mu50 || 2e24_lhvloose_nod0 || e17_lhloose_nod0_mu14 || e7_lhmedium_nod0_mu24 || e26_lhmedium_nod0_mu8noL1 || e24_lhvloose_nod0_2e12_lhvloose_nod0_L1EM20VH_3EM10VH || e12_lhloose_nod0_2mu10 || 2e12_lhloose_nod0_mu10 || mu22_mu8noL1 || 2mu14 || 3mu6");
   configFromFile(m_trig2018combination_multiLep, "Trig.Multi2018", rEnv, "e26_lhtight_nod0_ivarloose_OR_e60_lhmedium_nod0_OR_e140_lhloose_nod0 || mu26_ivarmedium_OR_mu50 || 2e24_lhvloose_nod0 || e17_lhloose_nod0_mu14 || e7_lhmedium_nod0_mu24 || e26_lhmedium_nod0_mu8noL1 || e24_lhvloose_nod0_2e12_lhvloose_nod0_L1EM20VH_3EM10VH || e12_lhloose_nod0_2mu10 || 2e12_lhloose_nod0_mu10 || mu22_mu8noL1 || 2mu14 || 3mu6");
@@ -1481,7 +1481,7 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   //
   configFromFile(m_badmuQoverP, "BadMuon.qoverp", rEnv, 0.4);
   //
-  configFromFile(m_muCalibrationMode, "Muon.CalibrationMode", rEnv, 1); // 0: "setup1"(correctData), 1: "setup2"(additionalMCSys)
+  configFromFile(m_muCalibrationMode, "Muon.CalibrationMode", rEnv, 0); // 0: correctData_CB
   //
   configFromFile(m_photonBaselinePt, "PhotonBaseline.Pt", rEnv, 25000.);
   configFromFile(m_photonBaselineEta, "PhotonBaseline.Eta", rEnv, 2.37);
@@ -1649,7 +1649,7 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_autoconfigPRWFile, "PRW.autoconfigPRWFile", rEnv, "None");
   configFromFile(m_autoconfigPRWCombinedmode, "PRW.autoconfigPRWCombinedmode", rEnv, false);
   configFromFile(m_autoconfigPRWRPVmode, "PRW.autoconfigPRWRPVmode", rEnv, false);
-  configFromFile(m_autoconfigPRWRtags, "PRW.autoconfigPRWRtags", rEnv, "mc20a:r13167_r14859,mc20d:r13144_r14860,mc20e:r13145_r14861,mc21a:r13752_r13829,mc23a:r14622_r14932,mc23c:r14799_r14908,mc23d:r15224"); // Tag details here: https://twiki.cern.ch/twiki/bin/view/AtlasProtected/AtlasProductionGroup
+  configFromFile(m_autoconfigPRWRtags, "PRW.autoconfigPRWRtags", rEnv, "mc20a:r13167_r14859,mc20d:r13144_r14860,mc20e:r13145_r14861,mc21a:r13752_r13829,mc23a:r14622_r14932_r15540,mc23c:r14799_r14908,mc23d:r15224_r15530"); // Tag details here: https://twiki.cern.ch/twiki/bin/view/AtlasProtected/AtlasProductionGroup
   configFromFile(m_commonPRWFileMC20a, "PRW.commonPRWFileMC20a", rEnv, "PileupReweighting/mc20_common/mc20a.284500.physlite.prw.v1.root");
   configFromFile(m_commonPRWFileMC20d, "PRW.commonPRWFileMC20d", rEnv, "PileupReweighting/mc20_common/mc20d.300000.physlite.prw.v1.root");
   configFromFile(m_commonPRWFileMC20e, "PRW.commonPRWFileMC20e", rEnv, "PileupReweighting/mc20_common/mc20e.310000.physlite.prw.v1.root");
