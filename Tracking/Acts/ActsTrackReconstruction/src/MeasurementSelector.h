@@ -530,7 +530,6 @@ protected:
          for (typename TopCollection<NMeasMax, MeasCovPair >::IndexType
                  idx: selected_measurements) {
             TheMatchingMeasurement &a_selected_measurement = selected_measurements.getSlot(idx);
-            assert(calibrated_meas_cov_i < calibrated.size());
 
             // helper to select the destination storage which is the extra temporary buffer
             // if the measurement storage types during and after selection are different.
@@ -540,6 +539,7 @@ protected:
                      return a_selected_measurement.m_measurement;
                   }
                   else {
+                     assert(calibrated_meas_cov_i < calibrated.size());
                      return calibrated[calibrated_meas_cov_i];
                   }
                }();
@@ -585,7 +585,7 @@ protected:
                     (!selected_measurements.empty()
                      ? selected_measurements.getSlot( *(selected_measurements.begin())).m_isOutLier
                      : false) );
-      assert( result->size() == selectedMeasurements.size() );
+      assert( result->size() == selected_measurements.size() );
 
       // helper to determine whether calibrated storeage is to be used
       auto use_calibrated_storage = [&postCalibrator]() -> bool {
