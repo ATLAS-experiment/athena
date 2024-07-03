@@ -233,18 +233,7 @@ struct AtlasMeasurementSelector
    template <std::size_t DIM, typename measurement_t>
    const Calibrator<DIM, measurement_t> &
    postCalibrator() const {
-      // if the calibration is already done during the calibration
-      // the post calibrator is just an invalid delegate
-      // @TODO should s_fullPreCalibration be a template parameter
-      if constexpr(s_fullPreCalibration) {
-         // no post calibration:
-         static const Calibrator<DIM, measurement_t> s_invalidCalibrator;
-         return s_invalidCalibrator;
-      }
-      else {
-         // ... otherwise get the calibrator registered for this measurement type and dimension
-         return m_calibrators.template calibrator<DIM,measurement_t>();
-      }
+      return m_calibrators.template calibrator<DIM,measurement_t>();
    }
 
    // helper which returns a delegate or lambda to get the measurement and covariance used during the selection
