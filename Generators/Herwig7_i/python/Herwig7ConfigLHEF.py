@@ -131,7 +131,7 @@ saverun {} /Herwig/Generators/EventGenerator
   ##
   ## \param usespin Use the spin of tau leptons from the LHE file (spins of other particles are ignored anyways)
   ## \param usepwghlhereader Uses a different LHE reader, which is able to propagte multiple event weights
-  def __lhef_commands(self, lhe_filename="events.lhe", me_pdf_order="NLO", usespin=True, usepwghlhereader=False):
+  def __lhef_commands(self, lhe_filename="events.lhe", me_pdf_order="NLO", usespin=True, usepwghlhereader=False, pwg_reader = "powheg", pwg_reader_lib="libpowhegHerwig.so"):
 
     if me_pdf_order not in ["LO", "NLO"]:
       raise RuntimeError(hw7Utils.ansi_format_error("Herwig7ConfigLHEF.py:__lhef_commands: Parameter 'me_pdf_order' must either be 'LO' or 'NLO'!"))
@@ -159,8 +159,7 @@ saverun {} /Herwig/Generators/EventGenerator
 # set /Herwig/EventHandlers/LHEReader:PDFB /Herwig/Partons/Hard{MEPDFOrder}PDF
 """.format(MEPDFOrder = me_pdf_order)
 
-    pwg_reader_lib = "library libpowhegHerwig.so" 
-
+    pwg_reader_lib = "library "+pwg_reader_lib
 
     self.commands += """
 ## ----------------------------
@@ -203,7 +202,7 @@ set /Herwig/EventHandlers/LHEReader:Cuts /Herwig/Cuts/NoCuts
 {BeamCommands}
 """.format(FileName = lhe_filename,
            PwgReaderLib = pwg_reader_lib if usepwghlhereader else "",
-           PwgReader = "powheg" if usepwghlhereader else "",
+           PwgReader = pwg_reader if usepwghlhereader else "",
            Beams = self.beams,
            IncludeSpin = "Yes" if usespin else "No",
            MomentumTreatment = momentum_treatment,
@@ -284,11 +283,11 @@ set /Herwig/Shower/ShowerHandler:SpinCorrelations No
   ## If you want to use the pwglhereader, needed to propagte multiple event weights
   ## you need to use a gridpack that contains the powhegHerwig.so 
   ## 
-  def lhef_powhegbox_commands(self, lhe_filename="events.lhe", me_pdf_order="NLO", usespin=True, usepwhglhereader=False):
+  def lhef_powhegbox_commands(self, lhe_filename="events.lhe", me_pdf_order="NLO", usespin=True, usepwhglhereader=False, pwg_reader = "powheg", pwg_reader_lib="libpowhegHerwig.so"):
 
     if me_pdf_order not in ["LO", "NLO"]:
       raise RuntimeError(hw7Utils.ansi_format_error("Herwig7ConfigLHEF.py:lhef_powhegbox_commands: Parameter 'me_pdf_order' must either be 'LO' or 'NLO'!"))
 
     self.set_lhef_powhegbox_commands = True
 
-    self.__lhef_commands(lhe_filename, me_pdf_order, usespin, usepwhglhereader)
+    self.__lhef_commands(lhe_filename, me_pdf_order, usespin, usepwhglhereader, pwg_reader, pwg_reader_lib)
