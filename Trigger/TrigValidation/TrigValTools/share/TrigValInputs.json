@@ -40,7 +40,7 @@
         "source": "data",
         "format": "BS",
         "paths": [
-            "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data24_test.00466371.debug_PUCrash.daq.RAW._lb0000._SFO-19._0001.data"
+            "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data24_13p6TeV.00476730.debug_HLTSVForceAccept.daq.RAW._lb0000._SFO-13._0001.data"
         ]
     },
     "data21_dbg_stream": {

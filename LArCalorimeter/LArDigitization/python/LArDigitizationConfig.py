@@ -34,7 +34,7 @@ def useLArFloat(flags):
     # check for fast chain, running digitisation from hits in memory
     if flags.Sim.DoFullChain:
         return False
-    return True
+    return False
 
 
 def LArRangeEMCfg(flags, name="LArRangeEM", **kwargs):

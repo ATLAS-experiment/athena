@@ -21,7 +21,8 @@ run.flags = ['Trigger.triggerMenuSetup="MC_pp_run4_v1"',
              'ITk.doTruth=False',
              'Tracking.doTruth=False',
              'Trigger.enableL1CaloPhase1=False',
-             'Trigger.enabledSignatures=[\\\"Egamma\\\",\\\"Electron\\\",\\\"Photon\\\",\\\"Muon\\\",\\\"Tau\\\",\\\"Jet\\\",\\\"MET\\\"]']
+             'Trigger.enabledSignatures=[\\\"Egamma\\\",\\\"Electron\\\",\\\"Photon\\\",\\\"Muon\\\",\\\"Tau\\\",\\\"Jet\\\",\\\"MET\\\"]',
+             'IOVDb.GlobalTag="OFLCOND-MC21-SDR-RUN4-01"']
 
 # The full test configuration
 test = Test.Test()

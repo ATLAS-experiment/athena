@@ -69,10 +69,10 @@ std::ostream& operator<<( std::ostream& os, const std::set<T>& s ) {
 
 
 template<class T>
-std::ostream& operator<<( std::ostream& s, const std::vector<T>& _s ) { 
-  typename std::vector<T>::const_iterator sitr = _s.begin();
+std::ostream& operator<<( std::ostream& s, const std::vector<T>& v ) { 
+  typename std::vector<T>::const_iterator sitr = v.begin();
   s << "[  ";
-  while ( sitr!=_s.end() ) s << (*sitr++) << "\t"; 
+  while ( sitr!=v.end() ) s << (*sitr++) << "\t"; 
   s << " ]";
   return s;
 }
@@ -112,9 +112,6 @@ int main(int argc, char** argv) {
 
   std::string infile="";
 
-  bool adding_chains   = false;
-  bool deleting_chains = false;
-
   bool force = false;
 
   double ptmin = 0;
@@ -127,65 +124,74 @@ int main(int argc, char** argv) {
 
     std::string arg(argv[i]);
 
+    /// need to properly fix the logic for deleting
+    
     if ( arg.find('-')!=0 ) { 
-      if ( adding_chains || deleting_chains ) { 
+      if ( !deleting && infile!="" ) { 
+	require = true;
 	require_chains.insert(argv[i]); 
 	rchains.push_back(argv[i]); 
 	continue;
       }
+      else { 
+	if ( infile=="" ) infile = arg;
+	else { 
+	  std::cerr << "more than one file specified: " << arg << std::endl;
+	  return usage(-2);
+	  infile=arg;
+	}
+      }
     }
     else { 
-      adding_chains   = false;
-      deleting_chains = false;
-    }
-
-    if      ( arg=="-h" || arg=="--help" )   return usage(0);
-    else if ( arg=="-o" || arg=="--output" ) { 
-      if ( (i+1)<argc )  outfile = argv[++i];
-      else               return usage(-1);
-    }
-    else if ( arg=="-r" || arg=="--require" ) { 
-      if ( deleting ) { 
-	std::cerr << "cannot require and delete chains" << std::endl;
-	return usage(-4);
+      if      ( arg=="-h" || arg=="--help" )   return usage(0);
+      else if ( arg=="-o" || arg=="--output" ) { 
+	if ( (i+1)<argc )  outfile = argv[++i];
+	else               return usage(-1);
       }
-      adding_chains = true;
-      require = true;
-    }
-    else if ( arg=="-d" || arg=="--delete" ) {
-      if ( require ) { 
-	std::cerr << "cannot require and delete chains" << std::endl;
-	return usage(-3);
+      else if ( arg=="-r" || arg=="--require" ) { 
+	if ( deleting ) { 
+	  std::cerr << "cannot require and delete chains" << std::endl;
+	  return usage(-4);
+	}
+	require = true;
       }
-      deleting_chains = true;
-      deleting = true;
-    }
-    else if ( arg=="--pt" ) { 
-      if ( (i+1)<argc )  ptmin = std::atof(argv[++i])*1000;
-      else               return usage(-1);
-      force = true;
-    }
-    else if ( arg=="-v" || arg=="--verbose" ) verbose = true;
-    else if ( arg=="-f" || arg=="--force" )   force = true;
-    else if (              arg=="--roi" )     { force=true; roi_filter = true; }
-    else if ( infile=="" ) infile = arg;
-    else { 
-      std::cerr << "more than one file specified: " << arg << std::endl;
-      return usage(-2);
+      else if ( arg=="-d" || arg=="--delete" ) {
+	if ( require ) { 
+	  std::cerr << "cannot require and delete chains" << std::endl;
+	  return usage(-3);
+	}
+	deleting = true;
+      }
+      else if ( arg=="--pt" ) { 
+	if ( (i+1)<argc )  ptmin = std::atof(argv[++i])*1000;
+	else               return usage(-1);
+	force = true;
+      }
+      else if ( arg=="-v" || arg=="--verbose" ) verbose = true;
+      else if ( arg=="-f" || arg=="--force" )   force = true;
+      else if (              arg=="--roi" )     { force=true; roi_filter = true; }
+      else if ( infile=="" ) infile = arg;
+      else { 
+	std::cerr << "more than one file specified: " << arg << std::endl;
+	return usage(-2);
+      }
     }
   }
 
-  //  std::cout << "required chains " << require_chains << std::endl;
+  std::cout << "required chains " << require_chains << std::endl;
+
+  if ( require_chains.size()>0 ) require = true;
 
   if ( !force && require_chains.size()==0 ) { 
     std::cout << "no chains requested - not doing anything" << std::endl;
     return 0;
   }
 
+  std::cout << "chains: " << rchains << std::endl;
+
 
   std::cout << "skim::start       " << time_str() << std::endl; 
 
-  //  if ( require_chains.size()>0 ) require = true;
 
   if ( require  ) std::cout << "require chains " << require_chains << std::endl;
   if ( deleting ) std::cout << "delete  chains " << require_chains << std::endl;
@@ -196,15 +202,15 @@ int main(int argc, char** argv) {
     return usage(-1);
   }
 
-  std::cout << "reading from file " << infile << std::endl;
-  std::cout << "writing to file   " << outfile << std::endl;
+  std::cout << "reading from file: " << infile << std::endl;
+  std::cout << "writing to file:   " << outfile << std::endl;
 
 
   /// open output file
   TIDA::Event* track_ev = new TIDA::Event();
   TIDA::Event* h = track_ev;
 
-  std::cout << "opening outfile: " << outfile << std::endl;
+  std::cout << "opening outfile:   " << outfile << std::endl;
 
   TFile fout( outfile.c_str(), "recreate");
 
@@ -214,8 +220,7 @@ int main(int argc, char** argv) {
 
   TTree *tree = new TTree("tree","tree");
   
-  //  tree->Branch("Track","Int",&t,6400);
-  tree->Branch("TIDA::Event", "TIDA::Event",&h,6400, 1);
+  tree->Branch("TIDA::Event", "TIDA::Event", &h, 6400, 1);
     
   h->clear();
 
@@ -331,7 +336,6 @@ int main(int argc, char** argv) {
 
       if ( skip ) continue;
 
-
       /// now onto the business of deleting the chains ...
 
       { 
@@ -342,13 +346,14 @@ int main(int argc, char** argv) {
 
 	for ( size_t ic=0 ; ic<chainnames.size() ; ic++ ) {
 	  
+	  
 	  bool matched = false;
 	  for ( std::set<std::string>::iterator it=require_chains.begin() ; it!=require_chains.end() ; ++it ) { 
 
 	    matched |= std::regex_match( chainnames[ic], std::regex(*it+".*") );
 
 	    if ( verbose && matched ) std::cout << "chain: " << chainnames[ic] << "\t :: reg " << *it << "\tmatched: " << matched << std::endl;
-
+	    
 	  }
 	    
 	  if ( ( require && !matched ) ) track_ev->erase( chainnames[ic] );
@@ -435,9 +440,8 @@ int main(int argc, char** argv) {
 	}
 	
 
-	if ( verbose ) std::cout << *track_ev << std::endl;
+	if ( verbose ) std::cout << "writing event:\n" << *track_ev << std::endl;
 
-	//      std::cout << "writing event " << track_ev->event_number() << " <<<<<<<<<<<<<<<<<<<<" << std::endl; 
 	tree->Fill();
 	ev_out++;
 	
