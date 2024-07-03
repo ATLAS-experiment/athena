@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef dqutilsStatusFlagCOOL_h
@@ -53,8 +53,8 @@ namespace dqutils {
     virtual ~StatusFlagCOOL () {};
 
     // Methods of "interest". To insert a status flag you can use either ChannelId or ChannelName.
-    void insert(cool::ChannelId channelId, int code, float dfrac, float thrust, std::string tag_name);
-    void insert(std::string channelName, int code, float dfrac, float thrust, std::string tag_name);
+    void insert(cool::ChannelId channelId, int code, float dfrac, float thrust, const std::string& tag_name);
+    void insert(std::string channelName, int code, float dfrac, float thrust, const std::string& tag_name);
 
     // Needed for the ROOT interface.
     ClassDef(StatusFlagCOOL, 0) // A class for modifying DQ info in the COOL database
