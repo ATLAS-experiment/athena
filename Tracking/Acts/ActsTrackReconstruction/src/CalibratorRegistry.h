@@ -100,7 +100,7 @@ void CalibratorRegistry<MeasurementTypeTraits, bound_track_parameters_t, measure
 template <typename MeasurementTypeTraits, typename bound_track_parameters_t, typename measurement_container_variant_t>
 template <std::size_t DIM, typename T_ValueType>
 inline
-const typename CalibratorRegistry<MeasurementTypeTraits, bound_track_parameters_t, measurement_container_variant_t>::Calibrator<DIM, T_ValueType> &
+const typename CalibratorRegistry<MeasurementTypeTraits, bound_track_parameters_t, measurement_container_variant_t>::template Calibrator<DIM, T_ValueType> &
 CalibratorRegistry<MeasurementTypeTraits, bound_track_parameters_t, measurement_container_variant_t>
 ::calibrator() const {
    const CalibratorVariant &universal = getCalibratorGeneric< DIM, T_ValueType,std::variant_size_v<measurement_container_variant_t> >(m_calibrators);

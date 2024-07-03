@@ -484,7 +484,7 @@ protected:
       auto preCalibrator = derived().template preCalibrator<DIM, BaseElementType>();
       TopCollection<NMeasMax, TheMatchingMeasurement > selected_measurements(numMeasurementsCut);
       {
-         for ( const auto &measurement : MeasurementRange(container, sourceLinkBegin, sourceLinkEnd) ) {
+         for ( const auto &measurement : MeasurementRange<T_Container>(container, sourceLinkBegin, sourceLinkEnd) ) {
             TheMatchingMeasurement &matching_measurement=selected_measurements.slot();
             matching_measurement.m_measurement = preCalibrator(geometryContext,
                                                                calibrationContext,
@@ -530,16 +530,19 @@ protected:
          for (typename TopCollection<NMeasMax, MeasCovPair >::IndexType
                  idx: selected_measurements) {
             TheMatchingMeasurement &a_selected_measurement = selected_measurements.getSlot(idx);
-            assert(calibrated_meas_cov_i < calibrated.size());
 
             // helper to select the destination storage which is the extra temporary buffer
             // if the measurement storage types during and after selection are different.
             post_calib_meas_cov_pair_t &calibrated_measurement
                = [&calibrated, &a_selected_measurement, calibrated_meas_cov_i]() -> post_calib_meas_cov_pair_t & {
                   if constexpr(pre_and_post_calib_types_agree) {
+                     (void) calibrated;
+                     (void) calibrated_meas_cov_i;
                      return a_selected_measurement.m_measurement;
                   }
                   else {
+                     (void) a_selected_measurement;
+                     assert(calibrated_meas_cov_i < calibrated.size());
                      return calibrated[calibrated_meas_cov_i];
                   }
                }();
@@ -585,11 +588,12 @@ protected:
                     (!selected_measurements.empty()
                      ? selected_measurements.getSlot( *(selected_measurements.begin())).m_isOutLier
                      : false) );
-      assert( result->size() == selectedMeasurements.size() );
+      assert( result->size() == selected_measurements.size() );
 
       // helper to determine whether calibrated storeage is to be used
       auto use_calibrated_storage = [&postCalibrator]() -> bool {
          if constexpr(pre_and_post_calib_types_agree) {
+            (void) postCalibrator;
             return false;
          }
          else {
@@ -754,7 +758,8 @@ struct MeasurementSelectorWithDispatch : public MeasurementSelectorBase< NMeasMa
                                   &logger,
                                   numMeasurementsCut,
                                   &maxChi2Cut] (const auto &measurement_container_with_dimension) {
-               constexpr std::size_t DIM = measurement_container_with_dimension.dimension();
+               using ArgType = std::remove_cv_t<std::remove_reference_t< decltype(measurement_container_with_dimension) > >;
+               constexpr std::size_t DIM = ArgType::dimension();
                return this->template selectMeasurementsCreateTrackStates<DIM>(geometryContext,
                                                                              calibrationContext,
                                                                              surface,
@@ -822,7 +827,7 @@ struct MeasurementSelectorBaseImpl : public MeasurementSelectorWithDispatch<NMea
    ParameterMapping::type<DIM>
    parameterMap(const Acts::GeometryContext&,
                 const Acts::CalibrationContext&,
-                const Acts::Surface& surface) {
+                const Acts::Surface&) {
       return ParameterMapping::identity<DIM>();
    }
 

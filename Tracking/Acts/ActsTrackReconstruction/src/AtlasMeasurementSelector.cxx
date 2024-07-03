@@ -200,10 +200,10 @@ struct AtlasMeasurementSelector
    }
 
    template <std::size_t DIM>
-   static constexpr bool s_CanPreCalibrate =    std::is_same< typename traits::PreSelectionMeasurement<DIM>,
-                                                              typename traits::CalibratedMeasurement<DIM> >::value
-                                             && std::is_same< typename traits::PreSelectionMeasurementCovariance<DIM>,
-                                                              typename traits::CalibratedMeasurementCovariance<DIM> >::value;
+   static constexpr bool s_CanPreCalibrate =    std::is_same< typename traits::template PreSelectionMeasurement<DIM>,
+                                                              typename traits::template CalibratedMeasurement<DIM> >::value
+                                             && std::is_same< typename traits::template PreSelectionMeasurementCovariance<DIM>,
+                                                              typename traits::template CalibratedMeasurementCovariance<DIM> >::value;
 
    template < std::size_t DIM, typename T_ValueType >
    void setPreCalibrator(typename std::enable_if<s_CanPreCalibrate<DIM>, const Calibrator<DIM, T_ValueType> &>::type calibrator) {
@@ -233,18 +233,7 @@ struct AtlasMeasurementSelector
    template <std::size_t DIM, typename measurement_t>
    const Calibrator<DIM, measurement_t> &
    postCalibrator() const {
-      // if the calibration is already done during the calibration
-      // the post calibrator is just an invalid delegate
-      // @TODO should s_fullPreCalibration be a template parameter
-      if constexpr(s_fullPreCalibration) {
-         // no post calibration:
-         static const Calibrator<DIM, measurement_t> s_invalidCalibrator;
-         return s_invalidCalibrator;
-      }
-      else {
-         // ... otherwise get the calibrator registered for this measurement type and dimension
-         return m_calibrators.template calibrator<DIM,measurement_t>();
-      }
+      return m_calibrators.template calibrator<DIM,measurement_t>();
    }
 
    // helper which returns a delegate or lambda to get the measurement and covariance used during the selection
@@ -309,7 +298,7 @@ namespace {
       AtlasActsMeasurmentSelector(ActsTrk::MeasurementCalibrator2 &&calibrator,
                                   TheAtlasMeasurementSelector::Config &&config)
          : m_calibrator( std::move(calibrator)),
-           m_measurementSelector{std::move(config)}
+           m_measurementSelector{ {std::move(config)} }
       {
          // have to register one calibrator per measurement container type and associated dimension.
          // @TODO unfortunately automatic type deduction does not work, so have to provide the type
