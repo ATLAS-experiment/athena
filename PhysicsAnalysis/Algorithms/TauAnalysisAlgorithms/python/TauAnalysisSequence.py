@@ -7,7 +7,6 @@ from AnaAlgorithm.DualUseConfig import createAlgorithm, addPrivateTool, \
                                        createPublicTool
 
 def makeTauAnalysisSequence( dataType, workingPoint, postfix = '',
-                             legacyRecommendations = False,
                              deepCopyOutput = False,
                              shallowViewOutput = True,
                              rerunTruthMatching = True,
@@ -18,7 +17,6 @@ def makeTauAnalysisSequence( dataType, workingPoint, postfix = '',
 
     Keyword arguments:
       dataType -- The data type to run on ("data", "mc" or "afii")
-      legacyRecommendations -- use legacy tau BDT and electron veto recommendations
       deepCopyOutput -- If set to 'True', the output containers will be
                         standalone, deep copies (slower, but needed for xAOD
                         output writing)
@@ -52,8 +50,7 @@ def makeTauAnalysisSequence( dataType, workingPoint, postfix = '',
 
     makeTauCalibrationSequence (seq, dataType, postfix=postfix,
                                 rerunTruthMatching = rerunTruthMatching)
-    makeTauWorkingPointSequence (seq, dataType, workingPoint, postfix=postfix,
-                                 legacyRecommendations = legacyRecommendations)
+    makeTauWorkingPointSequence (seq, dataType, workingPoint, postfix=postfix)
     makeSharedObjectSequence (seq, deepCopyOutput = deepCopyOutput,
                               shallowViewOutput = shallowViewOutput,
                               postfix = '_Tau' + postfix,
@@ -112,13 +109,11 @@ def makeTauCalibrationSequence( seq, dataType,
 
 
 
-def makeTauWorkingPointSequence( seq, dataType, workingPoint, postfix = '',
-                             legacyRecommendations = False):
+def makeTauWorkingPointSequence( seq, dataType, workingPoint, postfix = ''):
     """Create tau analysis algorithms for a single working point
 
     Keyword arguments:
       dataType -- The data type to run on ("data", "mc" or "afii")
-      legacyRecommendations -- use legacy tau BDT and electron veto recommendations
       postfix -- a postfix to apply to decorations and algorithm
                  names.  this is mostly used/needed when using this
                  sequence with multiple working points to ensure all
@@ -133,8 +128,6 @@ def makeTauWorkingPointSequence( seq, dataType, workingPoint, postfix = '',
         raise ValueError ('working point should be of format "quality", not ' + workingPoint)
 
     nameFormat = 'TauAnalysisAlgorithms/tau_selection_{}.conf'
-    if legacyRecommendations:
-        nameFormat = 'TauAnalysisAlgorithms/tau_selection_{}_legacy.conf'
 
     if splitWP[0] not in ['Tight', 'Medium', 'Loose', 'VeryLoose', 'NoID', 'Baseline'] :
         raise ValueError ("invalid tau quality: \"" + splitWP[0] +
