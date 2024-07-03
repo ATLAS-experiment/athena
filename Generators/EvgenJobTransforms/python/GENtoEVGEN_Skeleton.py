@@ -19,7 +19,7 @@ from PyUtils.Helpers import release_metadata
 from PyJobTransforms.TransformUtils import processPreExec, processPreInclude, processPostExec, processPostInclude
 
 # Other imports that are needed
-import sys, os
+import sys, os, re
 
 # Function that reads the jO and returns an instance of Sample(EvgenCAConfig)
 def setupSample(runArgs, flags):
@@ -116,14 +116,37 @@ def setupSample(runArgs, flags):
     return sample
 
 
+# Function to check black-listed releases
+def checkBlackList(cache, generatorName, checkType) :
+    isError = None
+    fileName = "BlackList_caches.txt" if checkType == "black" else "PurpleList_generators.txt" 
+    with open(f"/cvmfs/atlas.cern.ch/repo/sw/Generators/MC16JobOptions/common/{fileName}") as bfile:
+        for line in bfile.readlines():
+            if not line.strip():
+                continue
+            # Bad caches
+            badCache=line.split(',')[1].strip()
+            # Bad generators
+            badGens=line.split(',')[2].strip()
+            
+            used_gens = ','.join(generatorName)
+            # Match Generator and release cache
+            if cache==badCache and re.search(badGens,used_gens) is not None:
+                if badGens=="": badGens="all generators"
+                isError=f"{cache} is {checkType}-listed for {badGens}"
+                return isError
+    return isError
+
+
 # Main function
 def fromRunArgs(runArgs):
     # print release information
     d = release_metadata()
     evgenLog.info("using release [%(project name)s-%(release)s] [%(platform)s] [%(nightly name)s/%(nightly release)s] -- built on [%(date)s]", d)
+    athenaRel = d["release"]
     
     evgenLog.info("****************** STARTING EVENT GENERATION *****************")
-
+        
     evgenLog.info("**** Transformation run arguments")
     evgenLog.info(runArgs)
 
@@ -148,6 +171,20 @@ def fromRunArgs(runArgs):
 
     # Create an instance of the Sample(EvgenCAConfig) and update global flags accordingly
     sample = setupSample(runArgs, flags)
+
+    # Sort the list of generator names into standard form
+    from GeneratorConfig.GenConfigHelpers import gen_sortkey, gen_lhef
+    generatorNames = sorted(sample.generators, key=gen_sortkey)
+    
+    # Check black-list and purple-list
+    blError = checkBlackList(athenaRel,generatorNames, "black")
+    plError = checkBlackList(athenaRel,generatorNames, "purple")
+    if blError is not None:
+        raise RuntimeError(blError)   
+    if plError is not None:
+        evgenLog.warning("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        evgenLog.warning(f"!!! WARNING {plError} !!!")
+        evgenLog.warning("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 
     # Setup the main flags
     flags.Exec.FirstEvent = runArgs.firstEvent
@@ -239,12 +276,8 @@ def fromRunArgs(runArgs):
     cfg.merge(SimTimeEstimateCfg(flags))   
     
     # TODO: Rivet
-     
-    # Sort the list of generator names into standard form
-    from GeneratorConfig.GenConfigHelpers import gen_sortkey, gen_lhef
-    generatorNames = sorted(sample.generators, key=gen_sortkey)
-
-    ## Include information about generators in metadata
+         
+    # Include information about generators in metadata
     from GeneratorConfig.Versioning import generatorsGetInitialVersionedDictionary, generatorsVersionedStringList
     generatorDictionary = generatorsGetInitialVersionedDictionary(generatorNames)
     generatorList = generatorsVersionedStringList(generatorDictionary)
