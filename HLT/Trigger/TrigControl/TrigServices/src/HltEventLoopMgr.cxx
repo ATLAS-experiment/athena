@@ -31,7 +31,6 @@
 
 // TDAQ includes
 #include "eformat/StreamTag.h"
-#include "owl/time.h"
 
 // ROOT includes
 #include "TROOT.h"
@@ -42,6 +41,7 @@
 #include <format>
 #include <sstream>
 #include <string>
+#include <time.h>
 
 // =============================================================================
 // Helper macros, typedefs and constants
@@ -742,13 +742,14 @@ void HltEventLoopMgr::printSORAttrList(const coral::AttributeList& atr) const
 {
   unsigned long long sorTime_ns(atr["SORTime"].data<unsigned long long>());
 
-  // Human readable format of SOR time if available
+  // Human readable format of SOR time
   time_t sorTime_sec = sorTime_ns / std::nano::den;
-  const auto sorTime_readable = OWLTime(sorTime_sec);
+  struct tm buf;
 
   ATH_MSG_INFO("SOR parameters:");
   ATH_MSG_INFO("   RunNumber             = " << atr["RunNumber"].data<unsigned int>());
-  ATH_MSG_INFO("   SORTime [ns]          = " << sorTime_ns << " (" << sorTime_readable << ") ");
+  ATH_MSG_INFO("   SORTime [ns]          = " << sorTime_ns <<
+               " (" << std::put_time(localtime_r(&sorTime_sec, &buf), "%F %T") << ") ");
 
   auto dmfst = atr["DetectorMaskFst"].data<unsigned long long>();
   auto dmsnd = atr["DetectorMaskSnd"].data<unsigned long long>();
