@@ -255,15 +255,23 @@ class TDAQC_Array_Variable(TDAQC_Multi_Channel_Variable):
 A_FAR_GARAGE, A_NEAR_GARAGE, C_FAR_GARAGE, C_NEAR_GARAGE = 101, 105, 109, 113
 A_FAR_SIT_HV, A_NEAR_SIT_HV, C_FAR_SIT_HV, C_NEAR_SIT_HV =   1,   5,   9,  13
 A_FAR_SIT_LV, A_NEAR_SIT_LV, C_FAR_SIT_LV, C_NEAR_SIT_LV =  21,  25,  29,  33
-A_FAR_TOF_HV,                C_FAR_TOF_HV                =  51,       59
-A_FAR_TOF_LV,                C_FAR_TOF_LV                =  71,       79
+A_FAR_TOF_HV,                C_FAR_TOF_HV                =  17,       19
+A_FAR_TOF_LV,                C_FAR_TOF_LV                =  37,       39
 
 # TDAQ channels
 TTC_RESTART        = 1000
 STOPLESSLY_REMOVED = 5000
 
 A_FAR_SIT_DISABLED, A_NEAR_SIT_DISABLED, C_FAR_SIT_DISABLED, C_NEAR_SIT_DISABLED = 1001, 1005, 1009, 1013
-A_FAR_TOF_DISABLED,                      C_FAR_TOF_DISABLED                      = 1051,       1059
+A_FAR_TOF_DISABLED,                      C_FAR_TOF_DISABLED                      = 1017,       1019
+
+# Channel names
+NAMING = ['FSA0', 'FSA1', 'FSA2', 'FSA3',
+          'NSA0', 'NSA1', 'NSA2', 'NSA3',
+          'FSC0', 'FSC1', 'FSC2', 'FSC3',
+          'NSC0', 'NSC1', 'NSC2', 'NSC3',
+          'TDC-A-1', 'TDC-A-2',
+          'TDC-C-1', 'TDC-C-2']
 
 # Channel groups
 GARAGE = [A_FAR_GARAGE, A_NEAR_GARAGE, C_FAR_GARAGE, C_NEAR_GARAGE]
@@ -279,9 +287,13 @@ TOF_DISABLED = [A_FAR_TOF_DISABLED,                      C_FAR_TOF_DISABLED]
 SIT_HV_DEAD_BAND = 0.05
 TOF_HV_DEAD_BAND = 0.90
 
-SIT_LV_CURRENT_LOW, SIT_LV_CURRENT_HIGH = 0.4, 0.6
-TOF_HV_CURRENT_LOW                      = 600
-TOF_LV_CURRENT_LOW                      = 1
+SIT_LV_CURRENT_LOW = [0.44, 0.40, 0.42, 0.46,
+                      0.38, 0.35, 0.38, 0.42,
+                      0.40, 0.39, 0.39, 0.38,
+                      0.41, 0.40, 0.43, 0.40]
+SIT_LV_CURRENT_HIGH = 0.8
+TOF_HV_CURRENT_LOW  = 600
+TOF_LV_CURRENT_LOW  = 1.4
 
 def mapChannels(*mapseqArgs):
     return dict(chain(*[zip(channels, range(defectChannel, defectChannel + len(channels))) for channels, defectChannel in mapseqArgs]))
@@ -309,7 +321,7 @@ class AFP(DCSC_DefectTranslate_Subdetector):
         # AFP_(A|C)_(FAR|NEAR)_SIT_(PARTIALLY|NOT)_OPERATIONAL_LV
         DCSC_Variable_With_Mapping(
             'SIT/LV',
-            lambda iov: SIT_LV_CURRENT_LOW <= remove_None(iov.current, 0) <= SIT_LV_CURRENT_HIGH,
+            lambda iov: SIT_LV_CURRENT_LOW[iov.channel - SIT_LV[0]] <= remove_None(iov.current, 0) <= SIT_LV_CURRENT_HIGH,
             mapping = mapChannels(
                 ([ 9, 10, 11, 12], A_FAR_SIT_LV ),
                 ([13, 14, 15, 16], A_NEAR_SIT_LV),
@@ -508,15 +520,15 @@ class AFP(DCSC_DefectTranslate_Subdetector):
 
     @staticmethod
     def comment_SIT_LV(iov):
-        return AFP.comment_planes(iov, 'with too low current')
+        return AFP.comment_planes(iov, 'out of nominal current', SIT_LV[0])
 
     @staticmethod
     def comment_SIT_HV(iov):
-        return AFP.comment_planes(iov, 'out of nominal voltage')
+        return AFP.comment_planes(iov, 'out of nominal voltage', SIT_HV[0])
 
     @staticmethod
     def comment_TOF_LV(iov):
-        return 'ToF TDC with too low current'
+        return AFP.comment_tof_tdc(iov, 'with too low current', TOF_LV[0])
 
     @staticmethod
     def comment_TOF_HV(iov):
@@ -536,11 +548,11 @@ class AFP(DCSC_DefectTranslate_Subdetector):
     
     @staticmethod
     def comment_SIT_DISABLED(iov):
-        return AFP.comment_planes(iov, 'removed from readout')
+        return AFP.comment_planes(iov, 'removed from readout', SIT_DISABLED[0])
     
     @staticmethod
     def comment_TOF_DISABLED(iov):
-        return AFP.comment_device(iov, 'ToF TDC', 'removed from readout')
+        return AFP.comment_tof_tdc(iov, 'removed from readout', TOF_DISABLED[0])
     
     ###########################################################################
     # Combination defects
@@ -555,12 +567,23 @@ class AFP(DCSC_DefectTranslate_Subdetector):
     ###########################################################################
 
     @staticmethod
-    def comment_planes(iov, message):
-        return AFP.comment_device(iov, 'SiT plane', message)
+    def comment_planes(iov, message, defect_offset=None, module_tagger=None):
+        return AFP.comment_device(iov, 'SiT plane', message, defect_offset, module_tagger)
+    
+    @staticmethod
+    def comment_tof_tdc(iov, message, defect_offset=None, module_tagger=None):
+        return AFP.comment_device(iov, 'ToF TDC', message, defect_offset - 16, module_tagger)
 
     @staticmethod
-    def comment_device(iov, device, message):
+    def comment_device(iov, device, message, defect_offset=None, module_tagger=None):
         count = iov.NConfig - iov.NWorking
         if count != 1:
             device += 's'
-        return f"{count} {device} {message}"
+        comment = f"{count} {device} {message}"
+        if defect_offset is None:
+            return comment
+        iovs = sorted([orig for orig in iov._orig_iovs if orig.good is False], key=lambda x: x.channel)
+        list = [NAMING[orig.channel - defect_offset] for orig in iovs]
+        if module_tagger is not None:
+            list = [f"{module} {module_tagger(orig)}" for module,orig in zip(list,iovs)]
+        return comment + f" ({', '.join(list)})"
