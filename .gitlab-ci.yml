@@ -12,6 +12,133 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+.build-cpp:
+  stage: build
+  extends: .only-review-cpp
+  interruptible: false
+  variables:
+    # Use prefixed CMake options to avoid UB while executing 'conan install'.
+    BPROTO_CI_CMAKE_BUILD_TYPE: "Debug"
+    # This can be defined global wide.
+    CMAKE_GENERATOR: Unix Makefiles
+  before_script:
+    # nproc on GNU/Linux, sysctl on macOS
+    - NPROC=$(nproc || sysctl -n hw.physicalcpu) 2>/dev/null
+    # Download all Conan packages
+    - |-
+      if [[ -f "${CI_PROJECT_DIR}/conanfile.py" || -f "${CI_PROJECT_DIR}/conanfile.txt" ]]; then
+        conan install . -if build -of build --build=missing \
+          -pr:b "${CC}" \
+          -pr:h "${CC}" \
+          -s:b build_type="${BPROTO_CI_CMAKE_BUILD_TYPE}" \
+          -s:h build_type="${BPROTO_CI_CMAKE_BUILD_TYPE}"
+
+        # Conan will generate this for us.
+        export BPROTO_CI_CMAKE_TOOLCHAIN_FILE="-DCMAKE_TOOLCHAIN_FILE='conan_toolchain.cmake'"
+      fi
+    - export BPROTO_CI_CMAKE_BUILD_TYPE="-DCMAKE_BUILD_TYPE=${BPROTO_CI_CMAKE_BUILD_TYPE}"
+    - |-
+      echo -e "BPROTO_CI_CMAKE_BUILD_TYPE:\n\t${BPROTO_CI_CMAKE_BUILD_TYPE}"
+      echo -e "BPROTO_CI_CMAKE_ARGS:\n\t${BPROTO_CI_CMAKE_ARGS}"
+      echo -e "BPROTO_CI_CMAKE_EXTRA_ARGS:\n\t${BPROTO_CI_CMAKE_EXTRA_ARGS}"
+      echo -e "BPROTO_CI_CMAKE_TOOLCHAIN_FILE:\n\t${BPROTO_CI_CMAKE_TOOLCHAIN_FILE}"
+  script:
+    - mkdir -p build
+    - |-
+      cmake -S. -Bbuild \
+        ${BPROTO_CI_CMAKE_BUILD_TYPE} \
+        ${BPROTO_CI_CMAKE_ARGS} \
+        ${BPROTO_CI_CMAKE_EXTRA_ARGS} \
+        ${BPROTO_CI_CMAKE_TOOLCHAIN_FILE} \
+          2>&1 | tee build/ConfigurationLog.txt
+    - cmake --build build -j${NPROC} 2>&1 | tee build/CompilationLog.txt
+  artifacts:
+    expire_in: 2 hrs
+    when: always
+    paths:
+      # Different logs are needed if something happens.
+      - build/CMakeFiles/CMakeError.log
+      - build/CMakeFiles/CMakeOutput.log
+      - build/ConfigurationLog.txt
+      - build/CompilationLog.txt
+
+      # The main binaries.
+      - build/bin/
+
+      # The cache is needed for the installation test.
+      - build/CMakeCache.txt
+
+      # CTest files are needed for the installation test.
+      - build/CTestTestfile.cmake
+      - build/**/CTestTestfile.cmake
+
+      # Dart files are needed for the tests with valgrind.
+      - build/DartConfiguration.tcl
+
+      # Test stage doesn't checkout repo and use only artifacts.
+      # So include test configs to an artifact too.
+      - tools/*
+
+.test-cpp:
+  stage: test
+  extends: .only-review-cpp
+  when: on_success
+  variables:
+    # Boost settings
+    BOOST_TEST_LOGGER: "JUNIT,all,test_results.xml:HRF,warning"
+    # CTest settings
+    CTEST_OUTPUT_ON_FAILURE: 1
+    # GIT settings
+    GIT_CHECKOUT: "false"
+    GIT_STRATEGY: none
+    # Sanitizers settings
+    ASAN_OPTIONS: "log_threads=1:verbosity=1"
+    LSAN_OPTIONS: "log_threads=1:verbosity=1"
+    TSAN_OPTIONS: "log_threads=1:verbosity=1"
+  before_script:
+    # nproc on GNU/Linux, sysctl on macOS
+    - NPROC=$(nproc || sysctl -n hw.physicalcpu) 2>/dev/null
+    - |-
+      asan_supp_file="${CI_PROJECT_DIR}/tools/asan.supp"
+      if [[ -f "${asan_supp_file}" ]]; then
+        export ASAN_OPTIONS="${ASAN_OPTIONS}:suppressions=${asan_supp_file}"
+      fi
+    - |-
+      lsan_supp_file="${CI_PROJECT_DIR}/tools/lsan.supp"
+      if [[ -f "${lsan_supp_file}" ]]; then
+        export LSAN_OPTIONS="${ASAN_OPTIONS}:suppressions=${lsan_supp_file}"
+      fi
+    - |-
+      tsan_supp_file="${CI_PROJECT_DIR}/tools/tsan.supp"
+      if [[ -f "${tsan_supp_file}" ]]; then
+        export TSAN_OPTIONS="${ASAN_OPTIONS}:suppressions=${tsan_supp_file}"
+      fi
+  script:
+    - ctest -j${NPROC} --test-dir build
+  artifacts:
+    reports:
+      junit:
+        - build/**/test_results.xml
+
+# If build job failed, upload compilation logs in an easily downloadable form.
+.report-build-cpp:
+  extends:
+    - .only-review-cpp
+    - .report
+  script:
+    - cp /build/CMakeFiles/CMakeError.log .
+    - cp /build/CMakeFiles/CMakeOutput.log .
+  artifacts:
+    expire_in: 1 day
+    expose_as: 'Build log'
+    name: "BuildLog-$CI_COMMIT_REF_SLUG"
+    paths:
+      - CMakeError.log
+      - CMakeOutput.log
+      - ConfigurationLog.txt
+      - CompilationLog.txt
+
+
 check:cpp:cppcheck:
   image: $BPROTO_CI_IMAGES_REGISTRY/ubuntu2304:latest
   stage: check
