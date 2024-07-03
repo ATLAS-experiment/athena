@@ -1,63 +1,55 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
 
 ///
 /// Implementation of energy scale uncertainties, for 2010 data and beyond
 ///
-#include <iostream>
+#include "ElectronPhotonFourMomentumCorrection/egammaEnergyCorrectionTool.h"
+
+#include <boost/format.hpp>
 #include <cassert>
 #include <exception>
 #include <iomanip>
 #include <ios>
+#include <iostream>
+#include <memory>
 #include <utility>
 
-#include <boost/format.hpp>
-#include <memory>
-
-
-#include "TH1.h"
-#include "TH2.h"
+#include "ElectronPhotonFourMomentumCorrection/GainTool.h"
+#include "ElectronPhotonFourMomentumCorrection/GainUncertainty.h"
+#include "ElectronPhotonFourMomentumCorrection/LinearityADC.h"
+#include "ElectronPhotonFourMomentumCorrection/e1hg_systematics.h"
+#include "ElectronPhotonFourMomentumCorrection/get_MaterialResolutionEffect.h"
+#include "PathResolver/PathResolver.h"
 #include "TF1.h"
 #include "TFile.h"
-#include "TList.h"
 #include "TGraphErrors.h"
-
+#include "TH1.h"
+#include "TH2.h"
+#include "TList.h"
 #include "egammaUtils/eg_resolution.h"
-#include "ElectronPhotonFourMomentumCorrection/egammaEnergyCorrectionTool.h"
-#include "ElectronPhotonFourMomentumCorrection/GainTool.h"
-#include "ElectronPhotonFourMomentumCorrection/get_MaterialResolutionEffect.h"
-#include "ElectronPhotonFourMomentumCorrection/e1hg_systematics.h"
-#include "ElectronPhotonFourMomentumCorrection/GainUncertainty.h"
-
-
-#include "PathResolver/PathResolver.h"
 
 namespace {
-double
-qsum(double x, double y)
-{
+double qsum(double x, double y) {
   return std::hypot(x, y);
 }
 
-template<typename TargetPtr, typename SourcePtr>
-TargetPtr
-checked_own_cast(SourcePtr ptr)
-{
-  //Do we have ptr types
+template <typename TargetPtr, typename SourcePtr>
+TargetPtr checked_own_cast(SourcePtr ptr) {
+  // Do we have ptr types
   static_assert(std::is_pointer<TargetPtr>::value,
                 "attempt to cast to no ptr object");
   static_assert(std::is_pointer<SourcePtr>::value,
-              "attempt to cast from no ptr object");
+                "attempt to cast from no ptr object");
 
-  //nullptr input
+  // nullptr input
   if (!ptr) {
     throw std::runtime_error(
-      "Attempt to cast from nullptr in egammaEnergyCorrectionTool");
+        "Attempt to cast from nullptr in egammaEnergyCorrectionTool");
   }
 
-  // dynamic_cast and check 
+  // dynamic_cast and check
   TargetPtr obj = dynamic_cast<TargetPtr>(ptr);
   if (not obj) {
     throw std::runtime_error("failed dynamic cast for " +
@@ -80,12 +72,9 @@ checked_own_cast(SourcePtr ptr)
   return obj;
 }
 
-double
-getValueHistoAt(const TH1& histo,
-                double xvalue,
-                bool use_lastbin_overflow = false,
-                bool use_firstbin_underflow = false)
-{
+double getValueHistoAt(const TH1& histo, double xvalue,
+                       bool use_lastbin_overflow = false,
+                       bool use_firstbin_underflow = false) {
   int bin = histo.FindFixBin(xvalue);
   if (use_lastbin_overflow and histo.IsBinOverflow(bin)) {
     bin = histo.GetNbinsX();
@@ -96,15 +85,11 @@ getValueHistoAt(const TH1& histo,
   return histo.GetBinContent(bin);
 }
 
-double
-getValueHistAt(const TH2& histo,
-               double xvalue,
-               double yvalue,
-               bool use_lastbin_x_overflow = false,
-               bool use_lastbin_y_overflow = false,
-               bool use_fistbin_x_underflow = false,
-               bool use_firstbin_y_underflow = false)
-{
+double getValueHistAt(const TH2& histo, double xvalue, double yvalue,
+                      bool use_lastbin_x_overflow = false,
+                      bool use_lastbin_y_overflow = false,
+                      bool use_fistbin_x_underflow = false,
+                      bool use_firstbin_y_underflow = false) {
   int xbin = histo.GetXaxis()->FindFixBin(xvalue);
   if (use_lastbin_x_overflow and xbin == histo.GetXaxis()->GetNbins() + 1) {
     xbin = histo.GetXaxis()->GetNbins();
@@ -121,3524 +106,5100 @@ getValueHistAt(const TH2& histo,
   }
   return histo.GetBinContent(xbin, ybin);
 }
-} // end anonymous namespace
+}  // end anonymous namespace
 
 namespace AtlasRoot {
 
-  using std::string;
+using std::string;
 
-  egammaEnergyCorrectionTool::egammaEnergyCorrectionTool()
-    :
-    asg::AsgMessaging("egammaEnergyCorrectionTool"),
-    m_rootFileName(PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v26/egammaEnergyCorrectionData.root")),
-    m_esmodel(egEnergyCorr::UNDEFINED)
-  {
+egammaEnergyCorrectionTool::egammaEnergyCorrectionTool()
+    : asg::AsgMessaging("egammaEnergyCorrectionTool"),
+      m_rootFileName(
+          PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v32/"
+                                    "egammaEnergyCorrectionData.root")),
+      m_esmodel(egEnergyCorr::UNDEFINED) {
 
+  if (m_rootFileName.empty()) {
+    ATH_MSG_FATAL("cannot find configuration file");
+    throw std::runtime_error("cannot find file");
+  }
 
+  m_begRunNumber = 0;
+  m_endRunNumber = 0;
 
-    if (m_rootFileName.empty()) {
-      ATH_MSG_FATAL("cannot find configuration file");
-      throw std::runtime_error("cannot find file");
-    }
+  /*
+   * All histogram vectors start empty
+   */
 
-    m_begRunNumber = 0;
-    m_endRunNumber = 0;
+  m_use_new_resolution_model = false;
 
+  // tools
 
-    /*
-     * All histogram vectors start empty
-     */
+  m_resolution_tool = nullptr;
+  // m_getMaterialDelta = nullptr;
+  m_e1hg_tool = nullptr;
 
+  // switches
+
+  m_use_etaCalo_scales = false;
+
+  m_applyPSCorrection = true;
+  m_applyS12Correction = true;
+
+  // special for es2015PRE
+  m_use_temp_correction201215 = true;
+  m_use_uA2MeV_2015_first2weeks_correction = false;
+
+  // special for es2016PRE
+  m_use_temp_correction201516 = true;
+
+  // espcial for R22 precision
+  m_useL2GainCorrection = false;
+  m_useL2GainInterpolation = false;
+  m_useLeakageCorrection = false;
+  m_usepTInterpolationForLeakage = false;
+
+  m_use_stat_error_scaling = false;
+  m_initialized = false;
+}
+
+egammaEnergyCorrectionTool::~egammaEnergyCorrectionTool() {
+
+  // Clean up
+}
+
+int egammaEnergyCorrectionTool::initialize() {
+
+  ATH_MSG_DEBUG("initialize internal tool");
+
+  // Load the ROOT filea
+  const std::unique_ptr<char[]> fname(
+      gSystem->ExpandPathName(m_rootFileName.c_str()));
+  std::unique_ptr<TFile> rootFile(TFile::Open(fname.get(), "READ"));
+
+  if (!rootFile) {
+    ATH_MSG_ERROR("no root file found");
+    return 0;
+  }
+
+  ATH_MSG_DEBUG("Opening ES model file " << fname.get());
+
+  // instantiate the resolution parametrization
+  m_getMaterialDelta = std::make_unique<get_MaterialResolutionEffect>();
+
+  // Energy corrections and systematic uncertainties
+  //////////////////////////////////////////////////
+
+  // Legacy numbers for 2010
+  if (m_esmodel == egEnergyCorr::es2010) {
     m_use_new_resolution_model = false;
+    m_aPSNom.reset(
+        checked_own_cast<TH1*>(rootFile->Get("Scales/es2010/alphaPS_errTot")));
+    m_aS12Nom.reset(
+        checked_own_cast<TH1*>(rootFile->Get("Scales/es2010/alphaS12_errTot")));
+    m_zeeNom.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Scales/es2010/alphaZee_errStat")));
+    m_zeeSyst.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Scales/es2010/alphaZee_errSyst")));
+    m_resNom.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Resolution/es2010/ctZee_errStat")));
+    m_resSyst.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Resolution/es2010/ctZee_errSyst")));
+    m_peakResData.reset(
+        checked_own_cast<TH1*>(rootFile->Get("Resolution/es2010/resZee_Data")));
+    m_peakResMC.reset(
+        checked_own_cast<TH1*>(rootFile->Get("Resolution/es2010/resZee_MC")));
+    m_begRunNumber = 152166;
+    m_endRunNumber = 170482;
+    // mc11c : faulty electron multiple scattering in G4; old geometry
+    // Precise Z scales, systematics otherwise as in 2010
 
-    // tools
+  } else if (m_esmodel == egEnergyCorr::es2011c) {
+    m_use_new_resolution_model = false;
+    m_aPSNom.reset(
+        checked_own_cast<TH1*>(rootFile->Get("Scales/es2011c/alphaPS_errTot")));
+    m_aS12Nom.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Scales/es2011c/alphaS12_errTot")));
+    m_zeeNom.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Scales/es2011c/alphaZee_errStat")));
+    m_zeeSyst.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Scales/es2011c/alphaZee_errSyst")));
+    m_resNom.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Resolution/es2011c/ctZee_errStat")));
+    m_resSyst.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Resolution/es2011c/ctZee_errSyst")));
+    m_peakResData.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Resolution/es2011c/resZee_Data")));
+    m_peakResMC.reset(
+        checked_own_cast<TH1*>(rootFile->Get("Resolution/es2011c/resZee_MC")));
 
-    m_resolution_tool = nullptr;
-    //m_getMaterialDelta = nullptr;
-    m_e1hg_tool = nullptr;
+    m_begRunNumber = 177531;
+    m_endRunNumber = 194382;
 
-    // switches
+    // mc11d : correct MSc in G4; new geometry
+    // Final Run1 calibration scheme
+  } else if (m_esmodel == egEnergyCorr::es2011d ||
+             m_esmodel == egEnergyCorr::es2011dMedium ||
+             m_esmodel == egEnergyCorr::es2011dTight) {
+    m_use_new_resolution_model = true;
+    m_resolution_tool = std::make_unique<eg_resolution>("run1");
+    m_aPSNom.reset(
+        checked_own_cast<TH1*>(rootFile->Get("Scales/es2011d/alphaPS_uncor")));
+    m_daPSCor.reset(
+        checked_own_cast<TH1*>(rootFile->Get("Scales/es2011d/dalphaPS_cor")));
+    m_aS12Nom.reset(
+        checked_own_cast<TH1*>(rootFile->Get("Scales/es2011d/alphaS12_uncor")));
+    m_daS12Cor.reset(
+        checked_own_cast<TH1*>(rootFile->Get("Scales/es2011d/dalphaS12_cor")));
+    m_trkSyst.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Scales/es2011d/momentum_errSyst")));
 
-    m_use_etaCalo_scales = false;
+    if (m_esmodel == egEnergyCorr::es2011d) {
 
-    m_applyPSCorrection = true;
-    m_applyS12Correction = true;
+      m_zeeNom.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2011d/alphaZee_errStat")));
+      m_zeeSyst.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2011d/alphaZee_errSyst")));
+      m_resNom.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Resolution/es2011d/ctZee_errStat")));
+      m_resSyst.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Resolution/es2011d/ctZee_errSyst")));
 
-    // special for es2015PRE
-    m_use_temp_correction201215 = true;
-    m_use_uA2MeV_2015_first2weeks_correction = false;
+    } else if (m_esmodel == egEnergyCorr::es2011dMedium) {
 
-    // special for es2016PRE
+      m_zeeNom.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2011dMedium/alphaZee_errStat")));
+      m_zeeSyst.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2011dMedium/alphaZee_errSyst")));
+      m_zeePhys.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2011dMedium/alphaZee_errPhys")));
+      m_resNom.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Resolution/es2011dMedium/ctZee_errStat")));
+      m_resSyst.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Resolution/es2011dMedium/ctZee_errSyst")));
+
+    } else if (m_esmodel == egEnergyCorr::es2011dTight) {
+
+      m_zeeNom.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2011dTight/alphaZee_errStat")));
+      m_zeeSyst.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2011dTight/alphaZee_errSyst")));
+      m_zeePhys.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2011dTight/alphaZee_errPhys")));
+      m_resNom.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Resolution/es2011dTight/ctZee_errStat")));
+      m_resSyst.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Resolution/es2011dTight/ctZee_errSyst")));
+    }
+
+    m_pedestalL0.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Pedestals/es2011d/pedestals_l0")));
+    m_pedestalL1.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Pedestals/es2011d/pedestals_l1")));
+    m_pedestalL2.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Pedestals/es2011d/pedestals_l2")));
+    m_pedestalL3.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Pedestals/es2011d/pedestals_l3")));
+
+    m_dX_ID_Nom.reset(
+        checked_own_cast<TH1*>(rootFile->Get("Material/DX0_ConfigA")));
+
+    m_dX_IPPS_Nom.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_IPPS_NewG_errUncor")));
+    m_dX_IPPS_LAr.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_IPPS_NewG_errLAr")));
+
+    m_dX_IPAcc_Nom.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errUncor")));
+    m_dX_IPAcc_LAr.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errLAr")));
+    m_dX_IPAcc_G4.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errG4")));
+    m_dX_IPAcc_GL1.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errGL1")));
+
+    m_dX_PSAcc_Nom.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errUncor")));
+    m_dX_PSAcc_LAr.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errLAr")));
+    m_dX_PSAcc_G4.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errG4")));
+
+    m_convRadius.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Conversions/es2011d/convRadiusMigrations")));
+    m_convFakeRate.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Conversions/es2011d/convFakeRate")));
+    m_convRecoEfficiency.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Conversions/es2011d/convRecoEfficiency")));
+
+    m_begRunNumber = 177531;
+    m_endRunNumber = 194382;
+
+    const std::string gain_filename1 = PathResolverFindCalibFile(
+        "ElectronPhotonFourMomentumCorrection/v8/FunctionsTO.root");
+    const std::string gain_filename2 = PathResolverFindCalibFile(
+        "ElectronPhotonFourMomentumCorrection/v8/FunctionsG_all.root");
+    m_gain_tool =
+        std::make_unique<egGain::GainTool>(gain_filename1, gain_filename2);
+
+    m_e1hg_tool = std::make_unique<e1hg_systematics>(
+        PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v8/"
+                                  "e1hg_systematics_histos.root"));
+
+    // mc12a : crude MSc fix in G4; old geometry
+    // All systematics as in 2010.
+  } else if (m_esmodel == egEnergyCorr::es2012a) {
+    m_use_new_resolution_model = false;
+    m_aPSNom.reset(
+        checked_own_cast<TH1*>(rootFile->Get("Scales/es2012a/alphaPS_errTot")));
+    m_aS12Nom.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Scales/es2012a/alphaS12_errTot")));
+
+    m_zeeNom.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Scales/es2012a/alphaZee_errStat")));
+    m_zeeSyst.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Scales/es2012a/alphaZee_errSyst")));
+
+    m_resNom.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Resolution/es2012a/ctZee_errStat")));
+    m_resSyst.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Resolution/es2012a/ctZee_errSyst")));
+    m_peakResData.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Resolution/es2012a/resZee_Data")));
+    m_peakResMC.reset(
+        checked_own_cast<TH1*>(rootFile->Get("Resolution/es2012a/resZee_MC")));
+
+    m_begRunNumber = 195847;
+    m_endRunNumber = 219365;
+
+    // mc12c : correct MSc in G4; new geometry
+    // Final Run1 calibration scheme
+  } else if (m_esmodel == egEnergyCorr::es2012c) {
+    m_use_new_resolution_model = true;
+    m_resolution_tool = std::make_unique<eg_resolution>("run1");
+
+    m_aPSNom.reset(
+        checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/alphaPS_uncor")));
+    m_daPSCor.reset(
+        checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/dalphaPS_cor")));
+    m_aS12Nom.reset(
+        checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/alphaS12_uncor")));
+    m_daS12Cor.reset(
+        checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/dalphaS12_cor")));
+
+    m_trkSyst.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Scales/es2012c/momentum_errSyst")));
+
+    m_zeeNom.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Scales/es2012c/alphaZee_errStat")));
+    m_zeeSyst.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Scales/es2012c/alphaZee_errSyst")));
+
+    m_resNom.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Resolution/es2012c/ctZee_errStat")));
+    m_resSyst.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Resolution/es2012c/ctZee_errSyst")));
+
+    m_pedestalL0.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Pedestals/es2012c/pedestals_l0")));
+    m_pedestalL1.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Pedestals/es2012c/pedestals_l1")));
+    m_pedestalL2.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Pedestals/es2012c/pedestals_l2")));
+    m_pedestalL3.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Pedestals/es2012c/pedestals_l3")));
+
+    m_dX_ID_Nom.reset(
+        checked_own_cast<TH1*>(rootFile->Get("Material/DX0_ConfigA")));
+
+    m_dX_IPPS_Nom.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_IPPS_NewG_errUncor")));
+    m_dX_IPPS_LAr.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_IPPS_NewG_errLAr")));
+
+    m_dX_IPAcc_Nom.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errUncor")));
+    m_dX_IPAcc_LAr.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errLAr")));
+    m_dX_IPAcc_G4.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errG4")));
+    m_dX_IPAcc_GL1.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errGL1")));
+
+    m_dX_PSAcc_Nom.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errUncor")));
+    m_dX_PSAcc_LAr.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errLAr")));
+    m_dX_PSAcc_G4.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errG4")));
+
+    m_convRadius.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Conversions/es2012c/convRadiusMigrations")));
+    m_convFakeRate.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Conversions/es2012c/convFakeRate")));
+    m_convRecoEfficiency.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Conversions/es2012c/convRecoEfficiency")));
+
+    m_begRunNumber = 195847;
+    m_endRunNumber = 219365;
+
+    const std::string gain_filename1 = PathResolverFindCalibFile(
+        "ElectronPhotonFourMomentumCorrection/v8/FunctionsTO.root");
+    const std::string gain_filename2 = PathResolverFindCalibFile(
+        "ElectronPhotonFourMomentumCorrection/v8/FunctionsG_all.root");
+    m_gain_tool =
+        std::make_unique<egGain::GainTool>(gain_filename1, gain_filename2);
+
+    m_e1hg_tool = std::make_unique<e1hg_systematics>(
+        PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v8/"
+                                  "e1hg_systematics_histos.root"));
+  } else if (m_esmodel == egEnergyCorr::es2012XX) {
+    m_use_etaCalo_scales = true;
+    m_use_new_resolution_model = true;
+    m_resolution_tool = std::make_unique<eg_resolution>("run1");
+
+    m_aPSNom.reset(
+        checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/alphaPS_uncor")));
+    m_daPSCor.reset(
+        checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/dalphaPS_cor")));
+    m_aS12Nom.reset(
+        checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/alphaS12_uncor")));
+    m_daS12Cor.reset(
+        checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/dalphaS12_cor")));
+
+    m_trkSyst.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Scales/es2012c/momentum_errSyst")));
+
+    m_zeeNom.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Scales/es2015PRE/alphaZee_errStat")));
+    m_zeeSyst.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Scales/es2012c/alphaZee_errSyst")));
+
+    m_resNom.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Resolution/es2015PRE/ctZee_errStat")));
+    m_resSyst.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Resolution/es2012c/ctZee_errSyst")));
+
+    m_pedestalL0.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Pedestals/es2012c/pedestals_l0")));
+    m_pedestalL1.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Pedestals/es2012c/pedestals_l1")));
+    m_pedestalL2.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Pedestals/es2012c/pedestals_l2")));
+    m_pedestalL3.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Pedestals/es2012c/pedestals_l3")));
+
+    m_dX_ID_Nom.reset(
+        checked_own_cast<TH1*>(rootFile->Get("Material/DX0_ConfigA")));
+
+    m_dX_IPPS_Nom.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_IPPS_NewG_errUncor")));
+    m_dX_IPPS_LAr.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_IPPS_NewG_errLAr")));
+
+    m_dX_IPAcc_Nom.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errUncor")));
+    m_dX_IPAcc_LAr.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errLAr")));
+    m_dX_IPAcc_G4.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errG4")));
+    m_dX_IPAcc_GL1.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errGL1")));
+
+    m_dX_PSAcc_Nom.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errUncor")));
+    m_dX_PSAcc_LAr.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errLAr")));
+    m_dX_PSAcc_G4.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errG4")));
+
+    m_convRadius.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Conversions/es2012c/convRadiusMigrations")));
+    m_convFakeRate.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Conversions/es2012c/convFakeRate")));
+    m_convRecoEfficiency.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Conversions/es2012c/convRecoEfficiency")));
+
+    m_begRunNumber = 195847;
+    m_endRunNumber = 219365;
+
+    const std::string gain_filename1 = PathResolverFindCalibFile(
+        "ElectronPhotonFourMomentumCorrection/v8/FunctionsTO.root");
+    const std::string gain_filename2 = PathResolverFindCalibFile(
+        "ElectronPhotonFourMomentumCorrection/v8/FunctionsG_all.root");
+    m_gain_tool =
+        std::make_unique<egGain::GainTool>(gain_filename1, gain_filename2);
+
+    m_e1hg_tool = std::make_unique<e1hg_systematics>(
+        PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v8/"
+                                  "e1hg_systematics_histos.root"));
+  } else if (m_esmodel == egEnergyCorr::es2015PRE or
+             m_esmodel == egEnergyCorr::es2015cPRE) {
+    m_use_etaCalo_scales = true;
+    m_use_new_resolution_model = true;
+    m_resolution_tool = std::make_unique<eg_resolution>("run2_pre");
+
+    m_aPSNom.reset(
+        checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/alphaPS_uncor")));
+    m_daPSCor.reset(
+        checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/dalphaPS_cor")));
+    m_aS12Nom.reset(
+        checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/alphaS12_uncor")));
+    m_daS12Cor.reset(
+        checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/dalphaS12_cor")));
+
+    m_trkSyst.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Scales/es2012c/momentum_errSyst")));
+
+    m_zeeNom.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Scales/es2015PRE/alphaZee_errStat")));
+    m_zeeSyst.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Scales/es2015PRE/alphaZee_errSyst")));
+    m_uA2MeV_2015_first2weeks_correction.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Scales/es2015PRE/histo_uA2MeV_week12")));
+
+    m_resNom.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Resolution/es2015PRE/ctZee_errStat")));
+    m_resSyst.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Resolution/es2015PRE/ctZee_errSyst")));
+
+    m_pedestalL0.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Pedestals/es2012c/pedestals_l0")));
+    m_pedestalL1.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Pedestals/es2012c/pedestals_l1")));
+    m_pedestalL2.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Pedestals/es2012c/pedestals_l2")));
+    m_pedestalL3.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Pedestals/es2012c/pedestals_l3")));
+
+    m_dX_ID_Nom.reset(
+        checked_own_cast<TH1*>(rootFile->Get("Material/DX0_ConfigA")));
+
+    m_dX_IPPS_Nom.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_IPPS_NewG_errUncor")));
+    m_dX_IPPS_LAr.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_IPPS_NewG_errLAr")));
+
+    m_dX_IPAcc_Nom.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errUncor")));
+    m_dX_IPAcc_LAr.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errLAr")));
+    m_dX_IPAcc_G4.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errG4")));
+    m_dX_IPAcc_GL1.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errGL1")));
+
+    m_dX_PSAcc_Nom.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errUncor")));
+    m_dX_PSAcc_LAr.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errLAr")));
+    m_dX_PSAcc_G4.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errG4")));
+
+    m_convRadius.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Conversions/es2012c/convRadiusMigrations")));
+    m_convFakeRate.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Conversions/es2012c/convFakeRate")));
+    m_convRecoEfficiency.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Conversions/es2012c/convRecoEfficiency")));
+
+    m_begRunNumber = 195847;
+    m_endRunNumber = 219365;
+
+    m_G4OverAFII_resolution_electron.reset(checked_own_cast<TH2*>(
+        rootFile->Get("FastSim/es2015/el_full_fast_resolution")));
+    m_G4OverAFII_resolution_unconverted.reset(checked_own_cast<TH2*>(
+        rootFile->Get("FastSim/es2015/ph_unconv_full_fast_resolution")));
+    m_G4OverAFII_resolution_converted.reset(checked_own_cast<TH2*>(
+        rootFile->Get("FastSim/es2015/ph_conv_full_fast_resolution")));
+
+    assert(m_G4OverAFII_resolution_electron);
+    assert(m_G4OverAFII_resolution_unconverted);
+    assert(m_G4OverAFII_resolution_converted);
+
+    const std::string gain_filename1 = PathResolverFindCalibFile(
+        "ElectronPhotonFourMomentumCorrection/v8/FunctionsTO.root");
+    const std::string gain_filename2 = PathResolverFindCalibFile(
+        "ElectronPhotonFourMomentumCorrection/v8/FunctionsG_all.root");
+    m_gain_tool =
+        std::make_unique<egGain::GainTool>(gain_filename1, gain_filename2);
+
+    m_e1hg_tool = std::make_unique<e1hg_systematics>(
+        PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v8/"
+                                  "e1hg_systematics_histos.root"));
+  } else if (m_esmodel == egEnergyCorr::es2015PRE_res_improved or
+             m_esmodel == egEnergyCorr::es2015cPRE_res_improved) {
+    m_use_etaCalo_scales = true;
+    m_use_new_resolution_model = true;
+    m_resolution_tool = std::make_unique<eg_resolution>("run2_pre");
+
+    m_aPSNom.reset(
+        checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/alphaPS_uncor")));
+    m_daPSCor.reset(
+        checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/dalphaPS_cor")));
+    m_aS12Nom.reset(
+        checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/alphaS12_uncor")));
+    m_daS12Cor.reset(
+        checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/dalphaS12_cor")));
+
+    m_trkSyst.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Scales/es2012c/momentum_errSyst")));
+
+    m_zeeNom.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Scales/es2015PRE/alphaZee_errStat")));
+    m_zeeSyst.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Scales/es2015PRE/alphaZee_errSyst")));
+    m_uA2MeV_2015_first2weeks_correction.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Scales/es2015PRE/histo_uA2MeV_week12")));
+
+    m_resNom.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Resolution/es2015PRE/ctZee_errStat")));
+    m_resSyst.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Resolution/es2015PRE_res_improved/ctZee_errSyst")));
+
+    m_pedestalL0.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Pedestals/es2012c/pedestals_l0")));
+    m_pedestalL1.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Pedestals/es2012c/pedestals_l1")));
+    m_pedestalL2.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Pedestals/es2012c/pedestals_l2")));
+    m_pedestalL3.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Pedestals/es2012c/pedestals_l3")));
+
+    m_dX_ID_Nom.reset(
+        checked_own_cast<TH1*>(rootFile->Get("Material/DX0_ConfigA")));
+
+    m_dX_IPPS_Nom.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_IPPS_NewG_errUncor")));
+    m_dX_IPPS_LAr.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_IPPS_NewG_errLAr")));
+
+    m_dX_IPAcc_Nom.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errUncor")));
+    m_dX_IPAcc_LAr.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errLAr")));
+    m_dX_IPAcc_G4.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errG4")));
+    m_dX_IPAcc_GL1.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errGL1")));
+
+    m_dX_PSAcc_Nom.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errUncor")));
+    m_dX_PSAcc_LAr.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errLAr")));
+    m_dX_PSAcc_G4.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errG4")));
+
+    m_convRadius.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Conversions/es2012c/convRadiusMigrations")));
+    m_convFakeRate.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Conversions/es2012c/convFakeRate")));
+    m_convRecoEfficiency.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Conversions/es2012c/convRecoEfficiency")));
+
+    m_begRunNumber = 195847;
+    m_endRunNumber = 219365;
+
+    m_G4OverAFII_resolution_electron.reset(checked_own_cast<TH2*>(
+        rootFile->Get("FastSim/es2015/el_full_fast_resolution")));
+    m_G4OverAFII_resolution_unconverted.reset(checked_own_cast<TH2*>(
+        rootFile->Get("FastSim/es2015/ph_unconv_full_fast_resolution")));
+    m_G4OverAFII_resolution_converted.reset(checked_own_cast<TH2*>(
+        rootFile->Get("FastSim/es2015/ph_conv_full_fast_resolution")));
+
+    assert(m_G4OverAFII_resolution_electron);
+    assert(m_G4OverAFII_resolution_unconverted);
+    assert(m_G4OverAFII_resolution_converted);
+    const std::string gain_filename1 = PathResolverFindCalibFile(
+        "ElectronPhotonFourMomentumCorrection/v8/FunctionsTO.root");
+    const std::string gain_filename2 = PathResolverFindCalibFile(
+        "ElectronPhotonFourMomentumCorrection/v8/FunctionsG_all.root");
+    m_gain_tool =
+        std::make_unique<egGain::GainTool>(gain_filename1, gain_filename2);
+
+    m_e1hg_tool = std::make_unique<e1hg_systematics>(
+        PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v8/"
+                                  "e1hg_systematics_histos.root"));
+  } else if (m_esmodel == egEnergyCorr::es2015c_summer) {
+    m_use_etaCalo_scales = true;
+    m_use_new_resolution_model = true;
+    m_resolution_tool = std::make_unique<eg_resolution>("run2_pre");
+
+    m_aPSNom.reset(
+        checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/alphaPS_uncor")));
+    m_daPSCor.reset(
+        checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/dalphaPS_cor")));
+    m_aS12Nom.reset(
+        checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/alphaS12_uncor")));
+    m_daS12Cor.reset(
+        checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/dalphaS12_cor")));
+
+    m_trkSyst.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Scales/es2012c/momentum_errSyst")));
+
+    m_zeeNom.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Scales/es2015Summer/alphaZee_errStat")));
+    m_zeeSyst.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Scales/es2015Summer/alphaZee_errSyst")));
+    m_uA2MeV_2015_first2weeks_correction = nullptr;
+
+    m_resNom.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Resolution/es2015Summer/ctZee_errStat")));
+    m_resSyst.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Resolution/es2015Summer/ctZee_errSyst")));
+
+    m_pedestalL0.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Pedestals/es2012c/pedestals_l0")));
+    m_pedestalL1.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Pedestals/es2012c/pedestals_l1")));
+    m_pedestalL2.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Pedestals/es2012c/pedestals_l2")));
+    m_pedestalL3.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Pedestals/es2012c/pedestals_l3")));
+
+    m_dX_ID_Nom.reset(
+        checked_own_cast<TH1*>(rootFile->Get("Material/DX0_ConfigA")));
+
+    m_dX_IPPS_Nom.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_IPPS_NewG_errUncor")));
+    m_dX_IPPS_LAr.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_IPPS_NewG_errLAr")));
+
+    m_dX_IPAcc_Nom.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errUncor")));
+    m_dX_IPAcc_LAr.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errLAr")));
+    m_dX_IPAcc_G4.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errG4")));
+    m_dX_IPAcc_GL1.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errGL1")));
+
+    m_dX_PSAcc_Nom.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errUncor")));
+    m_dX_PSAcc_LAr.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errLAr")));
+    m_dX_PSAcc_G4.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errG4")));
+
+    m_convRadius.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Conversions/es2012c/convRadiusMigrations")));
+    m_convFakeRate.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Conversions/es2012c/convFakeRate")));
+    m_convRecoEfficiency.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Conversions/es2012c/convRecoEfficiency")));
+
+    m_begRunNumber = 195847;
+    m_endRunNumber = 219365;
+
+    m_G4OverAFII_resolution_electron.reset(checked_own_cast<TH2*>(
+        rootFile->Get("FastSim/es2015/el_full_fast_resolution")));
+    m_G4OverAFII_resolution_unconverted.reset(checked_own_cast<TH2*>(
+        rootFile->Get("FastSim/es2015/ph_unconv_full_fast_resolution")));
+    m_G4OverAFII_resolution_converted.reset(checked_own_cast<TH2*>(
+        rootFile->Get("FastSim/es2015/ph_conv_full_fast_resolution")));
+
+    assert(m_G4OverAFII_resolution_electron);
+    assert(m_G4OverAFII_resolution_unconverted);
+    assert(m_G4OverAFII_resolution_converted);
+
+    const std::string gain_filename1 = PathResolverFindCalibFile(
+        "ElectronPhotonFourMomentumCorrection/v8/FunctionsTO.root");
+    const std::string gain_filename2 = PathResolverFindCalibFile(
+        "ElectronPhotonFourMomentumCorrection/v8/FunctionsG_all.root");
+    m_gain_tool =
+        std::make_unique<egGain::GainTool>(gain_filename1, gain_filename2);
+
+    m_e1hg_tool = std::make_unique<e1hg_systematics>(
+        PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v8/"
+                                  "e1hg_systematics_histos.root"));
+    m_use_temp_correction201215 = true;  // for eta > 2.5
+    m_use_temp_correction201516 = false;
+  } else if (m_esmodel == egEnergyCorr::es2016PRE) {
+    m_use_etaCalo_scales = true;
+    m_use_new_resolution_model = true;
+    m_resolution_tool = std::make_unique<eg_resolution>("run2_pre");
+
+    m_aPSNom.reset(
+        checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/alphaPS_uncor")));
+    m_daPSCor.reset(
+        checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/dalphaPS_cor")));
+    m_aS12Nom.reset(
+        checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/alphaS12_uncor")));
+    m_daS12Cor.reset(
+        checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/dalphaS12_cor")));
+
+    m_trkSyst.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Scales/es2012c/momentum_errSyst")));
+
+    m_zeeNom.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Scales/es2015Summer/alphaZee_errStat")));
+    m_zeeSyst.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Scales/es2015Summer/alphaZee_errSyst")));
+
+    m_resNom.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Resolution/es2015Summer/ctZee_errStat")));
+    m_resSyst.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Resolution/es2015Summer/ctZee_errSyst")));
+
+    m_pedestalL0.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Pedestals/es2012c/pedestals_l0")));
+    m_pedestalL1.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Pedestals/es2012c/pedestals_l1")));
+    m_pedestalL2.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Pedestals/es2012c/pedestals_l2")));
+    m_pedestalL3.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Pedestals/es2012c/pedestals_l3")));
+
+    m_dX_ID_Nom.reset(
+        checked_own_cast<TH1*>(rootFile->Get("Material/DX0_ConfigA")));
+
+    m_dX_IPPS_Nom.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_IPPS_NewG_errUncor")));
+    m_dX_IPPS_LAr.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_IPPS_NewG_errLAr")));
+
+    m_dX_IPAcc_Nom.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errUncor")));
+    m_dX_IPAcc_LAr.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errLAr")));
+    m_dX_IPAcc_G4.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errG4")));
+    m_dX_IPAcc_GL1.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errGL1")));
+
+    m_dX_PSAcc_Nom.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errUncor")));
+    m_dX_PSAcc_LAr.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errLAr")));
+    m_dX_PSAcc_G4.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errG4")));
+
+    m_convRadius.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Conversions/es2012c/convRadiusMigrations")));
+    m_convFakeRate.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Conversions/es2012c/convFakeRate")));
+    m_convRecoEfficiency.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Conversions/es2012c/convRecoEfficiency")));
+
+    m_begRunNumber = 195847;
+    m_endRunNumber = 219365;
+
+    m_G4OverAFII_resolution_electron.reset(checked_own_cast<TH2*>(
+        rootFile->Get("FastSim/es2015/el_full_fast_resolution")));
+    m_G4OverAFII_resolution_unconverted.reset(checked_own_cast<TH2*>(
+        rootFile->Get("FastSim/es2015/ph_unconv_full_fast_resolution")));
+    m_G4OverAFII_resolution_converted.reset(checked_own_cast<TH2*>(
+        rootFile->Get("FastSim/es2015/ph_conv_full_fast_resolution")));
+
+    assert(m_G4OverAFII_resolution_electron);
+    assert(m_G4OverAFII_resolution_unconverted);
+    assert(m_G4OverAFII_resolution_converted);
+
+    const std::string gain_filename1 = PathResolverFindCalibFile(
+        "ElectronPhotonFourMomentumCorrection/v8/FunctionsTO.root");
+    const std::string gain_filename2 = PathResolverFindCalibFile(
+        "ElectronPhotonFourMomentumCorrection/v8/FunctionsG_all.root");
+    m_gain_tool =
+        std::make_unique<egGain::GainTool>(gain_filename1, gain_filename2);
+
+    m_e1hg_tool = std::make_unique<e1hg_systematics>(
+        PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v8/"
+                                  "e1hg_systematics_histos.root"));
+
+    m_use_temp_correction201215 = true;  // for eta > 2.5
     m_use_temp_correction201516 = true;
-
-    m_use_stat_error_scaling = false;
-    m_initialized = false;
-  }
-
-
-  egammaEnergyCorrectionTool::~egammaEnergyCorrectionTool() {
-
-    // Clean up
-
-  }
-
-
-  int egammaEnergyCorrectionTool::initialize() {
-
-    ATH_MSG_DEBUG("initialize internal tool");
-
-    // Load the ROOT filea
-    const std::unique_ptr<char[]> fname(gSystem->ExpandPathName(m_rootFileName.c_str()));
-    std::unique_ptr<TFile> rootFile(TFile::Open( fname.get(), "READ" ));
-
-    if ( !rootFile ) {
-      ATH_MSG_ERROR("no root file found");
-      return 0;
-    }
-
-    // instantiate the resolution parametrization
-    m_getMaterialDelta = std::make_unique<get_MaterialResolutionEffect>( );
-
-
-    // Energy corrections and systematic uncertainties
-    //////////////////////////////////////////////////
-
-    // Legacy numbers for 2010
-    if ( m_esmodel==egEnergyCorr::es2010 ) {
-      m_use_new_resolution_model = false;
-      m_aPSNom.reset( checked_own_cast< TH1* >( rootFile->Get( "Scales/es2010/alphaPS_errTot" ) ) );
-      m_aS12Nom.reset( checked_own_cast< TH1* >( rootFile->Get("Scales/es2010/alphaS12_errTot")));        
-      m_zeeNom.reset( checked_own_cast< TH1* >( rootFile->Get("Scales/es2010/alphaZee_errStat")));         
-      m_zeeSyst.reset( checked_own_cast< TH1* >( rootFile->Get("Scales/es2010/alphaZee_errSyst")));       
-      m_resNom.reset( checked_own_cast< TH1* >( rootFile->Get("Resolution/es2010/ctZee_errStat")));        
-      m_resSyst.reset( checked_own_cast< TH1* >( rootFile->Get("Resolution/es2010/ctZee_errSyst")));
-      m_peakResData.reset( checked_own_cast< TH1* >( rootFile->Get("Resolution/es2010/resZee_Data")));
-      m_peakResMC.reset( checked_own_cast< TH1* >( rootFile->Get("Resolution/es2010/resZee_MC")));
-      m_begRunNumber = 152166;
-      m_endRunNumber = 170482;
-      // mc11c : faulty electron multiple scattering in G4; old geometry
-      // Precise Z scales, systematics otherwise as in 2010
-
-    } else if ( m_esmodel==egEnergyCorr::es2011c ) {
-      m_use_new_resolution_model = false;
-      m_aPSNom.reset( checked_own_cast< TH1* >( rootFile->Get("Scales/es2011c/alphaPS_errTot")));
-      m_aS12Nom.reset( checked_own_cast< TH1* >( rootFile->Get("Scales/es2011c/alphaS12_errTot")));
-      m_zeeNom.reset( checked_own_cast< TH1* >( rootFile->Get("Scales/es2011c/alphaZee_errStat"))); 
-      m_zeeSyst.reset( checked_own_cast< TH1* >( rootFile->Get("Scales/es2011c/alphaZee_errSyst")));
-      m_resNom.reset( checked_own_cast< TH1* >( rootFile->Get("Resolution/es2011c/ctZee_errStat")));
-      m_resSyst.reset( checked_own_cast< TH1* >( rootFile->Get("Resolution/es2011c/ctZee_errSyst")));   
-      m_peakResData.reset( checked_own_cast< TH1* >( rootFile->Get("Resolution/es2011c/resZee_Data")));
-      m_peakResMC.reset( checked_own_cast< TH1* >( rootFile->Get("Resolution/es2011c/resZee_MC")));
-
-      m_begRunNumber = 177531;
-      m_endRunNumber = 194382;
-
-
-      // mc11d : correct MSc in G4; new geometry
-      // Final Run1 calibration scheme
-    } else if ( m_esmodel==egEnergyCorr::es2011d || m_esmodel==egEnergyCorr::es2011dMedium || m_esmodel==egEnergyCorr::es2011dTight ) {
-      m_use_new_resolution_model = true;
-      m_resolution_tool = std::make_unique<eg_resolution>("run1");
-      m_aPSNom.reset( checked_own_cast< TH1* >( rootFile->Get("Scales/es2011d/alphaPS_uncor")));
-      m_daPSCor.reset( checked_own_cast< TH1* >( rootFile->Get("Scales/es2011d/dalphaPS_cor")));
-      m_aS12Nom.reset( checked_own_cast< TH1* >( rootFile->Get("Scales/es2011d/alphaS12_uncor")));
-      m_daS12Cor.reset( checked_own_cast< TH1* >( rootFile->Get("Scales/es2011d/dalphaS12_cor")));
-      m_trkSyst.reset( checked_own_cast< TH1* >( rootFile->Get("Scales/es2011d/momentum_errSyst")));
-
-      if( m_esmodel==egEnergyCorr::es2011d ) {
-
-        m_zeeNom.reset( checked_own_cast< TH1* >( rootFile->Get("Scales/es2011d/alphaZee_errStat")));
-        m_zeeSyst.reset( checked_own_cast< TH1* >( rootFile->Get("Scales/es2011d/alphaZee_errSyst")));
-        m_resNom.reset( checked_own_cast< TH1* >( rootFile->Get("Resolution/es2011d/ctZee_errStat")));
-        m_resSyst.reset( checked_own_cast< TH1* >( rootFile->Get("Resolution/es2011d/ctZee_errSyst")));
-
-      } else if( m_esmodel==egEnergyCorr::es2011dMedium ) {
-
-        m_zeeNom.reset( checked_own_cast< TH1* >( rootFile->Get("Scales/es2011dMedium/alphaZee_errStat")));
-        m_zeeSyst.reset( checked_own_cast< TH1* >( rootFile->Get("Scales/es2011dMedium/alphaZee_errSyst")));
-        m_zeePhys.reset( checked_own_cast< TH1* >( rootFile->Get("Scales/es2011dMedium/alphaZee_errPhys")));
-        m_resNom.reset( checked_own_cast< TH1* >( rootFile->Get("Resolution/es2011dMedium/ctZee_errStat")));
-        m_resSyst.reset( checked_own_cast< TH1* >( rootFile->Get("Resolution/es2011dMedium/ctZee_errSyst")));
-
-      } else if( m_esmodel==egEnergyCorr::es2011dTight ) {
-
-        m_zeeNom.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2011dTight/alphaZee_errStat")));
-        m_zeeSyst.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2011dTight/alphaZee_errSyst")));
-        m_zeePhys.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2011dTight/alphaZee_errPhys")));
-        m_resNom.reset(checked_own_cast<TH1*>(rootFile->Get("Resolution/es2011dTight/ctZee_errStat")));
-        m_resSyst.reset(checked_own_cast<TH1*>(rootFile->Get("Resolution/es2011dTight/ctZee_errSyst")));
-      }
-
-      m_pedestalL0.reset(checked_own_cast<TH1*>(rootFile->Get("Pedestals/es2011d/pedestals_l0")));
-      m_pedestalL1.reset(checked_own_cast<TH1*>(rootFile->Get("Pedestals/es2011d/pedestals_l1")));
-      m_pedestalL2.reset(checked_own_cast<TH1*>(rootFile->Get("Pedestals/es2011d/pedestals_l2")));
-      m_pedestalL3.reset(checked_own_cast<TH1*>(rootFile->Get("Pedestals/es2011d/pedestals_l3")));
-
-      m_dX_ID_Nom.reset(checked_own_cast<TH1*>(rootFile->Get("Material/DX0_ConfigA")));
-
-      m_dX_IPPS_Nom.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_IPPS_NewG_errUncor")));
-      m_dX_IPPS_LAr.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_IPPS_NewG_errLAr")));
-
-      m_dX_IPAcc_Nom.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errUncor")));
-      m_dX_IPAcc_LAr.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errLAr")));
-      m_dX_IPAcc_G4.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errG4")));
-      m_dX_IPAcc_GL1.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errGL1")));
-
-      m_dX_PSAcc_Nom.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errUncor")));
-      m_dX_PSAcc_LAr.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errLAr")));
-      m_dX_PSAcc_G4.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errG4")));
-
-      m_convRadius.reset(checked_own_cast<TH1*>(rootFile->Get("Conversions/es2011d/convRadiusMigrations")));
-      m_convFakeRate.reset(checked_own_cast<TH1*>(rootFile->Get("Conversions/es2011d/convFakeRate")));
-      m_convRecoEfficiency.reset(checked_own_cast<TH1*>(rootFile->Get("Conversions/es2011d/convRecoEfficiency")));
-
-      m_begRunNumber = 177531;
-      m_endRunNumber = 194382;
-
-      const std::string gain_filename1 = PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v8/FunctionsTO.root");
-      const std::string gain_filename2 = PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v8/FunctionsG_all.root");
-      m_gain_tool = std::make_unique<egGain::GainTool>(gain_filename1, gain_filename2);
-
-      m_e1hg_tool = std::make_unique<e1hg_systematics>();
-
-      // mc12a : crude MSc fix in G4; old geometry
-      // All systematics as in 2010.
-    } else if (m_esmodel == egEnergyCorr::es2012a) {
-      m_use_new_resolution_model = false;
-      m_aPSNom.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2012a/alphaPS_errTot")));
-      m_aS12Nom.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2012a/alphaS12_errTot")));
-
-      m_zeeNom.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2012a/alphaZee_errStat")));
-      m_zeeSyst.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2012a/alphaZee_errSyst")));
-
-      m_resNom.reset(checked_own_cast<TH1*>(rootFile->Get("Resolution/es2012a/ctZee_errStat")));
-      m_resSyst.reset(checked_own_cast<TH1*>(rootFile->Get("Resolution/es2012a/ctZee_errSyst")));
-      m_peakResData.reset(checked_own_cast<TH1*>(rootFile->Get("Resolution/es2012a/resZee_Data")));
-      m_peakResMC.reset(checked_own_cast<TH1*>(rootFile->Get("Resolution/es2012a/resZee_MC")));
-
-      m_begRunNumber = 195847;
-      m_endRunNumber = 219365;
-
-      // mc12c : correct MSc in G4; new geometry
-      // Final Run1 calibration scheme
-    } else if (m_esmodel == egEnergyCorr::es2012c) {
-      m_use_new_resolution_model = true;
-      m_resolution_tool = std::make_unique<eg_resolution>("run1");
-
-      m_aPSNom.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/alphaPS_uncor")));
-      m_daPSCor.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/dalphaPS_cor")));
-      m_aS12Nom.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/alphaS12_uncor")));
-      m_daS12Cor.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/dalphaS12_cor")));
-
-      m_trkSyst.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/momentum_errSyst")));
-
-      m_zeeNom.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/alphaZee_errStat")));
-      m_zeeSyst.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/alphaZee_errSyst")));
-
-      m_resNom.reset(checked_own_cast<TH1*>(rootFile->Get("Resolution/es2012c/ctZee_errStat")));
-      m_resSyst.reset(checked_own_cast<TH1*>(rootFile->Get("Resolution/es2012c/ctZee_errSyst")));
-
-      m_pedestalL0.reset(checked_own_cast<TH1*>(rootFile->Get("Pedestals/es2012c/pedestals_l0")));
-      m_pedestalL1.reset(checked_own_cast<TH1*>(rootFile->Get("Pedestals/es2012c/pedestals_l1")));
-      m_pedestalL2.reset(checked_own_cast<TH1*>(rootFile->Get("Pedestals/es2012c/pedestals_l2")));
-      m_pedestalL3.reset(checked_own_cast<TH1*>(rootFile->Get("Pedestals/es2012c/pedestals_l3")));
-
-      m_dX_ID_Nom.reset(checked_own_cast<TH1*>(rootFile->Get("Material/DX0_ConfigA")));
-
-      m_dX_IPPS_Nom.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_IPPS_NewG_errUncor")));
-      m_dX_IPPS_LAr.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_IPPS_NewG_errLAr")));
-
-      m_dX_IPAcc_Nom.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errUncor")));
-      m_dX_IPAcc_LAr.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errLAr")));
-      m_dX_IPAcc_G4.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errG4")));
-      m_dX_IPAcc_GL1.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errGL1")));
-
-      m_dX_PSAcc_Nom.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errUncor")));
-      m_dX_PSAcc_LAr.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errLAr")));
-      m_dX_PSAcc_G4.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errG4")));
-
-      m_convRadius.reset(checked_own_cast<TH1*>(rootFile->Get("Conversions/es2012c/convRadiusMigrations")));
-      m_convFakeRate.reset(checked_own_cast<TH1*>(rootFile->Get("Conversions/es2012c/convFakeRate")));
-      m_convRecoEfficiency.reset(checked_own_cast<TH1*>(rootFile->Get("Conversions/es2012c/convRecoEfficiency")));
-
-      m_begRunNumber = 195847;
-      m_endRunNumber = 219365;
-
-      const std::string gain_filename1 = PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v8/FunctionsTO.root");
-      const std::string gain_filename2 = PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v8/FunctionsG_all.root");
-      m_gain_tool = std::make_unique<egGain::GainTool>(gain_filename1, gain_filename2);
-
-      m_e1hg_tool = std::make_unique<e1hg_systematics>();
-    } else if (m_esmodel == egEnergyCorr::es2012XX) {
-      m_use_etaCalo_scales = true;
-      m_use_new_resolution_model = true;
-      m_resolution_tool = std::make_unique<eg_resolution>("run1");
-
-      m_aPSNom.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/alphaPS_uncor")));
-      m_daPSCor.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/dalphaPS_cor")));
-      m_aS12Nom.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/alphaS12_uncor")));
-      m_daS12Cor.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/dalphaS12_cor")));
-
-      m_trkSyst.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/momentum_errSyst")));
-
-      m_zeeNom.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2015PRE/alphaZee_errStat")));
-      m_zeeSyst.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/alphaZee_errSyst")));
-
-      m_resNom.reset(checked_own_cast<TH1*>(rootFile->Get("Resolution/es2015PRE/ctZee_errStat")));
-      m_resSyst.reset(checked_own_cast<TH1*>(rootFile->Get("Resolution/es2012c/ctZee_errSyst")));
-
-      m_pedestalL0.reset(checked_own_cast<TH1*>(rootFile->Get("Pedestals/es2012c/pedestals_l0")));
-      m_pedestalL1.reset(checked_own_cast<TH1*>(rootFile->Get("Pedestals/es2012c/pedestals_l1")));
-      m_pedestalL2.reset(checked_own_cast<TH1*>(rootFile->Get("Pedestals/es2012c/pedestals_l2")));
-      m_pedestalL3.reset(checked_own_cast<TH1*>(rootFile->Get("Pedestals/es2012c/pedestals_l3")));
-
-      m_dX_ID_Nom.reset(checked_own_cast<TH1*>(rootFile->Get("Material/DX0_ConfigA")));
-
-      m_dX_IPPS_Nom.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_IPPS_NewG_errUncor")));
-      m_dX_IPPS_LAr.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_IPPS_NewG_errLAr")));
-
-      m_dX_IPAcc_Nom.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errUncor")));
-      m_dX_IPAcc_LAr.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errLAr")));
-      m_dX_IPAcc_G4.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errG4")));
-      m_dX_IPAcc_GL1.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errGL1")));
-
-      m_dX_PSAcc_Nom.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errUncor")));
-      m_dX_PSAcc_LAr.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errLAr")));
-      m_dX_PSAcc_G4.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errG4")));
-
-      m_convRadius.reset(checked_own_cast<TH1*>(rootFile->Get("Conversions/es2012c/convRadiusMigrations")));
-      m_convFakeRate.reset(checked_own_cast<TH1*>(rootFile->Get("Conversions/es2012c/convFakeRate")));
-      m_convRecoEfficiency.reset(checked_own_cast<TH1*>(rootFile->Get("Conversions/es2012c/convRecoEfficiency")));
-
-      m_begRunNumber = 195847;
-      m_endRunNumber = 219365;
-
-      const std::string gain_filename1 = PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v8/FunctionsTO.root");
-      const std::string gain_filename2 = PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v8/FunctionsG_all.root");
-      m_gain_tool = std::make_unique<egGain::GainTool>(gain_filename1, gain_filename2);
-
-      m_e1hg_tool = std::make_unique<e1hg_systematics>();
-    } else if (m_esmodel == egEnergyCorr::es2015PRE or m_esmodel == egEnergyCorr::es2015cPRE) {
-      m_use_etaCalo_scales = true;
-      m_use_new_resolution_model = true;
-      m_resolution_tool = std::make_unique<eg_resolution>("run2_pre");
-
-      m_aPSNom.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/alphaPS_uncor")));
-      m_daPSCor.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/dalphaPS_cor")));
-      m_aS12Nom.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/alphaS12_uncor")));
-      m_daS12Cor.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/dalphaS12_cor")));
-
-      m_trkSyst.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/momentum_errSyst")));
-
-      m_zeeNom.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2015PRE/alphaZee_errStat")));
-      m_zeeSyst.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2015PRE/alphaZee_errSyst")));
-      m_uA2MeV_2015_first2weeks_correction.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2015PRE/histo_uA2MeV_week12")));
-
-      m_resNom.reset(checked_own_cast<TH1*>(rootFile->Get("Resolution/es2015PRE/ctZee_errStat")));
-      m_resSyst.reset(checked_own_cast<TH1*>(rootFile->Get("Resolution/es2015PRE/ctZee_errSyst")));
-
-      m_pedestalL0.reset(checked_own_cast<TH1*>(rootFile->Get("Pedestals/es2012c/pedestals_l0")));
-      m_pedestalL1.reset(checked_own_cast<TH1*>(rootFile->Get("Pedestals/es2012c/pedestals_l1")));
-      m_pedestalL2.reset(checked_own_cast<TH1*>(rootFile->Get("Pedestals/es2012c/pedestals_l2")));
-      m_pedestalL3.reset(checked_own_cast<TH1*>(rootFile->Get("Pedestals/es2012c/pedestals_l3")));
-
-      m_dX_ID_Nom.reset(checked_own_cast<TH1*>(rootFile->Get("Material/DX0_ConfigA")));
-
-      m_dX_IPPS_Nom.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_IPPS_NewG_errUncor")));
-      m_dX_IPPS_LAr.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_IPPS_NewG_errLAr")));
-
-      m_dX_IPAcc_Nom.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errUncor")));
-      m_dX_IPAcc_LAr.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errLAr")));
-      m_dX_IPAcc_G4.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errG4")));
-      m_dX_IPAcc_GL1.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errGL1")));
-
-      m_dX_PSAcc_Nom.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errUncor")));
-      m_dX_PSAcc_LAr.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errLAr")));
-      m_dX_PSAcc_G4.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errG4")));
-
-      m_convRadius.reset(checked_own_cast<TH1*>(rootFile->Get("Conversions/es2012c/convRadiusMigrations")));
-      m_convFakeRate.reset(checked_own_cast<TH1*>(rootFile->Get("Conversions/es2012c/convFakeRate")));
-      m_convRecoEfficiency.reset(checked_own_cast<TH1*>(rootFile->Get("Conversions/es2012c/convRecoEfficiency")));
-
-      m_begRunNumber = 195847;
-      m_endRunNumber = 219365;
-
-      m_G4OverAFII_resolution_electron.reset(checked_own_cast<TH2*>(rootFile->Get("FastSim/es2015/el_full_fast_resolution")));
-      m_G4OverAFII_resolution_unconverted.reset(
-        checked_own_cast<TH2*>(rootFile->Get("FastSim/es2015/ph_unconv_full_fast_resolution")));
-      m_G4OverAFII_resolution_converted.reset(
-        checked_own_cast<TH2*>(rootFile->Get("FastSim/es2015/ph_conv_full_fast_resolution")));
-
-      assert(m_G4OverAFII_resolution_electron);
-      assert(m_G4OverAFII_resolution_unconverted);
-      assert(m_G4OverAFII_resolution_converted);
-
-      const std::string gain_filename1 = PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v8/FunctionsTO.root");
-      const std::string gain_filename2 = PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v8/FunctionsG_all.root");
-      m_gain_tool = std::make_unique<egGain::GainTool>(gain_filename1, gain_filename2);
-
-      m_e1hg_tool = std::make_unique<e1hg_systematics>();
-    }
-    else if (m_esmodel == egEnergyCorr::es2015PRE_res_improved or m_esmodel == egEnergyCorr::es2015cPRE_res_improved) {
-      m_use_etaCalo_scales = true;
-      m_use_new_resolution_model = true;
-      m_resolution_tool = std::make_unique<eg_resolution>("run2_pre");
-
-      m_aPSNom.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/alphaPS_uncor")));
-      m_daPSCor.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/dalphaPS_cor")));
-      m_aS12Nom.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/alphaS12_uncor")));
-      m_daS12Cor.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/dalphaS12_cor")));
-
-      m_trkSyst.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/momentum_errSyst")));
-
-      m_zeeNom.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2015PRE/alphaZee_errStat")));
-      m_zeeSyst.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2015PRE/alphaZee_errSyst")));
-      m_uA2MeV_2015_first2weeks_correction.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2015PRE/histo_uA2MeV_week12")));
-
-      m_resNom.reset(checked_own_cast<TH1*>(rootFile->Get("Resolution/es2015PRE/ctZee_errStat")));
-      m_resSyst.reset(checked_own_cast<TH1*>(rootFile->Get("Resolution/es2015PRE_res_improved/ctZee_errSyst")));
-
-      m_pedestalL0.reset(checked_own_cast<TH1*>(rootFile->Get("Pedestals/es2012c/pedestals_l0")));
-      m_pedestalL1.reset(checked_own_cast<TH1*>(rootFile->Get("Pedestals/es2012c/pedestals_l1")));
-      m_pedestalL2.reset(checked_own_cast<TH1*>(rootFile->Get("Pedestals/es2012c/pedestals_l2")));
-      m_pedestalL3.reset(checked_own_cast<TH1*>(rootFile->Get("Pedestals/es2012c/pedestals_l3")));
-
-      m_dX_ID_Nom.reset(checked_own_cast<TH1*>(rootFile->Get("Material/DX0_ConfigA")));
-
-      m_dX_IPPS_Nom.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_IPPS_NewG_errUncor")));
-      m_dX_IPPS_LAr.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_IPPS_NewG_errLAr")));
-
-      m_dX_IPAcc_Nom.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errUncor")));
-      m_dX_IPAcc_LAr.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errLAr")));
-      m_dX_IPAcc_G4.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errG4")));
-      m_dX_IPAcc_GL1.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errGL1")));
-
-      m_dX_PSAcc_Nom.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errUncor")));
-      m_dX_PSAcc_LAr.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errLAr")));
-      m_dX_PSAcc_G4.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errG4")));
-
-      m_convRadius.reset(checked_own_cast<TH1*>(rootFile->Get("Conversions/es2012c/convRadiusMigrations")));
-      m_convFakeRate.reset(checked_own_cast<TH1*>(rootFile->Get("Conversions/es2012c/convFakeRate")));
-      m_convRecoEfficiency.reset(checked_own_cast<TH1*>(rootFile->Get("Conversions/es2012c/convRecoEfficiency")));
-
-      m_begRunNumber = 195847;
-      m_endRunNumber = 219365;
-
-      m_G4OverAFII_resolution_electron.reset(checked_own_cast<TH2*>(rootFile->Get("FastSim/es2015/el_full_fast_resolution")));
-      m_G4OverAFII_resolution_unconverted.reset(
-        checked_own_cast<TH2*>(rootFile->Get("FastSim/es2015/ph_unconv_full_fast_resolution")));
-      m_G4OverAFII_resolution_converted.reset(
-        checked_own_cast<TH2*>(rootFile->Get("FastSim/es2015/ph_conv_full_fast_resolution")));
-
-      assert(m_G4OverAFII_resolution_electron);
-      assert(m_G4OverAFII_resolution_unconverted);
-      assert(m_G4OverAFII_resolution_converted);
-      const std::string gain_filename1 = PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v8/FunctionsTO.root");
-      const std::string gain_filename2 = PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v8/FunctionsG_all.root");
-      m_gain_tool = std::make_unique<egGain::GainTool>(gain_filename1, gain_filename2);
-
-      m_e1hg_tool = std::make_unique<e1hg_systematics>();
-    }
-    else if (m_esmodel == egEnergyCorr::es2015c_summer) {
-      m_use_etaCalo_scales = true;
-      m_use_new_resolution_model = true;
-      m_resolution_tool = std::make_unique<eg_resolution>("run2_pre");
-
-      m_aPSNom.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/alphaPS_uncor")));
-      m_daPSCor.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/dalphaPS_cor")));
-      m_aS12Nom.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/alphaS12_uncor")));
-      m_daS12Cor.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/dalphaS12_cor")));
-
-      m_trkSyst.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/momentum_errSyst")));
-
-      m_zeeNom.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2015Summer/alphaZee_errStat")));
-      m_zeeSyst.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2015Summer/alphaZee_errSyst")));
-      m_uA2MeV_2015_first2weeks_correction = nullptr;
-
-      m_resNom.reset(checked_own_cast<TH1*>(rootFile->Get("Resolution/es2015Summer/ctZee_errStat")));
-      m_resSyst.reset(checked_own_cast<TH1*>(rootFile->Get("Resolution/es2015Summer/ctZee_errSyst")));
-
-      m_pedestalL0.reset(checked_own_cast<TH1*>(rootFile->Get("Pedestals/es2012c/pedestals_l0")));
-      m_pedestalL1.reset(checked_own_cast<TH1*>(rootFile->Get("Pedestals/es2012c/pedestals_l1")));
-      m_pedestalL2.reset(checked_own_cast<TH1*>(rootFile->Get("Pedestals/es2012c/pedestals_l2")));
-      m_pedestalL3.reset(checked_own_cast<TH1*>(rootFile->Get("Pedestals/es2012c/pedestals_l3")));
-
-      m_dX_ID_Nom.reset(checked_own_cast<TH1*>(rootFile->Get("Material/DX0_ConfigA")));
-
-      m_dX_IPPS_Nom.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_IPPS_NewG_errUncor")));
-      m_dX_IPPS_LAr.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_IPPS_NewG_errLAr")));
-
-      m_dX_IPAcc_Nom.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errUncor")));
-      m_dX_IPAcc_LAr.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errLAr")));
-      m_dX_IPAcc_G4.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errG4")));
-      m_dX_IPAcc_GL1.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errGL1")));
-
-      m_dX_PSAcc_Nom.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errUncor")));
-      m_dX_PSAcc_LAr.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errLAr")));
-      m_dX_PSAcc_G4.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errG4")));
-
-      m_convRadius.reset(checked_own_cast<TH1*>(rootFile->Get("Conversions/es2012c/convRadiusMigrations")));
-      m_convFakeRate.reset(checked_own_cast<TH1*>(rootFile->Get("Conversions/es2012c/convFakeRate")));
-      m_convRecoEfficiency.reset(checked_own_cast<TH1*>(rootFile->Get("Conversions/es2012c/convRecoEfficiency")));
-
-      m_begRunNumber = 195847;
-      m_endRunNumber = 219365;
-
-      m_G4OverAFII_resolution_electron.reset(checked_own_cast<TH2*>(rootFile->Get("FastSim/es2015/el_full_fast_resolution")));
-      m_G4OverAFII_resolution_unconverted.reset(
-        checked_own_cast<TH2*>(rootFile->Get("FastSim/es2015/ph_unconv_full_fast_resolution")));
-      m_G4OverAFII_resolution_converted.reset(
-        checked_own_cast<TH2*>(rootFile->Get("FastSim/es2015/ph_conv_full_fast_resolution")));
-
-      assert(m_G4OverAFII_resolution_electron);
-      assert(m_G4OverAFII_resolution_unconverted);
-      assert(m_G4OverAFII_resolution_converted);
-
-      const std::string gain_filename1 = PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v8/FunctionsTO.root");
-      const std::string gain_filename2 = PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v8/FunctionsG_all.root");
-      m_gain_tool = std::make_unique<egGain::GainTool>(gain_filename1, gain_filename2);
-
-      m_e1hg_tool = std::make_unique<e1hg_systematics>();
-      m_use_temp_correction201215 = true; // for eta > 2.5
-      m_use_temp_correction201516 = false;
-    }
-
-    else if (m_esmodel == egEnergyCorr::es2016PRE) {
-      m_use_etaCalo_scales = true;
-      m_use_new_resolution_model = true;
-      m_resolution_tool = std::make_unique<eg_resolution>("run2_pre");
-
-      m_aPSNom.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/alphaPS_uncor")));
-      m_daPSCor.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/dalphaPS_cor")));
-      m_aS12Nom.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/alphaS12_uncor")));
-      m_daS12Cor.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/dalphaS12_cor")));
-
-      m_trkSyst.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/momentum_errSyst")));
-
-      m_zeeNom.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2015Summer/alphaZee_errStat")));
-      m_zeeSyst.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2015Summer/alphaZee_errSyst")));
-
-      m_resNom.reset(checked_own_cast<TH1*>(rootFile->Get("Resolution/es2015Summer/ctZee_errStat")));
-      m_resSyst.reset(checked_own_cast<TH1*>(rootFile->Get("Resolution/es2015Summer/ctZee_errSyst")));
-
-      m_pedestalL0.reset(checked_own_cast<TH1*>(rootFile->Get("Pedestals/es2012c/pedestals_l0")));
-      m_pedestalL1.reset(checked_own_cast<TH1*>(rootFile->Get("Pedestals/es2012c/pedestals_l1")));
-      m_pedestalL2.reset(checked_own_cast<TH1*>(rootFile->Get("Pedestals/es2012c/pedestals_l2")));
-      m_pedestalL3.reset(checked_own_cast<TH1*>(rootFile->Get("Pedestals/es2012c/pedestals_l3")));
-
-      m_dX_ID_Nom.reset(checked_own_cast<TH1*>(rootFile->Get("Material/DX0_ConfigA")));
-
-      m_dX_IPPS_Nom.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_IPPS_NewG_errUncor")));
-      m_dX_IPPS_LAr.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_IPPS_NewG_errLAr")));
-
-      m_dX_IPAcc_Nom.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errUncor")));
-      m_dX_IPAcc_LAr.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errLAr")));
-      m_dX_IPAcc_G4.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errG4")));
-      m_dX_IPAcc_GL1.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errGL1")));
-
-      m_dX_PSAcc_Nom.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errUncor")));
-      m_dX_PSAcc_LAr.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errLAr")));
-      m_dX_PSAcc_G4.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errG4")));
-
-      m_convRadius.reset(checked_own_cast<TH1*>(rootFile->Get("Conversions/es2012c/convRadiusMigrations")));
-      m_convFakeRate.reset(checked_own_cast<TH1*>(rootFile->Get("Conversions/es2012c/convFakeRate")));
-      m_convRecoEfficiency.reset(checked_own_cast<TH1*>(rootFile->Get("Conversions/es2012c/convRecoEfficiency")));
-
-      m_begRunNumber = 195847;
-      m_endRunNumber = 219365;
-
-      m_G4OverAFII_resolution_electron.reset(checked_own_cast<TH2*>(rootFile->Get("FastSim/es2015/el_full_fast_resolution")));
-      m_G4OverAFII_resolution_unconverted.reset(
-        checked_own_cast<TH2*>(rootFile->Get("FastSim/es2015/ph_unconv_full_fast_resolution")));
-      m_G4OverAFII_resolution_converted.reset(
-        checked_own_cast<TH2*>(rootFile->Get("FastSim/es2015/ph_conv_full_fast_resolution")));
-
-      assert(m_G4OverAFII_resolution_electron);
-      assert(m_G4OverAFII_resolution_unconverted);
-      assert(m_G4OverAFII_resolution_converted);
-
-      const std::string gain_filename1 = PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v8/FunctionsTO.root");
-      const std::string gain_filename2 = PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v8/FunctionsG_all.root");
-      m_gain_tool = std::make_unique<egGain::GainTool>(gain_filename1, gain_filename2);
-
-      m_e1hg_tool = std::make_unique<e1hg_systematics>();
-      m_use_temp_correction201215 = true; // for eta > 2.5
-      m_use_temp_correction201516 = true;
-    }
-
-    else if (m_esmodel == egEnergyCorr::es2017 or m_esmodel == egEnergyCorr::es2017_summer or
-             m_esmodel == egEnergyCorr::es2017_summer_improved or m_esmodel == egEnergyCorr::es2017_summer_final or
-             m_esmodel == egEnergyCorr::es2015_5TeV or m_esmodel == egEnergyCorr::es2017_R21_PRE or
-             m_esmodel == egEnergyCorr::es2017_R21_v0 or m_esmodel == egEnergyCorr::es2017_R21_v1 or
-             m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 or m_esmodel == egEnergyCorr::es2018_R21_v0 or
+  } else if (m_esmodel == egEnergyCorr::es2017 or
+             m_esmodel == egEnergyCorr::es2017_summer or
+             m_esmodel == egEnergyCorr::es2017_summer_improved or
+             m_esmodel == egEnergyCorr::es2017_summer_final or
+             m_esmodel == egEnergyCorr::es2015_5TeV or
+             m_esmodel == egEnergyCorr::es2017_R21_PRE or
+             m_esmodel == egEnergyCorr::es2017_R21_v0 or
+             m_esmodel == egEnergyCorr::es2017_R21_v1 or
+             m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 or
+             m_esmodel == egEnergyCorr::es2018_R21_v0 or
              m_esmodel == egEnergyCorr::es2018_R21_v1 or
-             m_esmodel == egEnergyCorr::es2022_R22_PRE) { // add release 21 here for now
-      m_use_etaCalo_scales = true;
-      m_use_new_resolution_model = true;
-      if (m_esmodel == egEnergyCorr::es2017_R21_v1 || m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 ||
-          m_esmodel == egEnergyCorr::es2018_R21_v0 || m_esmodel == egEnergyCorr::es2018_R21_v1 ||
-          m_esmodel == egEnergyCorr::es2022_R22_PRE)
-        m_resolution_tool = std::make_unique<eg_resolution>("run2_R21_v1");
-      else
-        m_resolution_tool = std::make_unique<eg_resolution>("run2_pre");
-
-      if (m_esmodel == egEnergyCorr::es2017_summer_final or m_esmodel == egEnergyCorr::es2017_R21_v0 or
-          m_esmodel == egEnergyCorr::es2017_R21_v1 or m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 or
-          m_esmodel == egEnergyCorr::es2018_R21_v0 || m_esmodel == egEnergyCorr::es2022_R22_PRE) {
-
-        m_aPSNom.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2017_summer_final/alphaPS_uncor")));
-        m_daPSb12.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2017_summer_final/dalphaPS_b12")));
-        m_daPSCor.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/dalphaPS_cor")));
-        m_aS12Nom.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2017_summer_final/alphaS12_uncor")));
-        m_daS12Cor.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/dalphaS12_cor")));
-      } else if (m_esmodel == egEnergyCorr::es2018_R21_v1) {
-        m_aPSNom.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2017_summer_final/alphaPS_uncor")));
-        m_daPSb12.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2017_summer_final/dalphaPS_b12")));
-        m_daPSCor.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/dalphaPS_cor")));
-        m_aS12Nom.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2018_R21_v1/alphaS12_uncor")));
-        m_daS12Cor.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/dalphaS12_cor")));
-      } else {
-        m_aPSNom.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/alphaPS_uncor")));
-        m_daPSCor.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/dalphaPS_cor")));
-        m_aS12Nom.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/alphaS12_uncor")));
-        m_daS12Cor.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/dalphaS12_cor")));
-      }
-      m_trkSyst.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/momentum_errSyst")));
-
-      if (m_esmodel == egEnergyCorr::es2017) {
-        m_zeeNom.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2017/alphaZee_errStat_period_2016")));
-        m_zeeNom_data2015.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2017/alphaZee_errStat_period_2015")));
-      } else if (m_esmodel == egEnergyCorr::es2017_summer or m_esmodel == egEnergyCorr::es2017_summer_improved) {
-        m_zeeNom.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2017_summer/alphaZee_errStat_period_2016")));
-        m_zeeNom_data2015.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2017_summer/alphaZee_errStat_period_2015")));
-      } else if (m_esmodel == egEnergyCorr::es2017_summer_final) {
-        m_zeeNom.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2017_summer_final/alphaZee_errStat_period_2016")));
-        m_zeeNom_data2015.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2017_summer_final/alphaZee_errStat_period_2015")));
-      } else if (m_esmodel == egEnergyCorr::es2015_5TeV) {
-        m_zeeNom.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2015_5TeV/alphaZee_errStat_period_2015")));
-        // Same histogram added twice for simplicity
-        m_zeeNom_data2015.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2015_5TeV/alphaZee_errStat_period_2015")));
-      } else if (m_esmodel == egEnergyCorr::es2017_R21_v0) {
-        m_zeeNom.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2017_R21_v0/alphaZee_errStat_period_2017")));
-        m_zeeNom_data2016.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2017_R21_v0/alphaZee_errStat_period_2016")));
-        m_zeeNom_data2015.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2017_R21_v0/alphaZee_errStat_period_2015")));
-      } else if (m_esmodel == egEnergyCorr::es2017_R21_v1) {
-        m_zeeNom.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2017_R21_v1/alphaZee_errStat_period_2017")));
-        m_zeeNom_data2016.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2017_R21_v1/alphaZee_errStat_period_2016")));
-        m_zeeNom_data2015.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2017_R21_v1/alphaZee_errStat_period_2015")));
-        m_zeeFwdk.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2017_R21_v1/alphaFwd_Finalk")));
-        m_zeeFwdb.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2017_R21_v1/alphaFwd_Finalb")));
-      } else if (m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1) {
-        m_zeeNom.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2017_R21_ofc0_v1/alphaZee_errStat_period_2017")));
-        m_zeeNom_data2016.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2017_R21_ofc0_v1/alphaZee_errStat_period_2016")));
-        m_zeeNom_data2015.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2017_R21_ofc0_v1/alphaZee_errStat_period_2015")));
-        m_zeeNom_data2018.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2017_R21_ofc0_v1/alphaZee_errStat_period_2018")));
-        m_zeeFwdk.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2017_R21_v1/alphaFwd_Finalk")));
-        m_zeeFwdb.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2017_R21_v1/alphaFwd_Finalb")));
-      } else if (m_esmodel == egEnergyCorr::es2018_R21_v0) {
-
-        m_zeeNom.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2018_R21_v0/alphaZee_errStat_period_2018")));
-        m_zeeNom_data2017.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2018_R21_v0/alphaZee_errStat_period_2017")));
-        m_zeeNom_data2016.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2018_R21_v0/alphaZee_errStat_period_2016")));
-        m_zeeNom_data2015.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2018_R21_v0/alphaZee_errStat_period_2015")));
-        m_zeeFwdk.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2018_R21_v0/alphaFwd_Finalk")));
-        m_zeeFwdb.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2018_R21_v0/alphaFwd_Finalb")));
-      } else if (m_esmodel == egEnergyCorr::es2018_R21_v1) {
-        m_zeeNom.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2018_R21_v1/alphaZee_errStat_period_2018")));
-        m_zeeNom_data2017.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2018_R21_v1/alphaZee_errStat_period_2017")));
-        m_zeeNom_data2016.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2018_R21_v1/alphaZee_errStat_period_2016")));
-        m_zeeNom_data2015.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2018_R21_v1/alphaZee_errStat_period_2015")));
-        // same as in v0 model
-        m_zeeFwdk.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2018_R21_v0/alphaFwd_Finalk")));
-        m_zeeFwdb.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2018_R21_v0/alphaFwd_Finalb")));
-      } else if (m_esmodel == egEnergyCorr::es2022_R22_PRE) {
-        m_zeeNom.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2022_R22_PRE/alphaZee_errStat_period_2018")));
-        // same as in v0 model
-        m_zeeFwdk.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2018_R21_v0/alphaFwd_Finalk")));
-        m_zeeFwdb.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2018_R21_v0/alphaFwd_Finalb")));
-      } else {
-        m_zeeNom.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2017_R21_PRE/alphaZee_errStat_period_2016")));
-        // SAME HISTO FOR 2015 FOR NOW
-        m_zeeNom_data2015.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2017_R21_PRE/alphaZee_errStat_period_2016")));
-      }
-      if (m_esmodel == egEnergyCorr::es2017) {
-        m_zeeSyst.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2017/alphaZee_errSyst")));
-      } else if (m_esmodel == egEnergyCorr::es2017_summer_final) {
-        m_zeeSyst.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2017_summer_final/alphaZee_errSyst")));
-      } else if (m_esmodel == egEnergyCorr::es2015_5TeV) {
-        m_zeeSyst.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2015_5TeV/alphaZee_errSyst")));
-      } else if (m_esmodel == egEnergyCorr::es2017_R21_v0) {
-        m_zeeSyst.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2017_summer_final/alphaZee_errSyst")));
-      } else if (m_esmodel == egEnergyCorr::es2017_R21_v1) {
-        m_zeeSyst.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2017_R21_v1/alphaZee_errSyst")));
-      } else if (m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1) {
-        m_zeeSyst.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2017_R21_ofc0_v1/alphaZee_errSyst")));
-      } else if (m_esmodel == egEnergyCorr::es2018_R21_v0) {
-        m_zeeSyst.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2018_R21_v0/alphaZee_errSyst")));
-      } else if (m_esmodel == egEnergyCorr::es2018_R21_v1) {
-        m_zeeSyst.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2018_R21_v1/alphaZee_errSyst")));
-      } else if (m_esmodel == egEnergyCorr::es2022_R22_PRE) {
-        m_zeeSyst.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2022_R22_PRE/alphaZee_errSyst")));
-        m_zeeSystOFC.reset(checked_own_cast<TH1*>(
-          rootFile->Get("Scales/es2022_R22_PRE/alphaZee_errOFCSyst"))); // TODO: change to alphaZeeOFC_errSyst
-      } else {
-        m_zeeSyst.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2017_summer/alphaZee_errSyst")));
-      }
-
-      m_uA2MeV_2015_first2weeks_correction = nullptr;
-      if (m_esmodel == egEnergyCorr::es2017) {
-        m_resNom.reset(checked_own_cast<TH1*>(rootFile->Get("Resolution/es2017/ctZee_errStat")));
-      } else if (m_esmodel == egEnergyCorr::es2017_summer or m_esmodel == egEnergyCorr::es2017_summer_improved or
-                 m_esmodel == egEnergyCorr::es2015_5TeV) {
-        m_resNom.reset(checked_own_cast<TH1*>(rootFile->Get("Resolution/es2017_summer/ctZee_errStat")));
-      } else if (m_esmodel == egEnergyCorr::es2017_summer_final) {
-        m_resNom.reset(checked_own_cast<TH1*>(rootFile->Get("Resolution/es2017_summer_final/ctZee_errStat")));
-      } else if (m_esmodel == egEnergyCorr::es2017_R21_v0) {
-        m_resNom.reset(checked_own_cast<TH1*>(rootFile->Get("Resolution/es2017_R21_v0/ctZee_errStat")));
-      } else if (m_esmodel == egEnergyCorr::es2017_R21_v1) {
-        m_resNom.reset(checked_own_cast<TH1*>(rootFile->Get("Resolution/es2017_R21_v1/ctZee_errStat")));
-      } else if (m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1) {
-        m_resNom.reset(checked_own_cast<TH1*>(rootFile->Get("Resolution/es2017_R21_ofc0_v1/ctZee_errStat")));
-      } else if (m_esmodel == egEnergyCorr::es2018_R21_v0) {
-        m_resNom.reset(checked_own_cast<TH1*>(rootFile->Get("Resolution/es2018_R21_v0/ctZee_errStat")));
-      } else if (m_esmodel == egEnergyCorr::es2018_R21_v1) {
-        m_resNom.reset(checked_own_cast<TH1*>(rootFile->Get("Resolution/es2018_R21_v1/ctZee_errStat")));
-      } else if (m_esmodel == egEnergyCorr::es2022_R22_PRE) {
-        m_resNom.reset(checked_own_cast<TH1*>(rootFile->Get("Resolution/es2022_R22_PRE/ctZee_errStat")));
-      } else {
-        m_resNom.reset(checked_own_cast<TH1*>(rootFile->Get("Resolution/es2017_R21_PRE/ctZee_errStat")));
-      }
-
-      if (m_esmodel == egEnergyCorr::es2017) {
-        m_resSyst.reset(checked_own_cast<TH1*>(rootFile->Get("Resolution/es2017/ctZee_errSyst")));
-      } else if (m_esmodel == egEnergyCorr::es2017_summer_final) {
-        m_resSyst.reset(checked_own_cast<TH1*>(rootFile->Get("Resolution/es2017_summer_final/ctZee_errSyst")));
-      } else if (m_esmodel == egEnergyCorr::es2015_5TeV) {
-        m_resSyst.reset(checked_own_cast<TH1*>(rootFile->Get("Resolution/es2015_5TeV/ctZee_errSyst")));
-      } else if (m_esmodel == egEnergyCorr::es2017_R21_v0) {
-        m_resSyst.reset(checked_own_cast<TH1*>(rootFile->Get("Resolution/es2017_summer_final/ctZee_errSyst")));
-      } else if (m_esmodel == egEnergyCorr::es2017_R21_v1) {
-        m_resSyst.reset(checked_own_cast<TH1*>(rootFile->Get("Resolution/es2017_R21_v1/ctZee_errSyst")));
-      } else if (m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1) {
-        m_resSyst.reset(checked_own_cast<TH1*>(rootFile->Get("Resolution/es2017_R21_ofc0_v1/ctZee_errSyst")));
-      } else if (m_esmodel == egEnergyCorr::es2018_R21_v0) {
-        m_resSyst.reset(checked_own_cast<TH1*>(rootFile->Get("Resolution/es2018_R21_v0/ctZee_errSyst")));
-      } else if (m_esmodel == egEnergyCorr::es2018_R21_v1) {
-        m_resSyst.reset(checked_own_cast<TH1*>(rootFile->Get("Resolution/es2018_R21_v1/ctZee_errSyst")));
-      } else if (m_esmodel == egEnergyCorr::es2022_R22_PRE) {
-        m_resSyst.reset(checked_own_cast<TH1*>(rootFile->Get("Resolution/es2022_R22_PRE/ctZee_errSyst")));
-        m_resSystOFC.reset(checked_own_cast<TH1*>(rootFile->Get("Resolution/es2022_R22_PRE/ctZee_errOFCSyst")));
-      } else {
-        m_resSyst.reset(checked_own_cast<TH1*>(rootFile->Get("Resolution/es2017_summer/ctZee_errSyst")));
-      }
-      // else{
-      // m_resSyst.reset( checked_own_cast< TH1* >( rootFile->Get("Resolution/es2017_summer_improved/ctZee_errSyst")));
-      // }
-
-      m_pedestals_es2017.reset(checked_own_cast<TH1*>(rootFile->Get("Pedestals/es2017/pedestals")));
-
-      m_dX_ID_Nom.reset(checked_own_cast<TH1*>(rootFile->Get("Material/DX0_ConfigA")));
-
-      m_dX_IPPS_Nom.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_IPPS_NewG_errUncor")));
-      m_dX_IPPS_LAr.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_IPPS_NewG_errLAr")));
-
-      m_dX_IPAcc_Nom.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errUncor")));
-      m_dX_IPAcc_LAr.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errLAr")));
-      m_dX_IPAcc_G4.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errG4")));
-      m_dX_IPAcc_GL1.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errGL1")));
-
-      m_dX_PSAcc_Nom.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errUncor")));
-      m_dX_PSAcc_LAr.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errLAr")));
-      m_dX_PSAcc_G4.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errG4")));
-
-      m_convRadius.reset(checked_own_cast<TH1*>(rootFile->Get("Conversions/es2012c/convRadiusMigrations")));
-      if (m_esmodel == egEnergyCorr::es2017) {
-        m_convFakeRate.reset(checked_own_cast<TH1*>(rootFile->Get("Conversions/es2012c/convFakeRate")));
-        m_convRecoEfficiency.reset(checked_own_cast<TH1*>(rootFile->Get("Conversions/es2012c/convRecoEfficiency")));
-      } else {
-        m_convFakeRate.reset(checked_own_cast<TH1*>(rootFile->Get("Conversions/es2017_summer/convFakeRate")));
-        m_convRecoEfficiency.reset(checked_own_cast<TH1*>(rootFile->Get("Conversions/es2017_summer/convRecoEfficiency")));
-      }
-
-      // TODO: change path when moving to calibarea
-      // TODO: better package this somewhere
-
-      const std::string filename_pp0 = PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v8/PP0sys.root");
-
-      TFile file_pp0(filename_pp0.c_str());
-      m_pp0_elec.reset(checked_own_cast<TH2*>(file_pp0.Get("elec")));
-      m_pp0_conv.reset(checked_own_cast<TH2*>(file_pp0.Get("conv")));
-      m_pp0_unconv.reset(checked_own_cast<TH2*>(file_pp0.Get("unco")));
-
-      // similar case for wtots1
-      const std::string filename_wstot =
-        PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v8/wstot_related_syst.root");
-
-      TFile file_wstot(filename_wstot.c_str());
-      m_wstot_slope_A_data.reset(checked_own_cast<TH1*>(file_wstot.Get("A_data")));
-      m_wstot_slope_B_MC.reset(checked_own_cast<TH1*>(file_wstot.Get("B_mc")));
-      m_wstot_pT_data_p0_electrons.reset(checked_own_cast<TH1*>(file_wstot.Get("wstot_pT_el_data_p0")));
-      m_wstot_pT_data_p1_electrons.reset(checked_own_cast<TH1*>(file_wstot.Get("wstot_pT_el_data_p1")));
-      m_wstot_pT_data_p0_unconverted_photons.reset(checked_own_cast<TH1*>(file_wstot.Get("wstot_pT_uc_data_p0")));
-      m_wstot_pT_data_p1_unconverted_photons.reset(checked_own_cast<TH1*>(file_wstot.Get("wstot_pT_uc_data_p1")));
-      m_wstot_pT_data_p0_converted_photons.reset(checked_own_cast<TH1*>(file_wstot.Get("wstot_pT_c_data_p0")));
-      m_wstot_pT_data_p1_converted_photons.reset(checked_own_cast<TH1*>(file_wstot.Get("wstot_pT_c_data_p1")));
-      m_wstot_pT_MC_p0_electrons.reset(checked_own_cast<TH1*>(file_wstot.Get("wstot_pT_el_mc_p0")));
-      m_wstot_pT_MC_p1_electrons.reset(checked_own_cast<TH1*>(file_wstot.Get("wstot_pT_el_mc_p1")));
-      m_wstot_pT_MC_p0_unconverted_photons.reset(checked_own_cast<TH1*>(file_wstot.Get("wstot_pT_ph_uc_mc_p0")));
-      m_wstot_pT_MC_p1_unconverted_photons.reset(checked_own_cast<TH1*>(file_wstot.Get("wstot_pT_ph_uc_mc_p1")));
-      m_wstot_pT_MC_p0_converted_photons.reset(checked_own_cast<TH1*>(file_wstot.Get("wstot_pT_ph_c_mc_p0")));
-      m_wstot_pT_MC_p1_converted_photons.reset(checked_own_cast<TH1*>(file_wstot.Get("wstot_pT_ph_c_mc_p1")));
-
-      m_begRunNumber = 252604;
-      m_endRunNumber = 314199;
-
-      if (m_esmodel == egEnergyCorr::es2017_R21_v1 || m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 ||
-          m_esmodel == egEnergyCorr::es2018_R21_v0 || m_esmodel == egEnergyCorr::es2018_R21_v1 ||
-          m_esmodel == egEnergyCorr::es2022_R22_PRE) {
-        m_G4OverAFII_resolution_electron.reset(
-          checked_own_cast<TH2*>(rootFile->Get("FastSim/es2017_v1/resol_Af2ToG4_elec_rel21")));
-        m_G4OverAFII_resolution_unconverted.reset(
-          checked_own_cast<TH2*>(rootFile->Get("FastSim/es2017_v1/resol_Af2ToG4_unco_rel21")));
-        m_G4OverAFII_resolution_converted.reset(
-          checked_own_cast<TH2*>(rootFile->Get("FastSim/es2017_v1/resol_Af2ToG4_conv_rel21")));
-      } else {
-        m_G4OverAFII_resolution_electron.reset(checked_own_cast<TH2*>(rootFile->Get("FastSim/es2017/el_full_fast_resolution")));
-        m_G4OverAFII_resolution_unconverted.reset(
-          checked_own_cast<TH2*>(rootFile->Get("FastSim/es2017/ph_unconv_full_fast_resolution")));
-        m_G4OverAFII_resolution_converted.reset(
-          checked_own_cast<TH2*>(rootFile->Get("FastSim/es2017/ph_conv_full_fast_resolution")));
-      }
-      assert(m_G4OverAFII_resolution_electron);
-      assert(m_G4OverAFII_resolution_unconverted);
-      assert(m_G4OverAFII_resolution_converted);
-
-      const std::string gain_filename1 = PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v8/FunctionsTO.root");
-      const std::string gain_filename2 = PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v8/FunctionsG_all.root");
-      m_gain_tool = nullptr;
-
-      std::string gain_tool_run_2_filename;
-      if (m_esmodel == egEnergyCorr::es2017 or m_esmodel == egEnergyCorr::es2017_summer or
-          m_esmodel == egEnergyCorr::es2017_R21_PRE or m_esmodel == egEnergyCorr::es2015_5TeV) {
-        gain_tool_run_2_filename =
-          PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v11/gain_uncertainty_specialRun.root");
-      } else {
-        gain_tool_run_2_filename =
-          PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v14/gain_uncertainty_specialRun.root");
-      }
-      m_gain_tool_run2 = std::make_unique<egGain::GainUncertainty>(gain_tool_run_2_filename);
-
-      m_e1hg_tool = std::make_unique<e1hg_systematics>();
-      m_use_temp_correction201215 = false;
-      m_use_temp_correction201516 = false;
-    }
-
-    else if (m_esmodel == egEnergyCorr::es2015_day0_3percent) {
-      m_use_new_resolution_model = true;
+             m_esmodel == egEnergyCorr::es2022_R22_PRE or
+             m_esmodel == egEnergyCorr::es2023_R22_Run2_v0) {  // add release 21
+                                                               // here for now
+    m_use_etaCalo_scales = true;
+    m_use_new_resolution_model = true;
+    if (m_esmodel == egEnergyCorr::es2017_R21_v1 ||
+        m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 ||
+        m_esmodel == egEnergyCorr::es2018_R21_v0 ||
+        m_esmodel == egEnergyCorr::es2018_R21_v1 ||
+        m_esmodel == egEnergyCorr::es2022_R22_PRE ||
+        m_esmodel == egEnergyCorr::es2023_R22_Run2_v0) {
+      m_resolution_tool = std::make_unique<eg_resolution>("run2_R21_v1");
+    } else {
       m_resolution_tool = std::make_unique<eg_resolution>("run2_pre");
-
-      m_aPSNom.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2015_day0/alphaPS_uncor")));   // old one
-      m_daPSCor.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2015_day0/dalphaPS_cor")));   // old one
-      m_aS12Nom.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2015_day0/alphaS12_uncor"))); // old one
-      m_daS12Cor.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2015_day0/dalphaS12_cor"))); // old one
-
-      m_trkSyst.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2015_day0/momentum_errSyst"))); // old one
-
-      m_zeeNom.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2015_day0/alphaZee_errStat")));  // old one
-      m_zeeSyst.reset(checked_own_cast<TH1*>(rootFile->Get("Scales/es2015_day0/alphaZee_errSyst"))); // old one
-
-      m_resNom.reset(checked_own_cast<TH1*>(rootFile->Get("Resolution/es2012c/ctZee_errStat")));  // old one
-      m_resSyst.reset(checked_own_cast<TH1*>(rootFile->Get("Resolution/es2012c/ctZee_errSyst"))); // old one
-
-      m_pedestalL0.reset(checked_own_cast<TH1*>(rootFile->Get("Pedestals/es2012c/pedestals_l0"))); // old one
-      m_pedestalL1.reset(checked_own_cast<TH1*>(rootFile->Get("Pedestals/es2012c/pedestals_l1"))); // old one
-      m_pedestalL2.reset(checked_own_cast<TH1*>(rootFile->Get("Pedestals/es2012c/pedestals_l2"))); // old one
-      m_pedestalL3.reset(checked_own_cast<TH1*>(rootFile->Get("Pedestals/es2012c/pedestals_l3"))); // old one
-
-      m_dX_ID_Nom.reset(checked_own_cast<TH1*>(rootFile->Get("Material/DX0_ConfigA"))); // old one
-
-      m_dX_IPPS_Nom.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_IPPS_NewG_errUncor"))); // old one
-      m_dX_IPPS_LAr.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_IPPS_NewG_errLAr")));   // old one
-
-      m_dX_IPAcc_Nom.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errUncor"))); // old one
-      m_dX_IPAcc_LAr.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errLAr")));   // old one
-      m_dX_IPAcc_G4.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errG4")));     // old one
-      m_dX_IPAcc_GL1.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errGL1")));   // old one
-
-      m_dX_PSAcc_Nom.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errUncor"))); // old one
-      m_dX_PSAcc_LAr.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errLAr")));   // old one
-      m_dX_PSAcc_G4.reset(checked_own_cast<TH1*>(rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errG4")));     // old one
-
-      m_convRadius.reset(checked_own_cast<TH1*>(rootFile->Get("Conversions/es2012c/convRadiusMigrations")));       // old one
-      m_convFakeRate.reset(checked_own_cast<TH1*>(rootFile->Get("Conversions/es2012c/convFakeRate")));             // old one
-      m_convRecoEfficiency.reset(checked_own_cast<TH1*>(rootFile->Get("Conversions/es2012c/convRecoEfficiency"))); // old one
-
-      m_begRunNumber = 195847;
-      m_endRunNumber = 219365;
-
-      const std::string gain_filename1 = PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v8/FunctionsTO.root");
-      const std::string gain_filename2 = PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v8/FunctionsG_all.root");
-      m_gain_tool = std::make_unique<egGain::GainTool>(gain_filename1, gain_filename2);
-
-      m_e1hg_tool = std::make_unique<e1hg_systematics>();
-
-      // If we are here, fail      :
-
-    } else if (m_esmodel == egEnergyCorr::UNDEFINED) {
-      ATH_MSG_FATAL("ES model not initialized - Initialization fails");
-      return 0;
-    } else {
-      ATH_MSG_FATAL("ES model not recognized - Initialization fails");
-      return 0;
     }
 
-    if (m_esmodel == egEnergyCorr::es2015cPRE or m_esmodel == egEnergyCorr::es2015cPRE_res_improved or
-        m_esmodel == egEnergyCorr::es2015c_summer or m_esmodel == egEnergyCorr::es2016PRE or
-        m_esmodel == egEnergyCorr::es2017 or m_esmodel == egEnergyCorr::es2017_summer or
-        m_esmodel == egEnergyCorr::es2017_summer_improved or m_esmodel == egEnergyCorr::es2017_summer_final or
-        m_esmodel == egEnergyCorr::es2017_R21_v0 or m_esmodel == egEnergyCorr::es2017_R21_v1 or
-        m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 or m_esmodel == egEnergyCorr::es2017_R21_PRE or
-        m_esmodel == egEnergyCorr::es2015_5TeV or m_esmodel == egEnergyCorr::es2018_R21_v0 or
-        m_esmodel == egEnergyCorr::es2018_R21_v1 or m_esmodel == egEnergyCorr::es2022_R22_PRE) {
-      // E4 systematics
-      m_E4ElectronEtaBins.reset(checked_own_cast<TAxis*>(rootFile->Get("E4Recalibration/v4/electron_eta_axis")));
-      m_E4ElectronGraphs.reset(checked_own_cast<TList*>(rootFile->Get("E4Recalibration/v4/electron")));
-      // for photons use the same as electrons
-      m_E4UnconvertedEtaBins.reset(checked_own_cast<TAxis*>(rootFile->Get("E4Recalibration/v4/electron_eta_axis")));
-      m_E4UnconvertedGraphs.reset(checked_own_cast<TList*>(rootFile->Get("E4Recalibration/v4/electron")));
-      m_E4ConvertedEtaBins.reset(checked_own_cast<TAxis*>(rootFile->Get("E4Recalibration/v4/electron_eta_axis")));
-      m_E4ConvertedGraphs.reset(checked_own_cast<TList*>(rootFile->Get("E4Recalibration/v4/electron")));
-    }
-
-    // ... PS and S12 recalibration curves
-    if (m_esmodel == egEnergyCorr::es2015PRE or m_esmodel == egEnergyCorr::es2015PRE_res_improved or
-        m_esmodel == egEnergyCorr::es2015cPRE or m_esmodel == egEnergyCorr::es2015cPRE_res_improved or
-        m_esmodel == egEnergyCorr::es2015c_summer or m_esmodel == egEnergyCorr::es2016PRE or
-        m_esmodel == egEnergyCorr::es2017 or m_esmodel == egEnergyCorr::es2017_summer or
-        m_esmodel == egEnergyCorr::es2017_summer_improved or m_esmodel == egEnergyCorr::es2017_summer_final or
-        m_esmodel == egEnergyCorr::es2017_R21_v0 or m_esmodel == egEnergyCorr::es2017_R21_v1 or
-        m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 or m_esmodel == egEnergyCorr::es2017_R21_PRE or
-        m_esmodel == egEnergyCorr::es2015_5TeV or m_esmodel == egEnergyCorr::es2018_R21_v0 or
-        m_esmodel == egEnergyCorr::es2018_R21_v1 or m_esmodel == egEnergyCorr::es2022_R22_PRE) {
-
-      m_psElectronEtaBins.reset(checked_own_cast<TAxis*>(rootFile->Get("PSRecalibration/es2015PRE/ElectronAxis")));
-      m_psElectronGraphs.reset(checked_own_cast<TList*>(rootFile->Get("PSRecalibration/es2015PRE/ElectronBiasPS")));
-      m_psUnconvertedEtaBins.reset(
-        checked_own_cast<TAxis*>(rootFile->Get("PSRecalibration/es2015PRE/UnconvertedAxis")));
-      m_psUnconvertedGraphs.reset(
-        checked_own_cast<TList*>(rootFile->Get("PSRecalibration/es2015PRE/UnconvertedBiasPS")));
-      m_psConvertedEtaBins.reset(checked_own_cast<TAxis*>(rootFile->Get("PSRecalibration/es2015PRE/ConvertedAxis")));
-      m_psConvertedGraphs.reset(checked_own_cast<TList*>(rootFile->Get("PSRecalibration/es2015PRE/ConvertedBiasPS")));
-
-      m_s12ElectronEtaBins.reset(checked_own_cast<TAxis*>(rootFile->Get("S1Recalibration/es2015PRE/ElectronAxis")));
-      m_s12ElectronGraphs.reset(checked_own_cast<TList*>(rootFile->Get("S1Recalibration/es2015PRE/ElectronBiasS1")));
-      m_s12UnconvertedEtaBins.reset(
-        checked_own_cast<TAxis*>(rootFile->Get("S1Recalibration/es2015PRE/UnconvertedAxis")));
-      m_s12UnconvertedGraphs.reset(
-        checked_own_cast<TList*>(rootFile->Get("S1Recalibration/es2015PRE/UnconvertedBiasS1")));
-      m_s12ConvertedEtaBins.reset(checked_own_cast<TAxis*>(rootFile->Get("S1Recalibration/es2015PRE/ConvertedAxis")));
-      m_s12ConvertedGraphs.reset(checked_own_cast<TList*>(rootFile->Get("S1Recalibration/es2015PRE/ConvertedBiasS1")));
-    } else // run1
-    {
-      m_psElectronEtaBins.reset(checked_own_cast<TAxis*>(rootFile->Get("PSRecalibration/ElectronAxis")));
-      m_psElectronGraphs.reset(checked_own_cast<TList*>(rootFile->Get("PSRecalibration/ElectronBiasPS")));
-      m_psUnconvertedEtaBins.reset(checked_own_cast<TAxis*>(rootFile->Get("PSRecalibration/UnconvertedAxis")));
-      m_psUnconvertedGraphs.reset(checked_own_cast<TList*>(rootFile->Get("PSRecalibration/UnconvertedBiasPS")));
-      m_psConvertedEtaBins.reset(checked_own_cast<TAxis*>(rootFile->Get("PSRecalibration/ConvertedAxis")));
-      m_psConvertedGraphs.reset(checked_own_cast<TList*>(rootFile->Get("PSRecalibration/ConvertedBiasPS")));
-
-      m_s12ElectronEtaBins.reset(checked_own_cast<TAxis*>(rootFile->Get("S1Recalibration/ElectronAxis")));
-      m_s12ElectronGraphs.reset(checked_own_cast<TList*>(rootFile->Get("S1Recalibration/ElectronBiasS1")));
-      m_s12UnconvertedEtaBins.reset(checked_own_cast<TAxis*>(rootFile->Get("S1Recalibration/UnconvertedAxis")));
-      m_s12UnconvertedGraphs.reset(checked_own_cast<TList*>(rootFile->Get("S1Recalibration/UnconvertedBiasS1")));
-      m_s12ConvertedEtaBins.reset(checked_own_cast<TAxis*>(rootFile->Get("S1Recalibration/ConvertedAxis")));
-      m_s12ConvertedGraphs.reset(checked_own_cast<TList*>(rootFile->Get("S1Recalibration/ConvertedBiasS1")));
-    }
-
-    // further inputs do not depend on year
-
-    // ... material distortions
-    m_matUnconvertedScale.emplace_back(
-      std::unique_ptr<TH1>(checked_own_cast<TH1*>(rootFile->Get("Material/unconvertedBiasSubtracted_ConfigA"))));
-    m_matUnconvertedScale.emplace_back(
-      std::unique_ptr<TH1>(checked_own_cast<TH1*>(rootFile->Get("Material/unconvertedBiasSubtracted_ConfigCpDp"))));
-    m_matUnconvertedScale.emplace_back(
-      std::unique_ptr<TH1>(checked_own_cast<TH1*>(rootFile->Get("Material/unconvertedBiasSubtracted_ConfigEpLp"))));
-    m_matUnconvertedScale.emplace_back(
-      std::unique_ptr<TH1>(checked_own_cast<TH1*>(rootFile->Get("Material/unconvertedBiasSubtracted_ConfigFpMX"))));
-    m_matUnconvertedScale.emplace_back(
-      std::unique_ptr<TH1>(checked_own_cast<TH1*>(rootFile->Get("Material/unconvertedBiasSubtracted_ConfigGp"))));
-
-    m_matConvertedScale.emplace_back(
-      std::unique_ptr<TH1>(checked_own_cast<TH1*>(rootFile->Get("Material/convertedBiasSubtracted_ConfigA"))));
-    m_matConvertedScale.emplace_back(
-      std::unique_ptr<TH1>(checked_own_cast<TH1*>(rootFile->Get("Material/convertedBiasSubtracted_ConfigCpDp"))));
-    m_matConvertedScale.emplace_back(
-      std::unique_ptr<TH1>(checked_own_cast<TH1*>(rootFile->Get("Material/convertedBiasSubtracted_ConfigEpLp"))));
-    m_matConvertedScale.emplace_back(
-      std::unique_ptr<TH1>(checked_own_cast<TH1*>(rootFile->Get("Material/convertedBiasSubtracted_ConfigFpMX"))));
-    m_matConvertedScale.emplace_back(
-      std::unique_ptr<TH1>(checked_own_cast<TH1*>(rootFile->Get("Material/convertedBiasSubtracted_ConfigGp"))));
-
-    m_matElectronCstTerm.emplace_back(
-      std::unique_ptr<TH1>(checked_own_cast<TH1*>(rootFile->Get("Material/electronCstTerm_ConfigA"))));
-    m_matElectronCstTerm.emplace_back(
-      std::unique_ptr<TH1>(checked_own_cast<TH1*>(rootFile->Get("Material/electronCstTerm_ConfigCpDp"))));
-    m_matElectronCstTerm.emplace_back(
-      std::unique_ptr<TH1>(checked_own_cast<TH1*>(rootFile->Get("Material/electronCstTerm_ConfigEpLp"))));
-    m_matElectronCstTerm.emplace_back(
-      std::unique_ptr<TH1>(checked_own_cast<TH1*>(rootFile->Get("Material/electronCstTerm_ConfigFpMX"))));
-    m_matElectronCstTerm.emplace_back(
-      std::unique_ptr<TH1>(checked_own_cast<TH1*>(rootFile->Get("Material/electronCstTerm_ConfigGp"))));
-
-    if (m_esmodel == egEnergyCorr::es2017_R21_v1 || m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 ||
-        m_esmodel == egEnergyCorr::es2018_R21_v0 || m_esmodel == egEnergyCorr::es2018_R21_v1 ||
+    if (m_esmodel == egEnergyCorr::es2017_summer_final or
+        m_esmodel == egEnergyCorr::es2017_R21_v0 or
+        m_esmodel == egEnergyCorr::es2017_R21_v1 or
+        m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 or
+        m_esmodel == egEnergyCorr::es2018_R21_v0 ||
         m_esmodel == egEnergyCorr::es2022_R22_PRE) {
-      // update dX0 plots for distorted geometry for case A, EL, FMX and N
-      m_matX0Additions.emplace_back(std::unique_ptr<TH1>(checked_own_cast<TH1*>(rootFile->Get("Material_rel21/DX0_ConfigA"))));
-      m_matX0Additions.emplace_back(std::unique_ptr<TH1>(checked_own_cast<TH1*>(rootFile->Get("Material/DX0_ConfigCpDp"))));
-      m_matX0Additions.emplace_back(std::unique_ptr<TH1>(checked_own_cast<TH1*>(rootFile->Get("Material_rel21/DX0_ConfigEpLp"))));
-      m_matX0Additions.emplace_back(std::unique_ptr<TH1>(checked_own_cast<TH1*>(rootFile->Get("Material_rel21/DX0_ConfigFpMX"))));
-      m_matX0Additions.emplace_back(std::unique_ptr<TH1>(checked_own_cast<TH1*>(rootFile->Get("Material/DX0_ConfigGp"))));
-      m_matX0Additions.emplace_back(std::unique_ptr<TH1>(checked_own_cast<TH1*>(rootFile->Get("Material_rel21/DX0_ConfigN"))));
+      m_aPSNom.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2017_summer_final/alphaPS_uncor")));
+      m_daPSb12.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2017_summer_final/dalphaPS_b12")));
+      m_daPSCor.reset(
+          checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/dalphaPS_cor")));
+      m_aS12Nom.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2017_summer_final/alphaS12_uncor")));
+      m_daS12Cor.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2012c/dalphaS12_cor")));
+    } else if (m_esmodel == egEnergyCorr::es2018_R21_v1) {
+      m_aPSNom.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2017_summer_final/alphaPS_uncor")));
+      m_daPSb12.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2017_summer_final/dalphaPS_b12")));
+      m_daPSCor.reset(
+          checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/dalphaPS_cor")));
+      m_aS12Nom.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2018_R21_v1/alphaS12_uncor")));
+      m_daS12Cor.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2012c/dalphaS12_cor")));
+    } else if (m_esmodel == egEnergyCorr::es2023_R22_Run2_v0) {
+      m_aPSNom.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2023_R22_Run2_v0/alphaPS_uncor")));
+      m_aS12Nom.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2023_R22_Run2_v0/alphaS12_uncor")));
     } else {
-      m_matX0Additions.emplace_back(std::unique_ptr<TH1>(checked_own_cast<TH1*>(rootFile->Get("Material/DX0_ConfigA"))));
-      m_matX0Additions.emplace_back(std::unique_ptr<TH1>(checked_own_cast<TH1*>(rootFile->Get("Material/DX0_ConfigCpDp"))));
-      m_matX0Additions.emplace_back(std::unique_ptr<TH1>(checked_own_cast<TH1*>(rootFile->Get("Material/DX0_ConfigEpLp"))));
-      m_matX0Additions.emplace_back(std::unique_ptr<TH1>(checked_own_cast<TH1*>(rootFile->Get("Material/DX0_ConfigFpMX"))));
-      m_matX0Additions.emplace_back(std::unique_ptr<TH1>(checked_own_cast<TH1*>(rootFile->Get("Material/DX0_ConfigGp"))));
+      m_aPSNom.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2012c/alphaPS_uncor")));
+      m_daPSCor.reset(
+          checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/dalphaPS_cor")));
+      m_aS12Nom.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2012c/alphaS12_uncor")));
+      m_daS12Cor.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2012c/dalphaS12_cor")));
     }
+    m_trkSyst.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Scales/es2012c/momentum_errSyst")));
 
-    m_matElectronEtaBins.reset(checked_own_cast<TAxis*>(rootFile->Get("Material/LinearityEtaBins")));
-    m_matElectronGraphs.emplace_back(
-      std::unique_ptr<TList>(checked_own_cast<TList*>(rootFile->Get("Material/Linearity_Cluster_ConfigA"))));
-    m_matElectronGraphs.emplace_back(
-      std::unique_ptr<TList>(checked_own_cast<TList*>(rootFile->Get("Material/Linearity_Cluster_ConfigCpDp"))));
-    m_matElectronGraphs.emplace_back(
-      std::unique_ptr<TList>(checked_own_cast<TList*>(rootFile->Get("Material/Linearity_Cluster_ConfigEpLp"))));
-    m_matElectronGraphs.emplace_back(
-      std::unique_ptr<TList>(checked_own_cast<TList*>(rootFile->Get("Material/Linearity_Cluster_ConfigFpMX"))));
-    m_matElectronGraphs.emplace_back(
-      std::unique_ptr<TList>(checked_own_cast<TList*>(rootFile->Get("Material/Linearity_Cluster_ConfigGp"))));
+    if (m_esmodel == egEnergyCorr::es2017) {
+      m_zeeNom.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2017/alphaZee_errStat_period_2016")));
+      m_zeeNom_data2015.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2017/alphaZee_errStat_period_2015")));
+    } else if (m_esmodel == egEnergyCorr::es2017_summer or
+               m_esmodel == egEnergyCorr::es2017_summer_improved) {
+      m_zeeNom.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2017_summer/alphaZee_errStat_period_2016")));
+      m_zeeNom_data2015.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2017_summer/alphaZee_errStat_period_2015")));
+    } else if (m_esmodel == egEnergyCorr::es2017_summer_final) {
+      m_zeeNom.reset(checked_own_cast<TH1*>(rootFile->Get(
+          "Scales/es2017_summer_final/alphaZee_errStat_period_2016")));
+      m_zeeNom_data2015.reset(checked_own_cast<TH1*>(rootFile->Get(
+          "Scales/es2017_summer_final/alphaZee_errStat_period_2015")));
+    } else if (m_esmodel == egEnergyCorr::es2015_5TeV) {
+      m_zeeNom.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2015_5TeV/alphaZee_errStat_period_2015")));
+      // Same histogram added twice for simplicity
+      m_zeeNom_data2015.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2015_5TeV/alphaZee_errStat_period_2015")));
+    } else if (m_esmodel == egEnergyCorr::es2017_R21_v0) {
+      m_zeeNom.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2017_R21_v0/alphaZee_errStat_period_2017")));
+      m_zeeNom_data2016.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2017_R21_v0/alphaZee_errStat_period_2016")));
+      m_zeeNom_data2015.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2017_R21_v0/alphaZee_errStat_period_2015")));
+    } else if (m_esmodel == egEnergyCorr::es2017_R21_v1) {
+      m_zeeNom.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2017_R21_v1/alphaZee_errStat_period_2017")));
+      m_zeeNom_data2016.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2017_R21_v1/alphaZee_errStat_period_2016")));
+      m_zeeNom_data2015.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2017_R21_v1/alphaZee_errStat_period_2015")));
+      m_zeeFwdk.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2017_R21_v1/alphaFwd_Finalk")));
+      m_zeeFwdb.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2017_R21_v1/alphaFwd_Finalb")));
+    } else if (m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1) {
+      m_zeeNom.reset(checked_own_cast<TH1*>(rootFile->Get(
+          "Scales/es2017_R21_ofc0_v1/alphaZee_errStat_period_2017")));
+      m_zeeNom_data2016.reset(checked_own_cast<TH1*>(rootFile->Get(
+          "Scales/es2017_R21_ofc0_v1/alphaZee_errStat_period_2016")));
+      m_zeeNom_data2015.reset(checked_own_cast<TH1*>(rootFile->Get(
+          "Scales/es2017_R21_ofc0_v1/alphaZee_errStat_period_2015")));
+      m_zeeNom_data2018.reset(checked_own_cast<TH1*>(rootFile->Get(
+          "Scales/es2017_R21_ofc0_v1/alphaZee_errStat_period_2018")));
+      m_zeeFwdk.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2017_R21_v1/alphaFwd_Finalk")));
+      m_zeeFwdb.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2017_R21_v1/alphaFwd_Finalb")));
+    } else if (m_esmodel == egEnergyCorr::es2018_R21_v0) {
 
-    // ... new material distortions from release 21 parameterizations
-    if (m_esmodel == egEnergyCorr::es2017_R21_v1 || m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 ||
-        m_esmodel == egEnergyCorr::es2018_R21_v0 || m_esmodel == egEnergyCorr::es2018_R21_v1 ||
-        m_esmodel == egEnergyCorr::es2022_R22_PRE) {
-      m_electronBias_ConfigA.reset(checked_own_cast<TH2*>(rootFile->Get("Material_rel21/electronBias_ConfigA")));
-      m_electronBias_ConfigEpLp.reset(checked_own_cast<TH2*>(rootFile->Get("Material_rel21/electronBias_ConfigEpLp")));
-      m_electronBias_ConfigFpMX.reset(checked_own_cast<TH2*>(rootFile->Get("Material_rel21/electronBias_ConfigFpMX")));
-      m_electronBias_ConfigN.reset(checked_own_cast<TH2*>(rootFile->Get("Material_rel21/electronBias_ConfigN")));
-      m_electronBias_ConfigIBL.reset(checked_own_cast<TH2*>(rootFile->Get("Material_rel21/electronBias_ConfigIBL")));
-      m_electronBias_ConfigPP0.reset(checked_own_cast<TH2*>(rootFile->Get("Material_rel21/electronBias_ConfigPP0")));
-      m_unconvertedBias_ConfigA.reset(checked_own_cast<TH2*>(rootFile->Get("Material_rel21/unconvertedBias_ConfigA")));
-      m_unconvertedBias_ConfigEpLp.reset(checked_own_cast<TH2*>(rootFile->Get("Material_rel21/unconvertedBias_ConfigEpLp")));
-      m_unconvertedBias_ConfigFpMX.reset(checked_own_cast<TH2*>(rootFile->Get("Material_rel21/unconvertedBias_ConfigFpMX")));
-      m_unconvertedBias_ConfigN.reset(checked_own_cast<TH2*>(rootFile->Get("Material_rel21/unconvertedBias_ConfigN")));
-      m_unconvertedBias_ConfigIBL.reset(checked_own_cast<TH2*>(rootFile->Get("Material_rel21/unconvertedBias_ConfigIBL")));
-      m_unconvertedBias_ConfigPP0.reset(checked_own_cast<TH2*>(rootFile->Get("Material_rel21/unconvertedBias_ConfigPP0")));
-      m_convertedBias_ConfigA.reset(checked_own_cast<TH2*>(rootFile->Get("Material_rel21/convertedBias_ConfigA")));
-      m_convertedBias_ConfigEpLp.reset(checked_own_cast<TH2*>(rootFile->Get("Material_rel21/convertedBias_ConfigEpLp")));
-      m_convertedBias_ConfigFpMX.reset(checked_own_cast<TH2*>(rootFile->Get("Material_rel21/convertedBias_ConfigFpMX")));
-      m_convertedBias_ConfigN.reset(checked_own_cast<TH2*>(rootFile->Get("Material_rel21/convertedBias_ConfigN")));
-      m_convertedBias_ConfigIBL.reset(checked_own_cast<TH2*>(rootFile->Get("Material_rel21/convertedBias_ConfigIBL")));
-      m_convertedBias_ConfigPP0.reset(checked_own_cast<TH2*>(rootFile->Get("Material_rel21/convertedBias_ConfigPP0")));
-    }
-
-    // ... Fastsim to Fullsim corrections
-
-    if (m_esmodel == egEnergyCorr::es2015PRE or m_esmodel == egEnergyCorr::es2015PRE_res_improved or
-        m_esmodel == egEnergyCorr::es2015cPRE or m_esmodel == egEnergyCorr::es2015cPRE_res_improved or
-        m_esmodel == egEnergyCorr::es2015c_summer or m_esmodel == egEnergyCorr::es2016PRE) {
-
-      m_G4OverAFII_electron.reset(checked_own_cast<TH1*>(rootFile->Get("FastSim/es2015/el_scale_full_fast_peak_gaussian")));
-      m_G4OverAFII_unconverted.reset(
-        checked_own_cast<TH1*>(rootFile->Get("FastSim/es2015/ph_unconv_scale_full_fast_peak_gaussian")));
-      m_G4OverAFII_converted.reset(checked_own_cast<TH1*>(rootFile->Get("FastSim/es2015/ph_conv_scale_full_fast_peak_gaussian")));
-    } else if (m_esmodel == egEnergyCorr::es2017 or m_esmodel == egEnergyCorr::es2017_summer or
-               m_esmodel == egEnergyCorr::es2017_summer_improved or m_esmodel == egEnergyCorr::es2017_summer_final or
-               m_esmodel == egEnergyCorr::es2017_R21_PRE or m_esmodel == egEnergyCorr::es2015_5TeV or
-               m_esmodel == egEnergyCorr::es2017_R21_v0) {
-      m_G4OverAFII_electron.reset(checked_own_cast<TH1*>(rootFile->Get("FastSim/es2017/el_scale_full_fast_peak_gaussian")));
-      m_G4OverAFII_unconverted.reset(
-        checked_own_cast<TH1*>(rootFile->Get("FastSim/es2017/ph_unconv_scale_full_fast_peak_gaussian")));
-      m_G4OverAFII_converted.reset(checked_own_cast<TH1*>(rootFile->Get("FastSim/es2017/ph_conv_scale_full_fast_peak_gaussian")));
-    } else if (m_esmodel == egEnergyCorr::es2017_R21_v1 || m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 ||
-               m_esmodel == egEnergyCorr::es2018_R21_v0 || m_esmodel == egEnergyCorr::es2018_R21_v1 ||
-               m_esmodel == egEnergyCorr::es2022_R22_PRE) {
-      m_G4OverAFII_electron_2D.reset(checked_own_cast<TH2*>(rootFile->Get("FastSim/es2017_v1/scale_Af2ToG4_elec_rel21")));
-      m_G4OverAFII_electron_2D->SetDirectory(nullptr);
-      m_G4OverAFII_unconverted_2D.reset(checked_own_cast<TH2*>(rootFile->Get("FastSim/es2017_v1/scale_Af2ToG4_unco_rel21")));
-      m_G4OverAFII_converted_2D.reset(checked_own_cast<TH2*>(rootFile->Get("FastSim/es2017_v1/scale_Af2ToG4_conv_rel21")));
-    } else { // run 1
-      m_G4OverAFII_electron.reset(checked_own_cast<TH1*>(rootFile->Get("FastSim/hG4OverAF")));
-    }
-    m_G4OverFrSh.reset(checked_own_cast<TH1*>(rootFile->Get("FastSim/hG4OverFS")));
-
-    // ... Leakage systematics
-
-    if (m_esmodel != egEnergyCorr::es2017_summer and m_esmodel != egEnergyCorr::es2017_summer_improved and
-        m_esmodel != egEnergyCorr::es2017_summer_final and m_esmodel != egEnergyCorr::es2017_R21_PRE and
-        m_esmodel != egEnergyCorr::es2015_5TeV and m_esmodel != egEnergyCorr::es2017_R21_v0 and
-        m_esmodel != egEnergyCorr::es2017_R21_v1 and m_esmodel != egEnergyCorr::es2017_R21_ofc0_v1 and
-        m_esmodel != egEnergyCorr::es2018_R21_v0 and m_esmodel != egEnergyCorr::es2018_R21_v1 and
-        m_esmodel != egEnergyCorr::es2022_R22_PRE) {
-      m_leakageConverted.reset(checked_own_cast<TH1*>(rootFile->Get("Leakage/LeakageDiffConverted")));
-      m_leakageUnconverted.reset( checked_own_cast< TH1* >( rootFile->Get("Leakage/LeakageDiffUnconverted")));
+      m_zeeNom.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2018_R21_v0/alphaZee_errStat_period_2018")));
+      m_zeeNom_data2017.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2018_R21_v0/alphaZee_errStat_period_2017")));
+      m_zeeNom_data2016.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2018_R21_v0/alphaZee_errStat_period_2016")));
+      m_zeeNom_data2015.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2018_R21_v0/alphaZee_errStat_period_2015")));
+      m_zeeFwdk.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2018_R21_v0/alphaFwd_Finalk")));
+      m_zeeFwdb.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2018_R21_v0/alphaFwd_Finalb")));
+    } else if (m_esmodel == egEnergyCorr::es2018_R21_v1) {
+      m_zeeNom.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2018_R21_v1/alphaZee_errStat_period_2018")));
+      m_zeeNom_data2017.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2018_R21_v1/alphaZee_errStat_period_2017")));
+      m_zeeNom_data2016.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2018_R21_v1/alphaZee_errStat_period_2016")));
+      m_zeeNom_data2015.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2018_R21_v1/alphaZee_errStat_period_2015")));
+      // same as in v0 model
+      m_zeeFwdk.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2018_R21_v0/alphaFwd_Finalk")));
+      m_zeeFwdb.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2018_R21_v0/alphaFwd_Finalb")));
+    } else if (m_esmodel == egEnergyCorr::es2022_R22_PRE) {
+      m_zeeNom.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2022_R22_PRE/alphaZee_errStat_period_2018")));
+      // same as in v0 model
+      m_zeeFwdk.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2018_R21_v0/alphaFwd_Finalk")));
+      m_zeeFwdb.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2018_R21_v0/alphaFwd_Finalb")));
+    } else if (m_esmodel == egEnergyCorr::es2023_R22_Run2_v0) {
+      // TODO: update to latest version from Tao
+      m_zeeNom.reset(checked_own_cast<TH1*>(rootFile->Get(
+          "Scales/es2023_R22_Run2_v0/alphaZee_errStat_period_2018")));
+      m_zeeNom_data2017.reset(checked_own_cast<TH1*>(rootFile->Get(
+          "Scales/es2023_R22_Run2_v0/alphaZee_errStat_period_2017")));
+      m_zeeNom_data2016.reset(checked_own_cast<TH1*>(rootFile->Get(
+          "Scales/es2023_R22_Run2_v0/alphaZee_errStat_period_2016")));
+      m_zeeNom_data2015.reset(checked_own_cast<TH1*>(rootFile->Get(
+          "Scales/es2023_R22_Run2_v0/alphaZee_errStat_period_2015")));
+      // same as in v0 model
+      m_zeeFwdk.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2018_R21_v0/alphaFwd_Finalk")));
+      m_zeeFwdb.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2018_R21_v0/alphaFwd_Finalb")));
     } else {
-      m_leakageConverted.reset( checked_own_cast< TH1* >( rootFile->Get("Leakage/es2017_summer/LeakageDiffConverted")));
-      m_leakageUnconverted.reset( checked_own_cast< TH1* >( rootFile->Get("Leakage/es2017_summer/LeakageDiffUnconverted")));
+      m_zeeNom.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2017_R21_PRE/alphaZee_errStat_period_2016")));
+      // SAME HISTO FOR 2015 FOR NOW
+      m_zeeNom_data2015.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2017_R21_PRE/alphaZee_errStat_period_2016")));
+    }
+    if (m_esmodel == egEnergyCorr::es2017) {
+      m_zeeSyst.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2017/alphaZee_errSyst")));
+    } else if (m_esmodel == egEnergyCorr::es2017_summer_final) {
+      m_zeeSyst.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2017_summer_final/alphaZee_errSyst")));
+    } else if (m_esmodel == egEnergyCorr::es2015_5TeV) {
+      m_zeeSyst.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2015_5TeV/alphaZee_errSyst")));
+    } else if (m_esmodel == egEnergyCorr::es2017_R21_v0) {
+      m_zeeSyst.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2017_summer_final/alphaZee_errSyst")));
+    } else if (m_esmodel == egEnergyCorr::es2017_R21_v1) {
+      m_zeeSyst.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2017_R21_v1/alphaZee_errSyst")));
+    } else if (m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1) {
+      m_zeeSyst.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2017_R21_ofc0_v1/alphaZee_errSyst")));
+    } else if (m_esmodel == egEnergyCorr::es2018_R21_v0) {
+      m_zeeSyst.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2018_R21_v0/alphaZee_errSyst")));
+    } else if (m_esmodel == egEnergyCorr::es2018_R21_v1 ||
+               m_esmodel == egEnergyCorr::es2023_R22_Run2_v0) {
+      m_zeeSyst.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2018_R21_v1/alphaZee_errSyst")));
+    } else if (m_esmodel == egEnergyCorr::es2022_R22_PRE) {
+      m_zeeSyst.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2022_R22_PRE/alphaZee_errSyst")));
+      m_zeeSystOFC.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2022_R22_PRE/alphaZee_errOFCSyst")));
+    } else {
+      m_zeeSyst.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Scales/es2017_summer/alphaZee_errSyst")));
     }
 
-    // ... Zee S2 profile (needed for gain switch syst).
-    m_zeeES2Profile.reset( checked_own_cast< TH1* >( rootFile->Get("ZeeEnergyProfiles/p2MC")));
+    m_uA2MeV_2015_first2weeks_correction = nullptr;
+    if (m_esmodel == egEnergyCorr::es2017) {
+      m_resNom.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Resolution/es2017/ctZee_errStat")));
+    } else if (m_esmodel == egEnergyCorr::es2017_summer or
+               m_esmodel == egEnergyCorr::es2017_summer_improved or
+               m_esmodel == egEnergyCorr::es2015_5TeV) {
+      m_resNom.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Resolution/es2017_summer/ctZee_errStat")));
+    } else if (m_esmodel == egEnergyCorr::es2017_summer_final) {
+      m_resNom.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Resolution/es2017_summer_final/ctZee_errStat")));
+    } else if (m_esmodel == egEnergyCorr::es2017_R21_v0) {
+      m_resNom.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Resolution/es2017_R21_v0/ctZee_errStat")));
+    } else if (m_esmodel == egEnergyCorr::es2017_R21_v1) {
+      m_resNom.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Resolution/es2017_R21_v1/ctZee_errStat")));
+    } else if (m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1) {
+      m_resNom.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Resolution/es2017_R21_ofc0_v1/ctZee_errStat")));
+    } else if (m_esmodel == egEnergyCorr::es2018_R21_v0) {
+      m_resNom.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Resolution/es2018_R21_v0/ctZee_errStat")));
+    } else if (m_esmodel == egEnergyCorr::es2018_R21_v1) {
+      m_resNom.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Resolution/es2018_R21_v1/ctZee_errStat")));
+    } else if (m_esmodel == egEnergyCorr::es2022_R22_PRE) {
+      m_resNom.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Resolution/es2022_R22_PRE/ctZee_errStat")));
+    } else if (m_esmodel == egEnergyCorr::es2023_R22_Run2_v0) {
+      m_resNom.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Resolution/es2023_R22_Run2_v0/ctZee_errStat")));
+    } else {
+      m_resNom.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Resolution/es2017_R21_PRE/ctZee_errStat")));
+    }
 
-    // OK, now we are all initialized and everything went fine
-    m_initialized = true;
-    return 1;
+    if (m_esmodel == egEnergyCorr::es2017) {
+      m_resSyst.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Resolution/es2017/ctZee_errSyst")));
+    } else if (m_esmodel == egEnergyCorr::es2017_summer_final) {
+      m_resSyst.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Resolution/es2017_summer_final/ctZee_errSyst")));
+    } else if (m_esmodel == egEnergyCorr::es2015_5TeV) {
+      m_resSyst.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Resolution/es2015_5TeV/ctZee_errSyst")));
+    } else if (m_esmodel == egEnergyCorr::es2017_R21_v0) {
+      m_resSyst.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Resolution/es2017_summer_final/ctZee_errSyst")));
+    } else if (m_esmodel == egEnergyCorr::es2017_R21_v1) {
+      m_resSyst.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Resolution/es2017_R21_v1/ctZee_errSyst")));
+    } else if (m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1) {
+      m_resSyst.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Resolution/es2017_R21_ofc0_v1/ctZee_errSyst")));
+    } else if (m_esmodel == egEnergyCorr::es2018_R21_v0) {
+      m_resSyst.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Resolution/es2018_R21_v0/ctZee_errSyst")));
+    } else if (m_esmodel == egEnergyCorr::es2018_R21_v1 ||
+               m_esmodel == egEnergyCorr::es2023_R22_Run2_v0) {
+      m_resSyst.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Resolution/es2018_R21_v1/ctZee_errSyst")));
+    } else if (m_esmodel == egEnergyCorr::es2022_R22_PRE) {
+      m_resSyst.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Resolution/es2022_R22_PRE/ctZee_errSyst")));
+      m_resSystOFC.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Resolution/es2022_R22_PRE/ctZee_errOFCSyst")));
+    } else {
+      m_resSyst.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Resolution/es2017_summer/ctZee_errSyst")));
+    }
+    // else{
+    // m_resSyst.reset( checked_own_cast< TH1* >(
+    // rootFile->Get("Resolution/es2017_summer_improved/ctZee_errSyst")));
+    // }
 
+    m_pedestals_es2017.reset(
+        checked_own_cast<TH1*>(rootFile->Get("Pedestals/es2017/pedestals")));
+
+    m_dX_ID_Nom.reset(
+        checked_own_cast<TH1*>(rootFile->Get("Material/DX0_ConfigA")));
+
+    m_dX_IPPS_Nom.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_IPPS_NewG_errUncor")));
+    m_dX_IPPS_LAr.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_IPPS_NewG_errLAr")));
+
+    m_dX_IPAcc_Nom.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errUncor")));
+    m_dX_IPAcc_LAr.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errLAr")));
+    m_dX_IPAcc_G4.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errG4")));
+    m_dX_IPAcc_GL1.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errGL1")));
+
+    m_dX_PSAcc_Nom.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errUncor")));
+    m_dX_PSAcc_LAr.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errLAr")));
+    m_dX_PSAcc_G4.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errG4")));
+
+    m_convRadius.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Conversions/es2012c/convRadiusMigrations")));
+    if (m_esmodel == egEnergyCorr::es2017) {
+      m_convFakeRate.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Conversions/es2012c/convFakeRate")));
+      m_convRecoEfficiency.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Conversions/es2012c/convRecoEfficiency")));
+    } else if (m_esmodel == egEnergyCorr::es2023_R22_Run2_v0) {
+      m_convFakeRate_2D.reset(checked_own_cast<TH2*>(
+          rootFile->Get("Conversions/es2023_R22_Run2_v0/convFakeRate")));
+      m_convRecoEfficiency_2D.reset(checked_own_cast<TH2*>(
+          rootFile->Get("Conversions/es2023_R22_Run2_v0/convRecoEfficiency")));
+    } else {
+      m_convFakeRate.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Conversions/es2017_summer/convFakeRate")));
+      m_convRecoEfficiency.reset(checked_own_cast<TH1*>(
+          rootFile->Get("Conversions/es2017_summer/convRecoEfficiency")));
+    }
+
+    // TODO: change path when moving to calibarea
+    // TODO: better package this somewhere
+
+    const std::string filename_pp0 = PathResolverFindCalibFile(
+        "ElectronPhotonFourMomentumCorrection/v8/PP0sys.root");
+
+    TFile file_pp0(filename_pp0.c_str());
+    m_pp0_elec.reset(checked_own_cast<TH2*>(file_pp0.Get("elec")));
+    m_pp0_conv.reset(checked_own_cast<TH2*>(file_pp0.Get("conv")));
+    m_pp0_unconv.reset(checked_own_cast<TH2*>(file_pp0.Get("unco")));
+
+    // similar case for wtots1
+    const std::string filename_wstot = PathResolverFindCalibFile(
+        "ElectronPhotonFourMomentumCorrection/v8/wstot_related_syst.root");
+
+    TFile file_wstot(filename_wstot.c_str());
+    m_wstot_slope_A_data.reset(
+        checked_own_cast<TH1*>(file_wstot.Get("A_data")));
+    m_wstot_slope_B_MC.reset(checked_own_cast<TH1*>(file_wstot.Get("B_mc")));
+    m_wstot_pT_data_p0_electrons.reset(
+        checked_own_cast<TH1*>(file_wstot.Get("wstot_pT_el_data_p0")));
+    m_wstot_pT_data_p1_electrons.reset(
+        checked_own_cast<TH1*>(file_wstot.Get("wstot_pT_el_data_p1")));
+    m_wstot_pT_data_p0_unconverted_photons.reset(
+        checked_own_cast<TH1*>(file_wstot.Get("wstot_pT_uc_data_p0")));
+    m_wstot_pT_data_p1_unconverted_photons.reset(
+        checked_own_cast<TH1*>(file_wstot.Get("wstot_pT_uc_data_p1")));
+    m_wstot_pT_data_p0_converted_photons.reset(
+        checked_own_cast<TH1*>(file_wstot.Get("wstot_pT_c_data_p0")));
+    m_wstot_pT_data_p1_converted_photons.reset(
+        checked_own_cast<TH1*>(file_wstot.Get("wstot_pT_c_data_p1")));
+    m_wstot_pT_MC_p0_electrons.reset(
+        checked_own_cast<TH1*>(file_wstot.Get("wstot_pT_el_mc_p0")));
+    m_wstot_pT_MC_p1_electrons.reset(
+        checked_own_cast<TH1*>(file_wstot.Get("wstot_pT_el_mc_p1")));
+    m_wstot_pT_MC_p0_unconverted_photons.reset(
+        checked_own_cast<TH1*>(file_wstot.Get("wstot_pT_ph_uc_mc_p0")));
+    m_wstot_pT_MC_p1_unconverted_photons.reset(
+        checked_own_cast<TH1*>(file_wstot.Get("wstot_pT_ph_uc_mc_p1")));
+    m_wstot_pT_MC_p0_converted_photons.reset(
+        checked_own_cast<TH1*>(file_wstot.Get("wstot_pT_ph_c_mc_p0")));
+    m_wstot_pT_MC_p1_converted_photons.reset(
+        checked_own_cast<TH1*>(file_wstot.Get("wstot_pT_ph_c_mc_p1")));
+
+    m_begRunNumber = 252604;
+    m_endRunNumber = 314199;
+
+    if (m_esmodel == egEnergyCorr::es2017_R21_v1 ||
+        m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 ||
+        m_esmodel == egEnergyCorr::es2018_R21_v0 ||
+        m_esmodel == egEnergyCorr::es2018_R21_v1 ||
+        m_esmodel == egEnergyCorr::es2022_R22_PRE ||
+        m_esmodel == egEnergyCorr::es2023_R22_Run2_v0) {
+      m_G4OverAFII_resolution_electron.reset(checked_own_cast<TH2*>(
+          rootFile->Get("FastSim/es2017_v1/resol_Af2ToG4_elec_rel21")));
+      m_G4OverAFII_resolution_unconverted.reset(checked_own_cast<TH2*>(
+          rootFile->Get("FastSim/es2017_v1/resol_Af2ToG4_unco_rel21")));
+      m_G4OverAFII_resolution_converted.reset(checked_own_cast<TH2*>(
+          rootFile->Get("FastSim/es2017_v1/resol_Af2ToG4_conv_rel21")));
+    } else {
+      m_G4OverAFII_resolution_electron.reset(checked_own_cast<TH2*>(
+          rootFile->Get("FastSim/es2017/el_full_fast_resolution")));
+      m_G4OverAFII_resolution_unconverted.reset(checked_own_cast<TH2*>(
+          rootFile->Get("FastSim/es2017/ph_unconv_full_fast_resolution")));
+      m_G4OverAFII_resolution_converted.reset(checked_own_cast<TH2*>(
+          rootFile->Get("FastSim/es2017/ph_conv_full_fast_resolution")));
+    }
+    assert(m_G4OverAFII_resolution_electron);
+    assert(m_G4OverAFII_resolution_unconverted);
+    assert(m_G4OverAFII_resolution_converted);
+
+    const std::string gain_filename1 = PathResolverFindCalibFile(
+        "ElectronPhotonFourMomentumCorrection/v8/FunctionsTO.root");
+    const std::string gain_filename2 = PathResolverFindCalibFile(
+        "ElectronPhotonFourMomentumCorrection/v8/FunctionsG_all.root");
+    m_gain_tool = nullptr;
+
+    std::string gain_tool_run_2_filename;
+    if (m_esmodel == egEnergyCorr::es2017 or
+        m_esmodel == egEnergyCorr::es2017_summer or
+        m_esmodel == egEnergyCorr::es2017_R21_PRE or
+        m_esmodel == egEnergyCorr::es2015_5TeV) {
+      gain_tool_run_2_filename = PathResolverFindCalibFile(
+          "ElectronPhotonFourMomentumCorrection/v11/"
+          "gain_uncertainty_specialRun.root");
+    } else if (m_esmodel == egEnergyCorr::es2023_R22_Run2_v0) {
+      gain_tool_run_2_filename = PathResolverFindCalibFile(
+          "ElectronPhotonFourMomentumCorrection/v29/"
+          "gain_uncertainty_specialRun.root");
+    } else {
+      gain_tool_run_2_filename = PathResolverFindCalibFile(
+          "ElectronPhotonFourMomentumCorrection/v14/"
+          "gain_uncertainty_specialRun.root");
+    }
+    if (m_esmodel == egEnergyCorr::es2023_R22_Run2_v0) {
+      m_gain_tool_run2 = std::make_unique<egGain::GainUncertainty>(
+          gain_tool_run_2_filename, true, "GainUncertainty",
+          m_useL2GainInterpolation);
+    } else {
+      m_gain_tool_run2 =
+          std::make_unique<egGain::GainUncertainty>(gain_tool_run_2_filename);
+    }
+
+    m_gain_tool_run2->msg().setLevel(this->msg().level());
+
+    if (m_esmodel == egEnergyCorr::es2023_R22_Run2_v0) {
+      m_e1hg_tool = std::make_unique<e1hg_systematics>(
+          PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v29/"
+                                    "e1hg_systematics_histos.root"));
+    } else {
+      m_e1hg_tool = std::make_unique<e1hg_systematics>(
+          PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v8/"
+                                    "e1hg_systematics_histos.root"));
+    }
+
+    m_use_temp_correction201215 = false;
+    m_use_temp_correction201516 = false;
+  } else if (m_esmodel == egEnergyCorr::es2015_day0_3percent) {
+    m_use_new_resolution_model = true;
+    m_resolution_tool = std::make_unique<eg_resolution>("run2_pre");
+
+    m_aPSNom.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Scales/es2015_day0/alphaPS_uncor")));  // old one
+    m_daPSCor.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Scales/es2015_day0/dalphaPS_cor")));  // old one
+    m_aS12Nom.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Scales/es2015_day0/alphaS12_uncor")));  // old one
+    m_daS12Cor.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Scales/es2015_day0/dalphaS12_cor")));  // old one
+
+    m_trkSyst.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Scales/es2015_day0/momentum_errSyst")));  // old one
+
+    m_zeeNom.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Scales/es2015_day0/alphaZee_errStat")));  // old one
+    m_zeeSyst.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Scales/es2015_day0/alphaZee_errSyst")));  // old one
+
+    m_resNom.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Resolution/es2012c/ctZee_errStat")));  // old one
+    m_resSyst.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Resolution/es2012c/ctZee_errSyst")));  // old one
+
+    m_pedestalL0.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Pedestals/es2012c/pedestals_l0")));  // old one
+    m_pedestalL1.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Pedestals/es2012c/pedestals_l1")));  // old one
+    m_pedestalL2.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Pedestals/es2012c/pedestals_l2")));  // old one
+    m_pedestalL3.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Pedestals/es2012c/pedestals_l3")));  // old one
+
+    m_dX_ID_Nom.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/DX0_ConfigA")));  // old one
+
+    m_dX_IPPS_Nom.reset(checked_own_cast<TH1*>(rootFile->Get(
+        "Material/Measured/DXerr_IPPS_NewG_errUncor")));  // old one
+    m_dX_IPPS_LAr.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_IPPS_NewG_errLAr")));  // old one
+
+    m_dX_IPAcc_Nom.reset(checked_own_cast<TH1*>(rootFile->Get(
+        "Material/Measured/DXerr_IPAcc_NewG_errUncor")));  // old one
+    m_dX_IPAcc_LAr.reset(checked_own_cast<TH1*>(rootFile->Get(
+        "Material/Measured/DXerr_IPAcc_NewG_errLAr")));  // old one
+    m_dX_IPAcc_G4.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errG4")));  // old one
+    m_dX_IPAcc_GL1.reset(checked_own_cast<TH1*>(rootFile->Get(
+        "Material/Measured/DXerr_IPAcc_NewG_errGL1")));  // old one
+
+    m_dX_PSAcc_Nom.reset(checked_own_cast<TH1*>(rootFile->Get(
+        "Material/Measured/DXerr_PSAcc_NewG_errUncor")));  // old one
+    m_dX_PSAcc_LAr.reset(checked_own_cast<TH1*>(rootFile->Get(
+        "Material/Measured/DXerr_PSAcc_NewG_errLAr")));  // old one
+    m_dX_PSAcc_G4.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errG4")));  // old one
+
+    m_convRadius.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Conversions/es2012c/convRadiusMigrations")));  // old one
+    m_convFakeRate.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Conversions/es2012c/convFakeRate")));  // old one
+    m_convRecoEfficiency.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Conversions/es2012c/convRecoEfficiency")));  // old one
+
+    m_begRunNumber = 195847;
+    m_endRunNumber = 219365;
+
+    const std::string gain_filename1 = PathResolverFindCalibFile(
+        "ElectronPhotonFourMomentumCorrection/v8/FunctionsTO.root");
+    const std::string gain_filename2 = PathResolverFindCalibFile(
+        "ElectronPhotonFourMomentumCorrection/v8/FunctionsG_all.root");
+    m_gain_tool =
+        std::make_unique<egGain::GainTool>(gain_filename1, gain_filename2);
+
+    m_e1hg_tool = std::make_unique<e1hg_systematics>(
+        PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v8/"
+                                  "e1hg_systematics_histos.root"));
+
+    // If we are here, fail  s    :
+
+  } else if (m_esmodel == egEnergyCorr::UNDEFINED) {
+    ATH_MSG_FATAL("ES model not initialized - Initialization fails");
+    return 0;
+  } else {
+    ATH_MSG_FATAL("ES model not recognized - Initialization fails");
+    return 0;
   }
 
-  // User interface
-  // universal compact interface to getCorrectedEnergy(...)
-  double egammaEnergyCorrectionTool::getCorrectedMomentum( PATCore::ParticleDataType::DataType dataType,
-							   PATCore::ParticleType::Type ptype,
-							   double momentum,
-							   double trk_eta,
-							   egEnergyCorr::Scale::Variation scaleVar,
-							   double varSF ) const {
-
-    double correctedMomentum = momentum;
-    double aeta = std::abs(trk_eta);
-
-    if ( ptype == PATCore::ParticleType::Electron && dataType != PATCore::ParticleDataType::Data ) {
-
-      double corr = 0;
-      if( scaleVar==egEnergyCorr::Scale::MomentumUp )  corr = m_trkSyst->GetBinContent( m_trkSyst->FindFixBin(aeta) );
-      else if( scaleVar==egEnergyCorr::Scale::MomentumDown )corr = -m_trkSyst->GetBinContent( m_trkSyst->FindFixBin(aeta) );
-
-      correctedMomentum *= 1. + corr*varSF;
-    }
-
-    return correctedMomentum;
+  if (m_esmodel == egEnergyCorr::es2015cPRE or
+      m_esmodel == egEnergyCorr::es2015cPRE_res_improved or
+      m_esmodel == egEnergyCorr::es2015c_summer or
+      m_esmodel == egEnergyCorr::es2016PRE or
+      m_esmodel == egEnergyCorr::es2017 or
+      m_esmodel == egEnergyCorr::es2017_summer or
+      m_esmodel == egEnergyCorr::es2017_summer_improved or
+      m_esmodel == egEnergyCorr::es2017_summer_final or
+      m_esmodel == egEnergyCorr::es2017_R21_v0 or
+      m_esmodel == egEnergyCorr::es2017_R21_v1 or
+      m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 or
+      m_esmodel == egEnergyCorr::es2017_R21_PRE or
+      m_esmodel == egEnergyCorr::es2015_5TeV or
+      m_esmodel == egEnergyCorr::es2018_R21_v0 or
+      m_esmodel == egEnergyCorr::es2018_R21_v1 or
+      m_esmodel == egEnergyCorr::es2022_R22_PRE or
+      m_esmodel == egEnergyCorr::es2023_R22_Run2_v0) {
+    // E4 systematics
+    m_E4ElectronEtaBins.reset(checked_own_cast<TAxis*>(
+        rootFile->Get("E4Recalibration/v4/electron_eta_axis")));
+    m_E4ElectronGraphs.reset(
+        checked_own_cast<TList*>(rootFile->Get("E4Recalibration/v4/electron")));
+    // for photons use the same as electrons
+    m_E4UnconvertedEtaBins.reset(checked_own_cast<TAxis*>(
+        rootFile->Get("E4Recalibration/v4/electron_eta_axis")));
+    m_E4UnconvertedGraphs.reset(
+        checked_own_cast<TList*>(rootFile->Get("E4Recalibration/v4/electron")));
+    m_E4ConvertedEtaBins.reset(checked_own_cast<TAxis*>(
+        rootFile->Get("E4Recalibration/v4/electron_eta_axis")));
+    m_E4ConvertedGraphs.reset(
+        checked_own_cast<TList*>(rootFile->Get("E4Recalibration/v4/electron")));
   }
 
+  // ... PS and S12 recalibration curves
+  if (m_esmodel == egEnergyCorr::es2015PRE or
+      m_esmodel == egEnergyCorr::es2015PRE_res_improved or
+      m_esmodel == egEnergyCorr::es2015cPRE or
+      m_esmodel == egEnergyCorr::es2015cPRE_res_improved or
+      m_esmodel == egEnergyCorr::es2015c_summer or
+      m_esmodel == egEnergyCorr::es2016PRE or
+      m_esmodel == egEnergyCorr::es2017 or
+      m_esmodel == egEnergyCorr::es2017_summer or
+      m_esmodel == egEnergyCorr::es2017_summer_improved or
+      m_esmodel == egEnergyCorr::es2017_summer_final or
+      m_esmodel == egEnergyCorr::es2017_R21_v0 or
+      m_esmodel == egEnergyCorr::es2017_R21_v1 or
+      m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 or
+      m_esmodel == egEnergyCorr::es2017_R21_PRE or
+      m_esmodel == egEnergyCorr::es2015_5TeV or
+      m_esmodel == egEnergyCorr::es2018_R21_v0 or
+      m_esmodel == egEnergyCorr::es2018_R21_v1 or
+      m_esmodel == egEnergyCorr::es2022_R22_PRE) {
 
-  // This method handles the main switches between data and the various MC flavours.
-  // Called internally by getCorrectedEnergy(...)
-  double egammaEnergyCorrectionTool::getCorrectedEnergy( unsigned int runnumber,
-                                                         PATCore::ParticleDataType::DataType dataType,
-                                                         PATCore::ParticleType::Type ptype,
-                                                         double cl_eta,
-                                                         double cl_etaCalo,
-                                                         double energy,
-                                                         double energyS2,
-                                                         double eraw,
-                                                         RandomNumber random_seed,
-                                                         egEnergyCorr::Scale::Variation scaleVar,
-                                                         egEnergyCorr::Resolution::Variation resVar,
-                                                         egEnergyCorr::Resolution::resolutionType resType,
-                                                         double varSF ) const {
-    double fullyCorrectedEnergy = energy;
+    m_psElectronEtaBins.reset(checked_own_cast<TAxis*>(
+        rootFile->Get("PSRecalibration/es2015PRE/ElectronAxis")));
+    m_psElectronGraphs.reset(checked_own_cast<TList*>(
+        rootFile->Get("PSRecalibration/es2015PRE/ElectronBiasPS")));
+    m_psUnconvertedEtaBins.reset(checked_own_cast<TAxis*>(
+        rootFile->Get("PSRecalibration/es2015PRE/UnconvertedAxis")));
+    m_psUnconvertedGraphs.reset(checked_own_cast<TList*>(
+        rootFile->Get("PSRecalibration/es2015PRE/UnconvertedBiasPS")));
+    m_psConvertedEtaBins.reset(checked_own_cast<TAxis*>(
+        rootFile->Get("PSRecalibration/es2015PRE/ConvertedAxis")));
+    m_psConvertedGraphs.reset(checked_own_cast<TList*>(
+        rootFile->Get("PSRecalibration/es2015PRE/ConvertedBiasPS")));
 
-    // Correct fast sim flavours
+    m_s12ElectronEtaBins.reset(checked_own_cast<TAxis*>(
+        rootFile->Get("S1Recalibration/es2015PRE/ElectronAxis")));
+    m_s12ElectronGraphs.reset(checked_own_cast<TList*>(
+        rootFile->Get("S1Recalibration/es2015PRE/ElectronBiasS1")));
+    m_s12UnconvertedEtaBins.reset(checked_own_cast<TAxis*>(
+        rootFile->Get("S1Recalibration/es2015PRE/UnconvertedAxis")));
+    m_s12UnconvertedGraphs.reset(checked_own_cast<TList*>(
+        rootFile->Get("S1Recalibration/es2015PRE/UnconvertedBiasS1")));
+    m_s12ConvertedEtaBins.reset(checked_own_cast<TAxis*>(
+        rootFile->Get("S1Recalibration/es2015PRE/ConvertedAxis")));
+    m_s12ConvertedGraphs.reset(checked_own_cast<TList*>(
+        rootFile->Get("S1Recalibration/es2015PRE/ConvertedBiasS1")));
+  } else if (m_esmodel == egEnergyCorr::es2023_R22_Run2_v0) {
+    m_psElectronEtaBins.reset(checked_own_cast<TAxis*>(
+        rootFile->Get("PSRecalibration/es2023_R22_Run2_v0/ElectronAxis")));
+    m_psElectronGraphs.reset(checked_own_cast<TList*>(
+        rootFile->Get("PSRecalibration/es2023_R22_Run2_v0/ElectronBiasPS")));
+    m_psUnconvertedEtaBins.reset(checked_own_cast<TAxis*>(
+        rootFile->Get("PSRecalibration/es2023_R22_Run2_v0/UnconvertedAxis")));
+    m_psUnconvertedGraphs.reset(checked_own_cast<TList*>(
+        rootFile->Get("PSRecalibration/es2023_R22_Run2_v0/UnconvertedBiasPS")));
+    m_psConvertedEtaBins.reset(checked_own_cast<TAxis*>(
+        rootFile->Get("PSRecalibration/es2023_R22_Run2_v0/ConvertedAxis")));
+    m_psConvertedGraphs.reset(checked_own_cast<TList*>(
+        rootFile->Get("PSRecalibration/es2023_R22_Run2_v0/ConvertedBiasPS")));
 
-    if ( dataType == PATCore::ParticleDataType::FastShower ) // Frozen shower sim
-      fullyCorrectedEnergy = energy * this->applyFStoG4(cl_eta);
-    else if ( dataType == PATCore::ParticleDataType::Fast ) // AtlFast2 sim
-    {
-      fullyCorrectedEnergy = energy * this->applyAFtoG4(cl_eta, 0.001*energy/cosh(cl_eta),ptype);
-    }
+    m_s12ElectronEtaBins.reset(checked_own_cast<TAxis*>(
+        rootFile->Get("S2Recalibration/ElectronAxis")));
+    m_s12ElectronGraphs.reset(checked_own_cast<TList*>(
+        rootFile->Get("S2Recalibration/ElectronBiasS2")));
+    m_s12UnconvertedEtaBins.reset(checked_own_cast<TAxis*>(
+        rootFile->Get("S2Recalibration/UnconvertedAxis")));
+    m_s12UnconvertedGraphs.reset(checked_own_cast<TList*>(
+        rootFile->Get("S2Recalibration/UnconvertedBiasS2")));
+    m_s12ConvertedEtaBins.reset(checked_own_cast<TAxis*>(
+        rootFile->Get("S2Recalibration/ConvertedAxis")));
+    m_s12ConvertedGraphs.reset(checked_own_cast<TList*>(
+        rootFile->Get("S2Recalibration/ConvertedBiasS2")));
 
-    // If nothing is to be done
+    m_EaccElectronEtaBins.reset(checked_own_cast<TAxis*>(
+        rootFile->Get("SaccRecalibration/ElectronAxis")));
+    m_EaccElectronGraphs.reset(checked_own_cast<TList*>(
+        rootFile->Get("SaccRecalibration/ElectronBiasSacc")));
+    m_EaccUnconvertedEtaBins.reset(checked_own_cast<TAxis*>(
+        rootFile->Get("SaccRecalibration/UnconvertedAxis")));
+    m_EaccUnconvertedGraphs.reset(checked_own_cast<TList*>(
+        rootFile->Get("SaccRecalibration/UnconvertedBiasSacc")));
+    m_EaccConvertedEtaBins.reset(checked_own_cast<TAxis*>(
+        rootFile->Get("SaccRecalibration/ConvertedAxis")));
+    m_EaccConvertedGraphs.reset(checked_own_cast<TList*>(
+        rootFile->Get("SaccRecalibration/ConvertedBiasSacc")));
+  } else  // run1
+  {
+    m_psElectronEtaBins.reset(checked_own_cast<TAxis*>(
+        rootFile->Get("PSRecalibration/ElectronAxis")));
+    m_psElectronGraphs.reset(checked_own_cast<TList*>(
+        rootFile->Get("PSRecalibration/ElectronBiasPS")));
+    m_psUnconvertedEtaBins.reset(checked_own_cast<TAxis*>(
+        rootFile->Get("PSRecalibration/UnconvertedAxis")));
+    m_psUnconvertedGraphs.reset(checked_own_cast<TList*>(
+        rootFile->Get("PSRecalibration/UnconvertedBiasPS")));
+    m_psConvertedEtaBins.reset(checked_own_cast<TAxis*>(
+        rootFile->Get("PSRecalibration/ConvertedAxis")));
+    m_psConvertedGraphs.reset(checked_own_cast<TList*>(
+        rootFile->Get("PSRecalibration/ConvertedBiasPS")));
 
-    if ( scaleVar == egEnergyCorr::Scale::None && resVar == egEnergyCorr::Resolution::None )
-      return fullyCorrectedEnergy;
+    m_s12ElectronEtaBins.reset(checked_own_cast<TAxis*>(
+        rootFile->Get("S1Recalibration/ElectronAxis")));
+    m_s12ElectronGraphs.reset(checked_own_cast<TList*>(
+        rootFile->Get("S1Recalibration/ElectronBiasS1")));
+    m_s12UnconvertedEtaBins.reset(checked_own_cast<TAxis*>(
+        rootFile->Get("S1Recalibration/UnconvertedAxis")));
+    m_s12UnconvertedGraphs.reset(checked_own_cast<TList*>(
+        rootFile->Get("S1Recalibration/UnconvertedBiasS1")));
+    m_s12ConvertedEtaBins.reset(checked_own_cast<TAxis*>(
+        rootFile->Get("S1Recalibration/ConvertedAxis")));
+    m_s12ConvertedGraphs.reset(checked_own_cast<TList*>(
+        rootFile->Get("S1Recalibration/ConvertedBiasS1")));
+  }
 
-    ATH_MSG_DEBUG("after sim fl = " << boost::format("%.2f") % fullyCorrectedEnergy);
+  // further inputs do not depend on year
 
-    // main E-scale corrections
+  // ... material distortions
+  m_matUnconvertedScale.emplace_back(
+      std::unique_ptr<TH1>(checked_own_cast<TH1*>(
+          rootFile->Get("Material/unconvertedBiasSubtracted_ConfigA"))));
+  m_matUnconvertedScale.emplace_back(
+      std::unique_ptr<TH1>(checked_own_cast<TH1*>(
+          rootFile->Get("Material/unconvertedBiasSubtracted_ConfigCpDp"))));
+  m_matUnconvertedScale.emplace_back(
+      std::unique_ptr<TH1>(checked_own_cast<TH1*>(
+          rootFile->Get("Material/unconvertedBiasSubtracted_ConfigEpLp"))));
+  m_matUnconvertedScale.emplace_back(
+      std::unique_ptr<TH1>(checked_own_cast<TH1*>(
+          rootFile->Get("Material/unconvertedBiasSubtracted_ConfigFpMX"))));
+  m_matUnconvertedScale.emplace_back(
+      std::unique_ptr<TH1>(checked_own_cast<TH1*>(
+          rootFile->Get("Material/unconvertedBiasSubtracted_ConfigGp"))));
 
-    if ( dataType == PATCore::ParticleDataType::Data ) { // ... Data
+  m_matConvertedScale.emplace_back(std::unique_ptr<TH1>(checked_own_cast<TH1*>(
+      rootFile->Get("Material/convertedBiasSubtracted_ConfigA"))));
+  m_matConvertedScale.emplace_back(std::unique_ptr<TH1>(checked_own_cast<TH1*>(
+      rootFile->Get("Material/convertedBiasSubtracted_ConfigCpDp"))));
+  m_matConvertedScale.emplace_back(std::unique_ptr<TH1>(checked_own_cast<TH1*>(
+      rootFile->Get("Material/convertedBiasSubtracted_ConfigEpLp"))));
+  m_matConvertedScale.emplace_back(std::unique_ptr<TH1>(checked_own_cast<TH1*>(
+      rootFile->Get("Material/convertedBiasSubtracted_ConfigFpMX"))));
+  m_matConvertedScale.emplace_back(std::unique_ptr<TH1>(checked_own_cast<TH1*>(
+      rootFile->Get("Material/convertedBiasSubtracted_ConfigGp"))));
 
-      if( scaleVar == egEnergyCorr::Scale::Nominal ) {
-        double alpha = getAlphaValue(runnumber, cl_eta, cl_etaCalo, fullyCorrectedEnergy, energyS2, eraw, ptype, scaleVar, varSF);
-	fullyCorrectedEnergy /= (1 + alpha);
-        // apply additional k.E+b corrections if histograms exist (like in es2017_R21_v1)
-	if (m_zeeFwdk &&  m_zeeFwdb && std::abs(cl_eta)>2.5){ //  calo eta?
-	  int ieta_k = m_zeeFwdk->GetXaxis()->FindFixBin(cl_eta);
-	  double value_k = m_zeeFwdk->GetBinContent(ieta_k);
-	  int ieta_b = m_zeeFwdb->GetXaxis()->FindFixBin(cl_eta);
-          double value_b = m_zeeFwdb->GetBinContent(ieta_b);
-	  fullyCorrectedEnergy = value_k*fullyCorrectedEnergy + value_b*GeV;   // value is stored in GeV in the histogram file
-	}
-        ATH_MSG_DEBUG("after alpha = " << boost::format("%.2f") % fullyCorrectedEnergy);
-      }
+  m_matElectronCstTerm.emplace_back(std::unique_ptr<TH1>(checked_own_cast<TH1*>(
+      rootFile->Get("Material/electronCstTerm_ConfigA"))));
+  m_matElectronCstTerm.emplace_back(std::unique_ptr<TH1>(checked_own_cast<TH1*>(
+      rootFile->Get("Material/electronCstTerm_ConfigCpDp"))));
+  m_matElectronCstTerm.emplace_back(std::unique_ptr<TH1>(checked_own_cast<TH1*>(
+      rootFile->Get("Material/electronCstTerm_ConfigEpLp"))));
+  m_matElectronCstTerm.emplace_back(std::unique_ptr<TH1>(checked_own_cast<TH1*>(
+      rootFile->Get("Material/electronCstTerm_ConfigFpMX"))));
+  m_matElectronCstTerm.emplace_back(std::unique_ptr<TH1>(checked_own_cast<TH1*>(
+      rootFile->Get("Material/electronCstTerm_ConfigGp"))));
 
-    } else { // ... MC
+  if (m_esmodel == egEnergyCorr::es2017_R21_v1 ||
+      m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 ||
+      m_esmodel == egEnergyCorr::es2018_R21_v0 ||
+      m_esmodel == egEnergyCorr::es2018_R21_v1 ||
+      m_esmodel == egEnergyCorr::es2022_R22_PRE ||
+      m_esmodel == egEnergyCorr::es2023_R22_Run2_v0) {
+    // update dX0 plots for distorted geometry for case A, EL, FMX and N
+    m_matX0Additions.emplace_back(std::unique_ptr<TH1>(
+        checked_own_cast<TH1*>(rootFile->Get("Material_rel21/DX0_ConfigA"))));
+    m_matX0Additions.emplace_back(std::unique_ptr<TH1>(
+        checked_own_cast<TH1*>(rootFile->Get("Material/DX0_ConfigCpDp"))));
+    m_matX0Additions.emplace_back(std::unique_ptr<TH1>(checked_own_cast<TH1*>(
+        rootFile->Get("Material_rel21/DX0_ConfigEpLp"))));
+    m_matX0Additions.emplace_back(std::unique_ptr<TH1>(checked_own_cast<TH1*>(
+        rootFile->Get("Material_rel21/DX0_ConfigFpMX"))));
+    m_matX0Additions.emplace_back(std::unique_ptr<TH1>(
+        checked_own_cast<TH1*>(rootFile->Get("Material/DX0_ConfigGp"))));
+    m_matX0Additions.emplace_back(std::unique_ptr<TH1>(
+        checked_own_cast<TH1*>(rootFile->Get("Material_rel21/DX0_ConfigN"))));
+  } else {
+    m_matX0Additions.emplace_back(std::unique_ptr<TH1>(
+        checked_own_cast<TH1*>(rootFile->Get("Material/DX0_ConfigA"))));
+    m_matX0Additions.emplace_back(std::unique_ptr<TH1>(
+        checked_own_cast<TH1*>(rootFile->Get("Material/DX0_ConfigCpDp"))));
+    m_matX0Additions.emplace_back(std::unique_ptr<TH1>(
+        checked_own_cast<TH1*>(rootFile->Get("Material/DX0_ConfigEpLp"))));
+    m_matX0Additions.emplace_back(std::unique_ptr<TH1>(
+        checked_own_cast<TH1*>(rootFile->Get("Material/DX0_ConfigFpMX"))));
+    m_matX0Additions.emplace_back(std::unique_ptr<TH1>(
+        checked_own_cast<TH1*>(rootFile->Get("Material/DX0_ConfigGp"))));
+  }
 
-      // Do the energy scale correction (for systematic variations)
+  m_matElectronEtaBins.reset(
+      checked_own_cast<TAxis*>(rootFile->Get("Material/LinearityEtaBins")));
+  m_matElectronGraphs.emplace_back(
+      std::unique_ptr<TList>(checked_own_cast<TList*>(
+          rootFile->Get("Material/Linearity_Cluster_ConfigA"))));
+  m_matElectronGraphs.emplace_back(
+      std::unique_ptr<TList>(checked_own_cast<TList*>(
+          rootFile->Get("Material/Linearity_Cluster_ConfigCpDp"))));
+  m_matElectronGraphs.emplace_back(
+      std::unique_ptr<TList>(checked_own_cast<TList*>(
+          rootFile->Get("Material/Linearity_Cluster_ConfigEpLp"))));
+  m_matElectronGraphs.emplace_back(
+      std::unique_ptr<TList>(checked_own_cast<TList*>(
+          rootFile->Get("Material/Linearity_Cluster_ConfigFpMX"))));
+  m_matElectronGraphs.emplace_back(
+      std::unique_ptr<TList>(checked_own_cast<TList*>(
+          rootFile->Get("Material/Linearity_Cluster_ConfigGp"))));
+  // ... new material distortions from release 21 parameterizations
+  if (m_esmodel == egEnergyCorr::es2017_R21_v1 ||
+      m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 ||
+      m_esmodel == egEnergyCorr::es2018_R21_v0 ||
+      m_esmodel == egEnergyCorr::es2018_R21_v1 ||
+      m_esmodel == egEnergyCorr::es2022_R22_PRE ||
+      m_esmodel == egEnergyCorr::es2023_R22_Run2_v0) {
+    m_electronBias_ConfigA.reset(checked_own_cast<TH2*>(
+        rootFile->Get("Material_rel21/electronBias_ConfigA")));
+    m_electronBias_ConfigEpLp.reset(checked_own_cast<TH2*>(
+        rootFile->Get("Material_rel21/electronBias_ConfigEpLp")));
+    m_electronBias_ConfigFpMX.reset(checked_own_cast<TH2*>(
+        rootFile->Get("Material_rel21/electronBias_ConfigFpMX")));
+    m_electronBias_ConfigN.reset(checked_own_cast<TH2*>(
+        rootFile->Get("Material_rel21/electronBias_ConfigN")));
+    m_electronBias_ConfigIBL.reset(checked_own_cast<TH2*>(
+        rootFile->Get("Material_rel21/electronBias_ConfigIBL")));
+    m_electronBias_ConfigPP0.reset(checked_own_cast<TH2*>(
+        rootFile->Get("Material_rel21/electronBias_ConfigPP0")));
+    m_unconvertedBias_ConfigA.reset(checked_own_cast<TH2*>(
+        rootFile->Get("Material_rel21/unconvertedBias_ConfigA")));
+    m_unconvertedBias_ConfigEpLp.reset(checked_own_cast<TH2*>(
+        rootFile->Get("Material_rel21/unconvertedBias_ConfigEpLp")));
+    m_unconvertedBias_ConfigFpMX.reset(checked_own_cast<TH2*>(
+        rootFile->Get("Material_rel21/unconvertedBias_ConfigFpMX")));
+    m_unconvertedBias_ConfigN.reset(checked_own_cast<TH2*>(
+        rootFile->Get("Material_rel21/unconvertedBias_ConfigN")));
+    m_unconvertedBias_ConfigIBL.reset(checked_own_cast<TH2*>(
+        rootFile->Get("Material_rel21/unconvertedBias_ConfigIBL")));
+    m_unconvertedBias_ConfigPP0.reset(checked_own_cast<TH2*>(
+        rootFile->Get("Material_rel21/unconvertedBias_ConfigPP0")));
+    m_convertedBias_ConfigA.reset(checked_own_cast<TH2*>(
+        rootFile->Get("Material_rel21/convertedBias_ConfigA")));
+    m_convertedBias_ConfigEpLp.reset(checked_own_cast<TH2*>(
+        rootFile->Get("Material_rel21/convertedBias_ConfigEpLp")));
+    m_convertedBias_ConfigFpMX.reset(checked_own_cast<TH2*>(
+        rootFile->Get("Material_rel21/convertedBias_ConfigFpMX")));
+    m_convertedBias_ConfigN.reset(checked_own_cast<TH2*>(
+        rootFile->Get("Material_rel21/convertedBias_ConfigN")));
+    m_convertedBias_ConfigIBL.reset(checked_own_cast<TH2*>(
+        rootFile->Get("Material_rel21/convertedBias_ConfigIBL")));
+    m_convertedBias_ConfigPP0.reset(checked_own_cast<TH2*>(
+        rootFile->Get("Material_rel21/convertedBias_ConfigPP0")));
+  }
 
-      if ( scaleVar != egEnergyCorr::Scale::None && scaleVar != egEnergyCorr::Scale::Nominal ) {
-        double deltaAlpha = getAlphaUncertainty(runnumber, cl_eta, cl_etaCalo, fullyCorrectedEnergy, energyS2, eraw, ptype, scaleVar, varSF );
-        ATH_MSG_DEBUG("alpha sys " << variationName(scaleVar) << " = " << deltaAlpha);
-        fullyCorrectedEnergy *= ( 1 + deltaAlpha );
-        ATH_MSG_DEBUG("after mc alpha = " << boost::format("%.2f") % fullyCorrectedEnergy);
-      }
+  // ... Fastsim to Fullsim corrections
 
-       // AF2 systematics  (this will not be in the sum of all other NP in the 1 NP model)
-      if (dataType == PATCore::ParticleDataType::Fast &&
-          (m_esmodel == egEnergyCorr::es2017_R21_v0 || m_esmodel == egEnergyCorr::es2017_R21_v1 ||
-           m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 || m_esmodel == egEnergyCorr::es2018_R21_v0 ||
-           m_esmodel == egEnergyCorr::es2018_R21_v1 || m_esmodel == egEnergyCorr::es2022_R22_PRE)) {
-        if (scaleVar == egEnergyCorr::Scale::af2Up or scaleVar == egEnergyCorr::Scale::af2Down) {
-          double daAF2 = 0.;
-          if (m_esmodel == egEnergyCorr::es2017_R21_v0) {
-            if (scaleVar == egEnergyCorr::Scale::af2Up)
-              daAF2 = 0.005;
-            if (scaleVar == egEnergyCorr::Scale::af2Down)
-              daAF2 = -0.005;
-          }
-          if (m_esmodel == egEnergyCorr::es2017_R21_v1 || m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 ||
-              m_esmodel == egEnergyCorr::es2018_R21_v0 || m_esmodel == egEnergyCorr::es2018_R21_v1 ||
-              m_esmodel == egEnergyCorr::es2022_R22_PRE) {
-            if (scaleVar == egEnergyCorr::Scale::af2Up)
-              daAF2 = 0.001;
-            if (scaleVar == egEnergyCorr::Scale::af2Down)
-              daAF2 = -0.001;
-          }
-          fullyCorrectedEnergy *= (1 + daAF2);
-        }
-      }
+  if (m_esmodel == egEnergyCorr::es2015PRE or
+      m_esmodel == egEnergyCorr::es2015PRE_res_improved or
+      m_esmodel == egEnergyCorr::es2015cPRE or
+      m_esmodel == egEnergyCorr::es2015cPRE_res_improved or
+      m_esmodel == egEnergyCorr::es2015c_summer or
+      m_esmodel == egEnergyCorr::es2016PRE) {
 
-      // Do the resolution correction
-      if ( resVar != egEnergyCorr::Resolution::None )
-      fullyCorrectedEnergy *= getSmearingCorrection(cl_eta, cl_etaCalo, fullyCorrectedEnergy, random_seed, ptype, dataType, resVar, resType);
+    m_G4OverAFII_electron.reset(checked_own_cast<TH1*>(
+        rootFile->Get("FastSim/es2015/el_scale_full_fast_peak_gaussian")));
+    m_G4OverAFII_unconverted.reset(checked_own_cast<TH1*>(rootFile->Get(
+        "FastSim/es2015/ph_unconv_scale_full_fast_peak_gaussian")));
+    m_G4OverAFII_converted.reset(checked_own_cast<TH1*>(
+        rootFile->Get("FastSim/es2015/ph_conv_scale_full_fast_peak_gaussian")));
+  } else if (m_esmodel == egEnergyCorr::es2017 or
+             m_esmodel == egEnergyCorr::es2017_summer or
+             m_esmodel == egEnergyCorr::es2017_summer_improved or
+             m_esmodel == egEnergyCorr::es2017_summer_final or
+             m_esmodel == egEnergyCorr::es2017_R21_PRE or
+             m_esmodel == egEnergyCorr::es2015_5TeV or
+             m_esmodel == egEnergyCorr::es2017_R21_v0) {
+    m_G4OverAFII_electron.reset(checked_own_cast<TH1*>(
+        rootFile->Get("FastSim/es2017/el_scale_full_fast_peak_gaussian")));
+    m_G4OverAFII_unconverted.reset(checked_own_cast<TH1*>(rootFile->Get(
+        "FastSim/es2017/ph_unconv_scale_full_fast_peak_gaussian")));
+    m_G4OverAFII_converted.reset(checked_own_cast<TH1*>(
+        rootFile->Get("FastSim/es2017/ph_conv_scale_full_fast_peak_gaussian")));
+  } else if (m_esmodel == egEnergyCorr::es2017_R21_v1 ||
+             m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 ||
+             m_esmodel == egEnergyCorr::es2018_R21_v0 ||
+             m_esmodel == egEnergyCorr::es2018_R21_v1 ||
+             m_esmodel == egEnergyCorr::es2022_R22_PRE ||
+             m_esmodel == egEnergyCorr::es2023_R22_Run2_v0) {
+    m_G4OverAFII_electron_2D.reset(checked_own_cast<TH2*>(
+        rootFile->Get("FastSim/es2017_v1/scale_Af2ToG4_elec_rel21")));
+    m_G4OverAFII_electron_2D->SetDirectory(nullptr);
+    m_G4OverAFII_unconverted_2D.reset(checked_own_cast<TH2*>(
+        rootFile->Get("FastSim/es2017_v1/scale_Af2ToG4_unco_rel21")));
+    m_G4OverAFII_converted_2D.reset(checked_own_cast<TH2*>(
+        rootFile->Get("FastSim/es2017_v1/scale_Af2ToG4_conv_rel21")));
+  } else {  // run 1
+    m_G4OverAFII_electron.reset(
+        checked_own_cast<TH1*>(rootFile->Get("FastSim/hG4OverAF")));
+  }
+  m_G4OverFrSh.reset(
+      checked_own_cast<TH1*>(rootFile->Get("FastSim/hG4OverFS")));
+  // ... Leakage systematics
 
-      ATH_MSG_DEBUG("after resolution correction = " << boost::format("%.2f") % fullyCorrectedEnergy);
-    }
+  if (m_esmodel != egEnergyCorr::es2017_summer and
+      m_esmodel != egEnergyCorr::es2017_summer_improved and
+      m_esmodel != egEnergyCorr::es2017_summer_final and
+      m_esmodel != egEnergyCorr::es2017_R21_PRE and
+      m_esmodel != egEnergyCorr::es2015_5TeV and
+      m_esmodel != egEnergyCorr::es2017_R21_v0 and
+      m_esmodel != egEnergyCorr::es2017_R21_v1 and
+      m_esmodel != egEnergyCorr::es2017_R21_ofc0_v1 and
+      m_esmodel != egEnergyCorr::es2018_R21_v0 and
+      m_esmodel != egEnergyCorr::es2018_R21_v1 and
+      m_esmodel != egEnergyCorr::es2022_R22_PRE and
+      m_esmodel != egEnergyCorr::es2023_R22_Run2_v0) {
+    m_leakageConverted.reset(
+        checked_own_cast<TH1*>(rootFile->Get("Leakage/LeakageDiffConverted")));
+    m_leakageUnconverted.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Leakage/LeakageDiffUnconverted")));
+  } else if (m_esmodel != egEnergyCorr::es2023_R22_Run2_v0) {
+    m_leakageConverted.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Leakage/es2017_summer/LeakageDiffConverted")));
+    m_leakageUnconverted.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Leakage/es2017_summer/LeakageDiffUnconverted")));
+  } else {
+    m_leakageConverted.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Leakage/es2023_R22_Run2_v0/LeakageDiffConverted")));
+    m_leakageUnconverted.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Leakage/es2023_R22_Run2_v0/LeakageDiffUnconverted")));
+    m_leakageElectron.reset(checked_own_cast<TH1*>(
+        rootFile->Get("Leakage/es2023_R22_Run2_v0/LeakageDiffElectron")));
+    m_leakageElectron->SetDirectory(nullptr);
+  }
+  if (m_leakageConverted.get() && m_leakageUnconverted.get()) {
+    m_leakageConverted->SetDirectory(nullptr);
+    m_leakageUnconverted->SetDirectory(nullptr);
+  } else {
+    ATH_MSG_INFO("No leakage systematic uncertainty for ES model "
+                 << m_esmodel);
+  }
 
+  // ... Zee S2 profile (needed for gain switch syst).
+  m_zeeES2Profile.reset(
+      checked_own_cast<TH1*>(rootFile->Get("ZeeEnergyProfiles/p2MC")));
+  // mean Zee energy as function of eta
+  m_meanZeeProfile.reset(checked_own_cast<TProfile*>(
+      rootFile->Get("ZeeMeanET/MC_eta_vs_et_profiled")));
+  // OK, now we are all initialized and everything went fine
+  m_initialized = true;
+  return 1;
+}
+
+// User interface
+// universal compact interface to getCorrectedEnergy(...)
+double egammaEnergyCorrectionTool::getCorrectedMomentum(
+    PATCore::ParticleDataType::DataType dataType,
+    PATCore::ParticleType::Type ptype, double momentum, double trk_eta,
+    egEnergyCorr::Scale::Variation scaleVar, double varSF) const {
+
+  double correctedMomentum = momentum;
+  double aeta = std::abs(trk_eta);
+
+  if (ptype == PATCore::ParticleType::Electron &&
+      dataType != PATCore::ParticleDataType::Data) {
+
+    double corr = 0;
+    if (scaleVar == egEnergyCorr::Scale::MomentumUp)
+      corr = m_trkSyst->GetBinContent(m_trkSyst->FindFixBin(aeta));
+    else if (scaleVar == egEnergyCorr::Scale::MomentumDown)
+      corr = -m_trkSyst->GetBinContent(m_trkSyst->FindFixBin(aeta));
+
+    correctedMomentum *= 1. + corr * varSF;
+  }
+
+  return correctedMomentum;
+}
+
+// This method handles the main switches between data and the various MC
+// flavours. Called internally by getCorrectedEnergy(...)
+double egammaEnergyCorrectionTool::getCorrectedEnergy(
+    unsigned int runnumber, PATCore::ParticleDataType::DataType dataType,
+    PATCore::ParticleType::Type ptype, double cl_eta, double cl_etaCalo,
+    double energy, double energyS2, double eraw, RandomNumber random_seed,
+    egEnergyCorr::Scale::Variation scaleVar,
+    egEnergyCorr::Resolution::Variation resVar,
+    egEnergyCorr::Resolution::resolutionType resType, double varSF) const {
+  double fullyCorrectedEnergy = energy;
+
+  // Correct fast sim flavours
+
+  if (dataType == PATCore::ParticleDataType::FastShower)  // Frozen shower sim
+    fullyCorrectedEnergy = energy * this->applyFStoG4(cl_eta);
+  else if (dataType == PATCore::ParticleDataType::Fast)  // AtlFast2 sim
+  {
+    fullyCorrectedEnergy =
+        energy *
+        this->applyAFtoG4(cl_eta, 0.001 * energy / cosh(cl_eta), ptype);
+  }
+
+  // If nothing is to be done
+
+  if (scaleVar == egEnergyCorr::Scale::None &&
+      resVar == egEnergyCorr::Resolution::None)
     return fullyCorrectedEnergy;
+
+  ATH_MSG_DEBUG("after sim fl = " << boost::format("%.2f") %
+                                         fullyCorrectedEnergy);
+
+  // main E-scale corrections
+
+  if (dataType == PATCore::ParticleDataType::Data) {  // ... Data
+
+    if (scaleVar == egEnergyCorr::Scale::Nominal) {
+      double alpha =
+          getAlphaValue(runnumber, cl_eta, cl_etaCalo, fullyCorrectedEnergy,
+                        energyS2, eraw, ptype, scaleVar, varSF);
+      fullyCorrectedEnergy /= (1 + alpha);
+      // apply additional k.E+b corrections if histograms exist (like in
+      // es2017_R21_v1)
+      if (m_zeeFwdk && m_zeeFwdb && std::abs(cl_eta) > 2.5) {  //  calo eta?
+        int ieta_k = m_zeeFwdk->GetXaxis()->FindFixBin(cl_eta);
+        double value_k = m_zeeFwdk->GetBinContent(ieta_k);
+        int ieta_b = m_zeeFwdb->GetXaxis()->FindFixBin(cl_eta);
+        double value_b = m_zeeFwdb->GetBinContent(ieta_b);
+        fullyCorrectedEnergy =
+            value_k * fullyCorrectedEnergy +
+            value_b * GeV;  // value is stored in GeV in the histogram file
+      }
+      ATH_MSG_DEBUG("after alpha = " << boost::format("%.2f") %
+                                            fullyCorrectedEnergy);
+    }
+
+  } else {  // ... MC
+
+    // Do the energy scale correction (for systematic variations)
+
+    if (scaleVar != egEnergyCorr::Scale::None &&
+        scaleVar != egEnergyCorr::Scale::Nominal) {
+      double deltaAlpha = getAlphaUncertainty(runnumber, cl_eta, cl_etaCalo,
+                                              fullyCorrectedEnergy, energyS2,
+                                              eraw, ptype, scaleVar, varSF);
+      ATH_MSG_DEBUG("alpha sys " << variationName(scaleVar) << " = "
+                                 << deltaAlpha);
+      fullyCorrectedEnergy *= (1 + deltaAlpha);
+      ATH_MSG_DEBUG("after mc alpha = " << boost::format("%.2f") %
+                                               fullyCorrectedEnergy);
+    }
+
+    // AF2 systematics  (this will not be in the sum of all other NP in the 1 NP
+    // model)
+    if (dataType == PATCore::ParticleDataType::Fast &&
+        (m_esmodel == egEnergyCorr::es2017_R21_v0 ||
+         m_esmodel == egEnergyCorr::es2017_R21_v1 ||
+         m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 ||
+         m_esmodel == egEnergyCorr::es2018_R21_v0 ||
+         m_esmodel == egEnergyCorr::es2018_R21_v1 ||
+         m_esmodel == egEnergyCorr::es2022_R22_PRE ||
+         m_esmodel == egEnergyCorr::es2023_R22_Run2_v0)) {
+      if (scaleVar == egEnergyCorr::Scale::af2Up or
+          scaleVar == egEnergyCorr::Scale::af2Down) {
+        double daAF2 = 0.;
+        if (m_esmodel == egEnergyCorr::es2017_R21_v0) {
+          if (scaleVar == egEnergyCorr::Scale::af2Up)
+            daAF2 = 0.005;
+          if (scaleVar == egEnergyCorr::Scale::af2Down)
+            daAF2 = -0.005;
+        }
+        if (m_esmodel == egEnergyCorr::es2017_R21_v1 ||
+            m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 ||
+            m_esmodel == egEnergyCorr::es2018_R21_v0 ||
+            m_esmodel == egEnergyCorr::es2018_R21_v1 ||
+            m_esmodel == egEnergyCorr::es2022_R22_PRE ||
+            m_esmodel == egEnergyCorr::es2023_R22_Run2_v0) {
+          if (scaleVar == egEnergyCorr::Scale::af2Up)
+            daAF2 = 0.001;
+          if (scaleVar == egEnergyCorr::Scale::af2Down)
+            daAF2 = -0.001;
+        }
+        fullyCorrectedEnergy *= (1 + daAF2);
+      }
+    }
+
+    // Do the resolution correction
+    if (resVar != egEnergyCorr::Resolution::None)
+      fullyCorrectedEnergy *=
+          getSmearingCorrection(cl_eta, cl_etaCalo, fullyCorrectedEnergy,
+                                random_seed, ptype, dataType, resVar, resType);
+
+    ATH_MSG_DEBUG("after resolution correction = " << boost::format("%.2f") %
+                                                          fullyCorrectedEnergy);
   }
 
+  return fullyCorrectedEnergy;
+}
 
-  // This method applied the overall energy corrections and systematic variations.
-  // Called internally by getCorrectedEnergy(...).
-  // convention is Edata = (1+alpha)*Emc, hence Edata -> Edata/(1+alpha) to match the MC
-  // note : all energies in MeV
+// This method applied the overall energy corrections and systematic variations.
+// Called internally by getCorrectedEnergy(...).
+// convention is Edata = (1+alpha)*Emc, hence Edata -> Edata/(1+alpha) to match
+// the MC note : all energies in MeV
 
-  // returns alpha_var. var = egEnergyCorr::Scale::Nominal or any systematic variation
+// returns alpha_var. var = egEnergyCorr::Scale::Nominal or any systematic
+// variation
 
-  double egammaEnergyCorrectionTool::getAlphaValue(
-						   long int runnumber,
-						   double cl_eta,
-						   double cl_etaCalo,
-						   double energy,      // input energy (not ET!!)
-						   double energyS2,    // raw energy in S2
-						   double eraw,
-						   PATCore::ParticleType::Type ptype,
-						   egEnergyCorr::Scale::Variation var,
-						   double varSF ) const {
+double egammaEnergyCorrectionTool::getAlphaValue(
+    long int runnumber, double cl_eta, double cl_etaCalo,
+    double energy,    // input energy (not ET!!)
+    double energyS2,  // raw energy in S2
+    double eraw, PATCore::ParticleType::Type ptype,
+    egEnergyCorr::Scale::Variation var, double varSF) const {
 
-    double meanE = getZeeMeanET(cl_eta)*cosh(cl_eta);
+  double meanET = getZeeMeanET(m_use_etaCalo_scales ? cl_etaCalo : cl_eta);
+  ATH_MSG_DEBUG("getZeeMeanET() output " << meanET);
+  ATH_MSG_DEBUG("getZeeMeanET() eta: "
+                << double(m_use_etaCalo_scales ? cl_etaCalo : cl_eta));
+  double meanE = meanET * std::cosh(cl_eta);
+  double Et = energy / std::cosh(cl_eta);
 
-    // Main Scale factor
+  // Main Scale factor
 
-    double alphaZee = getAlphaZee(runnumber, m_use_etaCalo_scales ? cl_etaCalo : cl_eta, var, varSF );
+  double alphaZee = getAlphaZee(
+      runnumber, m_use_etaCalo_scales ? cl_etaCalo : cl_eta, var, varSF);
 
+  // Sampling recalibration
 
-    // Sampling recalibration
+  double daPS, daS12, linPS, linS12, linEacc, linPS_40_elec, linEacc_40_elec,
+      linS12_40_elec;
+  daPS = daS12 = linPS = linS12 = linEacc = linPS_40_elec = linEacc_40_elec =
+      linS12_40_elec = 0.;
 
-    double daPS, daS12, linPS, linS12;
-    daPS = daS12 = linPS = linS12 = 0.;
+  double daE4 = 0., linE4 = 0.;
+  // E4 contribution
+  if ((m_esmodel == egEnergyCorr::es2015c_summer or
+       m_esmodel == egEnergyCorr::es2016PRE or
+       m_esmodel == egEnergyCorr::es2017 or
+       m_esmodel == egEnergyCorr::es2017_summer or
+       m_esmodel == egEnergyCorr::es2017_summer_improved or
+       m_esmodel == egEnergyCorr::es2017_summer_final or
+       m_esmodel == egEnergyCorr::es2017_R21_PRE or
+       m_esmodel == egEnergyCorr::es2015_5TeV or
+       m_esmodel == egEnergyCorr::es2017_R21_v0 or
+       m_esmodel == egEnergyCorr::es2017_R21_v1 or
+       m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 or
+       m_esmodel == egEnergyCorr::es2018_R21_v0 or
+       m_esmodel == egEnergyCorr::es2018_R21_v1 or
+       m_esmodel == egEnergyCorr::es2022_R22_PRE or
+       m_esmodel == egEnergyCorr::es2023_R22_Run2_v0) and
+      (var == egEnergyCorr::Scale::E4ScintillatorUp or
+       var == egEnergyCorr::Scale::E4ScintillatorDown)) {
+    daE4 = getE4Uncertainty(cl_eta);
+    if (var == egEnergyCorr::Scale::E4ScintillatorDown)
+      daE4 *= -1;
+    linE4 = getE4NonLinearity(cl_eta, energy, ptype) -
+            getE4NonLinearity(cl_eta, meanE, PATCore::ParticleType::Electron);
+  }
 
-    double daE4 = 0., linE4 = 0.;
-    // E4 contribution
-    if ((m_esmodel == egEnergyCorr::es2015c_summer or m_esmodel == egEnergyCorr::es2016PRE or m_esmodel == egEnergyCorr::es2017 or
-         m_esmodel == egEnergyCorr::es2017_summer or m_esmodel == egEnergyCorr::es2017_summer_improved or
-         m_esmodel == egEnergyCorr::es2017_summer_final or m_esmodel == egEnergyCorr::es2017_R21_PRE or
-         m_esmodel == egEnergyCorr::es2015_5TeV or m_esmodel == egEnergyCorr::es2017_R21_v0 or
-         m_esmodel == egEnergyCorr::es2017_R21_v1 or m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 or
-         m_esmodel == egEnergyCorr::es2018_R21_v0 or m_esmodel == egEnergyCorr::es2018_R21_v1 or
-         m_esmodel == egEnergyCorr::es2022_R22_PRE) and
-        (var == egEnergyCorr::Scale::E4ScintillatorUp or var == egEnergyCorr::Scale::E4ScintillatorDown)) {
-      daE4 = getE4Uncertainty(cl_eta);
-      if (var == egEnergyCorr::Scale::E4ScintillatorDown) daE4 *= -1;
-      linE4 = getE4NonLinearity(cl_eta, energy, ptype) - getE4NonLinearity(cl_eta, meanE, PATCore::ParticleType::Electron);
-    }
+  // wtots1 contribution
+  double daWtots1 = 0.;
+  if ((m_esmodel == egEnergyCorr::es2017 or
+       m_esmodel == egEnergyCorr::es2017_summer or
+       m_esmodel == egEnergyCorr::es2017_summer_improved or
+       m_esmodel == egEnergyCorr::es2017_summer_final or
+       m_esmodel == egEnergyCorr::es2017_R21_PRE or
+       m_esmodel == egEnergyCorr::es2015_5TeV or
+       m_esmodel == egEnergyCorr::es2017_R21_v0 or
+       m_esmodel == egEnergyCorr::es2017_R21_v1 or
+       m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 or
+       m_esmodel == egEnergyCorr::es2018_R21_v0 or
+       m_esmodel == egEnergyCorr::es2018_R21_v1 or
+       m_esmodel == egEnergyCorr::es2022_R22_PRE or
+       m_esmodel == egEnergyCorr::es2023_R22_Run2_v0) and
+      (var == egEnergyCorr::Scale::Wtots1Up or
+       var == egEnergyCorr::Scale::Wtots1Down)) {
+    daWtots1 = getWtots1Uncertainty(cl_eta, energy, ptype);
+    if (var == egEnergyCorr::Scale::Wtots1Down)
+      daWtots1 = -daWtots1;
+  }
 
-    //wtots1 contribution
-    double daWtots1 = 0.;
-    if ((m_esmodel == egEnergyCorr::es2017 or m_esmodel == egEnergyCorr::es2017_summer or
-         m_esmodel == egEnergyCorr::es2017_summer_improved or m_esmodel == egEnergyCorr::es2017_summer_final or
-         m_esmodel == egEnergyCorr::es2017_R21_PRE or m_esmodel == egEnergyCorr::es2015_5TeV or
-         m_esmodel == egEnergyCorr::es2017_R21_v0 or m_esmodel == egEnergyCorr::es2017_R21_v1 or
-         m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 or m_esmodel == egEnergyCorr::es2018_R21_v0 or
-         m_esmodel == egEnergyCorr::es2018_R21_v1 or m_esmodel == egEnergyCorr::es2022_R22_PRE) and
-        (var == egEnergyCorr::Scale::Wtots1Up or var == egEnergyCorr::Scale::Wtots1Down)) {
-      daWtots1 = getWtots1Uncertainty(cl_eta, energy, ptype);
-      if(var == egEnergyCorr::Scale::Wtots1Down)
-	daWtots1 = -daWtots1;
-    }
+  // ... Presampler contribution
 
-    // ... Presampler contribution
+  if (var == egEnergyCorr::Scale::PSUp || var == egEnergyCorr::Scale::PSDown ||
+      var == egEnergyCorr::Scale::PSb12Up ||
+      var == egEnergyCorr::Scale::PSb12Down ||
+      var == egEnergyCorr::Scale::LArElecUnconvUp ||
+      var == egEnergyCorr::Scale::LArElecUnconvDown) {
 
-    if( var==egEnergyCorr::Scale::PSUp || var==egEnergyCorr::Scale::PSDown ||
-	var==egEnergyCorr::Scale::PSb12Up || var==egEnergyCorr::Scale::PSb12Down ||
-	var==egEnergyCorr::Scale::LArElecUnconvUp || var==egEnergyCorr::Scale::LArElecUnconvDown ) {
-
-      daPS  = getLayerUncertainty(  0, cl_eta, var, varSF );
-      linPS = getLayerNonLinearity( 0, cl_eta, energy, ptype )
-	- getLayerNonLinearity( 0, cl_eta, meanE,  PATCore::ParticleType::Electron );
-
-    }
-
-    // ... S1 / S2 contribution
-
-    if (var == egEnergyCorr::Scale::S12Up or var==egEnergyCorr::Scale::S12Down or
-        var == egEnergyCorr::Scale::LArCalibUp or var==egEnergyCorr::Scale::LArCalibDown or
-        var == egEnergyCorr::Scale::LArCalibExtra2015PreUp or var == egEnergyCorr::Scale::LArCalibExtra2015PreDown or
-        var == egEnergyCorr::Scale::S12ExtraLastEtaBinRun2Up or var == egEnergyCorr::Scale::S12ExtraLastEtaBinRun2Down)
-      {
-        daS12  = getLayerUncertainty(1, cl_eta, var, varSF);
-	linS12 = getLayerNonLinearity( 1, cl_eta, energy, ptype ) - getLayerNonLinearity( 1, cl_eta, meanE,  PATCore::ParticleType::Electron );
-      }
-
-    // Material contribution
-
-    double daMatID, daMatCryo, daMatCalo;
-    daMatID = daMatCryo = daMatCalo = 0;
-
-    // for release 21 sensitivity use the same getMaterialNonLinearity for all particles
-    // while in sensitivities derived from run 1 this is only used for electrons
-
-    if (ptype != PATCore::ParticleType::Electron &&
-        (m_esmodel != egEnergyCorr::es2017_R21_v1 && m_esmodel != egEnergyCorr::es2017_R21_ofc0_v1 &&
-         m_esmodel != egEnergyCorr::es2018_R21_v0 && m_esmodel != egEnergyCorr::es2018_R21_v1 &&
-         m_esmodel != egEnergyCorr::es2022_R22_PRE)) {
-
-      daMatID   = getAlphaMaterial( cl_eta, egEnergyCorr::MatID,   ptype, var, varSF );
-      daMatCryo = getAlphaMaterial( cl_eta, egEnergyCorr::MatCryo, ptype, var, varSF );
-      daMatCalo = getAlphaMaterial( cl_eta, egEnergyCorr::MatCalo, ptype, var, varSF );
-
+    if (m_esmodel != egEnergyCorr::es2023_R22_Run2_v0) {
+      daPS = getLayerUncertainty(0, cl_eta, var, varSF);
+      linPS = getLayerNonLinearity(0, cl_eta, energy, ptype) -
+              getLayerNonLinearity(0, cl_eta, meanE,
+                                   PATCore::ParticleType::Electron);
     } else {
-
-      daMatID   = getMaterialNonLinearity( cl_eta, energy, egEnergyCorr::MatID,   ptype, var, varSF )
-	- getMaterialNonLinearity( cl_eta, meanE,  egEnergyCorr::MatID,   PATCore::ParticleType::Electron, var, varSF );
-      daMatCryo = getMaterialNonLinearity( cl_eta, energy, egEnergyCorr::MatCryo, ptype, var, varSF )
-	- getMaterialNonLinearity( cl_eta, meanE,  egEnergyCorr::MatCryo, PATCore::ParticleType::Electron, var, varSF );
-      daMatCalo = getMaterialNonLinearity( cl_eta, energy, egEnergyCorr::MatCalo, ptype, var, varSF )
-	- getMaterialNonLinearity( cl_eta, meanE,  egEnergyCorr::MatCalo, PATCore::ParticleType::Electron, var, varSF );
+      daPS = getLayerUncertainty(0, cl_eta, var, varSF);
+      linPS = getLayerNonLinearity(0, cl_eta, energy, ptype);
+      linEacc = getLayerNonLinearity(
+          6, m_use_etaCalo_scales ? cl_etaCalo : cl_eta, energy, ptype);
+      linPS_40_elec = getLayerNonLinearity(0, cl_eta, meanE,
+                                           PATCore::ParticleType::Electron);
+      linEacc_40_elec = getLayerNonLinearity(
+          6, m_use_etaCalo_scales ? cl_etaCalo : cl_eta,
+          meanET * std::cosh(m_use_etaCalo_scales ? cl_etaCalo : cl_eta),
+          PATCore::ParticleType::Electron);
+      ATH_MSG_DEBUG(
+          "es2023_R22_Run2_v0 PS non-linearity before Acc correction: "
+          << linPS);
+      linPS = linPS - linEacc * linPS_40_elec / linEacc_40_elec;
+      ATH_MSG_DEBUG("es2023_R22_Run2_v0 PS non-linearity after Acc correction: "
+                    << linPS);
     }
+  }
 
-    // Pedestal subtraction
+  // ... S1 / S2 contribution
 
-    double daPedestal = getAlphaPedestal(cl_eta, energy, eraw, ptype, false, var, varSF)
-      - getAlphaPedestal(cl_eta, meanE, eraw, PATCore::ParticleType::Electron , true, var, varSF);
-
-    // double pedestal systematics for 2016, Guillaume 12/05/16
-    if (m_esmodel == egEnergyCorr::es2016PRE) {
-       daPedestal *= 2;
+  if (var == egEnergyCorr::Scale::S12Up or
+      var == egEnergyCorr::Scale::S12Down or
+      var == egEnergyCorr::Scale::LArCalibUp or
+      var == egEnergyCorr::Scale::LArCalibDown or
+      var == egEnergyCorr::Scale::LArCalibExtra2015PreUp or
+      var == egEnergyCorr::Scale::LArCalibExtra2015PreDown or
+      var == egEnergyCorr::Scale::S12ExtraLastEtaBinRun2Up or
+      var == egEnergyCorr::Scale::S12ExtraLastEtaBinRun2Down) {
+    if (m_esmodel != egEnergyCorr::es2023_R22_Run2_v0) {
+      daS12 = getLayerUncertainty(1, cl_eta, var, varSF);
+      linS12 = getLayerNonLinearity(1, cl_eta, energy, ptype) -
+               getLayerNonLinearity(1, cl_eta, meanE,
+                                    PATCore::ParticleType::Electron);
+    } else {
+      daS12 = getLayerUncertainty(1, cl_eta, var, varSF) *
+              -1.;  // uncertainty applied to E2 is equal to -delta E1/E2 scale
+      linS12 = getLayerNonLinearity(1, cl_eta, energy, ptype);
+      linEacc = getLayerNonLinearity(
+          6, m_use_etaCalo_scales ? cl_etaCalo : cl_eta, energy, ptype);
+      linS12_40_elec = getLayerNonLinearity(1, cl_eta, meanE,
+                                            PATCore::ParticleType::Electron);
+      linEacc_40_elec = getLayerNonLinearity(
+          6, m_use_etaCalo_scales ? cl_etaCalo : cl_eta,
+          meanET * std::cosh(m_use_etaCalo_scales ? cl_etaCalo : cl_eta),
+          PATCore::ParticleType::Electron);
+      ATH_MSG_DEBUG(
+          "es2023_R22_Run2_v0 S12 non-linearity before Acc correction: "
+          << linS12);
+      linS12 = linS12 - linEacc * linS12_40_elec / linEacc_40_elec;
+      ATH_MSG_DEBUG(
+          "es2023_R22_Run2_v0 S12 non-linearity after Acc correction: "
+          << linS12);
     }
+  }
 
-    // Leakage contribution (electron-photon difference)
+  // Material contribution
 
-    double daLeakage = getAlphaLeakage(cl_eta, ptype, var, varSF);
+  double daMatID, daMatCryo, daMatCalo;
+  daMatID = daMatCryo = daMatCalo = 0;
 
+  // for release 21 sensitivity use the same getMaterialNonLinearity for all
+  // particles while in sensitivities derived from run 1 this is only used for
+  // electrons
 
-    // L1 Gain switch contribution
+  if (ptype != PATCore::ParticleType::Electron &&
+      (m_esmodel != egEnergyCorr::es2017_R21_v1 &&
+       m_esmodel != egEnergyCorr::es2017_R21_ofc0_v1 &&
+       m_esmodel != egEnergyCorr::es2018_R21_v0 &&
+       m_esmodel != egEnergyCorr::es2018_R21_v1 &&
+       m_esmodel != egEnergyCorr::es2022_R22_PRE &&
+       m_esmodel != egEnergyCorr::es2023_R22_Run2_v0)) {
 
-    double daL1GainSwitch = 0.;
+    daMatID = getAlphaMaterial(cl_eta, egEnergyCorr::MatID, ptype, var, varSF);
+    daMatCryo =
+        getAlphaMaterial(cl_eta, egEnergyCorr::MatCryo, ptype, var, varSF);
+    daMatCalo =
+        getAlphaMaterial(cl_eta, egEnergyCorr::MatCalo, ptype, var, varSF);
 
-    if ( var==egEnergyCorr::Scale::L1GainUp || var==egEnergyCorr::Scale::L1GainDown ) {
+  } else {
 
-      int eg_e1hg_ptype;
-      if( ptype==PATCore::ParticleType::Electron )
-	eg_e1hg_ptype = 0;
-      else if( ptype==PATCore::ParticleType::UnconvertedPhoton )
-	eg_e1hg_ptype = 1;
-      else if( ptype==PATCore::ParticleType::ConvertedPhoton )
-	eg_e1hg_ptype = 2;
+    daMatID =
+        getMaterialNonLinearity(cl_eta, energy, egEnergyCorr::MatID, ptype, var,
+                                varSF) -
+        getMaterialNonLinearity(cl_eta, meanE, egEnergyCorr::MatID,
+                                PATCore::ParticleType::Electron, var, varSF);
+    daMatCryo =
+        getMaterialNonLinearity(cl_eta, energy, egEnergyCorr::MatCryo, ptype,
+                                var, varSF) -
+        getMaterialNonLinearity(cl_eta, meanE, egEnergyCorr::MatCryo,
+                                PATCore::ParticleType::Electron, var, varSF);
+    daMatCalo =
+        getMaterialNonLinearity(cl_eta, energy, egEnergyCorr::MatCalo, ptype,
+                                var, varSF) -
+        getMaterialNonLinearity(cl_eta, meanE, egEnergyCorr::MatCalo,
+                                PATCore::ParticleType::Electron, var, varSF);
+  }
+
+  // Pedestal subtraction
+
+  double daPedestal =
+      getAlphaPedestal(cl_eta, energy, eraw, ptype, false, var, varSF) -
+      getAlphaPedestal(cl_eta, meanE, eraw, PATCore::ParticleType::Electron,
+                       true, var, varSF);
+
+  // double pedestal systematics for 2016, Guillaume 12/05/16
+  if (m_esmodel == egEnergyCorr::es2016PRE) {
+    daPedestal *= 2;
+  }
+
+  // Leakage contribution (electron-photon difference)
+  double daLeakage = getAlphaLeakage2D(cl_eta, Et, ptype, var, varSF);
+
+  // L1 Gain switch contribution
+
+  double daL1GainSwitch = 0.;
+
+  if (var == egEnergyCorr::Scale::L1GainUp ||
+      var == egEnergyCorr::Scale::L1GainDown) {
+
+    int eg_e1hg_ptype;
+    if (ptype == PATCore::ParticleType::Electron)
+      eg_e1hg_ptype = 0;
+    else if (ptype == PATCore::ParticleType::UnconvertedPhoton)
+      eg_e1hg_ptype = 1;
+    else if (ptype == PATCore::ParticleType::ConvertedPhoton)
+      eg_e1hg_ptype = 2;
+    else
+      return -1;
+
+    daL1GainSwitch = m_e1hg_tool->getAlpha(eg_e1hg_ptype, energy, cl_eta, true);
+    if (var == egEnergyCorr::Scale::L1GainDown)
+      daL1GainSwitch = -daL1GainSwitch;
+  }
+
+  // L2 Gain switch contribution
+
+  double daL2GainSwitch = 0.;
+  double daL2MediumGainSwitch = 0.;
+  double daL2LowGainSwitch = 0.;
+
+  if (m_esmodel != egEnergyCorr::es2023_R22_Run2_v0 &&
+      (var == egEnergyCorr::Scale::L2GainUp ||
+       var == egEnergyCorr::Scale::L2GainDown)) {
+    if (m_gain_tool) {  // recipe for run1
+      if (!(std::abs(cl_eta) < 1.52 && std::abs(cl_eta) > 1.37) &&
+          std::abs(cl_eta) < 2.4) {
+        double evar = m_gain_tool->CorrectionGainTool(cl_eta, energy / GeV,
+                                                      energyS2 / GeV, ptype);
+        double meanES2 = m_zeeES2Profile->GetBinContent(
+            m_zeeES2Profile->FindFixBin(cl_eta));  // in GeV already
+        double eref = m_gain_tool->CorrectionGainTool(
+            cl_eta, meanE / GeV, meanES2, PATCore::ParticleType::Electron);
+        daL2GainSwitch = evar / energy - eref / meanE;
+        if (var == egEnergyCorr::Scale::L2GainDown)
+          daL2GainSwitch = -daL2GainSwitch;
+      }
+    } else if (m_gain_tool_run2) {  // recipe for run 2, see ATLASEG-44
+      daL2GainSwitch = m_gain_tool_run2->getUncertainty(cl_etaCalo, Et, ptype,
+                                                        m_useL2GainCorrection);
+      if (var == egEnergyCorr::Scale::L2GainDown)
+        daL2GainSwitch *= -1;
+      ATH_MSG_DEBUG("L2 gain uncertainty: " << daL2GainSwitch);
+    } else {
+      ATH_MSG_ERROR(
+          "trying to compute gain systematic, but no tool for doing it has "
+          "been instantiated, setting sys to 0");
+      daL2GainSwitch = 0.;
+    }
+  }
+
+  if (m_esmodel == egEnergyCorr::es2023_R22_Run2_v0 &&
+      (var == egEnergyCorr::Scale::L2MediumGainUp ||
+       var == egEnergyCorr::Scale::L2MediumGainDown)) {
+    if (m_gain_tool_run2) {  // recipe for run 2, see ATLASEG-44
+      daL2MediumGainSwitch = m_gain_tool_run2->getUncertainty(
+          cl_etaCalo, Et, ptype, m_useL2GainCorrection,
+          egGain::GainUncertainty::GainType::MEDIUM);
+      if (var == egEnergyCorr::Scale::L2MediumGainDown)
+        daL2MediumGainSwitch *= -1;
+      ATH_MSG_DEBUG("L2 gain Medium uncertainty: " << daL2MediumGainSwitch);
+    } else {
+      ATH_MSG_ERROR(
+          "trying to compute gain systematic, but no tool for doing it has "
+          "been instantiated, setting sys to 0");
+      daL2MediumGainSwitch = 0.;
+    }
+  }
+
+  if (m_esmodel == egEnergyCorr::es2023_R22_Run2_v0 &&
+      (var == egEnergyCorr::Scale::L2LowGainUp ||
+       var == egEnergyCorr::Scale::L2LowGainDown)) {
+    if (m_gain_tool_run2) {  // recipe for run 2, see ATLASEG-44
+      daL2LowGainSwitch = m_gain_tool_run2->getUncertainty(
+          cl_etaCalo, Et, ptype, m_useL2GainCorrection,
+          egGain::GainUncertainty::GainType::LOW);
+      if (var == egEnergyCorr::Scale::L2LowGainDown)
+        daL2LowGainSwitch *= -1;
+      ATH_MSG_DEBUG("L2 gain Low uncertainty: " << daL2LowGainSwitch);
+    } else {
+      ATH_MSG_ERROR(
+          "trying to compute Low gain systematic, but no tool for doing it has "
+          "been instantiated, setting sys to 0");
+      daL2LowGainSwitch = 0.;
+    }
+  }
+
+  // pp0 (and IBL)
+  double dapp0 = 0.;
+  // values from the histogram already are 0 for the Z->ee electrons
+  if (var == egEnergyCorr::Scale::MatPP0Up or
+      var == egEnergyCorr::Scale::MatPP0Down) {
+
+    // new parameterization for release 21 reconstruction with mc16 geometries +
+    // distortions
+    if (m_esmodel == egEnergyCorr::es2017_R21_v1 ||
+        m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 ||
+        m_esmodel == egEnergyCorr::es2018_R21_v0 ||
+        m_esmodel == egEnergyCorr::es2018_R21_v1 ||
+        m_esmodel == egEnergyCorr::es2022_R22_PRE ||
+        m_esmodel == egEnergyCorr::es2023_R22_Run2_v0) {
+
+      if (std::abs(cl_eta) < 1.5)
+        dapp0 = getMaterialEffect(egEnergyCorr::ConfigIBL, ptype, cl_eta,
+                                  energy / GeV / cosh(cl_eta)) -
+                getMaterialEffect(egEnergyCorr::ConfigIBL,
+                                  PATCore::ParticleType::Electron, cl_eta,
+                                  getZeeMeanET(cl_eta) / GeV);
       else
-	return -1;
+        dapp0 = getMaterialEffect(egEnergyCorr::ConfigPP0, ptype, cl_eta,
+                                  energy / GeV / cosh(cl_eta)) -
+                getMaterialEffect(egEnergyCorr::ConfigPP0,
+                                  PATCore::ParticleType::Electron, cl_eta,
+                                  getZeeMeanET(cl_eta) / GeV);
 
-      daL1GainSwitch = m_e1hg_tool->getAlpha(eg_e1hg_ptype, energy, cl_eta, true);
-      if( var==egEnergyCorr::Scale::L1GainDown )
-	daL1GainSwitch = -daL1GainSwitch;
-
-    }
-
-
-    // L2 Gain switch contribution
-
-    double daL2GainSwitch = 0.;
-
-    if ( var==egEnergyCorr::Scale::L2GainUp || var==egEnergyCorr::Scale::L2GainDown ) {
-      if (m_gain_tool) { // recipe for run1
-        if ((std::abs(cl_eta) >= 1.52 || std::abs(cl_eta) <= 1.37) and std::abs(cl_eta) < 2.4) {
-  	      double evar = m_gain_tool->CorrectionGainTool(cl_eta, energy/GeV, energyS2/GeV, ptype);
-  	      double meanES2 = m_zeeES2Profile->GetBinContent(m_zeeES2Profile->FindFixBin(cl_eta)); // in GeV already
-  	      double eref = m_gain_tool->CorrectionGainTool(cl_eta, meanE/GeV, meanES2, PATCore::ParticleType::Electron );
-  	      daL2GainSwitch = evar/energy - eref/meanE;
-  	      if( var==egEnergyCorr::Scale::L2GainDown )
-  	        daL2GainSwitch = -daL2GainSwitch;
-        }
-      }
-      else if (m_gain_tool_run2) { // recipe for run 2, see ATLASEG-44
-        daL2GainSwitch = m_gain_tool_run2->getUncertainty(cl_etaCalo, energy / cosh(cl_eta), ptype);
-        if (var == egEnergyCorr::Scale::L2GainDown) daL2GainSwitch *= -1;
-      }
-      else {
-        ATH_MSG_ERROR("trying to compute gain systematic, but no tool for doing it has been instantiated, setting sys to 0");
-        daL2GainSwitch = 0.;
+      if (var == egEnergyCorr::Scale::MatPP0Down) {
+        dapp0 = -dapp0;
       }
     }
 
-    // pp0 (and IBL)
-    double dapp0 = 0.;
-    // values from the histogram already are 0 for the Z->ee electrons
-    if (var == egEnergyCorr::Scale::MatPP0Up or var == egEnergyCorr::Scale::MatPP0Down) {
+    // release 20 run 2 systematics for mc15 like geometries
+    else {
+      // Just pick the owned one from a unique_ptr per case
+      const TH2* histo = nullptr;
+      if (ptype == PATCore::ParticleType::Electron && m_pp0_elec)
+        histo = m_pp0_elec.get();
+      else if (ptype == PATCore::ParticleType::ConvertedPhoton && m_pp0_conv)
+        histo = m_pp0_conv.get();
+      else if (ptype == PATCore::ParticleType::UnconvertedPhoton &&
+               m_pp0_unconv)
+        histo = m_pp0_unconv.get();
 
-      // new parameterization for release 21 reconstruction with mc16 geometries + distortions
-      if (m_esmodel == egEnergyCorr::es2017_R21_v1 || m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 ||
-          m_esmodel == egEnergyCorr::es2018_R21_v0 || m_esmodel == egEnergyCorr::es2018_R21_v1 ||
-          m_esmodel == egEnergyCorr::es2022_R22_PRE) {
-
-        if (std::abs(cl_eta) < 1.5)
-          dapp0 = getMaterialEffect(egEnergyCorr::ConfigIBL, ptype, cl_eta, energy / GeV / cosh(cl_eta)) -
-                  getMaterialEffect(egEnergyCorr::ConfigIBL, PATCore::ParticleType::Electron, cl_eta, getZeeMeanET(cl_eta) / GeV);
-        else
-          dapp0 = getMaterialEffect(egEnergyCorr::ConfigPP0, ptype, cl_eta, energy / GeV / cosh(cl_eta)) -
-                  getMaterialEffect(egEnergyCorr::ConfigPP0, PATCore::ParticleType::Electron, cl_eta, getZeeMeanET(cl_eta) / GeV);
-
+      if (histo) {
+        const double aeta = std::abs(cl_eta);
+        dapp0 = getValueHistAt(*histo, aeta, energy / GeV / cosh(cl_eta), false,
+                               true, false, true);
         if (var == egEnergyCorr::Scale::MatPP0Down) {
           dapp0 = -dapp0;
         }
-      }
 
-      // release 20 run 2 systematics for mc15 like geometries
-      else {
-        //Just pick the owned one from a unique_ptr per case
-        const TH2* histo = nullptr;
-        if (ptype == PATCore::ParticleType::Electron && m_pp0_elec) histo = m_pp0_elec.get();
-        else if (ptype == PATCore::ParticleType::ConvertedPhoton && m_pp0_conv ) histo = m_pp0_conv.get();
-        else if (ptype == PATCore::ParticleType::UnconvertedPhoton && m_pp0_unconv) histo = m_pp0_unconv.get();
-
-        if (histo) {
-          const double aeta = std::abs(cl_eta);
-          dapp0 = getValueHistAt(*histo, aeta, energy / GeV / cosh(cl_eta), false, true, false, true);
-          if (var == egEnergyCorr::Scale::MatPP0Down) { dapp0 = -dapp0; }
-
-          // normalize to pp0 systematics
-          if (aeta > 1.5 and aeta < 2.0) { dapp0 *= 2.6; }
-          else if (aeta >= 2.0 and aeta <= 2.5) { dapp0 *= 2.3; }
+        // normalize to pp0 systematics
+        if (aeta > 1.5 and aeta < 2.0) {
+          dapp0 *= 2.6;
+        } else if (aeta >= 2.0 and aeta <= 2.5) {
+          dapp0 *= 2.3;
         }
       }
     }
-
-    // Conversion systematics
-
-    double daConvSyst = getAlphaConvSyst(cl_eta, energy, ptype, var, varSF);
-
-    // topo cluster threshold systematics for release 21
-    double daTopoCluster = 0;
-    if ((var == egEnergyCorr::Scale::topoClusterThresUp || var == egEnergyCorr::Scale::topoClusterThresDown) &&
-        (m_esmodel == egEnergyCorr::es2017_R21_v0 || m_esmodel == egEnergyCorr::es2017_R21_v1 ||
-         m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 || m_esmodel == egEnergyCorr::es2018_R21_v0 ||
-         m_esmodel == egEnergyCorr::es2018_R21_v1 || m_esmodel == egEnergyCorr::es2022_R22_PRE)) {
-      double Et = energy / cosh(cl_eta);
-      double Et0 = 10000.;
-      //  Effect taken as 10**-3/(Et/10GeV) - order of magniture from
-      //  https://indico.cern.ch/event/669895/contributions/2745266/attachments/1535612/2405452/slides.pdf
-      if (var == egEnergyCorr::Scale::topoClusterThresUp)
-        daTopoCluster = 1e-3 * (1. / (Et / Et0) - 1. / (getZeeMeanET(cl_eta) / Et0));
-      if (var == egEnergyCorr::Scale::topoClusterThresUp)
-        daTopoCluster = -1e-3 * (1. / (Et / Et0) - 1. / (getZeeMeanET(cl_eta) / Et0));
-    }
-
-    // Total
-
-    double alphaTot = alphaZee;
-    alphaTot += daE4 * linE4;
-    alphaTot += daPS*linPS;
-    alphaTot += daS12*linS12;
-    alphaTot += daMatID + daMatCryo + daMatCalo;
-    alphaTot += daLeakage;
-    alphaTot += daL1GainSwitch;
-    alphaTot += daL2GainSwitch;
-    alphaTot += daConvSyst;
-    alphaTot += daPedestal;
-    alphaTot += daWtots1;
-    alphaTot += dapp0;
-    alphaTot += daTopoCluster;
-
-    ATH_MSG_DEBUG("alpha value for " << variationName(var) << " = " << alphaTot);
-
-    return alphaTot;
-
   }
 
+  // Conversion systematics
 
-  // returns alpha_var - alpha_nom, for systematic variations.
+  double daConvSyst = getAlphaConvSyst(cl_eta, energy, ptype, var, varSF);
 
-  double egammaEnergyCorrectionTool::getAlphaUncertainty(long int runnumber,
-							 double cl_eta,
-							 double cl_etaCalo,
-							 double energy,
-							 double energyS2,
-							 double eraw,
-							 PATCore::ParticleType::Type ptype,
-							 egEnergyCorr::Scale::Variation var, double varSF ) const {
-
-    double alphaNom = getAlphaValue(runnumber, cl_eta, cl_etaCalo, energy, energyS2, eraw, ptype, egEnergyCorr::Scale::Nominal );
-    double alphaVar = 0.;
-
-    if (var != egEnergyCorr::Scale::AllUp && var != egEnergyCorr::Scale::AllDown and
-        var != egEnergyCorr::Scale::AllCorrelatedUp and var != egEnergyCorr::Scale::AllCorrelatedDown)  {
-      // not an ALLUP
-      alphaVar = getAlphaValue(runnumber, cl_eta, cl_etaCalo, energy, energyS2, eraw, ptype, var, varSF ) - alphaNom;
-    }
-    else if (var == egEnergyCorr::Scale::AllUp) {
-      for (egEnergyCorr::Scale::Variation ivar = egEnergyCorr::Scale::ZeeStatUp;
-           ivar < egEnergyCorr::Scale::AllUp;
-           ivar = egEnergyCorr::Scale::Variation(ivar + 2)) {
-        if (ivar == egEnergyCorr::Scale::ZeeAllUp) continue;
-        const double v = getAlphaValue(runnumber, cl_eta, cl_etaCalo, energy, energyS2, eraw, ptype, ivar, varSF) - alphaNom;
-        ATH_MSG_DEBUG("computing ALLUP, adding " << variationName(ivar) << ": " << v);
-        alphaVar += pow(v, 2);
-      }
-      alphaVar = sqrt(alphaVar);
-    }
-    else if (var == egEnergyCorr::Scale::AllDown) {
-      for (egEnergyCorr::Scale::Variation ivar = egEnergyCorr::Scale::ZeeStatDown;
-           ivar < egEnergyCorr::Scale::AllDown;
-           ivar = egEnergyCorr::Scale::Variation(ivar + 2)) {
-	if (ivar == egEnergyCorr::Scale::ZeeAllDown) continue;
-        const double v = getAlphaValue(runnumber, cl_eta, cl_etaCalo, energy, energyS2, eraw, ptype, ivar, varSF) - alphaNom;
-        ATH_MSG_DEBUG("computing ALLDOWN, adding " << variationName(ivar) << ": " << v);
-	alphaVar += pow(v, 2);
-      }
-      alphaVar = -sqrt(alphaVar);
-    }
-    else if (var == egEnergyCorr::Scale::AllCorrelatedUp) {
-      for (egEnergyCorr::Scale::Variation ivar = egEnergyCorr::Scale::ZeeStatUp;
-           ivar < egEnergyCorr::Scale::AllUp;
-	   ivar = egEnergyCorr::Scale::Variation(ivar+2)) {
-        if (ivar == egEnergyCorr::Scale::ZeeAllUp or
-            ivar == egEnergyCorr::Scale::LArCalibExtra2015PreUp or
-            ivar == egEnergyCorr::Scale::LArTemperature2015PreUp or
-            ivar == egEnergyCorr::Scale::LArTemperature2016PreUp or
-            ivar == egEnergyCorr::Scale::E4ScintillatorUp) continue;
-        const double v = getAlphaValue(runnumber, cl_eta, cl_etaCalo, energy, energyS2, eraw, ptype, ivar, varSF) - alphaNom;
-        alphaVar += pow(v, 2);
-      }
-      alphaVar = sqrt(alphaVar);
-    }
-    else if (var == egEnergyCorr::Scale::AllCorrelatedDown) {
-      for (egEnergyCorr::Scale::Variation ivar = egEnergyCorr::Scale::ZeeStatDown;
-           ivar < egEnergyCorr::Scale::AllDown;
-           ivar = egEnergyCorr::Scale::Variation(ivar+2)) {
-        if (ivar == egEnergyCorr::Scale::ZeeAllDown or
-            ivar == egEnergyCorr::Scale::LArCalibExtra2015PreDown or
-            ivar == egEnergyCorr::Scale::LArTemperature2015PreDown or
-            ivar == egEnergyCorr::Scale::LArTemperature2016PreDown or
-            ivar == egEnergyCorr::Scale::E4ScintillatorDown) continue;
-        const double v = getAlphaValue(runnumber, cl_eta, cl_etaCalo, energy, energyS2, eraw, ptype, ivar, varSF) - alphaNom;
-        alphaVar += pow(v, 2);
-      }
-      alphaVar = -sqrt(alphaVar);
-    }
-
-    return alphaVar;
-
+  // topo cluster threshold systematics for release 21
+  double daTopoCluster = 0;
+  if ((var == egEnergyCorr::Scale::topoClusterThresUp ||
+       var == egEnergyCorr::Scale::topoClusterThresDown) &&
+      (m_esmodel == egEnergyCorr::es2017_R21_v0 ||
+       m_esmodel == egEnergyCorr::es2017_R21_v1 ||
+       m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 ||
+       m_esmodel == egEnergyCorr::es2018_R21_v0 ||
+       m_esmodel == egEnergyCorr::es2018_R21_v1 ||
+       m_esmodel == egEnergyCorr::es2022_R22_PRE ||
+       m_esmodel == egEnergyCorr::es2023_R22_Run2_v0)) {
+    double Et = energy / cosh(cl_eta);
+    double Et0 = 10000.;
+    //  Effect taken as 10**-3/(Et/10GeV) - order of magniture from
+    //  https://indico.cern.ch/event/669895/contributions/2745266/attachments/1535612/2405452/slides.pdf
+    if (var == egEnergyCorr::Scale::topoClusterThresUp)
+      daTopoCluster = 1e-3 * (1. / (Et / Et0) - 1. / (meanET / Et0));
+    if (var == egEnergyCorr::Scale::topoClusterThresDown)
+      daTopoCluster = -1e-3 * (1. / (Et / Et0) - 1. / (meanET / Et0));
   }
 
-
-  // returns mean electron ET at given eta
-  double egammaEnergyCorrectionTool::getZeeMeanET(double /* cl_eta */) {
-
-    return 40000.; // to be replaced by histogram look-up at some point
-
-  }
-
-
-  // RESOLUTION FUNCTIONS START HERE (MB)
-
-
-  // sampling term inMC, parametrization from Iro Koletsou
-
-  double egammaEnergyCorrectionTool::mcSamplingTerm(double cl_eta) {
-
-    double aeta = std::abs( cl_eta );
-    double sampling = 0.;
-
-    if ( aeta<0.8 )
-      sampling = 0.091;
-
-    else if ( aeta<1.37 )
-      sampling = 0.036 + 0.130 * aeta;
-
-    else if ( aeta<1.52 )
-      sampling = 0.27;
-
-    else if ( aeta<2.0 )
-      sampling = 0.85 - 0.36 * aeta;
-
-    else if ( aeta<2.3 )
-      sampling = 0.16;
-
-    else if ( aeta<2.5 )
-      sampling = -1.05 + 0.52 * aeta;
-
-    return sampling;
-
-  }
-
-
-  // sampling term uncertainty
-
-  double egammaEnergyCorrectionTool::mcSamplingTermRelError( double cl_eta ) {
-
-    (void) cl_eta; // not used
-    return 0.1; // when will this be improved?
-
-  }
-
-
-  // noise term in MC (from Iro)
-
-  double egammaEnergyCorrectionTool::mcNoiseTerm( double cl_eta ) {
-
-    double aeta = std::abs( cl_eta );
-    double noise = 0.;
-
-    double noise37[25]={ 0.27, 0.27, 0.27, 0.27, 0.27,
-			 0.26, 0.25, 0.23, 0.21, 0.19,
-			 0.17, 0.16, 0.15, 0.14, 0.27,
-			 0.23, 0.17, 0.15, 0.13, 0.10,
-			 0.07, 0.06, 0.05, 0.04, 0.03 };
-
-    int ieta = (int) (aeta/0.1);
-
-    if ( ieta >= 0 && ieta<25 )
-      noise =  noise37[ieta] * cosh(cl_eta); // the above parametrization is vs ET
-
-    return noise;
-
-  }
-
-
-  // constant term in MC (local)
-
-  double egammaEnergyCorrectionTool::mcConstantTerm( double cl_eta ) {
-
-    double aeta = std::abs( cl_eta );
-    double cst = 0.;
-
-    if ( aeta<0.6 )
-      cst = 0.005;
-
-    else if ( aeta<1.75 )
-      cst = 0.003;
-
-    else if ( aeta<2.5 )
-      cst = 0.0055 * (2.69 - aeta);
-
-    //cst = 0.005;
-
-    return cst;
-
-  }
-
-
-  // constant term fitted in data (long range)
-
-  double egammaEnergyCorrectionTool::dataConstantTerm( double eta ) const {
-    return std::max(0., m_resNom->GetBinContent(m_resNom->FindFixBin(eta)));
-  }
-
-  double egammaEnergyCorrectionTool::dataConstantTermError( double eta ) const {
-    return m_resSyst->GetBinContent(m_resSyst->FindFixBin(eta));
-  }
-
-  double egammaEnergyCorrectionTool::dataConstantTermOFCError( double eta ) const {
-    return m_resSystOFC->GetBinContent(m_resSystOFC->FindFixBin(eta));
-  }
-
-
-
-  // fitted Z peak resolution, data, in GeV
-
-  double egammaEnergyCorrectionTool::dataZPeakResolution( double cl_eta ) const {
-
-    return m_peakResData->GetBinContent( std::as_const(*m_peakResData).GetXaxis()->FindBin(cl_eta) );
-
-  }
-
-
-  // fitted Z peak resolution, MC, in GeV
-
-  double egammaEnergyCorrectionTool::mcZPeakResolution( double cl_eta ) const {
-
-    return m_peakResMC->GetBinContent( std::as_const(*m_peakResMC).GetXaxis()->FindBin(cl_eta) );
-
-  }
-
-
-  // correlated part of constant term uncertainty, in data (approx.)
-
-  double egammaEnergyCorrectionTool::dataConstantTermCorError( double cl_eta ) const {
-
-    double mz = 91.2;
-
-    double resData = dataZPeakResolution( cl_eta );
-    double resMC   = mcZPeakResolution( cl_eta );
-    double cmc     = mcConstantTerm( cl_eta );
-
-    double smpup = 1. + mcSamplingTermRelError( cl_eta );
-    double smpdo = 1. - mcSamplingTermRelError( cl_eta );
-
-    double central = sqrt( 2*(resData*resData - resMC*resMC)/mz/mz + cmc*cmc );
-    double vardown = sqrt( 2*(resData*resData - resMC*resMC*smpup*smpup)/mz/mz + cmc*cmc );
-    double varup   = sqrt( 2*(resData*resData - resMC*resMC*smpdo*smpdo)/mz/mz + cmc*cmc );
-
-    double errdown = std::abs( central - vardown );
-    double errup   = std::abs( central - varup );
-
-    return .5*( errup + errdown );
-
-  }
-
-  // get fractional uncertainty on resolution
-
-  double egammaEnergyCorrectionTool::getResolutionError(PATCore::ParticleDataType::DataType dataType,double energy, double eta, double etaCalo,
-                                                        PATCore::ParticleType::Type ptype,egEnergyCorr::Resolution::Variation value,
-                                                       egEnergyCorr::Resolution::resolutionType resType) const
-
-  {
-
-    int eg_resolution_ptype;
-    if( ptype==PATCore::ParticleType::Electron )
-      eg_resolution_ptype = 0;
-    else if( ptype==PATCore::ParticleType::UnconvertedPhoton )
-      eg_resolution_ptype = 1;
-    else if( ptype==PATCore::ParticleType::ConvertedPhoton )
-      eg_resolution_ptype = 2;
-    else
-      return -1;
-
-    int isys=0;
-    if (value==egEnergyCorr::Resolution::AllUp || value==egEnergyCorr::Resolution::AllDown) {
-      isys=0xFFFF;
-
-    }
-    if (value==egEnergyCorr::Resolution::ZSmearingUp || value==egEnergyCorr::Resolution::ZSmearingDown) {
-      isys=0x1;
-    }
-    if (value==egEnergyCorr::Resolution::SamplingTermUp || value==egEnergyCorr::Resolution::SamplingTermDown) {
-      isys=0x2;
-    }
-    if (value==egEnergyCorr::Resolution::MaterialIDUp || value==egEnergyCorr::Resolution::MaterialIDDown) {
-      isys=0x4;
-    }
-    if (value==egEnergyCorr::Resolution::MaterialCaloUp || value==egEnergyCorr::Resolution::MaterialCaloDown) {
-      isys=0x8;
-    }
-    if (value==egEnergyCorr::Resolution::MaterialGapUp || value==egEnergyCorr::Resolution::MaterialGapDown) {
-      isys=0x10;
-    }
-    if (value==egEnergyCorr::Resolution::MaterialCryoUp || value==egEnergyCorr::Resolution::MaterialCryoDown) {
-      isys=0x20;
-    }
-    if (value==egEnergyCorr::Resolution::PileUpUp || value==egEnergyCorr::Resolution::PileUpDown) {
-      isys=0x40;
-    }
-
-    if (value==egEnergyCorr::Resolution::MaterialIBLUp || value==egEnergyCorr::Resolution::MaterialIBLDown) {
-      isys=0x80;
-    }
-    if (value==egEnergyCorr::Resolution::MaterialPP0Up || value==egEnergyCorr::Resolution::MaterialPP0Down) {
-      isys=0x100;
-    }
-    if (value==egEnergyCorr::Resolution::af2Up || value==egEnergyCorr::Resolution::af2Down) {
-      isys=0x200;
-    }
-    if (value==egEnergyCorr::Resolution::OFCUp || value==egEnergyCorr::Resolution::OFCDown) {
-      isys=0x400;
-    }
-
-
-    double sign = 1.;
-    if (value==egEnergyCorr::Resolution::AllDown ||  value==egEnergyCorr::Resolution::ZSmearingDown ||
-        value==egEnergyCorr::Resolution::SamplingTermDown ||  value==egEnergyCorr::Resolution::MaterialIDDown ||
-        value==egEnergyCorr::Resolution::MaterialGapDown || value==egEnergyCorr::Resolution::MaterialCaloDown ||
-        value==egEnergyCorr::Resolution::MaterialCryoDown || value==egEnergyCorr::Resolution::PileUpDown ||
-	value==egEnergyCorr::Resolution::MaterialIBLDown || value==egEnergyCorr::Resolution::MaterialPP0Down ||
-        value==egEnergyCorr::Resolution::af2Down || value==egEnergyCorr::Resolution::OFCDown) sign=-1.;
-
-    double resolution;
-    double resolution_error;
-    double resolution_error_up;
-    double resolution_error_down;
-
-
-    getResolution_systematics(eg_resolution_ptype, energy,  eta, etaCalo, isys,  resolution, resolution_error, resolution_error_up, resolution_error_down, resType,
-          dataType == PATCore::ParticleDataType::Fast);
-
-    // total resolution uncertainty
-    if (value==egEnergyCorr::Resolution::AllUp || value==egEnergyCorr::Resolution::AllDown) {
-      resolution_error = resolution_error / resolution * sign;
+  // ADC non linearity correction. 30% of the effect from
+  // https://indico.cern.ch/event/1001455/contributions/4205636/attachments/2179584/3681315/ADC-linearity-28jan2021.pdf
+  // ?
+  double daADCLin = 0;
+  if (m_esmodel == egEnergyCorr::es2023_R22_Run2_v0 &&
+      (var == egEnergyCorr::Scale::ADCLinUp ||
+       var == egEnergyCorr::Scale::ADCLinDown)) {
+    if (m_ADCLinearity_tool) {
+      double corr = m_ADCLinearity_tool->getCorr(cl_etaCalo, Et, ptype) - 1.;
+      daADCLin = 0.3 * corr;
     } else {
-      if (sign==1) resolution_error= resolution_error_up/resolution;
-      else         resolution_error=resolution_error_down/resolution;
+      ATH_MSG_WARNING(
+          "trying to compute ADC correction systematic, but no tool for doing "
+          "it has been instantiated, setting sys to 0");
+      daADCLin = 0.;
     }
-
-    return resolution_error;
-
+    if (var == egEnergyCorr::Scale::ADCLinDown)
+      daADCLin *= -1;
   }
 
-  // total resolution uncertainty (fractional)  (OLD model)
+  // Total
+  double alphaTot = alphaZee;
+  alphaTot += daE4 * linE4;
+  alphaTot += daPS * linPS;
+  alphaTot += daS12 * linS12;
+  alphaTot += daMatID + daMatCryo + daMatCalo;
+  alphaTot += daLeakage;
+  alphaTot += daL1GainSwitch;
+  alphaTot += daL2GainSwitch;
+  alphaTot += daL2MediumGainSwitch;
+  alphaTot += daL2LowGainSwitch;
+  alphaTot += daConvSyst;
+  alphaTot += daPedestal;
+  alphaTot += daWtots1;
+  alphaTot += dapp0;
+  alphaTot += daTopoCluster;
+  alphaTot += daADCLin;
 
-  void egammaEnergyCorrectionTool::resolutionError( double energy /* GeV! */, double cl_eta, double& errUp, double& errDown ) const {
+  ATH_MSG_DEBUG("alpha value for " << variationName(var) << " = " << alphaTot);
 
-    double Cdata     = dataConstantTerm( cl_eta );
-    double Cdata_cor = dataConstantTermCorError( cl_eta );
-    double Cdata_err = dataConstantTermError( cl_eta );
+  return alphaTot;
+}
 
-    double Cdata_unc = 0.;
-    if( Cdata_err > Cdata_cor )
-      Cdata_unc = sqrt( Cdata_err*Cdata_err - Cdata_cor*Cdata_cor );
-    if( Cdata_unc<0.001 )
-      Cdata_unc = 0.001; // preserve at least the stat error
+// returns alpha_var - alpha_nom, for systematic variations.
 
-    double Smc       = mcSamplingTerm( cl_eta );
-    double Smc_err   = mcSamplingTermRelError( cl_eta );
+double egammaEnergyCorrectionTool::getAlphaUncertainty(
+    long int runnumber, double cl_eta, double cl_etaCalo, double energy,
+    double energyS2, double eraw, PATCore::ParticleType::Type ptype,
+    egEnergyCorr::Scale::Variation var, double varSF) const {
 
-    double central = fcn_sigma( energy,  Cdata,  0.,  Smc,  0.);
+  double alphaNom =
+      getAlphaValue(runnumber, cl_eta, cl_etaCalo, energy, energyS2, eraw,
+                    ptype, egEnergyCorr::Scale::Nominal);
+  double alphaVar = 0.;
 
-    double err1 = fcn_sigma( energy, Cdata,  Cdata_unc, Smc,  0.    ) - central;
-    double err2 = fcn_sigma( energy, Cdata, -Cdata_unc, Smc,  0.    ) - central;
-    double err3 = fcn_sigma( energy, Cdata, -Cdata_cor, Smc, Smc_err) - central;
-    double err4 = -err3;
-
-    errUp = 0;
-    if( err1>0 ) errUp = sqrt( errUp*errUp + err1*err1);
-    if( err2>0 ) errUp = sqrt( errUp*errUp + err2*err2);
-    if( err3>0 ) errUp = sqrt( errUp*errUp + err3*err3);
-    if( err4>0 ) errUp = sqrt( errUp*errUp + err4*err4);
-
-    errDown   = -errUp;
+  if (var != egEnergyCorr::Scale::AllUp &&
+      var != egEnergyCorr::Scale::AllDown and
+      var != egEnergyCorr::Scale::AllCorrelatedUp and
+      var != egEnergyCorr::Scale::AllCorrelatedDown) {
+    // not an ALLUP
+    alphaVar = getAlphaValue(runnumber, cl_eta, cl_etaCalo, energy, energyS2,
+                             eraw, ptype, var, varSF) -
+               alphaNom;
+  } else if (var == egEnergyCorr::Scale::AllUp) {
+    for (egEnergyCorr::Scale::Variation ivar = egEnergyCorr::Scale::ZeeStatUp;
+         ivar < egEnergyCorr::Scale::AllUp;
+         ivar = egEnergyCorr::Scale::Variation(ivar + 2)) {
+      if (ivar == egEnergyCorr::Scale::ZeeAllUp)
+        continue;
+      const double v = getAlphaValue(runnumber, cl_eta, cl_etaCalo, energy,
+                                     energyS2, eraw, ptype, ivar, varSF) -
+                       alphaNom;
+      ATH_MSG_DEBUG("computing ALLUP, adding " << variationName(ivar) << ": "
+                                               << v);
+      alphaVar += pow(v, 2);
+    }
+    alphaVar = sqrt(alphaVar);
+  } else if (var == egEnergyCorr::Scale::AllDown) {
+    for (egEnergyCorr::Scale::Variation ivar = egEnergyCorr::Scale::ZeeStatDown;
+         ivar < egEnergyCorr::Scale::AllDown;
+         ivar = egEnergyCorr::Scale::Variation(ivar + 2)) {
+      if (ivar == egEnergyCorr::Scale::ZeeAllDown)
+        continue;
+      const double v = getAlphaValue(runnumber, cl_eta, cl_etaCalo, energy,
+                                     energyS2, eraw, ptype, ivar, varSF) -
+                       alphaNom;
+      ATH_MSG_DEBUG("computing ALLDOWN, adding " << variationName(ivar) << ": "
+                                                 << v);
+      alphaVar += pow(v, 2);
+    }
+    alphaVar = -sqrt(alphaVar);
+  } else if (var == egEnergyCorr::Scale::AllCorrelatedUp) {
+    for (egEnergyCorr::Scale::Variation ivar = egEnergyCorr::Scale::ZeeStatUp;
+         ivar < egEnergyCorr::Scale::AllUp;
+         ivar = egEnergyCorr::Scale::Variation(ivar + 2)) {
+      if (ivar == egEnergyCorr::Scale::ZeeAllUp or
+          ivar == egEnergyCorr::Scale::LArCalibExtra2015PreUp or
+          ivar == egEnergyCorr::Scale::LArTemperature2015PreUp or
+          ivar == egEnergyCorr::Scale::LArTemperature2016PreUp or
+          ivar == egEnergyCorr::Scale::E4ScintillatorUp)
+        continue;
+      const double v = getAlphaValue(runnumber, cl_eta, cl_etaCalo, energy,
+                                     energyS2, eraw, ptype, ivar, varSF) -
+                       alphaNom;
+      alphaVar += pow(v, 2);
+    }
+    alphaVar = sqrt(alphaVar);
+  } else if (var == egEnergyCorr::Scale::AllCorrelatedDown) {
+    for (egEnergyCorr::Scale::Variation ivar = egEnergyCorr::Scale::ZeeStatDown;
+         ivar < egEnergyCorr::Scale::AllDown;
+         ivar = egEnergyCorr::Scale::Variation(ivar + 2)) {
+      if (ivar == egEnergyCorr::Scale::ZeeAllDown or
+          ivar == egEnergyCorr::Scale::LArCalibExtra2015PreDown or
+          ivar == egEnergyCorr::Scale::LArTemperature2015PreDown or
+          ivar == egEnergyCorr::Scale::LArTemperature2016PreDown or
+          ivar == egEnergyCorr::Scale::E4ScintillatorDown)
+        continue;
+      const double v = getAlphaValue(runnumber, cl_eta, cl_etaCalo, energy,
+                                     energyS2, eraw, ptype, ivar, varSF) -
+                       alphaNom;
+      alphaVar += pow(v, 2);
+    }
+    alphaVar = -sqrt(alphaVar);
   }
 
+  return alphaVar;
+}
 
-  // total resolution (fractional)
+// returns mean electron ET at given eta
+double egammaEnergyCorrectionTool::getZeeMeanET(double cl_eta) const {
+  if (m_esmodel != egEnergyCorr::es2023_R22_Run2_v0)
+    return 40000.;
+  else {
+    if (std::abs(cl_eta) >= 2.47)
+      cl_eta = 2.46;
+    return m_meanZeeProfile->GetBinContent(
+               m_meanZeeProfile->FindBin(std::abs(cl_eta))) *
+           1000;
+  }
+}
 
-  double egammaEnergyCorrectionTool::resolution(double energy, double cl_eta, double cl_etaCalo,
-						                                    PATCore::ParticleType::Type ptype,
-						                                    bool withCT,
-						                                    bool fast,
-                                                egEnergyCorr::Resolution::resolutionType resType) const
+// RESOLUTION FUNCTIONS START HERE (MB)
+
+// sampling term inMC, parametrization from Iro Koletsou
+
+double egammaEnergyCorrectionTool::mcSamplingTerm(double cl_eta) {
+
+  double aeta = std::abs(cl_eta);
+  double sampling = 0.;
+
+  if (aeta < 0.8)
+    sampling = 0.091;
+
+  else if (aeta < 1.37)
+    sampling = 0.036 + 0.130 * aeta;
+
+  else if (aeta < 1.52)
+    sampling = 0.27;
+
+  else if (aeta < 2.0)
+    sampling = 0.85 - 0.36 * aeta;
+
+  else if (aeta < 2.3)
+    sampling = 0.16;
+
+  else if (aeta < 2.5)
+    sampling = -1.05 + 0.52 * aeta;
+
+  return sampling;
+}
+
+// sampling term uncertainty
+
+double egammaEnergyCorrectionTool::mcSamplingTermRelError(double cl_eta) {
+
+  (void)cl_eta;  // not used
+  return 0.1;    // when will this be improved?
+}
+
+// noise term in MC (from Iro)
+
+double egammaEnergyCorrectionTool::mcNoiseTerm(double cl_eta) {
+
+  double aeta = std::abs(cl_eta);
+  double noise = 0.;
+
+  double noise37[25] = {0.27, 0.27, 0.27, 0.27, 0.27, 0.26, 0.25, 0.23, 0.21,
+                        0.19, 0.17, 0.16, 0.15, 0.14, 0.27, 0.23, 0.17, 0.15,
+                        0.13, 0.10, 0.07, 0.06, 0.05, 0.04, 0.03};
+
+  int ieta = (int)(aeta / 0.1);
+
+  if (ieta >= 0 && ieta < 25)
+    noise = noise37[ieta] * cosh(cl_eta);  // the above parametrization is vs ET
+
+  return noise;
+}
+
+// constant term in MC (local)
+
+double egammaEnergyCorrectionTool::mcConstantTerm(double cl_eta) {
+
+  double aeta = std::abs(cl_eta);
+  double cst = 0.;
+
+  if (aeta < 0.6)
+    cst = 0.005;
+
+  else if (aeta < 1.75)
+    cst = 0.003;
+
+  else if (aeta < 2.5)
+    cst = 0.0055 * (2.69 - aeta);
+
+  // cst = 0.005;
+
+  return cst;
+}
+
+// constant term fitted in data (long range)
+
+double egammaEnergyCorrectionTool::dataConstantTerm(double eta) const {
+  return std::max(0., m_resNom->GetBinContent(m_resNom->FindFixBin(eta)));
+}
+
+double egammaEnergyCorrectionTool::dataConstantTermError(double eta) const {
+  return m_resSyst->GetBinContent(m_resSyst->FindFixBin(eta));
+}
+
+double egammaEnergyCorrectionTool::dataConstantTermOFCError(double eta) const {
+  return m_resSystOFC->GetBinContent(m_resSystOFC->FindFixBin(eta));
+}
+
+// fitted Z peak resolution, data, in GeV
+
+double egammaEnergyCorrectionTool::dataZPeakResolution(double cl_eta) const {
+
+  return m_peakResData->GetBinContent(
+      std::as_const(*m_peakResData).GetXaxis()->FindBin(cl_eta));
+}
+
+// fitted Z peak resolution, MC, in GeV
+
+double egammaEnergyCorrectionTool::mcZPeakResolution(double cl_eta) const {
+
+  return m_peakResMC->GetBinContent(
+      std::as_const(*m_peakResMC).GetXaxis()->FindBin(cl_eta));
+}
+
+// correlated part of constant term uncertainty, in data (approx.)
+
+double egammaEnergyCorrectionTool::dataConstantTermCorError(
+    double cl_eta) const {
+
+  double mz = 91.2;
+
+  double resData = dataZPeakResolution(cl_eta);
+  double resMC = mcZPeakResolution(cl_eta);
+  double cmc = mcConstantTerm(cl_eta);
+
+  double smpup = 1. + mcSamplingTermRelError(cl_eta);
+  double smpdo = 1. - mcSamplingTermRelError(cl_eta);
+
+  double central =
+      sqrt(2 * (resData * resData - resMC * resMC) / mz / mz + cmc * cmc);
+  double vardown =
+      sqrt(2 * (resData * resData - resMC * resMC * smpup * smpup) / mz / mz +
+           cmc * cmc);
+  double varup =
+      sqrt(2 * (resData * resData - resMC * resMC * smpdo * smpdo) / mz / mz +
+           cmc * cmc);
+
+  double errdown = std::abs(central - vardown);
+  double errup = std::abs(central - varup);
+
+  return .5 * (errup + errdown);
+}
+
+// get fractional uncertainty on resolution
+
+double egammaEnergyCorrectionTool::getResolutionError(
+    PATCore::ParticleDataType::DataType dataType, double energy, double eta,
+    double etaCalo, PATCore::ParticleType::Type ptype,
+    egEnergyCorr::Resolution::Variation value,
+    egEnergyCorr::Resolution::resolutionType resType) const
+
 {
-    int eg_resolution_ptype;
-    if (ptype == PATCore::ParticleType::Electron) eg_resolution_ptype = 0;
-    else if (ptype==PATCore::ParticleType::UnconvertedPhoton) eg_resolution_ptype = 1;
-    else if (ptype==PATCore::ParticleType::ConvertedPhoton) eg_resolution_ptype = 2;
-    else {
-      ATH_MSG_FATAL("cannot understand particle type");
-      return -1;
-    }
 
-    double sig2 = 0.;
+  int eg_resolution_ptype;
+  if (ptype == PATCore::ParticleType::Electron)
+    eg_resolution_ptype = 0;
+  else if (ptype == PATCore::ParticleType::UnconvertedPhoton)
+    eg_resolution_ptype = 1;
+  else if (ptype == PATCore::ParticleType::ConvertedPhoton)
+    eg_resolution_ptype = 2;
+  else
+    return -1;
 
-    if (m_use_new_resolution_model) {
-      sig2 = pow(m_resolution_tool->getResolution(eg_resolution_ptype, energy, cl_eta, resType), 2);
-      const double et = energy / cosh(cl_eta);
-      sig2 += pow(pileUpTerm(energy, cl_eta, eg_resolution_ptype) / et, 2);  // TODO: why et and not E?
-    } else { // OLD model
+  int isys = 0;
+  if (value == egEnergyCorr::Resolution::AllUp ||
+      value == egEnergyCorr::Resolution::AllDown) {
+    isys = 0xFFFF;
+  }
+  if (value == egEnergyCorr::Resolution::ZSmearingUp ||
+      value == egEnergyCorr::Resolution::ZSmearingDown) {
+    isys = 0x1;
+  }
+  if (value == egEnergyCorr::Resolution::SamplingTermUp ||
+      value == egEnergyCorr::Resolution::SamplingTermDown) {
+    isys = 0x2;
+  }
+  if (value == egEnergyCorr::Resolution::MaterialIDUp ||
+      value == egEnergyCorr::Resolution::MaterialIDDown) {
+    isys = 0x4;
+  }
+  if (value == egEnergyCorr::Resolution::MaterialCaloUp ||
+      value == egEnergyCorr::Resolution::MaterialCaloDown) {
+    isys = 0x8;
+  }
+  if (value == egEnergyCorr::Resolution::MaterialGapUp ||
+      value == egEnergyCorr::Resolution::MaterialGapDown) {
+    isys = 0x10;
+  }
+  if (value == egEnergyCorr::Resolution::MaterialCryoUp ||
+      value == egEnergyCorr::Resolution::MaterialCryoDown) {
+    isys = 0x20;
+  }
+  if (value == egEnergyCorr::Resolution::PileUpUp ||
+      value == egEnergyCorr::Resolution::PileUpDown) {
+    isys = 0x40;
+  }
 
-      double energyGeV = energy/GeV;
-      double a = mcSamplingTerm( cl_eta );
-      double b = mcNoiseTerm( cl_eta );
-      double c = mcConstantTerm( cl_eta );
-      sig2 = a*a/energyGeV + b*b/energyGeV/energyGeV + c*c;
+  if (value == egEnergyCorr::Resolution::MaterialIBLUp ||
+      value == egEnergyCorr::Resolution::MaterialIBLDown) {
+    isys = 0x80;
+  }
+  if (value == egEnergyCorr::Resolution::MaterialPP0Up ||
+      value == egEnergyCorr::Resolution::MaterialPP0Down) {
+    isys = 0x100;
+  }
+  if (value == egEnergyCorr::Resolution::af2Up ||
+      value == egEnergyCorr::Resolution::af2Down) {
+    isys = 0x200;
+  }
+  if (value == egEnergyCorr::Resolution::OFCUp ||
+      value == egEnergyCorr::Resolution::OFCDown) {
+    isys = 0x400;
+  }
 
-    }
+  double sign = 1.;
+  if (value == egEnergyCorr::Resolution::AllDown ||
+      value == egEnergyCorr::Resolution::ZSmearingDown ||
+      value == egEnergyCorr::Resolution::SamplingTermDown ||
+      value == egEnergyCorr::Resolution::MaterialIDDown ||
+      value == egEnergyCorr::Resolution::MaterialGapDown ||
+      value == egEnergyCorr::Resolution::MaterialCaloDown ||
+      value == egEnergyCorr::Resolution::MaterialCryoDown ||
+      value == egEnergyCorr::Resolution::PileUpDown ||
+      value == egEnergyCorr::Resolution::MaterialIBLDown ||
+      value == egEnergyCorr::Resolution::MaterialPP0Down ||
+      value == egEnergyCorr::Resolution::af2Down ||
+      value == egEnergyCorr::Resolution::OFCDown)
+    sign = -1.;
 
-    if (withCT and fast) {
-      throw std::runtime_error("It doesn't make sense to ask resolution fast sim + additional CT."
-			                         " The resolution on data is FULL sim resolution + CT");
-    }
+  double resolution;
+  double resolution_error;
+  double resolution_error_up;
+  double resolution_error_down;
 
-    if (fast and std::abs(cl_eta) < 2.5) {
-      if (m_esmodel == egEnergyCorr::es2017 or m_esmodel == egEnergyCorr::es2017_summer or
-          m_esmodel == egEnergyCorr::es2017_summer_improved or m_esmodel == egEnergyCorr::es2017_summer_final or
-          m_esmodel == egEnergyCorr::es2017_R21_PRE or m_esmodel == egEnergyCorr::es2015_5TeV or
-          m_esmodel == egEnergyCorr::es2015PRE or m_esmodel == egEnergyCorr::es2015PRE_res_improved or
-          m_esmodel == egEnergyCorr::es2015cPRE or m_esmodel == egEnergyCorr::es2015cPRE_res_improved or
-          m_esmodel == egEnergyCorr::es2015c_summer or m_esmodel == egEnergyCorr::es2016PRE or
-          m_esmodel == egEnergyCorr::es2017_R21_v0 or m_esmodel == egEnergyCorr::es2017_R21_v1 or
-          m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 or m_esmodel == egEnergyCorr::es2018_R21_v0 or
-          m_esmodel == egEnergyCorr::es2018_R21_v1 or m_esmodel == egEnergyCorr::es2022_R22_PRE) {
+  getResolution_systematics(eg_resolution_ptype, energy, eta, etaCalo, isys,
+                            resolution, resolution_error, resolution_error_up,
+                            resolution_error_down, resType,
+                            dataType == PATCore::ParticleDataType::Fast);
 
-        double ratio_IQR_full_fast = 1.;
-        const double ptGeV = energy / cosh(cl_eta) / 1E3;
+  // total resolution uncertainty
+  if (value == egEnergyCorr::Resolution::AllUp ||
+      value == egEnergyCorr::Resolution::AllDown) {
+    resolution_error = resolution_error / resolution * sign;
+  } else {
+    if (sign == 1)
+      resolution_error = resolution_error_up / resolution;
+    else
+      resolution_error = resolution_error_down / resolution;
+  }
 
-        if (m_esmodel == egEnergyCorr::es2017_R21_v1 || m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 ||
-            m_esmodel == egEnergyCorr::es2018_R21_v0 || m_esmodel == egEnergyCorr::es2018_R21_v1 ||
-            m_esmodel == egEnergyCorr::es2022_R22_PRE) {
-          //
-          // for es2017_R21_v1, histograms contain directly values of deltaSigma**2 of relative energy resolution (FastSIm-FulSim)
-          // so need to subtract this value to get the sigma**2 of FastSim
+  return resolution_error;
+}
 
-          if (ptype == PATCore::ParticleType::Electron)
-            sig2 -= getValueHistAt(*m_G4OverAFII_resolution_electron, cl_eta, ptGeV, true, true, true, true);
-          if (ptype == PATCore::ParticleType::UnconvertedPhoton)
-            sig2 -= getValueHistAt(*m_G4OverAFII_resolution_unconverted, cl_eta, ptGeV, true, true, true, true);
-          if (ptype == PATCore::ParticleType::ConvertedPhoton)
-            sig2 -= getValueHistAt(*m_G4OverAFII_resolution_converted, cl_eta, ptGeV, true, true, true, true);
-          if (sig2 < 0.)
-            sig2 = 0.;
-        } else {
-          if (ptype == PATCore::ParticleType::Electron) { ratio_IQR_full_fast = getValueHistAt(*m_G4OverAFII_resolution_electron, ptGeV, cl_eta, true, false); }
-          else if (ptype == PATCore::ParticleType::UnconvertedPhoton) { ratio_IQR_full_fast = getValueHistAt(*m_G4OverAFII_resolution_unconverted, ptGeV, cl_eta, true, false); }
-          else if (ptype == PATCore::ParticleType::ConvertedPhoton) {  ratio_IQR_full_fast = getValueHistAt(*m_G4OverAFII_resolution_converted, ptGeV, cl_eta, true, false); }
+// total resolution uncertainty (fractional)  (OLD model)
 
-          sig2 /= ratio_IQR_full_fast * ratio_IQR_full_fast;
+void egammaEnergyCorrectionTool::resolutionError(double energy /* GeV! */,
+                                                 double cl_eta, double& errUp,
+                                                 double& errDown) const {
+
+  double Cdata = dataConstantTerm(cl_eta);
+  double Cdata_cor = dataConstantTermCorError(cl_eta);
+  double Cdata_err = dataConstantTermError(cl_eta);
+
+  double Cdata_unc = 0.;
+  if (Cdata_err > Cdata_cor)
+    Cdata_unc = sqrt(Cdata_err * Cdata_err - Cdata_cor * Cdata_cor);
+  if (Cdata_unc < 0.001)
+    Cdata_unc = 0.001;  // preserve at least the stat error
+
+  double Smc = mcSamplingTerm(cl_eta);
+  double Smc_err = mcSamplingTermRelError(cl_eta);
+
+  double central = fcn_sigma(energy, Cdata, 0., Smc, 0.);
+
+  double err1 = fcn_sigma(energy, Cdata, Cdata_unc, Smc, 0.) - central;
+  double err2 = fcn_sigma(energy, Cdata, -Cdata_unc, Smc, 0.) - central;
+  double err3 = fcn_sigma(energy, Cdata, -Cdata_cor, Smc, Smc_err) - central;
+  double err4 = -err3;
+
+  errUp = 0;
+  if (err1 > 0)
+    errUp = sqrt(errUp * errUp + err1 * err1);
+  if (err2 > 0)
+    errUp = sqrt(errUp * errUp + err2 * err2);
+  if (err3 > 0)
+    errUp = sqrt(errUp * errUp + err3 * err3);
+  if (err4 > 0)
+    errUp = sqrt(errUp * errUp + err4 * err4);
+
+  errDown = -errUp;
+}
+
+// total resolution (fractional)
+
+double egammaEnergyCorrectionTool::resolution(
+    double energy, double cl_eta, double cl_etaCalo,
+    PATCore::ParticleType::Type ptype, bool withCT, bool fast,
+    egEnergyCorr::Resolution::resolutionType resType) const {
+  int eg_resolution_ptype;
+  if (ptype == PATCore::ParticleType::Electron)
+    eg_resolution_ptype = 0;
+  else if (ptype == PATCore::ParticleType::UnconvertedPhoton)
+    eg_resolution_ptype = 1;
+  else if (ptype == PATCore::ParticleType::ConvertedPhoton)
+    eg_resolution_ptype = 2;
+  else {
+    ATH_MSG_FATAL("cannot understand particle type");
+    return -1;
+  }
+
+  double sig2 = 0.;
+
+  if (m_use_new_resolution_model) {
+    sig2 = pow(m_resolution_tool->getResolution(eg_resolution_ptype, energy,
+                                                cl_eta, resType),
+               2);
+    const double et = energy / cosh(cl_eta);
+    sig2 += pow(pileUpTerm(energy, cl_eta, eg_resolution_ptype) / et,
+                2);  // TODO: why et and not E?
+  } else {           // OLD model
+
+    double energyGeV = energy / GeV;
+    double a = mcSamplingTerm(cl_eta);
+    double b = mcNoiseTerm(cl_eta);
+    double c = mcConstantTerm(cl_eta);
+    sig2 = a * a / energyGeV + b * b / energyGeV / energyGeV + c * c;
+  }
+
+  if (withCT and fast) {
+    throw std::runtime_error(
+        "It doesn't make sense to ask resolution fast sim + additional CT."
+        " The resolution on data is FULL sim resolution + CT");
+  }
+
+  if (fast and std::abs(cl_eta) < 2.5) {
+    if (m_esmodel == egEnergyCorr::es2017 or
+        m_esmodel == egEnergyCorr::es2017_summer or
+        m_esmodel == egEnergyCorr::es2017_summer_improved or
+        m_esmodel == egEnergyCorr::es2017_summer_final or
+        m_esmodel == egEnergyCorr::es2017_R21_PRE or
+        m_esmodel == egEnergyCorr::es2015_5TeV or
+        m_esmodel == egEnergyCorr::es2015PRE or
+        m_esmodel == egEnergyCorr::es2015PRE_res_improved or
+        m_esmodel == egEnergyCorr::es2015cPRE or
+        m_esmodel == egEnergyCorr::es2015cPRE_res_improved or
+        m_esmodel == egEnergyCorr::es2015c_summer or
+        m_esmodel == egEnergyCorr::es2016PRE or
+        m_esmodel == egEnergyCorr::es2017_R21_v0 or
+        m_esmodel == egEnergyCorr::es2017_R21_v1 or
+        m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 or
+        m_esmodel == egEnergyCorr::es2018_R21_v0 or
+        m_esmodel == egEnergyCorr::es2018_R21_v1 or
+        m_esmodel == egEnergyCorr::es2022_R22_PRE or
+        m_esmodel == egEnergyCorr::es2023_R22_Run2_v0) {
+
+      double ratio_IQR_full_fast = 1.;
+      const double ptGeV = energy / cosh(cl_eta) / 1E3;
+
+      if (m_esmodel == egEnergyCorr::es2017_R21_v1 ||
+          m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 ||
+          m_esmodel == egEnergyCorr::es2018_R21_v0 ||
+          m_esmodel == egEnergyCorr::es2018_R21_v1 ||
+          m_esmodel == egEnergyCorr::es2022_R22_PRE ||
+          m_esmodel == egEnergyCorr::es2023_R22_Run2_v0) {
+        //
+        // for es2017_R21_v1, histograms contain directly values of
+        // deltaSigma**2 of relative energy resolution (FastSIm-FulSim) so need
+        // to subtract this value to get the sigma**2 of FastSim
+
+        if (ptype == PATCore::ParticleType::Electron)
+          sig2 -= getValueHistAt(*m_G4OverAFII_resolution_electron, cl_eta,
+                                 ptGeV, true, true, true, true);
+        if (ptype == PATCore::ParticleType::UnconvertedPhoton)
+          sig2 -= getValueHistAt(*m_G4OverAFII_resolution_unconverted, cl_eta,
+                                 ptGeV, true, true, true, true);
+        if (ptype == PATCore::ParticleType::ConvertedPhoton)
+          sig2 -= getValueHistAt(*m_G4OverAFII_resolution_converted, cl_eta,
+                                 ptGeV, true, true, true, true);
+        if (sig2 < 0.)
+          sig2 = 0.;
+      } else {
+        if (ptype == PATCore::ParticleType::Electron) {
+          ratio_IQR_full_fast = getValueHistAt(
+              *m_G4OverAFII_resolution_electron, ptGeV, cl_eta, true, false);
+        } else if (ptype == PATCore::ParticleType::UnconvertedPhoton) {
+          ratio_IQR_full_fast = getValueHistAt(
+              *m_G4OverAFII_resolution_unconverted, ptGeV, cl_eta, true, false);
+        } else if (ptype == PATCore::ParticleType::ConvertedPhoton) {
+          ratio_IQR_full_fast = getValueHistAt(
+              *m_G4OverAFII_resolution_converted, ptGeV, cl_eta, true, false);
         }
+
+        sig2 /= ratio_IQR_full_fast * ratio_IQR_full_fast;
       }
     }
-
-    // add the additional constant term from the Zee data/MC measurement
-    if (withCT) sig2 += pow(dataConstantTerm(m_use_etaCalo_scales ? cl_etaCalo : cl_eta), 2);  // TODO: is it correct? Or should be += -c**2 + (c + deltac) ** 2 ?
-
-    return sqrt(sig2);
   }
 
+  // add the additional constant term from the Zee data/MC measurement
+  if (withCT)
+    sig2 += pow(
+        dataConstantTerm(m_use_etaCalo_scales ? cl_etaCalo : cl_eta),
+        2);  // TODO: is it correct? Or should be += -c**2 + (c + deltac) ** 2 ?
 
-  // internal use only
+  return sqrt(sig2);
+}
 
-  double egammaEnergyCorrectionTool::fcn_sigma(double energy, double Cdata, double Cdata_er, double S, double S_er) {
+// internal use only
 
-    double sigma2 = std::pow((Cdata+Cdata_er)*energy,2) + std::pow(S*(1+S_er)*std::sqrt(energy),2);
+double egammaEnergyCorrectionTool::fcn_sigma(double energy, double Cdata,
+                                             double Cdata_er, double S,
+                                             double S_er) {
 
-    double sigma=0;
-    if (sigma2>0)
-      sigma=sqrt(sigma2);
+  double sigma2 = std::pow((Cdata + Cdata_er) * energy, 2) +
+                  std::pow(S * (1 + S_er) * std::sqrt(energy), 2);
 
-    return sigma/energy;
+  double sigma = 0;
+  if (sigma2 > 0)
+    sigma = sqrt(sigma2);
 
+  return sigma / energy;
+}
+
+// derive smearing correction
+
+double egammaEnergyCorrectionTool::getSmearingCorrection(
+    double cl_eta, double cl_etaCalo, double energy, RandomNumber seed,
+    PATCore::ParticleType::Type ptype,
+    PATCore::ParticleDataType::DataType dataType,
+    egEnergyCorr::Resolution::Variation value,
+    egEnergyCorr::Resolution::resolutionType resType) const {
+
+  if (dataType == PATCore::ParticleDataType::Data) {
+    ATH_MSG_FATAL("Trying to compute smearing correction on data");
   }
 
+  if (value == egEnergyCorr::Resolution::None || energy <= 0.)
+    return 1.0;
 
-  // derive smearing correction
+  const double energyGeV = energy / GeV;
 
-  double egammaEnergyCorrectionTool::getSmearingCorrection(double cl_eta, double cl_etaCalo, double energy,
-                                                           RandomNumber seed,
-                                                           PATCore::ParticleType::Type ptype,
-                                                           PATCore::ParticleDataType::DataType dataType,
-                                                           egEnergyCorr::Resolution::Variation value,
-                                                           egEnergyCorr::Resolution::resolutionType resType) const {
+  // relative resolutions
+  const double resMC =
+      resolution(energy, cl_eta, cl_etaCalo, ptype, false,  // no additional CT
+                 dataType == PATCore::ParticleDataType::Fast, resType);
+  double resData =
+      resolution(energy, cl_eta, cl_etaCalo, ptype, true,  // with additional CT
+                 false, resType);  // on top of Full simulation
 
-    if (dataType == PATCore::ParticleDataType::Data) { ATH_MSG_FATAL("Trying to compute smearing correction on data"); }
+  ATH_MSG_DEBUG("resolution in data: " << resData << " in MC: " << resMC);
 
-    if (value == egEnergyCorr::Resolution::None || energy <= 0.) return 1.0;
-
-    const double energyGeV = energy / GeV;
-
-    // relative resolutions
-    const double resMC = resolution(energy, cl_eta, cl_etaCalo, ptype, false, // no additional CT
-			                              dataType == PATCore::ParticleDataType::Fast, resType);
-    double resData = resolution(energy, cl_eta, cl_etaCalo, ptype, true,  // with additional CT
-		                            false, resType);  // on top of Full simulation
-
-    ATH_MSG_DEBUG("resolution in data: " << resData << " in MC: " << resMC);
-
-    if (m_use_new_resolution_model) {
-      resData *= 1 + getResolutionError(dataType,energy, cl_eta, cl_etaCalo, ptype, value, resType);
-    } else { // OLD model
-      double errUp, errDown;
-      resolutionError( energyGeV, cl_eta, errUp, errDown );
-      if( value == egEnergyCorr::Resolution::AllDown ) resData += errDown;
-      else if( value == egEnergyCorr::Resolution::AllUp )	resData += errUp;
-      else if( value != egEnergyCorr::Resolution::Nominal ) {
-        //      std::cout << "getSmearingCorrection : wrong value, return 1" << std::endl;
-        return 1.0;
-      }
+  if (m_use_new_resolution_model) {
+    resData *= 1 + getResolutionError(dataType, energy, cl_eta, cl_etaCalo,
+                                      ptype, value, resType);
+  } else {  // OLD model
+    double errUp, errDown;
+    resolutionError(energyGeV, cl_eta, errUp, errDown);
+    if (value == egEnergyCorr::Resolution::AllDown)
+      resData += errDown;
+    else if (value == egEnergyCorr::Resolution::AllUp)
+      resData += errUp;
+    else if (value != egEnergyCorr::Resolution::Nominal) {
+      //      std::cout << "getSmearingCorrection : wrong value, return 1" <<
+      //      std::endl;
+      return 1.0;
     }
-
-    ATH_MSG_DEBUG("resolution in data after systematics: " << resData);
-
-    const double sigma2 = std::pow(resData * energyGeV, 2 ) - std::pow(resMC * energyGeV, 2);
-
-    // TODO: for nominal case it can be simplified to:
-    // const double sigma = dataConstantTerm(m_use_etaCalo_scales ? cl_etaCalo : cl_eta) * energyGeV;
-    // which is just the additional constant term
-    if (sigma2 <= 0) { return 1; }
-
-    const double sigma = sqrt(sigma2);
-
-    TRandom3 rng(seed);
-
-    const double DeltaE0 = rng.Gaus(0, sigma);
-    const double cor0 = (energyGeV + DeltaE0) / energyGeV;
-
-    ATH_MSG_DEBUG("sigma|DeltaE0|cor0|seed = " << sigma << "|" << DeltaE0 << "|" << cor0 << "|" << rng.GetSeed());
-
-    return cor0;  // TODO: why not returning DeltaE0 and apply E -> E + DeltaE0 ?
-
   }
 
+  ATH_MSG_DEBUG("resolution in data after systematics: " << resData);
 
-  // a calibration correction for crack electrons, to be applied to both data11 and MC11
-  // not to be used in data12 / MC12
+  const double sigma2 =
+      std::pow(resData * energyGeV, 2) - std::pow(resMC * energyGeV, 2);
 
-  double egammaEnergyCorrectionTool::applyMCCalibration( double eta, double ET, PATCore::ParticleType::Type ptype) const {
+  // TODO: for nominal case it can be simplified to:
+  // const double sigma = dataConstantTerm(m_use_etaCalo_scales ? cl_etaCalo :
+  // cl_eta) * energyGeV; which is just the additional constant term
+  if (sigma2 <= 0) {
+    return 1;
+  }
 
-    if( ptype != PATCore::ParticleType::Electron || m_esmodel != egEnergyCorr::es2011c )
-      return 1.;
+  const double sigma = sqrt(sigma2);
 
-    double aeta = std::abs(eta);
+  TRandom3 rng(seed);
 
-    if( aeta<1.42 || aeta>1.55 )
-      return 1.;
+  const double DeltaE0 = rng.Gaus(0, sigma);
+  const double cor0 = (energyGeV + DeltaE0) / energyGeV;
 
-    const int nBoundaries = 18;
-    double ETBoundaries[nBoundaries]   = { 0., 5.4, 8.5, 12.9, 16., 20.,
-                                           25., 30., 35., 40., 45., 50.,
-                                           55., 60., 65., 70., 75., 99999. };
+  ATH_MSG_DEBUG("sigma|DeltaE0|cor0|seed = " << sigma << "|" << DeltaE0 << "|"
+                                             << cor0 << "|" << rng.GetSeed());
 
-    double CalibFactors[nBoundaries-1] = { 0.884845, 0.898526, 0.902439, 0.91899, 0.925868, 0.929440,
-                                           0.948080, 0.943788, 0.96026, 0.955709, 0.964285, 0.95762,
-                                           0.970385, 0.963489, 0.968149, 0.970799, 0.961617 };
+  return cor0;  // TODO: why not returning DeltaE0 and apply E -> E + DeltaE0 ?
+}
 
-    int i0 = -1;
-    for ( int i=0; i<nBoundaries-1; i++)
-      if ( ET/GeV>ETBoundaries[i] && ET/GeV<=ETBoundaries[i+1] )
-        i0 = i;
+// a calibration correction for crack electrons, to be applied to both data11
+// and MC11 not to be used in data12 / MC12
 
-    if( i0>=0 && i0<nBoundaries-1 )
-      return 1./CalibFactors[i0];
+double egammaEnergyCorrectionTool::applyMCCalibration(
+    double eta, double ET, PATCore::ParticleType::Type ptype) const {
 
+  if (ptype != PATCore::ParticleType::Electron ||
+      m_esmodel != egEnergyCorr::es2011c)
     return 1.;
 
-  }
+  double aeta = std::abs(eta);
 
+  if (aeta < 1.42 || aeta > 1.55)
+    return 1.;
 
-  // AF -> G4 correction
+  const int nBoundaries = 18;
+  double ETBoundaries[nBoundaries] = {0.,  5.4, 8.5, 12.9, 16., 20.,
+                                      25., 30., 35., 40.,  45., 50.,
+                                      55., 60., 65., 70.,  75., 99999.};
 
-  double egammaEnergyCorrectionTool::applyAFtoG4(double eta, double ptGeV,
-						 PATCore::ParticleType::Type ptype) const {
-    const double aeta = std::abs(eta);
-    if (aeta > 2.47) return 1.;
+  double CalibFactors[nBoundaries - 1] = {
+      0.884845, 0.898526, 0.902439, 0.91899,  0.925868, 0.929440,
+      0.948080, 0.943788, 0.96026,  0.955709, 0.964285, 0.95762,
+      0.970385, 0.963489, 0.968149, 0.970799, 0.961617};
 
-    if (m_esmodel == egEnergyCorr::es2015PRE or m_esmodel == egEnergyCorr::es2015PRE_res_improved or
-        m_esmodel == egEnergyCorr::es2015cPRE or m_esmodel == egEnergyCorr::es2015cPRE_res_improved or
-        m_esmodel == egEnergyCorr::es2015c_summer or m_esmodel == egEnergyCorr::es2016PRE or m_esmodel == egEnergyCorr::es2017 or
-        m_esmodel == egEnergyCorr::es2017_summer or m_esmodel == egEnergyCorr::es2017_summer_improved or
-        m_esmodel == egEnergyCorr::es2017_summer_final or m_esmodel == egEnergyCorr::es2017_R21_PRE or
-        m_esmodel == egEnergyCorr::es2017_R21_v0 or m_esmodel == egEnergyCorr::es2017_R21_v1 or
-        m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 or m_esmodel == egEnergyCorr::es2018_R21_v0 or
-        m_esmodel == egEnergyCorr::es2018_R21_v1 or m_esmodel == egEnergyCorr::es2022_R22_PRE) {
+  int i0 = -1;
+  for (int i = 0; i < nBoundaries - 1; i++)
+    if (ET / GeV > ETBoundaries[i] && ET / GeV <= ETBoundaries[i + 1])
+      i0 = i;
 
-      if (m_esmodel == egEnergyCorr::es2017_R21_v1 || m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 ||
-          m_esmodel == egEnergyCorr::es2018_R21_v0 || m_esmodel == egEnergyCorr::es2018_R21_v1 ||
-          m_esmodel == egEnergyCorr::es2022_R22_PRE) {
-        //
-        // in es02017_R21_v1 : AF2 to FullSim correction is in a 2D eta-Pt histogram
+  if (i0 >= 0 && i0 < nBoundaries - 1)
+    return 1. / CalibFactors[i0];
 
-        if (ptype == PATCore::ParticleType::Electron) { return (1.+getValueHistAt(*m_G4OverAFII_electron_2D, aeta,ptGeV,true,true,true,true)); }
-        else if (ptype == PATCore::ParticleType::ConvertedPhoton) { return (1.+getValueHistAt(*m_G4OverAFII_converted_2D, aeta,ptGeV,true,true,true,true)); }
-        else if (ptype == PATCore::ParticleType::UnconvertedPhoton) { return (1.+getValueHistAt(*m_G4OverAFII_unconverted_2D, aeta,ptGeV,true,true,true,true)); }
-        else { throw std::runtime_error("particle not valid"); }
+  return 1.;
+}
+
+// AF -> G4 correction
+
+double egammaEnergyCorrectionTool::applyAFtoG4(
+    double eta, double ptGeV, PATCore::ParticleType::Type ptype) const {
+  const double aeta = std::abs(eta);
+  if (aeta > 2.47)
+    return 1.;
+
+  if (m_esmodel == egEnergyCorr::es2015PRE or
+      m_esmodel == egEnergyCorr::es2015PRE_res_improved or
+      m_esmodel == egEnergyCorr::es2015cPRE or
+      m_esmodel == egEnergyCorr::es2015cPRE_res_improved or
+      m_esmodel == egEnergyCorr::es2015c_summer or
+      m_esmodel == egEnergyCorr::es2016PRE or
+      m_esmodel == egEnergyCorr::es2017 or
+      m_esmodel == egEnergyCorr::es2017_summer or
+      m_esmodel == egEnergyCorr::es2017_summer_improved or
+      m_esmodel == egEnergyCorr::es2017_summer_final or
+      m_esmodel == egEnergyCorr::es2017_R21_PRE or
+      m_esmodel == egEnergyCorr::es2017_R21_v0 or
+      m_esmodel == egEnergyCorr::es2017_R21_v1 or
+      m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 or
+      m_esmodel == egEnergyCorr::es2018_R21_v0 or
+      m_esmodel == egEnergyCorr::es2018_R21_v1 or
+      m_esmodel == egEnergyCorr::es2022_R22_PRE or
+      m_esmodel == egEnergyCorr::es2023_R22_Run2_v0) {
+
+    if (m_esmodel == egEnergyCorr::es2017_R21_v1 ||
+        m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 ||
+        m_esmodel == egEnergyCorr::es2018_R21_v0 ||
+        m_esmodel == egEnergyCorr::es2018_R21_v1 ||
+        m_esmodel == egEnergyCorr::es2022_R22_PRE ||
+        m_esmodel == egEnergyCorr::es2023_R22_Run2_v0) {
+      //
+      // in es02017_R21_v1 : AF2 to FullSim correction is in a 2D eta-Pt
+      // histogram
+
+      if (ptype == PATCore::ParticleType::Electron) {
+        return (1. + getValueHistAt(*m_G4OverAFII_electron_2D, aeta, ptGeV,
+                                    true, true, true, true));
+      } else if (ptype == PATCore::ParticleType::ConvertedPhoton) {
+        return (1. + getValueHistAt(*m_G4OverAFII_converted_2D, aeta, ptGeV,
+                                    true, true, true, true));
+      } else if (ptype == PATCore::ParticleType::UnconvertedPhoton) {
+        return (1. + getValueHistAt(*m_G4OverAFII_unconverted_2D, aeta, ptGeV,
+                                    true, true, true, true));
       } else {
-        if (ptype == PATCore::ParticleType::Electron) { return getValueHistoAt(*m_G4OverAFII_electron, aeta); }
-        else if (ptype == PATCore::ParticleType::ConvertedPhoton) { return getValueHistoAt(*m_G4OverAFII_converted, aeta); }
-        else if (ptype == PATCore::ParticleType::UnconvertedPhoton) { return getValueHistoAt(*m_G4OverAFII_unconverted, aeta); }
-        else { throw std::runtime_error("particle not valid"); }
+        throw std::runtime_error("particle not valid");
       }
     } else {
-      // run 1
-      return m_G4OverAFII_electron->GetBinContent( std::as_const(*m_G4OverAFII_electron).GetXaxis()->FindBin(eta) );
+      if (ptype == PATCore::ParticleType::Electron) {
+        return getValueHistoAt(*m_G4OverAFII_electron, aeta);
+      } else if (ptype == PATCore::ParticleType::ConvertedPhoton) {
+        return getValueHistoAt(*m_G4OverAFII_converted, aeta);
+      } else if (ptype == PATCore::ParticleType::UnconvertedPhoton) {
+        return getValueHistoAt(*m_G4OverAFII_unconverted, aeta);
+      } else {
+        throw std::runtime_error("particle not valid");
+      }
+    }
+  } else {
+    // run 1
+    return m_G4OverAFII_electron->GetBinContent(
+        std::as_const(*m_G4OverAFII_electron).GetXaxis()->FindBin(eta));
+  }
+}
+
+// Frozen Showers -> G4 correction
+
+double egammaEnergyCorrectionTool::applyFStoG4(double eta) const {
+
+  double aeta = std::abs(eta);
+  if (aeta < 3.3 || aeta > 4.9)
+    return 1.;
+
+  return m_G4OverFrSh->GetBinContent(
+      std::as_const(*m_G4OverFrSh).GetXaxis()->FindBin(aeta));
+}
+
+// functions for energy scale corrections
+
+double egammaEnergyCorrectionTool::getAlphaZee(
+    long int runnumber, double eta, egEnergyCorr::Scale::Variation var,
+    double varSF) const {
+
+  if (!m_zeeNom) {
+    ATH_MSG_FATAL("no data for Zee");
+    return -999.0;
+  }
+
+  double value = 0.;
+  if (m_esmodel != egEnergyCorr::es2023_R22_Run2_v0) {
+    int ieta = std::as_const(*m_zeeNom).GetXaxis()->FindBin(eta);
+    value = m_zeeNom->GetBinContent(ieta);
+  } else {
+    if (runnumber > 341649 && runnumber <= 364292) {
+      // 2018 runnumber range
+      int ieta = std::as_const(*m_zeeNom).GetXaxis()->FindBin(eta);
+      value = m_zeeNom->GetBinContent(ieta);
+    } else if (runnumber > 364292) {
+      ATH_MSG_WARNING(
+          "es2023_R22_Run2_v0 is only valid for Run-2 data! using 2018 scales");
+      int ieta = std::as_const(*m_zeeNom).GetXaxis()->FindBin(eta);
+      value = m_zeeNom->GetBinContent(ieta);
     }
   }
 
-
-  // Frozen Showers -> G4 correction
-
-  double egammaEnergyCorrectionTool::applyFStoG4(double eta) const {
-
-    double aeta = std::abs(eta);
-    if( aeta<3.3 || aeta>4.9 )
-      return 1.;
-
-    return m_G4OverFrSh->GetBinContent( std::as_const(*m_G4OverFrSh).GetXaxis()->FindBin(aeta) );
-
+  if ((m_esmodel == egEnergyCorr::es2018_R21_v0 ||
+       m_esmodel == egEnergyCorr::es2018_R21_v1 ||
+       m_esmodel == egEnergyCorr::es2023_R22_Run2_v0) &&
+      runnumber <= 341649 && runnumber >= 324320) {
+    int ieta = std::as_const(*m_zeeNom_data2017).GetXaxis()->FindBin(eta);
+    value = m_zeeNom_data2017->GetBinContent(ieta);
   }
 
-  // functions for energy scale corrections
+  // for es2017_R21_v0 different set of scales for 2017, 2016 and 2015 data
+  if (m_esmodel == egEnergyCorr::es2017_R21_v0 && runnumber < 322817 &&
+      runnumber >= 297000) {
+    int ieta = std::as_const(*m_zeeNom_data2016).GetXaxis()->FindBin(eta);
+    value = m_zeeNom_data2016->GetBinContent(ieta);
+  }
 
-  double egammaEnergyCorrectionTool::getAlphaZee(long int runnumber, double eta, egEnergyCorr::Scale::Variation var, double varSF) const {
+  if ((m_esmodel == egEnergyCorr::es2017_R21_v1 ||
+       m_esmodel == egEnergyCorr::es2018_R21_v0 ||
+       m_esmodel == egEnergyCorr::es2018_R21_v1 ||
+       m_esmodel == egEnergyCorr::es2023_R22_Run2_v0) &&
+      runnumber < 322817 && runnumber >= 297000) {
+    int ieta = std::as_const(*m_zeeNom_data2016).GetXaxis()->FindBin(eta);
+    value = m_zeeNom_data2016->GetBinContent(ieta);
+  }
 
-    if (!m_zeeNom) {
-      ATH_MSG_FATAL("no data for Zee");
-      return -999.0;
+  if (m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 && runnumber < 322817 &&
+      runnumber >= 297000) {
+    int ieta = std::as_const(*m_zeeNom_data2016).GetXaxis()->FindBin(eta);
+    value = m_zeeNom_data2016->GetBinContent(ieta);
+  }
+
+  if (m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 && runnumber < 297000) {
+    int ieta = std::as_const(*m_zeeNom_data2015).GetXaxis()->FindBin(eta);
+    value = m_zeeNom_data2015->GetBinContent(ieta);
+  }
+
+  if (m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 && runnumber > 347847) {
+    int ieta = std::as_const(*m_zeeNom_data2018).GetXaxis()->FindBin(eta);
+    value = m_zeeNom_data2018->GetBinContent(ieta);
+  }
+
+  if ((m_esmodel == egEnergyCorr::es2017 or
+       m_esmodel == egEnergyCorr::es2017_summer or
+       m_esmodel == egEnergyCorr::es2017_summer_improved or
+       m_esmodel == egEnergyCorr::es2017_summer_final or
+       m_esmodel == egEnergyCorr::es2015_5TeV or
+       m_esmodel == egEnergyCorr::es2017_R21_v0 or
+       m_esmodel == egEnergyCorr::es2017_R21_v1 or
+       m_esmodel == egEnergyCorr::es2018_R21_v0 or
+       m_esmodel == egEnergyCorr::es2018_R21_v1 or
+       m_esmodel == egEnergyCorr::es2023_R22_Run2_v0) &&
+      runnumber < 297000) {
+    // 2 sets of scales for this configuration
+    // change histogram if 2015 data
+    int ieta = std::as_const(*m_zeeNom_data2015).GetXaxis()->FindBin(eta);
+    value = m_zeeNom_data2015->GetBinContent(ieta);
+  }
+
+  if (m_esmodel == egEnergyCorr::es2015PRE or
+      m_esmodel == egEnergyCorr::es2015PRE_res_improved or
+      m_esmodel == egEnergyCorr::es2015cPRE or
+      m_esmodel == egEnergyCorr::es2015cPRE_res_improved) {
+    // special case for es2015PRE
+    // additional correction due to LAr temperature effect
+    // for extrapolation 2012 -> 2015 temperature change
+    // numbers from Guillaume 20150506
+    /*
+      2012 (K)   22/04/2015   DeltaResponse 2015/2012 (-2%/K)  deltaAlpha
+      EndCap C       88.41        88.63                            -0.45% -0.45%
+      Barrel C       88.47        88.70                            -0.46% -0.46%
+      Barrel A       88.50        88.71                            -0.42% -0.42%
+      EndCap A       88.70        88.70                            +0.00% +0.00%
+    */
+    if (eta >= 0) {  // side A
+      if (eta < 1.45)
+        value += -0.42E-2;
+      else if (eta < 3.2)
+        value += 0.;
+    } else {  // side C
+      if (eta > -1.45)
+        value += -0.46E-2;
+      else if (eta > -3.2)
+        value += -0.45E-2;
     }
+
+    // special case for es2015PRE
+    // additional correction for uA->MeV first 2 weeks 2015 data
+    if (runnumber >= 266904 and runnumber <= 267639 and
+        m_use_uA2MeV_2015_first2weeks_correction) {
+      const double uA2MeV_correction =
+          m_uA2MeV_2015_first2weeks_correction->GetBinContent(
+              m_uA2MeV_2015_first2weeks_correction->FindFixBin(std::abs(eta)));
+      // this takes into account also O((uA2MeV_correction - 1) * alpha) terms
+      // a simpler formula would be: value + uA2MeV_correction - 1
+      value = uA2MeV_correction * (1 + value) - 1;
+    }
+  }  // end special case for es2015PRE*
+
+  if ((m_esmodel == egEnergyCorr::es2015c_summer or
+       m_esmodel == egEnergyCorr::es2016PRE) and
+      m_use_temp_correction201215) {
+    // keep the correction 2012->2015 for |eta| > 2.5
+    // if (eta > 2.5 and eta < 3.2) value += 0.;
+    if (eta < -2.5 and eta > -3.2)
+      value += -0.45E-2;
+  }
+
+  if (m_esmodel == egEnergyCorr::es2015c_summer or
+      m_esmodel ==
+          egEnergyCorr::es2016PRE) {  // correction for the extrapolation from
+                                      // es2015_summer
+    if (runnumber >= 297000) {        // only for 2016 data
+      if (eta >= 0) {                 // side A
+        if (eta < 1.45)
+          value *= 1.00028;
+        else if (eta < 3.2)
+          value *= 1.00018;
+      } else {  // side C
+        if (eta > -1.45)
+          value *= 1.00028;
+        else if (eta > -3.2)
+          value *= 0.99986;
+      }
+    }
+  }
+
+  ATH_MSG_DEBUG("getAlphaZee, def alpha " << value << " at eta = " << eta);
+
+  if (var == egEnergyCorr::Scale::ZeeStatUp or
+      var == egEnergyCorr::Scale::ZeeStatDown) {
+    const double sign = (var == egEnergyCorr::Scale::ZeeStatUp) ? 1 : -1;
+
+    TH1* h = ((TH1*)m_zeeNom.get());
+
+    if ((m_esmodel == egEnergyCorr::es2017 or
+         m_esmodel == egEnergyCorr::es2017_summer or
+         m_esmodel == egEnergyCorr::es2017_summer_improved or
+         m_esmodel == egEnergyCorr::es2017_summer_final or
+         m_esmodel == egEnergyCorr::es2015_5TeV or
+         m_esmodel == egEnergyCorr::es2017_R21_v0 or
+         m_esmodel == egEnergyCorr::es2017_R21_v1 or
+         m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 or
+         m_esmodel == egEnergyCorr::es2018_R21_v0 or
+         m_esmodel == egEnergyCorr::es2018_R21_v1 or
+         m_esmodel == egEnergyCorr::es2023_R22_Run2_v0) &&
+        runnumber < 297000) {
+      h = ((TH1*)m_zeeNom_data2015.get());  // special for 2015 with es2017
+    }
+    if ((m_esmodel == egEnergyCorr::es2017_R21_v0 ||
+         m_esmodel == egEnergyCorr::es2017_R21_v1 ||
+         m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 ||
+         m_esmodel == egEnergyCorr::es2018_R21_v0 ||
+         m_esmodel == egEnergyCorr::es2018_R21_v1 or
+         m_esmodel == egEnergyCorr::es2023_R22_Run2_v0) &&
+        runnumber >= 297000 && runnumber < 322817) {
+      h = m_zeeNom_data2016.get();  // 2016 data
+    }
+    if (m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 && runnumber > 347847) {
+      h = m_zeeNom_data2018.get();
+    }
+    if ((m_esmodel == egEnergyCorr::es2018_R21_v0 ||
+         m_esmodel == egEnergyCorr::es2018_R21_v1 or
+         m_esmodel == egEnergyCorr::es2023_R22_Run2_v0) &&
+        runnumber >= 324320 && runnumber <= 341649) {
+      h = ((TH1*)m_zeeNom_data2017.get());  // 2017 data
+    }
+    double stat_error = h->GetBinError(h->FindFixBin(eta));
+    if (m_use_stat_error_scaling) {
+      stat_error = stat_error / sqrt(h->GetNbinsX());
+    }
+    value += sign * stat_error * varSF;
+  } else if (var == egEnergyCorr::Scale::ZeeSystUp && m_zeeSyst) {
+    value += get_ZeeSyst(eta) * varSF;
+
+  } else if (var == egEnergyCorr::Scale::ZeeSystDown && m_zeeSyst) {
+    value -= get_ZeeSyst(eta) * varSF;
+  } else if (var == egEnergyCorr::Scale::OFCUp && m_zeeSystOFC) {
+    value += get_OFCSyst(eta) * varSF;
+  } else if (var == egEnergyCorr::Scale::EXTRARUN3PREUp &&
+             m_esmodel ==
+                 egEnergyCorr::es2022_R22_PRE)  // as this is a flat 0.4% syst
+                                                // hardcoded, need to switch on
+                                                // only for es2022_R22_PRE. OFC
+                                                // should be OK, as the OFC file
+                                                // is only defined for this
+                                                // pre-recommendation.
+  {
+    value +=
+        0.4E-2 *
+        varSF;  // flat 0.4% syst (details:
+                // https://indico.cern.ch/event/1250560/contributions/5253619/attachments/2586538/4462853/mc21-change.pdf)
+  } else if (var == egEnergyCorr::Scale::EXTRARUN3PREDown &&
+             m_esmodel == egEnergyCorr::es2022_R22_PRE) {
+    value -= 0.4E-2 * varSF;
+  } else if (var == egEnergyCorr::Scale::OFCDown && m_zeeSystOFC) {
+    value -= get_OFCSyst(eta) * varSF;
+  } else if (var == egEnergyCorr::Scale::ZeePhysUp && m_zeePhys) {
+
+    int ieta = std::as_const(*m_zeePhys).GetXaxis()->FindBin(eta);
+    value += m_zeePhys->GetBinContent(ieta) * varSF;
+
+  } else if (var == egEnergyCorr::Scale::ZeePhysDown && m_zeePhys) {
+
+    int ieta = std::as_const(*m_zeePhys).GetXaxis()->FindBin(eta);
+    value -= m_zeePhys->GetBinContent(ieta) * varSF;
+
+  } else if ((var == egEnergyCorr::Scale::LArTemperature2015PreUp or
+              var == egEnergyCorr::Scale::LArTemperature2015PreDown) and
+             (m_esmodel == egEnergyCorr::es2015PRE or
+              m_esmodel == egEnergyCorr::es2015PRE_res_improved or
+              m_esmodel == egEnergyCorr::es2015cPRE or
+              m_esmodel == egEnergyCorr::es2015cPRE_res_improved) and
+             m_use_temp_correction201215) {
+    // special case only for es2015PRE
+    // add LAr temperature effect for extrapolation 2012 -> 2015 temperature
+    // change numbers from Guillaume 20150506
+
+    const double aeta = std::abs(eta);
+    const double sign =
+        (var == egEnergyCorr::Scale::LArTemperature2015PreUp) ? 1 : -1;
+    if (aeta < 1.45) {
+      value += 0.15E-2 * sign;
+    } else if (aeta > 1.45 and aeta < 3.2) {
+      value += 0.25E-2 * sign;
+    }
+  }
+
+  else if ((var == egEnergyCorr::Scale::LArTemperature2015PreUp or
+            var == egEnergyCorr::Scale::LArTemperature2015PreDown) and
+           (m_esmodel == egEnergyCorr::es2015c_summer or
+            m_esmodel == egEnergyCorr::es2016PRE) and
+           m_use_temp_correction201215) {
+    // keep 2012->2015 extrapolation correction for eta > 2.5
+    const double aeta = std::abs(eta);
+    const double sign =
+        (var == egEnergyCorr::Scale::LArTemperature2015PreUp) ? 1 : -1;
+    if (aeta > 2.5 and aeta < 3.2) {
+      value += 0.25E-2 * sign;
+    }
+  }
+
+  else if ((var == egEnergyCorr::Scale::LArTemperature2016PreUp or
+            var == egEnergyCorr::Scale::LArTemperature2016PreDown) and
+           (m_esmodel == egEnergyCorr::es2016PRE) and
+           m_use_temp_correction201516) {
+    // special case for es2016PRE (extrapolation from 2015)
+    const double sign =
+        (var == egEnergyCorr::Scale::LArTemperature2016PreUp) ? 1 : -1;
+    // temp + pileup
+    value += qsum(0.05E-2, 0.02E-2) *
+             sign;  // Guillaume email 23/05/2016 + 26/5/2016
+  }
+
+  else if (var == egEnergyCorr::Scale::ZeeAllDown ||
+           var == egEnergyCorr::Scale::ZeeAllUp) {
 
     int ieta = std::as_const(*m_zeeNom).GetXaxis()->FindBin(eta);
-    double value = m_zeeNom->GetBinContent(ieta);
+    double diff = pow(m_zeeNom->GetBinError(ieta) * varSF, 2);
 
-    if ((m_esmodel == egEnergyCorr::es2018_R21_v0 || m_esmodel == egEnergyCorr::es2018_R21_v1 )  && runnumber<=341649 && runnumber>=324320){
-      int ieta = std::as_const(*m_zeeNom_data2017).GetXaxis()->FindBin(eta);
-      value = m_zeeNom_data2017->GetBinContent(ieta);
+    if (m_zeeSyst) {
+      diff += pow(get_ZeeSyst(eta) * varSF, 2);
     }
 
-     // for es2017_R21_v0 different set of scales for 2017, 2016 and 2015 data
-    if ( m_esmodel == egEnergyCorr::es2017_R21_v0 && runnumber<322817 && runnumber>=297000) {
-      int ieta = std::as_const(*m_zeeNom_data2016).GetXaxis()->FindBin(eta);
-       value = m_zeeNom_data2016->GetBinContent(ieta);
+    if (m_zeePhys) {
+      ieta = std::as_const(*m_zeePhys).GetXaxis()->FindBin(eta);
+      diff += pow(m_zeePhys->GetBinContent(ieta) * varSF, 2);
     }
 
-    if ( (m_esmodel == egEnergyCorr::es2017_R21_v1 || m_esmodel == egEnergyCorr::es2018_R21_v0 || m_esmodel == egEnergyCorr::es2018_R21_v1 ) && runnumber<322817 && runnumber>=297000) {
-      int ieta = std::as_const(*m_zeeNom_data2016).GetXaxis()->FindBin(eta);
-      value = m_zeeNom_data2016->GetBinContent(ieta);
-    }
+    if (var == egEnergyCorr::Scale::ZeeAllUp)
+      value += sqrt(diff);
+    else if (var == egEnergyCorr::Scale::ZeeAllDown)
+      value -= sqrt(diff);
+  }
 
-    if (m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 && runnumber<322817 && runnumber>=297000) {
-      int ieta = std::as_const(*m_zeeNom_data2016).GetXaxis()->FindBin(eta);
-      value = m_zeeNom_data2016->GetBinContent(ieta);
-    }
+  return value;
+}
 
-    if (m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 && runnumber<297000) {
-       int ieta = std::as_const(*m_zeeNom_data2015).GetXaxis()->FindBin(eta);
-       value = m_zeeNom_data2015->GetBinContent(ieta);
-    }
+double egammaEnergyCorrectionTool::getE4Uncertainty(double eta) {
+  const double aeta = std::abs(eta);
+  if ((aeta > 1.6) or (aeta < 1.4)) {
+    return 0.;
+  }
 
-    if (m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 && runnumber>347847) {
-        int ieta = std::as_const(*m_zeeNom_data2018).GetXaxis()->FindBin(eta);
-        value = m_zeeNom_data2018->GetBinContent(ieta);
-    }
+  // numbers from Archil 20/5/2016
 
-    if ((m_esmodel == egEnergyCorr::es2017 or m_esmodel == egEnergyCorr::es2017_summer or
-         m_esmodel == egEnergyCorr::es2017_summer_improved or m_esmodel == egEnergyCorr::es2017_summer_final or
-         m_esmodel == egEnergyCorr::es2015_5TeV or m_esmodel == egEnergyCorr::es2017_R21_v0 or
-         m_esmodel == egEnergyCorr::es2017_R21_v1 or m_esmodel == egEnergyCorr::es2018_R21_v0 or
-         m_esmodel == egEnergyCorr::es2018_R21_v1) &&
-        runnumber < 297000) {
-      // 2 sets of scales for this configuration
-      // change histogram if 2015 data
-      int ieta = std::as_const(*m_zeeNom_data2015).GetXaxis()->FindBin(eta);
-      value = m_zeeNom_data2015->GetBinContent(ieta);
-    }
+  double data_mc_difference = 0.;
+  if (aeta < 1.46) {
+    data_mc_difference = 1E-2;
+  }  // 1.4 - 1.46
+  else if (aeta < 1.52) {
+    data_mc_difference = 3E-2;
+  }  // 1.46 - 1.52
+  else {
+    data_mc_difference = 4.3E-2;
+  }  // 1.52 - 1.6
 
-    if (m_esmodel==egEnergyCorr::es2015PRE or m_esmodel==egEnergyCorr::es2015PRE_res_improved or
-        m_esmodel == egEnergyCorr::es2015cPRE or m_esmodel == egEnergyCorr::es2015cPRE_res_improved) {
-      // special case for es2015PRE
-      // additional correction due to LAr temperature effect
-      // for extrapolation 2012 -> 2015 temperature change
-      // numbers from Guillaume 20150506
-      /*
-	2012 (K)   22/04/2015   DeltaResponse 2015/2012 (-2%/K)  deltaAlpha
-	EndCap C       88.41        88.63                            -0.45%      -0.45%
-	Barrel C       88.47        88.70                            -0.46%      -0.46%
-	Barrel A       88.50        88.71                            -0.42%      -0.42%
-	EndCap A       88.70        88.70                            +0.00%      +0.00%
-      */
-      if (eta >= 0) {  // side A
-        if (eta < 1.45) value += -0.42E-2;
-        else if (eta < 3.2) value += 0.;
-      }
-      else {  // side C
-        if (eta > -1.45) value += -0.46E-2;
-        else if (eta > -3.2) value += -0.45E-2;
-      }
+  const double em_scale = 2.4E-2;
+  const double mbias = 1E-2;  // Archil presentation 26/5/2016
+  const double laser = 4E-2;
 
-      // special case for es2015PRE
-      // additional correction for uA->MeV first 2 weeks 2015 data
-      if (runnumber >= 266904 and runnumber <= 267639 and m_use_uA2MeV_2015_first2weeks_correction)
-      {
-        const double uA2MeV_correction = m_uA2MeV_2015_first2weeks_correction->GetBinContent(
-                                           m_uA2MeV_2015_first2weeks_correction->FindFixBin(std::abs(eta)));
-        // this takes into account also O((uA2MeV_correction - 1) * alpha) terms
-        // a simpler formula would be: value + uA2MeV_correction - 1
-        value = uA2MeV_correction * (1 + value) - 1;
-      }
-    }  // end special case for es2015PRE*
+  return std::sqrt(data_mc_difference * data_mc_difference +
+                   em_scale * em_scale + mbias * mbias + laser * laser);
+}
 
-    if ((m_esmodel == egEnergyCorr::es2015c_summer or m_esmodel == egEnergyCorr::es2016PRE) and m_use_temp_correction201215) {
-      // keep the correction 2012->2015 for |eta| > 2.5
-      // if (eta > 2.5 and eta < 3.2) value += 0.;
-      if (eta < -2.5 and eta > -3.2) value += -0.45E-2;
-    }
+double egammaEnergyCorrectionTool::getWtots1Uncertainty(
+    double cl_eta, double energy, PATCore::ParticleType::Type ptype) const {
+  double value = 0;
 
-    if (m_esmodel == egEnergyCorr::es2015c_summer or m_esmodel == egEnergyCorr::es2016PRE) { // correction for the extrapolation from es2015_summer
-      if (runnumber >= 297000) { // only for 2016 data
-        if (eta >= 0) {  // side A
-          if (eta < 1.45) value *= 1.00028;
-          else if (eta < 3.2) value *= 1.00018;
-        }
-        else {  // side C
-          if (eta > -1.45) value *= 1.00028;
-          else if (eta > -3.2) value *= 0.99986;
-        }
-      }
-    }
+  // Get slopes and wstot values
+  // deltaE/E (Et, particle type ) =  2*A/mZ * ( wstot(Et,particle type)_data  -
+  // <wstot(40 GeV Et electrons)_data)> ) - 2*B/mZ* (wstot(Et,particle type)_MC
+  // - <w wstot(40 GeV Et electrons)_MC>) factor 2 to go from slopes in dM/M to
+  // dE/E
 
+  //|eta|>2.4 => use last eta bin
+  if (cl_eta < -2.4)
+    cl_eta = -2.35;
+  if (cl_eta > 2.4)
+    cl_eta = 2.35;
 
-    if (var == egEnergyCorr::Scale::ZeeStatUp or var == egEnergyCorr::Scale::ZeeStatDown) {
-      const double sign = (var == egEnergyCorr::Scale::ZeeStatUp) ? 1 : -1;
+  int bin = m_wstot_slope_A_data->FindFixBin(cl_eta);
+  double A = m_wstot_slope_A_data->GetBinContent(bin);
+  double B = m_wstot_slope_B_MC->GetBinContent(bin);
 
-      TH1* h= ((TH1*)m_zeeNom.get());
+  // the wstot=f(pT) depends on the particle type
+  double ETGeV = energy / cosh(cl_eta) / 1E3;
+  double wstot_pT_data_p0 = 0.;
+  double wstot_pT_data_p1 = 0.;
+  double wstot_pT_MC_p0 = 0.;
+  double wstot_pT_MC_p1 = 0.;
 
-      if ((m_esmodel == egEnergyCorr::es2017 or m_esmodel == egEnergyCorr::es2017_summer or
-           m_esmodel == egEnergyCorr::es2017_summer_improved or m_esmodel == egEnergyCorr::es2017_summer_final or
-           m_esmodel == egEnergyCorr::es2015_5TeV or m_esmodel == egEnergyCorr::es2017_R21_v0 or
-           m_esmodel == egEnergyCorr::es2017_R21_v1 or m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 or
-           m_esmodel == egEnergyCorr::es2018_R21_v0 or m_esmodel == egEnergyCorr::es2018_R21_v1) &&
-          runnumber < 297000) {
-        h = ((TH1*)m_zeeNom_data2015.get()); // special for 2015 with es2017
-      }
-      if ((m_esmodel == egEnergyCorr::es2017_R21_v0 || m_esmodel == egEnergyCorr::es2017_R21_v1 ||
-           m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 || m_esmodel == egEnergyCorr::es2018_R21_v0 ||
-           m_esmodel == egEnergyCorr::es2018_R21_v1) &&
-          runnumber >= 297000 && runnumber < 322817) {
-        h = m_zeeNom_data2016.get(); // 2016 data
-      }
-      if (  m_esmodel== egEnergyCorr::es2017_R21_ofc0_v1 && runnumber>347847) {
-        h = m_zeeNom_data2018.get();
-      }
-      if ( (m_esmodel == egEnergyCorr::es2018_R21_v0 || m_esmodel == egEnergyCorr::es2018_R21_v1 ) && runnumber>=324320 && runnumber<=341649 ){
-        h=((TH1*)m_zeeNom_data2017.get()); // 2017 data
-      }
-      double stat_error = h->GetBinError(h->FindFixBin(eta));
-	    if (m_use_stat_error_scaling) {
-        stat_error = stat_error / sqrt(h->GetNbinsX());
-	    }
-	    value += sign * stat_error * varSF;
-    }
-    else if( var==egEnergyCorr::Scale::ZeeSystUp && m_zeeSyst ) {
-      value += get_ZeeSyst(eta) * varSF;
+  double wstot_40_data =
+      m_wstot_pT_data_p0_electrons->GetBinContent(bin) +
+      (m_wstot_pT_data_p1_electrons->GetBinContent(bin)) / sqrt(40.);
+  double wstot_40_MC =
+      m_wstot_pT_MC_p0_electrons->GetBinContent(bin) +
+      (m_wstot_pT_MC_p1_electrons->GetBinContent(bin)) / sqrt(40.);
 
-    } else if( var==egEnergyCorr::Scale::ZeeSystDown && m_zeeSyst ) {
-      value -= get_ZeeSyst(eta) * varSF;
-    } else if( var==egEnergyCorr::Scale::OFCUp && m_zeeSystOFC ) {
-      value += get_OFCSyst(eta) * varSF;
-    } else if( var == egEnergyCorr::Scale::EXTRARUN3PREUp)
-    {
-      value+=0.4E-2*varSF;  // flat 0.4% syst (details: https://indico.cern.ch/event/1250560/contributions/5253619/attachments/2586538/4462853/mc21-change.pdf)
-    } else if(var == egEnergyCorr::Scale::EXTRARUN3PREDown)
-    {
-      value-=0.4E-2*varSF;
-    } else if( var==egEnergyCorr::Scale::OFCDown && m_zeeSystOFC ) {
-      value -= get_OFCSyst(eta) * varSF;
-    } else if( var==egEnergyCorr::Scale::ZeePhysUp && m_zeePhys ) {
+  if (ptype == PATCore::ParticleType::Electron) {
+    wstot_pT_data_p0 = m_wstot_pT_data_p0_electrons->GetBinContent(bin);
+    wstot_pT_data_p1 = m_wstot_pT_data_p1_electrons->GetBinContent(bin);
+    wstot_pT_MC_p0 = m_wstot_pT_MC_p0_electrons->GetBinContent(bin);
+    wstot_pT_MC_p1 = m_wstot_pT_MC_p1_electrons->GetBinContent(bin);
+  } else if (ptype == PATCore::ParticleType::UnconvertedPhoton) {
+    wstot_pT_data_p0 =
+        m_wstot_pT_data_p0_unconverted_photons->GetBinContent(bin);
+    wstot_pT_data_p1 =
+        m_wstot_pT_data_p1_unconverted_photons->GetBinContent(bin);
+    wstot_pT_MC_p0 = m_wstot_pT_MC_p0_unconverted_photons->GetBinContent(bin);
+    wstot_pT_MC_p1 = m_wstot_pT_MC_p1_unconverted_photons->GetBinContent(bin);
+  } else if (ptype == PATCore::ParticleType::ConvertedPhoton) {
+    wstot_pT_data_p0 = m_wstot_pT_data_p0_converted_photons->GetBinContent(bin);
+    wstot_pT_data_p1 = m_wstot_pT_data_p1_converted_photons->GetBinContent(bin);
+    wstot_pT_MC_p0 = m_wstot_pT_MC_p0_converted_photons->GetBinContent(bin);
+    wstot_pT_MC_p1 = m_wstot_pT_MC_p1_converted_photons->GetBinContent(bin);
+  }
 
-      ieta = std::as_const(*m_zeePhys).GetXaxis()->FindBin( eta );
-      value += m_zeePhys->GetBinContent(ieta) * varSF;
+  double wstot_pT_data = 0.;
+  double wstot_pT_MC = 0.;
 
+  // Initial parametrization: [0]+1*pT
+  // wstot_pT_data = wstot_pT_data_p0+wstot_pT_data_p1*ETGeV;
+  // prevent wstot_pT_data from being negative
+  // if(wstot_pT_data<0) wstot_pT_data = 0.;
 
-    } else if( var==egEnergyCorr::Scale::ZeePhysDown && m_zeePhys ) {
+  // New parametrization: p0+p1/sqrt(pT)
+  // flat uncertainty below 25 GeV
+  if (ETGeV < 25.)
+    ETGeV = 25.;
 
-      ieta = std::as_const(*m_zeePhys).GetXaxis()->FindBin( eta );
-      value -= m_zeePhys->GetBinContent(ieta) * varSF;
+  wstot_pT_data = wstot_pT_data_p0 + wstot_pT_data_p1 / sqrt(ETGeV);
+  wstot_pT_MC = wstot_pT_MC_p0 + wstot_pT_MC_p1 / sqrt(ETGeV);
 
+  value = 2 * A / 91.2 * (wstot_pT_data - wstot_40_data) -
+          2 * B / 91.2 * (wstot_pT_MC - wstot_40_MC);
 
-    }
-    else if ((var == egEnergyCorr::Scale::LArTemperature2015PreUp or var == egEnergyCorr::Scale::LArTemperature2015PreDown) and
-             (m_esmodel == egEnergyCorr::es2015PRE or m_esmodel == egEnergyCorr::es2015PRE_res_improved or
-              m_esmodel == egEnergyCorr::es2015cPRE or m_esmodel == egEnergyCorr::es2015cPRE_res_improved) and
-             m_use_temp_correction201215)
-    {
-      // special case only for es2015PRE
-      // add LAr temperature effect for extrapolation 2012 -> 2015 temperature change
-      // numbers from Guillaume 20150506
+  return value;
+}
 
-      const double aeta = std::abs(eta);
-      const double sign = (var == egEnergyCorr::Scale::LArTemperature2015PreUp) ? 1 : -1;
-      if (aeta < 1.45) { value += 0.15E-2 * sign; }
-      else if (aeta > 1.45 and aeta < 3.2) { value += 0.25E-2 * sign; }
-    }
+// Layer scale uncertainties and induced non-linearity
+//////////////////////////////////////////////////////
 
-    else if ((var == egEnergyCorr::Scale::LArTemperature2015PreUp or var == egEnergyCorr::Scale::LArTemperature2015PreDown) and
-             (m_esmodel == egEnergyCorr::es2015c_summer or m_esmodel == egEnergyCorr::es2016PRE) and m_use_temp_correction201215) {
-      // keep 2012->2015 extrapolation correction for eta > 2.5
-      const double aeta = std::abs(eta);
-      const double sign = (var == egEnergyCorr::Scale::LArTemperature2015PreUp) ? 1 : -1;
-      if (aeta > 2.5 and aeta < 3.2) { value += 0.25E-2 * sign; }
-    }
+double egammaEnergyCorrectionTool::getLayerUncertainty(
+    int iLayer, double cl_eta, egEnergyCorr::Scale::Variation var,
+    double varSF) const {
 
+  double value = 0.;
 
-    else if ((var == egEnergyCorr::Scale::LArTemperature2016PreUp or var == egEnergyCorr::Scale::LArTemperature2016PreDown) and
-             (m_esmodel == egEnergyCorr::es2016PRE) and
-             m_use_temp_correction201516)
-    {
-      // special case for es2016PRE (extrapolation from 2015)
-        const double sign = (var == egEnergyCorr::Scale::LArTemperature2016PreUp) ? 1 : -1;
-        // temp + pileup
-        value += qsum(0.05E-2, 0.02E-2) * sign; // Guillaume email 23/05/2016 + 26/5/2016
-    }
-
-
-    else if( var==egEnergyCorr::Scale::ZeeAllDown || var==egEnergyCorr::Scale::ZeeAllUp ) {
-
-      ieta = std::as_const(*m_zeeNom).GetXaxis()->FindBin( eta );
-      double diff = pow(m_zeeNom->GetBinError(ieta) * varSF, 2);
-
-      if( m_zeeSyst ) {
-	diff += pow(get_ZeeSyst(eta) * varSF, 2);
-      }
-
-      if( m_zeePhys ) {
-        ieta = std::as_const(*m_zeePhys).GetXaxis()->FindBin(eta);
-        diff += pow(m_zeePhys->GetBinContent(ieta) * varSF, 2);
-      }
-
-      if( var==egEnergyCorr::Scale::ZeeAllUp ) value += sqrt(diff);
-      else if( var==egEnergyCorr::Scale::ZeeAllDown ) value -= sqrt(diff);
-    }
-
+  if (var == egEnergyCorr::Scale::Nominal)
     return value;
 
+  // nearest eta outside of crack (for PS scale values and uncertainties)
+  double nearestEta = cl_eta;
+  if (m_esmodel != egEnergyCorr::es2023_R22_Run2_v0)
+    nearestEta = nearestEtaBEC(cl_eta);
+
+  if (iLayer == 0) {  // use nearestEta
+
+    if (var == egEnergyCorr::Scale::PSUp && m_aPSNom)
+      value = m_aPSNom->GetBinError(m_aPSNom->FindFixBin(nearestEta));
+
+    else if (var == egEnergyCorr::Scale::PSDown && m_aPSNom)
+      value = -m_aPSNom->GetBinError(m_aPSNom->FindFixBin(nearestEta));
+
+    else if (var == egEnergyCorr::Scale::PSb12Up && m_daPSb12)
+      value = m_daPSb12->GetBinContent(m_daPSb12->FindFixBin(nearestEta));
+
+    else if (var == egEnergyCorr::Scale::PSb12Down && m_daPSb12)
+      value = -m_daPSb12->GetBinContent(m_daPSb12->FindFixBin(nearestEta));
+
+    else if (var == egEnergyCorr::Scale::LArElecUnconvUp && m_daPSCor)
+      value = m_daPSCor->GetBinContent(m_daPSCor->FindFixBin(nearestEta));
+
+    else if (var == egEnergyCorr::Scale::LArElecUnconvDown && m_daPSCor)
+      value = -m_daPSCor->GetBinContent(m_daPSCor->FindFixBin(nearestEta));
+
   }
 
+  else if (iLayer == 1) {  // use cl_eta
 
-  double egammaEnergyCorrectionTool::getE4Uncertainty(double eta) {
-    const double aeta = std::abs(eta);
-    if ((aeta > 1.6) or (aeta < 1.4)) { return 0.; }
-
-    // numbers from Archil 20/5/2016
-
-    double data_mc_difference = 0.;
-    if (aeta < 1.46) { data_mc_difference = 1E-2; }       // 1.4 - 1.46
-    else if (aeta < 1.52) { data_mc_difference = 3E-2; }  // 1.46 - 1.52
-    else { data_mc_difference = 4.3E-2; }                 // 1.52 - 1.6
-
-    const double em_scale = 2.4E-2;
-    const double mbias = 1E-2;  // Archil presentation 26/5/2016
-    const double laser = 4E-2;
-
-    return std::sqrt(data_mc_difference * data_mc_difference +
-                     em_scale * em_scale + mbias * mbias +
-                     laser * laser);
-  }
-
-  double egammaEnergyCorrectionTool::getWtots1Uncertainty(double cl_eta, double energy, PATCore::ParticleType::Type ptype) const {
-    double value = 0;
-
-    //Get slopes and wstot values
-    //deltaE/E (Et, particle type ) =  2*A/mZ * ( wstot(Et,particle type)_data  - <wstot(40 GeV Et electrons)_data)> ) - 2*B/mZ* (wstot(Et,particle type)_MC - <w wstot(40 GeV Et electrons)_MC>)
-    //factor 2 to go from slopes in dM/M to dE/E
-
-    //|eta|>2.4 => use last eta bin
-    if(cl_eta<-2.4) cl_eta = -2.35;
-    if(cl_eta>2.4) cl_eta = 2.35;
-
-    int bin = m_wstot_slope_A_data->FindFixBin(cl_eta);
-    double A = m_wstot_slope_A_data->GetBinContent(bin);
-    double B = m_wstot_slope_B_MC->GetBinContent(bin);
-
-    //the wstot=f(pT) depends on the particle type
-    double ETGeV = energy / cosh(cl_eta) / 1E3;
-    double wstot_pT_data_p0 = 0.;
-    double wstot_pT_data_p1 = 0.;
-    double wstot_pT_MC_p0 = 0.;
-    double wstot_pT_MC_p1 = 0.;
-
-    double wstot_40_data = m_wstot_pT_data_p0_electrons->GetBinContent(bin) + (m_wstot_pT_data_p1_electrons->GetBinContent(bin))/sqrt(40.);
-    double wstot_40_MC   = m_wstot_pT_MC_p0_electrons->GetBinContent(bin) + (m_wstot_pT_MC_p1_electrons->GetBinContent(bin))/sqrt(40.);
-
-    if (ptype == PATCore::ParticleType::Electron ) {
-      wstot_pT_data_p0 = m_wstot_pT_data_p0_electrons->GetBinContent(bin);
-      wstot_pT_data_p1 = m_wstot_pT_data_p1_electrons->GetBinContent(bin);
-      wstot_pT_MC_p0 = m_wstot_pT_MC_p0_electrons->GetBinContent(bin);
-      wstot_pT_MC_p1 = m_wstot_pT_MC_p1_electrons->GetBinContent(bin);
-    }
-    else if (ptype == PATCore::ParticleType::UnconvertedPhoton) {
-      wstot_pT_data_p0 = m_wstot_pT_data_p0_unconverted_photons->GetBinContent(bin);
-      wstot_pT_data_p1 = m_wstot_pT_data_p1_unconverted_photons->GetBinContent(bin);
-      wstot_pT_MC_p0 = m_wstot_pT_MC_p0_unconverted_photons->GetBinContent(bin);
-      wstot_pT_MC_p1 = m_wstot_pT_MC_p1_unconverted_photons->GetBinContent(bin);
-    }
-    else if (ptype == PATCore::ParticleType::ConvertedPhoton) {
-      wstot_pT_data_p0 = m_wstot_pT_data_p0_converted_photons->GetBinContent(bin);
-      wstot_pT_data_p1 = m_wstot_pT_data_p1_converted_photons->GetBinContent(bin);
-      wstot_pT_MC_p0 = m_wstot_pT_MC_p0_converted_photons->GetBinContent(bin);
-      wstot_pT_MC_p1 = m_wstot_pT_MC_p1_converted_photons->GetBinContent(bin);
-    }
-
-    double wstot_pT_data = 0.;
-    double wstot_pT_MC = 0.;
-
-    //Initial parametrization: [0]+1*pT
-    //wstot_pT_data = wstot_pT_data_p0+wstot_pT_data_p1*ETGeV;
-    //prevent wstot_pT_data from being negative
-    //if(wstot_pT_data<0) wstot_pT_data = 0.;
-
-    //New parametrization: p0+p1/sqrt(pT)
-    //flat uncertainty below 25 GeV
-    if(ETGeV<25.) ETGeV = 25.;
-
-    wstot_pT_data = wstot_pT_data_p0+wstot_pT_data_p1/sqrt(ETGeV);
-    wstot_pT_MC = wstot_pT_MC_p0+wstot_pT_MC_p1/sqrt(ETGeV);
-
-    value = 2*A/91.2*(wstot_pT_data-wstot_40_data) - 2*B/91.2*(wstot_pT_MC-wstot_40_MC);
-
-    return value;
-  }
-
-
-
-  // Layer scale uncertainties and induced non-linearity
-  //////////////////////////////////////////////////////
-
-  double egammaEnergyCorrectionTool::getLayerUncertainty( int iLayer,
-							  double cl_eta,
-							  egEnergyCorr::Scale::Variation var,
-                double varSF) const {
-
-    double value = 0.;
-
-    if (var == egEnergyCorr::Scale::Nominal) return value;
-
-    // nearest eta outside of crack (for PS scale values and uncertainties)
-    double nearestEta = nearestEtaBEC(cl_eta);
-
-    if( iLayer==0 ) { // use nearestEta
-
-      if( var==egEnergyCorr::Scale::PSUp && m_aPSNom )
-	value =  m_aPSNom->GetBinError( m_aPSNom->FindFixBin(nearestEta) );
-
-      else if( var==egEnergyCorr::Scale::PSDown && m_aPSNom )
-	value = -m_aPSNom->GetBinError( m_aPSNom->FindFixBin(nearestEta) );
-
-      else if( var==egEnergyCorr::Scale::PSb12Up && m_daPSb12 )
-	value =  m_daPSb12->GetBinContent( m_daPSb12->FindFixBin(nearestEta) );
-
-      else if( var==egEnergyCorr::Scale::PSb12Down && m_daPSb12 )
-	value = -m_daPSb12->GetBinContent( m_daPSb12->FindFixBin(nearestEta) );
-
-      else if( var==egEnergyCorr::Scale::LArElecUnconvUp && m_daPSCor )
-	value =  m_daPSCor->GetBinContent( m_daPSCor->FindFixBin(nearestEta) );
-
-      else if( var==egEnergyCorr::Scale::LArElecUnconvDown && m_daPSCor )
-	value = -m_daPSCor->GetBinContent( m_daPSCor->FindFixBin(nearestEta) );
-
+    if (var == egEnergyCorr::Scale::S12Up && m_aS12Nom) {
+      value = m_aS12Nom->GetBinError(m_aS12Nom->FindFixBin(cl_eta));
+    } else if (var == egEnergyCorr::Scale::S12Down && m_aS12Nom) {
+      value = -m_aS12Nom->GetBinError(m_aS12Nom->FindFixBin(cl_eta));
+    } else if (var == egEnergyCorr::Scale::LArCalibUp && m_daS12Cor) {
+      value = m_daS12Cor->GetBinContent(m_daS12Cor->FindFixBin(cl_eta));
+    } else if (var == egEnergyCorr::Scale::LArCalibDown && m_daS12Cor) {
+      value = -m_daS12Cor->GetBinContent(m_daS12Cor->FindFixBin(cl_eta));
+    } else if (var == egEnergyCorr::Scale::LArCalibExtra2015PreUp and
+               (m_esmodel == egEnergyCorr::es2015PRE or
+                m_esmodel == egEnergyCorr::es2015PRE_res_improved or
+                m_esmodel == egEnergyCorr::es2015cPRE or
+                m_esmodel == egEnergyCorr::es2015cPRE_res_improved or
+                m_esmodel == egEnergyCorr::es2015c_summer or
+                m_esmodel == egEnergyCorr::es2016PRE or
+                m_esmodel == egEnergyCorr::es2017 or
+                m_esmodel == egEnergyCorr::es2017_summer or
+                m_esmodel == egEnergyCorr::es2017_summer_improved or
+                m_esmodel == egEnergyCorr::es2017_R21_PRE or
+                m_esmodel == egEnergyCorr::es2015_5TeV)) {
+      // special case for es2015PRE and also for es2015c_summer and also for
+      // es2017 numbers from Lydia and Christophe,
+      // https://indico.cern.ch/event/395345/contribution/2/material/slides/0.pdf
+      // assuming constant uncertainty
+      // es2017_summer: increased to 5% in the endcap
+      const double aeta = std::abs(cl_eta);
+      // endcap
+      if (aeta >= 1.37 and aeta < 2.5) {
+        if (m_esmodel == egEnergyCorr::es2017_summer or
+            m_esmodel == egEnergyCorr::es2017_summer_improved or
+            m_esmodel == egEnergyCorr::es2017_R21_PRE or
+            m_esmodel == egEnergyCorr::es2015_5TeV)
+          value = 5.0E-2;
+        else
+          value = 1.5E-2;
+      } else {  // barrel
+        if (m_esmodel == egEnergyCorr::es2017_summer_improved)
+          value = 2.5E-2;
+        else
+          value = 1.5E-2;
+      }
+    } else if (var == egEnergyCorr::Scale::LArCalibExtra2015PreDown and
+               (m_esmodel == egEnergyCorr::es2015PRE or
+                m_esmodel == egEnergyCorr::es2015PRE_res_improved or
+                m_esmodel == egEnergyCorr::es2015cPRE or
+                m_esmodel == egEnergyCorr::es2015cPRE_res_improved or
+                m_esmodel == egEnergyCorr::es2015c_summer or
+                m_esmodel == egEnergyCorr::es2016PRE or
+                m_esmodel == egEnergyCorr::es2017 or
+                m_esmodel == egEnergyCorr::es2017_summer or
+                m_esmodel == egEnergyCorr::es2017_summer_improved or
+                m_esmodel == egEnergyCorr::es2017_R21_PRE or
+                m_esmodel == egEnergyCorr::es2015_5TeV)) {
+      const double aeta = std::abs(cl_eta);
+      // endcap
+      if (aeta >= 1.37 and aeta < 2.5) {
+        if (m_esmodel == egEnergyCorr::es2017_summer or
+            m_esmodel == egEnergyCorr::es2017_summer_improved or
+            m_esmodel == egEnergyCorr::es2017_R21_PRE or
+            m_esmodel == egEnergyCorr::es2015_5TeV)
+          value = -5.0E-2;
+        else
+          value = -1.5E-2;
+      } else {  // barrel
+        if (m_esmodel == egEnergyCorr::es2017_summer_improved or
+            m_esmodel == egEnergyCorr::es2015_5TeV)
+          value = -2.5E-2;
+        else
+          value = -1.5E-2;
+      }
     }
 
-    else if( iLayer==1 ) { // use cl_eta
-
-      if (var == egEnergyCorr::Scale::S12Up && m_aS12Nom)	{ value = m_aS12Nom->GetBinError(m_aS12Nom->FindFixBin(cl_eta)); }
-      else if (var == egEnergyCorr::Scale::S12Down && m_aS12Nom) { value = -m_aS12Nom->GetBinError(m_aS12Nom->FindFixBin(cl_eta)); }
-      else if (var == egEnergyCorr::Scale::LArCalibUp && m_daS12Cor) { value = m_daS12Cor->GetBinContent(m_daS12Cor->FindFixBin(cl_eta)); }
-      else if (var == egEnergyCorr::Scale::LArCalibDown && m_daS12Cor) { value = -m_daS12Cor->GetBinContent( m_daS12Cor->FindFixBin(cl_eta)); }
-      else if (var == egEnergyCorr::Scale::LArCalibExtra2015PreUp and
-	       (m_esmodel == egEnergyCorr::es2015PRE or m_esmodel == egEnergyCorr::es2015PRE_res_improved or
-		m_esmodel == egEnergyCorr::es2015cPRE or m_esmodel == egEnergyCorr::es2015cPRE_res_improved or
-		m_esmodel == egEnergyCorr::es2015c_summer or m_esmodel == egEnergyCorr::es2016PRE or m_esmodel == egEnergyCorr::es2017
-		or m_esmodel == egEnergyCorr::es2017_summer or m_esmodel == egEnergyCorr::es2017_summer_improved or m_esmodel == egEnergyCorr::es2017_R21_PRE
-		or m_esmodel == egEnergyCorr::es2015_5TeV)) {
-	// special case for es2015PRE and also for es2015c_summer and also for es2017
-	// numbers from Lydia and Christophe,
-	// https://indico.cern.ch/event/395345/contribution/2/material/slides/0.pdf
-	// assuming constant uncertainty
-	// es2017_summer: increased to 5% in the endcap
-	const double aeta = std::abs(cl_eta);
-	//endcap
-	if ( aeta >= 1.37 and aeta < 2.5){
-          if (m_esmodel == egEnergyCorr::es2017_summer or m_esmodel == egEnergyCorr::es2017_summer_improved or
-              m_esmodel == egEnergyCorr::es2017_R21_PRE or m_esmodel == egEnergyCorr::es2015_5TeV)
-            value = 5.0E-2;
-          else
-            value = 1.5E-2;
-        } else { // barrel
-          if (m_esmodel == egEnergyCorr::es2017_summer_improved)
-            value = 2.5E-2;
-          else
-            value = 1.5E-2;
-        }
-      } else if (var == egEnergyCorr::Scale::LArCalibExtra2015PreDown and
-                 (m_esmodel == egEnergyCorr::es2015PRE or m_esmodel == egEnergyCorr::es2015PRE_res_improved or
-                  m_esmodel == egEnergyCorr::es2015cPRE or m_esmodel == egEnergyCorr::es2015cPRE_res_improved or
-                  m_esmodel == egEnergyCorr::es2015c_summer or m_esmodel == egEnergyCorr::es2016PRE or
-                  m_esmodel == egEnergyCorr::es2017 or m_esmodel == egEnergyCorr::es2017_summer or
-                  m_esmodel == egEnergyCorr::es2017_summer_improved or m_esmodel == egEnergyCorr::es2017_R21_PRE or
-                  m_esmodel == egEnergyCorr::es2015_5TeV)) {
+    else if (var == egEnergyCorr::Scale::S12ExtraLastEtaBinRun2Up or
+             var == egEnergyCorr::Scale::S12ExtraLastEtaBinRun2Down) {
+      // special large sys for run2 in the last eta-bin in es2017, see
+      // ATLASEG-42
+      if (m_esmodel == egEnergyCorr::es2017 or
+          m_esmodel == egEnergyCorr::es2017_summer or
+          m_esmodel == egEnergyCorr::es2017_summer_improved or
+          m_esmodel == egEnergyCorr::es2017_R21_PRE or
+          m_esmodel == egEnergyCorr::es2015_5TeV) {
         const double aeta = std::abs(cl_eta);
-        //endcap
-        if ( aeta >= 1.37 and aeta < 2.5){
-          if (m_esmodel == egEnergyCorr::es2017_summer or m_esmodel == egEnergyCorr::es2017_summer_improved or
-              m_esmodel == egEnergyCorr::es2017_R21_PRE or m_esmodel == egEnergyCorr::es2015_5TeV)
-            value = -5.0E-2;
+        if (aeta >= 2.4 and aeta < 2.5) {
+          if (var == egEnergyCorr::Scale::S12ExtraLastEtaBinRun2Up)
+            value = 25E-2;
           else
-            value = -1.5E-2;
-        } else { // barrel
-          if (m_esmodel == egEnergyCorr::es2017_summer_improved or m_esmodel == egEnergyCorr::es2015_5TeV)
-            value = -2.5E-2;
-          else
-            value = -1.5E-2;
-        }
-      }
-
-      else if (var == egEnergyCorr::Scale::S12ExtraLastEtaBinRun2Up or var == egEnergyCorr::Scale::S12ExtraLastEtaBinRun2Down) {
-        // special large sys for run2 in the last eta-bin in es2017, see ATLASEG-42
-        if (m_esmodel == egEnergyCorr::es2017 or m_esmodel == egEnergyCorr::es2017_summer or
-            m_esmodel == egEnergyCorr::es2017_summer_improved or m_esmodel == egEnergyCorr::es2017_R21_PRE or
-            m_esmodel == egEnergyCorr::es2015_5TeV) {
-          const double aeta = std::abs(cl_eta);
-          if (aeta >= 2.4 and aeta < 2.5) {
-            if (var == egEnergyCorr::Scale::S12ExtraLastEtaBinRun2Up)
-              value = 25E-2;
-            else
-              value = -25E-2;
-          }
+            value = -25E-2;
         }
       }
     }
-
-    return value * varSF;
-
   }
 
+  return value * varSF;
+}
 
-  double egammaEnergyCorrectionTool::getE4NonLinearity(double cl_eta, double energy, PATCore::ParticleType::Type ptype) const
-  {
-    double value = 0;
-    const double aeta = std::abs(cl_eta);
-    const double ETGeV = energy / cosh(cl_eta) / 1E3;
+double egammaEnergyCorrectionTool::getE4NonLinearity(
+    double cl_eta, double energy, PATCore::ParticleType::Type ptype) const {
+  double value = 0;
+  const double aeta = std::abs(cl_eta);
+  const double ETGeV = energy / cosh(cl_eta) / 1E3;
 
-    //This will point to the return of get() of a unique_ptr
-    const TAxis* axis;
-    const TList* graphs;
+  // This will point to the return of get() of a unique_ptr
+  const TAxis* axis;
+  const TList* graphs;
 
-    if (ptype == PATCore::ParticleType::Electron ) {
-      axis=m_E4ElectronEtaBins.get();
-      graphs=m_E4ElectronGraphs.get();
-    } else if (ptype == PATCore::ParticleType::UnconvertedPhoton) {
-      axis=m_E4UnconvertedEtaBins.get();
-      graphs=m_E4UnconvertedGraphs.get();
-    }
-    else if (ptype == PATCore::ParticleType::ConvertedPhoton) {
-      axis=m_E4ConvertedEtaBins.get();
-      graphs=m_E4ConvertedGraphs.get();
-    }
-    else { ATH_MSG_FATAL("invalid particle type"); return -1; }
-
-
-    const int ieta = axis->FindFixBin(aeta) - 1;
-    if (ieta >= 0 and ieta < graphs->GetSize()) {
-      value = static_cast<TGraph*>(graphs->At(ieta))->Eval(ETGeV);
-    }
-
-    return value;
+  if (ptype == PATCore::ParticleType::Electron) {
+    axis = m_E4ElectronEtaBins.get();
+    graphs = m_E4ElectronGraphs.get();
+  } else if (ptype == PATCore::ParticleType::UnconvertedPhoton) {
+    axis = m_E4UnconvertedEtaBins.get();
+    graphs = m_E4UnconvertedGraphs.get();
+  } else if (ptype == PATCore::ParticleType::ConvertedPhoton) {
+    axis = m_E4ConvertedEtaBins.get();
+    graphs = m_E4ConvertedGraphs.get();
+  } else {
+    ATH_MSG_FATAL("invalid particle type");
+    return -1;
   }
 
-  double egammaEnergyCorrectionTool::getLayerNonLinearity( int iLayer,
-							   double cl_eta,
-							   double energy,
-							   PATCore::ParticleType::Type ptype ) const {
+  const int ieta = axis->FindFixBin(aeta) - 1;
+  if (ieta >= 0 and ieta < graphs->GetSize()) {
+    value = static_cast<TGraph*>(graphs->At(ieta))->Eval(ETGeV);
+  }
 
-    double value = 0;
-    double aeta = std::abs(cl_eta);
-    double ET = energy/cosh(cl_eta);
+  return value;
+}
 
-    // move out of crack
+double egammaEnergyCorrectionTool::getLayerNonLinearity(
+    int iLayer, double cl_eta, double energy,
+    PATCore::ParticleType::Type ptype) const {
+
+  double value = 0;
+  // Accordion histogram specicif condition
+  if (iLayer == 6 && std::abs(cl_eta) >= 2.47)
+    cl_eta = 2.46;
+  double aeta = std::abs(cl_eta);
+  double ET = energy / cosh(cl_eta);
+
+  // move out of crack
+  if (m_esmodel != egEnergyCorr::es2023_R22_Run2_v0)
     aeta = nearestEtaBEC(aeta);
 
-    // argument ET is transverse energy in MeV
+  // argument ET is transverse energy in MeV
 
-    if( iLayer==0 && aeta>=1.82 )
-      return value;
-
-    if( ptype==PATCore::ParticleType::Electron ) {
-
-      if( iLayer==0 ) {
-
-	const int ieta = m_psElectronEtaBins->FindFixBin( aeta ) - 1;
-	if (ieta >= 0 and ieta < m_psElectronGraphs->GetSize()) {
-	  value = ((TF1*)m_psElectronGraphs->At(ieta))->Eval( ET );
-	}
-      } else if( iLayer==1 ) {
-
-	const int ieta = m_s12ElectronEtaBins->FindFixBin( aeta ) - 1;
-	if (ieta >= 0 and ieta < m_s12ElectronGraphs->GetSize()) {
-	  value = ((TF1*)m_s12ElectronGraphs->At(ieta))->Eval( ET );
-	}
-      }
-
-    } else if( ptype==PATCore::ParticleType::UnconvertedPhoton ) {
-
-      if( iLayer==0 ) {
-
-	const int ieta = m_psUnconvertedEtaBins->FindFixBin( aeta ) - 1;
-	if (ieta >= 0 and ieta < m_psUnconvertedGraphs->GetSize()) {
-	  value = ((TF1*)m_psUnconvertedGraphs->At(ieta))->Eval( ET );
-	}
-
-      } else if( iLayer==1 ) {
-
-	const int ieta = m_s12UnconvertedEtaBins->FindFixBin( aeta ) - 1;
-	if (ieta >= 0 and ieta < m_s12UnconvertedGraphs->GetSize()) {
-	  value = ((TF1*)m_s12UnconvertedGraphs->At(ieta))->Eval( ET );
-	}
-      }
-
-    } else if( ptype==PATCore::ParticleType::ConvertedPhoton ) {
-
-      if( iLayer==0 ) {
-
-	const int ieta = m_psConvertedEtaBins->FindFixBin( aeta ) - 1;
-	if (ieta >= 0 and ieta < m_psConvertedGraphs->GetSize()) {
-	  value = ((TF1*)m_psConvertedGraphs->At(ieta))->Eval( ET );
-	}
-
-      } else if( iLayer==1 ) {
-
-	const int ieta = m_s12ConvertedEtaBins->FindFixBin( aeta ) - 1;
-	if (ieta >= 0 and ieta < m_s12ConvertedGraphs->GetSize()) {
-	  value = ((TF1*)m_s12ConvertedGraphs->At(ieta))->Eval( ET );
-	}
-      }
-
-    }
-
-    if (value < 0) {
-      ATH_MSG_DEBUG("Value is negative -> set to 0");
-      value = 0;
-    }
-
+  if (iLayer == 0 && aeta >= 1.82)
     return value;
 
-  }
+  if (ptype == PATCore::ParticleType::Electron) {
 
+    if (iLayer == 0) {
 
-  // passive material correction
-  //////////////////////////////
+      const int ieta = m_psElectronEtaBins->FindFixBin(aeta) - 1;
+      if (ieta >= 0 and ieta < m_psElectronGraphs->GetSize()) {
+        value = ((TF1*)m_psElectronGraphs->At(ieta))->Eval(ET);
+      }
+    } else if (iLayer == 1) {
 
-  // ... material look-up function, called internally by getAlphaMaterial() and getMaterialNonLinearity()
+      const int ieta = m_s12ElectronEtaBins->FindFixBin(aeta) - 1;
+      if (ieta >= 0 and ieta < m_s12ElectronGraphs->GetSize()) {
+        value = ((TF1*)m_s12ElectronGraphs->At(ieta))->Eval(ET);
+      }
+    } else if (iLayer == 6) {  // Accordion correction (for Precision Run-2)
 
-  double egammaEnergyCorrectionTool::getDeltaX( double cl_eta,
-						egEnergyCorr::MaterialCategory imat,
-						egEnergyCorr::Scale::Variation var ) const {
-
-    double value = 0.;
-    double aeta = std::abs(cl_eta);
-
-    // "ID" : inner detector material; bottom-up (from construction/simulation accuracy : ConfigA)
-
-    if( imat==egEnergyCorr::MatID && m_dX_ID_Nom ) {
-
-      // ... NOTE : watch out here : this histo does not follow the usual value/error look-up convention
-
-      if( var==egEnergyCorr::Scale::MatIDUp )
-	value += m_dX_ID_Nom->GetBinContent( m_dX_ID_Nom->FindFixBin(aeta) );
-      else if( var==egEnergyCorr::Scale::MatIDDown )
-	value -= m_dX_ID_Nom->GetBinContent( m_dX_ID_Nom->FindFixBin(aeta) );
-
-      // "Cryo" : integral from IP to PS or Acc, depending on eta
-
-    } else if( imat==egEnergyCorr::MatCryo && aeta<1.82 && m_dX_IPPS_Nom ) { // Integral between IP and PS
-
-      value = m_dX_IPPS_Nom->GetBinContent( m_dX_IPPS_Nom->FindFixBin(aeta) );
-
-      if( var==egEnergyCorr::Scale::MatCryoUp )
-	value += m_dX_IPPS_Nom->GetBinError( m_dX_IPPS_Nom->FindFixBin(aeta) );
-      else if( var==egEnergyCorr::Scale::MatCryoDown )
-	value -= m_dX_IPPS_Nom->GetBinError( m_dX_IPPS_Nom->FindFixBin(aeta) );
-
-      // ... careful : sign below should be opposite to the effect of this source on the PS scale!
-      if( var==egEnergyCorr::Scale::LArElecUnconvUp && m_dX_IPPS_LAr )
-	value -= m_dX_IPPS_LAr->GetBinContent( m_dX_IPPS_LAr->FindFixBin(aeta) );
-      else if( var==egEnergyCorr::Scale::LArElecUnconvDown && m_dX_IPPS_LAr )
-	value += m_dX_IPPS_LAr->GetBinContent( m_dX_IPPS_LAr->FindFixBin(aeta) );
-
-    } else if( imat==egEnergyCorr::MatCryo && aeta>1.82 && m_dX_IPAcc_Nom ) { // Integral between IP and Accordion
-
-      value = m_dX_IPAcc_Nom->GetBinContent( m_dX_IPAcc_Nom->FindFixBin(aeta) );
-
-      if( var==egEnergyCorr::Scale::MatCryoUp )
-	value += m_dX_IPAcc_Nom->GetBinError( m_dX_IPAcc_Nom->FindFixBin(aeta) );
-      else if( var==egEnergyCorr::Scale::MatCryoDown )
-	value -= m_dX_IPAcc_Nom->GetBinError( m_dX_IPAcc_Nom->FindFixBin(aeta) );
-
-      if( var==egEnergyCorr::Scale::LArElecCalibUp && m_dX_IPAcc_LAr )
-	value += m_dX_IPAcc_LAr->GetBinContent( m_dX_IPAcc_LAr->FindFixBin(aeta) );
-      else if( var==egEnergyCorr::Scale::LArElecCalibDown && m_dX_IPAcc_LAr )
-	value -= m_dX_IPAcc_LAr->GetBinContent( m_dX_IPAcc_LAr->FindFixBin(aeta) );
-
-      if( var==egEnergyCorr::Scale::G4Up && m_dX_IPAcc_G4 )
-	value += m_dX_IPAcc_G4->GetBinContent( m_dX_IPAcc_G4->FindFixBin(aeta) );
-      else if( var==egEnergyCorr::Scale::G4Down && m_dX_IPAcc_G4 )
-	value -= m_dX_IPAcc_G4->GetBinContent( m_dX_IPAcc_G4->FindFixBin(aeta) );
-
-      if( var==egEnergyCorr::Scale::L1GainUp && m_dX_IPAcc_GL1 )
-      	value += m_dX_IPAcc_GL1->GetBinContent( m_dX_IPAcc_GL1->FindFixBin(aeta) );
-      else if( var==egEnergyCorr::Scale::L1GainDown && m_dX_IPAcc_GL1 )
-      	value -= m_dX_IPAcc_GL1->GetBinContent( m_dX_IPAcc_GL1->FindFixBin(aeta) );
-
-      // "Calo" : between PS and Strips
-
-    } else if( imat==egEnergyCorr::MatCalo && aeta<1.82 && m_dX_PSAcc_Nom ) {
-
-      value = m_dX_PSAcc_Nom->GetBinContent( m_dX_PSAcc_Nom->FindFixBin(aeta) );
-
-      if( var==egEnergyCorr::Scale::MatCaloUp )
-	value += m_dX_PSAcc_Nom->GetBinError( m_dX_PSAcc_Nom->FindFixBin(aeta) );
-      else if( var==egEnergyCorr::Scale::MatCaloDown )
-	value -= m_dX_PSAcc_Nom->GetBinError( m_dX_PSAcc_Nom->FindFixBin(aeta) );
-
-      if( var==egEnergyCorr::Scale::LArUnconvCalibUp && m_dX_PSAcc_LAr )
-	value += m_dX_PSAcc_LAr->GetBinContent( m_dX_PSAcc_LAr->FindFixBin(aeta) );
-      else if( var==egEnergyCorr::Scale::LArUnconvCalibDown && m_dX_PSAcc_LAr )
-	value -= m_dX_PSAcc_LAr->GetBinContent( m_dX_PSAcc_LAr->FindFixBin(aeta) );
-
-      if( var==egEnergyCorr::Scale::G4Up && m_dX_PSAcc_G4 )
-	value += m_dX_PSAcc_G4->GetBinContent( m_dX_PSAcc_G4->FindFixBin(aeta) );
-      else if( var==egEnergyCorr::Scale::G4Down && m_dX_PSAcc_G4 )
-	value -= m_dX_PSAcc_G4->GetBinContent( m_dX_PSAcc_G4->FindFixBin(aeta) );
-
+      const int ieta = m_EaccElectronEtaBins->FindFixBin(aeta) - 1;
+      if (ieta >= 0 && ieta < m_EaccElectronGraphs->GetSize()) {
+        value = ((TF1*)m_EaccElectronGraphs->At(ieta))->Eval(ET);
+      }
     }
 
+  } else if (ptype == PATCore::ParticleType::UnconvertedPhoton) {
+
+    if (iLayer == 0) {
+
+      const int ieta = m_psUnconvertedEtaBins->FindFixBin(aeta) - 1;
+      if (ieta >= 0 and ieta < m_psUnconvertedGraphs->GetSize()) {
+        value = ((TF1*)m_psUnconvertedGraphs->At(ieta))->Eval(ET);
+      }
+
+    } else if (iLayer == 1) {
+
+      const int ieta = m_s12UnconvertedEtaBins->FindFixBin(aeta) - 1;
+      if (ieta >= 0 and ieta < m_s12UnconvertedGraphs->GetSize()) {
+        value = ((TF1*)m_s12UnconvertedGraphs->At(ieta))->Eval(ET);
+      }
+    } else if (iLayer == 6) {  // Accordion correction (for Precision Run-2)
+
+      const int ieta = m_EaccUnconvertedEtaBins->FindFixBin(aeta) - 1;
+      if (ieta >= 0 && ieta < m_EaccUnconvertedGraphs->GetSize()) {
+        value = ((TF1*)m_EaccUnconvertedGraphs->At(ieta))->Eval(ET);
+      }
+    }
+
+  } else if (ptype == PATCore::ParticleType::ConvertedPhoton) {
+
+    if (iLayer == 0) {
+
+      const int ieta = m_psConvertedEtaBins->FindFixBin(aeta) - 1;
+      if (ieta >= 0 and ieta < m_psConvertedGraphs->GetSize()) {
+        value = ((TF1*)m_psConvertedGraphs->At(ieta))->Eval(ET);
+      }
+
+    } else if (iLayer == 1) {
+
+      const int ieta = m_s12ConvertedEtaBins->FindFixBin(aeta) - 1;
+      if (ieta >= 0 and ieta < m_s12ConvertedGraphs->GetSize()) {
+        value = ((TF1*)m_s12ConvertedGraphs->At(ieta))->Eval(ET);
+      }
+    } else if (iLayer == 6) {  // Accordion correction (for Precision Run-2)
+
+      const int ieta = m_EaccConvertedEtaBins->FindFixBin(aeta) - 1;
+      if (ieta >= 0 && ieta < m_EaccConvertedGraphs->GetSize()) {
+        if (ET < 10000. && (aeta < 1.2 || (aeta >= 1.59 && aeta < 1.73))) {
+          // harcoded condition to correct bad beahviour of function at low ET
+          // <10GeV
+          value = ((TF1*)m_EaccConvertedGraphs->At(ieta))->Eval(10000.);
+        } else {
+          value = ((TF1*)m_EaccConvertedGraphs->At(ieta))->Eval(ET);
+        }
+      }
+    }
+  }
+
+  ATH_MSG_DEBUG("Layer non-linearity: " << iLayer << " value: " << value);
+
+  if (value < 0) {
+    ATH_MSG_DEBUG("Value is negative -> set to 0");
+    value = 0;
+  }
+
+  return value;
+}
+
+// passive material correction
+//////////////////////////////
+
+// ... material look-up function, called internally by getAlphaMaterial() and
+// getMaterialNonLinearity()
+
+double egammaEnergyCorrectionTool::getDeltaX(
+    double cl_eta, egEnergyCorr::MaterialCategory imat,
+    egEnergyCorr::Scale::Variation var) const {
+
+  double value = 0.;
+  double aeta = std::abs(cl_eta);
+
+  // "ID" : inner detector material; bottom-up (from construction/simulation
+  // accuracy : ConfigA)
+
+  if (imat == egEnergyCorr::MatID && m_dX_ID_Nom) {
+
+    // ... NOTE : watch out here : this histo does not follow the usual
+    // value/error look-up convention
+
+    if (var == egEnergyCorr::Scale::MatIDUp)
+      value += m_dX_ID_Nom->GetBinContent(m_dX_ID_Nom->FindFixBin(aeta));
+    else if (var == egEnergyCorr::Scale::MatIDDown)
+      value -= m_dX_ID_Nom->GetBinContent(m_dX_ID_Nom->FindFixBin(aeta));
+
+    // "Cryo" : integral from IP to PS or Acc, depending on eta
+
+  } else if (imat == egEnergyCorr::MatCryo && aeta < 1.82 &&
+             m_dX_IPPS_Nom) {  // Integral between IP and PS
+
+    value = m_dX_IPPS_Nom->GetBinContent(m_dX_IPPS_Nom->FindFixBin(aeta));
+
+    if (var == egEnergyCorr::Scale::MatCryoUp)
+      value += m_dX_IPPS_Nom->GetBinError(m_dX_IPPS_Nom->FindFixBin(aeta));
+    else if (var == egEnergyCorr::Scale::MatCryoDown)
+      value -= m_dX_IPPS_Nom->GetBinError(m_dX_IPPS_Nom->FindFixBin(aeta));
+
+    // ... careful : sign below should be opposite to the effect of this source
+    // on the PS scale!
+    if (var == egEnergyCorr::Scale::LArElecUnconvUp && m_dX_IPPS_LAr)
+      value -= m_dX_IPPS_LAr->GetBinContent(m_dX_IPPS_LAr->FindFixBin(aeta));
+    else if (var == egEnergyCorr::Scale::LArElecUnconvDown && m_dX_IPPS_LAr)
+      value += m_dX_IPPS_LAr->GetBinContent(m_dX_IPPS_LAr->FindFixBin(aeta));
+
+  } else if (imat == egEnergyCorr::MatCryo && aeta > 1.82 &&
+             m_dX_IPAcc_Nom) {  // Integral between IP and Accordion
+
+    value = m_dX_IPAcc_Nom->GetBinContent(m_dX_IPAcc_Nom->FindFixBin(aeta));
+
+    if (var == egEnergyCorr::Scale::MatCryoUp)
+      value += m_dX_IPAcc_Nom->GetBinError(m_dX_IPAcc_Nom->FindFixBin(aeta));
+    else if (var == egEnergyCorr::Scale::MatCryoDown)
+      value -= m_dX_IPAcc_Nom->GetBinError(m_dX_IPAcc_Nom->FindFixBin(aeta));
+
+    if (var == egEnergyCorr::Scale::LArElecCalibUp && m_dX_IPAcc_LAr)
+      value += m_dX_IPAcc_LAr->GetBinContent(m_dX_IPAcc_LAr->FindFixBin(aeta));
+    else if (var == egEnergyCorr::Scale::LArElecCalibDown && m_dX_IPAcc_LAr)
+      value -= m_dX_IPAcc_LAr->GetBinContent(m_dX_IPAcc_LAr->FindFixBin(aeta));
+
+    if (var == egEnergyCorr::Scale::G4Up && m_dX_IPAcc_G4)
+      value += m_dX_IPAcc_G4->GetBinContent(m_dX_IPAcc_G4->FindFixBin(aeta));
+    else if (var == egEnergyCorr::Scale::G4Down && m_dX_IPAcc_G4)
+      value -= m_dX_IPAcc_G4->GetBinContent(m_dX_IPAcc_G4->FindFixBin(aeta));
+
+    if (var == egEnergyCorr::Scale::L1GainUp && m_dX_IPAcc_GL1)
+      value += m_dX_IPAcc_GL1->GetBinContent(m_dX_IPAcc_GL1->FindFixBin(aeta));
+    else if (var == egEnergyCorr::Scale::L1GainDown && m_dX_IPAcc_GL1)
+      value -= m_dX_IPAcc_GL1->GetBinContent(m_dX_IPAcc_GL1->FindFixBin(aeta));
+
+    // "Calo" : between PS and Strips
+
+  } else if (imat == egEnergyCorr::MatCalo && aeta < 1.82 && m_dX_PSAcc_Nom) {
+
+    value = m_dX_PSAcc_Nom->GetBinContent(m_dX_PSAcc_Nom->FindFixBin(aeta));
+
+    if (var == egEnergyCorr::Scale::MatCaloUp)
+      value += m_dX_PSAcc_Nom->GetBinError(m_dX_PSAcc_Nom->FindFixBin(aeta));
+    else if (var == egEnergyCorr::Scale::MatCaloDown)
+      value -= m_dX_PSAcc_Nom->GetBinError(m_dX_PSAcc_Nom->FindFixBin(aeta));
+
+    if (var == egEnergyCorr::Scale::LArUnconvCalibUp && m_dX_PSAcc_LAr)
+      value += m_dX_PSAcc_LAr->GetBinContent(m_dX_PSAcc_LAr->FindFixBin(aeta));
+    else if (var == egEnergyCorr::Scale::LArUnconvCalibDown && m_dX_PSAcc_LAr)
+      value -= m_dX_PSAcc_LAr->GetBinContent(m_dX_PSAcc_LAr->FindFixBin(aeta));
+
+    if (var == egEnergyCorr::Scale::G4Up && m_dX_PSAcc_G4)
+      value += m_dX_PSAcc_G4->GetBinContent(m_dX_PSAcc_G4->FindFixBin(aeta));
+    else if (var == egEnergyCorr::Scale::G4Down && m_dX_PSAcc_G4)
+      value -= m_dX_PSAcc_G4->GetBinContent(m_dX_PSAcc_G4->FindFixBin(aeta));
+  }
+
+  return value;
+}
+
+// returns the impact of material variation on response.
+// non-zero for photons only (the average effect is absorbed by the effective Z
+// scales for electrons).
+
+// Strategy for material before the PS :
+// - consider ID material and uncertainty fixed to ConfigA
+// - attribute measured material to ConfigL, with uncertainty from difference
+// between measurement and ConfigA
+//   I.e : DX_A = 0 +- dA ; DX_L = DX_Meas +- (dMeas ++ dA)
+
+// Strategy for material after the PS :
+// - direct measurement
+//   I.e : DX_M = DX_Meas +- dMeas
+
+// Then calculate the impact on the scale accordingly.
+
+double egammaEnergyCorrectionTool::getAlphaMaterial(
+    double cl_eta, egEnergyCorr::MaterialCategory imat,
+    PATCore::ParticleType::Type ptype, egEnergyCorr::Scale::Variation var,
+    double varSF) const {
+
+  double value = 0.;
+  if (ptype == PATCore::ParticleType::Electron)
+    return value;
+  if (var == egEnergyCorr::Scale::Nominal)
     return value;
 
+  egEnergyCorr::Geometry geoID, geoCryo, geoCalo, geoGp;
+  geoID = egEnergyCorr::ConfigA;
+  if (std::abs(cl_eta) < 2.)
+    geoCryo = egEnergyCorr::ConfigEL;
+  else
+    geoCryo = egEnergyCorr::ConfigFMX;
+  geoCalo = egEnergyCorr::ConfigFMX;
+  geoGp = egEnergyCorr::ConfigGp;
+
+  // look up material bias
+
+  double DeltaX = getDeltaX(cl_eta, imat, var) -
+                  getDeltaX(cl_eta, imat, egEnergyCorr::Scale::Nominal);
+
+  // calculate scale change per unit added material
+
+  double DAlphaDXID, DAlphaDXCryo, DAlphaDXCalo, DAlphaDXGp;
+  DAlphaDXID = DAlphaDXCryo = DAlphaDXCalo = DAlphaDXGp = 0;
+  if (ptype == PATCore::ParticleType::UnconvertedPhoton) {
+    DAlphaDXGp = m_matUnconvertedScale[geoGp]->GetBinContent(
+        m_matUnconvertedScale[geoGp]->FindBin(cl_eta));
+    DAlphaDXID = m_matUnconvertedScale[geoID]->GetBinContent(
+        m_matUnconvertedScale[geoID]->FindBin(cl_eta));
+    DAlphaDXCryo = m_matUnconvertedScale[geoCryo]->GetBinContent(
+        m_matUnconvertedScale[geoCryo]->FindBin(cl_eta));
+    DAlphaDXCalo = m_matUnconvertedScale[geoCalo]->GetBinContent(
+        m_matUnconvertedScale[geoCalo]->FindBin(cl_eta));
+  } else if (ptype == PATCore::ParticleType::ConvertedPhoton) {
+    DAlphaDXGp = m_matConvertedScale[geoGp]->GetBinContent(
+        m_matConvertedScale[geoGp]->FindBin(cl_eta));
+    DAlphaDXID = m_matConvertedScale[geoID]->GetBinContent(
+        m_matConvertedScale[geoID]->FindBin(cl_eta));
+    DAlphaDXCryo = m_matConvertedScale[geoCryo]->GetBinContent(
+        m_matConvertedScale[geoCryo]->FindBin(cl_eta));
+    DAlphaDXCalo = m_matConvertedScale[geoCalo]->GetBinContent(
+        m_matConvertedScale[geoCalo]->FindBin(cl_eta));
   }
 
+  // when in crack, use G', exit
 
-  // returns the impact of material variation on response.
-  // non-zero for photons only (the average effect is absorbed by the effective Z scales for electrons).
-
-  // Strategy for material before the PS :
-  // - consider ID material and uncertainty fixed to ConfigA
-  // - attribute measured material to ConfigL, with uncertainty from difference between measurement and ConfigA
-  //   I.e : DX_A = 0 +- dA ; DX_L = DX_Meas +- (dMeas ++ dA)
-
-  // Strategy for material after the PS :
-  // - direct measurement
-  //   I.e : DX_M = DX_Meas +- dMeas
-
-  // Then calculate the impact on the scale accordingly.
-
-  double egammaEnergyCorrectionTool::getAlphaMaterial( double cl_eta,
-						       egEnergyCorr::MaterialCategory imat,
-						       PATCore::ParticleType::Type ptype,
-						       egEnergyCorr::Scale::Variation var, double varSF ) const {
-
-    double value=0.;
-    if( ptype==PATCore::ParticleType::Electron )
-      return value;
-    if( var==egEnergyCorr::Scale::Nominal )
-      return value;
-
-    egEnergyCorr::Geometry geoID, geoCryo, geoCalo, geoGp;
-    geoID = egEnergyCorr::ConfigA;
-    if( std::abs(cl_eta)<2. )
-      geoCryo = egEnergyCorr::ConfigEL;
-    else
-      geoCryo = egEnergyCorr::ConfigFMX;
-    geoCalo = egEnergyCorr::ConfigFMX;
-    geoGp = egEnergyCorr::ConfigGp;
-
-    // look up material bias
-
-    double DeltaX = getDeltaX(cl_eta, imat, var) - getDeltaX(cl_eta, imat, egEnergyCorr::Scale::Nominal);
-
-
-    // calculate scale change per unit added material
-
-    double DAlphaDXID, DAlphaDXCryo, DAlphaDXCalo, DAlphaDXGp;
-    DAlphaDXID = DAlphaDXCryo = DAlphaDXCalo = DAlphaDXGp = 0;
-    if( ptype==PATCore::ParticleType::UnconvertedPhoton ) {
-      DAlphaDXGp   = m_matUnconvertedScale[geoGp]->GetBinContent( m_matUnconvertedScale[geoGp]->FindBin(cl_eta) );
-      DAlphaDXID   = m_matUnconvertedScale[geoID]->GetBinContent( m_matUnconvertedScale[geoID]->FindBin(cl_eta) );
-      DAlphaDXCryo = m_matUnconvertedScale[geoCryo]->GetBinContent( m_matUnconvertedScale[geoCryo]->FindBin(cl_eta) );
-      DAlphaDXCalo = m_matUnconvertedScale[geoCalo]->GetBinContent( m_matUnconvertedScale[geoCalo]->FindBin(cl_eta) );
-    } else if( ptype==PATCore::ParticleType::ConvertedPhoton ) {
-      DAlphaDXGp   = m_matConvertedScale[geoGp]->GetBinContent( m_matConvertedScale[geoGp]->FindBin(cl_eta) );
-      DAlphaDXID   = m_matConvertedScale[geoID]->GetBinContent( m_matConvertedScale[geoID]->FindBin(cl_eta) );
-      DAlphaDXCryo = m_matConvertedScale[geoCryo]->GetBinContent( m_matConvertedScale[geoCryo]->FindBin(cl_eta) );
-      DAlphaDXCalo = m_matConvertedScale[geoCalo]->GetBinContent( m_matConvertedScale[geoCalo]->FindBin(cl_eta) );
-    }
-
-
-    // when in crack, use G', exit
-
-    if( isInCrack(cl_eta) ) {
-      if( imat==egEnergyCorr::MatID && var==egEnergyCorr::Scale::MatIDUp )
-	value = DAlphaDXGp;
-      else if( imat==egEnergyCorr::MatID && var==egEnergyCorr::Scale::MatIDDown )
-	value = -DAlphaDXGp;
-      return value;
-    }
-
-    // normal case
-
-    int idx = m_matX0Additions[geoID]->FindBin( std::abs(cl_eta) );
-    if(idx<1 || idx>m_matX0Additions[geoID]->GetNbinsX())
-      DAlphaDXID = 0;
-    else
-      DAlphaDXID /= m_matX0Additions[geoID]->GetBinContent(idx);
-
-    idx = m_matX0Additions[geoCryo]->FindBin( std::abs(cl_eta) );
-    if(idx<1 || idx>m_matX0Additions[geoCryo]->GetNbinsX())
-      DAlphaDXCryo = 0;
-    else
-      DAlphaDXCryo /= m_matX0Additions[geoCryo]->GetBinContent(idx);
-
-    idx = m_matX0Additions[geoCalo]->FindBin( std::abs(cl_eta) );
-    if(idx<1 || idx>m_matX0Additions[geoCalo]->GetNbinsX())
-      DAlphaDXCalo = 0;
-    else
-      DAlphaDXCalo /= m_matX0Additions[geoCalo]->GetBinContent(idx);
-
-    // final value
-
-
-    if( imat==egEnergyCorr::MatID )
-      value = DeltaX * (DAlphaDXID - DAlphaDXCryo);
-    else if( imat==egEnergyCorr::MatCryo )
-      value = DeltaX * DAlphaDXCryo;
-    else if( imat==egEnergyCorr::MatCalo )
-      value = DeltaX * DAlphaDXCalo;
-
-
-    return value * varSF;
-
+  if (isInCrack(cl_eta)) {
+    if (imat == egEnergyCorr::MatID && var == egEnergyCorr::Scale::MatIDUp)
+      value = DAlphaDXGp;
+    else if (imat == egEnergyCorr::MatID &&
+             var == egEnergyCorr::Scale::MatIDDown)
+      value = -DAlphaDXGp;
+    return value;
   }
 
-double egammaEnergyCorrectionTool::getMaterialEffect(egEnergyCorr::Geometry geo,PATCore::ParticleType::Type ptype,double cl_eta,double ET) const {
+  // normal case
 
-  //Again this does no need to be ptr just get the one owned
-   TH2D* hmat;
+  int idx = m_matX0Additions[geoID]->FindBin(std::abs(cl_eta));
+  if (idx < 1 || idx > m_matX0Additions[geoID]->GetNbinsX())
+    DAlphaDXID = 0;
+  else
+    DAlphaDXID /= m_matX0Additions[geoID]->GetBinContent(idx);
 
-   if (ptype==PATCore::ParticleType::Electron) {
-      if (geo==egEnergyCorr::ConfigA) hmat=((TH2D*) m_electronBias_ConfigA.get());
-      else if (geo==egEnergyCorr::ConfigEL) hmat=((TH2D*)m_electronBias_ConfigEpLp.get());
-      else if (geo==egEnergyCorr::ConfigFMX) hmat=((TH2D*)m_electronBias_ConfigFpMX.get());
-      else if (geo==egEnergyCorr::ConfigN) hmat=((TH2D*)m_electronBias_ConfigN.get());
-      else if (geo==egEnergyCorr::ConfigIBL) hmat=((TH2D*)m_electronBias_ConfigIBL.get());
-      else if (geo==egEnergyCorr::ConfigPP0) hmat=((TH2D*)m_electronBias_ConfigPP0.get());
-      else return 0;
-   } else if (ptype==PATCore::ParticleType::UnconvertedPhoton) {
-      if (geo==egEnergyCorr::ConfigA) hmat=((TH2D*)m_unconvertedBias_ConfigA.get());
-      else if (geo==egEnergyCorr::ConfigEL) hmat=((TH2D*)m_unconvertedBias_ConfigEpLp.get());
-      else if (geo==egEnergyCorr::ConfigFMX) hmat=((TH2D*)m_unconvertedBias_ConfigFpMX.get());
-      else if (geo==egEnergyCorr::ConfigN) hmat=((TH2D*)m_unconvertedBias_ConfigN.get());
-      else if (geo==egEnergyCorr::ConfigIBL) hmat=((TH2D*)m_unconvertedBias_ConfigIBL.get());
-      else if (geo==egEnergyCorr::ConfigPP0) hmat=((TH2D*)m_unconvertedBias_ConfigIBL.get());
-      else return 0;
-   } else if (ptype==PATCore::ParticleType::ConvertedPhoton) {
-      if (geo==egEnergyCorr::ConfigA) hmat=((TH2D*)m_convertedBias_ConfigA.get());
-      else if (geo==egEnergyCorr::ConfigEL) hmat=((TH2D*)m_convertedBias_ConfigEpLp.get());
-      else if (geo==egEnergyCorr::ConfigFMX) hmat=((TH2D*)m_convertedBias_ConfigFpMX.get());
-      else if (geo==egEnergyCorr::ConfigN) hmat=((TH2D*)m_convertedBias_ConfigN.get());
-      else if (geo==egEnergyCorr::ConfigIBL) hmat=((TH2D*)m_convertedBias_ConfigIBL.get());
-      else if (geo==egEnergyCorr::ConfigPP0) hmat=((TH2D*)m_convertedBias_ConfigPP0.get());
-      else return 0;
-   } else return 0;
+  idx = m_matX0Additions[geoCryo]->FindBin(std::abs(cl_eta));
+  if (idx < 1 || idx > m_matX0Additions[geoCryo]->GetNbinsX())
+    DAlphaDXCryo = 0;
+  else
+    DAlphaDXCryo /= m_matX0Additions[geoCryo]->GetBinContent(idx);
 
+  idx = m_matX0Additions[geoCalo]->FindBin(std::abs(cl_eta));
+  if (idx < 1 || idx > m_matX0Additions[geoCalo]->GetNbinsX())
+    DAlphaDXCalo = 0;
+  else
+    DAlphaDXCalo /= m_matX0Additions[geoCalo]->GetBinContent(idx);
 
+  // final value
 
+  if (imat == egEnergyCorr::MatID)
+    value = DeltaX * (DAlphaDXID - DAlphaDXCryo);
+  else if (imat == egEnergyCorr::MatCryo)
+    value = DeltaX * DAlphaDXCryo;
+  else if (imat == egEnergyCorr::MatCalo)
+    value = DeltaX * DAlphaDXCalo;
 
+  return value * varSF;
+}
 
-   // use one bin in eta and linear interpolation in Et between 2 bins
+double egammaEnergyCorrectionTool::getMaterialEffect(
+    egEnergyCorr::Geometry geo, PATCore::ParticleType::Type ptype,
+    double cl_eta, double ET) const {
 
-  double aeta=std::abs(cl_eta);
+  // Again this does no need to be ptr just get the one owned
+  TH2D* hmat;
+
+  if (ptype == PATCore::ParticleType::Electron) {
+    if (geo == egEnergyCorr::ConfigA)
+      hmat = ((TH2D*)m_electronBias_ConfigA.get());
+    else if (geo == egEnergyCorr::ConfigEL)
+      hmat = ((TH2D*)m_electronBias_ConfigEpLp.get());
+    else if (geo == egEnergyCorr::ConfigFMX)
+      hmat = ((TH2D*)m_electronBias_ConfigFpMX.get());
+    else if (geo == egEnergyCorr::ConfigN)
+      hmat = ((TH2D*)m_electronBias_ConfigN.get());
+    else if (geo == egEnergyCorr::ConfigIBL)
+      hmat = ((TH2D*)m_electronBias_ConfigIBL.get());
+    else if (geo == egEnergyCorr::ConfigPP0)
+      hmat = ((TH2D*)m_electronBias_ConfigPP0.get());
+    else
+      return 0;
+  } else if (ptype == PATCore::ParticleType::UnconvertedPhoton) {
+    if (geo == egEnergyCorr::ConfigA)
+      hmat = ((TH2D*)m_unconvertedBias_ConfigA.get());
+    else if (geo == egEnergyCorr::ConfigEL)
+      hmat = ((TH2D*)m_unconvertedBias_ConfigEpLp.get());
+    else if (geo == egEnergyCorr::ConfigFMX)
+      hmat = ((TH2D*)m_unconvertedBias_ConfigFpMX.get());
+    else if (geo == egEnergyCorr::ConfigN)
+      hmat = ((TH2D*)m_unconvertedBias_ConfigN.get());
+    else if (geo == egEnergyCorr::ConfigIBL)
+      hmat = ((TH2D*)m_unconvertedBias_ConfigIBL.get());
+    else if (geo == egEnergyCorr::ConfigPP0)
+      hmat = ((TH2D*)m_unconvertedBias_ConfigIBL.get());
+    else
+      return 0;
+  } else if (ptype == PATCore::ParticleType::ConvertedPhoton) {
+    if (geo == egEnergyCorr::ConfigA)
+      hmat = ((TH2D*)m_convertedBias_ConfigA.get());
+    else if (geo == egEnergyCorr::ConfigEL)
+      hmat = ((TH2D*)m_convertedBias_ConfigEpLp.get());
+    else if (geo == egEnergyCorr::ConfigFMX)
+      hmat = ((TH2D*)m_convertedBias_ConfigFpMX.get());
+    else if (geo == egEnergyCorr::ConfigN)
+      hmat = ((TH2D*)m_convertedBias_ConfigN.get());
+    else if (geo == egEnergyCorr::ConfigIBL)
+      hmat = ((TH2D*)m_convertedBias_ConfigIBL.get());
+    else if (geo == egEnergyCorr::ConfigPP0)
+      hmat = ((TH2D*)m_convertedBias_ConfigPP0.get());
+    else
+      return 0;
+  } else
+    return 0;
+
+  // use one bin in eta and linear interpolation in Et between 2 bins
+
+  double aeta = std::abs(cl_eta);
   int ieta = hmat->GetXaxis()->FindBin(aeta);
 
   int ipt = hmat->GetYaxis()->FindBin(ET);
   double ptBin = hmat->GetYaxis()->GetBinCenter(ipt);
 
-  int i1,i2;
-  double pt1,pt2;
-   if (ET>ptBin) {
-      i1=ipt;
-      i2=ipt+1;
-      pt1=ptBin;
-      pt2= hmat->GetYaxis()->GetBinCenter(i2);
-  }
-  else {
-     i1=ipt-1;
-     i2=ipt;
-     pt1=hmat->GetYaxis()->GetBinCenter(i1);
-     pt2=ptBin;
+  int i1, i2;
+  double pt1, pt2;
+  if (ET > ptBin) {
+    i1 = ipt;
+    i2 = ipt + 1;
+    pt1 = ptBin;
+    pt2 = hmat->GetYaxis()->GetBinCenter(i2);
+  } else {
+    i1 = ipt - 1;
+    i2 = ipt;
+    pt1 = hmat->GetYaxis()->GetBinCenter(i1);
+    pt2 = ptBin;
   }
 
-  int nbins=hmat->GetYaxis()->GetNbins();
-  double value=0;
-  if (i1>=1 && i1 < nbins) {
-    double v1 = hmat->GetBinContent(ieta,i1);
-    double v2 = hmat->GetBinContent(ieta,i2);
-    value =  (v1*(pt2-ET) + v2*(ET-pt1)) / (pt2-pt1);
-  }
-  else{
-    if (ipt<1) ipt=1;
-    if (ipt>nbins) ipt=nbins;
-    value=hmat->GetBinContent(ieta,ipt);
+  int nbins = hmat->GetYaxis()->GetNbins();
+  double value = 0;
+  if (i1 >= 1 && i1 < nbins) {
+    double v1 = hmat->GetBinContent(ieta, i1);
+    double v2 = hmat->GetBinContent(ieta, i2);
+    value = (v1 * (pt2 - ET) + v2 * (ET - pt1)) / (pt2 - pt1);
+  } else {
+    if (ipt < 1)
+      ipt = 1;
+    if (ipt > nbins)
+      ipt = nbins;
+    value = hmat->GetBinContent(ieta, ipt);
   }
   return value;
-
 }
 
+// returns the energy dependence of the above (non-zero for electrons only).
 
-  // returns the energy dependence of the above (non-zero for electrons only).
+double egammaEnergyCorrectionTool::getMaterialNonLinearity(
+    double cl_eta, double energy, egEnergyCorr::MaterialCategory imat,
+    PATCore::ParticleType::Type ptype, egEnergyCorr::Scale::Variation var,
+    double varSF) const {
 
-  double egammaEnergyCorrectionTool::getMaterialNonLinearity( double cl_eta, double energy,
-							      egEnergyCorr::MaterialCategory imat,
-							      PATCore::ParticleType::Type ptype,
-							      egEnergyCorr::Scale::Variation var, double varSF ) const {
+  double value = 0;
+  double ET = energy / cosh(cl_eta) / GeV;
 
-    double value = 0;
-    double ET = energy/cosh(cl_eta)/GeV;
+  if ((ptype != PATCore::ParticleType::Electron &&
+       (m_esmodel != egEnergyCorr::es2017_R21_v1 &&
+        m_esmodel != egEnergyCorr::es2017_R21_ofc0_v1 &&
+        m_esmodel != egEnergyCorr::es2018_R21_v0 &&
+        m_esmodel != egEnergyCorr::es2018_R21_v1 &&
+        m_esmodel != egEnergyCorr::es2022_R22_PRE &&
+        m_esmodel != egEnergyCorr::es2023_R22_Run2_v0)) ||
+      var == egEnergyCorr::Scale::Nominal)
+    return value;
 
-    if( (ptype!=PATCore::ParticleType::Electron && (m_esmodel != egEnergyCorr::es2017_R21_v1 && m_esmodel != egEnergyCorr::es2017_R21_ofc0_v1 && m_esmodel != egEnergyCorr::es2018_R21_v0 &&  m_esmodel !=egEnergyCorr::es2018_R21_v1 && m_esmodel != egEnergyCorr::es2022_R22_PRE) )  || var==egEnergyCorr::Scale::Nominal )
-      return value;
+  egEnergyCorr::Geometry geoID, geoCryo, geoCalo, geoGp;
+  geoID = egEnergyCorr::ConfigA;
+  if (std::abs(cl_eta) < 2.)
+    geoCryo = egEnergyCorr::ConfigEL;
+  else
+    geoCryo = egEnergyCorr::ConfigFMX;
 
-    egEnergyCorr::Geometry geoID, geoCryo, geoCalo, geoGp;
-    geoID = egEnergyCorr::ConfigA;
-    if( std::abs(cl_eta)<2. )
-      geoCryo = egEnergyCorr::ConfigEL;
+  //   G.Unal 21.08.2018
+  // for Calo material use correctly ConfigN material for endcap (PS to Calo) in
+  // release 21 (not done for run 1, which used FMX in this case)
+  if (std::abs(cl_eta) > 1.52 &&
+      (m_esmodel == egEnergyCorr::es2017_R21_v1 ||
+       m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 ||
+       m_esmodel == egEnergyCorr::es2018_R21_v0 ||
+       m_esmodel == egEnergyCorr::es2018_R21_v1 ||
+       m_esmodel == egEnergyCorr::es2022_R22_PRE ||
+       m_esmodel == egEnergyCorr::es2023_R22_Run2_v0))
+    geoCalo = egEnergyCorr::ConfigN;
+  else
+    geoCalo = egEnergyCorr::ConfigFMX;
+  geoGp = egEnergyCorr::ConfigGp;
+
+  // look up material bias
+
+  double DeltaX = getDeltaX(cl_eta, imat, var) -
+                  getDeltaX(cl_eta, imat, egEnergyCorr::Scale::Nominal);
+
+  // calculate scale change per unit added material
+
+  // G.Unal 21.08.2019 new code called for release 21 sensivitities
+
+  double DAlphaDXGp, DAlphaDXID, DAlphaDXCryo, DAlphaDXCalo;
+
+  if (m_esmodel == egEnergyCorr::es2017_R21_v1 ||
+      m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 ||
+      m_esmodel == egEnergyCorr::es2018_R21_v0 ||
+      m_esmodel == egEnergyCorr::es2018_R21_v1 ||
+      m_esmodel == egEnergyCorr::es2022_R22_PRE ||
+      m_esmodel == egEnergyCorr::es2023_R22_Run2_v0) {
+    DAlphaDXGp =
+        getMaterialEffect(egEnergyCorr::ConfigFMX, ptype, cl_eta,
+                          ET);  // no G' in release 21, use FMX for the crack
+    DAlphaDXID = getMaterialEffect(geoID, ptype, cl_eta, ET);
+    DAlphaDXCryo = getMaterialEffect(geoCryo, ptype, cl_eta, ET);
+    DAlphaDXCalo = getMaterialEffect(geoCalo, ptype, cl_eta, ET);
+
+  } else {
+    int ialpha = m_matElectronEtaBins->FindFixBin(std::abs(cl_eta)) - 1;
+    if (ialpha < 0 || ialpha >= m_matElectronGraphs[geoGp]->GetSize())
+      return 0.;
+
+    DAlphaDXGp = ((TGraphErrors*)m_matElectronGraphs[geoGp]->At(ialpha))
+                     ->GetFunction("fNonLin")
+                     ->Eval(ET);
+    DAlphaDXID = ((TGraphErrors*)m_matElectronGraphs[geoID]->At(ialpha))
+                     ->GetFunction("fNonLin")
+                     ->Eval(ET);
+    DAlphaDXCryo = ((TGraphErrors*)m_matElectronGraphs[geoCryo]->At(ialpha))
+                       ->GetFunction("fNonLin")
+                       ->Eval(ET);
+    DAlphaDXCalo = ((TGraphErrors*)m_matElectronGraphs[geoCalo]->At(ialpha))
+                       ->GetFunction("fNonLin")
+                       ->Eval(ET);
+  }
+
+  // when in crack, use G', exit
+
+  if (isInCrack(cl_eta)) {
+    if (imat == egEnergyCorr::MatID && var == egEnergyCorr::Scale::MatIDUp)
+      value = DAlphaDXGp;
+    else if (imat == egEnergyCorr::MatID &&
+             var == egEnergyCorr::Scale::MatIDDown)
+      value = -DAlphaDXGp;
+    return value;
+  }
+
+  int idx = m_matX0Additions[geoID]->FindBin(std::abs(cl_eta));
+  if (idx < 1 || idx > m_matX0Additions[geoID]->GetNbinsX())
+    DAlphaDXID = 0;
+  else {
+    if (m_matX0Additions[geoID]->GetBinContent(idx) > 0.)
+      DAlphaDXID /= m_matX0Additions[geoID]->GetBinContent(idx);
     else
-      geoCryo = egEnergyCorr::ConfigFMX;
+      DAlphaDXID = 0.;
+  }
 
-    //   G.Unal 21.08.2018
-    // for Calo material use correctly ConfigN material for endcap (PS to Calo) in release 21 (not done for run 1, which used FMX in this case)
-    if (std::abs(cl_eta)>1.52 && (m_esmodel == egEnergyCorr::es2017_R21_v1 || m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 || m_esmodel == egEnergyCorr::es2018_R21_v0 ||  m_esmodel == egEnergyCorr::es2018_R21_v1 || m_esmodel == egEnergyCorr::es2022_R22_PRE ))
-      geoCalo = egEnergyCorr::ConfigN;
+  idx = m_matX0Additions[geoCryo]->FindBin(std::abs(cl_eta));
+  if (idx < 1 || idx > m_matX0Additions[geoCryo]->GetNbinsX())
+    DAlphaDXCryo = 0;
+  else {
+    if (m_matX0Additions[geoCryo]->GetBinContent(idx) > 0.)
+      DAlphaDXCryo /= m_matX0Additions[geoCryo]->GetBinContent(idx);
     else
-      geoCalo = egEnergyCorr::ConfigFMX;
-    geoGp = egEnergyCorr::ConfigGp;
+      DAlphaDXCryo = 0.;
+  }
 
-    // look up material bias
+  idx = m_matX0Additions[geoCalo]->FindBin(std::abs(cl_eta));
+  if (idx < 1 || idx > m_matX0Additions[geoCalo]->GetNbinsX())
+    DAlphaDXCalo = 0;
+  else {
+    if (m_matX0Additions[geoCalo]->GetBinContent(idx) > 0.)
+      DAlphaDXCalo /= m_matX0Additions[geoCalo]->GetBinContent(idx);
+    else
+      DAlphaDXCalo = 0.;
+  }
 
-    double DeltaX = getDeltaX(cl_eta, imat, var) - getDeltaX(cl_eta, imat, egEnergyCorr::Scale::Nominal);
+  // final value
 
+  if (imat == egEnergyCorr::MatID)
+    value = DeltaX * (DAlphaDXID - DAlphaDXCryo);
+  else if (imat == egEnergyCorr::MatCryo)
+    value = DeltaX * DAlphaDXCryo;
+  else if (imat == egEnergyCorr::MatCalo)
+    value = DeltaX * DAlphaDXCalo;
 
-    // calculate scale change per unit added material
+  return value * varSF;
+}
 
-    // G.Unal 21.08.2019 new code called for release 21 sensivitities
+double egammaEnergyCorrectionTool::getAlphaLeakage(
+    double cl_eta, PATCore::ParticleType::Type ptype,
+    egEnergyCorr::Scale::Variation var, double varSF) const {
 
-    double DAlphaDXGp,DAlphaDXID,DAlphaDXCryo,DAlphaDXCalo;
+  double alpha = 0.;
+  double aeta = std::abs(cl_eta);
 
-    if (m_esmodel == egEnergyCorr::es2017_R21_v1 || m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 || m_esmodel == egEnergyCorr::es2018_R21_v0 ||  m_esmodel == egEnergyCorr::es2018_R21_v1 || m_esmodel == egEnergyCorr::es2022_R22_PRE ) {
-       DAlphaDXGp = getMaterialEffect(egEnergyCorr::ConfigFMX,ptype,cl_eta,ET);   // no G' in release 21, use FMX for the crack
-       DAlphaDXID = getMaterialEffect(geoID,ptype,cl_eta,ET);
-       DAlphaDXCryo = getMaterialEffect(geoCryo,ptype,cl_eta,ET);
-       DAlphaDXCalo = getMaterialEffect(geoCalo,ptype,cl_eta,ET);
+  if (var == egEnergyCorr::Scale::Nominal ||
+      ptype == PATCore::ParticleType::Electron)
+    return alpha;
 
+  if (ptype == PATCore::ParticleType::UnconvertedPhoton) {
+
+    if (var == egEnergyCorr::Scale::LeakageUnconvUp) {
+      alpha = m_leakageUnconverted->GetBinContent(
+          m_leakageUnconverted->FindFixBin(aeta));
+    } else if (var == egEnergyCorr::Scale::LeakageUnconvDown) {
+      alpha = -m_leakageUnconverted->GetBinContent(
+          m_leakageUnconverted->FindFixBin(aeta));
+    }
+
+  } else if (ptype == PATCore::ParticleType::ConvertedPhoton) {
+
+    if (var == egEnergyCorr::Scale::LeakageConvUp) {
+      alpha = m_leakageConverted->GetBinContent(
+          m_leakageConverted->FindFixBin(aeta));
+    } else if (var == egEnergyCorr::Scale::LeakageConvDown) {
+      alpha = -m_leakageConverted->GetBinContent(
+          m_leakageConverted->FindFixBin(aeta));
+    }
+  }
+
+  return alpha * varSF;
+}
+
+double egammaEnergyCorrectionTool::getAlphaLeakage2D(
+    double cl_eta, double et, PATCore::ParticleType::Type ptype,
+    egEnergyCorr::Scale::Variation var, double varSF) const {
+
+  // To be on the safe side
+  if (m_esmodel != egEnergyCorr::es2023_R22_Run2_v0) {
+    return getAlphaLeakage(cl_eta, ptype, var, varSF);
+  }
+
+  // No correction for electron
+  if (ptype == PATCore::ParticleType::Electron &&
+      var != egEnergyCorr::Scale::LeakageElecDown &&
+      var != egEnergyCorr::Scale::LeakageElecUp)
+    return 0.;
+
+  // Outside acceptance. Should never happen
+  double aeta = std::abs(cl_eta);
+  if (aeta > 2.47) {
+    ATH_MSG_WARNING("Very high |eta| object, eta = " << cl_eta);
+    return 0.;
+  }
+
+  // If no correction applied, can only be the egEnergyCorr::Scale::LeakageXXX
+  // syst
+  if (!m_useLeakageCorrection && var != egEnergyCorr::Scale::LeakageConvDown &&
+      var != egEnergyCorr::Scale::LeakageConvUp &&
+      var != egEnergyCorr::Scale::LeakageUnconvDown &&
+      var != egEnergyCorr::Scale::LeakageUnconvUp &&
+      var != egEnergyCorr::Scale::LeakageElecDown &&
+      var != egEnergyCorr::Scale::LeakageElecUp)
+    return 0.;
+
+  double etGeV = et / GeV;
+  double alpha = 0, dalpha = 0;
+  if (var == egEnergyCorr::Scale::LeakageElecDown ||
+      var == egEnergyCorr::Scale::LeakageElecUp) {
+    dalpha = getAlphaUncAlpha(*m_leakageElectron, aeta, etGeV,
+                              m_usepTInterpolationForLeakage)
+                 .first;
+    if (var == egEnergyCorr::Scale::LeakageElecDown)
+      dalpha *= -1;
+    if (ptype == PATCore::ParticleType::Electron)
+      return dalpha;
+  }
+
+  bool isConv = ptype == PATCore::ParticleType::ConvertedPhoton;
+  TH1* hh = isConv ? m_leakageConverted.get() : m_leakageUnconverted.get();
+  std::pair<double, double> p =
+      getAlphaUncAlpha(*hh, aeta, etGeV, m_usepTInterpolationForLeakage);
+
+  if (m_useLeakageCorrection) {
+    alpha = p.first;
+  }
+  if ((isConv && (var == egEnergyCorr::Scale::LeakageConvDown ||
+                  var == egEnergyCorr::Scale::LeakageConvUp)) ||
+      (!isConv && (var == egEnergyCorr::Scale::LeakageUnconvDown ||
+                   var == egEnergyCorr::Scale::LeakageUnconvUp))) {
+    // If we correct, use uncertainty. Else use full size of the effect
+    // for es2023_R22_Run2_v0, use full size of correction as uncertainty
+    if (m_useLeakageCorrection && m_esmodel != egEnergyCorr::es2023_R22_Run2_v0)
+      dalpha = p.second;
+    else
+      dalpha = alpha;
+
+    if (var == egEnergyCorr::Scale::LeakageConvDown ||
+        var == egEnergyCorr::Scale::LeakageUnconvDown)
+      dalpha *= -1;
+  }
+  alpha += dalpha;
+
+  ATH_MSG_VERBOSE(
+      "In leakage2D alpha = " << alpha << " from var = " << variationName(var));
+
+  return alpha * varSF;
+}
+
+std::pair<double, double> egammaEnergyCorrectionTool::getAlphaUncAlpha(
+    const TH1& hh, double aeta, double et, bool useInterp) const {
+
+  // stay within the histogram limits in pT
+  // no warning to say the pT is not in the "validity" range...
+  int ibeta = hh.GetXaxis()->FindBin(aeta);
+  int nbpT = hh.GetYaxis()->GetNbins();
+  int ibpT = hh.GetYaxis()->FindBin(et);
+  bool isOUFlow = false;
+  if (ibpT > nbpT) {
+    ibpT = nbpT;
+    isOUFlow = true;
+  } else if (ibpT == 0) {
+    ibpT = 1;
+    isOUFlow = true;
+  }
+  double alpha = 0.;
+  double pTp = hh.GetYaxis()->GetBinCenter(ibpT), pTn = pTp;
+  if (!useInterp || isOUFlow || (ibpT == nbpT && et > pTp) ||
+      (ibpT == 1 && et < pTp))
+    alpha = hh.GetBinContent(ibeta, ibpT);
+  else {
+    int jp = ibpT, jn = ibpT - 1;
+    if (et > pTp) {
+      jp = ibpT + 1;
+      jn = ibpT;
+      pTn = pTp;
+      pTp = hh.GetYaxis()->GetBinCenter(jp);
     } else {
-      int ialpha = m_matElectronEtaBins->FindFixBin( std::abs(cl_eta) ) - 1;
-      if (ialpha<0 || ialpha>=m_matElectronGraphs[geoGp]->GetSize())
-        return 0.;
-
-      DAlphaDXGp   = ((TGraphErrors*)m_matElectronGraphs[geoGp]->At(ialpha))->GetFunction("fNonLin")->Eval( ET );
-      DAlphaDXID   = ((TGraphErrors*)m_matElectronGraphs[geoID]->At(ialpha))->GetFunction("fNonLin")->Eval( ET );
-      DAlphaDXCryo = ((TGraphErrors*)m_matElectronGraphs[geoCryo]->At(ialpha))->GetFunction("fNonLin")->Eval( ET );
-      DAlphaDXCalo = ((TGraphErrors*)m_matElectronGraphs[geoCalo]->At(ialpha))->GetFunction("fNonLin")->Eval( ET );
+      pTn = hh.GetYaxis()->GetBinCenter(jn);
     }
+    double aPos = hh.GetBinContent(ibeta, jp);
+    double aNeg = hh.GetBinContent(ibeta, jn);
+    alpha = (aPos * (et - pTn) + aNeg * (pTp - et)) / (pTp - pTn);
+    ATH_MSG_VERBOSE("interp et = " << et << " alpha+ = " << aPos << " alpha- = "
+                                   << aNeg << " alpha = " << alpha);
+  }
+  double dalpha = hh.GetBinError(ibeta, ibpT);
 
+  return std::make_pair(alpha, dalpha);
+}
 
-    // when in crack, use G', exit
+double egammaEnergyCorrectionTool::getAlphaConvSyst(
+    double cl_eta, double energy, PATCore::ParticleType::Type ptype,
+    egEnergyCorr::Scale::Variation var, double varSF) const {
 
-    if( isInCrack(cl_eta) ) {
-      if( imat==egEnergyCorr::MatID && var==egEnergyCorr::Scale::MatIDUp )
-	value = DAlphaDXGp;
-      else if( imat==egEnergyCorr::MatID && var==egEnergyCorr::Scale::MatIDDown )
-	value = -DAlphaDXGp;
-      return value;
-    }
+  double alpha = 0.;
+  double aeta = std::abs(cl_eta);
+  if (aeta > 2.37)
+    aeta = 2.36;
+  double ET = energy / std::cosh(cl_eta);
 
-    int idx = m_matX0Additions[geoID]->FindBin( std::abs(cl_eta) );
-    if(idx<1 || idx>m_matX0Additions[geoID]->GetNbinsX())
-      DAlphaDXID = 0;
-    else
-    {
-      if (m_matX0Additions[geoID]->GetBinContent(idx) >0.) DAlphaDXID /= m_matX0Additions[geoID]->GetBinContent(idx);
-      else DAlphaDXID=0.;
-    }
+  if (var == egEnergyCorr::Scale::Nominal ||
+      ptype == PATCore::ParticleType::Electron)
+    return alpha;
 
-    idx = m_matX0Additions[geoCryo]->FindBin( std::abs(cl_eta) );
-    if(idx<1 || idx>m_matX0Additions[geoCryo]->GetNbinsX())
-      DAlphaDXCryo = 0;
-    else
-    {
-      if (m_matX0Additions[geoCryo]->GetBinContent(idx)>0.) DAlphaDXCryo /= m_matX0Additions[geoCryo]->GetBinContent(idx);
-      else DAlphaDXCryo=0.;
-    }
+  if (ptype == PATCore::ParticleType::UnconvertedPhoton) {
 
-    idx = m_matX0Additions[geoCalo]->FindBin( std::abs(cl_eta) );
-    if(idx<1 || idx>m_matX0Additions[geoCalo]->GetNbinsX())
-      DAlphaDXCalo = 0;
-    else
-    {
-      if (m_matX0Additions[geoCalo]->GetBinContent(idx)>0.) DAlphaDXCalo /= m_matX0Additions[geoCalo]->GetBinContent(idx);
-      else DAlphaDXCalo=0.;
-    }
+    if (var == egEnergyCorr::Scale::ConvEfficiencyUp &&
+        m_esmodel != egEnergyCorr::es2023_R22_Run2_v0)
+      alpha = m_convRecoEfficiency->GetBinContent(
+          m_convRecoEfficiency->FindFixBin(aeta));
+    else if (var == egEnergyCorr::Scale::ConvEfficiencyDown &&
+             m_esmodel != egEnergyCorr::es2023_R22_Run2_v0)
+      alpha = -m_convRecoEfficiency->GetBinContent(
+          m_convRecoEfficiency->FindFixBin(aeta));
+    else if (var == egEnergyCorr::Scale::ConvRecoUp &&
+             m_esmodel == egEnergyCorr::es2023_R22_Run2_v0)
+      alpha = getInterpolateConvSyst2D(*m_convRecoEfficiency_2D, aeta, ET);
+    else if (var == egEnergyCorr::Scale::ConvRecoDown &&
+             m_esmodel == egEnergyCorr::es2023_R22_Run2_v0)
+      alpha =
+          -1. * getInterpolateConvSyst2D(*m_convRecoEfficiency_2D, aeta, ET);
 
-    // final value
+  } else if (ptype == PATCore::ParticleType::ConvertedPhoton) {
 
-    if( imat==egEnergyCorr::MatID )
-      value = DeltaX * (DAlphaDXID - DAlphaDXCryo);
-    else if( imat==egEnergyCorr::MatCryo )
-      value = DeltaX * DAlphaDXCryo;
-    else if( imat==egEnergyCorr::MatCalo )
-      value = DeltaX * DAlphaDXCalo;
-
-
-    return value * varSF;
-
+    if (var == egEnergyCorr::Scale::ConvFakeRateUp &&
+        m_esmodel != egEnergyCorr::es2023_R22_Run2_v0)
+      alpha = m_convFakeRate->GetBinContent(m_convFakeRate->FindFixBin(aeta));
+    else if (var == egEnergyCorr::Scale::ConvFakeRateDown &&
+             m_esmodel != egEnergyCorr::es2023_R22_Run2_v0)
+      alpha = -m_convFakeRate->GetBinContent(m_convFakeRate->FindFixBin(aeta));
+    else if (var == egEnergyCorr::Scale::ConvRecoUp &&
+             m_esmodel == egEnergyCorr::es2023_R22_Run2_v0)
+      alpha = getInterpolateConvSyst2D(*m_convFakeRate_2D, aeta, ET);
+    else if (var == egEnergyCorr::Scale::ConvRecoDown &&
+             m_esmodel == egEnergyCorr::es2023_R22_Run2_v0)
+      alpha = -1. * getInterpolateConvSyst2D(*m_convFakeRate_2D, aeta, ET);
+    else if (var == egEnergyCorr::Scale::ConvRadiusUp)
+      alpha =
+          m_convRadius->GetBinContent(m_convRadius->FindFixBin(aeta, ET / GeV));
+    else if (var == egEnergyCorr::Scale::ConvRadiusDown)
+      alpha = -m_convRadius->GetBinContent(
+          m_convRadius->FindFixBin(aeta, ET / GeV));
   }
 
+  return alpha * varSF;
+}
 
+double egammaEnergyCorrectionTool::getInterpolateConvSyst2D(
+    const TH2& conv_hist, double aeta, double ET) const {
 
-  double egammaEnergyCorrectionTool::getAlphaLeakage(double cl_eta, PATCore::ParticleType::Type ptype,
-						     egEnergyCorr::Scale::Variation var, double varSF) const {
+  // use one bin in eta and linear interpolation in Et between 2 bins
+  int ieta = conv_hist.GetXaxis()->FindBin(aeta);
 
-    double alpha = 0.;
-    double aeta = std::abs(cl_eta);
+  int ipt = conv_hist.GetYaxis()->FindBin(ET);
+  double ptBin = conv_hist.GetYaxis()->GetBinCenter(ipt);
 
-    if( var==egEnergyCorr::Scale::Nominal || ptype==PATCore::ParticleType::Electron )
-      return alpha;
+  int i1, i2;
+  double pt1, pt2;
+  if (ET > ptBin) {
+    i1 = ipt;
+    i2 = ipt + 1;
+    pt1 = ptBin;
+    pt2 = conv_hist.GetYaxis()->GetBinCenter(i2);
+  } else {
+    i1 = ipt - 1;
+    i2 = ipt;
+    pt1 = conv_hist.GetYaxis()->GetBinCenter(i1);
+    pt2 = ptBin;
+  }
 
-    if( ptype==PATCore::ParticleType::UnconvertedPhoton ) {
+  int nbins = conv_hist.GetYaxis()->GetNbins();
+  double value = 0;
+  if (i1 >= 1 && i1 < nbins) {
+    double v1 = conv_hist.GetBinContent(ieta, i1);
+    double v2 = conv_hist.GetBinContent(ieta, i2);
+    value = (v1 * (pt2 - ET) + v2 * (ET - pt1)) / (pt2 - pt1);
+  } else {
+    if (ipt < 1)
+      ipt = 1;
+    if (ipt > nbins)
+      ipt = nbins;
+    value = conv_hist.GetBinContent(ieta, ipt);
+  }
 
-      if( var==egEnergyCorr::Scale::LeakageUnconvUp ) {
-	alpha =  m_leakageUnconverted->GetBinContent( m_leakageUnconverted->FindFixBin(aeta) );
-      } else if( var==egEnergyCorr::Scale::LeakageUnconvDown ) {
-	alpha = -m_leakageUnconverted->GetBinContent( m_leakageUnconverted->FindFixBin(aeta) );
-      }
+  return value;
+}
 
-    } else if( ptype==PATCore::ParticleType::ConvertedPhoton ) {
+double egammaEnergyCorrectionTool::getAlphaPedestal(
+    double cl_eta, double energy, double eraw,
+    PATCore::ParticleType::Type ptype, bool isRef,
+    egEnergyCorr::Scale::Variation var, double varSF) const {
+  double alpha = 0.;
+  if (var == egEnergyCorr::Scale::PedestalUp ||
+      var == egEnergyCorr::Scale::PedestalDown) {
+    if (m_esmodel == egEnergyCorr::es2017) {
+      const double delta =
+          getValueHistoAt(*m_pedestals_es2017, std::abs(cl_eta));
+      alpha = delta / (energy / cosh(cl_eta));
+      if (var == egEnergyCorr::Scale::PedestalDown)
+        alpha *= -1;
+    } else if (m_esmodel == egEnergyCorr::es2017_summer or
+               m_esmodel == egEnergyCorr::es2017_summer_improved or
+               m_esmodel == egEnergyCorr::es2017_summer_final or
+               m_esmodel == egEnergyCorr::es2017_R21_PRE or
+               m_esmodel == egEnergyCorr::es2015_5TeV or
+               m_esmodel == egEnergyCorr::es2017_R21_v0 or
+               m_esmodel == egEnergyCorr::es2017_R21_v1 or
+               m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 or
+               m_esmodel == egEnergyCorr::es2018_R21_v0 or
+               m_esmodel == egEnergyCorr::es2018_R21_v1 or
+               m_esmodel == egEnergyCorr::es2022_R22_PRE or
+               m_esmodel == egEnergyCorr::es2023_R22_Run2_v0) {
+      // Et uncertainty band: 10 MeV for the corrected cluster
+      alpha = 10. / (energy / cosh(cl_eta));
+      if (var == egEnergyCorr::Scale::PedestalDown)
+        alpha *= -1;
+    } else {
+      // observed pedestal corrected as a systematic on MC for now.
+      // TODO : correct for it in the data
 
-      if( var==egEnergyCorr::Scale::LeakageConvUp ) {
-	alpha =  m_leakageConverted->GetBinContent( m_leakageConverted->FindFixBin(aeta) );
-      } else if( var==egEnergyCorr::Scale::LeakageConvDown ) {
-	alpha = -m_leakageConverted->GetBinContent( m_leakageConverted->FindFixBin(aeta) );
-      }
+      double pedestal = getLayerPedestal(cl_eta, ptype, 0, var, varSF) +
+                        getLayerPedestal(cl_eta, ptype, 1, var, varSF) +
+                        getLayerPedestal(cl_eta, ptype, 2, var, varSF) +
+                        getLayerPedestal(cl_eta, ptype, 3, var, varSF);
 
+      if (isRef)
+        alpha = pedestal / energy *
+                1.06;  // approximate average ratio between calibrated and raw
+      else
+        alpha = pedestal / eraw;
+    }
+  }
+
+  return alpha * varSF;
+}
+
+double egammaEnergyCorrectionTool::getLayerPedestal(
+    double cl_eta, PATCore::ParticleType::Type ptype, int iLayer,
+    egEnergyCorr::Scale::Variation var, double varSF) const {
+
+  double pedestal = 0.;
+  double aeta = std::abs(cl_eta);
+
+  if (var == egEnergyCorr::Scale::PedestalUp ||
+      var == egEnergyCorr::Scale::PedestalDown) {
+
+    if (iLayer == 0)
+      pedestal = m_pedestalL0->GetBinContent(m_pedestalL0->FindFixBin(aeta));
+    else if (iLayer == 1)
+      pedestal = m_pedestalL1->GetBinContent(m_pedestalL1->FindFixBin(aeta));
+    else if (iLayer == 2)
+      pedestal = m_pedestalL2->GetBinContent(m_pedestalL2->FindFixBin(aeta));
+    else if (iLayer == 3)
+      pedestal = m_pedestalL3->GetBinContent(m_pedestalL3->FindFixBin(aeta));
+
+    if (ptype == PATCore::ParticleType::UnconvertedPhoton && aeta < 1.4) {
+      if (iLayer <= 1)
+        pedestal /= 1.5;
+      else if (iLayer == 2)
+        pedestal *= 15. / 21.;
     }
 
-    return alpha*varSF;
-
+    if (var == egEnergyCorr::Scale::PedestalDown)
+      pedestal *= -1.;
   }
 
-  double egammaEnergyCorrectionTool::getAlphaConvSyst(double cl_eta, double energy, PATCore::ParticleType::Type ptype,
-						      egEnergyCorr::Scale::Variation var, double varSF) const {
+  return pedestal * varSF;
+}
 
-    double alpha = 0.;
-    double aeta = std::abs(cl_eta);
-    double ET = energy/cosh(cl_eta)/GeV;
+bool egammaEnergyCorrectionTool::isInCrack(double cl_eta) {
 
-    if( var==egEnergyCorr::Scale::Nominal || ptype==PATCore::ParticleType::Electron )
-      return alpha;
+  return std::abs(cl_eta) >= 1.35 && std::abs(cl_eta) <= 1.55;
+}
 
-    if( ptype==PATCore::ParticleType::UnconvertedPhoton ) {
+double egammaEnergyCorrectionTool::nearestEtaBEC(double cl_eta) {
 
-      if( var==egEnergyCorr::Scale::ConvEfficiencyUp )
-	alpha =  m_convRecoEfficiency->GetBinContent( m_convRecoEfficiency->FindFixBin(aeta) );
-      else if( var==egEnergyCorr::Scale::ConvEfficiencyDown )
-	alpha = -m_convRecoEfficiency->GetBinContent( m_convRecoEfficiency->FindFixBin(aeta) );
+  double newEta = cl_eta;
 
-    } else if( ptype==PATCore::ParticleType::ConvertedPhoton ) {
-
-      if( var==egEnergyCorr::Scale::ConvFakeRateUp )
-	alpha =  m_convFakeRate->GetBinContent( m_convFakeRate->FindFixBin(aeta) );
-      else if( var==egEnergyCorr::Scale::ConvFakeRateDown )
-	alpha = -m_convFakeRate->GetBinContent( m_convFakeRate->FindFixBin(aeta) );
-      else if( var==egEnergyCorr::Scale::ConvRadiusUp )
-	alpha =  m_convRadius->GetBinContent( m_convRadius->FindFixBin(aeta, ET) );
-      else if( var==egEnergyCorr::Scale::ConvRadiusDown )
-	alpha = -m_convRadius->GetBinContent( m_convRadius->FindFixBin(aeta, ET) );
-
-    }
-
-    return alpha*varSF;
-
-  }
-
-  double
-  egammaEnergyCorrectionTool::getAlphaPedestal(double cl_eta,
-                                               double energy,
-                                               double eraw,
-                                               PATCore::ParticleType::Type ptype,
-                                               bool isRef,
-                                               egEnergyCorr::Scale::Variation var,
-                                               double varSF) const
-  {
-    double alpha = 0.;
-    if (var == egEnergyCorr::Scale::PedestalUp || var == egEnergyCorr::Scale::PedestalDown) {
-      if (m_esmodel == egEnergyCorr::es2017) {
-        const double delta = getValueHistoAt(*m_pedestals_es2017, std::abs(cl_eta));
-        alpha = delta / (energy / cosh(cl_eta));
-        if (var == egEnergyCorr::Scale::PedestalDown)
-          alpha *= -1;
-      } else if (m_esmodel == egEnergyCorr::es2017_summer or m_esmodel == egEnergyCorr::es2017_summer_improved or
-                 m_esmodel == egEnergyCorr::es2017_summer_final or m_esmodel == egEnergyCorr::es2017_R21_PRE or
-                 m_esmodel == egEnergyCorr::es2015_5TeV or m_esmodel == egEnergyCorr::es2017_R21_v0 or
-                 m_esmodel == egEnergyCorr::es2017_R21_v1 or m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 or
-                 m_esmodel == egEnergyCorr::es2018_R21_v0 or m_esmodel == egEnergyCorr::es2018_R21_v1 or
-                 m_esmodel == egEnergyCorr::es2022_R22_PRE) {
-        // Et uncertainty band: 10 MeV for the corrected cluster
-        alpha = 10. / (energy / cosh(cl_eta));
-        if (var == egEnergyCorr::Scale::PedestalDown)
-          alpha *= -1;
-      } else {
-        // observed pedestal corrected as a systematic on MC for now.
-        // TODO : correct for it in the data
-
-        double pedestal = getLayerPedestal(cl_eta, ptype, 0, var, varSF) + getLayerPedestal(cl_eta, ptype, 1, var, varSF) +
-                          getLayerPedestal(cl_eta, ptype, 2, var, varSF) + getLayerPedestal(cl_eta, ptype, 3, var, varSF);
-
-        if (isRef)
-          alpha = pedestal / energy * 1.06; // approximate average ratio between calibrated and raw
-        else
-          alpha = pedestal / eraw;
-      }
-    }
-
-    return alpha * varSF;
-  }
-
-  double egammaEnergyCorrectionTool::getLayerPedestal(double cl_eta, PATCore::ParticleType::Type ptype, int iLayer,
-						      egEnergyCorr::Scale::Variation var, double varSF) const {
-
-    double pedestal = 0.;
-    double aeta = std::abs(cl_eta);
-
-    if( var==egEnergyCorr::Scale::PedestalUp || var==egEnergyCorr::Scale::PedestalDown ) {
-
-      if( iLayer==0 )
-	pedestal = m_pedestalL0->GetBinContent( m_pedestalL0->FindFixBin(aeta) );
-      else if( iLayer==1 )
-	pedestal = m_pedestalL1->GetBinContent( m_pedestalL1->FindFixBin(aeta) );
-      else if( iLayer==2 )
-	pedestal = m_pedestalL2->GetBinContent( m_pedestalL2->FindFixBin(aeta) );
-      else if( iLayer==3 )
-	pedestal = m_pedestalL3->GetBinContent( m_pedestalL3->FindFixBin(aeta) );
-
-      if( ptype==PATCore::ParticleType::UnconvertedPhoton && aeta<1.4 ) {
-	if( iLayer<=1 )
-	  pedestal /= 1.5;
-	else if( iLayer==2 )
-	  pedestal *= 15./21.;
-      }
-
-      if( var==egEnergyCorr::Scale::PedestalDown )
-	pedestal *= -1.;
-
-    }
-
-    return pedestal*varSF;
-
-  }
-
-
-  bool egammaEnergyCorrectionTool::isInCrack( double cl_eta ) {
-
-    return std::abs(cl_eta)>=1.35 && std::abs(cl_eta)<=1.55;
-
-  }
-
-  double egammaEnergyCorrectionTool::nearestEtaBEC( double cl_eta ) {
-
-    double newEta = cl_eta;
-
-    if( !isInCrack(newEta) )
-      return newEta;
-
-    if( newEta>=1.35  && newEta<=1.45) newEta = 1.349;
-    if( newEta>=1.45  && newEta<=1.55) newEta = 1.551;
-
-    if( newEta>=-1.55 && newEta<=-1.45) newEta = -1.551;
-    if( newEta>=-1.45 && newEta<=-1.35) newEta = -1.349;
-
+  if (!isInCrack(newEta))
     return newEta;
 
-  }
+  if (newEta >= 1.35 && newEta <= 1.45)
+    newEta = 1.349;
+  if (newEta >= 1.45 && newEta <= 1.55)
+    newEta = 1.551;
 
+  if (newEta >= -1.55 && newEta <= -1.45)
+    newEta = -1.551;
+  if (newEta >= -1.45 && newEta <= -1.35)
+    newEta = -1.349;
 
-  double egammaEnergyCorrectionTool::pileUpTerm(double energy, double eta, int particle_type) const {
+  return newEta;
+}
 
-    double pileupNoise;
+double egammaEnergyCorrectionTool::pileUpTerm(double energy, double eta,
+                                              int particle_type) const {
 
-    // release 21 for <mu> =32 (combined 2015-2016-2017 dataset), pileup noise = f(Et) for superclusters
-    if (m_esmodel == egEnergyCorr::es2017_R21_v0 or m_esmodel == egEnergyCorr::es2017_R21_v1 or
-        m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 or m_esmodel == egEnergyCorr::es2018_R21_v0 or
-        m_esmodel == egEnergyCorr::es2018_R21_v1 or m_esmodel == egEnergyCorr::es2022_R22_PRE) {
-      double et = energy / cosh(eta);
-      if (et < 5000.)
-        et = 5000.;
-      if (et > 50000.)
-        et = 50000.;
-      pileupNoise = sqrt(32.) * (60. + 40. * log(et / 10000.) / log(5.));
-    } else {
-      // approximate pileup noise addition to the total noise in MeV   for <mu_data> (2012) = 20
-      // converted photons and electrons
-      pileupNoise=240.;
-      // unconverted photons, different values in barrel and end-cap
-      if (particle_type==1) {
-      if (std::abs(eta)<1.4) pileupNoise=200.;
-      }
+  double pileupNoise;
+
+  // release 21 for <mu> =32 (combined 2015-2016-2017 dataset), pileup noise =
+  // f(Et) for superclusters
+  if (m_esmodel == egEnergyCorr::es2017_R21_v0 or
+      m_esmodel == egEnergyCorr::es2017_R21_v1 or
+      m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 or
+      m_esmodel == egEnergyCorr::es2018_R21_v0 or
+      m_esmodel == egEnergyCorr::es2018_R21_v1 or
+      m_esmodel == egEnergyCorr::es2022_R22_PRE or
+      m_esmodel == egEnergyCorr::es2023_R22_Run2_v0) {
+    double avgmu = 32;
+    if (m_esmodel == egEnergyCorr::es2023_R22_Run2_v0)
+      avgmu = 34.;
+
+    double et = energy / cosh(eta);
+    if (et < 5000.)
+      et = 5000.;
+    if (et > 50000.)
+      et = 50000.;
+    pileupNoise = sqrt(avgmu) * (60. + 40. * log(et / 10000.) / log(5.));
+  } else {
+    // approximate pileup noise addition to the total noise in MeV   for
+    // <mu_data> (2012) = 20 converted photons and electrons
+    pileupNoise = 240.;
+    // unconverted photons, different values in barrel and end-cap
+    if (particle_type == 1) {
+      if (std::abs(eta) < 1.4)
+        pileupNoise = 200.;
     }
-    return pileupNoise;
-
   }
+  return pileupNoise;
+}
 
+void egammaEnergyCorrectionTool::getResolution_systematics(
+    int particle_type, double energy, double eta, double etaCalo, int syst_mask,
+    double& resolution, double& resolution_error, double& resolution_error_up,
+    double& resolution_error_down, int resol_type, bool fast) const {
 
-  void egammaEnergyCorrectionTool::getResolution_systematics(int particle_type,
-							     double energy,
-							     double eta,
-							     double etaCalo,
-							     int syst_mask,
-							     double& resolution,
-							     double& resolution_error,
-                                                             double& resolution_error_up,
-                                                             double& resolution_error_down,
-							     int resol_type,
-                                                             bool fast) const {
+  double pileupNoise = pileUpTerm(energy, eta, particle_type);
+  double et = energy / cosh(eta);
 
-    double pileupNoise =  pileUpTerm(energy,eta, particle_type);
-    double et = energy/cosh(eta);
+  resolution =
+      m_resolution_tool->getResolution(particle_type, energy, eta, resol_type);
+  // std::cout << " resolution from tool " << resolution << std::endl;
+  double smearingZ = dataConstantTerm(m_use_etaCalo_scales ? etaCalo : eta);
+  double esmearingZ =
+      dataConstantTermError(m_use_etaCalo_scales ? etaCalo : eta);
+  double esmearingOFC = m_esmodel == egEnergyCorr::es2022_R22_PRE
+                            ? dataConstantTermOFCError(eta)
+                            : 0.;
+  double resolution2 = resolution * resolution + smearingZ * smearingZ +
+                       (pileupNoise * pileupNoise) / (et * et);
+  resolution = sqrt(resolution2);
 
-    resolution = m_resolution_tool->getResolution(particle_type,energy,eta,resol_type);
-    //std::cout << " resolution from tool " << resolution << std::endl;
-    double smearingZ=dataConstantTerm(m_use_etaCalo_scales ? etaCalo : eta);
-    double esmearingZ=dataConstantTermError(m_use_etaCalo_scales ? etaCalo : eta);
-    double esmearingOFC= m_esmodel == egEnergyCorr::es2022_R22_PRE? dataConstantTermOFCError(eta) : 0.;
-    double resolution2=resolution*resolution+smearingZ*smearingZ + (pileupNoise*pileupNoise)/(et*et);
-    resolution=sqrt(resolution2);
+  double_t sum_sigma_resolution2 = 0.;
+  double sum_deltaDown = 0.;
+  double sum_deltaUp = 0.;
 
+  for (int isys = 0; isys < 11; isys++) {
 
-    double_t sum_sigma_resolution2=0.;
-    double sum_deltaDown=0.;
-    double sum_deltaUp=0.;
+    if (syst_mask & (1 << isys)) {
 
-    for (int isys=0;isys<11;isys++) {
+      double sigma2 = 0.;
+      double sigma2up = 0.;
+      double sigma2down = 0.;
 
-      if (syst_mask & (1<<isys) ) {
-
-	double sigma2=0.;
-	double sigma2up=0.;
-	double sigma2down=0.;
-
-	// systematics on Z smearing measurement
-	if (isys==0) {
-	  double d1 = (smearingZ+esmearingZ)*(smearingZ+esmearingZ) - smearingZ*smearingZ;
-	  double d2 = smearingZ*smearingZ- (smearingZ-esmearingZ)*(smearingZ-esmearingZ);
-	  double d = 0.5*(d1+d2);
-	  sigma2up = d1;
-	  sigma2down = -d2;
-	  sigma2 = d;
-    ATH_MSG_DEBUG(boost::format("sys resolution Zsmearing: %.7f %.7f %.7f") % sigma2 % sigma2up % sigma2down);
-	}
-
-	// systematics on intrinsic resolution
-	if (isys==1) {
-	  double resolutionZ=m_resolution_tool->getResolution(3,40000.*cosh(eta),eta,resol_type);
-	  double deltaSigma2 = (1.1*resolutionZ)*(1.1*resolutionZ)-resolutionZ*resolutionZ;
-	  double resolution1 = m_resolution_tool->getResolution(3,energy,eta,resol_type);
-	  sigma2up = (1.1*resolution1)*(1.1*resolution1)-resolution1*resolution1 - deltaSigma2;
-	  deltaSigma2 = (0.9*resolutionZ)*(0.9*resolutionZ)-resolutionZ*resolutionZ;
-	  sigma2down= (0.9*resolution1)*(0.9*resolution1)-resolution1*resolution1-deltaSigma2;
-	  sigma2 = 0.5*(sigma2up-sigma2down);
-    ATH_MSG_DEBUG(boost::format("sys resolution intrinsic: %.7f %.7f %.7f") % sigma2 % sigma2up % sigma2down);
-	}
-
-	// systematics from configA ID material
-	else if (isys==2) {
-    double sigmaA= m_getMaterialDelta->getDelta(particle_type,energy,eta,1,0);
-	  sigma2 = sigmaA*sigmaA;
-	  sigma2up = sigma2;
-	  sigma2down = -1.*sigma2;
-    ATH_MSG_DEBUG(boost::format("sys resolution configA ID material: %.7f %.7f %.7f") % sigma2 % sigma2up % sigma2down);
-	}
-
-	// systematics from material presampler-layer 1 in barrel (based on half config M )
-	else if (isys==3 ) {
-	  if( std::abs(eta)<1.45) {
-	    double sigmaM = m_getMaterialDelta->getDelta(particle_type,energy,eta,1,3);
-	    sigma2 = 0.5*sigmaM*sigmaM;
-	  } else sigma2=0.;
-	  sigma2up = sigma2;
-	  sigma2down = -1.*sigma2;
-    ATH_MSG_DEBUG(boost::format("sys resolution presampler-layer1: %.7f %.7f %.7f") % sigma2 % sigma2up % sigma2down);
-	}
-
-	// systematic from material in barrel-endcap gap (using full config X for now)
-	else if (isys==4) {
-	  if (std::abs(eta)>1.52 && std::abs(eta)<1.82) {
-	    double sigmaX =  m_getMaterialDelta->getDelta(particle_type,energy,eta,1,3);
-	    sigma2 = sigmaX*sigmaX;
-	  } else sigma2=0.;
-	  sigma2up = sigma2;
-	  sigma2down = -1.*sigma2;
-    ATH_MSG_DEBUG(boost::format("sys resolution barrel-endcap gap: %.7f %.7f %.7f") % sigma2 % sigma2up % sigma2down);
-	}
-
-	// systematics from material in cryostat area (using half config EL, FIXME: could use clever eta dependent scaling)
-	else if (isys==5) {
-	  double sigmaEL = m_getMaterialDelta->getDelta(particle_type,energy,eta,1,2);
-	  sigma2 = 0.5*sigmaEL*sigmaEL;
-	  sigma2up = sigma2;
-	  sigma2down = -1.*sigma2;
-    ATH_MSG_DEBUG(boost::format("sys resolution cryostat area: %.7f %.7f %.7f") % sigma2 % sigma2up % sigma2down);
-	}
-
-	// systematics from pileup noise  on total noise (200 MeV in quadrature, somewhat conservative)
-	else if (isys==6) {
-    double et = energy/cosh(eta);
-    double sigmaPileUp=0.;
-    double sigmaZ=0.;
-    // release 21 - 10% uncertainty on pileup noise
-    if (m_esmodel == egEnergyCorr::es2017_R21_v0 or m_esmodel == egEnergyCorr::es2017_R21_v1 or m_esmodel == egEnergyCorr::es2018_R21_v0 or  m_esmodel == egEnergyCorr::es2018_R21_v1 or m_esmodel == egEnergyCorr::es2022_R22_PRE) {
-      double deltaNoise = sqrt(1.1*1.1-1.0)*pileupNoise;  // uncertainty in quadrature 1.1*noise - noise
-      sigmaPileUp = deltaNoise/et;   // sigmaE/E impact
-      sigmaZ = deltaNoise/40000.;    // sigmaE/E for Z->ee electrons (absorbed in smearing correction)
-    }
-    // no pileup noise uncertainty for es2017_R21_ofc0_v1
-    else if (m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1) {
-      sigmaPileUp=0.;
-      sigmaZ=0.;
-    }
-    else {
-    // older models
-	    double deltaPileupNoise=100.; // MeV
-	    if (std::abs(eta)>=1.4 && std::abs(eta)<1.8) deltaPileupNoise=200.; // larger systematic in this eta bin
-	    double scaleNcells=1;
-	    if (particle_type==1 && std::abs(eta)<1.4) scaleNcells = sqrt(3./5.);   // cluster=3X5 instead of 3x7, rms scales with cluster area
-	    sigmaPileUp = deltaPileupNoise*scaleNcells/et;
-	    sigmaZ = deltaPileupNoise/(40000.); // effect for Z->ee at Et=40 GeV
-    }
-	  sigma2=sigmaPileUp*sigmaPileUp-sigmaZ*sigmaZ;
-	  sigma2up = sigma2;
-	  sigma2down = -1.*sigma2;
-    ATH_MSG_DEBUG(boost::format("sys resolution pileup noise: %.7f %.7f %.7f") % sigma2 % sigma2up % sigma2down);
-	}
-
-	// systematics from material in IBL+PP0 for barrel
-	else if (isys==7 && std::abs(eta)<1.5  && (m_esmodel==egEnergyCorr::es2017 or m_esmodel == egEnergyCorr::es2017_summer or m_esmodel == egEnergyCorr::es2017_summer_improved or m_esmodel == egEnergyCorr::es2017_summer_final or m_esmodel == egEnergyCorr::es2015_5TeV or m_esmodel == egEnergyCorr::es2017_R21_v0 or m_esmodel == egEnergyCorr::es2017_R21_v1 or m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 or m_esmodel == egEnergyCorr::es2018_R21_v0 or  m_esmodel == egEnergyCorr::es2018_R21_v1 or m_esmodel == egEnergyCorr::es2022_R22_PRE)) {
-	  double  sigmaE = m_getMaterialDelta->getDelta(particle_type,energy,eta,1,5);
-	  sigma2 = sigmaE*sigmaE;
-	  sigma2up = sigma2;
-	  sigma2down = -1.*sigma2;
-	  ATH_MSG_DEBUG(boost::format("sys resolution ibl material: %.7f %.7f %.7f") % sigma2 % sigma2up % sigma2down);
-	}
-
-	// systematics from material in IBL+PP0 for end-cap
-	else if (isys==8 && std::abs(eta)>1.5 && (m_esmodel==egEnergyCorr::es2017 or m_esmodel == egEnergyCorr::es2017_summer or m_esmodel == egEnergyCorr::es2017_summer_improved or m_esmodel == egEnergyCorr::es2017_summer_final or m_esmodel == egEnergyCorr::es2015_5TeV or m_esmodel == egEnergyCorr::es2017_R21_v0 or m_esmodel == egEnergyCorr::es2017_R21_v1 or m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 or m_esmodel == egEnergyCorr::es2018_R21_v0 or  m_esmodel == egEnergyCorr::es2018_R21_v1 or m_esmodel == egEnergyCorr::es2022_R22_PRE)) {
-	  double sigmaE =  m_getMaterialDelta->getDelta(particle_type,energy,eta,1,5);
-	  // scale factor 2.3 in X0 => sqrt(2) in resolution or 2 in resolution**2
-	  sigma2 = 2.3*sigmaE*sigmaE;
-	  sigma2up = sigma2;
-	  sigma2down = -1.*sigma2;
-	  ATH_MSG_DEBUG(boost::format("sys resolution pp0 material: %.7f %.7f %.7f") % sigma2 % sigma2up % sigma2down);
-
-	}
-
-  // AF2 resolution systematics for es2017_R21_v1 model (neglected before that...)
-  else if (isys==9 && (m_esmodel == egEnergyCorr::es2017_R21_v1 || m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 || m_esmodel == egEnergyCorr::es2018_R21_v0 || m_esmodel == egEnergyCorr::es2018_R21_v1 || m_esmodel == egEnergyCorr::es2022_R22_PRE ) && fast) {
-    const double ptGeV = et/1e3;
-    if(particle_type == 0) sigma2 = getValueHistAt(*m_G4OverAFII_resolution_electron,eta,ptGeV,true,true,true,true);
-    if(particle_type == 1) sigma2 = getValueHistAt(*m_G4OverAFII_resolution_unconverted,eta,ptGeV,true,true,true,true);
-    if(particle_type == 2) sigma2 = getValueHistAt(*m_G4OverAFII_resolution_converted,eta,ptGeV,true,true,true,true);
-    sigma2up = -1.*sigma2;  // AF2 resolution worse than full Sim, sigma2up gives back AF2 resolution
-    sigma2down = sigma2;
-  }
-
-  // OFC resolution systematics for for es2022_RUN3_PRE
-  else if (isys==10 && (m_esmodel == egEnergyCorr::es2022_R22_PRE)) {
-    double d1 = (smearingZ+esmearingOFC)*(smearingZ+esmearingOFC) - smearingZ*smearingZ;
-	  double d2 = smearingZ*smearingZ- (smearingZ-esmearingOFC)*(smearingZ-esmearingOFC);
-	  double d = 0.5*(d1+d2);
-	  sigma2up = d1;
-	  sigma2down = -d2;
-	  sigma2 = d;
-    ATH_MSG_DEBUG(boost::format("sys resolution OFC unc.: %.7f %.7f %.7f") % sigma2 % sigma2up % sigma2down);
-  }
-
-//  old method to use max of up and down for All
-/*
-	double rr1 = sqrt(resolution2+sigma2);   // nominal (data) + average error
-	double rr2=0.;
-	if((resolution2-sigma2) > 0.) rr2 = sqrt(resolution2-sigma2);  // max(0, nominal (data) - average error)
-	double deltaSigma_sys;
-	if ((rr1-resolution) > (resolution-rr2) ) deltaSigma_sys = rr1-resolution;
-	else deltaSigma_sys = resolution-rr2;
-	deltaSigma_sys = deltaSigma_sys / resolution;
-*/
-
-// use average of up and down for symmetric uncertainty for All
-
-	double rr1=0.;
-	if((resolution2+sigma2up)>0.) rr1 = sqrt(resolution2+sigma2up);   // nominal (data) + up error
-	double rr2=0.;
-        if((resolution2+sigma2down) > 0.) rr2 = sqrt(resolution2+sigma2down);  // max(0, nominal (data) + down error
-        double deltaSigma_sys;
-        deltaSigma_sys = 0.5*(rr1-rr2);        // average of up and down uncertainties
-        deltaSigma_sys = deltaSigma_sys / resolution;   // relative resolution uncertainty
-
-	sum_sigma_resolution2 += deltaSigma_sys*deltaSigma_sys;
-
-	if ((resolution2+sigma2up)>0.) rr1=sqrt(resolution2+sigma2up);
-	else rr1=0.;
-	double deltaSigmaUp = (rr1-resolution)/resolution;
-	//std::cout << " relative resolution change Up " << deltaSigmaUp << std::endl;
-
-	if ((resolution2+sigma2down)>0.) rr2=sqrt(resolution2+sigma2down);
-	else rr2=0.;
-	double deltaSigmaDown = (rr2-resolution)/resolution;
-	//std::cout << " relative resolution change Down " << deltaSigmaDown << std::endl;
-
-	sum_deltaUp += deltaSigmaUp;
-	sum_deltaDown += deltaSigmaDown;
-
+      // systematics on Z smearing measurement
+      if (isys == 0) {
+        double d1 = (smearingZ + esmearingZ) * (smearingZ + esmearingZ) -
+                    smearingZ * smearingZ;
+        double d2 = smearingZ * smearingZ -
+                    (smearingZ - esmearingZ) * (smearingZ - esmearingZ);
+        double d = 0.5 * (d1 + d2);
+        sigma2up = d1;
+        sigma2down = -d2;
+        sigma2 = d;
+        ATH_MSG_DEBUG(
+            boost::format("sys resolution Zsmearing: %.7f %.7f %.7f") % sigma2 %
+            sigma2up % sigma2down);
       }
 
+      // systematics on intrinsic resolution
+      if (isys == 1) {
+        double resolutionZ = m_resolution_tool->getResolution(
+            3, 40000. * cosh(eta), eta, resol_type);
+        double deltaSigma2 = (1.1 * resolutionZ) * (1.1 * resolutionZ) -
+                             resolutionZ * resolutionZ;
+        double resolution1 =
+            m_resolution_tool->getResolution(3, energy, eta, resol_type);
+        sigma2up = (1.1 * resolution1) * (1.1 * resolution1) -
+                   resolution1 * resolution1 - deltaSigma2;
+        deltaSigma2 = (0.9 * resolutionZ) * (0.9 * resolutionZ) -
+                      resolutionZ * resolutionZ;
+        sigma2down = (0.9 * resolution1) * (0.9 * resolution1) -
+                     resolution1 * resolution1 - deltaSigma2;
+        sigma2 = 0.5 * (sigma2up - sigma2down);
+        ATH_MSG_DEBUG(
+            boost::format("sys resolution intrinsic: %.7f %.7f %.7f") % sigma2 %
+            sigma2up % sigma2down);
+      }
+
+      // systematics from configA ID material
+      else if (isys == 2) {
+        double sigmaA =
+            m_getMaterialDelta->getDelta(particle_type, energy, eta, 1, 0);
+        sigma2 = sigmaA * sigmaA;
+        sigma2up = sigma2;
+        sigma2down = -1. * sigma2;
+        ATH_MSG_DEBUG(
+            boost::format(
+                "sys resolution configA ID material: %.7f %.7f %.7f") %
+            sigma2 % sigma2up % sigma2down);
+      }
+
+      // systematics from material presampler-layer 1 in barrel (based on half
+      // config M )
+      else if (isys == 3) {
+        if (std::abs(eta) < 1.45) {
+          double sigmaM =
+              m_getMaterialDelta->getDelta(particle_type, energy, eta, 1, 3);
+          sigma2 = 0.5 * sigmaM * sigmaM;
+        } else
+          sigma2 = 0.;
+        sigma2up = sigma2;
+        sigma2down = -1. * sigma2;
+        ATH_MSG_DEBUG(
+            boost::format("sys resolution presampler-layer1: %.7f %.7f %.7f") %
+            sigma2 % sigma2up % sigma2down);
+      }
+
+      // systematic from material in barrel-endcap gap (using full config X for
+      // now)
+      else if (isys == 4) {
+        if (std::abs(eta) > 1.52 && std::abs(eta) < 1.82) {
+          double sigmaX =
+              m_getMaterialDelta->getDelta(particle_type, energy, eta, 1, 3);
+          sigma2 = sigmaX * sigmaX;
+        } else
+          sigma2 = 0.;
+        sigma2up = sigma2;
+        sigma2down = -1. * sigma2;
+        ATH_MSG_DEBUG(
+            boost::format("sys resolution barrel-endcap gap: %.7f %.7f %.7f") %
+            sigma2 % sigma2up % sigma2down);
+      }
+
+      // systematics from material in cryostat area (using half config EL,
+      // FIXME: could use clever eta dependent scaling)
+      else if (isys == 5) {
+        double sigmaEL =
+            m_getMaterialDelta->getDelta(particle_type, energy, eta, 1, 2);
+        sigma2 = 0.5 * sigmaEL * sigmaEL;
+        sigma2up = sigma2;
+        sigma2down = -1. * sigma2;
+        ATH_MSG_DEBUG(
+            boost::format("sys resolution cryostat area: %.7f %.7f %.7f") %
+            sigma2 % sigma2up % sigma2down);
+      }
+
+      // systematics from pileup noise  on total noise (200 MeV in quadrature,
+      // somewhat conservative)
+      else if (isys == 6) {
+        double et = energy / cosh(eta);
+        double sigmaPileUp = 0.;
+        double sigmaZ = 0.;
+        // release 21 - 10% uncertainty on pileup noise
+        if (m_esmodel == egEnergyCorr::es2017_R21_v0 or
+            m_esmodel == egEnergyCorr::es2017_R21_v1 or
+            m_esmodel == egEnergyCorr::es2018_R21_v0 or
+            m_esmodel == egEnergyCorr::es2018_R21_v1 or
+            m_esmodel == egEnergyCorr::es2022_R22_PRE or
+            m_esmodel == egEnergyCorr::es2023_R22_Run2_v0) {
+          double deltaNoise =
+              sqrt(1.1 * 1.1 - 1.0) *
+              pileupNoise;  // uncertainty in quadrature 1.1*noise - noise
+          sigmaPileUp = deltaNoise / et;  // sigmaE/E impact
+          sigmaZ = deltaNoise / 40000.;   // sigmaE/E for Z->ee electrons
+                                          // (absorbed in smearing correction)
+        }
+        // no pileup noise uncertainty for es2017_R21_ofc0_v1
+        else if (m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1) {
+          sigmaPileUp = 0.;
+          sigmaZ = 0.;
+        } else {
+          // older models
+          double deltaPileupNoise = 100.;  // MeV
+          if (std::abs(eta) >= 1.4 && std::abs(eta) < 1.8)
+            deltaPileupNoise = 200.;  // larger systematic in this eta bin
+          double scaleNcells = 1;
+          if (particle_type == 1 && std::abs(eta) < 1.4)
+            scaleNcells = sqrt(3. / 5.);  // cluster=3X5 instead of 3x7, rms
+                                          // scales with cluster area
+          sigmaPileUp = deltaPileupNoise * scaleNcells / et;
+          sigmaZ =
+              deltaPileupNoise / (40000.);  // effect for Z->ee at Et=40 GeV
+        }
+        sigma2 = sigmaPileUp * sigmaPileUp - sigmaZ * sigmaZ;
+        sigma2up = sigma2;
+        sigma2down = -1. * sigma2;
+        ATH_MSG_DEBUG(
+            boost::format("sys resolution pileup noise: %.7f %.7f %.7f") %
+            sigma2 % sigma2up % sigma2down);
+      }
+
+      // systematics from material in IBL+PP0 for barrel
+      else if (isys == 7 && std::abs(eta) < 1.5 &&
+               (m_esmodel == egEnergyCorr::es2017 or
+                m_esmodel == egEnergyCorr::es2017_summer or
+                m_esmodel == egEnergyCorr::es2017_summer_improved or
+                m_esmodel == egEnergyCorr::es2017_summer_final or
+                m_esmodel == egEnergyCorr::es2015_5TeV or
+                m_esmodel == egEnergyCorr::es2017_R21_v0 or
+                m_esmodel == egEnergyCorr::es2017_R21_v1 or
+                m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 or
+                m_esmodel == egEnergyCorr::es2018_R21_v0 or
+                m_esmodel == egEnergyCorr::es2018_R21_v1 or
+                m_esmodel == egEnergyCorr::es2022_R22_PRE or
+                m_esmodel == egEnergyCorr::es2023_R22_Run2_v0)) {
+        double sigmaE =
+            m_getMaterialDelta->getDelta(particle_type, energy, eta, 1, 5);
+        sigma2 = sigmaE * sigmaE;
+        sigma2up = sigma2;
+        sigma2down = -1. * sigma2;
+        ATH_MSG_DEBUG(
+            boost::format("sys resolution ibl material: %.7f %.7f %.7f") %
+            sigma2 % sigma2up % sigma2down);
+      }
+
+      // systematics from material in IBL+PP0 for end-cap
+      else if (isys == 8 && std::abs(eta) > 1.5 &&
+               (m_esmodel == egEnergyCorr::es2017 or
+                m_esmodel == egEnergyCorr::es2017_summer or
+                m_esmodel == egEnergyCorr::es2017_summer_improved or
+                m_esmodel == egEnergyCorr::es2017_summer_final or
+                m_esmodel == egEnergyCorr::es2015_5TeV or
+                m_esmodel == egEnergyCorr::es2017_R21_v0 or
+                m_esmodel == egEnergyCorr::es2017_R21_v1 or
+                m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 or
+                m_esmodel == egEnergyCorr::es2018_R21_v0 or
+                m_esmodel == egEnergyCorr::es2018_R21_v1 or
+                m_esmodel == egEnergyCorr::es2022_R22_PRE or
+                m_esmodel == egEnergyCorr::es2023_R22_Run2_v0)) {
+        double sigmaE =
+            m_getMaterialDelta->getDelta(particle_type, energy, eta, 1, 5);
+        // scale factor 2.3 in X0 => sqrt(2) in resolution or 2 in resolution**2
+        sigma2 = 2.3 * sigmaE * sigmaE;
+        sigma2up = sigma2;
+        sigma2down = -1. * sigma2;
+        ATH_MSG_DEBUG(
+            boost::format("sys resolution pp0 material: %.7f %.7f %.7f") %
+            sigma2 % sigma2up % sigma2down);
+
+      }
+
+      // AF2 resolution systematics for es2017_R21_v1 model (neglected before
+      // that...)
+      else if (isys == 9 &&
+               (m_esmodel == egEnergyCorr::es2017_R21_v1 ||
+                m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 ||
+                m_esmodel == egEnergyCorr::es2018_R21_v0 ||
+                m_esmodel == egEnergyCorr::es2018_R21_v1 ||
+                m_esmodel == egEnergyCorr::es2022_R22_PRE ||
+                m_esmodel == egEnergyCorr::es2023_R22_Run2_v0) &&
+               fast) {
+        const double ptGeV = et / 1e3;
+        if (particle_type == 0)
+          sigma2 = getValueHistAt(*m_G4OverAFII_resolution_electron, eta, ptGeV,
+                                  true, true, true, true);
+        if (particle_type == 1)
+          sigma2 = getValueHistAt(*m_G4OverAFII_resolution_unconverted, eta,
+                                  ptGeV, true, true, true, true);
+        if (particle_type == 2)
+          sigma2 = getValueHistAt(*m_G4OverAFII_resolution_converted, eta,
+                                  ptGeV, true, true, true, true);
+        sigma2up = -1. * sigma2;  // AF2 resolution worse than full Sim,
+                                  // sigma2up gives back AF2 resolution
+        sigma2down = sigma2;
+      }
+
+      // OFC resolution systematics for for es2022_RUN3_PRE
+      else if (isys == 10 && (m_esmodel == egEnergyCorr::es2022_R22_PRE)) {
+        double d1 = (smearingZ + esmearingOFC) * (smearingZ + esmearingOFC) -
+                    smearingZ * smearingZ;
+        double d2 = smearingZ * smearingZ -
+                    (smearingZ - esmearingOFC) * (smearingZ - esmearingOFC);
+        double d = 0.5 * (d1 + d2);
+        sigma2up = d1;
+        sigma2down = -d2;
+        sigma2 = d;
+        ATH_MSG_DEBUG(boost::format("sys resolution OFC unc.: %.7f %.7f %.7f") %
+                      sigma2 % sigma2up % sigma2down);
+      }
+
+      //  old method to use max of up and down for All
+      /*
+              double rr1 = sqrt(resolution2+sigma2);   // nominal (data) +
+         average error double rr2=0.; if((resolution2-sigma2) > 0.) rr2 =
+         sqrt(resolution2-sigma2);  // max(0, nominal (data) - average error)
+              double deltaSigma_sys;
+              if ((rr1-resolution) > (resolution-rr2) ) deltaSigma_sys =
+         rr1-resolution; else deltaSigma_sys = resolution-rr2; deltaSigma_sys =
+         deltaSigma_sys / resolution;
+      */
+
+      // use average of up and down for symmetric uncertainty for All
+
+      double rr1 = 0.;
+      if ((resolution2 + sigma2up) > 0.)
+        rr1 = sqrt(resolution2 + sigma2up);  // nominal (data) + up error
+      double rr2 = 0.;
+      if ((resolution2 + sigma2down) > 0.)
+        rr2 = sqrt(resolution2 +
+                   sigma2down);  // max(0, nominal (data) + down error
+      double deltaSigma_sys;
+      deltaSigma_sys =
+          0.5 * (rr1 - rr2);  // average of up and down uncertainties
+      deltaSigma_sys =
+          deltaSigma_sys / resolution;  // relative resolution uncertainty
+
+      sum_sigma_resolution2 += deltaSigma_sys * deltaSigma_sys;
+
+      if ((resolution2 + sigma2up) > 0.)
+        rr1 = sqrt(resolution2 + sigma2up);
+      else
+        rr1 = 0.;
+      double deltaSigmaUp = (rr1 - resolution) / resolution;
+      ATH_MSG_VERBOSE("relative resolution change Up " << deltaSigmaUp);
+
+      if ((resolution2 + sigma2down) > 0.)
+        rr2 = sqrt(resolution2 + sigma2down);
+      else
+        rr2 = 0.;
+      double deltaSigmaDown = (rr2 - resolution) / resolution;
+      ATH_MSG_VERBOSE("relative resolution change Down " << deltaSigmaDown);
+
+      sum_deltaUp += deltaSigmaUp;
+      sum_deltaDown += deltaSigmaDown;
     }
-
-    resolution = resolution *energy;  // to return final resolution in MeV
-    resolution_error = sqrt(sum_sigma_resolution2)*resolution;   // to return resolution uncertainty in MeV
-
-    resolution_error_up = sum_deltaUp*resolution;
-    resolution_error_down = sum_deltaDown*resolution;
-
-
-    //std::cout << " Resolution (MeV): " << resolution << "   Resolution Error (MeV): " << resolution_error
-    //	      << " Z smearing " << smearingZ << " +- " << esmearingZ << std::endl;
-
   }
 
-  string egammaEnergyCorrectionTool::variationName(egEnergyCorr::Scale::Variation& var) {
-    switch(var) {
-    case egEnergyCorr::Scale::None: return "None";
-    case egEnergyCorr::Scale::Nominal: return "Nominal";
-    case egEnergyCorr::Scale::MomentumUp: return "MomentumUp";
-    case egEnergyCorr::Scale::MomentumDown: return "MomentumDown";
-    case egEnergyCorr::Scale::ZeeStatUp: return "ZeeStatUp";
-    case egEnergyCorr::Scale::ZeeStatDown: return "ZeeStatDown";
-    case egEnergyCorr::Scale::ZeeSystUp: return "ZeeSystUp";
-    case egEnergyCorr::Scale::ZeeSystDown: return "ZeeSystDown";
-    case egEnergyCorr::Scale::ZeePhysUp: return "ZeePhysUp";
-    case egEnergyCorr::Scale::ZeePhysDown: return "ZeePhysDown";
-    case egEnergyCorr::Scale::ZeeAllUp: return "ZeeAllUp";
-    case egEnergyCorr::Scale::ZeeAllDown: return "ZeeAllDown";
-    case egEnergyCorr::Scale::LArCalibUp: return "LArCalibUp";
-    case egEnergyCorr::Scale::LArCalibDown: return "LArCalibDown";
-    case egEnergyCorr::Scale::LArUnconvCalibUp: return "LArUnconvCalibUp";
-    case egEnergyCorr::Scale::LArUnconvCalibDown: return "LArUnconvCalibDown";
-    case egEnergyCorr::Scale::LArElecCalibUp: return "LArElecCalibUp";
-    case egEnergyCorr::Scale::LArElecCalibDown: return "LArElecCalibDown";
-    case egEnergyCorr::Scale::LArCalibExtra2015PreUp: return "LArCalibExtra2015PreUp";
-    case egEnergyCorr::Scale::LArCalibExtra2015PreDown: return "LArCalibExtra2015PreDown";
-    case egEnergyCorr::Scale::LArElecUnconvUp: return "LArElecUnconvUp";
-    case egEnergyCorr::Scale::LArElecUnconvDown: return "LArElecUnconvDown";
-    case egEnergyCorr::Scale::G4Up: return "G4Up";
-    case egEnergyCorr::Scale::G4Down: return "G4Down";
-    case egEnergyCorr::Scale::PSUp: return "PSUp";
-    case egEnergyCorr::Scale::PSDown: return "PSDown";
-    case egEnergyCorr::Scale::PSb12Up: return "PSb12Up";
-    case egEnergyCorr::Scale::PSb12Down: return "PSb12Down";
-    case egEnergyCorr::Scale::S12Up: return "S12Up";
-    case egEnergyCorr::Scale::S12Down: return "S12Down";
-    case egEnergyCorr::Scale::S12ExtraLastEtaBinRun2Up: return "S12ExtraLastEtaBinRun2Up";
-    case egEnergyCorr::Scale::S12ExtraLastEtaBinRun2Down: return "S12ExtraLastEtaBinRun2Down";
-    case egEnergyCorr::Scale::MatIDUp: return "MatIDUp";
-    case egEnergyCorr::Scale::MatIDDown: return "MatIDDown";
-    case egEnergyCorr::Scale::MatCryoUp: return "MatCryoUp";
-    case egEnergyCorr::Scale::MatCryoDown: return "MatCryoDown";
-    case egEnergyCorr::Scale::MatCaloUp: return "MatCaloUp";
-    case egEnergyCorr::Scale::MatCaloDown: return "MatCaloDown";
-    case egEnergyCorr::Scale::L1GainUp: return "L1GainUp";
-    case egEnergyCorr::Scale::L1GainDown: return "L1GainDown";
-    case egEnergyCorr::Scale::L2GainUp: return "L2GainUp";
-    case egEnergyCorr::Scale::L2GainDown: return "L2GainDown";
-    case egEnergyCorr::Scale::LeakageUnconvUp: return "LeakageUnconvUp";
-    case egEnergyCorr::Scale::LeakageUnconvDown: return "LeakageUnconvDown";
-    case egEnergyCorr::Scale::LeakageConvUp: return "LeakageConvUp";
-    case egEnergyCorr::Scale::LeakageConvDown: return "LeakageConvDown";
-    case egEnergyCorr::Scale::ConvEfficiencyUp: return "ConvEfficiencyUp";
-    case egEnergyCorr::Scale::ConvEfficiencyDown: return "ConvEfficiencyDown";
-    case egEnergyCorr::Scale::ConvFakeRateUp: return "ConvFakeRateUp";
-    case egEnergyCorr::Scale::ConvFakeRateDown: return "ConvFakeRateDown";
-    case egEnergyCorr::Scale::ConvRadiusUp: return "ConvRadiusUp";
-    case egEnergyCorr::Scale::ConvRadiusDown: return "ConvRadiusDown";
-    case egEnergyCorr::Scale::PedestalUp: return "PedestalUp";
-    case egEnergyCorr::Scale::PedestalDown: return "PedestalDown";
-    case egEnergyCorr::Scale::AllUp: return "AllUp";
-    case egEnergyCorr::Scale::AllDown: return "AllDown";
-    case egEnergyCorr::Scale::AllCorrelatedUp: return "AllCorrelatedUp";
-    case egEnergyCorr::Scale::AllCorrelatedDown: return "AllCorrelatedDown";
-    case egEnergyCorr::Scale::LArTemperature2015PreUp: return "LArTemperature2015PreUp";
-    case egEnergyCorr::Scale::LArTemperature2015PreDown: return "LArTemperature2015PreDown";
-    case egEnergyCorr::Scale::LArTemperature2016PreUp: return "LArTemperature2016PreUp";
-    case egEnergyCorr::Scale::LArTemperature2016PreDown: return "LArTemperature2016PreDown";
-    case egEnergyCorr::Scale::E4ScintillatorUp: return "E4ScintillatorUp";
-    case egEnergyCorr::Scale::E4ScintillatorDown: return "E4ScintillatorDown";
-    case egEnergyCorr::Scale::MatPP0Up: return "MatPP0Up";
-    case egEnergyCorr::Scale::MatPP0Down: return "MatPP0Down";
-    case egEnergyCorr::Scale::Wtots1Up: return "Wtots1Up";
-    case egEnergyCorr::Scale::Wtots1Down: return "Wtots1Down";
-    case egEnergyCorr::Scale::LastScaleVariation: return "LastScaleVariation";
-    case egEnergyCorr::Scale::OFCUp: return "OFCUp";
-    case egEnergyCorr::Scale::OFCDown: return "OFCDown";
-    case egEnergyCorr::Scale::EXTRARUN3PREUp: return "EXTRARUN3PREUp";
-    case egEnergyCorr::Scale::EXTRARUN3PREDown: return "EXTRARUN3PREDown";
-    default: return "Unknown";
-    }
+  resolution = resolution * energy;  // to return final resolution in MeV
+  resolution_error = sqrt(sum_sigma_resolution2) *
+                     resolution;  // to return resolution uncertainty in MeV
+
+  resolution_error_up = sum_deltaUp * resolution;
+  resolution_error_down = sum_deltaDown * resolution;
+
+  ATH_MSG_VERBOSE("Resolution (MeV): "
+                  << resolution
+                  << " Resolution Error (MeV): " << resolution_error << " down "
+                  << resolution_error_down << " up " << resolution_error_up
+                  << " Z smearing " << smearingZ << " +- " << esmearingZ
+                  << " using mask " << syst_mask);
+}
+
+string egammaEnergyCorrectionTool::variationName(
+    egEnergyCorr::Scale::Variation& var) {
+  switch (var) {
+    case egEnergyCorr::Scale::None:
+      return "None";
+    case egEnergyCorr::Scale::Nominal:
+      return "Nominal";
+    case egEnergyCorr::Scale::topoClusterThresUp:
+      return "topoClusterThresUp";
+    case egEnergyCorr::Scale::topoClusterThresDown:
+      return "topoClusterThresDown";
+    case egEnergyCorr::Scale::MomentumUp:
+      return "MomentumUp";
+    case egEnergyCorr::Scale::MomentumDown:
+      return "MomentumDown";
+    case egEnergyCorr::Scale::ZeeStatUp:
+      return "ZeeStatUp";
+    case egEnergyCorr::Scale::ZeeStatDown:
+      return "ZeeStatDown";
+    case egEnergyCorr::Scale::ZeeSystUp:
+      return "ZeeSystUp";
+    case egEnergyCorr::Scale::ZeeSystDown:
+      return "ZeeSystDown";
+    case egEnergyCorr::Scale::ZeePhysUp:
+      return "ZeePhysUp";
+    case egEnergyCorr::Scale::ZeePhysDown:
+      return "ZeePhysDown";
+    case egEnergyCorr::Scale::ZeeAllUp:
+      return "ZeeAllUp";
+    case egEnergyCorr::Scale::ZeeAllDown:
+      return "ZeeAllDown";
+    case egEnergyCorr::Scale::LArCalibUp:
+      return "LArCalibUp";
+    case egEnergyCorr::Scale::LArCalibDown:
+      return "LArCalibDown";
+    case egEnergyCorr::Scale::LArUnconvCalibUp:
+      return "LArUnconvCalibUp";
+    case egEnergyCorr::Scale::LArUnconvCalibDown:
+      return "LArUnconvCalibDown";
+    case egEnergyCorr::Scale::LArElecCalibUp:
+      return "LArElecCalibUp";
+    case egEnergyCorr::Scale::LArElecCalibDown:
+      return "LArElecCalibDown";
+    case egEnergyCorr::Scale::LArCalibExtra2015PreUp:
+      return "LArCalibExtra2015PreUp";
+    case egEnergyCorr::Scale::LArCalibExtra2015PreDown:
+      return "LArCalibExtra2015PreDown";
+    case egEnergyCorr::Scale::LArElecUnconvUp:
+      return "LArElecUnconvUp";
+    case egEnergyCorr::Scale::LArElecUnconvDown:
+      return "LArElecUnconvDown";
+    case egEnergyCorr::Scale::G4Up:
+      return "G4Up";
+    case egEnergyCorr::Scale::G4Down:
+      return "G4Down";
+    case egEnergyCorr::Scale::PSUp:
+      return "PSUp";
+    case egEnergyCorr::Scale::PSDown:
+      return "PSDown";
+    case egEnergyCorr::Scale::PSb12Up:
+      return "PSb12Up";
+    case egEnergyCorr::Scale::PSb12Down:
+      return "PSb12Down";
+    case egEnergyCorr::Scale::S12Up:
+      return "S12Up";
+    case egEnergyCorr::Scale::S12Down:
+      return "S12Down";
+    case egEnergyCorr::Scale::S12ExtraLastEtaBinRun2Up:
+      return "S12ExtraLastEtaBinRun2Up";
+    case egEnergyCorr::Scale::S12ExtraLastEtaBinRun2Down:
+      return "S12ExtraLastEtaBinRun2Down";
+    case egEnergyCorr::Scale::MatIDUp:
+      return "MatIDUp";
+    case egEnergyCorr::Scale::MatIDDown:
+      return "MatIDDown";
+    case egEnergyCorr::Scale::MatCryoUp:
+      return "MatCryoUp";
+    case egEnergyCorr::Scale::MatCryoDown:
+      return "MatCryoDown";
+    case egEnergyCorr::Scale::MatCaloUp:
+      return "MatCaloUp";
+    case egEnergyCorr::Scale::MatCaloDown:
+      return "MatCaloDown";
+    case egEnergyCorr::Scale::L1GainUp:
+      return "L1GainUp";
+    case egEnergyCorr::Scale::L1GainDown:
+      return "L1GainDown";
+    case egEnergyCorr::Scale::L2GainUp:
+      return "L2GainUp";
+    case egEnergyCorr::Scale::L2GainDown:
+      return "L2GainDown";
+    case egEnergyCorr::Scale::L2LowGainDown:
+      return "L2LowGainDown";
+    case egEnergyCorr::Scale::L2LowGainUp:
+      return "L2LowGainUp";
+    case egEnergyCorr::Scale::L2MediumGainDown:
+      return "L2MediumGainDown";
+    case egEnergyCorr::Scale::L2MediumGainUp:
+      return "L2MediumGainUp";
+    case egEnergyCorr::Scale::ADCLinUp:
+      return "ADCLinUp";
+    case egEnergyCorr::Scale::ADCLinDown:
+      return "ADCLinDown";
+    case egEnergyCorr::Scale::LeakageElecUp:
+      return "LeakageElecUp";
+    case egEnergyCorr::Scale::LeakageElecDown:
+      return "LeakageElecDown";
+    case egEnergyCorr::Scale::ConvRecoUp:
+      return "ConvRecoUp";
+    case egEnergyCorr::Scale::ConvRecoDown:
+      return "ConvRecoDown";
+    case egEnergyCorr::Scale::af2Up:
+      return "af2Up";
+    case egEnergyCorr::Scale::af2Down:
+      return "af2Down";
+    case egEnergyCorr::Scale::LeakageUnconvUp:
+      return "LeakageUnconvUp";
+    case egEnergyCorr::Scale::LeakageUnconvDown:
+      return "LeakageUnconvDown";
+    case egEnergyCorr::Scale::LeakageConvUp:
+      return "LeakageConvUp";
+    case egEnergyCorr::Scale::LeakageConvDown:
+      return "LeakageConvDown";
+    case egEnergyCorr::Scale::ConvEfficiencyUp:
+      return "ConvEfficiencyUp";
+    case egEnergyCorr::Scale::ConvEfficiencyDown:
+      return "ConvEfficiencyDown";
+    case egEnergyCorr::Scale::ConvFakeRateUp:
+      return "ConvFakeRateUp";
+    case egEnergyCorr::Scale::ConvFakeRateDown:
+      return "ConvFakeRateDown";
+    case egEnergyCorr::Scale::ConvRadiusUp:
+      return "ConvRadiusUp";
+    case egEnergyCorr::Scale::ConvRadiusDown:
+      return "ConvRadiusDown";
+    case egEnergyCorr::Scale::PedestalUp:
+      return "PedestalUp";
+    case egEnergyCorr::Scale::PedestalDown:
+      return "PedestalDown";
+    case egEnergyCorr::Scale::AllUp:
+      return "AllUp";
+    case egEnergyCorr::Scale::AllDown:
+      return "AllDown";
+    case egEnergyCorr::Scale::AllCorrelatedUp:
+      return "AllCorrelatedUp";
+    case egEnergyCorr::Scale::AllCorrelatedDown:
+      return "AllCorrelatedDown";
+    case egEnergyCorr::Scale::LArTemperature2015PreUp:
+      return "LArTemperature2015PreUp";
+    case egEnergyCorr::Scale::LArTemperature2015PreDown:
+      return "LArTemperature2015PreDown";
+    case egEnergyCorr::Scale::LArTemperature2016PreUp:
+      return "LArTemperature2016PreUp";
+    case egEnergyCorr::Scale::LArTemperature2016PreDown:
+      return "LArTemperature2016PreDown";
+    case egEnergyCorr::Scale::E4ScintillatorUp:
+      return "E4ScintillatorUp";
+    case egEnergyCorr::Scale::E4ScintillatorDown:
+      return "E4ScintillatorDown";
+    case egEnergyCorr::Scale::MatPP0Up:
+      return "MatPP0Up";
+    case egEnergyCorr::Scale::MatPP0Down:
+      return "MatPP0Down";
+    case egEnergyCorr::Scale::Wtots1Up:
+      return "Wtots1Up";
+    case egEnergyCorr::Scale::Wtots1Down:
+      return "Wtots1Down";
+    case egEnergyCorr::Scale::LastScaleVariation:
+      return "LastScaleVariation";
+    case egEnergyCorr::Scale::OFCUp:
+      return "OFCUp";
+    case egEnergyCorr::Scale::OFCDown:
+      return "OFCDown";
+    case egEnergyCorr::Scale::EXTRARUN3PREUp:
+      return "EXTRARUN3PREUp";
+    case egEnergyCorr::Scale::EXTRARUN3PREDown:
+      return "EXTRARUN3PREDown";
+    default:
+      return "Unknown";
   }
+}
 
-  string egammaEnergyCorrectionTool::variationName(egEnergyCorr::Resolution::Variation& var) {
-    switch(var) {
-      case egEnergyCorr::Resolution::None: return "Resolution::None";
-      case egEnergyCorr::Resolution::Nominal: return "Resolution::Nominal";
-      case egEnergyCorr::Resolution::AllDown: return "Resolution::AllDown";
-      case egEnergyCorr::Resolution::AllUp: return "Resolution::AllUp";
-      case egEnergyCorr::Resolution::ZSmearingUp: return "Resolution::ZSmearingUp";
-      case egEnergyCorr::Resolution::ZSmearingDown: return "Resolution::ZSmearingDown";
-      case egEnergyCorr::Resolution::SamplingTermUp: return "Resolution::SamplingTermUp";
-      case egEnergyCorr::Resolution::SamplingTermDown: return "Resolution::SamplingTermDown";
-      case egEnergyCorr::Resolution::MaterialIDUp: return "Resolution::MaterialUp";
-      case egEnergyCorr::Resolution::MaterialIDDown: return "Resolution::MaterialDown";
-      case egEnergyCorr::Resolution::MaterialCaloUp: return "Resolution::MaterialUp";
-      case egEnergyCorr::Resolution::MaterialCaloDown: return "Resolution::MaterialDown";
-      case egEnergyCorr::Resolution::MaterialCryoUp: return "Resolution::MaterialUp";
-      case egEnergyCorr::Resolution::MaterialCryoDown: return "Resolution::MaterialDown";
-      case egEnergyCorr::Resolution::MaterialGapUp: return "Resolution::MaterialUp";
-      case egEnergyCorr::Resolution::MaterialGapDown: return "Resolution::MaterialDown";
-      case egEnergyCorr::Resolution::PileUpUp: return "Resolution::PileUpUp";
-      case egEnergyCorr::Resolution::PileUpDown: return "Resolution::PileUpDown";
-      case egEnergyCorr::Resolution::MaterialPP0Up: return "Resolution::MaterialPP0Up";
-      case egEnergyCorr::Resolution::MaterialPP0Down: return "Resolution::MaterialPP0Down";
-      case egEnergyCorr::Resolution::MaterialIBLUp: return "Resolution::MaterialIBLUp";
-      case egEnergyCorr::Resolution::MaterialIBLDown: return "Resolution::MaterialIBLDown";
-      case egEnergyCorr::Resolution::af2Up: return "Resolution::af2Up";
-      case egEnergyCorr::Resolution::af2Down: return "Resolution::af2Down";
-      case egEnergyCorr::Resolution::OFCUp: return "Resolution::OFCUp";
-      case egEnergyCorr::Resolution::OFCDown: return "Resolution::OFCDown";
-      case egEnergyCorr::Resolution::LastResolutionVariation: return "LastResolutionVariation";
-      default: return "Resolution::Unknown";
-    }
+string egammaEnergyCorrectionTool::variationName(
+    egEnergyCorr::Resolution::Variation& var) {
+  switch (var) {
+    case egEnergyCorr::Resolution::None:
+      return "Resolution::None";
+    case egEnergyCorr::Resolution::Nominal:
+      return "Resolution::Nominal";
+    case egEnergyCorr::Resolution::AllDown:
+      return "Resolution::AllDown";
+    case egEnergyCorr::Resolution::AllUp:
+      return "Resolution::AllUp";
+    case egEnergyCorr::Resolution::ZSmearingUp:
+      return "Resolution::ZSmearingUp";
+    case egEnergyCorr::Resolution::ZSmearingDown:
+      return "Resolution::ZSmearingDown";
+    case egEnergyCorr::Resolution::SamplingTermUp:
+      return "Resolution::SamplingTermUp";
+    case egEnergyCorr::Resolution::SamplingTermDown:
+      return "Resolution::SamplingTermDown";
+    case egEnergyCorr::Resolution::MaterialIDUp:
+      return "Resolution::MaterialUp";
+    case egEnergyCorr::Resolution::MaterialIDDown:
+      return "Resolution::MaterialDown";
+    case egEnergyCorr::Resolution::MaterialCaloUp:
+      return "Resolution::MaterialUp";
+    case egEnergyCorr::Resolution::MaterialCaloDown:
+      return "Resolution::MaterialDown";
+    case egEnergyCorr::Resolution::MaterialCryoUp:
+      return "Resolution::MaterialUp";
+    case egEnergyCorr::Resolution::MaterialCryoDown:
+      return "Resolution::MaterialDown";
+    case egEnergyCorr::Resolution::MaterialGapUp:
+      return "Resolution::MaterialUp";
+    case egEnergyCorr::Resolution::MaterialGapDown:
+      return "Resolution::MaterialDown";
+    case egEnergyCorr::Resolution::PileUpUp:
+      return "Resolution::PileUpUp";
+    case egEnergyCorr::Resolution::PileUpDown:
+      return "Resolution::PileUpDown";
+    case egEnergyCorr::Resolution::MaterialPP0Up:
+      return "Resolution::MaterialPP0Up";
+    case egEnergyCorr::Resolution::MaterialPP0Down:
+      return "Resolution::MaterialPP0Down";
+    case egEnergyCorr::Resolution::MaterialIBLUp:
+      return "Resolution::MaterialIBLUp";
+    case egEnergyCorr::Resolution::MaterialIBLDown:
+      return "Resolution::MaterialIBLDown";
+    case egEnergyCorr::Resolution::af2Up:
+      return "Resolution::af2Up";
+    case egEnergyCorr::Resolution::af2Down:
+      return "Resolution::af2Down";
+    case egEnergyCorr::Resolution::OFCUp:
+      return "Resolution::OFCUp";
+    case egEnergyCorr::Resolution::OFCDown:
+      return "Resolution::OFCDown";
+    case egEnergyCorr::Resolution::LastResolutionVariation:
+      return "LastResolutionVariation";
+    default:
+      return "Resolution::Unknown";
   }
+}
 
+double egammaEnergyCorrectionTool::get_ZeeSyst(double eta) const {
+  const auto ieta = std::as_const(*m_zeeSyst).GetXaxis()->FindFixBin(eta);
+  auto value_histo = m_zeeSyst->GetBinContent(ieta);
 
-  double egammaEnergyCorrectionTool::get_ZeeSyst(double eta) const
-  {
-    const auto ieta = std::as_const(*m_zeeSyst).GetXaxis()->FindFixBin(eta);
-    auto value_histo = m_zeeSyst->GetBinContent(ieta);
+  return value_histo;
+}
 
-    return value_histo;
-  }
+double egammaEnergyCorrectionTool::get_OFCSyst(double eta) const {
+  const auto ieta = std::as_const(*m_zeeSystOFC).GetXaxis()->FindFixBin(eta);
+  auto value_histo = m_zeeSystOFC->GetBinContent(ieta);
 
-  double egammaEnergyCorrectionTool::get_OFCSyst(double eta) const
-  {
-    const auto ieta = std::as_const(*m_zeeSystOFC).GetXaxis()->FindFixBin(eta);
-    auto value_histo = m_zeeSystOFC->GetBinContent(ieta);
+  return value_histo;
+}
 
-    return value_histo;
-  }
+const TAxis& egammaEnergyCorrectionTool::get_ZeeStat_eta_axis() const {
+  return *std::as_const(*m_zeeNom).GetXaxis();
+}
 
-  const TAxis& egammaEnergyCorrectionTool::get_ZeeStat_eta_axis() const
-  {
-    return *std::as_const(*m_zeeNom).GetXaxis();
-  }
-
-
-
-} // egRescaler
+}  // namespace AtlasRoot

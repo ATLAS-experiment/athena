@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODEgamma/EgammaxAODHelpers.h"
@@ -8,7 +8,6 @@
 #include "xAODEgamma/Electron.h"
 #include "xAODCaloEvent/CaloCluster.h"
 #include "xAODTracking/TrackParticle.h"
-
 
 bool xAOD::EgammaHelpers::isElectron(const xAOD::Egamma *eg){
   return ( (eg->type()==xAOD::Type::Electron) &&

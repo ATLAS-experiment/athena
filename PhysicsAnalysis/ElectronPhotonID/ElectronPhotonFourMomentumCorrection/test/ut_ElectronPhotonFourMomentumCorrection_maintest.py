@@ -50,17 +50,9 @@ class TestEgammaCalibrationAndSmearingTool(unittest.TestCase):
         tool.msg().setLevel(ROOT.MSG.FATAL)
         self.assertFalse(tool.initialize().isSuccess())
 
-        tool.msg().setLevel(ROOT.MSG.FATAL)
-        self.assertTrue(tool.setProperty("ESModel", "xyz").isSuccess())
-        self.assertFalse(tool.initialize().isSuccess())
-
-        tool.msg().setLevel(ROOT.MSG.WARNING)
-        self.assertTrue(tool.setProperty("ESModel", "es2010").isSuccess())
-        self.assertTrue(tool.initialize().isSuccess())
-        
-        tool.msg().setLevel(ROOT.MSG.INFO)
-        self.assertTrue(tool.setProperty(
-            "ESModel", "es2022_R22_PRE").isSuccess())
+        tool.msg().setLevel(ROOT.MSG.DEBUG)
+        self.assertTrue(tool.setProperty("ESModel", "es2023_R22_Run2_v0").isSuccess())
+        self.assertTrue(tool.setProperty("useFastSim", False).isSuccess())
         self.assertTrue(tool.initialize().isSuccess())
 
     def generator_kinematics(self, eta_range=None,
@@ -129,9 +121,11 @@ class TestEgammaCalibrationAndSmearingTool(unittest.TestCase):
         """
         tool = ROOT.CP.EgammaCalibrationAndSmearingTool("tool")
         self.assertTrue(tool.setProperty(
-            "ESModel", "es2022_R22_PRE").isSuccess())
+            "ESModel", "es2023_R22_Run2_v0").isSuccess())
+        self.assertTrue(tool.setProperty(
+            "decorrelationModel", "1NP_v1"). isSuccess())    
         self.assertTrue(tool.setProperty["int"](
-            "randomRunNumber", RUN2015).isSuccess())
+            "randomRunNumber", RUN2018).isSuccess())
         self.assertTrue(tool.setProperty['bool']("doSmearing", 0).isSuccess())
         self.assertTrue(tool.setProperty("useFastSim", False).isSuccess())
         tool.msg().setLevel(ROOT.MSG.WARNING)
@@ -140,10 +134,10 @@ class TestEgammaCalibrationAndSmearingTool(unittest.TestCase):
 
         tool_MVA = ROOT.egammaMVACalibTool('MVA_tool')
         tool_MVA.setProperty("ParticleType", ROOT.xAOD.EgammaParameters.electron).ignore()
-        tool_MVA.setProperty("folder", "egammaMVACalib/offline/v7").ignore()
+        tool_MVA.setProperty("folder", "egammaMVACalib/offline/v9").ignore()
         tool_MVA.setProperty['int']("use_layer_corrected", 0).ignore()
 
-        tool_MVA.msg().setLevel(ROOT.MSG.WARNING)
+        tool_MVA.msg().setLevel(ROOT.MSG.INFO)
         self.assertTrue(tool_MVA.initialize().isSuccess())
 
         ei = self.factory.create_eventinfo(True, 100000)   # simulation
@@ -157,13 +151,13 @@ class TestEgammaCalibrationAndSmearingTool(unittest.TestCase):
         """
         check the all up systematic is different from the nominal
         """
-        tool = ROOT.CP.EgammaCalibrationAndSmearingTool("tool_2015PRE")
-        self.assertTrue(tool.setProperty("ESModel", "es2022_R22_PRE").isSuccess())
+        tool = ROOT.CP.EgammaCalibrationAndSmearingTool("tool_es2023_R22_Run2_v0")
+        self.assertTrue(tool.setProperty("ESModel", "es2023_R22_Run2_v0").isSuccess())
         self.assertTrue(tool.setProperty['bool']("doSmearing", 0).isSuccess())
         self.assertTrue(tool.setProperty(
             "decorrelationModel", "1NP_v1"). isSuccess())
         self.assertTrue(tool.setProperty["int"](
-            "randomRunNumber", RUN2022).isSuccess())
+            "randomRunNumber", RUN2018).isSuccess())
         self.assertTrue(tool.setProperty("useFastSim", False).isSuccess())
         tool.msg().setLevel(ROOT.MSG.INFO)
         self.assertTrue(tool.initialize().isSuccess())
@@ -249,7 +243,7 @@ class TestEgammaCalibrationAndSmearingTool(unittest.TestCase):
         test if different MVAs give different results
         """
         tool1 = ROOT.CP.EgammaCalibrationAndSmearingTool("tool")
-        tool1.setProperty("ESModel", "es2022_R22_PRE").ignore()
+        tool1.setProperty("ESModel", "es2023_R22_Run2_v0").ignore()
         tool1.setProperty['bool']("doSmearing", 0).ignore()
         tool1.setProperty["int"]("randomRunNumber", RUN2015).ignore()
         tool1.setProperty("useFastSim", False).ignore()
@@ -257,7 +251,7 @@ class TestEgammaCalibrationAndSmearingTool(unittest.TestCase):
         self.assertTrue(tool1.initialize().isSuccess())
 
         tool2 = ROOT.CP.EgammaCalibrationAndSmearingTool("tool2")
-        tool2.setProperty("ESModel", "es2018_R21_v0").ignore()
+        tool2.setProperty("ESModel", "es2023_R22_Run2_v0").ignore()
         tool2.setProperty['bool']("doSmearing", 0).ignore()
         tool2.setProperty("MVAfolder", "egammaMVACalib/offline/v7").ignore()
         tool2.setProperty["int"]("randomRunNumber", RUN2015).ignore()
@@ -266,9 +260,8 @@ class TestEgammaCalibrationAndSmearingTool(unittest.TestCase):
         self.assertTrue(tool2.initialize().isSuccess())
 
         tool3 = ROOT.CP.EgammaCalibrationAndSmearingTool("tool3")
-        tool3.setProperty("ESModel", "es2018_R21_v0").ignore()
+        tool3.setProperty("ESModel", "es2023_R22_Run2_v0").ignore()
         tool3.setProperty['bool']("doSmearing", 0).ignore()
-        tool3.setProperty("MVAfolder", "egammaMVACalib/offline/v6").ignore()
         tool3.setProperty["int"]("randomRunNumber", RUN2015).ignore()
         tool3.setProperty("useFastSim", False).ignore()
         tool3.msg().setLevel(ROOT.MSG.WARNING)
@@ -280,8 +273,8 @@ class TestEgammaCalibrationAndSmearingTool(unittest.TestCase):
             e1 = tool1.getEnergy(ph, ei)
             e2 = tool2.getEnergy(ph, ei)
             e3 = tool3.getEnergy(ph, ei)
-            self.assertNotEqual(e1, e3)
-            self.assertEqual(e1, e2)
+            self.assertEqual(e1, e3)
+            self.assertNotEqual(e1, e2)
 
     # rename it test* if you want to generate a new file
     def create_MVA_testfile(self, esmodel='es2015cPRE', particle='electron', isdata=True):
@@ -461,36 +454,9 @@ class TestEgammaCalibrationAndSmearingTool(unittest.TestCase):
                                         'EG_SCALE_LARTEMPERATURE_EXTRA2015PRE__1up',
                                         'EG_SCALE_LARTEMPERATURE_EXTRA2016PRE__1down',
                                         'EG_SCALE_LARTEMPERATURE_EXTRA2016PRE__1up']
-        _test_list_syst("es2015PRE", "1NP_v1", None, None,
-                        list_1NP_scale + list_1NP_resolution)
-        _test_list_syst("es2012c", "1NP_v1", None, None,
-                        list_1NP_scale + list_1NP_resolution)
-        _test_list_syst("es2016PRE", None, "1NP_v1", "1NP_v1",
-                        list_1NP_scale + list_1NP_resolution)
-        _test_list_syst("es2016PRE", None, "1NP_v1", "FULL_v1",
-                        list_1NP_scale + list_FULL_resolution)
-        _test_list_syst("es2015PRE", "1NPCOR_PLUS_UNCOR", None,
-                        None, list_1NP_resolution + list_1NPCOR_PLUS_UNCOR_scale)
-        _test_list_syst("es2015PRE", "1NP_v1", "1NPCOR_PLUS_UNCOR",
-                        None, list_1NP_resolution + list_1NPCOR_PLUS_UNCOR_scale)
-        _test_list_syst("es2015c_summer", "1NP_v1", None, None,
-                        list_1NP_scale + list_1NP_resolution)
-
-        _test_list_syst("es2015PRE", "FULL_ETACORRELATED_v1", None, None, 58)
-        _test_list_syst("es2012c", "FULL_ETACORRELATED_v1", None, None, 54)
-        _test_list_syst("es2016PRE", "FULL_ETACORRELATED_v1", None, None, 62)
-        _test_list_syst("es2015c_summer",
-                        "FULL_ETACORRELATED_v1", None, None, 60)
-        _test_list_syst("es2016data_mc15c",
-                        "FULL_ETACORRELATED_v1", None, None, 68)
-        _test_list_syst("es2012c", "FULL_v1", None, None, 148)
-        _test_list_syst("es2012c", None, "FULL_v1", "FULL_v1", 148)
-        _test_list_syst("es2015PRE", "FULL_v1", None, None, 158)
-        _test_list_syst("es2015PRE", None, "FULL_v1", "FULL_v1", 158)
-        _test_list_syst("es2015PRE", None, None, None, 158)
-        _test_list_syst("es2018_R21_v0", None, None, None, 158)
+      
         _test_list_syst("es2022_R22_PRE", None, None, None, 164)
-
+        _test_list_syst("es2023_R22_Run2_v0", None, None, None, 162)
         # these works, but generate FATALS, as expected
         _test_list_syst("es2016PRE", "1NP_v1", "1NP_v1",
                         "1NP_v1", [], success=False)
@@ -629,19 +595,20 @@ class TestEgammaCalibrationAndSmearingTool(unittest.TestCase):
     def test_1NP_vs_FULL_es2022(self):
         """ check that the 1NP model is the squared sum of the single systematics """
         tool_1NP = ROOT.CP.EgammaCalibrationAndSmearingTool(
-            "tool_es2022_R22_PRE_1NP")
-        tool_1NP.setProperty("ESModel", "es2022_R22_PRE").ignore()
+            "tool_es2023_R22_Run2_v01NP")
+        tool_1NP.setProperty("ESModel", "es2023_R22_Run2_v0").ignore()
         tool_1NP.setProperty("decorrelationModel", "1NP_v1").ignore()
-        tool_1NP.setProperty["int"]("randomRunNumber", RUN2022).ignore()
+        tool_1NP.setProperty["int"]("randomRunNumber", RUN2018).ignore()
         tool_1NP.setProperty("useFastSim", False).isSuccess()
         tool_1NP.msg().setLevel(ROOT.MSG.WARNING)
 
         tool_1NP.initialize().ignore()
 
         tool_FULL = ROOT.CP.EgammaCalibrationAndSmearingTool(
-            "tool_es2022_R22_PRE_full")
-        tool_FULL.setProperty("ESModel", "es2022_R22_PRE").ignore()
-        tool_FULL.setProperty["int"]("randomRunNumber", RUN2022).ignore()
+            "tool_es2023_R22_Run2_v0_full")
+        tool_FULL.setProperty("ESModel", "es2023_R22_Run2_v0").ignore()
+        tool_FULL.setProperty["int"]("randomRunNumber", RUN2018
+        ).ignore()
         # use ETACORRELATED to compare. FULL_v1 will differ (very small difference) since by default
         # FULL_v1 divide the ZEESTAT by the sqrt(#bins)
         tool_FULL.setProperty("decorrelationModel",

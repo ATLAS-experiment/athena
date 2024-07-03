@@ -1,7 +1,7 @@
 // Dear Emacs, this is -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -46,13 +46,14 @@
 struct StdCalibrationInputs
 {
   float averageInteractionsPerCrossing;  // only for pileup correction
-  unsigned int RunNumber;   // only for HV presampler correction
+  unsigned int RunNumber;   // only for HV presampler correction and accordion energy correction
   double eta;
   double phi;               // only for HV presampler correction
   double E0raw;
   double E1raw;
   double E2raw;
   double E3raw;
+  double etaCalo;
 };
 
 
@@ -191,6 +192,16 @@ protected:
 };
 
 
+struct GetAmountHisto2DEtaCaloRunNumber : public GetAmountBase
+{
+  GetAmountHisto2DEtaCaloRunNumber(const TH2F& histo) : m_histo(histo) { m_histo.SetDirectory(0); };
+  virtual GetAmountHisto2DEtaCaloRunNumber* clone() const { return new GetAmountHisto2DEtaCaloRunNumber(*this); };
+  virtual float operator()(const StdCalibrationInputs & input) const;
+protected:
+  TH2F m_histo;
+};
+
+
 struct GetAmountFixed : public GetAmountBase
 {
 public:
@@ -312,8 +323,8 @@ public:
    - as default it is "current_default"
    - "test1" just for testing
   **/
-  egammaLayerRecalibTool(const std::string& name, const std::string& tune);
-  egammaLayerRecalibTool(const std::string& tune);
+  egammaLayerRecalibTool(const std::string& name, const std::string& tune, int SaccEnable = 1);
+  egammaLayerRecalibTool(const std::string& tune, int SaccEnable = 1);
   ~egammaLayerRecalibTool() { clear_corrections(); delete m_pileup_tool; }
 
   CP::CorrectionCode applyCorrection(xAOD::Egamma &, const xAOD::EventInfo& event_info) const;
@@ -341,16 +352,19 @@ public:
    * remove all the scale corrections
    **/
   void clear_corrections();
-  /**
-   * apply the fix for missing cells due to timing cut
-   **/
+
   void fixForMissingCells(bool fix = true) { m_aodFixMissingCells = fix; }
+  void disable_PSCorrections(){m_doPSCorrections=false;}
+  void disable_S12Corrections(){m_doS12Corrections=false;}
 
 private:
 
   static const unsigned int m_Run2Run3runNumberTransition = 400000;
 
   std::string m_tune;
+  bool m_doPSCorrections = true;
+  bool m_doS12Corrections = true;
+  bool m_doSaccCorrections = true;
   const std::string resolve_path(std::string filename) const;
   static std::string resolve_alias(const std::string& tune) ;
   ModifiersList m_modifiers;
