@@ -73,6 +73,8 @@ else:
 
 flags.Exec.FPE = 500
 flags.Exec.EventPrintoutInterval = 100
+if flags.PerfMon.doFullMonMT or flags.PerfMon.doFastMonMT:
+        flags.PerfMon.OutputJSON="perfmonmt_CPAnalysis.json"
 flags.lock()
 
 # Setup main services
