@@ -114,9 +114,6 @@ class TauWorkingPointConfig (ConfigBlock) :
         self.addOption ('useGNTau', False, type=bool,
             info="use GNTau based ID instead of RNNTau ID "    
             "recommendations: that's new experimental feature and might come default soon") 
-        self.addOption ('legacyRecommendations', False, type=bool,
-            info="whether to use legacy tau-jet BDT and electron veto "
-            "recommendations. The default is False.")
         self.addOption ('noEffSF', False, type=bool,
             info="disables the calculation of efficiencies and scale factors. "
             "Experimental! only useful to test a new WP for which scale "
@@ -160,9 +157,6 @@ class TauWorkingPointConfig (ConfigBlock) :
             nameFormat = 'TauAnalysisAlgorithms/tau_selection_{}.conf'
             if not self.use_eVeto:
                 nameFormat = 'TauAnalysisAlgorithms/tau_selection_{}_noeleid.conf'
-
-        if self.legacyRecommendations:
-            nameFormat = 'TauAnalysisAlgorithms/tau_selection_{}_legacy.conf'
 
         if self.quality not in ['Tight', 'Medium', 'Loose', 'VeryLoose', 'NoID', 'Baseline'] :
             raise ValueError ("invalid tau quality: \"" + self.quality +
@@ -275,12 +269,10 @@ def makeTauCalibrationConfig( seq, containerName, inputContainer='TauJets',
 
 
 def makeTauWorkingPointConfig( seq, containerName, workingPoint, selectionName,
-                               legacyRecommendations = None,
                                noEffSF = None ):
     """Create tau analysis algorithms for a single working point
 
     Keyword arguments:
-      legacyRecommendations -- use legacy tau BDT and electron veto recommendations
       selectionName -- a postfix to apply to decorations and algorithm
                  names.  this is mostly used/needed when using this
                  sequence with multiple working points to ensure all
@@ -294,7 +286,6 @@ def makeTauWorkingPointConfig( seq, containerName, workingPoint, selectionName,
         if len (splitWP) != 1 :
             raise ValueError ('working point should be of format "quality", not ' + workingPoint)
         config.setOptionValue ('quality', splitWP[0])
-    config.setOptionValue ('legacyRecommendations', legacyRecommendations)
     config.setOptionValue ('noEffSF', noEffSF)
     seq.append (config)
 
