@@ -168,7 +168,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             "default is None.")
         self.addOption ('uncertToolMCType', None, type=str,
             info="data type (str) to use for the jet uncertainty tool (e.g. "
-            "'AFII' or 'MC16'). Expert option to override JetETmiss "
+            "'AF3' or 'MC16'). Expert option to override JetETmiss "
             "recommendations. The default is None.")
 
 
@@ -204,17 +204,24 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
         if self.uncertToolConfigPath is not None:
             config_file = self.uncertToolConfigPath
         else:
-            config_file = "rel22/Summer2023_PreRec/" + config_file
+            if config.geometry() is LHCPeriod.Run2:
+                config_file = "rel22/Summer2023_PreRec/" + config_file
+            else:
+                config_file = "rel22/Summer2024_PreRec/" + config_file
 
         # MC type:
         mc_type = None
         if self.uncertToolMCType is not None:
             mc_type = self.uncertToolMCType
         else:
-            if config.geometry() is LHCPeriod.Run2:
-                mc_type = "MC20"
+            if config.dataType() is DataType.FastSim and config.geometry() is LHCPeriod.Run2:
+                # not supported for Run 3 yet!
+                mc_type = "AF3"
             else:
-                mc_type = "MC21"
+                if config.geometry() is LHCPeriod.Run2:
+                    mc_type = "MC20"
+                else:
+                    mc_type = "MC23"
 
         return config_file, calib_area, mc_type
 
