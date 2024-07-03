@@ -2,7 +2,7 @@
    Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "MuonSimHitCsvDumperAlg.h"
+#include "SimHitCsvDumperAlg.h"
 
 #include <MuonReadoutGeometryR4/MuonReadoutElement.h>
 #include <MuonReadoutGeometryR4/MuonChamber.h>
@@ -23,10 +23,11 @@ struct TrueHitInChamb {
     }
 };
 
-MuonSimHitCsvDumperAlg::MuonSimHitCsvDumperAlg(const std::string& name, ISvcLocator* pSvcLocator):
+namespace MuonR4{
+SimHitCsvDumperAlg::SimHitCsvDumperAlg(const std::string& name, ISvcLocator* pSvcLocator):
    AthAlgorithm{name, pSvcLocator} {}
 
-StatusCode MuonSimHitCsvDumperAlg::initialize() {
+StatusCode SimHitCsvDumperAlg::initialize() {
    ATH_CHECK(m_geoCtxKey.initialize());
    ATH_CHECK(m_inSimHitKey.initialize());
    ATH_CHECK(m_idHelperSvc.retrieve());
@@ -35,7 +36,7 @@ StatusCode MuonSimHitCsvDumperAlg::initialize() {
 
 }
 
-StatusCode MuonSimHitCsvDumperAlg::execute(){
+StatusCode SimHitCsvDumperAlg::execute(){
    
    const EventContext & context = Gaudi::Hive::currentContext();
    SG::ReadHandle<ActsGeometryContext> gctxHandle{m_geoCtxKey, context};
@@ -123,5 +124,4 @@ StatusCode MuonSimHitCsvDumperAlg::execute(){
    }
    return StatusCode::SUCCESS;
 }
-
-
+}

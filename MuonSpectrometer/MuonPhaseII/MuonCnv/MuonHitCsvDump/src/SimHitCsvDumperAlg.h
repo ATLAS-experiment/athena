@@ -1,5 +1,5 @@
-#ifndef MUONCSVDUMP_MuonSimHitCsvDumperAlg_H
-#define MUONCSVDUMP_MuonSimHitCsvDumperAlg_H
+#ifndef MUONCSVDUMP_SimHitCsvDumperAlg_H
+#define MUONCSVDUMP_SimHitCsvDumperAlg_H
 /*
    Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
@@ -14,13 +14,13 @@
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
 
 /** The CsvMuonSimHitDumper reads a Simulation Hit container for muons and dumps information to csv files**/
-
-class MuonSimHitCsvDumperAlg: public AthAlgorithm {
+namespace MuonR4{
+class SimHitCsvDumperAlg: public AthAlgorithm {
 
    public:
 
-   MuonSimHitCsvDumperAlg(const std::string& name, ISvcLocator* pSvcLocator);
-   ~MuonSimHitCsvDumperAlg() = default;
+   SimHitCsvDumperAlg(const std::string& name, ISvcLocator* pSvcLocator);
+   ~SimHitCsvDumperAlg() = default;
 
 
     StatusCode initialize() override;
@@ -41,4 +41,5 @@ class MuonSimHitCsvDumperAlg: public AthAlgorithm {
 
    size_t m_event{0};
 };
+}
 #endif

@@ -11,31 +11,28 @@ if __name__=="__main__":
     from xAODMuonSimHitCnv.MuonSimHitCnvCfg import MuonSimHitToMeasurementCfg
     cfg.merge(MuonSimHitToMeasurementCfg(flags))
 
-    from MuonHitCsvDump.MuonHitCsvDumpConfig import CsvMuonSimHitDumpCfg, CsvMuonStripDumpCfg, CsvMdtDriftCircleDumpCfg
+    from MuonHitCsvDump.MuonHitCsvDumpConfig import CsvMuonSimHitDumpCfg, CsvSpacePointDumpCfg
 
     truthContainers = []
     if flags.Detector.GeometryMDT:
         truthContainers += ["xMdtSimHits"]    
-        cfg.merge(CsvMdtDriftCircleDumpCfg(flags))
+
 
     if flags.Detector.GeometryRPC:
         truthContainers += ["xMdtSimHits"]
-        cfg.merge(CsvMuonStripDumpCfg(flags, name = "RpcCsvDumper", ContainerKey="xRpcStrips", PreFix="Rpc"))
  
     if flags.Detector.GeometryTGC:
         truthContainers += ["xTgcSimHits"]
-        cfg.merge(CsvMuonStripDumpCfg(flags,name = "TgcCsvDumper", ContainerKey="xTgcStrips", PreFix="Tgc"))
 
-    if False and flags.Detector.GeometrysTGC:
-        truthContainers += ["xStgcSimHits"]
-        cfg.merge(CsvMuonStripDumpCfg(flags,name = "sTgcCsvDumper", ContainerKey="xAODsTGCStrips", PreFix="sTgc"))
+    if flags.Detector.GeometrysTGC:
+        truthContainers += ["xStgcSimHits"]       
 
-    if False and flags.Detector.GeometryMM:
-        truthContainers += ["xMmSimHits"]
-        cfg.merge(CsvMuonStripDumpCfg(flags,name = "MmCsvDumper", ContainerKey="xAODMMClusters", PreFix="Mm"))
+    if flags.Detector.GeometryMM:
+        truthContainers += ["xMmSimHits"]       
 
     ### Truth hit conversion
     cfg.merge(CsvMuonSimHitDumpCfg(flags, MuonSimHitKey = truthContainers))
+    cfg.merge(CsvSpacePointDumpCfg(flags))
 
     executeTest(cfg, num_events = args.nEvents)
 
