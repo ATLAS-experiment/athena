@@ -20,6 +20,7 @@ import subprocess
 import re
 import os
 import argparse
+import itertools
 from functools import cache
 
 gitlab_available = True
@@ -99,7 +100,7 @@ def main():
             exit(1)
         gl_project = gl.projects.get("atlas/athena")
 
-    print('About to parse the MRs. Depending on the number, this could take a few minutes (run with --verbose to get more output while this is happening).')
+    print('Retrieving the list of MRs (run with --verbose to get more output while this is happening).')
     merged_mrs = parse_mrs_from_log(output_log['stdout'].decode("utf-8"),
                                     pretty_format=pretty_format, verbose=verbose, gl_project=gl_project)
     
@@ -296,21 +297,27 @@ def parse_mrs_from_log(output, pretty_format='%b', verbose=False, gl_project=Non
         line = line.lstrip().strip()
         if line.startswith('See merge request'):
             lines_this_mr.append(line)
-            mri = MergeRequestInfo().init_from_gitlab_message_lines(lines_this_mr, verbose)
-            if gl_project:
-                mrs.append(gl_project.mergerequests.get(mri.mr))
-            else:
-                mrs.append(mri)
+            mrs.append( MergeRequestInfo().init_from_gitlab_message_lines(lines_this_mr, verbose) )
             lines_this_mr = []
         elif line:  # skip empty
             lines_this_mr.append(line)
-    if lines_this_mr:
-        mri = MergeRequestInfo().init_from_gitlab_message_lines(lines_this_mr, verbose)
-        if gl_project:
-            mrs.append(gl_project.mergerequests.get(mri.mr))
-        else:
-            mrs.append(mri)
-    return mrs
+
+    # If GitLab is available return list of GitLab MRs
+    if gl_project:
+        gl_mrs = []
+        # We retrieve the MRs in batches for speed. In principle the gitlab API should be able
+        # to return the full set with one request but it seems the long list of iids then causes
+        # a 502 error on the CERN web server. So we go with a reasonable batch size.
+        iids = [int(m.mr) for m in mrs]
+        iterator = iter(iids)
+        while batch := list(itertools.islice(iterator, 25)):
+            # Retrieve MRs. But order gets lost, so we sort them in the original order.
+            r = sorted(gl_project.mergerequests.list(iids=batch, get_all=True),
+                       key=lambda m: iids.index(m.iid))
+            gl_mrs += r
+        return gl_mrs
+    else:
+        return mrs
 
 
 def default_template():
