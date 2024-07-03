@@ -200,10 +200,10 @@ struct AtlasMeasurementSelector
    }
 
    template <std::size_t DIM>
-   static constexpr bool s_CanPreCalibrate =    std::is_same< typename traits::PreSelectionMeasurement<DIM>,
-                                                              typename traits::CalibratedMeasurement<DIM> >::value
-                                             && std::is_same< typename traits::PreSelectionMeasurementCovariance<DIM>,
-                                                              typename traits::CalibratedMeasurementCovariance<DIM> >::value;
+   static constexpr bool s_CanPreCalibrate =    std::is_same< typename traits::template PreSelectionMeasurement<DIM>,
+                                                              typename traits::template CalibratedMeasurement<DIM> >::value
+                                             && std::is_same< typename traits::template PreSelectionMeasurementCovariance<DIM>,
+                                                              typename traits::template CalibratedMeasurementCovariance<DIM> >::value;
 
    template < std::size_t DIM, typename T_ValueType >
    void setPreCalibrator(typename std::enable_if<s_CanPreCalibrate<DIM>, const Calibrator<DIM, T_ValueType> &>::type calibrator) {
@@ -298,7 +298,7 @@ namespace {
       AtlasActsMeasurmentSelector(ActsTrk::MeasurementCalibrator2 &&calibrator,
                                   TheAtlasMeasurementSelector::Config &&config)
          : m_calibrator( std::move(calibrator)),
-           m_measurementSelector{std::move(config)}
+           m_measurementSelector{ {std::move(config)} }
       {
          // have to register one calibrator per measurement container type and associated dimension.
          // @TODO unfortunately automatic type deduction does not work, so have to provide the type
