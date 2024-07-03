@@ -49,11 +49,13 @@ set_target_properties( ISF_FastCaloSimParametrization PROPERTIES INTERPROCEDURAL
 # in debug builds.  If you need to debug it you might want to change this.
 # Specifying optimization via an attribute on the particular
 # function didn't work, because that still didn't allow inlining.
+# Be sure to use -UNDEBUG; otherwise Trk::ObjectCount may be compiled
+# inconsistently.
 if ( "${CMAKE_BUILD_TYPE}" STREQUAL "Debug" )
   set_source_files_properties(
      ${CMAKE_CURRENT_SOURCE_DIR}/src/FastCaloSimCaloExtrapolation.cxx
      PROPERTIES
-     COMPILE_FLAGS "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}"
+     COMPILE_FLAGS "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -UNDEBUG "
      COMPILE_DEFINITIONS "FLATTEN" )
 endif()
 
