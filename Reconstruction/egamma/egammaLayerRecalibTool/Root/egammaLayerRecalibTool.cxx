@@ -20,6 +20,8 @@
 #include "egammaLayerRecalibTool/egammaLayerRecalibTool.h"
 #include "xAODEgamma/EgammaxAODHelpers.h"
 
+#include "xAODEgamma/EgammaxAODHelpers.h"
+
 namespace {
 const float VALUE_OVERFLOW = std::numeric_limits<float>::max();
 
@@ -82,6 +84,12 @@ float GetAmountHisto1DErrorDown::operator()(const StdCalibrationInputs & input) 
 
 float GetAmountHisto2D::operator()(const StdCalibrationInputs & input) const {
   const int bin = m_histo.FindFixBin(input.eta, input.phi);
+  if (m_histo.IsBinUnderflow(bin) or m_histo.IsBinOverflow(bin)) return VALUE_OVERFLOW;
+  return m_histo.GetBinContent(bin);
+}
+
+float GetAmountHisto2DEtaCaloRunNumber::operator()(const StdCalibrationInputs & input) const {
+  const int bin = m_histo.FindFixBin(input.etaCalo, input.RunNumber);
   if (m_histo.IsBinUnderflow(bin) or m_histo.IsBinOverflow(bin)) return VALUE_OVERFLOW;
   return m_histo.GetBinContent(bin);
 }
@@ -242,6 +250,9 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   std::string tune = resolve_alias(tuneIn);
 
   if (tune.empty()) { }
+  else if ("es2022_21.0_Precision" == tune) {
+    add_scale("run2_alt_with_layer2_r21_Precision");
+  }
   else if ("es2018_21.0_v0" == tune) {
     add_scale("run2_alt_with_layer2_r21_v1");
   }
@@ -265,6 +276,11 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
     add_scale(new ScaleE3(InputModifier::SUBTRACT), new GetAmountPileupE3(m_pileup_tool));
   }
   //Run 2
+  else if ("run2_alt_with_layer2_r21_Precision"==tune) {
+    add_scale("layer2_alt_el_mu_comb_r21_v0");
+    add_scale("ps_mu_r21_v0");
+    if(m_doSaccCorrections) add_scale("acc_zee_r22_v0");
+  }
   else if ("run2_alt_with_layer2_r21_v1"==tune) {
     add_scale("layer2_alt_run2_r21_v1");
     add_scale("ps_2016_r21_v0");
@@ -486,6 +502,14 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
     add_scale(new ScaleE0(InputModifier::ZEROBASED), new GetAmountHisto1D(h_presampler));
     add_scale(new ScaleE1(InputModifier::ZEROBASED), new GetAmountFixed(0.01));
   }
+  else if ("acc_zee_r22_v0" == tune) {
+    const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v11/egammaLayerRecalibTunes.root");
+    TFile f(file.c_str());
+    TH2F* histo_acc = static_cast<TH2F*>(f.Get("hACC_Zee_rel22"));
+    assert(histo_acc);
+    add_scale(new ScaleEaccordion(InputModifier::ZEROBASED_ALPHA),
+              new GetAmountHisto2DEtaCaloRunNumber(*histo_acc));
+  }
   else if ("layer1_1" == tune) {
     TFormula f("formula_layer1_1", "(abs(x)<1.425) ? 0.97 : 1");
     add_scale(new ScaleE1(InputModifier::ONEBASED_ALPHA), new GetAmountFormula(f));
@@ -612,6 +636,14 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
     TH1* histo = checked_cast<TH1*>(f.Get("hE1E2ave_2010"));
     add_scale(new ScaleE1(InputModifier::ZEROBASED_ALPHA),
 	      new GetAmountHisto1DErrorDown(*histo));
+  }
+  else if("layer2_alt_el_mu_comb_r21_v0"==tune) {
+    const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v11/egammaLayerRecalibTunes.root");
+    TFile f(file.c_str());
+    TH1D* histo = static_cast<TH1D*>(f.Get("hE1E2_emu_run2_rel21_v0"));
+    assert(histo);
+    add_scale(new ScaleE2(InputModifier::ONEBASED),
+         new GetAmountHisto1D(*histo));
   }
   else if("layer2_alt_run2_r21_v1"==tune) {
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v6/egammaLayerRecalibTunes.root");
@@ -760,6 +792,14 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
     add_scale(new ScaleE0(InputModifier::ONEBASED_ALPHA),
               new GetAmountHisto1D(*histo_ps_tot_error));
   }
+  else if ("ps_mu_r21_v0" == tune) {
+    const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v11/egammaLayerRecalibTunes.root");
+    TFile f(file.c_str());
+    TH1F* histo_ps_tot_error = static_cast<TH1F*>(f.Get("hPS_MuonLowMu_rel21"));
+    assert(histo_ps_tot_error);
+    add_scale(new ScaleE0(InputModifier::ONEBASED_ALPHA),
+              new GetAmountHisto1D(*histo_ps_tot_error));
+  }
   else if ("ps_2016_v1" == tune) {
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v4/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
@@ -878,14 +918,15 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   }
 }
 
-egammaLayerRecalibTool::egammaLayerRecalibTool(const std::string& name, const std::string& tune)
-  : asg::AsgMessaging(name), m_tune(tune)
+egammaLayerRecalibTool::egammaLayerRecalibTool(const std::string& name, const std::string& tune, int SaccEnable)
+  : asg::AsgMessaging(name), m_tune(tune), m_doSaccCorrections(SaccEnable)
 {
   add_scale(tune);
 }
 
-egammaLayerRecalibTool::egammaLayerRecalibTool(const std::string& tune)
-  : egammaLayerRecalibTool("egammaLayerRecalibTool", tune) { }
+
+egammaLayerRecalibTool::egammaLayerRecalibTool(const std::string& tune, int SaccEnable)
+  : egammaLayerRecalibTool("egammaLayerRecalibTool", tune, SaccEnable) { }
 
 
 void egammaLayerRecalibTool::add_scale(InputModifier* modifier, GetAmountBase* amount)
@@ -926,6 +967,21 @@ CP::CorrectionCode egammaLayerRecalibTool::applyCorrection(xAOD::Egamma& particl
     }
   }
 
+  double eta_calo;
+  if(particle.author() == xAOD::EgammaParameters::AuthorFwdElectron){
+    eta_calo = cluster->eta();
+  }
+  else if (cluster->retrieveMoment(xAOD::CaloCluster::ETACALOFRAME, eta_calo)){
+
+  }
+  else if (cluster->isAvailable<float>("etaCalo")) {
+    eta_calo = cluster->auxdata<float>("etaCalo");
+  }
+  else{
+    ATH_MSG_ERROR("etaCalo not available as auxilliary variable, using cluster eta as eta calo!");
+    eta_calo=cluster->eta();
+  }
+
   StdCalibrationInputs inputs {
     event_info.averageInteractionsPerCrossing(),
       event_info.runNumber(),
@@ -934,7 +990,8 @@ CP::CorrectionCode egammaLayerRecalibTool::applyCorrection(xAOD::Egamma& particl
       cluster->energyBE(0),
       cluster->energyBE(1),
       cluster->energyBE(2) + addE2,
-      cluster->energyBE(3) + addE3 };
+      cluster->energyBE(3) + addE3,
+      eta_calo };
 
   const CP::CorrectionCode status = scale_inputs(inputs);
 
@@ -946,9 +1003,9 @@ CP::CorrectionCode egammaLayerRecalibTool::applyCorrection(xAOD::Egamma& particl
 
   if (status == CP::CorrectionCode::Ok) {
     ATH_MSG_DEBUG("decorating cluster with corrected layer energies");
-    deco_E0(*cluster) = inputs.E0raw;
-    deco_E1(*cluster) = inputs.E1raw;
-    deco_E2(*cluster) = inputs.E2raw;
+    deco_E0(*cluster) = m_doPSCorrections  ? inputs.E0raw : cluster->energyBE(0);
+    deco_E1(*cluster) = m_doS12Corrections ? inputs.E1raw : cluster->energyBE(1) ;
+    deco_E2(*cluster) = m_doS12Corrections ? inputs.E2raw : cluster->energyBE(2) ;
     deco_E3(*cluster) = inputs.E3raw;
     deco_layer_correction(*cluster) = m_tune;
     return status;
