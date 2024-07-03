@@ -17,6 +17,7 @@ Jets:
         noEffSF: True
         btagger: 'DL1dv01'
         btagWP: 'FixedCutBEff_60'
+        saveScores: 'All'
     JVT: {}
     PtEtaSelection: {}
 

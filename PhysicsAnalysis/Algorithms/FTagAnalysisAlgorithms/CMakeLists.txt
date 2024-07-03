@@ -9,7 +9,7 @@ atlas_subdir( FTagAnalysisAlgorithms )
 atlas_add_library( FTagAnalysisAlgorithmsLib
    FTagAnalysisAlgorithms/*.h FTagAnalysisAlgorithms/*.icc Root/*.cxx
    PUBLIC_HEADERS FTagAnalysisAlgorithms
-   LINK_LIBRARIES xAODJet SelectionHelpersLib SystematicsHandlesLib
+   LINK_LIBRARIES xAODJet xAODBTagging SelectionHelpersLib SystematicsHandlesLib
    AnaAlgorithmLib FTagAnalysisInterfacesLib )
 
 atlas_add_dictionary( FTagAnalysisAlgorithmsDict

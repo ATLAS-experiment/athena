@@ -10,5 +10,6 @@
 
 #include <FTagAnalysisAlgorithms/BTaggingEfficiencyAlg.h>
 #include <FTagAnalysisAlgorithms/BTaggingInformationDecoratorAlg.h>
+#include <FTagAnalysisAlgorithms/BTaggingScoresAlg.h>
 
 #endif

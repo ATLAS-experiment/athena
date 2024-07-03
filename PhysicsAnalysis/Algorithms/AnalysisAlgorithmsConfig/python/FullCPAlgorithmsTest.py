@@ -734,6 +734,7 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite,
     configSeq.setOptionValue ('.noEffSF', forCompare)
     configSeq.setOptionValue ('.btagger', btagger)
     configSeq.setOptionValue ('.btagWP', btagWP)
+    configSeq.setOptionValue ('.saveScores', 'All')
     
     if not forCompare:
         configSeq += config.makeConfig( 'Jets.FlavourTaggingEventSF',

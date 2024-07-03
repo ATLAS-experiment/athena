@@ -79,6 +79,7 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     config.setOptions (noEffSF=True)
     config.setOptions (btagger='DL1dv01')
     config.setOptions (btagWP='FixedCutBEff_60')
+    config.setOptions (saveScores='All')
     # Jets.JVT
     config.addBlock('Jets.JVT', containerName='AnaJets')
     # Jets.PtEtaSelection
