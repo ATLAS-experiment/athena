@@ -1,6 +1,7 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
+from AthenaConfiguration.Enums import LHCPeriod
 
 
 class DiTauMassBlock(ConfigBlock):
@@ -69,7 +70,7 @@ class DiTauMassBlock(ConfigBlock):
                    info='save information about the reconstruction with the best-fit neutrino kinematics.')
     self.addOption('doMAXW', False, type=bool,
                    info='save information about the reconstruction with the maximum-weight estimator.')
-
+                    
   def makeAlgs(self, config):
 
     alg = config.createAlgorithm('CP::DiTauMassCalculatorAlg', 'DiTauMMCAlg' + self.algName)
@@ -94,6 +95,11 @@ class DiTauMassBlock(ConfigBlock):
     alg.mmcTool.UseEfficiencyRecovery = self.useEfficiencyRecovery
     alg.mmcTool.UseMETDphiLL          = self.useMETdphiLL
     alg.mmcTool.ParamFilePath         = self.paramFilePath
+  
+    if config.geometry() is LHCPeriod.Run2:
+      alg.mmcTool.BeamEnergy = 6500.0
+    else:
+      alg.mmcTool.BeamEnergy = 6800.0
 
     alg.eventSelection = self.eventSelection
     alg.doMAXW         = self.doMAXW
