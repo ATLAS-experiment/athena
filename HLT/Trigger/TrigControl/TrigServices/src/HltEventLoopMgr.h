@@ -157,9 +157,6 @@ private:
   void updateDFProps();
 
   // Update internally kept data from new sor
-  void updateInternal(const coral::AttributeList & sor_attrlist);
-
-  // Update internally kept data from new sor
   void updateMetadataStore(const coral::AttributeList & sor_attrlist) const;
 
   /// Set magnetic field currents from ptree
@@ -167,9 +164,6 @@ private:
 
   /// Clear per-event stores
   StatusCode clearTemporaryStores();
-
-  /// Update the detector mask
-  void updateDetMask(const std::pair<uint64_t, uint64_t>& dm);
 
   /// Extract the single attr list off the SOR CondAttrListCollection
   const coral::AttributeList& getSorAttrList() const;
@@ -326,13 +320,6 @@ private:
   SG::ReadHandleKey<HLT::HLTResultMT> m_hltResultRHKey;    ///< StoreGate key for reading the HLT result
 
   // ------------------------- Other private members ---------------------------
-  /// typedef used for detector mask fields
-  typedef EventIDBase::number_type numt;
-  /**
-   * Detector mask0,1,2,3 - bit field indicating which TTC zones have been built into the event,
-   * one bit per zone, 128 bit total, significance increases from first to last
-   */
-  std::tuple<numt, numt, numt, numt> m_detector_mask{0xffffffff, 0xffffffff, 0, 0};
 
   /// "Event" context of current run with dummy event/slot number
   EventContext m_currentRunCtx{0,0};

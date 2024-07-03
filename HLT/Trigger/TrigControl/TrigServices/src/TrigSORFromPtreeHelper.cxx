@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigSORFromPtreeHelper.h"
@@ -9,7 +9,7 @@
 #include "AthenaBaseComps/AthCheckMacros.h"
 #include "CxxUtils/checker_macros.h"
 
-#include "owl/time.h"
+#include <ctime>
 #include <eformat/DetectorMask.h>
 
 using namespace boost::property_tree;
@@ -32,8 +32,17 @@ TrigSORFromPtreeHelper::TrigSORFromPtreeHelper(IMessageSvc* msgSvc,
   // Set run number and timestamp from RunParams. Can be overwritten later.
   m_runNumber = rparams.get<unsigned int>("run_number");
 
-  const auto t = OWLTime{(rparams.get_child("timeSOR").data()).c_str()};
-  m_sorTime_ns = t.total_mksec_utc() * 1000;
+  std::istringstream ss(rparams.get_child("timeSOR").data());
+  std::tm t = {};
+  t.tm_isdst = -1; // auto-detect daylight savings time
+  unsigned int microseconds = 0;
+
+  // Format: 08/05/24 22:14:38.000000 (see OWLTime in tdaq)
+  ss >> std::get_time(&t, "%d/%m/%y %H:%M:%S.") >> microseconds;
+  if (ss.fail()) {
+    ATH_MSG_ERROR("Cannot parse timeSOR: " << ss.str());
+  }
+  m_sorTime_ns = std::mktime(&t)*std::nano::den + microseconds*1000;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
