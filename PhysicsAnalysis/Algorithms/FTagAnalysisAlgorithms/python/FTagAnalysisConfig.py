@@ -5,6 +5,7 @@ from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AthenaConfiguration.Enums import LHCPeriod
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 from PathResolver import PathResolver
+from FTagAnalysisAlgorithms.FTagHelpers import getRecommendedBTagCalib
 
 def parseTDPdatabase(tdpFile, dsid):
     """function to parse the TopDataPreparation database
@@ -77,6 +78,13 @@ class FTagConfig (ConfigBlock):
         self.addOption ('excludeRecommendedFromEigenVectorTreatment', False, type=str,
             info="whether or not to add recommended lists to the user specified "
             "eigenvector decomposition exclusion lists")
+        self.addOption ('saveScores', '', type=str,
+            info="whether or not to save the scores from the tagger. Set to 'True' "
+            "to save only the overall score, or to 'All' to save also the per-flavour"
+            "probabilities.")
+        self.addOption ('saveCustomVariables', [], type=list,
+            info="[Expert mode] additional variables to save from the b-tagging object associated "
+            "to each jet. E.g. ['pb','pc','pu', 'ptau'] to replicate 'saveScores=All'.")
 
     def resolveMCMCgenerator(self, config, generatorDict):
         """use either the metadata (generatorDict) or TopDataPreparation
@@ -208,10 +216,7 @@ class FTagConfig (ConfigBlock):
         if self.bTagCalibFile is not None :
             bTagCalibFile = self.bTagCalibFile
         else:
-            if config.geometry() is LHCPeriod.Run2:
-                bTagCalibFile = "xAODBTaggingEfficiency/13TeV/2023-22-13TeV-MC20-CDI-2023-09-13_v1.root"
-            elif config.geometry() >= LHCPeriod.Run3:
-                bTagCalibFile = "xAODBTaggingEfficiency/13p6TeV/2023-22-13TeV-MC21-CDI-2023-09-13_v1.root"
+            bTagCalibFile = getRecommendedBTagCalib(config.geometry())
 
         # Set up the ftag selection algorithm(s):
         alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'FTagSelectionAlg' + postfix )
@@ -275,6 +280,34 @@ class FTagConfig (ConfigBlock):
             alg.jets = config.readName (self.containerName)
             config.addOutputVar (self.containerName, alg.scaleFactorDecoration, selectionName + '_eff')
 
+        # Save the b-tagging score
+        if self.saveScores in ['True', 'All']:
+            # Save the b-tagger weight
+            alg = config.createAlgorithm('CP::BTaggingInformationDecoratorAlg', 'FTagInfoAlg_' + self.btagger)
+            alg.jets = config.readName (self.containerName)
+            alg.taggerWeightDecoration = f'{self.btagger}'
+            alg.affectingSystematicsFilter = '.*' # only run it on nominal!
+            config.addPrivateTool( 'selectionTool', 'BTaggingSelectionTool' )
+            # Configure the b-tagging selection tool
+            alg.selectionTool.TaggerName = self.btagger
+            alg.selectionTool.OperatingPoint = 'Continuous'
+            alg.selectionTool.JetAuthor = jetCollection
+            alg.selectionTool.FlvTagCutDefinitionsFileName = bTagCalibFile
+            alg.selectionTool.MinPt = 0.
+            config.addOutputVar(self.containerName, alg.taggerWeightDecoration, alg.taggerWeightDecoration, noSys=True)
+
+        # Save the per-flavour probabilities or additional custom variables
+        if self.saveScores == 'All' or self.saveCustomVariables:
+            alg = config.createAlgorithm('CP::BTaggingScoresAlg', 'BTagScoringAlg_' + self.btagger)
+            alg.jets = config.readName (self.containerName).replace('%SYS%', 'NOSYS')
+            alg.taggerName = self.btagger
+
+            variables = [f'{self.btagger}_{x}' for x in ['pb','pc','pu','ptau'] if x != 'ptau' or self.btagger == 'GN2v01']
+            variables += self.saveCustomVariables
+
+            alg.vars = variables
+            for var in variables:
+                config.addOutputVar(self.containerName, var, var, noSys=True)
 
 def makeFTagAnalysisConfig( seq, containerName,
                             selectionName,
