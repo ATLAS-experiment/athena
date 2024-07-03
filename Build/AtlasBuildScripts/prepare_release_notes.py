@@ -76,7 +76,7 @@ def main():
     verbose = args.verbose
     pretty_format = '%b'  # perhaps some combination of '%s%n%b' ?
     cmd = "git log "+previous_release+".."+nightly_tag + \
-        " --pretty=format:'"+pretty_format+"' --merges"
+        " --pretty=format:'"+pretty_format+"' --merges"+" --grep='See merge request'"
     if verbose:
         print("Executing:")
         print(cmd)
@@ -272,20 +272,16 @@ class MergeRequestInfo(object):
             print("parsing\n", mr_description_lines)
         lines = mr_description_lines
         see_mr_lines = [l for l in lines if l.startswith('See merge request')]
-        # -1 in case there are multiple matches
-        see_mr_line = see_mr_lines[-1] if see_mr_lines else []
         if len(lines) >= 2 and see_mr_lines:
             self.one_liner = lines[0]
             mr_match = re.search(
-                r'See merge request.*!(?P<mr>\d+).*', see_mr_line)
+                r'See merge request.*!(?P<mr>\d+).*', see_mr_lines[-1])  # use last match in case multiple "See ..." lines
             self.mr = mr_match.group('mr') if mr_match else None
             if verbose:
                 print(self.__str__())
         else:
-            self.one_liner = '; '.join(lines)
-            if verbose:
-                print("Cannot parse these lines:\n" +
-                      '\n'.join("[%02d] : '%s'" % (iL, l) for iL, l in enumerate(lines)))
+            print("WARNING: Cannot parse these lines:\n" +
+                  '\n'.join("[%02d] : '%s'" % (iL, l) for iL, l in enumerate(lines)))
         return self
 
 
@@ -343,23 +339,23 @@ def sweep_template():
 
 def format_mrs_from_gitlab(merged_mrs, group_mrs=False, gl=None):
 
+    @cache
+    def allowed_labels():
+        """Read domain labels from the CI repository"""
+        gl_project = gl.projects.get("atlas-sit/CI")
+        domains_py = gl_project.files.raw("data/domain_map.py", "master")
+        namespace = {}
+        exec(domains_py, namespace)
+        labels = set(namespace['DOMAIN_MAP'])
+
+        # Add/remove some labels
+        labels.discard('full-unit-tests')
+        labels.add('frozen-tier0-violating')
+        labels.add('sweep:ignore')
+        return labels
+
     def allowed_label(label):
         """Check if given label should be shown in release notes"""
-        @cache
-        def allowed_labels():
-            """Read domain labels from the CI repository"""
-            gl_project = gl.projects.get("atlas-sit/CI")
-            domains_py = gl_project.files.raw("data/domain_map.py", "master")
-            namespace = {}
-            exec(domains_py, namespace)
-            labels = set(namespace['DOMAIN_MAP'])
-
-            # Add/remove some labels
-            labels.discard('full-unit-tests')
-            labels.add('frozen-tier0-violating')
-            labels.add('sweep:ignore')
-            return labels
-
         allowed_labels_regex = [re.compile('changes-.*'), re.compile('.*-output-changed')]
         return label in allowed_labels() or any(regex.match(label) for regex in allowed_labels_regex)
 
