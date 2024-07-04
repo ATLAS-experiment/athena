@@ -1,0 +1,138 @@
+/*
+    Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
+
+/**
+ * @file src/EFTrackingDataformats.h
+ * @author zhaoyuan.cui@cern.ch
+ * @author yuan-tang.chou@cern.ch
+ * @date Apr. 22, 2024
+ * @brief Temporary data format design for the EF tracking FPGA integration development
+ */
+
+#ifndef EFTRACKING_FPGA_INTEGRATION_EFTRACKING_DATA_FORMATS_H
+#define EFTRACKING_FPGA_INTEGRATION_EFTRACKING_DATA_FORMATS_H
+
+#include <vector>
+
+namespace EFTrackingDataFormats
+{
+    // The struct of the StripCluster and PixelCluster are not aligned at the moment
+    // They might be aligned in the future for efficient device memory usage
+
+    /**
+     * @brief The StripClusters struct contains all xAOD::StripCluster data members
+     *
+     * This struct is only used as the input to the xAODTransfer kernel
+     * The outputs of the xAODTransfer kernel are plain arrays
+     */
+    struct StripCluster
+    {
+        float localPosition = 0.0f;
+        float localCovariance = 0.0f;
+        unsigned int idHash = 0;
+        long unsigned int id = 0;
+        float globalPosition[3] = {0.0f, 0.0f, 0.0f};
+        unsigned long long rdoList[1000] = {0};
+        int channelsInPhi = 0;
+        int sizeOfRDOList = 0;
+    };
+
+    /**
+     * @brief The PixelClusters struct contains all xAOD::PixelCluster data members
+     * 
+     * This struct is only used as the input to the xAODTransfer kernel
+     * The outputs of the xAODTransfer kernel are plain arrays
+     */
+    struct PixelCluster
+    {
+        long unsigned int id = 0;
+        unsigned int idHash = 0;
+        float localPosition[2] = {0.0f, 0.0f};
+        float localCovariance[2] = {0.0f, 0.0f};
+        float globalPosition[3] = {0.0f, 0.0f, 0.0f};
+        unsigned long long rdoList[1000] = {0};
+        int channelsInPhi = 0;
+        int channelsInEta = 0;
+        float widthInEta = 0.0f;
+        float omegaX = 0.0f;
+        float omegaY = 0.0f;
+        int totList[1000] = {0};
+        int totalToT = 0;
+        float chargeList[1000] = {0.0f};
+        float totalCharge = 0.0f;
+        float energyLoss = 0.0f;
+        char isSplit = 0;
+        float splitProbability1 = 0.0f;
+        float splitProbability2 = 0.0f;
+        int lvl1a = 0;
+        int sizeOfRDOList = 0;
+        int sizeOfTotList = 0;
+        int sizeOfChargeList = 0;
+    };
+
+    /**
+     * @brief The structure of the Metadata containing data after clusterization
+     * 
+     * These data are required to create xAOD cluster container
+     */
+    struct Metadata
+    {
+        unsigned int numOfStripClusters = 0;
+        unsigned int numOfPixelClusters = 0;
+        int scRdoIndex[1000] = {0};
+        int pcRdoIndex[1000] = {0};
+        int pcTotIndex[1000] = {0};
+        int pcChargeIndex[1000] = {0};
+        unsigned int pcRdoIndexSize = 0;
+        unsigned int scRdoIndexSize = 0;
+        unsigned int pcTotIndexSize = 0;
+        unsigned int pcChargeIndexSize = 0;
+    };
+
+    /**
+     * @brief The StripClusterAuxInput struct is used to simplify the creaction of the xAOD::StripClusterContainer
+     */
+    struct StripClusterAuxInput
+    {
+        std::vector<float> localPosition;
+        std::vector<float> localCovariance;
+        std::vector<unsigned int> idHash;
+        std::vector<long unsigned int> id;
+        std::vector<float> globalPosition;
+        std::vector<unsigned long long> rdoList;
+        std::vector<int> channelsInPhi;
+    };
+
+    /**
+     * @brief The PixelClusterAuxInput struct is used to simplify the creaction of the xAOD::PixelClusterContainer
+     */
+    struct PixelClusterAuxInput
+    {
+        std::vector<long unsigned int> id;
+        std::vector<unsigned int> idHash;
+        std::vector<float> localPosition;
+        std::vector<float> localCovariance;
+        std::vector<float> globalPosition;
+        std::vector<unsigned long long> rdoList;
+        std::vector<int> channelsInPhi;
+        std::vector<int> channelsInEta;
+        std::vector<float> widthInEta;
+        std::vector<float> omegaX;
+        std::vector<float> omegaY;
+        std::vector<int> totList;
+        std::vector<int> totalToT;
+        std::vector<float> chargeList;
+        std::vector<float> totalCharge;
+        std::vector<float> energyLoss;
+        std::vector<char> isSplit;
+        std::vector<float> splitProbability1;
+        std::vector<float> splitProbability2;
+        std::vector<int> lvl1a;
+        std::vector<int> sizeOfRDOList;
+        std::vector<int> sizeOfTotList;
+        std::vector<int> sizeOfChargeList;
+    };
+} // namespace EFTrackingDataFormats
+
+#endif // EFTRACKING_FPGA_INTEGRATION_EFTRACKING_DATA_FORMATS_H

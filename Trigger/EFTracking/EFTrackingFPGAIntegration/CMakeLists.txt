@@ -11,7 +11,7 @@ find_package(OpenCL REQUIRED)
 atlas_add_component(EFTrackingFPGAIntegration
     src/*.h src/*.cxx src/components/*.cxx 
     INCLUDE_DIRS ${OpenCL_INCLUDE_DIRS} 
-    LINK_LIBRARIES GaudiKernel AthenaBaseComps ${OpenCL_LIBRARIES}
+    LINK_LIBRARIES GaudiKernel AthenaBaseComps xAODInDetMeasurement ${OpenCL_LIBRARIES}
 )
 
 atlas_install_python_modules(python/*.py)

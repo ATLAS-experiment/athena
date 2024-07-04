@@ -9,8 +9,8 @@
  * @brief Class for the spacepoints kernel
  */
 
-#ifndef SPACEPOINTS_H
-#define SPACEPOINTS_H
+#ifndef EFTRACKING_FPGA_INTEGRATION_SPACEPOINTS_H
+#define EFTRACKING_FPGA_INTEGRATION_SPACEPOINTS_H
 
 // EFTracking include
 #include "IntegrationBase.h"
@@ -32,4 +32,4 @@ private:
     Gaudi::Property<std::string> m_refTV{this, "RefTV", "", "Reference TestVector"};   //!< Reference TestVector
 };
 
-#endif // SPACEPOINTS_H
+#endif // EFTRACKING_FPGA_INTEGRATION_SPACEPOINTS_H
