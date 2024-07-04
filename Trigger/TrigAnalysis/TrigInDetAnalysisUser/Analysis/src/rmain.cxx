@@ -4,7 +4,7 @@
  **     @author  mark sutton
  **     @date    Fri 11 Jan 2019 07:41:26 CET 
  **
- **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -1119,7 +1119,7 @@ int main(int argc, char** argv)
 
 
   /// clean up
-  if ( binningConfig!=&inputdata ) delete binningConfig;
+  if ( binningConfig!=&inputdata ) delete binningConfig;  // cppcheck-suppress autovarInvalidDeallocation; false positive
 
 
   if ( inputdata.isTagDefined("PRINT_BRESIDUALS") ) PRINT_BRESIDUALS = ( inputdata.GetValue("PRINT_BRESIDUALS")==0 ? false : true );
