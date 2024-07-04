@@ -76,7 +76,7 @@ class ttbb(PowhegRES):
         self.add_keyword("btlscalect", 1)
         self.add_keyword("btlscalereal", 1)
         self.add_keyword("clobberlhe")
-        self.add_keyword("compress_lhe", 1)
+        self.add_keyword("compress_lhe", 0)
         self.add_keyword("compress_upb", 1)
         self.add_keyword("facscfact", self.default_scales[0])
         self.add_keyword("fastbtlbound", 1)
