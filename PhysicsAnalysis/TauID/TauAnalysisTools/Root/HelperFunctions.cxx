@@ -625,10 +625,12 @@ std::vector<const xAOD::TauJet*> TauAnalysisTools::combineTauJetsWithMuonRM(cons
   // Info("TauAnalysisTools::getTauJetsWithMuonRM", message.c_str());
   std::vector<const xAOD::TauJet*> taus_murm_vec(taus_muonRM->begin(), taus_muonRM->end());
   std::vector<const xAOD::TauJet*> taus_combined;
+  static const SG::ConstAccessor<ElementLink<xAOD::TauJetContainer> >
+    originalTauJetAcc ("originalTauJet");
   for(const xAOD::TauJet* tau_std : *taus_std){
     auto replacement_itr = std::find_if(taus_murm_vec.begin(), taus_murm_vec.end(), 
-      [=](const xAOD::TauJet* tau_murm){
-        auto link_to_ori_tau = tau_murm->auxdata<ElementLink<xAOD::TauJetContainer>>("originalTauJet");
+      [&](const xAOD::TauJet* tau_murm){
+        auto link_to_ori_tau = originalTauJetAcc (*tau_murm);
         if (!link_to_ori_tau.isValid()) { return false; }
         if (*link_to_ori_tau == tau_std){ return true;  }
         return false;
