@@ -14,6 +14,8 @@
 #include "TH1.h"
 #include "TH2I.h"
 
+#include "Acts/Surfaces/Surface.hpp"
+#include "Acts/Surfaces/SurfaceBounds.hpp"
 
 using chType = sTgcIdHelper::sTgcChannelTypes;
 

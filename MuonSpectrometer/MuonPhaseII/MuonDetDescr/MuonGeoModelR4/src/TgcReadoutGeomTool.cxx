@@ -14,6 +14,7 @@
 #include <GeoModelKernel/GeoBox.h>
 
 #include <GeoModelRead/ReadGeoModel.h>
+#include <ActsGeoUtils/SurfaceBoundSet.h>
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
 #include <MuonReadoutGeometryR4/WireGroupDesign.h>
 #include <MuonReadoutGeometryR4/RadialStripDesign.h>
@@ -22,6 +23,10 @@
 #include <RDBAccessSvc/IRDBRecord.h>
 
 #include <MuonDetDescrUtils/MuonSectorMapping.h>
+
+#ifndef SIMULATIONBASE
+#   include "Acts/Surfaces/TrapezoidBounds.hpp"
+#endif
 
 using namespace CxxUtils;
 using namespace ActsTrk;

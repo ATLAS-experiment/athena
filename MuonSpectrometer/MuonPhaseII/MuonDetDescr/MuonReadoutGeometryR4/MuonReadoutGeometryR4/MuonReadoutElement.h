@@ -12,16 +12,16 @@
 #include <GeoModelKernel/GeoAlignableTransform.h>
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
 
-#include <ActsGeoUtils/TransformCache.h>
-#include <ActsGeoUtils/SurfaceCache.h>
+#include <ActsGeoUtils/Defs.h>
 #include <ActsGeometryInterfaces/IDetectorElement.h>
-
+#include <ActsGeoUtils/TransformCache.h>
 #include <GeoModelUtilities/TransientConstSharedPtr.h>
 
-#ifndef SIMULATIONBASE
-#   include "Acts/Surfaces/LineBounds.hpp"
-#   include "Acts/Surfaces/PlanarBounds.hpp"
-#endif
+namespace Acts{
+    class Surface;
+    class LineBounds;
+    class PlanarBounds;
+}
 namespace MuonGMR4 {
 
 class MuonChamber;
@@ -53,6 +53,8 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
     
 
     MuonReadoutElement(defineArgs&& args);
+    virtual ~MuonReadoutElement();
+    
     MuonReadoutElement()=delete;
     MuonReadoutElement(const MuonReadoutElement&)=delete;
     
@@ -139,7 +141,7 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
 
 #ifndef SIMULATIONBASE
     /// Returns the transformation to the origin of the chamber coordinate system
-    const Acts::Transform3& transform(const Acts::GeometryContext& gctx) const override final;    
+    const Amg::Transform3D& transform(const Acts::GeometryContext& gctx) const override final;    
     /// Returns the surface associated to the readout element plane
     const Acts::Surface& surface() const override final;
     Acts::Surface& surface() override final;
@@ -204,10 +206,10 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
 
     /// Cache all local to global transformations
     using TransformCacheMap = std::unordered_map<IdentifierHash, std::unique_ptr<ActsTrk::TransformCache>>;
-    TransformCacheMap m_localToGlobalCaches{};
+    TransformCacheMap m_localToGlobalCaches;
 #ifndef SIMULATIONBASE
     ///Cache of all associated surfaces
-    ActsTrk::SurfaceCacheSet m_surfaces{};
+    ActsTrk::SurfaceCacheSet m_surfaces;
     /// Pointer to the associated MuonChamber
     GeoModel::TransientConstSharedPtr<MuonChamber> m_chambLink{};
 #endif

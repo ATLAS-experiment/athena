@@ -3,8 +3,9 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include <ActsGeoUtils/SurfaceCache.h>
-#include <GeoModelHelpers/throwExcept.h>
 #ifndef SIMULATIONBASE
+#include <Acts/Surfaces/Surface.hpp>
+#include <GeoModelHelpers/throwExcept.h>
 
 namespace ActsTrk{
 

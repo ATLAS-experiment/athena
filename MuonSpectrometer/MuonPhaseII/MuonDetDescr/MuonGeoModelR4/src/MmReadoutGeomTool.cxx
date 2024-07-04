@@ -3,6 +3,7 @@
 */
 
 #include <MuonGeoModelR4/MmReadoutGeomTool.h>
+#include <ActsGeoUtils/SurfaceBoundSet.h>
 #include <GaudiKernel/SystemOfUnits.h>
 #include <RDBAccessSvc/IRDBAccessSvc.h>
 #include <RDBAccessSvc/IRDBRecordset.h>
@@ -17,9 +18,14 @@
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
 #include <RDBAccessSvc/IRDBRecord.h>
 
-using namespace ActsTrk;
+#ifndef SIMULATIONBASE
+#   include "Acts/Surfaces/TrapezoidBounds.hpp"
+#endif
 
+using namespace ActsTrk;
 using namespace CxxUtils;
+
+
 
 namespace MuonGMR4 {
 

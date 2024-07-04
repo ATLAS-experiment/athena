@@ -8,7 +8,6 @@
 #include <GeoPrimitives/GeoPrimitivesToStringConverter.h>
 ///
 #include <ActsGeometryInterfaces/ActsGeometryContext.h>
-#include <ActsGeoUtils/SurfaceBoundSet.h>
 
 #include <CxxUtils/ArrayHelper.h>
 #include <CxxUtils/StringUtils.h>

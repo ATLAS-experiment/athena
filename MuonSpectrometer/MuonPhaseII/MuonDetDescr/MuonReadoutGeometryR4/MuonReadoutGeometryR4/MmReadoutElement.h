@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONREADOUTGEOMETRYR4_MMREADOUTELEMENT_H
 #define MUONREADOUTGEOMETRYR4_MMREADOUTELEMENT_H
@@ -8,10 +8,12 @@
 #include <MuonReadoutGeometryR4/StripDesign.h>
 #include <MuonReadoutGeometryR4/StripLayer.h>
 
-#ifndef SIMULATIONBASE
-#   include "Acts/Surfaces/TrapezoidBounds.hpp"
-#endif
 
+
+namespace Acts{
+    class TrapezoidBounds;
+    class Surface;
+}
 
 namespace MuonGMR4 {
 
@@ -38,7 +40,7 @@ class MmReadoutElement : public MuonReadoutElement {
       std::vector<StripLayerPtr> layers{};
 
 #ifndef SIMULATIONBASE
-        ActsTrk::SurfaceBoundSetPtr<Acts::TrapezoidBounds> layerBounds{};
+        ActsTrk::SurfaceBoundSetPtr<Acts::TrapezoidBounds> layerBounds;
 #endif
 
 

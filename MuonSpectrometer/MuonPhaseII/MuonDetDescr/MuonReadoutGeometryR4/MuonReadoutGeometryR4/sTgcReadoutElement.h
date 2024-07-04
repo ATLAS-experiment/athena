@@ -9,10 +9,12 @@
 #include <MuonReadoutGeometryR4/WireGroupDesign.h>
 #include <MuonReadoutGeometryR4/PadDesign.h>
 #include <MuonReadoutGeometryR4/StripLayer.h>
-#ifndef SIMULATIONBASE
-#   include "Acts/Surfaces/TrapezoidBounds.hpp"
-#endif
 
+
+namespace Acts{
+    class TrapezoidBounds;
+    class Surface;
+} 
 
 namespace MuonGMR4 {
 
@@ -70,7 +72,7 @@ class sTgcReadoutElement : public MuonReadoutElement {
         PadDesignPtr padDesign{nullptr};
 
 #ifndef SIMULATIONBASE
-        ActsTrk::SurfaceBoundSetPtr<Acts::TrapezoidBounds> layerBounds{};
+        ActsTrk::SurfaceBoundSetPtr<Acts::TrapezoidBounds> layerBounds;
 #endif
 
     };
@@ -79,6 +81,7 @@ class sTgcReadoutElement : public MuonReadoutElement {
                         public parameterBook {};
 
     sTgcReadoutElement(defineArgs&& args);
+    virtual ~sTgcReadoutElement();
 
     const parameterBook& getParameters() const;
     /// Overload from the ActsTrk::IDetectorElement

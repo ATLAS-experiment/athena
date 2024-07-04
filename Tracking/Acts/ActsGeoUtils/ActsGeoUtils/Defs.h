@@ -11,4 +11,19 @@
 #include <limits>
 #include <set>
 
+/** @brief forward declarations of the classes defined in the package*/
+namespace ActsTrk{
+   
+  template <class> class SurfaceBoundSet;
+  /// Aberivation to create a new SurfaceBoundSetPtr
+  template<class BoundType> using SurfaceBoundSetPtr = std::shared_ptr<SurfaceBoundSet<BoundType>>;
+
+   class SurfaceCache;
+   using SurfaceCacheSet = std::set<std::unique_ptr<SurfaceCache>, std::less<>>;
+
+   
+   class TransformCache;
+   template <class> class TransformCacheDetEle;
+}
+
 #endif

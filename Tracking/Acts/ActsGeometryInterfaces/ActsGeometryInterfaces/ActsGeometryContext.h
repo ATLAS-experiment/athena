@@ -15,10 +15,9 @@
 #endif
 
 #include "ActsGeometryInterfaces/DetectorAlignStore.h"
+#include "GeoModelUtilities/TransientConstSharedPtr.h"
 #include "AthenaKernel/CLASS_DEF.h"
 #include "AthenaKernel/CondCont.h"
-#include "GeoModelUtilities/TransientConstSharedPtr.h"
-
 /** @brief ActsGeometry context carries all information related to the aboslute positions of the Readout geometry
  *         Per detector technology (e.g. Mdt), it contains an ActsTrk::DetectorAlignmentStore which carries pointers
  *         to the rigid alignment transfomrations of each FullPhysical volume representing the detector sensor envelope.

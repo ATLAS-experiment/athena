@@ -8,6 +8,10 @@
 #include <MuonReadoutGeometryR4/StripDesign.h>
 #include <MuonReadoutGeometryR4/StripLayer.h>
 
+namespace Acts{
+    class RectangleBounds;
+    class Surface;
+}
 
 namespace MuonGMR4 {
 
@@ -35,7 +39,7 @@ class RpcReadoutElement : public MuonReadoutElement {
         StripDesignPtr phiDesign{nullptr};
         StripDesignPtr etaDesign{nullptr};
 #ifndef SIMULATIONBASE
-        ActsTrk::SurfaceBoundSetPtr<Acts::RectangleBounds> layerBounds{};
+        ActsTrk::SurfaceBoundSetPtr<Acts::RectangleBounds> layerBounds;
 #endif
     };
 
@@ -43,7 +47,7 @@ class RpcReadoutElement : public MuonReadoutElement {
                         public parameterBook {};
 
     RpcReadoutElement(defineArgs&& args);
-
+    virtual ~RpcReadoutElement();
     const parameterBook& getParameters() const;
     /// Overload from the ActsTrk::IDetectorElement
     ActsTrk::DetectorType detectorType() const override final {

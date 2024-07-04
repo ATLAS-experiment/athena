@@ -1,13 +1,22 @@
 /*
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
+#include <MuonReadoutGeometryR4/MdtReadoutElement.h>
+
+#include <ActsGeoUtils/SurfaceBoundSet.h>
 #include <GeoPrimitives/GeoPrimitivesToStringConverter.h>
 #include <GeoPrimitives/GeoPrimitivesHelpers.h>
-#include <MuonReadoutGeometryR4/MdtReadoutElement.h>
 #include <AthenaBaseComps/AthCheckMacros.h>
 #include <GaudiKernel/SystemOfUnits.h>
 
 #include <optional>
+
+
+#ifndef SIMULATIONBASE
+#   include "Acts/Surfaces/TrapezoidBounds.hpp"
+#   include "Acts/Surfaces/LineBounds.hpp"
+#   include "Acts/Surfaces/Surface.hpp"
+#endif
 
 using namespace ActsTrk;
 
@@ -27,6 +36,7 @@ std::ostream& operator<<(std::ostream& ostr, const MuonGMR4::MdtReadoutElement::
     }
     return ostr;
 }
+MdtReadoutElement::~MdtReadoutElement() = default;
 MdtReadoutElement::MdtReadoutElement(defineArgs&& args)
     : MuonReadoutElement(std::move(args)),
       m_pars{std::move(args)} {

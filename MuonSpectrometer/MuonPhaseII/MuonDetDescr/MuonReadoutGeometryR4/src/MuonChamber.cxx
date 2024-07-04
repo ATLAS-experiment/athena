@@ -4,6 +4,7 @@
 #ifndef SIMULATIONBASE
 #include <MuonReadoutGeometryR4/MuonChamber.h>
 #include <Acts/Geometry/TrapezoidVolumeBounds.hpp>
+#include <Acts/Geometry/Volume.hpp>
 #include <ActsGeoUtils/NoDeletePtr.h>
 
 
