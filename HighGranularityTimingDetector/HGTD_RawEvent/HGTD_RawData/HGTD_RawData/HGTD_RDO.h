@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  *
  * @file HGTD_RawData/HGTD_RDO.h
  * @author Alexander Leopold <alexander.leopold@cern.ch>
@@ -95,23 +95,23 @@ private:
 
   /** @brief Time of arrival, 7 bit word.
    */
-  float m_toa;
+  float m_toa{};
 
   /** @brief Time over threshold, 9 bit word.
    */
-  unsigned int m_tot;
+  unsigned int m_tot{};
 
   /** @brief Bunch crossing ID.
    */
-  unsigned short m_bcid;
+  unsigned short m_bcid{};
 
   /** @brief Level 1 accept.
    */
-  unsigned short m_l1_id;
+  unsigned short m_l1_id{};
 
   /** @brief ATLAS LVL1.
    */
-  unsigned short m_l1_a;
+  unsigned short m_l1_a{};
 };
 
 inline Identifier HGTD_RDO::identify() const { return m_rdo_id; }
