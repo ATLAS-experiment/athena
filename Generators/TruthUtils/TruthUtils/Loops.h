@@ -35,41 +35,62 @@ public:
         m_loop_particles.clear();
         m_loop_vertices.clear();
         std::map<Prt, int> incycle;
-        for (auto & p: *m_evt) if (!p->end_vertex()||!p->production_vertex()) incycle[p] = -1;
+        for (const auto & p: *m_evt) if (!p->end_vertex()||!p->production_vertex()) incycle[p] = -1;
             else incycle[p] = 0;
         size_t minincycle = m_evt->particles_size();
         for (;;) {
             size_t unknown = 0;
-            for (auto & p: *m_evt) {
+            for (const auto & p: *m_evt) {
                 if (incycle[p] != 0) continue;
                 unknown++;
                 auto ev = p->end_vertex();
                 if (ev) {
                     bool goodo = true;
-                    for (auto& po: ev->particles_out()) goodo = goodo && (incycle[po] == -1);
+                    for (auto& po: *ev) goodo = goodo && (incycle[po] == -1);
                     if (goodo) incycle[p] = -1;
                 }
                 auto pv = p->production_vertex();
                 if (pv) {
                     bool goodi = true;
+#ifdef HEPMC3
                     for (auto& pi: ev->particles_in()) goodi = goodi && (incycle[pi] == -1);
+#else
+                    for (auto ip = ev->particles_in_const_begin();
+                         ip != ev->particles_in_const_end();
+                         ++ip)
+                    {
+                      goodi = goodi && (incycle[*ip] == -1);
+                    }
+#endif
                     if (goodi) incycle[p] = -1;
                 }
             }
             if (minincycle == unknown) break;
             minincycle = std::min(minincycle, unknown);
         }
-        for (auto & p: *m_evt) if (incycle[p] == 0) incycle[p] = 1;
+        for (const auto & p: *m_evt) if (incycle[p] == 0) incycle[p] = 1;
 
-        for (auto & p: *m_evt) if (incycle[p] == 1) m_loop_particles.push_back(p);
+        for (const auto & p: *m_evt) if (incycle[p] == 1) m_loop_particles.push_back(p);
+#ifdef HEPMC3
         for (auto & v: m_evt->vertices()) {
+#else
+        for (auto iv = m_evt->vertices_begin(); iv != m_evt->vertices_end(); ++iv) {
+            auto v = *iv;
+#endif
             bool push = false;
+#ifdef HEPMC3
             for ( auto& pin: v->particles_in()) if (incycle[pin] == 1) {
+#else
+            for ( auto ipin = v->particles_in_const_begin();
+                  ipin != v->particles_in_const_end();
+                  ++ipin)
+              if (incycle[*ipin] == 1) {
+#endif
                     push = true;
                     break;
                 }
             if(!push) {
-                for ( auto& pou: v->particles_out()) {
+                for ( const auto& pou: *v) {
                     if (incycle[pou] == 1) {
                         push = true;
                         break;
