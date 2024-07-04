@@ -73,14 +73,7 @@ std::unique_ptr<Acts::BoundTrackParameters> ActsTrk::RandomProtoTrackCreator::ma
   Acts::BoundSquareMatrix cov = Acts::BoundSquareMatrix::Identity();
   cov *= 100000; 
 
-  // some ACTS paperwork 
-  Trk::ParticleHypothesis hypothesis = Trk::pion;
-  float mass = Trk::ParticleMasses::mass[hypothesis] * Acts::UnitConstants::MeV;
-  Acts::PdgParticle absPdg = Acts::makeAbsolutePdgParticle(Acts::ePionPlus);
-  Acts::ParticleHypothesis actsHypothesis{
-    absPdg, mass, Acts::AnyCharge{1.0f}};
-
   return std::make_unique<Acts::BoundTrackParameters>(actsSurface, params,
-                                    cov, actsHypothesis);
+                                    cov,  Acts::ParticleHypothesis::pion());
 
 }

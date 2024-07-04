@@ -1,7 +1,8 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
+#include <Gaudi/Property.h>
 #ifndef ACTSTRACKRECONSTRUCTION_PROTOTRACKCREATIONANDFITALG_H
 #define ACTSTRACKRECONSTRUCTION_PROTOTRACKCREATIONANDFITALG_H 1
 
@@ -18,6 +19,7 @@
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "StoreGate/CondHandleKeyArray.h"
 #include "ActsEvent/TrackContainerHandlesHelper.h"
+#include "ActsEvent/ProtoTrackCollection.h"
 
 namespace
 {
@@ -61,6 +63,10 @@ namespace ActsTrk{
       ToolHandle<IActsExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
       // output location to write to 
       SG::WriteHandleKey<ActsTrk::TrackContainer> m_trackContainerKey{this, "ACTSTracksLocation", "", "Output track collection (ActsTrk variant)"};
+
+      // output location for proto tracks (can be empty)
+      SG::WriteHandleKey<ActsTrk::ProtoTrackCollection> m_protoTrackCollectionKey{this, "ProtoTracksLocation", "", "Output proto tracks as well"};
+      Gaudi::Property<bool> m_copyParametersFromFit{this, "copyParametersFromFit", true, "If enabled proto tracks will have the same parameters as fitted tracks"};
       // acts helper for the output
       ActsTrk::MutableTrackContainerHandlesHelper m_tracksBackendHandlesHelper;
 
