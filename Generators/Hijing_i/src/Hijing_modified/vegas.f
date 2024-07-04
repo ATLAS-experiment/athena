@@ -96,7 +96,10 @@ C
       IF(NPRN.NE.0) WRITE(16,200) NDIM,CALLS,IT,ITMX,ACC,MDS,ND
      1                           ,(XL(J),XU(J),J=1,NDIM)
 C
-      ENTRY VEGAS3(FXN,AVGI,SD,CHI2A)
+c      sss --- calling this entry will use a bunch of variables without
+c              initialization.  hijing doesn't use it, so just comment
+c              it out.
+c      ENTRY VEGAS3(FXN,AVGI,SD,CHI2A)
 C         - MAIN INTEGRATION LOOP
 9     IT=IT+1
       TI=0.
