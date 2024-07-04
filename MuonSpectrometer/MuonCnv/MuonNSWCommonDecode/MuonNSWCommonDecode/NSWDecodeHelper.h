@@ -144,7 +144,7 @@ namespace Muon
       constexpr int8_t max_bit(const T &number) {
       constexpr int8_t num_bits = sizeof(number) * 8 - 1;
       for (int8_t bit = num_bits; bit >= 0; --bit) {
-	if (number & (1u << bit))
+	if (number & (1ul << bit))
 	  return bit;
       }
       return -1;
@@ -157,7 +157,7 @@ namespace Muon
       constexpr int8_t min_bit(const T &number) {
       constexpr int8_t num_bits = sizeof(number) * 8 - 1;  
       for (size_t bit = 0; bit <= num_bits; ++bit) {
-	if (number & (1u << bit))
+	if (number & (1ul << bit))
 	  return bit;
       }
       return -1;
