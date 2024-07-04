@@ -248,7 +248,7 @@ public:
   /**
    * @brief Return the name of the decoration alias (CONT.DECOR).
    */
-  std::string decorKey() const;
+  const std::string& decorKey() const;
 
   
 private:

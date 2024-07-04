@@ -94,7 +94,8 @@ namespace SG {
   template <typename T>
   ReadCondHandle<T>::ReadCondHandle(const SG::ReadCondHandleKey<T>& key):
   ReadCondHandle(key, Gaudi::Hive::currentContext())
-  { 
+  {
+    // cppcheck-suppress missingReturn; false positive
   }
 
   //---------------------------------------------------------------------------

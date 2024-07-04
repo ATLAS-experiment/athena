@@ -321,7 +321,7 @@ Gaudi::DataHandle::Mode WriteDecorHandle<T, D>::mode() const
  */
 template <class T, class D>
 inline
-std::string WriteDecorHandle<T, D>::decorKey() const
+const std::string& WriteDecorHandle<T, D>::decorKey() const
 {
   return m_decorKey;
 }

@@ -71,6 +71,7 @@ class NotThere {};
 class SillyKey {
 public:
   SillyKey(const std::string& aString) : m_string(aString) {}
+  // cppcheck-suppress returnByReference
   operator std::string() const {return m_string;}
 
 private:
