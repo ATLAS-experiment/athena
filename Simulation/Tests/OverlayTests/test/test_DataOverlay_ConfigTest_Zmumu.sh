@@ -5,6 +5,7 @@
 # art-architecture:  '#x86_64-intel'
 # art-include: main/Athena
 
+# art-memory: 3999
 # art-output: dataOverlayRDO.pool.root
 # art-output: log.*
 # art-output: mem.summary.*
