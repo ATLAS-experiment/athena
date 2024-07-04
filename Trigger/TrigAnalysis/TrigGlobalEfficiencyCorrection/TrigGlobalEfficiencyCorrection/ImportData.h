@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // contact: jmaurer@cern.ch
@@ -125,8 +125,8 @@ public:
 	const std::map<std::size_t,TrigDef>& getTriggerDefs() const { return m_triggerDefs; }
 	const std::map<std::size_t,float>& getTriggerThresholds() const { return m_triggerThresholds; }
 	const std::map<std::string, std::pair<unsigned,unsigned>>& getDataPeriods() const { return m_dataPeriods; }
-	const std::vector<Hierarchy> getHierarchyMeta() const { return m_hierarchyMeta; }
-	const std::vector<std::size_t> getHierarchyData() const { return m_hierarchyData; }
+	const std::vector<Hierarchy>& getHierarchyMeta() const { return m_hierarchyMeta; }
+	const std::vector<std::size_t>& getHierarchyData() const { return m_hierarchyData; }
 	const std::map<std::size_t,std::string>& getDictionary() const { return m_dictionary; }
 	xAOD::Type::ObjectType associatedLeptonFlavour(std::size_t leg, bool& success);
 	static xAOD::Type::ObjectType associatedLeptonFlavour(const std::string& leg, bool& success);
