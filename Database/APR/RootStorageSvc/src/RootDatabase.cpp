@@ -621,6 +621,14 @@ DbStatus RootDatabase::setOption(const DbOption& opt)  {
         new TFileCacheWrite(m_file, v); //TFile will take ownership and delete its TFileCacheWrite
         return Success;
       }
+      else if ( !strcasecmp(n,"FILEFORWARD_COMPATIBILITY") ) {
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 30, 0 )
+        DbPrint log("RootDatabase.setOption");
+        log << DbPrintLvl::Info << "Setting ROOT TFile bit for forward compatibility, see ATEAM-1001" << DbPrint::endmsg;
+        m_file->SetBit(TFile::k630forwardCompatibility);
+#endif
+        return Success;
+      }
       break;
     case 'I':
        if( !strcasecmp(n, "INDEX_MASTER") ) {

@@ -446,14 +446,17 @@ if hasattr( runArgs, "outputEVNTFile") or hasattr( runArgs, "outputEVNT_PreFile"
     ## Configure POOL streaming to the output EVNT format file
     from AthenaPoolCnvSvc.WriteAthenaPool import AthenaPoolOutputStream
     from AthenaPoolCnvSvc.AthenaPoolCnvSvcConf import AthenaPoolCnvSvc
-    # remove because it was removed from Database/AthenaPOOL/AthenaPoolCnvSvc
-    #svcMgr.AthenaPoolCnvSvc.CommitInterval = 10 #< tweak for MC needs
     if hasattr(runArgs, "outputEVNTFile"):
         poolFile = runArgs.outputEVNTFile
     elif hasattr(runArgs, "outputEVNT_PreFile"):
         poolFile = runArgs.outputEVNT_PreFile
     else:
         raise RuntimeError("Output pool file, either EVNT or EVNT_Pre, is not known.")
+
+    # ROOT inadvertently broke forward compatibility in v6.30+ (see root/issues/15964)
+    # This workaround is needed so that older releases can read files created by the new ones
+    # For more information see ATEAM-1001
+    svcMgr.AthenaPoolCnvSvc.PoolAttributes += [ f"DatabaseName = '{poolFile}'; FILEFORWARD_COMPATIBILITY = '1'" ]
 
     StreamEVGEN = AthenaPoolOutputStream("StreamEVGEN", poolFile, noTag=True, eventInfoKey="EventInfo")
 
