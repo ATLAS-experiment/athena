@@ -12,13 +12,12 @@ Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 //Constructor sets up the geometry for all future loops
 
-ITkPixEncoder::ITkPixEncoder(const uint nCol, const uint nRow, const uint nColInCCol, const uint nRowInQRow, const uint nEventsPerStream, const bool plainHitMap, const bool dropToT): m_nCol(nCol), m_nRow(nRow), m_nColInCCol(nColInCCol), m_nRowInQRow(nRowInQRow), m_nEventsPerStream(nEventsPerStream), m_plainHitMap(plainHitMap), m_dropToT(dropToT){
-    m_nCCol = nCol/m_nColInCCol;
-    m_nQRow = nRow/m_nRowInQRow;
-    m_currBlock  = 0x0ULL;
-    m_currBit    = 0;
-    m_currEvent  = 0;
-    m_currStream = 0;
+ITkPixEncoder::ITkPixEncoder(const unsigned nCol, const unsigned nRow, const unsigned nColInCCol, 
+  const unsigned nRowInQRow, const unsigned nEventsPerStream, const bool plainHitMap, 
+  const bool dropToT): m_nCol(nCol/nColInCCol), m_nRow(nRow/nRowInQRow), 
+  m_nColInCCol(nColInCCol), m_nRowInQRow(nRowInQRow), m_nEventsPerStream(nEventsPerStream), 
+  m_plainHitMap(plainHitMap), m_dropToT(dropToT){
+    //nop
 }
 
 void ITkPixEncoder::addBits64(const uint64_t value, const uint8_t length){
@@ -76,11 +75,11 @@ void ITkPixEncoder::pushWords32(){
     m_currBit   = 0;
 }
 
-void ITkPixEncoder::encodeQCore(const uint nCCol, const uint nQRow){
+void ITkPixEncoder::encodeQCore(const unsigned nCCol, const unsigned nQRow){
     //produce hit map and ToTs
     //First, get the top-left pixel in the QCore
-    uint col = nCCol * m_nColInCCol;
-    uint row = nQRow * m_nRowInQRow;
+    unsigned col = nCCol * m_nColInCCol;
+    unsigned row = nQRow * m_nRowInQRow;
 
     //now loop, store ToTs, and build index of the
     //compressed hit map in the LUT
@@ -88,8 +87,8 @@ void ITkPixEncoder::encodeQCore(const uint nCCol, const uint nQRow){
     std::vector<uint16_t> tots;
     tots.reserve(16);
     int pix = 0;
-    for (uint pixRow = row; pixRow < row + m_nRowInQRow; pixRow++){
-        for (uint pixCol = col; pixCol < col + m_nColInCCol; pixCol++){
+    for (unsigned pixRow = row; pixRow < row + m_nRowInQRow; pixRow++){
+        for (unsigned pixCol = col; pixCol < col + m_nColInCCol; pixCol++){
             if (m_hitMap(pixCol, pixRow)){
                 lutIndex |= 0x1 << pix;
                 tots.push_back(m_hitMap(pixCol, pixRow) - 1);
@@ -114,14 +113,14 @@ void ITkPixEncoder::encodeQCore(const uint nCCol, const uint nQRow){
     }
 }
 
-bool ITkPixEncoder::hitInQCore(const uint CCol, const uint QRow){
+bool ITkPixEncoder::hitInQCore(const unsigned CCol, const unsigned QRow){
     //Was there a hit in this QCore?
 
-    uint col = CCol * m_nColInCCol;
-    uint row = QRow * m_nRowInQRow;
+    unsigned col = CCol * m_nColInCCol;
+    unsigned row = QRow * m_nRowInQRow;
 
-    for (uint pixRow = row; pixRow < row + m_nRowInQRow; pixRow++){
-        for (uint pixCol = col; pixCol < col + m_nColInCCol; pixCol++){
+    for (unsigned pixRow = row; pixRow < row + m_nRowInQRow; pixRow++){
+        for (unsigned pixCol = col; pixCol < col + m_nColInCCol; pixCol++){
             if (m_hitMap(pixCol, pixRow)) return true;
         }
     }
@@ -132,10 +131,10 @@ bool ITkPixEncoder::hitInQCore(const uint CCol, const uint QRow){
 void ITkPixEncoder::scanHitMap(){
     //Fill in a helper map of hit QCores and a vector of last qrow in each ccol
     m_hitQCores = std::vector<std::vector<bool>>(m_nCCol, std::vector<bool>(m_nQRow, false));
-    m_lastQRow  = std::vector<uint>(m_nCCol, 0);
+    m_lastQRow  = std::vector<unsigned> (m_nCCol, 0);
 
-    for (uint CCol = 0; CCol < m_nCCol; CCol++){
-        for (uint QRow = 0; QRow < m_nQRow; QRow++){
+    for (unsigned CCol = 0; CCol < m_nCCol; CCol++){
+        for (unsigned QRow = 0; QRow < m_nQRow; QRow++){
             //if there's a hit in the qcore, flag the helper map
             m_hitQCores[CCol][QRow] = hitInQCore(CCol, QRow);
             
@@ -154,14 +153,14 @@ void ITkPixEncoder::encodeEvent(){
     //First, scan the map and produce helpers
     scanHitMap();
 
-    for (uint CCol = 0; CCol < m_nCCol; CCol++){
+    for (unsigned CCol = 0; CCol < m_nCCol; CCol++){
         //if there are no hits in this CCol, continue
         if (m_lastQRow[CCol] == 0) continue;
         //add the 6-bit (CCol + 1) address
         addBits64(CCol + 1, 6);    
 
         int previousQRow = -666;
-        for (uint QRow = 0; QRow < m_nQRow; QRow++){
+        for (unsigned QRow = 0; QRow < m_nQRow; QRow++){
             //if there's no hit in this row, continue
             if (!m_hitQCores[CCol][QRow]) continue;            
             
