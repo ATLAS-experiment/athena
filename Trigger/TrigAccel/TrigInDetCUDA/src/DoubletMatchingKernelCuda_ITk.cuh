@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+	Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGINDETCUDA_DOUBLETMATCHINGKERNELCUDA_ITK_CUH
@@ -271,7 +271,6 @@ __global__ static void doubletMatchingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SET
 
 	for(int doublet_i = threadIdx.x; doublet_i<iDoublet; doublet_i += blockDim.x) {
 		if (innerDoubletTriplets[doublet_i] == 0) continue;
-		int spiIdx = spIdx_array[doublet_i]; // index of inner spacepoint of the doublet
 
 		// Find pairs with the inner doublet
 		for (int l=0; l < nTriplets && l < MAX_TRIPLETS_ITk; ++l) { 
