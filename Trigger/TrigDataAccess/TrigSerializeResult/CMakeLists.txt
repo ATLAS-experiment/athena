@@ -1,19 +1,18 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigSerializeResult )
 
 # External dependencies:
 find_package( ROOT COMPONENTS RIO Core Tree MathCore Hist pthread )
-find_package( Boost )
 
 # Component(s) in the package:
 atlas_add_library( TrigSerializeResultLib
                    src/*.cxx
                    PUBLIC_HEADERS TrigSerializeResult
-                   PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
+                   PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
                    LINK_LIBRARIES AthenaBaseComps AthenaKernel GaudiKernel
-                   PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} CxxUtils DataModelRoot PathResolver RootUtils )
+                   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} CxxUtils DataModelRoot PathResolver RootUtils )
 
 atlas_add_component( TrigSerializeResult
                      src/components/*.cxx
