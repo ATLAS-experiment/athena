@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //             Interface for jFEXBDTool - Tool to read the COOL DB for jFEX
@@ -163,13 +163,13 @@ void jFEXDBCondData::set_PUThrHighFcal(int PileUpThresholdHighFcal){
     m_PileUpThresholdHighFcal = PileUpThresholdHighFcal;
 }
 
-void jFEXDBCondData::set_NoiseCuts(std::unordered_map< uint16_t, std::array<uint16_t,4> > NoiseCuts){
+void jFEXDBCondData::set_NoiseCuts(const std::unordered_map< uint16_t, std::array<uint16_t,4> >& NoiseCuts){
     
     for(auto const& [key, array] : NoiseCuts){
         m_NoiseCuts[key]=array;
     }
 }
-void jFEXDBCondData::set_PileUpValues(std::unordered_map< uint16_t, std::array<uint16_t,4> > PileUpWeight){
+void jFEXDBCondData::set_PileUpValues(const std::unordered_map< uint16_t, std::array<uint16_t,4> >& PileUpWeight){
         
     for(auto const& [key, array] : PileUpWeight){
         m_PileUpWeight[key]=array;
