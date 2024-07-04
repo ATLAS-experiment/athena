@@ -172,7 +172,6 @@ class EgammaCalibrationAndSmearingTool
   PATCore::ParticleDataType::DataType m_simulation =
       PATCore::ParticleDataType::Full;
   // flags duplicated from the underlying ROOT tool
-  int m_useLayer2Recalibration;
   int m_useIntermoduleCorrection;
   int m_usePhiUniformCorrection;
   int m_useCaloDistPhiUnifCorrection;
