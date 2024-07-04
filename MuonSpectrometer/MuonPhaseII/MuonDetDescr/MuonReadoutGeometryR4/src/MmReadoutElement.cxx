@@ -1,14 +1,18 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-#include <EventPrimitives/EventPrimitivesToStringConverter.h>
-#include <GeoPrimitives/GeoPrimitivesHelpers.h>
 #include <MuonReadoutGeometryR4/MmReadoutElement.h>
+
+
+#include <GeoPrimitives/GeoPrimitivesHelpers.h>
+#include <ActsGeoUtils/SurfaceBoundSet.h>
+
 #include <AthenaBaseComps/AthCheckMacros.h>
 #include <GaudiKernel/SystemOfUnits.h>
 #include <optional>
 
 #ifndef SIMULATIONBASE
+#   include "Acts/Surfaces/Surface.hpp"
 #   include "Acts/Surfaces/TrapezoidBounds.hpp"
 #endif
 

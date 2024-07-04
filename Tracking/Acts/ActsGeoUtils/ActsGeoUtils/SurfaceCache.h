@@ -1,14 +1,17 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONREADOUTGEOMETRY_SurfaceCache_H
 #define MUONREADOUTGEOMETRY_SurfaceCache_H
 #ifndef SIMULATIONBASE
+#include <ActsGeoUtils/Defs.h>
 #include <ActsGeoUtils/TransformCache.h>
 #include <Acts/Geometry/DetectorElementBase.hpp>
-#include <Acts/Surfaces/Surface.hpp>
 
+namespace Acts{
+    class Surface;
+}
 namespace ActsTrk {
 
     /** @brief: Helper class to connect the aligned transformations of each active sensor(layer) with the Acts::Surfaces.
@@ -59,8 +62,7 @@ namespace ActsTrk {
   }
   inline bool operator<(const std::unique_ptr<SurfaceCache>& a, const IdentifierHash& b) {
       return a->hash() < b;
-  }
-  using SurfaceCacheSet = std::set<std::unique_ptr<SurfaceCache>, std::less<>>;
+  }  
 }
 #endif
 #endif

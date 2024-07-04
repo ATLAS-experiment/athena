@@ -19,6 +19,11 @@
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
 #include <RDBAccessSvc/IRDBRecord.h>
 
+#include <ActsGeoUtils/SurfaceBoundSet.h>
+#ifndef SIMULATIONBASE
+#   include "Acts/Surfaces/TrapezoidBounds.hpp"
+#endif
+
 namespace {
     constexpr double tolerance = 0.001 * Gaudi::Units::mm;
 }

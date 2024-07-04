@@ -1,12 +1,16 @@
 /*
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-#include <EventPrimitives/EventPrimitivesToStringConverter.h>
-#include <GeoPrimitives/GeoPrimitivesHelpers.h>
 #include <MuonReadoutGeometryR4/RpcReadoutElement.h>
+
+
+#include <GeoPrimitives/GeoPrimitivesHelpers.h>
+#include <ActsGeoUtils/SurfaceBoundSet.h>
+
 #include <AthenaBaseComps/AthCheckMacros.h>
 #include <GaudiKernel/SystemOfUnits.h>
 #include <optional>
+
 #ifndef SIMULATIONBASE
 #  include "Acts/Surfaces/RectangleBounds.hpp"
 #endif
@@ -21,7 +25,7 @@ std::ostream& operator<<(std::ostream& ostr, const parameterBook& pars) {
    if (pars.phiDesign) ostr<<"Phi strips: "<<(*pars.phiDesign)<<std::endl;   
    return ostr;
 }
-
+RpcReadoutElement::~RpcReadoutElement() = default;
 RpcReadoutElement::RpcReadoutElement(defineArgs&& args)
     : MuonReadoutElement(std::move(args)),
       m_pars{std::move(args)} {

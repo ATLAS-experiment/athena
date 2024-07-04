@@ -1,11 +1,16 @@
 /*
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-#include <EventPrimitives/EventPrimitivesToStringConverter.h>
-#include <GeoPrimitives/GeoPrimitivesHelpers.h>
 #include <MuonReadoutGeometryR4/sTgcReadoutElement.h>
+
+#include <ActsGeoUtils/SurfaceBoundSet.h>
 #include <AthenaBaseComps/AthCheckMacros.h>
 #include <GaudiKernel/SystemOfUnits.h>
+
+#ifndef SIMULATIONBASE
+#   include "Acts/Surfaces/TrapezoidBounds.hpp"
+#   include "Acts/Surfaces/Surface.hpp"
+#endif
 
 using namespace ActsTrk;
 
@@ -17,7 +22,7 @@ std::ostream& operator<<(std::ostream& ostr, const parameterBook& pars) {
   if (pars.padDesign) ostr<<"Pads: "<<(*pars.padDesign)<<std::endl;   
   return ostr;
 }
-
+sTgcReadoutElement::~sTgcReadoutElement() = default;
 sTgcReadoutElement::sTgcReadoutElement(defineArgs&& args)
     : MuonReadoutElement(std::move(args)),
       m_pars{std::move(args)} {

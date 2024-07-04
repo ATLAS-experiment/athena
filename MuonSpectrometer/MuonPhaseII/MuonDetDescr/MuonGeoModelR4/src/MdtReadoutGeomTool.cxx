@@ -18,6 +18,13 @@
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
 #include <RDBAccessSvc/IRDBRecord.h>
 
+
+#include <ActsGeoUtils/SurfaceBoundSet.h>
+#ifndef SIMULATIONBASE
+#   include "Acts/Surfaces/TrapezoidBounds.hpp"
+#   include "Acts/Surfaces/LineBounds.hpp"
+#endif
+
 using namespace CxxUtils;
 using namespace ActsTrk;
 

@@ -3,10 +3,22 @@
 */
 
 #include <MuonReadoutGeometryR4/TgcReadoutElement.h>
+
+
+#include <ActsGeoUtils/SurfaceBoundSet.h>
 #include <AthenaBaseComps/AthCheckMacros.h>
 #include <GaudiKernel/SystemOfUnits.h>
 #include <optional>
+
+#ifndef SIMULATIONBASE
+#   include "Acts/Surfaces/TrapezoidBounds.hpp"
+#   include "Acts/Surfaces/Surface.hpp"
+
+#endif
+
+
 using namespace ActsTrk;
+
 
 namespace MuonGMR4 {
 using parameterBook = TgcReadoutElement::parameterBook;
@@ -18,7 +30,7 @@ std::ostream& operator<<(std::ostream& ostr, const parameterBook& pars) {
    ostr<<"longWidth: "<<pars.halfWidthLong<<" --- ";
    return ostr;
 }
-
+TgcReadoutElement::~TgcReadoutElement() = default;
 TgcReadoutElement::TgcReadoutElement(defineArgs&& args)
     : MuonReadoutElement(std::move(args)),
       m_pars{std::move(args)} {

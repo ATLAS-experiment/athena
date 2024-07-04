@@ -1,9 +1,14 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include "MuonReadoutGeometryR4/MuonReadoutElement.h"
 #include "MuonReadoutGeometryR4/MuonChamber.h"
+#include "ActsGeoUtils/TransformCache.h"
+#include "ActsGeoUtils/SurfaceCache.h"
 #ifndef SIMULATIONBASE
+#    include "Acts/Surfaces/LineBounds.hpp"
+#    include "Acts/Surfaces/PlanarBounds.hpp"
+#    include "Acts/Geometry/GeometryContext.hpp"
 #    include "Acts/Surfaces/StrawSurface.hpp"
 #    include "Acts/Surfaces/PlaneSurface.hpp"
 #endif
@@ -14,7 +19,7 @@ namespace {
     static const Amg::Transform3D dummyTrans{Amg::Transform3D::Identity()};
 }
 namespace MuonGMR4 {
-
+MuonReadoutElement::~MuonReadoutElement() = default;
 MuonReadoutElement::MuonReadoutElement(defineArgs&& args)
     : GeoVDetectorElement(args.physVol),
       AthMessaging("MuonReadoutElement"),

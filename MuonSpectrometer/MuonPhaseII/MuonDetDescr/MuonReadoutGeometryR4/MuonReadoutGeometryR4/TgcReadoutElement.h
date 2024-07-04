@@ -8,9 +8,13 @@
 #include <MuonReadoutGeometryR4/WireGroupDesign.h>
 #include <MuonReadoutGeometryR4/RadialStripDesign.h>
 #include <MuonReadoutGeometryR4/StripLayer.h>
-#ifndef SIMULATIONBASE
-#   include "Acts/Surfaces/TrapezoidBounds.hpp"
-#endif
+
+
+
+namespace Acts{
+    class Surface;
+    class TrapezoidBounds;
+}
 namespace MuonGMR4 {
 
 class TgcReadoutElement : public MuonReadoutElement {
@@ -34,7 +38,7 @@ class TgcReadoutElement : public MuonReadoutElement {
         std::array<StripLayerPtr, 6> sensorLayouts{};
 #ifndef SIMULATIONBASE
         /// Set of surface boundaries
-        ActsTrk::SurfaceBoundSetPtr<Acts::TrapezoidBounds> layerBounds{};
+        ActsTrk::SurfaceBoundSetPtr<Acts::TrapezoidBounds> layerBounds;
 #endif
     };
 
@@ -42,6 +46,7 @@ class TgcReadoutElement : public MuonReadoutElement {
                         public parameterBook {};
 
     TgcReadoutElement(defineArgs&& args);
+    virtual ~TgcReadoutElement();
 
     const parameterBook& getParameters() const;
     /// Overload from the ActsTrk::IDetectorElement

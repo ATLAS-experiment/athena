@@ -8,12 +8,12 @@
 #include <RDBAccessSvc/IRDBAccessSvc.h>
 #include <RDBAccessSvc/IRDBRecordset.h>
 
-#include <EventPrimitives/EventPrimitivesToStringConverter.h>
 #include <GeoPrimitives/GeoPrimitivesHelpers.h>
 #include <GeoModelKernel/GeoFullPhysVol.h>
 #include <GeoModelKernel/GeoPhysVol.h>
 #include <GeoModelKernel/GeoTrd.h>
 #include <GeoModelKernel/GeoSimplePolygonBrep.h>
+#include <ActsGeoUtils/SurfaceBoundSet.h>
 #include<CxxUtils/bitscan.h>
 
 #include <GeoModelRead/ReadGeoModel.h>
@@ -21,6 +21,10 @@
 #include <MuonReadoutGeometryR4/sTgcReadoutElement.h>
 
 #include <RDBAccessSvc/IRDBRecord.h>
+
+#ifndef SIMULATIONBASE
+#   include "Acts/Surfaces/TrapezoidBounds.hpp"
+#endif
 
 using namespace CxxUtils;
 using namespace ActsTrk;

@@ -46,8 +46,6 @@ namespace ActsTrk {
             };
             std::set<std::shared_ptr<BoundType>, BoundComparer> m_store{};
     };
-    /// Aberivation to create a new SurfaceBoundSetPtr
-    template<class BoundType> using SurfaceBoundSetPtr = std::shared_ptr<SurfaceBoundSet<BoundType>>;
 }
 #endif
 #endif

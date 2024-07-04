@@ -16,11 +16,14 @@
 */
 
 #include <MuonReadoutGeometryR4/MuonReadoutElement.h>
-#include <Acts/Geometry/TrapezoidVolumeBounds.hpp>
-#include <Acts/Geometry/Volume.hpp>
+
 
 #include <set>
 
+namespace Acts {
+    class TrapezoidVolumeBounds;
+    class Volume;
+}
 namespace MuonGMR4{
     class MuonChamber;
 }
