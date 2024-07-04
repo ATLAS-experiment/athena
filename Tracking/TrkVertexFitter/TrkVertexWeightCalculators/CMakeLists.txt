@@ -14,6 +14,7 @@ atlas_add_component( TrkVertexWeightCalculators
                      LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps GeoPrimitives xAODTracking GaudiKernel
                      TrkVertexFitterInterfaces GeneratorObjects TrkParameters VxVertex TrkNeuralNetworkUtilsLib
                      xAODJet ParticlesInConeToolsLib AsgTools MVAUtils AnaAlgorithmLib PhotonVertexSelectionLib PATCoreLib
+                     AsgDataHandlesLib
                      PRIVATE_LINK_LIBRARIES PathResolver PhotonVertexSelectionLib TrkParameters)
 
 # Install files from the package
