@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //             Interface for jFEXDBCondData - Tool to read the COOL DB for jFEX
@@ -58,8 +58,8 @@ class jFEXDBCondData
         void set_PUThrHighHadTrex(int PileUpThresholdHighHadTrex);
         void set_PUThrLowFcal(int PileUpThresholdLowFcal);
         void set_PUThrHighFcal(int PileUpThresholdHighFcal);
-        void set_NoiseCuts(std::unordered_map< uint16_t, std::array<uint16_t,4> > NoiseCuts);
-        void set_PileUpValues(std::unordered_map< uint16_t, std::array<uint16_t,4> > PileUpWeight);
+        void set_NoiseCuts(const std::unordered_map< uint16_t, std::array<uint16_t,4> >& NoiseCuts);
+        void set_PileUpValues(const std::unordered_map< uint16_t, std::array<uint16_t,4> >& PileUpWeight);
         void set_sendDefaults(bool sendDefaults);
         
         
