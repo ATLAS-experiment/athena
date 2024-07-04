@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -42,15 +42,15 @@ class VP1LightRun
 
   std::vector<std::string> m_initialvp1files;
   std::string m_initialCruiseMode;//"NONE", "EVENT", "TAB", "BOTH".
-  unsigned m_initialCruiseSeconds;
+  unsigned m_initialCruiseSeconds{0};
 
   bool m_noGui;//For testing job-options in RTT
 
   // Properties for multiple input files (mf)
-  bool m_mfOn;                        // Flag to turn multiple files ON/OFF. Default OFF
+  bool m_mfOn{false};                 // Flag to turn multiple files ON/OFF. Default OFF
   std::string m_mfSourceDir;          // Directory to take event files from
   std::string m_mfLocalCopyDir;       // Directory to keep local copies of processed events. Default "."
-  int m_mfLimit;                      // Maximum number of local copies to keep
+  int m_mfLimit{0};                   // Maximum number of local copies to keep
   std::vector<std::string> m_mfAvailableLocalInputDirectories;//Will only be used if sourcedir is set and local
 };
 
