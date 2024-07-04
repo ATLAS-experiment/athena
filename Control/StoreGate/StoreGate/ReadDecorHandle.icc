@@ -243,7 +243,7 @@ SG::auxid_t ReadDecorHandle<T, D>::auxid() const
  */
 template <class T, class D>
 inline
-std::string ReadDecorHandle<T, D>::decorKey() const
+const std::string& ReadDecorHandle<T, D>::decorKey() const
 {
   return m_decorKey;
 }
