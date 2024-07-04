@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PERSISTENTDATAMODELTPCNV_DATAHEADER_P6_H
@@ -120,12 +120,12 @@ public:
   
 private:
    /// common DB entry index used by all short DH elements
-   unsigned                     m_commonDbIndex;
-   unsigned long long           m_commonOID2;
+   unsigned                     m_commonDbIndex{};
+   unsigned long long           m_commonOID2{};
   
    std::vector<int>             m_shortElements;
    std::vector<FullElement>     m_fullElements;
-   unsigned int                 m_provenanceSize;
+   unsigned int                 m_provenanceSize{};
 
    std::string                  m_dhFormToken;
 };
