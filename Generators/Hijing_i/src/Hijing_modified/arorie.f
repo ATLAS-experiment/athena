@@ -23,6 +23,10 @@ C
              BET=ACOS(CBET)
      
 C.....MINIMIZE PT1-SQUARED PLUS PT3-SQUARED.....
+             pt1 = 0            ! sss --- uninitialized variables
+             pt3 = 0
+             pz1 = 0
+             pz3 = 0
              IF(P1.GE.P3) THEN
           PSI=.5*ULANGL(P1**2+P3**2*COS(2.*BET),-P3**2*SIN(2.*BET))
           PT1=P1*SIN(PSI)

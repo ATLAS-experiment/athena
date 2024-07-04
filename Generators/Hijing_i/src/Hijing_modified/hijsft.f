@@ -86,6 +86,12 @@ C
        DPKC12=0.0
        DPKC21=0.0
        DPKC22=0.0
+       phi1 = 0                 ! sss --- uninitialized variables
+       phi2 = 0
+       ptjet = 0
+       ppjet = 0
+       i_sng = 0
+       pkc = 0
        IF(NFP(JP,10).EQ.1.OR.NFT(JT,10).EQ.1) THEN
           IF(NFP(JP,10).EQ.1) THEN
              PHI1=ULANGL(PP(JP,10),PP(JP,11))
@@ -266,6 +272,7 @@ C*****give some PT kick to the two exited strings******************
 20       SWPTN=4.0*(MAX(AMP0,AMT0)**2+MAX(PTP02,PTT02))
        SWPTD=4.0*(MAX(DPM0,DTM0)**2+MAX(PTP02,PTT02))
        SWPTX=4.0*(AMX**2+MAX(PTP02,PTT02))
+       pkcmx = 0                ! sss --- uninitialized variable
        IF(SW.LE.SWPTN) THEN
               PKCMX=0.0
        ELSE IF(SW.GT.SWPTN .AND. SW.LE.SWPTD

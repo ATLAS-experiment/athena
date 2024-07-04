@@ -474,6 +474,10 @@ C               ********At large impact parameter, there maybe no
 C                       interaction at all. For NN collision
 C                       repeat the event until interaction happens
 C
+       jthard = 0               ! sss --- uninitialized variables
+       jphard = 0
+       jpmini = 0
+       jtmini = 0
        IF(IHPR2(3).NE.0) THEN
           NHARD=1+INT(ATL_RAN(NSEED)*(NCOLT-1)+0.5)
           NHARD=MIN(NHARD,NCOLT)
