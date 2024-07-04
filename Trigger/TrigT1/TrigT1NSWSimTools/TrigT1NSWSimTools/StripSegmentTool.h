@@ -6,7 +6,6 @@
 #define STRIPSEGMENTTOOL_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "AthenaKernel/IAtRndmGenSvc.h"
 #include "CLHEP/Random/RandFlat.h"
 #include "CLHEP/Random/RandGauss.h"
 #include "CxxUtils/checker_macros.h"
