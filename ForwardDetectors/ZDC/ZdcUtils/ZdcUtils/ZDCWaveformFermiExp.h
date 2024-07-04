@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ZDCUTILS_ZDCWAVEFORMFERMIEXP_H
@@ -11,7 +11,7 @@
 // The Fermi*negative exponential that we have used since the start of Run 2 to
 //   parameterize ZDC pulses
 //
-class ZDCWaveformFermiExp : virtual public ZDCWaveformBase
+class ZDCWaveformFermiExp : public ZDCWaveformBase
 {
 protected:
   double doEvaluate(double time) const override;
@@ -19,9 +19,7 @@ protected:
   virtual std::string name() const override {return "FermiExp";}
 
 public:
-  ZDCWaveformFermiExp() : 
-    ZDCWaveformBase("default", 1, 6, std::vector<std::string>(), std::vector<double>())
-  {}
+  ZDCWaveformFermiExp() = delete;
 
   ZDCWaveformFermiExp(const std::string& tag, double initialTauRise, double initialTauFall) :
     ZDCWaveformBase(tag, initialTauRise, initialTauFall, std::vector<std::string>(), std::vector<double>())
@@ -36,7 +34,7 @@ public:
 //   to describe a small (few %) long tail seen in pulses in the Run 3 data
 //
 //
-class ZDCWaveformFermiExpTail : virtual public ZDCWaveformFermiExp
+class ZDCWaveformFermiExpTail : public ZDCWaveformFermiExp
 {
   double doEvaluate(double time) const override
   {
@@ -48,10 +46,7 @@ class ZDCWaveformFermiExpTail : virtual public ZDCWaveformFermiExp
   virtual std::string name() const override {return "FermiExpTail";}
 
 public:
-  ZDCWaveformFermiExpTail() : ZDCWaveformFermiExp()
-  {
-    setAddtlShapeParameters(std::vector<std::string>({"tailFrac"}), std::vector<double>({0}));
-  }
+  ZDCWaveformFermiExpTail() = delete;
 
   ZDCWaveformFermiExpTail(const std::string& tag, double initialTauRise, double initialTauFall, double tailShiftFrac) :
     ZDCWaveformFermiExp(tag, initialTauRise, initialTauFall)
@@ -59,8 +54,6 @@ public:
     double tailShiftScaled = tailShiftFrac*ZDCWaveformFermiExp::doEvaluate(0);
     setAddtlShapeParameters(std::vector<std::string>({"tailFrac"}), std::vector<double>({tailShiftScaled}));
   }
-
-  ZDCWaveformFermiExpTail(const ZDCWaveformFermiExpTail& instance) : ZDCWaveformBase(static_cast<const ZDCWaveformBase&>(instance)), ZDCWaveformFermiExp(static_cast<const ZDCWaveformFermiExp&>(instance)) {}
 
   void setTailParameter(double tailShiftFrac) {
     double tailShiftScaled = tailShiftFrac*ZDCWaveformFermiExp::doEvaluate(0);
