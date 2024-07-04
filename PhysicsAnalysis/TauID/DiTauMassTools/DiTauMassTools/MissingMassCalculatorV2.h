@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -334,6 +334,9 @@ public:
   ~MissingMassCalculatorV2() ;
 
   MissingMassCalculatorV2(MMCCalibrationSetV2::e aset, std::string m_paramFilePath) ;
+
+  MissingMassCalculatorV2 (const MissingMassCalculatorV2&) = delete;
+  MissingMassCalculatorV2& operator= (const MissingMassCalculatorV2&) = delete;
 
   MissingMassInput preparedInput;
   MissingMassOutput OutputInfo;

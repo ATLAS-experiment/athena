@@ -210,14 +210,14 @@ void MissingMassProb::setParamRatio(int tau, int tautype) {
 }
 
 // Default Constructor
-MissingMassProb::MissingMassProb(MMCCalibrationSetV2::e aset, std::string m_paramFilePath) {
+MissingMassProb::MissingMassProb(MMCCalibrationSetV2::e aset, const std::string& paramFilePath) {
   m_mmcCalibrationSet = aset;
   m_allowUseHT = false;
   m_UseHT = false;
 
   m_fParams = NULL;
-  if (!m_paramFilePath.empty()){
-     std::string total_path = "DiTauMassTools/"+m_paramFilePath;
+  if (!paramFilePath.empty()){
+     std::string total_path = "DiTauMassTools/"+paramFilePath;
      m_fParams = TFile::Open( (const char*) PathResolverFindCalibFile(total_path).c_str() ,"READ");
   }
   if (aset == MMCCalibrationSetV2::MMC2019) {
