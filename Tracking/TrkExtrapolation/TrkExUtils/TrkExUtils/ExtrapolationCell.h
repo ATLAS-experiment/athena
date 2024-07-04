@@ -335,6 +335,7 @@ public:
     , sensitiveCurvilinear(false)
     , destinationCurvilinear(false)
     , extrapolationConfiguration(econfig)
+    , time(0)
     , eLoss(nullptr)
     , zOaTrX(0.)
     , zX(0.)
