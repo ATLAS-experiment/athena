@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigCompositeUtils_ChainNameParser_h
@@ -21,9 +21,9 @@ namespace ChainNameParser {
         /// The multiplicity of the leg (number of objects returned by the leg)
         std::size_t multiplicity{};
         /// The HLT signature responsible for creating the object
-        std::string signature{""};
+        std::string signature{};
         /// The threshold on the object
-        int threshold;
+        int threshold{-1};
         /// All the parts of the leg
         std::vector<std::string> legParts;
     };
