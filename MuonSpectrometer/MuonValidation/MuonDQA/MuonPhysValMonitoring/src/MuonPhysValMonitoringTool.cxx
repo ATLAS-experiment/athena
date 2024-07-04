@@ -746,17 +746,17 @@ namespace MuonPhysValMonitoring {
                 for (const auto& L1MuonItem : m_L1MuonItems) {
                     m_vRecoMuons_EffDen = m_vRecoMuons_EffDen_CB;
                     m_SelectedAuthor = 1;
-                    float treshold = 0.;
-                    if (L1MuonItem == "L1_MU4") treshold = 4000;
-                    else if (L1MuonItem == "L1_MU6") treshold = 6000;
-                    else if (L1MuonItem == "L1_MU10") treshold = 10000;
-                    else if (L1MuonItem == "L1_MU11") treshold = 11000;
-                    else if (L1MuonItem == "L1_MU15") treshold = 15000;
-                    else if (L1MuonItem == "L1_MU20") treshold = 20000;
+                    float threshold = 0.;
+                    if (L1MuonItem == "L1_MU4") threshold = 4000;
+                    else if (L1MuonItem == "L1_MU6") threshold = 6000;
+                    else if (L1MuonItem == "L1_MU10") threshold = 10000;
+                    else if (L1MuonItem == "L1_MU11") threshold = 11000;
+                    else if (L1MuonItem == "L1_MU15") threshold = 15000;
+                    else if (L1MuonItem == "L1_MU20") threshold = 20000;
                     for (const auto TrigL1mu : *L1TrigMuons) {
                         for (unsigned int j = 0; j < m_selectMuonCategories.size(); j++) {
                             if (m_selectMuonCategories[j] == ALL) {
-                                if ((TrigL1mu->thrValue()) >= treshold)
+                                if ((TrigL1mu->thrValue()) >= threshold)
                                     m_TriggerMuonValidationPlots[j]->fillFeatPlots(*TrigL1mu, L1MuonItem);
                             }  // if categ=ALL
                         }      // categories
@@ -768,7 +768,7 @@ namespace MuonPhysValMonitoring {
                             }
                         }
                         for (const auto TrigL1mu : *L1TrigMuons) {
-                            if (((TrigL1mu->thrValue()) >= treshold) &&
+                            if (((TrigL1mu->thrValue()) >= threshold) &&
                                 (sqrt(pow(m_vRecoMuons_EffDen.at(k)->eta() - TrigL1mu->eta(), 2.) +
                                       pow(m_vRecoMuons_EffDen.at(k)->phi() - TrigL1mu->phi(), 2.)) < 0.2)) {
                                 ATH_MSG_DEBUG("   $$$ match Reco_EffDen "
@@ -811,17 +811,17 @@ namespace MuonPhysValMonitoring {
                         m_vRecoMuons_EffDen = m_vRecoMuons_EffDen_MS;
                         m_SelectedAuthor = 5;
                     }
-                    float treshold = 0.;
-                    if (m_L1Seed[m] == "L1_MU4") treshold = 4000;
-                    if (m_L1Seed[m] == "L1_MU6") treshold = 6000;
-                    if (m_L1Seed[m] == "L1_MU10") treshold = 10000;
-                    if (m_L1Seed[m] == "L1_MU11") treshold = 11000;
-                    if (m_L1Seed[m] == "L1_MU15") treshold = 15000;
-                    if (m_L1Seed[m] == "L1_MU20") treshold = 20000;
+                    float threshold = 0.;
+                    if (m_L1Seed[m] == "L1_MU4") threshold = 4000;
+                    if (m_L1Seed[m] == "L1_MU6") threshold = 6000;
+                    if (m_L1Seed[m] == "L1_MU10") threshold = 10000;
+                    if (m_L1Seed[m] == "L1_MU11") threshold = 11000;
+                    if (m_L1Seed[m] == "L1_MU15") threshold = 15000;
+                    if (m_L1Seed[m] == "L1_MU20") threshold = 20000;
                     for (unsigned int k = 0; k < m_vRecoMuons_EffDen.size(); k++) {
                         bool break_flag = false;
                         for (const auto TrigL1mu : *L1TrigMuons) {
-                            if (((TrigL1mu->thrValue()) >= treshold) &&
+                            if (((TrigL1mu->thrValue()) >= threshold) &&
                                 (sqrt(pow(m_vRecoMuons_EffDen.at(k)->eta() - TrigL1mu->eta(), 2.) +
                                       pow(m_vRecoMuons_EffDen.at(k)->phi() - TrigL1mu->phi(), 2.)) < 0.2)) {
                                 for (unsigned int j = 0; j < m_selectMuonCategories.size(); j++) {
@@ -1468,14 +1468,14 @@ namespace MuonPhysValMonitoring {
 
 
         if (histname.find("trigger_L1_pt") != std::string::npos) {  // if (histname=="Muons_All_trigger_L1_pt"){
-            hist->SetTitle("L1Trigger Muons pt treshold");
-            hist->GetXaxis()->SetTitle("L1Trigger Muons pt treshold [GeV]");
+            hist->SetTitle("L1Trigger Muons pt threshold");
+            hist->GetXaxis()->SetTitle("L1Trigger Muons pt threshold [GeV]");
             hist->GetXaxis()->Set(30, -0.5, 29.5);
         }
         if (histname.find("trigger_L1_eta_pt") != std::string::npos) {  // if (histname=="Muons_All_trigger_L1_eta_pt") {
-            hist->SetTitle("L1Trigger Muons pt treshold vs eta");
+            hist->SetTitle("L1Trigger Muons pt threshold vs eta");
             hist->GetYaxis()->Set(90, -0.5, 29.5);
-            hist->GetYaxis()->SetTitle("L1Trigger Muons pt treshold [GeV]");
+            hist->GetYaxis()->SetTitle("L1Trigger Muons pt threshold [GeV]");
         }
 
         if (histname.find("trigger") != std::string::npos &&
