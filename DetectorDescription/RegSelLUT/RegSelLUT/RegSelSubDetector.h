@@ -1,7 +1,7 @@
 // emacs: this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**************************************************************************
@@ -45,7 +45,7 @@ class RegSelSubDetector : public ZRObject, public RegSelName {
   
 public:
   
-  RegSelSubDetector() : ZRObject(0,0,0,0), m_mapped(false) { } 
+  RegSelSubDetector() : ZRObject(0,0,0,0), m_ID(0),  m_Nlayers(0), m_mapped(false) { }
 
   RegSelSubDetector(int ID, int Nlayers, const std::string& s) : 
     ZRObject(0,0,0,0), RegSelName(s), m_ID(ID), m_Nlayers(Nlayers), m_mapped(false)   
@@ -63,14 +63,14 @@ public:
   
   RegSelSubDetector(double rmin, double rmax, 
 		    double zmin, double zmax) :
-    ZRObject(rmin, rmax, zmin, zmax), m_Nlayers(0), m_mapped(false)   
+    ZRObject(rmin, rmax, zmin, zmax), m_ID(0), m_Nlayers(0), m_mapped(false)
   {  } // m_layer.resize(m_Nlayers); } 
   
 
   RegSelSubDetector(double rmin, double rmax, 
 		    double zmin, double zmax, 
 		    const std::string& s) :
-    ZRObject(rmin, rmax, zmin, zmax), RegSelName(s), m_Nlayers(0), m_mapped(false) 
+    ZRObject(rmin, rmax, zmin, zmax), RegSelName(s), m_ID(0), m_Nlayers(0), m_mapped(false)
   { } 
   
 
