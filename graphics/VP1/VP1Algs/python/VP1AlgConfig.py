@@ -311,11 +311,11 @@ def SetupVP1():
             AtlasExtrapolationEngine = cfg.getPrimaryAndMerge(AtlasExtrapolationEngineCfg(flags))
             cfg.addPublicTool(AtlasExtrapolationEngine)
 
-        if flags.Input.isMC:
+        if flags.Input.isMC and "xAOD::TruthEventContainer#TruthEvents" not in flags.Input.TypedCollections:
             # AOD2xAOD Truth conversion
             from xAODTruthCnv.xAODTruthCnvConfig import GEN_AOD2xAODCfg
-
             cfg.merge(GEN_AOD2xAODCfg(flags))
+
     _logger.verbose("+ ... Main services done")
 
     _logger.verbose("+ About to setup geometry")
