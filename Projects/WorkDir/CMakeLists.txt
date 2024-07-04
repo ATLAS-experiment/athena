@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 # Project file for building a selected set of packages against an
 # installed ATLAS release/nightly.
@@ -140,6 +140,14 @@ if( CPPCHECK_FOUND )
    # Don't warn about those.
    list( APPEND CMAKE_CPPCHECK_DEFAULT "--suppress=assignmentInAssert:*_test.*" )
    list( APPEND CMAKE_CPPCHECK_DEFAULT "--suppress=assertWithSideEffect:*_test.*" )
+   # Do not warn about unknown marcros.
+   list( APPEND CMAKE_CPPCHECK_DEFAULT "--suppress=unknownMacro" )
+   # Do not warn about same-named functions in class hierarchies.
+   list( APPEND CMAKE_CPPCHECK_DEFAULT "--suppress=duplInheritedMember" )
+   # Do not warn about syntax errors (if it compiles it is likely a bug in cppcheck)
+   list( APPEND CMAKE_CPPCHECK_DEFAULT "--suppress=syntaxError" )
+   # Disable warning about too complex files being ignored in check.
+   list( APPEND CMAKE_CPPCHECK_DEFAULT "--suppress=normalCheckLevelMaxBranches" )
    # Allow conditionalizing code on cppcheck.
    list( APPEND CMAKE_CPPCHECK_DEFAULT "-D__CPPCHECK__" )
    # Set the cache variable(s) that CMake uses to decide how to use cppcheck.
