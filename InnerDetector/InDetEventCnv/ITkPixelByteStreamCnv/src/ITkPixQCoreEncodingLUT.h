@@ -30,13 +30,21 @@ namespace ITkPixEncoding{
     one_bit(uint32_t v){
       return v!=0;
     }
-    
-    constexpr std::array<uint32_t, 8>
-    prepByte(uint32_t word){
-      std::array<uint32_t,8> b;
+
+    // nb. If we use std::array here instead of a C array,
+    // then compilation fails with gcc13 in the dbg build
+    // because the compile-time execution of encode() then takes
+    // too many steps.
+    constexpr void prepByte(uint32_t word, uint32_t b[8]){
       for(int i = 0 ;i<8;i++) {
         b[i] =  ((word >> (2*i)) & 0x1) << 1 | ((word >> (2*i+1)) & 0x1);
       }
+    }
+
+    std::array<uint32_t, 8> prepByte(uint32_t word)
+    {
+      std::array<uint32_t, 8> b;
+      prepByte(word, b.data());
       return b;
     }
     
@@ -44,7 +52,8 @@ namespace ITkPixEncoding{
     //QCore encoding function, taken from Matthias Wittgen and Carlos
     uint32_t 
     constexpr encode(uint32_t decoded, uint32_t &encoded) {
-        const auto & b = prepByte(decoded);
+        uint32_t b[8];
+        prepByte(decoded, b);
         //
         uint32_t S1 = (one_bit(b[0] | b[1] | b[2] | b[3]) << 1) | one_bit(b[4] | b[5] | b[6] | b[7]);
         uint32_t S2t = (one_bit(b[0] | b[1]) << 1) | one_bit(b[2] | b[3]);
