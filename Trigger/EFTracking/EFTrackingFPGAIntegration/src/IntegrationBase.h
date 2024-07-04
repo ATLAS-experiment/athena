@@ -9,8 +9,8 @@
  * @brief The base class for EFTracking 2nd demonstrator integration
  */
 
-#ifndef INTEGRATION_BASE_H
-#define INTEGRATION_BASE_H
+#ifndef EFTRACKING_FPGA_INTEGRATION_INTEGRATION_BASE_H
+#define EFTRACKING_FPGA_INTEGRATION_INTEGRATION_BASE_H
 
 // Athena include
 #include "AthenaBaseComps/AthAlgorithm.h"
@@ -68,4 +68,4 @@ protected:
     cl::Program m_program;    //!< Program object containing the kernel
 };
 
-#endif // INTEGRATION_BASE_H
+#endif // EFTRACKING_FPGA_INTEGRATION_INTEGRATION_BASE_H
