@@ -13,6 +13,7 @@ ActsTrk::ProtoTrackCreationAndFitAlg::ProtoTrackCreationAndFitAlg (const std::st
 
 StatusCode ActsTrk::ProtoTrackCreationAndFitAlg::initialize() {
   ATH_CHECK(m_trackContainerKey.initialize()); 
+  ATH_CHECK(m_protoTrackCollectionKey.initialize(SG::AllowEmpty));
   ATH_CHECK(m_PixelClusters.initialize()); 
   ATH_CHECK(m_StripClusters.initialize()); 
   ATH_CHECK(m_tracksBackendHandlesHelper.initialize(ActsTrk::prefixFromTrackContainerName(m_trackContainerKey.key())));
@@ -47,13 +48,12 @@ StatusCode ActsTrk::ProtoTrackCreationAndFitAlg::execute(const EventContext & ct
   auto trackContainerHandle = SG::makeHandle(m_trackContainerKey, ctx);
 
   // call the user-provided track finder 
-  std::vector<ActsTrk::ProtoTrack> myProtoTracks; 
+  auto myProtoTracks = std::make_unique<ActsTrk::ProtoTrackCollection>(); 
   ATH_CHECK(m_patternBuilder->findProtoTracks(ctx,
                   *thePixelClusters,
                   *theStripClusters,
-                  myProtoTracks )); 
-  ATH_MSG_INFO("I received " <<myProtoTracks.size()<<" proto-tracks");
-  
+                  *myProtoTracks )); 
+  ATH_MSG_INFO("I received " << myProtoTracks->size() << " proto-tracks");
 
   /// ----------------------------------------------------------
   /// The following block has nothing to do with EF tracking 
@@ -110,7 +110,7 @@ StatusCode ActsTrk::ProtoTrackCreationAndFitAlg::execute(const EventContext & ct
   ActsTrk::MutableTrackContainer trackContainer;
 
   // now we fit each of the proto tracks
-  for (auto & proto : myProtoTracks){
+  for (auto & proto : *myProtoTracks){
     auto res = m_actsFitter->fit(ctx, proto.measurements,*proto.parameters, 
 											           m_trackingGeometryTool->getGeometryContext(ctx).context(),
                                  m_extrapolationTool->getMagneticFieldContext(ctx),
@@ -128,11 +128,25 @@ StatusCode ActsTrk::ProtoTrackCreationAndFitAlg::execute(const EventContext & ct
     }
     auto destProxy = trackContainer.getTrack(trackContainer.addTrack());
     destProxy.copyFrom(trackProxy, true); // make sure we copy track states!
+    if ( m_copyParametersFromFit ) {
+      ATH_MSG_VERBOSE("original " << proto.parameters->parameters());
+      proto.parameters = 
+      std::make_unique<Acts::BoundTrackParameters>( trackProxy.referenceSurface().getSharedPtr(), 
+                                                    trackProxy.parameters(), 
+                                                    trackProxy.covariance(),
+                                                    trackProxy.particleHypothesis());
+      ATH_MSG_VERBOSE("corrected" << proto.parameters->parameters());
+    }
+
   }
   std::unique_ptr<ActsTrk::TrackContainer> constTracksContainer = m_tracksBackendHandlesHelper.moveToConst(std::move(trackContainer), 
     m_trackingGeometryTool->getGeometryContext(ctx).context(), ctx);  
   ATH_CHECK(trackContainerHandle.record(std::move(constTracksContainer)));
 
+  if (not m_protoTrackCollectionKey.empty()) {
+    auto handle =  SG::makeHandle(m_protoTrackCollectionKey, ctx);
+    ATH_CHECK(handle.record(std::move(myProtoTracks)));
+  }
 
   return StatusCode::SUCCESS;
 }

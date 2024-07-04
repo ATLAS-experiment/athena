@@ -66,6 +66,8 @@ def ActsProtoTrackReportingAlgCfg(flags,
                                   name: str = "ActsProtoTrackReportingAlg",
                                   **kwargs) -> ComponentAccumulator: 
     acc = ComponentAccumulator() 
+    kwargs.setdefault("ProtoTracksLocation", "ProtoTracksCollection")
+    kwargs.setdefault("copyParametersFromFit", True)
     acc.addEventAlgo(CompFactory.ActsTrk.ProtoTrackReportingAlg(name,**kwargs),
                      primary=True)
     return acc
