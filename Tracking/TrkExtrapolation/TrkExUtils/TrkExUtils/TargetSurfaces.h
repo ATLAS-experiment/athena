@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -210,11 +210,11 @@ private:
                       const Amg::Vector3D& position,
                       const Amg::Vector3D& direction);
 
-  bool m_orderTrue; // neutral(true)/charged(false)
-  bool m_flipDirection;
-  bool m_absDist;
-  bool m_debugMode;
-  float m_tolerance;
+  bool m_orderTrue{true}; // neutral(true)/charged(false)
+  bool m_flipDirection{false};
+  bool m_absDist{false};
+  bool m_debugMode{false};
+  float m_tolerance{0.001};
   TargetSurfaceVector
     m_baseSurfaces; // surfaces to be followed all along the path;
   std::vector<TargetSurfaceVector>
@@ -223,14 +223,14 @@ private:
 
   Amg::Vector3D m_probePos;
   Amg::Vector3D m_probeDir;
-  unsigned int m_numAlongPath;
-  int m_nextSf;
-  double m_distanceToNext;
-  double m_lastStep;
-  double m_flipDistance;
+  unsigned int m_numAlongPath{0};
+  int m_nextSf{-1};
+  double m_distanceToNext{1e6};
+  double m_lastStep{0};
+  double m_flipDistance{0};
 
-  const Trk::TrackingVolume* m_currentFrame;
-  const Trk::TrackingVolume* m_currentDense;
+  const Trk::TrackingVolume* m_currentFrame{};
+  const Trk::TrackingVolume* m_currentDense{};
 };
 
 inline double
