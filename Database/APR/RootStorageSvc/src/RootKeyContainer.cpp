@@ -34,6 +34,8 @@
 
 #include "RootDataPtr.h"
 
+#include <algorithm>
+
 using namespace pool;
 
 RootKeyContainer::RootKeyContainer() :
@@ -339,8 +341,34 @@ DbStatus RootKeyContainer::open(DbDatabase&           dbH,
 {
   DbPrint log( dir_nam );
   m_name = dir_nam;
+
+  // Sanitise the name by replacing '/' with '_' (excluding the slash separating
+  // the container name from the object name)
+  std::string sanitisedName(dir_nam);
+  std::size_t beg = sanitisedName.find_first_of('(');
+  std::size_t end = sanitisedName.find_first_of(')');
+  std::string sanitisedObjName = sanitisedName.substr(beg + 1, end - beg - 1);
+
+  if (sanitisedObjName.starts_with("/")) {
+      std::replace(sanitisedObjName.begin(), sanitisedObjName.end(), '/', '_');
+  }
+  if (sanitisedObjName.find("//") != std::string::npos) {
+      std::string from = "//";
+      std::string to = "/_";
+      size_t start_pos = sanitisedObjName.find(from);
+      sanitisedObjName.replace(start_pos, from.length(), to);
+      std::replace(sanitisedObjName.begin() + start_pos + 1,
+                   sanitisedObjName.end(), '/', '_');
+  }
+  sanitisedName.replace(beg + 1, sanitisedObjName.length(), sanitisedObjName);
+
+  log << DbPrintLvl::Debug
+      << "Opening RootKeyContainer, mode=" << accessMode(mode)
+      << DbPrint::endmsg;
+
   if ( dbH.isValid() && dir_nam.length() > 0 )    {
-    std::string nam = (dir_nam[0]=='/') ? dir_nam.substr(1) : dir_nam;
+    std::string nam = sanitisedName.starts_with('/') ? sanitisedName.substr(1)
+                                                     : sanitisedName;
     size_t idx1     = std::string::npos, idx2 = nam.find('/',1);
     TDirectory::TContext dirCtxt(0);
     IDbDatabase* idb = dbH.info();
@@ -354,7 +382,7 @@ DbStatus RootKeyContainer::open(DbDatabase&           dbH,
       std::string s = nam.substr(idx1+1, idx2-idx1-1); 
       m_dir->cd();
       TDirectory* dir = (TDirectory*)m_dir->Get(s.c_str());
-      if ( 0==dir && mode&pool::CREATE )    {
+      if ( 0==dir && mode&pool::CREATE && !s.empty() ) {
         dir = m_dir->mkdir(s.c_str());
       }
       else if ( 0==dir ) {
