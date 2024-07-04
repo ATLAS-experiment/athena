@@ -3044,7 +3044,7 @@ void MissingMassCalculatorV2::FinalizeSettings(const xAOD::IParticle *part1,
     Error("DiTauMassTools", "MMCCalibrationSet has not been set !. Please use "
                             "fMMC.SetCalibrationSet(MMCCalibrationSetV2::MMC2019)"
                             ". Abort now. ");
-    throw; // stop job
+    std::abort();
   }
   //----------- Re-ordering input info, to make sure there is no dependence of
   // results on input order

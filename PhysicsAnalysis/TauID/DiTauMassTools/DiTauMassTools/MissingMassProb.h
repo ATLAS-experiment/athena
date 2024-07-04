@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Class handling the probability calculation of the MissingMassCalculator
@@ -27,7 +27,7 @@ class MissingMassCalculatorV2;
 class MissingMassProb {
 
   public:
-    MissingMassProb(MMCCalibrationSetV2::e aset, std::string m_paramFilePath);
+    MissingMassProb(MMCCalibrationSetV2::e aset, const std::string& paramFilePath);
     ~MissingMassProb();
 
     double apply(MissingMassInput& preparedInput, const int & tau_type1, const int & tau_type2, const TLorentzVector & tauvec1, const TLorentzVector & tauvec2, const TLorentzVector nuvec1, const TLorentzVector & nuvec2, bool constant=false, bool oneTau=false, bool twoTau=false);
