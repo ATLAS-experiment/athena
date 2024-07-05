@@ -25,14 +25,22 @@ namespace Trk{
 namespace TRT{
 class TrackInfo;
 }
+
+static const InterfaceID IID_ITRTCalibrator("ITRTCalibrator", 1, 0);
+
 // This tool is only called once in a job reconstructing only one event
 class ATLAS_NOT_THREAD_SAFE ITRTCalibrator : virtual public IAlgTool {
-public:
-  DeclareInterfaceID( ITRTCalibrator, 1, 0 );
-  virtual bool fill(const Trk::Track* aTrack, TRT::TrackInfo* output) = 0;
-  // uses thread-unsafe methods from Calibrator.
-  virtual bool calibrate ATLAS_NOT_THREAD_SAFE () = 0;
+    public:
+        virtual bool fill(const Trk::Track* aTrack, TRT::TrackInfo* output) = 0;
+        // uses thread-unsafe methods from Calibrator.
+        virtual bool calibrate ATLAS_NOT_THREAD_SAFE () = 0;
+        static const InterfaceID& interfaceID();
 };
+
+inline const InterfaceID& ITRTCalibrator::interfaceID()
+{
+	return IID_ITRTCalibrator;
+}
 
 #endif // TRT_CALIBTOOLS__ITRTCALIBRATOR_H
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include "fastjet/internal/base.hh"
 #include "fastjet/PseudoJet.hh"
@@ -48,20 +48,20 @@ class Puppi{
 
   std::vector< std::vector< fastjet::PseudoJet >* > m_allParticles;
 
-  double m_R0;
-  double m_Rmin;
-  double m_beta;
-  double m_centralPTCutOffset;
-  double m_centralPTCutSlope;
-  double m_forwardPTCutOffset;
-  double m_forwardPTCutSlope;
-  double m_etaBoundary;
-  bool m_includeCentralNeutralsInAlpha;
+  double m_R0{};
+  double m_Rmin{};
+  double m_beta{};
+  double m_centralPTCutOffset{};
+  double m_centralPTCutSlope{};
+  double m_forwardPTCutOffset{};
+  double m_forwardPTCutSlope{};
+  double m_etaBoundary{};
+  bool m_includeCentralNeutralsInAlpha{};
 
-  double m_median;
-  double m_rms;
+  double m_median{};
+  double m_rms{};
 
-  double m_nPV;
+  double m_nPV{};
 
 };
 

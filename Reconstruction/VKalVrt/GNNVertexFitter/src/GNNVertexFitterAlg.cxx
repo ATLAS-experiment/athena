@@ -50,7 +50,8 @@ StatusCode GNNVertexFitterAlg::execute(const EventContext &ctx) const {
   //-- Extract Primary Vertices
   SG::ReadHandle<xAOD::VertexContainer> pv_cont(m_pvContainerKey, ctx);
   if (!pv_cont.isValid()) {
-    ATH_MSG_WARNING("No Primary Vertices container found in TDS");
+    ATH_MSG_ERROR("No Primary Vertices container found in TDS");
+    return StatusCode::FAILURE;
   } else {
     //-- Extract PV itself
     for (auto v : *pv_cont) {

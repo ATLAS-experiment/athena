@@ -22,6 +22,8 @@ namespace TRTCond {
   class RtRelation;
 }
 
+static const InterfaceID IID_ITRT_CalDbTool("ITRT_CalDbTool",1,0);
+
 /** @class ITRT_CalDbTool
  *  abstract interface to TRT calibration constants
  */
@@ -32,7 +34,6 @@ class ITRT_CalDbTool: virtual public IAlgTool
   typedef TRTCond::StrawT0MultChanContainer StrawT0Container ;
   
   static const InterfaceID& interfaceID();
-//   DeclareInterfaceID(ITRT_CalDbTool, 1, 0);
 
   virtual float getT0( const Identifier& ,  int level = TRTCond::ExpandedIdentifier::STRAW ) const = 0;
   virtual const TRTCond::RtRelation* getRtRelation( const Identifier& , int level = TRTCond::ExpandedIdentifier::STRAW ) const  = 0;
@@ -50,8 +51,7 @@ class ITRT_CalDbTool: virtual public IAlgTool
 };
 
 inline const InterfaceID& ITRT_CalDbTool::interfaceID() {
-  static const InterfaceID IID("ITRT_CalDbTool",1,0);
-  return IID;
+  return IID_ITRT_CalDbTool;
 }
 
 #endif //  ITRT_CALDBTOOL_H
