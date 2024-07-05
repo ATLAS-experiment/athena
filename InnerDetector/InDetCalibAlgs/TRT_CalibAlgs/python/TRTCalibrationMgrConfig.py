@@ -4,38 +4,6 @@ Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-
-# Tool to process R-t ntuple. Produces histograms and calibration text files.
-def TRTCalibratorCfg(flags, name="TRTCalibrator", **kwargs) :
-    acc = ComponentAccumulator()
-    kwargs.setdefault("MinRt",10000)
-    kwargs.setdefault("MinT0",500)
-    kwargs.setdefault("Hittuple","merged.root")
-    kwargs.setdefault("RtRelation","basic")
-    kwargs.setdefault("RtBinning","t")
-    kwargs.setdefault("FloatP3",True)
-    kwargs.setdefault("T0Offset",0.0)
-    kwargs.setdefault("DoShortStrawCorrection",False)
-    kwargs.setdefault("DoArgonXenonSep",True)                
-    if "TRTStrawSummaryTool" not in kwargs:
-        from TRT_ConditionsServices.TRT_ConditionsServicesConfig import (
-            TRT_StrawStatusSummaryToolCfg)
-        kwargs.setdefault("TRTStrawSummaryTool", acc.popToolsAndMerge(
-            TRT_StrawStatusSummaryToolCfg(flags)))
-    if "NeighbourSvc" not in kwargs:
-        from TRT_ConditionsServices.TRT_ConditionsServicesConfig import (
-            TRT_StrawNeighbourSvcCfg)
-        kwargs.setdefault("NeighbourSvc", acc.getPrimaryAndMerge(
-            TRT_StrawNeighbourSvcCfg(flags)))
-    if "TRTCalDbTool" not in kwargs:
-        from TRT_ConditionsServices.TRT_ConditionsServicesConfig import TRT_CalDbToolCfg
-        kwargs.setdefault("TRT_CalDbTool", acc.popToolsAndMerge(TRT_CalDbToolCfg(flags)))
-
-    acc.setPrivateTools(CompFactory.TRTCalibrator(name, **kwargs))
-        
-    return acc
-
-
     
 # Steering algorithm. Either it fills track and hit ntuples, or it calls TRTCalibrator
 def TRT_CalibrationMgrCfg(flags,name='TRT_CalibrationMgr',calibconstants='',**kwargs) :
@@ -62,13 +30,12 @@ def TRT_CalibrationMgrCfg(flags,name='TRT_CalibrationMgr',calibconstants='',**kw
     if "TrackSelectorTool" not in kwargs:
         from InDetConfig.InDetTrackSelectorToolConfig import TRT_InDetDetailedTrackSelectorToolCfg
         kwargs.setdefault("TrackSelectorTool", acc.popToolsAndMerge(TRT_InDetDetailedTrackSelectorToolCfg(flags)))
+        
+    if "TRTCalibrator" not in kwargs:
+        from TRT_CalibTools.TRTCalibratorConfig import  TRTCalibratorCfg
+        kwargs.setdefault("TRTCalibrator",[acc.addPublicTool(acc.popToolsAndMerge(TRTCalibratorCfg(flags)))])        
+        
     
-    # FIXME! Let all straws participate in trackfinding as default - SERGI This is wrong and needs to be UPDATED @peter    
-        # acc.merge(addOverride('/TRT/Cond/Status','TRTCondStatus-empty-00-00'))
-        # TypeError: addOverride() missing 1 required positional argument: 'tag'  
-                         
-    # acc.merge(addOverride('/TRT/Cond/Status','TRTCondStatus-empty-00-00'))
-                          
     # if a text file is in the arguments, use the constants in that instead of the DB
     if not calibconstants=="":
 
@@ -85,14 +52,14 @@ def TRT_StrawStatusCfg(flags,name='InDet_TRT_StrawStatus',**kwargs) :
     
     acc = ComponentAccumulator()
     
-    from TRT_ConditionsServices.TRT_ConditionsServicesConfig import (
-        TRT_StrawStatusSummaryToolCfg)
-    kwargs.setdefault("TRT_StrawStatusSummaryTool", acc.popToolsAndMerge(
-        TRT_StrawStatusSummaryToolCfg(flags)))
+    from TRT_ConditionsServices.TRT_ConditionsServicesConfig import TRT_StrawStatusSummaryToolCfg
+    kwargs.setdefault("TRT_StrawStatusSummaryTool", acc.popToolsAndMerge(TRT_StrawStatusSummaryToolCfg(flags)))
 
     from InDetConfig.TRT_TrackHoleSearchConfig import TRTTrackHoleSearchToolCfg
-    kwargs.setdefault("trt_hole_finder", acc.popToolsAndMerge(
-        TRTTrackHoleSearchToolCfg(flags)))
+    kwargs.setdefault("trt_hole_finder", acc.popToolsAndMerge(TRTTrackHoleSearchToolCfg(flags)))
+    
+    from IOVDbSvc.IOVDbSvcConfig import addOverride
+    acc.merge(addOverride(flags,'/TRT/Cond/Status','TRTCondStatus-empty-00-00'))
 
     acc.addEventAlgo(CompFactory.InDet.TRT_StrawStatus(name,**kwargs))
     return acc
@@ -141,9 +108,10 @@ if __name__ == '__main__':
                                    description="""Run R-t TRT calibration.\n\n
                                    Example: python -m TRT_CalibAlgs.TRTCalibrationMgrConfig --filesInput "/path/to/files/data22*" --evtMax 10""")
     
-    parser.add_argument('--evtMax',type=int,default=10,help="Number of events. Default 10 (Run all events)")
-    parser.add_argument('--filesInput', nargs='+', default=[],help="Input files. RAW data")
-    parser.add_argument('--fileOutput', default="basic.root" ,help="Output file name. Flat Ntuple")
+    parser.add_argument('--evtMax'      ,type=int,default=1,help="Number of events.")
+    parser.add_argument('--filesInput'  , nargs='+', default=[],help="Input files. RAW data")
+    parser.add_argument('--fileOutput'  , default="basic.root" ,help="Output file name. Flat Ntuple")
+    parser.add_argument('--doCalibrator',action='store_true' ,help="Run the calibrator to obtain the constants")
     args = parser.parse_args()
     
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
@@ -160,8 +128,6 @@ if __name__ == '__main__':
     
     flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
     flags.IOVDb.GlobalTag = "CONDBR2-BLKPA-2023-03"     
-    
-    flags.fillFromArgs()
     
     CalibConfig(flags)    
     
@@ -187,7 +153,7 @@ if __name__ == '__main__':
     acc.merge(InDetTrackRecoCfg(flags))
     
     # Algorithm to create the basic.root ntuple file 
-    acc.merge(TRT_CalibrationMgrCfg(flags))
+    acc.merge(TRT_CalibrationMgrCfg(flags, DoCalibrate=args.doCalibrator))
     
     # Algorithm to generate the straw masking file
     acc.merge(TRT_StrawStatusCfg(flags))

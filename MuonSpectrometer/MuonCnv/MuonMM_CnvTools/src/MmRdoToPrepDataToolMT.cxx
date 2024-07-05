@@ -21,7 +21,6 @@ using namespace Muon;
 namespace {
 // Count hits with negative charge, which indicates bad calibration
 std::atomic<bool> hitNegativeCharge{false};
-std::atomic<bool> invalidLocalPos{false};
 }  // namespace
 class NswCalibDbTimeChargeData;
 
@@ -161,10 +160,9 @@ StatusCode Muon::MmRdoToPrepDataToolMT::processCollection(const EventContext& ct
 
     bool getLocalPos = detEl->stripPosition(prdId, localPos);
     if (!getLocalPos) {
-      if (!invalidLocalPos || msgLvl(MSG::DEBUG)) {
+      if (msgLvl(MSG::DEBUG)) { // We should still keep this a warning and fix it properly but silence it for now (ATLASRECTS-7520)
         ATH_MSG_WARNING("Could not get the local strip position for "
                         << m_idHelperSvc->toString(prdId));
-        invalidLocalPos = true;
       }
       continue;
     }

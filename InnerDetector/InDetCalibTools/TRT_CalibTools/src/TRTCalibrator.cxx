@@ -45,67 +45,9 @@ TRTCalibrator::TRTCalibrator(const std::string& type, const std::string& name, c
   AthAlgTool(type, name, parent),
   m_DetID(nullptr),
   m_TRTID(nullptr),
-  m_trtmanager(nullptr),
-  m_trtcaldbTool("ITRT_CalDbTool", this),
-  m_neighbourSvc("ITRT_StrawNeighbourSvc", name),
-  m_TRTStrawSummaryTool("InDetTRTStrawStatusSummaryTool",this),
-  m_maxDistance(2.8),
-  m_maxTimeResidual(150),
-  m_minTimebinsOverThreshold(2),
-  m_maxTrackChisquarePerDof(10),
-  m_numOfHitsTotal(0),
-  m_numOfHitsAccepted(0),
-  m_numOfProcessedTracks(0),
-  m_comTimeName("ComTime"),
-  m_minrt(10000),
-  m_mint0(200),
-  m_nevents(-1),
-  m_t0offset(-0.3),
-  m_calsub("user"),
-  m_rtbinning("t"),
-  m_selstring("_*_-_-_-_-_-_-"),
-  m_options(""),
-  m_hittuple("basic.root"),
-  m_rtrel("basic"),
-  m_ntrtmanager("TRT"),
-  m_SplitBarrel(true),
-  m_useP0(true),
-  m_floatP3(true),
-  m_DoShortStrawCorrection(true),
-  m_DoArXenonSep(false)
+  m_trtmanager(nullptr)
 {
   declareInterface<ITRTCalibrator>(this);
-  declareProperty("TRTCalDbTool",m_trtcaldbTool);
-  declareProperty("NeighbourSvc",m_neighbourSvc);
-  declareProperty("maxDistance",m_maxDistance) ;
-  declareProperty("maxTimeResidual",m_maxTimeResidual) ;
-  declareProperty("minTimebinsOverThreshold",m_minTimebinsOverThreshold) ;
-  declareProperty("maxTrackChisquarePerDof",m_maxTrackChisquarePerDof) ;
-  declareProperty("MinRt",m_minrt);
-  declareProperty("MinT0",m_mint0);
-  declareProperty("Nevents",m_nevents);
-  declareProperty("Selstring",m_selstring);
-  declareProperty("SubPart",m_calsub);
-  declareProperty("Options",m_options);
-  declareProperty("Hittuple",m_hittuple);
-  declareProperty("RtRel",m_rtrel);
-  declareProperty("TrtManagerLocation",m_ntrtmanager);
-  declareProperty("CalibrateRt",m_doRt);
-  declareProperty("CalibrateT0",m_doT0);
-  declareProperty("RtBinning",m_rtbinning);
-  declareProperty("FitResidual",m_doRes);
-  declareProperty("NoHistograms",m_beQuiet);
-  declareProperty("UseBoardRef",m_useBoardRef);
-  declareProperty("SplitBarrel",m_SplitBarrel);
-  declareProperty("UseP0",m_useP0);
-  declareProperty("FloatP3",m_floatP3);
-  declareProperty("PrintLog",m_doLogPrint);
-  declareProperty("PrintT0Out",m_doOutPrint);
-  declareProperty("PrintRtOut",m_doRtPrint);
-  declareProperty("T0Offset",m_t0offset);
-  declareProperty("DoShortStrawCorrection",m_DoShortStrawCorrection);
-  declareProperty("DoArXenonSep",m_DoArXenonSep);
-  declareProperty("TRTStrawSummaryTool",  m_TRTStrawSummaryTool);
 }
 
 
@@ -545,8 +487,8 @@ bool TRTCalibrator::calibrate ATLAS_NOT_THREAD_SAFE () {
 
   
   //set type of rt-relation
-  bool isdines = m_rtrel.find("dines")!=std::string::npos;
-  bool isbinned = m_rtrel.find("binned")!=std::string::npos;
+  bool isdines = (m_rtrel.value()).find("dines")!=std::string::npos;
+  bool isbinned = (m_rtrel.value()).find("binned")!=std::string::npos;
   int rtint;
   if (isdines) rtint=2;
   else if (isbinned) rtint=1;

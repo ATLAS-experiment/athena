@@ -55,14 +55,11 @@ FillAlignTRTHits::FillAlignTRTHits(const std::string& type, const std::string& n
 	m_f(nullptr), m_ntuple(nullptr)
 {
 	declareInterface<IFillAlignTrkInfo>(this);
-	// declareProperty("TRTCalDbTool",m_trtcaldbTool);
-	// declareProperty("NeighbourSvc",m_neighbourSvc);
 	declareProperty("maxDistance",m_maxDistance) ;
 	declareProperty("maxTimeResidual",m_maxTimeResidual) ;
 	declareProperty("minTimebinsOverThreshold",m_minTimebinsOverThreshold) ;
 	declareProperty("maxTrackChisquarePerDof",m_maxTrackChisquarePerDof) ;
 	declareProperty("DoMCCosmicTimeShift",m_DoMCCosmicTimeShift);
-	// declareProperty("TRTStrawSummaryTool",  m_TRTStrawSummaryTool);
 }
 
 StatusCode FillAlignTRTHits::initialize(){

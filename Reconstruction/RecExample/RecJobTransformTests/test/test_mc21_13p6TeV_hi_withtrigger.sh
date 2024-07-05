@@ -15,7 +15,7 @@ Reco_tf.py \
 --steering 'doRDO_TRIG' \
 --maxEvents=20 \
 --outputAODFile=myAOD.pool.root  \
---conditionsTag='OFLCOND-MC21-SDR-RUN3-07' \
+--conditionsTag='OFLCOND-MC23-SDR-RUN3-05' \
 --postInclude 'all:PyJobTransforms.UseFrontier' \
 --preInclude='RAWtoALL:HIRecConfig.HIModeFlags.HImode' \
 --preExec='flags.Egamma.doForward=False;flags.Reco.EnableZDC=False;flags.Reco.EnableTrigger=False;flags.DQ.doMonitoring=False;flags.Beam.BunchSpacing=100;flags.Trigger.triggerMenuSetup="Dev_HI_run3_v1";flags.Trigger.AODEDMSet = "AODFULL";flags.Trigger.forceEnableAllChains=True;flags.Trigger.L1.Menu.doHeavyIonTobThresholds=True' \
