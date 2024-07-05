@@ -297,18 +297,18 @@ StatusCode BuildTruthTaus::examineTruthTau(const xAOD::TruthParticle& xTruthPart
   if ( m_bWriteVertices )
   {
     // tau decay vertex
-    static const SG::AuxElement::Decorator<double> decDecayVertexX("decay_vertex_x");
-    static const SG::AuxElement::Decorator<double> decDecayVertexY("decay_vertex_y");
-    static const SG::AuxElement::Decorator<double> decDecayVertexZ("decay_vertex_z"); 
+    static const SG::AuxElement::Decorator<float> decDecayVertexX("decay_vertex_x");
+    static const SG::AuxElement::Decorator<float> decDecayVertexY("decay_vertex_y");
+    static const SG::AuxElement::Decorator<float> decDecayVertexZ("decay_vertex_z"); 
    
     decDecayVertexX(xTruthParticle) = truthInfo.m_vDecayVertex.X();
     decDecayVertexY(xTruthParticle) = truthInfo.m_vDecayVertex.Y();
     decDecayVertexZ(xTruthParticle) = truthInfo.m_vDecayVertex.Z();
  
     // tau production vertex
-    static const SG::AuxElement::Decorator<double> decProdVertexX("prod_vertex_x");
-    static const SG::AuxElement::Decorator<double> decProdVertexY("prod_vertex_y");
-    static const SG::AuxElement::Decorator<double> decProdVertexZ("prod_vertex_z");
+    static const SG::AuxElement::Decorator<float> decProdVertexX("prod_vertex_x");
+    static const SG::AuxElement::Decorator<float> decProdVertexY("prod_vertex_y");
+    static const SG::AuxElement::Decorator<float> decProdVertexZ("prod_vertex_z");
     
     decProdVertexX(xTruthParticle) = truthInfo.m_vProdVertex.X();
     decProdVertexY(xTruthParticle) = truthInfo.m_vProdVertex.Y();
