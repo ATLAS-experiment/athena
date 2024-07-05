@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TGC_Hid2RESrcID.h" 
 
 #include "MuonRDO/TgcRdo.h"
-#include "TGCcablingInterface/ITGCcablingSvc.h"
+#include "MuonTGC_Cabling/MuonTGC_CablingSvc.h"
 
 #include "MuonRDO/TgcRdoIdHash.h"
 
@@ -35,7 +35,7 @@ uint32_t Muon::TGC_Hid2RESrcID::getRodID(uint16_t subDetectorId, uint16_t rodId)
 
 // get source ID for an TgcDigitCollection 
 uint32_t Muon::TGC_Hid2RESrcID::getRodID(const Identifier& offlineId,
-                                         const ITGCcablingSvc* cabling) 
+                                         const MuonTGC_CablingSvc* cabling) 
 {
   int subDetectorId;
   int rodId;

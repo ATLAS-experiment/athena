@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTGC_Cabling/TGCCableASDToPP.h"
@@ -14,100 +14,58 @@
 
 namespace MuonTGC_Cabling {
 
-// Constructor & Destructor
 TGCCableASDToPP::TGCCableASDToPP(const std::string& filename) :
   TGCCable(TGCCable::ASDToPP),
-  m_tgcCablingDbTool("TGCCablingDbTool"),
-  m_ASD2PP_DIFF_12(nullptr) {
+  m_tgcCablingDbTool("TGCCablingDbTool") {
     initialize(filename);
 }
 
-TGCCableASDToPP::~TGCCableASDToPP(void)
-{
-  // MuonSpectrometer/MuonCablings/TGCcablingInterface/TGCcablingInterface/TGCIdBase.h defines  
-  // enum ModuleType    {NoModuleType=-1,    WD,SD,WT,ST,WI,SI, MaxModuleType}; as of TGCcablingInterface-00-01-12.  
-  // If this order is changed, these for loops should be revisited.  
-  for(int side=0; side<TGCIdBase::MaxSideType; side++) { 
-    for(int module=TGCIdBase::WD; module<=TGCIdBase::SI; module++) { 
-      for(int region=TGCIdBase::Endcap; region<=TGCIdBase::Forward; region++) { 
-	for(int sector=0;  
-	    (module<=TGCIdBase::ST && ((region==TGCIdBase::Forward && sector<TGCId::NumberOfForwardSector) || // Big Wheel Forward  
-				       (region==TGCIdBase::Endcap && sector<TGCId::NumberOfEndcapSector))) // Big Wheel Endcap  
-	      || (module>=TGCIdBase::WI && sector<TGCId::NumberOfInnerSector); // EI/FI  
-	    sector++) {  
-	  TGCDatabaseASDToPP* db = dynamic_cast<TGCDatabaseASDToPP*>(getDatabase(side, region, sector, module)); 
-	  // If the database is used by only this sector, it is deleted now.  
-	  if(db && !(db->isCommon())) {  
-	    delete db; 
-	    db = nullptr; 
-	  } 
-	} 
-      } 
-    } 
-  } 
-
-  // Common databases are deleted.   
-  for(int region=0; region<TGCIdBase::MaxRegionType; region++) { 
-    for(int module=0; module<TGCIdBase::MaxModuleType; module++) { 
-      delete m_commonDb[region][module]; // delete null pointer should be safe.   
-      m_commonDb[region][module] = nullptr;  
-    } 
-  } 
-
+TGCCableASDToPP::~TGCCableASDToPP() {
   delete m_ASD2PP_DIFF_12;
   m_ASD2PP_DIFF_12 = nullptr;
 }
 
 
-void TGCCableASDToPP::initialize(const std::string& filename)
-{
-  // Common database pointers are initialized 
-  for(int region=0; region<TGCIdBase::MaxRegionType; region++) { 
-    for(int module=0; module<TGCIdBase::MaxModuleType; module++) { 
-      m_commonDb[region][module] = nullptr; 
-    } 
-  } 
+void TGCCableASDToPP::initialize(const std::string& filename) {
+  m_commonDb[TGCId::Forward][TGCId::WD] = std::make_shared<TGCDatabaseASDToPP>(filename, "FWD");
+  m_commonDb[TGCId::Forward][TGCId::SD] = std::make_shared<TGCDatabaseASDToPP>(filename, "FSD");
+  m_commonDb[TGCId::Forward][TGCId::WT] = std::make_shared<TGCDatabaseASDToPP>(filename, "FWT");
+  m_commonDb[TGCId::Forward][TGCId::ST] = std::make_shared<TGCDatabaseASDToPP>(filename, "FST");
 
-  m_commonDb[TGCIdBase::Forward][TGCIdBase::WD] = new TGCDatabaseASDToPP(filename, "FWD"); 
-  m_commonDb[TGCIdBase::Forward][TGCIdBase::SD] = new TGCDatabaseASDToPP(filename, "FSD"); 
-  m_commonDb[TGCIdBase::Forward][TGCIdBase::WT] = new TGCDatabaseASDToPP(filename, "FWT"); 
-  m_commonDb[TGCIdBase::Forward][TGCIdBase::ST] = new TGCDatabaseASDToPP(filename, "FST"); 
-  
-  m_commonDb[TGCIdBase::Endcap][TGCIdBase::WD] = new TGCDatabaseASDToPP(filename, "EWD"); 
-  m_commonDb[TGCIdBase::Endcap][TGCIdBase::SD] = new TGCDatabaseASDToPP(filename, "ESD"); 
-  m_commonDb[TGCIdBase::Endcap][TGCIdBase::WT] = new TGCDatabaseASDToPP(filename, "EWT"); 
-  m_commonDb[TGCIdBase::Endcap][TGCIdBase::ST] = new TGCDatabaseASDToPP(filename, "EST"); 
+  m_commonDb[TGCId::Endcap][TGCId::WD] = std::make_shared<TGCDatabaseASDToPP>(filename, "EWD");
+  m_commonDb[TGCId::Endcap][TGCId::SD] = std::make_shared<TGCDatabaseASDToPP>(filename, "ESD");
+  m_commonDb[TGCId::Endcap][TGCId::WT] = std::make_shared<TGCDatabaseASDToPP>(filename, "EWT");
+  m_commonDb[TGCId::Endcap][TGCId::ST] = std::make_shared<TGCDatabaseASDToPP>(filename, "EST");
 
-  m_commonDb[TGCIdBase::Forward][TGCIdBase::WI] = new TGCDatabaseASDToPP(filename, "FWI"); 
-  m_commonDb[TGCIdBase::Forward][TGCIdBase::SI] = new TGCDatabaseASDToPP(filename, "FSI"); 
-  m_commonDb[TGCIdBase::Endcap][TGCIdBase::WI] = new TGCDatabaseASDToPP(filename, "EWI"); 
-  m_commonDb[TGCIdBase::Endcap][TGCIdBase::SI] = new TGCDatabaseASDToPP(filename, "ESI"); 
-  
-  for(int side=0; side < TGCIdBase::MaxSideType; side++) { 
-    for(int sector=0; sector < TGCId::NumberOfForwardSector; sector++) { 
-      m_FWDdb[side][sector] = m_commonDb[TGCIdBase::Forward][TGCIdBase::WD];  
-      m_FSDdb[side][sector] = m_commonDb[TGCIdBase::Forward][TGCIdBase::SD]; 
-      m_FWTdb[side][sector] = m_commonDb[TGCIdBase::Forward][TGCIdBase::WT]; 
-      m_FSTdb[side][sector] = m_commonDb[TGCIdBase::Forward][TGCIdBase::ST];  
-    } 
-    for(int sector=0; sector < TGCId::NumberOfEndcapSector; sector++) { 
-      m_EWDdb[side][sector] = m_commonDb[TGCIdBase::Endcap][TGCIdBase::WD]; 
-      m_ESDdb[side][sector] = m_commonDb[TGCIdBase::Endcap][TGCIdBase::SD];  
-      m_EWTdb[side][sector] = m_commonDb[TGCIdBase::Endcap][TGCIdBase::WT];  
-      m_ESTdb[side][sector] = m_commonDb[TGCIdBase::Endcap][TGCIdBase::ST];  
-    } 
-    for(int sector=0; sector < TGCId::NumberOfInnerSector; sector++) { 
-      m_FWIdb[side][sector] = m_commonDb[TGCIdBase::Forward][TGCIdBase::WI];  
-      m_FSIdb[side][sector] = m_commonDb[TGCIdBase::Forward][TGCIdBase::SI];  
-      m_EWIdb[side][sector] = m_commonDb[TGCIdBase::Endcap][TGCIdBase::WI]; 
-      m_ESIdb[side][sector] = m_commonDb[TGCIdBase::Endcap][TGCIdBase::SI]; 
+  m_commonDb[TGCId::Forward][TGCId::WI] = std::make_shared<TGCDatabaseASDToPP>(filename, "FWI");
+  m_commonDb[TGCId::Forward][TGCId::SI] = std::make_shared<TGCDatabaseASDToPP>(filename, "FSI");
+  m_commonDb[TGCId::Endcap][TGCId::WI] = std::make_shared<TGCDatabaseASDToPP>(filename, "EWI");
+  m_commonDb[TGCId::Endcap][TGCId::SI] = std::make_shared<TGCDatabaseASDToPP>(filename, "ESI");
+
+  for(int side=0; side < TGCId::MaxSideType; side++) {
+    for(int sector=0; sector < TGCId::NUM_FORWARD_SECTOR; sector++) {
+      m_FWDdb[side][sector] = m_commonDb[TGCId::Forward][TGCId::WD];
+      m_FSDdb[side][sector] = m_commonDb[TGCId::Forward][TGCId::SD];
+      m_FWTdb[side][sector] = m_commonDb[TGCId::Forward][TGCId::WT];
+      m_FSTdb[side][sector] = m_commonDb[TGCId::Forward][TGCId::ST];
+    }
+    for(int sector=0; sector < TGCId::NUM_ENDCAP_SECTOR; sector++) {
+      m_EWDdb[side][sector] = m_commonDb[TGCId::Endcap][TGCId::WD];
+      m_ESDdb[side][sector] = m_commonDb[TGCId::Endcap][TGCId::SD];
+      m_EWTdb[side][sector] = m_commonDb[TGCId::Endcap][TGCId::WT];
+      m_ESTdb[side][sector] = m_commonDb[TGCId::Endcap][TGCId::ST];
+    }
+    for(int sector=0; sector < TGCId::NUM_INNER_SECTOR; sector++) {
+      m_FWIdb[side][sector] = m_commonDb[TGCId::Forward][TGCId::WI];
+      m_FSIdb[side][sector] = m_commonDb[TGCId::Forward][TGCId::SI];
+      m_EWIdb[side][sector] = m_commonDb[TGCId::Endcap][TGCId::WI];
+      m_ESIdb[side][sector] = m_commonDb[TGCId::Endcap][TGCId::SI];
     } 
   } 
 }
 
 
-StatusCode TGCCableASDToPP::updateDatabase()
-{
+StatusCode TGCCableASDToPP::updateDatabase() {
   if(m_tgcCablingDbTool.retrieve().isFailure()) return StatusCode::FAILURE;
 
   StatusCode sc = m_tgcCablingDbTool->readASD2PP_DIFF_12FromText();
@@ -120,7 +78,6 @@ StatusCode TGCCableASDToPP::updateDatabase()
 
   delete m_ASD2PP_DIFF_12;
   m_ASD2PP_DIFF_12 = new std::vector<std::string>;
-
   // Truncation saves initialization CPU time of about 30 ms.
   for (const std::string& s : *tmp_ASD2PP_DIFF_12) {
     char letter = s.at(0);
@@ -130,10 +87,11 @@ StatusCode TGCCableASDToPP::updateDatabase()
   delete tmp_ASD2PP_DIFF_12;
   tmp_ASD2PP_DIFF_12 = nullptr;
 
-  for(int side=0; side<TGCIdBase::MaxSideType; side++) { 
-    for(int sector=0; sector<TGCId::NumberOfForwardSector; sector++) { 
+  for(int side=0; side<TGCId::MaxSideType; side++) { 
+    for(int sector=0; sector<TGCId::NUM_FORWARD_SECTOR; sector++) { 
       StatusCode sc = updateIndividualDatabase(side, sector, "FWD", m_FWDdb[side][sector]);
       if(!sc.isSuccess()) return sc; 
+
       sc = updateIndividualDatabase(side, sector, "FSD", m_FSDdb[side][sector]); 
       if(!sc.isSuccess()) return sc; 
       sc = updateIndividualDatabase(side, sector, "FWT", m_FWTdb[side][sector]); 
@@ -141,7 +99,7 @@ StatusCode TGCCableASDToPP::updateDatabase()
       sc = updateIndividualDatabase(side, sector, "FST", m_FSTdb[side][sector]); 
       if(!sc.isSuccess()) return sc; 
     } 
-    for(int sector=0; sector<TGCId::NumberOfEndcapSector; sector++) { 
+    for(int sector=0; sector<TGCId::NUM_ENDCAP_SECTOR; sector++) { 
       StatusCode sc = updateIndividualDatabase(side, sector, "EWD", m_EWDdb[side][sector]); 
       if(!sc.isSuccess()) return sc; 
       sc = updateIndividualDatabase(side, sector, "ESD", m_ESDdb[side][sector]); 
@@ -151,7 +109,7 @@ StatusCode TGCCableASDToPP::updateDatabase()
       sc = updateIndividualDatabase(side, sector, "EST", m_ESTdb[side][sector]); 
       if(!sc.isSuccess()) return sc; 
     } 
-    for(int sector=0; sector<TGCId::NumberOfInnerSector; sector++) { 
+    for(int sector=0; sector<TGCId::NUM_INNER_SECTOR; sector++) { 
       StatusCode sc = updateIndividualDatabase(side, sector, "EWI", m_EWIdb[side][sector]); 
       if(!sc.isSuccess()) return sc; 
       sc = updateIndividualDatabase(side, sector, "ESI", m_ESIdb[side][sector]); 
@@ -226,57 +184,57 @@ StatusCode TGCCableASDToPP::getUpdateInfo(const int side,
 
 
 
-TGCDatabase* TGCCableASDToPP::getDatabase(const int side, 
+TGCDatabaseASDToPP* TGCCableASDToPP::getDatabase(const int side,
 					  const int region, 
 					  const int sector,
 					  const int module) const
 {
-  if(side<0 || side>=TGCIdBase::MaxSideType) return nullptr;
+  if(side<0 || side>=TGCId::MaxSideType) return nullptr;
   if(sector<0) return nullptr;
 
-  TGCDatabase* db=nullptr;
-  if(region==TGCIdBase::Endcap) {
+  TGCDatabaseASDToPP* db=nullptr;
+  if(region==TGCId::Endcap) {
     switch(module) {
-    case TGCIdBase::WD :
-      if(sector<TGCId::NumberOfEndcapSector) db = m_EWDdb[side][sector];
+    case TGCId::WD :
+      if(sector<TGCId::NUM_ENDCAP_SECTOR) db = m_EWDdb[side][sector].get();
       break;
-    case TGCIdBase::SD :
-      if(sector<TGCId::NumberOfEndcapSector) db = m_ESDdb[side][sector];
+    case TGCId::SD :
+      if(sector<TGCId::NUM_ENDCAP_SECTOR) db = m_ESDdb[side][sector].get();
       break;
-    case TGCIdBase::WT :
-      if(sector<TGCId::NumberOfEndcapSector) db = m_EWTdb[side][sector];
+    case TGCId::WT :
+      if(sector<TGCId::NUM_ENDCAP_SECTOR) db = m_EWTdb[side][sector].get();
       break;
-    case TGCIdBase::ST :
-      if(sector<TGCId::NumberOfEndcapSector) db = m_ESTdb[side][sector];
+    case TGCId::ST :
+      if(sector<TGCId::NUM_ENDCAP_SECTOR) db = m_ESTdb[side][sector].get();
       break;
-    case TGCIdBase::WI :
-      if(sector<TGCId::NumberOfInnerSector) db = m_EWIdb[side][sector];
+    case TGCId::WI :
+      if(sector<TGCId::NUM_INNER_SECTOR) db = m_EWIdb[side][sector].get();
       break;
-    case TGCIdBase::SI :
-      if(sector<TGCId::NumberOfInnerSector) db = m_ESIdb[side][sector];
+    case TGCId::SI :
+      if(sector<TGCId::NUM_INNER_SECTOR) db = m_ESIdb[side][sector].get();
       break;
     default:
       break;
     }
-  } else if(region==TGCIdBase::Forward) {
+  } else if(region==TGCId::Forward) {
     switch(module) {
-    case TGCIdBase::WD :
-      if(sector<TGCId::NumberOfForwardSector) db = m_FWDdb[side][sector];
+    case TGCId::WD :
+      if(sector<TGCId::NUM_FORWARD_SECTOR) db = m_FWDdb[side][sector].get();
       break;
-    case TGCIdBase::SD :
-      if(sector<TGCId::NumberOfForwardSector) db = m_FSDdb[side][sector];
+    case TGCId::SD :
+      if(sector<TGCId::NUM_FORWARD_SECTOR) db = m_FSDdb[side][sector].get();
       break;
-    case TGCIdBase::WT :
-      if(sector<TGCId::NumberOfForwardSector) db = m_FWTdb[side][sector];
+    case TGCId::WT :
+      if(sector<TGCId::NUM_FORWARD_SECTOR) db = m_FWTdb[side][sector].get();
       break;
-    case TGCIdBase::ST :
-      if(sector<TGCId::NumberOfForwardSector) db = m_FSTdb[side][sector];
+    case TGCId::ST :
+      if(sector<TGCId::NUM_FORWARD_SECTOR) db = m_FSTdb[side][sector].get();
       break;
-    case TGCIdBase::WI :
-      if(sector<TGCId::NumberOfInnerSector) db = m_FWIdb[side][sector];
+    case TGCId::WI :
+      if(sector<TGCId::NUM_INNER_SECTOR) db = m_FWIdb[side][sector].get();
       break;
-    case TGCIdBase::SI :
-      if(sector<TGCId::NumberOfInnerSector) db = m_FSIdb[side][sector];
+    case TGCId::SI :
+      if(sector<TGCId::NUM_INNER_SECTOR) db = m_FSIdb[side][sector].get();
       break;
     default:
       break;
@@ -292,9 +250,9 @@ const int TGCCableASDToPP::s_stripForward[] = {2,1,0,4,3,6,5,8,7};
 TGCChannelId* TGCCableASDToPP::getChannel(const TGCChannelId* channelId,
 					  bool orChannel) const {
   if(channelId) {
-    if(channelId->getChannelIdType()==TGCIdBase::ASDOut)
+    if(channelId->getChannelIdType()==TGCChannelId::ChannelIdType::ASDOut)
       return getChannelOut(channelId,orChannel);
-    if(channelId->getChannelIdType()==TGCIdBase::PPIn)
+    if(channelId->getChannelIdType()==TGCChannelId::ChannelIdType::PPIn)
       return getChannelIn(channelId,orChannel);
   }
   return nullptr;
@@ -305,7 +263,7 @@ TGCChannelId* TGCCableASDToPP::getChannelIn(const TGCChannelId* ppin,
   if(orChannel) return nullptr;
   if(ppin->isValid()==false) return nullptr;
   
-  TGCDatabase* databaseP = 
+  TGCDatabaseASDToPP* databaseP = 
     getDatabase(ppin->getSideType(),
 		ppin->getRegionType(),
 		ppin->getSector(),
@@ -333,7 +291,6 @@ TGCChannelId* TGCCableASDToPP::getChannelIn(const TGCChannelId* ppin,
   if(ppin->isEndcap() && ppin->isTriplet()) {
     chamber = chamber+1;
   }
-  
   TGCChannelASDOut *asdout = new TGCChannelASDOut(ppin->getSideType(),
 						  ppin->getSignalType(),
 						  ppin->getRegionType(),
@@ -358,7 +315,7 @@ TGCChannelId* TGCCableASDToPP::getChannelOut(const TGCChannelId* asdout,
   const int asdoutChamber = asdout->getChamber();
   const int asdoutChannel = asdout->getChannel();
 
-  TGCDatabase* databaseP =
+  TGCDatabaseASDToPP* databaseP =
     getDatabase(asdout->getSideType(),
 		asdout->getRegionType(),
 		asdout->getSector(),
@@ -403,32 +360,27 @@ TGCChannelId* TGCCableASDToPP::getChannelOut(const TGCChannelId* asdout,
       } 
   }
   return ppin;
-}  
+}
 
-StatusCode TGCCableASDToPP::updateIndividualDatabase(const int side,  
-						     const int sector, 
-						     const std::string& blockname, 
-						     TGCDatabase*& database) { 
-  TGCDatabaseASDToPP* db = dynamic_cast<TGCDatabaseASDToPP*>(database); 
-  if(!db) return StatusCode::FAILURE; 
-  
-  std::vector<std::vector<int> > info; 
-  
-  StatusCode sc = getUpdateInfo(side, sector, blockname, info); 
+StatusCode TGCCableASDToPP::updateIndividualDatabase(const int side,
+						     const int sector,
+						     const std::string& blockname,
+						     std::shared_ptr<TGCDatabaseASDToPP>& database) {
+  if (!database) return StatusCode::FAILURE;
+  std::vector<std::vector<int>> info;
+  StatusCode sc = getUpdateInfo(side, sector, blockname, info);
   if(!sc.isSuccess()) return sc;
-  
+
   size_t info_size = info.size(); 
   if(!info_size) return StatusCode::SUCCESS; 
 
-  if(db->isCommon()) { 
-    db = new TGCDatabaseASDToPP(*db, false); // false means this database is not commonly used.  
-    if(!db) return StatusCode::FAILURE;
-
-    database = db; 
-  } 
+  if(database->isCommon()) {
+    database.reset(new TGCDatabaseASDToPP(*database, false));  // false means this database is not commonly used.
+    if(!database) return StatusCode::FAILURE;
+  }
 
   for(size_t i=0; i<info_size; i++) { 
-    db->update(info[i]); 
+    database->update(info[i]);
   } 
 
   return StatusCode::SUCCESS;

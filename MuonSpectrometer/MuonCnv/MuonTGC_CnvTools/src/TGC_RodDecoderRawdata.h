@@ -1,17 +1,13 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// TGC_RodDecoderRawdata.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 #ifndef MUONTGC_CNVTOOLS_TGC_RODDECODERRAWDATA_H
 #define MUONTGC_CNVTOOLS_TGC_RODDECODERRAWDATA_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "MuonTGC_CnvTools/ITGC_RodDecoder.h"
-#include "TGCcablingInterface/ITGCcablingServerSvc.h"
+#include "MuonTGC_Cabling/MuonTGC_CablingSvc.h"
 #include "GaudiKernel/ServiceHandle.h"
 
 class TgcRdo;
@@ -65,7 +61,7 @@ class TGC_RodDecoderRawdata : public extends<AthAlgTool, ITGC_RodDecoder>
       /** Flag for showStatusWords */
       bool m_showStatusWords;
 
-      ServiceHandle<ITGCcablingServerSvc> m_cablingSvc{this, "TGCCablingServiceSvc", "Muon::TGCcablingServerSvc", ""};
+      ServiceHandle<MuonTGC_CablingSvc> m_cablingSvc{this, "TGCCablingSvc", "MuonTGC_CablingSvc", ""};
     };
 
 } // end of namespace 

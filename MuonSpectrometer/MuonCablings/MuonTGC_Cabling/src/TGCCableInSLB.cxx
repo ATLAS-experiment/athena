@@ -1,10 +1,9 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTGC_Cabling/TGCCableInSLB.h"
 
-#include "TGCcablingInterface/TGCIdBase.h"
 #include "MuonTGC_Cabling/TGCChannelSLBIn.h"
 #include "MuonTGC_Cabling/TGCChannelSLBOut.h"
 
@@ -13,9 +12,9 @@ namespace MuonTGC_Cabling {
 TGCChannelId* TGCCableInSLB::getChannel(const TGCChannelId* channelId,
 					bool orChannel) const {
   if(channelId){
-    if(channelId->getChannelIdType()==TGCIdBase::SLBIn)
+    if(channelId->getChannelIdType()==TGCChannelId::ChannelIdType::SLBIn)
       return getChannelOut(channelId,orChannel);
-    if(channelId->getChannelIdType()==TGCIdBase::SLBOut)
+    if(channelId->getChannelIdType()==TGCChannelId::ChannelIdType::SLBOut)
       return getChannelIn(channelId,orChannel);
   }
   return nullptr;
@@ -27,7 +26,7 @@ TGCChannelId* TGCCableInSLB::getChannelIn(const TGCChannelId* slbout,
 
   int channel = slbout->getChannel();
   int block = slbout->getBlock();
-  TGCIdBase::ModuleType moduleType = slbout->getModuleType();
+  TGCId::ModuleType moduleType = slbout->getModuleType();
 
   int channelInBlock = TGCChannelSLBOut::getChannelInBlock(moduleType);
   int numberOfLayer  = TGCChannelSLBOut::getNumberOfLayer(moduleType);
@@ -36,7 +35,7 @@ TGCChannelId* TGCCableInSLB::getChannelIn(const TGCChannelId* slbout,
   int channelInSLB = -1;
   TGCChannelSLBIn::CellType cellType=TGCChannelSLBIn::NoCellType;
   switch(moduleType){ 
-  case TGCIdBase::WD:
+  case TGCId::WD:
     //  channel        SLBIn
     //   2*n           CellB    n+block*16  
     //   2*n+1         CellA    n+block*16
@@ -69,7 +68,7 @@ TGCChannelId* TGCCableInSLB::getChannelIn(const TGCChannelId* slbout,
       }
     } 
     break;
-  case TGCIdBase::SD:
+  case TGCId::SD:
     //  channel        SLBIn
     //   2*n           CellB    n+block*16  
     //   2*n+1         CellA    n+block*16
@@ -102,7 +101,7 @@ TGCChannelId* TGCCableInSLB::getChannelIn(const TGCChannelId* slbout,
       } 
     }
     break;
-  case TGCIdBase::WT:
+  case TGCId::WT:
     //  channel        SLBIn
     //   3*n           CellC    n+block*16  
     //   3*n+1         CellB    n+block*16
@@ -126,9 +125,9 @@ TGCChannelId* TGCCableInSLB::getChannelIn(const TGCChannelId* slbout,
 	+adjacentOfSLB;
     } 
     break;
-  case TGCIdBase::ST:
-  case TGCIdBase::WI:
-  case TGCIdBase::SI:
+  case TGCId::ST:
+  case TGCId::WI:
+  case TGCId::SI:
     //  channel        SLBIn
     //   2*n           CellB    n+block*16  
     //   2*n+1         CellA    n+block*16
@@ -189,7 +188,7 @@ TGCChannelId* TGCCableInSLB::getChannelOut(const TGCChannelId* slbin,
     TGCChannelSLBIn::convertCellType(slbin->getChannel());
   if(cellType==TGCChannelSLBIn::NoCellType) return nullptr;
 
-  TGCIdBase::ModuleType moduleType = slbin->getModuleType();
+  TGCId::ModuleType moduleType = slbin->getModuleType();
   int channelInCell = 
     TGCChannelSLBIn::convertChannelInCell(slbin->getChannel());
   int channelInSLB = 
@@ -202,7 +201,7 @@ TGCChannelId* TGCCableInSLB::getChannelOut(const TGCChannelId* slbin,
   int channel = -1;
   int block = -1;
   switch(moduleType){
-  case TGCIdBase::WD:
+  case TGCId::WD:
     if(orChannel==false){
       if(cellType==TGCChannelSLBIn::CellA)
 	channel = (channelInSLB-adjacentOfSLB)*numberOfLayer+1;
@@ -220,7 +219,7 @@ TGCChannelId* TGCCableInSLB::getChannelOut(const TGCChannelId* slbin,
       channel = channel%channelInBlock;
     }
     break;
-  case TGCIdBase::SD:
+  case TGCId::SD:
     if(orChannel==false){
       if(cellType==TGCChannelSLBIn::CellA)
 	channel = (channelInSLB-adjacentOfSLB)*numberOfLayer+1;
@@ -238,7 +237,7 @@ TGCChannelId* TGCCableInSLB::getChannelOut(const TGCChannelId* slbin,
       channel = channel%channelInBlock;
     }
     break;
-  case TGCIdBase::WT:
+  case TGCId::WT:
     if(cellType==TGCChannelSLBIn::CellA)
       channel = (channelInSLB-adjacentOfSLB)*numberOfLayer+2;
     if(cellType==TGCChannelSLBIn::CellB)
@@ -248,9 +247,9 @@ TGCChannelId* TGCCableInSLB::getChannelOut(const TGCChannelId* slbin,
     block = channel/channelInBlock;
     channel = channel%channelInBlock;
     break;
-  case TGCIdBase::ST:
-  case TGCIdBase::WI:
-  case TGCIdBase::SI:
+  case TGCId::ST:
+  case TGCId::WI:
+  case TGCId::SI:
     if(cellType== TGCChannelSLBIn::CellA||cellType== TGCChannelSLBIn::CellB){
       if(cellType==TGCChannelSLBIn::CellA)
 	channel = (channelInSLB-adjacentOfSLB)*numberOfLayer+1;

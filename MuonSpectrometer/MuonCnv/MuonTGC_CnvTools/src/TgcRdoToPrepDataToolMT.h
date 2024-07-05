@@ -16,7 +16,7 @@
 #include "MuonTrigCoinData/MuonTrigCoinData_Cache.h"
 #include "MuonRDO/TgcRdoContainer.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
-#include "TGCcablingInterface/ITGCcablingSvc.h"
+#include "MuonTGC_Cabling/MuonTGC_CablingSvc.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/HandleKeyArray.h"
 #include "StoreGate/UpdateHandleKey.h"
@@ -94,7 +94,7 @@ namespace Muon
       StatusCode setupState(const EventContext& ctx, State& state) const;
 
       struct CablingInfo {
-        const ITGCcablingSvc* m_tgcCabling = nullptr;
+        const MuonTGC_CablingSvc* m_tgcCabling;
         /** Conversion from hash to onlineId */  
         std::vector<uint16_t> m_hashToOnlineId;
         int m_MAX_N_ROD = 0;
@@ -397,9 +397,6 @@ namespace Muon
 
       ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc {this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
       
-      /* TGC Cabling service */
-      const ITGCcablingSvc* m_tgcCabling = nullptr;
-
       /** TgcPrepRawData container key for current BC */ 
       Gaudi::Property<std::string> m_outputCollectionLocation{this, "OutputCollection", "TGC_Measurements"};      
       

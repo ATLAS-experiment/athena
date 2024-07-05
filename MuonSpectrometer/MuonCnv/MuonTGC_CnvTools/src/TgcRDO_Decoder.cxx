@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TgcRDO_Decoder.h"
@@ -7,14 +7,11 @@
 #include "MuonDigitContainer/TgcDigit.h"
 #include "MuonRDO/TgcRawData.h"
 #include "Identifier/Identifier.h"
-#include "TGCcablingInterface/ITGCcablingSvc.h"
-#include "TGCcablingInterface/ITGCcablingServerSvc.h"
 
 // constructor 
 Muon::TgcRDO_Decoder::TgcRDO_Decoder
 (const std::string& type, const std::string& name, const IInterface* parent)
   : AthAlgTool(type, name, parent), 
-    m_cabling(nullptr), 
     m_applyPatch(false) 
 {
   declareInterface<ITGC_RDO_Decoder>(this);
@@ -25,10 +22,7 @@ StatusCode Muon::TgcRDO_Decoder::initialize()
   ATH_MSG_DEBUG("TgcRDO_Decoder::initialize"); 
 
   //try to configure the cabling service
-  StatusCode sc = getCabling();
-  if(sc.isFailure()) {
-      ATH_MSG_INFO( "TGCCablingServer not yet configured; postone TGCcabling initialization at first event. " );
-  }
+  ATH_CHECK(m_cabling.retrieve());
 
   return StatusCode::SUCCESS;
 }
@@ -45,9 +39,9 @@ void Muon::TgcRDO_Decoder::applyPatch(bool patch)
 
 TgcDigit* Muon::TgcRDO_Decoder::getDigit(const TgcRawData * rawData, bool orFlag) const 
 {
-  // ITGCcablingSvc should be configured at initialise
+  // MuonTGC_CablingSvc should be configured at initialise
   if(!m_cabling){
-    ATH_MSG_ERROR("ITGCcablingSvc is not available in TgcRDO_Decoder::getDigit()");
+    ATH_MSG_ERROR("MuonTGC_CablingSvc is not available in TgcRDO_Decoder::getDigit()");
     return nullptr;
   }
 
@@ -151,24 +145,4 @@ Identifier Muon::TgcRDO_Decoder::getOfflineData(const TgcRawData * rawData, bool
   return chanId;
 }
 
-StatusCode Muon::TgcRDO_Decoder::getCabling() {
-  // get TGC cablingSvc
-
-  const ITGCcablingServerSvc* TgcCabGet = nullptr;
-  StatusCode sc = service("Muon::TGCCablingServerSvc", TgcCabGet);
-  if(!sc.isSuccess()) {
-    msg(sc.isFailure() ? MSG::FATAL : MSG::ERROR) << "Could not get TGCCablingServerSvc !" << endmsg;
-    return sc;
-  }
-  
-  sc = TgcCabGet->giveCabling(m_cabling);
-  if(!sc.isSuccess()) {
-    msg(sc.isFailure() ? MSG::FATAL : MSG::ERROR) << "Could not get ITGCcablingSvc from Server!" << endmsg;
-    return sc;
-  } else {
-    ATH_MSG_DEBUG("Found the ITGCcablingSvc.");
-  }
- 
-  return sc;
-} 
 

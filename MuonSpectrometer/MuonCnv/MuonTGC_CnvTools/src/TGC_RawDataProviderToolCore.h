@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTGC_CNVTOOLS_TGC_RAWDATAPROVIDERTOOLCORE_H
@@ -14,7 +14,7 @@
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "ByteStreamCnvSvcBase/IROBDataProviderSvc.h"
 #include "MuonTGC_CnvTools/ITGC_RodDecoder.h"
-#include "TGCcablingInterface/ITGCcablingSvc.h"
+#include "MuonTGC_Cabling/MuonTGC_CablingSvc.h"
 #include "CxxUtils/CachedPointer.h"
 
 class TgcRdoContainer;
@@ -58,11 +58,11 @@ namespace Muon {
       /** ID converter */
       TGC_Hid2RESrcID                     m_hid2re;
       /** TGC cabling Svc */
-      CxxUtils::CachedPointer<const ITGCcablingSvc> m_cabling;
+      CxxUtils::CachedPointer<const MuonTGC_CablingSvc> m_cabling;
       /** Rob Data Provider handle */
       ServiceHandle<IROBDataProviderSvc>  m_robDataProvider;
 
-      const ITGCcablingSvc* getCabling() const;
+      const MuonTGC_CablingSvc* getCabling() const;
     };
 } // end of namespace
 

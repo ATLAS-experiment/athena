@@ -14,9 +14,9 @@ class TGCChannelPPOut : public TGCChannelId
 {
 public:
   // Constructor & Destructor
-  TGCChannelPPOut(TGCIdBase::SideType side,
-		  TGCIdBase::ModuleType module,
-		  TGCIdBase::RegionType region,
+  TGCChannelPPOut(TGCId::SideType side,
+		  TGCId::ModuleType module,
+		  TGCId::RegionType region,
 		  int sector,
 		  int id,
 		  int block,

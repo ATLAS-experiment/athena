@@ -14,7 +14,7 @@ class TGCModuleSSW : public TGCModuleId
 {
 public:
   // Constructor & Destructor
-  TGCModuleSSW(TGCIdBase::SideType side,
+  TGCModuleSSW(TGCId::SideType side,
 	       int readoutSector,
 	       int id);
 

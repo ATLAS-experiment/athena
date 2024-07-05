@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigT1TGC )
@@ -11,8 +11,9 @@ atlas_add_library( TrigT1TGCLib
                    src/*.cxx
                    PUBLIC_HEADERS TrigT1TGC
                    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps AthenaKernel ByteStreamData GaudiKernel Identifier MuonCondSvcLib MuonDigitContainer MuonRDO StoreGateLib TileEvent TrigT1Interfaces TGCTriggerCondSvcLib xAODMuon
-                   PRIVATE_LINK_LIBRARIES AthenaPoolUtilities MuonCondInterface PathResolver TGCcablingInterfaceLib TrigConfL1Data )
+                   LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps AthenaKernel ByteStreamData
+                                  GaudiKernel Identifier MuonCondSvcLib MuonDigitContainer MuonRDO MuonTGC_CablingLib StoreGateLib TileEvent TrigT1Interfaces TGCTriggerCondSvcLib xAODMuon
+		   PRIVATE_LINK_LIBRARIES AthenaPoolUtilities MuonCondInterface PathResolver TrigConfL1Data )
 
 atlas_add_component( TrigT1TGC
                      src/components/*.cxx

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTGC_CABLING_TGCCHANNELSLBOUT_HH
@@ -12,11 +12,11 @@ namespace MuonTGC_Cabling
   
 class TGCChannelSLBOut : public TGCChannelId
 {
-public:
+ public:
   // Constructor & Destructor
-  TGCChannelSLBOut(TGCIdBase::SideType side,
-		   TGCIdBase::ModuleType module,
-		   TGCIdBase::RegionType region,
+  TGCChannelSLBOut(TGCId::SideType side,
+		   TGCId::ModuleType module,
+		   TGCId::RegionType region,
 		   int sector,
 		   int id,
 		   int block,
@@ -43,9 +43,9 @@ private:
   static const int s_channelInBlockForST;
 
 public:
-  static int getNumberOfBlock(TGCIdBase::ModuleType moduleType);
-  static int getNumberOfLayer(TGCIdBase::ModuleType moduleType);
-  static int getChannelInBlock(TGCIdBase::ModuleType moduleType);
+  static int getNumberOfBlock(TGCId::ModuleType moduleType);
+  static int getNumberOfLayer(TGCId::ModuleType moduleType);
+  static int getChannelInBlock(TGCId::ModuleType moduleType);
 
 private:
   TGCChannelSLBOut(void) {}

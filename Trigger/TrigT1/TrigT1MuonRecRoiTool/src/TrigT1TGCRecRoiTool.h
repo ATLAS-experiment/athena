@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGT1TGCRECROITOOL_H
@@ -7,10 +7,13 @@
 
 #include "TrigT1Interfaces/ITrigT1MuonRecRoiTool.h"
 #include "AthenaBaseComps/AthAlgTool.h"
+#include "MuonTGC_Cabling/MuonTGC_CablingSvc.h"
 
-class TGCIdBase;
+namespace MuonTGC_Cabling {
+  class TGCId;
+}
 class Identifier;
-class ITGCcablingSvc;
+
 namespace Muon{
   class IMuonIdHelperSvc;
 }
@@ -39,7 +42,7 @@ namespace LVL1 {
       // does not exists for TGCs
       bool etaDimLow (const TrigT1MuonRecRoiData& , double& , double& ) const override {return false;}
       bool etaDimHigh(const TrigT1MuonRecRoiData& , double& , double& ) const override {return false;}
-      
+
   private:
       
       enum EdgeType {NonEdge=-1,
@@ -50,7 +53,7 @@ namespace LVL1 {
       enum DummyOffset {DummyOffset=-9999};
       
       bool getSLBparameters(const unsigned int & roIWord,
-			    TGCIdBase & tgcIdBase,
+			    MuonTGC_Cabling::TGCId & tgcId,
 			    unsigned int & sectorID,
 			    unsigned int & roiNumber,
 			    unsigned int & r,
@@ -58,41 +61,40 @@ namespace LVL1 {
 			    int & wireSLBId,
 			    int & block ) const;
       
-      std::unique_ptr<TGCIdBase> getWireASDOut(const TGCIdBase& tgcIdBase,
-					       unsigned int sectorID,
-					       int wireSLBId,
-					       int block,
-					       int phi ,
-					       int offset) const;
+      std::unique_ptr<MuonTGC_Cabling::TGCChannelId> getWireASDOut(const MuonTGC_Cabling::TGCId& tgcId,
+					   unsigned int sectorID,
+					   int wireSLBId,
+					   int block,
+					   int phi,
+					   int offset) const;
       
-      std::unique_ptr<TGCIdBase> getStripASDOut(const TGCIdBase& tgcIdBase,
-						unsigned int sectorID,
-						int wireSLBId,
-						int block,
-						int phi,
-						int wireOffset,
-						int stripOffset=DummyOffset) const;
+      std::unique_ptr<MuonTGC_Cabling::TGCChannelId> getStripASDOut(const MuonTGC_Cabling::TGCId& tgcId,
+		                            unsigned int sectorID,
+					    int wireSLBId,
+					    int block,
+					    int phi,
+					    int wireOffset,
+					    int stripOffset=DummyOffset) const;
       
       void getWireInfo(double& eta, double& phi,
 		       Identifier & wireId,
-		       std::unique_ptr<TGCIdBase> w_asdout,
+		       std::unique_ptr<MuonTGC_Cabling::TGCChannelId> w_asdout,
 		       EdgeType edge=NonEdge) const;
       
       void getStripInfo(double& eta, double& phi,
 			Identifier & stripId,
-			std::unique_ptr<TGCIdBase> s_asdout,
+			std::unique_ptr<MuonTGC_Cabling::TGCChannelId> s_asdout,
 			EdgeType edge=NonEdge) const;
-      
-      
+
+
       BooleanProperty m_useRun3Config{this,"UseRun3Config",false,"use Run 3 config"};
       BooleanProperty m_patchForRoIWord{this,"PatchForRoIWord",false,"apply a patch to RoI word"};
       BooleanProperty m_useConditionData{this,"UseConditionData",true,"use condition data"};
       ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc {this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
       SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_DetectorManagerKey {this, "DetectorManagerKey","MuonDetectorManager","Key of input MuonDetectorManager condition data"};
-      const ITGCcablingSvc* m_cabling{nullptr};
-      
-    }; // end of TrigT1TGCRecRoiTool
-} // namespace LVL1
+      ServiceHandle<MuonTGC_CablingSvc> m_cabling{this, "TGCCablingSvc", "MuonTGC_CablingSvc"};
+  };  // end of TrigT1TGCRecRoiTool
+}  // namespace LVL1
 
 
 #endif

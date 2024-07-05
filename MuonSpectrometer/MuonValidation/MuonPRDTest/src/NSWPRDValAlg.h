@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONPRDTEST_NSWPRDVALALG_H
@@ -10,7 +10,7 @@
 #include "EDM_object.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonTesterTree/MuonTesterTree.h"
-#include "TGCcablingInterface/ITGCcablingSvc.h"
+#include "MuonTGC_Cabling/MuonTGC_CablingSvc.h"
 #include "MuonCSC_CnvTools/ICSC_RDO_Decoder.h"
 
 class NSWPRDValAlg : public AthHistogramAlgorithm {
@@ -33,7 +33,7 @@ public:
 private:    
     MuonVal::MuonTesterTree m_tree{"NSWValTree", "NSWPRDValAlg"};
 
-    const ITGCcablingSvc* m_tgcCabling{nullptr};
+    ServiceHandle<MuonTGC_CablingSvc> m_tgcCabling{this, "TGCCablingSvc", "MuonTGC_CablingSvc"};
 
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
     PublicToolHandle<Muon::ICSC_RDO_Decoder> m_csc_decoder{this, "CscRDODecoder", "Muon::CscRDO_Decoder/CSC_RDODecoder"};

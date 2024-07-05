@@ -4,7 +4,6 @@
 
 #include "MuonTGC_Cabling/TGCCableSSWToROD.h"
 
-#include "TGCcablingInterface/TGCIdBase.h"
 #include "MuonTGC_Cabling/TGCDatabaseSLBToROD.h" 
 #include "MuonTGC_Cabling/TGCModuleSSW.h"
 #include "MuonTGC_Cabling/TGCModuleROD.h"
@@ -63,7 +62,7 @@ TGCModuleMap* TGCCableSSWToROD::getModule(const TGCModuleId* moduleId) const {
 TGCModuleMap* TGCCableSSWToROD::getModuleIn(const TGCModuleId* rod) const {
   if(!rod->isValid()) return nullptr;
 
-  const TGCIdBase::SideType rodSideType = rod->getSideType(); 
+  const TGCId::SideType rodSideType = rod->getSideType(); 
   const int rodReadoutSector = rod->getReadoutSector();
 
   TGCModuleMap* mapId = nullptr;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // STL
@@ -37,8 +37,6 @@
 #include "MuonDigitContainer/TgcDigitCollection.h"
 #include "MuonDigitContainer/TgcDigit.h"
 
-#include "TGCcablingInterface/ITGCcablingSvc.h"
-#include "TGCcablingInterface/ITGCcablingServerSvc.h"
 #include "PathResolver/PathResolver.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 
@@ -50,7 +48,6 @@ namespace LVL1TGCTrigger {
 
 LVL1TGCTrigger::LVL1TGCTrigger(const std::string& name, ISvcLocator* pSvcLocator)
 : AthAlgorithm(name,pSvcLocator),
-  m_cabling(0),
   m_db(0),
   m_nEventInSector(0),
   m_innerTrackletSlotHolder( tgcArgs() ),
@@ -102,6 +99,14 @@ StatusCode LVL1TGCTrigger::initialize()
 
     // initialize the TGCcabling
     ATH_CHECK(getCabling());
+
+    // create TGCElectronicsSystem
+    m_system = std::make_unique<TGCElectronicsSystem>(&m_tgcArgs,m_db);
+
+    m_TimingManager = std::make_unique<TGCTimingManager>(m_readCondKey);
+    m_TimingManager->setBunchCounter(0);
+
+    m_nEventInSector = 0;
 
     // read and write handle key
     ATH_CHECK(m_keyTgcRdoIn.initialize());
@@ -1235,35 +1240,23 @@ int LVL1TGCTrigger::getLPTTypeInRawData(int type)
 ///////////////////////////////////////////////////////////
 StatusCode LVL1TGCTrigger::getCabling()
 {
-    ATH_MSG_DEBUG("LVL1TGCTrigger::getCabling()");
+  ATH_MSG_DEBUG("LVL1TGCTrigger::getCabling()");
 
-    // TGCcablingSvc
-    // get Cabling Server Service
-    const ITGCcablingServerSvc* TgcCabGet = 0;
-    ATH_CHECK(service("Muon::TGCCablingServerSvc", TgcCabGet));
+  // get Cabling service
+  ATH_CHECK(m_cabling.retrieve());
 
-    // get Cabling Service
-    ATH_CHECK(TgcCabGet->giveCabling(m_cabling));
-
-    int maxRodId, maxSRodId, maxSswId, maxSbloc,minChannelId, maxChannelId;
-    m_cabling->getReadoutIDRanges( maxRodId, maxSRodId, maxSswId, maxSbloc,minChannelId, maxChannelId);
-    if (maxRodId ==12) {
+  int maxRodId, maxSRodId, maxSswId, maxSbloc,minChannelId, maxChannelId;
+  m_cabling->getReadoutIDRanges( maxRodId, maxSRodId, maxSswId, maxSbloc,minChannelId, maxChannelId);
+  if (maxRodId ==12) {
       ATH_MSG_INFO(m_cabling->name() << " is OK");
-    } else {
+  } else {
       ATH_MSG_FATAL("Old TGCcablingSvc(octant segmentation) can not be used !");
       return StatusCode::FAILURE;
-    }
+  }
 
-    // create TGCElectronicsSystem
-    m_system = std::make_unique<TGCElectronicsSystem>(&m_tgcArgs,m_db);
-    
-    m_TimingManager = std::make_unique<TGCTimingManager>(m_readCondKey);
-    m_TimingManager->setBunchCounter(0);
-    m_nEventInSector = 0;
+  ATH_MSG_DEBUG("finished LVL1TGCTrigger::getCabling()");
 
-    ATH_MSG_DEBUG("finished LVL1TGCTrigger::getCabling()");
-
-    return StatusCode::SUCCESS;
+  return StatusCode::SUCCESS;
 }
 
 

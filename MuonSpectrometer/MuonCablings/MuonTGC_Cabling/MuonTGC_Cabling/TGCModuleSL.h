@@ -14,8 +14,8 @@ class TGCModuleSL : public TGCModuleId
 {
 public:
   // Constructor & Destructor
-  TGCModuleSL(TGCIdBase::SideType side,
-	      TGCIdBase::RegionType region,
+  TGCModuleSL(TGCId::SideType side,
+	      TGCId::RegionType region,
 	      int sector);
 
   virtual ~TGCModuleSL(void) {}

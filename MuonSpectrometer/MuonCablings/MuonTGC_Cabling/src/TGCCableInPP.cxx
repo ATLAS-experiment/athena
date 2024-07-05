@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTGC_Cabling/TGCCableInPP.h"
@@ -15,44 +15,44 @@ namespace MuonTGC_Cabling {
 TGCCableInPP::TGCCableInPP(const std::string& filename)
   : TGCCable(TGCCable::InPP)
 {
-  m_database[TGCIdBase::Endcap][TGCIdBase::WD] = new TGCDatabaseInPP(filename,"EWD");
-  m_database[TGCIdBase::Endcap][TGCIdBase::WT] = new TGCDatabaseInPP(filename,"EWT");
-  m_database[TGCIdBase::Endcap][TGCIdBase::SD] = new TGCDatabaseInPP(filename,"ESD");
-  m_database[TGCIdBase::Endcap][TGCIdBase::ST] = new TGCDatabaseInPP(filename,"EST");
-  m_database[TGCIdBase::Endcap][TGCIdBase::WI] = new TGCDatabaseInPP(filename,"EWI");
-  m_database[TGCIdBase::Endcap][TGCIdBase::SI] = new TGCDatabaseInPP(filename,"ESI");
-  m_database[TGCIdBase::Forward][TGCIdBase::WD] = new TGCDatabaseInPP(filename,"FWD");
-  m_database[TGCIdBase::Forward][TGCIdBase::WT] = new TGCDatabaseInPP(filename,"FWT");
-  m_database[TGCIdBase::Forward][TGCIdBase::SD] = new TGCDatabaseInPP(filename,"FSD");
-  m_database[TGCIdBase::Forward][TGCIdBase::ST] = new TGCDatabaseInPP(filename,"FST");
-  m_database[TGCIdBase::Forward][TGCIdBase::WI] = new TGCDatabaseInPP(filename,"FWI");
-  m_database[TGCIdBase::Forward][TGCIdBase::SI] = new TGCDatabaseInPP(filename,"FSI");
+  m_database[TGCId::Endcap][TGCId::WD] = new TGCDatabaseInPP(filename,"EWD");
+  m_database[TGCId::Endcap][TGCId::WT] = new TGCDatabaseInPP(filename,"EWT");
+  m_database[TGCId::Endcap][TGCId::SD] = new TGCDatabaseInPP(filename,"ESD");
+  m_database[TGCId::Endcap][TGCId::ST] = new TGCDatabaseInPP(filename,"EST");
+  m_database[TGCId::Endcap][TGCId::WI] = new TGCDatabaseInPP(filename,"EWI");
+  m_database[TGCId::Endcap][TGCId::SI] = new TGCDatabaseInPP(filename,"ESI");
+  m_database[TGCId::Forward][TGCId::WD] = new TGCDatabaseInPP(filename,"FWD");
+  m_database[TGCId::Forward][TGCId::WT] = new TGCDatabaseInPP(filename,"FWT");
+  m_database[TGCId::Forward][TGCId::SD] = new TGCDatabaseInPP(filename,"FSD");
+  m_database[TGCId::Forward][TGCId::ST] = new TGCDatabaseInPP(filename,"FST");
+  m_database[TGCId::Forward][TGCId::WI] = new TGCDatabaseInPP(filename,"FWI");
+  m_database[TGCId::Forward][TGCId::SI] = new TGCDatabaseInPP(filename,"FSI");
 }
   
 TGCCableInPP::~TGCCableInPP(void)
 {
-  delete m_database[TGCIdBase::Endcap][TGCIdBase::WD];
-  delete m_database[TGCIdBase::Endcap][TGCIdBase::WT];
-  delete m_database[TGCIdBase::Endcap][TGCIdBase::SD];
-  delete m_database[TGCIdBase::Endcap][TGCIdBase::ST];
-  delete m_database[TGCIdBase::Endcap][TGCIdBase::WI];
-  delete m_database[TGCIdBase::Endcap][TGCIdBase::SI];
-  delete m_database[TGCIdBase::Forward][TGCIdBase::WD];
-  delete m_database[TGCIdBase::Forward][TGCIdBase::WT];
+  delete m_database[TGCId::Endcap][TGCId::WD];
+  delete m_database[TGCId::Endcap][TGCId::WT];
+  delete m_database[TGCId::Endcap][TGCId::SD];
+  delete m_database[TGCId::Endcap][TGCId::ST];
+  delete m_database[TGCId::Endcap][TGCId::WI];
+  delete m_database[TGCId::Endcap][TGCId::SI];
+  delete m_database[TGCId::Forward][TGCId::WD];
+  delete m_database[TGCId::Forward][TGCId::WT];
 
-  delete m_database[TGCIdBase::Forward][TGCIdBase::SD];
-  delete m_database[TGCIdBase::Forward][TGCIdBase::ST];
-  delete m_database[TGCIdBase::Forward][TGCIdBase::WI];
-  delete m_database[TGCIdBase::Forward][TGCIdBase::SI];
+  delete m_database[TGCId::Forward][TGCId::SD];
+  delete m_database[TGCId::Forward][TGCId::ST];
+  delete m_database[TGCId::Forward][TGCId::WI];
+  delete m_database[TGCId::Forward][TGCId::SI];
 }
 
 
 TGCChannelId* TGCCableInPP::getChannel(const TGCChannelId* channelId,
 				       bool orChannel) const {
   if(channelId){
-    if(channelId->getChannelIdType()==TGCIdBase::PPIn)
+    if(channelId->getChannelIdType()==TGCChannelId::ChannelIdType::PPIn)
       return getChannelOut(channelId,orChannel);
-    if(channelId->getChannelIdType()==TGCIdBase::PPOut)
+    if(channelId->getChannelIdType()==TGCChannelId::ChannelIdType::PPOut)
       return getChannelIn(channelId,orChannel);
   }
   return nullptr;
@@ -62,17 +62,17 @@ TGCChannelId* TGCCableInPP::getChannelIn(const TGCChannelId* ppout,
 					 bool orChannel) const {
   if(ppout->isValid()==false) return nullptr;
   
-  TGCIdBase::ModuleType moduleType = ppout->getModuleType();
+  TGCId::ModuleType moduleType = ppout->getModuleType();
   
   int ndatabaseP = 1;
   TGCDatabase* databaseP[2];
   databaseP[0] = m_database[ppout->getRegionType()][moduleType];
   // EI/FI
-  //  wire(TGCIdBase::WI) and strip(TGCIdBase::SI) of a chamber
+  //  wire(TGCId::WI) and strip(TGCId::SI) of a chamber
   //  use the same SLB chip
-  //  The SLB chip is treated as TGCIdBase::WI in TGCCableSLBToSSW.cxx
-  if(moduleType==TGCIdBase::WI) {
-    databaseP[1] = m_database[ppout->getRegionType()][TGCIdBase::SI];
+  //  The SLB chip is treated as TGCId::WI in TGCCableSLBToSSW.cxx
+  if(moduleType==TGCId::WI) {
+    databaseP[1] = m_database[ppout->getRegionType()][TGCId::SI];
     ndatabaseP = 2;
   }
   
@@ -81,11 +81,11 @@ TGCChannelId* TGCCableInPP::getChannelIn(const TGCChannelId* ppout,
   
   for(int idatabaseP=0; idatabaseP<ndatabaseP; idatabaseP++) {
     // EI/FI
-    //  wire(TGCIdBase::WI) and strip(TGCIdBase::SI) of a chamber
+    //  wire(TGCId::WI) and strip(TGCId::SI) of a chamber
     //  use the same SLB chip
-    //  The SLB chip is treated as TGCIdBase::WI in TGCCableSLBToSSW.cxx
+    //  The SLB chip is treated as TGCId::WI in TGCCableSLBToSSW.cxx
     if(idatabaseP==1) {
-      moduleType = TGCIdBase::SI;
+      moduleType = TGCId::SI;
     }
 
     int indexIn[TGCDatabaseInPP::NIndexIn] = 
@@ -157,7 +157,7 @@ TGCChannelId* TGCCableInPP::getChannelOut(const TGCChannelId* ppin,
       //TGCChannelSLBIn::CellType cellType = TGCChannelSLBIn::NoCellType;
       int channelInSLB = -1;
       bool adjacent = false;
-      TGCIdBase::ModuleType moduleType = ppin->getModuleType();
+      TGCId::ModuleType moduleType = ppin->getModuleType();
       if(block==0||block==2){//C,D
 	int lengthOfC = TGCChannelSLBIn::getLengthOfSLB(moduleType,
 							TGCChannelSLBIn::CellC);
@@ -201,8 +201,8 @@ TGCChannelId* TGCCableInPP::getChannelOut(const TGCChannelId* ppin,
 	}
       }
        
-      if((moduleType == TGCIdBase::SD)  &&
-	 (ppin->getRegionType() == TGCIdBase::Endcap)){
+      if((moduleType == TGCId::SD)  &&
+	 (ppin->getRegionType() == TGCId::Endcap)){
 	// Strips of Middle doublets are ORed to the adjacent chamber  
 	adjacent = cond2;
       } 

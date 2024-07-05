@@ -1,14 +1,13 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTGC_Cabling/TGCModuleSROD.h"
 
-namespace MuonTGC_Cabling
-{
- 
+namespace MuonTGC_Cabling {
+
 // Constructor
-TGCModuleSROD::TGCModuleSROD(TGCIdBase::SideType vside,
+TGCModuleSROD::TGCModuleSROD(TGCId::SideType vside,
 			   int vreadoutSector)
   : TGCModuleId(TGCModuleId::SROD)
 {
@@ -20,10 +19,10 @@ TGCModuleSROD::TGCModuleSROD(TGCIdBase::SideType vside,
   
 bool TGCModuleSROD::isValid(void) const
 {
-  return (getSideType()  >TGCIdBase::NoSideType) &&
-    (getSideType()  <TGCIdBase::MaxSideType)     &&
+  return (getSideType()  >TGCId::NoSideType) &&
+    (getSideType()  <TGCId::MaxSideType)     &&
     (getReadoutSector() >=0)                     &&
-    (getReadoutSector() < NumberOfReadoutSector );
+    (getReadoutSector() < N_RODS);
 }
 
 } // end of namespace

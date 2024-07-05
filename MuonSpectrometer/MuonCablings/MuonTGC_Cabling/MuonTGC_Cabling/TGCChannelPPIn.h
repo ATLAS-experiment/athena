@@ -14,9 +14,9 @@ class TGCChannelPPIn : public TGCChannelId
 {
 public:
   // Constructor & Destructor
-  TGCChannelPPIn(TGCIdBase::SideType side,
-		 TGCIdBase::ModuleType module,
-		 TGCIdBase::RegionType region,
+  TGCChannelPPIn(TGCId::SideType side,
+		 TGCId::ModuleType module,
+		 TGCId::RegionType region,
 		 int sector,
 		 int id,
 		 int block,

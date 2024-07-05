@@ -75,10 +75,7 @@ def TGCCablingConfigCfg(flags):
     acc = ComponentAccumulator()
     if not flags.Detector.GeometryTGC: return acc
 
-    # No ServiceHandle in TGCCablingServerSvc
     acc.merge(MuonTGC_CablingSvcCfg(flags))
-
-    acc.addService( CompFactory.Muon.TGCCablingServerSvc(), primary=True )
 
     from IOVDbSvc.IOVDbSvcConfig import addFolders
     dbName = 'TGC_OFL' if flags.Input.isMC else 'TGC'

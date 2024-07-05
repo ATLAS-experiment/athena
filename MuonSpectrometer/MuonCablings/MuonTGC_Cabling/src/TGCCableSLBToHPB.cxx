@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTGC_Cabling/TGCCableSLBToHPB.h"
@@ -16,42 +16,42 @@ namespace MuonTGC_Cabling {
 TGCCableSLBToHPB::TGCCableSLBToHPB(const std::string& filename)
   : TGCCable(TGCCable::SLBToHPB)
 {
-  m_database[TGCIdBase::Endcap][TGCIdBase::WT] = 
+  m_database[TGCId::Endcap][TGCId::WT] = 
     new TGCDatabasePPToSL(filename,"SB EWT");
-  m_database[TGCIdBase::Endcap][TGCIdBase::WD] = 
+  m_database[TGCId::Endcap][TGCId::WD] = 
     new TGCDatabasePPToSL(filename,"SB EWD");
-  m_database[TGCIdBase::Endcap][TGCIdBase::ST] =
+  m_database[TGCId::Endcap][TGCId::ST] =
     new TGCDatabasePPToSL(filename,"SB EST");
-  m_database[TGCIdBase::Endcap][TGCIdBase::SD] = 
+  m_database[TGCId::Endcap][TGCId::SD] = 
     new TGCDatabasePPToSL(filename,"SB ESD");
-  m_database[TGCIdBase::Forward][TGCIdBase::WT] = 
+  m_database[TGCId::Forward][TGCId::WT] = 
     new TGCDatabasePPToSL(filename,"SB FWT");
-  m_database[TGCIdBase::Forward][TGCIdBase::WD] =
+  m_database[TGCId::Forward][TGCId::WD] =
     new TGCDatabasePPToSL(filename,"SB FWD");
-  m_database[TGCIdBase::Forward][TGCIdBase::ST] = 
+  m_database[TGCId::Forward][TGCId::ST] = 
     new TGCDatabasePPToSL(filename,"SB FST");
-  m_database[TGCIdBase::Forward][TGCIdBase::SD] = 
+  m_database[TGCId::Forward][TGCId::SD] = 
     new TGCDatabasePPToSL(filename,"SB FSD");
 }
 
 TGCCableSLBToHPB::~TGCCableSLBToHPB(void)
 {
-  delete m_database[TGCIdBase::Endcap][TGCIdBase::WT];
-  delete m_database[TGCIdBase::Endcap][TGCIdBase::WD];
-  delete m_database[TGCIdBase::Endcap][TGCIdBase::ST];
-  delete m_database[TGCIdBase::Endcap][TGCIdBase::SD];
-  delete m_database[TGCIdBase::Forward][TGCIdBase::WT];
-  delete m_database[TGCIdBase::Forward][TGCIdBase::WD];
-  delete m_database[TGCIdBase::Forward][TGCIdBase::ST];
-  delete m_database[TGCIdBase::Forward][TGCIdBase::SD];
+  delete m_database[TGCId::Endcap][TGCId::WT];
+  delete m_database[TGCId::Endcap][TGCId::WD];
+  delete m_database[TGCId::Endcap][TGCId::ST];
+  delete m_database[TGCId::Endcap][TGCId::SD];
+  delete m_database[TGCId::Forward][TGCId::WT];
+  delete m_database[TGCId::Forward][TGCId::WD];
+  delete m_database[TGCId::Forward][TGCId::ST];
+  delete m_database[TGCId::Forward][TGCId::SD];
 }
 
 TGCChannelId* TGCCableSLBToHPB::getChannel(const TGCChannelId* channelId,
 					   bool orChannel) const {
   if(channelId){
-    if(channelId->getChannelIdType()==TGCIdBase::SLBOut)
+    if(channelId->getChannelIdType()==TGCChannelId::ChannelIdType::SLBOut)
       return getChannelOut(channelId,orChannel);
-    if(channelId->getChannelIdType()==TGCIdBase::HPBIn)
+    if(channelId->getChannelIdType()==TGCChannelId::ChannelIdType::HPBIn)
       return getChannelIn(channelId,orChannel);
   }
   return nullptr;
@@ -82,14 +82,14 @@ TGCChannelId* TGCCableSLBToHPB::getChannelIn(const TGCChannelId* hpbin,
   delete hpb;
   if(!mapId) return nullptr;
   
-  int numOfBlock = TGCChannelSLBOut::getNumberOfBlock(TGCIdBase::WD);//SD
+  int numOfBlock = TGCChannelSLBOut::getNumberOfBlock(TGCId::WD);//SD
   if(numOfBlock==0) {
     delete mapId;
     mapId = nullptr;
     return nullptr;
   }
 
-  int chInBlock = TGCChannelSLBOut::getChannelInBlock(TGCIdBase::WD);//SD
+  int chInBlock = TGCChannelSLBOut::getChannelInBlock(TGCId::WD);//SD
   int slbInBlock = TGCChannelHPBIn::getSlbInBlock();
 
   // SLB module
@@ -127,7 +127,7 @@ TGCChannelId* TGCCableSLBToHPB::getChannelIn(const TGCChannelId* hpbin,
 }
 
 TGCChannelId* TGCCableSLBToHPB::getChannelInforHPB(const TGCChannelId* hpbin,
-						   TGCIdBase::ModuleType moduleType,
+						   TGCId::ModuleType moduleType,
 						   bool orChannel) const 
 {
   if(orChannel) return nullptr;
@@ -170,8 +170,8 @@ TGCChannelId* TGCCableSLBToHPB::getChannelInforHPB(const TGCChannelId* hpbin,
   int size = 0;
   switch(moduleType){
 
-  case TGCIdBase::WD:
-  case TGCIdBase::SD:
+  case TGCId::WD:
+  case TGCId::SD:
     slbInBlock = 3;    
     blockInHPB = hpbin->getBlock();
     nSlb = hpbin->getChannel()/(numOfBlock*2);
@@ -188,7 +188,7 @@ TGCChannelId* TGCCableSLBToHPB::getChannelInforHPB(const TGCChannelId* hpbin,
     channel    = (chInBlock/2)*posInHpb;
     break;
   
-  case TGCIdBase::WT:
+  case TGCId::WT:
     slbInBlock = 2;
     blockInHPB = hpbin->getBlock();
     nSlb = hpbin->getChannel()/(numOfBlock*2);
@@ -205,7 +205,7 @@ TGCChannelId* TGCCableSLBToHPB::getChannelInforHPB(const TGCChannelId* hpbin,
     channel    = (chInBlock/2)*posInHpb;
     break;
 
-  case TGCIdBase::ST:
+  case TGCId::ST:
     blockInHPB = hpbin->getBlock();
     if(blockInHPB==0 && hpbin->getChannel()<numOfBlock) port=1;
     else port=2;
@@ -259,7 +259,7 @@ TGCChannelId* TGCCableSLBToHPB::getChannelOut(const TGCChannelId* slbout,
 					      bool orChannel) const {
   if(orChannel) return nullptr;
   if(slbout->isValid()==false) return nullptr;
-  if(slbout->getMultipletType()==TGCIdBase::Triplet) return nullptr;
+  if(slbout->getMultipletType()==TGCId::Triplet) return nullptr;
   TGCChannelHPBIn* hpbin = nullptr;
   
   // SLB module
@@ -307,18 +307,18 @@ TGCModuleMap* TGCCableSLBToHPB::getModuleIn(const TGCModuleId* hpb) const {
   if(hpb->isValid()==false) return nullptr;
   const int hpbId = hpb->getId();
 
-  TGCIdBase::ModuleType doublet=TGCIdBase::NoModuleType;
-  TGCIdBase::ModuleType triplet=TGCIdBase::NoModuleType;
-  if(hpb->getSignalType()==TGCIdBase::Wire){
-    doublet = TGCIdBase::WD;
-    triplet = TGCIdBase::WT;
+  TGCId::ModuleType doublet=TGCId::NoModuleType;
+  TGCId::ModuleType triplet=TGCId::NoModuleType;
+  if(hpb->getSignalType()==TGCId::Wire){
+    doublet = TGCId::WD;
+    triplet = TGCId::WT;
   }
-  if(hpb->getSignalType()==TGCIdBase::Strip){
-    doublet = TGCIdBase::SD;
-    triplet = TGCIdBase::ST;
+  if(hpb->getSignalType()==TGCId::Strip){
+    doublet = TGCId::SD;
+    triplet = TGCId::ST;
   }
 
-  if(doublet==TGCIdBase::NoModuleType || triplet==TGCIdBase::NoModuleType) { 
+  if(doublet==TGCId::NoModuleType || triplet==TGCId::NoModuleType) { 
     return nullptr;
   }
   
@@ -361,7 +361,7 @@ TGCModuleMap* TGCCableSLBToHPB::getModuleIn(const TGCModuleId* hpb) const {
 }
 
 TGCModuleMap* TGCCableSLBToHPB::getModuleInforHPB(const TGCModuleId* hpb, 
-						  TGCIdBase::ModuleType moduleType) const {
+						  TGCId::ModuleType moduleType) const {
   if(hpb->isValid()==false) return nullptr;
 
   const int hpbId = hpb->getId();
@@ -376,13 +376,13 @@ TGCModuleMap* TGCCableSLBToHPB::getModuleInforHPB(const TGCModuleId* hpb,
 	int id = databaseP->getEntry(i,0);
 	int block = -100;
 	switch(moduleType){
-	case TGCIdBase::WD:
-	case TGCIdBase::SD:
+	case TGCId::WD:
+	case TGCId::SD:
 	block = databaseP->getEntry(i,2);
 	break;
 
-	case TGCIdBase::WT:
-	case TGCIdBase::ST:
+	case TGCId::WT:
+	case TGCId::ST:
 	block = -1*databaseP->getEntry(i,2);// check - sign
 	break;
 
@@ -416,7 +416,7 @@ TGCModuleMap* TGCCableSLBToHPB::getModuleOut(const TGCModuleId* slb) const {
       {
 	int id = databaseP->getEntry(i,1);
 	int block = databaseP->getEntry(i,2);
-	if(slb->getMultipletType()==TGCIdBase::Triplet) 
+	if(slb->getMultipletType()==TGCId::Triplet) 
 	  block *=-1;
 	
 	TGCModuleHPB* hpb = new TGCModuleHPB(slb->getSideType(),

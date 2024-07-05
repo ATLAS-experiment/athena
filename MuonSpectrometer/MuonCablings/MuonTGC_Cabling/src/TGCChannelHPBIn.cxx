@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTGC_Cabling/TGCChannelHPBIn.h"
@@ -10,14 +10,14 @@ namespace MuonTGC_Cabling
 {
  
 // Constructor
-TGCChannelHPBIn::TGCChannelHPBIn(TGCIdBase::SideType vside,
-				 TGCIdBase::SignalType vsignal,
-				 TGCIdBase::RegionType vregion,
+TGCChannelHPBIn::TGCChannelHPBIn(TGCId::SideType vside,
+				 TGCId::SignalType vsignal,
+				 TGCId::RegionType vregion,
 				 int vsector,
 				 int vid,
 				 int vblock,
 				 int vchannel)
-  : TGCChannelId(TGCIdBase::HPBIn)
+  : TGCChannelId(TGCChannelId::ChannelIdType::HPBIn)
 {
   setSideType(vside);
   setSignalType(vsignal);
@@ -40,12 +40,12 @@ TGCModuleId* TGCChannelHPBIn::getModule(void) const
 
 bool TGCChannelHPBIn::isValid(void) const
 {
-  if((getSideType()  >TGCIdBase::NoSideType)   &&
-     (getSideType()  <TGCIdBase::MaxSideType)  &&
-     (getSignalType()>TGCIdBase::NoSignalType) &&
-     (getSignalType()<TGCIdBase::MaxSignalType)&&
-     (getRegionType()>TGCIdBase::NoRegionType) &&
-     (getRegionType()<TGCIdBase::MaxRegionType)&&
+  if((getSideType()  >TGCId::NoSideType)   &&
+     (getSideType()  <TGCId::MaxSideType)  &&
+     (getSignalType()>TGCId::NoSignalType) &&
+     (getSignalType()<TGCId::MaxSignalType)&&
+     (getRegionType()>TGCId::NoRegionType) &&
+     (getRegionType()<TGCId::MaxRegionType)&&
      (getOctant()    >=0)                  &&
      (getOctant()    <8)                   &&
      (getId()        >=0)                  &&

@@ -14,7 +14,7 @@ class TGCModuleROD : public TGCModuleId
 {
 public:
   // Constructor & Destructor
-  TGCModuleROD(TGCIdBase::SideType side,
+  TGCModuleROD(TGCId::SideType side,
 	       int readoutSector);
 
   virtual ~TGCModuleROD(void) {}

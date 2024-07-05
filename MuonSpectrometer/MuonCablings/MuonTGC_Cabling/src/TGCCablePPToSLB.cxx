@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTGC_Cabling/TGCCablePPToSLB.h"
@@ -16,55 +16,55 @@ namespace MuonTGC_Cabling {
 TGCCablePPToSLB::TGCCablePPToSLB(const std::string& filename)
   : TGCCable(TGCCable::PPToSLB)
 {
-  m_database[TGCIdBase::Endcap][TGCIdBase::WT] = 
+  m_database[TGCId::Endcap][TGCId::WT] = 
     new TGCDatabasePPToSL(filename,"PP EWT");
-  m_database[TGCIdBase::Endcap][TGCIdBase::WD] =
+  m_database[TGCId::Endcap][TGCId::WD] =
     new TGCDatabasePPToSL(filename,"PP EWD");
-  m_database[TGCIdBase::Endcap][TGCIdBase::ST] = 
+  m_database[TGCId::Endcap][TGCId::ST] = 
     new TGCDatabasePPToSL(filename,"PP EST");
-  m_database[TGCIdBase::Endcap][TGCIdBase::SD] = 
+  m_database[TGCId::Endcap][TGCId::SD] = 
     new TGCDatabasePPToSL(filename,"PP ESD");
-  m_database[TGCIdBase::Endcap][TGCIdBase::WI] = 
+  m_database[TGCId::Endcap][TGCId::WI] = 
     new TGCDatabasePPToSL(filename,"PP EWI");
-  m_database[TGCIdBase::Endcap][TGCIdBase::SI] = 
+  m_database[TGCId::Endcap][TGCId::SI] = 
     new TGCDatabasePPToSL(filename,"PP ESI");
-  m_database[TGCIdBase::Forward][TGCIdBase::WT] =
+  m_database[TGCId::Forward][TGCId::WT] =
     new TGCDatabasePPToSL(filename,"PP FWT");
-  m_database[TGCIdBase::Forward][TGCIdBase::WD] = 
+  m_database[TGCId::Forward][TGCId::WD] = 
     new TGCDatabasePPToSL(filename,"PP FWD");
-  m_database[TGCIdBase::Forward][TGCIdBase::ST] = 
+  m_database[TGCId::Forward][TGCId::ST] = 
     new TGCDatabasePPToSL(filename,"PP FST");
-  m_database[TGCIdBase::Forward][TGCIdBase::SD] = 
+  m_database[TGCId::Forward][TGCId::SD] = 
     new TGCDatabasePPToSL(filename,"PP FSD");
-  m_database[TGCIdBase::Forward][TGCIdBase::WI] = 
+  m_database[TGCId::Forward][TGCId::WI] = 
     new TGCDatabasePPToSL(filename,"PP FWI");
-  m_database[TGCIdBase::Forward][TGCIdBase::SI] = 
+  m_database[TGCId::Forward][TGCId::SI] = 
     new TGCDatabasePPToSL(filename,"PP FSI");
 }
 
 TGCCablePPToSLB::~TGCCablePPToSLB(void)
   {
-    delete m_database[TGCIdBase::Endcap][TGCIdBase::WT];
-    delete m_database[TGCIdBase::Endcap][TGCIdBase::WD];
-    delete m_database[TGCIdBase::Endcap][TGCIdBase::ST];
-    delete m_database[TGCIdBase::Endcap][TGCIdBase::SD];
-    delete m_database[TGCIdBase::Endcap][TGCIdBase::WI];
-    delete m_database[TGCIdBase::Endcap][TGCIdBase::SI];
-    delete m_database[TGCIdBase::Forward][TGCIdBase::WT];
-    delete m_database[TGCIdBase::Forward][TGCIdBase::WD];
-    delete m_database[TGCIdBase::Forward][TGCIdBase::ST];
-    delete m_database[TGCIdBase::Forward][TGCIdBase::SD];
-    delete m_database[TGCIdBase::Forward][TGCIdBase::WI];
-    delete m_database[TGCIdBase::Forward][TGCIdBase::SI];
+    delete m_database[TGCId::Endcap][TGCId::WT];
+    delete m_database[TGCId::Endcap][TGCId::WD];
+    delete m_database[TGCId::Endcap][TGCId::ST];
+    delete m_database[TGCId::Endcap][TGCId::SD];
+    delete m_database[TGCId::Endcap][TGCId::WI];
+    delete m_database[TGCId::Endcap][TGCId::SI];
+    delete m_database[TGCId::Forward][TGCId::WT];
+    delete m_database[TGCId::Forward][TGCId::WD];
+    delete m_database[TGCId::Forward][TGCId::ST];
+    delete m_database[TGCId::Forward][TGCId::SD];
+    delete m_database[TGCId::Forward][TGCId::WI];
+    delete m_database[TGCId::Forward][TGCId::SI];
   }
   
 
 TGCChannelId* TGCCablePPToSLB::getChannel(const TGCChannelId* channelId,
 					  bool orChannel) const {
   if(channelId){
-    if(channelId->getChannelIdType()==TGCIdBase::PPOut)
+    if(channelId->getChannelIdType()==TGCChannelId::ChannelIdType::PPOut)
       return getChannelOut(channelId,orChannel);
-    if(channelId->getChannelIdType()==TGCIdBase::SLBIn)
+    if(channelId->getChannelIdType()==TGCChannelId::ChannelIdType::SLBIn)
       return getChannelIn(channelId,orChannel);
   }
   return nullptr;
@@ -88,7 +88,7 @@ TGCChannelId* TGCCablePPToSLB::getChannelIn(const TGCChannelId* slbin,
 
   // SLB channel
   const TGCChannelSLBIn* slbIn = nullptr;
-  if(slbin->getChannelIdType()==TGCIdBase::SLBIn){
+  if(slbin->getChannelIdType()==TGCChannelId::ChannelIdType::SLBIn){
     slbIn = dynamic_cast<const TGCChannelSLBIn*>(slbin);
   } 
   if(!slbIn) {

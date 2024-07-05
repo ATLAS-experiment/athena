@@ -11,7 +11,7 @@ atlas_add_library (MuonPRDTestLib
                    MuonPRDTest/*.h Root/*.cxx
                    PUBLIC_HEADERS MuonPRDTest
                    LINK_LIBRARIES AthenaBaseComps GeneratorObjects MuonDigitContainer MuonIdHelpersLib MuonReadoutGeometry MuonSimData MuonSimEvent 
-				  MuonPrepRawData MuonRDO MuonCSC_CnvToolsLib MuonTesterTreeLib StoreGateLib TrackRecordLib TGCcablingInterfaceLib
+                                  MuonPrepRawData MuonRDO MuonCSC_CnvToolsLib MuonTesterTreeLib StoreGateLib TrackRecordLib MuonTGC_CablingLib
                    PRIVATE_LINK_LIBRARIES AthenaKernel AtlasHepMCLib )
 
 # Component(s) in the package:
@@ -20,7 +20,7 @@ atlas_add_component( MuonPRDTest
                      src/components/*.cxx
                      INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
                      LINK_LIBRARIES ${CLHEP_LIBRARIES} ${ROOT_LIBRARIES} AthenaBaseComps AthenaKernel GaudiKernel MuonAGDDDescription MuonCSC_CnvToolsLib 
-                                    MuonDigitContainer MuonPRDTestLib MuonPrepRawData MuonRDO MuonReadoutGeometry MuonSimData MuonSimEvent TGCcablingInterfaceLib 
+                                    MuonDigitContainer MuonPRDTestLib MuonPrepRawData MuonRDO MuonReadoutGeometry MuonSimData MuonSimEvent MuonTGC_CablingLib 
                                     AthAnalysisBaseCompsLib xAODCutFlow PileupReweightingLib EventBookkeeperMetaData xAODMetaData MuonPattern)
 
 # Install files from the package:

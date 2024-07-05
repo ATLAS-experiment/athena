@@ -12,8 +12,7 @@
 #include "MuonRDO/TgcRdo.h"
 #include "MuonRDO/TgcRdoContainer.h"
 #include "StoreGate/DataHandle.h"
-#include "TGCcablingInterface/ITGCcablingServerSvc.h"
-#include "TGCcablingInterface/ITGCcablingSvc.h"
+#include "MuonTGC_Cabling/MuonTGC_CablingSvc.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -37,8 +36,7 @@ private:
     BooleanProperty m_isNewTgcDigit{this, "isNewTgcDigit",  true};  // to select new TgcDigit (bcTag added)
 
 protected:
-    ServiceHandle<ITGCcablingServerSvc> m_tgc_cabling_server{this, "CablingServer", "Muon::TGCCablingServerSvc"};
-    const ITGCcablingSvc* m_cabling{nullptr};
+    ServiceHandle<MuonTGC_CablingSvc> m_cabling{this, "CablingSvc", "MuonTGC_CablingSvc"};
 
     SG::WriteHandleKey<TgcRdoContainer> m_rdoContainerKey{this, "OutputObjectName", "TGCRDO", "WriteHandleKey for Output TgcRdoContainer"};
     SG::ReadHandleKey<TgcDigitContainer> m_digitContainerKey{this, "InputObjectName", "TGC_DIGITS",

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTGC_Cabling/TGCCableInASD.h"
@@ -14,54 +14,54 @@ namespace MuonTGC_Cabling {
 TGCCableInASD::TGCCableInASD(const std::string& filename)
   : TGCCable(TGCCable::InASD)
 {
-  m_database[TGCIdBase::Endcap][TGCIdBase::WD] = 
+  m_database[TGCId::Endcap][TGCId::WD] = 
     new TGCDatabaseASDToPP(filename,"EWD");
-  m_database[TGCIdBase::Endcap][TGCIdBase::WT] = 
+  m_database[TGCId::Endcap][TGCId::WT] = 
     new TGCDatabaseASDToPP(filename,"EWT");
-  m_database[TGCIdBase::Endcap][TGCIdBase::SD] =
+  m_database[TGCId::Endcap][TGCId::SD] =
     new TGCDatabaseASDToPP(filename,"ESD");
-  m_database[TGCIdBase::Endcap][TGCIdBase::ST] =
+  m_database[TGCId::Endcap][TGCId::ST] =
     new TGCDatabaseASDToPP(filename,"EST");
-  m_database[TGCIdBase::Endcap][TGCIdBase::WI] =
+  m_database[TGCId::Endcap][TGCId::WI] =
     new TGCDatabaseASDToPP(filename,"EWI");
-  m_database[TGCIdBase::Endcap][TGCIdBase::SI] =
+  m_database[TGCId::Endcap][TGCId::SI] =
     new TGCDatabaseASDToPP(filename,"ESI");
-  m_database[TGCIdBase::Forward][TGCIdBase::WD] = 
+  m_database[TGCId::Forward][TGCId::WD] = 
     new TGCDatabaseASDToPP(filename,"FWD");
-  m_database[TGCIdBase::Forward][TGCIdBase::WT] =
+  m_database[TGCId::Forward][TGCId::WT] =
     new TGCDatabaseASDToPP(filename,"FWT");
-  m_database[TGCIdBase::Forward][TGCIdBase::SD] =
+  m_database[TGCId::Forward][TGCId::SD] =
     new TGCDatabaseASDToPP(filename,"FSD");
-  m_database[TGCIdBase::Forward][TGCIdBase::ST] = 
+  m_database[TGCId::Forward][TGCId::ST] = 
     new TGCDatabaseASDToPP(filename,"FST");
-  m_database[TGCIdBase::Forward][TGCIdBase::WI] =
+  m_database[TGCId::Forward][TGCId::WI] =
     new TGCDatabaseASDToPP(filename,"FWI");
-  m_database[TGCIdBase::Forward][TGCIdBase::SI] = 
+  m_database[TGCId::Forward][TGCId::SI] = 
     new TGCDatabaseASDToPP(filename,"FSI");
 }
   
 TGCCableInASD::~TGCCableInASD(void)
 {
-  delete m_database[TGCIdBase::Endcap][TGCIdBase::WD];
-  delete m_database[TGCIdBase::Endcap][TGCIdBase::WT];
-  delete m_database[TGCIdBase::Endcap][TGCIdBase::SD];
-  delete m_database[TGCIdBase::Endcap][TGCIdBase::ST];
-  delete m_database[TGCIdBase::Endcap][TGCIdBase::WI];
-  delete m_database[TGCIdBase::Endcap][TGCIdBase::SI];
-  delete m_database[TGCIdBase::Forward][TGCIdBase::WD];
-  delete m_database[TGCIdBase::Forward][TGCIdBase::WT];
-  delete m_database[TGCIdBase::Forward][TGCIdBase::SD];
-  delete m_database[TGCIdBase::Forward][TGCIdBase::ST];
-  delete m_database[TGCIdBase::Forward][TGCIdBase::WI];
-  delete m_database[TGCIdBase::Forward][TGCIdBase::SI];
+  delete m_database[TGCId::Endcap][TGCId::WD];
+  delete m_database[TGCId::Endcap][TGCId::WT];
+  delete m_database[TGCId::Endcap][TGCId::SD];
+  delete m_database[TGCId::Endcap][TGCId::ST];
+  delete m_database[TGCId::Endcap][TGCId::WI];
+  delete m_database[TGCId::Endcap][TGCId::SI];
+  delete m_database[TGCId::Forward][TGCId::WD];
+  delete m_database[TGCId::Forward][TGCId::WT];
+  delete m_database[TGCId::Forward][TGCId::SD];
+  delete m_database[TGCId::Forward][TGCId::ST];
+  delete m_database[TGCId::Forward][TGCId::WI];
+  delete m_database[TGCId::Forward][TGCId::SI];
 }
 
 TGCChannelId* TGCCableInASD::getChannel(const TGCChannelId* channelId,
 					bool orChannel) const {
   if(channelId){
-    if(channelId->getChannelIdType()==TGCIdBase::ASDIn)
+    if(channelId->getChannelIdType()==TGCChannelId::ChannelIdType::ASDIn)
       return getChannelOut(channelId,orChannel);
-    if(channelId->getChannelIdType()==TGCIdBase::ASDOut)
+    if(channelId->getChannelIdType()==TGCChannelId::ChannelIdType::ASDOut)
       return getChannelIn(channelId,orChannel);
   }
   return nullptr;
@@ -81,10 +81,10 @@ TGCChannelId*TGCCableInASD::getChannelIn(const TGCChannelId* asdout,
   int sector;
   if(asdout->isEndcap() && !asdout->isInner()){
     sector = asdout->getSector()-1;
-    if(sector<=0) sector += TGCId::NumberOfEndcapSector;
+    if(sector<=0) sector += TGCId::NUM_ENDCAP_SECTOR;
   } else {
     sector = asdout->getSector();
-    if(sector<=0) sector += TGCId::NumberOfForwardSector;
+    if(sector<=0) sector += TGCId::NUM_FORWARD_SECTOR;
   }
 
   // chamber ASDIn [1(F),1,2,3,4,5(E)], ASDOut [0(F),4,3,2,1,0(E)]
@@ -146,18 +146,18 @@ TGCChannelId* TGCCableInASD::getChannelOut(const TGCChannelId* asdin,
   if(asdin->isEndcap()) {
    if(!asdin->isInner()){
       // Endcap
-      sector = (asdin->getSector()+1) % TGCId::NumberOfEndcapSector;
+      sector = (asdin->getSector()+1) % TGCId::NUM_ENDCAP_SECTOR;
     } else {
       // EI
-       sector = (asdin->getSector()) % TGCId::NumberOfInnerSector;
+       sector = (asdin->getSector()) % TGCId::NUM_INNER_SECTOR;
     } 
   } else {
    if(!asdin->isInner()){
       // Forward
-      sector = (asdin->getSector()) % TGCId::NumberOfForwardSector;
+      sector = (asdin->getSector()) % TGCId::NUM_FORWARD_SECTOR;
     } else {
       // FI 
-      sector = (asdin->getSector()) % TGCId::NumberOfInnerSector;
+      sector = (asdin->getSector()) % TGCId::NUM_INNER_SECTOR;
     }
   }
   

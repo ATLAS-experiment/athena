@@ -14,9 +14,9 @@ class TGCChannelASDIn : public TGCChannelId
 {
 public:
   // Constructor & Destructor
-  TGCChannelASDIn(TGCIdBase::SideType side,
-		  TGCIdBase::SignalType signal,
-		  TGCIdBase::RegionType region,
+  TGCChannelASDIn(TGCId::SideType side,
+		  TGCId::SignalType signal,
+		  TGCId::RegionType region,
 		  int sector,
 		  int layer,
 		  int chamber,

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTGC_CNVTOOLS_TGCRDO_DECODER_H
@@ -8,13 +8,13 @@
 #include "MuonTGC_CnvTools/ITGC_RDO_Decoder.h"
 
 #include "AthenaBaseComps/AthAlgTool.h"
+#include "MuonTGC_Cabling/MuonTGC_CablingSvc.h"
 
 #include "CxxUtils/checker_macros.h"
 
 class TgcDigit;
 class TgcRawData;
 class Identifier;
-class ITGCcablingSvc;
 
 namespace Muon 
 {
@@ -29,36 +29,28 @@ namespace Muon
    *  CscRDO_Decoder written by Ketevi A. Assamagan. 
    */
 
-  class TgcRDO_Decoder : virtual public ITGC_RDO_Decoder, public AthAlgTool 
-    {
-    public:
-      
-      /** Constructor */
-      TgcRDO_Decoder(const std::string& type, const std::string& name, 
-		     const IInterface* parent);
-      /** Destructor */
-      ~TgcRDO_Decoder() {}
+  class TgcRDO_Decoder : virtual public ITGC_RDO_Decoder, public AthAlgTool {
+   public:
+    TgcRDO_Decoder(const std::string& type, const std::string& name, 
+                   const IInterface* parent);
+    ~TgcRDO_Decoder() = default;
 
-      /** Initializer */
-      virtual StatusCode initialize();
-      /** Finalizer */
-      virtual StatusCode finalize();
+    virtual StatusCode initialize();
+    virtual StatusCode finalize();
 
-      /** Set a flag for application of patch.
-       *  Need to describe when patch is required. */
-      void applyPatch(bool patch);
-      /** Get TGC Digit from TGC RDO */
-      TgcDigit * getDigit(const TgcRawData * rawData, bool orFlag) const;
-      /** Get offline ID and bcTag from TGC RDO */
-      Identifier getOfflineData(const TgcRawData * rawData, bool orFlag, uint16_t& bctag) const;
+    /** Set a flag for application of patch.
+     *  Need to describe when patch is required. */
+    void applyPatch(bool patch);
+    /** Get TGC Digit from TGC RDO */
+    TgcDigit * getDigit(const TgcRawData * rawData, bool orFlag) const;
+    /** Get offline ID and bcTag from TGC RDO */
+    Identifier getOfflineData(const TgcRawData * rawData, bool orFlag, uint16_t& bctag) const;
 
-    private:
-      StatusCode getCabling();
+   private:
+    ServiceHandle<MuonTGC_CablingSvc> m_cabling{this, "CablingSvc", "MuonTGC_CablingSvc"};
+    bool m_applyPatch;
 
-      const ITGCcablingSvc *m_cabling;
-      bool m_applyPatch;
-
-    };
+  };
 
 } // end of namespace
 

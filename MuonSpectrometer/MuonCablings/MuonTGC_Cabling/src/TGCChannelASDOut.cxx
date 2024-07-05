@@ -1,21 +1,21 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTGC_Cabling/TGCChannelASDOut.h"
-
+#include <iostream>
 namespace MuonTGC_Cabling
 {
  
 // Constructor
-TGCChannelASDOut::TGCChannelASDOut(TGCIdBase::SideType vside,
-				   TGCIdBase::SignalType vsignal,
-				   TGCIdBase::RegionType vregion,
+TGCChannelASDOut::TGCChannelASDOut(TGCId::SideType vside,
+				   TGCId::SignalType vsignal,
+				   TGCId::RegionType vregion,
 				   int vsector,
 				   int vlayer,
 				   int vchamber,
 				   int vchannel)
-  : TGCChannelId(TGCIdBase::ASDOut)
+  : TGCChannelId(TGCChannelId::ChannelIdType::ASDOut)
 {
   setSideType(vside);
   setSignalType(vsignal);
@@ -26,14 +26,14 @@ TGCChannelASDOut::TGCChannelASDOut(TGCIdBase::SideType vside,
   setChannel(vchannel);
 }
 
-TGCChannelASDOut::TGCChannelASDOut(TGCIdBase::SideType vside,
-				   TGCIdBase::SignalType vsignal,
+TGCChannelASDOut::TGCChannelASDOut(TGCId::SideType vside,
+				   TGCId::SignalType vsignal,
 				   int voctant,
 				   int vsectorModule,
 				   int vlayer,
 				   int vchamber,
 				   int vchannel)
-  : TGCChannelId(TGCIdBase::ASDOut)
+  : TGCChannelId(TGCChannelId::ChannelIdType::ASDOut)
 {
   setSideType(vside);
   setSignalType(vsignal);
@@ -46,12 +46,12 @@ TGCChannelASDOut::TGCChannelASDOut(TGCIdBase::SideType vside,
 
 bool TGCChannelASDOut::isValid(void) const
 {
-  if((getSideType()  >TGCIdBase::NoSideType)   &&
-     (getSideType()  <TGCIdBase::MaxSideType)  &&
-     (getSignalType()>TGCIdBase::NoSignalType) &&
-     (getSignalType()<TGCIdBase::MaxSignalType)&&
-     (getRegionType()>TGCIdBase::NoRegionType) &&
-     (getRegionType()<TGCIdBase::MaxRegionType)&&
+  if((getSideType()  >TGCId::NoSideType)   &&
+     (getSideType()  <TGCId::MaxSideType)  &&
+     (getSignalType()>TGCId::NoSignalType) &&
+     (getSignalType()<TGCId::MaxSignalType)&&
+     (getRegionType()>TGCId::NoRegionType) &&
+     (getRegionType()<TGCId::MaxRegionType)&&
      (getOctant()    >=0)                  &&
      (getOctant()    <8)                   &&
      (getLayer()     >=0)                  &&

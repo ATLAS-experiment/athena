@@ -14,9 +14,9 @@ class TGCModulePP : public TGCModuleId
 {
 public:
   // Constructor & Destructor
-  TGCModulePP(TGCIdBase::SideType side,
-	       TGCIdBase::ModuleType module,
-	       TGCIdBase::RegionType region,
+  TGCModulePP(TGCId::SideType side,
+	       TGCId::ModuleType module,
+	       TGCId::RegionType region,
 	       int sector,
 	       int id);
 

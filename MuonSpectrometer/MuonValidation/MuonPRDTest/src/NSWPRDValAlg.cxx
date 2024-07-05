@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // NSWValAlg inlcudes
@@ -14,7 +14,6 @@
 
 // Misc includes
 #include "GaudiKernel/ITHistSvc.h"
-#include "TGCcablingInterface/ITGCcablingServerSvc.h"
 
 #include <mutex>
 
@@ -78,9 +77,7 @@ StatusCode NSWPRDValAlg::initialize() {
     if (m_doTGCSDO) { m_tree.addBranch(std::make_unique<TgcSDOVariables>(m_tree, m_TGC_SDOContainerName.value(), msgLevel())); }
     if (m_doTGCDigit) { m_tree.addBranch(std::make_unique<TgcDigitVariables>(m_tree, m_TGC_DigitContainerName.value(), msgLevel())); }
     if (m_doTGCRDO) {
-        const ITGCcablingServerSvc* TgcCabGet = nullptr;
-        ATH_CHECK(service("Muon::TGCCablingServerSvc", TgcCabGet, true));
-        ATH_CHECK(TgcCabGet->giveCabling(m_tgcCabling));
+	ATH_CHECK(m_tgcCabling.retrieve());
         m_tree.addBranch(std::make_unique<TGCRDOVariables>(m_tree, m_TGC_RDOContainerName.value(), msgLevel(), m_tgcCabling));
     }
     if (m_doTGCPRD) { m_tree.addBranch(std::make_unique<TGCPRDVariables>(m_tree, m_TGC_PRDContainerName.value(), msgLevel())); }

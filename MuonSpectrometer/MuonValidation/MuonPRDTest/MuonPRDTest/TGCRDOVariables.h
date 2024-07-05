@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MuonPRDTEST_TGCRDOVARIABLES_H
@@ -7,12 +7,12 @@
 
 #include "MuonPRDTest/PrdTesterModule.h"
 #include "MuonRDO/TgcRdoContainer.h"
-#include "TGCcablingInterface/ITGCcablingSvc.h"
+#include "MuonTGC_Cabling/MuonTGC_CablingSvc.h"
 
 namespace MuonPRDTest{
     class TGCRDOVariables : public PrdTesterModule {
     public:
-        TGCRDOVariables(MuonTesterTree& tree, const std::string& container_name, MSG::Level msglvl, const ITGCcablingSvc* cabling_svc);
+        TGCRDOVariables(MuonTesterTree& tree, const std::string& container_name, MSG::Level msglvl, ServiceHandle<MuonTGC_CablingSvc> cabling_svc);
     
         ~TGCRDOVariables() = default;
     
@@ -22,7 +22,7 @@ namespace MuonPRDTest{
     
     private:
         SG::ReadHandleKey<TgcRdoContainer> m_key{};
-        const ITGCcablingSvc* m_tgcCabling{nullptr};
+        ServiceHandle<MuonTGC_CablingSvc> m_tgcCabling;
         ScalarBranch<unsigned int>& m_TGC_nRDO{parent().newScalar<unsigned int>("N_RDO_TGC")};
         VectorBranch<float>& m_TGC_rdo_localPosX{parent().newVector<float>("RDO_TGC_localPosX")};
         VectorBranch<float>& m_TGC_rdo_localPosY{parent().newVector<float>("RDO_TGC_localPosY")};

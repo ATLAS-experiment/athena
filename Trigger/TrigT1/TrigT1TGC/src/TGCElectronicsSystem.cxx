@@ -135,7 +135,6 @@ TGCForwardBackwardType TGCElectronicsSystem::getForwardBackward(int side, int oc
   bool isAside = (side ==0);
   
   // backward/Forward definition is same 
-  // compared with TGCIdBase::isBackward() in TGCcablingInterface
   // because strip layer is swapped in default
   if ( isEndcap ){
     if (!isInner){

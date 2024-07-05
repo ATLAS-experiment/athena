@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTGC_Cabling/TGCChannelSLBIn.h"
@@ -10,13 +10,13 @@ namespace MuonTGC_Cabling
 {
 
 // Constructor
-TGCChannelSLBIn::TGCChannelSLBIn(TGCIdBase::SideType vside,
-				 TGCIdBase::ModuleType vmodule,
-				 TGCIdBase::RegionType vregion,
+TGCChannelSLBIn::TGCChannelSLBIn(TGCId::SideType vside,
+				 TGCId::ModuleType vmodule,
+				 TGCId::RegionType vregion,
 				 int vsector,
 				 int vid,
 				 int vchannel)
-  : TGCChannelId(TGCIdBase::SLBIn)
+  : TGCChannelId(TGCChannelId::ChannelIdType::SLBIn)
 {
   setSideType(vside);
   setModuleType(vmodule);
@@ -37,12 +37,12 @@ TGCModuleId* TGCChannelSLBIn::getModule(void) const
 
 bool TGCChannelSLBIn::isValid(void) const
 {
-  if((getSideType()  >TGCIdBase::NoSideType)   &&
-     (getSideType()  <TGCIdBase::MaxSideType)  &&
-     (getModuleType()>TGCIdBase::NoModuleType) &&
-     (getModuleType()<TGCIdBase::MaxModuleType)&&
-     (getRegionType()>TGCIdBase::NoRegionType) &&
-     (getRegionType()<TGCIdBase::MaxRegionType)&&
+  if((getSideType()  >TGCId::NoSideType)   &&
+     (getSideType()  <TGCId::MaxSideType)  &&
+     (getModuleType()>TGCId::NoModuleType) &&
+     (getModuleType()<TGCId::MaxModuleType)&&
+     (getRegionType()>TGCId::NoRegionType) &&
+     (getRegionType()<TGCId::MaxRegionType)&&
      (getOctant()    >=0)                      &&
      (getOctant()    <8)                       &&
      (getId()        >=0)                      &&
@@ -76,20 +76,20 @@ int TGCChannelSLBIn::getOffsetOfCell(CellType cellType) {
   return s_offsetCell[cellType];
 }
 
-int TGCChannelSLBIn::getLengthOfSLB(TGCIdBase::ModuleType moduleType, 
+int TGCChannelSLBIn::getLengthOfSLB(TGCId::ModuleType moduleType, 
 				    CellType cellType) {
   switch(moduleType){
-  case TGCIdBase::WD:
+  case TGCId::WD:
     return s_lengthWD[cellType];
-  case TGCIdBase::SD:
+  case TGCId::SD:
     return s_lengthSD[cellType];
-  case TGCIdBase::WT:
+  case TGCId::WT:
     return s_lengthWT[cellType];
-  case TGCIdBase::ST:
+  case TGCId::ST:
     return s_lengthST[cellType];
-  case TGCIdBase::WI:
+  case TGCId::WI:
     return s_lengthST[cellType];
-  case TGCIdBase::SI:
+  case TGCId::SI:
     return s_lengthST[cellType];
   default:
     break;
@@ -101,20 +101,20 @@ int TGCChannelSLBIn::getAdjacentOfCell(CellType cellType) {
   return s_adjacentCell[cellType];
 }
 
-int TGCChannelSLBIn::getAdjacentOfSLB(TGCIdBase::ModuleType moduleType,
+int TGCChannelSLBIn::getAdjacentOfSLB(TGCId::ModuleType moduleType,
 				      CellType cellType) {
   switch(moduleType){
-  case TGCIdBase::WD:
+  case TGCId::WD:
     return s_adjacentWD[cellType];
-  case TGCIdBase::SD:
+  case TGCId::SD:
     return s_adjacentSD[cellType];
-  case TGCIdBase::WT:
+  case TGCId::WT:
     return s_adjacentWT[cellType];
-  case TGCIdBase::ST:
+  case TGCId::ST:
     return s_adjacentST[cellType];
-  case TGCIdBase::WI:
+  case TGCId::WI:
     return s_adjacentST[cellType];
-  case TGCIdBase::SI:
+  case TGCId::SI:
     return s_adjacentST[cellType];
   default:
     break;
@@ -171,14 +171,14 @@ TGCChannelSLBIn::CellType TGCChannelSLBIn::convertCellType(int channel) {
   return NoCellType;
 }
 
-int TGCChannelSLBIn::convertChannelInSLB(TGCIdBase::ModuleType moduleType,
+int TGCChannelSLBIn::convertChannelInSLB(TGCId::ModuleType moduleType,
 					 CellType cellType, int channel) {
   int offset = getAdjacentOfCell(cellType)
     -getAdjacentOfSLB(moduleType, cellType);
   return channel-offset;
 }
 
-int TGCChannelSLBIn::convertChannel(TGCIdBase::ModuleType moduleType,
+int TGCChannelSLBIn::convertChannel(TGCId::ModuleType moduleType,
 				    CellType cellType, int channelInSLB) {
   int offset = getAdjacentOfCell(cellType)
     -getAdjacentOfSLB(moduleType, cellType);
@@ -194,7 +194,7 @@ int TGCChannelSLBIn::getChannelInSLB(void) const {
 }
 
 void TGCChannelSLBIn::setChannel(int vchannel) {
-  TGCId::setChannel(vchannel);
+  TGCChannelId::setChannel(vchannel);
   m_cellType = convertCellType(vchannel);
   m_channelInCell = convertChannelInCell(vchannel);
   m_channelInSLB = convertChannelInSLB(getModuleType(), getCellType(),
