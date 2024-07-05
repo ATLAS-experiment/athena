@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCollisionTimeAlg.h"
 #include "Identifier/Identifier.h"
 #include "CaloIdentifier/CaloCell_ID.h"
-
+#include "LArElecCalib/LArProvenance.h"
 
 StatusCode LArCollisionTimeAlg::initialize()
   {
@@ -64,34 +64,36 @@ StatusCode LArCollisionTimeAlg::execute(const EventContext& ctx) const
   float timeA=0.;
   float timeC=0.;
 
-  CaloCellContainer::const_iterator first_cell = cell_container->begin();
-  CaloCellContainer::const_iterator end_cell   = cell_container->end();
-  ATH_MSG_DEBUG ("*** Start loop over CaloCells in LArCollisionTimeAlg");
-  for (; first_cell != end_cell; ++first_cell)
-  {
-      Identifier cellID = (*first_cell)->ID();
+  for (const CaloCell* cell : *cell_container) {
+      Identifier cellID = cell->ID();
       if (m_calo_id->is_tile(cellID)) continue;
 
-      double eta   =  (*first_cell)->eta();
+      const double eta   = cell->eta();
       if (std::fabs(eta)<1.5) continue;
 
-      uint16_t provenance = (*first_cell)->provenance();
+      const uint16_t provenance =cell->provenance();
 //
 // check time correctly available
 //   for Data:    offline Iteration   0x2000 time available, 0x0100 Iteration converted, not 0x0200 and not 0x0400 (bad cells), 0x00A5 (correctly calibrated)
 //                DSP time  0x1000 : cell from DSP, 0x2000 time available, not 0x0200 and not 0x0400
-//   for MC   check time available  0x2000, and not bad cel
+//   for MC   check time available  0x2000, and not bad cell      
+      if (!LArProv::test(provenance, LArProv::QTPRESENT))
+        continue;
+      if (LArProv::test(provenance, LArProv::MASKED))
+        continue;
 
-      uint16_t mask1 = 0x3DFF;
-      if (!m_iterCut) mask1 = 0x3CFF;
-      uint16_t cut1 = 0x21A5;
-      if (!m_iterCut) cut1 = 0x20A5;
+      if (!m_isMC) {
+        if (m_iterCut) {
+          if (!LArProv::test(provenance, LArProv::LArProvenance(LArProv::DEFAULTRECO | LArProv::ITERCONVERGED )))
+            continue;
+        } else {
+          if (!LArProv::test(provenance, LArProv::DEFAULTRECO) && !LArProv::test(provenance, LArProv::DSPCALC))
+            continue;
+        }
+      }
 
-      if ( (provenance & mask1) != cut1 && (provenance & 0x3C00) != 0x3000 && !m_isMC) continue;
-      if ( (provenance & 0x2C00) != 0x2000 && m_isMC) continue;
-      
-      const double energy=  (*first_cell)->energy();
-      const double noise=noiseCDO->getNoise(cellID,(*first_cell)->gain());
+      const double energy=cell->energy();
+      const double noise=noiseCDO->getNoise(cellID,cell->gain());
       double signif=9999.;
       if (noise>0.) signif = energy/noise;
       if (signif < 5.) continue;
@@ -103,7 +105,7 @@ StatusCode LArCollisionTimeAlg::execute(const EventContext& ctx) const
       if (ecut<0.) continue;
       if (energy<ecut) continue;
 
-      double time = (*first_cell)->time();
+      double time = cell->time();
 
       if (eta>0.) {
           ncellA += 1;
@@ -117,7 +119,6 @@ StatusCode LArCollisionTimeAlg::execute(const EventContext& ctx) const
       }
           
   }
-
   if (ncellA>0) timeA = timeA/((float)(ncellA));
   if (ncellC>0) timeC = timeC/((float)(ncellC));
 
