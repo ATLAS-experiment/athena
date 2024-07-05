@@ -199,7 +199,7 @@ def NTUPEntries(fileName, treeNames):
 #  - Number of entries.
 #  - Sum of weights if integral is true.
 #  - @c None if the determination failed.
-#  @note Use the PyCmt forking decorator to ensure that ROOT is run completely within 
+#  @note Use the PyCmt forking decorator to ensure that ROOT is run completely within
 #  a child process and will not 'pollute' the parent python process with unthread-safe
 #  bits of code (otherwise strange hangs are observed on subsequent uses of ROOT)
 @_decos.forking
@@ -233,6 +233,40 @@ def PRWEntries(fileName, integral=False):
         # Was not one of our histograms
     # Make sure we return an int for the number of events
     return int(total)
+
+
+## @brief Determines number of entries in NTUP_PHYSVAL file
+#  @param fileName Path to the PHYSVAL file.
+#  @param integral Returns sum of weights if true
+#  @return
+#  - Number of entries.
+#  - Sum of weights if integral is true.
+#  - @c None if the determination failed.
+#  @note Use the PyCmt forking decorator to ensure that ROOT is run completely within
+#  a child process and will not 'pollute' the parent python process with unthread-safe
+#  bits of code (otherwise strange hangs are observed on subsequent uses of ROOT)
+@_decos.forking
+def PHYSVALEntries(fileName, integral=False):
+
+    root = import_root()
+
+    fname = root.TFile.Open(fileName, 'READ')
+
+    if not (isinstance(fname, root.TFile) and fname.IsOpen()):
+        return None
+
+    aipc = fname.Get("/EventInfo/EventInfo_actualInteractionsPerCrossing")
+
+    if aipc is None:
+        # Not PHYSVAL...
+        return None
+
+    # If we want the weights, give us the weights
+    if integral:
+        return aipc.Integral()
+
+    # Otherwise we just want the entries
+    return int(aipc.GetEntries())
 
 
 ## @brief Get the size of a file via ROOT's TFile

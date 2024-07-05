@@ -210,6 +210,13 @@ def checkDirectory(directory, the_type, requireTree, depth):
             if checkDirectory(the_object, the_type, requireTree, depth + 1)==1:
                 return 1
 
+    # If we don't even require a *Tree* here, then we should not try to count entries
+    # using standard metadata tools. The above corruption checks and other checks should
+    # be sufficient
+    if not requireTree:
+        msg.debug('Directory %s looks ok.', directory.GetName())
+        return 0
+
     if depth == 0 and checkNEvents(directory.GetName(), nentries)==1:
         return 1
     else:
