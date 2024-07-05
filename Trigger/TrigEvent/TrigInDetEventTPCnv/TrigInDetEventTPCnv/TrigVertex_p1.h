@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**********************************************************************************
@@ -12,8 +12,6 @@
  * @author Andrew Hamilton  <Andrew.Hamilton@cern.ch>  - U. Geneva
  * @author Francesca Bucci  <F.Bucci@cern.ch>          - U. Geneva
  *
- * File and Version Information:
- * $Id: TrigVertex_p1.h,v 1.2 2009-04-01 22:08:45 salvator Exp $
  **********************************************************************************/
 #ifndef TRIGINDETEVENTTPCNV_TRIGVERTEX_P1_H
 #define TRIGINDETEVENTTPCNV_TRIGVERTEX_P1_H
@@ -42,18 +40,18 @@ class TrigVertex_p1
 
  private:
 
-  float                  m_x                ;
-  float                  m_y                ;
-  float                  m_z                ;
-  float                  m_mass             ;
-  float                  m_massVar          ;
-  double                 m_cov[6]           ;
-  float                  m_energyFraction   ;
-  int                    m_nTwoTracksSecVtx ;
-  float                  m_chiSquared       ;
-  int                    m_nDOF             ;
-  std::vector<TPObjRef>  m_tracks           ; 
-  AlgoId_p1              m_algId            ;  
+  float                  m_x{}                ;
+  float                  m_y{}                ;
+  float                  m_z{}                ;
+  float                  m_mass{}             ;
+  float                  m_massVar{}          ;
+  double                 m_cov[6]{}           ;
+  float                  m_energyFraction{}   ;
+  int                    m_nTwoTracksSecVtx{} ;
+  float                  m_chiSquared{}       ;
+  int                    m_nDOF{}             ;
+  std::vector<TPObjRef>  m_tracks             ;
+  AlgoId_p1              m_algId{}            ;
 
 };
 

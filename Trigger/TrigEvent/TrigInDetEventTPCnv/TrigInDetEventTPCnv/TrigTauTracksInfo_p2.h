@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**********************************************************************************
@@ -31,7 +31,7 @@ class TrigTauTracksInfo_p2
   
   //private:
 
-  int m_allTheInts[4];
+  int m_allTheInts[4]{};
 /*
   int m_roiID;
   int m_nCoreTracks;
@@ -39,7 +39,7 @@ class TrigTauTracksInfo_p2
   int m_nIsoTracks;
 */
 
-  float m_allTheFloats[5];
+  float m_allTheFloats[5]{};
 /*
   float m_charge; 
   float m_leadingTrackPt;

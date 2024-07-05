@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**********************************************************************************
@@ -34,8 +34,8 @@ class TrigVertex_p2
   
  private:
 
-  float m_allFloats[13];//m_x,m_y,m_z,m_mass,m_massVar,m_cov[6],m_energyFraction, m_chiSquared
-  int m_allInts[3];//m_nTwoTracksSecVtx,m_nDOF,m_algId 
+  float m_allFloats[13]{};//m_x,m_y,m_z,m_mass,m_massVar,m_cov[6],m_energyFraction, m_chiSquared
+  int m_allInts[3]{};//m_nTwoTracksSecVtx,m_nDOF,m_algId
   
   std::vector<TPObjRef>  m_tracks           ; 
 };

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**********************************************************************************
@@ -28,7 +28,7 @@ class TrigInDetTrack_p5
 
      TPObjRef m_param;    //actual type is TrigInDetTrackFitPar*
      TPObjRef m_endParam; //actual type is TrigInDetTrackFitPar*
-     double  m_chi2;
+     double  m_chi2{};
      
      // TrigInDetTrack::AlgoId m_algId;
      // int     m_NStrawHits;
@@ -38,7 +38,7 @@ class TrigInDetTrack_p5
      // int     m_NPixelSpacePoints;
      // int     m_NSCT_SpacePoints;
      // long    m_HitPattern;
-     int    m_allIntegers[8]; // all the integers above are saved in this one array.
+     int    m_allIntegers[8]{}; // all the integers above are saved in this one array.
      std::vector< unsigned long long >  m_rdoList;
 };
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**********************************************************************************
@@ -12,8 +12,6 @@
  * @author Andrew Hamilton  <Andrew.Hamilton@cern.ch>  - U. Geneva
  * @author Francesca Bucci  <f.bucci@cern.ch>          - U. Geneva
  *
- * File and Version Information:
- * $Id: TrigInDetTrack_p2.h,v 1.2 2009-04-01 22:08:44 ilija@vukotic.me Exp $
  **********************************************************************************/
 
 #ifndef TrigInDetEventTPCnv_TrigInDetTrack_p3_H
@@ -29,11 +27,9 @@ class TrigInDetTrack_p3
      TrigInDetTrack_p3() {}
      friend class TrigInDetTrackCnv_p3;
 
-     //private:
-
      TPObjRef m_param;    //actual type is TrigInDetTrackFitPar*
      TPObjRef m_endParam; //actual type is TrigInDetTrackFitPar*
-     double  m_chi2;
+     double  m_chi2{};
      
      // TrigInDetTrack::AlgoId m_algId;
      // int     m_NStrawHits;
@@ -43,7 +39,7 @@ class TrigInDetTrack_p3
      // int     m_NPixelSpacePoints;
      // int     m_NSCT_SpacePoints;
      // long    m_HitPattern;
-     int    m_allIntegers[8]; // all the integers above are saved in this one array.
+     int    m_allIntegers[8]{}; // all the integers above are saved in this one array.
 };
 
 #endif
