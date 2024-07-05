@@ -76,9 +76,9 @@ private:
 
   StringProperty m_testTypeStr { this, "TestType", "Offline", "Type of track collection to be used as test" }; 
   StringProperty m_refTypeStr { this, "RefType", "Truth", "Type of track collection to be used as reference" }; 
-  bool m_useTrigger, m_useEFTrigger, m_useTruth, m_useOffline;
-  bool m_isTestTrigger, m_isTestEFTrigger, m_isTestTruth, m_isTestOffline;
-  bool m_isRefTrigger, m_isRefEFTrigger, m_isRefTruth, m_isRefOffline;
+  bool m_useTrigger{}, m_useEFTrigger{}, m_useTruth{}, m_useOffline{};
+  bool m_isTestTrigger{}, m_isTestEFTrigger{}, m_isTestTruth{}, m_isTestOffline{};
+  bool m_isRefTrigger{}, m_isRefEFTrigger{}, m_isRefTruth{}, m_isRefOffline{};
 
   StringProperty m_testTag { this, "TestTag", "offl", "Short label for test track type, used in histo booking" }; 
   StringProperty m_refTag { this, "RefTag", "truth", "Short label for reference track type, used in histo booking" }; 

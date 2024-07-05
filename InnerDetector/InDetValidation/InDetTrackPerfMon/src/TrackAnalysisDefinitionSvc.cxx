@@ -19,10 +19,7 @@
 /// --- Constructor ---
 /// -------------------
 TrackAnalysisDefinitionSvc::TrackAnalysisDefinitionSvc( const std::string& name, ISvcLocator* pSvcLocator ) :
-    AsgService( name, pSvcLocator ), 
-    m_useTrigger( false ), m_useTruth( false ), m_useOffline( false ),
-    m_isTestTrigger( false ), m_isTestTruth( false ), m_isTestOffline( false ),
-    m_isRefTrigger( false ), m_isRefTruth( false ), m_isRefOffline( false )
+    AsgService( name, pSvcLocator )
 {
   declareServiceInterface< ITrackAnalysisDefinitionSvc >();
 }
