@@ -43,7 +43,11 @@ private:
       : fraction(fraction), accessor(accessor), isTarget(isTarget) {}
   };
   std::vector<FractionAccessor> m_fractionAccessors;
-  std::vector<std::pair<std::string, float>> m_OPCutValues;
+  std::vector<float> m_pTbins;
+  std::vector<std::vector<float>> m_massbins;
+  std::vector<std::vector<float>> m_OPCutValues;
+
+  int findBin(const std::vector<float>& bins, float value) const;
 
 };
 
