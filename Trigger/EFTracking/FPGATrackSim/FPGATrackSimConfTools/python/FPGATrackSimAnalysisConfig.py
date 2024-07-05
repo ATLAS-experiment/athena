@@ -603,8 +603,8 @@ if __name__ == "__main__":
     if flags.Trigger.FPGATrackSim.doEDMConversion:
         acc.merge(FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlg_1st', stage = '_1st', doActsTrk=True))
         
-        from FPGATrackSimPrototrackFitter.FPGATrackSimPrototrackFitterConfig import FPGAPrototrackFitAndMonitoringCfg
-        acc.merge(FPGAPrototrackFitAndMonitoringCfg(flags,FinalProtoTrackChainxAODTracksKey=FinalProtoTrackChainxAODTracksKey,stage='_1st')) # Run ACTS KF + IDPVM for 1st stage
+        from FPGATrackSimPrototrackFitter.FPGATrackSimPrototrackFitterConfig import FPGAPrototrackFitAndTruthDecorationCfg
+        acc.merge(FPGAPrototrackFitAndTruthDecorationCfg(flags,FinalProtoTrackChainxAODTracksKey=FinalProtoTrackChainxAODTracksKey,stage='_1st')) # Run ACTS KF for 1st stage
             
         if flags.Trigger.FPGATrackSim.writeToAOD: acc.merge(WriteToAOD(flags, stage = '_1st'))
         if flags.Trigger.FPGATrackSim.Hough.secondStage : acc.merge(FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlg_2nd', stage = '_2nd')) # Default disabled, doesn't work if enabled

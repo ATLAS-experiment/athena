@@ -48,7 +48,7 @@ def FPGAPrototrackFitAlgCfg(flags,
                      primary=True)
     return acc
 
-def FPGAPrototrackFitAndMonitoringCfg(flags,FinalProtoTrackChainxAODTracksKey="xAODFPGAPrototracks",name="FPGAPrototrackFitterConfig", stage = '',**kwargs):
+def FPGAPrototrackFitAndTruthDecorationCfg(flags,FinalProtoTrackChainxAODTracksKey="xAODFPGAPrototracks",name="FPGAPrototrackFitterConfig", stage = '',**kwargs):
 
     ACTSProtoTrackChainTrackKey = "ACTSProtoTrackChainTestTracks"
     FinalProtoTrackChainxAODTracksKey=FinalProtoTrackChainxAODTracksKey
@@ -115,8 +115,7 @@ def FPGAPrototrackFitAndMonitoringCfg(flags,FinalProtoTrackChainxAODTracksKey="x
     acc.merge(ActsTrackParticleTruthDecorationAlgCfg(flags,
                                                     f"{prefix}ActsFPGATrackParticleTruthDecorationAlg",
                                                     TrackToTruthAssociationMaps=[acts_tracks+"FPGAToTruthParticleAssociation"],
-                                                    TrackParticleContainerName=f"{FinalProtoTrackChainxAODTracksKey}TrackParticles"))
-    
-    
-
+                                                    TrackParticleContainerName=f"{FinalProtoTrackChainxAODTracksKey}TrackParticles",
+                                                    TruthParticleHitCounts="FPGATruthParticleHitCounts",
+                                                    ComputeTrackRecoEfficiency=True))
     return acc
