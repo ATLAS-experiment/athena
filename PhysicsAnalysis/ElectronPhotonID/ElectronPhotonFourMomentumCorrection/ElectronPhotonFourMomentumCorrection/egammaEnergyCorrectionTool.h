@@ -11,25 +11,16 @@
 #ifndef ELECTRONPHOTONFOURMOMENTUMCORRECTION_EGAMMAENERGYCORRECTIONTOOL_H
 #define ELECTRONPHOTONFOURMOMENTUMCORRECTION_EGAMMAENERGYCORRECTIONTOOL_H
 
-// STL includes
-#include <cctype>
-#include <cmath>
-#include <cstddef>
-#include <cstdlib>
-#include <fstream>
-#include <iomanip>
-#include <iostream>
-#include <string>
-#include <vector>
+
 
 // PAT includes
 #include <AsgMessaging/AsgMessaging.h>
-
 #include "PATCore/PATCoreEnums.h"
 
-// ROOT includes
-#include "TRandom3.h"
-#include "TSystem.h"
+// STL includes
+#include <string>
+#include <vector>
+#include <memory>
 
 // Forward declarations
 class eg_resolution;
@@ -45,247 +36,247 @@ class TFile;
 class TList;
 
 namespace egGain {
-class GainTool;         // run1 tool
-class GainUncertainty;  // run2 tool
+  class GainTool;         // run1 tool
+  class GainUncertainty;  // run2 tool
 }  // namespace egGain
 
 // Create a namespace for all needed enums
 namespace egEnergyCorr {
-struct ROOT6_OpenNamespaceWorkaround {
-};  // workaround for reflex dict generation
+  struct ROOT6_OpenNamespaceWorkaround {
+    // workaround for reflex dict generation
+  };  
 
-// Resolution error variations
-namespace Resolution {
-struct ROOT6_OpenNamespaceWorkaround {
-};  // workaround for reflex dict generation
+  // Resolution error variations
+  namespace Resolution {
+    struct ROOT6_OpenNamespaceWorkaround {
+    // workaround for reflex dict generation
+    };  
 
-enum Variation {
-
-  // ZSmearing,SamplingTerm,Material,PileUp only implemented for mc12c...
-
-  // Nothing to be done
-  None,
-
-  // Nominal
-  Nominal,
-
-  // All (Only for error plotting - not correct when running over a sample!)
-  AllDown,
-  AllUp,
-
-  // Z smearing uncertainty (symmetrized)
-  ZSmearingDown,
-  ZSmearingUp,
-
-  // Sampling term uncertainty
-  SamplingTermDown,
-  SamplingTermUp,
-
-  // Material uncertainty
-  MaterialIDDown,
-  MaterialIDUp,
-  MaterialCaloDown,
-  MaterialCaloUp,
-  MaterialGapDown,
-  MaterialGapUp,
-  MaterialCryoDown,
-  MaterialCryoUp,
-
-  // Pileup uncertainty
-  PileUpDown,
-  PileUpUp,
-
-  // IBL+PP0 for run 2
-  MaterialIBLUp,
-  MaterialIBLDown,
-  MaterialPP0Up,
-  MaterialPP0Down,
-
-  // Atlfast 2 resolution uncertainties
-  af2Up,
-  af2Down,
-
-  // OFC for Run-3 pre-recommendations
-  OFCUp,
-  OFCDown,
-
-  // to help with loops
-  LastResolutionVariation
-
-};
-
-// type of resolution parameterization
-enum resolutionType {
-  // gaussian "core"
-  Gaussian,
-  // sigma_eff 80%
-  SigmaEff80,
-  // sigma_eff 90%
-  SigmaEff90
-};
-
+  enum Variation {
+    // ZSmearing,SamplingTerm,Material,PileUp only implemented for mc12c...
+  
+    // Nothing to be done
+    None,
+  
+    // Nominal
+    Nominal,
+  
+    // All (Only for error plotting - not correct when running over a sample!)
+    AllDown,
+    AllUp,
+  
+    // Z smearing uncertainty (symmetrized)
+    ZSmearingDown,
+    ZSmearingUp,
+  
+    // Sampling term uncertainty
+    SamplingTermDown,
+    SamplingTermUp,
+  
+    // Material uncertainty
+    MaterialIDDown,
+    MaterialIDUp,
+    MaterialCaloDown,
+    MaterialCaloUp,
+    MaterialGapDown,
+    MaterialGapUp,
+    MaterialCryoDown,
+    MaterialCryoUp,
+  
+    // Pileup uncertainty
+    PileUpDown,
+    PileUpUp,
+  
+    // IBL+PP0 for run 2
+    MaterialIBLUp,
+    MaterialIBLDown,
+    MaterialPP0Up,
+    MaterialPP0Down,
+  
+    // Atlfast 2 resolution uncertainties
+    af2Up,
+    af2Down,
+  
+    // OFC for Run-3 pre-recommendations
+    OFCUp,
+    OFCDown,
+  
+    // to help with loops
+    LastResolutionVariation
+  
+  };
+  
+  // type of resolution parameterization
+  enum resolutionType {
+    // gaussian "core"
+    Gaussian,
+    // sigma_eff 80%
+    SigmaEff80,
+    // sigma_eff 90%
+    SigmaEff90
+  };
 }  // namespace Resolution
 
 // Scale error variations
 namespace Scale {
-struct ROOT6_OpenNamespaceWorkaround {
-};  // workaround for reflex dict generation
+  struct ROOT6_OpenNamespaceWorkaround {
+    // workaround for reflex dict generation
+  };  
 
-enum Variation {
-
-  // Nothing to be done
-  None,
-
-  // central value
-  Nominal,
-
-  // This applies to electrons only
-
-  // ... Momentum scale systematics
-  MomentumUp,
-  MomentumDown,
-
-  // The following apply to electrons and photons
-
-  // ... Zee scale uncertainty variations : Stat uncorrelated; Syst correlated
-  // vs eta
-  ZeeStatUp,
-  ZeeStatDown,
-  ZeeSystUp,
-  ZeeSystDown,
-  ZeePhysUp,
-  ZeePhysDown,
-  ZeeAllUp,
-  ZeeAllDown,
-
-  // ... LAr systematics on scale and material determinations : correlated vs
-  // eta
-  LArCalibUp,
-  LArCalibDown,
-  LArUnconvCalibUp,
-  LArUnconvCalibDown,
-  LArElecCalibUp,
-  LArElecCalibDown,
-  LArElecUnconvUp,
-  LArElecUnconvDown,
-
-  // extra systematics for 2015PRE*
-  LArCalibExtra2015PreUp,
-  LArCalibExtra2015PreDown,
-  LArTemperature2015PreUp,
-  LArTemperature2015PreDown,
-
-  // extra systematics for 2015->2016 extrapolation
-  LArTemperature2016PreUp,
-  LArTemperature2016PreDown,
-
-  // ... G4 systematics on E1/E2
-  G4Up,
-  G4Down,
-
-  // scale for E4 TileGap3
-  E4ScintillatorUp,
-  E4ScintillatorDown,
-
-  // ... Layer scale variations : data driven, uncorrelated vs eta
-  PSUp,
-  PSDown,
-  S12Up,
-  S12Down,
-
-  // PS correlated contribution
-  PSb12Up,
-  PSb12Down,
-
-  // ... ADC non linearity correction
-  ADCLinUp,
-  ADCLinDown,
-
-  // ... Leakage : electron
-  LeakageElecUp,
-  LeakageElecDown,
-
-  // ... Leakage : photon
-  LeakageUnconvUp,
-  LeakageUnconvDown,
-  LeakageConvUp,
-  LeakageConvDown,
-
-  // topo cluster threshold
-  topoClusterThresUp,
-  topoClusterThresDown,
-
-  // extra E12 for es2017 run2
-  S12ExtraLastEtaBinRun2Up,
-  S12ExtraLastEtaBinRun2Down,
-
-  // ... Material variations : data driven, uncorrelated vs eta
-  MatIDUp,
-  MatIDDown,
-  MatCryoUp,
-  MatCryoDown,
-  MatCaloUp,
-  MatCaloDown,
-
-  // ... Gain correction
-  L1GainUp,
-  L1GainDown,
-  L2GainUp,
-  L2GainDown,
-  L2MediumGainDown,
-  L2MediumGainUp,
-  L2LowGainDown,
-  L2LowGainUp,
-
-  // ... Pedestal
-  PedestalUp,
-  PedestalDown,
-
-  // ... wtots1
-  Wtots1Up,
-  Wtots1Down,
-
-  // PP0
-  MatPP0Up,
-  MatPP0Down,
-
-  // AF2 systematics
-  af2Up,
-  af2Down,
-
-  // The following apply to photons only
-
-  // ... Conversion efficiency (-> vary unconverted photon calib), fake rate (->
-  // vary converted photon calib)
-  ConvEfficiencyUp,
-  ConvEfficiencyDown,
-  ConvFakeRateUp,
-  ConvFakeRateDown,
-  ConvRadiusUp,
-  ConvRadiusDown,
-
-  // ... in R21, 2022, Precision : NP is correlated between conv and unconv,
-  // let's call it ConvReco
-  ConvRecoUp,
-  ConvRecoDown,
-
-  // Rel22 OFC changes
-  OFCUp,
-  OFCDown,
-
-  // Rel22 MC20 pre and bulk
-  EXTRARUN3PREUp,
-  EXTRARUN3PREDown,
-
-  AllUp,
-  AllDown,
-  AllCorrelatedUp,
-  AllCorrelatedDown,
-
-  // to help with loops
-  LastScaleVariation
-
-};
+  enum Variation {
+  
+    // Nothing to be done
+    None,
+  
+    // central value
+    Nominal,
+  
+    // This applies to electrons only
+  
+    // ... Momentum scale systematics
+    MomentumUp,
+    MomentumDown,
+  
+    // The following apply to electrons and photons
+  
+    // ... Zee scale uncertainty variations : Stat uncorrelated; Syst correlated
+    // vs eta
+    ZeeStatUp,
+    ZeeStatDown,
+    ZeeSystUp,
+    ZeeSystDown,
+    ZeePhysUp,
+    ZeePhysDown,
+    ZeeAllUp,
+    ZeeAllDown,
+  
+    // ... LAr systematics on scale and material determinations : correlated vs
+    // eta
+    LArCalibUp,
+    LArCalibDown,
+    LArUnconvCalibUp,
+    LArUnconvCalibDown,
+    LArElecCalibUp,
+    LArElecCalibDown,
+    LArElecUnconvUp,
+    LArElecUnconvDown,
+  
+    // extra systematics for 2015PRE*
+    LArCalibExtra2015PreUp,
+    LArCalibExtra2015PreDown,
+    LArTemperature2015PreUp,
+    LArTemperature2015PreDown,
+  
+    // extra systematics for 2015->2016 extrapolation
+    LArTemperature2016PreUp,
+    LArTemperature2016PreDown,
+  
+    // ... G4 systematics on E1/E2
+    G4Up,
+    G4Down,
+  
+    // scale for E4 TileGap3
+    E4ScintillatorUp,
+    E4ScintillatorDown,
+  
+    // ... Layer scale variations : data driven, uncorrelated vs eta
+    PSUp,
+    PSDown,
+    S12Up,
+    S12Down,
+  
+    // PS correlated contribution
+    PSb12Up,
+    PSb12Down,
+  
+    // ... ADC non linearity correction
+    ADCLinUp,
+    ADCLinDown,
+  
+    // ... Leakage : electron
+    LeakageElecUp,
+    LeakageElecDown,
+  
+    // ... Leakage : photon
+    LeakageUnconvUp,
+    LeakageUnconvDown,
+    LeakageConvUp,
+    LeakageConvDown,
+  
+    // topo cluster threshold
+    topoClusterThresUp,
+    topoClusterThresDown,
+  
+    // extra E12 for es2017 run2
+    S12ExtraLastEtaBinRun2Up,
+    S12ExtraLastEtaBinRun2Down,
+  
+    // ... Material variations : data driven, uncorrelated vs eta
+    MatIDUp,
+    MatIDDown,
+    MatCryoUp,
+    MatCryoDown,
+    MatCaloUp,
+    MatCaloDown,
+  
+    // ... Gain correction
+    L1GainUp,
+    L1GainDown,
+    L2GainUp,
+    L2GainDown,
+    L2MediumGainDown,
+    L2MediumGainUp,
+    L2LowGainDown,
+    L2LowGainUp,
+  
+    // ... Pedestal
+    PedestalUp,
+    PedestalDown,
+  
+    // ... wtots1
+    Wtots1Up,
+    Wtots1Down,
+  
+    // PP0
+    MatPP0Up,
+    MatPP0Down,
+  
+    // AF2 systematics
+    af2Up,
+    af2Down,
+  
+    // The following apply to photons only
+  
+    // ... Conversion efficiency (-> vary unconverted photon calib), fake rate (->
+    // vary converted photon calib)
+    ConvEfficiencyUp,
+    ConvEfficiencyDown,
+    ConvFakeRateUp,
+    ConvFakeRateDown,
+    ConvRadiusUp,
+    ConvRadiusDown,
+  
+    // ... in R21, 2022, Precision : NP is correlated between conv and unconv,
+    // let's call it ConvReco
+    ConvRecoUp,
+    ConvRecoDown,
+  
+    // Rel22 OFC changes
+    OFCUp,
+    OFCDown,
+  
+    // Rel22 MC20 pre and bulk
+    EXTRARUN3PREUp,
+    EXTRARUN3PREDown,
+  
+    AllUp,
+    AllDown,
+    AllCorrelatedUp,
+    AllCorrelatedDown,
+  
+    // to help with loops
+    LastScaleVariation
+  };
 
 }  // namespace Scale
 

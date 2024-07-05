@@ -14,10 +14,10 @@ LinearityADC::LinearityADC(const std::string& filename, const std::string& name)
       {"elec", PATCore::ParticleType::Electron},
       {"unco", PATCore::ParticleType::UnconvertedPhoton},
       {"conv", PATCore::ParticleType::ConvertedPhoton}};
-  for (auto it : pN) {
-    m_hcorr[it.second].reset(dynamic_cast<TProfile2D*>(
-        adcFile->Get(Form("linearity_%s", it.first.Data()))));
-    m_hcorr[it.second]->SetDirectory(nullptr);
+  for (const auto & [ptclName, ptclType] : pN) {
+    m_hcorr[ptclType].reset(dynamic_cast<TProfile2D*>(
+        adcFile->Get(Form("linearity_%s", ptclName.Data()))));
+    m_hcorr[ptclType]->SetDirectory(nullptr);
   }
   adcFile->Close();
 }
@@ -34,7 +34,7 @@ float LinearityADC::getCorr(float etaCalo, float et,
 
   auto it = m_hcorr.find(pType);
   if (it == m_hcorr.end()) {
-    ATH_MSG_ERROR("unknow particle type " << pType);
+    ATH_MSG_ERROR("unknown particle type " << pType);
     return 1.;
   }
   TProfile2D* hh = it->second.get();
@@ -66,6 +66,10 @@ float LinearityADC::getCorr(float etaCalo, float et,
   float y1 = hh->GetYaxis()->GetBinCenter(iy1);
   // subtract effect for 40 GeV Et electrons
   it = m_hcorr.find(PATCore::ParticleType::Electron);
+  if (it == m_hcorr.end()){
+    ATH_MSG_ERROR("Unknown particle type " << pType<<" in LinearityADC::getCorr");
+    return 1.;
+  }
   float c0 = hh->GetBinContent(ix, iy0) - it->second->GetBinContent(ix, iyc);
   float c1 = hh->GetBinContent(ix, iy1) - it->second->GetBinContent(ix, iyc);
 
