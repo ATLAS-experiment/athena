@@ -5,7 +5,7 @@
  **     @author  mark sutton
  **     @date    Sun 18 Jan 2009 19:08:11 GMT 
  **
- **     Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -41,26 +41,26 @@ public:
   
 private:
 
-  TH1D*   m_heta;
-  TH1D*   m_hphi;
-  TH1D*   m_hz0;
-  TH1D*   m_hd0;
-  TH1D*   m_hpT;
+  TH1D*   m_heta = nullptr;
+  TH1D*   m_hphi = nullptr;
+  TH1D*   m_hz0 = nullptr;
+  TH1D*   m_hd0 = nullptr;
+  TH1D*   m_hpT = nullptr;
 
-  TH1D*   m_hdeta;
-  TH1D*   m_hdphi;
-  TH1D*   m_hdz0;
-  TH1D*   m_hdd0;
-  TH1D*   m_hdpT;
+  TH1D*   m_hdeta = nullptr;
+  TH1D*   m_hdphi = nullptr;
+  TH1D*   m_hdz0 = nullptr;
+  TH1D*   m_hdd0 = nullptr;
+  TH1D*   m_hdpT = nullptr;
 
-  TH1D*   m_hchi2;
+  TH1D*   m_hchi2 = nullptr;
 
-  TH1D*   m_hblayer;
-  TH1D*   m_hpixel;
-  TH1D*   m_hsct;
-  TH1D*   m_hsilicon;
-  TH1D*   m_hstraw;
-  TH1D*   m_htr;
+  TH1D*   m_hblayer = nullptr;
+  TH1D*   m_hpixel = nullptr;
+  TH1D*   m_hsct = nullptr;
+  TH1D*   m_hsilicon = nullptr;
+  TH1D*   m_hstraw = nullptr;
+  TH1D*   m_htr = nullptr;
   
 };
 

@@ -5,7 +5,7 @@
  **     @author  mark sutton
  **     @date    Sun  9 Aug 2015 00:02:23 CEST 
  **
- **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -44,28 +44,28 @@ private:
 
   TIDDirectory* m_dir;
 
-  TH1F*    m_hnvtx;
-  TH1F*    m_hzed;
-  TH1F*    m_hntrax;
+  TH1F*    m_hnvtx = nullptr;
+  TH1F*    m_hzed = nullptr;
+  TH1F*    m_hntrax = nullptr;
 
-  TH1F*    m_hnvtx_rec;
-  TH1F*    m_hzed_rec;
-  TH1F*    m_hntrax_rec;
+  TH1F*    m_hnvtx_rec = nullptr;
+  TH1F*    m_hzed_rec = nullptr;
+  TH1F*    m_hntrax_rec = nullptr;
 
-  TH1F*    m_hzed_res;
+  TH1F*    m_hzed_res = nullptr;
 
-  TProfile* m_rdz_vs_zed;
-  TProfile* m_rdz_vs_ntrax;
-  TProfile* m_rdz_vs_nvtx;
+  TProfile* m_rdz_vs_zed = nullptr;
+  TProfile* m_rdz_vs_ntrax = nullptr;
+  TProfile* m_rdz_vs_nvtx = nullptr;
   //No currently used 
   //but retained in case
   //TProfile* m_rdz_vs_mu;
 
-  TProfile* m_eff_zed;
-  TProfile* m_eff_ntrax;
-  TProfile* m_eff_nvtx;
-  TProfile* m_eff_mu;
-  TProfile* m_eff_lb;
+  TProfile* m_eff_zed = nullptr;
+  TProfile* m_eff_ntrax = nullptr;
+  TProfile* m_eff_nvtx = nullptr;
+  TProfile* m_eff_mu = nullptr;
+  TProfile* m_eff_lb = nullptr;
  
 };
 
