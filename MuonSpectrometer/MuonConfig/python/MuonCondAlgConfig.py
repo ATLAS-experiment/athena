@@ -376,3 +376,31 @@ def NswDcsDbAlgCfg(flags, **kwargs):
     acc.addCondAlgo(alg)
     return acc
 
+
+def MmDigitEffiCondAlgCfg(flags, **kwargs):
+    acc = ComponentAccumulator()
+    if not flags.Input.isMC: return acc
+
+    if (kwargs["readFromJSON"]):
+        kwargs["ReadKey"] = ""
+    else:
+        kwargs.setdefault("ReadKey","/MDT/MM/EFFMAP")
+        acc.merge(addFolders(flags, kwargs["ReadKey"]),"MDT_OFL", className="CondAttrListCollection")
+
+    alg = CompFactory.MmDigitEffiCondAlg("MmDigitEffiCondAlg", **kwargs)
+    acc.addCondAlgo(alg)
+    return acc
+
+def sTgcDigitEffiCondAlgCfg(flags, **kwargs):
+    acc = ComponentAccumulator()
+    if not flags.Input.isMC: return acc
+
+    if (kwargs["readFromJSON"]):
+        kwargs["ReadKey"] = ""
+    else:
+        kwargs.setdefault("ReadKey","/TGC/NSW/EFFMAP")
+        acc.merge(addFolders(flags, kwargs["ReadKey"]),"TGC_OFL", className="CondAttrListCollection")
+
+    alg = CompFactory.sTgcDigitEffiCondAlg("sTgcDigitEffiCondAlg", **kwargs)
+    acc.addCondAlgo(alg)
+    return acc

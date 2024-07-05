@@ -23,7 +23,7 @@ namespace Muon{
                 lookUpId = m_idHelperSvc->gasGapId(channelId);
                 break;
             case TechIndex::MM:
-                lookUpId = m_idHelperSvc->mmIdHelper().pcbID(channelId);
+                lookUpId = m_idHelperSvc->mmIdHelper().febID(channelId);
                 break;
             case TechIndex::STGC:
                 lookUpId = m_idHelperSvc->stgcIdHelper().hvID(channelId, isInnerQ1);
@@ -43,11 +43,11 @@ namespace Muon{
         return m_defaultEffi;
     }
 
-    StatusCode DigitEffiData::setEfficiency(const Identifier& channelId, const double effi){
-        const Identifier gasGapId = getLookUpId(channelId);
+    StatusCode DigitEffiData::setEfficiency(const Identifier& channelId, const double effi, bool isInnerQ1 /*=false*/){
+        const Identifier gasGapId = getLookUpId(channelId, isInnerQ1);
         auto insert_itr = m_effiData.insert(std::make_pair(gasGapId, effi));
         if (!insert_itr.second) {
-            ATH_MSG_ERROR("An efficiency for gasGap "<<m_idHelperSvc->toStringGasGap(gasGapId)
+            ATH_MSG_ERROR("An efficiency for gasGap "<<m_idHelperSvc->toString(gasGapId)
             <<" has already been stored "<<m_effiData[gasGapId]<<" vs. "<<effi);
             return StatusCode::FAILURE;
         }

@@ -281,6 +281,8 @@ class sTgcReadoutElement : public MuonReadoutElement {
     std::map<Identifier, std::shared_ptr<Acts::Surface>> getSurfaces() const override final;
 #endif
 
+   bool isEtaZero(const IdentifierHash& measurementHash, const Amg::Vector2D& localPosition) const;
+
    private:
         /// Returns channel position for a given identifierHash
         static unsigned int channelNumber(const IdentifierHash& measHash);
