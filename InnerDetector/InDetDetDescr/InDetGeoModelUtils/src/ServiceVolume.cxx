@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 //
@@ -88,10 +88,9 @@
 #include "GeoModelKernel/GeoShapeSubtraction.h"
 #include "GaudiKernel/SystemOfUnits.h"
 
-#include <string>
+#include <format>
 #include <iostream>
-#include <sstream>
-#include <iomanip>
+#include <string>
 
 namespace InDetDD {
   ServiceVolume::ServiceVolume()
@@ -170,10 +169,7 @@ namespace InDetDD {
 
   void
   ServiceVolume::setLabel(const std::string& name, int volId) {
-    std::ostringstream o;
-    o.fill('0');
-    o << name << std::setw(2) << volId;
-    m_label = o.str();
+    m_label = std::format("{:s}{:02d}", name, volId);
   }
 
   std::string
