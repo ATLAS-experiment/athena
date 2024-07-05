@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //    gFEXJetTOB - Forms the Jet TOBs for gFEX
@@ -10,14 +10,6 @@
 
 #include "L1CaloFEXSim/gFEXJetTOB.h"
 
-
-LVL1::gFEXJetTOB::gFEXJetTOB():
-  m_eta{99999},
-  m_phi{99999},
-  m_ET{99999},
-  m_st{99999},
-  m_tobID{99999}
-{}
 
 void LVL1::gFEXJetTOB::setEta(unsigned int eta) {
   m_eta = eta;
