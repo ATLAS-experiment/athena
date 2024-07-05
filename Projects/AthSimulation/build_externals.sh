@@ -9,8 +9,8 @@
 ATLAS_PROJECT_DIR=$(cd $(dirname ${BASH_SOURCE[0]}) && pwd)
 ATLAS_EXT_PROJECT_NAME="AthSimulationExternals"
 ATLAS_BUILDTYPE="RelWithDebInfo"
-ATLAS_EXTRA_CMAKE_ARGS=(-DLCG_VERSION_NUMBER=104
-                        -DLCG_VERSION_POSTFIX="d_ATLAS_21"
+ATLAS_EXTRA_CMAKE_ARGS=(-DLCG_VERSION_NUMBER=106
+                        -DLCG_VERSION_POSTFIX="_ATLAS_3"
                         -DATLAS_GAUDI_SOURCE="URL;https://gitlab.cern.ch/atlas/Gaudi/-/archive/v38r2.000/Gaudi-v38r2.000.tar.gz;URL_MD5;739b777252581eb13dd159532ea19985"
                         -DATLAS_GEOMODEL_SOURCE="URL;https://gitlab.cern.ch/GeoModelDev/GeoModel/-/archive/6.2.0/GeoModel-6.2.0.tar.bz2;URL_MD5;f5c17be0aa7b56a5bd346b84799ac233"
                         -DATLAS_GEANT4_USE_LTO=TRUE
