@@ -274,6 +274,12 @@ namespace FlavorTagDiscriminants {
     // Create decorators for links to the input tracks
     if (!m_decorators.jetVecChar.empty() || !m_decorators.jetVecFloat.empty()) {
       std::string name = m_onnxUtil->getModelName() + "_TrackLinks";
+
+      // modify the deco name if we're using flip taggers
+      if (options.flip != FlipTagConfig::STANDARD) {
+        name = str::sub_first(flip_converters, name, context);
+      }
+
       name = str::remapName(name, remap, usedRemap);
       deps.bTagOutputs.insert(name);
       m_decorators.jetTrackLinks.emplace_back(name, Dec<TrackLinks>(name));
