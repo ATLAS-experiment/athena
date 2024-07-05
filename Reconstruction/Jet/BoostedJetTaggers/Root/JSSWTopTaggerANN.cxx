@@ -309,7 +309,7 @@ StatusCode JSSWTopTaggerANN::decorate(  const xAOD::JetContainer& jetCont  ) con
     ATH_MSG_VERBOSE( "Jet values : Mass = " << jet_mass << ", score = " << jet_score );
 
     /// Get SF weight
-    if ( !m_calcSF ) return StatusCode::SUCCESS;
+    if ( !m_calcSF ) continue;
 
     float weight = 1.0;
     float effSF = 1.0;
