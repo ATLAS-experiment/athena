@@ -74,10 +74,15 @@ namespace MuonR4 {
                                                          idHelper.multilayer(hitId), 
                                                          idHelper.gasGap(hitId), 
                                                          channelNumber, isValid);
+
             if(!isValid) {
                 ATH_MSG_WARNING("Invalid strip identifier for layer " << m_idHelperSvc->toStringGasGap(hitId) 
                              << " channel " << channelNumber << " locPos " << Amg::toString(locPos));
                 continue;
+            }
+            
+            if(efficiencyMap && efficiencyMap->getEfficiency(clusId) < CLHEP::RandFlat::shoot(rndEngine, 0., 1.)){
+                    continue;
             }
             
             NswErrorCalibData::Input errorCalibInput{};

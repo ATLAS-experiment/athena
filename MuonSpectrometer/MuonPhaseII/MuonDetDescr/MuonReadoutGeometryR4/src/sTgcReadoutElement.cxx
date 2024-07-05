@@ -347,5 +347,14 @@ Amg::Vector3D sTgcReadoutElement::rightStripEdge(const ActsGeometryContext& ctx,
    
 }
 
+bool sTgcReadoutElement::isEtaZero(const IdentifierHash& measurementHash, const Amg::Vector2D& localPosition) const {
+   if(std::abs(m_idHelper.stationEta(identify())) != 1 ) return false; // if we are not in a Q1 ro element we do not have to check further
+   const WireGroupDesign& wireDes = wireDesign(measurementHash); // function is not checking for channel type so we just use its gas gap info
+
+   double lpos  = (chType(measurementHash) == ReadoutChannelType::Strip  ? localPosition.x() : localPosition.y() );
+   if (lpos < 0.5 * gapHeight(measurementHash) - wireDes.wireCutout()) return true;
+   return false;
+}
+
 
 }  // namespace MuonGMR4

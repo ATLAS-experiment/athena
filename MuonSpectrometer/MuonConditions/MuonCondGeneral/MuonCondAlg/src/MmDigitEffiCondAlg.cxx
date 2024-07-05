@@ -76,7 +76,7 @@ StatusCode MmDigitEffiCondAlg::parseDataFromJSON(const nlohmann::json& lines,
         const std::string stationType = line["station"];
         const int stationPhi = line["phi"];
         const int stationEta = line["eta"];
-        const int multiLayer = line["multiLayer"];
+        const int multiLayer = line["multilayer"];
         const int gasGap = line["gasGap"];
         const int feb = line["frontEndBoard"];
         const double efficiency = line["efficiency"];

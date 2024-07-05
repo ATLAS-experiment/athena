@@ -76,7 +76,7 @@ StatusCode sTgcDigitEffiCondAlg::parseDataFromJSON(const nlohmann::json& lines,
         const std::string stationType = line["station"];
         const int stationPhi = line["phi"];
         const int stationEta = line["eta"];
-        const int multiLayer = line["multiLayer"];
+        const int multiLayer = line["multilayer"];
         const int gasGap = line["gasGap"];
         const int isInnerQ1 = line["isInnerQ1"];
         const double efficiency = line["efficiency"];
@@ -88,7 +88,7 @@ StatusCode sTgcDigitEffiCondAlg::parseDataFromJSON(const nlohmann::json& lines,
                         << ", "<<multiLayer<<", "<<gasGap<<", "<< isInnerQ1<<" is invalid");
             return StatusCode::FAILURE;
         }
-        ATH_CHECK(effiData.setEfficiency(id, efficiency));
+        ATH_CHECK(effiData.setEfficiency(id, efficiency, isInnerQ1));
     }
     return StatusCode::SUCCESS;
 }

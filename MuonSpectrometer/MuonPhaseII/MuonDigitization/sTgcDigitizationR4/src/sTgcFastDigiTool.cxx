@@ -76,12 +76,6 @@ namespace MuonR4 {
         }
         ++m_allHits[channelType::Strip];
         const Identifier hitId{timedHit->identify()};
-        /// Check efficiencies
-        if (efficiencyMap && efficiencyMap->getEfficiency(hitId) < CLHEP::RandFlat::shoot(rndEngine,0.,1.)){
-            ATH_MSG_VERBOSE("Simulated strip hit "<<xAOD::toEigen(timedHit->localPosition())
-                            << m_idHelperSvc->toString(hitId) <<" is rejected because of efficency modelling");
-            return false;
-        }
         const MuonGMR4::sTgcReadoutElement* readOutEle{m_detMgr->getsTgcReadoutElement(hitId)};
         
         const sTgcIdHelper& idHelper{m_idHelperSvc->stgcIdHelper()};
@@ -107,6 +101,14 @@ namespace MuonR4 {
                             <<m_idHelperSvc->toStringGasGap(hitId)<<" strip: "<<stripNum);
             return false;
         } 
+
+        /// Check efficiencies
+        bool isInnerQ1 = readOutEle->isEtaZero(readOutEle->measurementHash(hitId), stripPos);
+        if (efficiencyMap && efficiencyMap->getEfficiency(hitId, isInnerQ1) < CLHEP::RandFlat::shoot(rndEngine,0.,1.)){
+            ATH_MSG_VERBOSE("Simulated strip hit "<<xAOD::toEigen(timedHit->localPosition())
+                            << m_idHelperSvc->toString(hitId) <<" is rejected because of efficency modelling");
+            return false;
+        }
 
         NswErrorCalibData::Input errorCalibInput{};
         errorCalibInput.stripId= stripId;
@@ -213,7 +215,17 @@ namespace MuonR4 {
                                       readOutEle->localToGlobalTrans(gctx, stripLayHash)};
         
         const Amg::Vector2D wirePos{(toWire*xAOD::toEigen(timedHit->localPosition())).block<2,1>(0,0)};
-        /// 
+        // do not digitise wires that are never read out in reality
+        bool isInnerQ1 = readOutEle->isEtaZero(readOutEle->measurementHash(hitId), wirePos);
+        if(isInnerQ1) return false;
+        
+        /// Check efficiencies
+        if (efficiencyMap && efficiencyMap->getEfficiency(hitId, isInnerQ1) < CLHEP::RandFlat::shoot(rndEngine,0.,1.)){
+            ATH_MSG_VERBOSE("Simulated wire hit "<<xAOD::toEigen(timedHit->localPosition())
+                            << m_idHelperSvc->toString(hitId) <<" is rejected because of efficency modelling");
+            return false;
+        }
+
         const MuonGMR4::WireGroupDesign& design{readOutEle->wireDesign(gasGap)};
         
         const int wireGrpNum = design.stripNumber(wirePos);
@@ -270,12 +282,6 @@ namespace MuonR4 {
         ++m_allHits[channelType::Pad];
 
         const Identifier hitId{timedHit->identify()};
-        /// Check efficiencies
-        if (efficiencyMap && efficiencyMap->getEfficiency(hitId) < CLHEP::RandFlat::shoot(rndEngine,0.,1.)){
-            ATH_MSG_VERBOSE("Simulated pad hit "<<xAOD::toEigen(timedHit->localPosition())
-                            << m_idHelperSvc->toString(hitId) <<" is rejected because of efficency modelling");
-            return false;
-        }
         const sTgcIdHelper& idHelper{m_idHelperSvc->stgcIdHelper()};
         const MuonGMR4::sTgcReadoutElement* readOutEle = m_detMgr->getsTgcReadoutElement(hitId);
         const int gasGap = idHelper.gasGap(hitId);
@@ -296,7 +302,7 @@ namespace MuonR4 {
         
         const auto [padEta, padPhi] = design.channelNumber(padPos);
         if (padEta < 0 || padPhi < 0) {
-            ATH_MSG_VERBOSE("The wire "<<Amg::toString(padPos)<<" in "<<m_idHelperSvc->toStringGasGap(hitId)
+            ATH_MSG_VERBOSE("The pad "<<Amg::toString(padPos)<<" in "<<m_idHelperSvc->toStringGasGap(hitId)
                         <<" is outside of the acceptance of "<<std::endl<<design);
             return false;
         }
@@ -310,6 +316,16 @@ namespace MuonR4 {
                             <<" in "<<m_idHelperSvc->toStringGasGap(hitId));
             return false;
         }
+        
+        /// Check efficiencies
+        bool isInnerQ1 = readOutEle->isEtaZero(readOutEle->measurementHash(hitId), padPos);
+        if (efficiencyMap && efficiencyMap->getEfficiency(hitId, isInnerQ1) < CLHEP::RandFlat::shoot(rndEngine,0.,1.)){
+            ATH_MSG_VERBOSE("Simulated pad hit "<<xAOD::toEigen(timedHit->localPosition())
+                            << m_idHelperSvc->toString(hitId) <<" is rejected because of efficency modelling");
+            return false;
+        }
+
+
 
         outCollection.push_back(std::make_unique<sTgcDigit>(padId,
                                                             associateBCIdTag(ctx, timedHit), 

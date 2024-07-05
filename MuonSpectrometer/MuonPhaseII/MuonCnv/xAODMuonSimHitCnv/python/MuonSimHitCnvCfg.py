@@ -61,6 +61,13 @@ def MmFastDigitizationCfg(flags, name="MmFastDigitizer",  **kwargs):
     kwargs.setdefault("StreamName", "MmSimForklift")
     kwargs.setdefault("OutputSDOName", "MM_SDO")
     kwargs.setdefault("SimHitKey", "xMmSimHits")
+    
+    """
+    from MuonConfig.MuonCondAlgConfig import MmDigitEffiCondAlgCfg
+    result.merge(MmDigitEffiCondAlgCfg(flags,readFromJSON="EffMapMM.json"))
+    kwargs.setdefault("EffiDataKey", "MmDigitEff")
+    """
+    
     kwargs.setdefault("EffiDataKey", "")
     
     from MuonConfig.MuonCalibrationConfig import NswErrorCalibDbAlgCfg
@@ -73,6 +80,7 @@ def MmFastDigitizationCfg(flags, name="MmFastDigitizer",  **kwargs):
                                         DigitizationTool = the_tool)
     result.addEventAlgo(the_alg, primary = True)
     return result
+
 def RpcFastDigitizationCfg(flags, name="RpcFastDigitizer", **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("StreamName", "RpcSimForklift")
@@ -114,6 +122,13 @@ def sTgcFastDigitizationCfg(flags, name="sTgcFastDigitizer", **kwargs):
     kwargs.setdefault("StreamName", "sTgcSimForklift")
     kwargs.setdefault("OutputSDOName", "STGC_SDO")
     kwargs.setdefault("SimHitKey", "xStgcSimHits")
+    
+    """
+    from MuonConfig.MuonCondAlgConfig import sTgcDigitEffiCondAlgCfg
+    result.merge(sTgcDigitEffiCondAlgCfg(flags,readFromJSON="EffMapsTGC.json"))
+    kwargs.setdefault("EffiDataKey", "sTgcDigitEff")
+    """
+    
     kwargs.setdefault("EffiDataKey", "")
     from MuonConfig.MuonCalibrationConfig import NswErrorCalibDbAlgCfg
     result.merge(NswErrorCalibDbAlgCfg(flags))

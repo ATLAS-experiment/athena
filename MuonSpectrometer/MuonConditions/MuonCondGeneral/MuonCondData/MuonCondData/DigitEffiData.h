@@ -28,7 +28,7 @@ namespace Muon{
             /// Returns the signal generation efficiency of the sTgc channel
             double getEfficiency(const Identifier& channelId, bool isInnerQ1 = false /* needed for the sTGCs*/) const;
             /// Sets the efficiency for a given minimal section of the dector
-            StatusCode setEfficiency(const Identifier& sectionId, const double effi);
+            StatusCode setEfficiency(const Identifier& sectionId, const double effi, bool isInnerQ1 = false /* needed for the sTGCs*/);
         private:
             Identifier getLookUpId(const Identifier& channelId, bool isInnerQ1 = false /*needed for the sTGCs*/) const;
             const Muon::IMuonIdHelperSvc* m_idHelperSvc{nullptr};
