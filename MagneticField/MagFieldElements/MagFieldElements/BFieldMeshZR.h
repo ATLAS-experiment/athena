@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -23,6 +23,8 @@
 class BFieldMeshZR
 {
 public:
+  // no default constructor
+  BFieldMeshZR() = delete;
   // constructor
   BFieldMeshZR(double zmin, double zmax, double rmin, double rmax);
   // allocate space to vectors
@@ -59,7 +61,7 @@ private:
   std::vector<BFieldVectorZR> m_field;
   // look-up table and related variables
   std::array<std::vector<int>, 2> m_LUT;
-  std::array<double, 2> m_invUnit; // inverse unit size in the LUT
+  std::array<double, 2> m_invUnit = {1}; // inverse unit size in the LUT
   int m_zoff{0};
 };
 
