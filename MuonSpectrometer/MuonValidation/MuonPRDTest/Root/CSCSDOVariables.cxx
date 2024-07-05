@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonPRDTest/CSCSDOVariables.h"
@@ -7,7 +7,7 @@
 #include "MuonReadoutGeometry/CscReadoutElement.h"
 namespace MuonPRDTest {
     CscSDOVariables::CscSDOVariables(MuonTesterTree& tree, const std::string& container_name, MSG::Level msglvl) :
-        PrdTesterModule(tree, "CSC_SDO", false, msglvl), m_key{container_name} {}
+        PrdTesterModule(tree, "CSC_SDO", msglvl), m_key{container_name} {}
 
     bool CscSDOVariables::declare_keys() { return declare_dependency(m_key); }
 

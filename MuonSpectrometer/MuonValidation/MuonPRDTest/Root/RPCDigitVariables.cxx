@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonPRDTest/RPCDigitVariables.h"
@@ -7,7 +7,7 @@
 #include "MuonReadoutGeometry/RpcReadoutElement.h"
 namespace MuonPRDTest {
     RpcDigitVariables::RpcDigitVariables(MuonTesterTree& tree, const std::string& container_name, MSG::Level msglvl) :
-        PrdTesterModule(tree, "Digits_RPC", true, msglvl), m_key{container_name} {}
+        PrdTesterModule(tree, "Digits_RPC", msglvl), m_key{container_name} {}
 
     bool RpcDigitVariables::declare_keys() { return declare_dependency(m_key); }
     bool RpcDigitVariables::fill(const EventContext& ctx) {

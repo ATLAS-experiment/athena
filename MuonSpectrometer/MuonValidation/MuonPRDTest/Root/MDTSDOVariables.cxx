@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <MuonPRDTest/MDTSDOVariables.h>
 #include <StoreGate/ReadHandle.h>
 namespace MuonPRDTest {
     MdtSDOVariables::MdtSDOVariables(MuonTesterTree& tree, const std::string& container_name, MSG::Level msglvl) :
-        PrdTesterModule(tree, "SDO_MDT", false, msglvl), m_sdo_key{container_name} {}
+        PrdTesterModule(tree, "SDO_MDT", msglvl), m_sdo_key{container_name} {}
 
     bool MdtSDOVariables::fill(const EventContext& ctx) {
         const MuonGM::MuonDetectorManager* MuonDetMgr = getDetMgr(ctx);

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonPRDTest/CSCRDOVariables.h"
@@ -10,7 +10,7 @@
 using namespace Muon;
 namespace MuonPRDTest {
     CSCRDOVariables::CSCRDOVariables(MuonTesterTree& tree, const std::string& container_name, MSG::Level msglvl, const MuonIdHelper* idhelper, const Muon::ICSC_RDO_Decoder* rdo_decoder) :
-        PrdTesterModule(tree, "RDO_CSC", true, msglvl), m_key{container_name},  m_rdo_decoder{rdo_decoder} {setHelper(idhelper);}
+        PrdTesterModule(tree, "RDO_CSC", msglvl), m_key{container_name},  m_rdo_decoder{rdo_decoder} {setHelper(idhelper);}
     bool CSCRDOVariables::declare_keys() { return declare_dependency(m_key); }
 
     bool CSCRDOVariables::fill(const EventContext& ctx) {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include "MuonPRDTest/MMSimHitVariables.h"
 
@@ -8,7 +8,7 @@
 
 namespace MuonPRDTest {
     MMSimHitVariables::MMSimHitVariables(MuonTesterTree& tree, const std::string& container_name, MSG::Level msglvl) :
-        PrdTesterModule(tree, "MM_Sim", false, msglvl), m_key{container_name} {}
+        PrdTesterModule(tree, "MM_Sim", msglvl), m_key{container_name} {}
 
     bool MMSimHitVariables::declare_keys() { return declare_dependency(m_key); }
 

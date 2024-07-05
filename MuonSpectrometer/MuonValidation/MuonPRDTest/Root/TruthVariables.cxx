@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonPRDTest/TruthVariables.h"
@@ -8,7 +8,7 @@
 #include "AtlasHepMC/GenVertex.h"
 namespace MuonPRDTest {
     TruthVariables::TruthVariables(MuonTesterTree& tree, const std::string& container_name, MSG::Level msglvl) :
-        PrdTesterModule(tree, "TruthTestModule", false, msglvl), m_key{container_name} {}
+        PrdTesterModule(tree, "TruthTestModule", msglvl), m_key{container_name} {}
     bool TruthVariables::declare_keys() { return declare_dependency(m_key); }
 
     bool TruthVariables::fill(const EventContext& ctx) {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonPRDTest/MMPRDVariables.h"
@@ -9,7 +9,7 @@
 
 namespace MuonPRDTest {
     MMPRDVariables::MMPRDVariables(MuonTesterTree& tree, const std::string& prd_container_name, MSG::Level msglvl) :
-        PrdTesterModule(tree, "PRD_MM", true, msglvl), m_key{prd_container_name} {}
+        PrdTesterModule(tree, "PRD_MM", msglvl), m_key{prd_container_name} {}
 
     bool MMPRDVariables::declare_keys() { return declare_dependency(m_key); }
 

@@ -9,12 +9,21 @@ def MuonHitTesterCfg(flags, name="MuonHitTester", outFile="SimHitTest.root", **k
     cfg.merge(setupHistSvcCfg(flags,out_file=outFile, out_stream="MuonR4HitTest"))
     kwargs.setdefault("isMC", flags.Input.isMC)
 
-
+    ### Overall simhit container dump protected by dumpSimHits property
+    ### If property is set to true ensure that only the containers of the activated
+    ### detectors are written
     kwargs.setdefault("dumpMdtSimHits", flags.Detector.GeometryMDT)
     kwargs.setdefault("dumpRpcSimHits", flags.Detector.GeometryRPC)
     kwargs.setdefault("dumpTgcSimHits", flags.Detector.GeometryTGC)
     kwargs.setdefault("dumpStgcSimHits",flags.Detector.GeometrysTGC)
     kwargs.setdefault("dumpMmSimHits", flags.Detector.GeometryMM)
+
+
+    kwargs.setdefault("dumpMdtDigits", flags.Detector.GeometryMDT)
+    kwargs.setdefault("dumpRpcDigits", flags.Detector.GeometryRPC)
+    kwargs.setdefault("dumpTgcDigits", flags.Detector.GeometryTGC)
+    kwargs.setdefault("dumpStgcDigits",flags.Detector.GeometrysTGC)
+    kwargs.setdefault("dumpMmDigits", flags.Detector.GeometryMM)
 
     theAlg = CompFactory.MuonValR4.MuonHitTesterAlg(name, **kwargs)
     result.addEventAlgo(theAlg, primary = True)

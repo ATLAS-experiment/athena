@@ -5,7 +5,18 @@
 
 #include "MuonTesterTree/EventInfoBranch.h"
 #include "MuonPRDTestR4/SimHitTester.h"
+
+#include "MuonPRDTest/MDTDigitVariables.h"
+#include "MuonPRDTest/RPCDigitVariables.h"
+#include "MuonPRDTest/TGCDigitVariables.h"
+#include "MuonPRDTest/MMDigitVariables.h"
+#include "MuonPRDTest/sTGCDigitVariables.h"
+
+
+
+
 using namespace MuonVal;
+using namespace MuonPRDTest;
 namespace MuonValR4 {
     MuonHitTesterAlg::MuonHitTesterAlg(const std::string& alg_name,
                                     ISvcLocator* pSvcLocator):
@@ -17,6 +28,7 @@ namespace MuonValR4 {
         
         m_tree.addBranch(std::make_shared<EventInfoBranch>(m_tree, evOpts));
         ATH_CHECK(setupSimHits());
+        ATH_CHECK(setupDigits());
         ATH_CHECK(m_tree.init(this));
         return StatusCode::SUCCESS;
     }
@@ -49,6 +61,27 @@ namespace MuonValR4 {
             m_tree.addBranch(std::make_shared<SimHitTester>(m_tree, m_mmSimHitKey, 
                                                             ActsTrk::DetectorType::Mm, 
                                                             msgLevel()));
+        }
+        return StatusCode::SUCCESS;
+    }
+    StatusCode MuonHitTesterAlg::setupDigits() {
+        if (!m_writeDigits || !m_isMC){
+            return StatusCode::SUCCESS;
+        }
+        if (m_writeMdtDigits) {
+            m_tree.addBranch(std::make_shared<MdtDigitVariables>(m_tree, m_mdtDigitKey, msgLevel()));
+        }
+        if (m_writeRpcDigits) {
+            m_tree.addBranch(std::make_shared<RpcDigitVariables>(m_tree, m_rpcDigitKey, msgLevel()));
+        }
+        if (m_writeTgcDigits) {
+            m_tree.addBranch(std::make_shared<TgcDigitVariables>(m_tree, m_tgcDigitKey, msgLevel()));
+        }
+        if (m_writeMmDigits) {
+            m_tree.addBranch(std::make_shared<MMDigitVariables>(m_tree, m_mmDigitKey, msgLevel()));
+        }
+        if (m_writesTgcDigits) {
+            m_tree.addBranch(std::make_shared<sTgcDigitVariables>(m_tree, m_sTgcDigitKey, msgLevel()));
         }
         return StatusCode::SUCCESS;
     }

@@ -9,7 +9,7 @@
 
 namespace MuonPRDTest {
     RPCSimHitVariables::RPCSimHitVariables(MuonTesterTree& tree, const std::string& container_name, MSG::Level msglvl) :
-        PrdTesterModule(tree, "SIM_RPC", false, msglvl), m_key{container_name} {}
+        PrdTesterModule(tree, "SIM_RPC", msglvl), m_key{container_name} {}
 
     bool RPCSimHitVariables::declare_keys() { return declare_dependency(m_key); }
 

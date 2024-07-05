@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include "MuonPRDTest/sTGCSimHitVariables.h"
 
@@ -7,7 +7,7 @@
 #include "MuonSimEvent/sTgcHitIdHelper.h"
 namespace MuonPRDTest {
     sTGCSimHitVariables::sTGCSimHitVariables(MuonTesterTree& tree, const std::string& container_name, MSG::Level msglvl) :
-        PrdTesterModule(tree, "sTGC_Sim", false, msglvl), m_key{container_name} {}
+        PrdTesterModule(tree, "sTGC_Sim", msglvl), m_key{container_name} {}
 
     bool sTGCSimHitVariables::declare_keys() { return declare_dependency(m_key); }
 

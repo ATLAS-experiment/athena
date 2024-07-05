@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonPRDTest/MMSDOVariables.h"
 
 namespace MuonPRDTest {
     MMSDOVariables::MMSDOVariables(MuonTesterTree& tree, const std::string& container_name, MSG::Level msglvl) :
-        PrdTesterModule(tree, "SDO_MM", false, msglvl), m_key{container_name} {}
+        PrdTesterModule(tree, "SDO_MM", msglvl), m_key{container_name} {}
 
     bool MMSDOVariables::declare_keys() { return declare_dependency(m_key); }
 
