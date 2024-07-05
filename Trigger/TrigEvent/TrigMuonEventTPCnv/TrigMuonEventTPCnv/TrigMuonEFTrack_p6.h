@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**********************************************************************************
@@ -37,7 +37,7 @@ public:
     // float m_posy;
     // float m_posz;
     // this array stores all the floats listed above in the order they are listed here
-    float m_allTheFloats[8];
+    float m_allTheFloats[8]{};
     
     // unsigned short int m_nRpcHitsPhi;
     // unsigned short int m_nTgcHitsPhi;
@@ -47,7 +47,7 @@ public:
     // unsigned short int m_nCscHitsEta;
     // unsigned short int m_nMdtHits;
     // this array stores all the unsigned shorts listed above in the order they are listed here
-    unsigned short int m_allTheInts[7];
+    unsigned short int m_allTheInts[7]{};
     
 	TPObjRef m_P4IPtCotThPhiM;
 };

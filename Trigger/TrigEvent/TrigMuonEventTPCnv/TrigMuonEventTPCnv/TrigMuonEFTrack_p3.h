@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**********************************************************************************
@@ -32,20 +32,20 @@ public:
 	virtual ~TrigMuonEFTrack_p3(){}
 
         //private:
-	double m_charge;
-	double m_d0;
-	double m_z0;
-	double m_chi2;
-	double m_chi2prob;
-	double m_posx;
-	double m_posy;
-	double m_posz;
-	unsigned short int m_nRpcHitsPhi;
-	unsigned short int m_nTgcHitsPhi;
-	unsigned short int m_nCscHitsPhi;
-	unsigned short int m_nRpcHitsEta;
-	unsigned short int m_nTgcHitsEta;
-	unsigned short int m_nCscHitsEta;
+	double m_charge{};
+	double m_d0{};
+	double m_z0{};
+	double m_chi2{};
+	double m_chi2prob{};
+	double m_posx{};
+	double m_posy{};
+	double m_posz{};
+	unsigned short int m_nRpcHitsPhi{};
+	unsigned short int m_nTgcHitsPhi{};
+	unsigned short int m_nCscHitsPhi{};
+	unsigned short int m_nRpcHitsEta{};
+	unsigned short int m_nTgcHitsEta{};
+	unsigned short int m_nCscHitsEta{};
 	TPObjRef m_P4IPtCotThPhiM;
 };
 

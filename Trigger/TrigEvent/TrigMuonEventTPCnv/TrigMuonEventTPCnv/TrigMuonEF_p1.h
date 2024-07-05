@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**********************************************************************************
@@ -13,7 +13,6 @@
  * @author Francesca Bucci  <F.Bucci@cern.ch>          - U. Geneva
  *
  * File and Version Information:
- * $Id: TrigMuonEF_p1.h,v 1.2 2009-04-01 22:12:15 salvator Exp $
  **********************************************************************************/
 #ifndef TRIGMUONEVENTTPCNV_TRIGMUONEF_P1_H
 #define TRIGMUONEVENTTPCNV_TRIGMUONEF_P1_H
@@ -34,9 +33,9 @@ class TrigMuonEF_p1
   virtual ~TrigMuonEF_p1(){}
   
   //private:
-  int m_muonCode;
+  int m_muonCode{};
   std::string m_roi;
-  float m_charge;
+  float m_charge{};
 
   TPObjRef m_P4IPtCotThPhiM;
 };

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**********************************************************************************
@@ -31,7 +31,7 @@ class TrigMuonEFTrack_p1
   virtual ~TrigMuonEFTrack_p1(){}
   
   //private:
-  double m_charge;
+  double m_charge{};
 
   TPObjRef m_P4IPtCotThPhiM;
 };
