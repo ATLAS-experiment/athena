@@ -38,6 +38,21 @@ namespace LVL1 {
      ATH_CHECK(m_gFEXFPGA_gTowerContainerKey.initialize());
      ATH_CHECK(m_gFEXFPGA_gTower50ContainerKey.initialize());
 
+     // set all value to 1024 for no calibration 
+   
+     std::array<int,12> Aslopes    =  { 891,905,903,954,1128,1106,1093,1034,940,887,877,874};
+     std::array<int,12> Bslopes    =  { 880,869,888,923,1011,1060,1062,1109,941,912,904,882};
+     std::array<int,12> Cslopes    =  { 1024,1024,1306,1011,887,878,860,888,975,1252,1024,1024};
+ 
+     std::array<int,12> AnoiseCuts =  { -100, -100, -100, -100, -100, -100,  -100, -100, -100, -100, -100, -100 };
+     std::array<int,12> BnoiseCuts =  { -100, -100, -100, -100, -100, -100,  -100, -100, -100, -100, -100, -100 };
+     std::array<int,12> CnoiseCuts =  {  176, -100, -100, -100, -100, -100,  -100, -100, -100, -100, -100,  176 };
+
+     gFEXFPGA::calExpand( m_offsetsDefaultA, m_noiseCutsDefaultA, m_slopesDefaultA, 48,  AnoiseCuts, Aslopes);
+     gFEXFPGA::calExpand( m_offsetsDefaultB, m_noiseCutsDefaultB, m_slopesDefaultB, 48,  BnoiseCuts, Bslopes);
+     gFEXFPGA::calExpand( m_offsetsDefaultC, m_noiseCutsDefaultC, m_slopesDefaultC, 48,  CnoiseCuts, Cslopes);
+
+
      return StatusCode::SUCCESS;
   }
 
@@ -57,7 +72,8 @@ namespace LVL1 {
 
    void gFEXFPGA::FillgTowerEDMCentral(SG::WriteHandle<xAOD::gFexTowerContainer> & gTowersContainer, // output
                                        gTowersCentral & gTowersIDs_central,                          // input, IDs
-                                       gTowersType & output_gTower_energies,                         // output, 200 MeV
+                                       //int fpga,                                                     // input fpga (A=0, B=1) 
+ 	                               gTowersType & output_gTower_energies,                         // output, 200 MeV
                                        gTowersType & output_gTower50_energies,                       // output, 50 MeV
                                        gTowersType & output_saturation) {                            // output, saturation                          
 
@@ -66,6 +82,8 @@ namespace LVL1 {
       int TowerEt = -99;
       int Fpga = m_fpgaId;
       char IsSaturated = 0;
+
+      float etaSum = 0; 
 
       SG::ReadHandle<gTowerContainer> gFEXFPGA_gTowerContainer(m_gFEXFPGA_gTowerContainerKey/*,ctx*/);     // 200 MeV
       SG::ReadHandle<gTowerContainer> gFEXFPGA_gTower50Container(m_gFEXFPGA_gTower50ContainerKey/*,ctx*/); // 50 MeV
@@ -100,6 +118,9 @@ namespace LVL1 {
             TowerEt = tmpTower->getET();
             Eta = tmpTower->eta();
             Phi = tmpTower->phi();
+
+	    etaSum += Eta;
+
             int iPhiFW, iEtaFW;
             uint32_t gFEXtowerID = tmpTower->getFWID(iPhiFW, iEtaFW);
             IsSaturated = tmpTower->isSaturated();
@@ -112,6 +133,20 @@ namespace LVL1 {
             output_saturation[myrow][mycol] = tmpTower->isSaturated();
          }
       }
+     
+      // apply defualt slopes set in initialization.
+      // In the future these values will be read from the online COOL data base
+      // Note the unforutnate hack used to figure out if we are in FPGA A or B.  
+
+      // FPGA A 
+      if( etaSum < 0 ) {
+	gFEXFPGA::gtCalib( output_gTower_energies, m_offsetsDefaultA, m_noiseCutsDefaultA, m_slopesDefaultA);
+      // FPGA B 
+      } else {
+         gFEXFPGA::gtCalib( output_gTower_energies, m_offsetsDefaultB, m_noiseCutsDefaultB, m_slopesDefaultB);
+      }
+      
+
    }
 
    void gFEXFPGA::FillgTowerEDMForward(SG::WriteHandle<xAOD::gFexTowerContainer> & gTowersContainer,
@@ -130,7 +165,7 @@ namespace LVL1 {
       if (!gFEXFPGA_gTower50Container.isValid()) {
          is_mc = true;
       }
-      
+         
 
       //
       // C-N
@@ -205,7 +240,61 @@ namespace LVL1 {
             output_saturation[iPhiFW][iEtaFW - 32 + 6] = tmpTower->isSaturated();
          }
       }
+
+     // apply defualt slopes set in initialization.   
+     // In the future these values will be read from the online COOL data base
+
+      gFEXFPGA::gtCalib( output_gTower_energies, m_offsetsDefaultC,  m_noiseCutsDefaultC,  m_slopesDefaultC);
+
    }
 
+void gFEXFPGA::gtCalib(gTowersType & twrs,const gTowersType & offsets, const gTowersType & noiseCuts, const gTowersType & slopes) const {
+  int rows = twrs.size();
+  int cols = twrs[0].size();
+  for( int irow = 0; irow < rows; irow++ ){
+    for(int jcolumn = 0; jcolumn < cols; jcolumn++){
+       twrs[irow][jcolumn] = twrs[irow][jcolumn] + offsets[irow][jcolumn];
+       calLookup( &twrs[irow][jcolumn],  offsets[irow][jcolumn],  noiseCuts[irow][jcolumn], slopes[irow][jcolumn]);	
+    }	
+  }
+}
+
+void gFEXFPGA::calLookup( int *tower, const int offset, const int noiseCut, const int calib) const {
+  int address = *tower	;
+  
+  if( address < 0 ){
+     ATH_MSG_DEBUG("gTower lookup address out of range " << address );
+     address = 0; 
+  }
+  if(address > 2047){
+    ATH_MSG_DEBUG("gTower lookup address out of range " << address );
+    address = 2047;
+  }
+
+  // noise cut is made before calibraiton 
+  if( (address - offset)  < noiseCut) address = offset; 
+  
+  int calTower  = ( ( calib*address + 511 ) >> 10 )  -  ( (calib*offset + 511 ) >> 10);
+
+  if( calTower < -2048 ) calTower = -2048;
+  if( calTower > 2047 ) calTower = 2047;
+
+  *tower = calTower; 
+}
+
+
+void gFEXFPGA::calExpand( gTowersType & offsets, gTowersType & noiseCuts, gTowersType & slopes, const int offset, const std::array<int,12> columnNoiseCuts, const std::array<int,12> columnSlopes ) const {
+
+  int rows = offsets.size();	
+  int cols = offsets[0].size();
+  for(int irow=0; irow<rows; irow++){
+    for(int jcolumn=0; jcolumn<cols; jcolumn++){
+      offsets[irow][jcolumn] = offset; 
+      noiseCuts[irow][jcolumn] = columnNoiseCuts[jcolumn];
+      slopes[irow][jcolumn] = columnSlopes[jcolumn];
+    }
+  }	
+
+}
 
 } // end of namespace bracket
