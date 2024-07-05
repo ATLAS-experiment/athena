@@ -16,7 +16,7 @@ atlas_add_component( DerivationFrameworkHiggs
    LINK_LIBRARIES ${CLHEP_LIBRARIES} ${ROOT_LIBRARIES} AthenaBaseComps CxxUtils GaudiKernel
    xAODEventInfo xAODEgamma xAODJet xAODMuon xAODTracking xAODTruth xAODTrigger xAODPFlow
    FourMomUtils TrkVKalVrtFitterLib TrkVertexFitterInterfaces TrkVertexAnalysisUtilsLib 
-   TrigDecisionToolLib VxVertex GammaORToolsLib egammaInterfacesLib PFlowUtilsLib PhotonVertexSelectionLib VrtSecInclusiveLib PFlowUtilsLib
+   TrigDecisionToolLib VxVertex egammaInterfacesLib PFlowUtilsLib PhotonVertexSelectionLib VrtSecInclusiveLib PFlowUtilsLib
    EgammaAnalysisInterfacesLib MuonAnalysisInterfacesLib DerivationFrameworkInterfaces CaloDetDescrLib MuonCondSvcLib
    ExpressionEvaluationLib AthContainers PathResolver
    TruthConvertersLib TruthRivetToolsLib TruthUtils 
