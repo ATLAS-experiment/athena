@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**********************************************************************************
@@ -34,9 +34,9 @@ class TrigTrackCounts_p1
   std::vector<float> m_phi0cnt;
   std::vector<float> m_etacnt;
   std::vector<float> m_ptcnt;
-  int m_trkcnt;
-  int m_pixcnt;
-  int m_sctcnt;
+  int m_trkcnt{};
+  int m_pixcnt{};
+  int m_sctcnt{};
 
 };
 
