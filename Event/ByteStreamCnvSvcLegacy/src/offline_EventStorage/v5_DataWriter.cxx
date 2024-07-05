@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <time.h>
@@ -457,7 +457,7 @@ DWError DataWriter::closeFile()
   m_cFile.close();
   std::ostringstream oss;
   oss.width(8);
-  oss.fill('0');
+  (void)oss.fill('0');
   oss << std::hex << std::uppercase <<m_check;
   std::string checksum = oss.str();
   m_check = ::adler32(0L, Z_NULL, 0);
