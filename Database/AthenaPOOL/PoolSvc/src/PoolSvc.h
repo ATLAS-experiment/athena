@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef POOLSVC_H
@@ -207,6 +207,19 @@ public: // Non-static members
 
 private: // data
    typedef std::recursive_mutex CallMutex;
+   // Lock Guard class to safely lock a mutex for a given contextId
+   class ContextLock {
+      std::unique_lock< CallMutex > m_lock;
+   public:
+      ContextLock(int contextId, CallMutex &glob_mtx, const std::vector<CallMutex*> &ctx_mutexes) {
+         // lock the global mutex to gain exclusive access to the context mutexes vector
+         std::lock_guard<CallMutex>    temp_lock( glob_mtx );
+         // lock the mutex for the given context ID for the lifetime of this object
+         m_lock = std::unique_lock< CallMutex >{ *ctx_mutexes[contextId] };
+      }
+      ~ContextLock() { m_lock.unlock(); }
+   };
+
    mutable CallMutex                                 m_pool_mut;
    coral::Context*                                   m_context{nullptr};
    bool                                              m_shareCat{false};
