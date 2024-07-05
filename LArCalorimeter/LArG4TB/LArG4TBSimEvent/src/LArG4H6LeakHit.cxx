@@ -1,17 +1,8 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArG4TBSimEvent/LArG4H6LeakHit.h"
-
-
-LArG4H6LeakHit::LArG4H6LeakHit()
-  : m_ekin(0),
-    m_etot(0),
-    m_pcode(0),
-    m_dir(0)
-{
-}
 
 
 LArG4H6LeakHit::LArG4H6LeakHit(int d, int cod, float ek, float et)
