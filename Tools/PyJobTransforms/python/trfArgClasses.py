@@ -18,7 +18,7 @@ msg = logging.getLogger(__name__)
 
 import PyJobTransforms.trfExceptions as trfExceptions
 
-from PyJobTransforms.trfFileUtils import athFileInterestingKeys, AthenaLiteFileInfo, NTUPEntries, HISTEntries, PRWEntries, urlType, ROOTGetSize
+from PyJobTransforms.trfFileUtils import athFileInterestingKeys, AthenaLiteFileInfo, NTUPEntries, HISTEntries, PHYSVALEntries, PRWEntries, urlType, ROOTGetSize
 from PyJobTransforms.trfUtils import call
 from PyJobTransforms.trfExeStepTools import commonExecutorStepName
 from PyJobTransforms.trfExitCodes import trfExit as trfExit
@@ -1711,15 +1711,23 @@ class argNTUPFile(argFile):
         if self._treeNames is None:
             for fname in files:
                 # Attempt to treat this as a pileup reweighting file
-                myEntries = PRWEntries(fileName=fname)
-                if myEntries is not None:
-                    self._fileMetadata[fname]['nentries'] = myEntries
+                myPRWEntries = PRWEntries(fileName=fname)
+                if myPRWEntries is not None:
+                    self._fileMetadata[fname]['nentries'] = myPRWEntries
                     if self.name and 'NTUP_PILEUP' in self.name:
-                        myEntries = PRWEntries(fileName=fname, integral=True)
-                        self._fileMetadata[fname]['sumOfWeights'] = myEntries
+                        myPRWEntries = PRWEntries(fileName=fname, integral=True)
+                        self._fileMetadata[fname]['sumOfWeights'] = myPRWEntries
                 else:
-                    msg.debug('treeNames is set to None - event count undefined for this NTUP')
-                    self._fileMetadata[fname]['nentries'] = 'UNDEFINED'
+                    # Attempt to treat this as a PHYSVAL file
+                    myPHYSVALEntries = PHYSVALEntries(fileName=fname)
+                    if myPHYSVALEntries is not None:
+                        self._fileMetadata[fname]['nentries'] = myPHYSVALEntries
+                        if self.name and 'NTUP_PHYSVAL' in self.name:
+                            myPHYSVALEntries = PHYSVALEntries(fileName=fname, integral=True)
+                            self._fileMetadata[fname]['sumOfWeights'] = myPHYSVALEntries
+                    else:
+                        msg.debug('treeNames is set to None - event count undefined for this NTUP')
+                        self._fileMetadata[fname]['nentries'] = 'UNDEFINED'
         else:
             for fname in files:
                 try:
