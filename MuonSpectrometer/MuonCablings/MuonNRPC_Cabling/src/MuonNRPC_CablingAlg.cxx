@@ -99,7 +99,8 @@ StatusCode MuonNRPC_CablingAlg::payLoadJSON(MuonNRPC_CablingMap& cabling_map,
     for (const auto& cabl_chan : payload.items()) {
         nlohmann::json cabl_payload = cabl_chan.value();
         CablingData cabl_data{};
-        cabl_data.stationIndex = cabl_payload["station"];
+        const std::string stName{cabl_payload["station"]};
+        cabl_data.stationIndex = m_idHelperSvc->rpcIdHelper().stationNameIndex(stName);
         cabl_data.eta = cabl_payload["eta"];
         cabl_data.phi = cabl_payload["phi"];
         cabl_data.doubletR = cabl_payload["doubletR"];
