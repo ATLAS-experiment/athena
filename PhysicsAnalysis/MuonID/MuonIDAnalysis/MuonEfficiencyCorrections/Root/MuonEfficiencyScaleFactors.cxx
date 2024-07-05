@@ -150,7 +150,7 @@ namespace CP {
 
         // temporary workaround to avoid bad Jpsi scale factors
         if (m_lowpt_threshold < 0) { // not set by the user, use default values
-            if (m_calibration_version.find("Preliminary_r22run3") != std::string::npos) {
+            if (m_calibration_version.find("run3") != std::string::npos) {
                 m_lowpt_threshold = 1e4;
             } else {
                 m_lowpt_threshold = 15e3;
