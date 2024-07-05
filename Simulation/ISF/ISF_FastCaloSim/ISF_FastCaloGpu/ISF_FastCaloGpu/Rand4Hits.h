@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_FASTCALOGPU_RAND4HITS_H
@@ -12,10 +12,7 @@
 
 class Rand4Hits {
 public:
-  Rand4Hits() {
-    m_rand_ptr     = 0;
-    m_total_a_hits = 0;
-  };
+  Rand4Hits() = default;
   ~Rand4Hits();
 
   float* rand_ptr( int nhits ) {
@@ -65,8 +62,8 @@ private:
   void   destroyCPUGen();
 
   float*       m_rand_ptr{nullptr};
-  unsigned int m_total_a_hits;
-  unsigned int m_current_hits;
+  unsigned int m_total_a_hits{0};
+  unsigned int m_current_hits{0};
   void*        m_gen{nullptr};
   bool         m_useCPU{false};
 
