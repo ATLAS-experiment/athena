@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthAllocators/test/ArenaHeapAllocator_test.cxx
@@ -34,7 +34,7 @@ struct Payload
 
   int x;
   int y;
-  char pad[40-2*sizeof(int)-sizeof(void*)];
+  char pad[40-2*sizeof(int)-sizeof(void*)]{};
   static std::atomic<int> n;
   static std::vector<int> v ATLAS_THREAD_SAFE;
 };

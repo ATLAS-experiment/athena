@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthAllocators/test/ArenaBlockAllocatorBase_test.cxx
@@ -35,7 +35,7 @@ struct Payload
 
   int x;
   int y;
-  char pad[40-2*sizeof(int)];
+  char pad[40-2*sizeof(int)]{};
   static std::atomic<int> n;
   static std::vector<int> v ATLAS_THREAD_SAFE;
 };
@@ -148,7 +148,7 @@ void test1()
   assert (bab.params().name == "foo");
   assert (bab2.name() == "foo");
   assert (bab2.params().name == "foo");
-  test_stats (bab, 0, 0);
+  test_stats (bab, 0, 0);  // cppcheck-suppress accessMoved; on purpose
   test_stats (bab2, 1, nelt2);
   assert (bab.m_blocks == nullptr);
   assert (bab.m_freeblocks == nullptr);
@@ -160,7 +160,7 @@ void test1()
   assert (bab.params().name == "foo");
   assert (bab2.name() == "foo");
   assert (bab2.params().name == "foo");
-  test_stats (bab2, 0, 0);
+  test_stats (bab2, 0, 0);  // cppcheck-suppress accessMoved; on purpose
   test_stats (bab, 1, nelt2);
   assert (bab2.m_blocks == nullptr);
   assert (bab2.m_freeblocks == nullptr);
