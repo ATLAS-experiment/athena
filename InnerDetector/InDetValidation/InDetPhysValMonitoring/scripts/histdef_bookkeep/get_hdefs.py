@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 '''
 make ordered list of .xml histogram definitions for 
@@ -9,13 +9,10 @@ make ordered list of .xml histogram definitions for
      of input histo definitions)
 use-case: introducing some order in ~ 1k histograms InDetPVM produces
 '''
-
-import sys
-import string
 import re
 import argparse
 
-from hist_bookkeep_utils import *
+from hist_bookkeep_utils import get_hbuff
 
 parser = argparse.ArgumentParser(
     description='Get histogram xml blocks for list of id-s')
@@ -48,12 +45,12 @@ in_xmldef_name=args.in_xmldef.name
 out_xmldef_name=in_xmldef_name.split(".")[0]+"_"+in_histid_name.split(".")[0]+".xml"
 out_missingdef_name=in_xmldef_name.split(".")[0]+"_"+in_histid_name.split(".")[0]+"_missing.txt"
 
-print ''
-print ' reading input histogram ids in: ', in_histid_name
-print ' reading histogram xml definitions in: ', in_xmldef_name
-print ' writing histogram definitions to: ', out_xmldef_name
-print ' writing histos missing definitions to: ', out_missingdef_name
-print ''
+print('')
+print(' reading input histogram ids in: ', in_histid_name)
+print(' reading histogram xml definitions in: ', in_xmldef_name)
+print(' writing histogram definitions to: ', out_xmldef_name)
+print(' writing histos missing definitions to: ', out_missingdef_name)
+print('')
 
 out_xmldef=open(out_xmldef_name, 'w')
 out_missingdef=open(out_missingdef_name, 'w')
@@ -74,6 +71,6 @@ for line in args.in_histid:
 out_xmldef.close()
 out_missingdef.close()
 
-print ''
-print 'all done'
-print ''
+print('')
+print('all done')
+print('')
