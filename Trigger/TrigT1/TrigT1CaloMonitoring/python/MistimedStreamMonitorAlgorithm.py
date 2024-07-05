@@ -3,7 +3,7 @@
 #
 
 
-def MistimedStreamMonitorConfig(flags):
+def MistimedStreamMonitorConfig(flags, Legacy, PhaseI):
     '''Function to configure LVL1 Mistimed Stream algorithm in the monitoring system.'''
     import math 
 
@@ -18,7 +18,11 @@ def MistimedStreamMonitorConfig(flags):
 
     # get any algorithms
     MistimedMonAlg = helper.addAlgorithm(CompFactory.MistimedStreamMonitorAlgorithm,'MistimedStreamMonitorAlg')
-    
+    if (Legacy):
+        MistimedMonAlg.UseLegacy = True
+    if (PhaseI):
+        MistimedMonAlg.UsePhase1 = True
+
     # import tools
     from DetDescrCnvSvc.DetDescrCnvSvcConfig import DetDescrCnvSvcCfg
     helper.result().merge(DetDescrCnvSvcCfg(flags))
@@ -175,13 +179,15 @@ if __name__=='__main__':
     
     flags.lock()
 
+    from AthenaCommon.AppMgr import ServiceMgr
+    ServiceMgr.Dump = False
+
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
     acc = MainServicesCfg(flags)
     acc.merge(PoolReadCfg(flags))
     
-
-    MistimedStreamMonitorCfg = MistimedStreamMonitorConfig(flags)
+    MistimedStreamMonitorCfg = MistimedStreamMonitorConfig(flags, legacy=False, phaseI=True)
     acc.merge(MistimedStreamMonitorCfg)
 
     MistimedStreamMonitorCfg.getEventAlgo('MistimedStreamMonitorAlg').OutputLevel = 2 # 1/2 INFO/DEBUG

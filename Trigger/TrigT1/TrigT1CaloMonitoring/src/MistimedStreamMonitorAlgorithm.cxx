@@ -33,6 +33,7 @@ StatusCode MistimedStreamMonitorAlgorithm::initialize() {
   ATH_CHECK( m_ttTool.retrieve());
   ATH_CHECK( m_runParametersContainer.initialize() );
   ATH_CHECK( m_readoutConfigContainerJSON.initialize() );
+  ATH_CHECK( m_ctpRdoReadKey.initialize() );
 
   // eFex Container
   ATH_CHECK( m_eFexEMContainerKey.initialize() );
@@ -158,33 +159,88 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
     return StatusCode::SUCCESS;
   }
   
+  bool legacyHLT=false, phase1HLT=false; 
+  const CTP_RDO* ctpBc = 0;
+  ctpBc = SG::get(m_ctpRdoReadKey);
+  CTP_Decoder ctp;
+  ctp.setRDO(ctpBc);
+  uint32_t numberBC = ctpBc->getNumberOfBunches();
+  if (numberBC > 0) {
+    unsigned int bcPos = ctpBc->getL1AcceptBunchPosition();
+    if (currentRunNo < 472553){
+      legacyHLT = ((ctp.getBunchCrossing(bcPos-1).getTBP().test(180)) or (ctp.getBunchCrossing(bcPos+1).getTBP().test(180)));
+      phase1HLT = ((ctp.getBunchCrossing(bcPos-1).getTBP().test(224)) or (ctp.getBunchCrossing(bcPos+1).getTBP().test(224)));
+    }
+    else if (currentRunNo < 476718){
+      legacyHLT = ((ctp.getBunchCrossing(bcPos-1).getTBP().test(184)) or (ctp.getBunchCrossing(bcPos+1).getTBP().test(184)));
+      phase1HLT = ((ctp.getBunchCrossing(bcPos-1).getTBP().test(228)) or (ctp.getBunchCrossing(bcPos+1).getTBP().test(228)));
+    }
+    else {
+      legacyHLT = ((ctp.getBunchCrossing(bcPos-1).getTBP().test(185)) or (ctp.getBunchCrossing(bcPos+1).getTBP().test(185)));
+      phase1HLT = ((ctp.getBunchCrossing(bcPos-1).getTBP().test(229)) or (ctp.getBunchCrossing(bcPos+1).getTBP().test(229)));
+    }
+  }
+   
+  if ((m_uselegacy) and (legacyHLT==false)) {
+    ATH_MSG_DEBUG("TrigDec don't pass HLT_mistimemonj400_L1All");
+    return StatusCode::SUCCESS;
+  }
+  else if ((m_usephaseI) and (phase1HLT==false)) {
+    ATH_MSG_DEBUG("TrigDec don't pass HLT_mistimemonj400_L1All");
+    return StatusCode::SUCCESS;
+  }
+  // if all events fail here, check the ctp item number with the right SMUK key
+
   cutFlowX=HLT_mistimemonj400;
   fill(m_packageName,cutFlowX);
   
   //Only select events which passed the L1_J100, L1_jJ160, L1_eEM26M, L1_jJ400 or L1_gJ400p0ETA25
   //Adjustable depending on which trigger we are interested 
-  if(! ( (m_trigDec->isPassed("L1_J100")) or
-         (m_trigDec->isPassed("L1_jJ160")) or
-         (m_trigDec->isPassed("L1_eEM26M")) or
+  if (m_usephaseI) {
+    if(! ( (m_trigDec->isPassed("L1_eEM26M")) or
          (m_trigDec->isPassed("L1_gJ100p0ETA25")) or
          (m_trigDec->isPassed("L1_gJ400p0ETA25")) or
+         (m_trigDec->isPassed("L1_jJ160")) or
          (m_trigDec->isPassed("L1_jJ400")) 
          ) ){ 
-    ATH_MSG_DEBUG("TrigDec doesn't pass");
-    return StatusCode::SUCCESS;
+      ATH_MSG_DEBUG("TrigDec doesn't pass");
+      return StatusCode::SUCCESS;
+    }
+  }
+
+  else if (m_uselegacy) {
+    if(! (m_trigDec->isPassed("L1_J100")) ){ 
+      ATH_MSG_DEBUG("TrigDec doesn't pass");
+      return StatusCode::SUCCESS;
+    }
+  }
+
+  else {
+    ATH_MSG_ERROR("No trigger selected...aborting"); 
+    return StatusCode::FAILURE;
   }
 
   //Define trigger for subsequent cuts
-  std::string trigger= "legacy";;
-  
-  if (m_trigDec->isPassed("L1_eEM26M")) {
-    trigger = "eFex";
+  bool legacyTrigger= false;
+  bool phase1Trigger= false;
+  std::string trigger = ""; 
+
+  if ((m_uselegacy) and (m_trigDec->isPassed("L1_J100")) ) {
+    legacyTrigger= true;
   }
-  else if ((m_trigDec->isPassed("L1_jJ160"))or (m_trigDec->isPassed("L1_jJ400"))) {
-    trigger = "jFex";
-  }
-  else if ( (m_trigDec->isPassed("L1_gJ400p0ETA25")) or (m_trigDec->isPassed("L1_gJ100p0ETA25")) ) {
-    trigger = "gFex";
+  else if (m_usephaseI) {
+    if (m_trigDec->isPassed("L1_eEM26M")) {
+      phase1Trigger= true;
+      trigger = "eFex";
+    }
+    if ((m_trigDec->isPassed("L1_jJ160"))or (m_trigDec->isPassed("L1_jJ400"))) {
+      phase1Trigger= true;
+      trigger = "jFex";
+    }
+    if ( (m_trigDec->isPassed("L1_gJ400p0ETA25")) or (m_trigDec->isPassed("L1_gJ100p0ETA25")) ) {
+      phase1Trigger= true;
+      trigger = "gFex";
+    }
   }
   
   cutFlowX=L1_Trigger;
@@ -202,6 +258,16 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
   int jFexCounter = 0; // in-time TOBs
   int gFexCounter = 0; // in-time TOBs
   int emActivityCounter = 0; //count number of TT in EM layer with ADC > 70 
+
+  double dEta = 0., dPhi = 0., dPhi1 = 0., dR = 0.; 
+  double etaIn = 0., phiIn = 0., etIn = 0.;
+  double etaOut = 0., phiOut = 0., etOut = 0.; 
+  bool overlap = false; 
+
+  SG::ReadHandle<xAOD::jFexSRJetRoIContainer> jFexSRJetContainer{m_jFexSRJetContainerKey, ctx};
+  if(!jFexSRJetContainer.isValid()) {
+    ATH_MSG_WARNING("No jFex SR Jet container found in storegate "<< m_jFexSRJetContainerKey<<". Will be skipped!");
+  }
 
   // =====================================================================
   // ================= Container: TriggerTower ===========================
@@ -281,6 +347,83 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
           badCounter++;
           ttPulseCategory = 2;
       }
+
+      if (trigger == "jFex") {
+        const xAOD::jFexSRJetRoIContainer* jFexSRJetRoI;
+        CHECK( evtStore()->retrieve( jFexSRJetRoI, "L1_jFexSRJetRoI" ) );
+        for(auto tob : *jFexSRJetRoI) {
+          etaIn = tob->eta();
+          phiIn = tob->phi();
+          etIn = tob->tobEt()/5;
+
+          if( (adcPeakPositon == 3) and (goodQual) ) {
+            etaOut = tt->eta();
+            phiOut = tt->phi()-M_PI;
+            dEta = std::abs(etaIn-etaOut);
+            dPhi = std::abs(phiIn-phiOut);
+            if ((phiIn < 0) and (phiOut > 0)){
+              dPhi1 = std::abs((phiIn+2*M_PI)-phiOut);
+              if (dPhi1 < dPhi) {
+                dPhi = dPhi1;
+              }
+            }
+            else if ((phiIn > 0) and (phiOut < 0)){
+              dPhi1 = std::abs(phiIn-(phiOut+2*M_PI));
+              if (dPhi1 < dPhi) {
+                dPhi = dPhi1;
+              }
+            }
+            dR = TMath::Sqrt(dEta*dEta+dPhi*dPhi);
+            if ((dR < .2) and (etIn > 160.))  {
+              overlap = true; 
+            }
+          } // if statement - good tt
+        } // for loop - jFex TOBs
+      } // if statement - jFex
+
+      if (trigger == "gFex") {
+
+        for (const auto& key : m_gFexJetTobKeyList){
+          SG::ReadHandle<xAOD::gFexJetRoIContainer> jetContainer (key, ctx);
+          // Check that this container is present
+          if ( !jetContainer.isValid() ) {
+            ATH_MSG_WARNING("No gFex jet container found in storegate: "<< key.key());
+          }
+          else {
+            const xAOD::gFexJetRoIContainer* gFexJetRoI;
+            CHECK( evtStore()->retrieve( gFexJetRoI, key.key() ) );
+            for(auto tob : *gFexJetRoI) {
+              etaIn = tob->eta();
+              phiIn = tob->phi();
+              etIn = tob->gFexTobEt()/10;
+
+              if( (adcPeakPositon == 3) and (goodQual) ) {
+                etaOut = tt->eta();
+                phiOut = tt->phi()-M_PI;
+                dEta = std::abs(etaIn-etaOut);
+                dPhi = std::abs(phiIn-phiOut);
+                if ((phiIn < 0) and (phiOut > 0)){
+                  dPhi1 = std::abs((phiIn+2*M_PI)-phiOut);
+                  if (dPhi1 < dPhi) {
+                    dPhi = dPhi1;
+                  }
+                }
+                else if ((phiIn > 0) and (phiOut < 0)){
+                  dPhi1 = std::abs(phiIn-(phiOut+2*M_PI));
+                  if (dPhi1 < dPhi) {
+                    dPhi = dPhi1;
+                  }
+                }
+                dR = TMath::Sqrt(dEta*dEta+dPhi*dPhi);
+                if ((dR < .2) and (etIn > 100.))  {
+                  overlap = true; 
+                }
+              } // if statement - good tt
+            } // for loop - gFex TOBs
+          } // else stamement - valid container 
+        } // for loop - gFex container
+      } // if statement - gFex
+
     }
     
     // decorate the TT in order to have to recompute the pulse categorisation
@@ -371,11 +514,6 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
   }
   cutFlowX=  TTEMLayer;
   fill(m_packageName,cutFlowX);
-
-  double dEta = 0., dPhi = 0., dPhi1 = 0., dR = 0.; 
-  double etaIn = 0., phiIn = 0;
-  double etaOut = 0., phiOut = 0; 
-  bool overlap = false; 
   
   if (trigger == "eFex") {
     const xAOD::eFexEMRoIContainer* emTobs;
@@ -386,10 +524,13 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
     for(auto tob : *emTobs) {
       etaIn = tob->eta();
       phiIn = tob->phi();
+      etIn = tob->et()/1000; //eT in GeV
 
       for(auto tobOut : *emTobsOut) {
         etaOut = tobOut->eta();
         phiOut = tobOut->phi();
+        etOut = tobOut->et()/1000; //eT in GeV
+
         dEta = std::abs(etaIn-etaOut);
         dPhi = std::abs(phiIn-phiOut);
         if ((phiIn < 0) and (phiOut > 0)){
@@ -405,126 +546,15 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
           }
         }
         dR = TMath::Sqrt(dEta*dEta+dPhi*dPhi);
-        if ((dR < .2) ){ 
+        if ((dR < .2) and (etIn > 26.) and (etOut > 26.)){ 
           overlap = true; 
         }
       }
     }
   }
 
-  SG::ReadHandle<xAOD::jFexSRJetRoIContainer> jFexSRJetContainer{m_jFexSRJetContainerKey, ctx};
-  if(!jFexSRJetContainer.isValid()) {
-    ATH_MSG_WARNING("No jFex SR Jet container found in storegate "<< m_jFexSRJetContainerKey<<". Will be skipped!");
-  }
-
-  if (trigger == "jFex") {
-    const xAOD::jFexSRJetRoIContainer* jFexSRJetRoI;
-    CHECK( evtStore()->retrieve( jFexSRJetRoI, "L1_jFexSRJetRoI" ) );
-    for(auto tob : *jFexSRJetRoI) {
-      etaIn = tob->eta();
-      phiIn = tob->phi();
-      
-      for (const xAOD::TriggerTower* tt : *triggerTowerTES) {
-        const std::vector<uint16_t>& ttADC =  (tt)->adc();
-        std::vector<uint16_t> readoutCorrectedADC; //this is the standard readout ADC vector: 5 40MHz samples with l1A in the middle
-        if(!readout80ModePpm){//40 MHz
-          //just acess the acd vector, as the sanity checks where done above
-          readoutCorrectedADC.push_back(ttADC.at(l1aFadcSlice-2));
-          readoutCorrectedADC.push_back(ttADC.at(l1aFadcSlice-1));
-          readoutCorrectedADC.push_back(ttADC.at(l1aFadcSlice));
-          readoutCorrectedADC.push_back(ttADC.at(l1aFadcSlice+1));
-          readoutCorrectedADC.push_back(ttADC.at(l1aFadcSlice+2));
-        }
-        
-        // retrieve max ADC value and position, this seems to be buggy in the DAOD
-        auto maxValIterator = std::max_element(readoutCorrectedADC.begin(), readoutCorrectedADC.end());
-        int adcPeakPositon = std::distance(std::begin(readoutCorrectedADC), maxValIterator);
-        bool goodQual = pulseQuality(readoutCorrectedADC, adcPeakPositon);
-
-        if( (adcPeakPositon == 3) and (goodQual) ) {
-          etaOut = tt->eta();
-          phiOut = tt->phi()-M_PI;
-          dEta = std::abs(etaIn-etaOut);
-          dPhi = std::abs(phiIn-phiOut);
-          if ((phiIn < 0) and (phiOut > 0)){
-            dPhi1 = std::abs((phiIn+2*M_PI)-phiOut);
-            if (dPhi1 < dPhi) {
-              dPhi = dPhi1;
-            }
-          }
-          else if ((phiIn > 0) and (phiOut < 0)){
-            dPhi1 = std::abs(phiIn-(phiOut+2*M_PI));
-            if (dPhi1 < dPhi) {
-              dPhi = dPhi1;
-            }
-          }
-          dR = TMath::Sqrt(dEta*dEta+dPhi*dPhi);
-          if (dR < .2)  {
-            overlap = true; 
-          }
-        }
-      }
-    }
-  }
-  
-  if (trigger == "gFex") {
-
-    for (const auto& key : m_gFexJetTobKeyList){
-      SG::ReadHandle<xAOD::gFexJetRoIContainer> jetContainer (key, ctx);
-      // Check that this container is present
-      if ( !jetContainer.isValid() ) {
-        ATH_MSG_WARNING("No gFex jet container found in storegate: "<< key.key());
-      }
-      else {
-        const xAOD::gFexJetRoIContainer* gFexJetRoI;
-        CHECK( evtStore()->retrieve( gFexJetRoI, key.key() ) );
-        for(auto tob : *gFexJetRoI) {
-          etaIn = tob->eta();
-          phiIn = tob->phi();
-          
-          for (const xAOD::TriggerTower* tt : *triggerTowerTES) {
-            const std::vector<uint16_t>& ttADC =  (tt)->adc();
-            std::vector<uint16_t> readoutCorrectedADC; //this is the standard readout ADC vector: 5 40MHz samples with l1A in the middle
-            if(!readout80ModePpm){//40 MHz
-              //just acess the acd vector, as the sanity checks where done above
-              readoutCorrectedADC.push_back(ttADC.at(l1aFadcSlice-2));
-              readoutCorrectedADC.push_back(ttADC.at(l1aFadcSlice-1));
-              readoutCorrectedADC.push_back(ttADC.at(l1aFadcSlice));
-              readoutCorrectedADC.push_back(ttADC.at(l1aFadcSlice+1));
-              readoutCorrectedADC.push_back(ttADC.at(l1aFadcSlice+2));
-            }
-            
-            // retrieve max ADC value and position, this seems to be buggy in the DAOD
-            auto maxValIterator = std::max_element(readoutCorrectedADC.begin(), readoutCorrectedADC.end());
-            int adcPeakPositon = std::distance(std::begin(readoutCorrectedADC), maxValIterator);
-            bool goodQual = pulseQuality(readoutCorrectedADC, adcPeakPositon);
-
-            if( (adcPeakPositon == 3) and (goodQual) ) {
-              etaOut = tt->eta();
-              phiOut = tt->phi()-M_PI;
-              dEta = std::abs(etaIn-etaOut);
-              dPhi = std::abs(phiIn-phiOut);
-              if ((phiIn < 0) and (phiOut > 0)){
-                dPhi1 = std::abs((phiIn+2*M_PI)-phiOut);
-                if (dPhi1 < dPhi) {
-                  dPhi = dPhi1;
-                }
-              }
-              else if ((phiIn > 0) and (phiOut < 0)){
-                dPhi1 = std::abs(phiIn-(phiOut+2*M_PI));
-                if (dPhi1 < dPhi) {
-                  dPhi = dPhi1;
-                }
-              }
-              dR = TMath::Sqrt(dEta*dEta+dPhi*dPhi);
-              if (dR < .2)  {
-                overlap = true; 
-              }
-            }
-          }
-        }
-      }
-    }
+  if ((legacyTrigger) and !(phase1Trigger)){
+    overlap = true; 
   }
 
   if(overlap==false){
@@ -549,10 +579,10 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
     auto  eventMonitor_phaseI= Monitored::Scalar<std::string>("eventMonitor_phaseI", "Event"+std::to_string(eventCounter)+"_"+trigger+"="+std::to_string(currentEventNo));
     auto  lbMonitor= Monitored::Scalar<std::string>("lbMonitor", std::to_string(lumiNo));
     std::string groupName = "Event_";
-    if (trigger == "legacy") {
+    if (legacyTrigger) {
       fill(groupName, eventMonitor_legacy, lbMonitor );
     }
-    else {
+    if (phase1Trigger) {
       fill(groupName, eventMonitor_phaseI, lbMonitor );
     }
   
@@ -916,10 +946,10 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
     auto  eventMonitor_all_legacy= Monitored::Scalar<std::string>("eventMonitor_all_legacy", std::to_string(currentEventNo));
     auto  eventMonitor_all_phaseI= Monitored::Scalar<std::string>("eventMonitor_all_phaseI", trigger+"="+std::to_string(currentEventNo));
     auto  lbMonitor_all= Monitored::Scalar<std::string>("lbMonitor_all", std::to_string(lumiNo));
-    if (trigger == "legacy") {
+    if (legacyTrigger) {
       fill("Event_all_", eventMonitor_all_legacy, lbMonitor_all );
     }
-    else {
+    if (phase1Trigger) {
       fill("Event_all_", eventMonitor_all_phaseI, lbMonitor_all );
     }
   }
@@ -1112,8 +1142,14 @@ bool MistimedStreamMonitorAlgorithm::pulseQuality(const std::vector<uint16_t>& t
     int size = ttPulse.size();
     if (peakSlice > size) {
       ATH_MSG_ERROR("Peak Slice " << peakSlice << " supress the ttPulse vector size "  <<  size ); 
+      goodPulse = false; 
+      return goodPulse;
     }
-
+    if (size < 1) {
+      ATH_MSG_ERROR("The ttPulse vector size "  <<  size << " not valid for Peak Slice " << peakSlice ); 
+      goodPulse = false; 
+      return goodPulse;
+    }
     int a = ttPulse[peakSlice-1];
     int b = ttPulse[peakSlice];
     int c = ttPulse[peakSlice+1];

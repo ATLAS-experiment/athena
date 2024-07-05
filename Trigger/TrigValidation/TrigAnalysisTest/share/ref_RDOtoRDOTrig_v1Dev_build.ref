@@ -14898,6 +14898,14 @@ HLT_j200_0eta290_020jvt_boffperf_pf_ftf_preselj140_L1jJ160:
     0: 3
     1: 1
     2: 1
+HLT_j200_2timing15_L1jJ160:
+  eventCount: 0
+HLT_j200_2timing_L1jJ160:
+  eventCount: 0
+HLT_j200_3timeSig15_L1jJ160:
+  eventCount: 0
+HLT_j200_3timeSig_L1jJ160:
+  eventCount: 0
 HLT_j20_0eta290_020jvt_boffperf_pf_ftf_L1J15:
   eventCount: 19
   stepCounts:
@@ -15670,6 +15678,14 @@ HLT_j240f_L1J75p31ETA49:
   eventCount: 0
 HLT_j240f_L1jJ125p30ETA49:
   eventCount: 0
+HLT_j250_2timing15_L1jJ160:
+  eventCount: 0
+HLT_j250_2timing_L1jJ160:
+  eventCount: 0
+HLT_j250_3timeSig15_L1jJ160:
+  eventCount: 0
+HLT_j250_3timeSig_L1jJ160:
+  eventCount: 0
 HLT_j255_0eta290_020jvt_bdl1d70_pf_ftf_preselj225_L1J100:
   eventCount: 0
   stepCounts:
@@ -16090,6 +16106,14 @@ HLT_j300_0eta290_bdl1d77_pf_ftf_L1J100:
     0: 3
   stepFeatures:
     0: 3
+HLT_j300_2timing15_L1jJ160:
+  eventCount: 0
+HLT_j300_2timing_L1jJ160:
+  eventCount: 0
+HLT_j300_3timeSig15_L1jJ160:
+  eventCount: 0
+HLT_j300_3timeSig_L1jJ160:
+  eventCount: 0
 HLT_j300f_L1J75p31ETA49:
   eventCount: 0
 HLT_j300f_L1jJ125p30ETA49:

@@ -3,13 +3,16 @@
 # ===============================================================
 #  __mistimedAlg(flags)__
 # ===============================================================
-def mistimedAlg(flags):
+def mistimedAlg(flags, legacy, phaseI):
 
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     from AthenaConfiguration.ComponentFactory import CompFactory
     from AthenaConfiguration.Enums import Format
 
     acc = ComponentAccumulator()
+
+    from AthenaCommon.AppMgr import ServiceMgr
+    ServiceMgr.Dump = False
 
     type_names = [
         # ===== CPM ================================================================
@@ -20,7 +23,9 @@ def mistimedAlg(flags):
         "xAOD::TriggerTowerAuxContainer/xAODTriggerTowersAux.",
         # ===== JETELEMENT =========================================================
         "xAOD::JetElementContainer/JetElements",
-        "xAOD::JetElementAuxContainer/JetElementsAux."
+        "xAOD::JetElementAuxContainer/JetElementsAux.",
+        # ====== CTP ============================================================
+        "CTP_RDO/CTP_RDO"
     ]
 
     from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
@@ -58,7 +63,7 @@ def mistimedAlg(flags):
 
     #mistimed algorithm 
     from TrigT1CaloMonitoring.MistimedStreamMonitorAlgorithm import MistimedStreamMonitorConfig
-    MistimedStreamMonitorCfg = MistimedStreamMonitorConfig(flags)
+    MistimedStreamMonitorCfg = MistimedStreamMonitorConfig(flags, Legacy=legacy, PhaseI=phaseI)
     acc.merge(MistimedStreamMonitorCfg)
 
     MistimedStreamMonitorCfg.OutputLevel = 1 # 1/2 INFO/DEBUG
@@ -73,7 +78,8 @@ if __name__ == "__main__": # typically not needed in top level script
     from optparse import OptionParser
     parser = OptionParser(usage = "usage: %prog arguments", version="%prog")
     parser.add_option("-r", dest="runNumber",type="string", help="Input raw data run number (default: %default)")
-    parser.set_defaults(runNumber="00455857")
+    parser.add_option("-v", dest="systemVersion",type="string", help="Input legacy or phaseI (default: %default)")
+    parser.set_defaults(runNumber="00455857", systemVersion="phaseI")
     (options,args) = parser.parse_args()
 
     import sys
@@ -84,17 +90,19 @@ if __name__ == "__main__": # typically not needed in top level script
     flags.Exec.MaxEvents = -1
     flags.GeoModel.AtlasVersion = 'ATLAS-R3S-2021-03-02-00'
     flags.Trigger.EDMVersion = 3
+    flags.Trigger.L1.doCTP = True
     flags.Trigger.enableL1CaloPhase1 = True
     flags.IOVDb.GlobalTag = 'CONDBR2-BLKPA-2023-01'
     
     import glob
     runNumber = options.runNumber
-    flags.Input.Files = glob.glob("/eos/atlas/atlastier0/rucio/data23_13p6TeV/physics_Mistimed/"+runNumber+"/data23_13p6TeV."+runNumber+".physics_Mistimed.merge.RAW/data23_13p6TeV."+runNumber+".physics_Mistimed.merge.RAW._lb*._SFO-ALL._0001.1")
-    
+    systemVersion = options.systemVersion
+    flags.Input.Files = glob.glob("/eos/atlas/atlastier0/rucio/data24_13p6TeV/physics_Mistimed/"+runNumber+"/data24_13p6TeV."+runNumber+".physics_Mistimed.merge.RAW/data24_13p6TeV."+runNumber+".physics_Mistimed.merge.RAW._lb*._SFO-ALL._0001.1")
+
     flags.Trigger.DecisionMakerValidation.Execute=False
     flags.Trigger.DecisionMakerValidation.ErrorMode=False
 
-    flags.Output.HISTFileName = "MistimedPhI_"+runNumber+".root"
+    flags.Output.HISTFileName = "MistimedPhI_"+runNumber+"_"+systemVersion+".root"
     flags.lock()
 
     # create basic infrastructure
@@ -105,8 +113,11 @@ if __name__ == "__main__": # typically not needed in top level script
     sysAcc.printConfig(withDetails=True, summariseProps=True)
 
     # add the algorithm to the configuration
-    sysAcc.merge(mistimedAlg(flags))
-
+    if (systemVersion=="legacy") :
+        sysAcc.merge(mistimedAlg(flags, legacy=True, phaseI=False))
+    else :
+        sysAcc.merge(mistimedAlg(flags, legacy=False, phaseI=True))
+    
     # run the job
     status = sysAcc.run()
 

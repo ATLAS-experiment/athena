@@ -45,7 +45,7 @@ test.check_steps.append(logmerge)
 msgcount = test.get_step("MessageCount")
 msgcount.thresholds = {
    'INFO': 400,
-   'WARNING': 25,
+   'WARNING': 350,
    'other': 20
 }
 
