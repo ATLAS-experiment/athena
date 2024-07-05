@@ -440,6 +440,7 @@ namespace MuonGM {
             mstat = new MuonStation(stName.substr(0, 3), width, length, totthick, longWidth, length, totthick, zi, fi + 1,
                                     (zi < 0 && !is_mirrored)); //!< fi here goes from 0 to 7; in amdb from 1 to 8;
         }
+        mstat->setPhysVol(ptrd);
         manager->addMuonStation(std::unique_ptr<MuonStation>(mstat));
         ATH_MSG_DEBUG( " Building a MuonStation for this MuonChamber " 
                       << m_station->GetName() << " at zi, fi " << zi << " " << fi + 1 << " is_mirrored " << is_mirrored);

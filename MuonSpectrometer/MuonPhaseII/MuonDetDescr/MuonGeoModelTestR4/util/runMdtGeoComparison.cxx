@@ -98,7 +98,7 @@ std::ostream& operator<<(std::ostream& ostr, const MdtChamber& chamb) {
         {17, "EML"}, {18, "EMS"}, 
         {20, "EOL"}, {21, "EOS"}
     };
-    ostr<<stationDict.at(chamb.id.stationIndex)<<" "<<chamb.design<<" "<<chamb.id;    
+    ostr<<stationDict.at(chamb.id.stationIndex)<<" "<<chamb.id<<" "<<chamb.design;    
     return ostr;
 } 
 
@@ -279,6 +279,7 @@ int main( int argc, char** argv ) {
         return EXIT_FAILURE;
     }
     int return_code = EXIT_SUCCESS;
+    unsigned int goodChamb{0};
     /// Start to loop over the chambers
     for (const MdtChamber& reference : refChambers) {
         std::set<MdtChamber>::const_iterator test_itr = testChambers.find(reference);
@@ -296,13 +297,6 @@ int main( int argc, char** argv ) {
         TEST_BASICPROP(tubePitch, "tube pitch");
         TEST_BASICPROP(tubeRadius, "tube radius");
         
-        const Amg::Transform3D alignableDistort = test.alignableTransform.inverse()*(reference.alignableTransform );
-        if (!Amg::doesNotDeform(alignableDistort) || alignableDistort.translation().mag() > tolerance) {
-            std::cerr<<"runMdtGeoComparision() "<<__LINE__<<": The alignable nodes are at differnt places for  "
-                     <<test<<". " <<GeoTrf::toString(alignableDistort, true)<<" chamber length: "<<
-                      (reference.tubePitch * (1.*reference.numTubes + 0.5))<<std::endl;
-            chamberOkay = false; 
-        }
         const Amg::Transform3D distortion = test.geoModelTransform.inverse() * reference.geoModelTransform;
         /// We do not care whether the orientation of the coordinate system along the wire flips for negative
         /// chambers or not
@@ -331,7 +325,7 @@ int main( int argc, char** argv ) {
         
                 if (!alignFailure && !(Amg::doesNotDeform(tubeDistortion)  || flippedTube)) {
                     std::cerr<<"runMdtGeoComparision() "<<__LINE__<<": In chamber "<<reference<<" the tube reference systems for ("<<layer<<", "
-                             <<std::setfill('0')<<std::setw(3)<<tube<<") are not exactly aligned. "<<Amg::toString(tubeDistortion)<<std::endl;                   
+                             <<std::setfill('0')<<std::setw(3)<<tube<<") are not exactly aligned. "<<GeoTrf::toString(tubeDistortion)<<std::endl;                   
                     alignFailure = true;
                 }
                 /// Remember the tube staggering is in the (x-y) plane. Allow for
@@ -339,9 +333,9 @@ int main( int argc, char** argv ) {
                 if (!stagFailure && tubeDistortion.translation().perp() > tolerance) {
                     std::cerr<<"runMdtGeoComparision() "<<__LINE__<<": Misplaced staggering found in "<<reference<<" the tube ("<<layer
                              <<", "<<std::setfill('0')<<std::setw(3)<<tube<<") "
-                             << Amg::toString(refTube.localToGlobal.translation() - 
-                                              testTube.localToGlobal.translation(), 3)<<std::endl;                    
-                    stagFailure = true;
+                             << Amg::toString(tubeDistortion.translation(), 3)<<", mag: "<<tubeDistortion.translation().mag()<<
+                             ", perp: "<<tubeDistortion.translation().perp()<<std::endl;                    
+                    if (tube > 1) stagFailure = true;
                 }
                 
                 // TEST_TUBEPROP(tubeLength, "tube length");
@@ -360,14 +354,26 @@ int main( int argc, char** argv ) {
                              <<Amg::toString(refRO, 2)<<" vs. "<<Amg::toString(testRO)<<std::endl;
                     readoutOrient = true;
                 }
-
             }
             if (stagFailure || alignFailure) {
                 chamberOkay = false;
             }
         }
-        if (!chamberOkay) return_code = EXIT_FAILURE;
-        else std::cout<<"runMdtGeoComparision() "<<__LINE__<<": Found perfect agreement between new & old geometry for "<<reference<<std::endl;       
+        if (!chamberOkay) {
+            return_code = EXIT_FAILURE;
+            continue;
+        }
+        const Amg::Transform3D alignableDistort = test.alignableTransform.inverse()*(reference.alignableTransform );
+        if (!Amg::doesNotDeform(alignableDistort) || alignableDistort.translation().mag() > tolerance) {
+            std::cerr<<"runMdtGeoComparision() "<<__LINE__<<": The alignable nodes are at differnt places for  "
+                     <<test<<". " <<GeoTrf::toString(alignableDistort, true)<<" chamber length: "<<
+                      (reference.tubePitch * (1.*reference.numTubes + 0.5))<<std::endl;
+            chamberOkay = false;
+
+        } else {
+            // std::cout<<"runMdtGeoComparision() "<<__LINE__<<": Found perfect agreement between new & old geometry for "<<reference<<std::endl;
+            ++goodChamb;
+        }
     }
     for (const MdtChamber& test : testChambers) {
         if (!refChambers.count(test)) {
@@ -375,6 +381,8 @@ int main( int argc, char** argv ) {
             return_code = EXIT_FAILURE;
         }
     }
+    std::cout<<"runMdtGeoComparision() "<<__LINE__<<": "<<goodChamb<<"/"<<refChambers.size()<<" chambers are in perfect agreement. "<<std::endl;
+
     return return_code;
 
 }

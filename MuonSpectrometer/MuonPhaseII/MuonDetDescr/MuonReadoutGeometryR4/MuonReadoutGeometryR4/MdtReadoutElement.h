@@ -8,6 +8,13 @@
 #include <MuonReadoutGeometryR4/MdtTubeLayer.h>
 
 
+
+#ifndef SIMULATIONBASE
+#   include <MuonAlignmentData/BLinePar.h>
+#   include <MuonAlignmentData/MdtAsBuiltPar.h>
+#   include "Acts/Surfaces/TrapezoidBounds.hpp"
+#endif
+
 namespace Acts{
     class TrapezoidBounds;
     class LineBounds;
@@ -164,15 +171,28 @@ class MdtReadoutElement : public MuonReadoutElement {
     double tubeLength(const IdentifierHash& hash) const;
     
     double wireLength(const IdentifierHash& hash) const;
+    /** @brief Returns the uncut tube length */
+    double uncutTubeLength(const IdentifierHash& tubeHash) const;
 
 #ifndef SIMULATIONBASE
     std::map<Identifier, std::shared_ptr<Acts::Surface>> getSurfaces() const override final;
 #endif
 
         friend ActsTrk::TransformCacheDetEle<MdtReadoutElement>;
-   private:
-        /// Returns the tube position in the chamber coordinate frame
+
+        /** @brief Set the link to the second readout element inside the  muon station. 
+         *  @param: other pointer to the readoutElement
+        */
+        void setComplementaryReadoutEle(const MdtReadoutElement* other);
+        /** @brief Returns the fixed point of the B-line & as-bult defromation 
+         *         model expressed in the as-built frame.
+         */
+        Amg::Vector3D bLineReferencePoint() const;
+
+
+        /// Returns the tube position in the chamber coordinate frame (Not applying the B-line corrections)
         Amg::Vector3D localTubePos(const IdentifierHash& hash) const;
+    private:
         /// Returns the transformation into the rest frame of the tube
         /// x-axis: Pointing towards the next layer
         /// y-axis: Pointing parallel to the wire layer 
@@ -183,14 +203,50 @@ class MdtReadoutElement : public MuonReadoutElement {
         /// y-axis: Pointing parallel to the wire layer 
         /// z-axis: Pointing along the wire
         Amg::Transform3D toTubeFrame(const IdentifierHash& hash) const;
+        /// Applies the B & as-built parameters
+        Amg::Transform3D fromIdealToDeformed(const IdentifierHash& tubeHash,
+                                             const ActsTrk::DetectorAlignStore* store) const;
+                                             
+ #ifndef SIMULATIONBASE
+        /** @brief Moves the wire endpoints according to the as-built model
+         *  @param asBuilt: As-built model parameters
+         *  @param tubeHash: Measurement hash of the considered tube
+         *  @param nominalEnd: Tube end of a nominally uncut tube
+         *  @param side: Does the end represent positive or negative z
+        */ 
+        using tubeSide_t = MdtAsBuiltPar::tubeSide_t;
+        Amg::Vector3D wireEndpointAsBuilt(const MdtAsBuiltPar&  asBuilt,
+                                           const IdentifierHash& tubeHash,
+                                           const Amg::Vector3D& nominalEnd, 
+                                           const tubeSide_t side) const;
+        
+        /** @brief Apply the B-line model correction to a tube endpoint
+         *  @param bline: Set of b-line parameters
+         *  @param localTubeEndPoint: Endpoint of the tube to correct
+         *  @param fixedPoint: Point in the chamber that's invariant in the b-line model
+         *  @param thickness: Thickness of the two multilayers
+        */
+        Amg::Vector3D applyBlineCorrections(const BLinePar& bline,
+                                            const Amg::Vector3D& localTubeEndPoint,
+                                            const Amg::Vector3D& fixedPoint,
+                                            const double thickness) const;
+
+#endif        
+        /** @brief Returns the transformation to go into the reference frame of the as-buit & b-line model
+                   starting from the readout element frame. */
+        Amg::Transform3D asBuiltRefFrame() const;
 
 
+        /** @brief defining parameter set */
         parameterBook m_pars{};
+        /** @brief Detector identifier helper to quickly extract the ID fields */
         const MdtIdHelper& m_idHelper{idHelperSvc()->mdtIdHelper()};
         /// Identifier index of the multilayer (1-2)
         int m_stML{m_idHelper.multilayer(identify())};
         /// Flag defining whether the chamber is barrel or not
         bool m_isBarrel{m_idHelper.isBarrel(identify())};
+        /** @brief Complementary readout element. */
+        const MdtReadoutElement* m_reOtherMl{this};
 };
 
 std::ostream& operator<<(std::ostream& ostr, const MdtReadoutElement::parameterBook& pars);

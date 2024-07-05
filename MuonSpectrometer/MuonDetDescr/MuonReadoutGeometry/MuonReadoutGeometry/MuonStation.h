@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MuonReadoutGeometry_MuonStation_H
@@ -84,7 +84,7 @@ namespace MuonGM {
         void setTransform(GeoAlignableTransform* xf);
         void setBlineFixedPointInAmdbLRS(double s0, double z0, double t0);
         const Amg::Vector3D& getBlineFixedPointInAmdbLRS() const;
-        const Amg::Vector3D& getUpdatedBlineFixedPointInAmdbLRS() const;
+
         void updateBlineFixedPointInAmdbLRS();
         void setNativeToAmdbLRS(Amg::Transform3D xf);
         void setNominalAmdbLRSToGlobal(Amg::Transform3D xf);

@@ -206,8 +206,8 @@ if __name__=="__main__":
         cfg.merge(GeoModelMdtTestCfg(flags, 
                                      TestStations = [ch for ch in chambToTest if ch[0] == "B" or ch[0] == "E"],
                                      ReadoutSideXML="ReadoutSides.xml",
-                                     ExtraInputs=[( 'MuonGM::MuonDetectorManager' , 'ConditionStore+MuonDetectorManager' ),
-                                                  ( 'Trk::TrackingGeometry' , 'ConditionStore+AtlasTrackingGeometry' ) 
+                                     ExtraInputs=[#( 'MuonGM::MuonDetectorManager' , 'ConditionStore+MuonDetectorManager' ),
+                                                  #( 'Trk::TrackingGeometry' , 'ConditionStore+AtlasTrackingGeometry' ) 
                                                 ]))
 
     if flags.Detector.GeometryRPC: 

@@ -12,6 +12,7 @@
 #include <GeoPrimitives/GeoPrimitives.h>
 #include <GeoPrimitives/GeoPrimitivesHelpers.h>
 #include <GeoPrimitives/GeoPrimitivesToStringConverter.h>
+#include <GeoModelHelpers/TransformToStringConverter.h>
 #include <MuonCablingData/NrpcCablingData.h>
 #include <MuonReadoutGeometryR4/MuonDetectorDefs.h>
 #include <GaudiKernel/SystemOfUnits.h>
@@ -43,6 +44,9 @@ struct RpcChamber{
     }
     /// Transformation of the underlying GeoModel element
     Amg::Transform3D geoModelTransform{Amg::Transform3D::Identity()};
+    /// Transformation of the underlying Alignable node
+    Amg::Transform3D alignableTransform{Amg::Transform3D::Identity()};
+
 
     float stripPitchEta{0.f};
     float stripPitchPhi{0.f};
@@ -180,6 +184,11 @@ std::set<RpcChamber> readTreeDump(const std::string& inputFile) {
     TTreeReaderValue<std::vector<float>> geoModelTransformY{treeReader, "GeoModelTransformY"};
     TTreeReaderValue<std::vector<float>> geoModelTransformZ{treeReader, "GeoModelTransformZ"};
 
+    TTreeReaderValue<std::vector<float>> alignableNodeX{treeReader, "AlignableNodeX"};
+    TTreeReaderValue<std::vector<float>> alignableNodeY{treeReader, "AlignableNodeY"};
+    TTreeReaderValue<std::vector<float>> alignableNodeZ{treeReader, "AlignableNodeZ"};
+
+
 
     TTreeReaderValue<std::vector<float>> stripRotTranslationX{treeReader, "stripRotTranslationX"};
     TTreeReaderValue<std::vector<float>> stripRotTranslationY{treeReader, "stripRotTranslationY"};
@@ -246,7 +255,13 @@ std::set<RpcChamber> readTreeDump(const std::string& inputFile) {
         geoRot.col(1) = Amg::Vector3D((*geoModelTransformX)[2], (*geoModelTransformY)[2], (*geoModelTransformZ)[2]);
         geoRot.col(2) = Amg::Vector3D((*geoModelTransformX)[3], (*geoModelTransformY)[3], (*geoModelTransformZ)[3]);       
         newchamber.geoModelTransform = Amg::getTransformFromRotTransl(std::move(geoRot), std::move(geoTrans));       
-        
+
+        geoRot.col(0) = Amg::Vector3D((*alignableNodeX)[1], (*alignableNodeY)[1], (*alignableNodeZ)[1]);
+        geoRot.col(1) = Amg::Vector3D((*alignableNodeX)[2], (*alignableNodeY)[2], (*alignableNodeZ)[2]);
+        geoRot.col(2) = Amg::Vector3D((*alignableNodeX)[3], (*alignableNodeY)[3], (*alignableNodeZ)[3]);       
+        geoTrans = Amg::Vector3D{(*alignableNodeX)[0], (*alignableNodeY)[0], (*alignableNodeZ)[0]};
+        newchamber.alignableTransform = Amg::getTransformFromRotTransl(std::move(geoRot), std::move(geoTrans));
+ 
         //strips
         for (size_t s = 0; s < stripPosX->size(); ++s){
             RpcChamber::RpcStrip newStrip{};
@@ -395,14 +410,14 @@ int main( int argc, char** argv ) {
                          <<", perp: "<<layAlignment.translation().perp()
                          <<", mag: "<<layAlignment.translation().mag()<<std::endl;
                 chamberOkay = false;
-                continue;
             }
-            // continue;            
-            if (!Amg::doesNotDeform(layAlignment)) {
+            if (!Amg::doesNotDeform(layAlignment) && 
+                !Amg::doesNotDeform(layAlignment * Amg::getRotateX3D(180*Gaudi::Units::deg)) &&
+                !Amg::doesNotDeform(layAlignment * Amg::getRotateZ3D(180*Gaudi::Units::deg))) {
                 std::cerr<<"runRpcGeoComparison() "<<__LINE__<<": "<<test<<" "
                          <<"the layer "<<testLayer<<" is misaligned w.r.t. reference by "
-                         <<Amg::toString(layAlignment)<<std::endl;
-                continue;
+                         <<GeoTrf::toString(layAlignment, true)<<std::endl;
+                chamberOkay = false;
             }
         }
         using RpcStrip = RpcChamber::RpcStrip;
@@ -442,9 +457,18 @@ int main( int argc, char** argv ) {
         }
         if (!chamberOkay) {
             return_code = EXIT_FAILURE;
+            continue;
+        } 
+
+        const Amg::Transform3D alignableDistort = test.alignableTransform.inverse()*(reference.alignableTransform );
+        if (!Amg::doesNotDeform(alignableDistort) || alignableDistort.translation().mag() > tolerance) {
+            std::cerr<<"runRpcGeoComparison() "<<__LINE__<<": The alignable nodes are at differnt places for  "
+                     <<test<<". " <<Amg::toString(alignableDistort, true)<<std::endl;
+            return_code = EXIT_FAILURE;
         } else {
             ++goodChambers;
         }
+
     }
     for (const RpcChamber& test : testChambers){
         if (refChambers.find(test) == refChambers.end()) {
@@ -452,7 +476,8 @@ int main( int argc, char** argv ) {
             return_code = EXIT_FAILURE;
         }
     }
-    std::cout<<goodChambers<<"/"<<refChambers.size()<<" are in complete agreement. "<<std::endl;
+    std::cout<<"runRpcGeoComparison() "<<__LINE__<<": "<<
+                goodChambers<<"/"<<refChambers.size()<<" chambers are in complete agreement. "<<std::endl;
     return return_code;
 
 }

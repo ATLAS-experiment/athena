@@ -9,36 +9,7 @@
 #include <GeoModelHelpers/GeoPhysVolSorter.h>
 #include <GeoModelUtilities/GeoVisitVolumes.h>
 
-namespace MuonGMR4{
 
- 
-    bool MdtTubeLayerSorter::operator()(const MdtTubeLayer& a, const MdtTubeLayer& b) const{
-        // Don't bother calling the underlying comparisons
-        // if the objects are the same.  This saves a lot of time.
-        if (&a.layerTransform() != &b.layerTransform()) {
-          static const GeoTrf::TransformSorter trfSort{};
-          const int trfCmp = trfSort.compare(a.layerTransform(), b.layerTransform());
-          if (trfCmp) return trfCmp < 0;
-        }
-        if (a.m_layerNode != b.m_layerNode) {
-          static const GeoPhysVolSorter physSort{};
-          return physSort(a.m_layerNode, b.m_layerNode);
-        }
-        return false;
-    }
-    bool MdtTubeLayerSorter::operator()(const MdtTubeLayerPtr&a, const MdtTubeLayerPtr& b) const{
-        return (*this)(*a, *b); 
-    }
-    
-
-MdtTubeLayer::MdtTubeLayer(const PVConstLink layer,
-                           const GeoIntrusivePtr<const GeoTransform> toLayTrf):
-    m_layerNode{std::move(layer)},
-    m_layTrf{std::move(toLayTrf)} {}
-
-const Amg::Transform3D& MdtTubeLayer::layerTransform() const {
-    return m_layTrf->getDefTransform();
-}
 namespace {
 // Helper to find the Nth child volume, without keeping track
 // of the transform.
@@ -60,10 +31,43 @@ public:
     }
   }
 
-  size_t m_n;
-  const GeoVPhysVol* m_node = nullptr;
+  size_t m_n{0};
+  const GeoVPhysVol* m_node{nullptr};
 };
 } // anonymous namespace
+
+namespace MuonGMR4{
+
+ 
+    bool MdtTubeLayerSorter::operator()(const MdtTubeLayer& a, const MdtTubeLayer& b) const{
+        // Don't bother calling the underlying comparisons
+        // if the objects are the same.  This saves a lot of time.
+        if (a.m_layTrf != b.m_layTrf) {
+          static const GeoTrf::TransformSorter trfSort{};
+          const int trfCmp = trfSort.compare(a.layerTransform(), b.layerTransform());
+          if (trfCmp) return trfCmp < 0;
+        }
+        if (a.m_layerNode != b.m_layerNode) {
+          static const GeoPhysVolSorter physSort{};
+          return physSort(a.m_layerNode, b.m_layerNode);
+        }
+        return false;
+    }
+    bool MdtTubeLayerSorter::operator()(const MdtTubeLayerPtr&a, const MdtTubeLayerPtr& b) const{
+        return (*this)(*a, *b); 
+    }
+    
+
+MdtTubeLayer::MdtTubeLayer(const PVConstLink layer,
+                           const GeoIntrusivePtr<const GeoTransform> toLayTrf,
+                           const CutTubeSet& cutTubes):
+    m_layerNode{std::move(layer)},
+    m_layTrf{std::move(toLayTrf)},
+    m_cutTubes{cutTubes} {}
+
+const Amg::Transform3D& MdtTubeLayer::layerTransform() const {
+    return m_layTrf->getDefTransform();
+}
 PVConstLink MdtTubeLayer::getTubeNode(unsigned int tube) const {
      if (tube >= nTubes()) {
         std::stringstream except{};
@@ -104,6 +108,13 @@ double MdtTubeLayer::tubeHalfLength(const unsigned int tube) const {
     const GeoShape* shape = child->getLogVol()->getShape();
     const GeoTube* tubeShape = static_cast<const GeoTube*>(shape);
     return tubeShape->getZHalfLength();    
-}   
+}
+double MdtTubeLayer::uncutHalfLength(unsigned int tube) const{
+    CutTubeSet::const_iterator itr = m_cutTubes.find(tube);
+    if (itr!= m_cutTubes.end()) {
+      return itr->unCutHalfLength;
+    }
+    return tubeHalfLength(tube);
+}
 }
 

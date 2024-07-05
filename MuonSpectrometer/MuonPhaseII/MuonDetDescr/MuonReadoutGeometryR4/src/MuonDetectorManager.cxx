@@ -53,6 +53,7 @@ namespace {
                           <<m_idHelperSvc->toStringDetEl(new_element->identify())); \
             return StatusCode::FAILURE;                                             \
         }                                                                           \
+        linkElements(STORAGE_VEC, element.get());                                   \
         new_element = std::move(element);                                           \
         return StatusCode::SUCCESS;                                                 \
     }
@@ -158,6 +159,25 @@ std::vector<ActsTrk::DetectorType> MuonDetectorManager::getDetectorTypes() const
          return allChambers;
     }
 #endif
+
+template <class MuonDetectorType> void MuonDetectorManager::linkElements(ElementStorage<MuonDetectorType>& detStore,
+                                                                         MuonDetectorType* reEle) {
+        ATH_MSG_VERBOSE("No inter-linking for "<<ActsTrk::to_string(reEle->detectorType())<<" "<<detStore.size());
+}
+template <> void MuonDetectorManager::linkElements(ElementStorage<MdtReadoutElement>& detStore,
+                                                   MdtReadoutElement* refEle) {
+        const MdtIdHelper& idHelper{m_idHelperSvc->mdtIdHelper()};
+        const int complMl = refEle->multilayer() == 2 ? 1 : idHelper.multilayerMax(refEle->identify());
+        const Identifier complMlId = idHelper.multilayerID(refEle->identify(), complMl);
+        const unsigned mlHash =static_cast<unsigned>(m_idHelperSvc->detElementHash(complMlId));
+        /// The complementary detector element has not yet been parsed.
+        if (mlHash >= detStore.size() || !detStore[mlHash]) {
+            return;
+        }
+        detStore[mlHash]->setComplementaryReadoutEle(refEle);
+        refEle->setComplementaryReadoutEle(detStore[mlHash].get());
+
+}
 
 
 }  // namespace MuonGMR4

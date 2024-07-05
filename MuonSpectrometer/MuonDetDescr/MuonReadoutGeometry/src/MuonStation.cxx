@@ -80,8 +80,6 @@ namespace MuonGM {
         return m_BlineFixedPointInAmdbLRS;
     }
 
-    const Amg::Vector3D& MuonStation::getUpdatedBlineFixedPointInAmdbLRS() const { return m_BlineFixedPointInAmdbLRS; }
-
     void MuonStation::updateBlineFixedPointInAmdbLRS() {
         if (!m_firstRequestBlineFixedP) return;        
         // Before correction m_BlineFixedPointInAmdbLRS has a z set at the edge of

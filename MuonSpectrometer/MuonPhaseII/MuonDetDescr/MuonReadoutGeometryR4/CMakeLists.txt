@@ -10,6 +10,10 @@ atlas_subdir( MuonReadoutGeometryR4 )
 # Extra dependencies, based on the environment (no MuonCondSvc needed in AthSimulation):
 set( extra_libs )
 
+if( NOT SIMULATIONBASE )
+    set( extra_libs MuonAlignmentDataR4)
+endif()
+
 # External dependencies:
 find_package( GeoModel COMPONENTS GeoModelKernel GeoModelHelpers )
 
@@ -17,8 +21,8 @@ atlas_add_library( MuonReadoutGeometryR4
                    src/*.cxx
                    PUBLIC_HEADERS MuonReadoutGeometryR4
                    INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${GEOMODEL_LIBRARIES} AthenaBaseComps AthenaKernel GeoPrimitives Identifier GaudiKernel  
-                                  ActsGeometryInterfacesLib ActsGeoUtils MuonIdHelpersLib 
+                   LINK_LIBRARIES ${GEOMODEL_LIBRARIES} AthenaBaseComps AthenaKernel GeoPrimitives Identifier  
+                                  ActsGeometryInterfacesLib ActsGeoUtils MuonIdHelpersLib GaudiKernel 
                                   StoreGateLib GeoModelUtilities CxxUtils ${extra_libs})
 
 # we also add unit tests. 

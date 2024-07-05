@@ -30,13 +30,32 @@ namespace MuonGMR4{
          * Constructor taking the GeoModel parent node of the tube nodes
         */
     public:
+        
+        /** @brief Helper struct to store information about the uncut lengths of 
+         *         cut tubes */
+        struct CutTubes {
+            /** @brief First tube of the cut */
+            unsigned int firstTube{0};
+            /** @brief Last tube of the cut */
+            unsigned int lastTube{0};
+            /** @brief Tube length before cut  */
+            double unCutHalfLength{0.};
+            /** @brief ordering operator for set look up */
+            bool operator<(const CutTubes& other) const {
+                return lastTube <= other.firstTube;
+            }
+        };
+        using CutTubeSet = std::set<CutTubes, std::less<>>;
+        
         friend MdtTubeLayerSorter;
         /// @brief Standard constructor of a MdtTube layer. Taking a GeoVPhysVol
         ///       which is usually shared across multiple layers & chambers
         /// @param layer GeoVPhysVol representing this layer
         /// @param toLayTrf Transformation to reach the layer
+        /// @param cutTubes: List of tubes that are cut
         MdtTubeLayer(const PVConstLink layer, 
-                     const GeoIntrusivePtr<const GeoTransform> toLayTrf);
+                     const GeoIntrusivePtr<const GeoTransform> toLayTrf,
+                     const CutTubeSet& cutTubes);
         ///@brief Returns the number of tubes in the layer
         unsigned int nTubes() const;
         ///@brief: Returns the transformation from the layer to the muon station
@@ -50,12 +69,24 @@ namespace MuonGMR4{
         const Amg::Vector3D tubePosInLayer(const unsigned int tube) const;
         ///@brief Returns the half-length of the given tube 
         double tubeHalfLength(const unsigned int tube) const;
+        ///@brief Returns the uncut-half length of the given tube
+        double uncutHalfLength(const unsigned int tube) const;
         ///@brief returns the PVConst link to the n-th tube [0 - nTubes() -1]
         PVConstLink getTubeNode(unsigned int tube) const;
+
+
     private:
         PVConstLink m_layerNode{nullptr};
-        GeoIntrusivePtr<const GeoTransform> m_layTrf{nullptr};      
+        GeoIntrusivePtr<const GeoTransform> m_layTrf{nullptr};
+        CutTubeSet m_cutTubes{};
     };
+
+    inline bool operator<(const MdtTubeLayer::CutTubes& a, unsigned int tube){
+        return a.lastTube < tube;
+    }
+    inline bool operator<(const unsigned int tube, const MdtTubeLayer::CutTubes& a) {
+        return tube < a.firstTube;
+    }
 
 }
 #endif

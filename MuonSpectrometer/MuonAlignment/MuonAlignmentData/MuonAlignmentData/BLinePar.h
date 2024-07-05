@@ -32,6 +32,7 @@ public:
        en,    // local expansion
        numPars
     };
+    static constexpr double expansionScale = 1.e-3;
     /// Cast the parameter to an unsigned int    
     void setParameters(float bz, float bp, float bn, float sp, float sn, float tw, float pg, float tr, float eg, float ep, float en);
 
