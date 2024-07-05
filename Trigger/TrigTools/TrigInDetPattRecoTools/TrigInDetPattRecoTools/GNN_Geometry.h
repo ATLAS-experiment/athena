@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGINDETPATTRECOTOOLS_GNN_GEOMETRY_H
@@ -38,7 +38,7 @@ public:
 
 protected:
 
-  float m_etaBinWidth, m_phiBinWidth;
+  float m_etaBinWidth;
 
   float m_r1, m_z1, m_r2, m_z2;
   int m_nBins;
