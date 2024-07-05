@@ -198,7 +198,7 @@ StatusCode MdtCablingJsonDumpAlg::execute() {
            if (ch + 1 != card.tdcToTubeMap().size())mezz_json<<",";
          }
          mezz_json<<"]"<<std::endl;
-         mezz_json<<"     }";       
+         mezz_json<<"     }";
          if (i +1 != cached_cards.size()) mezz_json<<",";
          mezz_json<<std::endl;
       }

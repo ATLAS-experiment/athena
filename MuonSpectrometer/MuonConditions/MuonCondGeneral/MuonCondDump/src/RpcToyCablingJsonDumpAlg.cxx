@@ -37,7 +37,7 @@ StatusCode RpcToyCablingJsonDumpAlg::execute() {
   /// Subdetector identifiers (0x65 for chambers on the posivie side and 0x66 for chambers on the other side
   constexpr int subDetA = 0x65;
   constexpr int subDetB = 0x66;
-  constexpr unsigned int nStripsPerTdc = 32;
+  constexpr unsigned int nStripsPerTdc = 64;
 
   unsigned int tdcSecA{0}, tdcSecC{0};
 
@@ -52,8 +52,9 @@ StatusCode RpcToyCablingJsonDumpAlg::execute() {
       for (unsigned int gasGap =1 ; gasGap <= reEle->nGasGaps(); ++gasGap){
         for (int doubletPhi = reEle->doubletPhi(); doubletPhi <= reEle->doubletPhiMax(); ++doubletPhi) {
             for (bool measPhi: {false, true}) {
-              const unsigned int nStrips = measPhi ? reEle->nEtaStrips() : reEle->nPhiStrips();
-              const unsigned int nTdcStrips = (nStrips % nStripsPerTdc ? 1 : 0) + (nStrips / nStripsPerTdc);  
+              const unsigned int nStrips = (measPhi ? reEle->nPhiStrips() : reEle->nEtaStrips())+1;
+              const unsigned int nTdcStrips = (nStrips % nStripsPerTdc ? 1 : 0) + 
+                                              (nStrips - (nStrips % nStripsPerTdc)) / nStripsPerTdc;  
                 for (bool side : {false, true}) {
                     if (side && reEle->stationName() != m_BIL_stIdx) {
                       /// Do not create side cablings for non BIL stations
@@ -67,6 +68,7 @@ StatusCode RpcToyCablingJsonDumpAlg::execute() {
                         cablingChannel["phi"] = reEle->stationPhi();
                         cablingChannel["doubletR"] = reEle->doubletR();
                         cablingChannel["doubletZ"] = reEle->doubletZ();
+                        cablingChannel["doubletPhi"] = doubletPhi;                        
                         cablingChannel["gasGap"] = gasGap;
                         cablingChannel["measPhi"] = measPhiSide;
 

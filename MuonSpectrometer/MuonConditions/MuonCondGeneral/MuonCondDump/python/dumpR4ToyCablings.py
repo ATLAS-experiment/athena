@@ -8,6 +8,11 @@ def RpcToyCablingJsonDumpAlgCfg(flags, name="RpcToyCablingJsonDumpAlg", **kwargs
     result.addEventAlgo(the_alg, primary = True)
     return result
 
+def MdtToyCablingJsonDumpAlgCfg(flags, name="MdtToyCablingJsonDumpAlg", **kwargs):
+    result = ComponentAccumulator()
+    the_alg = CompFactory.MdtToyCablingJsonDumpAlg(name, **kwargs)
+    result.addEventAlgo(the_alg, primary = True)
+    return result
 if __name__=="__main__":
     from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, executeTest
     parser = SetupArgParser()
@@ -15,11 +20,11 @@ if __name__=="__main__":
     parser.set_defaults(noMM=True)
     parser.set_defaults(noSTGC=True)
     parser.set_defaults(noTgc=True)
-    parser.set_defaults(noMdt=True)
 
     args = parser.parse_args()
     flags, cfg = setupGeoR4TestCfg(args)
     
     cfg.merge(RpcToyCablingJsonDumpAlgCfg(flags))
+    cfg.merge(MdtToyCablingJsonDumpAlgCfg(flags))
     executeTest(cfg, args.nEvents)
    
