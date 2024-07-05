@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -18,13 +18,8 @@
 class BFieldVectorZR
 {
 public:
-  // default
-  BFieldVectorZR() = default;
-  BFieldVectorZR(const BFieldVectorZR&) = default;
-  BFieldVectorZR(BFieldVectorZR&&) = default;
-  BFieldVectorZR& operator=(const BFieldVectorZR&) = default;
-  BFieldVectorZR& operator=(BFieldVectorZR&&) = default;
-  ~BFieldVectorZR() = default;
+  // no default constructor
+  BFieldVectorZR() = delete;
 
   //constructor
   BFieldVectorZR(double Bz, double Br)
