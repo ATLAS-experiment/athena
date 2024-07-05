@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -24,10 +24,8 @@ namespace LArSamples {
   
    public:
    
-    DataTweaker() : 
-      m_nSamplesTruncation(0), m_removeNoiseCorrelations(false),
-      m_refit(false), m_adjust(false), m_fitParams(DefaultChi2) { }
-    
+    DataTweaker() = default;
+
     bool set(const TString& tweaks);
     bool findOption(TString& tweaks, const TString& option) const;
 
@@ -44,10 +42,10 @@ namespace LArSamples {
 
   private:
    
-    unsigned int m_nSamplesTruncation;
-    bool m_removeNoiseCorrelations, m_refit, m_adjust, m_removeRoIs;
+    unsigned int m_nSamplesTruncation{0};
+    bool m_removeNoiseCorrelations{false}, m_refit{false}, m_adjust{false}, m_removeRoIs{false};
     std::map<unsigned int, bool> m_samples; //automatically ordered... 
-    Chi2Params m_fitParams;
+    Chi2Params m_fitParams{DefaultChi2};
   };
 }
 #endif
