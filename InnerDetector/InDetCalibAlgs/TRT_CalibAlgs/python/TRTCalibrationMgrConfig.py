@@ -6,7 +6,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
     
 # Steering algorithm. Either it fills track and hit ntuples, or it calls TRTCalibrator
-def TRT_CalibrationMgrCfg(flags,name='TRT_CalibrationMgr',calibconstants='',**kwargs) :
+def TRT_CalibrationMgrCfg(flags,name='TRT_CalibrationMgr',calibconstants='', Hittuple='', caltag='' ,**kwargs) :
     acc = ComponentAccumulator()
 
     kwargs.setdefault("DoCalibrate",False)
@@ -31,7 +31,13 @@ def TRT_CalibrationMgrCfg(flags,name='TRT_CalibrationMgr',calibconstants='',**kw
         
     if "TRTCalibrator" not in kwargs:
         from TRT_CalibTools.TRTCalibratorConfig import  TRTCalibratorCfg
-        kwargs.setdefault("TRTCalibrator",[acc.addPublicTool(acc.popToolsAndMerge(TRTCalibratorCfg(flags)))])        
+        
+        if not Hittuple:
+            kwargs.setdefault("TRTCalibrator",[acc.addPublicTool(acc.popToolsAndMerge(TRTCalibratorCfg(flags)))])        
+        else:
+            # This changes the name of the input file used for the calibrator tool
+            kwargs.setdefault("TRTCalibrator",[acc.addPublicTool(acc.popToolsAndMerge(TRTCalibratorCfg(flags, Hittuple=Hittuple, calTag=caltag)))])
+        
         
     
     # if a text file is in the arguments, use the constants in that instead of the DB

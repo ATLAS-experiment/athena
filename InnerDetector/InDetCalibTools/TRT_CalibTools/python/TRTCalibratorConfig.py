@@ -6,7 +6,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 # Tool to process R-t ntuple. Produces histograms and calibration text files.
-def TRTCalibratorCfg(flags, name="TRTCalibratorTool", **kwargs) :
+def TRTCalibratorCfg(flags, name="TRTCalibratorTool", calTag='all', **kwargs) :
     
     acc = ComponentAccumulator()
     kwargs.setdefault("MinRt",10000)
@@ -19,8 +19,9 @@ def TRTCalibratorCfg(flags, name="TRTCalibratorTool", **kwargs) :
     kwargs.setdefault("T0Offset",0.0)
     kwargs.setdefault("DoShortStrawCorrection",False)
     kwargs.setdefault("DoArXenonSep",True)
+    kwargs.setdefault("TrtManagerLocation","TRT")
     
-    kwargs.update(CaltagConfiguration("-1"))
+    kwargs.update(CaltagConfiguration(calTag))
     
     if "TRTStrawSummaryTool" not in kwargs:
         from TRT_ConditionsServices.TRT_ConditionsServicesConfig import TRT_StrawStatusSummaryToolCfg
@@ -42,7 +43,7 @@ def TRTCalibratorCfg(flags, name="TRTCalibratorTool", **kwargs) :
 
 def CaltagConfiguration(caltag, **kwargs):
     # caltag dependent stuff
-    if caltag == 'all':
+    if caltag == 'all': # Full TRT detector
         kwargs.setdefault("Selstring",'_*_-_-_-_-_-_-')
         kwargs.setdefault("NoHistograms",['TRT'])        
         kwargs.setdefault("CalibrateT0",['TRT'])
@@ -50,7 +51,7 @@ def CaltagConfiguration(caltag, **kwargs):
         kwargs.setdefault("PrintLog",['TRT'])
         kwargs.setdefault("PrintT0Out",['TRT'])
         kwargs.setdefault("PrintRtOut",['TRT'])
-    elif caltag == 'barrel':
+    elif caltag == 'barrel': # Full barrel detector
         kwargs.setdefault("Selstring",'_*_1_*_-_-_-_-')
         kwargs.setdefault("NoHistograms",['TRT'])        
         kwargs.setdefault("CalibrateT0",['TRT','Detector','Layer'])
@@ -58,7 +59,7 @@ def CaltagConfiguration(caltag, **kwargs):
         kwargs.setdefault("PrintLog",['TRT','Detector','Layer'])
         kwargs.setdefault("PrintT0Out",['Layer'])
         kwargs.setdefault("PrintRtOut",['Layer'])
-    elif caltag == '-1':
+    elif caltag == '-1': # C-side barrel
         kwargs.setdefault("Selstring",'_*_-1_-_-_-_-_-')
         kwargs.setdefault("NoHistograms",['TRT'])        
         kwargs.setdefault("CalibrateT0",['TRT','Detector'])
@@ -66,7 +67,7 @@ def CaltagConfiguration(caltag, **kwargs):
         kwargs.setdefault("PrintLog",['TRT','Detector'])
         kwargs.setdefault("PrintT0Out",['TRT','Detector'])
         kwargs.setdefault("PrintRtOut",['TRT','Detector'])
-    elif caltag == '-1_0':
+    elif caltag == '-1_0': # First layer of the C-side barrel
         kwargs.setdefault("Selstring",'_*_-1_0_*_*_*_*')
         kwargs.setdefault("NoHistograms",['TRT','Detector','Chip','Straw'])
         kwargs.setdefault("CalibrateT0",['TRT','Detector','Layer','Module','Board','Chip'])
@@ -74,7 +75,7 @@ def CaltagConfiguration(caltag, **kwargs):
         kwargs.setdefault("PrintLog",['TRT','Detector','Layer','Module','Board','Chip'])                          
         kwargs.setdefault("PrintT0Out",['Layer','Module','Board','Chip','Straw'])
         kwargs.setdefault("PrintRtOut",['Layer'])
-    elif caltag == '-1_1':
+    elif caltag == '-1_1': # Second layer of the C-side barrel
         kwargs.setdefault("Selstring",'_*_-1_1_*_*_*_*')
         kwargs.setdefault("NoHistograms",['TRT','Detector','Chip','Straw'])
         kwargs.setdefault("CalibrateT0",['TRT','Detector','Layer','Module','Board','Chip'])
@@ -82,7 +83,7 @@ def CaltagConfiguration(caltag, **kwargs):
         kwargs.setdefault("PrintLog",['TRT','Detector','Layer','Module','Board','Chip'])                          
         kwargs.setdefault("PrintT0Out",['Layer','Module','Board','Chip','Straw'])
         kwargs.setdefault("PrintRtOut",['Layer'])
-    elif caltag == '-1_2':
+    elif caltag == '-1_2': # Third layer of the C-side barrel
         kwargs.setdefault("Selstring",'_*_-1_2_*_*_*_*')
         kwargs.setdefault("NoHistograms",['TRT','Detector','Chip','Straw'])
         kwargs.setdefault("CalibrateT0",['TRT','Detector','Layer','Module','Board','Chip'])
@@ -90,7 +91,7 @@ def CaltagConfiguration(caltag, **kwargs):
         kwargs.setdefault("PrintLog",['TRT','Detector','Layer','Module','Board','Chip'])                          
         kwargs.setdefault("PrintT0Out",['Layer','Module','Board','Chip','Straw'])
         kwargs.setdefault("PrintRtOut",['Layer'])
-    elif caltag == '1':
+    elif caltag == '1': # A-side barrel
         kwargs.setdefault("Selstring",'_*_1_-_-_-_-_-')
         kwargs.setdefault("NoHistograms",['TRT'])        
         kwargs.setdefault("CalibrateT0",['TRT','Detector'])
@@ -98,7 +99,7 @@ def CaltagConfiguration(caltag, **kwargs):
         kwargs.setdefault("PrintLog",['TRT','Detector'])
         kwargs.setdefault("PrintT0Out",['TRT','Detector'])
         kwargs.setdefault("PrintRtOut",['TRT','Detector'])
-    elif caltag == '1_0':
+    elif caltag == '1_0': # First layer of the A-side barrel
         kwargs.setdefault("Selstring",'_*_1_0_*_*_*_*')
         kwargs.setdefault("NoHistograms",['TRT','Detector','Chip','Straw'])
         kwargs.setdefault("CalibrateT0",['TRT','Detector','Layer','Module','Board','Chip'])
@@ -106,7 +107,7 @@ def CaltagConfiguration(caltag, **kwargs):
         kwargs.setdefault("PrintLog",['TRT','Detector','Layer','Module','Board','Chip'])                          
         kwargs.setdefault("PrintT0Out",['Layer','Module','Board','Chip','Straw'])
         kwargs.setdefault("PrintRtOut",['Layer'])
-    elif caltag == '1_1':
+    elif caltag == '1_1': # Second layer of the A-side barrel
         kwargs.setdefault("Selstring",'_*_1_1_*_*_*_*')
         kwargs.setdefault("NoHistograms",['TRT','Detector','Chip','Straw'])
         kwargs.setdefault("CalibrateT0",['TRT','Detector','Layer','Module','Board','Chip'])
@@ -114,7 +115,7 @@ def CaltagConfiguration(caltag, **kwargs):
         kwargs.setdefault("PrintLog",['TRT','Detector','Layer','Module','Board','Chip'])                          
         kwargs.setdefault("PrintT0Out",['Layer','Module','Board','Chip','Straw'])
         kwargs.setdefault("PrintRtOut",['Layer'])
-    elif caltag == '1_2':
+    elif caltag == '1_2': # Third layer of the A-side barrel
         kwargs.setdefault("Selstring",'_*_1_2_*_*_*_*')
         kwargs.setdefault("NoHistograms",['TRT','Detector','Chip','Straw'])
         kwargs.setdefault("CalibrateT0",['TRT','Detector','Layer','Module','Board','Chip'])
@@ -122,13 +123,13 @@ def CaltagConfiguration(caltag, **kwargs):
         kwargs.setdefault("PrintLog",['TRT','Detector','Layer','Module','Board','Chip'])                          
         kwargs.setdefault("PrintT0Out",['Layer','Module','Board','Chip','Straw'])
         kwargs.setdefault("PrintRtOut",['Layer'])
-    elif caltag == '2':
+    elif caltag == '2': # A-side End-cap 
         kwargs.setdefault("Selstring",'_*_2_-_-_-_-_-')
         kwargs.setdefault("NoHistograms",['TRT'])        
         kwargs.setdefault("CalibrateT0",['TRT','Detector'])
         kwargs.setdefault("CalibrateRt",['TRT','Detector'])
         kwargs.setdefault("PrintLog",['TRT','Detector'])
-    elif caltag == '2_a':
+    elif caltag == '2_a': # First layer A-side End-cap
         kwargs.setdefault("Selstring",'_*_2_0,1,2,3_*_*_*_*')
         kwargs.setdefault("NoHistograms",['TRT','Detector','Chip','Straw'])
         kwargs.setdefault("CalibrateT0",['TRT','Detector','Layer','Module','Board','Chip'])
@@ -136,7 +137,7 @@ def CaltagConfiguration(caltag, **kwargs):
         kwargs.setdefault("PrintLog",['TRT','Detector','Layer','Module','Board','Chip'])                          
         kwargs.setdefault("PrintT0Out",['Layer','Module','Board','Chip','Straw'])
         kwargs.setdefault("PrintRtOut",['Layer'])
-    elif caltag == '2_b':
+    elif caltag == '2_b': # Second layer A-side End-cap
         kwargs.setdefault("Selstring",'_*_2_4,5,6,7_*_*_*_*')
         kwargs.setdefault("NoHistograms",['TRT','Detector','Chip','Straw'])
         kwargs.setdefault("CalibrateT0",['TRT','Detector','Layer','Module','Board','Chip'])
@@ -144,7 +145,7 @@ def CaltagConfiguration(caltag, **kwargs):
         kwargs.setdefault("PrintLog",['TRT','Detector','Layer','Module','Board','Chip'])                          
         kwargs.setdefault("PrintT0Out",['Layer','Module','Board','Chip','Straw'])
         kwargs.setdefault("PrintRtOut",['Layer'])
-    elif caltag == '2_c':
+    elif caltag == '2_c': # Third layer A-side End-cap
         kwargs.setdefault("Selstring",'_*_2_8,9,10,11_*_*_*_*')
         kwargs.setdefault("NoHistograms",['TRT','Detector','Chip','Straw'])
         kwargs.setdefault("CalibrateT0",['TRT','Detector','Layer','Module','Board','Chip'])
@@ -152,7 +153,7 @@ def CaltagConfiguration(caltag, **kwargs):
         kwargs.setdefault("PrintLog",['TRT','Detector','Layer','Module','Board','Chip'])                          
         kwargs.setdefault("PrintT0Out",['Layer','Module','Board','Chip','Straw'])
         kwargs.setdefault("PrintRtOut",['Layer'])
-    elif caltag == '2_d':
+    elif caltag == '2_d': # Fourth layer A-side End-cap
         kwargs.setdefault("Selstring",'_*_2_12,13_*_*_*_*')
         kwargs.setdefault("NoHistograms",['TRT','Detector','Chip','Straw'])
         kwargs.setdefault("CalibrateT0",['TRT','Detector','Layer','Module','Board','Chip'])
@@ -160,13 +161,13 @@ def CaltagConfiguration(caltag, **kwargs):
         kwargs.setdefault("PrintLog",['TRT','Detector','Layer','Module','Board','Chip'])                          
         kwargs.setdefault("PrintT0Out",['Layer','Module','Board','Chip','Straw'])
         kwargs.setdefault("PrintRtOut",['Layer'])
-    elif caltag == '-2':
+    elif caltag == '-2': # C-side End-cap
         kwargs.setdefault("Selstring",'_*_-2_-_-_-_-_-')
         kwargs.setdefault("NoHistograms",['TRT'])        
         kwargs.setdefault("CalibrateT0",['TRT','Detector'])
         kwargs.setdefault("CalibrateRt",['TRT','Detector'])
         kwargs.setdefault("PrintLog",['TRT','Detector'])
-    elif caltag == '-2_a':
+    elif caltag == '-2_a': # First layer C-side End-cap
         kwargs.setdefault("Selstring",'_*_-2_0,1,2,3_*_*_*_*')
         kwargs.setdefault("NoHistograms",['TRT','Detector','Chip','Straw'])
         kwargs.setdefault("CalibrateT0",['TRT','Detector','Layer','Module','Board','Chip'])
@@ -174,7 +175,7 @@ def CaltagConfiguration(caltag, **kwargs):
         kwargs.setdefault("PrintLog",['TRT','Detector','Layer','Module','Board','Chip'])                          
         kwargs.setdefault("PrintT0Out",['Layer','Module','Board','Chip','Straw'])
         kwargs.setdefault("PrintRtOut",['Layer'])
-    elif caltag == '-2_b':
+    elif caltag == '-2_b': # Second layer C-side End-cap
         kwargs.setdefault("Selstring",'_*_-2_4,5,6,7_*_*_*_*')
         kwargs.setdefault("NoHistograms",['TRT','Detector','Chip','Straw'])
         kwargs.setdefault("CalibrateT0",['TRT','Detector','Layer','Module','Board','Chip'])
@@ -182,7 +183,7 @@ def CaltagConfiguration(caltag, **kwargs):
         kwargs.setdefault("PrintLog",['TRT','Detector','Layer','Module','Board','Chip'])                          
         kwargs.setdefault("PrintT0Out",['Layer','Module','Board','Chip','Straw'])
         kwargs.setdefault("PrintRtOut",['Layer'])
-    elif caltag == '-2_c':
+    elif caltag == '-2_c': # Third layer C-side End-cap
         kwargs.setdefault("Selstring",'_*_-2_8,9,10,11_*_*_*_*')
         kwargs.setdefault("NoHistograms",['TRT','Detector','Chip','Straw'])
         kwargs.setdefault("CalibrateT0",['TRT','Detector','Layer','Module','Board','Chip'])
@@ -190,7 +191,7 @@ def CaltagConfiguration(caltag, **kwargs):
         kwargs.setdefault("PrintLog",['TRT','Detector','Layer','Module','Board','Chip'])                          
         kwargs.setdefault("PrintT0Out",['Layer','Module','Board','Chip','Straw'])
         kwargs.setdefault("PrintRtOut",['Layer'])
-    elif caltag == '-2_d':
+    elif caltag == '-2_d': # Fourth layer C-side End-cap
         kwargs.setdefault("Selstring",'_*_-2_12,13_*_*_*_*')
         kwargs.setdefault("NoHistograms",['TRT','Detector','Chip','Straw'])
         kwargs.setdefault("CalibrateT0",['TRT','Detector','Layer','Module','Board','Chip'])

@@ -8,6 +8,9 @@ from TRT_CalibAlgs.TRTCalibrationMgrConfig import CalibConfig, TRT_CalibrationMg
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 
 def fromRunArgs(runArgs):
+    
+    if runArgs.doCalibrator and not (runArgs.inputBINARYFile and runArgs.calTag):
+        print("WARNING - Calibrator is ON, --inputBINARYFile=\'%s\' and a --calTag=\'%s\' not provided. Using defaults" % (runArgs.inputBINARYFile, runArgs.calTag))
 
     from AthenaConfiguration.AllConfigFlags import initConfigFlags    
     flags=initConfigFlags()
@@ -44,7 +47,7 @@ def fromRunArgs(runArgs):
     from InDetConfig.TrackRecoConfig import InDetTrackRecoCfg
     cfg.merge(InDetTrackRecoCfg(flags))    
     
-    cfg.merge(TRT_CalibrationMgrCfg(flags))
+    cfg.merge(TRT_CalibrationMgrCfg(flags,DoCalibrate=runArgs.doCalibrator, Hittuple=runArgs.inputBINARYFile, caltag=runArgs.calTag))
     cfg.merge(TRT_StrawStatusCfg(flags))
 
     processPostInclude(runArgs, flags, cfg)
