@@ -106,7 +106,7 @@ class TriggerAnalysisSFBlock (ConfigBlock):
             if config.campaign() in [Campaign.MC21a, Campaign.MC23a]:
                 if not alg.triggers_2022:
                     raise ValueError( 'TriggerAnalysisConfig: you must provide a set of triggers for the year 2022!' )
-            elif config.campaign() is Campaign.MC23c:
+            elif config.campaign() in [Campaign.MC23c, Campaign.MC23d]:
                 if not alg.triggers_2023:
                     raise ValueError( 'TriggerAnalysisConfig: you must provide a set of triggers for the year 2023!' )
         else:
