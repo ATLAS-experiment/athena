@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -182,10 +182,7 @@ DbStatus RootKeyContainer::load( void** ptr, ShapeH shape,
     const TKey* key = (TKey*)m_dir->GetListOfKeys()->FindObject(txt);
     if ( key )    {
        sc = loadObject(ptr, shape, oid);
-      if ( sc.isSuccess() )  {
-        return sc;
-      }
-      return sc;
+       return sc;
     }
     if ( !any_next )  {
       return Error;
@@ -368,7 +365,7 @@ DbStatus RootKeyContainer::open(DbDatabase&           dbH,
 
   if ( dbH.isValid() && dir_nam.length() > 0 )    {
     std::string nam = sanitisedName.starts_with('/') ? sanitisedName.substr(1)
-                                                     : sanitisedName;
+                                                     : std::move(sanitisedName);
     size_t idx1     = std::string::npos, idx2 = nam.find('/',1);
     TDirectory::TContext dirCtxt(0);
     IDbDatabase* idb = dbH.info();
@@ -379,6 +376,7 @@ DbStatus RootKeyContainer::open(DbDatabase&           dbH,
     }
     m_dir  = m_rootDb->file();
     do  {
+      //bug: on entry, idx1 = 18446744073709551615UL. Adding 1 overflows size_t.
       std::string s = nam.substr(idx1+1, idx2-idx1-1); 
       m_dir->cd();
       TDirectory* dir = (TDirectory*)m_dir->Get(s.c_str());
