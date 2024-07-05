@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TGC_RawDataProviderToolCore.h"
 
 #include "MuonRDO/TgcRdoContainer.h"
-#include "TGCcablingInterface/ITGCcablingServerSvc.h"
+#include "MuonTGC_Cabling/MuonTGC_CablingSvc.h"
 
 //================ Constructor =================================================
 
@@ -72,34 +72,29 @@ StatusCode Muon::TGC_RawDataProviderToolCore::convertIntoContainer(const std::ve
   return StatusCode::SUCCESS;
 }
 
-const ITGCcablingSvc*  Muon::TGC_RawDataProviderToolCore::getCabling() const
+const MuonTGC_CablingSvc*  Muon::TGC_RawDataProviderToolCore::getCabling() const
 {
-  const ITGCcablingSvc* cabling = m_cabling.get();
+  const MuonTGC_CablingSvc* cabling = m_cabling.get();
   if (cabling) {
     return cabling;
   }
 
-  ServiceHandle<ITGCcablingServerSvc> TgcCabGet("Muon::TGCCablingServerSvc", name());
+  ServiceHandle<MuonTGC_CablingSvc> TgcCabGet("MuonTGC_CablingSvc", name());
   if (TgcCabGet.retrieve().isFailure()) {
-    ATH_MSG_FATAL( "Could not get TGCCablingServerSvc !" );
+    ATH_MSG_FATAL( "Could not get MuonTGC_CablingSvc !" );
     return nullptr;
   }
 
-  if (TgcCabGet->giveCabling(cabling).isFailure()) {
-    ATH_MSG_FATAL( "Could not get ITGCcablingSvc from the Server !" );
-    return nullptr;
-  }
-
-  m_cabling.set (cabling);
+  m_cabling.set(TgcCabGet.get());
   
-  return cabling;
+  return m_cabling.get();
 }
 
 
 std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> Muon::TGC_RawDataProviderToolCore::getROBData(const std::vector<IdentifierHash>& rdoIdhVect) const
 {
   std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> vecOfRobf;
-  const ITGCcablingSvc* cabling = getCabling();
+  const MuonTGC_CablingSvc* cabling = getCabling();
   if(!cabling) {
     ATH_MSG_ERROR("Could not get cabling, return empty vector of ROB fragments");
     return vecOfRobf;

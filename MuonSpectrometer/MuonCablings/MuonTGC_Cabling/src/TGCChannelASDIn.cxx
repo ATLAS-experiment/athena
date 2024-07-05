@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTGC_Cabling/TGCChannelASDIn.h"
@@ -8,14 +8,14 @@ namespace MuonTGC_Cabling
 {
  
 // Constructor
-TGCChannelASDIn::TGCChannelASDIn(TGCIdBase::SideType vside,
-				 TGCIdBase::SignalType vsignal,
-				 TGCIdBase::RegionType vregion,
+TGCChannelASDIn::TGCChannelASDIn(TGCId::SideType vside,
+				 TGCId::SignalType vsignal,
+				 TGCId::RegionType vregion,
 				 int vsector,
 				 int vlayer,
 				 int vchamber,
 				 int vchannel)
-  : TGCChannelId(TGCIdBase::ASDIn)
+  : TGCChannelId(TGCChannelId::ChannelIdType::ASDIn)
 {
   setSideType(vside);
   setSignalType(vsignal);
@@ -29,9 +29,9 @@ TGCChannelASDIn::TGCChannelASDIn(TGCIdBase::SideType vside,
 void TGCChannelASDIn::setSector(int sector) 
 {
   if(isEndcap()&&!isInner()){
-    TGCId::setSector((sector+1)%TGCId::NumberOfEndcapSector);
+    TGCId::setSector((sector+1)%TGCId::NUM_ENDCAP_SECTOR);
   } else {
-    TGCId::setSector(sector%TGCId::NumberOfForwardSector);
+    TGCId::setSector(sector%TGCId::NUM_FORWARD_SECTOR);
   }
 }
 
@@ -39,11 +39,11 @@ int TGCChannelASDIn::getSector(void) const
 {
   int sector;
   if(isEndcap()&&!isInner()){
-    sector = TGCIdBase::getSector()-1;
-    if(sector<=0) sector += TGCId::NumberOfEndcapSector;
+    sector = TGCId::getSector()-1;
+    if(sector<=0) sector += TGCId::NUM_ENDCAP_SECTOR;
   } else {
-    sector = TGCIdBase::getSector();
-    if(sector<=0) sector += TGCId::NumberOfForwardSector;
+    sector = TGCId::getSector();
+    if(sector<=0) sector += TGCId::NUM_FORWARD_SECTOR;
   }
 
   return sector;
@@ -51,12 +51,12 @@ int TGCChannelASDIn::getSector(void) const
 
 bool TGCChannelASDIn::isValid(void) const
 {
-  if((getSideType()  >TGCIdBase::NoSideType)   &&
-     (getSideType()  <TGCIdBase::MaxSideType)  &&
-     (getSignalType()>TGCIdBase::NoSignalType) &&
-     (getSignalType()<TGCIdBase::MaxSignalType)&&
-     (getRegionType()>TGCIdBase::NoRegionType) &&
-     (getRegionType()<TGCIdBase::MaxRegionType)&&
+  if((getSideType()  >TGCId::NoSideType)   &&
+     (getSideType()  <TGCId::MaxSideType)  &&
+     (getSignalType()>TGCId::NoSignalType) &&
+     (getSignalType()<TGCId::MaxSignalType)&&
+     (getRegionType()>TGCId::NoRegionType) &&
+     (getRegionType()<TGCId::MaxRegionType)&&
      (getOctant()    >=0)                  &&
      (getOctant()    <8)                   &&
      (getLayer()     >=0)                  &&

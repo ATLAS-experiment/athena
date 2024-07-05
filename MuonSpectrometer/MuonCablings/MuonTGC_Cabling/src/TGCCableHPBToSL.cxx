@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTGC_Cabling/TGCCableHPBToSL.h"
@@ -10,28 +10,13 @@
 
 namespace MuonTGC_Cabling {
 
-// Constructor & Destructor
 TGCCableHPBToSL::TGCCableHPBToSL(const std::string& filename)
-  : TGCCable(TGCCable::HPBToSL)
-{
-  m_database[TGCIdBase::Endcap][TGCIdBase::Wire] =
-    new TGCDatabasePPToSL(filename,"HPB EW");
-  m_database[TGCIdBase::Endcap][TGCIdBase::Strip] =
-    new TGCDatabasePPToSL(filename,"HPB ES");
-  m_database[TGCIdBase::Forward][TGCIdBase::Wire] =
-    new TGCDatabasePPToSL(filename,"HPB FW");
-  m_database[TGCIdBase::Forward][TGCIdBase::Strip] = 
-    new TGCDatabasePPToSL(filename,"HPB FS");
-  }
-  
-TGCCableHPBToSL::~TGCCableHPBToSL(void)
-{
-  delete m_database[TGCIdBase::Endcap][TGCIdBase::Wire];
-  delete m_database[TGCIdBase::Endcap][TGCIdBase::Strip];
-  delete m_database[TGCIdBase::Forward][TGCIdBase::Wire];
-  delete m_database[TGCIdBase::Forward][TGCIdBase::Strip];
+  : TGCCable(TGCCable::HPBToSL) {
+  m_database[TGCId::Endcap][TGCId::Wire]   = std::make_unique<TGCDatabasePPToSL>(filename,"HPB EW");
+  m_database[TGCId::Endcap][TGCId::Strip]  = std::make_unique<TGCDatabasePPToSL>(filename,"HPB ES");
+  m_database[TGCId::Forward][TGCId::Wire]  = std::make_unique<TGCDatabasePPToSL>(filename,"HPB FW");
+  m_database[TGCId::Forward][TGCId::Strip] = std::make_unique<TGCDatabasePPToSL>(filename,"HPB FS");
 }
-  
 
 TGCModuleMap* TGCCableHPBToSL::getModule(const TGCModuleId* moduleId) const {
   if(moduleId){
@@ -46,8 +31,8 @@ TGCModuleMap* TGCCableHPBToSL::getModule(const TGCModuleId* moduleId) const {
 TGCModuleMap* TGCCableHPBToSL::getModuleIn(const TGCModuleId* sl) const {
   if(sl->isValid()==false) return nullptr;  
 
-  TGCDatabase* wireP = m_database[sl->getRegionType()][TGCIdBase::Wire];
-  TGCDatabase* stripP = m_database[sl->getRegionType()][TGCIdBase::Strip];
+  TGCDatabase* wireP = m_database[sl->getRegionType()][TGCId::Wire].get();
+  TGCDatabase* stripP = m_database[sl->getRegionType()][TGCId::Strip].get();
 
   TGCModuleMap* mapId = nullptr;
   const int wireMaxEntry = wireP->getMaxEntry();
@@ -55,7 +40,7 @@ TGCModuleMap* TGCCableHPBToSL::getModuleIn(const TGCModuleId* sl) const {
     int id = wireP->getEntry(i,0);
     int block = wireP->getEntry(i,1);
     TGCModuleHPB* hpb = new TGCModuleHPB(sl->getSideType(),
-					 TGCIdBase::Wire,
+					 TGCId::Wire,
 					 sl->getRegionType(),
 					 sl->getSector(),
 					 id);
@@ -68,7 +53,7 @@ TGCModuleMap* TGCCableHPBToSL::getModuleIn(const TGCModuleId* sl) const {
     int id = stripP->getEntry(i,0);
     int block = stripP->getEntry(i,1);
     TGCModuleHPB* hpb = new TGCModuleHPB(sl->getSideType(),
-					 TGCIdBase::Strip,
+					 TGCId::Strip,
 					 sl->getRegionType(),
 					 sl->getSector(),
 					 id);
@@ -78,14 +63,13 @@ TGCModuleMap* TGCCableHPBToSL::getModuleIn(const TGCModuleId* sl) const {
 
   return mapId;
 }
-  
 
 TGCModuleMap* TGCCableHPBToSL::getModuleOut(const TGCModuleId* hpb) const {
   if(hpb->isValid()==false) return nullptr;  
 
   const int hpbId = hpb->getId();
 
-  TGCDatabase* databaseP =m_database[hpb->getRegionType()][hpb->getSignalType()];
+  TGCDatabase* databaseP = m_database[hpb->getRegionType()][hpb->getSignalType()].get();
 
   TGCModuleMap* mapId = nullptr;
   const int MaxEntry = databaseP->getMaxEntry();

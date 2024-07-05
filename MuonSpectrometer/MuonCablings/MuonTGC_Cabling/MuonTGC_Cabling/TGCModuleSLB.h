@@ -14,9 +14,9 @@ class TGCModuleSLB : public TGCModuleId
 {
 public:
   // Constructor & Destructor
-  TGCModuleSLB(TGCIdBase::SideType side,
-	       TGCIdBase::ModuleType module,
-	       TGCIdBase::RegionType region,
+  TGCModuleSLB(TGCId::SideType side,
+	       TGCId::ModuleType module,
+	       TGCId::RegionType region,
 	       int sector,
 	       int id,
 	       int sbLoc = -1,

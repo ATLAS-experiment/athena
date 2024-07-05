@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTGC_CNVTOOLS_TGCRODREADOUT_H
@@ -9,7 +9,7 @@
 #include <vector>
 
 #include "MuonRDO/TgcRdo.h"
-#include "TGCcablingInterface/ITGCcablingSvc.h"
+#include "MuonTGC_Cabling/MuonTGC_CablingSvc.h"
 #include "ByteStreamData/RawEvent.h"
 
 namespace Muon 
@@ -39,7 +39,7 @@ namespace Muon
 
     public:
       /** Constructor */
-      TgcRODReadOut(const ITGCcablingSvc& cabling);
+      TgcRODReadOut(const MuonTGC_CablingSvc& cabling);
       /** Destructor */
       virtual ~TgcRODReadOut();
 
@@ -91,7 +91,7 @@ namespace Muon
 		    TgcSlbData * slb, int rxId) const;
 
     private:
-      /** The number of RODs (1-24 for 12-fold, 0-15 for 8-fold) */
+      /** The number of RODs (1-24 for 12-fold) */
       enum NROD_SIDE {
 	NROD  = 24+1,
         NSROD = 6+1,
@@ -112,7 +112,7 @@ namespace Muon
       mutable std::atomic<unsigned int> m_failedGetReadoutIDfromSLBID[NROD+1];
 
       /** TGC Cabling Svc */
-      const ITGCcablingSvc& m_cabling;
+      const MuonTGC_CablingSvc& m_cabling;
 
       /** TGC SLB data helper */
       TgcSlbDataHelper* m_tgcSlbDataHelper;

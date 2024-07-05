@@ -9,7 +9,7 @@
 #include "AthenaKernel/getMessageSvc.h"
 
 // constructor
-Muon::TgcRODReadOut::TgcRODReadOut(const ITGCcablingSvc& cabling)
+Muon::TgcRODReadOut::TgcRODReadOut(const MuonTGC_CablingSvc& cabling)
   : m_cabling(cabling)
 { 
   m_tgcSlbDataHelper = new TgcSlbDataHelper;

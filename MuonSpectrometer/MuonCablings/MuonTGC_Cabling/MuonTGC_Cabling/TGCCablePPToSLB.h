@@ -9,7 +9,6 @@
 
 #include <string>
 
-#include "TGCcablingInterface/TGCIdBase.h"
 
 namespace MuonTGC_Cabling
 {
@@ -36,7 +35,7 @@ private:
 				      bool orChannel=false) const;
   virtual TGCModuleMap* getModuleIn(const TGCModuleId* slb) const;
   virtual TGCModuleMap* getModuleOut(const TGCModuleId* pp) const;
-  TGCDatabase* m_database[TGCIdBase::MaxRegionType][TGCIdBase::MaxModuleType]{};
+  TGCDatabase* m_database[TGCId::MaxRegionType][TGCId::MaxModuleType]{};
 };
   
 } // end of namespace

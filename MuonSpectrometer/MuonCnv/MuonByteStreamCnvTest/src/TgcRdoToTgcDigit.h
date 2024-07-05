@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONBYTESTREAMCNVTEST_TGCRDOTOTGCDIGIT_H
@@ -12,7 +12,7 @@
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonRDO/TgcRdoContainer.h"
 #include "MuonTGC_CnvTools/ITGC_RDO_Decoder.h"
-#include "TGCcablingInterface/ITGCcablingServerSvc.h"
+#include "MuonTGC_Cabling/MuonTGC_CablingSvc.h"
 
 class TgcRdoToTgcDigit : public AthReentrantAlgorithm {
 public:
@@ -29,8 +29,7 @@ private:
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
     Gaudi::Property<bool> m_show_warning_level_invalid_TGC_A09_SSW6_hit{this, "show_warning_level_invalid_TGC_A09_SSW6_hit", false, ""};
 
-    ServiceHandle<ITGCcablingServerSvc> m_tgcCablingServerSvc{this, "TGCCablingServerSvc", "Muon::TGCCablingServerSvc", ""};
-    const ITGCcablingSvc* m_tgcCabling{};
+    ServiceHandle<MuonTGC_CablingSvc> m_tgcCabling{this, "TGCCablingSvc", "MuonTGC_CablingSvc", ""};
 
     SG::ReadHandleKey<TgcRdoContainer> m_tgcRdoKey{this, "TgcRdoContainer", "TGCRDO", "Tgc RDO Input"};
     SG::WriteHandleKey<TgcDigitContainer> m_tgcDigitKey{this, "TgcDigitContainer", "TGC_DIGITS", "Tgc Digit Output"};

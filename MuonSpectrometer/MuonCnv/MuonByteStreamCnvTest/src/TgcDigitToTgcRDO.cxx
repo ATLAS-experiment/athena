@@ -9,7 +9,6 @@
 #include "MuonDigitContainer/TgcDigitCollection.h"
 #include "MuonRDO/TgcRdoIdHash.h"
 #include "StoreGate/StoreGateSvc.h"
-#include "TGCcablingInterface/ITGCcablingServerSvc.h"
 
 /////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
@@ -27,7 +26,6 @@ TgcDigitToTgcRDO::TgcDigitToTgcRDO(const std::string& name, ISvcLocator* pSvcLoc
 StatusCode TgcDigitToTgcRDO::initialize() {
     ATH_MSG_DEBUG(" in initialize()");
     ATH_CHECK(m_idHelperSvc.retrieve());
-    ATH_CHECK(m_tgc_cabling_server.retrieve());
 
     ATH_MSG_DEBUG("standard digitization job: "
                   << "initialize now the TGC cabling and TGC container.");
@@ -88,7 +86,7 @@ StatusCode TgcDigitToTgcRDO::execute(const EventContext& ctx) const {
                 bool status = m_cabling->getReadoutIDfromOfflineID(channelId, subDetectorID, rodID, sswID, slbID, channelID, adFlag);
 
                 if (!status) {
-                    ATH_MSG_DEBUG("ITGCcablingSvc can't return an online ID for the channel : "
+                    ATH_MSG_DEBUG("MuonTGC_CablingSvc can't return an online ID for the channel : "
                                 << MSG::dec << " N_" << m_idHelperSvc->toString(channelId) );
                     continue;
                 }
@@ -156,15 +154,14 @@ StatusCode TgcDigitToTgcRDO::fillTagInfo() const {
 }
 
 StatusCode TgcDigitToTgcRDO::getCabling() {
-    ATH_CHECK(m_tgc_cabling_server->giveCabling(m_cabling));
+    ATH_CHECK(m_cabling.retrieve());
 
-    int maxRodId, maxSRodId, maxSswId, maxSbloc, minChannelId, maxChannelId;
-    m_cabling->getReadoutIDRanges(maxRodId, maxSRodId, maxSswId, maxSbloc, minChannelId, maxChannelId);
+    int maxRodId = m_cabling->getMaxRodId();
     if (maxRodId == 12) {
         ATH_MSG_INFO(m_cabling->name() << " (12-fold) is selected ");
         m_cablingType = "TGCcabling12Svc";
     } else {
-        ATH_MSG_INFO("TGCcablingSvc (8-fold) is selected");
+        ATH_MSG_INFO("Other TGC cabling scheme is (e.g. 8-fold) is selected");
         m_cablingType = "TGCcabling8Svc";
     }
 

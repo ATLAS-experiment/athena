@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTGC_Cabling/TGCCabling.h"
@@ -29,7 +29,6 @@ TGCCabling::TGCCabling(const std::string& filenameASDToPP,
 		       const std::string& filenameInPP,
 		       const std::string& filenamePPToSL,
 		       const std::string& filenameSLBToROD)
-  : TGCCablingBase()
 {
   m_cableInASD    = new TGCCableInASD(filenameASDToPP);
   m_cableASDToPP  = new TGCCableASDToPP(filenameASDToPP);
@@ -65,9 +64,8 @@ StatusCode TGCCabling::updateCableASDToPP()
   return m_cableASDToPP->updateDatabase(); 
 } 
 
-// virtual method  of TGCCabligBase   
 // slbIn --> AsdOut
-TGCIdBase* TGCCabling::getASDOutChannel(const TGCIdBase* in) const
+TGCChannelId* TGCCabling::getASDOutChannel(const TGCChannelId* in) const
 {
   TGCChannelSLBIn slb_in(in->getSideType(),
 			 in->getModuleType(),
@@ -76,13 +74,13 @@ TGCIdBase* TGCCabling::getASDOutChannel(const TGCIdBase* in) const
 			 in->getId(),
 			 in->getChannel());
   return getChannel(&slb_in,
-		    TGCIdBase::ASDOut); 
+		    TGCChannelId::ChannelIdType::ASDOut); 
 }
 
 
 
 // readout ID -> SLB Module
-const TGCModuleId* TGCCabling::getSLBFromReadout(TGCIdBase::SideType side,
+const TGCModuleId* TGCCabling::getSLBFromReadout(TGCId::SideType side,
 						 int rodId,
 						 int sswId,
 						 int sbLoc) const 
@@ -158,7 +156,7 @@ const TGCModuleId* TGCCabling::getSLBFromReadout(TGCIdBase::SideType side,
 }
 
 // readout ID -> RxID
-int TGCCabling::getRxIdFromReadout(TGCIdBase::SideType side,
+int TGCCabling::getRxIdFromReadout(TGCId::SideType side,
 				   int                 rodId,
 				   int                 sswId,
 				   int                 sbLoc) const
@@ -208,7 +206,7 @@ int TGCCabling::getRxIdFromReadout(TGCIdBase::SideType side,
 }
 
 // SSW ID/Rx ID -> SLB Module
-TGCModuleId* TGCCabling::getSLBFromRxId(TGCIdBase::SideType side,
+TGCModuleId* TGCCabling::getSLBFromRxId(TGCId::SideType side,
 					int rodId,
 					int sswId,
 					int rxId) const 
@@ -259,13 +257,13 @@ TGCModuleId* TGCCabling::getSLBFromRxId(TGCIdBase::SideType side,
 
 // SLB Module -> readout ID
 bool TGCCabling::getReadoutFromSLB(const TGCModuleSLB* slb,
-				   TGCIdBase::SideType & side,
+				   TGCId::SideType & side,
 				   int & rodId,
 				   int & sswId,
 				   int & sbLoc) const 
 {
   // initialize
-  side = TGCIdBase::NoSideType;
+  side = TGCId::NoSideType;
   rodId = -1;
   sswId = -1;
   sbLoc = -1;
@@ -316,7 +314,7 @@ bool TGCCabling::getReadoutFromSLB(const TGCModuleSLB* slb,
 	  break;
 	}
 	// SI is connected to the SLB corrsponding WI 
-	if((slb->getModuleType()==TGCIdBase::SI) && (pSlb->getModuleType()==TGCIdBase::WI)) {  
+	if((slb->getModuleType()==TGCId::SI) && (pSlb->getModuleType()==TGCId::WI)) {  
 	  sbLoc = pSlb->getSBLoc();	
 	  //found = true;
 	  break;
@@ -348,19 +346,19 @@ bool TGCCabling::getReadoutFromSLB(const TGCModuleSLB* slb,
 }
 
 // coincidence channel -> readout channel
-bool TGCCabling::getReadoutFromHighPtID(TGCIdBase::SideType side,
+bool TGCCabling::getReadoutFromHighPtID(TGCId::SideType side,
 					 int rodId,
 					 int & sswId,
 					 int & sbLoc,
 					 int & channel,
-					 TGCIdBase::SignalType signal,
-					 TGCIdBase::RegionType region,
+					 TGCId::SignalType signal,
+					 TGCId::RegionType region,
 					 int sectorInReadout,
 					 int hpbId,
 					 int block,
 					 int hitId,
 					 int pos,
-					 TGCIdBase::ModuleType moduleType,
+					 TGCId::ModuleType moduleType,
 					 bool orChannel) const 
 {
   // initialize
@@ -373,17 +371,17 @@ bool TGCCabling::getReadoutFromHighPtID(TGCIdBase::SideType side,
   int readoutSector = (rodId -1); 
   int sector = sectorInReadout;
   if (rodId<13){
-    if(region==TGCIdBase::Forward) {
-      sector += readoutSector*(TGCId::NumberOfForwardSector/TGCId::NumberOfReadoutSector);
+    if(region==TGCId::Forward) {
+      sector += readoutSector*(TGCId::NUM_FORWARD_SECTOR/TGCId::N_RODS);
     } else {
-      sector += readoutSector*(TGCId::NumberOfEndcapSector/TGCId::NumberOfReadoutSector);
+      sector += readoutSector*(TGCId::NUM_ENDCAP_SECTOR/TGCId::N_RODS);
     }
   }else if(rodId<20){
     readoutSector -= 16;
-    if(region==TGCIdBase::Forward) {
-      sector += readoutSector*(TGCId::NumberOfForwardSector/TGCId::NumberOfSReadoutSector);
+    if(region==TGCId::Forward) {
+      sector += readoutSector*(TGCId::NUM_FORWARD_SECTOR/TGCModuleId::NumberOfSReadoutSector);
     } else {
-      sector += readoutSector*(TGCId::NumberOfEndcapSector/TGCId::NumberOfSReadoutSector);
+      sector += readoutSector*(TGCId::NUM_ENDCAP_SECTOR/TGCModuleId::NumberOfSReadoutSector);
     }
   }
     
@@ -413,7 +411,7 @@ bool TGCCabling::getReadoutFromHighPtID(TGCIdBase::SideType side,
   if(!slb) return false;
   
   // SLB Module -> readout ID
-  TGCIdBase::SideType sideType;
+  TGCId::SideType sideType;
   int rodid; // dummy
   bool status = getReadoutFromSLB(slb,
 				  sideType,
@@ -427,21 +425,21 @@ bool TGCCabling::getReadoutFromHighPtID(TGCIdBase::SideType side,
 }
 
 // readout channel -> coincidence channel
-bool TGCCabling::getHighPtIDFromReadout(TGCIdBase::SideType side,
+bool TGCCabling::getHighPtIDFromReadout(TGCId::SideType side,
 					 int rodId,
 					 int sswId,
 					 int sbLoc,
 					 int channel,
-					 TGCIdBase::SignalType & signal,
-					 TGCIdBase::RegionType & region,
+					 TGCId::SignalType & signal,
+					 TGCId::RegionType & region,
 					 int & sectorInReadout,
 					 int & hpbId,
 					 int & block,
 					 int & hitId,
 					 int & pos) const 
 {
-  signal = TGCIdBase::NoSignalType;
-  region = TGCIdBase::NoRegionType;
+  signal = TGCId::NoSignalType;
+  region = TGCId::NoRegionType;
   sectorInReadout = -1;
   hpbId  = -1;
   block  = -1;
@@ -461,7 +459,7 @@ bool TGCCabling::getHighPtIDFromReadout(TGCIdBase::SideType side,
                         slb->getId(),
                         channel);
   
-  TGCChannelId* hpbin = getChannel(&slbin,TGCIdBase::HPBIn,false); 
+  TGCChannelId* hpbin = getChannel(&slbin,TGCChannelId::ChannelIdType::HPBIn,false); 
   if(!hpbin) return 0;
   if(!hpbin->isValid()) {
     delete hpbin;
@@ -481,7 +479,7 @@ bool TGCCabling::getHighPtIDFromReadout(TGCIdBase::SideType side,
 
 
 // coincidence channel -> readout channel
-bool TGCCabling::getReadoutFromLowPtCoincidence(TGCIdBase::SideType side,
+bool TGCCabling::getReadoutFromLowPtCoincidence(TGCId::SideType side,
 						int rodId,
 						int sswId,
 						int sbLoc,
@@ -506,7 +504,7 @@ bool TGCCabling::getReadoutFromLowPtCoincidence(TGCIdBase::SideType side,
 			  block,
 			  pos);
 
-  TGCChannelId* slbin = getChannel(&slbout,TGCIdBase::SLBIn, orChannel); 
+  TGCChannelId* slbin = getChannel(&slbout,TGCChannelId::ChannelIdType::SLBIn, orChannel); 
   
   if(!slbin) return false;
   
@@ -519,7 +517,7 @@ bool TGCCabling::getReadoutFromLowPtCoincidence(TGCIdBase::SideType side,
 
 
 // readout channel -> coincidence channel
-bool TGCCabling::getLowPtCoincidenceFromReadout(TGCIdBase::SideType side,
+bool TGCCabling::getLowPtCoincidenceFromReadout(TGCId::SideType side,
 						int rodId,
 						int sswId,
 						int sbLoc,
@@ -542,7 +540,7 @@ bool TGCCabling::getLowPtCoincidenceFromReadout(TGCIdBase::SideType side,
 			channel);
   if(!slbin.isValid()) return false;
   
-  TGCChannelId* slbout = getChannel(&slbin,TGCIdBase::SLBOut,middle); 
+  TGCChannelId* slbout = getChannel(&slbin,TGCChannelId::ChannelIdType::SLBOut,middle); 
   if(!slbout) return false;
   
   block = slbout->getBlock();
@@ -554,7 +552,7 @@ bool TGCCabling::getLowPtCoincidenceFromReadout(TGCIdBase::SideType side,
 
 
 // readout channel -> chamber channel
-TGCChannelId* TGCCabling::getASDOutFromReadout(TGCIdBase::SideType side,
+TGCChannelId* TGCCabling::getASDOutFromReadout(TGCId::SideType side,
 					       int rodId,
 					       int sswId,
 					       int sbLoc,
@@ -574,20 +572,20 @@ TGCChannelId* TGCCabling::getASDOutFromReadout(TGCIdBase::SideType side,
 			channel);
   if(!slbin.isValid()) return nullptr;  
  
-  return getChannel(&slbin,TGCIdBase::ASDOut,orChannel); 
+  return getChannel(&slbin,TGCChannelId::ChannelIdType::ASDOut,orChannel); 
 }
 
 
 // chamber channel -> readout channel
 bool TGCCabling::getReadoutFromASDOut(const TGCChannelASDOut* asdout,
-				      TGCIdBase::SideType & side,
+				      TGCId::SideType & side,
 				      int & rodId,
 				      int & sswId,
 				      int & sbLoc,
 				      int & channel,
 				      bool orChannel) const {
   // initialize
-  side = TGCIdBase::NoSideType;
+  side = TGCId::NoSideType;
   rodId = -1;
   sswId = -1;
   sbLoc = -1;
@@ -595,7 +593,7 @@ bool TGCCabling::getReadoutFromASDOut(const TGCChannelASDOut* asdout,
 
 
   // SLBIn channel
-  TGCChannelId* slbin = getChannel(asdout,TGCIdBase::SLBIn,orChannel);
+  TGCChannelId* slbin = getChannel(asdout,TGCChannelId::ChannelIdType::SLBIn,orChannel);
   
   if(!slbin) return false;
   channel = slbin->getChannel();
@@ -616,13 +614,13 @@ bool TGCCabling::getReadoutFromASDOut(const TGCChannelASDOut* asdout,
 }
 
 TGCChannelId* TGCCabling::getChannel(const TGCChannelId* channelId,
-				     TGCIdBase::ChannelIdType type,
+				     TGCChannelId::ChannelIdType type,
 				     bool orChannel) const {
   switch(channelId->getChannelIdType()){
-  case TGCIdBase::ASDIn:
-    if(type==TGCIdBase::ASDOut)
+  case TGCChannelId::ChannelIdType::ASDIn:
+    if(type==TGCChannelId::ChannelIdType::ASDOut)
       return m_cableInASD->getChannel(channelId,orChannel);
-    if(type==TGCIdBase::SLBIn){
+    if(type==TGCChannelId::ChannelIdType::SLBIn){
       TGCChannelId* asdout = m_cableInASD->getChannel(channelId,false);
       if(!asdout) return nullptr;
       if(!asdout->isValid()){
@@ -648,12 +646,12 @@ TGCChannelId* TGCCabling::getChannel(const TGCChannelId* channelId,
       return slbin;
     } 
     break;
-  case TGCIdBase::ASDOut:
-    if(type==TGCIdBase::ASDIn)
+  case TGCChannelId::ChannelIdType::ASDOut:
+    if(type==TGCChannelId::ChannelIdType::ASDIn)
       return m_cableInASD->getChannel(channelId,orChannel);
-    if(type==TGCIdBase::PPIn)
+    if(type==TGCChannelId::ChannelIdType::PPIn)
       return m_cableASDToPP->getChannel(channelId,orChannel);
-    if(type==TGCIdBase::SLBIn){
+    if(type==TGCChannelId::ChannelIdType::SLBIn){
       TGCChannelId* ppin = m_cableASDToPP->getChannel(channelId,false);
       if(!ppin) return nullptr;
       if(!ppin->isValid()){
@@ -672,22 +670,22 @@ TGCChannelId* TGCCabling::getChannel(const TGCChannelId* channelId,
       return slbin;
     } 
     break;
-  case TGCIdBase::PPIn:
-    if(type==TGCIdBase::ASDOut)
+  case TGCChannelId::ChannelIdType::PPIn:
+    if(type==TGCChannelId::ChannelIdType::ASDOut)
       return m_cableASDToPP->getChannel(channelId,orChannel);
-    if(type==TGCIdBase::PPOut)
+    if(type==TGCChannelId::ChannelIdType::PPOut)
       return m_cableInPP->getChannel(channelId,orChannel);
     break;
-  case TGCIdBase::PPOut:
-    if(type==TGCIdBase::PPIn)
+  case TGCChannelId::ChannelIdType::PPOut:
+    if(type==TGCChannelId::ChannelIdType::PPIn)
       return m_cableInPP->getChannel(channelId,orChannel);
-    if(type==TGCIdBase::SLBIn)
+    if(type==TGCChannelId::ChannelIdType::SLBIn)
       return m_cablePPToSLB->getChannel(channelId,orChannel);
     break;
-  case TGCIdBase::SLBIn:
-    if(type==TGCIdBase::SLBOut)
+  case TGCChannelId::ChannelIdType::SLBIn:
+    if(type==TGCChannelId::ChannelIdType::SLBOut)
       return m_cableInSLB->getChannel(channelId,orChannel);
-    if(type==TGCIdBase::HPBIn){
+    if(type==TGCChannelId::ChannelIdType::HPBIn){
       TGCChannelId* slbout = m_cableInSLB->getChannel(channelId,orChannel);
       if(!slbout) return nullptr; 
       if(!slbout->isValid()) {
@@ -698,9 +696,9 @@ TGCChannelId* TGCCabling::getChannel(const TGCChannelId* channelId,
       delete slbout;
       return hpbin;
     }
-    if(type==TGCIdBase::PPOut)
+    if(type==TGCChannelId::ChannelIdType::PPOut)
       return m_cablePPToSLB->getChannel(channelId,orChannel);
-    if(type==TGCIdBase::ASDOut){
+    if(type==TGCChannelId::ChannelIdType::ASDOut){
       TGCChannelId* ppout = m_cablePPToSLB->getChannel(channelId,false);
       if(!ppout) return nullptr;
       if(!ppout->isValid()){
@@ -718,7 +716,7 @@ TGCChannelId* TGCCabling::getChannel(const TGCChannelId* channelId,
       delete ppin;
       return asdout;
     } 
-    if(type==TGCIdBase::ASDIn){
+    if(type==TGCChannelId::ChannelIdType::ASDIn){
       TGCChannelId* ppout = m_cablePPToSLB->getChannel(channelId,false);
       if(!ppout) return nullptr;
       if(!ppout->isValid()){
@@ -744,15 +742,15 @@ TGCChannelId* TGCCabling::getChannel(const TGCChannelId* channelId,
       return asdin;
     } 
     break;
-  case TGCIdBase::SLBOut:
-    if(type==TGCIdBase::SLBIn)
+  case TGCChannelId::ChannelIdType::SLBOut:
+    if(type==TGCChannelId::ChannelIdType::SLBIn)
       return m_cableInSLB->getChannel(channelId,orChannel);
-    if(type==TGCIdBase::HPBIn){
+    if(type==TGCChannelId::ChannelIdType::HPBIn){
       return m_cableSLBToHPB->getChannel(channelId,orChannel);
     }
     break;
-  case TGCIdBase::HPBIn:
-    if(type==TGCIdBase::SLBIn){
+  case TGCChannelId::ChannelIdType::HPBIn:
+    if(type==TGCChannelId::ChannelIdType::SLBIn){
       TGCChannelId* slbout = m_cableSLBToHPB->getChannel(channelId,false);
       if(!slbout) return nullptr;
       if(!slbout->isValid()){
@@ -763,7 +761,7 @@ TGCChannelId* TGCCabling::getChannel(const TGCChannelId* channelId,
       delete slbout;
       return slbin;
     }
-    if(type==TGCIdBase::SLBOut)
+    if(type==TGCChannelId::ChannelIdType::SLBOut)
       return m_cableSLBToHPB->getChannel(channelId,orChannel);
     break;
   default:
@@ -813,11 +811,11 @@ TGCModuleMap* TGCCabling::getModule(const TGCModuleId* moduleId,
   return nullptr;
 } 
 
-int TGCCabling::getIndexFromReadoutWithoutChannel(const TGCIdBase::SideType side, 
+int TGCCabling::getIndexFromReadoutWithoutChannel(const TGCId::SideType side, 
 						  const int rodId, 
 						  const int sswId, 
 						  const int sbLoc) const { 
-  return ((((side-TGCIdBase::Aside) 
+  return ((((side-TGCId::Aside) 
 	    *(MAXRODID-MINRODID+1) + rodId-MINRODID) 
 	   *(MAXSSWID-MINSSWID+1) + sswId-MINSSWID) 
 	  *(MAXSBLOC-MINSBLOC+1) + sbLoc-MINSBLOC); 

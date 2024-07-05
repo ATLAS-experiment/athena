@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGT1TGC_LVL1TGCTRIGGER_H
@@ -20,6 +20,7 @@
 #include "TrigT1Interfaces/Lvl1MuCTPIInput.h"
 #include "TrigT1Interfaces/Lvl1MuCTPIInputPhase1.h"
 #include "Identifier/Identifier.h"
+#include "MuonTGC_Cabling/MuonTGC_CablingSvc.h"
 
 // EIFI-SL connection
 #include "TrigT1TGC/TGCInnerTrackletSlotHolder.h"
@@ -52,8 +53,6 @@
 
 class TgcRdo;
 class TgcRawData;
-class ITGCcablingSvc;
-
 
 namespace LVL1TGCTrigger {
   
@@ -101,9 +100,6 @@ class LVL1TGCTrigger : public AthAlgorithm
     // Retrieve Masked channel list
     StatusCode getMaskedChannel();
     
-    // pointers to various external services
-    const ITGCcablingSvc*       m_cabling ;
-    
     // useful functions
     int getCharge(int dR, int Zdir);
     void extractFromString(const std::string&, std::vector<int>&);
@@ -137,9 +133,8 @@ class LVL1TGCTrigger : public AthAlgorithm
     BooleanProperty   m_USEBIS78{this,"USEBIS78",false};     // flag for using RPC BIS78
     BooleanProperty   m_useRun3Config{this,"useRun3Config",false}; // flag for using switch between Run3 and Run2 algorithms
 
-   StringProperty     m_NSWSideInfo{this,"NSWSideInfo",""};// Information about NSW geometry. It should be "" or "AC" or "A" or "C"
+    StringProperty     m_NSWSideInfo{this,"NSWSideInfo",""};// Information about NSW geometry. It should be "" or "AC" or "A" or "C"
 
-    
     bool              m_firstTime{true};
     uint16_t m_bctagInProcess{TgcDigit::BC_UNDEFINED};
 
@@ -160,6 +155,9 @@ class LVL1TGCTrigger : public AthAlgorithm
     
     TGCArguments m_tgcArgs;
     TGCArguments* tgcArgs();
+
+
+    ServiceHandle<MuonTGC_CablingSvc> m_cabling{this, "TGCCablingSvc", "MuonTGC_CablingSvc", ""};
 
     SG::WriteHandleKey<TgcRdoContainer> m_keyTgcRdo{this,"TgcRdo","TGCRDO2","Location of TgcRdoContainer"};
     SG::ReadHandleKey<TgcRdoContainer> m_keyTgcRdoIn{this,"InputRDO","TGCRDO","Location of input TgcRdoContainer"};

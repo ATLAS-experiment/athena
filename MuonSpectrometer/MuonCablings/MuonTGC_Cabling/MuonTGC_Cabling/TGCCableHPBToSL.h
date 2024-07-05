@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTGC_CABLING_TGCCABLEHPBTOSL_HH
@@ -8,29 +8,27 @@
 #include "MuonTGC_Cabling/TGCCable.h"
 
 #include <string>
+#include <array>
+#include <memory>
 
-#include "TGCcablingInterface/TGCIdBase.h"
+#include "MuonTGC_Cabling/TGCId.h"
 
-namespace MuonTGC_Cabling
-{
+namespace MuonTGC_Cabling {
 
 class TGCDatabase;
   
-class TGCCableHPBToSL : public TGCCable
-{
-public:
-  // Constructor & Destructor
+class TGCCableHPBToSL : public TGCCable {
+ public:
   TGCCableHPBToSL(const std::string& filename);
-
-  virtual ~TGCCableHPBToSL(void);
+  virtual ~TGCCableHPBToSL() = default;
   
   virtual TGCModuleMap* getModule(const TGCModuleId* moduleId) const;
 
-private:
+ private:
   TGCCableHPBToSL(void) {}
   virtual TGCModuleMap* getModuleIn(const TGCModuleId* sl) const;
   virtual TGCModuleMap* getModuleOut(const TGCModuleId* hpt) const;
-  TGCDatabase* m_database[TGCIdBase::MaxRegionType][TGCIdBase::MaxSignalType]{};
+  std::array<std::array<std::unique_ptr<TGCDatabase>, TGCId::MaxSignalType>, TGCId::MaxRegionType> m_database{};
 };
   
 } // end of namespace

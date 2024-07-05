@@ -1,41 +1,39 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef MUONTGC_CABLING_TGCCHANNELASDOUT_HH
-#define MUONTGC_CABLING_TGCCHANNELASDOUT_HH
- 
+#ifndef MUONTGC_CABLING_TGCCHANNELASDOUT_H
+#define MUONTGC_CABLING_TGCCHANNELASDOUT_H
+
 #include "MuonTGC_Cabling/TGCChannelId.h"
- 
-namespace MuonTGC_Cabling
-{
-  
-class TGCChannelASDOut : public TGCChannelId
-{
-public:
+
+namespace MuonTGC_Cabling {
+
+class TGCChannelASDOut : public TGCChannelId {
+ public:
   // Constructor & Destructor
-  TGCChannelASDOut(TGCIdBase::SideType side,
-		   TGCIdBase::SignalType signal,
-		   TGCIdBase::RegionType region,
+  TGCChannelASDOut(TGCId::SideType side,
+		   TGCId::SignalType signal,
+		   TGCId::RegionType region,
 		   int sector,
 		   int layer,
 		   int chamber,
 		   int channel);
 
-  TGCChannelASDOut(TGCIdBase::SideType side,
-		   TGCIdBase::SignalType signal,
+  TGCChannelASDOut(TGCId::SideType side,
+		   TGCId::SignalType signal,
 		   int octant,
 		   int moduleSector,
 		   int layer,
 		   int chamber,
 		   int channel);
 
-  virtual ~TGCChannelASDOut(void) {}
+  virtual ~TGCChannelASDOut(void) = default;
 
   virtual bool isValid(void) const;
-  
-private:
-  TGCChannelASDOut(void) {}
+
+ private:
+  TGCChannelASDOut() = delete;
 };
   
 } // end of namespace

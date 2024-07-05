@@ -1,23 +1,21 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTGC_CABLING_TGCCABLING_HH
 #define MUONTGC_CABLING_TGCCABLING_HH
   
-#include "TGCcablingInterface/TGCCablingBase.h"
-
-#include "MuonTGC_Cabling/TGCId.h"
+#include "MuonTGC_Cabling/TGCChannelId.h"
 #include "MuonTGC_Cabling/TGCModuleId.h"
 #include "CxxUtils/checker_macros.h"
 
+#include <string>
 #include <map>
 #include <mutex>
 
 class StatusCode;
 
-namespace MuonTGC_Cabling
-{
+namespace MuonTGC_Cabling {
 
 class TGCCableASDToPP;
 class TGCCableHPBToSL;
@@ -33,7 +31,7 @@ class TGCChannelId;
 class TGCModuleMap;
 class TGCModuleSLB;
 
-class TGCCabling : public TGCCablingBase
+class TGCCabling
 {
  private: //hide default constructor, copy constructor and assignment
   TGCCabling () = delete;
@@ -63,26 +61,25 @@ class TGCCabling : public TGCCablingBase
     MAXCHANNELID = 199 
   }; 
 
-  // virtual method  of TGCCabligBase   
   // slbIn --> AsdOut
-  virtual TGCIdBase* getASDOutChannel(const TGCIdBase* slb_in) const ; 
+  virtual TGCChannelId* getASDOutChannel(const TGCChannelId* slb_in) const; 
 
 
   /////////////////////////////////////////////////////
   // readout ID -> SLB Module
-  const TGCModuleId* getSLBFromReadout(TGCIdBase::SideType side,
+  const TGCModuleId* getSLBFromReadout(TGCId::SideType side,
 				       int rodId,
 				       int sswId,
 				       int sbLoc) const;
   
   // readoutID -> RxID
-  int getRxIdFromReadout(TGCIdBase::SideType side,
+  int getRxIdFromReadout(TGCId::SideType side,
 			 int rodId,
 			 int sswId,
 			 int sbLoc) const;
 
   // SSW ID/RX ID-> SLB Module
-  TGCModuleId* getSLBFromRxId(TGCIdBase::SideType side,
+  TGCModuleId* getSLBFromRxId(TGCId::SideType side,
 			      int rodId,
 			      int sswId,
 			      int rxId) const;
@@ -90,14 +87,14 @@ class TGCCabling : public TGCCablingBase
   
   // SLB Module -> readout ID
   bool getReadoutFromSLB(const TGCModuleSLB* slb,
-			 TGCIdBase::SideType & side,
+			 TGCId::SideType & side,
 			 int & rodId,
 			 int & sswId,
 			 int & sbLoc) const;
   
   
   // readout channel -> chamber channel
-  TGCChannelId* getASDOutFromReadout(TGCIdBase::SideType side,
+  TGCChannelId* getASDOutFromReadout(TGCId::SideType side,
 				     int rodId,
 				     int sswId,
 				     int sbLoc,
@@ -107,7 +104,7 @@ class TGCCabling : public TGCCablingBase
 
   // chamber channel -> readout channel
   bool getReadoutFromASDOut(const TGCChannelASDOut* asdout,
-			    TGCIdBase::SideType & side,
+			    TGCId::SideType & side,
 			    int & rodId,
 			    int & sswId,
 			    int & sbLoc,
@@ -116,13 +113,13 @@ class TGCCabling : public TGCCablingBase
   
 
   // readout channel -> coincidence channel
-  bool getHighPtIDFromReadout(TGCIdBase::SideType side,
+  bool getHighPtIDFromReadout(TGCId::SideType side,
 			      int rodId,
 			      int sswId,
 			      int sbLoc,
 			      int channel,
-			      TGCIdBase::SignalType & signal,
-			      TGCIdBase::RegionType & region,
+			      TGCId::SignalType & signal,
+			      TGCId::RegionType & region,
 			      int & sectorInReadout,
 			      int & hpbId,
 			      int & block,
@@ -131,23 +128,23 @@ class TGCCabling : public TGCCablingBase
   
 
   // coincidence channel -> readout channel
-  bool getReadoutFromHighPtID(TGCIdBase::SideType side,
+  bool getReadoutFromHighPtID(TGCId::SideType side,
 			      int rodId,
 			      int & sswId,
 			      int & sbLoc,
 			      int & channel,
-			      TGCIdBase::SignalType signal,
-			      TGCIdBase::RegionType region,
+			      TGCId::SignalType signal,
+			      TGCId::RegionType region,
 			      int sectorInReadout,
 			      int hpbId,
 			      int block,
 			      int hitId,
 			      int pos,
-			      TGCIdBase::ModuleType moduleType,
+			      TGCId::ModuleType moduleType,
 			      bool orChannel) const;
 
   // readout channel -> coincidence channel
-  bool getLowPtCoincidenceFromReadout(TGCIdBase::SideType side,
+  bool getLowPtCoincidenceFromReadout(TGCId::SideType side,
 				      int rodId,
 				      int sswId,
 				      int sbLoc,
@@ -158,7 +155,7 @@ class TGCCabling : public TGCCablingBase
   
 
   // coincidence channel -> readout channel
-  bool getReadoutFromLowPtCoincidence(TGCIdBase::SideType side,
+  bool getReadoutFromLowPtCoincidence(TGCId::SideType side,
 				      int rodId,
 				      int sswId,
 				      int sbLoc,
@@ -169,7 +166,7 @@ class TGCCabling : public TGCCablingBase
   
   // channel connection
   TGCChannelId* getChannel(const TGCChannelId* channelId,
-			   TGCIdBase::ChannelIdType type,
+			   TGCChannelId::ChannelIdType type,
 			   bool orChannel=false) const;
   // module connection
   TGCModuleMap* getModule(const TGCModuleId* moduleId,
@@ -194,7 +191,7 @@ private:
   mutable std::map<int, TGCModuleId*> m_slbModuleIdMap ATLAS_THREAD_SAFE;
   mutable std::mutex m_mutex;
   
-  int getIndexFromReadoutWithoutChannel(const TGCIdBase::SideType side,  
+  int getIndexFromReadoutWithoutChannel(const TGCId::SideType side,  
 					const int rodId, 
 					const int sswId, 
 					const int sbLoc) const; 

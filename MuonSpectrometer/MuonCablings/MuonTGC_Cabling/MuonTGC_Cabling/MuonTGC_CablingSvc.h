@@ -1,20 +1,17 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
     MuonTGC_CablingSvc.h
-
-    Author : Toshi.Sumida@cern.ch, Susumu.Oda@cern.ch, Hisaya.Kurashige@cern.ch
-    Created from TGCcabling12Svc.cxx in June, 2009
     Description : online-offline ID mapper for TGC
-  
 ***************************************************************************/
 
 #ifndef MUONTGC_CABLING_MUONTGC_CABLINGSVC_H
 #define MUONTGC_CABLING_MUONTGC_CABLINGSVC_H
 
-#include "TGCcablingInterface/ITGCcablingSvc.h"
+#include "AthenaBaseComps/AthService.h"
+#include "GaudiKernel/IInterface.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
 
@@ -26,109 +23,100 @@
 
 #include <string>
 #include <vector>
+#include <algorithm>
 
-class MuonTGC_CablingSvc : public ITGCcablingSvc
+class Identifier;
+
+class MuonTGC_CablingSvc : public AthService, virtual public IInterface
 {
  public:
   MuonTGC_CablingSvc(const std::string& name, ISvcLocator* svc);
-  virtual ~MuonTGC_CablingSvc()=default;
-  
-  static const InterfaceID& interfaceID(void) 
-    {
-      return  IID_TGCcablingSvc;
-    }
-  
+  virtual ~MuonTGC_CablingSvc() = default;
+  /// Retrieve interface ID
+  DeclareInterfaceID(MuonTGC_CablingSvc, 1, 0);
+
   virtual StatusCode queryInterface(const InterfaceID& riid, void** ppvIF) override; 
   
   virtual StatusCode initialize(void) override;
   virtual StatusCode finalize(void) override;
 
-  //////  virtual methods of IMuonTGC_CablingSvc
-  virtual const TGCCablingBase* getTGCCabling(void) const override;
+  const MuonTGC_Cabling::TGCCabling* getTGCCabling() const;
+
+  // give max value of the ROD ID
+  int getMaxRodId() { return MuonTGC_Cabling::TGCCabling::MAXRODID; }
 
   // give max value of ReadoutID parameters
-  virtual
   void getReadoutIDRanges(int& maxRodId,
                           int& maxSRodId,
 			  int& maxSswId,
 			  int& maxSbloc,
 			  int& minChannelId,
-			  int& maxChannelId) const override;
+			  int& maxChannelId) const;
 
   // give phi-range which a ROD covers
-  virtual
   bool getCoveragefromRodID(const int rodID,
 			    double & startPhi,
-			    double & endPhi) const override;
+			    double & endPhi) const;
 
-  virtual
   bool getCoveragefromRodID(const int rodID,
 			    int & startEndcapSector,
 			    int & coverageOfEndcapSector,
 			    int & startForwardSector,
-			    int & coverageOfForwardSector) const override;
+			    int & coverageOfForwardSector) const;
 
   // give phi-range which a SROD covers
-  virtual
   bool getCoveragefromSRodID(const int srodID,
 			    double & startPhi,
-			    double & endPhi) const override;
+			    double & endPhi) const;
 
-  virtual
   bool getCoveragefromSRodID(const int srodID,
                              int & startEndcapSector,
                              int & coverageOfEndcapSector,
                              int & startForwardSector,
-                             int & coverageOfForwardSector) const override;
+                             int & coverageOfForwardSector) const;
 
   // Readout ID is ored
-  virtual
   bool isOredChannel(const int subDetectorID,
 		     const int rodID,
 		     const int sswID,
 		     const int sbLoc,
-		     const int channelID) const override;
+		     const int channelID) const;
 
 
   // Offline ID has adjacent Readout ID
-  virtual 
-  bool hasAdjacentChannel(const Identifier & offlineID) const override;
+  bool hasAdjacentChannel(const Identifier & offlineID) const;
 
 
   // Online ID has adjacent Readout ID
-  virtual
   bool hasAdjacentChannel(const int subsystemNumber,
 			  const int octantNumber,
 			  const int moduleNumber,
 			  const int layerNumber,
 			  const int rNumber,
 			  const int wireOrStrip,
-			  const int channelNumber) const override;
+			  const int channelNumber) const;
 
 
   // readout IDs -> offline IDs
-  virtual
   bool getOfflineIDfromReadoutID(Identifier & offlineID,
 				 const int subDetectorID,
 				 const int rodID,
 				 const int sswID,
 				 const int sbLoc,
 				 const int channelID,
-				 bool orChannel=false) const override;
+				 bool orChannel=false) const;
 
   
   // offline IDs -> readout IDs
-  virtual
   bool getReadoutIDfromOfflineID(const Identifier & offlineID,
 				 int & subDetectorID,
 				 int & rodID,
 				 int & sswID,
 				 int & sbLoc,
 				 int & channelID,
-				 bool adChannel=false) const override;
+				 bool adChannel=false) const;
 
   // offline ID -> online IDs
-  virtual
   bool getOnlineIDfromOfflineID(const Identifier & offlineID,
 				int & subsystemNumber,
 				int & octantNumber,
@@ -136,10 +124,9 @@ class MuonTGC_CablingSvc : public ITGCcablingSvc
 				int & layerNumber,
 				int & rNumber,
 				int & wireOrStrip,
-				int & channelNumber) const override;
+				int & channelNumber) const;
 
   // online IDs -> offline ID
-  virtual
   bool getOfflineIDfromOnlineID(Identifier & offlineID,
 				const int subsystemNumber,
 				const int octantNumber,
@@ -147,10 +134,9 @@ class MuonTGC_CablingSvc : public ITGCcablingSvc
 				const int layerNumber,
 				const int rNumber,
 				const int wireOrStrip,
-				const int channelNumber) const override;
+				const int channelNumber) const;
 
   // readout IDs -> online IDs
-  virtual
   bool getOnlineIDfromReadoutID(const int subDetectorID,
 				const int rodID,
 				const int sswID,
@@ -163,10 +149,9 @@ class MuonTGC_CablingSvc : public ITGCcablingSvc
 				int & rNumber,
 				int & wireOrStrip,
 				int & channelNumber,
-				bool orChannel=false) const override;
+				bool orChannel=false) const;
 
   // online IDs -> readout IDs
-  virtual
   bool getReadoutIDfromOnlineID(int & subDetectorID,
 				int & rodID,
 				int & sswID,
@@ -179,26 +164,23 @@ class MuonTGC_CablingSvc : public ITGCcablingSvc
 				const int rNumber,
 				const int wireOrStrip,
 				const int channelNumber,
-				bool adChannel=false) const override;
+				bool adChannel=false) const;
   
   // element ID -> readout IDs
-  virtual
   bool getReadoutIDfromElementID(const Identifier & elementID,
 				 int & subdetectorID,
-				 int & rodID) const override;
+				 int & rodID) const;
   
   // readout IDs -> element ID
-  virtual
   bool getElementIDfromReadoutID(Identifier & elementID,
 				 const int subDetectorID,
 				 const int rodID,
 				 const int sswID,
 				 const int sbLoc,
 				 const int channelID,
-				 bool orChannel=false) const override;
+				 bool orChannel=false) const;
 
   // HPT ID -> readout ID
-  virtual
   bool getReadoutIDfromHPTID(const int phi,
 			     const bool isAside,
 			     const bool isEndcap,
@@ -207,10 +189,9 @@ class MuonTGC_CablingSvc : public ITGCcablingSvc
 			     int & subsectorID,
 			     int & rodID,
 			     int & sswID,
-			     int & sbLoc) const override;
+			     int & sbLoc) const;
 
   // readout ID -> SLB ID
-  virtual
   bool getSLBIDfromReadoutID(int &phi,
 			     bool & isAside,
 			     bool & isEndcap,
@@ -219,26 +200,23 @@ class MuonTGC_CablingSvc : public ITGCcablingSvc
 			     const int subsectorID,
 			     const int rodID,
 			     const int sswID,
-			     const int sbLoc) const override;
+			     const int sbLoc) const;
 
   // readout ID -> slbAddr
-  virtual
   bool getSLBAddressfromReadoutID(int & slbAddr,
 				  const int subsectorID,
 				  const int rodID,
 				  const int sswID,
-				  const int sbLoc) const override;
+				  const int sbLoc) const;
 
   // readout ID -> RxID
-  virtual
   bool getRxIDfromReadoutID(int & rxId,
 			    const int subsectorID,
 			    const int rodID,
 			    const int sswID,
-			    const int sbLoc) const override;
+			    const int sbLoc) const;
   
   // ROD_ID / SSW_ID / RX_ID -> SLB ID
-  virtual
   bool getSLBIDfromRxID(int &phi,
 			bool & isAside,
 			bool & isEndcap,
@@ -247,10 +225,9 @@ class MuonTGC_CablingSvc : public ITGCcablingSvc
 			const int subsectorID,
 			const int rodID,
 			const int sswID,
-			const int rxId) const override;
+			const int rxId) const;
 
   // SLB ID -> readout ID
-  virtual
   bool getReadoutIDfromSLBID(const int phi,
 			     const bool isAside,
 			     const bool isEndcap,
@@ -259,140 +236,128 @@ class MuonTGC_CablingSvc : public ITGCcablingSvc
 			     int & subsectorID,
 			     int & rodID,
 			     int & sswID,
-			     int & sbLoc) const override;
+			     int & sbLoc) const;
   
   // readout ID (ROD) -> SL ID 
-  virtual
   bool getSLIDfromReadoutID(int & phi,
 			    bool & isAside,
 			    bool & isEndcap,
 			    const int subsectorID,
 			    const int rodID,
 			    const int sswID,
-			    const int sbLoc) const override;
+			    const int sbLoc) const;
 
   // readout ID (SROD) -> SL ID 
-  virtual
   bool getSLIDfromSReadoutID(int & phi,
                              bool & isAside,
                              const int subsectorID,
                              const int srodID,
                              const int sector,
-                             const bool forward) const override;
+                             const bool forward) const;
 
   // SL ID -> readout ID ( ROD )
-  virtual
   bool getReadoutIDfromSLID(const int phi,
 			    const bool isAside,
 			    const bool isEndcap,
 			    int & subsectorID,
 			    int & rodID,
 			    int & sswID,
-			    int & sbLoc) const override;
+			    int & sbLoc) const;
 
   // SL ID -> readout ID ( SROD )
-  virtual
   bool getSReadoutIDfromSLID(const int phi,
                              const bool isAside,
                              const bool isEndcap,
                              int & subsectorID,
                              int & srodID,
                              int & sswID,
-                             int & sbLoc) const override;
+                             int & sbLoc) const;
 
   // HighPtID used in Simulation -> HighPtID in RDO
-  virtual
   bool getRDOHighPtIDfromSimHighPtID(const bool isForward,
                                      const bool isStrip,
                                      int & index,
                                      int & chip,
-                                     int & hitId) const override;
+                                     int & hitId) const;
  
   // HighPtID in RDO -> HighPtID used in Simulation
-  virtual
   bool getSimHighPtIDfromRDOHighPtID(const bool isForward,
                                      const bool isStrip,
                                      int & index,
                                      int & chip,
-                                     int & hitId) const override;
+                                     int & hitId) const;
 
 
   // high pt coincidence IDs -> offline IDs
-  virtual 
-    bool getOfflineIDfromHighPtID(Identifier & offlineID,
-				  const int subDetectorID,
-				  const int rodID,
-				  const int sectorInReadout,
-				  const bool isStrip,
-				  const bool isForward,
-				  const int hpb,
-				  const int chip,
-				  const int hitID,
-				  const int pos ) const override;
+  bool getOfflineIDfromHighPtID(Identifier & offlineID,
+				const int subDetectorID,
+				const int rodID,
+				const int sectorInReadout,
+				const bool isStrip,
+				const bool isForward,
+				const int hpb,
+				const int chip,
+				const int hitID,
+				const int pos ) const;
 
   // offline IDs -> high pt coincidence IDs
-  virtual 
-    bool getHighPtIDfromOfflineID(const Identifier & offlineID,
-				  int & subDetectorID,
-				  int & rodID,
-				  int & sectorInReadout,
-				  bool & isStrip,
-				  bool & isForward,
-				  int & hpb,
-				  int & chip,
-				  int & hitID,
-				  int & pos) const override;
+  bool getHighPtIDfromOfflineID(const Identifier & offlineID,
+				int & subDetectorID,
+				int & rodID,
+				int & sectorInReadout,
+				bool & isStrip,
+				bool & isForward,
+				int & hpb,
+				int & chip,
+				int & hitID,
+				int & pos) const;
 
   // HPT HitID -> ROI Number
-  virtual 
-    bool getROINumberfromHighPtID(int &roi,
-				  bool isForward,
-				  int hpb_wire,
-				  int chip_wire,
-				  int hitId_wire,
-				  int sub_wire,
-				  int chip_strip,
-				  int hitId_strip,
-				  int sub_strip) const override;
+  bool getROINumberfromHighPtID(int &roi,
+				bool isForward,
+				int hpb_wire,
+				int chip_wire,
+				int hitId_wire,
+				int sub_wire,
+				int chip_strip,
+				int hitId_strip,
+				int sub_strip) const;
 
   // HPT HitID -> ROI Number
-  virtual
-     bool getHighPtIDfromROINumber(int roi,
-				   bool isForward,
-				   bool isStrip,
-				   int & hpb,
-				   int & chip,
-				   int & hitID,
-				   int & sub) const override;
+  bool getHighPtIDfromROINumber(int roi,
+				bool isForward,
+				bool isStrip,
+				int & hpb,
+				int & chip,
+				int & hitID,
+				int & sub) const;
   
   // low pt coincidence IDs -> offline IDs
-  virtual
-    bool getOfflineIDfromLowPtCoincidenceID(Identifier & offlineID,
-					    const int subDetectorID,
-					    const int rodID,
-					    const int sswID,
-					    const int sbLoc,
-					    const int block,
-					    const int pos,
-					    bool middle=false) const override;
+  bool getOfflineIDfromLowPtCoincidenceID(Identifier & offlineID,
+					  const int subDetectorID,
+					  const int rodID,
+					  const int sswID,
+					  const int sbLoc,
+					  const int block,
+					  const int pos,
+					  bool middle=false) const;
   
   // offline IDs -> low pt coincidence IDs
-  virtual 
-    bool getLowPtCoincidenceIDfromOfflineID(const Identifier & offlineID,
-					    int & subDetectorID,
-					    int & rodID,
-					    int & sswID,
-					    int & sbLoc,
-					    int & block,
-					    int & pos, 
-					    bool middle=false) const override;
+  bool getLowPtCoincidenceIDfromOfflineID(const Identifier & offlineID,
+					  int & subDetectorID,
+					  int & rodID,
+					  int & sswID,
+					  int & sbLoc,
+					  int & block,
+					  int & pos,
+					  bool middle=false) const;
 
 
   /////////////////////////////////////////////////////////////
   // channel connection
   MuonTGC_Cabling::TGCChannelId* 
     getChannel(const MuonTGC_Cabling::TGCChannelId* channelId,
-	       TGCIdBase::ChannelIdType type,
+	       MuonTGC_Cabling::TGCChannelId::ChannelIdType type,
 	       bool orChannel=false) const;
   
   // module connection
@@ -406,10 +371,22 @@ class MuonTGC_CablingSvc : public ITGCcablingSvc
   MuonTGC_Cabling::TGCCabling* m_cabling;
   ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc {this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
   ToolHandle<ITGCCablingDbTool> m_condDataTool{this,"TGCCablingDbTool","TGCCablingDbTool"};
+
+ protected:
+  IntegerProperty m_AsideId;
+  IntegerProperty m_CsideId;
+  IntegerArrayProperty m_rodId;
+
+  StringProperty m_databaseASDToPP;
+  StringProperty m_databaseInPP;
+  StringProperty m_databasePPToSL;
+  StringProperty m_databaseSLBToROD;
+
+  StringProperty m_databaseASDToPPdiff;
 };
 
 
-inline const TGCCablingBase* MuonTGC_CablingSvc::getTGCCabling(void) const
+inline const MuonTGC_Cabling::TGCCabling* MuonTGC_CablingSvc::getTGCCabling() const
 {
   return m_cabling;
 }  

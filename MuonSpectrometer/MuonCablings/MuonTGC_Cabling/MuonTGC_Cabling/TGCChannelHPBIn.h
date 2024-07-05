@@ -14,9 +14,9 @@ class TGCChannelHPBIn : public TGCChannelId
 {
 public:
   // Constructor & Destructor
-  TGCChannelHPBIn(TGCIdBase::SideType side,
-		  TGCIdBase::SignalType signal,
-		  TGCIdBase::RegionType region,
+  TGCChannelHPBIn(TGCId::SideType side,
+		  TGCId::SignalType signal,
+		  TGCId::RegionType region,
 		  int sector,
 		  int id,
 		  int block,

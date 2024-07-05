@@ -1,14 +1,10 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
     MuonTGC_CablingSvc.cxx
-
-    Author : Susumu.Oda@cern.ch, Hisaya.Kurashige@cern.ch
-    Created from TGCcabling12Svc.cxx in June, 2009
     Description : online-offline ID mapper for TGC
-
 ***************************************************************************/
 
 #include "MuonTGC_Cabling/MuonTGC_CablingSvc.h"
@@ -24,8 +20,8 @@
 #include <fstream>
 
 ///////////////////////////////////////////////////////////////
-MuonTGC_CablingSvc::MuonTGC_CablingSvc(const std::string& name, ISvcLocator* svc) :
-    ITGCcablingSvc(name, svc),
+MuonTGC_CablingSvc::MuonTGC_CablingSvc(const std::string& name, ISvcLocator* svc)
+  : AthService(name, svc),
     m_cabling(nullptr) {
   declareProperty("AsideId", m_AsideId=103);
   declareProperty("CsideId", m_CsideId=104);
@@ -39,8 +35,8 @@ MuonTGC_CablingSvc::MuonTGC_CablingSvc(const std::string& name, ISvcLocator* svc
 ///////////////////////////////////////////////////////////////
 StatusCode  MuonTGC_CablingSvc::queryInterface(const InterfaceID& riid, void** ppvIF)
 {
-  if(ITGCcablingSvc::interfaceID().versionMatch(riid)) {
-    *ppvIF = dynamic_cast<ITGCcablingSvc*>(this);
+  if(MuonTGC_CablingSvc::interfaceID().versionMatch(riid)) {
+    *ppvIF = dynamic_cast<MuonTGC_CablingSvc*>(this);
   } else {
     return Service::queryInterface(riid, ppvIF);
   }
@@ -178,10 +174,10 @@ bool MuonTGC_CablingSvc::getCoveragefromRodID(const int rodID,
 					      double & endPhi) const
 {
   int sectorInReadout = rodID - 1;  //rodID = 1..12
-  if(sectorInReadout>= MuonTGC_Cabling::TGCId::NumberOfReadoutSector) return false;
+  if(sectorInReadout>= MuonTGC_Cabling::TGCId::N_RODS) return false;
   
-  startPhi = 2.*M_PI*(sectorInReadout-0.5)/MuonTGC_Cabling::TGCId::NumberOfReadoutSector;
-  endPhi = startPhi + 2.*M_PI/MuonTGC_Cabling::TGCId::NumberOfReadoutSector;
+  startPhi = 2.*M_PI*(sectorInReadout-0.5)/MuonTGC_Cabling::TGCId::N_RODS;
+  endPhi = startPhi + 2.*M_PI/MuonTGC_Cabling::TGCId::N_RODS;
  
   return true; 
 }
@@ -194,15 +190,15 @@ bool MuonTGC_CablingSvc::getCoveragefromRodID(const int rodID,
 					      int & coverageOfForwardSector) const
 {
   int sectorInReadout = rodID - 1;  //rodID = 1..12
-  if(sectorInReadout>= MuonTGC_Cabling::TGCId::NumberOfReadoutSector) return false;
+  if(sectorInReadout>= MuonTGC_Cabling::TGCId::N_RODS) return false;
   
   coverageOfEndcapSector =  
-    MuonTGC_Cabling::TGCId::NumberOfEndcapSector /
-    MuonTGC_Cabling::TGCId::NumberOfReadoutSector;
+    MuonTGC_Cabling::TGCId::NUM_ENDCAP_SECTOR /
+    MuonTGC_Cabling::TGCId::N_RODS;
   startEndcapSector = sectorInReadout *  coverageOfEndcapSector;
   coverageOfForwardSector =  
-    MuonTGC_Cabling::TGCId::NumberOfForwardSector /
-    MuonTGC_Cabling::TGCId::NumberOfReadoutSector;
+    MuonTGC_Cabling::TGCId::NUM_FORWARD_SECTOR /
+    MuonTGC_Cabling::TGCId::N_RODS;
   startForwardSector = sectorInReadout *coverageOfForwardSector;  
   
   return true; 
@@ -215,10 +211,10 @@ bool MuonTGC_CablingSvc::getCoveragefromSRodID(const int srodID,
 					      double & endPhi) const
 {
   int sectorInReadout = srodID - 17;  //rodID = 17..19
-  if(sectorInReadout>= MuonTGC_Cabling::TGCId::NumberOfSReadoutSector) return false;
+  if(sectorInReadout>= MuonTGC_Cabling::TGCModuleId::NumberOfSReadoutSector) return false;
   
-  startPhi = 2.*M_PI*(sectorInReadout-0.5)/MuonTGC_Cabling::TGCId::NumberOfSReadoutSector;
-  endPhi = startPhi + 2.*M_PI/MuonTGC_Cabling::TGCId::NumberOfSReadoutSector;
+  startPhi = 2.*M_PI*(sectorInReadout-0.5)/MuonTGC_Cabling::TGCModuleId::NumberOfSReadoutSector;
+  endPhi = startPhi + 2.*M_PI/MuonTGC_Cabling::TGCModuleId::NumberOfSReadoutSector;
  
   return true; 
 }
@@ -231,15 +227,15 @@ bool MuonTGC_CablingSvc::getCoveragefromSRodID(const int srodID,
                                                int & coverageOfForwardSector) const
 {
   int sectorInReadout = srodID - 17;  //srodID = 17..19
-  if(sectorInReadout>= MuonTGC_Cabling::TGCId::NumberOfSReadoutSector) return false;
+  if(sectorInReadout>= MuonTGC_Cabling::TGCModuleId::NumberOfSReadoutSector) return false;
   
   coverageOfEndcapSector =  
-    MuonTGC_Cabling::TGCId::NumberOfEndcapSector /
-    MuonTGC_Cabling::TGCId::NumberOfSReadoutSector;
+    MuonTGC_Cabling::TGCId::NUM_ENDCAP_SECTOR /
+    MuonTGC_Cabling::TGCModuleId::NumberOfSReadoutSector;
   startEndcapSector = sectorInReadout *  coverageOfEndcapSector;
   coverageOfForwardSector =  
-    MuonTGC_Cabling::TGCId::NumberOfForwardSector /
-    MuonTGC_Cabling::TGCId::NumberOfSReadoutSector;
+    MuonTGC_Cabling::TGCId::NUM_FORWARD_SECTOR /
+    MuonTGC_Cabling::TGCModuleId::NumberOfSReadoutSector;
   startForwardSector = sectorInReadout *coverageOfForwardSector;  
   
   return true; 
@@ -513,13 +509,13 @@ bool MuonTGC_CablingSvc::getOnlineIDfromOfflineID(const Identifier & offlineId,
   if(regionType==ENDCAP) {
     if(stationType!=4) {
       // Endcap
-      sector = (iPhi+1) % MuonTGC_Cabling::TGCId::NumberOfEndcapSector;
+      sector = (iPhi+1) % MuonTGC_Cabling::TGCId::NUM_ENDCAP_SECTOR;
     } else {
       // EI
       sector  = sectorEI[ iPhi ];
       // iPhi is redefined for internal use
       if(sector == 0) {
-	iPhi = sector + MuonTGC_Cabling::TGCId::NumberOfInnerSector;
+	iPhi = sector + MuonTGC_Cabling::TGCId::NUM_INNER_SECTOR;
       } else {
 	iPhi = sector; 
       }
@@ -527,16 +523,16 @@ bool MuonTGC_CablingSvc::getOnlineIDfromOfflineID(const Identifier & offlineId,
   } else {
     if(stationType!=4) {      
       // Forward
-      sector = iPhi % MuonTGC_Cabling::TGCId::NumberOfForwardSector;
+      sector = iPhi % MuonTGC_Cabling::TGCId::NUM_FORWARD_SECTOR;
     } else {
       // FI 
-      sector = iPhi % MuonTGC_Cabling::TGCId::NumberOfInnerSector;
+      sector = iPhi % MuonTGC_Cabling::TGCId::NUM_INNER_SECTOR;
     }
   }
   int max_module = (regionType==FORWARD||stationType==4) ? 
-    MuonTGC_Cabling::TGCId::NumberOfForwardSector 
-    : MuonTGC_Cabling::TGCId::NumberOfEndcapSector;
-  max_module /=  MuonTGC_Cabling::TGCId::NumberOfOctant;
+    MuonTGC_Cabling::TGCId::NUM_FORWARD_SECTOR 
+    : MuonTGC_Cabling::TGCId::NUM_ENDCAP_SECTOR;
+  max_module /=  MuonTGC_Cabling::TGCId::NUM_OCTANT;
   const int iOctant = static_cast<int>(sector/max_module);
   const int iModule = sector % max_module;
   
@@ -627,19 +623,19 @@ bool MuonTGC_CablingSvc::getOnlineIDfromOfflineID(const Identifier & offlineId,
     }
   }
   // SideType
-  TGCIdBase::SideType sideType = TGCIdBase::NoSideType;
-  if(subSystemNumber==1)  sideType = TGCIdBase::Aside;
-  if(subSystemNumber==-1) sideType = TGCIdBase::Cside;
+  MuonTGC_Cabling::TGCId::SideType sideType = MuonTGC_Cabling::TGCId::NoSideType;
+  if(subSystemNumber==1)  sideType = MuonTGC_Cabling::TGCId::Aside;
+  if(subSystemNumber==-1) sideType = MuonTGC_Cabling::TGCId::Cside;
 
   // SignalType
-  TGCIdBase::SignalType signalType = TGCIdBase::NoSignalType;
-  if(wireOrStrip==0) signalType = TGCIdBase::Wire;
-  if(wireOrStrip==1) signalType = TGCIdBase::Strip;
+  MuonTGC_Cabling::TGCId::SignalType signalType = MuonTGC_Cabling::TGCId::NoSignalType;
+  if(wireOrStrip==0) signalType = MuonTGC_Cabling::TGCId::Wire;
+  if(wireOrStrip==1) signalType = MuonTGC_Cabling::TGCId::Strip;
 
   // RegionType
-  TGCIdBase::RegionType region = TGCIdBase::NoRegionType;
-  if(regionType==FORWARD) region = TGCIdBase::Forward;
-  if(regionType==ENDCAP)  region = TGCIdBase::Endcap;
+  MuonTGC_Cabling::TGCId::RegionType region = MuonTGC_Cabling::TGCId::NoRegionType;
+  if(regionType==FORWARD) region = MuonTGC_Cabling::TGCId::Forward;
+  if(regionType==ENDCAP)  region = MuonTGC_Cabling::TGCId::Endcap;
 
 
   // ASDIn
@@ -655,7 +651,7 @@ bool MuonTGC_CablingSvc::getOnlineIDfromOfflineID(const Identifier & offlineId,
   // offline Id -> online Id
   MuonTGC_Cabling::TGCChannelId* asdout =
     m_cabling->getChannel(&asdin,
-			  TGCIdBase::ASDOut,
+			  MuonTGC_Cabling::TGCChannelId::ChannelIdType::ASDOut,
 			  false);
   if(asdout==nullptr) return false;
   if(!asdout->isValid()) {
@@ -682,21 +678,21 @@ bool MuonTGC_CablingSvc::getOfflineIDfromOnlineID(Identifier & offlineId,
 						  const int channelNumber) const
 {
   // SideType
-  TGCIdBase::SideType sideType = TGCIdBase::NoSideType;
-  if(subSystemNumber==1)  sideType = TGCIdBase::Aside;
-  if(subSystemNumber==-1) sideType = TGCIdBase::Cside;
+  MuonTGC_Cabling::TGCId::SideType sideType = MuonTGC_Cabling::TGCId::NoSideType;
+  if(subSystemNumber==1)  sideType = MuonTGC_Cabling::TGCId::Aside;
+  if(subSystemNumber==-1) sideType = MuonTGC_Cabling::TGCId::Cside;
 
   // SignalType
-  TGCIdBase::SignalType signalType = TGCIdBase::NoSignalType;
-  if(wireOrStrip==0) signalType = TGCIdBase::Wire;
-  if(wireOrStrip==1) signalType = TGCIdBase::Strip;
+  MuonTGC_Cabling::TGCId::SignalType signalType = MuonTGC_Cabling::TGCId::NoSignalType;
+  if(wireOrStrip==0) signalType = MuonTGC_Cabling::TGCId::Wire;
+  if(wireOrStrip==1) signalType = MuonTGC_Cabling::TGCId::Strip;
 
   ATH_MSG_VERBOSE("getOfflineIDfromOnlineID for " 
 	<< " side=" << sideType << " octant=" << octantNumber 
 	<< " module=" << moduleNumber << " layer=" << layerNumber
 	<< " chamber=" << rNumber << " w/s=" << signalType
 	<< " channel=" << channelNumber);
-  
+
   // ASDOut
   MuonTGC_Cabling::TGCChannelASDOut asdout(sideType,
 					   signalType,
@@ -717,7 +713,7 @@ bool MuonTGC_CablingSvc::getOfflineIDfromOnlineID(Identifier & offlineId,
   // online Id -> offline Id
   MuonTGC_Cabling::TGCChannelId* asdin =
     m_cabling->getChannel(&asdout,
-			  TGCIdBase::ASDIn,
+			  MuonTGC_Cabling::TGCChannelId::ChannelIdType::ASDIn,
 			  false);
   if(!asdin || !asdin->isValid()) {
     ATH_MSG_WARNING(" getOfflineIDfromOnlineID :"
@@ -753,7 +749,7 @@ bool MuonTGC_CablingSvc::getOfflineIDfromOnlineID(Identifier & offlineId,
     return false;
   }
   int stationEta = asdin->getChamber();
-  if(asdin->getSideType()==TGCIdBase::Cside) stationEta *= -1;
+  if(asdin->getSideType()==MuonTGC_Cabling::TGCId::Cside) stationEta *= -1;
   int stationPhi = asdin->getSector();
   int gasGap = asdin->getGasGap();
   int isStrip = (asdin->isStrip()) ? 1 : 0;
@@ -834,9 +830,9 @@ bool MuonTGC_CablingSvc::getOnlineIDfromReadoutID(const int subDetectorID,
 						  bool orChannel) const
 {
   // SideType
-  TGCIdBase::SideType sideType = TGCIdBase::NoSideType;
-  if(subDetectorID==m_AsideId.value()) sideType = TGCIdBase::Aside;
-  if(subDetectorID==m_CsideId.value()) sideType = TGCIdBase::Cside;
+  MuonTGC_Cabling::TGCId::SideType sideType = MuonTGC_Cabling::TGCId::NoSideType;
+  if(subDetectorID==m_AsideId.value()) sideType = MuonTGC_Cabling::TGCId::Aside;
+  if(subDetectorID==m_CsideId.value()) sideType = MuonTGC_Cabling::TGCId::Cside;
   
   // readout channel -> chamber channel
   MuonTGC_Cabling::TGCChannelId* asdout =
@@ -915,14 +911,14 @@ bool MuonTGC_CablingSvc::getReadoutIDfromOnlineID(int & subDetectorID,
 						  bool adChannel) const
 {
   // SideType
-  TGCIdBase::SideType sideType = TGCIdBase::NoSideType;
-  if(subsystemNumber==1)  sideType = TGCIdBase::Aside;
-  if(subsystemNumber==-1) sideType = TGCIdBase::Cside;
+  MuonTGC_Cabling::TGCId::SideType sideType = MuonTGC_Cabling::TGCId::NoSideType;
+  if(subsystemNumber==1)  sideType = MuonTGC_Cabling::TGCId::Aside;
+  if(subsystemNumber==-1) sideType = MuonTGC_Cabling::TGCId::Cside;
 
   // SignalType
-  TGCIdBase::SignalType signalType = TGCIdBase::NoSignalType;
-  if(wireOrStrip==0) signalType = TGCIdBase::Wire;
-  if(wireOrStrip==1) signalType = TGCIdBase::Strip;
+  MuonTGC_Cabling::TGCId::SignalType signalType = MuonTGC_Cabling::TGCId::NoSignalType;
+  if(wireOrStrip==0) signalType = MuonTGC_Cabling::TGCId::Wire;
+  if(wireOrStrip==1) signalType = MuonTGC_Cabling::TGCId::Strip;
 
   // ASDOut
   MuonTGC_Cabling::TGCChannelASDOut asdout(sideType,
@@ -973,8 +969,8 @@ bool MuonTGC_CablingSvc::getReadoutIDfromOnlineID(int & subDetectorID,
   if(!status) return false;
 
   // SubDetectorID
-  if(sideType==TGCIdBase::Aside) subDetectorID = m_AsideId.value();
-  if(sideType==TGCIdBase::Cside) subDetectorID = m_CsideId.value();
+  if(sideType==MuonTGC_Cabling::TGCId::Aside) subDetectorID = m_AsideId.value();
+  if(sideType==MuonTGC_Cabling::TGCId::Cside) subDetectorID = m_CsideId.value();
 
   return status;
 }
@@ -1000,9 +996,9 @@ bool MuonTGC_CablingSvc::getReadoutIDfromElementID(const Identifier & elementID,
 
   // sector index and module index
   const int max_phi = (regionType==FORWARD||stationType==4) ?
-    MuonTGC_Cabling::TGCId::NumberOfForwardSector :
-    MuonTGC_Cabling::TGCId::NumberOfEndcapSector;
-  const int max_module =  max_phi / MuonTGC_Cabling::TGCId::NumberOfReadoutSector;
+    MuonTGC_Cabling::TGCId::NUM_FORWARD_SECTOR :
+    MuonTGC_Cabling::TGCId::NUM_ENDCAP_SECTOR;
+  const int max_module =  max_phi / MuonTGC_Cabling::TGCId::N_RODS;
   const int sector = ((iPhi-1)+ max_phi/24 + max_phi)%max_phi;
   int readoutSector = static_cast<int>(sector/max_module);  
   // Inner case
@@ -1081,7 +1077,7 @@ bool MuonTGC_CablingSvc::getSLBIDfromReadoutID(int & phi,
 {
   isAside = (subsectorID==m_AsideId);
 
-  TGCIdBase::SideType side = isAside ? TGCIdBase::Aside : TGCIdBase::Cside;
+  MuonTGC_Cabling::TGCId::SideType side = isAside ? MuonTGC_Cabling::TGCId::Aside : MuonTGC_Cabling::TGCId::Cside;
 
   const MuonTGC_Cabling::TGCModuleId * slb = m_cabling->getSLBFromReadout(side, rodID, sswID, sbLoc);
   if(!slb) {
@@ -1094,17 +1090,17 @@ bool MuonTGC_CablingSvc::getSLBIDfromReadoutID(int & phi,
     return false;
   }
 
-  isEndcap = (slb->getRegionType()==TGCIdBase::Endcap);
+  isEndcap = (slb->getRegionType()==MuonTGC_Cabling::TGCId::Endcap);
   moduleType = (int)slb->getModuleType();
-  bool isInner = (moduleType==TGCIdBase::WI || moduleType==TGCIdBase::SI);
+  bool isInner = (moduleType==MuonTGC_Cabling::TGCId::WI || moduleType==MuonTGC_Cabling::TGCId::SI);
   int offset, numOfSector;
   if(isInner) {
-    numOfSector = MuonTGC_Cabling::TGCId::NumberOfInnerSector;
+    numOfSector = MuonTGC_Cabling::TGCId::NUM_INNER_SECTOR;
   } else {
     if(isEndcap) {
-      numOfSector = MuonTGC_Cabling::TGCId::NumberOfEndcapSector;
+      numOfSector = MuonTGC_Cabling::TGCId::NUM_ENDCAP_SECTOR;
     }else{
-      numOfSector = MuonTGC_Cabling::TGCId::NumberOfForwardSector;
+      numOfSector = MuonTGC_Cabling::TGCId::NUM_FORWARD_SECTOR;
     }
   } 
   offset = numOfSector -  numOfSector/24;
@@ -1126,7 +1122,7 @@ bool MuonTGC_CablingSvc::getSLBAddressfromReadoutID(int & slbAddr,
   
   bool isAside = (subsectorID==m_AsideId);
   
-  TGCIdBase::SideType side = isAside ? TGCIdBase::Aside : TGCIdBase::Cside;
+  MuonTGC_Cabling::TGCId::SideType side = isAside ? MuonTGC_Cabling::TGCId::Aside : MuonTGC_Cabling::TGCId::Cside;
 
   const MuonTGC_Cabling::TGCModuleId * slb = m_cabling->getSLBFromReadout(side, rodID, sswID, sbLoc);
   if(!slb)   {
@@ -1161,7 +1157,7 @@ bool  MuonTGC_CablingSvc::getRxIDfromReadoutID(int &rxId,
   rxId = -1;
   
   bool isAside = (subsectorID==m_AsideId);
-  TGCIdBase::SideType side = isAside ? TGCIdBase::Aside : TGCIdBase::Cside;
+  MuonTGC_Cabling::TGCId::SideType side = isAside ? MuonTGC_Cabling::TGCId::Aside : MuonTGC_Cabling::TGCId::Cside;
   
   rxId  = m_cabling->getRxIdFromReadout(side, rodID, sswID, sbLoc);
   if(rxId<0) {
@@ -1189,7 +1185,7 @@ bool MuonTGC_CablingSvc::getSLBIDfromRxID(int &phi,
 					  const int rxId) const
 {
   isAside = (subsectorID==m_AsideId);
-  TGCIdBase::SideType side = isAside ? TGCIdBase::Aside : TGCIdBase::Cside;
+  MuonTGC_Cabling::TGCId::SideType side = isAside ? MuonTGC_Cabling::TGCId::Aside : MuonTGC_Cabling::TGCId::Cside;
 
   MuonTGC_Cabling::TGCModuleId * slb = m_cabling->getSLBFromRxId(side, rodID, sswID, rxId);
   if(!slb) {
@@ -1202,17 +1198,17 @@ bool MuonTGC_CablingSvc::getSLBIDfromRxID(int &phi,
     return false;
   }
   
-  isEndcap = (slb->getRegionType()==TGCIdBase::Endcap);
+  isEndcap = (slb->getRegionType()==MuonTGC_Cabling::TGCId::Endcap);
   moduleType = (int)slb->getModuleType();
-  bool isInner = (moduleType==TGCIdBase::WI || moduleType==TGCIdBase::SI);
+  bool isInner = (moduleType==MuonTGC_Cabling::TGCId::WI || moduleType==MuonTGC_Cabling::TGCId::SI);
   int offset, numOfSector;
   if(isInner) {
-    numOfSector = MuonTGC_Cabling::TGCId::NumberOfInnerSector;
+    numOfSector = MuonTGC_Cabling::TGCId::NUM_INNER_SECTOR;
   } else {
     if(isEndcap) {
-      numOfSector = MuonTGC_Cabling::TGCId::NumberOfEndcapSector;
+      numOfSector = MuonTGC_Cabling::TGCId::NUM_ENDCAP_SECTOR;
     } else {
-      numOfSector = MuonTGC_Cabling::TGCId::NumberOfForwardSector;
+      numOfSector = MuonTGC_Cabling::TGCId::NUM_FORWARD_SECTOR;
     }
   } 
   offset = numOfSector -  numOfSector/24;
@@ -1234,18 +1230,18 @@ bool MuonTGC_CablingSvc::getReadoutIDfromSLBID(const int phi,
 					       int & sswID,
 					       int & sbLoc) const
 {
-  TGCIdBase::ModuleType module = static_cast<TGCIdBase::ModuleType>(moduleType);
-  TGCIdBase::RegionType region = isEndcap ? TGCIdBase::Endcap : TGCIdBase::Forward;
-  bool isInner = (module==TGCIdBase::WI || module==TGCIdBase::SI); 
+  MuonTGC_Cabling::TGCId::ModuleType module = static_cast<MuonTGC_Cabling::TGCId::ModuleType>(moduleType);
+  MuonTGC_Cabling::TGCId::RegionType region = isEndcap ? MuonTGC_Cabling::TGCId::Endcap : MuonTGC_Cabling::TGCId::Forward;
+  bool isInner = (module==MuonTGC_Cabling::TGCId::WI || module==MuonTGC_Cabling::TGCId::SI); 
   int sector = -1;// sector=0-47(EC), 0-23(FWD), 0-23(INNER)
   if(isInner) {
-    sector = phi % MuonTGC_Cabling::TGCId::NumberOfInnerSector;
+    sector = phi % MuonTGC_Cabling::TGCId::NUM_INNER_SECTOR;
   } else if(isEndcap) {
-    sector = (phi+1) % MuonTGC_Cabling::TGCId::NumberOfEndcapSector;
+    sector = (phi+1) % MuonTGC_Cabling::TGCId::NUM_ENDCAP_SECTOR;
   } else {
-    sector = phi  % MuonTGC_Cabling::TGCId::NumberOfForwardSector;
+    sector = phi  % MuonTGC_Cabling::TGCId::NUM_FORWARD_SECTOR;
   }
-  TGCIdBase::SideType side = isAside ? TGCIdBase::Aside : TGCIdBase::Cside;
+  MuonTGC_Cabling::TGCId::SideType side = isAside ? MuonTGC_Cabling::TGCId::Aside : MuonTGC_Cabling::TGCId::Cside;
 
   MuonTGC_Cabling::TGCModuleSLB slb(side, module, region, sector, id);
   
@@ -1301,7 +1297,7 @@ bool MuonTGC_CablingSvc::getSLIDfromReadoutID(int & phi,
     return false;
   } 
   int sectorInReadout = (rodID -1); // rodID = 1..12 for both sides
-  if(sectorInReadout>= MuonTGC_Cabling::TGCId::NumberOfReadoutSector) return false;
+  if(sectorInReadout>= MuonTGC_Cabling::TGCId::N_RODS) return false;
   
   // sswID check removed
   if(sswID!= 9) {
@@ -1314,15 +1310,15 @@ bool MuonTGC_CablingSvc::getSLIDfromReadoutID(int & phi,
   int offset, numOfSector, sector;
   if(0<=sbLoc && sbLoc <= 3) {
     isEndcap=true;
-    numOfSector = MuonTGC_Cabling::TGCId::NumberOfEndcapSector; // 48
+    numOfSector = MuonTGC_Cabling::TGCId::NUM_ENDCAP_SECTOR; // 48
     offset = numOfSector -  numOfSector/24; // 48 - 2 = 46
-    sector = numOfSector * sectorInReadout /  MuonTGC_Cabling::TGCId::NumberOfReadoutSector;
+    sector = numOfSector * sectorInReadout /  MuonTGC_Cabling::TGCId::N_RODS;
     phi = (sector + sbLoc + offset)%numOfSector+1;
   } else if(sbLoc==4 || sbLoc==5) {
     isEndcap=false;
-    numOfSector = MuonTGC_Cabling::TGCId::NumberOfForwardSector;
+    numOfSector = MuonTGC_Cabling::TGCId::NUM_FORWARD_SECTOR;
     offset = numOfSector -  numOfSector/24;
-    sector = numOfSector * sectorInReadout /  MuonTGC_Cabling::TGCId::NumberOfReadoutSector;
+    sector = numOfSector * sectorInReadout /  MuonTGC_Cabling::TGCId::N_RODS;
     phi = (sector + (sbLoc-4) + offset)% numOfSector+1;
   } else {
     ATH_MSG_WARNING(" getSLIDfromReadoutID : "
@@ -1351,7 +1347,7 @@ bool MuonTGC_CablingSvc::getSLIDfromSReadoutID(int & phi,
   } 
 
   int sectorInReadout = (srodID - 17); // 0-2, srodID : 0x11-0x13 (17-19)
-  if((sectorInReadout >= MuonTGC_Cabling::TGCId::NumberOfSReadoutSector) ||
+  if((sectorInReadout >= MuonTGC_Cabling::TGCModuleId::NumberOfSReadoutSector) ||
      (sectorInReadout < 0)){
     ATH_MSG_WARNING(" Invalid SROD ID : "  << srodID );
     return false;
@@ -1360,14 +1356,14 @@ bool MuonTGC_CablingSvc::getSLIDfromSReadoutID(int & phi,
   int offset, tmpsector, numOfSector;
   // sswID check removed
   if(forward) {
-    numOfSector = MuonTGC_Cabling::TGCId::NumberOfForwardSector;
+    numOfSector = MuonTGC_Cabling::TGCId::NUM_FORWARD_SECTOR;
     offset = numOfSector -  numOfSector/24; // 24 - 1
-    tmpsector = numOfSector * sectorInReadout / MuonTGC_Cabling::TGCId::NumberOfSReadoutSector; // 8*[0-2]
+    tmpsector = numOfSector * sectorInReadout / MuonTGC_Cabling::TGCModuleId::NumberOfSReadoutSector; // 8*[0-2]
     phi = (sector + tmpsector + offset)%numOfSector + 1;
   }else{
-    numOfSector = MuonTGC_Cabling::TGCId::NumberOfEndcapSector;
+    numOfSector = MuonTGC_Cabling::TGCId::NUM_ENDCAP_SECTOR;
     offset = numOfSector -  numOfSector/24; // 48 - 2
-    tmpsector = numOfSector * sectorInReadout /  MuonTGC_Cabling::TGCId::NumberOfSReadoutSector; // 16*[0-2]
+    tmpsector = numOfSector * sectorInReadout /  MuonTGC_Cabling::TGCModuleId::NumberOfSReadoutSector; // 16*[0-2]
     phi = (sector + tmpsector + offset)%numOfSector + 1;
   }
   return true;  
@@ -1387,28 +1383,28 @@ bool MuonTGC_CablingSvc::getReadoutIDfromSLID(const int phi,
   else subsectorID=m_CsideId;
   
   if(isEndcap) {
-    if(phi<1 || phi>MuonTGC_Cabling::TGCId::NumberOfEndcapSector) return false;
+    if(phi<1 || phi>MuonTGC_Cabling::TGCId::NUM_ENDCAP_SECTOR) return false;
   } else {
-    if(phi<1 || phi>MuonTGC_Cabling::TGCId::NumberOfForwardSector) return false;
+    if(phi<1 || phi>MuonTGC_Cabling::TGCId::NUM_FORWARD_SECTOR) return false;
   }
 
   int sector;
   int sectorInReadout;
   if(isEndcap) {
-    sector = (phi+1)% MuonTGC_Cabling::TGCId::NumberOfEndcapSector;
+    sector = (phi+1)% MuonTGC_Cabling::TGCId::NUM_ENDCAP_SECTOR;
     sectorInReadout = sector %  
-      (MuonTGC_Cabling::TGCId::NumberOfEndcapSector / MuonTGC_Cabling::TGCId::NumberOfReadoutSector);
+      (MuonTGC_Cabling::TGCId::NUM_ENDCAP_SECTOR / MuonTGC_Cabling::TGCId::N_RODS);
     sbLoc = sectorInReadout;
     rodID = (sector-sectorInReadout)/
-      (MuonTGC_Cabling::TGCId::NumberOfEndcapSector / MuonTGC_Cabling::TGCId::NumberOfReadoutSector)
+      (MuonTGC_Cabling::TGCId::NUM_ENDCAP_SECTOR / MuonTGC_Cabling::TGCId::N_RODS)
       + 1;
   } else {
-    sector = phi % MuonTGC_Cabling::TGCId::NumberOfForwardSector;
+    sector = phi % MuonTGC_Cabling::TGCId::NUM_FORWARD_SECTOR;
     sectorInReadout = sector % 
-      (MuonTGC_Cabling::TGCId::NumberOfForwardSector / MuonTGC_Cabling::TGCId::NumberOfReadoutSector);
+      (MuonTGC_Cabling::TGCId::NUM_FORWARD_SECTOR / MuonTGC_Cabling::TGCId::N_RODS);
     sbLoc = sectorInReadout +4;
     rodID = (sector-sectorInReadout)/
-      (MuonTGC_Cabling::TGCId::NumberOfForwardSector / MuonTGC_Cabling::TGCId::NumberOfReadoutSector)
+      (MuonTGC_Cabling::TGCId::NUM_FORWARD_SECTOR / MuonTGC_Cabling::TGCId::N_RODS)
       + 1;
   }
   // Fixed SSWID for SL 
@@ -1431,28 +1427,28 @@ bool MuonTGC_CablingSvc::getSReadoutIDfromSLID(const int phi,
   else subsectorID=m_CsideId;
   
   if(isEndcap) {
-    if(phi<1 || phi>MuonTGC_Cabling::TGCId::NumberOfEndcapSector) return false;
+    if(phi<1 || phi>MuonTGC_Cabling::TGCId::NUM_ENDCAP_SECTOR) return false;
   } else {
-    if(phi<1 || phi>MuonTGC_Cabling::TGCId::NumberOfForwardSector) return false;
+    if(phi<1 || phi>MuonTGC_Cabling::TGCId::NUM_FORWARD_SECTOR) return false;
   }
 
   int sector;
   int sectorInReadout;
   if(isEndcap) {
-    sector = (phi+1)% MuonTGC_Cabling::TGCId::NumberOfEndcapSector;
+    sector = (phi+1)% MuonTGC_Cabling::TGCId::NUM_ENDCAP_SECTOR;
     sectorInReadout = sector %  
-      (MuonTGC_Cabling::TGCId::NumberOfEndcapSector / MuonTGC_Cabling::TGCId::NumberOfSReadoutSector); // [2-48, 1] % (48/3)
+      (MuonTGC_Cabling::TGCId::NUM_ENDCAP_SECTOR / MuonTGC_Cabling::TGCModuleId::NumberOfSReadoutSector); // [2-48, 1] % (48/3)
     sbLoc = sectorInReadout;
     srodID = (sector-sectorInReadout)/
-      (MuonTGC_Cabling::TGCId::NumberOfEndcapSector / MuonTGC_Cabling::TGCId::NumberOfSReadoutSector)
+      (MuonTGC_Cabling::TGCId::NUM_ENDCAP_SECTOR / MuonTGC_Cabling::TGCModuleId::NumberOfSReadoutSector)
       + 0x11 ;
   } else {
-    sector = phi % MuonTGC_Cabling::TGCId::NumberOfForwardSector;
+    sector = phi % MuonTGC_Cabling::TGCId::NUM_FORWARD_SECTOR;
     sectorInReadout = sector % 
-      (MuonTGC_Cabling::TGCId::NumberOfForwardSector / MuonTGC_Cabling::TGCId::NumberOfSReadoutSector); // [2-23, 1] % (24/3)
+      (MuonTGC_Cabling::TGCId::NUM_FORWARD_SECTOR / MuonTGC_Cabling::TGCModuleId::NumberOfSReadoutSector); // [2-23, 1] % (24/3)
     sbLoc = sectorInReadout;
     srodID = (sector-sectorInReadout)/
-      (MuonTGC_Cabling::TGCId::NumberOfForwardSector / MuonTGC_Cabling::TGCId::NumberOfSReadoutSector)
+      (MuonTGC_Cabling::TGCId::NUM_FORWARD_SECTOR / MuonTGC_Cabling::TGCModuleId::NumberOfSReadoutSector)
       + 0x11;
   }
   // Fixed SSWID for SL 
@@ -1486,7 +1482,7 @@ bool MuonTGC_CablingSvc::getReadoutIDfromHPTID(const int phi,
 // channel connection
 MuonTGC_Cabling::TGCChannelId* 
 MuonTGC_CablingSvc::getChannel(const MuonTGC_Cabling::TGCChannelId* channelId,
-			       TGCIdBase::ChannelIdType type,
+			       MuonTGC_Cabling::TGCChannelId::ChannelIdType type,
 			       bool orChannel) const 
 {
   return m_cabling->getChannel(channelId, type, orChannel);
@@ -1749,20 +1745,20 @@ bool MuonTGC_CablingSvc::getOfflineIDfromHighPtID(Identifier & offlineID,
   int channelID = -1;
   
   // SideType
-  TGCIdBase::SideType sideType = TGCIdBase::NoSideType;
-  if(subDetectorID==m_AsideId.value()) sideType = TGCIdBase::Aside;
-  if(subDetectorID==m_CsideId.value()) sideType = TGCIdBase::Cside;
+  MuonTGC_Cabling::TGCId::SideType sideType = MuonTGC_Cabling::TGCId::NoSideType;
+  if(subDetectorID==m_AsideId.value()) sideType = MuonTGC_Cabling::TGCId::Aside;
+  if(subDetectorID==m_CsideId.value()) sideType = MuonTGC_Cabling::TGCId::Cside;
 
   // SignalType, RegionType
-  TGCIdBase::SignalType signalType = (isStrip) ? TGCIdBase::Strip : TGCIdBase::Wire;
-  TGCIdBase::RegionType regionType = (isForward) ? TGCIdBase::Forward : TGCIdBase::Endcap;
+  MuonTGC_Cabling::TGCId::SignalType signalType = (isStrip) ? MuonTGC_Cabling::TGCId::Strip : MuonTGC_Cabling::TGCId::Wire;
+  MuonTGC_Cabling::TGCId::RegionType regionType = (isForward) ? MuonTGC_Cabling::TGCId::Forward : MuonTGC_Cabling::TGCId::Endcap;
 
   // ModuleType
-  TGCIdBase::ModuleType moduleType = TGCIdBase::NoModuleType;
-  if(signalType==TGCIdBase::Wire) { 
-    moduleType=TGCIdBase::WD;
+  MuonTGC_Cabling::TGCId::ModuleType moduleType = MuonTGC_Cabling::TGCId::NoModuleType;
+  if(signalType==MuonTGC_Cabling::TGCId::Wire) { 
+    moduleType=MuonTGC_Cabling::TGCId::WD;
   } else {
-    moduleType=TGCIdBase::SD;
+    moduleType=MuonTGC_Cabling::TGCId::SD;
   }
 
   // Get ReadoutID for pivot plane 
@@ -1819,12 +1815,12 @@ bool MuonTGC_CablingSvc::getHighPtIDfromOfflineID(const Identifier & offlineID,
   if(!status) return false;    
   
   // SideType
-  TGCIdBase::SideType sideType = TGCIdBase::NoSideType;
-  if(subDetectorID==m_AsideId.value()) sideType = TGCIdBase::Aside;
-  if(subDetectorID==m_CsideId.value()) sideType = TGCIdBase::Cside;
+  MuonTGC_Cabling::TGCId::SideType sideType = MuonTGC_Cabling::TGCId::NoSideType;
+  if(subDetectorID==m_AsideId.value()) sideType = MuonTGC_Cabling::TGCId::Aside;
+  if(subDetectorID==m_CsideId.value()) sideType = MuonTGC_Cabling::TGCId::Cside;
   
-  TGCIdBase::SignalType signalType;
-  TGCIdBase::RegionType regionType;
+  MuonTGC_Cabling::TGCId::SignalType signalType;
+  MuonTGC_Cabling::TGCId::RegionType regionType;
 
   status = m_cabling->getHighPtIDFromReadout(sideType,
 					     rodID,
@@ -1840,8 +1836,8 @@ bool MuonTGC_CablingSvc::getHighPtIDfromOfflineID(const Identifier & offlineID,
 					     pos);
   if(!status) return false;
   
-  isStrip = (signalType==TGCIdBase::Strip); 
-  isForward = (regionType==TGCIdBase::Forward); 
+  isStrip = (signalType==MuonTGC_Cabling::TGCId::Strip); 
+  isForward = (regionType==MuonTGC_Cabling::TGCId::Forward); 
 
   return true;
 }
@@ -1861,9 +1857,9 @@ bool MuonTGC_CablingSvc::getOfflineIDfromLowPtCoincidenceID(Identifier & offline
   int channelID = -1;
   
   // SideType
-  TGCIdBase::SideType sideType = TGCIdBase::NoSideType;
-  if(subDetectorID==m_AsideId.value()) sideType = TGCIdBase::Aside;
-  if(subDetectorID==m_CsideId.value()) sideType = TGCIdBase::Cside;
+  MuonTGC_Cabling::TGCId::SideType sideType = MuonTGC_Cabling::TGCId::NoSideType;
+  if(subDetectorID==m_AsideId.value()) sideType = MuonTGC_Cabling::TGCId::Aside;
+  if(subDetectorID==m_CsideId.value()) sideType = MuonTGC_Cabling::TGCId::Cside;
   
   bool status = m_cabling->getReadoutFromLowPtCoincidence(sideType,
 							  rodID,
@@ -1905,9 +1901,9 @@ bool MuonTGC_CablingSvc::getLowPtCoincidenceIDfromOfflineID(const Identifier & o
   if(!status) return false;    
   
   // SideType
-  TGCIdBase::SideType sideType = TGCIdBase::NoSideType;
-  if(subDetectorID==m_AsideId.value()) sideType = TGCIdBase::Aside;
-  if(subDetectorID==m_CsideId.value()) sideType = TGCIdBase::Cside;
+  MuonTGC_Cabling::TGCId::SideType sideType = MuonTGC_Cabling::TGCId::NoSideType;
+  if(subDetectorID==m_AsideId.value()) sideType = MuonTGC_Cabling::TGCId::Aside;
+  if(subDetectorID==m_CsideId.value()) sideType = MuonTGC_Cabling::TGCId::Cside;
   
   return m_cabling->getLowPtCoincidenceFromReadout(sideType,
 						   rodID,

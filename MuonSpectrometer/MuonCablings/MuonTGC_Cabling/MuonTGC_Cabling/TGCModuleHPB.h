@@ -14,9 +14,9 @@ class TGCModuleHPB : public TGCModuleId
 {
 public:
   // Constructor & Destructor
-  TGCModuleHPB(TGCIdBase::SideType side,
-	       TGCIdBase::SignalType signal,
-	       TGCIdBase::RegionType region,
+  TGCModuleHPB(TGCId::SideType side,
+	       TGCId::SignalType signal,
+	       TGCId::RegionType region,
 	       int sector,
 	       int id);
 

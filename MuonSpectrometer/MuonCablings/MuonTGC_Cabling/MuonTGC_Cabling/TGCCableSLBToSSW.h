@@ -20,8 +20,8 @@ class TGCCableSLBToSSW : public TGCCable
 {
 public:
   enum {
-    SL            = TGCIdBase::MaxModuleType, 
-    MaxModuleType = TGCIdBase::MaxModuleType + 1
+    SL            = TGCId::MaxModuleType, 
+    MaxModuleType = TGCId::MaxModuleType + 1
   };
 
   // Constructor & Destructor
@@ -35,7 +35,7 @@ private:
   TGCCableSLBToSSW(void) {}
   virtual TGCModuleMap* getModuleIn(const TGCModuleId* ssw) const;
   virtual TGCModuleMap* getModuleOut(const TGCModuleId* slb) const;
-  TGCDatabase* m_database[TGCIdBase::MaxRegionType][MaxModuleType]{};
+  TGCDatabase* m_database[TGCId::MaxRegionType][MaxModuleType]{};
 };
   
 } // end of namespace

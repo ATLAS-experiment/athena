@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTGC_CNVTOOLS_TGC_HID2RESRCID
@@ -10,7 +10,7 @@
 
 class TgcRdo;
 class Identifier;
-class ITGCcablingSvc;
+class MuonTGC_CablingSvc;
 
 namespace Muon 
 {
@@ -41,7 +41,7 @@ namespace Muon
       static uint32_t getRodID(uint16_t subDetectorId, uint16_t rodId) ;
       /** Make a ROD Source ID for TgcDigitCollection. */ 
       static uint32_t getRodID(const Identifier & offlineId,
-                        const ITGCcablingSvc* cabling) ;
+                        const MuonTGC_CablingSvc* cabling) ;
       /** Make a ROB Source ID from a ROD source ID. */ 
       static uint32_t getRobID  (uint32_t rod_id) ; 
       /** Make a ROS Source ID from a ROB source ID. */ 

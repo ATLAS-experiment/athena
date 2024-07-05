@@ -8,9 +8,9 @@ namespace MuonTGC_Cabling
 {
  
 // Constructor
-TGCModuleHPB::TGCModuleHPB(TGCIdBase::SideType side,
-			   TGCIdBase::SignalType signal,
-			   TGCIdBase::RegionType region,
+TGCModuleHPB::TGCModuleHPB(TGCId::SideType side,
+			   TGCId::SignalType signal,
+			   TGCId::RegionType region,
 			   int sector,
 			   int id)
   : TGCModuleId(TGCModuleId::HPB)
@@ -24,12 +24,12 @@ TGCModuleHPB::TGCModuleHPB(TGCIdBase::SideType side,
   
 bool TGCModuleHPB::isValid(void) const
 {
-  if((getSideType()  >TGCIdBase::NoSideType)   &&
-     (getSideType()  <TGCIdBase::MaxSideType)  &&
-     (getSignalType()>TGCIdBase::NoSignalType) &&
-     (getSignalType()<TGCIdBase::MaxSignalType)&&
-     (getRegionType()>TGCIdBase::NoRegionType) &&
-     (getRegionType()<TGCIdBase::MaxRegionType)&&
+  if((getSideType()  >TGCId::NoSideType)   &&
+     (getSideType()  <TGCId::MaxSideType)  &&
+     (getSignalType()>TGCId::NoSignalType) &&
+     (getSignalType()<TGCId::MaxSignalType)&&
+     (getRegionType()>TGCId::NoRegionType) &&
+     (getRegionType()<TGCId::MaxRegionType)&&
      (getOctant()    >=0)                      &&
      (getOctant()    <8)                       &&
      (getId()        >=0)                      )

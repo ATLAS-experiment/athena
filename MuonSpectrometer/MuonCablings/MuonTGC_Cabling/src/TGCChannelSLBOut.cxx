@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTGC_Cabling/TGCChannelSLBOut.h"
@@ -10,14 +10,14 @@ namespace MuonTGC_Cabling
 {
  
 // Constructor
-TGCChannelSLBOut::TGCChannelSLBOut(TGCIdBase::SideType vside,
-				   TGCIdBase::ModuleType vmodule,
-				   TGCIdBase::RegionType vregion,
+TGCChannelSLBOut::TGCChannelSLBOut(TGCId::SideType vside,
+				   TGCId::ModuleType vmodule,
+				   TGCId::RegionType vregion,
 				   int vsector,
 				   int vid,
 				   int vblock,
 				   int vchannel)
-  : TGCChannelId(TGCIdBase::SLBOut)
+  : TGCChannelId(TGCChannelId::ChannelIdType::SLBOut)
 {
   setSideType(vside);
   setModuleType(vmodule);
@@ -40,12 +40,12 @@ TGCModuleId* TGCChannelSLBOut::getModule(void) const
 
 bool TGCChannelSLBOut::isValid(void) const
 {
-  if((getSideType()  >TGCIdBase::NoSideType)   &&
-     (getSideType()  <TGCIdBase::MaxSideType)  &&
-     (getModuleType()>TGCIdBase::NoModuleType) &&
-     (getModuleType()<TGCIdBase::MaxModuleType)&&
-     (getRegionType()>TGCIdBase::NoRegionType) &&
-     (getRegionType()<TGCIdBase::MaxRegionType)&&
+  if((getSideType()  >TGCId::NoSideType)   &&
+     (getSideType()  <TGCId::MaxSideType)  &&
+     (getModuleType()>TGCId::NoModuleType) &&
+     (getModuleType()<TGCId::MaxModuleType)&&
+     (getRegionType()>TGCId::NoRegionType) &&
+     (getRegionType()<TGCId::MaxRegionType)&&
      (getOctant()    >=0)                  &&
      (getOctant()    <8)                   &&
      (getId()        >=0)                  &&
@@ -69,15 +69,15 @@ const int TGCChannelSLBOut::s_channelInBlockForSD = 32;
 const int TGCChannelSLBOut::s_channelInBlockForWT = 32;
 const int TGCChannelSLBOut::s_channelInBlockForST = 16;
 
-int TGCChannelSLBOut::getNumberOfBlock(TGCIdBase::ModuleType moduleType) {
+int TGCChannelSLBOut::getNumberOfBlock(TGCId::ModuleType moduleType) {
   switch(moduleType){
-  case TGCIdBase::WD:
+  case TGCId::WD:
     return s_numberOfBlockInWD;
-  case TGCIdBase::SD:
+  case TGCId::SD:
     return s_numberOfBlockInSD;
-  case TGCIdBase::WT:
+  case TGCId::WT:
     return s_numberOfBlockInWT;
-  case TGCIdBase::ST:
+  case TGCId::ST:
     return s_numberOfBlockInST;
   default:
     break;
@@ -85,15 +85,15 @@ int TGCChannelSLBOut::getNumberOfBlock(TGCIdBase::ModuleType moduleType) {
   return -1;
 }
 
-int TGCChannelSLBOut::getNumberOfLayer(TGCIdBase::ModuleType moduleType) {
+int TGCChannelSLBOut::getNumberOfLayer(TGCId::ModuleType moduleType) {
   switch(moduleType){
-  case TGCIdBase::WD:
+  case TGCId::WD:
     return s_numberOfLayerInWD;
-  case TGCIdBase::SD:
+  case TGCId::SD:
     return s_numberOfLayerInSD;
-  case TGCIdBase::WT:
+  case TGCId::WT:
     return s_numberOfLayerInWT;
-  case TGCIdBase::ST:
+  case TGCId::ST:
     return s_numberOfLayerInST;
   default:
     break;
@@ -101,15 +101,15 @@ int TGCChannelSLBOut::getNumberOfLayer(TGCIdBase::ModuleType moduleType) {
   return -1;
 }
 
-int TGCChannelSLBOut::getChannelInBlock(TGCIdBase::ModuleType moduleType) {
+int TGCChannelSLBOut::getChannelInBlock(TGCId::ModuleType moduleType) {
   switch(moduleType){
-  case TGCIdBase::WD:
+  case TGCId::WD:
     return s_channelInBlockForWD;
-  case TGCIdBase::SD:
+  case TGCId::SD:
     return s_channelInBlockForSD;
-  case TGCIdBase::WT:
+  case TGCId::WT:
     return s_channelInBlockForWT;
-  case TGCIdBase::ST:
+  case TGCId::ST:
     return s_channelInBlockForST;
   default:
     break;

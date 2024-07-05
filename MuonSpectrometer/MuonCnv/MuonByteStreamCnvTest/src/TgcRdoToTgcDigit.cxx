@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TgcRdoToTgcDigit.h"
@@ -11,9 +11,7 @@ StatusCode TgcRdoToTgcDigit::initialize() {
     ATH_CHECK(m_tgcRdoDecoderTool.retrieve());
     ATH_CHECK(m_tgcRdoKey.initialize());
     ATH_CHECK(m_tgcDigitKey.initialize());
-    // get TGC cablingSvc
-    ATH_CHECK(m_tgcCablingServerSvc.retrieve());
-    ATH_CHECK(m_tgcCablingServerSvc->giveCabling(m_tgcCabling));
+    ATH_CHECK(m_tgcCabling.retrieve());
     return StatusCode::SUCCESS;
 }
 

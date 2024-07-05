@@ -8,8 +8,8 @@ namespace MuonTGC_Cabling
 {
  
 // Constructor
-TGCModuleSL::TGCModuleSL(TGCIdBase::SideType vside,
-			 TGCIdBase::RegionType vregion,
+TGCModuleSL::TGCModuleSL(TGCId::SideType vside,
+			 TGCId::RegionType vregion,
 			 int vsector)
   : TGCModuleId(TGCModuleId::SL)
 {
@@ -20,10 +20,10 @@ TGCModuleSL::TGCModuleSL(TGCIdBase::SideType vside,
   
 bool TGCModuleSL::isValid(void) const
 {
-  if((getSideType()  >TGCIdBase::NoSideType)   &&
-     (getSideType()  <TGCIdBase::MaxSideType)  &&
-     (getRegionType()>TGCIdBase::NoRegionType) &&
-     (getRegionType()<TGCIdBase::MaxRegionType)&&
+  if((getSideType()  >TGCId::NoSideType)   &&
+     (getSideType()  <TGCId::MaxSideType)  &&
+     (getRegionType()>TGCId::NoRegionType) &&
+     (getRegionType()<TGCId::MaxRegionType)&&
      (getOctant()    >=0)                      &&
      (getOctant()    <8)                       )
     return true;

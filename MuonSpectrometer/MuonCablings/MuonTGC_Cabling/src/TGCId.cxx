@@ -1,53 +1,68 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTGC_Cabling/TGCId.h"
 
-namespace MuonTGC_Cabling
-{
+namespace MuonTGC_Cabling {
 
-int TGCId::getGasGap(void) const {
-  if(getLayer()==0||getLayer()==3||getLayer()==5||getLayer()==7)
-    return 1;
-  if(getLayer()==1||getLayer()==4||getLayer()==6||getLayer()==8)
-    return 2;
-  if(getLayer()==2)
-    return 3;
-  return -1;
+TGCId::TGCId(TGCId::IdType vtype) {
+  m_idType = vtype;
 }
 
-int TGCId::getSectorInOctant(void) const {
+int TGCId::getSectorInOctant() const {
   if(isInner()){
-    return getSector()%(NumberOfInnerSector/NumberOfOctant);
+    return getSector() % (NUM_INNER_SECTOR/NUM_OCTANT);
   }
   if(isEndcap()){
-    return getSector()%(NumberOfEndcapSector/NumberOfOctant);
+    return getSector() % (NUM_ENDCAP_SECTOR/NUM_OCTANT);
   }
   if(isForward()){
-    return getSector()%(NumberOfForwardSector/NumberOfOctant);
+    return getSector() % (NUM_FORWARD_SECTOR/NUM_OCTANT);
   }
   return -1;
 }
 
-int TGCId::getSectorInReadout(void) const {
+int TGCId::getSectorInReadout() const {
   if(isInner()){
-    return getSector()%(NumberOfInnerSector/NumberOfReadoutSector);
+    return getSector() % (NUM_INNER_SECTOR/N_RODS);
   }
   if(isEndcap()){
-    return getSector()%(NumberOfEndcapSector/NumberOfReadoutSector);
+    return getSector() % (NUM_ENDCAP_SECTOR/N_RODS);
   }
   if(isForward()){
-    return getSector()%(NumberOfForwardSector/NumberOfReadoutSector);
+    return getSector() % (NUM_FORWARD_SECTOR/N_RODS);
   }
   return -1;
 }
-  
 
-void TGCId::setSideType(SideType v_side) {
-  m_side = v_side; 
+bool TGCId::isBackward() const { 
+  if (isEndcap()){
+    if ( !isInner() ) { 
+      if(isAside()) return (m_sector%2==1);
+      else          return (m_sector%2==0); 
+    } else {
+      // EI  
+      // Special case of EI11
+      if (m_sector == 15) {
+        if(isAside()) return false; 
+        else          return true;
+      } else if (m_sector == 16) {
+        if(isAside()) return true; 
+        else          return false;
+      } else {
+        //  A-m_side phi0 F: phi1 F: phi2 B
+        //  C-m_side phi0 B: phi1 B: phi2 F
+        if(isAside())  return (m_sector%3==2);
+        else           return (m_sector%3!=2);
+      }
+    }
+  } else {
+    if(isAside()) return true;  // all Backward
+    else          return false; // all Forward 
+  }
 }
-  
+
 void TGCId::setModuleType(ModuleType v_module)  {
   m_module=v_module;
   if(m_module==WI){
@@ -95,11 +110,7 @@ void TGCId::setMultipletType(MultipletType v_multiplet)  {
   if(m_multiplet==Triplet&&m_signal==Wire)  m_module=WT;
   if(m_multiplet==Triplet&&m_signal==Strip) m_module=ST;
 }
-   
-void TGCId::setRegionType(RegionType v_region)  { 
-  m_region = v_region; 
-}
-   
+
 void TGCId::setStation(int v_station)  { 
   m_station = v_station;
   if(m_station==0) setMultipletType(Triplet);	  
@@ -108,23 +119,16 @@ void TGCId::setStation(int v_station)  {
   if(m_station==3) setMultipletType(Inner);
 }
    
-void TGCId::setReadoutSector(int v_sector)  { 
-  m_sectorRO = v_sector;
-}
-
 void TGCId::setSector(int v_sector)  { 
   m_sector = v_sector;
   if(m_region==Endcap) {
     if(m_multiplet==Inner) {
-      m_octant=m_sector /(NumberOfInnerSector/NumberOfOctant);
-      m_sectorRO=m_sector /(NumberOfInnerSector/NumberOfReadoutSector);
+      m_octant = m_sector / (NUM_INNER_SECTOR/NUM_OCTANT);
     } else {
-      m_octant=m_sector /(NumberOfEndcapSector/NumberOfOctant);
-      m_sectorRO=m_sector /(NumberOfEndcapSector/NumberOfReadoutSector);
+      m_octant=m_sector / (NUM_ENDCAP_SECTOR/NUM_OCTANT);
     }
   } else if(m_region==Forward) {
-    m_octant=m_sector /(NumberOfForwardSector/NumberOfOctant);
-    m_sectorRO=m_sector/(NumberOfForwardSector/NumberOfReadoutSector);
+    m_octant=m_sector / (NUM_FORWARD_SECTOR/NUM_OCTANT);
   }
 }
    
@@ -167,64 +171,18 @@ void TGCId::setSectorModule(int sectorModule) {
 
   if(regionId[sectorModule]==0){ 
     setRegionType(Endcap); 
-    setSector(sectorId[sectorModule] + m_octant*(NumberOfEndcapSector/NumberOfOctant));
+    setSector(sectorId[sectorModule] + m_octant*(NUM_ENDCAP_SECTOR/NUM_OCTANT));
 
   } else if(regionId[sectorModule]==1){ 
-    setRegionType(Forward); 
-    setSector(sectorId[sectorModule] + m_octant*(NumberOfForwardSector/NumberOfOctant));
+    setRegionType(Forward);
+    setSector(sectorId[sectorModule] + m_octant*(NUM_FORWARD_SECTOR/NUM_OCTANT));
   } else  {                             
     setMultipletType(Inner);
     if(regionId[sectorModule]==2){ setRegionType(Endcap); }
     if(regionId[sectorModule]==3){ setRegionType(Forward); }
-    setSector(sectorId[sectorModule] + m_octant*(NumberOfInnerSector/NumberOfOctant));
-  }
- 
- }
-   
-void TGCId::setLayer(int v_layer)  { 
-  m_layer=v_layer;
-  if(m_layer>=0&&m_layer<=2){
-    setMultipletType(Triplet);
-    setStation(0);
-  }
-  if(m_layer>=3&&m_layer<=4){
-    setMultipletType(Doublet);
-    setStation(1);
-  }
-  if(m_layer>=5&&m_layer<=6){
-    setMultipletType(Doublet);
-    setStation(2);
-  }
-  if(m_layer>=7&&m_layer<=8){
-    setMultipletType(Inner);
-    setStation(3);
-    if(m_sector!=-1)
-      m_octant=m_sector/3;
+    setSector(sectorId[sectorModule] + m_octant*(NUM_INNER_SECTOR/NUM_OCTANT));
   }
 }
 
-void TGCId::setChamber(int v_chamber)  { 
-  m_chamber = v_chamber;
-}
-   
-void TGCId::setId(int v_id)  { 
-  m_id=v_id;
-}
-   
-void TGCId::setBlock(int v_block)  { 
-  m_block=v_block;
-}
-   
-void TGCId::setChannel(int v_channel)  {
-  m_channel=v_channel; 
-}  
-   
-void TGCId::setEvent(int v_event) {
-  m_event=v_event;
-}
-   
-void TGCId::setBunch(int v_bunch) {
-  m_bunch=v_bunch;
-}
 
-} // end of namespace
+}  // end of namespace

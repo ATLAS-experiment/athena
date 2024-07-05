@@ -14,9 +14,9 @@ class TGCChannelSLBIn : public TGCChannelId
 {
 public:
   // Constructor & Destructor
-  TGCChannelSLBIn(TGCIdBase::SideType side,
-		   TGCIdBase::ModuleType module,
-		   TGCIdBase::RegionType region,
+  TGCChannelSLBIn(TGCId::SideType side,
+		   TGCId::ModuleType module,
+		   TGCId::RegionType region,
 		   int sector,
 		   int id,
 		   int channel);
@@ -35,16 +35,16 @@ public:
 
   static int convertChannelInCell(int channel);
   static CellType convertCellType(int channel);
-  static int convertChannelInSLB(TGCIdBase::ModuleType moduleType, 
+  static int convertChannelInSLB(TGCId::ModuleType moduleType, 
 				 CellType cellType, int channel);
-  static int convertChannel(TGCIdBase::ModuleType moduleType, 
+  static int convertChannel(TGCId::ModuleType moduleType, 
 			    CellType cellType, int channelInSLB);
   static int getLengthOfCell(CellType cellType);
   static int getOffsetOfCell(CellType cellType);
-  static int getLengthOfSLB(TGCIdBase::ModuleType moduleType,
+  static int getLengthOfSLB(TGCId::ModuleType moduleType,
 			    CellType cellType);
   static int getAdjacentOfCell(CellType cellType);
-  static int getAdjacentOfSLB(TGCIdBase::ModuleType moduleType,
+  static int getAdjacentOfSLB(TGCId::ModuleType moduleType,
 			      CellType cellType);
   
   virtual CellType getCellType(void) const {

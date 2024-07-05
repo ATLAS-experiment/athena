@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// TGC_RodDecoderRawdata.cxx, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 #include "TGC_RodDecoderRawdata.h"
 
@@ -45,10 +41,7 @@ StatusCode Muon::TGC_RodDecoderRawdata::initialize()
   ATH_CHECK( AthAlgTool::initialize() );
 
   ATH_CHECK( m_cablingSvc.retrieve() );
-  const ITGCcablingSvc* cabling = nullptr;
-  ATH_CHECK( m_cablingSvc->giveCabling (cabling) );
-
-  m_tgcRODReadOut = new TgcRODReadOut (*cabling);
+  m_tgcRODReadOut = new TgcRODReadOut(*(m_cablingSvc.get()));
   
   ATH_MSG_INFO( "initialize() successful in " << name() );
   return StatusCode::SUCCESS;

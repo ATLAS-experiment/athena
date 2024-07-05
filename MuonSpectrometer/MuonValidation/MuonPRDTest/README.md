@@ -89,7 +89,7 @@ All output should happen through an ATH_MSG_(DEBUG/VERBOSE/INFO/WARNING/ERROR/FA
 ## Cabling Services
 The [TgcRawData](https://gitlab.cern.ch/atlas/athena/-/blob/main/MuonSpectrometer/MuonRDO/MuonRDO/TgcRawData.h) 
 do not have a method returning an Identifier currently, but we can retrieve the Identifier by using the cabling services 
-in the package [TGCcablingInterface](https://gitlab.cern.ch/atlas/athena/-/tree/main/MuonSpectrometer/MuonCablings/TGCcablingInterface/TGCcablingInterface).   
+in the package [MuonTGC_Cabling](https://gitlab.cern.ch/atlas/athena/-/tree/main/MuonSpectrometer/MuonCablings/MuonTGC_Cabling).
 The Identifiers can be retrieved by calling TGC cabling services:
 ```
 Identifier Id;

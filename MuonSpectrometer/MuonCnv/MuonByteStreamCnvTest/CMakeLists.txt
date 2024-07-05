@@ -10,6 +10,6 @@ atlas_add_component( MuonByteStreamCnvTest
                                     MuonCSC_CnvToolsLib MuonMDT_CnvToolsLib MuonRPC_CnvToolsLib 
                                     MuonTGC_CnvToolsLib MuonSTGC_CnvToolsLib MuonMM_CnvToolsLib 
                                     AthenaBaseComps GaudiKernel MuonReadoutGeometry MuonRDO StoreGateLib 
-                                    TrigT1RPChardwareLib TrigT1RPClogicLib TGCcablingInterfaceLib MuonIdHelpersLib 
+				    TrigT1RPChardwareLib TrigT1RPClogicLib MuonTGC_CablingLib MuonIdHelpersLib 
                                     RPC_CondCablingLib MuonDigToolInterfacesLib CscCalibToolsLib MuonDigitContainer 
                                     NSWCalibToolsLib xAODMuonRDO EventInfoMgtLib)
