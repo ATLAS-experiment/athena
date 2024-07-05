@@ -39,8 +39,6 @@ int main( int, char** )
       std::cout << std::endl;
       testTechnology( driver, pool::ROOTTREE_StorageType, false );
       std::cout << std::endl;
-      std::cout << "----- KEY-based Storage does not work for Strings" << std::endl;
-      std::cout << "----- If string values start to show up below it may actually mean an improvement" << std::endl;
       testTechnology( driver, pool::ROOTKEY_StorageType, false );
       std::cout << std::endl;
       testTechnology( driver, pool::ROOTTREEINDEX_StorageType, false );

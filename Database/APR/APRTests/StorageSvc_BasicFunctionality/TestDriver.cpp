@@ -245,6 +245,7 @@ TestDriver::testReading()
         }
         DbString str;
         void *ptr = &str;
+        void *originalPtr = ptr; // this is to check if the pointer is changed (RootKeyContainer modifies it!)
         if( !storSvc->read( *fd, *stringToken, shape, &ptr ).isSuccess() ) {
            throw std::runtime_error( "failed to read an object back from the persistency" );
         }
@@ -253,7 +254,12 @@ TestDriver::testReading()
            throw std::runtime_error( std::string("read wrong class type: ") + shape->shapeID().toString());
         }
 
-        cout << "Read back string: " << str << endl;
+        if (ptr == originalPtr) {
+           cout << "Read back string: " << str << endl;
+        } else {
+           cout << "Read back string: " << *reinterpret_cast<std::string*>(ptr) << endl;
+        }
+
         stringToken->release();
      }
   }

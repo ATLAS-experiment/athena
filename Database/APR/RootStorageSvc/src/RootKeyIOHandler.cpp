@@ -52,7 +52,12 @@ namespace pool {
       fKeylen    = fBufferRef->Length();
       void* ptr ATLAS_THREAD_SAFE = const_cast<void*>(obj);
       fBufferRef->MapObject(ptr, cl);    //register obj in map in case of self reference
-      cl->WriteBuffer(*fBufferRef, ptr); //write object
+      if (!strcmp(cl->GetName(), "string")) {
+        std::string* strObj = static_cast<std::string*>(ptr);
+        fBufferRef->WriteStdString(strObj);
+      } else {
+        cl->WriteBuffer(*fBufferRef, ptr); //write object
+      }
       lbuf       = fBufferRef->Length();
       fObjlen    = lbuf - fKeylen;
       Int_t cxlevel = gFile->GetCompressionLevel();
@@ -175,7 +180,11 @@ namespace pool {
         }
       }
       else {
-        fBufferRef->ReadClassBuffer(cl, *tobj); //read object
+        if (!strcmp(cl->GetName(), "string")) {
+          fBufferRef->ReadStdString(reinterpret_cast<std::string*>(*tobj));
+        } else {
+          fBufferRef->ReadClassBuffer(cl, *tobj); //read object
+        }
       }
 
     CLEAR:
