@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // EDM include(s):
@@ -14,7 +14,7 @@
 #include "PATInterfaces/SystematicRegistry.h"
 #include "AsgMessaging/StatusCode.h"
 #include "ElectronPhotonFourMomentumCorrection/EgammaCalibrationAndSmearingTool.h"
-
+#include "TString.h"
 // local include
 #include "testAthenaEgammaCalibTool.h"
 

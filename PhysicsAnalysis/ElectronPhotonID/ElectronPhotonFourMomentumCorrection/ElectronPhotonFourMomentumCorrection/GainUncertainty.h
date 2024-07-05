@@ -8,7 +8,6 @@
 #include <AsgMessaging/AsgMessaging.h>
 #include <PATCore/PATCoreEnums.h>
 
-#include <memory>
 #include <string>
 
 class TH1;

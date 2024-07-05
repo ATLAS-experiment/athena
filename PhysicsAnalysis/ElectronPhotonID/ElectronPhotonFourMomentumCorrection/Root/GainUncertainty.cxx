@@ -6,13 +6,17 @@
 #include <TFile.h>
 #include <TH1.h>
 
+#include <memory>
+#include <cstdio> //sprintf
+#include <cmath> //abs()
+
 namespace egGain {
 
 //--------------------------------------
 
 GainUncertainty::GainUncertainty(const std::string& filename, bool splitGainUnc,
-                                 const std::string& name, bool setInterpolation)
-    : asg::AsgMessaging(name.c_str()) {
+                                 const std::string& thisname, bool setInterpolation)
+    : asg::AsgMessaging(thisname.c_str()) {
 
   ATH_MSG_INFO("opening file " << filename);
   std::unique_ptr<TFile> gainFile(TFile::Open(filename.c_str(), "READ"));

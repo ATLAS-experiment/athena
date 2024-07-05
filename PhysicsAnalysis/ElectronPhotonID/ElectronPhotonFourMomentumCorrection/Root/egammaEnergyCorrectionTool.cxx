@@ -7,14 +7,7 @@
 ///
 #include "ElectronPhotonFourMomentumCorrection/egammaEnergyCorrectionTool.h"
 
-#include <boost/format.hpp>
-#include <cassert>
-#include <exception>
-#include <iomanip>
-#include <ios>
-#include <iostream>
-#include <memory>
-#include <utility>
+
 
 #include "ElectronPhotonFourMomentumCorrection/GainTool.h"
 #include "ElectronPhotonFourMomentumCorrection/GainUncertainty.h"
@@ -28,7 +21,20 @@
 #include "TH1.h"
 #include "TH2.h"
 #include "TList.h"
+#include "TSystem.h"
+#include "TRandom3.h"
 #include "egammaUtils/eg_resolution.h"
+
+#include <boost/format.hpp>
+#include <cassert>
+#include <exception>
+#include <iomanip>
+#include <ios>
+#include <iostream>
+#include <utility>
+#include <type_traits> //std::is_pointer
+#include <cmath> //hypot
+
 
 namespace {
 double qsum(double x, double y) {
@@ -161,6 +167,7 @@ egammaEnergyCorrectionTool::egammaEnergyCorrectionTool()
 
   m_use_stat_error_scaling = false;
   m_initialized = false;
+  m_RunNumber = 0;
 }
 
 egammaEnergyCorrectionTool::~egammaEnergyCorrectionTool() {
