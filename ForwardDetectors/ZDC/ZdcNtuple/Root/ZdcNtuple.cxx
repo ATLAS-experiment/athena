@@ -171,10 +171,10 @@ StatusCode ZdcNtuple :: initialize ()
     if(m_isMC){
       //Modules
       m_outputTree->Branch("zdc_ZdcModuleTruthTotal",&t_ZdcModuleTruthTotal,"zdc_ZdcModuleTruthTotal[2][7]/F");
-      m_outputTree->Branch("zdc_ZdcModuleTruthInivsible",&t_ZdcModuleTruthInvis,"zdc_ZdcModuleTruthInvisible[2][7]/F");
+      m_outputTree->Branch("zdc_ZdcModuleTruthInvisible",&t_ZdcModuleTruthInvis,"zdc_ZdcModuleTruthInvisible[2][7]/F");
       m_outputTree->Branch("zdc_ZdcModuleTruthEM",&t_ZdcModuleTruthEM,"zdc_ZdcModuleTruthEM[2][7]/F");
       m_outputTree->Branch("zdc_ZdcModuleTruthNonEM",&t_ZdcModuleTruthNonEM,"zdc_ZdcModuleTruthNonEM[2][7]/F");
-      m_outputTree->Branch("zdc_ZdModulecTruthEscaped",&t_ZdcModuleTruthEscaped,"zdc_ZdcModuleTruthEscaped[2][7]/F");
+      m_outputTree->Branch("zdc_ZdcModuleTruthEscaped",&t_ZdcModuleTruthEscaped,"zdc_ZdcModuleTruthEscaped[2][7]/F");
       m_outputTree->Branch("zdc_ZdcModuleTruthNphotons",&t_ZdcModuleTruthNphotons,"zdc_ZdcModuleTruthNphotons[2][7]/i");
       m_outputTree->Branch("zdc_RpdModuleTruthNphotons",&t_RpdModuleTruthNphotons,"zdc_RpdModuleTruthNphotons[2][16]/i");
 
