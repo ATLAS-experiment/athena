@@ -14,7 +14,7 @@ namespace MuonPRDTest {
     
     class PrdTesterModule : public MuonTesterBranch {
     public:
-        PrdTesterModule(MuonTesterTree& tree, const std::string& grp_name, bool useCondGeo, MSG::Level msglvl);
+        PrdTesterModule(MuonTesterTree& tree, const std::string& grp_name, MSG::Level msglvl);
 
         virtual ~PrdTesterModule() = default;
 
@@ -27,10 +27,7 @@ namespace MuonPRDTest {
 
     private:
         SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_detMgrKey{"MuonDetectorManager"};
-        ServiceHandle<StoreGateSvc> m_detStore{"StoreGateSvc/DetectorStore", name()};
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{"Muon::MuonIdHelperSvc/MuonIdHelperSvc", name()};
-        const MuonGM::MuonDetectorManager* m_detMgr{nullptr};
-        bool m_useCondDetMgr{false};
     };
 }  // namespace MuonPRDTest
 #endif

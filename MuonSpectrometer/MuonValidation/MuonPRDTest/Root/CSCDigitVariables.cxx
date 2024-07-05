@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonPRDTest/CSCDigitVariables.h"
@@ -7,7 +7,7 @@
 #include "MuonReadoutGeometry/CscReadoutElement.h"
 namespace MuonPRDTest {
     CscDigitVariables::CscDigitVariables(MuonTesterTree& tree, const std::string& container_name, MSG::Level msglvl) :
-        PrdTesterModule(tree, "Digits_CSC", true, msglvl), m_key{container_name} {}
+        PrdTesterModule(tree, "Digits_CSC", msglvl), m_key{container_name} {}
     bool CscDigitVariables::declare_keys() { return declare_dependency(m_key); }
 
     bool CscDigitVariables::fill(const EventContext& ctx) {

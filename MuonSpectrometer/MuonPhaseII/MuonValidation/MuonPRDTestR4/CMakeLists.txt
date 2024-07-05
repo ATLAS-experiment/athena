@@ -14,7 +14,7 @@ atlas_add_library( MuonPRDTestR4Lib
 
 atlas_add_component( MuonPRDTestR4
                      src/components/*.cxx src/*.cxx
-                     LINK_LIBRARIES AthenaKernel StoreGateLib MuonTesterTreeLib
+                     LINK_LIBRARIES AthenaKernel StoreGateLib MuonTesterTreeLib MuonPRDTestLib
                                     xAODMuonSimHit xAODMuonPrepData MuonPRDTestR4Lib)
 
 # Install files from the package:

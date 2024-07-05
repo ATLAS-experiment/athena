@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonPRDTest/CSCSimHitVariables.h"
@@ -10,7 +10,7 @@
 #include "MuonSimEvent/CscHitIdHelper.h"
 namespace MuonPRDTest {
     CSCSimHitVariables::CSCSimHitVariables(MuonTesterTree& tree, const std::string& container_name, MSG::Level msglvl) :
-        PrdTesterModule(tree, "CSC_Sim", false, msglvl),m_key{container_name} {}
+        PrdTesterModule(tree, "CSC_Sim", msglvl),m_key{container_name} {}
     bool CSCSimHitVariables::declare_keys() { return declare_dependency(m_key); }
 
     bool CSCSimHitVariables::fill(const EventContext& ctx) {

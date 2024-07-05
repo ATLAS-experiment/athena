@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonPRDTest/TGCSDOVariables.h"
 namespace MuonPRDTest {
     TgcSDOVariables::TgcSDOVariables(MuonTesterTree& tree, const std::string& container_name, MSG::Level msglvl) :
-        PrdTesterModule(tree, "TGC_SDO", false, msglvl), m_key{container_name} {}
+        PrdTesterModule(tree, "TGC_SDO", msglvl), m_key{container_name} {}
 
     bool TgcSDOVariables::declare_keys() { return declare_dependency(m_key); }
 

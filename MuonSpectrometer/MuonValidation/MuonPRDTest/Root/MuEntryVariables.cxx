@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonPRDTest/MuEntryVariables.h"
@@ -11,7 +11,7 @@
 
 namespace MuonPRDTest{
   MuEntryVariables::MuEntryVariables(MuonTesterTree& tree, const std::string& container_name, MSG::Level msglvl):
-        PrdTesterModule(tree, "MuEntryVariables", true, msglvl), m_key{container_name} {}
+        PrdTesterModule(tree, "MuEntryVariables", msglvl), m_key{container_name} {}
   bool MuEntryVariables::declare_keys() { return declare_dependency(m_key); }
 
   bool MuEntryVariables::fill(const EventContext& ctx) {

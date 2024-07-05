@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonPRDTest/sTGCDigitVariables.h"
@@ -8,7 +8,7 @@
 
 namespace MuonPRDTest {
     sTgcDigitVariables::sTgcDigitVariables(MuonTesterTree& tree, const std::string& container_name, MSG::Level msglvl) :
-        PrdTesterModule(tree, "Digits_sTGC", true, msglvl), m_key{container_name} {}
+        PrdTesterModule(tree, "Digits_sTGC", msglvl), m_key{container_name} {}
 
     bool sTgcDigitVariables::declare_keys() { return declare_dependency(m_key); }
     bool sTgcDigitVariables::fill(const EventContext& ctx) {

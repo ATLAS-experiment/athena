@@ -8,7 +8,7 @@
 #include "EventPrimitives/EventPrimitivesHelpers.h"
 namespace MuonPRDTest {
     TGCPRDVariables::TGCPRDVariables(MuonTesterTree& tree, const std::string& container_name, MSG::Level msglvl) :
-        PrdTesterModule(tree, "PRD_TGC", true, msglvl), m_key{container_name} {}
+        PrdTesterModule(tree, "PRD_TGC", msglvl), m_key{container_name} {}
     bool TGCPRDVariables::declare_keys() { return declare_dependency(m_key); }
 
     bool TGCPRDVariables::fill(const EventContext& ctx) {

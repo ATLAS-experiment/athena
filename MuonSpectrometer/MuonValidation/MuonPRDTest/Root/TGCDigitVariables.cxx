@@ -7,7 +7,7 @@
 #include "MuonReadoutGeometry/TgcReadoutElement.h"
 namespace MuonPRDTest {
     TgcDigitVariables::TgcDigitVariables(MuonTesterTree& tree, const std::string& container_name, MSG::Level msglvl) :
-        PrdTesterModule(tree, "Digits_TGC", true, msglvl), m_key{container_name} {}
+        PrdTesterModule(tree, "Digits_TGC", msglvl), m_key{container_name} {}
 
     bool TgcDigitVariables::fill(const EventContext& ctx) {
         ATH_MSG_DEBUG("do fillTGCSimHitVariables()");

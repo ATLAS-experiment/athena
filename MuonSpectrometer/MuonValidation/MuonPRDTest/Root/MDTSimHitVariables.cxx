@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonPRDTest/MDTSimHitVariables.h"
@@ -10,7 +10,7 @@
 #include "MuonSimEvent/MdtHitIdHelper.h"
 namespace MuonPRDTest {
     MDTSimHitVariables::MDTSimHitVariables(MuonTesterTree& tree, const std::string& container_name, MSG::Level msglvl) :
-        PrdTesterModule(tree, "MDT_Sim", false, msglvl), m_simHitKey{container_name} {}
+        PrdTesterModule(tree, "MDT_Sim", msglvl), m_simHitKey{container_name} {}
     bool MDTSimHitVariables::fill(const EventContext& ctx) {
         ATH_MSG_DEBUG("do fillMDTSimHitVariables()");
         const MuonGM::MuonDetectorManager* MuonDetMgr = getDetMgr(ctx);

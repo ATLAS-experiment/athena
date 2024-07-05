@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonPRDTest/sTGCRDOVariables.h"
@@ -9,7 +9,7 @@
 using namespace Muon;
 namespace MuonPRDTest {
     sTGCRDOVariables::sTGCRDOVariables(MuonTesterTree& tree, const std::string& container_name, MSG::Level msglvl) :
-        PrdTesterModule(tree, "RDO_sTGC", true, msglvl), m_key{container_name} {}
+        PrdTesterModule(tree, "RDO_sTGC", msglvl), m_key{container_name} {}
     bool sTGCRDOVariables::declare_keys() { return declare_dependency(m_key); }
 
     bool sTGCRDOVariables::fill(const EventContext& ctx) {

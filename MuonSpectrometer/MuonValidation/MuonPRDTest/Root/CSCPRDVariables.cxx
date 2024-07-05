@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonPRDTest/CSCPRDVariables.h"
@@ -8,7 +8,7 @@
 
 namespace MuonPRDTest {
     CSCPRDVariables::CSCPRDVariables(MuonTesterTree& tree, const std::string& container_name, MSG::Level msglvl) :
-        PrdTesterModule(tree, "PRD_CSC", true, msglvl), m_key{container_name} {}
+        PrdTesterModule(tree, "PRD_CSC", msglvl), m_key{container_name} {}
     bool CSCPRDVariables::declare_keys() { return declare_dependency(m_key); }
 
     bool CSCPRDVariables::fill(const EventContext& ctx) {
