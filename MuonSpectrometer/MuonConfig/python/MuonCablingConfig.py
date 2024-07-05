@@ -5,19 +5,21 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 def NRPCCablingConfigCfg(flags, name = "MuonNRPC_CablingAlg", **kwargs):
     result = ComponentAccumulator()
-    if not flags.Muon.enableNRPC:
-        return result
 
     ### Add DB folder
-    from IOVDbSvc.IOVDbSvcConfig import addFolders
-    dbName = 'RPC_OFL' if flags.Input.isMC else 'RPC'
-    cablingFolder = "/RPC/NCABLING/JSON" if flags.Input.isMC else "/RPC/Onl/NCABLING/JSON"
-    cablingTag = "RpcNcablingJson-RUN3-02" 
-    result.merge(addFolders(flags, [cablingFolder], detDb=dbName, className='CondAttrListCollection', tag=cablingTag))
+    kwargs.setdefault("JSONFile", "RpcCabling.json")
+    if len(kwargs["JSONFile"]) == 0:
+        from IOVDbSvc.IOVDbSvcConfig import addFolders
+        dbName = 'RPC_OFL' if flags.Input.isMC else 'RPC'
+        cablingFolder = "/RPC/NCABLING/JSON" if flags.Input.isMC else "/RPC/Onl/NCABLING/JSON"
+        cablingTag = "RpcNcablingJson-RUN3-04" 
+        if flags.Muon.usePhaseIIGeoSetup and flags.Input.isMC:    
+            cablingTag = "RpcNcablingJson-RUN3-FanatasyCabling-1"
+        result.merge(addFolders(flags, [cablingFolder], detDb=dbName, className='CondAttrListCollection', tag=cablingTag))
+        kwargs.setdefault("MapFolders",  cablingFolder)
     
     ### Cabling algorithm setup
     NRPCCablingAlg = CompFactory.MuonNRPC_CablingAlg(name, **kwargs)
-    NRPCCablingAlg.MapFolders = cablingFolder
 
     result.addCondAlgo( NRPCCablingAlg, primary= True)
     return result
@@ -26,8 +28,13 @@ def NRPCCablingConfigCfg(flags, name = "MuonNRPC_CablingAlg", **kwargs):
 def RPCCablingConfigCfg(flags):
     acc = ComponentAccumulator()
     if not flags.Detector.GeometryRPC: return acc
-    acc.merge(NRPCCablingConfigCfg(flags))
-
+    if flags.Muon.enableNRPC:
+        acc.merge(NRPCCablingConfigCfg(flags))
+    acc.merge(RPCLegacyCablingConfigCfg(flags))
+    return acc
+    
+def RPCLegacyCablingConfigCfg(flags):
+    acc = ComponentAccumulator()
     dbName = 'RPC_OFL' if flags.Input.isMC else 'RPC'
     dbRepo="MuonRPC_Cabling/ATLAS.data"
     rpcCabMap="/RPC/CABLING/MAP_SCHEMA"

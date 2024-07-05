@@ -5,7 +5,7 @@ from copy import deepcopy
 ###     Simple script to generate a BIS78 cabling map as used for the
 ###     Monte Carlo processing. The channel numbers are place holders
 ###     for the final ones
-station_name = 1 #BIS
+station_name = "BIS"
 eta_index = 7  # To represent BIS78 (Station eta, always 7 for BIS78)
 doubletR = 1   # Chamber mounted below the Mdts (Always 1 for BIS78)
 doubletPhi = 1  # Single phi module (Always 1 for BIS78)
