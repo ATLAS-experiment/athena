@@ -5,7 +5,7 @@
  **     @author  mark sutton
  **     @date    Sun 18 Jan 2009 19:53:18 GMT 
  **
- **     Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -43,6 +43,10 @@ public:
   { } 
   
   virtual ~TrackAnalysis() { } 
+
+  // no copy allowed/necessary
+  TrackAnalysis(const TrackAnalysis&) = delete;
+  TrackAnalysis& operator=(const TrackAnalysis&) = delete;
 
   /// return identifier
   std::string name() const { return m_name; }  
