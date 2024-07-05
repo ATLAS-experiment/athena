@@ -57,7 +57,7 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
     
     MuonReadoutElement()=delete;
     MuonReadoutElement(const MuonReadoutElement&)=delete;
-    
+    MuonReadoutElement& operator=(const MuonReadoutElement&)=delete;
     /// Element initialization
     virtual StatusCode initElement() = 0;
     /// Returnsthe alignable transform of the readout element
@@ -171,7 +171,7 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
 
      friend class ActsTrk::TransformCacheDetEle<MuonGMR4::MuonReadoutElement>;
    protected:
-     /// Returns the transformation into the center of the readout volume
+     /// Returns the local -> global transformation to go from the volume center origin
      const Amg::Transform3D& toStation(const ActsTrk::DetectorAlignStore* alignStore) const;
       
      /// Inserts a transfomration for caching

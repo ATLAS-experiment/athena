@@ -11,8 +11,9 @@ def ActsMuonAlignCondAlgCfg(flags, name="ActsMuonAlignCondAlg", **kwargs):
     
     from MuonConfig.MuonGeometryConfig import MuonAlignmentCondAlgCfg
     kwargs.setdefault("applyMmPassivation", flags.Muon.applyMMPassivation)
-    kwargs.setdefault("FillAlignCache", True)
+    kwargs.setdefault("FillAlignCache", False)
     kwargs.setdefault("FillGeoAlignStore", False)
+    kwargs.setdefault("applyBLines", False)
     
 
     if kwargs["applyMmPassivation"]:

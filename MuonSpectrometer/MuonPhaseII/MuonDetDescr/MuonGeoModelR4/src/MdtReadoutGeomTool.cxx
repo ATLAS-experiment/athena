@@ -65,6 +65,7 @@ StatusCode MdtReadoutGeomTool::loadDimensions(FactoryCache& facCache,
     /// Loop over the child nodes of the full mdt tube layer volume to pick the ones representing the 
     /// tubeLayer -- their logical volume is callded TubeLayerLog. 
     /// The node right before the child volume is the associated transform node
+    const MdtIdHelper& idHelper{m_idHelperSvc->mdtIdHelper()};
     for (unsigned int ch = 1; ch < define.physVol->getNChildNodes(); ++ch) {
         const GeoGraphNode* childNode = (*define.physVol->getChildNode(ch));
         const GeoVPhysVol* childVol = dynamic_cast<const GeoVPhysVol*>(childNode);
@@ -78,8 +79,10 @@ StatusCode MdtReadoutGeomTool::loadDimensions(FactoryCache& facCache,
         }
         ATH_MSG_VERBOSE("Add new tube layer "<<m_idHelperSvc->toStringDetEl(define.detElId)<<
                        std::endl<<std::endl<<m_geoUtilTool->dumpVolume(childVol));
-
-        MdtTubeLayerPtr newLay = std::make_unique<MdtTubeLayer>(childVol, trfNode);
+        const Identifier tubeLayId = idHelper.channelID(define.detElId,
+                                                        idHelper.multilayer(define.detElId),
+                                                        define.tubeLayers.size() +1, 1);
+        MdtTubeLayerPtr newLay = std::make_unique<MdtTubeLayer>(childVol, trfNode, facCache.cutTubes[tubeLayId]);
         define.tubeLayers.emplace_back(*facCache.tubeLayers.insert(newLay).first);
 
         const MdtTubeLayer& lay{*define.tubeLayers.back()};
@@ -224,6 +227,34 @@ StatusCode MdtReadoutGeomTool::readParameterBook(FactoryCache& cache) const {
             }
         }
     }
+    /** List of cut tubes */
+     paramTable = accessSvc->getRecordsetPtr("MdtCutTubes" ,"");
+     if (paramTable->size() == 0) {
+        ATH_MSG_INFO("No information about cut mdt tubes has been found. Skipping.");
+        return StatusCode::SUCCESS;
+    }
+     for (const IRDBRecord_ptr& record : *paramTable) {
+        const std::string stName = record->getString("stationName");
+        const int stEta = record->getInt("stationEta");
+        const int stPhi = record->getInt("stationPhi");
+        const int multiLay = record->getInt("multiLayer");
+        const int tubeLay = record->getInt("tubeLayer");
+        bool isValid{false};
+        const Identifier tubeId = idHelper.channelID(stName, stEta, stPhi, multiLay, tubeLay, 1 , isValid);
+        if (!isValid) {
+            ATH_MSG_FATAL("Failed to deduce valid Idnetifier "<<stName<<", "<<stEta<<", "<<stPhi<<","<<multiLay<<", "<<tubeLay);
+            return StatusCode::FAILURE;
+        }
+        FactoryCache::CutTubes cutTubes{};
+
+        cutTubes.firstTube = record->getInt("firstTube");
+        cutTubes.lastTube = record->getInt("lastTube");
+        cutTubes.unCutHalfLength = record->getDouble("uncutHalfLength");
+        ATH_MSG_VERBOSE("Found new uncut tube set in "<<m_idHelperSvc->toString(tubeId)<<" tubes: ["
+                     <<cutTubes.firstTube<<"-"<<cutTubes.lastTube<<"], length: "<< 2.*cutTubes.unCutHalfLength );
+        cache.cutTubes[tubeId].insert(std::move(cutTubes));
+
+     }
     return StatusCode::SUCCESS;
 }
 

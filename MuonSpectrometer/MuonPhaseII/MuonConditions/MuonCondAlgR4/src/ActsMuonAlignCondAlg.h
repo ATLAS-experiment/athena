@@ -94,7 +94,7 @@ private:
     Gaudi::Property<bool> m_applyMdtAsBuilt{this, "applyMdtAsBuilt", false, 
                                             "Toggles the application of the Mdt as-built parameters"};
     /// Apply translations and rotations to align the Muon stations
-    Gaudi::Property<bool> m_applyALines{this, "applyALines", true};
+    Gaudi::Property<bool> m_applyALines{this, "applyALines", false};
     /// Apply the chamber deformation model (Mdts + Nsw)
     Gaudi::Property<bool> m_applyBLines{this, "applyBLines", false};
     /// Flag toggling whether the alignment store shall be filled with the transforms or not

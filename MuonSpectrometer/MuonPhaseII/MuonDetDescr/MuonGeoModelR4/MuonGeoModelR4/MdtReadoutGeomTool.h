@@ -40,8 +40,10 @@ class MdtReadoutGeomTool : public AthAlgTool,
         ParamBookTable parBook{};
         /// List of chambers that have the readout chip at 
         /// negative Z
-        std::set<Identifier> readoutOnLeftSide{};
-
+        std::unordered_set<Identifier> readoutOnLeftSide{};
+        using CutTubes = MdtTubeLayer::CutTubes;
+        using CutTubeSet =  MdtTubeLayer::CutTubeSet;
+        std::unordered_map<Identifier, CutTubeSet> cutTubes{};
         MdtTubeLayerSet tubeLayers{};
     };
 

@@ -249,8 +249,8 @@ StatusCode MuonReadoutGeomCnvAlg::cloneReadoutVolume(const ActsGeometryContext& 
     const MuonGMR4::MuonReadoutElement* copyMe = m_detMgr->getReadoutElement(reId);
     GeoIntrusivePtr<const GeoVFullPhysVol> readOutVol{copyMe->getMaterialGeom()};
     parentPhysVol->add(cacheObj.newIdTag());
-    parentPhysVol->add(cacheObj.makeTransform(parentPhysVol->getX().inverse() *
-                                              copyMe->localToGlobalTrans(gctx)));
+    parentPhysVol->add(cacheObj.makeTransform(copyMe->alignableTransform()->getDefTransform().inverse() *
+                                              readOutVol->getParent()->getX() * readOutVol->getX()));
     /// Clone the detector element with all of its subvolumes
     PVLink clonedVol{cloneVolume(const_pointer_cast<GeoVFullPhysVol>(readOutVol))};
     physVol = dynamic_pointer_cast<GeoVFullPhysVol>(clonedVol);
@@ -601,6 +601,7 @@ StatusCode  MuonReadoutGeomCnvAlg::buildSTGC(const ActsGeometryContext& gctx,
             padDesign.sectorOpeningAngle = copyPadDesign.sectorAngle();
         }     
         newRE->fillCache();
+        ATH_CHECK(dumpAndCompare(gctx, *copyMe, *newRE));
         cacheObj.detMgr->addsTgcReadoutElement(std::move(newRE));
     }
     return StatusCode::SUCCESS;
@@ -652,9 +653,10 @@ StatusCode MuonReadoutGeomCnvAlg::buildMdt(const ActsGeometryContext& gctx,
         /// Determine the tube length's 
         const MuonGMR4::MdtTubeLayer& tubeLay{*pars.tubeLayers[0]};
         unsigned int step{1};
-        double lastLength{2.*tubeLay.tubeHalfLength(1)}; 
+        double lastLength{2.*tubeLay.uncutHalfLength(1)}; 
         for (unsigned tube = 0; tube < copyMe->numTubesInLay(); ++tube) {
-            const double currLength = 2.*tubeLay.tubeHalfLength(tube);
+            const double currLength = 2.*tubeLay.uncutHalfLength(tube);
+            ATH_MSG_VERBOSE(m_idHelperSvc->toString(copyMe->identify())<< ", tube "<<tube<<", length: "<<currLength);
             if (std::abs(lastLength - currLength) > std::numeric_limits<float>::epsilon() ||
                 tube == copyMe->numTubesInLay() -1) {
                 newElement->m_tubelength[step-1] = lastLength;
@@ -669,12 +671,11 @@ StatusCode MuonReadoutGeomCnvAlg::buildMdt(const ActsGeometryContext& gctx,
         newElement->m_nsteps = step;
         
         /// Define the tube staggering
-        const Amg::Transform3D globToLoc{copyMe->globalToLocalTrans(gctx)};
         double xOffSet{pars.halfY}, yOffSet{pars.halfHeight};
         if (newElement->barrel())  std::swap(xOffSet, yOffSet);
         for (unsigned lay = 1; lay <= copyMe->numLayers(); ++lay) {
             const IdentifierHash tubeHash{copyMe->measurementHash(lay, 1)};
-            const Amg::Vector3D locTube = globToLoc * copyMe->globalTubePos(gctx, tubeHash);
+            const Amg::Vector3D locTube = copyMe->localTubePos(tubeHash);
             newElement->m_firstwire_x[lay-1] = locTube.z() + xOffSet;
             newElement->m_firstwire_y[lay-1] = locTube.x() + yOffSet;
         }
@@ -687,9 +688,10 @@ StatusCode MuonReadoutGeomCnvAlg::buildMdt(const ActsGeometryContext& gctx,
         if (!station->hasBLines()){
             station->setBline(distort.bLine);
         }
+        const Amg::Vector3D refPoint = copyMe->bLineReferencePoint();
+        station->setBlineFixedPointInAmdbLRS(refPoint.x(), refPoint.y(), refPoint.z());
 
         newElement->geoInitDone();
-
         newElement->setBLinePar(distort.bLine);
         newElement->fillCache();
         /// Add the readout element to the manager
@@ -795,23 +797,26 @@ StatusCode MuonReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx
             if ( (refPos - tubePos).mag() > Gaudi::Units::micrometer &&
                  (globToLocal*refPos - globToLocal * tubePos).perp() > Gaudi::Units::micrometer) {
                 ATH_MSG_ERROR("Tube positions differ for "<<m_idHelperSvc->toString(refEle.measurementId(tubeHash))
-                            <<" reference: "<<GeoTrf::toString(refPos)<<" vs. test: "
-                            <<GeoTrf::toString(tubePos) <<" delta: "<<(refPos - tubePos).mag());
+                            <<" reference: "<<GeoTrf::toString(globToLocal*refPos)<<" vs. test: "
+                            <<GeoTrf::toString(globToLocal*tubePos) <<" delta: "<<(refPos - tubePos).mag()
+                            <<" Transforms "<<std::endl
+                            <<" **** "<< GeoTrf::toString(globToLocal.inverse())<<std::endl
+                            <<" **** "<< GeoTrf::toString(testEle.transform(lay, tube)));
                 return StatusCode::FAILURE;
             }
             ATH_MSG_VERBOSE("Tube positions layer: "<<lay<<", tube: "<<tube
                 <<std::endl<<"reference: "<<GeoTrf::toString(refPos)
                 <<std::endl<<"test:      "<<GeoTrf::toString(tubePos)
-                <<std::endl<<testEle.tubeLength(lay, tube)<<"/"
-                            <<testEle.getActiveTubeLength(lay, tube)<<"/"
-                            <<testEle.getWireLength(lay,tube)
-                            <<" vs. "<<refEle.tubeLength(tubeHash)<<"/"<<refEle.activeTubeLength(tubeHash)
-                            <<"/"<<refEle.wireLength(tubeHash));
-            if (std::abs(testEle.tubeLength(lay,tube) - refEle.tubeLength(tubeHash)) >
+                <<std::endl<<testEle.tubeLength(lay, tube)<<"/"<<testEle.getActiveTubeLength(lay, tube)<<"/"
+                            <<testEle.getWireLength(lay,tube)<<" vs. "<<refEle.tubeLength(tubeHash)
+                            <<"/"<<refEle.activeTubeLength(tubeHash)<<"/"<<refEle.wireLength(tubeHash)
+                            <<"/"<<refEle.uncutTubeLength(tubeHash));
+            if (std::abs(testEle.getTubeLengthForCaching(lay,tube) - refEle.uncutTubeLength(tubeHash)) >
                 std::numeric_limits<float>::epsilon() ) {
-                ATH_MSG_WARNING("Different tube length's detected for "<<m_idHelperSvc->toStringDetEl(refEle.identify())
-                                << " layer: "<<lay<<", tube: "<<tube<<" "<<testEle.tubeLength(lay,tube)<<" (new) vs. "
-                                <<refEle.tubeLength(tubeHash)<<" (ref)");
+                ATH_MSG_FATAL("Different tube length's detected for "<<m_idHelperSvc->toStringDetEl(refEle.identify())
+                                << " layer: "<<lay<<", tube: "<<tube<<" -- "<<testEle.getTubeLengthForCaching(lay,tube)<<" (new) vs. "
+                                <<refEle.uncutTubeLength(tubeHash)<<" (ref)");
+                return StatusCode::FAILURE;
             }
         }
     }

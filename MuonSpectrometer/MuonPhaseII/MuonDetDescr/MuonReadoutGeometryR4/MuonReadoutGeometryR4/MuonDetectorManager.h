@@ -108,8 +108,15 @@ class MuonDetectorManager : public GeoVDetectorManager, public AthMessaging {
     /// Returns a list of all detector types
     std::vector<ActsTrk::DetectorType> getDetectorTypes() const;
    private:
-    ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{
-        "Muon::MuonIdHelperSvc/MuonIdHelperSvc", "MuonDetectorManager"};
+    /** @brief Method that connect the same elements from the station with the parsed readout Element and
+     *         vice versa. The way how they are inter-linked depends on the detector technology
+     *         For the moment, only link Mdts from the same multilayer against each other.
+     */
+    template <class MuonDetectorType> void linkElements(ElementStorage<MuonDetectorType>& allStore,
+                                                        MuonDetectorType* readOutEle);
+
+    ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{"Muon::MuonIdHelperSvc/MuonIdHelperSvc", 
+                                                        "MuonDetectorManager"};
 
     ElementStorage<MdtReadoutElement> m_mdtEles{};
     ElementStorage<TgcReadoutElement> m_tgcEles{};    
@@ -119,6 +126,8 @@ class MuonDetectorManager : public GeoVDetectorManager, public AthMessaging {
 
     std::vector<PVConstLink> m_treeTopVector{};
 };
+
+template <> void MuonDetectorManager::linkElements(ElementStorage<MdtReadoutElement>& detStore, MdtReadoutElement* refEle);
 
 }  // namespace MuonGMR4
 

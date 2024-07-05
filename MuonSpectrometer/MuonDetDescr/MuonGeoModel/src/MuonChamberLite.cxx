@@ -299,11 +299,13 @@ namespace MuonGM {
             mstat = new MuonStation(stName.substr(0, 3), width, length, totthick, longWidth, length, totthick, zi, fi + 1,
                                     (zi < 0 && !is_mirrored)); //!< fi here goes from 0 to 7; in amdb from 1 to 8;
         }
+       
         manager->addMuonStation(std::unique_ptr<MuonStation>(mstat));
         ATH_MSG_DEBUG( " Building a MuonStation for this MuonChamberLite " << m_station->GetName() 
                         << " at zi, fi " << zi << " " << fi + 1 << " is_mirrored " << is_mirrored);
         
         GeoFullPhysVol *ptrd=(*m_mapFPV)[std::string(stName)+"_Station"+"_"+std::to_string(zi)+"_"+std::to_string(fi)];
+        mstat->setPhysVol(ptrd);
         // here the big loop over the components !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         for (int i = 0; i < m_station->GetNrOfComponents(); i++) {
             StandardComponent *c = (StandardComponent *)m_station->GetComponent(i);

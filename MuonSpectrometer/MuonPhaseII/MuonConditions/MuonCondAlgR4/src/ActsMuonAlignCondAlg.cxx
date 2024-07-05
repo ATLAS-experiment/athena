@@ -55,6 +55,9 @@ StatusCode ActsMuonAlignCondAlg::initialize() {
         m_writeKeys.emplace_back(ActsTrk::to_string(det) + m_keyToken);
         ATH_MSG_INFO("Register new alignment container "<<m_writeKeys.back().fullKey());
     }
+    ATH_MSG_INFO("Switched options "<<m_fillAlignStoreCache<<", "<<", "<<m_applyALines<<", "
+                <<m_applyBLines<<", "<<m_applyMdtAsBuilt<<", "
+                <<","<<m_applyNswAsBuilt<<", "<<m_applyMmPassivation);
     ATH_CHECK(m_writeKeys.initialize());
     return StatusCode::SUCCESS;
 }

@@ -17,7 +17,8 @@ namespace ActsTrk{
                 return m_parent->toStation(store) * m_parent->toChamberLayer(hash()) *
                         toCenter * Amg::getRotateY3D(90*Gaudi::Units::deg); 
             }
-            return m_parent->toStation(store) * m_parent->toTubeFrame(hash());
+            return m_parent->toStation(store) * 
+                   m_parent->fromIdealToDeformed(hash(), store) * m_parent->toTubeFrame(hash());
         }
 }
 

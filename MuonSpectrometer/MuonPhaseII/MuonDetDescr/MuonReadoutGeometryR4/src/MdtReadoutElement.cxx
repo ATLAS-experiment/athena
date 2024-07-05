@@ -5,6 +5,7 @@
 
 #include <ActsGeoUtils/SurfaceBoundSet.h>
 #include <GeoPrimitives/GeoPrimitivesToStringConverter.h>
+#include <GeoModelHelpers/TransformToStringConverter.h>
 #include <GeoPrimitives/GeoPrimitivesHelpers.h>
 #include <AthenaBaseComps/AthCheckMacros.h>
 #include <GaudiKernel/SystemOfUnits.h>
@@ -13,6 +14,7 @@
 
 
 #ifndef SIMULATIONBASE
+#     include <MuonAlignmentDataR4/MdtAlignmentStore.h>
 #   include "Acts/Surfaces/TrapezoidBounds.hpp"
 #   include "Acts/Surfaces/LineBounds.hpp"
 #   include "Acts/Surfaces/Surface.hpp"
@@ -143,7 +145,7 @@ StatusCode MdtReadoutElement::initElement() {
 
 Amg::Vector3D MdtReadoutElement::globalTubePos(const ActsGeometryContext& ctx,
                                                const IdentifierHash& hash) const {
-   return localToGlobalTrans(ctx) * localTubePos(hash);
+   return localToGlobalTrans(ctx, hash).translation();
 }
 
 Amg::Vector3D MdtReadoutElement::localTubePos(const IdentifierHash& hash) const {
@@ -151,19 +153,13 @@ Amg::Vector3D MdtReadoutElement::localTubePos(const IdentifierHash& hash) const 
 }
 Amg::Vector3D MdtReadoutElement::readOutPos(const ActsGeometryContext& ctx,
                                             const IdentifierHash& hash) const {
-   const unsigned int layer = layerNumber(hash);
-   const unsigned int tube  = tubeNumber(hash);
-   const MdtTubeLayer& zeroT{*m_pars.tubeLayers[layer]};
-   const double length = zeroT.tubeHalfLength(tube) * m_pars.readoutSide;
-   return localToGlobalTrans(ctx) * zeroT.tubeTransform(tube)*(length * Amg::Vector3D::UnitZ());
+   return localToGlobalTrans(ctx, hash) * 
+          (0.5*activeTubeLength(hash) * m_pars.readoutSide * Amg::Vector3D::UnitZ());
 }
 Amg::Vector3D MdtReadoutElement::highVoltPos(const ActsGeometryContext& ctx,
                                              const IdentifierHash& hash) const {
-   const unsigned int layer = layerNumber(hash);
-   const unsigned int tube  = tubeNumber(hash);
-   const MdtTubeLayer& zeroT{*m_pars.tubeLayers[layer]};
-   const double length = - zeroT.tubeHalfLength(tube) * m_pars.readoutSide;
-   return localToGlobalTrans(ctx) * zeroT.tubeTransform(tube)*(length * Amg::Vector3D::UnitZ());
+   return localToGlobalTrans(ctx, hash) * 
+          (-0.5*activeTubeLength(hash) * m_pars.readoutSide * Amg::Vector3D::UnitZ());
 }
 Amg::Transform3D MdtReadoutElement::toChamberLayer(const IdentifierHash& hash) const {   
    const unsigned int layer = layerNumber(hash);
@@ -181,6 +177,12 @@ double MdtReadoutElement::activeTubeLength(const IdentifierHash& hash) const {
    const unsigned int tube = tubeNumber(hash);
    const MdtTubeLayer& zeroT{*m_pars.tubeLayers[layer]}; 
    return 2. * zeroT.tubeHalfLength(tube);
+}
+double MdtReadoutElement::uncutTubeLength(const IdentifierHash& tubeHash) const {
+   const unsigned int layer = layerNumber(tubeHash);
+   const unsigned int tube = tubeNumber(tubeHash);
+   const MdtTubeLayer& zeroT{*m_pars.tubeLayers[layer]}; 
+   return 2.*zeroT.uncutHalfLength(tube);
 }
 double MdtReadoutElement::tubeLength(const IdentifierHash& hash) const {
   return activeTubeLength(hash) + 2.*m_pars.deadLength;
@@ -214,6 +216,296 @@ std::map<Identifier, std::shared_ptr<Acts::Surface>> MdtReadoutElement::getSurfa
     }
     return surfaces;
 }
+
 #endif
+
+void MdtReadoutElement::setComplementaryReadoutEle(const MdtReadoutElement* other) {
+      m_reOtherMl = other;
+}
+
+Amg::Transform3D MdtReadoutElement::asBuiltRefFrame() const {
+      return alignableTransform()->getDefTransform().inverse()*
+             getMaterialGeom()->getParent()->getX() *
+             getMaterialGeom()->getX();
+}
+
+Amg::Vector3D MdtReadoutElement::bLineReferencePoint() const {
+   /* The fix point is the point that's closest to the interaction point. 
+   /  Recall that the readout element origin is expressed in the geometric centre & 
+      the x-axis points upwards. The point is then transformed into the Muon station frame */ 
+   const MdtReadoutElement* refEle{multilayer() == 1 ? this : m_reOtherMl};
+   return refEle->asBuiltRefFrame()*(-0.5*( refEle->moduleThickness() *Amg::Vector3D::UnitX() + 
+                                            (stationEta() >0 || !isBarrel() ? 1. : -1.)*refEle->moduleHeight() * Amg::Vector3D::UnitZ()));
+}
+#ifndef SIMULATIONBASE    
+Amg::Vector3D MdtReadoutElement::wireEndpointAsBuilt(const MdtAsBuiltPar&  params,
+                                                     const IdentifierHash& tubeHash,
+                                                     const Amg::Vector3D& wireEnd, 
+                                                     const tubeSide_t side) const {
+      
+
+   ATH_MSG_VERBOSE( "Applying as-built parameters for chamber " << idHelperSvc()->toString(measurementId(tubeHash)));
+
+  
+   using tubeSide_t = MdtAsBuiltPar::tubeSide_t;
+   using multilayer_t = MdtAsBuiltPar::multilayer_t;
+   const multilayer_t ml = (multilayer() == 1) ? multilayer_t::ML1 : multilayer_t::ML2;
+
+   const IdentifierHash refLayer{measurementHash((ml == multilayer_t::ML1) ? numLayers() : 1, 1)};
+   const Amg::Vector3D refTube{localTubePos(refLayer)};
+
+  
+   const double sideSign = 0.5*(1.- 2.*(side ==tubeSide_t::NEG));
+   // Compute the reference for the as-built parameters
+   const Amg::Vector3D reference_point = asBuiltRefFrame() *
+                                             Amg::Vector3D {refTube.x() + (1. - 2.*(ml == multilayer_t::ML2)) * tubeRadius(),
+                                                            sideSign*uncutTubeLength(refLayer),
+                                                            -0.5*moduleHeight()};
+   ATH_MSG_VERBOSE("AMDB transform "<<" "<<idHelperSvc()->toStringDetEl(identify())<<
+                  " "<<GeoTrf::toString(asBuiltRefFrame(), true)<<", reference point: "<<Amg::toString(reference_point));
+
+   
+   const int tubeLayer = layerNumber(tubeHash);
+   const int tube = tubeNumber(tubeHash);
+   const int layer_delta = ml == multilayer_t::ML1 ?  numLayers() + 1 - tubeLayer : tubeLayer;
+
+
+   // Get the As-Built parameters for this ML and side of the chamber
+   const double zpitch = params.zpitch(ml, side);
+   const double ypitch = params.ypitch(ml, side);
+   const double stagg =  params.stagg(ml, side);
+   const double alpha = params.alpha(ml, side);
+   const double y0 = params.y0(ml, side);
+   const double z0 = params.z0(ml, side);
+
+   const Amg::Transform3D planeRot{Amg::getRotateX3D(-alpha)};
+
+   // Find the vector from the reference_point to the endplug
+   // 0 for layer 1 and 3, 1 for layer 2 and 4
+   const double offset_stagg = 0.5 * zpitch * stagg * ( (layer_delta - 1) % 2);
+   const Amg::Vector3D end_plug = planeRot * Amg::Vector3D{0., 
+                                                            (tube - 1.0) * zpitch + offset_stagg, 
+                                                            (layer_delta - 1) * ypitch};
+
+   // Calculate x position, which varies for endcap chambers
+   const double xshift = sideSign*(uncutTubeLength(tubeHash) - uncutTubeLength(refLayer));
+
+   Amg::Vector3D ret(reference_point.x() + xshift, 
+                     reference_point.y() + z0 + end_plug.y(),
+                     reference_point.z() + y0 + end_plug.z());
+
+   
+   if ((ret - wireEnd).mag() > 3. * Gaudi::Units::mm) {
+         ATH_MSG_WARNING( "Large as-built correction for chamber " << idHelperSvc()->toString(measurementId(tubeHash))
+                        << ", side "<< (side == tubeSide_t::POS ? "positive" : "negative") 
+                        << ", Delta " << Amg::toString(ret - wireEnd) );
+   }
+   ATH_MSG_VERBOSE((side == tubeSide_t::POS ? "positive" : "negative")<<" wire end has moved from "
+                  <<Amg::toString(wireEnd)<<" to "<<Amg::toString(ret));
+   return ret;
+}
+
+Amg::Vector3D MdtReadoutElement::applyBlineCorrections(const BLinePar& bline,
+                                                       const Amg::Vector3D& localTubeEndPoint,
+                                                       const Amg::Vector3D& fixedPoint,
+                                                       const double chamberThickness) const {
+   
+   using Parameter = BLinePar::Parameter;
+   Amg::Vector3D deformedPos{localTubeEndPoint};
+   // MDT deformations like tube bow: bz,bp,bn bend the tube while the wire endpoints are not affected
+   //                                 => the wire keeps it's nominal straight line trajectory but it is not concentric to the tube
+   //                                 ==> in this function bz, bp and bn are ignored or set to 0
+   // MDT deformations that extend/contract the wire longitudinally (while keeping it straight):
+   //                                 delta_s from eg and tr are irrelevant for the tube geometry
+   //                                 and for the wire trajectory => set to 0 here
+   //                                 (should be applied as a correction to the
+   //                                 tube lenght => tube surface bounds
+   //                                 =++>>>> effect in tracking just through the gravitational sagging TOTALLY NEGLIGIBLE=> ignore)
+   // pg is irrelevant for tracking purposes and (at least for the endcaps) is applies to the internal bars only, not to the tubes !!!
+   //                                 =++>>>> IGNORE IT
+   // ep,en: bend the tube by moving (differently) the endplugs ===> the wire straight trajectory is moved w.r.t. the nominal one
+   //                                 in addition the tubes keep their nominal position at the center => the wire is not concentric to
+   //                                 the tube delta_s from ep,en must also be considered for the implementation of the realistic tube
+   //                                 trajectory induced by ep,en
+   // tw,sp,sn,pg (for deltaT and deltaZ) are geometrical effects, that impact on tracking and keep the wire straight.
+   const double chamberHeight = std::max(moduleHeight(), m_reOtherMl->moduleHeight());
+      
+
+   // NOTE s0,z0,t0 are the coord. in the amdb frame of this point: the origin of the frame can be different than the fixed point for
+   // deformations s0mdt,z0mdt,t0mdt
+   //    (always equal to the point at lowest t,z and s=0 of the MDT stack)
+   double s0 = deformedPos.x();
+   double z0 = deformedPos.y();
+   double t0 = deformedPos.z();
+   ATH_MSG_VERBOSE( "** In "<<__func__<<" - moduleWidthS, moduleWidthL(), length, thickness, " << moduleWidthS() << " " << moduleWidthL()
+            << " " << chamberHeight << " " << chamberThickness << " " );
+   ATH_MSG_VERBOSE( "** In "<<__func__<<" - going to correct for B-line the position of Point at " << Amg::toString(deformedPos));
+
+   double s0mdt = s0;  // always I think !
+   if (std::abs(fixedPoint.x()) > 0.01) s0mdt = s0 - fixedPoint.x();
+   double z0mdt = z0;  // unless in the D section of this station there's a dy diff. from 0 for the innermost MDT multilayer (sometimes
+                       // in the barrel)
+   // unless in the D section of this station there's a dz diff. from 0 for the innermost MDT multilayer (often in barrel)
+   if (std::abs(fixedPoint.y()) > 0.01) z0mdt = z0 - fixedPoint.y();
+   double t0mdt = t0;  
+      if (std::abs(fixedPoint.z()) > 0.01) t0mdt = t0 - fixedPoint.z();
+   if (z0mdt < 0 || t0mdt < 0) {
+      ATH_MSG_WARNING(""<<__func__<<": correcting the local position of a point outside the mdt station (2 multilayers) volume -- RE "
+                  << idHelperSvc()->toStringDetEl(identify()) << " local point: szt=" << s0 << " " << z0 << " " << t0
+                  << " fixedPoint " <<Amg::toString(fixedPoint) );
+   }
+   ATH_MSG_VERBOSE( "** In "<<__func__<<" - correct for offset of B-line fixed point " << s0mdt << " " << z0mdt << " " << t0mdt);
+
+   const double width_actual = moduleWidthS() + (moduleWidthL() - moduleWidthS()) * (z0mdt / chamberHeight);
+   const double s_rel = s0mdt / (width_actual / 2.);
+   const double z_rel = (z0mdt - chamberHeight / 2.) / (chamberHeight / 2.);
+   const double t_rel = (t0mdt - chamberThickness / 2.) / (chamberThickness / 2.);
+
+   ATH_MSG_VERBOSE( "** In "<<__func__<<" - width_actual, s_rel, z_rel, t_rel  " << width_actual << " " << s_rel << " "
+                                 << z_rel << " " << t_rel );
+   double ds{0.},dz{0.},dt{0.};
+   
+   // sp, sn - cross plate sag out of plane
+   if ( bline.getParameter(Parameter::sp) || bline.getParameter(Parameter::sn)) {
+      double ztmp = z_rel * z_rel - 1;
+      dt += 0.5 * (bline.getParameter(Parameter::sp) + bline.getParameter(Parameter::sn)) * ztmp 
+         +  0.5 * (bline.getParameter(Parameter::sp) - bline.getParameter(Parameter::sn)) * ztmp * s_rel;
+   }
+
+   // tw     - twist
+   if (bline.getParameter(Parameter::tw)) {
+      dt -= bline.getParameter(Parameter::tw) * s_rel * z_rel;
+      dz += bline.getParameter(Parameter::tw) * s_rel * t_rel * chamberThickness / chamberHeight;
+      ATH_MSG_VERBOSE( "** In "<<__func__<<": tw=" << bline.getParameter(Parameter::tw) << " dt, dz " << dt << " " << dz );
+   }
+
+   constexpr double expansionScale = BLinePar::expansionScale;
+     // eg     - global expansion
+   if (bline.getParameter(Parameter::eg)) {
+      double egppm = bline.getParameter(Parameter::eg) * expansionScale;
+      ds += 0.;
+      dz += z0mdt * egppm;
+      dt += t0mdt * egppm;
+   }
+
+   // ep, en - local expansion
+   //
+   // Imporant note: the chamber height and length, as they denoted in Christoph's talk,
+   // correspond to thickness and height parameters of this function;
+   //
+
+   if (bline.getParameter(Parameter::ep) || bline.getParameter(Parameter::en)) {
+      const double ep = bline.getParameter(Parameter::ep) * expansionScale;
+      const double en = bline.getParameter(Parameter::en) * expansionScale;
+      const double phi = 0.5 * (ep + en) * s_rel * s_rel + 0.5 * (ep - en) * s_rel;
+      const double localDt = phi * (t0mdt - chamberThickness / 2.);
+      const double localDz = phi * (z0mdt - chamberHeight / 2.);
+      dt += localDt;
+      dz += localDz;
+   }
+
+   ATH_MSG_VERBOSE( "posOnDefChamStraighWire: ds,z,t = " << ds << " " << dz << " " << dt );
+   deformedPos[0] = s0 + ds;
+   deformedPos[1] = z0 + dz;
+   deformedPos[2] = t0 + dt;
+
+        
+   return deformedPos;
+}
+#endif
+Amg::Transform3D MdtReadoutElement::fromIdealToDeformed(const IdentifierHash& tubeHash,
+                                                        const ActsTrk::DetectorAlignStore* store) const {
+
+   /// No deformation parameters were parsed at all
+   if (!store || !store->internalAlignment) {
+   ATH_MSG_VERBOSE("No deformed transformation available "<<idHelperSvc()->toString(measurementId(tubeHash)));
+
+      return Amg::Transform3D::Identity();
+   }
+#ifdef SIMULATIONBASE
+   return Amg::Transform3D::Identity();
+#else
+   using ChamberDistortions = MdtAlignmentStore::chamberDistortions;
+
+   /// No deformation parameters were stored for this particular readout element
+   const ChamberDistortions distortPars = static_cast<const MdtAlignmentStore&>(*store->internalAlignment).getDistortion(identify());
+   if (!distortPars) {
+      ATH_MSG_VERBOSE("No set of deformation parameters is in the DB for "<<idHelperSvc()->toString(measurementId(tubeHash)));
+      return Amg::Transform3D::Identity();
+   }
+
+   const Amg::Vector3D fixedPoint{bLineReferencePoint()};
+   
+   
+   const double height = std::max(moduleHeight(), m_reOtherMl->moduleHeight()) - 
+                         (tubePitch() - 2. * tubeRadius());
+
+   const Amg::Transform3D toAMDB{asBuiltRefFrame()};
+   /// Relative sign to calculate the thickness. If multilayer == 1,
+   /// we want the lower point and the upper point otherwise.
+   const double relSign = (multilayer() == 1 ? -1. : 1.);
+   const double modHalfThick{0.5*relSign*moduleThickness()}, 
+                modHalTHickO{-0.5*relSign*m_reOtherMl->moduleThickness()};
+
+   const double thickness = relSign*( (toAMDB* (modHalfThick*Amg::Vector3D::UnitX())) -
+                                      (m_reOtherMl->asBuiltRefFrame()*(modHalTHickO* Amg::Vector3D::UnitX()))).z();
+
+   
+   Amg::Vector3D idealTube = localTubePos(tubeHash);
+   /// Move the tube into the center
+   idealTube[Amg::y] = 0.;
+
+   Amg::Vector3D positiveEnd = toAMDB * (idealTube + 0.5 * uncutTubeLength(tubeHash) * Amg::Vector3D::UnitY());
+   Amg::Vector3D negativeEnd = toAMDB * (idealTube - 0.5 * uncutTubeLength(tubeHash) * Amg::Vector3D::UnitY());
+   /// Apply as-built correction
+   if (distortPars.asBuilt) {
+      positiveEnd = wireEndpointAsBuilt(*distortPars.asBuilt, tubeHash, positiveEnd, tubeSide_t::POS);
+      negativeEnd = wireEndpointAsBuilt(*distortPars.asBuilt, tubeHash, negativeEnd, tubeSide_t::NEG);
+   }
+   Amg::Vector3D positiveEndBline{positiveEnd};
+   Amg::Vector3D negativeEndBline{negativeEnd};
+   if (distortPars.bLine) {
+      positiveEndBline = applyBlineCorrections(*distortPars.bLine, positiveEndBline, fixedPoint, thickness);
+      negativeEndBline = applyBlineCorrections(*distortPars.bLine, negativeEndBline, fixedPoint, thickness); 
+   }
+
+   ATH_MSG_VERBOSE("Calculate the deformation parameters of "<<idHelperSvc()->toString(measurementId(tubeHash))
+                <<", ideal tube "<<Amg::toString(idealTube)
+                <<", fixed point "<<Amg::toString(fixedPoint)
+                <<"/ "<<Amg::toString(alignableTransform()->getDefTransform() * fixedPoint)
+                <<", thickness: "<<thickness<<", height: "<<height);
+
+   const Amg::Transform3D fromAMDB{toAMDB.inverse()};
+   /// Switch tube ends back to MGM coordinates
+   positiveEnd = fromAMDB * positiveEnd;
+   negativeEnd = fromAMDB * negativeEnd;
+   positiveEndBline = fromAMDB * positiveEndBline;
+   negativeEndBline = fromAMDB * negativeEndBline;
+
+   // Calculate deformation. Make sure that the wire length stays the same.
+   // Code in positionOnDeformedChamber does not provide this by default.
+   // Break transformation into translation of the wire center and the rotation of the wire
+   // Move to the coordinate system originated at the wire center, then rotate the wire, then
+   // move wire center to the new position
+   const Amg::Transform3D to_center{Amg::getTranslate3D(-idealTube)};
+   const Amg::Transform3D from_center{Amg::getTranslate3D( 0.5 * (positiveEndBline + negativeEndBline))};
+   const Amg::Vector3D old_direction = (positiveEnd - negativeEnd).unit();
+   const Amg::Vector3D new_direction = (positiveEndBline - negativeEndBline).unit();
+   const Amg::Vector3D rotation_vector = old_direction.cross(new_direction);
+
+  Amg::Transform3D deformedTransform{Amg::Transform3D::Identity()};
+   if (rotation_vector.mag() > 10. * std::numeric_limits<double>::epsilon()) {
+      const Amg::AngleAxis3D wire_rotation(std::asin(rotation_vector.mag()), rotation_vector.unit());
+      deformedTransform = from_center * wire_rotation * to_center;
+   } else {
+      deformedTransform = from_center * to_center;
+   }
+   ATH_MSG_VERBOSE("To center "<<GeoTrf::toString(to_center)<<" from: "<<GeoTrf::toString(from_center)<<
+            " -- direction: "<<GeoTrf::toString(old_direction)<<" vs. "<<GeoTrf::toString(new_direction)
+            <<" --> rot: "<<GeoTrf::toString(rotation_vector)<<" ==> "<<GeoTrf::toString(deformedTransform,true));
+   return deformedTransform;
+#endif
+}
+
 
 }  // namespace MuonGMR4

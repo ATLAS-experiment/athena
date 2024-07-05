@@ -19,6 +19,7 @@
 #include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
 #include "GeoModelHelpers/throwExcept.h"
 #include "GeoModelHelpers/TransformToStringConverter.h"
+#include "GeoModelHelpers/GeoShapeUtils.h"
 
 #include "MuonAlignmentData/BLinePar.h"
 #include "MuonIdHelpers/MdtIdHelper.h"
@@ -464,22 +465,24 @@ namespace MuonGM {
         if ( !ms->hasBLines() && !ms->hasMdtAsBuiltParams()) {
             return Amg::Transform3D::Identity();
         }
+        const Amg::Vector3D fixedPoint = ms->getBlineFixedPointInAmdbLRS();
 
-        const Amg::Vector3D fixedPoint = ms->getUpdatedBlineFixedPointInAmdbLRS();
-
-        int ntot_tubes = m_nlayers * m_ntubesperlayer;
-        int itube = (tubeLayer - 1) * m_ntubesperlayer + tube - 1;
-        if (itube >= ntot_tubes) {
-            ATH_MSG_WARNING( "global index for tubeLayer/tube =  " << tubeLayer << "/" << tube << " is " << itube
-                << " >=ntot_tubes =" << ntot_tubes << " RESETTING global index to 0" );
-            itube = 0;
-        }
 
         // Chamber parameters
         double width_narrow = m_Ssize;
         double width_wide = m_LongSsize;
         double height = barrel() ? ms->ZsizeMdtStation() : ms->RsizeMdtStation();
         double thickness = barrel() ? ms->RsizeMdtStation() : ms->ZsizeMdtStation();
+
+
+       
+        ATH_MSG_VERBOSE("Calculate deformed transform "<<idHelperSvc()->toStringDetEl(identify())
+                        <<", layer: "<<tubeLayer<<", tube: "<<tube
+                         <<", fixedPoint: "<<Amg::toString(fixedPoint)<<" / "
+                        <<Amg::toString(ms->getGeoTransform()->getDefTransform() *ms->getNativeToAmdbLRS().inverse()* fixedPoint)
+                         <<", height: "<<height<<", thickness: "<<thickness
+                         <<", ideal tube: "<<Amg::toString(localNominalTubePosWoCutouts(tubeLayer,tube)));
+
 #ifndef NDEBUG
         double heightML = barrel() ? m_Zsize : m_Rsize;
         double thicknessML = barrel() ? m_Rsize : m_Zsize;
@@ -536,16 +539,24 @@ namespace MuonGM {
         // Move to the coordinate system originated at the wire center, then rotate the wire, then
         // move wire center to the new position
         const Amg::Vector3D pt_center_new = 0.5 * (pt_end1_new + pt_end2_new);
-        const Amg::Translation3D to_center{-pt_center};
-        const Amg::Translation3D from_center{pt_center_new};
+        const Amg::Transform3D to_center{Amg::getTranslate3D(-pt_center)};
+        const Amg::Transform3D from_center{Amg::getTranslate3D(pt_center_new)};
         const Amg::Vector3D old_direction = (pt_end2 - pt_end1).unit();
         const Amg::Vector3D new_direction = (pt_end2_new - pt_end1_new).unit();
         const Amg::Vector3D rotation_vector = old_direction.cross(new_direction);
+        
+
+        Amg::Transform3D deformedTransform{Amg::Transform3D::Identity()};
         if (rotation_vector.mag() > 10. * std::numeric_limits<double>::epsilon()) {
             const Amg::AngleAxis3D wire_rotation(std::asin(rotation_vector.mag()), rotation_vector.unit());
-            return Amg::Transform3D{from_center * wire_rotation * to_center};
+            deformedTransform = from_center * wire_rotation * to_center;
+        } else {
+            deformedTransform = from_center * to_center;
         }
-        return Amg::Transform3D{from_center * Amg::getRotateX3D(std::asin(rotation_vector.mag())) * to_center};
+        ATH_MSG_VERBOSE("To center "<<GeoTrf::toString(to_center)<<" from: "<<GeoTrf::toString(from_center)<<
+                  " -- direction: "<<GeoTrf::toString(old_direction)<<" vs. "<<GeoTrf::toString(new_direction)
+                  <<" --> rot: "<<GeoTrf::toString(rotation_vector)<<" ==> "<<GeoTrf::toString(deformedTransform,true));
+        return deformedTransform;
     }
 
     //   //Correspondence to AMDB parameters -TBM
@@ -632,7 +643,7 @@ namespace MuonGM {
         if (z0mdt < 0 || t0mdt < 0) {
             ATH_MSG_WARNING(""<<__func__<<": correcting the local position of a point outside the mdt station (2 multilayers) volume -- RE "
                 << idHelperSvc()->toStringDetEl(identify()) << " local point: szt=" << s0 << " " << z0 << " " << t0
-                << " fixedPoint " << fixedPoint );
+                << " fixedPoint " <<Amg::toString(fixedPoint) );
         }
         ATH_MSG_VERBOSE( "** In "<<__func__<<" - correct for offset of B-line fixed point " << s0mdt << " " << z0mdt << " " << t0mdt);
 
@@ -720,12 +731,13 @@ namespace MuonGM {
         std::array<Amg::Vector3D, nsid> wireEnd{locAMDBWireEndP, locAMDBWireEndN};
         multilayer_t ml = (getMultilayer() == 1) ? multilayer_t::ML1 : multilayer_t::ML2;
 
+        const double xmin = *std::min_element(m_firstwire_x.begin(), m_firstwire_x.begin() + m_nlayers) - outerTubeRadius();
+        const int ref_layer = (ml == multilayer_t::ML1) ? m_nlayers : 1;
+        const double y_offset = (ml == multilayer_t::ML1) ? outerTubeRadius() : -outerTubeRadius();
+
         for (int isid = 0; isid < nsid; ++isid) {  // first s>0 then s<0
             // Compute the reference for the as-built parameters
             double xref{0.}, yref{0.}, zref{0.};
-            int ref_layer = (ml == multilayer_t::ML1) ? m_nlayers : 1;
-            double y_offset = (ml == multilayer_t::ML1) ? outerTubeRadius() : -outerTubeRadius();
-            double xmin = *std::min_element(m_firstwire_x.begin(), m_firstwire_x.begin() + m_nlayers) - outerTubeRadius();
             if (barrel()) {
                 xref = -m_Rsize / 2. + m_firstwire_y[ref_layer - 1] + y_offset;
                 zref = -m_Zsize / 2. + xmin;
@@ -735,8 +747,6 @@ namespace MuonGM {
             }
             const Amg::Transform3D toAMDB = parentMuonStation()->getNativeToAmdbLRS() * toParentStation();
             Amg::Vector3D reference_point{xref, yref, zref};
-            ATH_MSG_VERBOSE("AMDB transform "<<" "<<idHelperSvc()->toStringDetEl(identify())<<
-                          " "<<GeoTrf::toString(toAMDB, true)<<", reference point: "<<Amg::toString(reference_point));
 
             reference_point = toAMDB * reference_point;
 
@@ -744,6 +754,10 @@ namespace MuonGM {
                 reference_point = reference_point + 0.5 * getNominalTubeLengthWoCutouts(ref_layer, 1) * Amg::Vector3D::UnitX();
             else
                 reference_point = reference_point -0.5 * getNominalTubeLengthWoCutouts(ref_layer, 1) * Amg::Vector3D::UnitX();
+
+            ATH_MSG_VERBOSE("AMDB transform "<<idHelperSvc()->toStringDetEl(identify())<<
+                            " "<<GeoTrf::toString(toAMDB, true)<<", reference point: "<<Amg::toString(reference_point));
+
             int layer_delta = tubeLayer;
             if (ml == multilayer_t::ML1) layer_delta = m_nlayers + 1 - tubeLayer;
 
@@ -779,6 +793,8 @@ namespace MuonGM {
                 ATH_MSG_WARNING( "Large as-built correction for chamber " << idHelperSvc()->toStringDetEl(identify()) << ", side "
                     << isid << ", Delta " << Amg::toString(ret - wireEnd[isid]) );
             }
+            ATH_MSG_VERBOSE(( tubeSide[isid] == tubeSide_t::POS ? "positive" : "negative")<<" wire end has moved from "
+                        <<Amg::toString(wireEnd[isid])<<" to "<<Amg::toString(ret));
 
             // Save the result
             if (tubeSide[isid] == tubeSide_t::POS)
