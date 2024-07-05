@@ -1,4 +1,4 @@
-## Get handle to Athena logging
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 from AthenaCommon import Logging
 logger = Logging.logging.getLogger("PowhegControl")
 

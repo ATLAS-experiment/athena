@@ -8,7 +8,7 @@ from ..powheg_Beta import PowhegBeta
 logger = Logging.logging.getLogger("PowhegControl")
 
 
-class bblvlv_Beta(PowhegBeta):
+class bblvlv_Beta_modified(PowhegBeta):
     """! Default Powheg configuration for top pair and Wt production including non-resonant and interference effects.
 
     Create a configurable object with all applicable Powheg options.
@@ -22,7 +22,7 @@ class bblvlv_Beta(PowhegBeta):
         @param base_directory: path to PowhegBox code.
         @param kwargs          dictionary of arguments from Generate_tf.
         """
-        super(bblvlv_Beta, self).__init__(base_directory, "b_bbar_4l", **kwargs)
+        super(bblvlv_Beta_modified, self).__init__(base_directory, "b_bbar_4l_modified", **kwargs)
 
         # This is a hacky fix that's needed at the moment...
         self.manually_set_openloops_paths()
