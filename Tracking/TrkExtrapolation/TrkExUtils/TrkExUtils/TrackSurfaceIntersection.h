@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -73,7 +73,7 @@ class TrackSurfaceIntersection final {
  private:
   Amg::Vector3D m_position;
   Amg::Vector3D m_direction;
-  double m_pathlength;
+  double m_pathlength{0};
   std::unique_ptr<IIntersectionCache> m_cache;
 };
 
