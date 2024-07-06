@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -107,7 +107,7 @@ void eSuperCellTowerMapper::reset() const {
   //const CaloCell_Base_ID* idHelper = caloIdManager->getCaloCell_SuperCell_ID(); // getting the id helper class
   const CaloCell_Base_ID* idHelper = nullptr;
   ATH_CHECK( detStore()->retrieve (idHelper, "CaloCell_SuperCell_ID") );
-  for (const auto& cell : * scellsCollection){
+  for (const CaloCell* cell : * scellsCollection){
 
     // Discard masked cells from monitoring
     int SCprov = (cell)->provenance()&0xFFF;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //    gFEXOutputCollection
@@ -60,7 +60,7 @@ void LVL1::gFEXOutputCollection::addJetTob(uint32_t jettob)
   m_jettob.push_back(jettob);
 }
 
-std::vector<uint32_t> LVL1::gFEXOutputCollection::getJetTob() const
+const std::vector<uint32_t>& LVL1::gFEXOutputCollection::getJetTob() const
 {
   return m_jettob;
 }
@@ -93,7 +93,7 @@ void LVL1::gFEXOutputCollection::addGlobalTob(uint32_t globaltob)
   m_globaltob.push_back(globaltob);
 }
 
-std::vector<uint32_t> LVL1::gFEXOutputCollection::getGlobalTob() const
+const std::vector<uint32_t>& LVL1::gFEXOutputCollection::getGlobalTob() const
 {
   return m_globaltob;
 }

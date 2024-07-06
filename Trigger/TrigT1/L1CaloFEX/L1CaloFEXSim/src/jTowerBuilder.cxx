@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -305,7 +305,7 @@ StatusCode jTowerBuilder::AssignPileupAndNoiseValues(std::unique_ptr<jTowerConta
         return StatusCode::FAILURE;
     }
 
-    for(const auto & jtower : *jTowerContainerRaw) {
+    for(LVL1::jTower* jtower : *jTowerContainerRaw) {
         
         auto [CutJetEM, CutJetHad, CutMetEM, CutMetHad] = myDBTool->get_NoiseCuts( jtower->OnlineID() );
         auto [PileUpWeightEM, PileUpWeightHad, InverseWeightEM, InverseWeightHad] = myDBTool->get_PileUpValues( jtower->OnlineID() );
