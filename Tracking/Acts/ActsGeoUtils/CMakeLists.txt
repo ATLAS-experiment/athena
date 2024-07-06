@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 ################################################################################
 # Package: ActsGeoUtils
@@ -26,8 +26,7 @@ if( NOT SIMULATIONBASE )
     foreach(_theTestSource ${tests})
         get_filename_component(_theTest ${_theTestSource} NAME_WE)
         atlas_add_test( ${_theTest} SOURCES ${_theTestSource}
-                        INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} 
-                        LINK_LIBRARIES ${ROOT_LIBRARIES} ActsGeoUtils 
+                        LINK_LIBRARIES ActsGeoUtils 
                         POST_EXEC_SCRIPT nopost.sh)
     endforeach()
 
