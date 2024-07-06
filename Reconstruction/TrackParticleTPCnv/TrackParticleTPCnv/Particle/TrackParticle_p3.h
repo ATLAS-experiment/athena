@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRACKPARTICLE_P3_REC_H
@@ -15,15 +15,15 @@ namespace Rec
     class TrackParticle_p3
     {
     public:
-        TrackParticle_p3():m_fitQuality_m_chiSquared{},m_fitQuality_m_numberDoF{}{/* nop */}
+        TrackParticle_p3() = default;
 
         ElementLinkInt_p3         m_originalTrack;
         ElementLinkInt_p3         m_elVxCandidate;
         std::vector< TPObjRef >   m_trackParameters; 
 
         TPObjRef                  m_trackSummary; 
-        float                     m_fitQuality_m_chiSquared;
-        float                     m_fitQuality_m_numberDoF;
+        float                     m_fitQuality_m_chiSquared{};
+        float                     m_fitQuality_m_numberDoF{};
 
         /** bitsAndPieces contains the following:
        *     unsigned int m_trackParticleOrigin;
@@ -35,7 +35,7 @@ namespace Rec
          *     unsigned int      m_patternRecognition;
          *     unsigned int      m_extPatternRecognition;
        */
-        unsigned int              bitsAndPieces[6]; // contains the 6 things below in the same order    
+        unsigned int              bitsAndPieces[6]{}; // contains the 6 things below in the same order
 
 
 
