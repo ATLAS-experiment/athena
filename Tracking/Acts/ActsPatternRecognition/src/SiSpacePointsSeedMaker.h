@@ -147,7 +147,7 @@ namespace ActsTrk {
     void
       newSpacePoint(InDet::SiSpacePointsSeedMakerEventData& data,
 		    const xAOD::SpacePoint* const& sp) const;
-    bool skipSpacePoint(float x, float y, float z) const;
+    
     static void pixInform(const Trk::SpacePoint* const& sp,
 			  float* r) ;
     static void stripInform(InDet::SiSpacePointsSeedMakerEventData& data,
