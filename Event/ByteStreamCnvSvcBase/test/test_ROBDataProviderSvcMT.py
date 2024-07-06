@@ -11,6 +11,7 @@ flags.Concurrency.NumThreads = 10
 flags.Concurrency.NumConcurrentEvents = 2
 flags.Exec.MaxEvents = 1000
 flags.Input.Files = defaultTestFiles.RAW_RUN3
+flags.fillFromArgs()
 flags.lock()
 
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
