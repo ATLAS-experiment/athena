@@ -52,11 +52,6 @@
 #include <algorithm>
 #include <set>
 
-template<typename C>
-bool isEmptyCont(C& c) {
-  return (!c.isValid() || c->size()==0); 
-}
-
 
 /*---------------------------------------------------------*/
 LArDigitalTriggMonAlg::~LArDigitalTriggMonAlg()
@@ -265,6 +260,8 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
     ATH_MSG_DEBUG("hLArLATOMEHeaderContainer.size() " << hLArLATOMEHeaderContainer->size());
   }
 
+
+  auto isEmptyCont=[](auto& c) {return (!c.isValid() || c->empty()); };
   if (isEmptyCont(hLArDigitContainer) && isEmptyCont(hSCetContainer) && isEmptyCont(hSCetRecoContainer) && isEmptyCont(hLArLATOMEHeaderContainer)) {
     //Make this only warning, come CI tests use the runs without DT info
     ATH_MSG_WARNING("All of the requested containers are empty. Was there a problem retrieving information from the run logger?");
