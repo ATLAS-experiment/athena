@@ -5,7 +5,7 @@
  **     @author  mark sutton
  **     @date    Wed 28 Oct 2009 02:41:51 CET 
  **
- **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -82,27 +82,27 @@ private:
 
   std::map<std::string, TH1F*> m_histos;
 
-  Efficiency1D* m_eff_pt;
-  Efficiency1D* m_eff_ptp;
-  Efficiency1D* m_eff_ptm;
+  Efficiency1D* m_eff_pt = nullptr;
+  Efficiency1D* m_eff_ptp = nullptr;
+  Efficiency1D* m_eff_ptm = nullptr;
 
-  Efficiency1D* m_eff_eta;
-  Efficiency1D* m_eff_phi;
-  Efficiency1D* m_eff_z0;
-  Efficiency1D* m_eff_d0;
-  Efficiency1D* m_eff_a0;
+  Efficiency1D* m_eff_eta = nullptr;
+  Efficiency1D* m_eff_phi = nullptr;
+  Efficiency1D* m_eff_z0 = nullptr;
+  Efficiency1D* m_eff_d0 = nullptr;
+  Efficiency1D* m_eff_a0 = nullptr;
 
-  Efficiency1D* m_purity_pt;
-  Efficiency1D* m_purity_eta;
-  Efficiency1D* m_purity_phi;
-  Efficiency1D* m_purity_z0;
-  Efficiency1D* m_purity_d0;
-  Efficiency1D* m_purity_a0;
+  Efficiency1D* m_purity_pt = nullptr;
+  Efficiency1D* m_purity_eta = nullptr;
+  Efficiency1D* m_purity_phi = nullptr;
+  Efficiency1D* m_purity_z0 = nullptr;
+  Efficiency1D* m_purity_d0 = nullptr;
+  Efficiency1D* m_purity_a0 = nullptr;
 
 
-  TH2F* m_h2;
-  TH2F* m_h2m;
-  TH2F* m_h2r;
+  TH2F* m_h2 = nullptr;
+  TH2F* m_h2m = nullptr;
+  TH2F* m_h2r = nullptr;
 
   /// number of reconstructed tracks 
   int m_Nreco;
