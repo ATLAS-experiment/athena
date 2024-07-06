@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRACKPARTICLE_P2_REC_H
@@ -15,17 +15,17 @@ namespace Rec
     class TrackParticle_p2
     {
     public:
-    TrackParticle_p2():m_fitQuality_m_chiSquared(0),m_fitQuality_m_numberDoF(0){/* nop */}
+        TrackParticle_p2() = default;
 
         ElementLinkInt_p3         m_originalTrack;
         ElementLinkInt_p3         m_elVxCandidate;
         std::vector< TPObjRef >   m_trackParameters; 
 
         TPObjRef m_trackSummary; 
-        float  m_fitQuality_m_chiSquared;
-        float  m_fitQuality_m_numberDoF;
+        float  m_fitQuality_m_chiSquared{};
+        float  m_fitQuality_m_numberDoF{};
 
-        unsigned int bitsAndPieces[6]; // contains the 6 things below in the same order    
+        unsigned int bitsAndPieces[6]{}; // contains the 6 things below in the same order
      //     unsigned int m_trackParticleOrigin;
      //     // data properties related to the TrackInfo    
      //     unsigned int    m_fitter;
