@@ -43,15 +43,17 @@
 
 #include "AtlasUncalibSourceLinkAccessor.h"
 
-namespace
-{
-  /// =========================================================================
-  /// Include all sorts of stuff needed to interface with the Acts Core classes.
-  /// This is only required by code in TrackFindingAlg.cxx, so we keep it in the anonymous namespace.
-  /// =========================================================================
-
+/// =========================================================================
+/// Include all sorts of stuff needed to interface with the Acts Core classes.
+/// =========================================================================
+namespace ActsTrk::detail {
   // container used during the reconstruction
-  using RecoTrackStateContainer = ActsTrk::TrackFindingAlg::RecoTrackStateContainer;
+  using RecoTrackContainer = Acts::TrackContainer<Acts::VectorTrackContainer,
+                                                  Acts::VectorMultiTrajectory>;
+  using RecoTrackContainerProxy = RecoTrackContainer::TrackProxy;
+  using RecoTrackStateContainer = Acts::VectorMultiTrajectory;
+  using RecoTrackStateContainerProxy = RecoTrackStateContainer::TrackStateProxy;
+
 
 
   /// Adapted from Acts Examples/Algorithms/TrackFinding/src/TrackFindingAlgorithmFunction.cpp
@@ -299,8 +301,8 @@ namespace
       for (std::size_t typeIndex = 0; typeIndex < m_measurementRanges.numContainers(); ++typeIndex)
       {
         const xAOD::UncalibratedMeasurementContainer *the_container
-           = std::visit( [] (const auto &a) -> const xAOD::UncalibratedMeasurementContainer * { return a.containerPtr();} ,
-                         m_measurementRanges.container(typeIndex));
+            = std::visit( [] (const auto &a) -> const xAOD::UncalibratedMeasurementContainer * { return a.containerPtr();} ,
+                          m_measurementRanges.container(typeIndex));
         if (measurementOffset(typeIndex) > 0 && the_container != nullptr)
         {
           offsets.emplace_back(the_container, measurementOffset(typeIndex));
@@ -324,7 +326,5 @@ namespace
     std::size_t m_measurementsTotal = 0;
     bool m_sorted = false;
   };
-
-} // anonymous namespace
-
+}
 #endif

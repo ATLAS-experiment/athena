@@ -51,14 +51,7 @@
 #include "StoreGate/CondHandleKeyArray.h"
 #include "StoreGate/WriteHandleKey.h"
 #include "ActsEvent/TrackContainerHandlesHelper.h"
-
-namespace
-{
-  // Forward-declare internal classes defined in TrackFindingData.h and used only in TrackFindingAlg.cxx.
-  // Define in the anonymous namespace to prevent unnecessary external linkage.
-  class TrackFindingMeasurements;
-  class DuplicateSeedDetector;
-}
+#include "TrackFindingData.h"
 
 namespace ActsTrk
 {
@@ -66,11 +59,6 @@ namespace ActsTrk
   class TrackFindingAlg : public AthReentrantAlgorithm
   {
   public:
-    using RecoTrackContainer = Acts::TrackContainer<Acts::VectorTrackContainer,
-                                                    Acts::VectorMultiTrajectory>;
-    using RecoTrackContainerProxy = RecoTrackContainer::TrackProxy;
-    using RecoTrackStateContainer = Acts::VectorMultiTrajectory;
-    using RecoTrackStateContainerProxy = RecoTrackStateContainer::TrackStateProxy;
 
     TrackFindingAlg(const std::string &name,
                     ISvcLocator *pSvcLocator);
@@ -90,9 +78,9 @@ namespace ActsTrk
     ToolHandle<ActsTrk::IActsToTrkConverterTool> m_ATLASConverterTool{this, "ATLASConverterTool", ""};
     ToolHandle<ActsTrk::TrackStatePrinter> m_trackStatePrinter{this, "TrackStatePrinter", "", "optional track state printer"};
     ToolHandle<ActsTrk::IFitterTool> m_fitterTool{this, "FitterTool", "", "Fitter Tool for Seeds"};
-    ToolHandle<ActsTrk::IOnTrackCalibratorTool<RecoTrackStateContainer>> m_pixelCalibTool{
+    ToolHandle<ActsTrk::IOnTrackCalibratorTool<detail::RecoTrackStateContainer>> m_pixelCalibTool{
       this, "PixelCalibrator", "", "Opt. pixel measurement calibrator"};
-    ToolHandle<ActsTrk::IOnTrackCalibratorTool<RecoTrackStateContainer>> m_stripCalibTool{
+    ToolHandle<ActsTrk::IOnTrackCalibratorTool<detail::RecoTrackStateContainer>> m_stripCalibTool{
       this, "StripCalibrator", "", "Opt. strip measurement calibrator"};
 
     // Handle Keys
@@ -179,8 +167,8 @@ namespace ActsTrk
      */
     StatusCode
     findTracks(const EventContext &ctx,
-               const TrackFindingMeasurements &measurements,
-               DuplicateSeedDetector &duplicateSeedDetector,
+               const detail::TrackFindingMeasurements &measurements,
+               detail::DuplicateSeedDetector &duplicateSeedDetector,
                const ActsTrk::BoundTrackParametersContainer &estimatedTrackParameters,
                const ActsTrk::SeedContainer *seeds,
                ActsTrk::MutableTrackContainer &tracksContainer,
@@ -190,9 +178,9 @@ namespace ActsTrk
 
     // Create tracks from one seed's CKF result, appending to tracksContainer
 
-    void storeSeedInfo(const RecoTrackContainer &tracksContainer,
-                       const RecoTrackContainerProxy &track,
-                       DuplicateSeedDetector &duplicateSeedDetector) const;
+    void storeSeedInfo(const detail::RecoTrackContainer &tracksContainer,
+                       const detail::RecoTrackContainerProxy &track,
+                       detail::DuplicateSeedDetector &duplicateSeedDetector) const;
 
     // Access Acts::CombinatorialKalmanFilter etc using "pointer to implementation"
     // so we don't have to instantiate the heavily templated classes in the header.

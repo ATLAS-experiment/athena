@@ -6,14 +6,15 @@
 #define ACTS_ITKANALOGUECLUSTERINGTOOL_H
 
 #include "AnalogueClusteringToolImpl.h"
-#include "TrackFindingAlg.h"
+#include "TrackFindingData.h"
+
 namespace ActsTrk {
 
 class ITkAnalogueClusteringTool :
-	public AnalogueClusteringToolImpl<ITk::PixelOfflineCalibData, ActsTrk::TrackFindingAlg::RecoTrackStateContainer> {
+	public AnalogueClusteringToolImpl<ITk::PixelOfflineCalibData, detail::RecoTrackStateContainer> {
 public:
     using calib_data_t = ITk::PixelOfflineCalibData;
-    using traj_t = ActsTrk::TrackFindingAlg::RecoTrackStateContainer;
+    using traj_t = detail::RecoTrackStateContainer;
 
     using AnalogueClusteringToolImpl<calib_data_t, traj_t>::AnalogueClusteringToolImpl;
 };
