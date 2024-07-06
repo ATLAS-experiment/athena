@@ -381,7 +381,7 @@ def MUON1Cfg(flags):
     MUON1SlimmingHelper.IncludeTauTriggerContent = False
     MUON1SlimmingHelper.IncludeEtMissTriggerContent = False
     MUON1SlimmingHelper.IncludeBJetTriggerContent = False
-    MUON1SlimmingHelper.IncludeBPhysTriggerContent = False
+    MUON1SlimmingHelper.IncludeBPhysTriggerContent = True
     MUON1SlimmingHelper.IncludeMinBiasTriggerContent = False
 
     # Trigger matching
@@ -394,6 +394,15 @@ def MUON1Cfg(flags):
         AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = MUON1SlimmingHelper, 
                                          OutputContainerPrefix = "TrigMatch_",
                                          TriggerList = MUON1TriggerListsHelper.Run2TriggerNamesNoTau)
+        
+        # Custom (B-physics) muon chains not in PHYS
+        from DerivationFrameworkMuons.MuonsExtraTriggerConfig import MuonExtraTriggerHelper
+        ExtraHelper = MuonExtraTriggerHelper(flags,MUON1TriggerListsHelper)
+        acc.merge(ExtraHelper.Run2MatchAugmentationCfg(flags))
+        ExtraHelper.AddRun2MatchingToSlimmingHelper(SlimmingHelper = MUON1SlimmingHelper, 
+                                         OutputContainerPrefix = "TrigMatch_")
+
+       
     # Run 3, or Run 2 with navigation conversion
     if flags.Trigger.EDMVersion == 3 or (flags.Trigger.EDMVersion == 2 and flags.Trigger.doEDMVersionConversion):
         from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import AddRun3TrigNavSlimmingCollectionsToSlimmingHelper
