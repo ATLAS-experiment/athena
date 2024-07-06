@@ -1,16 +1,20 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RegionSelector/RegSelectorMapElement.h"
 
 #include <stdio.h>
 #include <iostream>
-// using namespace std;
+
 
 RegSelectorMapElement::RegSelectorMapElement(){
   m_position = 0;
   m_number = 0;
+  m_etaminValue = 1000;
+  m_etamaxValue = -1000;
+  m_phiminValue = 1000;
+  m_phimaxValue = -1000;
 }
 
 int RegSelectorMapElement::layerDiskPosition(void) const{
