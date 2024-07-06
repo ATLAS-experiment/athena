@@ -17,7 +17,7 @@ timeout 64800 Reco_tf.py \
   --multithreaded='True' \
   --preExec 'flags.Exec.FPE=10' \
   --autoConfiguration="everything" \
-  --conditionsTag "all:CONDBR2-BLKPA-2022-07" \
+  --conditionsTag "all:CONDBR2-BLKPA-2022-15" \
   --geometryVersion="all:ATLAS-R3S-2021-03-00-00" \
   --runNumber="431493" \
   --maxEvents='-1'
