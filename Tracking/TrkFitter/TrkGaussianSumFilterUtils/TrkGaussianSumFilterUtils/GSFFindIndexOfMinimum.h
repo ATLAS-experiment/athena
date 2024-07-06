@@ -35,6 +35,10 @@
  * In this aimplementations a vec<float,4> vec<int,4>
  * is a 4 wide register. And we do operation explicitly
  * 4 elements a time.
+ * 
+ * Additionally avx2 versions of some of these functions are 
+ * provided using gnu::target (when available) using 
+ * vec<float, 8> and vec<int, 8>.
  *
  * For completeness and future comparisons
  * we collect
@@ -58,6 +62,7 @@
 
 #ifndef GSFFindIndexOfMimimum_H
 #define GSFFindIndexOfMimimum_H
+#include "CxxUtils/features.h"
 #include "CxxUtils/inline_hints.h"
 #include "CxxUtils/restrict.h"
 #include "CxxUtils/vec.h"
@@ -65,6 +70,7 @@
 #include "TrkGaussianSumFilterUtils/GsfConstants.h"
 //
 #include <algorithm>
+#include <concepts>
 #include <memory>
 #include <numeric>
 namespace findIdxOfMinDetail {
@@ -234,21 +240,46 @@ int32_t vecUpdateIdxOnNewMin(const float* distancesIn, int n) {
   return 0;
 }
 
-template <typename T = float, int STRIDE = 16, int VEC_WIDTH = 4>
+// Functionality is very similar to std::reduce but instead of returning
+// a value it updates the iterable inplace such that the reduction result is
+// stored in values[0].
+//
+// This is required to bypass a compile warning like:
+//   warning: AVX vector return without AVX enabled changes the ABI [-Wpsabi]
+//
+// This could be extended to handle SIMD containers (similar to 
+// std::experimental::reduce)
+template <typename T, std::size_t SIZE>
+requires std::ranges::random_access_range<T>
+void reduce(const auto& lambda, T indexable) {
+  static_assert(SIZE % 2 == 0 || SIZE == 1);
+
+  if constexpr (SIZE == 1) {
+    return;
+  }
+
+  for (std::size_t i = 0; i < SIZE / 2; i++) {
+    lambda(indexable[i], indexable[i + (SIZE / 2)]); 
+  }
+
+  reduce<T, SIZE / 2>(lambda, indexable);
+}
+
+template <std::size_t STRIDE = 16, std::size_t VEC_WIDTH = 4> 
 ATH_ALWAYS_INLINE
-float vecFindMinimum(const T* distancesIn, int n) {
+float vecFindMinimum(const float* distancesIn, int n) {
   using namespace CxxUtils;
-  const T* array = std::assume_aligned<GSFConstants::alignment>(distancesIn);
+  const float* array = std::assume_aligned<GSFConstants::alignment>(distancesIn);
   constexpr int vectorCount = STRIDE / VEC_WIDTH;
 
-  vec<T, VEC_WIDTH> minValues[vectorCount];
+  vec<float, VEC_WIDTH> minValues[vectorCount];
 
   for (int i = 0; i < vectorCount; i++) {
     vload(minValues[i], array + (VEC_WIDTH * i));
   }
 
   constexpr int totalStride = VEC_WIDTH * vectorCount;
-  vec<T, VEC_WIDTH> values[vectorCount];
+  vec<float, VEC_WIDTH> values[vectorCount];
   for (int i = totalStride; i < n; i += totalStride) {
     GAUDI_LOOP_UNROLL(4)
     for (int j = 0; j < vectorCount; j++) {
@@ -257,28 +288,31 @@ float vecFindMinimum(const T* distancesIn, int n) {
     }
   }
 
-  T finalMinValues[VEC_WIDTH];
-  vstore(finalMinValues, std::reduce(std::begin(minValues), 
-                                     std::end(minValues), 
-                                     minValues[0], 
-                                     [](auto a, auto b){ return a < b ? a : b; }));
+  reduce<vec<float, VEC_WIDTH>[vectorCount], vectorCount>(
+    [](vec<float, VEC_WIDTH>& a, vec<float, VEC_WIDTH>& b){ a = a < b ? a : b; }, 
+    minValues
+  );
+
+  float finalMinValues[VEC_WIDTH];
+  vstore(finalMinValues, minValues[0]);
 
   // Do the final calculation scalar way
   return std::reduce(std::begin(finalMinValues), 
                      std::end(finalMinValues), 
                      finalMinValues[0], 
-                     [](auto a, auto b){ return a < b ? a : b; });
+                     [](float a, float b){ return a < b ? a : b; });
 }
 
-template <typename T = float, int STRIDE = 16, int VEC_WIDTH = 4>
+template <std::size_t STRIDE = 16, std::size_t VEC_WIDTH = 4> 
 ATH_ALWAYS_INLINE
-int32_t vecIdxOfValue(const T value, const T* distancesIn, int n) {
+int32_t vecIdxOfValue(const float value, const float* distancesIn, int n) {
   using namespace CxxUtils;
-  const T* array = std::assume_aligned<GSFConstants::alignment>(distancesIn);
+  const float* array = std::assume_aligned<GSFConstants::alignment>(distancesIn);
   constexpr int vectorCount = STRIDE / VEC_WIDTH;
+  constexpr int stride = static_cast<int>(STRIDE);
 
-  vec<T, VEC_WIDTH> values[vectorCount];
-  vec<T, VEC_WIDTH> target;
+  vec<float, VEC_WIDTH> values[vectorCount];
+  vec<float, VEC_WIDTH> target;
   vbroadcast(target, value);
   vec<int, VEC_WIDTH> eqs[vectorCount];
 
@@ -289,14 +323,16 @@ int32_t vecIdxOfValue(const T value, const T* distancesIn, int n) {
       eqs[j] = values[j] == target;
     }
     
+    reduce<vec<int, VEC_WIDTH>[vectorCount], vectorCount>(
+      [](vec<int, VEC_WIDTH>& a, vec<int, VEC_WIDTH>& b){ a = a || b; }, 
+      eqs
+    );
+    
     // See if we have the value in any
     // of the vectors
     // If yes then use scalar code to locate it
-    if (vany(std::reduce(std::begin(eqs),
-                         std::end(eqs),
-                         eqs[0],
-                         [](auto a, auto b){ return a || b; }))) {
-      for (int idx = i; idx < i + STRIDE; ++idx) {
+    if (vany(eqs[0])) {
+      for (int idx = i; idx < i + stride; ++idx) {
         if (distancesIn[idx] == value) {
           return idx;
         }
@@ -306,8 +342,9 @@ int32_t vecIdxOfValue(const T value, const T* distancesIn, int n) {
   return -1;
 }
 
+template <std::size_t STRIDE = 16, std::size_t VEC_WIDTH = 4> 
 ATH_ALWAYS_INLINE
-int32_t vecMinThenIdx(const float* distancesIn, int n) {
+int32_t vecMinThenIdxImpl(const float* distancesIn, int n) {
   using namespace CxxUtils;
   const float* array =
       std::assume_aligned<GSFConstants::alignment>(distancesIn);
@@ -317,15 +354,15 @@ int32_t vecMinThenIdx(const float* distancesIn, int n) {
   constexpr int blockSize = 2 << blockSizePower2;
   // case for n less than blockSize
   if (n <= blockSize) {
-    float min = vecFindMinimum(array, n);
-    return vecIdxOfValue(min, array, n);
+    float min = vecFindMinimum<STRIDE, VEC_WIDTH>(array, n);
+    return vecIdxOfValue<STRIDE, VEC_WIDTH>(min, array, n);
   }
   int32_t idx = 0;
   float min = array[0];
   // We might have a remainder that we need to handle
   const int remainder = n & (blockSize - 1);
   for (int32_t i = 0; i < (n - remainder); i += blockSize) {
-    float mintmp = vecFindMinimum(array + i, blockSize);
+    float mintmp = vecFindMinimum<STRIDE, VEC_WIDTH>(array + i, blockSize);
     if (mintmp < min) {
       min = mintmp;
       idx = i;
@@ -333,17 +370,28 @@ int32_t vecMinThenIdx(const float* distancesIn, int n) {
   }
   if (remainder != 0) {
     int index = n - remainder;
-    float mintmp = vecFindMinimum(array + index, remainder);
+    float mintmp = vecFindMinimum<STRIDE, VEC_WIDTH>(array + index, remainder);
     // if the minimum is in this part
     if (mintmp < min) {
       min = mintmp;
-      return index + vecIdxOfValue(min, array + index, remainder);
+      return index + vecIdxOfValue<STRIDE, VEC_WIDTH>(min, array + index, remainder);
     }
   }
   //default return
-  return idx + vecIdxOfValue(min, array + idx, blockSize);
+  return idx + vecIdxOfValue<STRIDE, VEC_WIDTH>(min, array + idx, blockSize);
 }
 
+#if HAVE_FUNCTION_MULTIVERSIONING
+[[gnu::target("avx2")]]
+int32_t vecMinThenIdx(const float* distancesIn, int n) {
+  return vecMinThenIdxImpl<16, 8>(distancesIn, n);
+}
+
+[[gnu::target("default")]]
+#endif
+int32_t vecMinThenIdx(const float* distancesIn, int n) {
+  return vecMinThenIdxImpl<16, 4>(distancesIn, n);
+}
 }  // namespace findIdxOfMinDetail
 
 namespace findIdxOfMinimum {
