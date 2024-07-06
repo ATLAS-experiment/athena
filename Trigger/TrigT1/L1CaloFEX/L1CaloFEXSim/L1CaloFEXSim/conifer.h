@@ -55,7 +55,7 @@ private:
   std::vector<double> m_value;
 
 public:
-  U decision_function(std::vector<T> x) const {
+  U decision_function(const std::vector<T>& x) const {
     /* Do the prediction */
     int i = 0;
     while (m_feature[i] != -2) { // continue until reaching leaf

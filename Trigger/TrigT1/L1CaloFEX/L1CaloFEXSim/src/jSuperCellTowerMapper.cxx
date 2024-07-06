@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "L1CaloFEXSim/jSuperCellTowerMapper.h"
@@ -103,7 +103,7 @@ void jSuperCellTowerMapper::reset(){
     const CaloCell_Base_ID* idHelper = nullptr;
     ATH_CHECK( detStore()->retrieve (idHelper, "CaloCell_SuperCell_ID") );
 
-    for (const auto& cell : * scellsCollection) {
+    for (const CaloCell* cell : * scellsCollection) {
 
         const CaloSampling::CaloSample sample = (cell)->caloDDE()->getSampling(); // corresponds 'module' for FCAL/MiniFCAL
         const Identifier ID = (cell)->ID(); // super cell unique ID

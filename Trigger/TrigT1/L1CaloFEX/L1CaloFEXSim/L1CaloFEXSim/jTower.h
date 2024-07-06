@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -126,7 +126,7 @@ namespace LVL1 {
     std::vector<int> getLayerETvec(unsigned int layer) const;
     
     /** Get vector of all ET values in MeV */
-    std::vector<int> getETs() const {return m_et;};
+    const std::vector<int>& getETs() const {return m_et;};
     
     /** Set ET value in MeV */
     void set_Et(int layer, int et);
@@ -150,7 +150,7 @@ namespace LVL1 {
     std::vector<float> getLayerETvec_float(unsigned int layer) const;
 
     /** Get vector of all ET values in MeV FLOAT VERSION */
-    std::vector<float> getETs_float() const {return m_et_float_raw;};
+    const std::vector<float>& getETs_float() const {return m_et_float_raw;};
 
     void set_TileCal_Et(int layer, int et);
 
@@ -166,8 +166,8 @@ namespace LVL1 {
     void  setNoiseForJet(int noiseVal,int layer);
     int getNoiseForJet(int layer)const;
 
-    std::vector<Identifier> getEMSCIDs() const { return m_EM_scID; }
-    std::vector<Identifier> getHADSCIDs() const { return m_HAD_scID; }
+    const std::vector<Identifier>& getEMSCIDs() const { return m_EM_scID; }
+    const std::vector<Identifier>& getHADSCIDs() const { return m_HAD_scID; }
 
     Identifier getEMSCID(int cell) const { return m_EM_scID[cell]; }
     Identifier getHADSCID(int cell) const { return m_HAD_scID[cell]; }

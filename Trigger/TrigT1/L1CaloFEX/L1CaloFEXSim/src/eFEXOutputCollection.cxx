@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "L1CaloFEXSim/eFEXOutputCollection.h"
@@ -79,7 +79,7 @@ void LVL1::eFEXOutputCollection::addeFexNumber(int efexnumber)
   m_eFexNumber.push_back(efexnumber);
 }
 
-std::vector<int> LVL1::eFEXOutputCollection::geteFexNumber() const
+const std::vector<int>& LVL1::eFEXOutputCollection::geteFexNumber() const
 {
   return m_eFexNumber;
 }
@@ -89,7 +89,7 @@ void LVL1::eFEXOutputCollection::addEMtob(uint32_t emtob)
   m_emtob.push_back(emtob);
 }
 
-std::vector<uint32_t> LVL1::eFEXOutputCollection::getEMtob() const
+const std::vector<uint32_t>& LVL1::eFEXOutputCollection::getEMtob() const
 {
   return m_emtob;
 }

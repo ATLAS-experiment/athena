@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -284,7 +284,7 @@ uint32_t jFEXFormTOBs::formMetTOB(int METX, int METY, bool sat, int Resolution )
     uint32_t tobWord = 0;
 
     bool Sat = sat;
-    int res = 0;
+    unsigned int res = 0;
 
     int metX = std::floor(1.0*METX/Resolution);
     int metY = std::floor(1.0*METY/Resolution);

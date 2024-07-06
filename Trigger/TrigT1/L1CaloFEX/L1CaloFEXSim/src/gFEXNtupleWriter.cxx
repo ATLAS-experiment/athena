@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //    gFEXOutputCollection
@@ -297,13 +297,13 @@ StatusCode LVL1::gFEXNtupleWriter::execute () {
   
 
 
-  for (const auto& cell : * SCCollection){
+  for (const CaloCell* cell : * SCCollection){
     m_sc_eta.push_back((cell)->eta());
     m_sc_phi.push_back((cell)->phi());
     m_sc_et.push_back((cell)->energy()/cosh((cell)->eta()));
   }
 
-  for (const auto& gTower : *gTowersHandle) {
+  for (const LVL1::gTower* gTower : *gTowersHandle) {
     m_gtower_eta.push_back(gTower->eta());
     m_gtower_phi.push_back(gTower->phi());
     m_gtower_et.push_back(gTower->getET());
@@ -314,7 +314,7 @@ StatusCode LVL1::gFEXNtupleWriter::execute () {
     m_posneg.push_back(gTower->getPosNeg());
   }
 
-  for (const auto& gRho : *gRhoHandle) {
+  for (const xAOD::gFexJetRoI* gRho : *gRhoHandle) {
     m_gRho_eta.push_back(gRho->iEta());
     m_gRho_phi.push_back(gRho->iPhi());
     m_gRho_tobEt.push_back(gRho->gFexTobEt());
@@ -322,7 +322,7 @@ StatusCode LVL1::gFEXNtupleWriter::execute () {
     m_gRho_etScale.push_back(gRho->tobEtScale());
   }
 
-  for (const auto& gSJ : *gBlockHandle) {
+  for (const xAOD::gFexJetRoI* gSJ : *gBlockHandle) {
     m_gSJ_iEta.push_back(gSJ->iEta());
     m_gSJ_iPhi.push_back(gSJ->iPhi());
     m_gSJ_eta.push_back(gSJ->eta());
@@ -335,7 +335,7 @@ StatusCode LVL1::gFEXNtupleWriter::execute () {
 
   }
 
-  for (const auto& gLJ : *gJetHandle) {
+  for (const xAOD::gFexJetRoI* gLJ : *gJetHandle) {
     m_gLJ_iEta.push_back(gLJ->iEta());
     m_gLJ_iPhi.push_back(gLJ->iPhi());
     m_gLJ_eta.push_back(gLJ->eta());
@@ -348,44 +348,44 @@ StatusCode LVL1::gFEXNtupleWriter::execute () {
 
   }
 
-  for (const auto& gScalarEJwoj : *gScalarEJwojHandle) {
+  for (const xAOD::gFexGlobalRoI* gScalarEJwoj : *gScalarEJwojHandle) {
     m_gJwoJ_MET.push_back(gScalarEJwoj->METquantityOne());
     m_gJwoJ_SumET.push_back(gScalarEJwoj->METquantityTwo());
     m_gGlobal_etScale1.push_back(gScalarEJwoj->tobEtScaleOne());
     m_gGlobal_etScale2.push_back(gScalarEJwoj->tobEtScaleTwo());
   }
 
-  for (const auto& gMETJwoj : *gMETJwojHandle) {
+  for (const xAOD::gFexGlobalRoI* gMETJwoj : *gMETJwojHandle) {
     m_gJwoJ_METx.push_back(gMETJwoj->METquantityOne());
     m_gJwoJ_METy.push_back(gMETJwoj->METquantityTwo());
   }
 
-  for (const auto& gMHTJwoj : *gMHTJwojHandle) {
+  for (const xAOD::gFexGlobalRoI* gMHTJwoj : *gMHTJwojHandle) {
     m_gJwoJ_MHTx.push_back(gMHTJwoj->METquantityOne());
     m_gJwoJ_MHTy.push_back(gMHTJwoj->METquantityTwo());
   }
 
-  for (const auto& gMSTJwoj : *gMSTJwojHandle) {
+  for (const xAOD::gFexGlobalRoI* gMSTJwoj : *gMSTJwojHandle) {
     m_gJwoJ_MSTx.push_back(gMSTJwoj->METquantityOne());
     m_gJwoJ_MSTy.push_back(gMSTJwoj->METquantityTwo());
   }
 
-  for (const auto& gMETNoiseCut : *gMETNoiseCutHandle) {
+  for (const xAOD::gFexGlobalRoI* gMETNoiseCut : *gMETNoiseCutHandle) {
     m_gNoiseCut_METx.push_back(gMETNoiseCut->METquantityOne());
     m_gNoiseCut_METy.push_back(gMETNoiseCut->METquantityTwo());
   }
 
-  for (const auto& gMETRms : *gMETRmsHandle) {
+  for (const xAOD::gFexGlobalRoI* gMETRms : *gMETRmsHandle) {
     m_gRms_METx.push_back(gMETRms->METquantityOne());
     m_gRms_METy.push_back(gMETRms->METquantityTwo());
   }
 
-  for (const auto& gScalarENoiseCut : *gScalarENoiseCutHandle) {
+  for (const xAOD::gFexGlobalRoI* gScalarENoiseCut : *gScalarENoiseCutHandle) {
     m_gNoiseCut_MET.push_back(gScalarENoiseCut->METquantityOne());
     m_gNoiseCut_SumET.push_back(gScalarENoiseCut->METquantityTwo());
   }
 
-  for (const auto& gScalarERms : *gScalarERmsHandle) {
+  for (const xAOD::gFexGlobalRoI* gScalarERms : *gScalarERmsHandle) {
     m_gRms_MET.push_back(gScalarERms->METquantityOne());
     m_gRms_SumET.push_back(gScalarERms->METquantityTwo());
   }

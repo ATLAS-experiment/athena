@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -86,7 +86,7 @@ namespace LVL1 {
     const std::vector<int>& getETs() const {return m_et;};
 
     /** Get vector of INT which describe whether a slot shared split ET from two different supercells - required information for production of CSV input files */
-    std::vector<unsigned int> getETSplits() const {return m_etSplits;};
+    const std::vector<unsigned int>& getETSplits() const {return m_etSplits;};
 
     /** Get ET of a specified cell in MeV FLOAT VERSION */
     float getET_float(unsigned int layer, int cell = 0) const;
@@ -101,16 +101,16 @@ namespace LVL1 {
     std::vector<float> getLayerETvec_float(unsigned int layer) const;
 
     /** Get vector of all ET values in MeV FLOAT VERSION */
-    std::vector<float> getETs_float() const {return m_et_float;};
+    const std::vector<float>& getETs_float() const {return m_et_float;};
 
     void setET(int cell, float et, int layer, bool ignoreDisable=false);
 
     /** Set supercell position ID **/
     void setSCID(Identifier ID, int cell, float et, int layer, bool doenergysplit);
 
-    std::vector<Identifier> getSCIDs() const { return m_scID; }
+    const std::vector<Identifier>& getSCIDs() const { return m_scID; }
     
-    std::vector<Identifier> getSCIDs_split() const { return m_scID_split; }
+    const std::vector<Identifier>& getSCIDs_split() const { return m_scID_split; }
 
     Identifier getSCID(int cell) const { return m_scID[cell]; }
 

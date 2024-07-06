@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -104,7 +104,9 @@ namespace LVL1 {
         return (((i->getWord() >> bits ) & mask)>((j->getWord() >> bits ) & mask)); 
     }
     
-    static bool etFwdElSort  (std::vector<uint32_t> i, std::vector<uint32_t> j){ return (((i.at(0) >> FEXAlgoSpaceDefs::jEM_etBit ) & 0x7ff  )> ((j.at(0) >> FEXAlgoSpaceDefs::jEM_etBit) & 0x7ff ));}
+    static bool etFwdElSort  (const std::vector<uint32_t>& i,
+                              const std::vector<uint32_t>& j)
+    { return (((i.at(0) >> FEXAlgoSpaceDefs::jEM_etBit ) & 0x7ff  )> ((j.at(0) >> FEXAlgoSpaceDefs::jEM_etBit) & 0x7ff ));}
     
     std::vector<std::unique_ptr<jFEXTOB>> m_tau_tobwords;
     std::vector<std::unique_ptr<jFEXTOB>> m_SRJet_tobwords;

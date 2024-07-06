@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //    gFEXOutputCollection
@@ -61,8 +61,8 @@ namespace LVL1 {
     void addGlobalTob(uint32_t);
 
     //Get all jet TOB words of an event
-    std::vector<uint32_t> getJetTob() const;
-    std::vector<uint32_t> getGlobalTob() const;
+    const std::vector<uint32_t>& getJetTob() const;
+    const std::vector<uint32_t>& getGlobalTob() const;
 
     //setting true if ntuple output is needed
     void setdooutput(bool);

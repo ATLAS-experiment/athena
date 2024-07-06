@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -63,7 +63,7 @@ StatusCode jTowerMakerFromSuperCells::execute() {
         sc_tower_map.open("./new_jfex_SCID.txt");
         sc_tower_map << "# Simulation ID, 12 Scells (EMB or EMEC or FCAL1 layer) + 1 Scell (HEC or FCAL2/3 layer)" << "\n";
 
-        for(const auto & jtower : *local_jTowerContainerRaw) {
+        for(const LVL1::jTower* jtower : *local_jTowerContainerRaw) {
             sc_tower_map << jtower->OfflineID() << " ";
 
             std::vector<Identifier> vEM = jtower->getEMSCIDs();

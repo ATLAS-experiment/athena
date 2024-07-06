@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //    gSuperCellTowerMapper - supercells and Tile tower assignment to gTowers
@@ -110,7 +110,7 @@ StatusCode gSuperCellTowerMapper::AssignSuperCellsToTowers(std::unique_ptr<gTowe
   const CaloCell_Base_ID* idHelper = nullptr;
   ATH_CHECK( detStore()->retrieve (idHelper, "CaloCell_SuperCell_ID") );
 
-  for (const auto& cell : * scellsCollection){
+  for (const CaloCell* cell : * scellsCollection){
 
     const CaloSampling::CaloSample sample = (cell)->caloDDE()->getSampling();
     const Identifier ID = (cell)->ID(); // super cell unique ID

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -75,13 +75,13 @@ namespace LVL1 {
     void addeFexNumber(int);
 
     /// @brief get the eFEX numbers of all TOBs
-    std::vector<int> geteFexNumber() const;
+    const std::vector<int>& geteFexNumber() const;
 
     /// @brief add a 32-bit e-gamma TOB word
     void addEMtob(uint32_t);
     
     /// @brief get all e-gamma TOB words of an event
-    std::vector<uint32_t> getEMtob() const;
+    const std::vector<uint32_t>& getEMtob() const;
 
     /// @brief setting to true if ntuple output is needed
     void setdooutput(bool);

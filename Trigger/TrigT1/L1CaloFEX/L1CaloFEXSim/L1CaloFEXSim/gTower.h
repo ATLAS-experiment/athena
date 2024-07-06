@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //    gTower - Defines all properties and methods for the gFEX towers
@@ -93,7 +93,7 @@ namespace LVL1 {
     /** Set supercell position ID **/
     void setSCID(Identifier ID);
 
-    std::vector<Identifier> getSCIDs() const { return m_scID; }
+    const std::vector<Identifier>& getSCIDs() const { return m_scID; }
 
     /** Apply supercell noise cut **/
     bool noiseCut(int et) const;
