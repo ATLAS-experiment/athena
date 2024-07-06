@@ -530,7 +530,6 @@ Trk::TrkTrackState* TrigInDetTrackFitter::extrapolate(Trk::TrkTrackState* pTS,
   pTE->setTrackCovariance(Gf);
   pTE->attachToSurface(pSE);
 
-  //  pTE->applyMaterialEffects();
   if(m_doMultScatt)
     pTE->applyMultipleScattering();
 
@@ -539,6 +538,16 @@ Trk::TrkTrackState* TrigInDetTrackFitter::extrapolate(Trk::TrkTrackState* pTS,
   if(m_doBremm)
     pTE->applyEnergyLoss(1);
 
+  //quick check for covariance sanity
+
+  for(int idx=0;idx<5;idx++) {
+    if(pTE->getTrackCovariance(idx,idx) < 0) {
+      ATH_MSG_DEBUG("REGTEST: cov(" << idx << "," << idx << ") =" << pTE->getTrackCovariance(idx,idx) << " < 0, reject track");
+      delete pTE;
+      return nullptr;
+    }
+  }
+  
   AmgSymMatrix(5) Gi;
   for(i=0;i<5;i++) for(j=i;j<5;j++)
     {
@@ -711,8 +720,8 @@ std::pair<Trk::Track*,Trk::Track*> TrigInDetTrackFitter::fitTrack(const Trk::Tra
       double cov_diag = pTS->getTrackCovariance(i,i);
       if (cov_diag < 0) {
         bad_cov = true;//Diagonal elements must be positive
-        break;
         ATH_MSG_DEBUG("REGTEST: cov(" << i << "," << i << ") =" << cov_diag << " < 0, reject track");
+	break;
       }
       (cov)(i, i) = pTS->getTrackCovariance(i,i);
       for(int j=i+1;j<5;j++) {

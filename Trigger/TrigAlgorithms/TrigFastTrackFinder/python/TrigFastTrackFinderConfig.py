@@ -176,7 +176,7 @@ def TrigFastTrackFinderMonitoringArg(flags, name, doResMon):
         montool.defineHistogram('hit_SCTEndcapL9PhiResidual',path='EXPERT',type='TH1F',title="SCT Endcap L9 hit-track phi residual",xbins = 100, xmin=-0.5, xmax=0.5)
         montool.defineHistogram('hit_SCTEndcapPull',         path='EXPERT',type='TH1F',title="SCT EC hit-track pull",xbins = 100, xmin=-5., xmax=5.)
 
-    def addUTTHistograms(montool):
+    def addUTTHistograms(montool, name):
         montool.defineHistogram('trk_dedx',           path='EXPERT',type='TH1F',title="Track dEdx (pT > 3 GeV)", xbins = 140, xmin=-0.5, xmax=6.5)
         montool.defineHistogram('trk_dedx_nusedhits', path='EXPERT',type='TH1F',title="Nr of used hits for dEdx",xbins =  11, xmin=-0.5, xmax=10.5)
         #
@@ -192,11 +192,15 @@ def TrigFastTrackFinderMonitoringArg(flags, name, doResMon):
         montool.defineHistogram('disCombTrk_nclone',  path='EXPERT',type='TH1F',title="Nr of disCombTrk (after clone removal)", xbins = 20, xmin=0, xmax=100)
         montool.defineHistogram('disCombTrk_ncand',   path='EXPERT',type='TH1F',title="Nr of disCombTrk (after pre-selection)", xbins = 20, xmin=0, xmax=100)
         #
-        montool.defineHistogram('TIME_dEdxTrk',           path='EXPERT',type='TH1F',title="Large dEdx search (ms)",            xbins =  20, xmin=0.0, xmax=20.0)
-        montool.defineHistogram('TIME_disTrkZVertex',     path='EXPERT',type='TH1F',title="UTT z-vertexing time (ms)",         xbins =  10, xmin=0.0, xmax=10.0)
-        montool.defineHistogram('TIME_disappearingTrack', path='EXPERT',type='TH1F',title="Disappearing track reco time (ms)", xbins = 100, xmin=0.0, xmax=300.0)
-
-
+        if name in ['FS', 'JetFS', 'FullScan', 'fullScan', 'fullScanUTT', 'jet']:
+            montool.defineHistogram('TIME_dEdxTrk',           path='EXPERT',type='TH1F',title="Large dEdx search (ms)",            xbins =  20, xmin=0.0, xmax=200.0)
+            montool.defineHistogram('TIME_disTrkZVertex',     path='EXPERT',type='TH1F',title="UTT z-vertexing time (ms)",         xbins =  10, xmin=0.0, xmax=100.0)
+            montool.defineHistogram('TIME_disappearingTrack', path='EXPERT',type='TH1F',title="Disappearing track reco time (ms)", xbins = 100, xmin=0.0, xmax=3000.0)
+        else:
+            montool.defineHistogram('TIME_dEdxTrk',           path='EXPERT',type='TH1F',title="Large dEdx search (ms)",            xbins =  20, xmin=0.0, xmax=20.0)
+            montool.defineHistogram('TIME_disTrkZVertex',     path='EXPERT',type='TH1F',title="UTT z-vertexing time (ms)",         xbins =  10, xmin=0.0, xmax=10.0)
+            montool.defineHistogram('TIME_disappearingTrack', path='EXPERT',type='TH1F',title="Disappearing track reco time (ms)", xbins = 100, xmin=0.0, xmax=300.0)
+        
     montool = GenericMonitoringTool(flags, HistPath = f"TrigFastTrackFinder_{name}")
     addSPHistograms(montool, name)
     addDataErrorHistograms(montool)
@@ -206,7 +210,7 @@ def TrigFastTrackFinderMonitoringArg(flags, name, doResMon):
         addResidualHistograms(montool)
     uttMode = flags.Tracking.ActiveConfig.doHitDV or flags.Tracking.ActiveConfig.doDisappearingTrk
     if uttMode:
-        addUTTHistograms(montool)
+        addUTTHistograms(montool, name)
 
     return montool
 
