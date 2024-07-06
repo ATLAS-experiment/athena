@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONRDO_STGCRAWDATA_H
@@ -19,17 +19,17 @@ class STGC_RawData final{
  private:
 
  // offline identifier
-   Identifier m_id;
+   Identifier m_id{};
 
    // readout data
    // keeping time in two variables: a float and an int. The float variable is kept for backward compatibility
-   float m_time;
-   unsigned int m_tdo; // time converted to TDC counts
-   unsigned int m_charge;
-   uint16_t m_bcTag;
+   float m_time{0};
+   unsigned int m_tdo{0}; // time converted to TDC counts
+   unsigned int m_charge{0};
+   uint16_t m_bcTag{0};
 
-   bool m_isDead;
-   bool m_timeAndChargeInCounts;
+   bool m_isDead{false};
+   bool m_timeAndChargeInCounts{false};
 
 
  public:

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONRDO_MM_RAWDATA_H
@@ -26,25 +26,23 @@ class MM_RawData final{
  private:
 
   // not sure whether the offline identifier is needed
-  Identifier m_id;
+  Identifier m_id{};
 
   /// channel Id
-  int m_channel;
+  int m_channel{0};
   /// tdc counts or ns
-  int m_time;
+  int m_time{0};
   /// adc counts or electrons
-  int m_charge;
+  int m_charge{0};
   /// rel bcid
-  uint16_t m_relBcid;
+  uint16_t m_relBcid{0};
   //indicator if the charge and time are in counts or physical units
-  bool m_timeAndChargeInCounts;
+  bool m_timeAndChargeInCounts{false};
 
 
  public:
 
-  /** default constructor */
-  MM_RawData ( const Identifier& id ) : m_id(id), m_channel(0), m_time(0), m_charge(0), m_relBcid(0), m_timeAndChargeInCounts(0) {}
-
+  MM_RawData ( const Identifier& id ) : m_id(id) {}
 
   MM_RawData ( const Identifier& id, const int channel,
 	       const int time, const int charge, const uint16_t relBcid, bool timeAndChargeInCounts)
