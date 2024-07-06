@@ -17,6 +17,7 @@ Reco_tf.py \
   --outputAODFile myAOD.pool.root \
   --athenaopts "RAWtoALL:--threads=${ATHENA_CORE_NUMBER} --nprocs=0" "AODtoDAOD:--threads=0 --nprocs=${ATHENA_CORE_NUMBER}" \
   --preExec 'flags.Exec.FPE=10' \
+  --conditionsTag "CONDBR2-BLKPA-2022-15"
   --maxEvents -1
 
 rc1=$?
@@ -109,9 +110,7 @@ echo "============ done "
 # Run trf_getVariables.py to extract variables from DAOD_PHYSLITE.art.pool.root
 echo "============ trf_getVariables.py"
 get_files trf_getVariables.py
-export ATLAS_LOCAL_ROOT_BASE=/cvmfs/atlas.cern.ch/repo/ATLASLocalRootBase
-source ${ATLAS_LOCAL_ROOT_BASE}/user/atlasLocalSetup.sh
-lsetup "root recommended"
+source /cvmfs/sft.cern.ch/lcg/releases/LCG_106/uproot/5.3.7/x86_64-el9-gcc13-opt/uproot-env.sh
 trf_getVariables.py --inputFile DAOD_PHYSLITE.art.pool.root
 rccsv=$?
 tar czf generated_csv_files.tar.gz generated_csv_files/
