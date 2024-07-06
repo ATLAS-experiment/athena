@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -135,7 +135,7 @@ StatusCode eFexTowerBuilder::fillTowers(const EventContext& ctx) const {
     // add tile energies from TriggerTowers
     static const auto etaIndex = [](float eta) { return int( eta*10 ) + ((eta<0) ? -1 : 1); };
     static const auto phiIndex = [](float phi) { return int( phi*32./M_PI ) + (phi<0 ? -1 : 1); };
-    for(const auto& tTower : *tTowers) {
+    for(const xAOD::TriggerTower_v2* tTower : *tTowers) {
         if (std::abs(tTower->eta()) > 1.5) continue;
         if (tTower->sampling() != 1) continue;
         double phi = tTower->phi(); if(phi > M_PI) phi -= 2.*M_PI;
