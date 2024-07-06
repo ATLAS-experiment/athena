@@ -5,7 +5,7 @@ atlas_subdir( L1CaloFEXSim )
 
 # External dependencies:
 find_package( CLHEP )
-find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread Gpad Graf )
+find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO Gpad Graf )
 
 # Component(s) in the package:
 atlas_add_library( L1CaloFEXSimLib
