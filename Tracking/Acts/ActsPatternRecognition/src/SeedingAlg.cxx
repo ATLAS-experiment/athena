@@ -125,11 +125,7 @@ namespace ActsTrk {
     selectedSpacePoints.reserve(number_input_space_points);
     
     for (const auto* collection : all_input_collections) {
-      for (const auto* sp : *collection) {
-        if (m_fastTracking and skipSpacePoint(sp->x()-beamPos.x(), sp->y()-beamPos.y(), sp->z()-beamPos.z()))
-          continue;
-        selectedSpacePoints.push_back( sp );
-      }
+      selectedSpacePoints.insert(selectedSpacePoints.end(), collection->begin(), collection->end());
     }
     
     ATH_MSG_DEBUG( "    \\__ Total input space points: " << selectedSpacePoints.size());
