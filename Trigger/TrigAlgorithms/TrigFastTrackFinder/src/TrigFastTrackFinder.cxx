@@ -211,6 +211,7 @@ StatusCode TrigFastTrackFinder::initialize() {
 
   ATH_CHECK(m_trigInDetTrackFitter.retrieve());
 
+  
   if (m_doZFinder) {
     ATH_CHECK(m_trigZFinder.retrieve());
     // If m_tcs.m_zvErrorEndcap has negative default value, it was not set by user,
@@ -834,12 +835,15 @@ StatusCode TrigFastTrackFinder::findTracks(InDet::SiTrackMakerEventData_xk &trac
   }
   else {
      TrackCollection outputTrackswTP;
+     
      m_trigInDetTrackFitter->fit(initialTracks, outputTracks, outputTrackswTP, ctx, m_particleHypothesis, true); // add TP to TSoS for dEdx
-
+     
      // large dEdx finding
      mnt_timer_dEdxTrk.start();
+     
      for(auto t=outputTrackswTP.begin(); t!=outputTrackswTP.end();t++) { m_trackSummaryTool->updateTrack(**t); }
      ATH_CHECK( finddEdxTrk(ctx,outputTrackswTP) );
+     
   }
 
   if( m_dodEdxTrk ) mnt_timer_dEdxTrk.stop(); // to include timing to destroy TrackCollection object
@@ -858,7 +862,7 @@ StatusCode TrigFastTrackFinder::findTracks(InDet::SiTrackMakerEventData_xk &trac
   TrackCollection fittedExtraDisCombTracks;
   fittedExtraDisCombTracks.reserve(extraDisCombTracks.size());
   TrackCollection fittedDisCombTrks(SG::VIEW_ELEMENTS);
-  if( m_doDisappearingTrk ) {
+  if( m_doDisappearingTrk) {
      ATH_MSG_VERBOSE("nr of extraDisCombTracks=" << extraDisCombTracks.size());
      if( extraDisCombTracks.size() > 0 ) {
 	ATH_MSG_VERBOSE("fitting extraDisCombTracks ...");
