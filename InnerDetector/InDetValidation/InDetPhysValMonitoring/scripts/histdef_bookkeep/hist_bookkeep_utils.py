@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 # utilities for  book-keeping xml histograms
 
@@ -63,7 +63,7 @@ def get_hbuff(_id,_infname,_withcomment=True):
                     if ( re.search("-->",_wline) ):
                         _docommbuff=False
                 elif not is_xml_form(_wline): 
-                    print 'Warning', _infname, 'non-xml formatted line :', _line
+                    print('Warning', _infname, 'non-xml formatted line :', _line)
                     
             # buffer histo lines here:
             if (_dobuff):

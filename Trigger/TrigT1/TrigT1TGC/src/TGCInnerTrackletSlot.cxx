@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1TGC/TGCInnerTrackletSlot.h"
@@ -11,6 +11,7 @@ namespace LVL1TGCTrigger {
   {
     m_sideId = -1;
     m_slotId = -1;
+    m_tgcArgs = nullptr;
     clearTriggerBits();
   }
 

@@ -45,13 +45,39 @@ namespace LVL1 {
     virtual void FillgTowerEDMForward(SG::WriteHandle<xAOD::gFexTowerContainer> &, gTowersForward &, gTowersForward &, gTowersType &, gTowersType &, gTowersType &) override ;
 
 
+
+
+
     /** Internal data */
   private:
 
     int m_fpgaId = -1;
 
+     gTowersType m_offsetsDefaultA   = {{0}};
+     gTowersType m_noiseCutsDefaultA = {{0}};
+     gTowersType m_slopesDefaultA    = {{0}};
+     
+     gTowersType m_offsetsDefaultB  = {{0}};	
+     gTowersType m_noiseCutsDefaultB= {{0}};
+     gTowersType m_slopesDefaultB   = {{0}};
+
+     gTowersType m_offsetsDefaultC   = {{0}};
+     gTowersType m_noiseCutsDefaultC = {{0}};
+     gTowersType m_slopesDefaultC    = {{0}};
+
+
+
+
     // gTowersCentral m_gTowersIDs_central;
     // gTowersForward m_gTowersIDs_forward;
+
+    void gtCalib(gTowersType & twrs,const gTowersType & offsets, const gTowersType & noiseCuts, const gTowersType & slopes) const;
+
+    void calLookup( int *tower, const int offset, const int noiseCut, const int slope) const;
+
+    void calExpand( gTowersType & offsets, gTowersType & noiseCuts, gTowersType & slopes, const int offset, const std::array<int,12> columnNoiseCuts, const std::array<int,12> columnSlopes ) const;
+
+
 
 
     SG::ReadHandleKey<LVL1::gTowerContainer> m_gFEXFPGA_gTowerContainerKey {this, "MyGTowers", "gTowerContainer", "Input container for gTowers"};

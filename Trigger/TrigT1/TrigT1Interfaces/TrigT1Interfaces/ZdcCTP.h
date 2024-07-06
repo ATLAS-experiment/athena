@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGT1INTERFACES_ZDC_CTP_H
 #define TRIGT1INTERFACES_ZDC_CTP_H
@@ -31,7 +31,7 @@ namespace LVL1 {
    class ZdcCTP: public DataObject {
    public:
       // default constructor
-      ZdcCTP() = default;
+      ZdcCTP() = delete;
 
       // Constructor with parameters:
       ZdcCTP( unsigned int cableword0 = 0 );

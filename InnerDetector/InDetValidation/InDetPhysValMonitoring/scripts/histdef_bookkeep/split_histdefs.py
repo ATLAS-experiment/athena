@@ -1,13 +1,10 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-import sys
-import string
-import re
 import argparse
 
-from hist_bookkeep_utils import *
+from hist_bookkeep_utils import get_val, get_comm_def, weed, get_hbuff
 
 parser = argparse.ArgumentParser(
     description='''
@@ -79,10 +76,10 @@ def compare_hbuffs(blist):
     if ("error"==test):
         return [-1,-1]
     elif ("textdiff"==test):
-        textdiff=True    
+        textdiff=True
 
-    type1=get_val("type",_buff1[0])
-    type2=get_val("type",_buff2[0])
+    get_val("type",_buff1[0])
+    get_val("type",_buff2[0])
 
     testx=compare_xyline(_buff1[1],_buff2[1])
     testy=compare_xyline(_buff1[2],_buff2[2])
@@ -113,16 +110,16 @@ outfname_2diffrange=infname2.split(".")[0]+"_diffrange.xml"
 outfname_1difftext=infname1.split(".")[0]+"_difftext.xml"
 outfname_2difftext=infname2.split(".")[0]+"_difftext.xml"
 
-print ''
-print ' reading histogram xml definitions in ', infname1, infname2
-print ' writing histograms only in ', infname1, 'to', outfname_1only
-print ' writing histograms only in ', infname2, 'to', outfname_2only
-print ' writing histograms range diff in ', infname1, 'to', outfname_1diffrange
-print ' writing histograms range diff in ', infname2, 'to', outfname_2diffrange
-print ' writing histograms text diff in ', infname1, 'to', outfname_1difftext
-print ' writing histograms text diff in ', infname2, 'to', outfname_2difftext
-print ' writing histograms common to both to', outfname_common
-print ''
+print('')
+print(' reading histogram xml definitions in ', infname1, infname2)
+print(' writing histograms only in ', infname1, 'to', outfname_1only)
+print(' writing histograms only in ', infname2, 'to', outfname_2only)
+print(' writing histograms range diff in ', infname1, 'to', outfname_1diffrange)
+print(' writing histograms range diff in ', infname2, 'to', outfname_2diffrange)
+print(' writing histograms text diff in ', infname1, 'to', outfname_1difftext)
+print(' writing histograms text diff in ', infname2, 'to', outfname_2difftext)
+print(' writing histograms common to both to', outfname_common)
+print('')
 
 outf_common=open(outfname_common, 'w')
 outf_1only=open(outfname_1only, 'w')
@@ -186,6 +183,6 @@ for line in args.in_xml2:
 for key,of in buff_comp_dict.iteritems():
     of.close()
 
-print ''
-print 'all done'
-print ''
+print('')
+print('all done')
+print('')

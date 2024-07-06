@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //    gFEXJetTOB - Forms the Jet TOBs for gFEX
@@ -12,22 +12,22 @@
 #include "AthenaKernel/CLASS_DEF.h"
 
 namespace LVL1 {
+  /** The gFEXJetTOB.h class stores the energy, the eta, phi coordinate,
+   * the status and the type (gRho, gBlock, gJet) of the gFEX Jet TOBs
+   */
   class gFEXJetTOB
   {
-    //gFEXJetTOB class description below:
-    /** The gFEXJetTOB.h class stores the energy, the eta, phi coordinate,
-     * the status and the type (gRho, gBlock, gJet) of the gFEX Jet TOBs
-     */
+
   private:
-    unsigned int m_eta;
-    unsigned int m_phi;
-    unsigned int m_ET;
-    unsigned int m_st;
-    unsigned int m_tobID;
-    uint32_t     m_word;
+    unsigned int m_eta{99999};
+    unsigned int m_phi{99999};
+    unsigned int m_ET{99999};
+    unsigned int m_st{99999};
+    unsigned int m_tobID{99999};
+    uint32_t     m_word{0};
 
   public:
-    gFEXJetTOB();
+    gFEXJetTOB() = default;
     ~gFEXJetTOB() {};
 
     inline unsigned int getEta() const {return m_eta;}
