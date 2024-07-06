@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /*****************************************************************************
@@ -28,14 +28,9 @@ Nov.2006: A simple AOD containing just track parameters and status for re-runnin
 // "Distance" used by the comparison operator(s):
 static const double DELTA = 0.001;
 
-TrigMuonEF::TrigMuonEF() :
-  P4IPtCotThPhiM( 0., 0., 0., 0. ),
-  m_muonCode(0){
-}
 
 TrigMuonEF::TrigMuonEF(double theIPt, double theCotTh, double thePhi, double theM) :
-  P4IPtCotThPhiM(theIPt , theCotTh, thePhi ,theM ),
-  m_muonCode(0){
+  P4IPtCotThPhiM(theIPt , theCotTh, thePhi ,theM ) {
 }
 
 /** set data member */
