@@ -1,7 +1,7 @@
 // -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGMUONEVENT_TRIGMUONEF_H
@@ -28,7 +28,7 @@ class TrigMuonEF : public P4IPtCotThPhiM,
 public: 
 
    /** Default constructor */
-   TrigMuonEF( );
+   TrigMuonEF( ) = default;
 
    //  /** Default constructor */
    TrigMuonEF( double theIPt, double theCotTh, double thePhi, double theM );
@@ -40,7 +40,7 @@ public:
    TrigMuonEF& operator=( const TrigMuonEF& rhs ) = delete;
 
    /** Destructor */
-   ~TrigMuonEF();
+   virtual ~TrigMuonEF();
 
    /* set methods */
    /** Set MuonCode */
@@ -65,9 +65,9 @@ public:
 
 private:
    /** what kind of track we are dealing with (Moore, StandAlone, Combined) */
-   int m_muonCode;
+   int m_muonCode{0};
    std::string m_roi;
-   double m_charge;
+   double m_charge{0};
 
 };
 
