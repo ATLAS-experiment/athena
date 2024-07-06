@@ -2,7 +2,6 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include "src/TrackFindingAlg.h"
-#include "src/TrackFindingData.h"
 #include "src/FitterHelperFunctions.h"
 
 // Athena
@@ -47,7 +46,7 @@
 
 namespace ActsTrk
 {
-  struct TrackFindingAlg::CKF_pimpl : public CKF_config
+  struct TrackFindingAlg::CKF_pimpl : public detail::CKF_config
   {
   };
 
@@ -136,16 +135,16 @@ namespace ActsTrk
     auto magneticField = std::make_unique<ATLASMagneticFieldWrapper>();
     auto trackingGeometry = m_trackingGeometryTool->trackingGeometry();
 
-    Stepper stepper(std::move(magneticField));
-    Navigator::Config cfg{trackingGeometry};
+    detail::Stepper stepper(std::move(magneticField));
+    detail::Navigator::Config cfg{trackingGeometry};
     cfg.resolvePassive = false;
     cfg.resolveMaterial = true;
     cfg.resolveSensitive = true;
-    Navigator navigator(cfg, logger().cloneWithSuffix("Navigator"));
-    Propagator propagator(std::move(stepper), std::move(navigator), logger().cloneWithSuffix("Prop"));
+    detail::Navigator navigator(cfg, logger().cloneWithSuffix("Navigator"));
+    detail::Propagator propagator(std::move(stepper), std::move(navigator), logger().cloneWithSuffix("Prop"));
 
     // Using the CKF propagator as extrapolator
-    Extrapolator extrapolator = propagator;
+    detail::Extrapolator extrapolator = propagator;
 
     std::vector<double> etaBins;
     // m_etaBins (from flags.Tracking.ActiveConfig.etaBins) includes a dummy first and last bin, which we ignore
@@ -217,15 +216,15 @@ namespace ActsTrk
        ATH_MSG_DEBUG("chi2OutlierCutOff set but not supported when using the default measurement selector.");
     }
 
-    m_trackFinder.reset(new CKF_pimpl{CKF_config{std::move(extrapolator), {std::move(propagator), logger().cloneWithSuffix("CKF")}, measurementSelector, {}, {}, {}, trackSelectorCfg}});
+    m_trackFinder.reset(new CKF_pimpl{detail::CKF_config{std::move(extrapolator), {std::move(propagator), logger().cloneWithSuffix("CKF")}, measurementSelector, {}, {}, {}, trackSelectorCfg}});
 
     trackFinder().pOptions.maxSteps = m_maxPropagationStep;
     trackFinder().pSecondOptions.maxSteps = m_maxPropagationStep;
     trackFinder().pOptions.direction = Acts::Direction::Forward;
     trackFinder().pSecondOptions.direction = trackFinder().pOptions.direction.invert();
 
-    trackFinder().ckfExtensions.updater.connect<&ActsTrk::FitterHelperFunctions::gainMatrixUpdate<RecoTrackStateContainer>>();
-    trackFinder().ckfExtensions.measurementSelector.connect<&Acts::MeasurementSelector::select<RecoTrackStateContainer>>(&trackFinder().measurementSelector);
+    trackFinder().ckfExtensions.updater.connect<&ActsTrk::FitterHelperFunctions::gainMatrixUpdate<detail::RecoTrackStateContainer>>();
+    trackFinder().ckfExtensions.measurementSelector.connect<&Acts::MeasurementSelector::select<detail::RecoTrackStateContainer>>(&trackFinder().measurementSelector);
     initStatTables();
 
     return StatusCode::SUCCESS;
@@ -309,7 +308,7 @@ namespace ActsTrk
       ATH_MSG_DEBUG("Retrieved " << detEleColl.back()->size() << " input condition elements from key " << detEleCollKey.key());
     }
 
-    DuplicateSeedDetector duplicateSeedDetector(total_seeds, m_skipDuplicateSeeds);
+    detail::DuplicateSeedDetector duplicateSeedDetector(total_seeds, m_skipDuplicateSeeds);
     for (std::size_t icontainer = 0; icontainer < seedContainers.size(); ++icontainer)
     {
       if (!seedContainers[icontainer])
@@ -317,7 +316,7 @@ namespace ActsTrk
       duplicateSeedDetector.addSeeds(icontainer, *seedContainers[icontainer]);
     }
 
-    TrackFindingMeasurements measurements(measTotal);
+    detail::TrackFindingMeasurements measurements(measTotal);
 
     // @TODO make this condition data
     for (std::size_t icontainer = 0; icontainer < detEleColl.size(); ++icontainer) {
@@ -392,8 +391,8 @@ namespace ActsTrk
 
   StatusCode
   TrackFindingAlg::findTracks(const EventContext &ctx,
-                              const TrackFindingMeasurements &measurements,
-                              DuplicateSeedDetector &duplicateSeedDetector,
+                              const detail::TrackFindingMeasurements &measurements,
+                              detail::DuplicateSeedDetector &duplicateSeedDetector,
                               const ActsTrk::BoundTrackParametersContainer &estimatedTrackParameters,
                               const ActsTrk::SeedContainer *seeds,
                               ActsTrk::MutableTrackContainer &tracksContainer,
@@ -425,7 +424,7 @@ namespace ActsTrk
     slAccessorDelegate.connect<&UncalibSourceLinkAccessor::range>(&slAccessor);
 
     // Set the CombinatorialKalmanFilter options
-    using TrackFinderOptions = Acts::CombinatorialKalmanFilterOptions<UncalibSourceLinkAccessor::Iterator, RecoTrackStateContainer>;
+    using TrackFinderOptions = Acts::CombinatorialKalmanFilterOptions<UncalibSourceLinkAccessor::Iterator, detail::RecoTrackStateContainer>;
     TrackFinderOptions options(tgContext,
                                mfContext,
                                calContext,
@@ -454,13 +453,13 @@ namespace ActsTrk
     // ActsTrk::MutableTrackContainer tracksContainerTemp;
     Acts::VectorTrackContainer trackBackend;
     Acts::VectorMultiTrajectory trackStateBackend;
-    RecoTrackContainer tracksContainerTemp(trackBackend, trackStateBackend);
+    detail::RecoTrackContainer tracksContainerTemp(trackBackend, trackStateBackend);
 
     // Measurement calibration
     // N.B. OnTrackCalibrator expects disabled tool handles when no calibration is requested.
     // Therefore, passing them without checking if they are enabled is safe.
 
-    auto calibrator = OnTrackCalibrator<RecoTrackStateContainer>(
+    auto calibrator = OnTrackCalibrator<detail::RecoTrackStateContainer>(
        *m_ATLASConverterTool,
        measurements.trackingSurfaceHelper(),
        m_pixelCalibTool,
@@ -468,9 +467,9 @@ namespace ActsTrk
 
     if (m_useDefaultMeasurementSelector.value()) {
        // for default measurement selector need connect calibrator
-       options.extensions.calibrator.connect<&OnTrackCalibrator<RecoTrackStateContainer>::calibrate>(&calibrator);
+       options.extensions.calibrator.connect<&OnTrackCalibrator<detail::RecoTrackStateContainer>::calibrate>(&calibrator);
        if (m_doTwoWay) {
-          secondOptions->extensions.calibrator.connect<&OnTrackCalibrator<RecoTrackStateContainer>::calibrate>(&calibrator);
+          secondOptions->extensions.calibrator.connect<&OnTrackCalibrator<detail::RecoTrackStateContainer>::calibrate>(&calibrator);
        }
     }
 
@@ -486,7 +485,7 @@ namespace ActsTrk
 
     using BranchStopperResult = Acts::CombinatorialKalmanFilterBranchStopperResult;
     auto stopBranch = [&](const Acts::CombinatorialKalmanFilterTipState &tipState,
-                          RecoTrackStateContainer::TrackStateProxy &trackState) -> BranchStopperResult {
+                          detail::RecoTrackStateContainer::TrackStateProxy &trackState) -> BranchStopperResult {
       if (!m_trackStatePrinter.empty()) {
         m_trackStatePrinter->printTrackState(tgContext, trackState, measurementContainerOffsets, true);
       }
@@ -647,7 +646,7 @@ namespace ActsTrk
       size_t ntracks = 0;
 
       // lambda to collect together all the things we do with a viable track.
-      auto addTrack = [&](const RecoTrackContainerProxy &track) {
+      auto addTrack = [&](const detail::RecoTrackContainerProxy &track) {
         if (!m_trackStatePrinter.empty()) {
           m_trackStatePrinter->printTrack(tgContext, tracksContainerTemp, track, measurementContainerOffsets);
         }
@@ -683,7 +682,7 @@ namespace ActsTrk
         }
 
         if (m_doTwoWay) {
-          std::optional<RecoTrackStateContainerProxy> firstState;
+          std::optional<detail::RecoTrackStateContainerProxy> firstState;
           for (auto st : firstTrack.trackStatesReversed()) {
             bool isMeasurement = st.typeFlags().test(Acts::TrackStateFlag::MeasurementFlag);
             bool isOutlier = st.typeFlags().test(Acts::TrackStateFlag::OutlierFlag);
@@ -782,16 +781,16 @@ namespace ActsTrk
   }
 
   void 
-  TrackFindingAlg::storeSeedInfo(const RecoTrackContainer &tracksContainer,
-                                 const RecoTrackContainerProxy &track,
-                                 DuplicateSeedDetector &duplicateSeedDetector) const {
+  TrackFindingAlg::storeSeedInfo(const detail::RecoTrackContainer &tracksContainer,
+                                 const detail::RecoTrackContainerProxy &track,
+                                 detail::DuplicateSeedDetector &duplicateSeedDetector) const {
 
       const auto lastMeasurementIndex = track.tipIndex();
       duplicateSeedDetector.newTrajectory();
 
       tracksContainer.trackStateContainer().visitBackwards(
           lastMeasurementIndex,
-          [&duplicateSeedDetector](const RecoTrackStateContainer::ConstTrackStateProxy &state) -> void
+          [&duplicateSeedDetector](const detail::RecoTrackStateContainer::ConstTrackStateProxy &state) -> void
           {
             // Check there is a source link
             if (not state.hasUncalibratedSourceLink())
