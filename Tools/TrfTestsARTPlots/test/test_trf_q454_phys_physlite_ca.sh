@@ -83,9 +83,8 @@ echo "art-result: ${rc5} dcube_physlite"
 
 # Run trf_getVariables.py to extract variables from DAOD_PHYSLITE.art.pool.root
 echo "============ trf_getVariables.py"
-export ATLAS_LOCAL_ROOT_BASE=/cvmfs/atlas.cern.ch/repo/ATLASLocalRootBase
-source ${ATLAS_LOCAL_ROOT_BASE}/user/atlasLocalSetup.sh
-lsetup "root recommended"
+get_files trf_getVariables.py
+source /cvmfs/sft.cern.ch/lcg/releases/LCG_106/uproot/5.3.7/x86_64-el9-gcc13-opt/uproot-env.sh
 trf_getVariables.py --inputFile DAOD_PHYSLITE.art.pool.root
 rccsv=$?
 tar czf generated_csv_files.tar.gz generated_csv_files/
