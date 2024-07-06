@@ -23,7 +23,7 @@
 
 class MMT_Parameters : public AthMessaging {
   public:
-    MMT_Parameters(std::string layerSetup, char wedgeSize, const MuonGM::MuonDetectorManager* detManager);
+    MMT_Parameters(const std::string& layerSetup, char wedgeSize, const MuonGM::MuonDetectorManager* detManager);
     std::vector<ROOT::Math::XYZVector> MM_firststrip_positions(const MuonGM::MuonDetectorManager* detManager, const std::string& wedge, int eta) const;
 
     // start counting at 1 to be consistent with mmIdHelper.

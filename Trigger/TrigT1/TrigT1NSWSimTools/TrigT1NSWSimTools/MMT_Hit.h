@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef MMT_HIT_H
@@ -22,7 +22,7 @@ class MMT_Hit {
     int getBC() const { return m_BC_time; }
     int getChannel() const { return m_strip; }
     int getGasGap() const { return m_gasgap; }
-    std::string getModule() const { return m_module; }
+    const std::string& getModule() const { return m_module; }
     int getMultiplet() const { return m_multiplet; }
     int getPlane() const { return m_plane; }
     char getSector() const { return m_sector; }
@@ -31,7 +31,7 @@ class MMT_Hit {
     int getVMM() const { return m_VMM_chip; }
     int getMMFE8() const { return m_MMFE_VMM; }
     float getShift() const { return m_shift; }
-    std::string getStationName() const { return m_station_name; }
+    const std::string& getStationName() const { return m_station_name; }
     int getStationEta() const { return m_station_eta; }
     int getStationPhi() const { return m_station_phi; }
     double getR() const { return m_R; }

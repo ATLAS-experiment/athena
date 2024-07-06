@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -54,7 +54,7 @@ namespace NSWL1 {
                           const std::vector<std::shared_ptr<PadOfflineData>> &pads,
                           const std::vector<size_t> &padIndices);
     const std::string& pattern() const {return m_pattern;}
-    const std::vector<size_t> padIndices() const {return m_padIndices;}
+    const std::vector<size_t>& padIndices() const {return m_padIndices;}
     EtaPhiHalf halfPadCoordinates() const;
     //! use the first pad to determine whether it's a small/large sector
     bool isSmallSector() const;

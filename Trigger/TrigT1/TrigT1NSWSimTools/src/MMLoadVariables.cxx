@@ -244,7 +244,7 @@ StatusCode MMLoadVariables::getMMDigitsInfo(const EventContext& ctx,
           int thisStripPosition = m_MmIdHelper->channel(tmpID);
           double thisLocalPosX  = dW.strip_lpos.X();
           int thisVMM           = m_MmIdHelper->channel( tmpID);
-          int thisMMFE_VMM      = m_MmIdHelper->channel( tmpID);
+          int thisMMFE_VMM      = thisVMM;
           int thisStationEta    = m_MmIdHelper->stationEta( tmpID );
           int thisStationPhi    = m_MmIdHelper->stationPhi( tmpID );
           int thisPlane = (thisMultiplet-1)*4+thisGasGap-1;

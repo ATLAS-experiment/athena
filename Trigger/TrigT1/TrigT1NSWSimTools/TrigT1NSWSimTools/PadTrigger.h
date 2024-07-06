@@ -1,7 +1,7 @@
 //  -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef NSWL1_PADDATA_H
@@ -84,18 +84,18 @@ namespace NSWL1 {
         int moduleIdInner() const { return m_moduleIdInner;}
         int moduleIdOuter() const { return m_moduleIdOuter;}
 
-        std::vector<float> const trglocalminYInner() const { return m_trglocalminYInner; }
-        std::vector<float> const trglocalmaxYInner() const { return m_trglocalmaxYInner; }
-        std::vector<float> const trglocalminYOuter() const { return m_trglocalminYOuter; }
-        std::vector<float> const trglocalmaxYOuter() const { return m_trglocalmaxYOuter; }
-        std::vector<int> trgSelectedLayersInner()const{ return m_trgSelectedLayersInner;}
-        std::vector<int> trgSelectedLayersOuter() const { return m_trgSelectedLayersOuter; }
-        std::vector<int> trgSelectedBandsInner() const { return m_trgSelectedBandsInner;}
-        std::vector<int> trgSelectedBandsOuter() const { return m_trgSelectedBandsOuter;}
-        std::vector<int> trgPadPhiIndicesInner() const { return m_trgPadPhiIndicesInner;}
-        std::vector<int> trgPadPhiIndicesOuter() const { return  m_trgPadPhiIndicesOuter;}
-        std::vector<int> trgPadEtaIndicesInner() const { return m_trgPadEtaIndicesInner;}
-        std::vector<int> trgPadEtaIndicesOuter() const { return m_trgPadEtaIndicesOuter;}         
+        const std::vector<float>& trglocalminYInner() const { return m_trglocalminYInner; }
+        const std::vector<float>& trglocalmaxYInner() const { return m_trglocalmaxYInner; }
+        const std::vector<float>& trglocalminYOuter() const { return m_trglocalminYOuter; }
+        const std::vector<float>& trglocalmaxYOuter() const { return m_trglocalmaxYOuter; }
+        const std::vector<int>& trgSelectedLayersInner()const{ return m_trgSelectedLayersInner;}
+        const std::vector<int>& trgSelectedLayersOuter() const { return m_trgSelectedLayersOuter; }
+        const std::vector<int>& trgSelectedBandsInner() const { return m_trgSelectedBandsInner;}
+        const std::vector<int>& trgSelectedBandsOuter() const { return m_trgSelectedBandsOuter;}
+        const std::vector<int>& trgPadPhiIndicesInner() const { return m_trgPadPhiIndicesInner;}
+        const std::vector<int>& trgPadPhiIndicesOuter() const { return  m_trgPadPhiIndicesOuter;}
+        const std::vector<int>& trgPadEtaIndicesInner() const { return m_trgPadEtaIndicesInner;}
+        const std::vector<int>& trgPadEtaIndicesOuter() const { return m_trgPadEtaIndicesOuter;}         
         
         
     };
