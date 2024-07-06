@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -230,7 +230,7 @@ StatusCode jFexTower2SCellDecorator::execute(const EventContext& ctx) const {
 
             //How many SCell are masked? if all then send invalid code
             unsigned int count_scMask =0;
-            for(const auto& masked : scMask){
+            for(const bool masked : scMask){
                 if(masked) count_scMask++;
             }
 

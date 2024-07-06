@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include "JfexSimMonitorAlgorithm.h"
 
@@ -191,7 +191,7 @@ template <> void JfexSimMonitorAlgorithm::fillVectors(const SG::ReadHandleKey<xA
         word0s.reserve(tobs->size());
         std::vector<SortableTob> sortedTobs;
         sortedTobs.reserve(tobs->size());
-        for(const auto& tob : *tobs) {
+        for(const xAOD::jFexMETRoI* tob : *tobs) {
             sortedTobs.emplace_back(SortableTob{tob->tobWord(),0.,0.});
         }
         std::sort(sortedTobs.begin(),sortedTobs.end(),[](const SortableTob& lhs, const SortableTob& rhs) { return lhs.word0<rhs.word0; });
