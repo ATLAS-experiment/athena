@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  *
  * @file HGTD_EventTPCnv/HGTD_RDO_p1.h
  * @author Alexander Leopold <alexander.leopold@cern.ch>
@@ -21,12 +21,12 @@ public:
   friend class HGTD_RDO_Cnv_p1;
 
 private:
-  IdType_t m_rdo_id;
-  float m_toa;
-  unsigned int m_tot;
-  unsigned short m_bcid;
-  unsigned short m_l1_id;
-  unsigned short m_l1_a;
+  IdType_t m_rdo_id{};
+  float m_toa{};
+  unsigned int m_tot{};
+  unsigned short m_bcid{};
+  unsigned short m_l1_id{};
+  unsigned short m_l1_a{};
 };
 
 #endif // HGTD_RDO_P1_H
