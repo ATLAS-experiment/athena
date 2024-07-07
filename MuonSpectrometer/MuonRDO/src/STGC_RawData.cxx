@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonRDO/STGC_RawData.h"
@@ -10,7 +10,7 @@
 // P1 ------------------------
 // Constructor for Hit
 Muon::STGC_RawData::STGC_RawData(const Identifier id)
-  :m_id(id), m_time(0.0), m_tdo(0), m_charge(0), m_bcTag(0), m_isDead(false),m_timeAndChargeInCounts(false)
+  :m_id(id)
 {
 }
 

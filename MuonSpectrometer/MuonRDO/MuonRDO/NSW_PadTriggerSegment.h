@@ -23,10 +23,10 @@ public:
     friend MsgStream& operator<<(MsgStream& stream, const NSW_PadTriggerSegment& rhs);
     friend std::ostream& operator<<(std::ostream& stream, const NSW_PadTriggerSegment& rhs);
 private:
-    uint8_t m_bandID;
-    uint8_t m_phiID;
+    uint8_t m_bandID{};
+    uint8_t m_phiID{};
     // aka "coincidences", active layer count in each wedge ([0] = inner, [1] = outer)
-    std::array<uint8_t, 2> m_activeLayers;
+    std::array<uint8_t, 2> m_activeLayers{};
 };
 } // namespace Muon
 
