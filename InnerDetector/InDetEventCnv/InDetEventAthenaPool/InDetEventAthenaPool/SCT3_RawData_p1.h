@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -13,13 +13,13 @@
 
 class SCT3_RawData_p1 {
  public:
-  SCT3_RawData_p1(): m_rdoId{0}, m_word{0}  {};
+  SCT3_RawData_p1() = default;
 // List of Cnv classes that convert this into Rdo objects
   friend class SCT3_RawDataCnv_p1;
  private:
-  Identifier32::value_type m_rdoId; //Offline ID for readout channel
-  unsigned int m_word; // raw data word 
-  float m_errCH[20];
+  Identifier32::value_type m_rdoId{0}; //Offline ID for readout channel
+  unsigned int m_word{0}; // raw data word
+  float m_errCH[20]{};
 };
 
 #endif
