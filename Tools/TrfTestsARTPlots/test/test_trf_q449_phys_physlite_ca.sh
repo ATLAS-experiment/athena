@@ -17,7 +17,7 @@ Reco_tf.py \
   --outputAODFile myAOD.pool.root \
   --athenaopts "RAWtoALL:--threads=${ATHENA_CORE_NUMBER} --nprocs=0" "AODtoDAOD:--threads=0 --nprocs=${ATHENA_CORE_NUMBER}" \
   --preExec 'flags.Exec.FPE=10' \
-  --conditionsTag "CONDBR2-BLKPA-2022-15"
+  --conditionsTag "CONDBR2-BLKPA-2022-15" \
   --maxEvents -1
 
 rc1=$?
