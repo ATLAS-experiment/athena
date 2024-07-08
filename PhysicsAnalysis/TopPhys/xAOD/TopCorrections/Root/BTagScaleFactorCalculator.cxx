@@ -389,9 +389,6 @@ namespace top {
                            "Failed to set new b-tagging systematic variation " + syst_set.name());
 		if (std::abs(jetPtr->eta()) <= 2.5) {
 		  
-		  top::check(btageff->getMCEfficiency(*jetPtr, btag_MCeff),
-			     "Failed to get b-tagging MC efficiency for variation " + syst_set.name());
-		    
 		  if (tagWP.find("Continuous") == std::string::npos) {
 		    if (isTagged) top::check(btageff->getScaleFactor(*jetPtr, btag_SF),
 					     "Failed to get b-tagging SF for variation " + syst_set.name());
@@ -401,6 +398,11 @@ namespace top {
 		    top::check(btageff->getScaleFactor(*jetPtr, btag_SF),
 			       "Failed to get Continuous b-tagging SF for variation " + syst_set.name());
 		  }
+		  // don't apply the systematic variation to the MC efficiency! -> will give 0 for down variations and the nominal value for up variations
+		  top::check(btageff->applySystematicVariation(m_nominal),
+			     "Failed to set nominal b-tagging systematic variation" + syst_set.name());
+		  top::check(btageff->getMCEfficiency(*jetPtr, btag_MCeff),
+			     "Failed to get nominal b-tagging MC efficiency for variation " + syst_set.name());
 		}
 		jetPtr->auxdecor<float>("btag_SF_" + tagWP + "_" + variation.name()) = btag_SF;
 		jetPtr->auxdecor<float>("btag_MCeff_" + tagWP + "_" + variation.name()) = btag_MCeff;
