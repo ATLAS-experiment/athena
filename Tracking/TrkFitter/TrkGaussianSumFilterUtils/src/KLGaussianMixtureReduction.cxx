@@ -28,6 +28,7 @@
 
 namespace {
 
+
 /**
  * internal implementation methods
  */
@@ -355,9 +356,7 @@ findMergesImpl(const Component1DArray& componentsIn,
   // merge loop
   while (numberOfComponentsLeft > reducedSize) {
     // find pair with minimum distance
-    const int32_t minIndex =
-        findIdxOfMinimum::impl<findIdxOfMinimum::VecMinThenIdx>(
-            distances.buffer(), nnpadded);
+    const int32_t minIndex = GSFFMVDetail::vIdxOfMin(distances.buffer(), nnpadded);
     const triangularToIJ conversion = convert(minIndex);
     int8_t minTo = conversion.I;
     int8_t minFrom = conversion.J;

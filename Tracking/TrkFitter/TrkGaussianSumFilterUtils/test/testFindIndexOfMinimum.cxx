@@ -12,6 +12,7 @@
 
 // create global data for the test
 constexpr size_t N = 4096;
+template <typename T>
 struct InitArray {
  public:
   InitArray() : distances(N) {
@@ -30,51 +31,37 @@ struct InitArray {
       }
     }
   }
-  GSFUtils::AlignedDynArray<float, GSFConstants::alignment> distances;
+  GSFUtils::AlignedDynArray<T, GSFConstants::alignment> distances;
 };
-static const InitArray initArray;
-
-static void findIdxOfMinimumC() {
-  int32_t minIndex = findIdxOfMinimum::impl<findIdxOfMinimum::C>(
-      initArray.distances.buffer(), N);
-  std::cout << "C Index of Minimum : " << minIndex << " with value "
-            << initArray.distances[minIndex] << '\n';
-}
+static const InitArray<float> initArrayF;
+static const InitArray<double> initArrayD;
 
 static void findIdxOfMinimumSTL() {
-  int32_t minIndex = findIdxOfMinimum::impl<findIdxOfMinimum::STL>(
-      initArray.distances.buffer(), N);
+  const float* arrayF = std::assume_aligned<GSFConstants::alignment>(
+      initArrayF.distances.buffer());
+  int minIndex = std::distance(arrayF, std::min_element(arrayF, arrayF + N));
   std::cout << "STL Index of Minimum : " << minIndex << " with value "
-            << initArray.distances[minIndex] << '\n';
-}
-
-static void findVecAlwaysTrackIdx() {
-  int32_t minIndex =
-      findIdxOfMinimum::impl<findIdxOfMinimum::VecAlwaysTrackIdx>(
-          initArray.distances.buffer(), N);
-  std::cout << "VecAlwaysTrackIdx Index of Minimum : " << minIndex
-            << " with value " << initArray.distances[minIndex] << '\n';
-}
-
-static void findVecUpdateIdxOnNewMin() {
-  int32_t minIndex =
-      findIdxOfMinimum::impl<findIdxOfMinimum::VecUpdateIdxOnNewMin>(
-          initArray.distances.buffer(), N);
-  std::cout << "VecUpdateIdxOnNewMin Index of Minimum : " << minIndex
-            << " with value " << initArray.distances[minIndex] << '\n';
+            << initArrayF.distances[minIndex] << '\n';
+  const double* arrayD = std::assume_aligned<GSFConstants::alignment>(
+      initArrayD.distances.buffer());
+  minIndex = std::distance(arrayD, std::min_element(arrayD, arrayD + N));
+  std::cout << "STL Index of Minimum : " << minIndex << " with value "
+            << initArrayD.distances[minIndex] << '\n';
 }
 
 static void findVecMinThenIdx() {
-  int32_t minIndex = findIdxOfMinimum::impl<findIdxOfMinimum::VecMinThenIdx>(
-      initArray.distances.buffer(), N);
-  std::cout << "VecMinThenIdx Index of Minimum : " << minIndex << " with value "
-            << initArray.distances[minIndex] << '\n';
+
+  int minIndex = GSFFMVDetail::vIdxOfMin(initArrayF.distances.buffer(), N);
+  std::cout << "vIdxOfMin Index of Minimum : " << minIndex << " with value "
+            << initArrayF.distances[minIndex] << '\n';
+  minIndex = GSFFMVDetail::vIdxOfMin(initArrayD.distances.buffer(), N);
+  std::cout << "vIdxOfMin Index of Minimum : " << minIndex << " with value "
+            << initArrayD.distances[minIndex] << '\n';
+
 }
+
 int main() {
-  findIdxOfMinimumC();
   findIdxOfMinimumSTL();
-  findVecAlwaysTrackIdx();
-  findVecUpdateIdxOnNewMin();
   findVecMinThenIdx();
   return 0;
 }
