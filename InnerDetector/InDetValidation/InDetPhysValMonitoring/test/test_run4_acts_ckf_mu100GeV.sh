@@ -10,13 +10,15 @@
 # art-html: dcube_ambi_last
 
 lastref_dir=last_results
-dcubeXml=dcube_IDPVMPlots_ACTS_CKF_ITk_techeff.xml
+dcubeXml=dcube_IDPVMPlots_ACTS_CKF_ITk.xml
+dcubeXmlTechEff=dcube_IDPVMPlots_ACTS_CKF_ITk_techeff.xml
 rdo=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.900498.PG_single_muonpm_Pt100_etaFlatnp0_43.recon.RDO.e8481_s4149_r14697/RDO.33675668._000016.pool.root.1
 ref_idpvm_athena=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/ReferenceHistograms/physval_run4_mu100GeV_reco_r24.root
 nEvents=1000
 
 # search in $DATAPATH for matching file
 dcubeXmlAbsPath=$(find -H ${DATAPATH//:/ } -mindepth 1 -maxdepth 1 -name $dcubeXml -print -quit 2>/dev/null)
+dcubeXmlTechEffAbsPath=$(find -H ${DATAPATH//:/ } -mindepth 1 -maxdepth 1 -name $dcubeXmlTechEff -print -quit 2>/dev/null)
 # Don't run if dcube config not found
 if [ -z "$dcubeXmlAbsPath" ]; then
     echo "art-result: 1 dcube-xml-config"
@@ -78,7 +80,6 @@ run "Reconstruction-ambi" \
     Reco_tf.py --CA \
     --steering doRAWtoALL \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateResolvedTracksFlags" \
-    --preExec 'flags.Tracking.writeExtendedSi_PRDInfo=True;' \
     --inputRDOFile ${rdo} \
     --outputAODFile AOD.ambi.root \
     --perfmon fullmonmt \
@@ -115,7 +116,7 @@ ls -la "$lastref_dir"
 run "dcube-ckf-last" \
     $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
     -p -x dcube_ckf_last \
-    -c ${dcubeXmlAbsPath} \
+    -c ${dcubeXmlTechEffAbsPath} \
     -r ${lastref_dir}/idpvm.ckf.root \
     idpvm.ckf.root
 
@@ -138,6 +139,6 @@ run "dcube-ckf-ambi" \
 run "dcube-ckf-athena" \
     $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
     -p -x dcube_ckf_athena \
-    -c ${dcubeXmlAbsPath} \
+    -c ${dcubeXmlTechEffAbsPath} \
     -r ${ref_idpvm_athena} \
     idpvm.ckf.root
