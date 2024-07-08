@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef _TrkVKalVrtCore_ForCFT_H
@@ -36,10 +36,10 @@ namespace Trk {
 //    For "passing near" vrt+covvrt+charge from ForVrtClose structure is used.
 //    For pointing cnst vertex from constraint object itself is used
 //---------------------------------------------------------------------------
-    double vrt[3], covvrt[6], wgtvrt[6];
+    double vrt[3]{}, covvrt[6]{}, wgtvrt[6]{};
 //
 // temporary vertex in global ref.frame
-    double vrtstp[3];
+    double vrtstp[3]{};
     int irob;
     double RobustScale;
     double robres[vkalNTrkM];

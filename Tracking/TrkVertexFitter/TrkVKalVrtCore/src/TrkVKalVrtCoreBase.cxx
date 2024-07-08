@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <algorithm>
@@ -123,10 +123,11 @@ namespace Trk {
 
 
 
-
+  // cppcheck-suppress uninitMemberVar; large ader array not initialized
   VKVertex::VKVertex(const VKalVrtControl & FitControl): VKVertex()
   {    vk_fitterControl = std::make_unique<VKalVrtControl>(FitControl);  }
 
+  // cppcheck-suppress uninitMemberVar; large ader array not initialized
   VKVertex::VKVertex():
      useApriorVertex(0), passNearVertex(false), passWithTrkCov(false),
      TrackList(0), tmpArr(0), ConstraintList(0),nextCascadeVrt(nullptr),includedVrt(0)
