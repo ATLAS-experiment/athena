@@ -29,8 +29,9 @@ class OutputAnalysisConfig (ConfigBlock):
             "(values) to be used when saving to the output tree. Branches "
             "are then of the form prefix_decoration.")
         # TODO: add info string
-        self.addOption ('containersOnlyForMC', [], type=None,
-            info="")
+        self.addOption ('containersOnlyForMC', {}, type=None,
+            info="same as containers, but for MC-only containers so as to avoid "
+            "a crash when running on data.")
         self.addOption ('treeName', 'analysis', type=str,
             info="name of the output TTree to save. The default is analysis.")
         self.addOption ('metTermName', 'Final', type=str,
@@ -59,6 +60,15 @@ class OutputAnalysisConfig (ConfigBlock):
         # merge the MC-specific branches and containers into the main list/dictionary only if we are not running on data
         if config.dataType() is not DataType.Data:
             self.vars |= self.varsOnlyForMC
+
+            # protect 'containers' against being overwritten
+            # find overlapping keys
+            overlapping_keys = set(self.containers.keys()).intersection(self.containersOnlyForMC.keys())
+            if overlapping_keys:
+                # convert the set of overlapping keys to a list of strings for the message (represents the empty string too!)
+                keys_message = [repr(key) for key in overlapping_keys]
+                raise KeyError(f"containersOnlyForMC would overwrite the following container keys: {', '.join(keys_message)}")
+
             self.containers.update(self.containersOnlyForMC)
 
         if self.storeSelectionFlags:
