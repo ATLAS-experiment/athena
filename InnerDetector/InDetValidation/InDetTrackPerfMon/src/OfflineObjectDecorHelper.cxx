@@ -9,6 +9,7 @@
 
 /// local includes
 #include "OfflineObjectDecorHelper.h"
+#include "AthContainers/ConstAccessor.h"
 
 
 namespace IDTPM {
@@ -49,8 +50,8 @@ namespace IDTPM {
 
   /// getTruthMatchProb
   float getTruthMatchProb( const xAOD::TrackParticle& track ) {
-    return ( track.isAvailable< float >( "truthMatchProbability" ) ?
-        track.auxdata< float >( "truthMatchProbability" ) : -1. );
+    static const SG::ConstAccessor< float > truthMatchProbabilityAcc( "truthMatchProbability" );
+    return truthMatchProbabilityAcc.withDefault (track, -1);
   }
 
 

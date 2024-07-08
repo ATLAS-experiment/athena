@@ -31,7 +31,8 @@ namespace IDTPM {
   bool isUnlinkedObject( const xAOD::TrackParticle& track,
                          const std::string& decoName ) {
     using elementLink_t = ElementLink< container_t >;
-    return ( not track.isAvailable< elementLink_t >( decoName ) );
+    const SG::ConstAccessor< elementLink_t > acc( decoName );
+    return ( not acc.isAvailable( track ) );
   }
 
   /// Templated method to retrieve object linked to a track
@@ -44,7 +45,8 @@ namespace IDTPM {
 
     if( isUnlinkedObject< container_t >( track, decoName ) ) return nullptr;
 
-    elementLink_t eleLink = track.auxdata< elementLink_t >( decoName );
+    const SG::ConstAccessor< elementLink_t > acc( decoName );
+    elementLink_t eleLink = acc( track );
 
     if( not eleLink.isValid() ) return nullptr;
 
