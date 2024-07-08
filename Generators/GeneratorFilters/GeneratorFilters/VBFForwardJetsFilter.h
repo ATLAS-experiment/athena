@@ -31,7 +31,9 @@ private:
   double m_Jet2MaxEta;
   bool m_UseOppositeSignEtaJet1Jet2;
   double m_DeltaEtaJJ;
+  double m_DeltaPhiJJ;
   double m_MassJJ;
+  bool m_RequireSamePair;
   bool m_UseLeadingJJ;
   double m_LGMinPt;
   double m_LGMaxEta;

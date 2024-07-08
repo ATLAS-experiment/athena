@@ -30,6 +30,8 @@ filtSeq += xAODVBFForwardJetsFilter
 #filtSeq.xAODVBFForwardJetsFilter.UseLeadingJJ=True
 #filtSeq.xAODVBFForwardJetsFilter.MassJJ = 300.*GeV
 #filtSeq.xAODVBFForwardJetsFilter.DeltaEtaJJ = 3.0
+#filtSeq.xAODVBFForwardJetsFilter.DeltaPhiJJ = 3.0
+#filtSeq.xAODVBFForwardJetsFilter.RequireSamePair=False
 
 
 
