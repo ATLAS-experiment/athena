@@ -30,6 +30,8 @@ xAODVBFForwardJetsFilter::xAODVBFForwardJetsFilter(const std::string &name, ISvc
     declareProperty("UseOppositeSignEtaJet1Jet2", m_UseOppositeSignEtaJet1Jet2 = false);
     declareProperty("MassJJ", m_MassJJ = 300. * Gaudi::Units::GeV);
     declareProperty("DeltaEtaJJ", m_DeltaEtaJJ = 2.0);
+    declareProperty("DeltaPhiJJ", m_DeltaPhiJJ = -1.0);
+    declareProperty("RequireSamePair",m_RequireSamePair = false);
     declareProperty("UseLeadingJJ", m_UseLeadingJJ = false);
     declareProperty("TruthJetContainer", m_TruthJetContainerName = "AntiKt4TruthJets");
     declareProperty("LGMinPt", m_LGMinPt = 10. * Gaudi::Units::GeV);
@@ -58,6 +60,8 @@ StatusCode xAODVBFForwardJetsFilter::filterInitialize()
     ATH_MSG_INFO("MassJJ=" << m_MassJJ);
     ATH_MSG_INFO("*** DeltaEta of JJ (Nj>=2) ***");
     ATH_MSG_INFO("DeltaEtaJJ=" << m_DeltaEtaJJ);
+    ATH_MSG_INFO("*** DeltaPhi of JJ (Nj>=2) ***");
+    ATH_MSG_INFO("DeltaPhiJJ=" << m_DeltaPhiJJ);
     ATH_MSG_INFO("*** Use only 1st and 2nd jets ***");
     ATH_MSG_INFO("UseLeadingJJ=" << m_UseLeadingJJ);
     ATH_MSG_INFO("*** e/gamma/tau/ matching ***");
@@ -225,25 +229,35 @@ StatusCode xAODVBFForwardJetsFilter::filterEvent()
 
     // DeltaEta and Mass of JJ
     int flagJJ = -1;
-    if (m_DeltaEtaJJ >= 0. || m_MassJJ >= 0.)
+    if (m_DeltaEtaJJ >= 0. || m_DeltaPhiJJ >= 0. || m_MassJJ >= 0.)
     {
         flagJJ = 0;
         if (jetList.size() >= 2)
         {
             int okDeltaEtaJJ = m_DeltaEtaJJ >= 0. ? 0 : 1;
+            int okDeltaPhiJJ = m_DeltaPhiJJ >= 0. ? 0 : 1;
             int okMassJJ = m_MassJJ >= 0. ? 0 : 1;
             for (unsigned i = 0; i < jetList.size() - 1; ++i)
             {
                 for (unsigned j = i + 1; j < jetList.size(); ++j)
                 {
+                    if (m_RequireSamePair) {
+                      okDeltaEtaJJ = m_DeltaEtaJJ >= 0. ? 0 : 1;
+                      okDeltaPhiJJ = m_DeltaPhiJJ >= 0. ? 0 : 1;
+                      okMassJJ = m_MassJJ >= 0. ? 0 : 1;
+                    }
                     double dEta = std::abs(jetList[i]->eta() - jetList[j]->eta());
+                    double dPhi = std::abs(jetList[i]->p4().DeltaPhi(jetList[j]->p4()));
                     double Mjj = (jetList[i]->p4() + jetList[j]->p4()).M();
                     ATH_MSG_INFO("DeltaEtaJJ = " << dEta << " MassJJ(Gaudi::Units::GeV) = " << Mjj / Gaudi::Units::GeV << " (" << i << ", " << j << ")");
-                    if (okDeltaEtaJJ == 0 && dEta > m_DeltaEtaJJ)
+                    if (okDeltaEtaJJ == 0 && dEta > m_DeltaEtaJJ) {
                         okDeltaEtaJJ = 1;
-                    if (okMassJJ == 0 && Mjj > m_MassJJ)
+                    } if (okDeltaPhiJJ == 0 && dPhi < m_DeltaPhiJJ) {
+                        okDeltaPhiJJ = 1;
+                    } if (okMassJJ == 0 && Mjj > m_MassJJ) {
                         okMassJJ = 1;
-                    if (okDeltaEtaJJ && okMassJJ)
+                    }
+                    if (okDeltaEtaJJ && okDeltaPhiJJ && okMassJJ)
                     {
                         flagJJ = 1;
                         break;
