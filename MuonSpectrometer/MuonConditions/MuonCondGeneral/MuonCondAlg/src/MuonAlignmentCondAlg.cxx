@@ -161,7 +161,7 @@ StatusCode MuonAlignmentCondAlg::parseDataFromJSON(const nlohmann::json& lines,
             }
             id = m_idHelperSvc->mmIdHelper().channelID(stationType, stationEta, stationPhi, multiLayer, 1, 1);
         } else if (stationType[0] == 'S') {
-            if (!m_idHelperSvc->hasTGC()) {
+            if (!m_idHelperSvc->hasSTGC()) {
                 ATH_MSG_VERBOSE("No sTgcs defined skipping: "<<stationType<<","<<","<<stationEta<<","<<stationPhi<<","<<multiLayer);
                 continue;
             }
