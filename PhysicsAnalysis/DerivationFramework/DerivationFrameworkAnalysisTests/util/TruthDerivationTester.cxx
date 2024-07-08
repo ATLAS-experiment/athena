@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /* Simple class for working with truth DAODs */
@@ -41,6 +41,7 @@ namespace po = boost::program_options;
 #include "xAODJet/JetContainer.h"
 #include "xAODTruth/TruthVertexContainer.h"
 #include "xAODTruth/TruthMetaDataContainer.h"
+#include "AthContainers/ConstAccessor.h"
 
 // ROOT dependencies
 #include <TFile.h>
@@ -278,7 +279,8 @@ int main(int argc, char **argv) {
     h_x1->Fill( x1 );
     h_x2->Fill( x2 );
     h_xsec->Fill( (*xTruthEventContainer)[0]->crossSection() );
-    h_HTFilt->Fill( xEventInfo->auxdata<float>("GenFiltHT") );
+    static const SG::ConstAccessor<float> GenFiltHTAcc ("GenFiltHT");
+    h_HTFilt->Fill( GenFiltHTAcc (*xEventInfo ) );
     // For MET: NonInt, Int, IntOut, IntMuons
     h_metNonInt->Fill( (*truthMET)["NonInt"]->met()*0.001 );
     h_metNonInt->Fill( (*truthMET)["Int"]->met()*0.001 );
@@ -292,45 +294,59 @@ int main(int argc, char **argv) {
         h_partConn[n]->Fill( -1-countParents( p ) );
       }
     }
+
+    static const SG::ConstAccessor<float> ptcone30Acc("ptcone30");
+    static const SG::ConstAccessor<float> ptcone20Acc("ptcone20");
+    static const SG::ConstAccessor<float> etcone20Acc("etcone20");
+    static const SG::ConstAccessor<float> pt_dressedAcc("pt_dressed");
+    static const SG::ConstAccessor<float> pt_vis_dressedAcc("pt_vis_dressed");
+    static const SG::ConstAccessor<float> Tau2_wtaAcc("Tau2_wta");
+    static const SG::ConstAccessor<float> D2Acc("D2");
+    static const SG::ConstAccessor<unsigned int> classifierParticleTypeAcc("classifierParticleType");
+    static const SG::ConstAccessor<unsigned int> classifierParticleOriginAcc("classifierParticleOrigin");
+    static const SG::ConstAccessor<int> HadronConeExclTruthLabelIDAcc("HadronConeExclTruthLabelID");
+    static const SG::ConstAccessor<int> PartonTruthLabelIDAcc("PartonTruthLabelID");
+    static const SG::ConstAccessor<int> TrueFlavorAcc("TrueFlavor");
+
     for (const auto * p : *truthParticles[0]){ // Electrons
-      h_elPtCone->Fill( p->auxdata<float>("ptcone30")*0.001 );
-      h_elEtCone->Fill( p->auxdata<float>("etcone20")*0.001 );
-      h_elDressedPt->Fill( p->auxdata<float>("pt_dressed")*0.001 );
-      h_elType->Fill( p->auxdata<unsigned int>("classifierParticleType") );
-      h_elOrig->Fill( p->auxdata<unsigned int>("classifierParticleOrigin") );
+      h_elPtCone->Fill( ptcone30Acc(*p)*0.001 );
+      h_elEtCone->Fill( etcone20Acc(*p)*0.001 );
+      h_elDressedPt->Fill( pt_dressedAcc(*p)*0.001 );
+      h_elType->Fill( classifierParticleTypeAcc(*p) );
+      h_elOrig->Fill( classifierParticleOriginAcc(*p) );
     }
     for (const auto * p : *truthParticles[1]){ // Muons
-      h_muPtCone->Fill( p->auxdata<float>("ptcone30")*0.001 );
-      h_muEtCone->Fill( p->auxdata<float>("etcone20")*0.001 );
-      h_muDressedPt->Fill( p->auxdata<float>("pt_dressed")*0.001 );
-      h_muType->Fill( p->auxdata<unsigned int>("classifierParticleType") );
-      h_muOrig->Fill( p->auxdata<unsigned int>("classifierParticleOrigin") );
+      h_muPtCone->Fill( ptcone30Acc(*p)*0.001 );
+      h_muEtCone->Fill( etcone20Acc(*p)*0.001 );
+      h_muDressedPt->Fill( pt_dressedAcc(*p)*0.001 );
+      h_muType->Fill( classifierParticleTypeAcc(*p) );
+      h_muOrig->Fill( classifierParticleOriginAcc(*p) );
     }
     for (const auto * p : *truthParticles[2]){ // Photons
-      h_phPtCone->Fill( p->auxdata<float>("ptcone20")*0.001 );
-      h_phEtCone->Fill( p->auxdata<float>("etcone20")*0.001 );
-      h_phType->Fill( p->auxdata<unsigned int>("classifierParticleType") );
-      h_phOrig->Fill( p->auxdata<unsigned int>("classifierParticleOrigin") );
+      h_phPtCone->Fill( ptcone20Acc(*p)*0.001 );
+      h_phEtCone->Fill( etcone20Acc(*p)*0.001 );
+      h_phType->Fill( classifierParticleTypeAcc(*p) );
+      h_phOrig->Fill( classifierParticleOriginAcc(*p) );
     }
     for (const auto * p : *truthParticles[3]){ // Taus
-      h_taDressedPt->Fill( p->auxdata<float>("pt_vis_dressed")*0.001 );
-      h_taType->Fill( p->auxdata<unsigned int>("classifierParticleType") );
-      h_taOrig->Fill( p->auxdata<unsigned int>("classifierParticleOrigin") );
+      h_taDressedPt->Fill( pt_vis_dressedAcc(*p)*0.001 );
+      h_taType->Fill( classifierParticleTypeAcc(*p) );
+      h_taOrig->Fill( classifierParticleOriginAcc(*p) );
     }
     for (const auto * p : *truthParticles[4]){ // Neutrinos
-      h_nuType->Fill( p->auxdata<unsigned int>("classifierParticleType") );
-      h_nuOrig->Fill( p->auxdata<unsigned int>("classifierParticleOrigin") );
+      h_nuType->Fill( classifierParticleTypeAcc(*p) );
+      h_nuOrig->Fill( classifierParticleOriginAcc(*p) );
     }
     for (const auto * j : *smallRJets){ // Small-R jets
       h_jetPt->Fill( j->pt()*0.001 );
-      h_jetFTAG->Fill( j->auxdata<int>("HadronConeExclTruthLabelID") );
-      h_jetJeMe->Fill( j->auxdata<int>("PartonTruthLabelID") );
-      h_jetFull->Fill( j->auxdata<int>("TrueFlavor") );
+      h_jetFTAG->Fill( HadronConeExclTruthLabelIDAcc(*j) );
+      h_jetJeMe->Fill( PartonTruthLabelIDAcc(*j) );
+      h_jetFull->Fill( TrueFlavorAcc(*j) );
     }
     for (const auto * j : *largeRJets){ // Large-R jets
       h_jetLRPt->Fill( j->pt()*0.001 );
-      h_jetLRT2->Fill( j->auxdata<float>("Tau2_wta") );
-      h_jetLRD2->Fill( j->auxdata<float>("D2") );
+      h_jetLRT2->Fill( Tau2_wtaAcc(*j) );
+      h_jetLRD2->Fill( D2Acc(*j) );
     }
 
   } // End of event loop
