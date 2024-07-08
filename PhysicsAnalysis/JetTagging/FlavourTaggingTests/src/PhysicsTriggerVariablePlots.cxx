@@ -1,4 +1,4 @@
-//Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+//Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  
 
 #include "FlavourTaggingTests/PhysicsTriggerVariablePlots.h"
@@ -138,11 +138,13 @@ namespace FTAGValidation {
 
         //nMuons and nSV1
         const xAOD::BTagging* bTag = xAOD::BTaggingUtilities::getBTagging( *jet );
-        std::vector< ElementLink< xAOD::VertexContainer > > SV1_vertex = bTag->auxdata<std::vector< ElementLink< xAOD::VertexContainer > > >("SV1_vertices");
+        static const SG::ConstAccessor<std::vector< ElementLink< xAOD::VertexContainer > > > SV1_verticesAcc("SV1_vertices");
+        std::vector< ElementLink< xAOD::VertexContainer > > SV1_vertex = SV1_verticesAcc(*bTag);
         if(SV1_vertex.size() >= 1) nJetsWithSV++;
 
-        if (bTag->isAvailable< ElementLink<xAOD::MuonContainer> >("SMT_mu_link")) {
-          ElementLink<xAOD::MuonContainer> muonLink = bTag->auxdata< ElementLink<xAOD::MuonContainer> >("SMT_mu_link");
+        static const SG::ConstAccessor< ElementLink<xAOD::MuonContainer> > SMT_mu_linkAcc("SMT_mu_link");
+        if (SMT_mu_linkAcc.isAvailable(*bTag)) {
+          ElementLink<xAOD::MuonContainer> muonLink = SMT_mu_linkAcc(*bTag);
           if ( muonLink.isValid() ) {
             const xAOD::Muon* muon=(*muonLink);
             if ( muon != 0 ) {
@@ -166,11 +168,12 @@ namespace FTAGValidation {
           }
           const xAOD::Jet *matchedOfflineJet = qualityOfflineJetCollection.at(offlineJetIndex);
 
-          if( matchedOfflineJet->isAvailable< int >( "HadronConeExclTruthLabelID" ) == false ) {
+          static const SG::ConstAccessor< int > HadronConeExclTruthLabelIDAcc( "HadronConeExclTruthLabelID" );
+          if( HadronConeExclTruthLabelIDAcc.isAvailable( *matchedOfflineJet ) == false ) {
             ATH_MSG_ERROR( "Input sample is MC but matched offline jet has no 'HadronConeExclTruthLabelID' aux data. Something is wrong!" );
             return StatusCode::FAILURE;
           }
-          int HadronConeExclTruthLabelID = matchedOfflineJet->auxdata< int >( "HadronConeExclTruthLabelID");
+          int HadronConeExclTruthLabelID = HadronConeExclTruthLabelIDAcc( *matchedOfflineJet );
           ATH_MSG_DEBUG( "  ** 'HadronConeExclTruthLabelID' is " << HadronConeExclTruthLabelID );
           ATH_CHECK( fillHistogram( chain + "_truth_label" , HadronConeExclTruthLabelID ) );
           if( HadronConeExclTruthLabelID == 0 ) flavour = "U_";
