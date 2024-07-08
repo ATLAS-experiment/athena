@@ -173,7 +173,6 @@ def CPAlgorithmsCfg(flags):
     subConfig = factory.makeConfig ('Jets', containerName='AnalysisLargeRJets',
         jetCollection=largeRjetContainer)
     subConfig.setOptionValue ('.runGhostMuonAssociation', False)
-    subConfig.setOptionValue ('.postfix', 'largeR_jets' )
     configSeq += subConfig
     subConfig = factory.makeConfig ('Thinning', containerName='AnalysisLargeRJets')
     subConfig.setOptionValue ('.deepCopy', True)
