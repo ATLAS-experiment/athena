@@ -53,7 +53,8 @@ class TrackingComponent(FlagEnum):
     ActsValidateAmbiguityResolution = "ActsValidateAmbiguityResolution"
     # GNN
     GNNChain = "GNNChain"
-
+    # FPGA
+    FPGAChain = "FPGAChain"
 
 def createTrackingConfigFlags():
     icf = AthConfigFlags()
@@ -564,6 +565,11 @@ def createTrackingConfigFlags():
     from InDetGNNTracking.InDetGNNTrackingFlags import createGNNTrackingPassFlags
     icf.addFlagsCategory ("Tracking.ITkGNNPass",
                           createGNNTrackingPassFlags, prefix=True)
+    #FPGA 
+    from TrkConfig.InDetFPGATrackingFlags import createFPGATrackingPassFlags 
+    icf.addFlagsCategory ("Tracking.ITkFPGAPass",
+                          createFPGATrackingPassFlags, prefix=True)    
+
 
     ####################################################################
 

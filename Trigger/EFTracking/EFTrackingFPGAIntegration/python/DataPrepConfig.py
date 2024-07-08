@@ -25,8 +25,8 @@ def DataPrepCfg(flags, name = "DataPreparationPipeline", **kwarg):
     kwarg.setdefault('xclbin', './xAODTransfer.xclbin')
     kwarg.setdefault('KernelName', 'xAODTransfer')
     kwarg.setdefault('ClusterMaker', tool)
-    kwarg.setdefault('StripClusterContainerKey', '')
-    kwarg.setdefault('PixelClusterContainerKey', '')
+    kwarg.setdefault('StripClusterContainerKey', 'FPGAITkStripClusters')
+    kwarg.setdefault('PixelClusterContainerKey', 'FPGAITkPixelClusters')
 
     acc.addEventAlgo(CompFactory.DataPreparationPipeline(**kwarg))
     return acc

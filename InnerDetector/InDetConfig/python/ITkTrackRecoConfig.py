@@ -86,6 +86,12 @@ def CombinedTrackingPassFlagSets(flags):
                                              "Tracking.ITkLargeD0Pass")
         flags_set += [flagsLRT]
 
+    ## FPGA pass 
+    if TrackingComponent.FPGAChain in flags.Tracking.recoChain:
+        flags_set += [flags.cloneAndReplace(
+            "Tracking.ActiveConfig",
+            "Tracking.ITkFPGAPass")]
+
     # Photon conversion tracking reco
     if flags.Detector.EnableCalo and flags.Tracking.doITkConversion:
         flagsConv = flags.cloneAndReplace("Tracking.ActiveConfig",

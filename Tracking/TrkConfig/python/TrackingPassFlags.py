@@ -217,6 +217,9 @@ def createITkTrackingPassFlags():
     # --- flags for GNN tracking
     icf.addFlag("doGNNTrack", False)
 
+    # ---flag for FPGA tracking
+    icf.addFlag("doFPGATrack", False)
+
     # --- Flags for detailed information. 
     #     Ignored for Primary Pass (always active); 
     #     Enable for other passes with dedicated output container, if desired.
