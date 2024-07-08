@@ -13,6 +13,7 @@
 #include "xAODTracking/VertexContainer.h"
 #include "TrkToolInterfaces/ITrackSelectorTool.h"
 #include "InDetConversionFinderTools/VertexPointEstimator.h"
+#include "DerivationFrameworkBPhys/EtacCandidateVector.h"
 #include <vector>
 
 namespace Trk {
@@ -22,11 +23,6 @@ namespace Trk {
 }
 
 class IBeamCondSvc;
-
-namespace DerivationFramework {
-  struct RhoCandidate;
-  struct EtacCandidate;
-}
 
 namespace DerivationFramework {
 
@@ -47,12 +43,12 @@ namespace DerivationFramework {
     std::vector<std::string> m_vertexJpsiHypoNames;
     Gaudi::Property<std::string> m_VxPrimaryCandidateName{this, "VxPrimaryCandidateName", "PrimaryVertices", "Name of primary vertex container"};
     Gaudi::Property<std::string> m_trackContainerName{this, "TrackContainerName", "InDetTrackParticles", "Name of Inner Detector TrackParticles container"};
-    Gaudi::Property<double> m_trkMinPt1{this, "TrackMinPtTrk1", 2500., "1st leading track pt from eta_c"};
-    Gaudi::Property<double> m_trkMinPt2{this, "TrackMinPtTrk2", 2000., "2nd leading track pt from eta_c"};
-    Gaudi::Property<double> m_trkMinPt3{this, "TrackMinPtTrk3", 1500., "3rd leading track pt from eta_c"};
+    Gaudi::Property<double> m_trkMinPt1{this, "TrackMinPtTrk1", 1800., "1st leading track pt from eta_c"};
+    Gaudi::Property<double> m_trkMinPt2{this, "TrackMinPtTrk2", 1500., "2nd leading track pt from eta_c"};
+    Gaudi::Property<double> m_trkMinPt3{this, "TrackMinPtTrk3", 1200., "3rd leading track pt from eta_c"};
     Gaudi::Property<double> m_trkMinPt4{this, "TrackMinPtTrk4", 1000., "4th leading track pt from eta_c"};
-    Gaudi::Property<double> m_trkMinPt5{this, "TrackMinPtTrk5", 1000., "5th leading track pt from eta_c"};
-    Gaudi::Property<double> m_trkMinPt6{this, "TrackMinPtTrk6", 1000., "6th leading track pt from eta_c"};
+    Gaudi::Property<double> m_trkMinPt5{this, "TrackMinPtTrk5", 900., "5th leading track pt from eta_c"};
+    Gaudi::Property<double> m_trkMinPt6{this, "TrackMinPtTrk6", 800., "6th leading track pt from eta_c"};
     double m_jpsiMassLower;
     double m_jpsiMassUpper;
     int    m_etacDaug_num;
