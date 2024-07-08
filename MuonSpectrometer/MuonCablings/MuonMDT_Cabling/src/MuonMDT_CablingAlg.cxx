@@ -374,7 +374,7 @@ StatusCode MuonMDT_CablingAlg::loadCablingSchemaFromJSON(nlohmann::json&& payloa
         ms_channel.channelId = hedgeHogCard ? (*std::min_element(
                                                     hedgeHogCard->tubeToTdcMap().begin(),
                                                     hedgeHogCard->tubeToTdcMap().end())) : 0;
-        if (!cabling_map.addMezzanine(ms_channel, DataSource::JSON, msgStream())) return StatusCode::FAILURE;   
+        if (!cabling_map.addMezzanine(std::move(ms_channel), DataSource::JSON, msgStream())) return StatusCode::FAILURE;   
     }
     return StatusCode::SUCCESS;
 }

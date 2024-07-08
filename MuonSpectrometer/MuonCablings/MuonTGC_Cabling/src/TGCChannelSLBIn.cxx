@@ -5,6 +5,19 @@
 #include "MuonTGC_Cabling/TGCChannelSLBIn.h"
 
 #include "MuonTGC_Cabling/TGCModuleSLB.h"
+#include <string>
+#include <stdexcept>
+
+namespace{
+ void
+ checkCellType(MuonTGC_Cabling::TGCChannelSLBIn::CellType cellType, const std::string & funcName){
+   if (cellType == MuonTGC_Cabling::TGCChannelSLBIn::CellType::NoCellType or cellType == MuonTGC_Cabling::TGCChannelSLBIn::CellType::MaxCellType){
+    const std::string msg = "cellType out of range in " + funcName;
+    throw std::out_of_range(msg);
+  }
+ }
+
+}
 
 namespace MuonTGC_Cabling
 {
@@ -69,15 +82,18 @@ const int TGCChannelSLBIn::s_adjacentST[]  = { 0,  0,  0,  0,  0};
 
 
 int TGCChannelSLBIn::getLengthOfCell(CellType cellType) {
+  checkCellType(cellType, __func__);
   return s_lengthCell[cellType];
 }
   
 int TGCChannelSLBIn::getOffsetOfCell(CellType cellType) {
+  checkCellType(cellType, __func__);
   return s_offsetCell[cellType];
 }
 
 int TGCChannelSLBIn::getLengthOfSLB(TGCId::ModuleType moduleType, 
 				    CellType cellType) {
+	checkCellType(cellType, __func__);
   switch(moduleType){
   case TGCId::WD:
     return s_lengthWD[cellType];
@@ -98,11 +114,13 @@ int TGCChannelSLBIn::getLengthOfSLB(TGCId::ModuleType moduleType,
 }
 
 int TGCChannelSLBIn::getAdjacentOfCell(CellType cellType) {
+  checkCellType(cellType, __func__);
   return s_adjacentCell[cellType];
 }
 
 int TGCChannelSLBIn::getAdjacentOfSLB(TGCId::ModuleType moduleType,
 				      CellType cellType) {
+	checkCellType(cellType, __func__);
   switch(moduleType){
   case TGCId::WD:
     return s_adjacentWD[cellType];
@@ -173,15 +191,21 @@ TGCChannelSLBIn::CellType TGCChannelSLBIn::convertCellType(int channel) {
 
 int TGCChannelSLBIn::convertChannelInSLB(TGCId::ModuleType moduleType,
 					 CellType cellType, int channel) {
-  int offset = getAdjacentOfCell(cellType)
-    -getAdjacentOfSLB(moduleType, cellType);
+	const int adjacentSLB = getAdjacentOfSLB(moduleType, cellType);
+	if (adjacentSLB == -1){
+	  throw std::out_of_range("adjacentSLB is -1 in TGCChannelSLBIn::convertChannelInSLB");
+	}
+  int offset = getAdjacentOfCell(cellType) - adjacentSLB;
   return channel-offset;
 }
 
 int TGCChannelSLBIn::convertChannel(TGCId::ModuleType moduleType,
 				    CellType cellType, int channelInSLB) {
-  int offset = getAdjacentOfCell(cellType)
-    -getAdjacentOfSLB(moduleType, cellType);
+	const int adjacentSLB = getAdjacentOfSLB(moduleType, cellType);
+	if (adjacentSLB == -1){
+	  throw std::out_of_range("adjacentSLB is -1 in TGCChannelSLBIn::convertChannel");
+	}
+  int offset = getAdjacentOfCell(cellType)-adjacentSLB;
   return getOffsetOfCell(cellType)+offset+channelInSLB;
 }
 

@@ -1,16 +1,19 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONMDT_CABLING_MUONMDT_CABLINGMAP_H
 #define MUONMDT_CABLING_MUONMDT_CABLINGMAP_H
 
-#include <set>
+
 
 #include "AthenaKernel/CLASS_DEF.h"
-#include "Identifier/Identifier.h"
 #include "MuonCablingData/MdtTdcMap.h"
-
+#include <set>
+#include <memory>
+#include <map>
+#include <vector>
+#include <cstdint>
 /**********************************************
  *
  * @brief MDT map data object
@@ -20,6 +23,7 @@
 class MdtMezzanineType;
 class MdtIdHelper;
 class IdentifierHash;
+class Identifier;
 
 class MuonMDT_CablingMap {
    public:
@@ -88,7 +92,7 @@ class MuonMDT_CablingMap {
     /** Add a new fully configured mezzanine card */
     /** the indexes multilayer, layer, tube refer to the tube connected to the
      * channelZero */
-    bool addMezzanine(CablingData cabling_data, DataSource source,
+    bool addMezzanine(CablingData  cabling_data, DataSource source,
                       MsgStream& log);
 
     /** return the offline id given the online id */

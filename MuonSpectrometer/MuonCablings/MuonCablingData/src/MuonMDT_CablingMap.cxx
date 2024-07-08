@@ -1,16 +1,17 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCablingData/MuonMDT_CablingMap.h"
 
 #include <cmath>
-#include <set>
 
 #include "GaudiKernel/ISvcLocator.h"
 #include "MuonIdHelpers/MdtIdHelper.h"
 #include "CxxUtils/ArrayHelper.h"
 #include "StoreGate/StoreGateSvc.h"
+#include "Identifier/Identifier.h"
+
 
 namespace {
 /// Four mezzanine channels explicitly break the cabling schema in the legacy
