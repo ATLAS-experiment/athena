@@ -15,7 +15,7 @@
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
 
 #include "GeoModelKernel/GeoTransform.h"
-#include "GeoModelHelpers/TransformSorter.h"
+#include "GeoModelHelpers/GeoDeDuplicator.h"
 #include "GeoModelKernel/GeoVFullPhysVol.h"
 #include "GeoModelKernel/GeoIdentifierTag.h"
 
@@ -38,16 +38,9 @@ class MuonReadoutGeomCnvAlg : public AthReentrantAlgorithm {
         bool isReEntrant() const override { return false; }
     
     private:
-        struct ConstructionCache{
+        struct ConstructionCache: public GeoDeDuplicator {
             public:
                 ConstructionCache() = default;
-
-                /** @brief Transforms an Amg::Transform3D into a GeoModelTransform node
-                 *         If the transform has been shown before to the cache, it returns the 
-                 *         precached node */
-                GeoIntrusivePtr<GeoTransform> makeTransform(const Amg::Transform3D& trf) {
-                    return *m_trfPool.insert(make_intrusive<GeoTransform>(trf)).first;
-                }
                 /** @brief Pointer to the legacy MuonDetectorManager*/
                 std::unique_ptr<MuonGM::MuonDetectorManager> detMgr{};
                 /** @brief Pointer to the world */
@@ -59,7 +52,6 @@ class MuonReadoutGeomCnvAlg : public AthReentrantAlgorithm {
                     return make_intrusive<GeoIdentifierTag>(++m_id);
                 }
             private:
-                std::set<GeoIntrusivePtr<GeoTransform>, GeoTrf::TransformSorter> m_trfPool{};
                 unsigned int m_id{0};
 
         };
