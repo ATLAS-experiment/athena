@@ -1,4 +1,4 @@
-//Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+//Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #ifndef FTAGVALIDATION_PHYSICSVARIABLEPLOTS_H
 #define FTAGVALIDATION_PHYSICSVARIABLEPLOTS_H 1
@@ -39,7 +39,7 @@ namespace FTAGValidation {
 
     StatusCode computeAndStoreTrackVariables( const std::string&, const xAOD::Jet*,
 					      const std::string&, const xAOD::TrackParticle*,
-					      const xAOD::Vertex*, const std::string = "" );
+					      const xAOD::Vertex*, const std::string& = "" );
 
     StatusCode analyseBTaggingObject( const xAOD::Jet*,
 				      const std::string&,

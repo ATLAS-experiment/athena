@@ -319,7 +319,7 @@ namespace FTAGValidation {
 
   StatusCode PhysicsVariablePlots::computeAndStoreTrackVariables( const std::string& jetType, const xAOD::Jet* jet,
 								  const std::string& trackType, const xAOD::TrackParticle *trackParticle,
-								  const xAOD::Vertex* primaryVertex, const std::string chain) {
+								  const xAOD::Vertex* primaryVertex, const std::string& chain) {
 
     std::string flavour = jetType + trackType;
 
