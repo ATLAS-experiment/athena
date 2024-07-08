@@ -61,7 +61,7 @@ def createActsConfigFlags():
     actscf.addFlag("Acts.SeedingStrategy", SeedingStrategy.Default, type=SeedingStrategy)  # Define Seeding Strategy
 
     # Track finding
-    actscf.addFlag('Acts.PixelCalibrationStrategy', PixelCalibrationStrategy.AnalogueClustering, type=PixelCalibrationStrategy)
+    actscf.addFlag('Acts.PixelCalibrationStrategy', PixelCalibrationStrategy.AnalogueClusteringAfterSelection, type=PixelCalibrationStrategy)
     actscf.addFlag('Acts.doRotCorrection', True)
     actscf.addFlag('Acts.doPrintTrackStates', False)
     actscf.addFlag('Acts.skipDuplicateSeeds', True)
