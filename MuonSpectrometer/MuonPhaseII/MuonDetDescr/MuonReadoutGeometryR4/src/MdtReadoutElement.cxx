@@ -75,7 +75,7 @@ StatusCode MdtReadoutElement::initElement() {
      /// Cache the transformations to the chamber layers
      const IdentifierHash layHash = measurementHash(lay,0);
      ATH_CHECK(insertTransform<MdtReadoutElement>(layHash));
-#ifndef SIMULATIONBASE
+#ifdef SIMULATIONBASE_REMOVEPLANESURFACE
      ATH_CHECK(planeSurfaceFactory(layHash, m_pars.layerBounds->make_bounds(m_pars.shortHalfX, 
                                                                             m_pars.longHalfX, 
                                                                             m_pars.halfY)));
@@ -203,21 +203,6 @@ double MdtReadoutElement::distanceToReadout(const ActsGeometryContext& ctx,
                                      Amg::Vector3D::UnitZ();
     return readOutPos.z() - locPoint.z();
 }
-#ifndef SIMULATIONBASE
-std::map<Identifier, std::shared_ptr<Acts::Surface>> MdtReadoutElement::getSurfaces() const {
-    std::map<Identifier,  std::shared_ptr<Acts::Surface>> surfaces{};
-    for (unsigned int layer = 1; layer<= numLayers(); ++layer) {
-         for (unsigned int tube = 1; tube<= numTubesInLay(); ++tube) {
-            const IdentifierHash measHash = measurementHash(layer, tube);
-            if (isValid(measHash)) {
-               surfaces[measurementId(measHash)] = surfacePtr(measHash);
-            }
-         }
-    }
-    return surfaces;
-}
-
-#endif
 
 void MdtReadoutElement::setComplementaryReadoutEle(const MdtReadoutElement* other) {
       m_reOtherMl = other;

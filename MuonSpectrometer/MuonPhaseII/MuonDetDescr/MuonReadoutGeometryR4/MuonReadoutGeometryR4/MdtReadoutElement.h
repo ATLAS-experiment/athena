@@ -18,7 +18,6 @@
 namespace Acts{
     class TrapezoidBounds;
     class LineBounds;
-    class Surface;
 }
 
 namespace MuonGMR4 {
@@ -174,9 +173,6 @@ class MdtReadoutElement : public MuonReadoutElement {
     /** @brief Returns the uncut tube length */
     double uncutTubeLength(const IdentifierHash& tubeHash) const;
 
-#ifndef SIMULATIONBASE
-    std::map<Identifier, std::shared_ptr<Acts::Surface>> getSurfaces() const override final;
-#endif
 
         friend ActsTrk::TransformCacheDetEle<MdtReadoutElement>;
 
@@ -255,6 +251,8 @@ std::ostream& operator<<(std::ostream& ostr, const MdtReadoutElement::parameterB
 namespace ActsTrk{
     template <> Amg::Transform3D 
         TransformCacheDetEle<MuonGMR4::MdtReadoutElement>::fetchTransform(const DetectorAlignStore* store) const;
+    template <> Identifier
+        TransformCacheDetEle<MuonGMR4::MdtReadoutElement>::identify() const;
 }
 
 #include <MuonReadoutGeometryR4/MdtReadoutElement.icc>

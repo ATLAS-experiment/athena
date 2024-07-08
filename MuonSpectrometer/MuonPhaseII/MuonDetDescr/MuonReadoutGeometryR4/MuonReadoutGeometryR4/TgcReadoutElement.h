@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONREADOUTGEOMETRYR4_TGCREADOUTELEMENT_H
 #define MUONREADOUTGEOMETRYR4_TGCREADOUTELEMENT_H
@@ -12,7 +12,6 @@
 
 
 namespace Acts{
-    class Surface;
     class TrapezoidBounds;
 }
 namespace MuonGMR4 {
@@ -103,9 +102,6 @@ class TgcReadoutElement : public MuonReadoutElement {
 
     friend class ActsTrk::TransformCacheDetEle<TgcReadoutElement>;
 
-#ifndef SIMULATIONBASE
-    std::map<Identifier, std::shared_ptr<Acts::Surface>> getSurfaces() const override final;
-#endif
 
    private:
         parameterBook m_pars{};
@@ -134,6 +130,8 @@ std::ostream& operator<<(std::ostream& ostr, const TgcReadoutElement::parameterB
 namespace ActsTrk{
     template <> Amg::Transform3D 
         TransformCacheDetEle<MuonGMR4::TgcReadoutElement>::fetchTransform(const DetectorAlignStore* store) const;
+    template <> Identifier
+        TransformCacheDetEle<MuonGMR4::TgcReadoutElement>::identify() const;
 }
 
 #include <MuonReadoutGeometryR4/TgcReadoutElement.icc>

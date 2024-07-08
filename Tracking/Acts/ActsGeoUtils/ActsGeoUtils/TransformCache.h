@@ -28,6 +28,9 @@ namespace ActsTrk {
 
           virtual ~TransformCache();
 
+
+          /** @brief Returns the Identifier of the transform cache */
+          virtual Identifier identify() const = 0;
           /** @brief Returns the sensor hash of this transformation cache */
           IdentifierHash hash() const;
           /** @brief Returns the parent IDetectorElement owning the cache*/
@@ -71,6 +74,7 @@ namespace ActsTrk {
                            const CachingDetectorEle* parentEle);
       
       const IDetectorElement* parent() const override final;
+      Identifier identify() const override final;
     private:
        Amg::Transform3D fetchTransform(const DetectorAlignStore* store) const override final;
        const CachingDetectorEle* m_parent{nullptr};

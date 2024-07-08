@@ -48,5 +48,9 @@ template<typename CachingDetectorEle>
     const IDetectorElement* TransformCacheDetEle<CachingDetectorEle>::parent()  const {
         return m_parent;
     }
+template <typename CachingDetectorEle>
+    Identifier TransformCacheDetEle<CachingDetectorEle>::identify() const {
+        return parent()->identify();
+    }
 }
 #endif

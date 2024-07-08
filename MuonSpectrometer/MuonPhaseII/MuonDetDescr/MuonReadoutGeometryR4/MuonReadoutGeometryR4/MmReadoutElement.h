@@ -12,7 +12,6 @@
 
 namespace Acts{
     class TrapezoidBounds;
-    class Surface;
 }
 
 namespace MuonGMR4 {
@@ -121,9 +120,7 @@ class MmReadoutElement : public MuonReadoutElement {
     const StripLayer& stripLayer(const IdentifierHash& measHash) const;    
  
     friend ActsTrk::TransformCacheDetEle<MmReadoutElement>;
-#ifndef SIMULATIONBASE
-    std::map<Identifier, std::shared_ptr<Acts::Surface>> getSurfaces() const override final;
-#endif
+
    private:
        
     
@@ -146,6 +143,9 @@ std::ostream& operator<<(std::ostream& ostr, const MmReadoutElement::parameterBo
 namespace ActsTrk{
     template <> Amg::Transform3D 
         TransformCacheDetEle<MuonGMR4::MmReadoutElement>::fetchTransform(const DetectorAlignStore* store) const;
+    /** Identifier of the transform cache equivalent to the Identifier of the first strip inside the gasGap */
+    template <> Identifier
+        TransformCacheDetEle<MuonGMR4::MmReadoutElement>::identify() const;
 }
 
 
