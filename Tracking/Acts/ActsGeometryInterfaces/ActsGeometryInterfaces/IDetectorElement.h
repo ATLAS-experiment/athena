@@ -21,18 +21,29 @@
  *         context. 
  */
 namespace ActsTrk {
-    class IDetectorElement
+    /** @brief base class interface providing the bare minimal interface
+     *         extension. Each associated detector element returned by an Acts::Surface 
+     *         is castable to an IDetectorElementBase.
+     */ 
+    class IDetectorElementBase
 #ifndef SIMULATIONBASE    
      : public Acts::DetectorElementBase
 #endif 
     {
+        public:
+            /// @brief Default destructor
+            ~IDetectorElementBase() = default;
+            /// @brief Return the ATLAS identifier
+            virtual Identifier identify() const = 0;
+            /// @brief Returns the detector element type
+            virtual DetectorType detectorType() const = 0;
+
+    };
+    /** @brief Base class interface for the actual readout elements. */    
+    class IDetectorElement : public IDetectorElementBase {
     public:
         virtual ~IDetectorElement() = default;
 
-        /// Returns the ATLAS identifier
-        virtual Identifier identify() const = 0;
-        /// Returns the detector element type
-        virtual DetectorType detectorType() const = 0;
         /// Caches the aligned transformation in the provided store. Returns the number of cached elements
         virtual unsigned int storeAlignedTransforms(const ActsTrk::DetectorAlignStore& store) const = 0;
     };

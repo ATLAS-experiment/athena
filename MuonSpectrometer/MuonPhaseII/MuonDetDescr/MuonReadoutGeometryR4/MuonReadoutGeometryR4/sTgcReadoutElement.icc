@@ -10,6 +10,12 @@ namespace ActsTrk{
         TransformCacheDetEle<MuonGMR4::sTgcReadoutElement>::fetchTransform(const DetectorAlignStore* store) const{
             return  m_parent->toStation(store) * m_parent->fromGapToChamOrigin(hash());
         }
+    template <> inline Identifier
+        TransformCacheDetEle<MuonGMR4::sTgcReadoutElement>::identify() const {
+            using RE = MuonGMR4::sTgcReadoutElement;
+            return m_parent->measurementId(RE::createHash(RE::gasGapNumber(hash()) + 1,
+                                                          RE::chType(hash()), 1));
+    }
 }
 
 

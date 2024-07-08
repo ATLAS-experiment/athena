@@ -7,7 +7,6 @@
 #ifndef SIMULATIONBASE
 #include <ActsGeoUtils/Defs.h>
 #include <ActsGeoUtils/TransformCache.h>
-#include <Acts/Geometry/DetectorElementBase.hpp>
 
 namespace Acts{
     class Surface;
@@ -21,7 +20,7 @@ namespace ActsTrk {
       * Once constructed, the TransformCache is parsed to the surface construction mechanism of the Acts::Surface. The resulting shared_ptr is then parsed to the SurfaceCache.
     */
 
-  class SurfaceCache: public Acts::DetectorElementBase {
+  class SurfaceCache: public IDetectorElementBase {
 
     public:
         /** @brief: Standard constructor taking the tranasform cache of the element and the detector type. 
@@ -46,6 +45,10 @@ namespace ActsTrk {
 
       /// Hash of the SurfaceCache which is the same as the one of the TransformCache.
       IdentifierHash hash() const;
+      /// Returns the identifier of the Surface
+      Identifier identify() const override final;
+      /// Returns the detector type
+      DetectorType detectorType() const override final;
       /// Returns the associated transform cache
       const TransformCache* transformCache() const;
     private:

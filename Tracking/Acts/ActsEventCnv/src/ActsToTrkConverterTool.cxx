@@ -23,6 +23,7 @@
 #include "ActsGeometryInterfaces/ActsGeometryContext.h"
 #include "ActsGeometry/ActsTrackingGeometryTool.h"
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
+#include "ActsGeoUtils/SurfaceCache.h"
 #include "ActsInterop/IdentityHelper.h"
 
 // ACTS
@@ -109,10 +110,10 @@ StatusCode ActsTrk::ActsToTrkConverterTool::initialize() {
     ATH_CHECK(detStore()->retrieve(muonMgr));
     unsigned int mapSize = m_actsSurfaceMap.size(); // For debugging message later
     for (auto readoutElement : muonMgr->getAllReadoutElements()) {
-      std::map<Identifier, std::shared_ptr<Acts::Surface>> reSurfaces = readoutElement->getSurfaces();
-      for (auto [id, surf] : reSurfaces){
-        const Acts::Surface* tmp = surf.get();
-        m_actsSurfaceMap.insert(std::pair<Identifier, const Acts::Surface*>(id, tmp));
+      std::vector<std::shared_ptr<Acts::Surface>> reSurfaces = readoutElement->getSurfaces();
+      for ( const auto& surf : reSurfaces) {
+        const Identifier id = static_cast<const ActsTrk::SurfaceCache*>(surf->associatedDetectorElement())->identify();
+        m_actsSurfaceMap.insert(std::make_pair(id, surf.get()));
       }
     }
     ATH_MSG_VERBOSE("After adding muon surfaces, the map has grown from "<<mapSize<<" to "<<m_actsSurfaceMap.size());

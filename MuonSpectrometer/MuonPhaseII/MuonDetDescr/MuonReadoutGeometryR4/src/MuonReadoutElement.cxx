@@ -147,6 +147,18 @@ void MuonReadoutElement::setChamberLink(GeoModel::TransientConstSharedPtr<MuonCh
 const MuonChamber* MuonReadoutElement::getChamber() const {
     return m_chambLink.get();
 }
+std::vector<std::shared_ptr<Acts::Surface>> MuonReadoutElement::getSurfaces() const {
+    std::vector<std::shared_ptr<Acts::Surface>> surfaces{};
+    surfaces.reserve(m_surfaces.size());
+    for (const std::unique_ptr<SurfaceCache>& cache : m_surfaces) {
+        if (cache->hash() != geoTransformHash()) {
+            surfaces.push_back(cache->getSurface());
+            ATH_MSG_VERBOSE("Add surface "<<idHelperSvc()->toString(cache->identify())
+                           <<std::endl<<(surfaces.back()->bounds()));
+        }
+    }
+    return surfaces;
+}
 #endif
 
 }  // namespace MuonGMR4

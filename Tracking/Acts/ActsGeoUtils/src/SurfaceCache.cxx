@@ -28,5 +28,7 @@ namespace ActsTrk{
   double SurfaceCache::thickness() const { return 0.; }
   void SurfaceCache::setSurface(std::shared_ptr<Acts::Surface> surface) { m_surface = surface; }
   IdentifierHash SurfaceCache::hash() const { return m_transformCache->hash(); }
+  Identifier SurfaceCache::identify() const { return m_transformCache->identify(); }
+  DetectorType SurfaceCache::detectorType() const { return m_transformCache->detectorType(); }
 }
 #endif

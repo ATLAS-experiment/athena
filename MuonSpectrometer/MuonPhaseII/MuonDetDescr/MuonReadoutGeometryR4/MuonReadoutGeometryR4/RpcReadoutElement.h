@@ -10,7 +10,6 @@
 
 namespace Acts{
     class RectangleBounds;
-    class Surface;
 }
 
 namespace MuonGMR4 {
@@ -124,9 +123,6 @@ class RpcReadoutElement : public MuonReadoutElement {
     
     friend class ActsTrk::TransformCacheDetEle<RpcReadoutElement>;
 
-#ifndef SIMULATIONBASE
-    std::map<Identifier, std::shared_ptr<Acts::Surface>> getSurfaces() const override final;
-#endif
 
         /// Access to the StripLayer associated to a given measurement Hash
         const StripLayer& sensorLayout(const IdentifierHash& measHash) const;
@@ -164,6 +160,9 @@ std::ostream& operator<<(std::ostream& ostr, const RpcReadoutElement::parameterB
 namespace ActsTrk{
     template <> Amg::Transform3D 
         TransformCacheDetEle<MuonGMR4::RpcReadoutElement>::fetchTransform(const DetectorAlignStore* store) const;
+    /** Identifier of the transform cache equivalent to the Identifier of the first strip inside the gasGap */
+    template <> Identifier
+        TransformCacheDetEle<MuonGMR4::RpcReadoutElement>::identify() const;
 }
 
 

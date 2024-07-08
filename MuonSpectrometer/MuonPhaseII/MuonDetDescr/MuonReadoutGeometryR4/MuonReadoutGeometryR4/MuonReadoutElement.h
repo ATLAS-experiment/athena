@@ -158,7 +158,7 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
 
     const MuonChamber* getChamber() const;
     /// Returns all surfaces that are associated with the active readout planes
-    virtual std::map<Identifier, std::shared_ptr<Acts::Surface>> getSurfaces() const = 0;
+    std::vector<std::shared_ptr<Acts::Surface>> getSurfaces() const;
 #else
     /// In AthSimulation there's no Acts::DetectorElement which is declaring this method
     /// in its interface.

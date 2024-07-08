@@ -244,21 +244,6 @@ int sTgcReadoutElement::padNumber(const Amg::Vector2D& hitPos, const IdentifierH
    return channel;   
 }
 
-#ifndef SIMULATIONBASE
-std::map<Identifier, std::shared_ptr<Acts::Surface>> sTgcReadoutElement::getSurfaces() const {
-    std::map<Identifier, std::shared_ptr<Acts::Surface>> surfaces{};
-    for (unsigned int gasGap = 1; gasGap <= numLayers(); ++gasGap) {
-         for (unsigned int ch : {ReadoutChannelType::Strip, ReadoutChannelType::Wire,
-                                 ReadoutChannelType::Pad}) {
-            IdentifierHash hash  = createHash(gasGap,ch, 1);
-            surfaces[measurementId(hash)] = surfacePtr(layerHash(hash));
-         }
-    }
-    return surfaces;
-}
-#endif
-
-
 Amg::Vector3D sTgcReadoutElement::leftStripEdge(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const {
    const IdentifierHash lHash = layerHash(measHash);
    unsigned int gasGap = gasGapNumber(measHash);

@@ -13,7 +13,6 @@
 
 namespace Acts{
     class TrapezoidBounds;
-    class Surface;
 } 
 
 namespace MuonGMR4 {
@@ -277,11 +276,8 @@ class sTgcReadoutElement : public MuonReadoutElement {
                                      const unsigned int channel,
                                      const unsigned int wireInGrp = 0);
     friend class ActsTrk::TransformCacheDetEle<sTgcReadoutElement>;
-#ifndef SIMULATIONBASE
-    std::map<Identifier, std::shared_ptr<Acts::Surface>> getSurfaces() const override final;
-#endif
 
-   bool isEtaZero(const IdentifierHash& measurementHash, const Amg::Vector2D& localPosition) const;
+    bool isEtaZero(const IdentifierHash& measurementHash, const Amg::Vector2D& localPosition) const;
 
    private:
         /// Returns channel position for a given identifierHash
@@ -308,6 +304,8 @@ std::ostream& operator<<(std::ostream& ostr, const MuonGMR4::sTgcReadoutElement:
 namespace ActsTrk{
     template <> Amg::Transform3D 
         TransformCacheDetEle<MuonGMR4::sTgcReadoutElement>::fetchTransform(const DetectorAlignStore* store) const;
+    template <> Identifier
+        TransformCacheDetEle<MuonGMR4::sTgcReadoutElement>::identify() const;
 }
 
 #include <MuonReadoutGeometryR4/sTgcReadoutElement.icc>
