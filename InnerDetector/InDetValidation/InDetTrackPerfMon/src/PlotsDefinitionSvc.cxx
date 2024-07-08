@@ -43,10 +43,9 @@ StatusCode PlotsDefinitionSvc::initialize() {
 
   /// Checking validity of plots definitions
   bool allDefsOk( true );
-  plotsDefMap_t::iterator map_it;
-  for( map_it = m_plotsDefMap.begin(); map_it != m_plotsDefMap.end(); map_it++ ) {
-    if( not map_it->second.isValid() ) {
-      ATH_MSG_WARNING( "Invalid plot definition: " << map_it->second.plotDigest() );
+  for( const auto& p : m_plotsDefMap ) {
+    if( not p.second.isValid() ) {
+      ATH_MSG_WARNING( "Invalid plot definition: " << p.second.plotDigest() );
       allDefsOk = false;
     }
   }

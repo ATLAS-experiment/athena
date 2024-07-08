@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -234,18 +234,12 @@ IDTPM::TrackRoiSelectionTool::getTrigTracks(
 
   SG::ReadHandle<xAOD::TrackParticleContainer> handle( handleKey );
 
-  std::vector< const xAOD::TrackParticle* > selectedTrigTracks;
   
   std::pair< xAOD::TrackParticleContainer::const_iterator,
              xAOD::TrackParticleContainer::const_iterator > selTrigTrkItrPair =
                  m_trigDecTool->associateToEventView( handle, roiLink );
-
-  xAOD::TrackParticleContainer::const_iterator trigTrkiItr;
-  for( trigTrkiItr = selTrigTrkItrPair.first ;
-       trigTrkiItr != selTrigTrkItrPair.second ;
-       trigTrkiItr++ ) {
-    selectedTrigTracks.push_back( *trigTrkiItr );
-  }  
+  std::vector< const xAOD::TrackParticle* > selectedTrigTracks
+    (selTrigTrkItrPair.first, selTrigTrkItrPair.second);
 
   return selectedTrigTracks;
 }
