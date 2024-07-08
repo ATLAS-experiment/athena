@@ -401,6 +401,7 @@ StatusCode ZdcNtuple :: initialize ()
   ANA_MSG_INFO("lhcf2022 = " << lhcf2022);
   ANA_MSG_INFO("lhcf2022afp = " << lhcf2022afp);
   ANA_MSG_INFO("lhcf2022zdc = " << lhcf2022zdc);
+  ANA_MSG_INFO("pbpb2023 = " << pbpb2023);
   ANA_MSG_INFO("doZdcCalib = " << doZdcCalib);
 
   ANA_MSG_DEBUG("initialize: Initialize!");
@@ -543,13 +544,13 @@ StatusCode ZdcNtuple :: execute ()
 
     // Global E_T quantities for centrality
 
-    //ANA_CHECK(evtStore()->retrieve( m_caloSums, "CaloSums") );
-    //ANA_CHECK(evtStore()->retrieve( m_eventShapes, "HIEventShape") );
+    ANA_CHECK(evtStore()->retrieve( m_caloSums, "CaloSums") );
+    ANA_CHECK(evtStore()->retrieve( m_eventShapes, "HIEventShape") );
 
     m_lvl1EnergySumRoI = 0;
-    //ANA_CHECK(evtStore()->retrieve( m_lvl1EnergySumRoI, "LVL1EnergySumRoI") );
+    ANA_CHECK(evtStore()->retrieve( m_lvl1EnergySumRoI, "LVL1EnergySumRoI") );
 
-    //processFCal();
+    processFCal();
 
     // MBTS quantities, but may require a derivation to be accessible (required STDM6 in pp)
     //ANA_CHECK(evtStore()->retrieve( m_mbtsInfo, "MBTSForwardEventInfo") );
@@ -558,11 +559,18 @@ StatusCode ZdcNtuple :: execute ()
     //ANA_CHECK(evtStore()->retrieve( m_trigT2MbtsBits, "HLT_xAOD__TrigT2MbtsBitsContainer_T2Mbts") );
     //processMBTS();
 
+    
     ANA_CHECK(evtStore()->retrieve( m_primaryVertices, "PrimaryVertices") );
     processInDet();
 
-
-    ANA_CHECK(evtStore()->retrieve( m_caloClusters, "CaloCalTopoClusters"));
+    if (pbpb2023)
+      {
+	ANA_CHECK(evtStore()->retrieve( m_caloClusters, "SubtractedCaloCalTopoClusters"));
+      }
+    else
+      {
+	ANA_CHECK(evtStore()->retrieve( m_caloClusters, "CaloCalTopoClusters"));
+      }
     processClusters();
 
     // Gaps will require some evaluation of Run 3 performance of the clusters
@@ -1107,6 +1115,8 @@ void ZdcNtuple::processInDet()
   t_vtx_sumpt2.clear();
   t_vtx_trk_index.clear();
 
+  if (!enableTracks) return;
+  
   if (m_primaryVertices)
     {
       ANA_MSG_DEBUG("processInDet: processing vertices");
@@ -1585,6 +1595,8 @@ void ZdcNtuple::processClusters()
   t_clusetaMax = 0;
   t_clusphiMax = 0;
 
+  if (!enableClusters) return;
+  
   for (const auto cluster : *m_caloClusters)
   {
     t_cc_pt.push_back(cluster->pt());
@@ -1745,64 +1757,73 @@ void ZdcNtuple::setupTriggerHistos()
 
   std::vector<std::string> triggers;
   std::vector<std::string> rerunTriggers;
-  bool zdc_triggers = true;
+  bool zdc_triggers = zdcOnly||zdcCalib||zdcLaser;
 
   // ZDC triggers
   if (zdc_triggers)
-  {
-    if (zdcCalib) // lists for calibration data
-      {
-	if (lhcf2022)
-	  {
-	    triggers.push_back("HLT_noalg_ZDCPEB_L1LHCF");
-	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_OR");
-	  }
-
-	if (pbpb2023)
-	  {
-	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_OR");
-	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_OR_EMPTY");
-	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_OR_UNPAIRED_NONISO");
-	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_A_C");
-	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_A_C_EMPTY");
-	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_A_C_UNPAIRED_NONISO");
-	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_A");
-	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_A_EMPTY");
-	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_A_UNPAIRED_NONISO");
-	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_C");
-	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_C_EMPTY");
-	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_C_UNPAIRED_NONISO");
-	  }
-      }
-    else // lists for physics data
-      {
-	if (lhcf2022)
-          {
-            triggers.push_back("HLT_noalg_L1LHCF");
-          }
-	if (lhcf2022afp)
-          {
-            triggers.push_back("HLT_noalg_AFPPEB_L1AFP_A");
-            triggers.push_back("HLT_noalg_AFPPEB_L1AFP_C");
-          }
-	if (lhcf2022zdc)
-          {
-            triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_OR");
-            triggers.push_back("HLT_noalg_ZDCPEB_L1LHCF");
-            triggers.push_back("HLT_noalg_L1ZDC_OR");
-            triggers.push_back("HLT_noalg_L1ZDC_XOR_E2");
-            triggers.push_back("HLT_noalg_L1ZDC_XOR_E1_E3");
-            triggers.push_back("HLT_noalg_L1ZDC_A_AND_C");
-            triggers.push_back("HLT_mb_sptrk_L1ZDC_OR");
-            triggers.push_back("HLT_mb_sptrk_L1ZDC_XOR_E2");
-            triggers.push_back("HLT_mb_sptrk_L1ZDC_XOR_E1_E3");
-            triggers.push_back("HLT_mb_sptrk_L1ZDC_A_AND_C");
-            triggers.push_back("HLT_mb_sp100_trk30_hmt_L1ZDC_XOR_E2");
-            triggers.push_back("HLT_mb_sp100_trk30_hmt_L1ZDC_XOR_E1_E3");
-            triggers.push_back("HLT_mb_sp100_trk30_hmt_L1ZDC_A_AND_C");
-          }
-      }
-  }
+    {
+      if (zdcCalib) // lists for calibration data
+	{
+	  if (lhcf2022)
+	    {
+	      triggers.push_back("HLT_noalg_ZDCPEB_L1LHCF");
+	      triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_OR");
+	    }
+	  
+	  if (pbpb2023)
+	    {
+	      triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_OR");
+	      triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_OR_EMPTY");
+	      triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_OR_UNPAIRED_NONISO");
+	      triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_A_C");
+	      triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_A_C_EMPTY");
+	      triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_A_C_UNPAIRED_NONISO");
+	      triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_A");
+	      triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_A_EMPTY");
+	      triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_A_UNPAIRED_NONISO");
+	      triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_C");
+	      triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_C_EMPTY");
+	      triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_C_UNPAIRED_NONISO");
+	    }
+	}
+      else // lists for physics data
+	{
+	  if (lhcf2022)
+	    {
+	      triggers.push_back("HLT_noalg_L1LHCF");
+	    }
+	  if (lhcf2022afp)
+	    {
+	      triggers.push_back("HLT_noalg_AFPPEB_L1AFP_A");
+	      triggers.push_back("HLT_noalg_AFPPEB_L1AFP_C");
+	    }
+	  if (lhcf2022zdc)
+	    {
+	      triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_OR");
+	      triggers.push_back("HLT_noalg_ZDCPEB_L1LHCF");
+	      triggers.push_back("HLT_noalg_L1ZDC_OR");
+	      triggers.push_back("HLT_noalg_L1ZDC_XOR_E2");
+	      triggers.push_back("HLT_noalg_L1ZDC_XOR_E1_E3");
+	      triggers.push_back("HLT_noalg_L1ZDC_A_AND_C");
+	      triggers.push_back("HLT_mb_sptrk_L1ZDC_OR");
+	      triggers.push_back("HLT_mb_sptrk_L1ZDC_XOR_E2");
+	      triggers.push_back("HLT_mb_sptrk_L1ZDC_XOR_E1_E3");
+	      triggers.push_back("HLT_mb_sptrk_L1ZDC_A_AND_C");
+	      triggers.push_back("HLT_mb_sp100_trk30_hmt_L1ZDC_XOR_E2");
+	      triggers.push_back("HLT_mb_sp100_trk30_hmt_L1ZDC_XOR_E1_E3");
+	      triggers.push_back("HLT_mb_sp100_trk30_hmt_L1ZDC_A_AND_C");
+	    }
+	}
+    }
+  else // not ZDC-only triggers
+    {
+      if (pbpb2023)
+	{
+	  triggers.push_back("HLT_noalg_L1TE50_VTE600p0ETA49");
+	  triggers.push_back("HLT_mb_sptrk_pc_L1ZDC_A_C_VTE50");
+	  triggers.push_back("HLT_noalg_L1TE600p0ETA49");
+	}
+    }
 
   //char name[50];
   ANA_MSG_INFO("Adding trigger branches!");

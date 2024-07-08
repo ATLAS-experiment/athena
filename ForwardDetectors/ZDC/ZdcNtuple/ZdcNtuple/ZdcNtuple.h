@@ -56,8 +56,8 @@ public:
   bool enableOutputSamples; // write samples into TTree
   bool enableTrigger; // use trigger info (skip this for laser runs)
   bool writeOnlyTriggers; // only write passed triggers to ntuple
-  bool enableClusters; // store tracks
-  bool enableTracks; // store clusters
+  bool enableClusters; // store clusters
+  bool enableTracks; // store tracks
   bool enableMuons; // store muons in ntuple
   bool enableElectrons; // store electrons in ntuple
   bool enablePhotons; // store photons in ntuple
