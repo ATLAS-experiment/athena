@@ -48,91 +48,91 @@
 
 using CLHEP::deg;
 using CLHEP::cm;
-
+using enum xAOD::CaloCluster::MomentType;
 
 // Known moments
 namespace {
   // name -> enum translator
   const std::map<std::string,xAOD::CaloCluster::MomentType> momentNameToEnumMap = {
-    { "AVG_LAR_Q",         xAOD::CaloCluster::AVG_LAR_Q },
-    { "AVG_TILE_Q",        xAOD::CaloCluster::AVG_TILE_Q },
-    { "BADLARQ_FRAC",      xAOD::CaloCluster::BADLARQ_FRAC },
-    { "BAD_CELLS_CORR_E",  xAOD::CaloCluster::BAD_CELLS_CORR_E },
-    { "CELL_SIGNIFICANCE", xAOD::CaloCluster::CELL_SIGNIFICANCE },
-    { "CELL_SIG_SAMPLING", xAOD::CaloCluster::CELL_SIG_SAMPLING },
-    { "CENTER_LAMBDA",     xAOD::CaloCluster::CENTER_LAMBDA },
-    { "CENTER_MAG",        xAOD::CaloCluster::CENTER_MAG },
-    { "CENTER_X",          xAOD::CaloCluster::CENTER_X },
-    { "CENTER_Y",          xAOD::CaloCluster::CENTER_Y },
-    { "CENTER_Z",          xAOD::CaloCluster::CENTER_Z },
-    { "DELTA_ALPHA",       xAOD::CaloCluster::DELTA_ALPHA },
-    { "DELTA_PHI",         xAOD::CaloCluster::DELTA_PHI },
-    { "DELTA_THETA",       xAOD::CaloCluster::DELTA_THETA },
-    { "ENG_BAD_CELLS",     xAOD::CaloCluster::ENG_BAD_CELLS },
-    { "ENG_BAD_HV_CELLS",  xAOD::CaloCluster::ENG_BAD_HV_CELLS },
-    { "ENG_FRAC_CORE",     xAOD::CaloCluster::ENG_FRAC_CORE },
-    { "ENG_FRAC_EM",       xAOD::CaloCluster::ENG_FRAC_EM },
-    { "ENG_FRAC_MAX",      xAOD::CaloCluster::ENG_FRAC_MAX },
-    { "ENG_POS",           xAOD::CaloCluster::ENG_POS },
-    { "FIRST_ENG_DENS",    xAOD::CaloCluster::FIRST_ENG_DENS },
-    { "FIRST_ETA",         xAOD::CaloCluster::FIRST_ETA },
-    { "FIRST_PHI",         xAOD::CaloCluster::FIRST_PHI },
-    { "ISOLATION",         xAOD::CaloCluster::ISOLATION },
-    { "LATERAL",           xAOD::CaloCluster::LATERAL },
-    { "LONGITUDINAL",      xAOD::CaloCluster::LONGITUDINAL },
-    { "MASS",              xAOD::CaloCluster::MASS },
-    { "N_BAD_CELLS",       xAOD::CaloCluster::N_BAD_CELLS },
-    { "N_BAD_HV_CELLS",    xAOD::CaloCluster::N_BAD_HV_CELLS },
-    { "N_BAD_CELLS_CORR",  xAOD::CaloCluster::N_BAD_CELLS_CORR },
-    { "PTD",               xAOD::CaloCluster::PTD },
-    { "SECOND_ENG_DENS",   xAOD::CaloCluster::SECOND_ENG_DENS },
-    { "SECOND_LAMBDA",     xAOD::CaloCluster::SECOND_LAMBDA },
-    { "SECOND_R",          xAOD::CaloCluster::SECOND_R },
-    { "SECOND_TIME",       xAOD::CaloCluster::SECOND_TIME },
-    { "SIGNIFICANCE",      xAOD::CaloCluster::SIGNIFICANCE },
-    { "EM_PROBABILITY",    xAOD::CaloCluster::EM_PROBABILITY },
-    { "NCELL_SAMPLING",    xAOD::CaloCluster::NCELL_SAMPLING }
+    { "AVG_LAR_Q",         AVG_LAR_Q },
+    { "AVG_TILE_Q",        AVG_TILE_Q },
+    { "BADLARQ_FRAC",      BADLARQ_FRAC },
+    { "BAD_CELLS_CORR_E",  BAD_CELLS_CORR_E },
+    { "CELL_SIGNIFICANCE", CELL_SIGNIFICANCE },
+    { "CELL_SIG_SAMPLING", CELL_SIG_SAMPLING },
+    { "CENTER_LAMBDA",     CENTER_LAMBDA },
+    { "CENTER_MAG",        CENTER_MAG },
+    { "CENTER_X",          CENTER_X },
+    { "CENTER_Y",          CENTER_Y },
+    { "CENTER_Z",          CENTER_Z },
+    { "DELTA_ALPHA",       DELTA_ALPHA },
+    { "DELTA_PHI",         DELTA_PHI },
+    { "DELTA_THETA",       DELTA_THETA },
+    { "ENG_BAD_CELLS",     ENG_BAD_CELLS },
+    { "ENG_BAD_HV_CELLS",  ENG_BAD_HV_CELLS },
+    { "ENG_FRAC_CORE",     ENG_FRAC_CORE },
+    { "ENG_FRAC_EM",       ENG_FRAC_EM },
+    { "ENG_FRAC_MAX",      ENG_FRAC_MAX },
+    { "ENG_POS",           ENG_POS },
+    { "FIRST_ENG_DENS",    FIRST_ENG_DENS },
+    { "FIRST_ETA",         FIRST_ETA },
+    { "FIRST_PHI",         FIRST_PHI },
+    { "ISOLATION",         ISOLATION },
+    { "LATERAL",           LATERAL },
+    { "LONGITUDINAL",      LONGITUDINAL },
+    { "MASS",              MASS },
+    { "N_BAD_CELLS",       N_BAD_CELLS },
+    { "N_BAD_HV_CELLS",    N_BAD_HV_CELLS },
+    { "N_BAD_CELLS_CORR",  N_BAD_CELLS_CORR },
+    { "PTD",               PTD },
+    { "SECOND_ENG_DENS",   SECOND_ENG_DENS },
+    { "SECOND_LAMBDA",     SECOND_LAMBDA },
+    { "SECOND_R",          SECOND_R },
+    { "SECOND_TIME",       SECOND_TIME },
+    { "SIGNIFICANCE",      SIGNIFICANCE },
+    { "EM_PROBABILITY",    EM_PROBABILITY },
+    { "NCELL_SAMPLING",    NCELL_SAMPLING }
   };
   // enum -> name translator
   const std::map<xAOD::CaloCluster::MomentType,std::string> momentEnumToNameMap = {
-    { xAOD::CaloCluster::AVG_LAR_Q,          "AVG_LAR_Q"        },
-    { xAOD::CaloCluster::AVG_TILE_Q,         "AVG_TILE_Q"       },
-    { xAOD::CaloCluster::BADLARQ_FRAC,       "BADLARQ_FRAC"     },
-    { xAOD::CaloCluster::BAD_CELLS_CORR_E,   "BAD_CELLS_CORR_E" },
-    { xAOD::CaloCluster::CELL_SIGNIFICANCE,  "CELL_SIGNIFICANCE"},
-    { xAOD::CaloCluster::CELL_SIG_SAMPLING,  "CELL_SIG_SAMPLING"},
-    { xAOD::CaloCluster::CENTER_LAMBDA,      "CENTER_LAMBDA"    },
-    { xAOD::CaloCluster::CENTER_MAG,         "CENTER_MAG"       },
-    { xAOD::CaloCluster::CENTER_X,           "CENTER_X"         },
-    { xAOD::CaloCluster::CENTER_Y,           "CENTER_Y"         },
-    { xAOD::CaloCluster::CENTER_Z,           "CENTER_Z"         },
-    { xAOD::CaloCluster::DELTA_ALPHA,        "DELTA_ALPHA"      },
-    { xAOD::CaloCluster::DELTA_PHI,          "DELTA_PHI"        },
-    { xAOD::CaloCluster::DELTA_THETA,        "DELTA_THETA"      },
-    { xAOD::CaloCluster::ENG_BAD_CELLS,      "ENG_BAD_CELLS"    },
-    { xAOD::CaloCluster::ENG_BAD_HV_CELLS,   "ENG_BAD_HV_CELLS" },
-    { xAOD::CaloCluster::ENG_FRAC_CORE,      "ENG_FRAC_CORE"    },
-    { xAOD::CaloCluster::ENG_FRAC_EM,        "ENG_FRAC_EM"      },
-    { xAOD::CaloCluster::ENG_FRAC_MAX,       "ENG_FRAC_MAX"     },
-    { xAOD::CaloCluster::ENG_POS,            "ENG_POS"          },
-    { xAOD::CaloCluster::FIRST_ENG_DENS,     "FIRST_ENG_DENS"   },
-    { xAOD::CaloCluster::FIRST_ETA,          "FIRST_ETA"        },
-    { xAOD::CaloCluster::FIRST_PHI,          "FIRST_PHI"        },
-    { xAOD::CaloCluster::ISOLATION,          "ISOLATION"        },
-    { xAOD::CaloCluster::LATERAL,            "LATERAL"          },
-    { xAOD::CaloCluster::LONGITUDINAL,       "LONGITUDINAL"     },
-    { xAOD::CaloCluster::MASS,               "MASS"             },
-    { xAOD::CaloCluster::N_BAD_CELLS,        "N_BAD_CELLS"      },
-    { xAOD::CaloCluster::N_BAD_HV_CELLS,     "N_BAD_HV_CELLS"   },
-    { xAOD::CaloCluster::N_BAD_CELLS_CORR,   "N_BAD_CELLS_CORR" },
-    { xAOD::CaloCluster::PTD,                "PTD"              },
-    { xAOD::CaloCluster::SECOND_ENG_DENS,    "SECOND_ENG_DENS"  },
-    { xAOD::CaloCluster::SECOND_LAMBDA,      "SECOND_LAMBDA"    },
-    { xAOD::CaloCluster::SECOND_R,           "SECOND_R"         },
-    { xAOD::CaloCluster::SECOND_TIME,        "SECOND_TIME"      },
-    { xAOD::CaloCluster::SIGNIFICANCE,       "SIGNIFICANCE"     },
-    { xAOD::CaloCluster::EM_PROBABILITY,     "EM_PROBABILITY"   },
-    { xAOD::CaloCluster::NCELL_SAMPLING,     "NCELL_SAMPLING"   }
+    { AVG_LAR_Q,          "AVG_LAR_Q"        },
+    { AVG_TILE_Q,         "AVG_TILE_Q"       },
+    { BADLARQ_FRAC,       "BADLARQ_FRAC"     },
+    { BAD_CELLS_CORR_E,   "BAD_CELLS_CORR_E" },
+    { CELL_SIGNIFICANCE,  "CELL_SIGNIFICANCE"},
+    { CELL_SIG_SAMPLING,  "CELL_SIG_SAMPLING"},
+    { CENTER_LAMBDA,      "CENTER_LAMBDA"    },
+    { CENTER_MAG,         "CENTER_MAG"       },
+    { CENTER_X,           "CENTER_X"         },
+    { CENTER_Y,           "CENTER_Y"         },
+    { CENTER_Z,           "CENTER_Z"         },
+    { DELTA_ALPHA,        "DELTA_ALPHA"      },
+    { DELTA_PHI,          "DELTA_PHI"        },
+    { DELTA_THETA,        "DELTA_THETA"      },
+    { ENG_BAD_CELLS,      "ENG_BAD_CELLS"    },
+    { ENG_BAD_HV_CELLS,   "ENG_BAD_HV_CELLS" },
+    { ENG_FRAC_CORE,      "ENG_FRAC_CORE"    },
+    { ENG_FRAC_EM,        "ENG_FRAC_EM"      },
+    { ENG_FRAC_MAX,       "ENG_FRAC_MAX"     },
+    { ENG_POS,            "ENG_POS"          },
+    { FIRST_ENG_DENS,     "FIRST_ENG_DENS"   },
+    { FIRST_ETA,          "FIRST_ETA"        },
+    { FIRST_PHI,          "FIRST_PHI"        },
+    { ISOLATION,          "ISOLATION"        },
+    { LATERAL,            "LATERAL"          },
+    { LONGITUDINAL,       "LONGITUDINAL"     },
+    { MASS,               "MASS"             },
+    { N_BAD_CELLS,        "N_BAD_CELLS"      },
+    { N_BAD_HV_CELLS,     "N_BAD_HV_CELLS"   },
+    { N_BAD_CELLS_CORR,   "N_BAD_CELLS_CORR" },
+    { PTD,                "PTD"              },
+    { SECOND_ENG_DENS,    "SECOND_ENG_DENS"  },
+    { SECOND_LAMBDA,      "SECOND_LAMBDA"    },
+    { SECOND_R,           "SECOND_R"         },
+    { SECOND_TIME,        "SECOND_TIME"      },
+    { SIGNIFICANCE,       "SIGNIFICANCE"     },
+    { EM_PROBABILITY,     "EM_PROBABILITY"   },
+    { NCELL_SAMPLING,     "NCELL_SAMPLING"   }
   };
 }
 
@@ -192,19 +192,19 @@ StatusCode CaloClusterMomentsMaker::initialize()
       // valid moment found
       nstr = std::max(nstr, mom.length());
       ++nmom;
-      if (fmap->second == xAOD::CaloCluster::SECOND_TIME) {
+      if (fmap->second == SECOND_TIME) {
         // special flag for second moment of cell times - this moment is not
         // calculated in this tool! Do not add to internal (!) valid moments
         // list. Its value is available from xAOD::CaloCluster::secondTime()!
         m_secondTime = true;
-      } else if (fmap->second == xAOD::CaloCluster::NCELL_SAMPLING) {
+      } else if (fmap->second == NCELL_SAMPLING) {
         // flag indicates if number of cells in a sampling should be counted.
         // This is a vector of integers counts that is filled in this tool but
         // does not need any post-processing (e.g. normalization). It is not
         // added to the valid moments list for this reason.
         ATH_MSG_DEBUG("moment " << fmap->first << " found");
         m_nCellsPerSampling = true;
-      } else if (fmap->second == xAOD::CaloCluster::EM_PROBABILITY) {
+      } else if (fmap->second == EM_PROBABILITY) {
         ATH_MSG_WARNING(mom
                         << " not calculated in this tool - misconfiguration?");
       } else {
@@ -212,14 +212,14 @@ StatusCode CaloClusterMomentsMaker::initialize()
         m_validMoments.push_back(fmap->second);
         // flag some special requests
         switch (fmap->second) {
-          case xAOD::CaloCluster::SIGNIFICANCE:
-          case xAOD::CaloCluster::CELL_SIGNIFICANCE:
+          case SIGNIFICANCE:
+          case CELL_SIGNIFICANCE:
             m_calculateSignificance = true;
             break;
-          case xAOD::CaloCluster::ISOLATION:
+          case ISOLATION:
             m_calculateIsolation = true;
             break;
-          case xAOD::CaloCluster::ENG_BAD_HV_CELLS:
+          case ENG_BAD_HV_CELLS:
             m_calculateLArHVFraction = true;
             break;
           default:
@@ -761,22 +761,22 @@ CaloClusterMomentsMaker::execute(const EventContext& ctx,
           {
 	    // now calculate the actual moments
 	    switch (m_validMoments[iMoment]) {
-	    case xAOD::CaloCluster::FIRST_ETA:
+	    case FIRST_ETA:
 	      myMoments[iMoment] += ci.energy*ci.eta;
 	      break;
-	    case xAOD::CaloCluster::FIRST_PHI:
+	    case FIRST_PHI:
 	      // first cell decides the sign in order to avoid
 	      // overlap problem at phi = -pi == +pi
 	      // need to be normalized to the range [-pi,+pi] in the end
               myMoments[iMoment] += ci.energy * proxim (ci.phi, phi0);
 	      break;
-	    case xAOD::CaloCluster::SECOND_R:
+	    case SECOND_R:
 	      myMoments[iMoment] += ci.energy*ci.r*ci.r;
 	      break;
-	    case xAOD::CaloCluster::SECOND_LAMBDA:
+	    case SECOND_LAMBDA:
 	      myMoments[iMoment] += ci.energy*ci.lambda*ci.lambda;
 	      break;
-	    case xAOD::CaloCluster::LATERAL:
+	    case LATERAL:
 	      if ( (int)i != iCellMax && (int)i != iCellScndMax ) {
 		myMoments[iMoment] += ci.energy*ci.r*ci.r;
 		myNorms[iMoment] += ci.energy*ci.r*ci.r;
@@ -788,7 +788,7 @@ CaloClusterMomentsMaker::execute(const EventContext& ctx,
 		myNorms[iMoment] += rm*rm*ci.energy;
 	      }
 	      break;
-	    case xAOD::CaloCluster::LONGITUDINAL:
+	    case LONGITUDINAL:
 	      if ( (int)i != iCellMax && (int)i != iCellScndMax ) {
 		myMoments[iMoment] += ci.energy*ci.lambda*ci.lambda;
 		myNorms[iMoment] += ci.energy*ci.lambda*ci.lambda;
@@ -800,19 +800,19 @@ CaloClusterMomentsMaker::execute(const EventContext& ctx,
 		myNorms[iMoment] += lm*lm*ci.energy;
 	      }
 	      break;
-	    case xAOD::CaloCluster::FIRST_ENG_DENS:
+	    case FIRST_ENG_DENS:
 	      if ( ci.volume > 0 ) {
 		myMoments[iMoment] += ci.energy*ci.energy/ci.volume;
 		myNorms[iMoment] += ci.energy;
 	      }
 	      break;
-	    case xAOD::CaloCluster::SECOND_ENG_DENS:
+	    case SECOND_ENG_DENS:
 	      if ( ci.volume > 0 ) {
 		myMoments[iMoment] += ci.energy*std::pow(ci.energy/ci.volume,2);
 		myNorms[iMoment] += ci.energy;
 	      }
 	      break;
-	    case xAOD::CaloCluster::ENG_FRAC_EM:
+	    case ENG_FRAC_EM:
 	      if ( ci.sample == CaloCell_ID::EMB1 
 		   || ci.sample == CaloCell_ID::EMB2 
 		   || ci.sample == CaloCell_ID::EMB3 
@@ -822,11 +822,11 @@ CaloClusterMomentsMaker::execute(const EventContext& ctx,
 		   || ci.sample == CaloCell_ID::FCAL0 )
 		myMoments[iMoment] += ci.energy;
 	      break;
-	    case xAOD::CaloCluster::ENG_FRAC_MAX:
+	    case ENG_FRAC_MAX:
 	      if ( (int)i == iCellMax ) 
 		myMoments[iMoment] = ci.energy;
 	      break;
-	    case xAOD::CaloCluster::PTD:
+	    case PTD:
 	      // do not convert to pT since clusters are small and
 	      // there is virtually no difference and cosh just costs
 	      // time ...
@@ -848,36 +848,36 @@ CaloClusterMomentsMaker::execute(const EventContext& ctx,
         {
 	  // now calculate the actual moments
           switch (m_validMoments[iMoment]) {
-	  case xAOD::CaloCluster::FIRST_ETA:
-	  case xAOD::CaloCluster::FIRST_PHI:
-	  case xAOD::CaloCluster::SECOND_R:
-	  case xAOD::CaloCluster::SECOND_LAMBDA:
-	  case xAOD::CaloCluster::ENG_FRAC_EM:
-	  case xAOD::CaloCluster::ENG_FRAC_MAX:
+	  case FIRST_ETA:
+	  case FIRST_PHI:
+	  case SECOND_R:
+	  case SECOND_LAMBDA:
+	  case ENG_FRAC_EM:
+	  case ENG_FRAC_MAX:
 	    myNorms[iMoment] = commonNorm;
 	    break;
-	  case xAOD::CaloCluster::DELTA_PHI:
+	  case DELTA_PHI:
 	    myMoments[iMoment] = deltaPhi;
 	    break;
-	  case xAOD::CaloCluster::DELTA_THETA:
+	  case DELTA_THETA:
 	    myMoments[iMoment] = deltaTheta;
 	    break;
-	  case xAOD::CaloCluster::DELTA_ALPHA:
+	  case DELTA_ALPHA:
 	    myMoments[iMoment] = angle;
 	    break;
-	  case xAOD::CaloCluster::CENTER_X:
+	  case CENTER_X:
 	    myMoments[iMoment] = showerCenter.x();
 	    break;
-	  case xAOD::CaloCluster::CENTER_Y:
+	  case CENTER_Y:
 	    myMoments[iMoment] = showerCenter.y();
 	    break;
-	  case xAOD::CaloCluster::CENTER_Z:
+	  case CENTER_Z:
 	    myMoments[iMoment] = showerCenter.z();
 	    break;
-	  case xAOD::CaloCluster::CENTER_MAG:
+	  case CENTER_MAG:
 	    myMoments[iMoment] = showerCenter.mag();
 	    break;
-	  case xAOD::CaloCluster::CENTER_LAMBDA:
+	  case CENTER_LAMBDA:
 	    // calculate the longitudinal distance along the shower axis
 	    // of the shower center from the calorimeter start
 	    
@@ -939,12 +939,12 @@ CaloClusterMomentsMaker::execute(const EventContext& ctx,
 	      myMoments[iMoment] = lambda_c;
 	    }
 	    break;
-	  case xAOD::CaloCluster::ENG_FRAC_CORE:
+	  case ENG_FRAC_CORE:
 	    for(i=0;i<(int)CaloCell_ID::Unknown;i++) 
 	      myMoments[iMoment] += maxSampE[i];
 	    myNorms[iMoment] = commonNorm;
 	    break;
-	  case xAOD::CaloCluster::ISOLATION:
+	  case ISOLATION:
 	    {
 	      // loop over empty and filled perimeter cells and
 	      // get a weighted ratio by means of energy fraction per layer
@@ -963,49 +963,49 @@ CaloClusterMomentsMaker::execute(const EventContext& ctx,
 	      }//end loop over samplings
 	    }
 	    break;
-	  case xAOD::CaloCluster::ENG_BAD_CELLS:
+	  case ENG_BAD_CELLS:
 	    myMoments[iMoment] = eBad;
 	    break;
-	  case xAOD::CaloCluster::N_BAD_CELLS:
+	  case N_BAD_CELLS:
 	    myMoments[iMoment] = nbad;
             break;
-          case xAOD::CaloCluster::N_BAD_CELLS_CORR:
+          case N_BAD_CELLS_CORR:
             myMoments[iMoment] = nbad_dac;
             break;
-	  case xAOD::CaloCluster::BAD_CELLS_CORR_E:
+	  case BAD_CELLS_CORR_E:
 	    myMoments[iMoment] = ebad_dac;
             break;
-	  case xAOD::CaloCluster::BADLARQ_FRAC:
+	  case BADLARQ_FRAC:
 	    myMoments[iMoment] = eBadLArQ/(theCluster->e()!=0.?theCluster->e():1.);
             break;
-	  case xAOD::CaloCluster::ENG_POS:
+	  case ENG_POS:
 	    myMoments[iMoment] = ePos;
             break;
-	  case xAOD::CaloCluster::SIGNIFICANCE:
+	  case SIGNIFICANCE:
 	    myMoments[iMoment] = (sumSig2>0?theCluster->e()/sqrt(sumSig2):0.);
             break;
-	  case xAOD::CaloCluster::CELL_SIGNIFICANCE:
+	  case CELL_SIGNIFICANCE:
 	    myMoments[iMoment] = maxAbsSig;
             break;
-	  case xAOD::CaloCluster::CELL_SIG_SAMPLING:
+	  case CELL_SIG_SAMPLING:
 	    myMoments[iMoment] = nSigSampl;
             break;
-	  case xAOD::CaloCluster::AVG_LAR_Q:
+	  case AVG_LAR_Q:
 	    myMoments[iMoment] = eLAr2Q/(eLAr2>0?eLAr2:1);
             break;
-	  case xAOD::CaloCluster::AVG_TILE_Q:
+	  case AVG_TILE_Q:
 	    myMoments[iMoment] = eTile2Q/(eTile2>0?eTile2:1);
             break;
-	  case xAOD::CaloCluster::ENG_BAD_HV_CELLS:
+	  case ENG_BAD_HV_CELLS:
 	    myMoments[iMoment] = eBadLArHV;
 	    break;
-	  case xAOD::CaloCluster::N_BAD_HV_CELLS:
+	  case N_BAD_HV_CELLS:
 	    myMoments[iMoment] = nBadLArHV;
             break;
-	  case xAOD::CaloCluster::PTD:
+	  case PTD:
 	    myMoments[iMoment] = sqrt(myMoments[iMoment]);
             break;
-	  case xAOD::CaloCluster::MASS:
+	  case MASS:
 	    myMoments[iMoment] = mass;
 	    break;
 	  default:
@@ -1021,13 +1021,13 @@ CaloClusterMomentsMaker::execute(const EventContext& ctx,
         xAOD::CaloCluster::MomentType moment = m_validMoments[iMoment];
 	if ( myNorms[iMoment] != 0 ) 
 	  myMoments[iMoment] /= myNorms[iMoment];
-	if ( moment == xAOD::CaloCluster::FIRST_PHI ) 
+	if ( moment == FIRST_PHI ) 
 	  myMoments[iMoment] = CaloPhiRange::fix(myMoments[iMoment]);
 	theCluster->insertMoment(moment,myMoments[iMoment]);
       } // loop on moments for cluster
     } // check on requested moments
     // check on second moment of time if requested
-    if ( m_secondTime ) { theCluster->insertMoment(xAOD::CaloCluster::SECOND_TIME,theCluster->secondTime()); }
+    if ( m_secondTime ) { theCluster->insertMoment(SECOND_TIME,theCluster->secondTime()); }
     // check on number of cells per sampling moment if requested
     if ( m_nCellsPerSampling ) {
       for ( size_t isam(0); isam < nCellsSamp.size(); ++isam ) { 
