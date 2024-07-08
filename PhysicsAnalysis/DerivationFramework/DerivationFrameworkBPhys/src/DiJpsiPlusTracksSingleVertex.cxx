@@ -21,31 +21,6 @@ namespace DerivationFramework {
   typedef ElementLink<xAOD::TrackParticleContainer> TrackParticleLink;
   typedef std::vector<TrackParticleLink> TrackParticleLinkVector;
 
-  struct RhoCandidate {
-    const xAOD::TrackParticle* trackParticle1 = nullptr;
-    const xAOD::TrackParticle* trackParticle2 = nullptr;
-    double mass_hypo1;
-    double mass_hypo2;
-    double mass_hypo3;
-    double chi2NDF;
-    Amg::Vector3D vtxPos;
-  };
-
-  struct EtacCandidate {
-    const xAOD::TrackParticle* trackParticle1 = nullptr;
-    const xAOD::TrackParticle* trackParticle2 = nullptr;
-    const xAOD::TrackParticle* trackParticle3 = nullptr;
-    const xAOD::TrackParticle* trackParticle4 = nullptr;
-    const xAOD::TrackParticle* trackParticle5 = nullptr;
-    const xAOD::TrackParticle* trackParticle6 = nullptr;
-    int nTracks = 0;
-    double ptTot;
-    double chi2NDFSum;
-    Amg::Vector3D vtxPos1;
-    Amg::Vector3D vtxPos2;
-    Amg::Vector3D vtxPos3;
-  };
-
   DiJpsiPlusTracksSingleVertex::DiJpsiPlusTracksSingleVertex(const std::string& type, const std::string& name, const IInterface* parent) : AthAlgTool(type,name,parent),
     m_outputKey("OutputVtxContainer"),
     m_vertex1ContainerKey("InputJpsi1Container"),
@@ -349,7 +324,7 @@ namespace DerivationFramework {
       }
     }
 
-    std::vector<RhoCandidate> rhos;
+    RhoCandidateVector rhos(m_maxCandidates, m_ptOrdering);
     if(m_tracks_num>=2) {
       for(auto iter1=tracksPlus.cbegin(); iter1!=tracksPlus.cend(); ++iter1) {
 	for(auto iter2=tracksMinus.cbegin(); iter2!=tracksMinus.cend(); ++iter2) {
@@ -369,25 +344,49 @@ namespace DerivationFramework {
 	    mass3 = (p4_track1+p4_track2).M();
 	  }
 	  if((mass1>m_rho1MassLower && mass1<m_rho1MassUpper) || (m_tracks_num>=4 && mass2>m_rho2MassLower && mass2<m_rho2MassUpper) || (m_tracks_num==6 && mass3>m_rho3MassLower && mass3<m_rho3MassUpper)) {
-	    std::unique_ptr<xAOD::Vertex> vtx = fitTwoTracks(*iter1, *iter2);
-	    if(vtx) {
-	      double chi2NDF = vtx->chiSquared()/vtx->numberDoF();
-	      if(m_chi2cut_rho > 0.0 && chi2NDF > m_chi2cut_rho)
+	    bool passDR = false;
+	    for(auto iter=selectedDiJpsiCandidates.cbegin(); iter!=selectedDiJpsiCandidates.cend(); ++iter) {
+	      tracksJpsis.clear();
+	      tracksJpsis.push_back(iter->first->trackParticle(0));
+	      tracksJpsis.push_back(iter->first->trackParticle(1));
+	      tracksJpsis.push_back(iter->second->trackParticle(0));
+	      tracksJpsis.push_back(iter->second->trackParticle(1));
+	      if(std::find(tracksJpsis.cbegin(), tracksJpsis.cend(), *iter1) != tracksJpsis.cend())
 		continue;
-	      RhoCandidate rho;
-	      rho.trackParticle1 = *iter1; rho.trackParticle2 = *iter2;
-	      rho.mass_hypo1 = mass1;
-	      rho.mass_hypo2 = mass2;
-	      rho.mass_hypo3 = mass3;
-	      rho.chi2NDF = chi2NDF; rho.vtxPos = vtx->position();
-	      rhos.push_back(rho);
+	      if(std::find(tracksJpsis.cbegin(), tracksJpsis.cend(), *iter2) != tracksJpsis.cend())
+		continue;
+	      p4_mu1.SetPtEtaPhiM(tracksJpsis[0]->pt(), tracksJpsis[0]->eta(), tracksJpsis[0]->phi(), m_vtx0Daug1MassHypo);
+	      p4_mu2.SetPtEtaPhiM(tracksJpsis[1]->pt(), tracksJpsis[1]->eta(), tracksJpsis[1]->phi(), m_vtx0Daug2MassHypo);
+	      p4_mu3.SetPtEtaPhiM(tracksJpsis[2]->pt(), tracksJpsis[2]->eta(), tracksJpsis[2]->phi(), m_vtx0Daug3MassHypo);
+	      p4_mu4.SetPtEtaPhiM(tracksJpsis[3]->pt(), tracksJpsis[3]->eta(), tracksJpsis[3]->phi(), m_vtx0Daug4MassHypo);
+	      if(DR((p4_mu1+p4_mu2+p4_mu3+p4_mu4).Eta(),(p4_mu1+p4_mu2+p4_mu3+p4_mu4).Phi(),(*iter1)->eta(),(*iter1)->phi())<m_maxDR &&
+		 DR((p4_mu1+p4_mu2+p4_mu3+p4_mu4).Eta(),(p4_mu1+p4_mu2+p4_mu3+p4_mu4).Phi(),(*iter2)->eta(),(*iter2)->phi())<m_maxDR) {
+		passDR = true; break;
+	      }
+	    }
+	    if(passDR) {
+	      std::unique_ptr<xAOD::Vertex> vtx = fitTwoTracks(*iter1, *iter2);
+	      if(vtx) {
+		double chi2NDF = vtx->chiSquared()/vtx->numberDoF();
+		if(m_chi2cut_rho > 0.0 && chi2NDF > m_chi2cut_rho)
+		  continue;
+		RhoCandidate rho;
+		rho.trackParticle1 = *iter1; rho.trackParticle2 = *iter2;
+		rho.mass_hypo1 = mass1;
+		rho.mass_hypo2 = mass2;
+		rho.mass_hypo3 = mass3;
+		rho.ptTot = (p4_track1 + p4_track2).Pt();
+		rho.chi2NDF = chi2NDF;
+		rho.vtxPos = vtx->position();
+		rhos.AddElement(rho);
+	      }
 	    }
 	  }
 	}
       }
     }
 
-    std::vector<EtacCandidate> candidates;
+    EtacCandidateVector candidates(m_maxCandidates, m_ptOrdering);
     if(m_tracks_num==1) {
       std::vector<const xAOD::TrackParticle*> tracksSelected;
       tracksSelected.insert(tracksSelected.begin(), tracksPlus.begin(), tracksPlus.end());
@@ -416,7 +415,7 @@ namespace DerivationFramework {
 	    etac.nTracks = 1;
 	    etac.trackParticle1 = track;
 	    etac.ptTot = track->pt();
-	    candidates.push_back(etac);
+	    candidates.AddElement(etac);
 	  }
 	} // tracksSelected
       } // selectedDiJpsiCandidates
@@ -432,7 +431,7 @@ namespace DerivationFramework {
       	p4_mu2.SetPtEtaPhiM(tracksJpsis[1]->pt(), tracksJpsis[1]->eta(), tracksJpsis[1]->phi(), m_vtx0Daug2MassHypo);
 	p4_mu3.SetPtEtaPhiM(tracksJpsis[2]->pt(), tracksJpsis[2]->eta(), tracksJpsis[2]->phi(), m_vtx0Daug3MassHypo);
 	p4_mu4.SetPtEtaPhiM(tracksJpsis[3]->pt(), tracksJpsis[3]->eta(), tracksJpsis[3]->phi(), m_vtx0Daug4MassHypo);
-	for(auto iter1=rhos.cbegin(); iter1!=rhos.cend(); ++iter1) {
+	for(auto iter1=rhos.GetVector().cbegin(); iter1!=rhos.GetVector().cend(); ++iter1) {
 	  if(std::find(tracksJpsis.cbegin(), tracksJpsis.cend(), iter1->trackParticle1) != tracksJpsis.cend())
 	    continue;
 	  if(std::find(tracksJpsis.cbegin(), tracksJpsis.cend(), iter1->trackParticle2) != tracksJpsis.cend())
@@ -457,17 +456,17 @@ namespace DerivationFramework {
 	    etac.vtxPos1(0) = iter1->vtxPos(0);
 	    etac.vtxPos1(1) = iter1->vtxPos(1);
 	    etac.vtxPos1(2) = iter1->vtxPos(2);
-	    candidates.push_back(etac);
+	    candidates.AddElement(etac);
 	  }
 	} // rhos
       } // selectedDiJpsiCandidates
     } // m_tracks_num==2
     else if(m_tracks_num==4) {
-      for(auto iter1=rhos.cbegin(); iter1!=rhos.cend(); ++iter1) {
+      for(auto iter1=rhos.GetVector().cbegin(); iter1!=rhos.GetVector().cend(); ++iter1) {
 	tracksRho1.clear();
 	tracksRho1.push_back(iter1->trackParticle1);
 	tracksRho1.push_back(iter1->trackParticle2);
-	for(auto iter2=iter1+1; iter2!=rhos.cend(); ++iter2) {
+	for(auto iter2=iter1+1; iter2!=rhos.GetVector().cend(); ++iter2) {
 	  if(std::find(tracksRho1.cbegin(), tracksRho1.cend(), iter2->trackParticle1) != tracksRho1.cend())
 	    continue;
 	  if(std::find(tracksRho1.cbegin(), tracksRho1.cend(), iter2->trackParticle2) != tracksRho1.cend())
@@ -480,23 +479,23 @@ namespace DerivationFramework {
 	  EtacCandidate etac2 = getEtacCandidate(*iter2, *iter1, selectedDiJpsiCandidates);
 	  bool etac1_pass = (etac1.nTracks != 0); bool etac2_pass = (etac2.nTracks != 0);
 	  if(etac1_pass) {
-	    if(isFound(etac1,candidates))      etac1_pass = false;
-	    else candidates.push_back(etac1);
+	    if(isFound(etac1,candidates.GetVector()))      etac1_pass = false;
+	    else candidates.AddElement(etac1);
 	  }
 	  if(etac2_pass) {
 	    if(etac1_pass && m_same_mass12)    etac2_pass = false;
-	    else if(isFound(etac2,candidates)) etac2_pass = false;
-	    else candidates.push_back(etac2);
+	    else if(isFound(etac2,candidates.GetVector())) etac2_pass = false;
+	    else candidates.AddElement(etac2);
 	  }
 	} // iter2 of rhos
       } // iter1 of rhos
     } // m_tracks_num==4
     else { // m_tracks_num==6
-      for(auto iter1=rhos.cbegin(); iter1!=rhos.cend(); ++iter1) {
+      for(auto iter1=rhos.GetVector().cbegin(); iter1!=rhos.GetVector().cend(); ++iter1) {
 	tracksRho1.clear();
 	tracksRho1.push_back(iter1->trackParticle1);
 	tracksRho1.push_back(iter1->trackParticle2);
-	for(auto iter2=iter1+1; iter2!=rhos.cend(); ++iter2) {
+	for(auto iter2=iter1+1; iter2!=rhos.GetVector().cend(); ++iter2) {
 	  if(std::find(tracksRho1.cbegin(), tracksRho1.cend(), iter2->trackParticle1) != tracksRho1.cend())
 	    continue;
 	  if(std::find(tracksRho1.cbegin(), tracksRho1.cend(), iter2->trackParticle2) != tracksRho1.cend())
@@ -506,7 +505,7 @@ namespace DerivationFramework {
 	  tracksRho12.push_back(iter1->trackParticle2);
 	  tracksRho12.push_back(iter2->trackParticle1);
 	  tracksRho12.push_back(iter2->trackParticle2);
-	  for(auto iter3=iter2+1; iter3!=rhos.cend(); ++iter3) {
+	  for(auto iter3=iter2+1; iter3!=rhos.GetVector().cend(); ++iter3) {
 	    if(std::find(tracksRho12.cbegin(), tracksRho12.cend(), iter3->trackParticle1) != tracksRho12.cend())
 	      continue;
 	    if(std::find(tracksRho12.cbegin(), tracksRho12.cend(), iter3->trackParticle2) != tracksRho12.cend())
@@ -526,58 +525,49 @@ namespace DerivationFramework {
 	    bool etac5_pass = (etac5.nTracks != 0); bool etac6_pass = (etac6.nTracks != 0);
 
 	    if(etac1_pass) {
-	      if(isFound(etac1,candidates))         etac1_pass = false;
-	      else candidates.push_back(etac1);
+	      if(isFound(etac1,candidates.GetVector()))      etac1_pass = false;
+	      else candidates.AddElement(etac1);
 	    }
 	    if(etac2_pass) {
-	      if(etac1_pass && m_same_mass23)       etac2_pass = false;
-	      else if(isFound(etac2,candidates))    etac2_pass = false;
-	      else candidates.push_back(etac2);
+	      if(etac1_pass && m_same_mass23)                etac2_pass = false;
+	      else if(isFound(etac2,candidates.GetVector())) etac2_pass = false;
+	      else candidates.AddElement(etac2);
 	    }
 	    if(etac3_pass) {
-	      if(etac1_pass && m_same_mass12)       etac3_pass = false;
-	      else if(etac2_pass && m_same_mass123) etac3_pass = false;
-	      else if(isFound(etac3,candidates))    etac3_pass = false;
-	      else candidates.push_back(etac3);
+	      if(etac1_pass && m_same_mass12)                etac3_pass = false;
+	      else if(etac2_pass && m_same_mass123)          etac3_pass = false;
+	      else if(isFound(etac3,candidates.GetVector())) etac3_pass = false;
+	      else candidates.AddElement(etac3);
 	    }
 	    if(etac4_pass) {
-	      if(etac1_pass && m_same_mass123)      etac4_pass = false;
-	      else if(etac2_pass && m_same_mass12)  etac4_pass = false;
-	      else if(etac3_pass && m_same_mass13)  etac4_pass = false;
-	      else if(isFound(etac4,candidates))    etac4_pass = false;
-	      else candidates.push_back(etac4);
+	      if(etac1_pass && m_same_mass123)               etac4_pass = false;
+	      else if(etac2_pass && m_same_mass12)           etac4_pass = false;
+	      else if(etac3_pass && m_same_mass13)           etac4_pass = false;
+	      else if(isFound(etac4,candidates.GetVector())) etac4_pass = false;
+	      else candidates.AddElement(etac4);
 	    }
 	    if(etac5_pass) {
-	      if(etac1_pass && m_same_mass123)      etac5_pass = false;
-	      else if(etac2_pass && m_same_mass13)  etac5_pass = false;
-	      else if(etac3_pass && m_same_mass23)  etac5_pass = false;
-	      else if(etac4_pass && m_same_mass123) etac5_pass = false;
-	      else if(isFound(etac5,candidates))    etac5_pass = false;
-	      else candidates.push_back(etac5);
+	      if(etac1_pass && m_same_mass123)               etac5_pass = false;
+	      else if(etac2_pass && m_same_mass13)           etac5_pass = false;
+	      else if(etac3_pass && m_same_mass23)           etac5_pass = false;
+	      else if(etac4_pass && m_same_mass123)          etac5_pass = false;
+	      else if(isFound(etac5,candidates.GetVector())) etac5_pass = false;
+	      else candidates.AddElement(etac5);
 	    }
 	    if(etac6_pass) {
-	      if(etac1_pass && m_same_mass13)       etac6_pass = false;
-	      else if(etac2_pass && m_same_mass123) etac6_pass = false;
-	      else if(etac3_pass && m_same_mass123) etac6_pass = false;
-	      else if(etac4_pass && m_same_mass23)  etac6_pass = false;
-	      else if(etac5_pass && m_same_mass12)  etac6_pass = false;
-	      else if(isFound(etac6,candidates))    etac6_pass = false;
-	      else candidates.push_back(etac6);
+	      if(etac1_pass && m_same_mass13)                etac6_pass = false;
+	      else if(etac2_pass && m_same_mass123)          etac6_pass = false;
+	      else if(etac3_pass && m_same_mass123)          etac6_pass = false;
+	      else if(etac4_pass && m_same_mass23)           etac6_pass = false;
+	      else if(etac5_pass && m_same_mass12)           etac6_pass = false;
+	      else if(isFound(etac6,candidates.GetVector())) etac6_pass = false;
+	      else candidates.AddElement(etac6);
 	    }
 	  } // iter3 of rhos
 	} // iter2 of rhos
       } // iter1 of rhos
     } // m_tracks_num==6
-
-    if(m_ptOrdering) { // order by pt
-      std::sort( candidates.begin(), candidates.end(), [](const EtacCandidate& a, const EtacCandidate& b) { return a.ptTot > b.ptTot; } );
-    }
-    else { // order by chi2/NDF sum
-      std::sort( candidates.begin(), candidates.end(), [](const EtacCandidate& a, const EtacCandidate& b) { return a.chi2NDFSum < b.chi2NDFSum; } );
-    }
-    if(m_maxCandidates>0 && candidates.size()>m_maxCandidates) {
-      candidates.erase(candidates.begin()+m_maxCandidates, candidates.end());
-    }
+    if(candidates.GetVector().size()==0) return StatusCode::SUCCESS;
 
     // loop over di-Jpsi
     for(auto iter=selectedDiJpsiCandidates.cbegin(); iter!=selectedDiJpsiCandidates.cend(); ++iter) {
@@ -586,7 +576,7 @@ namespace DerivationFramework {
       tracksJpsis.push_back(iter->first->trackParticle(1));
       tracksJpsis.push_back(iter->second->trackParticle(0));
       tracksJpsis.push_back(iter->second->trackParticle(1));
-      for(auto&& etac : candidates) {
+      for(auto&& etac : candidates.GetVector()) {
 	if(std::find(tracksJpsis.cbegin(), tracksJpsis.cend(), etac.trackParticle1) != tracksJpsis.cend())
 	  continue;
 	if(m_tracks_num>=2) {

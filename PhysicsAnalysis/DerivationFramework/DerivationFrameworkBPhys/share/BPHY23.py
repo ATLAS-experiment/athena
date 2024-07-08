@@ -50,6 +50,8 @@ Phimass = 1019.461
 Dpmmass = 1869.66
 Dspmmass = 1968.35
 etacmass = 2983.9
+chic0mass = 3414.71
+chic1mass = 3510.67
 Jpsimass = 3096.916
 Psi2Smass = 3686.10
 X3872mass = 3871.65
@@ -386,7 +388,7 @@ BPHY23_JpsiEtac4T = DerivationFramework__JpsiPlusEtacSingleVertex(
     JpsiMass                 = 3096.916,
     ApplyJpsiMassConstraint  = True,
     Chi2CutJpsi              = 4.,
-    Chi2CutRho               = 4.,
+    Chi2CutRho               = 3.,
     Chi2Cut                  = 4.,
     TrkVertexFitterTool      = BPHY23_VertexTools.TrkVKalVrtFitter,
     TrackSelectorTool        = BPHY23_VertexTools.InDetTrackSelectorTool,
@@ -437,7 +439,7 @@ BPHY23_JpsiEtac6T = DerivationFramework__JpsiPlusEtacSingleVertex(
     JpsiMass                 = 3096.916,
     ApplyJpsiMassConstraint  = True,
     Chi2CutJpsi              = 4.,
-    Chi2CutRho               = 4.,
+    Chi2CutRho               = 3.,
     Chi2Cut                  = 4.,
     TrkVertexFitterTool      = BPHY23_VertexTools.TrkVKalVrtFitter,
     TrackSelectorTool        = BPHY23_VertexTools.InDetTrackSelectorTool,
@@ -525,7 +527,7 @@ BPHY23_JpsiJpsi2T = DerivationFramework__DiJpsiPlusTracksSingleVertex(
     ApplyJpsi2MassConstraint = True,
     Chi2CutJpsi1             = 4.,
     Chi2CutJpsi2             = 4.,
-    Chi2CutRho               = 4.,
+    Chi2CutRho               = 3.,
     Chi2Cut                  = 4.,
     TrkVertexFitterTool      = BPHY23_VertexTools.TrkVKalVrtFitter,
     TrackSelectorTool        = BPHY23_VertexTools.InDetTrackSelectorTool,
@@ -579,7 +581,7 @@ BPHY23_JpsiJpsi4T = DerivationFramework__DiJpsiPlusTracksSingleVertex(
     ApplyJpsi2MassConstraint = True,
     Chi2CutJpsi1             = 4.,
     Chi2CutJpsi2             = 4.,
-    Chi2CutRho               = 4.,
+    Chi2CutRho               = 3.,
     Chi2Cut                  = 4.,
     TrkVertexFitterTool      = BPHY23_VertexTools.TrkVKalVrtFitter,
     TrackSelectorTool        = BPHY23_VertexTools.InDetTrackSelectorTool,
@@ -639,7 +641,7 @@ BPHY23_JpsiJpsi6T = DerivationFramework__DiJpsiPlusTracksSingleVertex(
     ApplyJpsi2MassConstraint = True,
     Chi2CutJpsi1             = 4.,
     Chi2CutJpsi2             = 4.,
-    Chi2CutRho               = 4.,
+    Chi2CutRho               = 3.,
     Chi2Cut                  = 4.,
     TrkVertexFitterTool      = BPHY23_VertexTools.TrkVKalVrtFitter,
     TrackSelectorTool        = BPHY23_VertexTools.InDetTrackSelectorTool,
@@ -652,6 +654,251 @@ BPHY23_JpsiJpsi6T = DerivationFramework__DiJpsiPlusTracksSingleVertex(
     MaxnPV                   = 100,
     DoVertexType             = 7)
 ToolSvc += BPHY23_JpsiJpsi6T
+
+
+BPHY23Rev_JpsiEtac4T_etac = DerivationFramework__ReVertex(
+    name                       = "BPHY23Rev_JpsiEtac4T_etac",
+    InputVtxContainerName      = "BPHY23_JpsiEtac4TVertices",
+    TrackIndices               = [ 2, 3, 4, 5 ],
+    RefitPV                    = True,
+    RefPVContainerName         = "BPHY23_JpsiEtac4T_RefPrimaryVertices", # use existing refitted PVs
+    UseMassConstraint          = True,
+    VertexMass                 = etacmass,
+    MassInputParticles         = [Pimass, Pimass, Pimass, Pimass],
+    TrkVertexFitterTool        = BPHY23VertexFit,
+    OutputVtxContainerName     = "BPHY23Revtx_JpsiEtac4T_etac",
+    MaxPVrefit                 = 100,
+    DoVertexType               = 7)
+ToolSvc += BPHY23Rev_JpsiEtac4T_etac
+
+BPHY23Rev_JpsiEtac4T_jpsi = DerivationFramework__ReVertex(
+    name                       = "BPHY23Rev_JpsiEtac4T_jpsi",
+    InputVtxContainerName      = "BPHY23_JpsiEtac4TVertices",
+    TrackIndices               = [ 2, 3, 4, 5 ],
+    RefitPV                    = True,
+    RefPVContainerName         = "BPHY23_JpsiEtac4T_RefPrimaryVertices", # use existing refitted PVs
+    UseMassConstraint          = True,
+    VertexMass                 = Jpsimass,
+    MassInputParticles         = [Pimass, Pimass, Pimass, Pimass],
+    TrkVertexFitterTool        = BPHY23VertexFit,
+    OutputVtxContainerName     = "BPHY23Revtx_JpsiEtac4T_jpsi",
+    MaxPVrefit                 = 100,
+    DoVertexType               = 7)
+ToolSvc += BPHY23Rev_JpsiEtac4T_jpsi
+
+BPHY23Rev_JpsiEtac4T_chic0 = DerivationFramework__ReVertex(
+    name                       = "BPHY23Rev_JpsiEtac4T_chic0",
+    InputVtxContainerName      = "BPHY23_JpsiEtac4TVertices",
+    TrackIndices               = [ 2, 3, 4, 5 ],
+    RefitPV                    = True,
+    RefPVContainerName         = "BPHY23_JpsiEtac4T_RefPrimaryVertices", # use existing refitted PVs
+    UseMassConstraint          = True,
+    VertexMass                 = chic0mass,
+    MassInputParticles         = [Pimass, Pimass, Pimass, Pimass],
+    TrkVertexFitterTool        = BPHY23VertexFit,
+    OutputVtxContainerName     = "BPHY23Revtx_JpsiEtac4T_chic0",
+    MaxPVrefit                 = 100,
+    DoVertexType               = 7)
+ToolSvc += BPHY23Rev_JpsiEtac4T_chic0
+
+BPHY23Rev_JpsiEtac4T_chic1 = DerivationFramework__ReVertex(
+    name                       = "BPHY23Rev_JpsiEtac4T_chic1",
+    InputVtxContainerName      = "BPHY23_JpsiEtac4TVertices",
+    TrackIndices               = [ 2, 3, 4, 5 ],
+    RefitPV                    = True,
+    RefPVContainerName         = "BPHY23_JpsiEtac4T_RefPrimaryVertices", # use existing refitted PVs
+    UseMassConstraint          = True,
+    VertexMass                 = chic1mass,
+    MassInputParticles         = [Pimass, Pimass, Pimass, Pimass],
+    TrkVertexFitterTool        = BPHY23VertexFit,
+    OutputVtxContainerName     = "BPHY23Revtx_JpsiEtac4T_chic1",
+    MaxPVrefit                 = 100,
+    DoVertexType               = 7)
+ToolSvc += BPHY23Rev_JpsiEtac4T_chic1
+
+
+BPHY23Rev_JpsiEtac6T_etac = DerivationFramework__ReVertex(
+    name                       = "BPHY23Rev_JpsiEtac6T_etac",
+    InputVtxContainerName      = "BPHY23_JpsiEtac6TVertices",
+    TrackIndices               = [ 2, 3, 4, 5, 6, 7 ],
+    RefitPV                    = True,
+    RefPVContainerName         = "BPHY23_JpsiEtac6T_RefPrimaryVertices", # use existing refitted PVs
+    UseMassConstraint          = True,
+    VertexMass                 = etacmass,
+    MassInputParticles         = [Pimass, Pimass, Pimass, Pimass, Pimass, Pimass],
+    TrkVertexFitterTool        = BPHY23VertexFit,
+    OutputVtxContainerName     = "BPHY23Revtx_JpsiEtac6T_etac",
+    MaxPVrefit                 = 100,
+    DoVertexType               = 7)
+ToolSvc += BPHY23Rev_JpsiEtac6T_etac
+
+BPHY23Rev_JpsiEtac6T_jpsi = DerivationFramework__ReVertex(
+    name                       = "BPHY23Rev_JpsiEtac6T_jpsi",
+    InputVtxContainerName      = "BPHY23_JpsiEtac6TVertices",
+    TrackIndices               = [ 2, 3, 4, 5, 6, 7 ],
+    RefitPV                    = True,
+    RefPVContainerName         = "BPHY23_JpsiEtac6T_RefPrimaryVertices", # use existing refitted PVs
+    UseMassConstraint          = True,
+    VertexMass                 = Jpsimass,
+    MassInputParticles         = [Pimass, Pimass, Pimass, Pimass, Pimass, Pimass],
+    TrkVertexFitterTool        = BPHY23VertexFit,
+    OutputVtxContainerName     = "BPHY23Revtx_JpsiEtac6T_jpsi",
+    MaxPVrefit                 = 100,
+    DoVertexType               = 7)
+ToolSvc += BPHY23Rev_JpsiEtac6T_jpsi
+
+BPHY23Rev_JpsiEtac6T_chic0 = DerivationFramework__ReVertex(
+    name                       = "BPHY23Rev_JpsiEtac6T_chic0",
+    InputVtxContainerName      = "BPHY23_JpsiEtac6TVertices",
+    TrackIndices               = [ 2, 3, 4, 5, 6, 7 ],
+    RefitPV                    = True,
+    RefPVContainerName         = "BPHY23_JpsiEtac6T_RefPrimaryVertices", # use existing refitted PVs
+    UseMassConstraint          = True,
+    VertexMass                 = chic0mass,
+    MassInputParticles         = [Pimass, Pimass, Pimass, Pimass, Pimass, Pimass],
+    TrkVertexFitterTool        = BPHY23VertexFit,
+    OutputVtxContainerName     = "BPHY23Revtx_JpsiEtac6T_chic0",
+    MaxPVrefit                 = 100,
+    DoVertexType               = 7)
+ToolSvc += BPHY23Rev_JpsiEtac6T_chic0
+
+BPHY23Rev_JpsiEtac6T_chic1 = DerivationFramework__ReVertex(
+    name                       = "BPHY23Rev_JpsiEtac6T_chic1",
+    InputVtxContainerName      = "BPHY23_JpsiEtac6TVertices",
+    TrackIndices               = [ 2, 3, 4, 5, 6, 7 ],
+    RefitPV                    = True,
+    RefPVContainerName         = "BPHY23_JpsiEtac6T_RefPrimaryVertices", # use existing refitted PVs
+    UseMassConstraint          = True,
+    VertexMass                 = chic1mass,
+    MassInputParticles         = [Pimass, Pimass, Pimass, Pimass, Pimass, Pimass],
+    TrkVertexFitterTool        = BPHY23VertexFit,
+    OutputVtxContainerName     = "BPHY23Revtx_JpsiEtac6T_chic1",
+    MaxPVrefit                 = 100,
+    DoVertexType               = 7)
+ToolSvc += BPHY23Rev_JpsiEtac6T_chic1
+
+
+BPHY23Rev_JpsiJpsi4T_etac = DerivationFramework__ReVertex(
+    name                       = "BPHY23Rev_JpsiJpsi4T_etac",
+    InputVtxContainerName      = "BPHY23_JpsiJpsi4TVertices",
+    TrackIndices               = [ 4, 5, 6, 7 ],
+    RefitPV                    = True,
+    RefPVContainerName         = "BPHY23_JpsiJpsi4T_RefPrimaryVertices", # use existing refitted PVs
+    UseMassConstraint          = True,
+    VertexMass                 = etacmass,
+    MassInputParticles         = [Pimass, Pimass, Pimass, Pimass],
+    TrkVertexFitterTool        = BPHY23VertexFit,
+    OutputVtxContainerName     = "BPHY23Revtx_JpsiJpsi4T_etac",
+    MaxPVrefit                 = 100,
+    DoVertexType               = 7)
+ToolSvc += BPHY23Rev_JpsiJpsi4T_etac
+
+BPHY23Rev_JpsiJpsi4T_jpsi = DerivationFramework__ReVertex(
+    name                       = "BPHY23Rev_JpsiJpsi4T_jpsi",
+    InputVtxContainerName      = "BPHY23_JpsiJpsi4TVertices",
+    TrackIndices               = [ 4, 5, 6, 7 ],
+    RefitPV                    = True,
+    RefPVContainerName         = "BPHY23_JpsiJpsi4T_RefPrimaryVertices", # use existing refitted PVs
+    UseMassConstraint          = True,
+    VertexMass                 = Jpsimass,
+    MassInputParticles         = [Pimass, Pimass, Pimass, Pimass],
+    TrkVertexFitterTool        = BPHY23VertexFit,
+    OutputVtxContainerName     = "BPHY23Revtx_JpsiJpsi4T_jpsi",
+    MaxPVrefit                 = 100,
+    DoVertexType               = 7)
+ToolSvc += BPHY23Rev_JpsiJpsi4T_jpsi
+
+BPHY23Rev_JpsiJpsi4T_chic0 = DerivationFramework__ReVertex(
+    name                       = "BPHY23Rev_JpsiJpsi4T_chic0",
+    InputVtxContainerName      = "BPHY23_JpsiJpsi4TVertices",
+    TrackIndices               = [ 4, 5, 6, 7 ],
+    RefitPV                    = True,
+    RefPVContainerName         = "BPHY23_JpsiJpsi4T_RefPrimaryVertices", # use existing refitted PVs
+    UseMassConstraint          = True,
+    VertexMass                 = chic0mass,
+    MassInputParticles         = [Pimass, Pimass, Pimass, Pimass],
+    TrkVertexFitterTool        = BPHY23VertexFit,
+    OutputVtxContainerName     = "BPHY23Revtx_JpsiJpsi4T_chic0",
+    MaxPVrefit                 = 100,
+    DoVertexType               = 7)
+ToolSvc += BPHY23Rev_JpsiJpsi4T_chic0
+
+BPHY23Rev_JpsiJpsi4T_chic1 = DerivationFramework__ReVertex(
+    name                       = "BPHY23Rev_JpsiJpsi4T_chic1",
+    InputVtxContainerName      = "BPHY23_JpsiJpsi4TVertices",
+    TrackIndices               = [ 4, 5, 6, 7 ],
+    RefitPV                    = True,
+    RefPVContainerName         = "BPHY23_JpsiJpsi4T_RefPrimaryVertices", # use existing refitted PVs
+    UseMassConstraint          = True,
+    VertexMass                 = chic1mass,
+    MassInputParticles         = [Pimass, Pimass, Pimass, Pimass],
+    TrkVertexFitterTool        = BPHY23VertexFit,
+    OutputVtxContainerName     = "BPHY23Revtx_JpsiJpsi4T_chic1",
+    MaxPVrefit                 = 100,
+    DoVertexType               = 7)
+ToolSvc += BPHY23Rev_JpsiJpsi4T_chic1
+
+
+BPHY23Rev_JpsiJpsi6T_etac = DerivationFramework__ReVertex(
+    name                       = "BPHY23Rev_JpsiJpsi6T_etac",
+    InputVtxContainerName      = "BPHY23_JpsiJpsi6TVertices",
+    TrackIndices               = [ 4, 5, 6, 7, 8, 9 ],
+    RefitPV                    = True,
+    RefPVContainerName         = "BPHY23_JpsiJpsi6T_RefPrimaryVertices", # use existing refitted PVs
+    UseMassConstraint          = True,
+    VertexMass                 = etacmass,
+    MassInputParticles         = [Pimass, Pimass, Pimass, Pimass, Pimass, Pimass],
+    TrkVertexFitterTool        = BPHY23VertexFit,
+    OutputVtxContainerName     = "BPHY23Revtx_JpsiJpsi6T_etac",
+    MaxPVrefit                 = 100,
+    DoVertexType               = 7)
+ToolSvc += BPHY23Rev_JpsiJpsi6T_etac
+
+BPHY23Rev_JpsiJpsi6T_jpsi = DerivationFramework__ReVertex(
+    name                       = "BPHY23Rev_JpsiJpsi6T_jpsi",
+    InputVtxContainerName      = "BPHY23_JpsiJpsi6TVertices",
+    TrackIndices               = [ 4, 5, 6, 7, 8, 9 ],
+    RefitPV                    = True,
+    RefPVContainerName         = "BPHY23_JpsiJpsi6T_RefPrimaryVertices", # use existing refitted PVs
+    UseMassConstraint          = True,
+    VertexMass                 = Jpsimass,
+    MassInputParticles         = [Pimass, Pimass, Pimass, Pimass, Pimass, Pimass],
+    TrkVertexFitterTool        = BPHY23VertexFit,
+    OutputVtxContainerName     = "BPHY23Revtx_JpsiJpsi6T_jpsi",
+    MaxPVrefit                 = 100,
+    DoVertexType               = 7)
+ToolSvc += BPHY23Rev_JpsiJpsi6T_jpsi
+
+BPHY23Rev_JpsiJpsi6T_chic0 = DerivationFramework__ReVertex(
+    name                       = "BPHY23Rev_JpsiJpsi6T_chic0",
+    InputVtxContainerName      = "BPHY23_JpsiJpsi6TVertices",
+    TrackIndices               = [ 4, 5, 6, 7, 8, 9 ],
+    RefitPV                    = True,
+    RefPVContainerName         = "BPHY23_JpsiJpsi6T_RefPrimaryVertices", # use existing refitted PVs
+    UseMassConstraint          = True,
+    VertexMass                 = chic0mass,
+    MassInputParticles         = [Pimass, Pimass, Pimass, Pimass, Pimass, Pimass],
+    TrkVertexFitterTool        = BPHY23VertexFit,
+    OutputVtxContainerName     = "BPHY23Revtx_JpsiJpsi6T_chic0",
+    MaxPVrefit                 = 100,
+    DoVertexType               = 7)
+ToolSvc += BPHY23Rev_JpsiJpsi6T_chic0
+
+BPHY23Rev_JpsiJpsi6T_chic1 = DerivationFramework__ReVertex(
+    name                       = "BPHY23Rev_JpsiJpsi6T_chic1",
+    InputVtxContainerName      = "BPHY23_JpsiJpsi6TVertices",
+    TrackIndices               = [ 4, 5, 6, 7, 8, 9 ],
+    RefitPV                    = True,
+    RefPVContainerName         = "BPHY23_JpsiJpsi6T_RefPrimaryVertices", # use existing refitted PVs
+    UseMassConstraint          = True,
+    VertexMass                 = chic1mass,
+    MassInputParticles         = [Pimass, Pimass, Pimass, Pimass, Pimass, Pimass],
+    TrkVertexFitterTool        = BPHY23VertexFit,
+    OutputVtxContainerName     = "BPHY23Revtx_JpsiJpsi6T_chic1",
+    MaxPVrefit                 = 100,
+    DoVertexType               = 7)
+ToolSvc += BPHY23Rev_JpsiJpsi6T_chic1
+
 
 #Track isolation for vertices
 from DerivationFrameworkBPhys.DerivationFrameworkBPhysConf import DerivationFramework__VertexTrackIsolation
@@ -713,7 +960,15 @@ for obj in list_all_obj:
 
 OutputCollections += ["BPHY23_JpsiEtac4TVertices", "BPHY23_JpsiEtac6TVertices",
                       "BPHY23_JpsiJpsi1TVertices", "BPHY23_JpsiJpsi2TVertices",
-                      "BPHY23_JpsiJpsi4TVertices", "BPHY23_JpsiJpsi6TVertices"]
+                      "BPHY23_JpsiJpsi4TVertices", "BPHY23_JpsiJpsi6TVertices",
+                      "BPHY23Revtx_JpsiEtac4T_etac", "BPHY23Revtx_JpsiEtac4T_jpsi",
+                      "BPHY23Revtx_JpsiEtac4T_chic0", "BPHY23Revtx_JpsiEtac4T_chic1",
+                      "BPHY23Revtx_JpsiEtac6T_etac", "BPHY23Revtx_JpsiEtac6T_jpsi",
+                      "BPHY23Revtx_JpsiEtac6T_chic0", "BPHY23Revtx_JpsiEtac6T_chic1",
+                      "BPHY23Revtx_JpsiJpsi4T_etac", "BPHY23Revtx_JpsiJpsi4T_jpsi",
+                      "BPHY23Revtx_JpsiJpsi4T_chic0", "BPHY23Revtx_JpsiJpsi4T_chic1",
+                      "BPHY23Revtx_JpsiJpsi6T_etac", "BPHY23Revtx_JpsiJpsi6T_jpsi",
+                      "BPHY23Revtx_JpsiJpsi6T_chic0", "BPHY23Revtx_JpsiJpsi6T_chic1"]
 RefPVContainers += ["xAOD::VertexContainer#BPHY23_JpsiEtac4T_RefPrimaryVertices",
                     "xAOD::VertexContainer#BPHY23_JpsiEtac6T_RefPrimaryVertices",
                     "xAOD::VertexContainer#BPHY23_JpsiJpsi1T_RefPrimaryVertices",
@@ -752,7 +1007,7 @@ ToolSvc += BPHY23_SelectEvent
 
 # The name of the kernel (BPHY23Kernel in this case) must be unique to this derivation
 from DerivationFrameworkCore.DerivationFrameworkCoreConf import DerivationFramework__DerivationKernel
-augmentation_tools = [BPHY23_Reco_mumu, BPHY23FourTrackReco_PsiX3872, BPHY23Rev_Psi4Body, BPHY23Select_Jpsi, BPHY23Select_Psi, BPHY23Rev_Jpsi, BPHY23Rev_Psi] + list_all_obj + [ BPHY23_JpsiEtac4T, BPHY23_JpsiEtac6T, BPHY23_JpsiJpsi1T, BPHY23_JpsiJpsi2T, BPHY23_JpsiJpsi4T, BPHY23_JpsiJpsi6T, BPHY23_JpsiEtac4T_VtxTrkIso, BPHY23_JpsiEtac6T_VtxTrkIso, BPHY23_JpsiJpsi1T_VtxTrkIso, BPHY23_JpsiJpsi2T_VtxTrkIso, BPHY23_JpsiJpsi4T_VtxTrkIso, BPHY23_JpsiJpsi6T_VtxTrkIso]
+augmentation_tools = [BPHY23_Reco_mumu, BPHY23FourTrackReco_PsiX3872, BPHY23Rev_Psi4Body, BPHY23Select_Jpsi, BPHY23Select_Psi, BPHY23Rev_Jpsi, BPHY23Rev_Psi] + list_all_obj + [ BPHY23_JpsiEtac4T, BPHY23_JpsiEtac6T, BPHY23_JpsiJpsi1T, BPHY23_JpsiJpsi2T, BPHY23_JpsiJpsi4T, BPHY23_JpsiJpsi6T, BPHY23_JpsiEtac4T_VtxTrkIso, BPHY23_JpsiEtac6T_VtxTrkIso, BPHY23_JpsiJpsi1T_VtxTrkIso, BPHY23_JpsiJpsi2T_VtxTrkIso, BPHY23_JpsiJpsi4T_VtxTrkIso, BPHY23_JpsiJpsi6T_VtxTrkIso, BPHY23Rev_JpsiEtac4T_etac, BPHY23Rev_JpsiEtac4T_jpsi, BPHY23Rev_JpsiEtac4T_chic0, BPHY23Rev_JpsiEtac4T_chic1, BPHY23Rev_JpsiEtac6T_etac, BPHY23Rev_JpsiEtac6T_jpsi, BPHY23Rev_JpsiEtac6T_chic0, BPHY23Rev_JpsiEtac6T_chic1, BPHY23Rev_JpsiJpsi4T_etac, BPHY23Rev_JpsiJpsi4T_jpsi, BPHY23Rev_JpsiJpsi4T_chic0, BPHY23Rev_JpsiJpsi4T_chic1, BPHY23Rev_JpsiJpsi6T_etac, BPHY23Rev_JpsiJpsi6T_jpsi, BPHY23Rev_JpsiJpsi6T_chic0, BPHY23Rev_JpsiJpsi6T_chic1]
 
 DerivationFrameworkJob += CfgMgr.DerivationFramework__DerivationKernel(
     "BPHY23Kernel",
