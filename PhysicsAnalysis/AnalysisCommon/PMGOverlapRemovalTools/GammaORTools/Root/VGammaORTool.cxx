@@ -15,8 +15,7 @@ VGammaORTool::VGammaORTool(const std::string& name)
                                                                   32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42});
   declareProperty("preferred_lepton_origins", m_preferred_lepton_origins = {1, 2, 4, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21});
 
-  declareProperty("veto_photon_origins", m_veto_photon_origins = {9, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35,
-                                                                  42});
+  declareProperty("veto_photon_origins", m_veto_photon_origins = {9, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 42});
 
   declareProperty("photon_pT_cuts", m_photon_pT_cuts = {});
   declareProperty("dR_lepton_photon_cut", m_dR_lepton_photon_cut = 0.1);
@@ -112,12 +111,10 @@ StatusCode VGammaORTool::photonPtsOutsideDrs(std::map<float, std::vector<float> 
           break;
         }
       }
-      if (!tooCloseToLepton) {
-        result[drCut].push_back(photon.Pt());
-      }
+      if (!tooCloseToLepton) result[drCut].push_back(photon.Pt());
     }
     // photon pts are sorted and returned
-    sort(result[drCut].begin(), result[drCut].end(), std::greater<float>());
+    std::sort(result[drCut].begin(), result[drCut].end(), std::greater<float>());
   }
 
   return StatusCode::SUCCESS;
@@ -237,9 +234,7 @@ std::vector<TLorentzVector> VGammaORTool::filterLeptonOrigins(const std::vector<
   // the result is filled with leptons that were merely not vetoed
   for (const auto& l : leptons_not_vetoed_p4s) {
     lepton_p4s.push_back(l);
-    if (m_n_leptons>=0 && int(lepton_p4s.size()) >= m_n_leptons) {
-      return lepton_p4s;
-    }
+    if (m_n_leptons>=0 && int(lepton_p4s.size()) >= m_n_leptons) break;
   }
   return lepton_p4s;
 }
@@ -251,15 +246,11 @@ std::vector<TLorentzVector> VGammaORTool::getLeptonP4s(const xAOD::TruthParticle
   std::vector<const xAOD::TruthParticle*> elmu_candidates;
   for (const auto *p : truthParticles) {
     // ignore all particles created in Geant4
-    if (HepMC::is_simulation_particle(p)) {
-      continue;
-    }
+    if (HepMC::is_simulation_particle(p)) continue;
     // ignore all particles with the wrong pdgid
-    if (std::find(m_lepton_pdgIds.begin(), m_lepton_pdgIds.end(), p->pdgId()) == m_lepton_pdgIds.end()) {
-      continue;
-    }
+    if (std::find(m_lepton_pdgIds.begin(), m_lepton_pdgIds.end(), p->pdgId()) == m_lepton_pdgIds.end()) continue;
     // handle taus: use tau instances before decay into non-tau
-    if (std::abs(p->pdgId()) == 15) {
+    if (MC::isTau(p)) {
       bool childIsTau = false;
       bool hasChildren = false;
       // make sure tau has no tau children, i.e. is tau before decay
@@ -272,9 +263,7 @@ std::vector<TLorentzVector> VGammaORTool::getLeptonP4s(const xAOD::TruthParticle
           break;
         }
       }
-      if (hasChildren && !childIsTau) {
-        tau_candidates.push_back(p);
-      }
+      if (hasChildren && !childIsTau) tau_candidates.push_back(p);
     }
     // electron and muons: use all status 1 not from tau
     else if (MC::isStable(p) && !isFromTau(*p)) {
@@ -311,14 +300,9 @@ std::vector<TLorentzVector> VGammaORTool::getPhotonP4s(const xAOD::TruthParticle
   std::vector<int> photon_origins;
   for (const auto *p : truthParticles) {
     // consider only final state photons, not from geant, above a lower pt cut
-    if (!MC::isStable(p) || HepMC::is_simulation_particle(p) || p->pdgId() != 22 || p->pt() < m_min_considered_photon_pT) {
-      continue;
-    }
+    if (!MC::isStable(p) || HepMC::is_simulation_particle(p) || !MC::isPhoton(p) || p->pt() < m_min_considered_photon_pT) continue;
     // require photons to be isolated if use_gamma_iso is true
-    if (m_use_gamma_iso &&
-        !frixioneIsolated(*p, truthParticles, m_frixione_dR, m_frixione_exponent, m_frixione_epsilon)) {
-      continue;
-    }
+    if (m_use_gamma_iso && !frixioneIsolated(*p, truthParticles, m_frixione_dR, m_frixione_exponent, m_frixione_epsilon)) continue;
     // determine photon origin
     static const SG::ConstAccessor<unsigned int> classifierParticleOriginAcc("classifierParticleOrigin");
     const unsigned int origin = classifierParticleOriginAcc(*p);
@@ -336,9 +320,7 @@ bool VGammaORTool::isFromTau(const xAOD::TruthParticle& lepton, int nRecursions)
   }
   for(uint i=0; i<lepton.nParents(); i++){
     const xAOD::TruthParticle* parent=lepton.parent(i);
-    if(abs(parent->pdgId())==15){
-      return true;
-    }
+    if (MC::isTau(parent)) return true;
     if(parent->pdgId()==lepton.pdgId()){
       return isFromTau(lepton, nRecursions+1);
     }
@@ -374,10 +356,7 @@ bool VGammaORTool::frixioneIsolated(const xAOD::TruthParticle& photon,
   // create map between hadron-photon dr and hadron pt
   std::map<float, float> dr_to_pt;
   for (const auto *p : truthParticles) {
-    // consider status 1  not from geant
-    if (!MC::isStable(p) || HepMC::is_simulation_particle(p)) {
-      continue;
-    }
+    if (!MC::isStable(p) || HepMC::is_simulation_particle(p)) continue;
     // ignore what typically is leptons and photons
     if (std::find(m_abs_pdgids_excluded_from_iso.begin(), m_abs_pdgids_excluded_from_iso.end(),
                   std::abs(p->pdgId())) != m_abs_pdgids_excluded_from_iso.end()) {
