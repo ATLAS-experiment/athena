@@ -53,17 +53,17 @@ namespace LVL1 {
 
     int m_fpgaId = -1;
 
-     gTowersType m_offsetsDefaultA   = {{0}};
-     gTowersType m_noiseCutsDefaultA = {{0}};
-     gTowersType m_slopesDefaultA    = {{0}};
+     gTowersType m_offsetsDefaultA   = {{{0}}};
+     gTowersType m_noiseCutsDefaultA = {{{0}}};
+     gTowersType m_slopesDefaultA    = {{{0}}};
      
-     gTowersType m_offsetsDefaultB  = {{0}};	
-     gTowersType m_noiseCutsDefaultB= {{0}};
-     gTowersType m_slopesDefaultB   = {{0}};
+     gTowersType m_offsetsDefaultB  = {{{0}}};
+     gTowersType m_noiseCutsDefaultB= {{{0}}};
+     gTowersType m_slopesDefaultB   = {{{0}}};
 
-     gTowersType m_offsetsDefaultC   = {{0}};
-     gTowersType m_noiseCutsDefaultC = {{0}};
-     gTowersType m_slopesDefaultC    = {{0}};
+     gTowersType m_offsetsDefaultC   = {{{0}}};
+     gTowersType m_noiseCutsDefaultC = {{{0}}};
+     gTowersType m_slopesDefaultC    = {{{0}}};
 
 
 

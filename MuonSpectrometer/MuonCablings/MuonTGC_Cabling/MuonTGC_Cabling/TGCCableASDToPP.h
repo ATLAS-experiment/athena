@@ -81,7 +81,7 @@ class TGCCableASDToPP : public TGCCable {
 
   /** Pointers of common databases are recorded in this array */
   using CommonDB = std::array<std::array<std::shared_ptr<TGCDatabaseASDToPP>, TGCId::MaxModuleType>, TGCId::MaxRegionType>;
-  CommonDB m_commonDb{nullptr};
+  CommonDB m_commonDb{{{nullptr}}};
 };
   
 } // end of namespace
