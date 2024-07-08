@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef _TrkVKalVrtCore_PGRAPH_H
 #define _TrkVKalVrtCore_PGRAPH_H
@@ -14,7 +14,8 @@ namespace Trk {
     long int m_lvset, m_lwset, m_choice;
 
 public:
-    PGraph() { } //Prevent zeroing of large arrays.
+    PGraph() { }  // cppcheck-suppress uninitMemberVar; prevent zeroing of large arrays.
+
     int pgraphm_(long int *weit, long int edges, long int nodes, long int *set, long int *nptr, long int nth) noexcept;
     static void trevni_(long int *from, long int length, long int *to, long int maxv, long int *newlng, long int *work) noexcept;
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef _TrkVKalVrtCoreBase_VKalVrtCore_H
@@ -43,7 +43,7 @@ namespace Trk {
    class TWRK       // collection of temporary arrays for
    {
     public:
-      TWRK() { }; //bypass initialization
+      TWRK() { }; // cppcheck-suppress uninitMemberVar; bypass initialization
      ~TWRK() = default;//default destructor allows compiler to optimize out method in this case.
 
      public:
