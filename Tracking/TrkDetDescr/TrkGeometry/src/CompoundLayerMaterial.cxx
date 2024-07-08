@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -10,12 +10,6 @@
 
 #include "TrkGeometry/MaterialProperties.h"
 
-Trk::CompoundLayerMaterial::CompoundLayerMaterial()
-    : Trk::LayerMaterialProperties(),
-      m_materialProperties(),
-      m_binUtility(nullptr),
-      m_fullComposition(false),
-      m_elementTable(Trk::SharedObject<const Trk::ElementTable>(nullptr)) {}
 
 Trk::CompoundLayerMaterial::CompoundLayerMaterial(
     const Trk::BinUtility& binutility, const ValueStore& thicknessBins,

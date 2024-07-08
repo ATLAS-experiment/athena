@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -60,7 +60,7 @@ struct ValueStore {
 class CompoundLayerMaterial final: public LayerMaterialProperties {
  public:
   /** Default Constructor - needed by POOL*/
-  CompoundLayerMaterial();
+  CompoundLayerMaterial() = default;
 
   /**Explizit constructor */
   CompoundLayerMaterial(
@@ -122,16 +122,16 @@ class CompoundLayerMaterial final: public LayerMaterialProperties {
   std::vector<std::vector<MaterialPropertiesCUP> >
     m_materialProperties;  //!< the ones you return
 
-  BinUtility* m_binUtility;    //!< the helper for the bin finding
-  ValueStore m_thicknessBins;  //!< thickness parameter
-  ValueStore m_x0Bins;         //!< x0 parameter
-  ValueStore m_l0Bins;         //!< l0 parameter
-  ValueStore m_aBins;          //!< A parameters (averaged)
-  ValueStore m_zBins;          //!< Z parameter (averaged)
-  ValueStore m_rhoBins;        //!< rho parameter (averaged)
+  BinUtility* m_binUtility{nullptr};    //!< the helper for the bin finding
+  ValueStore m_thicknessBins{};  //!< thickness parameter
+  ValueStore m_x0Bins{};         //!< x0 parameter
+  ValueStore m_l0Bins{};         //!< l0 parameter
+  ValueStore m_aBins{};          //!< A parameters (averaged)
+  ValueStore m_zBins{};          //!< Z parameter (averaged)
+  ValueStore m_rhoBins{};        //!< rho parameter (averaged)
   std::vector<std::vector<MaterialComposition> >
       m_composition;       //!< composition matrix
-  bool m_fullComposition;  //!< full composition calculation
+  bool m_fullComposition{false}; //!< full composition calculation
   SharedObject<const ElementTable>
       m_elementTable;  // the ElementTable (filled/synchronised)
 };
