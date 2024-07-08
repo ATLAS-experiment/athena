@@ -12,8 +12,7 @@
 #include <xAODTruth/TruthParticle.h>
 #include "AsgTools/IAsgTool.h"
 
-/****************************************************************************//**
-*									       
+/****************************************************************************
 *   This tool can be used to identify the overlap of a V+jets and V+gamma sample
 *   or in fact between most V^n+gamma^m and V^n+gamma^(m-1) samples
 *   (e.g. V+gammagamma vs V+gamma or VV+gamma vs VV).
