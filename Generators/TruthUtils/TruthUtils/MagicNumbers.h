@@ -41,7 +41,6 @@ namespace HepMC {
   constexpr int SPECIALSTATUS = 902;
   constexpr int EVTGENUNDECAYEDSTATUS = 899;
   constexpr int PYTHIA8LHESTATUS = 1003;
-  constexpr int HERWIG7INTERMEDIATESTATUS = 11;
   constexpr int PYTHIA8NOENDVERTEXSTATUS = 201;
   constexpr int FORWARDTRANSPORTMODELSTATUS = 212;
 
