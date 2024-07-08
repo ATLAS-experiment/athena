@@ -115,53 +115,27 @@ set( ATLAS_ALWAYS_CHECK_WILDCARDS TRUE CACHE BOOL
 # We require version > 2.9 to avoid picking up cppcheck installed with EL9.
 find_package( Cppcheck 2.11 )
 if( CPPCHECK_FOUND )
-   # Set up the default cppcheck command to use.
-   set( CMAKE_CPPCHECK_DEFAULT "${CPPCHECK_cppcheck_EXECUTABLE}" "--quiet"
-      "--enable=warning,portability" "--inline-suppr" "--template=gcc" )
-   foreach( ignored_path "${LCG_RELEASE_BASE}" "${TDAQ-COMMON_INCLUDE_DIR}"
-                         "${TDAQ_INCLUDE_DIR}" "${AthenaExternals_INCLUDE_DIR}"
-                         "${AnalysisBaseExternals_INCLUDE_DIR}"
-                         "${AthAnalysisExternals_INCLUDE_DIR}"
-                         "${AthDerivationExternals_INCLUDE_DIR}"
-                         "${AthSimulationExternals_INCLUDE_DIR}"
-                         "${AthGenerationExternals_INCLUDE_DIR}" )
+   # Prepend cppcheck command to already defined command line options:
+   list( PREPEND CMAKE_CPPCHECK_DEFAULT "${CPPCHECK_cppcheck_EXECUTABLE}" )
+
+   # Ignore externals:
+   foreach( ignored_path "${LCG_RELEASE_BASE}"
+         "${TDAQ-COMMON_INCLUDE_DIR}" "${TDAQ_INCLUDE_DIR}"
+         "${${ATLAS_PROJECT}Externals_INCLUDE_DIR}" )
       if( ignored_path )
          list( APPEND CMAKE_CPPCHECK_DEFAULT "--suppress=*:${ignored_path}/*" )
       endif()
    endforeach()
-   list( APPEND CMAKE_CPPCHECK_DEFAULT "--suppress=*:*Dict.cxx" )
-   # Suppress a cppcheck warning from Boost.
-   # This isn't always caught by the settings above.  In a nightly,
-   # LCG_RELEASE_BASE points at trees under /cvmfs/sft-nightlies.cern.ch.
-   # But some of these are just symlinks to /cvmfs/sft.cern.ch, and those
-   # won't match the pattern.
-   list( APPEND CMAKE_CPPCHECK_DEFAULT "--suppress=preprocessorErrorDirective:*/select_stdlib_config.hpp" )
-   # It's common to use assert with side-effects in unit tests.
-   # Don't warn about those.
-   list( APPEND CMAKE_CPPCHECK_DEFAULT "--suppress=assignmentInAssert:*_test.*" )
-   list( APPEND CMAKE_CPPCHECK_DEFAULT "--suppress=assertWithSideEffect:*_test.*" )
-   # Do not warn about unknown marcros.
-   list( APPEND CMAKE_CPPCHECK_DEFAULT "--suppress=unknownMacro" )
-   # Do not warn about same-named functions in class hierarchies.
-   list( APPEND CMAKE_CPPCHECK_DEFAULT "--suppress=duplInheritedMember" )
-   # Do not warn about syntax errors (if it compiles it is likely a bug in cppcheck)
-   list( APPEND CMAKE_CPPCHECK_DEFAULT "--suppress=syntaxError" )
-   # Disable warning about too complex files being ignored in check.
-   list( APPEND CMAKE_CPPCHECK_DEFAULT "--suppress=normalCheckLevelMaxBranches" )
-   # Allow conditionalizing code on cppcheck.
-   list( APPEND CMAKE_CPPCHECK_DEFAULT "-D__CPPCHECK__" )
-   # Set the cache variable(s) that CMake uses to decide how to use cppcheck.
+
+  # Set the cache variable(s) that CMake uses to decide how to use cppcheck:
    set( CMAKE_C_CPPCHECK "${CMAKE_CPPCHECK_DEFAULT}"
       CACHE STRING "CppCheck command to use for the C source files" )
    set( CMAKE_CXX_CPPCHECK "${CMAKE_CPPCHECK_DEFAULT}"
       CACHE STRING "CppCheck command to use for the C++ source files" )
-   unset( CMAKE_CPPCHECK_DEFAULT )
-   # Let the user know what happened.
-   if( CMAKE_C_CPPCHECK )
-      message( STATUS "Checking C files with: ${CMAKE_C_CPPCHECK}" )
-   endif()
-   if( CMAKE_CXX_CPPCHECK )
-      message( STATUS "Checking C++ files with: ${CMAKE_CXX_CPPCHECK}" )
+   # Let the user know what happened:
+   if( CMAKE_C_CPPCHECK OR CMAKE_CXX_CPPCHECK )
+      list( JOIN CMAKE_CPPCHECK_DEFAULT " " _cmd )
+      message( STATUS "Checking C/C++ files with: ${_cmd}" )
    endif()
 endif()
 

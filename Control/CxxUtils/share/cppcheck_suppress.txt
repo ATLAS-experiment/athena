@@ -1,0 +1,25 @@
+# athena-specific cppcheck suppression file
+
+# Do not check dictionaries.
+*:*Dict.cxx
+
+# Suppress a cppcheck warning from Boost. While we generally ignore externals,
+# in a nightly, LCG_RELEASE_BASE points at trees under /cvmfs/sft-nightlies.cern.ch.
+# But some of these are just symlinks to /cvmfs/sft.cern.ch, which don't match the pattern.
+preprocessorErrorDirective:*/select_stdlib_config.hpp"
+
+# It's common to use assert with side-effects in unit tests. Don't warn about those.
+assignmentInAssert:*_test.*
+assertWithSideEffect:*_test.*
+
+# Do not warn about unknown marcros.
+unknownMacro
+
+# Do not warn about same-named functions in class hierarchies.
+duplInheritedMember
+
+# Do not warn about syntax errors (if it compiles it is likely a bug in cppcheck).
+syntaxError
+
+# Disable warning about too complex files being ignored in check.
+normalCheckLevelMaxBranches
