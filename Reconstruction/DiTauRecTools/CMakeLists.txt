@@ -26,7 +26,7 @@ atlas_add_library( DiTauRecToolsLib
    CxxUtils AthLinks AsgMessagingLib AsgDataHandlesLib AsgTools xAODCaloEvent
    xAODEventInfo xAODJet xAODParticleEvent xAODPFlow xAODTau xAODTracking xAODEventShape
    MVAUtils ${extra_public_libs}
-   PRIVATE_LINK_LIBRARIES CaloGeoHelpers FourMomUtils PathResolver )
+   PRIVATE_LINK_LIBRARIES CaloGeoHelpers FourMomUtils PathResolver AthContainers )
 
 atlas_add_dictionary( DiTauRecToolsDict
    DiTauRecTools/DiTauRecToolsDict.h DiTauRecTools/selection.xml
