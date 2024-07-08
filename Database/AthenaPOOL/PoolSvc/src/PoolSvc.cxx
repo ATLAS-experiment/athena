@@ -461,7 +461,7 @@ pool::ICollection* PoolSvc::createCollection(const std::string& collectionType,
       ATH_MSG_WARNING("createCollection: Using default input Stream instead of id = " << contextId);
       contextId = IPoolSvc::kInputStream;
    }
-   ContextLock(contextId, m_pool_mut, m_pers_mut);
+   ContextLock lock(contextId, m_pool_mut, m_pers_mut);
    // Check POOL FileCatalog entry.
    bool insertFile = false;
    if (connection.compare(0, 4, "PFN:") == 0) {
@@ -614,7 +614,7 @@ StatusCode PoolSvc::connect(pool::ITransaction::Type type, unsigned int contextI
    if (contextId >= m_persistencySvcVec.size()) {
       return(StatusCode::FAILURE);
    }
-   ContextLock(contextId, m_pool_mut, m_pers_mut);
+   ContextLock lock(contextId, m_pool_mut, m_pers_mut);
    pool::IPersistencySvc* persSvc = m_persistencySvcVec[contextId];
    // Connect to a logical database using the pre-defined technology and dbID
    if (persSvc->session().transaction().isActive()) {
@@ -632,7 +632,7 @@ StatusCode PoolSvc::commit(unsigned int contextId) const {
    if (contextId >= m_persistencySvcVec.size()) {
       return(StatusCode::FAILURE);
    }
-   ContextLock(contextId, m_pool_mut, m_pers_mut);
+   ContextLock lock(contextId, m_pool_mut, m_pers_mut);
    pool::IPersistencySvc* persSvc = m_persistencySvcVec[contextId];
    if (persSvc != nullptr && persSvc->session().transaction().isActive()) {
       if (!persSvc->session().transaction().commit()) {
@@ -650,7 +650,7 @@ StatusCode PoolSvc::commitAndHold(unsigned int contextId) const {
    if (contextId >= m_persistencySvcVec.size()) {
       return(StatusCode::FAILURE);
    }
-   ContextLock(contextId, m_pool_mut, m_pers_mut);
+   ContextLock lock(contextId, m_pool_mut, m_pers_mut);
    pool::IPersistencySvc* persSvc = m_persistencySvcVec[contextId];
    if (persSvc != nullptr && persSvc->session().transaction().isActive()) {
       if (!persSvc->session().transaction().commitAndHold()) {
@@ -666,7 +666,7 @@ StatusCode PoolSvc::disconnect(unsigned int contextId) const {
    if (contextId >= m_persistencySvcVec.size()) {
       return(StatusCode::SUCCESS);
    }
-   ContextLock(contextId, m_pool_mut, m_pers_mut);
+   ContextLock lock(contextId, m_pool_mut, m_pers_mut);
    pool::IPersistencySvc* persSvc = m_persistencySvcVec[contextId];
    if (persSvc != nullptr && persSvc->session().transaction().isActive()) {
       if (!commit(contextId).isSuccess()) {
@@ -687,7 +687,7 @@ StatusCode PoolSvc::disconnectDb(const std::string& connection, unsigned int con
    if (contextId >= m_persistencySvcVec.size()) {
       return(StatusCode::SUCCESS);
    }
-   ContextLock(contextId, m_pool_mut, m_pers_mut);
+   ContextLock lock(contextId, m_pool_mut, m_pers_mut);
    std::unique_ptr<pool::IDatabase> dbH = getDbHandle(contextId, connection);
    if (dbH == nullptr) {
       ATH_MSG_ERROR("Failed to get Session/DatabaseHandle.");
@@ -702,7 +702,7 @@ StatusCode PoolSvc::disconnectDb(const std::string& connection, unsigned int con
 }
 //_______________________________________________________________________
 long long int PoolSvc::getFileSize(const std::string& dbName, long tech, unsigned int contextId) const {
-   ContextLock(contextId, m_pool_mut, m_pers_mut);
+   ContextLock lock(contextId, m_pool_mut, m_pers_mut);
    std::unique_ptr<pool::IDatabase> dbH = getDbHandle(contextId, dbName);
    if (dbH == nullptr) {
       ATH_MSG_DEBUG("getFileSize: Failed to get Session/DatabaseHandle to get POOL FileSize property.");
@@ -727,7 +727,7 @@ StatusCode PoolSvc::getAttribute(const std::string& optName,
       ATH_MSG_WARNING("getAttribute: Using default input Stream instead of id = " << contextId);
       contextId = IPoolSvc::kInputStream;
    }
-   ContextLock(contextId, m_pool_mut, m_pers_mut);
+   ContextLock lock(contextId, m_pool_mut, m_pers_mut);
    pool::ISession& sesH = m_persistencySvcVec[contextId]->session();
    std::ostringstream oss;
    if (data == "DbLonglong") {
@@ -748,7 +748,7 @@ StatusCode PoolSvc::getAttribute(const std::string& optName,
 		const std::string& dbName,
 		const std::string& contName,
 		unsigned int contextId) const {
-   ContextLock(contextId, m_pool_mut, m_pers_mut);
+   ContextLock lock(contextId, m_pool_mut, m_pers_mut);
    std::unique_ptr<pool::IDatabase> dbH = getDbHandle(contextId, dbName);
    if (dbH == nullptr) {
       ATH_MSG_DEBUG("getAttribute: Failed to get Session/DatabaseHandle to get POOL property.");
@@ -801,7 +801,7 @@ StatusCode PoolSvc::setAttribute(const std::string& optName,
       ATH_MSG_WARNING("setAttribute: Using default output Stream instead of id = " << contextId);
       contextId = IPoolSvc::kOutputStream;
    }
-   ContextLock(contextId, m_pool_mut, m_pers_mut);
+   ContextLock lock(contextId, m_pool_mut, m_pers_mut);
    pool::ISession& sesH = m_persistencySvcVec[contextId]->session();
    if (data[data.size() - 1] == 'L') {
       if (!sesH.technologySpecificAttributes(tech).setAttribute<long long int>(optName, atoll(data.c_str()))) {
@@ -827,7 +827,7 @@ StatusCode PoolSvc::setAttribute(const std::string& optName,
       ATH_MSG_WARNING("setAttribute: Using default output Stream instead of id = " << contextId);
       contextId = IPoolSvc::kOutputStream;
    }
-   ContextLock(contextId, m_pool_mut, m_pers_mut);
+   ContextLock lock(contextId, m_pool_mut, m_pers_mut);
    std::unique_ptr<pool::IDatabase> dbH = getDbHandle(contextId, dbName);
    if (dbH == nullptr) {
       ATH_MSG_DEBUG("Failed to get Session/DatabaseHandle to set POOL property.");
