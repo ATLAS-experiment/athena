@@ -10,6 +10,7 @@
 #include "CLHEP/Random/RandomEngine.h"
 
 #include "TruthUtils/MagicNumbers.h"
+#include "ISF_Event/ISFTruthIncident.h"
 
 using namespace Acts::UnitLiterals;
 
@@ -22,7 +23,7 @@ ISF::ActsFatrasSimTool::~ActsFatrasSimTool() {}
 
 StatusCode ISF::ActsFatrasSimTool::initialize() {
   ATH_CHECK(BaseSimulatorTool::initialize());
-  ATH_MSG_INFO("ISF::ActsFatrasSimTool update with ACTS 32.2.0");
+  ATH_MSG_INFO("ISF::ActsFatrasSimTool update with ACTS 35.1.0");
   // Retrieve particle filter
   if (!m_particleFilter.empty()) ATH_CHECK(m_particleFilter.retrieve());
 
@@ -49,6 +50,9 @@ StatusCode ISF::ActsFatrasSimTool::initialize() {
     return StatusCode::FAILURE;
   }
 
+  // ISF truth service
+  ATH_CHECK (m_truthRecordSvc.retrieve());
+  ATH_MSG_DEBUG( "- Using ISF TruthRecordSvc : " << m_truthRecordSvc.typeAndName() );
   return StatusCode::SUCCESS;
 }
 
@@ -64,6 +68,7 @@ StatusCode ISF::ActsFatrasSimTool::simulate(
   // Process ParticleState from particle stack
   // Wrap the input ISFParticle in an STL vector with size of 1
   const ISF::ISFParticleVector ispVector(1, &isp);
+  ATH_CHECK(m_truthRecordSvc->initializeTruthCollection());
   ATH_CHECK(this->simulateVector(ispVector, secondaries, mcEventCollection));
   ATH_MSG_VERBOSE("Simulation done");
   return StatusCode::SUCCESS;
@@ -130,6 +135,7 @@ StatusCode ISF::ActsFatrasSimTool::simulateVector(
     std::vector<ActsFatras::Particle> simulatedInitial;
     std::vector<ActsFatras::Particle> simulatedFinal;
     std::vector<ActsFatras::Hit> hits;
+    ATH_MSG_DEBUG(name() << " Convert ISF::Particle " << isfp->barcode() << " to ActsFatras::Particle " << input[0].particleId().value());
     ATH_MSG_DEBUG(name() << " Propagating ActsFatras::Particle  vertex|particle|generation|subparticle, " << input[0]);
     // simulate
     auto result=simulator.simulate(anygctx, mctx, generator, input, simulatedInitial, simulatedFinal, hits);
@@ -144,35 +150,6 @@ StatusCode ISF::ActsFatrasSimTool::simulateVector(
     }
 
     ATH_MSG_DEBUG(name() << " initial particle " << simulatedInitial[0]);
-    ATH_MSG_DEBUG(name() << " No. of particles after ActsFatras simulator: " << simulatedFinal.size());
-    // convert final particles to ISF::particle
-    for (const auto& factsp : simulatedFinal){
-      const auto pos = Amg::Vector3D(factsp.position()[Acts::ePos0],factsp.position()[Acts::ePos1],factsp.position()[Acts::ePos2]);
-      const auto mom = Amg::Vector3D(factsp.fourMomentum()[Acts::eMom0] / Acts::UnitConstants::MeV,factsp.fourMomentum()[Acts::eMom1] / Acts::UnitConstants::MeV,factsp.fourMomentum()[Acts::eMom2] / Acts::UnitConstants::MeV);
-      double mass = factsp.mass() / Acts::UnitConstants::MeV;
-      double charge = factsp.charge();
-      int pdgid = factsp.pdg();
-      double properTime = factsp.properTime();
-
-      if (factsp.particleId() == simulatedInitial[0].particleId()) {
-        ATH_MSG_DEBUG(name() << " final particle " << factsp);
-      }
-      else {
-        ATH_MSG_DEBUG(name() << " secondaries particle " << factsp);
-        auto secisfp = std::make_unique<ISF::ISFParticle>(pos,
-                                                          mom,
-                                                          mass,
-                                                          charge,
-                                                          pdgid,
-                                                          1, //status
-                                                          properTime,
-                                                          *isfp,
-                                                          HepMC::UNDEFINED_ID // id
-                                                          );
-        secondaries.push_back(secisfp.release());
-
-      }
-    }
     ATH_MSG_DEBUG(name() << " ActsFatras simulator hits: " << hits.size());
     int i = 0;
     for (const auto& hit : hits) {
@@ -180,13 +157,57 @@ StatusCode ISF::ActsFatrasSimTool::simulateVector(
       ++i;
       if (i>5) break;
     }
+    ATH_MSG_DEBUG(name() << " No. of particles after ActsFatras simulator: " << simulatedFinal.size());
+    if (simulatedFinal.size()>1){
+      ATH_MSG_DEBUG(name() << " start procesing secondaries");
+    // convert final particles to ISF::particle
+      auto isAlive = ISF::fPrimarySurvives;
+      // int generation = simulatedFinal[-1].particleId().generation();
+      int n = 1;
+      for (std::vector<ActsFatras::Particle>::iterator itr=simulatedFinal.begin()+1;itr!=simulatedFinal.end();++itr){
+        ATH_MSG_DEBUG(name() << " secondaries particle " <<n<<"/"<< simulatedFinal.size()-1<<": "<< *itr);
+        ++n;
+        const auto pos = Amg::Vector3D(itr->position()[Acts::ePos0],itr->position()[Acts::ePos1],itr->position()[Acts::ePos2]);
+        const auto mom = Amg::Vector3D(itr->fourMomentum()[Acts::eMom0] / Acts::UnitConstants::MeV,itr->fourMomentum()[Acts::eMom1] / Acts::UnitConstants::MeV,itr->fourMomentum()[Acts::eMom2] / Acts::UnitConstants::MeV);
+        double mass = itr->mass() / Acts::UnitConstants::MeV;
+        double charge = itr->charge();
+        int pdgid = itr->pdg();
+        double properTime = itr->properTime();
+        const int status = 1 + HepMC::SIM_STATUS_THRESHOLD;
+        const int id = HepMC::UNDEFINED_ID;
+        ATH_MSG_DEBUG(name() << " secondaries particle process code " << itr->process());
+        auto secisfp = new ISF::ISFParticle (pos,mom,mass,charge,pdgid,status,properTime,*isfp,id);
+        auto vecsecisfp = std::make_unique<ISF::ISFParticleVector>();
+        vecsecisfp->push_back(secisfp);
+        ATH_MSG_DEBUG(name() << " vecsecisfp barcode|p: " << (*vecsecisfp)[0]->barcode() <<"|"<< (*vecsecisfp)[0]->momentum().mag());
+        if(!itr->isAlive()) isAlive = ISF::fKillsPrimary;
+        ISF::ISFTruthIncident truth(*isfp,
+                                    *vecsecisfp,
+                                    getATLASProcessCode(itr->process()),
+                                    isfp->nextGeoID(),  // inherits from the parent
+                                    isAlive
+                                    );
+        ATH_MSG_DEBUG(name() << " Truth incident physicsProcessCode()" << truth.physicsProcessCode());
+        m_truthRecordSvc->registerTruthIncident(truth, true);
+        truth.updateChildParticleProperties();
+        ATH_MSG_DEBUG(name() << " Create secondariy ISF::Particle " << secisfp->barcode());
+        if (secisfp->getTruthBinding()) {
+            ATH_MSG_DEBUG(name() << " Save secondariy " << *secisfp);
+            secondaries.push_back(secisfp);
+        }
+        else {
+            ATH_MSG_WARNING("Secondary particle not written out to truth.\n Parent (" << isfp << ")\n Secondary (" << *secisfp <<")");
+        }
+      }
+    }//end of secondaries
   ATH_MSG_DEBUG(name() << " No. of secondaries: " << secondaries.size());
+    ATH_MSG_DEBUG(name() << " End of particle " << isfp->barcode());
   
   std::vector<ActsFatras::Particle>().swap(input);
   std::vector<ActsFatras::Particle>().swap(simulatedInitial);
   std::vector<ActsFatras::Particle>().swap(simulatedFinal);
   std::vector<ActsFatras::Hit>().swap(hits);
-  }
+  } // end of isfp loop
   return StatusCode::SUCCESS;
 }
 
