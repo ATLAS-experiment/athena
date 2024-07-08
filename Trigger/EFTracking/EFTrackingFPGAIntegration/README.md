@@ -78,5 +78,38 @@ Go to the directory that includes the `athena`
 ```bash
 mkdir build run
 # Now, ls should show athena, build, run
-echo $'+ Trigger/EFTracking/EFTrackingIntegration\n- .*' > package_filter_EFT.txt
+echo $'+ Trigger/EFTracking/EFTrackingFPGAIntegration\n- .*' > package_filter_EFT.txt
 ```
+
+### TL;DR Run the full ITk Pass-though Chain 
+```bash 
+# Spin up container
+singularity run --bind /cvmfs,$PWD docker://maxwellcui/athenaxrt:2022.2
+# CMake 
+cmake -DATLAS_PACKAGE_FILTER_FILE=../package_filter_EFT.txt ../athena/Projects/WorkDir/
+# Move to build directory
+cd build
+# Setup Athena
+asetup Athena,main,latest
+# Build
+make -j20
+source x*/setup.sh
+
+cd ../run 
+# Run Reco_tf with fpgaPassThroughValidation
+Reco_tf.py \
+  --CA 'all:True' \
+  --maxEvents '100' \
+  --perfmon 'fullmonmt' \
+  --multithreaded 'True' \
+  --autoConfiguration 'everything' \
+  --conditionsTag 'all:OFLCOND-MC15c-SDR-14-05' \
+  --geometryVersion 'all:ATLAS-P2-RUN4-03-00-00' \
+  --postInclude 'all:PyJobTransforms.UseFrontier' \
+  --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,TrkConfig.InDetFPGATrackingFlags.fpgaPassThroughValidation" \
+  --steering 'doRAWtoALL' \
+  --preExec 'flags.Acts.doMonitoring=True;' \
+  --inputRDOFile '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4149_r14700/*' \
+  --outputAODFile 'myAOD.pool.root' \
+  --jobNumber '1' \
+  --ignorePatterns 'ActsTrackFindingAlg.+ERROR.+Propagation.+reached.+the.+step.+count.+limit,ActsTrackFindingAlg.+ERROR.+Propagation.+failed:.+PropagatorError:3.+Propagation.+reached.+the.+configured.+maximum.+number.+of.+steps.+with.+the.+initial.+parameters,ActsTrackFindingAlg.Acts.+ERROR.+CombinatorialKalmanFilter.+failed:.+CombinatorialKalmanFilterError:5.+Propagation.+reaches.+max.+steps.+before.+track.+finding.+is.+finished.+with.+the.+initial.+parameters,ActsTrackFindingAlg.Acts.+ERROR.+SurfaceError:1'

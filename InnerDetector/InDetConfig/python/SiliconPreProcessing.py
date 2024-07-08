@@ -121,8 +121,13 @@ def ITkRecPreProcessingSiliconCfg(flags,
         acc.merge(ActsRegionsOfInterestCreatorAlgCfg(flags,
                                                      name=f"{flags.Tracking.ActiveConfig.extension}RegionsOfInterestCreatorAlg"))
 
-        from ActsConfig.ActsClusterizationConfig import ActsClusterizationCfg
-        acc.merge(ActsClusterizationCfg(flags, previousActsExtension=previousActsExtension))
+        # If running FPGA tracking, use ACTS clusterization + FPGA pass-through
+        if flags.Tracking.ActiveConfig.doFPGATrack:
+            from EFTrackingFPGAIntegration.EFClusterizationConfig import EFPassThroughClusterizationCfg
+            acc.merge(EFPassThroughClusterizationCfg(flags))
+        else:
+            from ActsConfig.ActsClusterizationConfig import ActsClusterizationCfg
+            acc.merge(ActsClusterizationCfg(flags, previousActsExtension=previousActsExtension))
 
     #
     # ---  Cluster EDM converters
