@@ -2061,7 +2061,7 @@ namespace top {
     vec_btagSF_down.clear();
 
     unsigned int n_eigen = 0;
-    std::string prefix = "btag_SF_" + WP + "_FT_EFF_Eigen_";
+    std::string prefix = "_FT_EFF_Eigen_";
     std::string flav = "";
 
     switch (SFSyst) {
@@ -2102,21 +2102,21 @@ namespace top {
       std::string decoration_tag_onl = decoration_tag + "_onl" + "_nom"; // online tag
 
       // MC efficiency Scale Factor
-      std::string decoration_SF_off_up = decoration_SF + "_FT_EFF_EIGEN_" + flav + num + "__1up"; // this is either eff SF or ineff SF 
-      std::string decoration_SF_off_down = decoration_SF + "_FT_EFF_EIGEN_" + flav + num + "__1down"; // this is either eff SF or ineff SF 
-      std::string decoration_SF_onl_up = decoration_SF + "_onl" + "_FT_EFF_EIGEN_" + flav + num + "__1up"; // this is always eff SF
-      std::string decoration_SF_onl_down = decoration_SF + "_onl" + "_FT_EFF_EIGEN_" + flav + num + "__1down"; // this is always eff SF
-      std::string decoration_SF_cond_up = decoration_SF + "_cond" + "_FT_EFF_EIGEN_" + flav + num + "__1up"; // this is always eff SF
-      std::string decoration_SF_cond_down = decoration_SF + "_cond" + "_FT_EFF_EIGEN_" + flav + num + "__1down"; // this is always eff SF
+      std::string decoration_SF_off_up = decoration_SF + prefix + flav + num + "__1up"; // this is either eff SF or ineff SF 
+      std::string decoration_SF_off_down = decoration_SF + prefix + flav + num + "__1down"; // this is either eff SF or ineff SF 
+      std::string decoration_SF_onl_up = decoration_SF + "_onl" + prefix + flav + num + "__1up"; // this is always eff SF
+      std::string decoration_SF_onl_down = decoration_SF + "_onl" + prefix + flav + num + "__1down"; // this is always eff SF
+      std::string decoration_SF_cond_up = decoration_SF + "_cond" + prefix + flav + num + "__1up"; // this is always eff SF
+      std::string decoration_SF_cond_down = decoration_SF + "_cond" + prefix + flav + num + "__1down"; // this is always eff SF
 
 
       // MC efficiency
-      std::string decoration_MCeff_off_up = decoration_MCeff + "_FT_EFF_EIGEN_" + flav + num + "__1up";
-      std::string decoration_MCeff_off_down = decoration_MCeff + "_FT_EFF_EIGEN_" + flav + num + "__1down";
-      std::string decoration_MCeff_onl_up = decoration_MCeff + "_onl" + "_FT_EFF_EIGEN_" + flav + num + "__1up";
-      std::string decoration_MCeff_onl_down = decoration_MCeff + "_onl" + "_FT_EFF_EIGEN_" + flav + num + "__1down";
-      std::string decoration_MCeff_cond_up = decoration_MCeff + "_cond" + "_FT_EFF_EIGEN_" + flav + num + "__1up";
-      std::string decoration_MCeff_cond_down = decoration_MCeff + "_cond" + "_FT_EFF_EIGEN_" + flav + num + "__1down";
+      std::string decoration_MCeff_off_up = decoration_MCeff + prefix + flav + num + "__1up";
+      std::string decoration_MCeff_off_down = decoration_MCeff + prefix + flav + num + "__1down";
+      std::string decoration_MCeff_onl_up = decoration_MCeff + "_onl" + prefix + flav + num + "__1up";
+      std::string decoration_MCeff_onl_down = decoration_MCeff + "_onl" + prefix + flav + num + "__1down";
+      std::string decoration_MCeff_cond_up = decoration_MCeff + "_cond" + prefix + flav + num + "__1up";
+      std::string decoration_MCeff_cond_down = decoration_MCeff + "_cond" + prefix + flav + num + "__1down";
     
       xAOD::JetContainer jets = event.m_jets;
       if (do_trackjets) jets = event.m_trackJets;
@@ -2221,8 +2221,7 @@ namespace top {
     vec_btagSF_down.clear();
 
     unsigned int n_eigen = 0;
-    std::string prefix1 = "btag_SF_" + WP1 + "_FT_EFF_Eigen_";
-    std::string prefix2 = "btag_SF_" + WP2 + "_FT_EFF_Eigen_";
+    std::string prefix = "_FT_EFF_Eigen_";
     std::string flav = "";
 
     switch (SFSyst) {
@@ -2267,29 +2266,29 @@ namespace top {
       std::string decoration_tag_onl = decoration_tag1 + "_onl" + "_nom"; // online tag
 
       // MC efficiency Scale Factor
-      std::string decoration_SF_off1_up = decoration_SF1 + "_FT_EFF_EIGEN_" + flav + num + "__1up"; // this is either eff SF or ineff SF 
-      std::string decoration_SF_off1_down = decoration_SF1 + "_FT_EFF_EIGEN_" + flav + num + "__1down"; // this is either eff SF or ineff SF 
-      std::string decoration_SF_off2_up = decoration_SF2 + "_FT_EFF_EIGEN_" + flav + num + "__1up"; // this is either eff SF or ineff SF 
-      std::string decoration_SF_off2_down = decoration_SF2 + "_FT_EFF_EIGEN_" + flav + num + "__1down"; // this is either eff SF or ineff SF 
-      std::string decoration_SF_onl_up = decoration_SF1 + "_onl" + "_FT_EFF_EIGEN_" + flav + num + "__1up"; // this is always eff SF
-      std::string decoration_SF_onl_down = decoration_SF1 + "_onl" + "_FT_EFF_EIGEN_" + flav + num + "__1down"; // this is always eff SF
-      std::string decoration_SF_cond1_up = decoration_SF1 + "_cond" + "_FT_EFF_EIGEN_" + flav + num + "__1up"; // this is always eff SF
-      std::string decoration_SF_cond1_down = decoration_SF1 + "_cond" + "_FT_EFF_EIGEN_" + flav + num + "__1down"; // this is always eff SF
-      std::string decoration_SF_cond2_up = decoration_SF2 + "_cond" + "_FT_EFF_EIGEN_" + flav + num + "__1up"; // this is always eff SF
-      std::string decoration_SF_cond2_down = decoration_SF2 + "_cond" + "_FT_EFF_EIGEN_" + flav + num + "__1down"; // this is always eff SF
+      std::string decoration_SF_off1_up = decoration_SF1 + prefix + flav + num + "__1up"; // this is either eff SF or ineff SF 
+      std::string decoration_SF_off1_down = decoration_SF1 + prefix + flav + num + "__1down"; // this is either eff SF or ineff SF 
+      std::string decoration_SF_off2_up = decoration_SF2 + prefix + flav + num + "__1up"; // this is either eff SF or ineff SF 
+      std::string decoration_SF_off2_down = decoration_SF2 + prefix + flav + num + "__1down"; // this is either eff SF or ineff SF 
+      std::string decoration_SF_onl_up = decoration_SF1 + "_onl" + prefix + flav + num + "__1up"; // this is always eff SF
+      std::string decoration_SF_onl_down = decoration_SF1 + "_onl" + prefix + flav + num + "__1down"; // this is always eff SF
+      std::string decoration_SF_cond1_up = decoration_SF1 + "_cond" + prefix + flav + num + "__1up"; // this is always eff SF
+      std::string decoration_SF_cond1_down = decoration_SF1 + "_cond" + prefix + flav + num + "__1down"; // this is always eff SF
+      std::string decoration_SF_cond2_up = decoration_SF2 + "_cond" + prefix + flav + num + "__1up"; // this is always eff SF
+      std::string decoration_SF_cond2_down = decoration_SF2 + "_cond" + prefix + flav + num + "__1down"; // this is always eff SF
 
 
       // MC efficiency
-      std::string decoration_MCeff_off1_up = decoration_MCeff1 + "_FT_EFF_EIGEN_" + flav + num + "__1up";
-      std::string decoration_MCeff_off1_down = decoration_MCeff1 + "_FT_EFF_EIGEN_" + flav + num + "__1down";
-      std::string decoration_MCeff_off2_up = decoration_MCeff2 + "_FT_EFF_EIGEN_" + flav + num + "__1up";
-      std::string decoration_MCeff_off2_down = decoration_MCeff2 + "_FT_EFF_EIGEN_" + flav + num + "__1down";
-      std::string decoration_MCeff_onl_up = decoration_MCeff1 + "_onl" + "_FT_EFF_EIGEN_" + flav + num + "__1up";
-      std::string decoration_MCeff_onl_down = decoration_MCeff1 + "_onl" + "_FT_EFF_EIGEN_" + flav + num + "__1down";
-      std::string decoration_MCeff_cond1_up = decoration_MCeff1 + "_cond" + "_FT_EFF_EIGEN_" + flav + num + "__1up";
-      std::string decoration_MCeff_cond1_down = decoration_MCeff1 + "_cond" + "_FT_EFF_EIGEN_" + flav + num + "__1down";
-      std::string decoration_MCeff_cond2_up = decoration_MCeff2 + "_cond" + "_FT_EFF_EIGEN_" + flav + num + "__1up";
-      std::string decoration_MCeff_cond2_down = decoration_MCeff2 + "_cond" + "_FT_EFF_EIGEN_" + flav + num + "__1down";
+      std::string decoration_MCeff_off1_up = decoration_MCeff1 + prefix + flav + num + "__1up";
+      std::string decoration_MCeff_off1_down = decoration_MCeff1 + prefix + flav + num + "__1down";
+      std::string decoration_MCeff_off2_up = decoration_MCeff2 + prefix + flav + num + "__1up";
+      std::string decoration_MCeff_off2_down = decoration_MCeff2 + prefix + flav + num + "__1down";
+      std::string decoration_MCeff_onl_up = decoration_MCeff1 + "_onl" + prefix + flav + num + "__1up";
+      std::string decoration_MCeff_onl_down = decoration_MCeff1 + "_onl" + prefix + flav + num + "__1down";
+      std::string decoration_MCeff_cond1_up = decoration_MCeff1 + "_cond" + prefix + flav + num + "__1up";
+      std::string decoration_MCeff_cond1_down = decoration_MCeff1 + "_cond" + prefix + flav + num + "__1down";
+      std::string decoration_MCeff_cond2_up = decoration_MCeff2 + "_cond" + prefix + flav + num + "__1up";
+      std::string decoration_MCeff_cond2_down = decoration_MCeff2 + "_cond" + prefix + flav + num + "__1down";
     
       xAOD::JetContainer jets = event.m_jets;
       if (do_trackjets) jets = event.m_trackJets;
