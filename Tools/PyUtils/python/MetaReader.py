@@ -710,13 +710,15 @@ def _read_guid(filename):
     """
     Extracts the "guid" (Globally Unique Identifier) in POOL files and Grid catalogs) value from a POOL file.
     :param filename: the input file
-    :return: the guid value
+    :return: the guid value, None if unavailable
     """
     import ROOT
     root_file = ROOT.TFile.Open( _get_pfn(filename) )
     params = root_file.Get('##Params')
+    if not params:
+        return
     if not isinstance(params, ROOT.TTree):
-        raise NotImplementedError(f"Cannot extract ##Params from object of type {type(params)!r}")
+        raise NotImplementedError(f"Cannot extract GUID from object {params!r} of type {type(params)!r}")
 
     regex = re.compile(r'\[NAME=(\w+)\]\[VALUE=(.*)\]', re.ASCII)
     fid = None
