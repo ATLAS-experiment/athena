@@ -23,9 +23,6 @@ class PreJetAnalysisConfig (ConfigBlock) :
             noneAction='error',
             info="the jet container to run on. It is interpreted to determine "
             "the correct config blocks to call for small- or large-R jets.")
-        self.addOption ('postfix', '', type=str,
-            info="a postfix to apply to decorations and algorithm names. Useful "
-            "here to distinguish between different jet definitions.")
         # TODO: add info string
         self.addOption ('runOriginalObjectLink', False, type=bool,
             info="")
@@ -39,9 +36,6 @@ class PreJetAnalysisConfig (ConfigBlock) :
 
     def makeAlgs (self, config) :
 
-        postfix = self.postfix
-        if postfix != '' and postfix[0] != '_' :
-            postfix = '_' + postfix
 
         if config.isPhyslite() and self.jetCollection == 'AntiKt4EMPFlowJets' :
             config.setSourceName (self.containerName, "AnalysisJets", originalName = self.jetCollection)
@@ -53,7 +47,7 @@ class PreJetAnalysisConfig (ConfigBlock) :
         # Relink original jets in case of b-tagging calibration
         if self.runOriginalObjectLink :
             alg = config.createAlgorithm( 'CP::AsgOriginalObjectLinkAlg',
-                                          'JetOriginalObjectLinkAlg'+postfix )
+                                          'JetOriginalObjectLinkAlg'+self.containerName )
             alg.baseContainerName = self.jetCollection
             alg.particles = config.readName (self.containerName)
             if config.wantCopy (self.containerName) :
@@ -64,7 +58,7 @@ class PreJetAnalysisConfig (ConfigBlock) :
         if (self.runGhostMuonAssociation is None and not config.isPhyslite()) or \
            (self.runGhostMuonAssociation is True):
             alg = config.createAlgorithm( 'CP::JetGhostMuonAssociationAlg',
-                                          'JetGhostMuonAssociationAlg'+postfix )
+                                          'JetGhostMuonAssociationAlg'+self.containerName )
             alg.jets = config.readName (self.containerName)
             if config.isPhyslite():
                 alg.muons = "AnalysisMuons"
@@ -78,7 +72,7 @@ class PreJetAnalysisConfig (ConfigBlock) :
             and config.dataType() is not DataType.Data
         ):
             # Decorate jets with isHS labels (required to retrieve Jvt SFs)
-            alg = config.createAlgorithm( 'CP::JetDecoratorAlg', 'JetPileupLabelAlg'+postfix )
+            alg = config.createAlgorithm( 'CP::JetDecoratorAlg', 'JetPileupLabelAlg'+self.containerName )
             config.addPrivateTool( 'decorator', 'JetPileupLabelingTool' )
             alg.jets = config.readName (self.containerName)
             alg.jetsOut = config.copyName (self.containerName)
@@ -87,7 +81,7 @@ class PreJetAnalysisConfig (ConfigBlock) :
 
         # Set up shallow copy if needed and not yet done
         if config.wantCopy (self.containerName) :
-            alg = config.createAlgorithm( 'CP::AsgShallowCopyAlg', 'JetShallowCopyAlg' + self.postfix )
+            alg = config.createAlgorithm( 'CP::AsgShallowCopyAlg', 'JetShallowCopyAlg' + self.containerName )
             alg.input = config.readName (self.containerName)
             alg.output = config.copyName (self.containerName)
  
@@ -114,9 +108,6 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
         self.addOption ('jetInput', jetInput, type=str,
             noneAction='error',
             info="")
-        self.addOption ('postfix', '', type=str,
-            info="a postfix to apply to decorations and algorithm names. Useful "
-            "here to distinguish between different jet definitions.")
         self.addOption ('runJvtUpdate', False, type=bool,
             info="whether to update the JVT. The default is False.")
         self.addOption ('runNNJvtUpdate', False, type=bool,
@@ -263,10 +254,6 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
 
     def makeAlgs (self, config) :
 
-        postfix = self.postfix
-        if postfix != '' and postfix[0] != '_' :
-            postfix = '_' + postfix
-
         jetCollectionName=self.jetCollection
         if(self.jetCollection=="AnalysisJets") :
             jetCollectionName="AntiKt4EMPFlowJets"
@@ -287,7 +274,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
 
         if not config.isPhyslite() or self.recalibratePhyslite:
             # Prepare the jet calibration algorithm
-            alg = config.createAlgorithm( 'CP::JetCalibrationAlg', 'JetCalibrationAlg'+postfix )
+            alg = config.createAlgorithm( 'CP::JetCalibrationAlg', 'JetCalibrationAlg'+self.containerName )
             config.addPrivateTool( 'calibrationTool', 'JetCalibrationTool' )
             alg.calibrationTool.JetCollection = jetCollectionName[:-4]
             # Get the correct string to use in the config file name
@@ -318,7 +305,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             alg.jetsOut = config.copyName (self.containerName)
 
         # Jet uncertainties
-        alg = config.createAlgorithm( 'CP::JetUncertaintiesAlg', 'JetUncertaintiesAlg'+postfix )
+        alg = config.createAlgorithm( 'CP::JetUncertaintiesAlg', 'JetUncertaintiesAlg'+self.containerName )
         self.createUncertaintyTool(alg, config, jetCollectionName, doPseudoData=( self.systematicsModelJER in ["Full","All"] ))
         alg.jets = config.readName (self.containerName)
         alg.jetsOut = config.copyName (self.containerName)
@@ -326,7 +313,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
 
         # Set up the JVT update algorithm:
         if self.runJvtUpdate :
-            alg = config.createAlgorithm( 'CP::JvtUpdateAlg', 'JvtUpdateAlg'+postfix )
+            alg = config.createAlgorithm( 'CP::JvtUpdateAlg', 'JvtUpdateAlg'+self.containerName )
             config.addPrivateTool( 'jvtTool', 'JetVertexTaggerTool' )
             alg.jvtTool.JetContainer = self.jetCollection
             alg.jvtTool.SuppressInputDependence=True
@@ -336,7 +323,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
 
         if self.runNNJvtUpdate:
             assert self.jetInput=="EMPFlow", "NN JVT only defined for PFlow jets"
-            alg = config.createAlgorithm( 'CP::JetDecoratorAlg', 'NNJvtUpdateAlg'+postfix )
+            alg = config.createAlgorithm( 'CP::JetDecoratorAlg', 'NNJvtUpdateAlg'+self.containerName )
             config.addPrivateTool( 'decorator', 'JetPileupTag::JetVertexNNTagger' )
             # Set this actually to the *output* collection
             alg.jets = config.readName (self.containerName)
@@ -346,7 +333,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             alg.decorator.SuppressOutputDependence=True
 
         if self.runFJvtUpdate :
-            alg = config.createAlgorithm( 'CP::JetModifierAlg', 'JetModifierAlg'+postfix )
+            alg = config.createAlgorithm( 'CP::JetModifierAlg', 'JetModifierAlg'+self.containerName )
             config.addPrivateTool( 'modifierTool', 'JetForwardJvtTool')
             alg.modifierTool.OutputDec = "passFJVT_internal" #Output decoration
             alg.modifierTool.FJVTName = "fJVT"
@@ -362,7 +349,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
         # Change the truthJetCollection property to AntiKt4TruthWZJets if preferred
         if self.runJvtSelection :
             assert self.jetInput=="EMPFlow", "NNJvt WPs and SFs only valid for PFlow jets"
-            alg = config.createAlgorithm('CP::AsgSelectionAlg', f'JvtSelectionAlg{postfix}')
+            alg = config.createAlgorithm('CP::AsgSelectionAlg', f'JvtSelectionAlg{self.containerName}')
             config.addPrivateTool('selectionTool', 'CP::NNJvtSelectionTool')
             alg.selectionTool.JetContainer = config.readName(self.containerName)
             alg.selectionTool.WorkingPoint = self.jvtWP
@@ -371,7 +358,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             alg.particles = config.readName(self.containerName)
 
             if self.runJvtEfficiency and config.dataType() is not DataType.Data:
-                alg = config.createAlgorithm( 'CP::JvtEfficiencyAlg', 'JvtEfficiencyAlg'+postfix )
+                alg = config.createAlgorithm( 'CP::JvtEfficiencyAlg', 'JvtEfficiencyAlg'+self.containerName )
                 config.addPrivateTool( 'efficiencyTool', 'CP::NNJvtEfficiencyTool' )
                 alg.efficiencyTool.JetContainer = config.readName(self.containerName)
                 alg.efficiencyTool.MaxPtForJvt = 60e3
@@ -392,7 +379,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
 
         if self.runFJvtSelection :
             assert self.jetInput=="EMPFlow", "fJvt WPs and SFs only valid for PFlow jets"
-            alg = config.createAlgorithm('CP::AsgSelectionAlg', f'FJvtSelectionAlg{postfix}')
+            alg = config.createAlgorithm('CP::AsgSelectionAlg', f'FJvtSelectionAlg{self.containerName}')
             config.addPrivateTool('selectionTool', 'CP::FJvtSelectionTool')
             alg.selectionTool.JetContainer = config.readName(self.containerName)
             alg.selectionTool.WorkingPoint = self.fJvtWP
@@ -400,7 +387,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             alg.particles = config.readName(self.containerName)
 
             if self.runFJvtEfficiency and config.dataType() is not DataType.Data:
-                alg = config.createAlgorithm( 'CP::JvtEfficiencyAlg', 'FJvtEfficiencyAlg'+postfix )
+                alg = config.createAlgorithm( 'CP::JvtEfficiencyAlg', 'FJvtEfficiencyAlg'+self.containerName )
                 config.addPrivateTool( 'efficiencyTool', 'CP::FJvtEfficiencyTool' )
                 alg.efficiencyTool.JetContainer = config.readName(self.containerName)
                 alg.efficiencyTool.WorkingPoint = self.fJvtWP
@@ -419,7 +406,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             config.addSelection (self.containerName, 'baselineFJvt', 'fjvt_selection,as_char', preselection=False)
 
         # Additional decorations
-        alg = config.createAlgorithm( 'CP::AsgEnergyDecoratorAlg', 'EnergyDecorator' + self.containerName + self.postfix )
+        alg = config.createAlgorithm( 'CP::AsgEnergyDecoratorAlg', 'EnergyDecorator' + self.containerName )
         alg.particles = config.readName (self.containerName)
 
         config.addOutputVar (self.containerName, 'e_%SYS%', 'e')
@@ -445,19 +432,12 @@ class RScanJetAnalysisConfig (ConfigBlock) :
         self.addOption (radius, radius, type=int,
             noneAction='error',
             info="")
-        self.addOption ('postfix', '', type=str,
-            info="a postfix to apply to decorations and algorithm names. Useful "
-            "here to distinguish between different jet definitions.")
         self.addOption ('recalibratePhyslite', True, type=bool,
             info="whether to run the CP::JetCalibrationAlg on PHYSLITE "
             "derivations. The default is True.")
 
 
     def makeAlgs (self, config) :
-
-        postfix = self.postfix
-        if postfix != '' and postfix[0] != '_' :
-            postfix = '_' + postfix
 
         jetCollectionName=self.jetCollection
         if(self.jetCollection=="AnalysisJets") :
@@ -470,7 +450,7 @@ class RScanJetAnalysisConfig (ConfigBlock) :
                 raise ValueError(
                     "Unsupported input type '{0}' for R-scan jets!".format(self.jetInput) )
             # Prepare the jet calibration algorithm
-            alg = config.createAlgorithm( 'CP::JetCalibrationAlg', 'JetCalibrationAlg'+postfix )
+            alg = config.createAlgorithm( 'CP::JetCalibrationAlg', 'JetCalibrationAlg'+self.containerName )
             config.addPrivateTool( 'calibrationTool', 'JetCalibrationTool' )
             alg.calibrationTool.JetCollection = jetCollectionName[:-4]
             alg.calibrationTool.ConfigFile = \
@@ -521,9 +501,6 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
         self.addOption ('jetInput', jetInput, type=str,
             noneAction='error',
             info="")
-        self.addOption ('postfix', '', type=str,
-            info="a postfix to apply to decorations and algorithm names. Useful "
-            "here to distinguish between different jet definitions.")
         # TODO: add info string
         self.addOption ('largeRMass', "Comb", type=str,
             info="")
@@ -538,10 +515,6 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
     def makeAlgs (self, config) :
 
         configFile = None
-
-        postfix = self.postfix
-        if postfix != '' and postfix[0] != '_' :
-            postfix = '_' + postfix
 
         jetCollectionName=self.jetCollection
         if(self.jetCollection=="AnalysisJets") :
@@ -571,7 +544,7 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
 
         if not config.isPhyslite() or self.recalibratePhyslite:
             # Prepare the jet calibration algorithm
-            alg = config.createAlgorithm( 'CP::JetCalibrationAlg', 'JetCalibrationAlg'+postfix )
+            alg = config.createAlgorithm( 'CP::JetCalibrationAlg', 'JetCalibrationAlg'+self.containerName )
             config.addPrivateTool( 'calibrationTool', 'JetCalibrationTool' )
             alg.calibrationTool.JetCollection = jetCollectionName[:-4]
             if self.configFileOverride is not None:
@@ -593,7 +566,7 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
             print("WARNING: uncertainties for UFO jets are not yet released!")
 
         if self.jetInput != "UFO":
-            alg = config.createAlgorithm( 'CP::JetUncertaintiesAlg', 'JetUncertaintiesAlg'+postfix )
+            alg = config.createAlgorithm( 'CP::JetUncertaintiesAlg', 'JetUncertaintiesAlg'+self.containerName )
             # R=1.0 jets have a validity range
             alg.outOfValidity = 2 # SILENT
             alg.outOfValidityDeco = 'outOfValidity'
@@ -628,7 +601,7 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
 # https://twiki.cern.ch/twiki/bin/view/AtlasProtected/JVTCalibrationRel21
 
 @groupBlocks
-def makeJetAnalysisConfig( seq, containerName, jetCollection, postfix = None,
+def makeJetAnalysisConfig( seq, containerName, jetCollection,
                            runGhostMuonAssociation = None):
     """Create a jet analysis algorithm sequence
       The jet collection is interpreted and selects the correct function to call,
@@ -637,7 +610,6 @@ def makeJetAnalysisConfig( seq, containerName, jetCollection, postfix = None,
 
       Keyword arguments
         jetCollection -- The jet container to run on.
-        postfix -- String to be added to the end of all public names.
     """
 
     # Remove b-tagging calibration from the container name
@@ -656,7 +628,6 @@ def makeJetAnalysisConfig( seq, containerName, jetCollection, postfix = None,
     if jetCollectionName == 'AntiKtVR30Rmax4Rmin02PV0TrackJets' :
         # don't to anything on track jets
         config = PreJetAnalysisConfig (containerName, jetCollection)
-        config.setOptionValue ("postfix", postfix)
         config.setOptionValue ('runOriginalObjectLink', False)
         config.setOptionValue ('runGhostMuonAssociation', False)
         seq.append (config)
@@ -676,29 +647,26 @@ def makeJetAnalysisConfig( seq, containerName, jetCollection, postfix = None,
 
 
     config = PreJetAnalysisConfig (containerName, jetCollection)
-    config.setOptionValue ('postfix', postfix)
     config.runOriginalObjectLink = (btIndex != -1)
     config.setOptionValue ('runGhostMuonAssociation', runGhostMuonAssociation)
     seq.append (config)
 
     if radius == 4:
         makeSmallRJetAnalysisConfig(seq, containerName,
-            jetCollection, jetInput=jetInput, postfix=postfix)
+            jetCollection, jetInput=jetInput)
     elif radius in [2, 6]:
         makeRScanJetAnalysisConfig(seq, containerName,
-            jetCollection, jetInput=jetInput, radius=radius,
-            postfix=postfix)
+            jetCollection, jetInput=jetInput, radius=radius)
     else:
         trim = match.group(3)
         if trim == "":
             raise ValueError("Untrimmed large-R jets are not supported!")
         makeLargeRJetAnalysisConfig(seq, containerName,
-            jetCollection, jetInput=jetInput, postfix=postfix)
+            jetCollection, jetInput=jetInput)
 
 
 
-def makeSmallRJetAnalysisConfig( seq, containerName, jetCollection,
-                                 jetInput, postfix = None,
+def makeSmallRJetAnalysisConfig( seq, containerName, jetCollection, jetInput,
                                  runJvtUpdate = None, runNNJvtUpdate = None, runFJvtUpdate = None,
                                  runJvtSelection = None, runFJvtSelection = None,
                                  jvtWP = None, fJvtWP = None,
@@ -710,7 +678,6 @@ def makeSmallRJetAnalysisConfig( seq, containerName, jetCollection,
         seq -- The sequence to add the algorithms to
         jetCollection -- The jet container to run on.
         jetInput -- The type of input used, read from the collection name.
-        postfix -- String to be added to the end of all public names.
         runJvtUpdate -- Determines whether or not to update JVT on the jets
         runNNJvtUpdate -- Determines whether or not to update NN JVT on the jets
         runFJvtUpdate -- Determines whether or not to update forward JVT on the jets
@@ -729,7 +696,6 @@ def makeSmallRJetAnalysisConfig( seq, containerName, jetCollection,
             "Unsupported input type '{0}' for R=0.4 jets!".format(jetInput) )
 
     config = SmallRJetAnalysisConfig (containerName, jetCollection, jetInput)
-    config.setOptionValue ('postfix', postfix)
     config.setOptionValue ('runJvtUpdate', runJvtUpdate)
     config.setOptionValue ('runNNJvtUpdate', runNNJvtUpdate)
     config.setOptionValue ('runFJvtUpdate', runFJvtUpdate)
@@ -745,7 +711,7 @@ def makeSmallRJetAnalysisConfig( seq, containerName, jetCollection,
 
 
 def makeRScanJetAnalysisConfig( seq, containerName, jetCollection,
-                                  jetInput, radius, postfix = None ):
+                                  jetInput, radius ):
     """Add algorithms for the R-scan jets.
 
       Keyword arguments
@@ -753,29 +719,25 @@ def makeRScanJetAnalysisConfig( seq, containerName, jetCollection,
         jetCollection -- The jet container to run on.
         jetInput -- The type of input used, read from the collection name.
         radius -- The radius of the r-scan jets.
-        postfix -- String to be added to the end of all public names.
     """
 
     config = SmallRJetAnalysisConfig (containerName, jetCollection, jetInput, radius)
-    config.setOptionValue ('postfix', postfix)
     seq.append (config)
 
 
 
 
 def makeLargeRJetAnalysisConfig( seq, containerName, jetCollection,
-                                 jetInput, postfix = None, largeRMass = None):
+                                 jetInput, largeRMass = None):
     """Add algorithms for the R=1.0 jets.
 
       Keyword arguments
         seq -- The sequence to add the algorithms to
         jetCollection -- The jet container to run on.
         jetInput -- The type of input used, read from the collection name.
-        postfix -- String to be added to the end of all public names.
         largeRMass -- Which large-R mass definition to use. Ignored if not running on large-R jets ("Comb", "Calo", "TA")
     """
 
     config = LargeRJetAnalysisConfig (containerName, jetCollection, jetInput)
-    config.setOptionValue ('postfix', postfix)
     config.setOptionValue ('largeRMass', largeRMass)
     seq.append (config)

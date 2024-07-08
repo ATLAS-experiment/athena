@@ -747,7 +747,6 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite,
         configSeq += config.makeConfig( 'Jets',
             containerName='AnaLargeRJets',
             jetCollection='AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets' )
-        configSeq.setOptionValue ('.postfix', 'largeR_jets' )
         outputContainers['larger_jet_'] = 'OutLargeRJets'
         if not forCompare :
             configSeq.setOptionValue ('.recalibratePhyslite', False)
@@ -756,7 +755,6 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite,
         configSeq += config.makeConfig( 'Jets',
             containerName='AnaTrackJets',
             jetCollection='AntiKtVR30Rmax4Rmin02PV0TrackJets' )
-        configSeq.setOptionValue ('.postfix', 'track_jets' )
         outputContainers['track_jet_'] = 'OutTrackJets'
 
     configSeq += config.makeConfig ('Jets.PtEtaSelection',
