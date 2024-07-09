@@ -199,14 +199,14 @@ def TrigNavSlimmingMTCfg(flags):
     aodSlim.NodesToDrop = ["F"]
     aodSlim.ChainsFilter = []
     #
-    if flags.Trigger.AODEDMSet == "AODFULL":
-      aodSlim.KeepFailedBranched = True
-      aodSlim.KeepOnlyFinalFeatures = False
-      log.info("Producing AODFULL Slimmed Trigger Navigation Collection. Reading {} and writing {}".format(aodSlim.PrimaryInputCollection, aodSlim.OutputCollection))
-    else:
+    if flags.Trigger.AODEDMSet == "AODSLIM":
       aodSlim.KeepFailedBranched = False
       aodSlim.KeepOnlyFinalFeatures = True
       log.info("Producing AODSLIM Trigger Navigation Collection. Reading {} and writing {}".format(aodSlim.PrimaryInputCollection, aodSlim.OutputCollection))
+    else: # For "AODFULL", "ESD", or any other future identifier which is _not_ "AODSLIM"
+      aodSlim.KeepFailedBranched = True
+      aodSlim.KeepOnlyFinalFeatures = False
+      log.info("Producing AODFULL Slimmed Trigger Navigation Collection. Reading {} and writing {}".format(aodSlim.PrimaryInputCollection, aodSlim.OutputCollection))
     ca.addEventAlgo(aodSlim)
     #
     collections = [f"xAOD::TrigCompositeContainer#{aodSlim.OutputCollection}", f"xAOD::TrigCompositeAuxContainer#{aodSlim.OutputCollection}Aux.-"]
