@@ -39,6 +39,7 @@
 #include "xAODTracking/TrackParticle.h"
 #include "PATCore/AcceptData.h"
 #include "METUtilities/METHelpers.h"
+#include "AthContainers/Decorator.h"
 
 using namespace xAOD;
 
@@ -746,9 +747,10 @@ namespace MissingEtDQA {
         ATH_MSG_ERROR ( "Failed to retrieve Jet container: " << name_jet << ". Exiting." );
         return StatusCode::FAILURE;
       }
+      SG::Decorator<float> NewJvtDec("NewJvt");
       for(auto jet : *jets) {
         float newjvt = (*jvtTool)->updateJvt(*jet); 
-        jet->auxdecor<float>("NewJvt") = newjvt;
+        NewJvtDec(*jet) = newjvt;
       }
       ConstDataVector<JetContainer> metJets(SG::VIEW_ELEMENTS);
       for(const auto jet : *jets) { 
