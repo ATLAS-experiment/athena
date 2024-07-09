@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 # Additional CMake settings for the build. Used by Projects/.
 #
@@ -28,3 +28,20 @@ endif()
 # Configure the checker:
 set( ATLAS_GCC_CHECKERS_CONFIG ${_config}
    CACHE STRING "Configuration file(s) for the GCC checker plugins" FORCE )
+
+
+# CppCheck options:
+
+# User-defined cppcheck command line options:
+set( ATLAS_CPPCHECK_OPTIONS "--enable=warning,portability"
+   CACHE STRING "cppcheck user-defined command line options" )
+
+# Default options:
+set( CMAKE_CPPCHECK_DEFAULT
+   ${ATLAS_CPPCHECK_OPTIONS}
+   "--quiet" "--inline-suppr" "--template=gcc"
+   "-D__CPPCHECK__" # allow conditionalizing code on cppcheck
+   CACHE STRING "cppcheck command line options" FORCE )
+
+# Athena-specific suppression file:
+list( APPEND CMAKE_CPPCHECK_DEFAULT "--suppressions-list=${_baseDir}/cppcheck_suppress.txt" )
