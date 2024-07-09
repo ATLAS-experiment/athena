@@ -145,23 +145,25 @@ namespace MuonR4{
         }
         return *gctx;
     }
-    void MuonDigitizationTool::addSDO(const TimedHit& hit, xAOD::MuonSimHitContainer* sdoContainer) const{
+    xAOD::MuonSimHit* MuonDigitizationTool::addSDO(const TimedHit& hit, 
+                                                   xAOD::MuonSimHitContainer* sdoContainer) const {
         if(!sdoContainer) {
             ATH_MSG_VERBOSE("No SDO container setup of writing");
-            return;
+            return nullptr;
         }
         if (!m_includePileUpTruth && HepMC::ignoreTruthLink(hit->genParticleLink(), m_vetoPileUpTruthLinks)) { 
             ATH_MSG_VERBOSE("Hit "<<m_idHelperSvc->toString(hit->identify())<<" is a pile-up truth link");
-            return; 
+            return nullptr; 
         }
         
         xAOD::MuonSimHit* sdoHit = sdoContainer->push_back(std::make_unique<xAOD::MuonSimHit>());
         (*sdoHit) = (*hit);
-        static const SG::Accessor<float> acc_eventTime{"SDO_evtTime"};
-        static const SG::Accessor<unsigned short> acc_eventID{"SDO_evtID"};
-        static const SG::Accessor<unsigned short> acc_puType{"SDO_puType"};
+        static const SG::Accessor<float> acc_eventTime{"MuSim_evtTime"};
+        static const SG::Accessor<unsigned short> acc_eventID{"MuSim_evtID"};
+        static const SG::Accessor<unsigned short> acc_puType{"MuSim_puType"};
         acc_eventTime(*sdoHit) = hit.eventTime();
         acc_eventID(*sdoHit) = hit.eventId();
         acc_puType(*sdoHit) = hit.pileupType();
+        return sdoHit;
     }
 }
