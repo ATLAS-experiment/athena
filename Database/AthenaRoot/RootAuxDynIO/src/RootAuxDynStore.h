@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ROOTAUXDYNSTORE_H
@@ -22,6 +22,7 @@ public:
 
   /// implementation of the IAuxStore interface
   virtual const void*                getData(SG::auxid_t auxid) const override;
+  virtual const SG::IAuxTypeVector*  getVector (SG::auxid_t auxid) const override;
   virtual void*                      getData(SG::auxid_t auxid, size_t size, size_t capacity) override;
 
   ///  implementation of the IAuxStoreIO interface

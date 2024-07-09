@@ -74,16 +74,25 @@ public:
 
 
   /**
-   * @brief Return the data vector for one aux data item
+   * @brief Return the data vector for one aux data item.
    * @param auxid The identifier of the desired aux data item.
    *
    * Each aux data item is stored as a vector, with one entry
    * per entry in the owning container.  This returns a pointer
    * to the start of the vector.
    *
-   * This should return 0 if the item doesn't exist.
+   * This should return nullptr if the item doesn't exist.
    */
   virtual const void* getData (SG::auxid_t auxid) const override;
+
+
+  /**
+   * @brief Return vector interface for one aux data item.
+   * @param auxid The identifier of the desired aux data item.
+   *
+   * This should return nullptr if the item doesn't exist.
+   */
+  virtual const IAuxTypeVector* getVector (SG::auxid_t auxid) const override;
 
 
   /**
@@ -416,11 +425,11 @@ protected:
 
 
 private:
-  /// Implementation of getDataInternal; no locking.
-  virtual void* getDataInternal_noLock (SG::auxid_t auxid,
-                                        size_t size,
-                                        size_t capacity,
-                                        bool no_lock_check);
+  /// Implementation of getVectorInternal; no locking.
+  virtual IAuxTypeVector* getVectorInternal_noLock (SG::auxid_t auxid,
+                                                    size_t size,
+                                                    size_t capacity,
+                                                    bool no_lock_check);
 
   /// Return the number of elements in the store; no locking.
   size_t size_noLock() const;

@@ -194,12 +194,21 @@ namespace xAOD {
 
    const void* AuxInfoBase::getData( auxid_t auxid ) const {
 
+      const SG::IAuxTypeVector* v = getVector( auxid );
+      if( v ) {
+         return v->toPtr();
+      }
+      return nullptr;
+   }
+
+   const SG::IAuxTypeVector* AuxInfoBase::getVector( auxid_t auxid ) const {
+
       // Guard against multi-threaded execution:
       guard_t guard( m_mutex );
 
       if( ( auxid >= m_vecs.size() ) || ( ! m_vecs[ auxid ] ) ) {
          if( m_store ) {
-            const void* result = m_store->getData( auxid );
+            const SG::IAuxTypeVector* result = m_store->getVector( auxid );
             if( result ) {
                auxid_set_t& auxids_nc ATLAS_THREAD_SAFE =
                  const_cast<auxid_set_t&> (m_auxids);
@@ -224,7 +233,7 @@ namespace xAOD {
       // its own variable accesses.
       IOStats::instance().stats().readBranch( m_name, auxid );
 
-      return m_vecs[ auxid ]->toPtr();
+      return m_vecs[ auxid ];
    }
 
    bool AuxInfoBase::isDecoration (auxid_t auxid) const

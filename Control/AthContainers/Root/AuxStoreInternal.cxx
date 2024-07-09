@@ -71,16 +71,32 @@ bool AuxStoreInternal::standalone() const
 
 
 /**
- * @brief Return the data vector for one aux data item
+ * @brief Return the data vector for one aux data item.
  * @param auxid The identifier of the desired aux data item.
  *
  * Each aux data item is stored as a vector, with one entry
  * per entry in the owning container.  This returns a pointer
  * to the start of the vector.
  *
- * This should return 0 if the item doesn't exist.
+ * This should return nullptr if the item doesn't exist.
  */
 const void* AuxStoreInternal::getData (auxid_t auxid) const
+{
+  const IAuxTypeVector* v = getVector (auxid);
+  if (v) {
+    return v->toPtr();
+  }
+  return nullptr;
+}
+
+
+/**
+ * @brief Return vector interface for one aux data item.
+ * @param auxid The identifier of the desired aux data item.
+ *
+ * This should return nullptr if the item doesn't exist.
+ */
+const IAuxTypeVector* AuxStoreInternal::getVector (auxid_t auxid) const
 {
   guard_t guard (m_mutex);
   if (auxid >= m_vecs.size() || !m_vecs[auxid]) {
@@ -91,7 +107,7 @@ const void* AuxStoreInternal::getData (auxid_t auxid) const
     // complain itself in case of an error.
     return 0;
   }
-  return m_vecs[auxid]->toPtr();
+  return m_vecs[auxid].get();
 }
 
 
@@ -359,10 +375,10 @@ bool AuxStoreInternal::insertMove (size_t pos,
         if (src_ptr) {
           size_t sz = size_noLock();
           if (sz < other_size) sz = other_size + pos;
-          (void)getDataInternal_noLock (id, sz, sz, false);
-          m_vecs[id]->resize (sz - other_size);
-          m_vecs[id]->insertMove (pos, src_ptr, reinterpret_cast<char*>(src_ptr) + other_size*r.getEltSize(id),
-                                  other);
+          IAuxTypeVector* v = getVectorInternal_noLock (id, sz, sz, false);
+          v->resize (sz - other_size);
+          v->insertMove (pos, src_ptr, reinterpret_cast<char*>(src_ptr) + other_size*r.getEltSize(id),
+                         other);
           nomove = false;
         }
       }
@@ -653,11 +669,12 @@ void AuxStoreInternal::addAuxID (auxid_t auxid)
 }
 
 
-/// Implementation of getDataInternal; no locking.
-void* AuxStoreInternal::getDataInternal_noLock (auxid_t auxid,
-                                                size_t size,
-                                                size_t capacity,
-                                                bool no_lock_check)
+/// Implementation of getVectorInternal; no locking.
+IAuxTypeVector*
+AuxStoreInternal::getVectorInternal_noLock (auxid_t auxid,
+                                            size_t size,
+                                            size_t capacity,
+                                            bool no_lock_check)
 {
   if (m_vecs.size() <= auxid) {
     m_vecs.resize (auxid+1);
@@ -684,7 +701,7 @@ void* AuxStoreInternal::getDataInternal_noLock (auxid_t auxid,
       m_vecs[auxid]->reserve (capacity);
     }
   }
-  return m_vecs[auxid]->toPtr();
+  return m_vecs[auxid].get();
 }
 
 
@@ -711,7 +728,7 @@ void* AuxStoreInternal::getDataInternal (auxid_t auxid,
                                          bool no_lock_check)
 {
   guard_t guard (m_mutex);
-  return getDataInternal_noLock (auxid, size, capacity, no_lock_check);
+  return getVectorInternal_noLock (auxid, size, capacity, no_lock_check)->toPtr();
 }
 
 

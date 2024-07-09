@@ -186,13 +186,22 @@ namespace xAOD {
 
    const void* ShallowAuxContainer::getData( auxid_t auxid ) const {
 
+      const SG::IAuxTypeVector* v = getVector( auxid );
+      if( v ) {
+         return v->toPtr();
+      }
+      return nullptr;
+   }
+
+   const SG::IAuxTypeVector* ShallowAuxContainer::getVector( auxid_t auxid ) const {
+
       guard_t guard( m_mutex );
 
       // Check if we have this variable ourselves. I use getData(...)
       // instead of getAuxIDs(), as a dynamic store may not have connected
       // to all the variables yet that it has available...
       size_t nids = m_store->getAuxIDs().size();
-      const void* result = m_store->getData( auxid );
+      const SG::IAuxTypeVector* result = m_store->getVector( auxid );
       if( result ) {
          if( nids != m_store->getAuxIDs().size() ) {
             remakeAuxIDs();
@@ -203,7 +212,7 @@ namespace xAOD {
       // If not, then leave it up to the parent object do deal with this:
       if( m_parentLink.isValid() ) {
          nids = m_parentLink->getAuxIDs().size();
-         result = m_parentLink->getData( auxid );
+         result = m_parentLink->getVector( auxid );
          if( result && ( nids != m_parentLink->getAuxIDs().size() ) ) {
             remakeAuxIDs();
          }

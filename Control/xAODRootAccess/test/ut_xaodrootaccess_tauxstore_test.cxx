@@ -51,6 +51,9 @@ StatusCode test_linked()
   int* vp1 = reinterpret_cast<int*> (s.getData (auxid1, 10, 10));
   float* vp2 = reinterpret_cast<float*> (s.getData (auxid2, 3, 3));
 
+  assert (s.getVector (auxid1)->toPtr() == vp1);
+  assert (s.getVector (auxid1)->size() == 10);
+
   auto v1 = reinterpret_cast<const std::vector<int>*> (s.getIOData (auxid1));
   auto v2 = reinterpret_cast<const std::vector<float>*> (s.getIOData (auxid2));
   assert (v1->size() == 10);

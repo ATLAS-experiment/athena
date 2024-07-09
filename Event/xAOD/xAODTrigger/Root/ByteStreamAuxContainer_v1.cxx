@@ -84,24 +84,33 @@ namespace xAOD {
 
    const void* ByteStreamAuxContainer_v1::getData( auxid_t auxid ) const {
 
+      const SG::IAuxTypeVector* v = getVector( auxid );
+      if( v ) {
+         return v->toPtr();
+      }
+      return nullptr;
+   }
+
+   const SG::IAuxTypeVector* ByteStreamAuxContainer_v1::getVector( auxid_t auxid ) const {
+
       guard_t guard (m_mutex);
 
       // If it's a static auxiliary property:
       if( ( auxid < m_staticVecs.size() ) && ( m_staticVecs[ auxid ] ) ) {
          // We're done already:
-         return m_staticVecs[ auxid ]->toPtr();
+         return m_staticVecs[ auxid ];
       }
       // If it's a dynamic one:
       else if( ( auxid < m_dynamicVecs.size() ) &&
                ( m_dynamicVecs[ auxid ] ) ) {
          // We're done already:
-         return m_dynamicVecs[ auxid ]->toPtr();
+         return m_dynamicVecs[ auxid ];
       }
 
       // Try to retrieve the dynamic variable:
       // quiet on because this method may be called from isAccessible
       // and that shouldn't generate any output.
-      return getData1 (auxid, 0, 0, true, false);
+      return getVector1 (auxid, 0, 0, true, false);
    }
 
    const ByteStreamAuxContainer_v1::auxid_set_t&
@@ -129,8 +138,12 @@ namespace xAOD {
         ret = m_dynamicVecs[ auxid ]->toPtr();
       }
 
-      if (!ret)
-        ret = getData1 (auxid, 0, 0, true, true);
+      if (!ret) {
+        SG::IAuxTypeVector* v = getVector1 (auxid, 0, 0, true, true);
+        if( v ) {
+           ret = v->toPtr();
+        }
+      }
 
       if (ret) {
         // Raise exception if locked and not a decoration.
@@ -143,7 +156,10 @@ namespace xAOD {
       }
 
       // Make a new variable.
-      ret = getData1 (auxid, size, capacity, false, true);
+      SG::IAuxTypeVector* v = getVector1 (auxid, size, capacity, false, true);
+      if( v ) {
+         ret = v->toPtr();
+      }
 
       // If locked, mark as a decoration.
       if (m_locked) {
@@ -256,7 +272,11 @@ namespace xAOD {
          return m_dynamicVecs[ auxid ]->toPtr();
       }
 
-      return getData1 (auxid, size, capacity, false, false);
+      SG::IAuxTypeVector* v = getVector1 (auxid, size, capacity, false, false);
+      if( v ) {
+         return v->toPtr();
+      }
+      return nullptr;
    }
 
    const ByteStreamAuxContainer_v1::auxid_set_t&
@@ -385,7 +405,7 @@ namespace xAOD {
             void* src_ptr = other.getData (id, other_size, other_size);
             if (src_ptr) {
               size_t sz = size_noLock();
-              getData1 (id, sz, sz, true, false);
+              getVector1 (id, sz, sz, true, false);
               m_dynamicVecs[id]->resize (sz - other_size);
               m_dynamicVecs[id]->insertMove (pos, src_ptr, reinterpret_cast<char*>(src_ptr) + other_size*r.getEltSize(id),
                                              other);
@@ -435,13 +455,13 @@ namespace xAOD {
    /// Look for variable auxid in pers.
    /// If not found, create it if capacity != 0.
    template< typename T >
-   void*
-   ByteStreamAuxContainer_v1::getData1( auxid_t auxid,
-                                        std::map< std::string,
-                                                  std::vector< T > >& pers,
-                                        size_t size, size_t capacity,
-                                        bool quiet,
-                                        bool forDecor) const {
+   SG::IAuxTypeVector*
+   ByteStreamAuxContainer_v1::getVector1( auxid_t auxid,
+                                          std::map< std::string,
+                                                    std::vector< T > >& pers,
+                                          size_t size, size_t capacity,
+                                          bool quiet,
+                                          bool forDecor) const {
 
       // Private method --- should hold lock before calling this.
 
@@ -488,7 +508,7 @@ namespace xAOD {
       if( m_dynamicVecs[ auxid ] ) {
          std::cerr << "ERROR xAOD::ByteStreamAuxContainer_v1::getData "
                    << "Internal inconsistency detected!" << std::endl;
-         return m_dynamicVecs[ auxid ]->toPtr();
+         return m_dynamicVecs[ auxid ];
       }
 
       // Register the variable:
@@ -504,36 +524,36 @@ namespace xAOD {
       m_auxids.insert( auxid );
 
       // Return the pointer to the array:
-      return m_dynamicVecs[ auxid ]->toPtr();
+      return m_dynamicVecs[ auxid ];
    }
 
-   void*
-   ByteStreamAuxContainer_v1::getData1( auxid_t auxid,
-                                        size_t size, size_t capacity,
-                                        bool quiet,
-                                        bool forDecor) const {
+   SG::IAuxTypeVector*
+   ByteStreamAuxContainer_v1::getVector1( auxid_t auxid,
+                                          size_t size, size_t capacity,
+                                          bool quiet,
+                                          bool forDecor) const {
 
       // Private method --- should hold lock before calling this.
 
       if( *( SG::AuxTypeRegistry::instance().getType( auxid ) ) ==
           typeid( int ) ) {
 
-         return getData1( auxid, m_int, size, capacity, quiet, forDecor );
+         return getVector1( auxid, m_int, size, capacity, quiet, forDecor );
       }
       else if( *( SG::AuxTypeRegistry::instance().getType( auxid ) ) ==
                typeid( float ) ) {
 
-         return getData1( auxid, m_float, size, capacity, quiet, forDecor );
+         return getVector1( auxid, m_float, size, capacity, quiet, forDecor );
       }
       else if( *( SG::AuxTypeRegistry::instance().getType( auxid ) ) ==
                typeid( std::vector< int > ) ) {
 
-         return getData1( auxid, m_vecInt, size, capacity, quiet, forDecor );
+         return getVector1( auxid, m_vecInt, size, capacity, quiet, forDecor );
       }
       else if( *( SG::AuxTypeRegistry::instance().getType( auxid ) ) ==
                typeid( std::vector< float > ) ) {
 
-         return getData1( auxid, m_vecFloat, size, capacity, quiet, forDecor );
+         return getVector1( auxid, m_vecFloat, size, capacity, quiet, forDecor );
       }
 
       // The object can't handle this variable type...

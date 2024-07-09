@@ -361,6 +361,7 @@ class TestStore
 public:
   TestStore()  {}
   virtual const void* getData (SG::auxid_t) const { std::abort(); }
+  virtual const SG::IAuxTypeVector* getVector (SG::auxid_t) const { std::abort(); }
   virtual void* getDecoration (SG::auxid_t, size_t, size_t) { std::abort(); }
   virtual const SG::auxid_set_t& getAuxIDs() const { std::abort(); }
   virtual bool isDecoration(SG::auxid_t /*auxid*/) const { std::abort(); }

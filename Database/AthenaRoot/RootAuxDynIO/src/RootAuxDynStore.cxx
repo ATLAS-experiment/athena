@@ -1,8 +1,9 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthContainers/exceptions.h"
+#include "AthContainersInterfaces/IAuxTypeVector.h"
 
 #include "RootAuxDynStore.h"
 #include "RootAuxDynIO/RootAuxDynIO.h"
@@ -23,13 +24,23 @@ RootAuxDynStore::RootAuxDynStore(RootAuxDynIO::IRootAuxDynReader& reader,
       
 const void* RootAuxDynStore::getData(SG::auxid_t auxid) const
 {
+  const SG::IAuxTypeVector* v = getVector( auxid );
+  if( v ) {
+     return v->toPtr();
+  }
+  return nullptr;
+}
+
+
+const SG::IAuxTypeVector* RootAuxDynStore::getVector(SG::auxid_t auxid) const
+{
   guard_t guard (m_mutex);
   // lock
-  const void* ret = SG::AuxStoreInternal::getData (auxid);
+  const SG::IAuxTypeVector* ret = SG::AuxStoreInternal::getVector (auxid);
   if (!ret) {
     auto this_nc ATLAS_THREAD_SAFE = const_cast<RootAuxDynStore*>(this); // locked above
     this_nc->readData(auxid);
-    ret = SG::AuxStoreInternal::getData (auxid);
+    ret = SG::AuxStoreInternal::getVector (auxid);
   }
   return ret;
 }

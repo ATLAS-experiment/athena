@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file xAODRootAccess/test/ut_xaodtrigger_bytestreamauxcontainer_v1_test.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -51,6 +49,9 @@ void test1()
 
   int* i1 = reinterpret_cast<int*> (s1.getData(ityp1, 5, 20));
   int* i2 = reinterpret_cast<int*> (s1.getData(ityp2, 5, 20));
+
+  assert (s1.getVector(ityp1)->toPtr() == i1);
+  assert (s1.getVector(ityp1)->size() == 5);
 
   for (int i=0; i<5; i++) {
     i1[i] = i;

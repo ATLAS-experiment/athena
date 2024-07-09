@@ -66,6 +66,9 @@ namespace xAOD {
       /// Get a pointer to a given array
       virtual const void* getData( auxid_t auxid ) const override;
 
+      /// Return vector interface for one aux data item.
+      virtual const SG::IAuxTypeVector* getVector( auxid_t auxid ) const override final;
+
       /// Get the types(names) of variables handled by this container
       virtual const auxid_set_t& getAuxIDs() const override;
 
@@ -145,16 +148,16 @@ namespace xAOD {
       size_t size_noLock() const;
 
      /// Function retrieving a simple dynamic variable.
-      /// If capacity > 0, a new verable will be created if necessary.
+      /// If capacity > 0, a new variable will be created if necessary.
       template< typename T >
-      void* getData1( auxid_t auxid,
-                      std::map< std::string, std::vector< T > >& pers,
-                      size_t size, size_t capacity, bool quiet,
-                      bool forDecor) const;
+      SG::IAuxTypeVector* getVector1( auxid_t auxid,
+                                      std::map< std::string, std::vector< T > >& pers,
+                                      size_t size, size_t capacity, bool quiet,
+                                      bool forDecor) const;
 
-      void* getData1( auxid_t auxid,
-                      size_t size, size_t capacity, bool quiet,
-                      bool forDecor ) const;
+      SG::IAuxTypeVector* getVector1( auxid_t auxid,
+                                      size_t size, size_t capacity, bool quiet,
+                                      bool forDecor ) const;
 
       /// @name Variables persisified into the ByteStream
       /// @{

@@ -123,11 +123,14 @@ void test1()
   SG::auxid_t ityp1 = SG::AuxTypeRegistry::instance().getAuxID<int> ("anInt");
   assert (s.getData (ityp1) == 0);
   assert (s.size() == 0);
+  assert (s.getVector (ityp1) == nullptr);
 
   int* i1 = reinterpret_cast<int*> (s.getData(ityp1, 10, 20));
   assert (s.size() == 10);
   i1[0] = 1;
   i1[1] = 2;
+  assert (s.getVector (ityp1)->toPtr() == i1);
+  assert (s.getVector (ityp1)->size() == 10);
 
   const int* i1c = reinterpret_cast<const int*> (s.getData(ityp1));
   assert (i1c == i1);

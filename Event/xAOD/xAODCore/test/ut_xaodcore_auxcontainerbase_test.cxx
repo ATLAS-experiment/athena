@@ -144,6 +144,9 @@ void test1()
   int* i2 = reinterpret_cast<int*> (s1.getData(ityp2, 5, 20));
   MoveTest* m1 = reinterpret_cast<MoveTest*> (s1.getData(mtyp1, 5, 20));
 
+  assert (s1.getVector(ityp1)->toPtr() == i1);
+  assert (s1.getVector(ityp1)->size() == 5);
+
   for (int i=0; i<5; i++) {
     i1[i] = i;
     i2[i] = i+100;

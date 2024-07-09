@@ -89,6 +89,9 @@ void test1()
   int* a1 = reinterpret_cast<int*> (s1.getData(atyp1, 1, 1));
   assert (i1 == &s1.i1);
   assert (a1 == &s1.a1);
+
+  assert (s1.getVector(ityp1)->toPtr() == i1);
+  assert (s1.getVector(ityp1)->size() == 1);
 }
 
 
