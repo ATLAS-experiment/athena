@@ -1,4 +1,4 @@
-#Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+#Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 import matplotlib
 matplotlib.use('Agg')
@@ -20,16 +20,12 @@ def tempCorr(Temp,Eg):
 # Jennet shamelessly steals Nick's code for bookkeeping
 def averageData (m,lumi_df):
 
-    #home directory definition                                                                                                        
-    fillerDate = datetime.datetime(2000,1,1,1,1,1,1)
-    tempDate = datetime.datetime(2000,1,1,1,1,1,1)
-    returnList =[fillerDate,fillerDate,fillerDate,False,"LI_S00_0_M0"]
+    #home directory definition
     homeDirectory =  os.path.expanduser('/eos/atlas/user/j/jdickins/Pixel/LeakageCurrent/')
 
     # Define path to folder                                                                                                  
     dataFolder = homeDirectory + "/IBLData/processedData/means_dat/"
     inputFolder = homeDirectory + "/IBLData/processedData/"
-    runDataFolder = homeDirectory + "/IBLData/processedData/Lumi/runData.txt"
 
     if not os.path.exists(dataFolder):
         os.mkdir(dataFolder)
@@ -117,7 +113,6 @@ def averageData (m,lumi_df):
     output_dict["volume"] = volume  
 
     dataTypes = ["PP4LV","TModule","ENV_TT","HV_VMeas","HV_IMeas"]
-    dataType_index = 0
 
     for dataType in dataTypes:
 

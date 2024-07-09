@@ -1,4 +1,4 @@
-#Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+#Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Write a text file containing all module names
 def main():
@@ -6,7 +6,6 @@ def main():
     modules = []
     # Get the module names
 
-    i=0                                                                                
     for stave in range(1,15):
         staveString = str(stave)
 

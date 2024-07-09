@@ -1,10 +1,6 @@
-#Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+#Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-import matplotlib
-#matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-import os, sys
-import numpy as np
+import os
 import pandas as pd
 
 # Jennet averages over modules and saves TGraphs
