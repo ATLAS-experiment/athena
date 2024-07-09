@@ -145,6 +145,7 @@ def checkDirectory(directory, the_type, requireTree, depth):
 
     from PyUtils import PoolFile
     nentries = None
+    hasMetadata = False
 
     msg.debug('Checking directory %s ...', directory.GetName())
 
@@ -170,9 +171,13 @@ def checkDirectory(directory, the_type, requireTree, depth):
 
             msg.debug('Checking tree %s ...', the_object.GetName())
 
-            if depth == 0 and PoolFile.PoolOpts.TTreeNames.EventData == the_object.GetName():
-                nentries = the_object.GetEntries()
-                msg.debug(f'  contains {nentries} events')
+            if depth == 0:
+                if PoolFile.PoolOpts.TTreeNames.EventData == the_object.GetName():
+                    nentries = the_object.GetEntries()
+                    msg.debug(f'  contains {nentries} events')
+                elif PoolFile.PoolOpts.TTreeNames.MetaData == the_object.GetName():
+                    hasMetadata = True
+                    msg.debug('  contains MetaData')
             
             if the_type=='event':
                 if checkTreeEventWise(the_object)==1:
@@ -193,9 +198,13 @@ def checkDirectory(directory, the_type, requireTree, depth):
                 msg.warning('Could not open ntuple %s: %s', the_object, err)
                 return 1
 
-            if depth == 0 and PoolFile.PoolOpts.RNTupleNames.EventData == reader.GetDescriptor().GetName():
-                nentries = reader.GetNEntries()
-                msg.debug(f'  contains {nentries} events')
+            if depth == 0:
+                if PoolFile.PoolOpts.RNTupleNames.EventData == reader.GetDescriptor().GetName():
+                    nentries = reader.GetNEntries()
+                    msg.debug(f'  contains {nentries} events')
+                elif PoolFile.PoolOpts.RNTupleNames.MetaData == reader.GetDescriptor().GetName():
+                    hasMetadata = True
+                    msg.debug('  contains MetaData')
 
             if the_type=='event':
                 if checkNTupleEventWise(the_object)==1:
@@ -210,14 +219,8 @@ def checkDirectory(directory, the_type, requireTree, depth):
             if checkDirectory(the_object, the_type, requireTree, depth + 1)==1:
                 return 1
 
-    # If we don't even require a *Tree* here, then we should not try to count entries
-    # using standard metadata tools. The above corruption checks and other checks should
-    # be sufficient
-    if not requireTree:
-        msg.debug('Directory %s looks ok.', directory.GetName())
-        return 0
-
-    if depth == 0 and checkNEvents(directory.GetName(), nentries)==1:
+    # Only check if metadata object is available as in standard POOL files
+    if depth == 0 and hasMetadata and checkNEvents(directory.GetName(), nentries)==1:
         return 1
     else:
         msg.debug('Directory %s looks ok.', directory.GetName())
@@ -276,12 +279,6 @@ def checkNEvents(fileName, nEntries):
     return     0 in case of consistency, 1 otherwise
     """
     from PyUtils.MetaReader import read_metadata
-
-    from AthenaCommon.Logging import logging as athlogging
-    from PyUtils.MetaReader import msg as metamsg
-
-    if msg.getEffectiveLevel() != logging.DEBUG:
-        metamsg.setLevel(athlogging.ERROR)
 
     msg.debug('Checking number of events in file %s ...', fileName)
 
