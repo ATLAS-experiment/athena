@@ -532,6 +532,7 @@ def WriteToAOD(flags, stage = ''): #  store xAOD containers in AOD file
     toAOD = []
     toAOD += [f"xAOD::PixelClusterContainer#xAODPixelClusters{stage}FromFPGACluster",f"xAOD::PixelClusterAuxContainer#xAODPixelClusters{stage}FromFPGAClusterAux.",
               f"xAOD::StripClusterContainer#xAODStripClusters{stage}FromFPGACluster",f"xAOD::StripClusterAuxContainer#xAODStripClusters{stage}FromFPGAClusterAux.",
+              "xAOD::TrackParticleContainer#xAODFPGAProtoTracksTrackParticles","xAOD::TrackParticleAuxContainer#xAODFPGAProtoTracksTrackParticlesAux.",
             ]
 
     result = ComponentAccumulator()
