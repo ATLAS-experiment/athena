@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCTExtension/SCTExtensionAlg.h"
@@ -7,6 +7,7 @@
 #include "InDetPrepRawData/PixelCluster.h"
 #include "TrkMeasurementBase/MeasurementBase.h"
 #include "InDetRIO_OnTrack/PixelClusterOnTrack.h"
+#include "AthContainers/Decorator.h"
 
 
 
@@ -48,6 +49,9 @@ StatusCode SCTExtensionAlg::execute(const EventContext& ctx) const {
 
   int n_tracks=0;
   int n_tracklets=0;
+
+  static const SG::Decorator< ElementLink< xAOD:: TrackParticleContainer > > MatchedTrackLinkDec("MatchedTrackLink");
+  static const SG::Decorator< int > MatchedTrackSharedHitsDec("MatchedTrackSharedHits");
 
   for (mytracklet = tracklets->begin(); mytracklet != tracklets->end(); ++mytracklet) // Loop over tracklets
     { 
@@ -120,14 +124,14 @@ StatusCode SCTExtensionAlg::execute(const EventContext& ctx) const {
               nSharedHits=n_corr;
               ElementLink< xAOD:: TrackParticleContainer > eLink( *trks, trackParticle->index());
               eLink.toPersistent();
-              trackletParticle->auxdecor<  ElementLink< xAOD:: TrackParticleContainer >  >("MatchedTrackLink") = eLink;
+              MatchedTrackLinkDec(*trackletParticle) = eLink;
 	
               break; //??? how many n_corr?
 
             }  
         } // End: Loop over tracks for each tracklet
   
-      trackletParticle->auxdecor<int>("MatchedTrackSharedHits") = nSharedHits;
+      MatchedTrackSharedHitsDec(*trackletParticle) = nSharedHits;
   
 
   
