@@ -151,10 +151,12 @@ inline StatusCode ISF::CollectionMerger::mergeCollections( const SG::ReadHandleK
   }
   // TODO: is there a way to conveniently get the total number of hits in all inputReadHandleKeys
   //       and reserve the corresponding size in the outputHandle
+  ATH_MSG_VERBOSE("Create new output container "<<outputWriteHandleKey.fullKey());
   SG::WriteHandle<T> outputHandle{outputWriteHandleKey, ctx};
   ATH_CHECK( outputHandle.record(std::make_unique<T>()) );
 
   for ( const auto& collKey: inputReadHandleKeys ) {
+    ATH_MSG_VERBOSE("Read-in collection "<<collKey.fullKey());
     SG::ReadHandle<T> inputHandle{collKey, ctx};
 
     for ( const auto& hit: *inputHandle ) {

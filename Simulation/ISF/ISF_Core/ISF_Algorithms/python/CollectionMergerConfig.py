@@ -8,32 +8,7 @@ from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
 @AccumulatorCache
 def ISFCollectionMergerCfg(flags,name="ISF_CollectionMerger", **kwargs):
-    kwargs.setdefault( "InputBCMHits",              [ ] )
-    kwargs.setdefault( "InputBLMHits",              [ ] )
-    kwargs.setdefault( "InputPixelHits",            [ ] )
-    kwargs.setdefault( "InputSCTHits",              [ ] )
-    kwargs.setdefault( "InputTRTUncompressedHits",  [ ] )
-
-    kwargs.setdefault( "InputITkPixelHits",         [ ] )
-    kwargs.setdefault( "InputITkStripHits",         [ ] )
-    kwargs.setdefault( "InputPLRHits",              [ ] )
-    kwargs.setdefault( "InputHGTDHits",             [ ] )
-
-    kwargs.setdefault( "InputLArEMBHits",           [ ] )
-    kwargs.setdefault( "InputLArEMECHits",          [ ] )
-    kwargs.setdefault( "InputLArFCALHits",          [ ] )
-    kwargs.setdefault( "InputLArHECHits",           [ ] )
-
-    kwargs.setdefault( "InputTileHits",             [ ] )
-    kwargs.setdefault( "InputMBTSHits",             [ ] )
-
-    kwargs.setdefault( "InputCSCHits",              [ ] )
-    kwargs.setdefault( "InputMDTHits",              [ ] )
-    kwargs.setdefault( "InputRPCHits",              [ ] )
-    kwargs.setdefault( "InputTGCHits",              [ ] )
-    kwargs.setdefault( "InputsTGCHits",             [ ] )
-    kwargs.setdefault( "InputMMHits",               [ ] )
-
+   
     hardscatterSG=""
     from AthenaConfiguration.Enums import Project
     if flags.Sim.DoFullChain:
@@ -43,7 +18,7 @@ def ISFCollectionMergerCfg(flags,name="ISF_CollectionMerger", **kwargs):
         else:
             msg = logging.getLogger(name)
             msg.warning("Fast Chain running only supported in the Athena project.")
-    if flags.Detector.EnableBCM and not flags.Sim.ISF.Simulator.usesFatras():
+    if flags.Detector.EnableBCM:
         kwargs.setdefault( "OutputBCMHits",             hardscatterSG+"BCMHits"             )
         kwargs.setdefault( "OutputBLMHits",             hardscatterSG+"BLMHits"             )
     if flags.Detector.EnablePixel:

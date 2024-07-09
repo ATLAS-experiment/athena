@@ -14,58 +14,59 @@ ISF::CollectionMerger::CollectionMerger( const std::string& name, ISvcLocator* p
 /** Athena Algorithm initialize */
 StatusCode ISF::CollectionMerger::initialize()
 {
-  ATH_CHECK( m_inputBCMHits.initialize(SG::AllowEmpty) );
-  ATH_CHECK( m_inputBLMHits.initialize(SG::AllowEmpty) );
-  ATH_CHECK( m_inputPixelHits.initialize(SG::AllowEmpty) );
-  ATH_CHECK( m_inputSCTHits.initialize(SG::AllowEmpty) );
-  ATH_CHECK( m_inputTRTUncompressedHits.initialize(SG::AllowEmpty) );
+  ATH_MSG_VERBOSE("In initialize");
+  ATH_CHECK( m_inputBCMHits.initialize() );
+  ATH_CHECK( m_inputBLMHits.initialize() );
+  ATH_CHECK( m_inputPixelHits.initialize() );
+  ATH_CHECK( m_inputSCTHits.initialize() );
+  ATH_CHECK( m_inputTRTUncompressedHits.initialize() );
 
-  ATH_CHECK( m_inputITkPixelHits.initialize(SG::AllowEmpty) );
-  ATH_CHECK( m_inputITkStripHits.initialize(SG::AllowEmpty) );
-  ATH_CHECK( m_inputPLRHits.initialize(SG::AllowEmpty) );
-  ATH_CHECK( m_inputHGTDHits.initialize(SG::AllowEmpty) );
+  ATH_CHECK( m_inputITkPixelHits.initialize() );
+  ATH_CHECK( m_inputITkStripHits.initialize() );
+  ATH_CHECK( m_inputPLRHits.initialize() );
+  ATH_CHECK( m_inputHGTDHits.initialize() );
 
-  ATH_CHECK( m_inputLArEMBHits.initialize(SG::AllowEmpty) );
-  ATH_CHECK( m_inputLArEMECHits.initialize(SG::AllowEmpty) );
-  ATH_CHECK( m_inputLArFCALHits.initialize(SG::AllowEmpty) );
-  ATH_CHECK( m_inputLArHECHits.initialize(SG::AllowEmpty) );
+  ATH_CHECK( m_inputLArEMBHits.initialize() );
+  ATH_CHECK( m_inputLArEMECHits.initialize() );
+  ATH_CHECK( m_inputLArFCALHits.initialize() );
+  ATH_CHECK( m_inputLArHECHits.initialize() );
 
-  ATH_CHECK( m_inputTileHits.initialize(SG::AllowEmpty) );
-  ATH_CHECK( m_inputMBTSHits.initialize(SG::AllowEmpty) );
+  ATH_CHECK( m_inputTileHits.initialize() );
+  ATH_CHECK( m_inputMBTSHits.initialize() );
 
-  ATH_CHECK( m_inputCSCHits.initialize(SG::AllowEmpty) );
-  ATH_CHECK( m_inputMDTHits.initialize(SG::AllowEmpty) );
-  ATH_CHECK( m_inputRPCHits.initialize(SG::AllowEmpty) );
-  ATH_CHECK( m_inputTGCHits.initialize(SG::AllowEmpty) );
-  ATH_CHECK( m_inputsTGCHits.initialize(SG::AllowEmpty) );
-  ATH_CHECK( m_inputMMHits.initialize(SG::AllowEmpty) );
+  ATH_CHECK( m_inputCSCHits.initialize() );
+  ATH_CHECK( m_inputMDTHits.initialize() );
+  ATH_CHECK( m_inputRPCHits.initialize() );
+  ATH_CHECK( m_inputTGCHits.initialize() );
+  ATH_CHECK( m_inputsTGCHits.initialize() );
+  ATH_CHECK( m_inputMMHits.initialize() );
 
 
-  ATH_CHECK( m_outputBCMHits.initialize(SG::AllowEmpty) );
-  ATH_CHECK( m_outputBLMHits.initialize(SG::AllowEmpty) );
-  ATH_CHECK( m_outputPixelHits.initialize(SG::AllowEmpty) );
-  ATH_CHECK( m_outputSCTHits.initialize(SG::AllowEmpty) );
-  ATH_CHECK( m_outputTRTUncompressedHits.initialize(SG::AllowEmpty) );
+  ATH_CHECK( m_outputBCMHits.initialize(!m_inputBCMHits.empty()) );
+  ATH_CHECK( m_outputBLMHits.initialize(!m_inputBLMHits.empty()) );
+  ATH_CHECK( m_outputPixelHits.initialize(!m_inputPixelHits.empty()) );
+  ATH_CHECK( m_outputSCTHits.initialize(!m_inputSCTHits.empty()) );
+  ATH_CHECK( m_outputTRTUncompressedHits.initialize(!m_inputTRTUncompressedHits.empty()) );
 
-  ATH_CHECK( m_outputITkPixelHits.initialize(SG::AllowEmpty) );
-  ATH_CHECK( m_outputITkStripHits.initialize(SG::AllowEmpty) );
-  ATH_CHECK( m_outputPLRHits.initialize(SG::AllowEmpty) );
-  ATH_CHECK( m_outputHGTDHits.initialize(SG::AllowEmpty) );
+  ATH_CHECK( m_outputITkPixelHits.initialize(!m_inputITkPixelHits.empty()) );
+  ATH_CHECK( m_outputITkStripHits.initialize(!m_inputITkStripHits.empty()) );
+  ATH_CHECK( m_outputPLRHits.initialize(!m_inputPLRHits.empty()) );
+  ATH_CHECK( m_outputHGTDHits.initialize(!m_inputHGTDHits.empty()) );
 
-  ATH_CHECK( m_outputLArEMBHits.initialize(SG::AllowEmpty) );
-  ATH_CHECK( m_outputLArEMECHits.initialize(SG::AllowEmpty) );
-  ATH_CHECK( m_outputLArFCALHits.initialize(SG::AllowEmpty) );
-  ATH_CHECK( m_outputLArHECHits.initialize(SG::AllowEmpty) );
+  ATH_CHECK( m_outputLArEMBHits.initialize(!m_inputLArEMBHits.empty()) );
+  ATH_CHECK( m_outputLArEMECHits.initialize(!m_inputLArEMECHits.empty()) );
+  ATH_CHECK( m_outputLArFCALHits.initialize(!m_inputLArFCALHits.empty()) );
+  ATH_CHECK( m_outputLArHECHits.initialize(!m_inputLArHECHits.empty()) );
 
-  ATH_CHECK( m_outputTileHits.initialize(SG::AllowEmpty) );
-  ATH_CHECK( m_outputMBTSHits.initialize(SG::AllowEmpty) );
+  ATH_CHECK( m_outputTileHits.initialize(!m_inputTileHits.empty()) );
+  ATH_CHECK( m_outputMBTSHits.initialize(!m_inputMBTSHits.empty()) );
 
-  ATH_CHECK( m_outputCSCHits.initialize(SG::AllowEmpty) );
-  ATH_CHECK( m_outputMDTHits.initialize(SG::AllowEmpty) );
-  ATH_CHECK( m_outputRPCHits.initialize(SG::AllowEmpty) );
-  ATH_CHECK( m_outputTGCHits.initialize(SG::AllowEmpty) );
-  ATH_CHECK( m_outputsTGCHits.initialize(SG::AllowEmpty) );
-  ATH_CHECK( m_outputMMHits.initialize(SG::AllowEmpty) );
+  ATH_CHECK( m_outputCSCHits.initialize(!m_inputCSCHits.empty()) );
+  ATH_CHECK( m_outputMDTHits.initialize(!m_inputMDTHits.empty()) );
+  ATH_CHECK( m_outputRPCHits.initialize(!m_inputRPCHits.empty()) );
+  ATH_CHECK( m_outputTGCHits.initialize(!m_inputTGCHits.empty()) );
+  ATH_CHECK( m_outputsTGCHits.initialize(!m_inputsTGCHits.empty()) );
+  ATH_CHECK( m_outputMMHits.initialize(!m_inputMMHits.empty()) );
 
   return StatusCode::SUCCESS;
 }
@@ -74,6 +75,7 @@ StatusCode ISF::CollectionMerger::initialize()
 /** Athena Algorithm execute */
 StatusCode ISF::CollectionMerger::execute(const EventContext& ctx) const
 {
+  ATH_MSG_VERBOSE("in execute()");
   ATH_CHECK(mergeCollections( m_inputBCMHits,             m_outputBCMHits,             ctx ));
   ATH_CHECK(mergeCollections( m_inputBLMHits,             m_outputBLMHits,             ctx ));
   ATH_CHECK(mergeCollections( m_inputPixelHits,           m_outputPixelHits,           ctx ));
