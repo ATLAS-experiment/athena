@@ -70,7 +70,7 @@ namespace MuonR4 {
             /** @brief Adds the timed simHit to the output SDO container. The hit may be rejected if it's originating from
              *         pile-up and the pile-up truth skimming strategy is applied
              */
-            void addSDO(const TimedHit& hit, xAOD::MuonSimHitContainer* sdoContainer) const;
+            xAOD::MuonSimHit* addSDO(const TimedHit& hit, xAOD::MuonSimHitContainer* sdoContainer) const;
 
             /** @brief Returns the reference to the ActsGeometryContext needed to fetch global positions from the Readout geometry*/
             const ActsGeometryContext& getGeoCtx(const EventContext& ctx) const;
