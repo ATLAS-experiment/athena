@@ -7,7 +7,7 @@
  **     @author  mark sutton
  **     @date    Wed 28 Oct 2009 02:23:23 CET 
  **
- **     Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -229,12 +229,6 @@ public:
 
     return dr;
   }
-
-protected: 
-
-  double m_deta2;
-  double m_dphi2;
-  double m_dzed2;
 
 };
 
