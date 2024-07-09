@@ -122,7 +122,7 @@ namespace JetTagDQA {
     std::vector<HistData> hists = plots.retrieveBookedHistograms();
 
     for (auto& hist : hists){
-      ATH_MSG_INFO ("Initializing " << hist.first << " " << hist.first->GetName() << " " << hist.second << "...");
+      ATH_MSG_DEBUG ("Initializing " << hist.first << " " << hist.first->GetName() << " " << hist.second << "...");
       ATH_CHECK(regHist(hist.first,hist.second,all));
     }
     return StatusCode::SUCCESS;
