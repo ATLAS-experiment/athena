@@ -101,7 +101,6 @@ run "IDPVM" \
     --doTightPrimary \
     --doHitLevelPlots \
     --HSFlag All \
-    --doTechnicalEfficiency \
     --doExpertPlots
 
 reco_rc=$?
