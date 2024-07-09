@@ -149,9 +149,24 @@ namespace ActsTrk {
         //obtain a write handle
         auto cache_wh = cacheHandle->getWriteHandle(idHash);
         auto overlap_cache_wh = overlapCacheHandle->getWriteHandle(idHash);
+        //check if objects are available in the cache already (function has a sideeffect of including them in this container if they are)
+        bool fill_sp = true;
+        bool fill_osp = true;
         //check if already available
         if(cache_wh.OnlineAndPresentInAnotherView()){
           nCachedIdHashes += 1;
+          fill_sp = false;
+        }
+
+        //avoid calling a cache function if not going to process osp
+        if(m_processOverlapForStrip){
+          fill_osp = !overlap_cache_wh.OnlineAndPresentInAnotherView();
+        }else{
+          fill_osp = false;
+        }
+
+        //check if we have something to do
+        if(!(fill_sp || fill_osp)){
           continue;
         }
 
@@ -165,9 +180,9 @@ namespace ActsTrk {
         std::vector<StripSP> sps;
         std::vector<StripSP> osps;
         //reserve the total number of clusters in the starting block
-        //at most will get one spacepoint for each
-        sps.reserve(nsp);
-        osps.reserve(nsp);
+        //at most will get one spacepoint for two clusters
+        sps.reserve(nsp*0.5);
+        osps.reserve(nsp*0.5);
 
         ATH_CHECK( m_spacePointMakerTool->produceSpacePoints(ctx,
                   *inputClusters,
@@ -180,14 +195,18 @@ namespace ActsTrk {
                   std::vector<IdentifierHash>{idHash}, 
                   clusterAccessor) );
 
-        unsigned int sp_start_idx = spacePoints->size();
+        
 
-        fillSpacepoints(spacePoints, sps, inputClusters, sp_start_idx);
+        //cannot insert twice so need to check if we already have something
+        if(fill_sp){
+          unsigned int sp_start_idx = spacePoints->size();
+          fillSpacepoints(spacePoints, sps, inputClusters, sp_start_idx);
 
-        //add to cache
-        ATH_CHECK(Cache::Helper<xAOD::SpacePoint>::insert(cache_wh, spacePoints, sp_start_idx, spacePoints->size()));
+          //add to cache
+          ATH_CHECK(Cache::Helper<xAOD::SpacePoint>::insert(cache_wh, spacePoints, sp_start_idx, spacePoints->size()));
+        }
 
-        if(overlapSpacePoints && m_processOverlapForStrip){
+        if(overlapSpacePoints && m_processOverlapForStrip && fill_osp){
           unsigned int osp_start_idx = overlapSpacePoints->size();
           fillSpacepoints(overlapSpacePoints, osps, inputClusters, osp_start_idx);
 
