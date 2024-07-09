@@ -8,12 +8,12 @@ ActsStripClusterizationAlg                                        INFO Clusteriz
 | RDOs     |    1345365 |
 | Clusters |    1081478 |
 |----------|------------|
-ActsPixelClusterPreparationAlg                                    INFO Clusterization statistics
+ActsPixelClusterPreparationAlg                                    INFO Data Prep statistics
 |---------|------------|
 | Inputs  |    1165578 |
 | Outputs |    1165578 |
 |---------|------------|
-ActsStripClusterPreparationAlg                                    INFO Clusterization statistics
+ActsStripClusterPreparationAlg                                    INFO Data Prep statistics
 |---------|------------|
 | Inputs  |    1081478 |
 | Outputs |    1081478 |
@@ -29,17 +29,17 @@ ActsStripSpacePointFormationAlg                                   INFO Space Poi
 | Space Points         |     325456 |
 | Overlap Space Points |      94491 |
 |----------------------|------------|
-ActsPixelSpacePointPreparationAlg                                 INFO Clusterization statistics
+ActsPixelSpacePointPreparationAlg                                 INFO Data Prep statistics
 |---------|------------|
 | Inputs  |    1165578 |
 | Outputs |    1165578 |
 |---------|------------|
-ActsStripSpacePointPreparationAlg                                 INFO Clusterization statistics
+ActsStripSpacePointPreparationAlg                                 INFO Data Prep statistics
 |---------|------------|
 | Inputs  |     325456 |
 | Outputs |     325456 |
 |---------|------------|
-ActsStripOverlapSpacePointPreparationAlg                          INFO Clusterization statistics
+ActsStripOverlapSpacePointPreparationAlg                          INFO Data Prep statistics
 |---------|------------|
 | Inputs  |      94491 |
 | Outputs |      94491 |
@@ -105,12 +105,12 @@ ActsLargeRadiusStripClusterizationAlg                             INFO Clusteriz
 | RDOs     |          0 |
 | Clusters |          0 |
 |----------|------------|
-ActsLargeRadiusPixelClusterPreparationAlg                         INFO Clusterization statistics
+ActsLargeRadiusPixelClusterPreparationAlg                         INFO Data Prep statistics
 |---------|------------|
 | Inputs  |    1165578 |
 | Outputs |    1065144 |
 |---------|------------|
-ActsLargeRadiusStripClusterPreparationAlg                         INFO Clusterization statistics
+ActsLargeRadiusStripClusterPreparationAlg                         INFO Data Prep statistics
 |---------|------------|
 | Inputs  |    1081478 |
 | Outputs |    1041797 |
@@ -121,57 +121,57 @@ ActsLargeRadiusStripSpacePointFormationAlg                        INFO Space Poi
 | Space Points         |          0 |
 | Overlap Space Points |          0 |
 |----------------------|------------|
-ActsLargeRadiusStripSpacePointPreparationAlg                      INFO Clusterization statistics
+ActsLargeRadiusStripSpacePointPreparationAlg                      INFO Data Prep statistics
 |---------|------------|
 | Inputs  |     324482 |
 | Outputs |     303744 |
 |---------|------------|
-ActsLargeRadiusStripOv...pSpacePointPreparationAlg                INFO Clusterization statistics
+ActsLargeRadiusStripOv...pSpacePointPreparationAlg                INFO Data Prep statistics
 |---------|------------|
-| Inputs  |          0 |
-| Outputs |          0 |
+| Inputs  |      94077 |
+| Outputs |      88348 |
 |---------|------------|
 ActsLargeRadiusStripSeedingAlg                                    INFO Seed statistics
 |---------------------|------------|
-| Spacepoints         |     303744 |
-| Seeds               |       5558 |
+| Spacepoints         |     392092 |
+| Seeds               |       8979 |
 | No track parameters |          0 |
 |---------------------|------------|
 ActsLargeRadiusTrackFindingAlg                                    INFO statistics
 |-----------------------------------|------------|------------|
 |                           All eta | SSS        | ALL        |
 |-----------------------------------|------------|------------|
-| Input seeds                       |       5558 |       5558 |
+| Input seeds                       |       8979 |       8979 |
 | No track parameters               |          0 |          0 |
-| Used   seeds                      |       5531 |       5531 |
-| Cannot find track                 |       5446 |       5446 |
-| Duplicate seeds                   |         27 |         27 |
-| CKF tracks                        |         85 |         85 |
+| Used   seeds                      |       8940 |       8940 |
+| Cannot find track                 |       8812 |       8812 |
+| Duplicate seeds                   |         39 |         39 |
+| CKF tracks                        |        128 |        128 |
 | Rejected refined parameters       |          0 |          0 |
-| selected tracks                   |         17 |         17 |
-| Stopped tracks reaching max holes |       4736 |       4736 |
+| selected tracks                   |         25 |         25 |
+| Stopped tracks reaching max holes |       7621 |       7621 |
 | Seeds with more than one branch   |          0 |          0 |
-| Tracks failing second CKF         |         84 |         84 |
-| Stopped tracks below pT cut       |        794 |        794 |
+| Tracks failing second CKF         |        127 |        127 |
+| Stopped tracks below pT cut       |       1318 |       1318 |
 | Stopped tracks above max eta      |          0 |          0 |
 |-----------------------------------|------------|------------|
 ActsLargeRadiusTrackFindingAlg                                    INFO Ratios
 |------------------------------------------|------------|------------|
 |                                          | SSS        | ALL        |
 |------------------------------------------|------------|------------|
-| failed / seeds                           |   0.979849 |   0.979849 |
-| duplication / seeds                      | 0.00485786 | 0.00485786 |
+| failed / seeds                           |   0.981401 |   0.981401 |
+| duplication / seeds                      | 0.00434347 | 0.00434347 |
 | Rejected refined params / seeds          |          0 |          0 |
-| selected / CKF tracks                    |        0.2 |        0.2 |
-| selected tracks / used seeds             | 0.00307359 | 0.00307359 |
+| selected / CKF tracks                    |   0.195312 |   0.195312 |
+| selected tracks / used seeds             | 0.00279642 | 0.00279642 |
 | branched tracks / used seeds             |          0 |          0 |
-| no 2nd CKF / CKF tracks                  |   0.988235 |   0.988235 |
+| no 2nd CKF / CKF tracks                  |   0.992188 |   0.992188 |
 |------------------------------------------|------------|------------|
-| selected / CKF tracks           0.0- 0.5 |       0.15 |       0.15 |
-|                                 0.5- 1.0 |        0.2 |        0.2 |
-|                                 1.0- 1.5 |          0 |          0 |
-|                                 1.5- 2.0 |   0.526316 |   0.526316 |
-|                                 2.0- 2.5 |  0.0645161 |  0.0645161 |
+| selected / CKF tracks           0.0- 0.5 |    0.15625 |    0.15625 |
+|                                 0.5- 1.0 |   0.111111 |   0.111111 |
+|                                 1.0- 1.5 |        0.1 |        0.1 |
+|                                 1.5- 2.0 |   0.583333 |   0.583333 |
+|                                 2.0- 2.5 |  0.0588235 |  0.0588235 |
 |                                 2.5- 3.0 |          0 |          0 |
 |                                 3.0- 3.5 |          0 |          0 |
 |                                 3.5-+inf |          0 |          0 |
@@ -186,12 +186,12 @@ ActsConversionStripClusterizationAlg                              INFO Clusteriz
 | RDOs     |          0 |
 | Clusters |          0 |
 |----------|------------|
-ActsConversionPixelClusterPreparationAlg                          INFO Clusterization statistics
+ActsConversionPixelClusterPreparationAlg                          INFO Data Prep statistics
 |---------|------------|
 | Inputs  |      30471 |
 | Outputs |      27236 |
 |---------|------------|
-ActsConversionStripClusterPreparationAlg                          INFO Clusterization statistics
+ActsConversionStripClusterPreparationAlg                          INFO Data Prep statistics
 |---------|------------|
 | Inputs  |      16420 |
 | Outputs |      15530 |
@@ -202,7 +202,7 @@ ActsConversionStripSpacePointFormationAlg                         INFO Space Poi
 | Space Points         |          0 |
 | Overlap Space Points |          0 |
 |----------------------|------------|
-ActsConversionStripSpacePointPreparationAlg                       INFO Clusterization statistics
+ActsConversionStripSpacePointPreparationAlg                       INFO Data Prep statistics
 |---------|------------|
 | Inputs  |       4982 |
 | Outputs |       4506 |

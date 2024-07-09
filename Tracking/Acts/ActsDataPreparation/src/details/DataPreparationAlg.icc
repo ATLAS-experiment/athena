@@ -39,7 +39,7 @@ namespace ActsTrk {
   template <typename external_collection_t, bool useCache>
   StatusCode DataPreparationAlg<external_collection_t, useCache>::finalize()
   {
-    ATH_MSG_INFO("Clusterization statistics" << std::endl << makeTable(m_stat,
+    ATH_MSG_INFO("Data Prep statistics" << std::endl << makeTable(m_stat,
 								       std::array<std::string, kNStat>{
 									 "Inputs",
 									 "Outputs"

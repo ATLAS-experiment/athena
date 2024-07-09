@@ -70,22 +70,22 @@ ActsTrackFindingAlg                                               INFO Ratios
 |                                 3.0- 3.5 |   0.912977 |          0 |   0.912977 |
 |                                 3.5-+inf |   0.979918 |          0 |   0.979918 |
 |------------------------------------------|------------|------------|------------|
-ActsLargeRadiusPixelClusterPreparationAlg                         INFO Clusterization statistics
+ActsLargeRadiusPixelClusterPreparationAlg                         INFO Data Prep statistics
 |---------|------------|
 | Inputs  |    1165578 |
 | Outputs |    1065144 |
 |---------|------------|
-ActsLargeRadiusStripClusterPreparationAlg                         INFO Clusterization statistics
+ActsLargeRadiusStripClusterPreparationAlg                         INFO Data Prep statistics
 |---------|------------|
 | Inputs  |    1081478 |
 | Outputs |    1041797 |
 |---------|------------|
-ActsLargeRadiusStripSpacePointPreparationAlg                      INFO Clusterization statistics
+ActsLargeRadiusStripSpacePointPreparationAlg                      INFO Data Prep statistics
 |---------|------------|
 | Inputs  |     325456 |
 | Outputs |     303744 |
 |---------|------------|
-ActsLargeRadiusStripOv...pSpacePointPreparationAlg                INFO Clusterization statistics
+ActsLargeRadiusStripOv...pSpacePointPreparationAlg                INFO Data Prep statistics
 |---------|------------|
 | Inputs  |      94491 |
 | Outputs |      88348 |
@@ -135,17 +135,17 @@ ActsLargeRadiusTrackFindingAlg                                    INFO Ratios
 |                                 3.0- 3.5 |          0 |          0 |
 |                                 3.5-+inf |          0 |          0 |
 |------------------------------------------|------------|------------|
-ActsConversionPixelClusterPreparationAlg                          INFO Clusterization statistics
+ActsConversionPixelClusterPreparationAlg                          INFO Data Prep statistics
 |---------|------------|
 | Inputs  |    1165578 |
 | Outputs |      27236 |
 |---------|------------|
-ActsConversionStripClusterPreparationAlg                          INFO Clusterization statistics
+ActsConversionStripClusterPreparationAlg                          INFO Data Prep statistics
 |---------|------------|
 | Inputs  |    1081478 |
 | Outputs |      15530 |
 |---------|------------|
-ActsConversionStripSpacePointPreparationAlg                       INFO Clusterization statistics
+ActsConversionStripSpacePointPreparationAlg                       INFO Data Prep statistics
 |---------|------------|
 | Inputs  |     325456 |
 | Outputs |       4506 |
