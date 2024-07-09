@@ -177,7 +177,7 @@ def InDetSensitiveDetectorListCfg(flags):
     if flags.Detector.EnableTRT:
         from TRT_G4_SD.TRT_G4_SDToolConfig import TRTSensitiveDetectorCfg
         tools += [ result.popToolsAndMerge(TRTSensitiveDetectorCfg(flags)) ]
-    if flags.Detector.EnableBCM:
+    if flags.Detector.EnableBCM and not flags.Sim.ISF.Simulator.usesFatras():
         from BCM_G4_SD.BCM_G4_SDToolConfig import BCMSensorSDCfg
         tools += [ result.popToolsAndMerge(BCMSensorSDCfg(flags)) ]
         from BLM_G4_SD.BLM_G4_SDToolConfig import BLMSensorSDCfg
