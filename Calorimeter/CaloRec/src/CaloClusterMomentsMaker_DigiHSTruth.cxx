@@ -38,6 +38,7 @@
 
 using CLHEP::deg;
 using CLHEP::cm;
+using enum xAOD::CaloCluster::MomentType;
 
 namespace {
 
@@ -52,42 +53,42 @@ struct MomentName
 
 // Must be sorted by name.
 const MomentName moment_names[] = {
-  { "ENERGY_DigiHSTruth",            xAOD::CaloCluster::ENERGY_DigiHSTruth },
-  { "ETA_DigiHSTruth",               xAOD::CaloCluster::ETA_DigiHSTruth },
-  { "PHI_DigiHSTruth",               xAOD::CaloCluster::PHI_DigiHSTruth },
-  { "AVG_LAR_Q_DigiHSTruth",         xAOD::CaloCluster::AVG_LAR_Q_DigiHSTruth },
-  { "AVG_TILE_Q_DigiHSTruth",        xAOD::CaloCluster::AVG_TILE_Q_DigiHSTruth },
-  { "BADLARQ_FRAC_DigiHSTruth",      xAOD::CaloCluster::BADLARQ_FRAC_DigiHSTruth },
-  { "BAD_CELLS_CORR_E_DigiHSTruth",  xAOD::CaloCluster::BAD_CELLS_CORR_E_DigiHSTruth },
-  { "CELL_SIGNIFICANCE_DigiHSTruth", xAOD::CaloCluster::CELL_SIGNIFICANCE_DigiHSTruth },
-  { "CELL_SIG_SAMPLING_DigiHSTruth", xAOD::CaloCluster::CELL_SIG_SAMPLING_DigiHSTruth },
-  { "CENTER_LAMBDA_DigiHSTruth",     xAOD::CaloCluster::CENTER_LAMBDA_DigiHSTruth },
-  { "CENTER_MAG_DigiHSTruth",        xAOD::CaloCluster::CENTER_MAG_DigiHSTruth },
-  { "CENTER_X_DigiHSTruth",          xAOD::CaloCluster::CENTER_X_DigiHSTruth },
-  { "CENTER_Y_DigiHSTruth",          xAOD::CaloCluster::CENTER_Y_DigiHSTruth },
-  { "CENTER_Z_DigiHSTruth",          xAOD::CaloCluster::CENTER_Z_DigiHSTruth },
-  { "DELTA_ALPHA_DigiHSTruth",       xAOD::CaloCluster::DELTA_ALPHA_DigiHSTruth },
-  { "DELTA_PHI_DigiHSTruth",         xAOD::CaloCluster::DELTA_PHI_DigiHSTruth },
-  { "DELTA_THETA_DigiHSTruth",       xAOD::CaloCluster::DELTA_THETA_DigiHSTruth },
-  { "ENG_BAD_CELLS_DigiHSTruth",     xAOD::CaloCluster::ENG_BAD_CELLS_DigiHSTruth },
-  { "ENG_BAD_HV_CELLS_DigiHSTruth",  xAOD::CaloCluster::ENG_BAD_HV_CELLS_DigiHSTruth },
-  { "ENG_FRAC_CORE_DigiHSTruth",     xAOD::CaloCluster::ENG_FRAC_CORE_DigiHSTruth },
-  { "ENG_FRAC_EM_DigiHSTruth",       xAOD::CaloCluster::ENG_FRAC_EM_DigiHSTruth },
-  { "ENG_FRAC_MAX_DigiHSTruth",      xAOD::CaloCluster::ENG_FRAC_MAX_DigiHSTruth },
-  { "ENG_POS_DigiHSTruth",           xAOD::CaloCluster::ENG_POS_DigiHSTruth },
-  { "FIRST_ENG_DENS_DigiHSTruth",    xAOD::CaloCluster::FIRST_ENG_DENS_DigiHSTruth },
-  { "FIRST_ETA_DigiHSTruth",         xAOD::CaloCluster::FIRST_ETA_DigiHSTruth },
-  { "FIRST_PHI_DigiHSTruth",         xAOD::CaloCluster::FIRST_PHI_DigiHSTruth },
-  { "ISOLATION_DigiHSTruth",         xAOD::CaloCluster::ISOLATION_DigiHSTruth },
-  { "LATERAL_DigiHSTruth",           xAOD::CaloCluster::LATERAL_DigiHSTruth },
-  { "LONGITUDINAL_DigiHSTruth",      xAOD::CaloCluster::LONGITUDINAL_DigiHSTruth },
-  { "N_BAD_CELLS_DigiHSTruth",       xAOD::CaloCluster::N_BAD_CELLS_DigiHSTruth },
-  { "N_BAD_HV_CELLS_DigiHSTruth",    xAOD::CaloCluster::N_BAD_HV_CELLS_DigiHSTruth },
-  { "N_BAD_CELLS_CORR_DigiHSTruth",  xAOD::CaloCluster::N_BAD_CELLS_CORR_DigiHSTruth },
-  { "SECOND_ENG_DENS_DigiHSTruth",   xAOD::CaloCluster::SECOND_ENG_DENS_DigiHSTruth },
-  { "SECOND_LAMBDA_DigiHSTruth",     xAOD::CaloCluster::SECOND_LAMBDA_DigiHSTruth },
-  { "SECOND_R_DigiHSTruth",          xAOD::CaloCluster::SECOND_R_DigiHSTruth },
-  { "SIGNIFICANCE_DigiHSTruth",      xAOD::CaloCluster::SIGNIFICANCE_DigiHSTruth },
+  { "ENERGY_DigiHSTruth",            ENERGY_DigiHSTruth },
+  { "ETA_DigiHSTruth",               ETA_DigiHSTruth },
+  { "PHI_DigiHSTruth",               PHI_DigiHSTruth },
+  { "AVG_LAR_Q_DigiHSTruth",         AVG_LAR_Q_DigiHSTruth },
+  { "AVG_TILE_Q_DigiHSTruth",        AVG_TILE_Q_DigiHSTruth },
+  { "BADLARQ_FRAC_DigiHSTruth",      BADLARQ_FRAC_DigiHSTruth },
+  { "BAD_CELLS_CORR_E_DigiHSTruth",  BAD_CELLS_CORR_E_DigiHSTruth },
+  { "CELL_SIGNIFICANCE_DigiHSTruth", CELL_SIGNIFICANCE_DigiHSTruth },
+  { "CELL_SIG_SAMPLING_DigiHSTruth", CELL_SIG_SAMPLING_DigiHSTruth },
+  { "CENTER_LAMBDA_DigiHSTruth",     CENTER_LAMBDA_DigiHSTruth },
+  { "CENTER_MAG_DigiHSTruth",        CENTER_MAG_DigiHSTruth },
+  { "CENTER_X_DigiHSTruth",          CENTER_X_DigiHSTruth },
+  { "CENTER_Y_DigiHSTruth",          CENTER_Y_DigiHSTruth },
+  { "CENTER_Z_DigiHSTruth",          CENTER_Z_DigiHSTruth },
+  { "DELTA_ALPHA_DigiHSTruth",       DELTA_ALPHA_DigiHSTruth },
+  { "DELTA_PHI_DigiHSTruth",         DELTA_PHI_DigiHSTruth },
+  { "DELTA_THETA_DigiHSTruth",       DELTA_THETA_DigiHSTruth },
+  { "ENG_BAD_CELLS_DigiHSTruth",     ENG_BAD_CELLS_DigiHSTruth },
+  { "ENG_BAD_HV_CELLS_DigiHSTruth",  ENG_BAD_HV_CELLS_DigiHSTruth },
+  { "ENG_FRAC_CORE_DigiHSTruth",     ENG_FRAC_CORE_DigiHSTruth },
+  { "ENG_FRAC_EM_DigiHSTruth",       ENG_FRAC_EM_DigiHSTruth },
+  { "ENG_FRAC_MAX_DigiHSTruth",      ENG_FRAC_MAX_DigiHSTruth },
+  { "ENG_POS_DigiHSTruth",           ENG_POS_DigiHSTruth },
+  { "FIRST_ENG_DENS_DigiHSTruth",    FIRST_ENG_DENS_DigiHSTruth },
+  { "FIRST_ETA_DigiHSTruth",         FIRST_ETA_DigiHSTruth },
+  { "FIRST_PHI_DigiHSTruth",         FIRST_PHI_DigiHSTruth },
+  { "ISOLATION_DigiHSTruth",         ISOLATION_DigiHSTruth },
+  { "LATERAL_DigiHSTruth",           LATERAL_DigiHSTruth },
+  { "LONGITUDINAL_DigiHSTruth",      LONGITUDINAL_DigiHSTruth },
+  { "N_BAD_CELLS_DigiHSTruth",       N_BAD_CELLS_DigiHSTruth },
+  { "N_BAD_HV_CELLS_DigiHSTruth",    N_BAD_HV_CELLS_DigiHSTruth },
+  { "N_BAD_CELLS_CORR_DigiHSTruth",  N_BAD_CELLS_CORR_DigiHSTruth },
+  { "SECOND_ENG_DENS_DigiHSTruth",   SECOND_ENG_DENS_DigiHSTruth },
+  { "SECOND_LAMBDA_DigiHSTruth",     SECOND_LAMBDA_DigiHSTruth },
+  { "SECOND_R_DigiHSTruth",          SECOND_R_DigiHSTruth },
+  { "SIGNIFICANCE_DigiHSTruth",      SIGNIFICANCE_DigiHSTruth },
 };
 
 const MomentName* const moment_names_end =
@@ -182,14 +183,14 @@ StatusCode CaloClusterMomentsMaker_DigiHSTruth::initialize()
     if (it != moment_names_end) {
       m_validMoments.push_back (it->mom);
       switch (it->mom) {
-      case xAOD::CaloCluster::SIGNIFICANCE_DigiHSTruth:
-      case xAOD::CaloCluster::CELL_SIGNIFICANCE_DigiHSTruth:
+      case SIGNIFICANCE_DigiHSTruth:
+      case CELL_SIGNIFICANCE_DigiHSTruth:
         m_calculateSignificance = true;
         break;
-      case xAOD::CaloCluster::ISOLATION_DigiHSTruth:
+      case ISOLATION_DigiHSTruth:
         m_calculateIsolation = true;
         break;
-      case xAOD::CaloCluster::ENG_BAD_HV_CELLS_DigiHSTruth:
+      case ENG_BAD_HV_CELLS_DigiHSTruth:
         m_calculateLArHVFraction = true;
       default:
         break;
@@ -663,22 +664,22 @@ CaloClusterMomentsMaker_DigiHSTruth::execute(const EventContext& ctx,
           {
 	    // now calculate the actual moments
 	    switch (m_validMoments[iMoment]) {
-       case xAOD::CaloCluster::FIRST_ETA_DigiHSTruth:
+       case FIRST_ETA_DigiHSTruth:
         myMoments[iMoment] += ci.energy*ci.eta;
         break;
-	    case xAOD::CaloCluster::FIRST_PHI_DigiHSTruth:
+	    case FIRST_PHI_DigiHSTruth:
 	      // first cell decides the sign in order to avoid
 	      // overlap problem at phi = -pi == +pi
 	      // need to be normalized to the range [-pi,+pi] in the end
         myMoments[iMoment] += ci.energy * proxim (ci.phi, phi0);
 	      break;
-	    case xAOD::CaloCluster::SECOND_R_DigiHSTruth:
+	    case SECOND_R_DigiHSTruth:
 	      myMoments[iMoment] += ci.energy*ci.r*ci.r;
 	      break;
-	    case xAOD::CaloCluster::SECOND_LAMBDA_DigiHSTruth:
+	    case SECOND_LAMBDA_DigiHSTruth:
 	      myMoments[iMoment] += ci.energy*ci.lambda*ci.lambda;
 	      break;
-	    case xAOD::CaloCluster::LATERAL_DigiHSTruth:
+	    case LATERAL_DigiHSTruth:
 	      if ( (int)i != iCellMax && (int)i != iCellScndMax ) {
 		myMoments[iMoment] += ci.energy*ci.r*ci.r;
 		myNorms[iMoment] += ci.energy*ci.r*ci.r;
@@ -690,7 +691,7 @@ CaloClusterMomentsMaker_DigiHSTruth::execute(const EventContext& ctx,
 		myNorms[iMoment] += rm*rm*ci.energy;
 	      }
 	      break;
-	    case xAOD::CaloCluster::LONGITUDINAL_DigiHSTruth:
+	    case LONGITUDINAL_DigiHSTruth:
 	      if ( (int)i != iCellMax && (int)i != iCellScndMax ) {
 		myMoments[iMoment] += ci.energy*ci.lambda*ci.lambda;
 		myNorms[iMoment] += ci.energy*ci.lambda*ci.lambda;
@@ -702,19 +703,19 @@ CaloClusterMomentsMaker_DigiHSTruth::execute(const EventContext& ctx,
 		myNorms[iMoment] += lm*lm*ci.energy;
 	      }
 	      break;
-	    case xAOD::CaloCluster::FIRST_ENG_DENS_DigiHSTruth:
+	    case FIRST_ENG_DENS_DigiHSTruth:
 	      if ( ci.volume > 0 ) {
 		myMoments[iMoment] += ci.energy*ci.energy/ci.volume;
 		myNorms[iMoment] += ci.energy;
 	      }
 	      break;
-	    case xAOD::CaloCluster::SECOND_ENG_DENS_DigiHSTruth:
+	    case SECOND_ENG_DENS_DigiHSTruth:
 	      if ( ci.volume > 0 ) {
 		myMoments[iMoment] += ci.energy*std::pow(ci.energy/ci.volume,2);
 		myNorms[iMoment] += ci.energy;
 	      }
 	      break;
-	    case xAOD::CaloCluster::ENG_FRAC_EM_DigiHSTruth:
+	    case ENG_FRAC_EM_DigiHSTruth:
 	      if ( ci.sample == CaloCell_ID::EMB1 
 		   || ci.sample == CaloCell_ID::EMB2 
 		   || ci.sample == CaloCell_ID::EMB3 
@@ -724,7 +725,7 @@ CaloClusterMomentsMaker_DigiHSTruth::execute(const EventContext& ctx,
 		   || ci.sample == CaloCell_ID::FCAL0 )
 		myMoments[iMoment] += ci.energy;
 	      break;
-	    case xAOD::CaloCluster::ENG_FRAC_MAX_DigiHSTruth:
+	    case ENG_FRAC_MAX_DigiHSTruth:
 	      if ( (int)i == iCellMax ) 
 		myMoments[iMoment] = ci.energy;
 	      break;
@@ -747,36 +748,36 @@ CaloClusterMomentsMaker_DigiHSTruth::execute(const EventContext& ctx,
         {
 	  // now calculate the actual moments
           switch (m_validMoments[iMoment]) {
-	  case xAOD::CaloCluster::FIRST_ETA_DigiHSTruth:
-	  case xAOD::CaloCluster::FIRST_PHI_DigiHSTruth:
-	  case xAOD::CaloCluster::SECOND_R_DigiHSTruth:
-	  case xAOD::CaloCluster::SECOND_LAMBDA_DigiHSTruth:
-	  case xAOD::CaloCluster::ENG_FRAC_EM_DigiHSTruth:
-	  case xAOD::CaloCluster::ENG_FRAC_MAX_DigiHSTruth:
+	  case FIRST_ETA_DigiHSTruth:
+	  case FIRST_PHI_DigiHSTruth:
+	  case SECOND_R_DigiHSTruth:
+	  case SECOND_LAMBDA_DigiHSTruth:
+	  case ENG_FRAC_EM_DigiHSTruth:
+	  case ENG_FRAC_MAX_DigiHSTruth:
 	    myNorms[iMoment] = commonNorm;
 	    break;
-	  case xAOD::CaloCluster::DELTA_PHI_DigiHSTruth:
+	  case DELTA_PHI_DigiHSTruth:
 	    myMoments[iMoment] = deltaPhi;
 	    break;
-	  case xAOD::CaloCluster::DELTA_THETA_DigiHSTruth:
+	  case DELTA_THETA_DigiHSTruth:
 	    myMoments[iMoment] = deltaTheta;
 	    break;
-	  case xAOD::CaloCluster::DELTA_ALPHA_DigiHSTruth:
+	  case DELTA_ALPHA_DigiHSTruth:
 	    myMoments[iMoment] = angle;
 	    break;
-	  case xAOD::CaloCluster::CENTER_X_DigiHSTruth:
+	  case CENTER_X_DigiHSTruth:
 	    myMoments[iMoment] = showerCenter.x();
 	    break;
-	  case xAOD::CaloCluster::CENTER_Y_DigiHSTruth:
+	  case CENTER_Y_DigiHSTruth:
 	    myMoments[iMoment] = showerCenter.y();
 	    break;
-	  case xAOD::CaloCluster::CENTER_Z_DigiHSTruth:
+	  case CENTER_Z_DigiHSTruth:
 	    myMoments[iMoment] = showerCenter.z();
 	    break;
-	  case xAOD::CaloCluster::CENTER_MAG_DigiHSTruth:
+	  case CENTER_MAG_DigiHSTruth:
 	    myMoments[iMoment] = showerCenter.mag();
 	    break;
-	  case xAOD::CaloCluster::CENTER_LAMBDA_DigiHSTruth:
+	  case CENTER_LAMBDA_DigiHSTruth:
 	    // calculate the longitudinal distance along the shower axis
 	    // of the shower center from the calorimeter start
 	    
@@ -838,12 +839,12 @@ CaloClusterMomentsMaker_DigiHSTruth::execute(const EventContext& ctx,
 	      myMoments[iMoment] = lambda_c;
 	    }
 	    break;
-	  case xAOD::CaloCluster::ENG_FRAC_CORE_DigiHSTruth:
+	  case ENG_FRAC_CORE_DigiHSTruth:
 	    for(i=0;i<(int)CaloCell_ID::Unknown;i++) 
 	      myMoments[iMoment] += maxSampE[i];
 	    myNorms[iMoment] = commonNorm;
 	    break;
-	  case xAOD::CaloCluster::ISOLATION_DigiHSTruth:
+	  case ISOLATION_DigiHSTruth:
 	    {
 	      // loop over empty and filled perimeter cells and
 	      // get a weighted ratio by means of energy fraction per layer
@@ -862,56 +863,56 @@ CaloClusterMomentsMaker_DigiHSTruth::execute(const EventContext& ctx,
 	      }//end loop over samplings
 	    }
 	    break;
-	  case xAOD::CaloCluster::ENG_BAD_CELLS_DigiHSTruth:
+	  case ENG_BAD_CELLS_DigiHSTruth:
 	    myMoments[iMoment] = eBad;
 	    break;
-	  case xAOD::CaloCluster::N_BAD_CELLS_DigiHSTruth:
+	  case N_BAD_CELLS_DigiHSTruth:
 	    myMoments[iMoment] = nbad;
             break;
-          case xAOD::CaloCluster::N_BAD_CELLS_CORR_DigiHSTruth:
+          case N_BAD_CELLS_CORR_DigiHSTruth:
             myMoments[iMoment] = nbad_dac;
             break;
-	  case xAOD::CaloCluster::BAD_CELLS_CORR_E_DigiHSTruth:
+	  case BAD_CELLS_CORR_E_DigiHSTruth:
 	    myMoments[iMoment] = ebad_dac;
             break;
-	  case xAOD::CaloCluster::BADLARQ_FRAC_DigiHSTruth:
+	  case BADLARQ_FRAC_DigiHSTruth:
 	    myMoments[iMoment] = eBadLArQ/(theCluster->e()!=0.?theCluster->e():1.);
             break;
-	  case xAOD::CaloCluster::ENG_POS_DigiHSTruth:
+	  case ENG_POS_DigiHSTruth:
 	    myMoments[iMoment] = ePos;
             break;
-	  case xAOD::CaloCluster::SIGNIFICANCE_DigiHSTruth:
+	  case SIGNIFICANCE_DigiHSTruth:
 	    myMoments[iMoment] = (sumSig2>0?theCluster->e()/sqrt(sumSig2):0.);
             break;
-	  case xAOD::CaloCluster::CELL_SIGNIFICANCE_DigiHSTruth:
+	  case CELL_SIGNIFICANCE_DigiHSTruth:
 	    myMoments[iMoment] = maxAbsSig;
             break;
-	  case xAOD::CaloCluster::CELL_SIG_SAMPLING_DigiHSTruth:
+	  case CELL_SIG_SAMPLING_DigiHSTruth:
 	    myMoments[iMoment] = nSigSampl;
             break;
-	  case xAOD::CaloCluster::AVG_LAR_Q_DigiHSTruth:
+	  case AVG_LAR_Q_DigiHSTruth:
 	    myMoments[iMoment] = eLAr2Q/(eLAr2>0?eLAr2:1);
             break;
-	  case xAOD::CaloCluster::AVG_TILE_Q_DigiHSTruth:
+	  case AVG_TILE_Q_DigiHSTruth:
 	    myMoments[iMoment] = eTile2Q/(eTile2>0?eTile2:1);
             break;
-	  case xAOD::CaloCluster::ENG_BAD_HV_CELLS_DigiHSTruth:
+	  case ENG_BAD_HV_CELLS_DigiHSTruth:
 	    myMoments[iMoment] = eBadLArHV;
 	    break;
-	  case xAOD::CaloCluster::N_BAD_HV_CELLS_DigiHSTruth:
+	  case N_BAD_HV_CELLS_DigiHSTruth:
 	    myMoments[iMoment] = nBadLArHV;
             break;
-	  case xAOD::CaloCluster::ENERGY_DigiHSTruth:
+	  case ENERGY_DigiHSTruth:
 	    myMoments[iMoment] = theClusterEnergy;
             break;
-	  case xAOD::CaloCluster::ETA_DigiHSTruth:
+	  case ETA_DigiHSTruth:
       if(theClusterAbsEnergy > 0)
 	    myMoments[iMoment] = theClusterEta / theClusterAbsEnergy;
       else{
 	    myMoments[iMoment] = 0;
 			}
             break;
-	  case xAOD::CaloCluster::PHI_DigiHSTruth:
+	  case PHI_DigiHSTruth:
       if(theClusterAbsEnergy > 0)
 	    myMoments[iMoment] = CaloPhiRange::fix(theClusterPhi / theClusterAbsEnergy);
       else{
@@ -931,7 +932,7 @@ CaloClusterMomentsMaker_DigiHSTruth::execute(const EventContext& ctx,
         xAOD::CaloCluster::MomentType moment = m_validMoments[iMoment];
 	if ( myNorms[iMoment] != 0 ) 
 	  myMoments[iMoment] /= myNorms[iMoment];
-	if ( moment == xAOD::CaloCluster::FIRST_PHI_DigiHSTruth ) 
+	if ( moment == FIRST_PHI_DigiHSTruth ) 
 	  myMoments[iMoment] = CaloPhiRange::fix(myMoments[iMoment]);
 	
 	theCluster->insertMoment(moment,myMoments[iMoment]);
