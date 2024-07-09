@@ -5,7 +5,7 @@
  **     @author  mark sutton
  **     @date    Mon 26 Oct 2009 01:22:40 GMT 
  **
- **     Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -183,7 +183,7 @@ protected:
     /// so instead, set the bin contents, for these bins to 
     /// something really, really, *really* tiny ... 
 
-    for ( int i=1 ; i<=hd->GetNbinsX() ; i++ ) { 
+    for ( int i=1 ; i<=hd->GetNbinsX() ; i++ ) {  // cppcheck-suppress [ctunullpointer, nullPointer]; false positive
       double y = hd->GetBinContent(i);
       if ( y==0 ) hd->SetBinContent(i, 1e-20);
     }
