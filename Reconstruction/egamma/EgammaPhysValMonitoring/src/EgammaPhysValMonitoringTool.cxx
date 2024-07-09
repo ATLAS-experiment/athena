@@ -92,21 +92,21 @@ StatusCode EgammaPhysValMonitoringTool::bookHistograms()
   m_oElectronValidationPlots.initialize();
   std::vector<HistData> hists = m_oElectronValidationPlots.retrieveBookedHistograms();
   for (auto &hist : hists){
-    ATH_MSG_INFO ("Initializing " << hist.first << " " << hist.first->GetName() << " " << hist.second << "...");
+    ATH_MSG_DEBUG ("Initializing " << hist.first << " " << hist.first->GetName() << " " << hist.second << "...");
     ATH_CHECK(regHist(hist.first,hist.second,all));
   }
 
   m_oPhotonValidationPlots.initialize();
   hists = m_oPhotonValidationPlots.retrieveBookedHistograms();
   for (auto &hist : hists){
-    ATH_MSG_INFO ("Initializing " << hist.first << " " << hist.first->GetName() << " " << hist.second << "...");
+    ATH_MSG_DEBUG ("Initializing " << hist.first << " " << hist.first->GetName() << " " << hist.second << "...");
     ATH_CHECK(regHist(hist.first,hist.second,all));
   }
 
   m_oLRTElectronValidationPlots.initialize();
   hists = m_oLRTElectronValidationPlots.retrieveBookedHistograms();
   for (auto &hist : hists){
-    ATH_MSG_INFO ("Initializing " << hist.first << " " << hist.first->GetName() << " " << hist.second << "...");
+    ATH_MSG_DEBUG ("Initializing " << hist.first << " " << hist.first->GetName() << " " << hist.second << "...");
     ATH_CHECK(regHist(hist.first,hist.second,all));
   }
 
