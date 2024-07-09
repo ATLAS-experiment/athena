@@ -308,38 +308,33 @@ float LArHVScaleCorrTool::Scale_barrel(const float hv) const
    return resp;
 }
 
-
 // *** Build list of correction to hardcode by jobOptions
-void LArHVScaleCorrTool::buildFixHVList(const std::vector<std::string>& fixHVStrings,
-                                        MsgStream& msg) {
+void LArHVScaleCorrTool::buildFixHVList(
+    const std::vector<std::string>& fixHVStrings, MsgStream& msg) {
 
   m_HVfix.clear();
-  std::vector<std::string>::const_iterator itrStringID=fixHVStrings.begin();
-  for (;itrStringID!=fixHVStrings.end();++itrStringID) {
-    const std::string& theString=*itrStringID;
+  for (const std::string& theString : fixHVStrings) {
     std::stringstream is;
     is << theString << std::endl;
-  
-    unsigned int iDetector,ilayer_min,ilayer_max;
-    float eta_min,eta_max,phi_min,phi_max,corr;
-    is >> iDetector >> ilayer_min >> ilayer_max >> eta_min >> eta_max >> phi_min >> phi_max >> corr;
 
-    HVfix_t myfix{};
-    myfix.subdet = iDetector;
-    myfix.layer_min = ilayer_min;
-    myfix.layer_max = ilayer_max;
-    myfix.eta_min = eta_min;
-    myfix.eta_max = eta_max;
-    myfix.phi_min = phi_min;
-    myfix.phi_max = phi_max;
-    myfix.corr = corr;
-    m_HVfix.push_back(myfix);
+    unsigned int iDetector, ilayer_min, ilayer_max;
+    float eta_min, eta_max, phi_min, phi_max, corr;
+    is >> iDetector >> ilayer_min >> ilayer_max >> eta_min >> eta_max >>
+        phi_min >> phi_max >> corr;
+
+    m_HVfix.push_back({.subdet = iDetector,
+                       .layer_min = ilayer_min,
+                       .layer_max = ilayer_max,
+                       .eta_min = eta_min,
+                       .eta_max = eta_max,
+                       .phi_min = phi_min,
+                       .phi_max = phi_max,
+                       .corr = corr});
   }
 
-  msg << MSG::INFO << "  Number of regions with overwritten HV corrections from jobOptions " << m_HVfix.size() << endmsg;
+  msg << MSG::INFO
+      << "  Number of regions with overwritten HV corrections from jobOptions "
+      << m_HVfix.size() << endmsg;
 
   return;
 }
-
-
-
