@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -755,6 +755,7 @@ class TestEmptyStore
 {
 public:
   virtual const void* getData (SG::auxid_t) const { return 0;}
+  virtual const SG::IAuxTypeVector* getVector (SG::auxid_t) const { return 0;}
   virtual void* getDecoration (SG::auxid_t, size_t, size_t) { return 0; }
   virtual const SG::auxid_set_t& getAuxIDs() const { return m_auxids; }
   virtual bool isDecoration(SG::auxid_t /*auxid*/) const { std::abort(); }

@@ -71,6 +71,7 @@ class ConstAuxStoreTest
 {
 public:
   virtual const void* getData (SG::auxid_t auxid) const;
+  virtual const SG::IAuxTypeVector* getVector (SG::auxid_t) const { std::abort(); }
   virtual const SG::auxid_set_t& getAuxIDs() const { return m_set; }
   virtual bool isDecoration(SG::auxid_t /*auxid*/) const { std::abort(); }
   virtual void* getDecoration (SG::auxid_t /*auxid*/, size_t /*size*/, size_t /*capacity*/) { std::abort(); }

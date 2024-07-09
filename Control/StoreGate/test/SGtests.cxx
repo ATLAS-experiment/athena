@@ -129,6 +129,7 @@ class TestAuxStore
 public:
   TestAuxStore() : m_locked(false) {}
   virtual const void* getData (SG::auxid_t /*auxid*/) const { return 0; }
+  virtual const SG::IAuxTypeVector* getVector (SG::auxid_t /*auxid*/) const { std::abort(); }
   virtual const SG::auxid_set_t& getAuxIDs() const { return m_set; }
   virtual void* getData (auxid_t /*auxid*/, size_t /*size*/, size_t /*capacity*/) { return 0; }
   virtual const SG::auxid_set_t& getWritableAuxIDs() const { return m_set; }

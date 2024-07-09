@@ -109,6 +109,9 @@ namespace xAOD {
       /// Get a pointer to a given array
       virtual const void* getData( auxid_t auxid ) const override;
 
+      /// Return vector interface for one aux data item.
+      virtual const SG::IAuxTypeVector* getVector (SG::auxid_t auxid) const override;
+
       /// Get the types(names) of variables handled by this container
       virtual const auxid_set_t& getAuxIDs() const override;
 

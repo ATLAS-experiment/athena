@@ -68,16 +68,25 @@ public:
 
 
   /**
-   * @brief Return the data vector for one aux data item
+   * @brief Return the data vector for one aux data item.
    * @param auxid The identifier of the desired aux data item.
    *
    * Each aux data item is stored as a vector, with one entry
    * per entry in the owning container.  This returns a pointer
    * to the start of the vector.
    *
-   * This should return 0 if the item doesn't exist.
+   * This should return nullptr if the item doesn't exist.
    */
   virtual const void* getData (SG::auxid_t auxid) const = 0;
+
+
+  /**
+   * @brief Return vector interface for one aux data item.
+   * @param auxid The identifier of the desired aux data item.
+   *
+   * This should return nullptr if the item doesn't exist.
+   */
+  virtual const IAuxTypeVector* getVector (SG::auxid_t auxid) const = 0;
 
 
   /**

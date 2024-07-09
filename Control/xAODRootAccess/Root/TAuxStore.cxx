@@ -286,13 +286,22 @@ namespace xAOD {
 
    const void* TAuxStore::getData( auxid_t auxid ) const {
 
+      const SG::IAuxTypeVector* v = getVector( auxid );
+      if( v ) {
+         return v->toPtr();
+      }
+      return nullptr;
+   }
+
+   const SG::IAuxTypeVector* TAuxStore::getVector( auxid_t auxid ) const {
+
       // Guard against multi-threaded execution:
       guard_t guard( m_mutex1 );
 
       // Check if the transient store already handles this variable:
       if( m_transientStore &&
           ( m_transientStore->getAuxIDs().test( auxid ) ) ) {
-         return m_transientStore->getData( auxid );
+         return m_transientStore->getVector( auxid );
       }
 
       // Connect this auxiliary variable both to the input and output
@@ -302,7 +311,7 @@ namespace xAOD {
          auto this_nc ATLAS_THREAD_SAFE = const_cast<TAuxStore*>(this);  // locked above
          if( ( ! this_nc->setupInputData( auxid ).isSuccess() ) ||
              ( ! this_nc->setupOutputData( auxid ).isSuccess() ) ) {
-            return 0;
+            return nullptr;
          }
       }
 
@@ -312,11 +321,11 @@ namespace xAOD {
          ::Error( "xAOD::TAuxStore::getData",
                   XAOD_MESSAGE( "Couldn't read in variable %s" ),
                   SG::AuxTypeRegistry::instance().getName( auxid ).c_str() );
-         return 0;
+         return nullptr;
       }
 
       // Return the pointer to the object:
-      return m_vecs[ auxid ]->toPtr();
+      return m_vecs[ auxid ];
    }
 
    const TAuxStore::auxid_set_t& TAuxStore::getAuxIDs() const {
