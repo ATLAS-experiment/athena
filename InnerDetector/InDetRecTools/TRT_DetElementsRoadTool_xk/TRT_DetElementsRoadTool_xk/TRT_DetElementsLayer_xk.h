@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -143,6 +143,8 @@ namespace InDet{
       m_z   = float(z );
       m_dz  = float(dz);
       m_dfe = float(df);
+      m_f0  = 0.       ;
+      m_sfi = 0.       ;
       m_wf  = 0.       ;
       m_wz  = 0.       ;
     } 
