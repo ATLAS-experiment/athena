@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGCONFDATA_L1CTPFiles_H
@@ -54,7 +54,7 @@ namespace TrigConf {
          CTPCoreInput(size_t inputNumber, const std::string& name, size_t bit, size_t phase, InputType inputType) :
             m_inputNumber(inputNumber), m_name(name), m_bit(bit), m_phase(phase), m_inputType(inputType) {}
          size_t      inputNumber() const { return m_inputNumber; }
-         std::string name() const { return m_name; }
+         const std::string& name() const { return m_name; }
          size_t      bit() const { return m_bit; }
          size_t      phase() const { return m_phase; }
          InputType   inputType() const { return m_inputType; }
@@ -73,7 +73,7 @@ namespace TrigConf {
          CTPCoreCTPXInput(size_t inputNumber, const std::string& name, size_t bit, InputType inputType) :
             m_inputNumber(inputNumber), m_name(name), m_bit(bit), m_inputType(inputType) {}
          size_t      inputNumber() const { return m_inputNumber; }
-         std::string name() const { return m_name; }
+         const std::string& name() const { return m_name; }
          size_t      bit() const { return m_bit; }
          InputType   inputType() const { return m_inputType; }
       private:
@@ -87,7 +87,7 @@ namespace TrigConf {
       public:
          CTPInCounter(const std::string& name, size_t slot, size_t cable, size_t number) :
             m_name(name), m_slot(slot), m_cable(cable), m_number(number) {}
-         std::string name() const { return m_name; }
+         const std::string& name() const { return m_name; }
          size_t      slot() const { return m_slot; }
          size_t      cable() const { return m_cable; }
          size_t      number() const { return m_number; }
@@ -102,7 +102,7 @@ namespace TrigConf {
       public:
          CTPMonCounter(const std::string& name, size_t number) :
             m_name(name), m_number(number) {}
-         std::string name() const { return m_name; }
+         const std::string& name() const { return m_name; }
          size_t      number() const { return m_number; }
       private:
          std::string m_name;
