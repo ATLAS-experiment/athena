@@ -7,12 +7,12 @@
 
 # Full chain with special flags
 # Deactivated G4Optimizations: MuonFieldOnlyInCalo, NRR, PRR, FrozenShowers
-# ATLAS-R3S-2021-03-02-00 and OFLCOND-MC23-SDR-RUN3-01
+# ATLAS-R3S-2021-03-02-00 and OFLCOND-MC23-SDR-RUN3-05
 
 Sim_tf.py \
     --CA \
     --simulator 'FullG4MT'  \
-    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
+    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-05' \
     --postInclude 'all:PyJobTransforms.UseFrontier' 'EVNTtoHITS:ISF_FastCaloSimSD.ISF_FastCaloSimSDToolConfig.PostIncludeParametrizationInputSim_1mm' \
     --preInclude 'EVNTtoHITS:Campaigns.MC23SimulationSingleIoV,ISF_FastCaloSimParametrization.ISF_FastCaloSimParametrizationConfig.ISF_FastCaloSimParametrization_SimPreInclude' \
     --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
@@ -33,7 +33,7 @@ then
         --inputHITSFile "Hits.CA.pool.root" \
         --outputRDOFile RDO.CA.pool.root \
         --outputESDFile ESD.CA.pool.root \
-        --conditionsTag "default:OFLCOND-MC23-SDR-RUN3-01" \
+        --conditionsTag "default:OFLCOND-MC23-SDR-RUN3-05" \
         --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
         --preInclude 'all:Campaigns.MC23NoPileUp' \
         --preExec 'all:flags.LAr.ROD.NumberOfCollisions=20;flags.LAr.ROD.UseHighestGainAutoCorr=True;' 'HITtoRDO:flags.Digitization.DoCaloNoise=False' 'RAWtoALL:flags.Reco.EnableTrigger=False' \
