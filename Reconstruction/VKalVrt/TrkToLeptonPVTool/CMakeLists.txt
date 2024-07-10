@@ -15,7 +15,7 @@ atlas_add_library  ( TrkToLeptonPVToolLib
                      PUBLIC_HEADERS TrkToLeptonPVTool
                      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} LINK_LIBRARIES ${ROOT_LIBRARIES}
                      AthenaBaseComps xAODTracking xAODEventInfo GaudiKernel 
-                     TrkVKalVrtFitterLib TrkVertexFitterInterfaces BeamSpotConditionsData)
+                     TrkVKalVrtFitterLib TrkVertexFitterInterfaces BeamSpotConditionsData AthContainers)
 
 atlas_add_component  ( TrkToLeptonPVTool
                        src/components/*.cxx

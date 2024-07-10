@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /*
    Tool to match a track to a Primary Vertex obtained with other leptons/tracks
@@ -11,6 +11,7 @@
 
 #include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
 #include "AthContainers/AuxStoreInternal.h"
+#include "AthContainers/ConstAccessor.h"
 #include "GaudiKernel/EventContext.h"
 //
 //Constructor-------------------------------------------------------------- 
@@ -52,7 +53,8 @@ TrkToLeptonPVTool::TrkToLeptonPVTool(const std::string& type,
    std::unique_ptr<xAOD::Vertex>  TrkToLeptonPVTool::matchTrkToPV( const xAOD::TrackParticle *trk, const xAOD::Vertex * PV,
                                                                          const xAOD::EventInfo * eventINFO) const
    {
-     if(trk->isAvailable<float>("vy")) {
+     static const SG::ConstAccessor<float> vyAcc("vy");
+     if(vyAcc.isAvailable(*trk)) {
        std::vector<const xAOD::TrackParticle *> tpv(1,trk);
        return std::unique_ptr<xAOD::Vertex>(m_fitterSvc->fit(tpv,(*PV)));
      }
@@ -70,7 +72,8 @@ TrkToLeptonPVTool::TrkToLeptonPVTool(const std::string& type,
      const EventContext& ctx = Gaudi::Hive::currentContext();
      const float mvx= (eventINFO) ? eventINFO->beamPosX() : 0.;
      const float mvy= (eventINFO) ? eventINFO->beamPosY() : 0.;
-     const float mvz= (trk->isAvailable<float>("vz")) ? trk->vz() : 0.;
+     static const SG::ConstAccessor<float> vzAcc("vz");
+     const float mvz= (vzAcc.isAvailable(*trk)) ? trk->vz() : 0.;
      TPC[0]->setParametersOrigin( mvx, mvy, mvz);
      wrkTrkC[0]=TPC[0];
      return std::unique_ptr<xAOD::Vertex>(m_fitterSvc->fit(ctx,wrkTrkC,(*PV)));
@@ -91,7 +94,8 @@ TrkToLeptonPVTool::TrkToLeptonPVTool(const std::string& type,
        return {nullptr};
      }
 
-     bool fullxAOD=false;   if(particles[0]->isAvailable<float>("vy")) fullxAOD=true;
+     static const SG::ConstAccessor<float> vyAcc("vy");
+     bool fullxAOD=false;   if(vyAcc.isAvailable(*particles[0])) fullxAOD=true;
 
      xAOD::Vertex BEAM; 
      BEAM.makePrivateStore();
@@ -156,12 +160,13 @@ TrkToLeptonPVTool::TrkToLeptonPVTool(const std::string& type,
      pAux = std::make_unique< SG::AuxStoreInternal >();
      TPC.setStore( pAux.get() );
      TPC.reserve( NPRT );
+     static const SG::ConstAccessor<float> vzAcc("vz");
      for(int i=0; i<NPRT; i++){
 	TPC.push_back(new (std::nothrow) xAOD::TrackParticle(*particles[i]));
 	if(!TPC[i])return {nullptr};
 	const float mvx= (eventINFO) ? eventINFO->beamPosX() : 0.;
 	const float mvy= (eventINFO) ? eventINFO->beamPosY() : 0.;
-	const float mvz= (particles[i]->isAvailable<float>("vz")) ? particles[i]->vz() : 0.;
+	const float mvz= (vzAcc.isAvailable(*particles[i])) ? particles[i]->vz() : 0.;
 	TPC[i]->setParametersOrigin( mvx, mvy, mvz);
 	wrkTrkC[i]=TPC[i];
      }
