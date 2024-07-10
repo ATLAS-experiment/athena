@@ -23,6 +23,7 @@ TrackRecordCnv_p1::persToTrans(const TrackRecord_p1* persObj, TrackRecord* trans
    transObj->SetStatus(HepMC::new_particle_status_from_old(oldStatus, persObj->barCode()));
    transObj->SetTime((double) persObj->time());
    transObj->SetBarcode(persObj->barCode()); // FIXME barcode-based
+   transObj->SetID(HepMC::INVALID_PARTICLE_ID); // FIXME Currently in order to set ID values correctly one would need to look into the McEventCollection
    transObj->SetVolName(persObj->volName());
 }
 
