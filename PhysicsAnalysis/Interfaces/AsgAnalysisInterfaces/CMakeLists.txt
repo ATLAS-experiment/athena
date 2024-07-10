@@ -12,7 +12,7 @@ atlas_add_library( AsgAnalysisInterfaces
    INTERFACE
    PUBLIC_HEADERS AsgAnalysisInterfaces
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-   LINK_LIBRARIES ${ROOT_LIBRARIES} AsgTools xAODBase xAODEventInfo PATInterfaces )
+   LINK_LIBRARIES ${ROOT_LIBRARIES} AsgTools xAODBase xAODEventInfo PATInterfaces AthContainers )
 
 atlas_add_dictionary( AsgAnalysisInterfacesDict
    AsgAnalysisInterfaces/AsgAnalysisInterfacesDict.h

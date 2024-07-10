@@ -26,8 +26,16 @@
 using namespace FakeBkgTools;
 using namespace CP;
 
-BaseFakeBkgTool::BaseFakeBkgTool(const std::string& toolname) :  AsgTool(toolname),
-  m_initialized(false), m_database(nullptr), m_energyUnit("MeV"), m_tightDecoNameAndType("Tight,as_char"), m_progressFileName("none"), m_progressFileDirectory("")
+BaseFakeBkgTool::BaseFakeBkgTool(const std::string& toolname):
+    AsgTool(toolname),
+    m_initialized(false),
+    m_database(nullptr),
+    m_energyUnit("MeV"),
+    m_tightDecoNameAndType("Tight,as_char"),
+    m_progressFileName("none"),
+    m_progressFileDirectory(""),
+    m_accRealEff("real_eff"),
+    m_accFakeEff("fake_eff")
 {
     /// Note: don't use the usual syntax declareProperty("", x = default, ""), it won't work for standalone compilation
     
@@ -152,7 +160,8 @@ bool BaseFakeBkgTool::importEfficiencies(bool resetDB)
     return m_database->ready();
 }
 
-StatusCode BaseFakeBkgTool::addEvent(const xAOD::IParticleContainer& iparticles, float mcWeight)
+template<class C>
+StatusCode BaseFakeBkgTool::addEventImpl(const C& iparticles, float mcWeight)
 {
     if(!m_initialized)
     {
@@ -201,8 +210,8 @@ StatusCode BaseFakeBkgTool::addEvent(const xAOD::IParticleContainer& iparticles,
         }
         else
         {
-            d.real_efficiency.nominal = p.auxdataConst<float>("real_eff");
-            d.fake_efficiency.nominal = p.auxdataConst<float>("fake_eff");
+            d.real_efficiency.nominal = m_accRealEff(p);
+            d.fake_efficiency.nominal = m_accFakeEff(p);
         }
     }
     if(m_particles.size() > maxParticles())
@@ -214,6 +223,16 @@ StatusCode BaseFakeBkgTool::addEvent(const xAOD::IParticleContainer& iparticles,
     m_externalWeight = mcWeight;
     ATH_MSG_DEBUG("calling addEventCustom() with #particles = " << m_particles.size());
     return addEventCustom();
+}
+
+StatusCode BaseFakeBkgTool::addEvent(const xAOD::IParticleContainer& iparticles, float mcWeight)
+{
+    return addEventImpl(iparticles, mcWeight);
+}
+
+StatusCode BaseFakeBkgTool::addEvent(const ConstDataVector<xAOD::IParticleContainer>& iparticles, float mcWeight)
+{
+    return addEventImpl(iparticles, mcWeight);
 }
 
 FinalState BaseFakeBkgTool::getCachedFinalState(uint8_t nparticles, const std::string& strPID, const std::string& strProc, bool& success)

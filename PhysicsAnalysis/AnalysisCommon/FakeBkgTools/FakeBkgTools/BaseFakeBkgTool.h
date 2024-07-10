@@ -8,6 +8,7 @@
 #include "AsgAnalysisInterfaces/IFakeBkgTool.h"
 #include "AsgAnalysisInterfaces/IFakeBkgSystDescriptor.h"
 #include "AsgTools/AsgTool.h"
+#include "AthContainers/ConstAccessor.h"
 
 #include <string>
 #include <map>
@@ -48,6 +49,7 @@ class BaseFakeBkgTool : virtual public CP::IFakeBkgTool, public CP::IFakeBkgSyst
     virtual StatusCode initialize() override;
 
     virtual StatusCode addEvent(const xAOD::IParticleContainer& particles, float extraWeight = 1.f) override final;
+    virtual StatusCode addEvent(const ConstDataVector<xAOD::IParticleContainer>& particles, float extraWeight = 1.f) override final;
   
     virtual StatusCode register1DHistogram(TH1* h1, const float *val) override;
     virtual StatusCode register2DHistogram(TH2* h2, const float *xval, const float *yval) override;
@@ -171,8 +173,13 @@ class BaseFakeBkgTool : virtual public CP::IFakeBkgTool, public CP::IFakeBkgSyst
 
     /// \brief when m_unlimitedSystematicVariations=false, keeps track of prior calls to applySystematicVariation() / addEvent()
     bool m_lockedSystematicVariations = false; //!
+    
+    SG::ConstAccessor<float> m_accRealEff; //! only used when m_useDB is false
+    
+    SG::ConstAccessor<float> m_accFakeEff; //! only used when m_useDB is false
 
   private:
+    template<class C> StatusCode addEventImpl(const C& iparticles, float mcWeight);
 
     /// \brief load the config file(s) storing efficiencies
     bool importEfficiencies(bool resetDB = false);
