@@ -11,6 +11,7 @@
 #include "MuonPattern/MuonPatternCombination.h"
 #include "MuonReadoutGeometry/MuonChannelDesign.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
+#include "StoreGate/ReadCondHandle.h"
 #include "MuonReadoutGeometry/MuonPadDesign.h"
 #include "MuonReadoutGeometry/sTgcReadoutElement.h"
 #include "xAODMuon/MuonSegmentContainer.h"
@@ -27,10 +28,8 @@ namespace Muon {
         ATH_CHECK(m_idHelperSvc.retrieve());
         m_ntechnologies = m_idHelperSvc->mdtIdHelper().technologyNameIndexMax() + 1;
         ATH_CHECK(m_printer.retrieve());
-        const MuonGM::MuonDetectorManager* muDetMgr = nullptr;
-        ATH_CHECK(detStore()->retrieve(muDetMgr));
+        ATH_CHECK(m_muonManagerKey.initialize());
 
-        initializeSectorMapping(muDetMgr);
 
         ATH_CHECK(m_truthNames.initialize());
      
@@ -106,6 +105,8 @@ namespace Muon {
         const std::vector<const MdtPrepDataCollection*>& mdtCols, const std::vector<const CscPrepDataCollection*>& cscCols,
         const std::vector<const TgcPrepDataCollection*>& tgcCols, const std::vector<const RpcPrepDataCollection*>& rpcCols,
         const MuonSegmentCombinationCollection*, const EventContext& ctx) const {
+        
+        initializeSectorMapping(ctx);
         State state;
         ATH_MSG_DEBUG("MuonLayerHoughTool::find");
 
@@ -182,6 +183,7 @@ namespace Muon {
         const MdtPrepDataContainer* mdtCont, const CscPrepDataContainer* cscCont, const TgcPrepDataContainer* tgcCont,
         const RpcPrepDataContainer* rpcCont, const sTgcPrepDataContainer* stgcCont, const MMPrepDataContainer* mmCont,
         const EventContext& ctx) const {
+        initializeSectorMapping(ctx);
         State state;
         ATH_MSG_DEBUG("MuonLayerHoughTool::analyse");
 
@@ -1883,18 +1885,22 @@ namespace Muon {
                                           << " sectors: " << sectors.size());
     }
 
-    void MuonLayerHoughTool::insertHash(const IdentifierHash& hash, const Identifier& id) {
+    void MuonLayerHoughTool::insertHash(const IdentifierHash& hash, const Identifier& id) const{
         insertHash(m_idHelperSvc->sector(id), hash, id);
     }
 
-    void MuonLayerHoughTool::insertHash(int sector, const IdentifierHash& hash, const Identifier& id) {
+    void MuonLayerHoughTool::insertHash(int sector, const IdentifierHash& hash, const Identifier& id) const{
         MuonStationIndex::TechnologyIndex techIndex = m_idHelperSvc->technologyIndex(id);
         int sectorLayerHash = MuonStationIndex::sectorLayerHash(m_idHelperSvc->regionIndex(id), m_idHelperSvc->layerIndex(id));
         m_collectionsPerSector[sector - 1].technologyRegionHashVecs[techIndex][sectorLayerHash].push_back(hash);
     }
 
     // all chambers are mapped onto a layer and sector map
-    void MuonLayerHoughTool::initializeSectorMapping(const MuonGM::MuonDetectorManager* detMgr) {
+    void MuonLayerHoughTool::initializeSectorMapping(const EventContext& ctx) const{
+        if (m_sectorSetup) return;
+        std::lock_guard kuchen(m_mutex);
+        if (m_sectorSetup) return;
+        SG::ReadCondHandle<MuonGM::MuonDetectorManager> detMgr{m_muonManagerKey, ctx};
         m_collectionsPerSector.resize(MuonStationIndex::numberOfSectors());
         // set sector numbers
         unsigned int nsectorHashMax = MuonStationIndex::sectorLayerHashMax();
@@ -2028,6 +2034,7 @@ namespace Muon {
                 }
             }
         }
+        m_sectorSetup = true;
     }
 
     void MuonLayerHoughTool::printTruthSummary(std::set<Identifier>& truth, std::set<Identifier>& found) const {
