@@ -1730,7 +1730,7 @@ int MonitoringFile::mergeObjs(TObject *objTarget, TObject *obj, const std::strin
        TList tl; tl.Add(nextH); h->Merge(&tl);
      } else {
        if (!h->Add( nextH )) {
-   std::cerr << "Histogram " << h->GetName() << " should NOT be using Add: needs to specify a merge method (e.g. merge) in its metadata";
+   std::cerr << "Histogram " << h->GetName() << " should NOT be using Add: needs to specify a merge method (e.g. merge) in its metadata\n";
        }
      }
    }else if( (g = dynamic_cast<TGraph*>( objTarget )) ) {  // TGraphs
