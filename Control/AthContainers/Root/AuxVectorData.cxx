@@ -616,4 +616,24 @@ bool AuxVectorData::clearDecorations() const
 }
 
 
+/**
+ * @brief Explicitly lock a decoration.
+ * @param auxid ID of the decoration to lock.
+ *
+ * This is only safe if no other thread can be accessing this decoration.
+ * It is strongly preferred to do this via a @c WriteDecorHandle,
+ * where the dependencies can help ensure this.
+ */
+void AuxVectorData::lockDecoration (SG::auxid_t auxid)
+{
+  const IConstAuxStore* store = this->getConstStore();
+  if (store) {
+    // Casting away const ok if no other thread is accessing this decoration.
+    IConstAuxStore* store_nc ATLAS_THREAD_SAFE = const_cast<IConstAuxStore*> (store);
+    store_nc->lockDecoration (auxid);
+    this->clearDecorCache (auxid);
+  }
+}
+
+
 } // namespace SG
