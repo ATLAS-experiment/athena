@@ -1,17 +1,34 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+from typing import Iterable, Union
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
-from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
+from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType, ConfigAccumulator
 from AthenaConfiguration.Enums import LHCPeriod
 from Campaigns.Utils import Campaign
 
 
-class TriggerAnalysisSFBlock (ConfigBlock):
-    """the ConfigBlock for trigger analysis"""
+def is_mc_from(config: ConfigAccumulator, campaign_list: Union[Campaign, Iterable[Campaign]]) -> bool:
+    """
+    Utility function to check whether the data type is mc and whether the campaign is in desired list of campaigns
+    without causing an invalid FlugEnum comparison
+    """
+    campaign_list = [campaign_list] if isinstance(campaign_list, Campaign) else campaign_list
+    return config.dataType() is not DataType.Data and config.campaign() in campaign_list
 
-    def __init__ (self, configName='') :
-        super (TriggerAnalysisSFBlock, self).__init__ ()
+
+def is_data_from(config, data_year_list: Union[int, Iterable[int]]) -> bool:
+    """
+    Utility function to check whether the data type is data and whether the year is in desired list of years
+    """
+    data_year_list = [data_year_list] if isinstance(data_year_list, int) else data_year_list
+    return config.dataType() is DataType.Data and config.dataYear() in data_year_list
+
+
+class TriggerAnalysisSFBlock(ConfigBlock):
+    """the ConfigBlock for trigger analysis"""
+    def __init__(self):
+        super(TriggerAnalysisSFBlock, self).__init__()
         self.addDependency('Electrons', required=False)
         self.addDependency('Photons', required=False)
         self.addDependency('Muons', required=False)
@@ -60,7 +77,7 @@ class TriggerAnalysisSFBlock (ConfigBlock):
             "trigger legs. The default is False.")
     
 
-    def makeTriggerDecisionTool(self, config):
+    def makeTriggerDecisionTool(self, config: ConfigAccumulator):
         # Might have already been added in TriggerAnalysisBlock
         if "TrigDecisionTool" in config._algorithms:
             return config._algorithms["TrigDecisionTool"]
@@ -76,8 +93,7 @@ class TriggerAnalysisSFBlock (ConfigBlock):
 
         return decisionTool
 
-    def makeTriggerMatchingTool(self, config, decisionTool):
-
+    def makeTriggerMatchingTool(self, config: ConfigAccumulator, decisionTool):
         # Create public trigger tools
         drScoringTool = config.createPublicTool( 'Trig::DRScoringTool', 'DRScoringTool' )
         if config.geometry() is LHCPeriod.Run3:
@@ -93,36 +109,45 @@ class TriggerAnalysisSFBlock (ConfigBlock):
 
         return matchingTool
 
-    
-    def makeTriggerGlobalEffCorrAlg(self, config, matchingTool, noSF,
-                                    triggerSuffix=''):
-
+    def makeTriggerGlobalEffCorrAlg(
+        self,
+        config: ConfigAccumulator,
+        matchingTool,
+        noSF: bool,
+        triggerSuffix: str = ''
+    ) -> None:
         alg = config.createAlgorithm( 'CP::TrigGlobalEfficiencyAlg', 'TrigGlobalSFAlg' + triggerSuffix )
         if config.geometry() is LHCPeriod.Run3:
             alg.triggers_2022 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in self.triggerChainsPerYear.get('2022',[])]
             alg.triggers_2023 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in self.triggerChainsPerYear.get('2023',[])]
             alg.triggers_2024 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in self.triggerChainsPerYear.get('2024',[])]
             alg.triggers_2025 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in self.triggerChainsPerYear.get('2025',[])]
-            if config.campaign() in [Campaign.MC21a, Campaign.MC23a]:
+            if is_mc_from(config, [Campaign.MC21a, Campaign.MC23a]) or is_data_from(config, 2022):
                 if not alg.triggers_2022:
-                    raise ValueError( 'TriggerAnalysisConfig: you must provide a set of triggers for the year 2022!' )
-            elif config.campaign() in [Campaign.MC23c, Campaign.MC23d]:
+                    raise ValueError('TriggerAnalysisConfig: you must provide a set of triggers for the year 2022!')
+            elif is_mc_from(config, [Campaign.MC23c, Campaign.MC23d]) or is_data_from(config, 2023):
                 if not alg.triggers_2023:
-                    raise ValueError( 'TriggerAnalysisConfig: you must provide a set of triggers for the year 2023!' )
+                    raise ValueError('TriggerAnalysisConfig: you must provide a set of triggers for the year 2023!')
         else:
             alg.triggers_2015 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in self.triggerChainsPerYear.get('2015',[])]
             alg.triggers_2016 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in self.triggerChainsPerYear.get('2016',[])]
             alg.triggers_2017 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in self.triggerChainsPerYear.get('2017',[])]
             alg.triggers_2018 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in self.triggerChainsPerYear.get('2018',[])]
-            if config.campaign() is Campaign.MC20a:
+            if is_mc_from(config, Campaign.MC20a):
                 if not (alg.triggers_2015 and alg.triggers_2016):
-                    raise ValueError( 'TriggerAnalysisConfig: you must provide a set of triggers for the years 2015 and 2016!' )
-            elif config.campaign() is Campaign.MC20d:
-                if not alg.triggers_2017:
-                    raise ValueError( 'TriggerAnalysisConfig: you must provide a set of triggers for the year 2017!' )
-            elif config.campaign() is Campaign.MC20e:
+                    raise ValueError('TriggerAnalysisConfig: you must provide a set of triggers for the years 2015 and 2016!')
+            elif is_data_from(config, 2015):
+                if not alg.triggers_2015:
+                    raise ValueError('TriggerAnalysisConfig: you must provide a set of triggers for the year 2015!')
+            elif is_data_from(config, 2016):
+                if not alg.triggers_2016:
+                    raise ValueError('TriggerAnalysisConfig: you must provide a set of triggers for the year 2016!')
+            elif is_mc_from(config, Campaign.MC20d):
+                if not alg.triggers_2017 or is_data_from(config, 2017):
+                    raise ValueError('TriggerAnalysisConfig: you must provide a set of triggers for the year 2017!')
+            elif is_mc_from(config, Campaign.MC20e) or is_data_from(config, 2018):
                 if not alg.triggers_2018:
-                    raise ValueError( 'TriggerAnalysisConfig: you must provide a set of triggers for the year 2018!' )
+                    raise ValueError('TriggerAnalysisConfig: you must provide a set of triggers for the year 2018!')
 
         alg.matchingTool = '%s/%s' % ( matchingTool.getType(), matchingTool.getName() )
         alg.isRun3Geo = config.geometry() is LHCPeriod.Run3
@@ -142,18 +167,20 @@ class TriggerAnalysisSFBlock (ConfigBlock):
         if self.photons:
             alg.photons, alg.photonSelection = config.readNameAndSelection(self.photons)
         if not (self.electrons or self.muons or self.photons):
-            raise ValueError ('TriggerAnalysisConfig: at least one object collection must be provided! (electrons, muons, photons)' )
+            raise ValueError('TriggerAnalysisConfig: at least one object collection must be provided! (electrons, muons, photons)' )
 
         if config.dataType() is not DataType.Data and not alg.doMatchingOnly:
-            config.addOutputVar ('EventInfo', alg.scaleFactorDecoration, 'globalTriggerEffSF'+triggerSuffix)
-        config.addOutputVar ('EventInfo', alg.matchingDecoration, 'globalTriggerMatch'+triggerSuffix, noSys=False)
+            config.addOutputVar('EventInfo', alg.scaleFactorDecoration, 'globalTriggerEffSF'+triggerSuffix)
+        config.addOutputVar('EventInfo', alg.matchingDecoration, 'globalTriggerMatch'+triggerSuffix, noSys=False)
 
         return
 
-    def makeAlgs (self, config) :
-
-        if (self.multiTriggerChainsPerYear and self.triggerChainsPerYear and
-            self.triggerChainsPerYear not in self.multiTriggerChainsPerYear.values()):
+    def makeAlgs(self, config: ConfigAccumulator) -> None:
+        if (
+            self.multiTriggerChainsPerYear and
+            self.triggerChainsPerYear and
+            self.triggerChainsPerYear not in self.multiTriggerChainsPerYear.values()
+        ):
             raise Exception('multiTriggerChainsPerYear and triggerChainsPerYear cannot be configured at the same time!')
 
         if self.triggerChainsPerYear and not self.multiTriggerChainsPerYear:
