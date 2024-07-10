@@ -86,7 +86,6 @@ StatusCode MuonSegmentFittingAlg::prepareSegmentFit(const HoughSegmentSeed & see
     return StatusCode::SUCCESS;
 }
 StatusCode MuonSegmentFittingAlg::prepareEventData(const EventContext & ctx, MuonSegmentFitterEventData & data) const {
-    HoughPlaneConfig cfg;
     const ActsGeometryContext* gctx{nullptr};
     ATH_CHECK(retrieveContainer(ctx, m_geoCtxKey, gctx));
     data.gctx = gctx;
