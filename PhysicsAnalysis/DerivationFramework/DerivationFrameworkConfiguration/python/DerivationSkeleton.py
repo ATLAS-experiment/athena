@@ -152,6 +152,10 @@ def fromRunArgs(runArgs):
 
     # Post-exec
     processPostExec(runArgs, flags, cfg)
+
+    # Configure components' logging levels
+    from AthenaConfiguration.Utils import setupLoggingLevels
+    setupLoggingLevels(flags, cfg)
     
     # Run the final configuration
     sc = cfg.run()
