@@ -5,6 +5,8 @@
 
 #include "AsgTools/AsgTool.h"
 #include "AthOnnxInterfaces/IOnnxRuntimeInferenceTool.h"
+#include "AthOnnxInterfaces/IAthInferenceTool.h"
+
 #include "AthOnnxInterfaces/IOnnxRuntimeSvc.h"
 #include "AthOnnxInterfaces/IOnnxRuntimeSessionTool.h"
 #include "AsgServices/ServiceHandle.h"
@@ -16,9 +18,9 @@ namespace AthOnnx {
     // @brief Tool to create Onnx Runtime session with CPU backend
     //
     // @author Xiangyang Ju <xiangyang.ju@cern.ch>
-    class OnnxRuntimeInferenceTool :  public asg::AsgTool, virtual public IOnnxRuntimeInferenceTool
+    class OnnxRuntimeInferenceTool :  public asg::AsgTool, virtual public IOnnxRuntimeInferenceTool, virtual public AthInfer::IAthInferenceTool
     {
-        ASG_TOOL_CLASS(OnnxRuntimeInferenceTool, IOnnxRuntimeInferenceTool)
+        ASG_TOOL_CLASS2(OnnxRuntimeInferenceTool, IOnnxRuntimeInferenceTool, AthInfer::IAthInferenceTool)
         public:
         /// Standard constructor
         OnnxRuntimeInferenceTool( const std::string& name );
@@ -34,6 +36,8 @@ namespace AthOnnx {
         virtual StatusCode inference(std::vector<Ort::Value>& inputTensors, std::vector<Ort::Value>& outputTensors) const override final;
 
         virtual void printModelInfo() const override final;
+
+        virtual StatusCode inference(AthInfer::InputDataMap& inputData, AthInfer::OutputDataMap& outputData) const override final;
 
         protected:
         OnnxRuntimeInferenceTool() = delete;

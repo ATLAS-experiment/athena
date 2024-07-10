@@ -11,7 +11,7 @@ atlas_add_library( AthOnnxCompsLib
    src/*.cxx
    PUBLIC_HEADERS AthOnnxComps
    INCLUDE_DIRS ${ONNXRUNTIME_INCLUDE_DIRS}
-   LINK_LIBRARIES ${ONNXRUNTIME_LIBRARIES} AsgTools AsgServicesLib AthOnnxInterfaces AthOnnxUtilsLib
+   LINK_LIBRARIES ${ONNXRUNTIME_LIBRARIES} AsgTools AsgServicesLib AthOnnxInterfaces AthOnnxUtilsLib PathResolver
 )
 
 atlas_add_dictionary( AthOnnxCompsDict

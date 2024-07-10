@@ -4,7 +4,7 @@
 #include <cassert>
 #include <string>
 
-namespace AthOnnx {
+namespace AthOnnxUtils {
 
 void getNodeInfo(
     const Ort::Session& session,
@@ -77,18 +77,6 @@ int64_t getTensorSize(const std::vector<int64_t>& dataShape){
     }
     return size;
 }
-
-Ort::Value createTensor(std::vector<float>& data, const std::vector<int64_t>& dataShape)
-{
-    auto memoryInfo = Ort::MemoryInfo::CreateCpu(OrtAllocatorType::OrtArenaAllocator, OrtMemType::OrtMemTypeDefault); 
-
-    return Ort::Value::CreateTensor<float>(
-                                memoryInfo, 
-                                data.data(), 
-                                data.size(),  
-                                dataShape.data(), 
-                                dataShape.size());
-};
 
 
 } // namespace AthOnnx

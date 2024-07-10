@@ -2,70 +2,13 @@
 
 // Local include(s).
 #include "EvaluateModel.h"
-#include <tuple>
-#include <fstream>
-#include <chrono>
-#include <arpa/inet.h>
 
 // Framework include(s).
 #include "AthOnnxUtils/OnnxUtils.h"
+#include "EvaluateUtils.h"
+#include "PathResolver/PathResolver.h"
 
 namespace AthOnnx {
-
-   //*******************************************************************
-   // for reading MNIST images
-   std::vector<std::vector<std::vector<float>>> read_mnist_pixel_notFlat(const std::string &full_path) //function to load test images
-   {
-     std::vector<std::vector<std::vector<float>>> input_tensor_values;
-     input_tensor_values.resize(10000, std::vector<std::vector<float> >(28,std::vector<float>(28)));
-     std::ifstream file (full_path.c_str(), std::ios::binary);
-     int magic_number=0;
-     int number_of_images=0;
-     int n_rows=0;
-     int n_cols=0;
-     file.read((char*)&magic_number,sizeof(magic_number));
-     magic_number= ntohl(magic_number);
-     file.read((char*)&number_of_images,sizeof(number_of_images));
-     number_of_images= ntohl(number_of_images);
-     file.read((char*)&n_rows,sizeof(n_rows));
-     n_rows= ntohl(n_rows);
-     file.read((char*)&n_cols,sizeof(n_cols));
-     n_cols= ntohl(n_cols);
-     for(int i=0;i<number_of_images;++i)
-     {
-      	for(int r=0;r<n_rows;++r)
-        {
-           for(int c=0;c<n_cols;++c)
-           {
-             unsigned char temp=0;
-             file.read((char*)&temp,sizeof(temp));
-             input_tensor_values[i][r][c]= float(temp)/255;
-           }
-	}
-     }
-     return input_tensor_values;
-   }
-
-   //********************************************************************************
-   // for reading MNIST labels
-   std::vector<int> read_mnist_label(const std::string &full_path) //function to load test labels
-   {
-     std::vector<int> output_tensor_values(1*10000);
-     std::ifstream file (full_path.c_str(), std::ios::binary);
-     int magic_number=0;
-     int number_of_labels=0;
-     file.read((char*)&magic_number,sizeof(magic_number));
-     magic_number= ntohl(magic_number);
-     file.read((char*)&number_of_labels,sizeof(number_of_labels));
-     number_of_labels= ntohl(number_of_labels);
-     for(int i=0;i<number_of_labels;++i)
-     {
-          unsigned char temp=0;
-          file.read((char*)&temp,sizeof(temp));
-          output_tensor_values[i]= int(temp);
-     }
-      return output_tensor_values;
-    }
 
    StatusCode EvaluateModel::initialize() {
     // Fetch tools
@@ -81,9 +24,10 @@ namespace AthOnnx {
 	return StatusCode::FAILURE;
        }
      // read input file, and the target file for comparison.
-      ATH_MSG_INFO( "Using pixel file: " << m_pixelFileName.value() );
+     std::string pixelFilePath = PathResolver::find_file(m_pixelFileName.value(), "CALIBPATH", PathResolver::RecursiveSearch);
+     ATH_MSG_INFO( "Using pixel file: " << pixelFilePath );
   
-      m_input_tensor_values_notFlat = read_mnist_pixel_notFlat(m_pixelFileName);
+     m_input_tensor_values_notFlat = EvaluateUtils::read_mnist_pixel_notFlat(pixelFilePath);
       ATH_MSG_INFO("Total no. of samples: "<<m_input_tensor_values_notFlat.size());
     
       return StatusCode::SUCCESS;
@@ -95,7 +39,7 @@ namespace AthOnnx {
    std::vector<float> inputData;
    for (int ibatch = 0; ibatch < m_batchSize; ibatch++){
       const std::vector<std::vector<float> >& imageData = m_input_tensor_values_notFlat[ibatch];
-      std::vector<float> flatten = AthOnnx::flattenNestedVectors(imageData);
+      std::vector<float> flatten = AthOnnxUtils::flattenNestedVectors(imageData);
       inputData.insert(inputData.end(), flatten.begin(), flatten.end());
    }
 
@@ -130,10 +74,6 @@ namespace AthOnnx {
      	}
       ATH_MSG_INFO("Class: "<<max_index<<" has the highest score: "<<outputScores[max_index] << " in batch " << ibatch);
    }
-
-      return StatusCode::SUCCESS;
-   }
-   StatusCode EvaluateModel::finalize() {
 
       return StatusCode::SUCCESS;
    }

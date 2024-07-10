@@ -3,4 +3,5 @@
   <class name="AthOnnx::IOnnxRuntimeSvc" />
   <class name="AthOnnx::IOnnxRuntimeSessionTool" />
   <class name="AthOnnx::IOnnxRuntimeInferenceTool" />
+  <class name="AthInfer::IAthInferenceTool" />
 </lcgdict>

@@ -11,5 +11,6 @@
 #include "AthOnnxInterfaces/IOnnxRuntimeSvc.h"
 #include "AthOnnxInterfaces/IOnnxRuntimeSessionTool.h"
 #include "AthOnnxInterfaces/IOnnxRuntimeInferenceTool.h"
+#include "AthOnnxInterfaces/IAthInferenceTool.h"
 
 #endif // ATHONNXINTERFACESDICT_H

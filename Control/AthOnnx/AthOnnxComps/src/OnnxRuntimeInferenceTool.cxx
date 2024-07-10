@@ -32,8 +32,8 @@ StatusCode AthOnnx::OnnxRuntimeInferenceTool::getNodeInfo()
     m_numInputs = session.GetInputCount();
     m_numOutputs = session.GetOutputCount();
 
-    AthOnnx::getInputNodeInfo(session, m_inputShapes, m_inputNodeNames);
-    AthOnnx::getOutputNodeInfo(session, m_outputShapes, m_outputNodeNames);
+    AthOnnxUtils::getInputNodeInfo(session, m_inputShapes, m_inputNodeNames);
+    AthOnnxUtils::getOutputNodeInfo(session, m_outputShapes, m_outputNodeNames);
 
     return StatusCode::SUCCESS;
 }
@@ -61,7 +61,7 @@ void AthOnnx::OnnxRuntimeInferenceTool::setBatchSize(int64_t batchSize)
 
 int64_t AthOnnx::OnnxRuntimeInferenceTool::getBatchSize(int64_t inputDataSize, int idx) const
 {
-    auto tensorSize = AthOnnx::getTensorSize(m_inputShapes[idx]);
+    auto tensorSize = AthOnnxUtils::getTensorSize(m_inputShapes[idx]);
     if (tensorSize < 0) {
         return inputDataSize / abs(tensorSize);
     } else {
@@ -75,7 +75,7 @@ StatusCode AthOnnx::OnnxRuntimeInferenceTool::inference(std::vector<Ort::Value>&
     assert (outputTensors.size() == m_numOutputs);
 
     // Run the model.
-    AthOnnx::inferenceWithIOBinding(
+    AthOnnxUtils::inferenceWithIOBinding(
             m_onnxSessionTool->session(), 
             m_inputNodeNames, inputTensors, 
             m_outputNodeNames, outputTensors);
@@ -115,4 +115,48 @@ void AthOnnx::OnnxRuntimeInferenceTool::printModelInfo() const
         }
         ATH_MSG_INFO(shapeStr);
     }
+}
+
+StatusCode AthOnnx::OnnxRuntimeInferenceTool::inference(AthInfer::InputDataMap& inputData, AthInfer::OutputDataMap& outputData) const
+{
+    // Create input tensors.
+    std::vector<Ort::Value> inputTensors;
+    for (auto& [inputName, inputInfo] : inputData) {
+        const std::vector<int64_t>& shape = inputInfo.first;
+        if (std::holds_alternative<std::vector<float>>(inputInfo.second)) {
+            auto& data = std::get<std::vector<float>>(inputInfo.second);
+            inputTensors.push_back(std::move(AthOnnxUtils::createTensor(data, shape)));
+        } else if (std::holds_alternative<std::vector<int64_t>>(inputInfo.second)) {
+            auto& data = std::get<std::vector<int64_t>>(inputInfo.second);
+            inputTensors.push_back(std::move(AthOnnxUtils::createTensor(data, shape)));
+        } else {
+            ATH_MSG_ERROR("Unsupported data type");
+            return StatusCode::FAILURE;
+        }
+    }
+
+    // Create output tensors.
+    std::vector<Ort::Value> outputTensors;
+    outputTensors.reserve(inputData.size());
+    for (auto& [outputName, outputInfo] : outputData) {
+        auto& shape = outputInfo.first;
+        auto tensorSize = std::accumulate(shape.begin(), shape.end(), 1, std::multiplies<int64_t>());
+
+        if (std::holds_alternative<std::vector<float>>(outputInfo.second)) {
+            auto& data = std::get<std::vector<float>>(outputInfo.second);
+            data.resize(tensorSize);
+            outputTensors.push_back(std::move(AthOnnxUtils::createTensor(data, shape)));
+        } else if (std::holds_alternative<std::vector<int64_t>>(outputInfo.second)) {
+            auto& data = std::get<std::vector<int64_t>>(outputInfo.second);
+            data.resize(tensorSize);
+            outputTensors.push_back(std::move(AthOnnxUtils::createTensor(data, shape)));
+        } else {
+            ATH_MSG_ERROR("Unsupported data type");
+            return StatusCode::FAILURE;
+        }
+    }
+
+    ATH_CHECK(inference(inputTensors, outputTensors));
+
+    return StatusCode::SUCCESS;
 }

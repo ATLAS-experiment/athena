@@ -1,9 +1,9 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon import Constants
-from AthOnnxComps.OnnxRuntimeFlags import OnnxRuntimeType 
+from AthOnnxComps.OnnxRuntimeFlags import OnnxRuntimeType
 
 
 def AthExOnnxRuntimeExampleCfg(flags, name="AthOnnxExample", **kwargs):
@@ -20,7 +20,7 @@ def AthExOnnxRuntimeExampleCfg(flags, name="AthOnnxExample", **kwargs):
     kwargs.setdefault("BatchSize", 3)
     kwargs.setdefault("InputDataPixel", input_data)
     kwargs.setdefault("OutputLevel", Constants.DEBUG)
-    acc.addEventAlgo(CompFactory.AthOnnx.EvaluateModel(name, **kwargs))
+    acc.addEventAlgo(CompFactory.AthOnnx.EvaluateModelWithAthInfer(name, **kwargs))
 
     return acc
 
@@ -39,7 +39,7 @@ if __name__ == "__main__":
     acc.merge(AthExOnnxRuntimeExampleCfg(flags))
     acc.printConfig(withDetails=True, summariseProps=True)
 
-    acc.store(open('test_AthExOnnxRuntimeExampleCfg.pkl','wb'))
+    acc.store(open('test_AthInferORTExampleCfg.pkl','wb'))
 
     import sys
     sys.exit(acc.run(2).isFailure())

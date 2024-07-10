@@ -3,6 +3,7 @@
 */
 
 #include "AthOnnxComps/OnnxRuntimeSessionToolCPU.h"
+#include "PathResolver/PathResolver.h"
 
 AthOnnx::OnnxRuntimeSessionToolCPU::OnnxRuntimeSessionToolCPU(const std::string& name )
   : asg::AsgTool( name)
@@ -26,7 +27,10 @@ StatusCode AthOnnx::OnnxRuntimeSessionToolCPU::initialize()
     sessionOptions.SetGraphOptimizationLevel( GraphOptimizationLevel::ORT_ENABLE_ALL );
 
     // Create the session.
-    m_session = std::make_unique<Ort::Session>(m_onnxRuntimeSvc->env(), m_modelFileName.value().c_str(), sessionOptions);
+    ATH_MSG_INFO("Asking model from: " << m_modelFileName.value());
+    std::string modelFilePath = PathResolver::find_file(m_modelFileName.value(), "CALIBPATH", PathResolver::RecursiveSearch);
+    ATH_MSG_INFO("Loading model from: " << modelFilePath);
+    m_session = std::make_unique<Ort::Session>(m_onnxRuntimeSvc->env(), modelFilePath.c_str(), sessionOptions);
 
     return StatusCode::SUCCESS;
 }
