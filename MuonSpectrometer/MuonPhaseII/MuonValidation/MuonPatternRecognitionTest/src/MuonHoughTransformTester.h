@@ -27,6 +27,9 @@
 #include "MuonTesterTree/IdentifierBranch.h"
 
 #include "TCanvas.h"
+#include "TEllipse.h"
+#include "TBox.h"
+#include "TLatex.h"
 ///  @brief Lightweight algorithm to read xAOD MDT sim hits and 
 ///  (fast-digitised) drift circles from SG and fill a 
 ///  validation NTuple with identifier and drift circle info.
@@ -45,27 +48,21 @@ namespace MuonValR4{
   private:
     Amg::Transform3D toChamberTrf(const ActsGeometryContext& gctx,
                                   const Identifier& hitId) const;
+
     StatusCode drawEventDisplay(const EventContext& ctx,
                                 const std::vector<const xAOD::MuonSimHit*>& simHits,
                                 const MuonR4::HoughSegmentSeed* foundMax) const;
 
-    StatusCode drawChi2(const EventContext& ctx,
-                        const std::vector<const xAOD::MuonSimHit*>& simHits,
-                        const MuonR4::HoughSegmentSeed* foundMax,
-                        const MuonR4::MuonSegment* foundSegment,
-                        const std::string & label) const;
+    StatusCode drawChi2(        const EventContext& ctx,
+                                const std::vector<const xAOD::MuonSimHit*>& simHits,
+                                const MuonR4::HoughSegmentSeed* foundMax,
+                                const MuonR4::MuonSegment* foundSegment,
+                                const std::string & label, const ActsGeometryContext & gctx) const;
     
-    void fillMaximum(const MuonR4::HoughSegmentSeed* foundMax);
-
-    StatusCode dumpUnMatched(const EventContext& ctx,
-                             const MuonR4::StationHoughSegmentSeedContainer& seedContainer,
-                             const std::set<const MuonR4::HoughSegmentSeed*>& matchedSeeds);
-
-
-
     // MDT sim hits in xAOD format 
     SG::ReadHandleKeyArray<xAOD::MuonSimHitContainer> m_inSimHitKeys {this, "SimHitKeys",{ "xMdtSimHits","xRpcSimHits","xTgcSimHits"}, "xAOD  SimHit collections"};
                                                           
+    SG::ReadHandleKey<MuonR4::StationHoughMaxContainer> m_inHoughMaximaKey{this, "StationHoughMaxContainer", "MuonHoughStationMaxima"};
     SG::ReadHandleKey<MuonR4::StationHoughSegmentSeedContainer> m_inHoughSegmentSeedKey{this, "StationHoughSegmentSeedContainer", "MuonHoughStationSegmentSeeds"};
     SG::ReadHandleKey<MuonR4::MuonSegmentContainer> m_inSegmentKey{this, "MuonSegmentContainer", "R4MuonSegments"};
     SG::ReadHandleKey<MuonR4::MuonSpacePointContainer> m_spacePointKey{this, "SpacePointContainer", "MuonSpacePoints"};
@@ -75,10 +72,9 @@ namespace MuonValR4{
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
     const MuonGMR4::MuonDetectorManager* m_r4DetMgr{nullptr};
 
-    Gaudi::Property<bool> m_dumpUnmatchedSeeds{this, "UnMatchedSeeds", true,
-                                          "DumpsAll seeds that do not belong to a true muon"};
     // // output tree - allows to compare the sim and fast-digitised hits
     MuonVal::MuonTesterTree m_tree{"MuonEtaHoughTest","MuonEtaHoughTransformTest"}; 
+    MuonVal::ScalarBranch<Long64_t>& m_evtNumber{m_tree.newScalar<Long64_t>("eventNumber")};
     MuonVal::ScalarBranch<int>&   m_out_stationName{m_tree.newScalar<int>("stationName")};
     MuonVal::ScalarBranch<int>&   m_out_stationEta{m_tree.newScalar<int>("stationEta")};
     MuonVal::ScalarBranch<int>&   m_out_stationPhi{m_tree.newScalar<int>("stationPhi")};
@@ -158,6 +154,8 @@ namespace MuonValR4{
     Gaudi::Property<bool> m_drawEvtDisplayFailure{this, "drawDisplayFailed", false};
     /// Draw the event dispalty for the successful cases
     Gaudi::Property<bool> m_drawEvtDisplaySuccess{this, "drawDisplaySuccss", false};
+    /// Add beamline constraint
+    Gaudi::Property<bool> m_doBeamspotConstraint{this, "doBeamspotConstraint", false};
     
     std::unique_ptr<TCanvas> m_allCan{};
     Gaudi::Property<std::string> m_allCanName{this, "AllCanvasName", "AllHoughiDiPuffDisplays.pdf"};

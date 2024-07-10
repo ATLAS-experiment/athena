@@ -52,6 +52,8 @@ namespace MuonR4{
             SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
 
             // data members
+            /// Add beamline constraint
+            Gaudi::Property<bool> m_doBeamspotConstraint{this, "doBeamspotConstraint", true};
     };
 }
 

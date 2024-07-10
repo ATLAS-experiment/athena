@@ -21,15 +21,14 @@ double SegmentFitHelpers::chiSqTermStrip(double x0, double y0, double tanPhi, do
     AmgSymMatrix(2) weightMatrix = measurement->covariance().inverse(); 
     return residual.dot(weightMatrix * residual); 
 }
-double SegmentFitHelpers::segmentChiSquare(const double* par, const std::vector<MuonR4::HoughHitType> & hits, std::vector<double> & chi2PerMeas){
+double SegmentFitHelpers::segmentChiSquare(const double* par, const std::vector<MuonR4::HoughHitType> & hits, std::vector<double> & chi2PerMeas, const ActsGeometryContext & gctx, bool doBSConstraint){
 
     double y0 = par[(int)MuonSegmentFitterEventData::parameterIndices::y0];
     double x0 = par[(int)MuonSegmentFitterEventData::parameterIndices::x0];
     double tanTheta = par[(int)MuonSegmentFitterEventData::parameterIndices::tanTheta];
     double tanPhi = par[(int)MuonSegmentFitterEventData::parameterIndices::tanPhi];
-    double chi2 = 0.;
-    double nDF = -2.;
-    size_t iHit = 0; 
+    double chi2{0.}, nDF{-2.};
+    size_t iHit{0u},nPhi{0u}; 
     for (auto & hit : hits){
         double localchi2 = 0; 
         switch (hit->primaryMeasurement()->type()){
@@ -40,6 +39,7 @@ double SegmentFitHelpers::segmentChiSquare(const double* par, const std::vector<
             case xAOD::UncalibMeasType::TgcStripType:
             case xAOD::UncalibMeasType::RpcStripType: 
                 localchi2 = SegmentFitHelpers::chiSqTermStrip(x0,y0,tanPhi,tanTheta, hit);
+                nPhi+=hit->measuresPhi(); 
                 nDF+=2; 
                 break; 
             case xAOD::UncalibMeasType::MMClusterType: 
@@ -55,5 +55,29 @@ double SegmentFitHelpers::segmentChiSquare(const double* par, const std::vector<
         chi2 += localchi2;  
         ++iHit; 
     }
+    if(doBSConstraint && 0 < nPhi && nPhi < 3){
+        double beamspotchi2 = SegmentFitHelpers::chiSqTermBeamspot(x0,y0,tanPhi,tanTheta, hits.front(), gctx);
+        nDF+=2;
+        chi2 += beamspotchi2;
+    }
     return (nDF != 0 ?  chi2/nDF : chi2); 
+}
+
+double SegmentFitHelpers::chiSqTermBeamspot(double x0, double y0, double tanPhi, double tanTheta, 
+                                            const MuonR4::HoughHitType & hit, const ActsGeometryContext & gctx){
+    Amg::Vector3D beamSpotVector = hit->muonChamber()->globalToLocalTrans(gctx).translation();
+    AmgSymMatrix(3) covariance (AmgSymMatrix(3)::Identity()); 
+    /// placeholder for a very generous beam spot: 300mm in X,Y (tracking volume), 20000 along Z
+    covariance(0,0) = 300.*300;
+    covariance(1,1) = 300.*300;
+    covariance(2,2) = 20000.*20000;
+    AmgSymMatrix(3) jacobian =  hit->muonChamber()->globalToLocalTrans(gctx).linear();
+    covariance = jacobian * covariance * jacobian.transpose(); 
+    covariance = covariance.inverse().eval();
+    Amg::MatrixX covariance2(2,2);
+    covariance2 = covariance.block<2,2>(0,0);
+
+    Amg::Vector2D residual {x0 + beamSpotVector.z() * tanPhi - beamSpotVector.x(),
+                            y0 + beamSpotVector.z() * tanTheta - beamSpotVector.y()};
+    return residual.dot(covariance2 * residual);
 }

@@ -15,10 +15,50 @@
 #include "TLine.h"
 #include "TArrow.h"
 #include "TMarker.h"
-#include "TEllipse.h"
-#include "TLatex.h"
+#include "TLegend.h"
 
 
+std::unique_ptr<TLatex> getTLatex(const std::string & label){
+    auto tl = std::make_unique<TLatex>( 0.15,0.8,label.c_str());
+    tl->SetNDC();
+    tl->SetTextFont(53); 
+    tl->SetTextSize(18); 
+    return tl;
+}
+
+std::unique_ptr<TEllipse> getDriftCircleShape(double x, double y, double r, bool maxHit){
+    auto ell = std::make_unique<TEllipse>(x, y, r);
+    if (r>1e-6) {
+        ell->SetLineColor(kRed);
+        ell->SetFillColor(kRed);
+    } else {
+        ell->SetLineColor(kBlue);
+        ell->SetFillColor(kBlue);
+    }
+    ell->SetFillStyle(0);
+    if (maxHit) {
+        ell->SetFillStyle(1001);
+        ell->SetFillColorAlpha(ell->GetFillColor(), 0.8); 
+    }
+    return ell;
+}
+
+std::unique_ptr<TBox> getBoxShape(double x1, double x2, double y1, double y2, bool isRPC, bool maxHit){
+    auto box = std::make_unique<TBox>(x1, y1, x2, y2);
+    if (isRPC) {
+        box->SetLineColor(kViolet); 
+        box->SetFillColor(kViolet);
+    } else {
+        box->SetLineColor(kGreen); 
+        box->SetFillColor(kGreen);
+    }
+    box->SetFillStyle(0);
+    if (maxHit) {
+        box->SetFillStyle(1001);
+        box->SetFillColorAlpha(box->GetFillColor(), 0.8); 
+    }
+    return box;
+}
 
 namespace MuonValR4 {
     
@@ -32,6 +72,7 @@ namespace MuonValR4 {
     StatusCode MuonHoughTransformTester::initialize() {
         ATH_CHECK(m_geoCtxKey.initialize());
         ATH_CHECK(m_inSimHitKeys.initialize());
+        ATH_CHECK(m_inHoughMaximaKey.initialize());
         ATH_CHECK(m_inHoughSegmentSeedKey.initialize());
         ATH_CHECK(m_inSegmentKey.initialize());
         ATH_CHECK(m_spacePointKey.initialize());
@@ -75,6 +116,9 @@ namespace MuonValR4 {
 
         auto simHitCollections = m_inSimHitKeys.makeHandles(ctx);
         
+        SG::ReadHandle<MuonR4::StationHoughMaxContainer> readHoughPeaks(m_inHoughMaximaKey, ctx);
+        ATH_CHECK(readHoughPeaks.isPresent());        
+        
         SG::ReadHandle<MuonR4::StationHoughSegmentSeedContainer> readSegmentSeeds(m_inHoughSegmentSeedKey, ctx);
         ATH_CHECK(readSegmentSeeds.isPresent());        
         
@@ -83,7 +127,6 @@ namespace MuonValR4 {
 
         ATH_MSG_DEBUG("Succesfully retrieved input collections");
 
-        std::set<const MuonR4::HoughSegmentSeed*> matchedSeeds{};
         // map the drift circles to identifiers. 
         // The fast digi should only generate one circle per tube. 
         std::map<std::pair<const MuonGMR4::MuonChamber*, HepMC::ConstGenParticlePtr>, std::vector<const xAOD::MuonSimHit*>> simHitMap{};
@@ -112,7 +155,7 @@ namespace MuonValR4 {
             HepMC::ConstGenParticlePtr genParticlePtr = stationAndParticle.second;
             const xAOD::MuonSimHit* simHit = hits.front();
             const Identifier ID = simHit->identify();
-            const MuonGMR4::MuonChamber* chamber = m_r4DetMgr->getReadoutElement(ID)->getChamber();
+            const MuonGMR4::MuonReadoutElement* reElement = m_r4DetMgr->getReadoutElement(ID);
                        
             const Amg::Transform3D toChamber{toChamberTrf(gctx, ID)};
             const Amg::Vector3D localPos{toChamber * xAOD::toEigen(simHit->localPosition())};
@@ -122,9 +165,10 @@ namespace MuonValR4 {
             const std::optional<double> lambda = Amg::intersect<3>(localPos, chamberDir, Amg::Vector3D::UnitZ(), 0.);
             Amg::Vector3D chamberPos = localPos + (*lambda)*chamberDir;
 
-            m_out_stationName = chamber->stationName();
-            m_out_stationEta = chamber->stationEta();
-            m_out_stationPhi = chamber->stationPhi();
+            m_evtNumber = ctx.eventID().event_number();
+            m_out_stationName = reElement->stationName();
+            m_out_stationEta = reElement->stationEta();
+            m_out_stationPhi = reElement->stationPhi();
             /// Global coordinates
             m_out_gen_Eta   = genParticlePtr->momentum().eta();
             m_out_gen_Phi= genParticlePtr->momentum().phi();
@@ -149,7 +193,7 @@ namespace MuonValR4 {
             m_out_gen_z0 = chamberPos.y(); 
             m_out_gen_x0 = chamberPos.x(); 
 
-            const std::vector<MuonR4::HoughSegmentSeed>& houghMaxima = houghPeakMap[chamber];
+            const std::vector<MuonR4::HoughSegmentSeed>& houghMaxima = houghPeakMap[reElement->getChamber()];
             if (houghMaxima.empty()){
                 if (!m_tree.fill(ctx)) {
                     return StatusCode::FAILURE;
@@ -190,17 +234,83 @@ namespace MuonValR4 {
             }
             /// Maximum could be associated to the hit
             if (foundMax != nullptr){
-                matchedSeeds.insert(foundMax);
-                fillMaximum(foundMax);
+                m_out_hasMax = true; 
+                m_out_max_hasPhiExtension = foundMax->hasPhiExtension(); 
+                m_out_max_tantheta = foundMax->tanTheta();
+                m_out_max_z0 = foundMax->interceptY();
+                if (m_out_max_hasPhiExtension.getVariable()){
+                    m_out_max_tanphi = foundMax->tanPhi();
+                    m_out_max_x0 = foundMax->interceptX(); 
+                }
                 m_out_max_nHits = max_hits; 
                 m_out_max_nEtaHits = max_etaHits; 
                 m_out_max_nPhiHits = max_phiHits; 
+                unsigned int nMdtMax{0}, nRpcMax{0}, nTgcMax{0}, nMmMax{0}, nsTgcMax{0}; 
+                for (const MuonR4::HoughHitType & houghSP: foundMax->getHitsInMax()){
+                    /// Skip all space points that don' contain any phi measurement
+                    
+                    const xAOD::UncalibratedMeasurement* meas = houghSP->primaryMeasurement();
+                    switch (meas->type()) {
+                        case xAOD::UncalibMeasType::MdtDriftCircleType: 
+                            m_max_driftCircleId.push_back(houghSP->identify());
+                            m_max_driftCircleTubePos.push_back(houghSP->positionInChamber());
+                            m_max_driftCirclRadius.push_back(houghSP->driftRadius());
+                            m_max_driftCircleDriftUncert.push_back(houghSP->uncertainty()[0]);
+                            m_max_driftCircleTubeLength.push_back(houghSP->uncertainty()[1]);
+                             ++nMdtMax;
+                            break;
+                        case xAOD::UncalibMeasType::RpcStripType:
+                            m_max_rpcHitId.push_back(houghSP->identify());
+                            m_max_rpcHitPos.push_back(houghSP->positionInChamber());
+                            m_max_rpcHitHasPhiMeas.push_back(houghSP->measuresPhi());
+                            m_max_rpcHitErrorX.push_back(houghSP->uncertainty()[0]);
+                            m_max_rpcHitErrorY.push_back(houghSP->uncertainty()[1]);
+                            ++nRpcMax;
+                            break;
+                        case xAOD::UncalibMeasType::TgcStripType:
+                            m_max_tgcHitId.push_back(houghSP->identify());
+                            m_max_tgcHitPos.push_back(houghSP->positionInChamber());
+                            m_max_tgcHitHasPhiMeas.push_back(houghSP->measuresPhi());
+                            m_max_tgcHitErrorX.push_back(houghSP->uncertainty()[0]);
+                            m_max_tgcHitErrorY.push_back(houghSP->uncertainty()[1]);
+                            ++nTgcMax;
+                            break;
+                        case xAOD::UncalibMeasType::sTgcStripType:
+                            m_max_stgcHitId.push_back(houghSP->identify());
+                            m_max_stgcHitPos.push_back(houghSP->positionInChamber());
+                            m_max_stgcHitHasPhiMeas.push_back(houghSP->measuresPhi());
+                            m_max_stgcHitErrorX.push_back(houghSP->uncertainty()[0]);
+                            m_max_stgcHitErrorY.push_back(houghSP->uncertainty()[1]);
+                            ++nsTgcMax;
+                            break;
+                        case xAOD::UncalibMeasType::MMClusterType:
+                            m_max_MmHitId.push_back(houghSP->identify());
+                            m_max_MmHitPos.push_back(houghSP->positionInChamber());
+                            m_max_MmHitIsStero.push_back(m_idHelperSvc->mmIdHelper().isStereo(houghSP->identify()));
+                            m_max_MmHitErrorX.push_back(houghSP->uncertainty()[0]);
+                            m_max_MmHitErrorY.push_back(houghSP->uncertainty()[1]);
+                            ++nMmMax;
+                            break;
+                        default:
+                            ATH_MSG_WARNING("Technology "<<m_idHelperSvc->toString(houghSP->identify())
+                                        <<" not yet implemented");                        
+                    }                    
+                }
+                m_out_max_nMdt = nMdtMax;
+                m_out_max_nRpc = nRpcMax;
+                m_out_max_nTgc = nTgcMax;
+                m_out_max_nsTgc = nsTgcMax;
+                m_out_max_nMm = nMmMax;
 
                 bool foundSegment = false; 
                 const MuonR4::MuonSegment* theSegment = nullptr; 
-                max_hits =  max_etaHits = max_phiHits; 
+                max_hits = 0;
+                max_etaHits = 0;
+                max_phiHits = 0; 
                 for (const MuonR4::MuonSegment & segment : *readMuonSegments){             
-                    size_t nFound{0}, nEta{0}, nPhi{0}; 
+                    size_t nFound{0}; 
+                    size_t nEta{0};
+                    size_t nPhi{0}; 
                     for (const xAOD::MuonSimHit* simHit : hits) {
                         for (const xAOD::UncalibratedMeasurement* hitOnMax : segment.measurements()) {
                             if(hitOnMax->type() == xAOD::UncalibMeasType::MdtDriftCircleType &&
@@ -239,114 +349,16 @@ namespace MuonValR4 {
 
                 if (m_drawEvtDisplaySuccess) {
                     ATH_CHECK(drawEventDisplay(ctx, hits, foundMax));
-                    ATH_CHECK(drawChi2(ctx, hits, foundMax, theSegment ,"ValidMin"));
-                   
-
+                    ATH_CHECK(drawChi2(ctx, hits, foundMax, theSegment ,"ValidMin", gctx));
                 }
             } else if (m_drawEvtDisplayFailure) {
                 ATH_CHECK(drawEventDisplay(ctx, hits, nullptr));          
             }
             if (!m_tree.fill(ctx)) return StatusCode::FAILURE;
         }
-        ATH_CHECK(dumpUnMatched(ctx, *readSegmentSeeds, matchedSeeds));
         return StatusCode::SUCCESS;
     }
-    void MuonHoughTransformTester::fillMaximum(const MuonR4::HoughSegmentSeed* foundMax) {
-        if (!foundMax) return;
-        m_out_hasMax = true; 
-        m_out_max_hasPhiExtension = foundMax->hasPhiExtension(); 
-        m_out_max_tantheta = foundMax->tanTheta();
-        m_out_max_z0 = foundMax->interceptY();
-        if (m_out_max_hasPhiExtension.getVariable()){
-            m_out_max_tanphi = foundMax->tanPhi();
-            m_out_max_x0 = foundMax->interceptX(); 
-        }
-        unsigned int nMdtMax{0}, nRpcMax{0}, nTgcMax{0}, nMmMax{0}, nsTgcMax{0}; 
-        for (const MuonR4::HoughHitType & houghSP: foundMax->getHitsInMax()){
-            /// Skip all space points that don' contain any phi measurement
-            
-            const xAOD::UncalibratedMeasurement* meas = houghSP->primaryMeasurement();
-            switch (meas->type()) {
-                case xAOD::UncalibMeasType::MdtDriftCircleType: 
-                    m_max_driftCircleId.push_back(houghSP->identify());
-                    m_max_driftCircleTubePos.push_back(houghSP->positionInChamber());
-                    m_max_driftCirclRadius.push_back(houghSP->driftRadius());
-                    m_max_driftCircleDriftUncert.push_back(houghSP->uncertainty()[0]);
-                    m_max_driftCircleTubeLength.push_back(houghSP->uncertainty()[1]);
-                        ++nMdtMax;
-                    break;
-                case xAOD::UncalibMeasType::RpcStripType:
-                    m_max_rpcHitId.push_back(houghSP->identify());
-                    m_max_rpcHitPos.push_back(houghSP->positionInChamber());
-                    m_max_rpcHitHasPhiMeas.push_back(houghSP->measuresPhi());
-                    m_max_rpcHitErrorX.push_back(houghSP->uncertainty()[0]);
-                    m_max_rpcHitErrorY.push_back(houghSP->uncertainty()[1]);
-                    ++nRpcMax;
-                    break;
-                case xAOD::UncalibMeasType::TgcStripType:
-                    m_max_tgcHitId.push_back(houghSP->identify());
-                    m_max_tgcHitPos.push_back(houghSP->positionInChamber());
-                    m_max_tgcHitHasPhiMeas.push_back(houghSP->measuresPhi());
-                    m_max_tgcHitErrorX.push_back(houghSP->uncertainty()[0]);
-                    m_max_tgcHitErrorY.push_back(houghSP->uncertainty()[1]);
-                    ++nTgcMax;
-                    break;
-                case xAOD::UncalibMeasType::sTgcStripType:
-                    m_max_stgcHitId.push_back(houghSP->identify());
-                    m_max_stgcHitPos.push_back(houghSP->positionInChamber());
-                    m_max_stgcHitHasPhiMeas.push_back(houghSP->measuresPhi());
-                    m_max_stgcHitErrorX.push_back(houghSP->uncertainty()[0]);
-                    m_max_stgcHitErrorY.push_back(houghSP->uncertainty()[1]);
-                    ++nsTgcMax;
-                    break;
-                case xAOD::UncalibMeasType::MMClusterType:
-                    m_max_MmHitId.push_back(houghSP->identify());
-                    m_max_MmHitPos.push_back(houghSP->positionInChamber());
-                    m_max_MmHitIsStero.push_back(m_idHelperSvc->mmIdHelper().isStereo(houghSP->identify()));
-                    m_max_MmHitErrorX.push_back(houghSP->uncertainty()[0]);
-                    m_max_MmHitErrorY.push_back(houghSP->uncertainty()[1]);
-                    ++nMmMax;
-                    break;
-                default:
-                    ATH_MSG_WARNING("Technology "<<m_idHelperSvc->toString(houghSP->identify())
-                                <<" not yet implemented");                        
-            }                    
-        }
-        m_out_max_nMdt = nMdtMax;
-        m_out_max_nRpc = nRpcMax;
-        m_out_max_nTgc = nTgcMax;
-        m_out_max_nsTgc = nsTgcMax;
-        m_out_max_nMm = nMmMax;
 
-    }
-    StatusCode MuonHoughTransformTester::dumpUnMatched(const EventContext& ctx,
-                                                       const MuonR4::StationHoughSegmentSeedContainer& seedContainer,
-                                                       const std::set<const MuonR4::HoughSegmentSeed*>& matchedSeeds) {
-        if (!m_dumpUnmatchedSeeds){
-            return StatusCode::SUCCESS;
-        }
-        for (const auto& maxInStation : seedContainer) {            
-            
-            const MuonGMR4::MuonChamber* chamber = maxInStation.chamber();
-            for (const MuonR4::HoughSegmentSeed& dumpMeMayBe : maxInStation.getMaxima()) {
-               if (matchedSeeds.count(&dumpMeMayBe)) {
-                  ATH_MSG_VERBOSE("Do not dump the seed twice");
-                  continue;
-               }
-               fillMaximum(&dumpMeMayBe);
-               m_out_gen_Eta = -666;
-               m_out_gen_Phi = -666;
-               m_out_gen_Pt = -1;
-               m_out_gen_nHits = 0;
-               m_out_stationName = chamber->stationName();
-               m_out_stationEta = chamber->stationEta();
-               m_out_stationPhi = chamber->stationPhi();
-
-               if (!m_tree.fill(ctx)) return StatusCode::FAILURE;
-            }
-        }
-        return StatusCode::SUCCESS;                     
-    }
     StatusCode MuonHoughTransformTester::drawEventDisplay(const EventContext& ctx,
                                                        const std::vector<const xAOD::MuonSimHit*>& simHits,
                                                        const MuonR4::HoughSegmentSeed* foundMax) const {
@@ -360,8 +372,9 @@ namespace MuonValR4 {
         auto readSpacePoints = SG::makeHandle(m_spacePointKey, ctx);  
         ATH_CHECK(readSpacePoints.isPresent()); 
 
-        double zmin{1.e9}, zmax{-1.e9}, ymin{1.e9}, ymax{-1.e9}; 
-        std::vector<std::pair<double,double>> shPos{}, shDir{};
+        double zmin{1.e9}, zmax{-1.e9}, ymin{1.e9}, ymax{-1.e9}, xmin{1.e9}, xmax{-1.e9}; 
+        std::vector<std::pair<double,double>> yzPos{}, yzDir{};
+        std::vector<std::pair<double,double>> xzPos{}, xzDir{};
 
         const MuonGMR4::MuonChamber* refChamber = m_r4DetMgr->getChamber(simHits[0]->identify());
         
@@ -372,12 +385,16 @@ namespace MuonValR4 {
             const Amg::Vector3D localPos{toChamber * xAOD::toEigen(thisHit->localPosition())};
             const Amg::Vector3D chamberDir = toChamber.linear() * xAOD::toEigen(thisHit->localDirection());
 
-            shPos.push_back(std::make_pair(localPos.y(), localPos.z())); 
-            shDir.push_back(std::make_pair(chamberDir.y(), chamberDir.z())); 
+            yzPos.push_back(std::make_pair(localPos.y(), localPos.z())); 
+            yzDir.push_back(std::make_pair(chamberDir.y(), chamberDir.z())); 
+            xzPos.push_back(std::make_pair(localPos.x(), localPos.z())); 
+            xzDir.push_back(std::make_pair(chamberDir.x(), chamberDir.z())); 
             zmin = std::min(localPos.z(), zmin);
             zmax = std::max(localPos.z(), zmax);
             ymin = std::min(localPos.y(), ymin);
             ymax = std::max(localPos.y(), ymax);
+            xmin = std::min(localPos.x(), xmin);
+            xmax = std::max(localPos.x(), xmax);
         }
                 
         TCanvas myCanvas("can","can",800,600); 
@@ -394,78 +411,20 @@ namespace MuonValR4 {
         double z1 = 0.5 * (zmax + zmin) + 0.5 * height;  
         auto frame = myCanvas.DrawFrame(y0,z0,y1,z1); 
         double frameWidth = frame->GetXaxis()->GetXmax() - frame->GetXaxis()->GetXmin(); 
-                
+        frame->GetXaxis()->SetTitle("y [mm]");
+        frame->GetYaxis()->SetTitle("z [mm]");
+ 
         std::vector<std::unique_ptr<TObject>> primitives; 
-        for (size_t h = 0; h < shPos.size(); ++h){
-            auto  l = std::make_unique<TArrow>(shPos.at(h).first, shPos.at(h).second,shPos.at(h).first + 0.3 * frameWidth * shDir.at(h).first, shPos.at(h).second + 0.3 * frameWidth * shDir.at(h).second); 
+        // archery with spacepoints
+        for (size_t h = 0; h < yzPos.size(); ++h){
+            auto  l = std::make_unique<TArrow>(yzPos.at(h).first, yzPos.at(h).second,yzPos.at(h).first + 0.3 * frameWidth * yzDir.at(h).first, yzPos.at(h).second + 0.3 * frameWidth * yzDir.at(h).second); 
             l->SetLineStyle(kDotted);
             l->Draw();
             primitives.emplace_back(std::move(l));
-            auto m = std::make_unique<TMarker>(shPos.at(h).first, shPos.at(h).second,kFullDotLarge); 
+            auto m = std::make_unique<TMarker>(yzPos.at(h).first, yzPos.at(h).second,kFullDotLarge); 
             m->Draw(); 
             primitives.emplace_back(std::move(m));
         }
-        
-        for (auto spbucket : *readSpacePoints) {            
-            if (spbucket->muonChamber() != refChamber) continue;
-            std::set<MuonR4::HoughHitType> hitsOnMax{};
-            if (foundMax){
-                hitsOnMax.insert(foundMax->getHitsInMax().begin(), foundMax->getHitsInMax().end()); 
-            } 
-            for (auto & hit : *spbucket){
-                ATH_MSG_DEBUG( "         HIT @ "<<Amg::toString(hit->positionInChamber())<<"  "<<m_idHelperSvc->toString(hit->identify())<<" with r = "<<hit->driftRadius()); 
-                /// Space point is a mdt space point
-                if (hit->driftRadius() > 1e-6) {
-                    auto  ell = std::make_unique<TEllipse>(hit->positionInChamber().y(), 
-                                                          hit->positionInChamber().z(),
-                                                          hit->driftRadius());
-                    ell->SetLineColor(kRed);
-                    ell->SetFillColor(kRed);
-                    if (hitsOnMax.count(hit)) {
-                        ell->SetFillStyle(1001);
-                        ell->SetFillColorAlpha(ell->GetFillColor(), 0.8); 
-                    }else{
-                        ell->SetFillStyle(0);
-                    }
-                    ell->Draw(); 
-                    primitives.emplace_back(std::move(ell));
-                } else {
-                    auto  m = std::make_unique<TEllipse>(hit->positionInChamber().y(), 
-                                                         hit->positionInChamber().z(), 
-                                                         hit->uncertainty().y());
-                    m->SetLineColor(kBlue); 
-                    m->SetFillColor(kBlue); 
-                    m->SetFillStyle(0);
-                    
-                    if (hit->measuresPhi() && hit->measuresEta()) {
-                        m->SetLineColor(kViolet); 
-                        m->SetFillColor(kViolet);
-                    } else if (hit->measuresPhi())  {
-                        m->SetLineColor(kGreen); 
-                        m->SetFillColor(kGreen);
-                    }
-                    /// Fill the ellipse if the hit is on the hough maximum
-                    if (hitsOnMax.count(hit)) {
-                        m->SetFillStyle(1001);
-                        m->SetFillColorAlpha(m->GetFillColor(), 0.8); 
-                    }
-                    m->Draw();
-                    primitives.emplace_back(std::move(m));
-                }
-            }
-        }
-            
-        std::stringstream legendLabel{};
-        legendLabel<<"Evt "<<ctx.evt()<<" station: "<<m_idHelperSvc->mdtIdHelper().stationNameString(refChamber->stationName());
-        legendLabel<<"eta: "<<refChamber->stationEta()<<", phi: "<<refChamber->stationPhi();
-        legendLabel<<", found maximum: "<<( foundMax ? "si" : "no");
-
-
-        TLatex tl( 0.15,0.8,legendLabel.str().c_str());
-        tl.SetNDC();
-        tl.SetTextFont(53); 
-        tl.SetTextSize(18); 
-        tl.Draw();
         if (foundMax) {
             auto  mrk = std::make_unique<TMarker>( foundMax->interceptY(), 0., kFullTriangleUp);
             mrk->SetMarkerSize(1);
@@ -477,15 +436,141 @@ namespace MuonValR4 {
             trajectory->Draw();
             primitives.push_back(std::move(trajectory));
         }
+ 
+        // shapes with spacepoints
+        for (auto spbucket : *readSpacePoints) {
+            if (spbucket->muonChamber() != refChamber) continue;
+            std::set<MuonR4::HoughHitType> hitsOnMax{};
+            if (foundMax){
+                hitsOnMax.insert(foundMax->getHitsInMax().begin(), foundMax->getHitsInMax().end()); 
+            } 
+            for (auto & hit : *spbucket){
+                ATH_MSG_DEBUG( "         HIT @ "<<Amg::toString(hit->positionInChamber())<<"  "<<m_idHelperSvc->toString(hit->identify())<<" with r = "<<hit->driftRadius()); 
+                /// Space point is a mdt space point
+                // for circle making 
+                double x, y;
+                x = hit->positionInChamber().y();
+                y = hit->positionInChamber().z();  // confusing i know
+                double r = hit->driftRadius();
+                // for box making 
+                double bx1, bx2, by1, by2;
+                bx1 = hit->positionInChamber().y() - 3*hit->uncertainty().y();
+                bx2 = hit->positionInChamber().y() + 3*hit->uncertainty().y();
+                by1 = hit->positionInChamber().z() - 0.01*height;
+                by2 = hit->positionInChamber().z() + 0.01*height;
+                bool isMaxHit = hitsOnMax.count(hit);
+                if (r>1e-6) {
+                    auto ell = getDriftCircleShape(x, y, r, isMaxHit);
+                    ell->Draw();
+                    primitives.emplace_back(std::move(ell));
+                } else {
+                    // RPC and TGC
+                    if (hit->measuresPhi()) {
+                        auto box = getBoxShape(bx1, bx2, by1, by2, hit->measuresPhi() && hit->measuresEta(), isMaxHit);
+                        box->Draw();
+                        primitives.emplace_back(std::move(box));
+                    } else {
+                        auto ell = getDriftCircleShape(x, y, r, isMaxHit);
+                        ell->Draw();
+                        primitives.emplace_back(std::move(ell));
+                    }
+                }
+            }
+        }
+            
+        std::stringstream legendLabel{};
+        legendLabel<<"Evt "<<ctx.evt()<<" station: "<<m_idHelperSvc->mdtIdHelper().stationNameString(refChamber->stationName());
+        legendLabel<<"eta: "<<refChamber->stationEta()<<", phi: "<<refChamber->stationPhi();
+        legendLabel<<", found maximum: "<<( foundMax ? "si" : "no");
+
+        std::unique_ptr<TLatex> tl = getTLatex(legendLabel.str());
+        tl->Draw();
         static std::atomic<unsigned int> pdfCounter{0};
         std::stringstream pdfName{};
-        pdfName<<"HoughEvt_"<<ctx.evt()<<"_"<<(++pdfCounter)
+        pdfName<<"HoughEvt_YZ_"<<ctx.evt()<<"_"<<(++pdfCounter)
                 <<m_idHelperSvc->mdtIdHelper().stationNameString(refChamber->stationName())<<"_"
                 <<refChamber->stationEta()<<"_"<<refChamber->stationPhi()<<".pdf"; 
         
         myCanvas.SaveAs(pdfName.str().c_str());
         myCanvas.SaveAs(m_allCanName.value().c_str());
         primitives.clear();
+
+        //////////////////////////////////////////  
+        /// BEEG WALL OF COPYING STARTING HERE ///
+        // XZ plot
+        TCanvas xzCanvas("can","can",800,600); 
+        xzCanvas.cd();
+
+        width = (xmax - xmin)*1.1;
+        if (height > width) width = height; 
+        else height = width;
+
+        double x0 = 0.5 * (xmax + xmin) - 0.5 * width;  
+        double x1 = 0.5 * (xmax + xmin) + 0.5 * width;  
+        auto xzframe = xzCanvas.DrawFrame(x0,z0,x1,z1); 
+        frameWidth = xzframe->GetXaxis()->GetXmax() - frame->GetXaxis()->GetXmin(); 
+        xzframe->GetXaxis()->SetTitle("x [mm]");
+        xzframe->GetYaxis()->SetTitle("z [mm]");
+ 
+        // archery with spacepoints
+        for (size_t h = 0; h < xzPos.size(); ++h){
+            auto  l = std::make_unique<TArrow>(xzPos.at(h).first, xzPos.at(h).second,xzPos.at(h).first + 0.3 * frameWidth * xzDir.at(h).first, xzPos.at(h).second + 0.3 * frameWidth * xzDir.at(h).second); 
+            l->SetLineStyle(kDotted);
+            l->Draw();
+            primitives.emplace_back(std::move(l));
+            auto m = std::make_unique<TMarker>(xzPos.at(h).first, xzPos.at(h).second,kFullDotLarge); 
+            m->Draw(); 
+            primitives.emplace_back(std::move(m));
+        }
+        if (foundMax) {
+            auto  mrk = std::make_unique<TMarker>( foundMax->interceptX(), 0., kFullTriangleUp);
+            mrk->SetMarkerSize(1);
+            mrk->SetMarkerColor(kOrange-3); 
+            mrk->Draw();
+            primitives.emplace_back(std::move(mrk));
+            auto trajectory = std::make_unique<TArrow>( foundMax->interceptX(), 0., foundMax->interceptX() +  0.3 * frameWidth * foundMax->tanTheta(), 0.3 * frameWidth);
+            trajectory->SetLineColor(kOrange-3); 
+            trajectory->Draw();
+            primitives.push_back(std::move(trajectory));
+        }
+ 
+        // shapes with spacepoints
+        for (auto spbucket : *readSpacePoints) {
+            if (spbucket->muonChamber() != refChamber) continue;
+            std::set<MuonR4::HoughHitType> hitsOnMax{};
+            if (foundMax){
+                hitsOnMax.insert(foundMax->getHitsInMax().begin(), foundMax->getHitsInMax().end()); 
+            } 
+            for (auto & hit : *spbucket){
+                ATH_MSG_DEBUG( "         HIT @ "<<Amg::toString(hit->positionInChamber())<<"  "<<m_idHelperSvc->toString(hit->identify())<<" with r = "<<hit->driftRadius()); 
+                /// Space point is a mdt space point
+                // for circle making 
+                double r = hit->driftRadius();
+                // for box making 
+                double bx1, bx2, by1, by2;
+                bx1 = hit->positionInChamber().x() - 3*hit->uncertainty().x();
+                bx2 = hit->positionInChamber().x() + 3*hit->uncertainty().x();
+                by1 = hit->positionInChamber().z() - 0.01*height;
+                by2 = hit->positionInChamber().z() + 0.01*height;
+                bool isMaxHit = hitsOnMax.count(hit);
+                // for xz plot, ignore MDT completely
+                if (r<1e-6 && hit->measuresPhi()) {
+                    auto box = getBoxShape(bx1, bx2, by1, by2, hit->measuresPhi() && hit->measuresEta(), isMaxHit);
+                    box->Draw();
+                    primitives.emplace_back(std::move(box));
+                }
+            }
+        }
+            
+        std::unique_ptr<TLatex> tl2 = getTLatex(legendLabel.str());
+        tl2->Draw();
+        std::stringstream xzpdfName{};
+        xzpdfName<<"HoughEvt_XZ_"<<ctx.evt()<<"_"<<(++pdfCounter)
+                <<m_idHelperSvc->mdtIdHelper().stationNameString(refChamber->stationName())<<"_"
+                <<refChamber->stationEta()<<"_"<<refChamber->stationPhi()<<".pdf"; 
+        
+        xzCanvas.SaveAs(xzpdfName.str().c_str());
+        xzCanvas.SaveAs(m_allCanName.value().c_str());
         return StatusCode::SUCCESS;
     }    
     
@@ -497,10 +582,10 @@ namespace MuonValR4 {
                                 const std::vector<const xAOD::MuonSimHit*>& simHits,
                                 const MuonR4::HoughSegmentSeed* foundMax,
                                 const MuonR4::MuonSegment* foundSegment,
-                                const std::string & label) const{
+                                const std::string & label, const ActsGeometryContext & gctx) const{
         
         if (simHits.size() < 4) return StatusCode::SUCCESS;
-        std::vector<std::pair<double,double>> shPos{}, shDir{};
+        std::vector<std::pair<double,double>> yzPos{}, yzDir{};
 
         const MuonGMR4::MuonChamber* refChamber = m_r4DetMgr->getChamber(simHits[0]->identify());
         std::cout <<" ref chamber = "<<refChamber<<std::endl;
@@ -528,7 +613,7 @@ namespace MuonValR4 {
                 double t = hChi2.GetYaxis()->GetBinCenter(by); 
                 pars[(int)MuonR4::MuonSegmentFitterEventData::parameterIndices::y0] = y;
                 pars[(int)MuonR4::MuonSegmentFitterEventData::parameterIndices::tanTheta] = t;
-                hChi2.Fill(y,t,MuonR4::SegmentFitHelpers::segmentChiSquare(pars.data(),foundMax->getHitsInMax(),chi2PerLayer));
+                hChi2.Fill(y,t,MuonR4::SegmentFitHelpers::segmentChiSquare(pars.data(),foundMax->getHitsInMax(),chi2PerLayer, gctx, m_doBeamspotConstraint.value()));
             }
         }
         int mx,my,mz = 0;
@@ -543,6 +628,7 @@ namespace MuonValR4 {
         hChi2.GetXaxis()->SetTitle("y0[mm]");
         hChi2.GetYaxis()->SetTitle("tan #Theta");
         hChi2.Draw("COLZ");
+        hChi2.SetStats(0);
         std::shared_ptr<TH2D> hClone (dynamic_cast<TH2D*>(hChi2.Clone("leeeeeak"))); 
         hClone->SetContour(5, contourLevels.data()); 
         hClone->SetFillStyle(0);
@@ -572,6 +658,14 @@ namespace MuonValR4 {
             gx2Min.SetY(foundSegment->tanTheta());
             gx2Min.Draw();
         }
+        
+        // adding a legend for all the dots we have! 
+        TLegend leg(0.65, 0.38, 0.90, 0.15);
+        leg.AddEntry(&mark, "True parameters", "P");
+        leg.AddEntry(&houghMin, "Hough maximum", "P");
+        leg.AddEntry(&th2min, "#chi2 TH2 minimum", "P");
+        leg.AddEntry(&gx2Min, "#chi2 Minuit minimum", "P");
+        leg.Draw();
             
         std::stringstream legendLabel{};
         legendLabel<<"Method "<<label<<" Evt "<<ctx.evt()<<" station: "<<m_idHelperSvc->mdtIdHelper().stationNameString(refChamber->stationName());
@@ -579,11 +673,9 @@ namespace MuonValR4 {
         legendLabel<<", found maximum: "<<( foundMax ? "si" : "no");
 
 
-        TLatex tl( 0.15,0.8,legendLabel.str().c_str());
-        tl.SetNDC();
-        tl.SetTextFont(53); 
-        tl.SetTextSize(18); 
-        tl.Draw();
+        std::unique_ptr<TLatex> tl = getTLatex(legendLabel.str());
+        tl->Draw();
+
         static std::atomic<unsigned int> pdfCounter{0};
         std::stringstream pdfName{};
         pdfName<<"Chi2_Eta_"<<label<<"_"<<ctx.evt()<<"_"<<(++pdfCounter)
@@ -607,7 +699,7 @@ namespace MuonValR4 {
                 double t = hChi3.GetYaxis()->GetBinCenter(by); 
                 pars[(int)MuonR4::MuonSegmentFitterEventData::parameterIndices::x0] = y;
                 pars[(int)MuonR4::MuonSegmentFitterEventData::parameterIndices::tanPhi] = t;
-                hChi3.Fill(y,t,MuonR4::SegmentFitHelpers::segmentChiSquare(pars.data(),foundMax->getHitsInMax(),chi2PerLayer));
+                hChi3.Fill(y,t,MuonR4::SegmentFitHelpers::segmentChiSquare(pars.data(),foundMax->getHitsInMax(),chi2PerLayer, gctx, m_doBeamspotConstraint.value()));
             }
         }
         mbin = hChi3.GetMinimumBin(mx, my, mz); 
@@ -619,6 +711,7 @@ namespace MuonValR4 {
         hChi3.GetXaxis()->SetTitle("x0[mm]");
         hChi3.GetYaxis()->SetTitle("tan #Phi");
         hChi3.SetContour(100000);
+        hChi3.SetStats(0);
         hChi3.Draw("COLZ");
         hClone.reset (dynamic_cast<TH2D*>(hChi3.Clone("leeeeeak"))); 
         hClone->SetContour(5, contourLevels.data()); 
@@ -650,17 +743,25 @@ namespace MuonValR4 {
             gx2Min2.Draw();
         }
             
+        // adding a legend for all the dots we have! 
+        TLegend leg2(0.65, 0.38, 0.90, 0.15);
+        leg.AddEntry(&mark, "True parameters", "P");
+        leg2.AddEntry(&houghMin, "Hough maximum", "P");
+        leg2.AddEntry(&th2min, "#chi2 TH2 minimum", "P");
+        leg2.AddEntry(&gx2Min, "#chi2 Minuit minimum", "P");
+        leg2.Draw();
+
         std::stringstream legendLabel2{};
         legendLabel2<<"Method "<<label<<" Evt "<<ctx.evt()<<" station: "<<m_idHelperSvc->mdtIdHelper().stationNameString(refChamber->stationName());
         legendLabel2<<"eta: "<<refChamber->stationEta()<<", phi: "<<refChamber->stationPhi();
         legendLabel2<<", found maximum: "<<( foundMax ? "si" : "no");
 
 
-        TLatex tl2( 0.15,0.8,legendLabel2.str().c_str());
-        tl2.SetNDC();
-        tl2.SetTextFont(53); 
-        tl2.SetTextSize(18); 
-        tl2.Draw();
+        std::unique_ptr<TLatex> tl2 = getTLatex(legendLabel2.str());
+        tl2->SetNDC();
+        tl2->SetTextFont(53); 
+        tl2->SetTextSize(18); 
+        tl2->Draw();
         std::stringstream pdfName2{};
         pdfName2<<"Chi2_Phi_"<<label<<"_"<<ctx.evt()<<"_"<<(++pdfCounter)
                 <<m_idHelperSvc->mdtIdHelper().stationNameString(refChamber->stationName())<<"_"

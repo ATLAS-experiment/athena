@@ -129,10 +129,8 @@ StatusCode MuonEtaHoughTransformAlg::processBucket(
         chamberCenter + 0.5 * data.houghPlane->nBinsY() * m_targetResoIntercept;
     // Protection for very wide buckets - if the search space does not cover all
     // of the bucket, widen the bin size so that we cover everything
-
-
     searchStart = std::min(searchStart, bucket.searchWindowIntercept.first -
-                                            m_minSigmasSearchIntercept * m_targetResoIntercept);
+                                        m_minSigmasSearchIntercept * m_targetResoIntercept);
     searchEnd = std::max(searchEnd, bucket.searchWindowIntercept.second +
                                         m_minSigmasSearchIntercept * m_targetResoIntercept);
     // also treat tan(theta)
