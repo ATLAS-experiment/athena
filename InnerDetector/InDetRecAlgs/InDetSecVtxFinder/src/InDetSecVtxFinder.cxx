@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /***************************************************************************
                          InDetSecVtxFinder.cxx  -  Description
@@ -20,6 +20,7 @@
 #include "VxSecVertex/VxSecVertexInfo.h"
 // normal includes
 #include "TrkParticleBase/TrackParticleBaseCollection.h"
+#include "AthContainers/ConstAccessor.h"
 
 namespace InDet
 {
@@ -87,7 +88,8 @@ namespace InDet
     
     if(vtxCont.isValid()){
       const xAOD::Vertex *privtx = static_cast< const xAOD::Vertex * >( *(vtxCont->begin()) );
-      if( privtx->vertexType() != xAOD::VxType::PriVtx || privtx->nTrackParticles() < 2 || !privtx->isAvailable<float> ("z")){
+      static const SG::ConstAccessor<float> zAcc ("z");
+      if( privtx->vertexType() != xAOD::VxType::PriVtx || privtx->nTrackParticles() < 2 || !zAcc.isAvailable(*privtx)){
         ATH_MSG_WARNING(" Illed Primary vertex, keeping privtx_z0 = 0  ");
       }
       else{
