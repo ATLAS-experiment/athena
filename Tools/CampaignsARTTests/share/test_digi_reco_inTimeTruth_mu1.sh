@@ -9,7 +9,7 @@ number_of_events=$1
 
 #Option for sim/digi/reco
 default_geometry="ATLAS-P2-RUN4-03-00-00"
-default_condition="OFLCOND-MC15c-SDR-14-05"
+default_condition="OFLCOND-MC21-SDR-RUN4-02"
 
 #Post-processing for ID/ITk and FTag
 ftag_merge_DQA="${Athena_DIR}/src/PhysicsAnalysis/JetTagging/JetTagValidation/JetTagDQA/scripts/"
