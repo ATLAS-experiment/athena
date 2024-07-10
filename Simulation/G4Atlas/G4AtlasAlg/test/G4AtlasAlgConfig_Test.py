@@ -43,7 +43,7 @@ if __name__ == '__main__':
     flags.Sim.TruthStrategy = TruthStrategy.MC15aPlus
     flags.Sim.ISF.Simulator = SimulationFlavour.AtlasG4
     flags.Sim.TightMuonStepping=True
-    from SimuJobTransforms.SimulationHelpers import enableBeamPipeKill, enableFrozenShowersFCalOnly
+    from SimulationConfig.G4Optimizations import enableBeamPipeKill, enableFrozenShowersFCalOnly
     enableBeamPipeKill(flags)
     enableFrozenShowersFCalOnly(flags)
 
