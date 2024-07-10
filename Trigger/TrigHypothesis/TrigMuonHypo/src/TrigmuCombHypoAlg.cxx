@@ -48,13 +48,6 @@ StatusCode TrigmuCombHypoAlg::execute(const EventContext& context) const
   size_t counter = 0; 
 
   for ( const auto previousDecision: *previousDecisionsHandle )  {
-    // get L2MuonSA Feature
-    TrigCompositeUtils::LinkInfo<xAOD::L2StandAloneMuonContainer> linkInfo = 
-       TrigCompositeUtils::findLink<xAOD::L2StandAloneMuonContainer>(previousDecision, featureString());
-    ElementLink<xAOD::L2StandAloneMuonContainer> muFastLink = linkInfo.link;
-    ATH_CHECK( muFastLink.isValid() );        
-    const xAOD::L2StandAloneMuon* muFast = *muFastLink;
-
     // get View
     ATH_CHECK( previousDecision->hasObjectLink(viewString()) );
     auto viewEL = previousDecision->objectLink<ViewContainer>(viewString());
@@ -70,6 +63,7 @@ StatusCode TrigmuCombHypoAlg::execute(const EventContext& context) const
       auto muCombEL = ViewHelper::makeLink( *viewEL, muCombHandle, i );
       ATH_CHECK( muCombEL.isValid() );
       const xAOD::L2CombinedMuon* muComb = *muCombEL;
+      const xAOD::L2StandAloneMuon* muFast = muComb->muSATrack();
 
       // create new decisions
       auto newd = newDecisionIn( decisions, hypoAlgNodeName() );
