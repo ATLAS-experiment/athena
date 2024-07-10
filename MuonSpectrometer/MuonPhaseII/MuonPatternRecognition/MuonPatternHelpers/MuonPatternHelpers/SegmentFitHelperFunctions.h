@@ -15,7 +15,8 @@ namespace MuonR4{
     namespace SegmentFitHelpers{
       double chiSqTermMdt(double y0, double tanTheta, const MuonR4::HoughHitType & measurement);
       double chiSqTermStrip(double x0, double y0, double tanPhi, double tanTheta, const MuonR4::HoughHitType & measurement);
-      double segmentChiSquare(const double* par, const std::vector<MuonR4::HoughHitType> & hits, std::vector<double> & chi2PerMeas);
+      double segmentChiSquare(const double* par, const std::vector<MuonR4::HoughHitType> & hits, std::vector<double> & chi2PerMeas, const ActsGeometryContext & gctx, bool doBSConstraint);
+      double chiSqTermBeamspot(double x0, double y0, double tanPhi, double tanTheta, const MuonR4::HoughHitType & hit, const ActsGeometryContext & gctx);
     }
 }
 

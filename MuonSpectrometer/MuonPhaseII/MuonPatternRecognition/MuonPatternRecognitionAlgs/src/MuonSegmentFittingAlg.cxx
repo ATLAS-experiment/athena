@@ -86,6 +86,7 @@ StatusCode MuonSegmentFittingAlg::prepareSegmentFit(const HoughSegmentSeed & see
     return StatusCode::SUCCESS;
 }
 StatusCode MuonSegmentFittingAlg::prepareEventData(const EventContext & ctx, MuonSegmentFitterEventData & data) const {
+    HoughPlaneConfig cfg;
     const ActsGeometryContext* gctx{nullptr};
     ATH_CHECK(retrieveContainer(ctx, m_geoCtxKey, gctx));
     data.gctx = gctx;
@@ -93,7 +94,7 @@ StatusCode MuonSegmentFittingAlg::prepareEventData(const EventContext & ctx, Muo
 }
 
 StatusCode MuonSegmentFittingAlg::fitSegment(MuonSegmentFitterEventData & data) const{
-    ROOT::Math::Functor c2f(std::bind(SegmentFitHelpers::segmentChiSquare, std::placeholders::_1, data.measurementsToFit, data.chi2_per_measurement),4);
+    ROOT::Math::Functor c2f(std::bind(SegmentFitHelpers::segmentChiSquare, std::placeholders::_1, data.measurementsToFit, data.chi2_per_measurement, *data.gctx, m_doBeamspotConstraint),4);
     data.minimizer->SetFunction(c2f);
     // do the minimization
     if (!data.minimizer->Minimize()){
@@ -103,7 +104,7 @@ StatusCode MuonSegmentFittingAlg::fitSegment(MuonSegmentFitterEventData & data) 
     data.minimizer->Hesse();
     const double* xs = data.minimizer->X();
     const double* errs = data.minimizer->Errors();
-    SegmentFitHelpers::segmentChiSquare(xs, data.measurementsToFit, data.chi2_per_measurement);   // updates the event data's chi2 per layer 
+    SegmentFitHelpers::segmentChiSquare(xs, data.measurementsToFit, data.chi2_per_measurement, *data.gctx, m_doBeamspotConstraint);   // updates the event data's chi2 per layer 
     data.x0 = xs[(int)MuonSegmentFitterEventData::parameterIndices::x0];
     data.y0 = xs[(int)MuonSegmentFitterEventData::parameterIndices::y0];
     data.sigmaX0 = errs[(int)MuonSegmentFitterEventData::parameterIndices::x0];
