@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef STOREGATE_DATASTORE_H
@@ -182,12 +182,14 @@ namespace SG {
     StoreMap m_storeMap;
 
     /// Map of hashed sgkey -> DataProxy.
+    // Separating this avoids a cppcheck 2.14 syntax error.
+    static constexpr CxxUtils::detail::ConcurrentHashmapVal_t s_nullval =
+      static_cast<CxxUtils::detail::ConcurrentHashmapVal_t> (-1);
     using KeyMap_t = CxxUtils::ConcurrentMap<
       sgkey_t, DataProxy*,
       CxxUtils::SimpleUpdater,
       SGKeyHash, SGKeyEqual,
-      0,
-      static_cast<CxxUtils::detail::ConcurrentHashmapVal_t> (-1)>;
+      0, s_nullval>;
     KeyMap_t m_keyMap;
 
     StoreID::type m_storeID;
