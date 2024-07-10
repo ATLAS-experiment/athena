@@ -1,4 +1,4 @@
-
+#!/usr/bin/env athena.py
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -100,10 +100,11 @@ if __name__=="__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaCommon.Logging import log
     from AthenaCommon.Constants import DEBUG,INFO
-    from AthenaConfiguration.TestDefaults import defaultGeometryTags
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags,defaultConditionsTags,defaultTestFiles
     log.setLevel(DEBUG)
     flags = initConfigFlags()
-    flags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/data17_13TeV.00330470.physics_Main.daq.RAW._lb0310._SFO-1._0001.data",]
+    flags.Input.Files = (defaultTestFiles.RAW_RUN3)
+    flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_DATA
     flags.GeoModel.AtlasVersion=defaultGeometryTags.RUN3
 
     flags.Exec.OutputLevel=INFO
