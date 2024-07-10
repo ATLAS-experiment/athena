@@ -39,6 +39,9 @@
 #include "StoreGate/WriteHandleKey.h"
 #include "StoreGate/WriteHandleKeyArray.h"
 
+#include "GeneratorObjects/xAODTruthParticleLink.h"
+#include "xAODTruth/TruthParticleContainer.h"
+
 class FPGATrackSimDataFlowTool;
 class FPGATrackSimHoughRootOutputTool;
 class FPGATrackSimLLPRoadFilterTool;
@@ -113,6 +116,7 @@ class FPGATrackSimLogicalHitsProcessAlg : public AthAlgorithm
         Gaudi::Property<bool> m_writeOutputData  {this, "writeOutputData", true,"write the output TTree"};
 	Gaudi::Property<bool> m_outputHitTxt  {this, "outputHitTxt", false, "write out road hits to text file"};
 	Gaudi::Property<bool> m_doEvtSel {this, "doEvtSel", true, "do event selection"};
+        Gaudi::Property<bool> m_runOnRDO {this,"runOnRDO", false, "case when runnin on RDO file (and not or wrapper)"};
 	
         std::string m_outputHitTxtName = "outputRoadHits.txt";
         std::ofstream m_outputHitTxtStream;
@@ -170,6 +174,9 @@ class FPGATrackSimLogicalHitsProcessAlg : public AthAlgorithm
         SG::WriteHandleKey<FPGATrackSimHitContainer> m_FPGAHitInRoadsKey{this, "FPGATrackSimHitInRoads1stKey","FPGAHitsInRoads_1st","FPGATrackSim Hits in 1st stage roads key"};
         SG::WriteHandleKey<FPGATrackSimRoadCollection> m_FPGARoadKey{this, "FPGATrackSimRoad1stKey","FPGARoads_1st","FPGATrackSim Roads 1st stage key"};
         SG::WriteHandleKey<FPGATrackSimTrackCollection> m_FPGATrackKey{this, "FPGATrackSimTrack1stKey","FPGATracks_1st","FPGATrackSim Tracks 1st stage key"};
+        
+        SG::ReadHandleKey<xAOD::TruthParticleContainer> m_inputTruthParticleContainerKey{this, "TruthTrackContainer", "TruthParticles", "Truth Particle Container"};
+        SG::WriteHandleKey<xAODTruthParticleLinkVector> m_truthLinkContainerKey{this, "TruthLinks", "xAODFPGATruthLinks", "Output EF xAODTruthLinks container"};
 };
 
 
