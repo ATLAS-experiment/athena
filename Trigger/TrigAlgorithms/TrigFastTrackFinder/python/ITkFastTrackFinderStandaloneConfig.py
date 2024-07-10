@@ -16,7 +16,7 @@ def ITkFastTrackFinderStandaloneCfg(flags, SiSPSeededTrackCollectionKey = None):
 
     ITkSiTrackMakerTool.CombinatorialTrackFinder.writeHolesFromPattern = False
     
-    acc.addPublicTool( CompFactory.TrigInDetTrackFollowingTool( name = "TrigTrackFollowingTool_FTF") )
+    acc.addPublicTool( CompFactory.TrigInDetTrackFollowingTool( name = "TrigTrackFollowingTool_FTF", LayerNumberTool = acc.getPublicTool("TrigL2LayerNumberTool_FTF") ) )
     ITkSiTrackMakerTool.useTrigTrackFollowingTool = True
     ITkSiTrackMakerTool.TrigTrackFollowingTool = acc.getPublicTool("TrigTrackFollowingTool_FTF")
     

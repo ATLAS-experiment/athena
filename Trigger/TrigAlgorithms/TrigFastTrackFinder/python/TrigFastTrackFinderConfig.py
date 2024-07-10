@@ -335,7 +335,8 @@ def ITkTrigSiTrackMaker_FTF_Cfg(flags, signature, layerNumberingTool) -> Compone
   
   acc.addPublicTool( CompFactory.TrigInDetTrackFollowingTool( name = "TrigTrackFollowingTool_FTF_"+signature,
                                                               PixelClusterContainer='ITkTrigPixelClusters',
-                                                              SCT_ClusterContainer='ITkTrigStripClusters' ) )
+                                                              SCT_ClusterContainer='ITkTrigStripClusters',
+                                                              LayerNumberTool = layerNumberingTool ) )
   trackMaker.useTrigTrackFollowingTool = True
   trackMaker.TrigTrackFollowingTool = acc.getPublicTool("TrigTrackFollowingTool_FTF_"+signature)
 
