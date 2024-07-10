@@ -24,4 +24,4 @@ atlas_add_executable( TruthDerivationTester
    util/TruthDerivationTester.cxx
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} ${xaod_access_lib} AsgTools PATInterfaces
-   PMGAnalysisInterfacesLib xAODEventInfo xAODTruth xAODJet xAODMissingET ${Boost_LIBRARIES})
+   PMGAnalysisInterfacesLib xAODEventInfo xAODTruth xAODJet xAODMissingET AthContainers ${Boost_LIBRARIES})
