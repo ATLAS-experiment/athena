@@ -38,10 +38,8 @@ def MdtRdoToMdtDigitCfg(flags, name="MdtRdoToMdtDigitAlg", **kwargs):
 
 def RpcRdoToRpcDigitCfg(flags, name="RpcRdoToRpcDigitAlg", **kwargs):
     """Return ComponentAccumulator with configured RpcRdoToRpcDigit algorithm"""
-    acc = ComponentAccumulator()
-    from MuonConfig.MuonCablingConfig import RPCCablingConfigCfg
-    acc.merge(RPCCablingConfigCfg(flags))
-    kwargs.setdefault("DecodeNrpcRDO", flags.Muon.enableNRPC)
+    result = ComponentAccumulator()
+    
     if flags.Common.isOverlay:
         kwargs.setdefault("RpcRdoContainer", f"{flags.Overlay.BkgPrefix}RPCPAD")
         kwargs.setdefault("RpcDigitContainer", f"{flags.Overlay.BkgPrefix}RPC_DIGITS")
@@ -51,17 +49,34 @@ def RpcRdoToRpcDigitCfg(flags, name="RpcRdoToRpcDigitAlg", **kwargs):
         kwargs.setdefault("RpcDigitContainer", "RPC_DIGITS")
         kwargs.setdefault("NRpcRdoContainer", "NRPCRDO")
 
+    container = [x for x in flags.Input.TypedCollections \
+                    if x == "RpcPadContainer#{cont_name}".format(cont_name=kwargs["RpcRdoContainer"])  or \
+                       x == "xAOD::NRPCRDOContainer#{cont_name}".format(cont_name=kwargs["NRpcRdoContainer"])  or \
+                       x == "xAOD::NRPCRDOAuxContainer#{cont_name}Aux.".format(cont_name=kwargs["NRpcRdoContainer"])  ]
+    
+    
+    ### If the length of the list is > 1, then the NRPC container is in the file
+    ### and shall be decoded. Same is true if the length is 1 or 3
+    kwargs.setdefault("DecodeNrpcRDO", len(container) > 1 )
+    ### If it's dataoverlay, there's only the legacy container...
+    kwargs.setdefault("DecodeLegacyRDO", len(container) % 2 or \
+                                         not flags.Input.isMC)
+    if kwargs["DecodeNrpcRDO"]:
+        from MuonConfig.MuonCablingConfig import NRPCCablingConfigCfg
+        result.merge(NRPCCablingConfigCfg(flags))
+    if kwargs["DecodeLegacyRDO"]:
+        from MuonConfig.MuonCablingConfig import RPCLegacyCablingConfigCfg
+        result.merge(RPCLegacyCablingConfigCfg(flags))
     if flags.Common.isOverlay and not flags.Overlay.DataOverlay:
         from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
-        acc.merge(SGInputLoaderCfg(flags, [f'RpcPadContainer#{kwargs["RpcRdoContainer"]}']))
-
+        result.merge(SGInputLoaderCfg(flags, container))
 
     #Set N BCs and central BC consistently with RPC readout settings
     rpcrdo_decode = CompFactory.Muon.RpcRDO_Decoder("RpcRDO_Decoder", BCZERO=flags.Trigger.L1MuonSim.RPCNBCZ)
     kwargs.setdefault("rpcRdoDecoderTool", rpcrdo_decode)
 
-    acc.addEventAlgo(CompFactory.RpcRdoToRpcDigit(name, **kwargs))
-    return acc
+    result.addEventAlgo(CompFactory.RpcRdoToRpcDigit(name, **kwargs))
+    return result
 
 
 def TgcRdoToTgcDigitCfg(flags, name="TgcRdoToTgcDigitAlg", **kwargs):
@@ -161,8 +176,14 @@ def RpcDigitToRpcRDOCfg(flags, name="RpcDigitToRpcRDO", **kwargs):
 def NrpcDigitToNrpcRDOCfg(flags, name="NrpcDigitToNrpcRDO", **kwargs):
     """Return ComponentAccumulator with configured NrpcDigitToNrpcRDO algorithm"""
     acc = ComponentAccumulator()
-    kwargs.setdefault("MuonIdHelperSvc", acc.getPrimaryAndMerge(MuonIdHelperSvcCfg(flags)).name)
+    kwargs.setdefault("MuonIdHelperSvc", acc.getPrimaryAndMerge(MuonIdHelperSvcCfg(flags)))
+    
+    from MuonConfig.MuonCablingConfig import NRPCCablingConfigCfg
+    acc.merge(NRPCCablingConfigCfg(flags))
 
+    if flags.Muon.usePhaseIIGeoSetup:
+        kwargs.setdefault("ConvertHitsFromStations", [])
+    
     if flags.Common.ProductionStep == ProductionStep.PileUpPresampling:
         kwargs.setdefault("NrpcRdoKey", flags.Overlay.BkgPrefix + "NRPCRDO")
     else:
@@ -175,7 +196,7 @@ def NrpcDigitToNrpcRDOCfg(flags, name="NrpcDigitToNrpcRDO", **kwargs):
 def TgcDigitToTgcRDOCfg(flags, name="TgcDigitToTgcRDO", **kwargs):
     """Return ComponentAccumulator with configured TgcDigitToTgcRDO algorithm"""
     acc = ComponentAccumulator()
-    kwargs.setdefault("MuonIdHelperSvc", acc.getPrimaryAndMerge(MuonIdHelperSvcCfg(flags)).name)
+    kwargs.setdefault("MuonIdHelperSvc", acc.getPrimaryAndMerge(MuonIdHelperSvcCfg(flags)))
 
     if flags.Common.ProductionStep == ProductionStep.PileUpPresampling:
         kwargs.setdefault("OutputObjectName", f"{flags.Overlay.BkgPrefix}TGCRDO")

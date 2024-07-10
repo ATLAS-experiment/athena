@@ -26,27 +26,22 @@ public:
     virtual StatusCode execute(const EventContext& ctx) const override final;
 
 private:
-    struct TempDigitContainer{
-        TempDigitContainer(RpcDigitContainer* container):
-           m_cont{container} {}
-        StatusCode findCollection(const Identifier& elementId,
-                                  const IdentifierHash& hash, RpcDigitCollection* &coll, MsgStream& msg);
 
-      private:
-        RpcDigitContainer* m_cont{nullptr};
-        RpcDigitCollection* m_lastColl{nullptr};
-        std::map<IdentifierHash, RpcDigitCollection*> m_digitMap{};
-    };
-    StatusCode decodeRpc(const RpcPad*, TempDigitContainer& container, const RpcCablingCondData* rpcCab) const;
-   
-    StatusCode decodeNRpc(const EventContext& ctx, RpcDigitContainer& container) const;
+    using TempDigitContainer = std::vector<std::unique_ptr<RpcDigitCollection>>;
+
+    
+    /** @brief: Decode the legacy RpcRdo format*/
+    StatusCode decodeLegacyRdo(const EventContext& ctx, TempDigitContainer& container) const;
+
+    StatusCode decodeNRpc(const EventContext& ctx, TempDigitContainer& container) const;
     ToolHandle<Muon::IRPC_RDO_Decoder> m_rpcRdoDecoderTool{this, "rpcRdoDecoderTool", "Muon::RpcRDO_Decoder", ""};
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
     SG::ReadHandleKey<RpcPadContainer> m_rpcRdoKey{this, "RpcRdoContainer", "RPCPAD", "Rpc RDO Input"};
     SG::WriteHandleKey<RpcDigitContainer> m_rpcDigitKey{this, "RpcDigitContainer", "RPC_DIGITS", "Rpc Digit Output"};
     SG::ReadCondHandleKey<RpcCablingCondData> m_rpcReadKey{this, "RpcCablingKey", "RpcCablingCondData", "Key of RpcCablingCondData"};
 
-
+    
+    Gaudi::Property<bool> m_decodeLegacyRDO{this, "DecodeLegacyRDO", true};
     Gaudi::Property<bool> m_decodeNrpcRDO{this, "DecodeNrpcRDO", false};
     Gaudi::Property<bool> m_patch_for_rpc_time{this, "PatchForRpcTime", false, "flag for patching the RPC time"};
 
