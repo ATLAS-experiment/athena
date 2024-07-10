@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DataQualityInterfaces/HanConfig.h"
@@ -7,9 +7,7 @@
 #include <cstring>	// strncmp()
 
 #include <iostream>
-#include <map>
-#include <memory>
-#include <set>
+
 #include <sstream>
 
 #include <TCollection.h>
@@ -147,7 +145,7 @@ AssembleAndSave( std::string infileName, std::string outfileName, std::string co
 
   MiniConfig metadataconfig;
   metadataconfig.AddKeyword("metadata");
-  metadataconfig.ReadFile(infileName);
+  metadataconfig.ReadFile(std::move(infileName));
   MetadataVisitor metadatavisitor(outfile.get(), metadataconfig);
   metadataconfig.SendVisitor(metadatavisitor);
 
@@ -178,7 +176,7 @@ BuildMonitors( std::string configName, HanInputRootFile& input, HanOutput& outpu
     return;
   }
 
-  m_dqRoot = BuildMonitorsNewRoot( configName, input, output );
+  m_dqRoot = BuildMonitorsNewRoot( std::move(configName), input, output );
 
   output.setConfig( this );
 }
@@ -244,7 +242,7 @@ BuildConfigOutput( std::string configName, TFile* inputFile, std::string path,
   if( path != "" ) {
     std::string pathForSearch = path;
     pathForSearch += "/dummyName";
-    basedir = ChangeInputDir( inputFile, pathForSearch );
+    basedir = ChangeInputDir( inputFile, std::move(pathForSearch) );
   }
 
   if( basedir == 0 )
@@ -425,7 +423,7 @@ Write( MiniConfigTreeNode* node )
     std::string reference = node->GetName();
 
     if(jsonPayload.find(reference) != jsonPayload.end()) {
-      nlohmann::json referenceJson = jsonPayload[reference];
+      nlohmann::json referenceJson = jsonPayload[std::move(reference)];
       for (nlohmann::json::iterator it = referenceJson.begin(); it != referenceJson.end(); ++it) {
         node->SetAttribute(it.key(), it.value(), false);
       }
@@ -463,7 +461,7 @@ GetROOTFile( std::string& fname )
     }
     std::shared_ptr<TFile> thisptr(TFile::Open(fname.c_str()));
     if (thisptr.get()) {
-      return ( m_filecache[fname] = thisptr );
+      return ( m_filecache[fname] = std::move(thisptr) );
      } else {
        m_badPaths.insert(fname);
       return thisptr;
@@ -473,7 +471,7 @@ GetROOTFile( std::string& fname )
 
 void
 HanConfig::AssessmentVisitorBase::
-PopulateKeyCache(std::string& fname, std::shared_ptr<TFile> file) {
+PopulateKeyCache(const std::string& fname, std::shared_ptr<TFile> file) {
   auto& vec = m_keycache[fname];
   dolsr(file.get(), vec);
 }
@@ -530,11 +528,11 @@ GetAlgorithmConfiguration( HanConfigAssessor* dqpar, const std::string& algID,
     if( *i == "name" ) {
       // hasName = true;
       std::string algName( m_algConfig.GetStringAttribute(algID,"name") );
-      dqpar->SetAlgName( algName );
+      dqpar->SetAlgName( std::move(algName) );
     }
     else if( *i == "libname" ) {
       std::string algLibName( m_algConfig.GetStringAttribute(algID,"libname") );
-      dqpar->SetAlgLibName( algLibName );
+      dqpar->SetAlgLibName( std::move(algLibName) );
     }
     else if( *i == "thresholds" || trail == "thresholds" ) {
       std::string thrID( m_algConfig.GetStringAttribute(algID,*i) );
@@ -552,7 +550,7 @@ GetAlgorithmConfiguration( HanConfigAssessor* dqpar, const std::string& algID,
           algLim.SetName( *t );
         }
         algLim.SetGreen( m_thrConfig.GetFloatAttribute(limName,"warning") );
-        algLim.SetRed( m_thrConfig.GetFloatAttribute(limName,"error") );
+        algLim.SetRed( m_thrConfig.GetFloatAttribute(std::move(limName),"error") );
         dqpar->AddAlgLimit( algLim );
       }
     }
@@ -564,7 +562,7 @@ GetAlgorithmConfiguration( HanConfigAssessor* dqpar, const std::string& algID,
       //std::cout<<"Got tmpRefID=\""<<tmpRefID<<"\""<<std::endl;
       dqi::ConditionsSingleton &CS=dqi::ConditionsSingleton::getInstance();
       //parses
-      std::vector<std::pair<std::string,std::string> > condPairs=CS.getConditionReferencePairs(tmpRefID);
+      std::vector<std::pair<std::string,std::string> > condPairs=CS.getConditionReferencePairs(std::move(tmpRefID));
       std::stringstream newRefString;
       // for each condition ...
       for(size_t t=0;t<condPairs.size();t++){
@@ -842,8 +840,9 @@ Visit( const MiniConfigTreeNode* node )
   auto alloc = std::make_unique<HanConfigGroup>();
   HanConfigGroup* reg = (grandparent==0) ? m_root : alloc.get();
 
-  std::string regName( node->GetName() );
-  reg->SetName( regName );
+
+
+  reg->SetName( node->GetName() );
   reg->SetPathName( node->GetPathName() );
 
   std::string algID( node->GetAttribute("algorithm") );
@@ -929,7 +928,7 @@ Visit( const MiniConfigTreeNode* node )
     std::string strHistName, strFullHistName;
     std::string::size_type atsign = strNodeName.find('@');
     if (atsign == std::string::npos) {
-      strHistName = strNodeName;
+      strHistName = std::move(strNodeName);
       strFullHistName = histNode->GetPathName();
     } else {
       strHistName = strNodeName.substr(0, atsign);
@@ -1004,7 +1003,7 @@ Visit( const MiniConfigTreeNode* node )
     std::string strHistName, strFullHistName, extension;
     std::string::size_type atsign = strNodeName.find('@');
     if (atsign == std::string::npos) {
-      strHistName = strNodeName;
+      strHistName = std::move(strNodeName);
       strFullHistName = histNode->GetPathName();
       extension = "";
     } else {
@@ -1038,7 +1037,7 @@ Visit( const MiniConfigTreeNode* node )
       std::string objPath("");
       std::string absObjPath("");
 
-      refFile = SplitReference( m_refConfig.GetStringAttribute(refID,"location"), refFile);
+      refFile = SplitReference( m_refConfig.GetStringAttribute(std::move(refID),"location"), refFile);
       std::shared_ptr<TFile> infile( GetROOTFile(refFile) );
       TDirectory* basedir(0);
       TDirectory* dir(0);
