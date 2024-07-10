@@ -28,7 +28,7 @@ Electrons:
   - containerName: 'AnaElectrons'
     WorkingPoint:
       - selectionName: 'loose'
-        likelihoodWP: 'LooseBLayerLH'
+        identificationWP: 'LooseBLayerLH'
         isolationWP: 'Loose_VarRad'
         recomputeLikelihood: False
     PtEtaSelection:

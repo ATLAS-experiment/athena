@@ -148,6 +148,14 @@ Root::TElectronEfficiencyCorrectionTool::initialize()
   return sc;
 }
 
+bool Root::TElectronEfficiencyCorrectionTool::uncorrEmpty(const PATCore::ParticleDataType::DataType dataType)
+{
+  const bool isFastSim = dataType == PATCore::ParticleDataType::Fast;
+  const auto& currentmap = (isFastSim) ? m_fastHistList : m_histList;
+
+  return  currentmap.at(mapkey::stat).empty() && currentmap.at(mapkey::uncorr).empty();
+}
+
 int
 Root::TElectronEfficiencyCorrectionTool::calculate(
   const PATCore::ParticleDataType::DataType dataType,

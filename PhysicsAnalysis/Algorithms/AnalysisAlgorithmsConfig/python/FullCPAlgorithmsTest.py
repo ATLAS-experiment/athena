@@ -791,9 +791,9 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite,
     if forCompare :
         configSeq.setOptionValue ('.noEffSF', True)
     if likelihood:
-        configSeq.setOptionValue ('.likelihoodWP', 'LooseBLayerLH')
+        configSeq.setOptionValue ('.identificationWP', 'LooseBLayerLH')
     else:
-        configSeq.setOptionValue ('.likelihoodWP', 'LooseDNN')
+        configSeq.setOptionValue ('.identificationWP', 'LooseDNN')
     configSeq.setOptionValue ('.isolationWP', 'Loose_VarRad')
     configSeq.setOptionValue ('.recomputeLikelihood', recomputeLikelihood)
     configSeq.setOptionValue ('.writeTrackD0Z0', True)

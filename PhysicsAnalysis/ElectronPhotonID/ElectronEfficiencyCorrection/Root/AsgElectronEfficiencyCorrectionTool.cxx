@@ -298,6 +298,15 @@ AsgElectronEfficiencyCorrectionTool::initialize()
     m_pteta_bins.emplace_back(i.first, i.second);
   }
 
+  // Check if the input contains uncorr/stat necessary
+  // to run non-total systematic model
+  if (m_correlation_model != correlationModel::TOTAL &&
+      m_rootTool->uncorrEmpty(m_dataType) ) {
+    ATH_MSG_ERROR("Called correlation model "+m_correlation_model_name+
+                  " but input does not contain necessary histograms.");
+    return StatusCode::FAILURE;
+  }
+
   // Initialize the systematics
   if (InitSystematics() != StatusCode::SUCCESS) {
     ATH_MSG_ERROR("(InitSystematics() != StatusCode::SUCCESS)");

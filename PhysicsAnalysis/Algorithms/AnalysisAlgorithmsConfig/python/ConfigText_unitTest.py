@@ -97,7 +97,7 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     config.setOptions (selectionName='loose')
     config.setOptions (forceFullSimConfig=True)
     config.setOptions (noEffSF=True)
-    config.setOptions (likelihoodWP='LooseBLayerLH')
+    config.setOptions (identificationWP='LooseBLayerLH')
     config.setOptions (isolationWP='Loose_VarRad')
     config.setOptions (recomputeLikelihood=False)
     config.setOptions (writeTrackD0Z0=True)
