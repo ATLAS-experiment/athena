@@ -240,15 +240,15 @@ def makeElectronWorkingPointSequence( seq, dataType, workingPoint,
     if len (splitWP) != 2 :
         raise ValueError ('working point should be of format "likelihood.isolation", not ' + workingPoint)
 
-    likelihoodWP = splitWP[0]
+    identificationWP = splitWP[0]
     isolationWP = splitWP[1]
 
-    if 'LH' in likelihoodWP:
+    if 'LH' in identificationWP:
         # Set up the likelihood ID selection algorithm
         # It is safe to do this before calibration, as the cluster E is used
         alg = createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronLikelihoodAlg' + postfix )
         alg.selectionDecoration = 'selectLikelihood' + postfix + ',as_bits'
-        if 'SiHits' in likelihoodWP:
+        if 'SiHits' in identificationWP:
             # Select from Derivation Framework IsEM bits
             addPrivateTool( alg, 'selectionTool', 'CP::AsgMaskSelectionTool' )
             dfVar = "DFCommonElectronsLHLooseBLIsEMValue"
@@ -261,12 +261,12 @@ def makeElectronWorkingPointSequence( seq, dataType, workingPoint,
                 # Rerun the likelihood ID
                 addPrivateTool( alg, 'selectionTool', 'AsgElectronLikelihoodTool' )
                 alg.selectionTool.primaryVertexContainer = 'PrimaryVertices'
-                alg.selectionTool.WorkingPoint = likelihoodWP
+                alg.selectionTool.WorkingPoint = identificationWP
                 algDecorCount = 7
             else:
                 # Select from Derivation Framework flags
                 addPrivateTool( alg, 'selectionTool', 'CP::AsgFlagSelectionTool' )
-                dfFlag = "DFCommonElectronsLH" + likelihoodWP.split('LH')[0]
+                dfFlag = "DFCommonElectronsLH" + identificationWP.split('LH')[0]
                 dfFlag = dfFlag.replace("BLayer","BL")
                 alg.selectionTool.selectionFlags = [dfFlag]
                 algDecorCount = 1
@@ -277,7 +277,7 @@ def makeElectronWorkingPointSequence( seq, dataType, workingPoint,
         if recomputeLikelihood:
             # Rerun the DNN ID
             addPrivateTool( alg, 'selectionTool', 'AsgElectronSelectorTool' )
-            alg.selectionTool.WorkingPoint = likelihoodWP
+            alg.selectionTool.WorkingPoint = identificationWP
             algDecorCount = 6
         else:
             # Select from Derivation Framework flags

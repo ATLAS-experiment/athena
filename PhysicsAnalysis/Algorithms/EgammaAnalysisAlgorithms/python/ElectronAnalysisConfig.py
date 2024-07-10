@@ -214,7 +214,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             "The default is 0.5 mm")
         self.addOption ('writeTrackD0Z0', False, type = bool,
             info="save the d0 significance and z0sinTheta variables so they can be written out")
-        self.addOption ('likelihoodWP', None, type=str,
+        self.addOption ('identificationWP', None, type=str,
             info="the ID WP (string) to use. Supported ID WPs: TightLH, "
             "MediumLH, LooseBLayerLH. ")
         self.addOption ('isolationWP', None, type=str,
@@ -226,8 +226,9 @@ class ElectronWorkingPointConfig (ConfigBlock) :
         self.addOption ('recomputeLikelihood', False, type=bool,
             info="whether to rerun the LH. The default is False, i.e. to use "
             "derivation flags.")
-        self.addOption ('chargeIDSelection', False, type=bool,
-            info="whether to run the ECIDS tool. The default is False.")
+        self.addOption ('chargeIDSelectionRun2', False, type=bool,
+            info="whether to run the ECIDS tool. Only available for run 2. "
+            "The default is False.")
         self.addOption ('doFSRSelection', False, type=bool,
             info="whether to accept additional electrons close to muons for "
             "the purpose of FSR corrections to these muons. Expert feature "
@@ -241,6 +242,15 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             info="whether to force the tool to use the configuration meant for "
             "full simulation samples. Only for testing purposes. "
             "The default is False.")
+        self.addOption ('correlationModelId', 'SIMPLIFIED', type=str,
+            info="the correlation model (string) to use for ID scale factors "
+            "Supported models: SIMPLIFIED (default), FULL, TOTAL, TOYS")
+        self.addOption ('correlationModelIso', 'SIMPLIFIED', type=str,
+            info="the correlation model (string) to use for isolation scale factors "
+            "Supported models: SIMPLIFIED (default), FULL, TOTAL, TOYS")
+        self.addOption ('correlationModelReco', 'SIMPLIFIED', type=str,
+            info="the correlation model (string) to use for reconstruction scale factors "
+            "Supported models: SIMPLIFIED (default), FULL, TOTAL, TOYS")
 
 
     def makeAlgs (self, config) :
@@ -281,7 +291,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
                 config.addOutputVar (self.containerName, alg.d0sigDecoration, alg.d0sigDecoration,noSys=True)
                 config.addOutputVar (self.containerName, alg.z0sinthetaDecoration, alg.z0sinthetaDecoration,noSys=True)
                 
-        if 'LH' in self.likelihoodWP:
+        if 'LH' in self.identificationWP:
             # Set up the likelihood ID selection algorithm
             # It is safe to do this before calibration, as the cluster E is used
             alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronLikelihoodAlg' + postfix )
@@ -293,16 +303,16 @@ class ElectronWorkingPointConfig (ConfigBlock) :
                 # Here we have to match the naming convention of EGSelectorConfigurationMapping.h
                 # which differ from the one used for scale factors
                 if config.geometry() >= LHCPeriod.Run3:
-                    alg.selectionTool.WorkingPoint = self.likelihoodWP.replace("BLayer","BL") + 'Electron'
+                    alg.selectionTool.WorkingPoint = self.identificationWP.replace("BLayer","BL") + 'Electron'
                 elif config.geometry() is LHCPeriod.Run2:
-                    alg.selectionTool.WorkingPoint = self.likelihoodWP.replace("BLayer","BL") + 'Electron_Run2'
+                    alg.selectionTool.WorkingPoint = self.identificationWP.replace("BLayer","BL") + 'Electron_Run2'
             else:
                 # Select from Derivation Framework flags
                 config.addPrivateTool( 'selectionTool', 'CP::AsgFlagSelectionTool' )
-                dfFlag = "DFCommonElectronsLH" + self.likelihoodWP.split('LH')[0]
+                dfFlag = "DFCommonElectronsLH" + self.identificationWP.split('LH')[0]
                 dfFlag = dfFlag.replace("BLayer","BL")
                 alg.selectionTool.selectionFlags = [dfFlag]
-        elif 'SiHit' in self.likelihoodWP:
+        elif 'SiHit' in self.identificationWP:
             # Only want SiHit electrons, so veto loose LH electrons
             algVeto = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronLikelihoodAlgVeto' + postfix + 'Veto')
             algVeto.selectionDecoration = 'selectLikelihoodVeto' + postfix + ',as_bits'  
@@ -332,7 +342,11 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             # Set flag to only collect SiHit electrons for events with an electron or muon pair to minimize size increase from SiHit electrons
             algDec.RequireTwoLeptons = True
             config.addSelection (self.containerName, self.selectionName, selDec)
-        elif 'DNN' in self.likelihoodWP:
+        elif 'DNN' in self.identificationWP:
+            if self.chargeIDSelectionRun2:
+                raise ValueError('DNN is not intended to be used with '
+                                 '`chargeIDSelectionRun2` option as there are '
+                                 'DNN WPs containing charge flip rejection.')
             # Set up the DNN ID selection algorithm
             alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronDNNAlg' + postfix )
             alg.selectionDecoration = 'selectDNN' + selectionPostfix + ',as_bits'
@@ -343,10 +357,12 @@ class ElectronWorkingPointConfig (ConfigBlock) :
                 if config.geometry() is LHCPeriod.Run3:
                     raise ValueError ( "DNN working points are not available for Run 3 yet.")
                 else:
-                    alg.selectionTool.WorkingPoint = self.likelihoodWP + 'Electron'
+                    alg.selectionTool.WorkingPoint = self.identificationWP + 'Electron'
             else:
                 # Select from Derivation Framework flags
-                raise ValueError ( "DNN working points are not available in derivations yet.")
+                config.addPrivateTool( 'selectionTool', 'CP::AsgFlagSelectionTool' )
+                dfFlag = "DFCommonElectronsDNN" + self.identificationWP.split('DNN')[0]
+                alg.selectionTool.selectionFlags = [dfFlag]
 
         alg.particles = config.readName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, self.selectionName)
@@ -362,7 +378,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             # For SiHit electrons, set flag to remove FSR electrons. 
             # For standard electrons, FSR electrons need to be added as they may be missed by the standard selection. 
             # For SiHit electrons FSR electrons are generally always selected, so they should be removed since they will be in the standard electron container.
-            if 'SiHit' in self.likelihoodWP:
+            if 'SiHit' in self.identificationWP:
                 alg.vetoFSR = True
 
         # Set up the isolation selection algorithm:
@@ -378,8 +394,11 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             alg.preselection = config.getPreselection (self.containerName, self.selectionName)
             config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration)
 
+        if self.chargeIDSelectionRun2 and config.geometry() >= LHCPeriod.Run3:
+            print("WARNING! ECIDS is only available for Run 2 and will not have effect in run 3.")
+
         # Select electrons only if they don't appear to have flipped their charge.
-        if self.chargeIDSelection:
+        if self.chargeIDSelectionRun2 and config.geometry() < LHCPeriod.Run3:
             alg = config.createAlgorithm( 'CP::AsgSelectionAlg',
                                           'ElectronChargeIDSelectionAlg' + postfix )
             alg.selectionDecoration = 'chargeID' + selectionPostfix + ',as_bits'
@@ -393,6 +412,8 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             alg.preselection = config.getPreselection (self.containerName, self.selectionName)
             config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration)
 
+        correlationModels = ["SIMPLIFIED", "FULL", "TOTAL", "TOYS"]
+
         # Set up the RECO electron efficiency correction algorithm:
         if config.dataType() is not DataType.Data and not self.noEffSF:
             alg = config.createAlgorithm( 'CP::ElectronEfficiencyCorrectionAlg',
@@ -401,7 +422,15 @@ class ElectronWorkingPointConfig (ConfigBlock) :
                                    'AsgElectronEfficiencyCorrectionTool' )
             alg.scaleFactorDecoration = 'el_reco_effSF' + selectionPostfix + '_%SYS%'
             alg.efficiencyCorrectionTool.RecoKey = "Reconstruction"
-            alg.efficiencyCorrectionTool.CorrelationModel = "TOTAL"
+            if self.correlationModelReco not in correlationModels:
+                raise ValueError('Invalid correlation model for reconstruction efficiency, '
+                                 f'has to be one of: {", ".join(correlationModels)}')
+            if config.geometry() >= LHCPeriod.Run3:
+                print("WARNING! Only TOTAL correlation model is currently supported "
+                      "for reconstruction efficiency correction in Run 3.")
+                alg.efficiencyCorrectionTool.CorrelationModel = "TOTAL" 
+            else:
+                alg.efficiencyCorrectionTool.CorrelationModel = self.correlationModelReco
             if config.dataType() is DataType.FastSim:
                 alg.efficiencyCorrectionTool.ForceDataType = (
                     PATCore.ParticleDataType.Full if self.forceFullSimConfig
@@ -424,8 +453,12 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             config.addPrivateTool( 'efficiencyCorrectionTool',
                                    'AsgElectronEfficiencyCorrectionTool' )
             alg.scaleFactorDecoration = 'el_id_effSF' + selectionPostfix + '_%SYS%'
-            alg.efficiencyCorrectionTool.IdKey = self.likelihoodWP.replace("LH","")
+            alg.efficiencyCorrectionTool.IdKey = self.identificationWP.replace("LH","")
             alg.efficiencyCorrectionTool.CorrelationModel = "TOTAL"
+            if self.correlationModelId not in correlationModels:
+                raise ValueError('Invalid correlation model for identification efficiency, '
+                                 f'has to be one of: {", ".join(correlationModels)}')
+            alg.efficiencyCorrectionTool.CorrelationModel = self.correlationModelId
             if config.dataType() is DataType.FastSim:
                 alg.efficiencyCorrectionTool.ForceDataType = (
                     PATCore.ParticleDataType.Full if self.forceFullSimConfig
@@ -448,9 +481,17 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             config.addPrivateTool( 'efficiencyCorrectionTool',
                                    'AsgElectronEfficiencyCorrectionTool' )
             alg.scaleFactorDecoration = 'el_isol_effSF' + selectionPostfix + '_%SYS%'
-            alg.efficiencyCorrectionTool.IdKey = self.likelihoodWP.replace("LH","")
+            alg.efficiencyCorrectionTool.IdKey = self.identificationWP.replace("LH","")
             alg.efficiencyCorrectionTool.IsoKey = self.isolationWP
-            alg.efficiencyCorrectionTool.CorrelationModel = "TOTAL"
+            if self.correlationModelIso not in correlationModels:
+                raise ValueError('Invalid correlation model for isolation efficiency, '
+                                 f'has to be one of: {", ".join(correlationModels)}')
+            if config.geometry() >= LHCPeriod.Run3:
+                print("WARNING! Only TOTAL correlation model is currently supported "
+                      "for isolation efficiency correction in Run 3.")
+                alg.efficiencyCorrectionTool.CorrelationModel = "TOTAL" 
+            else:
+                alg.efficiencyCorrectionTool.CorrelationModel = self.correlationModelIso
             if config.dataType() is DataType.FastSim:
                 alg.efficiencyCorrectionTool.ForceDataType = (
                     PATCore.ParticleDataType.Full if self.forceFullSimConfig
@@ -460,7 +501,9 @@ class ElectronWorkingPointConfig (ConfigBlock) :
                     PATCore.ParticleDataType.Full
             if config.geometry() is LHCPeriod.Run2:
                 alg.efficiencyCorrectionTool.MapFilePath = "ElectronEfficiencyCorrection/2015_2018/rel21.2/Precision_Summer2020_v1/map4.txt"
-                alg.efficiencyCorrectionTool.CorrelationModel = "SIMPLIFIED" # remove when Run 2 R25 recommendations are available!
+                if self.correlationModelIso == 'TOTAL':
+                    raise ValueError('TOTAL correlation model is currently not '
+                                     'supported for electron isolation efficiency.')
             alg.outOfValidity = 2 #silent
             alg.outOfValidityDeco = 'el_isol_bad_eff' + selectionPostfix
             alg.electrons = config.readName (self.containerName)
@@ -469,7 +512,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
 
         # TO-DO: add trigger SFs, for which we need ID key + ISO key + Trigger key !
 
-        if self.chargeIDSelection:
+        if self.chargeIDSelectionRun2:
             # ECIDS is currently not supported in R22.
             # SFs might become available or it will be part of the DNN ID.
             pass
@@ -507,7 +550,7 @@ def makeElectronCalibrationConfig( seq, containerName, postfix = None,
 def makeElectronWorkingPointConfig( seq, containerName, workingPoint,
                                     selectionName,
                                     recomputeLikelihood = None,
-                                    chargeIDSelection = None,
+                                    chargeIDSelectionRun2 = None,
                                     noEffSF = None,
                                     forceFullSimConfig = None):
     """Create electron analysis configuration blocks
@@ -519,7 +562,7 @@ def makeElectronWorkingPointConfig( seq, containerName, workingPoint,
                  sequence with multiple working points to ensure all
                  names are unique.
       recomputeLikelihood -- Whether to rerun the LH. If not, use derivation flags
-      chargeIDSelection -- Whether or not to perform charge ID/flip selection
+      chargeIDSelectionRun2 -- Whether or not to perform charge ID/flip selection
       noEffSF -- Disables the calculation of efficiencies and scale factors
       forceFullSimConfig -- imposes full-sim config for FastSim for testing
     """
@@ -530,10 +573,10 @@ def makeElectronWorkingPointConfig( seq, containerName, workingPoint,
         splitWP = workingPoint.split ('.')
         if len (splitWP) != 2 :
             raise ValueError ('working point should be of format "likelihood.isolation", not ' + workingPoint)
-        config.setOptionValue ('likelihoodWP', splitWP[0])
+        config.setOptionValue ('identificationWP', splitWP[0])
         config.setOptionValue ('isolationWP', splitWP[1])
     config.setOptionValue ('recomputeLikelihood', recomputeLikelihood)
-    config.setOptionValue ('chargeIDSelection', chargeIDSelection)
+    config.setOptionValue ('chargeIDSelectionRun2', chargeIDSelectionRun2)
     config.setOptionValue ('noEffSF', noEffSF)
     config.setOptionValue ('forceFullSimConfig', forceFullSimConfig)
     seq.append (config)

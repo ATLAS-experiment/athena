@@ -80,7 +80,7 @@ def CPAlgorithmsCfg(flags):
     subConfig = factory.makeConfig ('Electrons.WorkingPoint', containerName='AnalysisElectrons',
                                     selectionName='loose')
     subConfig.setOptionValue ('.trackSelection', False)
-    subConfig.setOptionValue ('.likelihoodWP', 'LooseLHElectron')
+    subConfig.setOptionValue ('.identificationWP', 'LooseLHElectron')
     subConfig.setOptionValue ('.isolationWP', 'NonIso')
     subConfig.setOptionValue ('.doFSRSelection', True)
     subConfig.setOptionValue ('.noEffSF', True)
@@ -101,7 +101,7 @@ def CPAlgorithmsCfg(flags):
     configSeq += subConfig
     subConfig = factory.makeConfig ('Electrons.WorkingPoint', containerName='AnalysisSiHitElectrons', selectionName='SiHits')
     subConfig.setOptionValue ('.trackSelection', False)
-    subConfig.setOptionValue ('.likelihoodWP', 'SiHitElectron')
+    subConfig.setOptionValue ('.identificationWP', 'SiHitElectron')
     subConfig.setOptionValue ('.isolationWP', 'NonIso')
     subConfig.setOptionValue ('.doFSRSelection', True) # needed to veto FSR electrons 
     subConfig.setOptionValue ('.noEffSF', True)

@@ -109,6 +109,9 @@ public:
   /// Set the Random Seed
   inline void setSeed(const unsigned long int seed) { m_seed = seed; }
 
+  /// Check if stat+uncorr has input
+  bool uncorrEmpty(const PATCore::ParticleDataType::DataType dataType);
+
 private:
   // Private methods
   /// Load all histograms from the input file(s)
