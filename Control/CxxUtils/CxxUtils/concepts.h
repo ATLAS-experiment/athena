@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/concepts.h
@@ -92,6 +92,12 @@ concept IsContiguousContainer =
   {
     requires std::contiguous_iterator<decltype(c.begin())>;
   };
+
+
+template <class ITERATOR, class VAL>
+concept InputValIterator =
+  std::input_iterator<ITERATOR> &&
+  std::convertible_to<std::iter_value_t<ITERATOR>, VAL>;
 
 
 } // namespace detail
