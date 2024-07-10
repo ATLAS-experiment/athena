@@ -281,8 +281,8 @@ namespace CP {
 
             // Check that the requested WP is currently supported by the MCP group.
             if (isRun3()) {
-                if(m_quality!=0 && m_quality!=1 && m_quality!=2 && m_quality!=4) {
-                    ATH_MSG_WARNING("MuonSelectionTool currently supports Loose, Medium, Tight and HighPt WPs for Run3; all other WPs can only be used in ExpertDevelopMode mode");
+                if(m_quality!=0 && m_quality!=1 && m_quality!=2 && m_quality!=4 && m_quality!=5) {
+                    ATH_MSG_WARNING("MuonSelectionTool currently supports Loose, Medium, Tight, HighPt, and LowPtEfficiency WPs for Run3; all other WPs can only be used in ExpertDevelopMode mode");
                 }
                 
                 if(m_quality==0 && !m_developMode && (m_excludeNSWFromPrecisionLayers || !m_recalcPrecisionLayerswNSW)) {
@@ -983,11 +983,10 @@ namespace CP {
 
             //::: BIS78
             if (isBIS78(etaMS, phiMS)) {
-		// No BIS78 chambers for Run2    
-                if (!isRun3()) {
-		    ATH_MSG_VERBOSE("Muon is in BIS7/8 eta/phi region - fail high-pT");
+                if (!isRun3() || !(m_developMode && m_useBEEBISInHighPtRun3)) {
+		            ATH_MSG_VERBOSE("Muon is in BIS7/8 eta/phi region - fail high-pT");
                     return false;
-	    	}	
+	    	    }	
             }
             
             //// tentatively removed for r22, to be rechecked
@@ -1001,6 +1000,11 @@ namespace CP {
 
             //::: BEE
             if (isBEE(etaMS, phiMS)) {
+                // in Run3, large mis-alignment on the BEE chamber was found. temporarily mask the BEE region
+                if (isRun3() && !(m_developMode && m_useBEEBISInHighPtRun3)) {
+                    ATH_MSG_VERBOSE("Muon is in BEE eta/phi region - fail high-pT");
+                    return false;
+                }
                 // Muon falls in the BEE eta-phi region: asking for 4 good precision layers
                 // if( nGoodPrecLayers < 4 ) return false; // postponed (further studies needed)
                 if (summary.nprecisionLayers < 4) {
