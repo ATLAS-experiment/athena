@@ -57,7 +57,7 @@ def FPGAPrototrackFitAndTruthDecorationCfg(flags,FinalProtoTrackChainxAODTracksK
     from InDetConfig.ITkTrackRecoConfig import ITkTrackRecoCfg
     acc.merge(ITkTrackRecoCfg(flags))
 
-    
+
     # ProtoTrackChain Track algo
     acc.merge(FPGAPrototrackFitAlgCfg(flags,"FPGATrackSimProtoTackFitAlg",
                                       ACTSTracksLocation=ACTSProtoTrackChainTrackKey,
@@ -71,11 +71,13 @@ def FPGAPrototrackFitAndTruthDecorationCfg(flags,FinalProtoTrackChainxAODTracksK
     
     acc.merge(ActsPixelClusterToTruthAssociationAlgCfg(flags,
                                                        name="ActsFPGAPixelClusterToTruthAssociationAlg",
+                                                       InputTruthParticleLinks="xAODFPGATruthLinks",
                                                        AssociationMapOut="ITkFPGAPixelClustersToTruthParticles",
                                                        Measurements=f"xAODPixelClusters{stage}FromFPGACluster")) 
     
     acc.merge(ActsStripClusterToTruthAssociationAlgCfg(flags,
                                                        name="ActsFPGAStripClusterToTruthAssociationAlg",
+                                                       InputTruthParticleLinks="xAODFPGATruthLinks",
                                                        AssociationMapOut="ITkFPGAStripClustersToTruthParticles",
                                                        Measurements=f"xAODStripClusters{stage}FromFPGACluster"))
     

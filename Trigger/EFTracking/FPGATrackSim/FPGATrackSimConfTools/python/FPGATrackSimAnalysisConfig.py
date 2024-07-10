@@ -384,6 +384,7 @@ def FPGATrackSimLogicalHistProcessAlgCfg(inputFlags):
     theFPGATrackSimLogicalHistProcessAlg.DoHoughRootOutput = False
     theFPGATrackSimLogicalHistProcessAlg.DoNNTrack = False
     theFPGATrackSimLogicalHistProcessAlg.eventSelector = result.getPrimaryAndMerge(FPGATrackSimEventSelectionCfg(flags))
+    theFPGATrackSimLogicalHistProcessAlg.runOnRDO = True if not flags.Trigger.FPGATrackSim.wrapperFileName else False
 
     FPGATrackSimMaping = result.getPrimaryAndMerge(FPGATrackSimMappingCfg(flags))
     theFPGATrackSimLogicalHistProcessAlg.FPGATrackSimMapping = FPGATrackSimMaping
@@ -599,7 +600,7 @@ if __name__ == "__main__":
         if not flags.Reco.EnableTrackOverlay:
             from InDetConfig.TrackRecoConfig import InDetTrackRecoCfg
             acc.merge(InDetTrackRecoCfg(flags))
-    
+
     acc.merge(FPGATrackSimLogicalHistProcessAlgCfg(flags))
     if flags.Trigger.FPGATrackSim.doEDMConversion:
         acc.merge(FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlg_1st', stage = '_1st', doActsTrk=True))

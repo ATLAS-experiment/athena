@@ -112,6 +112,8 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::initialize()
     ATH_CHECK( m_FPGAHitUnmappedKey.initialize() );
     ATH_CHECK( m_FPGARoadKey.initialize() );
     ATH_CHECK( m_FPGATrackKey.initialize() );
+    ATH_CHECK( m_inputTruthParticleContainerKey.initialize(m_runOnRDO) );
+    ATH_CHECK( m_truthLinkContainerKey.initialize() );
 
     ATH_MSG_DEBUG("initialize() Finished");
 
@@ -173,24 +175,62 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     SG::WriteHandle<FPGATrackSimClusterCollection> FPGASpacePoints_1st (m_FPGASpacePointsKey.at(0), ctx);
     ATH_CHECK( FPGASpacePoints_1st.record (std::make_unique<FPGATrackSimClusterCollection>()));
 
-    // Apply truth track cuts
+    SG::WriteHandle<xAODTruthParticleLinkVector> truthLinkVec(m_truthLinkContainerKey);
+    ATH_CHECK(truthLinkVec.record(std::make_unique<xAODTruthParticleLinkVector>()));
+
+    // Apply truth track cuts    
     if ( m_doEvtSel ){
         if (!m_evtSel->selectEvent(&m_eventHeader))
         {
             ATH_MSG_DEBUG("Event skipped by: " << m_evtSel->name());
             return StatusCode::SUCCESS;
         }
-        ATH_MSG_DEBUG("Event accepted by: " << m_evtSel->name());
+        else {
+            ATH_MSG_DEBUG("Event accepted by: " << m_evtSel->name());
+            // Make a new truth link vector based on FPGATrackSim selections 
+            if (m_runOnRDO) {
+                SG::ReadHandle<xAOD::TruthParticleContainer> truthParticleContainer(m_inputTruthParticleContainerKey, ctx); // Read offline TruthParticles
+                if (!truthParticleContainer.isValid()) {
+                    ATH_MSG_ERROR("No valid truth particle container with key " << truthParticleContainer.key());
+                    return StatusCode::FAILURE;
+                }
+                const ElementLink<xAOD::TruthParticleContainer> eltp(*truthParticleContainer, truthParticleContainer->size() - 1);
+                std::vector<FPGATrackSimTruthTrack> const& truthtracks = m_eventHeader.optional().getTruthTracks();
+                for (const xAOD::TruthParticle* truthParticle : *truthParticleContainer) // loop over offline truth particles
+                {
+                    for (const FPGATrackSimTruthTrack& fpgaTruthTrack : truthtracks) // loop over FPGA truth tracks
+                    {
+                        if (fabs(fpgaTruthTrack.getPt() - truthParticle->pt()) < fabs(truthParticle->pt() * 0.001) &&
+                            fabs(fpgaTruthTrack.getEta() - truthParticle->eta()) < fabs(truthParticle->eta() * 0.001) &&
+                            fabs(fpgaTruthTrack.getPhi() - truthParticle->phi()) < fabs(truthParticle->phi() * 0.001)) // TO DO: this needs to change and use barcodes
+                        {
+                            truthLinkVec->push_back(new xAODTruthParticleLink(HepMcParticleLink(truthParticle->barcode(), 0,
+                                HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_BARCODE), eltp));
+                            ATH_MSG_VERBOSE("Truth link added");
+                            break;
+                        }
+                    }
+                }
+                std::stable_sort(truthLinkVec->begin(), truthLinkVec->end(), SortTruthParticleLink());
+                ATH_MSG_VERBOSE("Truth link size: " << truthLinkVec->size());
+                if (truthLinkVec->size() == 0)
+                {
+                    ATH_MSG_DEBUG("No truth particles selected. Event skipped...");
+                    return StatusCode::SUCCESS;
+                }
+            }
+        }
     } else {
-        ATH_MSG_DEBUG("No Event Election applied");
+        ATH_MSG_DEBUG("No Event Selection applied");
     }
     TIME(m_tread);
 
     // Event passes cuts, count it
     m_evt++;
-       
+    
     // Map, cluster, and filter hits
     ATH_CHECK(processInputs(FPGAHitUnmapped_1st, FPGAClusters_1st, FPGAClustersFiltered_1st, FPGASpacePoints_1st));
+    
     // Get reference to hits
     unsigned regionID = m_evtSel->getRegionID();
     // Recording Data
@@ -315,7 +355,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     m_nTracksTot += tracks_1st.size();
     
     // Do some simple monitoring of efficiencies
-    std::vector<FPGATrackSimTruthTrack> const & truthtracks = m_logicEventHeader_1st->optional().getTruthTracks();    
+    std::vector<FPGATrackSimTruthTrack> const & truthtracks = m_logicEventHeader_1st->optional().getTruthTracks();
     if (truthtracks.size() > 0) {
         m_evt_truth++;
 	auto passroad = Monitored::Scalar<bool>("eff_road",(roads_1st.size() > 0));
@@ -466,7 +506,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     if (m_runSecondStage) m_logicEventHeader_2nd->reset();
 
     TIME(m_tfin);
-
+    
     return StatusCode::SUCCESS;
 }
 
