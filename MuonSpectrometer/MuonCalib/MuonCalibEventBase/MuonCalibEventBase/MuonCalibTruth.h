@@ -36,12 +36,14 @@ namespace MuonCalib {
         void setKinEnergy(double kinEnergy);         //!< sets kinetic energy
         void setPDGCode(int code);                   //!< sets PDG code
         void setBarCode(int barCode);                //!< sets barcode
+        void setUniqueID(int uniqueID);                //!< sets unique ID
 
         const Amg::Vector3D& position() const;  //!< retrieve position
         const Amg::Vector3D& momentum() const;  //!< retrieve momentum
         double kinEnergy() const;               //!< retrieve kinetic energy
         int PDGCode() const;                    //!< retrieve PDG code
         int barCode() const;                    //!< retrieve barcode
+        int id() const; //!< retrieve unique ID
 
         std::ostream& dump(std::ostream& stream) const;  //!< dump method to be used in operator<<() of the MuonCalibTruth for output
     private:
@@ -50,6 +52,7 @@ namespace MuonCalib {
         double m_kinEnergy{0.};                //!< kinetic energy
         int m_PDGCode{0};                      //!< PDG code
         int m_barCode{0};                      //!< bar code
+        int m_uniqueID{0}; //!< unique ID
     };
 
 }  // namespace MuonCalib

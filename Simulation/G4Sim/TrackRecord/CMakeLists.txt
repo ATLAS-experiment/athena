@@ -14,7 +14,7 @@ atlas_add_library( TrackRecordLib
                    INTERFACE
                    PUBLIC_HEADERS TrackRecord
                    INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
-                   LINK_LIBRARIES HitManagement AthenaKernel ${CLHEP_LIBRARIES} )
+                   LINK_LIBRARIES HitManagement AthenaKernel GeneratorObjects TruthUtils ${CLHEP_LIBRARIES} )
 
 # Component(s) in the package:
 atlas_add_dictionary( TrackRecordDict

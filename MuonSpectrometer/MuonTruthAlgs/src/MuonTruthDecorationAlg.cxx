@@ -508,7 +508,7 @@ namespace Muon {
             // loop over trajectories
             for (const auto& trajectory : *col) {
                 // check if gen particle same as input
-              if (std::find(truthParticleHistory.begin(),truthParticleHistory.end(), HepMC::barcode(trajectory.second)) == truthParticleHistory.end()) continue; // FIXME barcode-based TrackRecords read in from existing inputs will not have valid id values.
+              if (std::find(truthParticleHistory.begin(),truthParticleHistory.end(), HepMC::barcode(trajectory.second)) == truthParticleHistory.end()) continue; // FIXME barcode-based - TrackRecords read in from existing inputs will not have valid id values.
 
                 const Identifier& id = trajectory.first;
                 bool measPhi = m_idHelperSvc->measuresPhi(id);

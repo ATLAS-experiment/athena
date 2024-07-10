@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCalibEventBase/MuonCalibTruth.h"
@@ -21,6 +21,8 @@ namespace MuonCalib {
 
     void MuonCalibTruth::setBarCode(int barCode) { m_barCode = barCode; }
 
+    void MuonCalibTruth::setUniqueID(int uniqueID) { m_uniqueID = uniqueID; }
+
     const Amg::Vector3D& MuonCalibTruth::position() const { return m_position; }
 
     const Amg::Vector3D& MuonCalibTruth::momentum() const { return m_momentum; }
@@ -30,11 +32,14 @@ namespace MuonCalib {
     int MuonCalibTruth::PDGCode() const { return m_PDGCode; }
 
     int MuonCalibTruth::barCode() const { return m_barCode; }
+
+    int MuonCalibTruth::id() const { return m_uniqueID; }
+
     std::ostream& MuonCalibTruth::dump(std::ostream& stream) const {
         stream << "MuonCalibTruth with" << std::endl;
         stream << "   position " << position() << std::endl;
         stream << "   momentum " << momentum() << std::endl;
-        stream << "   kinEnergy " << kinEnergy() << " , PDGCode " << PDGCode() << " and barCode " << barCode() << std::endl;
+        stream << "   kinEnergy " << kinEnergy() << " , PDGCode " << PDGCode() << " and barCode/uniqueID " << barCode() <<"/" << id() << std::endl;
 
         return stream;
     }
