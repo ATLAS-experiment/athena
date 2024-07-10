@@ -7,12 +7,15 @@
 # art-include: 24.0/Athena
 # art-athena-mt: 8
 
+# TODO update following ATLASRECTS-8054
+
 Reco_tf.py  \
 --AMI x788 \
 --inputBSFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data23_hi.00462107.express_express.merge.RAW._lb0380._SFO-ALL._0001.1" \
 --outputAODFile="AOD.pool.root" \
 --outputESDFile="ESD.pool.root" \
 --outputHISTFile="HIST.root" \
+--conditionsTag="CONDBR2-BLKPA-2022-15" \
 --imf False
 
 rc1=$?

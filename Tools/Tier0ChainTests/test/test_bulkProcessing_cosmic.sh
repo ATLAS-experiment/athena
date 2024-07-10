@@ -8,6 +8,7 @@
 # art-athena-mt: 8
 
 # temporary preExec override due to ATLASRECTS-7502
+# TODO update following ATLASRECTS-8054
 
 Reco_tf.py  \
 --AMI f1328  \
@@ -16,6 +17,7 @@ Reco_tf.py  \
 --outputAODFile="AOD.pool.root" \
 --outputESDFile="ESD.pool.root" \
 --outputHISTFile="HIST.root" \
+--conditionsTag="CONDBR2-BLKPA-2022-15" \
 --imf False
 
 rc1=$?
