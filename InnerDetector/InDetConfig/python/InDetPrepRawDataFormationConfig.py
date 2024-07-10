@@ -3,6 +3,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import Format
+from AthenaConfiguration.Enums import ProductionStep
 
 def HGTDInDetToXAODClusterConversionCfg(flags, name="HGTDInDetToXAODClusterConversion", **kwargs):
     acc = ComponentAccumulator()
@@ -41,7 +42,7 @@ def PixelClusterizationCfg(flags, name = "InDetPixelClusterization", **kwargs):
        doTrackOverlay = getattr(flags.TrackOverlay.ActiveConfig, "doTrackOverlay", None)
     else:
        doTrackOverlay = flags.Overlay.doTrackOverlay
-    prefix = flags.Overlay.SigPrefix if doTrackOverlay else ''
+    prefix = flags.Overlay.SigPrefix if doTrackOverlay or flags.Common.ProductionStep is ProductionStep.PileUpPretracking else ''
 
     if "clusteringTool" not in kwargs:
         from InDetConfig.SiClusterizationToolConfig import MergedPixelsToolCfg
@@ -100,7 +101,7 @@ def ITkPixelClusterizationCfg(flags, name = "ITkPixelClusterization", **kwargs):
        doTrackOverlay = getattr(flags.TrackOverlay.ActiveConfig, "doTrackOverlay", None)
     else:
        doTrackOverlay = flags.Overlay.doTrackOverlay
-    prefix = flags.Overlay.SigPrefix if doTrackOverlay else ''
+    prefix = flags.Overlay.SigPrefix if doTrackOverlay or flags.Common.ProductionStep is ProductionStep.PileUpPretracking else ''
 
     if "clusteringTool" not in kwargs:
         from InDetConfig.SiClusterizationToolConfig import ITkMergedPixelsToolCfg
@@ -135,7 +136,7 @@ def SCTClusterizationCfg(flags, name="InDetSCT_Clusterization", **kwargs):
        doTrackOverlay = getattr(flags.TrackOverlay.ActiveConfig, "doTrackOverlay", None)
     else:
        doTrackOverlay = flags.Overlay.doTrackOverlay
-    prefix = flags.Overlay.SigPrefix if doTrackOverlay else ''
+    prefix = flags.Overlay.SigPrefix if doTrackOverlay or flags.Common.ProductionStep is ProductionStep.PileUpPretracking else ''
 
     if "conditionsTool" not in kwargs:
         from SCT_ConditionsTools.SCT_ConditionsToolsConfig import SCT_ConditionsSummaryToolCfg
@@ -199,7 +200,7 @@ def ITkStripClusterizationCfg(flags, name="ITkStripClusterization", **kwargs):
        doTrackOverlay = getattr(flags.TrackOverlay.ActiveConfig, "doTrackOverlay", None)
     else:
        doTrackOverlay = flags.Overlay.doTrackOverlay
-    prefix = flags.Overlay.SigPrefix if doTrackOverlay else ''
+    prefix = flags.Overlay.SigPrefix if doTrackOverlay or flags.Common.ProductionStep is ProductionStep.PileUpPretracking else ''
 
     if "conditionsTool" not in kwargs:
         from SCT_ConditionsTools.ITkStripConditionsToolsConfig import ITkStripConditionsSummaryToolCfg
@@ -237,7 +238,7 @@ def InDetTRT_RIO_MakerCfg(flags, name = "InDetTRT_RIO_Maker", **kwargs):
        doTrackOverlay = getattr(flags.TrackOverlay.ActiveConfig, "doTrackOverlay", None)
     else:
        doTrackOverlay = flags.Overlay.doTrackOverlay
-    prefix = flags.Overlay.SigPrefix if doTrackOverlay else ''
+    prefix = flags.Overlay.SigPrefix if doTrackOverlay or flags.Common.ProductionStep is ProductionStep.PileUpPretracking else ''
     if "TRT_DriftCircleTool" not in kwargs:
         from InDetConfig.TRT_DriftCircleToolConfig import TRT_DriftCircleToolCfg
         kwargs.setdefault("TRT_DriftCircleTool", acc.popToolsAndMerge(
