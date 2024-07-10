@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <TSystem.h>
@@ -8,6 +8,7 @@
 #include "xAODRootAccess/Init.h"
 #include "xAODRootAccess/TEvent.h"
 #include "xAODCore/ShallowCopy.h"
+#include "AthContainers/ConstAccessor.h"
 
 #include <ZdcNtuple/ZdcLEDNtuple.h>
 
@@ -127,12 +128,21 @@ void ZdcLEDNtuple::processZdcLEDNtupleFromModules()
 
   ANA_MSG_DEBUG("accessing ZdcModules");
 
+  SG::ConstAccessor<int> ADCSumAcc("ADCSum" + auxSuffix);
+  SG::ConstAccessor<unsigned int> LEDTypeAcc("LEDType" + auxSuffix);
+  SG::ConstAccessor<float> PresampleAcc("Presample"+auxSuffix);
+  SG::ConstAccessor<int> MaxADCAcc("MaxADC" + auxSuffix);
+  SG::ConstAccessor<unsigned int> MaxSampleAcc("MaxSample" + auxSuffix);
+  SG::ConstAccessor<float> AvgTimeAcc("AvgTime" + auxSuffix);
+  SG::ConstAccessor<std::vector<uint16_t> > g0dataAcc("g0data" + auxSuffix);
+  SG::ConstAccessor<std::vector<uint16_t> > g1dataAcc("g1data" + auxSuffix);
+
   if (zdcModules.ptr())
   {
 
     for (const auto zdcMod : *zdcModules)
     {
-      if (zdcMod->isAvailable<int>("ADCSum" + auxSuffix))
+      if (ADCSumAcc.isAvailable(*zdcMod))
       {
         if (zdcSums.ptr())
         {
@@ -140,9 +150,9 @@ void ZdcLEDNtuple::processZdcLEDNtupleFromModules()
           {
             if (zdcSum->zdcSide() == infoSumInd)
             {
-              if (zdcSum->isAvailable<unsigned int>("LEDType" + auxSuffix))
+              if (LEDTypeAcc.isAvailable(*zdcSum))
               {
-                t_LEDType = zdcSum->auxdataConst<unsigned int>("LEDType" + auxSuffix);
+                t_LEDType = LEDTypeAcc(*zdcSum);
                 break;
               }
             }
@@ -164,19 +174,19 @@ void ZdcLEDNtuple::processZdcLEDNtupleFromModules()
         if (zdcMod->zdcType() == ZdcTypeInd)
         {
           int imod = zdcMod->zdcModule();
-	  if (!zdcMod->isAvailable<float>("Presample"+auxSuffix))
+	  if (!PresampleAcc.isAvailable(*zdcMod))
 	    {
 	      ANA_MSG_WARNING("Missing ZDC aux data");
 	      continue;
 	    }
-          t_ZdcModulePresample[iside][imod] = zdcMod->auxdataConst<float>("Presample" + auxSuffix);
-          t_ZdcModuleADCSum[iside][imod] = zdcMod->auxdataConst<int>("ADCSum" + auxSuffix);
-          t_ZdcModuleMaxADC[iside][imod] = zdcMod->auxdataConst<int>("MaxADC" + auxSuffix);
-          t_ZdcModuleMaxSample[iside][imod] = zdcMod->auxdataConst<unsigned int>("MaxSample" + auxSuffix);
-          t_ZdcModuleAvgTime[iside][imod] = zdcMod->auxdataConst<float>("AvgTime" + auxSuffix);
+          t_ZdcModulePresample[iside][imod] = PresampleAcc(*zdcMod);
+          t_ZdcModuleADCSum[iside][imod] = ADCSumAcc(*zdcMod);
+          t_ZdcModuleMaxADC[iside][imod] = MaxADCAcc(*zdcMod);
+          t_ZdcModuleMaxSample[iside][imod] = MaxSampleAcc(*zdcMod);
+          t_ZdcModuleAvgTime[iside][imod] = AvgTimeAcc(*zdcMod);
 
-          g0dataVec = zdcMod->auxdataConst<std::vector<uint16_t>>("g0data" + auxSuffix);
-          g1dataVec = zdcMod->auxdataConst<std::vector<uint16_t>>("g1data" + auxSuffix);
+          g0dataVec = g0dataAcc(*zdcMod);
+          g1dataVec = g1dataAcc(*zdcMod);
 
           for (int isam = 0; isam < nSamples; isam++)
           {
@@ -187,18 +197,18 @@ void ZdcLEDNtuple::processZdcLEDNtupleFromModules()
         if ((zdcMod->zdcType() == RPDTypeInd) && (zdcMod->zdcModule() == RPDModuleInd))
         {
           int imod = zdcMod->zdcChannel();
-	  if (!zdcMod->isAvailable<float>("Presample"+auxSuffix))
+	  if (!PresampleAcc.isAvailable(*zdcMod))
 	    {
 	      ANA_MSG_WARNING("Missing RPD aux data");
 	      continue;
 	    }
-          t_RPDModulePresample[iside][imod] = zdcMod->auxdataConst<float>("Presample" + auxSuffix);
-          t_RPDModuleADCSum[iside][imod] = zdcMod->auxdataConst<int>("ADCSum" + auxSuffix);
-          t_RPDModuleMaxADC[iside][imod] = zdcMod->auxdataConst<int>("MaxADC" + auxSuffix);
-          t_RPDModuleMaxSample[iside][imod] = zdcMod->auxdataConst<unsigned int>("MaxSample" + auxSuffix);
-          t_RPDModuleAvgTime[iside][imod] = zdcMod->auxdataConst<float>("AvgTime" + auxSuffix);
+          t_RPDModulePresample[iside][imod] = PresampleAcc(*zdcMod);
+          t_RPDModuleADCSum[iside][imod] = ADCSumAcc(*zdcMod);
+          t_RPDModuleMaxADC[iside][imod] = MaxADCAcc(*zdcMod);
+          t_RPDModuleMaxSample[iside][imod] = MaxSampleAcc(*zdcMod);
+          t_RPDModuleAvgTime[iside][imod] = AvgTimeAcc(*zdcMod);
 
-          g0dataVec = zdcMod->auxdataConst<std::vector<uint16_t>>("g0data" + auxSuffix);
+          g0dataVec = g0dataAcc(*zdcMod);
 
           for (int isam = 0; isam < nSamples; isam++)
           {

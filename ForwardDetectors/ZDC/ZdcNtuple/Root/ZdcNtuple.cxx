@@ -8,6 +8,7 @@
 #include "xAODRootAccess/Init.h"
 #include "xAODRootAccess/TEvent.h"
 #include "xAODCore/ShallowCopy.h"
+#include "AthContainers/ConstAccessor.h"
 
 #include <ZdcNtuple/ZdcNtuple.h>
 
@@ -707,6 +708,71 @@ void ZdcNtuple::processZdcNtupleFromModules()
       return;
     }
 
+  SG::ConstAccessor<char> centroidEventValidAcc("centroidEventValid" + auxSuffix);
+  SG::ConstAccessor<float> cosDeltaReactionPlaneAngleAcc("cosDeltaReactionPlaneAngle" + auxSuffix);
+  SG::ConstAccessor<float> CalibEnergyAcc("CalibEnergy"+auxSuffix);
+  SG::ConstAccessor<float> CalibEnergyErrAcc("CalibEnergyErr"+auxSuffix);
+  SG::ConstAccessor<float> UncalibSumAcc("UncalibSum"+auxSuffix);
+  SG::ConstAccessor<float> UncalibSumErrAcc("UncalibSumErr"+auxSuffix);
+  SG::ConstAccessor<float> AverageTimeAcc("AverageTime"+auxSuffix);
+  SG::ConstAccessor<unsigned int> StatusAcc("Status"+auxSuffix);
+  SG::ConstAccessor<unsigned int> ModuleMaskAcc("ModuleMask"+auxSuffix);
+  SG::ConstAccessor<float> TruthTotalEnergyAcc("TruthTotalEnergy" + auxSuffix);
+  SG::ConstAccessor<float> TruthInvisibleEnergyAcc("TruthInvisibleEnergy" + auxSuffix);
+  SG::ConstAccessor<float> TruthEMEnergyAcc("TruthEMEnergy" + auxSuffix);
+  SG::ConstAccessor<float> TruthNonEMEnergyAcc("TruthNonEMEnergy" + auxSuffix);
+  SG::ConstAccessor<float> TruthEscapedEnergyAcc("TruthEscapedEnergy" + auxSuffix);
+  SG::ConstAccessor<unsigned int> centroidStatusAcc("centroidStatus" + auxSuffix);
+  SG::ConstAccessor<std::vector<float> > RPDChannelSubtrAmpAcc("RPDChannelSubtrAmp" + auxSuffix);
+  SG::ConstAccessor<float> RPDSubtrAmpSumAcc("RPDSubtrAmpSum" + auxSuffix);
+  SG::ConstAccessor<float> xCentroidPreGeomCorPreAvgSubtrAcc("xCentroidPreGeomCorPreAvgSubtr" + auxSuffix);
+  SG::ConstAccessor<float> yCentroidPreGeomCorPreAvgSubtrAcc("yCentroidPreGeomCorPreAvgSubtr" + auxSuffix);
+  SG::ConstAccessor<float> xCentroidPreAvgSubtrAcc("xCentroidPreAvgSubtr" + auxSuffix);
+  SG::ConstAccessor<float> yCentroidPreAvgSubtrAcc("yCentroidPreAvgSubtr" + auxSuffix);
+  SG::ConstAccessor<float> xCentroidAcc("xCentroid" + auxSuffix);
+  SG::ConstAccessor<float> yCentroidAcc("yCentroid" + auxSuffix);
+  SG::ConstAccessor<std::vector<float> > xRowCentroidAcc("xRowCentroid" + auxSuffix);
+  SG::ConstAccessor<std::vector<float> > yColCentroidAcc("yColCentroid" + auxSuffix);
+  SG::ConstAccessor<float> reactionPlaneAngleAcc("reactionPlaneAngle" + auxSuffix);
+  SG::ConstAccessor<unsigned int> RPDStatusAcc("RPDStatus" + auxSuffix);
+  SG::ConstAccessor<unsigned int> nPhotonsAcc("nPhotons" + auxSuffix);
+  SG::ConstAccessor<float> CalibTimeAcc("CalibTime" + auxSuffix);
+  SG::ConstAccessor<float> AmplitudeAcc("Amplitude" + auxSuffix);
+  SG::ConstAccessor<float> TimeAcc("Time" + auxSuffix);
+  SG::ConstAccessor<float> ChisqAcc("Chisq" + auxSuffix);
+  SG::ConstAccessor<float> FitAmpAcc("FitAmp" + auxSuffix);
+  SG::ConstAccessor<float> FitAmpErrorAcc("FitAmpError" + auxSuffix);
+  SG::ConstAccessor<float> FitT0Acc("FitT0" + auxSuffix);
+  SG::ConstAccessor<float> BkgdMaxFractionAcc("BkgdMaxFraction" + auxSuffix);
+  SG::ConstAccessor<float> MinDeriv2ndAcc("MinDeriv2nd" + auxSuffix);
+  SG::ConstAccessor<float> PresampleAcc("Presample" + auxSuffix);
+  SG::ConstAccessor<float> PreSampleAmpAcc("PreSampleAmp" + auxSuffix);
+  SG::ConstAccessor<float> RPDChannelBaselineAcc("RPDChannelBaseline" + auxSuffix);
+  SG::ConstAccessor<std::vector<float> > RPDChannelPileupExpFitParamsAcc("RPDChannelPileupExpFitParams" + auxSuffix);
+  SG::ConstAccessor<std::vector<float> > RPDChannelPileupExpFitParamErrsAcc("RPDChannelPileupExpFitParamErrs" + auxSuffix);
+  SG::ConstAccessor<std::vector<float> > RPDChannelPileupStretchedExpFitParamsAcc("RPDChannelPileupStretchedExpFitParams" + auxSuffix);
+  SG::ConstAccessor<std::vector<float> > RPDChannelPileupStretchedExpFitParamErrsAcc("RPDChannelPileupStretchedExpFitParamErrs" + auxSuffix);
+  SG::ConstAccessor<float> RPDChannelPileupExpFitMSEAcc("RPDChannelPileupExpFitMSE" + auxSuffix);
+  SG::ConstAccessor<float> RPDChannelPileupStretchedExpFitMSEAcc("RPDChannelPileupStretchedExpFitMSE" + auxSuffix);
+  SG::ConstAccessor<float> RPDChannelAmplitudeAcc("RPDChannelAmplitude" + auxSuffix);
+  SG::ConstAccessor<float> RPDChannelAmplitudeCalibAcc("RPDChannelAmplitudeCalib" + auxSuffix);
+  SG::ConstAccessor<float> RPDChannelMaxADCAcc("RPDChannelMaxADC" + auxSuffix);
+  SG::ConstAccessor<float> RPDChannelMaxADCCalibAcc("RPDChannelMaxADCCalib" + auxSuffix);
+  SG::ConstAccessor<unsigned int> RPDChannelMaxSampleAcc("RPDChannelMaxSample" + auxSuffix);
+  SG::ConstAccessor<unsigned int> RPDChannelStatusAcc("RPDChannelStatus" + auxSuffix);
+  SG::ConstAccessor<float> RPDChannelPileupFracAcc("RPDChannelPileupFrac" + auxSuffix);
+
+  static const SG::ConstAccessor<uint16_t> LucrodTriggerAmpAcc("LucrodTriggerAmp");
+  static const SG::ConstAccessor<uint16_t> LucrodTriggerSideAmpAcc("LucrodTriggerSideAmp");
+  static const SG::ConstAccessor<float> Amplitude0Acc("Amplitude");
+  static const SG::ConstAccessor<float> MaxADCAcc("MaxADC");
+  static const SG::ConstAccessor<std::vector<uint16_t> > g0d0DataAcc("g0d0Data");
+  static const SG::ConstAccessor<std::vector<uint16_t> > g0d1DataAcc("g0d1Data");
+  static const SG::ConstAccessor<std::vector<uint16_t> > g1d0DataAcc("g1d0Data");
+  static const SG::ConstAccessor<std::vector<uint16_t> > g1d1DataAcc("g1d1Data");
+  static const SG::ConstAccessor<std::vector<uint16_t> > g0dataAcc("g0data");
+  static const SG::ConstAccessor<std::vector<uint16_t> > g1dataAcc("g1data");
+
   if (zdcSums.ptr())
   {
     ANA_MSG_DEBUG( "accessing ZdcSums" );
@@ -714,8 +780,8 @@ void ZdcNtuple::processZdcNtupleFromModules()
     {
       if (zdcSum->zdcSide()==0) {
         // new global sum
-        t_centroidEventValid = zdcSum->auxdataConst<char>("centroidEventValid" + auxSuffix);
-        t_cosDeltaReactionPlaneAngle = zdcSum->auxdataConst<float>("cosDeltaReactionPlaneAngle" + auxSuffix);
+        t_centroidEventValid = centroidEventValidAcc(*zdcSum);
+        t_cosDeltaReactionPlaneAngle = cosDeltaReactionPlaneAngleAcc(*zdcSum);
         continue;
       }
       int iside = 0;
@@ -724,49 +790,49 @@ void ZdcNtuple::processZdcNtupleFromModules()
       //static SG::AuxElement::ConstAccessor< float > acc( "CalibEnergy" );
       //t_ZdcEnergy[iside] = acc(*zdcSum);
 
-      t_ZdcEnergy[iside] = zdcSum->auxdataConst<float>("CalibEnergy"+auxSuffix);
-      t_ZdcEnergyErr[iside] = zdcSum->auxdataConst<float>("CalibEnergyErr"+auxSuffix);
+      t_ZdcEnergy[iside] = CalibEnergyAcc(*zdcSum);
+      t_ZdcEnergyErr[iside] = CalibEnergyErrAcc(*zdcSum);
 
-      t_ZdcAmp[iside] = zdcSum->auxdataConst<float>("UncalibSum"+auxSuffix);
-      t_ZdcAmpErr[iside] = zdcSum->auxdataConst<float>("UncalibSumErr"+auxSuffix);
-      if (zdcSum->isAvailable<uint16_t>("LucrodTriggerSideAmp"))
-	t_ZdcLucrodTriggerSideAmp[iside] = zdcSum->auxdataConst<uint16_t>("LucrodTriggerSideAmp");
+      t_ZdcAmp[iside] = UncalibSumAcc(*zdcSum);
+      t_ZdcAmpErr[iside] = UncalibSumErrAcc(*zdcSum);
+      if (LucrodTriggerSideAmpAcc.isAvailable(*zdcSum))
+	t_ZdcLucrodTriggerSideAmp[iside] = LucrodTriggerSideAmpAcc(*zdcSum);
 
       ANA_MSG_VERBOSE("processZdcNtupleFromModules: ZdcSum energy = " << t_ZdcEnergy[iside]);
 
-      t_ZdcTime[iside] = zdcSum->auxdataConst<float>("AverageTime"+auxSuffix);
-      t_ZdcStatus[iside] = zdcSum->auxdataConst<unsigned int>("Status"+auxSuffix);
-      t_ZdcModuleMask += (zdcSum->auxdataConst<unsigned int>("ModuleMask"+auxSuffix) << 4 * iside);
+      t_ZdcTime[iside] = AverageTimeAcc(*zdcSum);
+      t_ZdcStatus[iside] = StatusAcc(*zdcSum);
+      t_ZdcModuleMask += (ModuleMaskAcc(*zdcSum) << 4 * iside);
 
       if(m_isMC){
         ANA_MSG_DEBUG("Filling sum truth");
-        t_ZdcTruthTotal  [iside] = zdcSum->auxdataConst<float>("TruthTotalEnergy" + auxSuffix);
-        t_ZdcTruthInvis  [iside] = zdcSum->auxdataConst<float>("TruthInvisibleEnergy" + auxSuffix);
-        t_ZdcTruthEM     [iside] = zdcSum->auxdataConst<float>("TruthEMEnergy" + auxSuffix);
-        t_ZdcTruthNonEM  [iside] = zdcSum->auxdataConst<float>("TruthNonEMEnergy" + auxSuffix);
-        t_ZdcTruthEscaped[iside] = zdcSum->auxdataConst<float>("TruthEscapedEnergy" + auxSuffix);
+        t_ZdcTruthTotal  [iside] = TruthTotalEnergyAcc(*zdcSum);
+        t_ZdcTruthInvis  [iside] = TruthInvisibleEnergyAcc(*zdcSum);
+        t_ZdcTruthEM     [iside] = TruthEMEnergyAcc(*zdcSum);
+        t_ZdcTruthNonEM  [iside] = TruthNonEMEnergyAcc(*zdcSum);
+        t_ZdcTruthEscaped[iside] = TruthEscapedEnergyAcc(*zdcSum);
       }
 
       if (nsamplesZdc == 24) {
         if (enableCentroid) {
-          t_centroidStatus[iside] = zdcSum->auxdataConst<unsigned int>("centroidStatus" + auxSuffix);
-          std::vector<float> const& rpdChannelSubtrAmp = zdcSum->auxdataConst<std::vector<float>>("RPDChannelSubtrAmp" + auxSuffix);
+          t_centroidStatus[iside] = centroidStatusAcc(*zdcSum);
+          std::vector<float> const& rpdChannelSubtrAmp = RPDChannelSubtrAmpAcc(*zdcSum);
           std::copy(rpdChannelSubtrAmp.begin(), rpdChannelSubtrAmp.end(), t_RPDChannelSubtrAmp[iside]);
-          t_RPDSubtrAmpSum[iside] = zdcSum->auxdataConst<float>("RPDSubtrAmpSum" + auxSuffix);
-          t_xCentroidPreGeomCorPreAvgSubtr[iside] = zdcSum->auxdataConst<float>("xCentroidPreGeomCorPreAvgSubtr" + auxSuffix);
-          t_yCentroidPreGeomCorPreAvgSubtr[iside] = zdcSum->auxdataConst<float>("yCentroidPreGeomCorPreAvgSubtr" + auxSuffix);
-          t_xCentroidPreAvgSubtr[iside] = zdcSum->auxdataConst<float>("xCentroidPreAvgSubtr" + auxSuffix);
-          t_yCentroidPreAvgSubtr[iside] = zdcSum->auxdataConst<float>("yCentroidPreAvgSubtr" + auxSuffix);
-          t_xCentroid[iside] = zdcSum->auxdataConst<float>("xCentroid" + auxSuffix);
-          t_yCentroid[iside] = zdcSum->auxdataConst<float>("yCentroid" + auxSuffix);
-          std::vector<float> const& xRowCentroid = zdcSum->auxdataConst<std::vector<float>>("xRowCentroid" + auxSuffix);
+          t_RPDSubtrAmpSum[iside] = RPDSubtrAmpSumAcc(*zdcSum);
+          t_xCentroidPreGeomCorPreAvgSubtr[iside] = xCentroidPreGeomCorPreAvgSubtrAcc(*zdcSum);
+          t_yCentroidPreGeomCorPreAvgSubtr[iside] = yCentroidPreGeomCorPreAvgSubtrAcc(*zdcSum);
+          t_xCentroidPreAvgSubtr[iside] = xCentroidPreAvgSubtrAcc(*zdcSum);
+          t_yCentroidPreAvgSubtr[iside] = yCentroidPreAvgSubtrAcc(*zdcSum);
+          t_xCentroid[iside] = xCentroidAcc(*zdcSum);
+          t_yCentroid[iside] = yCentroidAcc(*zdcSum);
+          std::vector<float> const& xRowCentroid = xRowCentroidAcc(*zdcSum);
           std::copy(xRowCentroid.begin(), xRowCentroid.end(), t_xRowCentroid[iside]);
-          std::vector<float> const& yColCentroid = zdcSum->auxdataConst<std::vector<float>>("yColCentroid" + auxSuffix);
+          std::vector<float> const& yColCentroid = yColCentroidAcc(*zdcSum);
           std::copy(yColCentroid.begin(), yColCentroid.end(), t_yColCentroid[iside]);
-          t_reactionPlaneAngle[iside] = zdcSum->auxdataConst<float>("reactionPlaneAngle" + auxSuffix);
+          t_reactionPlaneAngle[iside] = reactionPlaneAngleAcc(*zdcSum);
         }
         if (enableRPD) {
-          t_RpdSideStatus[iside] = zdcSum->auxdataConst<unsigned int>("RPDStatus" + auxSuffix);
+          t_RpdSideStatus[iside] = RPDStatusAcc(*zdcSum);
         }
       }
     }
@@ -784,43 +850,43 @@ void ZdcNtuple::processZdcNtupleFromModules()
       if (m_isMC){
         //Calib hits are only stored in channel 0 of the RPD
         if(!(imod == 4 && zdcMod->zdcChannel() != 0)){
-          t_ZdcModuleTruthTotal  [iside][imod] = zdcMod->auxdataConst<float>("TruthTotalEnergy" + auxSuffix);
-          t_ZdcModuleTruthInvis  [iside][imod] = zdcMod->auxdataConst<float>("TruthInvisibleEnergy" + auxSuffix);
-          t_ZdcModuleTruthEM     [iside][imod] = zdcMod->auxdataConst<float>("TruthEMEnergy" + auxSuffix);
-          t_ZdcModuleTruthNonEM  [iside][imod] = zdcMod->auxdataConst<float>("TruthNonEMEnergy" + auxSuffix);
-          t_ZdcModuleTruthEscaped[iside][imod] = zdcMod->auxdataConst<float>("TruthEscapedEnergy" + auxSuffix);
-          t_ZdcModuleTruthNphotons[iside][imod] = zdcMod->auxdataConst<unsigned int>("nPhotons" + auxSuffix);
+          t_ZdcModuleTruthTotal  [iside][imod] = TruthTotalEnergyAcc(*zdcMod);
+          t_ZdcModuleTruthInvis  [iside][imod] = TruthInvisibleEnergyAcc(*zdcMod);
+          t_ZdcModuleTruthEM     [iside][imod] = TruthEMEnergyAcc(*zdcMod);
+          t_ZdcModuleTruthNonEM  [iside][imod] = TruthNonEMEnergyAcc(*zdcMod);
+          t_ZdcModuleTruthEscaped[iside][imod] = TruthEscapedEnergyAcc(*zdcMod);
+          t_ZdcModuleTruthNphotons[iside][imod] = nPhotonsAcc(*zdcMod);
         }
         //Calib hits are stored for all modules
         //Other data is only valid for module 1-4
         if(imod > 4) continue;
       }
 
-      ANA_MSG_VERBOSE ("Module " << zdcMod->zdcSide() << " " << zdcMod->zdcModule() << " amp:" << zdcMod->auxdataConst<float>("Amplitude"));
+      ANA_MSG_VERBOSE ("Module " << zdcMod->zdcSide() << " " << zdcMod->zdcModule() << " amp:" << Amplitude0Acc(*zdcMod));
 
       if (zdcMod->zdcType() == 0) {
-        // thi is the ZDC
-        t_ZdcModuleCalibAmp[iside][imod] = zdcMod->auxdataConst<float>("CalibEnergy" + auxSuffix);
-        t_ZdcModuleCalibTime[iside][imod] = zdcMod->auxdataConst<float>("CalibTime" + auxSuffix);
-        t_ZdcModuleStatus[iside][imod] = zdcMod->auxdataConst<unsigned int>("Status" + auxSuffix);
+        // this is the ZDC
+        t_ZdcModuleCalibAmp[iside][imod] = CalibEnergyAcc(*zdcMod);
+        t_ZdcModuleCalibTime[iside][imod] = CalibTimeAcc(*zdcMod);
+        t_ZdcModuleStatus[iside][imod] = StatusAcc(*zdcMod);
         if (t_ZdcModuleAmp[iside][imod] != 0.)
           Warning("processZdcNtupleFromModules", "overwriting side %d module %d!", iside, imod);
-        t_ZdcModuleAmp[iside][imod] = zdcMod->auxdataConst<float>("Amplitude" + auxSuffix);
-        t_ZdcModuleTime[iside][imod] = zdcMod->auxdataConst<float>("Time" + auxSuffix);
+        t_ZdcModuleAmp[iside][imod] = AmplitudeAcc(*zdcMod);
+        t_ZdcModuleTime[iside][imod] = TimeAcc(*zdcMod);
 
-        t_ZdcModuleChisq[iside][imod] = zdcMod->auxdataConst<float>("Chisq" + auxSuffix);
-        t_ZdcModuleFitAmp[iside][imod] = zdcMod->auxdataConst<float>("FitAmp" + auxSuffix);
-        t_ZdcModuleAmpError[iside][imod] = zdcMod->auxdataConst<float>("FitAmpError" + auxSuffix);
-        t_ZdcModuleFitT0[iside][imod] = zdcMod->auxdataConst<float>("FitT0" + auxSuffix);
-        t_ZdcModuleBkgdMaxFraction[iside][imod] = zdcMod->auxdataConst<float>("BkgdMaxFraction" + auxSuffix);
-        t_ZdcModuleMinDeriv2nd[iside][imod] = zdcMod->auxdataConst<float>("MinDeriv2nd" + auxSuffix);
-        t_ZdcModulePresample[iside][imod] = zdcMod->auxdataConst<float>("Presample" + auxSuffix);
-        t_ZdcModulePreSampleAmp[iside][imod] = zdcMod->auxdataConst<float>("PreSampleAmp" + auxSuffix);
+        t_ZdcModuleChisq[iside][imod] = ChisqAcc(*zdcMod);
+        t_ZdcModuleFitAmp[iside][imod] = FitAmpAcc(*zdcMod);
+        t_ZdcModuleAmpError[iside][imod] = FitAmpErrorAcc(*zdcMod);
+        t_ZdcModuleFitT0[iside][imod] = FitT0Acc(*zdcMod);
+        t_ZdcModuleBkgdMaxFraction[iside][imod] = BkgdMaxFractionAcc(*zdcMod);
+        t_ZdcModuleMinDeriv2nd[iside][imod] = MinDeriv2ndAcc(*zdcMod);
+        t_ZdcModulePresample[iside][imod] = PresampleAcc(*zdcMod);
+        t_ZdcModulePreSampleAmp[iside][imod] = PreSampleAmpAcc(*zdcMod);
 
-	if (zdcMod->isAvailable<uint16_t>("LucrodTriggerAmp"))
-	  t_ZdcLucrodTriggerAmp[iside][imod] = zdcMod->auxdataConst<uint16_t>("LucrodTriggerAmp");
-	if (zdcMod->isAvailable<float>("MaxADC"))
-	  t_ZdcModuleMaxADC[iside][imod] = zdcMod->auxdataConst<float>("MaxADC");
+	if (LucrodTriggerAmpAcc.isAvailable(*zdcMod))
+	  t_ZdcLucrodTriggerAmp[iside][imod] = LucrodTriggerAmpAcc(*zdcMod);
+	if (MaxADCAcc.isAvailable(*zdcMod))
+	  t_ZdcModuleMaxADC[iside][imod] = MaxADCAcc(*zdcMod);
 
         if (enableOutputSamples)
           {
@@ -828,24 +894,24 @@ void ZdcNtuple::processZdcNtupleFromModules()
 	      {
 		if (nsamplesZdc == 7)
 		  {
-		    t_raw7[iside][imod][0][0][isamp] = (zdcMod->auxdataConst<std::vector<uint16_t>>("g0d0Data")).at(isamp);
-		    t_raw7[iside][imod][0][1][isamp] = (zdcMod->auxdataConst<std::vector<uint16_t>>("g0d1Data")).at(isamp);
-		    t_raw7[iside][imod][1][0][isamp] = (zdcMod->auxdataConst<std::vector<uint16_t>>("g1d0Data")).at(isamp);
-		    t_raw7[iside][imod][1][1][isamp] = (zdcMod->auxdataConst<std::vector<uint16_t>>("g1d1Data")).at(isamp);
+		    t_raw7[iside][imod][0][0][isamp] = g0d0DataAcc(*zdcMod).at(isamp);
+		    t_raw7[iside][imod][0][1][isamp] = g0d1DataAcc(*zdcMod).at(isamp);
+		    t_raw7[iside][imod][1][0][isamp] = g1d0DataAcc(*zdcMod).at(isamp);
+		    t_raw7[iside][imod][1][1][isamp] = g1d1DataAcc(*zdcMod).at(isamp);
 		  }
 		
 		if (nsamplesZdc == 15)
 		  {
-		    t_raw15[iside][imod][0][0][isamp] = (zdcMod->auxdataConst<std::vector<uint16_t>>("g0d0Data")).at(isamp);
-		    t_raw15[iside][imod][0][1][isamp] = (zdcMod->auxdataConst<std::vector<uint16_t>>("g0d1Data")).at(isamp);
-		    t_raw15[iside][imod][1][0][isamp] = (zdcMod->auxdataConst<std::vector<uint16_t>>("g1d0Data")).at(isamp);
-		    t_raw15[iside][imod][1][1][isamp] = (zdcMod->auxdataConst<std::vector<uint16_t>>("g1d1Data")).at(isamp);
+		    t_raw15[iside][imod][0][0][isamp] = g0d0DataAcc(*zdcMod).at(isamp);
+		    t_raw15[iside][imod][0][1][isamp] = g0d1DataAcc(*zdcMod).at(isamp);
+		    t_raw15[iside][imod][1][0][isamp] = g1d0DataAcc(*zdcMod).at(isamp);
+		    t_raw15[iside][imod][1][1][isamp] = g1d1DataAcc(*zdcMod).at(isamp);
 		  }
 		
 		if (nsamplesZdc == 24)
 		  {
-		    t_raw24[iside][imod][0][0][isamp] = (zdcMod->auxdataConst<std::vector<uint16_t>>("g0data")).at(isamp);
-		    t_raw24[iside][imod][1][0][isamp] = (zdcMod->auxdataConst<std::vector<uint16_t>>("g1data")).at(isamp);
+		    t_raw24[iside][imod][0][0][isamp] = g0dataAcc(*zdcMod).at(isamp);
+		    t_raw24[iside][imod][1][0][isamp] = g1dataAcc(*zdcMod).at(isamp);
 		  }
 	      }
           }
@@ -854,31 +920,31 @@ void ZdcNtuple::processZdcNtupleFromModules()
         // this is the RPD
 	if (enableRPD)
 	  {
-	    t_RpdChannelBaseline[iside][zdcMod->zdcChannel()] = zdcMod->auxdataConst<float>("RPDChannelBaseline" + auxSuffix);
-	    std::vector<float> const &rpdChannelPileupExpFitParams = zdcMod->auxdataConst<std::vector<float>>("RPDChannelPileupExpFitParams" + auxSuffix);
+	    t_RpdChannelBaseline[iside][zdcMod->zdcChannel()] = RPDChannelBaselineAcc(*zdcMod);
+	    std::vector<float> const &rpdChannelPileupExpFitParams = RPDChannelPileupExpFitParamsAcc(*zdcMod);
 	    std::copy(rpdChannelPileupExpFitParams.begin(), rpdChannelPileupExpFitParams.end(), t_RpdChannelPileupExpFitParams[iside][zdcMod->zdcChannel()]);
-	    std::vector<float> const &rpdChannelPileupExpFitParamErrs = zdcMod->auxdataConst<std::vector<float>>("RPDChannelPileupExpFitParamErrs" + auxSuffix);
+	    std::vector<float> const &rpdChannelPileupExpFitParamErrs = RPDChannelPileupExpFitParamErrsAcc(*zdcMod);
 	    std::copy(rpdChannelPileupExpFitParamErrs.begin(), rpdChannelPileupExpFitParamErrs.end(), t_RpdChannelPileupExpFitParamErrs[iside][zdcMod->zdcChannel()]);
-	    std::vector<float> const &rpdChannelPileupStretchedExpFitParams = zdcMod->auxdataConst<std::vector<float>>("RPDChannelPileupStretchedExpFitParams" + auxSuffix);
+	    std::vector<float> const &rpdChannelPileupStretchedExpFitParams = RPDChannelPileupStretchedExpFitParamsAcc(*zdcMod);
 	    std::copy(rpdChannelPileupStretchedExpFitParams.begin(), rpdChannelPileupStretchedExpFitParams.end(), t_RpdChannelPileupStretchedExpFitParams[iside][zdcMod->zdcChannel()]);
-	    std::vector<float> const &rpdChannelPileupStretchedExpFitParamErrs = zdcMod->auxdataConst<std::vector<float>>("RPDChannelPileupStretchedExpFitParamErrs" + auxSuffix);
+	    std::vector<float> const &rpdChannelPileupStretchedExpFitParamErrs = RPDChannelPileupStretchedExpFitParamErrsAcc(*zdcMod);
 	    std::copy(rpdChannelPileupStretchedExpFitParamErrs.begin(), rpdChannelPileupStretchedExpFitParamErrs.end(), t_RpdChannelPileupStretchedExpFitParamErrs[iside][zdcMod->zdcChannel()]);
-	    t_RpdChannelPileupExpFitMSE[iside][zdcMod->zdcChannel()] = zdcMod->auxdataConst<float>("RPDChannelPileupExpFitMSE" + auxSuffix);
-	    t_RpdChannelPileupStretchedExpFitMSE[iside][zdcMod->zdcChannel()] = zdcMod->auxdataConst<float>("RPDChannelPileupStretchedExpFitMSE" + auxSuffix);
-	    t_RpdChannelAmplitude[iside][zdcMod->zdcChannel()] = zdcMod->auxdataConst<float>("RPDChannelAmplitude" + auxSuffix);
-	    t_RpdChannelAmplitudeCalib[iside][zdcMod->zdcChannel()] = zdcMod->auxdataConst<float>("RPDChannelAmplitudeCalib" + auxSuffix);
-	    t_RpdChannelMaxADC[iside][zdcMod->zdcChannel()] = zdcMod->auxdataConst<float>("RPDChannelMaxADC" + auxSuffix);
-	    t_RpdChannelMaxADCCalib[iside][zdcMod->zdcChannel()] = zdcMod->auxdataConst<float>("RPDChannelMaxADCCalib" + auxSuffix);
-	    t_RpdChannelMaxSample[iside][zdcMod->zdcChannel()] = zdcMod->auxdataConst<unsigned int>("RPDChannelMaxSample" + auxSuffix);
-	    t_RpdChannelStatus[iside][zdcMod->zdcChannel()] = zdcMod->auxdataConst<unsigned int>("RPDChannelStatus" + auxSuffix);
-	    t_RpdChannelPileupFrac[iside][zdcMod->zdcChannel()] = zdcMod->auxdataConst<float>("RPDChannelPileupFrac" + auxSuffix);
+	    t_RpdChannelPileupExpFitMSE[iside][zdcMod->zdcChannel()] = RPDChannelPileupExpFitMSEAcc(*zdcMod);
+	    t_RpdChannelPileupStretchedExpFitMSE[iside][zdcMod->zdcChannel()] = RPDChannelPileupStretchedExpFitMSEAcc(*zdcMod);
+	    t_RpdChannelAmplitude[iside][zdcMod->zdcChannel()] = RPDChannelAmplitudeAcc(*zdcMod);
+	    t_RpdChannelAmplitudeCalib[iside][zdcMod->zdcChannel()] = RPDChannelAmplitudeCalibAcc(*zdcMod);
+	    t_RpdChannelMaxADC[iside][zdcMod->zdcChannel()] = RPDChannelMaxADCAcc(*zdcMod);
+	    t_RpdChannelMaxADCCalib[iside][zdcMod->zdcChannel()] = RPDChannelMaxADCCalibAcc(*zdcMod);
+	    t_RpdChannelMaxSample[iside][zdcMod->zdcChannel()] = RPDChannelMaxSampleAcc(*zdcMod);
+	    t_RpdChannelStatus[iside][zdcMod->zdcChannel()] = RPDChannelStatusAcc(*zdcMod);
+	    t_RpdChannelPileupFrac[iside][zdcMod->zdcChannel()] = RPDChannelPileupFracAcc(*zdcMod);
       if(m_isMC){
-        t_RpdModuleTruthNphotons[iside][zdcMod->zdcChannel()] = zdcMod->auxdataConst<unsigned int>("nPhotons" + auxSuffix);
+        t_RpdModuleTruthNphotons[iside][zdcMod->zdcChannel()] = nPhotonsAcc(*zdcMod);
       }
 	  }
         if (enableOutputSamples)
           {
-            std::vector<uint16_t> const &rpdChannelRaw = zdcMod->auxdataConst<std::vector<uint16_t>>("g0data");
+            std::vector<uint16_t> const &rpdChannelRaw = g0dataAcc(*zdcMod);
             std::copy(rpdChannelRaw.begin(), rpdChannelRaw.end(), t_rpdRaw[iside][zdcMod->zdcChannel()]);
           }
       }
@@ -1123,6 +1189,8 @@ void ZdcNtuple::processInDet()
 
       t_nvx = m_primaryVertices->size();
 
+      static const SG::ConstAccessor<float> sumPt2Acc("sumPt2");
+
       // start of new vertex representation
       t_nvtx = m_primaryVertices->size();
       for (const auto vertex : *m_primaryVertices)
@@ -1139,10 +1207,7 @@ void ZdcNtuple::processInDet()
 	  t_vtx_sumpt2.push_back(vtx_sumpt2 / 1e6);
 	  t_vtx_ntrk_all.push_back(vertex->nTrackParticles());
 
-	  if (vertex->isAvailable<float>("sumPt2"))
-	    t_vtx_sumpt2_all.push_back(vertex->auxdataConst<float>("sumPt2"));
-	  else
-	    t_vtx_sumpt2_all.push_back(-1);
+          t_vtx_sumpt2_all.push_back(sumPt2Acc.withDefault(*vertex, -1));
 
 	  std::vector<int16_t> trk_index;
 	  if ( m_trackParticles && vertex->nTrackParticles() <= trackLimit )
@@ -1205,10 +1270,8 @@ void ZdcNtuple::processInDet()
 	  t_vxcov[i] = 0;
 	}
       t_vxntrk = primary_vertex->nTrackParticles();
-      if (primary_vertex->isAvailable<float>("sumPt2"))
-	t_vxsumpt2 = primary_vertex->auxdata<float>("sumPt2");
-      else
-	t_vxsumpt2 = 0;
+      static const SG::ConstAccessor<float> sumPt2Acc("sumPt2");
+      t_vxsumpt2 = sumPt2Acc.withDefault(*primary_vertex, 0);
       t_vxtype = primary_vertex->vertexType();
       t_pvindex = pv_index;
       t_puvxz = max_pileup_z;
@@ -1330,19 +1393,32 @@ void ZdcNtuple::writeTrack(const xAOD::TrackParticle* track, const xAOD::Vertex*
   float vtxz = -999.;
   t_trk_vtxz.push_back(vtxz);
 
+  static const SG::ConstAccessor<uint8_t> numberOfInnermostPixelLayerHitsAcc("numberOfInnermostPixelLayerHits");
+  static const SG::ConstAccessor<uint8_t> expectInnermostPixelLayerHitAcc("expectInnermostPixelLayerHit");
+  static const SG::ConstAccessor<uint8_t> numberOfNextToInnermostPixelLayerHitsAcc("numberOfNextToInnermostPixelLayerHits");
+  static const SG::ConstAccessor<uint8_t> expectNextToInnermostPixelLayerHitAcc("expectNextToInnermostPixelLayerHit");
+  static const SG::ConstAccessor<uint8_t> numberOfSCTHitsAcc("numberOfSCTHits");
+  static const SG::ConstAccessor<uint8_t> numberOfPixelHitsAcc("numberOfPixelHits");
+  static const SG::ConstAccessor<uint8_t> numberOfSCTDeadSensorsAcc("numberOfSCTDeadSensors");
+  static const SG::ConstAccessor<uint8_t> numberOfPixelDeadSensorsAcc("numberOfPixelDeadSensors");
+  static const SG::ConstAccessor<uint8_t> numberOfSCTHolesAcc("numberOfSCTHoles");
+  static const SG::ConstAccessor<uint8_t> numberOfPixelHolesAcc("numberOfPixelHoles");
+  static const SG::ConstAccessor<uint8_t> numberOfTRTHitsAcc("numberOfTRTHits");
+  static const SG::ConstAccessor<uint8_t> numberOfTRTOutliersAcc("numberOfTRTOutliers");
+
   t_trk_quality.push_back(trackQuality(track, vertex));
-  t_trk_inPixHits.push_back(track->auxdata<uint8_t>("numberOfInnermostPixelLayerHits"));
-  t_trk_exPixHits.push_back(track->auxdata<uint8_t>("expectInnermostPixelLayerHit"));
-  t_trk_ninPixHits.push_back(track->auxdata<uint8_t>("numberOfNextToInnermostPixelLayerHits"));
-  t_trk_nexPixHits.push_back(track->auxdata<uint8_t>("expectNextToInnermostPixelLayerHit"));
-  t_trk_nSctHits.push_back(track->auxdata<uint8_t>("numberOfSCTHits"));
-  t_trk_nPixHits.push_back(track->auxdata<uint8_t>("numberOfPixelHits"));
-  t_trk_nSctDead.push_back(track->auxdata<uint8_t>("numberOfSCTDeadSensors"));
-  t_trk_nPixDead.push_back(track->auxdata<uint8_t>("numberOfPixelDeadSensors"));
-  t_trk_nSctHoles.push_back(track->auxdata<uint8_t>("numberOfSCTHoles"));
-  t_trk_nPixHoles.push_back(track->auxdata<uint8_t>("numberOfPixelHoles"));
-  t_trk_nTrtHits.push_back(track->auxdata<uint8_t>("numberOfTRTHits"));
-  t_trk_nTrtOutliers.push_back(track->auxdata<uint8_t>("numberOfTRTOutliers"));
+  t_trk_inPixHits.push_back(numberOfInnermostPixelLayerHitsAcc(*track));
+  t_trk_exPixHits.push_back(expectInnermostPixelLayerHitAcc(*track));
+  t_trk_ninPixHits.push_back(numberOfNextToInnermostPixelLayerHitsAcc(*track));
+  t_trk_nexPixHits.push_back(expectNextToInnermostPixelLayerHitAcc(*track));
+  t_trk_nSctHits.push_back(numberOfSCTHitsAcc(*track));
+  t_trk_nPixHits.push_back(numberOfPixelHitsAcc(*track));
+  t_trk_nSctDead.push_back(numberOfSCTDeadSensorsAcc(*track));
+  t_trk_nPixDead.push_back(numberOfPixelDeadSensorsAcc(*track));
+  t_trk_nSctHoles.push_back(numberOfSCTHolesAcc(*track));
+  t_trk_nPixHoles.push_back(numberOfPixelHolesAcc(*track));
+  t_trk_nTrtHits.push_back(numberOfTRTHitsAcc(*track));
+  t_trk_nTrtOutliers.push_back(numberOfTRTOutliersAcc(*track));
   float pixeldEdx = 0;
   track->summaryValue(pixeldEdx, xAOD::SummaryType::pixeldEdx);
   t_trk_pixeldEdx.push_back(pixeldEdx);
@@ -1361,9 +1437,10 @@ void ZdcNtuple::processFCal()
 
   if (m_caloSums)
     {
+      static const SG::ConstAccessor<std::string> SummaryAcc("Summary");
       for (const auto calosum : *m_caloSums)
 	{
-	  const std::string name = calosum->auxdataConst<std::string>("Summary");
+	  const std::string name = SummaryAcc(*calosum);
 	  if (name == "FCal")
 	    {
 	      t_fcalEt = calosum->et();
