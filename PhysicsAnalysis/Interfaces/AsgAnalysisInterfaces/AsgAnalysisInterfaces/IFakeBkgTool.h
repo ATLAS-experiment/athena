@@ -7,6 +7,7 @@
 
 #include "PATInterfaces/ISystematicsTool.h"
 #include "xAODBase/IParticleContainer.h"
+#include "AthContainers/ConstDataVector.h"
 
 #include <string>
 
@@ -39,6 +40,10 @@ class IFakeBkgTool : virtual public CP::ISystematicsTool
     /// \brief supply list of leptons / global variables, internal counters incremented
     /// Does not return anything; event weight(s) must be retrieved by subsequent call(s) to getEventWeight() (for tools inheriting from ILinearFakeBkgTool)
     virtual StatusCode addEvent(const xAOD::IParticleContainer& particles, float extraWeight = 1.f) = 0;
+    
+    /// \brief supply list of leptons / global variables, internal counters incremented
+    /// Does not return anything; event weight(s) must be retrieved by subsequent call(s) to getEventWeight() (for tools inheriting from ILinearFakeBkgTool)
+    virtual StatusCode addEvent(const ConstDataVector<xAOD::IParticleContainer>& particles, float extraWeight = 1.f) = 0;
     
     /// \brief returns the accumulated fake lepton background yield (or compute it, in the case of the likelihood matrix method), and fills the registered histograms (if any)
     /// The 'selection' and 'process' settings used for these operations can be chosen with the 'Selection' and 'Process' properties.
