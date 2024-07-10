@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include <fstream>
 #include <stdexcept>
@@ -81,16 +81,18 @@ namespace LVL1 {
        { // type = 0 are big modules, type = 1 the pixels
        
        ATH_MSG_DEBUG("ZDC Side " << zdcModule->zdcSide() << ", Module: " << zdcModule->zdcModule() << " and Energy: " << zdcModuleCalibEnergyHandle(*zdcModule));
+
+       static const SG::ConstAccessor<uint16_t> LucrodTriggerAmpAcc("LucrodTriggerAmp");
        // Side A
        if (zdcModule->zdcSide() > 0)
         {
-          moduleEnergy.at(zdcModule->zdcModule()) = (!m_energyToADCScaleFactor && zdcModule->isAvailable<uint16_t>("LucrodTriggerAmp")) ? static_cast<float>(zdcModule->auxdataConst<uint16_t>("LucrodTriggerAmp")) : zdcModuleCalibEnergyHandle(*zdcModule);
+          moduleEnergy.at(zdcModule->zdcModule()) = (!m_energyToADCScaleFactor && LucrodTriggerAmpAcc.isAvailable(*zdcModule)) ? static_cast<float>(LucrodTriggerAmpAcc(*zdcModule)) : zdcModuleCalibEnergyHandle(*zdcModule);
         }
 
        // Side C
        if (zdcModule->zdcSide() < 0)
         {
-          moduleEnergy.at(zdcModule->zdcModule() + 4) = (!m_energyToADCScaleFactor && zdcModule->isAvailable<uint16_t>("LucrodTriggerAmp")) ? static_cast<float>(zdcModule->auxdataConst<uint16_t>("LucrodTriggerAmp")) : zdcModuleCalibEnergyHandle(*zdcModule);
+          moduleEnergy.at(zdcModule->zdcModule() + 4) = (!m_energyToADCScaleFactor && LucrodTriggerAmpAcc.isAvailable(*zdcModule)) ? static_cast<float>(LucrodTriggerAmpAcc(*zdcModule)) : zdcModuleCalibEnergyHandle(*zdcModule);
         }
        }
      }
