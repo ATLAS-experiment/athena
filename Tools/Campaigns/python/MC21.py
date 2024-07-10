@@ -105,12 +105,12 @@ def MC21SimulationNoIoV(flags):
     flags.Sim.TRTRangeCut = 30.0
     flags.Sim.TightMuonStepping = True
 
-    from SimuJobTransforms.SimulationHelpers import enableBeamPipeKill, enableFrozenShowersFCalOnly
+    from SimulationConfig.G4Optimizations import enableBeamPipeKill, enableFrozenShowersFCalOnly
     enableBeamPipeKill(flags)
     if flags.Sim.ISF.Simulator.isFullSim():
         enableFrozenShowersFCalOnly(flags)
 
-    from SimuJobTransforms.G4Optimizations import enableG4Optimizations
+    from SimulationConfig.G4Optimizations import enableG4Optimizations
     enableG4Optimizations(flags)
 
 
