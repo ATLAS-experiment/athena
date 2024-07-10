@@ -237,7 +237,7 @@ class ActsFatrasSimTool : public BaseSimulatorTool {
   }
 
   // Random number service
-  ServiceHandle<IAthRNGSvc> m_rngSvc{this, "RNGServec", "AthRNGSvc"};
+  ServiceHandle<IAthRNGSvc> m_rngSvc{this, "RNGService", "AthRNGSvc"};
   ATHRNG::RNGWrapper* m_randomEngine ATLAS_THREAD_SAFE {};
   Gaudi::Property<std::string> m_randomEngineName{this, "RandomEngineName",
     "RandomEngineName", "Name of random number stream"};
@@ -257,7 +257,7 @@ class ActsFatrasSimTool : public BaseSimulatorTool {
   PublicToolHandle<ISF::IParticleFilter> m_particleFilter{
       this, "ParticleFilter", "", "Particle filter kinematic cuts, etc."};
 
-  ServiceHandle<ITruthSvc> m_truthRecordSvc{this,"TruthRecordService", "", ""};
+  ServiceHandle<ISF::ITruthSvc> m_truthRecordSvc{this, "TruthRecordService", "ISF_TruthRecordSvc", ""};
   Gaudi::Property<double> m_interact_minPt{this, "Interact_MinPt", 50.0,
       "Min pT of the interactions (MeV)"};
 

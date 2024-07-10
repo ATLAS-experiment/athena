@@ -200,7 +200,7 @@ StatusCode ISF::ActsFatrasSimTool::simulateVector(
         }
       }
     }//end of secondaries
-  ATH_MSG_DEBUG(name() << " No. of secondaries: " << secondaries.size());
+    ATH_MSG_VERBOSE(name() << " No. of secondaries: " << secondaries.size());
     ATH_MSG_DEBUG(name() << " End of particle " << isfp->barcode());
   
   std::vector<ActsFatras::Particle>().swap(input);

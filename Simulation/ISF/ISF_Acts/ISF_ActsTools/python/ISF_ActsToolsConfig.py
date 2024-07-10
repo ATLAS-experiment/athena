@@ -14,5 +14,11 @@ def ActsFatrasSimToolCfg(flags, name="ISF_ActsFatrasSimTool", **kwargs):
     kwargs.setdefault('TrackingGeometryTool', acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)))
 
     kwargs.setdefault("MaxSteps", 2000)
+
+    from ISF_Services.ISF_ServicesConfig import TruthServiceCfg
+    kwargs.setdefault("TruthRecordService", acc.getPrimaryAndMerge(TruthServiceCfg(flags)).name)
+    from RngComps.RngCompsConfig import AthRNGSvcCfg
+    kwargs.setdefault("RNGService", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
+
     acc.setPrivateTools(CompFactory.ISF.ActsFatrasSimTool(name, **kwargs))
     return acc
