@@ -1,11 +1,13 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DiTauRecTools/DiTauIDVarCalculator.h"
 
 // Core include(s):
 #include "AthLinks/ElementLink.h"
+#include "AthContainers/Decorator.h"
+#include "AthContainers/ConstAccessor.h"
 
 // EDM include(s):
 #include "xAODTracking/TrackParticleContainer.h"
@@ -91,44 +93,83 @@ StatusCode DiTauIDVarCalculator::calculateHadHadIDVariables(const xAOD::DiTauJet
 {
   ATH_MSG_DEBUG("Calculate DiTau ID variables");
   
-  xDiTau.auxdecor< int >("n_subjets") = n_subjets(xDiTau);
+  static const SG::Decorator< int > n_subjetsDec("n_subjets");
+  n_subjetsDec(xDiTau) = n_subjets(xDiTau);
   ATH_CHECK( decorNtracks(xDiTau) );
-  xDiTau.auxdecor< float >( "ditau_pt") = ditau_pt(xDiTau);
-  xDiTau.auxdecor< float >( "f_core_lead" ) = f_core(xDiTau, 0);
-  xDiTau.auxdecor< float >( "f_core_subl" ) = f_core(xDiTau, 1);
-  xDiTau.auxdecor< float >( "f_subjet_lead" ) = f_subjet(xDiTau, 0);
-  xDiTau.auxdecor< float >( "f_subjet_subl" ) = f_subjet(xDiTau, 1);
-  xDiTau.auxdecor< float >( "f_subjets") = f_subjets(xDiTau);
-  xDiTau.auxdecor< float >( "f_track_lead") = f_track(xDiTau, 0);
-  xDiTau.auxdecor< float >( "f_track_subl") = f_track(xDiTau, 1);
-  xDiTau.auxdecor< float >( "R_max_lead") = R_max(xDiTau, 0);
-  xDiTau.auxdecor< float >( "R_max_subl") = R_max(xDiTau, 1);
-  xDiTau.auxdecor< int >( "n_track" ) = n_track(xDiTau);
-  xDiTau.auxdecor< int >( "n_tracks_lead" ) = n_tracks(xDiTau, 0);
-  xDiTau.auxdecor< int >( "n_tracks_subl" ) = n_tracks(xDiTau, 1);
-  xDiTau.auxdecor< int >( "n_isotrack" ) = n_isotrack(xDiTau);
-  xDiTau.auxdecor< float >( "R_track" ) = R_track(xDiTau);
-  xDiTau.auxdecor< float >( "R_track_core" ) = R_track_core(xDiTau);
-  xDiTau.auxdecor< float >( "R_track_all" ) = R_track_all(xDiTau);
-  xDiTau.auxdecor< float >( "R_isotrack" ) = R_isotrack(xDiTau);
-  xDiTau.auxdecor< float >( "R_core_lead" ) = R_core(xDiTau, 0);
-  xDiTau.auxdecor< float >( "R_core_subl" ) = R_core(xDiTau, 1);
-  xDiTau.auxdecor< float >( "R_tracks_lead" ) = R_tracks(xDiTau, 0);
-  xDiTau.auxdecor< float >( "R_tracks_subl" ) = R_tracks(xDiTau, 1);
-  xDiTau.auxdecor< float >( "m_track" ) = mass_track(xDiTau);
-  xDiTau.auxdecor< float >( "m_track_core" ) = mass_track_core(xDiTau);
-  xDiTau.auxdecor< float >( "m_core_lead" ) = mass_core(xDiTau, 0);
-  xDiTau.auxdecor< float >( "m_core_subl" ) = mass_core(xDiTau, 1);
-  xDiTau.auxdecor< float >( "m_track_all" ) = mass_track_all(xDiTau);
-  xDiTau.auxdecor< float >( "m_tracks_lead" ) = mass_tracks(xDiTau, 0);
-  xDiTau.auxdecor< float >( "m_tracks_subl" ) = mass_tracks(xDiTau, 1);
-  xDiTau.auxdecor< float >( "E_frac_subl" ) = E_frac(xDiTau,1);
-  xDiTau.auxdecor< float >( "E_frac_subsubl") = E_frac(xDiTau, 2);
-  xDiTau.auxdecor< float >( "R_subjets_subl") = R_subjets(xDiTau, 1);
-  xDiTau.auxdecor< float >( "R_subjets_subsubl") = R_subjets(xDiTau, 2);
-  xDiTau.auxdecor< float >( "d0_leadtrack_lead") = d0_leadtrack(xDiTau, 0);
-  xDiTau.auxdecor< float >( "d0_leadtrack_subl") = d0_leadtrack(xDiTau, 1);
-  xDiTau.auxdecor< float >( "f_isotracks" ) = f_isotracks(xDiTau);
+
+  static const SG::Decorator< float > ditau_ptDec("ditau_pt");
+  static const SG::Decorator< float > f_core_leadDec("f_core_lead");
+  static const SG::Decorator< float > f_core_sublDec("f_core_subl");
+  static const SG::Decorator< float > f_subjet_leadDec("f_subjet_lead");
+  static const SG::Decorator< float > f_subjet_sublDec("f_subjet_subl");
+  static const SG::Decorator< float > f_subjetsDec("f_subjets");
+  static const SG::Decorator< float > f_track_leadDec("f_track_lead");
+  static const SG::Decorator< float > f_track_sublDec("f_track_subl");
+  static const SG::Decorator< float > R_max_leadDec("R_max_lead");
+  static const SG::Decorator< float > R_max_sublDec("R_max_subl");
+  static const SG::Decorator< int >   n_trackDec("n_track");
+  static const SG::Decorator< int >   n_tracks_leadDec("n_tracks_lead");
+  static const SG::Decorator< int >   n_tracks_sublDec("n_tracks_subl");
+  static const SG::Decorator< int >   n_isotrackDec("n_isotrack");
+  static const SG::Decorator< float > R_trackDec("R_track");
+  static const SG::Decorator< float > R_track_coreDec("R_track_core");
+  static const SG::Decorator< float > R_track_allDec("R_track_all");
+  static const SG::Decorator< float > R_isotrackDec("R_isotrack");
+  static const SG::Decorator< float > R_core_leadDec("R_core_lead");
+  static const SG::Decorator< float > R_core_sublDec("R_core_subl");
+  static const SG::Decorator< float > R_tracks_leadDec("R_tracks_lead");
+  static const SG::Decorator< float > R_tracks_sublDec("R_tracks_subl");
+  static const SG::Decorator< float > M_trackDec("m_track");
+  static const SG::Decorator< float > M_track_coreDec("m_track_core");
+  static const SG::Decorator< float > M_core_leadDec("m_core_lead");
+  static const SG::Decorator< float > M_core_sublDec("m_core_subl");
+  static const SG::Decorator< float > M_track_allDec("m_track_all");
+  static const SG::Decorator< float > M_tracks_leadDec("m_tracks_lead");
+  static const SG::Decorator< float > M_tracks_sublDec("m_tracks_subl");
+  static const SG::Decorator< float > E_frac_sublDec("E_frac_subl");
+  static const SG::Decorator< float > E_frac_subsublDec("E_frac_subsubl");
+  static const SG::Decorator< float > R_subjets_sublDec("R_subjets_subl");
+  static const SG::Decorator< float > R_subjets_subsublDec("R_subjets_subsubl");
+  static const SG::Decorator< float > d0_leadtrack_leadDec("d0_leadtrack_lead");
+  static const SG::Decorator< float > d0_leadtrack_sublDec("d0_leadtrack_subl");
+  static const SG::Decorator< float > f_isotracksDec("f_isotracks");
+
+  ditau_ptDec(xDiTau) = ditau_pt(xDiTau);
+  f_core_leadDec(xDiTau) = f_core(xDiTau, 0);
+  f_core_sublDec(xDiTau) = f_core(xDiTau, 1);
+  f_subjet_leadDec(xDiTau) = f_subjet(xDiTau, 0);
+  f_subjet_sublDec(xDiTau) = f_subjet(xDiTau, 1);
+  f_subjetsDec(xDiTau) = f_subjets(xDiTau);
+  f_track_leadDec(xDiTau) = f_track(xDiTau, 0);
+  f_track_sublDec(xDiTau) = f_track(xDiTau, 1);
+  R_max_leadDec(xDiTau) = R_max(xDiTau, 0);
+  R_max_sublDec(xDiTau) = R_max(xDiTau, 1);
+  n_trackDec(xDiTau) = n_track(xDiTau);
+  n_tracks_leadDec(xDiTau) = n_tracks(xDiTau, 0);
+  n_tracks_sublDec(xDiTau) = n_tracks(xDiTau, 1);
+  n_isotrackDec(xDiTau) = n_isotrack(xDiTau);
+  R_trackDec(xDiTau) = R_track(xDiTau);
+  R_track_coreDec(xDiTau) = R_track_core(xDiTau);
+  R_track_allDec(xDiTau) = R_track_all(xDiTau);
+  R_isotrackDec(xDiTau) = R_isotrack(xDiTau);
+  R_core_leadDec(xDiTau) = R_core(xDiTau, 0);
+  R_core_sublDec(xDiTau) = R_core(xDiTau, 1);
+  R_tracks_leadDec(xDiTau) = R_tracks(xDiTau, 0);
+  R_tracks_sublDec(xDiTau) = R_tracks(xDiTau, 1);
+  M_trackDec(xDiTau) = mass_track(xDiTau);
+  M_track_coreDec(xDiTau) = mass_track_core(xDiTau);
+  M_core_leadDec(xDiTau) = mass_core(xDiTau, 0);
+  M_core_sublDec(xDiTau) = mass_core(xDiTau, 1);
+  M_track_allDec(xDiTau) = mass_track_all(xDiTau);
+  M_tracks_leadDec(xDiTau) = mass_tracks(xDiTau, 0);
+  M_tracks_sublDec(xDiTau) = mass_tracks(xDiTau, 1);
+  E_frac_sublDec(xDiTau) = E_frac(xDiTau,1);
+  E_frac_subsublDec(xDiTau) = E_frac(xDiTau, 2);
+  R_subjets_sublDec(xDiTau) = R_subjets(xDiTau, 1);
+  R_subjets_subsublDec(xDiTau) = R_subjets(xDiTau, 2);
+  d0_leadtrack_leadDec(xDiTau) = d0_leadtrack(xDiTau, 0);
+  d0_leadtrack_sublDec(xDiTau) = d0_leadtrack(xDiTau, 1);
+  f_isotracksDec(xDiTau) = f_isotracks(xDiTau);
 
   return StatusCode::SUCCESS;
 }
@@ -154,7 +195,8 @@ float DiTauIDVarCalculator::n_subjets(const xAOD::DiTauJet& xDiTau)
 
 float DiTauIDVarCalculator::ditau_pt(const xAOD::DiTauJet& xDiTau) const
 {
-  if (xDiTau.auxdata<int>("n_subjets") < 2 ) {
+  static const SG::ConstAccessor<int> n_subjetsAcc("n_subjets");
+  if (n_subjetsAcc(xDiTau) < 2 ) {
     return m_dDefault;
   }
 
@@ -165,7 +207,8 @@ float DiTauIDVarCalculator::ditau_pt(const xAOD::DiTauJet& xDiTau) const
 //______________________________________________________________________________;
 float DiTauIDVarCalculator::f_core(const xAOD::DiTauJet& xDiTau, int iSubjet) const 
 {
-  if (iSubjet < 0 || iSubjet >= xDiTau.auxdata<int>("n_subjets")) {
+  static const SG::ConstAccessor<int> n_subjetsAcc("n_subjets");
+  if (iSubjet < 0 || iSubjet >= n_subjetsAcc(xDiTau)) {
     return m_dDefault;
   }
 
@@ -176,7 +219,8 @@ float DiTauIDVarCalculator::f_core(const xAOD::DiTauJet& xDiTau, int iSubjet) co
 //______________________________________________________________________________;
 float DiTauIDVarCalculator::f_subjet(const xAOD::DiTauJet& xDiTau, int iSubjet) const
 {
-  if (iSubjet < 0 || iSubjet >= xDiTau.auxdata<int>("n_subjets")) {
+  static const SG::ConstAccessor<int> n_subjetsAcc("n_subjets");
+  if (iSubjet < 0 || iSubjet >= n_subjetsAcc(xDiTau)) {
     return m_dDefault;
   }
 
@@ -187,7 +231,8 @@ float DiTauIDVarCalculator::f_subjet(const xAOD::DiTauJet& xDiTau, int iSubjet) 
 //______________________________________________________________________________;
 float DiTauIDVarCalculator::f_subjets(const xAOD::DiTauJet& xDiTau) const
 {
-  if (xDiTau.auxdata<int>("n_subjets") < 2 ) {
+  static const SG::ConstAccessor<int> n_subjetsAcc("n_subjets");
+  if (n_subjetsAcc(xDiTau) < 2 ) {
     return m_dDefault;
   }
 
@@ -198,11 +243,13 @@ float DiTauIDVarCalculator::f_subjets(const xAOD::DiTauJet& xDiTau) const
 //______________________________________________________________________________;
 float DiTauIDVarCalculator::f_track(const xAOD::DiTauJet& xDiTau, int iSubjet) const
 {
-  if (iSubjet < 0 || iSubjet >= xDiTau.auxdata<int>("n_subjets")) {
+  static const SG::ConstAccessor<int> n_subjetsAcc("n_subjets");
+  if (iSubjet < 0 || iSubjet >= n_subjetsAcc(xDiTau)) {
     return m_dDefault;
   }
 
-  if (!xDiTau.isAvailable< TrackParticleLinks_t >("trackLinks") )
+  static const SG::ConstAccessor<TrackParticleLinks_t> trackLinksAcc("trackLinks");
+  if (!trackLinksAcc.isAvailable(xDiTau) )
   {
     ATH_MSG_WARNING("Link not available");
   } 
@@ -247,7 +294,8 @@ float DiTauIDVarCalculator::f_track(const xAOD::DiTauJet& xDiTau, int iSubjet) c
 //______________________________________________________________________________;
 float DiTauIDVarCalculator::R_max(const xAOD::DiTauJet& xDiTau, int iSubjet) const
 { 
-  if (iSubjet < 0 || iSubjet >= xDiTau.auxdata<int>("n_subjets")) {
+  static const SG::ConstAccessor<int> n_subjetsAcc("n_subjets");
+  if (iSubjet < 0 || iSubjet >= n_subjetsAcc(xDiTau)) {
     return m_dDefault;
   }
 
@@ -262,6 +310,7 @@ float DiTauIDVarCalculator::R_max(const xAOD::DiTauJet& xDiTau, int iSubjet) con
   TLorentzVector tlvTrack;
   TLorentzVector tlvRmaxTrack;
   double Rmax = 0;
+  static const SG::ConstAccessor<float> R_subjetAcc("R_subjet");
   for (const auto &xTrack: xTracks) 
   {
     tlvTrack.SetPtEtaPhiE( (*xTrack)->pt(),
@@ -269,7 +318,7 @@ float DiTauIDVarCalculator::R_max(const xAOD::DiTauJet& xDiTau, int iSubjet) con
                            (*xTrack)->phi(),
                            (*xTrack)->e() );
 
-    if ( tlvSubjet.DeltaR(tlvTrack) < xDiTau.auxdata< float >("R_subjet") )
+    if ( tlvSubjet.DeltaR(tlvTrack) < R_subjetAcc(xDiTau) )
     {
       if (tlvTrack.DeltaR(tlvSubjet) > Rmax) 
       {
@@ -291,15 +340,18 @@ int DiTauIDVarCalculator::n_track(const xAOD::DiTauJet& xDiTau)
 //______________________________________________________________________________;
 int DiTauIDVarCalculator::n_tracks(const xAOD::DiTauJet& xDiTau, int iSubjet) const
 {
-  if (iSubjet < 0 || iSubjet >= xDiTau.auxdata<int>("n_subjets")) {
+  static const SG::ConstAccessor<int> n_subjetsAcc("n_subjets");
+  if (iSubjet < 0 || iSubjet >= n_subjetsAcc(xDiTau)) {
     return m_dDefault;
   }
 
-  if (!xDiTau.isAvailable<std::vector<int>>("n_tracks"))
+  static const SG::ConstAccessor<std::vector<int> > n_tracksAcc("n_tracks");
+  if (!n_tracksAcc.isAvailable(xDiTau))
   {
     ATH_MSG_DEBUG("n_tracks decoration not available. Try with track links.");
 
-    if (!xDiTau.isAvailable< TrackParticleLinks_t >("trackLinks") )
+    static const SG::ConstAccessor<TrackParticleLinks_t> trackLinksAcc("trackLinks");
+    if (!trackLinksAcc.isAvailable(xDiTau) )
     {
       ATH_MSG_WARNING("Track links not available. Return 0.");
       return (int)m_dDefault;
@@ -327,7 +379,7 @@ int DiTauIDVarCalculator::n_tracks(const xAOD::DiTauJet& xDiTau, int iSubjet) co
     return nTracks;
   }
 
-  return xDiTau.auxdata<std::vector<int>>("n_tracks").at(iSubjet);
+  return n_tracksAcc(xDiTau).at(iSubjet);
 
 }
 
@@ -343,12 +395,14 @@ float DiTauIDVarCalculator::R_tracks(const xAOD::DiTauJet& xDiTau, int iSubjet) 
   double R_sum = 0;
   double pt = 0;
 
-  if (!xDiTau.isAvailable< TrackParticleLinks_t >("trackLinks") )
+  static const SG::ConstAccessor<TrackParticleLinks_t> trackLinksAcc("trackLinks");
+  if (!trackLinksAcc.isAvailable(xDiTau) )
   {
     ATH_MSG_WARNING("Link not available");
   }
 
-  if (iSubjet < 0 || iSubjet >= xDiTau.auxdata<int>("n_subjets")) {
+  static const SG::ConstAccessor<int> n_subjetsAcc("n_subjets");
+  if (iSubjet < 0 || iSubjet >= n_subjetsAcc(xDiTau)) {
     return m_dDefault;
   }
  
@@ -391,11 +445,13 @@ float DiTauIDVarCalculator::R_core(const xAOD::DiTauJet& xDiTau, int iSubjet) co
   double R_sum = 0;
   double pt = 0;
 
-  if (!xDiTau.isAvailable< TrackParticleLinks_t >("trackLinks") )
+  static const SG::ConstAccessor<TrackParticleLinks_t> trackLinksAcc("trackLinks");
+  if (!trackLinksAcc.isAvailable(xDiTau) )
   {
     ATH_MSG_WARNING("Link not available");
   }
-  if (iSubjet < 0 || iSubjet >= xDiTau.auxdata<int>("n_subjets")) {
+  static const SG::ConstAccessor<int> n_subjetsAcc("n_subjets");
+  if (iSubjet < 0 || iSubjet >= n_subjetsAcc(xDiTau)) {
     return m_dDefault;
   }
  
@@ -409,6 +465,7 @@ float DiTauIDVarCalculator::R_core(const xAOD::DiTauJet& xDiTau, int iSubjet) co
     
   TLorentzVector tlvTrack;
 
+  static const SG::ConstAccessor<float> R_coreAcc("R_core");
   for (const auto& xTrack: xTracks) 
   { 
     tlvTrack.SetPtEtaPhiE( (*xTrack)->pt(),
@@ -416,7 +473,7 @@ float DiTauIDVarCalculator::R_core(const xAOD::DiTauJet& xDiTau, int iSubjet) co
                            (*xTrack)->phi(),
                            (*xTrack)->e() );
 
-    if ( tlvSubjet.DeltaR(tlvTrack) < xDiTau.auxdata< float >( "R_core" ) )
+    if ( tlvSubjet.DeltaR(tlvTrack) < R_coreAcc(xDiTau) )
     {
       R_sum += tlvSubjet.DeltaR(tlvTrack)*tlvTrack.Pt();
       pt += tlvTrack.Pt();
@@ -437,11 +494,13 @@ float DiTauIDVarCalculator::R_track_core(const xAOD::DiTauJet& xDiTau) const
   double R_sum = 0;
   double pt = 0;
 
-  if (!xDiTau.isAvailable< TrackParticleLinks_t >("trackLinks") )
+  static const SG::ConstAccessor<TrackParticleLinks_t> trackLinksAcc("trackLinks");
+  if (!trackLinksAcc.isAvailable(xDiTau) )
   {
     ATH_MSG_WARNING("Link not available");
   }
-  if (xDiTau.auxdata<int>("n_subjets") < 2) {
+  static const SG::ConstAccessor<int> n_subjetsAcc("n_subjets");
+  if (n_subjetsAcc(xDiTau) < 2) {
     return m_dDefault;
   }
  
@@ -459,13 +518,14 @@ float DiTauIDVarCalculator::R_track_core(const xAOD::DiTauJet& xDiTau) const
       
     TLorentzVector tlvTrack;
 
+    static const SG::ConstAccessor<float> R_coreAcc("R_core");
     for (const auto& xTrack: xTracks) 
     { 
       tlvTrack.SetPtEtaPhiE( (*xTrack)->pt(),
                              (*xTrack)->eta(),
                              (*xTrack)->phi(),
                              (*xTrack)->e() );
-      if ( tlvSubjet.DeltaR(tlvTrack) < xDiTau.auxdata< float >("R_core") )
+      if ( tlvSubjet.DeltaR(tlvTrack) < R_coreAcc(xDiTau) )
       {
         //ATH_MSG_DEBUG("smaller");
         R_sum += tlvSubjet.DeltaR(tlvTrack)*tlvTrack.Pt();
@@ -487,11 +547,13 @@ float DiTauIDVarCalculator::R_track(const xAOD::DiTauJet& xDiTau) const
   double R_sum = 0;
   double pt = 0;
 
-  if (!xDiTau.isAvailable< TrackParticleLinks_t >("trackLinks") )
+  static const SG::ConstAccessor<TrackParticleLinks_t> trackLinksAcc("trackLinks");
+  if (!trackLinksAcc.isAvailable(xDiTau) )
   {
     ATH_MSG_WARNING("Link not available");
   }
-  if (xDiTau.auxdata<int>("n_subjets") < 2) {
+  static const SG::ConstAccessor<int> n_subjetsAcc("n_subjets");
+  if (n_subjetsAcc(xDiTau) < 2) {
     return m_dDefault;
   }
  
@@ -535,12 +597,14 @@ float DiTauIDVarCalculator::R_track_all(const xAOD::DiTauJet& xDiTau) const
   double R_sum = 0;
   double pt = 0;
 
-  if (!xDiTau.isAvailable< TrackParticleLinks_t >("trackLinks") )
+  static const SG::ConstAccessor<TrackParticleLinks_t> trackLinksAcc("trackLinks");
+  if (!trackLinksAcc.isAvailable(xDiTau) )
   {
     ATH_MSG_WARNING("Link not available");
   }
 
-  for (int i = 0; i<xDiTau.auxdata<int>("n_subjets"); i++)
+  static const SG::ConstAccessor<int> n_subjetsAcc("n_subjets");
+  for (int i = 0; i<n_subjetsAcc(xDiTau); i++)
   {
   
     TrackParticleLinks_t xTracks = xDiTau.trackLinks();
@@ -582,12 +646,14 @@ float DiTauIDVarCalculator::R_isotrack(const xAOD::DiTauJet& xDiTau) const
   double R_sum = 0;
   double pt = 0;
 
-  if (!xDiTau.isAvailable< TrackParticleLinks_t >("isoTrackLinks") )
+  static const SG::ConstAccessor<TrackParticleLinks_t> isoTrackLinksAcc("isoTrackLinks");
+  if (!isoTrackLinksAcc.isAvailable(xDiTau) )
   {
     ATH_MSG_WARNING("Link not available");
   }
   
-  if (xDiTau.auxdata<int>("n_subjets") < 2) {
+  static const SG::ConstAccessor<int> n_subjetsAcc("n_subjets");
+  if (n_subjetsAcc(xDiTau) < 2) {
     return m_dDefault;
   }
  
@@ -631,17 +697,20 @@ float DiTauIDVarCalculator::R_isotrack(const xAOD::DiTauJet& xDiTau) const
 float DiTauIDVarCalculator::mass_track_core(const xAOD::DiTauJet& xDiTau) const
 {
 
-  if (!xDiTau.isAvailable< TrackParticleLinks_t >("trackLinks") )
+  static const SG::ConstAccessor<TrackParticleLinks_t> trackLinksAcc("trackLinks");
+  if (!trackLinksAcc.isAvailable(xDiTau) )
   {
     ATH_MSG_WARNING("Link not available");
   } 
     
-  if (xDiTau.auxdata<int>("n_subjets") < 2) {
+  static const SG::ConstAccessor<int> n_subjetsAcc("n_subjets");
+  if (n_subjetsAcc(xDiTau) < 2) {
     return m_dDefault;
   }
 
   TLorentzVector tlvallTracks;
 
+  static const SG::ConstAccessor<float> R_coreAcc("R_core");
   for (int i = 0; i<=1; i++)
   {
 
@@ -661,7 +730,7 @@ float DiTauIDVarCalculator::mass_track_core(const xAOD::DiTauJet& xDiTau) const
                              (*xTrack)->eta(),
                              (*xTrack)->phi(),
                              (*xTrack)->e() );
-      if ( tlvSubjet.DeltaR(tlvTrack) < xDiTau.auxdata< float >("R_core") )
+      if ( tlvSubjet.DeltaR(tlvTrack) < R_coreAcc(xDiTau) )
       {
         //ATH_MSG_DEBUG("smaller");
         tlvallTracks += tlvTrack;
@@ -680,12 +749,14 @@ float DiTauIDVarCalculator::mass_track_core(const xAOD::DiTauJet& xDiTau) const
 float DiTauIDVarCalculator::mass_core(const xAOD::DiTauJet& xDiTau, int iSubjet) const
 {
 
-  if (!xDiTau.isAvailable< TrackParticleLinks_t >("trackLinks") )
+  static const SG::ConstAccessor<TrackParticleLinks_t> trackLinksAcc("trackLinks");
+  if (!trackLinksAcc.isAvailable(xDiTau) )
   {
     ATH_MSG_WARNING("Link not available");
   } 
     
-  if ( iSubjet < 0 || iSubjet >= xDiTau.auxdata<int>("n_subjets")) {
+  static const SG::ConstAccessor<int> n_subjetsAcc("n_subjets");
+  if ( iSubjet < 0 || iSubjet >= n_subjetsAcc(xDiTau)) {
     return m_dDefault;
   }
 
@@ -702,13 +773,14 @@ float DiTauIDVarCalculator::mass_core(const xAOD::DiTauJet& xDiTau, int iSubjet)
   
   TLorentzVector tlvTrack;
 
+  static const SG::ConstAccessor<float> R_coreAcc("R_core");
   for (const auto& xTrack: xTracks) 
   { 
     tlvTrack.SetPtEtaPhiE( (*xTrack)->pt(),
                            (*xTrack)->eta(),
                            (*xTrack)->phi(),
                            (*xTrack)->e() );
-    if ( tlvSubjet.DeltaR(tlvTrack) < xDiTau.auxdata< float >("R_core") )
+    if ( tlvSubjet.DeltaR(tlvTrack) < R_coreAcc(xDiTau) )
     {
       //ATH_MSG_DEBUG("smaller");
       tlvallTracks += tlvTrack;
@@ -727,12 +799,14 @@ float DiTauIDVarCalculator::mass_core(const xAOD::DiTauJet& xDiTau, int iSubjet)
 float DiTauIDVarCalculator::mass_tracks(const xAOD::DiTauJet& xDiTau, int iSubjet) const
 {
 
-  if (!xDiTau.isAvailable< TrackParticleLinks_t >("trackLinks") )
+  static const SG::ConstAccessor<TrackParticleLinks_t> trackLinksAcc("trackLinks");
+  if (!trackLinksAcc.isAvailable(xDiTau) )
   {
     ATH_MSG_WARNING("Link not available");
   } 
     
-  if ( iSubjet < 0 || iSubjet >= xDiTau.auxdata<int>("n_subjets")) {
+  static const SG::ConstAccessor<int> n_subjetsAcc("n_subjets");
+  if ( iSubjet < 0 || iSubjet >= n_subjetsAcc(xDiTau)) {
     return m_dDefault;
   }
 
@@ -771,7 +845,8 @@ float DiTauIDVarCalculator::mass_tracks(const xAOD::DiTauJet& xDiTau, int iSubje
 float DiTauIDVarCalculator::mass_track(const xAOD::DiTauJet& xDiTau) const
 {
 
-  if (!xDiTau.isAvailable< TrackParticleLinks_t >("trackLinks") )
+  static const SG::ConstAccessor<TrackParticleLinks_t> trackLinksAcc("trackLinks");
+  if (!trackLinksAcc.isAvailable(xDiTau) )
   {
     ATH_MSG_WARNING("Link not available");
   } 
@@ -802,7 +877,8 @@ float DiTauIDVarCalculator::mass_track(const xAOD::DiTauJet& xDiTau) const
 float DiTauIDVarCalculator::mass_track_all(const xAOD::DiTauJet& xDiTau) const
 {
 
-  if (!xDiTau.isAvailable< TrackParticleLinks_t >("trackLinks") )
+  static const SG::ConstAccessor<TrackParticleLinks_t> trackLinksAcc("trackLinks");
+  if (!trackLinksAcc.isAvailable(xDiTau) )
   {
     ATH_MSG_WARNING("Link not available");
   } 
@@ -849,7 +925,8 @@ float DiTauIDVarCalculator::mass_track_all(const xAOD::DiTauJet& xDiTau) const
 //______________________________________________________________________________;
 float DiTauIDVarCalculator::E_frac(const xAOD::DiTauJet& xDiTau, int iSubjet) const
 { 
-  if ( iSubjet < 0 || iSubjet >= xDiTau.auxdata<int>("n_subjets")) {
+  static const SG::ConstAccessor<int> n_subjetsAcc("n_subjets");
+  if ( iSubjet < 0 || iSubjet >= n_subjetsAcc(xDiTau)) {
     return m_dDefault;
   }
 
@@ -860,11 +937,13 @@ float DiTauIDVarCalculator::E_frac(const xAOD::DiTauJet& xDiTau, int iSubjet) co
 float DiTauIDVarCalculator::R_subjets(const xAOD::DiTauJet& xDiTau, int iSubjet) const
 {
 
-  if ( iSubjet < 0 || iSubjet >= xDiTau.auxdata<int>("n_subjets")) {
+  static const SG::ConstAccessor<int> n_subjetsAcc("n_subjets");
+  if ( iSubjet < 0 || iSubjet >= n_subjetsAcc(xDiTau)) {
     return m_dDefault;
   }
   
-  if (!xDiTau.isAvailable< TrackParticleLinks_t >("trackLinks") )
+  static const SG::ConstAccessor<TrackParticleLinks_t> trackLinksAcc("trackLinks");
+  if (!trackLinksAcc.isAvailable(xDiTau) )
   {
     ATH_MSG_WARNING("Track links not available");
   }
@@ -888,12 +967,14 @@ float DiTauIDVarCalculator::d0_leadtrack(const xAOD::DiTauJet& xDiTau, int iSubj
 {
   double pt_leadtrk = 0;
   double d0 = m_dDefault;
-  if (!xDiTau.isAvailable< TrackParticleLinks_t >("trackLinks") )
+  static const SG::ConstAccessor<TrackParticleLinks_t> trackLinksAcc("trackLinks");
+  if (!trackLinksAcc.isAvailable(xDiTau) )
   {
     ATH_MSG_WARNING("Track links not available");
   } 
 
-  if ( iSubjet < 0 || iSubjet >= xDiTau.auxdata<int>("n_subjets")) {
+  static const SG::ConstAccessor<int> n_subjetsAcc("n_subjets");
+  if ( iSubjet < 0 || iSubjet >= n_subjetsAcc(xDiTau)) {
     return m_dDefault;
   }
 
@@ -907,6 +988,7 @@ float DiTauIDVarCalculator::d0_leadtrack(const xAOD::DiTauJet& xDiTau, int iSubj
     
   TLorentzVector tlvTrack;
 
+  static const SG::ConstAccessor<float> R_coreAcc("R_core");
   for (auto &xTrack: xTracks) 
   { 
     tlvTrack.SetPtEtaPhiE( (*xTrack)->pt(),
@@ -914,7 +996,7 @@ float DiTauIDVarCalculator::d0_leadtrack(const xAOD::DiTauJet& xDiTau, int iSubj
                            (*xTrack)->phi(),
                            (*xTrack)->e() );
 
-    if (tlvTrack.DeltaR(tlvSubjet) < xDiTau.auxdata< float >("R_core")) 
+    if (tlvTrack.DeltaR(tlvSubjet) < R_coreAcc(xDiTau)) 
     {
       if (tlvTrack.Pt() > pt_leadtrk)
       {
@@ -930,7 +1012,8 @@ float DiTauIDVarCalculator::d0_leadtrack(const xAOD::DiTauJet& xDiTau, int iSubj
 float DiTauIDVarCalculator::f_isotracks(const xAOD::DiTauJet& xDiTau) const
 {
   double iso_pt = 0;
-  if (!xDiTau.isAvailable< TrackParticleLinks_t >("isoTrackLinks") )
+  static const SG::ConstAccessor<TrackParticleLinks_t> isoTrackLinksAcc("isoTrackLinks");
+  if (!isoTrackLinksAcc.isAvailable(xDiTau) )
   {
     ATH_MSG_WARNING("Track links not available");
   }
@@ -955,15 +1038,18 @@ float DiTauIDVarCalculator::f_isotracks(const xAOD::DiTauJet& xDiTau) const
 //______________________________________________________________________________;
 StatusCode DiTauIDVarCalculator::decorNtracks (const xAOD::DiTauJet& xDiTau)
 {
-  if (!xDiTau.isAvailable< TrackParticleLinks_t >("trackLinks") )
+  static const SG::ConstAccessor<TrackParticleLinks_t> trackLinksAcc("trackLinks");
+  if (!trackLinksAcc.isAvailable(xDiTau) )
   {
     Warning("decorNtracks()", "Track links not available.");
     return StatusCode::FAILURE;
   } 
 
-  int nSubjets = xDiTau.auxdata<int>("n_subjets");
+  static const SG::ConstAccessor<int> n_subjetsAcc("n_subjets");
+  int nSubjets = n_subjetsAcc(xDiTau);
 
-  float Rsubjet = xDiTau.auxdata<float>("R_subjet");
+  static const SG::ConstAccessor<float> R_subjetAcc("R_subjet");
+  float Rsubjet = R_subjetAcc(xDiTau);
   std::vector<int> nTracks(nSubjets, 0);
 
   TrackParticleLinks_t xTracks = xDiTau.trackLinks();
@@ -991,7 +1077,8 @@ StatusCode DiTauIDVarCalculator::decorNtracks (const xAOD::DiTauJet& xDiTau)
     if (itrmin > -1) nTracks[itrmin]++;
   } // loop over tracks
 
-  xDiTau.auxdecor< std::vector<int> >("n_tracks") = nTracks;
+  static const SG::Decorator< std::vector<int> > n_tracksDec("n_tracks");
+  n_tracksDec(xDiTau) = nTracks;
 
   return StatusCode::SUCCESS;
 }
