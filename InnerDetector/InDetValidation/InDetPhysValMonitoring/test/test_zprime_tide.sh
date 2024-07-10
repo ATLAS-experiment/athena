@@ -31,8 +31,7 @@ Reco_tf.py \
     --maxEvents 100 \
     --postInclude "default:PyJobTransforms.UseFrontier"  \
     --autoConfiguration="everything" \
-    --conditionsTag "default:OFLCOND-MC23-SDR-RUN3-01" \
-    --geometryVersion="default:ATLAS-R3S-2021-03-02-00" \
+    --conditionsTag "default:OFLCOND-MC23-SDR-RUN3-07" \
     --digiSeedOffset1="8" \
     --digiSeedOffset2="8" \
     --CA "default:True" \

@@ -90,7 +90,7 @@ case $ArtProcess in
       --inputRDOFile $x \
       --outputAODFile   physval.AOD.root \
       --steering        doRAWtoALL \
-      --conditionsTag   'default:OFLCOND-MC23-SDR-RUN3-01' \
+      --conditionsTag   'default:OFLCOND-MC23-SDR-RUN3-07' \
       --checkEventCount False \
       --ignoreErrors    True \
       --maxEvents       -1 
