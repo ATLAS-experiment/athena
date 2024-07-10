@@ -134,6 +134,10 @@ def AthenaMtesEventLoopMgrCfg(flags, mtEs=False, channel=''):
         SchedulerSvc = scheduler.getName(),
         EventRangeChannel = channel)
 
+    if flags.Input.OverrideRunNumber:
+        from AthenaKernel.EventIdOverrideConfig import EvtIdModifierSvcCfg
+        elmgr.EvtIdModifierSvc = cfg.getPrimaryAndMerge(EvtIdModifierSvcCfg(flags)).name
+
     if mtEs:
         from AthenaServices.OutputStreamSequencerSvcConfig import OutputStreamSequencerSvcCfg
         cfg.merge(OutputStreamSequencerSvcCfg(flags,

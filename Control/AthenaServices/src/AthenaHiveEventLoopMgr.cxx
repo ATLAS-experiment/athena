@@ -1166,14 +1166,7 @@ int AthenaHiveEventLoopMgr::declareEventRootAddress(EventContext& ctx){
 void AthenaHiveEventLoopMgr::modifyEventContext(EventContext& ctx, const EventID& eID, bool consume_modifier_stream) {
 
   if(m_evtIdModSvc.isSet()) {
-    EventID* new_eID=new EventID(eID);
-    // interface to m_evtIdModSvc->modify_evtid wants to be able to
-    // update the pointer itself, but in reality function doesn't need
-    // it. And cannot obviously use a smart pointer here, as the
-    // pointer itself can get updated by modify_evtid, so plain
-    // pointer for now.
-    // CHECK: Update evtIdModSvc method modify_evtid
-    // interface to use just a pointer or even better a reference?
+    EventID new_eID(eID);
     // In Hive EventLoopMgr ctx.evt() gets set to m_nevt and *then* m_nevt is
     // incremented later so it's zero-indexed and we don't need to subtract one
     m_evtIdModSvc->modify_evtid(new_eID, ctx.evt(), consume_modifier_stream);
@@ -1182,14 +1175,13 @@ void AthenaHiveEventLoopMgr::modifyEventContext(EventContext& ctx, const EventID
       unsigned int oldLB=eID.lumi_block();
       unsigned int oldTS=eID.time_stamp();
       unsigned int oldTSno=eID.time_stamp_ns_offset();
-      ATH_MSG_DEBUG ( "modifyEventContext: use evtIdModSvc runnr=" << oldrunnr << " -> " << new_eID->run_number() );
-      ATH_MSG_DEBUG ( "modifyEventContext: use evtIdModSvc LB=" << oldLB << " -> " << new_eID->lumi_block() );
-      ATH_MSG_DEBUG ( "modifyEventContext: use evtIdModSvc TimeStamp=" << oldTS << " -> " << new_eID->time_stamp() );
-      ATH_MSG_DEBUG ( "modifyEventContext: use evtIdModSvc TimeStamp ns Offset=" << oldTSno << " -> " << new_eID->time_stamp_ns_offset() );
+      ATH_MSG_DEBUG ( "modifyEventContext: use evtIdModSvc runnr=" << oldrunnr << " -> " << new_eID.run_number() );
+      ATH_MSG_DEBUG ( "modifyEventContext: use evtIdModSvc LB=" << oldLB << " -> " << new_eID.lumi_block() );
+      ATH_MSG_DEBUG ( "modifyEventContext: use evtIdModSvc TimeStamp=" << oldTS << " -> " << new_eID.time_stamp() );
+      ATH_MSG_DEBUG ( "modifyEventContext: use evtIdModSvc TimeStamp ns Offset=" << oldTSno << " -> " << new_eID.time_stamp_ns_offset() );
     }
-    ctx.setEventID( *new_eID );
+    ctx.setEventID( new_eID );
     Atlas::getExtendedEventContext(ctx).setConditionsRun( ctx.eventID().run_number() );
-    delete new_eID;
     return;
   }
 

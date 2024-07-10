@@ -4,10 +4,10 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-// EvtIdModifierSvc.h 
+// EvtIdModifierSvc.h
 // Header file for class EvtIdModifierSvc
 // Author: S.Binet<binet@cern.ch>
-/////////////////////////////////////////////////////////////////// 
+///////////////////////////////////////////////////////////////////
 #ifndef ATHENASERVICES_EVTIDMODIFIERSVC_H
 #define ATHENASERVICES_EVTIDMODIFIERSVC_H 1
 
@@ -17,7 +17,6 @@
 
 // FrameWork includes
 #include "AthenaBaseComps/AthService.h"
-#include "GaudiKernel/ServiceHandle.h"
 
 // AthenaKernel
 #include "AthenaKernel/IEvtIdModifierSvc.h"
@@ -27,128 +26,66 @@
 
 // Forward declaration
 class ISvcLocator;
-template <class TYPE> class SvcFactory;
+template <class TYPE>
+class SvcFactory;
 
-
-struct ItemModifier
-{
-  EventID::number_type runnbr;
-  EventID::event_number_t evtnbr;
-  EventID::number_type timestamp;
-  EventID::number_type lbknbr;
-  EventID::event_number_t nevts;
-  int mod_bit;
-  ItemModifier() :
-    runnbr(0),
-    evtnbr(0),
-    timestamp(0),
-    lbknbr(0),
-    nevts(0),
-    mod_bit(0)
-  {}
+struct ItemModifier {
+  EventID::number_type runnbr{0};
+  event_number_t evtnbr{0};
+  EventID::number_type timestamp{0};
+  EventID::number_type lbknbr{0};
+  event_number_t nevts{0};
+  int flags{0};
 };
 
-class EvtIdModifierSvc
-  : virtual public ::IEvtIdModifierSvc,
-            public ::AthService
-{ 
+class EvtIdModifierSvc : virtual public ::IEvtIdModifierSvc,
+                         public ::AthService {
   friend class SvcFactory<EvtIdModifierSvc>;
 
-  /////////////////////////////////////////////////////////////////// 
-  // Public methods: 
-  /////////////////////////////////////////////////////////////////// 
- public: 
-
-  // Copy constructor: 
-
-  /// Constructor with parameters: 
-  EvtIdModifierSvc( const std::string& name, ISvcLocator* pSvcLocator );
-
-  /// Destructor: 
-  virtual ~EvtIdModifierSvc(); 
-
-  // Assignment operator: 
-  //EvtIdModifierSvc &operator=(const EvtIdModifierSvc &alg); 
+  ///////////////////////////////////////////////////////////////////
+  // Public methods:
+  ///////////////////////////////////////////////////////////////////
+ public:
+  /// Constructor with parameters:
+  EvtIdModifierSvc(const std::string& name, ISvcLocator* pSvcLocator);
 
   /// Gaudi Service Implementation
   //@{
-  virtual StatusCode initialize();
-  virtual StatusCode finalize();
-  virtual StatusCode queryInterface( const InterfaceID& riid, 
-                                     void** ppvInterface );
+  virtual StatusCode initialize() override;
+  virtual StatusCode queryInterface(const InterfaceID& riid,
+                                    void** ppvInterface) override;
   //@}
 
-  /////////////////////////////////////////////////////////////////// 
-  // Const methods: 
   ///////////////////////////////////////////////////////////////////
-
-  /** @brief return the current run-nbr (after modification)
-   */
-  virtual number_type run_number() const;
-
-  /** @brief return the current evt-nbr (after modification)
-   */
-  virtual EventID::event_number_t event_number() const;
-
-  /** @brief return the current time-stamp (after modification)
-   */
-  virtual number_type time_stamp() const;
-
-  /** @brief return the current lbk-nbr (after modification)
-   */
-  virtual number_type lumi_block() const;
-
-  /** @brief tell if the svc modified the run-nbr (for *this* event!)
-   */
-  virtual bool has_modified_run_number() const;
-
-  /** @brief tell if the svc modified the evt-nbr (for *this* event!)
-   */
-  virtual bool has_modified_event_number() const;
-
-  /** @brief tell if the svc modified the time-stamp (for *this* event!)
-   */
-  virtual bool has_modified_time_stamp() const;
-
-  /** @brief tell if the svc modified the lbk-nbr (for *this* event!)
-   */
-  virtual bool has_modified_lumi_block() const;
+  // Const methods:
+  ///////////////////////////////////////////////////////////////////
 
   /** @brief return the (sorted) list of run-numbers which will be modified.
    */
-  virtual
-  std::vector<number_type> run_number_list() const;
+  virtual std::vector<number_type> run_number_list() const override;
 
-  /////////////////////////////////////////////////////////////////// 
-  // Non-const methods: 
-  /////////////////////////////////////////////////////////////////// 
+  ///////////////////////////////////////////////////////////////////
+  // Non-const methods:
+  ///////////////////////////////////////////////////////////////////
 
   static const InterfaceID& interfaceID();
 
   /** @brief modify an `EventID`'s lumi block content.
    */
-  virtual
-  void
-  modify_evtid(EventID*& evt_id, EventID::event_number_t evt_index, bool consume_stream);
+  virtual void modify_evtid(EventID& evt_id, event_number_t evt_index,
+                            bool consume_stream) override;
 
-  /////////////////////////////////////////////////////////////////// 
-  // Private data: 
-  /////////////////////////////////////////////////////////////////// 
- private: 
-
-  /// Default constructor: 
+  ///////////////////////////////////////////////////////////////////
+  // Private data:
+  ///////////////////////////////////////////////////////////////////
+ private:
+  /// Default constructor:
   EvtIdModifierSvc();
 
-  /// number of events skipped in the event selector
-  EventID::event_number_t m_skippedEvents;
-  /// first event number at which we begin to modify event ids
-  EventID::event_number_t m_firstEvtIdx;
-
-  /// total number of events inspected so-far
-  EventID::event_number_t m_allEvtsCounter;
-
-  /// lumi block counter (per evt)
-  EventID::event_number_t m_evtCounter;
+  /// (prop) number of events skipped in the event selector
+  event_number_t m_skippedEvents;
+  /// (prop) first event number at which we begin to modify event ids
+  event_number_t m_firstEvtIdx;
 
   /// (prop) list of n-plets
   /// (run-nbr, evt-nbr, time-stamp, lbk-nbr, nbr-of-events-per-lbk, mod-bit)
@@ -157,31 +94,20 @@ class EvtIdModifierSvc
   /// (prop) Name of the event store whose EventIDs will be modified.
   std::string m_evtStoreName;
 
-  typedef std::vector<ItemModifier> ModDb_t;
   /// db of list of ItemModifiers:
   /// (run-nbr, evt-nbr, time-stamp, lbk-nbr, nbr-of-events-per-lbk, mod-bit)
-  ModDb_t m_evtNplets;
+  std::vector<ItemModifier> m_evtNplets;
 
   /// Running total of numEvts before each modifier
-  std::vector<EventID::event_number_t> m_numEvtTotals{};
+  std::vector<event_number_t> m_numEvtTotals;
+};
 
-  /// iterator pointing at the current n-plet describing how to massage evtid
-  ModDb_t::iterator m_cursor;
+///////////////////////////////////////////////////////////////////
+// Inline methods:
+///////////////////////////////////////////////////////////////////
 
-  /// cached item-modifier: the one after the current modification has been
-  /// applied
-  ItemModifier m_current;
-}; 
-
-/////////////////////////////////////////////////////////////////// 
-// Inline methods: 
-/////////////////////////////////////////////////////////////////// 
-
-inline const InterfaceID& EvtIdModifierSvc::interfaceID() 
-{ 
-  return IEvtIdModifierSvc::interfaceID(); 
+inline const InterfaceID& EvtIdModifierSvc::interfaceID() {
+  return IEvtIdModifierSvc::interfaceID();
 }
 
-
-
-#endif //> !ATHENASERVICES_EVTIDMODIFIERSVC_H
+#endif  //> !ATHENASERVICES_EVTIDMODIFIERSVC_H
