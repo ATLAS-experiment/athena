@@ -1,13 +1,11 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef dqiHanConfig_h
 #define dqiHanConfig_h
 
-#include <string>
-#include <set>
-#include <map>
+
 #include <TList.h>
 #include <TMap.h>
 
@@ -20,6 +18,11 @@
 #ifndef __CINT__
 #include <boost/shared_ptr.hpp>
 #endif
+
+#include <string>
+#include <set>
+#include <map>
+#include <memory>
 
 #include "CxxUtils/checker_macros.h"
 ATLAS_NO_CHECK_FILE_THREAD_SAFETY;  // standalone application
@@ -116,7 +119,7 @@ protected:
     // vector since we are going to iterate through them
     std::map<std::string, std::vector<std::string>> m_keycache;
     std::shared_ptr<TFile> GetROOTFile(std::string& fname);
-    void PopulateKeyCache(std::string& fname, std::shared_ptr<TFile> file);
+    void PopulateKeyCache(const std::string& fname, std::shared_ptr<TFile> file);
     void EnsureKeyCache(std::string& fname);
   };
 
