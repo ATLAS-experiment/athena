@@ -138,12 +138,22 @@ atlas_add_citest( DerivationRun3Data_Train
    SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag data_PHYS_PHYSLITE --threads 4 --no-output-checks
    PROPERTIES PROCESSORS 4 )
 
+# Explicitly set maxEvents so that the preExec doesn't get overwritten
+atlas_add_citest( DerivationRun3Data_Train_RNTuple
+   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation -e '--maxEvents=500 --preExec="flags.Output.StorageTechnology.EventData=\\"ROOTRNTUPLE\\"" --parallelCompression="False"' --tag data_PHYS_PHYSLITE --threads 4 --no-output-checks
+   PROPERTIES PROCESSORS 4 )
+
 atlas_add_citest( DerivationRun3MC_PHYS
    SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag mc_PHYS --threads 4
    PROPERTIES PROCESSORS 4 )
 
 atlas_add_citest( DerivationRun3MC_PHYSLITE
    SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag mc_PHYSLITE --threads 4
+   PROPERTIES PROCESSORS 4 )
+
+# Explicitly set maxEvents so that the preExec doesn't get overwritten
+atlas_add_citest( DerivationRun3MC_Train_RNTuple
+   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation -e '--maxEvents=500 --preExec="flags.Output.StorageTechnology.EventData=\\"ROOTRNTUPLE\\"" --parallelCompression="False"' --tag mc_PHYS_PHYSLITE --threads 4 --no-output-checks
    PROPERTIES PROCESSORS 4 )
 
 atlas_add_citest( DerivationRun3MCAF3_PHYS
