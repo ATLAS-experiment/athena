@@ -7,13 +7,14 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import Format, BeamType
 
-
 def TRTPreProcessingCfg(flags):
     acc = ComponentAccumulator()
     if not flags.Detector.EnableTRT:
         return acc
 
-    if flags.Input.Format is Format.BS or 'TRT_RDOs' in flags.Input.Collections:
+    if (flags.Input.Format is Format.BS
+       or 'TRT_RDOs' in flags.Input.Collections
+       or f'{flags.Overlay.BkgPrefix}TRT_RDOs' in flags.Input.Collections):
 
         #
         # --- TRT_RIO_Maker Algorithm
