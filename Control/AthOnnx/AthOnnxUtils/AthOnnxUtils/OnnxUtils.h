@@ -9,7 +9,7 @@
 // Onnx Runtime include(s).
 #include <onnxruntime_cxx_api.h>
 
-namespace AthOnnx {
+namespace AthOnnxUtils {
 
 // @author Xiangyang Ju <xiangyang.ju@cern.ch>
 
@@ -74,8 +74,12 @@ void inferenceWithIOBinding(Ort::Session& session,
 );
 
 // @brief Create a tensor from a vector of data and its shape.
-Ort::Value createTensor(std::vector<float>& data, const std::vector<int64_t>& dataShape);
-
-
+template<typename T>
+Ort::Value createTensor(std::vector<T>& data, const std::vector<int64_t>& dataShape) {
+  // Create a tensor from the data.
+  Ort::MemoryInfo memoryInfo = Ort::MemoryInfo::CreateCpu(OrtArenaAllocator, OrtMemTypeDefault);
+  return Ort::Value::CreateTensor<T>(memoryInfo, data.data(), data.size(), dataShape.data(), dataShape.size());
 }
+
+} // namespace AthOnnx
 #endif

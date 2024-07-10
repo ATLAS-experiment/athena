@@ -1,10 +1,10 @@
-// Dear emacs, this is -*- c++ -*-
 // Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
-#ifndef ATHEXONNXRUNTIME_EVALUATEMODEL_H
-#define ATHEXONNXRUNTIME_EVALUATEMODEL_H
+
+#ifndef ATHEXONNXRUNTIME_EVALUATEMODELWithAthInfer_H
+#define ATHEXONNXRUNTIME_EVALUATEMODELWithAthInfer_H
 
 // Local include(s).
-#include "AthOnnxInterfaces/IOnnxRuntimeInferenceTool.h"
+#include "AthOnnxInterfaces/IAthInferenceTool.h"
 
 // Framework include(s).
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
@@ -27,7 +27,7 @@ namespace AthOnnx {
    /// @author Debottam Bakshi Gupta <Debottam.Bakshi.Gupta@cern.ch>
    /// @author Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
    ///
-   class EvaluateModel: public AthReentrantAlgorithm {
+   class EvaluateModelWithAthInfer: public AthReentrantAlgorithm {
 
    public:
       /// Inherit the base class's constructor
@@ -56,7 +56,7 @@ namespace AthOnnx {
       Gaudi::Property<int> m_batchSize {this, "BatchSize", 1, "No. of elements/example in a batch"};
 
       /// Tool handler for onnx inference session
-      ToolHandle< IOnnxRuntimeInferenceTool >  m_onnxTool{
+      ToolHandle< AthInfer::IAthInferenceTool >  m_onnxTool{
          this, "ORTInferenceTool", "AthOnnx::OnnxRuntimeInferenceTool"
       };
 

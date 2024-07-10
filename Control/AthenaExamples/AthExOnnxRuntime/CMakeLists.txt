@@ -29,3 +29,15 @@ atlas_add_test( AthExOnnxRuntimeTest_pkl
    DEPENDS AthExOnnxRuntimeTest
    PROPERTIES TIMEOUT 100
    POST_EXEC_SCRIPT noerror.sh )
+
+atlas_add_test( AthInferORTTest
+   SCRIPT python -m AthExOnnxRuntime.AthExOnnxRuntime_test_infer
+   PROPERTIES TIMEOUT 100
+   POST_EXEC_SCRIPT noerror.sh 
+   )
+
+atlas_add_test( AthInferORTTest_pkl
+   SCRIPT athena --evtMax 2 --CA test_AthInferORTExampleCfg.pkl
+   DEPENDS AthExOnnxRuntimeTest
+   PROPERTIES TIMEOUT 100
+   POST_EXEC_SCRIPT noerror.sh )

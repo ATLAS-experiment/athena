@@ -12,9 +12,7 @@ def OnnxRuntimeSessionToolCfg(flags,
     """"Configure OnnxRuntimeSessionTool in Control/AthOnnx/AthOnnxComps/src"""
     
     acc = ComponentAccumulator()
-    
-    if model_fname is None:
-        raise ValueError("model_fname must be specified")
+
     
     execution_provider = flags.AthOnnx.ExecutionProvider if execution_provider is None else execution_provider
     name += execution_provider.name
