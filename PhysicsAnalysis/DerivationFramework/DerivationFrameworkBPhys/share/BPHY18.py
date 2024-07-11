@@ -29,6 +29,41 @@ print isSimulation
 #====================================================================
 # AUGMENTATION TOOLS 
 #====================================================================
+
+TrackParticleCollection = "GSFTrackParticles"
+
+# GSF-EMCal refit
+# Following code is NEEDED in preExec!!!
+# from InDetRecExample.InDetJobProperties import InDetFlags; InDetFlags.useDynamicAlignFolders.set_Value_and_Lock(True);
+runGSFCalo = True # ON/OFF for the new GSF+EMCal reco
+
+if runGSFCalo:
+    TrackParticleCollection = "GSFCaloContainer"
+
+    from TrkEventCnvTools import TrkEventCnvToolsConfig
+    EventCnvSuperTool = TrkEventCnvToolsConfig.Trk__EventCnvSuperTool("EventCnvSuperTool", DoMuons = False)
+    ToolSvc += EventCnvSuperTool
+    print EventCnvSuperTool
+
+    include("DerivationFrameworkBPhys/configureGSFCaloImprovement.py")
+    BPHY18_GSFCaloImprovementTools = GSFCaloImprovementTools("BPHY18")
+    BPHY18_GSFCaloImprovementTools.RefitterTool.useClusterPosition = True
+    BPHY18_GSFCaloImprovementTools.CCOTBuilder.UseClusterEnergy    = True
+    BPHY18_GSFCaloImprovementTools.CCOTBuilder.UseClusterPhi       = False
+    BPHY18_GSFCaloImprovementTools.CCOTBuilder.UseClusterEta       = False
+    BPHY18_GSFCaloImprovementTools.CaloDepthTool.DepthChoice       = "middle"
+
+    from DerivationFrameworkBPhys.DerivationFrameworkBPhysConf import DerivationFramework__GSFCaloImprovement
+    BPHY18_GSFCaloImprovement = DerivationFramework__GSFCaloImprovement(name                     = "BPHY18_GSFCaloImprovement",
+                                                                        ImprovedTrackRefitTool   = BPHY18_GSFCaloImprovementTools.RefitterTool,
+                                                                        TrackParticleCreatorTool = BPHY18_GSFCaloImprovementTools.TPCTool,
+                                                                        TrackSummaryTool         = BPHY18_GSFCaloImprovementTools.TrackSummaryTool,
+                                                                        doTruth                  = isSimulation,
+                                                                        isAOD                    = True)
+    ToolSvc += BPHY18_GSFCaloImprovement
+    print BPHY18_GSFCaloImprovement
+
+
 ## 1/ setup vertexing tools and services
 include("DerivationFrameworkBPhys/configureVertexing.py")
 BPHY18_VertexTools = BPHYVertexTools("BPHY18")
@@ -149,14 +184,14 @@ BPHY18DiElectronFinder = Analysis__JpsiFinder_ee(
     allChargeCombinations       = True,
     useElectronTrackMeasurement = True, 
     electronCollectionKey       = "Electrons",
-    TrackParticleCollection     = "GSFTrackParticles",
+    TrackParticleCollection     = TrackParticleCollection,
     useEgammaCuts               = True, 
     V0VertexFitterTool          = BPHY18_VertexTools.TrkV0Fitter,            
     useV0Fitter                 = False,                  
     TrkVertexFitterTool         = BPHY18_VertexTools.TrkVKalVrtFitter,      
     TrackSelectorTool           = BPHY18_VertexTools.InDetTrackSelectorTool,
     VertexPointEstimator        = BPHY18_VertexTools.VtxPointEstimator,
-    ElectronSelection 		      = "d0_or_nod0"
+    ElectronSelection 		    = "d0_or_nod0"
     )
 
 ToolSvc += BPHY18DiElectronFinder
@@ -232,6 +267,7 @@ BPHY18BeeKst = Analysis__JpsiPlus2Tracks(
     TrkQuadrupletMassLower  = 1000.0, 
     TrkQuadrupletMassUpper  = 10000.0, 
     FinalDiTrackPt          = 500.,
+    GSFCollection           = TrackParticleCollection,
     UseGSFTrackIndices      = [0,1]
     )
 
@@ -353,7 +389,7 @@ BPHY18_thinningTool_Tracks = DerivationFramework__Thin_vtxTrk(
 BPHY18_thinningTool_GSFTracks = DerivationFramework__Thin_vtxTrk(
     name                       = "BPHY18_thinningTool_GSFTracks",
     ThinningService            = "BPHY18ThinningSvc",
-    TrackParticleContainerName = "GSFTrackParticles",
+    TrackParticleContainerName = TrackParticleCollection,
     VertexContainerNames       = ["BeeKstCandidates"],
     PassFlags                  = ["passed_Bd", "passed_Bdbar"] )
 
@@ -384,7 +420,7 @@ BPHY18EgammaTPThinningTool = DerivationFramework__EgammaTrackParticleThinning(
     name                   = "BPHY18EgammaTPThinningTool",
     ThinningService        = "BPHY18ThinningSvc",
     SGKey                  = "Electrons",
-    InDetTrackParticlesKey = "InDetTrackParticles")  
+    InDetTrackParticlesKey = "InDetTrackParticles")
 ToolSvc += BPHY18EgammaTPThinningTool
 
 # Only save truth informtion directly associated with: mu Ds+ D+ D*+ Ds*+ D0 D*0 B+ B*+ B0 B*0 
@@ -418,20 +454,25 @@ if isSimulation:
 
 print thinningCollection
 
+# GSF-EMCal refit
+AugmentationToolList = []
+
+if runGSFCalo:
+    AugmentationToolList += [ BPHY18_GSFCaloImprovement ]
+
+AugmentationToolList += [ ElectronPassLHvloosenod0,BPHY18DiElectronSelectAndWrite,  
+                       BPHY18_Select_DiElectrons,
+                       BPHY18BeeKstSelectAndWrite, BPHY18_Select_BeeKst, BPHY18_Select_BeeKstbar,
+                       BPHY18_diMeson_revertex, BPHY18_Select_Kpi, BPHY18_Select_piK ]
+
 from DerivationFrameworkCore.DerivationFrameworkCoreConf import DerivationFramework__DerivationKernel
 DerivationFrameworkJob += CfgMgr.DerivationFramework__DerivationKernel(
     "BPHY18Kernel",
-
-    AugmentationTools = [ ElectronPassLHvloosenod0,BPHY18DiElectronSelectAndWrite,  
-                          BPHY18_Select_DiElectrons,
-                          BPHY18BeeKstSelectAndWrite, BPHY18_Select_BeeKst, BPHY18_Select_BeeKstbar,
-                          BPHY18_diMeson_revertex, BPHY18_Select_Kpi, BPHY18_Select_piK ],
-
+    AugmentationTools = AugmentationToolList,
     #Only skim if not MC
     SkimmingTools     = [BPHY18SkimmingAND],
     ThinningTools     = thinningCollection
     )
-
 
 #====================================================================
 # SET UP STREAM   
@@ -440,6 +481,10 @@ streamName   = derivationFlags.WriteDAOD_BPHY18Stream.StreamName
 fileName     = buildFileName( derivationFlags.WriteDAOD_BPHY18Stream )
 BPHY18Stream  = MSMgr.NewPoolRootStream( streamName, fileName )
 BPHY18Stream.AcceptAlgs(["BPHY18Kernel"])
+
+# GSF-EMCal refit
+BPHY18Stream.AddItem("xAOD::TrackParticleContainer#%s"        % TrackParticleCollection)
+BPHY18Stream.AddItem("xAOD::TrackParticleAuxContainer#%sAux." % TrackParticleCollection)
 
 # Special lines for thinning
 from AthenaServices.Configurables import ThinningSvc, createThinningSvc
@@ -489,6 +534,11 @@ StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPHY18_diM
 
 AllVariables += [ "GSFTrackParticles"] 
 
+# GSF-EMCal refit
+if runGSFCalo:
+    BPHY18SlimmingHelper.AppendToDictionary = { TrackParticleCollection: "xAOD::TrackParticleContainer", TrackParticleCollection + "Aux": "xAOD::TrackParticleAuxContainer" }
+    AllVariables += [ TrackParticleCollection ] # duplicates removed later, don't worry
+    ExtraVariables += [ "Electrons.gsfCaloTrackParticleLink" ]
 
 # Added by ASC
 # Truth information for MC only

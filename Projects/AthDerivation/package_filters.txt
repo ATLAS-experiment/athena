@@ -149,6 +149,9 @@
 - InnerDetector/InDetRecTools/SiClusterOnTrackTool
 + InnerDetector/InDetRecTools/.*
 + InnerDetector/InDetValidation/InDetPhysValMonitoring
++ InnerDetector/InDetEventCnv/InDetEventAthenaPool
++ InnerDetector/InDetEventCnv/InDetEventCnvTools
++ InnerDetector/InDetEventCnv/InDetEventTPCnv
 
 # LAr package(s):
 + LArCalorimeter/LArBadChannelTool

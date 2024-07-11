@@ -20,6 +20,51 @@
 #include "TrkCaloCluster_OnTrack/CaloCluster_OnTrack.h"
 
 
+// CALO-improved re-fit; following has been taken directly from "master":
+namespace {
+  // cluster E in MeV and absEta returns
+  // quick phi variance parametrization
+  // sigma^2 where sigma is mrad
+  double getPhiVariance(double clusterE, double absEta) {
+    // convert from MeV to GeV
+    const double EinGeV = clusterE * 1e-3;
+    // sigma phi = b/E (+) c
+    // E in GeV
+    // and (+) sum in quadrature
+    // we return variance so
+    // sigma^2 = (b*b)/(E*E) + c*c
+    //
+    if (absEta < 0.1) {
+      return (0.14 * 0.14) / (EinGeV * EinGeV) + 0.001 * 0.001;
+    }
+    if (absEta < 0.6) {
+      return (0.15 * 0.15) / (EinGeV * EinGeV) + 0.001 * 0.001;
+    }
+    if (absEta < 0.8) {
+      return (0.19 * 0.19) / (EinGeV * EinGeV) + 0.001 * 0.001;
+    }
+    if (absEta < 1.15) {
+      return (0.26 * 0.26) / (EinGeV * EinGeV) + 0.001 * 0.001;
+    }
+    if (absEta < 1.37) {
+      return (0.36 * 0.36) / (EinGeV * EinGeV) + 0.001 * 0.001;
+    }
+    if (absEta < 1.52) {
+      return (0.52 * 0.52) / (EinGeV * EinGeV) + 0.003 * 0.003;
+    }
+    if (absEta < 1.81) {
+      return (0.46 * 0.46) / (EinGeV * EinGeV) + 0.004 * 0.004;
+    }
+    if (absEta < 2.01) {
+      return (0.35 * 0.35) / (EinGeV * EinGeV) + 0.004 * 0.004;
+    }
+    if (absEta < 2.37) {
+      return (0.38 * 0.38) / (EinGeV * EinGeV) + 0.005 * 0.005;
+    }
+    return (0.47 * 0.47) / (EinGeV * EinGeV) + 0.006 * 0.006;
+  }
+}
+
 
 
 CaloCluster_OnTrackBuilder::CaloCluster_OnTrackBuilder(const std::string& t,
@@ -39,11 +84,14 @@ CaloCluster_OnTrackBuilder::CaloCluster_OnTrackBuilder(const std::string& t,
   m_barrel(0)
 {
   declareInterface<ICaloCluster_OnTrackBuilder>(this);
-  declareProperty( "CaloSurfaceBuilder",     m_calosurf      );
+  declareProperty( "CaloSurfaceBuilder",     m_calosurf);
   declareProperty( "InputCellContainerName", m_caloCellContainerName = "AODCellContainer");
-  declareProperty( "UseClusterEnergy",       m_useClusterEnergy =  true);
+  declareProperty( "UseClusterEnergy",       m_useClusterEnergy = true);
   declareProperty( "UseClusterPhi" ,         m_useClusterPhi    = true);
   declareProperty( "UseClusterEta" ,         m_useClusterEta    = true);
+
+  // CALO-improved re-fit; from "master"
+  m_eg_resol = std::make_unique<eg_resolution>("run2_R21_v1");
 }
 
 //--------------------------------------------------------------------------------------------
@@ -54,9 +102,12 @@ CaloCluster_OnTrackBuilder::~CaloCluster_OnTrackBuilder() {}
 //--------------------------------------------------------------------------------------------
 StatusCode CaloCluster_OnTrackBuilder::initialize() {
 //--------------------------------------------------------------------------------------------
-  
+
   ATH_MSG_INFO("Initializing CaloCluster_OnTrackBuilder");
- 
+  ATH_MSG_INFO("UseClusterEnergy = " << m_useClusterEnergy);
+  ATH_MSG_INFO("UseClusterEta    = " << m_useClusterEta);
+  ATH_MSG_INFO("UseClusterPhi    = " << m_useClusterPhi);
+
   // Retrieve the updator CaloSurfaceBuilder
   if ( m_calosurf.retrieve().isFailure() ){
     ATH_MSG_FATAL ( "Unable to retrieve the instance " << m_calosurf.name() << "... Exiting!" );
@@ -65,7 +116,7 @@ StatusCode CaloCluster_OnTrackBuilder::initialize() {
   
   // retrieve all helpers from det store
   m_calo_dd = CaloDetDescrManager::instance();
-  
+
   return StatusCode::SUCCESS;
 }
 
@@ -91,7 +142,6 @@ StatusCode CaloCluster_OnTrackBuilder::finalize(){ return StatusCode::SUCCESS; }
   Trk::CaloCluster_OnTrack* CaloCluster_OnTrackBuilder::buildClusterOnTrack( const xAOD::CaloCluster* cluster, int charge ) 
 //--------------------------------------------------------------------------------------------
 {
-
   ATH_MSG_DEBUG("Building Trk::CaloCluster_OnTrack");
   
   if(!m_useClusterPhi && !m_useClusterEta && !m_useClusterEnergy){
@@ -100,7 +150,6 @@ StatusCode CaloCluster_OnTrackBuilder::finalize(){ return StatusCode::SUCCESS; }
   }
   
   if(!cluster) return 0;
-
   const Trk::Surface* surface = getCaloSurface( cluster );
   
   if(!surface) return 0;
@@ -121,14 +170,15 @@ StatusCode CaloCluster_OnTrackBuilder::finalize(){ return StatusCode::SUCCESS; }
   }
   
   Trk::CaloCluster_OnTrack* ccot = new  Trk::CaloCluster_OnTrack( *lp, *em, *surface );
+  delete em;
   delete surface;
   delete lp;
 
   if(ccot) {
     ATH_MSG_DEBUG("Successful build of Trk::CaloCluster_OnTrack");
-    //std::cout << *ccot << std::endl;
+    // std::cout << *ccot << std::endl;
   }
-  
+
   return ccot;
 }
 
@@ -168,7 +218,8 @@ const Trk::LocalParameters*   CaloCluster_OnTrackBuilder::getClusterLocalParamet
   double tantheta = tan(theta);
   double phi = cluster->phi();
   
-  double clusterQoverE = cluster->calE() !=0 ? (double)charge/cluster->calE() : 0;
+  // CALO-improved re-fit; from "master"
+  double clusterQoverE = cluster->e() !=0 ? (double)charge/cluster->e() : 0;
 
   //std::cout << "   Cluster Energy        "<< cluster->calE() << std::endl;  
 
@@ -242,38 +293,64 @@ const  Amg::MatrixX*   CaloCluster_OnTrackBuilder::getClusterErrorMatrix( const 
     intphis = 0; 
   }
 */
-  double phierr = 0.1;
-  phierr = phierr < 1.e-10 ? 0.1 : pow(phierr,2);
-  if(!m_useClusterPhi) phierr = 10;
 
+  // CALO-improved re-fit; from "master"
+  const double clusterE   = cluster->e();
+  const double clusterEta = cluster->eta();
 
-  double etaerr = 10; //10mm large error as currently we dont want to use this measurement
-  etaerr = etaerr < 1.e-10 ? 10. : pow(etaerr,2);
-  
+  // variance in phi from calorimeter phi resolution
+  double phivariance_prep = getPhiVariance(clusterE, std::abs(clusterEta));
+  if (phivariance_prep < 1e-5) {
+    // Avoid going too small for  very high E
+    phivariance_prep = 1e-5;
+  }
 
-  double energyerr = pow( 0.10 * sqrt(cluster->calE()*1e-3)*1000 ,-4  ) ; 
-  Amg::MatrixX covMatrix;
+  // q over p variance from sigmaE/E (calo energy resolution)
+  const double sigmaP_over_P = m_eg_resol->getResolution(0, // electron
+                                                         clusterE,
+                                                         clusterEta,
+                                                         2 // 90% quantile
+  );
+  const double qOverP = 1. / clusterE;
+  const double qOverP_variance_prep = (qOverP * qOverP) * (sigmaP_over_P * sigmaP_over_P);
+
+  // Variance in Z
+  // sigma ~ 20 mm large error
+  // As currently we do not want to rely
+  // on the eta side of the cluster.
+  constexpr double zvariance_prep = 400;
+
+  const double phivariance     = m_useClusterPhi    ? phivariance_prep     : -1;
+  const double zvariance       = m_useClusterEta    ? zvariance_prep       : -1;
+  const double qOverP_variance = m_useClusterEnergy ? qOverP_variance_prep : -1;
+
+  int matrixSize = static_cast<int>(m_useClusterPhi) +
+                   static_cast<int>(m_useClusterEta) +
+                   static_cast<int>(m_useClusterEnergy);
+
+  Amg::MatrixX covMatrix(matrixSize, matrixSize);
+  covMatrix.setZero();
   
   if ( xAOD::EgammaHelpers::isBarrel( cluster ) ){
     //Two corindate in a cyclinder are 
     //Trk::locRPhi = 0 (ie phi)
     //Trk::locZ    = 1(ie z)   
     Amg::Vector3D surfRefPoint = surf->globalReferencePoint();
-    double r2 = pow(surfRefPoint[0],2 );
+    double r2 = pow(surfRefPoint.perp(), 2);
     
     int indexCount(0);
 
     if(m_useClusterPhi){ 
+      covMatrix( indexCount, indexCount ) = phivariance * r2 ;
       ++indexCount;
-      covMatrix( indexCount, indexCount ) = phierr * r2 ;
     }
     if(m_useClusterEta){
+      covMatrix( indexCount, indexCount ) = zvariance ;
       ++indexCount;
-      covMatrix( indexCount, indexCount ) = etaerr ;
     }
     if(m_useClusterEnergy){
+      covMatrix( indexCount, indexCount ) = qOverP_variance ;
       ++indexCount;
-      covMatrix( indexCount, indexCount ) = energyerr ;
     }
   } else{ 
     //Local paramters of a disk are
@@ -283,16 +360,16 @@ const  Amg::MatrixX*   CaloCluster_OnTrackBuilder::getClusterErrorMatrix( const 
     int indexCount(0);
      
     if(m_useClusterEta){
+      covMatrix( indexCount, indexCount ) = zvariance ;
       ++indexCount;
-      covMatrix( indexCount, indexCount ) = etaerr ;
     }
     if(m_useClusterPhi){
+      covMatrix( indexCount, indexCount ) = phivariance ;
       ++indexCount;
-      covMatrix( indexCount, indexCount ) = phierr ;
     }
     if(m_useClusterEnergy){
+      covMatrix( indexCount, indexCount ) = qOverP_variance ;
       ++indexCount;
-      covMatrix( indexCount, indexCount ) = energyerr ;
     }
 
   }

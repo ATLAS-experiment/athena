@@ -21,6 +21,9 @@ namespace Trk{
 #include "xAODEgamma/EgammaFwd.h"
 #include "xAODCaloEvent/CaloClusterFwd.h"
 
+// needed for the CALO-improved re-fit
+#include "ElectronPhotonFourMomentumCorrection/eg_resolution.h"
+
 class CaloCellContainer;
 class CaloDetDescrManager;
 class ICaloSurfaceBuilder;
@@ -69,7 +72,6 @@ class CaloCluster_OnTrackBuilder : public AthAlgTool, virtual public ICaloCluste
   bool m_useClusterPhi;
   bool m_useClusterEta;
 
-
   std::string                          m_caloCellContainerName;
   mutable const CaloCellContainer*     m_cellContainer;
   
@@ -86,7 +88,10 @@ class CaloCluster_OnTrackBuilder : public AthAlgTool, virtual public ICaloCluste
   mutable CaloSampling::CaloSample m_sam;
   mutable CaloCell_ID::SUBCALO m_subcalo;
   mutable bool m_barrel;
-  
+
+  // needed for the CALO-improved re-fit
+  /** @brief helper for returning energy resolution*/
+  std::unique_ptr<eg_resolution> m_eg_resol{};
 };
 
 #endif //CALOCLUSTER_ONTRACKBUILER_H

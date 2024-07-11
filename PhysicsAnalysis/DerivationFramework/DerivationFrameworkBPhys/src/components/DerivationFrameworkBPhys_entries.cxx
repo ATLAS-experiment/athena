@@ -46,6 +46,7 @@
 #include "DerivationFrameworkBPhys/JpsiXPlusDisplaced.h"
 #include "DerivationFrameworkBPhys/JpsiXPlus2V0.h"
 #include "DerivationFrameworkBPhys/PsiPlusPsiSingleVertex.h"
+#include "DerivationFrameworkBPhys/GSFCaloImprovement.h"
 #include "DerivationFrameworkBPhys/JpsiPlusEtacSingleVertex.h"
 #include "DerivationFrameworkBPhys/DiJpsiPlusTracksSingleVertex.h"
 
@@ -98,6 +99,7 @@ DECLARE_TOOL_FACTORY( PsiPlusPsiCascade )
 DECLARE_TOOL_FACTORY( JpsiXPlusDisplaced )
 DECLARE_TOOL_FACTORY( JpsiXPlus2V0 )
 DECLARE_TOOL_FACTORY( PsiPlusPsiSingleVertex )
+DECLARE_TOOL_FACTORY( GSFCaloImprovement )
 DECLARE_TOOL_FACTORY( JpsiPlusEtacSingleVertex )
 DECLARE_TOOL_FACTORY( DiJpsiPlusTracksSingleVertex )
 
@@ -149,6 +151,7 @@ DECLARE_FACTORY_ENTRIES( DerivationFrameworkBPhys ) {
    DECLARE_TOOL( JpsiXPlusDisplaced )
    DECLARE_TOOL( JpsiXPlus2V0 )
    DECLARE_TOOL( PsiPlusPsiSingleVertex )
+   DECLARE_TOOL( GSFCaloImprovement )
    DECLARE_TOOL( JpsiPlusEtacSingleVertex )
    DECLARE_TOOL( DiJpsiPlusTracksSingleVertex )
 }
