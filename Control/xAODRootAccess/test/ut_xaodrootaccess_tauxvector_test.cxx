@@ -51,6 +51,8 @@ void test1()
     assert (ptr_int[3+i] == 10+i);
   for (int i=3; i < 5; i++)
     assert (ptr_int[5+i] == i);
+  assert (vec_int.getDataSpan().beg == ptr_int);
+  assert (vec_int.getDataSpan().size == 10);
 
   std::vector<int> v3_int { 20, 21, 22, 23, 24 };
   vec_int.insertMove (10, v3_int.data(), v3_int.data() + 5, store);
@@ -64,6 +66,8 @@ void test1()
     assert (ptr_int[5+i] == i);
   for (int i=0; i < 5; i++)
     assert (ptr_int[10+i] == 20+i);
+  assert (vec_int.getDataSpan().beg == ptr_int);
+  assert (vec_int.getDataSpan().size == 15);
 
   //*********************************
 

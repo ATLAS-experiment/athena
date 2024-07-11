@@ -18,6 +18,7 @@
 #include "AthContainersInterfaces/IAuxSetOption.h"
 #include "AthContainers/tools/AuxDataTraits.h"
 #include "AthContainers/PackedContainer.h"
+#include "CxxUtils/checker_macros.h"
 #include <typeinfo>
 #include <vector>
 #include <algorithm>
@@ -248,6 +249,21 @@ public:
    * Returns null on failure.
    */
   virtual std::unique_ptr<IAuxTypeVector> toPacked() override;
+
+
+protected:
+  /**
+   * @brief Return a span object describing the current vector.
+   *        Used to initialize @c m_span the first time that @c getDataSpan
+   *        is called.
+   */
+  virtual AuxDataSpanBase getDataSpanImpl() const override final;
+
+
+  /**
+   * @brief Update the stored span.
+   */
+  void storeDataSpan();
 
 
 private:

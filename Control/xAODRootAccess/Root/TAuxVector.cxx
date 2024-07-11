@@ -87,6 +87,8 @@ namespace xAOD {
       m_vec = m_proxy->GetCollectionClass()->New();
       m_proxy->PushProxy( m_vec );
 
+      IAuxTypeVector::resetDataSpan();
+
       // Check the size of the other object:
       const size_t size = other.size();
       // Check if we need to do anything:
@@ -132,9 +134,10 @@ namespace xAOD {
 
    bool TAuxVector::resize( size_t sz ) {
 
-      const void* orig = toPtr();
+      const void* orig = this->getDataSpan().beg;
       m_proxy->Allocate( sz, false );
-      return toPtr() == orig;
+      this->storeDataSpan(); 
+      return this->getDataSpan().beg == orig;
    }
 
    void TAuxVector::reserve( size_t ) {
@@ -181,6 +184,7 @@ namespace xAOD {
                     beg + eltsz * ( pos + offs ),
                     m_proxy->Size() - pos );
          m_proxy->Allocate( m_proxy->Size() + offs, false );
+         this->storeDataSpan(); 
          return true;
 
       } else if( offs > 0 ) {
@@ -192,6 +196,7 @@ namespace xAOD {
                     beg + eltsz * ( pos + offs ),
                     m_proxy->Size() - pos - offs);
          clearRange( beg + eltsz * pos, offs );
+         this->storeDataSpan(); 
          return false;
       }
 
@@ -202,7 +207,7 @@ namespace xAOD {
                                 SG::IAuxStore& /*srcStore*/)
    {
      size_t eltsz = m_proxy->GetIncrement();
-     const void* orig = this->toPtr();
+     const void* orig = this->getDataSpan().beg;
 
      char* begp = reinterpret_cast<char*> (beg);
      char* endp = reinterpret_cast<char*> (end);
@@ -215,7 +220,8 @@ namespace xAOD {
      copyRange (beg,
                 reinterpret_cast<char*>(this->toPtr()) + pos*eltsz,
                 nelt);
-     return this->toPtr() == orig;
+     this->storeDataSpan(); 
+     return this->getDataSpan().beg == orig;
    }
 
 
@@ -245,6 +251,16 @@ namespace xAOD {
       }
 
       return;
+   }
+
+   SG::AuxDataSpanBase TAuxVector::getDataSpanImpl() const
+   {
+     return SG::AuxDataSpanBase( const_cast<void*> (toPtr()), size() );
+   }
+
+   void TAuxVector::storeDataSpan()
+   {
+     IAuxTypeVector::storeDataSpan( toPtr(), size() );
    }
 
 } // namespace xAOD

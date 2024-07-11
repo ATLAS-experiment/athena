@@ -16,6 +16,8 @@
 
 #include "AthContainersInterfaces/AuxTypes.h"
 #include "AthContainersInterfaces/IAuxStore.h"
+#include "AthContainersInterfaces/AuxDataSpan.h"
+#include "CxxUtils/CachedValue.h"
 #include <cstddef>
 #include <memory>
 #include <typeinfo>
@@ -47,7 +49,8 @@ public:
   IAuxTypeVector (auxid_t auxid, bool isLinked)
     : m_auxid (auxid),
       m_isLinked (isLinked)
-  {}
+  {
+  }
 
 
   /// Destructor.
@@ -230,12 +233,80 @@ public:
   }
 
 
+  /**
+   * @brief Return a reference to a description of this vector's start+size.
+   *
+   * This returns a reference to an @c AuxDataSpanBase, which gives the
+   * start and size of the vector.  This object will be updated if the
+   * vector changes.
+   *
+   * For low overhead, we want this to be a non-virtual function call.
+   * However, for variables being read, the usage pattern is that we first
+   * create the @IAuxTypeVector object, give the underlying @c std::vector
+   * object to ROOT, and then ROOT fills the vector without the involvement
+   * of the @c IAuxTypeVector.  To be able to have this work correctly,
+   * we need to defer initializing the span object until the first time
+   * that @c getDataSpan gets called.  We do this with a @c CachedValue.
+   * If the span has already been initialized, we just return it; otherwise,
+   * we make a virtual call to fetch the vector from the derived class.
+   *
+   * Be aware: this is in principle a const-correctness violation,
+   * since @c AuxDataSpanBase has a non-const pointer to the start
+   * of the vector.  But doing it properly is kind of painful, and as
+   * this interface is only meant to be used internally, it's likely
+   * not a real problem.
+   */
+  const AuxDataSpanBase& getDataSpan() const
+  {
+    if (!m_span.isValid()) {
+      m_span.set (this->getDataSpanImpl());
+    }
+    return *m_span.ptr();
+  }
+
+
+protected:
+  /**
+   * @brief Return a span object describing the current vector.
+   *        Used to initialize @c m_span the first time that @c getDataSpan
+   *        is called.
+   */
+  virtual AuxDataSpanBase getDataSpanImpl() const = 0;
+
+
+  /**
+   * @brief Update the stored span.
+   * @param beg The start of the vector.
+   * @param size The length of the vector.
+   */
+  void storeDataSpan (void* beg, size_t size)
+  {
+    // Only do this if the span is already valid, so that it doesn't
+    // get marked valid before ROOT I/O.
+    if (m_span.isValid()) {
+      m_span.store (AuxDataSpanBase (beg, size));
+    }
+  }
+
+
+  /**
+   * @brief Invalidate the stored span.
+   */
+  void resetDataSpan()
+  {
+    m_span.reset();
+  }
+    
+
 private:
   /// The auxid of the variable this vector represents.
   auxid_t m_auxid;
 
   /// True if this variable is linked from another one.
   bool m_isLinked;
+
+  /// Description of the vector start+size.
+  CxxUtils::CachedValue<AuxDataSpanBase> m_span;
 };
 
 

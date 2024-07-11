@@ -74,6 +74,8 @@ void test_vector1()
   ptr[0] = makeT<T>(1);
   ptr[1] = makeT<T>(2);
   assert (v->size() == 10);
+  assert (v->getDataSpan().beg == ptr);
+  assert (v->getDataSpan().size == 10);
 
   assert (vconcrete->vec()[0] == makeT<T>(1));
   assert (vconcrete->vec()[1] == makeT<T>(2));
@@ -87,6 +89,8 @@ void test_vector1()
   assert (ptr[0] == makeT<T>(1));
   assert (ptr[1] == makeT<T>(2));
   assert (v->size() == 40);
+  assert (v->getDataSpan().beg == ptr);
+  assert (v->getDataSpan().size == 40);
 
   v->shift (1, 1);
   assert (ptr[0] == makeT<T>(1));
@@ -115,6 +119,7 @@ void test_vector1()
 
   assert (v->resize (0) == true);
   assert (v->toPtr() == 0);
+  assert (v->getDataSpan().size == 0);
 
   if (typeid(T) == typeid(bool))
     assert (v->objType() == &typeid(std::vector<char, ALLOC<char> >));
@@ -131,6 +136,7 @@ void test_vector1()
   SG::AuxTypeVector<T> v4 (1, 0, 3, false);
   assert (!v4.resize (3));
   assert (v4.size() == 3);
+  assert (v4.getDataSpan().size == 3);
 }
 
 
