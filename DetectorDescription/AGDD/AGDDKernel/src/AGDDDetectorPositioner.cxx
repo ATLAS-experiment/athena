@@ -12,6 +12,7 @@ AGDDDetectorPositioner::AGDDDetectorPositioner(AGDDPositionerStore& ps,
                                                const std::string& n,
                                                const GeoTrf::Transform3D& t) :
   AGDDPositioner(ps,vs,n,t),
+  ID(),
   theDetector(nullptr),
   theVolume(nullptr) {
 }
