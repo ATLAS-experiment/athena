@@ -30,7 +30,11 @@ def MDT_RangeCfg(flags, name="MDT_Range", **kwargs):
     kwargs.setdefault("FirstXing", MDT_FirstXing())
     kwargs.setdefault("LastXing",  MDT_LastXing())
     kwargs.setdefault("CacheRefreshFrequency", 1.0)
-    kwargs.setdefault("ItemList", ["MDTSimHitCollection#MDT_Hits"])
+    if flags.Muon.usePhaseIIGeoSetup:
+        kwargs.setdefault("ItemList", ["xAOD::MuonSimHitContainer#xMdtSimHits",
+                                       "xAOD::MuonSimHitAuxContainer#xMdtSimHitsAux."])
+    else:        
+        kwargs.setdefault("ItemList", ["MDTSimHitCollection#MDT_Hits"])
     return PileUpXingFolderCfg(flags, name, **kwargs)
 
 
@@ -149,7 +153,11 @@ def MDT_OverlayDigitizationBasicCfg(flags, **kwargs):
 
     if flags.Common.ProductionStep != ProductionStep.FastChain:
         from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
-        acc.merge(SGInputLoaderCfg(flags, ["MDTSimHitCollection#MDT_Hits"]))
+        if flags.Muon.usePhaseIIGeoSetup:
+            acc.merge(SGInputLoaderCfg(flags, ["xAOD::MuonSimHitContainer#xMdtSimHits",
+                                               "xAOD::MuonSimHitAuxContainer#xMdtSimHitsAux."]))
+        else:            
+            acc.merge(SGInputLoaderCfg(flags, ["MDTSimHitCollection#MDT_Hits"]))
 
     kwargs.setdefault("DigitizationTool", acc.popToolsAndMerge(MDT_OverlayDigitizationToolCfg(flags)))
     

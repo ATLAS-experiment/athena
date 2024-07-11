@@ -28,25 +28,20 @@ def sTGC_RangeCfg(flags, name="sTgcRange", **kwargs):
     kwargs.setdefault("FirstXing", sTGC_FirstXing())
     kwargs.setdefault("LastXing", sTGC_LastXing())
     kwargs.setdefault("CacheRefreshFrequency", 1.0)
-    if 'sTGCSimHitCollection#sTGCSensitiveDetector' in flags.Input.TypedCollections:
-        kwargs.setdefault("ItemList", ["sTGCSimHitCollection#sTGCSensitiveDetector"])
+    if flags.Muon.usePhaseIIGeoSetup:
+        kwargs.setdefault("ItemList",  ["xAOD::MuonSimHitContainer#xStgcSimHits",
+                                        "xAOD::MuonSimHitAuxContainer#xStgcSimHitsAux."])
     else:
         kwargs.setdefault("ItemList", ["sTGCSimHitCollection#sTGC_Hits"])
     return PileUpXingFolderCfg(flags, name, **kwargs)
 
-
 def sTGC_DigitizationToolCfg(flags, name="sTgcDigitizationTool", **kwargs):
-    """Return ComponentAccumulator with configured sTgcDigitizationTool"""
-    from MuonConfig.MuonCalibrationConfig import NSWCalibToolCfg, STgcCalibSmearingToolCfg
     result = ComponentAccumulator()
-    kwargs.setdefault("CalibrationTool", result.popToolsAndMerge(NSWCalibToolCfg(flags)))
-    kwargs.setdefault("SmearingTool", result.popToolsAndMerge(STgcCalibSmearingToolCfg(flags)))
-    kwargs.setdefault("padChargeSharing", False)
-    # sTGC VMM configurables
-    kwargs.setdefault("deadtimeStrip", 250)
-    kwargs.setdefault("deadtimePad"  , 250)
-    kwargs.setdefault("deadtimeWire" , 250)
-    kwargs.setdefault("neighborOn", True)
+
+    from RngComps.RngCompsConfig import AthRNGSvcCfg
+    kwargs.setdefault("RndmSvc", result.getPrimaryAndMerge(AthRNGSvcCfg(flags)))
+
+
     if flags.Digitization.PileUp:
         intervals = []
         if flags.Digitization.DoXingByXingPileUp:
@@ -54,52 +49,53 @@ def sTGC_DigitizationToolCfg(flags, name="sTgcDigitizationTool", **kwargs):
             kwargs.setdefault("LastXing", sTGC_LastXing())
         else:
             intervals += [result.popToolsAndMerge(sTGC_RangeCfg(flags))]
-        kwargs.setdefault("MergeSvc", result.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)))
+        kwargs.setdefault("PileUpMergeSvc", result.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)))
     else:
-        kwargs.setdefault("MergeSvc", '')
+        kwargs.setdefault("PileUpMergeSvc", '')
     kwargs.setdefault("OnlyUseContainerName", flags.Digitization.PileUp)
-    kwargs.setdefault("doToFCorrection", True)
-    kwargs.setdefault("doEfficiencyCorrection", False)
-    # Operating voltage in the sTGC in kV. Sets the gas gain from electron avalance
-    # Every 100V increase roughly doubles the total electric charge per hit
-    kwargs.setdefault("operatingHVinkV", 2.8)
 
-    if 'sTGCSimHitCollection#sTGCSensitiveDetector' in flags.Input.TypedCollections:
-        kwargs.setdefault("InputObjectName", "sTGCSensitiveDetector")
-    else:
-        kwargs.setdefault("InputObjectName", "sTGC_Hits")
-    kwargs.setdefault("OutputObjectName", "sTGC_DIGITS")
-    from RngComps.RngCompsConfig import AthRNGSvcCfg
-    kwargs.setdefault("RndmSvc", result.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
     if flags.Common.ProductionStep == ProductionStep.PileUpPresampling:
         kwargs.setdefault("OutputSDOName", flags.Overlay.BkgPrefix + "sTGC_SDO")
     else:
         kwargs.setdefault("OutputSDOName", "sTGC_SDO")
-    sTgcDigitizationTool = CompFactory.sTgcDigitizationTool(name, **kwargs)
-    result.setPrivateTools(sTgcDigitizationTool)
-    return result
+        kwargs.setdefault("OutputObjectName", "sTGC_DIGITS")
 
+    the_tool = None
+    if not flags.Muon.usePhaseIIGeoSetup:
+        from MuonConfig.MuonCalibrationConfig import NSWCalibToolCfg, STgcCalibSmearingToolCfg
+        kwargs.setdefault("CalibrationTool", result.popToolsAndMerge(NSWCalibToolCfg(flags)))
+        kwargs.setdefault("SmearingTool", result.popToolsAndMerge(STgcCalibSmearingToolCfg(flags)))
+        # sTGC VMM configurables
+        kwargs.setdefault("doToFCorrection", True)
+        kwargs.setdefault("InputObjectName", "sTGC_Hits")
+        the_tool = CompFactory.sTgcDigitizationTool(name, **kwargs)
+    else:
+        from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
+        result.merge(ActsGeometryContextAlgCfg(flags))
+        kwargs.setdefault("StreamName", "sTgcSimForklift")
+        kwargs.setdefault("SimHitKey", "xStgcSimHits")
+        kwargs.setdefault("EffiDataKey", "")    
+        """
+        from MuonConfig.MuonCondAlgConfig import sTgcDigitEffiCondAlgCfg
+        result.merge(sTgcDigitEffiCondAlgCfg(flags,readFromJSON="EffMapsTGC.json"))
+        kwargs.setdefault("EffiDataKey", "sTgcDigitEff")
+        """
+        from MuonConfig.MuonCalibrationConfig import NswErrorCalibDbAlgCfg
+        result.merge(NswErrorCalibDbAlgCfg(flags))
+        the_tool = CompFactory.MuonR4.sTgcFastDigiTool(name, **kwargs)
+
+    result.setPrivateTools(the_tool)
+    return result
 
 def sTGC_OverlayDigitizationToolCfg(flags, name="STGC_OverlayDigitizationTool", **kwargs):
     """Return ComponentAccumulator with TgcDigitizationTool configured for Overlay"""
     acc = ComponentAccumulator()
-    kwargs.setdefault("doToFCorrection", True)
-    kwargs.setdefault("doEfficiencyCorrection", False)
-    # Operating voltage in the sTGC in kV. Sets the gas gain from electron avalance
-    # Every 100V increase roughly doubles the total electric charge per hit
-    kwargs.setdefault("operatingHVinkV", 2.8)
-    kwargs.setdefault("MergeSvc", '')
+    kwargs.setdefault("PileUpMergeSvc", '')
     kwargs.setdefault("OnlyUseContainerName", False)
-    if 'sTGCSimHitCollection#sTGCSensitiveDetector' in flags.Input.SecondaryTypedCollections:
-        kwargs.setdefault("InputObjectName", "sTGCSensitiveDetector")
-    else:
-        kwargs.setdefault("InputObjectName", "sTGC_Hits")
     kwargs.setdefault("OutputObjectName", flags.Overlay.SigPrefix + "sTGC_DIGITS")
     kwargs.setdefault("OutputSDOName", flags.Overlay.SigPrefix + "sTGC_SDO")
-    from RngComps.RngCompsConfig import AthRNGSvcCfg
-    kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
-    sTgcDigitizationTool = CompFactory.sTgcDigitizationTool
-    acc.setPrivateTools(sTgcDigitizationTool(name, **kwargs))
+    the_tool = acc.popToolsAndMerge(sTGC_DigitizationToolCfg(flags, name=name, **kwargs))
+    acc.setPrivateTools(the_tool)
     return acc
 
 
@@ -110,6 +106,9 @@ def sTGC_OutputCfg(flags):
         ItemList = ["Muon::STGC_RawDataContainer#*"]
         if flags.Digitization.EnableTruth:
             ItemList += ["MuonSimDataCollection#*"]
+            ItemList += ["xAOD::MuonSimHitContainer#*STGC_SDO",
+                         "xAOD::MuonSimHitAuxContainer#*STGC_SDOAux."]
+
             acc.merge(TruthDigitizationOutputCfg(flags))
         acc.merge(OutputStreamCfg(flags, "RDO", ItemList))
     return acc
@@ -130,11 +129,11 @@ def sTGC_OverlayDigitizationBasicCfg(flags, **kwargs):
     acc = MuonGeoModelCfg(flags)
     if flags.Common.ProductionStep != ProductionStep.FastChain:
         from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
-        if 'sTGCSimHitCollection#sTGCSensitiveDetector' in flags.Input.SecondaryTypedCollections:
-            acc.merge(SGInputLoaderCfg(flags, ["sTGCSimHitCollection#sTGCSensitiveDetector"]))
+        if flags.Muon.usePhaseIIGeoSetup:
+            acc.merge(SGInputLoaderCfg(flags, ["xAOD::MuonSimHitContainer#xStgcSimHits",
+                                               "xAOD::MuonSimHitAuxContainer#xStgcSimHitsAux."]))
         else:
             acc.merge(SGInputLoaderCfg(flags, ["sTGCSimHitCollection#sTGC_Hits"]))
-
     kwargs.setdefault("DigitizationTool", acc.popToolsAndMerge(sTGC_OverlayDigitizationToolCfg(flags)))
 
     if flags.Concurrency.NumThreads > 0:

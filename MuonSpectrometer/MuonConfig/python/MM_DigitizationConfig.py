@@ -28,8 +28,9 @@ def MM_RangeCfg(flags, name="MMRange", **kwargs):
     kwargs.setdefault("FirstXing", MM_FirstXing())
     kwargs.setdefault("LastXing", MM_LastXing())
     kwargs.setdefault("CacheRefreshFrequency", 1.0)
-    if 'MMSimHitCollection#MicromegasSensitiveDetector' in flags.Input.TypedCollections:
-        kwargs.setdefault("ItemList", ["MMSimHitCollection#MicromegasSensitiveDetector"])
+    if flags.Muon.usePhaseIIGeoSetup:
+        kwargs.setdefault("ItemList", ["xAOD::MuonSimHitContainer#xMmSimHits",
+                                       "xAOD::MuonSimHitAuxContainer#xMmSimHitsAux."])
     else:
         kwargs.setdefault("ItemList", ["MMSimHitCollection#MM_Hits"])
     return PileUpXingFolderCfg(flags, name, **kwargs)
@@ -37,11 +38,11 @@ def MM_RangeCfg(flags, name="MMRange", **kwargs):
 
 def MM_DigitizationToolCfg(flags, name="MM_DigitizationTool", **kwargs):
     """Return ComponentAccumulator with configured MM_DigitizationTool"""
-    from MuonConfig.MuonCalibrationConfig import NSWCalibToolCfg, MMCalibSmearingToolCfg
     result = ComponentAccumulator()
-    kwargs.setdefault("CalibrationTool", result.popToolsAndMerge(NSWCalibToolCfg(flags)))
-    kwargs.setdefault("SmearingTool", result.popToolsAndMerge(MMCalibSmearingToolCfg(flags)))
-    result.merge(AtlasFieldCacheCondAlgCfg(flags))
+    
+    from RngComps.RngCompsConfig import AthRNGSvcCfg
+    kwargs.setdefault("RndmSvc", result.getPrimaryAndMerge(AthRNGSvcCfg(flags)))
+    
     if flags.Digitization.PileUp:
         intervals = []
         if flags.Digitization.DoXingByXingPileUp:
@@ -49,45 +50,57 @@ def MM_DigitizationToolCfg(flags, name="MM_DigitizationTool", **kwargs):
             kwargs.setdefault("LastXing", MM_LastXing())
         else:
             intervals += [result.popToolsAndMerge(MM_RangeCfg(flags))]
-        kwargs.setdefault("MergeSvc", result.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)).name)
+        kwargs.setdefault("PileUpMergeSvc", result.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)).name)
     else:
-        kwargs.setdefault("MergeSvc", '')
+        kwargs.setdefault("PileUpMergeSvc", '')
+
     kwargs.setdefault("OnlyUseContainerName", flags.Digitization.PileUp)
-    kwargs.setdefault("CheckSimHits", True)
-    if 'MMSimHitCollection#MicromegasSensitiveDetector' in flags.Input.TypedCollections:
-        kwargs.setdefault("InputObjectName", "MicromegasSensitiveDetector")
-    else:
-        kwargs.setdefault("InputObjectName", "MM_Hits")
+
     kwargs.setdefault("OutputObjectName", "MM_DIGITS")
     if flags.Common.ProductionStep == ProductionStep.PileUpPresampling:
         kwargs.setdefault("OutputSDOName", flags.Overlay.BkgPrefix + "MM_SDO")
     else:
         kwargs.setdefault("OutputSDOName", "MM_SDO")
-    from RngComps.RngCompsConfig import AthRNGSvcCfg
-    kwargs.setdefault("RndmSvc", result.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
-    result.setPrivateTools(CompFactory.MM_DigitizationTool(name, **kwargs))
+
+    the_tool = None
+    if not flags.Muon.usePhaseIIGeoSetup:
+        from MuonConfig.MuonCalibrationConfig import NSWCalibToolCfg, MMCalibSmearingToolCfg  
+        kwargs.setdefault("CalibrationTool", result.popToolsAndMerge(NSWCalibToolCfg(flags)))
+        kwargs.setdefault("SmearingTool", result.popToolsAndMerge(MMCalibSmearingToolCfg(flags)))
+        result.merge(AtlasFieldCacheCondAlgCfg(flags))   
+        kwargs.setdefault("CheckSimHits", True)
+        the_tool = CompFactory.MM_DigitizationTool(name, **kwargs)
+    else:
+        kwargs.setdefault("StreamName", "MmSimForklift")
+        kwargs.setdefault("SimHitKey", "xMmSimHits")    
+        """
+        from MuonConfig.MuonCondAlgConfig import MmDigitEffiCondAlgCfg
+        result.merge(MmDigitEffiCondAlgCfg(flags,readFromJSON="EffMapMM.json"))
+        kwargs.setdefault("EffiDataKey", "MmDigitEff")
+        """
+    
+        kwargs.setdefault("EffiDataKey", "")
+    
+        from MuonConfig.MuonCalibrationConfig import NswErrorCalibDbAlgCfg
+        result.merge(NswErrorCalibDbAlgCfg(flags))
+        from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
+        result.merge(ActsGeometryContextAlgCfg(flags))
+        the_tool = CompFactory.MuonR4.MmFastDigiTool(name, **kwargs)
+
+    result.setPrivateTools(the_tool)
     return result
 
 
 def MM_OverlayDigitizationToolCfg(flags, name="MM_OverlayDigitizationTool", **kwargs):
     """Return ComponentAccumulator with MM_DigitizationTool configured for Overlay"""
-    acc=ComponentAccumulator()
-    from MuonConfig.MuonCalibrationConfig import NSWCalibToolCfg, MMCalibSmearingToolCfg
-    kwargs.setdefault("CalibrationTool", acc.popToolsAndMerge(NSWCalibToolCfg(flags)))
-    kwargs.setdefault("SmearingTool", acc.popToolsAndMerge(MMCalibSmearingToolCfg(flags)))
-    acc.merge(AtlasFieldCacheCondAlgCfg(flags))
-    kwargs.setdefault("MergeSvc", '')
-    kwargs.setdefault("CheckSimHits", True)
+    acc= ComponentAccumulator()
+    kwargs.setdefault("PileUpMergeSvc", '')
+   
     kwargs.setdefault("OnlyUseContainerName", False)
-    if 'MMSimHitCollection#MicromegasSensitiveDetector' in flags.Input.SecondaryTypedCollections:
-        kwargs.setdefault("InputObjectName", "MicromegasSensitiveDetector")
-    else:
-        kwargs.setdefault("InputObjectName", "MM_Hits")
     kwargs.setdefault("OutputObjectName", flags.Overlay.SigPrefix + "MM_DIGITS")
     kwargs.setdefault("OutputSDOName", flags.Overlay.SigPrefix + "MM_SDO")
-    from RngComps.RngCompsConfig import AthRNGSvcCfg
-    kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
-    acc.setPrivateTools(CompFactory.MM_DigitizationTool(name, **kwargs))
+    the_tool = acc.popToolsAndMerge(MM_DigitizationToolCfg(flags, **kwargs))
+    acc.setPrivateTools(the_tool)
     return acc
 
 
@@ -98,6 +111,9 @@ def MM_OutputCfg(flags):
         ItemList = ["Muon::MM_RawDataContainer#*"]
         if flags.Digitization.EnableTruth:
             ItemList += ["MuonSimDataCollection#*"]
+            ItemList += ["xAOD::MuonSimHitContainer#*MM_SDO",
+                         "xAOD::MuonSimHitAuxContainer#*MM_SDOAux."]
+
             acc.merge(TruthDigitizationOutputCfg(flags))
         acc.merge(OutputStreamCfg(flags, "RDO", ItemList))
     return acc
@@ -118,8 +134,9 @@ def MM_OverlayDigitizationBasicCfg(flags, **kwargs):
     acc = MuonGeoModelCfg(flags)
     if flags.Common.ProductionStep != ProductionStep.FastChain:
         from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
-        if 'MMSimHitCollection#MicromegasSensitiveDetector' in flags.Input.SecondaryTypedCollections:
-            acc.merge(SGInputLoaderCfg(flags, ["MMSimHitCollection#MicromegasSensitiveDetector"]))
+        if flags.Muon.usePhaseIIGeoSetup:
+            acc.merge(SGInputLoaderCfg(flags,["xAOD::MuonSimHitContainer#xMmSimHits",
+                                              "xAOD::muonSimHitAuxConatiner#xMmSimHitsAux."]))
         else:
             acc.merge(SGInputLoaderCfg(flags, ["MMSimHitCollection#MM_Hits"]))
 
