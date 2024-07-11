@@ -199,6 +199,7 @@ def TgcDigitToTgcRDOCfg(flags, name="TgcDigitToTgcRDO", **kwargs):
     kwargs.setdefault("MuonIdHelperSvc", acc.getPrimaryAndMerge(MuonIdHelperSvcCfg(flags)))
 
     if flags.Common.ProductionStep == ProductionStep.PileUpPresampling:
+        kwargs.setdefault("InputObjectName", f"{flags.Overlay.BkgPrefix}TGC_DIGITS")
         kwargs.setdefault("OutputObjectName", f"{flags.Overlay.BkgPrefix}TGCRDO")
     else:
         kwargs.setdefault("OutputObjectName", "TGCRDO")

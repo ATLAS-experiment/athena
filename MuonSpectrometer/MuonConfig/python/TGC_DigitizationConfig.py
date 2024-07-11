@@ -29,7 +29,11 @@ def TGC_RangeCfg(flags, name="TGC_Range", **kwargs):
     kwargs.setdefault("FirstXing", TGC_FirstXing())
     kwargs.setdefault("LastXing", TGC_LastXing())
     kwargs.setdefault("CacheRefreshFrequency", 1.0)
-    kwargs.setdefault("ItemList", ["TGCSimHitCollection#TGC_Hits"])
+    if flags.Muon.usePhaseIIGeoSetup:
+        kwargs.setdefault("ItemList", ["xAOD::MuonSimHitContainer#xTgcSimHits",
+                                       "xAOD::MuonSimHitAuxContainer#xTgcSimHitsAux."])
+    else:
+        kwargs.setdefault("ItemList", ["TGCSimHitCollection#TGC_Hits"])
     return PileUpXingFolderCfg(flags, name, **kwargs)
 
 
@@ -38,39 +42,47 @@ def TGC_DigitizationToolCfg(flags, name="TgcDigitizationTool", **kwargs):
     acc = ComponentAccumulator()
     if flags.Digitization.PileUp:
         intervals = []
-        if flags.Digitization.DoXingByXingPileUp:
-            kwargs.setdefault("FirstXing", TGC_FirstXing())
-            kwargs.setdefault("LastXing", TGC_LastXing())
-        else:
+        if not flags.Digitization.DoXingByXingPileUp:
             intervals += [acc.popToolsAndMerge(TGC_RangeCfg(flags))]
-        kwargs.setdefault("PileUpMergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)).name)
+        kwargs.setdefault("PileUpMergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)))
     else:
         kwargs.setdefault("PileUpMergeSvc", '')
     kwargs.setdefault("OnlyUseContainerName", flags.Digitization.PileUp)
+    
     if flags.Digitization.DoXingByXingPileUp:
         kwargs.setdefault("FirstXing", TGC_FirstXing())
         kwargs.setdefault("LastXing", TGC_LastXing())
-    kwargs.setdefault("OutputObjectName", "TGC_DIGITS")
+    
     if flags.Common.ProductionStep == ProductionStep.PileUpPresampling:
         kwargs.setdefault("OutputSDOName", flags.Overlay.BkgPrefix + "TGC_SDO")
+        kwargs.setdefault("OutputObjectName", flags.Overlay.BkgPrefix +"TGC_DIGITS")
     else:
         kwargs.setdefault("OutputSDOName", "TGC_SDO")
-
-    from MuonConfig.MuonCondAlgConfig import TgcDigitCondAlgCfg
-    acc.merge(TgcDigitCondAlgCfg(flags))
-    kwargs.setdefault("TGCDigitASDposKey", "TGCDigitASDposData")
-    kwargs.setdefault("TGCDigitTimeOffsetKey", "TGCDigitTimeOffsetData")
-    kwargs.setdefault("TGCDigitCrosstalkKey", "TGCDigitCrosstalkData")
-
-    from AthenaConfiguration.Enums  import LHCPeriod
-    if flags.GeoModel.Run < LHCPeriod.Run3:
-        kwargs.setdefault("FourBunchDigitization", False)
+        kwargs.setdefault("OutputObjectName", "TGC_DIGITS")
 
     from RngComps.RngCompsConfig import AthRNGSvcCfg
-    kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
+    kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)))
 
-    TgcDigitizationTool = CompFactory.TgcDigitizationTool
-    acc.setPrivateTools(TgcDigitizationTool(name, **kwargs))
+    the_tool = None
+    if not flags.Muon.usePhaseIIGeoSetup:
+        from MuonConfig.MuonCondAlgConfig import TgcDigitCondAlgCfg
+        acc.merge(TgcDigitCondAlgCfg(flags))
+        kwargs.setdefault("TGCDigitASDposKey", "TGCDigitASDposData")
+        kwargs.setdefault("TGCDigitTimeOffsetKey", "TGCDigitTimeOffsetData")
+        kwargs.setdefault("TGCDigitCrosstalkKey", "TGCDigitCrosstalkData")
+
+        from AthenaConfiguration.Enums  import LHCPeriod
+        kwargs.setdefault("FourBunchDigitization", flags.GeoModel.Run >= LHCPeriod.Run3)
+        the_tool = CompFactory.TgcDigitizationTool(name, **kwargs)
+    else:
+        from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
+        acc.merge(ActsGeometryContextAlgCfg(flags))
+        kwargs.setdefault("StreamName", "TgcSimForklift")
+        kwargs.setdefault("SimHitKey", "xTgcSimHits")
+        kwargs.setdefault("EffiDataKey", "")
+        the_tool = CompFactory.MuonR4.TgcFastDigiTool(name, **kwargs)
+        
+    acc.setPrivateTools(the_tool)
     return acc
 
 
@@ -80,22 +92,8 @@ def TGC_OverlayDigitizationToolCfg(flags, name="Tgc_OverlayDigitizationTool", **
     kwargs.setdefault("OnlyUseContainerName", False)
     kwargs.setdefault("OutputObjectName", flags.Overlay.SigPrefix + "TGC_DIGITS")
     kwargs.setdefault("OutputSDOName", flags.Overlay.SigPrefix + "TGC_SDO")
-
-    from MuonConfig.MuonCondAlgConfig import TgcDigitCondAlgCfg
-    acc.merge(TgcDigitCondAlgCfg(flags))
-    kwargs.setdefault("TGCDigitASDposKey", "TGCDigitASDposData")
-    kwargs.setdefault("TGCDigitTimeOffsetKey", "TGCDigitTimeOffsetData")
-    kwargs.setdefault("TGCDigitCrosstalkKey", "TGCDigitCrosstalkData")
-
-    from AthenaConfiguration.Enums  import LHCPeriod
-    if flags.GeoModel.Run < LHCPeriod.Run3:
-        kwargs.setdefault("FourBunchDigitization", False)
-
-    from RngComps.RngCompsConfig import AthRNGSvcCfg
-    kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
-    kwargs.setdefault("PileUpMergeSvc", '')
-    TgcDigitizationTool = CompFactory.TgcDigitizationTool
-    acc.setPrivateTools(TgcDigitizationTool(name, **kwargs))
+    the_tool = acc.popToolsAndMerge(TGC_DigitizationToolCfg(flags,name=name, **kwargs))
+    acc.setPrivateTools(the_tool)
     return acc
 
 
@@ -106,6 +104,9 @@ def TGC_OutputCfg(flags):
         ItemList = ["TgcRdoContainer#*"]
         if flags.Digitization.EnableTruth:
             ItemList += ["MuonSimDataCollection#*"]
+            ItemList += ["xAOD::MuonSimHitContainer#*TGC_SDO",
+                        "xAOD::MuonSimHitAuxContainer#*TGC_SDOAux."]
+
             acc.merge(TruthDigitizationOutputCfg(flags))
         acc.merge(OutputStreamCfg(flags, "RDO", ItemList))
     return acc
@@ -126,7 +127,11 @@ def TGC_OverlayDigitizationBasicCfg(flags, **kwargs):
     acc = MuonGeoModelCfg(flags)
     if flags.Common.ProductionStep != ProductionStep.FastChain:
         from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
-        acc.merge(SGInputLoaderCfg(flags, ["TGCSimHitCollection#TGC_Hits"]))
+        if flags.Muon.usePhaseIIGeoSetup:
+            acc.merge(SGInputLoaderCfg(flags,["xAOD::MuonSimHitContainer#xTgcSimHits",
+                                              "xAOD::MuonSimHitAuxContainer#xTgcSimHitsAux."]))
+        else:
+            acc.merge(SGInputLoaderCfg(flags, ["TGCSimHitCollection#TGC_Hits"]))
 
     kwargs.setdefault("DigitizationTool", acc.popToolsAndMerge(TGC_OverlayDigitizationToolCfg(flags)))
 

@@ -30,24 +30,47 @@ def RPC_RangeCfg(flags, name="RPC_Range", **kwargs):
     kwargs.setdefault("FirstXing", RPC_FirstXing())
     kwargs.setdefault("LastXing", RPC_LastXing())
     kwargs.setdefault("CacheRefreshFrequency", 1.0)
-    kwargs.setdefault("ItemList", ["RPCSimHitCollection#RPC_Hits"])
+    if flags.Muon.usePhaseIIGeoSetup:
+        kwargs.setdefault("ItemList", ["xAOD::MuonSimHitContainer#xRpcSimHits",
+                                       "xAOD::MuonSimHitAuxContainer#xRpcSimHitsAux."])
+    else:
+        kwargs.setdefault("ItemList", ["RPCSimHitCollection#RPC_Hits"])
+
     return PileUpXingFolderCfg(flags, name, **kwargs)
+
 
 
 def RPC_DigitizationToolCommonCfg(flags, name="RpcDigitizationTool", **kwargs):
     """Return ComponentAccumulator with configured RpcDigitizationTool"""
     acc = ComponentAccumulator()
+
     if flags.GeoModel.Run < LHCPeriod.Run3:  # Run 3 and later currently do not use conditions
         from MuonConfig.MuonCondAlgConfig import RpcCondDbAlgCfg
         acc.merge(RpcCondDbAlgCfg(flags))
+    
     if flags.Digitization.DoXingByXingPileUp:
         kwargs.setdefault("FirstXing", RPC_FirstXing())
         kwargs.setdefault("LastXing", RPC_LastXing())
-    kwargs.setdefault("OutputObjectName", "RPC_DIGITS")
     if flags.Common.ProductionStep == ProductionStep.PileUpPresampling:
         kwargs.setdefault("OutputSDOName", flags.Overlay.BkgPrefix + "RPC_SDO")
     else:
         kwargs.setdefault("OutputSDOName", "RPC_SDO")
+ 
+    from RngComps.RngCompsConfig import AthRNGSvcCfg
+    kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)))
+    kwargs.setdefault("OutputObjectName", "RPC_DIGITS")
+
+    ### For Phase II use the fast digitization tool
+    if flags.Muon.usePhaseIIGeoSetup:
+        from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
+        acc.merge(ActsGeometryContextAlgCfg(flags))
+        kwargs.setdefault("StreamName", "RpcSimForklift")
+        kwargs.setdefault("SimHitKey", "xRpcSimHits")
+        kwargs.setdefault("EffiDataKey", "")
+        the_tool = CompFactory.MuonR4.RpcFastDigiTool(name="RpcDigitizationTool", **kwargs)
+        acc.setPrivateTools(the_tool)       
+        return acc
+    
     # config
     kwargs.setdefault("DeadTime", 100)
     kwargs.setdefault("PatchForRpcTime", True)
@@ -76,8 +99,6 @@ def RPC_DigitizationToolCommonCfg(flags, name="RpcDigitizationTool", **kwargs):
     kwargs.setdefault("FracClusterSize2_C",   [0.259986, 0.259986, 0.259986, 0.259986, 0.259986, 0.259986, 0.259986, 0.259986, 0.259986, 0.259986, 0.259986, 0.259986, 0.259986, 0.259986, 0.259986, 0.259986, 0.259986, 0.259986])
     kwargs.setdefault("FracClusterSizeTail_C",[0.13035,  0.13035,  0.13035,  0.13035,  0.13035,  0.13035,  0.13035,  0.13035,  0.13035, 0.13035,  0.13035,  0.13035,  0.13035,  0.13035,  0.13035,  0.13035,  0.13035,  0.13035 ])
     kwargs.setdefault("MeanClusterSizeTail_C",[0.548598, 0.548598, 0.548598, 0.548598, 0.548598, 0.548598, 0.548598, 0.548598, 0.548598, 0.548598, 0.548598, 0.548598, 0.548598, 0.548598, 0.548598, 0.548598, 0.548598, 0.548598])
-    from RngComps.RngCompsConfig import AthRNGSvcCfg
-    kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
     RpcDigitizationTool = CompFactory.RpcDigitizationTool(name, **kwargs)
     acc.setPrivateTools(RpcDigitizationTool)
     return acc
@@ -122,6 +143,8 @@ def RPC_OutputCfg(flags):
             ItemList += [ 'xAOD::NRPCRDOContainer#*' , 'xAOD::NRPCRDOAuxContainer#*' ]
         if flags.Digitization.EnableTruth:
             ItemList += ["MuonSimDataCollection#*"]
+            ItemList += ["xAOD::MuonSimHitContainer#*RPC_SDO",
+                        "xAOD::MuonSimHitAuxContainer#*RPC_SDOAux."]
             acc.merge(TruthDigitizationOutputCfg(flags))
         acc.merge(OutputStreamCfg(flags, "RDO", ItemList))
     return acc
@@ -143,7 +166,11 @@ def RPC_OverlayDigitizationBasicCfg(flags, **kwargs):
 
     if flags.Common.ProductionStep != ProductionStep.FastChain:
         from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
-        acc.merge(SGInputLoaderCfg(flags, ["RPCSimHitCollection#RPC_Hits"]))
+        if flags.Muon.usePhaseIIGeoSetup:
+            acc.merge(SGInputLoaderCfg(flags,["xAOD::MuonSimHitContainer#xRpcSimHits",
+                                              "xAOD::MuonSimHitAuxContainer#xRpcSimHitsAux."]))
+        else:
+            acc.merge(SGInputLoaderCfg(flags, ["RPCSimHitCollection#RPC_Hits"]))
 
     kwargs.setdefault("DigitizationTool", acc.popToolsAndMerge(RPC_OverlayDigitizationToolCfg(flags)))
 
@@ -170,7 +197,8 @@ def RPC_DigitizationDigitToRDOCfg(flags):
     """Return ComponentAccumulator with RPC digitization and Digit to RPCPAD RDO"""
     acc = RPC_DigitizationCfg(flags)
     acc.merge(RPCCablingConfigCfg(flags))
-    acc.merge(RpcDigitToRpcRDOCfg(flags))
+    if not flags.Muon.usePhaseIIGeoSetup:
+        acc.merge(RpcDigitToRpcRDOCfg(flags))
     if flags.Muon.enableNRPC:
         acc.merge(NrpcDigitToNrpcRDOCfg(flags))
     return acc

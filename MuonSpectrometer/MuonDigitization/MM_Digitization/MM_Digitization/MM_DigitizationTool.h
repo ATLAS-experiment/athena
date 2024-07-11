@@ -170,7 +170,7 @@ private:
     SG::WriteHandleKey<MuonSimDataCollection> m_outputSDO_CollectionKey{
         this, "OutputSDOName", "MM_SDO", "WriteHandleKey for Output MuonSimDataCollection"};  // name of the output SDOs
 
-    ServiceHandle<PileUpMergeSvc> m_mergeSvc{this, "MergeSvc", "PileUpMergeSvc", "Merge service used in digitization"};
+    ServiceHandle<PileUpMergeSvc> m_mergeSvc{this, "PileUpMergeSvc", "PileUpMergeSvc", "Merge service used in digitization"};
 
     Gaudi::Property<bool> m_useCondThresholds{this, "useCondThresholds", false,
                                               "Use conditions data to get thresholds, overrules useThresholdScaling"};
