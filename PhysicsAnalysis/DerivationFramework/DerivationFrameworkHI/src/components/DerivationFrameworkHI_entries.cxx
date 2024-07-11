@@ -6,6 +6,7 @@
 #include "DerivationFrameworkHI/HITrackParticleThinningTool.h"
 #include "DerivationFrameworkHI/BtaggedObjectThinning.h"
 #include "DerivationFrameworkHI/HIGlobalAugmentationTool.h"
+#include "../HICentralityDecorationTool.h"
 #include "GaudiKernel/DeclareFactoryEntries.h"
 
 using namespace DerivationFramework;
@@ -17,6 +18,7 @@ DECLARE_TOOL_FACTORY( HIEventShapeAugmentationTool )
 DECLARE_TOOL_FACTORY( HITrackParticleThinningTool )
 DECLARE_TOOL_FACTORY( HIGlobalAugmentationTool )
 DECLARE_TOOL_FACTORY( BtaggedObjectThinning )
+DECLARE_TOOL_FACTORY( HICentralityDecorationTool )
 DECLARE_FACTORY_ENTRIES( DerivationFrameworkHI )
 {
   DECLARE_TOOL( HIMBSkimmingTool )
@@ -27,5 +29,6 @@ DECLARE_FACTORY_ENTRIES( DerivationFrameworkHI )
   DECLARE_TOOL( HITrackParticleThinningTool )
   DECLARE_TOOL( HIGlobalAugmentationTool )
   DECLARE_TOOL( BtaggedObjectThinning )
+  DECLARE_TOOL( HICentralityDecorationTool )
 }
 
