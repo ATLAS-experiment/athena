@@ -9,6 +9,11 @@ def MuonHitTesterCfg(flags, name="MuonHitTester", outFile="SimHitTest.root", **k
     cfg.merge(setupHistSvcCfg(flags,out_file=outFile, out_stream="MuonR4HitTest"))
     kwargs.setdefault("isMC", flags.Input.isMC)
 
+    
+    kwargs.setdefault("dumpPrds", False)
+    kwargs.setdefault("dumpDigits", False)
+    kwargs.setdefault("dumpSimHits", True)
+    
     ### Overall simhit container dump protected by dumpSimHits property
     ### If property is set to true ensure that only the containers of the activated
     ### detectors are written
@@ -24,6 +29,19 @@ def MuonHitTesterCfg(flags, name="MuonHitTester", outFile="SimHitTest.root", **k
     kwargs.setdefault("dumpTgcDigits", flags.Detector.GeometryTGC)
     kwargs.setdefault("dumpStgcDigits",flags.Detector.GeometrysTGC)
     kwargs.setdefault("dumpMmDigits", flags.Detector.GeometryMM)
+
+    kwargs.setdefault("dumpMdtPrds", flags.Detector.GeometryMDT)
+    kwargs.setdefault("dumpRpcPrds", flags.Detector.GeometryRPC)
+    kwargs.setdefault("dumpTgcPrds", flags.Detector.GeometryTGC)
+    kwargs.setdefault("dumpMmPrds", flags.Detector.GeometryMM)
+
+    ###
+    from AthenaConfiguration.Enums import LHCPeriod
+    if flags.GeoModel.Run >= LHCPeriod.Run4 and \
+       kwargs["dumpPrds"] and kwargs["dumpRpcPrds"]:
+            from xAODMuonMeasViewAlgs.ViewAlgsConfig import RpcMeasViewAlgCfg
+            result.merge(RpcMeasViewAlgCfg(flags))
+            kwargs.setdefault("RpcPrdKey", "xRpcMeasurements")
 
     theAlg = CompFactory.MuonValR4.MuonHitTesterAlg(name, **kwargs)
     result.addEventAlgo(theAlg, primary = True)
