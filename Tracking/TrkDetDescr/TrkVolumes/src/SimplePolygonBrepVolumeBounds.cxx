@@ -161,6 +161,7 @@ Trk::SimplePolygonBrepVolumeBounds::operator=(
     delete m_envelope;
     m_combinedVolume = trabo.m_combinedVolume->clone();
     m_envelope = trabo.m_envelope->clone();
+    m_ordering = trabo.m_ordering;
   }
   return *this;
 }
