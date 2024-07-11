@@ -135,30 +135,33 @@ def getDefaultDetectors(geoTag, sqliteDB, sqliteDBFullPath, includeForward=False
 
     geoTag: geometry tag (e.g. ATLAS-R2-2016-01-00-01)
     """
-    detectors = set()
-    detectors.add('Bpipe')
+    detectors = DetDescrInfo(geoTag,sqliteDB,sqliteDBFullPath)['Common']['Detectors']
+    ### Check whether the metadata contains information about all scheduled detectors
+    manualConfig = not DetDescrInfo(geoTag,sqliteDB,sqliteDBFullPath)['Common']["DetectorsConfigured"]
+    
+    ### If so add everything inside the MS entrance by hand
+    if manualConfig: 
+        detectors.add('Bpipe')
+        if DetDescrInfo(geoTag,sqliteDB,sqliteDBFullPath)['Common']['Run'] not in ['RUN1', 'RUN2', 'RUN3']: # RUN4 and beyond
+            detectors.add('ITkPixel')
+            detectors.add('ITkStrip')
+            if DetDescrInfo(geoTag,sqliteDB,sqliteDBFullPath)['Luminosity']['BCMPrime']:
+                detectors.add('BCMPrime')  # since https://gitlab.cern.ch/Atlas-Inner-Tracking/ITKLayouts/-/merge_requests/347 introduced BCMPrime geometry
+            if DetDescrInfo(geoTag,sqliteDB,sqliteDBFullPath)['Luminosity']['PLR']:
+                detectors.add('PLR')
+        else:
+            detectors.add('Pixel')
+            detectors.add('SCT')
+            detectors.add('TRT')
+            detectors.add('BCM')
 
-    if DetDescrInfo(geoTag,sqliteDB,sqliteDBFullPath)['Common']['Run'] not in ['RUN1', 'RUN2', 'RUN3']: # RUN4 and beyond
-        detectors.add('ITkPixel')
-        detectors.add('ITkStrip')
-        if DetDescrInfo(geoTag,sqliteDB,sqliteDBFullPath)['Luminosity']['BCMPrime']:
-            detectors.add('BCMPrime')  # since https://gitlab.cern.ch/Atlas-Inner-Tracking/ITKLayouts/-/merge_requests/347 introduced BCMPrime geometry
-        if DetDescrInfo(geoTag,sqliteDB,sqliteDBFullPath)['Luminosity']['PLR']:
-            detectors.add('PLR')
-    else:
-        detectors.add('Pixel')
-        detectors.add('SCT')
-        detectors.add('TRT')
-        detectors.add('BCM')
-    # TODO: wait for special table in the geo DB
-    # if DetDescrInfo(geoTag)['Common']['Run'] == 'RUN4':
-    #     detectors.add('BCMPrime')
+        if DetDescrInfo(geoTag,sqliteDB,sqliteDBFullPath)['Common']['Run'] not in ['RUN1', 'RUN2', 'RUN3']: # RUN4 and beyond
+            detectors.add('HGTD')
 
-    if DetDescrInfo(geoTag,sqliteDB,sqliteDBFullPath)['Common']['Run'] not in ['RUN1', 'RUN2', 'RUN3']: # RUN4 and beyond
-        detectors.add('HGTD')
+        detectors.add('LAr')
+        detectors.add('Tile')
 
-    detectors.add('LAr')
-    detectors.add('Tile')
+    ### TODO: Which plugin builds MBTS
     if DetDescrInfo(geoTag,sqliteDB,sqliteDBFullPath)['Common']['Run'] in ['RUN1', 'RUN2', 'RUN3']:
         detectors.add('MBTS')
 

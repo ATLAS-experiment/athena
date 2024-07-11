@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -14,10 +14,8 @@ def DetDescrCnvSvcCfg(flags, **kwargs):
     
 
     # Use GEOM DB to read InDet dictionary information 
-    if flags.Detector.GeometryITk or flags.Detector.GeometryHGTD:
-       kwargs.setdefault("useGeomDB_InDet", True)
-    else:
-       kwargs.setdefault("useGeomDB_InDet", False)   
+    kwargs.setdefault("useGeomDB_InDet", not flags.GeoModel.SQLiteDB and (flags.Detector.GeometryITk or \
+                                                                          flags.Detector.GeometryHGTD))   
 
     if (flags.Detector.GeometryITk or flags.Detector.GeometryHGTD) \
         and flags.ITk.Geometry.DictionaryLocal:
