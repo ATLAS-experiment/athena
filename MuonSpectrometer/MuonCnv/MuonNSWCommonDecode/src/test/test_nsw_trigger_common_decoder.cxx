@@ -310,6 +310,8 @@ int test_nsw_trigger_common_decoder_event (const eformat::read::ROBFragment &r, 
 	
 	const std::vector<std::shared_ptr<Muon::nsw::MMARTPacket>>& arts = link->art_packets();
 	std::vector<uint32_t> tmp_art_BCIDs;
+	std::vector<uint32_t> tmp_art_pipeIDs;
+	std::vector<uint32_t> tmp_art_fiberIDs;
 	std::vector<uint32_t> tmp_art_layers;
 	std::vector<uint32_t> tmp_art_channels;
 	for (const auto& art : arts){
@@ -318,9 +320,13 @@ int test_nsw_trigger_common_decoder_event (const eformat::read::ROBFragment &r, 
 	    tmp_art_layers.push_back( c.first );
 	    tmp_art_channels.push_back( c.second );
 	    tmp_art_BCIDs.push_back( art->art_BCID() );
+	    tmp_art_pipeIDs.push_back( art->art_pipeID() );
+	    tmp_art_fiberIDs.push_back( art->art_fiberID() );
 	  }
 	}
 	data.b_MML1A_art_BCID.push_back( tmp_art_BCIDs );
+	data.b_MML1A_art_pipeID.push_back( tmp_art_pipeIDs );
+	data.b_MML1A_art_fiberID.push_back( tmp_art_fiberIDs );
 	data.b_MML1A_art_layers.push_back( tmp_art_layers );
 	data.b_MML1A_art_channels.push_back( tmp_art_channels );
 	
