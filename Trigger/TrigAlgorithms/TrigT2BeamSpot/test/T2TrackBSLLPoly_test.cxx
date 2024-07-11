@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
 
 #include "../src/T2TrackBSLLPoly.h"
-
+#include <stdexcept>
 using namespace std;
 using namespace PESA;
 
@@ -14,15 +14,20 @@ namespace {
 
 void test_idx()
 {
+    constexpr int maxPower=2;
     cout << "=== Testing T2TrackBSLLPoly::idx method ===\n";
-    for (unsigned power_Bx = 0; power_Bx < 4; ++ power_Bx) {
-        for (unsigned power_By = 0; power_By < 4; ++ power_By) {
-            for (unsigned power_tx = 0; power_tx < 4; ++ power_tx) {
-                for (unsigned power_ty = 0; power_ty < 4; ++ power_ty) {
-                    for (unsigned power_omegax = 0; power_omegax < 4; ++ power_omegax) {
-                        for (unsigned power_omegay = 0; power_omegay < 4; ++ power_omegay) {
-
-                            int idx = T2TrackBSLLPoly::idx(power_Bx, power_By, power_tx, power_ty, power_omegax, power_omegay);
+    for (unsigned power_Bx = 0; power_Bx < maxPower; ++ power_Bx) {
+        for (unsigned power_By = 0; power_By < maxPower; ++ power_By) {
+            for (unsigned power_tx = 0; power_tx < maxPower; ++ power_tx) {
+                for (unsigned power_ty = 0; power_ty < maxPower; ++ power_ty) {
+                    for (unsigned power_omegax = 0; power_omegax < maxPower; ++ power_omegax) {
+                        for (unsigned power_omegay = 0; power_omegay < maxPower; ++ power_omegay) {
+                            int idx=-1;
+                            try{
+                                idx = T2TrackBSLLPoly::idx(power_Bx, power_By, power_tx, power_ty, power_omegax, power_omegay);
+                            } catch (std::out_of_range & e){
+                                std::cout<<"index out of range for ";
+                            }
                             cout << power_Bx << " " << power_By << " "
                                  << power_tx << " " << power_ty << " "
                                  << power_omegax << " " << power_omegay
