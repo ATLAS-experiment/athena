@@ -39,6 +39,9 @@ StatusCode CaloCellDumper::initialize() {
       ATH_MSG_ERROR("Failed to open reference file " << m_refName);
       return StatusCode::FAILURE;
     }
+    else {
+      ATH_MSG_INFO("Using reference file " << m_refName.value());
+    }
   }
 
   ATH_MSG_INFO("Cell energy cut=" << m_eCut.value());
