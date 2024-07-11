@@ -9,7 +9,9 @@ def InitializeGeometryParameters(dbGeomCursor):
    dbId, dbCommon, dbParam = dbGeomCursor.GetCurrentLeafContent("AtlasCommon")
 
    params = {"Run" : "UNDEFINED",
-             "GeoType" : "UNDEFINED"}
+             "GeoType" : "UNDEFINED",
+             "Detectors" : set(),
+             "DetectorsConfigured": False}
 
    if len(dbId)>0:
       key = dbId[0]
@@ -29,14 +31,56 @@ def InitializeGeometryParameters_SQLite(sqliteDbReader):
    dbData = sqliteDbReader.GetData("AtlasCommon")
 
    params = {"Run" : "UNDEFINED",
-             "GeoType" : "UNDEFINED"}
+             "GeoType" : "UNDEFINED",
+             "Detectors" : set(),
+             "DetectorsConfigured": False}
 
    if dbData:
       if "CONFIG" in dbData[0].keys():
          params["Run"] = dbData[0]["CONFIG"]
       if "GEOTYPE" in dbData[0].keys():
          params["GeoType"] = dbData[0]["GEOTYPE"]
-
+   
+   ### Read the set of the scheduled detector plugins from the meta-data
+   dbData =  sqliteDbReader.GetData("AAHEADER")
+   if dbData:
+      if "PluginNames" in dbData[0].keys():
+         plugins = dbData[0]["PluginNames"].split(";")
+         print (plugins)
+         detectors = set()
+         ### BeamPipe
+         if "Beampipe" in plugins:
+            detectors.add("Bpipe")
+         ### Inner detector: "Pixel", "SCT", "TRT", "BCM"
+         if "Pixel" in plugins:
+            detectors.add("Pixel")
+            detectors.add("BCM")
+         if "SCT" in plugins:
+            detectors.add("SCT")
+         if "TRT" in plugins:
+            detectors.add("TRT")
+         
+         ### ITk: "ITkStrip", "ITkPixel", "ITk", "PLR", "BCMPrime"
+         if "ITk" in plugins or "ITkStrip" in plugins:
+            detectors.add("ITkStrip")
+         if "ITk" in plugins or "ITkPixel" in plugins:
+            detectors.add("ITkPixel")
+         if "ITk" in plugins or "BCMPrime" in plugins:
+            detectors.add("BCMPrime")
+         if "ITk" in plugins or "PLR" in plugins:
+            detectors.add("PLR")
+         ### Calo: "LAr", "Tile"
+         if "LAr" in plugins:
+            detectors.add("LAr")
+         if "Tile" in plugins:
+            detectors.add("Tile")
+         ### HGTD:  "HGTD"
+         if "HGTD" in plugins:
+            detectors.add("HGTD")
+         ### Ignore muons as they write their own switches
+         ### Muons:  "MTechPlugin", "Muon"
+         params["Detectors"] = detectors
+         params["DetectorsConfigured"] =True
    return params
 
 
