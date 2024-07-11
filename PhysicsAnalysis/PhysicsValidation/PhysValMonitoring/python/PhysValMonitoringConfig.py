@@ -33,9 +33,6 @@ def PhysValExampleCfg(flags, **kwargs):
 
 
 def PhysValMonitoringCfg(flags, name="PhysValMonManager", tools=None, **kwargs):
-    if tools is None:
-        tools = []
-    
     acc = ComponentAccumulator()
 
     kwargs.setdefault("FileKey", "PhysVal")
@@ -46,50 +43,52 @@ def PhysValMonitoringCfg(flags, name="PhysValMonManager", tools=None, **kwargs):
     kwargs.setdefault("Run", 1)
     kwargs.setdefault("LumiBlock", 1)
 
-    if flags.PhysVal.doExample:
-        tools.append(acc.popToolsAndMerge(PhysValExampleCfg(flags)))
-    if flags.PhysVal.doInDet:
-        from InDetPhysValMonitoring.InDetPhysValMonitoringConfig import InDetPhysValMonitoringToolCfg
-        tools.append(acc.popToolsAndMerge(InDetPhysValMonitoringToolCfg(flags)))
-    if flags.PhysVal.doInDetLargeD0:
-        from InDetPhysValMonitoring.InDetPhysValMonitoringConfig import InDetLargeD0PhysValMonitoringToolCfg
-        tools.append(acc.popToolsAndMerge(InDetLargeD0PhysValMonitoringToolCfg(flags)))
-    if flags.PhysVal.doBtag:
-        from JetTagDQA.JetTagDQAConfig import PhysValBTagCfg
-        tools.append(acc.popToolsAndMerge(PhysValBTagCfg(flags)))
-    if flags.PhysVal.doMET:
-        from MissingEtDQA.MissingEtDQAConfig import PhysValMETCfg
-        tools.append(acc.popToolsAndMerge(PhysValMETCfg(flags)))
-    if flags.PhysVal.doEgamma:
-        from EgammaPhysValMonitoring.EgammaPhysValMonitoringConfig import EgammaPhysValMonitoringToolCfg
-        tools.append(acc.popToolsAndMerge(EgammaPhysValMonitoringToolCfg(flags)))
-    if flags.PhysVal.doTau:
-        from TauDQA.TauDQAConfig import PhysValTauCfg
-        tools.append(acc.popToolsAndMerge(PhysValTauCfg(flags)))
-    if flags.PhysVal.doJet:
-        from JetValidation.JetValidationConfig import PhysValJetCfg
-        tools.append(acc.popToolsAndMerge(PhysValJetCfg(flags)))
-    if flags.PhysVal.doTopoCluster:
-        from PFODQA.ClusterDQAConfig import PhysValClusterCfg
-        tools += acc.popToolsAndMerge(PhysValClusterCfg(flags))
-    if flags.PhysVal.doZee:
-        from ZeeValidation.ZeeValidationMonToolConfig import PhysValZeeCfg
-        tools.append(acc.popToolsAndMerge(PhysValZeeCfg(flags)))
-    if flags.PhysVal.doPFlow:
-        from PFODQA.PFPhysValConfig import PhysValPFOCfg
-        tools += acc.popToolsAndMerge(PhysValPFOCfg(flags))
-    if flags.PhysVal.doMuon:
-        from MuonPhysValMonitoring.MuonPhysValConfig import PhysValMuonCfg
-        tools.append(acc.popToolsAndMerge(PhysValMuonCfg(flags)))
-    if flags.PhysVal.doLRTMuon:
-        from MuonPhysValMonitoring.MuonPhysValConfig import PhysValLRTMuonCfg
-        tools.append(acc.popToolsAndMerge(PhysValLRTMuonCfg(flags)))
-    if flags.PhysVal.doActs:
-        from ActsConfig.ActsAnalysisConfig import PhysValActsCfg
-        tools.append(acc.popToolsAndMerge(PhysValActsCfg(flags)))
-    if flags.PhysVal.doLLPSecVtx:
-        from InDetSecVertexValidation.InDetSecVertexValidationConfig import PhysValSecVtxCfg
-        tools.append(acc.popToolsAndMerge(PhysValSecVtxCfg(flags)))
+    if tools is None:
+        tools = []
+        if flags.PhysVal.doExample:
+            tools.append(acc.popToolsAndMerge(PhysValExampleCfg(flags)))
+        if flags.PhysVal.doInDet:
+            from InDetPhysValMonitoring.InDetPhysValMonitoringConfig import InDetPhysValMonitoringToolCfg
+            tools.append(acc.popToolsAndMerge(InDetPhysValMonitoringToolCfg(flags)))
+        if flags.PhysVal.doInDetLargeD0:
+            from InDetPhysValMonitoring.InDetPhysValMonitoringConfig import InDetLargeD0PhysValMonitoringToolCfg
+            tools.append(acc.popToolsAndMerge(InDetLargeD0PhysValMonitoringToolCfg(flags)))
+        if flags.PhysVal.doBtag:
+            from JetTagDQA.JetTagDQAConfig import PhysValBTagCfg
+            tools.append(acc.popToolsAndMerge(PhysValBTagCfg(flags)))
+        if flags.PhysVal.doMET:
+            from MissingEtDQA.MissingEtDQAConfig import PhysValMETCfg
+            tools.append(acc.popToolsAndMerge(PhysValMETCfg(flags)))
+        if flags.PhysVal.doEgamma:
+            from EgammaPhysValMonitoring.EgammaPhysValMonitoringConfig import EgammaPhysValMonitoringToolCfg
+            tools.append(acc.popToolsAndMerge(EgammaPhysValMonitoringToolCfg(flags)))
+        if flags.PhysVal.doTau:
+            from TauDQA.TauDQAConfig import PhysValTauCfg
+            tools.append(acc.popToolsAndMerge(PhysValTauCfg(flags)))
+        if flags.PhysVal.doJet:
+            from JetValidation.JetValidationConfig import PhysValJetCfg
+            tools.append(acc.popToolsAndMerge(PhysValJetCfg(flags)))
+        if flags.PhysVal.doTopoCluster:
+            from PFODQA.ClusterDQAConfig import PhysValClusterCfg
+            tools.append(acc.popToolsAndMerge(PhysValClusterCfg(flags)))
+        if flags.PhysVal.doZee:
+            from ZeeValidation.ZeeValidationMonToolConfig import PhysValZeeCfg
+            tools.append(acc.popToolsAndMerge(PhysValZeeCfg(flags)))
+        if flags.PhysVal.doPFlow:
+            from PFODQA.PFPhysValConfig import PhysValPFOCfg
+            tools.append(acc.popToolsAndMerge(PhysValPFOCfg(flags)))
+        if flags.PhysVal.doMuon:
+            from MuonPhysValMonitoring.MuonPhysValConfig import PhysValMuonCfg
+            tools.append(acc.popToolsAndMerge(PhysValMuonCfg(flags)))
+        if flags.PhysVal.doLRTMuon:
+            from MuonPhysValMonitoring.MuonPhysValConfig import PhysValLRTMuonCfg
+            tools.append(acc.popToolsAndMerge(PhysValLRTMuonCfg(flags)))
+        if flags.PhysVal.doActs:
+            from ActsConfig.ActsAnalysisConfig import PhysValActsCfg
+            tools.append(acc.popToolsAndMerge(PhysValActsCfg(flags)))
+        if flags.PhysVal.doLLPSecVtx:
+            from InDetSecVertexValidation.InDetSecVertexValidationConfig import PhysValSecVtxCfg
+            tools.append(acc.popToolsAndMerge(PhysValSecVtxCfg(flags)))
 
     kwargs.setdefault("AthenaMonTools", tools)
 

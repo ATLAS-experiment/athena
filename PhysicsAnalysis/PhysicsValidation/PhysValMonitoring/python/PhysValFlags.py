@@ -6,7 +6,7 @@ def createPhysValConfigFlags():
 
     icf.addFlag("PhysVal.OutputFileName", "")
 
-    icf.addFlag("PhysVal.doExample", False)
+    icf.addFlag("PhysVal.doExample", True)
     icf.addFlag("PhysVal.doInDet", False)
     icf.addFlag("PhysVal.doInDetLargeD0", False)
     icf.addFlag("PhysVal.doBtag", False)
