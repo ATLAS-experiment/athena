@@ -125,10 +125,10 @@ StatusCode AthOnnx::OnnxRuntimeInferenceTool::inference(AthInfer::InputDataMap& 
         const std::vector<int64_t>& shape = inputInfo.first;
         if (std::holds_alternative<std::vector<float>>(inputInfo.second)) {
             auto& data = std::get<std::vector<float>>(inputInfo.second);
-            inputTensors.push_back(std::move(AthOnnxUtils::createTensor(data, shape)));
+            inputTensors.push_back(AthOnnxUtils::createTensor(data, shape));
         } else if (std::holds_alternative<std::vector<int64_t>>(inputInfo.second)) {
             auto& data = std::get<std::vector<int64_t>>(inputInfo.second);
-            inputTensors.push_back(std::move(AthOnnxUtils::createTensor(data, shape)));
+            inputTensors.push_back(AthOnnxUtils::createTensor(data, shape));
         } else {
             ATH_MSG_ERROR("Unsupported data type");
             return StatusCode::FAILURE;
@@ -145,11 +145,11 @@ StatusCode AthOnnx::OnnxRuntimeInferenceTool::inference(AthInfer::InputDataMap& 
         if (std::holds_alternative<std::vector<float>>(outputInfo.second)) {
             auto& data = std::get<std::vector<float>>(outputInfo.second);
             data.resize(tensorSize);
-            outputTensors.push_back(std::move(AthOnnxUtils::createTensor(data, shape)));
+            outputTensors.push_back(AthOnnxUtils::createTensor(data, shape));
         } else if (std::holds_alternative<std::vector<int64_t>>(outputInfo.second)) {
             auto& data = std::get<std::vector<int64_t>>(outputInfo.second);
             data.resize(tensorSize);
-            outputTensors.push_back(std::move(AthOnnxUtils::createTensor(data, shape)));
+            outputTensors.push_back(AthOnnxUtils::createTensor(data, shape));
         } else {
             ATH_MSG_ERROR("Unsupported data type");
             return StatusCode::FAILURE;
