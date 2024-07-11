@@ -244,7 +244,7 @@ def makeMuonWorkingPointSequence( seq, dataType, workingPoint, postfix = '',
     alg.outOfValidityDeco = 'bad_eff' + postfix
     alg.efficiencyScaleFactorTool.WorkingPoint = sfWorkingPoint
     if isRun3Geo:
-        alg.efficiencyScaleFactorTool.CalibrationRelease = '230309_Preliminary_r22run3'
+        alg.efficiencyScaleFactorTool.CalibrationRelease = '240711_Preliminary_r24run3'
     if dataType != 'data':
         seq.append( alg, inputPropName = 'muons',
                     stageName = 'efficiency',
