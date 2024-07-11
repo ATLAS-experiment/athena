@@ -17,6 +17,7 @@
 #include "GaudiKernel/MsgStream.h"
 
 // Athena
+#include "TruthUtils/MagicNumbers.h"
 #include "StoreGate/StoreGateSvc.h"
 
 // Transient(Geant) to Persistent(Disk)
@@ -483,6 +484,9 @@ void TRT_HitCollectionCnv_p3::persToTrans(const TRT_HitCollection_p3* persCont, 
         //
 
         HepMcParticleLink partLink(persCont->m_barcode[idxBC], event_number, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE, sg);
+        if ( HepMC::is_truth_suppressed_pileup(static_cast<int>(persCont->m_barcode[idxBC])) ) {
+          partLink.setTruthSuppressionType(EBC_PU_SUPPRESSED);
+        }
         transCont->Emplace( strawId, partLink, persCont->m_id[idxId],
                             kinEne, hitEne, startX, startY, startZ,
                             endX, endY, endZ, meanTime );

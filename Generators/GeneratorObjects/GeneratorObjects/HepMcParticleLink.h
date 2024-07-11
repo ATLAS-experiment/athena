@@ -31,6 +31,12 @@
 class IProxyDict;
 class McEventCollection;
 
+enum EBC_SUPPRESSED_TRUTH : unsigned char {
+  EBC_UNSUPPRESSED = 0, // Truth particle expected to be found in McEventCollection
+  EBC_PU_SUPPRESSED, // Link points to a suppressed pile-up truth particle do not attempt to resolve it.
+  EBC_NSUPP
+};
+
 /**
  * @brief a link optimized in size for a GenParticle in a McEventCollection
  *
@@ -176,6 +182,36 @@ public:
 
 
     /**
+     * @brief Return whether the truth particle has been suppressed.
+     */
+    inline EBC_SUPPRESSED_TRUTH getTruthSuppressionType() const { return m_truthSupp; }
+
+
+    /**
+     * @brief Return whether the truth particle has been suppressed.
+     */
+    inline void setTruthSuppressionType(EBC_SUPPRESSED_TRUTH truthSupp) { m_truthSupp = truthSupp; }
+
+
+    /**
+     * @brief Return whether the truth particle has been suppressed, as a char ('a'..'b').
+     */
+    char getTruthSuppressionTypeAsChar() const;
+
+
+    /**
+     * @brief Translate truth suppression enum to a char ('a'..'b').
+     */
+    static char truthSuppressionTypeAsChar (EBC_SUPPRESSED_TRUTH suppEnum);
+
+
+    /**
+     * @brief Translate truth suppression char ('a'..'b') to an enum.
+     */
+    static EBC_SUPPRESSED_TRUTH truthSuppressionTypeFromChar (char suppChar);
+
+
+    /**
      * @brief Equality test.
      *
      * Be aware: if one EBC holds the target GenEvent by number and the
@@ -315,6 +351,8 @@ public:
     /// target GenEvent number.
     mutable std::atomic<index_type> m_evtIndex{0};
 
+    /// Indicates whether the truth particle has been suppressed
+    EBC_SUPPRESSED_TRUTH m_truthSupp{EBC_UNSUPPRESSED};
   };
 
 
@@ -562,6 +600,24 @@ public:
    * which the redirected HepMcParticleLink should point at
    **/
   static HepMcParticleLink getRedirectedLink(const HepMcParticleLink& particleLink, uint32_t eventIndex, const EventContext& ctx);
+
+
+  /**
+   * @brief Return whether the truth particle has been suppressed, as an enum.
+   */
+  EBC_SUPPRESSED_TRUTH getTruthSuppressionType() const;
+
+
+  /**
+   * @brief Return whether the truth particle has been suppressed.
+   */
+  void setTruthSuppressionType(EBC_SUPPRESSED_TRUTH truthSupp);
+
+
+  /**
+   * @brief Return whether the truth particle has been suppressed, as a char ('a'..'b').
+   */
+  char getTruthSuppressionTypeAsChar() const;
 
 
   /**

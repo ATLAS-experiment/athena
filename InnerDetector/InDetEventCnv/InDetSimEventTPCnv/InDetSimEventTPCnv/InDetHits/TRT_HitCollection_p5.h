@@ -54,6 +54,7 @@ class TRT_HitCollection_p5
   std::vector<unsigned short> m_nId;
   std::vector<unsigned int>   m_truthID;
   std::vector<unsigned short> m_mcEvtIndex;
+  std::vector<char>           m_truthSupp;
   std::vector<unsigned short> m_nTruthID;
   std::vector<int>            m_id;     // particle code.
 

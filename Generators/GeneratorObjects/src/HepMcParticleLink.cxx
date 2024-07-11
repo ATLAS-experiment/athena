@@ -53,6 +53,36 @@ const unsigned short CPTRMAXMSGCOUNT = 100;
 
 
 /**
+ * @brief Translate truth suppression enum to a char ('a'..'b').
+ */
+char
+HepMcParticleLink::ExtendedBarCode::truthSuppressionTypeAsChar (EBC_SUPPRESSED_TRUTH suppEnum)
+{
+  static const char codes[EBC_NSUPP] = {'a', 'b'};
+  assert (suppEnum < EBC_NSUPP);
+  return codes[suppEnum];
+}
+
+
+/**
+ * @brief Translate truth suppression char ('a'..'b') to an enum.
+ */
+EBC_SUPPRESSED_TRUTH
+HepMcParticleLink::ExtendedBarCode::truthSuppressionTypeFromChar (char suppChar)
+{
+  switch (suppChar) {
+  case 'a': return EBC_UNSUPPRESSED;
+  case 'b': return EBC_PU_SUPPRESSED;
+  default:
+    // Should not reach this
+    MsgStream log (Athena::getMessageSvc(), "HepMcParticleLink");
+    log << MSG::ERROR << " Wrong truth Suppression Char (" << std::string(&suppChar,1) << ") set in HepMcParticleLink ExtendedBarCode object !!!" << endmsg;
+  }
+  return EBC_UNSUPPRESSED;
+}
+
+
+/**
  * @brief Dump in textual format to a stream.
  */
 void HepMcParticleLink::ExtendedBarCode::print (std::ostream& os) const

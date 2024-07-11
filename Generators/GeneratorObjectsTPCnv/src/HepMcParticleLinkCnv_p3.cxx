@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Framework includes
@@ -26,6 +26,8 @@ void HepMcParticleLinkCnv_p3::persToTrans( const HepMcParticleLink_p3* persObj,
     ( HepMcParticleLink::ExtendedBarCode( persObj->m_id,
                                           persObj->m_mcEvtIndex,
                                           flag) );
+
+  transObj->setTruthSuppressionType(HepMcParticleLink::ExtendedBarCode::truthSuppressionTypeFromChar (persObj->m_truthSupp));
 }
 
 void HepMcParticleLinkCnv_p3::transToPers( const HepMcParticleLink* transObj,
@@ -53,6 +55,6 @@ void HepMcParticleLinkCnv_p3::transToPers( const HepMcParticleLink* transObj,
   }
   persObj->m_mcEvtIndex = index;
   persObj->m_id = transObj->id();
-  persObj->m_evtColl = 'a';
+  persObj->m_truthSupp = transObj->getTruthSuppressionTypeAsChar();
 }
 

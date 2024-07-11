@@ -30,6 +30,7 @@ void compare (const HepMcParticleLink& p1,
   assert ( p1.barcode() == p2.barcode() );
   assert ( p1.id() == p2.id() );
   assert ( p1.eventIndex() == p2.eventIndex() );
+  assert ( p1.getTruthSuppressionTypeAsChar() == p2.getTruthSuppressionTypeAsChar() );
   assert ( p1.cptr() == p2.cptr() );
   assert ( p1 == p2 );
 }

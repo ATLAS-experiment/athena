@@ -69,6 +69,7 @@ void TRT_HitCollectionCnv_p5::transToPers(const TRTUncompressedHitCollection* tr
     TRTUncompressedHitCollection::const_iterator trtHit = it;
     const HepMcParticleLink * currentLink = &(trtHit->particleLink());
     const int truthId = currentLink->id();
+    const char truthSupp= currentLink->getTruthSuppressionTypeAsChar();
     int index{0};
     if (HepMcParticleLink::getEventPositionInCollection(currentLink->eventIndex(),
                                                         proxy).at(0) != 0) {
@@ -86,7 +87,7 @@ void TRT_HitCollectionCnv_p5::transToPers(const TRTUncompressedHitCollection* tr
       // with the same truthId and eventIndex.
       persCont->m_truthID.push_back(static_cast<unsigned int>(lastTruthId));
       persCont->m_mcEvtIndex.push_back(persIndex);
-
+      persCont->m_truthSupp.push_back(truthSupp); // TODO include this in the equality check above?
       if ( idx > 0 ) {
         persCont->m_nTruthID.push_back(idx - endTruthID);
         endTruthID = idx;
@@ -504,6 +505,7 @@ void TRT_HitCollectionCnv_p5::persToTrans(const TRT_HitCollection_p5* persCont, 
           flag = HepMcParticleLink::IS_POSITION;
         }
         HepMcParticleLink partLink( persCont->m_truthID[idxTruthID], persCont->m_mcEvtIndex[idxTruthID], flag, HepMcParticleLink::IS_ID, ctx );
+        partLink.setTruthSuppressionType(HepMcParticleLink::ExtendedBarCode::truthSuppressionTypeFromChar (persCont->m_truthSupp[idxTruthID]));
         transCont->Emplace( strawId, partLink, persCont->m_id[idxId],
                             kinEne, hitEne, startX, startY, startZ,
                             endX, endY, endZ, meanTime );

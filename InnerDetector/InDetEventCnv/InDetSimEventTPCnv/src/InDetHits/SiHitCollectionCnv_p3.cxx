@@ -17,6 +17,7 @@
 #include "GaudiKernel/ThreadLocalContext.h"
 
 // Athena
+#include "TruthUtils/MagicNumbers.h"
 #include "AthenaKernel/ExtendedEventContext.h"
 #include "StoreGate/StoreGateSvc.h"
 
@@ -355,6 +356,9 @@ void SiHitCollectionCnv_p3::persToTrans(const SiHitCollection_p3* persCont, SiHi
           flag = HepMcParticleLink::IS_POSITION;
         }
         HepMcParticleLink partLink( persCont->m_barcode[idxBC], persCont->m_mcEvtIndex[idxBC], flag, HepMcParticleLink::IS_BARCODE, ctx );
+        if ( HepMC::is_truth_suppressed_pileup(static_cast<int>(persCont->m_barcode[idxBC])) ) {
+          partLink.setTruthSuppressionType(EBC_PU_SUPPRESSED);
+        }
         transCont->Emplace( endLast, endThis, eneLoss, meanTime, partLink, persCont->m_id[idxId]);
 
         endLast = endThis;

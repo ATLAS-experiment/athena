@@ -35,6 +35,7 @@ void compare (const HepMcParticleLink& p1,
   assert ( HepMC::barcode(p1) == HepMC::barcode(p2) );
   assert ( p1.id() == p2.id() );
   assert ( p1.eventIndex() == p2.eventIndex() );
+  assert ( p1.getTruthSuppressionTypeAsChar() == p2.getTruthSuppressionTypeAsChar() );
   assert ( p1.cptr() == p2.cptr() );
   assert ( p1 == p2 );
 }
@@ -84,7 +85,7 @@ void compare (const TRTUncompressedHitCollection& p1,
 
 void checkPersistentVersion(const TRT_HitCollection_p4& pers, const TRTUncompressedHitCollection& trans)
 {
-  constexpr unsigned int numberOfStrings{11}; // The number of groups of hits caused by consecutive steps of "the same particle"
+  constexpr unsigned int numberOfStrings{12}; // The number of groups of hits caused by consecutive steps of "the same particle"
   constexpr unsigned int radiusVectorSize{10};
   //  1 element per string (a string resides in one straw; there may be more than one string in a straw)
   assert(numberOfStrings == pers.m_nHits.size());       // number of hits in the string (0,1,2 ... ,hundreds).
@@ -103,8 +104,8 @@ void checkPersistentVersion(const TRT_HitCollection_p4& pers, const TRTUncompres
   assert(trans.size() == pers.m_meanTimeof.size());  // t >= 75 ns overflow to a float.
 
   // much less frequent
-  constexpr unsigned int numberOfUniqueParticles{2};
-  constexpr unsigned int numberOfPhotons{1};
+  constexpr unsigned int numberOfUniqueParticles{3};
+  constexpr unsigned int numberOfPhotons{2};
   assert(numberOfPhotons == pers.m_hitEne.size()); // energy deposited.size(); *only stored for photons* (m_id=22)
   assert(numberOfUniqueParticles == pers.m_barcode.size());
   assert(numberOfUniqueParticles == pers.m_mcEvtIndex.size());
@@ -161,6 +162,20 @@ void test1 ATLAS_NOT_THREAD_SAFE (std::vector<HepMC::GenParticlePtr>& genPartVec
   HepMcParticleLink trkLink(HepMC::uniqueID(pGenParticle),pGenParticle->parent_event()->event_number(), HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_ID);
   trans1.Emplace (131, // hit ID
                   trkLink, // link to truth particle
+                  22, // pdg code (particleEncoding)
+                  134.5, // kinetic energy
+                  135.5, // energy deposit
+                  10, 3, 138.5, // PreStep (X,Y,Z)
+                  3, 10, 148.5, // PostStep (X,Y,Z)
+                  142.5 // time
+                  );
+
+  // HepMcParticleLink pointing at filtered pileup truth
+  HepMC::ConstGenParticlePtr pileupParticle = genPartVector.at(12);
+  HepMcParticleLink pileupLink(HepMC::uniqueID(pileupParticle),pileupParticle->parent_event()->event_number(),HepMcParticleLink::IS_EVENTNUM,HepMcParticleLink::IS_ID);
+  pileupLink.setTruthSuppressionType(EBC_PU_SUPPRESSED);
+  trans1.Emplace (141, // hit ID
+                  pileupLink, // link to truth particle
                   22, // pdg code (particleEncoding)
                   134.5, // kinetic energy
                   135.5, // energy deposit

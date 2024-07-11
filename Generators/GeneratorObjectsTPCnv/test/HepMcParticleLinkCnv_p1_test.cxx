@@ -31,6 +31,7 @@ void compare (const HepMcParticleLink& p1,
   assert ( p1.isValid() == p2.isValid() );
   assert ( p1.barcode() == p2.barcode() );
   assert ( p1.eventIndex() == p2.eventIndex() );
+  assert ( p1.getTruthSuppressionTypeAsChar() == p2.getTruthSuppressionTypeAsChar() );
   assert ( p1.cptr() == p2.cptr() );
   assert ( p1 == p2 );
 }
@@ -275,21 +276,27 @@ void test1()
   HepMC::ConstGenParticlePtr particle4 = genPartList.at(12);
   // By ConstGenParticlePtr + event_number
   HepMcParticleLink trans4a(particle4,particle4->parent_event()->event_number(),HepMcParticleLink::IS_EVENTNUM);
+  trans4a.setTruthSuppressionType(EBC_PU_SUPPRESSED);
   testit (trans4a);
   // By barcode + event_number
   HepMcParticleLink trans4b(HepMC::barcode(particle4),particle4->parent_event()->event_number(),HepMcParticleLink::IS_EVENTNUM,HepMcParticleLink::IS_BARCODE);
+  trans4b.setTruthSuppressionType(EBC_PU_SUPPRESSED);
   testit (trans4b);
   // By id + event_number
   HepMcParticleLink trans4c(HepMC::uniqueID(particle4),particle4->parent_event()->event_number(),HepMcParticleLink::IS_EVENTNUM,HepMcParticleLink::IS_ID);
+  trans4c.setTruthSuppressionType(EBC_PU_SUPPRESSED);
   testit (trans4c);
   // By ConstGenParticlePtr + position
   HepMcParticleLink trans4d(particle4,3,HepMcParticleLink::IS_POSITION);
+  trans4d.setTruthSuppressionType(EBC_PU_SUPPRESSED);
   testit (trans4d);
   // By barcode + position
   HepMcParticleLink trans4e(HepMC::barcode(particle4),3,HepMcParticleLink::IS_POSITION,HepMcParticleLink::IS_BARCODE);
+  trans4e.setTruthSuppressionType(EBC_PU_SUPPRESSED);
   testit (trans4e);
   // By id + position
   HepMcParticleLink trans4f(HepMC::uniqueID(particle4),3,HepMcParticleLink::IS_POSITION,HepMcParticleLink::IS_ID);
+  trans4f.setTruthSuppressionType(EBC_PU_SUPPRESSED);
   testit (trans4f);
 
   // HepMcParticleLinks pointing at delta-ray (barcode/id=0 - not recorded in McEventCollection) using event number

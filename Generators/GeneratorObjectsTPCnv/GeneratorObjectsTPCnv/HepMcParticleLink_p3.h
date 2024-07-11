@@ -31,7 +31,7 @@ public:
   HepMcParticleLink_p3(
                        const unsigned short genEvtIndex,
                        const unsigned long id,
-                       char evtColl );
+                       char truthSupp );
 
   ///////////////////////////////////////////////////////////////////
   // Protected data:
@@ -45,8 +45,8 @@ protected:
   /// id of the @c HepMC::GenParticle we are pointing to.
   unsigned long m_id{0}; // TODO could this be an unsigned int instead?
 
-  // identifier for the type of McEventCollection containing the particle (HS, PU,...)
-  char m_evtColl{'a'};
+  // indicates whether the truth particle has been suppressed
+  char m_truthSupp{'a'};
 };
 
 ///////////////////////////////////////////////////////////////////
@@ -59,10 +59,10 @@ inline
 HepMcParticleLink_p3::HepMcParticleLink_p3(
                                            const unsigned short genEvtIndex,
                                            const unsigned long id,
-                                           char evtColl) :
+                                           char truthSupp) :
   m_mcEvtIndex( genEvtIndex ),
   m_id( id ),
-  m_evtColl( evtColl )
+  m_truthSupp( truthSupp )
 {}
 
 #endif //> GENERATOROBJECTSTPCNV_HEPMCPARTICLELINK_P3_H
