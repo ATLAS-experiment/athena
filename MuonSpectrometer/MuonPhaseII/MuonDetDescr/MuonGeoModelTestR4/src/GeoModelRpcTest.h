@@ -40,6 +40,7 @@ class GeoModelRpcTest : public AthHistogramAlgorithm{
   
       /// String should be formated like <stationName><stationEta><A/C><stationPhi>
       Gaudi::Property<std::vector<std::string>> m_selectStat{this, "TestStations", {}};
+      Gaudi::Property<std::vector<std::string>> m_excludeStat{this, "ExcludeStations", {}};
       
       const MuonDetectorManager* m_detMgr{nullptr};
      

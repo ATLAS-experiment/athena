@@ -23,6 +23,7 @@ def SetupArgParser():
                         help="Input file to run on ", nargs="+")
     parser.add_argument("--geoModelFile", default = geoModelFileDefault(), help="GeoModel SqLite file containing the muon geometry.")
     parser.add_argument("--chambers", default=["all"], nargs="+", help="Chambers to check. If string is all, all chambers will be checked")
+    parser.add_argument("--excludedChambers", default=["none"], nargs="+", help="Chambers to exclude. If string contains 'none', all chambers will be checked. Note: adding a chamber to --excludedChambers will overwrite it being in --chambers.")
     parser.add_argument("--outRootFile", default="NewGeoModelDump.root", help="Output ROOT file to dump the geomerty")
     parser.add_argument("--nEvents", help="Number of events to rum", type = int ,default = 1)
     parser.add_argument("--noMdt", help="Disable the Mdts from the geometry", action='store_true', default = False)
@@ -195,6 +196,7 @@ if __name__=="__main__":
     flags, cfg = setupGeoR4TestCfg(args)  
     cfg.merge(setupHistSvcCfg(flags, out_file = args.outRootFile))
     chambToTest =  args.chambers if len([x for x in args.chambers if x =="all"]) ==0 else []
+    chambToExclude = [] if "none" in args.excludedChambers else args.excludedChambers
     
     cfg.getCondAlgo("MuonDetectorManagerCondAlg").checkGeo = True
     cfg.getService("MessageSvc").setVerbose = []
@@ -205,6 +207,7 @@ if __name__=="__main__":
     if flags.Detector.GeometryMDT:
         cfg.merge(GeoModelMdtTestCfg(flags, 
                                      TestStations = [ch for ch in chambToTest if ch[0] == "B" or ch[0] == "E"],
+                                     ExcludeStations = [ch for ch in chambToExclude if ch[0] == "B" or ch[0] == "E"],
                                      ReadoutSideXML="ReadoutSides.xml",
                                      ExtraInputs=[#( 'MuonGM::MuonDetectorManager' , 'ConditionStore+MuonDetectorManager' ),
                                                   #( 'Trk::TrackingGeometry' , 'ConditionStore+AtlasTrackingGeometry' ) 
@@ -212,19 +215,23 @@ if __name__=="__main__":
 
     if flags.Detector.GeometryRPC: 
         cfg.merge(GeoModelRpcTestCfg(flags, TestStations = [ch for ch in chambToTest if ch[0] == "B"],
+                                             ExcludeStations = [ch for ch in chambToExclude if ch[0] == "B"],
                                              ExtraInputs=[( 'MuonGM::MuonDetectorManager' , 'ConditionStore+MuonDetectorManager' )]))
 
     if flags.Detector.GeometryTGC: 
         cfg.merge(GeoModelTgcTestCfg(flags, TestStations = [ch for ch in chambToTest if ch[0] == "T"],
+                                            ExcludeStations = [ch for ch in chambToExclude if ch[0] == "T"],
                                             ExtraInputs=[( 'MuonGM::MuonDetectorManager' , 'ConditionStore+MuonDetectorManager' )]))
 
     if flags.Detector.GeometryMM: 
         cfg.merge(NswGeoPlottingAlgCfg(flags))
         cfg.merge(GeoModelMmTestCfg(flags, TestStations = [ch for ch in chambToTest if ch[0] == "M"],
+                                           ExcludeStations = [ch for ch in chambToExclude if ch[0] == "M"],
                                            ExtraInputs=[( 'MuonGM::MuonDetectorManager' , 'ConditionStore+MuonDetectorManager' )]))
     
     if flags.Detector.GeometrysTGC: 
         cfg.merge(GeoModelsTgcTestCfg(flags, TestStations = [ch for ch in chambToTest if ch[0] == "S"],
+                                             ExcludeStations = [ch for ch in chambToExclude if ch[0] == "S"],
                                              ExtraInputs=[( 'MuonGM::MuonDetectorManager' , 'ConditionStore+MuonDetectorManager' )]))
     
     executeTest(cfg, num_events = args.nEvents)
