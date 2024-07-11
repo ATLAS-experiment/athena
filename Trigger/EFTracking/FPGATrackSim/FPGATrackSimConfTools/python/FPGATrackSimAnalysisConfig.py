@@ -605,9 +605,13 @@ if __name__ == "__main__":
     if flags.Trigger.FPGATrackSim.doEDMConversion:
         acc.merge(FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlg_1st', stage = '_1st', doActsTrk=True))
         
+        from FPGATrackSimReporting.FPGATrackSimReportingConfig import FPGATrackSimReportingCfg
+        acc.merge(FPGATrackSimReportingCfg(flags,perEventReports=False))        
+        
         from FPGATrackSimPrototrackFitter.FPGATrackSimPrototrackFitterConfig import FPGAPrototrackFitAndTruthDecorationCfg
         acc.merge(FPGAPrototrackFitAndTruthDecorationCfg(flags,FinalProtoTrackChainxAODTracksKey=FinalProtoTrackChainxAODTracksKey,stage='_1st')) # Run ACTS KF for 1st stage
-            
+        
+        # write to AOD
         if flags.Trigger.FPGATrackSim.writeToAOD: acc.merge(WriteToAOD(flags, stage = '_1st'))
         if flags.Trigger.FPGATrackSim.Hough.secondStage : acc.merge(FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlg_2nd', stage = '_2nd')) # Default disabled, doesn't work if enabled
         if flags.Trigger.FPGATrackSim.convertUnmappedHits: acc.merge(FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlgUnmapped_1st', stage = 'Unmapped_1st', doClusters = False))
