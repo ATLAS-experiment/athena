@@ -79,7 +79,7 @@ public:
     unsigned getPhysLayer() const; // Returns the FPGATrackSim-defined physical layer index (see FPGATrackSimPlaneMap.h)
     unsigned getEtaWidth() const { return m_etaWidth; }
     unsigned getPhiWidth() const { return m_phiWidth; }
-    unsigned getEtaModule() const { return m_etaModule; }
+    int getEtaModule() const { return m_etaModule; }
     unsigned getPhiModule() const { return m_phiModule; }
 
     // --- Mapped Location ---
