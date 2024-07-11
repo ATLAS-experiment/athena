@@ -9,36 +9,19 @@ namespace {
     constexpr double inverseSpeedOfLight = 1 / Gaudi::Units::c_light; 
 }
 
-StatusCode RpcRdoToRpcDigit::TempDigitContainer::findCollection(const Identifier& elementId,
-                                                                const IdentifierHash& hash, RpcDigitCollection* &coll, MsgStream& msg) {
-    if (m_lastColl && m_lastColl->identifierHash() == hash) {
-        coll = m_lastColl;
-        return StatusCode::SUCCESS;
-    }
-    m_lastColl = m_digitMap[hash];
-    if (m_lastColl) {
-        coll = m_lastColl;
-        return StatusCode::SUCCESS;
-    }
-    std::unique_ptr<RpcDigitCollection> new_coll = std::make_unique<RpcDigitCollection>(elementId, hash);
-    coll = new_coll.get();
-    RpcDigitContainer::IDC_WriteHandle lock = m_cont->getWriteHandle(hash);
-    if(lock.addOrDelete(std::move(new_coll)).isFailure()){
-        msg<<MSG::ERROR<<" Failed to add digit collection "<<elementId<<endmsg;
-        coll = nullptr;
-        return StatusCode::FAILURE;
-    }    
-    m_lastColl = m_digitMap[hash] = coll;
-    return StatusCode::SUCCESS;
-}
-RpcRdoToRpcDigit::RpcRdoToRpcDigit(const std::string& name, ISvcLocator* pSvcLocator) : AthReentrantAlgorithm(name, pSvcLocator) {}
+RpcRdoToRpcDigit::RpcRdoToRpcDigit(const std::string& name, ISvcLocator* pSvcLocator) : 
+        AthReentrantAlgorithm(name, pSvcLocator) {}
 
 StatusCode RpcRdoToRpcDigit::initialize() {
-    ATH_CHECK(m_idHelperSvc.retrieve());
-    ATH_CHECK(m_rpcRdoKey.initialize());
+    ATH_CHECK(m_idHelperSvc.retrieve());    
     ATH_CHECK(m_rpcDigitKey.initialize());
-    ATH_CHECK(m_rpcRdoDecoderTool.retrieve());
-    ATH_CHECK(m_rpcReadKey.initialize());
+    if(!m_decodeLegacyRDO && !m_decodeNrpcRDO) {
+        ATH_MSG_ERROR("Neither legacy or xAOD::Rpcs shall be translated.");
+        return StatusCode::FAILURE;
+    }
+    ATH_CHECK(m_rpcRdoKey.initialize(m_decodeLegacyRDO));
+    ATH_CHECK(m_rpcRdoDecoderTool.retrieve(EnableTool{m_decodeLegacyRDO}));
+    ATH_CHECK(m_rpcReadKey.initialize(m_decodeLegacyRDO));
 
     ATH_CHECK(m_nRpcRdoKey.initialize(m_decodeNrpcRDO));
     ATH_CHECK(m_nRpcCablingKey.initialize(m_decodeNrpcRDO));
@@ -47,83 +30,83 @@ StatusCode RpcRdoToRpcDigit::initialize() {
     return StatusCode::SUCCESS;
 }
 
-StatusCode RpcRdoToRpcDigit::execute(const EventContext& ctx) const {
-    ATH_MSG_DEBUG("in execute()");
-    // retrieve the collection of RDO
-    SG::ReadHandle<RpcPadContainer> rdoRH(m_rpcRdoKey, ctx);
-    if (!rdoRH.isValid()) {
-        ATH_MSG_WARNING("No RPC RDO container found!");
+StatusCode RpcRdoToRpcDigit::decodeLegacyRdo(const EventContext& ctx, TempDigitContainer& container) const {
+    if (!m_decodeLegacyRDO) {
+        ATH_MSG_VERBOSE("No legacy containers to be decoded ");
         return StatusCode::SUCCESS;
     }
-    const RpcPadContainer* rdoContainer = rdoRH.cptr();
+    SG::ReadHandle<RpcPadContainer> rdoContainer(m_rpcRdoKey, ctx);
+    ATH_CHECK(rdoContainer.isPresent());
     ATH_MSG_DEBUG("Retrieved " << rdoContainer->size() << " RPC RDOs.");
+    SG::ReadCondHandle<RpcCablingCondData> cablingMap{m_rpcReadKey, ctx};
+    ATH_CHECK(cablingMap.isValid());
 
-    SG::WriteHandle<RpcDigitContainer> wh_rpcDigit(m_rpcDigitKey, ctx);
-    ATH_CHECK(wh_rpcDigit.record(std::make_unique<RpcDigitContainer>(m_idHelperSvc->rpcIdHelper().module_hash_max())));
-    ATH_MSG_DEBUG("Decoding RPC RDO into RPC Digit");
-
+    for (const RpcPad* rdoColl : *rdoContainer) {
+        ATH_MSG_DEBUG(" Number of CMs in this Pad " << rdoColl->size());
+        // Get pad online id and sector id
+        uint16_t padId = rdoColl->onlineId();
+        uint16_t sectorId = rdoColl->sector();
     
-    SG::ReadCondHandle<RpcCablingCondData> cablingCondData{m_rpcReadKey, ctx};
-    TempDigitContainer temp_out{wh_rpcDigit.ptr()};
-    for (const RpcPad* rpcPad : *rdoContainer) {
-        if (!rpcPad->empty()) { ATH_CHECK(decodeRpc(rpcPad, temp_out, cablingCondData.cptr())); }
-    }
-    ATH_CHECK(decodeNRpc(ctx, *wh_rpcDigit));
-   
-    return StatusCode::SUCCESS;
-}
+        /// For each pad, loop on the coincidence matrices
+        for (const RpcCoinMatrix* coinMatrix : *rdoColl) {
+            // Get CM online Id
+            uint16_t cmaId = coinMatrix->onlineId();
 
-StatusCode RpcRdoToRpcDigit::decodeRpc(const RpcPad* rdoColl, TempDigitContainer& container, const RpcCablingCondData* rpcCab) const {
-   
-    ATH_MSG_DEBUG(" Number of CMs in this Pad " << rdoColl->size());
-    // Get pad online id and sector id
-    uint16_t padId = rdoColl->onlineId();
-    uint16_t sectorId = rdoColl->sector();
-    
-    // For each pad, loop on the coincidence matrices
-    for (const RpcCoinMatrix* coinMatrix : *rdoColl) {
-        // Get CM online Id
-        uint16_t cmaId = coinMatrix->onlineId();
+            // For each CM, loop on the fired channels
+            for (const RpcFiredChannel* rpcChan : *coinMatrix) {
+                std::vector<std::unique_ptr<RpcDigit>> digitVec{m_rpcRdoDecoderTool->getDigit(rpcChan, 
+                                                                                              sectorId, 
+                                                                                              padId, 
+                                                                                              cmaId, 
+                                                                                              cablingMap.cptr())};
 
-        // For each CM, loop on the fired channels
-        for (const RpcFiredChannel* rpcChan : *coinMatrix) {
-            std::vector<std::unique_ptr<RpcDigit>> digitVec{m_rpcRdoDecoderTool->getDigit(rpcChan, 
-                                                                        sectorId, 
-                                                                        padId, 
-                                                                        cmaId, 
-                                                                        rpcCab)};
-           
-            if (digitVec.empty()) continue;
-            
-            
-            // Loop on the digits corresponding to the fired channel
-            for (std::unique_ptr<RpcDigit>& newDigit : digitVec) {
-                Identifier elementId = m_idHelperSvc->rpcIdHelper().elementID(newDigit->identify());
-                IdentifierHash coll_hash{0};
-                if (m_idHelperSvc->rpcIdHelper().get_module_hash(elementId, coll_hash)) {
-                    ATH_MSG_ERROR("Unable to get RPC digit collection hash id the identifier is "
-                                    <<m_idHelperSvc->toString(newDigit->identify()));
-                    return StatusCode::FAILURE;
+                if (digitVec.empty()) continue;
+
+                /// Loop on the digits corresponding to the fired channel
+                for (std::unique_ptr<RpcDigit>& newDigit : digitVec) {                    
+                    const IdentifierHash coll_hash = m_idHelperSvc->moduleHash(newDigit->identify());
+                    std::unique_ptr<RpcDigitCollection>& digitColl = container[coll_hash];
+                    if (!digitColl) {
+                        digitColl = std::make_unique<RpcDigitCollection>(m_idHelperSvc->chamberId(newDigit->identify()),
+                                                                                                  coll_hash);
+                    }
+                    digitColl->push_back(std::move(newDigit));
                 }
-                RpcDigitCollection* collection{nullptr};
-                ATH_CHECK(container.findCollection(elementId,coll_hash,collection, msgStream()));
-                collection->push_back(std::move(newDigit));
-            }          
+            }
         }
     }
     return StatusCode::SUCCESS;
 }
-StatusCode RpcRdoToRpcDigit::decodeNRpc(const EventContext& ctx, RpcDigitContainer& out_container) const {
+StatusCode RpcRdoToRpcDigit::execute(const EventContext& ctx) const {
+    ATH_MSG_DEBUG("in execute()");
+    // retrieve the collection of RDO
+
+    const size_t modHashMax{m_idHelperSvc->rpcIdHelper().module_hash_max()};
+    TempDigitContainer tempOut(modHashMax);
+    
+    ATH_CHECK(decodeLegacyRdo(ctx, tempOut));
+    ATH_CHECK(decodeNRpc(ctx, tempOut));
+    
+    SG::WriteHandle<RpcDigitContainer> writeHandle(m_rpcDigitKey, ctx);
+    ATH_CHECK(writeHandle.record(std::make_unique<RpcDigitContainer>(modHashMax)));
+    
+    for (size_t coll_hash = 0; coll_hash < modHashMax; ++coll_hash) {
+        if (tempOut[coll_hash] && tempOut[coll_hash]->size()) {
+            ATH_CHECK(writeHandle->addCollection(tempOut[coll_hash].release(), coll_hash));
+        }
+    }
+
+    ATH_MSG_DEBUG("Decoding RPC RDO into RPC Digit");
+    return StatusCode::SUCCESS;
+}
+StatusCode RpcRdoToRpcDigit::decodeNRpc(const EventContext& ctx, TempDigitContainer& digit_map) const {
     if (!m_decodeNrpcRDO) {
         ATH_MSG_VERBOSE("NRPC rdo decoding has been switched off ");
         return StatusCode::SUCCESS;
     }
     
     SG::ReadHandle<xAOD::NRPCRDOContainer> rdoContainer{m_nRpcRdoKey, ctx};
-    if (!rdoContainer.isValid()) {
-        ATH_MSG_FATAL("Failed to retrieve "<<m_nRpcRdoKey.fullKey());
-        return StatusCode::FAILURE;
-    }
+    ATH_CHECK(rdoContainer.isPresent());
     SG::ReadCondHandle<MuonNRPC_CablingMap> cabling{m_nRpcCablingKey, ctx};
     if (!cabling.isValid()) {
         ATH_MSG_FATAL("Failed to retrieve "<<m_nRpcCablingKey.fullKey());
@@ -135,7 +118,7 @@ StatusCode RpcRdoToRpcDigit::decodeNRpc(const EventContext& ctx, RpcDigitContain
         return StatusCode::FAILURE;
     }
     const RpcIdHelper& id_helper = m_idHelperSvc->rpcIdHelper();
-    std::map<IdentifierHash, std::unique_ptr<RpcDigitCollection>> digit_map{};
+
     /// Loop over the container
     for (const xAOD::NRPCRDO* rdo : *rdoContainer) {
         ATH_MSG_VERBOSE("Convert RDO tdcSector: "<< static_cast<int>(rdo->tdcsector())<<", tdc:"
@@ -174,10 +157,5 @@ StatusCode RpcRdoToRpcDigit::decodeNRpc(const EventContext& ctx, RpcDigitContain
         coll->push_back(std::move(digit));
     }
     
-    for (auto& [hash, coll] : digit_map){
-        if (coll->empty()) continue;
-        RpcDigitContainer::IDC_WriteHandle lock = out_container.getWriteHandle(hash);
-        ATH_CHECK(lock.addOrDelete(std::move(coll)));      
-    }
     return StatusCode::SUCCESS;
 }

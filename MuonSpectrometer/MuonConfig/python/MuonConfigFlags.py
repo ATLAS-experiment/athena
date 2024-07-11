@@ -66,8 +66,7 @@ def createMuonConfigFlags():
     
     mcf.addFlag("Muon.makePRDs",True) # Disable when e.g. re-running from ESD
     
-    mcf.addFlag("Muon.enableNRPC",False) # To be enabled for NRPC processing. Disabled by default for backward compatibility
-
+    mcf.addFlag("Muon.enableNRPC", lambda prevFlags: prevFlags.Muon.usePhaseIIGeoSetup )
     # MuonStandaloneFlags.py 
     mcf.addFlag("Muon.printSummary", False) # Print out a summary for each event at each reco stage
     mcf.addFlag("Muon.segmentOrigin", "Muon") # Can be 'Muon','TruthTracking'
