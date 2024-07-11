@@ -35,6 +35,7 @@
 
 #include "TrkExUtils/RungeKuttaUtils.h"
 
+#include <unordered_map>
 
 TrigFTF_ExtendedTrackState::TrigFTF_ExtendedTrackState(double const* P, const Trk::PlaneSurface* pS) : m_chi2(0), m_ndof(-5), m_pS(pS), m_pO(pS), m_nClusters(0), m_nHoles(0), m_isSwapped(false) {
 
@@ -171,6 +172,14 @@ TrigInDetTrackFollowingTool::TrigInDetTrackFollowingTool(const std::string& t,
 
 StatusCode TrigInDetTrackFollowingTool::initialize() {
 
+  StatusCode sc = m_layerNumberTool.retrieve();
+  if(sc.isFailure()) {
+    ATH_MSG_ERROR("Could not retrieve "<<m_layerNumberTool);
+    return sc;
+  } else {
+    ATH_MSG_INFO("Detector layer structure has "<<m_layerNumberTool->maxNumberOfUniqueLayers()<<" unique layers");
+  }
+  
   ATH_CHECK( m_fieldCondObjInputKey.initialize());
   ATH_CHECK( m_pixcontainerkey.initialize(SG::AllowEmpty) );
   ATH_CHECK( m_sctcontainerkey.initialize(SG::AllowEmpty) );
@@ -182,6 +191,73 @@ StatusCode TrigInDetTrackFollowingTool::finalize() {
   return StatusCode::SUCCESS;
 }
 
+
+void TrigInDetTrackFollowingTool::findNearestHit(int moduleIdx, const InDet::PixelClusterCollection* pColl, const double* TP, std::vector<std::tuple<double, const Trk::PrepRawData*, int> >& hitLinks) const {
+
+  const InDet::PixelCluster* bestHit = nullptr;
+
+  double bestDist = 1e8;
+  
+  for(const auto pPRD : *pColl) {
+    
+    double rx = std::fabs(pPRD->localPosition().x() - TP[0]);
+    if(rx > m_winX_Pixels) continue;
+    
+    double ry = std::fabs(pPRD->localPosition().y() - TP[1]);
+    if(ry > m_winY_Pixels) continue;
+
+    double dist = std::pow(5*rx,2) + std::pow(ry,2);//x-residual is given more weight
+
+    if(dist < bestDist) {
+      bestDist = dist;
+      bestHit = pPRD;
+    }
+
+  }
+  if(bestHit != nullptr) {
+    hitLinks.emplace_back(std::make_tuple(bestDist, bestHit, moduleIdx));
+  }
+}
+
+void TrigInDetTrackFollowingTool::findNearestHit(int moduleIdx, const InDet::SCT_ClusterCollection* pColl, int shape, const double* TP, std::vector<std::tuple<double, const Trk::PrepRawData*, int> >& hitLinks) const {
+
+  const InDet::SCT_Cluster* bestHit = nullptr;
+  float bestDist = 1e8;
+  
+  for(const auto pPRD : *pColl) {
+	    
+    double rx = 0.0;
+	    
+    if(shape == InDetDD::Box) {
+      rx = std::fabs(pPRD->localPosition().x() - TP[0]);
+    }
+    else {
+	      
+      double meas_x = pPRD->localPosition().x();
+      double meas_y = pPRD->localPosition().y();
+      
+      double e00 = pPRD->localCovariance()(0, 0);
+      double e01 = pPRD->localCovariance()(0, 1);
+      double e11 = pPRD->localCovariance()(1, 1);
+      
+      double beta = 0.5*std::atan(2*e01/(e00-e11));	
+      double sinB, cosB;
+      sincos(beta, &sinB, &cosB);
+      
+      rx = std::fabs((meas_x - TP[0])*cosB + (meas_y - TP[1])*sinB);
+    }
+
+    if(rx > m_winX_Strips) continue;
+    
+    if(rx < bestDist) {
+      bestHit = pPRD;
+      bestDist = rx;
+    }	  
+  }
+  if(bestHit != nullptr) {
+    hitLinks.emplace_back(std::make_tuple(bestDist, bestHit, moduleIdx));
+  }
+}
 
 double TrigInDetTrackFollowingTool::processHit(const InDet::PixelCluster* pPRD, double* resid, double* invcov, const TrigFTF_ExtendedTrackState& ets) const {
 
@@ -258,34 +334,17 @@ double TrigInDetTrackFollowingTool::processHit(const InDet::SCT_Cluster* pPRD, i
 }
 
 
-const Trk::PrepRawData* TrigInDetTrackFollowingTool::updateTrackState(const InDet::PixelCluster* pInputHit, const InDet::PixelClusterCollection* pColl, TrigFTF_ExtendedTrackState& ets) const {
+const Trk::PrepRawData* TrigInDetTrackFollowingTool::updateTrackState(const InDet::PixelCluster* pInputHit, TrigFTF_ExtendedTrackState& ets, bool forceAccept = false) const {
 
-  const InDet::PixelCluster* bestHit = pInputHit;
-  if(pColl == nullptr && pInputHit == nullptr) return nullptr;
   double resid[2];
   double invcov[3];
 
-  if(pColl != nullptr) {
-    
-    double bestChi2Dist = m_maxChi2Dist_Pixels;
+  double dchi2 = processHit(pInputHit, resid, invcov, ets);
 
-    for(const auto pPRD : *pColl) {
-
-      double dchi2 = processHit(pPRD, resid, invcov, ets);
-
-      if(dchi2 < bestChi2Dist) {
-	bestHit = pPRD;
-	bestChi2Dist = dchi2;
-      }
-    }
+  if(!forceAccept) {
+    if(dchi2 > m_maxChi2Dist_Pixels) return nullptr;//hit rejected
   }
-
-  if(bestHit == nullptr) return bestHit;
-
-  const InDet::PixelCluster* pPRD = bestHit;
-
-  double dchi2 = processHit(pPRD, resid, invcov, ets);
-
+  
   double CHT[10][2];
 
   for(int i=0;i<10;i++) {
@@ -308,43 +367,24 @@ const Trk::PrepRawData* TrigInDetTrackFollowingTool::updateTrackState(const InDe
     }
   }
 
-  ets.AddHit(pPRD, dchi2, 2);
+  ets.AddHit(pInputHit, dchi2, 2);
 
-  return pPRD;
+  return pInputHit;
 }
 
 
-const Trk::PrepRawData* TrigInDetTrackFollowingTool::updateTrackState(const InDet::SCT_Cluster* pInputHit, const InDet::SCT_ClusterCollection* pColl, int shape, TrigFTF_ExtendedTrackState& ets) const {
-
-  const InDet::SCT_Cluster* bestHit = pInputHit;
-  if(pColl == nullptr && pInputHit == nullptr) return nullptr;
-  double resid, invcov;
-  double H[2];//linearized observation matrix
+const Trk::PrepRawData* TrigInDetTrackFollowingTool::updateTrackState(const InDet::SCT_Cluster* pInputHit, int shape, TrigFTF_ExtendedTrackState& ets) const {
   
-  if(pColl && !pColl->empty()) {
-
-    double bestChi2Dist = m_maxChi2Dist_Strips;
-
-    for(const auto pPRD : *pColl) {
-
-      double dchi2 = processHit(pPRD, shape, resid, invcov, H, ets);
-
-      if(dchi2 < bestChi2Dist) {
-	bestHit = pPRD;
-	bestChi2Dist = dchi2;
-      }
-    }
-  }
-
-  if(bestHit == nullptr) return bestHit;
-
-  const InDet::SCT_Cluster* pPRD = bestHit;
+  double resid, invcov;
+  double H[2];//linearized measurement matrix
   
   double dchi2 = 0.0;
 
   if(shape == InDetDD::Box) {
 
-    dchi2 = processHit(pPRD, shape, resid, invcov, H, ets);
+    dchi2 = processHit(pInputHit, shape, resid, invcov, H, ets);
+
+    if(dchi2 > m_maxChi2Dist_Strips) return nullptr;
 
     double CHT[10], Gain[10];
     
@@ -363,8 +403,8 @@ const Trk::PrepRawData* TrigInDetTrackFollowingTool::updateTrackState(const InDe
     
     //boundary check
     
-    double covY = pPRD->localCovariance()(1, 1);
-    double stripCentre = pPRD->localPosition().y();
+    double covY = pInputHit->localCovariance()(1, 1);
+    double stripCentre = pInputHit->localPosition().y();
     double stripHalfLength = std::sqrt(3*covY);
 
     double dY = ets.m_Xk[1] - stripCentre;
@@ -379,8 +419,10 @@ const Trk::PrepRawData* TrigInDetTrackFollowingTool::updateTrackState(const InDe
   }
   else { //Annulus
 
-    dchi2 = processHit(pPRD, shape, resid, invcov, H, ets);
+    dchi2 = processHit(pInputHit, shape, resid, invcov, H, ets);
 
+    if(dchi2 > m_maxChi2Dist_Strips) return nullptr;
+ 
     double CHT[10], Gain[10];
     
     for(int i=0;i<10;i++) {
@@ -397,9 +439,9 @@ const Trk::PrepRawData* TrigInDetTrackFollowingTool::updateTrackState(const InDe
     }
   }
 
-  ets.AddHit(pPRD, dchi2, 1);
+  ets.AddHit(pInputHit, dchi2, 1);
 
-  return pPRD;
+  return pInputHit;
 }
 
 std::unique_ptr<TrigFTF_ExtendedTrackState> TrigInDetTrackFollowingTool::fitTheSeed(const std::vector<const Trk::SpacePoint*>& seed, MagField::AtlasFieldCache& fieldCache) const {
@@ -580,7 +622,7 @@ std::unique_ptr<TrigFTF_ExtendedTrackState> TrigInDetTrackFollowingTool::fitTheS
 
   P0[0] = cle->localPosition()[0];
   P0[1] = cle->localPosition()[1];
-  P0[2] = std::atan2(sinA - Rx[1]*cosA, cosA - Rx[1]*sinA);//phi in the global c.s.
+  P0[2] = std::atan2(sinA + Rx[1]*cosA, cosA - Rx[1]*sinA);//phi in the global c.s.
   P0[3] = std::atan2(1, Ry[1]);//theta in the global c.s.
   double coeff = 1.0/(300.0*B0[2]*std::sqrt(1+Ry[1]*Ry[1]));
   P0[4] = -Rx[2]*coeff;//qOverP estimate
@@ -672,135 +714,177 @@ Trk::Track* TrigInDetTrackFollowingTool::getTrack(const std::vector<const Trk::S
 
   TrigFTF_ExtendedTrackState& theState = *initialState;
 
-  std::vector<int> moduleIndexSequence(nModules);//the order in which modules will be explored to find hits
+  //3. create layer sequences for forward and backward passes
+    
+  std::vector<int> layerSequence[2]; //the order in which layers will be explored to find hits
+  std::unordered_map<int, std::vector<int> > layerMap[2]; //layer-to-modules map
+  
+  const std::vector<short>& vPixelL =  *(m_layerNumberTool->pixelLayers());
+  const std::vector<short>& vStripL =  *(m_layerNumberTool->sctLayers());
 
-  int modCounter = 0;
+  for(int passIdx=0;passIdx<2;passIdx++) {//0: forward pass, 1: backward pass
 
-  for(int moduleIdx = startModuleIdx + 1;moduleIdx<nModules;moduleIdx++, modCounter++) {//forward pass
-    moduleIndexSequence[modCounter] = moduleIdx;
-  }
-  for(int moduleIdx = startModuleIdx;moduleIdx>=0;moduleIdx--, modCounter++) {//backward pass
-    moduleIndexSequence[modCounter] = moduleIdx;
+    int start = passIdx==0 ? startModuleIdx + 1 : startModuleIdx;
+    int end   = passIdx==0 ? nModules : -1;
+    int step  = passIdx==0 ? 1 : -1;
+
+    for(int moduleIdx = start;moduleIdx!=end;moduleIdx+=step) {//iterating over modules in the road
+      const InDetDD::SiDetectorElement* de = road.at(moduleIdx);
+      int h = de->identifyHash();
+      int l = de->isPixel() ? vPixelL.at(h) : vStripL.at(h);
+      if(!de->isPixel()) {//Strips
+	l *= 1000;
+	if(h % 2) {//odd hash means the other side of the double Strip layer
+	  l += 1;
+	}
+      }
+      auto it = layerMap[passIdx].find(l);
+      if(it != layerMap[passIdx].end()) (*it).second.push_back(moduleIdx);
+      else {
+	layerSequence[passIdx].push_back(l);
+	std::vector<int> v = {moduleIdx};
+	layerMap[passIdx].insert(std::make_pair(l,v));
+      }
+    }
   }
   
-  //4. The track following loop
+  //4. The layer-based track following loop with two passes
 
-  for(auto const moduleIdx : moduleIndexSequence) {
+  for(int passIdx=0;passIdx<2;passIdx++) {
+  
+    for(const auto& lkey : layerSequence[passIdx]) {
 
-    if(theState.m_nHoles > m_nHolesMax) { //bailing-out early to save CPU time
-      return nullptr;
-    }
-    
-    if(moduleStatus[moduleIdx] < 0) continue;//checked and rejected
-    
-    const InDetDD::SiDetectorElement* de = road.at(moduleIdx);//next module
-
-    //4a. extrapolation to the target surface
-
-    const Trk::PrepRawData* pPRD = assignedHits[moduleIdx];
-
-    if(moduleIdx == startModuleIdx) {
-      theState.SwapTheEnds();//no extrapolation is needed (apart from the material effects)
-    }
-    else {
-
-      const Trk::PlaneSurface* plane = static_cast<const Trk::PlaneSurface*>(&de->surface());
+      if(theState.m_nHoles > m_nHolesMax) { //bailing-out early to save CPU time
+	return nullptr;
+      }
       
-      if(pPRD == nullptr) {//no hit assigned yet, check if we can cross the module first
-	//tentative extrapolation
-	bool inBounds = checkIntersection(theState.m_Xk, theState.m_pS, plane, fieldCache);
-	if(!inBounds) {
+      const auto& lp = (*layerMap[passIdx].find(lkey));
+
+      //4a. collect hits from modules on the layer
+
+      std::vector<std::tuple<double, const Trk::PrepRawData*, int> > hitLinks;
+
+      for(const auto& moduleIdx : lp.second) {
+
+	if(moduleIdx == startModuleIdx) {
+	  theState.SwapTheEnds();
+	}
+	
+	if(moduleStatus[moduleIdx] < 0) continue;//checked and rejected
+	
+	if (assignedHits[moduleIdx] != nullptr) {//we have a pre-assigned hit, so keep it
+	  hitLinks.emplace_back(std::make_tuple(-1.0,assignedHits[moduleIdx],moduleIdx));//force accept
+	  continue;
+	}
+	
+	//no pre-assigned hit
+	
+	const InDetDD::SiDetectorElement* de = road.at(moduleIdx);// module in the road
+      	
+	//5a. skip empty, dead, bad, etc. modules
+	
+	unsigned int moduleHash = de->identifyHash();
+	
+	bool noHits = false;
+	
+	if(de->isPixel()) {//Pixel module
+	  noHits = (p_pixcontainer == nullptr) || ((*p_pixcontainer).indexFindPtr(moduleHash) == nullptr);
+	} else {//Strip module
+	  noHits = (p_sctcontainer == nullptr) || ((*p_sctcontainer).indexFindPtr(moduleHash) == nullptr);
+	}
+	
+	if (noHits) {
+	  moduleStatus[moduleIdx] = -3;//skip the module
+	  continue;
+	}
+	
+	//5b. tentative extrapolation to check if the track can cross the module at all
+
+	const Trk::PlaneSurface* plane = static_cast<const Trk::PlaneSurface*>(&de->surface());
+
+	double trackParams[2];
+	
+	if(!tentativeExtrapolation(theState.m_Xk, trackParams, theState.m_pS, plane, fieldCache)) {
+	  moduleStatus[moduleIdx] = -2;//miss due to extrapolation failure
+	  continue;
+	}
+	
+	const double bound_tol = 0.2;    
+
+	InDetDD::SiIntersect intersection = de->inDetector(Amg::Vector2D(trackParams[0], trackParams[1]), bound_tol, bound_tol);
+
+	if (intersection.out()) {
 	  moduleStatus[moduleIdx] = -2;//miss
 	  continue;
 	}
+
+	//5c. search for the nearest hit on the module
+
+	moduleStatus[moduleIdx] = -4;//the default: all hits are rejected
+	
+	if(de->isPixel()) {
+	  findNearestHit(moduleIdx, (*p_pixcontainer).indexFindPtr(moduleHash), trackParams, hitLinks);
+	}
+	else {
+	  findNearestHit(moduleIdx, (*p_sctcontainer).indexFindPtr(moduleHash), de->design().shape(), trackParams, hitLinks);
+	}
       }
 
-      //precise extrapolation
-      int rkCode = extrapolateTrackState(theState, plane, fieldCache);
+      //4b. check what we've found
 
-      if(rkCode!=0) {
-	moduleStatus[moduleIdx] = -2;//miss
-	if(pPRD != nullptr) {
-	  theState.AddHole();//because we were expecting the pre-assigned hit
-	}
+      if(hitLinks.empty()) {//add a hole and go to the next layer
+	theState.AddHole();
 	continue;
       }
-    }
-
-    //4b. search for the best hit and update the track state
-
-    unsigned int moduleHash = de->identifyHash();
-
-    unsigned int nHits = 0;
-
-    const Trk::PrepRawData* selectedHit = nullptr;
-
-    if(de->isPixel()) {//Pixel module
-
-      const InDet::PixelClusterCollection *clustersOnElement = nullptr;
-      const InDet::PixelCluster* pPixelHit = nullptr;
-
-      if(pPRD == nullptr) {
-	if(p_pixcontainer != nullptr) {
-	  clustersOnElement = (*p_pixcontainer).indexFindPtr(moduleHash);
-	  if(clustersOnElement != nullptr) {
-	    nHits = clustersOnElement->size();
-	  }
-	}
-      }
-      else {
-	pPixelHit = dynamic_cast<const InDet::PixelCluster*>(pPRD);
-	nHits = 1;
-      }
       
-      if(nHits > 0) {
-	selectedHit = updateTrackState(pPixelHit, clustersOnElement, theState);
-      }
+      //4c. sorting by distance
 
-    }
-    else {//Strip module
+      std::sort(hitLinks.begin(), hitLinks.end());
 
-      const InDet::SCT_ClusterCollection *clustersOnElement = nullptr;
-      const InDet::SCT_Cluster* pStripHit = nullptr;
+      //4d. update the track state using selected hits
 
-      if(pPRD == nullptr) {
-	if(p_sctcontainer != nullptr) {
-	  clustersOnElement = (*p_sctcontainer).indexFindPtr(moduleHash);
-	  if(clustersOnElement != nullptr) {
-	    nHits = clustersOnElement->size();
-	  }
+      for(const auto& hl : hitLinks) {
+	
+	int moduleIdx = get<2>(hl);
+
+	const Trk::PrepRawData* pPRD = get<1>(hl);
+	
+	const InDetDD::SiDetectorElement* de = road.at(moduleIdx);
+	
+	const Trk::PlaneSurface* plane = static_cast<const Trk::PlaneSurface*>(&de->surface());
+
+	//precise extrapolation with covariance, material effects, etc.
+	
+	int rkCode = extrapolateTrackState(theState, plane, fieldCache);
+	
+	if(rkCode!=0) {
+	  moduleStatus[moduleIdx] = -2;//extrapolation failure
+	  continue;
 	}
-      }
-      else {
-	pStripHit = dynamic_cast<const InDet::SCT_Cluster*>(pPRD);
-	nHits = 1;
-      }
 
-      if(nHits > 0) {
-	selectedHit = updateTrackState(pStripHit, clustersOnElement, de->design().shape(), theState);
-      }
-
-    }
-
-    if(nHits == 0) {// dead module?
-      theState.AddHole();
-      moduleStatus[moduleIdx] = -3;//dead module
-      continue;
-    }
-
-    if(pPRD == nullptr) {
-      if(selectedHit == nullptr) {
-	theState.AddHole();      
-	moduleStatus[moduleIdx] = -4;//all hits rejected
-      }
-      else {
-	assignedHits[moduleIdx] = selectedHit;
-	moduleStatus[moduleIdx] = de->isPixel() ? 2 : 3;//a new Pixel/Strip hit assigned
-      }
-    }
+	const Trk::PrepRawData* acceptedHit = nullptr;
+      
+	if(de->isPixel()) {//Pixel module
+	  const InDet::PixelCluster* pPixelHit = dynamic_cast<const InDet::PixelCluster*>(pPRD);
+	  acceptedHit = updateTrackState(pPixelHit, theState, (get<0>(hl) < 0.0));
+	}
+	else {
+	  const InDet::SCT_Cluster* pStripHit = dynamic_cast<const InDet::SCT_Cluster*>(pPRD);
+	  acceptedHit = updateTrackState(pStripHit, de->design().shape(), theState);
+	}
+      
+	if(acceptedHit == nullptr) {//the corresponding max dchi2 exceeded
+	  //break;
+	}
+	else {
+	  assignedHits[moduleIdx] = acceptedHit;
+	  moduleStatus[moduleIdx] = de->isPixel() ? 2 : 3;//a new Pixel/Strip hit assigned
+	}      
+      }//end of the update cycle
+    }//end of layer processing cycle
   } //end of the track following loop
 
-  //5. create output track
+  //6. create output track
 
   int nClusters  = theState.m_nClusters;
   int nHoles     = theState.m_nHoles;
@@ -1098,12 +1182,11 @@ int TrigInDetTrackFollowingTool::extrapolateTrackState(TrigFTF_ExtendedTrackStat
   return 0;
 }
 
-bool TrigInDetTrackFollowingTool::checkIntersection(double const* Rk, const Trk::PlaneSurface* pS, const Trk::PlaneSurface* pN, MagField::AtlasFieldCache& fieldCache) const {
+bool TrigInDetTrackFollowingTool::tentativeExtrapolation(double const* Rk, double* TP, const Trk::PlaneSurface* pS, const Trk::PlaneSurface* pN, MagField::AtlasFieldCache& fieldCache) const {
 
   const double C = 299.9975;
   const double minStep = 100.0;
-  const double bound_tol = 0.2;
-  
+    
   double Re[5];
   
   memcpy(&Re[0], &Rk[0], sizeof(Re));
@@ -1258,18 +1341,10 @@ bool TrigInDetTrackFollowingTool::checkIntersection(double const* Rk, const Trk:
 
   const double d[3] = { gP[0] - Trf2(0, 3), gP[1] - Trf2(1, 3), gP[2] - Trf2(2, 3) };
 
-  double locX = d[0] * Ax2[0] + d[1] * Ax2[1] + d[2] * Ax2[2];
-  double locY = d[0] * Ay2[0] + d[1] * Ay2[1] + d[2] * Ay2[2];
-
-  const InDetDD::SiDetectorElement* pDE = dynamic_cast<const InDetDD::SiDetectorElement*>(pN->associatedDetectorElement());
-  if(!pDE) return false;
-  
-  InDetDD::SiIntersect intersection = pDE->inDetector(Amg::Vector2D(locX, locY), bound_tol, bound_tol);
-
-  if (intersection.out()) return false;
+  TP[0] = d[0] * Ax2[0] + d[1] * Ax2[1] + d[2] * Ax2[2];
+  TP[1] = d[0] * Ay2[0] + d[1] * Ay2[1] + d[2] * Ay2[2];
 
   return true;
-
 }
 
 double TrigInDetTrackFollowingTool::estimateRK_Step(const Trk::PlaneSurface* pN, double const * P) const {

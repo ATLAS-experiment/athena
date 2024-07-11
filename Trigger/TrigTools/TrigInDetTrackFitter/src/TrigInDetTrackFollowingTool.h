@@ -10,6 +10,7 @@
 #include "GaudiKernel/ServiceHandle.h"
 
 #include "TrigInDetToolInterfaces/ITrigInDetTrackFollowingTool.h"
+#include "TrigInDetToolInterfaces/ITrigL2LayerNumberTool.h"
 
 // MagField cache
 #include "MagFieldConditions/AtlasFieldCacheCondObj.h"
@@ -90,28 +91,38 @@ class TrigInDetTrackFollowingTool: public AthAlgTool, virtual public ITrigInDetT
 
 private:
 
+  ToolHandle<ITrigL2LayerNumberTool> m_layerNumberTool {this, "LayerNumberTool", "TrigL2LayerNumberToolITk"};
+  
   std::unique_ptr<TrigFTF_ExtendedTrackState> fitTheSeed(const std::vector<const Trk::SpacePoint*>&, MagField::AtlasFieldCache&) const;
  
-  const Trk::PrepRawData* updateTrackState(const InDet::PixelCluster*, const InDet::PixelClusterCollection*, TrigFTF_ExtendedTrackState&) const;
-  const Trk::PrepRawData* updateTrackState(const InDet::SCT_Cluster*, const InDet::SCT_ClusterCollection*, int, TrigFTF_ExtendedTrackState&) const;
+  const Trk::PrepRawData* updateTrackState(const InDet::PixelCluster*, TrigFTF_ExtendedTrackState&, bool) const;
+  const Trk::PrepRawData* updateTrackState(const InDet::SCT_Cluster*, int, TrigFTF_ExtendedTrackState&) const;
  
   int extrapolateTrackState(TrigFTF_ExtendedTrackState&, const Trk::PlaneSurface*, MagField::AtlasFieldCache&) const;
 
   int RungeKutta34(double*, double*, const Trk::PlaneSurface*, MagField::AtlasFieldCache&, bool) const;
-
-  bool checkIntersection(double const*, const Trk::PlaneSurface*, const Trk::PlaneSurface*, MagField::AtlasFieldCache&) const;
-
+  
+  bool tentativeExtrapolation(double const*, double*, const Trk::PlaneSurface*, const Trk::PlaneSurface*, MagField::AtlasFieldCache&) const;
+  
   inline double processHit(const InDet::PixelCluster*, double*, double*, const TrigFTF_ExtendedTrackState&) const;
   inline double processHit(const InDet::SCT_Cluster*, int, double&, double&, double*, const TrigFTF_ExtendedTrackState&) const;
 
+  inline void findNearestHit(int, const InDet::PixelClusterCollection*, const double*, std::vector<std::tuple<double, const Trk::PrepRawData*, int> >&) const;
+  inline void findNearestHit(int, const InDet::SCT_ClusterCollection*, int, const double*, std::vector<std::tuple<double, const Trk::PrepRawData*, int> >&) const;
+  
   inline void crossProduct(double const *, double const *, double*) const;
 
   double estimateRK_Step(const Trk::PlaneSurface*, double const *) const;
   
   Gaudi::Property<int> m_nClustersMin {this, "nClustersMin", 7, "Minimum number of clusters on track"};
-  Gaudi::Property<int> m_nHolesMax {this, "nHolesMax", 3, "Maximum number of holes on track"};
-  Gaudi::Property<double> m_maxChi2Dist_Pixels {this, "Chi2MaxPixels", 50.0, "the Pixel hit chi2 cut"};
-  Gaudi::Property<double> m_maxChi2Dist_Strips {this, "Chi2MaxStrips", 150.0, "the Strip hit chi2 cut"};
+  Gaudi::Property<int> m_nHolesMax {this, "nHolesMax", 100, "Maximum number of holes on track"};
+  Gaudi::Property<double> m_maxChi2Dist_Pixels {this, "Chi2MaxPixels", 25.0, "the Pixel hit chi2 cut"};
+  Gaudi::Property<double> m_maxChi2Dist_Strips {this, "Chi2MaxStrips", 12.0, "the Strip hit chi2 cut"};
+
+  Gaudi::Property<double> m_winX_Pixels {this, "XSearchWindowPixels", 3.0, "x-size of hit search window for Pixels"};
+  Gaudi::Property<double> m_winY_Pixels {this, "YSearchWindowPixels", 3.0, "y-size of hit search window for Pixels"};
+  Gaudi::Property<double> m_winX_Strips {this, "XSearchWindowStrips", 3.0, "x-size of hit search window for Strips"};
+  
   Gaudi::Property<bool> m_useHitErrors {this, "UseHitErrors", false, "use PrepRawData errors"};
   Gaudi::Property<bool> m_useDetectorThickness {this, "UseDetectorThickness", false, "get Si-modules thickness from InDet Geometry"};
   Gaudi::Property<double> m_nominalRadLength {this, "ModuleRadLength", 0.05, "fixed radiation thickness of the detector modules"};
