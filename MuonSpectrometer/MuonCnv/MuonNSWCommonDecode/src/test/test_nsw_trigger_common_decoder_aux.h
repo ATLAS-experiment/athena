@@ -70,6 +70,8 @@ struct outBranches
   std::vector<std::vector<uint32_t>> b_MML1A_stream_head_fifo_size = {} ;
   std::vector<std::vector<uint32_t>> b_MML1A_stream_head_streamID = {} ;
   std::vector<std::vector<uint32_t>> b_MML1A_art_BCID = {} ;
+  std::vector<std::vector<uint32_t>> b_MML1A_art_pipeID = {} ;
+  std::vector<std::vector<uint32_t>> b_MML1A_art_fiberID = {} ;
   std::vector<std::vector<uint32_t>> b_MML1A_art_layers = {} ;
   std::vector<std::vector<uint32_t>> b_MML1A_art_channels = {} ;
   std::vector<std::vector<uint32_t>> b_MML1A_trig_padding = {} ;
@@ -265,6 +267,8 @@ int test_nsw_trigger_common_decoder_init_tree (TTree &outtree, outBranches &data
     outtree.Branch( "MML1A_stream_head_streamID", &data.b_MML1A_stream_head_streamID);
     outtree.Branch( "MML1A_trailer_CRC", &data.b_MML1A_trailer_CRC);
     outtree.Branch( "MML1A_art_BCID", &data.b_MML1A_art_BCID);
+    outtree.Branch( "MML1A_art_pipeID", &data.b_MML1A_art_pipeID);
+    outtree.Branch( "MML1A_art_fiberID", &data.b_MML1A_art_fiberID);
     outtree.Branch( "MML1A_art_layers", &data.b_MML1A_art_layers);
     outtree.Branch( "MML1A_art_channels", &data.b_MML1A_art_channels);
     outtree.Branch( "MML1A_trig_padding", &data.b_MML1A_trig_padding);
