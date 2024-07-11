@@ -35,6 +35,7 @@ class SiHitCollection_p4
 
   std::vector<unsigned long>  m_truthID;
   std::vector<unsigned short> m_mcEvtIndex;
+  std::vector<char>           m_truthSupp;
   std::vector<unsigned short> m_nTruthID;
 
   std::vector<unsigned long>  m_id;

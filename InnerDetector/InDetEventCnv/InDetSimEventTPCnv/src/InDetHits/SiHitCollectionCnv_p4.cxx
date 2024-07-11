@@ -102,6 +102,7 @@ void SiHitCollectionCnv_p4::transToPers(const SiHitCollection* transCont, SiHitC
     SiHitCollection::const_iterator siHit = it;
     const HepMcParticleLink * currentLink = &(siHit->particleLink());
     const int truthId = currentLink->id();
+    const char truthSupp= currentLink->getTruthSuppressionTypeAsChar();
     int index{0};
     if (HepMcParticleLink::getEventPositionInCollection(currentLink->eventIndex(),
                                                         proxy).at(0) != 0) {
@@ -119,7 +120,7 @@ void SiHitCollectionCnv_p4::transToPers(const SiHitCollection* transCont, SiHitC
       // with the same truthId and eventIndex.
       persCont->m_truthID.push_back(static_cast<unsigned long>(truthId));
       persCont->m_mcEvtIndex.push_back(persIndex);
-
+      persCont->m_truthSupp.push_back(truthSupp); // TODO include this in the equality check above?
       if (idx > 0) {
         persCont->m_nTruthID.push_back(idx - endTruthID);
         endTruthID = idx;
@@ -354,6 +355,7 @@ void SiHitCollectionCnv_p4::persToTrans(const SiHitCollection_p4* persCont, SiHi
           flag = HepMcParticleLink::IS_POSITION;
         }
         HepMcParticleLink partLink( persCont->m_truthID[idxTruthID], persCont->m_mcEvtIndex[idxTruthID], flag, HepMcParticleLink::IS_ID, ctx  );
+        partLink.setTruthSuppressionType(HepMcParticleLink::ExtendedBarCode::truthSuppressionTypeFromChar (persCont->m_truthSupp[idxTruthID]));
         transCont->Emplace( endLast, endThis, eneLoss, meanTime, partLink, persCont->m_id[idxId] );
 
         endLast = endThis;

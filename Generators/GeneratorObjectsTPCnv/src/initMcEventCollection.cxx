@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include "GeneratorObjectsTPCnv/initMcEventCollection.h"
 
@@ -14,6 +14,7 @@
 #include "GeneratorObjectsTPCnv/HepMcParticleLinkCnv_p1.h"
 #include "StoreGate/WriteHandle.h"
 #include "GeneratorObjects/McEventCollection.h"
+#include "TruthUtils/MagicNumbers.h"
 
 #include "TestTools/initGaudi.h"
 
@@ -45,6 +46,11 @@ namespace Athena_test {
     populateGenEvent(ge1,-13,13,genPartList);
     populateGenEvent(ge1,-11,11,genPartList);
     populateGenEvent(ge1,22,22,genPartList);
+    inputTestDataHandle->push_back(new HepMC::GenEvent(ge1));
+    HepMC::GenEvent& ge2 = *(inputTestDataHandle->at(1));
+    const int event_number2(89);
+    ge2.set_event_number(event_number2);
+    populateFilteredGenEvent(ge2,genPartList);
     return true;
   }
 
@@ -85,5 +91,78 @@ namespace Athena_test {
     HepMC::suggest_barcode(inParticle4,maxBarcode+4);
     HepMC::set_signal_process_vertex(&ge, myVertex );
     ge.set_beam_particles(inParticle1,inParticle2);
+  }
+
+  void populateFilteredGenEvent(HepMC::GenEvent & ge, std::vector<HepMC::GenParticlePtr>& genPartVector)
+  {
+    //.......Create new particle (geantino) to link  hits from pileup
+    HepMC::GenParticlePtr genPart=HepMC::newGenParticlePtr();
+    genPart->set_pdg_id(999); //Geantino
+    genPart->set_status(1); //!< set decay status
+    HepMC::suggest_barcode(genPart, HepMC::SUPPRESSED_PILEUP_BARCODE );
+
+    HepMC::GenVertexPtr genVertex=HepMC::newGenVertexPtr();
+    genVertex->add_particle_out(genPart);
+    genPartVector.push_back(genPart);
+
+    //to set geantino vertex as a truth primary vertex
+    HepMC::GenVertexPtr  hScatVx = HepMC::barcode_to_vertex(&ge,-3);
+    if (hScatVx!=nullptr) {
+      HepMC::FourVector pmvxpos=hScatVx->position();
+      genVertex->set_position(pmvxpos);
+      //to set geantino kinematic phi=eta=0, E=p=E_hard_scat
+#ifdef HEPMC3
+      auto itrp =hScatVx->particles_in().cbegin();
+      if (hScatVx->particles_in().size()==2) {
+        HepMC::FourVector mom1=(*itrp)->momentum();
+        HepMC::FourVector mom2=(*(++itrp))->momentum();
+        HepMC::FourVector vxmom;
+        vxmom.setPx(mom1.e()+mom2.e());
+        vxmom.setPy(0.);
+        vxmom.setPz(0.);
+        vxmom.setE(mom1.e()+mom2.e());
+        genPart->set_momentum(vxmom);
+      }
+#else
+      HepMC::GenVertex::particles_in_const_iterator itrp =hScatVx->particles_in_const_begin();
+      if (hScatVx->particles_in_size()==2) {
+        HepMC::FourVector mom1=(*itrp)->momentum();
+        HepMC::FourVector mom2=(*(++itrp))->momentum();
+        HepMC::FourVector vxmom;
+        vxmom.setPx(mom1.e()+mom2.e());
+        vxmom.setPy(0.);
+        vxmom.setPz(0.);
+        vxmom.setE(mom1.e()+mom2.e());
+        genPart->set_momentum(vxmom);
+      }
+#endif
+    }
+
+#ifdef HEPMC3
+    if (!ge.vertices().empty()) {
+      std::vector<HepMC::GenVertexPtr> vtxvec;
+      for (const auto& vtx: ge.vertices()) {
+        vtxvec.push_back(vtx);
+        ge.remove_vertex(vtx);
+      }
+      vtxvec.clear();
+    }
+#else
+    if (!ge.vertices_empty()) {
+      std::vector<HepMC::GenVertexPtr> vtxvec;
+      HepMC::GenEvent::vertex_iterator itvtx = ge.vertices_begin();
+      for (;itvtx != ge.vertices_end(); ++itvtx ) {
+        ge.remove_vertex(*itvtx);
+        vtxvec.push_back((*itvtx));
+        //fix me: delete vertex pointer causes crash
+        //delete (*itvtx);
+      }
+      for(unsigned int i=0;i<vtxvec.size();i++)  delete vtxvec[i];
+    }
+#endif
+
+    //.....add new vertex with geantino
+    ge.add_vertex(genVertex);
+    HepMC::suggest_barcode(genPart, HepMC::SUPPRESSED_PILEUP_BARCODE );
   }
 }

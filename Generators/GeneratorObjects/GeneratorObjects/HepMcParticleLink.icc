@@ -47,7 +47,8 @@ HepMcParticleLink::ExtendedBarCode::ExtendedBarCode
 inline
 HepMcParticleLink::ExtendedBarCode::ExtendedBarCode (const ExtendedBarCode& rhs)
   : m_BC (static_cast<barcode_type> (rhs.m_BC)),
-    m_evtIndex (static_cast<index_type> (rhs.m_evtIndex))
+    m_evtIndex (static_cast<index_type> (rhs.m_evtIndex)),
+    m_truthSupp (rhs.m_truthSupp)
 {
 }
 
@@ -58,7 +59,8 @@ HepMcParticleLink::ExtendedBarCode::ExtendedBarCode (const ExtendedBarCode& rhs)
 inline
 HepMcParticleLink::ExtendedBarCode::ExtendedBarCode (ExtendedBarCode&& rhs) noexcept
   : m_BC (rhs.m_BC.load()), // no move constructor for atomics
-    m_evtIndex (rhs.m_evtIndex.load()) // no move constructor for atomics
+    m_evtIndex (rhs.m_evtIndex.load()), // no move constructor for atomics
+    m_truthSupp (std::exchange(rhs.m_truthSupp,EBC_UNSUPPRESSED))
 {
 }
 
@@ -72,6 +74,7 @@ HepMcParticleLink::ExtendedBarCode::operator= (const ExtendedBarCode& rhs)
   if (this != &rhs) {
     m_BC = static_cast<barcode_type> (rhs.m_BC);
     m_evtIndex = static_cast<index_type> (rhs.m_evtIndex);
+    m_truthSupp=rhs.m_truthSupp;
   }
   return *this;
 }
@@ -86,6 +89,7 @@ HepMcParticleLink::ExtendedBarCode::operator= (ExtendedBarCode&& rhs) noexcept
   if (this != &rhs) {
     m_BC = static_cast<barcode_type> (rhs.m_BC.load());
     m_evtIndex = static_cast<index_type>(rhs.m_evtIndex.load());
+    m_truthSupp = std::exchange(rhs.m_truthSupp, EBC_UNSUPPRESSED);
   }
   return *this;
 }
@@ -160,6 +164,16 @@ void HepMcParticleLink::ExtendedBarCode::uniqueID (barcode_type& id,
 
 
 /**
+ * @brief Return which collection we're targeting, as a char ('a'..'b').
+ */
+inline
+char HepMcParticleLink::ExtendedBarCode::getTruthSuppressionTypeAsChar() const
+{
+  return truthSuppressionTypeAsChar (m_truthSupp);
+}
+
+
+/**
  * @brief Equality test.
  *
  * Be aware: if one EBC holds the target GenEvent by number and the
@@ -172,6 +186,7 @@ bool
 HepMcParticleLink::ExtendedBarCode::operator==(const ExtendedBarCode& rhs) const
 {
   return (this->m_BC == rhs.m_BC &&
+          this->m_truthSupp == rhs.m_truthSupp &&
           this->m_evtIndex == rhs.m_evtIndex);
 }
 
@@ -203,9 +218,9 @@ inline
 bool
 HepMcParticleLink::ExtendedBarCode::operator< (const ExtendedBarCode& rhs) const
 {
-  return (
-          (m_evtIndex < rhs.m_evtIndex)  ||
-          (m_evtIndex == rhs.m_evtIndex && m_BC < rhs.m_BC) ) ;
+  return (m_truthSupp < rhs.m_truthSupp ||
+          (m_truthSupp == rhs.m_truthSupp && m_evtIndex < rhs.m_evtIndex)  ||
+          (m_truthSupp == rhs.m_truthSupp && m_evtIndex == rhs.m_evtIndex && m_BC < rhs.m_BC) ) ;
 }
 
 
@@ -356,7 +371,7 @@ void HepMcParticleLink::ExtendedBarCode::makeIndex (index_type index,
 inline
 void
 HepMcParticleLink::ExtendedBarCode::setUniqueID (barcode_type uid,
-                                              UniqueIDFlag barcodeFlag)
+                                                 UniqueIDFlag barcodeFlag)
 {
   assert ((uid & BARCODE_MASK) == 0);
   // For delta-rays barcode=id=0
@@ -556,7 +571,8 @@ HepMcParticleLink::operator bool() const
 inline
 bool HepMcParticleLink::operator== (const HepMcParticleLink& rhs) const
 {
-  return  (ExtendedBarCode::compareUniqueID(*this, rhs) == 0 &&
+  return  (m_extBarcode.getTruthSuppressionType()==rhs.m_extBarcode.getTruthSuppressionType() &&
+           ExtendedBarCode::compareUniqueID(*this, rhs) == 0 &&
            ExtendedBarCode::compareIndex (*this, rhs) == 0);
 }
 
@@ -577,12 +593,44 @@ bool HepMcParticleLink::operator!= (const HepMcParticleLink& rhs) const
 inline
 bool HepMcParticleLink::operator< (const HepMcParticleLink& rhs) const
 {
-  int cmpIndex = ExtendedBarCode::compareIndex (*this, rhs);
-  if (cmpIndex < 0) return true;
-  if (cmpIndex == 0) {
-    if (ExtendedBarCode::compareUniqueID(*this, rhs) < 0) return true;
+  if (m_extBarcode.getTruthSuppressionType() < rhs.m_extBarcode.getTruthSuppressionType()) return true;
+  if (m_extBarcode.getTruthSuppressionType() == rhs.m_extBarcode.getTruthSuppressionType()) {
+    int cmpIndex = ExtendedBarCode::compareIndex (*this, rhs);
+    if (cmpIndex < 0) return true;
+    if (cmpIndex == 0) {
+      if (ExtendedBarCode::compareUniqueID(*this, rhs) < 0) return true;
+    }
   }
   return false;
+}
+
+
+/**
+ * @brief Return whether the truth particle has been suppressed, as an enum.
+ */
+inline
+EBC_SUPPRESSED_TRUTH HepMcParticleLink::getTruthSuppressionType() const
+{
+  return m_extBarcode.getTruthSuppressionType();
+}
+
+
+/**
+ * @brief Return whether the truth particle has been suppressed.
+ */
+inline void HepMcParticleLink::setTruthSuppressionType(EBC_SUPPRESSED_TRUTH truthSupp)
+{
+  m_extBarcode.setTruthSuppressionType(truthSupp);
+}
+
+
+/**
+ * @brief Return whether the truth particle has been suppressed, as a char ('a'..'b').
+ */
+inline
+char HepMcParticleLink::getTruthSuppressionTypeAsChar() const
+{
+  return m_extBarcode.getTruthSuppressionTypeAsChar();
 }
 
 

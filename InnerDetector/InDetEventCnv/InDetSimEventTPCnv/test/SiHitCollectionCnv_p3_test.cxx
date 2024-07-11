@@ -29,6 +29,7 @@ void compare (const HepMcParticleLink& p1,
   assert ( HepMC::barcode(p1) == HepMC::barcode(p2) );
   assert ( p1.id() == p2.id() );
   assert ( p1.eventIndex() == p2.eventIndex() );
+  assert ( p1.getTruthSuppressionTypeAsChar() == p2.getTruthSuppressionTypeAsChar() );
   assert ( p1.cptr() == p2.cptr() );
   assert ( p1 == p2 );
 }
@@ -108,7 +109,7 @@ void compare (const SiHitCollection_p3& p1,
 
 void checkPersistentVersion(const SiHitCollection_p3& pers, const SiHitCollection& trans)
 {
-  constexpr int numberOfStrings{20}; // The number of groups of hits caused by consecutive steps of "the same particle"
+  constexpr int numberOfStrings{21}; // The number of groups of hits caused by consecutive steps of "the same particle"
   assert ( numberOfStrings == pers.m_hit1_meanTime.size());
   assert ( numberOfStrings == pers.m_hit1_meanTime.size());
   assert ( numberOfStrings == pers.m_hit1_x0.size());
@@ -124,10 +125,10 @@ void checkPersistentVersion(const SiHitCollection_p3& pers, const SiHitCollectio
   assert (trans.size()-numberOfStrings == pers.m_dTheta.size());
   assert (trans.size()-numberOfStrings == pers.m_dPhi.size());
   //  1 element per hit with  m_hitEne_2b[i] == 2**16
-  assert ( 110 == pers.m_hitEne_4b.size());
+  assert ( 111 == pers.m_hitEne_4b.size());
   //  1 element per hit with  m_hitLength_2b[i] == 2**16
   assert ( 0 == pers.m_hitLength_4b.size());
-  constexpr int numberOfUniqueParticles{11};
+  constexpr int numberOfUniqueParticles{12};
   // Less than the numberOfStrings as we don't require the start/end
   // positions of consecutive SiHits to match up in this case, so as all
   // delta-ray hits are grouped together they get a single entry
@@ -135,7 +136,7 @@ void checkPersistentVersion(const SiHitCollection_p3& pers, const SiHitCollectio
   assert (numberOfUniqueParticles == pers.m_mcEvtIndex.size());
   assert (numberOfUniqueParticles == pers.m_evtColl.size());
   assert (numberOfUniqueParticles == pers.m_nBC.size());
-  constexpr int numberOfIdentifierGroups{20}; // store id once for set of consecutive hits with same identifier
+  constexpr int numberOfIdentifierGroups{21}; // store id once for set of consecutive hits with same identifier
   assert(numberOfIdentifierGroups == pers.m_id.size());
   assert(numberOfIdentifierGroups == pers.m_nId.size());
 }
@@ -215,6 +216,27 @@ void test1 ATLAS_NOT_THREAD_SAFE (std::vector<HepMC::GenParticlePtr>& genPartVec
     }
 
   }
+
+  // HepMcParticleLink pointing at filtered pileup truth
+  HepMC::ConstGenParticlePtr pileupParticle = genPartVector.at(12);
+  HepMcParticleLink pileupLink(HepMC::uniqueID(pileupParticle),pileupParticle->parent_event()->event_number(),HepMcParticleLink::IS_EVENTNUM,HepMcParticleLink::IS_ID);
+  pileupLink.setTruthSuppressionType(EBC_PU_SUPPRESSED);
+  const double angle = 0.2*M_PI;
+  std::vector< HepGeom::Point3D<double> > stepPoints(2);
+    for (int j=0; j<2; ++j) {
+      const double jd(j);
+      const double r(30.+110.*jd);
+      stepPoints.emplace_back(r*std::cos(angle),
+                              r*std::sin(angle),
+                              350.*jd);
+    }
+    trans1.Emplace (stepPoints.at(0), //   local start position of the energy deposit
+                    stepPoints.at(1), //   local end position of the energy deposit
+                    16.5, //   deposited energy
+                    17.5, //   time of energy deposition
+                    pileupLink, //   link to particle which released this energy
+                    19 // SiHitIdentifier (int) - dummy value
+                    );
 
   testit (trans1);
 }

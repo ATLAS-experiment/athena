@@ -1,13 +1,14 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Framework includes
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/ThreadLocalContext.h"
 #include "AthenaKernel/ExtendedEventContext.h"
+#include "TruthUtils/MagicNumbers.h"
 
 #include "GeneratorObjectsTPCnv/HepMcParticleLinkCnv_p2.h"
 
@@ -26,6 +27,10 @@ void HepMcParticleLinkCnv_p2::persToTrans( const HepMcParticleLink_p2* persObj,
     ( HepMcParticleLink::ExtendedBarCode( persObj->m_barcode,
                                           persObj->m_mcEvtIndex,
                                           flag, HepMcParticleLink::IS_BARCODE) ); // FIXME barcode-based
+
+  if ( HepMC::is_truth_suppressed_pileup(static_cast<int>(persObj->m_barcode)) ) {
+    transObj->setTruthSuppressionType(EBC_PU_SUPPRESSED);
+  }
 }
 
 void HepMcParticleLinkCnv_p2::transToPers( const HepMcParticleLink* transObj,
@@ -52,7 +57,12 @@ void HepMcParticleLinkCnv_p2::transToPers( const HepMcParticleLink* transObj,
     }
   }
   persObj->m_mcEvtIndex = index;
-  persObj->m_barcode   = transObj->barcode();
-  persObj->m_evtColl    = 'a'; // Hard-coding as this only ever had a single value in production
+  if (transObj->getTruthSuppressionType() == EBC_PU_SUPPRESSED) {
+    persObj->m_barcode = HepMC::SUPPRESSED_PILEUP_BARCODE;
+  }
+  else {
+    persObj->m_barcode = transObj->barcode(); // FIXME in the future the barcode will need to be generated here
+  }
+  persObj->m_evtColl = 'a'; // Hard-coding as this only ever had a single value in production
 }
 

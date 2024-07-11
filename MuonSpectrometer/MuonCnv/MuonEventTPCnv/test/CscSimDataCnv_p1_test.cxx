@@ -28,6 +28,7 @@ void compare (const HepMcParticleLink& p1,
   assert ( p1.isValid() == p2.isValid() );
   assert ( HepMC::barcode(p1) == HepMC::barcode(p2) );
   assert ( p1.eventIndex() == p2.eventIndex() );
+  assert ( p1.getTruthSuppressionTypeAsChar() == p2.getTruthSuppressionTypeAsChar() );
   assert ( p1.cptr() == p2.cptr() );
   assert ( p1 == p2 );
 }
