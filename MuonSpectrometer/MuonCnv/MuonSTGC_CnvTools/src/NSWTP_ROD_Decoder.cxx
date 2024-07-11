@@ -16,7 +16,8 @@ namespace Muon {
 using namespace nsw::STGTPSegments;
 using STGTPSegmentPacket = nsw::STGTPSegmentPacket;
 using STGTPPadPacket = nsw::STGTPPadPacket;
-
+using STGTPMMPacket = nsw::STGTPMMPacket;
+using namespace nsw::STGTPMMData;
 //=====================================================================
 NSWTP_ROD_Decoder::NSWTP_ROD_Decoder(const std::string& type, const std::string& name, const IInterface* parent)
 : AthAlgTool(type, name, parent)
@@ -93,7 +94,7 @@ StatusCode NSWTP_ROD_Decoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::
 
     }
 
-    // and finally lets fill the output segments (merged) 
+    // lets fill the output segments (merged) 
     const std::vector<STGTPSegmentPacket>& segment_packets =  link->segment_packet();
     for(uint i_packetIndex = 0; i_packetIndex<segment_packets.size(); i_packetIndex++){
       const STGTPSegmentPacket& segment_packet = segment_packets.at(i_packetIndex);
@@ -125,6 +126,36 @@ StatusCode NSWTP_ROD_Decoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::
       rdo->merge_nsw_segmentSelector().push_back(segment_packet.NSW_SegmentSelector()); 
       rdo->merge_LUT_choiceSelection().push_back(segment_packet.LUT_ChoiceSelection()); 
     }
+
+    if (link->l1a_versionID() < 3){
+       return StatusCode::SUCCESS;
+    }
+    const std::vector<STGTPMMPacket>& mm_packets =  link->mm_packet();
+    for(uint i_packetIndex = 0; i_packetIndex<segment_packets.size(); i_packetIndex++){
+      const STGTPMMPacket& mm_packet = mm_packets.at(i_packetIndex);
+      uint8_t i_candidateIndex{0};
+       for (const STGTPMMPacket::MMSegmentData& payload : mm_packet.Segments()){
+        // we have at most 8 candidates in the output
+        if(payload.dTheta == 16) {
+           ++i_candidateIndex;
+           continue; // ignore candidates that the trigger processor flags as invalid
+        }
+        uint32_t word{0}; // word containing all information about the candidate
+        encodeSegmentProperty(MergedSegmentProperty::Monitor, payload.monitor ,word);
+        encodeSegmentProperty(MergedSegmentProperty::Spare, payload.spare ,word);
+        encodeSegmentProperty(MergedSegmentProperty::lowRes, payload.lowRes ,word);
+        encodeSegmentProperty(MergedSegmentProperty::phiRes, payload.phiRes,word);
+        encodeSegmentProperty(MergedSegmentProperty::dTheta, payload.dTheta,word);
+        encodeSegmentProperty(MergedSegmentProperty::phiID, payload.phiID,word);
+        encodeSegmentProperty(MergedSegmentProperty::rIndex, payload.rIndex ,word);
+        ++i_candidateIndex;
+
+        rdo->NSWTP_mm_segments().push_back(word);
+      }
+      // the first 12 bit are used for the bcid and the last 4 for sector ID
+      rdo->NSWTP_mm_BCID().push_back(mm_packet.BCID());
+    }
+
     }
     return StatusCode::SUCCESS;
   

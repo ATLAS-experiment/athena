@@ -29,10 +29,10 @@
 #include "MuonNSWCommonDecode/NSWTriggerSTGL1AElink.h"
 #include "MuonNSWCommonDecode/STGTPPackets.h"
 
-#include <CxxUtils/span.h>
 
 #include <TFile.h>
 #include <TTree.h>
+#include <span>
 
 #include "test_nsw_trigger_common_decoder_aux.h"
 
@@ -347,7 +347,7 @@ int test_nsw_trigger_common_decoder_event (const eformat::read::ROBFragment &r, 
 	data.b_MML1A_trig_rBin.push_back( tmp_trig_rBin );
 	
 	CRCL1AHelper CRCL1A;
-	CxxUtils::span<const uint32_t> load{bs+bs_pointer+2,link->nwordsFlx()-2};
+	std::span<const uint32_t> load{bs+bs_pointer+2,link->nwordsFlx()-2};
         bs_pointer+=link->nwordsFlx();
         data.b_MML1A_CRC_ok.push_back( (CRCL1A.getCRC(load)==link->trailer_CRC()) );
       }
@@ -403,7 +403,7 @@ int test_nsw_trigger_common_decoder_event (const eformat::read::ROBFragment &r, 
 	data.b_MMMon_fitter_rBin.push_back( link->fitter_rBin() );
 	data.b_MMMon_trailer_CRC.push_back( link->trailer_CRC() );
 	CRCMonHelper CRCMon(0xffff, 0x11021);
-	CxxUtils::span<const uint32_t> load{bs+bs_pointer+2,link->nwordsFlx()-2};
+	std::span<const uint32_t> load{bs+bs_pointer+2,link->nwordsFlx()-2};
         bs_pointer+=link->nwordsFlx();
 	data.b_MMMon_CRC_ok.push_back( (CRCMon.getCRC(load)==link->trailer_CRC()) );
       }
@@ -443,6 +443,16 @@ int test_nsw_trigger_common_decoder_event (const eformat::read::ROBFragment &r, 
 
       data.b_STGL1A_merge_BCID.resize(n_elinks);
       data.b_STGL1A_merge_sectorID.resize(n_elinks);
+
+      resize_segment(data.b_STGL1A_mm_monitor_segments);
+      resize_segment(data.b_STGL1A_mm_spare_segments);
+      resize_segment(data.b_STGL1A_mm_lowRes_segments);
+      resize_segment(data.b_STGL1A_mm_phiRes_segments);
+      resize_segment(data.b_STGL1A_mm_dTheta_segments);
+      resize_segment(data.b_STGL1A_mm_phiID_segments);
+      resize_segment(data.b_STGL1A_mm_RIndex_segments);
+
+      data.b_STGL1A_mm_BCID.resize(n_elinks);
 
       uint i = 0;
       for(const auto& baseLink: nsw_trigger_decoder.get_elinks()){
@@ -524,6 +534,22 @@ int test_nsw_trigger_common_decoder_event (const eformat::read::ROBFragment &r, 
 
 
 	} // end of merge packets
+       
+        const auto& mm_packets = link-> mm_packet(); 
+        for (auto packet: mm_packets) {
+          for (std::size_t i_seg=0; i_seg < Muon::nsw::STGTPMMData::num_mm; ++i_seg) {
+            data.b_STGL1A_mm_monitor_segments.at(i_seg).at(i).push_back(packet.Segment(i_seg).monitor);
+            data.b_STGL1A_mm_spare_segments.at(i_seg).at(i).push_back(packet.Segment(i_seg).spare);
+            data.b_STGL1A_mm_lowRes_segments.at(i_seg).at(i).push_back(packet.Segment(i_seg).lowRes);
+            data.b_STGL1A_mm_phiRes_segments.at(i_seg).at(i).push_back(packet.Segment(i_seg).phiRes);
+            data.b_STGL1A_mm_dTheta_segments.at(i_seg).at(i).push_back(packet.Segment(i_seg).dTheta);
+            data.b_STGL1A_mm_phiID_segments.at(i_seg).at(i).push_back(packet.Segment(i_seg).phiID);
+            data.b_STGL1A_mm_RIndex_segments.at(i_seg).at(i).push_back(packet.Segment(i_seg).rIndex);
+          }
+          data.b_STGL1A_mm_BCID[i].push_back(packet.BCID());
+
+
+        } // end of mm packets
 	i++;
       } // end of stgc elink loop
     } // end of stgc l1a block

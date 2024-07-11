@@ -28,7 +28,7 @@ BOOST_AUTO_TEST_CASE(NSWMMTPDecodeBitmaps_Functionality){
   constexpr auto bitSlice=Muon::nsw::bit_slice<uint64_t,uint32_t>;
   //fill a posiible bytestream fragment with all 1's
   uint32_t bytestream[3]={0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU};
-  CxxUtils::span<const uint32_t> bs{bytestream, 3};
+  std::span<const uint32_t> bs{bytestream, 3};
   int start=0;
   int end=2; //inclusive interval, so three bits
   BOOST_TEST(bitSlice(bs, start, end) == 0b111ULL);
@@ -38,7 +38,7 @@ BOOST_AUTO_TEST_CASE(NSWMMTPDecodeBitmaps_Functionality_Long){
   //no need to template this
   constexpr auto bitSlice=Muon::nsw::bit_slice<uint64_t,uint32_t>;
   uint32_t bytestream[10]={0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFU, 0x0U, 0x0U, 0x0U, 0x0U};
-  CxxUtils::span<const uint32_t> bs{bytestream, 10};
+  std::span<const uint32_t> bs{bytestream, 10};
   int start=159;
   int end=161; //inclusive interval, so three bits
   BOOST_TEST(bitSlice(bs, start, end) == 0b100ULL);
