@@ -18,7 +18,7 @@ class STGTPPadPacketTest : public ::testing::Test {
  protected:
   void SetUp() override {
     const auto data = std::vector(std::cbegin(s_DATA), std::cend(s_DATA));
-    m_decoder = std::make_unique<Muon::nsw::STGTPPadPacket>(data);
+    m_decoder = std::make_unique<Muon::nsw::STGTPPadPacket>(data,1);
   }
 
   std::unique_ptr<Muon::nsw::STGTPPadPacket> m_decoder{nullptr};

@@ -66,6 +66,70 @@ namespace xAOD {
         DECLARE_VEC_MEMBER(uint16_t, merge_BCID_sectorID) 
         
         DECLARE_VEC_MEMBER(uint8_t , merge_candidateNumber)
+
+        ///// fields available for v3 of the TP L1A stream and above 
+
+        const std::vector<uint32_t>& NSWTP_mm_segments() const;
+        std::vector<uint32_t>& NSWTP_mm_segments();
+        
+        const std::vector<uint32_t>& NSWTP_mm_BCID() const;
+        std::vector<uint32_t>& NSWTP_mm_BCID();
+        
+        const std::vector<uint8_t>& NSWTP_strip_bands_bandID() const;
+        std::vector<uint8_t>& NSWTP_strip_bands_bandID();
+        
+        const std::vector<uint8_t>& NSWTP_strip_bands_phiID() const;
+        std::vector<uint8_t>& NSWTP_strip_bands_phiID();
+        
+        const std::vector<uint16_t>& NSWTP_strip_bands_BCID() const;
+        std::vector<uint16_t>& NSWTP_strip_bands_BCID();
+        
+        const std::vector<uint8_t>& NSWTP_strip_bands_HLbit() const;
+        std::vector<uint8_t>& NSWTP_strip_bands_HLbit();
+        
+        const std::vector<uint8_t>& NSWTP_strip_bands_layer() const;
+        std::vector<uint8_t>& NSWTP_strip_bands_layer();
+        
+        const std::vector<uint8_t>& NSWTP_strip_bands_charge() const;
+        std::vector<uint8_t>& NSWTP_strip_bands_charge();
+        
+        const std::vector<uint8_t>& NSWTP_strip_BBbit() const;
+        std::vector<uint8_t>& NSWTP_strip_BBbit();
+        
+        const std::vector<uint32_t>& NSWTP_strip_centroids_bandID() const;
+        std::vector<uint32_t>& NSWTP_strip_centroids_bandID();
+        
+        const std::vector<uint32_t>& NSWTP_strip_centroids_phiID() const;
+        std::vector<uint32_t>& NSWTP_strip_centroids_phiID();
+        
+        const std::vector<uint32_t>& NSWTP_strip_centroids_layer() const;
+        std::vector<uint32_t>& NSWTP_strip_centroids_layer();
+        
+        const std::vector<uint32_t>& NSWTP_strip_centroids_offset() const;
+        std::vector<uint32_t>& NSWTP_strip_centroids_offset();
+        
+        const std::vector<uint32_t>& NSWTP_strip_centroids_loc() const;
+        std::vector<uint32_t>& NSWTP_strip_centroids_loc();
+        
+        const std::vector<uint8_t>& NSWTP_strip_segments_bandID() const;
+        std::vector<uint8_t>& NSWTP_strip_segments_bandID();
+        
+        const std::vector<uint8_t>& NSWTP_strip_segments_phiID() const;
+        std::vector<uint8_t>& NSWTP_strip_segments_phiID();
+        
+        const std::vector<uint32_t>& NSWTP_strip_segments_rA() const;
+        std::vector<uint32_t>& NSWTP_strip_segments_rA();
+        
+        const std::vector<uint32_t>& NSWTP_strip_segments_rB() const;
+        std::vector<uint32_t>& NSWTP_strip_segments_rB();
+        
+        const std::vector<uint32_t>& NSWTP_strip_segment() const;
+        std::vector<uint32_t>& NSWTP_strip_segment();
+        
+        const std::vector<uint32_t>& NSWTP_strip_segments_BCID() const;
+        std::vector<uint32_t>& NSWTP_strip_segments_BCID();
+
+
     };
 
 }

@@ -37,8 +37,7 @@ run Reco_tf.py \
   --runNumber="801271" \
   --AMITag="r14519" \
   --autoConfiguration="everything" \
-  --conditionsTag   'default:OFLCOND-MC23-SDR-RUN3-01' \
-  --geometryVersion="default:ATLAS-R3S-2021-03-02-00" \
+  --conditionsTag   'default:OFLCOND-MC23-SDR-RUN3-07' \
   --inputRDOFile     ${ArtInFile} \
   --outputAODFile   physval.AOD.root \
   --steering        doRAWtoALL \

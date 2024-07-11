@@ -632,6 +632,17 @@ public:
   bool clearDecorations() const;
 
 
+  /**
+   * @brief Explicitly lock a decoration.
+   * @param auxid ID of the decoration to lock.
+   *
+   * This is only safe if no other thread can be accessing this decoration.
+   * It is strongly preferred to do this via a @c WriteDecorHandle,
+   * where the dependencies can help ensure this.
+   */
+  void lockDecoration (SG::auxid_t auxid);
+
+
 protected:
   /**
    * @brief Explicitly set a cache pointer.

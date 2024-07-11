@@ -1,0 +1,5 @@
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+
+from .G4Optimizations import (enableFrozenShowersFCalOnly, disableFrozenShowersFCalOnly, enableBeamPipeKill, disableBeamPipeKill, enableTightMuonStepping, disableTightMuonStepping, enableMuonFieldOnlyInCalo, disableMuonFieldOnlyInCalo, enablePhotonRussianRoulette, disablePhotonRussianRoulette, enableNeutronRussianRoulette, disableNeutronRussianRoulette, enableEMRangeCuts, disableEMRangeCuts, enableG4GammaGeneralProcess, disableG4GammaGeneralProcess, enableWoodcockTracking, disableWoodcockTracking)
+
+__all__ = ['enableFrozenShowersFCalOnly', 'disableFrozenShowersFCalOnly', 'enableBeamPipeKill', 'disableBeamPipeKill', 'enableTightMuonStepping', 'disableTightMuonStepping', 'enableMuonFieldOnlyInCalo', 'disableMuonFieldOnlyInCalo', 'enablePhotonRussianRoulette', 'disablePhotonRussianRoulette', 'enableNeutronRussianRoulette', 'disableNeutronRussianRoulette', 'enableEMRangeCuts', 'disableEMRangeCuts', 'enableG4GammaGeneralProcess', 'disableG4GammaGeneralProcess', 'enableWoodcockTracking', 'disableWoodcockTracking']

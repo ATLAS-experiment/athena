@@ -20,6 +20,9 @@ atlas_add_library( exctrace_collector src/exctrace/exctrace_collector.cxx
    PUBLIC_HEADERS CxxUtils
    PRIVATE_LINK_LIBRARIES ${CMAKE_DL_LIBS} )
 
+atlas_add_library( excabort src/excabort.cxx
+  PUBLIC_HEADERS CxxUtils )
+
 atlas_add_library( calg src/libcalg/*.c
    PUBLIC_HEADERS CxxUtils )
 

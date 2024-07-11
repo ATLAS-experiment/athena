@@ -1199,7 +1199,14 @@ StatusCode AthenaEventLoopMgr::installEventContext(EventContext& ctx) {
 
 void AthenaEventLoopMgr::modifyEventContext(EventContext& ctx, const EventID& eID, bool consume_modifier_stream) {
   if (m_evtIdModSvc.isSet()) {
-    EventID new_eID(eID);
+    EventID* new_eID=new EventID(eID);
+    // interface to m_evtIdModSvc->modify_evtid wants to be able to
+    // update the pointer itself, but in reality function doesn't need
+    // it. And cannot obviously use a smart pointer here, as the
+    // pointer itself can get updated by modify_evtid, so plain
+    // pointer for now.
+    // CHECK: Update evtIdModSvc method modify_evtid interface to
+    // pointer or reference?
     // m_nevt - 1 because it's incremented early
     m_evtIdModSvc->modify_evtid(new_eID, m_nevt - 1, consume_modifier_stream);
     if (msgLevel(MSG::DEBUG)) {
@@ -1207,13 +1214,14 @@ void AthenaEventLoopMgr::modifyEventContext(EventContext& ctx, const EventID& eI
       unsigned int oldLB=eID.lumi_block();
       unsigned int oldTS=eID.time_stamp();
       unsigned int oldTSno=eID.time_stamp_ns_offset();
-      ATH_MSG_DEBUG ( "modifyEventContext: use evtIdModSvc runnr=" << oldrunnr << " -> " << new_eID.run_number() );
-      ATH_MSG_DEBUG ( "modifyEventContext: use evtIdModSvc LB=" << oldLB << " -> " << new_eID.lumi_block() );
-      ATH_MSG_DEBUG ( "modifyEventContext: use evtIdModSvc TimeStamp=" << oldTS << " -> " << new_eID.time_stamp() );
-      ATH_MSG_DEBUG ( "modifyEventContext: use evtIdModSvc TimeStamp ns Offset=" << oldTSno << " -> " << new_eID.time_stamp_ns_offset() );
+      ATH_MSG_DEBUG ( "modifyEventContext: use evtIdModSvc runnr=" << oldrunnr << " -> " << new_eID->run_number() );
+      ATH_MSG_DEBUG ( "modifyEventContext: use evtIdModSvc LB=" << oldLB << " -> " << new_eID->lumi_block() );
+      ATH_MSG_DEBUG ( "modifyEventContext: use evtIdModSvc TimeStamp=" << oldTS << " -> " << new_eID->time_stamp() );
+      ATH_MSG_DEBUG ( "modifyEventContext: use evtIdModSvc TimeStamp ns Offset=" << oldTSno << " -> " << new_eID->time_stamp_ns_offset() );
     }
-    ctx.setEventID( new_eID );
+    ctx.setEventID( *new_eID );
     Atlas::getExtendedEventContext(ctx).setConditionsRun( ctx.eventID().run_number() );
+    delete new_eID;
     return;
   }
 

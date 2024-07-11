@@ -27,7 +27,6 @@ dcube_rec_expert_fixref="dcube_expert"
 dcube_rec_expert_lastref="dcube_expert_last"
 
 artdata=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art
-name="run2"
 relname="r24"
 
 script="`basename \"$0\"`"
@@ -38,7 +37,7 @@ dcubemon_rdo=RDOAnalysis.root
 dcubecfg_sim=$artdata/InDetPhysValMonitoring/dcube/config/run2_SiHitValid.xml
 dcuberef_sim=$artdata/InDetPhysValMonitoring/ReferenceHistograms/SiHitValid_piplus_1GeV_simreco_${relname}.root
 dcubecfg_rdo=$artdata/InDetPhysValMonitoring/dcube/config/run2_RDOAnalysis.xml
-dcuberef_rdo=$artdata/InDetPhysValMonitoring/ReferenceHistograms/RDOAnalysis_piplus_1GeV_simreco_${relnam}.root
+dcuberef_rdo=$artdata/InDetPhysValMonitoring/ReferenceHistograms/RDOAnalysis_piplus_1GeV_simreco_${relname}.root
 dcubecfgshifter_rec=$artdata/InDetPhysValMonitoring/dcube/config/IDPVMPlots_mc_baseline.xml
 dcubecfgexpert_rec=$artdata/InDetPhysValMonitoring/dcube/config/IDPVMPlots_mc_expert.xml
 dcuberef_rec=$artdata/InDetPhysValMonitoring/ReferenceHistograms/nightly_references/2024-06-01T2101/physval_piplus1GeV_simreco_2024-06-01T2101.root
@@ -46,8 +45,9 @@ art_dcube=$ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py
 
 lastref_dir=last_results
 
+conditionsTag=OFLCOND-MC23-SDR-RUN3-07
 
-# Sim step (based on PanDA job 3777178576 which made HITS.12860054._032508.pool.root.1, which is the input for AMI config q221):
+# MC23a simulation config, based on s4162
  run Sim_tf.py \
     --CA \
     --inputEVNTFile   ${ArtInFile} \
@@ -56,7 +56,7 @@ lastref_dir=last_results
     --maxEvents       10000 \
     --randomSeed      24304 \
     --simulator       FullG4MT_QS \
-    --conditionsTag   'OFLCOND-MC23-SDR-RUN3-01' \
+    --conditionsTag   'default:$conditionsTag' \
     --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
     --preInclude 'EVNTtoHITS:Campaigns.MC23aSimulationMultipleIoV' \
     --postInclude     'PyJobTransforms.TransformUtils.UseFrontier' 'HitAnalysis.PostIncludes.IDHitAnalysis'
@@ -84,9 +84,8 @@ if [ $sim_tf_exit_code -eq 0 ]  ;then
  
  run Digi_tf.py \
    --CA \
-   --conditionsTag default:OFLCOND-MC23-SDR-RUN3-01 \
+   --conditionsTag default:$conditionsTag \
    --digiSeedOffset1 100 --digiSeedOffset2 100 \
-   --geometryVersion "default:ATLAS-R3S-2021-03-02-00" \
    --inputHITSFile $hits \
    --maxEvents -1 \
    --outputRDOFile output.RDO.root \
@@ -104,7 +103,7 @@ if [ $sim_tf_exit_code -eq 0 ]  ;then
    --CA \
    --inputRDOFile   output.RDO.root \
    --outputAODFile   physval.AOD.root \
-   --conditionsTag   'default:OFLCOND-MC23-SDR-RUN3-01' \
+   --conditionsTag   'default:$conditionsTag' \
    --steering        doRAWtoALL \
    --checkEventCount False \
    --ignoreErrors    True \

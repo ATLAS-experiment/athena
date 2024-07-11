@@ -22,7 +22,7 @@ AtlasG4_tf.py \
     --truthStrategy 'MC15aPlus' \
     --postExec 'with open("ConfigSimCA.pkl", "wb") as f: cfg.store(f)' \
     --postInclude 'default:PyJobTransforms.UseFrontier' \
-    --preExec 'AtlasG4Tf:flags.Sim.TightMuonStepping=True;from SimulationConfig.SimEnums import CalibrationRun;flags.Sim.CalibrationRun=CalibrationRun.Off;from SimuJobTransforms.SimulationHelpers import enableBeamPipeKill,enableFrozenShowersFCalOnly;enableBeamPipeKill(flags);enableFrozenShowersFCalOnly(flags)' \
+    --preExec 'AtlasG4Tf:flags.Sim.TightMuonStepping=True;from SimulationConfig.SimEnums import CalibrationRun;flags.Sim.CalibrationRun=CalibrationRun.Off;from SimulationConfig.G4Optimizations import enableBeamPipeKill,enableFrozenShowersFCalOnly;enableBeamPipeKill(flags);enableFrozenShowersFCalOnly(flags)' \
     --DataRunNumber '284500' \
     --geometryVersion 'default:ATLAS-R2-2016-01-00-01' \
     --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/valid1.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.evgen.EVNT.e4993.EVNT.08166201._000012.pool.root.1" \

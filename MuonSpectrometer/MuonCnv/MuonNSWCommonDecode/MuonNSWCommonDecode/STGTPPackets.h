@@ -13,9 +13,39 @@
 #include "MuonNSWCommonDecode/NSWSTGTPDecodeBitmaps.h"
 
 namespace Muon::nsw {
+
+
+class STGTPMMPacket {
+  public:
+
+  struct MMSegmentData {
+    std::uint32_t monitor{};
+    std::uint32_t spare{};
+    std::uint32_t lowRes{};
+    std::uint32_t phiRes{};
+    std::uint32_t dTheta{};
+    std::uint32_t phiID{};
+    std::uint32_t rIndex{};
+  };
+
+   explicit STGTPMMPacket(const std::vector<std::uint32_t>& payload, const int ver);
+   virtual ~STGTPMMPacket() = default;
+   size_t Size(const int ver);
+ 
+  [[nodiscard]] const std::array<MMSegmentData, STGTPMMData::num_mm>& Segments() const { return m_segmentData; }
+  [[nodiscard]] const MMSegmentData& Segment(std::size_t segment) const;
+
+  [[nodiscard]] std::uint32_t BCID() const { return m_BCID; };
+
+  private:  
+  std::array<MMSegmentData, STGTPMMData::num_mm> m_segmentData{};
+  std::uint32_t m_BCID{};
+
+};
+
 class STGTPPadPacket {
  public:
-  explicit STGTPPadPacket(const std::vector<std::uint32_t>& payload);
+  explicit STGTPPadPacket(const std::vector<std::uint32_t>& payload, const int ver);
   virtual ~STGTPPadPacket() = default;
   [[nodiscard]] std::uint32_t BCID() const { return m_BCID; };
   [[nodiscard]] std::uint32_t BandID(const std::size_t num) const { return m_bandIDs.at(num); };
@@ -29,6 +59,8 @@ class STGTPPadPacket {
   std::array<std::uint32_t, STGTPPad::num_pads> m_phiIDs{};
   std::uint32_t m_idleFlag{};
   std::uint32_t m_coincWedge{};
+  size_t Size(const int version);
+  
 };
 
 class STGTPSegmentPacket {
@@ -43,7 +75,7 @@ class STGTPSegmentPacket {
     std::uint32_t rIndex{};
   };
 
-  explicit STGTPSegmentPacket(const std::vector<std::uint32_t>& payload);
+  explicit STGTPSegmentPacket(const std::vector<std::uint32_t>& payload, const int ver);
 
   virtual ~STGTPSegmentPacket() = default;
   [[nodiscard]] std::uint32_t LUT_ChoiceSelection() const { return m_lut_choice; }
@@ -65,6 +97,7 @@ class STGTPSegmentPacket {
 
   std::uint32_t m_BCID{};
   std::uint32_t m_sectorID{};
+  size_t Size(const int ver);
 };
 
 }  // namespace Muon::nsw

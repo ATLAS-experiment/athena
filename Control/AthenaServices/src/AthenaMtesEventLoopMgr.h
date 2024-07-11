@@ -40,7 +40,6 @@ class IDataProviderSvc;
 class IIncidentSvc;
 class StoreGateSvc;
 class ISvcLocator;
-class IEvtIdModifierSvc;
 class OutputStreamSequencerSvc;
 
 namespace yampl {
@@ -81,10 +80,6 @@ protected:
   typedef ServiceHandle<IConversionSvc> IConversionSvc_t;
   /// @property Reference to the Histogram Persistency Service
   IConversionSvc_t   m_histoPersSvc;
-
-  typedef ServiceHandle<IEvtIdModifierSvc> IEvtIdModifierSvc_t;
-  /// @property Reference to the EventID modifier Service
-  IEvtIdModifierSvc_t m_evtIdModSvc;
 
   /// @property histogram persistency technology to use: "ROOT", "HBOOK", "NONE". By default ("") get property value from ApplicationMgr
   StringProperty    m_histPersName;
@@ -260,8 +255,6 @@ public:
    
 private:
   StoreGateSvc* eventStore() const;
-
-  void modifyEventContext(EventContext& ctx, const EventID& eID, bool consume_modifier_stream);
 
   ServiceHandle<Athena::IConditionsCleanerSvc> m_conditionsCleaner;
   

@@ -1,5 +1,5 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
-from SimulationConfig.SimEnums import BeamPipeSimMode, CalibrationRun, CavernBackground, LArParameterization, SimulationFlavour
+from SimulationConfig.SimEnums import CalibrationRun, CavernBackground, LArParameterization, SimulationFlavour
 
 
 def getDetectorsFromRunArgs(flags, runArgs):
@@ -33,21 +33,6 @@ def getDetectorsFromRunArgs(flags, runArgs):
             pass
 
     return detectors
-
-
-def enableFrozenShowersFCalOnly(flags):
-    """Turns on GFlash shower parametrization for FCAL"""
-    flags.Sim.LArParameterization = LArParameterization.FrozenShowersFCalOnly
-    flags.Sim.CalibrationRun = CalibrationRun.Off
-
-
-def enableBeamPipeKill(flags):
-    flags.Sim.BeamPipeCut = 0.
-    flags.Sim.BeamPipeSimMode = BeamPipeSimMode.FastSim
-
-
-def enableTightMuonStepping(flags):
-    flags.Sim.TightMuonStepping = True
 
 
 def enableG4SignalCavern(flags):
