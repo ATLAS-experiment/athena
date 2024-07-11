@@ -25,6 +25,11 @@ StatusCode GeoModelMdtTest::initialize() {
     
     const MdtIdHelper& id_helper{m_idHelperSvc->mdtIdHelper()};
     for (const std::string& testCham : m_selectStat) {
+        /// Check that the station is not on the excluded list
+        if (std::find(m_excludeStat.begin(), m_excludeStat.end(), testCham) != m_excludeStat.end()) {
+            continue;
+        }
+        /// Check format
         if (testCham.size() != 6) {
             ATH_MSG_FATAL("Wrong format given " << testCham);
             return StatusCode::FAILURE;
@@ -47,12 +52,55 @@ StatusCode GeoModelMdtTest::initialize() {
         if (is_valid)
             m_testStations.insert(secMl);
     }
-    /// Add all stations for testing
+    /// If no specific sub-set was added, add all stations for testing
     if (m_testStations.empty()){
+        /// Construct list of excluded stations
+        std::set<Identifier> excludedStations{};
+        for (const std::string& testCham : m_excludeStat) {
+            /// Check format
+            if (testCham.size() != 6) {
+                ATH_MSG_FATAL("Wrong format given " << testCham);
+                return StatusCode::FAILURE;
+            }
+            /// Construct identifier; example string BIL1A3
+            std::string statName = testCham.substr(0, 3);
+            unsigned int statEta = std::atoi(testCham.substr(3, 1).c_str()) * (testCham[4] == 'A' ? 1 : -1);
+            unsigned int statPhi = std::atoi(testCham.substr(5, 1).c_str());
+            bool is_valid{false};
+            const Identifier eleId = id_helper.elementID(statName, statEta, statPhi, is_valid);
+            if (!is_valid) {
+                ATH_MSG_FATAL("Failed to deduce a station name for " << testCham);
+                return StatusCode::FAILURE;
+            }
+            /// Add station to excludedStations
+            excludedStations.insert(eleId);
+            /// Add the second multilayer if possible
+            const Identifier secMl = id_helper.multilayerID(eleId, 2, is_valid);
+            if (is_valid) {
+                excludedStations.insert(secMl);
+            }
+        }
+        /// Add stations for testing
         for(auto itr = id_helper.detectorElement_begin();
                  itr!= id_helper.detectorElement_end();++itr){
-           m_testStations.insert(*itr);
+            if (excludedStations.count(*itr) == 0) {
+               m_testStations.insert(*itr);
+            }
         }
+        /// Report what stations are excluded
+        if (!excludedStations.empty()) {
+            std::stringstream excluded_report{};
+            for (const Identifier& id : excludedStations){
+                excluded_report << " *** " << m_idHelperSvc->toString(id) << std::endl;
+            }
+            ATH_MSG_INFO("Test all station except the following excluded ones " << std::endl << excluded_report.str());
+        }
+    } else {
+        std::stringstream sstr{};
+        for (const Identifier& id : m_testStations) {
+            sstr<<" *** "<<m_idHelperSvc->toString(id)<<std::endl;
+        }
+        ATH_MSG_INFO("Test only the following stations "<<std::endl<<sstr.str());
     }
     ATH_CHECK(detStore()->retrieve(m_detMgr));
     return StatusCode::SUCCESS;

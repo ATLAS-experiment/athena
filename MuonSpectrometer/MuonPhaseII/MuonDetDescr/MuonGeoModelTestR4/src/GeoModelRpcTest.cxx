@@ -23,6 +23,11 @@ StatusCode GeoModelRpcTest::initialize() {
     
     const RpcIdHelper& id_helper{m_idHelperSvc->rpcIdHelper()};
     for (const std::string& testCham : m_selectStat) {
+        /// Check that the station is not on the excluded list
+        if (std::find(m_excludeStat.begin(), m_excludeStat.end(), testCham) != m_excludeStat.end()) {
+            continue;
+        }
+        /// Check format
         if (testCham.size() != 6) {
             ATH_MSG_FATAL("Wrong format given " << testCham);
             return StatusCode::FAILURE;
@@ -47,11 +52,51 @@ StatusCode GeoModelRpcTest::initialize() {
                                    id_helper.stationPhi(id) == id_helper.stationPhi(eleId);
                         });
     }
-    /// Add all stations for testing if nothing has been specified
+    /// Look at all stations for testing if nothing has been specified
     if (m_testStations.empty()){
-        std::copy(id_helper.detectorElement_begin(), 
-                  id_helper.detectorElement_end(), 
-                  std::inserter(m_testStations, m_testStations.end()));
+        /// Construct list of excluded stations
+        std::set<Identifier> excludedStations{};
+        for (const std::string& testCham : m_excludeStat) {
+            /// Check format
+            if (testCham.size() != 6) {
+                ATH_MSG_FATAL("Wrong format given " << testCham);
+                return StatusCode::FAILURE;
+            }
+            /// Construct identifier; example string BIL1A3
+            std::string statName = testCham.substr(0, 3);
+            unsigned int statEta = std::atoi(testCham.substr(3, 1).c_str()) * (testCham[4] == 'A' ? 1 : -1);
+            unsigned int statPhi = std::atoi(testCham.substr(5, 1).c_str());
+            bool is_valid{false};
+            const Identifier eleId = id_helper.elementID(statName, statEta, statPhi, 1, is_valid);
+            if (!is_valid) {
+                ATH_MSG_FATAL("Failed to deduce a station name for " << testCham);
+                return StatusCode::FAILURE;
+            }
+            /// Add station to excludedStations
+            std::copy_if(id_helper.detectorElement_begin(), 
+                         id_helper.detectorElement_end(), 
+                         std::inserter(excludedStations, excludedStations.end()), 
+                         [&](const Identifier& id) {
+                            return id_helper.stationName(id) == id_helper.stationName(eleId) &&
+                                   id_helper.stationEta(id) == id_helper.stationEta(eleId) &&
+                                   id_helper.stationPhi(id) == id_helper.stationPhi(eleId);
+                         });
+        }
+        /// Add stations for testing
+        std::copy_if(id_helper.detectorElement_begin(), 
+                     id_helper.detectorElement_end(), 
+                     std::inserter(m_testStations, m_testStations.end()),
+                     [&](const Identifier& id) {
+                        return excludedStations.count(id) == 0;
+                     });
+        /// Report what stations are excluded
+        if (!excludedStations.empty()) {
+            std::stringstream excluded_report{};
+            for (const Identifier& id : excludedStations){
+                excluded_report << " *** " << m_idHelperSvc->toString(id) << std::endl;
+            }
+            ATH_MSG_INFO("Test all station except the following excluded ones " << std::endl << excluded_report.str());
+        }
     } else {
         std::stringstream sstr{};
         for (const Identifier& id : m_testStations){

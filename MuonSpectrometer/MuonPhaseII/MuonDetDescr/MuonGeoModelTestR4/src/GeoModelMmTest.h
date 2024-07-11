@@ -40,6 +40,7 @@ class GeoModelMmTest : public AthHistogramAlgorithm{
       /// String should be formated like MM_<Large/Small Sector + Module type><Quadruplet number>
       //e.g. MM_SM2Q1
       Gaudi::Property<std::vector<std::string>> m_selectStat{this, "TestStations", {}};
+      Gaudi::Property<std::vector<std::string>> m_excludeStat{this, "ExcludeStations", {}};
       
       const MuonDetectorManager* m_detMgr{nullptr};
      
