@@ -669,7 +669,7 @@ const Trk::MultiComponentState* Trk::GsfSmoother::addCCOT( const Trk::TrackState
   const Trk::FitQualityOnSurface* combinedFitQuality = m_updator->fitQuality( *extrapolatedState, *ccot );     
   
   // Build a TSOS using the dummy measurement and combined state
-  Trk::MultiComponentStateOnSurface* final = new Trk::MultiComponentStateOnSurface(pseudoMeasurement, combinedState, extrapolatedState, combinedFitQuality);
+  Trk::MultiComponentStateOnSurface* final = new Trk::MultiComponentStateOnSurface(pseudoMeasurement, combinedState, extrapolatedState->clone(), combinedFitQuality);
   smoothedTrajectory->push_back(updatedMCSOS);
   smoothedTrajectory->push_back(final);
   ATH_MSG_DEBUG("Successfully added CCOT ");

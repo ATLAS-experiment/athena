@@ -486,39 +486,44 @@ double egammaTrkRefitterTool::getMaterialTraversed(Trk::Track* track) {
 
 // =========================================================================
 std::vector<const Trk::MeasurementBase*> egammaTrkRefitterTool::addPointsToTrack(const Trk::Track* track, const xAOD::Electron* eg) {
+  // CALO-improved re-fit: some improvements from the iterations TO and FROM "master"
   ATH_MSG_DEBUG("Adding a Point to the Track");  
 
   //  Object to return
   std::vector<const Trk::MeasurementBase*> vec; 
   if (track && track->trackParameters() && track->trackParameters()->size() > 0) {
-    const Trk::VertexOnTrack* vot = provideVotFromBeamspot( track );
+    if (m_useBeamSpot) {
+      const Trk::VertexOnTrack* vot = provideVotFromBeamspot( track );
 
-    // fill the beamSpot if you have it
-    if (vot){
-      vec.push_back(vot);
-      m_trash.push_back(vot);
+      // fill the beamSpot if you have it
+      if (vot){
+        vec.push_back(vot);
+        m_trash.push_back(vot);
+      }
     }
+
     std::vector<const Trk::MeasurementBase*> vecIDHits  = getIDHits(track);
         
     std::vector<const Trk::MeasurementBase*>::const_iterator it    = vecIDHits.begin();
     std::vector<const Trk::MeasurementBase*>::const_iterator itend = vecIDHits.end();
     // Fill the track
     for (;it!=itend;++it) vec.push_back(*it);
+
+    if (m_useClusterPosition && eg) {
+      int charge(0);
+      if( track->perigeeParameters() ) charge  = (int)track->perigeeParameters()->charge(); 
+      const Trk::CaloCluster_OnTrack* ccot = m_CCOTBuilder->buildClusterOnTrack(eg,charge);
+      if (ccot){
+        vec.push_back(ccot);
+        m_trash.push_back(ccot);
+      }
+    }
+
+    return vec;
   } else {
     ATH_MSG_WARNING("Could not extract MeasurementBase from track");
     return vec;
   }
-  
-  if (m_useClusterPosition && eg){
-    int charge(0);
-    if( track->perigeeParameters() ) charge  = (int)track->perigeeParameters()->charge(); 
-    const Trk::CaloCluster_OnTrack* ccot = m_CCOTBuilder->buildClusterOnTrack(eg,charge);
-    if (ccot){
-      vec.push_back(ccot);
-      m_trash.push_back(ccot);
-    }
-  }
-  return vec; 
 }
 
 const Trk::VertexOnTrack* egammaTrkRefitterTool::provideVotFromBeamspot(const Trk::Track* track) const{

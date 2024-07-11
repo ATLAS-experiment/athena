@@ -251,10 +251,16 @@ namespace Analysis {
         if (m_elel || m_eltrk) {
             for (elItr=importedElectronCollection->begin(); elItr!=importedElectronCollection->end(); ++elItr) {
                 if ( *elItr == NULL ) continue;
-	        if (!(*elItr)->trackParticleLink().isValid()) continue; // No electrons without ID tracks
-	        const xAOD::TrackParticle* elTrk(0);
-                elTrk = (*elItr)->trackParticleLink().cachedElement();
                 
+                const xAOD::TrackParticle* elTrk(0);
+                if ( m_TrkParticleCollection == "GSFCaloContainer" ) { // TODO: the name should not be hardcoded here
+                    static const SG::AuxElement::Accessor<ElementLink<xAOD::TrackParticleContainer> > refittedTrackParticleLink("gsfCaloTrackParticleLink");
+                    if ( ! refittedTrackParticleLink.isAvailable(*(*elItr)) || ! refittedTrackParticleLink(*(*elItr)).isValid() ) continue;
+                    elTrk = *refittedTrackParticleLink(*(*elItr));
+                } else {
+                    if (!(*elItr)->trackParticleLink().isValid()) continue; // No electrons without ID tracks
+                    elTrk = (*elItr)->trackParticleLink().cachedElement();
+                }
                 if ( elTrk==NULL) continue;
                 if ( !m_trkSelector->decision(*elTrk, vx) ) continue; // all ID tracks must pass basic tracking cuts
                 if ( fabs(elTrk->pt())<m_thresholdPt ) continue; // higher pt cut if needed
@@ -295,8 +301,14 @@ namespace Analysis {
         if (m_elel) {
             for (jpsiItr=jpsiCandidates.begin(); jpsiItr!=jpsiCandidates.end(); ++jpsiItr) {
                 if ( m_useTrackMeasurement ) {
-                  (*jpsiItr).trackParticle1 = (*jpsiItr).el1->trackParticleLink().cachedElement();
-                  (*jpsiItr).trackParticle2 = (*jpsiItr).el2->trackParticleLink().cachedElement();
+                  if ( m_TrkParticleCollection == "GSFCaloContainer" ) { // TODO: the name should not be hardcoded here
+                    static const SG::AuxElement::Accessor<ElementLink<xAOD::TrackParticleContainer> > refittedTrackParticleLink("gsfCaloTrackParticleLink");
+                    (*jpsiItr).trackParticle1 = *refittedTrackParticleLink(*((*jpsiItr).el1));
+                    (*jpsiItr).trackParticle2 = *refittedTrackParticleLink(*((*jpsiItr).el2));
+                  } else {
+                    (*jpsiItr).trackParticle1 = (*jpsiItr).el1->trackParticleLink().cachedElement();
+                    (*jpsiItr).trackParticle2 = (*jpsiItr).el2->trackParticleLink().cachedElement();
+                  }
                   (*jpsiItr).collection1 = importedTrackCollection;
                   (*jpsiItr).collection2 = importedTrackCollection;
                 } else {
@@ -545,6 +557,12 @@ namespace Analysis {
     std::vector<JpsiEECandidate> JpsiFinder_ee::getPairs2Colls(const std::vector<const xAOD::TrackParticle*> &tracks, const std::vector<const xAOD::Electron*> &electrons, bool tagAndProbe){
         
         std::vector<JpsiEECandidate> myPairs;
+
+        if ( m_TrkParticleCollection == "GSFCaloContainer" ) { // TODO: the name should not be hardcoded here
+            ATH_MSG_FATAL("NOT READY YET!");
+            return(myPairs);
+        }
+
         JpsiEECandidate pair;
         std::vector<const xAOD::TrackParticle*>::const_iterator trkItr;
         std::vector<const xAOD::Electron*>::const_iterator muItr;

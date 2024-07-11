@@ -12,7 +12,7 @@ atlas_depends_on_subdirs( PRIVATE
                           Calorimeter/CaloIdentifier
                           Calorimeter/CaloTrackingGeometry
                           Calorimeter/CaloUtils
-			  Calorimeter/CaloGeoHelpers
+                          Calorimeter/CaloGeoHelpers
                           Control/AthenaBaseComps
                           Control/DataModel
                           DetectorDescription/AtlasDetDescr
@@ -25,6 +25,7 @@ atlas_depends_on_subdirs( PRIVATE
                           GaudiKernel
                           InnerDetector/InDetConditions/InDetBeamSpotService
                           InnerDetector/InDetDetDescr/InDetIdentifier
+                          PhysicsAnalysis/ElectronPhotonID/ElectronPhotonFourMomentumCorrection
                           Reconstruction/RecoTools/RecoToolInterfaces
                           Reconstruction/egamma/egammaInterfaces
                           Tracking/TrkDetDescr/TrkSurfaces
@@ -54,7 +55,7 @@ atlas_add_component( egammaTrackTools
                      src/*.cxx
                      src/components/*.cxx
                      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${ROOT_LIBRARIES} CaloDetDescrLib CaloEvent CaloIdentifier CaloUtilsLib CaloGeoHelpers AthenaBaseComps DataModel AtlasDetDescr IdDictDetDescr EventPrimitives xAODCaloEvent xAODEgamma xAODTracking FourMomUtils GaudiKernel InDetIdentifier RecoToolInterfaces TrkSurfaces TrkCaloCluster_OnTrack TrkCaloExtension TrkEventPrimitives TrkMaterialOnTrack TrkMeasurementBase TrkNeutralParameters TrkParameters TrkParametersIdentificationHelpers TrkParticleBase TrkPseudoMeasurementOnTrack TrkRIO_OnTrack TrkTrack TrkVertexOnTrack VxVertex TrkExInterfaces TrkFitterInterfaces TrkVertexFitterInterfaces )
+                     LINK_LIBRARIES ${ROOT_LIBRARIES} CaloDetDescrLib CaloEvent CaloIdentifier CaloUtilsLib CaloGeoHelpers AthenaBaseComps DataModel AtlasDetDescr IdDictDetDescr EventPrimitives xAODCaloEvent xAODEgamma xAODTracking ElectronPhotonFourMomentumCorrectionLib FourMomUtils GaudiKernel InDetIdentifier RecoToolInterfaces TrkSurfaces TrkCaloCluster_OnTrack TrkCaloExtension TrkEventPrimitives TrkMaterialOnTrack TrkMeasurementBase TrkNeutralParameters TrkParameters TrkParametersIdentificationHelpers TrkParticleBase TrkPseudoMeasurementOnTrack TrkRIO_OnTrack TrkTrack TrkVertexOnTrack VxVertex TrkExInterfaces TrkFitterInterfaces TrkVertexFitterInterfaces )
 
 # Install files from the package:
 atlas_install_headers( egammaTrackTools )

@@ -43,6 +43,10 @@ use CaloGeoHelpers             CaloGeoHelpers-*      Calorimeter
 
 use InDetBeamSpotService       InDetBeamSpotService-* InnerDetector/InDetConditions
 use InDetIdentifier             InDetIdentifier-*             InnerDetector/InDetDetDescr
+
+# needed for the CALO-improved re-fit:
+use ElectronPhotonFourMomentumCorrection ElectronPhotonFourMomentumCorrection-* PhysicsAnalysis/ElectronPhotonID
+
 use AtlasDetDescr               AtlasDetDescr-*               DetectorDescription
 use IdDictDetDescr              IdDictDetDescr-*              DetectorDescription
 use TrkRIO_OnTrack 	        TrkRIO_OnTrack-* 	      Tracking/TrkEvent
