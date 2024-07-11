@@ -1,4 +1,4 @@
-//#include "stdafx.h"
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #include "BFieldPoint.h"
 #include "SpacePoint.h"
 #include "DkfTrack.h"

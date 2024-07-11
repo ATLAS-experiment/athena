@@ -1,4 +1,4 @@
-//#include "stdafx.h"
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #include "McTrack.h"
 #include "SiCluster.h"
 #include "PixelCluster.h"

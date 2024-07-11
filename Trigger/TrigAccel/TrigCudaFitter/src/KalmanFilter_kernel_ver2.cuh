@@ -1,3 +1,4 @@
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 __global__ void KalmanFilterGPU(INPUT_TRACK_INFO_TYPE* d_In, 
 								OUTPUT_TRACK_INFO_TYPE *d_Out, 

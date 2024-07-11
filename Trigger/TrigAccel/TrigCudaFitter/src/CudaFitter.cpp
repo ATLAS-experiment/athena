@@ -1,3 +1,4 @@
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #include <iostream>
 #include <vector>
 #include <algorithm>
@@ -25,6 +26,19 @@
 #include <chrono>
 
 #include <cuda_runtime.h>
+
+
+template <class T>
+bool cudaMallocWrapper(T * pT, const std::string & funcname){
+  const cudaError_t ce = cudaMalloc((void **)&pT, sizeof(T));
+  if( ce != cudaSuccess ) {
+    std::cerr << "Failed to execute: cudaMalloc in "<< funcname<< std::endl;
+    std::cerr << "Reason: " << cudaGetErrorString( ce ) << std::endl;
+    delete pT;
+    return false;
+  }
+  return true;
+}
 
 /// Simple macro to run CUDA commands with
 #define CUDA_CHECK( EXP )                                                  \
@@ -60,10 +74,10 @@ void CudaFitter::fit(std::vector<const RecTrack*>& vpTracks) {
   HIT_INFO_TYPE* pHits = new HIT_INFO_TYPE;
   HIT_INFO_TYPE& hits=*pHits;
 
-  INPUT_TRACK_INFO_TYPE* d_In;
-  DETECTOR_SURFACE_TYPE* d_Geo;
-  OUTPUT_TRACK_INFO_TYPE* d_Out;
-  HIT_INFO_TYPE* d_Hit;
+  INPUT_TRACK_INFO_TYPE* d_In{};
+  DETECTOR_SURFACE_TYPE* d_Geo{};
+  OUTPUT_TRACK_INFO_TYPE* d_Out{};
+  HIT_INFO_TYPE* d_Hit{};
 
   cudaSetDevice(0);
 
@@ -80,14 +94,12 @@ void CudaFitter::fit(std::vector<const RecTrack*>& vpTracks) {
   printf("Input Data = %ld bytes, Output data = %ld bytes\n",inDataSize,outDataSize);
 
   int nFittedTracksCPU=0;
-  //bool doCPU_Fitting=false;
   bool doCPU_Fitting=true;
-  //printf("...allocating GPU memory.\n");
-
-  CUDA_CHECK(cudaMalloc((void **)&d_In, sizeof(INPUT_TRACK_INFO_TYPE)));
-  CUDA_CHECK(cudaMalloc((void **)&d_Geo, sizeof(DETECTOR_SURFACE_TYPE)));
-  CUDA_CHECK(cudaMalloc((void **)&d_Hit, sizeof(HIT_INFO_TYPE)));
-  CUDA_CHECK(cudaMalloc((void **)&d_Out, sizeof(OUTPUT_TRACK_INFO_TYPE)));
+  
+  if (not cudaMallocWrapper(d_In, __func__)) return;
+  if (not cudaMallocWrapper(d_Geo, __func__)) return;
+  if (not cudaMallocWrapper(d_Hit, __func__)) return;
+  if (not cudaMallocWrapper(d_Out, __func__)) return;
 
   int nFittedTracksGPU=0;
   float kernelTotal=0.0;

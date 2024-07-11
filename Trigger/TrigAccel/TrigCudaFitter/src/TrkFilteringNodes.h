@@ -2,7 +2,7 @@
 // TrkFilteringNodes.h
 //   Header file for classes representing filtering nodes
 ///////////////////////////////////////////////////////////////////
-// (c) ATLAS Detector software
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 ///////////////////////////////////////////////////////////////////
 // Author: Dmitry Emeliyanov, RAL
 // D.Emeliyanov@rl.ac.uk
