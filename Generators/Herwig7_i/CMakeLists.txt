@@ -58,6 +58,8 @@ atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_joboptions( share/common/*.py )
 atlas_install_runtime( share/file/*.pdt )
 
+
+if(CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "x86_64")
 # only some standard helper functions are needed from POWHEG-BOX, can be used from any fixed version 
 # -> in unlikely case that one of these helper functions change in future POWHEG-BOX release, maybe best to hard-code?
 set (ATLAS_POWHEGPATHFORH7 "/cvmfs/atlas.cern.ch/repo/sw/Generators/powheg/ATLASOTF-07-03")
@@ -105,6 +107,7 @@ atlas_add_library ( powhegHerwigBB4L
   INCLUDE_DIRS ${THEPEG_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${GSL_INCLUDE_DIRS} ${HERWIG3_INCLUDE_DIRS} ${ATLAS_POWHEGPATHFORH7}/POWHEG-BOX-RES/include ${ATLAS_POWHEGPATHFORH7}/POWHEG-BOX-RES/b_bbar_4l_modified
   LINK_LIBRARIES ${THEPEG_LIBRARIES} ${Boost_LIBRARIES} ${GSL_LIBRARIES} ${HERWIG3_LIBRARIES} ${ZLIB_LIBRARIES} CxxUtils HwShower powhegSOforHerwig )
 
+endif()
 
 # Set up some environment variables for Herwig.
 set( Herwig7Environment_DIR ${CMAKE_CURRENT_SOURCE_DIR}
