@@ -71,6 +71,8 @@ void test1()
   assert (!vec->isLinked());
   int* ptr = reinterpret_cast<int*> (vec->toPtr());
   assert (std::as_const (*vec).toPtr() == ptr);
+  assert (vec->getDataSpan().beg == ptr);
+  assert (vec->getDataSpan().size == 10);
   for (int i=0; i < 10; i++)
     ptr[i] = i+1;
   assert (vec->resize (100) == false);
@@ -97,6 +99,8 @@ void test1()
   assert (ptr[4] == 8);
   assert (ptr[5] == 9);
   assert (ptr[6] == 10);
+  assert (vec->getDataSpan().beg == ptr);
+  assert (vec->getDataSpan().size == 7);
 
   vec->shift (3, 2);
   assert (vec->size() == 9);
@@ -111,6 +115,8 @@ void test1()
   assert (ptr[6] == 8);
   assert (ptr[7] == 9);
   assert (ptr[8] == 10);
+  assert (vec->getDataSpan().beg == ptr);
+  assert (vec->getDataSpan().size == 9);
 
   std::unique_ptr<SG::IAuxTypeVector> vec2 = vec->clone();
   assert (vec2->auxid() == 1);
@@ -126,6 +132,8 @@ void test1()
   assert (ptr2[6] == 8);
   assert (ptr2[7] == 9);
   assert (ptr2[8] == 10);
+  assert (vec2->getDataSpan().beg == ptr2);
+  assert (vec2->getDataSpan().size == 9);
 
   std::vector<int> vec3 { 20, 21, 22, 23, 24 };
   assert (vec->insertMove (3, vec3.data(), vec3.data() + 5, store));
@@ -144,6 +152,8 @@ void test1()
   assert (ptr[11] == 8);
   assert (ptr[12] == 9);
   assert (ptr[13] == 10);
+  assert (vec->getDataSpan().beg == ptr);
+  assert (vec->getDataSpan().size == 14);
 
   std::vector<int> vec4 { 30, 31, 32, 33, 34 };
   assert (vec->insertMove (14, vec4.data(), vec4.data() + 5, store));
@@ -167,9 +177,12 @@ void test1()
   assert (ptr[16] == 32);
   assert (ptr[17] == 33);
   assert (ptr[18] == 34);
+  assert (vec->getDataSpan().beg == ptr);
+  assert (vec->getDataSpan().size == 19);
 
   assert (vec->resize (0) == false);
   assert (vec->toPtr() == 0);
+  assert (vec->getDataSpan().size == 0);
 
   delete vec;
 }

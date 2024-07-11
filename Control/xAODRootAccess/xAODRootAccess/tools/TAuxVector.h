@@ -70,6 +70,14 @@ namespace xAOD {
 
       /// @}
 
+  protected:
+     /// Return a span object describing the current vector.
+     virtual SG::AuxDataSpanBase getDataSpanImpl() const override final;
+
+     /// Update the stored span.
+     void storeDataSpan();
+
+
    private:
       /// Function copying the payload of a range to a new location
       void copyRange( const void* src, void* dst, size_t n );

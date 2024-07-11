@@ -95,6 +95,7 @@ AuxTypeVectorHolder<T, CONT>::operator= (const AuxTypeVectorHolder& other)
       m_vecPtr = new vector_type (*other.m_vecPtr);
     else
       m_vecPtr = other.m_vecPtr;
+    IAuxTypeVector::resetDataSpan();
   }
   return *this;
 }
@@ -114,6 +115,7 @@ AuxTypeVectorHolder<T, CONT>::operator= (AuxTypeVectorHolder&& other)
     m_ownFlag = other.m_ownFlag;
     m_vecPtr = other.m_vecPtr;
     other.m_ownFlag = false;
+    IAuxTypeVector::resetDataSpan();
   }
   return *this;
 }
@@ -221,6 +223,7 @@ bool AuxTypeVectorHolder<T, CONT>::resize (size_t sz)
   const void* orig = m_vecPtr->empty() ? nullptr : m_vecPtr->data();
   m_vecPtr->resize (sz * SCALE,
                     Zero<typename AuxDataTraits<T>::element_type>::zero());
+  this->storeDataSpan();
   return m_vecPtr->data() == orig;
 }
 
@@ -234,6 +237,7 @@ inline
 void AuxTypeVectorHolder<T, CONT>::reserve (size_t sz)
 {
   m_vecPtr->reserve (sz * SCALE);
+  this->storeDataSpan();
 }
 
 
@@ -324,6 +328,7 @@ bool AuxTypeVectorHolder<T, CONT>::shift (size_t pos, ptrdiff_t offs)
                vec.end(),
                vec.begin() + (pos+offs)*SCALE);
     vec.resize (vec.size() + offs*SCALE);
+    this->storeDataSpan();
     return true;
   }
   else if (offs > 0) {
@@ -342,6 +347,7 @@ bool AuxTypeVectorHolder<T, CONT>::shift (size_t pos, ptrdiff_t offs)
                  vec.begin() + (pos+offs)*SCALE,
                  Zero<typename AuxDataTraits<T>::element_type>::zero());
     }
+    this->storeDataSpan();
     return vec.data() == orig;
   }
   return true;
@@ -420,6 +426,7 @@ bool AuxTypeVectorHolder<T, CONT>::insertMove (size_t pos, void* beg, void* end,
                reinterpret_cast<element_type*> (end),
                typename std::conjunction<std::is_standard_layout<element_type>,
                                          std::is_trivial<element_type> >::type());
+  this->storeDataSpan();
   return m_vecPtr->data() == orig;
 }
 
@@ -514,6 +521,30 @@ std::unique_ptr<IAuxTypeVector> AuxTypeVectorHolder<T, CONT>::toPacked()
 }
 
 
+/**
+ * @brief Return a span object describing the current vector.
+ *        Used to initialize @c m_span the first time that @c getDataSpan
+ *        is called.
+ */
+template <class T, class CONT>
+AuxDataSpanBase AuxTypeVectorHolder<T, CONT>::getDataSpanImpl() const
+{
+  vector_type* vec ATLAS_THREAD_SAFE = m_vecPtr;
+  return AuxDataSpanBase (vec->data(), vec->size() / SCALE);
+}
+
+
+/**
+ * @brief Update the stored span.
+ */
+template <class T, class CONT>
+inline
+void AuxTypeVectorHolder<T, CONT>::storeDataSpan()
+{
+  IAuxTypeVector::storeDataSpan (m_vecPtr->data(), m_vecPtr->size() / SCALE);
+}
+
+
 //**********************************************************************
 
 
@@ -568,6 +599,7 @@ AuxTypeVectorT<HOLDER>::operator= (const AuxTypeVectorT& other)
   if (this != &other) {
     Base::IAuxTypeVector::operator= (other);
     m_vec = other.m_vec;
+    IAuxTypeVector::resetDataSpan();
   }
   return *this;
 }
@@ -583,6 +615,7 @@ AuxTypeVectorT<HOLDER>::operator= (AuxTypeVectorT&& other)
   if (this != &other) {
     Base::IAuxTypeVector::operator= (other);
     m_vec = std::move (other.m_vec);
+    IAuxTypeVector::resetDataSpan();
   }
   return *this;
 }

@@ -13,6 +13,7 @@
 
 // EDM include(s):
 #include "AthContainersInterfaces/IAuxTypeVector.h"
+#include "CxxUtils/checker_macros.h"
 
 namespace xAOD {
 
@@ -80,6 +81,12 @@ namespace xAOD {
       virtual const std::type_info* objType() const override {
          return &typeid(T);
       }
+
+     virtual SG::AuxDataSpanBase getDataSpanImpl() const override final
+     {
+       void* beg ATLAS_THREAD_SAFE = &m_info;
+       return SG::AuxDataSpanBase( const_cast<void*> (beg), 1 );
+     }
 
    private:
       /// Reference to the info being handled

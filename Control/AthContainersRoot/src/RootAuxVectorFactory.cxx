@@ -205,9 +205,10 @@ size_t RootAuxVector::size() const
  */
 bool RootAuxVector::resize (size_t sz)
 {
-  const void* orig = this->toPtr();
+  const void* orig = this->getDataSpan().beg;
   m_proxy->Allocate(sz, false);
-  return this->toPtr() == orig;
+  this->storeDataSpan();
+  return this->getDataSpan().beg == orig;
 }
 
 
@@ -259,6 +260,7 @@ bool RootAuxVector::shift (size_t pos, ptrdiff_t offs)
                         beg + eltsz*pos,
                         m_proxy->Size() - pos);
     m_proxy->Allocate (m_proxy->Size() + offs, false);
+    this->storeDataSpan();
     return true;
   }
   else if (offs > 0) {
@@ -270,6 +272,7 @@ bool RootAuxVector::shift (size_t pos, ptrdiff_t offs)
                           beg + eltsz*pos,
                           oldsz - pos);
     rootType.clearRange (beg + eltsz*pos, offs);
+    this->storeDataSpan();
     return false;
   }
   return true;
@@ -301,7 +304,7 @@ bool RootAuxVector::insertMove (size_t pos, void* beg, void* end,
                                 SG::IAuxStore& /*srcStore*/)
 {
   size_t eltsz = m_proxy->GetIncrement();
-  const void* orig = this->toPtr();
+  const void* orig = this->getDataSpan().beg;
   const RootUtils::Type& rootType = m_factory->rootType();
 
   char* begp = reinterpret_cast<char*> (beg);
@@ -314,7 +317,8 @@ bool RootAuxVector::insertMove (size_t pos, void* beg, void* end,
   // so just use copy for now.
   rootType.copyRange (reinterpret_cast<char*>(this->toPtr()) + pos*eltsz,
                       beg, nelt);
-  return this->toPtr() == orig;
+  this->storeDataSpan();
+  return this->getDataSpan().beg == orig;
 }
 
 
@@ -332,6 +336,27 @@ bool RootAuxVector::insertMove (size_t pos, void* beg, void* end,
 const std::type_info* RootAuxVector::objType() const
 {
   return m_factory->objClass()->GetTypeInfo();
+}
+
+
+/**
+ * @brief Return a span object describing the current vector.
+ *        Used to initialize @c m_span the first time that @c getDataSpan
+ *        is called.
+ */
+AuxDataSpanBase RootAuxVector::getDataSpanImpl() const
+{
+  void* ptr ATLAS_THREAD_SAFE = const_cast<void*>(this->toPtr());
+  return AuxDataSpanBase (ptr, m_proxy->Size());
+}
+
+
+/**
+ * @brief Update the stored span.
+ */
+void RootAuxVector::storeDataSpan()
+{
+  IAuxTypeVector::storeDataSpan (this->toPtr(), m_proxy->Size());
 }
 
 

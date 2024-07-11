@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( AthContainersInterfaces )
@@ -26,4 +26,12 @@ atlas_add_test( AuxDataOption_test
 
 atlas_add_test( IAuxElement_test
    SOURCES test/IAuxElement_test.cxx
+   LINK_LIBRARIES AthContainersInterfaces )
+
+atlas_add_test( AuxDataSpan_test
+   SOURCES test/AuxDataSpan_test.cxx
+   LINK_LIBRARIES AthContainersInterfaces TestTools )
+
+atlas_add_test( IAuxTypeVector_test
+   SOURCES test/IAuxTypeVector_test.cxx
    LINK_LIBRARIES AthContainersInterfaces )

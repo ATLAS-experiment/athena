@@ -219,7 +219,22 @@ public:
   virtual const std::type_info* objType() const override;
 
 
+protected:
+  /**
+   * @brief Return a span object describing the current vector.
+   *        Used to initialize @c m_span the first time that @c getDataSpan
+   *        is called.
+   */
+  virtual AuxDataSpanBase getDataSpanImpl() const override final;
+
+
 private:
+  /**
+   * @brief Update the stored span.
+   */
+  void storeDataSpan();
+
+
   /// Pointer back to the factory class for this type.
   const RootAuxVectorFactory* m_factory;
 
