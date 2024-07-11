@@ -1145,6 +1145,7 @@ int AthenaMtesEventLoopMgr::declareEventRootAddress(EventContext& ctx){
     const EventInfo* pEventObserver{pEvent.get()};
     if (!pEventObserver) {
         // Retrieve the Event object
+        EventInfoCnvParams::eventIndex = ctx.evt();
         pEventObserver = eventStore()->tryConstRetrieve<EventInfo>();
         if( !pEventObserver ) {
          
