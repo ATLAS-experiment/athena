@@ -1,4 +1,4 @@
-//Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+//Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #include "FlavourTaggingTests/FTAGValidationAlgorithm.h"
 
@@ -102,12 +102,13 @@ namespace FTAGValidation {
   bool FTAGValidationAlgorithm::passJetJVTSelection( const xAOD::Jet* jet,
 						     const std::string& jetType ) const {
 
-    if ( jet->isAvailable< float >( "Jvt" ) == false ) {
+    static const SG::ConstAccessor< float > JvtAcc( "Jvt" );
+    if ( JvtAcc.isAvailable( *jet ) == false ) {
       ATH_MSG_ERROR( "Jet auxdata 'Jvt' is not available." );
       return false;
     }
 
-    float jvt = jet->auxdata< float >( "Jvt" );
+    float jvt = JvtAcc( *jet );
     double jvtCut = 0.59;
     if ( jetType == "AntiKt4EMPFlowJets" )
       jvtCut = 0.2;

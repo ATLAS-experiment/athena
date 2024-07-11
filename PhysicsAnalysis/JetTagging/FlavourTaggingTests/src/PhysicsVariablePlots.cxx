@@ -1,4 +1,4 @@
-//Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+//Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  
 
 #include "FlavourTaggingTests/PhysicsVariablePlots.h"
@@ -9,6 +9,7 @@
 
 #include "xAODMuon/MuonContainer.h"
 #include "xAODMuon/MuonAuxContainer.h"
+#include "AthContainers/ConstAccessor.h"
 
 #include "CxxUtils/phihelper.h"
 
@@ -121,11 +122,13 @@ namespace FTAGValidation {
       ATH_CHECK( fillHistogram( "jet_phi" , jet->phi() ) );
       //nMuons and nSV1
       const xAOD::BTagging* bTag = xAOD::BTaggingUtilities::getBTagging( *jet );
-      std::vector< ElementLink< xAOD::VertexContainer > > SV1_vertex = bTag->auxdata<std::vector< ElementLink< xAOD::VertexContainer > > >("SV1_vertices");
+      static const SG::ConstAccessor<std::vector< ElementLink< xAOD::VertexContainer > > > SV1_verticesAcc("SV1_vertices");
+      std::vector< ElementLink< xAOD::VertexContainer > > SV1_vertex = SV1_verticesAcc(*bTag);
       if(SV1_vertex.size() >= 1) nJetsWithSV++;
 
-      if (bTag->isAvailable< ElementLink<xAOD::MuonContainer> >("SMT_mu_link")) {
-        ElementLink<xAOD::MuonContainer> muonLink = bTag->auxdata< ElementLink<xAOD::MuonContainer> >("SMT_mu_link");
+      static const SG::ConstAccessor< ElementLink<xAOD::MuonContainer> > SMT_mu_linkAcc("SMT_mu_link");
+      if (SMT_mu_linkAcc.isAvailable(*bTag)) {
+        ElementLink<xAOD::MuonContainer> muonLink = SMT_mu_linkAcc(*bTag);
         if ( muonLink.isValid() ) {
           const xAOD::Muon* muon=(*muonLink);
           if ( muon != 0 ) {
@@ -141,13 +144,14 @@ namespace FTAGValidation {
       // Retrieve jet flavour
       std::string flavour = "DATA_";
       if ( eventInfo->eventType(xAOD::EventInfo::EventType::IS_SIMULATION) ) {
-	
-	if ( jet->isAvailable< int >( "HadronConeExclTruthLabelID" ) == false ) {
+
+        static const SG::ConstAccessor< int > HadronConeExclTruthLabelIDAcc("HadronConeExclTruthLabelID");
+	if ( HadronConeExclTruthLabelIDAcc.isAvailable( *jet ) == false ) {
 	  ATH_MSG_ERROR( "Input sample is MC but jet has no 'HadronConeExclTruthLabelID' aux data. Something is wrong!" );
 	  return StatusCode::FAILURE;
 	}
 	
-	int HadronConeExclTruthLabelID = jet->auxdata< int >( "HadronConeExclTruthLabelID");
+        int HadronConeExclTruthLabelID = HadronConeExclTruthLabelIDAcc(*jet);
 	ATH_MSG_DEBUG( "  ** 'HadronConeExclTruthLabelID' is " << HadronConeExclTruthLabelID );
         ATH_CHECK( fillHistogram( "truth_label" , HadronConeExclTruthLabelID ) );
 	
@@ -288,12 +292,13 @@ namespace FTAGValidation {
       return StatusCode::FAILURE;
     }
 
-    if ( not bTaggingObject->isAvailable< std::vector< ElementLink<xAOD::TrackParticleContainer > > >("BTagTrackToJetAssociator") ) {
+    static const SG::ConstAccessor< std::vector< ElementLink<xAOD::TrackParticleContainer> > > BTagTrackToJetAssociatorAcc("BTagTrackToJetAssociator");
+    if ( not BTagTrackToJetAssociatorAcc.isAvailable(*bTaggingObject) ) {
       ATH_MSG_ERROR( "Cannot retrieve 'BTagTrackToJetAssociator' auxdata from b-tagging object!" );
       return StatusCode::FAILURE;
     }
 
-    std::vector< ElementLink< xAOD::TrackParticleContainer > > assocTracks = bTaggingObject->auxdata< std::vector< ElementLink<xAOD::TrackParticleContainer > > >("BTagTrackToJetAssociator");
+    std::vector< ElementLink< xAOD::TrackParticleContainer > > assocTracks = BTagTrackToJetAssociatorAcc(*bTaggingObject);
     ATH_CHECK( fillHistogram( chain+flavour+"numTracks_perJet",assocTracks.size() ) );
     ATH_MSG_DEBUG( "  ** nBTagTracksInJet: " << assocTracks.size() );
 
@@ -453,14 +458,19 @@ namespace FTAGValidation {
 //    std::vector< float > IP2D_sigZ0wrtPVOfTracks;
 
     bTaggingObject->variable< int >( "IP2D", "nTrks", IP2D_nTrks );
-    if ( bTaggingObject->isAvailable< std::vector< float > >( "IP2D_weightBOfTracks" ) )
-      IP2D_weightBOfTracks = bTaggingObject->auxdata< std::vector< float > >( "IP2D_weightBOfTracks" );
-    if ( bTaggingObject->isAvailable< std::vector< float > >( "IP2D_weightCOfTracks" ) )
-      IP2D_weightCOfTracks = bTaggingObject->auxdata< std::vector< float > >( "IP2D_weightCOfTracks" );
-    if ( bTaggingObject->isAvailable< std::vector< float > >( "IP2D_weightUOfTracks" ) )
-      IP2D_weightUOfTracks = bTaggingObject->auxdata< std::vector< float > >( "IP2D_weightUOfTracks" );
-    if ( bTaggingObject->isAvailable< std::vector< int > >( "IP2D_gradeOfTracks" ) )
-      IP2D_gradeOfTracks = bTaggingObject->auxdata< std::vector< int > >( "IP2D_gradeOfTracks" );
+
+    static const SG::ConstAccessor< std::vector< float > > IP2D_weightBOfTracksAcc( "IP2D_weightBOfTracks" );
+    IP2D_weightBOfTracks = IP2D_weightBOfTracksAcc.withDefault(*bTaggingObject, std::vector< float >());
+
+    static const SG::ConstAccessor< std::vector< float > > IP2D_weightCOfTracksAcc( "IP2D_weightCOfTracks" );
+    IP2D_weightCOfTracks = IP2D_weightCOfTracksAcc.withDefault(*bTaggingObject, std::vector< float >());
+
+    static const SG::ConstAccessor< std::vector< float > > IP2D_weightUOfTracksAcc( "IP2D_weightUOfTracks" );
+    IP2D_weightUOfTracks = IP2D_weightUOfTracksAcc.withDefault(*bTaggingObject, std::vector< float >());
+
+    static const SG::ConstAccessor< std::vector< int > > IP2D_gradeOfTracksAcc( "IP2D_gradeOfTracks" );
+    IP2D_gradeOfTracks = IP2D_gradeOfTracksAcc.withDefault(*bTaggingObject, std::vector< int >());
+
 //    if ( bTaggingObject->isAvailable< std::vector< float > >( "IP2D_valD0wrtPVOfTracks" ) )
 //      IP2D_valD0wrtPVOfTracks = bTaggingObject->auxdata< std::vector< float > >( "IP2D_valD0wrtPVOfTracks" );
 //    if ( bTaggingObject->isAvailable< std::vector< float > >( "IP2D_valZ0wrtPVOfTracks" ) )
@@ -516,23 +526,30 @@ namespace FTAGValidation {
     std::vector< float > IP3D_sigZ0wrtPVOfTracks;
 
     bTaggingObject->variable< int >( "IP3D", "nTrks", IP3D_nTrks );
-    if ( bTaggingObject->isAvailable< std::vector< float > >( "IP3D_weightBOfTracks" ) )
-      IP3D_weightBOfTracks = bTaggingObject->auxdata< std::vector< float > >( "IP3D_weightBOfTracks" );
-    if ( bTaggingObject->isAvailable< std::vector< float > >( "IP3D_weightCOfTracks" ) )
-      IP3D_weightCOfTracks = bTaggingObject->auxdata< std::vector< float > >( "IP3D_weightCOfTracks" );
-    if ( bTaggingObject->isAvailable< std::vector< float > >( "IP3D_weightUOfTracks" ) )
-      IP3D_weightUOfTracks = bTaggingObject->auxdata< std::vector< float > >( "IP3D_weightUOfTracks" );
-    if ( bTaggingObject->isAvailable< std::vector< int > >( "IP3D_gradeOfTracks" ) )
-      IP3D_gradeOfTracks = bTaggingObject->auxdata< std::vector< int > >( "IP3D_gradeOfTracks" );
 
-    if ( bTaggingObject->isAvailable< std::vector< float > >( "IP3D_D0wrtPVOfTracks" ) )
-      IP3D_D0wrtPVOfTracks = bTaggingObject->auxdata< std::vector< float > >( "IP3D_D0wrtPVOfTracks" );
-    if ( bTaggingObject->isAvailable< std::vector< float > >( "IP3D_Z0wrtPVOfTracks" ) )
-      IP3D_Z0wrtPVOfTracks = bTaggingObject->auxdata< std::vector< float > >( "IP3D_Z0wrtPVOfTracks" );
-    if ( bTaggingObject->isAvailable< std::vector< float > >( "IP3D_sigD0wrtPVOfTracks" ) )
-      IP3D_sigD0wrtPVOfTracks = bTaggingObject->auxdata< std::vector< float > >( "IP3D_sigD0wrtPVOfTracks" );
-    if ( bTaggingObject->isAvailable< std::vector< float > >( "IP3D_sigZ0wrtPVOfTracks" ) )
-      IP3D_sigZ0wrtPVOfTracks = bTaggingObject->auxdata< std::vector< float > >( "IP3D_sigZ0wrtPVOfTracks" );
+    static const SG::ConstAccessor< std::vector< float > > IP3D_weightBOfTracksAcc( "IP3D_weightBOfTracks" );
+    IP3D_weightBOfTracks = IP3D_weightBOfTracksAcc.withDefault(*bTaggingObject, std::vector< float >());
+
+    static const SG::ConstAccessor< std::vector< float > > IP3D_weightCOfTracksAcc( "IP3D_weightCOfTracks" );
+    IP3D_weightCOfTracks = IP3D_weightCOfTracksAcc.withDefault(*bTaggingObject, std::vector< float >());
+
+    static const SG::ConstAccessor< std::vector< float > > IP3D_weightUOfTracksAcc( "IP3D_weightUOfTracks" );
+    IP3D_weightUOfTracks = IP3D_weightUOfTracksAcc.withDefault(*bTaggingObject, std::vector< float >());
+
+    static const SG::ConstAccessor< std::vector< int > > IP3D_gradeOfTracksAcc( "IP3D_gradeOfTracks" );
+    IP3D_gradeOfTracks = IP3D_gradeOfTracksAcc.withDefault(*bTaggingObject, std::vector< int >());
+
+    static const SG::ConstAccessor< std::vector< float > > IP3D_D0wrtPVOfTracksAcc( "IP3D_D0wrtPVOfTracks" );
+    IP3D_D0wrtPVOfTracks = IP3D_D0wrtPVOfTracksAcc.withDefault(*bTaggingObject, std::vector< float >());
+
+    static const SG::ConstAccessor< std::vector< float > > IP3D_Z0wrtPVOfTracksAcc( "IP3D_Z0wrtPVOfTracks" );
+    IP3D_Z0wrtPVOfTracks = IP3D_Z0wrtPVOfTracksAcc.withDefault(*bTaggingObject, std::vector< float >());
+
+    static const SG::ConstAccessor< std::vector< float > > IP3D_sigD0wrtPVOfTracksAcc( "IP3D_sigD0wrtPVOfTracks" );
+    IP3D_sigD0wrtPVOfTracks = IP3D_sigD0wrtPVOfTracksAcc.withDefault(*bTaggingObject, std::vector< float >());
+
+    static const SG::ConstAccessor< std::vector< float > > IP3D_sigZ0wrtPVOfTracksAcc( "IP3D_sigZ0wrtPVOfTracks" );
+    IP3D_sigZ0wrtPVOfTracks = IP3D_sigZ0wrtPVOfTracksAcc.withDefault(*bTaggingObject, std::vector< float >());
 
     ATH_MSG_DEBUG("Size IP3D_gradeOfTracks/_weightBOfTracks/_weightUOfTracks/_D0wrtPVOfTracks/_sigD0wrtPVOfTracks/_Z0wrtPVOfTracks/_sigZ0wrtPVOfTracks: " << IP3D_gradeOfTracks.size() <<", "<< IP3D_weightBOfTracks.size() << ", " << IP3D_weightUOfTracks.size() << ", " << IP3D_D0wrtPVOfTracks.size() << ", " << IP3D_sigD0wrtPVOfTracks.size() << ", " << IP3D_Z0wrtPVOfTracks.size() << ", " << IP3D_sigZ0wrtPVOfTracks.size() );
     ATH_CHECK( fillHistogram( chain+flavour+"IP3D_nTracks",IP3D_nTrks ) );
