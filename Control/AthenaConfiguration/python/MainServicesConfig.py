@@ -143,10 +143,6 @@ def AthenaMtesEventLoopMgrCfg(flags, mtEs=False, channel=''):
         elmgr.RequireInputAttributeList = True
         elmgr.UseSecondaryEventNumber = True
 
-    if flags.Input.OverrideRunNumber:
-        from AthenaKernel.EventIdOverrideConfig import EvtIdModifierSvcCfg
-        elmgr.EvtIdModifierSvc = cfg.getPrimaryAndMerge(EvtIdModifierSvcCfg(flags)).name
-
     if mtEs:
         from AthenaServices.OutputStreamSequencerSvcConfig import OutputStreamSequencerSvcCfg
         cfg.merge(OutputStreamSequencerSvcCfg(flags,
