@@ -12,14 +12,16 @@
 #include "MuonPRDTest/MMDigitVariables.h"
 #include "MuonPRDTest/sTGCDigitVariables.h"
 
-
-
+#include "MuonPRDTestR4/MdtDriftCircleVariables.h"
+#include "MuonPRDTestR4/RpcMeasurementVariables.h"
+#include "MuonPRDTestR4/TgcStripVariables.h"
+#include "MuonPRDTestR4/MmClusterVariables.h"
 
 using namespace MuonVal;
 using namespace MuonPRDTest;
 namespace MuonValR4 {
     MuonHitTesterAlg::MuonHitTesterAlg(const std::string& alg_name,
-                                    ISvcLocator* pSvcLocator):
+                                       ISvcLocator* pSvcLocator):
         AthHistogramAlgorithm{alg_name, pSvcLocator}{} 
             
     StatusCode MuonHitTesterAlg::initialize(){
@@ -29,6 +31,7 @@ namespace MuonValR4 {
         m_tree.addBranch(std::make_shared<EventInfoBranch>(m_tree, evOpts));
         ATH_CHECK(setupSimHits());
         ATH_CHECK(setupDigits());
+        ATH_CHECK(setupPrds());
         ATH_CHECK(m_tree.init(this));
         return StatusCode::SUCCESS;
     }
@@ -65,7 +68,7 @@ namespace MuonValR4 {
         return StatusCode::SUCCESS;
     }
     StatusCode MuonHitTesterAlg::setupDigits() {
-        if (!m_writeDigits || !m_isMC){
+        if (!m_writeDigits) {
             return StatusCode::SUCCESS;
         }
         if (m_writeMdtDigits) {
@@ -85,7 +88,24 @@ namespace MuonValR4 {
         }
         return StatusCode::SUCCESS;
     }
-
+    StatusCode MuonHitTesterAlg::setupPrds() {
+        if (!m_writePrds) {
+            return StatusCode::SUCCESS;
+        }
+        if (m_writeMdtPrds) {
+            m_tree.addBranch(std::make_shared<MdtDriftCircleVariables>(m_tree, m_mdtPrdKey, msgLevel()));
+        }
+        if (m_writeRpcPrds) {
+            m_tree.addBranch(std::make_shared<RpcMeasurementVariables>(m_tree, m_rpcPrdKey, msgLevel()));
+        }
+        if (m_writeTgcPrds) {
+            m_tree.addBranch(std::make_shared<TgcStripVariables>(m_tree, m_tgcPrdKey, msgLevel()));
+        }
+        if (m_writeMmPrds) {
+            m_tree.addBranch(std::make_shared<MmClusterVariables>(m_tree, m_mmPrdKey, msgLevel()));
+        }
+        return StatusCode::SUCCESS;
+    }
     StatusCode MuonHitTesterAlg::finalize(){
         ATH_CHECK(m_tree.write());
         return StatusCode::SUCCESS;

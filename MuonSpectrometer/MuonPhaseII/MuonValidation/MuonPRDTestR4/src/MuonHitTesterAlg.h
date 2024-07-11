@@ -67,8 +67,25 @@ namespace MuonValR4 {
             Gaudi::Property<std::string> m_rpcDigitKey{this, "RpcDigitKey", "RPC_DIGITS"};
             Gaudi::Property<std::string> m_tgcDigitKey{this, "TgcDigitKey", "TGC_DIGITS"};
             Gaudi::Property<std::string> m_mmDigitKey{this, "MmDigitKey", "MM_DIGITS"};
-            Gaudi::Property<std::string> m_sTgcDigitKey{this, "sTgcDigitKey", "STGC_DIGITS"};  
-
+            Gaudi::Property<std::string> m_sTgcDigitKey{this, "sTgcDigitKey", "STGC_DIGITS"};
+            /**
+             *  @brief Toggle whether the uncalibrated measurement collections shall be tested
+             * */
+            StatusCode setupPrds();
+            Gaudi::Property<bool> m_writePrds{this, "dumpPrds", false,
+                                              "Master switch toggling the prd collection dump"};
+   
+            Gaudi::Property<bool> m_writeMdtPrds{this, "dumpMdtPrds", true};
+            Gaudi::Property<bool> m_writeRpcPrds{this, "dumpRpcPrds", true};
+            Gaudi::Property<bool> m_writeTgcPrds{this, "dumpTgcPrds", true};
+            Gaudi::Property<bool> m_writeMmPrds{this, "dumpMmPrds", true};
+            /**
+             *  @brief Prd collection names
+             */
+            Gaudi::Property<std::string> m_mdtPrdKey{this, "MdtPrdKey", "xAODMdtCircles"};
+            Gaudi::Property<std::string> m_rpcPrdKey{this, "RpcPrdKey", "xRpcStrips"};
+            Gaudi::Property<std::string> m_tgcPrdKey{this, "TgcPrdKey", "xTgcStrips"};
+            Gaudi::Property<std::string> m_mmPrdKey{this, "MmPrdKey", "xAODMMClusters"};
     };
 }
 #endif
