@@ -968,14 +968,15 @@ CP::CorrectionCode egammaLayerRecalibTool::applyCorrection(xAOD::Egamma& particl
   }
 
   double eta_calo;
+  static const SG::AuxElement::Accessor<float> accEtaCalo("etaCalo");
   if(particle.author() == xAOD::EgammaParameters::AuthorFwdElectron){
     eta_calo = cluster->eta();
   }
   else if (cluster->retrieveMoment(xAOD::CaloCluster::ETACALOFRAME, eta_calo)){
 
   }
-  else if (cluster->isAvailable<float>("etaCalo")) {
-    eta_calo = cluster->auxdata<float>("etaCalo");
+  else if (accEtaCalo.isAvailable(*cluster)) {
+    eta_calo = accEtaCalo(*cluster);
   }
   else{
     ATH_MSG_ERROR("etaCalo not available as auxilliary variable, using cluster eta as eta calo!");
