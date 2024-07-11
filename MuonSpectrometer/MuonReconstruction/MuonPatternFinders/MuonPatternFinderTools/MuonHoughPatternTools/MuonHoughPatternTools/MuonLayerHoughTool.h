@@ -32,13 +32,12 @@
 #include "TrkTruthData/PRD_MultiTruthCollection.h"
 #include "xAODMuon/MuonSegmentContainer.h"
 #include "xAODTruth/TruthParticleContainer.h"
+#include "MuonReadoutGeometry/MuonDetectorManager.h"
 namespace Trk {
     class PrepRawData;
 }
 
-namespace MuonGM {
-    class MuonDetectorManager;
-}
+
 namespace MuonHough {
     class HitDebugInfo;
 }
@@ -173,12 +172,13 @@ namespace Muon {
         void createPatternCombinations(std::map<MuonHough::MuonPhiLayerHough::Maximum*, MaximumVec>& phiEtaAssociations,
                                        MuonPatternCombinationCollection& patternCombis) const;
 
-        void insertHash(const IdentifierHash& hash, const Identifier& id);
-        void insertHash(int sector, const IdentifierHash& hash, const Identifier& id);
+        void insertHash(const IdentifierHash& hash, const Identifier& id) const;
+        void insertHash(int sector, const IdentifierHash& hash, const Identifier& id) const;
 
         void matchTruth(std::set<Identifier>& truthHits, const PRD_MultiTruthCollection& truthCol, const Identifier& id,
                         MuonHough::HitDebugInfo& debug) const;
-        void initializeSectorMapping(const MuonGM::MuonDetectorManager* detMgr);
+        
+        void initializeSectorMapping(const EventContext& ctx) const;
         void printTruthSummary(std::set<Identifier>& truth, std::set<Identifier>& found) const;
 
         void buildRoads(MaximumVec& seedMaxima, MuonHough::MuonDetectorHough& detectorHoughTransforms, 
@@ -187,6 +187,9 @@ namespace Muon {
         void mergePhiMaxima(Road& road) const;
 
         Gaudi::Property<bool> m_useSeeds{this, "UseSeeds", true};
+        
+        SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_muonManagerKey{this, "MuonManagerKey", "MuonDetectorManager", "MuonManager ReadKey for IOV Range intersection"};
+
 
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
         PublicToolHandle<MuonEDMPrinterTool> m_printer{this, "printerTool", "Muon::MuonEDMPrinterTool/MuonEDMPrinterTool"};
@@ -206,9 +209,12 @@ namespace Muon {
         Gaudi::Property<bool> m_addSectors{this, "AddSectors", false};                         // default false
         unsigned int m_ntechnologies{UINT_MAX};
         std::map<unsigned int, unsigned int> m_techToTruthNameIdx{};  // mapping the muon technology to the index of the m_truthNames vector
-        CollectionsPerSectorVec m_collectionsPerSector;
 
         MuonSectorMapping m_sectorMapping;
+
+        mutable std::mutex m_mutex ATLAS_THREAD_SAFE;
+        mutable CollectionsPerSectorVec m_collectionsPerSector ATLAS_THREAD_SAFE;
+        mutable bool m_sectorSetup ATLAS_THREAD_SAFE{false};
     };
 
     struct SortHoughDataPerSector {
