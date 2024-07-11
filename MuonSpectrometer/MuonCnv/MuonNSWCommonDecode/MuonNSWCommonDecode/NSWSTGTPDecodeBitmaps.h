@@ -52,7 +52,7 @@ namespace Muon
       constexpr int size_stream_head_fifo_size =             16;
       constexpr int size_stream_head_streamID =              16;
       constexpr int size_trailer_CRC =                       16;
-
+      
 
     };
 
@@ -67,10 +67,34 @@ namespace Muon
       constexpr std::size_t size_spare =                              3;
       constexpr std::size_t size_idleFlag =                           1;
       constexpr std::size_t size_padding =                            8;
-
+      constexpr std::size_t size_v2_padding =                         40;
+      constexpr std::size_t size_v3_padding =                         40;
+      constexpr std::size_t size_v1         =                         96;
+      constexpr std::size_t size_v2         =                         96;
+      constexpr std::size_t size_v3         =                         128;
+      
     };
 
-     
+    namespace STGTPMMData {
+       constexpr std::size_t num_mm =                    8;
+       constexpr int mm_stream_header  =              0xC0CA;
+       constexpr int size_output_mm_monitor =             1;
+       constexpr int size_output_mm_spare =               2;
+       constexpr int size_output_mm_lowRes =              1;
+       constexpr int size_output_mm_phiRes =              1;
+       constexpr int size_output_mm_dTheta =              5;
+       constexpr int size_output_mm_phiID =               6;
+       constexpr int size_output_mm_rIndex =              8;
+
+       constexpr int size_bcid             =                   16;
+       constexpr int size_v3_padding       =                   48;
+
+       constexpr std::size_t size_v1         =                   0;
+       constexpr std::size_t size_v2         =                   0;
+       constexpr std::size_t size_v3         =                   256;
+
+    };    
+ 
     namespace STGTPSegments {
        constexpr std::size_t num_segments =                    8;
 
@@ -90,6 +114,11 @@ namespace Muon
 
        constexpr int size_bcid             =                   12;
        constexpr int size_sectorID         =                   4;
+       constexpr int size_v3_padding       =                   28;
+       constexpr std::size_t size_v1       =                   256;
+       constexpr std::size_t size_v2       =                   256;
+       constexpr std::size_t size_v3       =                   256;
+       constexpr std::size_t size_valid_segment_v3 =              8;
       
       enum class MergedSegmentProperty {
           Monitor = fill_bitmask<uint32_t>(0, size_output_segment_monitor),

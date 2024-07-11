@@ -7,14 +7,19 @@ def NRPCCablingConfigCfg(flags, name = "MuonNRPC_CablingAlg", **kwargs):
     result = ComponentAccumulator()
 
     ### Add DB folder
-    kwargs.setdefault("JSONFile", "RpcCabling.json")
+    kwargs.setdefault("JSONFile", "")
     if len(kwargs["JSONFile"]) == 0:
         from IOVDbSvc.IOVDbSvcConfig import addFolders
         dbName = 'RPC_OFL' if flags.Input.isMC else 'RPC'
         cablingFolder = "/RPC/NCABLING/JSON" if flags.Input.isMC else "/RPC/Onl/NCABLING/JSON"
-        cablingTag = "RpcNcablingJson-RUN3-04" 
-        if flags.Muon.usePhaseIIGeoSetup and flags.Input.isMC:    
-            cablingTag = "RpcNcablingJson-RUN3-FanatasyCabling-1"
+        cablingTag = "RpcNcablingJson-RUN3-04"
+        from AthenaConfiguration.Enums import LHCPeriod
+        if flags.Muon.usePhaseIIGeoSetup and flags.Input.isMC:  
+            if flags.GeoModel.Run <= LHCPeriod.Run3:   
+                cablingTag = "RpcNcablingJson-RUN3-FanatasyCabling-2"
+            else:
+                cablingTag = "RpcNcablingJson-RUN4-FantasyCabling-1"
+
         result.merge(addFolders(flags, [cablingFolder], detDb=dbName, className='CondAttrListCollection', tag=cablingTag))
         kwargs.setdefault("MapFolders",  cablingFolder)
     
@@ -95,21 +100,45 @@ def TGCCablingConfigCfg(flags):
 def MDTCablingConfigCfg(flags, name = "MuonMDT_CablingAlg", **kwargs):
     acc = ComponentAccumulator()
     from AthenaConfiguration.Enums import LHCPeriod
-    kwargs.setdefault("isRun3", flags.GeoModel.Run >= LHCPeriod.Run3 )
-    MDTCablingAlg = CompFactory.MuonMDT_CablingAlg(name, **kwargs)
-   
-    from IOVDbSvc.IOVDbSvcConfig import addFolders
-    if flags.Input.isMC is True:
-        MDTCablingAlg.MapFolders = "/MDT/Ofl/CABLING/MAP_SCHEMA" 
-        MDTCablingAlg.MezzanineFolders    = "/MDT/Ofl/CABLING/MEZZANINE_SCHEMA" 
-        acc.merge( addFolders( flags, ["/MDT/Ofl/CABLING/MAP_SCHEMA",
-                                       "/MDT/Ofl/CABLING/MEZZANINE_SCHEMA"], 'MDT_OFL', className="CondAttrListCollection") )
-    else:
-        MDTCablingAlg.MapFolders = "/MDT/CABLING/MAP_SCHEMA" 
-        MDTCablingAlg.MezzanineFolders    = "/MDT/CABLING/MEZZANINE_SCHEMA" 
-        acc.merge( addFolders( flags, ["/MDT/CABLING/MAP_SCHEMA",
-                                       "/MDT/CABLING/MEZZANINE_SCHEMA"], 'MDT', className="CondAttrListCollection") )
+    
+    kwargs.setdefault("UseJSONFormat", flags.Muon.usePhaseIIGeoSetup and \
+                                       flags.GeoModel.Run >= LHCPeriod.Run4)
 
+    kwargs.setdefault("MezzanineJSON", "")
+    kwargs.setdefault("CablingJSON", "")
+
+    kwargs.setdefault("isRun3", flags.GeoModel.Run >= LHCPeriod.Run3 )
+    from IOVDbSvc.IOVDbSvcConfig import addFolders
+    if len(kwargs["MezzanineJSON"]) == 0 and len(kwargs["CablingJSON"]) == 0:
+        if flags.Input.isMC is True:
+            dbTagMezz = None 
+            dbTagSchema = None
+            if flags.Muon.usePhaseIIGeoSetup and \
+               flags.GeoModel.Run >= LHCPeriod.Run4: 
+                dbTagMezz = "MDTMezMapSchemaJSON_RUN4_FantasyCabling_1"
+                dbTagSchema = "MDTCablingMapSchemaJSON_RUN4_FantasyCabling_1"
+            if kwargs["UseJSONFormat"]:
+                kwargs.setdefault("MapFolders", "/MDT/Ofl/CABLING/MAP_SCHEMA_JSON")
+                kwargs.setdefault("MezzanineFolders", "/MDT/Ofl/CABLING/MEZZANINE_SCHEMA_JSON")
+            else:
+                kwargs.setdefault("MapFolders", "/MDT/Ofl/CABLING/MAP_SCHEMA")
+                kwargs.setdefault("MezzanineFolders", "/MDT/Ofl/CABLING/MEZZANINE_SCHEMA")
+            acc.merge( addFolders( flags, [kwargs["MapFolders"]], 'MDT_OFL',  
+                                className="CondAttrListCollection", tag = dbTagSchema))
+            acc.merge( addFolders( flags, [kwargs["MezzanineFolders"]], 'MDT_OFL',  
+                                className="CondAttrListCollection", tag = dbTagMezz) )
+        else:
+            if kwargs["UseJSONFormat"]:
+                kwargs.setdefault("MapFolders", "/MDT/CABLING/MAP_SCHEMA_JSON")
+                kwargs.setdefault("MezzanineFolders", "/MDT/CABLING/MEZZANINE_SCHEMA_JSON")
+            else:
+                kwargs.setdefault("MapFolders", "/MDT/CABLING/MAP_SCHEMA")
+                kwargs.setdefault("MezzanineFolders", "/MDT/CABLING/MEZZANINE_SCHEMA")
+            acc.merge( addFolders( flags, [kwargs["MapFolders"], kwargs["MezzanineFolders"]], 'MDT', 
+                                    className="CondAttrListCollection") )
+
+    
+    MDTCablingAlg = CompFactory.MuonMDT_CablingAlg(name, **kwargs)
     acc.addCondAlgo( MDTCablingAlg, primary = True )
    
     return acc

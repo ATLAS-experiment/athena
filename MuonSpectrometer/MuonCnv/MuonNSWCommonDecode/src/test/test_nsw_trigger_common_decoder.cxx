@@ -310,6 +310,8 @@ int test_nsw_trigger_common_decoder_event (const eformat::read::ROBFragment &r, 
 	
 	const std::vector<std::shared_ptr<Muon::nsw::MMARTPacket>>& arts = link->art_packets();
 	std::vector<uint32_t> tmp_art_BCIDs;
+	std::vector<uint32_t> tmp_art_pipeIDs;
+	std::vector<uint32_t> tmp_art_fiberIDs;
 	std::vector<uint32_t> tmp_art_layers;
 	std::vector<uint32_t> tmp_art_channels;
 	for (const auto& art : arts){
@@ -318,9 +320,13 @@ int test_nsw_trigger_common_decoder_event (const eformat::read::ROBFragment &r, 
 	    tmp_art_layers.push_back( c.first );
 	    tmp_art_channels.push_back( c.second );
 	    tmp_art_BCIDs.push_back( art->art_BCID() );
+	    tmp_art_pipeIDs.push_back( art->art_pipeID() );
+	    tmp_art_fiberIDs.push_back( art->art_fiberID() );
 	  }
 	}
 	data.b_MML1A_art_BCID.push_back( tmp_art_BCIDs );
+	data.b_MML1A_art_pipeID.push_back( tmp_art_pipeIDs );
+	data.b_MML1A_art_fiberID.push_back( tmp_art_fiberIDs );
 	data.b_MML1A_art_layers.push_back( tmp_art_layers );
 	data.b_MML1A_art_channels.push_back( tmp_art_channels );
 	
@@ -438,6 +444,16 @@ int test_nsw_trigger_common_decoder_event (const eformat::read::ROBFragment &r, 
       data.b_STGL1A_merge_BCID.resize(n_elinks);
       data.b_STGL1A_merge_sectorID.resize(n_elinks);
 
+      resize_segment(data.b_STGL1A_mm_monitor_segments);
+      resize_segment(data.b_STGL1A_mm_spare_segments);
+      resize_segment(data.b_STGL1A_mm_lowRes_segments);
+      resize_segment(data.b_STGL1A_mm_phiRes_segments);
+      resize_segment(data.b_STGL1A_mm_dTheta_segments);
+      resize_segment(data.b_STGL1A_mm_phiID_segments);
+      resize_segment(data.b_STGL1A_mm_RIndex_segments);
+
+      data.b_STGL1A_mm_BCID.resize(n_elinks);
+
       uint i = 0;
       for(const auto& baseLink: nsw_trigger_decoder.get_elinks()){
         const auto link = std::dynamic_pointer_cast<Muon::nsw::NSWTriggerSTGL1AElink>(baseLink);
@@ -518,6 +534,22 @@ int test_nsw_trigger_common_decoder_event (const eformat::read::ROBFragment &r, 
 
 
 	} // end of merge packets
+       
+        const auto& mm_packets = link-> mm_packet(); 
+        for (auto packet: mm_packets) {
+          for (std::size_t i_seg=0; i_seg < Muon::nsw::STGTPMMData::num_mm; ++i_seg) {
+            data.b_STGL1A_mm_monitor_segments.at(i_seg).at(i).push_back(packet.Segment(i_seg).monitor);
+            data.b_STGL1A_mm_spare_segments.at(i_seg).at(i).push_back(packet.Segment(i_seg).spare);
+            data.b_STGL1A_mm_lowRes_segments.at(i_seg).at(i).push_back(packet.Segment(i_seg).lowRes);
+            data.b_STGL1A_mm_phiRes_segments.at(i_seg).at(i).push_back(packet.Segment(i_seg).phiRes);
+            data.b_STGL1A_mm_dTheta_segments.at(i_seg).at(i).push_back(packet.Segment(i_seg).dTheta);
+            data.b_STGL1A_mm_phiID_segments.at(i_seg).at(i).push_back(packet.Segment(i_seg).phiID);
+            data.b_STGL1A_mm_RIndex_segments.at(i_seg).at(i).push_back(packet.Segment(i_seg).rIndex);
+          }
+          data.b_STGL1A_mm_BCID[i].push_back(packet.BCID());
+
+
+        } // end of mm packets
 	i++;
       } // end of stgc elink loop
     } // end of stgc l1a block

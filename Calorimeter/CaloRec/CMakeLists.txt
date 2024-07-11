@@ -42,7 +42,7 @@ atlas_add_test( CaloBCIDLumiCondAlg_test
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_joboptions( share/*.txt )
-
+atlas_install_data( share/CaloCells.txt.ref )
 
 atlas_add_test( CaloBCIDAvgAlgConfig_test
                 SCRIPT python -m CaloRec.CaloBCIDAvgAlgConfig
@@ -107,7 +107,7 @@ atlas_add_test( ToolConstantsCondAlgConfig_test
                 LOG_SELECT_PATTERN "ComponentAccumulator|^---" )
 
 atlas_add_test( CaloCellMakerTest
-                SCRIPT python ${CMAKE_CURRENT_SOURCE_DIR}/python/CaloCellMakerConfig.py
+		SCRIPT python -m CaloRec.CaloCellMakerConfig
                 POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( CaloTowerStore_test

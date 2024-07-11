@@ -133,10 +133,10 @@ def PhaseIISimulationNoIoV(flags):
     flags.Sim.TruthStrategy = TruthStrategy.MC15aPlus
     flags.Sim.TightMuonStepping = True
 
-    from SimuJobTransforms.SimulationHelpers import enableBeamPipeKill, enableFrozenShowersFCalOnly
+    from SimulationConfig.G4Optimizations import enableBeamPipeKill, enableFrozenShowersFCalOnly
     enableBeamPipeKill(flags)
     enableFrozenShowersFCalOnly(flags)
-    from SimuJobTransforms.G4Optimizations import enableG4Optimizations
+    from SimulationConfig.G4Optimizations import enableG4Optimizations
     enableG4Optimizations(flags)
 
 
@@ -269,10 +269,10 @@ def MC23PhaseIISimulationNoIoV(flags):
 
     flags.Sim.TightMuonStepping = True
 
-    from SimuJobTransforms.SimulationHelpers import enableBeamPipeKill, enableFrozenShowersFCalOnly
+    from SimulationConfig.G4Optimizations import enableBeamPipeKill, enableFrozenShowersFCalOnly
     enableBeamPipeKill(flags)
     enableFrozenShowersFCalOnly(flags)
-    from SimuJobTransforms.G4Optimizations import enableG4Optimizations
+    from SimulationConfig.G4Optimizations import enableG4Optimizations
     enableG4Optimizations(flags)
 
 

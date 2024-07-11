@@ -257,7 +257,10 @@ def PHYSVALEntries(fileName, integral=False):
 
     aipc = fname.Get("/EventInfo/EventInfo_actualInteractionsPerCrossing")
 
-    if aipc is None:
+    # ROOT returns an empty TObject, rather than explicit None, so this
+    # check has to be `== None` (is equivalent to None) rather than `is None`
+    # (is the same memory pointer as the object None)
+    if aipc == None: # noqa: E711
         # Not PHYSVAL...
         return None
 

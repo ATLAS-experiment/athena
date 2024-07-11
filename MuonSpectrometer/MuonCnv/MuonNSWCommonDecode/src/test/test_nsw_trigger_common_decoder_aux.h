@@ -70,6 +70,8 @@ struct outBranches
   std::vector<std::vector<uint32_t>> b_MML1A_stream_head_fifo_size = {} ;
   std::vector<std::vector<uint32_t>> b_MML1A_stream_head_streamID = {} ;
   std::vector<std::vector<uint32_t>> b_MML1A_art_BCID = {} ;
+  std::vector<std::vector<uint32_t>> b_MML1A_art_pipeID = {} ;
+  std::vector<std::vector<uint32_t>> b_MML1A_art_fiberID = {} ;
   std::vector<std::vector<uint32_t>> b_MML1A_art_layers = {} ;
   std::vector<std::vector<uint32_t>> b_MML1A_art_channels = {} ;
   std::vector<std::vector<uint32_t>> b_MML1A_trig_padding = {} ;
@@ -222,6 +224,16 @@ struct outBranches
   std::array<std::vector<std::vector<uint32_t>>, Muon::nsw::STGTPSegments::num_segments> b_STGL1A_merge_RIndex_segments{};
   std::vector<std::vector<uint32_t>> b_STGL1A_merge_BCID = {};
   std::vector<std::vector<uint32_t>> b_STGL1A_merge_sectorID = {};
+
+  std::array<std::vector<std::vector<uint32_t>>, Muon::nsw::STGTPMMData::num_mm> b_STGL1A_mm_monitor_segments{};
+  std::array<std::vector<std::vector<uint32_t>>, Muon::nsw::STGTPMMData::num_mm> b_STGL1A_mm_spare_segments{};
+  std::array<std::vector<std::vector<uint32_t>>, Muon::nsw::STGTPMMData::num_mm> b_STGL1A_mm_lowRes_segments{};
+  std::array<std::vector<std::vector<uint32_t>>, Muon::nsw::STGTPMMData::num_mm> b_STGL1A_mm_phiRes_segments{};
+  std::array<std::vector<std::vector<uint32_t>>, Muon::nsw::STGTPMMData::num_mm> b_STGL1A_mm_dTheta_segments{};
+  std::array<std::vector<std::vector<uint32_t>>, Muon::nsw::STGTPMMData::num_mm> b_STGL1A_mm_phiID_segments{};
+  std::array<std::vector<std::vector<uint32_t>>, Muon::nsw::STGTPMMData::num_mm> b_STGL1A_mm_RIndex_segments{};
+  std::vector<std::vector<uint32_t>> b_STGL1A_mm_BCID = {};
+
   std::vector<uint32_t> b_STGL1A_trailer_CRC = {} ;
 };
 
@@ -265,6 +277,8 @@ int test_nsw_trigger_common_decoder_init_tree (TTree &outtree, outBranches &data
     outtree.Branch( "MML1A_stream_head_streamID", &data.b_MML1A_stream_head_streamID);
     outtree.Branch( "MML1A_trailer_CRC", &data.b_MML1A_trailer_CRC);
     outtree.Branch( "MML1A_art_BCID", &data.b_MML1A_art_BCID);
+    outtree.Branch( "MML1A_art_pipeID", &data.b_MML1A_art_pipeID);
+    outtree.Branch( "MML1A_art_fiberID", &data.b_MML1A_art_fiberID);
     outtree.Branch( "MML1A_art_layers", &data.b_MML1A_art_layers);
     outtree.Branch( "MML1A_art_channels", &data.b_MML1A_art_channels);
     outtree.Branch( "MML1A_trig_padding", &data.b_MML1A_trig_padding);
@@ -419,6 +433,20 @@ int test_nsw_trigger_common_decoder_init_tree (TTree &outtree, outBranches &data
     
     outtree.Branch( "STGL1A_merge_BCID", &data.b_STGL1A_merge_BCID);
     outtree.Branch( "STGL1A_merge_sectorID", &data.b_STGL1A_merge_sectorID);
+
+
+    for (std::size_t i=0; i < Muon::nsw::STGTPMMData::num_mm; ++i) {
+      outtree.Branch( Muon::nsw::format("STGL1A_mm_monitor_segment{}", i).c_str(), &data.b_STGL1A_mm_monitor_segments.at(i));
+      outtree.Branch( Muon::nsw::format("STGL1A_mm_spare_segment{}", i).c_str(), &data.b_STGL1A_mm_spare_segments.at(i));
+      outtree.Branch( Muon::nsw::format("STGL1A_mm_lowRes_segment{}", i).c_str(), &data.b_STGL1A_mm_lowRes_segments.at(i));
+      outtree.Branch( Muon::nsw::format("STGL1A_mm_phiRes_segment{}", i).c_str(), &data.b_STGL1A_mm_phiRes_segments.at(i));
+      outtree.Branch( Muon::nsw::format("STGL1A_mm_dTheta_segment{}", i).c_str(), &data.b_STGL1A_mm_dTheta_segments.at(i));
+      outtree.Branch( Muon::nsw::format("STGL1A_mm_phiID_segment{}", i).c_str(), &data.b_STGL1A_mm_phiID_segments.at(i));
+      outtree.Branch( Muon::nsw::format("STGL1A_mm_RIndex_segment{}", i).c_str(), &data.b_STGL1A_mm_RIndex_segments.at(i));
+    }
+
+    outtree.Branch( "STGL1A_mm_BCID", &data.b_STGL1A_mm_BCID);
+
     outtree.Branch( "STGL1A_trailer_CRC", &data.b_STGL1A_trailer_CRC);
   }
   return 0;

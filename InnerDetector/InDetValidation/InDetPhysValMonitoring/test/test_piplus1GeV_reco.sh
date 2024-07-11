@@ -1,5 +1,5 @@
 #!/bin/bash
-# art-description: art job for InDetPhysValMonitoring, Single ele 1GeV
+# art-description: art job for InDetPhysValMonitoring, Single pi 1GeV
 # art-type: grid
 # art-input: user.keli:user.keli.mc16_13TeV.422047.ParticleGun_single_piplus_Pt1GeV_Rel22073
 # art-input-nfiles: 10
@@ -89,7 +89,7 @@ case $ArtProcess in
       --CA \
       --inputRDOFile $x \
       --outputAODFile   physval.AOD.root \
-      --conditionsTag   'default:OFLCOND-MC23-SDR-RUN3-01' \
+      --conditionsTag   'default:OFLCOND-MC23-SDR-RUN3-07' \
       --steering        doRAWtoALL \
       --checkEventCount False \
       --ignoreErrors    True \

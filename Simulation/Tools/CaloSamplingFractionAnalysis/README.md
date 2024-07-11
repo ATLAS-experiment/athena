@@ -49,7 +49,7 @@ Sim_tf.py --simulator 'FullG4MT' \
 --physicsList 'FTFP_BERT_ATL' \
 --truthStrategy 'MC15aPlus' \
 --postInclude 'default:PyJobTransforms.UseFrontier' \
---preExec 'from SimulationConfig.SimEnums import VertexSource;flags.Sim.VertexSource=VertexSource.AsGenerated;from SimuJobTransforms.SimulationHelpers import enableBeamPipeKill;enableBeamPipeKill(flags);from SimuJobTransforms.SimulationHelpers import enableCalHits;enableCalHits(flags);from SimuJobTransforms.SimulationHelpers import enableParticleID;enableParticleID(flags);from SimuJobTransforms.SimulationHelpers import enableTightMuonStepping;enableTightMuonStepping;enableTightMuonStepping(flags)' \
+--preExec 'from SimulationConfig.SimEnums import VertexSource;flags.Sim.VertexSource=VertexSource.AsGenerated;from SimulationConfig.G4Optimizations import enableBeamPipeKill;enableBeamPipeKill(flags);from SimulationConfig.G4Optimizations import enableCalHits;enableCalHits(flags);from SimulationConfig.G4Optimizations import enableParticleID;enableParticleID(flags);from SimulationConfig.G4Optimizations import enableTightMuonStepping;enableTightMuonStepping;enableTightMuonStepping(flags)' \
 --geometryVersion 'default:ATLAS-R2-2016-01-00-01' \
 --inputEVNTFile INPUTEVNTfile \
 --outputHITSFile OUTPUTEVNTfile \

@@ -13,7 +13,7 @@ CaloCondBlobBase::CaloCondBlobBase(coral::Blob* blob_nc,
                                    const coral::Blob* blob)
   : m_blob_nc(blob_nc),
     m_blob(blob)
-  , m_isBlobOwner(false),m_sizeOfObj(0),m_nChans(0),m_nGains(0) 
+  , m_isBlobOwner(false),m_sizeOfObj(0),m_nChans(0),m_nGains(0), m_pDataStart(nullptr) 
 {
   if(uint64_t(m_blob->size())>=getHdrSize()*sizeof(uint32_t)) {
     m_sizeOfObj=static_cast<const uint32_t*>(m_blob->startingAddress())[1];

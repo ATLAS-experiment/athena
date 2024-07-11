@@ -95,11 +95,15 @@ if __name__=="__main__":
     acc.getPrimary().CaloCellsOutputName="AllCaloNew"
     cfg.merge(acc)
 
-    import sys, os
-    thisdir = os.path.dirname (sys.argv[0])
+    from AthenaCommon.Utils.unixtools import find_datafile
+    reffile=find_datafile("CaloRec/CaloCells.txt.ref")
+    if not reffile:
+        log.error("Reference file 'CaloRec/CaloCells.txt.ref' not found")
+        reffile=""
+        
     from AthenaCommon.SystemOfUnits import GeV
     cfg.addEventAlgo(CompFactory.CaloCellDumper(InputContainer="AllCaloNew",EnergyCut=2*GeV,
-                                                RefName=os.path.join (thisdir, '../share/CaloCells.txt.ref')),sequenceName="AthAlgSeq")
+                                                RefName=reffile))
 
     cfg.run(5)
 

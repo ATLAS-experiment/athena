@@ -9,7 +9,8 @@
 # art-output: runTwo
 
 preExecString="flags.Reco.EnableTrigger=False;flags.DQ.doMonitoring=False"
-conditionsTagString="CONDBR2-BLKPA-2022-09"
+# TODO update following ATLASRECTS-8054
+conditionsTagString="CONDBR2-BLKPA-2022-15"
 geometryVersionString="ATLAS-R3S-2021-03-01-00"
 
 mkdir runOne; cd runOne
@@ -25,11 +26,11 @@ rc2=${PIPESTATUS[0]}
 xAODDigest.py myAOD.pool.root | tee digestTwo.log
 echo "art-result: $rc2 runTwo"
 
-if [[ $rc1 -eq 0 ]] && [[ $rc2 -eq  0 ]] 
+if [[ $rc1 -eq 0 ]] && [[ $rc2 -eq  0 ]]
 then
  echo "Compare two directories"
  art.py compare ref --entries 10 --mode=semi-detailed --order-trees --diff-root . ../runOne/ | tee diffEightThreads.log
  rcDiff=${PIPESTATUS[0]}
- collateDigest.sh digestTwo.log ../runOne/digestOne.log digestDiffOneTwo.log 
+ collateDigest.sh digestTwo.log ../runOne/digestOne.log digestDiffOneTwo.log
  echo "art-result: $rcDiff Diff-EightThreads-TwoRuns"
 fi

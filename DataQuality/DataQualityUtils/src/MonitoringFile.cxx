@@ -1672,7 +1672,7 @@ namespace dqutils {
       } else {
         if (!h->Add(nextH)) {
           std::cerr << "Histogram " << h->GetName() <<
-            " should NOT be using Add: needs to specify a merge method (e.g. merge) in its metadata";
+            " should NOT be using Add: needs to specify a merge method (e.g. merge) in its metadata\n";
         }
       }
     } else if ((g = dynamic_cast<TGraph*>(objTarget))) { // TGraphs

@@ -72,7 +72,7 @@ def MC16SimulationNoIoV(flags):
     flags.Sim.TRTRangeCut = 30.0
     flags.Sim.TightMuonStepping = True
 
-    from SimuJobTransforms.SimulationHelpers import enableBeamPipeKill, enableFrozenShowersFCalOnly
+    from SimulationConfig.G4Optimizations import enableBeamPipeKill, enableFrozenShowersFCalOnly
     enableBeamPipeKill(flags)
     if flags.Sim.ISF.Simulator.isFullSim():
         enableFrozenShowersFCalOnly(flags)

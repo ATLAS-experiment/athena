@@ -22,12 +22,15 @@
 
 using DataSource = MuonMDT_CablingMap::DataSource;
 
-MuonMDT_CablingAlg::MuonMDT_CablingAlg(const std::string& name, ISvcLocator* pSvcLocator) : AthReentrantAlgorithm(name, pSvcLocator) {}
+MuonMDT_CablingAlg::MuonMDT_CablingAlg(const std::string& name, ISvcLocator* pSvcLocator) : 
+    AthReentrantAlgorithm(name, pSvcLocator) {}
 
 StatusCode MuonMDT_CablingAlg::initialize() {
     ATH_MSG_DEBUG("initialize " << name());
-    ATH_CHECK(m_readKeyMez.initialize());
-    ATH_CHECK(m_readKeyMap.initialize());
+    const bool initCondKey = m_mezzJSON.value().empty() &&
+                             m_chambJSON.value().empty();
+    ATH_CHECK(m_readKeyMez.initialize(initCondKey));
+    ATH_CHECK(m_readKeyMap.initialize(initCondKey));
     ATH_CHECK(m_writeKey.initialize());
     ATH_CHECK(m_idHelperSvc.retrieve());
     return StatusCode::SUCCESS;
