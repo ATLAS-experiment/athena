@@ -2,6 +2,7 @@
 #
 # art-description: Derivation_tf.py mc23 w/ PHYS and PHYSLITE in RNTuple Format
 # art-type: grid
+# art-include: main/Athena
 # art-include: main--dev3LCG/Athena
 # art-include: main--dev4LCG/Athena
 # art-output: *.root

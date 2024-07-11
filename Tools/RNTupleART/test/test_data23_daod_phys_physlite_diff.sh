@@ -2,6 +2,7 @@
 #
 # art-description: Derivation_tf.py data23 w/ PHYS and PHYSLITE in TTree/RNTuple Formats w/ a diff at the end
 # art-type: grid
+# art-include: main/Athena
 # art-include: main--dev3LCG/Athena
 # art-include: main--dev4LCG/Athena
 # art-output: *.root
