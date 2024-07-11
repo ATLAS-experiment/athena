@@ -1573,8 +1573,8 @@ namespace top {
     }
     
     // tagger decision
-    std::string decoration_tag_off = decoration_tag + decoration_systSuffix;          // offline tag
-    std::string decoration_tag_onl = decoration_tag + "_onl" + decoration_systSuffix; // online tag
+    std::string decoration_tag_off = decoration_tag + "_nom";          // offline tag (always nominal)
+    std::string decoration_tag_onl = decoration_tag + "_onl_nom";      // online tag (always nominal)
 
     // MC efficiency Scale Factor
     std::string decoration_SF_off = decoration_SF + decoration_systSuffix;            // this is either eff SF or ineff SF 
@@ -1651,6 +1651,7 @@ namespace top {
 
     double weight = 1;
     double denom;
+    const double epsilon = 1e-3; // protect against numerical instabilities
     // there are 4 cases based on offline and online tag
     //
     // In case online or conditional info is absent - just use the offline
@@ -1666,7 +1667,7 @@ namespace top {
       else {
 	// not online tagged
 	denom = (1-mceff_cond);
-	if ( denom > 0 ) {
+	if ( denom > epsilon ) {
 	  weight = (1-mceff_cond*sf_cond)/denom * sf_off; 
 	}
 	else {
@@ -1680,14 +1681,14 @@ namespace top {
       if (isTagged_onl) {
 	// online tagged
 	denom = mceff_onl - mceff_cond*mceff_off;
-	if ( denom > 0 ) {
+	if ( denom > epsilon ) {
 	  weight = (mceff_onl*sf_onl - mceff_cond*sf_cond*mceff_off*sf_off)/denom;
 	}
 	else {
 	  // no valid online/conditional info
 	  // convert back to offline inefficiency SF
 	  denom = 1 - mceff_off;
-	  if ( denom > 0 ) {
+	  if ( denom > epsilon ) {
 	    weight = (1-mceff_off*sf_off)/denom;
 	  }
 	}
@@ -1695,14 +1696,14 @@ namespace top {
       else {
 	// not online tagged
 	denom = 1 - mceff_off - mceff_onl + mceff_cond * mceff_off;
-	if ( denom > 0 ) {
+	if ( denom > epsilon ) {
 	  weight = (1 - mceff_off*sf_off - mceff_onl*sf_onl + mceff_cond*sf_cond * mceff_off*sf_off)/denom;
 	}
 	else {
 	  // no valid online/conditional info
 	  // convert back to offline inefficiency SF
 	  denom = 1 - mceff_off;
-	  if ( denom > 0 ) {
+	  if ( denom > epsilon ) {
 	    weight = (1-mceff_off*sf_off)/denom;
 	  }
 	}
@@ -1779,9 +1780,9 @@ namespace top {
       break;
     }
     // tagger decision
-    std::string decoration_tag_off1 = decoration_tag1 + decoration_systSuffix;          // offline1 tag
-    std::string decoration_tag_off2 = decoration_tag2 + decoration_systSuffix;          // offline2 tag
-    std::string decoration_tag_onl = decoration_tag1 + "_onl" + decoration_systSuffix;  // online tag based on WP1
+    std::string decoration_tag_off1 = decoration_tag1 + "_nom";          // offline1 tag (always nominal)
+    std::string decoration_tag_off2 = decoration_tag2 + "_nom";          // offline2 tag (always nominal)
+    std::string decoration_tag_onl = decoration_tag1 + "_onl_nom";       // online tag based on WP1 (always nominal)
 
     // MC efficiency Scale Factor
     std::string decoration_SF_off1 = decoration_SF1 + decoration_systSuffix;            // this is either eff SF or ineff SF 
@@ -1893,6 +1894,7 @@ namespace top {
     
     double weight = 1;
     double denom;
+    const double epsilon = 1e-3; // protect against numerical instabilities
     // there are 8 cases based on offline1, offline2 and online tag
     //
     // In case online or conditional info is absent - just use the offline
@@ -1910,7 +1912,7 @@ namespace top {
 	else {
 	  // not online tagged
 	  denom = (1-mceff_cond2);
-	  if ( denom > 0 ) {
+	  if ( denom > epsilon ) {
 	    weight = (1-mceff_cond2*sf_cond2)/denom * sf_off2; 
 	  }
 	  else {
@@ -1924,14 +1926,14 @@ namespace top {
 	if (isTagged_onl) {
 	  // online tagged
 	  denom = mceff_cond1*mceff_off1 - mceff_cond2*mceff_off2;
-	  if ( denom > 0 ) {
+	  if ( denom > epsilon ) {
 	    weight = (mceff_cond1*sf_cond1*mceff_off1*sf_off1 - mceff_cond2*sf_cond2*mceff_off2*sf_off2)/denom;
 	  }
 	  else {
 	    // no valid online/conditional info
 	    // take offline only
 	    denom = mceff_off1 - mceff_off2;
-	    if ( denom > 0 ) {
+	    if ( denom > epsilon ) {
 	      weight = (mceff_off1*sf_off1-mceff_off2*sf_off2)/denom;
 	    }
 	  }
@@ -1939,14 +1941,14 @@ namespace top {
 	else {
 	  // not online tagged
 	  denom = (1 - mceff_cond1)*mceff_off1 - (1-mceff_cond2)*mceff_off2;
-	  if ( denom > 0 ) {
+	  if ( denom > epsilon ) {
 	    weight = ((1 - mceff_cond1*sf_cond1)*mceff_off1*sf_off1 - (1-mceff_cond2*sf_cond2)*mceff_off2*sf_off2)/denom;
 	  }
 	  else {
 	    // no valid online/conditional info
 	    // take offline only
 	    denom = mceff_off1 - mceff_off2;
-	    if ( denom > 0 ) {
+	    if ( denom > epsilon ) {
 	      weight = (mceff_off1*sf_off1-mceff_off2*sf_off2)/denom;
 	    }
 	  }
@@ -1964,14 +1966,14 @@ namespace top {
 	if (isTagged_onl) {
 	  // online tagged
 	  denom = mceff_onl-mceff_cond1*mceff_off1;
-	  if ( denom > 0 ) {
+	  if ( denom > epsilon ) {
 	    weight = (mceff_onl*sf_onl-mceff_cond1*sf_cond1*mceff_off1*sf_off1)/denom;
 	  }
 	  else {
 	    // no valid online/conditional info
 	    // take offline only
 	    denom = 1-mceff_off1;
-	    if ( denom > 0 ) {
+	    if ( denom > epsilon ) {
 	      weight = (1-mceff_off1*sf_off1)/denom;
 	    }
 	  }
@@ -1979,14 +1981,14 @@ namespace top {
 	else {
 	  // not online tagged
 	  denom = 1 - mceff_onl-(1-mceff_cond1)*mceff_off1;
-	  if ( denom > 0 ) {
+	  if ( denom > epsilon ) {
 	    weight = (1 - mceff_onl*sf_onl-(1-mceff_cond1*sf_cond1)*mceff_off1*sf_off1)/denom;
 	  }
 	  else {
 	    // no valid online/conditional info
 	    // take offline only
 	    denom = 1-mceff_off1;
-	    if ( denom > 0 ) {
+	    if ( denom > epsilon ) {
 	      weight = (1-mceff_off1*sf_off1)/denom;
 	    }
 	  }
