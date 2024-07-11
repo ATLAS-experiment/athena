@@ -1,3 +1,4 @@
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #include "TrkPlanarSurface.h"
 #include "TrkTrackState.h"
 #include "TrkBaseNode.h"

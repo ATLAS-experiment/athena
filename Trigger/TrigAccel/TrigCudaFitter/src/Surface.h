@@ -1,3 +1,4 @@
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #ifndef __SURFACE_H__
 #define __SURFACE_H__
 

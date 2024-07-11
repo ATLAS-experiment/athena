@@ -1,3 +1,4 @@
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #ifndef __MCTRACK_H__
 #define __MCTRACK_H__
 

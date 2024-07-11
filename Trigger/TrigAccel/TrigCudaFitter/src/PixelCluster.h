@@ -1,3 +1,4 @@
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #ifndef __PIXEL_CLUSTER_H__
 #define __PIXEL_CLUSTER_H__
 

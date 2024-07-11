@@ -1,3 +1,4 @@
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #include <stdlib.h>
 #include "McTrack.h"
 #include "RecTrack.h"

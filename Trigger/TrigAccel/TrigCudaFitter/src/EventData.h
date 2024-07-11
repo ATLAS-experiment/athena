@@ -1,3 +1,4 @@
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #ifndef __EVENTDATA_H__
 #define __EVENTDATA_H__
 
