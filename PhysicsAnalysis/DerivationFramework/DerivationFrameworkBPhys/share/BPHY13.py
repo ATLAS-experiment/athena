@@ -16,8 +16,8 @@ Psi_lo = 3300.0
 Psi_hi = 4200.0
 Upsi_lo = 8800.0
 Upsi_hi = 10000.0
-Dimu_lo = 5000.0
-Dimu_hi = 9100.0
+Dimu_lo = 750.0
+Dimu_hi = 3100.0
 
 Mumass = 105.658
 Pimass = 139.570
@@ -527,11 +527,11 @@ from DerivationFrameworkBPhys.DerivationFrameworkBPhysConf import DerivationFram
 list_4mu_hypo = ["UpsiUpsi_4mu", "UpsiPsi_4mu", "UpsiJpsi_4mu", "UpsiPhi_4mu",
                  "PsiPsi_4mu", "PsiJpsi_4mu", "PsiPhi_4mu",
                  "JpsiJpsi_4mu", "JpsiPhi_4mu", "PhiPhi_4mu",
-                 "UpsiDimu_4mu"]
+                 "JpsiDimu_4mu"]
 list_4mu_psi1Input = ["BPHY13Upsimumu_revtx", "BPHY13Upsimumu_revtx", "BPHY13Upsimumu_revtx", "BPHY13Upsimumu_revtx",
                       "BPHY13Psimumu_revtx", "BPHY13Psimumu_revtx", "BPHY13Psimumu_revtx",
                       "BPHY13Jpsimumu_revtx", "BPHY13Jpsimumu_revtx", "BPHY13Phimumu_revtx",
-                      "BPHY13Upsimumu_revtx"]
+                      "BPHY13Jpsimumu_revtx"]
 list_4mu_psi2Input = ["BPHY13Upsimumu_revtx", "BPHY13Psimumu_revtx", "BPHY13Jpsimumu_revtx", "BPHY13Phimumu_revtx",
                       "BPHY13Psimumu_revtx", "BPHY13Jpsimumu_revtx", "BPHY13Phimumu_revtx",
                       "BPHY13Jpsimumu_revtx", "BPHY13Phimumu_revtx", "BPHY13Phimumu_revtx",
@@ -539,15 +539,15 @@ list_4mu_psi2Input = ["BPHY13Upsimumu_revtx", "BPHY13Psimumu_revtx", "BPHY13Jpsi
 list_4mu_jpsi1lo = [Upsi_lo,Upsi_lo,Upsi_lo,Upsi_lo,
                     Psi_lo,Psi_lo,Psi_lo,
                     Jpsi_lo,Jpsi_lo,Phi_lo,
-                    Upsi_lo]
+                    Jpsi_lo]
 list_4mu_jpsi1hi = [Upsi_hi,Upsi_hi,Upsi_hi,Upsi_hi,
                     Psi_hi,Psi_hi,Psi_hi,
                     Jpsi_hi,Jpsi_hi,Phi_hi,
-                    Upsi_hi]
+                    Jpsi_hi]
 list_4mu_jpsi1mass = [Upsimass, Upsimass, Upsimass, Upsimass,
                       Psi2Smass, Psi2Smass, Psi2Smass,
                       Jpsimass, Jpsimass, Phimass,
-                      Upsimass]
+                      Jpsimass]
 list_4mu_jpsi2lo = [Upsi_lo,Psi_lo,Jpsi_lo,Phi_lo,
                     Psi_lo,Jpsi_lo,Phi_lo,
                     Jpsi_lo,Phi_lo,Phi_lo,
@@ -600,55 +600,55 @@ list_3mu1trk_hypo = ["UpsiUpsi_3mu1trk", "UpsiPsi_3mu1trk", "UpsiJpsi_3mu1trk", 
                      "JpsiJpsi_3mu1trk", "JpsiPhi_3mu1trk", "PhiPhi_3mu1trk",
                      "PsiUpsi_3mu1trk", "JpsiUpsi_3mu1trk", "PhiUpsi_3mu1trk",
                      "JpsiPsi_3mu1trk", "PhiPsi_3mu1trk", "PhiJpsi_3mu1trk",
-                     "UpsiDimu_3mu1trk", "DimuUpsi_3mu1trk"]
+                     "JpsiDimu_3mu1trk", "DimuJpsi_3mu1trk"]
 list_3mu1trk_psi1Input = ["BPHY13Upsimumu_revtx", "BPHY13Upsimumu_revtx", "BPHY13Upsimumu_revtx", "BPHY13Upsimumu_revtx",
                           "BPHY13Psimumu_revtx", "BPHY13Psimumu_revtx", "BPHY13Psimumu_revtx",
                           "BPHY13Jpsimumu_revtx", "BPHY13Jpsimumu_revtx", "BPHY13Phimumu_revtx",
                           "BPHY13Psimumu_revtx", "BPHY13Jpsimumu_revtx", "BPHY13Phimumu_revtx",
                           "BPHY13Jpsimumu_revtx", "BPHY13Phimumu_revtx", "BPHY13Phimumu_revtx",
-                          "BPHY13Upsimumu_revtx", "BPHY13Dimumumu"]
+                          "BPHY13Jpsimumu_revtx", "BPHY13Dimumumu"]
 list_3mu1trk_psi2Input = ["BPHY13Upsimutrk_revtx", "BPHY13Psimutrk_revtx", "BPHY13Jpsimutrk_revtx", "BPHY13Phimutrk_revtx",
                           "BPHY13Psimutrk_revtx", "BPHY13Jpsimutrk_revtx", "BPHY13Phimutrk_revtx",
                           "BPHY13Jpsimutrk_revtx", "BPHY13Phimutrk_revtx", "BPHY13Phimutrk_revtx",
                           "BPHY13Upsimutrk_revtx", "BPHY13Upsimutrk_revtx", "BPHY13Upsimutrk_revtx",
                           "BPHY13Psimutrk_revtx", "BPHY13Psimutrk_revtx", "BPHY13Jpsimutrk_revtx",
-                          "BPHY13Dimumutrk", "BPHY13Upsimutrk_revtx"]
+                          "BPHY13Dimumutrk", "BPHY13Jpsimutrk_revtx"]
 list_3mu1trk_jpsi1lo = [Upsi_lo,Upsi_lo,Upsi_lo,Upsi_lo,
                         Psi_lo,Psi_lo,Psi_lo,
                         Jpsi_lo,Jpsi_lo,Phi_lo,
                         Psi_lo,Jpsi_lo,Phi_lo,
                         Jpsi_lo,Phi_lo,Phi_lo,
-                        Upsi_lo, Dimu_lo]
+                        Jpsi_lo, Dimu_lo]
 list_3mu1trk_jpsi1hi = [Upsi_hi,Upsi_hi,Upsi_hi,Upsi_hi,
                         Psi_hi,Psi_hi,Psi_hi,
                         Jpsi_hi,Jpsi_hi,Phi_hi,
                         Psi_hi,Jpsi_hi,Phi_hi,
                         Jpsi_hi,Phi_hi,Phi_hi,
-                        Upsi_hi, Dimu_hi]
+                        Jpsi_hi, Dimu_hi]
 list_3mu1trk_jpsi1mass = [Upsimass, Upsimass, Upsimass, Upsimass,
                           Psi2Smass, Psi2Smass, Psi2Smass,
                           Jpsimass, Jpsimass, Phimass,
                           Psi2Smass, Jpsimass, Phimass,
                           Jpsimass, Phimass, Phimass,
-                          Upsimass, 0.0] # 0.0 is dummy
+                          Jpsimass, 0.0] # 0.0 is dummy
 list_3mu1trk_jpsi2lo = [Upsi_lo,Psi_lo,Jpsi_lo,Phi_lo,
                         Psi_lo,Jpsi_lo,Phi_lo,
                         Jpsi_lo,Phi_lo,Phi_lo,
                         Upsi_lo,Upsi_lo,Upsi_lo,
                         Psi_lo,Psi_lo,Jpsi_lo,
-                        Dimu_lo, Upsi_lo]
+                        Dimu_lo, Jpsi_lo]
 list_3mu1trk_jpsi2hi = [Upsi_hi,Psi_hi,Jpsi_hi,Phi_hi,
                         Psi_hi,Jpsi_hi,Phi_hi,
                         Jpsi_hi,Phi_hi,Phi_hi,
                         Upsi_hi,Upsi_hi,Upsi_hi,
                         Psi_hi,Psi_hi,Jpsi_hi,
-                        Dimu_hi, Upsi_lo]
+                        Dimu_hi, Jpsi_hi]
 list_3mu1trk_jpsi2mass = [Upsimass, Psi2Smass, Jpsimass, Phimass,
                           Psi2Smass, Jpsimass, Phimass,
                           Jpsimass, Phimass, Phimass,
                           Upsimass, Upsimass, Upsimass,
                           Psi2Smass, Psi2Smass, Jpsimass,
-                          0.0, Upsimass] # 0.0 is dummy
+                          0.0, Jpsimass] # 0.0 is dummy
 
 list_3mu1trk_obj = []
 for hypo in list_3mu1trk_hypo:
