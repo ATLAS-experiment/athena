@@ -45,14 +45,14 @@ namespace MuonCalib {
     public:
         //---------------------------constructor----------------------------------------
         /** Default Constructor */
-        inline ADCMTHistos() : m_adc(NULL), m_id(-1), m_adc_ok(false) {}
+        inline ADCMTHistos() : m_adc(NULL), m_id(-1), m_adc_ok(false), m_settings(nullptr) {}
         /** Initializing constructor
             @param id tube id
             @param settings t0-fit settings: settings will be asked about histogram binning
 
         */
         inline ADCMTHistos(int id, const T0MTSettings *settings, const char *hname = NULL) :
-            m_adc(NULL), m_id(-1), m_adc_ok(false) {
+            m_adc(NULL), m_id(-1), m_adc_ok(false), m_settings(nullptr) {
             Initialize(id, settings, hname);
         }
         //---------------------------public member functions----------------------------
