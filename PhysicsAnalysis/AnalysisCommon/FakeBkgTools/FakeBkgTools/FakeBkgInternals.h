@@ -97,7 +97,7 @@ using FSBitset = std::bitset<maxCombinations()>;
 class FinalState
 {
 public:
-    mutable FSBitset selection = 0;
+    FSBitset selection = 0;
     FinalState(size_t h) : m_hash(h) {} // for search by hash
     FinalState(size_t h, const unsigned nparticles, const std::string& strSelection, const std::string& strProc, std::string& error); // main constructor
     /// Important: the accept() function doesn't check the selection (for speed reason), this has to be done separately
@@ -132,7 +132,7 @@ public:
     bool operator<(const FinalState& rhs) const { return m_hash < rhs.m_hash; }
 private:
     size_t m_hash;
-    mutable uint32_t m_wmin = 0x0, m_wmax=0x3FFFFFFF;
+    uint32_t m_wmin = 0x0, m_wmax=0x3FFFFFFF;
     bool parseProcess(std::string process, std::string& error);
     bool parseSelection(const unsigned short nparticles, std::string strSelection, std::string& error);
 };
