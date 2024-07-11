@@ -61,7 +61,7 @@ class NSWTriggerSTGL1AElink : public NSWTriggerElink {
 
   const std::vector<STGTPPadPacket>& pad_packets() const { return m_pad_packets; };
   const std::vector<STGTPSegmentPacket>& segment_packet() const { return m_segment_packets; };
-
+  const std::vector<STGTPMMPacket>& mm_packet() const { return m_mm_packets; };
   
 
  private:
@@ -92,14 +92,15 @@ class NSWTriggerSTGL1AElink : public NSWTriggerElink {
    *
    * @param readPointer Current read pointer position (updated by function)
    */
-  void decode_header(std::size_t& readPointer, int version = 0);
-
+  void decode_header(std::size_t& readPointer, int& version);
+  void decode_header_v3(std::size_t& readPointer, int& version);
   /**
    * @brief Decode the pad and segment data
    *
    * @param readPointer Current read pointer position (updated by function)
    */
-  void decode_data(std::size_t& readPointer);
+  void decode_data(std::size_t& readPointer, int version);
+  void decode_data_v3(std::size_t& readPointer, int version);
 
   /**
    * @brief Decode the header of each data segment
@@ -109,8 +110,8 @@ class NSWTriggerSTGL1AElink : public NSWTriggerElink {
    * @param readPointer Current read pointer position (updated by function)
    * @return DataHeader Information from header
    */
-  DataHeader decode_data_header(std::size_t& readPointer);
-
+  DataHeader decode_data_header(std::size_t& readPointer, int version);
+  DataHeader decode_data_header_v3(std::size_t& readPointer, int version);
   /**
    * @brief Decode the payload of each data segment
    *
@@ -121,13 +122,15 @@ class NSWTriggerSTGL1AElink : public NSWTriggerElink {
    * @return DataHeader Information from header
    */
   [[nodiscard]] std::vector<std::vector<std::uint32_t>> decode_data_payload(std::size_t& readPointer,
-                                                                            const DataHeader& header) const;
-
+                                                                            const DataHeader& header, int version) const;
+  [[nodiscard]] std::vector<std::vector<std::uint32_t>> decode_data_payload_v3(std::size_t& readPointer,
+                                                                            const DataHeader& header, int version) const;
   /**
    * @brief Analyze data chunks and create decoded objects
    */
-  void analyze_data();
+  void analyze_data(int version);
 
+  void analyze_data_v3(int version);
   /**
    * @brief Decode the trailer
    *
@@ -143,10 +146,10 @@ class NSWTriggerSTGL1AElink : public NSWTriggerElink {
    * @return std::uint64_t Decoded value
    */
   [[nodiscard]] std::uint64_t decode(std::size_t& readPointer, std::size_t size) const;
-
+  [[nodiscard]] std::uint64_t decode_v3(std::size_t& readPointer, std::size_t size) const;
   [[nodiscard]] static std::uint64_t correct_size_for_padding(std::uint64_t initial);
 
-  CxxUtils::span<const std::uint32_t> m_data;
+  std::span<const std::uint32_t> m_data;
   static constexpr auto WORD_SIZE = sizeof(decltype(m_data)::element_type) * 8;
   static constexpr auto WORD_SIZE_DOUBLE = static_cast<double>(WORD_SIZE);
 
@@ -191,6 +194,9 @@ class NSWTriggerSTGL1AElink : public NSWTriggerElink {
 
   std::vector<STGTPPadPacket> m_pad_packets;
   std::vector<STGTPSegmentPacket> m_segment_packets;
+  std::vector<STGTPMMPacket> m_mm_packets;
+
+  int m_packet_version;
 };
 }  // namespace Muon::nsw
 

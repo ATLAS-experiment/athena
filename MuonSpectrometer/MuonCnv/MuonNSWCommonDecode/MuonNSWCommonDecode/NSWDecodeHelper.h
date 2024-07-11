@@ -8,7 +8,7 @@
 #include <stdexcept>
 
 #include <sstream>
-#include <CxxUtils/span.h>
+#include <span>
 
 namespace Muon
 {
@@ -74,7 +74,7 @@ namespace Muon
      * @return Target Decoded value
      */
     template <typename Target, typename Source>
-      Target bit_slice(const CxxUtils::span<const Source> words, const std::size_t start, const std::size_t end) {
+      Target bit_slice(const std::span<const Source> words, const std::size_t start, const std::size_t end) {
       // start and end are the positions in the entire stream
       // start and end included;
       const auto wordSize = sizeof(Source) * 8;
@@ -113,7 +113,7 @@ namespace Muon
      * @return Target Decoded value
      */
     template <typename Target, typename Source>
-      constexpr Target decode_and_advance(const CxxUtils::span<const Source> words, std::size_t& start, const std::size_t size) {
+      constexpr Target decode_and_advance(const std::span<const Source> words, std::size_t& start, const std::size_t size) {
       const auto res = bit_slice<Target, Source>(words, start, start + size - 1);
       start += size;
       return res;
@@ -131,7 +131,7 @@ namespace Muon
      * @return Target Decoded value
      */
     template <typename Target, typename Source>
-      constexpr Target decode_at_loc(const CxxUtils::span<const Source> words, std::size_t& start, const int offset, const std::size_t size) {
+      constexpr Target decode_at_loc(const std::span<const Source> words, std::size_t& start, const int offset, const std::size_t size) {
       const auto res = bit_slice<Target, Source>(words, start + offset, start + size + offset - 1);
       return res;
     }

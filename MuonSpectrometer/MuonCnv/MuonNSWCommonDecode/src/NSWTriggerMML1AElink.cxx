@@ -22,7 +22,7 @@ Muon::nsw::NSWTriggerMML1AElink::NSWTriggerMML1AElink (const uint32_t *bs, const
   std::size_t size_word{sizeof(uint32_t) * 8};
   // 2 felix header 32b words already decoded
   std::size_t readPointer{2 * 32};
-  CxxUtils::span<const std::uint32_t> data{bs, remaining};
+  std::span<const std::uint32_t> data{bs, remaining};
   //once format finalized, checking a minimum size or at least the structure
 
   m_head_fragID = Muon::nsw::decode_and_advance<uint64_t>(data, readPointer, Muon::nsw::MMTPL1A::size_head_fragID);

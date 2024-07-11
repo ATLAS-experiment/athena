@@ -14,7 +14,7 @@
 Muon::nsw::MMTrigPacket::MMTrigPacket (std::vector<uint32_t>& payload){
 
   std::size_t readPointer{0};
-  CxxUtils::span<const std::uint32_t> data{payload.data(), 3};
+  std::span<const std::uint32_t> data{payload.data(), 3};
 
   if (payload.size()!=2) {
     throw std::runtime_error( Muon::nsw::format( "MM Trigger packet size not as expected: expected exactly 2 uint32_t, got {}", payload.size() ));

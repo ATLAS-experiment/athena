@@ -222,6 +222,16 @@ struct outBranches
   std::array<std::vector<std::vector<uint32_t>>, Muon::nsw::STGTPSegments::num_segments> b_STGL1A_merge_RIndex_segments{};
   std::vector<std::vector<uint32_t>> b_STGL1A_merge_BCID = {};
   std::vector<std::vector<uint32_t>> b_STGL1A_merge_sectorID = {};
+
+  std::array<std::vector<std::vector<uint32_t>>, Muon::nsw::STGTPMMData::num_mm> b_STGL1A_mm_monitor_segments{};
+  std::array<std::vector<std::vector<uint32_t>>, Muon::nsw::STGTPMMData::num_mm> b_STGL1A_mm_spare_segments{};
+  std::array<std::vector<std::vector<uint32_t>>, Muon::nsw::STGTPMMData::num_mm> b_STGL1A_mm_lowRes_segments{};
+  std::array<std::vector<std::vector<uint32_t>>, Muon::nsw::STGTPMMData::num_mm> b_STGL1A_mm_phiRes_segments{};
+  std::array<std::vector<std::vector<uint32_t>>, Muon::nsw::STGTPMMData::num_mm> b_STGL1A_mm_dTheta_segments{};
+  std::array<std::vector<std::vector<uint32_t>>, Muon::nsw::STGTPMMData::num_mm> b_STGL1A_mm_phiID_segments{};
+  std::array<std::vector<std::vector<uint32_t>>, Muon::nsw::STGTPMMData::num_mm> b_STGL1A_mm_RIndex_segments{};
+  std::vector<std::vector<uint32_t>> b_STGL1A_mm_BCID = {};
+
   std::vector<uint32_t> b_STGL1A_trailer_CRC = {} ;
 };
 
@@ -419,6 +429,20 @@ int test_nsw_trigger_common_decoder_init_tree (TTree &outtree, outBranches &data
     
     outtree.Branch( "STGL1A_merge_BCID", &data.b_STGL1A_merge_BCID);
     outtree.Branch( "STGL1A_merge_sectorID", &data.b_STGL1A_merge_sectorID);
+
+
+    for (std::size_t i=0; i < Muon::nsw::STGTPMMData::num_mm; ++i) {
+      outtree.Branch( Muon::nsw::format("STGL1A_mm_monitor_segment{}", i).c_str(), &data.b_STGL1A_mm_monitor_segments.at(i));
+      outtree.Branch( Muon::nsw::format("STGL1A_mm_spare_segment{}", i).c_str(), &data.b_STGL1A_mm_spare_segments.at(i));
+      outtree.Branch( Muon::nsw::format("STGL1A_mm_lowRes_segment{}", i).c_str(), &data.b_STGL1A_mm_lowRes_segments.at(i));
+      outtree.Branch( Muon::nsw::format("STGL1A_mm_phiRes_segment{}", i).c_str(), &data.b_STGL1A_mm_phiRes_segments.at(i));
+      outtree.Branch( Muon::nsw::format("STGL1A_mm_dTheta_segment{}", i).c_str(), &data.b_STGL1A_mm_dTheta_segments.at(i));
+      outtree.Branch( Muon::nsw::format("STGL1A_mm_phiID_segment{}", i).c_str(), &data.b_STGL1A_mm_phiID_segments.at(i));
+      outtree.Branch( Muon::nsw::format("STGL1A_mm_RIndex_segment{}", i).c_str(), &data.b_STGL1A_mm_RIndex_segments.at(i));
+    }
+
+    outtree.Branch( "STGL1A_mm_BCID", &data.b_STGL1A_mm_BCID);
+
     outtree.Branch( "STGL1A_trailer_CRC", &data.b_STGL1A_trailer_CRC);
   }
   return 0;
@@ -432,7 +456,7 @@ class CRCMonHelper {
   }
   
   template <typename Source>
-    uint getCRC(const CxxUtils::span<const Source> words) {
+    uint getCRC(const std::span<const Source> words) {
     uint crc = m_preset;
     uint N = sizeof(Source); //N 8b subwords per word
     
@@ -478,7 +502,7 @@ class CRCL1AHelper {
   CRCL1AHelper() {} 
 
   template <typename Source>
-    uint getCRC(const CxxUtils::span<const Source> words) {
+    uint getCRC(const std::span<const Source> words) {
     uint crc = 0;
     uint N = sizeof(Source)/2; //N 16b subwords per word
 

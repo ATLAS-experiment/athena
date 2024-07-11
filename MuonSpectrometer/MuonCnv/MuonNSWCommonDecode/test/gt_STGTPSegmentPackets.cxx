@@ -18,7 +18,7 @@ class STGTPSegmentPacketTest : public ::testing::Test {
  protected:
   void SetUp() override {
     const auto data = std::vector(std::cbegin(s_DATA), std::cend(s_DATA));
-    m_decoder = std::make_unique<Muon::nsw::STGTPSegmentPacket>(data);
+    m_decoder = std::make_unique<Muon::nsw::STGTPSegmentPacket>(data,1);
   }
 
   std::unique_ptr<Muon::nsw::STGTPSegmentPacket> m_decoder{nullptr};
