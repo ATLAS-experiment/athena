@@ -42,5 +42,6 @@
 #include <AsgAnalysisAlgorithms/TreeFillerAlg.h>
 #include <AsgAnalysisAlgorithms/TreeMakerAlg.h>
 #include <AsgAnalysisAlgorithms/IOStatsAlg.h>
+#include <AsgAnalysisAlgorithms/FakeBkgCalculatorAlg.h>
 
 #endif

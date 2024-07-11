@@ -348,6 +348,10 @@ class ConfigFactory():
         from TauAnalysisAlgorithms.DiTauMassConfig import DiTauMassBlock
         self.addAlgConfigBlock(algName="DiTauMMC", alg=DiTauMassBlock)
 
+        # IFF fake background estimator
+        from AsgAnalysisAlgorithms.FakeBkgConfig import FakeBkgBlock
+        self.addAlgConfigBlock(algName='FakeBkgCalculator', alg=FakeBkgBlock)
+
         # output
         from AsgAnalysisAlgorithms.OutputAnalysisConfig import OutputAnalysisConfig
         self.addAlgConfigBlock(algName="Output", alg=OutputAnalysisConfig,

@@ -22,7 +22,7 @@ class TDirectory;
 namespace CP
 {
 
-class LhoodMM_tools : public BaseFakeBkgTool
+class ATLAS_NOT_THREAD_SAFE LhoodMM_tools : public BaseFakeBkgTool
 #ifndef FAKEBKGTOOLS_ATLAS_ENVIRONMENT
   , public FakeBkgTools::ExtraPropertyManager<LhoodMM_tools, BaseFakeBkgTool>
 #endif

@@ -72,10 +72,10 @@ TFile *rootEffFile;
 StatusCode initialize(CP::BaseFakeBkgTool& tool, const std::vector<std::string>& input, const std::string& selection, const std::string& process, bool verbose);
 StatusCode writeXML(const string& name, int type);
 StatusCode writeROOT(const string& name, int type, float realeff_mean, float fakeeff_mean, float eff_spread, float eff_delta_with_pt);
-StatusCode setupEfficiencies();
-StatusCode lookupEfficiencies(xAOD::IParticle& lepton, ParticleData& lepton_data);
+StatusCode setupEfficiencies ATLAS_NOT_THREAD_SAFE();
+StatusCode lookupEfficiencies ATLAS_NOT_THREAD_SAFE(xAOD::IParticle& lepton, ParticleData& lepton_data);
 
-StatusCode parseArguments(int argc, char *argv[], fbtTestToyMC_config &config);
+StatusCode parseArguments ATLAS_NOT_THREAD_SAFE(int argc, char *argv[], fbtTestToyMC_config &config);
 StatusCode setupSystBranches(const char* baseName, 
 			     CP::SystematicVariation sysvar, 
 			     float &weight,
@@ -98,7 +98,7 @@ std::unique_ptr<TFile> openRootFile(fbtTestToyMC_config &config);
 
 StatusCode doMerge( const std::vector<std::string> & input, const std::string & name, fbtTestToyMC_config &config, TH1F* h_lep_pt, float &lep_pt, TH1F* h_lep_eta, float &lep_eta, TH2F* h_lep_pt_eta, float &fakes, float &poserr, float &negerr, int icase);
   
-StatusCode Loop(fbtTestToyMC_config config);
+StatusCode Loop ATLAS_NOT_THREAD_SAFE(fbtTestToyMC_config config);
 
 double comboProb(const vector<FakeBkgTools::ParticleData> & leptons_data, const std::bitset<64> & tights, const std::bitset<64> &reals) ;
 
@@ -126,7 +126,7 @@ std::ofstream *f_stdpos_lhood_0;
 
 const int nSave = 4; // number of subjobs to split into when testing saveProgress
 
-int main(int argc, char *argv[]){
+int main ATLAS_NOT_THREAD_SAFE(int argc, char *argv[]){
   ANA_CHECK_SET_TYPE (int);
 
   fbtTestToyMC_config config;
@@ -158,7 +158,7 @@ int main(int argc, char *argv[]){
   ANA_CHECK( Loop(config) );
 }
 
-StatusCode Loop(fbtTestToyMC_config config){
+StatusCode Loop ATLAS_NOT_THREAD_SAFE(fbtTestToyMC_config config){
 
   //Open an output file
   if (config.verbose) cout << "maxnbaseline = " << config.maxnbaseline << endl;
@@ -765,7 +765,7 @@ StatusCode writeROOT(const string& name, int type, float realeff_mean, float fak
   return StatusCode::SUCCESS;
 }
 
-StatusCode parseArguments(int argc, char *argv[], fbtTestToyMC_config &config) {
+StatusCode parseArguments ATLAS_NOT_THREAD_SAFE(int argc, char *argv[], fbtTestToyMC_config &config) {
   static struct option long_options[] = 
     {
       {"ncases",  required_argument, 0, 'c'},
@@ -977,7 +977,7 @@ StatusCode initialize(CP::BaseFakeBkgTool& tool, const std::vector<std::string>&
   return StatusCode::SUCCESS;
 }
 
-StatusCode setupEfficiencies() {
+StatusCode setupEfficiencies ATLAS_NOT_THREAD_SAFE() {
   rootEffFile =  new TFile(rootEffFileName.c_str());
   if (rootEffFile == 0) {
     cout << "Um, no ROOT file!" << endl;
@@ -1004,7 +1004,7 @@ StatusCode setupEfficiencies() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode lookupEfficiencies(xAOD::IParticle& lepton, FakeBkgTools::ParticleData& lepton_data) {
+StatusCode lookupEfficiencies ATLAS_NOT_THREAD_SAFE(xAOD::IParticle& lepton, FakeBkgTools::ParticleData& lepton_data) {
 
   if (h_realeff_e == 0) cout << "No real e" << endl;
   if (h_fakeeff_e == 0) cout << "No fake e" << endl;
