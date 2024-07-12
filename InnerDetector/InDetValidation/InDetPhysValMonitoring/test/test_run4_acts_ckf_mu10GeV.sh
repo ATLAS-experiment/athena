@@ -98,27 +98,36 @@ fi
 
 echo "download latest result..."
 art.py download --user=artprod "$ArtPackage" "$ArtJobName"
-lastref_dir=ref-20??-??-??T????
-ls -la $lastref_dir
+lastref_dir=$(echo ref-20??-??-??T????)
+echo "${lastref_dir}:"
+ls -la "${lastref_dir}"
 
 run "dcube-ckf-last" \
     $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
     -p -x dcube_ckf_last \
-    -c ${dcubeXmlAbsPath} \
-    -r ${lastref_dir}/idpvm.ckf.root \
+    -c "${dcubeXmlAbsPath}" \
+    -r "${lastref_dir}/idpvm.ckf.root" \
+    -M "${AtlasBuildStamp}" \
+    -R "${lastref_dir#ref-}" \
+    --release="*" \
     idpvm.ckf.root
 
 run "dcube-ambi-last" \
     $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
     -p -x dcube_ambi_last \
-    -c ${dcubeXmlAbsPath} \
-    -r ${lastref_dir}/idpvm.ambi.root \
+    -c "${dcubeXmlAbsPath}" \
+    -r "${lastref_dir}/idpvm.ambi.root" \
+    -M "${AtlasBuildStamp}" \
+    -R "${lastref_dir#ref-}" \
+    --release="*" \
     idpvm.ambi.root
 
 # Compare performance w/ and w/o ambi. resolution
 run "dcube-ckf-ambi" \
     $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
     -p -x dcube_ckf_ambi \
-    -c ${dcubeXmlAbsPath} \
+    -c "${dcubeXmlAbsPath}" \
     -r idpvm.ckf.root \
+    -M "ckf" \
+    -R "ambi" \
     idpvm.ambi.root
