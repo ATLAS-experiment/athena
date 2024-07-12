@@ -18,7 +18,7 @@
 namespace CP
 {
 
-class ApplyFakeFactor : public CP::BaseLinearFakeBkgTool
+class ATLAS_NOT_THREAD_SAFE ApplyFakeFactor : public CP::BaseLinearFakeBkgTool
 {
 
   ASG_TOOL_CLASS2(ApplyFakeFactor, ILinearFakeBkgTool, IFakeBkgTool)

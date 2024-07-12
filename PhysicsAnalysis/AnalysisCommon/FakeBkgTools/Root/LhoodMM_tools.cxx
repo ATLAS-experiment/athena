@@ -36,7 +36,10 @@ using std::vector;
 using Clock=std::chrono::high_resolution_clock;
 
 
-LhoodMM_tools* LhoodMM_tools::m_current_lhoodMM_tool;
+LhoodMM_tools* LhoodMM_tools::m_current_lhoodMM_tool = nullptr;
+
+std::mutex LhoodMM_tools::s_mutex;
+
 
 LhoodMM_tools::LhoodMM_tools(const std::string& name)  :
   BaseFakeBkgTool(name)
@@ -829,6 +832,7 @@ double LhoodMM_tools::nfakes(Double_t *poserr, Double_t *negerr) {
   m_minnlep = minNlep_proc;
   m_maxnlep = maxNlep_proc;
 
+  std::lock_guard<std::mutex> lock(LhoodMM_tools::s_mutex); 
   if(setup() != StatusCode::SUCCESS) return 0.;
 
   if (m_maxnlep > m_maxnlep_loose) {

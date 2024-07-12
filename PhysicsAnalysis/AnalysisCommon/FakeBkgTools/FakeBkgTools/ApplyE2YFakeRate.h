@@ -11,7 +11,7 @@
 namespace CP
 {
 
-class ApplyE2YFakeRate : public CP::BaseLinearFakeBkgTool
+class ATLAS_NOT_THREAD_SAFE ApplyE2YFakeRate : public CP::BaseLinearFakeBkgTool
 {
 
   ASG_TOOL_CLASS2(ApplyE2YFakeRate, ILinearFakeBkgTool, IFakeBkgTool)

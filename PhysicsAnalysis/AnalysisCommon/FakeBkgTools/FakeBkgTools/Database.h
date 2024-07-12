@@ -25,7 +25,7 @@ class TH1;
 namespace FakeBkgTools
 {
 
-class Database
+class ATLAS_NOT_THREAD_SAFE Database
 {
 public:
     Database(Client client, bool useGeV, bool convertWhenMissing);

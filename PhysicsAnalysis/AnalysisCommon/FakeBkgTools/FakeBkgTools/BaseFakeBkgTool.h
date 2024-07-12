@@ -8,6 +8,7 @@
 #include "AsgAnalysisInterfaces/IFakeBkgTool.h"
 #include "AsgAnalysisInterfaces/IFakeBkgSystDescriptor.h"
 #include "AsgTools/AsgTool.h"
+#include "CxxUtils/checker_macros.h"
 #include "AthContainers/ConstAccessor.h"
 
 #include <string>
@@ -36,7 +37,7 @@ namespace CP
 /* 
  * Base class of concrete tools implementations, providing common helper methods
  */
-class BaseFakeBkgTool : virtual public CP::IFakeBkgTool, public CP::IFakeBkgSystDescriptor, public asg::AsgTool
+class ATLAS_NOT_THREAD_SAFE BaseFakeBkgTool: virtual public CP::IFakeBkgTool, public CP::IFakeBkgSystDescriptor, public asg::AsgTool
 #ifndef FAKEBKGTOOLS_ATLAS_ENVIRONMENT
   , public FakeBkgTools::PropertyManager<BaseFakeBkgTool>
 #endif
