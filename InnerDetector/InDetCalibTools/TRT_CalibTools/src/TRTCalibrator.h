@@ -151,12 +151,12 @@ private:
     Gaudi::Property< std::vector<std::string> > m_doOutPrint  {this, "PrintT0Out"  , {} , ""};
     Gaudi::Property< std::vector<std::string> > m_doRtPrint   {this, "PrintRtOut"  , {} , ""};
 
-  const AtlasDetectorID* m_DetID;
-  const TRT_ID* m_TRTID; 
-  const InDetDD::TRT_DetectorManager* m_trtmanager;
-  unsigned int m_numOfHitsTotal ;
-  unsigned int m_numOfHitsAccepted ;
-  unsigned int m_numOfProcessedTracks ;
+  const AtlasDetectorID* m_DetID{};
+  const TRT_ID* m_TRTID{}; 
+  const InDetDD::TRT_DetectorManager* m_trtmanager{};
+  unsigned int m_numOfHitsTotal{};
+  unsigned int m_numOfHitsAccepted{} ;
+  unsigned int m_numOfProcessedTracks{} ;
 
   std::string m_comTimeName;
   std::string m_Tkey,m_Dkey,m_Lkey,m_Mkey,m_Bkey,m_Ckey,m_Skey,m_Lkey_acc,m_Dkey_acc;
