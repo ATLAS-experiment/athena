@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -427,7 +427,7 @@ namespace Analysis
       
       /** decide whether to run the eigenvector method or not **/
       bool m_runEigenVectorMethod{};
-      Uncertainty m_EVStrategy; // <--- In addition, specify whether to use the global eigenvariations method
+      Uncertainty m_EVStrategy{}; // <--- In addition, specify whether to use the global eigenvariations method
 
       /** Eigenvector reduction strategy (per flavour) **/
       std::map<std::string, Analysis::EVReductionStrategy> m_EVReductions;
@@ -471,8 +471,8 @@ namespace Analysis
 
       /** |eta| bounds and strategy for dealing with out-of-bounds conditions */
       double               m_maxAbsEta{};
-      OutOfBoundsStrategy  m_absEtaStrategy;
-      OutOfBoundsStrategy  m_otherStrategy;
+      OutOfBoundsStrategy  m_absEtaStrategy{};
+      OutOfBoundsStrategy  m_otherStrategy{};
       
       [[nodiscard]] bool checkAbsEta(const CalibrationDataVariables& variables, unsigned int index);
 
