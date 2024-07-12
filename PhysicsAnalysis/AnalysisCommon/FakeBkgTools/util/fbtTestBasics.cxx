@@ -95,14 +95,14 @@ int main ATLAS_NOT_THREAD_SAFE(int argc, char* argv[])
 #else
   IAppMgrUI* app = POOL::Init();
   POOL::TEvent event(POOL::TEvent::kClassAccess);
-  FBT_CHECK( event.evtStore().retrieve() );
+  if(event.evtStore().retrieve().isFailure()) return 1;
   store = event.evtStore().get();
 #endif
     
   int returnCode = allTests() ? 0 : 1;
     
 #ifndef XAOD_STANDALONE
-  FBT_CHECK( app->finalize() );
+  if(app->finalize().isFailure()) return 1;
 #endif
   return returnCode;
 }
