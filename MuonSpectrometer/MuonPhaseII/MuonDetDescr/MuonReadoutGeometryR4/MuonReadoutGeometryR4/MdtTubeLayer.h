@@ -46,6 +46,23 @@ namespace MuonGMR4{
             }
         };
         using CutTubeSet = std::set<CutTubes, std::less<>>;
+
+        /** @brief Helper struct to avoid browsing with the serial transformer */
+        struct TubePositioner{
+            /** @brief First tube of the positioning */
+            unsigned int firstTube{0};
+            /** @brief Last tube of the positioning */
+            unsigned int lastTube{0};
+            /** @brief Underlying physical volume of the tube */
+            PVConstLink tubeVol{};
+            /** @brief Transform to reach the first tube */
+            Amg::Vector3D firstTubePos{Amg::Vector3D::Zero()};
+            /** @brief ordering operator for set look up */
+            bool operator<(const TubePositioner& other) const {
+                return lastTube < other.firstTube;
+            }
+        };
+        using TubePositionerSet = std::set<TubePositioner, std::less<>>;
         
         friend MdtTubeLayerSorter;
         /// @brief Standard constructor of a MdtTube layer. Taking a GeoVPhysVol
@@ -60,8 +77,6 @@ namespace MuonGMR4{
         unsigned int nTubes() const;
         ///@brief: Returns the transformation from the layer to the muon station
         const Amg::Transform3D& layerTransform() const;
-        ///@brief Return a cursor object over the tubes in the layer.
-        GeoVolumeCursor tubeCursor() const;
         ///@brief Returns the transformation of the tube to the muon station
         ///       Index counting [0 - nTubes()-1]
         const Amg::Transform3D tubeTransform(const unsigned int tube) const;
@@ -79,14 +94,15 @@ namespace MuonGMR4{
         PVConstLink m_layerNode{nullptr};
         GeoIntrusivePtr<const GeoTransform> m_layTrf{nullptr};
         CutTubeSet m_cutTubes{};
+        TubePositionerSet m_tubePos{};
+        Amg::Vector3D m_tubePitch{Amg::Vector3D::Zero()};
     };
 
-    inline bool operator<(const MdtTubeLayer::CutTubes& a, unsigned int tube){
-        return a.lastTube < tube;
-    }
-    inline bool operator<(const unsigned int tube, const MdtTubeLayer::CutTubes& a) {
-        return tube < a.firstTube;
-    }
+    bool operator<(const MdtTubeLayer::CutTubes& a, const unsigned int tube);
+    bool operator<(const unsigned int tube, const MdtTubeLayer::CutTubes& a);
+
+    bool operator<(const MdtTubeLayer::TubePositioner&a,const unsigned int tube);
+    bool operator<(const unsigned int tube, const MdtTubeLayer::TubePositioner& a);
 
 }
 #endif

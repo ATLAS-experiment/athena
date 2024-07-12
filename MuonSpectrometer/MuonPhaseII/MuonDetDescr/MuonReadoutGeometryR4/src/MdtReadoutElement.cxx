@@ -83,10 +83,8 @@ StatusCode MdtReadoutElement::initElement() {
     /// Cache the transformations to the tube layers
     std::optional<Amg::Vector3D> prevTubePos{std::nullopt};
     MdtTubeLayer& layer = *m_pars.tubeLayers[lay-1];
-    GeoVolumeCursor tubeCursor = layer.tubeCursor();
-    GeoTrf::Transform3D layerTransform = layer.layerTransform();
-    for (unsigned int tube = 1; tube <= numTubesInLay(); ++ tube, tubeCursor.next()) {
-      assert (!tubeCursor.atEnd());
+
+    for (unsigned int tube = 1; tube <= numTubesInLay(); ++ tube) {
       const IdentifierHash idHash = measurementHash(lay,tube);
       if (m_pars.removedTubes.count(idHash)) {
          prevTubePos = std::nullopt;
@@ -97,7 +95,7 @@ StatusCode MdtReadoutElement::initElement() {
       ATH_CHECK(strawSurfaceFactory(idHash, m_pars.tubeBounds->make_bounds(innerTubeRadius(), 0.5*tubeLength(idHash))));
 #endif
       ///Ensure that all linear transformations are rotations
-      GeoTrf::Transform3D tubeFrame = layerTransform*tubeCursor.getDefTransform();
+      GeoTrf::Transform3D tubeFrame = layer.tubeTransform(tubeNumber(idHash));
       const AmgSymMatrix(3) tubeRot = tubeFrame.linear();
       if (std::abs(tubeRot.determinant()- 1.) > std::numeric_limits<float>::epsilon()){
          ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" Transformation matrix is not a pure rotation for "<<
