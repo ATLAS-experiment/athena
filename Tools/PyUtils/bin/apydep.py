@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 # Created: Oct 2020, Frank Winklmeier
 #
@@ -43,13 +43,17 @@ def get_dependencies(filename, print_error=False):
 
    try:
       tree = ast.parse(open(filename,'rb').read(), filename=filename)
-   except SyntaxError as e:
+   except Exception as e:
       if print_error:
          print(e, file=sys.stderr)
       return DependencyFinder()
 
    finder = DependencyFinder()
-   finder.visit(tree)
+   try:
+      finder.visit(tree)
+   except Exception as e:
+      if print_error:
+         print(e, f'({os.path.basename(filename)})', file=sys.stderr)
 
    return finder
 
