@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  */
 
 
@@ -61,11 +61,12 @@ public:
   static std::string name() { return "POnce"; }
   POnce (const POnce& other)
     : m_x (other.m_x),
-      m_y (other.m_y)
+      m_y (other.m_y),
+      m_r (other.m_r)
   {
   }
   POnce (double x, double y)
-    : m_x(x), m_y(y)
+    : m_x(x), m_y(y), m_r()
   {
   }
   double x() const { return m_x; }
