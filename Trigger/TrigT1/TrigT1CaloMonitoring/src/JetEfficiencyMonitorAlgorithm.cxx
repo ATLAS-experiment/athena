@@ -38,7 +38,7 @@ StatusCode JetEfficiencyMonitorAlgorithm::initialize() {
 StatusCode JetEfficiencyMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const {
   ATH_MSG_DEBUG("JetEfficiencyMonitorAlgorithm::fillHistograms");
   std::vector<std::reference_wrapper<Monitored::IMonitoredVariable>> variables;
-  
+
   //  Retrieve Offline Jets from SG
   SG::ReadHandle<xAOD::JetContainer> jets(m_jetKey,ctx);
   if(!jets.isValid()){
@@ -64,48 +64,32 @@ StatusCode JetEfficiencyMonitorAlgorithm::fillHistograms( const EventContext& ct
     return StatusCode::SUCCESS;
   }
   
+  
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //DEFINITIONS and extracting variables from the python config file!
-  bool use_emulated_gfex_trig =  m_emulated;
   bool use_passed_before_prescale =  m_passedb4Prescale;
-  const std::string& HLTbootstrap_trigger = m_HLTbootstrap_reference_trigger.value();
   const std::string& bootstrap_trigger = m_bootstrap_reference_trigger.value();
   const std::vector<std::string>& muon_triggers = m_muon_reference_triggers.value();
-   const std::vector<std::string>& HLTrandom_triggers = m_HLTrandom_reference_triggers.value();
+  const std::vector<std::string>& HLTrandom_triggers = m_HLTrandom_reference_triggers.value();
   std::vector<std::string> gFex_types {"leadingGfex_SmallRadiusTOB", "leadingGfex_LargeRadiusTOB"};
   
   
   //Define the various reference vector things!
-  std::vector<std::string> reference_trigger_options {"Bootstrap", "BootstrapHLT", "RandomHLT", "No", "Muon"};
+  std::vector<std::string> reference_trigger_options {"Bootstrap",  "RandomHLT", "No", "Muon"};
   
   bool bootstrap_ref_decision = false; //bootstrap trigger decision 
-  bool bootstrapHLT_ref_decision = false; //HLT bootstrap trigger chain decision 
   bool random_ref_decision = false; //random reference triggers decision
   bool muon_ref_decision = false; //muon reference triggers decision
   
 
 
-  //if using pass before prescale to increase statstics, we determine reference trigger decision differently
-  if (use_passed_before_prescale) {
-    const unsigned int bs_bits = AthMonitorAlgorithm::getTrigDecisionTool()->isPassedBits(bootstrap_trigger);
-    bootstrap_ref_decision = bs_bits & TrigDefs::L1_isPassedBeforePrescale;
-    for (auto & u : muon_triggers) {
-      const unsigned int bits = AthMonitorAlgorithm::getTrigDecisionTool()->isPassedBits(u);
-      bool pass = bits & TrigDefs::L1_isPassedBeforePrescale;
-      if (pass) {muon_ref_decision = true;}
-    } // iterating through the list of unbaised triggers
-  } //close if used pass before prescale
-  // if not using pass before prescale, then is a more direct process to see if trigger passed
-  else {
-    bootstrap_ref_decision = AthMonitorAlgorithm::getTrigDecisionTool()->isPassed(bootstrap_trigger);
-    for (auto & u : muon_triggers) {
-      if (AthMonitorAlgorithm::getTrigDecisionTool()->isPassed(u)) {muon_ref_decision = true;}
-    } //close iterating through the muon triggers
-  } //close else
+  bootstrap_ref_decision = AthMonitorAlgorithm::getTrigDecisionTool()->isPassed(bootstrap_trigger);
+  for (auto & u : muon_triggers) {
+    if (AthMonitorAlgorithm::getTrigDecisionTool()->isPassed(u)) {muon_ref_decision = true;}
+  } //close iterating through the muon triggers
 
   //then for the HLT decision chains, we always want to use the traditional way of getting our trigger deicsion
-  bootstrapHLT_ref_decision = AthMonitorAlgorithm::getTrigDecisionTool()->isPassed(HLTbootstrap_trigger);
   for (auto & u : HLTrandom_triggers) {
     if (AthMonitorAlgorithm::getTrigDecisionTool()->isPassed(u)) {random_ref_decision = true;}
   } //close iterating through the HLT random chains
@@ -113,16 +97,10 @@ StatusCode JetEfficiencyMonitorAlgorithm::fillHistograms( const EventContext& ct
   
   std::map<std::string, bool> reference_trigger_decision {
     {"Bootstrap", bootstrap_ref_decision },
-    {"BootstrapHLT", bootstrapHLT_ref_decision },
     {"RandomHLT", random_ref_decision},
     {"No", true},
     {"Muon", muon_ref_decision}
   };
-  
-  
-  //fill a simple histogram of just the run number
-  auto run = Monitored::Scalar<int>("run",GetEventInfo(ctx)->runNumber());
-  fill(m_packageName, run); //fill the run number histogram that was default
   
   
   //definition of variables for the offlineSRJet_maxEta_minPt_requirement and offlineLRJet_maxEta_minPt_requirement
@@ -211,23 +189,27 @@ StatusCode JetEfficiencyMonitorAlgorithm::fillHistograms( const EventContext& ct
   
   
   
-  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  // #####################
+  // #####################
   //Physical cuts applied to all events on the offline jets
-  //requring a minimum pt threshold (Defined as minPt @ line 120)
-  //and maximum eta threshold (Defined as maxEta @ line 121)
+  //requring a minimum pt threshold 
+  //and maximum eta threshold 
 
   //offline SR Jet requriment 
   bool  offlineSRJet_maxEta_minPt_requirement = false;
-  if(std::abs(jet_eta["leadingOffline_SmallRadiusJet"])<=maxEta && (jet_pt["leadingOffline_SmallRadiusJet"] >= minPt)) {  offlineSRJet_maxEta_minPt_requirement = true; }
+  if(std::abs(jet_eta["leadingOffline_SmallRadiusJet"])<=maxEta && (jet_pt["leadingOffline_SmallRadiusJet"] >= minPt)) { 
+     offlineSRJet_maxEta_minPt_requirement = true; 
+  }
   
   // offline LR Jet requriment 
   bool  offlineLRJet_maxEta_minPt_requirement = false;
-  if(std::abs(jet_eta["leadingOffline_LargeRadiusJet"])<=maxEta && (jet_pt["leadingOffline_LargeRadiusJet"] >= minPt)) {  offlineLRJet_maxEta_minPt_requirement = true; }
+  if(std::abs(jet_eta["leadingOffline_LargeRadiusJet"])<=maxEta && (jet_pt["leadingOffline_LargeRadiusJet"] >= minPt)) {  
+    offlineLRJet_maxEta_minPt_requirement = true; 
+  }
   
   
-  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  // #####################
+  // #####################
   //PREP LISTS OF TRIGGERS
   
   //Create and clean up the list of L1Triggers
@@ -241,16 +223,13 @@ StatusCode JetEfficiencyMonitorAlgorithm::fillHistograms( const EventContext& ct
     // so we want 100% pt effiency, or after 'flattening out'
     {"L1_J15", 35*GeV}, {"L1_J20", 40*GeV},  {"L1_J30", 60*GeV},
     {"L1_J40", 80*GeV}, {"L1_J50", 90*GeV}, {"L1_J75", 120*GeV},
-    {"L1_J100", 140*GeV}
-  };
-  
-  /////////////////////////////////////////////////////////////
-  std::map<std::string, float> gFexTriggers_val {
-    //trigger val corresponding to the gfex triggers
-    {"L1_gJ20", 20*GeV}, {"L1_gJ30", 30*GeV},  {"L1_gJ40", 40*GeV},
-    {"L1_gJ50", 50*GeV}, {"L1_gJ60", 60*GeV}, {"L1_gJ100", 100*GeV},
-    {"L1_gJ160", 160*GeV}, {"L1_gLJ80", 80*GeV}, {"L1_gLJ100", 100*GeV},
-    {"L1_gLJ140", 140*GeV},  {"L1_gLJ160", 160*GeV}
+    {"L1_J100", 140*GeV}, {"L1_gLJ80p0ETA25", 175*GeV}, {"L1_gLJ100p0ETA25", 200*GeV}, 
+    {"L1_gLJ140p0ETA25", 270*GeV}, {"L1_gLJ160p0ETA25", 270*GeV}, {"L1_SC111-CJ15", 270*GeV}, {"L1_gJ20p0ETA25", 40*GeV},
+    {"L1_gJ50p0ETA25", 80*GeV}, {"L1_gJ100p0ETA25", 200*GeV},
+    {"L1_gJ400p0ETA25", 800*GeV}, {"L1_jJ30", 50*GeV}, {"L1_jJ40", 60*GeV},
+    {"L1_jJ50", 70*GeV}, {"L1_jJ60", 80*GeV}, {"L1_jJ80", 100*GeV},
+    {"L1_jJ90", 110*GeV}, {"L1_jJ125", 135*GeV}, {"L1_jJ140", 160*GeV}, {"L1_jJ160", 180*GeV},
+    {"L1_jJ180", 200*GeV}
   };
   
   std::map<std::string, std::vector<float>> multijet_triggers_val {
@@ -258,97 +237,74 @@ StatusCode JetEfficiencyMonitorAlgorithm::fillHistograms( const EventContext& ct
     {"L1_4J20", {20*GeV, 20*GeV, 20*GeV, 20*GeV}}, {"L1_J85_3J30", {85*GeV, 30*GeV, 30*GeV, 30*GeV}},
     {"L1_2J15_XE55", {15*GeV, 15*GeV}}, {"L1_2J50_XE40", {50*GeV, 50*GeV}}
   };
+
   
-  //define emulatedString variable so that we can have emulated in the title
-  //(or not) according to the status of the gfex triggers
-  std::string emulatedString = " ";
-  if (use_emulated_gfex_trig) {emulatedString = " Emulated Decision "; }
-  
-  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  // Fill sample histograms of the pt of leading jet
-  auto raw_pt  = Monitored::Scalar<float>("raw_pt", 0.);
-  raw_pt = jet_pt["leadingOffline_SmallRadiusJet"];
-  fill(m_packageName, raw_pt);
-  
-  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  // #####################
+  // #####################
+  // Fill sample histograms of the pt and eta of leading SR jet
+  if (offlineSRJet_maxEta_minPt_requirement ) {
+    auto raw_pt  = Monitored::Scalar<float>("raw_pt", jet_pt["leadingOffline_SmallRadiusJet"]);
+    auto raw_eta  = Monitored::Scalar<float>("raw_eta", jet_eta["leadingOffline_SmallRadiusJet"]);
+    fill(m_packageName, raw_pt, raw_eta);
+  }
+ // #####################
+ // #####################
+
+
   // FILL EFFIENCY HISTOGRAMS INVOLVING SMALL RADIUS OFFLINE JETS
-  
   for (auto & r : reference_trigger_options){ //iterate through the refernce triggers
     if (offlineSRJet_maxEta_minPt_requirement && reference_trigger_decision[r]) { //check that the physical cuts and reference trigger is passed
-      for(unsigned int t=0; t< SmallRadiusJetTriggers_phase1_and_legacy.size(); ++t) {//iterate through all of the useful triggers list (that we make effiency curves for)
+      //get the pt of leading jet 
+      auto pt_ref  = Monitored::Scalar<float>("val_SRpt", jet_pt["leadingOffline_SmallRadiusJet"]);
+      
+      for(unsigned int t=0; t< SmallRadiusJetTriggers_phase1_and_legacy.size(); ++t) {//iterate through triggers that we make effiency curves for
         const std::string& trigger_name = SmallRadiusJetTriggers_phase1_and_legacy[t]; // define the trigger name and get its decision
         
-        //default definition of the trigger of interest decison to be false,
-        //we will then check if the trigger actually passed 
-        bool trig_of_interest_decision = false;
-        
-        //check if we are looking at a gfex trigger and if we want to emulate the gfex trigger
-        if ((gFexTriggers_val.find(trigger_name) != gFexTriggers_val.end()) && use_emulated_gfex_trig) {
-          // check if the emuaulated trigger passed
-          // we have threshold values of gfex trigger values saved in the map 
-          // gFexTriggers_val that connects the trigger name to the value
-          // here we check if the gfex SR TOB pt is large than the threshold, which should mean the trigger passes
-          if (jet_pt["leadingGfex_SmallRadiusTOB"] > gFexTriggers_val[trigger_name]) { 
-            trig_of_interest_decision = true;
-          }
-        } else if (use_passed_before_prescale) {
+  
+        bool trig_of_interest_decision = false; //default definition of the trigger of interest decison to be false,
+        if (use_passed_before_prescale) {
           //We can choose if we want to use pass before prescale, or not when defining our trigger efficiency
           //this boolean is defiend in the jeteffmonalg.py file
           const unsigned int bits = AthMonitorAlgorithm::getTrigDecisionTool()->isPassedBits(trigger_name);
           trig_of_interest_decision = bits & TrigDefs::L1_isPassedBeforePrescale;
         } else { trig_of_interest_decision = AthMonitorAlgorithm::getTrigDecisionTool()->isPassed(trigger_name); }
         
-        //get values and fill the histogram of offline jet pt and boolean of trigger passing
-        auto pt_ref  = Monitored::Scalar<float>("pt_"+ r, jet_pt["leadingOffline_SmallRadiusJet"]);
-        auto passed_pt  = Monitored::Scalar<bool>("pt_" + r + "_" + trigger_name, trig_of_interest_decision);
-        fill(m_packageName, pt_ref, passed_pt);
+         //get values and fill the histogram of offline jet pt and boolean of trigger passing
+        auto passed_pt_bool  = Monitored::Scalar<bool>("bool_"+r+"_"+trigger_name, trig_of_interest_decision);
+        fill(m_packageName, pt_ref, passed_pt_bool);
         
-        //if loop to see if trigger of interest passed. If yes we want to fill a histogram with the pt value
-        if (trig_of_interest_decision) {
-          auto passed_pt_val = Monitored::Scalar<float>("pt:" + r +  "_" + trigger_name, jet_pt["leadingOffline_SmallRadiusJet"]);
-          fill(m_packageName, passed_pt_val);
-        } //(close IF) trig_of_interest_decision loop
         
-        //filling histograms that are effiency curves as a funciton of eta
-        //in order to ensure that we are isolating only the eta behavior, we have a
-        // flatline value where the pt effiencies aproximtley flatten out to 1
-        //these are hard coded, and saved for only a few of the triggers!
+         //filling histograms that are effiency curves as a funciton of eta
+         //in order to ensure that we are isolating only the eta behavior, we have a
+         // flatline value where the pt effiencies aproximtley flatten out to 1
+         //these are hard coded, and saved for only a few of the triggers!
         if (l1_trigger_flatline_vals.find(trigger_name) != l1_trigger_flatline_vals.end()) {
           if(jet_pt["leadingOffline_SmallRadiusJet"]>l1_trigger_flatline_vals[trigger_name]) { //is jet pt greater than the flatline value?
-            //get value of eta, and histogram passing boolean and fill
-            auto eta_ref  = Monitored::Scalar<float>("eta_" + r, jet_eta["leadingOffline_SmallRadiusJet"]);
-            auto passed_eta = Monitored::Scalar<bool>("eta_" + r + "_" + trigger_name, trig_of_interest_decision);
+             //get value of eta, and histogram passing boolean and fill
+            auto eta_ref  = Monitored::Scalar<float>("val_SReta", jet_eta["leadingOffline_SmallRadiusJet"]);
+            auto passed_eta = Monitored::Scalar<bool>("bool_" + r + "_" + trigger_name, trig_of_interest_decision);
             fill(m_packageName, eta_ref, passed_eta);
-            //if the trigger passes, we can also add the eta value to a stand alone histogram
-            if (trig_of_interest_decision) {
-              auto passed_eta_val  = Monitored::Scalar<float>("eta:" + r +"_" + trigger_name, jet_eta["leadingOffline_SmallRadiusJet"]);
-              fill(m_packageName, passed_eta_val);
-            } //(close IF) passed eta if loop
+              //if the trigger passes, we can also add the eta value to a stand alone histogram
           } //(close IF) jet pt is greater than pt flatline vlaue loop
-        } //(close IF) loop that checks if the trigger of interest is int eh
+        } //(close IF) loop that checks if the trigger of interest is in list of flatline trigger vals
       } //(close FOR) loop that iterates through all of L1 single jet triggers we make effiency curves for
       
       
-      ///////////////////////////////////////////////////////////////////////////////////////////////////////
-      ///////////////////////////////////////////////////////////////////////////////////////////////////////
+      //###########################
+      //###########################
       //now lets iterate through the multi jet triggers to make efficiency curves!
       for(unsigned int t=0; t< multiJet_LegacySmallRadiusTriggers.size(); ++t) {
         const std::string& trigger_name = multiJet_LegacySmallRadiusTriggers[t];
         
-        //determine if the trigger passed
+         //determine if the trigger passed
         bool trig_of_interest_decision = false;
         if (use_passed_before_prescale) {
           const unsigned int bits = AthMonitorAlgorithm::getTrigDecisionTool()->isPassedBits(trigger_name);
           trig_of_interest_decision = bits & TrigDefs::L1_isPassedBeforePrescale;
         } else { trig_of_interest_decision = AthMonitorAlgorithm::getTrigDecisionTool()->isPassed(trigger_name); }
         
-        // for these multijet triggers, we only want to fill the "last" jet 
-        // of the trigger defintion 
-        // example:
-        ///// a 4J100 jet trigger?
-        ///// we want to only plot the pt of the jet with the 4th highest pT 
+         // for these multijet triggers, we only want to fill the "last" jet of the trigger defintion 
+         // example: a 4J100 jet trigger? we want to only plot the pt of the jet with the 4th highest pT 
         int multijet_num = multijet_triggers_val[trigger_name].size(); // number of jets we expect from trigger definition 
         int jets_num = jets->size(); //total number of jets in the event
         if (jets_num >= multijet_num) {
@@ -358,13 +314,9 @@ StatusCode JetEfficiencyMonitorAlgorithm::fillHistograms( const EventContext& ct
             jet_count += 1;
             if(jet_count == multijet_num) { //only want to fill histogram on the last jet of the multijet
               const float jet_pt_loop = j->pt();
-              auto pt_ref  = Monitored::Scalar<float>("pt_"+ r, jet_pt_loop);
-              auto passed_pt  = Monitored::Scalar<bool>("pt_" + r + "_" + trigger_name, trig_of_interest_decision);
+              auto pt_ref  = Monitored::Scalar<float>("val_SRpt", jet_pt_loop);
+              auto passed_pt  = Monitored::Scalar<bool>("bool_" + r, trig_of_interest_decision);
               fill(m_packageName, pt_ref, passed_pt);
-              if (trig_of_interest_decision) {
-                auto passed_pt_val = Monitored::Scalar<float>("pt:" + r +  "_" + trigger_name, jet_pt_loop);
-                fill(m_packageName, passed_pt_val);
-              }  //(close IF) passed_pt if loop
             } //(close IF) loop that checks we are filling only the last jet of the multijet
           } //(close FOR) loop that iterates trhrough each jet required by the multijet trigger
         } //(close IF) loop that checks if the number of jets preseent agrees with the multijet trigger
@@ -380,28 +332,32 @@ StatusCode JetEfficiencyMonitorAlgorithm::fillHistograms( const EventContext& ct
   
   for (auto & r : reference_trigger_options){ //iterate through the reference triggers
     if ( offlineLRJet_maxEta_minPt_requirement && reference_trigger_decision[r]) { //check that the physical cuts and reference trigger is passed
+      auto pt_ref  = Monitored::Scalar<float>("val_LRpt", jet_pt["leadingOffline_LargeRadiusJet"]);
+
       for(unsigned int t=0; t< LargeRadiusJetTriggers_phase1_and_legacy.size(); ++t){ //iterate through all of the useful LR triggers list (that we make effiency curves for)
         const std::string& trigger_name = LargeRadiusJetTriggers_phase1_and_legacy[t];
-        
+      
         bool trig_of_interest_decision = false;
-        
-        if ((gFexTriggers_val.find(trigger_name) != gFexTriggers_val.end()) && use_emulated_gfex_trig) {
-          if (jet_pt["leadingGfex_LargeRadiusTOB"] > gFexTriggers_val[trigger_name]) { //the qualifier for emulating trigger passing
-            trig_of_interest_decision = true;
-          }
-        } else if (use_passed_before_prescale) {
+        if (use_passed_before_prescale) {
           const unsigned int bits = AthMonitorAlgorithm::getTrigDecisionTool()->isPassedBits(trigger_name);
           trig_of_interest_decision = bits & TrigDefs::L1_isPassedBeforePrescale;
         } else { trig_of_interest_decision = AthMonitorAlgorithm::getTrigDecisionTool()->isPassed(trigger_name); }
         
-        auto pt_ref  = Monitored::Scalar<float>("pt_"+ r, jet_pt["leadingOffline_LargeRadiusJet"]);
-        auto passed_pt  = Monitored::Scalar<bool>("pt_" + r + "_" + trigger_name, trig_of_interest_decision);
-        fill(m_packageName, pt_ref, passed_pt);
         
-        if (trig_of_interest_decision) { //if loop to see if trigger of interest passed. If yes we want to fill a histogram with the value
-          auto passed_pt_val = Monitored::Scalar<float>("pt:" + r +  "_" + trigger_name, jet_pt["leadingOffline_LargeRadiusJet"]);
-          fill(m_packageName, passed_pt_val);
-        } //(close IF) trig_of_interest_decision loop
+        auto passed_pt_bool  = Monitored::Scalar<bool>("bool_"+r+"_"+trigger_name, trig_of_interest_decision);
+        fill(m_packageName, pt_ref, passed_pt_bool);
+
+
+         //filling histograms that are effiency curves as a funciton of eta
+        if (l1_trigger_flatline_vals.find(trigger_name) != l1_trigger_flatline_vals.end()) {
+          if(jet_pt["leadingOffline_LargelRadiusJet"]>l1_trigger_flatline_vals[trigger_name]) { //is jet pt greater than the flatline value?
+             //get value of eta, and histogram passing boolean and fill
+            auto eta_ref  = Monitored::Scalar<float>("val_LReta", jet_eta["leadingOffline_LargeRadiusJet"]);
+            auto passed_eta = Monitored::Scalar<bool>("bool_" + r + "_" + trigger_name, trig_of_interest_decision);
+            fill(m_packageName, eta_ref, passed_eta);
+              //if the trigger passes, we can also add the eta value to a stand alone histogram
+          } //(close IF) jet pt is greater than pt flatline vlaue loop
+        } //(close IF) loop that checks if the trigger of interest is in list of flatline trigger vals
         
       } //(close FOR) loop that iterates through all of the triggers we make effiency curves for
     } //(close FOR) the iteration that fills effiency histogram for 4 different kinds of refernce triggers

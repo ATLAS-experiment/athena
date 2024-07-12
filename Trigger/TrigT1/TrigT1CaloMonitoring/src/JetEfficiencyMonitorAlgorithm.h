@@ -6,15 +6,17 @@
 
 #include "AthenaMonitoring/AthMonitorAlgorithm.h"
 #include "AthenaMonitoringKernel/Monitored.h"
-#include "StoreGate/ReadHandleKey.h"
+
 #include "AthenaKernel/Units.h"
 #include "FourMomUtils/P4Helpers.h"
 
-
+#include "StoreGate/ReadHandleKey.h"
+#include "xAODJet/JetContainer.h"
 #include "xAODTrigger/gFexJetRoI.h"
 #include "xAODTrigger/gFexJetRoIContainer.h"
 #include "xAODTrigger/gFexGlobalRoI.h"
 #include "xAODTrigger/gFexGlobalRoIContainer.h"
+
 
 // #include "TrigDecisionTool/TrigDecisionTool.h"
 //#include "TrigT1Interfaces/TrigT1CaloDefs.h"
@@ -28,10 +30,8 @@ private:
   StringProperty m_packageName{this,"PackageName","JetEfficiencyMonitor","group name for histograming"};
 
   StringProperty m_bootstrap_reference_trigger{this,"BootstrapReferenceTrigger","L1_J15","the bootstrapping trigger"};
-  StringProperty m_HLTbootstrap_reference_trigger{this,"HLTBootstrapReferenceTrigger","HLT_noalg_L1J20","the HLT bootstrapping trigger"};
   Gaudi::Property<std::vector<std::string>> m_muon_reference_triggers{this,"MuonReferenceTriggers",{},"the muon refernce triggers"};
   Gaudi::Property<std::vector<std::string>> m_HLTrandom_reference_triggers{this,"HLTRandomReferenceTriggers",{},"the random refernce trigger"};
-  Gaudi::Property<bool> m_emulated{this,"Emulated",0, "boolean of if we want to emulate the gfex triggers"};
   Gaudi::Property<bool> m_passedb4Prescale{this,"PassedBeforePrescale",0,"boolean of if we want to measure the efficiency based on passed before prescale"};
 
   Gaudi::Property<std::vector<std::string>> m_multiJet_LegacySmallRadiusTriggers{this,"multiJet_LegacySmallRadiusTriggers",{},"Vector of single jet L1 triggers"};
@@ -44,6 +44,5 @@ private:
   SG::ReadHandleKey<xAOD::JetContainer> m_LRjetKey{ this, "LRJetKey" , "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets", ""}; //offline LR jets  
   SG::ReadHandleKey<xAOD::gFexJetRoIContainer> m_gFexSRJetContainerKey{ this, "mygFexSRJetRoIContainer" , "L1_gFexSRJetRoI" , ""}; //gfex SR jets
   SG::ReadHandleKey<xAOD::gFexJetRoIContainer> m_gFexLRJetContainerKey{ this, "mygFexLRJetRoIContainer" , "L1_gFexLRJetRoI" , ""}; //gfex LR jets
-
 };
 #endif
