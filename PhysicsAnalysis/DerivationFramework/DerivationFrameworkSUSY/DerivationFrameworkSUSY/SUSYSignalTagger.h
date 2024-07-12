@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -27,9 +27,9 @@ namespace DerivationFramework {
 
   public:
     SUSYSignalTagger(const std::string& t, const std::string& n, const IInterface* p);
-    ~SUSYSignalTagger();
-    StatusCode initialize();
-    StatusCode finalize();
+    ~SUSYSignalTagger() = default;
+    StatusCode initialize() override;
+    StatusCode finalize() override;
     virtual StatusCode addBranches() const;
 
 
@@ -39,7 +39,6 @@ namespace DerivationFramework {
     std::string m_mcName;    
 
     bool FindSusyHardProc(const xAOD::TruthParticleContainer* truthP, int& pdgid1, int& pdgid2) const;
-    unsigned int finalStateID(const int SUSY_Spart1_pdgId, const int SUSY_Spart2_pdgId) const;
 
   }; /// class
 
