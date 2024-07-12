@@ -106,11 +106,10 @@ def MuonMaterialProviderToolCfg(flags,  name="MuonTrkMaterialProviderTool", **kw
 
 
 def MuonSegmentHitSummaryToolCfg(flags, name="MuonSegmentHitSummaryTool", **kwargs):
-    from MuonConfig.MuonGeometryConfig import MuonDetectorCondAlgCfg
-
-    result = MuonEDMPrinterToolCfg(flags)
-    kwargs.setdefault("Printer", result.getPrimary())
-    result.merge(MuonDetectorCondAlgCfg(flags))
+    from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
+    result = ComponentAccumulator()
+    kwargs.setdefault("Printer", result.getPrimaryAndMerge(MuonEDMPrinterToolCfg(flags)))
+    result.merge(MuonGeoModelCfg(flags))
     kwargs.setdefault("DetectorManagerKey", "MuonDetectorManager")
     tool = CompFactory.Muon.MuonSegmentHitSummaryTool(name, **kwargs)
     result.setPrivateTools(tool)

@@ -5,12 +5,12 @@
 #include "TrkDriftCircleMath/MdtChamberGeometry.h"
 
 #include <MuonIdHelpers/MdtIdHelper.h>  /// maxNTubesPerLayer
-#include <TString.h>                    // for Form
 #include <algorithm>
 #include <iostream>
 #include "TrkDriftCircleMath/SortDcsByY.h"
 #include <AthenaKernel/getMessageSvc.h>
 #include <MuonReadoutGeometry/MdtReadoutElement.h>
+#include "GeoModelHelpers/throwExcept.h"
 
 namespace {
     constexpr int maxNTubesPerLayer = MdtIdHelper::maxNTubesPerLayer;
@@ -46,22 +46,14 @@ namespace TrkDriftCircleMath {
         m_firstTube[1] = tube0ml1;
 
         if (m_nml < 1 || m_nml > 2)
-            throw std::runtime_error(
-                Form("File: %s, Line: %d\nMdtChamberGeometry::setGeometry() - got called with nml=%d which is definitely out of range",
-                     __FILE__, __LINE__, m_nml));
+            THROW_EXCEPTION("MdtChamberGeometry::setGeometry() - got called with nml="<<m_nml<<" which is definitely out of range.");
         if (m_nlay < 1 || m_nlay > 4)
-            throw std::runtime_error(
-                Form("File: %s, Line: %d\nMdtChamberGeometry::setGeometry() - got called with nlay=%d which is definitely out of range",
-                     __FILE__, __LINE__, m_nlay));
+            THROW_EXCEPTION("MdtChamberGeometry::setGeometry() - got called with nlay="<<m_nlay<<" which is definitely out of range");
         if (ntubesml0 < 1 || ntubesml0 > maxNTubesPerLayer)
-            throw std::runtime_error(Form(
-                "File: %s, Line: %d\nMdtChamberGeometry::setGeometry() - got called with ntubesml0=%d which is definitely out of range",
-                __FILE__, __LINE__, ntubesml0));
+            THROW_EXCEPTION("MdtChamberGeometry::setGeometry() - got called with ntubesml0="<<ntubesml0<<" which is definitely out of range");
         // there can be chambers with only 1 multilayer. Then, the second multilayer will have ntubesml1=0
         if (ntubesml1 > maxNTubesPerLayer)
-            throw std::runtime_error(Form(
-                "File: %s, Line: %d\nMdtChamberGeometry::setGeometry() - got called with ntubesml1=%d which is definitely out of range",
-                __FILE__, __LINE__, ntubesml1));
+            THROW_EXCEPTION("MdtChamberGeometry::setGeometry() - got called with ntubesml1="<<ntubesml1<<" which is definitely out of range");
 
         m_stationTheta = stationTheta;
     }
@@ -184,8 +176,7 @@ namespace TrkDriftCircleMath {
     }
     LocVec2D MdtChamberGeometry::tubePosition(unsigned int ml, unsigned int lay, unsigned int tube) const {
         if (!validId(ml, lay, tube)) {
-            throw std::runtime_error(Form("%s:%d -- Invalid combination of multilayer ml: %u, layer: %u and tube: %d given: ", __FILE__,
-                                          __LINE__, ml, lay, tube));
+            THROW_EXCEPTION("Combination of multilayer ml: "<<ml<<", layer: "<<lay<<" and tube: "<<tube<<" given ");
         }
         LocVec2D tube_vec{xPosTube(ml, lay, tube), yPosTube(ml, lay)};
         return tube_vec;

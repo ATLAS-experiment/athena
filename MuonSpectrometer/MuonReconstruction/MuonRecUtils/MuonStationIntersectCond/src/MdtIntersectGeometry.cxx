@@ -15,6 +15,7 @@
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 #include "TrkDriftCircleMath/MdtChamberGeometry.h"
 #include "TrkDriftCircleMath/MdtId.h"
+#include "GeoModelHelpers/throwExcept.h"
 // maxNTubesPerLayer is included via MdtChamberGeometry.h -> DriftCircle.h
 
 namespace Muon {
@@ -69,19 +70,13 @@ namespace Muon {
     double MdtIntersectGeometry::tubeLength(const int ml, const int layer, const int tube) const {
 #ifndef NDEBUG
         if (ml < 0 || ml > 1){
-            std::stringstream sstr{};
-            sstr<<__FILE__<<":"<<__LINE__<<" "<<__func__<<"() got called with ml="<<ml<<" which is definetly out of range";
-            throw std::runtime_error(sstr.str());
+            THROW_EXCEPTION(__func__<<"() got called with ml="<<ml<<" which is definetly out of range");
         }
         if (layer < 0 || layer > 3) {
-            std::stringstream sstr{};
-            sstr<<__FILE__<<":"<<__LINE__<<" "<<__func__<<"() got called with layer="<<layer<<" which is definetly out of range";
-            throw std::runtime_error(sstr.str());
+            THROW_EXCEPTION(__func__<<"() got called with layer="<<layer<<" which is definetly out of range");
         }  
         if (tube < 0 || tube >= int(MdtIdHelper::maxNTubesPerLayer)){
-            std::stringstream sstr{};
-            sstr<<__FILE__<<":"<<__LINE__<<" "<<__func__<<"() got called with tube="<<tube<<" which is definetly out of range";
-            throw std::runtime_error(sstr.str());
+            THROW_EXCEPTION(__func__<<"() got called with tube="<<tube<<" which is definetly out of range");
         }
 #endif
         // shift by one to account for MuonGeoModel scheme
