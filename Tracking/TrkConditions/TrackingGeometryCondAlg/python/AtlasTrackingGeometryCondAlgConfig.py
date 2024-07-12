@@ -44,8 +44,11 @@ def _setupCondDB(flags, CoolDataBaseFolder, quiet=True):
                                     tag=atlasMaterialTag,
                                     className='Trk::LayerMaterialMap'))
         else:
+            atlasVersion = flags.ITk.trackingGeometry.geometryTagForMaterialMaps
+
             materialFileTag = atlasMaterialTag + '_'+ \
-                              flags.GeoModel.AtlasVersion
+                              atlasVersion
+            print ("Requesting material map for tracking geometry from tag = ", materialFileTag)
             from IOVDbSvc.IOVDbSvcConfig import addFolders
             result.merge(addFolders(flags,
                                     "/GLOBAL/TrackingGeo/LayerMaterialITK",
