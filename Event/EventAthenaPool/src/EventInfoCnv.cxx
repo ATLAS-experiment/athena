@@ -130,9 +130,7 @@ EventInfoCnv::massageEventInfo (EventInfo* ei)
             ei->event_type()->set_mc_channel_number(ei->event_ID()->run_number());
             ei->event_type()->set_mc_event_number  (ei->event_ID()->event_number());
         }
-        EventID* evtid = ei->event_ID();
-        bool consume_stream = true;
-        m_evtIdModSvc->modify_evtid(evtid, EventInfoCnvParams::eventIndex, consume_stream);
+        m_evtIdModSvc->modify_evtid(*ei->event_ID(), EventInfoCnvParams::eventIndex, true);
         return (ei);
     }
 

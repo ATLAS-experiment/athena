@@ -4,24 +4,22 @@
   Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
 */
 
-// IEvtIdModifierSvc.h 
+// IEvtIdModifierSvc.h
 // Header file for class IEvtIdModifierSvc
 // Author: S.Binet<binet@cern.ch>
-/////////////////////////////////////////////////////////////////// 
-#ifndef ATHENAKERNEL_IEVTIDMODIFIERSVC_H 
-#define ATHENAKERNEL_IEVTIDMODIFIERSVC_H 1 
+///////////////////////////////////////////////////////////////////
+#ifndef ATHENAKERNEL_IEVTIDMODIFIERSVC_H
+#define ATHENAKERNEL_IEVTIDMODIFIERSVC_H 1
 
 /** @class IEvtIdModifierSvc
  */
 
 // STL includes
-#include <string>
 #include <vector>
 
 // FrameWork includes
-#include "GaudiKernel/IInterface.h"
-#include "GaudiKernel/ClassID.h"
 #include "GaudiKernel/EventIDBase.h"
+#include "GaudiKernel/IInterface.h"
 
 // AthenaKernel includes
 
@@ -33,91 +31,51 @@ using event_number_t = EventIDBase::event_number_t;
 
 // Special global thread_local to pass event index to EventInfoCnv
 namespace EventInfoCnvParams {
-  inline thread_local event_number_t eventIndex{0};
+inline thread_local event_number_t eventIndex{0};
 }
 
-class IEvtIdModifierSvc
-  : virtual public ::IInterface
-{ 
-  /////////////////////////////////////////////////////////////////// 
-  // Public typedefs: 
-  /////////////////////////////////////////////////////////////////// 
+class IEvtIdModifierSvc : virtual public ::IInterface {
+  ///////////////////////////////////////////////////////////////////
+  // Public typedefs:
+  ///////////////////////////////////////////////////////////////////
  public:
-   using number_type = EventIDBase::number_type;
+  using number_type = EventIDBase::number_type;
 
-  /////////////////////////////////////////////////////////////////// 
-  // Public methods: 
-  /////////////////////////////////////////////////////////////////// 
- public: 
-
-  /** Destructor: 
+  ///////////////////////////////////////////////////////////////////
+  // Public methods:
+  ///////////////////////////////////////////////////////////////////
+ public:
+  /** Destructor:
    */
   virtual ~IEvtIdModifierSvc();
 
-  /////////////////////////////////////////////////////////////////// 
-  // Const methods: 
   ///////////////////////////////////////////////////////////////////
-
-  /** @brief return the current run-nbr (after modification)
-   */
-  virtual number_type run_number() const =0;
-
-  /** @brief return the current evt-nbr (after modification)
-   */
-  virtual uint64_t event_number() const =0;
-
-  /** @brief return the current time-stamp (after modification)
-   */
-  virtual number_type time_stamp() const =0;
-
-  /** @brief return the current lbk-nbr (after modification)
-   */
-  virtual number_type lumi_block() const =0;
-
-  /** @brief tell if the svc modified the run-nbr (for *this* event!)
-   */
-  virtual bool has_modified_run_number() const =0;
-
-  /** @brief tell if the svc modified the evt-nbr (for *this* event!)
-   */
-  virtual bool has_modified_event_number() const =0;
-
-  /** @brief tell if the svc modified the time-stamp (for *this* event!)
-   */
-  virtual bool has_modified_time_stamp() const =0;
-
-  /** @brief tell if the svc modified the lbk-nbr (for *this* event!)
-   */
-  virtual bool has_modified_lumi_block() const =0;
+  // Const methods:
+  ///////////////////////////////////////////////////////////////////
 
   /** @brief return the (sorted) list of run-numbers which will be modified.
    */
-  virtual
-  std::vector<number_type> run_number_list() const =0;
+  virtual std::vector<number_type> run_number_list() const = 0;
 
-  /////////////////////////////////////////////////////////////////// 
-  // Non-const methods: 
-  /////////////////////////////////////////////////////////////////// 
+  ///////////////////////////////////////////////////////////////////
+  // Non-const methods:
+  ///////////////////////////////////////////////////////////////////
 
   static const InterfaceID& interfaceID();
 
   /** @brief modify an `EventID`'s content
    */
-  virtual
-  void
-  modify_evtid(EventID*& evt_id, event_number_t eventIndex, bool consume_stream) = 0;
+  virtual void modify_evtid(EventID& evt_id, event_number_t eventIndex,
+                            bool consume_stream) = 0;
+};
 
-}; 
+///////////////////////////////////////////////////////////////////
+// Inline methods:
+///////////////////////////////////////////////////////////////////
 
-
-/////////////////////////////////////////////////////////////////// 
-// Inline methods: 
-/////////////////////////////////////////////////////////////////// 
-
-inline const InterfaceID& IEvtIdModifierSvc::interfaceID() 
-{ 
+inline const InterfaceID& IEvtIdModifierSvc::interfaceID() {
   static const InterfaceID IID_IEvtIdModifierSvc("IEvtIdModifierSvc", 1, 0);
-  return IID_IEvtIdModifierSvc; 
+  return IID_IEvtIdModifierSvc;
 }
 
-#endif //> !ATHENAKERNEL_IEVTIDMODIFIERSVC_H
+#endif  //> !ATHENAKERNEL_IEVTIDMODIFIERSVC_H
