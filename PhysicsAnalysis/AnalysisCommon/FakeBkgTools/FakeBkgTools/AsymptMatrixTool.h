@@ -17,7 +17,7 @@
 namespace CP
 {
 
-class AsymptMatrixTool : public CP::BaseLinearFakeBkgTool
+class ATLAS_NOT_THREAD_SAFE AsymptMatrixTool: public CP::BaseLinearFakeBkgTool
 {
     ASG_TOOL_CLASS2(AsymptMatrixTool, ILinearFakeBkgTool, IFakeBkgTool)
 

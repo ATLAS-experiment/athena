@@ -37,7 +37,7 @@ namespace CP
 /* 
  * Base class of concrete tools implementations, providing common helper methods
  */
-class BaseLinearFakeBkgTool : public BaseFakeBkgTool, virtual public ILinearFakeBkgTool
+class ATLAS_NOT_THREAD_SAFE BaseLinearFakeBkgTool: public BaseFakeBkgTool, virtual public ILinearFakeBkgTool
 #ifndef FAKEBKGTOOLS_ATLAS_ENVIRONMENT 
   , public FakeBkgTools::ExtraPropertyManager<BaseLinearFakeBkgTool, BaseFakeBkgTool>
 #endif

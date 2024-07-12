@@ -12,6 +12,7 @@
 #include "FakeBkgTools/LhoodMMFitInfo.h"
 
 #include <vector>
+#include <mutex>
 
 class TH1;
 class TH2;
@@ -22,7 +23,7 @@ class TDirectory;
 namespace CP
 {
 
-class ATLAS_NOT_THREAD_SAFE LhoodMM_tools : public BaseFakeBkgTool
+class ATLAS_NOT_THREAD_SAFE LhoodMM_tools: public BaseFakeBkgTool
 #ifndef FAKEBKGTOOLS_ATLAS_ENVIRONMENT
   , public FakeBkgTools::ExtraPropertyManager<LhoodMM_tools, BaseFakeBkgTool>
 #endif
@@ -77,6 +78,7 @@ class ATLAS_NOT_THREAD_SAFE LhoodMM_tools : public BaseFakeBkgTool
 
   // pointer to instance of LhoodMM_tools to use in a given fit
   static LhoodMM_tools* m_current_lhoodMM_tool;
+  static std::mutex s_mutex;  // to prevent concurrent access to minuit / fit function
   
   LhoodMMFitInfo m_global_fitInfo;
   bool m_prevSave;

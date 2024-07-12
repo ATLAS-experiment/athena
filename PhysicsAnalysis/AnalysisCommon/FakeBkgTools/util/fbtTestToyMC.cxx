@@ -69,7 +69,7 @@ using namespace std;
 TH1F  *h_realeff_e, *h_fakeeff_e,  *h_realeff_mu, *h_fakeeff_mu;
 TFile *rootEffFile;
 
-StatusCode initialize(CP::BaseFakeBkgTool& tool, const std::vector<std::string>& input, const std::string& selection, const std::string& process, bool verbose);
+StatusCode initialize ATLAS_NOT_THREAD_SAFE(CP::BaseFakeBkgTool& tool, const std::vector<std::string>& input, const std::string& selection, const std::string& process, bool verbose);
 StatusCode writeXML(const string& name, int type);
 StatusCode writeROOT(const string& name, int type, float realeff_mean, float fakeeff_mean, float eff_spread, float eff_delta_with_pt);
 StatusCode setupEfficiencies ATLAS_NOT_THREAD_SAFE();
@@ -96,7 +96,7 @@ StatusCode setupSystBranchesAsym(const char* baseName,
 
 std::unique_ptr<TFile> openRootFile(fbtTestToyMC_config &config);
 
-StatusCode doMerge( const std::vector<std::string> & input, const std::string & name, fbtTestToyMC_config &config, TH1F* h_lep_pt, float &lep_pt, TH1F* h_lep_eta, float &lep_eta, TH2F* h_lep_pt_eta, float &fakes, float &poserr, float &negerr, int icase);
+StatusCode doMerge ATLAS_NOT_THREAD_SAFE( const std::vector<std::string> & input, const std::string & name, fbtTestToyMC_config &config, TH1F* h_lep_pt, float &lep_pt, TH1F* h_lep_eta, float &lep_eta, TH2F* h_lep_pt_eta, float &fakes, float &poserr, float &negerr, int icase);
   
 StatusCode Loop ATLAS_NOT_THREAD_SAFE(fbtTestToyMC_config config);
 
@@ -960,7 +960,7 @@ std::unique_ptr<TFile> openRootFile(fbtTestToyMC_config &config) {
   return f_out;
 }
 
-StatusCode initialize(CP::BaseFakeBkgTool& tool, const std::vector<std::string>& input, const std::string& selection, const std::string& process, bool verbose)
+StatusCode initialize ATLAS_NOT_THREAD_SAFE(CP::BaseFakeBkgTool& tool, const std::vector<std::string>& input, const std::string& selection, const std::string& process, bool verbose)
 {
   ANA_CHECK( tool.setProperty("InputFiles", input) );
   ANA_CHECK( tool.setProperty("EnergyUnit", "GeV") );
@@ -1118,7 +1118,7 @@ StatusCode setupSystBranchesAsym(const char* baseName,
   return StatusCode::SUCCESS;
 }
 
-StatusCode doMerge( const std::vector<std::string> & input, const std::string & name, fbtTestToyMC_config &config, TH1F* h_lep_pt, float &lep_pt, TH1F* h_lep_eta, float &lep_eta, TH2F* h_lep_pt_eta, float &fakes, float &poserr, float &negerr, int icase) { 
+StatusCode doMerge ATLAS_NOT_THREAD_SAFE( const std::vector<std::string> & input, const std::string & name, fbtTestToyMC_config &config, TH1F* h_lep_pt, float &lep_pt, TH1F* h_lep_eta, float &lep_eta, TH2F* h_lep_pt_eta, float &fakes, float &poserr, float &negerr, int icase) { 
 
   std::string haddcmd = "hadd -f "+config.mergeFileNameBase+"_"+name+"_"+to_string(icase)+".root "+config.mergeFileNameBase+"_"+name+"_"+to_string(icase)+"_*.root";
   system(haddcmd.c_str());
