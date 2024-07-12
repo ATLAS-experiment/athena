@@ -223,10 +223,13 @@ StatusCode MuonReadoutGeomCnvAlg::buildStation(const ActsGeometryContext& gctx,
                                                             longS, lengthR, lengthZ,  /// S / R / Z size (long)
                                                             stEta, stPhi, false);
     newStation->setPhysVol(parentPhysVol);
-    cacheObj.detMgr->addMuonStation(std::move(newStation));
     /// Add the physical volume to the world
     cacheObj.world->add(cacheObj.newIdTag());
-    cacheObj.world->add(cacheObj.makeTransform(alignedTransform));   
+    GeoIntrusivePtr<GeoAlignableTransform> trf = make_intrusive<GeoAlignableTransform>(alignedTransform);
+    newStation->setTransform(trf);
+    cacheObj.detMgr->addMuonStation(std::move(newStation));
+
+    cacheObj.world->add(trf);   
     cacheObj.world->add(parentPhysVol);
 
     return StatusCode::SUCCESS;
@@ -629,6 +632,7 @@ StatusCode MuonReadoutGeomCnvAlg::buildMdt(const ActsGeometryContext& gctx,
                                                                       cacheObj.detMgr.get());
         newElement->setIdentifier(reId);
         newElement->setMultilayer(copyMe->multilayer());
+        newElement->setNMdtInStation(m_idHelperSvc->mdtIdHelper().multilayerMax(reId));
         // cppcheck-suppress invalidLifetime; ok: mgr took ownership.
         newElement->setParentMuonStation(station);
         /// Define the dimensions
