@@ -1,7 +1,7 @@
 // -*- C++ -*-
 //
 // LesHouchesFileReader.cc is a part of ThePEG - Toolkit for HEP Event Generation
-// Copyright (C) 1999-2019 Leif Lonnblad
+// Copyright (C) 1999-2024 Leif Lonnblad
 //
 // ThePEG is licenced under version 3 of the GPL, see COPYING for details.
 // Please respect the MCnet academic guidelines, see GUIDELINES for details.
@@ -206,6 +206,7 @@ void BB4LPowhegLesHouchesFileReader::doinit  () {
 	}
 	else {
 	  nameAnti=name;
+	  // cppcheck-suppress invalidContainer; replacing single characters
 	  for(string::iterator it=nameAnti.begin();it!=nameAnti.end();++it) {
 	    if(*it=='+')      nameAnti.replace(it,it+1,"-");
 	    else if(*it=='-') nameAnti.replace(it,it+1,"+");
@@ -981,7 +982,7 @@ bool BB4LPowhegLesHouchesFileReader::doReadEvent  () {
       // store the optional weights found in the temporary map
       weightValue *= ubcorrections[weights_.radtype-1];
       m_optionalWeightsTemp[weightName] = weightValue;
-      if(numwgts > max_num_weights)
+      if(numwgts >= max_num_weights)
 	{
 	  std::cout<<" Number of weights > "<< max_num_weights<<endl;
 	  std::cout<<" Increase max_num_weights in BB4LPowhegLesHouchesFileReader.cc" <<endl;  
