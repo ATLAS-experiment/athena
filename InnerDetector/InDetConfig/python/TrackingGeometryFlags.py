@@ -19,8 +19,9 @@ def createITkTrackingGeometryFlags():
     itkcf.addFlag("passiveEndcapMatPhiBins", 50) # Number of phi bins to be used for passive material layers
     itkcf.addFlag("minimalRadialGapForVolumeSplit", 10.) # Radial gap to enable disc splitting
     itkcf.addFlag("loadLocalDbForMaterialMaps", False) # Enable reading of local database
-    itkcf.addFlag("localDatabaseName", "AtlasLayerMaterial.db") # EDatabase geometry name
+    itkcf.addFlag("localDatabaseName", "AtlasLayerMaterial.db") # Database geometry name
     itkcf.addFlag("materialTag", "AtlasLayerMat_v") # Material tag
     itkcf.addFlag("version", "22") # material version
+    itkcf.addFlag("geometryTagForMaterialMaps", lambda pcf: pcf.GeoModel.AtlasVersion) # Geometry Tag used for loading the material maps
 
     return itkcf
