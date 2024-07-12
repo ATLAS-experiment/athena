@@ -373,6 +373,7 @@ def SUSY20Cfg(flags):
 	# Commented out variables not needed by current analyses but still included in r21 SUSY20_DAODs
 	SUSY20SlimmingHelper.ExtraVariables += [
 		"EventInfo.DFCommonJets_eventClean_TightBad.DFCommonJets_jetClean_TightBad",
+		"AntiKt4EMPFlowJets.DFCommonJets_jetClean_LooseBad.DFCommonJets_jetClean_TightBad",
 		"Electrons.DFCommonElectronsLHVeryLoose.DFCommonElectronsLHLoose.DFCommonElectronsLHLooseBL.DFCommonElectronsLHMedium.DFCommonElectronsLHTight.DFCommonElectronsLHVeryLooseIsEMValue.DFCommonElectronsLHLooseIsEMValue.DFCommonElectronsLHLooseBLIsEMValue.DFCommonElectronsLHMediumIsEMValue.DFCommonElectronsLHTightIsEMValue",
 		#"Electrons.SUSY20_topoetcone20.SUSY20_topoetcone30.SUSY20_topoetcone40.SUSY20_topoetcone20NonCoreCone.SUSY20_topoetcone30NonCoreCone.SUSY20_topoetcone40NonCoreCone",
 		"Muons.ptcone40.ptcone30.ptcone20.charge.quality.InnerDetectorPt.MuonSpectrometerPt.CaloLRLikelihood.CaloMuonIDTag.eta_sampl.phi_sampl",
