@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef UTILITIES_COLLECTION_ARGS2CONTAINER
@@ -98,9 +98,9 @@ namespace pool
      void writeXMLContent(std::vector<std::string>& argv);
 
      std::string	m_name;
-     bool		m_xml;
-     XMLOption		m_xmlOpt;
-     XMLVersion		m_ver;
+     bool		m_xml{};
+     XMLOption		m_xmlOpt{};
+     XMLVersion		m_ver{};
      CmdLineArgs2	m_a2c_cla2;
   
      std::string	m_xFileName;
