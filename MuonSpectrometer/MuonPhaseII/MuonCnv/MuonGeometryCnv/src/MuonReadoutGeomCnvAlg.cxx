@@ -305,6 +305,7 @@ StatusCode MuonReadoutGeomCnvAlg::buildRpc(const ActsGeometryContext& gctx,
          for (unsigned int gasGap = 1; gasGap <= copyMe->nGasGaps(); ++gasGap) {
             for (int doubPhi = copyMe->doubletPhiMax(); doubPhi >= copyMe->doubletPhi(); --doubPhi) {
                 for (bool measPhi : {false, true}) {
+                    if (measPhi && copyMe->nPhiStrips()==0) continue;
                     const int channel = 1;
                     const Identifier gapId = idHelper.channelID(copyMe->identify(), 
                                                                 copyMe->doubletZ(), 
