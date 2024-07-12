@@ -11,125 +11,96 @@
  * $Id: EventInfo.cxx,v 1.14 2009-03-30 17:24:38 schaffer Exp $
  */
 
+#include <memory>
+
 #include "EventInfo/EventInfo.h"
 #include "EventInfo/EventID.h"
 #include "EventInfo/EventType.h"
 #include "EventInfo/TriggerInfo.h"
 
-
 EventInfo::EventInfo()
-  :
-  m_event_ID(new EventID(0, 0)),
-  m_event_type(new EventType()),
-  m_trigger_info(new TriggerInfo()),
-  m_event_flags(std::vector<unsigned int>(nDets, 0))
-{}
+    : m_event_ID(std::make_unique<EventID>(0, 0)),
+      m_event_type(std::make_unique<EventType>()),
+      m_trigger_info(std::make_unique<TriggerInfo>()) {}
 
-EventInfo::EventInfo(EventID* id, EventType* type)
-  :
-  m_event_ID(id),
-  m_event_type(type),
-  m_trigger_info(new TriggerInfo()),
-  m_event_flags(std::vector<unsigned int>(nDets, 0))
-{}
+EventInfo::EventInfo(owner<EventID*> id, owner<EventType*> type)
+    : EventInfo(std::unique_ptr<EventID>(id),
+                std::unique_ptr<EventType>(type)) {}
 
-EventInfo::EventInfo(EventID* id, EventType* type, TriggerInfo* trig_info)
-  :
-  m_event_ID(id),
-  m_event_type(type),
-  m_trigger_info(trig_info),
-  m_event_flags(std::vector<unsigned int>(nDets, 0))
-{}
+EventInfo::EventInfo(std::unique_ptr<EventID> id,
+                     std::unique_ptr<EventType> type)
+    : m_event_ID(std::move(id)),
+      m_event_type(std::move(type)),
+      m_trigger_info(std::make_unique<TriggerInfo>()) {}
+
+EventInfo::EventInfo(owner<EventID*> id, owner<EventType*> type,
+                     owner<TriggerInfo*> trig_info)
+    : EventInfo(std::unique_ptr<EventID>(id), std::unique_ptr<EventType>(type),
+                std::unique_ptr<TriggerInfo>(trig_info)) {}
+
+EventInfo::EventInfo(std::unique_ptr<EventID> id,
+                     std::unique_ptr<EventType> type,
+                     std::unique_ptr<TriggerInfo> trig_info)
+    : m_event_ID(std::move(id)),
+      m_event_type(std::move(type)),
+      m_trigger_info(std::move(trig_info)) {}
 
 EventInfo::EventInfo(const EventInfo& e)
-  :
-  m_event_ID(e.m_event_ID ?
-             new EventID(*(e.m_event_ID)) :
-             new EventID(0, 0)),
-  m_event_type(e.m_event_type ?
-               new EventType(*(e.m_event_type)) :
-               new EventType()),
-  m_trigger_info(e.m_trigger_info ?
-                 new TriggerInfo(*(e.m_trigger_info)) :
-                 new TriggerInfo()),
-  m_event_flags(e.m_event_flags)
-{}
-
+    : m_event_ID(e.m_event_ID ? std::make_unique<EventID>(*(e.m_event_ID))
+                              : std::make_unique<EventID>(0, 0)),
+      m_event_type(e.m_event_type
+                       ? std::make_unique<EventType>(*(e.m_event_type))
+                       : std::make_unique<EventType>()),
+      m_trigger_info(e.m_trigger_info
+                         ? std::make_unique<TriggerInfo>(*(e.m_trigger_info))
+                         : std::make_unique<TriggerInfo>()),
+      m_event_flags(e.m_event_flags) {}
 
 EventInfo& EventInfo::operator = (const EventInfo& e) {
   if (this != &e) {
-    delete m_event_ID;
-    m_event_ID = (e.m_event_ID ?
-                  new EventID(*(e.m_event_ID)) :
-                  new EventID(0, 0));
+    setEventID(e.m_event_ID ? std::make_unique<EventID>(*(e.m_event_ID))
+                            : std::make_unique<EventID>(0, 0));
 
-    delete m_event_type;
-    m_event_type = (e.m_event_type ?
-                    new EventType(*(e.m_event_type)) :
-                    new EventType());
+    setEventType(e.m_event_type ? std::make_unique<EventType>(*(e.m_event_type))
+                                : std::make_unique<EventType>());
 
-    delete m_trigger_info;
-    m_trigger_info = (e.m_trigger_info ?
-                      new TriggerInfo(*(e.m_trigger_info)) :
-                      new TriggerInfo());
+    setTriggerInfo(e.m_trigger_info
+                       ? std::make_unique<TriggerInfo>(*(e.m_trigger_info))
+                       : std::make_unique<TriggerInfo>());
 
     m_event_flags = e.m_event_flags;
   }
   return *this;
 }
 
-EventInfo::EventInfo(EventInfo&& e)
-  : m_event_ID(e.m_event_ID),
-  m_event_type(e.m_event_type),
-  m_trigger_info(e.m_trigger_info),
-  m_event_flags(std::move(e.m_event_flags)) {
-  e.m_event_ID = 0;
-  e.m_event_type = 0;
-  e.m_trigger_info = 0;
+// Needs to be defined here as unique_ptr's deleter needs the pointee's type to
+// be a complete type when called
+EventInfo::~EventInfo() = default;
+EventInfo::EventInfo(EventInfo&& e) noexcept = default;
+EventInfo& EventInfo::operator=(EventInfo&& e) noexcept = default;
+
+void EventInfo::setEventID(owner<EventID*> pid) {
+  m_event_ID.reset(pid);
 }
 
-EventInfo& EventInfo::operator = (EventInfo&& e) {
-  if (this != &e) {
-    delete m_event_ID;
-    m_event_ID = e.m_event_ID;
-    e.m_event_ID = 0;
-
-    delete m_event_type;
-    m_event_type = e.m_event_type;
-    e.m_event_type = 0;
-
-    delete m_trigger_info;
-    m_trigger_info = e.m_trigger_info;
-    e.m_trigger_info = 0;
-
-    m_event_flags = std::move(e.m_event_flags);
-  }
-  return *this;
+void EventInfo::setEventID(std::unique_ptr<EventID> pid) {
+  m_event_ID = std::move(pid);
 }
 
-
-EventInfo::~EventInfo() {
-  delete m_event_ID;
-  delete m_event_type;
-  delete m_trigger_info;
+void EventInfo::setEventType(owner<EventType*> pType) {
+  m_event_type.reset(pType);
 }
 
-void
-EventInfo::setEventID(EventID* pid) {
-  delete m_event_ID;
-  m_event_ID = pid;
+void EventInfo::setEventType(std::unique_ptr<EventType> pType) {
+  m_event_type = std::move(pType);
 }
 
-void
-EventInfo::setEventType(EventType* pType) {
-  delete m_event_type;
-  m_event_type = pType;
+void EventInfo::setTriggerInfo(owner<TriggerInfo*> pTrig) {
+  m_trigger_info.reset(pTrig);
 }
 
-void
-EventInfo::setTriggerInfo(TriggerInfo* pTrig) {
-  delete m_trigger_info;
-  m_trigger_info = pTrig;
+void EventInfo::setTriggerInfo(std::unique_ptr<TriggerInfo> pTrig) {
+  m_trigger_info = std::move(pTrig);
 }
 
 bool

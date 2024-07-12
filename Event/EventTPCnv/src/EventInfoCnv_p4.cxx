@@ -19,10 +19,10 @@ static const TriggerInfoCnv_p2	trigInfoCnv;
 
 
 void EventInfoCnv_p4::transToPers(const EventInfo* trans, EventInfo_p4* pers, MsgStream &log) const {
-    idConv.transToPers(trans->m_event_ID, &pers->m_event_ID, log);
-    typeConv.transToPers(trans->m_event_type, &pers->m_event_type, log);
+    idConv.transToPers(trans->event_ID(), &pers->m_event_ID, log);
+    typeConv.transToPers(trans->event_type(), &pers->m_event_type, log);
     if( trans->m_trigger_info ) {
-        trigInfoCnv.transToPers(trans->m_trigger_info, &pers->m_trigger_info, log);
+        trigInfoCnv.transToPers(trans->trigger_info(), &pers->m_trigger_info, log);
     }
     // Don't write out event flags if they are all == 0
     if (trans->m_event_flags.size()) {
@@ -35,12 +35,9 @@ void EventInfoCnv_p4::transToPers(const EventInfo* trans, EventInfo_p4* pers, Ms
 }
 
 void EventInfoCnv_p4::persToTrans(const EventInfo_p4* pers, EventInfo* trans, MsgStream &log) const {
-    delete trans->m_event_ID;
-    trans->m_event_ID     = idConv.createTransientConst(&pers->m_event_ID, log);
-    delete trans->m_event_type;
-    trans->m_event_type   = typeConv.createTransientConst(&pers->m_event_type, log);
-    delete trans->m_trigger_info;
-    trans->m_trigger_info = trigInfoCnv.createTransientConst(&pers->m_trigger_info, log);
+    trans->setEventID(idConv.createTransientConst(&pers->m_event_ID, log));
+    trans->setEventType(typeConv.createTransientConst(&pers->m_event_type, log));
+    trans->setTriggerInfo(trigInfoCnv.createTransientConst(&pers->m_trigger_info, log));
     if (pers->m_event_flags.size()) trans->m_event_flags = pers->m_event_flags;
 }
 
