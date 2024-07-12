@@ -107,6 +107,7 @@ include("Pythia8_i/Pythia8_MadGraph.py")
 def common_mixing_matrix(mtype):
     presusylog.info(f"Will set mixing to {mtype}")
     # Include various cases for common mixing matrices here
+    # https://arxiv.org/pdf/0801.0045
     if mtype == 'higgsino':
         # Off-diagonal chargino mixing matrix V
         param_blocks['VMIX']={}
@@ -185,3 +186,36 @@ def common_mixing_matrix(mtype):
         param_blocks['selmix'][ '3   6' ] = '0.0' # # RRl3x6
         param_blocks['selmix'][ '6   3' ] = '0.0' # # RRl6x3
         param_blocks['selmix'][ '6   6' ] = '1.0' # # RRl6x6
+    elif mtype == 'stop_maxmix':
+        param_blocks['USQMIX']={}
+        # use maximally mixed stop
+        param_blocks['USQMIX']['1  1'] = '1.0'  # RRu1x1
+        param_blocks['USQMIX']['2  2'] = '1.0'  # RRu2x2
+        param_blocks['USQMIX']['3  3'] = ' 0.70710678118' # RRu3x3
+        param_blocks['USQMIX']['3  6'] = ' 0.70710678118' # RRu3x6
+        param_blocks['USQMIX']['4  4'] = '1.0'  # RRu4x4
+        param_blocks['USQMIX']['5  5'] = '1.0'  # RRu5x5
+        param_blocks['USQMIX']['6  3'] = ' 0.70710678118' # RRu6x3
+        param_blocks['USQMIX']['6  6'] = ' -0.70710678118'# RRu6x6
+    elif mtype == 'stop_pureL':
+        param_blocks['USQMIX']={}
+        # stop only left-handed
+        param_blocks['USQMIX']['1  1'] = '1.0'  # RRu1x1
+        param_blocks['USQMIX']['2  2'] = '1.0'  # RRu2x2
+        param_blocks['USQMIX']['3  3'] = '1.0'  # RRu3x3
+        param_blocks['USQMIX']['3  6'] = '0.0'  # RRu3x6
+        param_blocks['USQMIX']['4  4'] = '1.0'  # RRu4x4
+        param_blocks['USQMIX']['5  5'] = '1.0'  # RRu5x5
+        param_blocks['USQMIX']['6  3'] = '0.0'  # RRu6x3
+        param_blocks['USQMIX']['6  6'] = '1.0'  # RRu6x6
+    elif mtype == 'stop_pureR':
+        param_blocks['USQMIX']={}
+        # stop only right-handed
+        param_blocks['USQMIX']['1  1'] = '1.0'  # RRu1x1
+        param_blocks['USQMIX']['2  2'] = '1.0'  # RRu2x2
+        param_blocks['USQMIX']['3  3'] = '0.0'  # RRu3x3
+        param_blocks['USQMIX']['3  6'] = '1.0'  # RRu3x6
+        param_blocks['USQMIX']['4  4'] = '1.0'  # RRu4x4
+        param_blocks['USQMIX']['5  5'] = '1.0'  # RRu5x5
+        param_blocks['USQMIX']['6  3'] = '1.0'  # RRu6x3
+        param_blocks['USQMIX']['6  6'] = '0.0'  # RRu6x6
