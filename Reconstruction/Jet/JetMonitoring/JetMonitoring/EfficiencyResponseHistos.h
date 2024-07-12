@@ -1,7 +1,7 @@
 //  -*- c++ -*- 
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETMONITORING_EFFICIENCYRESPONSEHISTOS_H
@@ -11,6 +11,11 @@
 
 #include "JetMonitoring/JetHistoBase.h"
 #include "JetMonitoring/HistoDefinitionTool.h"
+#include "xAODJet/JetContainer.h"
+#include <string>
+class TProfile;
+class TH1F;
+
 
 class EfficiencyResponseHistos : public JetHistoBase {
   ASG_TOOL_CLASS0(EfficiencyResponseHistos);
@@ -29,19 +34,19 @@ protected:
   std::string m_refContainerName;
 
 
-  TProfile * m_eff1;
-  TProfile * m_eff2;
-  TProfile * m_eff3;
+  TProfile * m_eff1{};
+  TProfile * m_eff2{};
+  TProfile * m_eff3{};
 
-  TH1F* m_etres;
-  TProfile* m_etres_eta;
-  TProfile* m_etres_pt;
+  TH1F* m_etres{};
+  TProfile* m_etres_eta{};
+  TProfile* m_etres_pt{};
 
-  TH1F* m_etres_noShift;
-  TProfile* m_etres_noShift_eta;
-  TProfile* m_etres_noShift_pt;
+  TH1F* m_etres_noShift{};
+  TProfile* m_etres_noShift_eta{};
+  TProfile* m_etres_noShift_pt{};
 
-  TH1F* m_deltaRclosest;
+  TH1F* m_deltaRclosest{};
 
 };
 

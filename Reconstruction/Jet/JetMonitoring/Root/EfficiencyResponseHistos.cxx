@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetMonitoring/EfficiencyResponseHistos.h"
@@ -11,6 +11,7 @@
 #include "TH1.h"
 #include "TH2.h"
 #include "TProfile.h"
+#include <cmath>
 
 
 using Athena::Units::GeV;
@@ -76,11 +77,11 @@ int EfficiencyResponseHistos::fillHistosFromContainer(const xAOD::JetContainer &
       double dr2 = jet::JetDistances::deltaR2(*(*it),*refjet);
       if(dr2 < dr2min) { dr2min = dr2; itmin = it ;}
     }
-    //cppcheck-suppress derefInvalidIterator
+    if (itmin == listJets.end()) break;
     const xAOD::Jet* matched = *itmin;
     listJets.erase(itmin);
     
-    double dr = sqrt(dr2min);
+    double dr = std::sqrt(dr2min);
     double refPt = refjet->pt() / GeV;
 
     m_eff1->Fill(refPt, dr<0.1 ?  weight : 0 ); // 0 weight if not matching close enough
