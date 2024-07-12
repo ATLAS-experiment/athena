@@ -17,6 +17,7 @@
  */
 
 #include "GaudiKernel/ClassID.h"
+#include <memory>
 #include <vector>
 
 class EventID;
@@ -46,7 +47,13 @@ class EventInfo {
   friend class G4AtlasAlg;
   friend class LooperKiller;
   friend class CopyMcEventCollection;
-public:
+
+  // Documents ownership of raw pointers in the interface itself
+  // and has no functional effect
+  template <class T>
+  using owner = T;
+
+ public:
   /// \name enum for event flags which indicate the subsystem
   /// detector to which the flags belong
   //@{
@@ -91,17 +98,21 @@ public:
   //@}
 
 
-  /// \name structors
-  //@{
-  EventInfo();
-  EventInfo(EventID* id, EventType* type);
-  EventInfo(EventID* id, EventType* type, TriggerInfo* trig_info);
-  EventInfo(const EventInfo& e);
-  EventInfo& operator = (const EventInfo& e);
-  EventInfo(EventInfo&& e);
-  EventInfo& operator = (EventInfo&& e);
-  virtual ~EventInfo();
-  //@}
+ /// \name structors
+ //@{
+ EventInfo();
+ EventInfo(owner<EventID*> id, owner<EventType*> type);
+ EventInfo(std::unique_ptr<EventID> id, std::unique_ptr<EventType> type);
+ EventInfo(owner<EventID*> id, owner<EventType*> type,
+           owner<TriggerInfo*> trig_info);
+ EventInfo(std::unique_ptr<EventID> id, std::unique_ptr<EventType> type,
+           std::unique_ptr<TriggerInfo> trig_info);
+ EventInfo(const EventInfo& e);
+ EventInfo& operator=(const EventInfo& e);
+ EventInfo(EventInfo&& e) noexcept;
+ EventInfo& operator=(EventInfo&& e) noexcept;
+ virtual ~EventInfo();
+ //@}
 
   /// \name DataObject-like clid accessors
   //@{
@@ -167,7 +178,8 @@ public:
   /// \name Event information setting
   //@{
   /// Add TriggerInfo to existing object
-  void setTriggerInfo(TriggerInfo*);
+  void setTriggerInfo(owner<TriggerInfo*> pTrig);
+  void setTriggerInfo(std::unique_ptr<TriggerInfo> pTrig);
 
   ///
   /// Setting the number of interactions per crossing:
@@ -180,10 +192,12 @@ public:
   //@}
 protected:
   friend class MixingEventSelector;
-  void setEventID(EventID* pid);
+  void setEventID(owner<EventID*> pid);
+  void setEventID(std::unique_ptr<EventID> pid);
 
   friend class TagInfoMgr;
-  void setEventType(EventType*);
+  void setEventType(owner<EventType*>);
+  void setEventType(std::unique_ptr<EventType> pType);
 private:
   friend class EventInfoCnv_p1;
   friend class EventInfoCnv_p2;
@@ -198,42 +212,42 @@ private:
     AVE_INTERACTS_BITS     = 0xFFFF0000,
     AVE_INTERACTS_SHIFT    = 16
   };
-  EventID* m_event_ID;
-  EventType* m_event_type;
-  TriggerInfo* m_trigger_info;
-  std::vector<unsigned int>   m_event_flags;
+  std::unique_ptr<EventID> m_event_ID;
+  std::unique_ptr<EventType> m_event_type;
+  std::unique_ptr<TriggerInfo> m_trigger_info;
+  std::vector<unsigned int> m_event_flags{std::vector<unsigned int>(nDets, 0)};
 };
 
 
 
 inline EventID*
 EventInfo::event_ID() {
-  return(m_event_ID);
+  return m_event_ID.get();
 }
 
 inline const EventID*
 EventInfo::event_ID() const {
-  return(m_event_ID);
+  return m_event_ID.get();
 }
 
 inline EventType*
 EventInfo::event_type() {
-  return(m_event_type);
+  return m_event_type.get();
 }
 
 inline const EventType*
 EventInfo::event_type() const {
-  return(m_event_type);
+  return m_event_type.get();
 }
 
 inline TriggerInfo*
 EventInfo::trigger_info() {
-  return(m_trigger_info);
+  return m_trigger_info.get();
 }
 
 inline const TriggerInfo*
 EventInfo::trigger_info() const {
-  return(m_trigger_info);
+  return m_trigger_info.get();
 }
 
 inline unsigned int

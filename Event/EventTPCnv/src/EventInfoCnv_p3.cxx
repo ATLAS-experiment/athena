@@ -73,11 +73,11 @@ void EventInfoCnv_p3::transToPers(const EventInfo* trans, EventInfo_p3* pers, Ms
 	
     int versionToWrite = 2 | (3<<6) | (3<<12) | (1<<18) | (1<<24);
     pers->m_AllTheData.push_back(versionToWrite);
-    idConv.transToPers(trans->m_event_ID, pers->m_AllTheData);
-    typeConv.transToPers(trans->m_event_type, pers->m_AllTheData);
+    idConv.transToPers(trans->event_ID(), pers->m_AllTheData);
+    typeConv.transToPers(trans->event_type(), pers->m_AllTheData);
     // 
     if( trans->m_trigger_info ) { // this should always be there !
-        trigInfoCnv.transToPers(trans->m_trigger_info, pers->m_AllTheData);
+        trigInfoCnv.transToPers(trans->trigger_info(), pers->m_AllTheData);
     }else{
         pers->m_AllTheData[0]&=0xfffc0fff; // sets TriggerInfo version to 0
     }
