@@ -66,9 +66,5 @@ if __name__=="__main__":
     cfg.merge(PerfMonMTSvcCfg(flags))
     # cfg.merge(VTuneProfilerServiceCfg(flags, ProfiledAlgs=["MuonHoughTransformAlg"]))
 
-    # output spam reduction
-    cfg.getService("AthenaHiveEventLoopMgr").EventPrintoutInterval=500
-
-
     executeTest(cfg, args.nEvents)
     

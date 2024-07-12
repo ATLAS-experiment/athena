@@ -219,6 +219,19 @@ const std::vector<IdentifierHash>& MuonNRPC_CablingMap::getChamberHashVec(
     static const std::vector<IdentifierHash> dummy;
     return dummy;
 }
+std::vector<IdentifierHash> MuonNRPC_CablingMap::getChamberHashVec(const ListOfROB& ROBs,
+                                                                  MsgStream& log) const {
+    std::unordered_set<IdentifierHash> hashSet{};
+    for (const uint32_t rob : ROBs) {
+        const std::vector<IdentifierHash>& hashFromROB = getChamberHashVec(rob, log);
+        hashSet.insert(hashFromROB.begin(), hashFromROB.end());
+    }
+    std::vector<IdentifierHash> hashVec{};
+    hashVec.insert(hashVec.end(), hashSet.begin(), hashSet.end());
+    return hashVec;
+
+}
+
 const MuonNRPC_CablingMap::ListOfROB& MuonNRPC_CablingMap::getAllROBId() const {
     return m_listOfROB;
 }

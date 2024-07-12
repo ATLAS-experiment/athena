@@ -59,6 +59,10 @@ class MuonNRPC_CablingMap {
     /** return a HashId list for a  given ROD */
     const std::vector<IdentifierHash>& getChamberHashVec(const uint32_t ROBI,
                                                          MsgStream& log) const;
+    
+    std::vector<IdentifierHash> getChamberHashVec(const ListOfROB& ROBs,
+                                                  MsgStream& log) const;
+
     /** return the full list of ROD id */
     const ListOfROB& getAllROBId() const;
 

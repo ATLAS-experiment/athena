@@ -16,7 +16,7 @@ def NRPCCablingConfigCfg(flags, name = "MuonNRPC_CablingAlg", **kwargs):
         from AthenaConfiguration.Enums import LHCPeriod
         if flags.Muon.usePhaseIIGeoSetup and flags.Input.isMC:  
             if flags.GeoModel.Run <= LHCPeriod.Run3:   
-                cablingTag = "RpcNcablingJson-RUN3-FanatasyCabling-2"
+                cablingTag = "RpcNcablingJson-RUN3-FantasyCabling-2"
             else:
                 cablingTag = "RpcNcablingJson-RUN4-FantasyCabling-1"
 
