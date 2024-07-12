@@ -55,46 +55,77 @@ def MuonRdoToPrepDataAlgCfg(flags, name="MuonRdoToPrepDataAlg", **kwargs):
 ## This configuration function sets up everything for decoding RPC RDO to PRD conversion
 #
 # The function returns a ComponentAccumulator and the data-converting algorithm, which should be added to the right sequence by the user
+def RpcRdoToPrepDataToolCfg(flags, name ="RpcRdoToRpcPrepData",RDOContainer = None, **kwargs):
+    result = ComponentAccumulator()
+    #### Check whether the input collection contains an old legacy pad container. 
+    #### Introduce the digit conversion bypass to convert them into the new RDO format
+    if flags.Input.isMC and flags.Muon.usePhaseIIGeoSetup and \
+        len([x for x in flags.Input.TypedCollections if x.find("RpcPadContainer#") != -1]):
+       
+        from MuonConfig.MuonByteStreamCnvTestConfig import RpcRdoToRpcDigitCfg, NrpcDigitToNrpcRDOCfg
+       
+        cnv_args = {}
+        if RDOContainer: cnv_args.setdefault("RpcRdoContainer", RDOContainer)
+        result.merge(RpcRdoToRpcDigitCfg(flags,
+                                         RpcDigitContainer="CnvRpcDigits", **cnv_args))
+        
+        result.merge(NrpcDigitToNrpcRDOCfg(flags,RpcDigitContainer="CnvRpcDigits",
+                                                 NrpcRdoKey="CnvRpcRDOs"))
+    
+        kwargs.setdefault("RdoCollection", "CnvRpcRDOs")
+    ####
+    ####
+    if RDOContainer: 
+        kwargs.setdefault("RpcRdoContainer", RDOContainer)
+
+    if flags.Muon.usePhaseIIGeoSetup:
+        from MuonConfig.MuonCablingConfig import NRPCCablingConfigCfg
+        result.merge(NRPCCablingConfigCfg(flags))
+        from xAODMuonMeasViewAlgs.ViewAlgsConfig import RpcMeasViewAlgCfg
+        result.merge(RpcMeasViewAlgCfg(flags))
+        the_tool = CompFactory.MuonR4.RpcRdoToRpcPrepDataTool(name, **kwargs)
+        result.setPrivateTools(the_tool)
+
+    else:
+        # We need the RPC cabling to be setup
+        from MuonConfig.MuonCablingConfig import RPCLegacyCablingConfigCfg
+        result.merge(RPCLegacyCablingConfigCfg(flags))
+
+        if not flags.Input.isMC:
+            kwargs["reduceCablingOverlap"] = True
+            kwargs["produceRpcCoinDatafromTriggerWords"] = True
+            kwargs["overlap_timeTolerance"] = 1000
+            kwargs["solvePhiAmbiguities"] = True
+            kwargs["etaphi_coincidenceTime"] = 1000
+        if not flags.Trigger.doHLT:
+            kwargs["RpcPrdContainerCacheKey"] = ""
+            kwargs["RpcCoinDataContainerCacheKey"] = ""
+
+            from MuonConfig.MuonCondAlgConfig import RpcCondDbAlgCfg
+            result.merge(RpcCondDbAlgCfg(flags))
+        else:
+            kwargs["RPCInfoFromDb"] = False
+
+        if not flags.Muon.enableNRPC:
+            kwargs["NrpcInputCollection"] = ""
+
+        kwargs["xAODKey"] = "xRpcMeasurements" if flags.Muon.writexAODPRD else ""
+
+        #Setup RPC RDO decoder to be consistent with RPC readout settings
+        if flags.Muon.MuonTrigger:
+            kwargs["RdoDecoderTool"] = CompFactory.Muon.RpcRDO_Decoder("RpcRDO_Decoder", BCZERO=flags.Trigger.L1MuonSim.RPCNBCZ)
+        
+        the_tool =  CompFactory.Muon.RpcRdoToPrepDataToolMT(name="RpcPrepDataProviderTool",**kwargs)
+        result.setPrivateTools(the_tool)
+
+    return result
+
 def RpcRDODecodeCfg(flags, name="RpcRdoToRpcPrepData", RDOContainer = None, **kwargs):
     acc = ComponentAccumulator()
-    # We need the RPC cabling to be setup
-    from MuonConfig.MuonCablingConfig import RPCCablingConfigCfg
-    acc.merge(RPCCablingConfigCfg(flags))
-
+    
     # Conditions not needed for online
-
-    tool_kwargs={}
-    if not flags.Input.isMC:
-        tool_kwargs["reduceCablingOverlap"] = True
-        tool_kwargs["produceRpcCoinDatafromTriggerWords"] = True
-        tool_kwargs["overlap_timeTolerance"] = 1000
-        tool_kwargs["solvePhiAmbiguities"] = True
-        tool_kwargs["etaphi_coincidenceTime"] = 1000
-    if not flags.Trigger.doHLT:
-        tool_kwargs["RpcPrdContainerCacheKey"] = ""
-        tool_kwargs["RpcCoinDataContainerCacheKey"] = ""
-
-        from MuonConfig.MuonCondAlgConfig import RpcCondDbAlgCfg
-        acc.merge(RpcCondDbAlgCfg(flags))
-    else:
-        tool_kwargs["RPCInfoFromDb"] = False
-    
-    if RDOContainer:
-        tool_kwargs["RDOContainer"] = RDOContainer
-    
-    if not flags.Muon.enableNRPC:
-        tool_kwargs["NrpcInputCollection"] = ""
-
-    tool_kwargs["xAODKey"] =  "xRpcMeasurements" if flags.Muon.writexAODPRD or flags.Muon.usePhaseIIGeoSetup else ""
-    
-    #Setup RPC RDO decoder to be consistent with RPC readout settings
-    rpcrdo_decode = CompFactory.Muon.RpcRDO_Decoder("RpcRDO_Decoder", BCZERO=flags.Trigger.L1MuonSim.RPCNBCZ)
-    if flags.Muon.MuonTrigger:
-        tool_kwargs["RdoDecoderTool"]=rpcrdo_decode
     # Get the RDO -> PRD tool
-    kwargs.setdefault("DecodingTool", CompFactory.Muon.RpcRdoToPrepDataToolMT(name="RpcPrepDataProviderTool",
-                                                                              **tool_kwargs))
-
+    kwargs.setdefault("DecodingTool", acc.popToolsAndMerge(RpcRdoToPrepDataToolCfg(flags)))
     # add RegSelTool
     from RegionSelector.RegSelToolConfig import regSelTool_RPC_Cfg
     kwargs.setdefault("RegSelector", acc.popToolsAndMerge(regSelTool_RPC_Cfg(flags)))

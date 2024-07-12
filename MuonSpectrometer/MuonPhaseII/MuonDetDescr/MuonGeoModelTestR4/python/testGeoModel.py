@@ -182,7 +182,8 @@ def setupGeoR4TestCfg(args, setupSimJob = False):
     from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
     cfg.merge(ActsGeometryContextAlgCfg(flags))
 
-
+    cfg.getService("MessageSvc").verboseLimit = 10000000
+    cfg.getService("MessageSvc").debugLimit = 10000000
 
     return flags, cfg
 
@@ -200,7 +201,7 @@ if __name__=="__main__":
     
     cfg.getCondAlgo("MuonDetectorManagerCondAlg").checkGeo = True
     cfg.getService("MessageSvc").setVerbose = []
-    cfg.getService("MessageSvc").verboseLimit = 10000000
+
     
     from TrackingGeometryCondAlg.AtlasTrackingGeometryCondAlgConfig import TrackingGeometryCondAlgCfg
     cfg.merge(TrackingGeometryCondAlgCfg(flags))

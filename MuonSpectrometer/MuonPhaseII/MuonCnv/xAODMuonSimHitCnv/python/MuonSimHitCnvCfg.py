@@ -55,91 +55,6 @@ def xAODSimHitToMmMeasCnvAlgCfg(flags, name = "SimHitToMmMeasurementCnvAlg",**kw
     result.addEventAlgo(the_alg,primary=True)
     return result
 
-
-def MmFastDigitizationCfg(flags, name="MmFastDigitizer",  **kwargs):
-    result = ComponentAccumulator()
-    kwargs.setdefault("StreamName", "MmSimForklift")
-    kwargs.setdefault("OutputSDOName", "MM_SDO")
-    kwargs.setdefault("SimHitKey", "xMmSimHits")
-    
-    """
-    from MuonConfig.MuonCondAlgConfig import MmDigitEffiCondAlgCfg
-    result.merge(MmDigitEffiCondAlgCfg(flags,readFromJSON="EffMapMM.json"))
-    kwargs.setdefault("EffiDataKey", "MmDigitEff")
-    """
-    
-    kwargs.setdefault("EffiDataKey", "")
-    
-    from MuonConfig.MuonCalibrationConfig import NswErrorCalibDbAlgCfg
-    result.merge(NswErrorCalibDbAlgCfg(flags))
-
-    from RngComps.RngCompsConfig import AthRNGSvcCfg
-    kwargs.setdefault("RndmSvc", result.getPrimaryAndMerge(AthRNGSvcCfg(flags)))
-    the_tool = CompFactory.MuonR4.MmFastDigiTool(name="MmDigitizationTool", **kwargs)
-    the_alg = CompFactory.MuonDigitizer(name,
-                                        DigitizationTool = the_tool)
-    result.addEventAlgo(the_alg, primary = True)
-    return result
-
-def RpcFastDigitizationCfg(flags, name="RpcFastDigitizer", **kwargs):
-    result = ComponentAccumulator()
-    kwargs.setdefault("StreamName", "RpcSimForklift")
-    kwargs.setdefault("OutputSDOName", "RPC_SDO")
-    kwargs.setdefault("SimHitKey", "xRpcSimHits")
-    kwargs.setdefault("EffiDataKey", "")
-    from RngComps.RngCompsConfig import AthRNGSvcCfg
-    kwargs.setdefault("RndmSvc", result.getPrimaryAndMerge(AthRNGSvcCfg(flags)))
-    the_tool = CompFactory.MuonR4.RpcFastDigiTool(name="RpcDigitizationTool", **kwargs)
-    the_alg = CompFactory.MuonDigitizer(name,
-                                        DigitizationTool = the_tool)
-    result.addEventAlgo(the_alg, primary = True)
-    return result
-def RpcDigitToMeasCnvAlgCfg(flags, name ="RpcDigitToMeasCnvAlg", **kwargs):
-    result = ComponentAccumulator()
-    from xAODMuonMeasViewAlgs.ViewAlgsConfig import RpcMeasViewAlgCfg
-    result.merge(RpcMeasViewAlgCfg(flags))
-    the_alg = CompFactory.MuonR4.RpcDigitToRpcMeasCnvAlg(name, **kwargs)
-    result.addEventAlgo(the_alg, primary = True)
-    return result
-
-def TgcFastDigitizationCfg(flags, name = "TgcFastDigitizer", **kwargs):
-    result = ComponentAccumulator()
-    kwargs.setdefault("StreamName", "TgcSimForklift")
-    kwargs.setdefault("OutputSDOName", "TGC_SDO")
-    kwargs.setdefault("SimHitKey", "xTgcSimHits")
-    kwargs.setdefault("EffiDataKey", "")
-    from RngComps.RngCompsConfig import AthRNGSvcCfg
-    kwargs.setdefault("RndmSvc", result.getPrimaryAndMerge(AthRNGSvcCfg(flags)))
-    the_tool = CompFactory.MuonR4.TgcFastDigiTool(name="TgcDigitizationTool", **kwargs)
-    the_alg = CompFactory.MuonDigitizer(name,
-                                        DigitizationTool = the_tool)
-    result.addEventAlgo(the_alg, primary = True)
-    return result
-
-def sTgcFastDigitizationCfg(flags, name="sTgcFastDigitizer", **kwargs):
-    result = ComponentAccumulator()
-    result = ComponentAccumulator()
-    kwargs.setdefault("StreamName", "sTgcSimForklift")
-    kwargs.setdefault("OutputSDOName", "STGC_SDO")
-    kwargs.setdefault("SimHitKey", "xStgcSimHits")
-    
-    """
-    from MuonConfig.MuonCondAlgConfig import sTgcDigitEffiCondAlgCfg
-    result.merge(sTgcDigitEffiCondAlgCfg(flags,readFromJSON="EffMapsTGC.json"))
-    kwargs.setdefault("EffiDataKey", "sTgcDigitEff")
-    """
-    
-    kwargs.setdefault("EffiDataKey", "")
-    from MuonConfig.MuonCalibrationConfig import NswErrorCalibDbAlgCfg
-    result.merge(NswErrorCalibDbAlgCfg(flags))
-    from RngComps.RngCompsConfig import AthRNGSvcCfg
-    kwargs.setdefault("RndmSvc", result.getPrimaryAndMerge(AthRNGSvcCfg(flags)))
-    the_tool = CompFactory.MuonR4.sTgcFastDigiTool(name="sTgcDigitizationTool", **kwargs)
-    the_alg = CompFactory.MuonDigitizer(name,
-                                        DigitizationTool = the_tool)
-    result.addEventAlgo(the_alg, primary = True)
-
-    return result
 ###
 ###  Configuration snippet to go from xAOD::MuonSimHit to xAOD::MuonPrepData    
 ###
@@ -153,31 +68,29 @@ def MuonSimHitToMeasurementCfg(flags):
         result.merge(MdtRDODecodeCfg(flags))
     if flags.Detector.GeometryRPC:
         #result.merge(xAODSimHitToRpcMeasCnvAlgCfg(flags))
-        result.merge(RpcFastDigitizationCfg(flags))
-        result.merge(RpcDigitToMeasCnvAlgCfg(flags))
+        from MuonConfig.RPC_DigitizationConfig import RPC_DigitizationDigitToRDOCfg
+        result.merge(RPC_DigitizationDigitToRDOCfg(flags))
+        from MuonConfig.MuonRdoDecodeConfig import RpcRDODecodeCfg
+        result.merge(RpcRDODecodeCfg(flags))
+
     if flags.Detector.GeometryTGC:
         #result.merge(xAODSimHitToTgcMeasCnvAlgCfg(flags))
-        result.merge(TgcFastDigitizationCfg(flags))
-        from MuonConfig.MuonByteStreamCnvTestConfig import TgcDigitToTgcRDOCfg
-        from MuonConfig.MuonCablingConfig import TGCCablingConfigCfg
-        result.merge(TGCCablingConfigCfg(flags))
-        result.merge(TgcDigitToTgcRDOCfg(flags))
+        from MuonConfig.TGC_DigitizationConfig import TGC_DigitizationDigitToRDOCfg
+        result.merge(TGC_DigitizationDigitToRDOCfg(flags))
         from MuonConfig.MuonRdoDecodeConfig import TgcRDODecodeCfg
         result.merge(TgcRDODecodeCfg(flags))
 
 
     if flags.Detector.GeometrysTGC:
         #result.merge(xAODSimHitTosTGCMeasCnvAlgCfg(flags))
-        result.merge(sTgcFastDigitizationCfg(flags))
-        from MuonConfig.MuonByteStreamCnvTestConfig import STGC_DigitToRDOCfg
-        result.merge(STGC_DigitToRDOCfg(flags))
+        from MuonConfig.sTGC_DigitizationConfig import sTGC_DigitizationDigitToRDOCfg
+        result.merge(sTGC_DigitizationDigitToRDOCfg(flags))
         from MuonConfig.MuonRdoDecodeConfig import StgcRDODecodeCfg
         result.merge(StgcRDODecodeCfg(flags))
     if flags.Detector.GeometryMM:    
         #result.merge(xAODSimHitToMmMeasCnvAlgCfg(flags))
-        result.merge(MmFastDigitizationCfg(flags))
-        from MuonConfig.MuonByteStreamCnvTestConfig import MM_DigitToRDOCfg
-        result.merge(MM_DigitToRDOCfg(flags))
+        from MuonConfig.MM_DigitizationConfig import MM_DigitizationDigitToRDOCfg
+        result.merge(MM_DigitizationDigitToRDOCfg(flags))
         from MuonConfig.MuonRdoDecodeConfig import MMRDODecodeCfg
         result.merge(MMRDODecodeCfg(flags))
 
