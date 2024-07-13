@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# art-description: Reco_tf.py MC23c Overlay+Trigger+Reconstruction in RNTuple Format
+# art-description: Reco_tf.py MC23 Overlay+Trigger+Reconstruction in RNTuple Format
 # art-type: grid
 # art-include: main/Athena
 # art-include: main--dev3LCG/Athena
@@ -9,9 +9,9 @@
 # art-output: log.*
 # art-athena-mt: 8
 
-HITS_File="/eos/atlas/atlascerngroupdisk/proj-spot/spot-job-inputs/mc23_13p6TeV/HITS/mc23_13p6TeV.601237.PhPy8EG_A14_ttbar_hdamp258p75_allhad.merge.HITS.e8514_e8528_s4159_s4114/HITS.34124871._003416.pool.root.1"
-RDO_BKG_File="/eos/atlas/atlascerngroupdisk/proj-spot/spot-job-inputs/mc23_13p6TeV/RDO/mc23_13p6TeV.900149.PG_single_nu_Pt50.merge.RDO.e8514_e8528_s4153_d1879_d1880/RDO.33837536._002942.pool.root.1"
-NEVENTS="1000"
+HITS_File="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc23/HITS/mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.simul.HITS.e8514_s4162/100events.HITS.pool.root"
+RDO_BKG_File="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc23/RDO_BKG/mc23_13p6TeV.900149.PG_single_nu_Pt50.merge.RDO.e8514_e8528_s4153_d1907_d1908/100events.RDO.pool.root"
+NEVENTS="-1"
 
 # Overlay+Trigger+Reconstruction
 ATHENA_CORE_NUMBER=8 \
