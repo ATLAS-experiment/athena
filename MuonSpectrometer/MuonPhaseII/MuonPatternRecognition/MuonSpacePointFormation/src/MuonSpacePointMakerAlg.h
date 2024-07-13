@@ -29,6 +29,7 @@ namespace MuonR4{
 
             StatusCode execute(const EventContext& ctx) const override;
             StatusCode initialize() override;
+            StatusCode finalize() override;
         
         private:
             /// Helper struct to collect all space points per chamber
@@ -37,10 +38,39 @@ namespace MuonR4{
                 std::vector<MuonSpacePoint> phiHits{};                
             };
             
-            using ChamberSorter = MuonGMR4::MuonDetectorManager::ChamberSorter;     
-            using PreSortedSpacePointMap = std::map<const MuonGMR4::MuonChamber*, spacePointsPerChamber, ChamberSorter>;
+            using PreSortedSpacePointMap = std::unordered_map<const MuonGMR4::MuonChamber*, spacePointsPerChamber>;
             using SpacePointBucketVec = std::vector<MuonSpacePointBucket>;
+            // Helper class to quantify how many space points are made within a certain detector region
+            class SpacePointStatistics{
+                public:
+                    SpacePointStatistics(const Muon::IMuonIdHelperSvc* idHelperSvc);
+                
+                    void addToStat(const std::vector<MuonSpacePoint>& spacePoints);
+                    void dumpStatisics(MsgStream& msg) const;
+                private:
+                    struct StatField{
+                        unsigned int measEtaPhi{0};
+                        unsigned int measEta{0};
+                        unsigned int measPhi{0};
 
+                        unsigned int allHits() const;
+                    };
+                    // Field key
+                    struct FieldKey{
+                        using StIdx_t = Muon::MuonStationIndex::StIndex;
+                        using TechIdx_t = Muon::MuonStationIndex::TechnologyIndex; 
+                        StIdx_t stIdx{StIdx_t::StUnknown};
+                        TechIdx_t techIdx{TechIdx_t::TechnologyUnknown};
+                        int eta{0};
+                        bool operator<(const FieldKey& other) const;
+                    };
+
+                    const Muon::IMuonIdHelperSvc* m_idHelperSvc{};
+                    std::mutex m_mutex{};
+                    using StatMap_t = std::map<FieldKey, StatField>;
+                    StatMap_t m_map{};
+            };
+  
             template <class ContType> StatusCode loadContainerAndSort(const EventContext& ctx,
                                                                       const SG::ReadHandleKey<ContType>& key,
                                                                       PreSortedSpacePointMap& fillContainer) const;
@@ -81,6 +111,12 @@ namespace MuonR4{
             Gaudi::Property<double> m_spacePointOverlap{this, "spacePointOverlap", 25.*Gaudi::Units::cm,
                                                         "Hits that are within <spacePointOverlap> of the bucket margin. "
                                                         "Are copied to the next bucket"};
+    
+            Gaudi::Property<bool> m_doStat{this, "doStats", true, 
+                                           "If enabled the algorithm keeps track how many hits have been made" };
+            
+            Gaudi::Property<unsigned int> m_capacityBucket{this,"CapacityBucket" , 50};
+            std::unique_ptr<SpacePointStatistics> m_statCounter ATLAS_THREAD_SAFE{};
     };
 }
 

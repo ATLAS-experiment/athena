@@ -5,15 +5,75 @@
 
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
-
+#include <thread>
 
 namespace MuonR4 {
+bool MuonSpacePointMakerAlg::SpacePointStatistics::FieldKey::operator<(const FieldKey& other) const{
+    if (techIdx != other.techIdx) {
+        return static_cast<int>(techIdx) < static_cast<int>(other.techIdx);
+    }
+    if (stIdx != other.stIdx) {
+        return static_cast<int>(stIdx) < static_cast<int>(other.stIdx);
+    }
+    return eta < other.eta;
+}
+unsigned int MuonSpacePointMakerAlg::SpacePointStatistics::StatField::allHits() const {
+    return measEta + measPhi + measEtaPhi;
+}
+MuonSpacePointMakerAlg::SpacePointStatistics::SpacePointStatistics(const Muon::IMuonIdHelperSvc* idHelperSvc):
+    m_idHelperSvc{idHelperSvc}{}
+
+void MuonSpacePointMakerAlg::SpacePointStatistics::addToStat(const std::vector<MuonSpacePoint>& spacePoints){
+    std::lock_guard guard{m_mutex};
+    for (const MuonSpacePoint& sp : spacePoints){
+        FieldKey key{};
+        key.stIdx = m_idHelperSvc->stationIndex(sp.identify());
+        key.techIdx = m_idHelperSvc->technologyIndex(sp.identify());
+        key.eta = m_idHelperSvc->stationEta(sp.identify());
+        StatField & stats = m_map[key];
+        if (sp.measuresEta() && sp.measuresPhi()) {
+            ++stats.measEtaPhi;
+        } else {
+            stats.measEta += sp.measuresEta();
+            stats.measPhi += sp.measuresPhi();
+        }               
+    }
+}
+void MuonSpacePointMakerAlg::SpacePointStatistics::dumpStatisics(MsgStream& msg) const {
+    using KeyVal = std::pair<FieldKey, StatField>; 
+    std::vector<KeyVal> sortedstats{};
+    sortedstats.reserve(m_map.size());
+    /// Sort statistics from largest to smallest
+    for (const auto & [key, stats] : m_map){
+        sortedstats.emplace_back(std::make_pair(key, stats));
+    }
+    std::stable_sort(sortedstats.begin(), sortedstats.end(), [](const KeyVal& a, const KeyVal&b) {
+        return a.second.allHits() > b.second.allHits();
+    });
+    msg<<MSG::ALWAYS<<"###########################################################################"<<endmsg;
+    for (const auto & [key, stats] : sortedstats) {
+        msg<<MSG::ALWAYS<<" "<<Muon::MuonStationIndex::technologyName(key.techIdx)
+                        <<" "<<Muon::MuonStationIndex::stName(key.stIdx)
+                        <<" "<<std::abs(key.eta)<<(key.eta < 0 ? "A" : "C")
+                        <<" "<<std::setw(8)<<stats.measEtaPhi
+                        <<" "<<std::setw(8)<<stats.measEta
+                        <<" "<<std::setw(8)<<stats.measPhi<<endmsg;
+    }
+    msg<<MSG::ALWAYS<<"###########################################################################"<<endmsg;
+    
+}
 
 
 MuonSpacePointMakerAlg::MuonSpacePointMakerAlg(const std::string& name, ISvcLocator* pSvcLocator):
     AthReentrantAlgorithm{name, pSvcLocator}{}
 
 
+StatusCode MuonSpacePointMakerAlg::finalize() {
+    if (m_statCounter) {
+        m_statCounter->dumpStatisics(msgStream());
+    }
+    return StatusCode::SUCCESS;
+}
 StatusCode MuonSpacePointMakerAlg::initialize() {
     ATH_CHECK(m_geoCtxKey.initialize());
     ATH_CHECK(m_mdtKey.initialize(!m_mdtKey.empty()));
@@ -23,6 +83,7 @@ StatusCode MuonSpacePointMakerAlg::initialize() {
     ATH_CHECK(m_stgcKey.initialize(!m_stgcKey.empty()));
     ATH_CHECK(m_idHelperSvc.retrieve());
     ATH_CHECK(m_writeKey.initialize());
+    if (m_doStat) m_statCounter = std::make_unique<SpacePointStatistics>(m_idHelperSvc.get());
     return StatusCode::SUCCESS;
 }
 
@@ -45,7 +106,11 @@ template <class ContType>StatusCode MuonSpacePointMakerAlg::loadContainerAndSort
     if constexpr (std::is_same<ContType, xAOD::MdtDriftCircleContainer>::value ||
                   std::is_same<ContType, xAOD::MMClusterContainer>::value) {
         for (const PrdType prd : *readHandle) {
-            fillContainer[prd->readoutElement()->getChamber()].etaHits.emplace_back(*gctx, prd, nullptr);
+            spacePointsPerChamber& hitVec = fillContainer[prd->readoutElement()->getChamber()];
+            if (hitVec.etaHits.capacity() == hitVec.etaHits.size()) {
+                hitVec.etaHits.reserve(m_capacityBucket + hitVec.etaHits.size());
+            }
+            hitVec.etaHits.emplace_back(*gctx, prd, nullptr);
         }
     } else {
         /// Helper pair to separate eta & phi hits
@@ -55,7 +120,7 @@ template <class ContType>StatusCode MuonSpacePointMakerAlg::loadContainerAndSort
         /// Rpcs have nominally 2 or 3 gasGaps but each gasGap in R can be split into two modules 
         /// according to their doubletPhi value 
         using EtaPhiHitsPerChamber = std::array<EtaPhiHits, 6>;
-        std::map<const MuonGMR4::MuonReadoutElement*, EtaPhiHitsPerChamber> collectedPrds{};
+        std::unordered_map<const MuonGMR4::MuonReadoutElement*, EtaPhiHitsPerChamber> collectedPrds{};
         for (const PrdType prd : *readHandle) {
             EtaPhiHitsPerChamber& hitsPerChamb = collectedPrds[prd->readoutElement()];
             /// Sort the hit into a GasGap
@@ -76,11 +141,11 @@ template <class ContType>StatusCode MuonSpacePointMakerAlg::loadContainerAndSort
                 measPhi = prd->measuresPhi();
             }
             EtaPhiHits& hitsPerLayer = hitsPerChamb[gapIdx];
-            if (!measPhi) {
-                hitsPerLayer.first.push_back(prd);
-            } else {
-                hitsPerLayer.second.push_back(prd);
+            PrdVec& toPush = measPhi ? hitsPerLayer.second : hitsPerLayer.first;
+            if (toPush.capacity() == toPush.size()) {
+                toPush.reserve(toPush.size() + m_capacityBucket);
             }
+            toPush.push_back(prd);
         }
         /// Loop over the splitted hits and form the space points
         for (auto& [reEle, hitsPerChamb] : collectedPrds) {
@@ -136,6 +201,11 @@ void MuonSpacePointMakerAlg::distributePointsAndStore(const EventContext& ctx,
                                                       MuonSpacePointContainer& finalContainer) const {
     SpacePointBucketVec splittedHits{};
     splittedHits.emplace_back();
+    if (m_statCounter){
+        m_statCounter->addToStat(hitsPerChamber.etaHits);
+        m_statCounter->addToStat(hitsPerChamber.phiHits);
+
+    }
     distributePointsAndStore(ctx, std::move(hitsPerChamber.etaHits), splittedHits);
     distributePointsAndStore(ctx, std::move(hitsPerChamber.phiHits), splittedHits);
     
