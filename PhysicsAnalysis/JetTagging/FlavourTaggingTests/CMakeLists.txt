@@ -1,16 +1,17 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( FlavourTaggingTests )
+
+find_package( ROOT COMPONENTS Core Hist )
 
 if (NOT XAOD_ANALYSIS)
   # Component(s) in the package:
   atlas_add_library( FlavourTaggingTestsLib
     src/*.cxx
     PUBLIC_HEADERS FlavourTaggingTests
-    PRIVATE_INCLUDE_DIRS ${EIGEN_INCLUDE_DIRS}
     LINK_LIBRARIES AsgTools AthenaBaseComps xAODEventInfo xAODBTagging xAODJet xAODTracking GaudiKernel AthContainers TrigDecisionToolLib FlavorTagDiscriminants
-    PRIVATE_LINK_LIBRARIES ${EIGEN_LIBRARIES} GeoPrimitives )
+    PRIVATE_LINK_LIBRARIES GeoPrimitives )
 
   atlas_add_component( FlavourTaggingTests
     src/*.cxx
