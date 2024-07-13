@@ -27,7 +27,7 @@
 #include "xAODEventInfo/EventAuxInfo.h"
 #include "xAODEgamma/Electron.h"
 #include "xAODMuon/Muon.h"
-#include "AthContainers/AuxElement.h"
+#include "AthContainers/Accessor.h"
 #include "AsgMessaging/MessageCheck.h"
 #include "AsgAnalysisInterfaces/IFakeBkgTool.h"
 #include "AsgAnalysisInterfaces/ILinearFakeBkgTool.h"
@@ -214,7 +214,8 @@ bool eventLoop ATLAS_NOT_THREAD_SAFE(asg::AnaToolHandle<Interface>& tool, Result
   auto eventInfo = std::make_unique<xAOD::EventInfo>();
   auto eventAuxInfo = std::make_unique<xAOD::EventAuxInfo>();
   eventInfo->setStore(eventAuxInfo.get());
-  eventInfo->auxdata<int>("flag") = 1;
+  static const SG::Accessor<int> flagAcc("flag");
+  flagAcc(*eventInfo) = 1;
   FBT_CHECK( store->record(std::move(eventInfo), "EventInfo") );
   FBT_CHECK( store->record(std::move(eventAuxInfo), "EventInfoAux.") );
  
@@ -223,10 +224,11 @@ bool eventLoop ATLAS_NOT_THREAD_SAFE(asg::AnaToolHandle<Interface>& tool, Result
   e->makePrivateStore();
   e->setCharge(1);
   particles.push_back(static_cast<xAOD::IParticle*>(&*e));
+  static const SG::Accessor<char> TightAcc("Tight");
   for(int i=eventOffset;i<nEvents+eventOffset;++i)
     {
       e->setP4((1 + (i%3))*1e4, 0., 0. ,0.511);
-      e->auxdecor<char>("Tight") = (i%4)? 0 : 1;
+      TightAcc(*e) = (i%4)? 0 : 1;
       FBT_CHECK( tool->addEvent(particles) );
       FBT_CHECK( addEventWeight(tool, result) );
     }
