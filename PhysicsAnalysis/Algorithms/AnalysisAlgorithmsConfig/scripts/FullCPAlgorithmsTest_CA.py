@@ -111,6 +111,8 @@ cfg.printConfig()  # For debugging
 if athArgs.dump_config:
     with open(athArgs.dump_config, "wb") as f:
         cfg.store(f)
-
-sc = cfg.run(500)
+if flags.Exec.MaxEvents>0:
+  sc=cfg.run(flags.Exec.MaxEvents)
+else:
+  sc = cfg.run(500)
 sys.exit(sc.isFailure())
