@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // PhysValMET.cxx 
@@ -595,7 +595,7 @@ namespace MissingEtDQA {
     }
     ConstDataVector<MuonContainer> metMuons(SG::VIEW_ELEMENTS);
     bool is_muon = 0;
-    for(const auto& mu : *muons) {
+    for(const auto mu : *muons) {
       if(Accept(mu)) {
         metMuons.push_back(mu);
         is_muon = 1;
@@ -610,7 +610,7 @@ namespace MissingEtDQA {
     }
    ConstDataVector<ElectronContainer> metElectrons(SG::VIEW_ELEMENTS);
    bool is_electron = 0;
-   for(const auto& el : *electrons) {
+   for(const auto el : *electrons) {
      if(Accept(el)) {
        metElectrons.push_back(el);
        is_electron = 1;
@@ -624,7 +624,7 @@ namespace MissingEtDQA {
       return StatusCode::FAILURE;
     }
     ConstDataVector<PhotonContainer> metPhotons(SG::VIEW_ELEMENTS);
-    for(const auto& ph : *photons) {
+    for(const auto ph : *photons) {
       if(Accept(ph)) {
         metPhotons.push_back(ph);
       }
@@ -637,7 +637,7 @@ namespace MissingEtDQA {
       return StatusCode::SUCCESS;
     }
     ConstDataVector<TauJetContainer> metTaus(SG::VIEW_ELEMENTS);
-    for(const auto& tau : *taus) {
+    for(const auto tau : *taus) {
       if(Accept(tau)) {
         metTaus.push_back(tau);
       }
@@ -751,7 +751,7 @@ namespace MissingEtDQA {
         jet->auxdecor<float>("NewJvt") = newjvt;
       }
       ConstDataVector<JetContainer> metJets(SG::VIEW_ELEMENTS);
-      for(const auto& jet : *jets) { 
+      for(const auto jet : *jets) { 
         metJets.push_back(jet);
       }
       //Overlap Removal
@@ -806,7 +806,7 @@ namespace MissingEtDQA {
         }
 
         ATH_MSG_INFO( "  MET_Ref_" << type << ":" );
-        for(const auto& it : *met_Ref) {
+        for(const auto it : *met_Ref) {
           const std::string& name = it->name();
           if(name == "RefEle"){
             (m_MET_Ref[type]).at(0)->Fill((*met_Ref)[name.c_str()]->met()/1000., weight);
@@ -946,7 +946,7 @@ namespace MissingEtDQA {
       }
 
       // Fill MET_Reb
-      for(const auto& it : *met_Reb) {
+      for(const auto it : *met_Reb) {
         std::string name = it->name();
         if(name == "RefEle"){
           (m_MET_Reb[type]).at(0)->Fill((*met_Reb)[name.c_str()]->met()/1000., weight);
@@ -1075,7 +1075,7 @@ namespace MissingEtDQA {
         
         //Fill Correlation Plots
         //Reference
-        for(const auto& it : *met_Ref) {
+        for(const auto it : *met_Ref) {
           const std::string& name = it->name();
           if(name == "RefEle"){
             (m_MET_CorrFinalTrk_Ref[type]).at(0)->Fill((*met_Ref)[name.c_str()]->met()/1000.,(*met_Ref)["FinalTrk"]->met()/1000., weight);
@@ -1108,7 +1108,7 @@ namespace MissingEtDQA {
 
       //Rebuilt
 
-      for(const auto& it : *met_Reb) {
+      for(const auto it : *met_Reb) {
         std::string name = it->name();
         if(name == "RefEle"){
           (m_MET_CorrFinalTrk_Reb[type]).at(0)->Fill((*met_Reb)[name.c_str()]->met()/1000.,(*met_Reb)["FinalTrk"]->met()/1000., weight);
@@ -1165,7 +1165,7 @@ namespace MissingEtDQA {
         if( (*met_Ref)["FinalTrk"]->sumet() != 0) (m_MET_Significance_Ref[type]).at(1)->Fill((*met_Ref)["FinalTrk"]->met()/sqrt((*met_Ref)["FinalTrk"]->sumet()*1000.), weight);
         
         //Fill Diff histograms
-        for(const auto& it : *met_Ref) {
+        for(const auto it : *met_Ref) {
           if(it->name() == "RefEle"){
             if(is_electron or (it->sumet() > 0)){
               target_tlv.SetPxPyPzE(-it->mpx(), -it->mpy(), 0, it->met());
@@ -1229,7 +1229,7 @@ namespace MissingEtDQA {
         }
       }
 
-      for(const auto& it : *met_Reb) {
+      for(const auto it : *met_Reb) {
         if(it->name() == "RefEle"){
           if(is_electron or (it->sumet() > 0)){
             target_tlv.SetPxPyPzE(-it->mpx(), -it->mpy(), 0, it->met());
@@ -1340,7 +1340,7 @@ namespace MissingEtDQA {
       
       const xAOD::VertexContainer *vxCont = nullptr;
       ATH_CHECK( evtStore()->retrieve(vxCont, "PrimaryVertices") );
-      for(const auto& vx : *vxCont) {
+      for(const auto vx : *vxCont) {
         int N = vx->index();
         const std::string name = "PVTrack_vx"+std::to_string(N);
         if(vx->vertexType()!=xAOD::VxType::NoVtx) {
