@@ -14,6 +14,7 @@
 #include <TF1.h>
 #include <TClass.h>
 #include <ers/ers.h>
+#include <set>
 
 
 #include <dqm_core/AlgorithmManager.h>
@@ -52,9 +53,19 @@ dqm_algorithms::TileTriggerMonitor::execute(const std::string & name,
   dqm_core::Result* result = new dqm_core::Result();
   //Count each category of the bins, if you find a red bin show red, if you find a yellow bin show yellow
   std::vector<int> range=dqm_algorithms::tools::GetBinRange(histogram, config.getParameters());
+  std::string ignoredBinsString = dqm_algorithms::tools::GetFirstFromMap( "IgnoredBins", config.getGenericParameters(), "");
+  std::set<int> ignoredBins;
+  if (!ignoredBinsString.empty()) {
+    std::string IgnoredBin;
+    std::istringstream is(ignoredBinsString);
+    while (std::getline(is, IgnoredBin, ',')) {
+      ignoredBins.insert(std::stoi(IgnoredBin));
+    }
+  }
   int worstStatus = -3;
   for ( int towerNum = range.at(0); towerNum <= range.at(1); ++towerNum ) {
     double inputCont = histogram->GetBinContent(towerNum);
+    if (ignoredBins.count(towerNum)) continue;
     if (inputCont>worstStatus) worstStatus=inputCont; //if you want to have a test for every bin remove the for loop and replace execute with 1D black bin algorithm
     if (inputCont>0) dqm_algorithms::tools::PublishBin(histogram,towerNum,0,inputCont,result);
     }
@@ -85,6 +96,6 @@ dqm_algorithms::TileTriggerMonitor::printDescription(std::ostream& out)
 
   out<<"Optional Parameter, Publish Bin: Publishes the content of the bins that are different than result." << std::endl;
 
-  
+  out<<"Optional Parameter, IgnoredBins: Ignores the content of the bin if you do not want a bin's result dominating a histogram" << std::endl;
 }
 

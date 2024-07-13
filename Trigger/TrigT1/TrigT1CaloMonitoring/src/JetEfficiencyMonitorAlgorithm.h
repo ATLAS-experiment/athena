@@ -30,10 +30,8 @@ private:
   StringProperty m_packageName{this,"PackageName","JetEfficiencyMonitor","group name for histograming"};
 
   StringProperty m_bootstrap_reference_trigger{this,"BootstrapReferenceTrigger","L1_J15","the bootstrapping trigger"};
-  StringProperty m_HLTbootstrap_reference_trigger{this,"HLTBootstrapReferenceTrigger","HLT_noalg_L1J20","the HLT bootstrapping trigger"};
   Gaudi::Property<std::vector<std::string>> m_muon_reference_triggers{this,"MuonReferenceTriggers",{},"the muon refernce triggers"};
   Gaudi::Property<std::vector<std::string>> m_HLTrandom_reference_triggers{this,"HLTRandomReferenceTriggers",{},"the random refernce trigger"};
-  Gaudi::Property<bool> m_emulated{this,"Emulated",0, "boolean of if we want to emulate the gfex triggers"};
   Gaudi::Property<bool> m_passedb4Prescale{this,"PassedBeforePrescale",0,"boolean of if we want to measure the efficiency based on passed before prescale"};
 
   Gaudi::Property<std::vector<std::string>> m_multiJet_LegacySmallRadiusTriggers{this,"multiJet_LegacySmallRadiusTriggers",{},"Vector of single jet L1 triggers"};

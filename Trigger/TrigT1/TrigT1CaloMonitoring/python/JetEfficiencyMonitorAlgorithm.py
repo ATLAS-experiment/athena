@@ -48,10 +48,6 @@ def JetEfficiencyMonitoringConfig(flags):
     #################################################################
     #################################################################
 
-    # Do we want to emulate the Phase 1 triggers?
-    emulated = False
-    JetEfficiencyMonAlg.Emulated = emulated
-
     # We can choose if we want to use pass before prescale, or not when defining our trigger efficiency
     # generally only want to use pass before prescale when considering the efficiency of a trigger for 
     # internal evaluation of how triggers are behaving
@@ -68,17 +64,11 @@ def JetEfficiencyMonitoringConfig(flags):
     hltRandom_reference_triggers = ['HLT_j0_perf_L1RD0_FILLED', 'HLT_j0_perf_pf_ftf_L1RD0_FILLED']
     JetEfficiencyMonAlg.HLTRandomReferenceTriggers = hltRandom_reference_triggers
 
-    muon_reference_triggers = ["L1_MU14FCH", "L1_MU18VFCH",
-    "L1_MU8F_TAU20IM", "L1_2MU8F", "L1_MU8VF_2MU5VF", "L1_3MU3VF",
-    "L1_MU5VF_3MU3VF", "L1_4MU3V", "L1_2MU5VF_3MU3V",
-    "L1_RD0_FILLED"]
+    muon_reference_triggers = ["L1_MU14FCH", "L1_MU18VFCH", "L1_MU8F_TAU20IM", "L1_2MU8F", "L1_MU8VF_2MU5VF", "L1_3MU3VF", "L1_MU5VF_3MU3VF", "L1_4MU3V", "L1_2MU5VF_3MU3V", "L1_RD0_FILLED"]
     JetEfficiencyMonAlg.MuonReferenceTriggers = muon_reference_triggers
 
     JetEfficiencyMonAlg.BootstrapReferenceTrigger='L1_J15' 
     bootstrap_trigger = JetEfficiencyMonAlg.BootstrapReferenceTrigger
-
-    JetEfficiencyMonAlg.HLTBootstrapReferenceTrigger='HLT_noalg_L1J20' 
-    HLTbootstrap_trigger = JetEfficiencyMonAlg.HLTBootstrapReferenceTrigger
 
     trigPath = 'Developer/JetEfficiency/'
     distributionPath = 'Distributions/'
@@ -86,20 +76,17 @@ def JetEfficiencyMonitoringConfig(flags):
     muonRefPath = 'MuonReferenceTrigger/'
     randomRefPath = 'RandomHLTReferenceTrigger/'
     bsRefPath = 'BootstrapReferenceTrigger/'
-    bsHLTRefPath = 'BootstrapHLTReferenceTrigger/'
     GeV = 1000
 
     # add monitoring algorithm to group, with group name and main directory
-    single_triggers = ['L1_J20', 'L1_J25', 'L1_J30', 'L1_J40', 'L1_J50', 'L1_J75',
-                       'L1_J85', 'L1_J100', 'L1_J120',  'L1_J400']
-    multijet_triggers = ['L1_J85_3J30', 'L1_3J50', 'L1_4J15', 'L1_4J20']
+    single_triggers = ['L1_J20', 'L1_J50', 'L1_J100',  'L1_J400']
+    multijet_triggers = [ 'L1_3J50', 'L1_4J15']
     LR_triggers = ['L1_SC111-CJ15']
     
-    gfex_SR_triggers = ['L1_gJ20','L1_gJ20p0ETA25','L1_gJ20p25ETA49','L1_gJ20p0ETA25_EMPTY', 'L1_gJ30','L1_gJ40','L1_gJ50', 'L1_gJ50p0ETA25','L1_gJ100', 'L1_gJ100p0ETA25', 'L1_gJ400p0ETA25' ]
-    gfex_LR_triggers = ['L1_gLJ80', 'L1_gLJ100', 'L1_gLJ140', 'L1_gLJ140p0ETA25']
+    gfex_SR_triggers = ['L1_gJ20p0ETA25', 'L1_gJ50p0ETA25', 'L1_gJ100p0ETA25', 'L1_gJ400p0ETA25' ]
+    gfex_LR_triggers = ['L1_gLJ80p0ETA25', 'L1_gLJ100p0ETA25', 'L1_gLJ140p0ETA25', 'L1_gLJ160p0ETA25']
 
-    jfex_SR_triggers = ['L1_jJ30','L1_jJ40','L1_jJ50', 'L1_jJ60',
-                    'L1_jJ80','L1_jJ90', 'L1_jJ125','L1_jJ140','L1_jJ160', 'L1_jJ180']
+    jfex_SR_triggers = ['L1_jJ30','L1_jJ40','L1_jJ50', 'L1_jJ60', 'L1_jJ80','L1_jJ90', 'L1_jJ125','L1_jJ140','L1_jJ160', 'L1_jJ180']
     jfex_LR_triggers = ['L1_SC111-CjJ40']
     
 
@@ -110,18 +97,11 @@ def JetEfficiencyMonitoringConfig(flags):
     JetEfficiencyMonAlg.LargeRadiusJetTriggers_phase1_and_legacy = all_LR_singletriggers
     JetEfficiencyMonAlg.multiJet_LegacySmallRadiusTriggers = multijet_triggers
 
-    if passedb4Prescale: 
-        prescale_title_add = " (PassBeforePrescale) "
-    else: 
-        prescale_title_add = " "
-
     reference_titles = {"Muon" : ' wrt muon triggers',
                         "RandomHLT": ' wrt HLT random chain ' + hltRandom_reference_triggers[0] + ' and ' + hltRandom_reference_triggers[1], 
                         "No": '', 
-                        "Bootstrap": ' wrt bootstrap trigger ' + bootstrap_trigger,
-                        "BootstrapHLT": ' wrt HLT bootstrap chain ' + HLTbootstrap_trigger }
-    reference_paths = {"Muon" : muonRefPath, "RandomHLT": randomRefPath, 
-                       "No": noRefPath,  "Bootstrap":  bsRefPath, "BootstrapHLT": bsHLTRefPath }
+                        "Bootstrap": ' wrt bootstrap trigger ' + bootstrap_trigger}
+    reference_paths = {"Muon" : muonRefPath, "RandomHLT": randomRefPath, "No": noRefPath,  "Bootstrap":  bsRefPath}
     references = list(reference_titles.keys())
 
 
@@ -142,50 +122,28 @@ def JetEfficiencyMonitoringConfig(flags):
     trigger_groups = list(trigger_group_list.keys())
 
 
-    title_for_prop = { "pt" :'pT',  "eta" : '#eta'}
-    xlabel_for_prop = { "pt" :'pT [MeV]',  "eta" : '#eta'}
-    nbins = {"pt": 200, "eta" :32}
-    binmin = {"pt": -50, "eta" :-3.3}
-    binmax = {"pt": 1400*GeV, "eta" :3.3}
+    title_for_prop = { "SRpt" :'pT',  "SReta" : '#eta', "LRpt" :'pT',  "LReta" : '#eta'}
+    xlabel_for_prop = { "SRpt" :'pT [MeV]',  "SReta" : '#eta',  "LRpt" :'pT [MeV]',  "LReta" : '#eta'}
+    nbins = {"SRpt": 200, "SReta" :32, "LRpt": 200, "LReta" :32}
+    binmin = {"SRpt": -50, "SReta" :-3.3, "LRpt": -50, "LReta" :-3.3}
+    binmax = {"SRpt": 1400*GeV, "SReta" :3.3, "LRpt": 1400*GeV, "LReta" :3.3}
     properties = list(title_for_prop.keys())
 
+    ######### turn off plotting distrubiton histograms so they dont show up on web dispaly 
+    plotDistrubutions = False
+    if plotDistrubutions: 
+        helper.defineHistogram('raw_pt',title='pT for all leading offline jets (with no trigger requirments);PT [MeV];Events',  fillGroup=groupName,  path=trigPath + distributionPath,xbins=nbins["SRpt"],xmin=binmin["SRpt"], xmax=binmax["SRpt"])
 
-    ######### define all the histograms 
-
-    helper.defineHistogram('run',title='Run Number;run;Events',
-                           fillGroup=groupName,
-                            path=trigPath,xbins=1000000,xmin=-0.5,xmax=999999.5)
-
-    helper.defineHistogram('raw_pt',title='pT for all leading offline jets (with no trigger requirments);PT [MeV];Events',
-                           fillGroup=groupName,
-                            path=trigPath + distributionPath,xbins=nbins["pt"],xmin=binmin["pt"], xmax=binmax["pt"])
-
-    helper.defineHistogram('eta',  title='Eta Distribution of offline jets for HLT random chain ' + hltRandom_reference_triggers[0] + ' and ' + hltRandom_reference_triggers[1] + ';#eta; Count',
-                           fillGroup=groupName,
-                                path=trigPath + distributionPath,xbins=nbins["eta"],xmin=binmin["eta"], xmax=binmax["eta"])
+        helper.defineHistogram('raw_eta',  title='Eta Distribution for all leading offline jets (with no trigger requirments);#eta; Count', fillGroup=groupName, path=trigPath + distributionPath,xbins=nbins["SReta"],xmin=binmin["SReta"], xmax=binmax["SReta"])
     
-
+    ######### define all the histograms 
     for tgroup in trigger_groups: #iterate through the trigger groups
         for t in trigger_group_list[tgroup]: #pull out trigger of interest
-            if ("gJ" in t) or ("gLJ" in t) or ("jLJ" in t) or ("jJ" in t):  pathAdd = "phase1/"
-            else: pathAdd = "legacy/"
-            for r in references: #iteratate through the refernce trigger options
-                for p in properties: 
-                    
-                    if emulated and (("gJ" in t) or ("gLJ" in t)): 
-                        eff_plot_title = title_for_prop[p] + ' Efficiency' + prescale_title_add + 'of ' + trigger_title_modifiers[tgroup] + ' for EMULATED trigger ' + t + reference_titles[r]+';'+xlabel_for_prop[p]+'; Efficiency '
-                        dist_plot_title = title_for_prop[p] + ' distribution' + prescale_title_add + 'of '+ trigger_title_modifiers[tgroup] +' for EMULATED trigger ' + t +';'+xlabel_for_prop[p]+'; Count '
-                    else: 
-                        eff_plot_title = title_for_prop[p] + ' Efficiency' + prescale_title_add + 'of ' + trigger_title_modifiers[tgroup] + ' for trigger ' + t + reference_titles[r]+';'+xlabel_for_prop[p]+'; Efficiency '
-                        dist_plot_title = title_for_prop[p] + ' distribution' + prescale_title_add + 'of '+ trigger_title_modifiers[tgroup] +' for trigger ' + t +';'+xlabel_for_prop[p]+'; Count '
-                        
-                    helper.defineHistogram(p+'_'+r+'_'+t+','+p+'_'+r, type='TEfficiency',  title=eff_plot_title,
-                                           fillGroup=groupName,
-                                    path=trigPath + pathAdd+ reference_paths[r], xbins=nbins[p], xmin=binmin[p], xmax=binmax[p])
-                    
-                    helper.defineHistogram(p+':'+r+'_'+t,  title=dist_plot_title,
-                                           fillGroup=groupName,
-                                    path=trigPath + distributionPath, xbins=nbins[p], xmin=binmin[p], xmax=binmax[p])
+            pathAdd = "phase1/" if ("gJ" in t) or ("gLJ" in t) or ("jLJ" in t) or ("jJ" in t) else "legacy/"
+            for p in properties: 
+                for r in references: #iteratate through the refernce trigger options
+                    eff_plot_title = title_for_prop[p] + ' Efficiency of ' + trigger_title_modifiers[tgroup] + ' for trigger ' + t + reference_titles[r]+';'+xlabel_for_prop[p]+'; Efficiency '
+                    helper.defineHistogram(f"bool_{r}_{t}, val_{p};{p}_{r}Ref_{t}", type='TEfficiency',  title=eff_plot_title, fillGroup=groupName, path=trigPath + pathAdd+ reference_paths[r], xbins=nbins[p], xmin=binmin[p], xmax=binmax[p])
 
     
 
