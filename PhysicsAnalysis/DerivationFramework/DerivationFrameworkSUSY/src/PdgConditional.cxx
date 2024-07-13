@@ -7,17 +7,17 @@
 
 
 namespace DerivationFramework {
-  PdgConditional::PdgConditional():m_condition(0),m_abs(false){
+  PdgConditional::PdgConditional():m_condition(0){
     //nop
   }
-  PdgConditional::PdgConditional(int equalInt):m_condition(equalInt),m_abs(false){
+  PdgConditional::PdgConditional(int equalInt):m_condition(equalInt){
     //nop
   }
-  PdgConditional::PdgConditional(unsigned equalInt):m_condition(equalInt),m_abs(true){
+  PdgConditional::PdgConditional(unsigned equalInt):m_condition(equalInt){
     //nop
   }
   
-  PdgConditional::PdgConditional(std::function<bool(int)> b):m_condition(b),m_abs(false){
+  PdgConditional::PdgConditional(std::function<bool(int)> b):m_condition(b){
     //nop
   }
   
@@ -31,7 +31,7 @@ namespace DerivationFramework {
     //use abs(value) if the held integer is unsigned
     if (std::holds_alternative<unsigned>(m_condition)){
       auto rawValue = std::get<1>(m_condition);
-      return std::abs(v) == rawValue;
+      return unsigned(std::abs(v)) == rawValue;
     }
     //otherwise use user-defined binary predicate
     return std::get<2>(m_condition)(v);

@@ -28,8 +28,6 @@ public:
   private:
     //variant member determines behaviour: raw compare, abs compare or use the provided function
     const std::variant<int, unsigned, std::function<bool(int)>> m_condition;
-    //determines whether to use std::abs(v) before comparing with held value
-    const bool m_abs;
   };
 
 }

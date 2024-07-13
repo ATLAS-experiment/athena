@@ -23,21 +23,7 @@ namespace DerivationFramework {
   SUSYSignalTagger::SUSYSignalTagger(const std::string& t, const std::string& n, const IInterface* p):
     AthAlgTool(t,n,p){
     declareInterface<DerivationFramework::IAugmentationTool>(this);
-    declareProperty("EventInfoName",m_eventInfoName="EventInfo");
-    declareProperty("MCCollectionName",m_mcName="TruthParticles");
   }  
-  
-  
-  StatusCode SUSYSignalTagger::initialize(){
-    ATH_MSG_DEBUG("Initialize " );
-    return StatusCode::SUCCESS;
-  }
-  
-  StatusCode SUSYSignalTagger::finalize(){
-    return StatusCode::SUCCESS;
-  }
-  
-  
   
   StatusCode SUSYSignalTagger::addBranches() const{
     const xAOD::EventInfo* eventInfo;

@@ -28,18 +28,13 @@ namespace DerivationFramework {
   public:
     SUSYSignalTagger(const std::string& t, const std::string& n, const IInterface* p);
     ~SUSYSignalTagger() = default;
-    StatusCode initialize() override;
-    StatusCode finalize() override;
-    virtual StatusCode addBranches() const;
-
+    virtual StatusCode addBranches() const override;
 
   private:
-
-    std::string m_eventInfoName;
-    std::string m_mcName;    
+    Gaudi::Property<std::string> m_eventInfoName{ this, "EventInfoName", "EventInfo", "Event Info Key"};
+    Gaudi::Property<std::string> m_mcName{ this,"MCCollectionName", "TruthParticles", "MC Collection Key"};
 
     bool FindSusyHardProc(const xAOD::TruthParticleContainer* truthP, int& pdgid1, int& pdgid2) const;
-
   }; /// class
 
 } /// namespace
