@@ -51,11 +51,12 @@ namespace po = boost::program_options;
 // STL includes
 #include <iostream>
 #include <cmath>
+#include <format>
 
 // Helper macro for retrieving containers from the event
 #define CHECK_RETRIEVE( container , name ) { \
     if (!event.retrieve( container , name ).isSuccess()){ \
-      Error( APP_NAME , "Could not load event %s from the file!" , name ); \
+      Error( APP_NAME , "%s", std::format ("Could not load event {} from the file!" , name ).c_str()); \
       throw std::runtime_error("Container retrieval failed"); \
     } \
   }
@@ -227,7 +228,7 @@ int main(int argc, char **argv) {
     CHECK_RETRIEVE( largeRJets , "AntiKt10TruthTrimmedPtFrac5SmallR20Jets" )
     CHECK_RETRIEVE( truthMET , "MET_Truth" )
     for (size_t n=0;n<nParticleContainers;++n){
-      CHECK_RETRIEVE( truthParticles[n] , particleKeyList[n].c_str() )
+      CHECK_RETRIEVE( truthParticles[n] , particleKeyList[n] )
     }
 
     if (!event.retrieveMetaInput( truthMeta , "TruthMetaData" ).isSuccess()){
