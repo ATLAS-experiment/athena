@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGT1INTERFACES_TRIGT1CTPDEFS_H
@@ -66,7 +66,7 @@ namespace LVL1CTP {
   }
 
   //! operator to dump a vector of numbers
-  inline std::ostream& operator<<(std::ostream& os, std::vector<unsigned int> rhs) 
+  inline std::ostream& operator<<(std::ostream& os, const std::vector<unsigned int>& rhs) 
   {
     for (std::vector<unsigned int>::const_iterator i(rhs.begin()); i != rhs.end(); ++i) {
       os << " " << *i;

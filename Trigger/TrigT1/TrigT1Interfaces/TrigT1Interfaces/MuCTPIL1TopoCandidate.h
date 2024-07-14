@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGT1INTERFACES_MUCTPIL1TOPOCANDIDATE_H
 #define TRIGT1INTERFACES_MUCTPIL1TOPOCANDIDATE_H
@@ -65,7 +65,7 @@ namespace LVL1 {
      bool moreThan2CandidatesOverflow() const { return m_ptL1TopoCode==3; }
 
      // getter functions
-     std::string  getSectorName() const { return m_sectorName; }
+     const std::string&  getSectorName() const { return m_sectorName; }
      unsigned int getRoiID() const { return  m_roiID; }
      unsigned int getbcid() const { return m_bcid; }  
      unsigned int getptThresholdID() const { return m_ptThresholdID; }

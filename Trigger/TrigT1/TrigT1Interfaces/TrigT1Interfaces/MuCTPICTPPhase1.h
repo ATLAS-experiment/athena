@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGT1INTERFACES_MUCTPICTPPHASE1_H
 #define TRIGT1INTERFACES_MUCTPICTPPHASE1_H
@@ -29,7 +29,7 @@ namespace LVL1 {
      /**
       * Return the muon data i.e. <code>(xxxxx|thrN|...|thr2|thr1)</code>
       */
-     std::vector<unsigned int> muCTPIWord() const;
+     const std::vector<unsigned int>& muCTPIWord() const;
      
    private:
       /// The only data member

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGT1INTERFACES_CTPSLINK_H
 #define TRIGT1INTERFACES_CTPSLINK_H
@@ -77,7 +77,7 @@ namespace LVL1CTP {
       //! get raw data content
       const std::vector<uint32_t> getDataElements() const;
       //! get full raw data content
-      const std::vector<uint32_t> getCTPToRoIBWords() const;
+      const std::vector<uint32_t>& getCTPToRoIBWords() const;
 
       /* access the trigger information */
 
