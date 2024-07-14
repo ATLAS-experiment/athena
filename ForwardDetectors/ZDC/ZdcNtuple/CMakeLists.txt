@@ -10,7 +10,7 @@ atlas_add_library (ZdcNtupleLib
                    ZdcAnalysisLib xAODCaloEvent xAODEventInfo
                    xAODForward xAODHIEvent xAODTracking InDetTrackSelectionToolLib
                    xAODTrigL1Calo xAODTrigMinBias xAODTrigger xAODTruth TrigConfxAODLib
-                   PRIVATE_LINK_LIBRARIES xAODCore xAODRootAccess)
+                   PRIVATE_LINK_LIBRARIES xAODCore xAODRootAccess AthContainers)
 
 if (XAOD_STANDALONE)
 atlas_add_dictionary (ZdcNtupleDict
