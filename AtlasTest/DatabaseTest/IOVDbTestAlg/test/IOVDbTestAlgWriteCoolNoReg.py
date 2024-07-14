@@ -1,9 +1,11 @@
+#!/usr/bin/env athena.py
 # Copyright (C) 2002-2024 by CERN for the benefit of the ATLAS collaboration
 
 from IOVDbTestAlg.IOVDbTestAlgConfig import IOVDbTestAlgFlags, IOVDbTestAlgWriteCfg
 
 flags = IOVDbTestAlgFlags()
 flags.Exec.MaxEvents = 25
+flags.fillFromArgs()
 flags.lock()
 
 acc = IOVDbTestAlgWriteCfg(flags)
