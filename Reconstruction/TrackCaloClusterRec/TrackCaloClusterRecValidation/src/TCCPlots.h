@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRACKCALOCLUSTERREC_TRACKCALOCLUSTERRECVALIDATION_TCCPLOTS_H
@@ -16,6 +16,7 @@
 #include "xAODCaloEvent/CaloClusterContainer.h"
 #include "xAODPFlow/TrackCaloClusterContainer.h"
 #include "xAODTruth/TruthParticleContainer.h"
+#include "AthContainers/ConstAccessor.h"
 
 class TCCPlots: public TCCPlotsBase {
 public:
@@ -667,9 +668,10 @@ inline const xAOD::TruthParticle* TCCPlots::getTruthPtr(const xAOD::TrackParticl
   typedef ElementLink<xAOD::TruthParticleContainer> ElementTruthLink_t;
   const xAOD::TruthParticle* result(nullptr);
   // 0. is there any truth?
-  if (trackParticle.isAvailable<ElementTruthLink_t>("truthParticleLink")) {
+  static const SG::ConstAccessor<ElementTruthLink_t> truthParticleLinkAcc("truthParticleLink");
+  if (truthParticleLinkAcc.isAvailable(trackParticle)) {
     // 1. ..then get link
-    const ElementTruthLink_t ptruthContainer = trackParticle.auxdata<ElementTruthLink_t>("truthParticleLink");
+    const ElementTruthLink_t ptruthContainer = truthParticleLinkAcc(trackParticle);
     if (ptruthContainer.isValid()) {
       result = *ptruthContainer;
     }
@@ -681,9 +683,10 @@ inline const xAOD::TrackParticle* TCCPlots::getTrackParticlePtr(const xAOD::Trac
   typedef ElementLink<xAOD::TrackParticleContainer> ElementTruthLink_t;
   const xAOD::TrackParticle* result(nullptr);
   // 0. is there any truth?
-  if (tcc.isAvailable<ElementTruthLink_t>("trackParticleLink")) {
+  static const SG::ConstAccessor<ElementTruthLink_t> trackParticleLinkAcc("trackParticleLink");
+  if (trackParticleLinkAcc(tcc)) {
     // 1. ..then get link
-    const ElementTruthLink_t ptrackContainer = tcc.auxdata<ElementTruthLink_t>("trackParticleLink");
+    const ElementTruthLink_t ptrackContainer = trackParticleLinkAcc(tcc);
     if (ptrackContainer.isValid()) {
       result = *ptrackContainer;
     }
