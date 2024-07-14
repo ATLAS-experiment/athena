@@ -42,6 +42,9 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::initialize()
   if( not m_trkAnaDefSvc ) {
     ISvcLocator* svcLoc = Gaudi::svcLocator();
     ATH_CHECK( svcLoc->service( "TrkAnaDefSvc"+m_anaTag, m_trkAnaDefSvc ) );
+    if( !m_trkAnaDefSvc ) { // suppress cppcheck warning.
+      return StatusCode::FAILURE;
+    }
   }
 
   /// Track parameters plots
