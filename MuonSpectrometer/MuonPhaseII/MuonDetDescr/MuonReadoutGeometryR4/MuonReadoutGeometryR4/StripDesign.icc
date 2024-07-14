@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONREADOUTGEOMETRYR4_STRIPDESIGN_ICC
 #define MUONREADOUTGEOMETRYR4_STRIPDESIGN_ICC
@@ -68,8 +68,8 @@ namespace MuonGMR4 {
                           <<" + lambda "<<Amg::toString(edgeDirTop(), 2));
             return std::nullopt;
         }
-        /// If the channel is a stereo channel && lamda is either smaller 0 or longer
-        /// then the bottom edge, then it's a routed strip
+        /// If the channel is a stereo channel && lambda is either smaller than 0 or longer
+        /// than the bottom edge, then it's a routed strip
         if (!uncapped && ((*lambda) < 0  || (*lambda) > lenTopEdge())) {
             const bool pickLeft =  (*lambda) < 0;
             const Amg::Vector2D& edgePos{pickLeft ?  cornerTopLeft() : cornerTopRight()};
@@ -98,8 +98,8 @@ namespace MuonGMR4 {
                           <<" + lambda "<<Amg::toString(edgeDirBottom(), 2));
             return std::nullopt;
         }
-        /// If the channel is a stereo channel && lamda is either smaller 0 or longer
-        /// then the bottom edge, then it's a routed strip
+        /// If the channel is a stereo channel && lambda is either smaller than 0 or longer
+        /// than the bottom edge, then it's a routed strip
         if (!uncapped  && ( (*lambda) < 0 || (*lambda) > lenBottomEdge())) {
             const bool selLeftEdge = (*lambda) < 0; 
             const Amg::Vector2D& edgePos{selLeftEdge ? cornerBotLeft() : cornerBotRight()};
