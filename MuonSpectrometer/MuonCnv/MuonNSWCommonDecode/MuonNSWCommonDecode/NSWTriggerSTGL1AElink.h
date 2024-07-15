@@ -1,23 +1,15 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONNSWCOMMONDECODE_NSWTRIGGERSTGL1AELINK_H
 #define MUONNSWCOMMONDECODE_NSWTRIGGERSTGL1AELINK_H
 
-#include <cstdint>
-
-#include <exception>
-#include <vector>
-
-#include "MuonNSWCommonDecode/NSWMMTPDecodeBitmaps.h"
-#include "MuonNSWCommonDecode/NSWSTGTPDecodeBitmaps.h"
 #include "MuonNSWCommonDecode/NSWTriggerElink.h"
-#include "MuonNSWCommonDecode/STGTPPackets.h"
+#include "MuonNSWCommonDecode/STGTPPackets.h" //vector template param
 
+#include <cstdint>
+#include <vector>
 namespace Muon::nsw {
-class NSWResourceId;
-
-class NSWTriggerElinkException;
 
 class NSWTriggerSTGL1AElink : public NSWTriggerElink {
  public:
