@@ -27,11 +27,11 @@ dcube_rec_lastref="dcube_shifter_last"
 dcube_rec_expert_lastref="dcube_expert_last"
 
 artdata=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art
-name="run2"
 relname="r24"
 
 script="`basename \"$0\"`"
 hits=physval.HITS.root
+rdo=physval.RDO.root
 dcubemon_sim=SiHitValid.root
 dcubemon_rec=physval.ntuple.root
 dcubemon_rdo=RDOAnalysis.root
@@ -57,7 +57,7 @@ conditionsTag=OFLCOND-MC23-SDR-RUN3-07
     --maxEvents       10000 \
     --randomSeed      24304 \
     --simulator       FullG4MT_QS \
-    --conditionsTag   'default:$conditionsTag' \
+    --conditionsTag   default:$conditionsTag \
     --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
     --preInclude 'EVNTtoHITS:Campaigns.MC23aSimulationMultipleIoV' \
     --postInclude     'PyJobTransforms.TransformUtils.UseFrontier' 'HitAnalysis.PostIncludes.IDHitAnalysis'
@@ -89,22 +89,22 @@ if [ $sim_tf_exit_code -eq 0 ]  ;then
    --digiSeedOffset1 100 --digiSeedOffset2 100 \
    --inputHITSFile $hits \
    --maxEvents -1 \
-   --outputRDOFile output.RDO.root \
+   --outputRDOFile $rdo \
    --preInclude 'HITtoRDO:Campaigns.MC23NoPileUp' \
    --postInclude 'PyJobTransforms.UseFrontier' 
  echo "art-result: $? digi"
 
  run RunRDOAnalysis.py \
-    -i output.RDO.root \
+    -i $rdo \
     Pixel SCT
  echo "art-result: $? RDOAnalysis"
  
  # Reco step based on test InDetPhysValMonitoring ART setup from Josh Moss.
  run Reco_tf.py \
    --CA \
-   --inputRDOFile    output.RDO.root \
+   --inputRDOFile    $rdo \
    --outputAODFile   physval.AOD.root \
-   --conditionsTag   'default:$conditionsTag' \
+   --conditionsTag   default:$conditionsTag \
    --steering        doRAWtoALL \
    --checkEventCount False \
    --ignoreErrors    True \
