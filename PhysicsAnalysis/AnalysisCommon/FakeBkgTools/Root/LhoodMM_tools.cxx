@@ -1,14 +1,16 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
 #include "FakeBkgTools/LhoodMM_tools.h"
 #include "FakeBkgTools/LhoodMMFitInfo.h"
+#include "FakeBkgTools/LhoodMMEvent.h"
 #include "FakeBkgTools/FakeBkgInternals.h"
 #include "FakeBkgTools/TMinuit_LHMM.h"
 #include "FakeBkgTools/Database.h"
 #include "PathResolver/PathResolver.h"
+
 #include "TH1.h"
 #include "TH2.h"
 #include "TH3.h"
@@ -930,7 +932,7 @@ double LhoodMM_tools::nfakes(Double_t *poserr, Double_t *negerr) {
     TString stheta = "theta_";
     char tmpchar[20];
     sprintf(tmpchar, "%i", ilep);
-    TString tmpstr = stheta;
+    TString tmpstr = std::move(stheta);
     tmpstr.Append(tmpchar);
     tmpstr.Append("_");
     ATH_MSG_VERBOSE("How many fake indices?" << m_fake_indices[ilep-1].size());

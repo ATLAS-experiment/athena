@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AsgAnalysisInterfaces/IFakeBkgTool.h"
@@ -612,7 +612,8 @@ void Database::addValues(const StringRef& contents, EfficiencyTable& table, Effi
             FakeBkgTools::Uncertainty uncval;
             std::string sysname;
             ss >> std::ws;
-            char c1 = ss.get(), c2 = ss.peek();
+            auto c1 = ss.get();
+            auto c2 = ss.peek();
             if(c2=='+' || c2=='-')
             {
                 ss >> c2 >> uncval.up >> sysname;

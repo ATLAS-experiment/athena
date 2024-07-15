@@ -1,24 +1,25 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef Lhood_MM_tools_h
 #define Lhood_MM_tools_h
 
-#include "Rtypes.h"
 #include "TMatrixT.h"
 #include "FakeBkgTools/BaseFakeBkgTool.h"
-#include "FakeBkgTools/LhoodMMEvent.h"
 #include "FakeBkgTools/LhoodMMFitInfo.h"
 
 #include <vector>
 #include <mutex>
+#include <memory>
+#include <map>
 
 class TH1;
 class TH2;
 class TH3;
 class TMinuit_LHMM;
 class TDirectory;
+class LhoodMMEvent;
 
 namespace CP
 {
@@ -80,35 +81,35 @@ class ATLAS_NOT_THREAD_SAFE LhoodMM_tools: public BaseFakeBkgTool
   static LhoodMM_tools* m_current_lhoodMM_tool;
   static std::mutex s_mutex;  // to prevent concurrent access to minuit / fit function
   
-  LhoodMMFitInfo m_global_fitInfo;
-  bool m_prevSave;
-  bool m_perfectFit;
+  LhoodMMFitInfo m_global_fitInfo{};
+  bool m_prevSave{};
+  bool m_perfectFit{};
 
-  const LhoodMMFitInfo *m_current_fitInfo;
+  const LhoodMMFitInfo *m_current_fitInfo{};
 
  #ifndef __CLING__
   std::vector<std::unique_ptr<FakeBkgTools::FinalState> > m_fsvec;
  #else
   std::vector<int> m_fsvec;
  #endif
-  int m_curr_nlep;
-  int m_minnlep, m_maxnlep, m_maxnlep_loose;
-  int m_theta_tot_start_index;
+  int m_curr_nlep{};
+  int m_minnlep{}, m_maxnlep{}, m_maxnlep_loose{};
+  int m_theta_tot_start_index{};
   std::vector<std::vector<int>> m_real_indices, m_fake_indices;
-  bool m_requireSS, m_requireOS;
+  bool m_requireSS{}, m_requireOS{};
 
-  bool m_needToResize;
+  bool m_needToResize{};
 
-  bool m_doFakeFactor;
+  bool m_doFakeFactor{};
 
-  bool m_fixNormalization;
+  bool m_fixNormalization{};
 
-  float m_maxWeight;
+  float m_maxWeight{};
 
-  bool m_alreadyMerged;
+  bool m_alreadyMerged{};
 
-  inline static const int s_nLepMax = 6;
-  inline static const int s_maxRank =  64; // i.e. 2^nLepMax
+  static constexpr int s_nLepMax = 6;
+  static constexpr int s_maxRank =  64; // i.e. 2^nLepMax
 
 
   std::vector < std::vector < std::vector < double > > > m_coeffs;
@@ -117,24 +118,24 @@ class ATLAS_NOT_THREAD_SAFE LhoodMM_tools: public BaseFakeBkgTool
   std::map<TH2*, std::vector< LhoodMMFitInfo > > m_fitInfo_2dhisto_map;
   std::map<TH3*, std::vector< LhoodMMFitInfo > > m_fitInfo_3dhisto_map;
 
-  double m_dilep_SSfrac_num, m_dilep_SSfrac_denom;
+  double m_dilep_SSfrac_num{}, m_dilep_SSfrac_denom{};
   std::vector< std::vector < double > > m_OSfrac;
 
-  double m_nfakes_std, m_nfakes_std_err;
+  double m_nfakes_std{}, m_nfakes_std_err{};
 
-  double m_nfakes_std_perEventWeight, m_nfakes_std_err_perEventWeight;
+  double m_nfakes_std_perEventWeight{}, m_nfakes_std_err_perEventWeight{};
 
-  bool m_do_std_perEventWeight;
+  bool m_do_std_perEventWeight{};
 
-  Int_t m_fitStatus;
+  Int_t m_fitStatus{};
 
-  Int_t m_printLevel;
+  Int_t m_printLevel{};
 
   std::vector<std::shared_ptr<TMatrixT<double>> > m_nrf_mat_vec;
   std::vector<std::shared_ptr<TMatrixT<double>> > m_MMmatrix_vec;
   std::vector<std::shared_ptr<TMatrixT<double>>> m_ntlpred_vec;
 
-  unsigned m_lastSaveIndex;
+  unsigned m_lastSaveIndex{};
 
   //mathematical constants
   inline static const double s_piover2 = 1.57079632679489661923;

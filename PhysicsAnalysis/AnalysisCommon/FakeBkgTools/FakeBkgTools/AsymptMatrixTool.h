@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ASYMPT_MATRIX_TOOL_H
@@ -10,9 +10,6 @@
 #include <array>
 #include <vector>
 #include <string>
-#include <bitset>
-#include <unordered_map>
-#include <functional>
 
 namespace CP
 {
