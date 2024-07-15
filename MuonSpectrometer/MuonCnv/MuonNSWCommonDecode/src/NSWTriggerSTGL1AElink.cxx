@@ -1,7 +1,12 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include "MuonNSWCommonDecode/NSWTriggerSTGL1AElink.h"
+
+
+#include "MuonNSWCommonDecode/NSWResourceId.h"
+#include "MuonNSWCommonDecode/NSWSTGTPDecodeBitmaps.h"
+#include "ers/ers.h"
 
 #include <cmath>
 #include <cstddef>
@@ -10,11 +15,6 @@
 #include <stdexcept>
 #include <string>
 
-#include "MuonNSWCommonDecode/NSWResourceId.h"
-#include "MuonNSWCommonDecode/NSWSTGTPDecodeBitmaps.h"
-#include "MuonNSWCommonDecode/NSWTriggerElink.h"
-#include "MuonNSWCommonDecode/STGTPPackets.h"
-#include "ers/ers.h"
 
 Muon::nsw::NSWTriggerSTGL1AElink::NSWTriggerSTGL1AElink(const uint32_t* bs, const uint32_t remaining)
     : NSWTriggerElink(bs, remaining), m_data{bs, remaining} {
@@ -201,7 +201,9 @@ Muon::nsw::NSWTriggerSTGL1AElink::DataHeader Muon::nsw::NSWTriggerSTGL1AElink::d
         default:
            break;
   }
-  
+  if (current_stream_head_nbits == 0){
+    throw std::runtime_error("current_stream_head_nbits is zero in NSWTriggerSTGL1AElink::decode_data_header_v3");
+  }
   current_stream_head_nwords = total_expected_size / current_stream_head_nbits;
   size_t data_size = std::ceil(total_expected_size / felix_word_size);
 
