@@ -4,8 +4,6 @@
 #ifndef ACTSTRACKRECONSTRUCTION_TRACKFINDINGDATA_H
 #define ACTSTRACKRECONSTRUCTION_TRACKFINDINGDATA_H 1
 
-#include "src/TrackFindingAlg.h"
-
 // ACTS
 #include "Acts/EventData/VectorTrackContainer.hpp"
 #include "Acts/EventData/TrackContainer.hpp"
@@ -198,7 +196,7 @@ namespace ActsTrk::detail {
     }
 
     TrackFindingMeasurements() = delete;
-    TrackFindingMeasurements(const TrackFindingMeasurements &) = delete;
+    TrackFindingMeasurements(const TrackFindingMeasurements &) = default;
     TrackFindingMeasurements &operator=(const TrackFindingMeasurements &) = delete;
 
     void addDetectorElements(xAOD::UncalibMeasType measType,
