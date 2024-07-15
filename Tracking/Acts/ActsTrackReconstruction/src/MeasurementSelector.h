@@ -423,7 +423,7 @@ protected:
    template <typename T>
    struct MeasurementRange {
    private:
-      const T *m_container;
+      const T *m_container{};
       using const_iterator = typename T::const_iterator;
       const_iterator m_begin;
       const_iterator m_end;
