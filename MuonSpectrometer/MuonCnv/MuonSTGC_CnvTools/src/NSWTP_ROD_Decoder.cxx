@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include "NSWTP_ROD_Decoder.h"
 #include "Identifier/Identifier.h"
@@ -133,11 +133,9 @@ StatusCode NSWTP_ROD_Decoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::
     const std::vector<STGTPMMPacket>& mm_packets =  link->mm_packet();
     for(uint i_packetIndex = 0; i_packetIndex<segment_packets.size(); i_packetIndex++){
       const STGTPMMPacket& mm_packet = mm_packets.at(i_packetIndex);
-      uint8_t i_candidateIndex{0};
        for (const STGTPMMPacket::MMSegmentData& payload : mm_packet.Segments()){
         // we have at most 8 candidates in the output
         if(payload.dTheta == 16) {
-           ++i_candidateIndex;
            continue; // ignore candidates that the trigger processor flags as invalid
         }
         uint32_t word{0}; // word containing all information about the candidate
@@ -148,7 +146,6 @@ StatusCode NSWTP_ROD_Decoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::
         encodeSegmentProperty(MergedSegmentProperty::dTheta, payload.dTheta,word);
         encodeSegmentProperty(MergedSegmentProperty::phiID, payload.phiID,word);
         encodeSegmentProperty(MergedSegmentProperty::rIndex, payload.rIndex ,word);
-        ++i_candidateIndex;
 
         rdo->NSWTP_mm_segments().push_back(word);
       }
