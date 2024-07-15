@@ -165,6 +165,145 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
             meta_dict[filename]['file_comp_alg'] = current_file.GetCompressionAlgorithm()
             meta_dict[filename]['file_comp_level'] = current_file.GetCompressionLevel()
 
+            if isinstance(
+                current_file.Get(PoolOpts.RNTupleNames.MetaData),
+                ROOT.Experimental.RNTuple,
+            ):
+                msg.warning(
+                    "Reading in-file metadata from RNTuple is currently of limited support"
+                )
+                meta_dict[filename]["nentries"] = dataheader_nentries(current_file)
+
+                def get_raw_md(filename):
+                    """Helper function to read the raw metadata from RNTuple.
+                    We use subprocess because output from RNTupleReader uses
+                    std::ostream for output, which is not captured by PyROOT.
+
+                    Returns the raw metadata as a json-like string, but one cannot
+                    assume it is valid json.
+
+                    Known issues of invalid json constructs:
+                    - double quotes are not escaped in string values
+                    - single-quoted strings
+                    - nested json objects and lists inside single-quoted strings
+                    """
+                    import subprocess
+                    import sys
+
+                    raw_md = f"""
+from ROOT.Experimental import RNTupleReader
+from ROOT import TFile
+
+
+def read_md(infile):
+    file_handle = TFile.Open(infile)
+    md = file_handle.Get("MetaData")
+    reader = RNTupleReader.Open(md)
+    reader.Show(0)
+
+read_md("{filename}")
+                    """
+                    result = subprocess.run(
+                        [sys.executable, "-c", raw_md],
+                        capture_output=True,
+                        text=True,
+                    )
+                    raw_data = "".join(result.stdout.split())
+                    return raw_data.replace("\x00", '""')
+
+                def extract_keys(json_like_string, keys):
+                    """Helper for extracting key-value pairs from json-like string"""
+                    import json
+
+                    result = {}
+                    for key in keys:
+                        if key == "m_eventTypes":
+                            pattern = rf'"{key}":(\[\{{.*?\}}\])'
+                        elif "beamEnergy" in key:
+                            pattern = rf'"{key}":(\b[+]?([0-9]*\.[0-9]+|[0-9]+\.?[0-9]*)[eE][+]?([0-9]+)\b)'
+                        else:
+                            pattern = rf'"{key}"\s*:\s*(\[[^\]]*\]|"[^"]*"|\d+)'
+                        match = re.search(pattern, json_like_string)
+                        if match:
+                            try:
+                                result[key] = json.loads(match.group(1))
+                            except json.JSONDecodeError:
+                                pass
+                    return result
+
+                # metadata keys which can be relatively reliably extracted from RNTuple
+                keys_to_extract = [
+                    "m_numberOfEvents",
+                    "m_runNumbers",
+                    "m_lumiBlockNumbers",
+                    "m_processingTags",
+                    "m_itemList",
+                    "m_eventTypes",
+                    "m_branchNames",
+                    "m_classNames",
+                    "FileMetaDataAux::amiTag",
+                    "FileMetaDataAux::AODFixVersion",
+                    "FileMetaDataAux::AODCalibVersion",
+                    "FileMetaDataAux::beamEnergy",
+                    "FileMetaDataAux::beamType",
+                    "FileMetaDataAux::conditionsTag",
+                    "FileMetaDataAux::dataYear",
+                    "FileMetaDataAux::generatorsInfo",
+                    "FileMetaDataAux::geometryVersion",
+                    "FileMetaDataAux::isDataOverlay",
+                    "FileMetaDataAux::mcCampaign",
+                    "FileMetaDataAux::mcProcID",
+                    "FileMetaDataAux::simFlavour",
+                    "productionRelease",
+                    "dataType",
+                ]
+
+                result = extract_keys(get_raw_md(filename), keys_to_extract)
+
+                item_list = []
+                from CLIDComps.clidGenerator import clidGenerator
+
+                cgen = clidGenerator("")
+                for item in result["m_itemList"]:
+                    item_list.append((cgen.getNameFromClid(item["_0"]), item["_1"].encode("utf-8")))
+                meta_dict[filename]["itemList"] = item_list
+                event_types = []
+                for event_type in result["m_eventTypes"]:
+                    fields = {
+                        key.removeprefix("m_"): value
+                        for key, value in event_type.items()
+                    }
+                    fields = _convert_event_type_bitmask(fields)
+                    fields = _convert_event_type_user_type(fields)
+                    event_types.extend(fields["type"])
+                meta_dict[filename]["eventTypes"] = event_types
+                meta_dict[filename]["numberOfEvents"] = result["m_numberOfEvents"]
+                meta_dict[filename]["runNumbers"] = result["m_runNumbers"]
+                meta_dict[filename]["lumiBlockNumbers"] = result["m_lumiBlockNumbers"]
+                meta_dict[filename]["processingTags"] = result["m_processingTags"]
+
+                meta_dict[filename]["EventFormat"] = {}
+                ef_items = {}
+                for branch_name, class_name in dict(
+                    zip(
+                        result["m_branchNames"],
+                        result["m_classNames"],
+                    )
+                ).items():
+                    ef_items[branch_name] = class_name
+                meta_dict[filename]["EventFormat"] = ef_items
+
+                meta_dict[filename]["FileMetaData"] = {}
+                for key in keys_to_extract:
+                    try:
+                        meta_dict[filename]["FileMetaData"][key.split("::")[1]] = (
+                            result[key]
+                        )
+                    except (IndexError, KeyError):
+                        continue
+                msg.debug(f"Read metadata from RNTuple: {meta_dict[filename]}")
+                return meta_dict
+
             # ----- read extra metadata required for 'lite' and 'full' modes ----------------------------------------#
             if mode != 'tiny':
                 # selecting from all tree the only one which contains metadata, respectively "MetaData"
