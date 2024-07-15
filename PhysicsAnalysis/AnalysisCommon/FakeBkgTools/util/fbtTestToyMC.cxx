@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //----------------------------------------------------------------------
@@ -16,6 +16,8 @@
 #include <AsgTools/StandaloneToolHandle.h>
 
 #include "FakeBkgTools/FakeBkgInternals.h"
+#include "FakeBkgTools/LhoodMMEvent.h"
+
 #include "FakeBkgTools/ApplyFakeFactor.h"
 #include "FakeBkgTools/AsymptMatrixTool.h"
 #include "FakeBkgTools/LhoodMM_tools.h"

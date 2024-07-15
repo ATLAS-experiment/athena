@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FakeBkgTools/BaseLinearFakeBkgTool.h"
@@ -93,9 +93,9 @@ StatusCode BaseLinearFakeBkgTool::getTotalYield(float& yield, float& yieldStatEr
     {
         for(int i=0;i<kv.first->GetNcells();++i)
         {
-            auto& yield = m_yields.at(kv.second.first + i);
-            kv.first->SetBinContent(i, yield.value(this));
-            kv.first->SetBinError(i, yield.stat());
+            auto& thisYield = m_yields.at(kv.second.first + i);
+            kv.first->SetBinContent(i, thisYield.value(this));
+            kv.first->SetBinError(i, thisYield.stat());
         }
     }
     return StatusCode::SUCCESS;

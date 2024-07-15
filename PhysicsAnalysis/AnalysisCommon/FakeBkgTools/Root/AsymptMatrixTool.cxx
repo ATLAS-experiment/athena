@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FakeBkgTools/AsymptMatrixTool.h"
@@ -51,7 +51,7 @@ StatusCode AsymptMatrixTool::addEventCustom()
 StatusCode AsymptMatrixTool::getEventWeightCustom(FakeBkgTools::Weight& weight, const FinalState& fs)
 {
     const uint64_t n = m_particles.size();
-    const uint64_t nc = (1 << n);
+    const uint64_t nc = (1ull << n);
     
     std::array<double, maxCombinations()> w;
     std::array<std::array<double, maxCombinations()>, 2*maxParticles()> dproj_dt;
