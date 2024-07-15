@@ -66,7 +66,6 @@ namespace InDet{
     UnsignedIntegerProperty m_knnVal{this, "knnVal", 500};
     FloatProperty m_filterCut{this, "filterCut", 0.21};
     StringProperty m_inputMLModuleDir{this, "inputMLModelDir", ""};
-    BooleanProperty m_useCUDA {this, "UseCUDA", false, "Use CUDA"};
 
     void initTrainedModels();
     MsgStream&    dumpevent     (MsgStream&    out) const;

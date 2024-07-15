@@ -7,7 +7,6 @@ from pathlib import Path
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-
 def DumpObjectsCfg(
         flags, name="DumpObjects", outfile="Dump_GNN4Itk.root", **kwargs):
     '''
@@ -21,8 +20,8 @@ def DumpObjectsCfg(
         )
     )
 
-    kwargs.setdefault("NtupleFileName", "/DumpObjects/")
-    kwargs.setdefault("NtupleTreeName", "GNN4ITk")
+    kwargs.setdefault("NtupleFileName", flags.Tracking.GNN.DumpObjects.NtupleFileName)
+    kwargs.setdefault("NtupleTreeName", flags.Tracking.GNN.DumpObjects.NtupleTreeName)
     kwargs.setdefault("rootFile", True)
 
     acc.addEventAlgo(CompFactory.InDet.DumpObjects(name, **kwargs))
@@ -33,22 +32,22 @@ def GNNTrackFinderToolCfg(flags, name='GNNTrackFinderTool', **kwargs):
     acc = ComponentAccumulator()
     
     ### parameters for GNNTrackFinderTool
-    kwargs.setdefault("embeddingDim", 8)
-    kwargs.setdefault("rVal", 1.7)
-    kwargs.setdefault("knnVal", 500)
-    kwargs.setdefault("filterCut", 0.21)
-    kwargs.setdefault("inputMLModelDir", "TrainedMLModels4ITk")
-    kwargs.setdefault("UseCUDA", False)
+    kwargs.setdefault("embeddingDim", flags.Tracking.GNN.TrackFinder.embeddingDim)
+    kwargs.setdefault("rVal", flags.Tracking.GNN.TrackFinder.rVal)
+    kwargs.setdefault("knnVal", flags.Tracking.GNN.TrackFinder.knnVal)
+    kwargs.setdefault("filterCut", flags.Tracking.GNN.TrackFinder.filterCut)
+    kwargs.setdefault("inputMLModelDir", flags.Tracking.GNN.TrackFinder.inputMLModelDir)
 
     from AthOnnxComps.OnnxRuntimeInferenceConfig import OnnxRuntimeInferenceToolCfg
+    ort_exe_provider = flags.Tracking.GNN.TrackFinder.ORTExeProvider
     kwargs.setdefault("Embedding", acc.popToolsAndMerge(
-        OnnxRuntimeInferenceToolCfg(flags, Path("TrainedMLModels4ITk") / "embedding.onnx")
+        OnnxRuntimeInferenceToolCfg(flags, Path(kwargs["inputMLModelDir"]) / "embedding.onnx", ort_exe_provider)
     ))
     kwargs.setdefault("Filtering", acc.popToolsAndMerge(
-        OnnxRuntimeInferenceToolCfg(flags, Path("TrainedMLModels4ITk") / "filtering.onnx")
+        OnnxRuntimeInferenceToolCfg(flags, Path(kwargs["inputMLModelDir"]) / "filtering.onnx", ort_exe_provider)
     ))
     kwargs.setdefault("GNN", acc.popToolsAndMerge(
-        OnnxRuntimeInferenceToolCfg(flags, Path("TrainedMLModels4ITk") / "gnn.onnx")
+        OnnxRuntimeInferenceToolCfg(flags, Path(kwargs["inputMLModelDir"]) / "gnn.onnx", ort_exe_provider)
     ))
     
     acc.setPrivateTools(CompFactory.InDet.SiGNNTrackFinderTool(name, **kwargs))
@@ -68,8 +67,8 @@ def GNNTrackReaderToolCfg(flags, name='GNNTrackReaderTool', **kwargs):
     acc = ComponentAccumulator()
 
     ### parameters for GNNTrackReader
-    kwargs.setdefault("inputTracksDir", "gnntracks")
-    kwargs.setdefault("csvPrefix", "track")
+    kwargs.setdefault("inputTracksDir", flags.Tracking.GNN.TrackReader.inputTracksDir)
+    kwargs.setdefault("csvPrefix", flags.Tracking.GNN.TrackReader.csvPrefix)
 
     acc.setPrivateTools(CompFactory.InDet.GNNTrackReaderTool(name, **kwargs))
     return acc
