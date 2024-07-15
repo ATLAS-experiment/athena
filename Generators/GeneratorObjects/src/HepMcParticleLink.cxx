@@ -463,7 +463,9 @@ HepMcParticleLink HepMcParticleLink::getRedirectedLink(const HepMcParticleLink& 
     (particleLink.barcode() != 0) ? particleLink.barcode() : particleLink.id();
   const HepMcParticleLink::UniqueIDFlag uidFlag =
     (particleLink.barcode() != 0) ? HepMcParticleLink::IS_BARCODE : HepMcParticleLink::IS_ID;
-  return HepMcParticleLink(uniqueID, eventIndex, idxFlag, uidFlag, ctx);
+  HepMcParticleLink redirectedLink(uniqueID, eventIndex, idxFlag, uidFlag, ctx);
+  redirectedLink.setTruthSuppressionType(particleLink.getTruthSuppressionType());
+  return redirectedLink;
 }
 
 
