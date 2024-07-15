@@ -96,6 +96,17 @@ namespace Rec {
        }
      }
      ATH_MSG_DEBUG("Found Vertices in this event: " << bVertexContainer->size());
+     //
+     //--Update track ElementLinks
+     for(auto iv : (*bVertexContainer)){
+       std::vector< ElementLink< xAOD::TrackParticleContainer > > newLinkVec;
+       for(auto &it : iv->trackParticleLinks()){
+         ElementLink< xAOD::TrackParticleContainer > tmpLnk=it;
+         tmpLnk.setStorableObject(*tp_cont);
+         newLinkVec.push_back(tmpLnk);
+       }
+       iv->setTrackParticleLinks(newLinkVec);
+     }
 
      SG::WriteHandle<xAOD::VertexContainer>  vrtInThisEvent(m_foundVerticesKey,ctx);
      ATH_CHECK( vrtInThisEvent.record (std::move(bVertexContainer),
