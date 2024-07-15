@@ -63,148 +63,137 @@
 #include <climits>
 
 namespace vAlgs{
+/// In the following
+/// ISA_WIDTH is the ISA width in bits e.g 128 for SSE
+/// 256 for AVX2 etc
+/// For the cases of interest/tested doing 4 simd vectors
+/// at a time seemed best.
 
-// Functionalit similar to std::reduce for array of vector types.
-// The reduction result is stored in array[0].
-template <typename T, int N, int SIZE>
-void vreduce(CxxUtils::vec<T, N> array[SIZE], const auto& lambda) {
-
-  static_assert(SIZE != 0, "SIZE can not be 0");
-  static_assert((SIZE & (SIZE - 1)) == 0 || SIZE == 1,
-                "SIZE not 1 or a power of 2");
-  if constexpr (SIZE == 1) {
-    return;
-  }
-  for (int i = 0; i < SIZE / 2; i++) {
-    lambda(array[i], array[i + (SIZE / 2)]);
-  }
-  if constexpr (SIZE / 2 > 0) {
-    vreduce<T, N, SIZE / 2>(array, lambda);
-  } else {
-    return;
-  }
+///@brief Alignment needed for  arrays of elements
+///when using an ISA of specific width
+///e.g 32 for AVX2 16 for SSE4 etc
+template <size_t ISA_WIDTH>
+constexpr size_t alignmentForArray(){
+  return ISA_WIDTH / CHAR_BIT;
 }
 
-/// ISA_WIDTH is the ISA width in bits e.g 128 for SSE
-/// 256 for AVX2
-///
-/// STRIDE is how many elements (in units of elements) we want to cover
-/// in each iteration
-///
-/// T is the element type
-///
-/// The input array is assumed to be at least
-/// ISA_WIDTH/CHAR_BIT aligned e.g 16 for SSE4, 32 for AVX2
-/// The array size is n . n needs to be dividable with STIDE.
-/// Aka the array needs to be properly padded.
-///
-/// Based on the ISA and the element type
-/// We choose the best size for the SIMD types
-///
-/// And then we use an array of as  many SIMD types needed
-/// As to cover the stride.
+/// @brief returns the STRIDE in units of elements
+/// covered by NumSIMDVec simd
+/// vectors of type T for the specific ISA
+/// For example for a 256 bit, a SIMD vector is 8 floats
+/// So 4 simd vectors correspond to 32 elements.
+template <size_t ISA_WIDTH, typename T>
+constexpr size_t strideOfNumSIMDVec(size_t NumSIMDVec){
+  return NumSIMDVec * (ISA_WIDTH / (sizeof(T) * CHAR_BIT));
+}
 
-template <int ISA_WIDTH, int STRIDE, typename T>
-ATH_ALWAYS_INLINE T
-vFindMinimum(const T* distancesIn, int n) {
+/// @brief Given a number n returns a
+/// new n >= n that is padded to
+/// the required STRIDE
+template <size_t STRIDE>
+constexpr int32_t numPadded(const int32_t n) {
+  // This always return a padded number dividable
+  // with STRIDE , eg if STRIDE = 16
+  // e.g ((33+15)&~15) = 48
+  constexpr size_t STRIDEMINUS1 = STRIDE - 1;
+  return ((n + STRIDEMINUS1) & ~STRIDEMINUS1);
+}
+
+/// @brief Find the minimum element
+/// in the array of distances
+/// processing four simd vectors at a time
+template <size_t ISA_WIDTH, typename T>
+ATH_ALWAYS_INLINE
+T vFindMinimum(const T* distancesIn, int32_t n) {
+
   using namespace CxxUtils;
-  //We want to have vectors that fit on the specified
-  //ISA
-  //For large STRIDES we use an array of such
-  //vectors
-  constexpr int VEC_WIDTH = ISA_WIDTH / (sizeof(T) * CHAR_BIT);
-  constexpr int ALIGNMENT = ISA_WIDTH / CHAR_BIT;
-  constexpr int VECTOR_COUNT = STRIDE / VEC_WIDTH;
-  static_assert((ISA_WIDTH & (ISA_WIDTH - 1)) == 0,
-                "ISA_WIDTH not a power of 2");
-  static_assert((STRIDE & (STRIDE - 1)) == 0,
-                "STRIDE not a power of 2");
-  static_assert((ALIGNMENT & (ALIGNMENT - 1)) == 0,
-                "ALIGNMENT not a power of 2");
-  static_assert(VECTOR_COUNT > 0,
-                "STRIDE smaller that the selected ISA SIMD width");
-  static_assert(std::is_floating_point_v<T> || std::is_integral_v<T>, "T not a floating or integral type");
-
-  const T* array = std::assume_aligned<ALIGNMENT>(distancesIn);
-
-  using vec_T = vec<T, VEC_WIDTH>;
-  vec_T minValues[VECTOR_COUNT];
-  // Limit unrolling to 4 for now as too much unrolling can
-  // also cause problems.
-  // When VECTOR_COUNT is less than 4 the relevant loops
-  // are removed
-  GAUDI_LOOP_UNROLL(4)
-  for (int i = 0; i < VECTOR_COUNT; i++) {
-    vload(minValues[i], array + (VEC_WIDTH * i));
+  static_assert(std::is_floating_point_v<T>, "T not a floating point32_t type");
+  constexpr size_t VEC_WIDTH = ISA_WIDTH / (sizeof(T) * CHAR_BIT);
+  const T* array =
+      std::assume_aligned<alignmentForArray<ISA_WIDTH>()>(distancesIn);
+  using vec_t = vec<T, VEC_WIDTH>;
+  vec_t minValues1;
+  vec_t minValues2;
+  vec_t minValues3;
+  vec_t minValues4;
+  vload(minValues1, array);
+  vload(minValues2, array + VEC_WIDTH);
+  vload(minValues3, array + VEC_WIDTH * 2);
+  vload(minValues4, array + VEC_WIDTH * 3);
+  vec_t values1;
+  vec_t values2;
+  vec_t values3;
+  vec_t values4;
+  for (int32_t i = 4 * VEC_WIDTH; i < n; i += 4 * VEC_WIDTH) {
+    // 1
+    vload(values1, array + i);
+    vmin(minValues1, values1, minValues1);
+    // 2
+    vload(values2, array + i + VEC_WIDTH);
+    vmin(minValues2, values2, minValues2);
+    // 3
+    vload(values3, array + i + 2 * VEC_WIDTH);
+    vmin(minValues3, values3, minValues3);
+    // 4
+    vload(values4, array + i + 3 * VEC_WIDTH);
+    vmin(minValues4, values4, minValues4);
   }
-  vec_T values[VECTOR_COUNT];
-  for (int i = STRIDE; i < n; i += STRIDE) {
-    GAUDI_LOOP_UNROLL(4)
-    for (int j = 0; j < VECTOR_COUNT; ++j) {
-      vload(values[j], array + i + (VEC_WIDTH * j));
-      vmin(minValues[j], values[j], minValues[j]);
-    }
-  }
-
-  vreduce<T, VEC_WIDTH, VECTOR_COUNT>(
-      minValues,
-      [](vec<T, VEC_WIDTH>& a, vec<T, VEC_WIDTH>& b) { a = a < b ? a : b; });
-
+  // Compare //1 with //2
+  vmin(minValues1, minValues1, minValues2);
+  // compare //3 with //4
+  vmin(minValues3, minValues3, minValues4);
+  // Compare //1 with //3
+  vmin(minValues1, minValues1, minValues3);
+  // Do the final calculation scalar way
   T finalMinValues[VEC_WIDTH];
-  vstore(finalMinValues, minValues[0]);
+  vstore(finalMinValues, minValues1);
 
   // Do the final calculation scalar way
   return std::reduce(std::begin(finalMinValues), std::end(finalMinValues),
                      finalMinValues[0],
-                     [](float a, float b) { return a < b ? a : b; });
+                     [](T a, T b) { return a < b ? a : b; });
 }
 
-template <int ISA_WIDTH, int STRIDE, typename T>
+/// @brief Find the index of an element
+/// in the array of distances
+/// processing four simd vectors at a time
+template <size_t ISA_WIDTH, typename T>
 ATH_ALWAYS_INLINE
-int vIdxOfValue(const T value,
-                const T* distancesIn, int n) {
+int32_t vIdxOfValue(const T value,
+                const T* distancesIn, int32_t n) {
   using namespace CxxUtils;
-  //We want to have vectors that fit on the specified
-  //ISA
-  //For large STRIDES we use an array of such
-  //vectors
-  constexpr int VEC_WIDTH = ISA_WIDTH / (sizeof(T) * CHAR_BIT);
-  constexpr int ALIGNMENT = ISA_WIDTH / CHAR_BIT;
-  constexpr int VECTOR_COUNT = STRIDE / VEC_WIDTH;
-  static_assert((ISA_WIDTH & (ISA_WIDTH - 1)) == 0,
-                "ISA_WIDTH not a power of 2");
-  static_assert((STRIDE & (STRIDE - 1)) == 0,
-                "STRIDE not a power of 2");
-  static_assert((ALIGNMENT & (ALIGNMENT - 1)) == 0,
-                "ALIGNMENT not a power of 2");
-  static_assert(VECTOR_COUNT > 0,
-                "STRIDE smaller that the selected ISA SIMD width");
-  static_assert(std::is_floating_point_v<T> || std::is_integral_v<T>, "T not a floating or integral type");
 
-  const T* array = std::assume_aligned<ALIGNMENT>(distancesIn);
-
-  using vec_T = vec<T, VEC_WIDTH>;
-  vec_T values[VECTOR_COUNT];
-  vec_T target;
+  static_assert(std::is_floating_point_v<T>, "T not a floating point32_t type");
+  constexpr int32_t VEC_WIDTH = ISA_WIDTH / (sizeof(T) * CHAR_BIT);
+  const T* array =
+      std::assume_aligned<alignmentForArray<ISA_WIDTH>()>(distancesIn);
+  using vec_t = vec<T, VEC_WIDTH>;
+  using vec_mask = vec_mask_type_t<vec_t>;
+  vec_t values1;
+  vec_t values2;
+  vec_t values3;
+  vec_t values4;
+  vec_t target;
   vbroadcast(target, value);
-  using vec_mask = vec_mask_type_t<vec<T, VEC_WIDTH>>;
-  vec_mask eqs[VECTOR_COUNT];
+  for (int32_t i = 0; i < n; i += 4 * VEC_WIDTH) {
+    // 1
+    vload(values1, array + i);
+    vec_mask eq1 = values1 == target;
+    // 2
+    vload(values2, array + i + VEC_WIDTH);
+    vec_mask eq2 = values2 == target;
+    // 3
+    vload(values3, array + i + VEC_WIDTH * 2);
+    vec_mask eq3 = values3 == target;
+    // 4
+    vload(values4, array + i + VEC_WIDTH * 3);
+    vec_mask eq4 = values4 == target;
 
-  for (int i = 0; i < n; i += STRIDE) {
-    GAUDI_LOOP_UNROLL(4)
-    for (int j = 0; j < VECTOR_COUNT; j++) {
-      vload(values[j], array + i + (VEC_WIDTH * j));
-      eqs[j] = values[j] == target;
-    }
-
-    vreduce<vec_type_t<vec_mask>, VEC_WIDTH, VECTOR_COUNT>(
-        eqs, [](vec_mask& a, vec_mask& b) { a = a || b; });
-
-    // See if we have the value in any
-    // of the vectors
-    // If yes then use scalar code to locate it
-    if (vany(eqs[0])) {
-      for (int idx = i; idx < i + STRIDE; ++idx) {
+    vec_mask eq12 = eq1 || eq2;
+    vec_mask eq34 = eq3 || eq4;
+    vec_mask eqAny = eq12 || eq34;
+    if (vany(eqAny)) {
+      for (int32_t idx = i; idx < i + 4 * VEC_WIDTH; ++idx) {
         if (distancesIn[idx] == value) {
           return idx;
         }
@@ -214,81 +203,50 @@ int vIdxOfValue(const T value,
   return -1;
 }
 
-template <int ISA_WIDTH, int STRIDE, typename T>
+/// @brief Find the index of the minimum
+/// in the array of distances
+template <int32_t ISA_WIDTH, typename T>
 ATH_ALWAYS_INLINE
-int vIdxOfMin(const T* distancesIn, int n) {
+int32_t vIdxOfMin(const T* distancesIn, int32_t n) {
   using namespace CxxUtils;
-  constexpr int ALIGNMENT = ISA_WIDTH / CHAR_BIT;
-  static_assert((ISA_WIDTH & (ISA_WIDTH - 1)) == 0,
-                "ISA_WIDTH not a power of 2");
-  static_assert((STRIDE & (STRIDE - 1)) == 0,
-                "STRIDE not a power of 2");
-  static_assert((ALIGNMENT & (ALIGNMENT - 1)) == 0,
-                "ALIGNMENT not a power of 2");
-  static_assert(std::is_floating_point_v<T> || std::is_integral_v<T>, "T not a floating or integral type");
-
-  const T* array = std::assume_aligned<ALIGNMENT>(distancesIn);
-  // Finding of minimum needs to loop over all elements
-  // But we can run the finding of index only inside a block
-  constexpr int blockSize = 512;
+  const T* array =
+      std::assume_aligned<vAlgs::alignmentForArray<ISA_WIDTH>()>(distancesIn);
+  static_assert(std::is_floating_point_v<T>, "T not a floating point32_t type");
+  //We process elements in blocks. When we find the minimum we also
+  //keep track in which block it was
+  constexpr int32_t blockSize = 512;
   // case for n less than blockSize
   if (n <= blockSize) {
-    T min = vFindMinimum<ISA_WIDTH, STRIDE>(array, n);
-    return vIdxOfValue<ISA_WIDTH, STRIDE>(min, array, n);
+    T min = vFindMinimum<ISA_WIDTH>(array, n);
+    return vIdxOfValue<ISA_WIDTH>(min, array, n);
   }
-  int idx = 0;
+  int32_t idx = 0;
   T min = array[0];
   // We might have a remainder that we need to handle
-  const int remainder = n & (blockSize - 1);
-  for (int i = 0; i < (n - remainder); i += blockSize) {
-    T mintmp = vFindMinimum<ISA_WIDTH, STRIDE>(array + i, blockSize);
+  const int32_t remainder = n & (blockSize - 1);
+  // process elements up to the remainder in blocks
+  for (int32_t i = 0; i < (n - remainder); i += blockSize) {
+    T mintmp = vFindMinimum<ISA_WIDTH>(array + i, blockSize);
     if (mintmp < min) {
       min = mintmp;
       idx = i;
     }
   }
+
+  //Process the remaining elements if any
   if (remainder != 0) {
-    int index = n - remainder;
-    T mintmp = vFindMinimum<ISA_WIDTH, STRIDE>(array + index, remainder);
-    // if the minimum is in this part
+    int32_t index = n - remainder;
+    T mintmp = vFindMinimum<ISA_WIDTH>(array + index, remainder);
+    // if the minimu is here
     if (mintmp < min) {
       min = mintmp;
-      return index + vIdxOfValue<ISA_WIDTH, STRIDE>(min, array + index, remainder);
+      return index + vIdxOfValue<ISA_WIDTH>(min, array + index, remainder);
     }
   }
-  //default return
-  return idx + vIdxOfValue<ISA_WIDTH, STRIDE>(min, array + idx, blockSize);
+  // Return the idx of the minimum just looping over a single block
+  return idx + vIdxOfValue<ISA_WIDTH>(min, array + idx, blockSize);
 }
 
 } // namespace vAlgs
-
-namespace GSFFMVDetail {
-// Multiversioning is an impl detail here
-// if we compile with different ISA. Things  can be changed/moved
-// but for now assume we mainly run on AVX2 machines and
-// cover as default SSE4 machines.
-#if HAVE_FUNCTION_MULTIVERSIONING
-[[gnu::target("avx2")]]
-int vIdxOfMin(const float* distancesIn, int n) {
-  return vAlgs::vIdxOfMin<256, 16>(distancesIn, n);
-}
-[[gnu::target("default")]]
-#endif
-int vIdxOfMin(const float* distancesIn, int n) {
-  return vAlgs::vIdxOfMin<128, 16>(distancesIn, n);
-}
-
-#if HAVE_FUNCTION_MULTIVERSIONING
-[[gnu::target("avx2")]]
-int vIdxOfMin(const double* distancesIn, int n) {
-  return vAlgs::vIdxOfMin<256, 16>(distancesIn, n);
-}
-[[gnu::target("default")]]
-#endif
-int vIdxOfMin(const double* distancesIn, int n) {
-  return vAlgs::vIdxOfMin<128, 16>(distancesIn, n);
-}
-
-}  // namespace GSFFMVDetail
 
 #endif

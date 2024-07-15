@@ -25,14 +25,26 @@
  *
  * Implementation of KLGaussianMixtureReduction
  */
+namespace KLReductionFMV {
+//clang FMV needs a namedpace :/
+#if HAVE_FUNCTION_MULTIVERSIONING
+[[gnu::target("avx2")]]
+int32_t vIdxOfMin(const float* distancesIn, int32_t n) {
+  return vAlgs::vIdxOfMin<256>(distancesIn, n);
+}
+[[gnu::target("default")]]
+#endif
+int32_t vIdxOfMin(const float* distancesIn, int32_t n) {
+  return vAlgs::vIdxOfMin<128>(distancesIn, n);
+}
+}  // namespace KLReductionFMV
 
 namespace {
+//internal implementation methods
 
-
-/**
- * internal implementation methods
- */
-
+//We want to be using up to a 256 ISA, these cover also a narrower one
+constexpr size_t STRIDEForKL = vAlgs::strideOfNumSIMDVec<256,float>(4);
+constexpr size_t ALIGNMENTForKL = vAlgs::alignmentForArray<256>();
 using namespace GSFUtils;
 
 /**
@@ -88,24 +100,10 @@ combine(GSFUtils::Component1D& ATH_RESTRICT updated,
   updated.weight = sumWeight;
 }
 
-/**
- * Given a number of components n
- * we need padding to use the
- * simd findIdxOfMinimum
- */
-constexpr inline int32_t
-numPadded(const int32_t n)
-{
-  //This always return a padded number dividable
-  //with 16
-  //e.g ((33+15)&~15) = 48
-  return ((n+15)&~15);
-}
-
 inline int32_t
 numDistances(const int32_t n, float* distancesIn)
 {
-  const int32_t npadded = numPadded(n);
+  const int32_t npadded = vAlgs::numPadded<STRIDEForKL>(n);
   // Make sure the padded elements are set to max
   std::fill(
     distancesIn + n, distancesIn + npadded, std::numeric_limits<float>::max());
@@ -341,8 +339,8 @@ findMergesImpl(const Component1DArray& componentsIn,
     copyComponents.components.data());
   // Based on the inputSize n allocate enough space for the pairwise distances
   int32_t nn = n * (n - 1) / 2;
-  int32_t nnpadded = numPadded(nn);
-  AlignedDynArray<float, GSFConstants::alignment> distances(
+  int32_t nnpadded = vAlgs::numPadded<STRIDEForKL>(nn);
+  AlignedDynArray<float, ALIGNMENTForKL> distances(
     nnpadded, std::numeric_limits<float>::max());
   // initial distance calculation
   calculateAllDistances(components, distances.buffer(), n);
@@ -356,7 +354,7 @@ findMergesImpl(const Component1DArray& componentsIn,
   // merge loop
   while (numberOfComponentsLeft > reducedSize) {
     // find pair with minimum distance
-    const int32_t minIndex = GSFFMVDetail::vIdxOfMin(distances.buffer(), nnpadded);
+    const int32_t minIndex = KLReductionFMV::vIdxOfMin(distances.buffer(), nnpadded);
     const triangularToIJ conversion = convert(minIndex);
     int8_t minTo = conversion.I;
     int8_t minFrom = conversion.J;

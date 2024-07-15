@@ -10,14 +10,39 @@
 #include <iostream>
 #include <random>
 
+
+//Multiversion for the test
+#if HAVE_FUNCTION_MULTIVERSIONING
+[[gnu::target("avx2")]]
+int32_t vIdxOfMin(const float* distancesIn, int n) {
+  return vAlgs::vIdxOfMin<256>(distancesIn, n);
+}
+[[gnu::target("default")]]
+#endif
+int32_t vIdxOfMin(const float* distancesIn, int n) {
+  return vAlgs::vIdxOfMin<128>(distancesIn, n);
+}
+#if HAVE_FUNCTION_MULTIVERSIONING
+[[gnu::target("avx2")]]
+int32_t vIdxOfMin(const double* distancesIn, int n) {
+  return vAlgs::vIdxOfMin<256>(distancesIn, n);
+}
+[[gnu::target("default")]]
+#endif
+int32_t vIdxOfMin(const double* distancesIn, int n) {
+  return vAlgs::vIdxOfMin<128>(distancesIn, n);
+}
+//constants
+constexpr size_t STRIDE = vAlgs::strideOfNumSIMDVec<256,float>(4);
+constexpr size_t ALIGNMENT = vAlgs::alignmentForArray<256>();
+constexpr size_t N = 128*STRIDE;
+
 // create global data for the test
-constexpr size_t N = 4096;
 template <typename T>
 struct InitArray {
  public:
   InitArray() : distances(N) {
-    std::random_device rd;
-    std::mt19937 gen(rd());
+    std::mt19937 gen(0);
     std::uniform_real_distribution<> dis(0.001, 5.0);
     for (size_t i = 0; i < N; ++i) {
       distances[i] = dis(gen);
@@ -31,36 +56,39 @@ struct InitArray {
       }
     }
   }
-  GSFUtils::AlignedDynArray<T, GSFConstants::alignment> distances;
+  GSFUtils::AlignedDynArray<T, ALIGNMENT> distances;
 };
 static const InitArray<float> initArrayF;
 static const InitArray<double> initArrayD;
 
+//Test using STL
 static void findIdxOfMinimumSTL() {
-  const float* arrayF = std::assume_aligned<GSFConstants::alignment>(
-      initArrayF.distances.buffer());
-  int minIndex = std::distance(arrayF, std::min_element(arrayF, arrayF + N));
+  const float* arrayF =
+      std::assume_aligned<ALIGNMENT>(
+          initArrayF.distances.buffer());
+  int32_t minIndex = std::distance(arrayF, std::min_element(arrayF, arrayF + N));
   std::cout << "STL Index of Minimum : " << minIndex << " with value "
             << initArrayF.distances[minIndex] << '\n';
-  const double* arrayD = std::assume_aligned<GSFConstants::alignment>(
-      initArrayD.distances.buffer());
+  const double* arrayD =
+      std::assume_aligned<ALIGNMENT>(
+          initArrayD.distances.buffer());
   minIndex = std::distance(arrayD, std::min_element(arrayD, arrayD + N));
   std::cout << "STL Index of Minimum : " << minIndex << " with value "
             << initArrayD.distances[minIndex] << '\n';
 }
 
+//Test using Vec code
 static void findVecMinThenIdx() {
-
-  int minIndex = GSFFMVDetail::vIdxOfMin(initArrayF.distances.buffer(), N);
+  int32_t minIndex = vIdxOfMin(initArrayF.distances.buffer(), N);
   std::cout << "vIdxOfMin Index of Minimum : " << minIndex << " with value "
             << initArrayF.distances[minIndex] << '\n';
-  minIndex = GSFFMVDetail::vIdxOfMin(initArrayD.distances.buffer(), N);
+  minIndex = vIdxOfMin(initArrayD.distances.buffer(), N);
   std::cout << "vIdxOfMin Index of Minimum : " << minIndex << " with value "
             << initArrayD.distances[minIndex] << '\n';
 
 }
 
-int main() {
+int32_t main() {
   findIdxOfMinimumSTL();
   findVecMinThenIdx();
   return 0;
