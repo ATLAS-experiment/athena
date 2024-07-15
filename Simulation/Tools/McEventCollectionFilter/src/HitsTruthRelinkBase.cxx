@@ -112,5 +112,9 @@ HepMcParticleLink HitsTruthRelinkBase::updatedLink(const EventContext &ctx, cons
     currentId = referenceId;
   }
   // TODO test using the ConstGenParticlePtr directly in the HepMcParticleLink constructor
-  return HepMcParticleLink(currentId, oldLink.eventIndex(), HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_ID, ctx);
+  HepMcParticleLink newLink(currentId, oldLink.eventIndex(), HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_ID, ctx);
+  if (currentId != 0) {
+    newLink.setTruthSuppressionType(EBC_PU_SUPPRESSED);
+  }
+  return newLink;
 }
