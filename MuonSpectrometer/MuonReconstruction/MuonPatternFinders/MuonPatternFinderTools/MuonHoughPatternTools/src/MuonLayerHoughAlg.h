@@ -21,7 +21,9 @@ public:
     virtual StatusCode execute(const EventContext& ctx) const override;
 
 private:
-    template <class T> const T* GetObject(const SG::ReadHandleKey<T>& key, const EventContext& ctx) const;
+    template <class T> StatusCode retrieveContainer(const EventContext& ctx,
+                                                    const SG::ReadHandleKey<T>& key,
+                                                    const T* & contPtr ) const;
 
     SG::ReadHandleKey<Muon::TgcPrepDataContainer> m_keyTgc{this, "TgcPrepDataContainer", "TGC_Measurements"};
     SG::ReadHandleKey<Muon::RpcPrepDataContainer> m_keyRpc{this, "RpcPrepDataContainer", "RPC_Measurements"};
@@ -38,13 +40,6 @@ private:
     Gaudi::Property<bool> m_printSummary{this, "PrintSummary", false};
 };
 
-template <class T> const T* MuonLayerHoughAlg::GetObject(const SG::ReadHandleKey<T>& key, const EventContext& ctx) const {
-    SG::ReadHandle<T> handle(key, ctx);
-    if (handle.isPresent() && !handle.isValid()) {
-        ATH_MSG_WARNING("MuonLayerHoughAlg Cannot retrieve " << handle.key());
-        return nullptr;
-    }
-    return handle.cptr();
-}
+
 
 #endif
