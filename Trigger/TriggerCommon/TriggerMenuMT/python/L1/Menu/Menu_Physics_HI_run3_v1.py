@@ -88,7 +88,9 @@ def defineMenu():
         'L1_jTE600',
         'L1_jTE1500',
         'L1_jTE3000',
-        'L1_jTE10000',
+        'L1_jTE6500',
+        'L1_jTE7000',
+        'L1_jTE7500',
         'L1_VjTE200',
         'L1_VjTE600',
 

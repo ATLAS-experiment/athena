@@ -979,7 +979,9 @@ class ItemDef:
         MenuItem('L1_jTE600'     ).setLogic( d.jTE600  & physcond).setTriggerType(TT.calo)
         MenuItem('L1_jTE1500'    ).setLogic( d.jTE1500 & physcond).setTriggerType(TT.calo)
         MenuItem('L1_jTE3000'    ).setLogic( d.jTE3000 & physcond).setTriggerType(TT.calo)
-        MenuItem('L1_jTE10000'    ).setLogic( d.jTE10000 & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_jTE6500'    ).setLogic( d.jTE6500 & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_jTE7000'    ).setLogic( d.jTE7000 & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_jTE7500'    ).setLogic( d.jTE7500 & physcond).setTriggerType(TT.calo)
         # additional VjTE items for 2023 heavy ion runs
         MenuItem('L1_VjTE50'    ).setLogic( Not(d.jTE50)  & physcond).setTriggerType(TT.calo)
         MenuItem('L1_VjTE200'    ).setLogic( Not(d.jTE200)  & physcond).setTriggerType(TT.calo)
