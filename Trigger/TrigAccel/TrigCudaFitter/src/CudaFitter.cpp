@@ -29,12 +29,17 @@
 
 
 template <class T>
-bool cudaMallocWrapper(T * pT, const std::string & funcname){
+bool cudaMallocWrapper(T * &pT, const std::string & funcname){
   const cudaError_t ce = cudaMalloc((void **)&pT, sizeof(T));
-  if( ce != cudaSuccess ) {
+  if( ce != cudaSuccess) {
     std::cerr << "Failed to execute: cudaMalloc in "<< funcname<< std::endl;
     std::cerr << "Reason: " << cudaGetErrorString( ce ) << std::endl;
     delete pT;
+    return false;
+  }
+  //belt'n'braces approach
+  if(pT == nullptr){
+    std::cerr << "nullptr returned by cudaMalloc in "<< funcname<< std::endl;
     return false;
   }
   return true;
