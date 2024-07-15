@@ -860,7 +860,15 @@ StatusCode MuonReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx
 
                     const Amg::Vector3D refStripPos = refEle.stripPosition(gctx, stripId);
                     const Amg::Vector3D testStripPos = testEle.stripPos(stripId);
-                    if ((refStripPos - testStripPos).mag() > std::numeric_limits<float>::epsilon()){
+                    // The threshold here used to be epsilon for a float.
+                    // But this was then giving a failure in aarch64,
+                    // with a difference of almost exactly 1e-4.
+                    // It turned out that that was coming from GeoDeDuplicator,
+                    // where to consider two transforms equivalent,
+                    // the translations must match to 1e-4.  But if the
+                    // difference is almost exactly 1e-4, then small FP
+                    // differences can be magnified to just about 1e-4.
+                    if ((refStripPos - testStripPos).mag() > 2e-4){
                         ATH_MSG_ERROR("Mismatch in strip positions "<<m_idHelperSvc->toString(stripId)
                                 <<" ref: "<<Amg::toString(refStripPos)<<" test: "<<Amg::toString(testStripPos)
                                 <<" local coordinates -- ref: "<<Amg::toString(testEle.absTransform().inverse()*refStripPos)
