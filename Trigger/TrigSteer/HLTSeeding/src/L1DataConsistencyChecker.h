@@ -51,7 +51,7 @@ private:
   Gaudi::Property<std::vector<std::string>> m_excludedThresholdTypes {
     this, "ExcludedThresholdTypes", {
       "internal", // internal to CTP (randoms)
-      "TOPO", "R2TOPO", "ZBTopo", "LArSaturation", // topo (data not used in HLTSeeding)
+      "TOPO", "R2TOPO", "ZBTopo", "LArSat", // topo (data not used in HLTSeeding)
       "TE", "XE", "XS", "jTE", "jXE", "gTE", "gXE", // energy (data not used in HLTSeeding)
       "ALFA", "BCM", "BCMCMB", "BPTX", "CALREQ", "LUCID", "MBTS", "MBTSSI", "NIM", "ZDC", "NSWMon" // direct signals from detectors to CTP (no TOB readout)
     },

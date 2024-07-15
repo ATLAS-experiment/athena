@@ -1378,7 +1378,7 @@ namespace MuonCombined {
             cluster = m_cellCollector.collectCells(*inputCaloExt, caloDDMgr, *container, *clusterContainer);
 
         if (!cluster) {
-            ATH_MSG_WARNING("Failed to create cluster from ParticleCellAssociation");
+            ATH_MSG_DEBUG("Failed to create cluster from ParticleCellAssociation");
             return;
         } else {
             ATH_MSG_DEBUG(" New cluster: eta " << cluster->eta() << " phi " << cluster->phi() << " cells " << cluster->size());

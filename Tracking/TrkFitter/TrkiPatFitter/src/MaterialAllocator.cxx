@@ -2167,7 +2167,7 @@ void MaterialAllocator::spectrometerMaterial(
       delete entranceIntersection;
     } else {
       // did not find MS entrance surface - no MS material taken into account
-      m_messageHelper->printWarning(3);
+      // m_messageHelper->printWarning(3); ATLASRECTS-7528
       return;
     }
   }
@@ -2275,7 +2275,9 @@ void MaterialAllocator::spectrometerMaterial(
 
   // insert the material into the measurement list
   if (!spectrometerMaterial || spectrometerMaterial->empty()) {
-    m_messageHelper->printWarning(5);
+    // m_messageHelper->printWarning(5);  
+    // Suppressing, as discussed in ATLASRECTS-7515, but keeping this here to remind us 
+    // to investigate it properly.
     delete spectrometerMaterial;
     spectrometerMaterial = nullptr;
   } else {
