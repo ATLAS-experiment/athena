@@ -15,6 +15,7 @@
 #include "TrkV0Fitter/TrkV0VertexFitter.h"
 #include "InDetConversionFinderTools/VertexPointEstimator.h"
 #include "StoreGate/ReadDecorHandleKeyArray.h"
+#include "StoreGate/ReadHandleKeyArray.h"
 #include "xAODEventInfo/EventInfo.h"
 #include <vector>
 
@@ -24,6 +25,7 @@ namespace Trk {
     class IVertexCascadeFitter;
     class VxCascadeInfo;
     class V0Tools;
+    class IExtrapolator;
     class ParticleDataTable;
 }
 namespace InDet { class VertexPointEstimator; }
@@ -38,29 +40,36 @@ namespace DerivationFramework {
   class JpsiXPlusDisplaced : virtual public AthAlgTool, public IAugmentationTool
   {
   enum V0Enum{ UNKNOWN=0, LAMBDA=1, LAMBDABAR=2, KS=3 };
+
+  struct XiCandidate {
+    V0Enum V0type = UNKNOWN;
+    const xAOD::Vertex* V0vtx = nullptr;
+    const xAOD::TrackParticle* track = nullptr;
+    double chi2NDF;
+    TLorentzVector p4_V0track1;
+    TLorentzVector p4_V0track2;
+    TLorentzVector p4_disVtrack;
+  };
+
   public:
     static const InterfaceID& interfaceID() { return IID_JpsiXPlusDisplaced;}
     JpsiXPlusDisplaced(const std::string& type, const std::string& name, const IInterface* parent);
     virtual ~JpsiXPlusDisplaced() = default;
     virtual StatusCode initialize() override;
-    StatusCode performSearch(std::vector<Trk::VxCascadeInfo*> *cascadeinfoContainer, xAOD::VertexContainer* V0OutputContainer, xAOD::VertexContainer* disVtxOutputContainer) const;
+    StatusCode performSearch(std::vector<Trk::VxCascadeInfo*>& cascadeinfoContainer, const std::vector<std::pair<const xAOD::Vertex*,V0Enum> >& selectedV0Candidates, const std::vector<const xAOD::TrackParticle*>& tracksDisplaced) const;
     virtual StatusCode addBranches() const override;
 
   private:
     SG::ReadHandleKey<xAOD::VertexContainer> m_vertexJXContainerKey;
     SG::ReadHandleKey<xAOD::VertexContainer> m_vertexV0ContainerKey;
-    SG::ReadHandleKey<xAOD::VertexContainer> m_vertexDisVContainerKey;
     std::vector<std::string> m_vertexJXHypoNames;
-    std::vector<std::string> m_vertexV0HypoNames;
     SG::WriteHandleKeyArray<xAOD::VertexContainer> m_cascadeOutputKeys;
-    bool m_refitV0;
     SG::WriteHandleKey<xAOD::VertexContainer> m_v0VtxOutputKey;
-    SG::WriteHandleKey<xAOD::VertexContainer> m_disVtxOutputKey;
     SG::ReadHandleKey<xAOD::TrackParticleContainer> m_TrkParticleCollection;
     SG::ReadHandleKey<xAOD::VertexContainer> m_VxPrimaryCandidateName;
     SG::WriteHandleKey<xAOD::VertexContainer> m_refPVContainerName;
     SG::ReadHandleKey<xAOD::EventInfo> m_eventInfo_key;
-    SG::ReadDecorHandleKeyArray<xAOD::EventInfo> m_beamSpotDecoKeys;
+    SG::ReadHandleKeyArray<xAOD::TrackParticleContainer> m_RelinkContainers;
     std::string m_hypoName;
 
     double m_jxMassLower;
@@ -73,8 +82,6 @@ namespace DerivationFramework {
     double m_V0MassLower;
     double m_V0MassUpper;
     double m_lxyV0_cut;
-    bool   m_doV0Enum;
-    bool   m_decorV0P;
     double m_minMass_gamma;
     double m_chi2cut_gamma;
     double m_DisplacedMassLower;
@@ -125,11 +132,13 @@ namespace DerivationFramework {
     ToolHandle < Trk::ITrackSelectorTool >           m_trkSelector;
     ToolHandle < Trk::ITrackSelectorTool >           m_v0TrkSelector;
     ToolHandle < DerivationFramework::CascadeTools > m_CascadeTools;
+    ToolHandle < InDet::VertexPointEstimator >       m_vertexEstimator;
+    ToolHandle < Trk::IExtrapolator >                m_extrapolator;
 
-    bool        m_refitPV;
-    int         m_PV_max;
-    size_t      m_PV_minNTracks;
-    int         m_DoVertexType;
+    bool   m_refitPV;
+    int    m_PV_max;
+    size_t m_PV_minNTracks;
+    int    m_DoVertexType;
 
     double m_mass_e;
     double m_mass_mu;
@@ -140,10 +149,15 @@ namespace DerivationFramework {
     double m_mass_Xi;
     double m_mass_Bpm;
 
-    bool d0Pass(const xAOD::TrackParticle* track, const xAOD::Vertex* PV, const Amg::Vector3D& beamspot) const;
-    xAOD::Vertex* fitDisVtx(const xAOD::Vertex* V0vtx, const V0Enum V0, const xAOD::TrackParticle* track3, const xAOD::TrackParticleContainer* trackContainer) const;
-    Trk::VxCascadeInfo* fitMainVtx(const xAOD::Vertex* JXvtx, std::vector<double>& massesJX, const xAOD::Vertex* V0vtx, const V0Enum V0, const xAOD::TrackParticleContainer* trackContainer) const;
-    Trk::VxCascadeInfo* fitMainVtx(const xAOD::Vertex* JXvtx, std::vector<double>& massesJX, const xAOD::Vertex* disVtx, const xAOD::Vertex* V0vtx, const V0Enum V0, const xAOD::TrackParticleContainer* trackContainer) const;
+    std::vector<double> m_massesV0_ppi;
+    std::vector<double> m_massesV0_pip;
+    std::vector<double> m_massesV0_pipi;
+
+    bool d0Pass(const xAOD::TrackParticle* track, const xAOD::Vertex* PV) const;
+    XiCandidate getXiCandidate(const xAOD::Vertex* V0vtx, const V0Enum V0, const xAOD::TrackParticle* track3) const;
+    Trk::VxCascadeInfo* fitMainVtx(const xAOD::Vertex* JXvtx, std::vector<double>& massesJX, const xAOD::Vertex* V0vtx, const V0Enum V0, const xAOD::TrackParticleContainer* trackContainer, const std::vector<const xAOD::TrackParticleContainer*>& trackCols) const;
+    Trk::VxCascadeInfo* fitMainVtx(const xAOD::Vertex* JXvtx, std::vector<double>& massesJX, const XiCandidate& disVtx, const std::vector<const xAOD::TrackParticleContainer*>& trackCols) const;
+    void fitV0Container(xAOD::VertexContainer* V0ContainerNew, const std::vector<const xAOD::TrackParticle*>& selectedTracks, const std::vector<const xAOD::TrackParticleContainer*>& trackCols) const;
     template<size_t NTracks> const xAOD::Vertex* FindVertex(const xAOD::VertexContainer* cont, const xAOD::Vertex* v) const;
   };
 }
