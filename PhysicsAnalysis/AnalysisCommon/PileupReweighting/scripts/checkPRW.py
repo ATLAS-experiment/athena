@@ -69,13 +69,17 @@ def main():
             if 'recon.AOD' not in ds[u'logicalDatasetName']: continue
             etags = re.findall('e[0-9]+_', dsName)
             stags = re.findall('s[0-9]+_', dsName)
-            if len(etags) == 2 or len(stags) == 2:
+            astags = re.findall('a[0-9]+_s[0-9]+', dsName)
+            if len(etags) == 2 or len(stags) == 2 or len(astags) == 1:
                 if len(etags) == 2:
                     print("INFO: Found a double e-tag container %s!" % dsName)
                     dsName = dsName.replace(etags[1], "")
                 if len(stags) == 2:
                     print("INFO: Found a double s-tag container %s!" % dsName)
                     dsName = dsName.replace(stags[1], "")
+                if len(astags) == 1 and len(stags) == 1:
+                    print("INFO: Found an a+s-tag container %s!" % dsName)
+                    dsName = dsName.replace(stags[0], "")
                 singleTagName = dsName
                 continue
             theParent = str(dsName)
