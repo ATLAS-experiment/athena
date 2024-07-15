@@ -9,6 +9,7 @@ Dump content of the HLT result and HLT related details from the event header
 
 import argparse
 import eformat
+from datetime import datetime
 from TrigByteStreamTools import hltResultMT
 
 from AthenaCommon.Logging import logging
@@ -80,6 +81,7 @@ def header_info(event):
     info_str += 'Global_ID: {:10d}, '.format(event.global_id())
     info_str += 'LVL1_ID: {:10d}, '.format(event.lvl1_id())
     info_str += 'BC_ID: {:4d}, '.format(event.bc_id())
+    info_str += 'Time: {}, '.format(datetime.fromtimestamp(event.bc_time_seconds()).isoformat())
     info_str += 'TT: 0x{:2x}, '.format(event.lvl1_trigger_type())
     info_str += 'Status: ' + decode_status(event)
     return info_str
@@ -334,7 +336,7 @@ def dump_info(bsfile, args):
         # Print header info
         print('{sep:s} Event: {:{width}d}, {:s} {sep:s}'.format(
               event_count, header_info(event),
-              sep='='*20, width=len(str(max_events))))
+              sep='===', width=len(str(max_events))))
 
         # Print CTP ROB
         if args.ctp is not False:
@@ -343,7 +345,7 @@ def dump_info(bsfile, args):
         # Print L1/L2/HLT bits
         if args.l1:
             print(lvl1_bits(event))
-        if args.ef:
+        if args.ef and version is not None:
             print(hlt_bits(event, version))
 
         # Print Stream Tags
