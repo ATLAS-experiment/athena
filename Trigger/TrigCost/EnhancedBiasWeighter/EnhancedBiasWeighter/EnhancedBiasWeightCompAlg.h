@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIG_ENHANCEDBIASWEIGHTCOMPALG_H
@@ -18,6 +18,7 @@
 
 #include <tbb/concurrent_hash_map.h>
 #include <tbb/concurrent_unordered_map.h>
+#include <tbb/concurrent_vector.h>
 
 /**
  *  @class EnhancedBiasWeightCompAlg
