@@ -16,13 +16,14 @@ def ITkFastTrackFinderStandaloneCfg(flags, SiSPSeededTrackCollectionKey = None):
 
     ITkSiTrackMakerTool.CombinatorialTrackFinder.writeHolesFromPattern = False
     
-    acc.addPublicTool( CompFactory.TrigInDetTrackFollowingTool( name = "TrigTrackFollowingTool_FTF", LayerNumberTool = acc.getPublicTool("TrigL2LayerNumberTool_FTF") ) )
-    ITkSiTrackMakerTool.useTrigTrackFollowingTool = True
-    ITkSiTrackMakerTool.TrigTrackFollowingTool = acc.getPublicTool("TrigTrackFollowingTool_FTF")
-    
-    acc.addPublicTool( CompFactory.TrigInDetRoadPredictorTool( name = "TrigRoadPredictorTool_FTF", LayerNumberTool = acc.getPublicTool("TrigL2LayerNumberTool_FTF") ) )
-    ITkSiTrackMakerTool.useTrigInDetRoadPredictorTool = True
-    ITkSiTrackMakerTool.TrigInDetRoadPredictorTool = acc.getPublicTool("TrigRoadPredictorTool_FTF")
+    if flags.Tracking.ActiveConfig.useTrigTrackFollowing:
+        acc.addPublicTool( CompFactory.TrigInDetTrackFollowingTool( name = "TrigTrackFollowingTool_FTF", LayerNumberTool = acc.getPublicTool("TrigL2LayerNumberTool_FTF") ) )
+        ITkSiTrackMakerTool.useTrigTrackFollowingTool = True
+        ITkSiTrackMakerTool.TrigTrackFollowingTool = acc.getPublicTool("TrigTrackFollowingTool_FTF")
+    if flags.Tracking.ActiveConfig.useTrigRoadPredictor:
+        acc.addPublicTool( CompFactory.TrigInDetRoadPredictorTool( name = "TrigRoadPredictorTool_FTF", LayerNumberTool = acc.getPublicTool("TrigL2LayerNumberTool_FTF") ) )
+        ITkSiTrackMakerTool.useTrigInDetRoadPredictorTool = True
+        ITkSiTrackMakerTool.TrigInDetRoadPredictorTool = acc.getPublicTool("TrigRoadPredictorTool_FTF")
     
     acc.addPublicTool(ITkSiTrackMakerTool)
 
@@ -87,7 +88,7 @@ def ITkFastTrackFinderStandaloneCfg(flags, SiSPSeededTrackCollectionKey = None):
                                            ITkMode                  = True, # Allows ftf to use the new TrigTrackSeedGenerator for ITk
                                            useGPU                   = flags.Trigger.InDetTracking.doGPU,
                                            StandaloneMode           = True, # Allows ftf to be run as an offline algorithm with reco_tf
-                                           UseTracklets             = True,
+                                           UseTracklets             = flags.Tracking.ActiveConfig.useTracklets,
                                            doTrackRefit             = False,
                                            FreeClustersCut          = 1,
                                            MonTool                  = monTool,

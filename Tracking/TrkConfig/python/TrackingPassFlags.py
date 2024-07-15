@@ -278,6 +278,9 @@ def createITkFTFPassFlags():
 
     icf.addFlag("doHitDV"            , False)
     icf.addFlag("doDisappearingTrk"  , False)
+    icf.addFlag("useTrigTrackFollowing", False)
+    icf.addFlag("useTrigRoadPredictor", False)
+    icf.addFlag("useTracklets", False)
     icf.useSeedFilter         = False
     icf.minPT                 = lambda pcf : (
         [0.9 * Units.GeV * pcf.BField.configuredSolenoidFieldScale,
