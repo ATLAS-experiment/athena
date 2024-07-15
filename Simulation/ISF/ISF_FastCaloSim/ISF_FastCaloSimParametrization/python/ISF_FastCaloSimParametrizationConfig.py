@@ -135,6 +135,7 @@ def PostIncludeISF_FastCaloSimParametrizationReco(flags, cfg):
     ESD_ItemList = [
         "ISF_FCS_Parametrization::FCS_StepInfoCollection#MergedEventSteps",
         "LArHitContainer#*",
+        "McEventCollection#TruthEvent",
         "TileHitVector#*",
         "TrackRecordCollection#CaloEntryLayer",
         "TrackRecordCollection#MuonEntryLayer"
