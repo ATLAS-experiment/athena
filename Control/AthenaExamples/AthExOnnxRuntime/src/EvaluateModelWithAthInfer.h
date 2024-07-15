@@ -14,7 +14,6 @@
 #include <onnxruntime_cxx_api.h>
 
 // System include(s).
-#include <memory>
 #include <string>
 #include <vector>
 

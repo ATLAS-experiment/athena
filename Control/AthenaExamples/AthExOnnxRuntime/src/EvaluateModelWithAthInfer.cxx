@@ -55,7 +55,7 @@ StatusCode EvaluateModelWithAthInfer::execute( [[maybe_unused]] const EventConte
    ATH_MSG_DEBUG("Label for the input test data: ");
    for(int ibatch = 0; ibatch < m_batchSize; ibatch++){
       float max = -999;
-      int max_index;
+      int max_index{-1};
       for (int i = 0; i < 10; i++){
             ATH_MSG_DEBUG("Score for class "<< i <<" = "<<outputScores[i] << " in batch " << ibatch);
             int index = i + ibatch * 10;
@@ -63,6 +63,10 @@ StatusCode EvaluateModelWithAthInfer::execute( [[maybe_unused]] const EventConte
                max = outputScores[index];
                max_index = index;
             }
+      }
+      if (max_index<0){
+        ATH_MSG_ERROR("No maximum found in EvaluateModelWithAthInfer::execute");
+        return StatusCode::FAILURE;
       }
       ATH_MSG_DEBUG("Class: "<<max_index<<" has the highest score: "<<outputScores[max_index] << " in batch " << ibatch);
    }
