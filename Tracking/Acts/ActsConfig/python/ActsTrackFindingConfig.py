@@ -65,19 +65,22 @@ def ActsMainTrackFindingAlgCfg(flags,
     kwargs.setdefault("maxPropagationStep", 10000)
     kwargs.setdefault("skipDuplicateSeeds", flags.Acts.skipDuplicateSeeds)
     kwargs.setdefault("doTwoWay", flags.Acts.doTwoWayCKF)
+
+    # Borrow many settings from flags.Tracking.ActiveConfig, normally initialised in createITkTrackingPassFlags() at
+    # https://gitlab.cern.ch/atlas/athena/-/blob/main/Tracking/TrkConfig/python/TrackingPassFlags.py#L121
+
     # bins in |eta|, used for both MeasurementSelectorCuts and TrackSelector::EtaBinnedConfig
     if flags.Detector.GeometryITk:
         kwargs.setdefault("etaBins", flags.Tracking.ActiveConfig.etaBins)
-    kwargs.setdefault("chi2CutOff", tolist(flags.Tracking.ActiveConfig.Xi2maxNoAdd))
-    # @ TODO when using the new measurement selector can chose chi2 cut-off for outliers and measurements
-    # if flags.Acts.useDefaultActsMeasurementSelector is True :
-    #     # only a single chi2 cut-off exist for the default Acts measurement selector
-    #     kwargs.setdefault("chi2CutOff", tolist(flags.Tracking.ActiveConfig.Xi2maxNoAdd))
-    # else :
-    #     # clusters with chi2 above this value will be treated as outliers
-    #     kwargs.setdefault("chi2CutOff", tolist(flags.Tracking.ActiveConfig.Xi2maxNo))
-    #     # clusters with chi2 above this value will be discarded.
-    #     kwargs.setdefault("chi2OutlierCutOff", tolist(flags.Tracking.ActiveConfig.Xi2maxNoAdd))
+    if flags.Acts.useDefaultActsMeasurementSelector or flags.Acts.doTrackFindingTrackSelector != 2:
+        # Only a single chi2 cut-off exists for the default Acts measurement selector.
+        # We keep this setting by default, even with the new MeasurementSelector, until the new hole/outlier cuts can be optimised.
+        kwargs.setdefault("chi2CutOff", tolist(flags.Tracking.ActiveConfig.Xi2maxNoAdd))
+    else :
+        # clusters with chi2 above this value will be treated as outliers
+        kwargs.setdefault("chi2CutOff", tolist(flags.Tracking.ActiveConfig.Xi2max))
+        # clusters with chi2 above this value will be discarded.
+        kwargs.setdefault("chi2OutlierCutOff", tolist(flags.Tracking.ActiveConfig.Xi2maxNoAdd))
     kwargs.setdefault("numMeasurementsCutOff", [1])
 
     # there is always an over and underflow bin so the first bin will be 0. - 0.5 the last bin 3.5 - inf.
@@ -85,30 +88,18 @@ def ActsMainTrackFindingAlgCfg(flags,
     kwargs.setdefault("StatisticEtaBins", [eta/10. for eta in range(5, 40, 5)]) # eta 0.0 - 4.0 in steps of 0.5
 
     if flags.Acts.doTrackFindingTrackSelector:
-        # Use settings from flags.Tracking.ActiveConfig, initialised in createITkTrackingPassFlags() at
-        # https://gitlab.cern.ch/atlas/athena/-/blob/main/Tracking/TrkConfig/python/TrackingPassFlags.py#L215
         kwargs.setdefault("absEtaMax", flags.Tracking.ActiveConfig.maxEta)
-        kwargs.setdefault("ptMin",
-                          [p / Units.GeV * UnitConstants.GeV for p in tolist(flags.Tracking.ActiveConfig.minPT)])
-        kwargs.setdefault("minMeasurements",
-                          tolist(flags.Tracking.ActiveConfig.minClusters))
-        if flags.Acts.doTrackFindingTrackSelector == 2:
-            # use the same cut for all eta - for comparison with previous behaviour
-            kwargs["ptMin"] = [min(kwargs["ptMin"])]
-            kwargs["minMeasurements"] = [min(kwargs["minMeasurements"])]
-        elif flags.Acts.doTrackFindingTrackSelector != 3:
-            # include hole/shared hit cuts
-            kwargs.setdefault("maxHoles", tolist(flags.Tracking.ActiveConfig.maxHoles))
-            if flags.Acts.doTrackFindingTrackSelector != 5:
-                # Acts counts many holes as outliers, so use the same cut for maxOutliers
-                kwargs.setdefault("maxOutliers", tolist(flags.Tracking.ActiveConfig.maxHoles))
-            kwargs.setdefault("maxSharedHits", tolist(flags.Tracking.ActiveConfig.maxShared))
-            if flags.Acts.doTrackFindingTrackSelector == 4:
-                # don't use branch stopper - for comparison with previous behaviour
-                kwargs.setdefault("doBranchStopper", False)
-            if flags.Acts.doTrackFindingTrackSelector == 1:  # disable with 6
-                kwargs.setdefault("ptMinMeasurements", isdet(flags, pixel=[3], strip=[6]))
-                kwargs.setdefault("absEtaMaxMeasurements", isdet(flags, pixel=[3], strip=[999999]))
+        kwargs.setdefault("ptMin", [p / Units.GeV * UnitConstants.GeV for p in tolist(flags.Tracking.ActiveConfig.minPT)])
+        kwargs.setdefault("minMeasurements", tolist(flags.Tracking.ActiveConfig.minClusters))
+        kwargs.setdefault("maxHoles", tolist(flags.Tracking.ActiveConfig.maxHoles))
+        if flags.Acts.doTrackFindingTrackSelector != 2:
+            # Acts default measurement selector counts most holes as outliers, so use the same cut for maxOutliers
+            kwargs.setdefault("maxOutliers", tolist(flags.Tracking.ActiveConfig.maxHoles))
+        else:
+            pass  # no maxOutliers cut
+        kwargs.setdefault("maxSharedHits", tolist(flags.Tracking.ActiveConfig.maxShared))
+        kwargs.setdefault("ptMinMeasurements", isdet(flags, pixel=[3], strip=[6]))
+        kwargs.setdefault("absEtaMaxMeasurements", isdet(flags, pixel=[3], strip=[999999]))
 
     if 'TrackingGeometryTool' not in kwargs:
         from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg

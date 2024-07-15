@@ -519,9 +519,6 @@ namespace ActsTrk
         return BranchStopperResult::StopAndDrop;
       }
 
-      // https://github.com/acts-project/acts/blob/v35.0.0/Core/include/Acts/TrackFinding/MeasurementSelector.ipp#L99
-      // counts any other measurement anywhere on the surface as an outlier, so does not register as a hole.
-      // We really want to count them as holes.
       if (!(tipState.nHoles > cutSet.maxHoles || tipState.nOutliers > cutSet.maxOutliers))
         return BranchStopperResult::Continue;
 
