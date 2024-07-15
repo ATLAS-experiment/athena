@@ -168,10 +168,10 @@ bool testChamberBackForthMapping(const MuonGMR4::StripDesign& design) {
                      <<design.stripNumber(lowerEdge)<<std::endl;
         }
 
-        auto testAdjecent = [&](const int adjacentCh) -> bool {
+        auto testAdjacent = [&](const int adjacentCh) -> bool {
             const CheckVector2D adjacentStrip = design.center(adjacentCh);
             /// Probably we're either at 1 or nChannels
-            if (!adjacentCh) {
+            if (!adjacentCh || !adjacentStrip) {
                 return true;
             }
             const Amg::Vector2D& adjacentVal{*adjacentStrip};
@@ -191,11 +191,11 @@ bool testChamberBackForthMapping(const MuonGMR4::StripDesign& design) {
             }
             return true;
         };
-        if (!testAdjecent(ch -1)){
+        if (!testAdjacent(ch -1)){
             std::cerr<<"runStripDesignDump() "<<__LINE__<<" Previous strip assignment of "<<ch<<" failed. "<<std::endl;
             return false;
         }
-        if (!testAdjecent(ch +1)){
+        if (!testAdjacent(ch +1)){
             std::cerr<<"runStripDesignDump() "<<__LINE__<<" Following strip assignment of "<<ch<<" failed. "<<std::endl;
             return false;
         }
