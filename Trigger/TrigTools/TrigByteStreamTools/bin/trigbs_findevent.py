@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 """Find event in FILE(s).
 
 If no event identifier(s) are specified on the command line all events are printed.
@@ -37,6 +37,9 @@ def main():
    parser.add_argument('-l', '--lvl1id', type=int, action='store', nargs='*',
                        help='LVL1 ID')
 
+   parser.add_argument('--lb', type=int, action='store', nargs='*',
+                       help='Lumiblock')
+
    parser.add_argument('-t', '--time', action=StoreTime, nargs='*',
                        help='Nanosecond time stamp (seconds:nanoseconds)')   
 
@@ -61,6 +64,8 @@ def main():
          if args.globalid is not None and e.global_id() not in args.globalid:
             found = False
          if args.lvl1id is not None and e.lvl1_id() not in args.lvl1id:
+            found = False
+         if args.lb is not None and e.lumi_block() not in args.lb:
             found = False
          if args.time is not None and (e.bc_time_seconds(),e.bc_time_nanoseconds()) not in args.time:
             found = False
