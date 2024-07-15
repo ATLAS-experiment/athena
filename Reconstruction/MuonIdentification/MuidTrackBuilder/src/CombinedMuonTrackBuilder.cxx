@@ -2665,11 +2665,14 @@ namespace Rec {
 
             std::unique_ptr<Trk::Track> recoveredTrack{m_muonHoleRecovery->recover(*track, ctx)};
 
-            if (!checkTrack("finalTrackBuild1", recoveredTrack.get())) {
+            // if (!checkTrack("finalTrackBuild1", recoveredTrack.get())) {
                 // final track lost, this should not happen
-                m_messageHelper->printWarning(44);
+                // m_messageHelper->printWarning(44);
+                // As discussed in ATLASRECTS-7603, we want to suppress this until we can work on it
+                // Keeping it here so we don't forget.
+                // FIXME!
 
-            } else {
+            if (checkTrack("finalTrackBuild1", recoveredTrack.get()))  {
                 double chi2After = normalizedChi2(*recoveredTrack);
                 if (chi2After < m_badFitChi2 || chi2After < chi2Before + 0.1) {
                     track.swap(recoveredTrack);
