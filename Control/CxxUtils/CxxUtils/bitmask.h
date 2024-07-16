@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /*
  */
@@ -103,8 +103,16 @@ namespace {
   template <class E, typename Enable = void>
   constexpr bool is_bitmask_v = false;
 
+#ifdef __CUDACC__
+# pragma nv_diagnostic push
+// expression has no effect
+# pragma nv_diag_suppress 174
+#endif
   template <class E>
   constexpr bool is_bitmask_v<E, std::enable_if_t<(E::IS_ATH_BITMASK,1)>> = true;
+#ifdef __CUDACC__
+# pragma nv_diagnostic pop
+#endif
 }
 
 
