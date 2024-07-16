@@ -9,6 +9,17 @@ import glob
 import mmap
 from AthenaCommon import Logging
 from xml.etree import ElementTree
+import gzip
+import io
+
+
+def _open_file(filename):
+   f = open(filename,"rb")
+   if bytes(f.read(2)).hex() == '1f8b':
+      return io.TextIOWrapper(gzip.GzipFile(filename))
+   else:
+      return open(filename,'r')
+
 
 ## Get handle to Athena logging
 logger = Logging.logging.getLogger("PowhegControl")
@@ -55,7 +66,7 @@ def event_iterator(input_files, verbose=True):
             logger.info("... reading events from {}".format(file_name))
         in_event, event_lines = False, ""
         # Group all lines inside an XML event element
-        with open(file_name, "r") as f_input:
+        with _open_file(file_name) as f_input:
             for line in f_input:
                 # Both <event ...> and <event> are permitted
                 if "<event" in line:
@@ -108,7 +119,7 @@ def add_weight_to_header(header, weightgroup_name, weight_name, weight_id):
 
 def preamble(input_LHE_file):
     """! Get opening lines from file as a string."""
-    with open(input_LHE_file, "r") as f_input:
+    with _open_file(input_LHE_file) as f_input:
         s_input = mmap.mmap(f_input.fileno(), 0, access=mmap.ACCESS_READ)
         s_output = s_input[: s_input.find(b"<event>")]
     return "".join( chr(x) for x in s_output)
@@ -116,7 +127,7 @@ def preamble(input_LHE_file):
 
 def postamble(input_LHE_file):
     """! Get closing lines from file as a string."""
-    with open(input_LHE_file, "r") as f_input:
+    with _open_file(input_LHE_file) as f_input:
         s_input = mmap.mmap(f_input.fileno(), 0, access=mmap.ACCESS_READ)
         s_output = s_input[s_input.rfind(b"</event>") + 9:]
     return "".join( chr(x) for x in s_output)
@@ -159,7 +170,7 @@ def init_block(input_LHE_file):
 
 def get_first_event(input_LHE_file):
     """! Get first event from file as a string."""
-    with open(input_LHE_file, "r") as f_input:
+    with _open_file(input_LHE_file) as f_input:
         s_input = mmap.mmap(f_input.fileno(), 0, access=mmap.ACCESS_READ)
         # Both <event ...> and <event> are permitted
         s_output = s_input[s_input.find("<event"): s_input.find("</event>") + 8]
