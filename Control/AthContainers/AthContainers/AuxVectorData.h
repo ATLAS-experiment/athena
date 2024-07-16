@@ -17,6 +17,7 @@
 #include "AthContainersInterfaces/AuxTypes.h"
 #include "AthContainersInterfaces/IConstAuxStore.h"
 #include "AthContainersInterfaces/AuxDataOption.h"
+#include "AthContainersInterfaces/AuxDataSpan.h"
 #include "AthContainers/tools/AuxDataTraits.h"
 #include "AthLinks/DataLink.h"
 #ifndef XAOD_STANDALONE
@@ -563,6 +564,21 @@ public:
   void* getDataArray (SG::auxid_t auxid);
 
 
+  /**
+   * @brief Return a reference to a description of this vector's start+size.
+   * @param auxid The desired aux data item.
+   *
+   * This low-overhead method of getting the start+size of an auxiliary
+   * variable.  The returned object will be updated if the variable's
+   * vector changes.  Raises an exception if the variable does not exist.
+   *
+   * This is in principle a const-correctness violation,
+   * since @c AuxDataSpanBase has a non-const pointer to the start
+   * of the vector.  But doing it properly is kind of painful, and as
+   * this interface is only meant to be used internally, it's likely
+   * not a real problem.
+   */
+  const AuxDataSpanBase* getDataSpan (SG::auxid_t auxid) const;
 
 
 protected:
@@ -771,6 +787,14 @@ private:
 
 
     /**
+     * @brief Return a reference to a description of this vector's start+size.
+     * @param auxid The desired aux data item.
+     */
+    const AuxDataSpanBase* getDataSpan (SG::auxid_t auxid,
+                                        const AuxVectorData& parent);
+
+
+    /**
      * @brief Swap this cache object with another.
      * @param other The cache object with which to swap.
      */
@@ -896,6 +920,21 @@ private:
   void* getDecorationOol (SG::auxid_t auxid) const;
 
 
+  /**
+   * @brief Return a reference to a description of this vector's start+size,
+   *        out-of-line portion.
+   * @param auxid The desired aux data item.
+   * @param allowMissing If true, then return nullptr if the variable
+   *                     is missing rather than throwing an exception.
+   *
+   * When this function returns, the cache entry @c m_spanCache[auxid]
+   * will be valid.  That entry is also returned.  If there's an error,
+   * the function will throw  an exception rather than returning.
+   */
+  const AuxDataSpanBase* getDataSpanOol (SG::auxid_t
+                                         auxid, bool allowMissing) const /*__attribute__((const))*/;
+
+
   /// Cached pointers to the start of aux data vectors, non-const.
   mutable Cache m_cache ATLAS_THREAD_SAFE;
 
@@ -904,6 +943,9 @@ private:
 
   /// Cached pointers to the start of aux data vectors, decorations.
   mutable Cache m_decorCache ATLAS_THREAD_SAFE;
+
+  /// Cached pointers to span descriptors.
+  mutable Cache m_spanCache ATLAS_THREAD_SAFE;
 
 
   /// Associated store, non-const.

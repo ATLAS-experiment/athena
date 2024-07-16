@@ -67,6 +67,7 @@ void test_get_data()
   EXPECT_EXCEPTION (SG::ExcNoAuxStore, b1.getData<int> (ityp, 0));
   EXPECT_EXCEPTION (SG::ExcNoAuxStore, cb1.getDataArray (ityp));
   EXPECT_EXCEPTION (SG::ExcNoAuxStore, cb1.getDataArrayAllowMissing (ityp));
+  EXPECT_EXCEPTION (SG::ExcNoAuxStore, cb1.getDataSpan (ityp));
 
   SG::AuxStoreInternal store;
   SG::IConstAuxStore* cstore = &store;
@@ -90,6 +91,7 @@ void test_get_data()
   EXPECT_EXCEPTION (SG::ExcBadAuxVar, cb1.getData<int> (ityp, 0));   
   EXPECT_EXCEPTION (SG::ExcBadAuxVar, cb1.getDataArray (ityp));
   assert (cb1.getDataArrayAllowMissing (ityp) == nullptr);
+  EXPECT_EXCEPTION (SG::ExcBadAuxVar, cb1.getDataSpan (ityp));
 
   b1.setStore (&store);
   assert (b1.getConstStore() == &store);
@@ -107,6 +109,8 @@ void test_get_data()
   assert (b1.isAvailableWritableAsDecoration (ityp));
   assert (reinterpret_cast<const int*>(cb1.getDataArray (ityp))[1] == 2);
   assert (reinterpret_cast<const int*>(cb1.getDataArrayAllowMissing (ityp))[1] == 2);
+  assert (cb1.getDataSpan(ityp)->beg == cb1.getDataArray (ityp));
+  assert (cb1.getDataSpan(ityp)->size == 10);
 
   b1.setStore (cstore);
   assert (!b1.hasNonConstStore());

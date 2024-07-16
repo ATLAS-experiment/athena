@@ -48,6 +48,7 @@ AuxVectorData::AuxVectorData (AuxVectorData&& rhs)
   : m_cache (std::move (rhs.m_cache)),
     m_constCache (std::move (rhs.m_constCache)),
     m_decorCache (std::move (rhs.m_decorCache)),
+    m_spanCache (std::move (rhs.m_spanCache)),
     m_store (rhs.m_store),
     m_constStore (rhs.m_constStore),
     m_constStoreLink (std::move (rhs.m_constStoreLink))
@@ -68,6 +69,7 @@ AuxVectorData& AuxVectorData::operator= (AuxVectorData&& rhs)
     m_cache = std::move (rhs.m_cache);
     m_constCache = std::move (rhs.m_constCache);
     m_decorCache = std::move (rhs.m_decorCache);
+    m_spanCache = std::move (rhs.m_spanCache);
     m_store = rhs.m_store;
     m_constStore = rhs.m_constStore;
     m_constStoreLink = rhs.m_constStoreLink;
@@ -421,6 +423,48 @@ void* AuxVectorData::getDecorationOol (SG::auxid_t auxid) const
 
   // Set the same entry in the const cache as well.
   m_constCache.store (auxid, ptr);
+
+  return ptr;
+}
+
+
+/**
+ * @brief Return a reference to a description of this vector's start+size,
+ *        out-of-line portion.
+ * @param auxid The desired aux data item.
+ * @param allowMissing If true, then return nullptr if the variable
+ *                     is missing rather than throwing an exception.
+ *
+ * When this function returns, the cache entry @c m_spanCache[auxid]
+ * will be valid.  That entry is also returned.  If there's an error,
+ * the function will throw  an exception rather than returning.
+ */
+const AuxDataSpanBase*
+AuxVectorData::getDataSpanOol (SG::auxid_t auxid, bool allowMissing) const
+{
+  guard_t guard (m_mutex);
+
+  // Fetch the pointer from the store, or raise an exception if we don't
+  // have a const store.
+  const IAuxTypeVector* v = 0;
+  if (getConstStore())
+    v = getConstStore()->getVector (auxid);
+  else
+    throw SG::ExcNoAuxStore (auxid);
+
+  // Check that we got a good pointer back, otherwise throw.
+  const AuxDataSpanBase* ptr = nullptr;
+  if (v) {
+    ptr = &v->getDataSpan();
+    // We could avoid the const_cast here by having distinct const and
+    // non-const Cache types, holding const void* and void*, respectively.
+    // However, since this is a purely internal class that users don't
+    // deal with directly, that's not worth the bother (and the extra code).
+    AuxDataSpanBase* vp ATLAS_THREAD_SAFE = const_cast<AuxDataSpanBase*> (ptr);
+    m_spanCache.store (auxid, vp);
+  }
+  else if (!allowMissing)
+    throw SG::ExcBadAuxVar (auxid);
 
   return ptr;
 }
