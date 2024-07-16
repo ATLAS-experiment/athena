@@ -130,13 +130,13 @@ void FPGATrackSimPlaneMap::allocateMap(ifstream & fin, uint32_t stage)
     {
         ok = ok && getline(fin, line);
     }
-    std::cout<<"~~allocateMap:"<<ok<<"  ~LINE:"<<line<<"\n";
+    //std::cout<<"~~allocateMap:"<<ok<<"  ~LINE:"<<line<<"\n";
     ANA_MSG_VERBOSE(line);
     istringstream sline(line);
-    std::cout<<"~~allocateMap:"<<ok<<"  ~2LINE2:"<<line<<"\n";
+    //std::cout<<"~~allocateMap:"<<ok<<"  ~2LINE2:"<<line<<"\n";
     ok = ok && (sline >> geoKey);
-    std::cout<<"~~allocateMap:"<<ok<<" ge:"<<geoKey<<"\n";
-    std::cout<<"~~allocateMap:"<<ok<<"\n";
+    //std::cout<<"~~allocateMap:"<<ok<<" ge:"<<geoKey<<"\n";
+    //std::cout<<"~~allocateMap:"<<ok<<"\n";
     m_diskIndex = Remappings::diskIndices(geoKey);
 
     ANA_MSG_INFO("Allocating map for geometry " << geoKey <<" diskIndex size="<<m_diskIndex.size());
@@ -289,7 +289,7 @@ void FPGATrackSimPlaneMap::readLayers(ifstream & fin, uint32_t stage)
             m_map[sil][BEC][physLayer].section = m_layerInfo[logiLayer].size(); // i.e. index into m_layerInfo[logiLayer] entry below
             m_layerInfo[logiLayer].push_back({ siTech, zone, physLayer, physDisk, stereo});
         }
-        std::cout<<"line~~"<<line<<"m_nDetLayers:"<<m_nDetLayers<<"   linesRead:"<<linesRead<<'\n';
+        //std::cout<<"line~~"<<line<<"m_nDetLayers:"<<m_nDetLayers<<"   linesRead:"<<linesRead<<'\n';
         if (m_nDetLayers == linesRead) break;
     }
 
@@ -314,20 +314,24 @@ void FPGATrackSimPlaneMap::map(FPGATrackSimHit & hit) const
 
     const LayerSection &pinfo = getLayerSection(hit.getDetType(), hit.getDetectorZone(), hit.getPhysLayer());
     hit.setSection(pinfo.section);
-    std::cout<<"\n before L:"<<pinfo.layer;
+    //std::cout<<"\n before L:"<<pinfo.layer;
+    /*
     if (hit.isMapped()){
         std::cout<<"\n before L:"<<pinfo.layer<<","<<hit.getLayer();
     }
     else{
         std::cout<<"\n before L:"<<pinfo.layer<<",~";
     }
+    */
     hit.setLayer(pinfo.layer);
+    /*
     if (hit.isMapped()){
         std::cout<<"  AfterSet:"<<pinfo.layer<<", "<<hit.getLayer()<<"\n \n";
     }
     else{
         std::cout<<"  AfterSet:"<<pinfo.layer<<", ~"<<"\n \n";
     }
+    */
     if (!hit.isMapped()) // failsafe if for some reason someone calls this on a clustered hit again, or something
         hit.setHitType(HitType::mapped);
 }

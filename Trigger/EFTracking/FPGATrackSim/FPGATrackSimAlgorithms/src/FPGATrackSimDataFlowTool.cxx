@@ -30,7 +30,7 @@ StatusCode FPGATrackSimDataFlowTool::initialize()
     ATH_CHECK(m_FPGATrackSimMapping.retrieve());
     ATH_CHECK(m_evtSel.retrieve());
 
-    m_nLayers_1st = m_FPGATrackSimMapping->PlaneMap_1st()->getNLogiLayers();
+    m_nLayers_1st = m_FPGATrackSimMapping->PlaneMap_1st(0)->getNLogiLayers();
 
     m_dataFlowTxt.open(m_dataFlowTxtName);
     m_dataFlowTeX.open(m_dataFlowTeXName);

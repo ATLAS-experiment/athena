@@ -26,7 +26,7 @@ StatusCode FPGATrackSimOverlapRemovalTool::initialize()
   }
   else
   {
-    m_totLayers = m_FPGATrackSimMapping->PlaneMap_1st()->getNLogiLayers();;
+    m_totLayers = m_FPGATrackSimMapping->PlaneMap_1st(0)->getNLogiLayers();;
   }
   ATH_MSG_DEBUG("Total number of layer: " << m_totLayers);
 

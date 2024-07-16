@@ -27,11 +27,11 @@ StatusCode FPGATrackSimTrackFitterTool::initialize()
 
     const FPGATrackSimFitConstantBank* nominalbank;
     std::vector<const FPGATrackSimFitConstantBank*> bankvec;
-
+    //TODO WW
     if(!m_do2ndStage){
       nominalbank = m_FPGATrackSimBank->FitConstantBank_1st();
       if (!m_guessHits) {
-        for (unsigned int iplane = 0; iplane < m_FPGATrackSimMapping->PlaneMap_1st()->getNLogiLayers(); iplane++) {
+        for (unsigned int iplane = 0; iplane < m_FPGATrackSimMapping->PlaneMap_1st(0)->getNLogiLayers(); iplane++) {
 	  const FPGATrackSimFitConstantBank* bank = m_FPGATrackSimBank->FitConstantBank_1st(iplane);
 	  bankvec.push_back(bank);
         }
@@ -52,7 +52,7 @@ StatusCode FPGATrackSimTrackFitterTool::initialize()
     m_tfpobj = std::unique_ptr<TrackFitter>(new TrackFitter(nominalbank, bankvec, m_guessHits));
 
     if(!m_do2ndStage) {
-      m_tfpobj->setPlaneMap(m_FPGATrackSimMapping->PlaneMap_1st());
+      m_tfpobj->setPlaneMap(m_FPGATrackSimMapping->PlaneMap_1st(0));
       m_tfpobj->setRegionMap(m_FPGATrackSimMapping->RegionMap_1st());
     } else {
       m_tfpobj->setPlaneMap(m_FPGATrackSimMapping->PlaneMap_2nd());

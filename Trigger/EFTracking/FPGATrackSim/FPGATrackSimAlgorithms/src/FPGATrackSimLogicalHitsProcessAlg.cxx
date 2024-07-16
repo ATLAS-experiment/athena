@@ -55,7 +55,6 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::initialize()
             ATH_MSG_INFO('\t' << line);
         }
     }
-
     ATH_CHECK(m_roadFinderTool.retrieve());
     ATH_CHECK(m_LRTRoadFilterTool.retrieve(EnableTool{m_doLRT}));
     ATH_CHECK(m_LRTRoadFinderTool.retrieve(EnableTool{m_doLRT}));
@@ -91,6 +90,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::initialize()
 
     ATH_MSG_DEBUG("initialize() Finished");
 
+    std::cout<<"LogcalHitProcessAlg: 118~"<<StatusCode::SUCCESS<<'\n';
     
     return StatusCode::SUCCESS;
 }
@@ -172,6 +172,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     std::vector<std::shared_ptr<const FPGATrackSimRoad>> prefilter_roads;
     std::vector<std::shared_ptr<const FPGATrackSimRoad>> roads_1st = prefilter_roads;
     ATH_CHECK(m_roadFinderTool->getRoads(phits_1st, roads_1st));
+//    std::cout<<"LogcalHitProcessAlg: 228~"<<StatusCode::SUCCESS<<'\n';
 
     for (auto const &road:roads_1st){
         std::vector<FPGATrackSimHit> road_hits;
@@ -185,10 +186,11 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
         FPGARoads_1st->push_back(*road);
     }
 
+    //std::cout<<"LogcalHitProcessAlg: 246~"<<StatusCode::SUCCESS<<'\n';
     auto mon_nroads_1st = Monitored::Scalar<unsigned>("nroads_1st", roads_1st.size());
     for (auto const &road : roads_1st) {
       unsigned bitmask = road->getHitLayers();
-      for (size_t l = 0; l < m_FPGATrackSimMapping->PlaneMap_1st()->getNLogiLayers(); l++) {
+      for (size_t l = 0; l < m_FPGATrackSimMapping->PlaneMap_1st(0)->getNLogiLayers(); l++) {
         if (bitmask & (1 << l)) {
             auto mon_layerIDs_1st = Monitored::Scalar<unsigned>("layerIDs_1st",l);
             Monitored::Group(m_monTool,mon_layerIDs_1st);
@@ -197,6 +199,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     }
     Monitored::Group(m_monTool, mon_nroads_1st);
     
+    std::cout<<"LogcalHitProcessAlg: 209~"<<StatusCode::SUCCESS<<'\n';
     TIME(m_troads);
     // Standard road Filter
     std::vector<std::shared_ptr<const FPGATrackSimRoad>> postfilter_roads;
@@ -313,6 +316,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
         Monitored::Group(m_monTool,passroad,passtrack,truthpT_zoom,truthpT,trutheta,truthphi,truthd0,truthz0,passtrackchi2);
     }
 
+    std::cout<<"LogcalHitProcessAlg: 354~"<<StatusCode::SUCCESS<<'\n';
     for (const FPGATrackSimTrack& track : tracks_1st) FPGATracks_1stHandle->push_back(track);
    
     TIME(m_tOR);

@@ -82,11 +82,12 @@ StatusCode FPGATrackSimMatrixGenAlgo::initialize()
       ATH_MSG_INFO("Hough constants method needs idealized geometry > 0, aborting.");
       return StatusCode::FAILURE;
     }
-    m_pmap = m_FPGATrackSimMapping->PlaneMap_1st();
+    //TODO WW
+    m_pmap = m_FPGATrackSimMapping->PlaneMap_1st(0);
     // Get detector configurations
-    m_nLayers = m_FPGATrackSimMapping->PlaneMap_1st()->getNLogiLayers();
+    m_nLayers = m_FPGATrackSimMapping->PlaneMap_1st(0)->getNLogiLayers();
     m_nRegions = m_FPGATrackSimMapping->RegionMap_1st()->getNRegions();
-    m_nDim = m_FPGATrackSimMapping->PlaneMap_1st()->getNCoords();
+    m_nDim = m_FPGATrackSimMapping->PlaneMap_1st(0)->getNCoords();
 
   }
   else {
@@ -462,10 +463,10 @@ FPGATrackSimMatrixGenAlgo::selectHit_returnCode FPGATrackSimMatrixGenAlgo::selec
     int  old_disk = 0;
     int  new_disk = 0;
     if (m_doHoughConstants) {
-      old_isEC = m_FPGATrackSimMapping->PlaneMap_1st()->isEC(layer, old_section);
-      new_isEC = m_FPGATrackSimMapping->PlaneMap_1st()->isEC(layer, new_section);
-      old_disk = m_FPGATrackSimMapping->PlaneMap_1st()->getLayerInfo(layer, old_section).physDisk;
-      new_disk = m_FPGATrackSimMapping->PlaneMap_1st()->getLayerInfo(layer, new_section).physDisk;
+      old_isEC = m_FPGATrackSimMapping->PlaneMap_1st(0)->isEC(layer, old_section);
+      new_isEC = m_FPGATrackSimMapping->PlaneMap_1st(0)->isEC(layer, new_section);
+      old_disk = m_FPGATrackSimMapping->PlaneMap_1st(0)->getLayerInfo(layer, old_section).physDisk;
+      new_disk = m_FPGATrackSimMapping->PlaneMap_1st(0)->getLayerInfo(layer, new_section).physDisk;
     }
     else {
       old_isEC = m_FPGATrackSimMapping->PlaneMap_2nd()->isEC(layer, old_section);

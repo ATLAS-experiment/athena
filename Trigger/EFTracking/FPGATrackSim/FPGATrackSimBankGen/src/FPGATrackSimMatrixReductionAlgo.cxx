@@ -32,7 +32,8 @@ StatusCode FPGATrackSimMatrixReductionAlgo::initialize()
   ATH_CHECK(m_FPGATrackSimMapping.retrieve());
   ATH_CHECK(m_tHistSvc.retrieve());
 
-  m_pmap_1st = m_FPGATrackSimMapping->PlaneMap_1st();
+    //TODO WW might need to refactor thsi m_pmap_1st->getLayerInfo(layer_1st, 0)
+  m_pmap_1st = m_FPGATrackSimMapping->PlaneMap_1st(0);
   m_pmap_2nd = m_FPGATrackSimMapping->PlaneMap_2nd();
 
   // Setup the boundaries for the merge
@@ -132,8 +133,12 @@ StatusCode FPGATrackSimMatrixReductionAlgo::copySliceTree(TFile *file)
  *
  * TODO this should be handled by the pmap?
  */
+ 
 std::pair<std::vector<size_t>, std::vector<size_t>> FPGATrackSimMatrixReductionAlgo::matchStages()
 {
+    //throw std::runtime_error("Error: TRACKMATIXREDUCTIONALGo");
+    //std::terminate();
+    //std::exit(EXIT_FAILURE); // Terminate the program with a failure status
   size_t iCoord_1st = 0;
 
   std::vector<size_t> layers_1st_to_2nd(m_pmap_1st->getNLogiLayers());
