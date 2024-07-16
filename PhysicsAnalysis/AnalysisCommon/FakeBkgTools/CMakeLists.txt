@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration 
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration 
 atlas_subdir( FakeBkgTools )
 
 find_package( ROOT COMPONENTS Core Tree RIO MathCore Gpad Hist MathMore Minuit Matrix )
@@ -14,7 +14,7 @@ atlas_add_library( FakeBkgToolsLib
   PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
   LINK_LIBRARIES AsgAnalysisInterfaces AsgTools xAODBase PATInterfaces CxxUtils
   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} xAODEgamma xAODMuon xAODTau PathResolver SelectionHelpersLib
-  xAODCore xAODEventInfo )
+  xAODCore xAODEventInfo AthContainers )
 
 if( NOT XAOD_STANDALONE )
   atlas_add_component( FakeBkgTools
@@ -36,7 +36,7 @@ endif()
 foreach( exec fbtNtupleTester fbtTestBasics fbtTestToyMC )
   atlas_add_executable( ${exec} util/${exec}.cxx
       INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-      LINK_LIBRARIES ${ROOT_LIBRARIES} FakeBkgToolsLib xAODEgamma xAODMuon ${pool_lib})
+      LINK_LIBRARIES ${ROOT_LIBRARIES} FakeBkgToolsLib xAODEgamma xAODMuon AthContainers ${pool_lib})
 endforeach()
 
 atlas_add_test( ut_fbtTestBasics

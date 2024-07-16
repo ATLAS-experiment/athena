@@ -23,6 +23,7 @@
 #include "FakeBkgTools/LhoodMM_tools.h"
 
 #include "xAODEgamma/Electron.h"
+#include "AthContainers/Accessor.h"
 
 #include "TFile.h"
 #include "TTree.h"
@@ -390,6 +391,8 @@ StatusCode Loop ATLAS_NOT_THREAD_SAFE(fbtTestToyMC_config config){
 	nevents_thiscase = config.nevents;
       }
 
+      static const SG::Accessor<char> TightAcc("Tight");
+
       // need two passes to simulate subtraction of real lepton contribution
       // in fake factor method with a statistically-independent sample
       for (int pass(0); pass<2; pass++) {
@@ -444,15 +447,15 @@ StatusCode Loop ATLAS_NOT_THREAD_SAFE(fbtTestToyMC_config config){
 	    // decide if lepton is tight or not
 	    if (isReal) {
 	      if (rand.Uniform() < lepton_data.real_efficiency.nominal) {
-		lepton->auxdata<char>("Tight") = true;
+		TightAcc(*lepton) = true;
 	      } else {
-		lepton->auxdata<char>("Tight") = false;
+		TightAcc(*lepton) = false;
 	      }
 	    } else {
 	      if (rand.Uniform() < lepton_data.fake_efficiency.nominal) {
-		lepton->auxdata<char>("Tight") = true;
+		TightAcc(*lepton) = true;
 	      } else {
-		lepton->auxdata<char>("Tight") = false;
+		TightAcc(*lepton) = false;
 	      }
 	    }
 	    leptons.push_back(static_cast<xAOD::IParticle*>(lepton));
@@ -517,7 +520,7 @@ StatusCode Loop ATLAS_NOT_THREAD_SAFE(fbtTestToyMC_config config){
 	    // now see how many events actually passed the required selection
 	    tights.reset();
 	    for (int ilep = 0; ilep < nlep_select; ilep++) {
-	      if (leptons[ilep]->auxdata<char>("Tight")) tights.set(ilep);
+	      if (TightAcc(*leptons[ilep])) tights.set(ilep);
 	    }
 	    if (fs[nlep_select]->accept_selection(tights,charges) ) {
 	      nevents_sel += extraweight;

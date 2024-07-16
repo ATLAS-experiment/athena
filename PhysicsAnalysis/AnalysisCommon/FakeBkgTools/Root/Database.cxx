@@ -5,6 +5,7 @@
 #include "AsgAnalysisInterfaces/IFakeBkgTool.h"
 #include "FakeBkgTools/Database.h"
 #include "PathResolver/PathResolver.h"
+#include "AthContainers/ConstAccessor.h"
 
 #include <fstream>
 #include <sstream>
@@ -1025,14 +1026,26 @@ bool Database::retrieveParameterValue(const xAOD::IParticle& p, const xAOD::Even
             else if(param.name=="phi") val.as_float = p.phi();
             else return false;
         }
-        else if(param.type == Param::Type::CUSTOM_FLOAT) val.as_float = p.auxdataConst<float>(param.name);
-        else if(param.type == Param::Type::CUSTOM_INT) val.as_int = p.auxdataConst<int>(param.name);
+        else if(param.type == Param::Type::CUSTOM_FLOAT) {
+          SG::ConstAccessor<float> acc(param.name);
+          val.as_float = acc(p);
+        }
+        else if(param.type == Param::Type::CUSTOM_INT) {
+          SG::ConstAccessor<int> acc(param.name);
+          val.as_int = acc(p);
+        }
         else return false;
     }
     else if(param.level == Param::Level::EVENT)
     {
-        if(param.type == Param::Type::CUSTOM_FLOAT) val.as_float = eventInfo.auxdataConst<float>(param.name);
-        else if(param.type == Param::Type::CUSTOM_INT) val.as_int = eventInfo.auxdataConst<int>(param.name);
+        if(param.type == Param::Type::CUSTOM_FLOAT) {
+          SG::ConstAccessor<float> acc(param.name);
+          val.as_float = acc(eventInfo);
+        }
+        else if(param.type == Param::Type::CUSTOM_INT) {
+          SG::ConstAccessor<int> acc(param.name);
+          val.as_int = acc(eventInfo);
+        }
         else return false;
     }
     else return false;
