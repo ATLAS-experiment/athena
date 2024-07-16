@@ -28,6 +28,10 @@ class MdtDriftCircle_v1 : public UncalibratedMeasurement_v1 {
     xAOD::UncalibMeasType type() const override final {
         return xAOD::UncalibMeasType::MdtDriftCircleType;
     }
+    /** @brief: Returns the Athena identifier of the drift circle. 
+     *          It's constructed from the measurementHash & passed to the associated readoutElement */
+    Identifier identify() const;
+
     unsigned int numDimensions() const override final { return 1; }
     /** @brief Returns the TDC (typically range is 0 to 2500)*/
     int16_t tdc() const;

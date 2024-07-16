@@ -28,6 +28,9 @@ IMPLEMENT_READOUTELEMENT(sTgcMeasurement_v1, m_readoutEle, sTgcReadoutElement)
 IdentifierHash sTgcMeasurement_v1::measurementHash() const {
    return MuonGMR4::sTgcReadoutElement::createHash(gasGap(), channelType(), channelNumber());
 }
+Identifier sTgcMeasurement_v1::identify() const {
+   return readoutElement()->measurementId(measurementHash());
+}
 IdentifierHash sTgcMeasurement_v1::layerHash() const {
    return MuonGMR4::sTgcReadoutElement::createHash(gasGap(), channelType(), 0);
 }

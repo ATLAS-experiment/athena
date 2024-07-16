@@ -25,6 +25,9 @@ class MMCluster_v1 : public UncalibratedMeasurement_v1 {
     xAOD::UncalibMeasType type() const override final {
         return xAOD::UncalibMeasType::MMClusterType;
     }
+    /** @brief: Returns the Athena identifier of the micro mega cluster 
+     *          It's constructed from the measurementHash & passed to the associated readoutElement */
+    Identifier identify() const;
     unsigned int numDimensions() const override final { return 1; }
 
     /** @brief  Returns the gas gap number to which the clsuter*/

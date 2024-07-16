@@ -45,8 +45,22 @@ namespace xAOD{
         THROW_EXCEPTION("Unsupported measurement given "<<typeid(*meas).name());
         return nullptr;
     }
-    
-
+    Identifier identify(const UncalibratedMeasurement* meas) {
+        if (!meas) return Identifier{};
+        if (meas->type() == UncalibMeasType::MdtDriftCircleType){
+            return static_cast<const MdtDriftCircle*>(meas)->identify();
+        } else if (meas->type() == UncalibMeasType::RpcStripType) {
+            return static_cast<const RpcMeasurement*>(meas)->identify();
+        } else if (meas->type() == UncalibMeasType::TgcStripType) {
+            return static_cast<const TgcStrip*>(meas)->identify();
+        } else if (meas->type() == UncalibMeasType::MMClusterType) {
+            return static_cast<const MMCluster*>(meas)->identify();
+        } else if (meas->type() == UncalibMeasType::sTgcStripType) {
+            return static_cast<const sTgcMeasurement*>(meas)->identify();
+        }
+        THROW_EXCEPTION("Unsupported measurement given "<<typeid(*meas).name());
+        return Identifier{};
+    }
     Amg::Vector3D positionInChamber(const ActsGeometryContext& gctx,
                                     const UncalibratedMeasurement* meas){
         if (!meas) return Amg::Vector3D::Zero();

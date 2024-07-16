@@ -35,6 +35,9 @@ class sTgcMeasurement_v1 : public UncalibratedMeasurement_v1 {
   unsigned int numDimensions() const override final {       
       return channelType() == sTgcChannelTypes::Pad ? 2 : 1; 
   }
+  /** @brief: Returns the Athena identifier of the measurement
+    *         It's constructed from the measurementHash & passed to the associated readoutElement */
+  Identifier identify() const;
   /** @brief Returns the hash of the measurement channel w.r.t ReadoutElement*/
   IdentifierHash measurementHash() const;
   /** @brief Returns the hash of the associated gasGap layer */

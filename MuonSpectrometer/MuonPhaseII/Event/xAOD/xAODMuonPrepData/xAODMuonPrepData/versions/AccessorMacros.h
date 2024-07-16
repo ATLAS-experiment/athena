@@ -79,7 +79,8 @@
     }
 
 /**
- *  Macro to declare the variables belonging to the AuxElementContainer
+ *  Macro to declare the variables belonging to the AuxElementContainer. It's preassumed that a preFixStr
+ *  is defined at the top of the source file
 */
 #define PRD_AUXVARIABLE(VAR)                                \
    do {                                                     \

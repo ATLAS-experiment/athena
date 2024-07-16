@@ -29,6 +29,9 @@ IdentifierHash MdtDriftCircle_v1::measurementHash() const {
     return MuonGMR4::MdtReadoutElement::measurementHash(tubeLayer(),
                                                         driftTube());
 }
+Identifier MdtDriftCircle_v1::identify() const {
+    return readoutElement()->measurementId(measurementHash());
+}
 float MdtDriftCircle_v1::driftRadius() const {
     return localPosition<1>()[Trk::locR];
 }

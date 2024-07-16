@@ -34,4 +34,7 @@ namespace xAOD {
     IdentifierHash RpcMeasurement_v1::layerHash() const {
         return MuonGMR4::RpcReadoutElement::createHash(0, gasGap(), doubletPhi(), measuresPhi());
     }
+    Identifier RpcMeasurement_v1::identify() const {
+        return readoutElement()->measurementId(measurementHash());
+    }
 }
