@@ -908,16 +908,16 @@ bool BB4LPowhegLesHouchesFileReader::doReadEvent  () {
   for ( int i = 0; i < hepeup.NUP; ++i ) 
     { 
       hepeup_.idup[i]     = hepeup.IDUP[i];
-      hepeup_.istup[i]    = hepeup.ISTUP[i]; 
-      hepeup_.mothup[i][0]= hepeup.MOTHUP[i].first; 
-      hepeup_.mothup[i][1]= hepeup.MOTHUP[i].second; 		
-      hepeup_.icolup[i][0]= hepeup.ICOLUP[i].first;
-      hepeup_.icolup[i][1]= hepeup.ICOLUP[i].second;
-      hepeup_.pup[i][0]   = hepeup.PUP[i][0]; 
-      hepeup_.pup[i][1]   = hepeup.PUP[i][1]; 		
-      hepeup_.pup[i][2]   = hepeup.PUP[i][2];		
-      hepeup_.pup[i][3]   = hepeup.PUP[i][3]; 
-      hepeup_.pup[i][4]   = hepeup.PUP[i][4];
+      hepeup_.istup[i]    = hepeup.ISTUP[i];
+      hepeup_.getMother(i,0)= hepeup.MOTHUP[i].first;
+      hepeup_.getMother(i,1)= hepeup.MOTHUP[i].second;
+      hepeup_.getColor(i,0)= hepeup.ICOLUP[i].first;
+      hepeup_.getColor(i,1)= hepeup.ICOLUP[i].second;
+      hepeup_.getP(i,0)   = hepeup.PUP[i][0];
+      hepeup_.getP(i,1)   = hepeup.PUP[i][1];
+      hepeup_.getP(i,2)   = hepeup.PUP[i][2];
+      hepeup_.getP(i,3)   = hepeup.PUP[i][3];
+      hepeup_.getP(i,4)   = hepeup.PUP[i][4];
       hepeup_.vtimup[i]   = hepeup.VTIMUP[i]; 
       hepeup_.spinup[i]   = hepeup.SPINUP[i]; 
     }
