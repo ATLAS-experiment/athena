@@ -50,7 +50,7 @@ bool ISF::GenParticleSimQuasiStableFilter::pass(const HepMC::GenParticle& partic
   
   bool passFilter = false;
   for(unsigned int i=0;i<m_statuscode.size();++i) {
-    if(particle->status()==m_statuscode[i]) {
+    if(particle->status() == m_statuscode[i]) {
       passFilter=true;
       if(particle->end_vertex()        && (m_minDecayRadius[i] > particle->end_vertex()->position().perp())        ) passFilter = false;
       if(particle->production_vertex() && (m_minProdRadius[i]  > particle->production_vertex()->position().perp()) ) passFilter = false;

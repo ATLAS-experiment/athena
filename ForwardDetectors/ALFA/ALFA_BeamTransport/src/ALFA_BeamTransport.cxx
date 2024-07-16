@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -8,8 +8,6 @@
 
 #include "ALFA_BeamTransport.h"
 #include "StoreGate/StoreGateSvc.h"
-
-
 
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "GaudiKernel/ServiceHandle.h"
@@ -60,13 +58,8 @@ ALFA_BeamTransport::ALFA_BeamTransport(const std::string& name, ISvcLocator* pSv
 
 }
 
-//================ Destructor =================================================
+ALFA_BeamTransport::~ALFA_BeamTransport(){}
 
-ALFA_BeamTransport::~ALFA_BeamTransport()
-{}
-
-
-//================ Initialisation =================================================
 
 StatusCode ALFA_BeamTransport::initialize()
 {
@@ -257,8 +250,7 @@ int ALFA_BeamTransport::DoBeamTracking(int evt_number)
 int ALFA_BeamTransport::TransportSelectedParticle(HepMC::GenEvent& evt, int evt_number){
      HepMC::GenParticlePtr p1{nullptr};
      HepMC::GenParticlePtr p2{nullptr};
-     
-	
+
      std::vector<FPTracker::Point> PosAtRP1;
      std::vector<FPTracker::Point> PosAtRP3;
      std::vector<FPTracker::Point> MomAtPR1;
@@ -282,22 +274,19 @@ int ALFA_BeamTransport::TransportSelectedParticle(HepMC::GenEvent& evt, int evt_
        theta = std::acos(std::abs(p->momentum().pz()) / mom);
        eta = -std::log(std::tan(theta / 2));
 
-       if (MC::isStable(p) &&
-           (!p->end_vertex())) { // TODO What is end_vertex()???
+       if (MC::isStable(p) && (!p->end_vertex())) {
          // Change the status code from Pythia (1) to 201 //added 120124
          p->set_status(HepMC::PYTHIA8NOENDVERTEXSTATUS);
 
          int pid = p->pdg_id();
-         if (eta > m_EtaCut &&
-             1 - std::abs(mom / m_FPConfig.pbeam0) < m_XiCut) {
+         if (eta > m_EtaCut && 1 - std::abs(mom / m_FPConfig.pbeam0) < m_XiCut) {
 
            // save a copy of the particles which passed the cut
            HepMC::FourVector Position = p->production_vertex()->position();
 
            HepMC::FourVector Momentum = p->momentum();
 
-           HepMC::GenVertexPtr Vertex =
-             HepMC::newGenVertexPtr(Position); // copy of the vertex
+           HepMC::GenVertexPtr Vertex = HepMC::newGenVertexPtr(Position); // copy of the vertex
            HepMC::GenParticlePtr Particle =
              HepMC::newGenParticlePtr(Momentum, pid, 202);
 
@@ -305,8 +294,7 @@ int ALFA_BeamTransport::TransportSelectedParticle(HepMC::GenEvent& evt, int evt_
            evt.add_vertex(Vertex);
 
            // select direction of particle
-           if (p->momentum().pz() > 0. &&
-               pid == 2212) { // Beam1 TODO Tracking only works for protons!!!!
+           if (p->momentum().pz() > 0. && pid == 2212) { // Beam1 TODO Tracking only works for protons!!!!
              p1 = p;
              // now we want to track the final particle if it's a protons
              // Positions are given in mm FPTracker needs them in meter
@@ -321,8 +309,7 @@ int ALFA_BeamTransport::TransportSelectedParticle(HepMC::GenEvent& evt, int evt_
              // do particle tracking for beam 1
 
              // tracking funktion
-             m_BeamTracker.ALFA_BeamTrack::CalculatePosRP(
-               m_Particle1); // calculates position and momentum at RP1
+             m_BeamTracker.ALFA_BeamTrack::CalculatePosRP(m_Particle1); // calculates position and momentum at RP1
              // Position at RP
              m_PosRP1 = m_BeamTracker.ALFA_BeamTrack::PosRP();
              PosAtRP1.push_back(m_PosRP1);
@@ -354,8 +341,7 @@ int ALFA_BeamTransport::TransportSelectedParticle(HepMC::GenEvent& evt, int evt_
                p2->momentum().py(),
                p2->momentum().pz());
              // tracking funktion
-             m_BeamTracker.ALFA_BeamTrack::CalculatePosRP(
-               m_Particle2); // gives position and momentum at RP3
+             m_BeamTracker.ALFA_BeamTrack::CalculatePosRP(m_Particle2); // gives position and momentum at RP3
              // Position at RP
              m_PosRP3 = m_BeamTracker.ALFA_BeamTrack::PosRP();
              PosAtRP3.push_back(m_PosRP3);
@@ -382,8 +368,6 @@ int ALFA_BeamTransport::TransportSelectedParticle(HepMC::GenEvent& evt, int evt_
            }
 
            if (pid == 2212) { // Find the protons
-             // change status code
-             //	(*p)->set_status(201); //Todo  here we have to find a convetion
              m_pcount++;
              if (m_pcount > 2) {
                ATH_MSG_ERROR("Strange: More than two protons in this event!");
@@ -399,47 +383,32 @@ int ALFA_BeamTransport::TransportSelectedParticle(HepMC::GenEvent& evt, int evt_
      //Add Data for HepMC Collection
      
      for(int i=0;i<(int)PosAtRP1.size();i++){//Beam1
-	  
-     
      	//The factor 1000 comes from the fact that HepMC saves length in mm
-     
      HepMC::FourVector PositionVectorRP1 = HepMC::FourVector(PosAtRP1.at(i).x()*1000.,PosAtRP1.at(i).y()*1000.,PosAtRP1.at(i).z()*1000.,0.*1000.);
-     
      HepMC::FourVector MomentumVectorRP1 = HepMC::FourVector(MomAtPR1.at(i).x(),MomAtPR1.at(i).y(),MomAtPR1.at(i).z(),EnergyRP1.at(i));
      
-     	HepMC::GenVertexPtr VertexRP1 = HepMC::newGenVertexPtr(PositionVectorRP1);
-     	HepMC::GenParticlePtr ParticleRP1 = HepMC::newGenParticlePtr(MomentumVectorRP1,2212,1); //save the transported particle with status code 1 (added 120124) preview was 201
-     	//Add particle to vertex
-     	VertexRP1->add_particle_out(ParticleRP1);
-     	//add new vertex to HepMC event record
-     	if(m_PosRP1.x()!=-99){ // add vertex to event record if the particle in the first beam was not lost
-		  evt.add_vertex(VertexRP1);
-     	}
+       HepMC::GenVertexPtr VertexRP1 = HepMC::newGenVertexPtr(PositionVectorRP1);
+       HepMC::GenParticlePtr ParticleRP1 = HepMC::newGenParticlePtr(MomentumVectorRP1,2212,1); //save the transported particle with status code 1 (added 120124) preview was 201
+       //Add particle to vertex
+       VertexRP1->add_particle_out(ParticleRP1);
+       //add new vertex to HepMC event record
+       if(m_PosRP1.x()!=-99){ // add vertex to event record if the particle in the first beam was not lost
+        evt.add_vertex(VertexRP1);
+       }
      }
      ATH_MSG_INFO ("Add transproted particle into HepMC event record Beam 2" );
      for(int i=0;i<(int)PosAtRP3.size();i++){
-	  
-	  //Add Data for HepMC Collection			
-	  
-	  //RP3		
 	  HepMC::FourVector PositionVectorRP3 = HepMC::FourVector(PosAtRP3.at(i).x()*1000.,PosAtRP3.at(i).y()*1000.,PosAtRP3.at(i).z()*1000.,0.*1000.);
-	  
 	  HepMC::FourVector MomentumVectorRP3 = HepMC::FourVector(MomAtPR3.at(i).x(),MomAtPR3.at(i).y(),MomAtPR3.at(i).z(),EnergyRP3.at(i));
-	  
 	  HepMC::GenVertexPtr VertexRP3 = HepMC::newGenVertexPtr(PositionVectorRP3);
-	  HepMC::GenParticlePtr ParticleRP3 = HepMC::newGenParticlePtr(MomentumVectorRP3,2212,1);//save the transported particle with status code 1 (added 120124) preview was 201 
-	  
+	  HepMC::GenParticlePtr ParticleRP3 = HepMC::newGenParticlePtr(MomentumVectorRP3,2212,1);//save the transported particle with status code 1 (added 120124) preview was 201   
 	  VertexRP3->add_particle_out(ParticleRP3);
-
-          if (m_PosRP3.x() != -99) { // add vertex to event record if the
-                                     // particle in the second beam was not lost
+          if (m_PosRP3.x() != -99) { // add vertex to event record if the // particle in the second beam was not lost
             evt.add_vertex(VertexRP3);
           }
-	  
      }
     
     //convert HepMC data back to HepMC standart ( momentum and energy in MeV)
     ALFA_BeamTransport::GeVToMeV(evt);
-
     return true;
 }
