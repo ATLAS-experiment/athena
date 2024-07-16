@@ -12,6 +12,7 @@
 #include "TrackAnalysisPlotsMgr.h"
 #include "TrackAnalysisCollections.h"
 #include "ITrackMatchingLookup.h"
+#include "OfflineObjectDecorHelper.h"
 
 /// Gaudi include(s)
 #include "GaudiKernel/ISvcLocator.h"
@@ -67,6 +68,12 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::initialize()
   if( m_trkAnaDefSvc->plotResolutions() ) {
     m_plots_resolution = std::make_unique< ResolutionPlots >(
         this, "Tracks/Resolutions", m_anaTag, m_trkAnaDefSvc->referenceTag() );
+  }
+
+  /// Fake Rate plots (only if reference is Truth)
+  if( m_trkAnaDefSvc->plotFakeRates() and m_trkAnaDefSvc->isReferenceTruth() ) {
+    m_plots_fakeRate = std::make_unique< FakeRatePlots >(
+        this, "Tracks/FakeRates", m_anaTag, m_trkAnaDefSvc->testTag() );
   }
 
   /// Offline electron plots
@@ -139,6 +146,12 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsTest(
       ATH_CHECK( m_plots_eff_vsTest->fillPlots( *particle, isMatched, weight ) );
     }
 
+    /// fake rate plots
+    if( m_plots_fakeRate ) {
+      bool isFake = isFakeTruth( *particle, m_trkAnaDefSvc->truthProbCut() );
+      ATH_CHECK( m_plots_fakeRate->fillPlots( *particle, isFake, weight ) );
+    }
+
     /// offline electron plots (Offline is always either test or reference)
     if( m_trkAnaDefSvc->isTestOffline() ) {
       if( m_plots_offEle ) {
@@ -186,6 +199,7 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsReference(
       ATH_CHECK( m_plots_eff_vsRef->fillPlots( *particle, isMatched, weight ) );
     }
 
+    /// resolustion plots
     if( m_plots_resolution ) {
       if( isMatched ) {
         if( m_trkAnaDefSvc->isTestTruth() ) {

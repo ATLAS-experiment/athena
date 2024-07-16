@@ -83,6 +83,7 @@ def TrackAnalysisDefinitionSvcCfg( flags, name="TrkAnaDefSvc", **kwargs ):
     kwargs.setdefault( "RefTag",  getTag( flags, flags.PhysVal.IDTPM.currentTrkAna.RefType ) )
 
     kwargs.setdefault( "MatchingType", flags.PhysVal.IDTPM.currentTrkAna.MatchingType )
+    kwargs.setdefault( "MatchingTruthProb", flags.PhysVal.IDTPM.currentTrkAna.truthProbCut )
 
     if ( ( "Trigger" in flags.PhysVal.IDTPM.currentTrkAna.TestType and  "EFTrigger" not in flags.PhysVal.IDTPM.currentTrkAna.TestType) or
          ( "Trigger" in flags.PhysVal.IDTPM.currentTrkAna.RefType and "EFTrigger" not in flags.PhysVal.IDTPM.currentTrkAna.RefType ) ):
@@ -90,6 +91,8 @@ def TrackAnalysisDefinitionSvcCfg( flags, name="TrkAnaDefSvc", **kwargs ):
 
     kwargs.setdefault( "plotTrackParameters", flags.PhysVal.IDTPM.currentTrkAna.plotTrackParameters )
     kwargs.setdefault( "plotEfficiencies", flags.PhysVal.IDTPM.currentTrkAna.plotEfficiencies )
+    kwargs.setdefault( "plotResolutions", flags.PhysVal.IDTPM.currentTrkAna.plotResolutions )
+    kwargs.setdefault( "plotFakeRates", flags.PhysVal.IDTPM.currentTrkAna.plotFakeRates )
     kwargs.setdefault( "plotOfflineElectrons", flags.PhysVal.IDTPM.currentTrkAna.plotOfflineElectrons )
 
     trkAnaSvc = CompFactory.TrackAnalysisDefinitionSvc( name, **kwargs )
