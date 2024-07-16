@@ -1317,6 +1317,22 @@ def getMCSignatures():
         ChainProp(name='HLT_g35_medium_tau25_dipion1_tracktwoMVA_50invmAB_L1eEM28M', l1SeedThresholds=['eEM28M','TAU12'], stream=[PhysicsStream], groups=PrimaryPhIGroup+EgammaTauGroup),
         ChainProp(name='HLT_g35_medium_tau25_dipion2_tracktwoMVA_50invmAB_L1eEM28M', l1SeedThresholds=['eEM28M','TAU12'], stream=[PhysicsStream], groups=PrimaryPhIGroup+EgammaTauGroup),
         ChainProp(name='HLT_g35_medium_tau25_dipion3_tracktwoMVA_L1TAU12_60invmAB_L1eEM28M', l1SeedThresholds=['eEM28M','TAU12'], stream=[PhysicsStream], groups=PrimaryPhIGroup+EgammaTauGroup),
+
+        ChainProp(name='HLT_g35_tight_tau25_dikaonmass_tracktwoMVA_50invmAB_L1eEM26M', l1SeedThresholds=['eEM26M','TAU12'], stream=[PhysicsStream], groups=PrimaryPhIGroup+EgammaTauGroup),
+        ChainProp(name='HLT_g35_tight_tau25_kaonpi1_tracktwoMVA_50invmAB_L1eEM26M', l1SeedThresholds=['eEM26M','TAU12'], stream=[PhysicsStream], groups=PrimaryPhIGroup+EgammaTauGroup),
+        ChainProp(name='HLT_g35_tight_tau25_kaonpi2_tracktwoMVA_50invmAB_L1eEM26M', l1SeedThresholds=['eEM26M','TAU12'], stream=[PhysicsStream], groups=PrimaryPhIGroup+EgammaTauGroup),
+        ChainProp(name='HLT_g35_tight_tau25_singlepion_tracktwoMVA_50invmAB_L1eEM26M', l1SeedThresholds=['eEM26M','TAU12'], stream=[PhysicsStream], groups=PrimaryPhIGroup+EgammaTauGroup),
+        ChainProp(name='HLT_g35_tight_tau25_dipion1_tracktwoMVA_50invmAB_L1eEM26M', l1SeedThresholds=['eEM26M','TAU12'], stream=[PhysicsStream], groups=PrimaryPhIGroup+EgammaTauGroup),
+        ChainProp(name='HLT_g35_tight_tau25_dipion2_tracktwoMVA_50invmAB_L1eEM26M', l1SeedThresholds=['eEM26M','TAU12'], stream=[PhysicsStream], groups=PrimaryPhIGroup+EgammaTauGroup),
+        ChainProp(name='HLT_g35_tight_tau25_dipion3_tracktwoMVA_60invmAB_L1eEM26M', l1SeedThresholds=['eEM26M','TAU12'], stream=[PhysicsStream], groups=PrimaryPhIGroup+EgammaTauGroup),
+        ChainProp(name='HLT_g35_tight_tau25_dikaonmass_tracktwoMVA_50invmAB_L1eEM28M', l1SeedThresholds=['eEM28M','TAU12'], stream=[PhysicsStream], groups=PrimaryPhIGroup+EgammaTauGroup),
+        ChainProp(name='HLT_g35_tight_tau25_kaonpi1_tracktwoMVA_50invmAB_L1eEM28M', l1SeedThresholds=['eEM28M','TAU12'], stream=[PhysicsStream], groups=PrimaryPhIGroup+EgammaTauGroup),
+        ChainProp(name='HLT_g35_tight_tau25_kaonpi2_tracktwoMVA_50invmAB_L1eEM28M', l1SeedThresholds=['eEM28M','TAU12'], stream=[PhysicsStream], groups=PrimaryPhIGroup+EgammaTauGroup),
+        ChainProp(name='HLT_g35_tight_tau25_singlepion_tracktwoMVA_50invmAB_L1eEM28M', l1SeedThresholds=['eEM28M','TAU12'], stream=[PhysicsStream], groups=PrimaryPhIGroup+EgammaTauGroup),
+        ChainProp(name='HLT_g35_tight_tau25_dipion1_tracktwoMVA_50invmAB_L1eEM28M', l1SeedThresholds=['eEM28M','TAU12'], stream=[PhysicsStream], groups=PrimaryPhIGroup+EgammaTauGroup),
+        ChainProp(name='HLT_g35_tight_tau25_dipion2_tracktwoMVA_50invmAB_L1eEM28M', l1SeedThresholds=['eEM28M','TAU12'], stream=[PhysicsStream], groups=PrimaryPhIGroup+EgammaTauGroup),
+        ChainProp(name='HLT_g35_tight_tau25_dipion3_tracktwoMVA_60invmAB_L1eEM28M', l1SeedThresholds=['eEM28M','TAU12'], stream=[PhysicsStream], groups=PrimaryPhIGroup+EgammaTauGroup),
+
         # Asymmetric Legacy tau chains for HH->bbtautau
         ChainProp(name='HLT_tau30_mediumRNN_tracktwoMVA_tau20_mediumRNN_tracktwoMVA_03dRAB30_j20c_020jvt_bgn185_pf_ftf_L1DR-TAU20ITAU12I-J25', l1SeedThresholds=['TAU20IM','TAU12IM', 'FSNOSEED'], stream=['VBFDelayed'], groups=TauBJetGroup),
         ChainProp(name='HLT_tau30_mediumRNN_tracktwoMVA_tau20_mediumRNN_tracktwoMVA_03dRAB30_4j20c_020jvt_SHARED_j20c_020jvt_bgn185_pf_ftf_L1DR-TAU20ITAU12I-J25', l1SeedThresholds=['TAU20IM','TAU12IM']+2*['FSNOSEED'], stream=['VBFDelayed'], groups=TauBJetGroup),

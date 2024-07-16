@@ -32,12 +32,16 @@ def defineMenu():
         # Legacy TAU items (ATR-28677)
         'L1_TAU8_EMPTY', 'L1_TAU8_FIRSTEMPTY', 'L1_TAU8_UNPAIRED_ISO',
         'L1_TAU40_EMPTY', 'L1_TAU40_UNPAIRED_ISO',
+        'L1_TAU8', 'L1_TAU12IM', 'L1_TAU20IM', 'L1_TAU40',
         'L1_TAU60', 
         'L1_TAU60_2TAU40',
         'L1_TAU100',
         'L1_DR-TAU20ITAU12I',
         'L1_DR-TAU20ITAU12I-J25',
         'L1_TAU60_DR-TAU20ITAU12I',
+        'L1_TAU20IM_2TAU12IM', 
+        # combined tau - jet
+        'L1_TAU20IM_2TAU12IM_4J12p0ETA25',
 
         # ATR-24037 
         'L1_jXEPerf100',

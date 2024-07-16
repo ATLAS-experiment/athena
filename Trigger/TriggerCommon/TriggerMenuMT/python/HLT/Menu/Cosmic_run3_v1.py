@@ -63,8 +63,6 @@ def getCosmicSignatures():
     ]
 
     chains['Tau'] = [
-        ChainProp(name='HLT_tau0_ptonly_L1TAU8', l1SeedThresholds=['TAU8'], stream=['Main'], groups=PrimaryLegGroup+SingleTauGroup),
-        #phase-I
         ChainProp(name='HLT_tau0_ptonly_L1eTAU12', l1SeedThresholds=['eTAU12'], stream=['Main'], groups=PrimaryPhIGroup+SingleTauGroup),
     ]
 
@@ -113,10 +111,6 @@ def getCosmicSignatures():
         ChainProp(name='HLT_noalg_L1eEM24L',     l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=EgammaStreamersGroup+SupportPhIGroup),
         ChainProp(name='HLT_noalg_L1eEM26M',     l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=EgammaStreamersGroup+SupportPhIGroup),
 
-        ChainProp(name='HLT_noalg_L1TAU8',       l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=TauStreamersGroup+SupportLegGroup),
-        ChainProp(name='HLT_noalg_L1TAU40',      l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=TauStreamersGroup+SupportLegGroup),
-        ChainProp(name='HLT_noalg_L1TAU12IM',    l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=TauStreamersGroup+SupportLegGroup),        
-        ChainProp(name='HLT_noalg_L1TAU20IM',    l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=TauStreamersGroup+SupportLegGroup),        
         #Tau, phase-I
         ChainProp(name='HLT_noalg_L1eTAU12',     l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=TauStreamersGroup+SupportPhIGroup),
         ChainProp(name='HLT_noalg_L1eTAU60',     l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=TauStreamersGroup+SupportPhIGroup),
