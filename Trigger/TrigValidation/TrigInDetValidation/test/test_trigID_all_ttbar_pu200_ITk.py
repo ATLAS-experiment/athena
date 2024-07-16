@@ -4,7 +4,7 @@
 # art-description: art job for all_ttbar_pu200_ITk
 # art-type: grid
 # art-include: main/Athena
-# art-input: mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4149_r14700
+# art-input: mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8514_s4345_r15583
 # art-input-nfiles: 20
 # art-athena-mt: 8
 # art-html: https://idtrigger-val.web.cern.ch/idtrigger-val/TIDAWeb/TIDAart/?jobdir=
@@ -38,7 +38,7 @@ useCA_Reco = True
 # by default, all MC tests override the global conditions tag and force OFLCOND-MC23-SDR-RUN3-05, which is not suitable for Run4
 conditionsOverride = 'Run4'
 
-preexec_trig = "flags.Tracking.doTruth=False;flags.Trigger.enableL1CaloPhase1=False;"
+preexec_trig = "flags.Tracking.doTruth=False;"
 
 Jobs = [ ( "Offline",     " TIDAdata-run4-offline.dat      -r Offline -o data-hists-offline.root" ),
          ( "OfflineVtx",  " TIDAdata-run4-offline-vtx.dat  -r Offline -o data-hists-offline-vtx.root" ) ]

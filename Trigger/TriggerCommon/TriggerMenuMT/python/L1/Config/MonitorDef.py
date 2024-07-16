@@ -118,7 +118,6 @@ class MonitorDef:
                 "L1_3MU3V", "L1_MU5VF_3MU3VF", "L1_4MU3V",
                 ## Legacy L1 items
                 # L1Calo
-                "L1_TAU8","L1_TAU20IM",
                 "L1_J15","L1_J400",
   
                 ## Phase-I

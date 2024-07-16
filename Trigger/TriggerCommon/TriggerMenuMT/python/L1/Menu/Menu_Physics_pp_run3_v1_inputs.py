@@ -244,16 +244,16 @@ def defineInputsMenu():
             ('jTE200',1), ('jTEC200',1), ('jTEFWD100',1), ('jTEFWDA100',1), ('jTEFWDC100',1),
             # additional heavy ion jTE items
             ('jTE3',1), ('jTE4',1), ('jTE10',1), ('jTE5',1), ('jTE20',1), ('jTE50',1),
-            ('jTE100',1) , ('jTE600',1), ('jTE1500',1), ('jTE3000',1), ('jTE10000',1),
+            ('jTE100',1) , ('jTE600',1), ('jTE1500',1), ('jTE3000',1), ('jTE6500',1), ('jTE7000',1), ('jTE7500',1),
             ('jTEFWDA1',1), ('jTEFWDC1',1), ('jTEFWDA5',1), ('jTEFWDC5',1),
 
             # spare energy thresholds for commissioning
-            ('jXESPARE1',1), ('jXESPARE2',1), ('jXESPARE3',1), ('jXESPARE4',1), ('jXESPARE5',1), ('jXESPARE6',1), ('jXESPARE7',1), ('jXESPARE8',1),
+            ('jXESPARE1',1), ('jXESPARE2',1), ('jXESPARE3',1), ('jXESPARE4',1), ('jXESPARE5',1), ('jXESPARE6',1),
 
             # production
             # decrement jXESPARE for additional heavy ion jTE thresholds
-            #('jXESPARE9',1), ('jXESPARE10',1), ('jXESPARE11',1), ('jXESPARE12',1), ('jXESPARE13',1),
-            #('jXESPARE14',1),
+            # ('jXESPARE7',1), ('jXESPARE8',1),('jXESPARE9',1), ('jXESPARE10',1), ('jXESPARE11',1),
+            # ('jXESPARE12',1), ('jXESPARE13',1), ('jXESPARE14',1),
 
         ]
     })
