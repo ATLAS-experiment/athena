@@ -293,6 +293,28 @@ void* AuxVectorData::getDecorationArray (SG::auxid_t auxid) const
 
 
 /**
+ * @brief Return a reference to a description of this vector's start+size.
+ * @param auxid The desired aux data item.
+ *
+ * This low-overhead method of getting the start+size of an auxiliary
+ * variable.  The returned object will be updated if the variable's
+ * vector changes.  Raises an exception if the variable does not exist.
+ *
+ * This is in principle a const-correctness violation,
+ * since @c AuxDataSpanBase has a non-const pointer to the start
+ * of the vector.  But doing it properly is kind of painful, and as
+ * this interface is only meant to be used internally, it's likely
+ * not a real problem.
+ */
+inline
+const AuxDataSpanBase*
+AuxVectorData::getDataSpan (SG::auxid_t auxid) const
+{
+  return m_spanCache.getDataSpan (auxid, *this);
+}
+
+
+/**
  * @brief Swap this instance with another.
  * @param other The other instance with which to swap.
  */
@@ -302,6 +324,7 @@ void AuxVectorData::swap (AuxVectorData& other)
   m_cache.swap (other.m_cache);
   m_constCache.swap (other.m_constCache);
   m_decorCache.swap (other.m_decorCache);
+  m_spanCache.swap (other.m_spanCache);
   std::swap (m_store, other.m_store);
   std::swap (m_constStore, other.m_constStore);
   std::swap (m_constStoreLink, other.m_constStoreLink);
@@ -320,6 +343,7 @@ void AuxVectorData::clearCache()
   m_cache.clear();
   m_constCache.clear();
   m_decorCache.clear();
+  m_spanCache.clear();
 }
 
 
@@ -473,6 +497,33 @@ void* AuxVectorData::Cache::getDecorationArray (SG::auxid_t auxid,
     ATHCONTAINERS_ASSUME (cachePtr (auxid) == ptr);
   }
   return ptr;
+}
+
+
+/**
+ * @brief Return a reference to a description of this vector's start+size.
+ * @param auxid The desired aux data item.
+ */
+inline
+const AuxDataSpanBase*
+AuxVectorData::Cache::getDataSpan (SG::auxid_t auxid,
+                                   const AuxVectorData& parent)
+{
+  // This function is important for performance.
+  // Be careful when changing it.
+
+  const void* ptr = cachePtr (auxid);
+  if (ATHCONTAINERS_UNLIKELY (ptr == 0)) {
+    // We don't have the variable cached.
+    // Call the out-of-line routine to get it cached.
+    ptr = static_cast<const void*>(parent.getDataSpanOol (auxid, false));
+
+    // These inform the compiler of what the previous call did.
+    // They tell the optimizer that it can now assume that this cache
+    // entry is valid.
+    //ATHCONTAINERS_ASSUME (ptr != 0);
+  }
+  return reinterpret_cast<const AuxDataSpanBase*> (ptr);
 }
 
 

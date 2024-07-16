@@ -5,6 +5,7 @@
     <field name="m_cache" transient="true"/>
     <field name="m_constCache" transient="true"/>
     <field name="m_decorCache" transient="true"/>
+    <field name="m_spanCache" transient="true"/>
     <field name="m_store" transient="true"/>
     <field name="m_constStore" transient="true"/>
     <field name="m_constStoreLink" transient="true"/>
