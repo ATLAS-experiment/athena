@@ -43,7 +43,7 @@ private:
 
 inline bool PRDHandle_MDT::masked() const
 {
-  return m_driftcircle->status()==Muon::MdtStatusMasked;
+  return m_driftcircle->status() == Muon::MdtStatusMasked;
 }
 
 inline int PRDHandle_MDT::ADC() const

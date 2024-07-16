@@ -20,7 +20,7 @@ StatusCode ZtoLeptonFilter::filterEvent() {
 #ifdef HEPMC3
     for ( const auto& pitr: genEvt->particles()) {
       if (MC::isZ(pitr)) {
-        if ( !pitr->end_vertex() && pitr->status()==3) continue; // Allow status 3 Zs with no end vertex
+        if ( !pitr->end_vertex() && !MC::isPhysical(pitr)) continue; // Allow status 3 Zs with no end vertex
         else if (!pitr->end_vertex() ){
           // Found a Z boson with no end vertex and status!=3 .  Something is sick about this event
           break;
@@ -36,7 +36,7 @@ StatusCode ZtoLeptonFilter::filterEvent() {
 #else
     for (HepMC::GenEvent::particle_const_iterator pitr = genEvt->particles_begin();	pitr != genEvt->particles_end(); ++pitr) {
       if (MC::isZ(*pitr)) {
-        if ( !(*pitr)->end_vertex() && (*pitr)->status()==3) continue; // Allow status 3 Zs with no end vertex
+        if ( !(*pitr)->end_vertex() && !MC::isPhysical(*pitr)) continue; // Allow status 3 Zs with no end vertex
         else if ( !(*pitr)->end_vertex() ){
           // Found a Z boson with no end vertex and status!=3 .  Something is sick about this event
           break;

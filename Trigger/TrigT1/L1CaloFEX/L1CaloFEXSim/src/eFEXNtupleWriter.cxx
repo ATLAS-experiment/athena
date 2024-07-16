@@ -345,7 +345,7 @@ std::unique_ptr<TLorentzVector> LVL1::eFEXNtupleWriter::visibleTauP4(const xAOD:
   // ignore documentation particles. Attempt to find the nOutgoingParticles() of a documentation particle 
   // causes crash.
   // It still gives the correct result, but I don't know why I have to do this.
-  if (particle->status() == 3) {
+  if (!MC::isPhysical(particle)) {
     return psum;
   }
   const xAOD::TruthVertex* decay_vertex = particle->decayVtx();
@@ -375,7 +375,7 @@ std::unique_ptr<TLorentzVector> LVL1::eFEXNtupleWriter::invisibleTauP4(const xAO
   // ignore documentation particles. Attempt to find the nOutgoingParticles() of a documentation particle 
   // causes crash.
   // It still gives the correct result, but I don't know why I have to do this.
-  if (particle->status() == 3) {
+  if (!MC::isPhysical(particle)) {
     return psum;
   }
   const xAOD::TruthVertex* decay_vertex = particle->decayVtx();

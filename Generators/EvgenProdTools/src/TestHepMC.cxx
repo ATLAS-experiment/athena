@@ -421,7 +421,7 @@ StatusCode TestHepMC::execute() {
             }
           } // Done with fancy print
 
-          if (part->status()==1 || part->status()==2){
+          if (part->status() == 1 || part->status() == 2){
             vtxDisplacedstatuscode12CheckRateCnt += 1;
           } else {
             vtxDisplacedstatuscodenot12CheckRateCnt += 1;

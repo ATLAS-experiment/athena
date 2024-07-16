@@ -221,7 +221,7 @@ MCTruthClassifier::getGenPart(const xAOD::TrackParticle* trk, MCTruthPartClassif
     }
   }
 
-  if (MC::isDecayed(theGenParticle) || theGenParticle->status() == 3) {
+  if (MC::isDecayed(theGenParticle) || !MC::isPhysical(theGenParticle)) {
     ATH_MSG_WARNING("track matched to the truth with status " << theGenParticle->status());
   }
 

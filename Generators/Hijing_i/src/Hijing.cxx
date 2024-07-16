@@ -762,8 +762,8 @@ Hijing::fillEvt(HepMC::GenEvent* evt)
       const std::vector <HepMC::GenParticlePtr> allParticles=evt->particles();
       for(auto p : allParticles)
       {
-	HepMC::ConstGenVertexPtr end_v=p->end_vertex();
-	if(p->status()==2 && !end_v) evt->remove_particle(p);
+        HepMC::ConstGenVertexPtr end_v=p->end_vertex();
+        if(p->status() == 2 && !end_v) evt->remove_particle(p);
       }
     }
 #else

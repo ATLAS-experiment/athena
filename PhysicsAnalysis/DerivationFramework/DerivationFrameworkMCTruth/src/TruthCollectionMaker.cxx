@@ -199,8 +199,8 @@ StatusCode DerivationFramework::TruthCollectionMaker::addBranches() const
                     // Only collect leptons
                     if (!MC::isSMLepton(truthParticles->at(i))) continue;
                     // Gather by status
-                    if (truthParticles->at(i)->status()==20) status20.push_back( truthParticles->at(i) );
-                    if (truthParticles->at(i)->status()== 3) status3.push_back(  truthParticles->at(i) );
+                    if (truthParticles->at(i)->status() == 20) status20.push_back( truthParticles->at(i) );
+                    if (truthParticles->at(i)->status() == 3) status3.push_back(  truthParticles->at(i) );
                 } // Done with loop over truth particles
                 // Make it so that we can exclusively use one vector
                 // Status 20 should have the priority -- it is the future
