@@ -23,7 +23,7 @@ int makeZdcNtuple(const std::string & submitDir = "submitDir", const std::string
   bool grid_mode = 0;
   bool isMC = 0;
 
-  if (readDir.find("file:") == 0)
+  if (readDir.starts_with("file:"))
   {
     fileDir = readDir.substr(5); // remove file:
     file_mode = 1;
@@ -32,7 +32,7 @@ int makeZdcNtuple(const std::string & submitDir = "submitDir", const std::string
     SH::ScanDir().filePattern("*").scan(sh, list);
   }
 
-  if (readDir.find("eos:") == 0)
+  if (readDir.starts_with("eos:"))
   {
     fileDir = readDir.substr(4);
     eos_mode = 1;
@@ -42,7 +42,7 @@ int makeZdcNtuple(const std::string & submitDir = "submitDir", const std::string
     SH::ScanDir().filePattern("*").scan(sh, list);
   }
 
-  if (readDir.find("eoslsf:") == 0)
+  if (readDir.starts_with("eoslsf:"))
   {
     fileDir = readDir.substr(7);
     eoslsf_mode = 1;
@@ -52,7 +52,7 @@ int makeZdcNtuple(const std::string & submitDir = "submitDir", const std::string
     SH::ScanDir().filePattern("*").scan(sh, list);
   }
 
-  if (readDir.find("grid:") == 0)
+  if (readDir.starts_with("grid:"))
   {
     fileDir = readDir.substr(5);
     grid_mode = 1;
