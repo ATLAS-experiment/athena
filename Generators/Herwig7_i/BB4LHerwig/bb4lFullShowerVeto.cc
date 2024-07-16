@@ -2,7 +2,7 @@
 //
 // This is the implementation of the non-inlined, non-templated member
 // functions of the bb4lFullShowerVeto class.
-// Copyright (C) 2017 Silvia Ferrario Ravasio, Tomas Jezo
+// Copyright (C) 2017, 2024 Silvia Ferrario Ravasio, Tomas Jezo
 // inspred by Contrib/ShowrVeto/NonBShowerVeto.cc file
 //
 
@@ -123,8 +123,8 @@ bool bb4lFullShowerVeto::vetoShower () {
 
     for ( int i = 2; i < hepeup_.nup; ++i )
     {
-      if(hepeup_.mothup[i][0] == itop && abs(hepeup_.idup[i])!=24){
-	for (int j=0; j<4; ++j) pbg[j]+=hepeup_.pup[i][j];
+      if(hepeup_.getMother(i,0) == itop && abs(hepeup_.idup[i])!=24){
+	for (int j=0; j<4; ++j) pbg[j]+=hepeup_.getP(i,j);
       }
     }
 
