@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -181,7 +181,7 @@ StatusCode CalibrationNtupleMakerTool::execute()
   //get NPV
   float npv = 0.;
   
-  for (const auto& vertex : *vertices) {
+  for (const auto vertex : *vertices) {
     if (vertex->nTrackParticles()>=2)
       npv++;
   }
@@ -205,7 +205,7 @@ StatusCode CalibrationNtupleMakerTool::execute()
     m_mTrue         ->clear();
     m_index         ->clear();
     
-    for (const auto& truth: *truths) {
+    for (const auto truth: *truths) {
 
       // here we match to the reco
       int index = 0;
@@ -290,7 +290,7 @@ int CalibrationNtupleMakerTool::Matched(const xAOD::Jet* truth, const xAOD::JetC
 double CalibrationNtupleMakerTool::DRmin(const xAOD::Jet* myjet, const xAOD::JetContainer* jets, double PtMin) {
 
   double DRmin=9999;
-  for (const auto& jet : *jets) {
+  for (const auto jet : *jets) {
     if (PtMin>0. and jet->pt()<PtMin) continue;
     double Dr = myjet->p4().DeltaR(jet->p4());
     if (Dr>0.0001 and Dr<DRmin) 
