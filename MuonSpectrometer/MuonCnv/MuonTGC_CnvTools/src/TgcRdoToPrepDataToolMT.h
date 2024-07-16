@@ -72,8 +72,8 @@ namespace Muon
       virtual StatusCode decode(const EventContext& ctx,
                                 const std::vector<IdentifierHash>& idVect) const override;
 
-      
-    protected:
+      virtual StatusCode provideEmptyContainer(const EventContext& ctx) const override;
+    private:
       /** The number of recorded Bunch Crossings (BCs) FOR HITS is 3 (Previous, Current, and Next BCs) */
       static constexpr int NBC_HIT = 3;
       /* Run1,2: The number of recorded Bunch Crossings (BCs) FOR TRIGGER (HPT/SL) is 3 (Previous, Current, Next BCs) */
@@ -82,19 +82,28 @@ namespace Muon
 
       struct State {
         /** TgcPrepRawData (hit PRD) containers */
-        TgcPrepDataContainer* m_tgcPrepDataContainer[NBC_HIT+1] = {};   // +1 for AllBCs
-        std::unordered_map<Identifier, TgcPrepDataCollection*> m_tgcPrepDataCollections[NBC_HIT+1];
+        std::array<TgcPrepDataContainer*, NBC_HIT +1> tgcPrepDataContainer{};   // +1 for AllBCs
+        
+        using TempPrepDataContainer = std::vector<std::unique_ptr<TgcPrepDataCollection>>;
+        std::array<TempPrepDataContainer, NBC_HIT +1> tgcPrepDataCollections{};
         /** TgcCoinData (coincidence PRD) containers */ 
-        TgcCoinDataContainer* m_tgcCoinDataContainer[NBC_TRIG] = {};
-        std::unordered_map<Identifier, TgcCoinDataCollection*> m_tgcCoinDataCollections[NBC_TRIG];
+        std::array<TgcCoinDataContainer*, NBC_TRIG> tgcCoinDataContainer{};
+
+        using TempCoinDataContainer = std::vector<std::unique_ptr<TgcCoinDataCollection>>;
+        std::array<TempCoinDataContainer, NBC_TRIG> tgcCoinDataCollections{};
 
         /// Handle for the xAOD container 
-        SG::WriteHandle<xAOD::TgcStripContainer>    m_xaodHandle;
+        SG::WriteHandle<xAOD::TgcStripContainer> m_xaodHandle{};
+
+        const MuonGM::MuonDetectorManager* muDetMgr{nullptr};
       };
+      template<class ContType, class CollType> StatusCode transferData(ContType& container,
+                                                                       std::vector<std::unique_ptr<CollType>>&& coll) const;
+
       StatusCode setupState(const EventContext& ctx, State& state) const;
 
       struct CablingInfo {
-        const MuonTGC_CablingSvc* m_tgcCabling;
+        const MuonTGC_CablingSvc* m_tgcCabling{nullptr};
         /** Conversion from hash to onlineId */  
         std::vector<uint16_t> m_hashToOnlineId;
         int m_MAX_N_ROD = 0;
@@ -183,55 +192,32 @@ namespace Muon
       enum MAP_SIZE {
         WT_MAP_SIZE = 3*BIT_POS_INPUT_SIZE,
         ST_MAP_SIZE = 2*BIT_POS_INPUT_SIZE,
-    SD_MAP_SIZE = 2*BIT_POS_INPUT_SIZE,
+        SD_MAP_SIZE = 2*BIT_POS_INPUT_SIZE,
         WD_MAP_SIZE = 2*BIT_POS_INPUT_SIZE
       };
 
-
-      /** Print PRD for debugging */
-      void printPrepDataImpl(const TgcPrepDataContainer* const* tgcPrepDataContainer,
-                             const TgcCoinDataContainer* const* tgcCoinDataContainer) const;
-      
+    
       /** Select decoder based on RDO type (Hit or Coincidence (Tracklet, HiPt and SL)) */
-      void selectDecoder(State& state,
-                         const TgcRawData& rd,
-                         const TgcRdo* rdoColl,
-                         std::vector< std::unordered_map<IdentifierHash, std::unique_ptr<TgcPrepDataCollection> > >& collectionMap,
-                         std::vector< std::unordered_map<IdentifierHash, std::unique_ptr<TgcCoinDataCollection> > >& coinMap) const;
+      void selectDecoder(State& state, const TgcRawData& rd, const TgcRdo* rdoColl) const;
 
       /** Decode RDO's of Hit */
-      StatusCode decodeHits(State& state,
-                            const TgcRawData& rd,
-                            std::vector<std::unordered_map<IdentifierHash, std::unique_ptr<TgcPrepDataCollection> > >& collectionMap) const;
+      StatusCode decodeHits(State& state, const TgcRawData& rd) const;
       /** Decode RDO's of Tracklet */
-      StatusCode decodeTracklet(State& state,
-                                const TgcRawData& rd,
-                                std::vector< std::unordered_map<IdentifierHash, std::unique_ptr<TgcCoinDataCollection> > >& coinMap) const;
+      StatusCode decodeTracklet(State& state, const TgcRawData& rd) const;
       /** Decode RDO's of Tracklet EIFI */
-      StatusCode decodeTrackletEIFI(State& state,
-                                    const TgcRawData& rd,
-                                    std::vector< std::unordered_map<IdentifierHash, std::unique_ptr<TgcCoinDataCollection> > >& coinMap) const;
+      StatusCode decodeTrackletEIFI(State& state, const TgcRawData& rd) const;
       /** Decode RDO's of HiPt */
-      StatusCode decodeHiPt(State& state,
-                            const TgcRawData& rd,
-                            std::vector< std::unordered_map<IdentifierHash, std::unique_ptr<TgcCoinDataCollection> > >& coinMap) const;
+      StatusCode decodeHiPt(State& state, const TgcRawData& rd) const;
       /** Decode RDO's of Inner */
-      StatusCode decodeInner(State& state,
-                             const TgcRawData& rd,
-                             std::vector< std::unordered_map<IdentifierHash, std::unique_ptr<TgcCoinDataCollection> > >& coinMap) const;
+      StatusCode decodeInner(State& state, const TgcRawData& rd) const;
       /** Decode RDO's of SectorLogic */
-      StatusCode decodeSL(State& state,
-                          const TgcRawData& rd,
-                          const TgcRdo* rdoColl,
-                          std::vector< std::unordered_map<IdentifierHash, std::unique_ptr<TgcCoinDataCollection> > >& coinMap) const;
+      StatusCode decodeSL(State& state, const TgcRawData& rd, const TgcRdo* rdoColl) const;
       
       /** Get bitpos from channel and SlbType */
       static int getbitpos(int channel, TgcRawData::SlbType slbType) ;
       /** Get channel from bitpos and SlbType */
       static int getchannel(int bitpos, TgcRawData::SlbType slbType) ;
 
-      /** Get r, phi and eta from x, y and z */
-      static bool getRPhiEtafromXYZ(const double x, const double y, const double z, double& r,  double& phi, double& eta) ;
       /** Get r from eta and z */
       static bool getRfromEtaZ(const double eta, const double z, double& r) ;
       /** Get eta from r and z */
@@ -239,8 +225,8 @@ namespace Muon
       
       /** Check the rdo is already converted or not */
       static bool isAlreadyConverted(const std::vector<const TgcRdo*>& decodedRdoCollVec,
-                              const std::vector<const TgcRdo*>& rdoCollVec,
-                              const TgcRdo* rdoColl) ;
+                                    const std::vector<const TgcRdo*>& rdoCollVec,
+                                    const TgcRdo* rdoColl) ;
       
       /** Check the IdHash is already requested or not */
       static bool isRequested(const std::vector<IdentifierHash>& requestedIdHashVect,
@@ -248,17 +234,6 @@ namespace Muon
       
       /** Check offline ID is OK for TgcReadoutElement */
       bool isOfflineIdOKForTgcReadoutElement(const MuonGM::TgcReadoutElement* descriptor, const Identifier channelId) const;
-
-
-      /** Show all IdentifierHash */
-      void showIdentifierHash(const State& state) const;
-      
-      /** Check an IdentifierHash is in any TgcPrepDataContainers */
-      static bool isIdentifierHashFoundInAnyTgcPrepDataContainer(const State& state,
-                                                          const IdentifierHash Hash) ;
-      /** Check an IdentifierHash is in any TgcCoinDataContainers */
-      static bool isIdentifierHashFoundInAnyTgcCoinDataContainer(const State& state,
-                                                          const IdentifierHash Hash) ;
       
       /** Retrieve slbId, subMatrix and position from Tracklet RDO */
       bool getTrackletInfo(const TgcRawData& rd,
@@ -390,9 +365,6 @@ namespace Muon
       /** Get SL local position */
       static const Amg::Vector2D* getSLLocalPosition(const MuonGM::TgcReadoutElement* readout, const Identifier, const double eta, const double phi) ; 
 
-      /** Utility function to get TgcCoinDataCollection from supplied map */
-      TgcCoinDataCollection* getTgcCoinDataColFromMap(const IdentifierHash& tgcHashId, State& state, std::vector< std::unordered_map<IdentifierHash, std::unique_ptr<TgcCoinDataCollection> > >& coinMap, int locId, const Identifier& elementId) const;
-
       SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_muDetMgrKey {this, "DetectorManagerKey", "MuonDetectorManager", "Key of input MuonDetectorManager condition data"}; 
 
       ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc {this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
@@ -456,8 +428,7 @@ namespace Muon
       Gaudi::Property<std::string> m_coinContainerCacheKeyStr{this, "CoinCacheString", "", "Prefix for names of Coin cache collections"};
 
       /** Avoid compiler warning **/
-      virtual StatusCode decode(const EventContext& ctx, const std::vector<uint32_t>& robIds) const override; 
-      virtual StatusCode provideEmptyContainer(const EventContext& ctx) const override;
+      StatusCode decode(const EventContext& ctx, const std::vector<uint32_t>& robIds) const override; 
       // Run3->Run2 conversion of rodId and sector
       void convertToRun2(const TgcRawData* rd, uint16_t& newrodId, uint16_t& newsector) const {
         newrodId = rd->rodId();
