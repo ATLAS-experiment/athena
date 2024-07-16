@@ -21529,6 +21529,19 @@ HLT_mu20_ivarloose_tau20_mediumRNN_tracktwoMVA_03dRAB_L1MU14FCH:
     2: 16
     3: 16
     4: 4
+HLT_mu20_ivarloose_tau20_mediumRNN_tracktwoMVA_L1eTAU12_03dRAB_L1MU14FCH:
+  eventCount: 0
+  stepCounts:
+    0: 6
+    1: 4
+    2: 4
+    3: 4
+  stepFeatures:
+    0: 28
+    1: 25
+    2: 16
+    3: 16
+    4: 4
 HLT_mu20_ivarmedium_L1MU12FCH:
   eventCount: 4
   stepCounts:
@@ -22054,6 +22067,19 @@ HLT_mu23_ivarloose_tau20_mediumRNN_tracktwoMVA_03dRAB_L1MU18VFCH:
   stepFeatures:
     0: 27
     1: 24
+    2: 16
+    3: 16
+    4: 4
+HLT_mu23_ivarloose_tau20_mediumRNN_tracktwoMVA_L1eTAU12_03dRAB_L1MU18VFCH:
+  eventCount: 0
+  stepCounts:
+    0: 6
+    1: 4
+    2: 4
+    3: 4
+  stepFeatures:
+    0: 28
+    1: 25
     2: 16
     3: 16
     4: 4
