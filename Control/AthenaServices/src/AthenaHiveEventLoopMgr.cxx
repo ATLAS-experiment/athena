@@ -10,6 +10,7 @@
 #include <iostream>
 #include <fstream> /* ofstream */
 #include <iomanip>
+#include <memory>
 
 // Athena includes
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
@@ -989,10 +990,9 @@ int AthenaHiveEventLoopMgr::declareEventRootAddress(EventContext& ctx){
   //-----------------------------------------------------------------------
   // we need an EventInfo Object to fire the incidents. 
   //-----------------------------------------------------------------------
-  const EventInfo* pEvent{};
+  std::unique_ptr<const EventInfo> pEvent{};
   if ( m_evtContext ) {
     // Deal with the case when an EventSelector is provided
-    std::unique_ptr<EventInfo> pEventPtr;
     //
     // FIXME: flow control if no more events in selector, etc.
     //
@@ -1074,9 +1074,10 @@ int AthenaHiveEventLoopMgr::declareEventRootAddress(EventContext& ctx){
             }
         }
 
-        pEventPtr = std::make_unique<EventInfo>
-          (new EventID(runNumber, eventNumber, eventTime, eventTimeNS, lumiBlock, bunchId), nullptr);
-        pEvent = pEventPtr.get();
+        pEvent = std::make_unique<EventInfo>(
+            std::make_unique<EventID>(runNumber, eventNumber, eventTime,
+                                      eventTimeNS, lumiBlock, bunchId),
+            nullptr);
       } catch (...) {
       }
     } else if (m_requireInputAttributeList) {
@@ -1084,16 +1085,16 @@ int AthenaHiveEventLoopMgr::declareEventRootAddress(EventContext& ctx){
       return -1;
     }
     // In the case that there is no TAG information
-    if (!pEvent) {
+    const EventInfo* pEventObserver{pEvent.get()};
+    if (!pEventObserver) {
       // Secondly try to retrieve a legacy EventInfo object from the input file
       // Again, m_nevt is incremented after executeEvent in the Hive manager so we don't need a -1
       EventInfoCnvParams::eventIndex = ctx.evt();
-      pEvent = eventStore()->tryConstRetrieve<EventInfo>();
-      if ( pEvent ) {
+      pEventObserver = eventStore()->tryConstRetrieve<EventInfo>();
+      if (pEventObserver) {
         consume_modifier_stream = false; // stream will already have been consumed during EventInfo TP conversion
         ATH_MSG_DEBUG ( "use EventInfo" );
-      }
-      else {
+      } else {
         // Finally try to retrieve an xAOD::EventInfo object from the
         // input file and build a legacy EventInfo object from that.
         const xAOD::EventInfo* pXEvent{nullptr};
@@ -1105,10 +1106,11 @@ int AthenaHiveEventLoopMgr::declareEventRootAddress(EventContext& ctx){
         consume_modifier_stream = true;
         ATH_MSG_DEBUG ( "use xAOD::EventInfo with runNumber=" << pXEvent->runNumber() );
         // Build the old-style Event Info object for those clients that still need it
-        pEventPtr = std::make_unique<EventInfo>(new EventID(eventIDFromxAOD(pXEvent))
-                                                , new EventType(eventTypeFromxAOD(pXEvent)));
-        pEvent = pEventPtr.get();
-        sc = eventStore()->record(std::move(pEventPtr),"");
+        pEvent = std::make_unique<EventInfo>(
+            std::make_unique<EventID>(eventIDFromxAOD(pXEvent)),
+            std::make_unique<EventType>(eventTypeFromxAOD(pXEvent)));
+        pEventObserver = pEvent.get();
+        sc = eventStore()->record(std::move(pEvent), "");
         if( !sc.isSuccess() )  {
           ATH_MSG_ERROR ( "Error declaring event data object" );
           return -1;
@@ -1116,7 +1118,8 @@ int AthenaHiveEventLoopMgr::declareEventRootAddress(EventContext& ctx){
       }
     }
 
-    modifyEventContext(ctx,*(pEvent->event_ID()), consume_modifier_stream);
+    modifyEventContext(ctx, *(pEventObserver->event_ID()),
+                       consume_modifier_stream);
 
   }
   else  {
@@ -1136,7 +1139,8 @@ int AthenaHiveEventLoopMgr::declareEventRootAddress(EventContext& ctx){
 
     m_timeStamp += m_timeStampInt;
 
-    pEvent = new EventInfo(eid.release(), new EventType());
+    pEvent = std::make_unique<EventInfo>(std::move(eid),
+                                         std::make_unique<EventType>());
 
     bool consume_modifier_stream = true;
     // EventInfo TP Conversion not called in this case, so we would
@@ -1151,7 +1155,7 @@ int AthenaHiveEventLoopMgr::declareEventRootAddress(EventContext& ctx){
     ATH_MSG_DEBUG ( "recording EventInfo " << *pEvent->event_ID() << " in "
             << eventStore()->name() );
 
-    sc = eventStore()->record(pEvent,"McEventInfo");
+    sc = eventStore()->record(std::move(pEvent), "McEventInfo");
     if( !sc.isSuccess() )  {
       ATH_MSG_ERROR ( "Error declaring event data object" );
       return -1;
