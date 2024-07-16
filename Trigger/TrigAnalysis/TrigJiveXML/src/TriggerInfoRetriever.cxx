@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigJiveXML/TriggerInfoRetriever.h"
@@ -32,8 +32,8 @@ namespace JiveXML {
   StatusCode TriggerInfoRetriever::retrieve(ToolHandle<IFormatTool> &FormatTool) {
 
 // retrieve TriggerInfo
-    const EventInfo* eventInfo;
-    const TriggerInfo* trigger_info;
+    const EventInfo* eventInfo = nullptr;
+    const TriggerInfo* trigger_info = nullptr;
     
     if ( evtStore()->retrieve(eventInfo).isFailure() ) {
       if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "No EventInfo found in SG" << endmsg;
