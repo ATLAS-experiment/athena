@@ -15,6 +15,7 @@
 #include <vector>
 //should be possible to fwd-declare TH1F, TH2F, TH3F, TProfile, TProfile2D TTree .. why isn't this done?
 #include "TH1F.h"
+#include "TH1D.h"
 #include "TH2F.h"
 #include "TH3F.h"
 #include "TProfile.h"
@@ -50,20 +51,20 @@ public:
   ///@{
 
   /// Book a TH1D histogram
-  TH1F* Book1D(const std::string & name, const std::string & labels, int nBins, float start, float end, bool prependDir = true);
+  TH1D* Book1D(const std::string & name, const std::string & labels, int nBins, float start, float end, bool prependDir = true);
   /// Book a TH1D histogram using refHist as reference for number of bins and axis range
-  TH1F* Book1D(const std::string & name, TH1* refHist, const std::string & labels, bool prependDir = true);
+  TH1D* Book1D(const std::string & name, TH1* refHist, const std::string & labels, bool prependDir = true);
 
-  /// Book a TH2D histogram
+  /// Book a TH2F histogram
   TH2F* Book2D(const std::string & name, const std::string & labels, int nBinsX, float startX, float endX, int nBinsY, float startY, float endY, bool prependDir = true);
   /// Book a TH2D histogram using refHist as reference for number of bins and axis range
   TH2F* Book2D(const std::string & name, TH2* refHist, const std::string & labels, bool prependDir = true);
-  /// Book a TH2D histogram with variable x axis binning
+  /// Book a TH2F histogram with variable x axis binning
   TH2F* Book2D(const std::string & name, const std::string & labels, int nBinsX, Double_t* binsX, int nBinsY, Double_t startY, Double_t endY, bool prependDir = true);
 
-  /// Book a TH3D histogram
+  /// Book a TH3F histogram
   TH3F* Book3D(const std::string & name, const std::string & labels, int nBinsX, float startX, float endX, int nBinsY, float startY, float endY, int nBinsZ, float startZ, float endZ, bool prependDir = true);
-  /// Book a TH3D histogram using refHist as reference for number of bins and axis range
+  /// Book a TH3F histogram using refHist as reference for number of bins and axis range
   TH3F* Book3D(const std::string & name, TH3* refHist, const std::string & labels, bool prependDir = true);
 
   /// Book a TProfile histogram

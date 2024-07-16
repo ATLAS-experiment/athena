@@ -14,10 +14,16 @@
 // -------------------------------------------------------------
 
 #include "TrkValHistUtils/PlotBase.h"
+
 #include "TH1F.h"
+#include "TH1D.h"
 #include "TH2F.h"
 #include "TH3F.h"
 #include "TProfile.h"
+#include "TProfile2D.h"
+#include "TTree.h"
+#include "TEfficiency.h"
+
 #include <algorithm>
 
 PlotBase::PlotBase(PlotBase *pParent, const std::string &sDir) {
@@ -84,13 +90,13 @@ PlotBase::retrieveBookedEfficiencies() {
 }
 
 
-TH1F *
+TH1D *
 PlotBase::Book1D(const std::string &name, const std::string &labels, int nBins, float start, float end,
                  bool prependDir) {
   std::string prefix = constructPrefix(m_sDirectory, prependDir);
   Bool_t oldstat = TH1::AddDirectoryStatus();
   TH1::AddDirectory(false);
-  TH1F *hist = new TH1F((prefix + name).c_str(), labels.c_str(), nBins, start, end);
+  TH1D *hist = new TH1D((prefix + name).c_str(), labels.c_str(), nBins, start, end);
   TH1::AddDirectory(oldstat);
 
   hist->Sumw2();
@@ -98,12 +104,12 @@ PlotBase::Book1D(const std::string &name, const std::string &labels, int nBins, 
   return hist;
 }
 
-TH1F *
+TH1D *
 PlotBase::Book1D(const std::string &name, TH1 *refHist, const std::string &labels, bool prependDir) {
   std::string prefix = constructPrefix(m_sDirectory, prependDir);
   Bool_t oldstat = TH1::AddDirectoryStatus();
   TH1::AddDirectory(false);
-  TH1F *hist = new TH1F((prefix + name).c_str(), labels.c_str(), refHist->GetNbinsX(),
+  TH1D *hist = new TH1D((prefix + name).c_str(), labels.c_str(), refHist->GetNbinsX(),
                         refHist->GetXaxis()->GetXbins()->GetArray());
   hist->Sumw2();
   TH1::AddDirectory(oldstat);
