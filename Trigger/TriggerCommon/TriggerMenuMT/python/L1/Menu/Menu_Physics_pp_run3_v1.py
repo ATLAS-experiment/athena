@@ -51,8 +51,6 @@ def defineMenu():
         # ATR-27156
         'L1_2eEM9',
         # single tau
-        'L1_TAU8', 'L1_TAU12IM', 'L1_TAU20IM', 'L1_TAU40',
-        # new calo
         'L1_eTAU12', 'L1_cTAU12M', 'L1_eTAU12_EMPTY', 'L1_eTAU12_FIRSTEMPTY', 'L1_eTAU12_UNPAIRED_ISO',
         'L1_eTAU20', 'L1_jTAU20', 'L1_jTAU30', 'L1_jTAU30M', 'L1_cTAU20M',
         'L1_eTAU20L', 'L1_eTAU20M', 
@@ -62,9 +60,7 @@ def defineMenu():
         'L1_eTAU60', 'L1_eTAU60_EMPTY', 'L1_eTAU60_UNPAIRED_ISO',
         'L1_eTAU80', 'L1_eTAU140',
 
-        # multi tau
-        # tempdisble to release space ATR-27156 'L1_2TAU8', 
-        'L1_TAU20IM_2TAU12IM', 
+
 
         # multi tau, new calo
         'L1_eTAU80_2eTAU60', 
@@ -87,9 +83,6 @@ def defineMenu():
         'L1_MU8F_cTAU30M',
         'L1_eEM18M_2cTAU20M_4jJ30',
         
-        # combined tau - jet
-        'L1_TAU20IM_2TAU12IM_4J12p0ETA25',
-
         # combined tau - xe
         'L1_eEM18M_2cTAU20M_jXE70',
         'L1_eTAU30M_2jJ50_jXE90',
