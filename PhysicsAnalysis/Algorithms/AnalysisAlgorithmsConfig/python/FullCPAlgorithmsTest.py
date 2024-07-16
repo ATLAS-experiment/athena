@@ -1012,6 +1012,14 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite,
         configSeq.setOptionValue ('.nReplicas', 2000 )
         configSeq.setOptionValue ('.runOnMC', True )
 
+    # per-event lepton SF
+    if not forCompare:
+        configSeq += config.makeConfig ('LeptonSF')
+        configSeq.setOptionValue ('.electrons', 'AnaElectrons.loose')
+        configSeq.setOptionValue ('.muons', 'AnaMuons.medium')
+        configSeq.setOptionValue ('.photons', 'AnaPhotons.tight')
+        configSeq.setOptionValue ('.lepton_postfix', 'nominal')
+
     configSeq += config.makeConfig ('Output')
     configSeq.setOptionValue ('.treeName', 'analysis')
     configSeq.setOptionValue ('.vars', vars)

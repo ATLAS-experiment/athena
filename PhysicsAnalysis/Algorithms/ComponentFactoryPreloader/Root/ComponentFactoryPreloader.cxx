@@ -39,6 +39,7 @@
 #include <AsgAnalysisAlgorithms/FakeBkgCalculatorAlg.h>
 #include <AsgAnalysisAlgorithms/IOStatsAlg.h>
 #include <AsgAnalysisAlgorithms/KinematicHistAlg.h>
+#include <AsgAnalysisAlgorithms/LeptonSFCalculatorAlg.h>
 #include <AsgAnalysisAlgorithms/ObjectCutFlowHistAlg.h>
 #include <AsgAnalysisAlgorithms/OverlapRemovalAlg.h>
 #include <AsgAnalysisAlgorithms/PMGTruthWeightAlg.h>
@@ -214,6 +215,7 @@ namespace CP
     ANA_CHECK (asg::registerAlgorithmFactory<CP::JvtEfficiencyAlg>("CP::JvtEfficiencyAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::JvtUpdateAlg>("CP::JvtUpdateAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::KinematicHistAlg>("CP::KinematicHistAlg"));
+    ANA_CHECK (asg::registerAlgorithmFactory<CP::LeptonSFCalculatorAlg>("CP::LeptonSFCalculatorAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::MetBuilderAlg>("CP::MetBuilderAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::MetMakerAlg>("CP::MetMakerAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::MetSignificanceAlg>("CP::MetSignificanceAlg"));
