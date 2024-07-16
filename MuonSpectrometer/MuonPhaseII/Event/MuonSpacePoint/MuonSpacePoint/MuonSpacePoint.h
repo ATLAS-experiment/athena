@@ -55,7 +55,7 @@ namespace MuonR4 {
             const xAOD::UncalibratedMeasurement* m_primaryMeas{nullptr};
             const xAOD::UncalibratedMeasurement* m_secondaryMeas{nullptr};
 
-            Identifier m_id{Identifier::value_type{m_primaryMeas->identifier()}};
+            Identifier m_id{xAOD::identify(m_primaryMeas)};
             const MuonGMR4::MuonChamber* m_chamber{xAOD::readoutElement(m_primaryMeas)->getChamber()};
 
             Amg::Vector3D m_pos{Amg::Vector3D::Zero()};

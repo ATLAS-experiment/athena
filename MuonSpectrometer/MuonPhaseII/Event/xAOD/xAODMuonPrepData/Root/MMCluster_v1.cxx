@@ -24,6 +24,9 @@ IdentifierHash MMCluster_v1::measurementHash() const {
 IdentifierHash MMCluster_v1::layerHash() const {
     return MuonGMR4::MmReadoutElement::createHash(gasGap(), 0);
 }
+Identifier MMCluster_v1::identify() const {
+   return readoutElement()->measurementId(measurementHash());
+}
 IMPLEMENT_SETTER_GETTER(MMCluster_v1, uint16_t, time, setTime)
 IMPLEMENT_SETTER_GETTER(MMCluster_v1, uint32_t, charge, setCharge)
 IMPLEMENT_SETTER_GETTER(MMCluster_v1, float, driftDist, setDriftDist)

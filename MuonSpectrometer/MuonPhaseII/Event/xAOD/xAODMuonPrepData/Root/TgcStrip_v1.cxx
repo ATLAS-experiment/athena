@@ -26,6 +26,9 @@ IMPLEMENT_READOUTELEMENT(TgcStrip_v1, m_readoutEle, TgcReadoutElement)
 IdentifierHash TgcStrip_v1::measurementHash() const {
    return MuonGMR4::TgcReadoutElement::constructHash(channelNumber(), gasGap(), measuresPhi());
 }
+Identifier TgcStrip_v1::identify() const {
+   return readoutElement()->measurementId(measurementHash());
+}
 IdentifierHash TgcStrip_v1::layerHash() const {
    return MuonGMR4::TgcReadoutElement::constructHash(0, gasGap(), measuresPhi());
 }

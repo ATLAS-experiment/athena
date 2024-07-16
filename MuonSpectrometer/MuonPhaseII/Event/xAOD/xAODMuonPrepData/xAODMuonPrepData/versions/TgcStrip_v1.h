@@ -27,6 +27,9 @@ class TgcStrip_v1 : public UncalibratedMeasurement_v1 {
     }
     unsigned int numDimensions() const override final { return 1; }
 
+    /** @brief: Returns the Athena identifier of the measurement
+      *         It's constructed from the measurementHash & passed to the associated readoutElement */
+    Identifier identify() const;
     /** @brief Returns the bcBitMap of this PRD
       bit2 for Previous BC, bit1 for Current BC, bit0 for Next BC */
     uint16_t bcBitMap() const;
