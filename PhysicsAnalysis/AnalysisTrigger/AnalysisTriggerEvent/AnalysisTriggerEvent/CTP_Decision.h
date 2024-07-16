@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: CTP_Decision.h,v 1.10 2008-05-20 16:59:50 efeld Exp $
@@ -56,7 +56,7 @@ public:
    const items_type& getItems() const { return m_items; }
 
    /// Get vector of CTP trigger words
-   std::vector< uint32_t > getWords() const { return m_CTPResultWord; }
+   const std::vector< uint32_t >& getWords() const { return m_CTPResultWord; }
    /// Get one CTP trigger word
    uint32_t getWord( const unsigned int i ) const {
       return m_CTPResultWord.size() > i ? m_CTPResultWord[ i ] : 0;
