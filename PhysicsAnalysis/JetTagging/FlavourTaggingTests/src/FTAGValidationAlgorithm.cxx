@@ -141,7 +141,7 @@ namespace FTAGValidation {
     return vertexContainer->at(0);
   }
   
-  int FTAGValidationAlgorithm::getMatchedOfflineJetIndex( const xAOD::Jet* onJet, std::vector< const xAOD::Jet* > offJets ) const {
+  int FTAGValidationAlgorithm::getMatchedOfflineJetIndex( const xAOD::Jet* onJet, const std::vector< const xAOD::Jet* >& offJets ) const {
     int matchedOffJetIndex = -1;
     double minDr = 0;
 

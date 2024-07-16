@@ -1,4 +1,4 @@
-//Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+//Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #ifndef FTAGVALIDATION_FTAGVALIDATIONALGORITHM_H
 #define FTAGVALIDATION_FTAGVALIDATIONALGORITHM_H 1
@@ -38,7 +38,7 @@ namespace FTAGValidation {
 
     const xAOD::Vertex* getPrimaryVertex( const xAOD::VertexContainer* ) const;
 
-    int getMatchedOfflineJetIndex( const xAOD::Jet*, std::vector< const xAOD::Jet* > ) const;
+    int getMatchedOfflineJetIndex( const xAOD::Jet*, const std::vector< const xAOD::Jet* >& ) const;
 
   private:
     FTAGValidationAlgorithm();
