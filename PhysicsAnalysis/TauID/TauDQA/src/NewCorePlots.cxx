@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <utility>
@@ -7,6 +7,7 @@
 
 #include "NewCorePlots.h"
 #include "xAODCaloEvent/CaloVertexedTopoCluster.h"
+#include "AthContainers/ConstAccessor.h"
 
 namespace Tau{
 
@@ -127,8 +128,9 @@ namespace Tau{
 
     float avariable = 0.;
     int bvariable = 0;
-    
-    if(tau.nTracks()>0 && tau.track(0)->isAvailable<float>("z0sinthetaSigTJVA")) {
+
+    static const SG::ConstAccessor<float> acc_z0sinthetaSigTJVA("z0sinthetaSigTJVA");
+    if(tau.nTracks()>0 && acc_z0sinthetaSigTJVA.isAvailable(*tau.track(0))) {
       m_ipZ0SinThetaSigLeadTrk->Fill(tau.track(0)->z0sinthetaSigTJVA(), weight);
       m_ipSigLeadTrk->Fill(tau.track(0)->d0SigTJVA(), weight);
     }
@@ -202,15 +204,16 @@ namespace Tau{
     m_logSeedJetPt->Fill(logTauSeedPt, weight);
 
     // tracks
-    static const SG::AuxElement::ConstAccessor<float> acc_trackScoreCharged("rnn_chargedScore");
-    static const SG::AuxElement::ConstAccessor<float> acc_trackScoreIso("rnn_isolationScore");
-    static const SG::AuxElement::ConstAccessor<float> acc_trackScoreConv("rnn_conversionScore");
+    static const SG::ConstAccessor<float> acc_trackScoreCharged("rnn_chargedScore");
+    static const SG::ConstAccessor<float> acc_trackScoreIso("rnn_isolationScore");
+    static const SG::ConstAccessor<float> acc_trackScoreConv("rnn_conversionScore");
+    static const SG::ConstAccessor<float> acc_z0sinthetaTJVA("z0sinthetaTJVA");
     // rnn_fakeScore may not be available (it is not provided by the TauJets smart slimming list), it can be obtained from unitarity
 
     for(const xAOD::TauTrack* track : tau.allTracks()) {
 
       // protection against thinned tracks
-      static const SG::AuxElement::Accessor< xAOD::TauTrack::TrackParticleLinks_t > trackAcc( "trackLinks" );
+      static const SG::Accessor< xAOD::TauTrack::TrackParticleLinks_t > trackAcc( "trackLinks" );
       if(!trackAcc(*track)[0]) {
 	continue;
       }
@@ -224,7 +227,7 @@ namespace Tau{
       float z0sinthetaSigTJVA = 999.;
       float rConv = 999.;
       float rConvII = 999.;
-      if(track->isAvailable<float>("z0sinthetaTJVA")) {
+      if(acc_z0sinthetaTJVA.isAvailable(*track)) {
 	d0TJVA = track->d0TJVA();
 	z0SinthetaTJVA = track->z0sinthetaTJVA();
 	d0SigTJVA = track->d0SigTJVA();
@@ -261,8 +264,8 @@ namespace Tau{
       trackParticle->summaryValue(numberOfSCTHoles, xAOD::numberOfSCTHoles);
       float eProbabilityHT = 0.;
       trackParticle->summaryValue(eProbabilityHT, xAOD::eProbabilityHT);
-      float eProbabilityNN = -1.;
-      if(trackParticle->isAvailable<float>("eProbabilityNN")) eProbabilityNN = trackParticle->auxdata<float>("eProbabilityNN");
+      static const SG::ConstAccessor<float> acc_eProbabilityNN("eProbabilityNN");
+      float eProbabilityNN = acc_eProbabilityNN.withDefault(*trackParticle, -1);
       // hybrid variable (eProbabilityNN is not computed for tracks with pt < 2 GeV)
       float eProbabilityHTorNN = (trackPt>2000.) ? eProbabilityNN : eProbabilityHT;
 

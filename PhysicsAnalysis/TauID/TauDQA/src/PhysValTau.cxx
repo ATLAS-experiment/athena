@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // PhysValTau.cxx 
@@ -20,6 +20,7 @@
 #include "xAODTruth/TruthParticleContainer.h"
 #include "AthenaBaseComps/AthCheckMacros.h"
 #include "TruthUtils/HepMCHelpers.h"
+#include "AthContainers/ConstAccessor.h"
 
 
 PhysValTau::PhysValTau(const std::string& type, 
@@ -135,10 +136,12 @@ StatusCode PhysValTau::fillHistograms()
     auto trueTau = m_truthTool->getTruth(*tau);
 
     // Fill truth and fake histograms
-    if ( (bool)tau->auxdata<char>("IsTruthMatched") ) {
+    static const SG::ConstAccessor<char> IsTruthMatchedAcc("IsTruthMatched");
+    if ( (bool)IsTruthMatchedAcc(*tau) ) {
       ATH_MSG_DEBUG("Tau is truth-matched");
       if ( trueTau->isTau() ) {
-	if ( (bool)trueTau->auxdata<char>("IsHadronicTau") ) {		
+        static const SG::ConstAccessor<char> IsHadronicTauAcc("IsHadronicTau");
+	if ( (bool)IsHadronicTauAcc(*trueTau) ) {
 	  ATH_MSG_DEBUG("Tau is hadronic tau");
 	  m_oTauValidationPlots->m_oGeneralTauAllProngsPlots.fill(*tau, weight);
 	  m_oTauValidationPlots->m_oNewCoreMatchedPlots.fill(*tau, weight);
