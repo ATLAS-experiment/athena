@@ -1,16 +1,15 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
- * @file findEvent.cxx
- * $Author: tmaeno $
- * $Revision: 1.3 $
- * $Date: 2008/02/22 13:33:08 $
+ * @file AtlFindBSEvent.cxx
+ * @author tmaeno
  *
  */
  
 #include <iostream>
+#include <iomanip>
 #include <memory>
 #include <string>
 #include <fstream>
@@ -21,15 +20,7 @@
 #include <ctype.h>
 #include <stdlib.h>
 
-#ifdef __GNUC__
-# pragma GCC diagnostic push
-# pragma GCC diagnostic ignored "-Wunused-parameter"
-# pragma GCC diagnostic ignored "-Wparentheses"
-#endif
 #include "eformat/eformat.h"
-#ifdef __GNUC__
-# pragma GCC diagnostic pop
-#endif
 #include "eformat/old/util.h"
 #include "EventStorage/pickDataReader.h"
 #include <time.h>
@@ -49,7 +40,7 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char *argv[])
   if(argc<2) {
     std::cerr << "usage: " << argv[0] << " -e [--event] <eventNumber> [-r, --run <runnumber>] [-c, --checkevents] [-l, --listevents] files ..." 
 	      << std::endl;
-    std::exit(1);
+    return 1;
   }
 
   std::vector<std::string> fileNames;
@@ -182,12 +173,12 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char *argv[])
 	const uint64_t eventNo=fe.global_id();
 	const uint32_t runNo=fe.run_no();
 	const time_t sec=fe.bc_time_seconds();
+	struct tm buf;
 	if (listevents) {
-	  std::cout << "Index=" << eventCounter <<" Run=" << runNo << " Event=" << eventNo 
-		    << " LB=" <<  fe.lumi_block() << " Size=" << fe. fragment_size_word()*4./1024 <<"kB " 
-		    << ctime(&sec);// << std::endl;
+	  std::cout << "Index=" << eventCounter <<" Run=" << runNo << " Event=" << eventNo
+	  	    << " LB=" <<  fe.lumi_block() << " Size=" << fe. fragment_size_word()*4./1024 <<"kB "
+	  	    << std::put_time(localtime_r(&sec, &buf),"%c");
 	}
-	//std::cout << "seconds: " << fe.bc_time_seconds() << " nanosecond: " << fe.bc_time_nanoseconds() << std::endl;
 
 	if (eventNo==searchEvent && (searchRun==std::numeric_limits<uint32_t>::max() || (runNo==searchRun))) {
 	  found=true;
@@ -197,7 +188,7 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char *argv[])
 	  std::cout << "Run:         " << runNo << std::endl;   
 	  std::cout << "Event ID:    " << eventNo << std::endl;
 	  std::cout << "LumiBlock:   " << fe.lumi_block() << std::endl;
-	  std::cout << "Timestamp:   " << asctime(gmtime(&sec));// << std::endl;
+	  std::cout << "Timestamp:   " << std::put_time(gmtime_r(&sec, &buf),"%c");
 	}
       } 
       catch (eformat::Issue& ex) {
