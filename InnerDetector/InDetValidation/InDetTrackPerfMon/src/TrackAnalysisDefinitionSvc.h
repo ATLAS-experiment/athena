@@ -61,10 +61,12 @@ public:
   virtual const std::string& testTag() const override { return m_testTag.value(); };
   virtual const std::string& referenceTag() const override { return m_refTag.value(); };
   virtual const std::string& matchingType() const override { return m_matchingType.value(); };
+  virtual float truthProbCut() const override { return m_truthProbCut.value(); };
 
   virtual bool plotTrackParameters() const override { return m_plotTrackParameters.value(); };
   virtual bool plotEfficiencies() const override { return m_plotEfficiencies.value(); };
   virtual bool plotResolutions() const override { return m_plotResolutions.value(); };
+  virtual bool plotFakeRates() const override { return m_plotFakeRates.value(); };
   virtual bool plotOfflineElectrons() const override { return m_plotOfflineElectrons.value(); };
 
 private:
@@ -84,6 +86,7 @@ private:
   StringProperty m_refTag { this, "RefTag", "truth", "Short label for reference track type, used in histo booking" }; 
 
   StringProperty m_matchingType { this, "MatchingType", "DeltaRMatch", "Type of test-reference matching performed" }; 
+  FloatProperty m_truthProbCut { this, "MatchingTruthProb", 0.5, "Minimal truthProbability for valid matching" };
 
   std::vector< std::string > m_configuredChains;
 
@@ -92,6 +95,7 @@ private:
   BooleanProperty m_plotTrackParameters { this, "plotTrackParameters", true, "Book/fill track parameters histograms" };
   BooleanProperty m_plotEfficiencies { this, "plotEfficiencies", true, "Book/fill track parameters histograms" };
   BooleanProperty m_plotResolutions { this, "plotResolutions", true, "Book/fill track resolutions histograms" };
+  BooleanProperty m_plotFakeRates { this, "plotFakeRates", true, "Book/fill fake rate histograms" };
   BooleanProperty m_plotOfflineElectrons { this, "plotOfflineElectrons", false, "Book/fill reference offline electrons histograms" };
  
 };

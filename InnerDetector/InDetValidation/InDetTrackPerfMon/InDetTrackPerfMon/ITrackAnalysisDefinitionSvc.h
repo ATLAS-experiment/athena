@@ -54,11 +54,13 @@ public:
   virtual const std::string& testTag() const = 0;
   virtual const std::string& referenceTag() const = 0;
   virtual const std::string& matchingType() const = 0;
+  virtual float truthProbCut() const = 0;
 
   /// histogram properties
   virtual bool plotTrackParameters() const = 0;
   virtual bool plotEfficiencies() const = 0;
   virtual bool plotResolutions() const = 0;
+  virtual bool plotFakeRates() const = 0;
   virtual bool plotOfflineElectrons() const = 0;
   
 };

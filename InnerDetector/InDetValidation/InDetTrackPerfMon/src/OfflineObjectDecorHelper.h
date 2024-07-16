@@ -76,6 +76,9 @@ namespace IDTPM {
   const xAOD::TruthParticle* getLinkedTruth( const xAOD::TrackParticle& track,
                                              const float truthProbCut=0. );
 
+  bool isFakeTruth( const xAOD::TrackParticle& track, const float truthProbCut=0. );
+  inline bool isFakeTruth( const xAOD::TruthParticle&, const float ) { return false; }; // dummy - to avoid compilation errors
+
 } // namespace IDTPM
 
 #endif // > ! INDETTRACKPERFMON_OFFLINEOBJECTDECORHELPER_H

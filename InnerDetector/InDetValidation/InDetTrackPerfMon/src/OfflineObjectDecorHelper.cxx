@@ -51,7 +51,7 @@ namespace IDTPM {
   /// getTruthMatchProb
   float getTruthMatchProb( const xAOD::TrackParticle& track ) {
     static const SG::ConstAccessor< float > truthMatchProbabilityAcc( "truthMatchProbability" );
-    return truthMatchProbabilityAcc.withDefault (track, -1);
+    return truthMatchProbabilityAcc.withDefault( track, -1 );
   }
 
 
@@ -63,6 +63,15 @@ namespace IDTPM {
 
     return getLinkedObject< xAOD::TruthParticleContainer >(
         track, "truthParticleLink" );
+  }
+
+  /// isFake
+  bool isFakeTruth( const xAOD::TrackParticle& track, const float truthProbCut )
+  {
+    /// Truth-unlinked tracks should not be counted as fake
+    if( isUnlinkedTruth( track ) ) return false;
+    float prob = getTruthMatchProb( track );
+    return ( prob < truthProbCut );
   }
 
 } // namespace IDTPM
