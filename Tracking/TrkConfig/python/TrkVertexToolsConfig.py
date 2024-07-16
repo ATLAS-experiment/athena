@@ -40,9 +40,9 @@ def JetRestrictedSumPt2VertexCollectionSortingToolCfg(flags, name="JetRestricted
 
     if "VertexWeightCalculator" not in kwargs:
         from TrkConfig.TrkVertexWeightCalculatorsConfig import (
-            JetRestrictedSumPtVertexWeightCalculatorCfg)
+            JetRestrictedSumPt2VertexWeightCalculatorCfg)
         kwargs.setdefault("VertexWeightCalculator", acc.popToolsAndMerge(
-            JetRestrictedSumPtVertexWeightCalculatorCfg(flags)))
+            JetRestrictedSumPt2VertexWeightCalculatorCfg(flags)))
 
     kwargs.setdefault("decorationName", "sumPt2")
 

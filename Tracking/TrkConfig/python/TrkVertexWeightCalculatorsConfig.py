@@ -19,13 +19,13 @@ def SumPtVertexWeightCalculatorCfg(flags, name="SumPtVertexWeightCalculator",
         CompFactory.Trk.SumPtVertexWeightCalculator(name, **kwargs))
     return acc
 
-def JetRestrictedSumPtVertexWeightCalculatorCfg(
+def JetRestrictedSumPt2VertexWeightCalculatorCfg(
     flags,
-    name="JetRestrictedSumPtVertexWeightCalculator",
+    name="JetRestrictedSumPt2VertexWeightCalculator",
     TrackParticleLocation="InDetTrackParticles",
     **kwargs):
     acc = ComponentAccumulator()
-    kwargs.setdefault("DoSumPt2Selection", False)
+    kwargs.setdefault("DoSumPt2Selection", True)
     kwargs.setdefault("JetContainer", "AntiKt4EMTopoJets")
     acc.setPrivateTools(
         CompFactory.Trk.JetRestrictedSumPtVertexWeightCalculator(
