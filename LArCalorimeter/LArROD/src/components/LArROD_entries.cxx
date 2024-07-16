@@ -1,4 +1,3 @@
-#include "../LArRawChannelBuilder.h"
 #include "../ReadLArRaw.h"
 #include "../ReadLArDigits.h"
 #include "../LArRawChannelSimpleBuilder.h"
@@ -29,7 +28,6 @@
 #include "../LArHITtoCell.h"
 
 
-DECLARE_COMPONENT( LArRawChannelBuilder )
 DECLARE_COMPONENT( ReadLArRaw )
 DECLARE_COMPONENT( ReadLArDigits )
 DECLARE_COMPONENT( LArRawChannelSimpleBuilder )
