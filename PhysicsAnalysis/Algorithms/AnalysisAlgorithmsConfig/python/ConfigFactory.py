@@ -334,6 +334,10 @@ class ConfigFactory():
         from AsgAnalysisAlgorithms.AsgAnalysisConfig import PerEventSFBlock
         self.addAlgConfigBlock(algName='PerEventSF', alg=PerEventSFBlock)
 
+        # per-event unified lepton scale factor calculation
+        from AsgAnalysisAlgorithms.LeptonSFCalculatorConfig import LeptonSFCalculatorBlock
+        self.addAlgConfigBlock(algName='LeptonSF', alg=LeptonSFCalculatorBlock)
+
         # thinning
         from AsgAnalysisAlgorithms.AsgAnalysisConfig import OutputThinningBlock
         self.addAlgConfigBlock(algName="Thinning", alg=OutputThinningBlock,

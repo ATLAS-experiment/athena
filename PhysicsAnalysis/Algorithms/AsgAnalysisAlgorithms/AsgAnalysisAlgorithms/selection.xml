@@ -36,5 +36,6 @@
    <class name="CP::TreeMakerAlg" />
    <class name="CP::IOStatsAlg" />
    <class name="CP::FakeBkgCalculatorAlg" />
+   <class name="CP::LeptonSFCalculatorAlg" />
 
 </lcgdict>

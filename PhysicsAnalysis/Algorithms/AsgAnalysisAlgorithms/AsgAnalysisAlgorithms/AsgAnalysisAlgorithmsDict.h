@@ -43,5 +43,6 @@
 #include <AsgAnalysisAlgorithms/TreeMakerAlg.h>
 #include <AsgAnalysisAlgorithms/IOStatsAlg.h>
 #include <AsgAnalysisAlgorithms/FakeBkgCalculatorAlg.h>
+#include <AsgAnalysisAlgorithms/LeptonSFCalculatorAlg.h>
 
 #endif

@@ -98,6 +98,13 @@ OverlapRemoval:
     photons: 'AnaPhotons.tight'
     muons: 'AnaMuons.medium'
 
+# per-event lepton SF
+LeptonSF:
+  - electrons: 'AnaElectrons.loose'
+    muons: 'AnaMuons.medium'
+    photons: 'AnaPhotons.tight'
+    lepton_postfix: 'nominal'
+
 Thinning:
   - containerName: 'AnaJets'
     outputName: 'OutJets'
