@@ -28,7 +28,6 @@
 
 #include "LArRawEvent/LArRawChannel.h"
 #include "LArRawEvent/LArRawChannelContainer.h"
-//#include "LArRawChannelBuilder.h"
 #include "ReadLArRaw.h"
 
 // access all RawChannel  
