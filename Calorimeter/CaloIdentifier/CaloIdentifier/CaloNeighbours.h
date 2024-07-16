@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOIDENTIFIER_CALONEIGHBOURS_H
@@ -7,7 +7,6 @@
 //-----------------------------------------------------------------------
 // File and Version Information:
 // 
-//$Id: CaloNeighbours.h,v 1.2 2008-12-13 04:57:11 ssnyder Exp $
 // 
 //
 // Description: Initialize and provide access to neighbours accross
@@ -63,7 +62,7 @@ class CaloNeighbourRegion {
     return m_type;
   }
 
-  inline const std::string getName() const {
+  inline const std::string& getName() const {
     return m_name;
   }
 
