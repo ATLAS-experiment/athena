@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include "TrackCaloClusterRecValidationTool.h"
 //
@@ -185,7 +185,7 @@ TrackCaloClusterRecValidationTool::fillHistograms()
 
       m_tccPlots.at(name)->fill(*jets);
 
-      for (const auto& jet : *jets) {
+      for (const auto jet : *jets) {
         // conditions to be satisfied to select jets
         if (fabs(jet->eta()) > m_maxEta)
           continue;
@@ -204,7 +204,7 @@ TrackCaloClusterRecValidationTool::fillHistograms()
         m_tccPlots.at(name)->fillMoments(*jet);
 
         // fill all jets histograms + truth
-        for (const auto& truth : *truths)
+        for (const auto truth : *truths)
           m_tccPlots.at(name)->fill(*jet, *truth);
 
         // get the truth matched
@@ -349,7 +349,7 @@ TrackCaloClusterRecValidationTool::fillHistograms()
     const auto *const tracks = getContainer<xAOD::TrackParticleContainer>(m_trackParticleCollectionName);
     if (not tracks)
       return StatusCode::FAILURE;
-    for (const auto& track : *tracks) {
+    for (const auto track : *tracks) {
       if (m_saveMatchingInfo)
         m_tccPlots.at(m_trackParticleCollectionName)->fillMatching(*track);
       m_tccPlots.at(m_trackParticleCollectionName)->fillTrackParametersAllPt(*track);
@@ -370,7 +370,7 @@ TrackCaloClusterRecValidationTool::fillHistograms()
     const auto *const clusters = getContainer<xAOD::CaloClusterContainer>(m_caloClusterCollectionName);
     if (not clusters)
       return StatusCode::FAILURE;
-    for (const auto& cluster : *clusters) {
+    for (const auto cluster : *clusters) {
       m_tccPlots.at(m_caloClusterCollectionName)->fillCluster(*cluster);
       if (fabs(cluster->eta()) < m_caloClusterEtaMax)
         m_tccPlots.at(m_caloClusterCollectionName)->fillClusterEtaCut(*cluster);
@@ -385,11 +385,11 @@ TrackCaloClusterRecValidationTool::fillHistograms()
         return StatusCode::FAILURE;
       // fill the map with all the tracks creating tcc (means from PV0)
       std::vector<const xAOD::TrackParticle*> allpv0tracks;
-      for (const auto& tcc : *tccs) {
+      for (const auto tcc : *tccs) {
         allpv0tracks.push_back(*tcc->trackParticleLink());
       }
 
-      for (const auto& tcc : *tccs) {
+      for (const auto tcc : *tccs) {
         m_tccPlots.at(name)->fillTCC(*tcc, allpv0tracks);
         if (tcc->pt() > m_tccPtMin)
           m_tccPlots.at(name)->fillTCCptCut(*tcc);
@@ -406,7 +406,7 @@ const xAOD::Jet*
 TrackCaloClusterRecValidationTool::ClusterMatched(const xAOD::Jet* jet, const xAOD::JetContainer* jets)
 {
   std::vector<const xAOD::Jet*> myjets = {};
-  for (const auto& tomatch : *jets)
+  for (const auto tomatch : *jets)
     myjets.push_back(tomatch);
   return ClusterMatched(jet, myjets);
 }
