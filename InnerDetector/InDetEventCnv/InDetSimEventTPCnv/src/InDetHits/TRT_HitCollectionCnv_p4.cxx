@@ -506,7 +506,7 @@ void TRT_HitCollectionCnv_p4::persToTrans(const TRT_HitCollection_p4* persCont, 
           flag = HepMcParticleLink::IS_POSITION;
         }
         HepMcParticleLink partLink( persCont->m_barcode[idxBC], persCont->m_mcEvtIndex[idxBC], flag, HepMcParticleLink::IS_BARCODE, ctx );
-        if ( HepMC::is_truth_suppressed_pileup(static_cast<int>(persCont->m_barcode[idxBC])) ) {
+        if ( HepMC::BarcodeBased::is_truth_suppressed_pileup(static_cast<int>(persCont->m_barcode[idxBC])) ) {
           partLink.setTruthSuppressionType(EBC_PU_SUPPRESSED);
         }
         transCont->Emplace( strawId, partLink, persCont->m_id[idxId],

@@ -335,7 +335,7 @@ void SiHitCollectionCnv_p2::persToTrans(const SiHitCollection_p2* persCont, SiHi
         HepGeom::Point3D<double> endThis( endLast + r );
 
         HepMcParticleLink partLink( persCont->m_barcode[idxBC], event_number, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE, sg);
-        if ( HepMC::is_truth_suppressed_pileup(static_cast<int>(persCont->m_barcode[idxBC])) ) {
+        if ( HepMC::BarcodeBased::is_truth_suppressed_pileup(static_cast<int>(persCont->m_barcode[idxBC])) ) {
           partLink.setTruthSuppressionType(EBC_PU_SUPPRESSED);
         }
         transCont->Emplace( endLast, endThis, eneLoss, meanTime, partLink, persCont->m_id[idxId]);

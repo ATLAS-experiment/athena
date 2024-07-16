@@ -28,7 +28,7 @@ void HepMcParticleLinkCnv_p2::persToTrans( const HepMcParticleLink_p2* persObj,
                                           persObj->m_mcEvtIndex,
                                           flag, HepMcParticleLink::IS_BARCODE) ); // FIXME barcode-based
 
-  if ( HepMC::is_truth_suppressed_pileup(static_cast<int>(persObj->m_barcode)) ) {
+  if ( HepMC::BarcodeBased::is_truth_suppressed_pileup(static_cast<int>(persObj->m_barcode)) ) {
     transObj->setTruthSuppressionType(EBC_PU_SUPPRESSED);
   }
 }
