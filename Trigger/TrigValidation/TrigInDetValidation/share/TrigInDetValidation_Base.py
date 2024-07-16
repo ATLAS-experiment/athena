@@ -122,7 +122,7 @@ if GridFiles:
 if "conditionsOverride" not in locals():
     rdo2aod.args += ' --conditionsTag "default:OFLCOND-MC23-SDR-RUN3-05"'
 elif conditionsOverride == "Run4":
-    rdo2aod.args += ' --conditionsTag "default:OFLCOND-MC21-SDR-RUN4-01"'
+    rdo2aod.args += ' --conditionsTag "default:OFLCOND-MC21-SDR-RUN4-02"'
 
 
 if (Malloc):

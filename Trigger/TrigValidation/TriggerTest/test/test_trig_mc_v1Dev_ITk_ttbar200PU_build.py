@@ -16,13 +16,11 @@ run.type = 'athena'
 run.threads = 1
 run.input = 'ttbar_pu200_Run4'
 run.job_options = 'TriggerJobOpts/runHLT.py'
-run.flags = ['Trigger.triggerMenuSetup="MC_pp_run4_v1"',
-             'Trigger.doRuntimeNaviVal=True',
+run.flags = ['Trigger.doRuntimeNaviVal=True',
              'ITk.doTruth=False',
              'Tracking.doTruth=False',
-             'Trigger.enableL1CaloPhase1=False',
              'Trigger.enabledSignatures=[\\\"Egamma\\\",\\\"Electron\\\",\\\"Photon\\\",\\\"Muon\\\",\\\"Tau\\\",\\\"Jet\\\",\\\"MET\\\"]',
-             'IOVDb.GlobalTag="OFLCOND-MC21-SDR-RUN4-01"']
+             'IOVDb.GlobalTag="OFLCOND-MC21-SDR-RUN4-02"']
 
 # The full test configuration
 test = Test.Test()

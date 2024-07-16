@@ -107,7 +107,7 @@ class TrigInDetReco(ExecStep):
                 # chains +=  "'HLT_e17_lhvloose_nod0_L1EM15VH',"
                 # chains += "'HLT_e26_idperf_gsf_tight_L1EM22VHI',"
                 chains += "'HLT_e26_idperf_loose_L1eEM26M',"
-                chains += "'HLT_e5_idperf_tight_L1EM3',"
+                chains += "'HLT_e5_idperf_tight_L1eEM5',"
                 flags += "'Egamma'," if self._isCA else 'doEgammaSlice=True;'
             if (i=='electron-tnp') :
                 chains += "'HLT_e26_lhtight_e14_idperf_tight_probe_50invmAB130_L1eEM26M',"
@@ -115,7 +115,9 @@ class TrigInDetReco(ExecStep):
                 flags += "'Egamma'," if self._isCA else 'doEgammaSlice=True;'
             if (i=='tau') :
                 chains +=  "'HLT_tau25_idperf_tracktwoMVA_L1TAU12IM',"
+                chains +=  "'HLT_tau20_idperf_tracktwoMVA_L1eTAU12',"
                 chains +=  "'HLT_mu24_ivarmedium_tau25_idperf_tracktwoMVA_probe_03dRAB_L1MU14FCH',"
+                chains +=  "'HLT_mu24_ivarmedium_tau25_idperf_tracktwoMVA_probe_L1cTAU20M_03dRAB_L1MU14FCH',"
                 flags += "'Tau'," if self._isCA else 'doTauSlice=True;'
             if (i=='tauLRT') :
                 chains +=  "'HLT_tau25_idperf_tracktwoMVA_L1TAU12IM',"
@@ -132,7 +134,7 @@ class TrigInDetReco(ExecStep):
                 chains += "'HLT_j75c_020jvt_j50c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_2j20c_020jvt_bdl1d77_pf_ftf_presel2c20XX2c20b85_L1J45p0ETA21_3J15p0ETA25',"
                 flags  += "'Bjet'," if self._isCA else 'doBjetSlice=True;'
             if ( i=='fsjet' or i=='fs' or i=='jet' ) :
-                chains += "'HLT_j45_pf_ftf_preselj20_L1J15',"
+                chains += "'HLT_j45_pf_ftf_preselj20_L1jJ40',"
                 flags  += "'Jet'," if self._isCA else 'doJetSlice=True;'
             if (i=='beamspot') :
                 chains += "'HLT_beamspot_allTE_trkfast_BeamSpotPEB_L1J15','HLT_beamspot_trkFS_trkfast_BeamSpotPEB_L1J15',"
