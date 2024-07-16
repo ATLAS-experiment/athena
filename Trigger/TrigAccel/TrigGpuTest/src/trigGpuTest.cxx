@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
@@ -54,6 +54,7 @@ int main(int argc, char* argv[]) {
 
   if(!cfgResult) {
     std::cout<<"Factory config failed"<<std::endl;
+    dlclose(handle);
     return -2;
   }
 
