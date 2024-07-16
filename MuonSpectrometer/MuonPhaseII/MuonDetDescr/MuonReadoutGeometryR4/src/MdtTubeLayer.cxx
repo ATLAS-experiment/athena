@@ -68,7 +68,6 @@ namespace MuonGMR4{
             m_tubePos.insert(std::move(positioner));
         }
     }
-
     const Amg::Transform3D& MdtTubeLayer::layerTransform() const {
         return m_layTrf->getDefTransform();
     }
@@ -96,8 +95,12 @@ namespace MuonGMR4{
         return m_layerNode->getNChildVols();
     }
     double MdtTubeLayer::tubeHalfLength(const unsigned int tube) const {
-        const PVConstLink child = getTubeNode(tube);
-        const GeoShape* shape = child->getLogVol()->getShape();
+        TubePositionerSet::const_iterator tube_itr = m_tubePos.find(tube);
+        if (tube_itr == m_tubePos.end()) {
+            THROW_EXCEPTION(m_layerNode->getLogVol()->getName()<<" has only "<<nTubes()<<" tubes. But "
+                            <<tube<<" is requested. Please check.");
+        }   
+        const GeoShape* shape = tube_itr->tubeVol->getLogVol()->getShape();
         const GeoTube* tubeShape = static_cast<const GeoTube*>(shape);
         return tubeShape->getZHalfLength();    
     }

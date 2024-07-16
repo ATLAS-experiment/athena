@@ -168,6 +168,12 @@ template <class ContType>StatusCode MuonSpacePointMakerAlg::loadContainerAndSort
                 fillInto.etaHits.reserve(fillInto.etaHits.size() + etaHits.size() * phiHits.size());
                 for (const PrdType etaPrd : etaHits) {
                     for (const PrdType phiPrd: phiHits) {
+                        /// For the Tgc do not combine space points from adjacent BCs
+                        if constexpr(std::is_same<xAOD::TgcStripContainer, ContType>::value) {
+                            if (!(etaPrd->bcBitMap() & phiPrd->bcBitMap())){
+                                continue;
+                            }
+                        }
                         fillInto.etaHits.emplace_back(*gctx, etaPrd, phiPrd);
                     }
                 }
