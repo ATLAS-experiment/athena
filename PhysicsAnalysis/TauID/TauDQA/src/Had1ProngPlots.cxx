@@ -1,8 +1,9 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "Had1ProngPlots.h"
+#include "AthContainers/ConstAccessor.h"
 
 namespace Tau{
 
@@ -67,8 +68,9 @@ void Had1ProngPlots::fill(const xAOD::TauJet& tau, float weight) {
 
   test = tau.detail(xAOD::TauJetParameters::trkAvgDist, avariable);
   if(test) m_tauTrkAvgDist->Fill(avariable, weight);
- 
-  if(tau.nTracks()>0 && tau.track(0)->isAvailable<float>("d0SigTJVA")) {
+
+  static const SG::ConstAccessor<float> d0SigTJVAAcc("d0SigTJVA");
+  if(tau.nTracks()>0 && d0SigTJVAAcc.isAvailable(*tau.track(0))) {
       m_tauIpSig->Fill(tau.track(0)->d0SigTJVA(), weight);
   }
 

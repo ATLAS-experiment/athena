@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
 #include "GeneralTauPlots.h"
+#include "AthContainers/ConstAccessor.h"
 
 namespace Tau{
 
@@ -61,14 +62,14 @@ void GeneralTauPlots::fill(const xAOD::TauJet& tau, float weight) {
   m_tauNWideTracks->Fill(tau.nTracks(xAOD::TauJetParameters::classifiedIsolation), weight);
   m_ptHighPt->Fill(tau.pt()/1000, weight);
 
-  static const SG::AuxElement::ConstAccessor<float> acc_RNNEleScore("RNNEleScore");
+  static const SG::ConstAccessor<float> acc_RNNEleScore("RNNEleScore");
   if ( acc_RNNEleScore.isAvailable(tau) ) {
      float rnnScore = tau.discriminant(xAOD::TauJetParameters::RNNEleScore);
      if ( rnnScore > -2.0 ) m_RNNEleScore->Fill(rnnScore, weight);
   }
-  static const SG::AuxElement::ConstAccessor<float> acc_RNNEleScoreSigTrans("RNNEleScoreSigTrans_v1");
+  static const SG::ConstAccessor<float> acc_RNNEleScoreSigTrans("RNNEleScoreSigTrans_v1");
   if ( acc_RNNEleScoreSigTrans.isAvailable(tau) ) {
-     float rnnScore = tau.auxdata<float>("RNNEleScoreSigTrans_v1");
+     float rnnScore = acc_RNNEleScoreSigTrans(tau);
      m_RNNEleScoreSigTrans->Fill(rnnScore, weight);
   }
   static const SG::AuxElement::ConstAccessor<float> acc_RNNJetScore("RNNJetScore");

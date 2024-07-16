@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <utility>
 
 #include "EVetoPlots.h"
+#include "AthContainers/ConstAccessor.h"
 
 namespace Tau{
 
@@ -64,11 +65,13 @@ void EVetoPlots::initializePlots(){
   test = tau.detail(xAOD::TauJetParameters::centFrac, avariable);
   if(test) m_CentFrac->Fill(avariable, weight);
 
-  if(tau.isAvailable<float>("RNNEleScore")) {
+  static const SG::ConstAccessor<float> RNNEleScoreAcc("RNNEleScore");
+  if(RNNEleScoreAcc.isAvailable(tau)) {
     m_id_RNNEleScore->Fill(tau.discriminant(xAOD::TauJetParameters::RNNEleScore), weight);
 
-    if(tau.isAvailable<float>("RNNEleScoreSigTrans_v1")) {
-       m_id_RNNEleScoreSigTrans->Fill(tau.auxdata<float>("RNNEleScoreSigTrans_v1"), weight);	    
+    static const SG::ConstAccessor<float> RNNEleScoreSigTrans_v1Acc("RNNEleScoreSigTrans_v1");
+    if(RNNEleScoreSigTrans_v1Acc.isAvailable(tau)) {
+       m_id_RNNEleScoreSigTrans->Fill(RNNEleScoreSigTrans_v1Acc(tau), weight);	    
     }  
 
     if ( tau.isTau(xAOD::TauJetParameters::EleRNNLoose) ) {
