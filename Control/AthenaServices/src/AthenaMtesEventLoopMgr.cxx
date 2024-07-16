@@ -1137,8 +1137,8 @@ int AthenaMtesEventLoopMgr::declareEventRootAddress(EventContext& ctx){
 
         // never recorded in the eventStore
         pEvent = std::make_unique<EventInfo>(
-            new EventID(runNumber, eventNumber, eventTime, eventTimeNS,
-                        lumiBlock, bunchId),
+            std::make_unique<EventID>(runNumber, eventNumber, eventTime,
+                                      eventTimeNS, lumiBlock, bunchId),
             nullptr);
       } catch (...) {
       }
@@ -1164,8 +1164,8 @@ int AthenaMtesEventLoopMgr::declareEventRootAddress(EventContext& ctx){
           consume_modifier_stream = true;
           // Build the old-style Event Info object for those clients that still need it
           pEvent = std::make_unique<EventInfo>(
-              new EventID(eventIDFromxAOD(pXEvent)),
-              new EventType(eventTypeFromxAOD(pXEvent)));
+              std::make_unique<EventID>(eventIDFromxAOD(pXEvent)),
+              std::make_unique<EventType>(eventTypeFromxAOD(pXEvent)));
           pEventObserver = pEvent.get();
           sc = eventStore()->record(std::move(pEvent), "");
           if( !sc.isSuccess() )  {
@@ -1200,7 +1200,8 @@ int AthenaMtesEventLoopMgr::declareEventRootAddress(EventContext& ctx){
 
     m_timeStamp += m_timeStampInt;
 
-    pEvent = std::make_unique<EventInfo>(eid.release(), new EventType());
+    pEvent = std::make_unique<EventInfo>(std::move(eid),
+                                         std::make_unique<EventType>());
 
     modifyEventContext(ctx,*(pEvent->event_ID()), true);
 

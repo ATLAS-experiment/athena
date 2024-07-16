@@ -12,6 +12,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;  // non-MT EventLoopMgr
 #include <iostream>
 #include <fstream> /* ofstream */
 #include <iomanip>
+#include <memory>
 #include <stdexcept>
 
 // Athena includes
@@ -1106,8 +1107,9 @@ StatusCode AthenaEventLoopMgr::installEventContext(EventContext& ctx) {
         }
 
         eventInfo = std::make_unique<EventInfo>(
-            new EventID(runNumber, eventNumber, eventTime, eventTimeNS, lumiBlock, bunchId),
-            (EventType*)nullptr);
+            std::make_unique<EventID>(runNumber, eventNumber, eventTime,
+                                      eventTimeNS, lumiBlock, bunchId),
+            nullptr);
         eventID = *(eventInfo->event_ID());
 
         if (!m_evtIdModSvc.isSet() && pAttrList->exists("ConditionsRun")) {
@@ -1153,8 +1155,8 @@ StatusCode AthenaEventLoopMgr::installEventContext(EventContext& ctx) {
         ATH_MSG_DEBUG("use xAOD::EventInfo with runNumber=" << xAODEvent->runNumber());
         // Record the old-style object for those clients that still need it
         eventInfo = std::make_unique<EventInfo>(
-            new EventID(eventIDFromxAOD(xAODEvent)),
-            new EventType(eventTypeFromxAOD(xAODEvent)));
+            std::make_unique<EventID>(eventIDFromxAOD(xAODEvent)),
+            std::make_unique<EventType>(eventTypeFromxAOD(xAODEvent)));
         eventID = *(eventInfo->event_ID());
         StatusCode sc = eventStore()->record(std::move(eventInfo), "");
         if (!sc.isSuccess()) {
@@ -1166,7 +1168,8 @@ StatusCode AthenaEventLoopMgr::installEventContext(EventContext& ctx) {
   } else {
     // No EventSelector is provided, so with no iterator it's up to us
     // to create an EventInfo
-    eventInfo = std::make_unique<EventInfo>(new EventID(1, m_nevt, 0), new EventType());
+    eventInfo = std::make_unique<EventInfo>(
+        std::make_unique<EventID>(1, m_nevt, 0), std::make_unique<EventType>());
     eventInfo->event_ID()->set_lumi_block(m_nevt);
     eventID = *(eventInfo->event_ID());
     StatusCode sc = eventStore()->record(std::move(eventInfo), "");
