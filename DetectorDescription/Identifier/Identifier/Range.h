@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IDENTIFIER_RANGE_H
@@ -91,7 +91,7 @@ public:
     bool get_previous (element_type current, element_type& previous) const; 
     bool get_next     (element_type current, element_type& next) const; 
     size_type get_indices () const; 
-    index_vector get_indexes () const;      
+    const index_vector& get_indexes () const;
     size_type get_bits () const; 
     element_type get_value_at (size_type index) const; 
     size_type get_value_index (element_type value) const; 
@@ -549,7 +549,7 @@ inline ExpandedIdentifier::size_type Range::field::get_indices () const
 }
 
 //------------------------------------------------------------------
-inline Range::field::index_vector Range::field::get_indexes () const
+inline const Range::field::index_vector& Range::field::get_indexes () const
 //------------------------------------------------------------------
 {
     return (m_indexes);
