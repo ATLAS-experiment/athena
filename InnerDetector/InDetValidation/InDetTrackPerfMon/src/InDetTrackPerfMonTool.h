@@ -21,6 +21,10 @@
 #include "AthenaMonitoring/ManagedMonitorToolBase.h"
 #include "TrigDecisionTool/TrigDecisionTool.h"
 
+/// EDM includes
+#include "xAODCore/BaseContainer.h"
+#include "xAODCore/AuxContainerBase.h"
+
 /// local includes
 #include "InDetTrackPerfMon/ITrackAnalysisDefinitionSvc.h"
 #include "TrackAnalysisCollections.h"
@@ -28,6 +32,7 @@
 #include "InDetTrackPerfMon/ITrackSelectionTool.h"
 #include "ITrackMatchingTool.h"
 #include "TrackAnalysisPlotsMgr.h"
+#include "TrackAnalysisInfoWriteTool.h"
 
 /// STL includes
 #include <string>
@@ -54,7 +59,7 @@ private :
     /// prevent default construction
     InDetTrackPerfMonTool();
 
-    /// reatrieve all collections and load them into trkAnaCollections object
+    /// retrieve all collections and load them into trkAnaCollections object
     StatusCode loadCollections( IDTPM::TrackAnalysisCollections& trkAnaColls );
 
     /// Offline TrackParticleContainer's name
@@ -73,6 +78,13 @@ private :
     SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoContainerName {
         this, "EventInfoContainerName", "EventInfo", "event info" };
 
+    SG::WriteHandleKey< xAOD::BaseContainer > m_trkAnaInfoKey {
+        this, "TrkAnaInfoKey", "TrackAnalysisInfo", "Dedicated TrackAnalysis Info written out" };
+
+    /// -----------------------------
+    /// --------- Sub-Tools ---------
+    /// -----------------------------
+
     PublicToolHandle< Trig::TrigDecisionTool > m_trigDecTool {
         this, "TrigDecisionTool", "Trig::TrigDecisionTool/TrigDecisionTool", "" };
 
@@ -88,9 +100,14 @@ private :
     ToolHandle< IDTPM::ITrackMatchingTool > m_trackMatchingTool {
         this, "TrackMatchingTool", "IDTPM::InDetTrackPerfMon/ITrackMatchingTool", "Tool to match test to reference tracks and viceversa" };
 
+    ToolHandle< IDTPM::TrackAnalysisInfoWriteTool > m_trkAnaInfoWriteTool {
+        this, "TrackAnalysisInfoWriteTool", "IDTPM::InDetTrackPerfMon/TrackAnalysisInfoWriteTool", "Tool to write TrackAnalysisInfo to StoreGate" };
+
     StringProperty m_anaTag{ this, "AnaTag", "", "Track analysis tag" }; 
 
     BooleanProperty m_doMatch{ this, "doMatch", false, "Enable TrackMatchingTool" };
+
+    BooleanProperty m_writeOut{ this, "writeOut", false, "Write TrkAnaInfo Collection to AOD_IDTPM" };
 
     /// TrackAnalysisDefinitionSvc
     ITrackAnalysisDefinitionSvc* m_trkAnaDefSvc;

@@ -19,6 +19,7 @@
 #include "../DeltaRMatchingTool.h"
 #include "../PlotsDefinitionSvc.h"
 #include "../JsonPlotsDefReadTool.h"
+#include "../TrackAnalysisInfoWriteTool.h"
 
 DECLARE_COMPONENT( InDetTrackPerfMonTool )
 DECLARE_COMPONENT( TrackAnalysisDefinitionSvc )
@@ -39,3 +40,4 @@ DECLARE_COMPONENT( IDTPM::TruthTrackMatchingTool )
 DECLARE_COMPONENT( IDTPM::DeltaRMatchingTool_trk )
 DECLARE_COMPONENT( IDTPM::DeltaRMatchingTool_trkTruth )
 DECLARE_COMPONENT( IDTPM::DeltaRMatchingTool_truthTrk )
+DECLARE_COMPONENT( IDTPM::TrackAnalysisInfoWriteTool )

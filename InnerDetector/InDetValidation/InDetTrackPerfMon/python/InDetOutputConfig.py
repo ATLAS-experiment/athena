@@ -82,6 +82,14 @@ def InDetOutputCfg( flags, **kwargs ):
                 #'xAOD::TauJetAuxContainer#TauJetsAux.',
             })
 
+        ## adding TrackAnalysisInfo containers
+        trkAnaInfo = "TrkAnaInfo"+getattr( flags.PhysVal.IDTPM, trkAnaName+'.anaTag' )
+        itemsToRecord.update({
+            'xAOD::BaseContainer#'+trkAnaInfo,
+            'xAOD::AuxContainerBase#'+trkAnaInfo+'Aux.',
+        })
+
+
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     acc.merge( OutputStreamCfg( flags, 'AOD_IDTPM',
                                 ItemList = list( itemsToRecord ),
