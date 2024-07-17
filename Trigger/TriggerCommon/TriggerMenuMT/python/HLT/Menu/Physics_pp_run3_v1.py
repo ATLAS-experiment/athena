@@ -1102,9 +1102,17 @@ def setupMenu(menu_name):
         ChainProp(name='HLT_j200_0eta180_emergingPTF0p08dR1p2_a10sd_cssk_pf_jes_ftf_preselj200_L1jJ160', groups=SingleJetGroup+PrimaryPhIGroup, l1SeedThresholds=['FSNOSEED']),
         # Phase-I Backup emerging jet chain
         ChainProp(name='HLT_j200_0eta160_emergingPTF0p08dR1p2_a10sd_cssk_pf_jes_ftf_preselj200_L1jJ160', groups=SingleJetGroup+PrimaryPhIGroup, l1SeedThresholds=['FSNOSEED']),
-
         
-        
+        ## ATR-29738 - Delayed Jets Triggers
+        # Single-Jet
+        ChainProp(name='HLT_j200_2timing15_L1jJ160', groups=SingleJetGroup+PrimaryPhIGroup, l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream]),
+        ChainProp(name='HLT_j200_3timeSig15_L1jJ160', groups=SingleJetGroup+PrimaryPhIGroup, l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream]),
+        ChainProp(name='HLT_j250_2timing15_L1jJ160', groups=SingleJetGroup+PrimaryPhIGroup, l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream]),
+        ChainProp(name='HLT_j250_3timeSig15_L1jJ160', groups=SingleJetGroup+PrimaryPhIGroup, l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream]),
+        # Multi-Jet
+        ChainProp(name='HLT_2j45_2j55_3timeSig15_L14jJ40', groups=MultiJetGroup+PrimaryPhIGroup, l1SeedThresholds=['FSNOSEED']*2, stream=[PhysicsStream]),
+        ChainProp(name='HLT_2j100_2timeSig15_L1jJ90', groups=MultiJetGroup+SupportPhIGroup, l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream]),
+        ChainProp(name='HLT_j220_j150_2timing15_L1jJ160', groups=MultiJetGroup+PrimaryPhIGroup, l1SeedThresholds=['FSNOSEED']*2, stream=[PhysicsStream]), 
         
         # ATR-21596 HT Delayed for Dark Showers 
         ChainProp(name='HLT_j0_HT650XX0eta240_pf_ftf_preselcHT450_L1HT190-jJ40s5pETA21', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=PrimaryPhIGroup+SingleJetGroup+Topo3Group),
