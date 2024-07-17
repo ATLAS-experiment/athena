@@ -240,7 +240,7 @@ namespace Rec {
 
             if (!haveMS) {
                 // combinedTrack fails: MS removed by cleaner
-                m_messageHelper->printWarning(1);
+                ATH_MSG_DEBUG("combinedFit:: fail with MS removed by cleaner"); //Used to be: m_messageHelper->printWarning(1);
             }
 
             if (!combinedTrack->perigeeParameters() || !m_indetVolume->inside(combinedTrack->perigeeParameters()->position())) {

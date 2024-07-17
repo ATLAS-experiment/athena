@@ -48,8 +48,12 @@ def L1TopoOnlineMonitorSequenceCfg(flags):
 
         reco = InEventRecoCA('L1TopoPhase1OnlineMonitor_reco',inputMaker=inputMaker)
 
+        readMuCTPI_local=True
+        if flags.Trigger.doLVL1:
+            readMuCTPI_local=False
+        
         reco.addSequence(seqAND('L1TopoSimSeq'))
-        reco.merge(TopoSimConfig.L1TopoSimulationCfg(flags,doMonitoring=True,readMuCTPI=False,name="L1OnlineTopoSimulation"), sequenceName='L1TopoSimSeq')
+        reco.merge(TopoSimConfig.L1TopoSimulationCfg(flags,doMonitoring=True,readMuCTPI=readMuCTPI_local,name="L1OnlineTopoSimulation"), sequenceName='L1TopoSimSeq')
     
         selAcc =  SelectionCA("L1TopoOnlineMonitorSequence")
         selAcc.mergeReco(reco)

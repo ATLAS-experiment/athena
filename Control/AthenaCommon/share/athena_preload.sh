@@ -10,6 +10,7 @@
 #   $ATLASMKLLIBDIR_PRELOAD : location of Intel math library
 #   $USEIMF                 : use Intel math library
 #   $USEEXCTRACE            : preload exception trace collector
+#   $USEEXCABORT            : preload exception-to-abort coversion
 #   $ATHENA_ADD_PRELOAD     : preload user specific library
 #   $ATHENA_DROP_RELOAD     : are we in drop/reload mode?
 #
@@ -102,6 +103,20 @@ if [ "$USEEXCTRACE" = "1" ] || [ "$USEEXCTRACE" = "true" ]; then
     fi
     echo "Preloading `basename $EXCTRACE_LIB`"
     ld_preload "$EXCTRACE_LIB"
+fi
+
+#
+# Making some exceptions aborting
+#
+if [ "$USEEXCABORT" = "1" ] || [ "$USEEXCABORT" = "true" ]; then
+    # Abuse which to search for the library.
+    EXCABORT_LIB=`PATH=$LD_LIBRARY_PATH /usr/bin/which libexcabort.so`
+    if [ "$EXCABORT_LIB" = "" ]; then
+        error "ERROR: Cannot find libexcabort.so"
+        exit 1
+    fi
+    echo "Preloading `basename $EXCABORT_LIB`"
+    ld_preload "$EXCABORT_LIB"
 fi
 
 #
