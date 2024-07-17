@@ -61,9 +61,39 @@ if __name__=="__main__":
     cfg.merge(MuonPatternRecognitionCfg(flags))
 
     cfg.merge(MuonHoughTransformTesterCfg(flags,
-                                       drawDisplayFailed =args.displayFailedSeeds,
-                                       drawDisplaySuccss = args.displayGoodSeeds))
+                                          drawDisplayFailed =args.displayFailedSeeds,
+                                          drawDisplaySuccss = args.displayGoodSeeds))
     cfg.merge(PerfMonMTSvcCfg(flags))
+    
+    
+    
+    from MuonConfig.MuonSegmentFindingConfig import MuonLayerHoughAlgCfg, MuonSegmentFinderAlgCfg, MuonSegmentCnvAlgCfg
+    ### Build segments from the leagcy chain
+    cfg.merge(MuonLayerHoughAlgCfg(flags))
+    cfg.merge(MuonSegmentFinderAlgCfg(flags,
+                                      NSWSegmentCollectionName=""))
+
+    cfg.merge(MuonSegmentCnvAlgCfg(flags))
+    from MuonConfig.MuonTrackBuildingConfig import MuPatTrackBuilderCfg
+    cfg.merge(MuPatTrackBuilderCfg(flags))
+    ### What happens if you parse the R4 patterns to the legacy chain?
+    from MuonPatternCnv.MuonPatternCnvConfig import MuonPatternCnvAlgCfg
+    cfg.merge(MuonPatternCnvAlgCfg(flags,
+                                   PatternCombiKey="R4Patterns",
+                                   HoughDataPerSecKey="R4HoughDataPerSec"))
+    cfg.merge(MuonSegmentFinderAlgCfg(flags,
+                                      name="MuonSegmentFinderR4Pattern",
+                                      MuonLayerHoughCombisKey="R4Patterns",
+                                      SegmentCollectionName="TrackMuonSegmentsFromR4",
+                                      NSWSegmentCollectionName=""))
+    cfg.merge(MuonSegmentCnvAlgCfg(flags, "MuonSegmentCnvAlgFromR4",
+                                   SegmentContainerName="TrackMuonSegmentsFromR4",
+                                   xAODContainerName="MuonSegmentsFromR4"))
+    
+    cfg.merge(MuPatTrackBuilderCfg(flags, name="TrackBuildingFromR4",
+                                   MuonSegmentCollection = "TrackMuonSegmentsFromR4",
+                                   SpectrometerTrackOutputLocation="MuonTracksFromR4"))
+
     # cfg.merge(VTuneProfilerServiceCfg(flags, ProfiledAlgs=["MuonHoughTransformAlg"]))
 
     executeTest(cfg, args.nEvents)
