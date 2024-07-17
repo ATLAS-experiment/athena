@@ -4,10 +4,10 @@
 #include "TMath.h"
 #include <limits>
 
-auto zeroVector = [](std::vector<float>& v){ v.assign(v.size(), 0); };
-auto zeroVectorVector = [](std::vector<std::vector<float>>& vv){ for (std::vector<float>& v : vv) v.assign(v.size(), 0); };
-auto zeroPileupFunc = [](unsigned int){ return 0; };
-auto zeroPileupFuncVector = [](std::vector<std::function<float(unsigned int)>>& v){ v.assign(v.size(), zeroPileupFunc); };
+const auto zeroVector = [](std::vector<float>& v){ v.assign(v.size(), 0); };
+const auto zeroVectorVector = [](std::vector<std::vector<float>>& vv){ for (std::vector<float>& v : vv) v.assign(v.size(), 0); };
+const auto zeroPileupFunc = [](unsigned int){ return 0; };
+const auto zeroPileupFuncVector = [](std::vector<std::function<float(unsigned int)>>& v){ v.assign(v.size(), zeroPileupFunc); };
 
 RPDDataAnalyzer::RPDDataAnalyzer(
   ZDCMsg::MessageFunctionPtr messageFunc_p, const std::string& tag, const RPDConfig& config, std::vector<float> const& calibFactors
