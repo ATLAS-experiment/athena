@@ -445,7 +445,8 @@ namespace H5Utils {
       flush();
     }
 
-    // make some assertions
+    // make some assertions to simplify debugging, the errors can be
+    // pretty nasty wtih all these templates.
     typedef internal::CheckType<N, T, I> checkType;
     static_assert(
       checkType::depth >= N,
@@ -453,6 +454,14 @@ namespace H5Utils {
       " ** H5 Writer rank is greater than the depth of fill(...) input! **"
       " \n");
     static_assert(
+      // Suppress cppcheck warning here. It reports that the condition
+      // below is always true if `N = 0`. In N > 0 cases this
+      // condition might be false though, so I consider this a
+      // spurious warning.
+      //
+      //     <3 Dan Guest, 2024-07-16 <3
+      //
+      // cppcheck-suppress incorrectLogicOperator
       !(checkType::any_type && !checkType::ok_type),
       "\n\n"
       " ** H5 Writer input type matches fill(...), but rank is incorrect! **"
