@@ -3489,6 +3489,20 @@ HLT_6j20_pf_ftf_presel6c25_PhysicsTLA_L14jJ40:
     1: 57
     2: 57
     3: 5
+HLT_6j20_pf_ftf_preselZ134XX5c20_PhysicsTLA_L14jJ40:
+  eventCount: 6
+  stepCounts:
+    0: 15
+    1: 10
+    2: 6
+    3: 6
+    4: 6
+  stepFeatures:
+    0: 15
+    1: 10
+    2: 74
+    3: 74
+    4: 6
 HLT_6j20_pf_ftf_preselZ142XX5c20_PhysicsTLA_L14jJ40:
   eventCount: 7
   stepCounts:
@@ -3503,6 +3517,20 @@ HLT_6j20_pf_ftf_preselZ142XX5c20_PhysicsTLA_L14jJ40:
     2: 105
     3: 105
     4: 7
+HLT_6j20_pf_ftf_preselZ197XX6c20_PhysicsTLA_L14jJ40:
+  eventCount: 8
+  stepCounts:
+    0: 12
+    1: 11
+    2: 8
+    3: 8
+    4: 8
+  stepFeatures:
+    0: 12
+    1: 11
+    2: 112
+    3: 112
+    4: 8
 HLT_6j20_pf_ftf_preselZ219XX6c20_PhysicsTLA_L14jJ40:
   eventCount: 8
   stepCounts:
@@ -14291,6 +14319,14 @@ HLT_j0_Z120XX6c55_roiftf_presel6j40_L14J15:
     0: 3
   stepFeatures:
     0: 3
+HLT_j0_Z134XX5c20_roiftf_presel5c20_L14jJ40:
+  eventCount: 10
+  stepCounts:
+    0: 15
+    1: 10
+  stepFeatures:
+    0: 15
+    1: 68
 HLT_j0_Z142XX5c20_roiftf_presel5c20_L14jJ40:
   eventCount: 11
   stepCounts:
@@ -14299,6 +14335,14 @@ HLT_j0_Z142XX5c20_roiftf_presel5c20_L14jJ40:
   stepFeatures:
     0: 15
     1: 75
+HLT_j0_Z197XX6c20_roiftf_presel6c20_L14jJ40:
+  eventCount: 11
+  stepCounts:
+    0: 12
+    1: 11
+  stepFeatures:
+    0: 12
+    1: 78
 HLT_j0_Z219XX6c20_roiftf_presel6c20_L14jJ40:
   eventCount: 11
   stepCounts:
@@ -14359,6 +14403,30 @@ HLT_j0_pf_ftf_L1jJ85p0ETA21_3jJ40p0ETA25:
   stepFeatures:
     0: 16
     1: 252
+HLT_j0_pf_ftf_presel5c20_PhysicsTLA_L14jJ40:
+  eventCount: 15
+  stepCounts:
+    0: 15
+    1: 15
+    2: 15
+    3: 15
+  stepFeatures:
+    0: 15
+    1: 285
+    2: 285
+    3: 15
+HLT_j0_pf_ftf_presel6c20_PhysicsTLA_L14jJ40:
+  eventCount: 12
+  stepCounts:
+    0: 12
+    1: 12
+    2: 12
+    3: 12
+  stepFeatures:
+    0: 12
+    1: 235
+    2: 235
+    3: 12
 HLT_j0_pf_ftf_presel6c25_PhysicsTLA_L14jJ40:
   eventCount: 5
   stepCounts:
@@ -14381,6 +14449,20 @@ HLT_j0_pf_ftf_preselZ120XX4c20_L1jJ85p0ETA21_3jJ40p0ETA25:
     0: 16
     1: 15
     2: 215
+HLT_j0_pf_ftf_preselZ134XX5c20_PhysicsTLA_L14jJ40:
+  eventCount: 10
+  stepCounts:
+    0: 15
+    1: 10
+    2: 10
+    3: 10
+    4: 10
+  stepFeatures:
+    0: 15
+    1: 10
+    2: 150
+    3: 150
+    4: 10
 HLT_j0_pf_ftf_preselZ138MAXMULT5cXX4c20_L1jJ85p0ETA21_3jJ40p0ETA25:
   eventCount: 15
   stepCounts:
@@ -14401,6 +14483,20 @@ HLT_j0_pf_ftf_preselZ142XX5c20_PhysicsTLA_L14jJ40:
     4: 11
   stepFeatures:
     0: 15
+    1: 11
+    2: 198
+    3: 198
+    4: 11
+HLT_j0_pf_ftf_preselZ197XX6c20_PhysicsTLA_L14jJ40:
+  eventCount: 11
+  stepCounts:
+    0: 12
+    1: 11
+    2: 11
+    3: 11
+    4: 11
+  stepFeatures:
+    0: 12
     1: 11
     2: 198
     3: 198
@@ -14453,6 +14549,22 @@ HLT_j0_roiftf_presel3c45_L1jJ85p0ETA21_3jJ40p0ETA25:
   stepFeatures:
     0: 15
     1: 282
+HLT_j0_roiftf_presel5c20_L14jJ40:
+  eventCount: 15
+  stepCounts:
+    0: 15
+    1: 15
+  stepFeatures:
+    0: 15
+    1: 315
+HLT_j0_roiftf_presel6c20_L14jJ40:
+  eventCount: 12
+  stepCounts:
+    0: 12
+    1: 12
+  stepFeatures:
+    0: 12
+    1: 254
 HLT_j0_roiftf_presel6c25_L14jJ40:
   eventCount: 5
   stepCounts:

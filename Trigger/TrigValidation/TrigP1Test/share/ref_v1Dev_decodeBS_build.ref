@@ -1418,7 +1418,11 @@ HLT_5j85_pf_ftf_presel5j55_L14jJ40:
   eventCount: 0
 HLT_6j20_pf_ftf_presel6c25_PhysicsTLA_L14jJ40:
   eventCount: 0
+HLT_6j20_pf_ftf_preselZ134XX5c20_PhysicsTLA_L14jJ40:
+  eventCount: 0
 HLT_6j20_pf_ftf_preselZ142XX5c20_PhysicsTLA_L14jJ40:
+  eventCount: 0
+HLT_6j20_pf_ftf_preselZ197XX6c20_PhysicsTLA_L14jJ40:
   eventCount: 0
 HLT_6j20_pf_ftf_preselZ219XX6c20_PhysicsTLA_L14jJ40:
   eventCount: 0
@@ -8804,7 +8808,11 @@ HLT_j0_Z120XX5c70_roiftf_presel5j50_L14J15:
   eventCount: 0
 HLT_j0_Z120XX6c55_roiftf_presel6j40_L14J15:
   eventCount: 0
+HLT_j0_Z134XX5c20_roiftf_presel5c20_L14jJ40:
+  eventCount: 0
 HLT_j0_Z142XX5c20_roiftf_presel5c20_L14jJ40:
+  eventCount: 0
+HLT_j0_Z197XX6c20_roiftf_presel6c20_L14jJ40:
   eventCount: 0
 HLT_j0_Z219XX6c20_roiftf_presel6c20_L14jJ40:
   eventCount: 0
@@ -8844,13 +8852,21 @@ HLT_j0_pf_ftf_L1jJ85p0ETA21_3jJ40p0ETA25:
   stepFeatures:
     0: 1
     1: 8
+HLT_j0_pf_ftf_presel5c20_PhysicsTLA_L14jJ40:
+  eventCount: 0
+HLT_j0_pf_ftf_presel6c20_PhysicsTLA_L14jJ40:
+  eventCount: 0
 HLT_j0_pf_ftf_presel6c25_PhysicsTLA_L14jJ40:
   eventCount: 0
 HLT_j0_pf_ftf_preselZ120XX4c20_L1jJ85p0ETA21_3jJ40p0ETA25:
   eventCount: 0
+HLT_j0_pf_ftf_preselZ134XX5c20_PhysicsTLA_L14jJ40:
+  eventCount: 0
 HLT_j0_pf_ftf_preselZ138MAXMULT5cXX4c20_L1jJ85p0ETA21_3jJ40p0ETA25:
   eventCount: 0
 HLT_j0_pf_ftf_preselZ142XX5c20_PhysicsTLA_L14jJ40:
+  eventCount: 0
+HLT_j0_pf_ftf_preselZ197XX6c20_PhysicsTLA_L14jJ40:
   eventCount: 0
 HLT_j0_pf_ftf_preselZ219XX6c20_PhysicsTLA_L14jJ40:
   eventCount: 0
@@ -8865,6 +8881,10 @@ HLT_j0_roiftf_presel3c30_L1jJ85p0ETA21_3jJ40p0ETA25:
 HLT_j0_roiftf_presel3c40_L1jJ85p0ETA21_3jJ40p0ETA25:
   eventCount: 0
 HLT_j0_roiftf_presel3c45_L1jJ85p0ETA21_3jJ40p0ETA25:
+  eventCount: 0
+HLT_j0_roiftf_presel5c20_L14jJ40:
+  eventCount: 0
+HLT_j0_roiftf_presel6c20_L14jJ40:
   eventCount: 0
 HLT_j0_roiftf_presel6c25_L14jJ40:
   eventCount: 0
