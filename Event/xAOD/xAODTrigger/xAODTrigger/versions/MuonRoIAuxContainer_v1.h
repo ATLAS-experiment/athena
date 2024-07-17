@@ -1,10 +1,9 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: MuonRoIAuxContainer_v1.h 631149 2014-11-26 12:26:18Z krasznaa $
 #ifndef XAODTRIGGER_VERSIONS_MUONROIAUXCONTAINER_V1_H
 #define XAODTRIGGER_VERSIONS_MUONROIAUXCONTAINER_V1_H
 
@@ -28,9 +27,6 @@ namespace xAOD{
    /// @author Lukas Heinrich <Lukas.Heinrich@cern.ch>
    /// @author Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
    ///
-   /// $Revision: 631149 $
-   /// $Date: 2014-11-26 13:26:18 +0100 (Wed, 26 Nov 2014) $
-   ///
    class MuonRoIAuxContainer_v1 : public AuxContainerBase{
 
    public:
@@ -43,6 +39,7 @@ namespace xAOD{
       std::vector< uint32_t > roiWord;
       std::vector< float > thrValue;
       std::vector< std::string > thrName;
+      std::vector< uint32_t > roiExtraWord;
 
    }; // class MuonRoIAuxContainer_v1
 
