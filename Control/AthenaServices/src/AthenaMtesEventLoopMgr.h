@@ -299,7 +299,7 @@ private:
   std::string m_pfn{""};
 
   // For the event service running:
-  yampl::ISocket* m_socket{nullptr};
+  std::unique_ptr<yampl::ISocket> m_socket;
 };
 
 #endif // ATHENASERVICES_ATHENAHIVEEVENTLOOPMGR_H
