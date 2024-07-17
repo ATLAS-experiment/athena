@@ -49,29 +49,29 @@ def L1TopoSimulationCfg(flags, doMonitoring=True, readMuCTPI=False, name="L1Topo
     acc = ComponentAccumulator()
 
     #Configure the MuonInputProvider
-    
-    muProvider = CompFactory.LVL1.MuonInputProvider("MuonInputProvider")
+    muProvider=""
 
-    """
-    If muons coming from the decoding, we use MuonRoI, otherwise MuCTPIL1Topo
-    So here we should be adding proper flag for P1, and when input file is RAW
-    Simply, if muons are simulated, we will use MuCTPIL1Topo, if decoded MuonRoI
-    """
+    if flags.Trigger.L1.doMuon:
+        muProvider = CompFactory.LVL1.MuonInputProvider("MuonInputProvider")
 
+        """
+        If muons coming from the decoding, we use MuonRoI, otherwise MuCTPIL1Topo
+        So here we should be adding proper flag for P1, and when input file is RAW
+        Simply, if muons are simulated, we will use MuCTPIL1Topo, if decoded MuonRoI
+        """
     
-    #if flags.Trigger.L1.doMuonTopoInputs:
-    if readMuCTPI:
-        muProvider.locationMuCTPItoL1Topo = ""
-        muProvider.locationMuCTPItoL1Topo1 = ""
-    else:
-        muProvider.locationMuonRoI = ""
-        muProvider.locationMuonRoI1 = ""
+        if readMuCTPI:
+            muProvider.locationMuCTPItoL1Topo = ""
+            muProvider.locationMuCTPItoL1Topo1 = ""
+        else:
+            muProvider.locationMuonRoI = ""
+            muProvider.locationMuonRoI1 = ""
         
-    #Configure the MuonRoiTools for the MIP
-    from TrigT1MuonRecRoiTool.TrigT1MuonRecRoiToolConfig import RPCRecRoiToolCfg, TGCRecRoiToolCfg
-    muProvider.RecRpcRoiTool = acc.popToolsAndMerge(RPCRecRoiToolCfg(flags))
-    muProvider.RecTgcRoiTool = acc.popToolsAndMerge(TGCRecRoiToolCfg(flags))
-    
+        #Configure the MuonRoiTools for the MIP
+        from TrigT1MuonRecRoiTool.TrigT1MuonRecRoiToolConfig import RPCRecRoiToolCfg, TGCRecRoiToolCfg
+        muProvider.RecRpcRoiTool = acc.popToolsAndMerge(RPCRecRoiToolCfg(flags))
+        muProvider.RecTgcRoiTool = acc.popToolsAndMerge(TGCRecRoiToolCfg(flags))
+
     emtauProvider = CompFactory.LVL1.eFexInputProvider("eFexInputProvider")
     jetProvider = CompFactory.LVL1.jFexInputProvider("jFexInputProvider")
     energyProvider = CompFactory.LVL1.gFexInputProvider("gFexInputProvider")
