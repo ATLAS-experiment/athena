@@ -202,12 +202,12 @@ namespace MuonGMR4 {
             return -1;
         }
         const double stripPitches = std::abs((*stripDist) / stripPitch());
-        if (stripPitches > (1.*numStrips() + 0.5)) {
+        if (stripPitches > (1.*numStrips() - 0.5)) {
             ATH_MSG_VERBOSE("Object "<<Amg::toString(pos)<<" is not covered by any strip."
                           <<" Virtual strip pitches: "<<stripPitches<<" max strips: "<<numStrips());
              return -1;
         }
-        const int chNum = std::min(static_cast<int>(std::round(stripPitches)), numStrips());       
+        const int chNum = std::min(static_cast<int>(std::round(stripPitches)), numStrips()-1);       
         if (!insideBoundaries(pos)){
             ATH_MSG_VERBOSE("Object "<<Amg::toString(pos)<<" is outside the active area of the trapezoid. "
                           <<"Distance to strip: "<<stripNormal().dot(pos - (*stripCenter(chNum)))
