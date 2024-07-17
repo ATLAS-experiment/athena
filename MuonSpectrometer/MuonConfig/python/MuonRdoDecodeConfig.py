@@ -78,11 +78,18 @@ def RpcRdoToPrepDataToolCfg(flags, name ="RpcRdoToRpcPrepData",RDOContainer = No
     if RDOContainer: 
         kwargs.setdefault("RpcRdoContainer", RDOContainer)
 
-    if flags.Muon.usePhaseIIGeoSetup:
+    if flags.Input.isMC and flags.Muon.usePhaseIIGeoSetup:
         from MuonConfig.MuonCablingConfig import NRPCCablingConfigCfg
         result.merge(NRPCCablingConfigCfg(flags))
-        from xAODMuonMeasViewAlgs.ViewAlgsConfig import RpcMeasViewAlgCfg
-        result.merge(RpcMeasViewAlgCfg(flags))
+        from AthenaConfiguration.Enums import LHCPeriod
+        kwargs.setdefault("decode2DStrips", flags.GeoModel.Run >= LHCPeriod.Run4)
+        if kwargs["decode2DStrips"]:
+            from xAODMuonMeasViewAlgs.ViewAlgsConfig import RpcMeasViewAlgCfg
+            result.merge(RpcMeasViewAlgCfg(flags))
+        else:
+            kwargs.setdefault("OutputContainer", "xRpcMeasurements")
+        from xAODMuonTrkPrepDataCnv.MuonPrepDataCnvCfg import xRpcToRpcPrepDataCnvAlgCfg
+        result.merge(xRpcToRpcPrepDataCnvAlgCfg(flags))
         the_tool = CompFactory.MuonR4.RpcRdoToRpcPrepDataTool(name, **kwargs)
         result.setPrivateTools(the_tool)
 
@@ -109,7 +116,8 @@ def RpcRdoToPrepDataToolCfg(flags, name ="RpcRdoToRpcPrepData",RDOContainer = No
         if not flags.Muon.enableNRPC:
             kwargs["NrpcInputCollection"] = ""
 
-        kwargs["xAODKey"] = "xRpcMeasurements" if flags.Muon.writexAODPRD else ""
+        kwargs["xAODKey"] = "xRpcMeasurements" if flags.Muon.writexAODPRD or \
+                                                  flags.Muon.usePhaseIIGeoSetup else ""
 
         #Setup RPC RDO decoder to be consistent with RPC readout settings
         if flags.Muon.MuonTrigger:
