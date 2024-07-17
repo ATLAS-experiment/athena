@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -36,8 +36,8 @@ protected Q_SLOTS:
   void entriesChanged(const QStringList& entry_key,const QStringList& entry_type,const QStringList& entry_id);
 
 private:
-  QTableWidget * m_tableWidget;
-  VP1BanksSystem * m_bankssystem;
+  QTableWidget * m_tableWidget{};
+  VP1BanksSystem * m_bankssystem{};
 };
 
 #endif
