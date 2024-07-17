@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -988,13 +988,14 @@ QString VP1ExecutionScheduler::saveSnaphsotToFile(IVP1System* s, bool batch)
 		QString evtimestamp = QString::number(m_d->mainwindow->getEventTimestamp());
 
 		time_t t_evttimestamp = m_d->mainwindow->getEventTimestamp();
-		tm * human_evtimestamp = localtime(&t_evttimestamp);
+		struct tm human_evtimestamp;
+		localtime_r(&t_evttimestamp, &human_evtimestamp);
 
 		std::ostringstream h_evtimestamp_ostri;
-		h_evtimestamp_ostri  << 1900 + human_evtimestamp->tm_year
-				       << "-" << 1 + human_evtimestamp->tm_mon  // tm_mon is in the range [0, 11], so 1 must be added to get real months
-				       << "-" << human_evtimestamp->tm_mday
-				       << "T" << human_evtimestamp->tm_hour << "-" << human_evtimestamp->tm_min << "-" << human_evtimestamp->tm_sec << "CEST";
+		h_evtimestamp_ostri  << 1900 + human_evtimestamp.tm_year
+				       << "-" << 1 + human_evtimestamp.tm_mon  // tm_mon is in the range [0, 11], so 1 must be added to get real months
+				       << "-" << human_evtimestamp.tm_mday
+				       << "T" << human_evtimestamp.tm_hour << "-" << human_evtimestamp.tm_min << "-" << human_evtimestamp.tm_sec << "CEST";
 
 		std::string h_evtimestamp_str = h_evtimestamp_ostri.str();
 		QString h_evtimestamp = QString::fromStdString(h_evtimestamp_str);
@@ -1002,22 +1003,23 @@ QString VP1ExecutionScheduler::saveSnaphsotToFile(IVP1System* s, bool batch)
 		// IMAGE TIMESTAMP
 
 		time_t t_timestamp = time(0);   // get time now;
-		tm *ltm = localtime(&t_timestamp);
+		struct tm ltm;
+		localtime_r(&t_timestamp, &ltm);
 
 		// print various components of tm structure.
-		VP1Msg::messageDebug(  "Year: "+ QString::number(1900 + ltm->tm_year)
-		                + " - " + "Month: " + QString::number(1 + ltm->tm_mon) + " - "  // tm_mon is in the range [0, 11], so 1 must be added to get real months
-		                + "Day: " +  QString::number(ltm->tm_mday)
-		                + " - " "Time: " + QString::number(ltm->tm_hour) + ":" + QString::number(ltm->tm_min) + ":" + QString::number(ltm->tm_sec) + "CEST");
+		VP1Msg::messageDebug(  "Year: "+ QString::number(1900 + ltm.tm_year)
+		                + " - " + "Month: " + QString::number(1 + ltm.tm_mon) + " - "  // tm_mon is in the range [0, 11], so 1 must be added to get real months
+		                + "Day: " +  QString::number(ltm.tm_mday)
+		                + " - " "Time: " + QString::number(ltm.tm_hour) + ":" + QString::number(ltm.tm_min) + ":" + QString::number(ltm.tm_sec) + "CEST");
 
 		std::ostringstream ostri_unix;
 		ostri_unix << t_timestamp;
 
 		std::ostringstream ostri;
-		ostri  << 1900 + ltm->tm_year
-		       << "-" << 1 + ltm->tm_mon  // tm_mon is in the range [0, 11], so 1 must be added to get real months
-		       << "-" << ltm->tm_mday
-		       << "T" << ltm->tm_hour << "-" << ltm->tm_min << "-" << ltm->tm_sec << "CEST";
+		ostri  << 1900 + ltm.tm_year
+		       << "-" << 1 + ltm.tm_mon  // tm_mon is in the range [0, 11], so 1 must be added to get real months
+		       << "-" << ltm.tm_mday
+		       << "T" << ltm.tm_hour << "-" << ltm.tm_min << "-" << ltm.tm_sec << "CEST";
 
 		std::string unixTimestamp = ostri_unix.str();
 		std::string humanTimestamp = ostri.str();
