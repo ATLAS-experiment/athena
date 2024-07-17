@@ -326,7 +326,7 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decode(const EventContext& ctx,
       else if (ibc == 1) bcBitMap = TgcPrepData::BCBIT_CURRENT;
       else if (ibc == 2) bcBitMap = TgcPrepData::BCBIT_NEXT;
       
-      for (std::unique_ptr<TgcPrepDataCollection>& bcColl : state.tgcPrepDataCollections[ibc]){
+      for (std::unique_ptr<TgcPrepDataCollection>& bcColl : state.tgcPrepDataCollections[ibc]) {
         if (!bcColl) continue;
         std::unique_ptr<TgcPrepDataCollection>& allBcColl = state.tgcPrepDataCollections[NBC_HIT][bcColl->identifyHash()];
         if (!allBcColl) {
@@ -353,25 +353,24 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decode(const EventContext& ctx,
           }
         }
      }
+  }
 
-     if (!m_xAODKey.empty()) {
-        for (std::unique_ptr<TgcPrepDataCollection>& allBcColl : state.tgcPrepDataCollections[NBC_HIT]) {
-            if (!allBcColl) continue;
-            for (const TgcPrepData* allBcPrd : *allBcColl) {
-              xAOD::TgcStrip* tgcStrip = xAODHandle->push_back(std::make_unique<xAOD::TgcStrip>());
-              tgcStrip->setMeasuresPhi(idHelper.isStrip(allBcPrd->identify()));
-              tgcStrip->setGasGap(idHelper.gasGap(allBcPrd->identify()));
-              tgcStrip->setChannelNumber(idHelper.channel(allBcPrd->identify()));
-              tgcStrip->setBcBitMap(allBcPrd->getBcBitMap());
-              tgcStrip->setIdentifier(allBcPrd->identify().get_compact());
-              tgcStrip->setMeasurement(m_idHelperSvc->moduleHash(allBcPrd->identify()),
-                                      xAOD::MeasVector<1>(allBcPrd->localPosition().x()),
-                                      xAOD::MeasMatrix<1>(allBcPrd->localCovariance()(0,0)));
-            }
+  if (!m_xAODKey.empty()) {
+    for (std::unique_ptr<TgcPrepDataCollection>& allBcColl : state.tgcPrepDataCollections[NBC_HIT]) {
+        if (!allBcColl) continue;
+        for (const TgcPrepData* allBcPrd : *allBcColl) {
+          xAOD::TgcStrip* tgcStrip = xAODHandle->push_back(std::make_unique<xAOD::TgcStrip>());
+          tgcStrip->setMeasuresPhi(idHelper.isStrip(allBcPrd->identify()));
+          tgcStrip->setGasGap(idHelper.gasGap(allBcPrd->identify()));
+          tgcStrip->setChannelNumber(idHelper.channel(allBcPrd->identify()));
+          tgcStrip->setBcBitMap(allBcPrd->getBcBitMap());
+          tgcStrip->setIdentifier(allBcPrd->identify().get_compact());
+          tgcStrip->setMeasurement(m_idHelperSvc->moduleHash(allBcPrd->identify()),
+                                  xAOD::MeasVector<1>(allBcPrd->localPosition().x()),
+                                  xAOD::MeasMatrix<1>(allBcPrd->localCovariance()(0,0)));
         }
     }
-
-  }
+}
 
   for (unsigned int k = 0 ; k < state.tgcPrepDataContainer.size(); ++k){
     ATH_CHECK(transferData(*state.tgcPrepDataContainer[k], std::move(state.tgcPrepDataCollections[k])));
