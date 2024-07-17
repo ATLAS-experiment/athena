@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -122,20 +122,4 @@ namespace CP
   }
 
 
-
-  StatusCode SysListHandle ::
-  foreach (const std::function<StatusCode(const CP::SystematicSet&)>& func) const
-  {
-    assert (isInitialized());
-
-    for (const CP::SystematicSet& sys : systematicsVector())
-    {
-      if (func (sys).isFailure())
-      {
-        ANA_MSG_ERROR ("failed to evaluate algorithm for systematic " << sys.name());
-        return StatusCode::FAILURE;
-      }
-    }
-    return StatusCode::SUCCESS;
-  }
 }

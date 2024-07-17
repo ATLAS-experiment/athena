@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -103,35 +103,6 @@ namespace CP
     /// (still convertible to `const CP::SystematicSet&` though).
   public:
     const std::vector<CP::SystematicSet>& systematicsVector () const;
-
-
-    /// \brief run the function for each systematic
-    ///
-    /// This allows to perform some amount of behind-the-scenes
-    /// optimizations in the future, which hopefully not creating too
-    /// many issues in the present.
-    ///
-    /// Technically this would be slightly more performant as a
-    /// template, but this is likely not to be an issue, and can still
-    /// be changed if it ever becomes an issue.
-    ///
-    /// Ideally this would be const, but the current version is not
-    /// thread-safe, so I'd rather not add a const qualifier to it.
-    ///
-    /// \par Guarantee
-    ///   basic
-    /// \par Failures
-    ///   function failures
-    /// \pre isInitialized()
-    ///
-    /// \warn This is deprecated in favor of just calling \ref
-    /// systematicsVector directly (mostly to make code easier to
-    /// understand for new users).
-  public:
-    [[deprecated("please use systematicsVector() instead")]]
-    StatusCode foreach
-      (const std::function<StatusCode(const CP::SystematicSet&)>& func) const;
-
 
 
     //
