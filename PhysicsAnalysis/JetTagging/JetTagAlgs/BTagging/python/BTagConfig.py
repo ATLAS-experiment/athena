@@ -63,11 +63,21 @@ def GetTaggerTrainingMap(inputFlags, jet_col):
             "JetCalibTools/CalibArea-00-04-83/CalibrationFactors/bbJESJMS_calibFactors_R22_MC20_CSSKUFO_bJR10v00Ext_20250212.onnx", # bJR10v00Ext
             "JetCalibTools/CalibArea-00-04-83/CalibrationFactors/bbJESJMS_calibFactors_R22_MC20MC23_CSSKUFO_bJR10v01_20250212.onnx" # bJR10v01
         ],
+<<<<<<< HEAD
         "HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_TLA": [
             "BTagging/20220314/dipsLoose/antikt4empflow/network.json",    # input to DL1dv01
             "BTagging/20220509/dl1dLoose/antikt4empflow/network.json",    # 2023 pre-rec DL1dv01
             "BTagging/20231205/GN2v01/antikt4empflow/network_fold0.onnx", # fold 0 of the GN2v01 (safe for HLT jets)
         ]
+=======
+        "AntiKt4EMPFlowByVertex": [ # ByVertex added 
+            "BTagging/201903/rnnip/antikt4empflow/network.json",
+            "BTagging/201903/dl1r/antikt4empflow/network.json",
+            "BTagging/20220314/dipsLoose/antikt4empflow/network.json",  # input to DL1dv01
+            "BTagging/20220509/dl1dLoose/antikt4empflow/network.json",  # 2023 pre-rec DL1dv01
+            "BTagging/20230306/gn2v00/antikt4empflow/network.onnx",
+        ],
+>>>>>>> e42caa8014e (Added ByVertex to networks lists)
     }
     
     networks_by_jet_col["AntiKt4EMPFlowCustomVtx"] = networks_by_jet_col["AntiKt4EMPFlow"] # PFlow jet with custom vertex definition used in HIGG1D1 
@@ -131,7 +141,7 @@ def RetagRenameInputContainerCfg(suffix, JetCollectionShort, tracksKey='InDetTra
     return acc
 
 
-def BTagRecoSplitCfg(inputFlags, JetCollection=['AntiKt4EMTopo','AntiKt4EMPFlow']):
+def BTagRecoSplitCfg(inputFlags, JetCollection=['AntiKt4EMTopo','AntiKt4EMPFlow', 'AntiKt4EMPFlowByVertex']):
     """
     Run flavour tagging algorithms during reconstruction (AOD or ESD production).
     """
