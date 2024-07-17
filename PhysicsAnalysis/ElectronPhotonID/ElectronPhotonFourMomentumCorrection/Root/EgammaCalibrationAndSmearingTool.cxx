@@ -1622,7 +1622,7 @@ void EgammaCalibrationAndSmearingTool::setupSystematics() {
       int i = 0;
       const TAxis& axis_statistical_error(m_rootTool->get_ZeeStat_eta_axis());
       for (int ibin = 1; ibin <= axis_statistical_error.GetNbins(); ++ibin) {
-        auto p = AbsEtaCaloPredicateFactory(
+        auto p = EtaCaloPredicateFactory(
             axis_statistical_error.GetBinLowEdge(ibin),
             axis_statistical_error.GetBinLowEdge(ibin + 1));
         m_syst_description[CP::SystematicVariation(

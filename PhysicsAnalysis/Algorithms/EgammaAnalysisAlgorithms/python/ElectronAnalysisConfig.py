@@ -22,6 +22,11 @@ class ElectronCalibrationConfig (ConfigBlock) :
         self.addOption ('containerName', containerName, type=str,
             noneAction='error',
             info="the name of the output container after calibration.")
+        self.addOption ('ESModel', '', type=str,
+            info="flag of egamma calibration recommendation.")
+        self.addOption ('decorrelationModel', '1NP_v1', type=str,
+            info="egamma energy scale decorrelationModel. The default is 1NP_v1. "
+            "Supported Model: 1NP_v1, FULL_v1.")
         self.addOption ('postfix', '', type=str,
             info="a postfix to apply to decorations and algorithm names. Typically "
             "not needed here since the calibration is common to all electrons.")
@@ -62,8 +67,20 @@ class ElectronCalibrationConfig (ConfigBlock) :
         alg = config.createAlgorithm( 'CP::EgammaCalibrationAndSmearingAlg', name + self.postfix )
         config.addPrivateTool( 'calibrationAndSmearingTool',
                             'CP::EgammaCalibrationAndSmearingTool' )
-        alg.calibrationAndSmearingTool.ESModel = 'es2022_R22_PRE'
-        alg.calibrationAndSmearingTool.decorrelationModel = '1NP_v1'
+        # Set default ESModel per period
+        if self.ESModel:
+            alg.calibrationAndSmearingTool.ESModel = self.ESModel
+        else:
+            if config.geometry() is LHCPeriod.Run2:
+                alg.calibrationAndSmearingTool.ESModel = 'es2023_R22_Run2_v0'
+            elif config.geometry() is LHCPeriod.Run3:
+                alg.calibrationAndSmearingTool.ESModel = 'es2022_R22_PRE'
+            else:
+                raise ValueError (f"Can't set up the ElectronCalibrationConfig with {config.geometry().value}, "
+                                  "there must be something wrong!")
+            print(f"WARNING! No ESModel specified, using default for {config.geometry().value}: {alg.calibrationAndSmearingTool.ESModel}")
+            
+        alg.calibrationAndSmearingTool.decorrelationModel = self.decorrelationModel
         alg.calibrationAndSmearingTool.useFastSim = (
             0 if self.forceFullSimConfig
             else int( config.dataType() is DataType.FastSim ))
