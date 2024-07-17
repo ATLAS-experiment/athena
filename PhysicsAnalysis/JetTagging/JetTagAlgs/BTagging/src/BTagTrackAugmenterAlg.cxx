@@ -76,12 +76,14 @@ namespace Analysis {
     CHECK( vertexContainerHandle.isValid() );
     const xAOD::VertexContainer *verteces = vertexContainerHandle.get();
 
+    /*
     const xAOD::Vertex* primary = getPrimaryVertex( *verteces );
     if ( primary == nullptr ) {
       ATH_MSG_FATAL("No primary vertex found");
       return StatusCode::FAILURE;
     }
 
+    */
     SG::ReadHandle< xAOD::TrackParticleContainer > trackContainerHandle = SG::makeHandle< xAOD::TrackParticleContainer >( m_TrackContainerKey,ctx);
     CHECK( trackContainerHandle.isValid() );
     const xAOD::TrackParticleContainer* tracks = trackContainerHandle.get();
@@ -103,16 +105,31 @@ namespace Analysis {
     SG::WriteDecorHandle<xAOD::TrackParticleContainer, char> decor_invalid(
         m_dec_invalid, ctx);
 
+    SG::WriteDecorHandle<xAOD::TrackParticleContainer, xAOD::Vertex> decor_TrkOriginVtx(m_trk_origin_vtx, ctx);
+
     // ==========================================================================================================================
     //    ** Computation
     // ==========================================================================================================================
 
-    Trk::PerigeeSurface primary_surface( primary->position() );
+    //Trk::PerigeeSurface primary_surface( primary->position() );
 
     // now decorate the tracks
     for (const xAOD::TrackParticle *track: *tracks) {
-      std::unique_ptr< const Trk::ImpactParametersAndSigma > ip( m_track_to_vx->estimate( track, primary ) );
+	float minDz = std::numeric_limits<float>::max();
+	const xAOD::Vertex* primary = nullptr; // calling it primary for now so I dont have to change anything
+      for (const xAOD::Vertex *vertex: *verteces) {
+	    std::unique_ptr< const Trk::ImpactParametersAndSigma > ipMin( m_track_to_vx->estimate( track, vertex) );
+	    if ( ipMin ){
+	    	if ( ipMin->IPz0SinTheta < minDz && ipMin->IPz0SinTheta > 1){
+			minDz = ipMin->IPz0SinTheta;
+			primary = vertex;
+	    	}
+	    }
+      }
+      std::unique_ptr< const Trk::ImpactParametersAndSigma > ip( m_track_to_vx->estimate( track, primary) );
+      Trk::PerigeeSurface primary_surface( primary->position() );
       if ( ip ) {
+	decor_TrkOriginVtx(*track) = primary;
         decor_d0(*track) = ip->IPd0;
         decor_z0(*track) = ip->IPz0SinTheta;
         decor_d0_sigma(*track) = ip->sigmad0;
