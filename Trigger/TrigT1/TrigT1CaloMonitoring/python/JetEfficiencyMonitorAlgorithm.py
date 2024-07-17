@@ -16,8 +16,6 @@ def JetEfficiencyMonitoringConfig(flags):
     if flags.Input.Format is Format.POOL and not flags.Input.isMC and not any(["AOD" in a for a in flags.Input.ProcessingTags]):
         from JetRecConfig.JetRecConfig import JetRecCfg
         from JetRecConfig.StandardSmallRJets import AntiKt4EMPFlow
-        from JetRecConfig.JetConfigFlags import jetInternalFlags
-        jetInternalFlags.isRecoJob = True
         result.merge( JetRecCfg(flags,AntiKt4EMPFlow) )
         
         from eflowRec.PFCfg import PFGlobalFlowElementLinkingCfg

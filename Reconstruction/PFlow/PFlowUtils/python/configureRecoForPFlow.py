@@ -11,8 +11,6 @@ def configureRecoForPFlowCfg(cfgFlags):
 
     from JetRecConfig.JetRecConfig import JetRecCfg
     from JetRecConfig.StandardSmallRJets import AntiKt4EMPFlow, AntiKt4LCTopo
-    from JetRecConfig.JetConfigFlags import jetInternalFlags  
-    jetInternalFlags.isRecoJob = True
     cfg.merge( JetRecCfg(cfgFlags,AntiKt4EMPFlow) )     
     cfg.merge( JetRecCfg(cfgFlags,AntiKt4LCTopo) )
     

@@ -50,10 +50,8 @@ def EGAM12KernelCfg(flags, name="EGAM12Kernel", **kwargs):
         AntiKt4Truth,
     )
     from JetRecConfig.JetRecConfig import JetRecCfg
-    from JetRecConfig.JetConfigFlags import jetInternalFlags
 
     jetList = [AntiKt4EMTopo, AntiKt4PV0Track, AntiKt4Truth]
-    jetInternalFlags.isRecoJob = True
     for jd in jetList:
         acc.merge(JetRecCfg(flags, jd))
     JetKey = "AntiKt4EMTopoJets"

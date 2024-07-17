@@ -213,9 +213,7 @@ def HIGG1D1CustomJetsCfg(ConfigFlags):
     )
 
     from JetRecConfig.JetRecConfig import JetRecCfg
-    from JetRecConfig.JetConfigFlags import jetInternalFlags
 
-    jetInternalFlags.isRecoJob = True
     acc.merge(JetRecCfg(ConfigFlags,AntiKt4EMPFlowCustomVtx))
   
     return acc

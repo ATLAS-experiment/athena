@@ -13,7 +13,6 @@ def StandardJetsInDerivCfg(flags):
 
     from JetRecConfig.StandardSmallRJets import AntiKt4EMTopo
     from JetRecConfig.JetRecConfig import JetRecCfg
-    from JetRecConfig.JetConfigFlags import jetInternalFlags
 
     acc = ComponentAccumulator()
 
@@ -23,7 +22,6 @@ def StandardJetsInDerivCfg(flags):
 
     jetList = [AntiKt4EMTopo_deriv]
 
-    jetInternalFlags.isRecoJob = True
 
     for jd in jetList:
         acc.merge(JetRecCfg(flags,jd))

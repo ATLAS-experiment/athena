@@ -24,7 +24,6 @@ The JetModifier config class is defined in JetDefinition.py
 from .JetDefinition import JetModifier
 from .Utilities import ldict
 from AthenaConfiguration.ComponentFactory import CompFactory
-from JetRecConfig.JetConfigFlags import jetInternalFlags
 from .StandardJetConstits import inputsFromContext
 
 stdJetModifiers = ldict()
@@ -39,7 +38,7 @@ stdJetModifiers.update(
                          PtMin = lambda jdef,modspec: int(modspec) 
                          ),
     Filter_ifnotESD = JetModifier("JetFilterTool","jetptfilter_{modspec}",
-                                 PtMin = lambda _,modspec: 1 if jetInternalFlags.isRecoJob else int(modspec),
+                                 PtMin = lambda _,modspec: 1,
                                  ),
     # Filter that can be easily turned off via pre-exec for e.g. PHYSVAL
     Filter_calibThreshold = JetModifier("JetFilterTool","jetptfilter_{modspec}",

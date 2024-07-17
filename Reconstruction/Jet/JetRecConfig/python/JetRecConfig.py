@@ -23,7 +23,6 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from JetRecConfig.JetDefinition import JetDefinition, JetInputConstitSeq, JetInputConstit, JetInputExternal
 from JetRecConfig.JetGrooming import GroomingDefinition
 from JetRecConfig.DependencyHelper import solveDependencies, solveGroomingDependencies, aliasToModDef
-from JetRecConfig.JetConfigFlags import jetInternalFlags
 
 
 __all__ = ["JetRecCfg", "JetInputCfg"]
@@ -143,7 +142,7 @@ def getJetDefAlgs(flags, jetdef ,  returnConfiguredDef=False, monTool=None):
     # check if the conditions are compatible with the inputs & modifiers of this jetdef_i.
     # if in reco job we will remove whatever is incompatible and still try to run
     # if not, we raise an exception
-    canrun = removeComponentFailingConditions(jetdef_i, raiseOnFailure= not jetInternalFlags.isRecoJob)
+    canrun = removeComponentFailingConditions(jetdef_i, raiseOnFailure= flags.Jet.strictMode)
     if not canrun :
         if returnConfiguredDef:
             return [], jetdef_i
@@ -203,7 +202,7 @@ def getJetGroomAlgs(flags, groomdef, returnConfiguredDef=False, monTool=None):
     groomdef_i._ungroomeddef = ungroomeddef_i # set directly the internal members to avoid complication. This is fine, since we've been cloning definitions.
 
     #Filter the modifiers based on the flags
-    removeGroomModifFailingConditions(groomdef_i, flags, raiseOnFailure = not jetInternalFlags.isRecoJob)
+    removeGroomModifFailingConditions(groomdef_i, flags, raiseOnFailure = flags.Jet.strictMode)
 
     algs += [ getJetRecGroomAlg(groomdef_i, monTool=monTool) ]
 
@@ -297,7 +296,7 @@ def getInputAlgs(jetOrConstitdef, flags, context="default", monTool=None):
         # technically we need a JetDefinition, so just build an empty one only containing our JetInputConstit
         jetlog.info("Setting up jet inputs from JetInputConstit : "+jetOrConstitdef.name)
         jetdef = solveDependencies( JetDefinition('Kt', 0., jetOrConstitdef, context=context), flags )
-        canrun = removeComponentFailingConditions(jetdef, raiseOnFailure = not jetInternalFlags.isRecoJob)
+        canrun = removeComponentFailingConditions(jetdef, raiseOnFailure = flags.Jet.strictMode)
         if not canrun:
             return []
     else:

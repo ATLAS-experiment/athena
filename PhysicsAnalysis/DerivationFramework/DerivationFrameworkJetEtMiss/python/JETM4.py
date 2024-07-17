@@ -136,10 +136,8 @@ def JETM4ExtraContentCfg(flags):
     acc.merge(PFlowCommonCfg(flags))
 
     from JetRecConfig.JetRecConfig import JetRecCfg
-    from JetRecConfig.JetConfigFlags import jetInternalFlags
     from JetRecConfig.StandardSmallRJets import AntiKt4UFOCSSKLowPt
     jetList = [AntiKt4UFOCSSKLowPt]
-    jetInternalFlags.isRecoJob = True
     for jd in jetList:
         acc.merge(JetRecCfg(flags,jd))
 

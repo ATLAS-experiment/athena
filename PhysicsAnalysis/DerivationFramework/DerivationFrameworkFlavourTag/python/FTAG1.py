@@ -371,7 +371,6 @@ def FTAG1ExtraContentCfg(flags):
     acc = ComponentAccumulator()
 
     from JetRecConfig.JetRecConfig import JetRecCfg
-    from JetRecConfig.JetConfigFlags import jetInternalFlags
     jetList = []
     #=======================================
     # CSSK R = 0.4 UFO jets
@@ -379,7 +378,6 @@ def FTAG1ExtraContentCfg(flags):
     from JetRecConfig.StandardSmallRJets import AntiKt4UFOCSSK
     jetList += [AntiKt4UFOCSSK]
 
-    jetInternalFlags.isRecoJob = True
 
     for jd in jetList:
         acc.merge(JetRecCfg(flags,jd))
