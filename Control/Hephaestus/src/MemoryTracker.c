@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "Hephaestus/Hephaestus.h"
@@ -1004,34 +1004,6 @@ static PyObject* hep_configure( PyObject* unused, PyObject* args ) {
 }
 
 /* _________________________________________________________________________ */
-#if PY_MAJOR_VERSION < 3
-static PyObject* hep_outstream( PyObject* unused, PyObject* args ) {
-   FILE *fp = 0;
-   int fd = -1;
-   PyObject* pyfile;
-
-   if ( ! PyArg_ParseTuple( args, "O!", &PyFile_Type, &pyfile ) )
-      return 0;
-
-   fp = PyFile_AsFile( pyfile );
-   if ( ! fp )
-      return 0;
-
-   if ( gReportStream && gReportStream != stdout )
-      fclose( gReportStream );
-
-   fd = dup( fileno( fp ) );
-   if (fd < 0)
-     return 0;
-
-   gReportStream = fdopen( fd, "w" );
-
-   Py_INCREF( Py_None );
-   return Py_None;
-}
-#endif
-
-/* _________________________________________________________________________ */
 static PyObject* hep_profname( PyObject* unused, PyObject* args ) {
    char *cmd = 0, *filename = 0;
    const char *name = 0;
@@ -1118,9 +1090,6 @@ static PyMethodDef gMemoryTrackerMethods[] = {
    { (char*)"ignore",    (PyCFunction)hep_ignore,    METH_VARARGS, (char*)"ignore in report" },
    { (char*)"ignoreCall",(PyCFunction)hep_ignoreCall,METH_VARARGS, (char*)"ignore in report anywhere in trace" },
    { (char*)"configure", (PyCFunction)hep_configure, METH_VARARGS, (char*)"set configuration flags" },
-#if PY_MAJOR_VERSION < 3
-   { (char*)"outstream", (PyCFunction)hep_outstream, METH_VARARGS, (char*)"set new outstream" },
-#endif
    { (char*)"depth",     (PyCFunction)hep_depth,     METH_VARARGS, (char*)"set large trace depth" },
    { (char*)"_profname", (PyCFunction)hep_profname,  METH_VARARGS, (char*)"set new profile file name" },
    { (char*)"_symbname", (PyCFunction)hep_symbname,  METH_VARARGS, (char*)"set new symbol file name" },
@@ -1154,18 +1123,13 @@ static PyMethodDef gFreeStatisticsMethods[] = {
 PyObject* initMemoryTrace();
 PyObject* initDoubleDeleteChecker();
 
-#if PY_MAJOR_VERSION >= 3
 PyObject *
 PyInit_MemoryTracker(void)
-#else
-void initMemoryTracker()
-#endif
 {
    PyObject *memtrack;
    PyObject *chkpoints, *freestat;
    PyObject *ddcheck, *memtrace;
 
-#if PY_MAJOR_VERSION >= 3
    static struct PyModuleDef moduledefMemoryTracker = {
      PyModuleDef_HEAD_INIT,
      "MemoryTracker",     /* m_name */
@@ -1178,21 +1142,17 @@ void initMemoryTracker()
      NULL,                /* m_free */
    };
    memtrack = PyModule_Create (&moduledefMemoryTracker);
-#else   
-   memtrack = Py_InitModule( (char*)"MemoryTracker", gMemoryTrackerMethods );
-#endif
 
 /* configuration flags */
-   PyModule_AddObject( memtrack, (char*)"LEAK_CHECK", PyLong_FromLong( LEAK_CHECK ) );
-   PyModule_AddObject( memtrack, (char*)"PROFILE",    PyLong_FromLong( PROFILE ) );
-   PyModule_AddObject( memtrack, (char*)"HIDEMEMADDR",PyLong_FromLong( HIDEMEMADDR ) );
-   PyModule_AddObject( memtrack, (char*)"QUICK",      PyLong_FromLong( QUICK ) );
-   PyModule_AddObject( memtrack, (char*)"STL_CHECKS", PyLong_FromLong( STL_CHECKS ) );
-   PyModule_AddObject( memtrack, (char*)"FILTER_STL", PyLong_FromLong( FILTER_STL ) );
-   PyModule_AddObject( memtrack, (char*)"FREESTAT",   PyLong_FromLong( FREESTAT ) );
+   (void)PyModule_AddObject( memtrack, (char*)"LEAK_CHECK", PyLong_FromLong( LEAK_CHECK ) );
+   (void)PyModule_AddObject( memtrack, (char*)"PROFILE",    PyLong_FromLong( PROFILE ) );
+   (void)PyModule_AddObject( memtrack, (char*)"HIDEMEMADDR",PyLong_FromLong( HIDEMEMADDR ) );
+   (void)PyModule_AddObject( memtrack, (char*)"QUICK",      PyLong_FromLong( QUICK ) );
+   (void)PyModule_AddObject( memtrack, (char*)"STL_CHECKS", PyLong_FromLong( STL_CHECKS ) );
+   (void)PyModule_AddObject( memtrack, (char*)"FILTER_STL", PyLong_FromLong( FILTER_STL ) );
+   (void)PyModule_AddObject( memtrack, (char*)"FREESTAT",   PyLong_FromLong( FREESTAT ) );
 
 /* checkpoints functionality for event-by-event leak checking */
-#if PY_MAJOR_VERSION >= 3
    static struct PyModuleDef moduledefCheckPoints = {
      PyModuleDef_HEAD_INIT,
      "CheckPoints",     /* m_name */
@@ -1205,13 +1165,9 @@ void initMemoryTracker()
      NULL,                /* m_free */
    };
    chkpoints = PyModule_Create (&moduledefCheckPoints);
-#else   
-   chkpoints = Py_InitModule( (char*)"CheckPoints", gCheckPointsMethods );
-#endif
-   PyModule_AddObject( memtrack, (char*)"CheckPoints", chkpoints );
+   (void)PyModule_AddObject( memtrack, (char*)"CheckPoints", chkpoints );
 
 /* steering of colleciton of free() statistics */
-#if PY_MAJOR_VERSION >= 3
    static struct PyModuleDef moduledefFreeStatistics = {
      PyModuleDef_HEAD_INIT,
      "FreeStatistics",     /* m_name */
@@ -1224,20 +1180,15 @@ void initMemoryTracker()
      NULL,                /* m_free */
    };
    freestat = PyModule_Create (&moduledefFreeStatistics);
-#else   
-   freestat = Py_InitModule( (char*)"FreeStatistics", gFreeStatisticsMethods );
-#endif
-   PyModule_AddObject( memtrack, (char*)"FreeStatistics", freestat );
+   (void)PyModule_AddObject( memtrack, (char*)"FreeStatistics", freestat );
 
 /* access to used size of memory traces */
    memtrace = initMemoryTrace();
-   PyModule_AddObject( memtrack, (char*)"MemoryTrace", memtrace );
+   (void)PyModule_AddObject( memtrack, (char*)"MemoryTrace", memtrace );
 
 /* double delete checker functionality */
    ddcheck = initDoubleDeleteChecker();
-   PyModule_AddObject( memtrack, (char*)"DeleteChecker", ddcheck );
+   (void)PyModule_AddObject( memtrack, (char*)"DeleteChecker", ddcheck );
 
-#if PY_MAJOR_VERSION >= 3
    return memtrack;
-#endif
 }

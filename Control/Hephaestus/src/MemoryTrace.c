@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "Hephaestus/Hephaestus.h"
@@ -221,7 +221,6 @@ static PyMethodDef gMemoryTraceMethods[] = {
 PyObject* initMemoryTrace() {
    PyObject *memtrace;
 
-#if PY_MAJOR_VERSION >= 3
    static struct PyModuleDef moduledef = {
      PyModuleDef_HEAD_INIT,
      "MemoryTrace",     /* m_name */
@@ -234,8 +233,6 @@ PyObject* initMemoryTrace() {
      NULL,                /* m_free */
    };
    memtrace = PyModule_Create (&moduledef);
-#else   
-   memtrace = Py_InitModule( (char*)"MemoryTrace", gMemoryTraceMethods );
-#endif
+
    return memtrace;
 }
