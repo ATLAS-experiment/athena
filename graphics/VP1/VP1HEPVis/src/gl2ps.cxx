@@ -1,6 +1,6 @@
 /*
  * GL2PS, an OpenGL to PostScript Printing Library
- * Copyright (C) 1999-2009 C. Geuzaine
+ * Copyright (C) 1999-2024 C. Geuzaine
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of either:
@@ -3922,10 +3922,9 @@ static int gl2psPrintPDFInfo(void)
 {
   int offs;
   time_t now;
-  struct tm *newtime;
+  struct tm newtime;
 
   time(&now);
-  newtime = gmtime(&now);
 
   offs = fprintf(gl2ps->stream,
                  "1 0 obj\n"
@@ -3937,7 +3936,7 @@ static int gl2psPrintPDFInfo(void)
                  GL2PS_PATCH_VERSION, GL2PS_EXTRA_VERSION, GL2PS_COPYRIGHT,
                  gl2ps->producer);
 
-  if(!newtime){
+  if(!gmtime_r(&now, &newtime)){
     offs += fprintf(gl2ps->stream,
                     ">>\n"
                     "endobj\n");
@@ -3948,12 +3947,12 @@ static int gl2psPrintPDFInfo(void)
                   "/CreationDate (D:%d%02d%02d%02d%02d%02d)\n"
                   ">>\n"
                   "endobj\n",
-                  newtime->tm_year+1900,
-                  newtime->tm_mon+1,
-                  newtime->tm_mday,
-                  newtime->tm_hour,
-                  newtime->tm_min,
-                  newtime->tm_sec);
+                  newtime.tm_year+1900,
+                  newtime.tm_mon+1,
+                  newtime.tm_mday,
+                  newtime.tm_hour,
+                  newtime.tm_min,
+                  newtime.tm_sec);
   return offs;
 }
 
