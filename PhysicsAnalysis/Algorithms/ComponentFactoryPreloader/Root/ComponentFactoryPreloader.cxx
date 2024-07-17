@@ -48,6 +48,7 @@
 #include <AsgAnalysisAlgorithms/SystObjectLinkerAlg.h>
 #include <AsgAnalysisAlgorithms/TreeFillerAlg.h>
 #include <AsgAnalysisAlgorithms/TreeMakerAlg.h>
+#include <AsgAnalysisAlgorithms/VGammaORAlg.h>
 #include <AssociationUtils/DeltaROverlapTool.h>
 #include <AssociationUtils/EleJetOverlapTool.h>
 #include <AssociationUtils/EleMuSharedTrkOverlapTool.h>
@@ -83,6 +84,7 @@
 #include <FTagAnalysisAlgorithms/BTaggingEfficiencyAlg.h>
 #include <FTagAnalysisAlgorithms/BTaggingInformationDecoratorAlg.h>
 #include <FTagAnalysisAlgorithms/BTaggingScoresAlg.h>
+#include <GammaORTools/VGammaORTool.h>
 #include <GoodRunsLists/GRLSelectorAlg.h>
 #include <GoodRunsLists/GoodRunsListSelectionTool.h>
 #include <IsolationCorrections/IsolationCorrectionTool.h>
@@ -255,6 +257,7 @@ namespace CP
     ANA_CHECK (asg::registerAlgorithmFactory<CP::TrigGlobalEfficiencyAlg>("CP::TrigGlobalEfficiencyAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::TrigPrescalesAlg>("CP::TrigPrescalesAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::VertexSelectionAlg>("CP::VertexSelectionAlg"));
+    ANA_CHECK (asg::registerAlgorithmFactory<CP::VGammaORAlg>("CP::VGammaORAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::xAODWriterAlg>("CP::xAODWriterAlg"));
 
     ANA_CHECK (asg::registerToolFactory<AsgDeadHVCellRemovalTool> ("AsgDeadHVCellRemovalTool"));
@@ -291,6 +294,7 @@ namespace CP
     ANA_CHECK (asg::registerToolFactory<Trig::TrigDecisionTool> ("Trig::TrigDecisionTool"));
     ANA_CHECK (asg::registerToolFactory<TrigConf::xAODConfigTool> ("TrigConf::xAODConfigTool"));
     ANA_CHECK (asg::registerToolFactory<TrigGlobalEfficiencyCorrectionTool> ("TrigGlobalEfficiencyCorrectionTool"));
+    ANA_CHECK (asg::registerToolFactory<VGammaORTool> ("VGammaORTool"));
     ANA_CHECK (asg::registerToolFactory<egammaMVACalibTool> ("egammaMVACalibTool"));
     ANA_CHECK (asg::registerToolFactory<met::METMaker> ("met::METMaker"));
     ANA_CHECK (asg::registerToolFactory<met::METSignificance> ("met::METSignificance"));
