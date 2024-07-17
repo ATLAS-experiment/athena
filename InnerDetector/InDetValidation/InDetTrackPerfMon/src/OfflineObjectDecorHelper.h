@@ -70,6 +70,7 @@ namespace IDTPM {
 
   /// For truth particles
   bool isUnlinkedTruth( const xAOD::TrackParticle& track );
+  inline bool isUnlinkedTruth( const xAOD::TruthParticle& ) { return false; }; // dummy - to avoid compilation errors
 
   float getTruthMatchProb( const xAOD::TrackParticle& track );
 

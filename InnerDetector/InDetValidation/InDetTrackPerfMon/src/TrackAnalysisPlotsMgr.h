@@ -96,6 +96,7 @@ namespace IDTPM {
     std::unique_ptr< ResolutionPlots >       m_plots_resolution;
     /// fake rate plots (only when reference=truth)
     std::unique_ptr< FakeRatePlots >         m_plots_fakeRate;
+    std::unique_ptr< FakeRatePlots >         m_plots_missingTruth;
     /// plots w.r.t. reference offline electron
     std::unique_ptr< OfflineElectronPlots >  m_plots_offEle;
     std::unique_ptr< OfflineElectronPlots >  m_plots_eff_vsOffEle;

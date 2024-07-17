@@ -75,7 +75,7 @@ template StatusCode IDTPM::FakeRatePlots::fillPlots< xAOD::TrackParticle >(
     const xAOD::TrackParticle&, bool isFake, float weight );
 
 template StatusCode IDTPM::FakeRatePlots::fillPlots< xAOD::TruthParticle >(
-    const xAOD::TruthParticle&, bool isMatched, float weight );
+    const xAOD::TruthParticle&, bool isFake, float weight );
 
 
 /// -------------------------

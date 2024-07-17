@@ -74,6 +74,8 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::initialize()
   if( m_trkAnaDefSvc->plotFakeRates() and m_trkAnaDefSvc->isReferenceTruth() ) {
     m_plots_fakeRate = std::make_unique< FakeRatePlots >(
         this, "Tracks/FakeRates", m_anaTag, m_trkAnaDefSvc->testTag() );
+    m_plots_missingTruth = std::make_unique< FakeRatePlots >(
+        this, "Tracks/Unlinked/FakeRates", m_anaTag, m_trkAnaDefSvc->testTag() );
   }
 
   /// Offline electron plots
@@ -147,9 +149,13 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsTest(
     }
 
     /// fake rate plots
-    if( m_plots_fakeRate ) {
-      bool isFake = isFakeTruth( *particle, m_trkAnaDefSvc->truthProbCut() );
-      ATH_CHECK( m_plots_fakeRate->fillPlots( *particle, isFake, weight ) );
+    if( m_plots_missingTruth ) {
+      bool isUnlinked = isUnlinkedTruth( *particle );
+      ATH_CHECK( m_plots_missingTruth->fillPlots( *particle, isUnlinked, weight ) );
+      if( not isUnlinked and m_plots_fakeRate ) {
+        bool isFake = isFakeTruth( *particle, m_trkAnaDefSvc->truthProbCut() );
+        ATH_CHECK( m_plots_fakeRate->fillPlots( *particle, isFake, weight ) );
+      }
     }
 
     /// offline electron plots (Offline is always either test or reference)
