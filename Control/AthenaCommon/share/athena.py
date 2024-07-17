@@ -11,6 +11,7 @@
 export USETCMALLOC=0
 export USEIMF=0
 export USEEXCTRACE=0
+export USEEXCABORT=1
 otherargs=()
 # but use tcmalloc by default if TCMALLOCDIR is defined
 if [ -n "$TCMALLOCDIR" ]; then
@@ -28,6 +29,7 @@ do
         --stdcmath)      USEIMF=0;;
         --imf)           USEIMF=1;;
         --exctrace)      USEEXCTRACE=1;;
+        --no-excabort)   USEEXCABORT=0;;
         --preloadlib*)     export ATHENA_ADD_PRELOAD=${a#*=};;
         --drop-and-reload) ATHENA_DROP_RELOAD=1;;
         *)               otherargs+=("$a");;

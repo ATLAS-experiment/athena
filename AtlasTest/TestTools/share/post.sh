@@ -264,6 +264,9 @@ PP="$PP"'|Reading Param:POOL_VSN=|Reading Param:FORMAT_VSN='
 # Ignore AthenaPoolCnvSvc performance measurements
 PP="$PP"'|^AthenaPoolCnvSvc.*PerfStats'
 
+# Ignore other preloads.
+PP="$PP"'|^Preloading '
+
 ########################################### END #####################################################
 
 # Combine the default ignore list with patterns from ENV (usually set in CMakeLists)

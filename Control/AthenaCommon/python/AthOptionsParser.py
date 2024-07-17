@@ -262,6 +262,9 @@ def getArgumentParser(legacy_args=False, **kwargs):
         g.add_argument('--exctrace', action='store_true',
                        help='preload exception trace collector')
 
+        g.add_argument('--no-excabort', action='store_true',
+                       help='disable converting some exceptions to abort')
+
         g.add_argument('--preloadlib', metavar='LIB',
                        help='localized preload of library %(metavar)s')
 
