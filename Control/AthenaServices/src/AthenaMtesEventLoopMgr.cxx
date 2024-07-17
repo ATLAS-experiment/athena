@@ -37,6 +37,7 @@
 #include "EventInfoUtils/EventInfoFromxAOD.h"
 
 #include "tbb/tick_count.h"
+#include <yampl/ISocket.h>
 #include "yampl/SocketFactory.h"
 #include "CxxUtils/starts_with.h"
 
@@ -736,10 +737,11 @@ StatusCode AthenaMtesEventLoopMgr::nextEvent(int maxevt)
 {
   if(maxevt==0) return StatusCode::SUCCESS;
 
-  yampl::ISocketFactory* socketFactory = new yampl::SocketFactory();
   // Create a socket to communicate with the Pilot
-  m_socket = socketFactory->createClientSocket(yampl::Channel(m_eventRangeChannel.value(),yampl::LOCAL),
-                                               yampl::MOVE_DATA);
+  m_socket =
+      std::unique_ptr<yampl::ISocket>{yampl::SocketFactory().createClientSocket(
+          yampl::Channel{m_eventRangeChannel.value(), yampl::LOCAL},
+          yampl::MOVE_DATA)};
 
   // Reset the application return code.
   resetAppReturnCode();
@@ -758,7 +760,7 @@ StatusCode AthenaMtesEventLoopMgr::nextEvent(int maxevt)
 
   std::unique_ptr<RangeStruct> range;
   while(!range) {
-    range = getNextRange(m_socket);
+    range = getNextRange(m_socket.get());
     usleep(1000);
   }
 
@@ -800,7 +802,7 @@ StatusCode AthenaMtesEventLoopMgr::nextEvent(int maxevt)
 	  // Fetch next event range
 	  range.reset();
 	  while(!range) {
-	    range = getNextRange(m_socket);
+	    range = getNextRange(m_socket.get());
 	    usleep(1000);
 	  }
 	  if(range->eventRangeID.empty()) {
@@ -843,9 +845,6 @@ StatusCode AthenaMtesEventLoopMgr::nextEvent(int maxevt)
 
   info() << "---> Loop Finished (seconds): " << secsFromStart() <<endmsg;
 
-  delete m_socket;
-  m_socket=nullptr;
-  delete socketFactory;
   return sc;
 }
 
@@ -1293,9 +1292,9 @@ AthenaMtesEventLoopMgr::drainScheduler(int& finishedEvts,bool report){
   StatusCode sc(StatusCode::SUCCESS);
     
   // maybe we can do better
-  std::vector<EventContext*> finishedEvtContexts;
+  std::vector<std::unique_ptr<EventContext>> finishedEvtContexts;
 
-  EventContext* finishedEvtContext(nullptr);
+  EventContext* finishedEvtContext{nullptr};
 
   // Here we wait not to loose cpu resources
   debug() << "drainScheduler: [" << finishedEvts << "] Waiting for a context" << endmsg;
@@ -1305,7 +1304,7 @@ AthenaMtesEventLoopMgr::drainScheduler(int& finishedEvts,bool report){
   if (sc.isSuccess()){
     debug() << "drainScheduler: scheduler not empty: Context " 
 	    << finishedEvtContext << endmsg;
-    finishedEvtContexts.push_back(finishedEvtContext);
+    finishedEvtContexts.emplace_back(finishedEvtContext);
   } else{
     // no more events left in scheduler to be drained
     debug() << "drainScheduler: scheduler empty" << endmsg;
@@ -1314,7 +1313,7 @@ AthenaMtesEventLoopMgr::drainScheduler(int& finishedEvts,bool report){
 
   // Let's see if we can pop other event contexts
   while (m_schedulerSvc->tryPopFinishedEvent(finishedEvtContext).isSuccess()){
-    finishedEvtContexts.push_back(finishedEvtContext);
+    finishedEvtContexts.emplace_back(finishedEvtContext);
   }
 
   // Now we flush them
@@ -1327,10 +1326,9 @@ AthenaMtesEventLoopMgr::drainScheduler(int& finishedEvts,bool report){
     }
 
     if (m_aess->eventStatus(*thisFinishedEvtContext) != EventStatus::Success) {
-      fatal() << "Failed event detected on " << thisFinishedEvtContext 
+      fatal() << "Failed event detected on " << thisFinishedEvtContext
               << " w/ fail mode: "
               << m_aess->eventStatus(*thisFinishedEvtContext) << endmsg;
-      delete thisFinishedEvtContext;
       fail = true;
       continue;
     }
@@ -1343,8 +1341,7 @@ AthenaMtesEventLoopMgr::drainScheduler(int& finishedEvts,bool report){
       n_evt = thisFinishedEvtContext->eventID().event_number();
     } else {
       error() << "DrainSched: unable to select store "
-	      << thisFinishedEvtContext->slot() << endmsg;
-      delete thisFinishedEvtContext;
+              << thisFinishedEvtContext->slot() << endmsg;
       fail = true;
       continue;
     }
@@ -1382,7 +1379,6 @@ AthenaMtesEventLoopMgr::drainScheduler(int& finishedEvts,bool report){
       error() << "Whiteboard slot " << thisFinishedEvtContext->slot() 
 	      << " could not be properly cleared";
       fail = true;
-      delete thisFinishedEvtContext;
       continue;
     }
     
@@ -1405,7 +1401,6 @@ AthenaMtesEventLoopMgr::drainScheduler(int& finishedEvts,bool report){
       if ( !outfile ) {
 	error() << " unable to open: eventLoopHeartBeat.txt" << endmsg;
 	fail = true;
-	delete thisFinishedEvtContext;
 	continue;
       } else {
 	outfile << "  done processing event #" << n_evt << ", run #" << n_run 
@@ -1416,8 +1411,6 @@ AthenaMtesEventLoopMgr::drainScheduler(int& finishedEvts,bool report){
 
     debug() << "drainScheduler thisFinishedEvtContext: " << thisFinishedEvtContext
 	    << endmsg;
-
-    delete thisFinishedEvtContext;
   }
 
   return (  fail ? -1 : 1 );

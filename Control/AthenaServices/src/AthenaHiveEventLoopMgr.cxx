@@ -3,6 +3,8 @@
 */
 
 #include <GaudiKernel/DataIncident.h>
+
+#include <memory>
 #define  ATHENASERVICES_ATHENAHIVEEVENTLOOPMGR_CPP
 
 #include <cassert>
@@ -1221,7 +1223,7 @@ AthenaHiveEventLoopMgr::drainScheduler(int& finishedEvts){
   StatusCode sc(StatusCode::SUCCESS);
     
   // maybe we can do better
-  std::vector<EventContext*> finishedEvtContexts;
+  std::vector<std::unique_ptr<EventContext>> finishedEvtContexts;
 
   EventContext* finishedEvtContext(nullptr);
 
@@ -1233,7 +1235,7 @@ AthenaHiveEventLoopMgr::drainScheduler(int& finishedEvts){
   if (sc.isSuccess()){
     ATH_MSG_DEBUG ( "drainScheduler: scheduler not empty: Context " 
             << finishedEvtContext );
-    finishedEvtContexts.push_back(finishedEvtContext);
+    finishedEvtContexts.emplace_back(finishedEvtContext);
   } else{
     // no more events left in scheduler to be drained
     ATH_MSG_DEBUG ( "drainScheduler: scheduler empty" );
@@ -1242,7 +1244,7 @@ AthenaHiveEventLoopMgr::drainScheduler(int& finishedEvts){
 
   // Let's see if we can pop other event contexts
   while (m_schedulerSvc->tryPopFinishedEvent(finishedEvtContext).isSuccess()){
-    finishedEvtContexts.push_back(finishedEvtContext);
+    finishedEvtContexts.emplace_back(finishedEvtContext);
   }
 
   // Now we flush them
@@ -1258,7 +1260,6 @@ AthenaHiveEventLoopMgr::drainScheduler(int& finishedEvts){
       ATH_MSG_FATAL ( "Failed event detected on " << thisFinishedEvtContext 
               << " w/ fail mode: "
               << m_aess->eventStatus(*thisFinishedEvtContext) );
-      delete thisFinishedEvtContext;
       fail = true;
       continue;
     }
@@ -1272,7 +1273,6 @@ AthenaHiveEventLoopMgr::drainScheduler(int& finishedEvts){
     } else {
       ATH_MSG_ERROR ( "DrainSched: unable to select store "
 	      << thisFinishedEvtContext->slot() );
-      delete thisFinishedEvtContext;
       fail = true;
       continue;
     }
@@ -1293,7 +1293,6 @@ AthenaHiveEventLoopMgr::drainScheduler(int& finishedEvts){
       ATH_MSG_ERROR ( "Whiteboard slot " << thisFinishedEvtContext->slot() 
                       << " could not be properly cleared" );
       fail = true;
-      delete thisFinishedEvtContext;
       continue;
     }
     
@@ -1316,7 +1315,6 @@ AthenaHiveEventLoopMgr::drainScheduler(int& finishedEvts){
       if ( !outfile ) {
 	ATH_MSG_ERROR ( " unable to open: eventLoopHeartBeat.txt" );
 	fail = true;
-	delete thisFinishedEvtContext;
 	continue;
       } else {
 	outfile << "  done processing event #" << n_evt << ", run #" << n_run 
@@ -1326,9 +1324,6 @@ AthenaHiveEventLoopMgr::drainScheduler(int& finishedEvts){
     }
 
     ATH_MSG_DEBUG ( "drainScheduler thisFinishedEvtContext: " << thisFinishedEvtContext );
-  
-
-    delete thisFinishedEvtContext;
   }
 
   return (  fail ? -1 : 1 );
