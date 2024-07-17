@@ -10,9 +10,9 @@ def TrigHIUCCHypoToolFromDict(chainDict):
 
   UCCInfo = chainDict['chainParts'][0]['hypoUCCInfo'][0]
 
-  UCC_th = {"Th1":  3610*GeV,
-            "Th2":  4080*GeV,
-            "Th3":  4450*GeV }
+  UCC_th = {"Th1":  3730*GeV,
+            "Th2":  4280*GeV,
+            "Th3":  4503*GeV }
 
   tool.FCalEtThreshold = UCC_th[UCCInfo.removeprefix('ucc')]
 
