@@ -40,8 +40,16 @@ set( ATLAS_CPPCHECK_OPTIONS "--enable=warning,portability"
 set( CMAKE_CPPCHECK_DEFAULT
    ${ATLAS_CPPCHECK_OPTIONS}
    "--quiet" "--inline-suppr" "--template=gcc"
-   "-D__CPPCHECK__" # allow conditionalizing code on cppcheck
+   # allow conditionalizing code on cppcheck
+   "-D__CPPCHECK__"
+   # Commonly used libraries
+   "--library=boost"
+   "--library=googletest"
+   "--library=posix"
+   "--library=python"
+   "--library=qt"
    CACHE STRING "cppcheck command line options" FORCE )
 
-# Athena-specific suppression file:
+# Athena-specific config and suppression file:
+list( APPEND CMAKE_CPPCHECK_DEFAULT "--library=${_baseDir}/cppcheck_athena.cfg" )
 list( APPEND CMAKE_CPPCHECK_DEFAULT "--suppressions-list=${_baseDir}/cppcheck_suppress.txt" )
