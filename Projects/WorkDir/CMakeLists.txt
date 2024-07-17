@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 # Project file for building a selected set of packages against an
 # installed ATLAS release/nightly.
@@ -9,6 +9,11 @@ cmake_minimum_required( VERSION 3.10 )
 # Note that there is a second `project` call further below to set
 # the version and languages.
 project( WorkDir )
+
+# Enable the CI tests in the CITest package in case the user wants to
+# run them locally:
+set( ATLAS_ENABLE_CI_TESTS TRUE CACHE BOOL
+   "Set up tests in CITest package" )
 
 # Let the user pick up updated AtlasCMake/AtlasLCG versions for testing.
 # Remember that it's not a problem if AtlasCMake is not found, that's why
