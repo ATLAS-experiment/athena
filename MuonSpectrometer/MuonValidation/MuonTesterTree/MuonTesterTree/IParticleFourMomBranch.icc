@@ -1,0 +1,73 @@
+/*
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
+
+#ifndef MUONTESTERTREE_IPARTICLEFOURMOMBRANCH_ICC
+#define MUONTESTERTREE_IPARTICLEFOURMOMBRANCH_ICC
+
+namespace MuonVal {
+    template <typename T>
+        bool IParticleFourMomBranch::addVariable(const std::string& var,
+                                                 const std::string& acc) {
+            if (getBranch<T>(var)) {
+                ATH_MSG_WARNING("The variable "<<var<<" has already been added.");
+                return true;
+            }
+            return addVariable(std::make_shared<ParticleVariableBranch<T>>(this->tree(), 
+                                                                        name() + "_" + var, 
+                                                                        acc.empty() ? var : acc));
+        }
+    template <typename T>
+        bool IParticleFourMomBranch::addVariable(T def_value, 
+                                                const std::string& var,
+                                                const std::string& acc) {
+            if (!addVariable<T>(var, acc)) {
+                return false;
+            }
+            std::shared_ptr<ParticleVariableBranch<T>> br = getBranch<T>(var);
+            if (!br) {
+                ATH_MSG_ERROR( "Failed to retrieve "<<var<<".");
+                return false;
+            }
+            br->setDefault(def_value);
+            return true;
+        }
+    template <typename T>
+        bool IParticleFourMomBranch::addVariableGeV(const std::string& var,
+                                                    const std::string& acc) {
+            if (getBranch<T>(var)) {
+                ATH_MSG_WARNING("The variable "<<var<<" has already been added.");
+                return true;
+            }
+            return addVariable(std::make_shared<ParticleVariableBranchGeV<T>>(this->tree(), 
+                                                                              name() + "_" + var, 
+                                                                              acc.empty() ? var : acc));
+    }
+    template <typename T>
+        bool IParticleFourMomBranch::addVariableGeV(T def_value, 
+                                                    const std::string& var,
+                                                    const std::string& acc) {
+            if (!addVariableGeV<T>(var, acc)) {
+                return false;
+            }
+            std::shared_ptr<ParticleVariableBranch<T>> br = getBranch<T>(var);
+            if (!br) {
+                ATH_MSG_ERROR( "Failed to retrieve "<<var<<".");
+                return false;
+            }
+            br->setDefault(def_value);
+            return true;
+        }
+
+    template <typename T>
+        std::shared_ptr<ParticleVariableBranch<T>> IParticleFourMomBranch::getBranch(const std::string& var) const {
+            const std::string searchMe{name() + "_" + var};
+            for (const auto& b : m_variables) {
+                if (b->name() == searchMe) {
+                    return std::dynamic_pointer_cast<ParticleVariableBranch<T>>(b);
+                }
+            }
+            return std::shared_ptr<ParticleVariableBranch<T>>();
+        }
+}
+#endif
