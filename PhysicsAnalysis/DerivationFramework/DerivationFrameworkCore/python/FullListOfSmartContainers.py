@@ -45,6 +45,7 @@ def FullListOfSmartContainers(flags=None):
       "AntiKt2LCTopoJets",
       "AntiKtVR30Rmax4Rmin02PV0TrackJets",
       "BTagging_AntiKt4EMPFlow",
+      "BTagging_AntiKt4EMPFlowByVertex",
       "BTagging_AntiKt4EMPFlow_expert",
       "AntiKt4EMPFlowJets_FTAG",
       "BTagging_AntiKt4UFOCSSK",
