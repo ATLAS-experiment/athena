@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -545,6 +545,7 @@ QImage VP1QtInventorUtils::renderToImage(VP1ExaminerViewer *ra, int pixels_x, in
 	// if fails, delete the renderer and return an empty image
 	if (!myRenderer->render(root)) {
 		delete myRenderer;
+		fclose (tmpf);
 		return QImage();
 	}
 	VP1Msg::messageVerbose("rendered the scenegraph");
@@ -555,6 +556,7 @@ QImage VP1QtInventorUtils::renderToImage(VP1ExaminerViewer *ra, int pixels_x, in
 		bool okOver = myRenderer->render(rootOverlay);
 		if ( !okOver) {
 			delete myRenderer;
+			fclose (tmpf);
 			return QImage();
 		}
 		else {
