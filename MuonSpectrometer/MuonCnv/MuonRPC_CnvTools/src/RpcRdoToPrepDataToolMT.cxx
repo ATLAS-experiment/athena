@@ -1051,23 +1051,23 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::processPad(
                 // registered before the current one (from the same RDO hit) if
                 // nMatchingEtaHits > 1
                 nPrepRawData++;
+                if (!m_xAODKey.empty()) {
+                  auto xprd = state.m_xaodHandle->push_back(std::make_unique<xAOD::RpcStrip>());
+                  xprd->setIdentifier(channelId.get_compact());
+                  xAOD::MeasVector<1> locpos{pointLocPos[0]};
+                  xAOD::MeasMatrix<1> cov{xAOD::MeasMatrix<1>::Identity()};
+                  (cov)(0, 0) = mat(0, 0);
+                  xprd->setMeasurement(m_idHelperSvc->detElementHash(channelId), locpos, cov);
+                  xprd->setStripNumber(idHelper.strip(channelId));
+                  xprd->setGasGap(idHelper.gasGap(channelId));
+                  xprd->setMeasuresPhi(idHelper.measuresPhi(channelId));
+                  xprd->setDoubletPhi(idHelper.doubletPhi(channelId));
+                  xprd->setTime(static_cast<float>(time));
+                  xprd->setTriggerInfo(rpcChan->ijk());
+                  xprd->setAmbiguityFlag(ambiguityFlag);
+                  xprd->setTimeOverThreshold(threshold);
+                }  // end of to be stored now for RpcPrepData
               }
-              if (!m_xAODKey.empty()) {
-                auto xprd = state.m_xaodHandle->push_back(std::make_unique<xAOD::RpcStrip>());
-                xprd->setIdentifier(channelId.get_compact());
-                xAOD::MeasVector<1> locpos{pointLocPos[0]};
-                xAOD::MeasMatrix<1> cov{xAOD::MeasMatrix<1>::Identity()};
-                (cov)(0, 0) = mat(0, 0);
-                xprd->setMeasurement(m_idHelperSvc->detElementHash(channelId), locpos, cov);
-                xprd->setStripNumber(idHelper.strip(channelId));
-                xprd->setGasGap(idHelper.gasGap(channelId));
-                xprd->setMeasuresPhi(idHelper.measuresPhi(channelId));
-                xprd->setDoubletPhi(idHelper.doubletPhi(channelId));
-                xprd->setTime(static_cast<float>(time));
-                xprd->setTriggerInfo(rpcChan->ijk());
-                xprd->setAmbiguityFlag(ambiguityFlag);
-                xprd->setTimeOverThreshold(threshold);
-              }  // end of to be stored now for RpcPrepData
             }    // end of to be stored now
           }      // this hit was not yet recorded
           else {
