@@ -294,7 +294,9 @@ JetChainParts = {
        'preselZ116XX3c20XX1c20bg85',
        'preselZ128XX4c85',
        'preselZ219XX6c20',
-       'preselZ142XX5c20'
+       'preselZ197XX6c20',
+       'preselZ142XX5c20',
+       'preselZ134XX5c20'
      ],
     # Hypo information
     #   If hypoScenario is 'simple', then hypo configuration is handled based on the
@@ -370,7 +372,9 @@ JetChainParts = {
                       'Z120XX6c55',
                       'Z120XX10c40',
                       'Z219XX6c20',
+                      'Z197XX6c20',
                       'Z142XX5c20',
+                      'Z134XX5c20'
                       ],
 
     'exotHypo' : ['emergingPTF0p2dR1p2', 'emergingPTF0p1dR1p2', 'emergingPTF0p09dR1p2', 'emergingPTF0p08dR1p2', 'emergingPTF0p075dR1p2', 'emergingPTF0p07dR1p2', 'emergingPTF0p0dR1p2',
