@@ -201,6 +201,23 @@ class EgammaCalibrationAndSmearingTool
 
   void setupSystematics();
 
+  // if using eta not abs_eta
+  struct EtaCaloPredicate
+  {
+    EtaCaloPredicate(double eta_min, double eta_max) : m_eta_min(eta_min), m_eta_max(eta_max) {}
+    bool operator()(const xAOD::Egamma& p) {
+      const double eta = xAOD::get_eta_calo(*p.caloCluster(),p.author());
+      return (eta >= m_eta_min and eta < m_eta_max);
+    }
+    private:
+      float m_eta_min, m_eta_max;
+  };
+
+  const EgammaPredicate EtaCaloPredicateFactory(double eta_min, double eta_max) const
+  {
+    return EtaCaloPredicate(eta_min, eta_max);
+  }
+
   // this is needed (instead of a simpler lambda since a clang bug, see
   // https://its.cern.ch/jira/browse/ATLASG-688)
   struct AbsEtaCaloPredicate {
