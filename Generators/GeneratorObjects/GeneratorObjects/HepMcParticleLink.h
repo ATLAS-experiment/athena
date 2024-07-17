@@ -27,15 +27,10 @@
 
 #include "AtlasHepMC/GenEvent_fwd.h"
 #include "AtlasHepMC/GenParticle.h"
+#include "TruthUtils/MagicNumbers.h"
 
 class IProxyDict;
 class McEventCollection;
-
-enum EBC_SUPPRESSED_TRUTH : unsigned char {
-  EBC_UNSUPPRESSED = 0, // Truth particle expected to be found in McEventCollection
-  EBC_PU_SUPPRESSED, // Link points to a suppressed pile-up truth particle do not attempt to resolve it.
-  EBC_NSUPP
-};
 
 /**
  * @brief a link optimized in size for a GenParticle in a McEventCollection
