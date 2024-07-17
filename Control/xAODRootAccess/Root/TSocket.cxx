@@ -1,8 +1,7 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: TSocket.cxx 781412 2016-10-31 16:40:04Z krasznaa $
 
 // System include(s):
 extern "C" {
@@ -58,8 +57,11 @@ namespace xAOD {
 
       // "Translate" the port number:
       short sport = 0;
-      struct servent *sp = 0;
-      if( ( sp = ::getservbyport( htons( port ), "tcp" ) ) ) {
+      struct servent sp_buf;
+      struct servent *sp;
+      char buf[1024];  // needs to be large enough for all strings in servent
+      getservbyport_r( htons( port ), "tcp", &sp_buf, buf, sizeof(buf), &sp );
+      if( sp ) {
          sport = sp->s_port;
       } else {
          sport = htons( port );
