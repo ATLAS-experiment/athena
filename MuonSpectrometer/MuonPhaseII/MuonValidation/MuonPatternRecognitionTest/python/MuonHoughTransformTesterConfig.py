@@ -61,8 +61,8 @@ if __name__=="__main__":
     cfg.merge(MuonPatternRecognitionCfg(flags))
 
     cfg.merge(MuonHoughTransformTesterCfg(flags,
-                                          drawDisplayFailed =args.displayFailedSeeds,
-                                          drawDisplaySuccss = args.displayGoodSeeds))
+                                       drawDisplayFailed = args.displayFailedSeeds,
+                                       drawDisplaySuccss = args.displayGoodSeeds))
     cfg.merge(PerfMonMTSvcCfg(flags))
     
     
