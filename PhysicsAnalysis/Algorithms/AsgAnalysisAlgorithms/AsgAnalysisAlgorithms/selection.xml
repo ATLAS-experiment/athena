@@ -37,5 +37,6 @@
    <class name="CP::IOStatsAlg" />
    <class name="CP::FakeBkgCalculatorAlg" />
    <class name="CP::LeptonSFCalculatorAlg" />
+   <class name="CP::VGammaORAlg" />
 
 </lcgdict>

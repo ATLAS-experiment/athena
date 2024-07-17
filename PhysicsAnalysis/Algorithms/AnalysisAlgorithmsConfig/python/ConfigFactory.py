@@ -356,6 +356,10 @@ class ConfigFactory():
         from AsgAnalysisAlgorithms.FakeBkgConfig import FakeBkgBlock
         self.addAlgConfigBlock(algName='FakeBkgCalculator', alg=FakeBkgBlock)
 
+        # VGamma overlap removal
+        from AsgAnalysisAlgorithms.VGammaORConfig import VGammaORBlock
+        self.addAlgConfigBlock(algName='VGammaOR', alg=VGammaORBlock)
+
         # output
         from AsgAnalysisAlgorithms.OutputAnalysisConfig import OutputAnalysisConfig
         self.addAlgConfigBlock(algName="Output", alg=OutputAnalysisConfig,
