@@ -2,7 +2,7 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "MuonPRDTestR4/SpacePointTestModule.h"
+#include "MuonPRDTestR4/SpacePointTesterModule.h"
 #include "StoreGate/ReadHandle.h"
 namespace MuonValR4{
     SpacePointTesterModule::SpacePointTesterModule(MuonTesterTree& tree,
@@ -14,7 +14,9 @@ namespace MuonValR4{
         m_key{inContainer}{}
 
     unsigned int SpacePointTesterModule::push_back(const MuonR4::MuonSpacePoint& spacePoint) {
-        
+        if (!m_internalFill) {
+            m_applyFilter = true;
+        }
         auto insert_itr = m_spacePointIdx.insert(std::make_pair(&spacePoint, m_spacePointIdx.size()));
         // Space point added before return the index of the space point
         if (!insert_itr.second) {
@@ -40,6 +42,7 @@ namespace MuonValR4{
         using TechIndex = Muon::MuonStationIndex::TechnologyIndex; 
         const Identifier id = spacePoint.identify();
         const TechIndex techIdx = idHelperSvc()->technologyIndex(id);
+        m_techIdx.push_back(static_cast<int>(techIdx));
         switch (techIdx) {
             case TechIndex::MDT: {
                     const MdtIdHelper& idHelper{idHelperSvc()->mdtIdHelper()}; 
@@ -80,7 +83,13 @@ namespace MuonValR4{
         return insert_itr.first->second;
     }
     unsigned int SpacePointTesterModule::push_back(const MuonR4::MuonSpacePointBucket& bucket) {
-          auto insert_itr = m_bucketIdx.insert(std::make_pair(&bucket, m_bucketIdx.size()));
+        if (!m_internalFill) {
+            m_applyFilter = true;
+        } else if (m_applyFilter) {
+            auto find_itr = m_bucketIdx.find(&bucket);
+            return find_itr != m_bucketIdx.end() ? find_itr->second : m_bucketIdx.size();
+        }
+        auto insert_itr = m_bucketIdx.insert(std::make_pair(&bucket, m_bucketIdx.size()));
         // Bucket has been added before. Bail out
         if (!insert_itr.second) {
             return insert_itr.first->second;
@@ -102,6 +111,7 @@ namespace MuonValR4{
         return declare_dependency(m_key);
     }
     bool SpacePointTesterModule::fill(const EventContext& ctx) {
+        m_internalFill = true;
         SG::ReadHandle<MuonR4::MuonSpacePointContainer> container{m_key, ctx};
         if (!container.isPresent()) {
             ATH_MSG_FATAL("Failed to retrieve container "<<m_key.fullKey());
@@ -110,6 +120,7 @@ namespace MuonValR4{
         for (const auto& bucket : *container) {
             push_back(*bucket);
         }
+        m_internalFill = false;
         m_spacePointIdx.clear();
         m_bucketIdx.clear();
         return true;

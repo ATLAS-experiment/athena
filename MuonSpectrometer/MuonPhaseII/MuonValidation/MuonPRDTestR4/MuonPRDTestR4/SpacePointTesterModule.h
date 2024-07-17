@@ -70,6 +70,10 @@ namespace MuonValR4{
            std::unordered_map<const MuonR4::MuonSpacePoint*, unsigned int> m_spacePointIdx{};
            /** @brief: Keep tarck when a space point bucket is filled into the tree */
            std::unordered_map<const MuonR4::MuonSpacePointBucket*, unsigned int> m_bucketIdx{};
+           /** @brief: Flag whether the module is operated in filter mode */
+           bool m_applyFilter{false};
+           /** @brief: Flag toggling whether the module is in internal filling mode */
+           bool m_internalFill{false};
     };
 }
 #endif

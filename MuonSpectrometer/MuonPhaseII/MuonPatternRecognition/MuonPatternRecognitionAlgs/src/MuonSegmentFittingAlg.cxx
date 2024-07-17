@@ -37,6 +37,9 @@ StatusCode MuonSegmentFittingAlg::execute(const EventContext& ctx) const {
             ATH_CHECK(fitSegment(data)); 
             if (data.foundMin){
                 writeSegments->push_back(buildSegment(data)); 
+                // limited lifetime validation info
+                writeSegments->back().setParentSeed(&seed);
+                writeSegments->back().setChamber(stationWithMax.chamber());
             }
         }
     }
