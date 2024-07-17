@@ -4,6 +4,7 @@ from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.Enums import HIMode
 from JetRecConfig.StandardJetContext import createJetContextFlags
 
+
 def createJetConfigFlags():
     flags = AthConfigFlags()
 
@@ -13,12 +14,28 @@ def createJetConfigFlags():
     flags.addFlag("Jet.useCalibJetThreshold", True)
 
     flags.addFlagsCategory("Jet.Context",createJetContextFlags)
+
+    # strictMode will cause jobs to crash if inputs are missing. This
+    # is disabled by default in production code because inputs
+    # sometimes go missing for good reasons in production.
+    flags.addFlag("Jet.strictMode", _useStrictMode)
     return flags
 
 
-# This jet internal flag is to signal some jet components we're in a RAW/RDO -> ESD job.
-# As long as we need compatibility with runII reco steering, it seems we can't rely on other AthConfigFlags
-# And we need to be able to switch such flag from JetRec_jobOptions.py or JetRecoSteeringCfg.py
-# thus we have this internal flags 
-jetInternalFlags = AthConfigFlags()
-jetInternalFlags.addFlag("isRecoJob", False)
+# specific flag defaults
+#
+def _useStrictMode(flags):
+    """Strict mode is disabled by default in production jobs, but
+    enabled otherwise
+    """
+    return not any([
+        flags.Output.doWriteESD,
+        flags.Output.doWriteAOD,
+        flags.Output.doWriteDAOD,
+        flags.Output.doWriteEVNT,
+        flags.Output.doWriteEVNT_TR,
+        flags.Output.doWriteBS,
+        flags.Output.doWriteRDO,
+        flags.Output.doWriteRDO_SGNL,
+        flags.Output.HISTFileName,
+    ])

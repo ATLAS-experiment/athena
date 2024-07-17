@@ -143,7 +143,6 @@ def JETM7ExtraContentCfg(flags):
     acc = ComponentAccumulator()
 
     from JetRecConfig.JetRecConfig import JetRecCfg
-    from JetRecConfig.JetConfigFlags import jetInternalFlags
     from JetRecConfig.StandardSmallRJets import AntiKt4PV0Track, AntiKt4EMPFlowByVertex 
 
     #======================================= 
@@ -156,7 +155,6 @@ def JETM7ExtraContentCfg(flags):
     #=======================================
     jetList += [AntiKt4EMPFlowByVertex]
 
-    jetInternalFlags.isRecoJob = True
 
     for jd in jetList:
         acc.merge(JetRecCfg(flags,jd))

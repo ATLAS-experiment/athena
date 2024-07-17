@@ -45,7 +45,6 @@ def JETM2ExtraContentCfg(flags):
     acc = ComponentAccumulator()
 
     from JetRecConfig.JetRecConfig import JetRecCfg, getInputAlgs, getConstitPJGAlg
-    from JetRecConfig.JetConfigFlags import jetInternalFlags
     from JetRecConfig.JetInputConfig import buildEventShapeAlg
     from JetRecConfig.StandardJetConstits import stdConstitDic as cst
     from JetRecConfig.StandardSmallRJets import AntiKt4UFOCSSKNoPtCut, AntiKt4EMPFlowNoPtCut, AntiKt4EMTopoNoPtCut
@@ -73,7 +72,6 @@ def JETM2ExtraContentCfg(flags):
     if flags.Input.isMC:
         jetList += [AntiKt10TruthDressedWZSoftDrop]
 
-    jetInternalFlags.isRecoJob = True
 
     for jd in jetList:
         acc.merge(JetRecCfg(flags,jd))

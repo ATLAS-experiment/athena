@@ -172,7 +172,6 @@ def JETM3ExtraContentCfg(flags):
     acc = ComponentAccumulator()
 
     from JetRecConfig.JetRecConfig import JetRecCfg, getModifier
-    from JetRecConfig.JetConfigFlags import jetInternalFlags
     from JetRecConfig.StandardJetMods import stdJetModifiers
     from JetRecConfig.StandardSmallRJets import AntiKt4EMPFlow, AntiKt4EMPFlowLowPt, AntiKt4EMTopoLowPt, AntiKt4UFOCSSKLowPt
 
@@ -189,7 +188,6 @@ def JETM3ExtraContentCfg(flags):
     #=======================================
     jetList = [AntiKt4EMPFlowLowPt, AntiKt4EMTopoLowPt, AntiKt4UFOCSSKLowPt]
 
-    jetInternalFlags.isRecoJob = True
 
     for jd in jetList:
         acc.merge(JetRecCfg(flags,jd))

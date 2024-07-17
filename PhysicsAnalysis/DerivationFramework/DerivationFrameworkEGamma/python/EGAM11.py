@@ -209,10 +209,8 @@ def EGAM11KernelCfg(flags, name="EGAM11Kernel", **kwargs):
     # Schedule extra jets collections
     from JetRecConfig.StandardSmallRJets import AntiKt4PV0Track, AntiKt4EMTopo
     from JetRecConfig.JetRecConfig import JetRecCfg
-    from JetRecConfig.JetConfigFlags import jetInternalFlags
 
     jetList = [AntiKt4PV0Track, AntiKt4EMTopo]
-    jetInternalFlags.isRecoJob = True
     for jd in jetList:
         acc.merge(JetRecCfg(flags, jd))
 

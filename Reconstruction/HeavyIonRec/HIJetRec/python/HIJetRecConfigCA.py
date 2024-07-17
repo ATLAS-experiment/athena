@@ -704,7 +704,7 @@ if __name__ == "__main__":
     # enable unit tests to switch only parts of reco such as (note the absence of spaces around equal sign):
     ### python -m HIRecConfig.HIRecConfig HeavyIon.doGlobal="False" GeoModel.AtlasVersion="ATLAS-R3S-2021-03-01-00"
     flags.fillFromArgs()
-    
+    flags.Jet.strictMode = False
     flags.lock()
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
@@ -713,8 +713,6 @@ if __name__ == "__main__":
     acc.merge(InDetTrackRecoCfg(flags))
 
     ## To avoid error coming from modifiers
-    from JetRecConfig.JetConfigFlags import jetInternalFlags
-    jetInternalFlags.isRecoJob = True
 
     from JetRecConfig.JetRecConfig import JetRecCfg
     from JetRecConfig.StandardSmallRJets import AntiKt4EMTopo

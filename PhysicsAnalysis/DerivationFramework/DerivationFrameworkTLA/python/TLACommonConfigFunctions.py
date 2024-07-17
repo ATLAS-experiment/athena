@@ -34,7 +34,6 @@ def StandardTLAJetsCfg(ConfigFlags):
 
     from JetRecConfig.StandardSmallRJets import AntiKt4EMTopo,AntiKt4EMPFlow
     from JetRecConfig.JetRecConfig import JetRecCfg
-    from JetRecConfig.JetConfigFlags import jetInternalFlags
 
     acc = ComponentAccumulator()
     
@@ -48,7 +47,6 @@ def StandardTLAJetsCfg(ConfigFlags):
 
     jetList = [AntiKt4EMTopo_deriv, AntiKt4EMPFlow_deriv]
 
-    jetInternalFlags.isRecoJob = True
 
     for jd in jetList:
         acc.merge(JetRecCfg(ConfigFlags,jd))
@@ -64,9 +62,7 @@ def AddTLATruthJetsCfg(flags):
 
     from JetRecConfig.StandardSmallRJets import AntiKt4Truth,AntiKt4TruthWZ,AntiKt4TruthDressedWZ
     from JetRecConfig.JetRecConfig import JetRecCfg
-    from JetRecConfig.JetConfigFlags import jetInternalFlags
 
-    jetInternalFlags.isRecoJob = True
 
     jetList = [AntiKt4Truth,AntiKt4TruthWZ,AntiKt4TruthDressedWZ]
 

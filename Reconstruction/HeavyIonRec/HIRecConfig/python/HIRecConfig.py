@@ -87,8 +87,6 @@ if __name__ == "__main__":
         acc.merge(EGammaSteeringCfg(flags))
     
     ## To avoid error coming from jet modifiers
-    from JetRecConfig.JetConfigFlags import jetInternalFlags
-    jetInternalFlags.isRecoJob = True
 
     from JetRecConfig.JetRecConfig import JetRecCfg
     from JetRecConfig.StandardSmallRJets import AntiKt4EMTopo

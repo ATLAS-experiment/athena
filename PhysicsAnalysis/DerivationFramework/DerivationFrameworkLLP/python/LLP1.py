@@ -221,9 +221,7 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
     from JetRecConfig.StandardSmallRJets import AntiKt4Truth, AntiKt4EMTopo
     from JetRecConfig.JetDefinition import JetDefinition
     from JetRecConfig.StandardJetConstits import stdConstitDic as cst
-    from JetRecConfig.JetConfigFlags import jetInternalFlags
 
-    jetInternalFlags.isRecoJob = True
     registerAsInputConstit(AntiKt4EMTopo)
     registerAsInputConstit(AntiKt4Truth)
     cst.AntiKt4EMTopoJets.label = "EMTopoRC"

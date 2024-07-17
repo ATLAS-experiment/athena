@@ -29,7 +29,6 @@ def StandardJetsInDerivCfg(ConfigFlags):
     from JetRecConfig.StandardSmallRJets import AntiKt4EMTopo,AntiKt4EMPFlow,AntiKtVR30Rmax4Rmin02PV0Track
     from JetRecConfig.StandardLargeRJets import AntiKt10LCTopoTrimmed,AntiKt10UFOCSSKSoftDrop
     from JetRecConfig.JetRecConfig import JetRecCfg
-    from JetRecConfig.JetConfigFlags import jetInternalFlags
 
     acc = ComponentAccumulator()
 
@@ -45,7 +44,6 @@ def StandardJetsInDerivCfg(ConfigFlags):
                AntiKtVR30Rmax4Rmin02PV0Track,
                AntiKt10LCTopoTrimmed,AntiKt10UFOCSSKSoftDrop]
 
-    jetInternalFlags.isRecoJob = True
 
     for jd in jetList:
         acc.merge(JetRecCfg(ConfigFlags,jd))
