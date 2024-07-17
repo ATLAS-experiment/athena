@@ -51,6 +51,12 @@ namespace MuonR4 {
                 return primaryMeasurement() == other.primaryMeasurement() &&
                        secondaryMeasurement() == other.secondaryMeasurement();
             }
+            /** @brief Set the number of space points built with the same eta / phi prd. */
+            void setInstanceCounts(unsigned int etaPrd, unsigned int phiPrd);
+            /** @brief How many space points have been built in total with the same eta prd */
+            unsigned int nEtaInstanceCounts() const;
+            /** @brief How many space points have been built in total with the same phi prd  */
+            unsigned int nPhiInstanceCounts() const;
         private:
             const xAOD::UncalibratedMeasurement* m_primaryMeas{nullptr};
             const xAOD::UncalibratedMeasurement* m_secondaryMeas{nullptr};
@@ -67,6 +73,10 @@ namespace MuonR4 {
             AmgSymMatrix(2) m_measCovariance{AmgSymMatrix(2)::Identity()}; 
             /// Drift radius of the associated drift circle - if there's any in the space point
             double m_driftR{0.};
+            /// In how many space points is the eta measurement used
+            unsigned int m_etaInstances{1};
+            /// In how many space points is the phi measurement used
+            unsigned int m_phiInstances{1};
     };
 
 }

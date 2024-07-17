@@ -52,6 +52,10 @@ namespace MuonValR4{
            /** @brief  Does the space point measure phi or eta*/
            VectorBranch<bool>& m_measEta{parent().newVector<bool>(m_collName+"spacePointMeasEta")};
            VectorBranch<bool>& m_measPhi{parent().newVector<bool>(m_collName+"spacePointMeasPhi")};
+           /** @brief How many other spacepoints were built with the same eta /phi prd */
+           VectorBranch<unsigned int>& m_nEtaInstances{parent().newVector<unsigned int>(m_collName+"spacePointNumEtaInUse")};
+           VectorBranch<unsigned int>& m_nPhiInstances{parent().newVector<unsigned int>(m_collName+"spacePointNumPhiInUse")};
+
 
            /** @brief Station Identifier */
            MuonIdentifierBranch m_spacePointId{parent(), "spacePoint"};

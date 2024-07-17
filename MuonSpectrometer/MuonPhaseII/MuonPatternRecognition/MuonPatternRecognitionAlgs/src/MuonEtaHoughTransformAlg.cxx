@@ -81,16 +81,10 @@ StatusCode MuonEtaHoughTransformAlg::preProcess(
             data.houghSetups[sp->front()->muonChamber()];
         buckets.push_back(HoughSetupForBucket{sp});
         HoughSetupForBucket& hs = buckets.back();
-        Amg::Vector3D leftSide =
-            hs.bucket->muonChamber()
-                ->globalToLocalTrans(data.gctx)
-                .translation() -
-            (hs.bucket->coveredMin() * Amg::Vector3D::UnitY());
-        Amg::Vector3D rightSide =
-            hs.bucket->muonChamber()
-                ->globalToLocalTrans(data.gctx)
-                .translation() -
-            (hs.bucket->coveredMax() * Amg::Vector3D::UnitY());
+        Amg::Vector3D leftSide = hs.bucket->muonChamber()->globalToLocalTrans(data.gctx).translation() -
+                                (hs.bucket->coveredMin() * Amg::Vector3D::UnitY());
+        Amg::Vector3D rightSide = hs.bucket->muonChamber()->globalToLocalTrans(data.gctx).translation() -
+                                 (hs.bucket->coveredMax() * Amg::Vector3D::UnitY());
         const double tanThetaLeft = leftSide.y() / leftSide.z();
         const double tanThetaRight = rightSide.y() / rightSide.z();
         hs.searchWindowTanAngle = {tanThetaLeft, tanThetaRight};
@@ -174,17 +168,15 @@ void MuonEtaHoughTransformAlg::fillFromSpacePoint(
     MuonHoughEventData& data, const MuonR4::HoughHitType& SP) const {
     if (SP->primaryMeasurement()->type() ==
         xAOD::UncalibMeasType::MdtDriftCircleType) {
-        data.houghPlane->fill<HoughHitType>(
-            SP, data.currAxisRanges, HoughHelpers::Eta::houghParamMdtLeft,
-            HoughHelpers::Eta::houghWidthMdt, SP, 0, 1.0);
-        data.houghPlane->fill<HoughHitType>(
-            SP, data.currAxisRanges, HoughHelpers::Eta::houghParamMdtRight,
-            HoughHelpers::Eta::houghWidthMdt, SP, 0, 1.0);
+        data.houghPlane->fill<HoughHitType>(SP, data.currAxisRanges, HoughHelpers::Eta::houghParamMdtLeft,
+                                            HoughHelpers::Eta::houghWidthMdt, SP, 0, 1.0);
+        data.houghPlane->fill<HoughHitType>(SP, data.currAxisRanges, HoughHelpers::Eta::houghParamMdtRight,
+                                            HoughHelpers::Eta::houghWidthMdt, SP, 0, 1.0);
     } else {
         if (SP->measuresEta()) {
-            data.houghPlane->fill<HoughHitType>(
-                SP, data.currAxisRanges, HoughHelpers::Eta::houghParamStrip,
-                HoughHelpers::Eta::houghWidthStrip, SP, 0, 1.0);
+            data.houghPlane->fill<HoughHitType>(SP, data.currAxisRanges, HoughHelpers::Eta::houghParamStrip,
+                                                HoughHelpers::Eta::houghWidthStrip, SP, 0, 
+                                                m_downWeightMultiplePrd ? 1.0 / SP->nEtaInstanceCounts() : 1.);
         }
     }
 }
@@ -192,5 +184,5 @@ void MuonEtaHoughTransformAlg::extendWithPhiHits(
     std::vector<HoughHitType>& hitList, HoughSetupForBucket& bucket) const {
     std::copy_if(bucket.bucket->begin(), bucket.bucket->end(),
                  std::back_inserter(hitList),
-                 [](MuonR4::HoughHitType hit) { return !hit->measuresEta(); });
+                 [](const MuonR4::HoughHitType& hit) { return !hit->measuresEta(); });
 }

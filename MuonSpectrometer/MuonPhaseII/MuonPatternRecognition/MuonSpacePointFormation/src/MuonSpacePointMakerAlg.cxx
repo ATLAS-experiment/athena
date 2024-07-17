@@ -7,6 +7,26 @@
 #include "StoreGate/WriteHandle.h"
 #include <thread>
 
+namespace {
+    using TgcStripVec = std::vector<const xAOD::TgcStrip*>;
+    inline unsigned int countMatches(const xAOD::TgcStrip* primaryPrd, 
+                                     const TgcStripVec& potentialMatches) {
+        unsigned int n{0};
+        for (const xAOD::TgcStrip* match : potentialMatches){
+            n += ((match->bcBitMap() & primaryPrd->bcBitMap()) >0);
+        }
+        return n;
+    }
+    inline std::vector<unsigned int> fillMatchCounts(const TgcStripVec& hitCollection,
+                                                     const TgcStripVec& potentialMatches) {
+        std::vector<unsigned int> match(hitCollection.size(), 0);
+        for (unsigned int p = 0; p < hitCollection.size() ;++p) {
+            match[p] = countMatches(hitCollection[p], potentialMatches);
+        }
+        return match;
+    }
+}
+
 namespace MuonR4 {
 bool MuonSpacePointMakerAlg::SpacePointStatistics::FieldKey::operator<(const FieldKey& other) const{
     if (techIdx != other.techIdx) {
@@ -164,17 +184,47 @@ template <class ContType>StatusCode MuonSpacePointMakerAlg::loadContainerAndSort
                     }
                     continue;
                 }
-                /// Simple combination by taking the cross-product
+
+                std::vector<unsigned int> etaCounts(etaHits.size(), phiHits.size());
+                std::vector<unsigned int> phiCounts(phiHits.size(), etaHits.size());
+                if constexpr(std::is_same<xAOD::TgcStripContainer, ContType>::value){
+                    etaCounts = fillMatchCounts(etaHits, phiHits);
+                    phiCounts = fillMatchCounts(phiHits, etaHits);
+                }
+                                
                 fillInto.etaHits.reserve(fillInto.etaHits.size() + etaHits.size() * phiHits.size());
-                for (const PrdType etaPrd : etaHits) {
-                    for (const PrdType phiPrd: phiHits) {
-                        /// For the Tgc do not combine space points from adjacent BCs
+                /// Flag whether an isolated phi hit which cannot be combined with others exists 
+                bool hasIsolatedPhi{false};
+                /// Flag whether an eta-phi space point has been made
+                bool hasCombinedSpacePoint{false};
+                /// Simple combination by taking the cross-product
+                for (unsigned int etaP = 0; etaP < etaHits.size(); ++etaP) {
+                    /// There's no valid combination with another phi hit
+                    if (!etaCounts[etaP]) {
+                        fillInto.etaHits.emplace_back(*gctx, etaHits[etaP]);
+                        continue;
+                    }
+                    for (unsigned int phiP = 0; phiP < phiHits.size(); ++ phiP){
+                        if (!phiCounts[phiP]) {
+                            hasIsolatedPhi = true;
+                            continue;
+                        }
                         if constexpr(std::is_same<xAOD::TgcStripContainer, ContType>::value) {
-                            if (!(etaPrd->bcBitMap() & phiPrd->bcBitMap())){
+                            if (!(etaHits[etaP]->bcBitMap() & phiHits[phiP]->bcBitMap())){
                                 continue;
                             }
                         }
-                        fillInto.etaHits.emplace_back(*gctx, etaPrd, phiPrd);
+                        MuonSpacePoint& spacePoint{fillInto.etaHits.emplace_back(*gctx, etaHits[etaP], phiHits[phiP])};
+                        spacePoint.setInstanceCounts(etaCounts[etaP], phiCounts[phiP]);
+                        hasCombinedSpacePoint = true;
+                    }
+                }
+                // Add isolated phi space points
+                if (!hasCombinedSpacePoint || hasIsolatedPhi) {
+                    for (unsigned int phiP = 0; phiP < phiHits.size(); ++ phiP){
+                        if (!hasCombinedSpacePoint || !phiCounts[phiP]) {
+                            fillInto.phiHits.emplace_back(*gctx, phiHits[phiP]);
+                        }
                     }
                 }
             }
