@@ -92,6 +92,9 @@ namespace MuonR4{
             IntegerProperty m_nBinsTanTheta{this, "nBinsTanTheta", 20};
             // number of accumulator bins for the intercept 
             IntegerProperty m_nBinsIntercept{this, "nBinsIntercept", 200};
+            // Flag to steer whether space points shall be downweighted according to their instance
+            // multiplicity of the phi measurement such that it effectively contributes with weight 1
+            BooleanProperty m_downWeightMultiplePrd{this, "downWeightPrdMultiplicity", false};
 
             // input space points from SG
             SG::ReadHandleKey<MuonR4::MuonSpacePointContainer> m_spacePointKey{this, "SpacePointContainer", "MuonSpacePoints"};

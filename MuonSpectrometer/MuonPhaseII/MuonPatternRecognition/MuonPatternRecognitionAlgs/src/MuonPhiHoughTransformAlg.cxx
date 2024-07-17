@@ -152,7 +152,7 @@ std::vector<MuonR4::ActsPeakFinderForMuon::Maximum> MuonPhiHoughTransformAlg::fi
             MuonR4::HoughHelpers::Phi::houghWidthStrip, hit, 0, 
             // up-weigh 2D spacepoints w.r.t 1D phi hits to prevent 
             // discarding measurements known to be compatible in eta 
-            (hit->measuresEta() ? 2.0 : 1.0)
+            (hit->measuresEta() ? 2.0 : 1.0) / (m_downWeightMultiplePrd? hit->nPhiInstanceCounts() : 1)
             );
     }
     // run the peak finder 

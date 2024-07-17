@@ -33,6 +33,9 @@ namespace MuonValR4{
 
         m_measEta.push_back(spacePoint.measuresEta());
         m_measPhi.push_back(spacePoint.measuresPhi());
+        m_nEtaInstances.push_back(spacePoint.measuresEta() ? spacePoint.nEtaInstanceCounts() : 0);
+        m_nPhiInstances.push_back(spacePoint.measuresPhi() ? spacePoint.nPhiInstanceCounts() : 0);
+        
 
         using TechIndex = Muon::MuonStationIndex::TechnologyIndex; 
         const Identifier id = spacePoint.identify();

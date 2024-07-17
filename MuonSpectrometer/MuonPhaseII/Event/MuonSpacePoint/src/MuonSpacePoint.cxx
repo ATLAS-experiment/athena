@@ -117,5 +117,10 @@ namespace MuonR4{
     const AmgSymMatrix(2)&  MuonSpacePoint::covariance() const {
         return m_measCovariance;
     }
-
+    void MuonSpacePoint::setInstanceCounts(unsigned int etaPrd, unsigned int phiPrd){
+        m_etaInstances = std::max(1u, etaPrd);
+        m_phiInstances = std::max(1u, phiPrd);
+    }
+    unsigned int MuonSpacePoint::nEtaInstanceCounts() const { return m_etaInstances; }
+    unsigned int MuonSpacePoint::nPhiInstanceCounts() const { return m_phiInstances; }
 }

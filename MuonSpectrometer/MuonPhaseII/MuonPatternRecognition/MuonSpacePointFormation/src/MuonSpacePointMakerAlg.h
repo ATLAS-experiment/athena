@@ -32,30 +32,40 @@ namespace MuonR4{
             StatusCode finalize() override;
         
         private:
-            /// Helper struct to collect all space points per chamber
-            struct spacePointsPerChamber{
-                std::vector<MuonSpacePoint> etaHits{};
-                std::vector<MuonSpacePoint> phiHits{};                
-            };
-            
-            using PreSortedSpacePointMap = std::unordered_map<const MuonGMR4::MuonChamber*, spacePointsPerChamber>;
-            using SpacePointBucketVec = std::vector<MuonSpacePointBucket>;
-            // Helper class to quantify how many space points are made within a certain detector region
+            /** @brief Helper class to keep track of how many eta+phi, eta and phi only space points are built
+             *         in various detector regions. The SpacePointStatistics split the counts per muon station layer,
+             *         i.e., BarrelInner, BarrelMiddle, EndCapInner, etc. are distinct categoriges. Each category
+             *         is further subdivided into the indivudal stationEtas of the chambers and finally also into
+             *         the technology type of the hit.
+             */
             class SpacePointStatistics{
                 public:
+                    /** @brief Standard constructor
+                     *  @param idHelperSvc: Pointer to the MuonIdHelperSvc needed to sort each hit into
+                     *                      a counting category. */
                     SpacePointStatistics(const Muon::IMuonIdHelperSvc* idHelperSvc);
                 
+                    /** @brief Adds the vector of space points to the overall statistics. */
                     void addToStat(const std::vector<MuonSpacePoint>& spacePoints);
+                    /** @brief Print the statistics table of the built space points per category 
+                     *         into the log-file / console */
                     void dumpStatisics(MsgStream& msg) const;
-                private:
-                    struct StatField{
-                        unsigned int measEtaPhi{0};
-                        unsigned int measEta{0};
-                        unsigned int measPhi{0};
 
+                private:
+                    /** @brief Helper struct to count the space-points in each 
+                     *          detector category. */
+                    struct StatField{
+                        /** @brief Number of space points measuring eta & phi */
+                        unsigned int measEtaPhi{0};
+                        /** @brief Number of space points measuring eta only */
+                        unsigned int measEta{0};
+                        /** @brief Number of space points measuring phi only*/
+                        unsigned int measPhi{0};
+                        /** @brief Helper method returning the sum of the three
+                         *         space point type counts */
                         unsigned int allHits() const;
                     };
-                    // Field key
+                    /** @brief Helper struct to define the counting categories. */
                     struct FieldKey{
                         using StIdx_t = Muon::MuonStationIndex::StIndex;
                         using TechIdx_t = Muon::MuonStationIndex::TechnologyIndex; 
@@ -70,11 +80,46 @@ namespace MuonR4{
                     using StatMap_t = std::map<FieldKey, StatField>;
                     StatMap_t m_map{};
             };
+            /** @brief: Helper struct to collect the space point per muon chamber, which are 
+             *          later sorted into the space point buckets. */
+            struct spacePointsPerChamber{
+                /** @brief Vector of all hits that contain an eta measurement including the 
+                 *         ones which are combined with phi measurements */
+                std::vector<MuonSpacePoint> etaHits{};
+                /** @brief Vector of all space points that are built from single phi hits */
+                std::vector<MuonSpacePoint> phiHits{};                
+            };
+            /** @brief Container abrivation of the presorted space point container per MuonChambers */
+            using PreSortedSpacePointMap = std::unordered_map<const MuonGMR4::MuonChamber*, spacePointsPerChamber>;
+
   
-            template <class ContType> StatusCode loadContainerAndSort(const EventContext& ctx,
-                                                                      const SG::ReadHandleKey<ContType>& key,
-                                                                      PreSortedSpacePointMap& fillContainer) const;
+            /** @brief Retrieve an uncalibrated measurement container <ContType> and fill the hits into the
+             *         presorted space point map. Per associated MuonChamber, hits from Tgc, Rpc, sTgcs are 
+             *         grouped by their gasGap location and then divided into eta & phi measurements. If both
+             *         are found, each eta measurement is combined with phi measurement into a MuonSpacePoint. 
+             *         In any other case, the measurements are just transformed into a MuonSpacePoint.
+             *  @param ctx: Event context of the current event
+             *  @param key: ReadHandleKey to access the container of data type <ContType>
+             *  @param fillContainer: Global container into which all space points are filled.
+             */
+            template <class ContType> 
+                StatusCode loadContainerAndSort(const EventContext& ctx,
+                                                const SG::ReadHandleKey<ContType>& key,
+                                                PreSortedSpacePointMap& fillContainer) const;
                                                     
+            /** @brief Abrivation of a MuonSapcePoint bucket vector */
+            using SpacePointBucketVec = std::vector<MuonSpacePointBucket>;
+
+            /** @brief Distribute the premade spacepoints per chamber into their individual MuonSpacePoint
+             *         buckets. A new bucket is created everytime if the hit to fill is along the z-axis 
+             *         farther away from the first point in the bucket than the <spacePointWindowSize>.
+             *         Hit in the previous bucket which are <spacePointOverlap> away from the first hit
+             *         in the new bucket are also mirrored. The bucket formation starts with the eta
+             *         Muon space points and then consumes the phi hits.
+             * @param ctx: Event context of the current event
+             * @param hitsPerChamber: List of all premade space points which have to be sorted
+             * @param finalContainer: Output MuonSpacePoint bucket container.
+             *  */
             void distributePointsAndStore(const EventContext& ctx,
                                           spacePointsPerChamber&& hitsPerChamber,
                                           MuonSpacePointContainer& finalContainer) const;

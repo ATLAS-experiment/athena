@@ -119,8 +119,10 @@ namespace MuonR4{
             IntegerProperty m_maxEtaHolesOnMax{this, "maxEtaHoles", 1};
             // flag to steer whether to recover maxima with a single phi measurement
             // using a beam spot projection. Should not be used in splashes or cosmics. 
-            BooleanProperty m_recoverSinglePhiWithBS{this, "recoverSinglePhiHitsWithBS", true}; 
-
+            BooleanProperty m_recoverSinglePhiWithBS{this, "recoverSinglePhiHitsWithBS", true};
+            // Flag to steer whether space points shall be downweighted according to their instance
+            // multiplicity of the phi measurement such that it effectively contributes with weight 1
+            BooleanProperty m_downWeightMultiplePrd{this, "downWeightPrdMultiplicity", false};
     };
 }
 
