@@ -200,34 +200,44 @@ namespace top {
       }
       top::check(tauSelectionTool->initialize(), "Failed to initialize tauSelectionTool");
       m_tauSelectionTool = tauSelectionTool.release();
+    }
 
-      ///-- Setup the EfficiencyCorrectionsTool while seting up the selection tool --///
-      if (asg::ToolStore::contains<ITauEffCorrTool>(tauEffCorrName)) {
-        m_tauEffCorrTool = asg::ToolStore::get<ITauEffCorrTool>(tauEffCorrName);
-      } else {
-        std::unique_ptr<ITauEffCorrTool> tauEffCorrTool
-          = std::make_unique<TauAnalysisTools::TauEfficiencyCorrectionsTool>(tauEffCorrName);
-        if (m_config->isMC()) {
+    ///-- Setup the EfficiencyCorrectionsTool ///
+    if (asg::ToolStore::contains<ITauEffCorrTool>(tauEffCorrName)) {
+      m_tauEffCorrTool = asg::ToolStore::get<ITauEffCorrTool>(tauEffCorrName);
+    } else {
+      std::unique_ptr<ITauEffCorrTool> tauEffCorrTool
+        = std::make_unique<TauAnalysisTools::TauEfficiencyCorrectionsTool>(tauEffCorrName);
+      if (m_config->isMC()) {
 
-          if(!m_config->isDataOverlay()){
-              top::check(m_pileupReweightingTool.retrieve(), "Failed to retireve pileup reweighting tool");
-              top::check(asg::setProperty(tauEffCorrTool, "PileupReweightingTool", m_pileupReweightingTool),
-                     "Failed to set PileupReweightingTool for " + tauEffCorrName);
-          }
-
-          top::check(asg::setProperty(tauEffCorrTool, "UseTauSubstructure", m_config->tauSubstructureSF()),
-                     "Failed to set UseTauSubstructure for " + tauEffCorrName);
-
-          top::check(asg::setProperty(tauEffCorrTool, "isAFII", m_config->isAFII()),
-                     "Failed to set isAFII for " + tauEffCorrName);
+        if(!m_config->isDataOverlay()){
+            top::check(m_pileupReweightingTool.retrieve(), "Failed to retireve pileup reweighting tool");
+            top::check(asg::setProperty(tauEffCorrTool, "PileupReweightingTool", m_pileupReweightingTool),
+                    "Failed to set PileupReweightingTool for " + tauEffCorrName);
         }
 
-        top::check(asg::setProperty(tauEffCorrTool, "TauSelectionTool", m_tauSelectionTool),
-                   "Failed to set TauSelectionTool for " + tauEffCorrName);
+        top::check(asg::setProperty(tauEffCorrTool, "UseTauSubstructure", m_config->tauSubstructureSF()),
+                    "Failed to set UseTauSubstructure for " + tauEffCorrName);
 
-        top::check(tauEffCorrTool->initialize(), "Failed to initialize");
-        m_tauEffCorrTool = tauEffCorrTool.release();
+        top::check(asg::setProperty(tauEffCorrTool, "isAFII", m_config->isAFII()),
+                   "Failed to set isAFII for " + tauEffCorrName);
       }
+
+      top::check(asg::setProperty(tauEffCorrTool, "JetIDLevel", tauJetIDWP),
+                 "Failed to set JetIDLevel for " + tauEffCorrName);
+      top::check(asg::setProperty(tauEffCorrTool, "EleIDLevel", tauEleIDWP),
+                 "Failed to set EleIDLevel for " + tauEffCorrName);
+
+      // Set correction types directly instead of via TauSelectionTool. See athena !70515
+      // Determine Tau efficiency correction types
+      std::vector<int> vEfficiencyCorrectionTypes = getTauEfficiencyCorrectionTypes(
+        iSelectionCuts, tauJetIDWP, tauEleIDWP
+      );
+      top::check(asg::setProperty(tauEffCorrTool, "EfficiencyCorrectionTypes", vEfficiencyCorrectionTypes),
+                 "Failed to set EfficiencyCorrectionTypes for " + tauEffCorrName);
+
+      top::check(tauEffCorrTool->initialize(), "Failed to initialize");
+      m_tauEffCorrTool = tauEffCorrTool.release();
     }
 
     //============================================================
@@ -274,34 +284,44 @@ namespace top {
       }
       top::check(tauSelectionTool->initialize(), "Failed to initialize tauSelectionTool");
       m_tauSelectionToolLoose = tauSelectionTool.release();
+    }
 
-      ///-- Setup the EfficiencyCorrectionsTool while seting up the selection tool --///
-      if (asg::ToolStore::contains<ITauEffCorrTool>(tauEffCorrNameLoose)) {
-        m_tauEffCorrTool = asg::ToolStore::get<ITauEffCorrTool>(tauEffCorrNameLoose);
-      } else {
-        std::unique_ptr<ITauEffCorrTool> tauEffCorrTool
-          = std::make_unique<TauEffCorrTool>(tauEffCorrNameLoose);
-        if (m_config->isMC()) {
+    ///-- Setup the EfficiencyCorrectionsTool ///
+    if (asg::ToolStore::contains<ITauEffCorrTool>(tauEffCorrNameLoose)) {
+      m_tauEffCorrTool = asg::ToolStore::get<ITauEffCorrTool>(tauEffCorrNameLoose);
+    } else {
+      std::unique_ptr<ITauEffCorrTool> tauEffCorrTool
+        = std::make_unique<TauEffCorrTool>(tauEffCorrNameLoose);
+      if (m_config->isMC()) {
 
-          if(!m_config->isDataOverlay()) {
-             top::check(m_pileupReweightingTool.retrieve(), "Failed to retireve pileup reweighting tool");
-             top::check(asg::setProperty(tauEffCorrTool, "PileupReweightingTool", m_pileupReweightingTool),
-                       "Failed to set PileupReweightingTool for " + tauEffCorrNameLoose);
-          }
-
-          top::check(asg::setProperty(tauEffCorrTool, "UseTauSubstructure", m_config->tauSubstructureSFLoose()),
-                     "Failed to set UseTauSubstructure for " + tauEffCorrNameLoose);
-
-          top::check(asg::setProperty(tauEffCorrTool, "isAFII", m_config->isAFII()),
-                  "Failed to set isAFII for " + tauEffCorrNameLoose);
+        if(!m_config->isDataOverlay()) {
+           top::check(m_pileupReweightingTool.retrieve(), "Failed to retireve pileup reweighting tool");
+           top::check(asg::setProperty(tauEffCorrTool, "PileupReweightingTool", m_pileupReweightingTool),
+                     "Failed to set PileupReweightingTool for " + tauEffCorrNameLoose);
         }
 
-        top::check(asg::setProperty(tauEffCorrTool, "TauSelectionTool", m_tauSelectionToolLoose),
-                   "Failed to set TauSelectionTool for " + tauEffCorrNameLoose);
+        top::check(asg::setProperty(tauEffCorrTool, "UseTauSubstructure", m_config->tauSubstructureSFLoose()),
+                   "Failed to set UseTauSubstructure for " + tauEffCorrNameLoose);
 
-        top::check(tauEffCorrTool->initialize(), "Failed to initialize");
-        m_tauEffCorrToolLoose = tauEffCorrTool.release();
+        top::check(asg::setProperty(tauEffCorrTool, "isAFII", m_config->isAFII()),
+                "Failed to set isAFII for " + tauEffCorrNameLoose);
       }
+
+      top::check(asg::setProperty(tauEffCorrTool, "JetIDLevel", tauJetIDWPLoose),
+                 "Failed to set JetIDLevel for " + tauEffCorrNameLoose);
+      top::check(asg::setProperty(tauEffCorrTool, "EleIDLevel", tauEleIDWPLoose),
+                 "Failed to set EleIDLevel for " + tauEffCorrNameLoose);
+
+      // Set correction types directly instead of via TauSelectionTool. See athena !70515
+      // Determine Tau efficiency correction types
+      std::vector<int> vEfficiencyCorrectionTypesLoose = getTauEfficiencyCorrectionTypes(
+        iSelectionCutsLoose, tauJetIDWPLoose, tauEleIDWPLoose
+      );
+      top::check(asg::setProperty(tauEffCorrTool, "EfficiencyCorrectionTypes", vEfficiencyCorrectionTypesLoose),
+                 "Failed to set EfficiencyCorrectionTypes for " + tauEffCorrNameLoose);
+
+      top::check(tauEffCorrTool->initialize(), "Failed to initialize");
+      m_tauEffCorrToolLoose = tauEffCorrTool.release();
     }
 
     ///-- Calibration and smearing --///
@@ -342,5 +362,57 @@ namespace top {
      *
      **/
     return StatusCode::SUCCESS;
+  }
+
+  std::vector<int> TauCPTools::getTauEfficiencyCorrectionTypes(int iSelectionCuts, int iJetIDLevel, int iEleIDLevel) {
+    std::vector<int> effCorrections;
+
+    bool addedJetIDSF {false};
+    bool addedEleIDSF {false};
+
+    // add reco systematics in any case
+    effCorrections.push_back(TauAnalysisTools::SFRecoHadTau);
+    ATH_MSG_VERBOSE( "added SFRecoHadTau" );
+
+    // use jet ID scale factors if TauSelectionTool applies jet ID cut
+    if (iSelectionCuts & TauAnalysisTools::CutJetIDWP) {
+      // add SFJetIDHadTau
+      if (iJetIDLevel == TauAnalysisTools::JETIDRNNLOOSE or iJetIDLevel == TauAnalysisTools::JETIDRNNMEDIUM or iJetIDLevel == TauAnalysisTools::JETIDRNNTIGHT) {
+        effCorrections.push_back(TauAnalysisTools::SFJetIDHadTau);
+        ATH_MSG_VERBOSE( "added SFJetIDHadTau" );
+        addedJetIDSF = true;
+      } else {
+        ATH_MSG_WARNING( "No JetID scale factor for working point " << iJetIDLevel );
+      }
+    }
+
+    // use electron veto scale factors if applying electron veto
+    if (iSelectionCuts & TauAnalysisTools::CutEleIDWP) {
+
+      // force m_iEleIDLevel to ELEIDNONE until RNN eVeto SFs are available
+      if (iEleIDLevel == TauAnalysisTools::ELEIDRNNTIGHT) {
+        ATH_MSG_WARNING("Scale factors for RNN eVeto (TIGHT) are not available yet");
+        iEleIDLevel = TauAnalysisTools::ELEIDNONE;
+      }
+
+      if (iEleIDLevel == TauAnalysisTools::ELEIDRNNLOOSE || iEleIDLevel == TauAnalysisTools::ELEIDRNNMEDIUM || iEleIDLevel == TauAnalysisTools::ELEIDRNNTIGHT) {
+        effCorrections.push_back(TauAnalysisTools::SFEleIDHadTau);
+        ATH_MSG_VERBOSE( "added SFEleIDHadTau" );
+        effCorrections.push_back(TauAnalysisTools::SFEleIDElectron);
+        ATH_MSG_VERBOSE( "added SFEleIDElectron" );
+        addedEleIDSF = true;
+      }
+    }
+
+    if (addedJetIDSF and addedEleIDSF) {
+      ATH_MSG_WARNING("Both Tau JetID and EleID corrections are applied. The final SF is a product of TauID and EleID SFs, which is not correct. Need to have two TauEfficiencyCorrectionsTool instances to handle them separately!");
+    }
+
+    if (m_config->tauSubstructureSF()) {
+      ATH_MSG_WARNING("Scale factors for decay mode ID are not available yet");
+      //effCorrections.push_back(TauAnalysisTools::SFDecayModeHadTau);
+    }
+
+    return effCorrections;
   }
 }  // namespace top

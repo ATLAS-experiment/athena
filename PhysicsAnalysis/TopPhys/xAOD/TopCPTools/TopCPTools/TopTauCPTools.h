@@ -48,6 +48,8 @@ namespace top {
 
     StatusCode setupCalibration();
     StatusCode setupScaleFactors();
+
+    std::vector<int> getTauEfficiencyCorrectionTypes(int iSelectionCuts, int iJetIDLevel, int iEleIDLevel);
   };
 }  // namespace top
 
