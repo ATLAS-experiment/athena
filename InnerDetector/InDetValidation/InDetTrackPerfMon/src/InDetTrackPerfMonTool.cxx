@@ -63,6 +63,7 @@ StatusCode InDetTrackPerfMonTool::initialize() {
   ATH_CHECK( m_roiSelectionTool.retrieve( EnableTool{ m_trkAnaDefSvc->useTrigger() and not m_trkAnaDefSvc->useEFTrigger() } ) );
   ATH_CHECK( m_trackRoiSelectionTool.retrieve( EnableTool{ m_trkAnaDefSvc->useTrigger() and not m_trkAnaDefSvc->useEFTrigger()} ) );
   ATH_CHECK( m_trackMatchingTool.retrieve( EnableTool{ m_doMatch.value() } ) );
+  ATH_CHECK( m_trkAnaInfoWriteTool.retrieve( EnableTool{ m_writeOut.value() } ) );
 
   ATH_CHECK( m_eventInfoContainerName.initialize() );
 
@@ -72,6 +73,8 @@ StatusCode InDetTrackPerfMonTool::initialize() {
       m_trkAnaDefSvc->useTrigger() and not m_triggerTrkParticleName.key().empty() ) );
   ATH_CHECK( m_truthParticleName.initialize( 
       m_trkAnaDefSvc->useTruth() and not m_truthParticleName.key().empty() ) );
+
+  ATH_CHECK( m_trkAnaInfoKey.initialize() );
 
   /// Retrieving list of configured chains
   const std::vector< std::string >& configuredChains = m_trkAnaDefSvc->configuredChains();
@@ -131,6 +134,14 @@ StatusCode InDetTrackPerfMonTool::bookHistograms()
 StatusCode InDetTrackPerfMonTool::fillHistograms() {
 
   ATH_MSG_INFO( "Filling hists " << name() << " ..." );
+
+  /// Output TrackAnalysisInfo container writing
+  SG::WriteHandle< xAOD::BaseContainer > outTrkAnaInfoContHandle( m_trkAnaInfoKey );
+  if( m_writeOut ) {
+    ATH_CHECK( outTrkAnaInfoContHandle.record(
+                  std::make_unique< xAOD::BaseContainer >(),
+                  std::make_unique< xAOD::AuxContainerBase >() ) );
+  }
 
   /// Defining TrackAnalysisCollections object
   /// to contain all collections for this event
@@ -251,9 +262,22 @@ StatusCode InDetTrackPerfMonTool::fillHistograms() {
       /// --------------------------
       ATH_CHECK( m_trkAnaPlotsMgrVec[iAna]->fill( thisTrkAnaCollections ) );
 
+      /// ---------------------------------------
+      /// --- Writing trkAnaInfo to StoreGate ---
+      /// ---------------------------------------
+      if( m_writeOut ) {
+        ATH_CHECK( m_trkAnaInfoWriteTool->write( outTrkAnaInfoContHandle,
+                                      thisTrkAnaCollections,
+                                      thisChain, ir, thisRoiStr ) );
+      }
+
     } // close selectedRois loop
 
   } // close TrkAnalyses loop 
+
+  if( m_writeOut ) {
+    ATH_MSG_DEBUG( m_trkAnaInfoWriteTool->printInfo( outTrkAnaInfoContHandle ) );
+  }
 
   return StatusCode::SUCCESS;
 }

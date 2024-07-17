@@ -64,6 +64,18 @@ def PlotsDefinitionSvcCfg( flags, name="PlotsDefSvc", **kwargs ):
     return acc
 
 
+def TrackAnalysisInfoWriteToolCfg( flags, name="TrackAnalysisInfoWriteTool", **kwargs ):
+    '''
+    Tool to write TrackAnalysisInfo to StoreGate
+    '''
+    acc = ComponentAccumulator()
+
+    kwargs.setdefault( "AnaTag", flags.PhysVal.IDTPM.currentTrkAna.anaTag )
+
+    acc.setPrivateTools( CompFactory.IDTPM.TrackAnalysisInfoWriteTool( name, **kwargs ) )
+    return acc
+
+
 def TrackAnalysisDefinitionSvcCfg( flags, name="TrkAnaDefSvc", **kwargs ):
     '''
     CA-based configuration for the TrackAnalysisDefinition Service
@@ -109,6 +121,16 @@ def InDetTrackPerfMonToolCfg( flags, name="InDetTrackPerfMonTool", **kwargs ):
                        flags.PhysVal.IDTPM.currentTrkAna.TruthPartKey )
 
     kwargs.setdefault( "AnaTag", flags.PhysVal.IDTPM.currentTrkAna.anaTag )
+
+    if flags.Output.doWriteAOD_IDTPM :
+        kwargs.setdefault( "writeOut", True )
+        kwargs.setdefault( "TrkAnaInfoKey",
+                           "TrkAnaInfo"+flags.PhysVal.IDTPM.currentTrkAna.anaTag )
+
+        if "TrackAnalysisInfoWriteTool" not in kwargs :
+            kwargs.setdefault( "TrackAnalysisInfoWriteTool", acc.popToolsAndMerge(
+                TrackAnalysisInfoWriteToolCfg( flags,
+                    name="TrackAnalysisInfoWriteTool"+flags.PhysVal.IDTPM.currentTrkAna.anaTag ) ) )
 
     ## TrackAnalysisDefinitionSvc
     acc.merge( TrackAnalysisDefinitionSvcCfg( flags,

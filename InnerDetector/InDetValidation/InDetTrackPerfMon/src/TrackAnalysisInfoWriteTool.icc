@@ -1,0 +1,116 @@
+/*
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
+
+/**
+ * @file    TrackAnalysisInfoWriteTool.icc
+ * @author  Marco Aparo <marco.aparo@cern.ch>
+ **/
+
+/// Local includes
+#include "TrackAnalysisInfoWriteTool.h"
+#include "TrackMatchingLookup.h"
+#include "TrackParametersHelper.h"
+
+/// STL includes
+#include <algorithm>
+#include <sstream>
+
+
+///-------------------------
+///----- getMatchInfo ------
+///-------------------------
+template< typename Tcoll_t, typename Rcoll_t >
+IDTPM::MatchInfo_t< Tcoll_t, Rcoll_t >
+IDTPM::TrackAnalysisInfoWriteTool::getMatchInfo(
+    const Vec_t< Tcoll_t >& Tvec,
+    const Vec_t< Rcoll_t >& Rvec,
+    const Tcoll_t* Tcoll,
+    const Rcoll_t* Rcoll,
+    const ITrackMatchingLookup* matches ) const
+{
+  VecEL_t< Tcoll_t > testVec;
+  VecEL_t< Rcoll_t > refVec;
+  VecF_t distVec;
+  Vec_t< Rcoll_t > matchedRefVec;
+
+  auto matches_c = dynamic_cast< const TrackMatchingLookupBase<
+      typename Tcoll_t::base_value_type, 
+      typename Rcoll_t::base_value_type >* >( matches );
+
+  /// Loop over test vector
+  for( typename Tcoll_t::const_value_type thisTest : Tvec ) {
+    EL_t< Tcoll_t > testLink;
+    EL_t< Rcoll_t > refLink;
+    float dist( 999. );
+
+    testLink.toContainedElement( *Tcoll, thisTest );
+
+    if( matches_c->isTestInMaps( *thisTest ) ) {
+      typename Rcoll_t::const_value_type thisRef =
+          matches_c->getMatchedRef( *thisTest );
+      refLink.toContainedElement( *Rcoll, thisRef );
+      dist = matches_c->getDist( *thisTest );
+      matchedRefVec.push_back( thisRef );
+    }
+
+    /// Fill both matched and unmatched tests
+    testVec.push_back( testLink );
+    refVec.push_back( refLink );
+    distVec.push_back( dist ); 
+  } // Close loop over test vector
+
+  /// Loop over reference vector
+  /// for remaining/unmatched reference only
+  for( typename Rcoll_t::const_value_type thisRef : Rvec ) {
+    EL_t< Tcoll_t > testLink;
+    EL_t< Rcoll_t > refLink;
+    float dist( 999. );
+
+    /// Skip already-recorded matched references
+    if( std::find( matchedRefVec.begin(), matchedRefVec.end(), thisRef ) != 
+                      matchedRefVec.end() ) continue;
+
+    if( matches_c->isRefInMaps( *thisRef ) ) {
+      ATH_MSG_WARNING( "Remaining reference is matched and it should not be." );
+    }
+
+    refLink.toContainedElement( *Rcoll, thisRef );
+
+    /// Fill remaining unmatched reference
+    testVec.push_back( testLink );
+    refVec.push_back( refLink );
+    distVec.push_back( dist ); 
+  } // Close loop over reference vector
+
+  return std::make_tuple( testVec, refVec, distVec );
+}
+
+
+///---------------------------
+///----- printMatchInfo ------
+///---------------------------
+template< typename Tcoll_t, typename Rcoll_t >
+std::string IDTPM::TrackAnalysisInfoWriteTool::printMatchInfo(
+    const VecEL_t< Tcoll_t >& testVec,
+    const VecEL_t< Rcoll_t >& refVec,
+    const VecF_t& distVec ) const
+{
+  std::stringstream ss;
+
+  if( testVec.size() != refVec.size() or testVec.size() != distVec.size() ) {
+    ATH_MSG_ERROR( "Vector size mismatch" );
+    return "";
+  }
+
+  for( size_t iv=0; iv<distVec.size(); iv++ ) {
+    /// return the (track or truth) particle pT
+    /// if their ElementLink is valid, i.e. if the particle exists
+    std::string testPt = testVec.at(iv).isValid() ? std::to_string( pT( **testVec.at(iv) ) ) : "N/A";
+    std::string refPt = refVec.at(iv).isValid() ? std::to_string( pT( **refVec.at(iv) ) ) : "N/A";
+    std::string dist = std::to_string( distVec.at(iv) );
+    ss << "\t\t\t\t" << testPt << " --> " << refPt << " ( " << dist << " )\n";
+    if( iv > 20 ) { ss << "\t\t\t\tet al....\n"; break; }
+  }
+  return ss.str();
+}
