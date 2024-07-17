@@ -80,7 +80,6 @@ void dSFMTEngine::init_dsfmt()
 {
   int err=posix_memalign((void**)&m_dsfmt,16,sizeof(dsfmt_t));
   if(err!=0) {
-    m_dsfmt=0;
     std::stringstream errstring;
     errstring << "dSFMTEngine::init_dsfmt() : could not allocate memory for dsfmt data structure, error=" << err;
     throw std::runtime_error(errstring.str());
