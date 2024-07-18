@@ -100,7 +100,7 @@ TrkToLeptonPVTool::TrkToLeptonPVTool(const std::string& type,
      xAOD::Vertex BEAM; 
      BEAM.makePrivateStore();
      BEAM.setX(0.); BEAM.setY(0.); BEAM.setZ(0.);
-     std::vector<float> defaultCovar={0.015*0.015,0.,0.015*0.015,0.,0.,1.e6};
+     std::vector<float> defaultCovar {0.015f*0.015f,0.f,0.015f*0.015f,0.f,0.f,1.e6};
      BEAM.setCovariance(defaultCovar);
      float beamtiltX=0.;
      float beamtiltY=0.;
