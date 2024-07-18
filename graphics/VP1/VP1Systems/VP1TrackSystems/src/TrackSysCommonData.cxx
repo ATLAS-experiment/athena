@@ -30,6 +30,7 @@
 
 #include "VP1Base/VisibleObjectToMaterialHelper.h"
 #include "VP1Base/VP1Msg.h"
+#include "VP1Utils/VP1SGAccessHelper.h"
 
 #include <Inventor/C/errors/debugerror.h>
 #include <Inventor/nodes/SoVertexProperty.h>
@@ -79,6 +80,12 @@ TrackSysCommonData::TrackSysCommonData(VP1TrackSystem * sys,TrackSystemControlle
   m_visTrkSegmentsToMaterialHelper = new VisibleObjectToMaterialHelper<Trk::Segment>(nullptr,sys);
   QObject::connect(m_visTrkTracksToMaterialHelper,SIGNAL(visibleObjectsChanged()),sys,SLOT(visibleObjectsChanged()));
   QObject::connect(m_visTrkSegmentsToMaterialHelper,SIGNAL(visibleObjectsChanged()),sys,SLOT(visibleObjectsChanged()));
+
+  // Get geometry context
+  if (!VP1SGAccessHelper(m_3dsystem).retrieve(m_geometryContext , "ActsAlignment")) {
+    message("Error: Could not retrieve ACTS alignment=");
+  }
+
 }
 
 //____________________________________________________________________
@@ -201,3 +208,17 @@ const TrackHandleBase* TrackSysCommonData::getHandle(const Trk::Track* trk)
   }
   return nullptr;  
 }
+
+const ActsGeometryContext& TrackSysCommonData::geometryContext() const {
+  return *m_geometryContext;
+}
+
+
+ServiceHandle<Muon::IMuonIdHelperSvc>& TrackSysCommonData::muonIdHelperSvc() {
+  if (m_idHelperSvc.retrieve().isFailure()) {
+      message("IMuonIdHelperSvc ERROR: Can not retrieve");
+  }
+  return m_idHelperSvc;
+  }
+
+

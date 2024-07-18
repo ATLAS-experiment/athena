@@ -118,13 +118,6 @@ bool TrackCollHandle_TrkTrack::Imp::isFatrasTruthTrack(const QString& key)
 }
 
 //____________________________________________________________________
-void TrackCollHandle_TrkTrack::setupSettingsFromControllerSpecific(TrackSystemController*)
-{
-  messageVerbose("setupSettingsFromControllerSpecific start");
-  messageVerbose("setupSettingsFromControllerSpecific end");
-}
-
-//____________________________________________________________________
 bool TrackCollHandle_TrkTrack::load()
 {
   //Get collection:

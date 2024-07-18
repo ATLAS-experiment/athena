@@ -72,7 +72,7 @@ bool VP1SGContentsHelper::contains( const CLID& id, const QString& key ) const
 //____________________________________________________________________
 QStringList VP1SGContentsHelper::getKeys(const CLID& id) const
 {
-  messageVerbose("getKeys(..) called");
+  messageVerbose("getKeys(..) called for CLID = "+QString::number(id));
   if (!m_sg) {
     message("ERROR: Does not have StoreGate pointer - returning empty key list");
     return QStringList();

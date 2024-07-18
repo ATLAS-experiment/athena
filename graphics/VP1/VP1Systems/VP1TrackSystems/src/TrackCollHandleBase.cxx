@@ -370,7 +370,6 @@ bool TrackCollHandleBase::cut(TrackHandleBase* handle)
     return handle->containsDetElement(m_requiredDetectorElement);
   
   if (cutOnlyVertexAssocTracks()){
-    // std::cout<<"cutOnlyVertexAssocTracks: "<<handle<<",\t: "<<common()->system()->materialFromVertex(handle)<<std::endl;
     return common()->system()->materialFromVertex(handle)!=nullptr; // return false if no vertex material associated to this track
   }  
   
@@ -1134,8 +1133,6 @@ void TrackCollHandleBase::fillObjectBrowser()
     } else {
       trkHandle->updateObjectBrowser();
     }
-
-    // messageVerbose("TrackCollHandleBase::fillObjectBrowser for track completed in "+QString::number(t.elapsed()));
 
     if (trkHandle->visible() ) numVisible++;
     i++;

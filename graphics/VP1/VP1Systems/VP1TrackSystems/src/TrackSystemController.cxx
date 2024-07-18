@@ -24,9 +24,11 @@
 // #include "VP1TrackSystems/TrackObjectBrowserController.h"
 #include "VP1TrackSystems/AscObjSelectionManager.h"
 #include "VP1TrackSystems/AscObj_TSOS.h"
+#include "VP1TrackSystems/AscObj_TrackState.h"
 #include "VP1TrackSystems/VP1TrackSystem.h"
 #include "VP1TrackSystems/TrackSysCommonData.h"
 #include "VP1TrackSystems/TrackHandle_TrkTrack.h"
+#include "VP1TrackSystems/TrackHandle_TrackContainer.h"
 
 #include "ui_vp1trackcontrollerform.h"
 #include "ui_settings_ascobjs_form.h"
@@ -2060,7 +2062,7 @@ void TrackSystemController::setCommonData(TrackSysCommonData * common){
 
 void TrackSystemController::objectBrowserClicked(QTreeWidgetItem * item, int){
   messageVerbose("objectBrowserClicked for "+item->text(0));
-  
+
   VP1TrackSystem* sys = dynamic_cast<VP1TrackSystem*>(systemBase());
   if (!sys){
     messageVerbose("TrackSystemController::objectBrowserClicked: Couldn't get VP1TrackSystem pointer");
@@ -2072,37 +2074,33 @@ void TrackSystemController::objectBrowserClicked(QTreeWidgetItem * item, int){
   SoNode* node = common()->node(item);
   if (node) {
     // okay, have track
+
     SoCooperativeSelection * sel = sys->selTracks();
     sel->select(node);
+    messageVerbose("Got track node. numselected="+QString::number(sel->getNumSelected()));
+
   } else {
+        messageVerbose("Checking to see if it is a TSOS/TrackState.");
+
     // maybe it's a TSOS? Check first that it has a parent 
     if (item->parent()) node = common()->node(item->parent());
-    if ( !node && item->parent()->parent() ) node = common()->node(item->parent()->parent()); // Try one more up (ugly, but shouldn't ever be deeper than this)
+
+    if ( !node && item->parent() && item->parent()->parent() ) node = common()->node(item->parent()->parent()); // Try one more up (ugly, but shouldn't ever be deeper than this)
+
     if (node) {
       // yes, so now get index within track, as we can hopefully use this to find the AscObj_TSOS
       unsigned int index = item->parent()->indexOfChild(item);// should correspond to the TSOS number
       messageVerbose("TrackSystemController::objectBrowserClicked: item has index of "+QString::number(index));
-      TrackHandle_TrkTrack* trkHandle = dynamic_cast<TrackHandle_TrkTrack*>(common()->trackHandle(node));
-      if (trkHandle && trkHandle->trkTrackPointer()) {
-        if (index<trkHandle->trkTrackPointer()->trackStateOnSurfaces()->size() ){
-          // in range
-          const Trk::TrackStateOnSurface* tsos = (*trkHandle->trkTrackPointer()->trackStateOnSurfaces())[index];
-          // now find matching AscObj_TSOS
-          QList<AssociatedObjectHandleBase*> list = trkHandle->getVisibleMeasurements();
-          for (int i = 0; i < list.size(); ++i) {
-            messageVerbose("TrackSystemController::objectBrowserClicked: checking ASC "+QString::number(i));
 
-            AscObj_TSOS* asc = dynamic_cast<AscObj_TSOS*>(list.at(i));
-            if (asc && asc->trackStateOnSurface()==tsos) {
-               messageVerbose("TrackSystemController::objectBrowserClicked: this ASC matches "+QString::number(i));
-              //asc->zoomView();
-               common()->ascObjSelectionManager()->pretendUserClicked(asc);          
-            } else {
-              messageVerbose("TrackSystemController::objectBrowserClicked: no matching Asc found");
-            }
-          } // for loop
-        } else {
-          messageVerbose("TrackSystemController::objectBrowserClicked: index of  "+QString::number(index)+" is greater than number of TSOSes:"+QString::number(trkHandle->trkTrackPointer()->trackStateOnSurfaces()->size()));
+      TrackHandle_TrkTrack* trkHandle = dynamic_cast<TrackHandle_TrkTrack*>(common()->trackHandle(node));
+      if (trkHandle){
+        trkHandle->zoomToTSOS(index);
+      } else {
+        TrackHandle_TrackContainer* trkProxyHandle = dynamic_cast<TrackHandle_TrackContainer*>(common()->trackHandle(node));
+        if (trkProxyHandle){
+          trkProxyHandle->zoomToTSOS(index); 
+          // FIXME There is a bug here currently - if the user clicks on an open TrackState e.g parameters. 
+          // This might have an index of 0, whereas the actual Trackstate is at index 23.
         }
       }
     } else {

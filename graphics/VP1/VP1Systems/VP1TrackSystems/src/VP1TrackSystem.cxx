@@ -11,22 +11,6 @@
 //                                                            //
 ////////////////////////////////////////////////////////////////
 
-//TODO: Features in old system that are missing now (+ stuff really needed):
-//
-//  --> short term:
-//        colour by clicked vertex
-//        check inner detector projections
-//
-//  --> medium term:
-//        refit tracks
-//
-//  --> longer term:
-//        object browser
-//        sdo's
-//
-//  soonish: detail levels depending on meas. type, and colour-by
-//  depending on collection.
-
 #include "VP1TrackSystems/VP1TrackSystem.h"
 #include "VP1TrackSystems/TrackSystemController.h"
 #include "VP1TrackSystems/TrackHandleBase.h"
@@ -45,6 +29,7 @@
 #include "VP1TrackSystems/TrackCollHandle_xAODTrackParticle.h"
 #include "VP1TrackSystems/TrackHandle_TrkTrack.h"
 #include "VP1TrackSystems/TrackCollHandle_RefittedTracks.h"
+#include "VP1TrackSystems/TrackCollHandle_TrackContainer.h"
 
 #include "VP1Base/VP1CameraHelper.h"
 #include "VP1Base/VisibleObjectToMaterialHelper.h"
@@ -120,6 +105,7 @@ public:
   QList<TrackCollHandleBase*> createSpecificCollections() {
     QList<TrackCollHandleBase*> l;
     for (QString name : T::availableCollections(theclass)) {
+      std::cout<<name.toStdString()<<std::endl;
       T * col = new T(common,name);
       col->init();
       l << col;
@@ -138,10 +124,8 @@ public:
     // theclass->messageVerbose("Creating coll handle for TrackCollHandle_TrackParticle");
     l << createSpecificCollections<TrackCollHandle_TrackParticle>();
     l << createSpecificCollections<TrackCollHandle_xAODTrackParticle>();
-    // theclass->messageVerbose("Creating coll handle for Muons");
-    // l << createSpecificCollections<TrackCollHandle_Muon>();
-    // l << createSpecificCollections<TrackCollHandle_Egamma>();
-
+    theclass->message("Creating coll handle for ACTS TrackContainers");
+    l << createSpecificCollections<TrackCollHandle_TrackContainer>();
     return l;
   }
   std::vector<std::map<GeoPVConstLink, float> > chamberT0s;

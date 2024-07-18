@@ -22,14 +22,16 @@
 #define ASSOCIATEDOBJECTHANDLEBASE_H
 
 
+
+#include <QStringList>
+#include "VP1TrackSystems/TrackCommonFlags.h"
+
 class TrackHandleBase;
 class SoTransform;
 class SoNode;
 class SoSeparator;
 class TrackSysCommonData;
 class AssocObjAttachmentHandle;
-#include <QStringList>
-
 class AssociatedObjectHandleBase {
 public:
 
@@ -41,8 +43,15 @@ public:
                                                //before moving to next event.
   virtual QStringList clicked() = 0;
   //  virtual SoNode * getNodeForPart( int part ) const = 0;
+  virtual TrackCommonFlags::TSOSPartsFlags parts() const { return TrackCommonFlags::TSOSPartsFlags(); }
   virtual unsigned nParts() const { return 1; }
-
+  bool hasParameters() const { return parts() & TrackCommonFlags::TSOS_TrackPars; }
+  bool hasParError() const { return parts()  & TrackCommonFlags::TSOS_AnyParsErrors; }
+  bool hasError() const { return parts()  & TrackCommonFlags::TSOS_AnyErrors; }
+  bool hasMaterialEffect() const { return parts()  & TrackCommonFlags::TSOS_AnyMaterialEffects; }
+  bool hasSurface() const { return parts()  & TrackCommonFlags::TSOS_AnySurface; }
+  bool hasMeasurement() const { return parts()  & TrackCommonFlags::TSOS_AnyMeasurement; }
+  
   TrackSysCommonData * common() const;
 
   enum PICKSTYLE { UNPICKABLE, ALL, COMPONENTS };

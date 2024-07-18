@@ -44,7 +44,7 @@ public:
   virtual unsigned getNMMHits() const { ensureInitSubSysHitInfo(); return m_nhits_mm; }
   virtual unsigned getNSTGCHits() const { ensureInitSubSysHitInfo(); return m_nhits_stgc; }
   void visibleStateChanged();
-  const std::vector< Amg::Vector3D > * provide_pathInfoPoints() const;
+  const std::vector< Amg::Vector3D > * provide_pathInfoPoints();
 
   void ensureTouchedMuonChambersInitialised() const;
   const Trk::Segment* trkSegmentPointer() const { return m_segment; }

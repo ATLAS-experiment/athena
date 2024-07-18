@@ -39,7 +39,6 @@ public:
 
   //NB: All overridden methods should be virtual since
   //TrackCollHandle_FatrasTruthTracks inherits from this.
-  virtual void setupSettingsFromControllerSpecific(TrackSystemController*);
   virtual bool allowColourByVertex() const { return true;}
   
   void visibleStateUpdated(TrackHandle_TrkTrack*);//Must be called whenever visibility/material of handle changes.

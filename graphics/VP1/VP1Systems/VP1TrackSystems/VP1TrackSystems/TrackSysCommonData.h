@@ -21,6 +21,9 @@
 #include "VP1Base/VP1HelperClassBase.h"
 #include "VP1Base/VisibleObjectToMaterialHelper.h"
 #include "VP1Utils/HitsSoNodeManager.h"
+#include "ActsGeometryInterfaces/ActsGeometryContext.h"
+#include "GaudiKernel/ServiceHandle.h"
+#include "MuonIdHelpers/IMuonIdHelperSvc.h"
 
 class VP1TrackSystem;
 class IVP13DSystem;
@@ -88,6 +91,9 @@ public:
   SoSeparator* m_textSep; // FIXME! FIXME! Make private, but then need set method for VP1TrackSystem.cxx:247
 
   const TrackHandleBase* getHandle(const Trk::Track* trk);
+
+  const ActsGeometryContext& geometryContext() const;
+  ServiceHandle<Muon::IMuonIdHelperSvc>& muonIdHelperSvc();
   
 private:
   class Imp;
@@ -109,6 +115,8 @@ private:
   SoPointSet * m_singlePoint;
   TrackHandleBase* m_lastSelectedTrack;
   HitsSoNodeManager m_nodeManager;
+  const ActsGeometryContext* m_geometryContext;
+  ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{"MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 };
 
 inline VP1TrackSystem* TrackSysCommonData::system() const { return m_3dsystem; }
