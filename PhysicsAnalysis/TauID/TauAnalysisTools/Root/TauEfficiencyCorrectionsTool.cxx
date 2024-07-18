@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // EDM include(s):
@@ -23,7 +23,6 @@ TauEfficiencyCorrectionsTool::TauEfficiencyCorrectionsTool( const std::string& s
   , m_bIsConfigured(false)
   , m_iRunNumber(0)
   , m_iMu(0)
-  , m_tTauSelectionToolHandle("")
   , m_tPRWTool("")
 {
   declareProperty( "EfficiencyCorrectionTypes",    m_vEfficiencyCorrectionTypes    = {} );
@@ -50,7 +49,6 @@ TauEfficiencyCorrectionsTool::TauEfficiencyCorrectionsTool( const std::string& s
   declareProperty( "isAFII",	                   m_sAFII	                   = false );
   declareProperty( "useFastSim",                   m_useFastSim                    = false );
   declareProperty( "SkipTruthMatchCheck",          m_bSkipTruthMatchCheck          = false );
-  declareProperty( "TauSelectionTool",             m_tTauSelectionToolHandle );
   declareProperty( "PileupReweightingTool",        m_tPRWTool );
 }
 
@@ -65,60 +63,6 @@ TauEfficiencyCorrectionsTool::~TauEfficiencyCorrectionsTool()
 }
 
 //______________________________________________________________________________
-StatusCode TauEfficiencyCorrectionsTool::initializeWithTauSelectionTool(TauSelectionTool* tauSelectionTool)
-{
-  ATH_MSG_DEBUG( "Initializing TauEfficiencyCorrectionsTool using TauSelectionTool" );
-
-  // add reco systematics in any case
-  m_vEfficiencyCorrectionTypes.push_back(SFRecoHadTau);
-  ATH_MSG_VERBOSE( "added SFRecoHadTau" );
-  
-  // use jet ID scale factors if TauSelectionTool applies jet ID cut
-  if (tauSelectionTool->m_iSelectionCuts & CutJetIDWP) {
-    m_iJetIDLevel = tauSelectionTool->m_iJetIDWP;
-
-    if (m_iJetIDLevel == JETIDRNNLOOSE || m_iJetIDLevel == JETIDRNNMEDIUM || m_iJetIDLevel == JETIDRNNTIGHT) {
-      m_vEfficiencyCorrectionTypes.push_back(SFJetIDHadTau);
-      ATH_MSG_VERBOSE( "added SFJetIDHadTau" );
-    }
-    else {
-      ATH_MSG_WARNING( "No JetID scale factor for working point " << m_iJetIDLevel );
-    }
-  }
-  
-  // use electron veto scale factors if TauSelectionTool applies electron veto
-  if (tauSelectionTool->m_iSelectionCuts & CutEleIDWP) {
-    m_iEleIDLevel = tauSelectionTool->m_iEleIDWP;
-
-    // force m_iEleIDLevel to ELEIDNONE until RNN eVeto SFs are available  
-    if (m_iEleIDLevel == ELEIDRNNTIGHT) {
-      ATH_MSG_WARNING("Scale factors for RNN eVeto (TIGHT) are not available yet");
-      m_iEleIDLevel = ELEIDNONE;
-    }
-
-    if (m_iEleIDLevel == ELEIDRNNLOOSE || m_iEleIDLevel == ELEIDRNNMEDIUM || m_iEleIDLevel == ELEIDRNNTIGHT) {	
-      m_vEfficiencyCorrectionTypes.push_back(SFEleIDHadTau);
-      ATH_MSG_VERBOSE( "added SFEleIDHadTau" );
-      m_vEfficiencyCorrectionTypes.push_back(SFEleIDElectron);
-      ATH_MSG_VERBOSE( "added SFEleIDElectron" );
-    }
-    // commented out until RNN eVeto SFs are available, to avoid double warnings
-    /*
-    else {
-      ATH_MSG_WARNING( "No EleID scale factor for working point " << m_iEleIDLevel );
-    }
-    */
-  }  
-  
-  if (m_bUseTauSubstructure) {
-    ATH_MSG_WARNING("Scale factors for decay mode ID are not available yet");
-    //m_vEfficiencyCorrectionTypes.push_back(SFDecayModeHadTau);
-  }
-
-  return StatusCode::SUCCESS;
-}
-
-//______________________________________________________________________________
 StatusCode TauEfficiencyCorrectionsTool::initialize()
 {
   ATH_MSG_INFO( "Initializing TauEfficiencyCorrectionsTool" );
@@ -128,25 +72,6 @@ StatusCode TauEfficiencyCorrectionsTool::initialize()
 
   if (!m_tPRWTool.empty())
     ATH_CHECK(m_tPRWTool.retrieve());
-
-  // determine set of scale factors using TauSelectionTool
-  if (!m_tTauSelectionToolHandle.empty())
-  {
-    if (!m_vEfficiencyCorrectionTypes.empty()) {
-      ATH_MSG_ERROR("Either use a TauSelectionTool handle or EfficiencyCorrectionTypes, not both.");
-      return StatusCode::FAILURE;
-    }
-    ATH_CHECK(m_tTauSelectionToolHandle.retrieve());
-    TauAnalysisTools::TauSelectionTool* tauSelectionTool = dynamic_cast<TauAnalysisTools::TauSelectionTool*>(&*m_tTauSelectionToolHandle);
-    if(tauSelectionTool == nullptr) {
-      ATH_MSG_ERROR("Could not retrieve TauSelectionTool");
-      return StatusCode::FAILURE;
-    }
-    if (initializeWithTauSelectionTool(tauSelectionTool).isFailure()) {
-      ATH_MSG_ERROR("Failed to determine scale factors using TauSelectionTool");
-      return StatusCode::FAILURE;
-    }
-  }
 
   // check efficiency correction type
   if (m_vEfficiencyCorrectionTypes.empty())

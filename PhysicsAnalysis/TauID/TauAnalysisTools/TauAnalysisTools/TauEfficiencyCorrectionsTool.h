@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAUANALYSISTOOLS_TAUEFFICIENCYCORRECTIONSTOOL_H
@@ -15,10 +15,10 @@
 
 // Framework include(s):
 #include "AsgTools/AsgMetadataTool.h"
+#include "AsgTools/AnaToolHandle.h"
 
 // Local include(s):
 #include "TauAnalysisTools/ITauEfficiencyCorrectionsTool.h"
-#include "TauAnalysisTools/TauSelectionTool.h"
 #include "TauAnalysisTools/CommonEfficiencyTool.h"
 #include "TauAnalysisTools/TauEfficiencyTriggerTool.h"
 
@@ -85,8 +85,6 @@ private:
 
   std::string GetTriggerSFMeasurementString() const;
 
-  StatusCode initializeWithTauSelectionTool(TauSelectionTool* tauSelectionTool);
-
   StatusCode initializeTools_2022_prerec();
   
   StatusCode readRandomRunNumber();
@@ -127,7 +125,6 @@ private:
   unsigned int m_iRunNumber;
   unsigned int m_iMu;
 
-  ToolHandle<TauAnalysisTools::ITauSelectionTool> m_tTauSelectionToolHandle;
   ToolHandle<CP::IPileupReweightingTool> m_tPRWTool;
 
 }; // class TauEfficiencyCorrectionsTool
