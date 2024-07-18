@@ -81,8 +81,12 @@ int main ATLAS_NOT_THREAD_SAFE ( int argc, char* argv[] )
   // ===========================================================================
   // TauEfficiencyCorrectionsTool
   // ===========================================================================
+  std::vector<int> efficiency_correction_types;
+  efficiency_correction_types.push_back((int)TauAnalysisTools::EfficiencyCorrectionType::SFJetIDHadTau);
+
   ToolHandle<TauAnalysisTools::ITauEfficiencyCorrectionsTool> TauEffCorrTool( "TauAnalysisTools::TauEfficiencyCorrectionsTool/TauEfficiencyCorrectionsTool" );
-  ANA_CHECK(AthAnalysisHelper::setProperty(TauEffCorrTool, "TauSelectionTool", TauSelTool));
+  ANA_CHECK(AthAnalysisHelper::setProperty( TauEffCorrTool, "JetIDLevel",  (int)TauAnalysisTools::JetID::JETIDRNNLOOSE));
+  ANA_CHECK(AthAnalysisHelper::setProperty( TauEffCorrTool, "EfficiencyCorrectionTypes", efficiency_correction_types));
   ANA_CHECK(TauEffCorrTool.retrieve());
 
   // ===========================================================================
@@ -189,5 +193,4 @@ int main ATLAS_NOT_THREAD_SAFE ( int argc, char* argv[] )
   ANA_CHECK(app->finalize()); //trigger finalization of all services and tools created by the Gaudi Application
   return 0;
 }
-
 #endif //> !TAUANALYSISTOOLS_UT_TAUANALYSISTOOLS_TEST_H

@@ -119,24 +119,6 @@ class TauWorkingPointConfig (ConfigBlock) :
             "Experimental! only useful to test a new WP for which scale "
             "factors are not available. The default is False.")
 
-    def createCommonSelectionTool (self, config, tauSelectionAlg, configPath, postfix) :
-
-        # This should eventually be fixed in the TauEfficiencyCorrectionsTool directly...
-        # ---
-        # Create two instances of TauSelectionTool, one public and one private.
-        # Both should share the same configuration options.
-        # We attach the private tool to the CP::AsgSelectionAlg for tau selection,
-        # and the public one is returned, to be retrieved later by TauEfficiencyCorrectionsTool.
-
-        config.addPrivateTool( 'selectionTool', 'TauAnalysisTools::TauSelectionTool' )
-        tauSelectionAlg.selectionTool.ConfigPath = configPath
-
-        publicTool = config.createPublicTool( 'TauAnalysisTools::TauSelectionTool',
-                                              'TauSelectionTool' + postfix)
-        publicTool.ConfigPath = configPath
-
-        return publicTool
-
     def makeAlgs (self, config) :
 
         selectionPostfix = self.selectionName
@@ -166,7 +148,8 @@ class TauWorkingPointConfig (ConfigBlock) :
 
         # Set up the algorithm selecting taus:
         alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'TauSelectionAlg' + postfix )
-        selectionTool = self.createCommonSelectionTool(config, alg, inputfile, postfix)
+        config.addPrivateTool( 'selectionTool', 'TauAnalysisTools::TauSelectionTool' )
+        alg.selectionTool.ConfigPath = inputfile
         alg.selectionDecoration = 'selected_tau' + selectionPostfix + ',as_bits'
         alg.particles = config.readName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, self.selectionName)
@@ -174,20 +157,86 @@ class TauWorkingPointConfig (ConfigBlock) :
 
         # Set up the algorithm calculating the efficiency scale factors for the
         # taus:
-        if config.dataType() is not DataType.Data and not self.noEffSF:
+        if config.dataType() is not DataType.Data and not self.noEffSF and not self.useGNTau:
+            # need multiple instances of the TauEfficiencyCorrectionTool
+            # 1) Reco 2) TauID, 3) eVeto for fake tau 4) eVeto for true tau
+            # 3) and 4) are optional if eVeto is used in TauSelectionTool 
+
+            # TauEfficiencyCorrectionTool for Reco, this should be always enabled
             alg = config.createAlgorithm( 'CP::TauEfficiencyCorrectionsAlg',
-                                   'TauEfficiencyCorrectionsAlg' + postfix )
+                                   'TauEfficiencyCorrectionsAlgReco' + postfix )
             config.addPrivateTool( 'efficiencyCorrectionsTool',
                             'TauAnalysisTools::TauEfficiencyCorrectionsTool' )
-            alg.efficiencyCorrectionsTool.TauSelectionTool = '%s/%s' % \
-                ( selectionTool.getType(), selectionTool.getName() )
+            alg.efficiencyCorrectionsTool.EfficiencyCorrectionTypes = [0]
             alg.efficiencyCorrectionsTool.useFastSim = config.dataType() is DataType.FastSim
-            alg.scaleFactorDecoration = 'tau_effSF' + selectionPostfix + '_%SYS%'
+            alg.scaleFactorDecoration = 'tau_Reco_effSF' + selectionPostfix + '_%SYS%'
             alg.outOfValidity = 2 #silent
-            alg.outOfValidityDeco = 'bad_eff' + selectionPostfix
+            alg.outOfValidityDeco = 'bad_Reco_eff' + selectionPostfix
             alg.taus = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, self.selectionName)
-            config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'effSF' + postfix)
+            config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'Reco_effSF' + postfix)
+
+            # TauEfficiencyCorrectionTool for Identification, use only in case TauID is requested in TauSelectionTool
+            if self.quality not in ('NoID','VeryLoose','Baseline'):
+
+                alg = config.createAlgorithm( 'CP::TauEfficiencyCorrectionsAlg',
+                                   'TauEfficiencyCorrectionsAlgID' + postfix )
+                config.addPrivateTool( 'efficiencyCorrectionsTool',
+                                'TauAnalysisTools::TauEfficiencyCorrectionsTool' ) 
+                alg.efficiencyCorrectionsTool.EfficiencyCorrectionTypes = [4]
+                if self.quality=="Loose":
+                    JetIDLevel = 7
+                elif self.quality=="Medium":
+                    JetIDLevel = 8
+                elif self.quality=="Tight":
+                    JetIDLevel = 9
+                else:
+                    raise ValueError ("invalid tauID: \"" + self.quality + "\". Allowed values are loose, medium, tight") 
+
+                alg.efficiencyCorrectionsTool.JetIDLevel = JetIDLevel
+                alg.efficiencyCorrectionsTool.useFastSim = config.dataType() is DataType.FastSim
+                alg.scaleFactorDecoration = 'tau_ID_effSF' + selectionPostfix + '_%SYS%'
+                alg.outOfValidity = 2 #silent
+                alg.outOfValidityDeco = 'bad_ID_eff' + selectionPostfix
+                alg.taus = config.readName (self.containerName)
+                alg.preselection = config.getPreselection (self.containerName, self.selectionName)
+                config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'ID_effSF' + postfix)
+
+            # TauEfficiencyCorrectionTool for eVeto both on true tau and fake tau, use only in case eVeto is requested in TauSelectionTool
+            if self.use_eVeto:
+
+                # correction for fake tau
+                alg = config.createAlgorithm( 'CP::TauEfficiencyCorrectionsAlg',
+                                   'TauEfficiencyCorrectionsAlgEvetoFakeTau' + postfix )
+                config.addPrivateTool( 'efficiencyCorrectionsTool',
+                                'TauAnalysisTools::TauEfficiencyCorrectionsTool' )
+
+                alg.efficiencyCorrectionsTool.EfficiencyCorrectionTypes = [10]
+                # since all TauSelectionTool config files have loose eRNN, code only this option for now
+                alg.efficiencyCorrectionsTool.EleIDLevel = 2
+                alg.efficiencyCorrectionsTool.useFastSim = config.dataType() is DataType.FastSim
+                alg.scaleFactorDecoration = 'tau_EvetoFakeTau_effSF' + selectionPostfix + '_%SYS%'
+                alg.outOfValidity = 2 #silent
+                alg.outOfValidityDeco = 'bad_EvetoFakeTau_eff' + selectionPostfix
+                alg.taus = config.readName (self.containerName)
+                alg.preselection = config.getPreselection (self.containerName, self.selectionName)
+                config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'EvetoFakeTau_effSF' + postfix)
+
+                # correction for true tau
+                alg = config.createAlgorithm( 'CP::TauEfficiencyCorrectionsAlg',
+                                   'TauEfficiencyCorrectionsAlgEvetoTrueTau' + postfix )
+                config.addPrivateTool( 'efficiencyCorrectionsTool',
+                                'TauAnalysisTools::TauEfficiencyCorrectionsTool' )
+
+                alg.efficiencyCorrectionsTool.EfficiencyCorrectionTypes = [8]
+                alg.efficiencyCorrectionsTool.useFastSim = config.dataType() is DataType.FastSim
+                alg.scaleFactorDecoration = 'tau_EvetoTrueTau_effSF' + selectionPostfix + '_%SYS%'
+                alg.outOfValidity = 2 #silent
+                alg.outOfValidityDeco = 'bad_EvetoTrueTau_eff' + selectionPostfix
+                alg.taus = config.readName (self.containerName)
+                alg.preselection = config.getPreselection (self.containerName, self.selectionName)
+                config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'EvetoTrueTau_effSF' + postfix)
+                
 
 class EXPERIMENTAL_TauCombineMuonRemovalConfig (ConfigBlock) :
     def __init__ (self, inputTaus = 'TauJets', inputTausMuRM = 'TauJets_MuonRM', outputTaus = 'TauJets_MuonRmCombined', postfix = '') :
