@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // System include(s):
@@ -36,12 +36,14 @@ bool successful(bool arg) { return arg; }
 bool successful(int arg);
 bool successful(const StatusCode& arg) { return arg == StatusCode::SUCCESS; }
 
-#define FBT_CHECK(x)							\
-  while(true) {								\
-    if(successful(x)) break;						\
-    Error("fbtTestBasics", "%s", ("failure encounted on l." + std::to_string(__LINE__)).c_str()); \
-    return false;							\
-  }
+#define FBT_CHECK1(x, FAIL)                                             \
+  do {                                                                  \
+    if(!successful(x)) {                                                \
+      Error("fbtTestBasics", "failure encounted on l.%d", __LINE__);    \
+      return FAIL;							\
+    }                                                                   \
+  } while(false)
+#define FBT_CHECK(x) FBT_CHECK1(x, false)
 
 struct Result
 {
@@ -95,14 +97,14 @@ int main ATLAS_NOT_THREAD_SAFE(int argc, char* argv[])
 #else
   IAppMgrUI* app = POOL::Init();
   POOL::TEvent event(POOL::TEvent::kClassAccess);
-  if(event.evtStore().retrieve().isFailure()) return 1;
+  FBT_CHECK1( event.evtStore().retrieve(), 1 );
   store = event.evtStore().get();
 #endif
     
   int returnCode = allTests() ? 0 : 1;
     
 #ifndef XAOD_STANDALONE
-  if(app->finalize().isFailure()) return 1;
+  FBT_CHECK1( app->finalize(), 1 );
 #endif
   return returnCode;
 }
