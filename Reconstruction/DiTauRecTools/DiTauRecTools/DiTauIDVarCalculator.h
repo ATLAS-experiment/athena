@@ -59,12 +59,8 @@ public:
 
   // calculate ID variables
   virtual StatusCode execute(const xAOD::DiTauJet& xDiTau) override;
-
-  // get decay mode
-  virtual std::string getDecayMode() override;
   
 private:
-  virtual StatusCode calculateHadHadIDVariables(const xAOD::DiTauJet& xDiTau);
 
   static float n_subjets(const xAOD::DiTauJet& xDiTau) ;
   float ditau_pt(const xAOD::DiTauJet& xDiTau) const;
@@ -95,12 +91,6 @@ private:
 
   // steering variables
   // float m_dMaxDeltaR;
-  std::string m_sDiTauContainerName;
-  std::string m_DiTauContainerNameAux;
-  std::string m_sTruthTauContainerName;
-  std::string m_sDecayChannel;
-  enum DecayChannel{ HadHad, HadEl, HadMu, Default };
-  DecayChannel m_eDecayChannel;
   float m_dDefault;
   
   static StatusCode decorNtracks (const xAOD::DiTauJet& xDiTau);
