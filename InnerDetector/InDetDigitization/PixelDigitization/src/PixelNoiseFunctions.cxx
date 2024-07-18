@@ -135,6 +135,7 @@ namespace PixelDigitization{
         if (noiseToT < 1.f) { continue; }  // throw away unphysical noise
         noiseToT = std::min(noiseToT, overflowToT);
         InDetDD::PixelDiodeType type = pixelReadout->getDiodeType(noisyID);
+        if (type == InDetDD::PixelDiodeType::NONE) continue;
         float chargeShape = chargeCalibData->getCharge(type, moduleHash, circuit, noiseToT);
         chargedDiodes.add(diodeNoise, SiCharge(chargeShape, 0, SiCharge::noise));
       }

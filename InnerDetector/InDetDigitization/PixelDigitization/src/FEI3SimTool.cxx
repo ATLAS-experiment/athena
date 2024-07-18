@@ -120,6 +120,7 @@ void FEI3SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
 
     unsigned int FE = m_pixelReadout->getFE(diodeID, moduleID);
     InDetDD::PixelDiodeType type = m_pixelReadout->getDiodeType(diodeID);
+    if ((FE == 0xFFFFFFFF) or (type == InDetDD::PixelDiodeType::NONE)) continue;//invalid frontend
 
     // charge to ToT conversion
     double tot = calibData->getToT(type, moduleHash, FE, charge);

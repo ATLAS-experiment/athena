@@ -124,6 +124,7 @@ void FEI4SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
 
     unsigned int FE = m_pixelReadout->getFE(diodeID, moduleID);
     InDetDD::PixelDiodeType type = m_pixelReadout->getDiodeType(diodeID);
+    if ((FE == 0xFFFFFFFF) or (type == InDetDD::PixelDiodeType::NONE)) continue;//invalid frontend
 
     // Apply analog threshold, timing simulation
     const auto & thresholds = calibData->getThresholds(type, moduleHash, FE);

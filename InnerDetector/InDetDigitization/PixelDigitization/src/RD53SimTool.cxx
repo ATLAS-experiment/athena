@@ -83,14 +83,15 @@ void RD53SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
   // Add random diabled pixels
   randomDisable(chargedDiodes, moduleData, rndmEngine); // FIXME How should we handle disabling pixels in Overlay jobs?
 
-  for (SiChargedDiodeIterator i_chargedDiode = chargedDiodes.begin(); i_chargedDiode != chargedDiodes.end();
-       ++i_chargedDiode) {
-    Identifier diodeID = chargedDiodes.getId((*i_chargedDiode).first);
-    double charge = (*i_chargedDiode).second.charge();
-
+  for (auto &[mapId,mapDiode]:chargedDiodes) {//cannot be const ref, mapDiode will be altered
+    Identifier diodeID = chargedDiodes.getId(mapId);
+    double charge = mapDiode.charge();
     unsigned int FE = m_pixelReadout->getFE(diodeID, moduleID);
     InDetDD::PixelDiodeType type = m_pixelReadout->getDiodeType(diodeID);
-
+    if ((FE == 0xFFFFFFFF) or (type == InDetDD::PixelDiodeType::NONE)){
+      SiHelper::disabled(mapDiode, true, true);
+      continue;//invalid frontend
+    } 
     // Apply analogue threshold, timing simulation
     const auto thresholds = calibData->getThresholds(type, moduleHash, FE);
     const int th0 = thresholds.value;
@@ -102,68 +103,61 @@ void RD53SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
 
     if (charge > threshold) {
       int bunchSim = 0;
-      if ((*i_chargedDiode).second.totalCharge().fromTrack()) {
-        bunchSim =
-          static_cast<int>(std::floor((getG4Time((*i_chargedDiode).second.totalCharge()) +
-                                  m_timeOffset) / m_bunchSpace));
-	
-	//Timewalk implementation 
-	if(m_doTimeWalk){
-	  if(charge < (threshold + m_overDrive)){
-	    const int timeWalk = 25; // Here it is assumed that the maximum value of timewalk is one bunch crossing (25ns)
-	    bunchSim =
-	      static_cast<int>(std::floor((getG4Time((*i_chargedDiode).second.totalCharge()) +
-				      m_timeOffset+ timeWalk) / m_bunchSpace));
-	  } 
-	}
+      if (mapDiode.totalCharge().fromTrack()) {
+        bunchSim = static_cast<int>(std::floor((getG4Time(mapDiode.totalCharge()) + m_timeOffset) / m_bunchSpace));
+        //Timewalk implementation 
+        if(m_doTimeWalk){
+          if(charge < (threshold + m_overDrive)){
+            const int timeWalk = 25; // Here it is assumed that the maximum value of timewalk is one bunch crossing (25ns)
+            bunchSim = static_cast<int>(std::floor((getG4Time(mapDiode.totalCharge()) + m_timeOffset + timeWalk) / m_bunchSpace));
+          } 
+        }
       } else {
         bunchSim = CLHEP::RandFlat::shootInt(rndmEngine, m_numberOfBcid);
       }
 
       if (bunchSim < 0 || bunchSim > m_numberOfBcid) {
-        SiHelper::belowThreshold((*i_chargedDiode).second, true, true);
+        SiHelper::belowThreshold(mapDiode, true, true);
       } else {
-        SiHelper::SetBunch((*i_chargedDiode).second, bunchSim);
+        SiHelper::SetBunch(mapDiode, bunchSim);
       }
     } else {
-      SiHelper::belowThreshold((*i_chargedDiode).second, true, true);
+      SiHelper::belowThreshold(mapDiode, true, true);
     }
 
     // charge to ToT conversion
     double tot = calibData->getToT(type, moduleHash, FE, charge);
     double totsig = calibData->getTotRes(moduleHash, FE, tot);
     int nToT = static_cast<int>(CLHEP::RandGaussZiggurat::shoot(rndmEngine, tot, totsig));
-
     if (nToT < 1) {
       nToT = 1;
     }
-
     // RD53 HitDiscConfig
     if (nToT >= overflowToT) {
       nToT = overflowToT;
     }
 
     if (nToT <= moduleData->getToTThreshold(barrel_ec, layerIndex)) {
-      SiHelper::belowThreshold((*i_chargedDiode).second, true, true);
+      SiHelper::belowThreshold(mapDiode, true, true);
     }
 
     // Filter events
-    if (SiHelper::isMaskOut((*i_chargedDiode).second)) {
+    if (SiHelper::isMaskOut(mapDiode)) {
       continue;
     }
-    if (SiHelper::isDisabled((*i_chargedDiode).second)) {
+    if (SiHelper::isDisabled(mapDiode)) {
       continue;
     }
 
     if (!m_pixelConditionsTool->isActive(moduleHash, diodeID, ctx)) {
-      SiHelper::disabled((*i_chargedDiode).second, true, true);
+      SiHelper::disabled(mapDiode, true, true);
       continue;
     }
 
-    int flag = (*i_chargedDiode).second.flag();
+    int flag = mapDiode.flag();
     int bunch = (flag >> 8) & 0xff;
 
-    InDetDD::SiReadoutCellId cellId = (*i_chargedDiode).second.getReadoutCell();
+    InDetDD::SiReadoutCellId cellId = mapDiode.getReadoutCell();
     const Identifier id_readout = chargedDiodes.element()->identifierFromCellId(cellId);
 
     // Front-End simulation

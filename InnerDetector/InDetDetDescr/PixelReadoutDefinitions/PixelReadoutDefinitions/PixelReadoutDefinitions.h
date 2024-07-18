@@ -1,23 +1,29 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PIXELREADOUTDEFINITIONS_H
 #define PIXELREADOUTDEFINITIONS_H
 #include <cstddef> //for size_t
+#include <cstdint> //for uint32_t
+#include <string>
+#include <stdexcept>
+#include <typeinfo>
 
 namespace InDetDD{
 
   enum class PixelModuleType{
+    NONE =-1,
     DBM,
     IBL_PLANAR,
     IBL_3D,
     PIX_BARREL,
     PIX_ENDCAP,
-    NONE
+    N_PIXELMODULETYPES
   };
 
   enum class PixelDiodeType{
+    NONE=-1,
     NORMAL,
     LONG,
     GANGED,
@@ -26,19 +32,35 @@ namespace InDetDD{
   };
 
   enum class PixelReadoutTechnology{
+    NONE =-1,
     FEI3,
     FEI4,
     RD53,
     N_TECHNOLOGIES
   };
   
+  constexpr uint32_t invalidRow = 0xFFFFFFFF;
+  constexpr uint32_t invalidColumn = 0xFFFFFFFF;
+  constexpr uint32_t invalidFrontEnd = 0xFFFFFFFF;
   ///Convert an enum class to size_t for use as an array index
   template <typename T>
   constexpr std::size_t
-  enum2uint(T n){
+  enum2uint(T n, const std::string & callingFunctionName=""){
+    if (n==T::NONE){
+      std::string m= callingFunctionName+std::string(" InDetDD::enum2uint: 'NONE' type is out of range for ")+typeid(T).name();
+      throw ( std::out_of_range(m.data()));
+    }
     return static_cast<size_t>(n);
   }
-
+  
+  std::string 
+  PixelModuleTypeName(const PixelModuleType & t);
+  
+  std::string 
+  PixelDiodeTypeName(const PixelDiodeType & t);
+  
+  std::string 
+  PixelReadoutTechnologyName(const PixelReadoutTechnology & t);
 }
 
 #endif

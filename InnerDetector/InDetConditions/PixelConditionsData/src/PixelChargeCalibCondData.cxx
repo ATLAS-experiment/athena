@@ -20,7 +20,7 @@ namespace{
   const std::out_of_range 
   generateError(const char * functionName, InDetDD::PixelDiodeType type, unsigned int moduleHash, unsigned int FE){
     std::stringstream error;
-    error << "PixelChargeCalibCondData::"<< functionName << "("<<enum2uint(type)<< ", " << moduleHash << ", " << FE << "): out of bounds";
+    error << "PixelChargeCalibCondData::"<< functionName << "("<<enum2uint(type,__func__)<< ", " << moduleHash << ", " << FE << "): out of bounds";
     return std::out_of_range(error.str());
   }
   const std::out_of_range 
@@ -88,7 +88,7 @@ PixelChargeCalibCondData::setAllFromConfigData(unsigned int moduleHash, const Pi
 void 
 PixelChargeCalibCondData::setThresholds(InDetDD::PixelDiodeType type, unsigned int moduleHash, const std::vector<PixelChargeCalib::Thresholds> & thresholds){
   if (moduleHash >= m_sizeOfHashVector) throw generateError(__func__, moduleHash);
-  auto & hashIndexedVector = m_thresholds[enum2uint(type)];
+  auto & hashIndexedVector = m_thresholds[enum2uint(type,__func__)];
   if (hashIndexedVector.size()<=moduleHash){
     hashIndexedVector.resize(m_sizeOfHashVector);
   }
@@ -97,7 +97,7 @@ PixelChargeCalibCondData::setThresholds(InDetDD::PixelDiodeType type, unsigned i
 
 PixelChargeCalib::Thresholds 
 PixelChargeCalibCondData::getThresholds(InDetDD::PixelDiodeType type, unsigned int moduleHash, unsigned int FE) const{
-  auto idx = enum2uint(type);
+  auto idx = enum2uint(type,__func__);
   const auto & hashIndexedVector = m_thresholds[idx];
   const auto &feIndexedVector = hashIndexedVector.at(moduleHash);
   if (FE < feIndexedVector.size()) {
@@ -109,7 +109,7 @@ PixelChargeCalibCondData::getThresholds(InDetDD::PixelDiodeType type, unsigned i
 void 
 PixelChargeCalibCondData::setLegacyFitParameters(InDetDD::PixelDiodeType type, unsigned int moduleHash, const std::vector<PixelChargeCalib::LegacyFitParameters> &parameters){
   if (moduleHash >= m_sizeOfHashVector) throw generateError(__func__, moduleHash);
-  auto & thisVector = m_legacyFit.at(enum2uint(type));
+  auto & thisVector = m_legacyFit.at(enum2uint(type,__func__));
   if (thisVector.size()<=moduleHash){
     thisVector.resize(m_sizeOfHashVector);
   }
@@ -119,7 +119,7 @@ PixelChargeCalibCondData::setLegacyFitParameters(InDetDD::PixelDiodeType type, u
 PixelChargeCalib::LegacyFitParameters 
 PixelChargeCalibCondData::getLegacyFitParameters(InDetDD::PixelDiodeType type, unsigned int moduleHash, unsigned int FE) const{
   if (moduleHash >= m_sizeOfHashVector) throw generateError(__func__, type, moduleHash, FE);
-  auto idx = enum2uint(type);
+  auto idx = enum2uint(type,__func__);
   const auto & thisVector = m_legacyFit.at(idx);
   const auto &v = thisVector.at(moduleHash);
   if (FE < v.size()) {
@@ -131,7 +131,7 @@ PixelChargeCalibCondData::getLegacyFitParameters(InDetDD::PixelDiodeType type, u
 void 
 PixelChargeCalibCondData::setLinearFitParameters(InDetDD::PixelDiodeType type, unsigned int moduleHash, const std::vector<PixelChargeCalib::LinearFitParameters> &parameters){
   if (moduleHash >= m_sizeOfHashVector) throw generateError(__func__, moduleHash);
-  auto & thisVector = m_linFit.at(enum2uint(type));
+  auto & thisVector = m_linFit.at(enum2uint(type,__func__));
   if ( thisVector.size()<=moduleHash){
     thisVector.resize(m_sizeOfHashVector);
   }
@@ -141,7 +141,8 @@ PixelChargeCalibCondData::setLinearFitParameters(InDetDD::PixelDiodeType type, u
 
 PixelChargeCalib::LinearFitParameters 
 PixelChargeCalibCondData::getLinearFitParameters(InDetDD::PixelDiodeType type, unsigned int moduleHash, unsigned int FE) const{
-  auto idx = enum2uint(type);
+  if (type==InDetDD::PixelDiodeType::NONE) throw generateError(__func__, type, moduleHash, FE);
+  auto idx = enum2uint(type,__func__);
   const auto &typeMap = m_linFit.at(idx);
   //
   const auto &linFit = typeMap.at(moduleHash);
@@ -174,6 +175,7 @@ PixelChargeCalibCondData::getToT(InDetDD::PixelDiodeType type, unsigned int modu
   if (getCalibrationStrategy(moduleHash) == CalibrationStrategy::LUTFEI4) {
     return getToTLUTFEI4(moduleHash, FE, Q);
   }
+  if (type == InDetDD::PixelDiodeType::NONE) return 0.f;
   const LegacyFitParameters & legacy = getLegacyFitParameters(type, moduleHash, FE);
   float tot = legacy.ToT(Q);
 
@@ -191,6 +193,7 @@ PixelChargeCalibCondData::getCharge(InDetDD::PixelDiodeType type, unsigned int m
   if (getCalibrationStrategy(moduleHash) == CalibrationStrategy::LUTFEI4) {
     return getChargeLUTFEI4(moduleHash, FE, ToT);
   }
+  if (type == InDetDD::PixelDiodeType::NONE) return 0.f;
   const LegacyFitParameters & legacy = getLegacyFitParameters(type, moduleHash, FE);
  
   float charge = legacy.Q(ToT);
