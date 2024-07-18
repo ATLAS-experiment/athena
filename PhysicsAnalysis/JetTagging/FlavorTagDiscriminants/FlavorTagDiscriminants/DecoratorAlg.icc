@@ -1,6 +1,6 @@
 // In case the extension is confusing, this is a -*- C++ -*- file
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "StoreGate/ReadDecorHandle.h"
@@ -64,9 +64,13 @@ namespace FlavorTagDiscriminants {
     m_decor.reserve(m_decorator->getDecoratorKeys().size());
     for (const std::string& key: m_decorator->getDecoratorKeys()) {
       const std::string full = m_containerKey.key() + "." + key;
-      ATH_MSG_DEBUG("Adding decorator: " + full);
       m_decor.emplace_back(this, key, full, "");
       ATH_CHECK(m_decor.back().initialize());
+      // look up auxids
+      SG::auxid_t auxid = SG::AuxTypeRegistry::instance().findAuxID(key);
+      ATH_MSG_DEBUG("Added decorator: " + full + ","
+                    " key " + key + " has auxid " + std::to_string(auxid) );
+      m_auxids.push_back(auxid);
     }
     ATH_MSG_DEBUG("Finished setting up");
     return StatusCode::SUCCESS;
@@ -86,6 +90,14 @@ namespace FlavorTagDiscriminants {
     for (const auto* element: *container) {
       m_decorator->decorate(*element);
     }
+
+    // Lock the decorations
+    //
+    for (SG::auxid_t id: m_auxids) {
+      ATH_MSG_DEBUG("locking auxid " << id << " in " << m_containerKey.key());
+      const_cast<C*>(container.cptr())->lockDecoration(id);
+    }
+
     return StatusCode::SUCCESS;
   }
 

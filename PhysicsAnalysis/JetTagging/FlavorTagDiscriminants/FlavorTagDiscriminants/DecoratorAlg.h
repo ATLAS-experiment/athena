@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DECORATOR_ALG_H
@@ -38,6 +38,9 @@ namespace FlavorTagDiscriminants {
     std::vector<SG::ReadDecorHandleKey<CONTAINER>> m_aux;
     std::vector<SG::ReadDecorHandleKey<CONSTITUENTS>> m_constituentAux;
     std::vector<SG::WriteDecorHandleKey<CONTAINER>> m_decor;
+
+    // aux ids (to lock)
+    std::vector<SG::auxid_t> m_auxids;
   };
 }
 

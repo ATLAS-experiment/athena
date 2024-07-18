@@ -93,6 +93,7 @@ def defineMenu():
         'L1_jTE7500',
         'L1_VjTE200',
         'L1_VjTE600',
+        'L1_jTE50_VjTE600',
 
         #L1 forward GAP
         'L1_GAP_A', 'L1_GAP_C', 'L1_GAP_AANDC',
@@ -103,6 +104,7 @@ def defineMenu():
         #UPC - new EM
         'L1_eEM1_VjTE200', 'L1_eEM2_VjTE200', 'L1_eEM5_VjTE200', 'L1_2eEM1_VjTE200', 'L1_2eEM2_VjTE200','L1_2eEM1_VjTE200_GAP_AANDC',
         'L1_2eEM1_VjTE200_EMPTY','L1_2eEM1_VjTE200_UNPAIRED_ISO','L1_2eEM1_VjTE200_UNPAIRED_NONISO',
+        'L1_eEM9_VjTE200',
 
         'L1_eTAU1', 'L1_jTAU1',
         
@@ -122,6 +124,7 @@ def defineMenu():
         'L1_ZDC_C_VZDC_A', 'L1_ZDC_A_VZDC_C',
         'L1_ZDC_A_EMPTY','L1_ZDC_C_EMPTY','L1_ZDC_A_C_EMPTY',
         'L1_ZDC_A_UNPAIRED_NONISO','L1_ZDC_C_UNPAIRED_NONISO','L1_ZDC_A_C_UNPAIRED_NONISO',
+        'L1_ZDC_A_C_VjTE50',
 
         # Run3 ZDC items for heavy ion runs 
         'L1_VZDC_A_VZDC_C', #comb0
@@ -235,6 +238,7 @@ def defineMenu():
         'L1_MBTS_1_UNPAIRED_ISO', 'L1_MBTS_1_1_UNPAIRED_ISO', 'L1_MBTS_2_UNPAIRED_ISO',
         'L1_MBTS_2_BGRP11',
         'L1_MBTS_A', 'L1_MBTS_C',
+        'L1_MBTS_1_1_VjTE50',
         # extra MBTS
         'L1_MBTSA0', 'L1_MBTSA1', 'L1_MBTSA2', 'L1_MBTSA3', 'L1_MBTSA4', 'L1_MBTSA5', 'L1_MBTSA6', 'L1_MBTSA7', 'L1_MBTSA8', 'L1_MBTSA9', 'L1_MBTSA10', 'L1_MBTSA11', 'L1_MBTSA12', 'L1_MBTSA13', 'L1_MBTSA14', 'L1_MBTSA15',
         'L1_MBTSC0', 'L1_MBTSC1', 'L1_MBTSC2', 'L1_MBTSC3', 'L1_MBTSC4', 'L1_MBTSC5', 'L1_MBTSC6', 'L1_MBTSC7', 'L1_MBTSC8', 'L1_MBTSC9', 'L1_MBTSC10', 'L1_MBTSC11', 'L1_MBTSC12', 'L1_MBTSC13', 'L1_MBTSC14', 'L1_MBTSC15',
