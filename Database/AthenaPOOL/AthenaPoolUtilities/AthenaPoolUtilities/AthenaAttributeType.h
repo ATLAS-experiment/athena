@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAPOOLUTILITIES_ATHENAATTRIBUTETYPE_H
@@ -53,7 +53,7 @@ public:
   std::string group() const;
 
   // return allowed keys
-  std::set<std::string> getKeys() {return m_keys;}
+  const std::set<std::string>& getKeys() {return m_keys;}
 
   bool operator==(const AthenaAttributeType& rhs) const;
   bool operator!=(const AthenaAttributeType& rhs) const;
