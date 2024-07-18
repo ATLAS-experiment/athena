@@ -52,6 +52,7 @@ StatusCode EvaluateModelWithAthInfer::execute( [[maybe_unused]] const EventConte
    ATH_CHECK(m_onnxTool->inference(inputData, outputData));
 
    auto& outputScores = std::get<std::vector<float>>(outputData["dense_1/Softmax"].second);
+   auto inRange = [&outputScores](int idx)->bool{return (idx>=0) and (idx<std::ssize(outputScores));};
    ATH_MSG_DEBUG("Label for the input test data: ");
    for(int ibatch = 0; ibatch < m_batchSize; ibatch++){
       float max = -999;
@@ -59,12 +60,13 @@ StatusCode EvaluateModelWithAthInfer::execute( [[maybe_unused]] const EventConte
       for (int i = 0; i < 10; i++){
             ATH_MSG_DEBUG("Score for class "<< i <<" = "<<outputScores[i] << " in batch " << ibatch);
             int index = i + ibatch * 10;
+            if (not inRange(index)) continue;
             if (max < outputScores[index]){
                max = outputScores[index];
                max_index = index;
             }
       }
-      if (max_index<0){
+      if (not inRange(max_index)){
         ATH_MSG_ERROR("No maximum found in EvaluateModelWithAthInfer::execute");
         return StatusCode::FAILURE;
       }
