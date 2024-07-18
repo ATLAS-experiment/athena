@@ -18,13 +18,13 @@ atlas_add_component( PixelDigitization
 atlas_add_test( BichselData_test
    SOURCES test/BichselData_test.cxx  src/BichselData.cxx src/PixelDigitizationUtilities.cxx
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-   LINK_LIBRARIES ${Boost_LIBRARIES} CxxUtils
+   LINK_LIBRARIES ${Boost_LIBRARIES} CxxUtils PixelConditionsData
    POST_EXEC_SCRIPT "nopost.sh" )
 
 atlas_add_test( PixelDigitizationUtilities_test
    SOURCES test/PixelDigitizationUtilities_test.cxx src/PixelDigitizationUtilities.cxx src/BichselData.cxx
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-   LINK_LIBRARIES ${Boost_LIBRARIES} GaudiKernel AthenaKernel CxxUtils TestTools PathResolver
+   LINK_LIBRARIES ${Boost_LIBRARIES} GaudiKernel AthenaKernel CxxUtils TestTools PathResolver PixelConditionsData
    POST_EXEC_SCRIPT "nopost.sh" )
 
 

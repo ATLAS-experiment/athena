@@ -1,8 +1,10 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "FEI4SimTool.h"
+#include "PixelDigitizationUtilities.h"
+
 #include "PixelConditionsData/ChargeCalibParameters.h" //for Thresholds
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
 #include "InDetRawData/Pixel1RawData.h"
@@ -69,7 +71,7 @@ void FEI4SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
   int barrel_ec = pixelId->barrel_ec(chargedDiodes.element()->identify());
   int layerIndex = pixelId->layer_disk(chargedDiodes.element()->identify());
 
-  if (abs(barrel_ec) != m_BarrelEC) {
+  if (std::abs(barrel_ec) != m_BarrelEC) {
     return;
   }
 
@@ -124,17 +126,11 @@ void FEI4SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
 
     unsigned int FE = m_pixelReadout->getFE(diodeID, moduleID);
     InDetDD::PixelDiodeType type = m_pixelReadout->getDiodeType(diodeID);
-    if ((FE == 0xFFFFFFFF) or (type == InDetDD::PixelDiodeType::NONE)) continue;//invalid frontend
+    if ((FE == InDetDD::invalidFrontEnd) or (type == InDetDD::PixelDiodeType::NONE)) continue;//invalid frontend
 
     // Apply analog threshold, timing simulation
     const auto & thresholds = calibData->getThresholds(type, moduleHash, FE);
-    double th0 = thresholds.value;
-
-    double thrand1 = CLHEP::RandGaussZiggurat::shoot(rndmEngine);
-    double thrand2 = CLHEP::RandGaussZiggurat::shoot(rndmEngine);
-    double threshold = th0
-                       + thresholds.sigma * thrand1
-                       + thresholds.noise * thrand2;
+    double threshold =  PixelDigitization::randomThreshold(thresholds, rndmEngine);
                        // This noise check is unaffected by digitizationFlags.doInDetNoise in
                        // 21.0 - see PixelCellDiscriminator.cxx in that branch
 
@@ -142,7 +138,7 @@ void FEI4SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
       int bunchSim;
       if (diode.totalCharge().fromTrack()) {
         bunchSim =
-          static_cast<int>(floor((getG4Time(diode.totalCharge()) +
+          static_cast<int>(std::floor((getG4Time(diode.totalCharge()) +
                                   m_timeOffset) / m_bunchSpace));
       } else {
         bunchSim = CLHEP::RandFlat::shootInt(rndmEngine, m_numberOfBcid);
