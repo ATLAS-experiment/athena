@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAPOOLUTILITIES_ATHENAATTRIBUTESPECIFICATION_H
@@ -36,11 +36,11 @@ public:
     m_name(n),m_type(t)
     {}
   
-  std::string name() const {return m_name;}
+  const std::string& name() const {return m_name;}
   std::string typeName() const {return m_type.typeName();}
   std::string unit() const {return m_type.unit();}
   std::string group() const {return m_type.group();}
-  AthenaAttributeType attributeType() const {return m_type;}
+  const AthenaAttributeType& attributeType() const {return m_type;}
   
   /// Equal operator
   bool operator==( const AthenaAttributeSpecification& rhs ) const;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -127,7 +127,7 @@ public:
     const std::string&   chanName(ChanNum chanNum) const;
 
     /// Current minimal IOVRange
-    IOVRange             minRange() const;
+    const IOVRange&      minRange() const;
 
     /// Check whether there is a unique IOV for all channels
     bool                 hasUniqueIOV() const;
@@ -434,7 +434,7 @@ inline const std::string& CondAttrListCollection::chanName(ChanNum chanNum) cons
 }
 
 /// Current minimal IOVRange
-inline IOVRange
+inline const IOVRange&
 CondAttrListCollection::minRange() const
 {
     return (m_minRange);

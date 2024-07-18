@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -73,7 +73,7 @@ public:
     iov_size_type               iov_size() const;
 
     /// Current minimal IOVRange
-    IOVRange                    minRange() const;
+    const IOVRange&             minRange() const;
 
     /// Check whether there is a unique IOV for all channels
     bool                        hasUniqueIOV() const;
@@ -189,7 +189,7 @@ CondMultChanCollImpl::iov_size() const
 
 /// Current minimal IOVRange
 inline 
-IOVRange
+const IOVRange&
 CondMultChanCollImpl::minRange() const
 {
     return (m_minRange);

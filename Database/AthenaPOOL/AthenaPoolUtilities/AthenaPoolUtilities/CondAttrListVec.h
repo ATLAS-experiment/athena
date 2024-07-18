@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -74,7 +74,7 @@ class CondAttrListVec : public DataObject
   size_type iov_size() const;
 
   // minimal IOVRange and uniqueness
-  IOVRange minRange() const;
+  const IOVRange& minRange() const;
   bool hasUniqueIOV() const;
 
   // adding new data - specify IOV range, channel and start/end of 
@@ -229,7 +229,7 @@ CondAttrListVec::iovRange(const unsigned int channel) const
 inline CondAttrListVec::size_type CondAttrListVec::iov_size() const
 { return m_iovmap.size(); }
 
-inline IOVRange CondAttrListVec::minRange() const
+inline const IOVRange& CondAttrListVec::minRange() const
 { return m_minrange; }
 
 inline bool CondAttrListVec::hasUniqueIOV() const 
