@@ -187,8 +187,8 @@ if joparts[0].startswith("mc") and all(c in string.digits for c in joparts[0][2:
         include(check_jofiles)
         check_naming(os.path.basename(jofile))
     else:
-        evgenLog.error("check_jo_consistency.py not found")
-        sys.exit(1)
+        evgenLog.warning("check_jo_consistency.py not found, will proceed without JOs consistency check")
+#        sys.exit(1)
 ## Include the JO fragment
 include(jofile)
 include("EvgenJobTransforms/LHEonly.py")
@@ -459,18 +459,22 @@ def checkPurpleList(relFlavour,cache,generatorName) :
 evgenLog.debug("****************** CHECKING RELEASE IS NOT BLACKLISTED *****************")
 rel = os.popen("echo $AtlasVersion").read()
 rel = rel.strip()
-errorBL = checkBlackList("AthGeneration",rel,gennames)
-if (errorBL):
-  if (hasattr( runArgs, "ignoreBlackList") and runArgs.ignoreBlackList): 
-      evgenLog.warning("This run is blacklisted for this generator, please use a different one for production !! "+ errorBL )
-  else:
-      raise RuntimeError("This run is blacklisted for this generator, please use a different one !! "+ errorBL)   
+if os.path.exists('/cvmfs/atlas.cern.ch/repo/sw/Generators/MC16JobOptions/common')
+   errorBL = checkBlackList("AthGeneration",rel,gennames)
+   if (errorBL):
+     if (hasattr( runArgs, "ignoreBlackList") and runArgs.ignoreBlackList): 
+         evgenLog.warning("This run is blacklisted for this generator, please use a different one for production !! "+ errorBL )
+     else:
+         raise RuntimeError("This run is blacklisted for this generator, please use a different one !! "+ errorBL)   
       
-errorPL = checkPurpleList("AthGeneration",rel,gennames)
-if (errorPL):
-   evgenLog.warning("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")  
-   evgenLog.warning("!!! WARNING  !!! "+ errorPL )
-   evgenLog.warning("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+   errorPL = checkPurpleList("AthGeneration",rel,gennames)
+   if (errorPL):
+      evgenLog.warning("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")  
+      evgenLog.warning("!!! WARNING  !!! "+ errorPL )
+      evgenLog.warning("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+else:
+   msg.waring("No access to cvmfs, so blacklisted runs will not be checked")
+
 
 ## Add special config option (extended model info for BSM scenarios)
 svcMgr.TagInfoMgr.ExtraTagValuePairs.update({"specialConfiguration": evgenConfig.specialConfig})
