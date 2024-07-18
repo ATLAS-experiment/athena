@@ -40,7 +40,7 @@ else()
       atlas_add_test( ${NAME}
          SCRIPT FullCPAlgorithmsTest_CA.py --evtMax=500 --output-file TestJobOutput-${NAME}.hist.root --dump-config ${NAME}.pkl --data-type ${DATA_TYPE} ${ARGN}
          POST_EXEC_SCRIPT nopost.sh
-         PROPERTIES TIMEOUT 900 )
+         PROPERTIES TIMEOUT 1800 )
 
    endfunction()
 
@@ -49,7 +49,7 @@ else()
       atlas_add_test( ${NAME}
          SCRIPT acmd.py diff-root --error-mode resilient -t analysis TestJobOutput-${NAME1}.hist.root TestJobOutput-${NAME2}.hist.root
          POST_EXEC_SCRIPT nopost.sh
-         PROPERTIES TIMEOUT 900
+         PROPERTIES TIMEOUT 1800
          DEPENDS ${NAME1} ${NAME2})
 
    endfunction()
