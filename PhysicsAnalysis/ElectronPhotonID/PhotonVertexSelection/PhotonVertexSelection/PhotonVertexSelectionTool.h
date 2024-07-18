@@ -18,6 +18,9 @@
 // Local includes
 #include "PhotonVertexSelection/IPhotonVertexSelectionTool.h"
 
+// ONNX Runtime include(s).
+#include <onnxruntime_cxx_api.h>
+
 // Forward declarations
 namespace TMVA { class Reader; }
 
@@ -39,19 +42,58 @@ namespace CP {
 
   private:
     /// Configuration variables
-    std::string m_configFileCase1;
-    std::string m_configFileCase2;
+    int         m_nVars;   // number of input variables
     float       m_convPtCut;
+    bool        m_doSkipByZSigma;
     std::string m_vertexContainerName;
     std::string m_derivationPrefix;
 
+    /// Container declarations
     SG::ReadHandleKey<xAOD::EventInfo> m_eventInfo{this, "EventInfoContName", "EventInfo", "event info key"};
     SG::ReadHandleKey<xAOD::VertexContainer> m_vertexContainer {this, "VertexContainer", "PrimaryVertices", "Vertex container name"};
 
-    /// MVA readers
+    /// TMVA
+    /// ==================================================
+    bool        m_isTMVA;  // boolean to use TMVA, if false assume to be ONNX-based
+    std::string m_TMVAModelFilePath1; //TMVA config file, converted case
+    std::string m_TMVAModelFilePath2; //TMVA config file, unconverted case
+
+    // MVA readers
     // Ideally these would be const but the main method called, EvaluateMVA, is non const.
     std::unique_ptr<TMVA::Reader> m_mva1;
     std::unique_ptr<TMVA::Reader> m_mva2;
+
+    // ONNX
+    // ==================================================
+    // Name of the ONNX model file to load
+    std::string m_ONNXModelFilePath1; //converted case
+    std::string m_ONNXModelFilePath2; //unconverted case 
+
+    // declare node vars
+    // converted
+    std::vector<int64_t> m_input_node_dims1, m_output_node_dims1;
+    std::vector<const char*> m_input_node_names1, m_output_node_names1;   
+    // unconverted
+    std::vector<int64_t> m_input_node_dims2, m_output_node_dims2;
+    std::vector<const char*> m_input_node_names2, m_output_node_names2;   
+
+    // The ONNX session handlers
+    std::shared_ptr<Ort::Session> m_sessionHandle1; //converted case     
+    std::shared_ptr<Ort::Session> m_sessionHandle2; //unconverted case     
+    // The ONNX memory allocators, for looping
+    Ort::AllocatorWithDefaultOptions m_allocator1; //converted case     
+    Ort::AllocatorWithDefaultOptions m_allocator2; //unconverted case  
+
+    // ONNX Methods
+    // create ONNX session and return both the allocator and session handler from user-defined onnx env and model
+    std::tuple<std::shared_ptr<Ort::Session>, Ort::AllocatorWithDefaultOptions> setONNXSession(Ort::Env& env, std::string modelFilePath);
+    // get the input nodes info from the onnx model file (using session and allocator)
+    std::tuple<std::vector<int64_t>, std::vector<const char*>> getInputNodes( const std::shared_ptr<Ort::Session> sessionHandle, Ort::AllocatorWithDefaultOptions& allocator);
+    // get the output nodes info from the onnx model file (using session and allocator)
+    std::tuple<std::vector<int64_t>, std::vector<const char*>> getOutputNodes(const std::shared_ptr<Ort::Session> sessionHandle, Ort::AllocatorWithDefaultOptions& allocator);
+    // wrapper for getting the NN score from onnx model file (passed as onnx session)
+    float getScore(int nVars, std::vector<std::vector<float>> input_data, const std::shared_ptr<Ort::Session> sessionHandle, std::vector<int64_t> input_node_dims, std::vector<const char*> input_node_names, std::vector<const char*> output_node_names) const;
+    // ==================================================
 
   private:
     /// Get combined 4-vector of photon container
