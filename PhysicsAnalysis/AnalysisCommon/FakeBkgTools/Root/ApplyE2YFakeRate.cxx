@@ -4,7 +4,6 @@
 
 #include "FakeBkgTools/ApplyE2YFakeRate.h"
 #include "FakeBkgTools/FakeBkgInternals.h"
-
 #include <cmath>
 
 using namespace CP;

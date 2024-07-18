@@ -10,11 +10,6 @@
 #include "xAODMuon/Muon.h"
 #include "xAODTau/TauJet.h"
 #include "SelectionHelpers/ISelectionReadAccessor.h"
-
-#ifndef FAKEBKGTOOLS_ATLAS_ENVIRONMENT
-    #define declareProperty(n, p, h) declareProperty(n, &BaseFakeBkgTool::p, h)
-#endif
-
 #include <TFile.h>
 #include <TH2F.h>
 #include <TH3.h>
@@ -37,25 +32,38 @@ BaseFakeBkgTool::BaseFakeBkgTool(const std::string& toolname):
     m_accRealEff("real_eff"),
     m_accFakeEff("fake_eff")
 {
-    /// Note: don't use the usual syntax declareProperty("", x = default, ""), it won't work for standalone compilation
-    
-    declareProperty("InputFiles", m_inputFiles, "list of XML/ROOT files storing the efficiencies [default = {}]. If left empty, the tool assumes that efficiencies are provided by the user as decorations (xAOD) or class members (standalone) of the lepton objects");
-    
-    m_selection = IFakeBkgTool::defaultSelection();
-    declareProperty("Selection", m_selection, "Selection used to increment total yield / fill histograms [default = \"" + m_selection +"\"]");
-    
-    m_process = IFakeBkgTool::defaultProcess();
-    declareProperty("Process", m_process, "Process used to increment total yield / fill histograms [default = \"" + m_process +"\"]");
-
-    declareProperty("EnergyUnit", m_energyUnit, "MeV or GeV -- keep consistent between the input (IParticle decorations/members) and the configuration files! [default = \"MeV\"]");
-
-    declareProperty("ConvertWhenMissing", m_convertWhenMissing, "set to 'true' to compute fake factors from fake efficiencies if only the latter are provided in the config files (and vice-versa) [default = false]");
-
-    declareProperty("TightDecoration", m_tightDecoNameAndType, "Name (and type) of the decoration used to indicate whether leptons pass the 'tight' requirements or not [default = \"Tight,as_char\"]");
-
-    declareProperty("ProgressFileName", m_progressFileName, "Name of ntuple file with results from a subset of the data");
-    
-    declareProperty("ProgressFileDirectory", m_progressFileDirectory, "complementary to ProgressFileName, specifies the directory inside the file where the results are stored [default = \"\"]");
+    declareProperty("InputFiles",
+                    m_inputFiles,
+                    "list of XML/ROOT files storing the efficiencies [default = {}]. If left empty, the tool "
+                    "assumes that efficiencies are provided by the user as decorations (xAOD) or class "
+                    "members (standalone) of the lepton objects");
+    declareProperty("Selection",
+                    m_selection = IFakeBkgTool::defaultSelection(),
+                    "Selection used to increment total yield / fill histograms [default = \""
+                        + m_selection +"\"]");
+    declareProperty("Process",
+                    m_process = IFakeBkgTool::defaultProcess(),
+                    "Process used to increment total yield / fill histograms [default = \""
+                        + m_process +"\"]");
+    declareProperty("EnergyUnit",
+                    m_energyUnit,
+                    "MeV or GeV -- keep consistent between the input (IParticle decorations/members) "
+                    "and the configuration files! [default = \"MeV\"]");
+    declareProperty("ConvertWhenMissing",
+                    m_convertWhenMissing,
+                    "set to 'true' to compute fake factors from fake efficiencies if only the latter "
+                    "are provided in the config files (and vice-versa) [default = false]");
+    declareProperty("TightDecoration",
+                    m_tightDecoNameAndType,
+                    "Name (and type) of the decoration used to indicate whether leptons pass the 'tight' "
+                    "requirements or not [default = \"Tight,as_char\"]");
+    declareProperty("ProgressFileName",
+                    m_progressFileName,
+                    "Name of ntuple file with results from a subset of the data");
+    declareProperty("ProgressFileDirectory",
+                    m_progressFileDirectory,
+                    "complementary to ProgressFileName, specifies the directory inside the file where the "
+                    "results are stored [default = \"\"]");
 }
 
 BaseFakeBkgTool::~BaseFakeBkgTool()
