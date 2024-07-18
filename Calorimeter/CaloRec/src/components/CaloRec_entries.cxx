@@ -1,4 +1,3 @@
-#include "../CaloTowerMonitor.h"
 #include "../CaloTowerAlgorithm.h"
 #include "../CaloTopoTowerAlgorithm.h"
 #include "../CaloClusterMaker.h"
@@ -43,7 +42,6 @@
 #include "../CaloTowerStoreTestAlg.h"
 
 
-DECLARE_COMPONENT( CaloTowerMonitor )
 DECLARE_COMPONENT( CaloTowerAlgorithm )
 DECLARE_COMPONENT( CaloTopoTowerAlgorithm )
 DECLARE_COMPONENT( CaloClusterMaker )
