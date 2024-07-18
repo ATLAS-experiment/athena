@@ -16,7 +16,7 @@ from EvgenJobTransforms.evgenTrfArgs import addStdEvgenArgs
 
 ## Prodsys1 hack...
 # TODO: Remove!
-ListOfDefaultPositionalKeys=['--AMIConfig', '--AMITag', '--argJSON', '--asetup', '--athena', '--athenaMPMergeTargetSize', '--athenaopts', '--attempt', '--checkEventCount', '--command', '--dumpJSON', '--dumpPickle', '--ecmEnergy', '--env', '--eventAcceptanceEfficiency', '--evgenJobOpts', '--execOnly', '--fileValidation', '--firstEvent', '--ignoreErrors', '--ignoreFiles', '--ignorePatterns', '--imf', '--inputEVNT_PreFile', '--inputFileValidation', '--inputGenConfFile', '--inputGeneratorFile', '--jobConfig', '--jobid', '--maxEvents', '--orphanKiller', '--outputEVNTFile', '--outputEVNT_PreFile', '--outputFileValidation', '--outputNTUP_TRUTHFile', '--outputTXTFile', '--parallelFileValidation', '--postExec', '--postInclude', '--preExec', '--preInclude', '--printEvts', '--randomSeed', '--reportName', '--reportType', '--rivetAnas', '--runNumber', '--showGraph', '--showPath', '--showSteps', '--skipEvents', '--skipFileValidation', '--skipInputFileValidation', '--skipOutputFileValidation', '--steering', '--taskid', '--tcmalloc', '--valgrind', '--valgrindbasicopts', '--valgrindextraopts', '--lheOnly', '--localPath', '--cleanOut', '--saveList']
+ListOfDefaultPositionalKeys=['--AMIConfig', '--AMITag', '--argJSON', '--asetup', '--athena', '--athenaMPMergeTargetSize', '--athenaopts', '--attempt', '--checkEventCount', '--command', '--dumpJSON', '--dumpPickle', '--ecmEnergy', '--env', '--eventAcceptanceEfficiency', '--evgenJobOpts', '--execOnly', '--fileValidation', '--firstEvent', '--ignoreErrors', '--ignoreFiles', '--ignorePatterns', '--imf', '--inputEVNT_PreFile', '--inputFileValidation', '--inputGenConfFile', '--inputGeneratorFile', '--jobConfig', '--jobid', '--maxEvents', '--orphanKiller', '--outputEVNTFile', '--outputEVNT_PreFile', '--outputFileValidation', '--outputNTUP_TRUTHFile', '--outputTXTFile', '--parallelFileValidation', '--postExec', '--postInclude', '--preExec', '--preInclude', '--wprintEvts', '--randomSeed', '--reportName', '--reportType', '--rivetAnas', '--runNumber', '--showGraph', '--showPath', '--showSteps', '--skipEvents', '--skipFileValidation', '--skipInputFileValidation', '--skipOutputFileValidation', '--steering', '--taskid', '--tcmalloc', '--valgrind', '--valgrindbasicopts', '--valgrindextraopts', '--lheOnly', '--localPath', '--cleanOut', '--saveList']
 
 class EvgenExecutor(athenaExecutor):
   "Specialised trf executor class for event generation jobs"
@@ -50,8 +50,9 @@ class EvgenExecutor(athenaExecutor):
         ## Handle locating of evgen job options / fragments, either from a tarball or CVMFS
         # read the JO directory
         os.environ['LOCAL_INSTALL_DIR'] = (os.environ['JOBOPTSEARCHPATH']).split(":")[0]
-        CommonCvmfsDir = '/cvmfs/atlas.cern.ch/repo/sw/Generators/MCJobOptions/common'
-        os.environ["JOBOPTSEARCHPATH"] = CommonCvmfsDir+":"+os.environ["JOBOPTSEARCHPATH"]
+        if os.path.exists('/cvmfs/atlas.cern.ch/repo/sw/Generators/MCJobOptions/common'):
+           CommonCvmfsDir = '/cvmfs/atlas.cern.ch/repo/sw/Generators/MCJobOptions/common'
+           os.environ["JOBOPTSEARCHPATH"] = CommonCvmfsDir+":"+os.environ["JOBOPTSEARCHPATH"]
         if os.path.exists('/cvmfs/atlas.cern.ch/repo/sw/Generators/MCJobOptions/common/MadGraphControl/dat/'):
             datCvmfsDir = '/cvmfs/atlas.cern.ch/repo/sw/Generators/MCJobOptions/common/MadGraphControl/dat/'
             os.environ["DATAPATH"] = datCvmfsDir+":"+os.environ["DATAPATH"]
@@ -59,7 +60,8 @@ class EvgenExecutor(athenaExecutor):
         dsidpar = (self._trf.argdict["jobConfig"].value).values()
         dsidparam = list(dsidpar)[0][0]
         # Adding cvmfs path to JOBOPTSEARCHPATH
-        BaseCvmfsPath = "/cvmfs/atlas.cern.ch/repo/sw/Generators/MCJobOptions/"
+        if os.path.exists('/cvmfs/atlas.cern.ch/repo/sw/Generators/MCJobOptions/'):
+           BaseCvmfsPath = "/cvmfs/atlas.cern.ch/repo/sw/Generators/MCJobOptions/"
 
         if dsidparam.isdigit() and (len(dsidparam)==6 or len(dsidparam)==7):
             #only dsid is provided, add cvmfs folder like 123xxx to JOBOPTSEARCHPATH
@@ -78,12 +80,14 @@ class EvgenExecutor(athenaExecutor):
                   os.environ["JOBOPTSEARCHPATH"] = cwd_Jodir_ful+":"+os.environ["JOBOPTSEARCHPATH"]
                   os.environ["DATAPATH"] = cwd_Jodir_ful+":"+os.environ["DATAPATH"]
                else:
-                  JoCvmfsPath = os.path.join(BaseCvmfsPath, Jodir)
-                  JoCvmfsPath_ful = os.path.join(JoCvmfsPath, dsidparam)
-                  os.environ["JOBOPTSEARCHPATH"] = JoCvmfsPath_ful+":"+os.environ["JOBOPTSEARCHPATH"]
-                  os.environ["DATAPATH"] = JoCvmfsPath_ful+":"+os.environ["DATAPATH"]
-
-
+                  if (os.path.isdir(BaseCvmfsPath)):
+                     JoCvmfsPath = os.path.join(BaseCvmfsPath, Jodir)
+                     JoCvmfsPath_ful = os.path.join(JoCvmfsPath, dsidparam)
+                     os.environ["JOBOPTSEARCHPATH"] = JoCvmfsPath_ful+":"+os.environ["JOBOPTSEARCHPATH"]
+                     os.environ["DATAPATH"] = JoCvmfsPath_ful+":"+os.environ["DATAPATH"]
+                  else:
+                     msg.error("No access to JOs cvmfs location. JOs should be placed in working directory or full path should be given.")
+                     raise RuntimeError("JOs not found - no cvmfs access")            
         else:  #Suppose full path of dsid folder is provided(/afs/.../123xxx/123456), add cvmfs floder and local path(/afs/.../123xxx) to JOBOPTSEARCHPATH
             if dsidparam.startswith("Test"):  # for testing
                 for token in (os.environ['JOBOPTSEARCHPATH']).split(":"):
