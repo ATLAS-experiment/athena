@@ -600,12 +600,27 @@ InDet::SiCombinatorialTrackFinder_xk::EStat_t InDet::SiCombinatorialTrackFinder_
   const InDet::PixelClusterContainer* p_pixcontainer = data.pixContainer();
   if (m_usePIX && !p_pixcontainer) {
     SG::ReadHandle<InDet::PixelClusterContainer> pixcontainer(m_pixcontainerkey,ctx);
+    if(!pixcontainer.isValid()){
+      //the pixel container is not valid
+      //we are supposed to use pixel so stop here
+      REPORT_ERROR (StatusCode::FAILURE)<< "Unable to dereference pix container, handle not valid";
+      return WrongInit;
+    }
+
     p_pixcontainer = pixcontainer.ptr();
     data.setPixContainer(p_pixcontainer);
   }
   const InDet::SCT_ClusterContainer* p_sctcontainer = data.sctContainer();
   if (m_useSCT && !p_sctcontainer) {
     SG::ReadHandle<InDet::SCT_ClusterContainer> sctcontainer(m_sctcontainerkey,ctx);
+
+    if(!sctcontainer.isValid()){
+      //the sct container is not valid
+      //we are supposed to use sct so stop here
+      REPORT_ERROR (StatusCode::FAILURE)<< "Unable to dereference sct container, handle not valid";
+      return WrongInit;
+    }
+
     p_sctcontainer = sctcontainer.ptr();
     data.setSctContainer(p_sctcontainer);
   }

@@ -433,7 +433,7 @@ namespace LVL1MUCTPIPHASE1 {
       }
       // despite the name "GetMin" we are actually getting the Max thr value here 
       std::pair<std::string, double> maxThrInfo = m_trigThresholdDecisionTool->getMinThresholdNameAndValue(data.thresholdDecisions, roiData.eta());
-      xAODRoIs->back()->initialize(data.dataWord, roiData.eta(), roiData.phi(), maxThrInfo.first, maxThrInfo.second);
+      xAODRoIs->back()->initialize(data.dataWord, roiData.eta(), roiData.phi(), maxThrInfo.first, maxThrInfo.second, 0);   // Note: last 0 is the extraRoI word for phase-II RoI
     }
 
     // Get outputs for L1Topo and store into Storegate

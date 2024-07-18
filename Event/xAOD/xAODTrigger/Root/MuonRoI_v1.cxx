@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id: MuonRoI_v1.cxx 579914 2014-01-24 10:15:15Z krasznaa $
 
 // xAOD include(s):
 #include "xAODCore/AuxStoreAccessorMacros.h"
@@ -21,24 +19,25 @@ namespace xAOD{
 
    }
 
-   /// It's just a convenience function, forwarding the call to all the
-   /// individual property setter functions.
+   /// Initialize the object for Run-4+ RoI definition
    ///
    /// @param roiword The 32-bit RoI word coming from the MuCTPI
    /// @param eta The pseudorapidity of the candidate
    /// @param phi The aximuthal angle of the candidate
    /// @param thrname The name of the highest threshold passed by the candidate
    /// @param thrvalue The value (in MeV) of the threshold passed
+   /// @param extraWord The 32-bit extra RoI word from the MUCTPI
    ///
    void MuonRoI_v1::initialize( uint32_t roiword, float eta, float phi,
-                                const std::string& thrname, float thrvalue ) {
+                                const std::string& thrname, float thrvalue,
+                                uint32_t extraword ) {
 
       setRoIWord( roiword );
       setEta( eta );
       setPhi( phi );
       setThrValue( thrvalue );
       setThrName( thrname );
-
+      setRoIExtraWord( extraword );
       return;
    }
 
@@ -54,27 +53,29 @@ namespace xAOD{
    AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( MuonRoI_v1, float, thrValue,
                                          setThrValue )
 
-
    AUXSTORE_OBJECT_SETTER_AND_GETTER( MuonRoI_v1, std::string, thrName,
                                       setThrName )
-
+   // for Run-4+ only
+   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( MuonRoI_v1, uint32_t, roiExtraWord,
+                                         setRoIExtraWord )
    //
    /////////////////////////////////////////////////////////////////////////////
 
    /////////////////////////////////////////////////////////////////////////////
    //
-   //             Implementation of the RoI word decoder functions
+   //          Implementation of the RoI word decoder functions
+   //                     available only in Run-1/2/3
    //
 
    /// Each detected LVL1 muon candidate is assigned a p<sub>T</sub> threshold.
-   /// The hardware can assign one of 6 p<sub>T</sub> thresholds to the
-   /// candidate, which are numbered from 1 to 6.
+   /// The hardware can assign one of 6/15 p<sub>T</sub> thresholds to the
+   /// candidate, which are numbered from 1 to 6 for Run-1/2, and 1 to 15 for Run-3.
    ///
    /// @return Integer number in the [1, 6] range
    ///
    int MuonRoI_v1::getThrNumber() const {
-
-     if (isRun3()) return ( ( roiWord() >> RUN3_CAND_PT_SHIFT ) & RUN3_CAND_PT_MASK );
+     if (isRun4()) return 0;   // TBI
+     else if (isRun3()) return ( ( roiWord() >> RUN3_CAND_PT_SHIFT ) & RUN3_CAND_PT_MASK );
      else return ( ( roiWord() >> CAND_PT_SHIFT ) & CAND_PT_MASK );
    }
 
@@ -86,8 +87,9 @@ namespace xAOD{
    /// @return Integer number smaller than 147
    ///
    int MuonRoI_v1::getRoI() const {
-
-     if (isRun3()) {
+     if (isRun4()) {
+       return 0;   // TBI
+     } else if (isRun3()) {
        if( this->getSource() == Forward ) {
 	 return ( ( roiWord() >> RUN3_ROI_SHIFT ) & FORWARD_ROI_MASK );
        } else if( this->getSource() == Endcap ) {
@@ -95,9 +97,7 @@ namespace xAOD{
        } else if( this->getSource() == Barrel ) {
 	 return ( ( roiWord() >> RUN3_ROI_SHIFT ) & BARREL_ROI_MASK );
        }
-     }
-     else
-     {
+     } else {
        if( this->getSource() == Forward ) {
 	 return ( ( roiWord() >> ROI_SHIFT ) & FORWARD_ROI_MASK );
        } else if( this->getSource() == Endcap ) {
@@ -120,8 +120,8 @@ namespace xAOD{
    /// @return An 8-bit identifier
    ///
    int MuonRoI_v1::getSectorAddress() const {
-
-     if (isRun3()) return ( ( roiWord() >> RUN3_CAND_SECTOR_ADDRESS_SHIFT ) & CAND_SECTOR_ADDRESS_MASK );
+     if (isRun4()) return 0;  // TBI
+     else if (isRun3()) return ( ( roiWord() >> RUN3_CAND_SECTOR_ADDRESS_SHIFT ) & CAND_SECTOR_ADDRESS_MASK );
      else return ( ( roiWord() >> CAND_SECTOR_ADDRESS_SHIFT ) & CAND_SECTOR_ADDRESS_MASK );
    }
 
@@ -131,8 +131,9 @@ namespace xAOD{
    /// @return A 5- or 6-bit identifier
    ///
    int MuonRoI_v1::getSectorID() const {
-
-     if (isRun3()) {
+     if (isRun4()) {
+       return 0;   // TBI
+     } else if (isRun3()) {
        if( this->getSource() == Forward ) {
 	 return ( ( roiWord() >> RUN3_CAND_SECTORID_SHIFT ) & FORWARD_SECTORID_MASK );
        } else if( this->getSource() == Endcap ) {
@@ -160,8 +161,8 @@ namespace xAOD{
    ///
    /// actually v1 only ... 
    bool MuonRoI_v1::isFirstCandidate() const {
-
-     if (isRun3()) return true; // undefined in run3, return default true
+     if (isRun4()) return true;  // TBI
+     else if (isRun3()) return true;  // undefined in run3, return default true
      else return ( ( roiWord() >> CAND_HIGHEST_PT_SHIFT ) & CAND_HIGHEST_PT_MASK );
    }
 
@@ -171,11 +172,14 @@ namespace xAOD{
    /// also detected another candidate with lower p<sub>T</sub>.
    ///
    bool MuonRoI_v1::isMoreCandInRoI() const {
-
-     if (isRun3()) {
+     if (isRun4()) {
+       return false;   // TBI
+     } else if (isRun3()) {
        if (getSource() == Barrel) return ( ( roiWord() >> RUN3_ROI_OVERFLOW_SHIFT ) & ROI_OVERFLOW_MASK );
        else return false; // Endcap + Fwd have no flag for this
-     } else return ( ( roiWord() >> ROI_OVERFLOW_SHIFT ) & ROI_OVERFLOW_MASK );
+     } else {
+       return ( ( roiWord() >> ROI_OVERFLOW_SHIFT ) & ROI_OVERFLOW_MASK );
+     }
    }
 
    /// This flag is set to <code>true</code> if the sector that this muon
@@ -184,8 +188,8 @@ namespace xAOD{
    /// @see MuonRoI_v1::isFirstCandidate()
    ///
    bool MuonRoI_v1::isMoreCandInSector() const {
-
-     if (isRun3()) return ( ( roiWord() >> RUN3_CAND_OVERFLOW_SHIFT ) & CAND_OVERFLOW_MASK );
+     if (isRun4()) return false;  // TBI
+     else if (isRun3()) return ( ( roiWord() >> RUN3_CAND_OVERFLOW_SHIFT ) & CAND_OVERFLOW_MASK );
      else return ( ( roiWord() >> CAND_OVERFLOW_SHIFT ) & CAND_OVERFLOW_MASK );
    }
 
@@ -196,7 +200,7 @@ namespace xAOD{
    /// @see MuonRoI_v1::RoISource
    ///
    MuonRoI_v1::RoISource MuonRoI_v1::getSource() const {
-
+     if (isRun4()) return Barrel;  // TBI - not correct
      //same mask for run2 and run3
      if( this->getSectorAddress() & ENDCAP_ADDRESS_MASK ) {
          return Endcap;
@@ -214,7 +218,7 @@ namespace xAOD{
    /// @see MuonRoI_v1::Hemisphere
    ///
    MuonRoI_v1::Hemisphere MuonRoI_v1::getHemisphere() const {
-
+     if (isRun4()) return Positive;  // TBI - not correct
      //same mask for run2 and run3
      if( this->getSectorAddress() & SECTOR_HEMISPHERE_MASK ) {
          return Positive;
@@ -228,6 +232,7 @@ namespace xAOD{
    /// Valid for Run-2 and Run-3 RPC candidates only
    ///
    bool MuonRoI_v1::getPhiOverlap() const {
+     if (isRun4()) return false;  // TBI
      if (isRun3()) {
        if (getSource() == Barrel) return (roiWord() >> RUN3_CAND_WORD_CANDFLAGS_BA_PHIOVERLAP_SHIFT) & RUN3_CAND_WORD_CANDFLAGS_BA_PHIOVERLAP_MASK;
        else return false;
@@ -242,6 +247,7 @@ namespace xAOD{
    /// Valid for Run-2 RPC/TGC candidates only
    ///
    bool MuonRoI_v1::getEtaOverlap() const {
+     if (isRun4()) return false;  // TBI
      if (isRun3()) return false;
      else {
        if (getSource() == Barrel) return (roiWord() >> BARREL_OL_SHIFT) & BARREL_ETA_OL_MASK;
@@ -256,8 +262,11 @@ namespace xAOD{
    /// @see MuonRoI_v1::getSource()
    ///
    MuonRoI_v1::Charge MuonRoI_v1::getCharge() const {
+     if (isRun4()) {
+       return ((roiWord() >> CHARGE_SHIFT) & 0x1) ? Pos : Neg;
+     }
 
-      if( getSource() == Barrel ) return Undef;
+     if( getSource() == Barrel ) return Undef;
 
       if (isRun3()) {
 	if( ( roiWord() >> RUN3_CAND_TGC_CHARGE_SIGN_SHIFT) & 0x1 ) {
@@ -278,6 +287,7 @@ namespace xAOD{
    /// Valid for Run-3 candidates only.
    ///
    bool MuonRoI_v1::getBW3Coincidence() const {
+     if (isRun4()) return false;  // TBI
      if (isRun3() && getSource() != Barrel) return (roiWord() >> RUN3_CAND_TGC_BW2OR3_SHIFT) & 0x1;
      else return false;
    }
@@ -287,6 +297,7 @@ namespace xAOD{
    /// Valid for Run-3 candidates only.
    ///
    bool MuonRoI_v1::getInnerCoincidence() const {
+     if (isRun4()) return false;  // TBI
      if (isRun3() && getSource() != Barrel) return (roiWord() >> RUN3_CAND_TGC_INNERCOIN_SHIFT) & 0x1;
      else return false;
    }
@@ -296,6 +307,7 @@ namespace xAOD{
    /// Valid for Run-3 candidates only.
    ///
    bool MuonRoI_v1::getGoodMF() const {
+     if (isRun4()) return false;  // TBI
      if (isRun3() && getSource() != Barrel) return (roiWord() >> RUN3_CAND_TGC_GOODMF_SHIFT) & 0x1;
      else return false;
    }
@@ -305,7 +317,7 @@ namespace xAOD{
    /// whether this particular candidate was ignored in the multiplicity sum.
    ///
    bool MuonRoI_v1::isVetoed() const {
-
+     if (isRun4()) return false;  // TBI
      if (isRun3()) return ( ( roiWord() >> RUN3_CAND_VETO_SHIFT) & 0x1 );
      else return ( ( roiWord() >> CAND_VETO_SHIFT) & 0x1 );
    }
@@ -314,11 +326,33 @@ namespace xAOD{
    /// in the EDM for technical purposes to distinguish whether we want to use
    /// the run2 or run3 bitmasks in decoding the word
    bool MuonRoI_v1::isRun3() const {
-
-      return ( roiWord() >> 31 & 0x1 );
+     return isRun4() ? false : (roiWord() >> 31 & 0x1);
    }
 
    //
    /////////////////////////////////////////////////////////////////////////////
+
+   /////////////////////////////////////////////////////////////////////////////
+   //
+   //   Implementation for Run-4+ only RoI interfaces
+   //
+
+   /// the transverse momentum of the muon candidate, which can be calculated from roiWord
+   /// valid for Run-4+ only
+   float MuonRoI_v1::pt() const {
+     if (isRun4()) return ((roiWord() >> PT_SHIFT) & PT_MASK);
+     else return 0.;
+   }
+
+   /// The indicator whether the RoI is Run-1/2/3 or Run-4+ format.
+   /// roiExtraWord exists only in Run-4+.
+   bool MuonRoI_v1::isRun4() const {
+     static const Accessor<uint32_t> acc{"roiExtraWord"};
+     if (!acc.isAvailable(*this)) {
+       return false;
+     } else {
+       return (roiExtraWord() > 0);
+     }
+   }
 
 } // namespace xAOD
