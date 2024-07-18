@@ -43,8 +43,9 @@ namespace IDTPM {
 
   /// isUnlinkedTruth
   bool isUnlinkedTruth( const xAOD::TrackParticle& track ) {
-    return isUnlinkedObject< xAOD::TruthParticleContainer >(
+    const xAOD::TruthParticle* truth = getLinkedObject< xAOD::TruthParticleContainer >(
         track, "truthParticleLink" );
+    return ( truth == nullptr );
   }
 
 
@@ -68,9 +69,9 @@ namespace IDTPM {
   /// isFake
   bool isFakeTruth( const xAOD::TrackParticle& track, const float truthProbCut )
   {
-    /// Truth-unlinked tracks should not be counted as fake
-    if( isUnlinkedTruth( track ) ) return false;
     float prob = getTruthMatchProb( track );
+    /// returns true if truthMatchProbability deco isn't available or
+    /// if the truth matching probability is below theshold
     return ( prob < truthProbCut );
   }
 
