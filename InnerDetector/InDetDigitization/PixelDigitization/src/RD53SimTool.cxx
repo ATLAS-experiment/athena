@@ -1,8 +1,9 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "RD53SimTool.h"
+#include "PixelDigitizationUtilities.h"
 
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
 #include "PixelConditionsData/ChargeCalibParameters.h" //for Thresholds
@@ -88,18 +89,14 @@ void RD53SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
     double charge = mapDiode.charge();
     unsigned int FE = m_pixelReadout->getFE(diodeID, moduleID);
     InDetDD::PixelDiodeType type = m_pixelReadout->getDiodeType(diodeID);
-    if ((FE == 0xFFFFFFFF) or (type == InDetDD::PixelDiodeType::NONE)){
+    if ((FE == InDetDD::invalidFrontEnd) or (type == InDetDD::PixelDiodeType::NONE)){
       SiHelper::disabled(mapDiode, true, true);
       continue;//invalid frontend
     } 
     // Apply analogue threshold, timing simulation
-    const auto thresholds = calibData->getThresholds(type, moduleHash, FE);
-    const int th0 = thresholds.value;
-    const int sigma = thresholds.sigma;
-    const int noise = thresholds.noise;
-    double threshold = th0 +
-                       sigma * CLHEP::RandGaussZiggurat::shoot(rndmEngine) +
-                       noise * CLHEP::RandGaussZiggurat::shoot(rndmEngine); // This noise check is unaffected by digitizationFlags.doInDetNoise in 21.0 - see PixelCellDiscriminator.cxx in that branch
+    const auto &thresholds = calibData->getThresholds(type, moduleHash, FE);
+    double threshold =  PixelDigitization::randomThreshold(thresholds, rndmEngine); 
+    // This noise check is unaffected by digitizationFlags.doInDetNoise in 21.0 - see PixelCellDiscriminator.cxx in that branch
 
     if (charge > threshold) {
       int bunchSim = 0;

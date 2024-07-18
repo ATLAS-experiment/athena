@@ -1,8 +1,9 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "FEI3SimTool.h"
+#include "PixelDigitizationUtilities.h"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "PixelConditionsData/ChargeCalibParameters.h" //for Thresholds
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
@@ -78,19 +79,16 @@ void FEI3SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
 
   // Add random diabled pixels
   randomDisable(chargedDiodes, moduleData, rndmEngine); // FIXME How should we handle disabling pixels in Overlay jobs?
-
-  for (SiChargedDiodeIterator i_chargedDiode = chargedDiodes.begin(); i_chargedDiode != chargedDiodes.end();
-       ++i_chargedDiode) {
+  const InDetDD::SiDetectorElement * siDetEl = static_cast<const InDetDD::SiDetectorElement *>(chargedDiodes.element());
+  for (auto &[mapId,mapDiode]:chargedDiodes) {
     // Merge ganged pixel
-    InDetDD::SiCellId cellID = chargedDiodes.element()->cellIdFromIdentifier(chargedDiodes.getId(
-                                                                               (*i_chargedDiode).first));
-    const InDetDD::SiDetectorElement * siDetEl = static_cast<const InDetDD::SiDetectorElement *>(chargedDiodes.element());
+    InDetDD::SiCellId cellID = chargedDiodes.element()->cellIdFromIdentifier(chargedDiodes.getId( mapId));
     InDetDD::SiCellId gangedCell = siDetEl->gangedCell(cellID);
     Identifier gangedID = chargedDiodes.element()->identifierFromCellId(gangedCell);
     if (gangedCell.isValid()) {
       SiChargedDiode* gangedChargeDiode = chargedDiodes.find(gangedID);
       int phiGanged = pixelId->phi_index(gangedID);
-      int phiThis = pixelId->phi_index(chargedDiodes.getId((*i_chargedDiode).first));
+      int phiThis = pixelId->phi_index(chargedDiodes.getId( mapId));
 
       if (gangedChargeDiode) { // merge charges
         bool maskGanged = ((phiGanged > 159) && (phiGanged < 168));
@@ -101,11 +99,11 @@ void FEI3SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
           ATH_MSG_ERROR("FEI3SimTool: both ganged pixels are in the mask out region -> BUG!");
         }
         if (maskGanged) {
-          (*i_chargedDiode).second.add(gangedChargeDiode->totalCharge()); // merged org pixel
+          mapDiode.add(gangedChargeDiode->totalCharge()); // merged org pixel
           SiHelper::maskOut(*gangedChargeDiode, true);
         } else {
-          gangedChargeDiode->add((*i_chargedDiode).second.totalCharge()); // merged org pixel
-          SiHelper::maskOut((*i_chargedDiode).second, true);
+          gangedChargeDiode->add(mapDiode.totalCharge()); // merged org pixel
+          SiHelper::maskOut(mapDiode, true);
         }
       }
     }
@@ -120,7 +118,7 @@ void FEI3SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
 
     unsigned int FE = m_pixelReadout->getFE(diodeID, moduleID);
     InDetDD::PixelDiodeType type = m_pixelReadout->getDiodeType(diodeID);
-    if ((FE == 0xFFFFFFFF) or (type == InDetDD::PixelDiodeType::NONE)) continue;//invalid frontend
+    if ((FE == InDetDD::invalidFrontEnd) or (type == InDetDD::PixelDiodeType::NONE)) continue;//invalid frontend
 
     // charge to ToT conversion
     double tot = calibData->getToT(type, moduleHash, FE, charge);
@@ -128,20 +126,15 @@ void FEI3SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
     // Apply analog threshold, timing simulation
     double th0 = thresholds.value;
     double ith0 = thresholds.inTimeValue;
-
-    double thrand1 = CLHEP::RandGaussZiggurat::shoot(rndmEngine);
-    double thrand2 = CLHEP::RandGaussZiggurat::shoot(rndmEngine);
-    double threshold = th0
-                       + thresholds.sigma * thrand1
-                       + thresholds.noise * thrand2;
-                       // This noise check is unaffected by digitizationFlags.doInDetNoise in
-                       // 21.0 - see PixelCellDiscriminator.cxx in that branch
+    double threshold = PixelDigitization::randomThreshold(thresholds, rndmEngine);
+    // This noise check is unaffected by digitizationFlags.doInDetNoise in
+    // 21.0 - see PixelCellDiscriminator.cxx in that branch
 
     if (charge > threshold) {
       int bunchSim = 0;
       if (diode.totalCharge().fromTrack()) {
-        std::vector<float> totCharges = moduleData->getTimingIndex(barrel_ec, layerIndex);
-        std::vector<float> probArray  = moduleData->getTimingProbability(barrel_ec, layerIndex, moduleIndex);
+        const std::vector<float> & totCharges = moduleData->getTimingIndex(barrel_ec, layerIndex);
+        const std::vector<float> & probArray  = moduleData->getTimingProbability(barrel_ec, layerIndex, moduleIndex);
 
         double prob = 0.0;
         if (selectedTuneYear==2023) { prob = getProbability(totCharges, probArray, tot); }
@@ -154,7 +147,7 @@ void FEI3SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
 
         double timeWalk = 0.0;
         if (rnd<prob) { timeWalk = 25.0; }
-        bunchSim = static_cast<int>(floor((G4Time+m_timeOffset+timeWalk)/m_bunchSpace));
+        bunchSim = static_cast<int>(std::floor((G4Time+m_timeOffset+timeWalk)/m_bunchSpace));
 
         if (selectedTuneYear == 2009) {   // RUN1 procedure (based on 2007 cosmic data)
           double intimethreshold = (ith0 / th0) * threshold;
