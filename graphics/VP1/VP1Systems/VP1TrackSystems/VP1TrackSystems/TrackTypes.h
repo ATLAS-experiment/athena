@@ -11,7 +11,7 @@ class TrackType {
 public:
   //NB: The order listed here is the order presented in the GUI (see TrackCollWidget::sortSections(..))
   enum Type {
-    Unknown, TrkTrack, TrackParticle, FatrasTruthTrack, RefittedTrack, TrkSegment, LV2Track, TruthTrack, SimulationTrack, AnalysisObject, xAOD
+    Unknown, TrkTrack, TrackParticle, FatrasTruthTrack, RefittedTrack, TrkSegment, LV2Track, TruthTrack, SimulationTrack, AnalysisObject, xAOD, ACTS
   };
 
   static qint32 typeToInt(const Type&);

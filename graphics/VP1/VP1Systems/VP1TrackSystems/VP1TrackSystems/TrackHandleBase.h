@@ -102,6 +102,7 @@ public:
   static double unknown() { return -999.0; }
 
   virtual bool hasSubSystemHitInfo() const { return false; }
+  virtual bool isRun4EDM() const { return false; }
   virtual bool isIDTrack() const ;
   virtual unsigned getNPixelHits() const { return 0; }
   virtual unsigned getNSCTHits() const { return 0; }
@@ -129,8 +130,8 @@ public:
   
   // Object browser code
   // @TODO revisit this once plan for more general approach is completed.
-  virtual void fillObjectBrowser(QList<QTreeWidgetItem *>& list); //!< Overload in child classes
-  void updateObjectBrowser(){};
+  virtual void fillObjectBrowser(QList<QTreeWidgetItem *>& list); //!< Called in child classes
+  virtual void updateObjectBrowser(){};
   QTreeWidgetItem* browserTreeItem() const ;
   
 protected:
@@ -147,7 +148,7 @@ protected:
   //memory cleanup of the returned objects:
   virtual const Trk::Track *              provide_pathInfoTrkTrack() const { return nullptr; };
   //  virtual const std::vector< HepGeom::Point3D<double> > * provide_pathInfoPoints() const { return 0; }
-  virtual const std::vector< Amg::Vector3D > * provide_pathInfoPoints() const { return nullptr; }
+  virtual const std::vector< Amg::Vector3D > * provide_pathInfoPoints() { return nullptr; }
 
   /** Default implementation of this next method bases hypothesis on pdgCode() and charge():*/
   virtual Trk::ParticleHypothesis extrapolationParticleHypothesis() const;
@@ -188,10 +189,14 @@ private:
   //For associated objects:
   friend class AssociatedObjectHandleBase;
   friend class TrackCollHandleBase; // Troels: maybe not needed...
+  /*** Returns the attachment handle for the given region index and crossover value.
+  * @param regionIndex: The region index is used to determine the region of the attachment in the detector.
+  * @param crossoverval: The crossover value is used to determine the level of detail of the track.
+  **/
   AssocObjAttachmentHandle * getAttachmentHandle(int regionIndex, const double& crossoverval);
 protected:
   void registerAssocObject(AssociatedObjectHandleBase*);//!<Trackhandle assumes ownership
-
+  virtual void ensureInitTSOSs(std::vector<AssociatedObjectHandleBase*>*&); //!< Ensure that the TSOSs are initialized. This is called by update3DObjects() and should be called by any method that needs to access the TSOSs.
 };
 
 class AssocObjAttachmentHandle {

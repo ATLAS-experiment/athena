@@ -24,20 +24,16 @@
 #include "VP1TrackSystems/TrackCommonFlags.h"
 #include "TrkEventPrimitives/ParticleHypothesis.h"
 #include <QFlags>
-#include "GaudiKernel/ServiceHandle.h"
-#include "TrkDetDescrInterfaces/ITrackingVolumesSvc.h"
 
 class TrackCollWidget;
 class SoMaterial;
 class SoDrawStyle;
-// class SoLightModel;
 class SoComplexity;
 class TrackSysCommonData;
-
-// class TrackObjectBrowserController;
-
 class QTreeWidget;
 class QTreeWidgetItem;
+class TrackHandle_TrkTrack;
+class TrackHandle_TrackContainer;
 
 namespace Trk {
   class IExtrapolator;
@@ -86,7 +82,6 @@ public:
   float propMaxRadius() const;
   
   bool ignoreMeasurementEffectsOnTrackInProp() ; //!< If true (default) don't use TSOS with MEOT to draw track points
-  // ITrackingVolumesSvc * trackingVolumeSvc() const;
   const Trk::Volume * extrapolateToThisVolume() const ; //!< Returns the volume to which we extrapolate ID tracks, or zero if no VolumesSvc found.
   Trk::ITrackFitter * trackFitter() const;
   

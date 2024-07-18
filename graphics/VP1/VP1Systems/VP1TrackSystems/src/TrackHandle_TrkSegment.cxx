@@ -108,7 +108,7 @@ void TrackHandle_TrkSegment::ensureInitSubSysHitInfo() const
 }
 
 //____________________________________________________________________
-const std::vector< Amg::Vector3D > * TrackHandle_TrkSegment::provide_pathInfoPoints() const
+const std::vector< Amg::Vector3D > * TrackHandle_TrkSegment::provide_pathInfoPoints()
 {
   if (!m_points) {
     m_points = new std::vector< Amg::Vector3D >;

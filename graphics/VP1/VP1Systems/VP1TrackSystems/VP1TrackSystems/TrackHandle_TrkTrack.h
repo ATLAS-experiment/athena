@@ -57,7 +57,7 @@ public:
   virtual bool containsDetElement(const QString&) const;
 
   virtual void fillObjectBrowser(QList<QTreeWidgetItem *>& list); 
-  void updateObjectBrowser();
+  virtual void updateObjectBrowser();
   
   SoNode* zoomToTSOS(unsigned int index); //!< Depending on controller configuration attempt to zoom to the corresponding TSOS & returned detailed node matching it
   

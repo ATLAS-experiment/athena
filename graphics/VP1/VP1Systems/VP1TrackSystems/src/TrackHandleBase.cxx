@@ -23,6 +23,7 @@
 #include "VP1TrackSystems/VP1TrackSanity.h"
 #include "VP1TrackSystems/SimBarCode.h"//For unknown pdg. Fixme: Use 0 for unknown pdg!
 #include "VP1TrackSystems/AscObj_TSOS.h"
+#include "VP1TrackSystems/AscObj_TrackState.h"
 #include "VP1TrackSystems/TrkObjToString.h"
 #include "VP1Utils/VP1ParticleData.h"
 #include "VP1Utils/VP1LinAlgUtils.h"
@@ -155,8 +156,8 @@ public:
 
   //We cache path info, but it might get invalidated (if switching off simhits for instance):
   bool pathInfoLoaded;
-  const Trk::Track * pathInfo_TrkTrack;
-  const std::vector< Amg::Vector3D > * pathInfo_Points;
+  const Trk::Track * pathInfo_TrkTrack; //!< Used in the case of a Trk::Track
+  const std::vector< Amg::Vector3D > * pathInfo_Points; //!< Used in all other cases
   SoSeparator * label_sep;
   void ensureLoadPathInfo();
 
@@ -174,8 +175,7 @@ public:
 
   TrackCommonFlags::TSOSPartsFlags shownTSOSParts;
   TrackCommonFlags::TSOSPartsFlags customColouredTSOSParts;
-  std::vector<AscObj_TSOS*> * tsos_ascobjs;
-  void ensureInitTSOSs();
+  std::vector<AssociatedObjectHandleBase*> * tsos_ascobjs;
   AscObj_TSOS* addTSOS(const Trk::TrackStateOnSurface * tsos,unsigned index) const;
 
   QTreeWidgetItem* m_objBrowseTree;
@@ -262,7 +262,7 @@ void TrackHandleBase::updateShapes_TSOSWithMeasurements()
 {
   if (!m_d->tsos_ascobjs)
     return;
-  std::vector<AscObj_TSOS*>::iterator
+  std::vector<AssociatedObjectHandleBase*>::iterator
     it(m_d->tsos_ascobjs->begin()),
     itE(m_d->tsos_ascobjs->end());
   for (;it!=itE;++it)
@@ -275,7 +275,7 @@ void TrackHandleBase::updateShapes_TSOSWithErrors()
 {
   if (!m_d->tsos_ascobjs)
     return;
-  std::vector<AscObj_TSOS*>::iterator
+  std::vector<AssociatedObjectHandleBase*>::iterator
     it(m_d->tsos_ascobjs->begin()),
     itE(m_d->tsos_ascobjs->end());
   for (;it!=itE;++it)
@@ -288,7 +288,7 @@ void TrackHandleBase::updateShapes_TSOSWithMaterialEffects()
 {
   if (!m_d->tsos_ascobjs)
     return;
-  std::vector<AscObj_TSOS*>::iterator
+  std::vector<AssociatedObjectHandleBase*>::iterator
     it(m_d->tsos_ascobjs->begin()),
     itE(m_d->tsos_ascobjs->end());
   for (;it!=itE;++it)
@@ -313,22 +313,27 @@ void TrackHandleBase::setShownTSOSParts(TrackCommonFlags::TSOSPartsFlags f)
 {
   VP1Msg::messageDebug(QString("TrackHandleBase::setShownTSOSParts to ")+QString::number(f) );
 
-  if (m_d->shownTSOSParts==f)
-    return;
+  if (m_d->shownTSOSParts==f){
+     VP1Msg::messageDebug(QString("->No change in shown parts. Skipping."));
+     return;
+  }
+
   //Figure out changed bits:
   TrackCommonFlags::TSOSPartsFlags change(m_d->shownTSOSParts ^ f);//^ is XOR
   m_d->shownTSOSParts=f;
   if (!m_d->tsos_ascobjs&&(m_d->shownTSOSParts==TrackCommonFlags::TSOS_NoObjects||!visible()))
     return;
 
-  m_d->ensureInitTSOSs();
+  ensureInitTSOSs(m_d->tsos_ascobjs);
   //Loop over all TSOS objects. Those with changed parts needs shape
   //and visibility update:
-  std::vector<AscObj_TSOS*>::iterator it(m_d->tsos_ascobjs->begin()), itE(m_d->tsos_ascobjs->end());
+  std::vector<AssociatedObjectHandleBase*>::iterator it(m_d->tsos_ascobjs->begin()), itE(m_d->tsos_ascobjs->end());
   for (;it!=itE;++it) {
-    if (!((*it)->parts()&change))
-      continue;
     const bool vis = (*it)->parts() & m_d->shownTSOSParts;
+    if (!((*it)->parts()&change)){
+      continue;
+    }
+
     if (vis==(*it)->visible()) {
       //Just update shape:
       (*it)->update3DObjects();
@@ -364,8 +369,7 @@ void TrackHandleBase::setCustomColouredTSOSParts(TrackCommonFlags::TSOSPartsFlag
   if (!changedShownParts)
     return;
 
-  //redundant  m_d->ensureInitTSOSs();
-  std::vector<AscObj_TSOS*>::iterator it(m_d->tsos_ascobjs->begin()), itE(m_d->tsos_ascobjs->end());
+  std::vector<AssociatedObjectHandleBase*>::iterator it(m_d->tsos_ascobjs->begin()), itE(m_d->tsos_ascobjs->end());
   for (;it!=itE;++it) {
     if ((*it)->parts()&changedShownParts)
       (*it)->update3DObjects();
@@ -373,22 +377,25 @@ void TrackHandleBase::setCustomColouredTSOSParts(TrackCommonFlags::TSOSPartsFlag
 }
 
 //____________________________________________________________________
-void TrackHandleBase::Imp::ensureInitTSOSs()
+void TrackHandleBase::ensureInitTSOSs(std::vector<AssociatedObjectHandleBase*>*& tsos_ascobjs)
 {
+  std::cout<<"TrackHandleBase::ensureInitTSOSs"<<std::endl;
   if (tsos_ascobjs)
     return;
-  tsos_ascobjs = new std::vector<AscObj_TSOS*>;
-  ensureLoadPathInfo();
-  if (!pathInfo_TrkTrack||!pathInfo_TrkTrack->trackParameters()||pathInfo_TrkTrack->trackParameters()->empty())
+
+  tsos_ascobjs = new std::vector<AssociatedObjectHandleBase*>;
+  m_d->ensureLoadPathInfo();
+
+  if (!m_d->pathInfo_TrkTrack||!m_d->pathInfo_TrkTrack->trackParameters()||m_d->pathInfo_TrkTrack->trackParameters()->empty())
     return;
 
-  tsos_ascobjs->reserve(pathInfo_TrkTrack->trackParameters()->size());
+  tsos_ascobjs->reserve(m_d->pathInfo_TrkTrack->trackParameters()->size());
 
   unsigned parindex(0);
 
   AscObj_TSOS* ascObjNeedDistToNext(nullptr);
-  Trk::TrackStates::const_iterator tsos_iter = pathInfo_TrkTrack->trackStateOnSurfaces()->begin();
-  Trk::TrackStates::const_iterator tsos_end = pathInfo_TrkTrack->trackStateOnSurfaces()->end();
+  Trk::TrackStates::const_iterator tsos_iter = m_d->pathInfo_TrkTrack->trackStateOnSurfaces()->begin();
+  Trk::TrackStates::const_iterator tsos_end = m_d->pathInfo_TrkTrack->trackStateOnSurfaces()->end();
   const Trk::TrackParameters* trackParam(nullptr);
   for (; tsos_iter != tsos_end; ++tsos_iter) {
     trackParam = (*tsos_iter)->trackParameters();
@@ -406,10 +413,11 @@ void TrackHandleBase::Imp::ensureInitTSOSs()
       ascObjNeedDistToNext = nullptr;
     }
     VP1Msg::messageVerbose("Adding TSOS at index:"+QString::number(parindex));
-    ascObjNeedDistToNext = addTSOS(*tsos_iter,parindex++);
+    ascObjNeedDistToNext = m_d->addTSOS(*tsos_iter,parindex++);
   }
 
 }
+
 
 //____________________________________________________________________
 AscObj_TSOS* TrackHandleBase::Imp::addTSOS(const Trk::TrackStateOnSurface * tsos,unsigned index) const
@@ -425,11 +433,13 @@ AscObj_TSOS* TrackHandleBase::Imp::addTSOS(const Trk::TrackStateOnSurface * tsos
 //____________________________________________________________________
 void TrackHandleBase::setVisible(bool vis)
 {
+  std::cout<<"TrackHandleBase::setVisible"<<std::endl;
   QString tmp = (vis)?"True":"False";
   QString tmp2 = (m_visible)?"True":"False";
   VP1Msg::messageDebug(QString("TrackHandleBase calling setVisible with vis=")+tmp+QString(", and m_visible=")+tmp2 );
   if (vis==m_visible)
     return;
+  std::cout<<"TrackHandleBase::setVisible 1"<<std::endl;
 
   m_visible=vis;
   if (vis) {
@@ -451,14 +461,20 @@ void TrackHandleBase::setVisible(bool vis)
     m_d->detach3DObjects();
   }
 
+    std::cout<<"TrackHandleBase::setVisible 2"<<std::endl;
+
+
   bool initTSOS(false);
   if (!m_d->tsos_ascobjs&&vis&&m_d->shownTSOSParts!=TrackCommonFlags::TSOS_NoObjects) {
-    m_d->ensureInitTSOSs();
+    ensureInitTSOSs(m_d->tsos_ascobjs);
     initTSOS = true;
   }
+  std::cout<<"m_d->tsos_ascobjs: "<<m_d->tsos_ascobjs<<std::endl;
+  std::cout<<"m_d->shownTSOSParts!=TrackCommonFlags::TSOS_NoObjects "<<(m_d->shownTSOSParts!=TrackCommonFlags::TSOS_NoObjects)<<std::endl;
+  std::cout<<"TrackHandleBase::setVisible 3"<<std::endl;
 
   if (!initTSOS && m_d->tsos_ascobjs) {
-    std::vector<AscObj_TSOS*>::iterator
+    std::vector<AssociatedObjectHandleBase*>::iterator
       it(m_d->tsos_ascobjs->begin()),
       itE(m_d->tsos_ascobjs->end());
     if (m_d->shownTSOSParts!=TrackCommonFlags::TSOS_NoObjects) {
@@ -473,6 +489,7 @@ void TrackHandleBase::setVisible(bool vis)
       }
     }
   }
+  std::cout<<"TrackHandleBase::setVisible 4"<<std::endl;
 
   visibleStateChanged();
 
@@ -1980,7 +1997,7 @@ QList<AssociatedObjectHandleBase*> TrackHandleBase::getVisibleMeasurements() con
 {
   QList<AssociatedObjectHandleBase*> l;
   if (!m_d->tsos_ascobjs) return l;
-  std::vector<AscObj_TSOS*>::iterator
+  std::vector<AssociatedObjectHandleBase*>::iterator
     it(m_d->tsos_ascobjs->begin()),
     itE(m_d->tsos_ascobjs->end());
   for (;it!=itE;++it)

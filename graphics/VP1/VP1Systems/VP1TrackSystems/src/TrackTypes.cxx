@@ -18,7 +18,8 @@ qint32 TrackType::typeToInt(const Type&t)
   case AnalysisObject: return 7;
   case SimulationTrack: return 8;
   case xAOD: return 9;
-  case Unknown: return 10;
+  case ACTS: return 10;
+  case Unknown: return 11;
   default: return -1;
   }
 }
@@ -37,7 +38,8 @@ TrackType::Type TrackType::intToType(const qint32& i)
   case 7: return AnalysisObject;
   case 8: return SimulationTrack;
   case 9: return xAOD;
-  case 10: return Unknown;
+  case 10: return ACTS;
+  case 11: return Unknown;
   default: return Unknown;
   }
 }
@@ -56,6 +58,7 @@ QString TrackType::typeToString(const Type& t)
   case AnalysisObject: return "AnalysisObject";
   case SimulationTrack: return "SimulationTrack";
   case xAOD: return "xAOD";
+  case ACTS: return "ACTS";
   case Unknown: return "Unknown";
   default: return "ERROR";
   }
@@ -75,6 +78,7 @@ TrackType::Type TrackType::stringToType(const QString&str, bool & status)
   if (str=="AnalysisObject") return AnalysisObject;
   if (str=="SimulationTrack") return SimulationTrack;
   if (str=="xAOD") return xAOD;
+  if (str=="ACTS") return ACTS;
   if (str=="Unknown") return Unknown;
   status = false;
   return Unknown;
@@ -94,6 +98,7 @@ QString TrackType::typeToSectionHeader(const Type& t)
   case AnalysisObject: return "Analysis Objects";
   case SimulationTrack: return "Forward Region Simulation Tracks";
   case xAOD: return "xAOD";
+  case ACTS: return "ACTS";
   case Unknown: return "Unknown";
   default: return "Error";
   }
@@ -113,6 +118,7 @@ TrackType::Type TrackType::sectionHeaderToType(const QString&str, bool & status)
   if (str=="Analysis Objects") return AnalysisObject;
   if (str=="Forward Region Simulation Tracks") return SimulationTrack;
   if (str=="xAOD") return xAOD;
+  if (str=="ACTS") return ACTS;
   if (str=="Unknown") return Unknown;
   status = false;
   return Unknown;
@@ -132,6 +138,7 @@ QString TrackType::typeToSectionHeaderToolTip(const Type& t)
   case AnalysisObject: return "AOD Analysis Objects (high level reconstruction objects, such as Muons, egamma etc)";
   case SimulationTrack: return "Forward Region Simulation Tracks";
   case xAOD: return "xAOD Analysis Objects (high level reconstruction objects, such as Muons, egamma etc)";
+  case ACTS: return "ACTS Tracks (under development for Run 4)";
   case Unknown: return "Unknown";
   default: return "Error";
   }

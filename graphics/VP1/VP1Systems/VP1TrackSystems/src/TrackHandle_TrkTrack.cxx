@@ -332,9 +332,6 @@ void TrackHandle_TrkTrack::updateObjectBrowser(){
     return;
   }
   
-  // QString tmp = (visible()==true)?"True":"False";
-//  VP1Msg::messageVerbose("updateObjectBrowser  "+m_objBrowseTree->text(0)+" with visible()="+tmp);
-  
   if (!visible()) {
     browserTreeItem()->setFlags(Qt::ItemFlag()); // not selectable, not enabled
   } else {

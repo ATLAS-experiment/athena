@@ -56,13 +56,7 @@ public:
   
   virtual void setVisible(bool);
   
-  TrackCommonFlags::TSOSPartsFlags parts() const { return m_parts; }
-  bool hasParameters() const { return m_parts & TrackCommonFlags::TSOS_TrackPars; }
-  bool hasParError() const { return m_parts & TrackCommonFlags::TSOS_AnyParsErrors; }
-  bool hasError() const { return m_parts & TrackCommonFlags::TSOS_AnyErrors; }
-  bool hasMaterialEffect() const { return m_parts & TrackCommonFlags::TSOS_AnyMaterialEffects; }
-  bool hasSurface() const { return m_parts & TrackCommonFlags::TSOS_AnySurface; }
-  bool hasMeasurement() const { return m_parts & TrackCommonFlags::TSOS_AnyMeasurement; }
+  virtual TrackCommonFlags::TSOSPartsFlags parts() const { return m_parts; }
 
   const Trk::MeasurementBase * measurement() const;
   const Trk::Surface * surface() const;
