@@ -711,7 +711,7 @@ def getLowMuPhysicsSignatures():
 
     return chains
 
-def setupMenu(menu_name):
+def setupMenu():
     # Add all standard monitoring chains from addP1Signatures function
     final_chains = ChainStore()
 

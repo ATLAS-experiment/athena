@@ -1061,7 +1061,7 @@ def getDevSignatures():
     
     chains['Monitor'] = [
         #ATR-27211, ATR-27203
-        ChainProp(name='HLT_l1topoPh1debug_L1All', l1SeedThresholds=['FSNOSEED'], stream=['L1TopoMismatches'], groups=['PS:Online', 'PS:NoHLTRepro', 'RATE:Monitoring', 'BW:Other']),
+        ChainProp(name='HLT_l1topoPh1debug_L1All', l1SeedThresholds=['FSNOSEED'], stream=['L1TopoMismatches'], groups=['PS:NoHLTRepro', 'RATE:Monitoring', 'BW:Other']),
     ]
 
     chains['UnconventionalTracking'] = [
@@ -1084,9 +1084,9 @@ def getDevSignatures():
 
     return chains
 
-def setupMenu(menu_name):
+def setupMenu():
 
-    chains = mc_menu.setupMenu(menu_name)
+    chains = mc_menu.setupMenu()
 
     from AthenaCommon.Logging import logging
     log = logging.getLogger( __name__ )

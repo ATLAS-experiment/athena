@@ -143,7 +143,7 @@ def getCosmicSignatures():
 
     return chains
 
-def setupMenu(menu_name):
+def setupMenu():
 
     chains = getCosmicSignatures()
 

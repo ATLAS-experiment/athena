@@ -33,9 +33,9 @@ import TriggerMenuMT.HLT.Menu.MC_pp_run4_v1 as mc_menu
 
 DevGroup = ['Development']
 
-def setupMenu(menu_name):
+def setupMenu():
 
-    chains = mc_menu.setupMenu(menu_name)
+    chains = mc_menu.setupMenu()
 
     from AthenaCommon.Logging import logging
     log = logging.getLogger( __name__ )

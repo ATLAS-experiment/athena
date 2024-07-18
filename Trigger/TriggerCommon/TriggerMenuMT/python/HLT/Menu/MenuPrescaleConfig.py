@@ -23,7 +23,7 @@ def MenuPrescaleConfig(hltMenuConfig, flags):
     except Exception as e:
         log.fatal(f'Failed to import menu module "{base_menu_name}" inferred from menu "{menu_name}"!')
         raise e
-    chains = menu_module.setupMenu(menu_name)
+    chains = menu_module.setupMenu()
 
     # Determine prescale sets from the remainder of the menu name
     # These filters become progressively less inclusive:
@@ -46,11 +46,11 @@ def MenuPrescaleConfig(hltMenuConfig, flags):
         HLTPrescales = Prescales.HLTPrescales_primary_prescale
     elif 'BulkMCProd_prescale' in menu_name:
         assert(menu_name.startswith('Dev') or menu_name.startswith('MC'))
-        filterChains(chains, Prescales.HLTPrescales_bulkmcprod_prescale, ["PS:NoHLTRepro","PS:NoTrigVal","PS:NoBulkMCProd","PS:Online"])
+        filterChains(chains, Prescales.HLTPrescales_bulkmcprod_prescale, ["PS:NoHLTRepro","PS:NoTrigVal","PS:NoBulkMCProd"])
         L1Prescales = Prescales.L1Prescales_bulkmcprod_prescale
         HLTPrescales = Prescales.HLTPrescales_bulkmcprod_prescale
     elif 'TriggerValidation_prescale' in menu_name:
-        filterChains(chains, Prescales.HLTPrescales_trigvalid_prescale, ["PS:NoHLTRepro","PS:NoTrigVal","PS:Online"])
+        filterChains(chains, Prescales.HLTPrescales_trigvalid_prescale, ["PS:NoHLTRepro","PS:NoTrigVal"])
         L1Prescales = Prescales.L1Prescales_trigvalid_prescale
         HLTPrescales = Prescales.HLTPrescales_trigvalid_prescale
     elif 'HLTReprocessing_prescale' in menu_name:

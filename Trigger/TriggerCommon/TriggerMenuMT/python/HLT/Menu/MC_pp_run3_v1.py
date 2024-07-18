@@ -1518,9 +1518,9 @@ def getMCSignatures():
 
     return chains
 
-def setupMenu(menu_name):
+def setupMenu():
     
-    chains = physics_menu.setupMenu(menu_name)
+    chains = physics_menu.setupMenu()
 
     log.info('[setupMenu] going to add the MC menu chains now')
 
