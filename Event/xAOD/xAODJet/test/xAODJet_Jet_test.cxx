@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -281,14 +281,13 @@ int testClusterConstituents ATLAS_NOT_THREAD_SAFE (xAOD::JetContainer& jetCont, 
 int testShallowCopy ATLAS_NOT_THREAD_SAFE (xAOD::JetContainer& jetCont){
   TEST_MSG("\n ---------------- testShallowCopy  ");
 
-  xAOD::JetContainer & shallowcopy = *(xAOD:: shallowCopyContainer( jetCont ).first);
-  xAOD::Jet * cjet = shallowcopy[0];
+  auto [shallowcopy, shallowcopyAux] = xAOD:: shallowCopyContainer( jetCont );
+  xAOD::Jet * cjet = (*shallowcopy)[0];
   xAOD::Jet * jet = jetCont[0];
 
   TESTMACRO( is_equal( cjet->pt(), jet->pt() ), " shallow copy pt identical");
   TESTMACRO( cjet->rawConstituent(0) == jet->rawConstituent(0), " first constit identical");
 
-  delete &shallowcopy;
   return 0;
 
 }
