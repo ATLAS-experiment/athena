@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RatesAnalysis/RatesHistoBase.h"
@@ -49,8 +49,7 @@ StatusCode RatesHistoBase::giveMuHist(const ServiceHandle<ITHistSvc>& svc, const
     ATH_MSG_ERROR("RatesHistoBase::giveMuHist Warning requested histograms when histograming is OFF here.");
     return StatusCode::FAILURE;
   }
-  ATH_CHECK( svc->regHist(name, std::move(m_rateVsMu), m_rateVsMuCachedPtr) );
-  ATH_MSG_DEBUG("For " << m_name << "(" << this << ") m_rateVsMuCachedPtr is updated to " << (uint64_t) m_rateVsMuCachedPtr);
+  ATH_CHECK( svc->regHist(name, std::move(m_rateVsMu)) );
   return StatusCode::SUCCESS;
 }
 
@@ -60,7 +59,7 @@ StatusCode RatesHistoBase::giveTrainHist(const ServiceHandle<ITHistSvc>& svc, co
     ATH_MSG_ERROR("RatesHistoBase::giveTrainHist Warning requested histograms when histograming is OFF here.");
     return StatusCode::FAILURE;
   }
-  ATH_CHECK( svc->regHist(name, std::move(m_rateVsTrain), m_rateVsTrainCachedPtr) );
+  ATH_CHECK( svc->regHist(name, std::move(m_rateVsTrain)) );
   return StatusCode::SUCCESS;
 }
 
@@ -70,7 +69,7 @@ StatusCode RatesHistoBase::giveDataHist(const ServiceHandle<ITHistSvc>& svc, con
     ATH_MSG_ERROR("RatesHistoBase::giveDataHist Warning requested histograms when histograming is OFF here.");
     return StatusCode::FAILURE;
   }
-  ATH_CHECK( svc->regHist(name, std::move(m_data), m_dataCachedPtr) );
+  ATH_CHECK( svc->regHist(name, std::move(m_data)) );
   return StatusCode::SUCCESS;
 }
 
