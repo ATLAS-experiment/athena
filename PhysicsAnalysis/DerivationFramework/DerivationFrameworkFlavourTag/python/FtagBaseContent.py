@@ -16,6 +16,7 @@ PHYSVAL_FTAG1_FTAG2_SmartCollections = [
     "PrimaryVertices",
     "InDetTrackParticles",
     "AntiKt4EMPFlowJets",
+    "AntiKt4TruthJets",
     "BTagging_AntiKt4EMPFlow",
     "MET_Baseline_AntiKt4EMPFlow",
     "TauJets",
