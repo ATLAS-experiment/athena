@@ -40,15 +40,15 @@ namespace CP
 
         } else if (m_calibMode == MuonCalibTool::correctData_IDMS) {
             ATH_MSG_INFO("Data will be corrected for sagitta bias with ID+MS calibration");
-	    if (m_isRun3.value()) ATH_MSG_INFO("Please make sure you are using the correct muon calibration. Please refer to the twiki MCPAnalysisGuidelinesR22");
+	    if (m_isRun3.value()) ATH_MSG_WARNING("You are using the ID+MS calibration which is currenlty not recommended from the MCP group in Run3. Please refer to the MCP documentation page");
             m_doDirectCBCalib = false;
             m_applyCorrectionOnData = true;
-
+	    
         } else if (m_calibMode == MuonCalibTool::notCorrectData_IDMS) {
-            ATH_MSG_INFO("Data will be untouched. Instead an additional systematic will be added with ID+MS calibration");
-	    if (m_isRun3.value()) ATH_MSG_INFO("Please make sure you are using the correct muon calibration. Please refer to the twiki MCPAnalysisGuidelinesR22");
-            m_doDirectCBCalib = false;
-            m_applyCorrectionOnData = false;
+	    ATH_MSG_INFO("Data will be untouched. Instead an additional systematic will be added with ID+MS calibration");
+	    if (m_isRun3.value()) ATH_MSG_WARNING("You are using the ID+MS calibration which is currenlty not recommended from the MCP group in Run3. Please refer to the MCP documentation page");
+	    m_doDirectCBCalib = false;
+	    m_applyCorrectionOnData = false;
         } 
 	else if (m_calibMode == MuonCalibTool::notCorrectData_CB) {
             ATH_MSG_INFO("Data will be untouched. Instead an additional systematic will be added with CB calibration");
