@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigConf_HLTChain
@@ -79,7 +79,7 @@ namespace TrigConf {
       unsigned int                        chain_hash_id         () const { return m_chain_hash_id; }
       unsigned int                        lower_chain_hash_id   () const { return m_lower_chain_hash_id; }
       int                                 EB_after_step         () const { return m_EB_after_step; }
-      const std::vector<size_t>           leg_multiplicities    () const { return m_leg_multiplicities; }
+      const std::vector<size_t>&          leg_multiplicities    () const { return m_leg_multiplicities; }
       bool                                hasMultipleLowerChains() const;
       const std::vector<int>&             lower_chain_counters  () const;
       std::vector<unsigned int>           lower_chain_hash_ids  () const;
