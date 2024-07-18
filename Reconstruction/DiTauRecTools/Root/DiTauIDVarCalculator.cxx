@@ -42,12 +42,8 @@ using JetLink_t = ElementLink<xAOD::JetContainer>;
 //______________________________________________________________________________
 DiTauIDVarCalculator::DiTauIDVarCalculator( const std::string& name )
   : AsgTool(name)
-  , m_sDiTauContainerName("DiTauJets")
-  , m_eDecayChannel(DecayChannel::Default)
 {
-  declareProperty( "DefaultValue", m_dDefault = 0);
-  declareProperty( "DiTauContainerName", m_sDiTauContainerName = "DiTauJets");
-  declareProperty( "DiTauDecayChannel", m_sDecayChannel = "HadHad");
+  declareProperty( "DefaultValue", m_dDefault = -1234);
 }
 
 //______________________________________________________________________________
@@ -58,13 +54,6 @@ DiTauIDVarCalculator::~DiTauIDVarCalculator( )
 StatusCode DiTauIDVarCalculator::initialize()
 {
   ATH_MSG_INFO( "Initializing DiTauIDVarCalculator" );
-  m_DiTauContainerNameAux = m_sDiTauContainerName + "Aux.";
-  if(m_sDecayChannel == "HadHad")
-    m_eDecayChannel = DecayChannel::HadHad;
-  if(m_eDecayChannel == DecayChannel::Default){
-    ATH_MSG_ERROR( "No Valid DecayChannel initialized. Valid options are: HadHad" );
-    return StatusCode::FAILURE;
-  }
   
   return StatusCode::SUCCESS;
 }
@@ -79,18 +68,7 @@ StatusCode DiTauIDVarCalculator::calculateIDVariables(const xAOD::DiTauJet& xDiT
 
 StatusCode DiTauIDVarCalculator::execute(const xAOD::DiTauJet& xDiTau)
 {
-  switch(m_eDecayChannel) {
-  case(DecayChannel::HadHad):
-    return calculateHadHadIDVariables(xDiTau);
-    break;
-  default:
-    return StatusCode::FAILURE;
-  }
-  return StatusCode::FAILURE;
-}
-
-StatusCode DiTauIDVarCalculator::calculateHadHadIDVariables(const xAOD::DiTauJet& xDiTau)
-{
+  
   ATH_MSG_DEBUG("Calculate DiTau ID variables");
   
   static const SG::Decorator< int > n_subjetsDec("n_subjets");
@@ -172,10 +150,6 @@ StatusCode DiTauIDVarCalculator::calculateHadHadIDVariables(const xAOD::DiTauJet
   f_isotracksDec(xDiTau) = f_isotracks(xDiTau);
 
   return StatusCode::SUCCESS;
-}
-
-std::string DiTauIDVarCalculator::getDecayMode(){
-  return m_sDecayChannel;
 }
 
 //=================================PRIVATE-PART=================================
