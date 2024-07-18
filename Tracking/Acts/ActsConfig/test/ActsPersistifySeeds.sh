@@ -13,7 +13,7 @@ Reco_tf.py \
     --outputAODFile AOD.athena.pool.root \
     --outputESDFile ESD.athena.pool.root \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
-    --preExec "flags.Exec.FPE=-1;" "flags.Tracking.doStoreTrackSeeds=True;flags.Tracking.doTruth=True;flags.Tracking.doStoreSiSPSeededTracks=True;flags.Tracking.writeExtendedSi_PRDInfo=True;" \
+    --preExec "flags.Exec.FPE=-1;" "flags.Tracking.doStoreTrackSeeds=True;flags.Tracking.doTruth=True;flags.Tracking.doStoreSiSPSeededTracks=True;flags.Tracking.writeExtendedSi_PRDInfo=True;" "flags.Tracking.doStoreTrackSeeds=True;" \
     --postExec "from OutputStreamAthenaPool.OutputStreamConfig import addToAOD; toAOD = ['xAOD::TrackParticleContainer#SiSPSeedSegments*', 'xAOD::TrackParticleAuxContainer#SiSPSeedSegments*']; cfg.merge(addToAOD(flags, toAOD))" \
     --maxEvents ${n_events} \
     --multithreaded

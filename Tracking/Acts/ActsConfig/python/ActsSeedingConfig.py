@@ -355,7 +355,6 @@ def ActsMainSeedingCfg(flags,
 
 def ActsSeedingCfg(flags) -> ComponentAccumulator:
     acc = ComponentAccumulator()
-
     processPixels = flags.Detector.EnableITkPixel
     processStrips = flags.Detector.EnableITkStrip
 
@@ -428,4 +427,36 @@ def ActsSeedingCfg(flags) -> ComponentAccumulator:
             kwargs.setdefault('StripEstimatedTrackParamsAnalysisAlg.InputTrackParamsCollection', kwargs['StripSeedingAlg.OutputEstimatedTrackParameters'])
             
     acc.merge(ActsMainSeedingCfg(flags, **kwargs))        
+
+    if flags.Tracking.ActiveConfig.storeTrackSeeds:   
+        acc.merge(ActsSeedToTrackCnvAlgCfg(flags))
+        from ActsConfig.ActsTrackFindingConfig import ActsTrackToTrackParticleCnvAlgCfg
+        acc.merge(ActsTrackToTrackParticleCnvAlgCfg(flags, 
+                                                    name="ActsTracksSeedToTrackParticleCnv",
+                                                    TrackParticlesOutKey=f"SiSPSeedSegments{flags.Tracking.ActiveConfig.extension}",
+                                                    ACTSTracksLocation=[f'SiSPTracksSeedSegments{flags.Tracking.ActiveConfig.extension}Tracks']))
     return acc
+
+
+def ActsSeedToTrackCnvAlgCfg(flags,
+                             name: str = 'ActsSeedToTrackCnvAlg',
+                             **kwargs: dict) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+
+    kwargs.setdefault('SeedContainerKey', f'{flags.Tracking.ActiveConfig.extension}PixelSeeds')
+    kwargs.setdefault('EstimatedTrackParametersKey',f'{flags.Tracking.ActiveConfig.extension}PixelEstimatedTrackParams')
+
+    kwargs.setdefault('ACTSTracksLocation', f'SiSPTracksSeedSegments{flags.Tracking.ActiveConfig.extension}Tracks') # This uses the same naming convention than the legacy code
+
+    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
+    kwargs.setdefault('TrackingGeometryTool', acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)))
+
+    from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
+    kwargs.setdefault('ATLASConverterTool', acc.popToolsAndMerge(ActsToTrkConverterToolCfg(flags)))
+    kwargs.setdefault('PixelDetectorElements', 'ITkPixelDetectorElementCollection')
+    kwargs.setdefault('StripDetectorElements', 'ITkStripDetectorElementCollection')
+
+
+    acc.addEventAlgo(CompFactory.ActsTrk.SeedToTrackCnvAlg(name, **kwargs), primary=True)
+    return acc
+
