@@ -9,6 +9,7 @@
  */
 
 #undef NDEBUG
+#define XAOD_DEPRECATE_AUXDATA 0 // suppress deprecation warnings.
 #include "AthContainers/AuxElement.h"
 #include "AthContainers/AuxStoreInternal.h"
 #include "AthContainers/exceptions.h"

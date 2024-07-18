@@ -31,6 +31,24 @@
 #include <cstddef>
 
 
+// In non-analysis builds, warn about uses of auxdata/auxdecor.
+// @c XAOD_DEPRECATE_AUXDATA may be set directly to override this; for example,
+// in unit tests.
+#ifndef XAOD_DEPRECATE_AUXDATA
+# if defined(XAOD_ANALYSIS)
+#  define XAOD_DEPRECATE_AUXDATA 0
+# else
+#  define XAOD_DEPRECATE_AUXDATA 1
+# endif
+#endif
+#if XAOD_DEPRECATE_AUXDATA
+# define XAOD_AUXDATA_DEPRECATED [[deprecated("auxdata/auxdecor are deprecated in non-analysis builds.  Use SG::ConstAccessor/SG::Accessor/SG::Decorator instead.")]]
+#else
+# define XAOD_AUXDATA_DEPRECATED
+#endif
+
+
+
 namespace SG {
 
 
@@ -127,6 +145,7 @@ public:
    * or @c ConstAccessor classes.
    */
   template <class T, class ALLOC = AuxAllocator_t<T> >
+  XAOD_AUXDATA_DEPRECATED
   typename ConstAccessor<T, ALLOC>::const_reference_type
   auxdata (const std::string& name) const;
 
@@ -142,6 +161,7 @@ public:
    * or @c ConstAccessor classes.
    */
   template <class T, class ALLOC = AuxAllocator_t<T> >
+  XAOD_AUXDATA_DEPRECATED
   typename ConstAccessor<T, ALLOC>::const_reference_type
   auxdata (const std::string& name,
            const std::string& clsname) const;
@@ -156,6 +176,7 @@ public:
    * inside of loops is discouraged; instead use the @c ConstAccessor class.
    */
   template <class T, class ALLOC = AuxAllocator_t<T> >
+  XAOD_AUXDATA_DEPRECATED
   typename ConstAccessor<T, ALLOC>::const_reference_type
   auxdataConst (const std::string& name) const;
 
@@ -170,6 +191,7 @@ public:
    * inside of loops is discouraged; instead use the @c ConstAccessor class.
    */
   template <class T, class ALLOC = AuxAllocator_t<T> >
+  XAOD_AUXDATA_DEPRECATED
   typename ConstAccessor<T, ALLOC>::const_reference_type
   auxdataConst (const std::string& name,
                 const std::string& clsname) const;
@@ -185,6 +207,7 @@ public:
    * inside of loops is discouraged; instead use the @c Accessor class.
    */
   template <class T, class ALLOC = AuxAllocator_t<T> >
+  XAOD_AUXDATA_DEPRECATED
   bool isAvailable (const std::string& name,
                     const std::string& clsname = "") const;
 
@@ -199,6 +222,7 @@ public:
    * inside of loops is discouraged; instead use the @c Accessor class.
    */
   template <class T, class ALLOC = AuxAllocator_t<T> >
+  XAOD_AUXDATA_DEPRECATED
   bool isAvailableWritableAsDecoration (const std::string& name,
                                         const std::string& clsname = "") const;
 
@@ -216,6 +240,7 @@ public:
    * or variables already marked as decorations.
    */
   template <class T, class ALLOC = AuxAllocator_t<T> >
+  XAOD_AUXDATA_DEPRECATED
   typename Decorator<T, ALLOC>::reference_type
   auxdecor (const std::string& name) const;
 
@@ -234,6 +259,7 @@ public:
    * or variables already marked as decorations.
    */
   template <class T, class ALLOC = AuxAllocator_t<T> >
+  XAOD_AUXDATA_DEPRECATED
   typename Decorator<T, ALLOC>::reference_type
   auxdecor (const std::string& name,
             const std::string& clsname) const;
@@ -534,6 +560,7 @@ public:
    * inside of loops is discouraged; instead use the @c Accessor class.
    */
   template <class T, class ALLOC = AuxAllocator_t<T> >
+  XAOD_AUXDATA_DEPRECATED
   typename Accessor<T, ALLOC>::reference_type
   auxdata (const std::string& name);
 
@@ -548,6 +575,7 @@ public:
    * inside of loops is discouraged; instead use the @c Accessor class.
    */
   template <class T, class ALLOC = AuxAllocator_t<T> >
+  XAOD_AUXDATA_DEPRECATED
   typename Accessor<T, ALLOC>::reference_type
   auxdata (const std::string& name,
            const std::string& clsname);
@@ -563,6 +591,7 @@ public:
    * or @c ConstAccessor classes.
    */
   template <class T, class ALLOC = AuxAllocator_t<T> >
+  XAOD_AUXDATA_DEPRECATED
   typename Accessor<T, ALLOC>::const_reference_type
   auxdata (const std::string& name) const;
 
@@ -578,6 +607,7 @@ public:
    * or @c ConstAccessor classes.
    */
   template <class T, class ALLOC = AuxAllocator_t<T> >
+  XAOD_AUXDATA_DEPRECATED
   typename Accessor<T, ALLOC>::const_reference_type
   auxdata (const std::string& name,
            const std::string& clsname) const;
@@ -592,6 +622,7 @@ public:
    * inside of loops is discouraged; instead use the @c ConstAccessor class.
    */
   template <class T, class ALLOC = AuxAllocator_t<T> >
+  XAOD_AUXDATA_DEPRECATED
   typename Accessor<T, ALLOC>::const_reference_type
   auxdataConst (const std::string& name) const;
 
@@ -606,6 +637,7 @@ public:
    * inside of loops is discouraged; instead use the @c ConstAccessor class.
    */
   template <class T, class ALLOC = AuxAllocator_t<T> >
+  XAOD_AUXDATA_DEPRECATED
   typename Accessor<T, ALLOC>::const_reference_type
   auxdataConst (const std::string& name,
                 const std::string& clsname) const;
@@ -621,6 +653,7 @@ public:
    * inside of loops is discouraged; instead use the @c Accessor class.
    */
   template <class T, class ALLOC = AuxAllocator_t<T> >
+  XAOD_AUXDATA_DEPRECATED
   bool isAvailable (const std::string& name,
                     const std::string& clsname = "") const;
 
@@ -635,6 +668,7 @@ public:
    * inside of loops is discouraged; instead use the @c Accessor class.
    */
   template <class T, class ALLOC = AuxAllocator_t<T> >
+  XAOD_AUXDATA_DEPRECATED 
   bool isAvailableWritable (const std::string& name,
                             const std::string& clsname = "");
 
@@ -649,6 +683,7 @@ public:
    * inside of loops is discouraged; instead use the @c Accessor class.
    */
   template <class T, class ALLOC = AuxAllocator_t<T> >
+  XAOD_AUXDATA_DEPRECATED
   bool isAvailableWritableAsDecoration (const std::string& name,
                                         const std::string& clsname = "") const;
 
@@ -666,6 +701,7 @@ public:
    * or variables already marked as decorations.
    */
   template <class T, class ALLOC = AuxAllocator_t<T> >
+  XAOD_AUXDATA_DEPRECATED
   typename Decorator<T, ALLOC>::reference_type
   auxdecor (const std::string& name) const;
 
@@ -684,6 +720,7 @@ public:
    * or variables already marked as decorations.
    */
   template <class T, class ALLOC = AuxAllocator_t<T> >
+  XAOD_AUXDATA_DEPRECATED
   typename Decorator<T, ALLOC>::reference_type
   auxdecor (const std::string& name,
             const std::string& clsname) const;

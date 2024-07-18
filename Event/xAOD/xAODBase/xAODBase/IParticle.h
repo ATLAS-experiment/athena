@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODBASE_IPARTICLE_H
@@ -12,6 +12,7 @@
 
 // EDM include(s):
 #include "AthContainers/AuxElement.h"
+#include "AthContainers/Accessor.h"
 
 // Local include(s):
 #include "ObjectType.h"
@@ -90,13 +91,14 @@ namespace xAOD {
       ///
       /// @param name Name of the aux variable
       /// @param clsname The name of the associated class.  May be blank
-      /// @returns A modifyable reference to the decoration
+      /// @returns A modifiable reference to the decoration
       ///
       template< class T >
+      XAOD_AUXDATA_DEPRECATED
       T& auxdata( const std::string& name,
                   const std::string& clsname = "" ) {
 
-         return SG::AuxElement::auxdata< T >( name, clsname );
+         return SG::Accessor< T >(name, clsname)(*this);
       }
 
       /// Fetch an aux data variable, as a const reference
@@ -112,10 +114,11 @@ namespace xAOD {
       /// @returns A constant reference to the decoration
       ///
       template< class T >
+      XAOD_AUXDATA_DEPRECATED
       const T& auxdata( const std::string& name,
                         const std::string& clsname = "" ) const {
-
-         return SG::AuxElement::auxdata< T >( name, clsname );
+        
+         return SG::ConstAccessor< T >( name, clsname )( *this );
       }
 
       /// Check if a user property is available for reading or not
@@ -128,10 +131,11 @@ namespace xAOD {
       /// @returns Whether the decoration exists or not
       ///
       template< class T >
+      XAOD_AUXDATA_DEPRECATED
       bool isAvailable( const std::string& name,
                         const std::string& clsname = "" ) const {
 
-         return SG::AuxElement::isAvailable< T >( name, clsname );
+         return SG::ConstAccessor< T >(name, clsname).isAvailable(*this);
       }
 
       /// Check if a user property is available for writing or not
@@ -144,10 +148,11 @@ namespace xAOD {
       /// @returns Whether the decoration is possible to set
       ///
       template< class T >
+      XAOD_AUXDATA_DEPRECATED
       bool isAvailableWritable( const std::string& name,
                                 const std::string& clsname = "" ) const {
 
-         return SG::AuxElement::isAvailableWritable< T >( name, clsname );
+         return SG::Accessor< T >(name, clsname).isAvailableWritable(*this);
       }
 
       /// @}
