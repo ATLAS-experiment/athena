@@ -7,7 +7,7 @@ find_package( Boost COMPONENTS unit_test_framework)
 
 # Component(s) in the package:
 atlas_add_library( PixelReadoutDefinitionsLib
-                   PixelReadoutDefinitions/*.h
+                   src/*.cxx
                    INTERFACE
                    PUBLIC_HEADERS PixelReadoutDefinitions )
                    

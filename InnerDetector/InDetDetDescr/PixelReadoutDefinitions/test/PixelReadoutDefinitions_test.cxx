@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -15,9 +15,12 @@
 
 
 #include <boost/test/unit_test.hpp>
+#include "PixelReadoutDefinitions/PixelReadoutDefinitions.h"
+
+#include <stdexcept>
+#include <string>
 //
 
-#include "PixelReadoutDefinitions/PixelReadoutDefinitions.h"
 using namespace InDetDD;
 
 BOOST_AUTO_TEST_SUITE(PixelReadoutDefinitionsTest)
@@ -25,5 +28,14 @@ BOOST_AUTO_TEST_SUITE(PixelReadoutDefinitionsTest)
     BOOST_TEST(enum2uint(PixelModuleType::IBL_PLANAR) == 1);
     BOOST_TEST(enum2uint(PixelDiodeType::LONG) == 1);
     BOOST_TEST(enum2uint(PixelReadoutTechnology::FEI4) == 1);
+    BOOST_CHECK_THROW(enum2uint(PixelModuleType::NONE), std::out_of_range);
   }
+  
+   BOOST_AUTO_TEST_CASE(TypenamesTest){
+    BOOST_TEST(PixelModuleTypeName(PixelModuleType::IBL_PLANAR) == "IBL_PLANAR");
+    BOOST_TEST(PixelDiodeTypeName(PixelDiodeType::LONG) == "LONG");
+    BOOST_TEST(PixelReadoutTechnologyName(PixelReadoutTechnology::FEI4) == "FEI4");
+    BOOST_TEST(PixelModuleTypeName(PixelModuleType::NONE) == "unknown");
+  }
+  
 BOOST_AUTO_TEST_SUITE_END()

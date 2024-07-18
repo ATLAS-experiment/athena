@@ -749,6 +749,7 @@ void PixelPrepDataToxAOD::addRdoInformation(xAOD::TrackMeasurementValidation* xp
     IdentifierHash moduleHash = m_PixelHelper->wafer_hash(moduleID); // wafer hash
     unsigned int FE = m_pixelReadout->getFE(rId, moduleID);
     InDetDD::PixelDiodeType type = m_pixelReadout->getDiodeType(rId);
+    if (type == InDetDD::PixelDiodeType::NONE) continue;
     const auto & parameters = calibData->getLegacyFitParameters(type, moduleHash, FE);
     CTerm.emplace_back(parameters.C);
     ATerm.emplace_back(parameters.A);
