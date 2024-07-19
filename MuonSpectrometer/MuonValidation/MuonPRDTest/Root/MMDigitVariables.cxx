@@ -29,11 +29,14 @@ namespace MuonPRDTest {
             ATH_MSG_DEBUG("processing collection with size " << coll->size());
             for (const MmDigit* digit : *coll) {
                 Identifier Id = digit->identify();
+		
                 const MuonGM::MMReadoutElement* rdoEl = MuonDetMgr->getMMReadoutElement(Id);
                 if (!rdoEl) {
                     ATH_MSG_ERROR("MMDigitVariables::fillVariables() - Failed to retrieve MMReadoutElement for "<<idHelperSvc()->mmIdHelper().print_to_string(Id).c_str());
                     return false;
                 }
+		m_NSWMM_dig_id.push_back(Id);
+		
                 Amg::Vector2D cr_strip_pos{Amg::Vector2D::Zero()};
                 if ( !rdoEl->stripPosition(Id, cr_strip_pos) ) {
                     ATH_MSG_WARNING("MMDigitVariables: failed to associate a valid local position for (chip response) strip n. " 
