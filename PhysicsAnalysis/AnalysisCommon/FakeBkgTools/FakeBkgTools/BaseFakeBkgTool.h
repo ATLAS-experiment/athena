@@ -38,9 +38,6 @@ namespace CP
  * Base class of concrete tools implementations, providing common helper methods
  */
 class ATLAS_NOT_THREAD_SAFE BaseFakeBkgTool: virtual public CP::IFakeBkgTool, public CP::IFakeBkgSystDescriptor, public asg::AsgTool
-#ifndef FAKEBKGTOOLS_ATLAS_ENVIRONMENT
-  , public FakeBkgTools::PropertyManager<BaseFakeBkgTool>
-#endif
 {
   public:
 

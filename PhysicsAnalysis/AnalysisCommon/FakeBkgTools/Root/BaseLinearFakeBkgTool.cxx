@@ -6,11 +6,6 @@
 #include "FakeBkgTools/FakeBkgInternals.h"
 #include "FakeBkgTools/Database.h"
 #include "PathResolver/PathResolver.h"
-
-#ifndef FAKEBKGTOOLS_ATLAS_ENVIRONMENT
-    #define declareProperty(n, p, h) ExtraPropertyManager<BaseLinearFakeBkgTool>::declareProperty(n, &BaseLinearFakeBkgTool::p, h)
-#endif
-
 #include "TTree.h"
 #include "TDirectory.h"
 #include "TFile.h"
@@ -29,8 +24,6 @@ namespace
 
 BaseLinearFakeBkgTool::BaseLinearFakeBkgTool(const std::string& toolname) : BaseFakeBkgTool(toolname), m_yields(1)
 {
-    /// Note: don't use the usual syntax declareProperty("", x = default, ""), it won't work for standalone compilation
-
     m_unlimitedSystematicVariations = true;
 }
 

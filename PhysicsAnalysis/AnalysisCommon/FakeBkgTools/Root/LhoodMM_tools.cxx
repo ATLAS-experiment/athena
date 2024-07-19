@@ -10,7 +10,6 @@
 #include "FakeBkgTools/TMinuit_LHMM.h"
 #include "FakeBkgTools/Database.h"
 #include "PathResolver/PathResolver.h"
-
 #include "TH1.h"
 #include "TH2.h"
 #include "TH3.h"
@@ -25,10 +24,6 @@
 #include "TDirectory.h"
 #include <chrono>
 #include <memory>
-
-#ifndef FAKEBKGTOOLS_ATLAS_ENVIRONMENT
-#define declareProperty(n, p, h) ExtraPropertyManager<LhoodMM_tools>::declareProperty(n, &LhoodMM_tools::p, h)
-#endif
 
 using namespace CP;
 using FakeBkgTools::Efficiency;
@@ -50,9 +45,13 @@ LhoodMM_tools::LhoodMM_tools(const std::string& name)  :
   m_unlimitedSystematicVariations = true;
 
   //setup fixHistogramNormalization property
-  declareProperty("FixHistogramNormalization", m_fixNormalization, "Boolean to determine whether or not histograms are scaled such that their normalization is equal to the fake yield computed for the entire sample (true =  yes, do the scaleing)");
-
-  declareProperty("DoFakeFactorFit",  m_doFakeFactor, "Give results corresponding to the fake factor method rather than the matrix method");
+  declareProperty("FixHistogramNormalization",
+                  m_fixNormalization,
+                  "Boolean to determine whether or not histograms are scaled such that their normalization "
+                  "is equal to the fake yield computed for the entire sample (true =  yes, do the scaling)");
+  declareProperty("DoFakeFactorFit",
+                  m_doFakeFactor,
+                  "Give results corresponding to the fake factor method rather than the matrix method");
 
   // set everything to default values
   reset();
