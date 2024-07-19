@@ -749,7 +749,11 @@ void LhoodMM_tools::fcn_nlep(Int_t &npar, Double_t *, Double_t &f, Double_t *par
 
 
 double LhoodMM_tools::nfakes(Double_t *poserr, Double_t *negerr) {
-  
+  // This top-level function modifies (via a call to setup()) the static variable m_current_lhoodMM_tool,
+  // which is used to provide information to the minimized function fcn_nlep.
+  // It also uses TMinuit for the minimisation.  
+  // Re-entrancy (by different class instances in different threads) is thus enforced with a critical section. 
+  std::lock_guard<std::mutex> lock(LhoodMM_tools::s_mutex); 
   if (m_current_fitInfo->totEvents == 0) {
     *poserr = 0.;
     *negerr = 0.;
@@ -833,8 +837,6 @@ double LhoodMM_tools::nfakes(Double_t *poserr, Double_t *negerr) {
 
   m_minnlep = minNlep_proc;
   m_maxnlep = maxNlep_proc;
-
-  std::lock_guard<std::mutex> lock(LhoodMM_tools::s_mutex); 
   if(setup() != StatusCode::SUCCESS) return 0.;
 
   if (m_maxnlep > m_maxnlep_loose) {
