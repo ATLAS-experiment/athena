@@ -182,7 +182,8 @@ auto floatAccessors = initAccessors<float>(
   "eProbabilityNN",
   "trk_d0","cl_eta2","cl_phi2", "deltaEta1PearDistortion",
   "ClusterEta", "ClusterPhi",
-  "d0TJVA", "d0SigTJVA", "z0sinthetaTJVA", "z0sinthetaSigTJVA"
+  "d0TJVA", "d0SigTJVA", "z0sinthetaTJVA", "z0sinthetaSigTJVA",
+  "pixQ2mod"
   );
 
 auto doubleAccessors = initAccessors<double>("ptcone02", "ptcone03", "JetDensityEMPFlow",
