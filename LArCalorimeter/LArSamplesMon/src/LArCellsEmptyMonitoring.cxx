@@ -49,6 +49,15 @@
 using namespace std;
 using namespace LArSamples;
 
+template <class T>
+using THVec=std::vector<std::unique_ptr<T>>;
+
+template <class T, std::size_t n>
+using THArray = std::array<std::unique_ptr<T>, n >;
+
+using TH1Fp = std::unique_ptr<TH1F>;
+using TH2Fp = std::unique_ptr<TH2F>;
+using TProfilep = std::unique_ptr<TProfile>;
 
 LArCellsEmptyMonitoring::LArCellsEmptyMonitoring()
   : m_LarIdTranslator (std::make_unique<LArIdTranslatorHelper>("LarIdTree.root"))
@@ -169,15 +178,15 @@ void LArCellsEmptyMonitoring::TestRun(const TString& inputfile)
     rootfilename.Form("Output/BadCells_run%d.root",runNumber);  
   }
 
-  TFile* fout = new TFile(rootfilename,"RECREATE");
+  auto fout = std::make_unique<TFile>(rootfilename,"RECREATE");
   Float_t noise = 0;
   Float_t fr_q4k = 0;
-  TH1F* h1_lb = nullptr;
-  TH1F* h1_elb = nullptr;
-  TH1F* h1_qlb = nullptr;
-  TH1F* h1_e = nullptr;
-  TH1F* h1_q = nullptr;
-  TH2F* h2_elb = nullptr;
+  TH1Fp h1_lb;
+  TH1Fp h1_elb;
+  TH1Fp h1_qlb;
+  TH1Fp h1_e;
+  TH1Fp h1_q;
+  TH2Fp h2_elb;
 
 
   // -------------------------------------------------------------------------
@@ -197,39 +206,45 @@ void LArCellsEmptyMonitoring::TestRun(const TString& inputfile)
   printf("Creating cut test histograms...");
   static constexpr int npl=4;
   TH2F tempHist = TH2F("tempNEvLB","",1000,0,1000.,1000,0.,1000.);
-  std::array<TH1F*, npl> hNoise{};
-  std::array<TH1F*, npl> hCellsPerLB{};
-  std::array<TH2F*, npl> hNEvVsEMean{};
-  std::array<TH2F*, npl> hNEvVsECum{};
-  std::array<TH2F*, npl> hECumVsEMean{};
+  //THArray, defined at file scope, holds unique_ptr
+  THArray<TH1F, npl> hNoise{};
+  THArray<TH1F, npl> hCellsPerLB{};
+  THArray<TH2F, npl> hNEvVsEMean{};
+  THArray<TH2F, npl> hNEvVsECum{};
+  THArray<TH2F, npl> hECumVsEMean{};
   
   for (int i=0;i<npl;i++){
     hname.Form("hNEvVsEMean_Layer%i",i);
-    hNEvVsEMean[i] = (TH2F*)tempHist.Clone(hname);
-    hNEvVsEMean[i]->GetXaxis()->SetTitle("Number of Events (E > 10 #sigma) / LB");    hNEvVsEMean[i]->GetYaxis()->SetTitle("E_{mean} per Event / LB [GeV]");
+    hNEvVsEMean[i].reset((TH2F*)tempHist.Clone(hname));
+    hNEvVsEMean[i]->GetXaxis()->SetTitle("Number of Events (E > 10 #sigma) / LB");    
+    hNEvVsEMean[i]->GetYaxis()->SetTitle("E_{mean} per Event / LB [GeV]");
     
     hname.Form("hNEvVsECum_Layer%i",i);
-    hNEvVsECum[i] = (TH2F*)tempHist.Clone(hname);
-    hNEvVsECum[i]->GetXaxis()->SetTitle("Number of Events (E > 10 #sigma) / LB");     hNEvVsECum[i]->GetYaxis()->SetTitle("E_{cumulative} per Cell / LB [GeV]");
+    hNEvVsECum[i].reset((TH2F*)tempHist.Clone(hname));
+    hNEvVsECum[i]->GetXaxis()->SetTitle("Number of Events (E > 10 #sigma) / LB");     
+    hNEvVsECum[i]->GetYaxis()->SetTitle("E_{cumulative} per Cell / LB [GeV]");
     
     hname.Form("hECumVsEMean_Layer%i",i);
-    hECumVsEMean[i] = (TH2F*)tempHist.Clone(hname);
-    hECumVsEMean[i]->GetXaxis()->SetTitle("E_{cumulative} per Cell / LB [GeV]");     hECumVsEMean[i]->GetYaxis()->SetTitle("E_{mean} per Event / LB [GeV]");
+    hECumVsEMean[i].reset((TH2F*)tempHist.Clone(hname));
+    hECumVsEMean[i]->GetXaxis()->SetTitle("E_{cumulative} per Cell / LB [GeV]");     
+    hECumVsEMean[i]->GetYaxis()->SetTitle("E_{mean} per Event / LB [GeV]");
     
     hname.Form("hNoise_Layer%i",i);
-    hNoise[i] = new TH1F(hname,"",60,0.,30.);    
-    hNoise[i]->GetXaxis()->SetTitle("Noise [GeV]");     hNoise[i]->GetYaxis()->SetTitle("Number Of Cells");
+    hNoise[i].reset(new TH1F(hname,"",60,0.,30.));    
+    hNoise[i]->GetXaxis()->SetTitle("Noise [GeV]");     
+    hNoise[i]->GetYaxis()->SetTitle("Number Of Cells");
     
     hname.Form("hCellsPerLB_Layer%i",i);
-    hCellsPerLB[i] = (TH1F*)hlb.Clone(hname);
-    hCellsPerLB[i]->GetXaxis()->SetTitle("LB");     hNoise[i]->GetYaxis()->SetTitle("Number Of Cells");
+    hCellsPerLB[i].reset((TH1F*)hlb.Clone(hname));
+    hCellsPerLB[i]->GetXaxis()->SetTitle("LB");     
+    hNoise[i]->GetYaxis()->SetTitle("Number Of Cells");
   }
   printf("Done\n");
   // -------------------------------------------------------------------------
 
  
   // Opening file:
-  LArSamples::Interface* tuple = (LArSamples::Interface*)Interface::open(inputfile);
+  std::unique_ptr<LArSamples::Interface> tuple ((LArSamples::Interface*)Interface::open(inputfile));
   printf("Number of events: %u %u\n",tuple->nEvents(),tuple->nChannels()); 
   unsigned int nchannels = tuple->nChannels();
 
@@ -254,17 +269,17 @@ void LArCellsEmptyMonitoring::TestRun(const TString& inputfile)
     if(m_SaveTextFile || m_SaveRootFile){
       // set individual cell histos
       hname.Form("h0x%x_Energy",onlid);
-      h1_e = (TH1F*)hene.Clone(hname);
+      h1_e.reset((TH1F*)hene.Clone(hname));
       hname.Form("h0x%x_Quality",onlid);
-      h1_q = (TH1F*)hqua.Clone(hname);
+      h1_q.reset((TH1F*)hqua.Clone(hname));
       hname.Form("h0x%x_LB",onlid);
-      h1_lb = (TH1F*)hlb.Clone(hname);
+      h1_lb.reset((TH1F*)hlb.Clone(hname));
       hname.Form("h0x%x_hNEvVsEMean",onlid);
-      h1_elb = (TH1F*)hlb.Clone(hname);
+      h1_elb.reset((TH1F*)hlb.Clone(hname));
       hname.Form("h0x%x_Energy_LB",onlid);
-      h2_elb = (TH2F*)henelb.Clone(hname);
+      h2_elb.reset((TH2F*)henelb.Clone(hname));
       hname.Form("h0x%x_Quality_LB",onlid);
-      h1_qlb = (TH1F*)hlb.Clone(hname);
+      h1_qlb.reset((TH1F*)hlb.Clone(hname));
     }
     
     // loop on the events for each cell
@@ -373,12 +388,6 @@ void LArCellsEmptyMonitoring::TestRun(const TString& inputfile)
       }
     }      
     
-    delete h1_e;
-    delete h1_q;
-    delete h1_lb;
-    delete h1_elb;
-    delete h2_elb;
-    delete h1_qlb;
     qcount = 0.;
     EventCount = 0.;
   } // end of cell loop
@@ -401,7 +410,6 @@ void LArCellsEmptyMonitoring::TestRun(const TString& inputfile)
   }
 
     fout->Close(); 
-    delete fout;
     fclose(pFile);
     return;
   
@@ -416,7 +424,7 @@ void LArCellsEmptyMonitoring::Run(const TString& inputfile)
   TString htitle,hname,textfilename,rootfilename;
 
   // partition/layer indexing entrirely defined by LarIdTranslator
-  int npl = m_LarIdTranslator->GetNpl();
+  const int npl = m_LarIdTranslator->GetNpl();
 
 
   // ----------------------------------------------------
@@ -566,7 +574,7 @@ printf("Set threshold at %4.3f counts per cell for LB range. \n",(MeanHits+(nsig
     rootfilename.Form("Output/BadCells_run%d.root",runNumber);  
   }
 
-  TFile* fout = new TFile(rootfilename,"RECREATE");
+  auto fout = std::make_unique<TFile>(rootfilename,"RECREATE");
   Int_t larid = 0;
   Int_t t_run =0;
   Int_t n_ensig = 0;
@@ -584,9 +592,9 @@ printf("Set threshold at %4.3f counts per cell for LB range. \n",(MeanHits+(nsig
   TH2D* h2_t_LB = nullptr;
   TProfile* TProf_pulse = nullptr;
   TH1F* h1_ADCmax = nullptr;
-  TTree* tree_cells = nullptr;
+  std::unique_ptr<TTree> tree_cells;
   if(m_SaveRootFile){
-    tree_cells = new TTree("BadTree","LAr Tree ordered by OnlID");
+    tree_cells.reset(new TTree("BadTree","LAr Tree ordered by OnlID"));
     tree_cells->Branch("Energy",&h1_e);
     tree_cells->Branch("Quality",&h1_q);
     tree_cells->Branch("LB",&h1_lb);
@@ -609,62 +617,96 @@ printf("Set threshold at %4.3f counts per cell for LB range. \n",(MeanHits+(nsig
 
   Double_t xmin=-4.9,xmax=4.9;
   Double_t xw=0.1;
-  TH2D* NormPulse = new TH2D("Normalised_pulse","",100,-200,200,400,-10,10); NormPulse->SetXTitle("Time [ns]"); NormPulse->SetYTitle("Value [ADC counts] / ADCmax");
-  TH2D** Pulsemaps = new TH2D*[npl];
-  TH2F** Cellmaps = new TH2F*[npl];
-  TH2F** E_LBmaps = new TH2F*[npl];
-  TH2D** t_LBmaps = new TH2D*[npl];
-  TH1F** CellsFlagged_LB_part = new TH1F*[npl];
-  TH1F** Emean_NbrEvents_part = new TH1F*[npl];
-  TH2F* E_LB = new TH2F("E_LB","",nlb,lbmin,lbmax,ne,emin,emax); E_LB->SetXTitle("LB"); E_LB->SetYTitle("Energy [GeV]");    
-  TH2D* t_LB=new TH2D("t_LB","",nlb,lbmin,lbmax,400,-200,200); t_LB->GetXaxis()->SetTitle("LB"); t_LB->GetYaxis()->SetTitle("Time(maxSample) + ofcTime [ns]");  
-  TH1F* CF_LB = new TH1F("CF_LB","",nlb,lbmin,lbmax); CF_LB->GetXaxis()->SetTitle("LB"); CF_LB->GetYaxis()->SetTitle("Number of cells flagged"); 
-  TH1F* ME_EV = new TH1F("ME_EV","",1000,0,1000); ME_EV->GetXaxis()->SetTitle("Nbr events >1 GeV"); ME_EV->GetYaxis()->SetTitle("Mean Energy [GeV]"); 
+  TH2D NormPulse("Normalised_pulse","",100,-200,200,400,-10,10); 
+  NormPulse.SetXTitle("Time [ns]"); 
+  NormPulse.SetYTitle("Value [ADC counts] / ADCmax");
+  //
+  //THVec, defined at file scope, holds unique_ptr, defined a filescope
+  THVec<TH2D> Pulsemaps(npl);
+  THVec<TH2F> Cellmaps(npl);
+  THVec<TH2F> E_LBmaps(npl);
+  THVec<TH2D> t_LBmaps(npl);
+  THVec<TH1F> CellsFlagged_LB_part(npl);
+  THVec<TH1F> Emean_NbrEvents_part(npl);
+  //
+  TH2F E_LB("E_LB","",nlb,lbmin,lbmax,ne,emin,emax); 
+  E_LB.SetXTitle("LB"); 
+  E_LB.SetYTitle("Energy [GeV]");
+  //    
+  TH2D t_LB("t_LB","",nlb,lbmin,lbmax,400,-200,200); 
+  t_LB.GetXaxis()->SetTitle("LB"); 
+  t_LB.GetYaxis()->SetTitle("Time(maxSample) + ofcTime [ns]");
+  //
+  TH1F CF_LB("CF_LB","",nlb,lbmin,lbmax); 
+  CF_LB.GetXaxis()->SetTitle("LB"); 
+  CF_LB.GetYaxis()->SetTitle("Number of cells flagged"); 
+  //
+  TH1F ME_EV("ME_EV","",1000,0,1000); 
+  ME_EV.GetXaxis()->SetTitle("Nbr events >1 GeV"); 
+  ME_EV.GetYaxis()->SetTitle("Mean Energy [GeV]"); 
 
 
 
   if(m_SaveRootFile){
     for (int ii=0;ii<npl;ii++){
-      Cellmaps[ii] = (TH2F*)m_LarIdTranslator->GetCaloPartitionLayerMap(ii);
+      Cellmaps[ii].reset((TH2F*)m_LarIdTranslator->GetCaloPartitionLayerMap(ii));
       Cellmaps[ii]->GetXaxis()->SetTitle("#eta"); Cellmaps[ii]->GetYaxis()->SetTitle("#Phi"); 
       hname.Form("%s_PulseShape_%dsigma",m_LarIdTranslator->GetPartitonLayerName(ii),(int)nsigmaHits);
-      Pulsemaps[ii] = (TH2D*)NormPulse->Clone(hname);
+      Pulsemaps[ii].reset((TH2D*)NormPulse.Clone(hname));
       hname.Form("%s_EvergyVsLB",m_LarIdTranslator->GetPartitonLayerName(ii));
-      E_LBmaps[ii] = (TH2F*)E_LB->Clone(hname);
+      E_LBmaps[ii].reset((TH2F*)E_LB.Clone(hname));
       hname.Form("%s_PulseTimeVsLB",m_LarIdTranslator->GetPartitonLayerName(ii));
-      t_LBmaps[ii] = (TH2D*)t_LB->Clone(hname);
+      t_LBmaps[ii].reset((TH2D*)t_LB.Clone(hname));
       hname.Form("%s_CellsFlaggedVsLB",m_LarIdTranslator->GetPartitonLayerName(ii));
-      CellsFlagged_LB_part[ii] = (TH1F*)CF_LB->Clone(hname);
+      CellsFlagged_LB_part[ii].reset((TH1F*)CF_LB.Clone(hname));
       // en plus
       hname.Form("%s_EmeanVsNbrEvents",m_LarIdTranslator->GetPartitonLayerName(ii));
-      Emean_NbrEvents_part[ii] = (TH1F*)ME_EV->Clone(hname);
+      Emean_NbrEvents_part[ii].reset((TH1F*)ME_EV.Clone(hname));
       //
     }
   }
-  TH2F* Eeta = new TH2F("Eeta","",(int)floor((xmax-xmin)/xw),xmin,xmax,ne,emin,emax);
-  Eeta->GetXaxis()->SetTitle("#eta");  Eeta->GetYaxis()->SetTitle("Energy [GeV]");
-  TH1F* CellEnergy = new TH1F("CellEnergy","",ne,emin,emax);
-  CellEnergy->GetXaxis()->SetTitle("Cell Mean Energy [GeV]"); CellEnergy->GetYaxis()->SetTitle("Cells");
-  TH1F* LBfrac = new TH1F("LBfrac","",100,0.,1.);
-  LBfrac->GetXaxis()->SetTitle("LB fraction"); LBfrac->GetYaxis()->SetTitle("Cells");
-  TH1F* Qfrac = new TH1F("Qfrac","",100.,0.,1.);
-  Qfrac->GetXaxis()->SetTitle("Fraction of Events Q>4000"); Qfrac->GetYaxis()->SetTitle("Cells");
-  TH1F* CellsFlagged_LB = new TH1F("CellsFlagged_LB","",nlb,lbmin,lbmax);
-  CellsFlagged_LB->GetXaxis()->SetTitle("LB"); CellsFlagged_LB->GetYaxis()->SetTitle("Number of cells flagged"); 
-  TH1F* Emean_NbrEvents = new TH1F("Emean_NEvents_1GeV","",1000,0,1000);
-  Emean_NbrEvents->GetXaxis()->SetTitle("N events > 1 GeV"); Emean_NbrEvents->GetYaxis()->SetTitle("Mean Energy [GeV]");
+  TH2F Eeta("Eeta","",(int)floor((xmax-xmin)/xw),xmin,xmax,ne,emin,emax);
+  Eeta.GetXaxis()->SetTitle("#eta");  
+  Eeta.GetYaxis()->SetTitle("Energy [GeV]");
+  //
+  TH1F CellEnergy("CellEnergy","",ne,emin,emax);
+  CellEnergy.GetXaxis()->SetTitle("Cell Mean Energy [GeV]"); 
+  CellEnergy.GetYaxis()->SetTitle("Cells");
+  //
+  TH1F LBfrac("LBfrac","",100,0.,1.);
+  LBfrac.GetXaxis()->SetTitle("LB fraction"); 
+  LBfrac.GetYaxis()->SetTitle("Cells");
+  //
+  TH1F Qfrac("Qfrac","",100.,0.,1.);
+  Qfrac.GetXaxis()->SetTitle("Fraction of Events Q>4000"); 
+  Qfrac.GetYaxis()->SetTitle("Cells");
+  //
+  TH1F CellsFlagged_LB("CellsFlagged_LB","",nlb,lbmin,lbmax);
+  CellsFlagged_LB.GetXaxis()->SetTitle("LB"); 
+  CellsFlagged_LB.GetYaxis()->SetTitle("Number of cells flagged"); 
+  //
+  TH1F Emean_NbrEvents("Emean_NEvents_1GeV","",1000,0,1000);
+  Emean_NbrEvents.GetXaxis()->SetTitle("N events > 1 GeV"); 
+  Emean_NbrEvents.GetYaxis()->SetTitle("Mean Energy [GeV]");
   //
   // -------------------------------------------------------------------------
   // create individual cell histos
   // -------------------------------------------------------------------------
   printf("Creating histograms (nEbins = %d, nQbins = %d, nLBbins = %d)... ",ne,nq,nlb);
-  TH1F hene   =  TH1F("hEne","",ne,emin,emax); hene.SetXTitle("Energy [GeV]"); hene.SetYTitle("Events");
-  TH1F hqua   =  TH1F("hQua","",nq/100.,qmin,qmax); hqua.SetXTitle("Quality"); hqua.SetYTitle("Events");
-  TH1F hlb    =  TH1F("hLB","",nlb,lbmin,lbmax); hlb.SetXTitle("LB"); hlb.SetYTitle("Events");
-  TH2F henelb = TH2F("hEnelb","",nlb,lbmin,lbmax,ne,emin,emax); henelb.SetXTitle("LB"); henelb.SetYTitle("Energy [GeV]");
-  TH2D hpulse =  TH2D("hPulse","",100,-200,200,400, -10,10); hpulse.SetXTitle("Time [ns]"); hpulse.SetYTitle("Value [ADC counts] / ADCmax");
-  TProfile TProfpulse =  TProfile("", "",5, 0, 5, "s"); TProfpulse.SetXTitle("Sample Number"); TProfpulse.SetYTitle("Value [ADC counts]");
-  TH2D ht_LB= TH2D("ht_LB","",nlb,lbmin,lbmax,400,-200,200); ht_LB.GetXaxis()->SetTitle("LB"); ht_LB.GetYaxis()->SetTitle("Time(maxSample) + ofcTime [ns]");  
+  TH1F hene   =  TH1F("hEne","",ne,emin,emax); hene.SetXTitle("Energy [GeV]"); 
+  hene.SetYTitle("Events");
+  TH1F hqua   =  TH1F("hQua","",nq/100.,qmin,qmax); hqua.SetXTitle("Quality"); 
+  hqua.SetYTitle("Events");
+  TH1F hlb    =  TH1F("hLB","",nlb,lbmin,lbmax); hlb.SetXTitle("LB"); 
+  hlb.SetYTitle("Events");
+  TH2F henelb = TH2F("hEnelb","",nlb,lbmin,lbmax,ne,emin,emax); henelb.SetXTitle("LB"); 
+  henelb.SetYTitle("Energy [GeV]");
+  TH2D hpulse =  TH2D("hPulse","",100,-200,200,400, -10,10); hpulse.SetXTitle("Time [ns]"); 
+  hpulse.SetYTitle("Value [ADC counts] / ADCmax");
+  TProfile TProfpulse =  TProfile("", "",5, 0, 5, "s"); TProfpulse.SetXTitle("Sample Number"); 
+  TProfpulse.SetYTitle("Value [ADC counts]");
+  TH2D ht_LB= TH2D("ht_LB","",nlb,lbmin,lbmax,400,-200,200); ht_LB.GetXaxis()->SetTitle("LB"); 
+  ht_LB.GetYaxis()->SetTitle("Time(maxSample) + ofcTime [ns]");  
   TH1F hADCmax = TH1F("","",110,-200,2000); hADCmax.SetXTitle("ADCmax [ADC counts]"); hADCmax.SetYTitle("Events");
   // -------------------------------------------------------------------------
   printf("Done.\n");
@@ -893,21 +935,20 @@ printf("Set threshold at %4.3f counts per cell for LB range. \n",(MeanHits+(nsig
 	  }
 	  n_ecut = nEvents_E_gt_ecut;
 	  Cellmaps[index]->Fill(eta,phi,meanECell);
-	  Eeta->Fill(eta,meanECell);
-	  CellEnergy->Fill(meanECell);
-	  LBfrac->Fill(fr_LB);
+	  Eeta.Fill(eta,meanECell);
+	  CellEnergy.Fill(meanECell);
+	  LBfrac.Fill(fr_LB);
 	  if (n_ecut>0) {
-            Emean_NbrEvents->Fill(n_ecut,EventEnergySum/n_ecut);
+            Emean_NbrEvents.Fill(n_ecut,EventEnergySum/n_ecut);
 	    Emean_NbrEvents_part[index]->Fill(n_ecut,EventEnergySum/n_ecut);
           }
 
-	  Qfrac->Fill(fr_q4k);
-	  Pulsemaps[index]->Add(Pulsemaps[index],h2_pulse);
-	  E_LBmaps[index]->Add(E_LBmaps[index],h2_elb);
-	  t_LBmaps[index]->Add(t_LBmaps[index],h2_t_LB);
+	  Qfrac.Fill(fr_q4k);
+	  Pulsemaps[index]->Add(Pulsemaps[index].get(),h2_pulse);
+	  E_LBmaps[index]->Add(E_LBmaps[index].get(),h2_elb);
+	  t_LBmaps[index]->Add(t_LBmaps[index].get(),h2_t_LB);
 	  CellsFlagged_LB_part[index]->Fill(LBFlaggedIn);
-	  CellsFlagged_LB->Fill(LBFlaggedIn);
-
+	  CellsFlagged_LB.Fill(LBFlaggedIn);
 	}
 
 	if (m_SaveRootTree){ tree_cells->Fill(); }
@@ -923,14 +964,6 @@ printf("Set threshold at %4.3f counts per cell for LB range. \n",(MeanHits+(nsig
       }
     }
     
-    if(h1_e)        delete h1_e;
-    if(h1_q)        delete h1_q;
-    if(h1_lb)       delete h1_lb;
-    if(h2_elb)      delete h2_elb;
-    if(h2_pulse)    delete h2_pulse;
-    if(TProf_pulse) delete TProf_pulse;
-    if(h1_ADCmax)   delete h1_ADCmax;    
-    if(h2_t_LB)     delete h2_t_LB;
     qcount = 0.;
     EventCount = 0.;
     nEvents_E_gt_ecut = 0.;
@@ -951,7 +984,6 @@ printf("Set threshold at %4.3f counts per cell for LB range. \n",(MeanHits+(nsig
   
   if(m_SaveRootFile){
     fout->cd();
-              
     for(int i=0;i<npl;i++){
       if(Cellmaps[i]->GetEntries()>0) Cellmaps[i]->Write();
       if(E_LBmaps[i]->GetEntries()>0) E_LBmaps[i]->Write();
@@ -960,16 +992,23 @@ printf("Set threshold at %4.3f counts per cell for LB range. \n",(MeanHits+(nsig
       if(CellsFlagged_LB_part[i]->GetEntries()>0) CellsFlagged_LB_part[i]->Write();
       if( Emean_NbrEvents_part[i]->GetEntries()>0) Emean_NbrEvents_part[i]->Write();
     }
-    CellsFlagged_LB->Write();
-    Eeta->Write();
-    CellEnergy->Write();
-    Qfrac->Write();
-    Emean_NbrEvents->Write();
-    LBfrac->Write();
+    CellsFlagged_LB.Write();
+    Eeta.Write();
+    CellEnergy.Write();
+    Qfrac.Write();
+    Emean_NbrEvents.Write();
+    LBfrac.Write();
   }
-  
-    fout->Close(); delete fout;
-    return;
+  fout->Close();
+  delete h1_lb;
+  delete h1_e;
+  delete h1_q;
+  delete h2_elb;
+  delete h2_pulse;
+  delete h2_t_LB;
+  delete TProf_pulse;
+  delete h1_ADCmax;
+  return;
   
 }
 
@@ -1089,16 +1128,16 @@ std::vector<int, std::allocator<int> >  LArCellsEmptyMonitoring::GetBadLBList(co
   // -------------------------------------------------------------------------
   // Find Bad LBs -> make list (BadLB vector output)
   // -------------------------------------------------------------------------
-  TProfile* hCells_Ev_LB = new TProfile("","",nlb,lbmin,lbmax,-100,100000);//averaged number of cells per event per LB
-   std::map< std::string, TProfile*> hCellsEvLB;
-   std::map< std::string, TH1F*> hp_cryo;
+   auto hCells_Ev_LB = std::make_unique<TProfile>("","",nlb,lbmin,lbmax,-100,100000);//averaged number of cells per event per LB
+   std::map< std::string, TProfilep> hCellsEvLB;
+   std::map< std::string, TH1Fp> hp_cryo;
   // -------------------------------------------------------------------------
   // loop over events (based on Interface::ShowEvents).
   // -------------------------------------------------------------------------
    int nCryo = 8;   
    std::string Cryo[8] = {"EMBA","EMBC","EMECA","EMECC","HECA", "HECC","FCALA","FCALC"};
    for(int k = 0; k< nCryo; k++){
-     hCellsEvLB[Cryo[k]] = (TProfile*)hCells_Ev_LB->Clone(); 
+     hCellsEvLB[Cryo[k]].reset((TProfile*)hCells_Ev_LB->Clone()); 
     }
     for(unsigned int ievent = 0; ievent < tuple->nEvents(); ievent++) {
      const LArSamples::EventData* evtData = tuple->eventData(ievent);
@@ -1113,11 +1152,11 @@ std::vector<int, std::allocator<int> >  LArCellsEmptyMonitoring::GetBadLBList(co
      hCells_Ev_LB->Fill(eventLumiBlock[id], eventCells_tot[id]);
   }
 
-   TH1F* hp = new TH1F("","",(hCells_Ev_LB->GetBinContent(hCells_Ev_LB->GetMaximumBin())),0,hCells_Ev_LB->GetBinContent(hCells_Ev_LB->GetMaximumBin()));// histo to find average number of cells firing per event per LB
+   auto hp = std::make_unique<TH1F>("","",(hCells_Ev_LB->GetBinContent(hCells_Ev_LB->GetMaximumBin())),0,hCells_Ev_LB->GetBinContent(hCells_Ev_LB->GetMaximumBin()));// histo to find average number of cells firing per event per LB
    for(int k = 0; k< nCryo; k++){
-    TH1F* hp_temp = new TH1F("","",(hCellsEvLB[Cryo[k]]->GetBinContent(hCellsEvLB[Cryo[k]]->GetMaximumBin())*10),0,hCellsEvLB[Cryo[k]]->GetBinContent(hCellsEvLB[Cryo[k]]->GetMaximumBin()));// histo to find average number of cells firing per event per LB
+     auto hp_temp = std::make_unique< TH1F>("","",(hCellsEvLB[Cryo[k]]->GetBinContent(hCellsEvLB[Cryo[k]]->GetMaximumBin())*10),0,hCellsEvLB[Cryo[k]]->GetBinContent(hCellsEvLB[Cryo[k]]->GetMaximumBin()));// histo to find average number of cells firing per event per LB
      std::string name1 = "hp_" + Cryo[k];
-     hp_cryo[Cryo[k]] = (TH1F*)hp_temp->Clone(name1.c_str());
+     hp_cryo[Cryo[k]].reset((TH1F*)hp_temp->Clone(name1.c_str()));
     }
    
    for (int p=1;p<=nlb;p++){
@@ -1175,7 +1214,6 @@ std::vector<int, std::allocator<int> >  LArCellsEmptyMonitoring::GetBadLBList(co
   printf("Number of Bad LBs found: %d\n",numberFlagged);
   printf("Number of LBs to be removed: %zu", BadLB_tot.size());
   printf("\n");
-  delete tuple;
 
   return BadLB_tot;
 }
@@ -1198,15 +1236,15 @@ void LArCellsEmptyMonitoring::GetMeanCellHits(const char* inputfile, int nlb, in
 
   int  nHits = 0., lumiBlock = 0.,nCells = 0.;
   double energy = 0, noise = 0;
-  LArSamples::Interface* tuple = (LArSamples::Interface*)Interface::open(inputfile);
+  std::unique_ptr<LArSamples::Interface> tuple((LArSamples::Interface*)Interface::open(inputfile));
   unsigned int nchannels = tuple->nChannels();
   
   //TH1F* h1_hits = new TH1F("","",nlb,lbmin,lbmax); // temp histo filled with every event in cell with E>4sig
   double TotalRecordedHits=0;
   std::vector<int, std::allocator<int> > HitsPerLB;
   double var=0;
-  TH1F* th1_Hits = new TH1F("","",nlb,lbmin,lbmax); // number of events (E>nsig) in each LB for each cell
-  TH1F* hNLB = new TH1F("","",nlb,lbmin,lbmax); // number of lumiblocks
+  TH1Fp th1_Hits = std::make_unique<TH1F>("","",nlb,lbmin,lbmax); // number of events (E>nsig) in each LB for each cell
+  TH1Fp hNLB = std::make_unique<TH1F>("","",nlb,lbmin,lbmax); // number of lumiblocks
 
   // -------------------------------------------------------------------------
   for(unsigned int ichan = 0; ichan < nchannels; ichan++){
@@ -1253,7 +1291,7 @@ void LArCellsEmptyMonitoring::GetMeanCellHits(const char* inputfile, int nlb, in
   
 
 
-  TH1F* tp_ev = new TH1F("","",th1_Hits->GetBinContent(th1_Hits->GetMaximumBin())*100,0,th1_Hits->GetBinContent(th1_Hits->GetMaximumBin()));
+  TH1Fp tp_ev = std::make_unique<TH1F>("","",th1_Hits->GetBinContent(th1_Hits->GetMaximumBin())*100,0,th1_Hits->GetBinContent(th1_Hits->GetMaximumBin()));
 
    for (int i=1;i<=nlb;i++){
      if(hNLB->GetBinContent(i)>0){
@@ -1278,8 +1316,6 @@ void LArCellsEmptyMonitoring::GetMeanCellHits(const char* inputfile, int nlb, in
    printf("Number of cells firing at E > %d sigma = %d\n",nsigma,nCells);
    printf("Total number of LBs included = %d\n",nlb_corr);
 
-
-   if (th1_Hits) delete th1_Hits;     
 
 }
 
@@ -1421,10 +1457,9 @@ std::vector<int> LArCellsEmptyMonitoring::ReadBadLBList(const TString& LBfile)
   // assume single-line format with coma-separated LBs (from python)                                                                                                                
   std::getline(infile,line,'\n');
   TString filter(line.c_str());
-  TObjArray* list = filter.Tokenize(", "); // coma\space delimiters                                                                                                                 
+  std::unique_ptr<TObjArray> list(filter.Tokenize(", ")); // coma\space delimiters                                                                                                                 
   if(list->GetEntries() == 0){
     printf("No LB filtering specified, or bad format. Exiting.\n");
-    delete list;
     LBList.push_back(0);
     return LBList;
   }
@@ -1433,9 +1468,7 @@ std::vector<int> LArCellsEmptyMonitoring::ReadBadLBList(const TString& LBfile)
     TObjString* tobs = (TObjString*)(list->At(k));
     LBList.push_back((int)(tobs->String()).Atoi());
   }
-  delete list;
   printf("LB List: %d\n",(int)LBList.size());
-
   return LBList;
 }
 /*
@@ -1474,12 +1507,12 @@ void LArCellsEmptyMonitoring::ScanOnlids(const TString& inputfile)
 
   int index = -1;
   ULong64_t onlid = 0;
-  std::map<ULong64_t,unsigned int>* idmap = new std::map<ULong64_t,unsigned int>;
+  std::map<ULong64_t,unsigned int> idmap;
   std::map<ULong64_t,unsigned int>::iterator idmap_itr;
   int nskipped=0,nrepeated=0;
 
   // Opening file:
-  LArSamples::Interface* tuple = (LArSamples::Interface*)Interface::open(inputfile);
+  std::unique_ptr<LArSamples::Interface> tuple((LArSamples::Interface*)Interface::open(inputfile));
   printf("Number of events: %u %u\n",tuple->nEvents(),tuple->nChannels()); //tuple->ShowEvents("energy>0.");
   unsigned int nchannels = tuple->nChannels();
 
@@ -1502,11 +1535,11 @@ void LArCellsEmptyMonitoring::ScanOnlids(const TString& inputfile)
     */
     if(onlid<=0) printf("%u: Bad Cell Onlid = 0x%x (%+.2f,%+.2f)\n",ichan,(unsigned int)onlid,cellInfo->eta(),cellInfo->phi());
 
-    idmap_itr = idmap->find(onlid);
+    idmap_itr = idmap.find(onlid);
     
     // new onlid
-    if(idmap_itr == idmap->end()){
-      (*idmap)[onlid] = ichan;
+    if(idmap_itr == idmap.end()){
+      idmap[onlid] = ichan;
     } else {
       nrepeated+=1;
       printf("Onlid 0x%x (%d,%s,%+.2f,%+.2f)\n",(unsigned int)onlid,index,m_LarIdTranslator->GetPartitonLayerName(index),
@@ -1515,7 +1548,7 @@ void LArCellsEmptyMonitoring::ScanOnlids(const TString& inputfile)
   }
 
   printf("Skipped %d cells.\n",nskipped);
-  printf("Number of onlids: Unique=%d, Repeated=%d\n",(int)idmap->size(),nrepeated); 
+  printf("Number of onlids: Unique=%d, Repeated=%d\n",(int)idmap.size(),nrepeated); 
 
   return; 
 }
@@ -1557,7 +1590,7 @@ void LArCellsEmptyMonitoring::DoEtaPhiMonitoring(const char* inputfile,const cha
   ULong64_t onlid = 0;
 
   // Opening file:
-  LArSamples::Interface* tuple = (LArSamples::Interface*)Interface::open(inputfile);
+  std::unique_ptr<LArSamples::Interface> tuple((LArSamples::Interface*)Interface::open(inputfile));
   printf("Number of events: %u %u\n",tuple->nEvents(),tuple->nChannels());
   unsigned int nchannels = tuple->nChannels();
 
@@ -1626,11 +1659,11 @@ void LArCellsEmptyMonitoring::DoEtaPhiMonitoring(const char* inputfile,const cha
     }
   }
 
-  TFile* tout = nullptr;
+  std::unique_ptr<TFile> tout;
   TCanvas* c0 = nullptr, *c1 = nullptr;
 
   if(!strcmp(optionsave,"root")){
-    tout = new TFile("EtaPhiMonitoring.root","recreate");
+    tout.reset(new TFile("EtaPhiMonitoring.root","recreate"));
     c0 = m_LarIdTranslator->CaloPartitionLayerDisplay((TH1**)hmap_counts_all,"Counts",1);
     c0->SetName("Normalization");
     c0->Write();
@@ -1647,7 +1680,7 @@ void LArCellsEmptyMonitoring::DoEtaPhiMonitoring(const char* inputfile,const cha
       c0->Write();
       for(int j=0;j<nhists;j++) hmap_quality_cut[j]->Write();
     }
-    tout->Close(); delete tout;
+    tout->Close(); 
   } else {
     c0 = m_LarIdTranslator->CaloPartitionLayerDisplay((TH1**)hmap_counts_all,"Counts",1);
     c0->SaveAs("Normalization.png");
@@ -1666,7 +1699,9 @@ void LArCellsEmptyMonitoring::DoEtaPhiMonitoring(const char* inputfile,const cha
       for(int j=0;j<nhists;j++){ hmap_quality_cut[j]->Draw("colz"); sprintf(hname,"%s.png",hmap_quality_cut[j]->GetName()); c1->SaveAs(hname); }
     }
   }
-
+  delete[] hmap_counts_all;
+  delete[] hmap_energy_cut;
+  delete[] hmap_quality_cut;
   return;
 }
 
@@ -1691,7 +1726,7 @@ void LArCellsEmptyMonitoring::TriggerEfficiency(const char* inputfile,float frac
   std::map< std::pair<unsigned int, unsigned int>, unsigned int > eventLayer;
   int run=0;
   // Opening file:
-  LArSamples::Interface* tuple = (LArSamples::Interface*)Interface::open(inputfile);
+  std::unique_ptr<LArSamples::Interface> tuple((LArSamples::Interface*)Interface::open(inputfile));
   unsigned int nchannels = tuple->nChannels();
 
   // -------------------------------------------------------------------------
@@ -1730,8 +1765,8 @@ void LArCellsEmptyMonitoring::TriggerEfficiency(const char* inputfile,float frac
   // non-constant binning for a wider spetrum
    //double binE[48]={0,2,4,6,8,10,13,16,19,22,26,30,34,38,42,47,52,57,62,68,75,82,90,100,110,120,130,140,150,160,170,180,195,210,225,240,255,270,285,300,320,340,360,380,400,430,460,500};
 
-   const int nbins = 42;
-   double* binE = new double[nbins+1];
+   constexpr int nbins = 42;
+   double binE[nbins+1]{};
    int i=0,j=0;
    int stop=0;
    double de = 0.,ene = 0.;
@@ -1760,22 +1795,22 @@ void LArCellsEmptyMonitoring::TriggerEfficiency(const char* inputfile,float frac
    binE[j] = 3500.;
    
 
-   TH1F* E_LAr_pass = new TH1F("E_LAr_pass","",nbins,binE);
-   TH1F* E_LAr_tot = new TH1F("E_LAr_tot","",nbins,binE);
-   TH1F* E_LAr_EM5_pass = new TH1F("E_LAr_EM5_pass","",nbins,binE);
-   TH1F* E_LAr_EM5_tot = new TH1F("E_LAr_EM5_tot","",nbins,binE);
-   TH1F* E_LAr_TAU8_pass = new TH1F("E_LAr_TAU8_pass","",nbins,binE);
-   TH1F* E_LAr_TAU8_tot = new TH1F("E_LAr_TAU8_tot","",nbins,binE);
-   TH1F* E_LAr_J10_pass = new TH1F("E_LAr_J10_pass","",nbins,binE);
-   TH1F* E_LAr_J10_tot = new TH1F("E_LAr_J10_tot","",nbins,binE);
-   TH1F* nCellsPS_pass = new TH1F("nCellsPS_pass","",100, 0, 100);
-   TH1F* nCellsPS_tot = new TH1F("nCellsPS_tot","",100, 0, 100);
-   TH1F* nCellsPS_EM5_pass = new TH1F("nCellsPS_EM5_pass","",100, 0, 100);
-   TH1F* nCellsPS_EM5_tot = new TH1F("nCellsPS_EM5_tot","",100, 0, 100);
-   TH1F* nCellsPS_TAU8_pass = new TH1F("nCellsPS_TAU8_pass","",100, 0, 100);
-   TH1F* nCellsPS_TAU8_tot = new TH1F("nCellsPS_TAU8_tot","",100, 0, 100);
-   TH1F* nCellsPS_J10_tot = new TH1F("nCellsPS_J10_tot","",100, 0, 100);
-   TH1F* nCellsPS_J10_pass = new TH1F("nCellsPS_J10_pass","",100, 0, 100);
+   TH1F E_LAr_pass("E_LAr_pass","",nbins,binE);
+   TH1F E_LAr_tot("E_LAr_tot","",nbins,binE);
+   TH1F E_LAr_EM5_pass("E_LAr_EM5_pass","",nbins,binE);
+   TH1F E_LAr_EM5_tot("E_LAr_EM5_tot","",nbins,binE);
+   TH1F E_LAr_TAU8_pass("E_LAr_TAU8_pass","",nbins,binE);
+   TH1F E_LAr_TAU8_tot("E_LAr_TAU8_tot","",nbins,binE);
+   TH1F E_LAr_J10_pass("E_LAr_J10_pass","",nbins,binE);
+   TH1F E_LAr_J10_tot("E_LAr_J10_tot","",nbins,binE);
+   TH1F nCellsPS_pass("nCellsPS_pass","",100, 0, 100);
+   TH1F nCellsPS_tot("nCellsPS_tot","",100, 0, 100);
+   TH1F nCellsPS_EM5_pass("nCellsPS_EM5_pass","",100, 0, 100);
+   TH1F nCellsPS_EM5_tot("nCellsPS_EM5_tot","",100, 0, 100);
+   TH1F nCellsPS_TAU8_pass("nCellsPS_TAU8_pass","",100, 0, 100);
+   TH1F nCellsPS_TAU8_tot("nCellsPS_TAU8_tot","",100, 0, 100);
+   TH1F nCellsPS_J10_tot("nCellsPS_J10_tot","",100, 0, 100);
+   TH1F nCellsPS_J10_pass("nCellsPS_J10_pass","",100, 0, 100);
     
   // -------------------------------------------------------------------------
   // loop over events (based on Interface::ShowEvents).
@@ -1789,19 +1824,19 @@ void LArCellsEmptyMonitoring::TriggerEfficiency(const char* inputfile,float frac
      bool isTAU8 = evtData->isPassed("L1_TAU8_EMPTY");
      bool isJ10 = evtData->isPassed("L1_J10_EMPTY");
 
-     E_LAr_tot->Fill(eventEnergy_LAr[id]);
-     nCellsPS_tot->Fill(eventCells_PS[id]);
+     E_LAr_tot.Fill(eventEnergy_LAr[id]);
+     nCellsPS_tot.Fill(eventCells_PS[id]);
      if(isEM5){
-        E_LAr_EM5_tot->Fill(eventEnergy_LAr[id]);
-        nCellsPS_EM5_tot->Fill(eventCells_PS[id]);
+        E_LAr_EM5_tot.Fill(eventEnergy_LAr[id]);
+        nCellsPS_EM5_tot.Fill(eventCells_PS[id]);
      }
      if(isTAU8){
-        E_LAr_TAU8_tot->Fill(eventEnergy_LAr[id]);
-        nCellsPS_TAU8_tot->Fill(eventCells_PS[id]);
+        E_LAr_TAU8_tot.Fill(eventEnergy_LAr[id]);
+        nCellsPS_TAU8_tot.Fill(eventCells_PS[id]);
       }
      if(isJ10){
-        E_LAr_J10_tot->Fill(eventEnergy_LAr[id]);
-        nCellsPS_J10_tot->Fill(eventCells_PS[id]);
+        E_LAr_J10_tot.Fill(eventEnergy_LAr[id]);
+        nCellsPS_J10_tot.Fill(eventCells_PS[id]);
      }
 
      double ratio = 0;
@@ -1811,47 +1846,44 @@ void LArCellsEmptyMonitoring::TriggerEfficiency(const char* inputfile,float frac
      if(ratio > fractionInPS) isL2_PreS = true;
 
      if(isL2_PreS){
-      E_LAr_pass->Fill(eventEnergy_LAr[id]);
-      nCellsPS_pass->Fill(eventCells_PS[id]);
+      E_LAr_pass.Fill(eventEnergy_LAr[id]);
+      nCellsPS_pass.Fill(eventCells_PS[id]);
       if(isEM5){
-        E_LAr_EM5_pass->Fill(eventEnergy_LAr[id]);
-        nCellsPS_EM5_pass->Fill(eventCells_PS[id]);
+        E_LAr_EM5_pass.Fill(eventEnergy_LAr[id]);
+        nCellsPS_EM5_pass.Fill(eventCells_PS[id]);
      }
      if(isTAU8){
-        E_LAr_TAU8_pass->Fill(eventEnergy_LAr[id]);
-        nCellsPS_TAU8_pass->Fill(eventCells_PS[id]);
+        E_LAr_TAU8_pass.Fill(eventEnergy_LAr[id]);
+        nCellsPS_TAU8_pass.Fill(eventCells_PS[id]);
      }
      if(isJ10){
-        E_LAr_J10_pass->Fill(eventEnergy_LAr[id]);
-        nCellsPS_J10_pass->Fill(eventCells_PS[id]);
+        E_LAr_J10_pass.Fill(eventEnergy_LAr[id]);
+        nCellsPS_J10_pass.Fill(eventCells_PS[id]);
      }
      }
   }
 
-  char fname[50];
+  char fname[50]{};
   sprintf(fname,"TriggerEfficiency_%d.root",run);
-  TFile* mfile = new TFile(fname,"recreate");
-  E_LAr_pass->Write();
-  E_LAr_tot->Write();
-  E_LAr_EM5_pass->Write();
-  E_LAr_EM5_tot->Write();
-  E_LAr_TAU8_pass->Write();
-  E_LAr_TAU8_tot->Write();
-  E_LAr_J10_pass->Write();
-  E_LAr_J10_tot->Write();
-  nCellsPS_pass->Write();
-  nCellsPS_tot->Write();
-  nCellsPS_EM5_pass->Write();
-  nCellsPS_EM5_tot->Write();
-  nCellsPS_TAU8_pass->Write();
-  nCellsPS_TAU8_tot->Write();
-  nCellsPS_J10_pass->Write();
-  nCellsPS_J10_tot->Write();
+  auto mfile = std::make_unique<TFile>(fname,"recreate");
+  E_LAr_pass.Write();
+  E_LAr_tot.Write();
+  E_LAr_EM5_pass.Write();
+  E_LAr_EM5_tot.Write();
+  E_LAr_TAU8_pass.Write();
+  E_LAr_TAU8_tot.Write();
+  E_LAr_J10_pass.Write();
+  E_LAr_J10_tot.Write();
+  nCellsPS_pass.Write();
+  nCellsPS_tot.Write();
+  nCellsPS_EM5_pass.Write();
+  nCellsPS_EM5_tot.Write();
+  nCellsPS_TAU8_pass.Write();
+  nCellsPS_TAU8_tot.Write();
+  nCellsPS_J10_pass.Write();
+  nCellsPS_J10_tot.Write();
 
-  mfile->Close(); delete mfile;
-  delete [] binE;
-
-  delete tuple;
+  mfile->Close(); 
 
 }
 
