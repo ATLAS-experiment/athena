@@ -1,10 +1,9 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: MuonRoI_v1.h 631149 2014-11-26 12:26:18Z krasznaa $
 #ifndef XAODTRIGGER_VERSIONS_MUONROI_V1_H
 #define XAODTRIGGER_VERSIONS_MUONROI_V1_H
 
@@ -19,18 +18,15 @@ extern "C" {
 
 namespace xAOD {
 
-   /// Class describing a LVL1 muon region of interest
-   ///
-   /// This class describes all the properties of a muon region of interest
-   /// (RoI) in the xAOD format.
-   ///
-   /// @author Lukas Heinrich <Lukas.Heinrich@cern.ch>
-   /// @author Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
-   ///
-   /// $Revision: 631149 $
-   /// $Date: 2014-11-26 13:26:18 +0100 (Wed, 26 Nov 2014) $
-   ///
-   class MuonRoI_v1 : public SG::AuxElement {
+  /// Class describing a LVL1 muon region of interest
+  ///
+  /// This class describes all the properties of a muon region of interest
+  /// (RoI) in the xAOD format.
+  ///
+  /// @author Lukas Heinrich <Lukas.Heinrich@cern.ch>
+  /// @author Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+  ///
+  class MuonRoI_v1 : public SG::AuxElement {
 
    public:
       /// RoI source enumeration
@@ -56,7 +52,8 @@ namespace xAOD {
 
       /// Initialise the object with all its properties
       void initialize( uint32_t roiword, float eta, float phi,
-                       const std::string& thrname, float thrvalue );
+                       const std::string& thrname, float thrvalue,
+                       uint32_t extraword = 0u );
 
       /// @name Independent properties stored for the muon candidate
       /// @{
@@ -128,7 +125,35 @@ namespace xAOD {
 
       /// @}
 
-   }; // class MuonRoI_v1
+      /// @name Properties available only for Run 4+
+      /// @{
+
+      /// The second "raw" RoI word describing extra information of the muon candidate
+      uint32_t roiExtraWord() const;
+      /// Set the second "raw" RoI word, describing extra information of the muon candidate
+      void setRoIExtraWord(uint32_t value);
+
+      /// the transverse momentum of the muon candidate
+      float pt() const;
+
+      /// flag whether it is Run4+ RoI definition
+      bool isRun4() const;
+
+      /// @}
+
+
+   private:
+    /// constants to decode RoI word for Run 4+
+    static constexpr uint32_t ETA_MASK = 0x3fff;
+    static constexpr uint32_t PHI_MASK = 0x1ff;
+    static constexpr uint32_t PT_MASK = 0xff;
+
+    static constexpr uint32_t ETA_SHIFT = 0;
+    static constexpr uint32_t PHI_SHIFT = 14;
+    static constexpr uint32_t CHARGE_SHIFT = 23;
+    static constexpr uint32_t PT_SHIFT = 24;
+
+  }; // class MuonRoI_v1
 
 } // namespace xAOD
 
