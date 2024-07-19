@@ -153,7 +153,7 @@ namespace MuonGMR4 {
 
     inline CheckVector2D StripDesign::center(int stripNumber) const {
         const int stripCh = (stripNumber - firstStripNumber());
-        if (stripCh < 0 ||  stripCh > numStrips()) {
+        if (stripCh < 0 ||  stripCh >= numStrips()) {
             ATH_MSG_WARNING("center() -- Invalid strip number given "<<stripNumber<<" allowed range ["
                          <<firstStripNumber()<<";"<<numStrips()<<"]");
             return std::nullopt;
@@ -164,7 +164,7 @@ namespace MuonGMR4 {
     }    
     inline CheckVector2D StripDesign::leftEdge(int stripNumber) const {
        const int stripCh = (stripNumber - firstStripNumber());
-       if (stripCh < 0 ||  stripCh > numStrips()) {
+       if (stripCh < 0 ||  stripCh >= numStrips()) {
             ATH_MSG_WARNING("leftEdge() -- Invalid strip number given "<<stripNumber<<" allowed range ["
                           <<firstStripNumber()<<";"<<numStrips()<<"]");
             return std::nullopt;
@@ -175,7 +175,7 @@ namespace MuonGMR4 {
     }
     inline CheckVector2D StripDesign::rightEdge(int stripNumber) const {
         const int stripCh = (stripNumber - firstStripNumber());
-        if (stripCh < 0 ||  stripCh > numStrips()) {
+        if (stripCh < 0 ||  stripCh >= numStrips()) {
             ATH_MSG_WARNING("rightEdge() -- Invalid strip number given "<<stripNumber<<" allowed range ["
                           <<firstStripNumber()<<";"<<numStrips()<<"]");
             return std::nullopt;
