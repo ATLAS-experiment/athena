@@ -87,7 +87,7 @@ Topo2Group = ['Topo2']
 Topo3Group = ['Topo3']
 LegacyTopoGroup = ['LegacyTopo']
 
-def setupMenu(menu_name):
+def setupMenu():
 
     from AthenaCommon.Logging import logging
     log = logging.getLogger( __name__ )

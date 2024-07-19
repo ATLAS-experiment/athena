@@ -203,6 +203,9 @@ if flags.Trigger.L1.doeFex or flags.Trigger.L1.dojFex or flags.Trigger.L1.dogFex
   from L1CaloFEXSim.L1CaloFEXSimCfg import L1CaloFEXSimCfg
   cfg.merge(L1CaloFEXSimCfg(flags,outputSuffix="DAODSim" if flags.Input.Format == Format.POOL else ""))
 
+  # ensure reloading OTF masking every event if running online monitoring
+  cfg.getCondAlgo("MaskedSCCondAlg").ReloadEveryEvent=flags.Common.isOnline
+
   # do otf masking:
   # from IOVDbSvc.IOVDbSvcConfig import addFolders,addOverride
   # #cfg.merge(addFolders(flags,"<db>sqlite://;schema=/afs/cern.ch/user/w/will/new_maskedSCs_run457976.db;dbname=CONDBR2</db> /LAR/BadChannels/NoisyChannelsSC",className="CondAttrListCollection")) # dmCorr from DB!

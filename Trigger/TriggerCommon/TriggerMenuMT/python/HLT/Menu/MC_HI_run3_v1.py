@@ -564,7 +564,7 @@ def getMCSignatures():
 
     return chains
 
-def setupMenu(menu_name):
+def setupMenu():
 
     chains = physics_menu.getPhysicsHISignatures()
 

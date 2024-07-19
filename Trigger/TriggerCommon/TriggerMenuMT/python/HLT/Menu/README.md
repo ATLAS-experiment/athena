@@ -55,7 +55,6 @@ A trigger is specified by a `ChainProp` object, with the following attributes:
       - CPS groups should not be used for primary triggers, and will be checked to ensure they contain at least 2 triggers. Defining CPS for a single trigger will break the menu generation.
       - As far as possible, all support triggers should have a CPS group defined.
   - `PS` groups are used to situationally predefine prescales to implement Menu Prescale Sets, defined in [HLT/Menu/MenuPrescaleConfig.py](MenuPrescaleConfig.py). Notably, the following veto labels take effect cumulatively:
-    - `PS:Online` deactivates the tagged triggers (removing them from the menu) in MC (incl Dev) menus and all following prescale sets
     - `PS:NoRepro` deactivates the tagged triggers in the `HLTReprocessing_prescale` set and all following prescale sets
     - `PS:NoTrigVal` deactivates the tagged triggers in the `TriggerValidation_prescale` set and all following prescale sets
     - `PS:NoBulkMCProd` deactivates the tagged triggers in the `BulkMCProd_prescale` set

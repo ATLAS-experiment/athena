@@ -301,7 +301,7 @@ class TrigTZReco(ExecStep):
         self.max_events = -1
         self.args = '--inputBSFile=' + find_file('*.physics_Main*._athenaHLT*.data')  # output of the previous step
         self.args += ' --outputAODFile=AOD.pool.root'
-        self.args += ' --conditionsTag=\'CONDBR2-BLKPA-2022-08\' --geometryVersion=\'ATLAS-R3S-2021-03-00-00\''
+        self.args += ' --conditionsTag=\'CONDBR2-BLKPA-2022-15\' --geometryVersion=\'ATLAS-R3S-2021-03-02-00\''
         self.args += ' --preExec="{:s}"'.format(tzrecoPreExec)
         self.args += ' --CA'
 

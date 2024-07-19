@@ -13,6 +13,7 @@
 ATHENA_CORE_NUMBER=4 Reco_tf.py \
 --multithreaded \
 --AMIConfig q449 \
+--conditionsTag CONDBR2-BLKPA-2022-13 \
 --imf False \
 --preExec="all:flags.BTagging.Trackless=True" \
 --maxEvents 25
