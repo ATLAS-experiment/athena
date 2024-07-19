@@ -459,7 +459,7 @@ def checkPurpleList(relFlavour,cache,generatorName) :
 evgenLog.debug("****************** CHECKING RELEASE IS NOT BLACKLISTED *****************")
 rel = os.popen("echo $AtlasVersion").read()
 rel = rel.strip()
-if os.path.exists('/cvmfs/atlas.cern.ch/repo/sw/Generators/MC16JobOptions/common')
+if os.path.exists('/cvmfs/atlas.cern.ch/repo/sw/Generators/MC16JobOptions/common'):
    errorBL = checkBlackList("AthGeneration",rel,gennames)
    if (errorBL):
      if (hasattr( runArgs, "ignoreBlackList") and runArgs.ignoreBlackList): 
