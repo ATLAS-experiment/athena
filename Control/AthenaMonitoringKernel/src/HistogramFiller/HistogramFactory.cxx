@@ -184,8 +184,7 @@ TEfficiency* HistogramFactory::createEfficiency(const HistogramDef& def) {
     }
     e->SetDirectory(0);
   }
-  if ( !m_histSvc->regEfficiency(fullName,e) ) {
-    delete e;
+  if ( !m_histSvc->regEfficiency(fullName, std::unique_ptr<TEfficiency>(e)) ) {
     throw HistogramException("Histogram >"+ fullName + "< can not be registered in THistSvc");
   }
   TH1* total ATLAS_THREAD_SAFE = const_cast<TH1*>(e->GetTotalHistogram());
@@ -218,13 +217,11 @@ HBASE* HistogramFactory::create(const HistogramDef& def, Types&&... hargs) {
     // cppcheck-suppress nullPointer; false positive
     h->SetDirectory(0);
   }
-  if ( !m_histSvc->regHist( fullName, static_cast<TH1*>(h) ) ) {
-    delete h;
+  if ( !m_histSvc->regHist( fullName, std::unique_ptr<TH1>(h) ) ) {
     throw HistogramException("Histogram >"+ fullName + "< can not be registered in THistSvc");
-
   }
-  h->GetYaxis()->SetTitleOffset(1.25); // magic shift to make histograms readable even if no post-procesing is done
 
+  h->GetYaxis()->SetTitleOffset(1.25); // magic shift to make histograms readable even if no post-procesing is done
   setLabels(h, def);
   setOpts(h, def);
 
@@ -250,10 +247,10 @@ TTree* HistogramFactory::createTree(const HistogramDef& def) {
     t = new TTree(def.alias.c_str(),def.title.c_str());
     t->SetDirectory(0);
   }
-  if ( !m_histSvc->regTree(fullName,std::unique_ptr<TTree>(t) ) ) {
+  if ( !m_histSvc->regTree(fullName, std::unique_ptr<TTree>(t) ) ) {
     throw HistogramException("Tree >"+ fullName + "< can not be registered in THistSvc");
   }
-  // cppcheck-suppress deallocret; false positive
+
   return t;
 }
 
