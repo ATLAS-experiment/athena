@@ -1851,9 +1851,7 @@ DvGraph::DvGraph(char *infile, string path, string folder, int det, int lay, boo
     if (rtgraph)
     {
 
-        TF1 *rtfunc;
-        if (rtgraph)
-            rtfunc = (TF1 *)rtgraph->GetListOfFunctions()->First();
+        TF1 *rtfunc = (TF1 *)rtgraph->GetListOfFunctions()->First();
 
         double p0 = rtfunc->GetParameter(0);
         double p1 = rtfunc->GetParameter(1);
@@ -1979,10 +1977,7 @@ DGraph::DGraph(char *infile, string path, string folder, int det, int lay, bool 
 
     if (rtgraph)
     {
-
-        TF1 *rtfunc;
-        if (rtgraph)
-            rtfunc = (TF1 *)rtgraph->GetListOfFunctions()->First();
+        TF1 *rtfunc = (TF1 *)rtgraph->GetListOfFunctions()->First();
 
         double p0 = rtfunc->GetParameter(0);
         double p1 = rtfunc->GetParameter(1);
@@ -3253,9 +3248,6 @@ class TBinnedRes : public TCanvas
 {
 public:
     TBinnedRes(TFile *, vector<TH1D *>);
-
-private:
-    TH1F *m_hist2;
 };
 
 TBinnedRes::TBinnedRes(TFile* /*file*/, vector<TH1D *> reshists)
@@ -3287,7 +3279,7 @@ public:
     RtBinning(TDirectory *, string);
 
 private:
-    TH1F *m_hist2;
+  TH1F *m_hist2{nullptr};
 };
 
 RtBinning::RtBinning(TDirectory *file, string detector)
