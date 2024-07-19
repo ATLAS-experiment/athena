@@ -51,7 +51,8 @@ StatusCode TrackAnalysisDefinitionSvc::initialize()
 
   m_useTrigger = m_isTestTrigger or m_isRefTrigger;
   m_useEFTrigger = m_isTestEFTrigger or m_isRefEFTrigger;
-  m_useTruth   = m_isTestTruth or m_isRefTruth;
+  m_useTruth   = m_isTestTruth or m_isRefTruth or m_matchingType.value().find("EFTruthMatch") != std::string::npos;;
+  ATH_MSG_INFO("USE TRUTH? " << m_useTruth);
   m_useOffline = m_isTestOffline or m_isRefOffline;
 
   /// Looping all requested chains and filling configured chains list (to be processed)

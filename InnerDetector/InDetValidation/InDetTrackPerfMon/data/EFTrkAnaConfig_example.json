@@ -1,8 +1,15 @@
 {
-    "TrkAnaEF" : {
+    "TrkAnaEFOffl" : {
         "enabled" : true,
         "TestType"  : "EFTrigger",
-        "RefType"   : "Truth", 
+        "RefType"   : "Offline",
+        "TrigTrkKey": "xAODFPGAProtoTracksTrackParticles",
+        "MatchingType"  : "EFTruthMatch" 
+    },
+    "TrkAnaEFTruth" : {
+        "enabled" : true,
+        "TestType"  : "EFTrigger",
+        "RefType"   : "Truth",
         "TrigTrkKey": "xAODFPGAProtoTracksTrackParticles",
         "MatchingType"  : "TruthMatch" 
     }

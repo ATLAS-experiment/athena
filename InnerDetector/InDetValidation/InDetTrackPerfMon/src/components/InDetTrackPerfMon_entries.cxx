@@ -16,6 +16,7 @@
 #include "../OfflineTrackQualitySelectionTool.h"
 #include "../TrackTruthMatchingTool.h"
 #include "../TruthTrackMatchingTool.h"
+#include "../EFTrackMatchingTool.h"
 #include "../DeltaRMatchingTool.h"
 #include "../PlotsDefinitionSvc.h"
 #include "../JsonPlotsDefReadTool.h"
@@ -37,6 +38,7 @@ DECLARE_COMPONENT( IDTPM::TrackObjectSelectionTool )
 DECLARE_COMPONENT( IDTPM::OfflineTrackQualitySelectionTool )
 DECLARE_COMPONENT( IDTPM::TrackTruthMatchingTool )
 DECLARE_COMPONENT( IDTPM::TruthTrackMatchingTool )
+DECLARE_COMPONENT( IDTPM::EFTrackMatchingTool )
 DECLARE_COMPONENT( IDTPM::DeltaRMatchingTool_trk )
 DECLARE_COMPONENT( IDTPM::DeltaRMatchingTool_trkTruth )
 DECLARE_COMPONENT( IDTPM::DeltaRMatchingTool_truthTrk )
