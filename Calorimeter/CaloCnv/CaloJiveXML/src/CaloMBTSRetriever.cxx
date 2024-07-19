@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloMBTSRetriever.h"
@@ -10,7 +10,6 @@
 
 #include "CaloDetDescr/CaloDetDescrElement.h"
 #include "TileEvent/TileCell.h"
-#include "TileEvent/TileCellContainer.h"
 #include "Identifier/HWIdentifier.h"
 #include "CaloIdentifier/TileID.h"
 #include "TileIdentifier/TileHWID.h"
@@ -185,12 +184,9 @@ namespace JiveXML {
       if (offlineRch) {
 
         for (const auto rawChannel : *RawChannelCnt) {
-
           for (const auto cell : *rawChannel) {
-
             Identifier pmt_id = cell->pmt_ID();
             if (!m_tileTBID->is_tiletb(pmt_id)) continue;
-
             Identifier id = cell->cell_ID();
             cellid = id.get_identifier32().get_compact();
             HWIdentifier hwid=cell->adc_HWID();
@@ -207,7 +203,6 @@ namespace JiveXML {
             } else if (RChUnit > TileRawChannelUnit::OnlineADCcounts) {
               amplitude = m_tileToolEmscale->undoOnlCalib(drawerIdx, channel, adc, amplitude, RChUnit);
             }
-
             theMbtspedestal.insert(std::make_pair( cellid, cell->pedestal() ) );
             theMbtsrawamp.insert(std::make_pair( cellid, amplitude ));
             theMbtsrawtime.insert(std::make_pair( cellid, cell->time(cell->uncorrTime()) ));
@@ -362,23 +357,24 @@ namespace JiveXML {
     if (!theMbtsrawtime.empty())  theMbtsrawtime.clear();
 
     // write values into DataMap
-    DataMap["energy"] = energy;
-    DataMap["label"] = label;
-    DataMap["phi"] = phi;
-    DataMap["eta"] = eta;
-    DataMap["sampling"] = sampling;
-    DataMap["time"] = timeVec;
-    DataMap["quality"] = quality;
-    DataMap["type"] = type;
-    DataMap["channel"] = channel;
-    DataMap["module"] = module;
-    DataMap["cellPedestal"] = cellPedestal;
-    DataMap["cellRawAmplitude"] = cellRawAmplitude;
-    DataMap["cellRawTime"] = cellRawTime;
-    DataMap[adcCountsStr] = adcCounts;
+    const auto nentries = phi.size();
+    DataMap["energy"] = std::move(energy);
+    DataMap["label"] = std::move(label);
+    DataMap["phi"] = std::move(phi);
+    DataMap["eta"] = std::move(eta);
+    DataMap["sampling"] = std::move(sampling);
+    DataMap["time"] = std::move(timeVec);
+    DataMap["quality"] = std::move(quality);
+    DataMap["type"] = std::move(type);
+    DataMap["channel"] = std::move(channel);
+    DataMap["module"] = std::move(module);
+    DataMap["cellPedestal"] = std::move(cellPedestal);
+    DataMap["cellRawAmplitude"] = std::move(cellRawAmplitude);
+    DataMap["cellRawTime"] = std::move(cellRawTime);
+    DataMap[adcCountsStr] = std::move(adcCounts);
 
     //Be verbose
-    ATH_MSG_DEBUG( dataTypeName() << " retrieved with " << phi.size() << " entries" );
+    ATH_MSG_DEBUG( dataTypeName() << " retrieved with " << nentries << " entries" );
 
     //All collections retrieved okay
     return DataMap;

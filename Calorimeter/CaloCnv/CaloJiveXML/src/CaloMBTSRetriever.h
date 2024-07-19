@@ -1,17 +1,13 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JIVEXML_CALOMBTSRETRIEVER_H
 #define JIVEXML_CALOMBTSRETRIEVER_H
 
-#include <string>
-#include <vector>
-#include <cstddef>
-#include <map>
+
 
 #include "CaloEvent/CaloCellContainer.h"
-#include "CaloIdentifier/CaloCell_ID.h"
 #include "TileEvent/TileCellContainer.h"
 #include "TileEvent/TileRawChannelContainer.h"
 #include "TileEvent/TileDigitsContainer.h"
@@ -21,6 +17,11 @@
 #include "JiveXML/IDataRetriever.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
+
+#include <string>
+#include <vector>
+#include <cstddef>
+#include <map>
 
 class IToolSvc;
 class Identifier;
