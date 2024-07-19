@@ -17,8 +17,6 @@ def main():
     flags.lock()
     flags.dump()
 
-    menu_name = flags.Trigger.triggerMenuSetup
-
     # for validation compare the decisions of a single chain, or all the chains in the menu 
     jetcoll_name_mapping = {
         "a10sd_cssk_pf_jes_ftf": "HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_jes_ftf", # 0
@@ -43,7 +41,7 @@ def main():
     jetcoll_emul = list(jetcoll_name_mapping.keys())[0] # only used for Jet slice, bjet slice uses a4_pf_subresjesgscIS_ftf [10]
 
     from TriggerMenuMT.HLT.Menu.Physics_pp_run3_v1 import setupMenu
-    chains_phys_pp_run3_v1 = setupMenu(menu_name)
+    chains_phys_pp_run3_v1 = setupMenu()
     if validation_singlechain:
         emulatedChains = [cp for cp in chains_phys_pp_run3_v1[trigger_slice] if cp.name == validation_singlechain]
     else:
