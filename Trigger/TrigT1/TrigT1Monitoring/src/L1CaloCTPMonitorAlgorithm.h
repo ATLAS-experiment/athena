@@ -19,7 +19,6 @@
 
 #include "TrigConfInterfaces/ILVL1ConfigSvc.h"
 #include "TrigT1CaloMonitoringTools/ITrigT1CaloMonErrorTool.h"
-#include "TrigT1CaloMonitoringTools/TrigT1CaloLWHistogramTool.h"
 #include "TrigT1Interfaces/TrigT1CaloDefs.h"
 #include "TrigConfL1Data/CTPConfig.h"
 #include "TrigConfL1Data/L1DataDef.h"
