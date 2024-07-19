@@ -68,10 +68,10 @@ def PhysValMonitoringCfg(flags, name="PhysValMonManager", tools=None, **kwargs):
         tools.append(acc.popToolsAndMerge(PhysValTauCfg(flags)))
     if flags.PhysVal.doJet:
         from JetValidation.JetValidationConfig import PhysValJetCfg
-        tools += acc.popToolsAndMerge(PhysValJetCfg(flags))
+        tools.append(acc.popToolsAndMerge(PhysValJetCfg(flags)))
     if flags.PhysVal.doTopoCluster:
         from PFODQA.ClusterDQAConfig import PhysValClusterCfg
-        tools.append(acc.popToolsAndMerge(PhysValClusterCfg(flags)))
+        tools += acc.popToolsAndMerge(PhysValClusterCfg(flags))
     if flags.PhysVal.doZee:
         from ZeeValidation.ZeeValidationMonToolConfig import PhysValZeeCfg
         tools.append(acc.popToolsAndMerge(PhysValZeeCfg(flags)))
