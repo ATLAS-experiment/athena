@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/tools/threading.h
@@ -19,9 +19,6 @@
 
 
 #ifdef ATHCONTAINERS_NO_THREADS
-
-
-#include <vector>
 
 
 namespace AthContainers_detail {
@@ -101,10 +98,6 @@ inline void fence_acq_rel() {}
 inline void fence_seq_cst() {}
 
 
-template <class T>
-using concurrent_vector = std::vector<T>;
-
-
 /// Dummy version of atomic.
 template <class T>
 class atomic
@@ -134,16 +127,6 @@ private:
 #include "boost/thread/shared_mutex.hpp"
 #include "boost/thread/tss.hpp"
 
-// See ATLINFR-4996 for an explanation of this clunky
-// warning suppression.
-#if (__cplusplus > 201703L) && defined(__ROOTCLING__)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-volatile"
-#endif  // >C++17 with ROOT
-#include "tbb/concurrent_vector.h"
-#if (__cplusplus > 201703L) && defined(__ROOTCLING__)
-#pragma clang diagnostic pop
-#endif  // >C++17 with ROOT
 
 #include <atomic>
 #include <mutex>
@@ -162,8 +145,6 @@ using std::recursive_mutex;
 using std::lock_guard;
 using std::thread;
 using std::atomic;
-
-using tbb::concurrent_vector;
 
 
 /**

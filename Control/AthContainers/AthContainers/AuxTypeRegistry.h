@@ -17,11 +17,7 @@
 #include "AthContainersInterfaces/AuxTypes.h"
 #include "AthContainersInterfaces/IAuxTypeVector.h"
 #include "AthContainersInterfaces/IAuxTypeVectorFactory.h"
-#include "AthContainers/tools/AuxTypeVector.h"
 #include "AthContainers/tools/AuxTypeVectorFactory.h"
-#include "AthContainers/tools/threading.h"
-#include "CxxUtils/ConcurrentStrMap.h"
-#include "CxxUtils/SimpleUpdater.h"
 #ifndef XAOD_STANDALONE
 #include "AthenaKernel/IInputRename.h"
 #include "AthenaKernel/IStringPool.h"
@@ -34,6 +30,9 @@
 
 
 namespace SG {
+
+
+class AuxTypeRegistryImpl;
 
 
 /**
@@ -128,6 +127,8 @@ public:
    * @param clsname The name of its associated class.  May be blank.
    * @param flags Optional flags qualifying the type.  See above.
    * @param linkedVariable auxid of a linked variable, or null_auxid.
+   * @param makeFactory Function to create a factory for this type, if needed.
+   *                    May return 0 if the type is unknown.
    *
    * The type of the item is given by @a ti.
    * Return @c null_auxid if we don't know how to make vectors of @a ti.
@@ -140,7 +141,8 @@ public:
                         const std::string& name,
                         const std::string& clsname = "",
                         const Flags flags = Flags::None,
-                        const SG::auxid_t linkedVariable = SG::null_auxid);
+                        const SG::auxid_t linkedVariable = SG::null_auxid,
+                        std::unique_ptr<IAuxTypeVectorFactory> (AuxTypeRegistry::*makeFactory) () const = &AuxTypeRegistry::makeFactoryNull);
 
 
   /**
@@ -533,6 +535,8 @@ public:
 
 
 private:
+  friend class AuxTypeRegistryImpl;
+
   typedef AthContainers_detail::mutex mutex_t;
   typedef AthContainers_detail::lock_guard<mutex_t> lock_t;
 
@@ -546,8 +550,6 @@ private:
 
   /**
    * @brief Destructor.
-   *
-   * Delete factory instances.
    */
   ~AuxTypeRegistry();
 
@@ -555,79 +557,6 @@ private:
   /// Disallow copy construction and assignment.
   AuxTypeRegistry (const AuxTypeRegistry&);
   AuxTypeRegistry& operator= (const AuxTypeRegistry&);
-
-
-  /**
-   * @brief Look up a name -> @c auxid_t mapping.
-   * @param name The name of the aux data item.
-   * @param clsname The name of its associated class.  May be blank.
-   * @param flags Optional flags qualifying the type.  See above.
-   * @param linkedVariable auxid of a linked variable, or null_auxid.
-   * @param ti The type of this aux data item.
-   * @param ti_alloc The type of the vector allocator.
-   * @param alloc_name The name of the vector allocator.
-   *                   Used only if ti_alloc is null.
-   * @param makeFactory Function to create a factory for this type, if needed.
-   *                    May return 0 if the type is unknown.
-   *
-   *
-   * If the aux data item already exists, check to see if the provided
-   * type matches the type that was used before.  If so, then set
-   * return the auxid; otherwise, throw @c SG::ExcAuxTypeMismatch.
-   *
-   * If the aux data item does not already exist, then see if we
-   * have a factory registered for this @c type_info.  If not, then
-   * call @c makeFactory and use what it returns.  If that returns 0,
-   * then fail and return null_auxid.  Otherwise, assign a new auxid
-   * and return it.
-   */
-  SG::auxid_t
-  findAuxID (const std::string& name,
-             const std::string& clsname,
-             const Flags flags,
-             const SG::auxid_t linkedVariable,
-             const std::type_info& ti,
-             const std::type_info* ti_alloc,
-             const std::string* alloc_name,
-             std::unique_ptr<IAuxTypeVectorFactory> (AuxTypeRegistry::*makeFactory) () const);
-
-
-  /**
-   * @brief Add a new type -> factory mapping.  (external locking)
-   * @param lock The registry lock.
-   * @param ti Type of the vector element.
-   * @param ti_alloc The type of the vector allocator
-   * @param factory The factory instance.  Ownership is not taken.
-   *
-   * This records that @c factory can be used to construct vectors with
-   * an element type of @c ti.  If a mapping already exists, the new
-   * factory is discarded, unless the old one is a dynamic factory and
-   * the new one isn't, in which case the new replaces the old one.
-   */
-  const IAuxTypeVectorFactory*
-  addFactory (lock_t& lock,
-              const std::type_info& ti,
-              const std::type_info& ti_alloc,
-              const IAuxTypeVectorFactory* factory);
-
-
-  /**
-   * @brief Add a new type -> factory mapping.  (external locking)
-   * @param lock The registry lock.
-   * @param ti Type of the vector element.
-   * @param ti_alloc_name The name of the vector allocator type.
-   * @param factory The factory instance.
-   *
-   * This records that @c factory can be used to construct vectors with
-   * an element type of @c ti.  If a mapping already exists, the new
-   * factory is discarded, unless the old one is a dynamic factory and
-   * the new one isn't, in which case the new replaces the old one.
-   */
-  const IAuxTypeVectorFactory*
-  addFactory (lock_t& /*lock*/,
-              const std::type_info& ti,
-              const std::string& ti_alloc_name,
-              std::unique_ptr<const IAuxTypeVectorFactory> factory);
 
 
   /**
@@ -659,101 +588,6 @@ private:
    */
   static std::string makeKey (const std::string& name,
                               const std::string& clsname);
-
-
-  /**
-   * @brief Check for valid variable name.
-   * @param name Name to check.
-   *
-   * Require that NAME be not empty, contains only alphanumeric characters plus
-   * underscore, and first character is not a digit.
-   */
-  static bool checkName (const std::string& s);
-
-
-  /**
-   * @brief Return the vector factory for a given vector element type.
-   *        (External locking.)
-   * @param lock The registry lock.
-   * @param ti The type of the vector element.
-   * @param ti_alloc The type of the vector allocator
-   *
-   * Returns nullptr if the type is not known.
-   * (Use @c addFactory to add new mappings.)
-   */
-  const IAuxTypeVectorFactory*  getFactory (lock_t& lock,
-                                            const std::type_info& ti,
-                                            const std::type_info& ti_alloc);
-
-
-  /// Hold information about one aux data item.
-  struct typeinfo_t
-  {
-    /// Factory object.
-    AthContainers_detail::atomic<const IAuxTypeVectorFactory*> m_factory;
-
-    /// Type of the aux data item.
-    const std::type_info* m_ti;
-
-    /// Type of the vector allocator.   May be null for a dynamic type;
-    const std::type_info* m_ti_alloc;
-
-    /// Name of the vector allocator.
-    std::string m_alloc_name;
-
-    /// Aux data name.
-    std::string m_name;
-
-    /// Class name associated with this aux data item.  May be blank.
-    std::string m_clsname;
-
-    /// auxid of a linked variable, or null_auxid.
-    auxid_t m_linked;
-
-    /// Additional type flags.
-    Flags m_flags;
-
-    /// Check that the allocator type for this entry matches
-    /// the requested type.
-    bool checkAlloc (const std::type_info* ti_alloc,
-                     const std::string* alloc_name) const;
-  };
-
-
-  /// Table of aux data items, indexed by @c auxid.
-  // A concurrent vector, so we don't need to take a lock to read it.
-  AthContainers_detail::concurrent_vector<typeinfo_t> m_types;
-
-
-  /// Map from name -> auxid.
-  using id_map_t = CxxUtils::ConcurrentStrMap<SG::auxid_t, CxxUtils::SimpleUpdater>;
-  id_map_t m_auxids;
-
-  /// Map from type_info name + allocator ti name -> IAuxTypeVectorFactory.
-  using ti_map_t = CxxUtils::ConcurrentStrMap<const IAuxTypeVectorFactory*, CxxUtils::SimpleUpdater>;
-  ti_map_t m_factories;
-
-  /// Hold additional factory instances we need to delete.
-  std::vector<const IAuxTypeVectorFactory*> m_oldFactories;
-
-  /// Save the information provided by @c setInputRenameMap.
-  /// Each entry is of the form   KEY.DECOR -> DECOR_RENAMED
-  typedef std::unordered_map<std::string, std::string> renameMap_t;
-  renameMap_t m_renameMap;
-
-  /// Mutex controlling access to the registry.
-  // We originally used an upgrading mutex here.
-  // But that's relatively slow, and most of the locked sections are short,
-  // so it's not really a win.
-  // This guards write access to all members, and read access to all members
-  // except for m_types.
-  mutable mutex_t m_mutex;
-
-  // Map from the TI name for T to the TI for AuxAllocator_t<T>.
-  // Filled in by addFactory().  Used in findAuxID() if the allocator
-  // type is not specified.
-  using allocMap_t = CxxUtils::ConcurrentStrMap<const std::type_info*, CxxUtils::SimpleUpdater>;
-  allocMap_t m_allocMap;
 };
 
 
