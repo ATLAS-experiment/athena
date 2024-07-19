@@ -12,7 +12,8 @@
 
 ATHENA_CORE_NUMBER=4 Reco_tf.py \
 --multithreaded \
---AMIConfig q445 \
+--AMIConfig q454 \
+--conditionsTag OFLCOND-MC23-SDR-RUN3-05
 --steering doRAWtoALL \
 --imf False \
 --CA all:True \
