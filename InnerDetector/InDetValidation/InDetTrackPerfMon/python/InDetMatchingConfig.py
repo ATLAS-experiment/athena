@@ -81,6 +81,19 @@ def TruthTrackMatchingToolCfg( flags, name="TruthTrackMatchingTool", **kwargs ):
     return acc
 
 
+def EFTrackMatchingToolCfg( flags, name="EFTrackMatchingTool", **kwargs ):
+    '''
+    Tool for Track->Truth matching via 'truthParticleLink' decorations
+    '''
+    acc = ComponentAccumulator()
+
+    kwargs.setdefault( "MatchingTruthProb", flags.PhysVal.IDTPM.currentTrkAna.truthProbCut )
+
+    acc.setPrivateTools(
+        CompFactory.IDTPM.EFTrackMatchingTool( name, **kwargs ) )
+    return acc
+
+
 def TrackMatchingToolCfg( flags, **kwargs ):
     '''
     CA-based configuration for the test-reference matching Tool 
@@ -123,6 +136,17 @@ def TrackMatchingToolCfg( flags, **kwargs ):
                     flags.PhysVal.IDTPM.currentTrkAna.anaTag, **kwargs )
 
         log.warning( "TruthMatch via decorations not configurable if Test or Ref isn't Truth" )
+        log.warning( "Matching will not be executed for TrkAnalysis %s",
+                     flags.PhysVal.IDTPM.currentTrkAna.anaTag )
+        return None
+
+    ## Matching track to track via truthParticleLink decorations
+    if flags.PhysVal.IDTPM.currentTrkAna.MatchingType == "EFTruthMatch":
+        if "EFtrigger" in flags.PhysVal.IDTPM.currentTrkAna.TestType and "Offline" in flags.PhysVal.IDTPM.currentTrkAna.RefType:
+            return EFTrackMatchingToolCfg(
+                    flags, name="EFTrackMatchingTool" +
+                        flags.PhysVal.IDTPM.currentTrkAna.anaTag, **kwargs )
+        log.warning( "EFTruthMatch via decorations configurable only with EFTrigger as Test Offline as Ref" )
         log.warning( "Matching will not be executed for TrkAnalysis %s",
                      flags.PhysVal.IDTPM.currentTrkAna.anaTag )
         return None
