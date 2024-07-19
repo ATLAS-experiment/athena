@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # The name of the package:
 atlas_subdir( L1Common )
@@ -30,6 +30,9 @@ add_custom_command( OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/L1Common
    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/schema/L1Specifications.xml )
 add_custom_target( L1CommonGen ALL DEPENDS
    ${CMAKE_CURRENT_BINARY_DIR}/L1Common )
+# Ninja does not clean non-empty directories. Declare it explicitly:
+set_target_properties( L1CommonGen
+   PROPERTIES ADDITIONAL_CLEAN_FILES ${CMAKE_CURRENT_BINARY_DIR}/L1Common )
 add_dependencies( Package_L1Common L1CommonGen )
 
 # And install them:
