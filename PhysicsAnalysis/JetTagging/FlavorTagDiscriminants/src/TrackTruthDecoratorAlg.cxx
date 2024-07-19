@@ -134,10 +134,18 @@ namespace FlavorTagDiscriminants {
         if ( !track_link.isValid() ) { continue; }
         auto track = *track_link;
 
+        // Get the truth particle associated to the track
+        const auto truth = m_trackTruthOriginTool->getTruth(track);
+        if ( !truth ) { continue; }
+
         // Get the track truth origin
         int trackTruthOrigin = m_trackTruthOriginTool->getTrackOrigin(track);
 
-        if ( muTruthOriginType == Truth::Type::CHadronDecay && InDet::TrkOrigin::isFromDfromB(trackTruthOrigin) ) {
+        if ( abs(truth->pdgId()) != 13 ) {
+          // Check if the truth particle associated to the track is not a muon
+          muTruthOrigin = 9;
+        }
+        else if ( muTruthOriginType == Truth::Type::CHadronDecay && InDet::TrkOrigin::isFromDfromB(trackTruthOrigin) ) {
           // Check if a muon is FromC and the associated track is FromBC
           muTruthOrigin = 4;
         }
