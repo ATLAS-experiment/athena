@@ -59,10 +59,8 @@ atlas_install_joboptions( share/common/*.py )
 atlas_install_runtime( share/file/*.pdt )
 
 
-if(CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "x86_64")
-# only some standard helper functions are needed from POWHEG-BOX, can be used from any fixed version 
-# -> in unlikely case that one of these helper functions change in future POWHEG-BOX release, maybe best to hard-code?
-set (ATLAS_POWHEGPATHFORH7 "/cvmfs/atlas.cern.ch/repo/sw/Generators/powheg/ATLASOTF-07-03")
+set (ATLAS_POWHEGPATHFORH7 "/cvmfs/atlas.cern.ch/repo/sw/Generators/powheg/ATLASOTF-07-05-${CMAKE_HOST_SYSTEM_PROCESSOR}")
+
 
 add_library( HwShower SHARED IMPORTED )
 set_target_properties( HwShower PROPERTIES IMPORTED_LOCATION ${HERWIG3_LCGROOT}/lib/Herwig/HwShower.so)
@@ -72,26 +70,6 @@ set_target_properties( powhegSOforHerwig
    PROPERTIES IMPORTED_LOCATION 
    ${ATLAS_POWHEGPATHFORH7}/POWHEG-BOX-RES/b_bbar_4l_modified/Pwhg-so-ATLAS/powhegSOforHerwig.so
 )
-
-## Different option for powhegSOforHerwig: compilation in 
-## Herwig7_i instead of loading the precompiled powhegSOforHerwig
-#atlas_add_library ( powhegSOforHerwig
-#  ${ATLAS_POWHEGPATHFORH7}/POWHEG-BOX-RES/pwhg_io_interface.f
-#  ${ATLAS_POWHEGPATHFORH7}/POWHEG-BOX-RES/powheginput.f
-#  ${ATLAS_POWHEGPATHFORH7}/POWHEG-BOX-RES/newunit.f
-#  ${ATLAS_POWHEGPATHFORH7}/POWHEG-BOX-RES/pwhg_analysis-dummy.f 
-#  ${ATLAS_POWHEGPATHFORH7}/POWHEG-BOX-RES/boostrot.f
-#  ${ATLAS_POWHEGPATHFORH7}/POWHEG-BOX-RES/bra_ket_subroutines.f
-#  ${ATLAS_POWHEGPATHFORH7}/POWHEG-BOX-RES/cernroutines.f
-#  ${ATLAS_POWHEGPATHFORH7}/POWHEG-BOX-RES/pwhg_bookhist-multi.f
-#  ${ATLAS_POWHEGPATHFORH7}/POWHEG-BOX-RES/boostrot4.f
-#  ${ATLAS_POWHEGPATHFORH7}/POWHEG-BOX-RES/locks.f 
-#  ${ATLAS_POWHEGPATHFORH7}/POWHEG-BOX-RES/random.f
-#  NO_PUBLIC_HEADERS
-#  SHARED
-#  INCLUDE_DIRS ${ATLAS_POWHEGPATHFORH7}/POWHEG-BOX-RES/include ${ATLAS_POWHEGPATHFORH7}/POWHEG-BOX-RES/b_bbar_4l_modified
-#  LINK_LIBRARIES ${ZLIB_LIBRARIES} )
-
 
 atlas_add_library ( powhegHerwigBB4L
   BB4LHerwig/BB4LPowhegLesHouchesFileReader.cc
@@ -107,8 +85,6 @@ atlas_add_library ( powhegHerwigBB4L
   INCLUDE_DIRS ${THEPEG_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${GSL_INCLUDE_DIRS} ${HERWIG3_INCLUDE_DIRS} ${ATLAS_POWHEGPATHFORH7}/POWHEG-BOX-RES/include ${ATLAS_POWHEGPATHFORH7}/POWHEG-BOX-RES/b_bbar_4l_modified
   LINK_LIBRARIES ${THEPEG_LIBRARIES} ${Boost_LIBRARIES} ${GSL_LIBRARIES} ${HERWIG3_LIBRARIES} ${ZLIB_LIBRARIES} CxxUtils HwShower powhegSOforHerwig )
 
-endif()
-
 # Set up some environment variables for Herwig.
 set( Herwig7Environment_DIR ${CMAKE_CURRENT_SOURCE_DIR}
    CACHE PATH "Location of Herwig7Environment.cmake" )
@@ -118,6 +94,4 @@ find_package( Herwig7Environment )
 set( TheP8IEnvironment_DIR ${CMAKE_CURRENT_SOURCE_DIR}
    CACHE PATH "Location of TheP8IEnvironment.cmake" )
 find_package( TheP8IEnvironment )
-
-
 
