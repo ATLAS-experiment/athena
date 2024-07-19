@@ -4,8 +4,8 @@
  
  */
  
-#ifndef PIXELDIGITIZATION_Utilities_H
-#define PIXELDIGITIZATION_Utilities_H
+#ifndef PIXELDIGITIZATION_UTILITIES_H
+#define PIXELDIGITIZATION_UTILITIES_H
  
 #include <string>
 #include <tuple>
@@ -13,7 +13,7 @@
 #include <utility>
 
 namespace PixelChargeCalib{
-  class Thresholds;
+  struct Thresholds;
 }
  
 namespace CLHEP{

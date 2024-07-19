@@ -351,9 +351,9 @@ int main(int argc, char *argv[])
     //   char header[50];
     std::vector<int> histdata(nhistbins, 0);
 
-    int nhits = 0, nhisthits = 0, nhists = 0;
+    int nhits = 0, nhists = 0;
     int ntres = 0, nres = 0, nrt = 0;
-    int nhistsadd = 0, nhitsadd = 0, nbinsadd = 0, nhiststmp = 0;
+    int nhistsadd = 0, nbinsadd = 0, nhiststmp = 0;
 
     int nfiles = argc - 2;
     cout << "PROCESSING " << nfiles << " FILE(S)" << endl
@@ -708,8 +708,6 @@ int main(int argc, char *argv[])
             //*********************************************************************
 
             nhistsadd = 0;
-            // nhitsadd=0;
-            // nhists=0;
 
             TFile *ntfile = new TFile(argv[ifiles + 2]);
             TNtuple *hittuple = (TNtuple *)ntfile->Get("ntuple");
@@ -857,8 +855,6 @@ int main(int argc, char *argv[])
                     if ((int)det == -1)
                         rt_ref2->Fill(t - t0 + ephase, fabs(rtrack));
 
-                    nhisthits++;
-
                     if (histmap.find(sid) == histmap.end())
                     {
                         nhistsadd++;
@@ -869,7 +865,6 @@ int main(int argc, char *argv[])
                     {
                         nbinsadd += histmap[sid]->IncreaseBin(tresbin, 1);
                         ntres++;
-                        nhitsadd++;
                     }
                     if (rresbin >= 0)
                     {
@@ -1782,7 +1777,6 @@ int main(int argc, char *argv[])
             cout << "SCANNING BINARY HISTOGRAM FILE " << argv[ifiles + 2] << endl;
 
             nhistsadd = 0;
-            nhitsadd = 0;
             nhists = 0;
 
             ifstream *ifile = new ifstream(argv[ifiles + 2], ios::in | ios::binary);
@@ -1813,7 +1807,6 @@ int main(int argc, char *argv[])
                     if (chist[ipop] < 100)
                     {
                         ntres += chist[ipop + 1];
-                        nhitsadd += chist[ipop + 1];
                     } // increase hit counters
                     else if (chist[ipop] >= 100 && chist[ipop] < 200)
                         nres += chist[ipop + 1];

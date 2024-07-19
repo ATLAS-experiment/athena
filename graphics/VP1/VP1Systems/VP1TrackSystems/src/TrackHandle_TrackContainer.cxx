@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////
@@ -406,7 +406,7 @@ TrkObjToString::MeasurementType TrackHandle_TrackContainer::measurementType(
   if (state.hasReferenceSurface()) {
       const auto *actsElement = dynamic_cast<const ActsDetectorElement *>(
           state.referenceSurface().associatedDetectorElement());
-      if (actsElement && &(common()->muonIdHelperSvc())!=nullptr) {
+      if (actsElement && common()->muonIdHelperSvc().get()) {
         auto& idhelper = common()->muonIdHelperSvc()->mdtIdHelper(); // This is a lazy way to get an AtlasID helper. Not ideal if muon geometry is off.
         if (idhelper.is_mdt(actsElement->identify())) {
           type = TrkObjToString::MDT;
