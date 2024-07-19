@@ -77,14 +77,14 @@ def ActsTrackReaderAlgCfg(flags,
 
 def ActsPoolReadCfg(flags) -> ComponentAccumulator:
     acc = ComponentAccumulator()
-
+    
     # Reader for InDet objects (i.e. xAOD SpacePoints and Measurements)
     from InDetConfig.InDetPoolReadConfig import InDetPoolReadCfg
     acc.merge(InDetPoolReadCfg(flags))
     
     StoredTracks = dict()
-    
     typedCollections = flags.Input.TypedCollections
+
     for typedCollection in typedCollections:
         [colType, colName] = typedCollection.split('#')
 
@@ -98,6 +98,7 @@ def ActsPoolReadCfg(flags) -> ComponentAccumulator:
     for (key, backends) in StoredTracks.items():
         if not backends.isValid():
             raise Exception(f'Track backends with prefix {key} are not consistent. Be sure all the backends have been properly persistified in the file: {backends}')
+
         acc.merge(ActsTrackReaderAlgCfg(flags, key))
     
     return acc

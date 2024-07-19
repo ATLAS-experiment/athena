@@ -281,7 +281,8 @@ def ITkTrackRecoPassCfg(flags,
 
 
 def ITkActsTrackFinalCfg(flags,
-                         InputCombinedITkTracks: list[str] = None) -> ComponentAccumulator:
+                         InputCombinedITkTracks: list[str] = None,
+                         ActsTrackContainerName="ActsInDetTrackParticles") -> ComponentAccumulator:
     # Inputs must not be None
     assert InputCombinedITkTracks is not None and isinstance(InputCombinedITkTracks, list)
 
@@ -289,12 +290,11 @@ def ITkActsTrackFinalCfg(flags,
     if len(InputCombinedITkTracks) == 0:
         return acc
     
-    mergeTrackContainer = "ActsCombinedTracks"
     # Schedule Track particle creation
     from ActsConfig.ActsTrackFindingConfig import ActsTrackToTrackParticleCnvAlgCfg
-    acc.merge(ActsTrackToTrackParticleCnvAlgCfg(flags, "ActsCombinedTrackToAltTrackParticleCnvAlg",
+    acc.merge(ActsTrackToTrackParticleCnvAlgCfg(flags, "ActsCombinedTrackToTrackParticleCnvAlg",
                                                 ACTSTracksLocation=InputCombinedITkTracks,
-                                                TrackParticlesOutKey=f'{mergeTrackContainer}ParticlesAlt'))
+                                                TrackParticlesOutKey=ActsTrackContainerName))
     if flags.Tracking.doTruth :
         from ActsConfig.ActsTruthConfig import ActsTrackParticleTruthDecorationAlgCfg
         track_to_truth_maps=[]
@@ -305,9 +305,9 @@ def ITkActsTrackFinalCfg(flags,
         #       the TrackFindingValidationAlg
         acc.merge(ActsTrackParticleTruthDecorationAlgCfg(
                      flags,
-                     name=f'{mergeTrackContainer}ParticleTruthDecorationAlg',
+                     name=f'{ActsTrackContainerName}TruthDecorationAlg',
                      TrackToTruthAssociationMaps = track_to_truth_maps,
-                     TrackParticleContainerName = f'{mergeTrackContainer}ParticlesAlt',
+                     TrackParticleContainerName = ActsTrackContainerName,
                      OutputLevel=WARNING              if len(InputCombinedITkTracks)==1 else INFO,
                      ComputeTrackRecoEfficiency=False if len(InputCombinedITkTracks)==1 else True
                      ))
@@ -322,7 +322,11 @@ def ITkTrackFinalCfg(flags,
     assert StatTrackCollections is not None and isinstance(StatTrackCollections, list)
     assert StatTrackTruthCollections is not None and isinstance(StatTrackTruthCollections, list)
 
+    # If there are no tracks return directly
     result = ComponentAccumulator()
+    if len(InputCombinedITkTracks) == 0:
+        return result
+    
     if hasattr(flags.TrackOverlay, "ActiveConfig"):
        doTrackOverlay = getattr(flags.TrackOverlay.ActiveConfig, "doTrackOverlay", None)
     else:
@@ -551,7 +555,7 @@ def ITkTrackRecoCfg(flags) -> ComponentAccumulator:
 
     for current_flags in flags_set:
         printActiveConfig(current_flags)
-
+        
         extension = current_flags.Tracking.ActiveConfig.extension
         _extensions_list.append(extension)
 
@@ -585,18 +589,33 @@ def ITkTrackRecoCfg(flags) -> ComponentAccumulator:
         # Store ACTS extension
         if 'Acts' in extension:
             previousActsExtension = extension
-
+            
     # This merges the track collection in InputCombinedITkTracks
     # and creates a track particle collection from that
-    result.merge(
-        ITkTrackFinalCfg(flags,
-                         InputCombinedITkTracks=InputCombinedITkTracks,
-                         StatTrackCollections=StatTrackCollections,
-                         StatTrackTruthCollections=StatTrackTruthCollections))
+    if InputCombinedITkTracks:
 
-    # This will handle ACTS tracks instead
-    result.merge(ITkActsTrackFinalCfg(flags,
-                                      InputCombinedITkTracks=InputCombinedActsTracks))
+        result.merge(
+            ITkTrackFinalCfg(flags,
+                             InputCombinedITkTracks=InputCombinedITkTracks,
+                             StatTrackCollections=StatTrackCollections,
+                             StatTrackTruthCollections=StatTrackTruthCollections))
+        
+
+    
+        
+    # Now handle ACTS tracks instead if present in the event
+    if InputCombinedActsTracks:
+
+        # The name of the Acts xAOD container name depends on what
+        # workflow has been executed, which we get by checking
+        # the size of the track containers.
+                
+        ActsTrackContainerName = "InDetTrackParticles" if not InputCombinedITkTracks else "ActsInDetTrackParticles"
+        ActsPrimaryVertices    = "PrimaryVertices" if not InputCombinedITkTracks else "ActsPrimaryVertices"
+
+        result.merge(ITkActsTrackFinalCfg(flags,
+                                          InputCombinedITkTracks=InputCombinedActsTracks,
+                                          ActsTrackContainerName=ActsTrackContainerName))
 
     # Store some collections for persistification
     # Used for validation and studies
@@ -608,9 +627,13 @@ def ITkTrackRecoCfg(flags) -> ComponentAccumulator:
 
     # Perform vertex finding
     if flags.Tracking.doVertexFinding:
-        # Schedule the usual vertex finding for Athena workflow(s)
+        
         from InDetConfig.InDetPriVxFinderConfig import primaryVertexFindingCfg
-        result.merge(primaryVertexFindingCfg(flags))
+
+        # Schedule the usual vertex finding for Athena workflow(s)
+        # ONLY schedule this if there are Athena Legacy Track collections
+        if InputCombinedITkTracks:
+            result.merge(primaryVertexFindingCfg(flags))
 
         # Schedule the same vertex finding for Acts workflow(s)
         # For now this is separate from the Athena counterpart, but in the
@@ -619,8 +642,8 @@ def ITkTrackRecoCfg(flags) -> ComponentAccumulator:
         if InputCombinedActsTracks:
             result.merge(primaryVertexFindingCfg(flags,
                                                  name="ActsPriVxFinderAlg",
-                                                 TracksName="ActsCombinedTracksParticlesAlt",
-                                                 vxCandidatesOutputName="ActsPrimaryVertices"))
+                                                 TracksName=ActsTrackContainerName,
+                                                 vxCandidatesOutputName=ActsPrimaryVertices))
 
 
     if flags.Tracking.doStats:

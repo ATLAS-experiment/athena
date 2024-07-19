@@ -24,6 +24,7 @@ def actsWorkflowFlags(flags) -> None:
     flags.Acts.doAmbiguityResolution = True
     flags.Tracking.recoChain = [TrackingComponent.AthenaChain,
                                 TrackingComponent.ActsChain]
+    flags.Acts.EDM.PersistifyTrackParticles = True
     flags.Output.HISTFileName = "ActsMonitoringOutput.root" 
 
 def actsValidateClustersFlags(flags) -> None:

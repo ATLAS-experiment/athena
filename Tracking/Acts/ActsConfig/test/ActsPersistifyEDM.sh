@@ -32,7 +32,7 @@ ActsReadEDM.py \
    tracks="ActsTracks" \
    readTrackParticles=True \
    redoAmbiguity=True \
-   trackParticles="ActsCombinedTracksParticlesAlt"
+   trackParticles="ActsInDetTrackParticles"
 
 rc=$?
 if [ $rc != 0 ]; then
