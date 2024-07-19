@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -349,8 +349,8 @@ int main() {
   CxxUtils::ubsan_suppress ( []() { TInterpreter::Instance(); } );
   ISvcLocator* pSvcLoc;
 
-  if (!Athena_test::initGaudi("GenericMon.txt", pSvcLoc)) {
-    throw runtime_error("This test can not be run: GenericMon.txt is missing");
+  if (!Athena_test::initGaudi("GenericMonMinimal.txt", pSvcLoc)) {
+    throw runtime_error("This test can not be run: GenericMonMinimal.txt is missing");
   }
 
   HistogramFactoryTestSuite().run();
