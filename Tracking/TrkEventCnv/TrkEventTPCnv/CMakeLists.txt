@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrkEventTPCnv )
@@ -22,7 +22,7 @@ set( _definitions
    -DUseFloatsIn_CompetingRIOsOnTrack )
 
 # Component(s) in the package:
-atlas_add_tpcnv_library( TrkEventTPCnv
+atlas_add_library( TrkEventTPCnv
    TrkEventTPCnv/*.h src/*.cxx
    TrkEventTPCnv/TrkEventPrimitives/*.h src/TrkEventPrimitives/*.cxx
    TrkEventTPCnv/TrkMaterialOnTrack/*.h src/TrkMaterialOnTrack/*.cxx
@@ -58,6 +58,13 @@ atlas_add_tpcnv_library( TrkEventTPCnv
    TrkSegment TrkTrack TrkTrackSummary TrkV0Vertex TrkVertexOnTrack TrkEventCnvToolsLib TrkEventUtils
    VxMultiVertex VxVertex 
    PRIVATE_LINK_LIBRARIES AthenaKernel TrkDetDescrUtils TrkTrackLink
+   DEFINITIONS ${_definitions} )
+
+atlas_add_tpcnv_library( TrkEventTPCnvFactories
+   src/factories/*.cxx
+   PUBLIC_HEADERS TrkEventTPCnv
+   INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
+   LINK_LIBRARIES TrkEventTPCnv
    DEFINITIONS ${_definitions} )
 
 atlas_add_dictionary( TrkEventTPCnvDict
