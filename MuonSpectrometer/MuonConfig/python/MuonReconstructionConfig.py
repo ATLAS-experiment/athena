@@ -84,6 +84,13 @@ def StandaloneMuonOutputCfg(flags):
     esd_items += ["Muon::TgcPrepDataContainer#TGC_MeasurementsAllBCs"]
     esd_items += ["Muon::MdtPrepDataContainer#MDT_DriftCircles"]
 
+    if flags.Muon.writexAODPRD:
+        esd_items += ["xAOD::MdtDriftCircleContainer#*", "xAOD::MdtDriftCircleAuxContainer#*" ]
+        esd_items += ["xAOD::sTgcStripContainer#*", "xAOD::sTgcStripAuxContainer#*" ]
+        esd_items += ["xAOD::MMClusterContainer#*", "xAOD::MMClusterAuxContainer#*" ]
+        esd_items += ["xAOD::TgcStripContainer#*", "xAOD::TgcStripAuxContainer#*" ]
+        esd_items += ["xAOD::RpcStripContainer#*", "xAOD::RpcStripAuxContainer#*" ]
+
     # trigger related info for offline DQA
     esd_items += ["Muon::TgcCoinDataContainer#TrigT1CoinDataCollection"]
     esd_items += ["Muon::TgcCoinDataContainer#TrigT1CoinDataCollectionPriorBC"]
