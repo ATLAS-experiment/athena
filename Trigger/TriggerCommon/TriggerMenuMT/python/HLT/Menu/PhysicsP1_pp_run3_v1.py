@@ -124,11 +124,11 @@ def addPhysicsP1Chains(chains):
     for sig,chainsInSig in chainsP1.items():
         chains[sig] += chainsInSig
 
-def setupMenu(menu_name):
+def setupMenu():
     log.info('setupMenu ...')
 
     # Add physics chains (data + MC)
-    chains = physics_menu.setupMenu(menu_name)
+    chains = physics_menu.setupMenu()
 
     addPhysicsP1Chains(chains)
 

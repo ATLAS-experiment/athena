@@ -65,7 +65,7 @@ def LArMaskedSCCfg(configFlags):
                             className="CondAttrListCollection",
                             extensible=configFlags.Common.isOnline )) # when run online, need folder to be extensible to force reload each event         
     condAlgo = CompFactory.LArBadChannelCondAlg(name="MaskedSCCondAlg",ReadKey="/LAR/BadChannels/MaskedSC",isSC=True,
-                                                CablingKey="LArOnOffIdMapSC",WriteKey="LArMaskedSC",ReloadEveryEvent=configFlags.Common.isOnline)         
+                                                CablingKey="LArOnOffIdMapSC",WriteKey="LArMaskedSC")         
     result.addCondAlgo(condAlgo)
     return result
 

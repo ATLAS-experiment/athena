@@ -103,7 +103,7 @@ namespace InDet {
     /** from long living particle decays or gamma conversions or hadronic interactions and anything else with barcode > 200000 */
     inline bool isSecondary(int origin) {
       static constexpr auto bit=[](int bitpos){return 0x1<<bitpos;};
-      static constexpr int isSecondaryMask=bit(StrangeMesonDecay)|bit(StrangeBaryonDecay)|bit(GammaConversion)|bit(HadronicInteraction)|bit(OtherDecay);
+      static constexpr int isSecondaryMask=bit(StrangeMesonDecay)|bit(StrangeBaryonDecay)|bit(GammaConversion)|bit(HadronicInteraction)|bit(OtherDecay)|bit(OtherSecondary);
       return (origin & isSecondaryMask);
     }
 

@@ -143,12 +143,12 @@ def getDevHISignatures():
 
     return chains
 
-def setupMenu(menu_name):
+def setupMenu():
 
     from AthenaCommon.Logging import logging
     log = logging.getLogger( __name__ )
 
-    chains = mc_menu.setupMenu(menu_name)
+    chains = mc_menu.setupMenu()
 
     log.info('[setupMenu] going to add the Dev menu chains now')
 

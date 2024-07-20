@@ -99,6 +99,7 @@ namespace FlavorTagDiscriminants {
       {Truth::Type::BHadronDecayLike, 8}, //4-like muons
       {Truth::Type::CHadronDecayLike, 8}, //4-like muons
       {Truth::Type::NonMuonlike, 8}, //Non-muons like muons
+      // There are also cases where the muon has the truth particle associated to the ID track that is not a muon. Those muons are labelled as 9 (NotInnerDetector muons)
     };
   };
 }

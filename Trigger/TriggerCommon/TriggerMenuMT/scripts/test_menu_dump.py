@@ -93,7 +93,7 @@ def run():
 
     # Import menu by name
     menumodule = importlib.import_module(f'TriggerMenuMT.HLT.Menu.{menu_name}')
-    menu = menumodule.setupMenu(menu_name)
+    menu = menumodule.setupMenu()
 
     # filter chains
     if args.stream:

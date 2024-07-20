@@ -81,7 +81,7 @@ Topo2Group = ['Topo2']
 Topo3Group = ['Topo3']
 LegacyTopoGroup = ['LegacyTopo']
 
-def setupMenu(menu_name):
+def setupMenu():
 
     from AthenaCommon.Logging import logging
     log = logging.getLogger( __name__ )
@@ -1912,7 +1912,6 @@ def setupMenu(menu_name):
     chains['Combined'] += [
 
         # AFP+dijet backup chains, discussed in ATR-24813
-        # TODO: Kept PS:Online for consistency, but move to PS:NoBulkMCProd?
         ChainProp(name='HLT_2j120_mb_afprec_afpdijet_L1AFP_A_AND_C', l1SeedThresholds=['FSNOSEED']*2, stream=[PhysicsStream], groups=MinBiasGroup+SupportGroup, monGroups=['mbMon:shifter']),
         ChainProp(name='HLT_2j175_mb_afprec_afpdijet_L1AFP_A_AND_C', l1SeedThresholds=['FSNOSEED']*2, stream=[PhysicsStream], groups=MinBiasGroup+SupportGroup, monGroups=['mbMon:t0']),
 
