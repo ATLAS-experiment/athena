@@ -26,7 +26,7 @@ StatusCode TrigCountSpacePoints::execute(const EventContext &context) const {
   // For Pixel info decoding
   SG::ReadHandle<PixelID> pixelHelper(m_pixelHelperKey, context);
 
-  // Here monitor
+  // counters
   int pixCLBeforeCuts{};
   int pixCL{};
   int pixCLnoToT{};
@@ -37,6 +37,7 @@ StatusCode TrigCountSpacePoints::execute(const EventContext &context) const {
   int pixCLEndcapA{};
   int pixCLEndcapC{};
   int pixModulesOverThreshold{};
+  std::complex<double> pixQ2TotSum;
 
   SG::ReadHandle<SpacePointContainer> pixelSP(m_pixelSpKey, context);
   ATH_MSG_DEBUG("Successfully retrieved pixel SP container of size " << pixelSP->size());
@@ -53,6 +54,8 @@ StatusCode TrigCountSpacePoints::execute(const EventContext &context) const {
     const int bec = pixelHelper->barrel_ec(pixid);
 
     int nPixSP{}, nPixCL_1{}, nPixCL_2{}, nPixCLmin3{}, nPixCLnoToT{};
+    std::complex<double> pixQ2sum;
+
     for (const auto pSP : *pixSPointColl) {
       pixCLBeforeCuts++;
       const InDet::PixelCluster *pixClust = static_cast<const InDet::PixelCluster *>(pSP->clusterList().first);
@@ -72,6 +75,7 @@ StatusCode TrigCountSpacePoints::execute(const EventContext &context) const {
         if (pixClSize >= 3) {
           ++nPixCLmin3;
         }
+        pixQ2sum += std::polar(1.0, 2.0*pSP->phi()); // this is complex value exp(2i*phi)
       }
     }
 
@@ -81,6 +85,7 @@ StatusCode TrigCountSpacePoints::execute(const EventContext &context) const {
       pixModulesOverThreshold++;
     } else {
       pixCL += nPixSP;
+      pixQ2TotSum += pixQ2sum;
       pixCLnoToT += nPixCLnoToT;
       pixCL_1 += nPixCL_1;
       pixCL_2 += nPixCL_2;
@@ -97,7 +102,7 @@ StatusCode TrigCountSpacePoints::execute(const EventContext &context) const {
       }
     }
   }
-
+  const float pixQ2mod = pixCL !=0 ? std::abs(pixQ2TotSum)/pixCL : 0.0;
   ATH_MSG_DEBUG("REGTEST : Formed  " << pixCLBeforeCuts << " pixel spacepoints in total before cuts.");
   ATH_MSG_DEBUG("REGTEST : " << pixCL_1 << " have cl size == 1 in total.");
   ATH_MSG_DEBUG("REGTEST : " << pixCL_2 << " have cl size == 2 in total.");
@@ -114,7 +119,7 @@ StatusCode TrigCountSpacePoints::execute(const EventContext &context) const {
   SG::ReadHandle<SCT_ID> SctHelper(m_sctHelperKey, context);
   ATH_MSG_DEBUG("Successfully retrieved SCT SP container of size " << SctSP->size());
 
-  // Here monitor define
+  // counters
   int nSctSP{};
   int sctSPBarrel{};
   int sctSPEndcapA{};
@@ -190,6 +195,7 @@ StatusCode TrigCountSpacePoints::execute(const EventContext &context) const {
   SAVE_AND_MONITOR(sctSPBarrel);
   SAVE_AND_MONITOR(sctSPEndcapA);
   SAVE_AND_MONITOR(sctSPEndcapC);
+  SAVE_AND_MONITOR(pixQ2mod);
 #undef SAVE_AND_MONITOR
 
   auto mon_pixCLBeforeCuts = Monitored::Scalar<int>("pixCLBeforeCuts", pixCLBeforeCuts);

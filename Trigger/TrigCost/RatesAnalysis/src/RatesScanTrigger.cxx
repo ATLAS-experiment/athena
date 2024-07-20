@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RatesAnalysis/RatesScanTrigger.h"
@@ -61,7 +61,7 @@ void RatesScanTrigger::setPassedAndExecute(const double t, const WeightingValues
 
 
 StatusCode RatesScanTrigger::giveThresholdHist(const ServiceHandle<ITHistSvc>& svc, const std::string& name) { 
-  ATH_CHECK( svc->regHist(name, std::move(m_rateScanHist), m_rateScanHistCachedPtr) );
+  ATH_CHECK( svc->regHist(name, std::move(m_rateScanHist)) );
   return StatusCode::SUCCESS;
 }
 

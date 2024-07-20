@@ -42,7 +42,7 @@ DataScoutingInfo._DataScoutingIdentifiers['ElectronDSPEBTest'] = 3
 DataScoutingInfo.TruncationThresholds[3] = 5*(1024**2) # 5 MB
 
 # Override the setupMenu function from Dev_pp_run3_v1
-def myMenu(menu_name):
+def myMenu():
     log.debug('Executing myMenu')
 
     from TriggerMenuMT.HLT.Menu.SignatureDicts import ChainStore
