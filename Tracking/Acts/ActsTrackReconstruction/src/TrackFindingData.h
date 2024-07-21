@@ -59,7 +59,7 @@ namespace ActsTrk::detail {
   using Stepper = Acts::EigenStepper<>;
   using Navigator = Acts::Navigator;
   using Propagator = Acts::Propagator<Stepper, Navigator>;
-  using CKF = Acts::CombinatorialKalmanFilter<Propagator, RecoTrackStateContainer>;
+  using CKF = Acts::CombinatorialKalmanFilter<Propagator, RecoTrackContainer>;
   using Extrapolator = Propagator;
 
   // Small holder class to keep CKF and related objects.
@@ -74,9 +74,7 @@ namespace ActsTrk::detail {
     CKF ckf;
     // CKF configuration
     Acts::MeasurementSelector measurementSelector;
-    Acts::PropagatorPlainOptions pOptions;
-    Acts::PropagatorPlainOptions pSecondOptions;
-    Acts::CombinatorialKalmanFilterExtensions<RecoTrackStateContainer> ckfExtensions;
+    Acts::CombinatorialKalmanFilterExtensions<RecoTrackContainer> ckfExtensions;
     // Track selection
     Acts::TrackSelector trackSelector;
   };

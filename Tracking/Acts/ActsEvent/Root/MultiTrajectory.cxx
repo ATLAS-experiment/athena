@@ -394,7 +394,7 @@ std::any ActsTrk::MutableMultiTrajectory::component_impl(
 }
 
 
-const std::any ActsTrk::MutableMultiTrajectory::component_impl(
+std::any ActsTrk::MutableMultiTrajectory::component_impl(
     Acts::HashedString key,
     ActsTrk::IndexType istate) const {
   using namespace Acts::HashedStringLiteral;
@@ -614,7 +614,7 @@ bool ActsTrk::MultiTrajectory::has_impl(Acts::HashedString key,
   return false;
 }
 
-const std::any ActsTrk::MultiTrajectory::component_impl(
+std::any ActsTrk::MultiTrajectory::component_impl(
     Acts::HashedString key, ActsTrk::IndexType istate) const {
   using namespace Acts::HashedStringLiteral;
   switch (key) {

@@ -560,10 +560,12 @@ GaussianSumFitter::prepareOptions(const Acts::GeometryContext& tgContext,
 				  const Acts::CalibrationContext& calContext,
 				  const Acts::PerigeeSurface& surface) const
 {
-  Acts::PropagatorPlainOptions propagationOption;
+  Acts::PropagatorPlainOptions propagationOption(tgContext, mfContext);
   propagationOption.maxSteps = m_option_maxPropagationStep;
 
-  Acts::GsfOptions<typename ActsTrk::MutableTrackStateBackend> gsfOptions{tgContext, mfContext, calContext, m_gsfExtensions, std::move(propagationOption)};
+  Acts::GsfOptions<typename ActsTrk::MutableTrackStateBackend> gsfOptions(tgContext, mfContext, calContext);
+  gsfOptions.extensions=m_gsfExtensions;
+  gsfOptions.propagatorPlainOptions=propagationOption;
   gsfOptions.referenceSurface = &surface;
 
   // Set abortOnError to false, else the refitting crashes if no forward propagation is done. Here, we just skip the event and continue.

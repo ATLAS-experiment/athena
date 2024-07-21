@@ -190,7 +190,7 @@ StatusCode KalmanFitter::initialize() {
   auto field = std::make_shared<ATLASMagneticFieldWrapper>();
 
   // Fitter
-  Acts::EigenStepper<> stepper(field, m_overstepLimit);
+  Acts::EigenStepper<> stepper(field);
   Acts::Navigator navigator( Acts::Navigator::Config{ m_trackingGeometryTool->trackingGeometry() },
 			     logger().cloneWithSuffix("Navigator"));
   Acts::Propagator<Acts::EigenStepper<>, Acts::Navigator> propagator(stepper, 
@@ -261,7 +261,7 @@ KalmanFitter::fit(const EventContext& ctx,
   ATLASSourceLinkSurfaceAccessor surfaceAccessor{&(*m_ATLASConverterTool)};
   kfExtensions.surfaceAccessor.connect<&ATLASSourceLinkSurfaceAccessor::operator()>(&surfaceAccessor);
 
-  Acts::PropagatorPlainOptions propagationOption;
+  Acts::PropagatorPlainOptions propagationOption(tgContext, mfContext);
   propagationOption.maxSteps = m_option_maxPropagationStep;
   // Set the KalmanFitter options
   Acts::KalmanFitterOptions
@@ -337,7 +337,7 @@ KalmanFitter::fit(const EventContext& ctx,
   ATLASSourceLinkSurfaceAccessor surfaceAccessor{&(*m_ATLASConverterTool)};
   kfExtensions.surfaceAccessor.connect<&ATLASSourceLinkSurfaceAccessor::operator()>(&surfaceAccessor);
 
-  Acts::PropagatorPlainOptions propagationOption;
+  Acts::PropagatorPlainOptions propagationOption(tgContext, mfContext);
   propagationOption.maxSteps = m_option_maxPropagationStep;
   // Set the KalmanFitter options
   Acts::KalmanFitterOptions
@@ -405,7 +405,7 @@ KalmanFitter::fit(const EventContext& ctx,
     PRDSourceLinkSurfaceAccessor surfaceAccessor{m_ATLASConverterTool.get()};
     kfExtensions.surfaceAccessor.connect<&PRDSourceLinkSurfaceAccessor::operator()>(&surfaceAccessor);
 
-    Acts::PropagatorPlainOptions propagationOption;
+    Acts::PropagatorPlainOptions propagationOption(tgContext, mfContext);
     propagationOption.maxSteps = m_option_maxPropagationStep;
     // Set the KalmanFitter options
     Acts::KalmanFitterOptions
@@ -475,7 +475,7 @@ KalmanFitter::fit(const EventContext& ,
 
   kfExtensions.calibrator.connect<&OnTrackCalibrator<ActsTrk::MutableTrackStateBackend>::calibrate>(&calibrator);
    
-  Acts::PropagatorPlainOptions propagationOption;
+  Acts::PropagatorPlainOptions propagationOption(tgContext, mfContext);
   propagationOption.maxSteps = m_option_maxPropagationStep;
  
   // Construct a perigee surface as the target surface if none is provided
@@ -554,7 +554,7 @@ KalmanFitter::fit(const EventContext& ctx,
 
   Acts::KalmanFitterExtensions<ActsTrk::MutableTrackStateBackend> kfExtensions = m_kfExtensions;
 
-  Acts::PropagatorPlainOptions propagationOption;
+  Acts::PropagatorPlainOptions propagationOption(tgContext, mfContext);
   propagationOption.maxSteps = m_option_maxPropagationStep;
   // Set the KalmanFitter options
   Acts::KalmanFitterOptions
@@ -643,7 +643,7 @@ KalmanFitter::fit(const EventContext& ctx,
 
   Acts::KalmanFitterExtensions<ActsTrk::MutableTrackStateBackend> kfExtensions = m_kfExtensions;
 
-  Acts::PropagatorPlainOptions propagationOption;
+  Acts::PropagatorPlainOptions propagationOption(tgContext, mfContext);
   propagationOption.maxSteps = m_option_maxPropagationStep;
   // Set the KalmanFitter options
   Acts::KalmanFitterOptions

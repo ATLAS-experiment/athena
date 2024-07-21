@@ -20,10 +20,9 @@ namespace ActsTrk::FitterHelperFunctions {
   template<typename trajectory_t>
   Acts::Result<void> gainMatrixUpdate(const Acts::GeometryContext& gctx,
                     typename trajectory_t::TrackStateProxy trackState, 
-                    Acts::Direction direction, 
                     const Acts::Logger& logger) {
     Acts::GainMatrixUpdater updater;
-    return updater.template operator()<trajectory_t>(gctx, trackState, direction, logger);
+    return updater.template operator()<trajectory_t>(gctx, trackState, logger);
   }
 
   template<typename trajectory_t>
@@ -55,10 +54,10 @@ namespace ActsTrk::FitterHelperFunctions {
     [&] (auto N) -> bool {
       constexpr size_t kMeasurementSize = decltype(N)::value;
 
-      typename Acts::TrackStateTraits<kMeasurementSize, true>::Measurement calibrated{
+      typename Acts::TrackStateTraits<kMeasurementSize, true>::Calibrated calibrated{
         state.template calibrated<Acts::MultiTrajectoryTraits::MeasurementSizeMax>().data()};
       
-      typename Acts::TrackStateTraits<kMeasurementSize, true>::MeasurementCovariance
+      typename Acts::TrackStateTraits<kMeasurementSize, true>::CalibratedCovariance
         calibratedCovariance{state.template calibratedCovariance<Acts::MultiTrajectoryTraits::MeasurementSizeMax>().data()};
       
       // Take the projector (measurement mapping function)

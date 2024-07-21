@@ -10,7 +10,6 @@
 #include "xAODMeasurementBase/UncalibratedMeasurement.h"
 #include "xAODMeasurementBase/UncalibratedMeasurementContainer.h"
 
-#include "Acts/EventData/Measurement.hpp"
 #include "Acts/EventData/MultiTrajectory.hpp"
 #include "Acts/Utilities/CalibrationContext.hpp"
 #include "Acts/Geometry/GeometryIdentifier.hpp"

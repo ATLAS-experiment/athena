@@ -22,13 +22,15 @@
 BOOST_AUTO_TEST_SUITE(EventDataTrackStorage)
 
 BOOST_AUTO_TEST_CASE(ConstCompilesWithInterface) {
-  ACTS_STATIC_CHECK_CONCEPT(Acts::ConstTrackContainerBackend,
-                            ActsTrk::TrackSummaryContainer);
+  static_assert(
+    Acts::ConstTrackContainerBackend<ActsTrk::TrackSummaryContainer>,
+    "ActsTrk::TrackSummaryContainer does not fulfill Acts::ConstTrackContainerBackend");
 }
 
 BOOST_AUTO_TEST_CASE(MutableCompilesWithInterface) {
-  ACTS_STATIC_CHECK_CONCEPT(Acts::TrackContainerBackend,
-                            ActsTrk::MutableTrackSummaryContainer);
+  static_assert(
+    Acts::TrackContainerBackend<ActsTrk::MutableTrackSummaryContainer>,
+    "ActsTrk::MutableTrackSummaryContainer does not fulfill Acts::TrackContainerBackend");
 
   using MutableTrackContainer [[maybe_unused]] = Acts::TrackContainer<ActsTrk::MutableTrackSummaryContainer, ActsTrk::MutableMultiTrajectory>;
 }

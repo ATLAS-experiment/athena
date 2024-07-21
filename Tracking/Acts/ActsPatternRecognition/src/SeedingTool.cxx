@@ -247,9 +247,9 @@ namespace ActsTrk {
 								   *m_topBinFinder, m_navigation);
     
     // variable middle SP radial region of interest
-    const Acts::Range1D<float> rMiddleSPRange(std::floor(rRangeSPExtent.min(Acts::binR) / 2) * 2 +
+    const Acts::Range1D<float> rMiddleSPRange(std::floor(rRangeSPExtent.min(Acts::BinningValue::binR) / 2) * 2 +
 					      m_finderCfg.deltaRMiddleMinSPRange,
-					      std::floor(rRangeSPExtent.max(Acts::binR) / 2) * 2 -
+					      std::floor(rRangeSPExtent.max(Acts::BinningValue::binR) / 2) * 2 -
 					      m_finderCfg.deltaRMiddleMaxSPRange);
     
     //TODO POSSIBLE OPTIMISATION come back here: see MR !52399 ( i.e. use static thread_local)
@@ -287,7 +287,7 @@ namespace ActsTrk {
 
     for (const auto [bottom, middle, top] : spacePointsGrouping) {
       m_finder.createSeedsForGroup(finderOpts, state, spacePointsGrouping.grid(), 
-          std::back_inserter(seeds), bottom, middle, top, rMiddleSPRange);
+          seeds, bottom, middle, top, rMiddleSPRange);
     }
 
     if (m_seedQualitySelection) {

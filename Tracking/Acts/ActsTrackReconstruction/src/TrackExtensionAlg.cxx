@@ -8,6 +8,7 @@
 #include "Acts/Geometry/TrackingGeometry.hpp"
 #include "Acts/Geometry/GeometryIdentifier.hpp"
 #include "Acts/MagneticField/MagneticFieldProvider.hpp"
+#include "Acts/Propagator/PropagatorOptions.hpp"
 #include "Acts/Surfaces/Surface.hpp"
 #include "Acts/TrackFinding/MeasurementSelector.hpp"
 #include "Acts/TrackFinding/CombinatorialKalmanFilter.hpp"
@@ -70,10 +71,14 @@ namespace ActsTrk{
     trackSelectorCfg.cutSets[0].maxSharedHits = 1;
     trackSelectorCfg.cutSets[0].maxChi2 = 25.;
 
-    m_ckfConfig.reset(new detail::CKF_config{std::move(extrapolator), {std::move(propagator), m_logger->cloneWithSuffix("CKF")}, measurementSelector, {}, {}, {}, trackSelectorCfg});
-    // TODO replace these arbitrary settings by config
-    m_ckfConfig->pOptions.maxSteps = 100;
-    m_ckfConfig->pOptions.direction= Acts::Direction::Backward;
+    detail::CKF_config ckfConfig{
+        std::move(extrapolator),
+        {std::move(propagator), m_logger->cloneWithSuffix("CKF")},
+        measurementSelector,
+        {},
+        trackSelectorCfg};
+
+    m_ckfConfig = std::make_unique<detail::CKF_config>(std::move(ckfConfig));
 
 
     return StatusCode::SUCCESS;
@@ -137,13 +142,16 @@ namespace ActsTrk{
     Acts::SourceLinkAccessorDelegate<ActsTrk::UncalibSourceLinkAccessor::Iterator> slAccessorDelegate;
     slAccessorDelegate.connect<&ActsTrk::UncalibSourceLinkAccessor::range>(&slAccessor);
 
+    Acts::PropagatorPlainOptions plainOptions(tgContext, mfContext);
+    plainOptions.maxSteps = 100;
+    plainOptions.direction= Acts::Direction::Backward;
 
     return CKFOptions(tgContext,
                       mfContext,
                       m_calibrationContext,
                       slAccessorDelegate,
                       m_ckfConfig->ckfExtensions,
-                      m_ckfConfig->pOptions,
+                      plainOptions,
                       perigeeSurface);
   }
 

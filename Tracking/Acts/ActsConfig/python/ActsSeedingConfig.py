@@ -29,8 +29,9 @@ def ActsFastPixelSeedingToolCfg(flags,
     kwargs.setdefault("maxPhiBins", 200)
     kwargs.setdefault("gridRMax", 250 * UnitConstants.mm)
     kwargs.setdefault("deltaRMax", 200 * UnitConstants.mm)
-    kwargs.setdefault("zBinsCustomLooping" , [2, 10, 3, 9, 6, 4, 8, 5, 7])
+    kwargs.setdefault("zBinsCustomLooping" , [3, 11, 4, 10, 7, 5, 9, 6, 8])
     kwargs.setdefault("rRangeMiddleSP", [
+             [40.0, 80.0],
              [40.0, 80.0],
              [40.0, 200.0],
              [70.0, 200.0],
@@ -40,7 +41,8 @@ def ActsFastPixelSeedingToolCfg(flags,
              [70.0, 250.0],
              [70.0, 200.0],
              [70.0, 200.0],
-             [40.0, 200.0],
+             [40.0, 200.0],        
+             [40.0, 80.0],
              [40.0, 80.0]])
     kwargs.setdefault("useVariableMiddleSPRange", False)
     kwargs.setdefault("useExperimentCuts", True)
@@ -66,7 +68,7 @@ def ActsStripSeedingToolCfg(flags,
     kwargs.setdefault("deltaRMaxBottomSP" , 300. * UnitConstants.mm)
     kwargs.setdefault("deltaZMax" , 900. * UnitConstants.mm)
     kwargs.setdefault("interactionPointCut" , False)
-    kwargs.setdefault("zBinsCustomLooping" , [6, 7, 5, 8, 4, 9, 3, 10, 2, 11, 1])
+    kwargs.setdefault("zBinsCustomLooping" , [7, 8, 6, 9, 5, 10, 4, 11, 3, 12, 2])
     kwargs.setdefault("deltaRMiddleMinSPRange" , 30 * UnitConstants.mm)
     kwargs.setdefault("deltaRMiddleMaxSPRange" , 150 * UnitConstants.mm)
     kwargs.setdefault("useDetailedDoubleMeasurementInfo" , True)
@@ -81,7 +83,7 @@ def ActsStripSeedingToolCfg(flags,
     kwargs.setdefault("maxSeedsPerSpMConf" , 100)
     kwargs.setdefault("maxQualitySeedsPerSpMConf" , 100)
     # For seeding algorithm
-    kwargs.setdefault("zBinNeighborsBottom" , [(0,1),(0,1),(0,1),(0,2),(0,1),(0,0),(-1,0),(-2,0),(-1,0),(-1,0),(-1,0)])
+    kwargs.setdefault("zBinNeighborsBottom" , [(0,0),(0,1),(0,1),(0,1),(0,2),(0,1),(0,0),(-1,0),(-2,0),(-1,0),(-1,0),(-1,0),(0,0)])
 
     acc.setPrivateTools(CompFactory.ActsTrk.SeedingTool(name, **kwargs))
     return acc

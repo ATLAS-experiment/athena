@@ -164,8 +164,8 @@ std::pair<std::vector<volumePtr>,std::vector<surfacePtr>> MuonDetectorBuilderToo
        mlCfg.transform = mdtTransform;      
        std::unique_ptr<Acts::TrapezoidVolumeBounds> mdtBounds = std::make_unique<Acts::TrapezoidVolumeBounds>(parameters.shortHalfX, parameters.longHalfX, parameters.halfY, parameters.halfHeight);
        mlCfg.mlBounds= mdtBounds->values();
-       mlCfg.mlBinning = {Acts::Experimental::ProtoBinning(Acts::binY, Acts::detail::AxisBoundaryType::Bound,                   
-           -mdtBounds->values()[1], mdtBounds->values()[1], std::lround(2*mdtBounds->values()[1]/parameters.tubePitch), 0u), Acts::Experimental::ProtoBinning(Acts::binZ, Acts::detail::AxisBoundaryType::Bound,                   
+       mlCfg.mlBinning = {Acts::Experimental::ProtoBinning(Acts::BinningValue::binY, Acts::AxisBoundaryType::Bound,                   
+           -mdtBounds->values()[1], mdtBounds->values()[1], std::lround(2*mdtBounds->values()[1]/parameters.tubePitch), 0u), Acts::Experimental::ProtoBinning(Acts::BinningValue::binZ, Acts::AxisBoundaryType::Bound,                   
            -mdtBounds->values()[2], mdtBounds->values()[2], std::lround(2*mdtBounds->values()[2]/parameters.tubePitch), 0u)};
                      
        Acts::Experimental::MultiWireStructureBuilder mdtBuilder(mlCfg);      
