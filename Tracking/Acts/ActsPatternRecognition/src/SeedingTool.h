@@ -101,7 +101,7 @@ namespace ActsTrk {
     Gaudi::Property< float > m_impactMax {this, "impactMax", 2. * Acts::UnitConstants::mm,
       "maximum impact parameter"}; // Used in SeedfinderConfig as well
     Gaudi::Property< std::vector< float > > m_zBinEdges {this, "zBinEdges",
-      {-3000., -2500., -1400., -925., -500., -250.,  250., 500., 925.,   1400.,  2500.,  3000.},
+      {-3000., -2700., -2500., -1400., -925., -500., -250.,  250., 500., 925.,   1400.,  2500., 2700, 3000.},
       "enable non equidistant binning in z"}; // Used in SeedfinderConfig as well
     Gaudi::Property< float > m_gridRMax {this, "gridRMax", 320. * Acts::UnitConstants::mm,
       "radial extension of subdetector to be used in grid building"};
@@ -145,11 +145,11 @@ namespace ActsTrk {
     Gaudi::Property< bool > m_interactionPointCut {this, "interactionPointCut", true,
       "Enable cut on the compatibility between interaction point and SPs"};
     Gaudi::Property< std::vector< size_t > > m_zBinsCustomLooping {this, "zBinsCustomLooping",
-      {1, 2, 3, 4, 11, 10, 9, 8, 6, 5, 7} , "defines order of z bins for looping"};
+      {2, 3, 4, 5, 12, 11, 10, 9, 7, 6, 8} , "defines order of z bins for looping"};
     Gaudi::Property< bool > m_useVariableMiddleSPRange {this, "useVariableMiddleSPRange", true,
       "Enable variable range to search for middle SPs"};
     Gaudi::Property< std::vector<std::vector<double>> > m_rRangeMiddleSP {this, "rRangeMiddleSP", 
-      {{40.0, 90.0}, {40.0, 200.0}, {46.0, 200.0}, {46.0, 200.0}, {46.0, 250.0}, {46.0, 250.0}, {46.0, 250.0}, {46.0, 200.0}, {46.0, 200.0}, {40.0, 200.0}, {40.0, 90.0}}, 
+      {{40.0, 90.0}, {40.0, 90.0}, {40.0, 200.0}, {46.0, 200.0}, {46.0, 200.0}, {46.0, 250.0}, {46.0, 250.0}, {46.0, 250.0}, {46.0, 200.0}, {46.0, 200.0}, {40.0, 200.0}, {40.0, 90.0}, {40.0, 90.0}}, 
       "radial range for middle SP"};
     Gaudi::Property< float > m_deltaRMiddleMinSPRange {this, "deltaRMiddleMinSPRange", 10.,
       "delta R for middle SP range (min)"};
@@ -244,10 +244,10 @@ namespace ActsTrk {
     // seeding algorithm
     Gaudi::Property< std::vector<std::pair<int, int>> > m_zBinNeighborsTop{this,
       "zBinNeighborsTop",
-      {{0, 0},  {-1, 0}, {-1, 0}, {-1, 0}, {-1, 0}, {-1, 1}, {0, 1},  {0, 1}, {0, 1},  {0, 1},  {0, 0}},
+      {{0, 0},  {-1, 0}, {-2, 0}, {-1, 0}, {-1, 0}, {-1, 0}, {-1, 1}, {0, 1},  {0, 1}, {0, 1}, {0, 2} , {0, 1},  {0, 0}},
       "vector containing the map of z bins in the top layers"};
     Gaudi::Property< std::vector<std::pair<int, int>> > m_zBinNeighborsBottom{this, "zBinNeighborsBottom",
-      {{0, 1},  {0, 1},  {0, 1},  {0, 1}, {0, 1},  {0, 0},  {-1, 0}, {-1, 0}, {-1, 0}, {-1, 0}, {-1, 0}},
+      {{0, 0}, {0, 1},  {0, 1},  {0, 1},  {0, 1}, {0, 1},  {0, 0},  {-1, 0}, {-1, 0}, {-1, 0}, {-1, 0}, {-1, 0}, {0, 0}},
       "vector containing the map of z bins in the top layers"};
     Gaudi::Property< int > m_numPhiNeighbors {this, "numPhiNeighbors", 1,
       "number of phi bin neighbors at each side of the current bin that will be used to search for SPs"};

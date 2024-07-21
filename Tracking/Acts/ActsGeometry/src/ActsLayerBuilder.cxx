@@ -165,10 +165,10 @@ void ActsLayerBuilder::buildBarrel(const Acts::GeometryContext &gctx,
     for (const auto &[key, surfaces] : layers) {
       Acts::ProtoLayer pl(gctx, surfaces);
       ACTS_VERBOSE("Layer #" << n << " with layerKey: (" << key << ")");
-      ACTS_VERBOSE(" -> at rMin / rMax: " << pl.min(Acts::binR) << " / "
-                                          << pl.max(Acts::binR));
-      ACTS_VERBOSE("    -> at zMin / zMax: " << pl.min(Acts::binZ) << " / "
-                                             << pl.max(Acts::binZ));
+      ACTS_VERBOSE(" -> at rMin / rMax: " << pl.min(Acts::BinningValue::binR) << " / "
+                                          << pl.max(Acts::BinningValue::binR));
+      ACTS_VERBOSE("    -> at zMin / zMax: " << pl.min(Acts::BinningValue::binZ) << " / "
+                                             << pl.max(Acts::BinningValue::binZ));
 
       n++;
     }
@@ -181,35 +181,35 @@ void ActsLayerBuilder::buildBarrel(const Acts::GeometryContext &gctx,
 
     // layers and extent are determined, build actual layer
     Acts::ProtoLayer pl(gctx, surfaces);
-    pl.envelope[Acts::binR] = m_cfg.barrelEnvelopeR;
-    pl.envelope[Acts::binZ] = m_cfg.barrelEnvelopeZ;
+    pl.envelope[Acts::BinningValue::binR] = m_cfg.barrelEnvelopeR;
+    pl.envelope[Acts::BinningValue::binZ] = m_cfg.barrelEnvelopeZ;
 
-    double layerZ = pl.medium(Acts::binZ, true);
-    double layerHalfZ = 0.5 * pl.range(Acts::binZ);
+    double layerZ = pl.medium(Acts::BinningValue::binZ, true);
+    double layerHalfZ = 0.5 * pl.range(Acts::BinningValue::binZ);
 
     Acts::Transform3 transform(Translation3(0., 0., -layerZ));
     // set up approach descriptor
 
     std::shared_ptr<Acts::CylinderSurface> innerBoundary =
         Acts::Surface::makeShared<Acts::CylinderSurface>(
-            transform, pl.min(Acts::binR), layerHalfZ);
+            transform, pl.min(Acts::BinningValue::binR), layerHalfZ);
 
     std::shared_ptr<Acts::CylinderSurface> outerBoundary =
         Acts::Surface::makeShared<Acts::CylinderSurface>(
-            transform, pl.max(Acts::binR), layerHalfZ);
+            transform, pl.max(Acts::BinningValue::binR), layerHalfZ);
 
     std::shared_ptr<Acts::CylinderSurface> centralSurface =
         Acts::Surface::makeShared<Acts::CylinderSurface>(
-            transform, (pl.min(Acts::binR) + pl.max(Acts::binR)) / 2.,
+            transform, (pl.min(Acts::BinningValue::binR) + pl.max(Acts::BinningValue::binR)) / 2.,
             layerHalfZ);
 
     size_t binsPhi = m_cfg.barrelMaterialBins.first;
     size_t binsZ = m_cfg.barrelMaterialBins.second;
 
     Acts::BinUtility materialBinUtil(binsPhi, -M_PI, M_PI, Acts::closed,
-                                     Acts::binPhi);
+                                     Acts::BinningValue::binPhi);
     materialBinUtil += Acts::BinUtility(binsZ, -layerHalfZ, layerHalfZ,
-                                        Acts::open, Acts::binZ, transform);
+                                        Acts::open, Acts::BinningValue::binZ, transform);
 
     materialProxy =
         std::make_shared<const Acts::ProtoSurfaceMaterial>(materialBinUtil);
@@ -220,10 +220,10 @@ void ActsLayerBuilder::buildBarrel(const Acts::GeometryContext &gctx,
     ACTS_VERBOSE("with binning: [" << binsPhi << ", " << binsZ << "]");
 
     ACTS_VERBOSE("Created ApproachSurfaces for cylinder layer at:");
-    ACTS_VERBOSE(" - inner:   R=" << pl.min(Acts::binR));
-    ACTS_VERBOSE(" - central: R=" << (pl.min(Acts::binR) + pl.max(Acts::binR)) /
+    ACTS_VERBOSE(" - inner:   R=" << pl.min(Acts::BinningValue::binR));
+    ACTS_VERBOSE(" - central: R=" << (pl.min(Acts::BinningValue::binR) + pl.max(Acts::BinningValue::binR)) /
                                          2.);
-    ACTS_VERBOSE(" - outer:   R=" << pl.max(Acts::binR));
+    ACTS_VERBOSE(" - outer:   R=" << pl.max(Acts::BinningValue::binR));
 
     // set material on inner
     innerBoundary->assignSurfaceMaterial(materialProxy);
@@ -240,14 +240,14 @@ void ActsLayerBuilder::buildBarrel(const Acts::GeometryContext &gctx,
     auto phiEqual = [this](const Acts::Surface &a,
                            const Acts::Surface &b) {
       Acts::GeometryContext gctx; // unused in matcher
-      Acts::BinningValue bv = Acts::binPhi;
+      Acts::BinningValue bv = Acts::BinningValue::binPhi;
       return m_cfg.surfaceMatcher(gctx, bv, &a, &b);
     };
 
     auto zEqual = [this](const Acts::Surface &a,
                          const Acts::Surface &b) {
       Acts::GeometryContext gctx; // unused in matcher
-      Acts::BinningValue bv = Acts::binZ;
+      Acts::BinningValue bv = Acts::BinningValue::binZ;
       return m_cfg.surfaceMatcher(gctx, bv, &a, &b);
     };
 
@@ -352,15 +352,15 @@ void ActsLayerBuilder::buildEndcap(const Acts::GeometryContext &gctx,
 
   for (const auto &[key, surfaces] : initialLayers) {
     auto &pl = protoLayers.emplace_back(gctx, surfaces);
-    pl.envelope[Acts::binR] = m_cfg.endcapEnvelopeR;
-    pl.envelope[Acts::binZ] = m_cfg.endcapEnvelopeZ;
+    pl.envelope[Acts::BinningValue::binR] = m_cfg.endcapEnvelopeR;
+    pl.envelope[Acts::BinningValue::binZ] = m_cfg.endcapEnvelopeZ;
   }
 
   // sort proto layers by their medium z position
   std::sort(protoLayers.begin(), protoLayers.end(),
             [type](const Acts::ProtoLayer &a, const Acts::ProtoLayer &b) {
-              double midA = (a.min(Acts::binZ) + a.max(Acts::binZ)) / 2.0;
-              double midB = (b.min(Acts::binZ) + b.max(Acts::binZ)) / 2.0;
+              double midA = (a.min(Acts::BinningValue::binZ) + a.max(Acts::BinningValue::binZ)) / 2.0;
+              double midB = (b.min(Acts::BinningValue::binZ) + b.max(Acts::BinningValue::binZ)) / 2.0;
               if (type < 0) {
                 return midA < midB;
               } else {
@@ -370,9 +370,9 @@ void ActsLayerBuilder::buildEndcap(const Acts::GeometryContext &gctx,
 
   auto plPrintZ = [](const auto &pl) -> std::string {
     std::stringstream ss;
-    double zMid = (pl.min(Acts::binZ) + pl.max(Acts::binZ)) / 2.0;
-    ss << " < " << pl.min(Acts::binZ) << " | " << zMid << " | "
-       << pl.max(Acts::binZ) << " > ";
+    double zMid = (pl.min(Acts::BinningValue::binZ) + pl.max(Acts::BinningValue::binZ)) / 2.0;
+    ss << " < " << pl.min(Acts::BinningValue::binZ) << " | " << zMid << " | "
+       << pl.max(Acts::BinningValue::binZ) << " > ";
     return ss.str();
   };
   if (logger().doPrint(Acts::Logging::VERBOSE)) {
@@ -380,8 +380,8 @@ void ActsLayerBuilder::buildEndcap(const Acts::GeometryContext &gctx,
 
       ACTS_VERBOSE(" -> at < zMin | zMid | zMax >: " << plPrintZ(pl));
 
-      ACTS_VERBOSE("    -> at rMin / rMax: " << pl.min(Acts::binR) << " / "
-                                             << pl.max(Acts::binR));
+      ACTS_VERBOSE("    -> at rMin / rMax: " << pl.min(Acts::BinningValue::binR) << " / "
+                                             << pl.max(Acts::BinningValue::binR));
     }
   }
 
@@ -395,8 +395,8 @@ void ActsLayerBuilder::buildEndcap(const Acts::GeometryContext &gctx,
       auto &pl_prev = mergedProtoLayers.back();
       // do they intersect?
       ACTS_VERBOSE("Compare: " << plPrintZ(pl_prev) << " and " << plPrintZ(pl));
-      bool overlap = (pl.min(Acts::binZ) <= pl_prev.max(Acts::binZ) &&
-                      pl.max(Acts::binZ) >= pl_prev.min(Acts::binZ));
+      bool overlap = (pl.min(Acts::BinningValue::binZ) <= pl_prev.max(Acts::BinningValue::binZ) &&
+                      pl.max(Acts::BinningValue::binZ) >= pl_prev.min(Acts::BinningValue::binZ));
       ACTS_VERBOSE(" -> overlap? " << (overlap ? "yes" : "no"));
       if (overlap) {
         ACTS_VERBOSE(" ===> merging");
@@ -409,8 +409,8 @@ void ActsLayerBuilder::buildEndcap(const Acts::GeometryContext &gctx,
         mergedProtoLayers.pop_back();
         auto &new_pl =
             mergedProtoLayers.emplace_back(gctx, std::move(surfaces));
-        new_pl.envelope[Acts::binR] = pl.envelope[Acts::binR];
-        new_pl.envelope[Acts::binZ] = pl.envelope[Acts::binZ];
+        new_pl.envelope[Acts::BinningValue::binR] = pl.envelope[Acts::BinningValue::binR];
+        new_pl.envelope[Acts::BinningValue::binZ] = pl.envelope[Acts::BinningValue::binZ];
       } else {
         mergedProtoLayers.push_back(std::move(pl));
       }
@@ -449,9 +449,9 @@ void ActsLayerBuilder::buildEndcap(const Acts::GeometryContext &gctx,
     std::unique_ptr<Acts::ApproachDescriptor> approachDescriptor = nullptr;
     std::shared_ptr<const Acts::ProtoSurfaceMaterial> materialProxy = nullptr;
 
-    double layerZ = pl.medium(Acts::binZ);
-    double layerHalfZ = 0.5 * pl.range(Acts::binZ);
-    double layerThickness = pl.range(Acts::binZ);
+    double layerZ = pl.medium(Acts::BinningValue::binZ);
+    double layerHalfZ = 0.5 * pl.range(Acts::BinningValue::binZ);
+    double layerThickness = pl.range(Acts::BinningValue::binZ);
 
     double layerZInner = layerZ - layerHalfZ;
     double layerZOuter = layerZ + layerHalfZ;
@@ -467,17 +467,17 @@ void ActsLayerBuilder::buildEndcap(const Acts::GeometryContext &gctx,
 
     std::shared_ptr<Acts::DiscSurface> innerBoundary =
       Acts::Surface::makeShared<Acts::DiscSurface>(
-        transformInner, pl.min(Acts::binR), pl.max(Acts::binR));
+        transformInner, pl.min(Acts::BinningValue::binR), pl.max(Acts::BinningValue::binR));
     aSurfaces.push_back(innerBoundary);
 
     std::shared_ptr<Acts::DiscSurface> nominalSurface =
       Acts::Surface::makeShared<Acts::DiscSurface>(
-        transformNominal, pl.min(Acts::binR), pl.max(Acts::binR));
+        transformNominal, pl.min(Acts::BinningValue::binR), pl.max(Acts::BinningValue::binR));
     aSurfaces.push_back(nominalSurface);
 
     std::shared_ptr<Acts::DiscSurface> outerBoundary =
       Acts::Surface::makeShared<Acts::DiscSurface>(
-        transformOuter, pl.min(Acts::binR), pl.max(Acts::binR));
+        transformOuter, pl.min(Acts::BinningValue::binR), pl.max(Acts::BinningValue::binR));
     aSurfaces.push_back(outerBoundary);
 
     if(layerThickness > 2_mm) {
@@ -485,12 +485,12 @@ void ActsLayerBuilder::buildEndcap(const Acts::GeometryContext &gctx,
       Acts::Transform3 trf{Translation3{0, 0, layerZ}};
       auto cylinderInner = 
         Acts::Surface::makeShared<Acts::CylinderSurface>(
-          trf, pl.min(Acts::binR), layerHalfZ);
+          trf, pl.min(Acts::BinningValue::binR), layerHalfZ);
         aSurfaces.push_back(cylinderInner);
 
       auto cylinderOuter = 
         Acts::Surface::makeShared<Acts::CylinderSurface>(
-          trf, pl.max(Acts::binR), layerHalfZ);
+          trf, pl.max(Acts::BinningValue::binR), layerHalfZ);
         aSurfaces.push_back(cylinderOuter);
     }
 
@@ -499,10 +499,10 @@ void ActsLayerBuilder::buildEndcap(const Acts::GeometryContext &gctx,
     size_t matBinsR = m_cfg.endcapMaterialBins.second;
 
     Acts::BinUtility materialBinUtil(matBinsPhi, -M_PI, M_PI, Acts::closed,
-                                     Acts::binPhi);
+                                     Acts::BinningValue::binPhi);
     materialBinUtil +=
-        Acts::BinUtility(matBinsR, pl.min(Acts::binR), pl.max(Acts::binR),
-                         Acts::open, Acts::binR, transformNominal);
+        Acts::BinUtility(matBinsR, pl.min(Acts::BinningValue::binR), pl.max(Acts::BinningValue::binR),
+                         Acts::open, Acts::BinningValue::binR, transformNominal);
 
     materialProxy =
         std::make_shared<const Acts::ProtoSurfaceMaterial>(materialBinUtil);

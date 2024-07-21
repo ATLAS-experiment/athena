@@ -732,18 +732,18 @@ ActsLayerBuilder::Config ActsTrackingGeometrySvc::makeLayerBuilderConfig(
     if (idA.bec() != idB.bec())
       return false;
 
-    if (bValue == Acts::binPhi) {
+    if (bValue == Acts::BinningValue::binPhi) {
       // std::cout << idA.phi_module() << " <-> " << idB.phi_module() <<
       // std::endl;
       return idA.phi_module() == idB.phi_module();
     }
 
-    if (bValue == Acts::binZ) {
+    if (bValue == Acts::BinningValue::binZ) {
       return (idA.eta_module() == idB.eta_module()) &&
              (idA.layer_disk() == idB.layer_disk()) && (idA.bec() == idB.bec());
     }
 
-    if (bValue == Acts::binR) {
+    if (bValue == Acts::BinningValue::binR) {
       return (idA.eta_module() == idB.eta_module()) &&
              (idA.layer_disk() == idB.layer_disk()) && (idB.bec() == idA.bec());
     }

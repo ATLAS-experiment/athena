@@ -33,7 +33,6 @@ def ActsFitterCfg(flags,
 
     if flags.Acts.trackFitterType is TrackFitterType.KalmanFitter:
         kwargs.setdefault("ReverseFilteringPt", 1.0 * UnitConstants.GeV)
-        kwargs.setdefault("OverstepLimit", 300 * UnitConstants.um)
 
     if 'ATLASConverterTool' not in kwargs:
         from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg

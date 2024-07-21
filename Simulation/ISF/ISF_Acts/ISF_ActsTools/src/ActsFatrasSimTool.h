@@ -140,7 +140,7 @@ class ActsFatrasSimTool : public BaseSimulatorTool {
       using Result = typename Actor::result_type;
       using Actions = Acts::ActionList<SteppingLogger, Actor>;
       using Abort = Acts::AbortList<Aborter, Acts::EndOfWorldReached>;
-      using PropagatorOptions = Acts::DenseStepperPropagatorOptions<Actions, Abort>;
+      using PropagatorOptions = typename propagator_t::Options<Actions, Abort>;
 
       // Construct per-call options.
       PropagatorOptions options(geoCtx, magCtx);
@@ -157,8 +157,8 @@ class ActsFatrasSimTool : public BaseSimulatorTool {
           particle.qOverP(), std::nullopt, particle.hypothesis());
       options.pathLimit = pathLimit * Acts::UnitConstants::cm;
       options.loopProtection = loopProtection;
-      options.maxStepSize = maxStepSize * Acts::UnitConstants::m;
       options.maxSteps = maxStep;
+      options.stepping.maxStepSize = maxStepSize * Acts::UnitConstants::m;
 
       auto result = propagator.propagate(startPoint, options);
       if (not result.ok()) {

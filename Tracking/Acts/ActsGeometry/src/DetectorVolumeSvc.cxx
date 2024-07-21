@@ -56,7 +56,7 @@ std::shared_ptr<const Acts::Experimental::Detector> DetectorVolumeSvc::buildDete
     //Define config for cylindrical container builder
     Acts::Experimental::CylindricalContainerBuilder::Config cylindricalCfg;
     cylindricalCfg.builders = builders;
-    cylindricalCfg.binning = std::vector<Acts::BinningValue>{Acts::binZ, Acts::binR};
+    cylindricalCfg.binning = std::vector<Acts::BinningValue>{Acts::BinningValue::binZ, Acts::BinningValue::binR};
     auto cylindricalBuilder = std::make_shared<Acts::Experimental::CylindricalContainerBuilder>(cylindricalCfg);
 
     //Define config for detector builder

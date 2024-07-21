@@ -21,7 +21,6 @@
 #include "Acts/Propagator/ActionList.hpp"
 #include <Acts/Propagator/StraightLineStepper.hpp>
 
-#include "Acts/Surfaces/BoundaryCheck.hpp"
 #include "Acts/Utilities/Logger.hpp"
 
 #include "Acts/Propagator/DefaultExtension.hpp"
@@ -150,31 +149,32 @@ ActsExtrapolationTool::propagationSteps(const EventContext& ctx,
 
   auto anygctx = gctx.context();
 
-  // Action list and abort list
-  using ActionList =
-  Acts::ActionList<SteppingLogger, Acts::MaterialInteractor>;
-  using AbortConditions = Acts::AbortList<EndOfWorld>;
-
-  using Options = Acts::DenseStepperPropagatorOptions<ActionList, AbortConditions>;
-
-  Options options(anygctx, mctx);
-  options.pathLimit = pathLimit;
-
-  options.loopProtection
-    = (Acts::VectorHelpers::perp(startParameters.momentum())
-       < m_ptLoopers * 1_MeV);
-  options.maxStepSize = m_maxStepSize * 1_m;
-  options.maxSteps = m_maxStep;
-  options.direction = navDir;
-
-  auto &mInteractor = options.actionList.get<Acts::MaterialInteractor>();
-  mInteractor.multipleScattering = m_interactionMultiScatering;
-  mInteractor.energyLoss = m_interactionEloss;
-  mInteractor.recordInteractions = m_interactionRecord;
-
   ActsPropagationOutput output;
 
   auto res = boost::apply_visitor([&](const auto& propagator) -> ResultType {
+      using Propagator = std::decay_t<decltype(propagator)>;
+
+      // Action list and abort list
+      using ActionList =
+      Acts::ActionList<SteppingLogger, Acts::MaterialInteractor>;
+      using AbortConditions = Acts::AbortList<EndOfWorld>;
+
+      using Options = typename Propagator::Options<ActionList, AbortConditions>;
+
+      Options options(anygctx, mctx);
+      options.pathLimit = pathLimit;
+      options.loopProtection
+        = (Acts::VectorHelpers::perp(startParameters.momentum())
+          < m_ptLoopers * 1_MeV);
+      options.maxSteps = m_maxStep;
+      options.direction = navDir;
+      options.stepping.maxStepSize = m_maxStepSize * 1_m;
+
+      auto &mInteractor = options.actionList.template get<Acts::MaterialInteractor>();
+      mInteractor.multipleScattering = m_interactionMultiScatering;
+      mInteractor.energyLoss = m_interactionEloss;
+      mInteractor.recordInteractions = m_interactionRecord;
+
       auto result = propagator.propagate(startParameters, options);
       if (!result.ok()) {
         return result.error();
@@ -224,28 +224,29 @@ ActsExtrapolationTool::propagate(const EventContext& ctx,
 
   auto anygctx = gctx.context();
 
-  // Action list and abort list
-  using ActionList =
-  Acts::ActionList<Acts::MaterialInteractor>;
-  using AbortConditions = Acts::AbortList<EndOfWorld>;
-  using Options = Acts::DenseStepperPropagatorOptions<ActionList, AbortConditions>;
-
-  Options options(anygctx, mctx);
-  options.pathLimit = pathLimit;
-
-  options.loopProtection
-    = (Acts::VectorHelpers::perp(startParameters.momentum())
-       < m_ptLoopers * 1_MeV);
-  options.maxStepSize = m_maxStepSize * 1_m;
-  options.maxSteps = m_maxStep;
-  options.direction = navDir;
-
-  auto& mInteractor = options.actionList.get<Acts::MaterialInteractor>();
-  mInteractor.multipleScattering = m_interactionMultiScatering;
-  mInteractor.energyLoss = m_interactionEloss;
-  mInteractor.recordInteractions = m_interactionRecord;
-
   auto parameters = boost::apply_visitor([&](const auto& propagator) -> std::optional<const Acts::CurvilinearTrackParameters> {
+      using Propagator = std::decay_t<decltype(propagator)>;
+
+      // Action list and abort list
+      using ActionList =
+      Acts::ActionList<Acts::MaterialInteractor>;
+      using AbortConditions = Acts::AbortList<EndOfWorld>;
+      using Options = typename Propagator::Options<ActionList, AbortConditions>;
+
+      Options options(anygctx, mctx);
+      options.pathLimit = pathLimit;
+      options.loopProtection
+        = (Acts::VectorHelpers::perp(startParameters.momentum())
+          < m_ptLoopers * 1_MeV);
+      options.maxSteps = m_maxStep;
+      options.direction = navDir;
+      options.stepping.maxStepSize = m_maxStepSize * 1_m;
+
+      auto& mInteractor = options.actionList.template get<Acts::MaterialInteractor>();
+      mInteractor.multipleScattering = m_interactionMultiScatering;
+      mInteractor.energyLoss = m_interactionEloss;
+      mInteractor.recordInteractions = m_interactionRecord;
+      
       auto result = propagator.propagate(startParameters, options);
       if (!result.ok()) {
         ATH_MSG_ERROR("Got error during propagation:" << result.error()
@@ -274,30 +275,31 @@ ActsExtrapolationTool::propagationSteps(const EventContext& ctx,
 
   auto anygctx = gctx.context();
 
-  // Action list and abort list
-  using ActionList =
-  Acts::ActionList<SteppingLogger, Acts::MaterialInteractor>;
-  using AbortConditions = Acts::AbortList<EndOfWorld>;
-  using Options = Acts::DenseStepperPropagatorOptions<ActionList, AbortConditions>;
-
-  Options options(anygctx, mctx);
-  options.pathLimit = pathLimit;
-
-  options.loopProtection
-    = (Acts::VectorHelpers::perp(startParameters.momentum())
-       < m_ptLoopers * 1_MeV);
-  options.maxStepSize = m_maxStepSize * 1_m;
-  options.maxSteps = m_maxStep;
-  options.direction = navDir;
-
-  auto& mInteractor = options.actionList.get<Acts::MaterialInteractor>();
-  mInteractor.multipleScattering = m_interactionMultiScatering;
-  mInteractor.energyLoss = m_interactionEloss;
-  mInteractor.recordInteractions = m_interactionRecord;
-
   ActsPropagationOutput output;
 
   auto res = boost::apply_visitor([&](const auto& propagator) -> ResultType {
+      using Propagator = std::decay_t<decltype(propagator)>;
+
+      // Action list and abort list
+      using ActionList =
+      Acts::ActionList<SteppingLogger, Acts::MaterialInteractor>;
+      using AbortConditions = Acts::AbortList<EndOfWorld>;
+      using Options = typename Propagator::Options<ActionList, AbortConditions>;
+
+      Options options(anygctx, mctx);
+      options.pathLimit = pathLimit;
+      options.loopProtection
+        = (Acts::VectorHelpers::perp(startParameters.momentum())
+          < m_ptLoopers * 1_MeV);
+      options.maxSteps = m_maxStep;
+      options.direction = navDir;
+      options.stepping.maxStepSize = m_maxStepSize * 1_m;
+
+      auto& mInteractor = options.actionList.template get<Acts::MaterialInteractor>();
+      mInteractor.multipleScattering = m_interactionMultiScatering;
+      mInteractor.energyLoss = m_interactionEloss;
+      mInteractor.recordInteractions = m_interactionRecord;
+
       auto result = propagator.propagate(startParameters, target, options);
       if (!result.ok()) {
         return result.error();
@@ -340,28 +342,29 @@ ActsExtrapolationTool::propagate(const EventContext& ctx,
 
   auto anygctx = gctx.context();
 
-  // Action list and abort list
-  using ActionList =
-  Acts::ActionList<Acts::MaterialInteractor>;
-  using AbortConditions = Acts::AbortList<EndOfWorld>;
-  using Options = Acts::DenseStepperPropagatorOptions<ActionList, AbortConditions>;
-
-  Options options(anygctx, mctx);
-  options.pathLimit = pathLimit;
-
-  options.loopProtection
-    = (Acts::VectorHelpers::perp(startParameters.momentum())
-       < m_ptLoopers * 1_MeV);
-  options.maxStepSize = m_maxStepSize * 1_m;
-  options.maxSteps = m_maxStep;
-  options.direction = navDir;
-
-  auto& mInteractor = options.actionList.get<Acts::MaterialInteractor>();
-  mInteractor.multipleScattering = m_interactionMultiScatering;
-  mInteractor.energyLoss = m_interactionEloss;
-  mInteractor.recordInteractions = m_interactionRecord;
-
   auto parameters = boost::apply_visitor([&](const auto& propagator) -> std::optional<const Acts::BoundTrackParameters> {
+      using Propagator = std::decay_t<decltype(propagator)>;
+
+      // Action list and abort list
+      using ActionList =
+      Acts::ActionList<Acts::MaterialInteractor>;
+      using AbortConditions = Acts::AbortList<EndOfWorld>;
+      using Options = typename Propagator::Options<ActionList, AbortConditions>;
+
+      Options options(anygctx, mctx);
+      options.pathLimit = pathLimit;
+      options.loopProtection
+        = (Acts::VectorHelpers::perp(startParameters.momentum())
+          < m_ptLoopers * 1_MeV);
+      options.maxSteps = m_maxStep;
+      options.direction = navDir;
+      options.stepping.maxStepSize = m_maxStepSize * 1_m;
+
+      auto& mInteractor = options.actionList.template get<Acts::MaterialInteractor>();
+      mInteractor.multipleScattering = m_interactionMultiScatering;
+      mInteractor.energyLoss = m_interactionEloss;
+      mInteractor.recordInteractions = m_interactionRecord;
+
       auto result = propagator.propagate(startParameters, target, options);
       if (!result.ok()) {
         ATH_MSG_ERROR("Got error during propagation: " << result.error()

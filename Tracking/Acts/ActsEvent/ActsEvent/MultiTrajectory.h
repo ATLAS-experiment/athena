@@ -122,7 +122,7 @@ class MutableMultiTrajectory final
    * nonconst variant)
    */
 
-  const std::any component_impl(Acts::HashedString key, ActsTrk::IndexType istate) const;
+  std::any component_impl(Acts::HashedString key, ActsTrk::IndexType istate) const;
   std::any component_impl(Acts::HashedString key, ActsTrk::IndexType istate);
 
   /**
@@ -239,25 +239,25 @@ class MutableMultiTrajectory final
   }
 
   /**
-   * @brief obtain measurements for a state at given index
+   * @brief obtain calibrated measurements for a state at given index
    *
    * @param index
-   * @return TrackStateProxy::Measurement
+   * @return TrackStateProxy::Calibrated
    */
 
   template <std::size_t measdim>
-  inline typename ConstTrackStateProxy::template Measurement<measdim>
-  measurement_impl(ActsTrk::IndexType index) const {
+  inline typename ConstTrackStateProxy::template Calibrated<measdim>
+  calibrated_impl(ActsTrk::IndexType index) const {
     xAOD::TrackStateIndexType measIdx = m_trackStatesAux->calibrated[index];
-    return typename ConstTrackStateProxy::template Measurement<measdim>{m_trackMeasurementsAux->meas[measIdx].data()};
+    return typename ConstTrackStateProxy::template Calibrated<measdim>{m_trackMeasurementsAux->meas[measIdx].data()};
   }
 
   template <std::size_t measdim, bool Enable = true>
   std::enable_if_t<Enable,
-                   typename TrackStateProxy::template Measurement<measdim>>
-  measurement_impl(ActsTrk::IndexType index) {
+                   typename TrackStateProxy::template Calibrated<measdim>>
+  calibrated_impl(ActsTrk::IndexType index) {
     xAOD::TrackStateIndexType measIdx = m_trackStatesAux->calibrated[index];
-    return typename TrackStateProxy::template Measurement<measdim>{m_trackMeasurementsAux->meas[measIdx].data()};
+    return typename TrackStateProxy::template Calibrated<measdim>{m_trackMeasurementsAux->meas[measIdx].data()};
   }
 
   /**
@@ -268,17 +268,17 @@ class MutableMultiTrajectory final
    */
 
   template <std::size_t measdim>
-  inline typename ConstTrackStateProxy::template MeasurementCovariance<measdim>
-  measurementCovariance_impl(ActsTrk::IndexType index) const {
+  inline typename ConstTrackStateProxy::template CalibratedCovariance<measdim>
+  calibratedCovariance_impl(ActsTrk::IndexType index) const {
     xAOD::TrackStateIndexType measIdx = m_trackStatesAux->calibrated[index];
-    return ConstTrackStateProxy::template MeasurementCovariance<measdim>{m_trackMeasurementsAux->covMatrix[measIdx].data()};
+    return ConstTrackStateProxy::template CalibratedCovariance<measdim>{m_trackMeasurementsAux->covMatrix[measIdx].data()};
   }
   template <std::size_t measdim, bool Enable = true>
   std::enable_if_t<
-      Enable, typename TrackStateProxy::template MeasurementCovariance<measdim>>
-  measurementCovariance_impl(ActsTrk::IndexType index) {
+      Enable, typename TrackStateProxy::template CalibratedCovariance<measdim>>
+  calibratedCovariance_impl(ActsTrk::IndexType index) {
     xAOD::TrackStateIndexType measIdx = m_trackStatesAux->calibrated[index];
-    return TrackStateProxy::template MeasurementCovariance<measdim>{m_trackMeasurementsAux->covMatrix[measIdx].data()};
+    return TrackStateProxy::template CalibratedCovariance<measdim>{m_trackMeasurementsAux->covMatrix[measIdx].data()};
   }
 
   /**
@@ -287,7 +287,7 @@ class MutableMultiTrajectory final
    * @return size_t
    */
 
-  inline size_t size_impl() const { 
+  inline Acts::TrackIndexType size_impl() const { 
     return m_trackStatesSize;
   }
 
@@ -414,7 +414,7 @@ class MultiTrajectory
 
   bool has_impl(Acts::HashedString key, ActsTrk::IndexType istate) const;
 
-  const std::any component_impl(Acts::HashedString key, ActsTrk::IndexType istate) const;
+  std::any component_impl(Acts::HashedString key, ActsTrk::IndexType istate) const;
 
   bool hasColumn_impl(Acts::HashedString key) const;
 
@@ -435,19 +435,19 @@ class MultiTrajectory
   }
 
   template <std::size_t measdim>
-  inline typename ConstTrackStateProxy::template Measurement<measdim>
-  measurement_impl(IndexType istate) const {
+  inline typename ConstTrackStateProxy::template Calibrated<measdim>
+  calibrated_impl(IndexType istate) const {
     xAOD::TrackStateIndexType measIdx = m_trackStatesAux->calibrated[istate];
-    return typename ConstTrackStateProxy::template Measurement<measdim>{m_trackMeasurementsAux->meas[measIdx].data()};
+    return typename ConstTrackStateProxy::template Calibrated<measdim>{m_trackMeasurementsAux->meas[measIdx].data()};
   }
 
   template <std::size_t measdim>
-  inline typename ConstTrackStateProxy::template MeasurementCovariance<measdim>
-  measurementCovariance_impl(IndexType index) const {
+  inline typename ConstTrackStateProxy::template CalibratedCovariance<measdim>
+  calibratedCovariance_impl(IndexType index) const {
     xAOD::TrackStateIndexType measIdx = m_trackStatesAux->calibrated[index];
-    return typename ConstTrackStateProxy::template MeasurementCovariance<measdim>{m_trackMeasurementsAux->covMatrix[measIdx].data()};
+    return typename ConstTrackStateProxy::template CalibratedCovariance<measdim>{m_trackMeasurementsAux->covMatrix[measIdx].data()};
   }
-  inline size_t size_impl() const { return m_trackStatesAux->size(); }
+  inline Acts::TrackIndexType size_impl() const { return m_trackStatesAux->size(); }
 
   ActsTrk::IndexType calibratedSize_impl(ActsTrk::IndexType istate) const;
   typename Acts::SourceLink getUncalibratedSourceLink_impl(ActsTrk::IndexType istate) const;

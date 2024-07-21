@@ -3,7 +3,7 @@
 */
 
 #include "ActsGeometry/ActsDetectorElement.h"
-#include "Acts/Surfaces/BoundaryCheck.hpp"
+#include "Acts/Surfaces/BoundaryTolerance.hpp"
 #include "ActsEvent/TrackContainer.h"
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "xAODMeasurementBase/MeasurementDefs.h"
@@ -64,16 +64,18 @@ namespace ActsTrk {
                    }
                 }
 
-                Acts::BoundaryCheck bcheck(//check local0 ?
-                                           (det_type == xAOD::UncalibMeasType::PixelClusterType
-                                            || state.referenceSurface().bounds().type() != Acts::SurfaceBounds::eAnnulus),
-                                           // check local1
-                                           (det_type == xAOD::UncalibMeasType::PixelClusterType
-                                            || state.referenceSurface().bounds().type() == Acts::SurfaceBounds::eAnnulus)
-                                           // @TODO tolerances ?
-                                           );
+                Acts::BoundaryTolerance tolerance = Acts::BoundaryTolerance::AbsoluteBound(
+                  // local0 tolerance
+                  (det_type == xAOD::UncalibMeasType::PixelClusterType
+                   || state.referenceSurface().bounds().type() != Acts::SurfaceBounds::eAnnulus)
+                  ? 0.0 : std::numeric_limits<double>::infinity(),
+                  // local1 tolerance
+                  (det_type == xAOD::UncalibMeasType::PixelClusterType
+                   || state.referenceSurface().bounds().type() == Acts::SurfaceBounds::eAnnulus)
+                  ? 0.0 : std::numeric_limits<double>::infinity()
+                );
                 Acts::Vector2 localPos(state.predicted()[Acts::eBoundLoc0],state.predicted()[Acts::eBoundLoc1]);
-                if (state.referenceSurface().insideBounds(localPos,bcheck)) {
+                if (state.referenceSurface().insideBounds(localPos,tolerance)) {
                    // @TODO check whether detector element is dead..
                    // if (dead) {
                    // ++specialHitCounts.at(to_underlying(det_type)).at(HitCategory::DeadSensor);

@@ -198,9 +198,6 @@ private:
   Gaudi::Property< double > m_option_seedCovarianceScale {this, "SeedCovarianceScale", 100.,
       "Scale factor for the input seed covariance when doing refitting"};
 
-  Gaudi::Property<double> m_overstepLimit{this, "OverstepLimit", 100 * Acts::UnitConstants::mm, 
-      "Overstep limit / tolerance for the Eigen stepper (use ACTS units!)"};
-
   std::unique_ptr<TrkMeasurementCalibrator> m_calibrator;
 
   /// Type erased track fitter function.

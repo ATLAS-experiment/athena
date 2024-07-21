@@ -44,29 +44,29 @@ struct MeasurementSelectorTraits
 {
    // the measurement type after the selection e.g. a Matrix<N,1>
    template <std::size_t N>
-   using CalibratedMeasurement = typename Acts::detail_lt::Types<N>::Coefficients;
+   using CalibratedMeasurement = typename Acts::detail_lt::FixedSizeTypes<N>::Coefficients;
 
    // the  measurement covariance type after the selection e.g. a Matrix<N,N>
    template <std::size_t N>
-   using CalibratedMeasurementCovariance = typename Acts::detail_lt::Types<N>::Covariance;
+   using CalibratedMeasurementCovariance = typename Acts::detail_lt::FixedSizeTypes<N>::Covariance;
 
    // the measurement type before the selection e.g. an Eigen::Map< Matrix<N,1> > if
    // the calibration is performed after the selection
    template <std::size_t N>
-   using PreSelectionMeasurement = typename Acts::detail_lt::Types<N>::Coefficients;
+   using PreSelectionMeasurement = typename Acts::detail_lt::FixedSizeTypes<N>::Coefficients;
 
    // the measurement covariance type before the selection e.g. an Eigen::Map<Matrix<N,N> > if
    // the calibration is performed after the selection
    template <std::size_t N>
-   using PreSelectionMeasurementCovariance = typename Acts::detail_lt::Types<N>::Covariance;
+   using PreSelectionMeasurementCovariance = typename Acts::detail_lt::FixedSizeTypes<N>::Covariance;
 
    // e.g. the same as CalibratedMeasurement
    template <std::size_t N>
-   using Predicted = typename Acts::detail_lt::Types<N>::Coefficients;
+   using Predicted = typename Acts::detail_lt::FixedSizeTypes<N>::Coefficients;
 
    // e.g. the same as CalibratedMeasurementCovariance
    template <std::size_t N>
-   using PredictedCovariance = typename Acts::detail_lt::Types<N>::Covariance;
+   using PredictedCovariance = typename Acts::detail_lt::FixedSizeTypes<N>::Covariance;
 
    // e.g. helper template to get the value_type from the container type
    template <typename T_Container>
@@ -729,7 +729,7 @@ struct MeasurementSelectorWithDispatch : public MeasurementSelectorBase< NMeasMa
                                const T_BoundState& boundState,
                                source_link_iterator_t sourceLinkBegin,
                                source_link_iterator_t sourceLinkEnd,
-                               std::size_t prevTip,
+                               typename TrackStateProxy::IndexType prevTip,
                                [[maybe_unused]] trajectory_t& trajectory_buffer,
                                [[maybe_unused]] std::vector<TrackStateProxy> &trackStateCandidates,
                                trajectory_t& trajectory,

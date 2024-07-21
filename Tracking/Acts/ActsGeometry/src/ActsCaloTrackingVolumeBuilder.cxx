@@ -267,7 +267,7 @@ ActsCaloTrackingVolumeBuilder::trackingVolume(
   std::vector<float> posNegBoundaries
    = {float(caloRMin), float(caloRMax)};
   auto binUtilityPosNeg = std::make_unique<const Acts::BinUtility>(posNegBoundaries,
-      Acts::open, Acts::binR);
+      Acts::open, Acts::BinningValue::binR);
 
   auto tVolArrPosNeg
       = std::make_shared<const Acts::BinnedArrayXD<Acts::TrackingVolumePtr>>(
@@ -309,7 +309,7 @@ ActsCaloTrackingVolumeBuilder::trackingVolume(
   auto binUtilityCtr
    = std::make_unique<const Acts::BinUtility>(
       ctrBoundaries,
-      Acts::open, Acts::binR);
+      Acts::open, Acts::BinningValue::binR);
 
   auto tVolArrCtr
       = std::make_shared<const Acts::BinnedArrayXD<Acts::TrackingVolumePtr>>(
@@ -335,7 +335,7 @@ ActsCaloTrackingVolumeBuilder::trackingVolume(
       caloRMin, caloRMax, caloDZ1),
       nullptr, nullptr,
       tvac.trackingVolumeArray(gctx, {negContainer, ctrContainer, posContainer},
-      Acts::binZ),
+      Acts::BinningValue::binZ),
       Acts::MutableTrackingVolumeVector{}
       );
 

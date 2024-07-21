@@ -9,10 +9,10 @@
 
 
 #include "Acts/Definitions/TrackParametrization.hpp"
-#include "Acts/EventData/Measurement.hpp"
 #include "Acts/EventData/MultiTrajectory.hpp"
 #include "Acts/Geometry/GeometryContext.hpp"
 #include "Acts/Geometry/GeometryIdentifier.hpp"
+#include "Acts/Utilities/detail/Subspace.hpp"
 
 #include <array>
 #include <cassert>
@@ -78,23 +78,30 @@ std::ostream& operator<<(std::ostream& os, const TestSourceLink& sourceLink);
 /// @param trackState TrackState to calibrated
 /// @return The measurement used
 template <typename trajectory_t>
-Acts::BoundVariantMeasurement testSourceLinkCalibratorReturn(
+void testSourceLinkCalibratorReturn(
     const GeometryContext& /*gctx*/,
     typename trajectory_t::TrackStateProxy trackState) {
   const TestSourceLink& sl =
     trackState.uncalibrated().template get<TestSourceLink>();
+
+  trackState.setUncalibratedSourceLink(sl);
+
   if ((sl.indices[0] != Acts::eBoundSize) and
       (sl.indices[1] != Acts::eBoundSize)) {
-    auto meas = makeMeasurement(trackState.uncalibrated(), sl.parameters,
-			      sl.covariance, sl.indices[0], sl.indices[1]);
-    trackState.setCalibrated(meas);
-    return meas;
+    trackState.allocateCalibrated(2);
+    trackState.template calibrated<2>() = sl.parameters;
+    trackState.template calibratedCovariance<2>() = sl.covariance;
+    trackState.setProjector(detail::FixedSizeSubspace<BoundIndices::eBoundSize, 2>(
+                                std::array{sl.indices[0], sl.indices[1]})
+                                .template projector<double>());
   } else if (sl.indices[0] != Acts::eBoundSize) {
-    auto meas =
-        makeMeasurement(trackState.uncalibrated(), sl.parameters.head<1>(),
-                        sl.covariance.topLeftCorner<1, 1>(), sl.indices[0]);
-    trackState.setCalibrated(meas);
-    return meas;
+    trackState.allocateCalibrated(1);
+    trackState.template calibrated<1>() = sl.parameters.head<1>();
+    trackState.template calibratedCovariance<1>() =
+        sl.covariance.topLeftCorner<1, 1>();
+    trackState.setProjector(detail::FixedSizeSubspace<BoundIndices::eBoundSize, 1>(
+                                std::array{sl.indices[0]})
+                                .template projector<double>());
   } else {
     throw std::runtime_error(
         "Tried to extract measurement from invalid TestSourceLink");

@@ -2,6 +2,7 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include "src/TrackFindingAlg.h"
+#include "Acts/Propagator/PropagatorOptions.hpp"
 #include "src/FitterHelperFunctions.h"
 
 // Athena
@@ -216,12 +217,14 @@ namespace ActsTrk
        ATH_MSG_DEBUG("chi2OutlierCutOff set but not supported when using the default measurement selector.");
     }
 
-    m_trackFinder.reset(new CKF_pimpl{detail::CKF_config{std::move(extrapolator), {std::move(propagator), logger().cloneWithSuffix("CKF")}, measurementSelector, {}, {}, {}, trackSelectorCfg}});
+    detail::CKF_config ckfConfig{
+        std::move(extrapolator),
+        {std::move(propagator), logger().cloneWithSuffix("CKF")},
+        measurementSelector,
+        {},
+        trackSelectorCfg};
 
-    trackFinder().pOptions.maxSteps = m_maxPropagationStep;
-    trackFinder().pSecondOptions.maxSteps = m_maxPropagationStep;
-    trackFinder().pOptions.direction = Acts::Direction::Forward;
-    trackFinder().pSecondOptions.direction = trackFinder().pOptions.direction.invert();
+    m_trackFinder = std::make_unique<CKF_pimpl>(std::move(ckfConfig));
 
     trackFinder().ckfExtensions.updater.connect<&ActsTrk::FitterHelperFunctions::gainMatrixUpdate<detail::RecoTrackStateContainer>>();
     trackFinder().ckfExtensions.measurementSelector.connect<&Acts::MeasurementSelector::select<detail::RecoTrackStateContainer>>(&trackFinder().measurementSelector);
@@ -423,14 +426,22 @@ namespace ActsTrk
     Acts::SourceLinkAccessorDelegate<UncalibSourceLinkAccessor::Iterator> slAccessorDelegate;
     slAccessorDelegate.connect<&UncalibSourceLinkAccessor::range>(&slAccessor);
 
+    Acts::PropagatorPlainOptions plainOptions{tgContext, mfContext};
+    Acts::PropagatorPlainOptions plainSecondOptions{tgContext, mfContext};
+
+    plainOptions.maxSteps = m_maxPropagationStep;
+    plainSecondOptions.maxSteps = m_maxPropagationStep;
+    plainSecondOptions.direction = Acts::Direction::Forward;
+    plainSecondOptions.direction = plainOptions.direction.invert();
+
     // Set the CombinatorialKalmanFilter options
-    using TrackFinderOptions = Acts::CombinatorialKalmanFilterOptions<UncalibSourceLinkAccessor::Iterator, detail::RecoTrackStateContainer>;
+    using TrackFinderOptions = Acts::CombinatorialKalmanFilterOptions<UncalibSourceLinkAccessor::Iterator, detail::RecoTrackContainer>;
     TrackFinderOptions options(tgContext,
                                mfContext,
                                calContext,
                                slAccessorDelegate,
                                trackFinder().ckfExtensions,
-                               trackFinder().pOptions,
+                               plainOptions,
                                pSurface.get());
     if (!m_useDefaultMeasurementSelector.value()) {
        m_measurementSelector->connect( &options.trackStateCandidateCreator );
@@ -442,7 +453,7 @@ namespace ActsTrk
                             calContext,
                             slAccessorDelegate,
                             trackFinder().ckfExtensions,
-                            trackFinder().pSecondOptions,
+                            plainSecondOptions,
                             pSurface.get());
       secondOptions->targetSurface = pSurface.get();
       if (!m_useDefaultMeasurementSelector.value()) {
@@ -484,8 +495,8 @@ namespace ActsTrk
     const auto measurementContainerOffsets = measurements.measurementContainerOffsets();
 
     using BranchStopperResult = Acts::CombinatorialKalmanFilterBranchStopperResult;
-    auto stopBranch = [&](const Acts::CombinatorialKalmanFilterTipState &tipState,
-                          detail::RecoTrackStateContainer::TrackStateProxy &trackState) -> BranchStopperResult {
+    auto stopBranch = [&](const detail::RecoTrackContainer::TrackProxy &track,
+                          const detail::RecoTrackContainer::TrackStateProxy &trackState) -> BranchStopperResult {
       if (!m_trackStatePrinter.empty()) {
         m_trackStatePrinter->printTrackState(tgContext, trackState, measurementContainerOffsets, true);
       }
@@ -498,38 +509,38 @@ namespace ActsTrk
       const auto &cutSet = getCuts(eta);
 
       if (typeIndex < m_ptMinMeasurements.size() &&
-          !(tipState.nMeasurements < m_ptMinMeasurements[typeIndex])) {
+          !(track.nMeasurements() < m_ptMinMeasurements[typeIndex])) {
         double pT = std::sin(parameters[Acts::eBoundTheta]) / parameters[Acts::eBoundQOverP];
         if (std::abs(pT) < cutSet.ptMin) {
           ++event_stat[category_i][kNStoppedTracksMinPt];
           ATH_MSG_DEBUG("CkfBranchStopper: drop branch with q*pT="
                         << pT << " after "
-                        << tipState.nMeasurements << " measurements");
+                        << track.nMeasurements() << " measurements");
           return BranchStopperResult::StopAndDrop;
         }
       }
 
       if (typeIndex < m_absEtaMaxMeasurements.size() &&
-          !(tipState.nMeasurements < m_absEtaMaxMeasurements[typeIndex]) &&
+          !(track.nMeasurements() < m_absEtaMaxMeasurements[typeIndex]) &&
           !(std::abs(eta) < trackSelectorCfg.absEtaEdges.back())) {
         ++event_stat[category_i][kNStoppedTracksMaxEta];
         ATH_MSG_DEBUG("CkfBranchStopper: drop branch with eta="
                       << eta << " after "
-                      << tipState.nMeasurements << " measurements");
+                      << track.nMeasurements() << " measurements");
         return BranchStopperResult::StopAndDrop;
       }
 
-      if (!(tipState.nHoles > cutSet.maxHoles || tipState.nOutliers > cutSet.maxOutliers))
+      if (!(track.nHoles() > cutSet.maxHoles || track.nOutliers() > cutSet.maxOutliers))
         return BranchStopperResult::Continue;
 
-      bool enoughMeasurements = !(tipState.nMeasurements < cutSet.minMeasurements);
+      bool enoughMeasurements = !(track.nMeasurements() < cutSet.minMeasurements);
       if (!enoughMeasurements)
         ++event_stat[category_i][kNStoppedTracksMaxHoles];
       ATH_MSG_DEBUG("CkfBranchStopper: stop and "
                     << (enoughMeasurements ? "keep" : "drop")
-                    << " branch with nHoles=" << tipState.nHoles
-                    << ", nOutliers=" << tipState.nOutliers
-                    << ", nMeasurements=" << tipState.nMeasurements);
+                    << " branch with nHoles=" << track.nHoles()
+                    << ", nOutliers=" << track.nOutliers()
+                    << ", nMeasurements=" << track.nMeasurements());
       return enoughMeasurements ? BranchStopperResult::StopAndKeep
                                 : BranchStopperResult::StopAndDrop;
     };
@@ -538,7 +549,8 @@ namespace ActsTrk
     if (m_doTwoWay)
       secondOptions->extensions.branchStopper.connect(stopBranch);
 
-    Acts::PropagatorOptions<Acts::ActionList<Acts::MaterialInteractor>,
+    Acts::PropagatorOptions<detail::Stepper::Options, detail::Navigator::Options,
+                            Acts::ActionList<Acts::MaterialInteractor>,
                             Acts::AbortList<Acts::EndOfWorldReached>>
     extrapolationOptions(tgContext, mfContext);
 

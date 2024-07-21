@@ -18,6 +18,7 @@
 #include "Acts/EventData/TrackParameters.hpp"
 #include "Acts/Surfaces/Surface.hpp"
 #include "Acts/Utilities/Logger.hpp"
+#include "Acts/TrackFinding/CombinatorialKalmanFilter.hpp"
 
 #include "MeasurementSelector.h"
 #include "ActsEvent/TrackContainer.h"
@@ -261,7 +262,9 @@ struct AtlasMeasurementSelector
 };
 
 namespace {
-   using RecoTrackStateContainer = Acts::VectorMultiTrajectory;     // the track back-end used during track finding:
+   // the track back-end used during track finding
+   using RecoTrackContainer = Acts::TrackContainer<Acts::VectorTrackContainer,
+                                                   Acts::VectorMultiTrajectory>;
 
    static constexpr std::size_t gAbsoluteMaxBranchesPerSurface = 3; // the absolute maximum number of branches per surface
                                                                     // the actual value is configurable up to this number
@@ -269,13 +272,13 @@ namespace {
 
    // Wrapper class which provides the actual measurement selector and
    // allows to connect it to the delegate used by the track finder
-   template <typename source_link_iterator_t, typename traj_t>
+   template <typename source_link_iterator_t, typename track_container_t>
    class AtlasActsMeasurmentSelector : public ActsTrk::IMeasurementSelector {
    public:
       using TheAtlasMeasurementSelector
                = AtlasMeasurementSelector<
                      gAbsoluteMaxBranchesPerSurface,
-                     traj_t,
+                     typename track_container_t::TrackStateContainerBackend,
                      ActsTrk::AtlasMeasurementContainerList::measurement_container_variant_t
                      // where measurement_container_variant_t is e.g.
                      //   variant<  ContainerRefWithDim<xAOD::PixelClusterContainer,2>, ... >
@@ -284,16 +287,7 @@ namespace {
       using BoundState = std::tuple<Acts::BoundTrackParameters, Acts::BoundMatrix, double>;
       // the delegate used by the track finder to which the measurement selector needs to be connected to
       using TrackStateCandidateCreator =
-         Acts::Delegate<Acts::Result<boost::container::small_vector<
-                                        typename traj_t::TrackStateProxy::IndexType,
-                                        TheAtlasMeasurementSelector::traits::s_maxBranchesPerSurface>>(
-                                                      const Acts::GeometryContext& geoContext,
-                                                      const Acts::CalibrationContext& calibrationContext, const Acts::Surface& surface,
-                                                      const BoundState& boundState, source_link_iterator_t slBegin,
-                                                      source_link_iterator_t slEnd, std::size_t prevTip,
-                                                      traj_t& bufferTrajectory,
-                                                      std::vector<typename traj_t::TrackStateProxy>& trackStateCandidates,
-                                                      traj_t& trajectory, const Acts::Logger& logger)>;
+         Acts::CombinatorialKalmanFilterOptions<source_link_iterator_t, track_container_t>::TrackStateCandidateCreator;
 
       AtlasActsMeasurmentSelector(ActsTrk::MeasurementCalibrator2 &&calibrator,
                                   TheAtlasMeasurementSelector::Config &&config)
@@ -341,7 +335,7 @@ std::unique_ptr<ActsTrk::IMeasurementSelector>  getMeasurementSelector([[maybe_u
     ActsTrk::MeasurementCalibrator2 atl_measurement_calibrator(onTrackCalibratorTool); // *m_ATLASConverterTool,
     using AtlMeasurementSelectorCuts = AtlasMeasurementSelectorCuts;
 
-    using AtlMeasurementSelector = AtlasActsMeasurmentSelector<ActsTrk::UncalibSourceLinkAccessor::Iterator, RecoTrackStateContainer>;
+    using AtlMeasurementSelector = AtlasActsMeasurmentSelector<ActsTrk::UncalibSourceLinkAccessor::Iterator, RecoTrackContainer>;
     using AtlMeasurementSelectorConfig = AtlMeasurementSelector::TheAtlasMeasurementSelector::Config;
 
     std::unique_ptr<ActsTrk::IMeasurementSelector>
