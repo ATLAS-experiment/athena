@@ -104,6 +104,7 @@ atlas_add_test( test_menu_dump
 
 atlas_install_scripts( python/TriggerAPI/TriggerAPISession.py )
 atlas_add_alias( tapis "TriggerAPISession.py" )
+atlas_add_alias( trig_tapis "TriggerAPISession.py" ) # second alias, for consistency with other trig tools
 
 # TriggerAPI tests
 atlas_add_test( TriggerAPISessionTest SCRIPT test/testTriggerAPISession.py POST_EXEC_SCRIPT noerror.sh PROPERTIES TIMEOUT 600 )
