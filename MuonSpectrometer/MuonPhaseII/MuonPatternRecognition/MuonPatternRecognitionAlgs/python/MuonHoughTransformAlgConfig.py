@@ -6,12 +6,14 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 def MuonPhiHoughTransformAlgCfg(flags, name = "MuonPhiHoughTransformAlg", **kwargs):
     result = ComponentAccumulator()
+    kwargs.setdefault("downWeightPrdMultiplicity", True)
     theAlg = CompFactory.MuonR4.MuonPhiHoughTransformAlg(name, **kwargs)
     result.addEventAlgo(theAlg, primary=True)
     return result
 
 def MuonEtaHoughTransformAlgCfg(flags, name = "MuonEtaHoughTransformAlg", **kwargs):
     result = ComponentAccumulator()
+    kwargs.setdefault("downWeightPrdMultiplicity", True)
     theAlg = CompFactory.MuonR4.MuonEtaHoughTransformAlg(name, **kwargs)
     result.addEventAlgo(theAlg, primary=True)
     return result

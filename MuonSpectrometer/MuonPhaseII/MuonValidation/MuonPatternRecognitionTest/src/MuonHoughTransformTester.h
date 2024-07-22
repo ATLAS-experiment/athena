@@ -48,6 +48,13 @@ namespace MuonValR4{
     virtual StatusCode finalize() override;
 
   private:
+    
+    /// Helper method to fetch data from StoreGate. If the key is empty, a nullptr is assigned to the container ptr
+    /// Failure is returned in cases, of non-empty keys and failed retrieval
+    template <class ContainerType> StatusCode retrieveContainer(const EventContext& ctx,
+                                                                const SG::ReadHandleKey<ContainerType>& key,
+                                                                const ContainerType* & contToPush) const;
+
     Amg::Transform3D toChamberTrf(const ActsGeometryContext& gctx,
                                   const Identifier& hitId) const;
 
@@ -61,16 +68,30 @@ namespace MuonValR4{
                                 const MuonR4::MuonSegment* foundSegment,
                                 const std::string & label, const ActsGeometryContext & gctx) const;
 
-    struct chamberLevelObjects{ 
-        std::map<HepMC::ConstGenParticlePtr, std::vector<const xAOD::MuonSimHit*>> truthToSimHits;
-        std::map<const MuonR4::MuonSegment*, std::pair<HepMC::ConstGenParticlePtr, double>> segmentTruthMatching; 
-        std::map<const MuonR4::HoughSegmentSeed*, std::pair<HepMC::ConstGenParticlePtr, double>> seedTruthMatching; 
-        std::map<const MuonR4::HoughSegmentSeed*, const MuonR4::MuonSegment*> seedToSegmentMatching; 
-        std::map<HepMC::ConstGenParticlePtr, std::pair<const MuonR4::HoughSegmentSeed*,double>> seedsFromTruth; 
-        std::map<HepMC::ConstGenParticlePtr, std::pair<const MuonR4::MuonSegment*,double>> segmentsFromTruth; 
+    struct chamberLevelObjects { 
+        struct SeedMatchQuantites {
+            /** @brief Best matched truth particle */
+            HepMC::ConstGenParticlePtr truthParticle{};
+            /** @brief Probability of which the segment is matched to it */
+            double matchProb{0.};
+            /** @brief Associated segment */
+            const MuonR4::MuonSegment* segment{nullptr};
+            /** @brief associated bucket */
+            const MuonR4::MuonSpacePointBucket* bucket{nullptr};
+        };
+        using SeedMatchMap = std::map<const MuonR4::HoughSegmentSeed*, SeedMatchQuantites>;
+        SeedMatchMap seedMatching{};
+
+        /** @brief Collection of the truth particle trajectory */
+        struct TruthMatchQuantities{
+            std::vector<const xAOD::MuonSimHit*> detectorHits{};
+            std::vector<const MuonR4::HoughSegmentSeed*> assocSeeds{};
+        };
+
+        std::map<HepMC::ConstGenParticlePtr, TruthMatchQuantities> truthMatching{}; 
     };
 
-    std::pair<HepMC::ConstGenParticlePtr, double> matchSeedToTruth(const MuonR4::HoughSegmentSeed* seed, chamberLevelObjects & objs ) const;                          
+    void matchSeedToTruth(const MuonR4::HoughSegmentSeed* seed, chamberLevelObjects & objs ) const;                          
     std::pair<HepMC::ConstGenParticlePtr, double> matchSegmentToTruth(const MuonR4::MuonSegment* seed, chamberLevelObjects & objs ) const;                          
     void matchSeedsToTruth(chamberLevelObjects & objs) const;          
     void matchSegmentsToTruth(chamberLevelObjects & objs) const;          
@@ -80,9 +101,8 @@ namespace MuonValR4{
     void fillSegmentInfo(const MuonR4::MuonSegment* segmentSeed, double matchProb);            
     
     // MDT sim hits in xAOD format 
-    SG::ReadHandleKeyArray<xAOD::MuonSimHitContainer> m_inSimHitKeys {this, "SimHitKeys",{ "xMdtSimHits","xRpcSimHits","xTgcSimHits"}, "xAOD  SimHit collections"};
+    SG::ReadHandleKeyArray<xAOD::MuonSimHitContainer> m_inSimHitKeys {this, "SimHitKeys",{}, "xAOD  SimHit collections"};
                                                           
-    SG::ReadHandleKey<MuonR4::StationHoughMaxContainer> m_inHoughMaximaKey{this, "StationHoughMaxContainer", "MuonHoughStationMaxima"};
     SG::ReadHandleKey<MuonR4::StationHoughSegmentSeedContainer> m_inHoughSegmentSeedKey{this, "StationHoughSegmentSeedContainer", "MuonHoughStationSegmentSeeds"};
     SG::ReadHandleKey<MuonR4::MuonSegmentContainer> m_inSegmentKey{this, "MuonSegmentContainer", "R4MuonSegments"};
     SG::ReadHandleKey<MuonR4::MuonSpacePointContainer> m_spacePointKey{this, "SpacePointContainer", "MuonSpacePoints"};
@@ -124,7 +144,11 @@ namespace MuonValR4{
     MuonVal::ScalarBranch<float>& m_out_max_x0{m_tree.newScalar<float>("maxX0", 0.0)}; 
     MuonVal::ScalarBranch<float>& m_out_max_tantheta{m_tree.newScalar<float>("maxTanTheta", 0.0)}; 
     MuonVal::ScalarBranch<float>& m_out_max_tanphi{m_tree.newScalar<float>("maxTanPhi", 0.0)}; 
+    
+    /** space point teste module */
     std::shared_ptr<MuonValR4::SpacePointTesterModule>      m_out_SP{nullptr}; 
+    MuonVal::VectorBranch<unsigned char>& m_sacePointOnSeed{m_tree.newVector<unsigned char>("spacePoint_onSegmentSeed")};
+    MuonVal::VectorBranch<unsigned char>& m_sacePointOnSegment{m_tree.newVector<unsigned char>("spacePoint_onSegment")};
     
     MuonVal::ScalarBranch<unsigned int>& m_out_max_nHits{m_tree.newScalar<unsigned int>("maxNHits", 0)}; 
     MuonVal::ScalarBranch<unsigned int>& m_out_max_nEtaHits{m_tree.newScalar<unsigned int>("maxNEtaHits", 0)}; 
@@ -134,8 +158,7 @@ namespace MuonValR4{
     MuonVal::ScalarBranch<unsigned int>& m_out_max_nTgc{m_tree.newScalar<unsigned int>("maxNTgcHits", 0)}; 
     MuonVal::ScalarBranch<unsigned int>& m_out_max_nsTgc{m_tree.newScalar<unsigned int>("maxNsTgcHits", 0)};
     MuonVal::ScalarBranch<unsigned int>& m_out_max_nMm{m_tree.newScalar<unsigned int>("maxNMmHits", 0)};
-    
-    // /// Dump of the Mdt hits on maximum
+
     
     MuonVal::ScalarBranch<bool>&  m_out_hasSegment {m_tree.newScalar<bool>("hasSegment", false)}; 
     MuonVal::ScalarBranch<float>&  m_out_segment_matchFraction {m_tree.newScalar<float>("segmentMatchFraction", false)}; 

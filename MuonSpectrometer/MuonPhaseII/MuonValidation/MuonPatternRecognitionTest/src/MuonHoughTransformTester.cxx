@@ -73,7 +73,6 @@ namespace MuonValR4 {
     StatusCode MuonHoughTransformTester::initialize() {
         ATH_CHECK(m_geoCtxKey.initialize());
         ATH_CHECK(m_inSimHitKeys.initialize());
-        ATH_CHECK(m_inHoughMaximaKey.initialize());
         ATH_CHECK(m_inHoughSegmentSeedKey.initialize());
         ATH_CHECK(m_inSegmentKey.initialize());
         ATH_CHECK(m_spacePointKey.initialize());
@@ -90,6 +89,20 @@ namespace MuonValR4 {
         }
         return StatusCode::SUCCESS;
     }
+   template <class ContainerType>
+        StatusCode MuonHoughTransformTester::retrieveContainer(const EventContext& ctx, 
+                                                               const SG::ReadHandleKey<ContainerType>& key,
+                                                               const ContainerType*& contToPush) const {
+            contToPush = nullptr;
+            if (key.empty()) {
+                ATH_MSG_VERBOSE("No key has been parsed for object "<< typeid(ContainerType).name());
+                return StatusCode::SUCCESS;
+            }
+            SG::ReadHandle<ContainerType> readHandle{key, ctx};
+            ATH_CHECK(readHandle.isPresent());
+            contToPush = readHandle.cptr();
+            return StatusCode::SUCCESS;
+        }
 
     StatusCode MuonHoughTransformTester::finalize() {
         ATH_CHECK(m_tree.write());
@@ -108,84 +121,47 @@ namespace MuonValR4 {
         return muonChamber->globalToLocalTrans(gctx) * reElement->localToGlobalTrans(gctx, trfHash);
     }
 
-    std::pair<HepMC::ConstGenParticlePtr, double> MuonHoughTransformTester::matchSeedToTruth(const MuonR4::HoughSegmentSeed* seed, chamberLevelObjects & objs ) const{
-        bool bestTruthFrac = 0.0; 
+   
+    void MuonHoughTransformTester::matchSeedToTruth(const MuonR4::HoughSegmentSeed* seed, 
+                                                    chamberLevelObjects & objs ) const{
+        double bestTruthFrac{0.}; 
         HepMC::ConstGenParticlePtr bestMatch = nullptr; 
-        for (auto & [ genParticle, simhits] : objs.truthToSimHits){
-            float nRecFound=0; 
-            for (auto & hitOnMax : seed->getHitsInMax()){
-                for (auto & simHit : simhits){
+        for (auto & [ genParticle, truthQuantities] : objs.truthMatching) {
+            unsigned int nRecFound{0}; 
+            for (const MuonR4::HoughHitType& spacePoint : seed->getHitsInMax()) {
+                for (const xAOD::MuonSimHit* simHit : truthQuantities.detectorHits) {
                     if(m_idHelperSvc->isMdt(simHit->identify()) &&
-                        hitOnMax->identify() == simHit->identify()){
+                        spacePoint->identify() == simHit->identify()){
                         ++nRecFound;
                         break;
                     } 
                     //// Sim hits are expressed w.r.t to the gas gap Id. Check whether
                     ///  the hit is in the same gas gap
-                    else if (m_idHelperSvc->gasGapId(hitOnMax->identify()) == simHit->identify()) {
+                    else if (m_idHelperSvc->gasGapId(spacePoint->identify()) == simHit->identify()) {
                         ++nRecFound;
                         // break; // should we... ? 
                     }
                 }
             }
-            float truthFraction = nRecFound / (float)seed->getHitsInMax().size(); 
-            if (truthFraction > bestTruthFrac){
+            double truthFraction = (1.*nRecFound) / (1.*seed->getHitsInMax().size()); 
+            if (truthFraction > bestTruthFrac) {
                 bestMatch = genParticle;
                 bestTruthFrac = truthFraction; 
             }
         }
-        return std::make_pair(bestMatch, bestTruthFrac); 
+        if (!bestMatch) return;
+        /** Map the seed to the truth particle */
+        chamberLevelObjects::SeedMatchQuantites& seedMatch = objs.seedMatching[seed];
+        seedMatch.matchProb = bestTruthFrac;
+        seedMatch.truthParticle = bestMatch;
+        /** Back mapping of the best truth -> seed */
+        objs.truthMatching[bestMatch].assocSeeds.push_back(seed);
     }
-    std::pair<HepMC::ConstGenParticlePtr, double> MuonHoughTransformTester::matchSegmentToTruth(const MuonR4::MuonSegment* segment, chamberLevelObjects & objs ) const{
-        bool bestTruthFrac = 0.0; 
-        HepMC::ConstGenParticlePtr bestMatch = nullptr; 
-        for (auto & [ genParticle, simhits] : objs.truthToSimHits){
-            float nRecFound=0; 
-            for (auto & hitOnMax : segment->measurements()){
-                for (auto & simHit : simhits){
-                    if(m_idHelperSvc->isMdt(simHit->identify()) &&
-                        xAOD::identify(hitOnMax) == simHit->identify()){
-                        ++nRecFound;
-                        break;
-                    } 
-                    //// Sim hits are expressed w.r.t to the gas gap Id. Check whether
-                    ///  the hit is in the same gas gap
-                    else if (m_idHelperSvc->gasGapId(xAOD::identify(hitOnMax)) == simHit->identify()) {
-                        ++nRecFound;
-                        // break; // should we... ? 
-                    }
-                }
-            }
-            float truthFraction = nRecFound / (float)segment->measurements().size(); 
-            if (truthFraction > bestTruthFrac){
-                bestMatch = genParticle;
-                bestTruthFrac = truthFraction; 
-            }
-        }
-        return std::make_pair(bestMatch, bestTruthFrac); 
-    }
-
-
-    void MuonHoughTransformTester::matchSeedsToTruth(chamberLevelObjects & objs) const{
-        for (auto & [ seed, truthAssociation] : objs.seedTruthMatching){
-            auto [match, prob]  = matchSeedToTruth(seed, objs);
-            truthAssociation.first = match; 
-            truthAssociation.second = prob; 
-            // populate the inverse association as well
-            if (truthAssociation.first != nullptr){
-                objs.seedsFromTruth[truthAssociation.first] = std::make_pair(seed,prob); 
-            }
-        }
-    }
-    void MuonHoughTransformTester::matchSegmentsToTruth(chamberLevelObjects & objs) const{
-        for (auto & [ segment, truthAssociation] : objs.segmentTruthMatching){
-            auto [match, prob]  = matchSegmentToTruth(segment, objs);
-            truthAssociation.first = match; 
-            truthAssociation.second = prob; 
-            // populate the inverse association as well
-            if (truthAssociation.first != nullptr){
-                objs.segmentsFromTruth[truthAssociation.first] = std::make_pair(segment,prob); 
-            }
+  
+    void MuonHoughTransformTester::matchSeedsToTruth(chamberLevelObjects & objs) const {        
+        for (auto & [ seed, matchObj] : objs.seedMatching) {
+            matchSeedToTruth(seed, objs);
+            ATH_MSG_VERBOSE("Truth matching probability "<<matchObj.matchProb);           
         }
     }
           
@@ -231,7 +207,8 @@ namespace MuonValR4 {
         m_out_gen_y0 = chamberPos.y(); 
         m_out_gen_x0 = chamberPos.x(); 
     }
-    void MuonHoughTransformTester::fillSeedInfo(const MuonR4::HoughSegmentSeed* foundMax, double matchProb){
+    void MuonHoughTransformTester::fillSeedInfo(const MuonR4::HoughSegmentSeed* foundMax, 
+                                                double matchProb) {
         if (!foundMax) return; 
         m_out_hasMax = true; 
         m_out_max_hasPhiExtension = foundMax->hasPhiExtension();
@@ -243,11 +220,13 @@ namespace MuonValR4 {
             m_out_max_x0 = foundMax->interceptX(); 
         }
         m_out_max_nHits = foundMax->getHitsInMax().size(); 
-        m_out_max_nEtaHits = std::accumulate(foundMax->getHitsInMax().begin(), foundMax->getHitsInMax().end(),0,[](int i, const MuonR4::HoughHitType & h){i += h->measuresEta();return i;}); 
-        m_out_max_nPhiHits = std::accumulate(foundMax->getHitsInMax().begin(), foundMax->getHitsInMax().end(),0,[](int i, const MuonR4::HoughHitType & h){i += h->measuresPhi();return i;}); 
+        m_out_max_nEtaHits = std::accumulate(foundMax->getHitsInMax().begin(), foundMax->getHitsInMax().end(),0,
+                                             [](int i, const MuonR4::HoughHitType & h){i += h->measuresEta();return i;}); 
+        m_out_max_nPhiHits = std::accumulate(foundMax->getHitsInMax().begin(), foundMax->getHitsInMax().end(),0,
+                                            [](int i, const MuonR4::HoughHitType & h){i += h->measuresPhi();return i;}); 
         unsigned int nMdtMax{0}, nRpcMax{0}, nTgcMax{0}, nMmMax{0}, nsTgcMax{0}; 
         for (const MuonR4::HoughHitType & houghSP: foundMax->getHitsInMax()){
-            m_out_SP->push_back(*houghSP); 
+            m_sacePointOnSeed[m_out_SP->push_back(*houghSP)] = true; 
             const xAOD::UncalibratedMeasurement* meas = houghSP->primaryMeasurement();
             switch (meas->type()) {
                 case xAOD::UncalibMeasType::MdtDriftCircleType: 
@@ -277,15 +256,13 @@ namespace MuonValR4 {
         m_out_max_nMm = nMmMax;
 
     }
-
-
     
     void MuonHoughTransformTester::fillSegmentInfo(const MuonR4::MuonSegment* segment, double matchProb){
         if (!segment) return; 
         m_out_hasSegment = true; 
         m_out_segment_matchFraction = matchProb; 
         m_out_segment_chi2 = segment->chi2();
-        for (auto & c2 : segment->chi2PerMeasurement()){
+        for (const double c2 : segment->chi2PerMeasurement()){
             m_out_segment_chi2_measurement.push_back(c2); 
         }
         m_out_segment_tanphi = segment->tanPhi();
@@ -296,22 +273,19 @@ namespace MuonValR4 {
     StatusCode MuonHoughTransformTester::execute()  {
         
         const EventContext & ctx = Gaudi::Hive::currentContext();
-        SG::ReadHandle<ActsGeometryContext> gctxHandle{m_geoCtxKey, ctx};
-        ATH_CHECK(gctxHandle.isPresent());
-        const ActsGeometryContext& gctx{*gctxHandle};
+        const ActsGeometryContext* gctxPtr{nullptr};
+        ATH_CHECK(retrieveContainer(ctx, m_geoCtxKey, gctxPtr));
+        const ActsGeometryContext& gctx{*gctxPtr};
 
         // retrieve the two input collections
-
-        auto simHitCollections = m_inSimHitKeys.makeHandles(ctx);
         
-        SG::ReadHandle<MuonR4::StationHoughMaxContainer> readHoughPeaks(m_inHoughMaximaKey, ctx);
-        ATH_CHECK(readHoughPeaks.isPresent());        
+        const MuonR4::StationHoughSegmentSeedContainer* readSegmentSeeds{nullptr};
+        ATH_CHECK(retrieveContainer(ctx, m_inHoughSegmentSeedKey, readSegmentSeeds));
         
-        SG::ReadHandle<MuonR4::StationHoughSegmentSeedContainer> readSegmentSeeds(m_inHoughSegmentSeedKey, ctx);
-        ATH_CHECK(readSegmentSeeds.isPresent());        
-        
-        SG::ReadHandle<MuonR4::MuonSegmentContainer> readMuonSegments(m_inSegmentKey, ctx);
-        ATH_CHECK(readMuonSegments.isPresent());        
+        const MuonR4::MuonSegmentContainer* readMuonSegments{nullptr};
+        ATH_CHECK(retrieveContainer(ctx, m_inSegmentKey, readMuonSegments));
+        const MuonR4::MuonSpacePointContainer* spacePoints{nullptr};
+        ATH_CHECK(retrieveContainer(ctx, m_spacePointKey, spacePoints));
 
         ATH_MSG_DEBUG("Succesfully retrieved input collections");
 
@@ -319,8 +293,9 @@ namespace MuonValR4 {
         // The fast digi should only generate one circle per tube. 
         std::map<const MuonGMR4::MuonChamber*, chamberLevelObjects> allObjectsPerChamber; 
 
-        for (auto & collection : simHitCollections){
-            ATH_CHECK(collection.isPresent());
+        for (const SG::ReadHandleKey<xAOD::MuonSimHitContainer>& key : m_inSimHitKeys){
+            const xAOD::MuonSimHitContainer* collection{nullptr};
+            ATH_CHECK(retrieveContainer(ctx, key, collection));
             for (const xAOD::MuonSimHit* simHit : *collection) {
                 const MuonGMR4::MuonReadoutElement* reElement = m_r4DetMgr->getReadoutElement(simHit->identify()); 
                 const MuonGMR4::MuonChamber* id{reElement->getChamber()};
@@ -331,72 +306,79 @@ namespace MuonValR4 {
                     genParticle = genLink.cptr(); 
                 }
                 /// skip empty truth matches for now
-                if (genParticle == nullptr) continue;
-                theObjects.truthToSimHits[genParticle].push_back(simHit); 
-                theObjects.seedsFromTruth[genParticle] = {nullptr,0.}; 
-                theObjects.segmentsFromTruth[genParticle] = {nullptr,0.}; 
+                if (!genParticle) continue;
+                theObjects.truthMatching[genParticle].detectorHits.push_back(simHit); 
             }
-        }
-        
-        for (const MuonR4::StationHoughSegmentSeeds  & max : *readSegmentSeeds){
-            auto  thechamber = allObjectsPerChamber.emplace(max.chamber(),chamberLevelObjects{}).first;
-            auto & recoOnChamber = thechamber->second.seedTruthMatching; 
-            for (auto & max : max.getMaxima()){
-                recoOnChamber.emplace(&max, std::pair(nullptr,0)); 
-                thechamber->second.seedToSegmentMatching[&max] = nullptr; 
-            }
-        }
-        for (const MuonR4::MuonSegment  & max : *readMuonSegments){
-            auto  thechamber = allObjectsPerChamber.emplace(max.chamber(),chamberLevelObjects{}).first;
-            auto & recoOnChamber = thechamber->second.segmentTruthMatching; 
-            recoOnChamber.emplace(&max, std::pair(nullptr,0)); 
-            thechamber->second.seedToSegmentMatching[max.parent()] = &max; 
         }
 
-        for (auto & [ chamber, chamberLevelObjects] : allObjectsPerChamber){
-            matchSeedsToTruth(chamberLevelObjects); 
-            matchSegmentsToTruth(chamberLevelObjects); 
+        // Populate the seeds first
+        for (const MuonR4::StationHoughSegmentSeeds  & max : *readSegmentSeeds) {
+            chamberLevelObjects&  thechamber = allObjectsPerChamber[max.chamber()];
+            chamberLevelObjects::SeedMatchMap& recoOnChamber = thechamber.seedMatching; 
+            for (const MuonR4::HoughSegmentSeed & max : max.getMaxima()) {
+               const MuonR4::MuonSpacePointBucket* parentBucket{nullptr};
+               /// Find the space point bucket that has all the hits in the maximum
+               for (const MuonR4::MuonSpacePointBucket* bucket : *spacePoints) {
+                    if (std::accumulate(bucket->begin(), bucket->end(),0u, 
+                            [&max](unsigned int i, const MuonR4::MuonSpacePointBucket::value_type & h){
+                                return i + (std::find(max.getHitsInMax().begin(),max.getHitsInMax().end(), h) != 
+                                            max.getHitsInMax().end());
+                            }) == max.getHitsInMax().size()){
+                        parentBucket = bucket;
+                        break;
+                    }
+               }
+               recoOnChamber[&max].bucket = parentBucket;
+               
+            }
+        }
+        for (const MuonR4::MuonSegment& segment : *readMuonSegments){
+            chamberLevelObjects&  thechamber = allObjectsPerChamber[segment.chamber()];
+            chamberLevelObjects::SeedMatchMap& recoOnChamber = thechamber.seedMatching;
+            recoOnChamber[segment.parent()].segment = &segment; 
+        }
+
+        for (auto & [chamber, chamberLevelObjects] : allObjectsPerChamber){
+            matchSeedsToTruth(chamberLevelObjects);            
             /// Step 1: Fill the matched pairs 
-            for (auto & [genParticlePtr, seedAndProb] : chamberLevelObjects.seedsFromTruth){
-                fillChamberInfo(chamber); 
-                const std::vector<const xAOD::MuonSimHit*> & hits = chamberLevelObjects.truthToSimHits[genParticlePtr];
-                fillTruthInfo(genParticlePtr,hits,gctx); 
-                // check for a reco match 
-                if (seedAndProb.first){
-                    fillSeedInfo(seedAndProb.first, seedAndProb.second); 
-                    if (m_drawEvtDisplaySuccess){
-                        ATH_CHECK(drawEventDisplay(ctx, hits, seedAndProb.first)); 
-                    }
-                    auto & segmentAndProb = chamberLevelObjects.segmentsFromTruth[genParticlePtr]; 
-                    if (segmentAndProb.first != nullptr){
-                        fillSegmentInfo(segmentAndProb.first, segmentAndProb.second); 
-                    }
+            for (auto & [genParticlePtr, assocInfo] : chamberLevelObjects.truthMatching) {                
+                if (assocInfo.assocSeeds.empty()) {
+                    fillChamberInfo(chamber); 
+                    fillTruthInfo(genParticlePtr, assocInfo.detectorHits, gctx);
+                    if (!m_tree.fill(ctx)) return StatusCode::FAILURE;
+                    continue;
                 }
-                else if (m_drawEvtDisplayFailure) {
-                    ATH_CHECK(drawEventDisplay(ctx, hits, nullptr));          
+                for (const MuonR4::HoughSegmentSeed* seed : assocInfo.assocSeeds) {
+                    fillChamberInfo(chamber); 
+                    fillTruthInfo(genParticlePtr, assocInfo.detectorHits, gctx);
+                    auto& seedMatch = chamberLevelObjects.seedMatching[seed];
+                    m_out_SP->push_back(*seedMatch.bucket);
+                    fillSeedInfo(seed, seedMatch.matchProb);
+                    if (seedMatch.segment) {
+                        fillSegmentInfo(seedMatch.segment, seedMatch.matchProb);
+                    }
+                    if (!m_tree.fill(ctx)) return StatusCode::FAILURE;
                 }
-                m_tree.fill(ctx);
             }
             // also fill the reco not matched to any truth 
-            for (auto & [ maximum, truth ] : chamberLevelObjects.seedTruthMatching){
-                if (truth.first == nullptr){
-                    fillChamberInfo(chamber);
-                    fillSeedInfo(maximum,0.); 
-                    if (chamberLevelObjects.seedToSegmentMatching[maximum] != nullptr){
-                        fillSegmentInfo(chamberLevelObjects.seedToSegmentMatching[maximum],0.); 
-                    }
-                    m_tree.fill(ctx); 
+            for (auto & [ seed, assocInfo ] : chamberLevelObjects.seedMatching) {
+                if (assocInfo.truthParticle) continue;
+                fillChamberInfo(chamber);
+                m_out_SP->push_back(*assocInfo.bucket);
+                fillSeedInfo(seed, 0.); 
+                    if (assocInfo.segment) {
+                    fillSegmentInfo(assocInfo.segment, 0.);
                 }
+                if (!m_tree.fill(ctx)) return StatusCode::FAILURE; 
             }
         } // end loop over chambers
-
 
         return StatusCode::SUCCESS;
     }
 
     StatusCode MuonHoughTransformTester::drawEventDisplay(const EventContext& ctx,
-                                                       const std::vector<const xAOD::MuonSimHit*>& simHits,
-                                                       const MuonR4::HoughSegmentSeed* foundMax) const {
+                                                          const std::vector<const xAOD::MuonSimHit*>& simHits,
+                                                          const MuonR4::HoughSegmentSeed* foundMax) const {
         
         if (simHits.size() < 4) return StatusCode::SUCCESS;
 
@@ -609,9 +591,6 @@ namespace MuonValR4 {
         return StatusCode::SUCCESS;
     }    
     
-    double evalX2(const double* pars,  std::function<double(double, double, const ActsGeometryContext &, const std::vector<const xAOD::MuonSimHit*>&, const MuonR4::HoughSegmentSeed*)> fcn, const ActsGeometryContext & gctx, const std::vector<const xAOD::MuonSimHit*>& simHits,  const MuonR4::HoughSegmentSeed* seed){
-        return fcn(pars[0],pars[1],gctx,simHits,seed);
-    }
     StatusCode MuonHoughTransformTester::drawChi2(const EventContext& ctx,
                                 const std::vector<const xAOD::MuonSimHit*>& simHits,
                                 const MuonR4::HoughSegmentSeed* foundMax,
