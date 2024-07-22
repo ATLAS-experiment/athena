@@ -20,7 +20,9 @@ mkdir $file; cd $file
 
 # run python test script
 log_file="run_${package}_${file}.log"
-python -m $package.$file --nEvents $nevents > $log_file 2>&1
+out_file="out_${package}_${file}.pool.root"
+
+python -m $package.$file --nEvents $nevents --outRootFile ${out_file} > $log_file 2>&1
 
 # save return code and write to art-results output 
 rc1=${PIPESTATUS[0]}
@@ -30,9 +32,6 @@ echo "art-result: $rc1 $file"
 if [[ $rc1 -eq 0 ]]
 then
 
-  # re-name the output file to a more descriptive name
-  out_file="out_${package}_${file}.pool.root"
-  mv myMuonSimTestStream.pool.root $out_file
 
   # compare the output to the reference file on cvmfs
   ref_out_path="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/"

@@ -42,9 +42,20 @@ if __name__=="__main__":
     from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, executeTest
     parser = SetupArgParser()
     parser.set_defaults(nEvents = -1)
+    parser.set_defaults(outRootFile="SimHits.pool.root")
 
     args = parser.parse_args()
-    flags, cfg = setupGeoR4TestCfg(args, setupSimJob = True)
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+
+    from AthenaConfiguration.Enums import ProductionStep
+    flags.Common.ProductionStep = ProductionStep.Simulation
+
+    from SimulationConfig.SimEnums import SimulationFlavour
+    flags.Sim.ISF.Simulator = SimulationFlavour.AtlasG4
+    flags.addFlag("Output.MuonSimTestStreamFileName", args.outRootFile)
+
+    flags, cfg = setupGeoR4TestCfg(args, flags)
     
     from BeamEffects.BeamEffectsAlgConfig import BeamEffectsAlgCfg
     cfg.merge(BeamEffectsAlgCfg(flags))
