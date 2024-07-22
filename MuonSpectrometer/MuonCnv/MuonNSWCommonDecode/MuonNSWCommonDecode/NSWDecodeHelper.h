@@ -6,9 +6,12 @@
 
 #include <stdint.h>
 #include <stdexcept>
+#include <type_traits>
 
 #include <sstream>
 #include <span>
+#include <CxxUtils/bitscan.h>
+#include <CxxUtils/ones.h>
 
 namespace Muon
 {
@@ -141,34 +144,22 @@ namespace Muon
     /// @param number value
     /// @return  Set bit. -1 if no bit is set
     template <class T>
-      constexpr int8_t max_bit(const T &number) {
-      constexpr int8_t num_bits = sizeof(number) * 8 - 1;
-      for (int8_t bit = num_bits; bit >= 0; --bit) {
-	if (number & (1ul << bit))
-	  return bit;
-      }
-      return -1;
+      constexpr int8_t max_bit(const T number) {
+      return CxxUtils::maxSetBit(static_cast<std::make_unsigned_t<T> >(number));
     }
     /// @brief Returns the most right hand bit which is set in a number
     /// @tparam T  Any built-in data type
     /// @param number value
     /// @return Position of the bit. -1 if no bit is set
     template <class T>
-      constexpr int8_t min_bit(const T &number) {
-      constexpr int8_t num_bits = sizeof(number) * 8 - 1;  
-      for (size_t bit = 0; bit <= num_bits; ++bit) {
-	if (number & (1ul << bit))
-	  return bit;
-      }
-      return -1;
+      constexpr int8_t min_bit(const T number) {
+      if (number == 0) return -1;
+      return
+        CxxUtils::count_trailing_zeros(static_cast<std::make_unsigned_t<T> >(number));
     }
     template <class Out>
       constexpr Out fill_bitmask(const uint8_t first_bit,  const uint8_t num_bits) {
-      Out mask {0};
-      for (uint8_t bit = first_bit; bit <= first_bit + num_bits ; ++bit){
-	mask |= (1<<bit);
-      }
-      return mask;
+      return CxxUtils::ones<Out> (num_bits) << first_bit;
     }
     
   }

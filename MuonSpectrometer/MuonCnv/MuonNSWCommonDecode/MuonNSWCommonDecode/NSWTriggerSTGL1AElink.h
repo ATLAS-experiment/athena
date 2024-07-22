@@ -48,7 +48,7 @@ class NSWTriggerSTGL1AElink : public NSWTriggerElink {
   const std::vector<std::uint32_t>& stream_head_nwords() const { return m_stream_head_nwords; };
   const std::vector<std::uint32_t>& stream_head_fifo_size() const { return m_stream_head_fifo_size; };
   const std::vector<std::uint32_t>& stream_head_streamID() const { return m_stream_head_streamID; };
-  const std::vector<std::vector<std::vector<std::uint32_t>>> stream_data() const { return m_stream_data; };
+  const std::vector<std::vector<std::vector<std::uint32_t>>>& stream_data() const { return m_stream_data; };
   std::uint32_t trailer_CRC() const { return m_trailer_CRC; };
 
   const std::vector<STGTPPadPacket>& pad_packets() const { return m_pad_packets; };
