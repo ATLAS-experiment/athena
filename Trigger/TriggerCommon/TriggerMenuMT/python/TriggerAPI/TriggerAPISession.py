@@ -103,7 +103,7 @@ class TriggerAPISession:
             self.dbQueries = SerializeAPI.load(json)
         elif grl is not None:
             from PathResolver import PathResolver
-            grl = PathResolver.FindCalibFile(grl)
+            grl = PathResolver.FindCalibFile(grl) if grl[0] != "/" else grl
             self.customGRL = grl
         elif flags is not None:
             self.flags = flags
@@ -209,7 +209,7 @@ class TriggerAPISession:
             out.update(ti._getLowestUnprescaled(triggerType[0], triggerType[1], "", livefraction))
         self.setRunRange() # reset to include all ranges
 
-        if not out and livefraction==1.0 and list(self.dbQueries.keys())[0][1]:
+        if not out and livefraction==1.0 and list(self.dbQueries.keys())[0][1] and runStart!=runEnd:
             log.warning("No triggers found that are fully unprescaled in your GRL ... checking for livefractions per run:")
             # check result by-run to see if there are problems with individual runs (possibly lumiblocks included in each)
             for run in sorted(list(self.runs())):
@@ -234,7 +234,10 @@ class TriggerAPISession:
         if not self.runs(): # case where loaded from trigger menu, for example
             return {"":self.getLowestUnprescaled(triggerType=triggerType,livefraction=livefraction,runStart=runStart,runEnd=runEnd)}
         out = {}
-        for run in self.runs():
+        import tqdm
+        pbar = tqdm.tqdm(self.runs(),unit=" runs",bar_format='{l_bar}{bar:10}{r_bar}{bar:-10b}')
+        for run in pbar:
+            pbar.set_description(f"Getting lowest unprescaled for run {run}")
             if int(run)<runStart or int(run)>runEnd: continue
             out[run] = self.getLowestUnprescaled(triggerType=triggerType,livefraction=livefraction,runStart=run,runEnd=run)
         return out
@@ -288,7 +291,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         prog='tapis',
         description="Example usage: tapis path/to/grl.xml getLowestUnprescaled --triggerType el_single",
-        epilog='General structure is: tapis [constructor arg] [command] [--commandOpt1] [--commandOpt2] ...',
+        epilog='General command structure is: tapis [grl/menu/json] [command] [--commandOpt1] [--commandOpt2] ...',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     parser.add_argument("--save",default=None,help="If specified, the path to save the session to as a json file")
@@ -297,21 +300,28 @@ if __name__ == "__main__":
     subparsers = parser.add_subparsers(help="Available subcommands",dest="command")
 
 
-    parser_getLowestUnprescaled = subparsers.add_parser('getLowestUnprescaled',help='get lowest unprescaled chain names')
+    parser_getLowestUnprescaled = subparsers.add_parser('getLowestUnprescaled',help='Get lowest unprescaled chain names',
+                                                        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser_getLowestUnprescaled.add_argument("--livefraction",type=float,default=1.0,help="EXPERT OPTION: lower the livefraction threshold for trigger to be considered unprescaled")
 
-    parser_chains = subparsers.add_parser('chains',help='Show info about a chain or selection of chains')
-    parser_chains.add_argument('--chainName',type=str,help="name of chain or wildcarded string",default="*",nargs='?')
+    parser_chains = subparsers.add_parser('chains',help='Show info about a chain or selection of chains',
+                                          formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser_chains.add_argument('chainName',type=str,help="name of chain or wildcarded string",default="*",nargs='?')
 
     parser_runs = subparsers.add_parser('runs',help='List runs available in the session')
 
-    parser_getLowerUnprescaled = subparsers.add_parser('getLowerUnprescaled',help='get chains that are deemed to be of same type but lower and also unprescaled compared to a given chain')
+    parser_getLowerUnprescaled = subparsers.add_parser('getLowerUnprescaled',help='Get chains that are deemed to be of same type but lower and also unprescaled compared to a given chain',
+                                                       formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser_getLowerUnprescaled.add_argument('chainName',type=str,help="name of chain")
     parser_getLowerUnprescaled.add_argument("--livefraction",type=float,default=1.0,help="EXPERT OPTION: lower the livefraction threshold for trigger to be considered unprescaled")
 
+    parser_getLowerUnprescaledByRun = subparsers.add_parser('getLowestUnprescaledByRun',
+                                                            help='Get lowest unprescaled chain names by run, results presented in terms of run ranges',
+                                                            formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser_getLowerUnprescaledByRun.add_argument("--livefraction",type=float,default=1.0,help="EXPERT OPTION: lower the livefraction threshold for trigger to be considered unprescaled")
 
-    for p in [parser_getLowestUnprescaled,parser_chains,parser_runs,parser_getLowerUnprescaled]:
-        #p.add_argument("input",metavar="grl/menu/json",help="Either a GRL, a menu name, or a json session cache file. PathResolve paths supported")
+
+    for p in [parser_getLowestUnprescaled,parser_chains,parser_runs,parser_getLowerUnprescaled,parser_getLowerUnprescaledByRun]:
         p.add_argument("--triggerType",choices=[x.name for x in TriggerType],nargs='+',default=["ALL"],help="can specify up to two trigger types")
         p.add_argument("--runStart",type=int,default=0,help="First runNumber to consider")
         p.add_argument("--runEnd",type=int,default=999999,help="Last runNumber to consider")
@@ -330,15 +340,56 @@ if __name__ == "__main__":
         args.triggerType = [TriggerType[t] for t in args.triggerType]
 
     pandasPrint=False
+    extraWarning = None
 
     if args.command == "getLowestUnprescaled":
         result = s.getLowestUnprescaled(triggerType=args.triggerType,
                                     livefraction=args.livefraction,
                                     runStart=args.runStart,runEnd=args.runEnd)
-        s.setRunRange(args.runStart,args.runEnd)
+        s.setRunRange(args.runStart,args.runEnd) # do so that livefractions are correctly updated
         chains = s.chains(triggerType=args.triggerType)
         result = [{"name":chains[c].name,"triggerType":TriggerType.toStr(chains[c].triggerType),"livefraction":chains[c].livefraction} for c in result]
         pandasPrint=True
+    elif args.command == "getLowestUnprescaledByRun":
+        result = s.getLowestUnprescaledByRun(triggerType=args.triggerType,
+                                        livefraction=args.livefraction,
+                                        runStart=args.runStart,runEnd=args.runEnd)
+        # result is sets of lowest unprescaled triggers in a dict indexed by runNumber
+        # instead need each trigger and a list of run ranges
+        # will start a new range if the livefraction changes as wel
+        runRanges = {}
+        chains = s.chains(triggerType=args.triggerType) # used to get livefractions for each trigger chain
+        badRuns = []
+        prevRun = 0
+        for run in sorted(result.keys()): # go through runs in order
+            s.setRunRange(run,run) # do so that livefractions are calculated for the chains
+            if not result[run]: # no chain met livefraction and triggerType requirement for this run, so declare a dummy trigger
+                result[run].update(["---"])
+                badRuns += [str(run)]
+            for trig in result[run]:
+                lf = chains[trig].livefraction if trig != "---" else -1
+                if trig not in runRanges: # new trigger
+                    runRanges[trig] = [[run,run,lf]] # values are start and end run numbers of the range, and livefraction
+                elif runRanges[trig][-1][1] == prevRun and runRanges[trig][-1][2]==lf: # can just extend the run range
+                    runRanges[trig][-1][1] = run
+                else: # must start a new run range because gap in range or livefraction changed
+                    runRanges[trig] += [[run,run,lf]]
+            prevRun = run
+        # now loop over each run range of each trigger, and add to the final result
+        result = []
+        for c,ranges in runRanges.items():
+            for start,end,livefraction in ranges:
+                #s.setRunRange(start,end) # do so that livefractions are correctly updated
+                result += [{"runStart":start,"runEnd":end,"name":c,"triggerType":TriggerType.toStr(chains[c].triggerType) if c != "---" else "---",
+                            "livefraction":livefraction
+                            }]
+
+        pandasPrint=True
+        if badRuns:
+            extraWarning = "The following runs did not have a trigger of the requested type with livefraction >= " + str(args.livefraction) + ": "
+            extraWarning += ",".join(badRuns)
+            if args.livefraction==1.0: extraWarning += ". If this is unexpected please report the issue to Data Preparation"
+
     elif args.command == "chains":
         s.setRunRange(args.runStart,args.runEnd)
         import fnmatch
@@ -355,11 +406,18 @@ if __name__ == "__main__":
     if pandasPrint:
         import pandas as pd
         #pd.options.display.max_colwidth = None
-        df = pd.DataFrame(result)
-        print(df.sort_values(by=['triggerType','livefraction','name'],ascending=[True,False,True]).to_string(index=False)) # noqa ATL901
+        df = pd.DataFrame(result) if len(result) else pd.DataFrame(columns=['name','triggerType','livefraction'])
+        if 'runStart' in df.columns:
+            # order by type and name and then runStart
+            dfStr = df.sort_values(by=['triggerType','name','runStart'],ascending=[True,True,True]).to_string(index=False)
+        else:
+            # order by type and livefraction, then name
+            dfStr = df.sort_values(by=['triggerType','livefraction','name'],ascending=[True,False,True]).to_string(index=False)
+        print(dfStr) # noqa ATL901
         result = None # so we don't print again below
 
     if result is not None:
         import pprint
         pprint.pp(result)
+    if extraWarning: log.warning(extraWarning)
 
