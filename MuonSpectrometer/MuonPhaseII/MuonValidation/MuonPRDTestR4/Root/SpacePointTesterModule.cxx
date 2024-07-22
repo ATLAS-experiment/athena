@@ -43,10 +43,12 @@ namespace MuonValR4{
         const Identifier id = spacePoint.identify();
         const TechIndex techIdx = idHelperSvc()->technologyIndex(id);
         m_techIdx.push_back(static_cast<int>(techIdx));
+        m_spacePointId.push_back(id);
+        int phiChannel{-1};
         switch (techIdx) {
             case TechIndex::MDT: {
                     const MdtIdHelper& idHelper{idHelperSvc()->mdtIdHelper()}; 
-                    m_layer.push_back( (idHelper.multilayer(id) -1)*idHelper.tubeLayerMax(id) + 
+                    m_layer.push_back((idHelper.multilayer(id) -1)*idHelper.tubeLayerMax(id) + 
                                         idHelper.tubeLayer(id));
                     m_channel.push_back(idHelper.tube(id));
                 }
@@ -56,19 +58,27 @@ namespace MuonValR4{
                     m_layer.push_back( (idHelper.doubletR(id) -1) * idHelper.gasGapMax(id) + 
                                         idHelper.gasGap(id));
                     m_channel.push_back(idHelper.channel(id));
-                    break;
+                    if (spacePoint.secondaryMeasurement()) {
+                        phiChannel = idHelper.channel(xAOD::identify(spacePoint.secondaryMeasurement()));
+                    }
                 }
                 break;
             case TechIndex::TGC: {
                     const TgcIdHelper& idHelper{idHelperSvc()->tgcIdHelper()};
                     m_layer.push_back(idHelper.gasGap(id));
                     m_channel.push_back(idHelper.channel(id));
+                    if (spacePoint.secondaryMeasurement()) {
+                        phiChannel = idHelper.channel(xAOD::identify(spacePoint.secondaryMeasurement()));
+                    }
                 }
                 break;
             case TechIndex::STGC: {
                     const sTgcIdHelper& idHelper{idHelperSvc()->stgcIdHelper()};
                     m_layer.push_back( (idHelper.multilayer(id) -1) * 4 + idHelper.gasGap(id));
-                    m_channel.push_back(idHelper.channel(id)); 
+                    m_channel.push_back(idHelper.channel(id));
+                    if (spacePoint.secondaryMeasurement()) {
+                        phiChannel = idHelper.channel(xAOD::identify(spacePoint.secondaryMeasurement()));
+                    }
                 }
                 break;
             case TechIndex::MM: {
@@ -80,6 +90,7 @@ namespace MuonValR4{
             default:
                 ATH_MSG_WARNING("Dude you can't have CSCs in R4 "<<idHelperSvc()->toString(id));
         };
+        m_phiChannel.push_back(phiChannel);
         return insert_itr.first->second;
     }
     unsigned int SpacePointTesterModule::push_back(const MuonR4::MuonSpacePointBucket& bucket) {

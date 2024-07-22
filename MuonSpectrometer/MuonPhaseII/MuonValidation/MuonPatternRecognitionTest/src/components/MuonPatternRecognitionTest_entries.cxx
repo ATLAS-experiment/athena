@@ -3,5 +3,7 @@
 */
 
 #include "../MuonHoughTransformTester.h"
+#include "../MuonRecoChainTester.h"
 
 DECLARE_COMPONENT(MuonValR4::MuonHoughTransformTester)
+DECLARE_COMPONENT(MuonValR4::MuonRecoChainTester)

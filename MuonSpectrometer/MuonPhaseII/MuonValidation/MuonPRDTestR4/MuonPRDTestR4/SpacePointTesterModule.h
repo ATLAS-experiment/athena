@@ -29,42 +29,44 @@ namespace MuonValR4{
            std::string m_collName{};
            SG::ReadHandleKey<MuonR4::MuonSpacePointContainer> m_key{};
            /** @brief Space point bucket information */
-           VectorBranch<uint16_t>& m_bucketNumber{parent().newVector<uint16_t>(m_collName+"bucketIndex")};
+           VectorBranch<uint16_t>& m_bucketNumber{parent().newVector<uint16_t>(m_collName+"bucket_index")};
            /** @brief stationIndex / stationEta / stationPhi of the bucket chamber */
            MuonIdentifierBranch m_bucketId{parent(), m_collName+"bucket"};
            /** @brief Range of the space point bucket */
-           VectorBranch<float>& m_bucketMin{parent().newVector<float>(m_collName+"bucketXMin")};
-           VectorBranch<float>& m_bucketMax{parent().newVector<float>(m_collName+"bucketXMax")};
+           VectorBranch<float>& m_bucketMin{parent().newVector<float>(m_collName+"bucket_xMin")};
+           VectorBranch<float>& m_bucketMax{parent().newVector<float>(m_collName+"bucket_xMax")};
            /** @brief associated space points */
-           MatrixBranch<uint16_t>& m_bucketPoints{parent().newMatrix<uint16_t>(m_collName+"bucketSpacePoints")};
+           MatrixBranch<uint16_t>& m_bucketPoints{parent().newMatrix<uint16_t>(m_collName+"bucket_spacePoints")};
 
          
            /** @brief Space point position */
-           ThreeVectorBranch m_globPos{parent(), m_collName+"spacePointPosition"};
+           ThreeVectorBranch m_globPos{parent(), m_collName+"spacePoint_Position"};
            /** @brief Space point drift radius */
-           VectorBranch<float>& m_driftR{parent().newVector<float>(m_collName+"spacePointDriftR")};
+           VectorBranch<float>& m_driftR{parent().newVector<float>(m_collName+"spacePoint_driftR")};
            /** @brief Covariance of the space point */
-           VectorBranch<float>& m_covXX{parent().newVector<float>(m_collName+"spacePointCovXX")};
-           VectorBranch<float>& m_covXY{parent().newVector<float>(m_collName+"spacePointCovYX")};
-           VectorBranch<float>& m_covYX{parent().newVector<float>(m_collName+"spacePointCovXY")};
-           VectorBranch<float>& m_covYY{parent().newVector<float>(m_collName+"spacePointCovYY")};
+           VectorBranch<float>& m_covXX{parent().newVector<float>(m_collName+"spacePoint_covXX")};
+           VectorBranch<float>& m_covXY{parent().newVector<float>(m_collName+"spacePoint_covYX")};
+           VectorBranch<float>& m_covYX{parent().newVector<float>(m_collName+"spacePoint_covXY")};
+           VectorBranch<float>& m_covYY{parent().newVector<float>(m_collName+"spacePoint_covYY")};
 
            /** @brief  Does the space point measure phi or eta*/
-           VectorBranch<bool>& m_measEta{parent().newVector<bool>(m_collName+"spacePointMeasEta")};
-           VectorBranch<bool>& m_measPhi{parent().newVector<bool>(m_collName+"spacePointMeasPhi")};
+           VectorBranch<bool>& m_measEta{parent().newVector<bool>(m_collName+"spacePoint_measEta")};
+           VectorBranch<bool>& m_measPhi{parent().newVector<bool>(m_collName+"spacePoint_measPhi")};
            /** @brief How many other spacepoints were built with the same eta /phi prd */
-           VectorBranch<unsigned int>& m_nEtaInstances{parent().newVector<unsigned int>(m_collName+"spacePointNumEtaInUse")};
-           VectorBranch<unsigned int>& m_nPhiInstances{parent().newVector<unsigned int>(m_collName+"spacePointNumPhiInUse")};
+           VectorBranch<unsigned int>& m_nEtaInstances{parent().newVector<unsigned int>(m_collName+"spacePoint_nEtaInUse")};
+           VectorBranch<unsigned int>& m_nPhiInstances{parent().newVector<unsigned int>(m_collName+"spacePoint_nPhiInUse")};
 
 
            /** @brief Station Identifier */
            MuonIdentifierBranch m_spacePointId{parent(), "spacePoint"};
            /** @brief Technology index of the space point */
-           VectorBranch<unsigned char>& m_techIdx{parent().newVector<unsigned char>(m_collName+"spacePointTechnology")};
+           VectorBranch<unsigned char>& m_techIdx{parent().newVector<unsigned char>(m_collName+"spacePoint_technology")};
            /** @brief Measurement layer */
-           VectorBranch<unsigned char>& m_layer{parent().newVector<unsigned char>(m_collName+"spacePointLayer")};
+           VectorBranch<unsigned char>& m_layer{parent().newVector<unsigned char>(m_collName+"spacePoint_layer")};
            /** @brief Measurement channel */
-           VectorBranch<uint16_t>& m_channel{parent().newVector<uint16_t>(m_collName+"spacePointChannel")};
+           VectorBranch<uint16_t>& m_channel{parent().newVector<uint16_t>(m_collName+"spacePoint_channel")};
+           /** @brief Channel of the secondary measurment */
+           VectorBranch<int16_t>& m_phiChannel{parent().newVector<int16_t>(m_collName+"spacePoint_secChannel")};
 
            /** @brief: Keep track when a spacepoint is filled into the tree */
            std::unordered_map<const MuonR4::MuonSpacePoint*, unsigned int> m_spacePointIdx{};

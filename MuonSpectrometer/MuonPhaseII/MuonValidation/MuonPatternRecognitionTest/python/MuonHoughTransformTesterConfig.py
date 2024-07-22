@@ -19,13 +19,19 @@ def MuonHoughTransformTesterCfg(flags, name = "MuonHoughTransformTester", **kwar
 
     result.addEventAlgo(theAlg, primary=True)
     return result
-
+def MuonRecoChainTesterCfg(flags,name="MuonRecoChainTester", **kwargs):
+    result = ComponentAccumulator()
+    kwargs.setdefault("isMC", flags.Input.isMC)
+    theAlg = CompFactory.MuonValR4.MuonRecoChainTester(name, **kwargs)
+    result.addEventAlgo(theAlg, primary = True)
+    return result
 if __name__=="__main__":
     from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, executeTest,setupHistSvcCfg
     parser = SetupArgParser()
     parser.set_defaults(nEvents = -1)
     parser.set_defaults(noMM=True)
     parser.set_defaults(noSTGC=True)
+    parser.set_defaults(outRootFile="HoughTransformTester.root")
     #parser.set_defaults(condTag="CONDBR2-BLKPA-2023-02")
     parser.set_defaults(inputFile=[
                                     #"/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00431493.physics_Main.daq.RAW._lb0525._SFO-16._0001.data"
@@ -41,7 +47,7 @@ if __name__=="__main__":
     args = parser.parse_args()
     flags, cfg = setupGeoR4TestCfg(args)
     
-    from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
+
     # from PerfMonVTune.PerfMonVTuneConfig import VTuneProfilerServiceCfg
     cfg.merge(setupHistSvcCfg(flags,out_file=args.outRootFile,
                                     out_stream="MuonEtaHoughTransformTest"))
@@ -61,9 +67,8 @@ if __name__=="__main__":
     cfg.merge(MuonPatternRecognitionCfg(flags))
 
     cfg.merge(MuonHoughTransformTesterCfg(flags,
-                                       drawDisplayFailed = args.displayFailedSeeds,
-                                       drawDisplaySuccss = args.displayGoodSeeds))
-    cfg.merge(PerfMonMTSvcCfg(flags))
+                                          drawDisplayFailed = args.displayFailedSeeds,
+                                          drawDisplaySuccss = args.displayGoodSeeds))
     
     
     
@@ -73,7 +78,8 @@ if __name__=="__main__":
     cfg.merge(MuonSegmentFinderAlgCfg(flags,
                                       NSWSegmentCollectionName=""))
 
-    cfg.merge(MuonSegmentCnvAlgCfg(flags))
+    cfg.merge(MuonSegmentCnvAlgCfg(flags,
+                                   xAODContainerName="MuonSegments"))
     from MuonConfig.MuonTrackBuildingConfig import MuPatTrackBuilderCfg
     cfg.merge(MuPatTrackBuilderCfg(flags))
     ### What happens if you parse the R4 patterns to the legacy chain?
@@ -94,6 +100,15 @@ if __name__=="__main__":
                                    MuonSegmentCollection = "TrackMuonSegmentsFromR4",
                                    SpectrometerTrackOutputLocation="MuonTracksFromR4"))
 
+    from xAODTrackingCnv.xAODTrackingCnvConfig import MuonStandaloneTrackParticleCnvAlgCfg
+    cfg.merge(MuonStandaloneTrackParticleCnvAlgCfg(flags))
+    cfg.merge(MuonStandaloneTrackParticleCnvAlgCfg(flags,"MuonXAODParticleConvR4",
+                                                   TrackContainerName="MuonTracksFromR4",
+                                                   xAODTrackParticlesFromTracksContainerName="MuonSpectrometerTrackParticlesR4"))
+
+
+    cfg.merge(MuonRecoChainTesterCfg(flags))
+    
     # cfg.merge(VTuneProfilerServiceCfg(flags, ProfiledAlgs=["MuonHoughTransformAlg"]))
 
     executeTest(cfg, args.nEvents)

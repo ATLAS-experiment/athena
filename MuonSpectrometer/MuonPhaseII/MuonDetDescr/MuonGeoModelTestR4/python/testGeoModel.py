@@ -103,10 +103,13 @@ def setupGeoR4TestCfg(args, setupSimJob = False):
     flags.Concurrency.NumThreads = args.threads
     flags.Concurrency.NumConcurrentEvents = args.threads
     flags.Input.isMC = args.condTag.find("OFLCOND") != -1
-    flags.Input.Files = args.inputFile 
+    from os import path, system, listdir
+    inFiles = [x for x in args.inputFile if not path.isdir(x)] + \
+              [ "{dir}/{file}".format(dir=x, file=y)  for x in args.inputFile if path.isdir(x) for y in listdir(x) ]
+    flags.Input.Files = inFiles 
     flags.Exec.FPE= 500
     flags.Exec.EventPrintoutInterval = args.eventPrintoutLevel
-    from os import path, system
+    
     if args.geoModelFile.startswith("root://"):
         if not path.exists("Geometry/{geoTag}.db".format(geoTag=args.geoTag)):
             print ("Copy geometry file from EOS {source}".format(source = args.geoModelFile))
@@ -166,7 +169,7 @@ def setupGeoR4TestCfg(args, setupSimJob = False):
     flags.Scheduler.ShowControlFlow = True
     flags.Scheduler.EnableVerboseViews = True
     flags.Scheduler.AutoLoadUnmetDependencies = True
-    flags.PerfMon.doFullMonMT = True
+    #flags.PerfMon.doFullMonMT = True
    
     flags.lock()
     flags.dump(evaluate = True)
