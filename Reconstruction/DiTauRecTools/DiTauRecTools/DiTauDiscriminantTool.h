@@ -58,9 +58,6 @@ public:
 
   // calculate and decorate BDTJetScore
   virtual StatusCode execute(const xAOD::DiTauJet& xDiTau) override;
-
-  // get decay mode
-  virtual std::string getDecayMode() override;
   
 private:
 
@@ -83,10 +80,7 @@ private:
   inline float& setVar(const TString& var) { return *(m_mIDVariables[var]); } //!< not-stateless, many such examples need to be fixed for r22
 
   std::vector<std::string> m_vVarNames;
-private:
-  enum DecayMode{ HadHad, HadMu, HadEl, Default };
-  std::string m_sDecayMode;
-  DecayMode m_eDecayMode;
+
 }; // class DiTauDiscriminantTool
 
 }
