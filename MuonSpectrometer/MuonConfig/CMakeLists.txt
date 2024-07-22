@@ -47,9 +47,8 @@ if( NOT SIMULATIONBASE )
                    PROPERTIES TIMEOUT 450
                    POST_EXEC_SCRIPT noerror.sh )
   
-  # TODO: reenable when new upgrade inputs are available
-  #  atlas_add_test( NewxAODConvertorTest
-  #                  SCRIPT test/MuonxAODPRDCnv_test.py 
-  #                  PROPERTIES TIMEOUT 450
-  #                  POST_EXEC_SCRIPT noerror.sh )
+   atlas_add_test( NewxAODConvertorTest
+                   SCRIPT test/MuonxAODPRDCnv_test.py 
+                   PROPERTIES TIMEOUT 450
+                   POST_EXEC_SCRIPT noerror.sh )
 endif()
