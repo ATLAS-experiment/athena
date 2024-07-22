@@ -82,7 +82,9 @@ def defineMenu():
         'L1_cTAU30M_2cTAU20M_DR-eTAU30eTAU20-jJ40',
         'L1_cTAU30M_2cTAU20M_DR-eTAU30eTAU20-jJ30',
         'L1_cTAU30M_2cTAU20M_3jJ30p0ETA25',
-        
+        #ATRBoosteddiTau
+        'L1_eTAU20_DR-eTAU20eTAU12-jJ40', 
+        'L1_eTAU20_DR-eTAU20eTAU12-jJ30', 
         #ATR-29523
         'L1_3jJ40p0ETA25',
         

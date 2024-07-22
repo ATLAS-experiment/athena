@@ -1652,6 +1652,41 @@ class TopoAlgoDef:
             alg.addvariable('DisambDRSqr', d.disamb*d.disamb*_dr_conversion*_dr_conversion, 0)
             tm.registerTopoAlgo(alg)
 
+
+        algolist=[
+            { "disamb": 2,
+              "otype1" : "eTAU",  "ocut1": 20, "olist1": "ab","nleading1": HW.eTauOutputWidthSelect, "inputwidth1": HW.eTauOutputWidthSelect,
+              "otype2" : "eTAU", "ocut2": 12, "olist2": "ab", "nleading2": HW.eTauOutputWidthSelect, "inputwidth2": HW.eTauOutputWidthSelect,
+              "otype3" : "jJ", "ocut3": 30, "olist3": "ab", "nleading3": HW.jJetOutputWidthSelect, "inputwidth3": HW.jJetOutputWidthSelect,
+              "drcutmin": 0, "drcutmax": 10}, # 2DISAMB-jJ30ab-0DR10-eTAU20ab-eTAU12ab
+        ]
+        for x in algolist:
+            class d:
+                pass
+            for k in x:
+                setattr (d, k, x[k])
+            obj1 = "-%s%s%s" % (d.otype1, str(d.ocut1), d.olist1)
+            obj2 = "-%s%s%s" % (d.otype2, str(d.ocut2), d.olist2)
+            obj3 = "%s%s%s"  % (d.otype3, str(d.ocut3), d.olist3)
+            toponame = "%sDISAMB-%s-%dDR%d%s%s"  % ( str(d.disamb) if d.disamb>0 else "", obj3, d.drcutmin, d.drcutmax, obj1, obj2)
+            log.debug("Define %s", toponame)
+            inputList = [d.otype1 + d.olist1, d.otype2 + d.olist2, d.otype3 + d.olist3]
+            alg = AlgConf.DisambiguationDRIncl3( name = toponame, inputs = inputList, outputs = [ toponame ])
+            alg.addgeneric('InputWidth1', d.inputwidth1)
+            alg.addgeneric('InputWidth2', d.inputwidth2)
+            alg.addgeneric('InputWidth3', d.inputwidth3)
+            alg.addgeneric('MaxTob1', d.nleading1)
+            alg.addgeneric('MaxTob2', d.nleading2)
+            alg.addgeneric('MaxTob3', d.nleading3)
+            alg.addgeneric('NumResultBits', 1)
+            alg.addvariable('MinET1', get_threshold_cut(d.otype1, d.ocut1)*_et_conversion, 0)
+            alg.addvariable('MinET2', get_threshold_cut(d.otype2, d.ocut2)*_et_conversion, 0)
+            alg.addvariable('MinET3', get_threshold_cut(d.otype3, d.ocut3)*_et_conversion, 0)
+            alg.addvariable('DisambDRSqrMin', d.drcutmin*d.drcutmin*_dr_conversion*_dr_conversion, 0)
+            alg.addvariable('DisambDRSqrMax', d.drcutmax*d.drcutmax*_dr_conversion*_dr_conversion, 0)
+            alg.addvariable('DisambDRSqr', d.disamb*d.disamb*_dr_conversion*_dr_conversion, 0)
+            tm.registerTopoAlgo(alg)
+
         # jINVM + DPHI
         NFFDphimap = [
             { "itemNameMinInvm": 400, "minInvm": 640 , "minDphi": 0, "maxDphiList": [26, 24, 22, 20],
