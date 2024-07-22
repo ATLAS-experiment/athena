@@ -71,6 +71,7 @@ def JetEfficiencyMonitoringConfig(flags):
     bootstrap_trigger = JetEfficiencyMonAlg.BootstrapReferenceTrigger
 
     trigPath = 'Developer/JetEfficiency/'
+    ExpertTrigPath = 'Expert/Efficiency/'
     distributionPath = 'Distributions/'
     noRefPath = 'NoReferenceTrigger/'
     muonRefPath = 'MuonReferenceTrigger/'
@@ -139,11 +140,28 @@ def JetEfficiencyMonitoringConfig(flags):
     ######### define all the histograms 
     for tgroup in trigger_groups: #iterate through the trigger groups
         for t in trigger_group_list[tgroup]: #pull out trigger of interest
-            pathAdd = "phase1/" if ("gJ" in t) or ("gLJ" in t) or ("jLJ" in t) or ("jJ" in t) else "legacy/"
+            if "_g" in t:
+                pathAdd = "gFEX/"
+            elif "_j" in t:
+                pathAdd = "jFEX/"
+            else:
+                pathAdd = "Legacy/"
+            #add algorithm that flags if the efficiency is not reaching 100% 
+            #later we can add if the efficiency is not turning on at a good time by adding to thresholdConfig={"Plateau":[0.99,0.95],  "Threshold": [A,B]} 
+            helper.defineDQAlgorithm("JetEfficiency_"+t, 
+                                    hanConfig={"libname":"libdqm_algorithms.so","name":"Simple_fermi_Fit_TEff"}, # this line is always the same
+                                    thresholdConfig={"Plateau":[0.99,0.95]} #can change the threshold values for stoplights
+                                )
             for p in properties: 
                 for r in references: #iteratate through the refernce trigger options
                     eff_plot_title = title_for_prop[p] + ' Efficiency of ' + trigger_title_modifiers[tgroup] + ' for trigger ' + t + reference_titles[r]+';'+xlabel_for_prop[p]+'; Efficiency '
-                    helper.defineHistogram(f"bool_{r}_{t}, val_{p};{p}_{r}Ref_{t}", type='TEfficiency',  title=eff_plot_title, fillGroup=groupName, path=trigPath + pathAdd+ reference_paths[r], xbins=nbins[p], xmin=binmin[p], xmax=binmax[p])
+
+                    #this is a long line to define the histogram -> with an if else 
+                    # for now only put the No reference selection plots into expert and with the DQ flags - once we have a sense of stats we can choose to prefer the muon ones 
+                    if r == "No" and p in ["SRpt", "LRpt"]:
+                        helper.defineHistogram(f"bool_{r}_{t}, val_{p};{p}_{t}", type='TEfficiency',  title=eff_plot_title, fillGroup=groupName, path=ExpertTrigPath + pathAdd+ reference_paths[r], xbins=nbins[p], xmin=binmin[p], xmax=binmax[p], hanConfig={"algorithm":"JetEfficiency_"+t})  
+                    else:
+                        helper.defineHistogram(f"bool_{r}_{t}, val_{p};{p}_{t}", type='TEfficiency',  title=eff_plot_title, fillGroup=groupName, path=trigPath + pathAdd+ reference_paths[r], xbins=nbins[p], xmin=binmin[p], xmax=binmax[p])
 
     
 
