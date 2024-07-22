@@ -160,8 +160,16 @@ def makeTauWorkingPointSequence( seq, dataType, workingPoint, postfix = ''):
                                'TauEfficiencyCorrectionsAlg' + postfix )
         addPrivateTool( alg, 'efficiencyCorrectionsTool',
                         'TauAnalysisTools::TauEfficiencyCorrectionsTool' )
-        alg.efficiencyCorrectionsTool.TauSelectionTool = '%s/%s' % \
-            ( selectionTool.getType(), selectionTool.getName() )
+        alg.efficiencyCorrectionsTool.EfficiencyCorrectionTypes = [4]
+        if splitWP[0]=="Loose":
+            JetIDLevel = 7
+        elif splitWP[0]=="Medium":
+            JetIDLevel = 8
+        elif splitWP[0]=="Tight":
+            JetIDLevel = 9
+        else:
+            JetIDLevel = 0
+        alg.efficiencyCorrectionsTool.JetIDLevel = JetIDLevel
         alg.scaleFactorDecoration = 'tau_effSF' + postfix + '_%SYS%'
         alg.outOfValidity = 2 #silent
         alg.outOfValidityDeco = 'bad_eff' + postfix
