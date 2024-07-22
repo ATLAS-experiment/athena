@@ -236,12 +236,22 @@ namespace HepMC {
     }
 
     /// @brief Method to establish if a if the object is linked to something which was never saved to the HepMC Truth - for example particle was too low energy to be recorded
-    template <class T>  inline bool no_truth_link(const T& p){ return (uniqueID(p) == UNDEFINED_ID);}
+    template <class T>  inline bool no_truth_link(const T& p){
+      if constexpr (std::is_same_v<std::remove_const_t<T>, HepMcParticleLink>) {
+        return p.linkIsNull();
+      }
+      else if constexpr (std::is_same_v<std::remove_const_t<remove_smart_pointer_t<std::remove_pointer_t<T>>>, HepMcParticleLink>) {
+        return p->linkIsNull();
+      }
+      else {
+        return (uniqueID(p) == UNDEFINED_ID);
+      }
+    }
 
     /// @brief Helper function for SDO creation in PileUpTools
     template <class T>  inline bool ignoreTruthLink(const T& p, bool vetoPileUp){
       if constexpr (std::is_same_v<std::remove_const_t<remove_smart_pointer_t<std::remove_pointer_t<T>>>, HepMcParticleLink>) {
-        const int u = uniqueID(p);  return no_truth_link(u) || (vetoPileUp && is_truth_suppressed_pileup(p));
+        return no_truth_link(p) || (vetoPileUp && is_truth_suppressed_pileup(p));
       }
       else {
         const int u = uniqueID(p);  return no_truth_link(u) || (vetoPileUp && is_truth_suppressed_pileup(u));
@@ -310,13 +320,27 @@ namespace HepMC {
   }
 
   /// @brief Method to establish if a particle (or barcode) corresponds to truth-suppressed pile-up (TODO update to be status based)
-  template <class T>  inline bool is_truth_suppressed_pileup(const T& p){ return BarcodeBased::is_truth_suppressed_pileup(p); }
+  template <class T>  inline bool is_truth_suppressed_pileup(const T& p){
+    if constexpr (std::is_same_v<std::remove_const_t<remove_smart_pointer_t<std::remove_pointer_t<T>>>, HepMcParticleLink>) {
+      return StatusBased::is_truth_suppressed_pileup(p);
+    }
+    else {
+      return BarcodeBased::is_truth_suppressed_pileup(p);
+    }
+  }
 
-  /// @brief Method to establish if a if the object is linked to something which was never saved to the HepMC Truth - for example particle was too low energy to be recorded (TODO update to be status based)
-  template <class T>  inline bool no_truth_link(const T& p){ return BarcodeBased::no_truth_link(p);} // TODO potentially this could become id()==0?
+  /// @brief Method to establish if a if the object is linked to something which was never saved to the HepMC Truth - for example particle was too low energy to be recorded
+  template <class T>  inline bool no_truth_link(const T& p){ return StatusBased::no_truth_link(p);}
 
   /// @brief Helper function for SDO creation in PileUpTools
-  template <class T>  inline bool ignoreTruthLink(const T& p, bool vetoPileUp){ return BarcodeBased::ignoreTruthLink(p, vetoPileUp); }
+  template <class T>  inline bool ignoreTruthLink(const T& p, bool vetoPileUp){
+    if constexpr (std::is_same_v<std::remove_const_t<remove_smart_pointer_t<std::remove_pointer_t<T>>>, HepMcParticleLink>) {
+      return StatusBased::ignoreTruthLink(p, vetoPileUp);
+    }
+    else {
+      return BarcodeBased::ignoreTruthLink(p, vetoPileUp);
+    }
+  }
 
   /// @brief Method to establish if a particle (or barcode) was created during the simulation (TODO update to be status based)
   template <class T>  inline bool is_simulation_particle(const T& p){ return BarcodeBased::is_simulation_particle(p);}

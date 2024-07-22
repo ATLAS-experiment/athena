@@ -491,6 +491,12 @@ public:
   HepMC::ConstGenParticlePtr scptr() const { return cptr(); }
 
 
+  /**
+   * @brief return true if neither barcode nor id are valid
+   */
+  bool linkIsNull() const;
+
+
   /** 
    * @brief Validity check.  Dereference and check for null.
    */

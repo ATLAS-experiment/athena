@@ -164,6 +164,14 @@ HepMcParticleLink::HepMcParticleLink (const HepMC::ConstGenParticlePtr& part,
 
 
 /**
+ * @brief return true if neither barcode nor id are valid
+ */
+bool HepMcParticleLink::linkIsNull() const {
+  return m_extBarcode.linkIsNull();
+}
+
+
+/**
  * @brief Dereference.
  */
 HepMC::ConstGenParticlePtr HepMcParticleLink::cptr() const

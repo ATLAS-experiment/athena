@@ -424,7 +424,7 @@ namespace Trk {
       // i.second = HepMcParticleLink
       auto pa = i.second.cptr();
       if ( !pa ) { continue; } // skip noise
-      if (  MC::isGeantino(pa) && HepMC::is_truth_suppressed_pileup(pa) ) { continue; } // skip geantinos
+      if (  MC::isGeantino(pa) && HepMC::is_truth_suppressed_pileup(i.second) ) { continue; } // skip geantinos
       result.insert(std::make_pair(i.second, i.first));
     }
   }

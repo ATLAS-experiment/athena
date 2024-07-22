@@ -774,8 +774,7 @@ void SCT_DigitizationTool::addSDO(SiChargedDiodeCollection* collection, SG::Writ
     const list_t::const_iterator EndOfChargeList{charges.end()};
     for (list_t::const_iterator i_ListOfCharges{charges.begin()}; i_ListOfCharges != EndOfChargeList; ++i_ListOfCharges) {
       const HepMcParticleLink& trkLink{i_ListOfCharges->particleLink()};
-      const int barcode{trkLink.barcode()};
-      if (HepMC::ignoreTruthLink(barcode, m_vetoPileUpTruthLinks)) {
+      if (HepMC::ignoreTruthLink(trkLink, m_vetoPileUpTruthLinks)) {
         continue;
       }
       if (!real_particle_hit) {
@@ -788,7 +787,7 @@ void SCT_DigitizationTool::addSDO(SiChargedDiodeCollection* collection, SG::Writ
         // processType()==SiCharge::cut_track
         // Tracks With Truth:            barcode!=0 and
         // processType()==SiCharge::track
-        if (!HepMC::no_truth_link(barcode) && i_ListOfCharges->processType() == SiCharge::track) {
+        if (!HepMC::no_truth_link(trkLink) && i_ListOfCharges->processType() == SiCharge::track) {
           real_particle_hit = true;
         }
       }
