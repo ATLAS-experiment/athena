@@ -83,9 +83,8 @@ StatusCode DerivationFramework::TruthClassificationDecorator::addBranches() cons
 
     for (unsigned int i=0; i<nParticles; ++i) {
         MCTruthPartClassifier::Info info;
-        std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin> classification = 
-          m_classifier->particleTruthClassifier((*truthParticles)[i], &info);
-          unsigned int particleOutCome = info.particleOutCome;
+        auto classification = m_classifier->particleTruthClassifier((*truthParticles)[i], &info);
+        unsigned int particleOutCome = info.particleOutCome;
         unsigned int result = (unsigned int)( (*truthParticles)[i] ? std::get<0>(MCTruthPartClassifier::defOrigOfParticle((*truthParticles)[i])) : 0 );
         unsigned int particleType = classification.first;
         unsigned int particleOrigin = classification.second;

@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-/////////////////////////////////////////////////////////////////
-// MuonTruthClassifierFallback.cxx, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 // Runs on muons without a truth particle link.
 // Finds the nearest stable truth particle and adds its info to the muon.
 #include "DerivationFrameworkMuons/MuonTruthClassifierFallback.h"

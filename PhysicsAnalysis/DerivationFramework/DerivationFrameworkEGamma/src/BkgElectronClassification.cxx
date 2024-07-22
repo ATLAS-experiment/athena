@@ -123,8 +123,7 @@ BkgElectronClassification::addBranches() const
 
     MCTruthPartClassifier::Info mcinfo(ctx);
     if (firstElTruth) {
-      auto res =
-        m_mcTruthClassifier->particleTruthClassifier(firstElTruth, &mcinfo);
+      auto res = m_mcTruthClassifier->particleTruthClassifier(firstElTruth, &mcinfo);
       firstEgMotherTT(*el) = res.first;
       firstEgMotherTO(*el) = res.second;
       firstEgMotherPdgID(*el) = firstElTruth->pdgId();
@@ -143,8 +142,7 @@ BkgElectronClassification::addBranches() const
       xAOD::EgammaHelpers::getBkgElectronMother(el);
 
     if (lastElTruth) {
-      auto res =
-        m_mcTruthClassifier->particleTruthClassifier(lastElTruth, &mcinfo);
+      auto res = m_mcTruthClassifier->particleTruthClassifier(lastElTruth, &mcinfo);
       lastEgMotherTT(*el) = res.first;
       lastEgMotherTO(*el) = res.second;
       lastEgMotherPdgID(*el) = lastElTruth->pdgId();

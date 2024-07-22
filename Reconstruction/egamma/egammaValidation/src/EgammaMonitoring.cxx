@@ -574,10 +574,8 @@ StatusCode EgammaMonitoring::execute() {
         std::numeric_limits<unsigned int>::max();
     for (const auto *truth : *truthParticles) {
 
-      if (!truth)
-        continue;
-      if (std::abs(truth->pdgId()) != 11)
-        continue;
+      if (!truth) continue;
+      if (std::abs(truth->pdgId()) != 11) continue;
 
       auto res = m_mcTruthClassifier->particleTruthClassifier(truth);
       MCTruthPartClassifier::ParticleOrigin TO = res.second;
@@ -631,14 +629,11 @@ StatusCode EgammaMonitoring::execute() {
       tp->summaryValue(nPi, xAOD::numberOfPixelHits);
       tp->summaryValue(nSCT, xAOD::numberOfSCTHits);
 
-      if ((nPi + nSCT) < 7)
-        continue;
+      if ((nPi + nSCT) < 7) continue;
 
-      const xAOD::TruthParticle *truth =
-          xAOD::TruthHelpers::getTruthParticle(*tp);
+      const xAOD::TruthParticle *truth = xAOD::TruthHelpers::getTruthParticle(*tp);
 
-      if (!truth || std::abs(truth->pdgId()) != 11)
-        continue;
+      if (!truth || std::abs(truth->pdgId()) != 11) continue;
 
       auto res = m_mcTruthClassifier->particleTruthClassifier(truth);
       MCTruthPartClassifier::ParticleOrigin TO = res.second;
@@ -671,14 +666,11 @@ StatusCode EgammaMonitoring::execute() {
     ATH_MSG_DEBUG("------------ GSFTracks ---------------");
     for (const auto *gsf : *GSFTracks) {
 
-      if (!gsf)
-        continue;
+      if (!gsf) continue;
 
-      const xAOD::TruthParticle *truth =
-          xAOD::TruthHelpers::getTruthParticle(*gsf);
+      const xAOD::TruthParticle *truth = xAOD::TruthHelpers::getTruthParticle(*gsf);
 
-      if (!truth)
-        continue;
+      if (!truth) continue;
 
       uint8_t nPi = 0;
       uint8_t nSCT = 0;
@@ -686,8 +678,7 @@ StatusCode EgammaMonitoring::execute() {
       gsf->summaryValue(nPi, xAOD::numberOfPixelHits);
       gsf->summaryValue(nSCT, xAOD::numberOfSCTHits);
 
-      if ((nPi + nSCT) < 7)
-        continue;
+      if ((nPi + nSCT) < 7) continue;
 
       auto res = m_mcTruthClassifier->particleTruthClassifier(truth);
       MCTruthPartClassifier::ParticleOrigin TO = res.second;
@@ -733,8 +724,7 @@ StatusCode EgammaMonitoring::execute() {
 
     for (const auto *elrec : *RecoEl) {
 
-      if (!elrec)
-        continue;
+      if (!elrec) continue;
 
       bool toFill = false;
 
@@ -764,10 +754,8 @@ StatusCode EgammaMonitoring::execute() {
         toFill = true;
         elTruth = truth;
       } else {
-        const xAOD::TruthParticle *firstElTruth =
-            xAOD::EgammaHelpers::getBkgElectronMother(truth);
-        if (!firstElTruth)
-          continue;
+        const xAOD::TruthParticle *firstElTruth = xAOD::EgammaHelpers::getBkgElectronMother(truth);
+        if (!firstElTruth) continue;
         // this is not a prompt electron, we need to check the parents
         // but we need to make sure that we double count if already found the
         // track foundPromptElectron will check that
@@ -779,14 +767,10 @@ StatusCode EgammaMonitoring::execute() {
       if (toFill) {
         foundPromptElectron = true;
         truthPromptElectronWithReco->fill(elTruth, elrec);
-        truthPromptElectronWithRecoTrack->fill(
-            elTruth, elrec); // yes the same. This is different for fwd
-        if (m_Loose_Ele->accept(elrec))
-          truthRecoElectronLoose->fill(elTruth, elrec);
-        if (m_Medium_Ele->accept(elrec))
-          truthRecoElectronMedium->fill(elTruth, elrec);
-        if (m_Tight_Ele->accept(elrec))
-          truthRecoElectronTight->fill(elTruth, elrec);
+        truthPromptElectronWithRecoTrack->fill(elTruth, elrec); // yes the same. This is different for fwd
+        if (m_Loose_Ele->accept(elrec)) truthRecoElectronLoose->fill(elTruth, elrec);
+        if (m_Medium_Ele->accept(elrec)) truthRecoElectronMedium->fill(elTruth, elrec);
+        if (m_Tight_Ele->accept(elrec)) truthRecoElectronTight->fill(elTruth, elrec);
       }
     } // RecoEl Loop
 
@@ -794,9 +778,7 @@ StatusCode EgammaMonitoring::execute() {
       SG::ReadHandle<xAOD::ElectronContainer> RecoFwdEl(m_FwdElectronsKey, ctx);
       for (const auto *el : *RecoFwdEl) {
         // This would be very weird ??
-        if (!el)
-          continue;
-
+        if (!el) continue;
         clusterAll->fill(*el, mu);
         recoElectronAll->fill(*el);
         showerShapesAll->fill(*el);
@@ -818,8 +800,7 @@ StatusCode EgammaMonitoring::execute() {
         // instead
         if (std::abs(truth->pdgId()) != 11 &&
             promptElectronTruthIndex < truthParticles->size()) {
-          const xAOD::TruthParticle *vtruth =
-              truthParticles->at(promptElectronTruthIndex);
+          const xAOD::TruthParticle *vtruth = truthParticles->at(promptElectronTruthIndex);
           double dR1 = vtruth->p4().DeltaR(el->caloCluster()->p4());
           double dR2 = truth->p4().DeltaR(el->caloCluster()->p4());
           m_dR1->Fill(dR1);
@@ -828,8 +809,7 @@ StatusCode EgammaMonitoring::execute() {
             truth = vtruth;
         }
 
-        if (std::abs(truth->pdgId()) != 11)
-          continue;
+        if (std::abs(truth->pdgId()) != 11) continue;
         const xAOD::TruthParticle *elTruth(nullptr);
         auto res = m_mcTruthClassifier->particleTruthClassifier(truth);
         if (res.second == MCTruthPartClassifier::SingleElec &&
@@ -840,8 +820,7 @@ StatusCode EgammaMonitoring::execute() {
         } else {
           const xAOD::TruthParticle *firstElTruth =
               xAOD::EgammaHelpers::getBkgElectronMother(truth);
-          if (!firstElTruth)
-            continue;
+          if (!firstElTruth) continue;
           if (firstElTruth->index() == promptElectronTruthIndex) {
             toFill = true;
             elTruth = firstElTruth;

@@ -32,7 +32,6 @@
 // Tool handle interface
 #include "MCTruthClassifier/IMCTruthClassifier.h"
 
-//--------------------------------------------------------------------------
 
 xAODHTFilter::xAODHTFilter(const std::string &name, ISvcLocator *pSvcLocator)
     : GenFilter(name, pSvcLocator), m_total(0), m_passed(0), m_ptfailed(0)
@@ -50,13 +49,7 @@ xAODHTFilter::xAODHTFilter(const std::string &name, ISvcLocator *pSvcLocator)
   declareProperty("EventInfoName",m_eventInfoName="EventInfo");   
 }
 
-//--------------------------------------------------------------------------
-
-xAODHTFilter::~xAODHTFilter()
-{
-}
-
-//---------------------------------------------------------------------------
+xAODHTFilter::~xAODHTFilter(){}
 
 StatusCode xAODHTFilter::filterInitialize()
 {
@@ -80,16 +73,12 @@ StatusCode xAODHTFilter::filterInitialize()
   return StatusCode::SUCCESS;
 }
 
-//---------------------------------------------------------------------------
-
 StatusCode xAODHTFilter::filterFinalize()
 {
   ATH_MSG_INFO("Total efficiency: " << 100. * double(m_passed) / double(m_total) << "% ("
                                     << 100. * double(m_ptfailed) / double(m_total) << "% failed p_T cuts)");
   return StatusCode::SUCCESS;
 }
-
-//---------------------------------------------------------------------------
 
 StatusCode xAODHTFilter::filterEvent()
 {
@@ -204,5 +193,4 @@ StatusCode xAODHTFilter::filterEvent()
    }
   return StatusCode::SUCCESS;
 }
-
 

@@ -335,8 +335,7 @@ egammaTruthAssociationAlg::particleTruthClassifier<xAOD::Electron>(
       !xAOD::EgammaHelpers::isFwdElectron(electron) &&
       electron->caloCluster()) {
     ATH_MSG_DEBUG("Trying cluster-based truth classification for electron");
-    ret = m_mcTruthClassifier->particleTruthClassifier(electron->caloCluster(),
-                                                       &mcinfo);
+    ret = m_mcTruthClassifier->particleTruthClassifier(electron->caloCluster(),&mcinfo);
   }
   info.genPart = mcinfo.genPart;
   info.first = ret.first;

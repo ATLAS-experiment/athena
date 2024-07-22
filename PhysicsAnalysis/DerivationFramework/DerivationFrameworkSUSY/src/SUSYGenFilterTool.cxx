@@ -32,20 +32,12 @@ namespace DerivationFramework {
     declareProperty("MaxLeptonEta",m_MaxLepEta = 2.5);
   }
   
-  
-  
   SUSYGenFilterTool::~SUSYGenFilterTool(){}
   
-  
-  
   StatusCode SUSYGenFilterTool::initialize(){
-    
     ATH_MSG_INFO("Initialize " );
-    
     return StatusCode::SUCCESS;
-    
   }
-    
 
   bool SUSYGenFilterTool::isPrompt( const xAOD::TruthParticle* tp ) const
   {
@@ -144,10 +136,9 @@ namespace DerivationFramework {
 	MEy += tp->py();
       }
     }
-    genFiltMET = sqrt(MEx*MEx+MEy*MEy);
+    genFiltMET = std::sqrt(MEx*MEx+MEy*MEy);
 
     return StatusCode::SUCCESS;
   }
-
 
 } /// namespace
