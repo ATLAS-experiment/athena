@@ -149,15 +149,13 @@ namespace Athena_test {
     }
 #else
     if (!ge.vertices_empty()) {
-      std::vector<HepMC::GenVertexPtr> vtxvec;
       HepMC::GenEvent::vertex_iterator itvtx = ge.vertices_begin();
-      for (;itvtx != ge.vertices_end(); ++itvtx ) {
-        ge.remove_vertex(*itvtx);
-        vtxvec.push_back((*itvtx));
-        //fix me: delete vertex pointer causes crash
-        //delete (*itvtx);
+      while (itvtx != ge.vertices_end()) {
+        HepMC::GenVertexPtr pvtx = *itvtx;
+        ++itvtx;
+        ge.remove_vertex(pvtx);
+        delete pvtx;
       }
-      for(unsigned int i=0;i<vtxvec.size();i++)  delete vtxvec[i];
     }
 #endif
 
