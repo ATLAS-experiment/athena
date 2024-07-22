@@ -43,8 +43,8 @@ if __name__=="__main__":
     
     from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
     # from PerfMonVTune.PerfMonVTuneConfig import VTuneProfilerServiceCfg
-    cfg.merge(setupHistSvcCfg(flags,out_file=args.outRootFile,
-                                    out_stream="MuonEtaHoughTransformTest"))
+    cfg.merge(setupHistSvcCfg(flags,outFile=args.outRootFile,
+                                    outStream="MuonEtaHoughTransformTest"))
 
     if flags.Input.isMC:
         from xAODMuonSimHitCnv.MuonSimHitCnvCfg import MuonSimHitToMeasurementCfg

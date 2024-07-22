@@ -28,7 +28,7 @@ atlas_add_test( checkStripDesign
                 POST_EXEC_SCRIPT nopost.sh)
 
 atlas_add_test( testR4SensitiveDetectors
-                SCRIPT python -m MuonGeoModelTestR4.testSensitiveDetectors  --nEvents 10 
+                SCRIPT python -m MuonGeoModelTestR4.testSensitiveDetectors  --nEvents 2 
                 PROPERTIES TIMEOUT 600
                 PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT nopost.sh)

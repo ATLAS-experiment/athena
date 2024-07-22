@@ -6,7 +6,9 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 def MuonHitTesterCfg(flags, name="MuonHitTester", outFile="SimHitTest.root", **kwargs):
     result = ComponentAccumulator()
     from MuonGeoModelTestR4.testGeoModel import setupHistSvcCfg
-    cfg.merge(setupHistSvcCfg(flags,out_file=outFile, out_stream="MuonR4HitTest"))
+    result.merge(setupHistSvcCfg(flags,outFile=outFile, outStream="MuonR4HitTest"))
+    from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
+    result.merge(ActsGeometryContextAlgCfg(flags))
     kwargs.setdefault("isMC", flags.Input.isMC)
 
     
@@ -52,6 +54,7 @@ if __name__=="__main__":
     parser = SetupArgParser()
     parser.set_defaults(nEvents = -1)
     parser.set_defaults(inputFile=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/R4SimHits.pool.root"])
+    parser.set_defaults(outRootFile="SimHitDumpNtuple.root")
     parser.set_defaults(eventPrintoutLevel = 500)
 
     args = parser.parse_args()

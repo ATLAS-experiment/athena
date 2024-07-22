@@ -14,8 +14,8 @@ def SetupArgParser():
     parser.add_argument("--threads", type=int, help="number of threads", default=1)
     parser.add_argument("--geoTag", default="ATLAS-R3S-2021-03-02-00", help="Geometry tag to use", choices=["ATLAS-R3S-2021-03-02-00",
                                                                                                             "ATLAS-P2-RUN4-01-00-00"])
-    parser.add_argument("--condTag", default="OFLCOND-MC23-SDR-RUN3-05", help="Conditions tag to use",
-                                                                         choices= ["OFLCOND-MC23-SDR-RUN3-05", "CONDBR2-BLKPA-2023-02"])
+    parser.add_argument("--condTag", default="OFLCOND-MC23-SDR-RUN3-07", help="Conditions tag to use",
+                                                                         choices= ["OFLCOND-MC23-SDR-RUN3-07", "CONDBR2-BLKPA-2023-03"])
     parser.add_argument("--inputFile", "-i", default=[
                                                       #"/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00431493.physics_Main.daq.RAW._lb0525._SFO-16._0001.data"
                                                       "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/EVGEN_ParticleGun_FourMuon_Pt10to500.root"
@@ -52,10 +52,10 @@ def setupServicesCfg(flags):
     result.merge(MuonIdHelperSvcCfg(flags))
     return result
 
-def setupHistSvcCfg(flags, out_file="MdtGeoDump.root", out_stream="GEOMODELTESTER"):
+def setupHistSvcCfg(flags, outFile="MdtGeoDump.root", outStream="GEOMODELTESTER"):
     result = ComponentAccumulator()
-    if len(out_file) == 0: return result
-    histSvc = CompFactory.THistSvc(Output=[f"{out_stream} DATAFILE='{out_file}', OPT='RECREATE'"])
+    if len(outFile) == 0: return result
+    histSvc = CompFactory.THistSvc(Output=[f"{outStream} DATAFILE='{outFile}', OPT='RECREATE'"])
     result.addService(histSvc, primary=True)
     return result
 
@@ -97,9 +97,11 @@ def NswGeoPlottingAlgCfg(flags, name="NswGeoPlotting", **kwargs):
     result.addEventAlgo(the_alg, primary = True)
     return result
 
-def setupGeoR4TestCfg(args, setupSimJob = False):
-    from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    flags = initConfigFlags()
+def setupGeoR4TestCfg(args,  flags = None):
+    
+    if flags is None:
+        from AthenaConfiguration.AllConfigFlags import initConfigFlags
+        flags = initConfigFlags()
     flags.Concurrency.NumThreads = args.threads
     flags.Concurrency.NumConcurrentEvents = args.threads
     flags.Input.isMC = args.condTag.find("OFLCOND") != -1
@@ -116,13 +118,6 @@ def setupGeoR4TestCfg(args, setupSimJob = False):
                                 
         args.geoModelFile = "Geometry/{geoTag}.db".format(geoTag=args.geoTag)
     
-    if setupSimJob:
-        from AthenaConfiguration.Enums import ProductionStep
-        flags.Common.ProductionStep = ProductionStep.Simulation
-
-        from SimulationConfig.SimEnums import SimulationFlavour
-        flags.Sim.ISF.Simulator = SimulationFlavour.AtlasG4
-
     flags.GeoModel.AtlasVersion = args.geoTag
     flags.IOVDb.GlobalTag = args.condTag
     flags.GeoModel.SQLiteDB = True
@@ -195,7 +190,7 @@ def executeTest(cfg, num_events = 1):
 if __name__=="__main__":
     args = SetupArgParser().parse_args()
     flags, cfg = setupGeoR4TestCfg(args)  
-    cfg.merge(setupHistSvcCfg(flags, out_file = args.outRootFile))
+    cfg.merge(setupHistSvcCfg(flags, outFile = args.outRootFile))
     chambToTest =  args.chambers if len([x for x in args.chambers if x =="all"]) ==0 else []
     chambToExclude = [] if "none" in args.excludedChambers else args.excludedChambers
     
