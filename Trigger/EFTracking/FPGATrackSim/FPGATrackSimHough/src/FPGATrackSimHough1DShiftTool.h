@@ -95,7 +95,7 @@ class FPGATrackSimHough1DShiftTool : public extends <AthAlgTool, IFPGATrackSimRo
         ///////////////////////////////////////////////////////////////////////
         // FPGATrackSimRoadFinderToolI
 
-        virtual StatusCode getRoads(const std::vector<const FPGATrackSimHit*> & hits, std::vector<FPGATrackSimRoad*> & roads) override;
+        virtual StatusCode getRoads(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, std::vector<FPGATrackSimRoad*> & roads) override;
 
     private:
 
@@ -187,9 +187,9 @@ class FPGATrackSimHough1DShiftTool : public extends <AthAlgTool, IFPGATrackSimRo
         void calculateShifts();
         float getPtFromShiftDiff(int shift) const;
         void readShifts(std::string const & filepath);
-        std::vector<boost::dynamic_bitset<>> makeHitMasks(const std::vector<const FPGATrackSimHit*> & hits);
+        std::vector<boost::dynamic_bitset<>> makeHitMasks(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits);
 
-        FPGATrackSimRoad makeRoad(const std::vector<const FPGATrackSimHit*>& hits, int bin_track, size_t iShift);
+        FPGATrackSimRoad makeRoad(const std::vector<std::shared_ptr<const FPGATrackSimHit>>& hits, int bin_track, size_t iShift);
         void matchIdealGeoSector(FPGATrackSimRoad & r) const;
         bool passThreshold(std::vector<boost::dynamic_bitset<>>& binHits, int bin ) const;
         void printHitMasks(std::vector<boost::dynamic_bitset<>> const & hitMasks) const;
@@ -198,7 +198,7 @@ class FPGATrackSimHough1DShiftTool : public extends <AthAlgTool, IFPGATrackSimRo
         void drawHitMasks(std::vector<boost::dynamic_bitset<>> const & hitMasks, std::string const & name, std::vector<int> const & shifts);
         void printShifts() const;
 
-        std::pair<int, int> getBins(const FPGATrackSimHit*) const;
+        std::pair<int, int> getBins(const std::shared_ptr<const FPGATrackSimHit>& hit) const;
         float phitrkDiff(float r1, float phi1,  float r2,  float phi2) const;
         std::pair<float, bool> phitrk(int bin, std::vector<int> const &  shifts ) const; // returns phi of track and a bool if the
                                                                                        // value is invalid because at the edge

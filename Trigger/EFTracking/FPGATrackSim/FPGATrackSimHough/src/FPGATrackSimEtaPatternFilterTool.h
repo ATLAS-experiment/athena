@@ -85,11 +85,11 @@ class FPGATrackSimEtaPatternFilterTool : public extends<AthAlgTool, IFPGATrackSi
 	struct ModulesToPattern
 	{
 	  std::vector<layer_bitmask_t*> m_pattern_bitmasks; // these point to the values in m_pattermap, created in initialize()
-	  std::vector<const FPGATrackSimHit*> m_hits; // reset every input road
+	  std::vector<std::shared_ptr<const FPGATrackSimHit>> m_hits; // reset every input road
 	  
 	  void reset() { m_hits.clear(); }
 	  void addPattern(layer_bitmask_t* counter) { m_pattern_bitmasks.push_back(counter); }
-	  void addHit(const FPGATrackSimHit* hit)
+	  void addHit(std::shared_ptr<const FPGATrackSimHit> hit)
 	  {
 	    if (hit->getHitType() != HitType::wildcard) {
 	      m_hits.push_back(hit);
@@ -97,7 +97,7 @@ class FPGATrackSimEtaPatternFilterTool : public extends<AthAlgTool, IFPGATrackSi
 		(*counter) |= (1 << hit->getLayer());
 	    }
 	  }
-	  const std::vector<const FPGATrackSimHit*> & getHits() const { return m_hits; }
+	  const std::vector<std::shared_ptr<const FPGATrackSimHit>> & getHits() const { return m_hits; }
 	};
 	
        	

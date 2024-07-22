@@ -88,9 +88,9 @@ class FPGATrackSimSpacepointRoadFilterTool : public extends<AthAlgTool, IFPGATra
 
         bool splitRoad(FPGATrackSimRoad* initial_road);
         unsigned setSector(FPGATrackSimRoad& road);
-        unsigned findUnique(std::vector<const FPGATrackSimHit*>& sp_in, std::vector<const FPGATrackSimHit*>& sp_out,
-                            std::vector<const FPGATrackSimHit*>& unique_in, std::vector<const FPGATrackSimHit*>& unique_out,
-                            std::vector<const FPGATrackSimHit*>& new_sp_in, std::vector<const FPGATrackSimHit*>& new_sp_out);
+        unsigned findUnique(std::vector<std::shared_ptr<const FPGATrackSimHit>>& sp_in, std::vector<std::shared_ptr<const FPGATrackSimHit>>& sp_out,
+                            std::vector<std::shared_ptr<const FPGATrackSimHit>>& unique_in, std::vector<std::shared_ptr<const FPGATrackSimHit>>& unique_out,
+                            std::vector<std::shared_ptr<const FPGATrackSimHit>>& new_sp_in, std::vector<std::shared_ptr<const FPGATrackSimHit>>& new_sp_out);
 
 };
 

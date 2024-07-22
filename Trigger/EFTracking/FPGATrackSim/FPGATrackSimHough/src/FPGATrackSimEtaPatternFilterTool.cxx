@@ -273,11 +273,11 @@ FPGATrackSimRoad FPGATrackSimEtaPatternFilterTool::buildRoad(std::pair<EtaPatter
     for (unsigned lyr = 0; lyr < m_nLayers; lyr++) {
         r.setHits(lyr, m_moduleHits[lyr].find(patt.first[lyr])->second.getHits());
         if (r.getNHits_layer().at(lyr) == 0) {
-            FPGATrackSimHit *wcHit = new FPGATrackSimHit();
+            std::shared_ptr<FPGATrackSimHit> wcHit = std::make_shared<FPGATrackSimHit>();
             wcHit->setHitType(HitType::wildcard);
             wcHit->setDetType(m_FPGATrackSimMapping->PlaneMap_1st()->getDetType(lyr));
             wcHit->setLayer(lyr);
-            r.setHits(lyr, std::vector<const FPGATrackSimHit*>{wcHit});
+            r.setHits(lyr, std::vector<std::shared_ptr<const FPGATrackSimHit>>{wcHit});
         }
     }
 

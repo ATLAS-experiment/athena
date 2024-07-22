@@ -49,7 +49,7 @@ class FPGATrackSimHoughTransform_d0phi0_Tool : public extends <AthAlgTool, IFPGA
         ///////////////////////////////////////////////////////////////////////
         // IFPGATrackSimRoadFinderTool
 
-        virtual StatusCode getRoads(const std::vector<const FPGATrackSimHit*> & hits, std::vector<FPGATrackSimRoad*> & roads) override;
+        virtual StatusCode getRoads(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, std::vector<FPGATrackSimRoad*> & roads) override;
 
     private:
 
@@ -105,7 +105,7 @@ class FPGATrackSimHoughTransform_d0phi0_Tool : public extends <AthAlgTool, IFPGA
             // These are calculated from m_parMin/Max.
         std::unordered_map<int, std::vector<size_t>> m_yBins_scaled; // saved all scaled binnings
 
-        typedef vector2D<std::pair<int, std::unordered_set<const FPGATrackSimHit*>>> Image;
+        typedef vector2D<std::pair<int, std::unordered_set<std::shared_ptr<const FPGATrackSimHit>>>> Image;
             // An image is a 2d array of points, where each point has a value.
             // This starts as the number of hits (or hit layers), but will
             // change after the convolution. Also stored are all hits that
@@ -128,21 +128,21 @@ class FPGATrackSimHoughTransform_d0phi0_Tool : public extends <AthAlgTool, IFPGA
         // Core
 
         // std::vector<FPGATrackSimHit const *> filterHits(std::vector<FPGATrackSimHit const *> const & hits) const;
-        Image createLayerImage(std::vector<unsigned> const & combine_layers, std::vector<FPGATrackSimHit const *> const & hits, unsigned const scale) const;
-        Image createImage(std::vector<FPGATrackSimHit const *> const & hits) const;
+        Image createLayerImage(std::vector<unsigned> const & combine_layers, const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, unsigned const scale) const;
+        Image createImage(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits) const;
         Image convolute(Image const & image) const;
 
         ///////////////////////////////////////////////////////////////////////
         // Helpers
 
-        double yToX(double y, FPGATrackSimHit const * h) const;
-        std::pair<unsigned, unsigned> yToXBins(size_t yBin_min, size_t yBin_max, FPGATrackSimHit const * hit) const;
+        double yToX(double y, const std::shared_ptr<const FPGATrackSimHit> & h) const;
+        std::pair<unsigned, unsigned> yToXBins(size_t yBin_min, size_t yBin_max, const std::shared_ptr<const FPGATrackSimHit> & hit) const;
         bool passThreshold(Image const & image, unsigned x, unsigned y) const;
         void matchIdealGeoSector(FPGATrackSimRoad & r) const;
-	FPGATrackSimRoad createRoad(std::unordered_set<const FPGATrackSimHit*> const & hits, unsigned x, unsigned y) const;
-        FPGATrackSimRoad createRoad(std::vector<std::vector<const FPGATrackSimHit*>> const & hits, layer_bitmask_t hitLayers, unsigned x, unsigned y) const;
-        void addRoad(std::unordered_set<const FPGATrackSimHit*> const & hits, unsigned x, unsigned y);
-        void addRoad(std::vector<const FPGATrackSimHit*> const & hits, unsigned x, unsigned y);
+	FPGATrackSimRoad createRoad(const std::unordered_set<std::shared_ptr<const FPGATrackSimHit>> & hits, unsigned x, unsigned y) const;
+        FPGATrackSimRoad createRoad(const std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>> &hits, layer_bitmask_t hitLayers, unsigned x, unsigned y) const;
+        void addRoad(const std::unordered_set<std::shared_ptr<const FPGATrackSimHit>> & hits, unsigned x, unsigned y);
+        void addRoad(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, unsigned x, unsigned y);
         int conv(unsigned y, unsigned x) { return m_conv[y * m_convSize_x + x]; } // NOTE: y index is first
         void drawImage(Image const & image, std::string const & name);
 

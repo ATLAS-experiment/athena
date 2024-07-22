@@ -24,6 +24,7 @@
 
 #include <vector>
 #include <ostream>
+#include <memory>
 
 #include "FPGATrackSimObjects/FPGATrackSimTypes.h"
 #include "FPGATrackSimObjects/FPGATrackSimMultiTruth.h"
@@ -212,10 +213,10 @@ protected:
 
 // Container of <FPGATrackSimHit const *>
 template <class Container>
-std::vector<std::vector<const FPGATrackSimHit*>> sortByLayer(Container const& hits)
+std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>> sortByLayer(Container const& hits)
 {
-    std::vector<std::vector<const FPGATrackSimHit*>> out;
-    for (FPGATrackSimHit const* hit : hits)
+    std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>> out;
+    for (auto const &hit : hits)
     {
         size_t layer = hit->getLayer();
         if (layer >= out.size()) out.resize(layer + 1);

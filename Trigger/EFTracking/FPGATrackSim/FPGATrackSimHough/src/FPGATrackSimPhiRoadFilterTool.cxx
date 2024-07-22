@@ -96,8 +96,8 @@ FPGATrackSimRoad FPGATrackSimPhiRoadFilterTool::buildRoad(FPGATrackSimRoad* orig
   
   // add hits
   for (unsigned lyr = 0; lyr < m_nLayers; lyr++) {
-    std::vector<const FPGATrackSimHit*> road_hits;
-    for (auto hit : origr->getHits(lyr)) {
+    std::vector<std::shared_ptr<const FPGATrackSimHit>> road_hits;
+    for (auto &hit : origr->getHits(lyr)) {
       float phi_expected = -1.0*asin(fpgatracksim::A * hit->getR() * qPt) + phi;
       if (m_fieldCorrection) phi_expected  -= FPGATrackSimHoughTransformTool::fieldCorrection(m_EvtSel->getRegionID(), qPt, hit->getR());
       if (abs(hit->getGPhi()-phi_expected)< (m_window.value()[lyr]+qPt*m_ptscaling)) {
@@ -106,11 +106,11 @@ FPGATrackSimRoad FPGATrackSimPhiRoadFilterTool::buildRoad(FPGATrackSimRoad* orig
       }
     }
     if (road_hits.size() == 0) {
-      FPGATrackSimHit *wcHit = new FPGATrackSimHit();
+      std::unique_ptr<FPGATrackSimHit> wcHit = std::make_unique<FPGATrackSimHit>();
       wcHit->setHitType(HitType::wildcard);
       wcHit->setDetType(m_FPGATrackSimMapping->PlaneMap_1st()->getDetType(lyr));
       wcHit->setLayer(lyr);
-      road_hits.push_back(wcHit);
+      road_hits.push_back(std::move(wcHit));
     }
     ATH_MSG_DEBUG("PhiRoad Hits " << lyr << " " << road_hits.size() << " " << origr->getHits(lyr).size());
     r.setHits(lyr,road_hits);

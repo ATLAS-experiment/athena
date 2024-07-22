@@ -143,7 +143,7 @@ sector_t FPGATrackSimSectorBank::findSector(std::vector<module_t> const & module
 
 // Returns the sector matching 'hits' exactly (WC must be matched with WC), or -1 if none.
 // If multiple hits have different hashIDs, will prefer most popular, then random.
-sector_t FPGATrackSimSectorBank::findSector(std::vector<std::vector<const FPGATrackSimHit*>> const & hits) const
+sector_t FPGATrackSimSectorBank::findSector(const std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>> & hits) const
 {
     std::vector<module_t> modules(hits.size());
 
@@ -160,7 +160,7 @@ sector_t FPGATrackSimSectorBank::findSector(std::vector<std::vector<const FPGATr
         else
         {
             std::unordered_map<unsigned, unsigned> hashCount;
-            for (const FPGATrackSimHit* h : hits[i]) hashCount[h->getIdentifierHash()]++;
+            for (auto const &h : hits[i]) hashCount[h->getIdentifierHash()]++;
             modules[i] = std::max_element(hashCount.begin(), hashCount.end())->first;
         }
     }

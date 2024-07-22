@@ -313,7 +313,7 @@ StatusCode FPGATrackSimHough1DShiftTool::finalize()
 ///////////////////////////////////////////////////////////////////////////////
 // Main Algorithm
 
-StatusCode FPGATrackSimHough1DShiftTool::getRoads(const std::vector<const FPGATrackSimHit*> & hits, std::vector<FPGATrackSimRoad*> & roads)
+StatusCode FPGATrackSimHough1DShiftTool::getRoads(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, std::vector<FPGATrackSimRoad*> & roads)
 {
     
     roads.clear();
@@ -415,10 +415,10 @@ bool FPGATrackSimHough1DShiftTool::passThreshold(std::vector<boost::dynamic_bits
 
 
 
-std::vector<boost::dynamic_bitset<>> FPGATrackSimHough1DShiftTool::makeHitMasks(const std::vector<const FPGATrackSimHit*> & hits)
+std::vector<boost::dynamic_bitset<>> FPGATrackSimHough1DShiftTool::makeHitMasks(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits)
 {
     std::vector<boost::dynamic_bitset<>> hitMasks(m_nLayers, boost::dynamic_bitset<>(m_phiBins));
-    for (const FPGATrackSimHit* hit : hits)
+    for (auto const &hit : hits)
     {
         if (m_subRegion >= 0 && !m_FPGATrackSimMapping->SubRegionMap()->isInRegion(m_subRegion, *hit)) continue;
 
@@ -432,15 +432,15 @@ std::vector<boost::dynamic_bitset<>> FPGATrackSimHough1DShiftTool::makeHitMasks(
 }
 
 
-FPGATrackSimRoad FPGATrackSimHough1DShiftTool::makeRoad(const std::vector<const FPGATrackSimHit*>& hits, int bin_track, size_t iShift)
+FPGATrackSimRoad FPGATrackSimHough1DShiftTool::makeRoad(const std::vector<std::shared_ptr<const FPGATrackSimHit>>& hits, int bin_track, size_t iShift)
 {
     std::vector<int> const & shifts = m_shifts[iShift];
     float qpT = m_qpt[iShift];
 
-    std::vector<const FPGATrackSimHit*> road_hits;
+    std::vector<std::shared_ptr<const FPGATrackSimHit>> road_hits;
     layer_bitmask_t hitLayers = 0;
 
-    for (const FPGATrackSimHit* hit : hits)
+    for (const auto & hit : hits)
     {
         if (m_subRegion >= 0 && !m_FPGATrackSimMapping->SubRegionMap()->isInRegion(m_subRegion, *hit)) continue;
 
@@ -520,12 +520,12 @@ void FPGATrackSimHough1DShiftTool::matchIdealGeoSector(FPGATrackSimRoad & r) con
             wc_layers |= (0x1 << il);
             r.setWCLayers(wc_layers);
 
-            FPGATrackSimHit *wcHit = new FPGATrackSimHit();
+            std::unique_ptr<FPGATrackSimHit> wcHit = std::make_unique<FPGATrackSimHit>();
             wcHit->setHitType(HitType::wildcard);
             wcHit->setLayer(il);
             wcHit->setDetType(m_FPGATrackSimMapping->PlaneMap_1st()->getDetType(il));
-            std::vector<const FPGATrackSimHit*> wcHits;
-            wcHits.push_back(wcHit);
+            std::vector<std::shared_ptr<const FPGATrackSimHit>> wcHits;
+            wcHits.push_back(std::move(wcHit));
             r.setHits(il,wcHits);
         }
         else {
@@ -561,7 +561,7 @@ float FPGATrackSimHough1DShiftTool::getPtFromShiftDiff(int shift) const
 
 
 // Returns the range of bins (inclusive) given a phi and an extension in number of bins
-std::pair<int, int> FPGATrackSimHough1DShiftTool::getBins(const FPGATrackSimHit* hit) const
+std::pair<int, int> FPGATrackSimHough1DShiftTool::getBins(const std::shared_ptr<const FPGATrackSimHit>& hit) const
 {
     float phi = hit->getGPhi();
     float bin_extend = m_hitExtend[hit->getLayer()];

@@ -242,16 +242,16 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     // Get roads
     std::vector<FPGATrackSimRoad*> prefilter_roads;
     std::vector<FPGATrackSimRoad*>& roads_1st = prefilter_roads;
-    std::vector<const FPGATrackSimHit*> phits_1st;
+    std::vector<std::shared_ptr<const FPGATrackSimHit>> phits_1st;
 
     // If and when we set up code to run over more than one region/tower at a time this will need to be updated
     std::vector<FPGATrackSimHit> const & hits_1st = m_logicEventHeader_1st->towers().at(0).hits();
 
     for (FPGATrackSimHit const& h : hits_1st) { 
-        if (h.isReal()) phits_1st.push_back(&h);
+        if (h.isReal()) phits_1st.emplace_back(std::make_shared<const FPGATrackSimHit>(h));
     }
 
-    for (const FPGATrackSimHit* Hit : phits_1st) FPGAHits_1st->push_back(*Hit);
+    for (const auto & Hit : phits_1st) FPGAHits_1st->push_back(*Hit);
  
     auto mon_nhits_1st = Monitored::Scalar<unsigned>("nHits_1st", hits_1st.size());
     auto mon_nhits_1st_unmapped = Monitored::Scalar<unsigned>("nHits_1st_unmapped", m_hits_1st_miss.size());
@@ -263,7 +263,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
         std::vector<FPGATrackSimHit> road_hits;
         ATH_MSG_DEBUG("Hough Road X Y: " << road->getX() << " " << road->getY());
         for (size_t l = 0; l < road->getNLayers(); ++l) {
-            for (const FPGATrackSimHit* layerH : road->getHits(l)) {
+            for (const auto &layerH : road->getHits(l)) {
                 road_hits.push_back(*layerH);
             }
         }
@@ -397,13 +397,13 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     std::vector<FPGATrackSimTrack> tracksLRT; // currently empty
     if (m_doLRT) {
         // Filter out hits that are on successful first-stage tracks
-        std::vector<const FPGATrackSimHit*> remainingHits;
+        std::vector<std::shared_ptr<const FPGATrackSimHit>> remainingHits;
 
         if (m_doLRTHitFiltering) {
             ATH_MSG_DEBUG("Doing hit filtering based on prompt tracks.");
             ATH_CHECK(m_LRTRoadFilterTool->filterUsedHits(tracks_1st, phits_1st, remainingHits));
 
-            for (const FPGATrackSimHit* Hit : remainingHits) FPGAHitsFiltered_1st->push_back(*Hit); 
+            for (const auto &Hit : remainingHits) FPGAHitsFiltered_1st->push_back(*Hit); 
 
         } else {
             ATH_MSG_DEBUG("No hit filtering requested; using all hits for LRT.");

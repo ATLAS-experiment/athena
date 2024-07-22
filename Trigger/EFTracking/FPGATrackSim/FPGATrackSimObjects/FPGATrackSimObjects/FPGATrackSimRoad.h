@@ -17,6 +17,7 @@
 #include <vector>
 #include <unordered_set>
 #include <ostream>
+#include <memory>
 
 #include "TObject.h"
 
@@ -34,13 +35,14 @@ public:
 
     FPGATrackSimRoad() = default;
 
-    FPGATrackSimRoad(unsigned nLayers) : m_hits(nLayers) { }
+    FPGATrackSimRoad(unsigned nLayers) : m_hits_trans(nLayers) { }
 
     FPGATrackSimRoad(int roadID, pid_t pid, sector_t sector, layer_bitmask_t hit_layers,
-        layer_bitmask_t wildcard_layers, std::vector<std::vector<const FPGATrackSimHit*>> const& hits)
-        : m_roadID(roadID), m_pid(pid), m_sector(sector), m_hit_layers(hit_layers), m_wildcard_layers(wildcard_layers), m_hits(hits)
-    { }
-
+        layer_bitmask_t wildcard_layers, std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>> & hits)
+        : m_roadID(roadID), m_pid(pid), m_sector(sector), m_hit_layers(hit_layers), m_wildcard_layers(wildcard_layers)/* , m_hits_trans(hits) */
+    {
+        setHits(hits);
+    }
 
     ///////////////////////////////////////////////////////////////////////
     // Setters
@@ -53,9 +55,18 @@ public:
     void setHitLayers(layer_bitmask_t hit_layers) { m_hit_layers = hit_layers; }
     void setWCLayers(layer_bitmask_t wc_layers) { m_wildcard_layers = wc_layers; }
 
-    void setNLayers(unsigned layers) { m_hits.resize(layers); }
-    void setHits(std::vector<std::vector<const FPGATrackSimHit*>> const& hits) { m_hits = hits; }
-    void setHits(unsigned layer, std::vector<const FPGATrackSimHit*> const& hits) { m_hits.at(layer) = hits; } // ensure setNLayers is called first
+    void setNLayers(unsigned layers) { m_hits_trans.resize(layers); m_hits.resize(layers); }
+    void setHits(const std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>> &hits){
+        if (hits.size() != m_hits_trans.size()) setNLayers(hits.size());
+        for (unsigned i = 0;i < hits.size();++i)
+            setHits(i,hits[i]);
+    }
+    void setHits(unsigned layer, const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits) {
+        m_hits_trans[layer] = hits;
+        m_hits[layer].clear();
+        for (const auto& hit : m_hits_trans[layer])
+            m_hits[layer].push_back(*hit);
+    } // ensure setNLayers is called first
     void setEtaPatternID(int patternID) { m_etaPatternID = patternID; }
 
     void setSubRegion(int v) { m_subRegion = v; }
@@ -84,18 +95,21 @@ public:
 
     int getEtaPatternID() const { return m_etaPatternID; }
 
-    std::vector<const FPGATrackSimHit*> const& getHits(size_t layer) const { return m_hits.at(layer); }
-    std::unordered_set<const FPGATrackSimHit*> getHits_flat() const
-    {
-        std::unordered_set<const FPGATrackSimHit*> hits;
-        for (const auto& x : m_hits) hits.insert(x.begin(), x.end());
+    const std::vector<std::shared_ptr<const FPGATrackSimHit>> &getHits(size_t layer) const { return m_hits_trans.at(layer); }
+
+    std::unordered_set<std::shared_ptr<const FPGATrackSimHit>> getHits_flat() const {
+        std::unordered_set<std::shared_ptr<const FPGATrackSimHit>> hits;
+        for (const auto& layerHits : m_hits_trans)
+            for (auto const& hit : layerHits)
+                hits.insert(hit);
+                // for (const auto& x : m_hits) hits.insert(x.begin(), x.end());
         return hits;
     }
 
     ///////////////////////////////////////////////////////////////////////
     // Utility
 
-    size_t getNLayers() const { return m_hits.size(); }
+    size_t getNLayers() const { return m_hits_trans.size(); }
     size_t getNHitLayers() const { return __builtin_popcount(m_hit_layers); }
     size_t getNWCLayers() const { return __builtin_popcount(m_wildcard_layers); }
 
@@ -126,15 +140,16 @@ private:
     float m_x = 0; // x value of Hough bin
     float m_y = 0; // y value of Hough bin
 
-    std::vector<std::vector<const FPGATrackSimHit*>> m_hits; // [layer, hit#]
-        // A list of hits in the road for each layer.
-        // These pointers are not owned by the road.
+    std::vector<std::vector<FPGATrackSimHit>> m_hits; // [layer, hit#] (used for ROOT storing)
+    std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>> m_hits_trans; //! (transient) [layer, hit#]
+    // A list of hits in the road for each layer.
+    // These pointers are not owned by the road.
+
 
     ///////////////////////////////////////////////////////////////////////
     // Misc
-
     friend std::ostream& operator<<(std::ostream& os, const FPGATrackSimRoad& road);
-    ClassDef(FPGATrackSimRoad, 2);
+    ClassDef(FPGATrackSimRoad, 4);
 };
 
 #endif // FPGATrackSimROAD_H

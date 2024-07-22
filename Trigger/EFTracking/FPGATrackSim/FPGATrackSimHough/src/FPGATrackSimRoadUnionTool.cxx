@@ -34,7 +34,7 @@ StatusCode FPGATrackSimRoadUnionTool::initialize()
 }
 
 
-StatusCode FPGATrackSimRoadUnionTool::getRoads(const std::vector<const FPGATrackSimHit*> & hits, std::vector<FPGATrackSimRoad*> & roads) 
+StatusCode FPGATrackSimRoadUnionTool::getRoads(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, std::vector<FPGATrackSimRoad*> & roads) 
 {
     roads.clear();
     for (auto & tool : m_tools)
