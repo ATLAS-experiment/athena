@@ -611,6 +611,16 @@ public:
 
 
   /**
+   * @brief Clear the cached aux data pointers for a single variable.
+   * @param auxid ID of the variable to clear.
+   *
+   * Not really safe to use if another thread may be accessing
+   * the same decoration.
+   */
+  void clearCache (SG::auxid_t auxid);
+
+
+  /**
    * @brief Clear the cached decoration pointer for a single variable.
    * @param auxid ID of the variable to clear.
    *

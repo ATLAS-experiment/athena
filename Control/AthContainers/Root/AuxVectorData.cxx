@@ -611,20 +611,6 @@ void AuxVectorData::Cache::store (SG::auxid_t auxid, void* ptr)
 
 
 /**
- * @brief Clear the cached decoration pointer for a single variable.
- * @param auxid ID of the variable to clear.
- *
- * Not really safe to use if another thread may be accessing
- * the same decoration.
- */
-void AuxVectorData::clearDecorCache (SG::auxid_t auxid)
-{
-  guard_t guard (m_mutex);
-  m_decorCache.clear (auxid);
-}
-
-
-/**
  * @brief Lock the container.
  *
  * After this, only decorations can be changed/modified.

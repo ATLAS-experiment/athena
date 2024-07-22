@@ -340,10 +340,45 @@ void AuxVectorData::swap (AuxVectorData& other)
 inline
 void AuxVectorData::clearCache()
 {
+  guard_t guard (m_mutex);
   m_cache.clear();
   m_constCache.clear();
   m_decorCache.clear();
   m_spanCache.clear();
+}
+
+
+/**
+ * @brief Clear the cached aux data pointers for a single variable.
+ * @param auxid ID of the variable to clear.
+ *
+ * Not really safe to use if another thread may be accessing
+ * the same decoration.
+ */
+inline
+void AuxVectorData::clearCache (SG::auxid_t auxid)
+{
+  guard_t guard (m_mutex);
+  m_cache.clear (auxid);
+  m_constCache.clear (auxid);
+  m_decorCache.clear (auxid);
+  // Don't clear the span cache here --- the referenced spans get updated
+  // automatically as needed.
+}
+
+
+/**
+ * @brief Clear the cached decoration pointer for a single variable.
+ * @param auxid ID of the variable to clear.
+ *
+ * Not really safe to use if another thread may be accessing
+ * the same decoration.
+ */
+inline
+void AuxVectorData::clearDecorCache (SG::auxid_t auxid)
+{
+  guard_t guard (m_mutex);
+  m_decorCache.clear (auxid);
 }
 
 
