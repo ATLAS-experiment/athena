@@ -91,7 +91,10 @@ namespace egammaMVAFunctions
 
       };
     funcLibrary["ph_zconv"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*)
-      { return static_cast<const xAOD::Photon*>(eg)->vertex()->position().z(); };
+      {
+	const auto *vertex = static_cast<const xAOD::Photon*>(eg)->vertex();
+	return vertex ? vertex->position().z() : 9999;
+      };
     funcLibrary["ph_pt1conv"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*)->float
       { return compute_pt1conv(static_cast<const xAOD::Photon*>(eg)); };
     funcLibrary["ph_pt2conv"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*)->float
