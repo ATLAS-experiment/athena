@@ -53,7 +53,7 @@ def TrigMuonEfficiencyMonTTbarConfig(helper):
     from TrigConfigSvc.TriggerConfigAccess import getHLTMonitoringAccess
     moniAccess = getHLTMonitoringAccess(helper.flags)
     Chains = moniAccess.monitoredChains(signatures="muonMon",monLevels=["shifter","t0","val"])
-    MonitoredChains = [c for c in Chains if '2mu' not in c]
+    MonitoredChains = [c for c in Chains if 'HLT_mu' in c] # this makes sure we don't consider 2mu, 3mu, 4mu chains
   
     # if mon groups not found fall back to hard-coded trigger monitoring list
     if len(MonitoredChains) == 0:
@@ -96,7 +96,7 @@ def TrigMuonEfficiencyMonZTPConfig(helper):
     from TrigConfigSvc.TriggerConfigAccess import getHLTMonitoringAccess
     moniAccess = getHLTMonitoringAccess(helper.flags)
     Chains = moniAccess.monitoredChains(signatures="muonMon",monLevels=["shifter","t0","val"])
-    MonitoredChains = [c for c in Chains if '2mu' not in c]
+    MonitoredChains = [c for c in Chains if 'HLT_mu' in c] # this makes sure we don't consider 2mu, 3mu, 4mu chains
           
     # if mon groups not found fall back to hard-coded trigger monitoring list
     if len(MonitoredChains) == 0:
