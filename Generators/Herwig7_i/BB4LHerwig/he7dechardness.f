@@ -208,6 +208,8 @@ c     In case of a g- > q q~ splitting we end our search.
       real *8 pin1(1:4), pin2(1:4), angle, ScalarProd, mod1, mod2
       integer i
       ScalarProd =0
+      mod1 = 0
+      mod2 = 0
       do i=1,3
          ScalarProd =ScalarProd+ pin1(i)*pin2(i)
          mod1= mod1+pin1(i)**2
