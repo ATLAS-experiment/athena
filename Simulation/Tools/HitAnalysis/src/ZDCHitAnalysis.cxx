@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ZDCHitAnalysis.h"
@@ -113,7 +113,7 @@ StatusCode ZDCHitAnalysis::execute() {
   int channel_fiber = -1;
 
   ZDC_SimFiberHit_ConstIterator fiberhi;
-  const ZDC_SimFiberHit_Collection* fiberiter;
+  const ZDC_SimFiberHit_Collection* fiberiter = nullptr;
   CHECK(evtStore()->retrieve(fiberiter,"ZDC_SimFiberHit_Collection"));
   for (fiberhi=(*fiberiter).begin(); fiberhi != (*fiberiter).end(); ++fiberhi) {
     ZDC_SimFiberHit ghit(*fiberhi);
@@ -146,7 +146,7 @@ StatusCode ZDCHitAnalysis::execute() {
   float calib_eEM = -999.;
   float calib_eNonEM = -999.;
   
-  const CaloCalibrationHitContainer* calibiter;
+  const CaloCalibrationHitContainer* calibiter = nullptr;
   CHECK(evtStore()->retrieve(calibiter,"ZDC_CalibrationHit"));
   for (auto hit : *calibiter) {
     Identifier id = hit->cellID();
