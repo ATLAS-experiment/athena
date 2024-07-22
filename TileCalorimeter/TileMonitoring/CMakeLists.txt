@@ -4,8 +4,7 @@
 atlas_subdir( TileMonitoring )
 
 # External dependencies:
-find_package( CLHEP )
-find_package( ROOT COMPONENTS Graf Hist HistPainter Spectrum Core Tree MathCore RIO )
+find_package( ROOT COMPONENTS Gpad Graf Hist HistPainter Spectrum Core Tree MathCore RIO )
 
 # Component(s) in the package:
 atlas_add_library( TileMonitoringLib
@@ -16,8 +15,8 @@ atlas_add_library( TileMonitoringLib
 
 atlas_add_component( TileMonitoring
   TileMonitoring/*.h src/*.cxx src/components/*.cxx
-  INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
-  LINK_LIBRARIES ${CLHEP_LIBRARIES} ${ROOT_LIBRARIES} AsgTools AthenaKernel AthenaMonitoringKernelLib AthenaMonitoringLib ByteStreamCnvSvcBaseLib CaloEvent CaloGeoHelpers CaloIdentifier GaudiKernel Identifier JetInterface JetMomentToolsLib JetSelectorToolsLib JetUtils LWHists StoreGateLib TileCalibBlobObjs TileConditionsLib TileEvent TileIdentifier TileMonitoringLib TileRecUtilsLib TrigConfData TrigDecisionToolLib TrigT1Result xAODCaloEvent xAODCore xAODEventInfo xAODJet xAODMuon xAODTrigger )
+  INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+  LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaKernel AthenaMonitoringKernelLib AthenaMonitoringLib ByteStreamCnvSvcBaseLib CaloEvent CaloIdentifier CxxUtils GaudiKernel JetInterface JetSelectorToolsLib StoreGateLib TileCalibBlobObjs TileConditionsLib TileEvent TileIdentifier TileMonitoringLib TileRecUtilsLib TrigConfData TrigDecisionToolLib TrigT1Result xAODCaloEvent xAODCore xAODEventInfo xAODJet xAODMuon xAODTrigger )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

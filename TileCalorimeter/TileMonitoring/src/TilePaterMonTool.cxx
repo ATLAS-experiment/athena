@@ -37,11 +37,6 @@
 #include "TString.h"
 #include "TDirectory.h"
 
-#include "LWHists/TH1I_LW.h"
-#include "LWHists/TH2I_LW.h"
-#include "LWHists/TProfile_LW.h"
-
-
 #include <sstream>
 #include <algorithm>
 
@@ -338,40 +333,6 @@ TProfile2D* TilePaterMonTool::bookProfile2D(std::string subdir, std::string nam,
 {
 
   TProfile2D* hist = new TProfile2D(TString(nam), TString(tit), nx, xmin, xmax, ny, ymin, ymax, zmin, zmax);
-  regHist(subdir, hist, interval, attribute, trigChain, mergeAlgo);
-  return hist;
-}
-
-
-TH1I_LW* TilePaterMonTool::book1ILW(std::string subdir, std::string nam, std::string tit,
-                                    int nx, double xmin, double xmax,
-                                    Interval_t interval, MgmtAttr_t attribute,
-                                    std::string trigChain, std::string mergeAlgo)
-{
-  TH1I_LW* hist =  TH1I_LW::create(TString(nam), TString(tit), nx, xmin, xmax);
-  regHist(subdir, hist, interval, attribute, trigChain, mergeAlgo);
-  return hist;
-}
-
-TH2I_LW* TilePaterMonTool::book2ILW(std::string subdir, std::string nam, std::string tit,
-                                    int nx, double xmin, double xmax,
-                                    int ny, double ymin, double ymax,
-                                    Interval_t interval, MgmtAttr_t attribute,
-                                    std::string trigChain, std::string mergeAlgo)
-{
-  TH2I_LW* hist =  TH2I_LW::create(TString(nam), TString(tit), nx, xmin, xmax, ny, ymin, ymax);
-  regHist(subdir, hist, interval, attribute, trigChain, mergeAlgo);
-  return hist;
-}
-
-
-TProfile_LW* TilePaterMonTool::bookProfileLW(std::string subdir, std::string nam, std::string tit,
-                                             int nx, double xmin, double xmax,
-                                             double ymin, double ymax,
-                                             Interval_t interval, MgmtAttr_t attribute,
-                                             std::string trigChain, std::string mergeAlgo)
-{
-  TProfile_LW* hist = TProfile_LW::create(TString(nam), TString(tit), nx, xmin, xmax, ymin, ymax);
   regHist(subdir, hist, interval, attribute, trigChain, mergeAlgo);
   return hist;
 }

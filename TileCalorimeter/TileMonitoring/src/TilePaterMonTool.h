@@ -41,9 +41,6 @@ class TileTBID;
 class TileHWID;
 class TileCablingService;
 
-class TH1I_LW;
-class TH2I_LW;
-class TProfile_LW;
 
 /** @class TilePaterMonTool
  *  @brief Base class for tilecal calibration monitoring tools
@@ -183,25 +180,6 @@ protected:
                                            float* X_errors2, float* Y_errors1, float* Y_errors2);
 
   TMultiGraph* bookMultiGraph (std::string dir, std::string nam, std::string tit);
-
-
-  TH1I_LW* book1ILW(std::string dir, std::string nam, std::string tit, 
-                    int nx, double xmin, double xmax, 
-                    Interval_t interval = run, MgmtAttr_t attribute = ATTRIB_MANAGED,
-                    std::string trigChain = "", std::string mergeAlgo = "");
-
-  TH2I_LW* book2ILW(std::string dir, std::string nam, std::string tit, 
-                    int nx, double xmin, double xmax, 
-                    int ny, double ymin, double ymax,
-                    Interval_t interval = run, MgmtAttr_t attribute = ATTRIB_MANAGED,
-                    std::string trigChain = "", std::string mergeAlgo = "");
-
-    
-  TProfile_LW* bookProfileLW(std::string dir, std::string nam, std::string tit,
-                             int nx, double xmin, double xmax,
-                             double ymin, double ymax,
-                             Interval_t interval = run, MgmtAttr_t attribute = ATTRIB_MANAGED,
-                             std::string trigChain = "", std::string mergeAlgo = "");
 
 
   StatusCode removeTObj(TObject* obj);
