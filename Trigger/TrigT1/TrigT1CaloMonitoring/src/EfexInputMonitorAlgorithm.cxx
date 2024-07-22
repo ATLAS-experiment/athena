@@ -74,9 +74,10 @@ StatusCode EfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
     return StatusCode::FAILURE;
   }
 
+
     auto evtNumber = Monitored::Scalar<ULong64_t>("EventNumber",GetEventInfo(ctx)->eventNumber());
     auto lbnString = Monitored::Scalar<std::string>("LBNString",std::to_string(GetEventInfo(ctx)->lumiBlock()));
-    auto lbn = Monitored::Scalar<int>("LBNS",GetEventInfo(ctx)->lumiBlock());
+    auto lbn = Monitored::Scalar<int>("LBN",GetEventInfo(ctx)->lumiBlock());
 
     // mismatches can be caused by recent/imminent OTF maskings, so track timings
     auto timeSince = Monitored::Scalar<int>("timeSince", -1);
@@ -94,8 +95,8 @@ StatusCode EfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
     auto Towereta = Monitored::Scalar<float>("TowerEta",0.0);
     auto Towerphi = Monitored::Scalar<float>("TowerPhi",0.0);
     auto TowerRefCount = Monitored::Scalar<int>("RefTowerCount",0);
-    auto Toweremstatus = Monitored::Scalar<uint32_t>("TowerEmstatus",0.0);
-    auto Towerhadstatus = Monitored::Scalar<uint32_t>("TowerHadstatus",0.0);
+    auto Toweremstatus = Monitored::Scalar<uint32_t>("TowerEmstatus",0);
+    auto Towerhadstatus = Monitored::Scalar<uint32_t>("TowerHadstatus",0);
     auto TowerSlot = Monitored::Scalar<int32_t>("TowerSlot",0);
     auto TowerCount = Monitored::Scalar<int>("TowerCount",0);
     auto SlotSCID = Monitored::Scalar<std::string>("SlotSCID","");
@@ -104,12 +105,13 @@ StatusCode EfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
     bool isPrescaled = (((GetEventInfo(ctx)->extendedLevel1ID()&0xffffff) % 200) != 0);
     if(!isPrescaled && eFexTowerContainer->empty()) {
         Decision = "MissingDataTowers";
-        fill("errors", Decision,timeSince,timeUntil,evtNumber,lbnString,TowerId,Towereta,Towerphi,Toweremstatus,Towerhadstatus,TowerSlot,TowerCount,TowerRefCount,SlotSCID);
+        fill("errors", Decision,timeSince,timeUntil,evtNumber,lbn,lbnString,TowerId,Towereta,Towerphi,Toweremstatus,Towerhadstatus,TowerSlot,TowerCount,TowerRefCount,SlotSCID);
     } else if(isPrescaled && !eFexTowerContainer->empty()) {
         Decision = "UnexpectedDataTowers";
-        fill("errors", Decision,timeSince,timeUntil,evtNumber,lbnString,TowerId,Towereta,Towerphi,Toweremstatus,Towerhadstatus,TowerSlot,TowerCount,TowerRefCount,SlotSCID);
+        fill("errors", Decision,timeSince,timeUntil,evtNumber,lbn,lbnString,TowerId,Towereta,Towerphi,Toweremstatus,Towerhadstatus,TowerSlot,TowerCount,TowerRefCount,SlotSCID);
     }
 
+    if(eFexTowerContainer->empty()) return StatusCode::SUCCESS; // don't do the rest of the monitoring unless processing a DataTowers event
 
 
     // Access eFexTower ref container, if possible
@@ -129,34 +131,34 @@ StatusCode EfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
                 TowerRefCount = Toweret_count[i];
                 if (TowerRefCount==1025) missingLAr=true; // 1025 comes from eFexTowerBuilder if it had no supercells
                 if(TowerRefCount==1025 || TowerRefCount==1022) TowerRefCount=0; // unavailable or invalid code
-                fill((i<10) ? "ecal" : "hcal",lbn,Towereta,TowerRefCount);
+                fill((i<10) ? "ecal" : "hcal",lbn,Towereta,Towerphi,TowerRefCount);
             }
         }
     }
     if(missingLAr) {
         Decision = "MissingSCells";
-        fill("errors", Decision,timeSince,timeUntil,evtNumber,lbnString,TowerId,Towereta,Towerphi,Toweremstatus,Towerhadstatus,TowerSlot,TowerCount,TowerRefCount,SlotSCID);
+        fill("errors", Decision,timeSince,timeUntil,evtNumber,lbn,lbnString,TowerId,Towereta,Towerphi,Toweremstatus,Towerhadstatus,TowerSlot,TowerCount,TowerRefCount,SlotSCID);
     }
-
-
-
-
 
 
 
   std::set<std::pair<std::pair<int,int>,int>> doneCounts; // only fill each count once (there are duplicates in DataTowers readout b.c. of module overlap)
 
+    auto IsMonReady = Monitored::Scalar<bool>("IsMonReady",true); // used to fill into eta/phi map only certain types of error.
+
   for(const xAOD::eFexTower* eTower : *eFexTowerContainer) {
     TowerId = eTower->id();
     Towereta=eTower->eta();
     Towerphi=eTower->phi();
+    Toweremstatus=eTower->em_status();
+    Towerhadstatus=eTower->had_status();
     if(eTower->em_status()) {
-        Decision="BadEMStatus";
-        fill("errors",Decision,timeSince,timeUntil,evtNumber,lbnString,TowerId,Towereta,Towerphi,Toweremstatus,Towerhadstatus,TowerSlot,TowerCount,TowerRefCount,SlotSCID);
+        Decision="BadEMStatus:" + std::to_string(TowerId);
+        fill("errors",Decision,timeSince,timeUntil,evtNumber,lbn,lbnString,TowerId,Towereta,Towerphi,Toweremstatus,Towerhadstatus,TowerSlot,TowerCount,TowerRefCount,SlotSCID,IsMonReady);
     }
       if(eTower->had_status()) {
-          Decision="BadHadStatus";
-          fill("errors",Decision,timeSince,timeUntil,evtNumber,lbnString,TowerId,Towereta,Towerphi,Toweremstatus,Towerhadstatus,TowerSlot,TowerCount,TowerRefCount,SlotSCID);
+          Decision="BadHadStatus:" + std::to_string(TowerId);
+          fill("errors",Decision,timeSince,timeUntil,evtNumber,lbn,lbnString,TowerId,Towereta,Towerphi,Toweremstatus,Towerhadstatus,TowerSlot,TowerCount,TowerRefCount,SlotSCID,IsMonReady);
       }
       std::vector<uint16_t> counts=eTower->et_count();
       std::vector<uint16_t> refcounts;
@@ -187,6 +189,9 @@ StatusCode EfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
                   if(isLAr) {
                       if(TowerCount==1022) {
                           Decision = "LArInvalidCode";
+                          if(TowerRefCount!=1022) {
+                              Decision = "LArInvalidCodeMismatched";
+                          }
                       } else if(!TowerCount && TowerRefCount) {
                           Decision="LArMissingMask";
                       } else if(TowerCount && !TowerRefCount) {
@@ -205,10 +210,10 @@ StatusCode EfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
                           SlotSCID = itr->second.second;
                       }
                   }
-                  fill("errors",Decision,timeSince,timeUntil,evtNumber,lbnString,TowerId,Towereta,Towerphi,Toweremstatus,Towerhadstatus,TowerSlot,TowerCount,TowerRefCount,SlotSCID);
+                  fill("errors",Decision,timeSince,timeUntil,evtNumber,lbn,lbnString,TowerId,Towereta,Towerphi,Toweremstatus,Towerhadstatus,TowerSlot,TowerCount,TowerRefCount,SlotSCID);
               }
           }
-          fill((i<10) ? "ecal" : "hcal",lbn,Towereta,TowerCount);
+          fill((i<10) ? "ecal" : "hcal",lbn,Towereta,Towerphi,TowerCount);
       }
   }
 
