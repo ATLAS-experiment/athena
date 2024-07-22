@@ -330,7 +330,7 @@ void TrackFitter::makeTrackCandidates(const FPGATrackSimRoad & road, const FPGAT
             }
             else
             {
-                const FPGATrackSimHit* hit = road.getHits(layer)[hit_indices[layer]];
+                const std::shared_ptr<const FPGATrackSimHit> hit = road.getHits(layer)[hit_indices[layer]];
                 // If this is an outer spacepoint, and it is not the same as the inner spacepoint, reject it.
                 // Here we "reject" it by marking the candidate as "invalid", to be rejected later.
                 // That require another field on the track object, but it avoids having to change the sizes

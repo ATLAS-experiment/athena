@@ -175,7 +175,7 @@ StatusCode FPGATrackSimHoughRootOutputTool::fillTree(std::vector<FPGATrackSimRoa
         for (unsigned layer = 0; layer < m_FPGATrackSimMapping->PlaneMap_1st()->getNLogiLayers(); layer++)
 	  {
 	    if (hit_indices[layer] >= 0) {
-	      const FPGATrackSimHit* hit = road->getHits(layer)[hit_indices[layer]];
+	      std::shared_ptr<const FPGATrackSimHit> hit = road->getHits(layer)[hit_indices[layer]];
 
 	      FPGATrackSimMultiTruth truth = hit->getTruth();
 

@@ -147,7 +147,7 @@ StatusCode FPGATrackSimHoughTransform_d0phi0_Tool::finalize()
 ///////////////////////////////////////////////////////////////////////////////
 // Main Algorithm
 
-StatusCode FPGATrackSimHoughTransform_d0phi0_Tool::getRoads(const std::vector<const FPGATrackSimHit*> & hits, std::vector<FPGATrackSimRoad*> & roads) 
+StatusCode FPGATrackSimHoughTransform_d0phi0_Tool::getRoads(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, std::vector<FPGATrackSimRoad*> & roads) 
 {
   ATH_MSG_DEBUG("Event: " << m_event << ", # hits: " << hits.size());
   roads.clear();
@@ -176,12 +176,12 @@ StatusCode FPGATrackSimHoughTransform_d0phi0_Tool::getRoads(const std::vector<co
 }
 
 
-FPGATrackSimHoughTransform_d0phi0_Tool::Image FPGATrackSimHoughTransform_d0phi0_Tool::createLayerImage(std::vector<unsigned> const & combine_layers, std::vector<FPGATrackSimHit const *> const & hits, unsigned const scale) const
+FPGATrackSimHoughTransform_d0phi0_Tool::Image FPGATrackSimHoughTransform_d0phi0_Tool::createLayerImage(std::vector<unsigned> const & combine_layers, const std::vector<std::shared_ptr<const FPGATrackSimHit>> &hits, unsigned const scale) const
 {
 
   Image image(m_imageSize_y, m_imageSize_x);
 
-  for (FPGATrackSimHit const * hit : hits) {
+  for (auto const & hit : hits) {
 
     bool belong1 = false, belong2 = false;
     for (auto layer : combine_layers) {
@@ -224,7 +224,7 @@ FPGATrackSimHoughTransform_d0phi0_Tool::Image FPGATrackSimHoughTransform_d0phi0_
   return image;
 }
 
-FPGATrackSimHoughTransform_d0phi0_Tool::Image FPGATrackSimHoughTransform_d0phi0_Tool::createImage(std::vector<FPGATrackSimHit const *> const & hits) const
+FPGATrackSimHoughTransform_d0phi0_Tool::Image FPGATrackSimHoughTransform_d0phi0_Tool::createImage(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits) const
 {
   Image image(m_imageSize_y, m_imageSize_x);
 
@@ -333,7 +333,7 @@ static inline std::string instance_name(std::string const & s)
   return s;
 }
 
-double FPGATrackSimHoughTransform_d0phi0_Tool::yToX(double y, FPGATrackSimHit const * hit) const
+double FPGATrackSimHoughTransform_d0phi0_Tool::yToX(double y, const std::shared_ptr<const FPGATrackSimHit> &hit) const
 {
   double x = 0;
 
@@ -351,7 +351,7 @@ double FPGATrackSimHoughTransform_d0phi0_Tool::yToX(double y, FPGATrackSimHit co
 
 // Find the min/max x bins of the hit's line, in each y bin. Max is exclusive.
 // Note this assumes yToX is monotonic. Returns {0, 0} if hit lies out of bounds.
-std::pair<unsigned, unsigned> FPGATrackSimHoughTransform_d0phi0_Tool::yToXBins(size_t yBin_min, size_t yBin_max, FPGATrackSimHit const * hit) const
+std::pair<unsigned, unsigned> FPGATrackSimHoughTransform_d0phi0_Tool::yToXBins(size_t yBin_min, size_t yBin_max, const std::shared_ptr<const FPGATrackSimHit> &hit) const
 {
   // Get float values
   double x_min = yToX(m_bins_y[yBin_min], hit);
@@ -397,7 +397,7 @@ void FPGATrackSimHoughTransform_d0phi0_Tool::matchIdealGeoSector(FPGATrackSimRoa
       wcHit->setHitType(HitType::wildcard);
       wcHit->setLayer(il);
       wcHit->setDetType(m_FPGATrackSimMapping->PlaneMap_1st()->getDetType(il));
-      r.setHits(il,std::vector<const FPGATrackSimHit*>({wcHit.get()}));
+      r.setHits(il,std::vector<std::shared_ptr<const FPGATrackSimHit>>({std::move(wcHit)}));
 
     }
     else
@@ -408,11 +408,11 @@ void FPGATrackSimHoughTransform_d0phi0_Tool::matchIdealGeoSector(FPGATrackSimRoa
 }
 
 // Create road via hits only
-FPGATrackSimRoad FPGATrackSimHoughTransform_d0phi0_Tool::createRoad(std::unordered_set<const FPGATrackSimHit*> const & hits, unsigned x, unsigned y) const {
+FPGATrackSimRoad FPGATrackSimHoughTransform_d0phi0_Tool::createRoad(const std::unordered_set<std::shared_ptr<const FPGATrackSimHit>> &hits, unsigned x, unsigned y) const {
   // Get the road hits
-  std::vector<const FPGATrackSimHit*> road_hits;
+  std::vector<std::shared_ptr<const FPGATrackSimHit>> road_hits;
   layer_bitmask_t hitLayers = 0;
-  for (const FPGATrackSimHit * hit : hits) {
+  for (const auto &hit : hits) {
     road_hits.push_back(hit);
     hitLayers |= 1 << hit->getLayer();
   }
@@ -433,7 +433,7 @@ FPGATrackSimRoad FPGATrackSimHoughTransform_d0phi0_Tool::createRoad(std::unorder
 }
 
 // Creates a road from hits that pass through the given bin (x, y), and pushes it onto m_roads
-FPGATrackSimRoad FPGATrackSimHoughTransform_d0phi0_Tool::createRoad(std::vector<std::vector<const FPGATrackSimHit*>> const & hits, layer_bitmask_t hitLayers, unsigned x, unsigned y) const
+FPGATrackSimRoad FPGATrackSimHoughTransform_d0phi0_Tool::createRoad(const std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>> &hits, layer_bitmask_t hitLayers, unsigned x, unsigned y) const
 {
   FPGATrackSimRoad r;
   r.setRoadID(m_roads.size());
@@ -451,10 +451,10 @@ FPGATrackSimRoad FPGATrackSimHoughTransform_d0phi0_Tool::createRoad(std::vector<
 
 
 // Creates a road from hits that pass through the given bin (x, y), and pushes it onto m_roads
-void FPGATrackSimHoughTransform_d0phi0_Tool::addRoad(std::unordered_set<const FPGATrackSimHit*> const & hits, unsigned x, unsigned y)
+void FPGATrackSimHoughTransform_d0phi0_Tool::addRoad(const std::unordered_set<std::shared_ptr<const FPGATrackSimHit>> &hits, unsigned x, unsigned y)
 {
   layer_bitmask_t hitLayers = 0;
-  for (FPGATrackSimHit const * hit : hits) {
+  for (auto const & hit : hits) {
     hitLayers |= 1 << hit->getLayer();
   }
 
@@ -464,12 +464,12 @@ void FPGATrackSimHoughTransform_d0phi0_Tool::addRoad(std::unordered_set<const FP
 }
 
 // Use this version of addRoad when hit tracing is turned off
-void FPGATrackSimHoughTransform_d0phi0_Tool::addRoad(std::vector<const FPGATrackSimHit*> const & hits, unsigned x, unsigned y)
+void FPGATrackSimHoughTransform_d0phi0_Tool::addRoad(const std::vector<std::shared_ptr<const FPGATrackSimHit>> &hits, unsigned x, unsigned y)
 {
   // Get the road hits
-  std::vector<FPGATrackSimHit const *> road_hits;
+  std::vector<std::shared_ptr<const FPGATrackSimHit>> road_hits;
   layer_bitmask_t hitLayers = 0;
-  for (const FPGATrackSimHit * hit : hits) {
+  for (const auto &hit : hits) {
     if (m_subRegion >= 0 && !m_FPGATrackSimMapping->SubRegionMap()->isInRegion(m_subRegion, *hit)) continue;
 
     // get bin scaling for the hit

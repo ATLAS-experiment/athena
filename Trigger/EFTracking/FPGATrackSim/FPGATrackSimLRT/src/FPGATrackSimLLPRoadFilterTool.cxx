@@ -7,8 +7,8 @@ FPGATrackSimLLPRoadFilterTool::FPGATrackSimLLPRoadFilterTool (const std::string&
 
 
 StatusCode FPGATrackSimLLPRoadFilterTool::filterUsedHits( std::vector<FPGATrackSimTrack> &tracks, 
-                                              const std::vector<const FPGATrackSimHit*>& allHits, 
-                                              std::vector<const FPGATrackSimHit*>& unusedHits ) {
+                                              const std::vector<std::shared_ptr<const FPGATrackSimHit>>& allHits, 
+                                              std::vector<std::shared_ptr<const FPGATrackSimHit>>& unusedHits ) {
     std::vector<FPGATrackSimHit> hitsInTracksVec;
     for (const auto& track : tracks) {
         for (const FPGATrackSimHit& hit : track.getFPGATrackSimHits()) {
@@ -17,17 +17,17 @@ StatusCode FPGATrackSimLLPRoadFilterTool::filterUsedHits( std::vector<FPGATrackS
             }
         }
     }
-    std::set<const FPGATrackSimHit*, HitCompare > hitsInTracks;
-    for ( auto& hit : hitsInTracksVec) {
-        hitsInTracks.insert(&hit);
+    std::set<std::shared_ptr<const FPGATrackSimHit>, HitCompare > hitsInTracks;
+    for ( const auto& hit : hitsInTracksVec) {
+        hitsInTracks.emplace(std::make_shared<const FPGATrackSimHit>(hit));
     }
 
     ATH_MSG_DEBUG("Number of hits from tracks " <<  hitsInTracks.size());
 
-    std::set<const FPGATrackSimHit*, HitCompare> orderedHits;
-    for ( auto hit: allHits){
+    std::set<std::shared_ptr<const FPGATrackSimHit>, HitCompare> orderedHits;
+    for ( const auto &hit: allHits){
         if ( hit->isReal()) {
-            orderedHits.insert(hit);
+            orderedHits.emplace(hit);
         }
     }
     ATH_MSG_DEBUG("Number of all hits " << orderedHits.size() << " " << allHits.size() );

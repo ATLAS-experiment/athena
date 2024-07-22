@@ -21,13 +21,13 @@ public:
   FPGATrackSimLLPRoadFilterTool (const std::string& algname, const std::string& name, const IInterface* ifc);
 
   StatusCode filterUsedHits(std::vector<FPGATrackSimTrack> &tracks, 
-			    const std::vector<const FPGATrackSimHit*>& allHits, 
-			    std::vector<const FPGATrackSimHit*>& unusedHits );
+			    const std::vector<std::shared_ptr<const FPGATrackSimHit>>& allHits, 
+			    std::vector<std::shared_ptr<const FPGATrackSimHit>>& unusedHits );
 
 private:
     // Make a list of all hits used in any track
     struct HitCompare {
-        bool operator()(const FPGATrackSimHit* a, const FPGATrackSimHit* b) const { 
+        bool operator()(std::shared_ptr<const FPGATrackSimHit> a, std::shared_ptr<const FPGATrackSimHit> b) const { 
             auto hash_a = a->getIdentifierHash();
             auto hash_b = b->getIdentifierHash();
             if ( hash_a == hash_b ) {

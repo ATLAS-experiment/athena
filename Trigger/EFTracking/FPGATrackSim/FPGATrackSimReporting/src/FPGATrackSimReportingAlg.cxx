@@ -177,8 +177,8 @@ void FPGATrackSim::FPGATrackSimReportingAlg::printFPGARoads(SG::ReadHandle<FPGAT
         for (unsigned int i = 0; i < road.getNLayers(); ++i)
         {
             hitCounter = 0;
-            const std::vector <const FPGATrackSimHit*>& hits = road.getHits(i);
-            for (const FPGATrackSimHit* const hit : hits)
+            const std::vector <std::shared_ptr<const FPGATrackSimHit>>& hits = road.getHits(i);
+            for (auto const& hit : hits)
             {
                 ++hitCounter;
                 mainTable += std::format("|        | {:>9} | {:>6} | {:>8} | {:>13} | {:>13} | {:>13} | {:>7} |\n",

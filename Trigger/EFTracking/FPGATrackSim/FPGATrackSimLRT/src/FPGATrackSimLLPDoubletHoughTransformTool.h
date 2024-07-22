@@ -31,7 +31,7 @@ public:
     virtual StatusCode initialize() override;
     virtual StatusCode finalize() override;
 
-    virtual StatusCode getRoads(const std::vector<const FPGATrackSimHit*> & hits, std::vector<FPGATrackSimRoad*> & roads) override;
+    virtual StatusCode getRoads(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, std::vector<FPGATrackSimRoad*> & roads) override;
 
 
 private:
@@ -46,7 +46,7 @@ private:
 	Gaudi::Property <bool> m_continuous { this, "continuous", true, "assure that there is continuity of the line (i.e. middle bins in d0 are filled when one q/pT step would result in a hole)"};
 
 
-    typedef vector2D<std::pair<int, std::unordered_set<const FPGATrackSimHit*>>> Image;
+    typedef vector2D<std::pair<int, std::unordered_set<std::shared_ptr<const FPGATrackSimHit>>>> Image;
     std::vector<FPGATrackSimRoad> m_roads;
 
     const double m_acceptedDistanceBetweenLayersMin = 200; // min R disstance for hits pair filtering
@@ -55,11 +55,11 @@ private:
     double m_step_x = 0; // helpers (accumulator granularity)
     double m_step_y = 0;
 
-    StatusCode fillImage(const FPGATrackSimHit *hit1, const FPGATrackSimHit *hit2, Image& image) const;
+    StatusCode fillImage(std::shared_ptr<const FPGATrackSimHit> &hit1, std::shared_ptr<const FPGATrackSimHit> &hit2, Image& image) const;
     bool passThreshold(Image const & image, int x, int y) const;
     bool isLocalMaxima(Image const & image, int x, int y) const;
 
-    FPGATrackSimRoad createRoad(std::unordered_set<const FPGATrackSimHit*> const & hits, unsigned x, unsigned y) const;
+    FPGATrackSimRoad createRoad(const std::unordered_set<std::shared_ptr<const FPGATrackSimHit>> & hits, unsigned x, unsigned y) const;
     unsigned m_event = 0;
     void drawImage(Image const & image) const;
 

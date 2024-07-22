@@ -118,9 +118,9 @@ StatusCode FPGATrackSimSpacepointRoadFilterTool::filterRoads(const std::vector<F
 bool FPGATrackSimSpacepointRoadFilterTool::splitRoad(FPGATrackSimRoad* initial_road) {
 
     // Loop through the initial road, keeping track of the spacepoints and single hits as we go.
-    std::map<size_t, std::vector<const FPGATrackSimHit*>> strip_hits;
-    std::map<size_t, std::vector<const FPGATrackSimHit*>> inner_spacepoints;
-    std::map<size_t, std::vector<const FPGATrackSimHit*>> outer_spacepoints;
+    std::map<size_t, std::vector<std::shared_ptr<const FPGATrackSimHit>>> strip_hits;
+    std::map<size_t, std::vector<std::shared_ptr<const FPGATrackSimHit>>> inner_spacepoints;
+    std::map<size_t, std::vector<std::shared_ptr<const FPGATrackSimHit>>> outer_spacepoints;
 
     bool retval = true;
     // Loop over each pair of strip layers.
@@ -136,10 +136,10 @@ bool FPGATrackSimSpacepointRoadFilterTool::splitRoad(FPGATrackSimRoad* initial_r
         }
 
         // Get the hits in these two layers, split by whether or not they are SPs.
-        std::vector<const FPGATrackSimHit*> strip_hits_in;
-        std::vector<const FPGATrackSimHit*> spacepoints_in;
-        const std::vector<const FPGATrackSimHit*> hits_in = initial_road->getHits(layer);
-        for (auto* hit : hits_in) {
+        std::vector<std::shared_ptr<const FPGATrackSimHit>> strip_hits_in;
+        std::vector<std::shared_ptr<const FPGATrackSimHit>> spacepoints_in;
+        const std::vector<std::shared_ptr<const FPGATrackSimHit>> hits_in = initial_road->getHits(layer);
+        for (auto& hit : hits_in) {
             if (hit->getHitType() == HitType::spacepoint) {
                 spacepoints_in.push_back(hit);
             } else {
@@ -148,10 +148,10 @@ bool FPGATrackSimSpacepointRoadFilterTool::splitRoad(FPGATrackSimRoad* initial_r
         }
 
         // Do the same for the next layer.
-        std::vector<const FPGATrackSimHit*> strip_hits_out;
-        std::vector<const FPGATrackSimHit*> spacepoints_out;
-        const std::vector<const FPGATrackSimHit*> hits_out = initial_road->getHits(layer + 1);
-        for (auto* hit : hits_out) {
+        std::vector<std::shared_ptr<const FPGATrackSimHit>> strip_hits_out;
+        std::vector<std::shared_ptr<const FPGATrackSimHit>> spacepoints_out;
+        const std::vector<std::shared_ptr<const FPGATrackSimHit>> hits_out = initial_road->getHits(layer + 1);
+        for (auto& hit : hits_out) {
             if (hit->getHitType() == HitType::spacepoint) {
                 spacepoints_out.push_back(hit);
             } else {
@@ -165,8 +165,8 @@ bool FPGATrackSimSpacepointRoadFilterTool::splitRoad(FPGATrackSimRoad* initial_r
         // In principle the only way this can happen legitimately is in the eta pattern filter; if it happens
         // for any other reason it's a bug.
 
-        std::vector<const FPGATrackSimHit*> new_sp_in;
-        std::vector<const FPGATrackSimHit*> new_sp_out;
+        std::vector<std::shared_ptr<const FPGATrackSimHit>> new_sp_in;
+        std::vector<std::shared_ptr<const FPGATrackSimHit>> new_sp_out;
         unsigned num_unique = findUnique(spacepoints_in, spacepoints_out, strip_hits_in, strip_hits_out, new_sp_in, new_sp_out);
 
         if (num_unique > 0) {
@@ -178,11 +178,11 @@ bool FPGATrackSimSpacepointRoadFilterTool::splitRoad(FPGATrackSimRoad* initial_r
             spacepoints_out = new_sp_out;
 
             // Now update the two layers accordingly, having converted invalid SPs back to paired hits.
-            std::vector<const FPGATrackSimHit*> new_all_in = spacepoints_in;
+            std::vector<std::shared_ptr<const FPGATrackSimHit>> new_all_in = spacepoints_in;
             new_all_in.insert(std::end(new_all_in), std::begin(strip_hits_in), std::end(strip_hits_in));
             initial_road->setHits(layer, new_all_in);
 
-            std::vector<const FPGATrackSimHit*> new_all_out = spacepoints_out;
+            std::vector<std::shared_ptr<const FPGATrackSimHit>> new_all_out = spacepoints_out;
             new_all_out.insert(std::end(new_all_out), std::begin(strip_hits_out), std::end(strip_hits_out));
             initial_road->setHits(layer + 1, new_all_out);
 
@@ -214,8 +214,8 @@ bool FPGATrackSimSpacepointRoadFilterTool::splitRoad(FPGATrackSimRoad* initial_r
         size_t layer = entry.first;
 
         // Look up the associated strip hits.
-        std::vector<const FPGATrackSimHit*> strip_hits_in = strip_hits[layer];
-        std::vector<const FPGATrackSimHit*> strip_hits_out = strip_hits[layer + 1];
+        std::vector<std::shared_ptr<const FPGATrackSimHit>> strip_hits_in = strip_hits[layer];
+        std::vector<std::shared_ptr<const FPGATrackSimHit>> strip_hits_out = strip_hits[layer + 1];
 
         ATH_MSG_DEBUG("Road (x = " << new_road.getXBin() << ", y = " << new_road.getYBin() << ") has merged spacepoints: " << entry.second.size() << ", unpaired inner hits: " << strip_hits_in.size() << ", unpaired outer hits: " << strip_hits_out.size());
 
@@ -227,17 +227,18 @@ bool FPGATrackSimSpacepointRoadFilterTool::splitRoad(FPGATrackSimRoad* initial_r
             // If there is only a strip hit in one of the two layers, we'll need to add a wildcard.
             int wildcard_layer = -1;
             if (strip_hits_in.size() == 0 || strip_hits_out.size() == 0) {
-                FPGATrackSimHit *wcHit = new FPGATrackSimHit();
+                std::unique_ptr<FPGATrackSimHit> wcHit = std::make_unique<FPGATrackSimHit>();
                 wcHit->setHitType(HitType::wildcard);
                 wcHit->setDetType(/*initial_road->isSecondStage() ? m_FPGATrackSimMapping->PlaneMap_2nd()->getDetType(layer) :*/ m_FPGATrackSimMapping->PlaneMap_1st()->getDetType(layer));
                 if (strip_hits_in.size() == 0) {
-                    strip_hits_in.push_back(wcHit);
                     wildcard_layer = layer;
+                    wcHit->setLayer(wildcard_layer);
+                    strip_hits_in.push_back(std::move(wcHit));
                 } else {
-                    strip_hits_out.push_back(wcHit);
                     wildcard_layer = layer + 1;
+                    wcHit->setLayer(wildcard_layer);
+                    strip_hits_out.push_back(std::move(wcHit));
                 }
-                wcHit->setLayer(wildcard_layer);
             }
 
             // This could probably be expressed with an iterator, but it's a little cleaner
@@ -348,16 +349,16 @@ unsigned FPGATrackSimSpacepointRoadFilterTool::setSector(FPGATrackSimRoad& road)
     return numSpacePlusPixel;
 }
 
-unsigned FPGATrackSimSpacepointRoadFilterTool::findUnique(std::vector<const FPGATrackSimHit*>& sp_in, std::vector<const FPGATrackSimHit*>& sp_out,
-                                             std::vector<const FPGATrackSimHit*>& unique_in, std::vector<const FPGATrackSimHit*>& unique_out,
-                                             std::vector<const FPGATrackSimHit*>& new_sp_in, std::vector<const FPGATrackSimHit*>& new_sp_out) {
+unsigned FPGATrackSimSpacepointRoadFilterTool::findUnique(std::vector<std::shared_ptr<const FPGATrackSimHit>>& sp_in, std::vector<std::shared_ptr<const FPGATrackSimHit>>& sp_out,
+    std::vector<std::shared_ptr<const FPGATrackSimHit>>& unique_in, std::vector<std::shared_ptr<const FPGATrackSimHit>>& unique_out,
+    std::vector<std::shared_ptr<const FPGATrackSimHit>>& new_sp_in, std::vector<std::shared_ptr<const FPGATrackSimHit>>& new_sp_out) {
 
-    std::map<std::tuple<float, float, float>, const FPGATrackSimHit*> merged_map;
+    std::map<std::tuple<float, float, float>, std::shared_ptr<const FPGATrackSimHit>> merged_map;
     std::tuple<float, float, float> coords;
 
     // Loop over the inner spacepoints and fill the (x,y,z)->hit map.
     unsigned num_unique = 0;
-    for (auto* spacepoint : sp_in) {
+    for (const auto& spacepoint : sp_in) {
         coords = {spacepoint->getX(), spacepoint->getY(), spacepoint->getZ()};
         merged_map.try_emplace(coords, spacepoint);
     }
@@ -365,13 +366,13 @@ unsigned FPGATrackSimSpacepointRoadFilterTool::findUnique(std::vector<const FPGA
     // Loop over the outer spacepoints. If a hit is *not* in the map already,
     // then it's unique. In which case we either convert it back to a normal hit
     // and add it to the "unique_out" vector, or we
-    for (auto* spacepoint : sp_out) {
+    for (auto& spacepoint : sp_out) {
         coords = {spacepoint->getX(), spacepoint->getY(), spacepoint->getZ()};
         if (merged_map.count(coords) == 0) {
             merged_map.emplace(coords, spacepoint);
             if (!m_filtering) {
-                FPGATrackSimHit* original = new FPGATrackSimHit(spacepoint->getOriginalHit());
-                unique_out.push_back(original);
+                std::unique_ptr<const FPGATrackSimHit> original = std::make_unique<FPGATrackSimHit>(spacepoint->getOriginalHit());
+                unique_out.push_back(std::move(original));
             }
             num_unique += 1;
         } else {
@@ -383,12 +384,12 @@ unsigned FPGATrackSimSpacepointRoadFilterTool::findUnique(std::vector<const FPGA
 
     // Now loop over the inner hits a second time, and find the unique entries.
     // At this point, if it IS present in the map, it's a unique entry.
-    for (auto* spacepoint : sp_in) {
+    for (auto& spacepoint : sp_in) {
         coords = {spacepoint->getX(), spacepoint->getY(), spacepoint->getZ()};
         if (merged_map.count(coords) != 0) {
             if (!m_filtering) {
-                FPGATrackSimHit* original = new FPGATrackSimHit(spacepoint->getOriginalHit());
-                unique_in.push_back(original);
+                std::unique_ptr<const FPGATrackSimHit> original = std::make_unique<FPGATrackSimHit>(spacepoint->getOriginalHit());
+                unique_in.push_back(std::move(original));
             }
             num_unique += 1;
         } else {

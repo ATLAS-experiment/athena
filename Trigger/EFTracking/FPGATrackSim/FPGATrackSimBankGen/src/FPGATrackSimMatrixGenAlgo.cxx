@@ -239,10 +239,10 @@ StatusCode FPGATrackSimMatrixGenAlgo::execute()
     std::vector<FPGATrackSimRoad*> houghRoads;
     if (m_doHoughConstants){
       
-      std::vector<const FPGATrackSimHit*> phits;
+      std::vector<std::shared_ptr<const FPGATrackSimHit>> phits;
       std::vector<FPGATrackSimRoad*> roads;
       
-      for (const FPGATrackSimHit& hit : sector_hits) phits.push_back(&hit);
+      for (const FPGATrackSimHit& hit : sector_hits) phits.emplace_back(std::make_shared<const FPGATrackSimHit>(hit));
       
       StatusCode sc = m_roadFinderTool->getRoads(phits, roads);
       if (sc.isFailure()) ATH_MSG_WARNING("Hough Transform -> getRoads() failed");

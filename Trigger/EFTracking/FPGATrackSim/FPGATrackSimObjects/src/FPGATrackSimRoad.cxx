@@ -18,30 +18,30 @@ using namespace std;
 size_t FPGATrackSimRoad::getNHits() const
 {
     size_t n = 0;
-    for (const auto& l : m_hits) n += l.size();
+    for (const auto& l : m_hits_trans) n += l.size();
     return n;
 }
 
 std::vector<size_t> FPGATrackSimRoad::getNHits_layer() const
 {
     std::vector<size_t> out;
-    for (const auto& l : m_hits) out.push_back(l.size());
+    for (const auto& l : m_hits_trans) out.push_back(l.size());
     return out;
 }
 
 size_t FPGATrackSimRoad::getNHitCombos() const
 {
     size_t combos = 1;
-    size_t l = m_hits.size();
+    size_t l = m_hits_trans.size();
     std::vector<unsigned int> skipindices;
 
     // figure out indices of outer layers of stereo layers, where inner layer is also present to not
     // double count spacepoints
     for (size_t i = 1; i < l; ++i) {
-        if (m_hits[i - 1].size() > 0 && m_hits[i].size() > 0) {
-            if ((m_hits[i - 1][0]->isStrip() && m_hits[i][0]->isStrip()) &&
-                (m_hits[i - 1][0]->getPhysLayer() % 2 == 0) &&
-                (m_hits[i][0]->getPhysLayer() - m_hits[i - 1][0]->getPhysLayer() == 1)) {
+        if (m_hits_trans[i - 1].size() > 0 && m_hits_trans[i].size() > 0) {
+            if ((m_hits_trans[i - 1][0]->isStrip() && m_hits_trans[i][0]->isStrip()) &&
+                (m_hits_trans[i - 1][0]->getPhysLayer() % 2 == 0) &&
+                (m_hits_trans[i][0]->getPhysLayer() - m_hits_trans[i - 1][0]->getPhysLayer() == 1)) {
                 skipindices.push_back(i);
                 ++i;
             }
@@ -51,9 +51,9 @@ size_t FPGATrackSimRoad::getNHitCombos() const
     // calculate number of combinations
     for (size_t i = 0; i < l; ++i) {
         size_t n = 0;
-        for (size_t j = 0; j < m_hits[i].size(); ++j) {
+        for (size_t j = 0; j < m_hits_trans[i].size(); ++j) {
             // extra handling of spacepoints in combination calculation
-            if (m_hits[i][j]->getHitType() == HitType::spacepoint) {
+            if (m_hits_trans[i][j]->getHitType() == HitType::spacepoint) {
                 bool skip = false;
                 size_t skipsize = skipindices.size();
                 for (size_t k = 0; k < skipsize; ++k)
@@ -75,14 +75,14 @@ FPGATrackSimMultiTruth FPGATrackSimRoad::getTruth() const
     // get number of pixel layers from hits. Assumes strips follow pixels,
     // and all hits in a layer share the same det type
     unsigned nPixel;
-    for (nPixel = 0; nPixel < m_hits.size(); nPixel++)
-        if (!m_hits[nPixel].empty() && m_hits[nPixel].front()->isStrip())
+    for (nPixel = 0; nPixel < m_hits_trans.size(); nPixel++)
+        if (!m_hits_trans[nPixel].empty() && m_hits_trans[nPixel].front()->isStrip())
             break;
 
     std::map<FPGATrackSimMultiTruth::Barcode, layer_bitmask_t> layer_map;
 
-    for (auto const& hits : m_hits)
-        for (FPGATrackSimHit const* h : hits)
+    for (auto const& hits : m_hits_trans)
+        for (auto const &h : hits)
             for (auto const& x : h->getTruth())
                 layer_map[x.first] |= (1 << h->getLayer());
 
@@ -90,9 +90,9 @@ FPGATrackSimMultiTruth FPGATrackSimRoad::getTruth() const
     for (auto const& x : layer_map)
     {
         int w = 0, n = 0;
-        for (unsigned i = 0; i < m_hits.size(); i++)
+        for (unsigned i = 0; i < m_hits_trans.size(); i++)
         {
-            if (!m_hits[i].empty())
+            if (!m_hits_trans[i].empty())
                 n += (i < nPixel) ? 2 : 1; // double weight pixels
             if (x.second & (1 << i))
                 w += (i < nPixel) ? 2 : 1; // double weight pixels

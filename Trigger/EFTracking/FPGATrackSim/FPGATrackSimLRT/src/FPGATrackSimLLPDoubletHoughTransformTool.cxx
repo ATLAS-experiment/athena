@@ -59,15 +59,15 @@ StatusCode FPGATrackSimLLPDoubletHoughTransformTool::finalize() {
     return StatusCode::SUCCESS;
 }
 
-StatusCode FPGATrackSimLLPDoubletHoughTransformTool::getRoads(const std::vector<const FPGATrackSimHit*> & hits, std::vector<FPGATrackSimRoad*> & roads) {
+StatusCode FPGATrackSimLLPDoubletHoughTransformTool::getRoads(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, std::vector<FPGATrackSimRoad*> & roads) {
     roads.clear();
     m_roads.clear();
     m_eventsProcessed++;
     Image image(m_imageSize_x, m_imageSize_y); // not quite optimal to allocate this memory in evey event, but following nominal HT
     for (unsigned ihit1 = 0; ihit1 < hits.size(); ihit1++) {
-      const FPGATrackSimHit *hit1 = hits[ihit1];
+      std::shared_ptr<const FPGATrackSimHit> hit1 = hits[ihit1];
       for (unsigned ihit2 = ihit1+1; ihit2 < hits.size(); ihit2++) {
-	const FPGATrackSimHit *hit2 = hits[ihit2];
+	std::shared_ptr<const FPGATrackSimHit> hit2 = hits[ihit2];
             ATH_MSG_DEBUG("Hits pair R: " << hit1->getR() << " " << hit2->getR());
             //TODO: replace with qualification by layer IDs
             const double radiusDifference =  hit2->getR() - hit1->getR();
@@ -99,7 +99,7 @@ StatusCode FPGATrackSimLLPDoubletHoughTransformTool::getRoads(const std::vector<
 }
 
 
-StatusCode FPGATrackSimLLPDoubletHoughTransformTool::fillImage(const FPGATrackSimHit *hit1, const FPGATrackSimHit *hit2, Image& image) const { 
+StatusCode FPGATrackSimLLPDoubletHoughTransformTool::fillImage(std::shared_ptr<const FPGATrackSimHit> &hit1, std::shared_ptr<const FPGATrackSimHit> &hit2, Image& image) const { 
     const pvec p1 {{hit1->getX(), hit1->getY()}};
     const pvec p2 {{hit2->getX(), hit2->getY()}};
     const pvec halfDiff = (p2 - p1)*0.5;
@@ -139,11 +139,11 @@ StatusCode FPGATrackSimLLPDoubletHoughTransformTool::fillImage(const FPGATrackSi
     return StatusCode::SUCCESS;
 }
 
-FPGATrackSimRoad FPGATrackSimLLPDoubletHoughTransformTool::createRoad(std::unordered_set<const FPGATrackSimHit*> const & hits, unsigned /*x*/, unsigned /*y*/) const {
+FPGATrackSimRoad FPGATrackSimLLPDoubletHoughTransformTool::createRoad(const std::unordered_set<std::shared_ptr<const FPGATrackSimHit>> & hits, unsigned /*x*/, unsigned /*y*/) const {
     // Get the road hits
-    std::vector<const FPGATrackSimHit*> road_hits;
+    std::vector<std::shared_ptr<const FPGATrackSimHit>> road_hits;
     layer_bitmask_t hitLayers = 0;
-    for (const FPGATrackSimHit * hit : hits)
+    for (const auto & hit : hits)
     {
         road_hits.push_back(hit);
         hitLayers |= 1 << hit->getLayer();

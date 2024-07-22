@@ -34,7 +34,7 @@ class FPGATrackSimRoadUnionTool : public extends <AthAlgTool, IFPGATrackSimRoadF
         ///////////////////////////////////////////////////////////////////////
         // IFPGATrackSimRoadFinderTool
 
-        virtual StatusCode getRoads(const std::vector<const FPGATrackSimHit*> & hits, std::vector<FPGATrackSimRoad*> & roads) override;
+        virtual StatusCode getRoads(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, std::vector<FPGATrackSimRoad*> & roads) override;
 
         ///////////////////////////////////////////////////////////////////////
         // FPGATrackSimRoadUnionTool

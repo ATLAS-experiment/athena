@@ -78,7 +78,7 @@ StatusCode FPGATrackSimNNTrackTool::getTracks(std::vector<FPGATrackSimRoad *> &r
 
       // list of indices for this particular combination
       std::vector<int> const &hit_indices = combs[icomb];
-      std::vector<const FPGATrackSimHit *> hit_list;
+      std::vector<std::shared_ptr<const FPGATrackSimHit>> hit_list;
 
       // Loop over all layers
       for (unsigned layer = 0; layer < planeMap->getNLogiLayers(); layer++) {
@@ -86,7 +86,7 @@ StatusCode FPGATrackSimNNTrackTool::getTracks(std::vector<FPGATrackSimRoad *> &r
         // Check to see if this is a valid hit
         if (hit_indices[layer] >= 0) {
 
-          const FPGATrackSimHit *hit = iroad->getHits(layer)[hit_indices[layer]];
+          std::shared_ptr<const FPGATrackSimHit> hit = iroad->getHits(layer)[hit_indices[layer]];
           // Add this hit to the road
           hit_list.push_back(hit);
         }
@@ -94,7 +94,7 @@ StatusCode FPGATrackSimNNTrackTool::getTracks(std::vector<FPGATrackSimRoad *> &r
 
       // Sort the list by radial distance
       std::sort(hit_list.begin(), hit_list.end(),
-                [](const FPGATrackSimHit *hit1, const FPGATrackSimHit *hit2) {
+                [](std::shared_ptr<const FPGATrackSimHit> &hit1, std::shared_ptr<const FPGATrackSimHit> &hit2) {
                   double rho1 = std::hypot(hit1->getX(), hit1->getY());
                   double rho2 = std::hypot(hit2->getX(), hit2->getY());
                   return rho1 < rho2;

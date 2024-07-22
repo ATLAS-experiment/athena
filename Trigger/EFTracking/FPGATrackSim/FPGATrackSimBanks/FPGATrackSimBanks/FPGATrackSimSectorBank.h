@@ -21,6 +21,8 @@
 #include <map>
 #include <fstream>
 #include <vector>
+#include <memory>
+
 #include "FPGATrackSimObjects/FPGATrackSimTypes.h"
 
 class FPGATrackSimHit;
@@ -43,7 +45,7 @@ class FPGATrackSimSectorBank
 
         // Returns the sector matching 'hits' exactly (WC must be matched with WC), or -1 if none.
         // If multiple hits have different hashIDs, will prefer most popular, then random.
-        sector_t findSector(std::vector<std::vector<const FPGATrackSimHit*>> const & hits) const;
+        sector_t findSector(std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>> const & hits) const;
 
 
         // Helper functions to set and retrieve information about the sector q/pt binning.
