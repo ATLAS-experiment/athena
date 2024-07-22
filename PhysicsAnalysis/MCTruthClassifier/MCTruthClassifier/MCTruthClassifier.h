@@ -126,7 +126,6 @@ public:
 #endif
   { return StatusCode::SUCCESS;}
 
-  /* All get to see these*/
   virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
   particleTruthClassifier(const xAOD::TruthParticle*,MCTruthPartClassifier::Info* info = nullptr) const override;
 

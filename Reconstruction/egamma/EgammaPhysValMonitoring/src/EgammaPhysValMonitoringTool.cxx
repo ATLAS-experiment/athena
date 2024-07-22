@@ -1,5 +1,3 @@
-///////////////////////// -*- C++ -*- /////////////////////////////
-
 /*
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
@@ -26,6 +24,7 @@
 
 #include "MCTruthClassifier/IMCTruthClassifier.h"
 #include "MCTruthClassifier/MCTruthClassifierDefs.h"
+#include "MCTruthClassifier/MCTruthClassifier.h"
 
 #include "StoreGate/ReadHandle.h"
 #include "AthContainers/ConstAccessor.h"
@@ -83,9 +82,7 @@ StatusCode EgammaPhysValMonitoringTool::initialize()
   return StatusCode::SUCCESS;
 }
 
-//-------------------------------------------------------------------
 StatusCode EgammaPhysValMonitoringTool::bookHistograms() 
-//-------------------------------------------------------------------
 {
   ATH_MSG_INFO ("Booking hists " << name() << "...");
 
@@ -114,9 +111,7 @@ StatusCode EgammaPhysValMonitoringTool::bookHistograms()
 }
 
 
-//-------------------------------------------------------------------
 StatusCode EgammaPhysValMonitoringTool::fillHistograms()
-//-------------------------------------------------------------------
 {
   ATH_MSG_DEBUG("Filling hists " << name() << "...");
 
@@ -244,8 +239,7 @@ StatusCode EgammaPhysValMonitoringTool::fillHistograms()
           MC::isStable(truthallParticle) &&
           HepMC::generations(truthallParticle) == 0) {
 
-        auto type =
-          m_truthClassifier->particleTruthClassifier(truthallParticle, &info);
+        auto type = m_truthClassifier->particleTruthClassifier(truthallParticle, &info);
         if (type.first == IsoElectron)
           elecPrompt = true;
 
@@ -264,8 +258,7 @@ StatusCode EgammaPhysValMonitoringTool::fillHistograms()
           MC::isStable(truthallParticle) &&
           HepMC::generations(truthallParticle) == 0) {
 
-        auto type =
-          m_truthClassifier->particleTruthClassifier(truthallParticle, &info);
+        auto type = m_truthClassifier->particleTruthClassifier(truthallParticle, &info);
         if (type.first == IsoPhoton)
           photonPrompt = true;
 
@@ -277,8 +270,7 @@ StatusCode EgammaPhysValMonitoringTool::fillHistograms()
           continue;
         if (truthallParticle->pt() / GeV > 20. &&
             fabs(truthallParticle->eta()) < 2.47) {
-          m_oPhotonValidationPlots.m_oTruthAllIsoPlots.fill(*truthallParticle,
-                                                            *eventInfo);
+          m_oPhotonValidationPlots.m_oTruthAllIsoPlots.fill(*truthallParticle, *eventInfo);
           m_truthClassifier->particleTruthClassifier(truthallParticle, &info);
           ParticleOutCome photOutCome = info.particleOutCome;
 
@@ -351,9 +343,7 @@ StatusCode EgammaPhysValMonitoringTool::fillHistograms()
   return StatusCode::SUCCESS;
 }
 
-//-------------------------------------------------------------------
 StatusCode EgammaPhysValMonitoringTool::fillRecoElecHistograms(const xAOD::TruthParticleContainer* truthParticles, const xAOD::EventInfo* eventInfo)
-//-------------------------------------------------------------------
 {
   ATH_MSG_DEBUG ("Filling reco electron hists " << name() << "...");
   
@@ -409,9 +399,7 @@ StatusCode EgammaPhysValMonitoringTool::fillRecoElecHistograms(const xAOD::Truth
   return StatusCode::SUCCESS;
 }
 
-//-------------------------------------------------------------------
 StatusCode EgammaPhysValMonitoringTool::fillLRTElecHistograms(const xAOD::TruthParticleContainer* truthParticles, const xAOD::EventInfo* eventInfo)
-//-------------------------------------------------------------------
 {
   ATH_MSG_DEBUG ("Filling lrt electron hists " << name() << "...");
   
@@ -509,9 +497,8 @@ StatusCode EgammaPhysValMonitoringTool::fillRecoFrwdElecHistograms(const xAOD::T
   
   return StatusCode::SUCCESS;
 }
-//-------------------------------------------------------------------
+
 StatusCode EgammaPhysValMonitoringTool::fillRecoPhotHistograms(const xAOD::TruthParticleContainer* truthParticles, const xAOD::EventInfo* eventInfo)
-//-------------------------------------------------------------------
 {
   ATH_MSG_DEBUG ("Filling reco photon  hists " << name() << "...");
  
@@ -580,9 +567,8 @@ StatusCode EgammaPhysValMonitoringTool::fillRecoPhotHistograms(const xAOD::Truth
 
   return StatusCode::SUCCESS;
 }
-//-------------------------------------------------------------------
+
 StatusCode EgammaPhysValMonitoringTool::procHistograms() 
-//-------------------------------------------------------------------
   {
     ATH_MSG_INFO ("Finalising hists " << name() << "...");
     m_oElectronValidationPlots.finalize();
@@ -590,11 +576,9 @@ StatusCode EgammaPhysValMonitoringTool::procHistograms()
     return StatusCode::SUCCESS;
   }
 
-//--------------------------------------------------------------------------------------------
 const xAOD::TruthParticle* EgammaPhysValMonitoringTool::Match(const xAOD::Egamma* particle,
 							      int pdg,
 							      const xAOD::TruthParticleContainer* truthParticles) {
-//-------------------------------------------------------------------------------------------
   float currentdr = 0.05;
   const xAOD::TruthParticle* matchedTruthParticle = nullptr;
   for (const auto *truthParticle: *truthParticles){

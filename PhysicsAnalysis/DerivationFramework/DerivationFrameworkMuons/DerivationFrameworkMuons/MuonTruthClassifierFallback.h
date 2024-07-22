@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// MuonTruthClassifierFallback.h
-///////////////////////////////////////////////////////////////////
 #ifndef DERIVATIONFRAMEWORK_MuonTruthClassifierFallback_H
 #define DERIVATIONFRAMEWORK_MuonTruthClassifierFallback_H
 

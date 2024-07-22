@@ -69,11 +69,7 @@ StatusCode TruthParticleClassificationFillerTool::book()
 StatusCode
 TruthParticleClassificationFillerTool::fill (const xAOD::TruthParticle& p)
 {
-  std::pair<MCTruthPartClassifier::ParticleType,
-    MCTruthPartClassifier::ParticleOrigin> res;
-
-  res = m_classifier->particleTruthClassifier(&p);
-   
+  auto res = m_classifier->particleTruthClassifier(&p);
   *m_type   = res.first;
   *m_origin = res.second;
   

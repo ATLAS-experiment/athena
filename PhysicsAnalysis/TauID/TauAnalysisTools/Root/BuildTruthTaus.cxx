@@ -168,7 +168,7 @@ BuildTruthTaus::buildTruthTausFromTruthParticles(TruthTausEvent& truthTausEvent)
       }
 
       // Run classification
-      std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin> pClassification = m_tMCTruthClassifier->particleTruthClassifier(xTruthTau);
+      auto pClassification = m_tMCTruthClassifier->particleTruthClassifier(xTruthTau);
       static const SG::AuxElement::Accessor<unsigned int> decClassifierParticleType("classifierParticleType");
       static const SG::AuxElement::Accessor<unsigned int> decClassifierParticleOrigin("classifierParticleOrigin");
       decClassifierParticleType(*xTruthTau) = pClassification.first;

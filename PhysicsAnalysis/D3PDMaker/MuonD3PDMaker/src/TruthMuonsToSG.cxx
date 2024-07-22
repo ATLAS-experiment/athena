@@ -60,7 +60,7 @@ StatusCode TruthMuonsToSG::execute() {
       muonColl->push_back(p);
     }
     else if( MC::isPhoton(p) ) {
-      std::pair<unsigned int, unsigned int> Classify=m_classifier->particleTruthClassifier( p );
+      auto Classify = m_classifier->particleTruthClassifier( p );
       if( (MCTruthPartClassifier::ParticleOrigin)(Classify.second) == MCTruthPartClassifier::FSRPhot  ) {
         muonColl->push_back(p);
       }
