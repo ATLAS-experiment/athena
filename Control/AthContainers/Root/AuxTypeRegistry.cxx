@@ -416,8 +416,8 @@ AuxTypeRegistryImpl::findAuxID (const std::string& name,
   }
   else {
     std::string def_alloc_name = SG::auxAllocatorNamePrefix + SG::normalizedTypeinfoName (ti);
-    if (def_alloc_name[def_alloc_name.size()-1] == '>') def_alloc_name += " ";
-    def_alloc_name += ">";
+    if (def_alloc_name[def_alloc_name.size()-1] == '>') def_alloc_name += ' ';
+    def_alloc_name += '>';
     fac = getFactory (ti,def_alloc_name);
   }
 
@@ -518,7 +518,9 @@ AuxTypeRegistryImpl::addFactory (lock_t& /*lock*/,
                                  const std::string& ti_alloc_name,
                                  std::unique_ptr<const IAuxTypeVectorFactory> factory)
 {
-  std::string key = std::string (ti.name()) + ";" + ti_alloc_name;
+  std::string key = ti.name();
+  key += ';';
+  key += ti_alloc_name;
   ti_map_t::const_iterator it = m_factories.find (key);
   const IAuxTypeVectorFactory* fac = factory.get();
   if (it != m_factories.end()) {
@@ -575,7 +577,9 @@ AuxTypeRegistryImpl::getFactory (lock_t& lock,
                                  const std::type_info& ti,
                                  const std::type_info& ti_alloc)
 {
-  std::string key = std::string (ti.name()) + ";TI;" + ti_alloc.name();
+  std::string key = ti.name();
+  key += ";TI;";
+  key += ti_alloc.name();
   ti_map_t::const_iterator it = m_factories.find (key);
   if (it != m_factories.end())
     return it->second;
@@ -848,7 +852,10 @@ std::string AuxTypeRegistry::makeKey (const std::string& name,
   if (clsname.empty()) {
     return name;
   }
-  return clsname + "::" + name;
+  std::string output = clsname;
+  output += "::";
+  output += name;
+  return output;
 }
 
 
