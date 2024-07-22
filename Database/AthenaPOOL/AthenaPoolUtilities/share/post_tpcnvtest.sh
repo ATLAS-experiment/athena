@@ -249,6 +249,7 @@ PP="$PP"'|AuxDynReader::init.*Could not find auxid for'
 
 # Warnings from MetaReader concerning multiple values in /TagInfo.
 PP="$PP"'|^Py:MetaReader.* WARNING (Found multiple values|Multiple values) for '
+PP="$PP"'|^profiling:'
 
 test=$1
 if [ -z "$ATLAS_CTEST_TESTSTATUS" ]; then
