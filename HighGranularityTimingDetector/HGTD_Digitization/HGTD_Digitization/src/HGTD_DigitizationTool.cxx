@@ -421,8 +421,7 @@ void HGTD_DigitizationTool::createAndStoreSDO(
     for (; charge_list_itr != charge_list_itr_end; ++charge_list_itr) {
 
       const HepMcParticleLink &trkLink = charge_list_itr->particleLink();
-      const int barcode = HepMC::barcode(trkLink);
-      if (HepMC::ignoreTruthLink(barcode, m_vetoPileUpTruthLinks)) {
+      if (HepMC::ignoreTruthLink(trkLink, m_vetoPileUpTruthLinks)) {
         continue;
       }
       if (!real_particle_hit) {
@@ -435,7 +434,7 @@ void HGTD_DigitizationTool::createAndStoreSDO(
         // processType()==SiCharge::cut_track
         // Tracks With Truth:            barcode!=0 &&
         // processType()==SiCharge::track
-        if (!HepMC::no_truth_link(barcode) && charge_list_itr->processType() == SiCharge::track) {
+        if (!HepMC::no_truth_link(trkLink) && charge_list_itr->processType() == SiCharge::track) {
           real_particle_hit = true;
         }
         // real_particle_hit = trkLink.isValid();
