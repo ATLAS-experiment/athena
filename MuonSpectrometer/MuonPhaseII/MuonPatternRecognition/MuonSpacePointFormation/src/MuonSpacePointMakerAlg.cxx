@@ -107,9 +107,42 @@ StatusCode MuonSpacePointMakerAlg::initialize() {
     return StatusCode::SUCCESS;
 }
 
-template <class ContType>StatusCode MuonSpacePointMakerAlg::loadContainerAndSort(const EventContext& ctx,
-                                                                                 const SG::ReadHandleKey<ContType>& key,
-                                                                                 PreSortedSpacePointMap& fillContainer) const {
+template <> 
+    bool MuonSpacePointMakerAlg::passOccupancy2D(const std::vector<const xAOD::TgcStrip*>& etaHits,
+                                                 const std::vector<const xAOD::TgcStrip*>& phiHits) const {
+        if (etaHits.empty() || phiHits.empty()) {
+            return false;
+        }
+        const MuonGMR4::TgcReadoutElement* re = etaHits[0]->readoutElement();
+        return (1.*etaHits.size() / (1.*re->numChannels(etaHits[0]->measurementHash()))) < m_maxOccTgcEta &&
+               (1.*phiHits.size() / (1.*re->numChannels(phiHits[0]->measurementHash()))) < m_maxOccTgcPhi;
+    }
+template <> 
+    bool MuonSpacePointMakerAlg::passOccupancy2D(const std::vector<const xAOD::RpcMeasurement*>& etaHits,
+                                                 const std::vector<const xAOD::RpcMeasurement*>& phiHits) const {
+        if (etaHits.empty() || phiHits.empty()) {
+            return false;
+        }
+        const MuonGMR4::RpcReadoutElement* re = etaHits[0]->readoutElement();
+        return (1.*etaHits.size() / 1.*re->nEtaStrips()) < m_maxOccRpcEta &&
+               (1.*phiHits.size() / 1.*re->nPhiStrips()) < m_maxOccRpcPhi;
+    }
+
+template <> 
+    bool MuonSpacePointMakerAlg::passOccupancy2D(const std::vector<const xAOD::sTgcMeasurement*>& etaHits,
+                                                 const std::vector<const xAOD::sTgcMeasurement*>& phiHits) const {
+        if (etaHits.empty() || phiHits.empty()) {
+            return false;
+        }
+        const MuonGMR4::sTgcReadoutElement* re = etaHits[0]->readoutElement();
+        return (1.*etaHits.size() / 1.*re->numStrips(etaHits[0]->measurementHash())) < m_maxOccStgcEta &&
+               (1.*phiHits.size() / 1.*re->numWireGroups(phiHits[0]->measurementHash())) < m_maxOccStgcPhi;
+    }
+
+template <class ContType>
+    StatusCode MuonSpacePointMakerAlg::loadContainerAndSort(const EventContext& ctx,
+                                                            const SG::ReadHandleKey<ContType>& key,
+                                                            PreSortedSpacePointMap& fillContainer) const {
     if (key.empty()) {
         ATH_MSG_DEBUG("Key "<<typeid(ContType).name()<<" not set. Do not fill anything");
         return StatusCode::SUCCESS;
@@ -173,7 +206,7 @@ template <class ContType>StatusCode MuonSpacePointMakerAlg::loadContainerAndSort
            ATH_MSG_VERBOSE("Fill collected measurements for "<<m_idHelperSvc->toStringDetEl(reEle->identify()));
            for (auto& [etaHits, phiHits]: hitsPerChamb) {
                 /// If one of the two is empty no chance to combine them
-                if (etaHits.empty() || phiHits.empty()) {
+                if (!passOccupancy2D(etaHits, phiHits)) {
                     fillInto.etaHits.reserve(fillInto.etaHits.size() + etaHits.size());
                     fillInto.phiHits.reserve(fillInto.phiHits.size() + phiHits.size());
                     for (const PrdType etaPrd : etaHits) {

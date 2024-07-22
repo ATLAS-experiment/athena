@@ -128,7 +128,18 @@ namespace MuonR4{
                                           std::vector<MuonSpacePoint>&& spacePoints,
                                           SpacePointBucketVec& splittedContainer) const;
 
-
+            /** @brief: Check whether the occupancy cuts of hits in a gasGap are surpassed.
+             *          The method is specified for each of the 3 strip technologies, 
+             *          Rpc, Tgc, sTgc and applies a technology-dependent upper bound on the 
+             *          number of phi & eta hits. If the threshold is surpassed, only 1D space
+             *          points are built intsead of 2D ones
+             * @param etaHits: List of all presorted eta measurements in a gas gap
+             * @param phiHits: List of all presorted phi measurements in a gas gap  
+             */
+            template <class PrdType>
+                bool passOccupancy2D(const std::vector<const PrdType*>& etaHits,
+                                     const std::vector<const PrdType*>& phiHits) const;
+            
             SG::ReadHandleKey<xAOD::MdtDriftCircleContainer> m_mdtKey{this, "MdtKey", "xAODMdtCircles",
                                                                       "Key to the uncalibrated Drift circle measurements"};
             
@@ -162,6 +173,22 @@ namespace MuonR4{
             
             Gaudi::Property<unsigned int> m_capacityBucket{this,"CapacityBucket" , 50};
             std::unique_ptr<SpacePointStatistics> m_statCounter ATLAS_THREAD_SAFE{};
+
+            Gaudi::Property<double> m_maxOccRpcEta{this, "maxRpcEtaOccupancy", 0.1, 
+                                                   "Maximum occpancy of Rpc eta hits in a gasGap"};
+            Gaudi::Property<double> m_maxOccRpcPhi{this, "maxRpcPhiOccupancy", 0.1, 
+                                                   "Maximum occpancy of Rpc phi hits in a gasGap"};
+
+            Gaudi::Property<double> m_maxOccTgcEta{this, "maxTgcEtaOccupancy", 0.1, 
+                                                   "Maximum occpancy of Tgc eta hits in a gasGap"};
+            Gaudi::Property<double> m_maxOccTgcPhi{this, "maxTgcPhiOccupancy", 0.1, 
+                                                   "Maximum occpancy of Tgc phi hits in a gasGap"};
+
+            Gaudi::Property<double> m_maxOccStgcEta{this, "maxSTGCEtaOccupancy", 0.1, 
+                                                   "Maximum occpancy of sTgc eta hits in a gasGap"};
+            Gaudi::Property<double> m_maxOccStgcPhi{this, "maxSTGCPhiOccupancy", 0.1, 
+                                                    "Maximum occpancy of sTgc phi hits in a gasGap"};
+
     };
 }
 
