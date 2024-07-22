@@ -15,7 +15,7 @@ atlas_add_component( MuonHitCsvDump
 atlas_install_python_modules( python/*.py)
 
 atlas_add_test( testCsvDumper
-                SCRIPT python -m MuonHitCsvDump.csvHitDump --nEvents 10 -i /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/R4SimHits.pool.root
+                SCRIPT python -m MuonHitCsvDump.csvHitDump --nEvents 5
                 PROPERTIES TIMEOUT 600
                 POST_EXEC_SCRIPT nopost.sh)
 
