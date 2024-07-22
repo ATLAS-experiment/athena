@@ -63,6 +63,17 @@ def getDevHISignatures():
         ChainProp(name='HLT_j20a_pf_jes_ftf_L1TE5_VTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream, 'express'], groups=SingleJetGroup+PrimaryLegGroup, monGroups=['jetMon:t0','jetMon:online']),
         ChainProp(name='HLT_j30a_pf_jes_ftf_L1TE5_VTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+PrimaryLegGroup),
 
+        #for testing of the new jet multiplicity hypo
+        ChainProp(name='HLT_j0_MULT0mult11XX15ptXX0eta490_j10a_pf_jes_ftf_L1jTE5_VjTE200', l1SeedThresholds=['FSNOSEED']*2, stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j0_MULT0mult11XX15ptXX0eta490_j15a_pf_jes_ftf_L1jTE5_VjTE200', l1SeedThresholds=['FSNOSEED']*2, stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j0_MULT0mult11XX15ptXX0eta490_j20a_pf_jes_ftf_L1jTE5_VjTE200', l1SeedThresholds=['FSNOSEED']*2, stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j0_MULT0mult11XX15ptXX0eta490_j30a_pf_jes_ftf_L1jTE5_VjTE200', l1SeedThresholds=['FSNOSEED']*2, stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j0_MULT0mult11XX15ptXX0eta490_j40a_pf_jes_ftf_L1jTE5_VjTE200', l1SeedThresholds=['FSNOSEED']*2, stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j10a_pf_jes_ftf_L1jTE5_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j15a_pf_jes_ftf_L1jTE5_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j20a_pf_jes_ftf_L1jTE5_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+PrimaryPhIGroup),
+        ChainProp(name='HLT_j30a_pf_jes_ftf_L1jTE5_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+PrimaryPhIGroup),
+        ChainProp(name='HLT_j40a_pf_jes_ftf_L1jTE5_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+PrimaryPhIGroup),
     ]
 
 
