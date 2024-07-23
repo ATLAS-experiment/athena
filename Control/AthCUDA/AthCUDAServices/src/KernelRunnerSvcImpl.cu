@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 //
 
 // Local include(s).
@@ -117,9 +117,13 @@ namespace AthCUDA {
 
       // Schedule a task that will take care of scheduling/launching the CUDA
       // kernel.
-      taskArena().enqueue( ::KernelSchedulerTask( m_callback,
-                                                  std::move( task ),
-                                                  *this ) );
+     // The enqueueTask() argument initializes a std::function, so it needs
+     // to be copyable.  KernelSchedulerTask itself isn't, so reference
+     // it via a shared_ptr.
+      auto taskptr = std::make_shared< ::KernelSchedulerTask >( m_callback,
+                                                                std::move( task ),
+                                                                *this );
+      enqueueTask( [=]() { (*taskptr)(); } );
 
       // Return gracefully.
       return;

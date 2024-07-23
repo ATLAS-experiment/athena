@@ -5,24 +5,20 @@
 #ifndef ATHCUDACORE_TASKARENA_H
 #define ATHCUDACORE_TASKARENA_H
 
-// TBB include(s).
-#include <tbb/task_arena.h>
+#include <functional>
 
 namespace AthCUDA {
 
-   /// Function returning the TBB task arena that should be used for CUDA calls
+   /// Enqueue a function to the TBB task arena used for CUDA calls
    ///
    /// Since many (most?) CUDA calls use global locks, in order to avoid
    /// waiting times in the threads, one needs to schedule all CUDA operations
-   /// using this single task arena, which takes care of executing all
-   /// operations one by one. Using the TBB threads allocated for the rest of
+   /// using a single task arena, which takes care of executing all
+   /// operations one by one, using the TBB threads allocated for the rest of
    /// the job.
-   ///
-   /// @return A reference to the @c tbb::task_arena object to use for CUDA
-   ///         calls.
-   ///
-   tbb::task_arena& taskArena();
+   void enqueueTask( std::function<void()> f );
 
 } // namespace AthCUDA
+
 
 #endif // ATHCUDACORE_TASKARENA_H
