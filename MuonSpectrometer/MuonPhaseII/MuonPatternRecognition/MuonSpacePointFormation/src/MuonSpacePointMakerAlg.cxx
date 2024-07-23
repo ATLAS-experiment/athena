@@ -377,10 +377,12 @@ void MuonSpacePointMakerAlg::distributePointsAndStore(const EventContext& ctx,
             }
         }
     }
-    MuonSpacePointBucket& lastBucket{splittedHits[splittedHits.size() - 1]};
-    newBucket(pointPos(*lastBucket.back()));
-    /// Remove the probably empty bucket again.
-    splittedHits.pop_back();
+    if (defineBuckets){
+        MuonSpacePointBucket& lastBucket{splittedHits[splittedHits.size() - 1]};
+        newBucket(pointPos(*lastBucket.back()));
+        /// Remove the probably empty bucket again.
+        splittedHits.pop_back();
+    }
 
 }
 
