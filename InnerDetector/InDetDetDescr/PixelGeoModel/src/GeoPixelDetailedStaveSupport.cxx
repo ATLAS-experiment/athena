@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -34,7 +34,7 @@ GeoPixelDetailedStaveSupport::GeoPixelDetailedStaveSupport(InDetDD::PixelDetecto
 							   GeoModelIO::ReadGeoModel* sqliteReader,
                                                            std::shared_ptr<std::map<std::string, GeoFullPhysVol*>> mapFPV,
                                                            std::shared_ptr<std::map<std::string, GeoAlignableTransform*>> mapAX)
-  : GeoPixelStaveSupport (ddmgr, mgr, sqliteReader, mapFPV, mapAX),
+  : GeoPixelStaveSupport (ddmgr, mgr, sqliteReader, std::move(mapFPV), std::move(mapAX)),
     m_transform(GeoTrf::Transform3D::Identity())
 {
   m_bVerbose = (m_gmt_mgr->msgLvl(MSG::DEBUG));
@@ -395,7 +395,7 @@ GeoVPhysVol* GeoPixelDetailedStaveSupport::Build ( ) {
   // clean up shape and store points to Brep structure
 
   if(m_bVerbose)m_gmt_mgr->msg(MSG::DEBUG)<<"Remove points "<<endmsg;
-  GetSurroundingConvexShape(xShape, yShape, iShapeExcept);
+  GetSurroundingConvexShape(xShape, yShape, std::move(iShapeExcept));
   RemoveCoincidentAndColinearPointsFromShape( xShape, yShape);
 
   for(unsigned int iPt=0; iPt<xShape.size(); iPt++)
@@ -1081,10 +1081,10 @@ GeoVPhysVol* GeoPixelDetailedStaveSupport::Build ( ) {
     m_serviceCoolPipePhysVol->add(cp_service_inner_logPV);
     
     GeoTrf::Translate3D cpipe_posA(xGblOffset+TubeMiddlePos,0.0,(MechanicalStaveLength*0.5+m_endblockSrvLength*0.5)-m_serviceZpos);
-    m_serviceCoolPipeTrfA = new GeoTransform(GeoTrf::Transform3D(cpipe_posA));
+    m_serviceCoolPipeTrfA = new GeoTransform(GeoTrf::Transform3D(std::move(cpipe_posA)));
     
     GeoTrf::Translate3D cpipe_posC(xGblOffset+TubeMiddlePos,0.0,-((MechanicalStaveLength*0.5+m_endblockSrvLength*0.5)-m_serviceZpos));
-    m_serviceCoolPipeTrfC = new GeoTransform(GeoTrf::Transform3D(cpipe_posC));
+    m_serviceCoolPipeTrfC = new GeoTransform(GeoTrf::Transform3D(std::move(cpipe_posC)));
   }
 
   // ------------------------------------------------------------------------------------------------------------
@@ -1564,7 +1564,7 @@ void GeoPixelDetailedStaveSupport::ComputeStaveExternalShape()
 
   GeoTrf::Vector3D midSidePt_omega(0.0,0.0,0.0);
   GeoTrf::Vector3D midSideDir(midSidePt.x()-midStaveCenter.x(),midSidePt.y()-midStaveCenter.y(),0.0);
-  midSidePt_omega=NeighbourPoint_Rad(midSidePt,midSideDir,omegaThick);
+  midSidePt_omega=NeighbourPoint_Rad(midSidePt,std::move(midSideDir),omegaThick);
 
   // endSidePt : point next to end of stave
   GeoTrf::Vector3D endSidePt(0.0,0.0,0.0);
@@ -1574,7 +1574,7 @@ void GeoPixelDetailedStaveSupport::ComputeStaveExternalShape()
 
   GeoTrf::Vector3D endSidePt_omega(0.0,0.0,0.0);
   GeoTrf::Vector3D endSideDir(endSidePt.x()-endStaveCenter.x(),endSidePt.y()-endStaveCenter.y(),0.0);
-  endSidePt_omega=NeighbourPoint_Rad(endSidePt,endSideDir,omegaThick);
+  endSidePt_omega=NeighbourPoint_Rad(endSidePt,std::move(endSideDir),omegaThick);
 
 
   // ***** Points defining the vertex of foam module and omega module
@@ -1599,7 +1599,7 @@ void GeoPixelDetailedStaveSupport::ComputeStaveExternalShape()
   // Neighbour endstave point (without omega)
   GeoTrf::Vector3D endStavePoint_omega(0.0,0.0,0.0);
   GeoTrf::Vector3D endStaveDir(endStavePoint.x()-endStaveCenter.x(),endStavePoint.y()-endStaveCenter.y(),0.0);
-  endStavePoint_omega=NeighbourPoint_Rad(endStavePoint,endStaveDir,omegaThick);
+  endStavePoint_omega=NeighbourPoint_Rad(endStavePoint,std::move(endStaveDir),omegaThick);
 
   GeoTrf::Vector3D endSidePt_omega2(0.0,0.0,0.0);
   endSidePt_omega2=IntersectionPoint(midSidePt_omega.x(),midSidePt_omega.y(),endSidePt_omega.x(),endSidePt_omega.y(),
@@ -1610,7 +1610,7 @@ void GeoPixelDetailedStaveSupport::ComputeStaveExternalShape()
 
   GeoTrf::Vector3D endSidePt_inner(0.0,0.0,0.0);
   GeoTrf::Vector3D endSidePt_vec(endSidePt_omega2.x()-endStavePoint.x(),endSidePt_omega2.y()-(endStavePoint.y()+m_OmegaEndStaveThick),0.0);
-  endSidePt_inner=NeighbourPoint_Perp(endSidePt_omega2,endSidePt_vec,omegaThick,-1);
+  endSidePt_inner=NeighbourPoint_Perp(std::move(endSidePt_omega2),std::move(endSidePt_vec),omegaThick,-1);
 
   // Compute Rx3,Ry3 coordinates
   GeoTrf::Vector3D endSidePt_inter(0.0,0.0,0.0);
@@ -1680,8 +1680,8 @@ double GeoPixelDetailedStaveSupport::ComputeAngle(double ux, double uy, double v
   GeoTrf::Vector3D u(ux,uy,0.0);
   GeoTrf::Vector3D v(vx,vy,0.0);
 
-  GeoTrf::Vector3D uNorm=NormalizeDir(u);
-  GeoTrf::Vector3D vNorm=NormalizeDir(v);
+  GeoTrf::Vector3D uNorm=NormalizeDir(std::move(u));
+  GeoTrf::Vector3D vNorm=NormalizeDir(std::move(v));
 
   double pScal=uNorm.x()*vNorm.x()+uNorm.y()*vNorm.y();
   double angle=acos(pScal);

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PIXELGEOMODEL_GEOPIXELDETAILEDSTAVESUPPORT_H
@@ -58,7 +58,7 @@ private:
   double m_thicknessN_svc = 0.0;
   double m_width_svc = 0.0;
   double m_SafetyMargin = 0.0;
-  bool m_bVerbose;
+  bool m_bVerbose{};
 
   void RemoveCoincidentAndColinearPointsFromShape(std::vector<double> &xPoint, std::vector<double>&yPoint);
   void GetSurroundingConvexShape(std::vector<double> &xPoint, std::vector<double>&yPoint, 
@@ -86,7 +86,7 @@ private:
   double ComputeAngle(double ux, double uy, double vx, double vy);
   double ComputeDistance(GeoTrf::Vector3D p, GeoTrf::Vector3D q);
 
-  const double m_oneDegree = 180.0/M_PI;
+  static constexpr double m_oneDegree = 180.0/M_PI;
 
 };
 
