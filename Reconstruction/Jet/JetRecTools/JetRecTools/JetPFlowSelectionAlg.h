@@ -34,9 +34,6 @@ public:
 
 private:
 
-  bool checkElectronLinks(const std::vector < ElementLink< xAOD::ElectronContainer > >& FE_ElectronLinks) const;
-  bool checkMuonLinks(const std::vector < ElementLink< xAOD::MuonContainer > >& FE_MuonLinks) const;
-
   Gaudi::Property<std::string> m_electronID{this,"electronID","LHMedium","Select electron ID"};
   Gaudi::Property<bool> m_removeNeutralElectronFE{this,"removeNeutralElectronFE",false,"Remove neutral FE matched to electrons"};
 
