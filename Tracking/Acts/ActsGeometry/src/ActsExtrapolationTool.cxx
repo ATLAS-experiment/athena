@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ActsGeometry/ActsExtrapolationTool.h"
@@ -159,7 +159,7 @@ ActsExtrapolationTool::propagationSteps(const EventContext& ctx,
       Acts::ActionList<SteppingLogger, Acts::MaterialInteractor>;
       using AbortConditions = Acts::AbortList<EndOfWorld>;
 
-      using Options = typename Propagator::Options<ActionList, AbortConditions>;
+      using Options = typename Propagator::template Options<ActionList, AbortConditions>;
 
       Options options(anygctx, mctx);
       options.pathLimit = pathLimit;
@@ -231,7 +231,7 @@ ActsExtrapolationTool::propagate(const EventContext& ctx,
       using ActionList =
       Acts::ActionList<Acts::MaterialInteractor>;
       using AbortConditions = Acts::AbortList<EndOfWorld>;
-      using Options = typename Propagator::Options<ActionList, AbortConditions>;
+      using Options = typename Propagator::template Options<ActionList, AbortConditions>;
 
       Options options(anygctx, mctx);
       options.pathLimit = pathLimit;
@@ -284,7 +284,7 @@ ActsExtrapolationTool::propagationSteps(const EventContext& ctx,
       using ActionList =
       Acts::ActionList<SteppingLogger, Acts::MaterialInteractor>;
       using AbortConditions = Acts::AbortList<EndOfWorld>;
-      using Options = typename Propagator::Options<ActionList, AbortConditions>;
+      using Options = typename Propagator::template Options<ActionList, AbortConditions>;
 
       Options options(anygctx, mctx);
       options.pathLimit = pathLimit;
@@ -349,7 +349,7 @@ ActsExtrapolationTool::propagate(const EventContext& ctx,
       using ActionList =
       Acts::ActionList<Acts::MaterialInteractor>;
       using AbortConditions = Acts::AbortList<EndOfWorld>;
-      using Options = typename Propagator::Options<ActionList, AbortConditions>;
+      using Options = typename Propagator::template Options<ActionList, AbortConditions>;
 
       Options options(anygctx, mctx);
       options.pathLimit = pathLimit;
