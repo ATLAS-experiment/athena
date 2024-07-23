@@ -1,0 +1,3 @@
+// minimal job options for unit tests
+MessageSvc.OutputLevel = 3;  // INFO
+THistSvc.OutputLevel = 5;  // WARNING

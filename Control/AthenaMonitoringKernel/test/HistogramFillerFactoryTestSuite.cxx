@@ -32,12 +32,7 @@
 #include "../src/HistogramFiller/HistogramFillerProfile.h"
 #include "../src/HistogramFiller/HistogramFiller2D.h"
 #include "../src/HistogramFiller/HistogramFiller2DProfile.h"
-
 #include "../src/HistogramFiller/HistogramFillerFactory.h"
-
-#include "mocks/MockGenericMonitoringTool.h"
-#include "mocks/MockITHistSvc.h"
-#include "mocks/MockHistogramDef.h"
 
 using namespace std;
 using namespace Monitored;
@@ -82,8 +77,14 @@ class HistogramFillerFactoryTestSuite {
   // ==================== Test code ====================
   private:
     void beforeEach() {
-      m_gmTool.reset(new MockGenericMonitoringTool());
-      m_histDef.reset(new MockHistogramDef());
+      m_gmTool = ToolHandle<GenericMonitoringTool>("GenericMonitoringTool/MonTool");
+      if (m_gmTool.retrieve().isFailure()) {
+        throw runtime_error("Cannot create GenericMonitoringTool");
+      }
+      m_histDef.reset(new Monitored::HistogramDef());
+      m_histDef->alias = "Hist" + to_string(++m_histCount);
+      m_histDef->xbins = 1;
+      m_histDef->ybins = 1;
     }
 
     void afterEach() {
@@ -95,18 +96,20 @@ class HistogramFillerFactoryTestSuite {
     }
 
     void test_shouldCreateStaticCumulativeHistogramFiller1D() {
+      m_histDef->type = "TH1F";
       m_histDef->kCumulative = true;
       performCreateFillerAndVerify<CumulativeHistogramFiller1D, StaticHistogramProvider>();
     }
 
     void test_shouldCreateStaticVecHistogramFiller1D() {
+      m_histDef->type = "TH1F";
       m_histDef->kVec = true;
       performCreateFillerAndVerify<VecHistogramFiller1D, StaticHistogramProvider>();
     }
 
     void test_shouldCreateStaticHistogramFillerRebinable1D() {
-      m_histDef->kAddBinsDynamically = true;
       m_histDef->type = "TH1F";
+      m_histDef->kAddBinsDynamically = true;
       performCreateFillerAndVerify<HistogramFillerRebinable1D, StaticHistogramProvider>();
     }
 
@@ -131,23 +134,27 @@ class HistogramFillerFactoryTestSuite {
     }
 
     void test_shouldCreateLumiblockHistogramFiller1D() {
+      m_histDef->type = "TH1F";
       m_histDef->kLBNHistoryDepth = 10;
       performCreateFillerAndVerify<HistogramFiller1D, LumiblockHistogramProvider>();
     }
 
     void test_shouldCreateLumiblockCumulativeHistogramFiller1D() {
+      m_histDef->type = "TH1F";
       m_histDef->kCumulative = true;
       m_histDef->kLBNHistoryDepth = 10;
       performCreateFillerAndVerify<CumulativeHistogramFiller1D, LumiblockHistogramProvider>();
     }
 
     void test_shouldCreateLumiblockVecHistogramFiller1D() {
+      m_histDef->type = "TH1F";
       m_histDef->kVec = true;
       m_histDef->kLBNHistoryDepth = 10;
       performCreateFillerAndVerify<VecHistogramFiller1D, LumiblockHistogramProvider>();
     }
 
     void test_shouldCreateLumiblockHistogramFillerRebinable1D() {
+      m_histDef->type = "TH1F";
       m_histDef->kAddBinsDynamically = true;
       m_histDef->kLBNHistoryDepth = 10;
       performCreateFillerAndVerify<HistogramFillerRebinable1D, LumiblockHistogramProvider>();
@@ -219,16 +226,17 @@ class HistogramFillerFactoryTestSuite {
   // ==================== Properties ====================
   private:
     MsgStream m_log;
-
-    shared_ptr<MockGenericMonitoringTool> m_gmTool;
+    int m_histCount{0};
+    ToolHandle<GenericMonitoringTool> m_gmTool;
     shared_ptr<HistogramDef> m_histDef;
 };
 
-int main() {
-  ISvcLocator* pSvcLoc;
 
-  if (!Athena_test::initGaudi("GenericMon.txt", pSvcLoc)) {
-    throw runtime_error("This test can not be run: GenericMon.txt is missing");
+int main() {
+  ISvcLocator* pSvcLoc{};
+
+  if (!Athena_test::initGaudi("GenericMonMinimal.txt", pSvcLoc)) {
+    throw runtime_error("This test can not be run: GenericMonMinimal.txt is missing");
   }
 
   HistogramFillerFactoryTestSuite().run();
