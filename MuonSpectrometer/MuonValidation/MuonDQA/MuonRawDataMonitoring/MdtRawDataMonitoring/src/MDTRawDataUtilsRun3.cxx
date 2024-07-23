@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////////////
@@ -9,17 +9,14 @@
 //    see MdtRawDataMonAlg.cxx
 ///////////////////////////////////////////////////////////////////////////
 
-#include <TBox.h>
-#include <TColor.h>
-#include <TError.h>
 #include <TLine.h>
 #include <TList.h>
-#include <TRegexp.h>
 #include <TString.h>
 
 #include <string>
 
 #include "MdtRawDataMonAlg.h"
+#include "LWHists/TH1F_LW.h"
 #include "MuonDQAUtils/MuonChamberNameConverter.h"
 #include "MuonReadoutGeometry/MdtReadoutElement.h"
 
