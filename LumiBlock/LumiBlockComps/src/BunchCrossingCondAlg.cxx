@@ -1,38 +1,17 @@
 /*
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  */
 
 #include "BunchCrossingCondAlg.h"
 #include "CoolKernel/IObject.h"
+#include "AthenaKernel/IOVInfiniteRange.h"
 #include "CoralBase/Blob.h"
 #include "StoreGate/ReadCondHandle.h"
 #include "StoreGate/WriteCondHandle.h"
-#include <charconv>
 #include <cstdint>
 
 #include "CoralBase/AttributeListException.h"
 
-namespace {
-   // helper to set timestamp based IOV with infinite range
-  EventIDBase infiniteIOVBegin() {
-     return EventIDBase( 0, // run,
-                        EventIDBase::UNDEFEVT,  // event
-                        0, // seconds
-                        0, // ns
-                        0 // LB
-                        );
-  }
-
-  EventIDBase infiniteIOVEnd() {
-     return EventIDBase( std::numeric_limits<int>::max() - 1, // run
-                         EventIDBase::UNDEFEVT,  // event
-                         std::numeric_limits<int>::max() - 1, // seconds
-                         std::numeric_limits<int>::max() - 1, // ns
-                         std::numeric_limits<int>::max() - 1  // LB
-                         );
-  }
-
-}
 
 StatusCode BunchCrossingCondAlg::initialize() {
   if (m_mode == 2) {
@@ -56,8 +35,7 @@ StatusCode BunchCrossingCondAlg::execute (const EventContext& ctx) const {
   // make sure that the output IOV has a valid timestamp, otherwise the conditions
   // data cannot be added to the "mixed" conditions data container. A mixed container
   // is needed when the conditions depends on e.g. the LuminosityCondData
-  EventIDRange infinite_range(infiniteIOVBegin(),infiniteIOVEnd());
-  writeHdl.addDependency(infinite_range);
+  writeHdl.addDependency(IOVInfiniteRange::infiniteMixed());
 
   //Output object & range:
   auto bccd=std::make_unique<BunchCrossingCondData>();
