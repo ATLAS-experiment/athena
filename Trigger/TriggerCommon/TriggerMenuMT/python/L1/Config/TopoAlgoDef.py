@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 # *** IMPORTANT ***
 # Menu parameter ordering must match that in the L1Topo
@@ -297,6 +297,25 @@ class TopoAlgoDef:
         alg.addvariable('IsoMin',    0) # Placeholder, see TypeWideThresholdConfig
         alg.addvariable('Frac1Min',  0)
         alg.addvariable('Frac2Min',  0)
+        tm.registerTopoAlgo(alg)
+
+        # jTAU inputs # for ATR-29784
+        # all
+        alg = AlgConf.jTauNoSort( name = 'jTAUall', inputs = 'jTauTobs', outputs = 'jTAUall')
+        alg.addgeneric('InputWidth', HW.jTauInputWidth)
+        alg.addgeneric('OutputWidth', HW.jTauInputWidth)
+        alg.addvariable('Isolation',0)
+        alg.addvariable('passIsolation', True) #if true, isolation requirement is ignored
+        tm.registerTopoAlgo(alg)
+
+        # SORT
+        alg = AlgConf.jTauSort( name = 'jTAUs', inputs = 'jTauTobs', outputs = 'jTAUs' )
+        alg.addgeneric('InputWidth', HW.jTauInputWidth)
+        alg.addgeneric('OutputWidth', HW.jTauOutputWidthSort)
+        alg.addvariable('MinEta',  0*_eta_conversion)
+        alg.addvariable('MaxEta',  32*_eta_conversion)
+        alg.addvariable('Isolation',0)
+        alg.addvariable('passIsolation', True) #if true, isolation requirement is ignored
         tm.registerTopoAlgo(alg)
 
         # MET
@@ -2236,4 +2255,38 @@ class TopoAlgoDef:
                 alg.addvariable('MinET1', get_threshold_cut('CjJ', minET)*_et_conversion, bitid)# noqa: F821
                 alg.addvariable('MinXi', 13600.0*_et_conversion*0.02, bitid) # noqa: F821
                 alg.addvariable('MaxXi', 13600.0*_et_conversion*0.05, bitid) # noqa: F821
+            tm.registerTopoAlgo(alg)
+
+        # dphi with s+s #ATR-29784
+        # Parameter ordering:
+        # 1. MinEt1
+        # 2. MinEt2
+        # 3. DeltaPhiMin
+        # 4. DeltaPhiMax
+        algolist=[
+            { "minDphi": 23, "maxDphi": 32, "mult": 2, "otype1" : "eEM",
+              "ocut1": 1, "olist1": "s", "nleading1": HW.eEmOutputWidthSort,"otype2" : ""},#23DPHI32_2eEM1s
+            { "minDphi": 23, "maxDphi": 32, "mult": 2, "otype1" : "eTAU",
+              "ocut1": 1, "olist1": "s", "nleading1": HW.eTauOutputWidthSort,"otype2" : ""},#23DPHI32_2eTAU1s
+            { "minDphi": 23, "maxDphi": 32, "mult": 2, "otype1" : "jTAU",
+              "ocut1": 1, "olist1": "s", "nleading1": HW.jTauOutputWidthSort,"otype2" : ""},#23DPHI32_2jTAU1s
+        ]
+        for x in algolist:
+            class d:
+                pass
+            for k in x:
+                setattr (d, k, x[k])
+            obj = "%s" % (str(d.mult)+d.otype1+str(d.ocut1)+str(d.olist1))
+            toponame = "%sDPHI%s-%s"  % (d.minDphi, d.maxDphi, obj)
+            log.debug("Define %s", toponame)
+            inputList = [d.otype1+d.olist1]
+            algoname = AlgConf.DeltaPhiIncl1
+            alg = algoname( name = toponame, inputs = inputList, outputs = [ toponame ])
+            alg.addgeneric('NumResultBits', 1)
+            alg.addgeneric('InputWidth', d.nleading1)
+            alg.addgeneric('MaxTob', d.nleading1)
+            alg.addvariable('MinET1',      0*_et_conversion)
+            alg.addvariable('MinET2',      0*_et_conversion)
+            alg.addvariable('MinDeltaPhi', d.minDphi*_phi_conversion)
+            alg.addvariable('MaxDeltaPhi', d.maxDphi*_phi_conversion)
             tm.registerTopoAlgo(alg)
