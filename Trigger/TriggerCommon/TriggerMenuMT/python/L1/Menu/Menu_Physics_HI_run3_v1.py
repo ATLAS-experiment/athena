@@ -250,6 +250,8 @@ def defineMenu():
         #--------------------------------
 
         'L1_LAR-ZEE', 'L1_LAR-ZEE-eEM',
+        #ATR-29784
+        'L1_DPHI-2eEM1','L1_DPHI-2eTAU1', 'L1_DPHI-2jTAU1',
 
         #ATR-17320
         # 'L1_CEP-CjJ100',

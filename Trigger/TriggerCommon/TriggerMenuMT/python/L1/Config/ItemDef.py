@@ -1961,6 +1961,10 @@ class ItemDef:
             MenuItem('L1_BTAG-MU5VFjJ80').setLogic( d.TOPO_0DR04_MU5VFab_CjJ80ab & physcond)
             MenuItem('L1_BTAG-MU5VFjJ90').setLogic( d.TOPO_0DR04_MU5VFab_CjJ90ab & physcond)
             MenuItem('L1_BPH-8M15-2MU3V-BO'    ).setLogic( d.TOPO_8INVM15_2CMU3Vab & physcond)           # 96% for Upsi
+            #ATR-29784
+            MenuItem('L1_DPHI-2eEM1').setLogic( d.TOPO_23DPHI32_2eEM1s & physcond)
+            MenuItem('L1_DPHI-2eTAU1').setLogic( d.TOPO_23DPHI32_2eTAU1s & physcond)
+            MenuItem('L1_DPHI-2jTAU1').setLogic( d.TOPO_23DPHI32_2jTAU1s & physcond)
 
         except NameError as ex:
             exc_type, exc_value, exc_traceback = sys.exc_info()

@@ -283,6 +283,8 @@ L1TopoParams = {
  'jJetSort': {'comment': '', 'parameters': ['MinEta', 'MaxEta']},
  'jJetNoSort': {'comment': '', 'parameters': []},
  'JetNoSort': {'comment': '', 'parameters': []},
+ 'jTauNoSort': {'comment': '', 'parameters': ['Isolation', 'passIsolation']},
+ 'jTauSort': {'comment': '', 'parameters': ['MinEta', 'MaxEta','Isolation', 'passIsolation']},
  
  # For the time being, no dedicated algs for gJetNoSort, jLJetNoSort
  'jXENoSort': {'comment': '', 'parameters': []},

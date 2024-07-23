@@ -89,6 +89,10 @@ def getDevHISignatures():
         ChainProp(name='HLT_mb_sp_vpix30_hi_FgapAC5_L1jTAU1', l1SeedThresholds=['FSNOSEED']*2,stream=[UPCStream],groups=MinBiasGroup+PrimaryPhIGroup),
         ChainProp(name='HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1eTAU1', l1SeedThresholds=['FSNOSEED']*2,stream=[UPCStream],groups=MinBiasGroup+PrimaryPhIGroup),
         ChainProp(name='HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1jTAU1', l1SeedThresholds=['FSNOSEED']*2,stream=[UPCStream],groups=MinBiasGroup+PrimaryPhIGroup),
+        #ATR-29784
+        ChainProp(name='HLT_mb_sp_vpix30_hi_FgapAC5_L1DPHI-2eEM1', l1SeedThresholds=['FSNOSEED']*2,stream=[UPCStream],groups=MinBiasGroup+PrimaryPhIGroup),
+        ChainProp(name='HLT_mb_sp_vpix30_hi_FgapAC5_L1DPHI-2eTAU1', l1SeedThresholds=['FSNOSEED']*2,stream=[UPCStream],groups=MinBiasGroup+PrimaryPhIGroup),
+        ChainProp(name='HLT_mb_sp_vpix30_hi_FgapAC5_L1DPHI-2jTAU1', l1SeedThresholds=['FSNOSEED']*2,stream=[UPCStream],groups=MinBiasGroup+PrimaryPhIGroup),
    
     ]
 
