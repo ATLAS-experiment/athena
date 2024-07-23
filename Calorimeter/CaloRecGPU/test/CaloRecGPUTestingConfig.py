@@ -725,10 +725,15 @@ def MainTestConfiguration(flags, testoptions, PlotterConfigurator, cellsname, cl
 
 def RunFullTestConfiguration(flags, testoptions, PlotterConfigurator = None, cellsname = "AllCalo", clustersname = "CaloCalTopoClustersNew"):
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 
     cfg=MainServicesCfg(flags)
-    cfg.merge(PoolReadCfg(flags))
+    
+    if flags.Input.Format is Format.BS:
+        from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
+        cfg.merge(ByteStreamReadCfg(flags))
+    else:
+        from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
+        cfg.merge(PoolReadCfg(flags))
     
     if testoptions.UsePerfMon:
        from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
@@ -825,7 +830,7 @@ def PrepareTest(default_files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-
             flags.Input.Files = args.files
     else:
         flags.Input.Files = args.files
-
+    
     if parse_command_arguments:
         flags.Concurrency.NumThreads = int(args.numthreads)
         flags.Concurrency.NumConcurrentEvents = int(args.numthreads)
@@ -846,5 +851,9 @@ def PrepareTest(default_files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-
     
     flags.CaloRecGPU.GlobalFlags.UseCaloRecGPU = True
     flags.CaloRecGPU.ActiveConfig.MissingCellsToFill = [186986, 187352]
+    
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags,defaultConditionsTags
+    flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_DATA
+    flags.GeoModel.AtlasVersion=defaultGeometryTags.RUN3
     
     return (flags, testoptions)

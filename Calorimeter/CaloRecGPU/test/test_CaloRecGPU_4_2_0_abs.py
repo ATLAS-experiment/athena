@@ -5,7 +5,7 @@
 # art-architecture: '#&nvidia'
 # art-output: expert-monitoring.root
 
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 import CaloRecGPUTestingConfig
 from CaloRecGPUTestingChecker import check
@@ -15,7 +15,7 @@ def do_test(files):
     #files does nothing for now, to be improved in the future to maybe allow multiple tests?
     
     
-    flags, testopts = CaloRecGPUTestingConfig.PrepareTest()
+    flags, testopts = CaloRecGPUTestingConfig.PrepareTest(default_files = files, parse_command_arguments = False)
     
     flags.CaloRecGPU.ActiveConfig.SeedThreshold = 4.0
     flags.CaloRecGPU.ActiveConfig.GrowThreshold = 2.0
@@ -34,7 +34,7 @@ def do_test(files):
     
     testopts.TestGrow = True
     testopts.TestSplit = True
-    testopts.NumEvents = 100
+    testopts.NumEvents = 500
     
     PlotterConfig = CaloRecGPUTestingConfig.PlotterConfigurator(["CPU_growing", "GPU_growing", "CPU_splitting", "GPU_splitting"], ["growing", "splitting"])
         
