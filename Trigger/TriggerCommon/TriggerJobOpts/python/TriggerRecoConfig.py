@@ -69,7 +69,7 @@ def TriggerRecoCfgData(flags):
         xRoIBResultAcc, _ = RoIBResultToxAODCfg(flags)
         acc.merge( xRoIBResultAcc )
 
-        if flags.Input.Format is Format.BS:
+        if flags.Input.Format is Format.BS and flags.Input.DataYear < 2024: 
             from L1TopoByteStream.L1TopoByteStreamConfig import L1TopoRawDataContainerBSCnvCfg
             acc.merge( L1TopoRawDataContainerBSCnvCfg(flags) )
             topoEDM = ['xAOD::L1TopoRawDataContainer#L1TopoRawData',
