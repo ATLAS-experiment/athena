@@ -114,7 +114,7 @@ def EfexMonitoringHistConfig(flags, eFexAlg):
                                    fillGroup=fillGroup,
                                     type='TH1F', path=trigPath+keyDirPathMap[containerKey]+cut_name, xbins=64,xmin=-math.pi,xmax=math.pi)
 
-            helper.defineHistogram(f"tauTOBEta,tauTOBPhi;h_{containerKey}_{cut_name}_EtaPhiMap", title='eEM '+tobStr+' Count'+cut_title_addition+';#eta;#phi',
+            helper.defineHistogram(f"TOBEta,TOBPhi;h_{containerKey}_{cut_name}_EtaPhiMap", title='eEM '+tobStr+' Count'+cut_title_addition+';#eta;#phi',
                                    fillGroup=fillGroup,
                                    hanConfig={"description":"Inspect for hot/cold spots - check help for list of known hot/coldspots"},
                                     type='TH2F',

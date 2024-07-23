@@ -71,7 +71,6 @@ class eFexTowerBuilder : public AthReentrantAlgorithm
 
     Gaudi::Property<bool> m_applyMasking{this,"ApplyMasking",true,"Apply masking of supercells based on provenance bits. Should be set to False for MC"};
 
-    mutable std::mutex m_debugMutex;
 
 };
 

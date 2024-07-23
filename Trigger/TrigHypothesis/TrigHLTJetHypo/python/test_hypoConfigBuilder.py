@@ -44,6 +44,12 @@ chains = [
     ChainProp(name='HLT_j0_DIPZ50XX4j20_MAXMULT20_roiftf_preselj20_L13J35p0ETA23', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream,'express'], groups=MultiJetGroup+SupportLegGroup, monGroups=['jetMon:t0','jetMon:online']),
     ChainProp(name='HLT_4j110_pf_ftf_presel4jDIPZ50X20pt_L13J50', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream,'express'], groups=MultiJetGroup+SupportLegGroup, monGroups=['jetMon:t0','jetMon:online']),
 
+    ChainProp(name='HLT_j0_HT400XX15ptXX0eta490_j45a_pf_ftf_preselj20_L1J15', l1SeedThresholds=['FSNOSEED']*2, stream=[PhysicsStream,'express'], groups=SingleJetGroup+SupportLegGroup+['RATE:CPS_J15'], monGroups=['jetMon:t0','jetMon:online','idMon:shifter','caloMon:t0']),
+
+ 
+    ChainProp(name='HLT_j0_HT400XX15ptXX0eta490XXveto_j45a_pf_ftf_preselj20_L1J15', l1SeedThresholds=['FSNOSEED']*2, stream=[PhysicsStream,'express'], groups=SingleJetGroup+SupportLegGroup+['RATE:CPS_J15'], monGroups=['jetMon:t0','jetMon:online','idMon:shifter','caloMon:t0']),
+
+    ChainProp(name='HLT_j0_MULT0mult11XX15ptXX0eta490_j45a_pf_ftf_preselj20_L1J15', l1SeedThresholds=['FSNOSEED']*2, stream=[PhysicsStream,'express'], groups=SingleJetGroup+SupportLegGroup+['RATE:CPS_J15'], monGroups=['jetMon:t0','jetMon:online','idMon:shifter','caloMon:t0']),
    ]
 
 def testChainDictMaker(idict):
