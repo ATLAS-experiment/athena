@@ -148,6 +148,7 @@ std::optional<double> sTgcRawDataMonAlg::band2eta(double rPosAtNSW, const MuonGM
   std::optional<double> status = band2theta(rPosAtNSW, muonDetectorManagerObject);
   if (!status.has_value()) return std::nullopt;
   double theta = status.value();
+  if (!std::isnormal(theta/2.)) return std::nullopt;
   double eta = -std::log(std::tan(theta/2.));
   return std::make_optional(eta);
 }
