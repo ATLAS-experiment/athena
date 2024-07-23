@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -19,12 +19,7 @@ def MuonHoughTransformTesterCfg(flags, name = "MuonHoughTransformTester", **kwar
 
     result.addEventAlgo(theAlg, primary=True)
     return result
-def MuonRecoChainTesterCfg(flags,name="MuonRecoChainTester", **kwargs):
-    result = ComponentAccumulator()
-    kwargs.setdefault("isMC", flags.Input.isMC)
-    theAlg = CompFactory.MuonValR4.MuonRecoChainTester(name, **kwargs)
-    result.addEventAlgo(theAlg, primary = True)
-    return result
+
 if __name__=="__main__":
     from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, executeTest,setupHistSvcCfg
     parser = SetupArgParser()
@@ -71,45 +66,5 @@ if __name__=="__main__":
                                           drawDisplaySuccss = args.displayGoodSeeds))
     
     
-    
-    from MuonConfig.MuonSegmentFindingConfig import MuonLayerHoughAlgCfg, MuonSegmentFinderAlgCfg, MuonSegmentCnvAlgCfg
-    ### Build segments from the leagcy chain
-    cfg.merge(MuonLayerHoughAlgCfg(flags))
-    cfg.merge(MuonSegmentFinderAlgCfg(flags,
-                                      NSWSegmentCollectionName=""))
-
-    cfg.merge(MuonSegmentCnvAlgCfg(flags,
-                                   xAODContainerName="MuonSegments"))
-    from MuonConfig.MuonTrackBuildingConfig import MuPatTrackBuilderCfg
-    cfg.merge(MuPatTrackBuilderCfg(flags))
-    ### What happens if you parse the R4 patterns to the legacy chain?
-    from MuonPatternCnv.MuonPatternCnvConfig import MuonPatternCnvAlgCfg
-    cfg.merge(MuonPatternCnvAlgCfg(flags,
-                                   PatternCombiKey="R4Patterns",
-                                   HoughDataPerSecKey="R4HoughDataPerSec"))
-    cfg.merge(MuonSegmentFinderAlgCfg(flags,
-                                      name="MuonSegmentFinderR4Pattern",
-                                      MuonLayerHoughCombisKey="R4Patterns",
-                                      SegmentCollectionName="TrackMuonSegmentsFromR4",
-                                      NSWSegmentCollectionName=""))
-    cfg.merge(MuonSegmentCnvAlgCfg(flags, "MuonSegmentCnvAlgFromR4",
-                                   SegmentContainerName="TrackMuonSegmentsFromR4",
-                                   xAODContainerName="MuonSegmentsFromR4"))
-    
-    cfg.merge(MuPatTrackBuilderCfg(flags, name="TrackBuildingFromR4",
-                                   MuonSegmentCollection = "TrackMuonSegmentsFromR4",
-                                   SpectrometerTrackOutputLocation="MuonTracksFromR4"))
-
-    from xAODTrackingCnv.xAODTrackingCnvConfig import MuonStandaloneTrackParticleCnvAlgCfg
-    cfg.merge(MuonStandaloneTrackParticleCnvAlgCfg(flags))
-    cfg.merge(MuonStandaloneTrackParticleCnvAlgCfg(flags,"MuonXAODParticleConvR4",
-                                                   TrackContainerName="MuonTracksFromR4",
-                                                   xAODTrackParticlesFromTracksContainerName="MuonSpectrometerTrackParticlesR4"))
-
-
-    cfg.merge(MuonRecoChainTesterCfg(flags))
-    
-    # cfg.merge(VTuneProfilerServiceCfg(flags, ProfiledAlgs=["MuonHoughTransformAlg"]))
-
     executeTest(cfg, args.nEvents)
     

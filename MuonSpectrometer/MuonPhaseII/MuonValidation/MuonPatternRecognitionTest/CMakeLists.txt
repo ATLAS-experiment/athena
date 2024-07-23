@@ -22,3 +22,9 @@ atlas_add_test( HoughTransformTest
                 PROPERTIES TIMEOUT 600
                 PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT nopost.sh)
+
+atlas_add_test( MuonR4FullChainIntegrationTest
+                SCRIPT python -m MuonPatternRecognitionTest.MuonRecoChainTesterConfig --nEvents 2 --noMM --noSTGC
+                PROPERTIES TIMEOUT 600
+                PRIVATE_WORKING_DIRECTORY
+                POST_EXEC_SCRIPT nopost.sh)
