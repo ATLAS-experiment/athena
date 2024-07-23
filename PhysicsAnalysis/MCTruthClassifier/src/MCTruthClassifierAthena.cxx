@@ -116,7 +116,7 @@ const xAOD::TruthParticle* MCTruthClassifier::egammaClusMatch(const xAOD::CaloCl
     bool isNCone = false;
     bool isExt = genPartToCalo(ctx, clus, thePart, isFwrdEle, dR, isNCone, *caloDDMgr);
     if (!isExt) continue;
-    theMatchPart = MC::find_matching(truthParticleContainerReadHandle.ptr(), thePart);
+    theMatchPart = MC::findMatching(truthParticleContainerReadHandle.ptr(), thePart);
     if (info) {
       info->egPartPtr.push_back(thePart);
       info->egPartdR.push_back(dR);
@@ -153,16 +153,16 @@ const xAOD::TruthParticle* MCTruthClassifier::egammaClusMatch(const xAOD::CaloCl
   }
 
   if (theEgamma != nullptr) {
-    theMatchPart = MC::find_matching(truthParticleContainerReadHandle.ptr(), theEgamma);
+    theMatchPart = MC::findMatching(truthParticleContainerReadHandle.ptr(), theEgamma);
     if (info) info->deltaRMatch = LeadingPhtdR;
   } else if (theLeadingPartInCone != nullptr) {
-    theMatchPart = MC::find_matching(truthParticleContainerReadHandle.ptr(),theLeadingPartInCone);
+    theMatchPart = MC::findMatching(truthParticleContainerReadHandle.ptr(),theLeadingPartInCone);
     if (info) info->deltaRMatch = LeadingPartdR;
   } else if (theBestPartOutCone != nullptr) {
-    theMatchPart = MC::find_matching(truthParticleContainerReadHandle.ptr(),theBestPartOutCone);
+    theMatchPart = MC::findMatching(truthParticleContainerReadHandle.ptr(),theBestPartOutCone);
     if (info) info->deltaRMatch = BestPartdR;
   } else if (isFwrdEle && theBestPartdR != nullptr) {
-    theMatchPart = MC::find_matching(truthParticleContainerReadHandle.ptr(),theBestPartdR );
+    theMatchPart = MC::findMatching(truthParticleContainerReadHandle.ptr(),theBestPartdR );
     if (info) info->deltaRMatch = BestPartdR;
   } else {
     theMatchPart = nullptr;
@@ -190,7 +190,7 @@ const xAOD::TruthParticle* MCTruthClassifier::egammaClusMatch(const xAOD::CaloCl
     bool isExt = genPartToCalo(ctx, clus, thePart, isFwrdEle, dR, isNCone, *caloDDMgr);
     if (!isExt) continue;
 
-    theMatchPart = MC::find_matching(truthParticleContainerReadHandle.ptr(),thePart);
+    theMatchPart = MC::findMatching(truthParticleContainerReadHandle.ptr(),thePart);
     if (info) {
       info->egPartPtr.push_back(thePart);
       info->egPartdR.push_back(dR);
@@ -219,13 +219,13 @@ const xAOD::TruthParticle* MCTruthClassifier::egammaClusMatch(const xAOD::CaloCl
   }
 
   if (theEgamma != nullptr) {
-    theMatchPart = MC::find_matching(truthParticleContainerReadHandle.ptr(),theEgamma);
+    theMatchPart = MC::findMatching(truthParticleContainerReadHandle.ptr(),theEgamma);
     if (info) info->deltaRMatch = LeadingPhtdR;
   } else if (theLeadingPartInCone != nullptr) {
-    theMatchPart = MC::find_matching(truthParticleContainerReadHandle.ptr(),theLeadingPartInCone);
+    theMatchPart = MC::findMatching(truthParticleContainerReadHandle.ptr(),theLeadingPartInCone);
     if (info)  info->deltaRMatch = LeadingPartdR;
   } else if (theBestPartOutCone != nullptr) {
-    theMatchPart = MC::find_matching(truthParticleContainerReadHandle.ptr(),theBestPartOutCone);
+    theMatchPart = MC::findMatching(truthParticleContainerReadHandle.ptr(),theBestPartOutCone);
     if (info) info->deltaRMatch = BestPartdR;
   } else {
     theMatchPart = nullptr;

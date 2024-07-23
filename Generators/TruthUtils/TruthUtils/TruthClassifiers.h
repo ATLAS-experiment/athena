@@ -160,7 +160,7 @@ std::tuple<unsigned int, T> defOrigOfParticle(T thePart) {
 
   auto prodVtx = thePart->production_vertex();
   if (isPhysical && prodVtx && !isGeant) {
-    fromHad = MC::fromHadron(thePart, parent_hadron_ptr, fromTau, fromBSM); 
+    fromHad = MC::isFromHadron(thePart, parent_hadron_ptr, fromTau, fromBSM); 
   }
   else  uncat = 1;
 
@@ -188,7 +188,7 @@ std::tuple<unsigned int, T> defOrigOfParticle(T thePart) {
 template <class T> 
 ParticleOutCome defOutComeOfElectron(T thePart) {
   ParticleOutCome PartOutCome = UnknownOutCome;
-  auto EndVert = MC::findEndVert(thePart);
+  auto EndVert = MC::findSimulatedEndVertex(thePart);
   if (EndVert == nullptr) return NonInteract;
 
   int ElecOutNumOfNucFr(0);
@@ -212,7 +212,7 @@ ParticleOutCome defOutComeOfElectron(T thePart) {
 template <class T> 
 ParticleOutCome defOutComeOfMuon(T thePart) {
   ParticleOutCome PartOutCome = UnknownOutCome;
-  auto EndVert = MC::findEndVert(thePart);
+  auto EndVert = MC::findSimulatedEndVertex(thePart);
   if (EndVert == nullptr) return NonInteract;
   int MuOutNumOfNucFr(0);
   int NumOfHadr(0);
@@ -239,7 +239,7 @@ ParticleOutCome defOutComeOfMuon(T thePart) {
 template <class T> 
 ParticleOutCome defOutComeOfTau(T thePart) {
   ParticleOutCome PartOutCome = UnknownOutCome;
-  auto EndVert = MC::findEndVert(thePart);
+  auto EndVert = MC::findSimulatedEndVertex(thePart);
   if (EndVert == nullptr) return NonInteract;
   int NumOfTauDaug = EndVert->nOutgoingParticles();
   auto tauFinalStatePart = MC::findFinalStatePart(EndVert);
@@ -267,7 +267,7 @@ ParticleOutCome defOutComeOfTau(T thePart) {
 template <class T> 
 ParticleOutCome defOutComeOfPhoton(T thePart) {
   ParticleOutCome PartOutCome = UnknownOutCome;
-  auto EndVert = MC::findEndVert(thePart);
+  auto EndVert = MC::findSimulatedEndVertex(thePart);
   if (EndVert == nullptr) return UnConverted;
 
   int PhtOutNumOfNucFr(0);

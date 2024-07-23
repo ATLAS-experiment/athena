@@ -100,11 +100,11 @@ namespace MC
 
   /// @brief Function to find a particle in container
   /** This can be used for HepMC3::GenVertexPtr, HepMC3::ConstGenVertexPtr or xAOD::TruthVertex* */  
-  template <class C, class T>  T find_matching(C TruthTES, T bcin) {
+  template <class C, class T>  T findMatching(C TruthContainer, T input) {
     T ptrPart = nullptr;
-    if (!bcin) return ptrPart;
-    for (T truthParticle : *TruthTES) {
-      if (HepMC::is_sim_descendant(bcin,truthParticle)) {
+    if (!input) return ptrPart;
+    for (T truthParticle : *TruthContainer) {
+      if (HepMC::is_sim_descendant(input,truthParticle)) {
         ptrPart = truthParticle;
         break;
       }
@@ -113,27 +113,27 @@ namespace MC
   }
   /// @brief Function to find all ancestors of the particle.
   /** This can be used for HepMC3::GenParticlePtr, HepMC3::ConstGenParticlePtr or xAOD::TruthParticle* */
-  template <class T> void findAllJetMothers(T thePart, std::set<T>& allJetMothers) {
-    auto partOriVert = thePart->production_vertex();
-    if (!partOriVert) return;
-    auto incoming = partOriVert->particles_in();
-    for (auto theMoth: incoming) {
-      if (!theMoth) continue;
-      allJetMothers.insert(theMoth);
-      findAllJetMothers(theMoth, allJetMothers);
+  template <class T> void findParticleAncestors(T thePart, std::set<T>& allancestors) {
+    auto prodVtx = thePart->production_vertex();
+    if (!prodVtx) return;
+    for (auto theMother: prodVtx->particles_in()) {
+      if (!theMother) continue;
+      allancestors.insert(theMother);
+      findParticleAncestors(theMother, allancestors);
     }
   }
 
   /// @brief Function to get the particle stable MC daughters.
   /** This can be used for HepMC3::GenParticlePtr, HepMC3::ConstGenParticlePtr or xAOD::TruthParticle* */
-  template <class T> void findParticleDaughters(T thePart, std::set<T>& daughters) {
+  template <class T> void findParticleStableDescendants(T thePart, std::set<T>& allstabledescendants) {
     auto endVtx = thePart->end_vertex();
     if (!endVtx) return;
     for (auto theDaughter: endVtx->particles_out()) {
-      if (theDaughter && isStable(theDaughter) && !HepMC::is_simulation_particle(theDaughter)) {
-         daughters.insert(theDaughter);
+      if (!theDaughter) continue;  
+      if (isStable(theDaughter) && !HepMC::is_simulation_particle(theDaughter)) {
+         allstabledescendants.insert(theDaughter);
       }
-      findParticleDaughters(theDaughter, daughters);
+      findParticleStableDescendants(theDaughter, allstabledescendants);
     }
   }
 
@@ -155,7 +155,7 @@ namespace MC
   /// AV: This is MCtruthClassifier legacy. Note that this function willnot capture some cases of the HardScattering vertices.
   /// The function should be improved in the future.
   /** This can be used for HepMC3::GenVertexPtr, HepMC3::ConstGenVertexPtr or xAOD::TruthVertex* */  
-  template <class T>  bool isHardScatVrtx(T pVert) {
+  template <class T>  bool isHardScatteringtVertex(T pVert) {
     if (pVert == nullptr) return false;
     T pV = pVert;
     int numOfPartIn(0);
@@ -181,7 +181,7 @@ namespace MC
   /// AV: This is MCtruthClassifier legacy.
   /// The function should be improved in the future.
   /** This can be used for HepMC3::GenVertexPtr, HepMC3::ConstGenVertexPtr or xAOD::TruthVertex* */  
-  template <class T> bool fromHadron(T p, T hadptr, bool &fromTau, bool &fromBSM) {
+  template <class T> bool isFromHadron(T p, T hadptr, bool &fromTau, bool &fromBSM) {
     if (isHadron(p)&&!isBeam(p))  return true; // trivial case
     auto vtx = p->production_vertex();
     if (!vtx)  return false;
@@ -201,7 +201,7 @@ namespace MC
         if (!hadptr)  hadptr = parent; // assumes linear hadron parentage
         return true;
       }
-      fromHad |= fromHadron(parent, hadptr, fromTau, fromBSM);
+      fromHad |= isFromHadron(parent, hadptr, fromTau, fromBSM);
     }
     return fromHad;
   }
@@ -209,7 +209,7 @@ namespace MC
   /// @brief Function to find the end vertex of a particle.
   /// This algorithm allows for 1->1 decays. 
   /** This can be used for HepMC3::GenVertexPtr, HepMC3::ConstGenVertexPtr or xAOD::TruthVertex*  and particle counterparts*/  
-  template <class T> auto findEndVert(T thePart) -> decltype(thePart->end_vertex()) {
+  template <class T> auto findSimulatedEndVertex(T thePart) -> decltype(thePart->end_vertex()) {
      decltype(thePart->end_vertex()) EndVert = thePart->end_vertex();
      decltype(thePart->end_vertex()) pVert(nullptr);
     if (EndVert != nullptr) {
@@ -220,7 +220,7 @@ namespace MC
         auto incoming = EndVert->particles_in();
         for (const auto& itrDaug: outgoing) {
           if (!itrDaug) continue;
-          if (((itrDaug && HepMC::is_same_generator_particle(itrDaug,thePart)) ||
+          if ((( HepMC::is_same_generator_particle(itrDaug,thePart)) ||
              // brem on generator level for tau
              (outgoing.size() == 1 && incoming.size() == 1 &&
               !HepMC::is_simulation_particle(itrDaug) && !HepMC::is_simulation_particle(thePart))) &&
@@ -235,7 +235,7 @@ namespace MC
     return EndVert;
   }
 
-  /// @brief Function to find the stable particle descendants of the gived vertex..
+  /// @brief Function to find the stable particle descendants of the given vertex..
   /** This can be used for HepMC3::GenVertexPtr, HepMC3::ConstGenVertexPtr or xAOD::TruthVertex*  and particle counterparts*/  
   template <class V> auto findFinalStatePart(V EndVert) -> decltype(EndVert->particles_out()) {
     if (!EndVert) return {};
@@ -245,7 +245,7 @@ namespace MC
       if (!thePart) continue;
       finalStatePart.push_back(thePart);
       if (isStable(thePart)) continue;
-      V pVert = findEndVert(thePart);
+      V pVert = findSimulatedEndVertex(thePart);
       if (pVert == EndVert) break; // to prevent Sherpa  loop
       if (pVert != nullptr) {
           auto  vecPart = findFinalStatePart<V>(pVert);

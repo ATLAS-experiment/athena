@@ -147,7 +147,7 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::Jet* jet, bool DR, MCTrut
   // AV: No hadrons in the jet -- the flavour is unknown.
   // AV: The algorithm will fail on 4/5 quark hadrons and probably on nonBSM hadrons. To be fixed.
   for (const auto& thePart: constituents) {
-    MC::findAllJetMothers(thePart, allJetMothers);
+    MC::findParticleAncestors(thePart, allJetMothers);
     //AV: probably skip ME particles
     if (!MC::isPhysical(thePart)) continue;
     // determine if hadron and its type
@@ -309,7 +309,7 @@ double MCTruthClassifier::fracParticleInJet(const xAOD::TruthParticle* thePart, 
   std::set<const xAOD::TruthParticle*> intersect;
 
   findJetConstituents(jet, constituents, DR);
-  MC::findParticleDaughters(thePart, daughters);
+  MC::findParticleStableDescendants(thePart, daughters);
   if (daughters.empty()) daughters.insert(thePart);
   // Get the intersection of constituents and daughters
   std::set_intersection(constituents.begin(),
