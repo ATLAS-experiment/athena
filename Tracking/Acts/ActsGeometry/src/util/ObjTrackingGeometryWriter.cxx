@@ -1,13 +1,15 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // This file was largely imported from the Acts testing framework
 
+
 #include "ObjTrackingGeometryWriter.h"
 
-#include <iostream>
 #include "Acts/Geometry/TrackingVolume.hpp"
+#include "Acts/Geometry/TrackingGeometry.hpp"
+
 #include "Acts/Surfaces/Surface.hpp"
 #include "Acts/Geometry/GeometryContext.hpp"
 
@@ -54,7 +56,7 @@ Acts::ObjTrackingGeometryWriter::write(const Acts::GeometryContext& gctx, const 
         auto writerName = writer->name();
         if (volumeName.find(writerName) != std::string::npos) {
           // asign the writer
-          surfaceWriter = writer;
+          surfaceWriter = std::move(writer);
           // and break
           break;
         }
