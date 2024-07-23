@@ -39,6 +39,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #include <map>
 #include <string>
 #include <vector>
+#include <stdexcept>
 using namespace std;
 
 bool do_expert = false;
@@ -688,12 +689,12 @@ T0CalibTypeXY::T0CalibTypeXY(char *infile, bool isAr = false)
         Moduletuple = (TNtuple *)file->Get("Module_Artuple");
     }
 
-    T0CalTypeXY *hxy1 = new T0CalTypeXY(Chiptuple, -1, 0.2);
-    T0CalTypeXY *hxy2 = new T0CalTypeXY(Boardtuple, -1, 0.5);
-    T0CalTypeXY *hxy3 = new T0CalTypeXY(Moduletuple, -1, 0.8);
-    T0CalTypeXY *hxy4 = new T0CalTypeXY(Chiptuple, 1, 0.2);
-    T0CalTypeXY *hxy5 = new T0CalTypeXY(Boardtuple, 1, 0.5);
-    T0CalTypeXY *hxy6 = new T0CalTypeXY(Moduletuple, 1, 0.8);
+    T0CalTypeXY hxy1 =  T0CalTypeXY(Chiptuple, -1, 0.2);
+    T0CalTypeXY hxy2 =  T0CalTypeXY(Boardtuple, -1, 0.5);
+    T0CalTypeXY hxy3 =  T0CalTypeXY(Moduletuple, -1, 0.8);
+    T0CalTypeXY hxy4 =  T0CalTypeXY(Chiptuple, 1, 0.2);
+    T0CalTypeXY hxy5 =  T0CalTypeXY(Boardtuple, 1, 0.5);
+    T0CalTypeXY hxy6 =  T0CalTypeXY(Moduletuple, 1, 0.8);
 
     this->SetName("c1");
     this->cd();
@@ -707,32 +708,32 @@ T0CalibTypeXY::T0CalibTypeXY(char *infile, bool isAr = false)
     if (!isAr)
     {
         this->cd(6);
-        hxy1->Draw("T0 calib type (Chip, side C)", false);
+        hxy1.Draw("T0 calib type (Chip, side C)", false);
         this->cd(5);
-        hxy2->Draw("T0 calib type (Board, side C)", false);
+        hxy2.Draw("T0 calib type (Board, side C)", false);
         this->cd(4);
-        hxy3->Draw("T0 calib type (Module, side C)", false);
+        hxy3.Draw("T0 calib type (Module, side C)", false);
         this->cd(3);
-        hxy4->Draw("T0 calib type (Chip, side A)", false);
+        hxy4.Draw("T0 calib type (Chip, side A)", false);
         this->cd(2);
-        hxy5->Draw("T0 calib type (Board, side A)", false);
+        hxy5.Draw("T0 calib type (Board, side A)", false);
         this->cd(1);
-        hxy6->Draw("T0 calib type (Module, side A)", true);
+        hxy6.Draw("T0 calib type (Module, side A)", true);
     }
     else
     {
         this->cd(6);
-        hxy1->Draw("Argon T0 calib type (Chip, side C)", false);
+        hxy1.Draw("Argon T0 calib type (Chip, side C)", false);
         this->cd(5);
-        hxy2->Draw("Argon T0 calib type (Board, side C)", false);
+        hxy2.Draw("Argon T0 calib type (Board, side C)", false);
         this->cd(4);
-        hxy3->Draw("Argon T0 calib type (Module, side C)", false);
+        hxy3.Draw("Argon T0 calib type (Module, side C)", false);
         this->cd(3);
-        hxy4->Draw("Argon T0 calib type (Chip, side A)", false);
+        hxy4.Draw("Argon T0 calib type (Chip, side A)", false);
         this->cd(2);
-        hxy5->Draw("Argon T0 calib type (Board, side A)", false);
+        hxy5.Draw("Argon T0 calib type (Board, side A)", false);
         this->cd(1);
-        hxy6->Draw("Argon T0 calib type (Module, side A)", true);
+        hxy6.Draw("Argon T0 calib type (Module, side A)", true);
     }
 }
 
@@ -1096,6 +1097,9 @@ BoardVariationsDiff::BoardVariationsDiff(char *infile_data, char *infile_ref, in
     // Increased margin from 0.1 to 0.2 (PH Sept 2022)
     this->fMaximum = maxy + 0.2;
     this->fMinimum = miny - 0.2;
+    if ((det + 1)>=3){
+      throw std::runtime_error("detlet[det + 1] is out of bounds");
+    }
     this->SetTitle(Form("Board T0 - ref (%c-side)", detlet[det + 1]));
     this->SetLineColor(4);
     this->RemovePoint(0);
@@ -1246,6 +1250,9 @@ BoardVariationsOldT0::BoardVariationsOldT0(char *infile, int det)
     }
     else
     {
+        if ((det+1) >=3){
+          throw std::runtime_error ("detlet[det + 1] is out of bounds of the array");
+        }
         this->SetTitle(Form("Endcap Board T0s (%c-side)", detlet[det + 1]));
     }
     this->SetLineColor(4);
@@ -1466,7 +1473,7 @@ BoardVariationsTRes1::BoardVariationsTRes1(char *infile, int det)
 
     cout << "In BoardVariationsTRes1   infile: " << string(infile) << " detector " << det << endl;
 
-    float t0, oldt0, dt0, bindex, t0offset;
+    float t0{}, oldt0{}, dt0{}, bindex{}, t0offset{};
 
     minx = 0;
     maxx = 289;
@@ -1948,11 +1955,11 @@ DGraph::DGraph(char *infile, string path, string folder, int det, int lay, bool 
     TDirectory *trt = (TDirectory *)file->FindKey("TRT_all")->ReadObj();
     if (folder != "")
     {
-        TDirectory *det = (TDirectory *)trt->FindKey(folder.c_str())->ReadObj();
+        TDirectory *thisDet = (TDirectory *)trt->FindKey(folder.c_str())->ReadObj();
         cout << "PLOT FOR " << folder << endl;
-        if (det->FindKey("rtgraph"))
+        if (thisDet->FindKey("rtgraph"))
         {
-            rtgraph = (TGraphErrors *)det->FindKey("rtgraph")->ReadObj();
+            rtgraph = (TGraphErrors *)thisDet->FindKey("rtgraph")->ReadObj();
             cout << " folder: " << folder << " found rtgraph " << endl;
         }
         else
@@ -2042,10 +2049,10 @@ class RtGraphs : public TCanvas
 public:
     // RtGraphs(char*,int,int);
     RtGraphs(char *, string, bool);
-    TH2F *rthist;
-    TGraphErrors *rtgraph;
-    TGraphErrors *trgraph;
-    TF1 *oldrtfunc;
+    TH2F *rthist{};
+    TGraphErrors *rtgraph{};
+    TGraphErrors *trgraph{};
+    TF1 *oldrtfunc{};
 };
 
 RtGraphs::RtGraphs(char *infile, string folder, bool isAr = false)
@@ -2357,7 +2364,7 @@ RtGraphs::RtGraphs(char *infile, string folder, bool isAr = false)
         else
         {
             char name[500];
-            sprintf(name, "t(r) fit (%s)", titlemap[string(folder)].c_str());
+            sprintf(name, "t(r) fit (%s)", titlemap[string(std::move(folder))].c_str());
             trgraph->SetTitle(name);
         }
 
@@ -2694,10 +2701,10 @@ class RtColor : public TCanvas
 {
 public:
     RtColor(char *, string, bool);
-    TH2F *hist;
-    TGraphErrors *rtgraph;
-    TF1 *oldrtfunc;
-    TF1 *newRT;
+    TH2F *hist{};
+    TGraphErrors *rtgraph{};
+    TF1 *oldrtfunc{};
+    TF1 *newRT{};
 };
 
 RtColor::RtColor(char *infile, string folder, bool isAr = false)
@@ -2942,6 +2949,9 @@ ResidualPlots::ResidualPlots(TFile *file, bool isAr = false)
     {
         cout << " In ResidualPlots Xenon" << endl;
         trt = (TDirectory *)file->FindKey("TRT_all")->ReadObj();
+        if (not trt){
+          throw std::runtime_error("trt pointer is null");
+        }
         det1 = (TDirectory *)trt->FindKey("Detector_-1")->ReadObj();
         det2 = (TDirectory *)trt->FindKey("Detector_1")->ReadObj();
         det3 = (TDirectory *)trt->FindKey("Detector_-2")->ReadObj();
@@ -3310,11 +3320,11 @@ public:
     map<double, double> resmap;
 
 private:
-    TGraphErrors *m_thegraph;
-    double *m_rdata;
-    double *m_erdata;
-    double *m_tdata;
-    double *m_etdata;
+    TGraphErrors *m_thegraph{};
+    double *m_rdata{};
+    double *m_erdata{};
+    double *m_tdata{};
+    double *m_etdata{};
 };
 
 RresTbin::RresTbin(TFile *file, string detname, int det)
@@ -3715,11 +3725,11 @@ FirstPage::FirstPage(char * /*filename*/, TFile *file)
     {
         ratiobc = residualAr_bcP->GetEntries() / residualAr_bc->GetEntries();
     }
-    if (residual_ea && residual_eaP && residual_ea->GetEntries() > 0)
+    if (residual_ea && residual_eaP && residualAr_eaP && residual_ea->GetEntries() > 0)
     {
         ratioea = (residual_eaP->GetEntries() + residualAr_eaP->GetEntries()) / (residual_ea->GetEntries() + residualAr_ea->GetEntries());
     }
-    if (residual_ec && residual_ecP && residual_ec->GetEntries() > 0)
+    if (residual_ec && residualAr_ecP &&residualAr_ec && residual_ec->GetEntries() > 0)
     {
         ratioec = (residual_ecP->GetEntries() + residualAr_ecP->GetEntries()) / (residual_ec->GetEntries() + residualAr_ec->GetEntries());
     }
@@ -4508,7 +4518,7 @@ TBDependence::TBDependence(TFile *file)
             }
             else
             {
-                ratioBC->SetPoint(i, x, 0);
+                ratioBA->SetPoint(i, x, 0);
             }
 
             residualBC1->GetPoint(i, x, all);
@@ -4713,6 +4723,9 @@ ToTDependence::ToTDependence(TFile *file, bool isba = true, bool isht = false, b
     TGraphErrors *tresBA = GetMean(tres_vs_ToT_ba);
     tresBA->SetLineColor(kRed);
     tresBA->SetMarkerColor(kRed);
+    if (not tres_vs_ToT_ba){
+      throw std::runtime_error("tres_vs_ToT_ba pointer is null");
+    }
     if (isba)
         tres_vs_ToT_ba->SetTitle("Barrel A Time Residual Mean VS ToT");
     else
@@ -4720,12 +4733,11 @@ ToTDependence::ToTDependence(TFile *file, bool isba = true, bool isht = false, b
     tres_vs_ToT_ba->GetXaxis()->SetTitle("ToT (bin)");
     tres_vs_ToT_ba->GetYaxis()->SetTitle("Time Residual (ns)");
 
-    if (isht)
-    {
-        if (isba)
+    if (isht){
+        if (isba){
             tres_vs_ToT_ba->SetTitle("Barrel A Time Residual Mean VS HT");
-        else
-            tres_vs_ToT_ba->SetTitle("Endcap A Time Residual Mean VS HT");
+        }else{
+            tres_vs_ToT_ba->SetTitle("Endcap A Time Residual Mean VS HT");}
         tres_vs_ToT_ba->GetXaxis()->SetTitle("HT (bin)");
     }
 
@@ -4736,18 +4748,21 @@ ToTDependence::ToTDependence(TFile *file, bool isba = true, bool isht = false, b
     TGraphErrors *tresBC = GetMean(tres_vs_ToT_bc);
     tresBC->SetLineColor(kBlue);
     tresBC->SetMarkerColor(kBlue);
-    if (isba)
+    if (isba){
+        if (not tres_vs_ToT_bc){
+          throw std::runtime_error(" tres_vs_ToT_bc is null");
+        }
         tres_vs_ToT_bc->SetTitle("Barrel C Time Residual Mean VS ToT");
-    else
-        tres_vs_ToT_bc->SetTitle("Endcap C Time Residual Mean VS ToT");
+    }else{
+        tres_vs_ToT_bc->SetTitle("Endcap C Time Residual Mean VS ToT");}
     tres_vs_ToT_bc->GetXaxis()->SetTitle("ToT (bin)");
     tres_vs_ToT_bc->GetYaxis()->SetTitle("Time Residual (ns)");
-    if (isht)
-    {
-        if (isba)
+    if (isht){
+        if (isba){
             tres_vs_ToT_bc->SetTitle("Barrel C Time Residual Mean VS HT");
-        else
+        }else{
             tres_vs_ToT_bc->SetTitle("Endcap C Time Residual Mean VS HT");
+        }
         tres_vs_ToT_bc->GetXaxis()->SetTitle("HT (bin)");
     }
 
@@ -4781,6 +4796,9 @@ ToTDependence::ToTDependence(TFile *file, bool isba = true, bool isht = false, b
     TGraphErrors *resBA1 = GetMean(res_vs_ToT_ba);
     resBA1->SetLineColor(kRed);
     resBA1->SetMarkerColor(kRed);
+    if (not res_vs_ToT_ba){
+      throw std::runtime_error("res_vs_ToT_ba is null ptr");
+    }
     if (isba)
         res_vs_ToT_ba->SetTitle("Barrel A Residual Mean VS ToT");
     else
@@ -6230,15 +6248,12 @@ int itersum (int argc, char *argv[])
             cout << " found TRT_all" << endl;
             dgraph0->SetLineWidth(3);
             dgraph0->SetLineColor(1);
-            if (isinverted)
-                dgraph0->SetTitle("r(t)");
-            else
-                dgraph0->SetTitle("r(t)");
+            dgraph0->SetTitle("r(t)");
+           
             dgraph0->GetXaxis()->SetTitle("t/ns");
-            if (isinverted)
-                dgraph0->GetYaxis()->SetTitle("R / (mm)");
-            else
-                dgraph0->GetYaxis()->SetTitle("R / (mm)");
+           
+            dgraph0->GetYaxis()->SetTitle("R / (mm)");
+           
             if (dgraph0->rtgraph)
                 dgraph0->Draw("apl");
             if (dgraph0->rtgraph)
