@@ -144,14 +144,14 @@ template <typename T> unsigned int EfexSimMonitorAlgorithm::fillHistos(const SG:
         }
 
         auto locIdx = Monitored::Scalar<std::string>("locIdx","");
-        for(size_t i = 0; i < sword0s.size();i++) {
-            if(word0s2.find(sword0s.at(i))==word0s2.end()) {
+        for(size_t i = 0; i < tobs1->size();i++) {
+            if(word0s2.find(tobs1->at(i)->word0())==word0s2.end()) {
                 locIdx = std::to_string(tobs1->at(i)->iPhi()/8) + ":" + std::to_string(tobs1->at(i)->iEta());
                 fill(signa + "_mismatches",lbn,locIdx,simReady);
             }
         }
-        for(size_t i = 0; i < dword0s.size();i++) {
-            if(word0s1.find(dword0s.at(i))==word0s1.end()) {
+        for(size_t i = 0; i < tobs2->size();i++) {
+            if(word0s1.find(tobs2->at(i)->word0())==word0s1.end()) {
                 locIdx = std::to_string(tobs2->at(i)->iPhi()/8) + ":" + std::to_string(tobs2->at(i)->iEta());
                 fill(signa + "_mismatches",lbn,locIdx,simReady);
             }

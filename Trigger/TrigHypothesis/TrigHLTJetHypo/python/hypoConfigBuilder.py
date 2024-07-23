@@ -7,6 +7,7 @@ from TrigHLTJetHypo.FastReductionAlgToolFactory import toolfactory
 from TrigHLTJetHypo.scenario_ht import scenario_ht
 from TrigHLTJetHypo.scenario_dipz import scenario_dipz
 from TrigHLTJetHypo.scenario_htdipz import scenario_htdipz
+from TrigHLTJetHypo.scenario_mult import scenario_mult
 from TrigHLTJetHypo.scenario_dijet import scenario_dijet
 from TrigHLTJetHypo.scenario_fbdjnoshared import scenario_fbdjnoshared
 from TrigHLTJetHypo.scenario_fbdjshared import scenario_fbdjshared
@@ -182,6 +183,22 @@ def process_htdipz(scenario, chainPartInd):
                            
     return helperconfigobjs
 
+
+def process_mult(scenario, chainPartInd):
+    """Obtain the paramters needed to build an AlgTool
+    to initialise a jet hypo HelperAlgTool"""
+
+    # obtain a list of parameter objects that will be used
+    # to build a helper config AlgTools
+    helper_params = scenario_mult(scenario, chainPartInd)
+
+    # build the helper config AlgTools
+    helperconfigobjs = [buildHypoHelperConfigTool(params) for params in
+                        helper_params]
+                           
+    return helperconfigobjs
+
+
 def process_dijet(scenario, chainPartInd):
     """Obtain the paramters needed to build an AlgTool
     to initialise a jet hypo HelperAlgTool"""
@@ -239,6 +256,7 @@ def process_nonsimple(scenario, chainPartInd):
         'Z': process_dipz,
         'HTZ': process_htdipz,
         'HT': process_ht,
+        'MULT': process_mult,
         'DIJET': process_dijet,
         'FBDJSHARED': process_fbdjshared,
         'FBDJNOSHARED': process_fbdjnoshared,

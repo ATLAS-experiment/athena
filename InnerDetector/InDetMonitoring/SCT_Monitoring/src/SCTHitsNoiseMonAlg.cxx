@@ -277,6 +277,14 @@ StatusCode SCTHitsNoiseMonAlg::generalHistsandNoise(const std::array<std::unorde
     auto phihitsmapAcc{Monitored::Collection("phi_"+hitmap, vPhi)};
     auto numberOfStripsAcc{Monitored::Collection("numberOfStrips_"+hitmap, vNumberOfStrips)};
     fill("SCTHitsNoiseMonitor_" + std::to_string(systemIndex), etahitsmapAcc, phihitsmapAcc, numberOfStripsAcc);
+     
+    if (m_doOnline){
+      const std::string hitmaprecent{"hitsmaprecent" + abbreviations[systemIndex] + "_" + layerSide.name()};
+      auto etahitsmapRecentAcc{Monitored::Collection("eta_"+hitmaprecent, vEta)};
+      auto phihitsmapRecentAcc{Monitored::Collection("phi_"+hitmaprecent, vPhi)};
+      auto numberOfStripsRecentAcc{Monitored::Collection("numberOfStrips_"+hitmaprecent, vNumberOfStrips)};
+      fill("SCTHitsNoiseMonitor_" + std::to_string(systemIndex), etahitsmapRecentAcc, phihitsmapRecentAcc, numberOfStripsAcc);
+    }
 
     if (numberOfHitsFromAllRDOs > 0) {
       int den{N_STRIPS - numberOfHitsFromSPs};

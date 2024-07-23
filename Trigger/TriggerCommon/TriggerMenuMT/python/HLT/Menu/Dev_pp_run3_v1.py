@@ -828,6 +828,9 @@ def getDevSignatures():
         ChainProp(name="HLT_tau160_ptonly_L1eTAU140", groups=SingleTauGroup+SupportPhIGroup),
         ChainProp(name="HLT_tau0_mediumRNN_tracktwoMVA_tau0_mediumRNN_tracktwoMVA_03dRAB_L1cTAU30M_2cTAU20M_DR-eTAU30eTAU20-jJ55" , l1SeedThresholds=['cTAU30M','cTAU20M'], groups=MultiTauGroup+DevGroup+Topo2Group), 
         ChainProp(name="HLT_tau0_mediumRNN_tracktwoMVA_tau0_mediumRNN_tracktwoMVA_03dRAB_L1TAU20IM_2TAU12IM_4J12p0ETA25",l1SeedThresholds=['TAU20IM','TAU12IM'], groups=MultiTauGroup+DevGroup),
+        #New DiTau Boosted chain Loose
+        ChainProp(name='HLT_tau25_mediumRNN_tracktwoMVA_tau20_mediumRNN_tracktwoMVA_02dRAB10_L1eTAU20_DR-eTAU20eTAU12-jJ40', l1SeedThresholds=['eTAU20','eTAU12'], groups=MultiTauGroup+SupportPhIGroup+Topo2Group),
+        ChainProp(name='HLT_tau25_mediumRNN_tracktwoMVA_tau20_mediumRNN_tracktwoMVA_02dRAB10_L1eTAU20_DR-eTAU20eTAU12-jJ30', l1SeedThresholds=['eTAU20','eTAU12'], groups=MultiTauGroup+SupportPhIGroup+Topo2Group),
 
 
         # Asymmetric Tau triggers for HH->bbtautau ATR-22230
