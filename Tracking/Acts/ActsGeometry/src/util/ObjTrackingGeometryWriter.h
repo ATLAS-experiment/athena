@@ -1,23 +1,23 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // This file was largely imported from the Acts testing framework
 
 #pragma once
 
-#include <mutex>
 
-#include <fstream>
-#include <iostream>
-#include "ObjSurfaceWriter.h"
-#include "Acts/Geometry/TrackingGeometry.hpp"
-#include "Acts/Surfaces/Surface.hpp"
-#include "Acts/Utilities/Logger.hpp"
-#include "Acts/Geometry/GeometryContext.hpp"
+#include "ObjSurfaceWriter.h"//surfaceWriters d'tor should be accessible
+#include "Acts/Utilities/Logger.hpp" //logger d'tor should be accessible
+
+#include <memory>
+#include <string>
+#include <vector>
 
 namespace Acts {
 class TrackingVolume;
+class TrackingGeometry;
+class GeometryContext;
 
 /// @class ObjTrackingGeometryWriter
 ///
