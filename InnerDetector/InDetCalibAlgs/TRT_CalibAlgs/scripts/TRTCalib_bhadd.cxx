@@ -143,7 +143,7 @@ class CompBHist
 {
 
 public:
-    CompBHist(int, std::vector<int>, int, int);
+    CompBHist(int, const std::vector<int> & , int, int);
     ~CompBHist();
     CompBHist(const CompBHist &) = delete;
     CompBHist &operator=(const CompBHist &) = delete;
@@ -156,7 +156,7 @@ public:
     int npop{};
 };
 
-CompBHist::CompBHist(int sid, std::vector<int> uchist, int ntbins, int nrbins)
+CompBHist::CompBHist(int sid, const std::vector<int> & uchist, int ntbins, int nrbins)
 {
 
     id = sid;
