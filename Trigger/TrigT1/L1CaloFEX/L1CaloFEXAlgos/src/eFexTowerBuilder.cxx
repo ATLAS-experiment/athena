@@ -37,6 +37,7 @@ StatusCode eFexTowerBuilder::initialize() {
     CHECK( m_ttKey.initialize(true) );
     CHECK( m_scellKey.initialize(true) );
     CHECK( m_outKey.initialize(true) );
+    CHECK( m_eiKey.initialize(true) );
 
     if (auto fileName = PathResolverFindCalibFile( m_mappingFile ); !fileName.empty()) {
         std::unique_ptr<TFile> f( TFile::Open(fileName.c_str()) );
@@ -82,43 +83,53 @@ StatusCode eFexTowerBuilder::fillTowers(const EventContext& ctx) const {
         return StatusCode::FAILURE;
     }
 
+    SG::ReadHandle<xAOD::EventInfo> ei(m_eiKey,ctx);
+    if(!ei.isValid()) {
+      ATH_MSG_FATAL("Cannot retrieve eventinfo");
+      return StatusCode::FAILURE;
+    }
+    bool isMC = ei->eventType(xAOD::EventInfo::IS_SIMULATION); // currently only used to decide if should set a saturation code or not
+    
 
     std::map<std::pair<int,int>,std::array<int,11>> towers;
+
+    constexpr int INVALID_VALUE = -99999; // use this value to indicate invalid
+    constexpr int SATURATED_VALUE = std::numeric_limits<int>::max()-1; // use this value to indicate saturation
 
     for (auto digi: *scells) {
         const auto itr = m_scMap.find(digi->ID().get_compact());
         if (itr == m_scMap.end()) { continue; } // not in map so not mapping to a tower
         int val =  std::round(digi->energy()/(12.5*std::cosh(digi->eta()))); // 12.5 is b.c. energy is in units of 12.5MeV per count
         // note: a val of < -99998 is what is produced if efex was sent an invalid code of 1022 (see LArRawtoSuperCell)
-        bool isSaturated = false; //(digi->quality()); - will uncomment this after discussing internally about consequences on MC
+        bool isSaturated = (!isMC) ? (digi->quality()) : false; // not applying saturation codes in MC until the changes to trigger counts has been investigated
         bool isMasked = m_applyMasking ? ((digi)->provenance()&0x80) : false;
         bool isInvalid = m_applyMasking ? ((digi)->provenance()&0x40) : false;
         if(isInvalid) {
-            val = -99999; // use this value to indicate invalid
+            val = INVALID_VALUE;
         }
         if(isSaturated) {
-            val = std::numeric_limits<int>::max()-1; // use this value to indicate saturation
+            val = SATURATED_VALUE;
         }
 
         auto& tower = towers[itr->second.first];
         if (itr->second.second.second<11) {
             // doing an energy split between slots ... don't include a masked channel (or invalid channel)
-            if (!isMasked && val!=-99999) {
+            if (!isMasked && val!=INVALID_VALUE) {
                 if(isSaturated) {
                     // mark both as saturated
-                    tower.at(itr->second.second.first) = std::numeric_limits<int>::max()-1;
-                    tower.at(itr->second.second.second) = std::numeric_limits<int>::max()-1;
+                    tower.at(itr->second.second.first) = SATURATED_VALUE;
+                    tower.at(itr->second.second.second) = SATURATED_VALUE;
                 }
-                if(tower.at(itr->second.second.first)!=(std::numeric_limits<int>::max()-1)) { // don't override saturation
+                if(tower.at(itr->second.second.first)!=(SATURATED_VALUE)) { // don't override saturation
                     // if the other contribution was masked or invalid, revert to 0 before adding this contribution
-                    if (tower.at(itr->second.second.first)==std::numeric_limits<int>::max() || tower.at(itr->second.second.first)==-99999) {
+                    if (tower.at(itr->second.second.first)==std::numeric_limits<int>::max() || tower.at(itr->second.second.first)==INVALID_VALUE) {
                         tower.at(itr->second.second.first)=0;
                     }
                     tower.at(itr->second.second.first) += val >> 1;
                 }
-                if(tower.at(itr->second.second.second)!=(std::numeric_limits<int>::max()-1)) { // don't override saturation
+                if(tower.at(itr->second.second.second)!=(SATURATED_VALUE)) { // don't override saturation
                     // if the other contribution was masked or invalid, revert to 0 before adding this contribution
-                    if (tower.at(itr->second.second.second)==std::numeric_limits<int>::max() || tower.at(itr->second.second.second)==-99999) {
+                    if (tower.at(itr->second.second.second)==std::numeric_limits<int>::max() || tower.at(itr->second.second.second)==INVALID_VALUE) {
                         tower.at(itr->second.second.second)=0;
                     }
                     tower.at(itr->second.second.second) += (val - (val >> 1)); // HW seems fixed now!
@@ -157,8 +168,8 @@ StatusCode eFexTowerBuilder::fillTowers(const EventContext& ctx) const {
 
     static const auto calToFex = [](int calEt) {
         if(calEt == std::numeric_limits<int>::max()) return 0; // indicates masked channel
-        if(calEt == std::numeric_limits<int>::max()-1) return 1023; // saturated channel
-        if( calEt == -99999 ) return 1022; // invalid channel value
+        if(calEt == SATURATED_VALUE) return 1023; // saturated channel
+        if( calEt == INVALID_VALUE ) return 1022; // invalid channel value
         if(calEt<448) return std::max((calEt&~1)/2+32,1); // 25 MeV per eFexTower count
         if(calEt<1472) return (calEt-448)/4+256;          // 50 MeV per eFexTower count
         if(calEt<3520) return (calEt-1472)/8+512;         // 100 MeV ...

@@ -30,6 +30,8 @@
 
 #include "L1CaloFEXSim/eFEXSuperCellTowerIdProvider.h"
 
+#include "xAODEventInfo/EventInfo.h"
+
 class CaloIdManager;
 
 
@@ -60,6 +62,8 @@ class eFexTowerBuilder : public AthReentrantAlgorithm
     StatusCode fillTowers(const EventContext& ctx) const;
     StatusCode fillMap(const EventContext& ctx) const;
 
+  SG::ReadHandleKey<xAOD::EventInfo> m_eiKey{this,"EventInfoKey","EventInfo",""};
+  
     SG::ReadCondHandleKey<CaloSuperCellDetDescrManager> m_ddmKey{this,"CaloSuperCellDetDescrManager","CaloSuperCellDetDescrManager",""};
 
   SG::ReadHandleKey<CaloCellContainer> m_scellKey { this, "CaloCellContainerReadKey", "SCell", "Read handle key for the supercells"};
