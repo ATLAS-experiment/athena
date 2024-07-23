@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_ACTSTOOLS_ACTSFATRASSIMTOOL_H
@@ -140,7 +140,7 @@ class ActsFatrasSimTool : public BaseSimulatorTool {
       using Result = typename Actor::result_type;
       using Actions = Acts::ActionList<SteppingLogger, Actor>;
       using Abort = Acts::AbortList<Aborter, Acts::EndOfWorldReached>;
-      using PropagatorOptions = typename propagator_t::Options<Actions, Abort>;
+      using PropagatorOptions = typename propagator_t::template Options<Actions, Abort>;
 
       // Construct per-call options.
       PropagatorOptions options(geoCtx, magCtx);
