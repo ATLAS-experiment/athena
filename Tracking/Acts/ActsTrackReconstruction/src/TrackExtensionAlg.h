@@ -51,7 +51,7 @@ class TrackExtensionAlg : public AthReentrantAlgorithm {
   ToolHandle<ActsTrk::IActsToTrkConverterTool> m_ATLASConverterTool{
       this, "ATLASConverterTool", ""};
   SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection>
-      m_pixelDetEleCollKey{this, "PixelDetEleCollKey", "",
+      m_pixelDetEleCollKey{this, "PixelDetEleCollKey", "ITkPixelDetectorElementCollection",
                            "Key of SiDetectorElementCollection for Pixel"};
   ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{
       this, "TrackingGeometryTool", ""};
@@ -60,13 +60,9 @@ class TrackExtensionAlg : public AthReentrantAlgorithm {
   std::unique_ptr<detail::CKF_config> m_ckfConfig;
   std::unique_ptr<const Acts::Logger> m_logger;
 
-  CKFOptions buildCKFOptions(const EventContext& context, const Acts::PerigeeSurface* perigeeSurface) const;
   detail::TrackFindingMeasurements collectMeasurements(const EventContext& context) const;
 
   Acts::CalibrationContext m_calibrationContext; // this will change in future to be updatable event by event
-
-
-
 };
 } // EOF namespace
 #endif  // ACTSTRACKRECONSTRUCTION_TRACKEXTENSIONALG_H

@@ -48,10 +48,9 @@ def FPGAPrototrackFitAlgCfg(flags,
                      primary=True)
     return acc
 
-def FPGAPrototrackFitAndTruthDecorationCfg(flags,FinalProtoTrackChainxAODTracksKey="xAODFPGAPrototracks",name="FPGAPrototrackFitterConfig", stage = '',**kwargs):
+def FPGAProtoTrackFitCfg(flags,  name="FPGAPrototrackFitterConfig", stage = '', **kwargs):
 
     ACTSProtoTrackChainTrackKey = "ACTSProtoTrackChainTestTracks"
-    FinalProtoTrackChainxAODTracksKey=FinalProtoTrackChainxAODTracksKey
 
     acc = ComponentAccumulator()
     from InDetConfig.ITkTrackRecoConfig import ITkTrackRecoCfg
@@ -63,12 +62,18 @@ def FPGAPrototrackFitAndTruthDecorationCfg(flags,FinalProtoTrackChainxAODTracksK
                                       ACTSTracksLocation=ACTSProtoTrackChainTrackKey,
                                       FPGATrackSimActsProtoTracks=f"ActsProtoTracks{stage}FromFPGATrack",
                                       **kwargs))
+    return acc
 
+def FPGATruthDecorationCfg(flags, FinalProtoTrackChainxAODTracksKey="xAODFPGAPrototracks", stage = '', **kwargs):
     ################################################################################
     # Track to Truth association and validation
     from ActsConfig.ActsTruthConfig import ActsTruthParticleHitCountAlgCfg, ActsPixelClusterToTruthAssociationAlgCfg,ActsStripClusterToTruthAssociationAlgCfg
     
-    
+    ACTSProtoTrackChainTrackKey = "ACTSProtoTrackChainTestTracks"
+    FinalProtoTrackChainxAODTracksKey=FinalProtoTrackChainxAODTracksKey
+
+    acc = ComponentAccumulator()
+
     acc.merge(ActsPixelClusterToTruthAssociationAlgCfg(flags,
                                                        name="ActsFPGAPixelClusterToTruthAssociationAlg",
                                                        InputTruthParticleLinks="xAODFPGATruthLinks",

@@ -264,7 +264,8 @@ namespace ActsTrk::detail {
             std::stringstream msg;
             msg << "Measurement with unexpected Acts geometryId: " << surface.geometryId()
                 << " type = " << static_cast<unsigned int>(measurement->type())
-                << " idHash=" << measurement->identifierHash();
+                << " idHash=" << measurement->identifierHash()
+                << (geo_iter == m_orderedGeoIds.end() ? " not" :"") << " found GeoId in orderedGeoIds, that are of size " << m_orderedGeoIds.size();
             throw std::runtime_error(msg.str());
           }
           range_idx = geo_iter - m_orderedGeoIds.begin();
