@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 //
 
 // Local include(s).
@@ -8,9 +8,6 @@
 #include "AthCUDACore/Info.h"
 #include "AthCUDACore/Macros.cuh"
 #include "AthCUDACore/TaskArena.h"
-
-// TBB include(s).
-#include <tbb/concurrent_queue.h>
 
 // System include(s).
 #include <cstdlib>
@@ -82,7 +79,7 @@ namespace AthCUDA {
 
          // If a device is available, then free up the memory using CUDA.
          if( Info::instance().nDevices() != 0 ) {
-            taskArena().enqueue( ::DeviceDeleterTask( ptr ) );
+            enqueueTask( ::DeviceDeleterTask( ptr ) );
             return;
          }
 
@@ -100,7 +97,7 @@ namespace AthCUDA {
 
          // If a device is available, then free up the memory using CUDA.
          if( Info::instance().nDevices() != 0 ) {
-            taskArena().enqueue( ::DeviceDeleterTask( ptr ) );
+            enqueueTask( ::DeviceDeleterTask( ptr ) );
             return;
          }
 
@@ -118,7 +115,7 @@ namespace AthCUDA {
 
          // If a device is available, then free up the memory using CUDA.
          if( Info::instance().nDevices() != 0 ) {
-            taskArena().enqueue( ::HostDeleterTask( ptr ) );
+            enqueueTask( ::HostDeleterTask( ptr ) );
             return;
          }
 
