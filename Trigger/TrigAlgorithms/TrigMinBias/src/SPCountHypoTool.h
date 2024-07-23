@@ -25,7 +25,8 @@ class SPCountHypoTool : virtual public AthCheckedComponent<::AthAlgTool> {
   StatusCode decide(SPCountsInfo &decisions) const;
 
  private:
-  bool applyCut(const Gaudi::Property<int> &threshold, const xAOD::TrigComposite *composit, const std::string_view name = "") const;
+ template<typename DetailType>
+  bool applyCut(const Gaudi::Property<DetailType> &threshold, const xAOD::TrigComposite *composit, const std::string_view name = "") const;
   bool applyInverseCut(const Gaudi::Property<int> &threshold, const xAOD::TrigComposite *composit, const std::string_view name = "") const;
 
   HLT::Identifier m_decisionId;
@@ -43,8 +44,10 @@ class SPCountHypoTool : virtual public AthCheckedComponent<::AthAlgTool> {
   Gaudi::Property<int> m_sctSPMax{this, "sctSPMax", -1, "Require SP Count < threshold (-1 disabled) in whole SCT"};
   Gaudi::Property<int> m_sctSPBarrel{this, "sctSPBarrel", -1, "Require SP Count > threshold (-1 disabled) in SCT Barrel"};
   Gaudi::Property<int> m_sctSPEndcapA{this, "sctSPEndcapA", -1, "Require SP Count > threshold (-1 disabled) in SCT Endcap A side"};
-  Gaudi::Property<int> m_sctSPEndcapC{this, "sctSPEndcapC", -1, "Require SP Count > threshold (-1 disabled) in SCT Endcap C side"};
+  Gaudi::Property<int> m_sctSPEndcapC{this, "sctSPEndcapC", -1, "Require SP Count > threshold (-1 disabled) in SCT Endcap C side"};  
   Gaudi::Property<bool> m_logicAnd{this, "TriggerTypeAnd", true, "And/Or Logic"};
+  Gaudi::Property<float> m_pixQ2mod{this, "pixQ2mod", -1, "Cut on the value of QT magnitude"};
+
 };
 
 #endif  //> !TRIGMINBIAS_SPCOUNTHYPOTOOL_H
