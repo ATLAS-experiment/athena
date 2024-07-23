@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # $Id: CMakeLists.txt 730483 2016-03-16 16:03:14Z harkusha $
 ################################################################################
@@ -11,7 +11,7 @@ atlas_subdir( MuonEventTPCnv )
 find_package( GeoModel COMPONENTS GeoModelKernel )
 
 # Component(s) in the package:
-atlas_add_tpcnv_library( MuonEventTPCnv
+atlas_add_library( MuonEventTPCnv
    MuonEventTPCnv/*.h src/*.cxx
    src/MuonRIO_OnTrack/*.cxx
    MuonEventTPCnv/MuonCompetingRIOsOnTrack/*.h
@@ -30,6 +30,11 @@ atlas_add_tpcnv_library( MuonEventTPCnv
    PRIVATE_LINK_LIBRARIES AthenaKernel StoreGateLib GeoPrimitives
    EventPrimitives MuonReadoutGeometry MuonIdHelpersLib TrkEventPrimitives
    TrkMeasurementBase )
+
+atlas_add_tpcnv_library( MuonEventTPCnvFactories
+   src/factories/*.cxx
+   PUBLIC_HEADERS MuonEventTPCnv
+   LINK_LIBRARIES MuonEventTPCnv )
 
 atlas_add_dictionary( MuonEventTPCnvDict
    MuonEventTPCnv/MuonEventTPCnvDict.h MuonEventTPCnv/selection.xml
