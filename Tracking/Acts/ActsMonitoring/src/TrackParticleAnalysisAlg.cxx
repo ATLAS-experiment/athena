@@ -41,9 +41,9 @@ namespace ActsTrk {
     ATH_MSG_DEBUG( "Filling Histograms for " << name() << " ... " );
 
     // Retrieve the tracks
-    SG::ReadHandle<xAOD::TrackParticleContainer> trackParticleskHandle = SG::makeHandle(m_tracksKey, ctx);
-    ATH_CHECK(trackParticleskHandle.isValid());
-    const xAOD::TrackParticleContainer *track_particles = trackParticleskHandle.cptr();
+    SG::ReadHandle<xAOD::TrackParticleContainer> trackParticlesHandle = SG::makeHandle(m_tracksKey, ctx);
+    ATH_CHECK(trackParticlesHandle.isValid());
+    const xAOD::TrackParticleContainer *track_particles = trackParticlesHandle.cptr();
 
     if (m_monitorTrackStateCounts) {
        for (const xAOD::TrackParticle *track_particle : *track_particles) {
