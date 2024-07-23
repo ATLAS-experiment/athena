@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -66,7 +66,7 @@ class CompoundLayer {
 
   virtual const Layer& layerRepresentation() const = 0;
 
-  std::vector<const Surface*> constituentSurfaces() const;
+  const std::vector<const Surface*>& constituentSurfaces() const;
 
   virtual std::vector<const Surface*> closestSurfaces(
       const Amg::Vector3D& gp, const Amg::Vector3D& dir,
@@ -84,7 +84,7 @@ class CompoundLayer {
   std::vector<const Surface*> m_surfaces;  //!< The constituent surfaces
 };
 
-inline std::vector<const Surface*> CompoundLayer::constituentSurfaces() const {
+inline const std::vector<const Surface*>& CompoundLayer::constituentSurfaces() const {
   return m_surfaces;
 }
 inline std::vector<const Surface*> CompoundLayer::closestSurfaces(
