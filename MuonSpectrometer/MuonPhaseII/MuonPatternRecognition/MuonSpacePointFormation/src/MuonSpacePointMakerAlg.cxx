@@ -114,8 +114,8 @@ template <>
             return false;
         }
         const MuonGMR4::TgcReadoutElement* re = etaHits[0]->readoutElement();
-        return (1.*etaHits.size() / (1.*re->numChannels(etaHits[0]->measurementHash()))) < m_maxOccTgcEta &&
-               (1.*phiHits.size() / (1.*re->numChannels(phiHits[0]->measurementHash()))) < m_maxOccTgcPhi;
+        return ((1.*etaHits.size()) / ((1.*re->numChannels(etaHits[0]->measurementHash())))) < m_maxOccTgcEta &&
+               ((1.*phiHits.size()) / ((1.*re->numChannels(phiHits[0]->measurementHash())))) < m_maxOccTgcPhi;
     }
 template <> 
     bool MuonSpacePointMakerAlg::passOccupancy2D(const std::vector<const xAOD::RpcMeasurement*>& etaHits,
@@ -124,8 +124,8 @@ template <>
             return false;
         }
         const MuonGMR4::RpcReadoutElement* re = etaHits[0]->readoutElement();
-        return (1.*etaHits.size() / 1.*re->nEtaStrips()) < m_maxOccRpcEta &&
-               (1.*phiHits.size() / 1.*re->nPhiStrips()) < m_maxOccRpcPhi;
+        return ((1.*etaHits.size()) / (1.*re->nEtaStrips())) < m_maxOccRpcEta &&
+               ((1.*phiHits.size()) / (1.*re->nPhiStrips())) < m_maxOccRpcPhi;
     }
 
 template <> 
@@ -135,8 +135,8 @@ template <>
             return false;
         }
         const MuonGMR4::sTgcReadoutElement* re = etaHits[0]->readoutElement();
-        return (1.*etaHits.size() / 1.*re->numStrips(etaHits[0]->measurementHash())) < m_maxOccStgcEta &&
-               (1.*phiHits.size() / 1.*re->numWireGroups(phiHits[0]->measurementHash())) < m_maxOccStgcPhi;
+        return ((1.*etaHits.size()) / (1.*re->numStrips(etaHits[0]->measurementHash()))) < m_maxOccStgcEta &&
+               ((1.*phiHits.size()) / (1.*re->numWireGroups(phiHits[0]->measurementHash()))) < m_maxOccStgcPhi;
     }
 
 template <class ContType>
