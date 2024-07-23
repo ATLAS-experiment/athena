@@ -490,6 +490,10 @@ void LArLATOMEDecoder::EventProcess::fillCollection(const ROBFragment* robFrag, 
   ////lets first decode the mon header in the first packet and get the info.
 
   unsigned int offset = decodeHeader(p,0);
+  if (offset> m_ROBFragSize) {
+    ATH_MSG_WARNING("Data corruption, offset found at pos 0 ("<<offset<<") is larger than the ROB fragment size (" << m_ROBFragSize << "). Ignoring data.");
+    return;
+  }
 
   if(m_isAveraged){
     m_at0type=m_at0typeRec>>24;
