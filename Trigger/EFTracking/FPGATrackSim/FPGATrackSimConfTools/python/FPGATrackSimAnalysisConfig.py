@@ -355,7 +355,8 @@ def prepareFlagsForFPGATrackSimLogicalHistProcessAlg(flags):
 
 def FPGAClusterConverterCfg(flags):
     result=ComponentAccumulator()
-    FPGAClusterConverter = CompFactory.FPGAClusterConverter()
+    from SiLorentzAngleTool.ITkStripLorentzAngleConfig import ITkStripLorentzAngleToolCfg
+    FPGAClusterConverter = CompFactory.FPGAClusterConverter(LorentzAngleTool=acc.popToolsAndMerge(ITkStripLorentzAngleToolCfg(flags)))
     result.setPrivateTools(FPGAClusterConverter)
 
     return result
@@ -490,6 +491,8 @@ def FPGAConversionAlgCfg(inputFlags, name = 'FPGAConversionAlg', stage = '', **k
     flags = prepareFlagsForFPGATrackSimLogicalHistProcessAlg(inputFlags)
    
     result=ComponentAccumulator()
+    from StripGeoModelXml.ITkStripGeoModelConfig import ITkStripReadoutGeometryCfg
+    result.merge(ITkStripReadoutGeometryCfg(flags))
 
     kwargs.setdefault("FPGATrackSimClusterKey", "FPGAClusters%s" %(stage))
     kwargs.setdefault("FPGATrackSimHitKey", "FPGAHits%s" %(stage))
@@ -547,14 +550,9 @@ if __name__ == "__main__":
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 
     flags = initConfigFlags()
-    flags.fillFromArgs()
     
     from AthenaConfiguration.TestDefaults import defaultGeometryTags
     flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN4
-    if isinstance(flags.Trigger.FPGATrackSim.wrapperFileName, str):
-        log.info("wrapperFile is string, converting to list")
-        flags.Trigger.FPGATrackSim.wrapperFileName = [flags.Trigger.FPGATrackSim.wrapperFileName]
-        flags.Input.Files = lambda f: [f.Trigger.FPGATrackSim.wrapperFileName]
     
     ############################################
     # Flags used in the prototrack chain
@@ -576,7 +574,15 @@ if __name__ == "__main__":
     flags.PhysVal.IDPVM.doTechnicalEfficiency = False # should figure out if 'True' is needed and what's missing to enable it
     flags.PhysVal.OutputFileName = "IDPVM.root"
     ############################################
-    
+    flags.Concurrency.NumThreads=1
+    flags.Scheduler.ShowDataDeps=True
+    # flags.Exec.DebugStage="exec" # useful option to debug the execution of the job - we want it commented out for production
+    flags.fillFromArgs()
+    if isinstance(flags.Trigger.FPGATrackSim.wrapperFileName, str):
+        log.info("wrapperFile is string, converting to list")
+        flags.Trigger.FPGATrackSim.wrapperFileName = [flags.Trigger.FPGATrackSim.wrapperFileName]
+        flags.Input.Files = lambda f: [f.Trigger.FPGATrackSim.wrapperFileName]
+
     flags.lock()
     flags = flags.cloneAndReplace("Tracking.ActiveConfig","Tracking.MainPass")
     acc=MainServicesCfg(flags)
@@ -608,10 +614,13 @@ if __name__ == "__main__":
         from FPGATrackSimReporting.FPGATrackSimReportingConfig import FPGATrackSimReportingCfg
         acc.merge(FPGATrackSimReportingCfg(flags,perEventReports=False))        
         
-        from FPGATrackSimPrototrackFitter.FPGATrackSimPrototrackFitterConfig import FPGAPrototrackFitAndTruthDecorationCfg
-        acc.merge(FPGAPrototrackFitAndTruthDecorationCfg(flags,FinalProtoTrackChainxAODTracksKey=FinalProtoTrackChainxAODTracksKey,stage='_1st')) # Run ACTS KF for 1st stage
-        
-        # write to AOD
+        from FPGATrackSimPrototrackFitter.FPGATrackSimPrototrackFitterConfig import FPGATruthDecorationCfg, FPGAProtoTrackFitCfg
+        acc.merge(FPGAProtoTrackFitCfg(flags,stage='_1st')) # Run ACTS KF for 1st stage
+        acc.merge(FPGATruthDecorationCfg(flags,FinalProtoTrackChainxAODTracksKey=FinalProtoTrackChainxAODTracksKey,stage='_1st')) # Run ACTS KF for 1st stage
+        # TODO enable once debugged
+        from FPGATrackSimConfTools.FPGATrackExtensionConfig import FPGATrackExtensionAlgCfg
+        acc.merge(FPGATrackExtensionAlgCfg(flags, name="FPGATrackExtension", ProtoTracksLocation="ActsProtoTracks_1stFromFPGATrack")) # run CKF track extension on FPGA tracks
+
         if flags.Trigger.FPGATrackSim.writeToAOD: acc.merge(WriteToAOD(flags, stage = '_1st'))
         if flags.Trigger.FPGATrackSim.Hough.secondStage : acc.merge(FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlg_2nd', stage = '_2nd')) # Default disabled, doesn't work if enabled
         if flags.Trigger.FPGATrackSim.convertUnmappedHits: acc.merge(FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlgUnmapped_1st', stage = 'Unmapped_1st', doClusters = False))
@@ -622,7 +631,7 @@ if __name__ == "__main__":
         from InDetPhysValMonitoring.InDetPhysValDecorationConfig import AddDecoratorCfg
         acc.merge(AddDecoratorCfg(flags))
 
-        # IDPVM running
+        # # IDPVM running
         from InDetPhysValMonitoring.InDetPhysValMonitoringConfig import InDetPhysValMonitoringCfg
         acc.merge(InDetPhysValMonitoringCfg(flags))
     

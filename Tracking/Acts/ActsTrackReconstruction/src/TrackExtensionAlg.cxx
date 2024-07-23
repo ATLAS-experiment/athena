@@ -39,7 +39,8 @@ namespace ActsTrk{
         ActsTrk::prefixFromTrackContainerName(m_trackContainerKey.key())));
     ATH_CHECK(m_ATLASConverterTool.retrieve());
     ATH_CHECK(m_trackingGeometryTool.retrieve());
-
+    ATH_CHECK(m_pixelDetEleCollKey.initialize());
+    ATH_CHECK(m_extrapolationTool.retrieve());
     m_logger = makeActsAthenaLogger(this, name());
 
     auto magneticField = std::make_unique<ATLASMagneticFieldWrapper>();
@@ -97,13 +98,40 @@ namespace ActsTrk{
     detail::RecoTrackContainer tracksContainerTemp(trackBackend, trackStateBackend);
     std::shared_ptr<Acts::PerigeeSurface> perigeeSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(Acts::Vector3::Zero());
 
+    Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(context).context();
+    Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(context);
+    detail::TrackFindingMeasurements measurements = collectMeasurements(context);
 
-    for (const ActsTrk::ProtoTrack& protTrack : *protoTracksHandle) {
-      auto result = m_ckfConfig->ckf.findTracks(*protTrack.parameters, buildCKFOptions(context, perigeeSurface.get()),
+
+    ActsTrk::UncalibSourceLinkAccessor slAccessor(measurements.orderedGeoIds(),
+                                                  measurements.measurementRanges());
+    Acts::SourceLinkAccessorDelegate<ActsTrk::UncalibSourceLinkAccessor::Iterator> slAccessorDelegate;
+    slAccessorDelegate.connect<&ActsTrk::UncalibSourceLinkAccessor::range>(&slAccessor);
+
+    Acts::PropagatorPlainOptions plainOptions(tgContext, mfContext);
+    plainOptions.maxSteps = 100;
+    plainOptions.direction= Acts::Direction::Backward;
+
+
+    TrackExtensionAlg::CKFOptions options(tgContext,
+                      mfContext,
+                      m_calibrationContext,
+                      slAccessorDelegate,
+                      m_ckfConfig->ckfExtensions,
+                      plainOptions,
+                      perigeeSurface.get());
+
+
+
+    for (const ActsTrk::ProtoTrack& protoTrack : *protoTracksHandle) {
+      ATH_MSG_DEBUG("Extending proto track of " << protoTrack.measurements.size() << " measurements");
+      auto result = m_ckfConfig->ckf.findTracks(*protoTrack.parameters, options,
                                                        tracksContainerTemp);
-
+      ATH_MSG_DEBUG("Built " << tracksContainerTemp.size() << " tracks from it");
       for (detail::RecoTrackContainer::TrackProxy tempTrackProxy : tracksContainerTemp) {
         ActsTrk::MutableTrackContainer::TrackProxy destTrackProxy = trackContainer.makeTrack();
+        ATH_MSG_DEBUG("This track has now " << tempTrackProxy.nMeasurements());
+
         destTrackProxy.copyFrom(tempTrackProxy);
       }
     }
@@ -125,35 +153,10 @@ namespace ActsTrk{
     SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> pixelDetEleHandle(m_pixelDetEleCollKey, context);
 
     detail::TrackFindingMeasurements measurements(pixelClustersHandle->size());
+    measurements.addDetectorElements(xAOD::UncalibMeasType::PixelClusterType, **pixelDetEleHandle, m_ATLASConverterTool);
     // potential TODO: filtering only certain layers
     measurements.addMeasurements(0, *pixelClustersHandle, **pixelDetEleHandle,
-                                m_ATLASConverterTool);
+                                 m_ATLASConverterTool);
     return measurements;
   }
-  TrackExtensionAlg::CKFOptions TrackExtensionAlg::buildCKFOptions(const EventContext& context, const Acts::PerigeeSurface* perigeeSurface) const {
-    Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(context).context();
-    Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(context);
-
-    detail::TrackFindingMeasurements measurements = collectMeasurements(context);
-
-
-    ActsTrk::UncalibSourceLinkAccessor slAccessor(measurements.orderedGeoIds(),
-                                                  measurements.measurementRanges());
-    Acts::SourceLinkAccessorDelegate<ActsTrk::UncalibSourceLinkAccessor::Iterator> slAccessorDelegate;
-    slAccessorDelegate.connect<&ActsTrk::UncalibSourceLinkAccessor::range>(&slAccessor);
-
-    Acts::PropagatorPlainOptions plainOptions(tgContext, mfContext);
-    plainOptions.maxSteps = 100;
-    plainOptions.direction= Acts::Direction::Backward;
-
-    return CKFOptions(tgContext,
-                      mfContext,
-                      m_calibrationContext,
-                      slAccessorDelegate,
-                      m_ckfConfig->ckfExtensions,
-                      plainOptions,
-                      perigeeSurface);
-  }
-
-
 } // EOF namespace

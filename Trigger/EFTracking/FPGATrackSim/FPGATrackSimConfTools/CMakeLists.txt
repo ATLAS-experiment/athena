@@ -33,3 +33,7 @@ atlas_add_test( FPGATrackSimRegionSlices_test
 atlas_add_test( FPGATrackSimConfigFlags_test
                 SCRIPT python -m FPGATrackSimConfTools.FPGATrackSimConfigFlags
                 POST_EXEC_SCRIPT noerror.sh ) 
+
+atlas_add_test( FPGATrackSimFromRDO_test
+                SCRIPT FPGATrackAnalysisOnRDO.sh
+                POST_EXEC_SCRIPT noerror.sh )

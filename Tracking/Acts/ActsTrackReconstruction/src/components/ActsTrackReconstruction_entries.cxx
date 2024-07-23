@@ -12,6 +12,7 @@
 #include "src/KalmanFitter.h"
 #include "src/GaussianSumFitter.h"
 #include "src/ProtoTrackCreationAndFitAlg.h"
+#include "src/TrackExtensionAlg.h"
 #include "src/ProtoTrackReportingAlg.h"
 #include "src/RandomProtoTrackCreator.h"
 #include "src/TruthGuidedProtoTrackCreator.h"
@@ -20,6 +21,7 @@ DECLARE_COMPONENT( ActsTrk::TrackFindingAlg )
 DECLARE_COMPONENT( ActsTrk::ReFitterAlg )
 DECLARE_COMPONENT( ActsTrk::AmbiguityResolutionAlg )
 DECLARE_COMPONENT( ActsTrk::ProtoTrackCreationAndFitAlg )
+DECLARE_COMPONENT( ActsTrk::TrackExtensionAlg )
 DECLARE_COMPONENT( ActsTrk::ProtoTrackReportingAlg )
 DECLARE_COMPONENT( ActsTrk::TrackToTrackParticleCnvAlg )
 
