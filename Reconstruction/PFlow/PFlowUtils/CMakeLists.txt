@@ -7,7 +7,7 @@ atlas_subdir( PFlowUtils )
 atlas_add_library( PFlowUtilsLib
    PFlowUtils/*.h Root/*.cxx
    PUBLIC_HEADERS PFlowUtils
-   LINK_LIBRARIES AsgTools xAODPFlow )
+   LINK_LIBRARIES AsgTools xAODEgamma xAODMuon xAODPFlow )
 
 atlas_add_dictionary( PFlowUtilsDict
    PFlowUtils/PFlowUtilsDict.h

@@ -7,6 +7,9 @@
 #include "AsgDataHandles/WriteHandle.h"
 #include "AsgDataHandles/ReadDecorHandle.h"
 
+#include "PFlowUtils/FEElectronHelper.h"
+#include "PFlowUtils/FEMuonHelper.h"
+
 #include "xAODEgamma/Electron.h"
 #include "xAODEgamma/EgammaxAODHelpers.h" 
 #include "xAODMuon/Muon.h"
@@ -85,11 +88,14 @@ StatusCode JetPFlowSelectionAlg::execute(const EventContext& ctx) const {
   // To store the charged FE objects matched to an electron/muon
   std::vector< const xAOD::FlowElement* > ChargedPFlowObjects_matched;
 
+  FEMuonHelper muonHelper;
+  FEElectronHelper electronHelper;
+
   // Loop over Charged FE objects
   for ( const xAOD::FlowElement* fe : *ChargedPFlowObjects ) {
 
     // Select FE object if not matched to an electron or muon via links
-    if ( !checkElectronLinks(chargedFE_ElectronLinks(*fe)) && !checkMuonLinks(chargedFE_MuonLinks(*fe)) ){
+    if ( !electronHelper.checkElectronLinks(chargedFE_ElectronLinks(*fe),m_electronID) && !muonHelper.checkMuonLinks(chargedFE_MuonLinks(*fe),m_muonID) ){
       xAOD::FlowElement* selectedFE = new xAOD::FlowElement();
       selectedChargedPFlowObjects->push_back(selectedFE);
       *selectedFE = *fe; // copies auxdata
@@ -106,7 +112,7 @@ StatusCode JetPFlowSelectionAlg::execute(const EventContext& ctx) const {
 
     //if links to an electron, then we veto entire neutral FE    
     if (m_removeNeutralElectronFE){
-      if (checkElectronLinks(neutralFE_ElectronLinks(*fe))) continue;
+      if (electronHelper.checkElectronLinks(neutralFE_ElectronLinks(*fe),m_electronID)) continue;
     }
 
     xAOD::FlowElement* selectedFE = new xAOD::FlowElement();
@@ -115,13 +121,10 @@ StatusCode JetPFlowSelectionAlg::execute(const EventContext& ctx) const {
 
     //if links to a muon, then we need to subtract off the muon energy in 
     //this calorimeter cluster
-    if (m_removeNeutralMuonFE && checkMuonLinks(neutralFE_MuonLinks(*fe))){
+
+    if (m_removeNeutralMuonFE && muonHelper.checkMuonLinks(neutralFE_MuonLinks(*fe),m_muonID)){
         SG::ReadDecorHandle<xAOD::FlowElementContainer, std::vector<double> > clusterMuonEnergyFracs(m_neutralFEMuons_efrac_match_DecorKey,ctx); 
-        double totalMuonCaloEnergy = 0.0;         
-        for (auto energy : clusterMuonEnergyFracs(*fe) ) totalMuonCaloEnergy += energy;
-        TLorentzVector newP4;
-        newP4.SetPxPyPzE(fe->p4().Px(),fe->p4().Py(),fe->p4().Pz(),fe->e() - totalMuonCaloEnergy);
-        selectedFE->setP4(newP4);
+        selectedFE->setP4(muonHelper.adjustNeutralCaloEnergy(clusterMuonEnergyFracs(*fe),*fe));
     }
 
 
@@ -265,55 +268,4 @@ StatusCode JetPFlowSelectionAlg::execute(const EventContext& ctx) const {
   }
 
   return StatusCode::SUCCESS;
-}
-
-bool JetPFlowSelectionAlg::checkElectronLinks(const std::vector < ElementLink< xAOD::ElectronContainer > >& FE_ElectronLinks) const{
-
-  // Links to electrons
-  for (const ElementLink<xAOD::ElectronContainer>& ElectronLink: FE_ElectronLinks){
-    if (!ElectronLink.isValid()){
-      ATH_MSG_WARNING("JetPFlowSelectionAlg encountered an invalid electron element link. Skipping. ");
-      continue; 
-    }
-
-    const xAOD::Electron* electron = *ElectronLink;
-    bool passElectronID = false;
-    bool gotID = electron->passSelection(passElectronID, m_electronID);
-    if (!gotID) {
-      ATH_MSG_WARNING("Could not get Electron ID");
-      continue;
-    }
-    
-    if( electron->pt() > 10000 && passElectronID){
-      return true;
-    }
-  }
-
-  return false;
-}
-
-bool JetPFlowSelectionAlg::checkMuonLinks(const std::vector < ElementLink< xAOD::MuonContainer > >& FE_MuonLinks) const{
-
-  // Links to muons
-  for (const ElementLink<xAOD::MuonContainer>& MuonLink: FE_MuonLinks){
-    if (!MuonLink.isValid()){
-      ATH_MSG_WARNING("JetPFlowSelectionAlg encountered an invalid muon element link. Skipping. ");
-      continue; 
-    }
-    
-    //Details of medium muons are here:
-    //https://twiki.cern.ch/twiki/bin/view/Atlas/MuonSelectionTool
-    const xAOD::Muon* muon = *MuonLink;
-    xAOD::Muon::Quality quality = xAOD::Muon::VeryLoose;
-
-    if (m_muonID == "Loose")  quality = xAOD::Muon::Loose;
-    else if (m_muonID == "Medium") quality = xAOD::Muon::Medium;
-    else if (m_muonID == "Tight")  quality = xAOD::Muon::Tight;
-
-    if ( muon->quality() <= quality && muon->muonType() == xAOD::Muon::Combined ){
-      return true;
-    }    
-  }
-
-  return false;
 }
