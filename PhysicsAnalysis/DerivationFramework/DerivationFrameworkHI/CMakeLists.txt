@@ -3,6 +3,11 @@
 # Declare the package name:
 atlas_subdir( DerivationFrameworkHI)
 
+# Components in the package:
+atlas_add_component( DerivationFrameworkHI
+                     src/*.cxx src/components/*.cxx
+                     LINK_LIBRARIES AthenaBaseComps DerivationFrameworkInterfaces GaudiKernel StoreGateLib PATCoreLib InDetTrackSelectionToolLib)
+
 atlas_install_python_modules( python/*.py
                               POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
