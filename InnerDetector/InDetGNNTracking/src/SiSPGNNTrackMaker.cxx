@@ -20,6 +20,7 @@ StatusCode InDet::SiSPGNNTrackMaker::initialize()
 {
   ATH_CHECK(m_SpacePointsPixelKey.initialize());
   ATH_CHECK(m_SpacePointsSCTKey.initialize());
+  ATH_CHECK(m_SpacePointsOverlapKey.initialize());
 
   ATH_CHECK(m_outputTracksKey.initialize());
 
@@ -77,8 +78,26 @@ StatusCode InDet::SiSPGNNTrackMaker::execute(const EventContext& ctx) const
     }
   };
 
+  auto getOverlapData = [&](const SG::ReadHandleKey<SpacePointOverlapCollection>& containerKey){
+    if (not containerKey.empty()){
+
+      SG::ReadHandle<SpacePointOverlapCollection> collection{containerKey, ctx};
+
+      if (collection.isValid()){
+        ATH_MSG_DEBUG("Number of overlapping space points: " << collection->size());
+        for (const Trk::SpacePoint *sp : *collection) {
+          spacePoints.push_back(sp);
+        }
+      }
+    }
+  };
+
   getData(m_SpacePointsPixelKey);
   getData(m_SpacePointsSCTKey);
+  int nNonOverlap = spacePoints.size();
+  ATH_MSG_DEBUG("Number of non-overlapping spacepoints: " << nNonOverlap );
+  getOverlapData(m_SpacePointsOverlapKey);
+  ATH_MSG_DEBUG("Number of spacepoints: " << spacePoints.size() );
 
   std::vector<std::vector<uint32_t> > TT;
   if (m_gnnTrackFinder.isSet()) {
@@ -115,6 +134,9 @@ StatusCode InDet::SiSPGNNTrackMaker::execute(const EventContext& ctx) const
       }
 
       const Trk::SpacePoint* sp = spacePoints[id];
+      if (static_cast<int>(id) > nNonOverlap) {
+        ATH_MSG_DEBUG("Track " << trackCounter << " Overlapping Hit " << id << ": (" << sp->globalPosition().x() << ", " <<  sp->globalPosition().y() << ", " << sp->globalPosition().z() << ")");
+      }
       if (sp != nullptr) {
         trackCandiate.push_back(sp);
         clusters.push_back(sp->clusterList().first);
