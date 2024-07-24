@@ -70,6 +70,7 @@ namespace DerivationFramework {
         double m_DstMassUpperAft; //mass cut after cascade fit
         double m_MassLower;
         double m_MassUpper;
+	double m_PtLower;
         double m_vtx0MassHypo;      // mass hypothesis of vertex 0
         double m_vtx1MassHypo;      // mass hypothesis of vertex 1
         double m_vtx0Daug1MassHypo; // mass hypothesis of 1st daughter from vertex 0

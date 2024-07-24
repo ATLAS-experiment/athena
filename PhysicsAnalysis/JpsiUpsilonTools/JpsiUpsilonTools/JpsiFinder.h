@@ -114,6 +114,7 @@ namespace Analysis {
         bool m_mcpCuts;
         bool m_doTagAndProbe;
         bool m_forceTagAndProbe;
+	int  m_maxNTracksInEvent;
 
     };
 } // end of namespace
