@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGHLTJETHYPO_ARGSTRINGTOSIZET_H
@@ -13,11 +13,12 @@
 class ArgStrToSizeT {
  public:
 
-  double operator() (const std::string& s){
+  unsigned long long operator() (const std::string& s){
     
-    double val{0};
-    if(std::find(m_posinf.begin(), m_posinf.end(), s) != m_posinf.end()){
-      val =  std::numeric_limits<std::size_t>::max();}
+    unsigned long long val{0};
+    if(std::find(m_posinf.begin(), m_posinf.end(), s) != m_posinf.end()) {
+      val =  std::numeric_limits<std::size_t>::max();
+    }
     else {
       val = std::stoull(s);
     }
