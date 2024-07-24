@@ -41,10 +41,12 @@ namespace SG {
  *
  *@code
  *   // Only need to do this once.
- *   SG::Accessor<int> vint1 ("myInt");
+ *   static const SG::Accessor<int> vint1 ("myInt");
  *   ...
- *   const Myclass* m = ...;
- *   int x = vint1 (*m);
+ *   DataVector<MyClass>* v = ...;
+ *   Myclass* m = v->at(2);
+ *   int x = ...;
+ *   vint1 (*m) = x;
  @endcode
  *
  * You can also use this to define getters/setters in your class:
@@ -53,10 +55,10 @@ namespace SG {
  *  class Myclass {
  *    ...
  *    int get_x() const
- *    { const static Accessor<int> acc ("x", "Myclass");
+ *    { const static SG::ConstAccessor<int> acc ("x");
  *      return acc (*this); }
  *    int& get_x()
- *    { const static Accessor<int> acc ("x", "Myclass");
+ *    { const static SG::Accessor<int> acc ("x");
  *      return acc (*this); }
  @endcode
 */

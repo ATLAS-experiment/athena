@@ -47,9 +47,10 @@ namespace SG {
  *
  *@code
  *   // Only need to do this once.
- *   SG::Decorator<int> vint1 ("myInt");
+ *   static const SG::Decorator<int> vint1 ("myInt");
  *   ...
- *   const Myclass* m = ...;
+ *   const DataVector<MyClass>* v = ...;
+ *   const Myclass* m = v->at(2);
  *   vint1 (*m) = 123;
  @endcode
 */
