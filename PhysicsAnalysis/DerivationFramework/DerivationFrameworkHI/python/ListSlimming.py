@@ -3,6 +3,48 @@
 # ListSlimming.py - List of collections for slimming from athena 21.2 HION4 and EGAM1ExtraContent.py
 
 #################################################################################
+#HION2
+
+def HION2AllVariablesGeneral():
+    
+    variables  = []
+    variables += ["CaloSums"]
+    variables += ["PrimaryVertices"]
+    
+    return variables
+
+def HION2ExtraVariablesGeneral():
+    variables  = []
+    variables += ["InDetTrackParticles.qOverP.theta.phi.TrackQuality"]
+    
+    return variables
+
+def HION2AllVariablesPbPb_2015_5TeV():
+    
+    variables  = []
+    variables += ["HIEventShape"]
+    
+    return variables
+
+def HION2ExtraVariablesPbPb_2015_5TeV(): 
+    
+    variables  = []
+    variables += ["HIClusters.calE.eta0.phi0"]
+    
+    return variables
+
+def HION2AllVariablespPb_2016():
+    
+    variables  = []
+    variables += ["ZdcModules",]
+    variables += ["ZdcSums"]
+    variables += ["ZdcTriggerTowers"]
+    variables += ["MBTSForwardEventInfo"]
+    variables += ["MBTSModules"]
+    
+    return variables
+
+#################################################################################
 #HION4
 
 def HION4SmartCollections():
