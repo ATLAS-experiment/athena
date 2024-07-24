@@ -14,7 +14,7 @@ HighPtMinbiasHitsFiles="${ATLAS_REFERENCE_DATA}/PhaseIIUpgrade/HITS/ATLAS-P2-RUN
 LowPtMinbiasHitsFiles="${ATLAS_REFERENCE_DATA}/PhaseIIUpgrade/HITS/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.900311.Epos_minbias_inelastic_lowjetphoton.merge.HITS.e8481_s4149_s4150/*"
 
 Reco_tf.py \
-  --conditionsTag OFLCOND-MC15c-SDR-14-05 \
+  --conditionsTag OFLCOND-MC21-SDR-RUN4-02 \
   --geometryVersion ATLAS-P2-RUN4-03-00-00 \
   --digiSteeringConf "StandardInTimeOnlyTruth" \
   --preInclude "all:Campaigns.PhaseIIPileUp200" \
