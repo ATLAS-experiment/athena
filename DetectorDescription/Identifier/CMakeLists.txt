@@ -4,7 +4,7 @@
 atlas_subdir( Identifier )
 
 # External dependencies:
-find_package( Boost COMPONENTS container)
+find_package( Boost COMPONENTS container unit_test_framework)
 
 # Component(s) in the package:
 atlas_add_library( Identifier
@@ -24,3 +24,10 @@ if ( "${CMAKE_BUILD_TYPE}" STREQUAL "Debug" )
      PROPERTIES
      COMPILE_FLAGS "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}" )
 endif()
+
+atlas_add_test(range_test
+  SOURCES src/Range.cxx test/range_test.cxx
+  INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
+  LINK_LIBRARIES ${Boost_LIBRARIES} CxxUtils
+  POST_EXEC_SCRIPT nopost.sh 
+)
