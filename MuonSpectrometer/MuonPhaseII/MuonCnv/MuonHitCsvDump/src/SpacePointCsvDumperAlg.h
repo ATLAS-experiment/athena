@@ -8,7 +8,7 @@
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
 #include <StoreGate/ReadHandleKey.h>
 #include <ActsGeometryInterfaces/ActsGeometryContext.h>
-#include <MuonSpacePoint/MuonSpacePointContainer.h>
+#include <MuonSpacePoint/SpacePointContainer.h>
 
 
 /** The MuonStripCsvDumperAlg reads the RpcStripContainer and dumps information to csv files
@@ -28,7 +28,7 @@ class SpacePointCsvDumperAlg: public AthAlgorithm {
    private:
 
     
-    SG::ReadHandleKey<MuonSpacePointContainer> m_readKey{this, "ReadKey", "MuonSpacePoints", "Key to the space point container"};
+    SG::ReadHandleKey<SpacePointContainer> m_readKey{this, "ReadKey", "MuonSpacePoints", "Key to the space point container"};
 
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 

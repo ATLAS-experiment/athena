@@ -2,6 +2,6 @@
 /*
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-#include "../MuonPatternCnvAlg.h"
+#include "../PatternCnvAlg.h"
 
-DECLARE_COMPONENT(MuonR4::MuonPatternCnvAlg)
+DECLARE_COMPONENT(MuonR4::PatternCnvAlg)

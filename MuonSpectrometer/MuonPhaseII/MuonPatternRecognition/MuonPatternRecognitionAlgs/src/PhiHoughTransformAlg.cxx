@@ -2,20 +2,20 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "MuonPhiHoughTransformAlg.h"
+#include "PhiHoughTransformAlg.h"
 
 #include <MuonReadoutGeometryR4/MuonChamber.h>
 #include <StoreGate/ReadCondHandle.h>
 
 #include "MuonPatternHelpers/HoughHelperFunctions.h"
 
-using namespace MuonR4;
+namespace MuonR4{
 
-MuonPhiHoughTransformAlg::MuonPhiHoughTransformAlg(const std::string& name,
+PhiHoughTransformAlg::PhiHoughTransformAlg(const std::string& name,
                                                    ISvcLocator* pSvcLocator)
     : AthReentrantAlgorithm(name, pSvcLocator) {}
 
-StatusCode MuonPhiHoughTransformAlg::initialize() {
+StatusCode PhiHoughTransformAlg::initialize() {
     ATH_CHECK(m_geoCtxKey.initialize());
     ATH_CHECK(m_maxima.initialize());
     ATH_CHECK(m_segmentSeeds.initialize());
@@ -24,7 +24,7 @@ StatusCode MuonPhiHoughTransformAlg::initialize() {
 }
 
 template <class ContainerType>
-StatusCode MuonPhiHoughTransformAlg::retrieveContainer(
+StatusCode PhiHoughTransformAlg::retrieveContainer(
     const EventContext& ctx, const SG::ReadHandleKey<ContainerType>& key,
     const ContainerType*& contToPush) const {
     contToPush = nullptr;
@@ -39,8 +39,8 @@ StatusCode MuonPhiHoughTransformAlg::retrieveContainer(
     return StatusCode::SUCCESS;
 }
 
-StatusCode MuonPhiHoughTransformAlg::prepareHoughPlane(
-    MuonHoughEventData& data) const {
+StatusCode PhiHoughTransformAlg::prepareHoughPlane(
+    HoughEventData& data) const {
     HoughPlaneConfig cfg;
     cfg.nBinsX = m_nBinsTanPhi;
     cfg.nBinsY = m_nBinsIntercept;
@@ -56,9 +56,9 @@ StatusCode MuonPhiHoughTransformAlg::prepareHoughPlane(
     return StatusCode::SUCCESS;
 }
 
-int MuonPhiHoughTransformAlg::countIncompatibleEtaHits(
-    const MuonR4::ActsPeakFinderForMuon::Maximum& phiMaximum,
-    const MuonR4::HoughMaximum& etaMaximum) const {
+int PhiHoughTransformAlg::countIncompatibleEtaHits(
+    const ActsPeakFinderForMuon::Maximum& phiMaximum,
+    const HoughMaximum& etaMaximum) const {
     std::unordered_map<const xAOD::UncalibratedMeasurement*, bool> foundEtas;
     // loop over the original eta maximum and check all hits measuring the eta-coordinate 
     for (auto& hit : etaMaximum.getHitsInMax()) {
@@ -78,11 +78,11 @@ int MuonPhiHoughTransformAlg::countIncompatibleEtaHits(
             return !p.second;
         });
 }
-MuonR4::HoughSegmentSeed MuonPhiHoughTransformAlg::buildSegmentSeed(
-    const HoughMaximum & etaMax,  
-    const MuonR4::ActsPeakFinderForMuon::Maximum & phiMax) const {
+std::unique_ptr<SegmentSeed> 
+    PhiHoughTransformAlg::buildSegmentSeed(const HoughMaximum & etaMax,  
+                                           const ActsPeakFinderForMuon::Maximum & phiMax) const {
         // book a new hit list
-        std::vector<MuonR4::HoughHitType> hitsOnMax; 
+        std::vector<HoughHitType> hitsOnMax; 
         // copy the pure eta hits onto the hit list 
         std::copy_if(etaMax.getHitsInMax().begin(), etaMax.getHitsInMax().end(), std::back_inserter(hitsOnMax), [](const HoughHitType &hit){
             return (hit->measuresEta() && !hit->measuresPhi()); 
@@ -90,10 +90,10 @@ MuonR4::HoughSegmentSeed MuonPhiHoughTransformAlg::buildSegmentSeed(
         // and then add all hits (2D and pure phi) from the phi-extension to it 
         hitsOnMax.insert(hitsOnMax.end(), phiMax.hitIdentifiers.begin(), phiMax.hitIdentifiers.end()); 
         // use this to construct the segment seed
-        return HoughSegmentSeed( etaMax.tanTheta(), etaMax.interceptY(), phiMax.x, phiMax.y, hitsOnMax.size(), std::move(hitsOnMax));         
+        return std::make_unique<SegmentSeed>(etaMax.tanTheta(), etaMax.interceptY(), phiMax.x, phiMax.y, hitsOnMax.size(), std::move(hitsOnMax), etaMax.parentBucket());         
 }
 
-StatusCode MuonPhiHoughTransformAlg::preProcessMaximum(MuonHoughEventData & eventData, const MuonR4::HoughMaximum & maximum) const{
+StatusCode PhiHoughTransformAlg::preProcessMaximum(HoughEventData & eventData, const HoughMaximum & maximum) const{
     // reset the event data 
     eventData.phiHitsOnMax = 0; 
     eventData.searchSpaceTanAngle = std::make_pair(1e10, -1e10); 
@@ -104,15 +104,15 @@ StatusCode MuonPhiHoughTransformAlg::preProcessMaximum(MuonHoughEventData & even
         if (!hit->measuresPhi())
             continue;
         // find the direction of the IP viewed from the chamber frame 
-        Amg::Vector3D extrapDir = (hit->positionInChamber() - hit->muonChamber()->globalToLocalTrans(eventData.gctx).translation()).unit(); 
+        Amg::Vector3D extrapDir = (hit->positionInChamber() - hit->chamber()->globalToLocalTrans(eventData.gctx).translation()).unit(); 
         // express the x location of our phi hits on the chamber plane (z = 0) when projecting from the beam spot
         std::optional<double> dummyIntercept = Amg::intersect<3>(hit->positionInChamber(),extrapDir,Amg::Vector3D::UnitZ(),0); 
         double x0 = (hit->positionInChamber() + dummyIntercept.value_or(0) * extrapDir).x(); 
         // now we can obtain the most likely tan(phi) via the pointing vector from the origin to our hit
         double tanPhi = extrapDir.x()/extrapDir.z(); 
         // update our search space with this info 
-        MuonR4::updateSearchWindow(eventData.searchSpaceTanAngle, tanPhi);
-        MuonR4::updateSearchWindow(eventData.searchSpaceIntercept, x0);
+        eventData.updateSearchWindow(eventData.searchSpaceTanAngle, tanPhi);
+        eventData.updateSearchWindow(eventData.searchSpaceIntercept, x0);
         // and increment the hit counter
         ++ eventData.phiHitsOnMax; 
     }
@@ -138,8 +138,8 @@ StatusCode MuonPhiHoughTransformAlg::preProcessMaximum(MuonHoughEventData & even
     return StatusCode::SUCCESS; 
 }
 
-std::vector<MuonR4::ActsPeakFinderForMuon::Maximum> MuonPhiHoughTransformAlg::findRankedSegmentSeeds (MuonHoughEventData & eventData, const MuonR4::HoughMaximum & maximum) const{
-    std::map<int, std::vector<MuonR4::ActsPeakFinderForMuon::Maximum>>  rankedSeeds;  
+std::vector<ActsPeakFinderForMuon::Maximum> PhiHoughTransformAlg::findRankedSegmentSeeds (HoughEventData & eventData, const HoughMaximum & maximum) const{
+    std::map<int, std::vector<ActsPeakFinderForMuon::Maximum>>  rankedSeeds;  
     // reset the accumulator
     eventData.houghPlane->reset();
     // fill the accumulator with the phi measurements   
@@ -148,8 +148,8 @@ std::vector<MuonR4::ActsPeakFinderForMuon::Maximum> MuonPhiHoughTransformAlg::fi
             continue;
         eventData.houghPlane->fill<HoughHitType>(
             hit, eventData.currAxisRanges,
-            MuonR4::HoughHelpers::Phi::houghParamStrip,
-            MuonR4::HoughHelpers::Phi::houghWidthStrip, hit, 0, 
+            HoughHelpers::Phi::houghParamStrip,
+            HoughHelpers::Phi::houghWidthStrip, hit, 0, 
             // up-weigh 2D spacepoints w.r.t 1D phi hits to prevent 
             // discarding measurements known to be compatible in eta 
             (hit->measuresEta() ? 2.0 : 1.0) / (m_downWeightMultiplePrd? hit->nPhiInstanceCounts() : 1)
@@ -172,73 +172,68 @@ std::vector<MuonR4::ActsPeakFinderForMuon::Maximum> MuonPhiHoughTransformAlg::fi
     } 
     return {}; 
 }            
-HoughSegmentSeed MuonPhiHoughTransformAlg::recoverSinglePhiMax(MuonHoughEventData & data, const MuonR4::HoughMaximum & maximum) const{
+std::unique_ptr<SegmentSeed> 
+    PhiHoughTransformAlg::recoverSinglePhiMax(HoughEventData & data, const HoughMaximum & maximum) const{
     // recovers cases of a single phi hit assuming a straight 
     // line extrapolation from the beam line to the phi measurement
-    return HoughSegmentSeed(maximum.tanTheta(), maximum.interceptY(), 
-                            data.searchSpaceTanAngle.first, 
-                            data.searchSpaceIntercept.first, 
-                            maximum.getCounts(), 
-                            std::vector<HoughHitType>(maximum.getHitsInMax())); 
+    return std::make_unique<SegmentSeed>(maximum.tanTheta(), maximum.interceptY(), 
+                        data.searchSpaceTanAngle.first, 
+                        data.searchSpaceIntercept.first, 
+                        maximum.getCounts(), 
+                        std::vector<HoughHitType>(maximum.getHitsInMax()), maximum.parentBucket()); 
 
 } 
 
 
-StatusCode MuonPhiHoughTransformAlg::execute(const EventContext& ctx) const {
+StatusCode PhiHoughTransformAlg::execute(const EventContext& ctx) const {
    
     // read the inputs
-    const StationHoughMaxContainer* maxima{nullptr};
+    const EtaHoughMaxContainer* maxima{nullptr};
     ATH_CHECK(retrieveContainer(ctx, m_maxima, maxima));
 
     const ActsGeometryContext* gctx{nullptr};
     ATH_CHECK(retrieveContainer(ctx, m_geoCtxKey, gctx));
 
     // book the event data object
-    MuonHoughEventData eventData(*gctx);
+    HoughEventData eventData(*gctx);
 
     // prepare the accumulator
     ATH_CHECK(prepareHoughPlane(eventData));
 
     // prepare our output collection
-    SG::WriteHandle<StationHoughSegmentSeedContainer> writeMaxima(
-        m_segmentSeeds, ctx);
-    ATH_CHECK(writeMaxima.record(
-        std::make_unique<StationHoughSegmentSeedContainer>()));
+    SG::WriteHandle<SegmentSeedContainer> writeMaxima{m_segmentSeeds, ctx};
+    ATH_CHECK(writeMaxima.record(std::make_unique<SegmentSeedContainer>()));
 
     // loop over the previously found eta-maxima for each station
-    for (auto& stationAndMax : *maxima) {
-        std::vector<MuonR4::HoughSegmentSeed> segmentSeedsInStation;
-        for (auto& max : stationAndMax.getMaxima()) {
-            // for each maximum, pre-process 
-            ATH_CHECK(preProcessMaximum(eventData,max)); 
-            bool foundSolution=false; 
-            // if we have enough hits, run a phi transform 
-            if (eventData.phiHitsOnMax > 1){        
-                std::vector<MuonR4::ActsPeakFinderForMuon::Maximum> rankedSeeds = findRankedSegmentSeeds(eventData, max); 
-                for (auto & phiSolution : rankedSeeds){
-                    foundSolution = true; 
-                    segmentSeedsInStation.push_back(buildSegmentSeed(max, phiSolution)); 
-                }
+    for (const HoughMaximum* max : *maxima) {
+        // for each maximum, pre-process 
+        ATH_CHECK(preProcessMaximum(eventData,*max)); 
+        bool foundSolution=false; 
+        // if we have enough hits, run a phi transform 
+        if (eventData.phiHitsOnMax > 1){        
+            std::vector<ActsPeakFinderForMuon::Maximum> rankedSeeds = findRankedSegmentSeeds(eventData, *max); 
+            for (auto & phiSolution : rankedSeeds){
+                foundSolution = true; 
+                writeMaxima->push_back(buildSegmentSeed(*max, phiSolution)); 
             }
-            // if we do not have at least two phi-hits for a proper transform: 
-            if (!foundSolution){
-                // if we have a single phi hit, we can approximate the phi 
-                // solution using the beam spot (as the IP is far). 
-                // This is steered by a flag, and not appropriate for splashes
-                // or cosmics. 
-                if (m_recoverSinglePhiWithBS && eventData.phiHitsOnMax == 1){
-                    segmentSeedsInStation.push_back(recoverSinglePhiMax(eventData,max)); 
-                }
-                // otherwise we have no phi-solution, and we fall back to writing a 1D eta-maximum 
-                else{ 
-                    segmentSeedsInStation.push_back(HoughSegmentSeed(max)); 
-                }
-            }   
         }
-        // add the maxima for this station to the output
-        writeMaxima->emplace(StationHoughSegmentSeeds(stationAndMax.chamber(),
-                                                      segmentSeedsInStation));
-
+        // if we do not have at least two phi-hits for a proper transform: 
+        if (!foundSolution){
+            // if we have a single phi hit, we can approximate the phi 
+            // solution using the beam spot (as the IP is far). 
+            // This is steered by a flag, and not appropriate for splashes
+            // or cosmics. 
+            if (m_recoverSinglePhiWithBS && eventData.phiHitsOnMax == 1){
+                writeMaxima->push_back(recoverSinglePhiMax(eventData,*max)); 
+            }
+            // otherwise we have no phi-solution, and we fall back to writing a 1D eta-maximum 
+            else{ 
+                writeMaxima->push_back(std::make_unique<SegmentSeed>(*max)); 
+            }
+        }   
     }
+    // add the maxima for this station to the output
+
     return StatusCode::SUCCESS;
+}
 }

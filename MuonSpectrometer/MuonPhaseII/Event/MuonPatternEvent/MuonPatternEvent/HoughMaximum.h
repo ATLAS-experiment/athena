@@ -2,30 +2,35 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef MUONR4__HOUGHMAXIMUM__H
-#define MUONR4__HOUGHMAXIMUM__H
+#ifndef MUONR4_MUONPATTERNRECOGNITION_HOUGHMAXIMUM__H
+#define MUONR4_MUONPATTERNRECOGNITION_HOUGHMAXIMUM__H
 #include <vector>
 
-#include "MuonSpacePoint/MuonSpacePointContainer.h"
+#include "MuonSpacePoint/SpacePointContainer.h"
 #include "xAODMeasurementBase/UncalibratedMeasurement.h"
 
 namespace MuonR4 {
 /// @brief Data class to represent an eta maximum in hough space.
-/// @tparam HitType: Data type encoding the hits used in the transform
-template <class HitType>
-class HoughMaximum_impl {
+class HoughMaximum {
    public:
+    using HitType = const SpacePoint*;
     /// @brief constructor.
     /// @param tanTheta: angle coordinate
     /// @param interceptY: intercept coordinate 
     /// @param counts: Weighted hit count of the maximum
     /// @param hits: list of measurements assigned to the maximum (owned by SG).
-    HoughMaximum_impl(double tanTheta, double interceptY, double counts,
-                 std::vector<HitType>&& hits)
-        : m_tanTheta(tanTheta), m_interceptY(interceptY), m_counts(counts), m_hitsInMax(hits) {}
+    /// @param bucket: Space point bucket out of which the hough maximum is built
+    HoughMaximum(double tanTheta, double interceptY, double counts,
+                 std::vector<HitType>&& hits,
+                 const SpacePointBucket* bucket):
+        m_tanTheta{tanTheta}, 
+        m_interceptY{interceptY}, 
+        m_counts{counts}, 
+        m_hitsInMax{hits},
+        m_bucket{bucket} {}
     /// @brief default c-tor, creates empty maximum with zero counts in the
     /// origin
-    HoughMaximum_impl() = default;
+    HoughMaximum() = default;
     /// @brief getter
     /// @return  the angular coordinate of the eta transform
     double tanTheta() const { return m_tanTheta; }
@@ -41,12 +46,23 @@ class HoughMaximum_impl {
     const std::vector<HitType>& getHitsInMax() const {
         return m_hitsInMax;
     }
+    /// @brief getter
+    /// @return The parent space point bucket
+    const SpacePointBucket* parentBucket() const {
+        return m_bucket;
+    }
+    /// @brief getter
+    /// @brief Return the associated chamber to the bucket
+    const MuonGMR4::MuonChamber* chamber() const {
+        return m_bucket->chamber();
+    }
 
    private:
     double m_tanTheta{0.};                    // first coordinate
     double m_interceptY{0.};                  // second coordinate
     double m_counts{0.};                      // weighted counts
     std::vector<HitType> m_hitsInMax{};  // list of hits on maximum
+    const SpacePointBucket* m_bucket{nullptr};
 };
 }  // namespace MuonR4
 

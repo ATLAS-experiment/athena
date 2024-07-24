@@ -1,8 +1,8 @@
 /*
    Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef MUONSPACEPOINT_MUONSPACEPOINT_H
-#define MUONSPACEPOINT_MUONSPACEPOINT_H
+#ifndef MUONSPACEPOINT_SPACEPOINT_H
+#define MUONSPACEPOINT_SPACEPOINT_H
 
 #include "MuonReadoutGeometryR4/MuonChamber.h"
 #include "xAODMeasurementBase/UncalibratedMeasurement.h"
@@ -15,7 +15,7 @@ namespace MuonR4 {
      *          the spacepoint just represents the single measurement and hence has a uncertainty into the other
      *          direction corresponding to the half-length of the measurement channel
     */
-    class MuonSpacePoint {
+    class SpacePoint {
         public:
             /*** @brief: Constructor of the SpacePoint
              *   @param gctx: Geometry context needed to derive the local positions
@@ -23,16 +23,16 @@ namespace MuonR4 {
              *                       if both measurements are available
              *   @param secondaryMeas: The complementary phi measurement if availbe
             */
-            MuonSpacePoint(const ActsGeometryContext& gctx,
-                           const xAOD::UncalibratedMeasurement* primMeas,
-                           const xAOD::UncalibratedMeasurement* secondMeas = nullptr);
+            SpacePoint(const ActsGeometryContext& gctx,
+                       const xAOD::UncalibratedMeasurement* primMeas,
+                       const xAOD::UncalibratedMeasurement* secondMeas = nullptr);
             
             /*** @brief: Pointer to the primary measurement */
             const xAOD::UncalibratedMeasurement* primaryMeasurement() const;
             /*** @brief: Pointer to the secondary measurement */
             const xAOD::UncalibratedMeasurement* secondaryMeasurement() const;
             /*** @brief: Pointer to the associated muon chamber */
-            const MuonGMR4::MuonChamber* muonChamber() const;
+            const MuonGMR4::MuonChamber* chamber() const;
             /*** @brief: Position of the space point inside the chamber */
             const Amg::Vector3D& positionInChamber() const;
             /** @brief: Does the space point contain a phi measurement */
@@ -47,7 +47,7 @@ namespace MuonR4 {
             Amg::Vector2D uncertainty() const;
             const AmgSymMatrix(2)& covariance() const; 
             /** @brief: Equality check by checking the prd pointers */
-            bool operator==(const MuonSpacePoint& other) const {
+            bool operator==(const SpacePoint& other) const {
                 return primaryMeasurement() == other.primaryMeasurement() &&
                        secondaryMeasurement() == other.secondaryMeasurement();
             }
@@ -78,7 +78,6 @@ namespace MuonR4 {
             /// In how many space points is the phi measurement used
             unsigned int m_phiInstances{1};
     };
-
 }
 
 

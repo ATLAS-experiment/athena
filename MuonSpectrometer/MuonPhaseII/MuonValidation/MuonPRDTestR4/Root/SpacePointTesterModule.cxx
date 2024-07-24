@@ -13,7 +13,7 @@ namespace MuonValR4{
         m_collName{collName},
         m_key{inContainer}{}
 
-    unsigned int SpacePointTesterModule::push_back(const MuonR4::MuonSpacePoint& spacePoint) {
+    unsigned int SpacePointTesterModule::push_back(const MuonR4::SpacePoint& spacePoint) {
         if (!m_internalFill) {
             m_applyFilter = true;
         }
@@ -93,7 +93,7 @@ namespace MuonValR4{
         m_phiChannel.push_back(phiChannel);
         return insert_itr.first->second;
     }
-    unsigned int SpacePointTesterModule::push_back(const MuonR4::MuonSpacePointBucket& bucket) {
+    unsigned int SpacePointTesterModule::push_back(const MuonR4::SpacePointBucket& bucket) {
         if (!m_internalFill) {
             m_applyFilter = true;
         } else if (m_applyFilter) {
@@ -108,7 +108,7 @@ namespace MuonValR4{
         
 
         m_bucketNumber.push_back(bucket.bucketId());
-        m_bucketId.push_back(bucket.muonChamber()->readOutElements()[0]->identify());
+        m_bucketId.push_back(bucket.chamber()->readOutElements()[0]->identify());
         m_bucketMin.push_back(bucket.coveredMin());
         m_bucketMax.push_back(bucket.coveredMax());
         std::vector<uint16_t>& spacePoints = m_bucketPoints[m_bucketPoints.size()];
@@ -123,7 +123,7 @@ namespace MuonValR4{
     }
     bool SpacePointTesterModule::fill(const EventContext& ctx) {
         m_internalFill = true;
-        SG::ReadHandle<MuonR4::MuonSpacePointContainer> container{m_key, ctx};
+        SG::ReadHandle<MuonR4::SpacePointContainer> container{m_key, ctx};
         if (!container.isPresent()) {
             ATH_MSG_FATAL("Failed to retrieve container "<<m_key.fullKey());
             return false;

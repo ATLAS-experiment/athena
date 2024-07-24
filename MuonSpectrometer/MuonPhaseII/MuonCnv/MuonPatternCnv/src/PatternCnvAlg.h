@@ -14,12 +14,12 @@
 #include "MuonPrepRawData/MuonPrepDataContainer.h"
 #include "MuonRecToolInterfaces/HoughDataPerSec.h"
 #include "MuonPattern/MuonPatternCombinationCollection.h"
-#include "MuonPatternEvent/StationHoughMaxContainer.h"
+#include "MuonPatternEvent/MuonPatternContainer.h"
 namespace MuonR4{
     /** @brief The MuonPatternCnvAlg converts the SegmentSeeds produced by the R4 pattern recognition chain
      *         into the segment seeds that can be consumed by the legacy muon segment maker
      */
-    class MuonPatternCnvAlg : public AthReentrantAlgorithm{
+    class PatternCnvAlg : public AthReentrantAlgorithm{
         public:
 
             using AthReentrantAlgorithm::AthReentrantAlgorithm;
@@ -57,7 +57,7 @@ namespace MuonR4{
              *  @param houghDataSec: Hough input data per sector.
             */
             StatusCode convertSeed(const EventContext& ctx,
-                                   const StationHoughSegmentSeedContainer& seedContainer,
+                                   const SegmentSeedContainer& seedContainer,
                                    ::MuonPatternCombinationCollection& patternContainer,
                                    Muon::HoughDataPerSectorVec& houghDataSec) const;
 
@@ -77,7 +77,7 @@ namespace MuonR4{
             SG::ReadHandleKey<Muon::sTgcPrepDataContainer> m_keysTgc{this, "sTgcKey", "STGC_Measurements"};
             SG::ReadHandleKey<Muon::MMPrepDataContainer> m_keyMM{this, "MmKey", "MM_Measurements"};
 
-            SG::ReadHandleKeyArray<StationHoughSegmentSeedContainer> m_readKeys{this, "Patterns", {"MuonHoughStationSegmentSeeds"}};
+            SG::ReadHandleKeyArray<SegmentSeedContainer> m_readKeys{this, "Patterns", {"MuonHoughStationSegmentSeeds"}};
             SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
 
             SG::WriteHandleKey<::MuonPatternCombinationCollection> m_combiKey{this, "PatternCombiKey", "MuonLayerHoughCombis"};

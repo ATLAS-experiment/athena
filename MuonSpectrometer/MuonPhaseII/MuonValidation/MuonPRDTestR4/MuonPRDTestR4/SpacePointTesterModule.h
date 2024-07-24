@@ -6,7 +6,7 @@
 #define PRDTESTERR4_MUONSPACEPOINTTESTMODULE_H
 #include "MuonPRDTestR4/TesterModuleBase.h"
 
-#include "MuonSpacePoint/MuonSpacePointContainer.h"
+#include "MuonSpacePoint/SpacePointContainer.h"
 #include "MuonTesterTree/IdentifierBranch.h"
 namespace MuonValR4{
     class SpacePointTesterModule: public TesterModuleBase {
@@ -21,13 +21,13 @@ namespace MuonValR4{
             bool fill(const EventContext& ctx) override final;
 
             
-            unsigned int push_back(const MuonR4::MuonSpacePointBucket& bucket);
-            unsigned int push_back(const MuonR4::MuonSpacePoint& spacePoint);
+            unsigned int push_back(const MuonR4::SpacePointBucket& bucket);
+            unsigned int push_back(const MuonR4::SpacePoint& spacePoint);
 
 
         private:
            std::string m_collName{};
-           SG::ReadHandleKey<MuonR4::MuonSpacePointContainer> m_key{};
+           SG::ReadHandleKey<MuonR4::SpacePointContainer> m_key{};
            /** @brief Space point bucket information */
            VectorBranch<uint16_t>& m_bucketNumber{parent().newVector<uint16_t>(m_collName+"bucket_index")};
            /** @brief stationIndex / stationEta / stationPhi of the bucket chamber */
@@ -69,9 +69,9 @@ namespace MuonValR4{
            VectorBranch<int16_t>& m_phiChannel{parent().newVector<int16_t>(m_collName+"spacePoint_secChannel")};
 
            /** @brief: Keep track when a spacepoint is filled into the tree */
-           std::unordered_map<const MuonR4::MuonSpacePoint*, unsigned int> m_spacePointIdx{};
+           std::unordered_map<const MuonR4::SpacePoint*, unsigned int> m_spacePointIdx{};
            /** @brief: Keep tarck when a space point bucket is filled into the tree */
-           std::unordered_map<const MuonR4::MuonSpacePointBucket*, unsigned int> m_bucketIdx{};
+           std::unordered_map<const MuonR4::SpacePointBucket*, unsigned int> m_bucketIdx{};
            /** @brief: Flag whether the module is operated in filter mode */
            bool m_applyFilter{false};
            /** @brief: Flag toggling whether the module is in internal filling mode */

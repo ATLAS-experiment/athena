@@ -65,13 +65,13 @@ double SegmentFitHelpers::segmentChiSquare(const double* par, const std::vector<
 
 double SegmentFitHelpers::chiSqTermBeamspot(double x0, double y0, double tanPhi, double tanTheta, 
                                             const MuonR4::HoughHitType & hit, const ActsGeometryContext & gctx){
-    Amg::Vector3D beamSpotVector = hit->muonChamber()->globalToLocalTrans(gctx).translation();
+    Amg::Vector3D beamSpotVector = hit->chamber()->globalToLocalTrans(gctx).translation();
     AmgSymMatrix(3) covariance (AmgSymMatrix(3)::Identity()); 
     /// placeholder for a very generous beam spot: 300mm in X,Y (tracking volume), 20000 along Z
     covariance(0,0) = 300.*300;
     covariance(1,1) = 300.*300;
     covariance(2,2) = 20000.*20000;
-    AmgSymMatrix(3) jacobian =  hit->muonChamber()->globalToLocalTrans(gctx).linear();
+    AmgSymMatrix(3) jacobian =  hit->chamber()->globalToLocalTrans(gctx).linear();
     covariance = jacobian * covariance * jacobian.transpose(); 
     covariance = covariance.inverse().eval();
     Amg::MatrixX covariance2(2,2);

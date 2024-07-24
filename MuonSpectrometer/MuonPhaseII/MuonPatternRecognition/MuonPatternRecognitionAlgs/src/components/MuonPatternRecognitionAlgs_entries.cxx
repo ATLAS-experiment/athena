@@ -1,9 +1,9 @@
 /*
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-#include "../MuonEtaHoughTransformAlg.h"
-#include "../MuonPhiHoughTransformAlg.h"
+#include "../EtaHoughTransformAlg.h"
+#include "../PhiHoughTransformAlg.h"
 #include "../MuonSegmentFittingAlg.h"
-DECLARE_COMPONENT(MuonR4::MuonEtaHoughTransformAlg)
-DECLARE_COMPONENT(MuonR4::MuonPhiHoughTransformAlg)
+DECLARE_COMPONENT(MuonR4::EtaHoughTransformAlg)
+DECLARE_COMPONENT(MuonR4::PhiHoughTransformAlg)
 DECLARE_COMPONENT(MuonR4::MuonSegmentFittingAlg)

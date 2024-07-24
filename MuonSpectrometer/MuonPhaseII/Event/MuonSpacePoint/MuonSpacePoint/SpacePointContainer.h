@@ -5,7 +5,7 @@
 #ifndef MUONSPACEPOINT_MUONSPACEPOINTCONTAINER_H
 #define MUONSPACEPOINT_MUONSPACEPOINTCONTAINER_H
 
-#include "MuonSpacePoint/MuonSpacePoint.h"
+#include "MuonSpacePoint/SpacePoint.h"
 #include "MuonReadoutGeometryR4/MuonDetectorManager.h"
 #include "GaudiKernel/SystemOfUnits.h"
 #include "AthContainers/DataVector.h"
@@ -18,11 +18,11 @@ namespace MuonR4{
      *           also partially overlap with other buckets close-by.
      * 
     */
-    class MuonSpacePointBucket : 
-        public std::vector<std::shared_ptr<MuonSpacePoint>> {
+    class SpacePointBucket : 
+        public std::vector<std::shared_ptr<SpacePoint>> {
          public:
             /** @brief Standard constructor*/
-            MuonSpacePointBucket() = default;
+            SpacePointBucket() = default;
             /** @brief set the range in the precision plane covered by the bucket*/
             void setCoveredRange(double min, double max){
                 m_min = min;
@@ -33,8 +33,8 @@ namespace MuonR4{
             /** @brief upper interval value covered by the bucket */
             double coveredMax() const { return m_max; }
             /** @brief returns th associated muonChamber */
-            const MuonGMR4::MuonChamber* muonChamber() const {
-                return empty() ? nullptr : front()->muonChamber();
+            const MuonGMR4::MuonChamber* chamber() const {
+                return empty() ? nullptr : front()->chamber();
             }
             /** @brief sets the Identifier of the MuonSpacePointBucket in context
              *         of the associated muonChamber
@@ -44,11 +44,11 @@ namespace MuonR4{
             }
             /** @brief  Returns the Identifier in the context of the MuonChamber*/
             unsigned int bucketId() const { return m_bucketId; }
-            bool operator<(const MuonSpacePointBucket& other) const {
+            bool operator<(const SpacePointBucket& other) const {
                 using ChamberSorter = MuonGMR4::MuonDetectorManager::ChamberSorter;
                 static const ChamberSorter sorter{};
-                int chambCompare = -sorter(muonChamber(), other.muonChamber()) + 
-                                    sorter(other.muonChamber(), muonChamber());
+                int chambCompare = -sorter(chamber(), other.chamber()) + 
+                                    sorter(other.chamber(), chamber());
                 if (chambCompare) return chambCompare < 0;
                 return bucketId() < other.bucketId();
             }
@@ -58,9 +58,9 @@ namespace MuonR4{
             double m_max{20. * Gaudi::Units::m};
     };
 
-    using MuonSpacePointContainer = DataVector<MuonSpacePointBucket>;
+    using SpacePointContainer = DataVector<SpacePointBucket>;
 }
 #include "AthenaKernel/CLASS_DEF.h"
-CLASS_DEF( MuonR4::MuonSpacePointContainer , 1177013528 , 1 );
+CLASS_DEF( MuonR4::SpacePointContainer , 1138818003 , 1 );
 
 #endif

@@ -6,7 +6,7 @@
 #define MUONR4__HOUGHSEGMENT__H
 #include <vector>
 
-#include "MuonSpacePoint/MuonSpacePointContainer.h"
+#include "MuonSpacePoint/SpacePointContainer.h"
 #include "xAODMeasurementBase/UncalibratedMeasurement.h"
 #include "AthenaKernel/CLASS_DEF.h"
 #include "MuonReadoutGeometryR4/MuonChamber.h"
@@ -37,7 +37,7 @@ namespace MuonR4{
             }
             // temporary validation info - will be removed in the final segment iteration
             void setChamber(const MuonGMR4::MuonChamber* ch){m_chamber=ch;}
-            void setParentSeed(const MuonR4::HoughSegmentSeed* parent){m_parent=parent;}
+            void setParentSeed(const MuonR4::SegmentSeed* parent){m_parent=parent;}
 
             // getters 
             double chi2() const {return m_chi2;}
@@ -49,7 +49,7 @@ namespace MuonR4{
             std::vector<double> chi2PerMeasurement() const{return m_chi2PerMeasurement;} 
             // temporary validation info - will be removed in the final segment iteration
             const MuonGMR4::MuonChamber* chamber()const {return m_chamber;}
-            const MuonR4::HoughSegmentSeed* parent()const {return m_parent;}
+            const MuonR4::SegmentSeed* parent()const {return m_parent;}
 
 
         private: 
@@ -61,7 +61,7 @@ namespace MuonR4{
             std::vector<const xAOD::UncalibratedMeasurement*> m_measurements{};
             std::vector<double> m_chi2PerMeasurement{};
             const MuonGMR4::MuonChamber* m_chamber{nullptr}; 
-            const MuonR4::HoughSegmentSeed* m_parent{nullptr}; 
+            const MuonR4::SegmentSeed* m_parent{nullptr}; 
     };
     // placeholder - later will be xAOD EDM 
     using MuonSegmentContainer = std::vector<MuonSegment> ; 

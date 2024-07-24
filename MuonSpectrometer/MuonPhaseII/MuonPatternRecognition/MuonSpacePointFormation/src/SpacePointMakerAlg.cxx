@@ -1,7 +1,7 @@
 /*
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-#include "MuonSpacePointMakerAlg.h"
+#include "SpacePointMakerAlg.h"
 
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
@@ -28,7 +28,7 @@ namespace {
 }
 
 namespace MuonR4 {
-bool MuonSpacePointMakerAlg::SpacePointStatistics::FieldKey::operator<(const FieldKey& other) const{
+bool SpacePointMakerAlg::SpacePointStatistics::FieldKey::operator<(const FieldKey& other) const{
     if (techIdx != other.techIdx) {
         return static_cast<int>(techIdx) < static_cast<int>(other.techIdx);
     }
@@ -37,15 +37,15 @@ bool MuonSpacePointMakerAlg::SpacePointStatistics::FieldKey::operator<(const Fie
     }
     return eta < other.eta;
 }
-unsigned int MuonSpacePointMakerAlg::SpacePointStatistics::StatField::allHits() const {
+unsigned int SpacePointMakerAlg::SpacePointStatistics::StatField::allHits() const {
     return measEta + measPhi + measEtaPhi;
 }
-MuonSpacePointMakerAlg::SpacePointStatistics::SpacePointStatistics(const Muon::IMuonIdHelperSvc* idHelperSvc):
+SpacePointMakerAlg::SpacePointStatistics::SpacePointStatistics(const Muon::IMuonIdHelperSvc* idHelperSvc):
     m_idHelperSvc{idHelperSvc}{}
 
-void MuonSpacePointMakerAlg::SpacePointStatistics::addToStat(const std::vector<MuonSpacePoint>& spacePoints){
+void SpacePointMakerAlg::SpacePointStatistics::addToStat(const std::vector<SpacePoint>& spacePoints){
     std::lock_guard guard{m_mutex};
-    for (const MuonSpacePoint& sp : spacePoints){
+    for (const SpacePoint& sp : spacePoints){
         FieldKey key{};
         key.stIdx = m_idHelperSvc->stationIndex(sp.identify());
         key.techIdx = m_idHelperSvc->technologyIndex(sp.identify());
@@ -59,7 +59,7 @@ void MuonSpacePointMakerAlg::SpacePointStatistics::addToStat(const std::vector<M
         }               
     }
 }
-void MuonSpacePointMakerAlg::SpacePointStatistics::dumpStatisics(MsgStream& msg) const {
+void SpacePointMakerAlg::SpacePointStatistics::dumpStatisics(MsgStream& msg) const {
     using KeyVal = std::pair<FieldKey, StatField>; 
     std::vector<KeyVal> sortedstats{};
     sortedstats.reserve(m_map.size());
@@ -84,17 +84,17 @@ void MuonSpacePointMakerAlg::SpacePointStatistics::dumpStatisics(MsgStream& msg)
 }
 
 
-MuonSpacePointMakerAlg::MuonSpacePointMakerAlg(const std::string& name, ISvcLocator* pSvcLocator):
+SpacePointMakerAlg::SpacePointMakerAlg(const std::string& name, ISvcLocator* pSvcLocator):
     AthReentrantAlgorithm{name, pSvcLocator}{}
 
 
-StatusCode MuonSpacePointMakerAlg::finalize() {
+StatusCode SpacePointMakerAlg::finalize() {
     if (m_statCounter) {
         m_statCounter->dumpStatisics(msgStream());
     }
     return StatusCode::SUCCESS;
 }
-StatusCode MuonSpacePointMakerAlg::initialize() {
+StatusCode SpacePointMakerAlg::initialize() {
     ATH_CHECK(m_geoCtxKey.initialize());
     ATH_CHECK(m_mdtKey.initialize(!m_mdtKey.empty()));
     ATH_CHECK(m_rpcKey.initialize(!m_rpcKey.empty()));
@@ -108,8 +108,8 @@ StatusCode MuonSpacePointMakerAlg::initialize() {
 }
 
 template <> 
-    bool MuonSpacePointMakerAlg::passOccupancy2D(const std::vector<const xAOD::TgcStrip*>& etaHits,
-                                                 const std::vector<const xAOD::TgcStrip*>& phiHits) const {
+    bool SpacePointMakerAlg::passOccupancy2D(const std::vector<const xAOD::TgcStrip*>& etaHits,
+                                             const std::vector<const xAOD::TgcStrip*>& phiHits) const {
         if (etaHits.empty() || phiHits.empty()) {
             return false;
         }
@@ -118,8 +118,8 @@ template <>
                ((1.*phiHits.size()) / ((1.*re->numChannels(phiHits[0]->measurementHash())))) < m_maxOccTgcPhi;
     }
 template <> 
-    bool MuonSpacePointMakerAlg::passOccupancy2D(const std::vector<const xAOD::RpcMeasurement*>& etaHits,
-                                                 const std::vector<const xAOD::RpcMeasurement*>& phiHits) const {
+    bool SpacePointMakerAlg::passOccupancy2D(const std::vector<const xAOD::RpcMeasurement*>& etaHits,
+                                             const std::vector<const xAOD::RpcMeasurement*>& phiHits) const {
         if (etaHits.empty() || phiHits.empty()) {
             return false;
         }
@@ -129,8 +129,8 @@ template <>
     }
 
 template <> 
-    bool MuonSpacePointMakerAlg::passOccupancy2D(const std::vector<const xAOD::sTgcMeasurement*>& etaHits,
-                                                 const std::vector<const xAOD::sTgcMeasurement*>& phiHits) const {
+    bool SpacePointMakerAlg::passOccupancy2D(const std::vector<const xAOD::sTgcMeasurement*>& etaHits,
+                                             const std::vector<const xAOD::sTgcMeasurement*>& phiHits) const {
         if (etaHits.empty() || phiHits.empty()) {
             return false;
         }
@@ -140,9 +140,9 @@ template <>
     }
 
 template <class ContType>
-    StatusCode MuonSpacePointMakerAlg::loadContainerAndSort(const EventContext& ctx,
-                                                            const SG::ReadHandleKey<ContType>& key,
-                                                            PreSortedSpacePointMap& fillContainer) const {
+    StatusCode SpacePointMakerAlg::loadContainerAndSort(const EventContext& ctx,
+                                                        const SG::ReadHandleKey<ContType>& key,
+                                                        PreSortedSpacePointMap& fillContainer) const {
     if (key.empty()) {
         ATH_MSG_DEBUG("Key "<<typeid(ContType).name()<<" not set. Do not fill anything");
         return StatusCode::SUCCESS;
@@ -159,7 +159,7 @@ template <class ContType>
     if constexpr (std::is_same<ContType, xAOD::MdtDriftCircleContainer>::value ||
                   std::is_same<ContType, xAOD::MMClusterContainer>::value) {
         for (const PrdType prd : *readHandle) {
-            spacePointsPerChamber& hitVec = fillContainer[prd->readoutElement()->getChamber()];
+            SpacePointsPerChamber& hitVec = fillContainer[prd->readoutElement()->getChamber()];
             if (hitVec.etaHits.capacity() == hitVec.etaHits.size()) {
                 hitVec.etaHits.reserve(m_capacityBucket + hitVec.etaHits.size());
             }
@@ -202,7 +202,7 @@ template <class ContType>
         }
         /// Loop over the splitted hits and form the space points
         for (auto& [reEle, hitsPerChamb] : collectedPrds) {
-           spacePointsPerChamber& fillInto {fillContainer[reEle->getChamber()]};           
+           SpacePointsPerChamber& fillInto {fillContainer[reEle->getChamber()]};           
            ATH_MSG_VERBOSE("Fill collected measurements for "<<m_idHelperSvc->toStringDetEl(reEle->identify()));
            for (auto& [etaHits, phiHits]: hitsPerChamb) {
                 /// If one of the two is empty no chance to combine them
@@ -247,7 +247,7 @@ template <class ContType>
                                 continue;
                             }
                         }
-                        MuonSpacePoint& spacePoint{fillInto.etaHits.emplace_back(*gctx, etaHits[etaP], phiHits[phiP])};
+                        SpacePoint& spacePoint{fillInto.etaHits.emplace_back(*gctx, etaHits[etaP], phiHits[phiP])};
                         spacePoint.setInstanceCounts(etaCounts[etaP], phiCounts[phiP]);
                         hasCombinedSpacePoint = true;
                     }
@@ -267,27 +267,27 @@ template <class ContType>
 }
 
 
-StatusCode MuonSpacePointMakerAlg::execute(const EventContext& ctx) const {
+StatusCode SpacePointMakerAlg::execute(const EventContext& ctx) const {
     PreSortedSpacePointMap preSortedContainer{};
     ATH_CHECK(loadContainerAndSort(ctx, m_mdtKey, preSortedContainer));
     ATH_CHECK(loadContainerAndSort(ctx, m_rpcKey, preSortedContainer));
     ATH_CHECK(loadContainerAndSort(ctx, m_tgcKey, preSortedContainer));
     ATH_CHECK(loadContainerAndSort(ctx, m_mmKey, preSortedContainer));
     ATH_CHECK(loadContainerAndSort(ctx, m_stgcKey, preSortedContainer));
-    std::unique_ptr<MuonSpacePointContainer> outContainer = std::make_unique<MuonSpacePointContainer>();
+    std::unique_ptr<SpacePointContainer> outContainer = std::make_unique<SpacePointContainer>();
     
     for (auto &[chamber, hitsPerChamber] : preSortedContainer){
         ATH_MSG_VERBOSE("Fill space points for chamber "<<chamber);
         distributePointsAndStore(ctx, std::move(hitsPerChamber), *outContainer);
     }
-    SG::WriteHandle<MuonSpacePointContainer> writeHandle{m_writeKey, ctx};
+    SG::WriteHandle<SpacePointContainer> writeHandle{m_writeKey, ctx};
     ATH_CHECK(writeHandle.record(std::move(outContainer)));
     return StatusCode::SUCCESS;
 }
 
-void MuonSpacePointMakerAlg::distributePointsAndStore(const EventContext& ctx,
-                                                      spacePointsPerChamber&& hitsPerChamber,
-                                                      MuonSpacePointContainer& finalContainer) const {
+void SpacePointMakerAlg::distributePointsAndStore(const EventContext& ctx,
+                                                  SpacePointsPerChamber&& hitsPerChamber,
+                                                  SpacePointContainer& finalContainer) const {
     SpacePointBucketVec splittedHits{};
     splittedHits.emplace_back();
     if (m_statCounter){
@@ -298,33 +298,33 @@ void MuonSpacePointMakerAlg::distributePointsAndStore(const EventContext& ctx,
     distributePointsAndStore(ctx, std::move(hitsPerChamber.etaHits), splittedHits);
     distributePointsAndStore(ctx, std::move(hitsPerChamber.phiHits), splittedHits);
     
-    for (MuonSpacePointBucket& bucket : splittedHits) {
+    for (SpacePointBucket& bucket : splittedHits) {
         if (bucket.size() > 1)
-            finalContainer.push_back(std::make_unique<MuonSpacePointBucket>(std::move(bucket)));
+            finalContainer.push_back(std::make_unique<SpacePointBucket>(std::move(bucket)));
     }
 
 }
-void MuonSpacePointMakerAlg::distributePointsAndStore(const EventContext& ctx,
-                                                      std::vector<MuonSpacePoint>&& spacePoints,
-                                                      SpacePointBucketVec& splittedHits) const {
+void SpacePointMakerAlg::distributePointsAndStore(const EventContext& ctx,
+                                                  std::vector<SpacePoint>&& spacePoints,
+                                                  SpacePointBucketVec& splittedHits) const {
     
     if (spacePoints.empty()) return;
 
     const bool defineBuckets = splittedHits[0].empty();
     const bool hasEtaMeas{spacePoints[0].measuresEta()};    
     
-    auto pointPos = [hasEtaMeas, defineBuckets] (const MuonSpacePoint& p) {
+    auto pointPos = [hasEtaMeas, defineBuckets] (const SpacePoint& p) {
         return hasEtaMeas || !defineBuckets ?  p.positionInChamber().y() : p.positionInChamber().x();
     };
     SG::ReadHandle<ActsGeometryContext> gctx{m_geoCtxKey, ctx};
 
-    auto channelDir = [hasEtaMeas, defineBuckets, &gctx](const MuonSpacePoint & p) {
+    auto channelDir = [hasEtaMeas, defineBuckets, &gctx](const SpacePoint & p) {
         const Amg::Vector3D d = xAOD::channelDirInChamber(*gctx, p.primaryMeasurement());
         return std::abs(hasEtaMeas || !defineBuckets ? d.y() : d.z());
     };
 
     std::sort(spacePoints.begin(), spacePoints.end(), 
-              [&pointPos] (const MuonSpacePoint& a, const MuonSpacePoint& b) {
+              [&pointPos] (const SpacePoint& a, const SpacePoint& b) {
                     return pointPos(a) < pointPos(b);
               });
     
@@ -334,10 +334,10 @@ void MuonSpacePointMakerAlg::distributePointsAndStore(const EventContext& ctx,
     auto newBucket = [this, &lastPoint, &splittedHits, &pointPos, &channelDir] (const double currPos) {
         splittedHits.emplace_back();
         splittedHits.back().setBucketId(splittedHits.size() -1);
-        MuonSpacePointBucket& overlap{splittedHits[splittedHits.size() - 2]};
-        MuonSpacePointBucket& newContainer{splittedHits[splittedHits.size() - 1]};
+        SpacePointBucket& overlap{splittedHits[splittedHits.size() - 2]};
+        SpacePointBucket& newContainer{splittedHits[splittedHits.size() - 1]};
      
-        for (const std::shared_ptr<MuonSpacePoint>& pointInBucket : overlap) {
+        for (const std::shared_ptr<SpacePoint>& pointInBucket : overlap) {
             const double overlapPos = pointPos(*pointInBucket) + pointInBucket->uncertainty()[1] * channelDir(*pointInBucket);
             if (std::abs(overlapPos - currPos) < m_spacePointOverlap) {
                 newContainer.push_back(pointInBucket);
@@ -347,12 +347,12 @@ void MuonSpacePointMakerAlg::distributePointsAndStore(const EventContext& ctx,
         overlap.setCoveredRange(pointPos(**overlap.begin()), pointPos(**overlap.rbegin()));
     };
 
-    for (MuonSpacePoint& toSort : spacePoints) {        
+    for (SpacePoint& toSort : spacePoints) {        
         const double currPoint = pointPos(toSort);
         /// Phi modules
         if (!defineBuckets) {
-           std::shared_ptr<MuonSpacePoint> madePoint = std::make_shared<MuonSpacePoint>(std::move(toSort));
-           for (MuonSpacePointBucket& bucket : splittedHits) {
+           std::shared_ptr<SpacePoint> madePoint = std::make_shared<SpacePoint>(std::move(toSort));
+           for (SpacePointBucket& bucket : splittedHits) {
                 const double measDir = channelDir(toSort);
                 const double posMin = currPoint - toSort.uncertainty()[1] * measDir;
                 const double posMax = currPoint + toSort.uncertainty()[1] * measDir;
@@ -367,10 +367,10 @@ void MuonSpacePointMakerAlg::distributePointsAndStore(const EventContext& ctx,
         if (currPoint - lastPoint > m_spacePointWindow) {
             newBucket(currPoint);            
         }
-        std::shared_ptr<MuonSpacePoint> spacePoint = std::make_shared<MuonSpacePoint>(std::move(toSort));
+        std::shared_ptr<SpacePoint> spacePoint = std::make_shared<SpacePoint>(std::move(toSort));
         splittedHits.back().emplace_back(spacePoint);
         if (splittedHits.size() > 1) {
-            MuonSpacePointBucket& overlap{splittedHits[splittedHits.size() - 2]};
+            SpacePointBucket& overlap{splittedHits[splittedHits.size() - 2]};
             const double overlapPos = currPoint - spacePoint->uncertainty()[1] * channelDir(*spacePoint);
             if (overlapPos - overlap.coveredMax() < m_spacePointOverlap) {
                 overlap.push_back(spacePoint);
@@ -378,7 +378,7 @@ void MuonSpacePointMakerAlg::distributePointsAndStore(const EventContext& ctx,
         }
     }
     if (defineBuckets){
-        MuonSpacePointBucket& lastBucket{splittedHits[splittedHits.size() - 1]};
+        SpacePointBucket& lastBucket{splittedHits[splittedHits.size() - 1]};
         newBucket(pointPos(*lastBucket.back()));
         /// Remove the probably empty bucket again.
         splittedHits.pop_back();

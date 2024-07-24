@@ -15,6 +15,6 @@ def MuonPatternCnvAlgCfg(flags, name="MuonPatternCnvAlg", **kwargs):
     if not flags.Detector.GeometryMM: kwargs.setdefault("MmKey" ,"")
     if not flags.Detector.GeometrysTGC: kwargs.setdefault("sTgcKey" ,"")
 
-    the_alg = CompFactory.MuonR4.MuonPatternCnvAlg(name, **kwargs)
+    the_alg = CompFactory.MuonR4.PatternCnvAlg(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result

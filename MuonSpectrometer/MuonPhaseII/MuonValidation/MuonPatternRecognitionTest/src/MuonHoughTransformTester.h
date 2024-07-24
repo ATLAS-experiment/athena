@@ -13,11 +13,10 @@
 
 // EDM includes 
 #include "xAODMuonSimHit/MuonSimHitContainer.h"
-#include "xAODMuonPrepData/MdtDriftCircleContainer.h"
-#include "xAODMuonPrepData/RpcStripContainer.h"
-#include "xAODMuonPrepData/TgcStripContainer.h"
-#include "MuonPatternEvent/StationHoughMaxContainer.h"
-#include "MuonPatternEvent/MuonSegment.h"
+
+#include <MuonPatternEvent/MuonPatternContainer.h>
+#include <MuonPatternEvent/MuonSegment.h>
+
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
 
 // muon includes
@@ -60,11 +59,11 @@ namespace MuonValR4{
 
     StatusCode drawEventDisplay(const EventContext& ctx,
                                 const std::vector<const xAOD::MuonSimHit*>& simHits,
-                                const MuonR4::HoughSegmentSeed* foundMax) const;
+                                const MuonR4::SegmentSeed* foundMax) const;
 
     StatusCode drawChi2(        const EventContext& ctx,
                                 const std::vector<const xAOD::MuonSimHit*>& simHits,
-                                const MuonR4::HoughSegmentSeed* foundMax,
+                                const MuonR4::SegmentSeed* foundMax,
                                 const MuonR4::MuonSegment* foundSegment,
                                 const std::string & label, const ActsGeometryContext & gctx) const;
 
@@ -76,36 +75,34 @@ namespace MuonValR4{
             double matchProb{0.};
             /** @brief Associated segment */
             const MuonR4::MuonSegment* segment{nullptr};
-            /** @brief associated bucket */
-            const MuonR4::MuonSpacePointBucket* bucket{nullptr};
         };
-        using SeedMatchMap = std::map<const MuonR4::HoughSegmentSeed*, SeedMatchQuantites>;
+        using SeedMatchMap = std::map<const MuonR4::SegmentSeed*, SeedMatchQuantites>;
         SeedMatchMap seedMatching{};
 
         /** @brief Collection of the truth particle trajectory */
         struct TruthMatchQuantities{
             std::vector<const xAOD::MuonSimHit*> detectorHits{};
-            std::vector<const MuonR4::HoughSegmentSeed*> assocSeeds{};
+            std::vector<const MuonR4::SegmentSeed*> assocSeeds{};
         };
 
         std::map<HepMC::ConstGenParticlePtr, TruthMatchQuantities> truthMatching{}; 
     };
 
-    void matchSeedToTruth(const MuonR4::HoughSegmentSeed* seed, chamberLevelObjects & objs ) const;                          
+    void matchSeedToTruth(const MuonR4::SegmentSeed* seed, chamberLevelObjects & objs ) const;                          
     std::pair<HepMC::ConstGenParticlePtr, double> matchSegmentToTruth(const MuonR4::MuonSegment* seed, chamberLevelObjects & objs ) const;                          
     void matchSeedsToTruth(chamberLevelObjects & objs) const;          
     void matchSegmentsToTruth(chamberLevelObjects & objs) const;          
     void fillChamberInfo(const MuonGMR4::MuonChamber* chamber);                
     void fillTruthInfo(const HepMC::ConstGenParticlePtr genParticlePtr, const std::vector<const xAOD::MuonSimHit*> & simHits, const ActsGeometryContext & gctx);     
-    void fillSeedInfo(const MuonR4::HoughSegmentSeed* segmentSeed, double matchProb);            
+    void fillSeedInfo(const MuonR4::SegmentSeed* segmentSeed, double matchProb);            
     void fillSegmentInfo(const MuonR4::MuonSegment* segmentSeed, double matchProb);            
     
     // MDT sim hits in xAOD format 
     SG::ReadHandleKeyArray<xAOD::MuonSimHitContainer> m_inSimHitKeys {this, "SimHitKeys",{}, "xAOD  SimHit collections"};
                                                           
-    SG::ReadHandleKey<MuonR4::StationHoughSegmentSeedContainer> m_inHoughSegmentSeedKey{this, "StationHoughSegmentSeedContainer", "MuonHoughStationSegmentSeeds"};
-    SG::ReadHandleKey<MuonR4::MuonSegmentContainer> m_inSegmentKey{this, "MuonSegmentContainer", "R4MuonSegments"};
-    SG::ReadHandleKey<MuonR4::MuonSpacePointContainer> m_spacePointKey{this, "SpacePointContainer", "MuonSpacePoints"};
+    SG::ReadHandleKey<MuonR4::SegmentSeedContainer> m_inHoughSegmentSeedKey{this, "SegmentSeedKey", "MuonHoughStationSegmentSeeds"};
+    SG::ReadHandleKey<MuonR4::MuonSegmentContainer> m_inSegmentKey{this, "SegmentKey", "R4MuonSegments"};
+    SG::ReadHandleKey<MuonR4::SpacePointContainer> m_spacePointKey{this, "SpacePointKey", "MuonSpacePoints"};
     
     SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
 
