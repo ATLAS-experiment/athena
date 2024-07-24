@@ -12,7 +12,7 @@ fi
 HSHitsFile="${ATLAS_REFERENCE_DATA}/PhaseIIUpgrade/HITS/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.simul.HITS.e8481_s4149/HITS.33605501._000106.pool.root.1"
 
 Reco_tf.py \
-  --conditionsTag OFLCOND-MC15c-SDR-14-05 \
+  --conditionsTag OFLCOND-MC21-SDR-RUN4-02 \
   --geometryVersion ATLAS-P2-RUN4-03-00-00 \
   --digiSteeringConf "StandardSignalOnlyTruth" \
   --preInclude "all:Campaigns.PhaseIINoPileUp" \

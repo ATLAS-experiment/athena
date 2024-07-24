@@ -13,7 +13,7 @@ HSHitsFile="${ATLAS_REFERENCE_DATA}/PhaseIIUpgrade/HITS/ATLAS-P2-RUN4-03-00-00/m
 RDOFile="${ATLAS_REFERENCE_DATA}/PhaseIIUpgrade/RDO_BKG/ATLAS-P2-RUN4-03-00-00/RUN4_presampling.mu200.withSuperCell.50events.RDO.pool.root"
 
 Reco_tf.py \
-  --conditionsTag OFLCOND-MC15c-SDR-14-05 \
+  --conditionsTag OFLCOND-MC21-SDR-RUN4-02 \
   --geometryVersion ATLAS-P2-RUN4-03-00-00 \
   --steering "doOverlay" "doRAWtoALL" \
   --preInclude "all:Campaigns.PhaseIIPileUp200" \
