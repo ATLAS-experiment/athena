@@ -1066,9 +1066,33 @@
   <x title="Local PU density [vertices/mm]" n="&NBINSPUDENS;" lo="0.0" hi="&PUDENSMAX;"/>
   <y title="HS vertex selection efficiency" lo="0.6" hi="1.2"/>
 </h>
+<h id="vx_hs_sel_eff_vs_nReco" type="TEfficiency" title="HS vertex selection efficiency (sum[pt,track^2])">
+  <x title="N of reco vertices" n="80" lo="0.0" hi="80.0"/>
+  <y title="HS vertex selection efficiency" lo="0.6" hi="1.2"/>
+</h>
+<h id="vx_hs_reco_sel_eff" type="TEfficiency" title="HS vertex reconstruction and selection efficiency (sum[pt,track^2])">
+  <x title="Local PU density [vertices/mm]" n="&NBINSPUDENS;" lo="0.0" hi="&PUDENSMAX;"/>
+  <y title="HS vertex reconstruction and selection efficiency" lo="0.6" hi="1.2"/>
+</h>
 <h id="vx_hs_sel_eff_dist" type="TEfficiency" title="HS vertex selection efficiency (distance based)">
   <x title="Placeholder" n="80" lo="0.0" hi="80.0"/>
   <y title="HS vertex selection efficiency" lo="0.6" hi="1.2"/>
+</h>
+<h id="vx_hs_sel_eff_dist_vs_nReco" type="TEfficiency" title="HS vertex selection efficiency (distance based)">
+  <x title="N reco vertices" n="80" lo="0.0" hi="80.0"/>
+  <y title="HS vertex selection efficiency" lo="0.6" hi="1.2"/>
+</h>
+<h id="vx_hs_reco_eff_vs_ntruth" type="TEfficiency" title="HS vertex reconstruction efficiency">
+  <x title="Number of interactions" n="&NBINSNINTERACTIONS;" lo="0.0" hi="&NINTERACTIONSMAX;"/>
+  <y title="HS vertex reconstruction efficiency" lo="0.8" hi="1.2"/>
+</h>
+<h id="vx_hs_sel_eff_vs_ntruth" type="TEfficiency" title="HS vertex selection efficiency (sum[pt,track^2])">
+  <x title="Number of interactions" n="&NBINSNINTERACTIONS;" lo="0.0" hi="&NINTERACTIONSMAX;"/>
+  <y title="HS vertex selection efficiency" lo="0.6" hi="1.2"/>
+</h>
+<h id="vx_hs_reco_sel_eff_vs_ntruth" type="TEfficiency" title="HS vertex reconstruction and selection efficiency (sum[pt,track^2])">
+  <x title="Number of interactions" n="&NBINSNINTERACTIONS;" lo="0.0" hi="&NINTERACTIONSMAX;"/>
+  <y title="HS vertex reconstruction and selection efficiency" lo="0.6" hi="1.2"/>
 </h>
 <h id="vx_hs_reco_long_reso" type="TProfile" title="Reco Longitudinal Resolution">
   <x title="Local PU density [vertices/mm]" n="&NBINSPUDENS;" lo="0.0" hi="&PUDENSMAX;"/>
@@ -1078,9 +1102,29 @@
   <x title="Local PU density [vertices/mm]" n="&NBINSPUDENS;" lo="0.0" hi="&PUDENSMAX;"/>
   <y title="Reco transverse resolution [mm]" lo="0.0" hi="1.0"/>
 </h>
-<h id="vx_hs_truth_long_reso_vs_PU" type="TH2" title="Truth Longitudinal Resolution vs. PU (2D)">
+<h id="resHelper_PUdensity_hsVxTruthLong" type="TH2F" title="residual vs PU density for hs vtx z">
   <x title="Local PU density [vertices/mm]" n="&NBINSPUDENS;" lo="0.0" hi="&PUDENSMAX;"/>
   <y title="|Reco-truth| longitudinal resolution [mm]" n="20" lo="-0.08" hi="0.08"/>
+</h>
+<h id="resolution_vs_PUdensity_hsVxTruthLong" type="TH1F" title="resolution vs PU density for hs vtx z">
+  <x title="Local PU density [vertices/mm]" n="&NBINSPUDENS;" lo="0.0" hi="&PUDENSMAX;"/>
+  <y title="width of resolution for z_{0}"/>
+</h>
+<h id="resmean_vs_PUdensity_hsVxTruthLong" type="TH1F" title="mean of resolution vs hs vtx z">
+  <x title="Local PU density [vertices/mm]" n="&NBINSPUDENS;" lo="0.0" hi="&PUDENSMAX;"/>
+  <y title="mean of resolution for z vtx"/>
+</h>
+<h id="resHelper_PUdensity_hsVxTruthTransv" type="TH2F" title="residual vs PU density for hs vtx r">
+  <x title="Local PU density [vertices/mm]" n="&NBINSPUDENS;" lo="0.0" hi="&PUDENSMAX;"/>
+  <y title="|Reco-truth| longitudinal resolution [mm]" n="20" lo="-0.08" hi="0.08"/>
+</h>
+<h id="resolution_vs_PUdensity_hsVxTruthTransv" type="TH1F" title="resolution vs PU density for hs vtx r">
+  <x title="Local PU density [vertices/mm]" n="&NBINSPUDENS;" lo="0.0" hi="&PUDENSMAX;"/>
+  <y title="width of resolution for z_{0}"/>
+</h>
+<h id="resmean_vs_PUdensity_hsVxTruthTransv" type="TH1F" title="mean of resolution vs hs vtx r">
+  <x title="Local PU density [vertices/mm]" n="&NBINSPUDENS;" lo="0.0" hi="&PUDENSMAX;"/>
+  <y title="mean of resolution for z vtx"/>
 </h>
 <h id="vx_hs_truth_trans_reso_vs_PU" type="TH2" title="Truth Transverse Resolution vs. PU (2D)">
   <x title="Local PU density [vertices/mm]" n="&NBINSPUDENS;" lo="0.0" hi="&PUDENSMAX;"/>
@@ -3001,4 +3045,20 @@
 <h id="TrkRec_eta_pT" type="TEfficiency" title="Fraction of reco-matched truth track">
   <x title="#eta"        n="&EtaBinsTrkRec;" lo="-&ETA;" hi="&ETA;"/>
   <y title="p_{T} [GeV]" n="&pTBinsTrkRec;"  lo="0.0"    hi="&pTTrkRec;"/>
+</h>
+
+<!-- Extra information about the sample -->
+<h id="vx_PUdensity" type="TH1F" title="Pileup density">
+  <x title="Local PU density [vertices/mm]" n="&NBINSPUDENS;" lo="0.0" hi="&PUDENSMAX;"/>
+  <y title="Entries" />
+</h>
+
+<h id="vx_nTruth" type="TH1F" title="Number interactions">
+  <x title="Number of interactions" n="&NBINSNINTERACTIONS;" lo="0.0" hi="&NINTERACTIONSMAX;"/>
+  <y title="Entries" />
+</h>
+
+<h id="vx_nTruth_vs_PUdensity" type="TH2F" title="Number interactions vs PU density">
+  <x title="Number of interactions" n="&NBINSNINTERACTIONS;" lo="0.0" hi="&NINTERACTIONSMAX;"/>
+  <y title="Local PU density [vertices/mm]" n="&NBINSPUDENS;" lo="0.0" hi="&PUDENSMAX;"/>
 </h>
