@@ -42,6 +42,8 @@ if __name__=="__main__":
     if flags.Input.isMC:
         from xAODMuonSimHitCnv.MuonSimHitCnvCfg import MuonSimHitToMeasurementCfg
         cfg.merge(MuonSimHitToMeasurementCfg(flags))
+        from MuonTruthSegmentMaker.SegmentMakerConfig import TruthSegmentMakerCfg
+        cfg.merge(TruthSegmentMakerCfg(flags))
     else:
         from MuonConfig.MuonBytestreamDecodeConfig import MuonByteStreamDecodersCfg
         cfg.merge(MuonByteStreamDecodersCfg(flags))
