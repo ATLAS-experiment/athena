@@ -40,9 +40,10 @@ namespace SG {
  *
  *@code
  *   // Only need to do this once.
- *   SG::ConstAccessor<int> vint1 ("myInt");
+ *   static const SG::ConstAccessor<int> vint1 ("myInt");
  *   ...
- *   const Myclass* m = ...;
+ *   const DataVector<MyClass>* v = ...;
+ *   const Myclass* m = v->at(2);
  *   int x = vint1 (*m);
  @endcode
  *
