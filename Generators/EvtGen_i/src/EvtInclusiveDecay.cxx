@@ -482,7 +482,7 @@ void EvtInclusiveDecay::removeDecayTree(HepMC::GenEvent* hepMC, HepMC::GenPartic
 //
 // status == 1     - undecayed particle (also for particles that are not supposed to decay)
 // status == 2   - particle decayed by EvtGen
-// status == 899   - particle was supposed to be decayed by EvtGen, but found no decay channel
+// status == 0   - error, particle was supposed to be decayed by EvtGen, but found no decay channel
 //
 // Note that if a particle with an existing decay tree but no defined decay channels
 // in EvtGen is passed to this routine, the net effect will be to "undecay" this
@@ -491,13 +491,12 @@ void EvtInclusiveDecay::removeDecayTree(HepMC::GenEvent* hepMC, HepMC::GenPartic
 // isToBeDecayed() to never enable decays of such particles by EvtGen.
 //
 void EvtInclusiveDecay::decayParticle(HepMC::GenEvent* hepMC, HepMC::GenParticlePtr part) {
-// TODO the printout below crashes with segfault for HepMC3 - needs expert action
   ATH_MSG_DEBUG("Decaying particle " << pdgName(part) << " " << part);
   if (msgLvl(MSG::VERBOSE)) HepMC::Print::line(std::cout,part);
 
   // Remove existing decay tree, if any, and flag particle as being decayed by EvtGen
   removeDecayTree(hepMC,part);
-  part->set_status(HepMC::EVTGENUNDECAYEDSTATUS);
+  part->set_status(0);
 
   // Create EvtGen version of part and have EvtGen decay it.
   // Since EvtGen uses GeV, convert particles momentum from MeV to GeV.

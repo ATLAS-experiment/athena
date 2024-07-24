@@ -201,7 +201,7 @@ if (LVL1Passed && (m_localLVL2MuonCutOn || m_localLVL2ElectronCutOn))
                 if ((MC::isBottomMeson(particleID) || MC::isBottomBaryon(particleID)) && MC::isPhysical(part) )
                 {
                     // ** Reject whole event if any of B-hadrons in the event is not decayed **
-                    if (MC::isStable(part) || part->status() == HepMC::EVTGENUNDECAYEDSTATUS)
+                    if (MC::isStable(part) )
                     {
                         acceptEvent = false;
                     }
