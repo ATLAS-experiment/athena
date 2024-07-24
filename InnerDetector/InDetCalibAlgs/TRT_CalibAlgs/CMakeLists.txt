@@ -4,7 +4,7 @@
 atlas_subdir( TRT_CalibAlgs )
 
 # External dependencies:
-find_package( ROOT COMPONENTS Graf Core Tree MathCore Hist RIO MathMore Physics
+find_package( ROOT COMPONENTS Graf Core Tree MathCore Hist HistPainter RIO MathMore Physics
    Matrix Gpad )
 
 # Libraries in the package:
