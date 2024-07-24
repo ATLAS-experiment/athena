@@ -71,7 +71,7 @@ bool xAOD::EgammaHelpers::isTrueConvertedPhoton(const xAOD::Photon* ph, float ma
   if (!truthPh) {return false;}
   // In older versions egammaTruthParticles did not have a decay vertex associated
   // so we look for the original truth particle
-  if (truthPh->hasDecayVtx()){ 
+  if (truthPh->hasDecayVtx()){
     return isTrueConvertedPhoton(truthPh, maxRadius);
   }
   const xAOD::TruthParticle *orgTruthPh = xAOD::TruthHelpers::getTruthParticle(*truthPh);
@@ -82,39 +82,11 @@ bool xAOD::EgammaHelpers::isTrueConvertedPhoton(const xAOD::Photon* ph, float ma
 //Is the true object a converted photon with R < maxRadius
 bool xAOD::EgammaHelpers::isTrueConvertedPhoton(const xAOD::TruthParticle* truthPh, float maxRadius /*= 800.*/){
   return (MC::isPhoton(truthPh) && truthPh->hasDecayVtx()
-	  && truthPh->decayVtx()->perp() < maxRadius); 
+	  && truthPh->decayVtx()->perp() < maxRadius);
 }
 
-// ==================================================================
-
-const xAOD::TruthParticle*
-xAOD::EgammaHelpers::getBkgElectronMother(const xAOD::Electron* el,
-					  const bool allTheWayBack/*=true*/){ 
-  const xAOD::TruthParticle *truthel =
-    xAOD::TruthHelpers::getTruthParticle(*el);
-  return getBkgElectronMother(truthel,allTheWayBack);
-}
-
-const xAOD::TruthParticle*
-xAOD::EgammaHelpers::getBkgElectronMother(const xAOD::TruthParticle* truthel,
-					  const bool allTheWayBack/*=true*/) {
-  std::vector<const xAOD::TruthParticle*>  vec =
-    xAOD::EgammaHelpers::getBkgElectronLineage(truthel,allTheWayBack);
-  if (!vec.empty()) { 
-    return vec.back();
-  }
-  return nullptr;
-}
-
-std::vector<const xAOD::TruthParticle*> 
-xAOD::EgammaHelpers::getBkgElectronLineage(const xAOD::Electron* el,
-					   const bool allTheWayBack/*=true*/) {
-  const xAOD::TruthParticle *truthel = xAOD::TruthHelpers::getTruthParticle(*el);
-  return getBkgElectronLineage(truthel,allTheWayBack);
-}
-
-//The actual implementation code 
-std::vector<const xAOD::TruthParticle*> 
+//Lineage methods
+std::vector<const xAOD::TruthParticle*>
 xAOD::EgammaHelpers::getBkgElectronLineage(const xAOD::TruthParticle* truthel,
 					   const bool allTheWayBack/*=true*/) {
   std::vector<const xAOD::TruthParticle*> vec;
@@ -132,7 +104,7 @@ xAOD::EgammaHelpers::getBkgElectronLineage(const xAOD::TruthParticle* truthel,
   if (!HepMC::is_simulation_particle(truthel) && !allTheWayBack)  {
     return vec;
   }
-  
+
   //And has to be a photon or electron
   const xAOD::TruthParticle* parent = truthel->parent();
   if ( !MC::isPhoton(parent) && !MC::isElectron(parent) ) {
@@ -146,14 +118,39 @@ xAOD::EgammaHelpers::getBkgElectronLineage(const xAOD::TruthParticle* truthel,
 	 (HepMC::is_simulation_particle(parent) || allTheWayBack)) {
     //Find the next parent
     const xAOD::TruthParticle* tmp = parent->parent();
-    //You want to see an electron or a photon 
+    //You want to see an electron or a photon
     if (MC::isPhoton(tmp) || MC::isElectron(tmp)) {
       parent=tmp;
     } else { // if we do not see any more electron and photons we stop
-      break; 
+      break;
     }
     vec.push_back(parent); //push in the parent
   }
   return vec;
 }
 
+const xAOD::TruthParticle*
+xAOD::EgammaHelpers::getBkgElectronMother(const xAOD::Electron* el,
+					  const bool allTheWayBack/*=true*/){
+  const xAOD::TruthParticle *truthel =
+    xAOD::TruthHelpers::getTruthParticle(*el);
+  return getBkgElectronMother(truthel,allTheWayBack);
+}
+
+const xAOD::TruthParticle*
+xAOD::EgammaHelpers::getBkgElectronMother(const xAOD::TruthParticle* truthel,
+					  const bool allTheWayBack/*=true*/) {
+  std::vector<const xAOD::TruthParticle*>  vec =
+    xAOD::EgammaHelpers::getBkgElectronLineage(truthel,allTheWayBack);
+  if (!vec.empty()) {
+    return vec.back();
+  }
+  return nullptr;
+}
+
+std::vector<const xAOD::TruthParticle*>
+xAOD::EgammaHelpers::getBkgElectronLineage(const xAOD::Electron* el,
+					   const bool allTheWayBack/*=true*/) {
+  const xAOD::TruthParticle *truthel = xAOD::TruthHelpers::getTruthParticle(*el);
+  return getBkgElectronLineage(truthel,allTheWayBack);
+}

@@ -21,77 +21,69 @@
 namespace xAOD {
 
   namespace EgammaHelpers{
-    
+
     /// @brief Access to element link to object of type T stored in auxdata
     template<class T>
     const T* getLink(const xAOD::IParticle* particle, std::string name){
       if (!particle) return nullptr;
       typedef ElementLink< DataVector<T> > Link_t;
-      
-      if (!particle->isAvailable< Link_t >(name) ) { 
-	  return nullptr; 
-	}  
+
+      if (!particle->isAvailable< Link_t >(name) ) {
+	  return nullptr;
+	}
       const Link_t link = particle->auxdata<Link_t>(name);
-      if (!link.isValid()) { 
-	  return nullptr; 
+      if (!link.isValid()) {
+	  return nullptr;
 	}
       return *link;
     }
-    
+
     ///@brief return the reco electron associated to the given TruthParticle (if any)
     const xAOD::Electron* getRecoElectron(const xAOD::TruthParticle*);
-    
+
     ///@brief return the reco photon associated to the given TruthParticle (if any)
     const xAOD::Photon* getRecoPhoton(const xAOD::TruthParticle* particle);
-        
+
     ///@brief is the object matched to a true converted photon with R < maxRadius
     bool isTrueConvertedPhoton(const xAOD::Photon* ph, float maxRadius = 800.);
 
     ///@brief is the true object a converted photon with R < maxRadius
     bool isTrueConvertedPhoton(const xAOD::TruthParticle* truePh, float maxRadius = 800.);
 
-    ///@brief Helper wrapper function for calling the function below that accepts truth input.
-    /// It extract the  truth from the  reco electron and uses the function below 
+    ///@brief Helper function for getting the truth lineage of an electron that is arising
+    /// from material interactions in simulation (so called Bkg Electron)
+    /// There are cases when an electron has  a  photon (or electron) mother, that in turn comes
+    /// from another electron of photon.
+    /// The allTheWayBack (default true) will return the full lineage of the electron going back
+    /// to the earliest generator e/gamma truth particle available.
+    /// When this is set to false we stop at the generator e/gamma particle that
+    /// interacted with material in simulation
+    /// (meaning we will not go at the beginning of the generator record).
+    /// The 0th entry of the returned vector is the passed e/gamma particle, while the last
+    /// is the last e/gamma particle we have seen in the lineage.
+    std::vector<const xAOD::TruthParticle*>
+    getBkgElectronLineage(const xAOD::TruthParticle* truthel,
+			  const bool allTheWayBack = true);
+
+    ///@brief Helper wrapper function for calling the function above
+    /// extracting the  truth from a reco electron.
     const xAOD::TruthParticle*
     getBkgElectronMother(const xAOD::Electron* el,
 			 const bool allTheWayBack = true);
 
-    ///@brief Helper function for getting the True "Mother" electron for an existing electron.
-    /// There are cases when an electron has  a  photon (or electron) mother, that in turn comes
-    /// from another particle (possible leading to a Z or W etc).
-    /// This method will navigate back up to the last electron or photon it can find
-    /// in the lineage of the original true electron.
-    /// Then the user just needs to check this electron/photon.
-    /// If it fails returns null pointer.
-    ///
-    /// The user can also get the first Geant4 particle cut. This is handy in cases when we want to find
-    /// the first non geant particle occuring when going back the lineage.
-    /// The method will stop after the 1st particle failing this cut 
+    ///@brief Helper function for getting the "Mother" electron for an existing electron.
+    /// return the last entry in the lineage vector
     const xAOD::TruthParticle*
     getBkgElectronMother(const xAOD::TruthParticle* truthel,
 			 const bool allTheWayBack = true);
 
     ///@brief Helper wrapper function for calling the function below that accepts truth input.
-    std::vector<const xAOD::TruthParticle*> 
+    std::vector<const xAOD::TruthParticle*>
     getBkgElectronLineage(const xAOD::Electron* el,
 			  const bool allTheWayBack = true);
-    
-    ///@brief Helper function for getting the True Lineage of an electron for an existing electron.
-    /// There are cases when an electron has  a  photon (or electron) mother, that in turn comes
-    /// from another particle (possible leading to a Z or W etc).
-    /// This method will navigate back  and will return all true electron and photons in the lineage.
-    /// in case of complex topologies will return just the 1st electron or photon mother
-    ///
-    /// The user can apply also a barcode cut. This is handy in cases when we want to find
-    /// the first non geant particle occuring when going back the lineage.
-    /// The method will stop after the 1st particle failing this cut 
-    std::vector<const xAOD::TruthParticle*> 
-    getBkgElectronLineage(const xAOD::TruthParticle* truthel,
-			  const bool allTheWayBack = true);
 
-        
   }// EgammaHelpers
 
 } // namespace xAOD
-  
+
 #endif // XAOD_EGAMMAXAODHELPERS_H
