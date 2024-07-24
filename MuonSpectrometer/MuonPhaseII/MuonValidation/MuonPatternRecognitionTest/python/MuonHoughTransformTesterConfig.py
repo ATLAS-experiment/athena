@@ -23,6 +23,8 @@ def MuonHoughTransformTesterCfg(flags, name = "MuonHoughTransformTester", **kwar
 if __name__=="__main__":
     from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, executeTest,setupHistSvcCfg
     parser = SetupArgParser()
+    parser.add_argument("--skipSegmentFit", 
+                        help="Skip the segment fit step", action='store_true', default = False)
     parser.set_defaults(nEvents = -1)
     parser.set_defaults(noMM=True)
     parser.set_defaults(noSTGC=True)
@@ -40,7 +42,10 @@ if __name__=="__main__":
 
 
     args = parser.parse_args()
-    flags, cfg = setupGeoR4TestCfg(args)
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    flags.PerfMon.doFullMonMT = True
+    flags, cfg = setupGeoR4TestCfg(args,flags)
     
 
     # from PerfMonVTune.PerfMonVTuneConfig import VTuneProfilerServiceCfg
@@ -60,12 +65,15 @@ if __name__=="__main__":
     from MuonSpacePointFormation.SpacePointFormationConfig import MuonSpacePointFormationCfg 
     cfg.merge(MuonSpacePointFormationCfg(flags))
 
-    from MuonPatternRecognitionAlgs.MuonHoughTransformAlgConfig import MuonPatternRecognitionCfg
+    from MuonPatternRecognitionAlgs.MuonHoughTransformAlgConfig import MuonPatternRecognitionCfg, MuonSegmentFittingAlgCfg
     cfg.merge(MuonPatternRecognitionCfg(flags))
 
-    cfg.merge(MuonHoughTransformTesterCfg(flags,
-                                          drawDisplayFailed = args.displayFailedSeeds,
-                                          drawDisplaySuccss = args.displayGoodSeeds))
+    testerArgs={"drawDisplayFailed": args.displayFailedSeeds, "drawDisplaySuccss":args.displayGoodSeeds}
+    if args.skipSegmentFit: 
+        testerArgs["MuonSegmentContainer"]=""
+    else: 
+        cfg.merge(MuonSegmentFittingAlgCfg(flags))
+    cfg.merge(MuonHoughTransformTesterCfg(flags, **testerArgs))
     
     
     executeTest(cfg, args.nEvents)

@@ -30,5 +30,4 @@ def MuonPatternRecognitionCfg(flags):
     result.merge(ActsGeometryContextAlgCfg(flags))
     result.merge(MuonEtaHoughTransformAlgCfg(flags))
     result.merge(MuonPhiHoughTransformAlgCfg(flags))
-    result.merge(MuonSegmentFittingAlgCfg(flags))
     return result
