@@ -33,6 +33,8 @@ Interface definition for eFEXTOBEtTool
                                   std::vector<unsigned int> &RetaSums,
                                   std::vector<unsigned int> &RhadSums, 
                                   std::vector<unsigned int> &WstotSums) = 0;
+								  
+	virtual StatusCode getTOBCellEnergies(float etaTOB, float phiTOB, std::vector<int> &ClusterCellETs) = 0;
 
 
     /** Tool to calculate eTaudiscriminant sums */

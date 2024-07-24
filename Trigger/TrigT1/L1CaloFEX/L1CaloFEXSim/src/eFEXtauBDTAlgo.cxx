@@ -78,7 +78,6 @@ std::unique_ptr<LVL1::eFEXtauTOB> LVL1::eFEXtauBDTAlgo::getTauTOB() const {
   tob->setSeedUnD(0);
   tob->setBDTScore(m_bdtAlgoImpl->getBDTScore());
   tob->setIsBDTAlgo(1);
-  setSCellEncoder(tob.get());
   return tob;
 }
 
