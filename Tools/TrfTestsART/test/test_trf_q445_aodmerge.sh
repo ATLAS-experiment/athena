@@ -11,6 +11,7 @@ Reco_tf.py --CA \
     --AMI q445 \
     --maxEvents 100 \
     --multithreaded="True" \
+    --conditionsTag "OFLCOND-MC23-SDR-RUN3-05" \
     --outputAODFile myAOD.MT.pool.root
 rc1=$?
 AODMerge_tf.py \
