@@ -6,7 +6,7 @@
 #define IDENTIFIER_RANGE_H
  
 #include <Identifier/ExpandedIdentifier.h> 
-#include<vector>
+#include <vector>
 #include <cassert>
 #include <stdexcept>
  
