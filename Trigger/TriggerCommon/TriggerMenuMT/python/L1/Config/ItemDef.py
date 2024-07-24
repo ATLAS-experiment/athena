@@ -20,6 +20,7 @@ from ..Base.Items import MenuItem, meta_d
 from ..Base.Thresholds import TopoThreshold
 from ..Base.CTPCondition import ThrCondition, InternalTrigger  # noqa: F401
 from .TriggerTypeDef import TT
+from .ItemDef_run4 import ItemDef_run4
 
 from future.utils import with_metaclass
 
@@ -1990,6 +1991,8 @@ class ItemDef:
             log.error( "Creation of L1Topo item failed, will abort!: %s" , ex)
             raise
 
+        # Phase-II
+        ItemDef_run4.registerItems(d, menuName)
 
         # =======================================================
         #
