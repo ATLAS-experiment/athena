@@ -22,7 +22,7 @@ parser.add_argument('-p', "--patchdb", dest='patchdb', default="freshConstantsOn
 parser.add_argument('-o', "--outdb", dest='outdb', default="new.db", help="Output DB. Default %(default)s.")
 parser.add_argument('-f', "--folder", dest='folder', default="/LAR/ElecCalibFlat/OFC", help="COOL folder. Default %(default)s.")
 parser.add_argument('-s', "--issc", dest='issc', default=False, action="store_true", help="Is this SuperCell Data? Default %(default)s.")
-parser.add_argument('-d', "--det", dest='patchdet', default=[], nargs='+', type=int, help="Detector to patch. Default %(default)s.")
+parser.add_argument('-d', "--det", dest='patchdet', default=[], nargs='+', type=int, help="Detector to patch. Default %(default)s. EMB = 0, EMEC OW = 1, EMEC IW = 2, HEC = 3, FCAL = 4")
 parser.add_argument('-ft', "-FT", dest='patchFT', default=[], nargs='+', type=str, help="Feedthrough to patch. Default %(default)s")
 parser.add_argument('-ch', dest='patchChan', default=[], nargs='+', type=str, help="Channel(s) to patch. Default %(default)s")
 
@@ -115,8 +115,8 @@ else:
     from LArCabling.LArCablingConfig import LArOnOffIdMappingCfg 
     cfg.merge(LArOnOffIdMappingCfg(flags))
 
-from LArConditionsCommon.LArOFCMergeAlg import LArOFCMergeAlg
-theLArMergeAlg=LArOFCMergeAlg("LAOFCMergeAlg", fld=args.folder,
+from LArConditionsCommon.LArBlobMergeAlg import LArBlobMergeAlg
+theLArMergeAlg=LArBlobMergeAlg("LArBlobMergeAlg", fld=args.folder,
                               inputdb=indb,
                               patchingdb=patchdb,
                               outputdb=outdb,
