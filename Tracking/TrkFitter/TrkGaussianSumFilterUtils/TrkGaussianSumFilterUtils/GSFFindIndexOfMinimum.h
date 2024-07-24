@@ -107,7 +107,7 @@ ATH_ALWAYS_INLINE
 T vFindMinimum(const T* distancesIn, int32_t n) {
 
   using namespace CxxUtils;
-  static_assert(std::is_floating_point_v<T>, "T not a floating point32_t type");
+  static_assert(std::is_floating_point_v<T>, "T not a floating point type");
   constexpr size_t VEC_WIDTH = ISA_WIDTH / (sizeof(T) * CHAR_BIT);
   const T* array =
       std::assume_aligned<alignmentForArray<ISA_WIDTH>()>(distancesIn);
@@ -163,7 +163,7 @@ int32_t vIdxOfValue(const T value,
                 const T* distancesIn, int32_t n) {
   using namespace CxxUtils;
 
-  static_assert(std::is_floating_point_v<T>, "T not a floating point32_t type");
+  static_assert(std::is_floating_point_v<T>, "T not a floating point type");
   constexpr int32_t VEC_WIDTH = ISA_WIDTH / (sizeof(T) * CHAR_BIT);
   const T* array =
       std::assume_aligned<alignmentForArray<ISA_WIDTH>()>(distancesIn);
@@ -211,7 +211,7 @@ int32_t vIdxOfMin(const T* distancesIn, int32_t n) {
   using namespace CxxUtils;
   const T* array =
       std::assume_aligned<vAlgs::alignmentForArray<ISA_WIDTH>()>(distancesIn);
-  static_assert(std::is_floating_point_v<T>, "T not a floating point32_t type");
+  static_assert(std::is_floating_point_v<T>, "T not a floating point type");
   //We process elements in blocks. When we find the minimum we also
   //keep track in which block it was
   constexpr int32_t blockSize = 512;
