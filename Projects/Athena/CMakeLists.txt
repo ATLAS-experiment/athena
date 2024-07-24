@@ -104,7 +104,7 @@ endif()
 # Set up CppCheck.
 # We require version > 2.9 to avoid picking up cppcheck installed with EL9.
 find_package( Cppcheck 2.11 QUIET )
-if( CPPCHECK_FOUND )
+if( CPPCHECK_FOUND AND NOT LCG_NIGHTLY)
    # Prepend cppcheck command to already defined command line options:
    list( PREPEND CMAKE_CPPCHECK_DEFAULT "${CPPCHECK_cppcheck_EXECUTABLE}" )
 
