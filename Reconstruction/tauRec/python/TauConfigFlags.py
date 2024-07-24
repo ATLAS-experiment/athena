@@ -57,7 +57,15 @@ def createTauConfigFlags():
     tau_cfg.addFlag("Tau.TauEleRNNWPfix", ["rnneveto_mc16d_flat_1p_fix.root", "rnneveto_mc16d_flat_3p_fix.root"])
     # GNTau ID tune file (need to add another version for noAux)
     tau_cfg.addFlag("Tau.TauGNNConfig", ["GNTau_noAux_simplified.onnx"])
-    tau_cfg.addFlag("Tau.TauGNNWP_v0", ["GNTauNA_flat_model_1p.root", "GNTauNA_flat_model_2p.root", "GNTauNA_flat_model_3p.root"])
+    tau_cfg.addFlag("Tau.TauGNNWP", ["GNTauNA_flat_model_1p.root", "GNTauNA_flat_model_2p.root", "GNTauNA_flat_model_3p.root"])
+    tau_cfg.addFlag("Tau.GNTauScoreName", "GNTauScore")
+    tau_cfg.addFlag("Tau.GNTauTransScoreName", "GNTauScoreSigTrans_v0")
+    tau_cfg.addFlag("Tau.GNTauMaxTracks", 30)
+    tau_cfg.addFlag("Tau.GNTauMaxClusters", 20)
+    tau_cfg.addFlag("Tau.GNTauNodeNameTau", "GN2TauNoAux_pb")
+    tau_cfg.addFlag("Tau.GNTauNodeNameJet", "GN2TauNoAux_pu")
+    tau_cfg.addFlag("Tau.GNTauDecorWPNames", ["GNTauVL_v0", "GNTauL_v0", "GNTauM_v0", "GNTauT_v0"])
+
 
     # PanTau config flags
     from PanTauAlgs.PanTauConfigFlags import createPanTauConfigFlags
