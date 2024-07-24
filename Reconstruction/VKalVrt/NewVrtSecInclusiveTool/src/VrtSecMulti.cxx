@@ -112,6 +112,7 @@ namespace Rec{
           newvrt.projectedVrt=MomProjDist(newvrt.vertex, primVrt, newvrt.vertexMom); //3D SV-PV distance
           wrkVrtSet->push_back(newvrt);
     } 
+    std::sort(wrkVrtSet->begin(),wrkVrtSet->end(),[](WrkVrt a, WrkVrt b){return a.selTrk.size()>b.selTrk.size();});
 //==================================================================================
 // boost::adjacency_list<boost::listS, boost::vecS, boost::undirectedS>::vertex_iterator vertexIt, vertexEnd;
 // boost::adjacency_list<boost::listS, boost::vecS, boost::undirectedS>::adjacency_iterator neighbourIt, neighbourEnd;
@@ -157,27 +158,34 @@ namespace Rec{
       //for(auto ku : vrtWithCommonTrk)std::cout<<" nCom="<<ku.first<<" v1="<<ku.second.first<<" v2="<<ku.second.second<<'\n';
       //if(msgLvl(MSG::DEBUG))printWrkSet(wrkVrtSet.get(),"Overlapped  Vertex Cleaning");
       //===========================================
-      unsigned int nTCom=(*vrtWithCommonTrk.rbegin()).first;
-      WrkVrt  & v1 = (*wrkVrtSet)[(*vrtWithCommonTrk.rbegin()).second.first];
-      WrkVrt  & v2 = (*wrkVrtSet)[(*vrtWithCommonTrk.rbegin()).second.second];
-      //--First check if one vertex is fully contained in another
-      if( nTCom==v1.selTrk.size() || nTCom==v2.selTrk.size() ){
-         if(nTCom==v1.selTrk.size()){v1.Good = false; continue;}
-         if(nTCom==v2.selTrk.size()){v2.Good = false; continue;}
-      }
-      //--Then check if 2 vertices with common tracks can be simply merged
-      if( nTCom>1 && TMath::Prob( v1.chi2, 2*v1.selTrk.size()-3) > probVrtMergeLimit
+      std::multimap<double,std::pair<int,int>>::reverse_iterator ovitr=vrtWithCommonTrk.rbegin();
+      for( ; ovitr!=vrtWithCommonTrk.rend(); ovitr++){
+         WrkVrt  & v1 = (*wrkVrtSet)[(*ovitr).second.first];
+         WrkVrt  & v2 = (*wrkVrtSet)[(*ovitr).second.second];
+         if(!v1.Good)continue;   //----One of the vertices is already preocessed
+         if(!v2.Good)continue;
+         //--Recheck amount of common tracks
+         unsigned int nTCom=nTrkCommon( wrkVrtSet.get(), (*ovitr).second.first, (*ovitr).second.second);
+         if(nTCom<nTComMax)continue;    //----One of the vertices is already preocessed
+         //--First check if one vertex is fully contained in another
+         if( nTCom==v1.selTrk.size() || nTCom==v2.selTrk.size() ){
+           if(nTCom==v1.selTrk.size()){v1.Good = false; continue;}
+           if(nTCom==v2.selTrk.size()){v2.Good = false; continue;}
+         }
+         //--Then check if 2 vertices with common tracks can be simply merged
+         if( nTCom>1 && TMath::Prob( v1.chi2, 2*v1.selTrk.size()-3) > probVrtMergeLimit
                   && TMath::Prob( v2.chi2, 2*v2.selTrk.size()-3) > probVrtMergeLimit){
-          double prbV=mergeAndRefitVertices( v1, v2, newvrt, xAODwrk->listSelTracks, *state);
-          if(prbV>probVrtMergeLimit){
+           double prbV=mergeAndRefitVertices( v1, v2, newvrt, xAODwrk->listSelTracks, *state);
+           if(prbV>probVrtMergeLimit){
              v1.Good = false;  v2.Good = false;
              newvrt.Good         = true;
              newvrt.projectedVrt=MomProjDist(newvrt.vertex, primVrt, newvrt.vertexMom); //3D SV-PV distance
              std::swap(v1,newvrt); //Replace v1 by new vertex
              continue;
-       }  }
-       //--If not mergeable - refine them
-       refineVerticesWithCommonTracks( v1, v2, xAODwrk->listSelTracks, *state);
+          }  }
+          //--If not mergeable - refine them
+          refineVerticesWithCommonTracks( v1, v2, xAODwrk->listSelTracks, *state);
+      }
     }
     if(m_fillHist){
       int cvgood=0; for(const auto& vrt:(*wrkVrtSet)) if(vrt.Good)cvgood++;
