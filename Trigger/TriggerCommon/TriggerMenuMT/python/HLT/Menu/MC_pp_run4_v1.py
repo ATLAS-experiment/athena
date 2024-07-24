@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #------------------------------------------------------------------------#
 # MC_pp_run4_v1.py menu for Phase-II developments 
@@ -96,12 +96,12 @@ def addMCSignatures(chains):
         ChainProp(name='HLT_mu26_ivarperf_L1MU14FCH', groups=SupportGroup+SingleMuonGroup, monGroups=['idMon:shifter']),
 
         # Phase-II Single muon
-        ChainProp(name='HLT_mu20_ivarmedium_L1MU14FCH', groups=PrimaryL1MuGroup+SingleMuonGroup, monGroups=['muonMon:shifter','muonMon:online']),
+        ChainProp(name='HLT_mu20_ivarmedium_L1MU12FCH', groups=PrimaryL1MuGroup+SingleMuonGroup, monGroups=['muonMon:shifter','muonMon:online']),
         # Phase-II Multi muon
         ChainProp(name='HLT_2mu10_L12MU5VF', groups=PrimaryL1MuGroup+MultiMuonGroup, monGroups=['muonMon:online','muonMon:shifter']),
         # Phase-II Support
-        ChainProp(name='HLT_mu20_idperf_L1MU14FCH', groups=SupportGroup+SingleMuonGroup, monGroups=['idMon:shifter']),
-        ChainProp(name='HLT_mu20_ivarperf_L1MU14FCH', groups=SupportGroup+SingleMuonGroup, monGroups=['idMon:shifter']),
+        ChainProp(name='HLT_mu20_idperf_L1MU12FCH', groups=SupportGroup+SingleMuonGroup, monGroups=['idMon:shifter']),
+        ChainProp(name='HLT_mu20_ivarperf_L1MU12FCH', groups=SupportGroup+SingleMuonGroup, monGroups=['idMon:shifter']),
     ]
 
     chainsMC['Egamma'] = [
@@ -167,15 +167,15 @@ def addMCSignatures(chains):
         ChainProp(name='HLT_e30_idperf_loose_lrtloose_L1eEM26M', groups=SupportPhIGroup+SingleElectronGroup, monGroups=['idMon:shifter']),
 
         # Phase-II Single egamma
-        ChainProp(name='HLT_e22_lhtight_ivarloose_L1eEM24L', groups=PrimaryPhIGroup+SingleElectronGroup, monGroups=['egammaMon:online','egammaMon:shifter_tp','caloMon:t0']),
-        ChainProp(name='HLT_g110_loose_L1eEM24L', groups=PrimaryPhIGroup+SinglePhotonGroup),
+        ChainProp(name='HLT_e22_lhtight_ivarloose_L1eEM22M', groups=PrimaryPhIGroup+SingleElectronGroup, monGroups=['egammaMon:online','egammaMon:shifter_tp','caloMon:t0']),
+        ChainProp(name='HLT_g110_loose_L1eEM22M', groups=PrimaryPhIGroup+SinglePhotonGroup),
         # Phase-II Multi egamma
-        ChainProp(name='HLT_2e10_lhvloose_L12eEM9', groups=PrimaryPhIGroup+MultiElectronGroup),
-        ChainProp(name='HLT_2g23_tight_icaloloose_L12eEM9', groups=PrimaryPhIGroup+MultiPhotonGroup),
+        ChainProp(name='HLT_2e10_lhvloose_L12eEM10L', groups=PrimaryPhIGroup+MultiElectronGroup),
+        ChainProp(name='HLT_2g23_tight_icaloloose_L12eEM10L', groups=PrimaryPhIGroup+MultiPhotonGroup),
         # Phase-II Support
         ChainProp(name='HLT_e22_lhtight_ivarloose_L1eEM18M', groups=SupportPhIGroup+SingleElectronGroup),
-        ChainProp(name='HLT_e22_lhtight_ivarloose_e5_idperf_loose_lrtloose_probe_L1eEM24L',l1SeedThresholds=['eEM24L','PROBEeEM5'],groups=TagAndProbePhIGroup+SingleElectronGroup),
-        ChainProp(name='HLT_e22_idperf_loose_L1eEM24L', groups=SupportPhIGroup+SingleElectronGroup),
+        ChainProp(name='HLT_e22_lhtight_ivarloose_e5_idperf_loose_lrtloose_probe_L1eEM22M',l1SeedThresholds=['eEM22M','PROBEeEM5'],groups=TagAndProbePhIGroup+SingleElectronGroup),
+        ChainProp(name='HLT_e22_idperf_loose_L1eEM22M', groups=SupportPhIGroup+SingleElectronGroup),
     ]
 
     chainsMC['Tau'] = [
@@ -267,12 +267,12 @@ def addMCSignatures(chains):
         ChainProp(name='HLT_j45_pf_ftf_preselj20_L1jJ40', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+SupportPhIGroup, monGroups=['idMon:shifter','jetMon:t0','jetMon:online']),
 
         # Phase-II single small R jet
-        ChainProp(name='HLT_j380_pf_ftf_preselj200_L1jJ160', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+SingleJetGroup),
+        ChainProp(name='HLT_j380_pf_ftf_preselj200_L1jJ140', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+SingleJetGroup),
         # Phase-II HT
-        ChainProp(name='HLT_j0_HT300_pf_ftf_preselj180_L1jJ160', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+SingleJetGroup),
+        ChainProp(name='HLT_j0_HT300_pf_ftf_preselj180_L1jJ140', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+SingleJetGroup),
         ChainProp(name='HLT_j0_HT300_pf_ftf_preselj140_L1HT190-jJ40s5pETA21', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+SingleJetGroup+Topo3Group, monGroups=['jetMon:online', 'jetMon:shifter']),
         # Phase-II multi small R jet
-        ChainProp(name='HLT_4j90_pf_ftf_presel4j50_L14jJ40', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+MultiJetGroup, monGroups=['jetMon:t0']),
+        ChainProp(name='HLT_4j90_pf_ftf_presel4j50_L13jJ40', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+MultiJetGroup, monGroups=['jetMon:t0']),
         # Phase-II single large R jet
         ChainProp(name='HLT_j380_a10sd_cssk_pf_jes_ftf_preselj180_L1gLJ100p0ETA25', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+SingleJetGroup, monGroups=['jetMon:shifter', 'jetMon:online']),
     ]
@@ -323,7 +323,7 @@ def addMCSignatures(chains):
         ChainProp(name='HLT_5j45c_020jvt_j25c_020jvt_SHARED_j25c_020jvt_bgn260_pf_ftf_presel5c25XXc25bgtwo85_L14jJ40', l1SeedThresholds=['FSNOSEED']*3, groups=PrimaryPhIGroup+MultiBjetGroup),
     
         # Phase-II single b-jet
-        ChainProp(name='HLT_j180_0eta290_020jvt_bgn285_pf_ftf_preselj140_L1jJ160', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+SingleBjetGroup, monGroups=['bJetMon:online']),
+        ChainProp(name='HLT_j180_0eta290_020jvt_bgn285_pf_ftf_preselj140_L1jJ140', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+SingleBjetGroup, monGroups=['bJetMon:online']),
         # Phase-II multi b-jet
         ChainProp(name='HLT_j75c_020jvt_j50c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_2j20c_020jvt_bgn280_pf_ftf_presel2c20XX2c20bgtwo85_L14jJ40', l1SeedThresholds=['FSNOSEED']*5, groups=PrimaryPhIGroup+MultiBjetGroup, monGroups=['idMon:t0']),
 
@@ -495,11 +495,11 @@ def addMCSignatures(chains):
         ChainProp(name='HLT_mu24_ivarmedium_tau25_idperf_tracktwoMVA_probe_03dRAB_L1MU14FCH', l1SeedThresholds=['MU14FCH','PROBETAU12IM'], stream=[PhysicsStream,'express'], groups=TagAndProbeLegGroup+SingleMuonGroup, monGroups=['idMon:t0']), # LEGACY!
 
         # Phase-II e+mu
-        ChainProp(name='HLT_e10_lhmedium_mu10_L1eEM18L_MU8F', l1SeedThresholds=['eEM18L','MU8F'], groups=PrimaryPhIGroup+EgammaMuonGroup),
+        ChainProp(name='HLT_e10_lhmedium_mu10_L1eEM10L_MU8F', l1SeedThresholds=['eEM10L','MU8F'], groups=PrimaryPhIGroup+EgammaMuonGroup),
         # Phase-II e+tau
-        ChainProp(name='HLT_e22_lhmedium_ivarloose_tau20_mediumRNN_tracktwoMVA_03dRAB_L1eEM24L', l1SeedThresholds=['eEM24L', 'eTAU12'], groups=PrimaryPhIGroup+EgammaTauGroup),
+        ChainProp(name='HLT_e22_lhmedium_ivarloose_tau20_mediumRNN_tracktwoMVA_03dRAB_L1eEM22M', l1SeedThresholds=['eEM22M', 'eTAU12'], groups=PrimaryPhIGroup+EgammaTauGroup),
         # Phase-II mu+tau
-        ChainProp(name='HLT_mu10_ivarloose_tau35_mediumRNN_tracktwoMVA_03dRAB_L1MU8F_cTAU30M', l1SeedThresholds=['MU8F', 'cTAU30M'], groups=PrimaryPhIGroup+MuonTauGroup),
+        ChainProp(name='HLT_mu10_ivarloose_tau35_mediumRNN_tracktwoMVA_03dRAB_L1MU5VF_cTAU30M', l1SeedThresholds=['MU5VF', 'cTAU30M'], groups=PrimaryPhIGroup+MuonTauGroup),
         # Phase-II Support
         ChainProp(name='HLT_e20_lhmedium_ivarloose_tau20_mediumRNN_tracktwoMVA_03dRAB_L1eEM18M', l1SeedThresholds=['eEM18M', 'eTAU12'], groups=SupportPhIGroup+EgammaTauGroup),
     ]
