@@ -22,6 +22,13 @@
 namespace CxxUtils {
 
 
+/// Concept for an input range over a given type.
+template <class RANGE, class T>
+concept InputRangeOverT =
+  std::ranges::input_range<RANGE> &&
+  std::convertible_to<std::ranges::range_value_t<RANGE>, T>;
+
+
 #if __cpp_lib_ranges_to_container
 // If we're using C++23, just take the library version.
 using std::ranges::to;
