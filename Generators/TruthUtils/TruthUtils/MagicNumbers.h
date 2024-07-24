@@ -46,7 +46,6 @@ namespace HepMC {
 
   /// @brief Constant that the meaning of which is currently lost, to be recovered...
   constexpr int SPECIALSTATUS = 902;
-  constexpr int EVTGENUNDECAYEDSTATUS = 899;
   constexpr int PYTHIA8LHESTATUS = 1003;
   constexpr int PYTHIA8NOENDVERTEXSTATUS = 201;
   constexpr int FORWARDTRANSPORTMODELSTATUS = 212;

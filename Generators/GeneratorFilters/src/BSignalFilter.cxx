@@ -196,7 +196,7 @@ StatusCode BSignalFilter::filterEvent()
 
 	      if( ( MC::isBottomMeson(particleID) || MC::isBottomBaryon(particleID) ) && MC::isPhysical(part) ){
 		  // ** Reject whole event if any of B-hadrons in the event is not decayed **
-		  if( MC::isStable(part) || part->status() == HepMC::EVTGENUNDECAYEDSTATUS ) { acceptEvent = false; }
+		  if( MC::isStable(part)) { acceptEvent = false; }
 
 #ifdef HEPMC3
 		  auto  firstParent = part->production_vertex()->particles_in().begin();
