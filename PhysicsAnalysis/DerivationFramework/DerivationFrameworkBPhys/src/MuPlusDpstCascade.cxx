@@ -648,6 +648,7 @@ m_cascadeOutputsKeysAdd{"TrkPlusBCascadeVtx1","TrkPlusBCascadeVtx2"},
     m_DstMassUpperAft(10000.0),
     m_MassLower(0.0),
     m_MassUpper(20000.0),
+    m_PtLower(9500.0),
     m_vtx0MassHypo(-1),
     m_vtx1MassHypo(-1),
     m_vtx0Daug1MassHypo(-1),
@@ -681,6 +682,7 @@ m_CascadeToolsAdd("DerivationFramework::CascadeTools")
        declareProperty("DstMassUpperCutAft",        m_DstMassUpperAft); //mass cut after cascade fit
        declareProperty("MassLowerCut",              m_MassLower);
        declareProperty("MassUpperCut",              m_MassUpper);
+       declareProperty("PtLowerCut",                m_PtLower);
        declareProperty("HypothesisName",            m_hypoName               = "B");
        declareProperty("Vtx0MassHypo",              m_vtx0MassHypo);
        declareProperty("Vtx1MassHypo",              m_vtx1MassHypo);
@@ -698,12 +700,12 @@ m_CascadeToolsAdd("DerivationFramework::CascadeTools")
        declareProperty("MinNTracksInPV",            m_PV_minNTracks          = 0);
        declareProperty("DoVertexType",              m_DoVertexType           = 7);
        declareProperty("TrkVertexFitterTool",       m_iVertexFitter);
-    declareProperty("TrkVertexFitterToolAdd",       m_iVertexFitter2);
+       declareProperty("TrkVertexFitterToolAdd",    m_iVertexFitter2);
        declareProperty("PVRefitter",                m_pvRefitter);
        declareProperty("V0Tools",                   m_V0Tools);
        declareProperty("CascadeTools",              m_CascadeTools);
        declareProperty("CascadeVertexCollections",  m_cascadeOutputsKeys);
-        declareProperty("AdditionalCascadeVertexCollections",  m_cascadeOutputsKeysAdd);
+       declareProperty("AdditionalCascadeVertexCollections",  m_cascadeOutputsKeysAdd);
 
     }
 
@@ -999,7 +1001,7 @@ m_CascadeToolsAdd("DerivationFramework::CascadeTools")
                   */
                 if(chi2CutPassed) {
                   if (mass >= m_MassLower && mass <= m_MassUpper) {
-                      if (m_CascadeTools->pT(moms[1]) > 9500){ //B_pT
+                      if (m_CascadeTools->pT(moms[1]) > m_PtLower){ //B_pT
                           if (m_CascadeTools->lxy(moms[0],cascadeVertices[0],cascadeVertices[1]) > 0){ //D0_Lxy>0
                               if (DstMassAft < m_DstMassUpperAft){
                                   

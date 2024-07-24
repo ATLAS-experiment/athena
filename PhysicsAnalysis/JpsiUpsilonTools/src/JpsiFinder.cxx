@@ -134,7 +134,8 @@ namespace Analysis {
     m_vertexEstimator("InDet::VertexPointEstimator"),
     m_mcpCuts(true),
     m_doTagAndProbe(false),
-    m_forceTagAndProbe(false) //forcing T&P method for any charge combinations
+    m_forceTagAndProbe(false), //forcing T&P method for any charge combinations
+    m_maxNTracksInEvent(-1)   
     
     {
         declareInterface<JpsiFinder>(this);
@@ -171,7 +172,7 @@ namespace Analysis {
         declareProperty("useMCPCuts",m_mcpCuts);
         declareProperty("doTagAndProbe",m_doTagAndProbe);
         declareProperty("forceTagAndProbe",m_forceTagAndProbe);
-
+        declareProperty("maxNTracksInEvent",m_maxNTracksInEvent);
     }
     
     JpsiFinder::~JpsiFinder() { }
@@ -287,6 +288,9 @@ namespace Analysis {
             if (theIDTracksAfterSelection.size() == 0) return StatusCode::SUCCESS;;
             ATH_MSG_DEBUG("Number of tracks after ID track selection: " << theIDTracksAfterSelection.size());
         }
+
+	// Option for low-mu run processing: discard events with too many track candidates
+        if(m_maxNTracksInEvent > 0 && theIDTracksAfterSelection.size() > m_maxNTracksInEvent) return StatusCode::SUCCESS;;
         
         // Select the muons
         MuonBag theMuonsAfterSelection;
