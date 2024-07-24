@@ -562,8 +562,8 @@ class T0CalTypeXY
 public:
     T0CalTypeXY(TNtuple *, int, float);
     void Draw(string, bool);
-    TGraph **graph;
-    TEventList **elist;
+    TGraph* graph[7];
+    TEventList* elist[7];
 };
 
 T0CalTypeXY::T0CalTypeXY(TNtuple *Levtuple, int detector, float markersize)
@@ -571,9 +571,6 @@ T0CalTypeXY::T0CalTypeXY(TNtuple *Levtuple, int detector, float markersize)
 
     float x, y, nt0, chp, brd, lay, mod, det;
     int color[7] = {0, 46, 38, 8, 16, 1, 2};
-
-    graph = new TGraph *[6];
-    elist = new TEventList *[6];
 
     Levtuple->SetBranchAddress("x", &x);
     Levtuple->SetBranchAddress("y", &y);
@@ -3520,8 +3517,8 @@ class FirstPage : public TCanvas
 {
 public:
     FirstPage(char *, TFile *);
-    float runnumber, t0offset;
-    int iter;
+    float runnumber = 0, t0offset = 0;
+    int iter = 0;
 
 private:
 };
