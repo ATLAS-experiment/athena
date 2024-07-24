@@ -12,6 +12,7 @@
 
 // data containers
 #include "TrkSpacePoint/SpacePointContainer.h"
+#include "TrkSpacePoint/SpacePointOverlapCollection.h"
 #include "TrkTrack/TrackCollection.h"
 
 // Tool handles
@@ -58,6 +59,7 @@ namespace InDet {
         this, "SpacePointsPixelName", "ITkPixelSpacePoints"};
       SG::ReadHandleKey<SpacePointContainer> m_SpacePointsSCTKey{
         this, "SpacePointsSCTName", "ITkStripSpacePoints"};
+      SG::ReadHandleKey<SpacePointOverlapCollection> m_SpacePointsOverlapKey{this, "SpacePointsOverlapName", "ITkOverlapSpacePoints"};
       //@}
 
       // output container
