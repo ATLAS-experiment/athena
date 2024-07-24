@@ -12,6 +12,10 @@
 #include "GeoModelKernel/GeoFullPhysVol.h"
 #include "InDetGeoModelUtils/InDetDetectorFactoryBase.h"
 #include "HGTD_ReadoutGeometry/HGTD_DetectorManager.h"
+#include <string>
+#include <map>
+#include <array>
+#include <memory>
 
 namespace InDetDD {
     class HGTD_ModuleDesign;
@@ -24,43 +28,43 @@ class StoredMaterialManager;
 class HGTD_GeoModelAthenaComps;
 
 struct HgtdGeoParams {
-  double rMid;
-  double rOuter;
-  double disk1Rotation;
-  double disk2Rotation;
-  double rowSpaceSide;
-  double rowBacksideInnerShift;
-  double rowBacksideOuterShift;
-  double moduleSpaceInner;
-  double moduleSpaceOuter;
-  double flexSheetSpacing;
+  double rMid{};
+  double rOuter{};
+  double disk1Rotation{};
+  double disk2Rotation{};
+  double rowSpaceSide{};
+  double rowBacksideInnerShift{};
+  double rowBacksideOuterShift{};
+  double moduleSpaceInner{};
+  double moduleSpaceOuter{};
+  double flexSheetSpacing{};
 };
 
 struct ModulePosition {
-  double x;
-  double y;
-  double phiRotation;
+  double x{};
+  double y{};
+  double phiRotation{};
   // below for backward compatibilty
-  bool flipped;
-  int row;
-  int el_in_row;
+  bool flipped{};
+  int row{};
+  int el_in_row{};
 };
 
 struct GeoCylVolParams {
   std::string name;
-  double rMin;
-  double rMax;
-  double zHalf;
-  double zOffsetLocal;
+  double rMin{};
+  double rMax{};
+  double zHalf{};
+  double zOffsetLocal{};
   std::string material;
 };
 
 struct GeoBoxVolParams {
   std::string name;
-  double xHalf;
-  double yHalf;
-  double zHalf;
-  double zOffsetLocal;
+  double xHalf{};
+  double yHalf{};
+  double zHalf{};
+  double zOffsetLocal{};
   std::string material;
 };
 
@@ -99,7 +103,7 @@ private:
               int & phi, int & eta ) ;
 
   // 3-ring layout
-  PositionsInQuadrant mirrorModulesInQuadrant( PositionsInQuadrant );
+  PositionsInQuadrant mirrorModulesInQuadrant(const  PositionsInQuadrant &);
   std::vector< ModulePosition > prepareModulePositionsInRowThreeRing( int row, int back = 0 );
   int reorderRows( PositionsInQuadrant* quadrant );
 
@@ -108,20 +112,20 @@ private:
 
   void mirrorPositionsAroundYaxis(std::array< PositionsInQuadrant, 4 >& arr);
 
-  HGTD_DetectorManager* m_detectorManager;
-  HGTD_GeoModelAthenaComps* m_athComps;
-  StoredMaterialManager* m_materialMgr;
+  HGTD_DetectorManager* m_detectorManager{};
+  HGTD_GeoModelAthenaComps* m_athComps{};
+  StoredMaterialManager* m_materialMgr{};
 
-  int m_geomVersion;
+  int m_geomVersion{};
 
   // whether print number of modules per row for to the input for Identifier dictionary
-  bool m_outputIdfr;
+  bool m_outputIdfr{};
 
   std::map<std::string,GeoCylVolParams> m_cylVolPars;
   std::map<std::string,GeoBoxVolParams> m_boxVolPars;
-  HgtdGeoParams m_hgtdPars;
+  HgtdGeoParams m_hgtdPars{};
 
-  std::unique_ptr<const InDetDD::SiCommonItems> m_commonItems;
+  std::unique_ptr<const InDetDD::SiCommonItems> m_commonItems{};
 };
 
 #endif // HGTD_GEOMODEL_HGTD_DETECTORFACTORY_H

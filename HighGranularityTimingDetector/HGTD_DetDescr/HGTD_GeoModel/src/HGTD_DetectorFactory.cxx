@@ -11,9 +11,7 @@
 
 #include "HGTD_GeoModel/HGTD_DetectorFactory.h"
 
-#include <string>
-#include <sstream>
-#include <math.h>
+
 
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "AthenaBaseComps/AthCheckMacros.h"
@@ -51,6 +49,9 @@
 #include "RDBAccessSvc/IRDBAccessSvc.h"
 #include "RDBAccessSvc/IRDBRecordset.h"
 #include "RDBAccessSvc/IRDBRecord.h"
+
+#include <sstream>
+#include <cmath>
 
 using namespace std;
 using namespace InDetDD;
@@ -93,7 +94,7 @@ void HGTD_DetectorFactory::create(GeoPhysVol* world) {
     initializeGeoParameters();
 
     // for now the position of the HGTD mother volumes is hardcoded - TODO: take from db!
-    float zMother = 3482.5;
+    constexpr float zMother = 3482.5;
 
     // build logical volumes for the two endcaps
     const GeoLogVol* positiveEndcapLogicalVolume = buildEndcapLogicalVolume(true);
@@ -487,8 +488,10 @@ GeoVPhysVol* HGTD_DetectorFactory::build( const GeoLogVol* logicalEnvelope, bool
         if (v == "HGTD::CoolingPlate") {
             double zOffsetPeriphElec = m_cylVolPars[v].zHalf + periphElPars.zOffsetLocal + periphElPars.zHalf;
             // place two, one on each side of cooling plate
+            static constexpr std::array<int,2> signArr{1,-1};
             for (int side = 0; side < 2; side++) {
-                HGTDparent->add(new GeoTransform(GeoTrf::TranslateZ3D(m_cylVolPars[v].zOffsetLocal + pow(-1, side)*zOffsetPeriphElec)));
+                //0, 1 index -> 1, -1 sign
+                HGTDparent->add(new GeoTransform(GeoTrf::TranslateZ3D(m_cylVolPars[v].zOffsetLocal + signArr[side]*zOffsetPeriphElec)));
                 HGTDparent->add(periphElec_phys);
             }
 
@@ -746,10 +749,10 @@ std::array< PositionsInQuadrant, 4 > HGTD_DetectorFactory::prepareLayersFromQuad
         PositionsInQuadrant d1q0front = mirrorModulesInQuadrant( d0q0back );
         PositionsInQuadrant d1q0back = mirrorModulesInQuadrant( d0q0front );
 
-        positions[ 0 ] = d0q0front; // front-side module positions
-        positions[ 1 ] = d0q0back; // back-side module positions
-        positions[ 2 ] = d1q0front; // front-side module positions
-        positions[ 3 ] = d1q0back; // back-side module positions
+        positions[ 0 ] = std::move(d0q0front); // front-side module positions
+        positions[ 1 ] = std::move(d0q0back); // back-side module positions
+        positions[ 2 ] = std::move(d1q0front); // front-side module positions
+        positions[ 3 ] = std::move(d1q0back); // back-side module positions
 
     } else {
         nRows = 18; // note  21-18 = 3 elements with positions of modules in rows are left empty
@@ -814,20 +817,20 @@ PositionsInQuadrant HGTD_DetectorFactory::prepareQuadrantsFromRows( int layer, u
         for (size_t row = 0; row <= maxRow; row++) {
             if ( row == 13 ) continue;  // element #21 is tried since one row is skipped
             std::vector<ModulePosition> rowModulePositions = prepareModulePositionsInRowThreeRing( row, isBackside );
-            rowsInQuad[ row > 13 ? row - 1 : row ] = rowModulePositions;
+            rowsInQuad[ row > 13 ? row - 1 : row ] = std::move(rowModulePositions);
         }
     }
     // two-ring layout
     else {
         for (size_t row = 0; row < maxRow; row++) {
             std::vector<ModulePosition> rowModulePositions = prepareModulePositionsInRowTwoRing(row, isBackside);
-            rowsInQuad[ row ] = rowModulePositions;
+            rowsInQuad[ row ] = std::move(rowModulePositions);
         }
     }
     return rowsInQuad;
 }
 
-PositionsInQuadrant HGTD_DetectorFactory::mirrorModulesInQuadrant( PositionsInQuadrant inquad ) {
+PositionsInQuadrant HGTD_DetectorFactory::mirrorModulesInQuadrant( const PositionsInQuadrant & inquad ) {
     PositionsInQuadrant rowsInQuad;
     for (size_t row = 0; row < inquad.size(); row ++ ) {
         std::vector<ModulePosition> modulePositions = inquad[ row ];
@@ -840,7 +843,7 @@ PositionsInQuadrant HGTD_DetectorFactory::mirrorModulesInQuadrant( PositionsInQu
             modulePositions[mod] = mirror;
         }
         // keeping the order defined in HGTD_DetectorFactory::reorderRows
-        rowsInQuad[ inquad.size() - row - 1 ] = modulePositions;
+        rowsInQuad[ inquad.size() - row - 1 ] = std::move(modulePositions);
     }
     return rowsInQuad;
 }
@@ -1048,9 +1051,9 @@ InDetDD::HGTD_ModuleDesign* HGTD_DetectorFactory::createHgtdDesign( double thick
 
     std::shared_ptr<const PixelDiodeMatrix> normalCell = InDetDD::PixelDiodeMatrix::construct(phiPitch, etaPitch);
     std::shared_ptr<const PixelDiodeMatrix> singleRow  = InDetDD::PixelDiodeMatrix::construct(InDetDD::PixelDiodeMatrix::phiDir, 0,
-                                                                                              normalCell, diodeColumnsPerCircuit, 0);
+                                                                                              std::move(normalCell), diodeColumnsPerCircuit, 0);
     std::shared_ptr<const PixelDiodeMatrix> fullMatrix = InDetDD::PixelDiodeMatrix::construct(InDetDD::PixelDiodeMatrix::etaDir, 0,
-                                                                                              singleRow, 2*diodeRowsPerCircuit, 0); // note 30 = 2*15 rows adopted
+                                                                                              std::move(singleRow), 2*diodeRowsPerCircuit, 0); // note 30 = 2*15 rows adopted
 
     DetectorDesign::Axis yDirection = InDetDD::DetectorDesign::yAxis;
 
@@ -1058,7 +1061,7 @@ InDetDD::HGTD_ModuleDesign* HGTD_DetectorFactory::createHgtdDesign( double thick
                                                                         circuitsPerColumn, circuitsPerRow,
                                                                         cellColumnsPerCircuit, cellRowsPerCircuit,
                                                                         diodeColumnsPerCircuit, diodeRowsPerCircuit,
-                                                                        fullMatrix,
+                                                                        std::move(fullMatrix),
                                                                         InDetDD::CarrierType::electrons, 1, yDirection );
 
     return design;
