@@ -14,8 +14,8 @@ import re
 
 from optparse import OptionParser
 
-import TrigEDMConfig.TriggerEDM     as edm
-import TrigEDMConfig.TriggerEDMRun3 as edmRun3
+import TrigEDMConfig.TriggerEDM as edm
+from edm import getRawTriggerEDMList
 
 
 # 'Counter' just contains the list of classes you want to include and the size
@@ -1160,7 +1160,7 @@ class checkFileTrigSize:
         ## Calculate trigger category sizes for AODCOMM
 
         self.triggerAlgListCOMM = []
-        edmRun3List = edmRun3.TriggerHLTListRun3
+        edmRun3List = getRawTriggerEDMList(flags=None, runVersion=3)
         for tup in edmRun3List:
             contName = tup[0].split("#")[1]
             edmSet = tup[1]

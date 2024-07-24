@@ -9,13 +9,14 @@
 
 from TrigEDMConfig.TriggerEDMRun1 import TriggerL2List,TriggerEFList,TriggerResultsRun1List
 from TrigEDMConfig.TriggerEDMRun2 import TriggerResultsList,TriggerLvl1List,TriggerIDTruth,TriggerHLTList,EDMDetails,EDMLibraries,TriggerL2EvolutionList,TriggerEFEvolutionList
-from TrigEDMConfig.TriggerEDMRun3 import TriggerHLTListRun3,varToRemoveFromAODSLIM,addExtraCollectionsToEDMList
+from TrigEDMConfig.TriggerEDMRun3 import TriggerHLTListRun3,varToRemoveFromAODSLIM
+from TrigEDMConfig.TriggerEDMRun4 import TriggerHLTListRun4
 from AthenaCommon.Logging import logging
 log = logging.getLogger('TriggerEDM')
 
 #************************************************************
 #
-#  For Run 3
+#  For Run 3 and Run 4
 #
 #************************************************************
 
@@ -63,106 +64,176 @@ def recordable( arg, runVersion=3 ):
         log.error("ERROR in recordable() - see following stack trace.")
         raise RuntimeError( msg )
 
+def _addExtraCollectionsToEDMList(edmList, extraList):
+    """
+    Extend edmList with extraList, keeping track whether a completely new
+    collection is being added, or a dynamic variable is added to an existing collection, or new targets are added to an existing collection.
+    The format of extraList is the same as those of TriggerHLTListRun3.
+    """
+    existing_collections = [(c[0].split("#")[1]).split(".")[0] for c in edmList]
+    for item in extraList:
+        colname = (item[0].split("#")[1]).split(".")[0]
+        if colname not in existing_collections:
+            # a new collection is added
+            edmList.append(item)
+            log.info("added new item to Trigger EDM: {}".format(item))
+        else:
+            # Maybe extra dynamic variables or EDM targets are added
+            isAux = "Aux." in item[0]
+            # find the index of the existing item
+            existing_item_nr = [i for i,s in enumerate(edmList) if colname == (s[0].split("#")[1]).split(".")[0]]
+            if len(existing_item_nr) != 1:
+                log.error("Found {} existing edm items corresponding to new item {}, but it must be exactly one!".format(len(existing_item_nr), item))
+            existingItem = edmList[existing_item_nr[0]]
+            if isAux:
+                dynVars = (item[0].split("#")[1]).split(".")[1:]
+                existing_dynVars = (existingItem[0].split("#")[1]).split(".")[1:]
+                existing_dynVars.extend(dynVars)
+                dynVars = list(dict.fromkeys(existing_dynVars))
+                if '' in dynVars:
+                    dynVars.remove('')
+                newVars = '.'.join(dynVars)
+            edmTargets = item[1].split(" ") if len(item) > 1 else []
+            existing_edmTargets = existingItem[1].split(" ")
+            edmTargets.extend(existing_edmTargets)
+            edmTargets = list(dict.fromkeys(edmTargets))
+            newTargets = " ".join(edmTargets)
+            typename = item[0].split("#")[0]
+            log.info("old item in Trigger EDM    : {}".format(existingItem))
+            signature = existingItem[2] # NOT updated at the moment
+            tags = existingItem[3] if len(existingItem) > 3 else None  # NOT updated at the moment
+            edmList.pop(existing_item_nr[0])
+            combName = typename + "#" + colname
+            if isAux:
+                combName += "." + newVars
+            if tags:
+                edmList.insert(existing_item_nr[0], (combName, newTargets, signature, tags))
+            else:
+                edmList.insert(existing_item_nr[0] , (combName, newTargets, signature))
+            log.info("updated item in Trigger EDM: {}".format(edmList[existing_item_nr[0]]))
 
-def getTriggerEDMList(key, runVersion, extraEDMList=[]):
+def getRawTriggerEDMList(flags, runVersion=-1):
+    """
+    The static EDM list does still need some light manipulation before it can be used commonly.
+    Never import TriggerHLTListRun3 or TriggerHLTListRun4 directly, always fetch them via this function
+    """
+    if runVersion == -1:
+        runVersion = flags.Trigger.EDMVersion
+
+    if runVersion <= 2 or runVersion > 4:
+        errMsg="ERROR the getRawTriggerEDMList function supports runs 3 and 4."
+        log.error(errMsg)
+        raise RuntimeError(errMsg)
+
+    if runVersion == 3:
+        edmListCopy = TriggerHLTListRun3.copy()
+    else:
+        edmListCopy = TriggerHLTListRun4.copy()
+
+    if flags and flags.Trigger.ExtraEDMList:
+        log.info( "Adding extra collections to EDM %i: %s", runVersion, str(flags.Trigger.ExtraEDMList))
+        _addExtraCollectionsToEDMList(edmListCopy, flags.Trigger.ExtraEDMList)
+
+    return edmListCopy
+
+def getTriggerEDMList(flags, key, runVersion=-1):
     """
     List (Literally Python dict) of trigger objects to be placed with flags:
+    flags is the CA flag container
     key can be" 'ESD', 'AODSLIM', 'AODFULL'
-    run can be: '1 (Run1)', '2 (Run2)', '3' (Run 3), '4' (Run 4)
+    runVersion can be: '-1 (Auto-configure)', '1 (Run1)', '2 (Run2)', '3' (Run 3), '4' (Run 4)
     """
+
+    # We allow for this to be overriden as Run1 bytestream actually need to request the Run2 EDM due to it additionally undergoing a transient xAOD migration. 
+    if runVersion == -1:
+        runVersion = flags.Trigger.EDMVersion
+
     if runVersion == 1:
-        return getTriggerObjList(key,[TriggerL2List,TriggerEFList, TriggerResultsRun1List])
+        return _getTriggerRun1Run2ObjList(key, [TriggerL2List,TriggerEFList, TriggerResultsRun1List])
 
     elif runVersion == 2:
-        if 'SLIM' in key:
-            return getTriggerEDMSlimList(key)
-        else:
-            return getTriggerObjList(key,[TriggerHLTList, TriggerResultsList])
+        edmList = _getTriggerRun1Run2ObjList(key, [TriggerHLTList, TriggerResultsList])
+        return _getTriggerRun2EDMSlimList(key, edmList) if 'SLIM' in key else edmList
 
-    elif runVersion >= 3: 
-        if key in AllowedOutputFormats: # AllowedOutputFormats is the entire list of output formats including ESD
-            # this keeps only the dynamic variables that have been specified in TriggerEDMRun3
-            Run3TrigEDM = {}
-            Run3TrigEDMCOMM = {}
-            Run3TrigEDMSLIM = {}
-
-            if extraEDMList:
-                log.info( "Adding extra collections to EDM: %s", str(extraEDMList))
-                # TODO - This function is currently changing a global state.
-                # Should re-work it to return a copy of TriggerHLTListRun3 with the additional content added.
-                addExtraCollectionsToEDMList(TriggerHLTListRun3, extraEDMList)
-
-            if "AODFULL" in key: 
-                #Containers marked with AODCOMM to be added to AODFULL
-
-                Run3TrigEDM.update(getRun3TrigEDMSlimList(key))
-
-                Run3TrigEDMCOMM.update(getRun3TrigEDMSlimList("AODCOMM"))
-                for kcomm,vcomm in Run3TrigEDMCOMM.items():
-                    if kcomm in Run3TrigEDM:
-                        Run3TrigEDM[kcomm].extend(vcomm)
-                    else:
-                        Run3TrigEDM[kcomm] = vcomm
-
-            elif "AODSLIM" in key:
-                # remove the variables that are defined in TriggerEDMRun3.varToRemoveFromAODSLIM from the containers
-                
-                # get all containers from list that are marked with AODSLIM
-                if len(varToRemoveFromAODSLIM) == 0:
-                    Run3TrigEDM.update(getRun3TrigEDMSlimList(key))
-                    log.info("No decorations are listed to be removed from AODSLIM")
-                else:
-                    Run3TrigEDMSLIM.update(getRun3TrigEDMSlimList(key))
-                    log.info("The following decorations are going to be removed from the listed collections in AODSLIM {}".format(varToRemoveFromAODSLIM))
-                    # Go through all container values and remove the variables to remove
-                    # Format of Run3TrigEDMSLIM is {'xAOD::Cont': ['coll1.varA.varB', 'coll2.varD',...],...} 
-                    for cont, values in Run3TrigEDMSLIM.items():
-                        if (isinstance(values, list)):
-                            newValues = []
-                            for value in values:                       
-                                newValue = value+'.'
-                                coll = value.split('.')[0]
-                                
-                                varRemovedFlag = False
-                                for myTuple in varToRemoveFromAODSLIM:
-                                    var = myTuple[0]
-                                    
-                                    if var in value and coll in myTuple:
-                                        varRemovedFlag = True
-                                        removeVar =  '.'+var+'.'
-                                        newValue = newValue.replace(removeVar, '.')
-                                        
-                                if newValue[-1:] == '.':
-                                    newValue = newValue[:-1]
-
-                                if varRemovedFlag is False: 
-                                    newValues.append(value)
-                                elif varRemovedFlag is True:
-                                    newValues.append(newValue)                                        
-                                else:
-                                    raise RuntimeError("Decoration removed but no new Value was available, not sure what to do...")
-
-                            # Filling the Run3TrigEDM dictionary with the new set of values for each cont
-                            Run3TrigEDM[cont] = newValues
-                        else:
-                            raise RuntimeError("Value in Run3TrigEDM dictionary is not a list")
-
-            else: # ESD
-                Run3TrigEDM.update(getRun3TrigEDMSlimList(key))
-
-            log.debug('TriggerEDM for EDM set {} contains the following collections: {}'.format(key, Run3TrigEDM) )    
-            return Run3TrigEDM
-
-        else:
+    elif runVersion >= 3:
+        RawEDMList = getRawTriggerEDMList(flags, 3)
+        if key not in AllowedOutputFormats: # AllowedOutputFormats is the entire list of output formats including ESD         
             log.warning('Output format: %s is not in list of allowed formats, please check!', key)
-            return getRun3TrigObjList(key, [TriggerHLTListRun3])
+            return _getRun3TrigObjList(key, [RawEDMList])
+            
+        # this keeps only the dynamic variables that have been specified in TriggerEDMRun3
+        Run3TrigEDM = {}
+        Run3TrigEDMCOMM = {}
+        Run3TrigEDMSLIM = {}
+
+        if "AODFULL" in key: 
+            #Containers marked with AODCOMM to be added to AODFULL
+
+            Run3TrigEDM.update(_getRun3TrigEDMSlimList(key, RawEDMList))
+
+            Run3TrigEDMCOMM.update(_getRun3TrigEDMSlimList("AODCOMM", RawEDMList))
+            for kcomm,vcomm in Run3TrigEDMCOMM.items():
+                if kcomm in Run3TrigEDM:
+                    Run3TrigEDM[kcomm].extend(vcomm)
+                else:
+                    Run3TrigEDM[kcomm] = vcomm
+
+        elif "AODSLIM" in key:
+            # remove the variables that are defined in TriggerEDMRun3.varToRemoveFromAODSLIM from the containers
+            
+            # get all containers from list that are marked with AODSLIM
+            if len(varToRemoveFromAODSLIM) == 0:
+                Run3TrigEDM.update(_getRun3TrigEDMSlimList(key, RawEDMList))
+                log.info("No decorations are listed to be removed from AODSLIM")
+            else:
+                Run3TrigEDMSLIM.update(_getRun3TrigEDMSlimList(key, RawEDMList))
+                log.info("The following decorations are going to be removed from the listed collections in AODSLIM {}".format(varToRemoveFromAODSLIM))
+                # Go through all container values and remove the variables to remove
+                # Format of Run3TrigEDMSLIM is {'xAOD::Cont': ['coll1.varA.varB', 'coll2.varD',...],...} 
+                for cont, values in Run3TrigEDMSLIM.items():
+                    if (isinstance(values, list)):
+                        newValues = []
+                        for value in values:                       
+                            newValue = value+'.'
+                            coll = value.split('.')[0]
+                            
+                            varRemovedFlag = False
+                            for myTuple in varToRemoveFromAODSLIM:
+                                var = myTuple[0]
+                                
+                                if var in value and coll in myTuple:
+                                    varRemovedFlag = True
+                                    removeVar =  '.'+var+'.'
+                                    newValue = newValue.replace(removeVar, '.')
+                                    
+                            if newValue[-1:] == '.':
+                                newValue = newValue[:-1]
+
+                            if varRemovedFlag is False: 
+                                newValues.append(value)
+                            elif varRemovedFlag is True:
+                                newValues.append(newValue)                                        
+                            else:
+                                raise RuntimeError("Decoration removed but no new Value was available, not sure what to do...")
+
+                        # Filling the Run3TrigEDM dictionary with the new set of values for each cont
+                        Run3TrigEDM[cont] = newValues
+                    else:
+                        raise RuntimeError("Value in Run3TrigEDM dictionary is not a list")
+
+        else: # ESD
+            Run3TrigEDM.update(_getRun3TrigEDMSlimList(key, RawEDMList))
+
+        log.debug('TriggerEDM for EDM set {} contains the following collections: {}'.format(key, Run3TrigEDM) )    
+        return Run3TrigEDM
+
 
     else:
         raise RuntimeError("Invalid runVersion=%s supplied to getTriggerEDMList" % runVersion)
 
 
 
-def getRun3TrigObjProducedInView(theKey, trigEDMList):
+def _getRun3TrigObjProducedInView(theKey, trigEDMList):
     """
     Run 3 only
     Finds a given key from within the trigEDMList.
@@ -177,12 +248,12 @@ def getRun3TrigObjProducedInView(theKey, trigEDMList):
                any(isinstance(v, InViews) for v in coll[3]))
 
 
-def handleRun3ViewContainers( el ):
+def _handleRun3ViewContainers( el, HLTList ):
     if 'Aux.' in el:
         # Get equivalent non-aux string (fragile!!!)
         keyNoAux = el.split('.')[0].replace('Aux','')
         # Check if this interface container is produced inside a View
-        inView = getRun3TrigObjProducedInView(keyNoAux, [TriggerHLTListRun3])
+        inView = _getRun3TrigObjProducedInView(keyNoAux, [HLTList])
         if el.split('.')[1] == '':
             # Aux lists zero dynamic vars to save ...
             if inView:
@@ -203,7 +274,7 @@ def handleRun3ViewContainers( el ):
         return el
 
 
-def getRun3BSList(keys):
+def getRun3BSList(flags, keys):
     """
     The keys should contain BS and all the identifiers used for scouting.
     Returns list of tuples (typename#key, [keys], [properties]).
@@ -212,12 +283,13 @@ def getRun3BSList(keys):
     from TrigEDMConfig.TriggerEDMRun3 import persistent
     keys = set(keys[:])
     collections = []
-    for definition in TriggerHLTListRun3:
+    _HLTList = getRawTriggerEDMList(flags, 3)
+    for definition in _HLTList:
 
         typename,collkey = definition[0].split("#")
         # normalise collection name and the key (decorations)
         typename = persistent(typename)
-        collkey  = handleRun3ViewContainers( collkey )
+        collkey  = _handleRun3ViewContainers( collkey, _HLTList )
         destination = keys & set(definition[1].split())
         if len(destination) > 0:
             collections.append( (typename+"#"+collkey, list(destination),
@@ -226,7 +298,7 @@ def getRun3BSList(keys):
     return collections
 
 
-def getRun3TrigObjList(destination, trigEDMList):
+def _getRun3TrigObjList(destination, trigEDMList):
     """
     Run 3 version
     Gives back the Python dictionary  with the content of ESD/AOD (dst) which can be inserted in OKS.
@@ -243,7 +315,7 @@ def getRun3TrigObjList(destination, trigEDMList):
         confset = set(item[1].split())
 
         if dset & confset: # intersection of the sets
-            t,k = getTypeAndKey(item[0])
+            t,k = _getTypeAndKey(item[0])
             colltype = t
 
             if colltype in toadd:
@@ -255,19 +327,19 @@ def getRun3TrigObjList(destination, trigEDMList):
     return toadd
 
 
-def getRun3TrigEDMSlimList(key):
+def _getRun3TrigEDMSlimList(key, HLTList):
     """
     Run 3 version
     Modified EDM list to remove all dynamic variables
     Requires changing the list to have 'Aux.-'
     """
-    _edmList = getRun3TrigObjList(key,[TriggerHLTListRun3])
+    _edmList = _getRun3TrigObjList(key,[HLTList])
     from collections import OrderedDict
     output = OrderedDict()
     for k,v in _edmList.items():
         newnames = []
         for el in v:
-            newnames.append( handleRun3ViewContainers( el ) )
+            newnames.append( _handleRun3ViewContainers( el, HLTList ) )
         output[k] = newnames
     return output
 
@@ -276,15 +348,14 @@ def getRun3TrigEDMSlimList(key):
 #  For Run 1 and Run 2 (not modified (so far))
 #
 #************************************************************
-def getTriggerEDMSlimList(key):
+def _getTriggerRun2EDMSlimList(key, edmList):
     """
     Run 2 version
     Modified EDM list to remove all dynamic variables
     Requires changing the list to have 'Aux.-'
     """
-    _edmList = getTriggerObjList(key,[TriggerHLTList, TriggerResultsList])
     output = {}
-    for k,v in _edmList.items():
+    for k,v in edmList.items():
         newnames = []
         for el in v:
             if 'Aux' in el:
@@ -330,14 +401,14 @@ def getCategory(s):
 
     TriggerListRun1 = TriggerL2List + TriggerEFList + TriggerResultsRun1List
     TriggerListRun2 = TriggerResultsList + TriggerLvl1List + TriggerIDTruth + TriggerHLTList
-    TriggerListRun3 = TriggerHLTListRun3
+    TriggerListRun3 = getRawTriggerEDMList(flags=None, runVersion=3)
 
     category = ''
     bestMatch = ''
 
     """ Loop over all objects already defined in lists (and hopefully categorized!!) """
     for item in TriggerListRun1+TriggerListRun2:
-        t,k = getTypeAndKey(item[0])
+        t,k = _getTypeAndKey(item[0])
 
         """ Clean up type name """
         if t.count('::'): t = t[t.index(':')+2:]
@@ -353,7 +424,7 @@ def getCategory(s):
             category = item[2]
 
     for item in TriggerListRun3:
-        t,k = getTypeAndKey(item[0])
+        t,k = _getTypeAndKey(item[0])
 
         """ Clean up type name """
         if t.count('::'): t = t[t.index(':')+2:]
@@ -377,12 +448,12 @@ def getCategory(s):
 
 
 
-def getTypeAndKey(s):
+def _getTypeAndKey(s):
     """ From the strings containing type and key of trigger EDM extract type and key
     """
     return s[:s.index('#')], s[s.index('#')+1:]
 
-def keyToLabel(key):
+def _keyToLabel(key):
     """ The key is usually HLT_*, this function returns second part of it or empty string
     """
     if '_' not in key:
@@ -390,7 +461,7 @@ def keyToLabel(key):
     else:
         return key[key.index('_'):].lstrip('_')
 
-def getTriggerObjList(destination, lst):
+def _getTriggerRun1Run2ObjList(destination, lst):
     """
     Gives back the Python dictionary  with the content of ESD/AOD (dst) which can be inserted in OKS.
     """
@@ -404,7 +475,7 @@ def getTriggerObjList(destination, lst):
             continue
         confset = set(item[1].split())
         if dset & confset: # intersection of the sets
-            t,k = getTypeAndKey(item[0])
+            t,k = _getTypeAndKey(item[0])
             colltype = t
             if 'collection' in EDMDetails[t]:
                 colltype = EDMDetails[t]['collection']
@@ -413,66 +484,66 @@ def getTriggerObjList(destination, lst):
                     toadd[colltype] += [k]
             else:
                 toadd[colltype] = [k]
-    return InsertContainerNameForHLT(toadd)
+    return _InsertContainerNameForHLT(toadd)
 
 
 def getTrigIDTruthList(dst):
     """
     Gives back the Python dictionary  with the truth trigger content of ESD/AOD (dst) which can be inserted in OKS.
     """
-    return getTriggerObjList(dst,[TriggerIDTruth])
+    return _getTriggerRun1Run2ObjList(dst,[TriggerIDTruth])
 
 def getLvl1ESDList():
     """
     Gives back the Python dictionary  with the lvl1 trigger result content of ESD which can be inserted in OKS.
     """
-    return getTriggerObjList('ESD',[TriggerLvl1List])
+    return _getTriggerRun1Run2ObjList('ESD',[TriggerLvl1List])
 
 def getLvl1AODList():
     """
     Gives back the Python dictionary  with the lvl1 trigger result content of AOD which can be inserted in OKS.
     """
-    return getTriggerObjList('AODFULL',[TriggerLvl1List])
+    return _getTriggerRun1Run2ObjList('AODFULL',[TriggerLvl1List])
 
 
 
-def getL2PreregistrationList():
+def _getL2PreregistrationList():
     """
     List (Literally Python list) of trigger objects to be preregistered i.e. this objects we want in every event for L2
     """
     l = []
     for item in TriggerL2List:
         if len (item[1]) == 0: continue
-        t,k = getTypeAndKey(item[0])
+        t,k = _getTypeAndKey(item[0])
         if('Aux' in t):
             continue #we don't wat to preregister Aux containers
-        l += [t+"#"+keyToLabel(k)]
+        l += [t+"#"+_keyToLabel(k)]
     return l
 
-def getEFPreregistrationList():
+def _getEFPreregistrationList():
     """
     List (Literally Python list) of trigger objects to be preregistered i.e. this objects we want in every event for EF
     """
     l = []
     for item in TriggerEFList:
         if len (item[1]) == 0: continue
-        t,k = getTypeAndKey(item[0])
+        t,k = _getTypeAndKey(item[0])
         if('Aux' in t):
             continue #we don't wat to preregister Aux containers
-        l += [t+"#"+keyToLabel(k)]
+        l += [t+"#"+_keyToLabel(k)]
     return l
 
-def getHLTPreregistrationList():
+def _getHLTPreregistrationList():
     """
     List (Literally Python list) of trigger objects to be preregistered i.e. this objects we want in every event for merged L2/EF in addition to default L2 and EF
     """
     l = []
     for item in TriggerHLTList:
         if len (item[1]) == 0: continue
-        t,k = getTypeAndKey(item[0])
+        t,k = _getTypeAndKey(item[0])
         if('Aux' in t):
             continue #we don't wat to preregister Aux containers
-        l += [t+"#"+keyToLabel(k)]
+        l += [t+"#"+_keyToLabel(k)]
     return l
 
 
@@ -484,136 +555,53 @@ def getPreregistrationList(version=2, doxAODConversion=True):
 
     l=[]
     if version==2:
-        l = getHLTPreregistrationList()
+        l = _getHLTPreregistrationList()
     elif version==1:
         # remove duplicates while preserving order
-        objs=getL2PreregistrationList()+getEFPreregistrationList()
+        objs=_getL2PreregistrationList()+_getEFPreregistrationList()
         if doxAODConversion:
-            objs += getHLTPreregistrationList()
+            objs += _getHLTPreregistrationList()
         l=list(dict.fromkeys(objs))
     else:
         raise RuntimeError("Invalid version=%s supplied to getPreregistrationList" % version)
     return l
 
 
-
-def getEFDSList():
-    """
-    List (Literally Python list) of trigger objects to be placed in RAW data. i.e. BS after EF
-    """
-    l = []
-    for item in TriggerEFList:
-        if 'DS' in item[1].split():
-            t,k = getTypeAndKey(item[0])
-            l += [t+"#"+keyToLabel(k)]
-    return l
-
-def getHLTDSList():
-    """
-    List (Literally Python list) of trigger objects to be placed in RAW data. i.e. BS after merged L2EF
-    """
-    l = []
-    for item in TriggerHLTList:
-        if 'DS' in item[1].split():
-            t,k = getTypeAndKey(item[0])
-            l += [t+"#"+keyToLabel(k)]
-    return l
-
-def getL2BSList():
-    """
-    List (Literally Python list) of L2 trigger objects to be placed in output BS
-    """
-    l = []
-    for item in TriggerL2List:
-        if 'BS' in item[1]:
-            t,k = getTypeAndKey(item[0])
-            l += [t+"#"+keyToLabel(k)]
-    return l
-
-def getEFBSList():
-    """
-    List (Literally Python list) of EF trigger objects to be placed in output BS
-    """
-    l = []
-    for item in TriggerEFList:
-        if 'BS' in item[1]:
-            t,k = getTypeAndKey(item[0])
-            l += [t+"#"+keyToLabel(k)]
-    return l
-
-def getHLTBSList():
-    """
-    List (Literally Python list) of merged HLT trigger objects to be placed in output BS
-    """
-    l = []
-    for item in TriggerHLTList:
-        if 'BS' in item[1]:
-            t,k = getTypeAndKey(item[0])
-            l += [t+"#"+keyToLabel(k)]
-    return l
-
-def getL2BSTypeList():
+def _getL2BSTypeList():
     """ List of L2 types to be read from BS, used by the TP
     """
     l = []
     for item in TriggerL2List:
-        t,k = getTypeAndKey(item[0])
+        t,k = _getTypeAndKey(item[0])
         ctype = t
         if 'collection' in EDMDetails[t]:
             ctype = EDMDetails[t]['collection']
         l += [ctype]
     return l
 
-def getEFBSTypeList():
+def _getEFBSTypeList():
     """ List of EF types to be read from BS, used by the TP
     """
     l = []
     for item in TriggerEFList:
-        t,k = getTypeAndKey(item[0])
+        t,k = _getTypeAndKey(item[0])
         ctype = t
         if 'collection' in EDMDetails[t]:
             ctype = EDMDetails[t]['collection']
         l += [ctype]
     return l
 
-def getHLTBSTypeList():
+def _getHLTBSTypeList():
     """ List of HLT types to be read from BS, used by the TP
     """
     l = []
     for item in TriggerHLTList:
-        t,k = getTypeAndKey(item[0])
+        t,k = _getTypeAndKey(item[0])
         ctype = t
         if 'collection' in EDMDetails[t]:
             ctype = EDMDetails[t]['collection']
         l += [ctype]
     return l
-
-def getEFDSTypeList():
-    """ List of types to be placed in BS after EF
-    """
-    l = []
-    for item in TriggerEFList:
-        if 'DS' in item[1].split():
-            t,k = getTypeAndKey(item[0])
-            ctype = t
-            if 'collection' in EDMDetails[t]:
-                ctype = EDMDetails[t]['collection']
-            l += [ctype]
-    return l
-
-def getHLTDSTypeList():
-    """ List of types to be placed in BS after L2EF
-    """
-    l = []
-    for item in TriggerHLTList:
-        if 'DS' in item[1].split():
-            t,k = getTypeAndKey(item[0])
-            ctype = t
-            if 'collection' in EDMDetails[t]:
-                ctype = EDMDetails[t]['collection']
-            l += [ctype]
-    return l
-
 
 def getTPList(version=2):
     """
@@ -622,9 +610,9 @@ def getTPList(version=2):
     """
     l = {}
     if version==2:
-        bslist = getHLTBSTypeList()
+        bslist = _getHLTBSTypeList()
     elif version==1:
-        bslist = list(set(getL2BSTypeList() + getEFBSTypeList()))
+        bslist = list(set(_getL2BSTypeList() + _getEFBSTypeList()))
     else:
         raise RuntimeError("Invalid version=%s supplied to getTPList" % version)
         
@@ -637,55 +625,10 @@ def getTPList(version=2):
     return l
 
 
-#FPP: how to change this for the merged HLT in view of splitting?
-def getARATypesRenaming():
-    """
-    Defines how to rename collecion keys in ARA when two types have the same key.
-    i.e. TrigRoiDescriptorCollection#HLT
-    and TrigTau#HLT
-    After the remapping they will be named HLT_tau and HLT_roi so are distinct.
-    """
-    edm = set(TriggerL2List + TriggerEFList + TriggerHLTList)
-    keys = [ getTypeAndKey(i[0])[1] for i in edm]
-    # find repeating keys
-    tmp = [ i for i in keys if keys.count(i) > 1 ]
-    nonunique = {}
-    for i in tmp:
-        nonunique[i] = 1
-    # nonunique = nonunique.keys()
-
-    # define remens for all object of which key appeared in nonunique
-    renames = {}
-    for entry in edm:
-        t, key = getTypeAndKey(entry[0])
-        if key in nonunique: # potential problem we have to do something
-
-            if 'typealias' not in EDMDetails[t] or EDMDetails[t]['typealias'] == '':
-                if nonunique[key] == 1:
-                    # First time's ok.
-                    nonunique[key] = t
-                elif nonunique[key] == t:
-                    # Duplicate entry; ok.
-                    continue
-                else:
-                    log.error("types/keys will catch %s %s", t, key)
-                continue
-            else:
-                obj = t
-                if 'collection' in EDMDetails[t]:
-                    obj = EDMDetails[t]['collection']
-
-                # form the branch name
-                bname = key+'_'+EDMDetails[t]['typealias']
-
-                renames[(key, obj)] = bname
-
-    return renames
-
 def getEDMLibraries():
     return EDMLibraries
 
-def InsertContainerNameForHLT(typedict):
+def _InsertContainerNameForHLT(typedict):
     import re
     output = {}
     for k,v in typedict.items():
@@ -709,8 +652,8 @@ def getEFRun1BSList():
     l = []
     for item in TriggerEFEvolutionList:
         if len (item[1]) == 0: continue
-        t,k = getTypeAndKey(item[0])
-        l += [t+"#"+keyToLabel(k)]
+        t,k = _getTypeAndKey(item[0])
+        l += [t+"#"+_keyToLabel(k)]
     return l
 
 def getEFRun2EquivalentList():
@@ -720,8 +663,8 @@ def getEFRun2EquivalentList():
     l = []
     for item in TriggerEFEvolutionList:
         if len (item[1]) == 0: continue
-        t,k = getTypeAndKey(item[1])
-        l += [t+"#"+keyToLabel(k)]
+        t,k = _getTypeAndKey(item[1])
+        l += [t+"#"+_keyToLabel(k)]
     return l
 
 def getL2Run1BSList():
@@ -731,8 +674,8 @@ def getL2Run1BSList():
     l = []
     for item in TriggerL2EvolutionList:
         if len (item[1]) == 0: continue
-        t,k = getTypeAndKey(item[0])
-        l += [t+"#"+keyToLabel(k)]
+        t,k = _getTypeAndKey(item[0])
+        l += [t+"#"+_keyToLabel(k)]
     return l
 
 def getL2Run2EquivalentList():
@@ -742,6 +685,6 @@ def getL2Run2EquivalentList():
     l = []
     for item in TriggerL2EvolutionList:
         if len (item[1]) == 0: continue
-        t,k = getTypeAndKey(item[1])
-        l += [t+"#"+keyToLabel(k)]
+        t,k = _getTypeAndKey(item[1])
+        l += [t+"#"+_keyToLabel(k)]
     return l

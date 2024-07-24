@@ -41,7 +41,7 @@ def NavConverterCfg(flags, chainsList = [], runTheChecker = False):
     cnvAlg.Rois = ["initialRoI","forID","forID1","forID2","forMS","forSA","forTB","forMT","forCB"]
 
     from TrigEDMConfig.TriggerEDM import getTriggerEDMList
-    edm = getTriggerEDMList("AODCONV", flags.Trigger.EDMVersion)
+    edm = getTriggerEDMList(flags, "AODCONV")
     types = [ t for t in edm ]
     log.info("Assuming these collections are relevant for trigger: %s", " ".join(types))
     cnvAlg.Collections = types
