@@ -4,6 +4,7 @@
 #include "DerivationFrameworkLLP/TrackParametersKVU.h"
 #include "DerivationFrameworkLLP/PixeldEdxTrackParticleThinning.h"
 #include "DerivationFrameworkLLP/TrackParticleCaloCellDecorator.h"
+#include "DerivationFrameworkLLP/AugmentationToolLeadingJets.h"
 
 using namespace DerivationFramework;
 
@@ -13,4 +14,5 @@ DECLARE_COMPONENT( RCJetSubstructureAug )
 DECLARE_COMPONENT( TrackParametersKVU )
 DECLARE_COMPONENT( PixeldEdxTrackParticleThinning )
 DECLARE_COMPONENT( TrackParticleCaloCellDecorator )
+DECLARE_COMPONENT( AugmentationToolLeadingJets )
 

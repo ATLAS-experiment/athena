@@ -24,6 +24,7 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
     acc = ComponentAccumulator()
 
     # Augmentations
+    
 
     # LRT track merge
     from DerivationFrameworkInDet.InDetToolsConfig import InDetLRTMergeCfg
@@ -356,6 +357,10 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
         doEvent           = True)
     acc.addEventAlgo(LLP1EventCleanAlg)
 
+    from DerivationFrameworkLLP.LLPToolsConfig import AugmentationToolLeadingJetsCfg
+    augmentationToolLeadingJets = acc.getPrimaryAndMerge(AugmentationToolLeadingJetsCfg(flags))
+    acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(name, AugmentationTools = [augmentationToolLeadingJets]))
+
     # Thinning tools...
     from DerivationFrameworkInDet.InDetToolsConfig import TrackParticleThinningCfg, EgammaTrackParticleThinningCfg, MuonTrackParticleThinningCfg, TauTrackParticleThinningCfg, DiTauTrackParticleThinningCfg 
     from DerivationFrameworkTools.DerivationFrameworkToolsConfig import GenericObjectThinningCfg
@@ -482,7 +487,7 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
                                                                                name                    = "LLP1JetTPThinningTool",
                                                                                StreamName              = kwargs['StreamName'],
                                                                                JetKey                  = "AntiKt4EMTopoJets",
-                                                                               SelectionString         = "(AntiKt4EMTopoJets.pt > 20.*GeV) && (abs(AntiKt4EMTopoJets.eta) < 2.5)",
+                                                                               SelectionString         = "(AntiKt4EMTopoJets.pt > 10.*GeV) && (abs(AntiKt4EMTopoJets.eta) < 2.5)",
                                                                                InDetTrackParticlesKey  = "InDetTrackParticles"))
 
     LLP1FatJetTPThinningTool = acc.getPrimaryAndMerge(JetTrackParticleThinningCfg(  flags,
@@ -525,6 +530,23 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
         InDetTrackParticlesKey  = "InDetDisappearingTrackParticles"))
 
 
+    #Thinning CaloCalTopoClusters associated to AntiKt4EMTopoJets
+    from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import JetCaloClusterThinningCfg
+
+    LLP1CCThinningTool = acc.getPrimaryAndMerge(JetCaloClusterThinningCfg(
+                                                                     flags,
+                                                                     name                    = "LLP1CCTool",
+                                                                     StreamName            = kwargs['StreamName'],
+                                                                     SGKey                   = "AntiKt4EMTopoJets",
+                                                                     TopoClCollectionSGKey   = "CaloCalTopoClusters",
+                                                                     SelectionString         = "(AntiKt4EMTopoJets.DFDecoratorLeadingJets)",
+                                                                     AdditionalClustersKey = ["EMOriginTopoClusters","LCOriginTopoClusters"] 
+                                                                     ))
+                                                                     
+   
+   
+
+
     # Finally the kernel itself
     thinningTools = [LLP1TrackParticleThinningTool,
                      LLP1DTTrackParticleThinningTool,
@@ -542,7 +564,9 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
                      LLP1JetTPThinningTool,
                      LLP1FatJetTPThinningTool,
                      LLP1PixeldEdxTrackParticleThinningTool,
-                     LLP1PixeldEdxDTTrackParticleThinningTool]
+                     LLP1PixeldEdxDTTrackParticleThinningTool,
+                     LLP1CCThinningTool
+                     ]
 
     if flags.Tracking.doLargeD0:
         thinningTools.append(LLP1LRTJetTPThinningTool)
@@ -611,6 +635,8 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
     RCSubstructureTrackSDAug = CompFactory.DerivationFramework.CommonAugmentation("RCSubstructureTrackSDAug", AugmentationTools = [LLP1RCJetSubstructureTrackSDAugTool])
     acc.addEventAlgo(RCSubstructureTrackSDAug)
 
+
+
     # Skimming
     skimmingTools = []
 
@@ -628,6 +654,10 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
                                       AugmentationTools = augmentationTools))
 
     return acc
+
+
+
+
 
 
 def LLP1Cfg(flags):
@@ -696,7 +726,15 @@ def LLP1Cfg(flags):
                                         "ExtraPolatedMuonsLRTTrackParticles",
                                         "MSOnlyExtraPolatedMuonsLRTTrackParticles",
                                         "CombinedStauTrackParticles",
+                                        "AntiKt4EMTopoJets",
+                                        "egammaClusters",
+                                        "ElectronRingSets",
+                                        "ElectronCaloRings",
+                                        "JetRingSets",
+                                        "JetCaloRings",
                                         "SlowMuons",
+                                        #"LCOriginTopoClusters",
+                                        "EMOriginTopoClusters",
                                         "Staus",
                                         "METAssoc_AntiKt4EMTopo",
                                         "MET_Core_AntiKt4EMTopo",
@@ -714,6 +752,7 @@ def LLP1Cfg(flags):
     StaticContent += ["xAOD::VertexContainer#SoftBVrtClusterTool_Loose_Vertices"]
     StaticContent += ["xAOD::VertexAuxContainer#SoftBVrtClusterTool_Loose_VerticesAux." + excludedVertexAuxData]
     StaticContent += ["xAOD::JetContainer#AntiKt10EMTopoRCJets","xAOD::JetAuxContainer#AntiKt10EMTopoRCJetsAux.-PseudoJet"]
+    StaticContent += ["CaloClusterCellLinkContainer#CaloCalTopoClusters_links"]
 
     for wp in LLP1VrtSecInclusiveSuffixes:
         StaticContent += ["xAOD::VertexContainer#VrtSecInclusive_SecondaryVertices" + wp]
@@ -767,6 +806,11 @@ def LLP1Cfg(flags):
         LLP1SlimmingHelper.ExtraVariables += [ "GSFTrackParticles." + '.'.join( [ var + suffix for var in VSITrackAuxVars] ) ]
         LLP1SlimmingHelper.ExtraVariables += [ "LRTGSFTrackParticles." + '.'.join( [ var + suffix for var in VSITrackAuxVars] ) ]
 
+    LLP1SlimmingHelper.ExtraVariables.append('CaloCalTopoClusters.e_sampl.calM.calE.calEta.calPhi.CENTER_MAG.SECOND_TIME')
+    LLP1SlimmingHelper.AppendToDictionary["EMOriginTopoClusters"]='xAOD::CaloClusterContainer'
+    LLP1SlimmingHelper.AppendToDictionary["EMOriginTopoClustersAux"]='xAOD::ShallowAuxContainer'
+    LLP1SlimmingHelper.ExtraVariables.append('EMOriginTopoClusters.e_sampl.calM.calE.calEta.calPhi.CENTER_MAG.SECOND_TIME')
+    
     # Truth containers
     if flags.Input.isMC:
 
@@ -783,6 +827,14 @@ def LLP1Cfg(flags):
         StaticContent += ["xAOD::JetContainer#AntiKt10TruthRCJets","xAOD::JetAuxContainer#AntiKt10TruthRCJetsAux.-PseudoJet"]
 
 
+    from DerivationFrameworkEGamma.PhotonsCPDetailedContent import (
+        PhotonsCPDetailedContent,
+        )
+    LLP1SlimmingHelper.ExtraVariables += PhotonsCPDetailedContent
+
+    
+    from DerivationFrameworkJetEtMiss.JetCommonConfig import addOriginCorrectedClustersToSlimmingTool
+    addOriginCorrectedClustersToSlimmingTool(LLP1SlimmingHelper,writeLC=True,writeEM=True)
     LLP1SlimmingHelper.StaticContent = StaticContent
 
     # Trigger content

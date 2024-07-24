@@ -102,6 +102,11 @@ def CaloClusterThinningCfg(flags, **kwargs):
     acc.addPublicTool(CaloClusterThinning(**kwargs), primary=True)
     return acc
 
+def JetCaloClusterThinningCfg(flags, **kwargs):
+    acc = ComponentAccumulator()
+    JetCaloClusterThinning = CompFactory.DerivationFramework.JetCaloClusterThinning
+    acc.addPublicTool(JetCaloClusterThinning(**kwargs), primary=True)
+    return acc
 
 ####
 # additional utilities to return the list of decorations
