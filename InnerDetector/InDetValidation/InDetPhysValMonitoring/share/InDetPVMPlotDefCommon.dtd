@@ -50,8 +50,12 @@
 <!ENTITY PHIBINS2D "160">
 
 <!-- PU density plots -->
-<!ENTITY NBINSPUDENS "4">
-<!ENTITY PUDENSMAX "2.0">
+<!ENTITY NBINSPUDENS "20">
+<!ENTITY PUDENSMAX "5.0">
+
+<!-- N interaction plots -->
+<!ENTITY NBINSNINTERACTIONS "300">
+<!ENTITY NINTERACTIONSMAX "300">
 
 <!-- Tracking Recommendation Plots -->
 <!ENTITY EtaBinsTrkRec "100">
