@@ -118,7 +118,3 @@ void LVL1::eFEXtauTOB::setxTobword1(uint32_t tobword) {
   m_xtobword1 = tobword;
 }
 
-void LVL1::eFEXtauTOB::setSuperCellEncoder(std::unique_ptr<SCellEncoder> scell_encoder) {
-	m_scell_encoder = std::move(scell_encoder);
-}
-

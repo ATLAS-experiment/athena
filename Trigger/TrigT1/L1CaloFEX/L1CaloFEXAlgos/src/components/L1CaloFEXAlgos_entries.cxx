@@ -7,6 +7,7 @@
 #include "../eFexTowerBuilder.h"
 #include "../jFexEmulatedTowers.h"
 #include "../eFexTOBDecorator.h"
+#include "../eFexTOBSuperCellDecorator.h"
 
 using namespace LVL1;
 
@@ -15,4 +16,5 @@ DECLARE_COMPONENT( gFexTower2SCellDecorator )
 DECLARE_COMPONENT( eFexTowerBuilder )
 DECLARE_COMPONENT( jFexEmulatedTowers )
 DECLARE_COMPONENT( eFexTOBDecorator )
+DECLARE_COMPONENT( eFexTOBSuperCellDecorator )
 

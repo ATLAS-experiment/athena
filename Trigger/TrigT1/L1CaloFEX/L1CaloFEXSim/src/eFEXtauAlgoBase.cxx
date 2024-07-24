@@ -11,7 +11,6 @@
 //  *********************************************************************************/
 
 #include "L1CaloFEXSim/eFEXtauAlgoBase.h"
-#include "L1CaloFEXSim/SCellEncoder.h"
 
 LVL1::eFEXtauAlgoBase::eFEXtauAlgoBase(const std::string &type,
                                        const std::string &name,
@@ -165,16 +164,4 @@ bool LVL1::eFEXtauAlgoBase::isCentralTowerSeed() const {
   }
 
   return out;
-}
-
-void LVL1::eFEXtauAlgoBase::setSCellEncoder(LVL1::eFEXtauTOB *tob) const {
-  if (!m_dumpSCells) {
-    tob->setSuperCellEncoder(nullptr);
-    return;
-  }
-
-  std::unique_ptr<SCellEncoder> scellEncoder = std::make_unique<SCellEncoder>();
-  scellEncoder->setSuperCells(m_em0cells, m_em1cells, m_em2cells, m_em3cells,
-                              m_hadcells);
-  tob->setSuperCellEncoder(std::move(scellEncoder));
 }

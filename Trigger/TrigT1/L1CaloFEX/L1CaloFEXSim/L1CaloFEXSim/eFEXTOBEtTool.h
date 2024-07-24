@@ -18,6 +18,7 @@
 #include "L1CaloFEXToolInterfaces/IeFEXTOBEtTool.h"
 #include "L1CaloFEXToolInterfaces/IeFEXtauAlgo.h"
 #include "L1CaloFEXToolInterfaces/IeFEXegAlgo.h"
+#include "L1CaloFEXSim/eTowerContainer.h"
 
 #include <vector>
 
@@ -51,6 +52,9 @@ namespace LVL1 {
                                   std::vector<unsigned int> &RetaSums,
                                   std::vector<unsigned int> &RhadSums, 
                                   std::vector<unsigned int> &WstotSums) override;
+								  
+	  virtual							  
+	  StatusCode getTOBCellEnergies(float etaTOB, float phiTOB, std::vector<int> &ClusterCellETs) override;
 
 
     /** Tool to calculate eTaudiscriminant sums */
@@ -79,6 +83,9 @@ namespace LVL1 {
     ToolHandle<IeFEXegAlgo> m_eFEXegAlgoTool {
       this, "eFEXegAlgoTool", "LVL1::eFEXegAlgo", 
 	"Tool that runs the eFEX e/gamma algorithm"};
+	
+	// Key for input towers
+    SG::ReadHandleKey<LVL1::eTowerContainer> m_eTowerContainerKey {this, "MyETowers", "eTowerContainer", "Input container for eTowers"};
     
   };
   

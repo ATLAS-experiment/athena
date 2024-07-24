@@ -12,7 +12,6 @@
 
 #pragma once
 #include "AthenaKernel/CLASS_DEF.h"
-#include "L1CaloFEXSim/SCellEncoder.h"
 
 namespace LVL1 {
   class eFEXtauTOB
@@ -39,7 +38,6 @@ namespace LVL1 {
     uint32_t m_tobword;
     uint32_t m_xtobword0;
     uint32_t m_xtobword1;
-    std::unique_ptr<SCellEncoder> m_scell_encoder;
     
   public:
     eFEXtauTOB();
@@ -65,7 +63,6 @@ namespace LVL1 {
     inline uint32_t getTobword() const {return m_tobword;}
     inline uint32_t getxTobword0() const {return m_xtobword0;}
     inline uint32_t getxTobword1() const {return m_xtobword1;}
-    inline SCellEncoder* getSCellEncoder() const {return m_scell_encoder.get();}
     
     void setEta(unsigned int);
     void setPhi(unsigned int);
@@ -85,7 +82,6 @@ namespace LVL1 {
     void setTobword(uint32_t);
     void setxTobword0(uint32_t);
     void setxTobword1(uint32_t);
-    void setSuperCellEncoder(std::unique_ptr<SCellEncoder> scell_encoder);
   };
   
 } // end of namespace

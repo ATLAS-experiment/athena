@@ -36,9 +36,6 @@ def eFexTOBDecoratorCfg(flags, name, eFexEMRoIContainer = "L1_eEMRoI", eFexTauRo
     """
     acc = ComponentAccumulator()
 
-    from L1CaloFEXSim.L1CaloFEXSimCfg import eFEXTOBEtToolCfg
-    acc.popToolsAndMerge(eFEXTOBEtToolCfg(flags))
-
     decorator = CompFactory.LVL1.eFexTOBDecorator(name, eFexEMRoIContainer = eFexEMRoIContainer, eFexTauRoIContainer = eFexTauRoIContainer)
 
     # in case the TOB containers are different from default we also have to change the write handles
@@ -65,6 +62,22 @@ def eFexTOBDecoratorCfg(flags, name, eFexEMRoIContainer = "L1_eEMRoI", eFexTauRo
     acc.addEventAlgo(decorator)
 
     return acc
+    
+
+def eFexTOBSuperCellDecoratorCfg(flags, name, eFexEMRoIContainer = "L1_eEMRoI", eFexTauRoIContainer = "L1_eTauxRoI"):
+    """
+    Configure the eFEX TOB decorator algorithm
+    Requires the eFEXTOBEtTool
+    """
+    acc = ComponentAccumulator()
+
+    decorator = CompFactory.LVL1.eFexTOBSuperCellDecorator(name, eFexEMRoIContainer = eFexEMRoIContainer, eFexTauRoIContainer = eFexTauRoIContainer)
+        
+    acc.addEventAlgo(decorator)
+
+    return acc
+    
+
 
 if __name__ == '__main__':
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
@@ -79,7 +92,7 @@ if __name__ == '__main__':
     parser.add_argument('--evtMax',type=int,default=-1,help="number of events")
     parser.add_argument('--filesInput',nargs='+',help="input files",required=True)
     parser.add_argument('--outputLevel',default="WARNING",choices={ 'INFO','WARNING','DEBUG','VERBOSE'})
-    parser.add_argument('--outputs',nargs='+',choices={"jTowers", "gTowers", "jTOBs","eTOBs"},required=True, help="What data to decode and output.")
+    parser.add_argument('--outputs',nargs='+',choices={"jTowers", "gTowers", "jTOBs","eTOBs", "eTOBsML"},required=True, help="What data to decode and output.")
     args = parser.parse_args()
 
 
@@ -228,6 +241,11 @@ if __name__ == '__main__':
     # Decorate eFEX RoIs
     if 'eTOBs' in args.outputs:
         DecoratorAlgo = eFexTOBDecoratorCfg(flags,'eFexTOBDecorator')
+        acc.merge(DecoratorAlgo)
+        
+    #Decorate eFEX SCs for ML
+    if 'eTOBsML' in args.outputs:
+        DecoratorAlgo = eFexTOBSuperCellDecoratorCfg(flags,'eFexTOBSuperCellDecorator')
         acc.merge(DecoratorAlgo)
 
     # Uses SCell to decorate the gTowers
