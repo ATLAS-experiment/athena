@@ -1,16 +1,15 @@
 /// copyright am arsch
 
-#ifndef MUONR4__HOUGHSEGMENTSEED__H
-#define MUONR4__HOUGHSEGMENTSEED__H
+#ifndef MUONR4_MUONPATTERNEVENT_HOUGHSEGMENTSEED__H
+#define MUONR4_MUONPATTERNEVENT_HOUGHSEGMENTSEED__H
 
 #include "MuonPatternEvent/HoughMaximum.h"
 
 namespace MuonR4 {
 /// @brief Representation of a segment seed (a fully processed hough maximum) produced
 /// by the hough transform. 
-/// @tparam HitType: Data type encoding the hits used in the transform
-template <class HitType>
-class HoughSegmentSeed_impl : public HoughMaximum_impl<HitType> {
+
+class SegmentSeed : public HoughMaximum {
    public:
     /// @brief Constructor to write a segment seed from an eta maximum and a valid
     /// phi extension. 
@@ -20,21 +19,21 @@ class HoughSegmentSeed_impl : public HoughMaximum_impl<HitType> {
     /// @param interceptX: x axis intercept from the phi-extension
     /// @param counts: (weighted) counts for the given hough maximum
     /// @param hits: Measurements on this maximum
-    HoughSegmentSeed_impl(double tanTheta, double interceptY, double tanPhi,
-                     double interceptX, double counts,
-                     std::vector<HitType>&& hits)
-        : HoughMaximum_impl<HitType>(tanTheta, interceptY, counts, std::move(hits)),
-          m_tanPhi(tanPhi),
-          m_interceptX(interceptX) {
-        m_hasPhiExt = true;
-    }
+    /// @param bucket: Space point bucket out of which the seed is built
+    SegmentSeed(double tanTheta, double interceptY, double tanPhi,
+                double interceptX, double counts,
+                std::vector<HitType>&& hits,
+                const SpacePointBucket* bucket):
+        HoughMaximum{tanTheta, interceptY, counts, std::move(hits), bucket},
+          m_tanPhi{tanPhi},
+          m_interceptX{interceptX},
+          m_hasPhiExt{true} {}
 
     /// @brief Constructor to write a segment seed from an eta maximum without 
     /// a valid phi extension
     /// @param toCopy: Eta maximum 
-    HoughSegmentSeed_impl(const HoughMaximum_impl<HitType>& toCopy) : HoughMaximum_impl<HitType>(toCopy) {
-        m_hasPhiExt = false;
-    }
+    SegmentSeed(const HoughMaximum& toCopy) : 
+        HoughMaximum{toCopy} {}
 
     /// @brief getter
     /// @return  the angle from the phi extension

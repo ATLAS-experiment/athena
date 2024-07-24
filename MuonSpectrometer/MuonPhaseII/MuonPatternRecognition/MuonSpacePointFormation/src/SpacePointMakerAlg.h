@@ -12,7 +12,7 @@
 
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonReadoutGeometryR4/MuonDetectorManager.h"
-#include "MuonSpacePoint/MuonSpacePointContainer.h"
+#include "MuonSpacePoint/SpacePointContainer.h"
 #include "xAODMuonPrepData/MdtDriftCircleContainer.h"
 #include "xAODMuonPrepData/RpcMeasurementContainer.h"
 #include "xAODMuonPrepData/TgcStripContainer.h"
@@ -21,11 +21,11 @@
 
 
 namespace MuonR4{
-    class MuonSpacePointMakerAlg: public AthReentrantAlgorithm {
+    class SpacePointMakerAlg: public AthReentrantAlgorithm {
         public:
-            MuonSpacePointMakerAlg(const std::string& name, ISvcLocator* pSvcLocator);
+            SpacePointMakerAlg(const std::string& name, ISvcLocator* pSvcLocator);
 
-            ~MuonSpacePointMakerAlg() = default;
+            ~SpacePointMakerAlg() = default;
 
             StatusCode execute(const EventContext& ctx) const override;
             StatusCode initialize() override;
@@ -46,7 +46,7 @@ namespace MuonR4{
                     SpacePointStatistics(const Muon::IMuonIdHelperSvc* idHelperSvc);
                 
                     /** @brief Adds the vector of space points to the overall statistics. */
-                    void addToStat(const std::vector<MuonSpacePoint>& spacePoints);
+                    void addToStat(const std::vector<SpacePoint>& spacePoints);
                     /** @brief Print the statistics table of the built space points per category 
                      *         into the log-file / console */
                     void dumpStatisics(MsgStream& msg) const;
@@ -82,22 +82,22 @@ namespace MuonR4{
             };
             /** @brief: Helper struct to collect the space point per muon chamber, which are 
              *          later sorted into the space point buckets. */
-            struct spacePointsPerChamber{
+            struct SpacePointsPerChamber{
                 /** @brief Vector of all hits that contain an eta measurement including the 
                  *         ones which are combined with phi measurements */
-                std::vector<MuonSpacePoint> etaHits{};
+                std::vector<SpacePoint> etaHits{};
                 /** @brief Vector of all space points that are built from single phi hits */
-                std::vector<MuonSpacePoint> phiHits{};                
+                std::vector<SpacePoint> phiHits{};                
             };
             /** @brief Container abrivation of the presorted space point container per MuonChambers */
-            using PreSortedSpacePointMap = std::unordered_map<const MuonGMR4::MuonChamber*, spacePointsPerChamber>;
+            using PreSortedSpacePointMap = std::unordered_map<const MuonGMR4::MuonChamber*, SpacePointsPerChamber>;
 
   
             /** @brief Retrieve an uncalibrated measurement container <ContType> and fill the hits into the
              *         presorted space point map. Per associated MuonChamber, hits from Tgc, Rpc, sTgcs are 
              *         grouped by their gasGap location and then divided into eta & phi measurements. If both
-             *         are found, each eta measurement is combined with phi measurement into a MuonSpacePoint. 
-             *         In any other case, the measurements are just transformed into a MuonSpacePoint.
+             *         are found, each eta measurement is combined with phi measurement into a SpacePoint. 
+             *         In any other case, the measurements are just transformed into a SpacePoint.
              *  @param ctx: Event context of the current event
              *  @param key: ReadHandleKey to access the container of data type <ContType>
              *  @param fillContainer: Global container into which all space points are filled.
@@ -108,9 +108,9 @@ namespace MuonR4{
                                                 PreSortedSpacePointMap& fillContainer) const;
                                                     
             /** @brief Abrivation of a MuonSapcePoint bucket vector */
-            using SpacePointBucketVec = std::vector<MuonSpacePointBucket>;
+            using SpacePointBucketVec = std::vector<SpacePointBucket>;
 
-            /** @brief Distribute the premade spacepoints per chamber into their individual MuonSpacePoint
+            /** @brief Distribute the premade spacepoints per chamber into their individual SpacePoint
              *         buckets. A new bucket is created everytime if the hit to fill is along the z-axis 
              *         farther away from the first point in the bucket than the <spacePointWindowSize>.
              *         Hit in the previous bucket which are <spacePointOverlap> away from the first hit
@@ -118,14 +118,14 @@ namespace MuonR4{
              *         Muon space points and then consumes the phi hits.
              * @param ctx: Event context of the current event
              * @param hitsPerChamber: List of all premade space points which have to be sorted
-             * @param finalContainer: Output MuonSpacePoint bucket container.
+             * @param finalContainer: Output SpacePoint bucket container.
              *  */
             void distributePointsAndStore(const EventContext& ctx,
-                                          spacePointsPerChamber&& hitsPerChamber,
-                                          MuonSpacePointContainer& finalContainer) const;
+                                          SpacePointsPerChamber&& hitsPerChamber,
+                                          SpacePointContainer& finalContainer) const;
 
             void distributePointsAndStore(const EventContext& ctx,
-                                          std::vector<MuonSpacePoint>&& spacePoints,
+                                          std::vector<SpacePoint>&& spacePoints,
                                           SpacePointBucketVec& splittedContainer) const;
 
             /** @brief: Check whether the occupancy cuts of hits in a gasGap are surpassed.
@@ -159,7 +159,7 @@ namespace MuonR4{
 
             ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc",  "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
             
-            SG::WriteHandleKey<MuonSpacePointContainer> m_writeKey{this, "WriteKey", "MuonSpacePoints"};
+            SG::WriteHandleKey<SpacePointContainer> m_writeKey{this, "WriteKey", "MuonSpacePoints"};
 
             Gaudi::Property<double> m_spacePointWindow{this, "spacePointWindowSize", 2.*Gaudi::Units::m,
                                                        "Maximal size of a space point bucket"};

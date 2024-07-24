@@ -2,23 +2,20 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef MUONR4__HOUGHTRANSFORMALG__H
-#define MUONR4__HOUGHTRANSFORMALG__H
+#ifndef MUONR4_MUONPATTERNRECOGNITIONALGS_ETAHOUGHTRANSFORMALG__H
+#define MUONR4_MUONPATTERNRECOGNITIONALGS_ETAHOUGHTRANSFORMALG__H
 
-#include "MuonPatternEvent/StationHoughMaxContainer.h"
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
-#include "GaudiKernel/ToolHandle.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
 #include "StoreGate/ReadCondHandleKey.h"
-#include "xAODMuonPrepData/MdtDriftCircleContainer.h"
-#include <xAODMuonPrepData/RpcStripContainer.h>
-#include <xAODMuonPrepData/TgcStripContainer.h>
-#include <MuonSpacePoint/MuonSpacePointContainer.h>
+
+#include <MuonPatternEvent/MuonPatternContainer.h>
+#include <MuonPatternEvent/HoughEventData.h>
+#include <MuonSpacePoint/SpacePointContainer.h>
+
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
-#include "MuonPatternEvent/MuonHoughDefs.h"
-#include "Gaudi/Property.h"
 
 // muon includes
 
@@ -31,16 +28,16 @@ namespace MuonR4{
     /// transform from space-points created in an upstream alg. 
     /// It will write HoughMaxima into the event store
     /// for downstream use. 
-    class MuonEtaHoughTransformAlg: public AthReentrantAlgorithm{
+    class EtaHoughTransformAlg: public AthReentrantAlgorithm{
         public:
-                MuonEtaHoughTransformAlg(const std::string& name, ISvcLocator* pSvcLocator);
-                virtual ~MuonEtaHoughTransformAlg() = default;
-                virtual StatusCode initialize() override;
-                virtual StatusCode execute(const EventContext& ctx) const override;
+            EtaHoughTransformAlg(const std::string& name, ISvcLocator* pSvcLocator);
+            virtual ~EtaHoughTransformAlg() = default;
+            virtual StatusCode initialize() override;
+            virtual StatusCode execute(const EventContext& ctx) const override;
 
         private:
             
-            using HoughSetupForBucket = MuonHoughEventData::HoughSetupForBucket;
+            using HoughSetupForBucket = HoughEventData::HoughSetupForBucket;
             /// Helper method to fetch data from StoreGate. If the key is empty, a nullptr is assigned to the container ptr
             /// Failure is returned in cases, of non-empty keys and failed retrieval
             template <class ContainerType> StatusCode retrieveContainer(const EventContext& ctx,
@@ -52,25 +49,25 @@ namespace MuonR4{
             /// bucket and identifies the optimal search space in each bucket.
             /// @param data: event data object
             /// @param space point list from store gate 
-            StatusCode preProcess(MuonHoughEventData & data, 
-                                  const MuonSpacePointContainer & spacePoints ) const; 
+            StatusCode preProcess(HoughEventData & data, 
+                                  const SpacePointContainer & spacePoints ) const; 
 
             /// @brief prepare the accumulator and the peak finder once per event 
             /// @param data: event data object
-            StatusCode prepareHoughPlane(MuonHoughEventData & data) const; 
+            StatusCode prepareHoughPlane(HoughEventData & data) const; 
             
             /// @brief process a bucket. 
             /// Performs the hough transform in the given bucket and adds the maxima
             /// to the event data. 
             /// @param data: event data object
             /// @param currentBucket: bucket to process
-            StatusCode processBucket(MuonHoughEventData & data, 
+            StatusCode processBucket(HoughEventData & data, 
                                      HoughSetupForBucket& currentBucket) const; 
 
             /// @brief fill the accumulator from a given space point. 
             /// @param data: event data object 
             /// @param SP: space point to fill from 
-            void fillFromSpacePoint(MuonHoughEventData & data, 
+            void fillFromSpacePoint(HoughEventData & data, 
                                     const MuonR4::HoughHitType & SP) const; 
             
             /// @brief extend a maximum with all compatible (pure) phi hits. 
@@ -97,10 +94,10 @@ namespace MuonR4{
             BooleanProperty m_downWeightMultiplePrd{this, "downWeightPrdMultiplicity", false};
 
             // input space points from SG
-            SG::ReadHandleKey<MuonR4::MuonSpacePointContainer> m_spacePointKey{this, "SpacePointContainer", "MuonSpacePoints"};
+            SG::ReadHandleKey<SpacePointContainer> m_spacePointKey{this, "SpacePointContainer", "MuonSpacePoints"};
             
             // output maxima for downstram processing
-            SG::WriteHandleKey<StationHoughMaxContainer> m_maxima{this, "StationHoughMaxContainer", "MuonHoughStationMaxima"};
+            SG::WriteHandleKey<EtaHoughMaxContainer> m_maxima{this, "EtaHoughMaxContainer", "MuonHoughStationMaxima"};
 
             // ACTS geometry context
             SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};

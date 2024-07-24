@@ -2,7 +2,9 @@
 /*
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-#include "MuonPatternCnvAlg.h"
+#include "PatternCnvAlg.h"
+
+#include "MuonPatternEvent/MuonHoughDefs.h"
 
 namespace{
     using DetIdx_t = Muon::MuonStationIndex::DetectorRegionIndex;
@@ -12,8 +14,7 @@ namespace{
 
 namespace MuonR4{
     
-    
-    StatusCode MuonPatternCnvAlg::initialize() {
+    StatusCode PatternCnvAlg::initialize() {
         ATH_CHECK(m_idHelperSvc.retrieve());
 
         ATH_CHECK(m_keyTgc.initialize(!m_keyTgc.empty()));
@@ -29,7 +30,7 @@ namespace MuonR4{
         return StatusCode::SUCCESS;
     }
     template <class ContainerType>
-        StatusCode MuonPatternCnvAlg::retrieveContainer(const EventContext& ctx, 
+        StatusCode PatternCnvAlg::retrieveContainer(const EventContext& ctx, 
                                                         const SG::ReadHandleKey<ContainerType>& key,
                                                         const ContainerType*& contToPush) const {
             contToPush = nullptr;
@@ -44,14 +45,14 @@ namespace MuonR4{
     }
 
 
-    StatusCode MuonPatternCnvAlg::execute(const EventContext& ctx) const {
+    StatusCode PatternCnvAlg::execute(const EventContext& ctx) const {
 
 
         auto translatedPatterns = std::make_unique<MuonPatternCombinationCollection>();
         auto translatedHough = std::make_unique<Muon::HoughDataPerSectorVec>();
 
-        for (const SG::ReadHandleKey<StationHoughSegmentSeedContainer>& key : m_readKeys) {
-            const StationHoughSegmentSeedContainer* translateMe{nullptr};
+        for (const SG::ReadHandleKey<SegmentSeedContainer>& key : m_readKeys) {
+            const SegmentSeedContainer* translateMe{nullptr};
             ATH_CHECK(retrieveContainer(ctx, key, translateMe));
             ATH_CHECK(convertSeed(ctx, *translateMe, * translatedPatterns, *translatedHough));
 
@@ -66,10 +67,10 @@ namespace MuonR4{
 
         return StatusCode::SUCCESS;
     }
-    StatusCode MuonPatternCnvAlg::convertSeed(const EventContext& ctx,
-                                              const StationHoughSegmentSeedContainer& seedContainer,
-                                              ::MuonPatternCombinationCollection& patternContainer,
-                                              Muon::HoughDataPerSectorVec& houghDataSec) const {
+    StatusCode PatternCnvAlg::convertSeed(const EventContext& ctx,
+                                          const SegmentSeedContainer& seedContainer,
+                                          ::MuonPatternCombinationCollection& patternContainer,
+                                          Muon::HoughDataPerSectorVec& houghDataSec) const {
 
         const Muon::RpcPrepDataContainer* rpcPrds{nullptr};
         const Muon::MdtPrepDataContainer* mdtPrds{nullptr};
@@ -88,64 +89,63 @@ namespace MuonR4{
 
        
     
-        for (const StationHoughSegmentSeeds& seedBucket : seedContainer) {
-            const Amg::Transform3D& localToGlobal = seedBucket.chamber()->localToGlobalTrans(*gctx);
-            for (const HoughSegmentSeed& seed: seedBucket.getMaxima()) {
+        for (const SegmentSeed* seed: seedContainer) {
+            const Amg::Transform3D& localToGlobal = seed->chamber()->localToGlobalTrans(*gctx);
                 
-                std::unordered_set<Identifier> channelsInMax{};
-                for (const HoughHitType& hit : seed.getHitsInMax()) {
-                   channelsInMax.insert(hit->identify());
-                   if (hit->secondaryMeasurement()) {
-                        channelsInMax.insert(xAOD::identify(hit->secondaryMeasurement()));
-                   }
+            std::unordered_set<Identifier> channelsInMax{};
+            for (const HoughHitType& hit : seed->getHitsInMax()) {
+                channelsInMax.insert(hit->identify());
+                if (hit->secondaryMeasurement()) {
+                    channelsInMax.insert(xAOD::identify(hit->secondaryMeasurement()));
                 }
-                std::vector<const Trk::PrepRawData*> trkHits{};
-                trkHits.reserve(channelsInMax.size());
-                using techIdx_t = Muon::MuonStationIndex::TechnologyIndex;
-                for (const Identifier& chId : channelsInMax){
-                    switch (m_idHelperSvc->technologyIndex(chId)){
-                        case techIdx_t::MDT:
-                            trkHits.push_back(fetchPrd(chId, mdtPrds));
-                            break;
-                        case techIdx_t::RPC:
-                            trkHits.push_back(fetchPrd(chId, rpcPrds));
-                            break;
-                        case techIdx_t::TGC:
-                            trkHits.push_back(fetchPrd(chId, tgcPrds));
-                            break;
-                        case techIdx_t::MM:
-                            trkHits.push_back(fetchPrd(chId, mmPrds));
-                            break;
-                        case techIdx_t::STGC:
-                            trkHits.push_back(fetchPrd(chId, stgcPrds));
-                            break;
-                        default:
-                            ATH_MSG_WARNING("Cscs are not part of the new paradigms. Where are they now coming from? "
-                                            <<m_idHelperSvc->toString(chId));
-                    };
-                }
-                if (std::find(trkHits.begin(), trkHits.end(), nullptr) != trkHits.end()){
-                    ATH_MSG_ERROR("Errors during the Prd conversion occured");
-                    return StatusCode::FAILURE;
-                }
-                const Amg::Vector3D maxPos{seed.interceptX(), seed.interceptY(), 0.};
-                const Amg::Vector3D locDir = Amg::Vector3D(seed.tanPhi(), seed.tanTheta(), 1.).unit();
-
-                Trk::TrackSurfaceIntersection isect{localToGlobal * maxPos, localToGlobal.linear()*locDir,0.};
-                ATH_MSG_VERBOSE("Intersection at "<<m_idHelperSvc->toStringChamber(trkHits[0]->identify())<<" "<<Amg::toString(isect.position())<<" "<<Amg::toString(isect.direction())
-                               <<Amg::angle(isect.position(), isect.direction()) / Gaudi::Units::deg );
-                Muon::MuonPatternChamberIntersect chamberIsect{std::move(isect), std::move(trkHits)};
-                
-                convertMaximum(chamberIsect, houghDataSec);
-                std::vector<Muon::MuonPatternChamberIntersect> chamberData{std::move(chamberIsect)};
-
-                auto patternCombi = std::make_unique<Muon::MuonPatternCombination>(nullptr, std::move(chamberData));
-                patternContainer.push_back(std::move(patternCombi));
             }
+            std::vector<const Trk::PrepRawData*> trkHits{};
+            trkHits.reserve(channelsInMax.size());
+            using techIdx_t = Muon::MuonStationIndex::TechnologyIndex;
+            for (const Identifier& chId : channelsInMax){
+                switch (m_idHelperSvc->technologyIndex(chId)){
+                    case techIdx_t::MDT:
+                        trkHits.push_back(fetchPrd(chId, mdtPrds));
+                        break;
+                    case techIdx_t::RPC:
+                        trkHits.push_back(fetchPrd(chId, rpcPrds));
+                        break;
+                    case techIdx_t::TGC:
+                        trkHits.push_back(fetchPrd(chId, tgcPrds));
+                        break;
+                    case techIdx_t::MM:
+                        trkHits.push_back(fetchPrd(chId, mmPrds));
+                        break;
+                    case techIdx_t::STGC:
+                        trkHits.push_back(fetchPrd(chId, stgcPrds));
+                        break;
+                    default:
+                        ATH_MSG_WARNING("Cscs are not part of the new paradigms. Where are they now coming from? "
+                                        <<m_idHelperSvc->toString(chId));
+                };
+            }
+            if (std::find(trkHits.begin(), trkHits.end(), nullptr) != trkHits.end()){
+                ATH_MSG_ERROR("Errors during the Prd conversion occured");
+                return StatusCode::FAILURE;
+            }
+            const Amg::Vector3D maxPos{seed->interceptX(), seed->interceptY(), 0.};
+            const Amg::Vector3D locDir = Amg::Vector3D(seed->tanPhi(), seed->tanTheta(), 1.).unit();
+
+            Trk::TrackSurfaceIntersection isect{localToGlobal * maxPos, localToGlobal.linear()*locDir,0.};
+            ATH_MSG_VERBOSE("Intersection at "<<m_idHelperSvc->toStringChamber(trkHits[0]->identify())<<" "<<Amg::toString(isect.position())<<" "<<Amg::toString(isect.direction())
+                            <<Amg::angle(isect.position(), isect.direction()) / Gaudi::Units::deg );
+            Muon::MuonPatternChamberIntersect chamberIsect{std::move(isect), std::move(trkHits)};
+            
+            convertMaximum(chamberIsect, houghDataSec);
+            std::vector<Muon::MuonPatternChamberIntersect> chamberData{std::move(chamberIsect)};
+
+            auto patternCombi = std::make_unique<Muon::MuonPatternCombination>(nullptr, std::move(chamberData));
+            patternContainer.push_back(std::move(patternCombi));
         }
+        
         return StatusCode::SUCCESS;
     }
-    void MuonPatternCnvAlg::convertMaximum(const Muon::MuonPatternChamberIntersect& intersect,
+    void PatternCnvAlg::convertMaximum(const Muon::MuonPatternChamberIntersect& intersect,
                                            Muon::HoughDataPerSectorVec& houghDataSec) const {
         
         if (houghDataSec.vec.empty()) {
@@ -187,7 +187,7 @@ namespace MuonR4{
 
 
     template <class PrdType> 
-        const PrdType* MuonPatternCnvAlg::fetchPrd(const Identifier& prdId,
+        const PrdType* PatternCnvAlg::fetchPrd(const Identifier& prdId,
                                                    const Muon::MuonPrepDataContainerT<PrdType>* prdContainer) const {
         if (!prdContainer) {
             ATH_MSG_ERROR("Cannot fetch a prep data object as the container given for "<<

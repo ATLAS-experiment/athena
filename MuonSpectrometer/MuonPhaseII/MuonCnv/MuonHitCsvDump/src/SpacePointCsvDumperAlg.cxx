@@ -56,10 +56,10 @@ SpacePointCsvDumperAlg::SpacePointCsvDumperAlg(const std::string& name, ISvcLoca
     file<<"measuresPhi"<<delim<<std::endl;
 
 
-   SG::ReadHandle<MuonSpacePointContainer> readHandle{m_readKey, ctx};
+   SG::ReadHandle<SpacePointContainer> readHandle{m_readKey, ctx};
    ATH_CHECK(readHandle.isPresent());
 
-   for(const MuonSpacePointBucket* bucket : *readHandle) {
+   for(const SpacePointBucket* bucket : *readHandle) {
       
        for (const auto& spacePoint : *bucket) {
             const Identifier measId = spacePoint->identify();
@@ -115,9 +115,9 @@ SpacePointCsvDumperAlg::SpacePointCsvDumperAlg(const std::string& name, ISvcLoca
             };
             
             bucketId buckId{};
-            buckId.fields[0] = spacePoint->muonChamber()->stationName();
-            buckId.fields[1] = spacePoint->muonChamber()->stationEta();
-            buckId.fields[2] = spacePoint->muonChamber()->stationPhi();
+            buckId.fields[0] = spacePoint->chamber()->stationName();
+            buckId.fields[1] = spacePoint->chamber()->stationEta();
+            buckId.fields[2] = spacePoint->chamber()->stationPhi();
             buckId.fields[3] = bucket->bucketId();
             
             file<<buckId.hash<<delim;

@@ -1,7 +1,7 @@
 /*
    Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-#include "MuonSpacePoint/MuonSpacePoint.h"
+#include "MuonSpacePoint/SpacePoint.h"
 #include "xAODMuonPrepData/UtilFunctions.h"
 
 #include "xAODMuonPrepData/MdtDriftCircle.h"
@@ -13,7 +13,7 @@
 
 
 namespace MuonR4{
-    MuonSpacePoint::MuonSpacePoint(const ActsGeometryContext& gctx,
+    SpacePoint::SpacePoint(const ActsGeometryContext& gctx,
                                    const xAOD::UncalibratedMeasurement* primaryMeas,
                                    const xAOD::UncalibratedMeasurement* secondaryMeas):
         m_primaryMeas{primaryMeas},
@@ -87,40 +87,40 @@ namespace MuonR4{
         m_measCovariance = Jac * uvcov * Jac.transpose();
     }
             
-    const xAOD::UncalibratedMeasurement* MuonSpacePoint::primaryMeasurement() const {
+    const xAOD::UncalibratedMeasurement* SpacePoint::primaryMeasurement() const {
        return m_primaryMeas;
     }
-    const xAOD::UncalibratedMeasurement* MuonSpacePoint::secondaryMeasurement() const {
+    const xAOD::UncalibratedMeasurement* SpacePoint::secondaryMeasurement() const {
        return m_secondaryMeas;
     }
-    const MuonGMR4::MuonChamber* MuonSpacePoint::muonChamber() const {
+    const MuonGMR4::MuonChamber* SpacePoint::chamber() const {
         return m_chamber;
     }
-    const Amg::Vector3D& MuonSpacePoint::positionInChamber() const {
+    const Amg::Vector3D& SpacePoint::positionInChamber() const {
         return m_pos;
     }
-    bool MuonSpacePoint::measuresPhi() const {
-        return secondaryMeasurement() ||  muonChamber()->idHelperSvc()->measuresPhi(identify());
+    bool SpacePoint::measuresPhi() const {
+        return secondaryMeasurement() ||  chamber()->idHelperSvc()->measuresPhi(identify());
     }
-    bool MuonSpacePoint::measuresEta() const {
-        return secondaryMeasurement() ||  !muonChamber()->idHelperSvc()->measuresPhi(identify());
+    bool SpacePoint::measuresEta() const {
+        return secondaryMeasurement() ||  !chamber()->idHelperSvc()->measuresPhi(identify());
     }
-    const Identifier& MuonSpacePoint::identify() const {
+    const Identifier& SpacePoint::identify() const {
         return m_id;
     }
-    double MuonSpacePoint::driftRadius() const { 
+    double SpacePoint::driftRadius() const { 
         return m_driftR; 
     }
-    Amg::Vector2D MuonSpacePoint::uncertainty() const {
+    Amg::Vector2D SpacePoint::uncertainty() const {
         return Amg::Vector2D{ Amg::error(m_measCovariance,0),Amg::error(m_measCovariance,1)  };
     }
-    const AmgSymMatrix(2)&  MuonSpacePoint::covariance() const {
+    const AmgSymMatrix(2)&  SpacePoint::covariance() const {
         return m_measCovariance;
     }
-    void MuonSpacePoint::setInstanceCounts(unsigned int etaPrd, unsigned int phiPrd){
+    void SpacePoint::setInstanceCounts(unsigned int etaPrd, unsigned int phiPrd){
         m_etaInstances = std::max(1u, etaPrd);
         m_phiInstances = std::max(1u, phiPrd);
     }
-    unsigned int MuonSpacePoint::nEtaInstanceCounts() const { return m_etaInstances; }
-    unsigned int MuonSpacePoint::nPhiInstanceCounts() const { return m_phiInstances; }
+    unsigned int SpacePoint::nEtaInstanceCounts() const { return m_etaInstances; }
+    unsigned int SpacePoint::nPhiInstanceCounts() const { return m_phiInstances; }
 }

@@ -13,7 +13,7 @@ def MuonSpacePointMakerAlgCfg(flags, name = "MuonSpacePointMakerAlg", **kwargs):
     
     from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
     result.merge(MuonGeoModelCfg(flags))
-    the_alg = CompFactory.MuonR4.MuonSpacePointMakerAlg(name, **kwargs)
+    the_alg = CompFactory.MuonR4.SpacePointMakerAlg(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
 

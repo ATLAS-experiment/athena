@@ -7,7 +7,7 @@
 #include "MuonPatternHelpers/SegmentFitHelperFunctions.h"
 #include "MuonPatternHelpers/HoughHelperFunctions.h"
 
-using namespace MuonR4;
+namespace MuonR4{
 
 MuonSegmentFittingAlg::MuonSegmentFittingAlg(const std::string& name,
                                                    ISvcLocator* pSvcLocator)
@@ -25,23 +25,20 @@ StatusCode MuonSegmentFittingAlg::execute(const EventContext& ctx) const {
 
     MuonSegmentFitterEventData data; 
     ATH_CHECK(prepareEventData(ctx, data)); 
-    const StationHoughSegmentSeedContainer* segmentSeeds=nullptr; 
+    const SegmentSeedContainer* segmentSeeds=nullptr; 
     ATH_CHECK(retrieveContainer(ctx, m_inHoughSegmentSeedKey, segmentSeeds));
     SG::WriteHandle<MuonSegmentContainer> writeSegments(
         m_outSegments, ctx);
-    ATH_CHECK(writeSegments.record(
-        std::make_unique<MuonSegmentContainer>()));
-    for (const StationHoughSegmentSeeds & stationWithMax : *segmentSeeds){
-        for (auto & seed : stationWithMax.getMaxima()){
-            ATH_CHECK(prepareSegmentFit(seed,data)); 
-            ATH_CHECK(fitSegment(data)); 
-            if (data.foundMin){
-                writeSegments->push_back(buildSegment(data)); 
-                // limited lifetime validation info
-                writeSegments->back().setParentSeed(&seed);
-                writeSegments->back().setChamber(stationWithMax.chamber());
-            }
-        }
+    ATH_CHECK(writeSegments.record(std::make_unique<MuonSegmentContainer>()));
+    for (const SegmentSeed* seed : *segmentSeeds){
+        ATH_CHECK(prepareSegmentFit(*seed,data)); 
+        ATH_CHECK(fitSegment(data)); 
+        if (data.foundMin){
+            writeSegments->push_back(buildSegment(data)); 
+            // limited lifetime validation info
+            writeSegments->back().setParentSeed(seed);
+            writeSegments->back().setChamber(seed->chamber());
+        }        
     }
 
     return StatusCode::SUCCESS; 
@@ -63,7 +60,7 @@ StatusCode MuonSegmentFittingAlg::retrieveContainer(
     return StatusCode::SUCCESS;
 }
 
-StatusCode MuonSegmentFittingAlg::prepareSegmentFit(const HoughSegmentSeed & seed,  MuonSegmentFitterEventData & data) const{
+StatusCode MuonSegmentFittingAlg::prepareSegmentFit(const SegmentSeed & seed,  MuonSegmentFitterEventData & data) const{
     data.chi2 = -1;
     data.measurementsToFit = seed.getHitsInMax(); 
     data.foundMin = false;
@@ -132,4 +129,5 @@ MuonR4::MuonSegment MuonSegmentFittingAlg::buildSegment(MuonSegmentFitterEventDa
     segment.setChi2(data.chi2);
     segment.setChi2PerMeasurement(data.chi2_per_measurement);
     return segment;
+}
 }
