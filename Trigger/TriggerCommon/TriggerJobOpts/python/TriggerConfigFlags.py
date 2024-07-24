@@ -292,7 +292,7 @@ def createTriggerFlags(doTriggerRecoFlags):
                   help='list of EDM objects to be written to ESD')
 
     flags.addFlag('Trigger.ExtraEDMList', [],
-                  help='list of extra EDM objects to be stored (for testing)')
+                  help='list of extra EDM objects to be stored (for testing). Supported features: Add new items. Add extra decorations to existing Aux. Add additional output targets.')
 
     def __availableRecoMetadata(flags):
         systems = ['L1','HLT']

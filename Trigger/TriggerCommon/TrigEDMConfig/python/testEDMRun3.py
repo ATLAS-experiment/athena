@@ -2,6 +2,7 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from TrigEDMConfig.TriggerEDMRun3 import TriggerHLTListRun3, EDMDetailsRun3
+from TrigEDMConfig.TriggerEDMDefs import allowTruncation
 from TrigEDMConfig.TriggerEDM import AllowedOutputFormats
 from AthenaCommon.Logging import logging
 log = logging.getLogger('testEDMRun3')
@@ -18,7 +19,7 @@ def isCLIDDefined(typename):
 def dumpListToJson(fileName):
   from TrigEDMConfig.TriggerEDM import getTriggerEDMList
   import json
-  edmDict = dict([(fmt, getTriggerEDMList(fmt, 3)) for fmt in AllowedOutputFormats])
+  edmDict = dict([(fmt, getTriggerEDMList(flags=None, key=fmt, runVersion=3)) for fmt in AllowedOutputFormats])
   with open(fileName,'w') as f:
     json.dump(edmDict, f)
 
@@ -26,6 +27,7 @@ def dumpListToJson(fileName):
 def main():
   import re
   return_code = 0
+  found_allow_truncation = False
   serializable_names = []
   serializable_names_no_label = []
   #Check for duplicates
@@ -67,6 +69,17 @@ def main():
       if file_type not in AllowedOutputFormats:
         log.error("unknown file type " + file_type + " for " + serializable_name)
         return_code = 1
+
+    # Check allowTuncation is only at the end
+    tags = edm[3] if len(edm) > 3 else None
+    allow_truncation_flag = False
+    if tags:
+      allow_truncation_flag = allowTruncation in tags
+      if allow_truncation_flag:
+        found_allow_truncation = True
+
+    if found_allow_truncation and not allow_truncation_flag:
+      log.error("All instances of 'allowTruncation' need to be at the END of the EDM serialisation list")
 
     serializable_names.append(serializable_name)
     serializable_names_no_label.append(serializable_name_no_label)

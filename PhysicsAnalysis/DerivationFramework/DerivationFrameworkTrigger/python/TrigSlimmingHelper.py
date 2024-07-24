@@ -9,9 +9,6 @@ from TrigEDMConfig.TriggerEDM import getTriggerEDMList
 def addTrigEDMSetToOutput(flags, helper: SlimmingHelper, edmSet: str, edmVersion: int = None):
     """Add a full trigger EDM set to the output slimming helper"""
 
-    # NB: I'm not sure that importing and using the ConfigFlags is a pattern that we want to
-    # encourage, but given that the derivations aren't built with CA's yet this is the best I can
-    # do...
     if edmVersion is None:
         edmVersion = flags.Trigger.EDMVersion
 
@@ -19,7 +16,7 @@ def addTrigEDMSetToOutput(flags, helper: SlimmingHelper, edmSet: str, edmVersion
     if edmVersion == -1:
         return
 
-    edmList = getTriggerEDMList(edmSet, edmVersion, flags.Trigger.ExtraEDMList)
+    edmList = getTriggerEDMList(flags, key=edmSet, runVersion=edmVersion)
     # This list is a mapping from container type to a list of required container names
     # This includes the Aux containers and their lists of aux variables.
     # The SlimmingHelper however requires the list of *interface* (non-Aux) containers with
