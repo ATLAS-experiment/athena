@@ -44,6 +44,14 @@ def RCJetSubstructureAugCfg(flags, name, **kwargs):
                       primary = True)
     return acc
 
+# tool to label leading/subleading jets
+def AugmentationToolLeadingJetsCfg(flags):
+    """Configure the RC jet substructure computation tool"""
+    acc = ComponentAccumulator()
+    acc.addPublicTool(CompFactory.DerivationFramework.AugmentationToolLeadingJets(name       = "LLP1AugmentationToolLeadingJets"),
+                      primary = True)
+    return acc
+
 # Vertex constraint tool
 def TrackParametersKVUCfg(flags, name, **kwargs):
     """Confiure the vertex constraint tool"""
