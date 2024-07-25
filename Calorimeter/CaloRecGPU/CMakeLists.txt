@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 
 # This package needs CUDA to be handled as a "first class language" by CMake.
@@ -22,6 +22,11 @@ atlas_add_library( CaloRecGPULib
    PUBLIC_HEADERS CaloRecGPU
    LINK_LIBRARIES AthenaBaseComps AthenaInterprocess CaloEvent CaloInterfaceLib CxxUtils GaudiKernel TileEvent TrigT2CaloCommonLib xAODTrigCalo
    PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS} )
+
+# Suppress spurious warnings seen in the LTO build originating 
+# in the boost parser code.
+set_target_properties( CaloRecGPULib
+                       PROPERTIES LINK_FLAGS " -Wno-maybe-uninitialized "  )
 
 atlas_add_component( CaloRecGPU
    src/components/*.cxx
