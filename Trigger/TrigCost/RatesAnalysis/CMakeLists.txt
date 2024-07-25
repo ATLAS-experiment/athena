@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( RatesAnalysis )
@@ -13,6 +13,11 @@ atlas_add_library( RatesAnalysisLib
                    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
                    LINK_LIBRARIES ${ROOT_LIBRARIES} GaudiKernel AthAnalysisBaseCompsLib AthenaBaseComps TrigDecisionToolLib EnhancedBiasWeighterLib
                    PRIVATE_LINK_LIBRARIES EventInfo TrigConfData TrigConfL1Data xAODEgamma xAODEventInfo )
+
+# Suppress spurious warnings seen in the LTO build originating 
+# in the boost parser code.
+set_target_properties( RatesAnalysisLib
+                       PROPERTIES LINK_FLAGS " -Wno-maybe-uninitialized "  )
 
 # Component(s) in the package:
 atlas_add_component( RatesAnalysis
