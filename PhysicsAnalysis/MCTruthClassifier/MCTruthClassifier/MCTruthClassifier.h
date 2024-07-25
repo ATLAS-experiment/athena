@@ -120,49 +120,44 @@ public:
 #endif
     return StatusCode::SUCCESS;
   }
-  virtual StatusCode finalize()
-#ifndef XAOD_STANDALONE
-    override
-#endif
-  { return StatusCode::SUCCESS;}
-
   virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
-  particleTruthClassifier(const xAOD::TruthParticle*,MCTruthPartClassifier::Info* info = nullptr) const override;
-
-  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
-  checkOrigOfBkgElec(const xAOD::TruthParticle* thePart,MCTruthPartClassifier::Info* info = nullptr) const override;
-
+  particleTruthClassifier(const xAOD::TruthParticle*,MCTruthPartClassifier::Info* info = nullptr) const override final;
 
 #ifndef XAOD_ANALYSIS /*These can not run in Analysis Base*/
   virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
-  particleTruthClassifier(const HepMcParticleLink& theLink,MCTruthPartClassifier::Info* info = nullptr) const override;
+  particleTruthClassifier(const HepMcParticleLink& theLink,MCTruthPartClassifier::Info* info = nullptr) const override final;
 
   virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
-  particleTruthClassifier(HepMC::ConstGenParticlePtr,MCTruthPartClassifier::Info* info = nullptr) const override;
+  particleTruthClassifier(HepMC::ConstGenParticlePtr,MCTruthPartClassifier::Info* info = nullptr) const override final;
 
 #endif
 
 #ifndef GENERATIONBASE /*These can not run in Generation only release*/
-  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
-  particleTruthClassifier(const xAOD::TrackParticle*,MCTruthPartClassifier::Info* info = nullptr) const override;
+  //Main method for Track to Truth association
+  virtual const xAOD::TruthParticle* getGenPart(const xAOD::TrackParticle*, MCTruthPartClassifier::Info* info = nullptr) const override final;
+
+#ifndef XAOD_ANALYSIS
+  //Main method for egamma clusters to Truth Particle association
+  virtual const xAOD::TruthParticle* egammaClusMatch(const xAOD::CaloCluster*,bool,MCTruthPartClassifier::Info* info) const override final;
+#endif
 
   virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
-  particleTruthClassifier(const xAOD::Electron*,MCTruthPartClassifier::Info* info = nullptr) const override;
+  particleTruthClassifier(const xAOD::TrackParticle*,MCTruthPartClassifier::Info* info = nullptr) const override final;
 
   virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
-  particleTruthClassifier(const xAOD::Photon*,MCTruthPartClassifier::Info* info = nullptr) const override;
+  particleTruthClassifier(const xAOD::Electron*,MCTruthPartClassifier::Info* info = nullptr) const override final;
 
   virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
-  particleTruthClassifier(const xAOD::Muon*,MCTruthPartClassifier::Info* info = nullptr) const override;
+  particleTruthClassifier(const xAOD::Photon*,MCTruthPartClassifier::Info* info = nullptr) const override final;
 
   virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
-  particleTruthClassifier(const xAOD::CaloCluster*,MCTruthPartClassifier::Info* info = nullptr) const override;
+  particleTruthClassifier(const xAOD::Muon*,MCTruthPartClassifier::Info* info = nullptr) const override final;
 
   virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
-  particleTruthClassifier(const xAOD::Jet*, bool DR, MCTruthPartClassifier::Info* info = nullptr) const override;
+  particleTruthClassifier(const xAOD::CaloCluster*,MCTruthPartClassifier::Info* info = nullptr) const override final;
 
-  virtual const xAOD::TruthParticle* getGenPart(const xAOD::TrackParticle*, MCTruthPartClassifier::Info* info = nullptr) const override;
-
+  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
+  particleTruthClassifier(const xAOD::Jet*, bool DR, MCTruthPartClassifier::Info* info = nullptr) const override final;
 #endif
 
 private:
@@ -209,7 +204,6 @@ private:
                      bool& isNarrowCone,
                      const CaloDetDescrManager& caloDDMgr) const;
 
-  const xAOD::TruthParticle* egammaClusMatch(const xAOD::CaloCluster*,bool,MCTruthPartClassifier::Info* info) const;
 #endif
 
 #ifndef GENERATIONBASE

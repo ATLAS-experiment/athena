@@ -17,8 +17,8 @@
 #   include "xAODRootAccess/TStore.h"
 #endif // ROOTCORE
 // EDM include(s):
-#include "xAODEgamma/ElectronContainer.h" 
-#include "xAODEgamma/PhotonContainer.h" 
+#include "xAODEgamma/ElectronContainer.h"
+#include "xAODEgamma/PhotonContainer.h"
 #include "MCTruthClassifier/MCTruthClassifier.h"
 #include "MCTruthClassifier/MCTruthClassifierDefs.h"
 
@@ -83,14 +83,14 @@ int main( int argc, char* argv[] ) {
      CHECK( event.retrieve(electrons, "Electrons") );
 
      xAOD::ElectronContainer::const_iterator el_it      = electrons->begin();
-     xAOD::ElectronContainer::const_iterator el_it_last = electrons->end(); 
-     unsigned int i = 0; 
+     xAOD::ElectronContainer::const_iterator el_it_last = electrons->end();
+     unsigned int i = 0;
 
      for (; el_it != el_it_last; ++el_it, ++i) {
-       const xAOD::Electron* el = (*el_it); 
+       const xAOD::Electron* el = (*el_it);
        std::cout << "Electron " << el << " Num " << i << std::endl;
        std::cout << "xAOD pt = " << (*el_it)->pt() << std::endl;
-       Info (APP_NAME,"Electron #%d", i); 
+       Info (APP_NAME,"Electron #%d", i);
        std::pair<MCTruthPartClassifier::ParticleType,MCTruthPartClassifier::ParticleOrigin>
           classification = myClassifier.particleTruthClassifier(*el_it);
 
@@ -108,7 +108,6 @@ int main( int argc, char* argv[] ) {
      Info( APP_NAME, "===>>>  done processing event #%lld ",entry);
    }
 
-   CHECK( myClassifier.finalize() );
    // Return gracefully:
    return 0;
 }

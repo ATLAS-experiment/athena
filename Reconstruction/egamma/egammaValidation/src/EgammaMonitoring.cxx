@@ -683,16 +683,6 @@ StatusCode EgammaMonitoring::execute() {
       auto res = m_mcTruthClassifier->particleTruthClassifier(truth);
       MCTruthPartClassifier::ParticleOrigin TO = res.second;
       MCTruthPartClassifier::ParticleType TT = res.first;
-      if (msgLvl(MSG::DEBUG)) {
-        auto res2 = m_mcTruthClassifier->checkOrigOfBkgElec(truth);
-        MCTruthPartClassifier::ParticleOrigin bkgTO = res2.second;
-        MCTruthPartClassifier::ParticleType bkgTT = res2.first;
-        ATH_MSG_DEBUG(" ** Truth particle associated to track Found: "
-                      << truth << " index    " << truth->index() << " bkg T0  "
-                      << bkgTO << " bkg TT   " << bkgTT << " T0  " << TO
-                      << " TT   " << TT << " eventNumber  "
-                      << eventInfo->eventNumber());
-      }
       if (TO == MCTruthPartClassifier::SingleElec &&
           TT == MCTruthPartClassifier::IsoElectron &&
           truth->index() == promptElectronTruthIndex) {
