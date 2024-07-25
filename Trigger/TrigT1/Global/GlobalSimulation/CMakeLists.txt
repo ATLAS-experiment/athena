@@ -8,18 +8,21 @@ find_package( ROOT COMPONENTS Core Hist)
 
 atlas_add_component (GlobalSimulation
    src/*.h src/*.cxx src/L1TopoAlgs/*.h src/L1TopoAlgs/*.cxx
+   src/GlobalAlgs/*.h src/GlobalAlgs/*.cxx 
    src/IO/*.h src/IO/*.cxx
    src/components/*.cxx
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} GaudiKernel
+   CaloDetDescrLib
+   CaloIdentifier
    L1TopoSimulationLib
    TrigConfData
    L1TopoEvent
    L1TopoInterfaces
    AthenaBaseComps
    AthenaMonitoringKernelLib
-   L1TopoAlgorithms) # L1TopoAlgorithms added temporarily during development
-
+   xAODTrigger
+   CaloEvent)
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
