@@ -30,7 +30,7 @@ bool ConvProxy::isChild(const ConvProxy* other ) const {
       return true;
     if ( c->isChild(other) )
       return true;
-  } 
+  }
   return false;
 }
 
@@ -40,7 +40,7 @@ bool ConvProxy::isParent(const ConvProxy* other ) const {
       return true;
     if ( c->isParent(other) )
       return true;
-  } 
+  }
   return false;
 }
 
@@ -182,15 +182,16 @@ StatusCode Run2ToRun3TrigNavConverterV2::initialize()
     size_t delimeterIndex = name.find('#');
     if (delimeterIndex != std::string::npos)
     {
-      ATH_MSG_ERROR("Not support for specific collection name yet");
-      return StatusCode::FAILURE;
       typeName = name.substr(0, delimeterIndex);
       collName = name.substr(delimeterIndex + 1);
     }
     CLID id{0};
     ATH_CHECK(m_clidSvc->getIDOfTypeName(typeName, id));
     ATH_MSG_DEBUG("Will be linking collection type " << typeName << " name (empty==all) " << collName);
-    m_collectionsToSaveDecoded[id].insert(collName);
+    if ( collName.empty() )
+      m_collectionsToSaveDecoded[id]; // creates empty set
+    else
+      m_collectionsToSaveDecoded[id].insert(collName);
   }
 
   for (const auto &name : m_roisToSave)
@@ -203,12 +204,12 @@ StatusCode Run2ToRun3TrigNavConverterV2::initialize()
   {
     if (keysSet.size() > 1 and keysSet.count("") != 0)
     {
-      ATH_MSG_ERROR("Bad configuration for CLID " << clid << " reuested saving of all (empty coll name configures) collections, yet there are also specific keys");
+      ATH_MSG_ERROR("Bad configuration for CLID " << clid << " requested saving of all (empty coll name configures) collections, yet there are also specific keys");
       return StatusCode::FAILURE;
     }
 
   }
-  
+
   bool anyChainBad=false;
   for ( auto chain: m_chainsToSave ) {
     if ( chain.find('*') != std::string::npos or chain.find('|') != std::string::npos ) {
@@ -245,10 +246,6 @@ StatusCode Run2ToRun3TrigNavConverterV2::finalize()
 
 StatusCode Run2ToRun3TrigNavConverterV2::execute(const EventContext &context) const
 {
-  // ATH_MSG_INFO("EVENT " << context.evt());
-  // if ( 4 == context.evt() )  return StatusCode::SUCCESS;
-  // ATH_MSG_INFO("EVENT processing " << context.evt());
-
   {
     // configuration reading could not be done before the event loop
     // it needs to be done only once though
@@ -324,7 +321,7 @@ StatusCode Run2ToRun3TrigNavConverterV2::execute(const EventContext &context) co
   {
     ATH_CHECK(numberOfHNodesPerProxyNotExcessive(convProxies));
   }
-  
+
   ATH_CHECK(createL1Nodes(convProxies, *decisionOutput, context));
   ATH_CHECK(linkFeaNode(convProxies, *decisionOutput, *run2NavigationPtr, context));
   ATH_CHECK(linkRoiNode(convProxies, *run2NavigationPtr));
@@ -382,11 +379,11 @@ size_t Run2ToRun3TrigNavConverterV2::is2LegTopoChain(const TrigConf::HLTChain* p
   std::set<HLT::te_id_type> tesInChain;
 
   for ( auto te: finalSeq->inputTEs()) {
-     tesInSeq.insert(te->id()); 
+     tesInSeq.insert(te->id());
   }
 
   for ( auto te: preFinalTEs) {
-     tesInChain.insert(te->id()); 
+     tesInChain.insert(te->id());
   }
 
   if (tesInSeq == tesInChain)  {
@@ -403,7 +400,9 @@ StatusCode Run2ToRun3TrigNavConverterV2::extractTECtoChainMapping(TEIdToChainsMa
   // obtain map output TE -> input TE via sequences
   for (auto ptrChain : m_configSvc->chains())
   {
-    std::string chainName = ptrChain->name();    
+    std::string chainName = ptrChain->name();
+
+
     if (not m_chainsToSave.empty())
     {
       auto found = std::find(m_chainsToSave.begin(), m_chainsToSave.end(), chainName);
@@ -412,13 +411,19 @@ StatusCode Run2ToRun3TrigNavConverterV2::extractTECtoChainMapping(TEIdToChainsMa
         continue;
       }
     }
+
+    if (std::regex_match(chainName, SpecialCases::bjetMuChain ))  {
+      ATH_CHECK(bjetMuChainConfigDecoder(allTEs, finalTEs, ptrChain));
+      continue;
+    }
+
     // hack for etcut chains
     // if we ever need to generalise that it should be moved to separate function
     std::map<HLT::te_id_type, HLT::te_id_type> etcutReplacementTEs;
     auto etcutReplacement = [&etcutReplacementTEs](HLT::te_id_type in) { auto out = etcutReplacementTEs.find(in);  return (out == etcutReplacementTEs.end() ? in : out->second ); };
     if ( chainName.find("etcut") != std::string::npos ) {
       std::set<size_t> positionsOfEtCutLegs;
-      // use heuristics to mention 
+      // use heuristics to mention
       if( std::regex_match(chainName, SpecialCases::egammaDiEtcut) ) {
          ATH_MSG_DEBUG("EtCut chains hack, chain with two etcut legs ");
          positionsOfEtCutLegs.insert({0, 1});
@@ -429,11 +434,11 @@ StatusCode Run2ToRun3TrigNavConverterV2::extractTECtoChainMapping(TEIdToChainsMa
          ATH_MSG_DEBUG("EtCut chains hack, single leg egamma chain");
          positionsOfEtCutLegs.insert({0});
       }
-      
+
       // pilot pass to fill the replacement map
       std::map<size_t, HLT::te_id_type> positionToDesiredIDmap;
       for (auto ptrHLTSignature : ptrChain->signatures()) {
-        size_t position = 0;        
+        size_t position = 0;
         for (auto ptrHLTTE : ptrHLTSignature->outputTEs()) {
           if (positionsOfEtCutLegs.count(position) and positionToDesiredIDmap.find(position) != positionToDesiredIDmap.end() ) {
             etcutReplacementTEs[ptrHLTTE->id()] = positionToDesiredIDmap[position];
@@ -454,7 +459,7 @@ StatusCode Run2ToRun3TrigNavConverterV2::extractTECtoChainMapping(TEIdToChainsMa
     for (auto ptrHLTSignature : ptrChain->signatures()) {
       for (auto ptrHLTTE : ptrHLTSignature->outputTEs()) {
         unsigned int teId = etcutReplacement(ptrHLTTE->id());
-        allTEs[teId].insert(chainId);  
+        allTEs[teId].insert(chainId);
         if (ptrHLTSignature == ptrChain->signatures().back()) {
             finalTEs[teId].insert(chainId);
             ATH_MSG_DEBUG("TE will be used to mark final chain decision " << ptrHLTTE->name() << " chain " << chainName );
@@ -464,17 +469,17 @@ StatusCode Run2ToRun3TrigNavConverterV2::extractTECtoChainMapping(TEIdToChainsMa
     // chains with a multiple legs
     std::vector<int> multiplicities = ChainNameParser::multiplicities(chainName);
 
-    // dirty hacks for failing chains parsing    
+    // dirty hacks for failing chains parsing
     if(std::regex_match(chainName, SpecialCases::gammaXeChain))
       multiplicities={1,1};
 
-    
+
     if ( multiplicities.size() > 1 ) {
       ATH_MSG_DEBUG(" this " << (is2LegTopoChain(ptrChain) ? "is": "is not") << " topological chain");
       // the chain structure (in terms of multiplicities) may change along the way
       // we'll assign legs only to these TEs of the steps that have identical multiplicity pattern
       // e.g. for the chain: HLT_2g25_loose_g20 the multiplicities are: [2, 1]
-      // 
+      //
 
       // hack for HLT.*tau.*xe.* case
       if (std::regex_match(chainName, SpecialCases::tauXeChain)) {
@@ -484,6 +489,7 @@ StatusCode Run2ToRun3TrigNavConverterV2::extractTECtoChainMapping(TEIdToChainsMa
 
       ATH_MSG_DEBUG("CHAIN " << chainName << " needs legs: " << multiplicities );
       std::vector<unsigned int> teIdsLastHealthyStepIds;
+
 
       for (auto ptrHLTSignature : ptrChain->signatures())
         {
@@ -495,7 +501,7 @@ StatusCode Run2ToRun3TrigNavConverterV2::extractTECtoChainMapping(TEIdToChainsMa
             if ( lastSeenId != ptrHLTTE->id()) {
               teCounts.push_back(1);
               teIds.push_back(ptrHLTTE->id());
-            } else { 
+            } else {
               teCounts.back()++;
             }
             lastSeenId = ptrHLTTE->id();
@@ -512,7 +518,7 @@ StatusCode Run2ToRun3TrigNavConverterV2::extractTECtoChainMapping(TEIdToChainsMa
               HLT::Identifier chainLegId = TrigCompositeUtils::createLegName(chainId, legNumber);
               allTEs[etcutReplacement(teIds[legNumber])].insert(chainLegId);
             }
-          } 
+          }
         }
         for ( size_t legNumber = 0; legNumber < teIdsLastHealthyStepIds.size(); ++ legNumber ) {
           HLT::Identifier chainLegId = TrigCompositeUtils::createLegName(chainId, legNumber);
@@ -521,11 +527,49 @@ StatusCode Run2ToRun3TrigNavConverterV2::extractTECtoChainMapping(TEIdToChainsMa
           finalTEs[etcutReplacement(teIdsLastHealthyStepIds[legNumber])].insert(chainLegId);
         }
     }
-
   }
   ATH_MSG_DEBUG("Recognised " << allTEs.size() << " kinds of TEs and among them " << finalTEs.size() << " final types");
   return StatusCode::SUCCESS;
 }
+
+StatusCode Run2ToRun3TrigNavConverterV2::bjetMuChainConfigDecoder(TEIdToChainsMap_t &allTEs, TEIdToChainsMap_t &finalTEs, const TrigConf::HLTChain* ptrChain ) const {
+  HLT::Identifier chainId = HLT::Identifier(ptrChain->name());
+
+  std::vector<unsigned int> muons;
+  std::vector<unsigned int> jets;
+  bool switchedTojets =false;
+  for (auto ptrHLTSignature : ptrChain->signatures()) {
+    for (auto ptrHLTTE : ptrHLTSignature->outputTEs()) {
+      if ( ptrHLTTE->name().find("_mu") == std::string::npos )  {
+        switchedTojets = true; 
+      }
+
+      if ( switchedTojets)
+        jets.push_back(ptrHLTTE->id());
+      else
+        muons.push_back(ptrHLTTE->id());
+    }
+  }
+  ATH_CHECK(not muons.empty());
+  ATH_CHECK(not jets.empty());
+  std::reverse(std::begin(muons), std::end(muons));
+  std::reverse(std::begin(jets), std::end(jets));
+  finalTEs[muons[0]].insert(TrigCompositeUtils::createLegName(chainId, 0));
+  finalTEs[muons[0]].insert(chainId);
+  finalTEs[jets[0]].insert(TrigCompositeUtils::createLegName(chainId, 1));
+  finalTEs[jets[0]].insert(chainId);
+
+  for ( size_t index = 0; index < std::min(muons.size(), jets.size()); ++index)
+    {
+      allTEs[muons[index]].insert(TrigCompositeUtils::createLegName(chainId, 0));
+      allTEs[muons[index]].insert(chainId);
+      allTEs[jets[index]].insert(TrigCompositeUtils::createLegName(chainId, 1));
+      allTEs[jets[index]].insert(chainId);
+    }
+  return StatusCode::SUCCESS;
+}
+
+
 
 StatusCode Run2ToRun3TrigNavConverterV2::mirrorTEsStructure(ConvProxySet_t &convProxies, const HLT::TrigNavStructure &run2Nav) const
 {
@@ -593,7 +637,7 @@ StatusCode Run2ToRun3TrigNavConverterV2::mirrorTEsStructure(ConvProxySet_t &conv
 }
 
 
-void Run2ToRun3TrigNavConverterV2::printProxies(const ConvProxySet_t& proxies, 
+void Run2ToRun3TrigNavConverterV2::printProxies(const ConvProxySet_t& proxies,
                                                 std::function<bool(const ConvProxy*)> selector,
                                                 std::vector<std::function<void(const ConvProxy*)>> printers) const {
   ATH_MSG_DEBUG("Printing proxies");
@@ -830,8 +874,8 @@ StatusCode Run2ToRun3TrigNavConverterV2::collapseFeaturelessProxies(ConvProxySet
       auto hasSomeFeatures = [](const ConvProxy* p){ return p->feaHash != ConvProxy::MissingFEA; };
       if (proxy->children.size() == 1 and
           std::all_of(proxy->children.begin(), proxy->children.end(), hasSomeFeatures ) and
-          proxy->parents.size() == 1 and 
-          std::all_of(proxy->parents.begin(), proxy->parents.end(), hasSomeFeatures ) 
+          proxy->parents.size() == 1 and
+          std::all_of(proxy->parents.begin(), proxy->parents.end(), hasSomeFeatures )
           )
       {
         ATH_MSG_VERBOSE("Proxy to possibly merge: " << proxy->description());
@@ -884,7 +928,7 @@ StatusCode Run2ToRun3TrigNavConverterV2::removeTopologicalProxies(ConvProxySet_t
       ++i;
     }
   }
-  return StatusCode::SUCCESS;  
+  return StatusCode::SUCCESS;
 }
 
 StatusCode Run2ToRun3TrigNavConverterV2::fillRelevantFeatures(ConvProxySet_t &convProxies, const HLT::TrigNavStructure &run2Nav) const
@@ -900,7 +944,7 @@ StatusCode Run2ToRun3TrigNavConverterV2::fillRelevantFeatures(ConvProxySet_t &co
         auto [sgKey, sgCLID, sgName] = getSgKey(run2Nav, helper);
         if (sgKey != 0)
         {
-          if (feaToSave(helper) == true)
+          if (feaToSave(helper, sgName))
           {
             proxy->features.push_back(helper);
           }
@@ -949,7 +993,7 @@ StatusCode Run2ToRun3TrigNavConverterV2::fillRelevantRois(ConvProxySet_t &convPr
 
   // roiPropagator
   std::set<const ConvProxy*>  visited;
-  std::function<void(std::set<ConvProxy *> &, const std::vector<HLT::TriggerElement::FeatureAccessHelper> &)> 
+  std::function<void(std::set<ConvProxy *> &, const std::vector<HLT::TriggerElement::FeatureAccessHelper> &)>
    roiPropagator = [&](std::set<ConvProxy *> &convProxyChildren, const std::vector<HLT::TriggerElement::FeatureAccessHelper> &roiParent)
   {
     for (auto &proxyChild : convProxyChildren)
@@ -1114,7 +1158,7 @@ StatusCode Run2ToRun3TrigNavConverterV2::updateTerminusNode(xAOD::TrigCompositeC
     {
       if (std::find(m_chainsToSave.begin(), m_chainsToSave.end(), chainName) == m_chainsToSave.end())
       {
-        ATH_MSG_ERROR("Navigation information for chain " << chainName << " in " 
+        ATH_MSG_ERROR("Navigation information for chain " << chainName << " in "
           << TCU::summaryPassNodeName() << " but this chain wasn't on the list of chains to save");
         return StatusCode::FAILURE;
       }
@@ -1131,7 +1175,7 @@ StatusCode Run2ToRun3TrigNavConverterV2::updateTerminusNode(xAOD::TrigCompositeC
   if (msgLvl(MSG::VERBOSE))
   {
     for (const TCU::DecisionID id : filteredIDs)
-    { 
+    {
       ATH_MSG_VERBOSE(" -- Retained passing ID: " << HLT::Identifier(id));
     }
   }
@@ -1225,6 +1269,7 @@ StatusCode Run2ToRun3TrigNavConverterV2::linkFeaNode(ConvProxySet_t &convProxies
     for (auto &fea : proxy->features)
     {
       auto [sgKey, sgCLID, sgName] = getSgKey(run2Nav, fea);
+      // link to itself when lined collection has size 0
       if (fea.getIndex().objectsBegin() == fea.getIndex().objectsEnd())
       {
         ElementLink<xAOD::TrigCompositeContainer> linkToSelf = TrigCompositeUtils::decisionToElementLink(*hNodeIter, context);
@@ -1273,7 +1318,7 @@ StatusCode Run2ToRun3TrigNavConverterV2::linkTrkNode(ConvProxySet_t &convProxies
     {
       if (proxy->imNode->hasObjectLink(TrigCompositeUtils::roiString()))
       {
-        try 
+        try
         {
           ElementLink<TrigRoiDescriptorCollection> ROIElementLink = proxy->imNode->objectLink<TrigRoiDescriptorCollection>(TrigCompositeUtils::roiString());
           if (ROIElementLink.isValid())
@@ -1368,15 +1413,21 @@ uint64_t Run2ToRun3TrigNavConverterV2::feaToHash(const std::vector<HLT::TriggerE
   return hash;
 }
 
-bool Run2ToRun3TrigNavConverterV2::feaToSave(const HLT::TriggerElement::FeatureAccessHelper &fea) const
+bool Run2ToRun3TrigNavConverterV2::feaToSave(const HLT::TriggerElement::FeatureAccessHelper &fea, const std::string& sgName) const
 {
-  if (m_collectionsToSaveDecoded.find(fea.getCLID()) != m_collectionsToSaveDecoded.end())
+  auto iter = m_collectionsToSaveDecoded.find(fea.getCLID());
+  if (iter != m_collectionsToSaveDecoded.end())
   {
-    return true; // feature accepted for saving
+    if ( iter->second.empty() )
+      return true; // feature accepted for saving
+    ATH_MSG_DEBUG("fea to save CLID: " << fea.getCLID() << ", sgName: " << sgName << " " <<iter->second.size() << " " << iter->second.empty() );
+    return iter->second.contains(sgName);
   }
 
   return false;
 }
+
+
 
 bool Run2ToRun3TrigNavConverterV2::roiToSave(const HLT::TrigNavStructure &run2Nav, const HLT::TriggerElement::FeatureAccessHelper &roi) const
 {

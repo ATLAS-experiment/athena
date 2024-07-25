@@ -8,6 +8,7 @@
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
+#include "TrigSteeringEvent/Chain.h"
 #include "xAODTrigger/TrigNavigation.h"
 #include "TrigConfInterfaces/IHLTConfigSvc.h"
 #include "GaudiKernel/IClassIDSvc.h"
@@ -135,7 +136,7 @@ private:
   uint64_t feaToHash(const std::vector<HLT::TriggerElement::FeatureAccessHelper> &feaVector, const HLT::TriggerElement *te_ptr, const HLT::TrigNavStructure &navigationDecoder) const;
 
   //!< returns true if this particular feature is to be saved (linked)
-  bool feaToSave(const HLT::TriggerElement::FeatureAccessHelper &fea) const;
+  bool feaToSave(const HLT::TriggerElement::FeatureAccessHelper &fea, const std::string& sgName) const;
 
   bool roiToSave(const HLT::TrigNavStructure &run2Nav, const HLT::TriggerElement::FeatureAccessHelper &fea) const;
 
@@ -180,6 +181,12 @@ private:
   CLID m_CaloClusterContainerCLID{0};
   CLID m_TrackParticleContainerCLID{0};
   CLID m_TauTrackContainerCLID{0};
+
+  // special cases that need separate method
+  // this is to cover chains like this one: HLT_mu4_j15_boffperf_split_dr05_dz02
+  // it's description in the TrigConfigSvc looks like it is 1 leg chain while in fact it is a two leg chain with jet +mu
+  // a special configuration decoding is used to restore multiplicity of 2
+  StatusCode bjetMuChainConfigDecoder(TEIdToChainsMap_t &allTES, TEIdToChainsMap_t &finalTEs, const TrigConf::HLTChain* ptrChain) const;
 
 
 };

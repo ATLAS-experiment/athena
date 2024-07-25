@@ -12,5 +12,7 @@ namespace SpecialCases {
   const std::regex isTopo{".*(Jpsi|Zee).*"};
   const std::regex specialEchain{"HLT_e26_lhmedium_nod0_mu8noL1"};
   const std::regex tauXeChain{"HLT.*tau.*xe.*"};
+  const std::regex bjetMuChain{"HLT_mu.*_j.*_split_.*"};
+
 
 }
