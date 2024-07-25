@@ -93,7 +93,9 @@ std::unique_ptr<SegmentSeed>
         return std::make_unique<SegmentSeed>(etaMax.tanTheta(), etaMax.interceptY(), phiMax.x, phiMax.y, hitsOnMax.size(), std::move(hitsOnMax), etaMax.parentBucket());         
 }
 
-StatusCode PhiHoughTransformAlg::preProcessMaximum(HoughEventData & eventData, const HoughMaximum & maximum) const{
+StatusCode PhiHoughTransformAlg::preProcessMaximum(const ActsGeometryContext& gctx,
+                                                   const HoughMaximum & maximum,
+                                                   HoughEventData& eventData) const{
     // reset the event data 
     eventData.phiHitsOnMax = 0; 
     eventData.searchSpaceTanAngle = std::make_pair(1e10, -1e10); 
@@ -104,7 +106,7 @@ StatusCode PhiHoughTransformAlg::preProcessMaximum(HoughEventData & eventData, c
         if (!hit->measuresPhi())
             continue;
         // find the direction of the IP viewed from the chamber frame 
-        Amg::Vector3D extrapDir = (hit->positionInChamber() - hit->chamber()->globalToLocalTrans(eventData.gctx).translation()).unit(); 
+        Amg::Vector3D extrapDir = (hit->positionInChamber() - hit->chamber()->globalToLocalTrans(gctx).translation()).unit(); 
         // express the x location of our phi hits on the chamber plane (z = 0) when projecting from the beam spot
         std::optional<double> dummyIntercept = Amg::intersect<3>(hit->positionInChamber(),extrapDir,Amg::Vector3D::UnitZ(),0); 
         double x0 = (hit->positionInChamber() + dummyIntercept.value_or(0) * extrapDir).x(); 
@@ -195,7 +197,7 @@ StatusCode PhiHoughTransformAlg::execute(const EventContext& ctx) const {
     ATH_CHECK(retrieveContainer(ctx, m_geoCtxKey, gctx));
 
     // book the event data object
-    HoughEventData eventData(*gctx);
+    HoughEventData eventData{};
 
     // prepare the accumulator
     ATH_CHECK(prepareHoughPlane(eventData));
@@ -207,7 +209,7 @@ StatusCode PhiHoughTransformAlg::execute(const EventContext& ctx) const {
     // loop over the previously found eta-maxima for each station
     for (const HoughMaximum* max : *maxima) {
         // for each maximum, pre-process 
-        ATH_CHECK(preProcessMaximum(eventData,*max)); 
+        ATH_CHECK(preProcessMaximum(*gctx, *max, eventData)); 
         bool foundSolution=false; 
         // if we have enough hits, run a phi transform 
         if (eventData.phiHitsOnMax > 1){        

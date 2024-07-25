@@ -48,13 +48,13 @@ StatusCode EtaHoughTransformAlg::execute(const EventContext& ctx) const {
     SG::WriteHandle<EtaHoughMaxContainer> writeMaxima(m_maxima, ctx);
     ATH_CHECK(writeMaxima.record(std::make_unique<EtaHoughMaxContainer>()));
 
-    SG::ReadHandle<ActsGeometryContext> gctxHandle{m_geoCtxKey, ctx};
-    ATH_CHECK(gctxHandle.isValid());
+    const ActsGeometryContext* gctx{nullptr};
+    ATH_CHECK(retrieveContainer(ctx, m_geoCtxKey, gctx));
 
-    HoughEventData data{*gctxHandle};
+    HoughEventData data{};
 
     /// pre-populate the event data - sort PRDs by station
-    ATH_CHECK(preProcess(data, *spacePoints));
+    ATH_CHECK(preProcess(*gctx, *spacePoints, data));
 
     /// book the hough plane
     ATH_CHECK(prepareHoughPlane(data));
@@ -75,17 +75,18 @@ StatusCode EtaHoughTransformAlg::execute(const EventContext& ctx) const {
               });
     return StatusCode::SUCCESS;
 }
-StatusCode EtaHoughTransformAlg::preProcess(HoughEventData& data,
-                                            const SpacePointContainer& spacePoints) const {
+StatusCode EtaHoughTransformAlg::preProcess(const ActsGeometryContext& gctx,
+                                            const SpacePointContainer& spacePoints,
+                                            HoughEventData& data) const {
 
     ATH_MSG_DEBUG("Load " << spacePoints.size() << " space point buckets");
     for (const SpacePointBucket* sp : spacePoints) {
         std::vector<HoughSetupForBucket>& buckets = data.houghSetups[sp->front()->chamber()];
         buckets.push_back(HoughSetupForBucket{sp});
         HoughSetupForBucket& hs = buckets.back();
-        Amg::Vector3D leftSide = hs.bucket->chamber()->globalToLocalTrans(data.gctx).translation() -
+        Amg::Vector3D leftSide = hs.bucket->chamber()->globalToLocalTrans(gctx).translation() -
                                 (hs.bucket->coveredMin() * Amg::Vector3D::UnitY());
-        Amg::Vector3D rightSide = hs.bucket->chamber()->globalToLocalTrans(data.gctx).translation() -
+        Amg::Vector3D rightSide = hs.bucket->chamber()->globalToLocalTrans(gctx).translation() -
                                  (hs.bucket->coveredMax() * Amg::Vector3D::UnitY());
         const double tanThetaLeft = leftSide.y() / leftSide.z();
         const double tanThetaRight = rightSide.y() / rightSide.z();

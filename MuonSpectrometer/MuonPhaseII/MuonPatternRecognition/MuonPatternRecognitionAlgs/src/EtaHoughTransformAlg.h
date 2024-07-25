@@ -47,10 +47,12 @@ namespace MuonR4{
             /// @brief pre-processing method called once per event. 
             /// Populates the event data with the space points for each
             /// bucket and identifies the optimal search space in each bucket.
+            /// @param gctx: Geometry context to retrieve global positioning of the chambers
+            /// @param spacePoints point list from store gate 
             /// @param data: event data object
-            /// @param space point list from store gate 
-            StatusCode preProcess(HoughEventData & data, 
-                                  const SpacePointContainer & spacePoints ) const; 
+            StatusCode preProcess(const ActsGeometryContext& gctx,
+                                  const SpacePointContainer & spacePoints,
+                                  HoughEventData & data) const; 
 
             /// @brief prepare the accumulator and the peak finder once per event 
             /// @param data: event data object
