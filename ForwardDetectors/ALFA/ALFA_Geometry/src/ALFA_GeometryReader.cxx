@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -215,8 +215,6 @@ void ALFA_GeometryReader::TransformFiberPositionsFCSCladding(PFIBERPARAMS pFiber
 		if(eType==EFT_ODFIBERU1)
 		{
 			pFiberParams->fcs_cladding.fAngle=0*CLHEP::deg;
-			//1.10.2010 LN: change of indexation scheme
-			//pFiberParams->fcs_cladding.fCentreYPos=(-22.75-0.5*(pFiberParams->nFiberID-1))*CLHEP::mm;
 			pFiberParams->fcs_cladding.fCentreYPos=(-29.75+0.5*(pFiberParams->nFiberID-16))*CLHEP::mm;
 
 			//adjust fiber offset
@@ -285,13 +283,7 @@ void ALFA_GeometryReader::TransformFiberPositionsFCSAtlas(PFIBERPARAMS pFiberPar
 	
 	const double fSCY_ODFiberU=-106.333;
 	const double fSCY_ODFiberV=-113.833;
-	
-	//const double fSCX_ODFiber00=-23.00;
-	//const double fSCX_ODFiber01=+23.00;
 
-	//MsgStream LogStream(Athena::getMessageSvc(), "ALFA_GeometryReader::TransformFiberPositionsFCSAtlas");
-
-	//HepGeom::Point3D<double> RealDetRefPointInATLAS=RPPosParams.RPTransformInATLAS*RPPosParams.IdealRefPoint;
 	double fCentrePos=0.0, fZOffset=0.0;
 	double fStagger=0.0;
 
@@ -326,11 +318,7 @@ void ALFA_GeometryReader::TransformFiberPositionsFCSAtlas(PFIBERPARAMS pFiberPar
 				pFiberParams->fOffset=fCentrePos+fSCY_ODFiberV+fStagger;
 			}
 			else if(eType==EFT_ODFIBERV1){
-
-				//1.10.2010 LN: change of indexation scheme
-				//fCentrePos=(-22.75-0.5*(pFiberParams->nFiberID-16))*CLHEP::mm;
 				fCentrePos=(-29.75+0.5*(pFiberParams->nFiberID-1))*CLHEP::mm;
-
 				pFiberParams->fOffset=fCentrePos+fSCY_ODFiberV+fStagger;
 			}
 		}
@@ -339,27 +327,28 @@ void ALFA_GeometryReader::TransformFiberPositionsFCSAtlas(PFIBERPARAMS pFiberPar
 		else fZOffset=-2*(pFiberParams->nPlateID-1)*CLHEP::mm-33.65*CLHEP::mm;
 		break;
 		case EFT_ODFIBERU0:
-		case EFT_ODFIBERU1:
-		fStagger=OD_stagger[pFiberParams->nPlateID-1]*CLHEP::mm;
-
-		if(eSourceType==EGST_IDEALGEOMETRY){
-			if(eType==EFT_ODFIBERU0){
-				fCentrePos=(-29.75+0.5*(pFiberParams->nFiberID-16))*CLHEP::mm;
-				pFiberParams->fOffset=fCentrePos+fSCY_ODFiberU+fStagger;
-			}
-			else if(eType==EFT_ODFIBERU1){
-
-				//1.10.2010 LN: change of indexation scheme
-				//fCentrePos=(-22.75-0.5*(pFiberParams->nFiberID-1))*CLHEP::mm;
-				fCentrePos=(-29.75+0.5*(pFiberParams->nFiberID-16))*CLHEP::mm;
-
-				pFiberParams->fOffset=fCentrePos+fSCY_ODFiberU+fStagger;
-			}
+		case EFT_ODFIBERU1:{
+      const int idx = pFiberParams->nPlateID-1;
+      if (idx<0 or idx>=3){
+        throw std::out_of_range("Index out of range in ALFA_GeometryReader::TransformFiberPositionsFCSAtlas");
+      }
+      fStagger=OD_stagger[idx]*CLHEP::mm;
+  
+      if(eSourceType==EGST_IDEALGEOMETRY){
+        if(eType==EFT_ODFIBERU0){
+          fCentrePos=(-29.75+0.5*(pFiberParams->nFiberID-16))*CLHEP::mm;
+          pFiberParams->fOffset=fCentrePos+fSCY_ODFiberU+fStagger;
+        }
+        else if(eType==EFT_ODFIBERU1){
+          fCentrePos=(-29.75+0.5*(pFiberParams->nFiberID-16))*CLHEP::mm;
+          pFiberParams->fOffset=fCentrePos+fSCY_ODFiberU+fStagger;
+        }
+      }
+  
+      if(!RPPosParams.bIsLow) fZOffset=2*(pFiberParams->nPlateID-1)*CLHEP::mm+32.35*CLHEP::mm;
+      else fZOffset=-2*(pFiberParams->nPlateID-1)*CLHEP::mm-32.35*CLHEP::mm;
+      break;
 		}
-
-		if(!RPPosParams.bIsLow) fZOffset=2*(pFiberParams->nPlateID-1)*CLHEP::mm+32.35*CLHEP::mm;
-		else fZOffset=-2*(pFiberParams->nPlateID-1)*CLHEP::mm-32.35*CLHEP::mm;
-		break;
 	default:
 		break;
 	}
@@ -396,50 +385,7 @@ void ALFA_GeometryReader::TransformFiberPositionsFCSAtlas(PFIBERPARAMS pFiberPar
 	pFiberParams->fcs_atlas_full.fDirY=DirVector[1]/DirVector.mag();
 	pFiberParams->fcs_atlas_full.fDirZ=DirVector[2]/DirVector.mag();
 
-	/* 2013-01-23: LN - old fashioned calculationfiber slope and offset in atlas cs
-	//TotTrans=ASPosParams.ASTransformInATLAS*ASPosParams.ASTransformInMainPoint*RPPosParams.RPTransformInStation*RPPosParams.DetTransformInMainPoint;
-	TotTrans=ASPosParams.ASTransformInATLAS*RPPosParams.RPTransformInStation*RPPosParams.DetTransformInMainPoint;
 
-	HepGeom::Point3D<double> IdealDetRefPointInMainPoint;
-	if(RPPosParams.bIsLow==false) {
-		IdealDetRefPointInMainPoint=HepGeom::Point3D<double>(RPPosParams.IdealRefPoint[0]-RPPosParams.IdealMainPoint[0],RPPosParams.IdealRefPoint[1]-RPPosParams.IdealMainPoint[1],RPPosParams.IdealRefPoint[2]+fZOffset-RPPosParams.IdealMainPoint[2]);
-	}
-	else{
-		IdealDetRefPointInMainPoint=HepGeom::Point3D<double>(RPPosParams.IdealRefPoint[0]-RPPosParams.IdealMainPoint[0],-(RPPosParams.IdealRefPoint[1]-RPPosParams.IdealMainPoint[1]),-(RPPosParams.IdealRefPoint[2]+fZOffset-RPPosParams.IdealMainPoint[2]));
-	}
-	
-	HepGeom::Point3D<double> RealDetRefPointInATLAS=TotTrans*IdealDetRefPointInMainPoint;
-
-	HepGeom::Point3D<double> FiberPointX, FiberPointY;
-	switch(eType)
-	{
-		case EFT_VFIBER:
-		case EFT_UFIBER:
-			FiberPointX=HepGeom::Point3D<double>(IdealDetRefPointInMainPoint[0]+0.0,IdealDetRefPointInMainPoint[1]+pFiberParams->fOffset,IdealDetRefPointInMainPoint[2]);
-			FiberPointY=HepGeom::Point3D<double>(IdealDetRefPointInMainPoint[0]-pFiberParams->fOffset/pFiberParams->fSlope,IdealDetRefPointInMainPoint[1]+0.0,IdealDetRefPointInMainPoint[2]);
-			break;
-		case EFT_ODFIBERV0:
-		case EFT_ODFIBERV1:
-		case EFT_ODFIBERU0:
-		case EFT_ODFIBERU1:
-			FiberPointX=HepGeom::Point3D<double>(IdealDetRefPointInMainPoint[0]+0.0,IdealDetRefPointInMainPoint[1]+pFiberParams->fOffset,IdealDetRefPointInMainPoint[2]);
-			FiberPointY=HepGeom::Point3D<double>(IdealDetRefPointInMainPoint[0]+100.0,IdealDetRefPointInMainPoint[1]+100.0*pFiberParams->fSlope+pFiberParams->fOffset,IdealDetRefPointInMainPoint[2]);
-			break;
-		default:
-			break;
-	}
-
-	HepGeom::Point3D<double> RealFiberPointXInATLAS=TotTrans*FiberPointX;
-	HepGeom::Point3D<double> RealFiberPointYInATLAS=TotTrans*FiberPointY;
-	HepGeom::Point3D<double> RealProjectedFiberPointXInATLAS=HepGeom::Point3D<double>(RealFiberPointXInATLAS[0],RealFiberPointXInATLAS[1],RealDetRefPointInATLAS[2]);
-	HepGeom::Point3D<double> RealProjectedFiberPointYInATLAS=HepGeom::Point3D<double>(RealFiberPointYInATLAS[0],RealFiberPointYInATLAS[1],RealDetRefPointInATLAS[2]);
-
-	pFiberParams->fcs_atlas.fSlope=(RealProjectedFiberPointYInATLAS[1]-RealProjectedFiberPointXInATLAS[1])/(RealProjectedFiberPointYInATLAS[0]-RealProjectedFiberPointXInATLAS[0]);
-	//pFiberParams->fcs_atlas.fOffset=RealProjectedFiberPointXInATLAS[1]-pFiberParams->fcs_atlas.fSlope*RealProjectedFiberPointXInATLAS[0];
-	HepGeom::Point3D<double> FiberPointYInAtlas=GetDetPointInAtlas(eRPName,FiberPointY);
-	pFiberParams->fcs_atlas.fOffset=FiberPointYInAtlas[1];
-	pFiberParams->fcs_atlas.fZPos=RealDetRefPointInATLAS[2];
-	*/
 }
 
 
@@ -452,7 +398,6 @@ bool ALFA_GeometryReader::InitializeDefault(const PGEOMETRYCONFIGURATION pConfig
 	m_RPPosParams.clear();
 	m_ListExistingRPots.clear();
 
-	//double fGlobalYOffset=DETEDGEDISTANCE;
 	double fYOffset;
 
 	// ALFA Station positions
@@ -827,28 +772,11 @@ void ALFA_GeometryReader::UpdateSimRPPos(const eRPotName eRPName)
 	HepGeom::Vector3D<double> NominalDetNormal=HepGeom::Vector3D<double>(0.0,0.0,1.0);
 	m_RPPosParams[eRPName].DetectorNormal=m_RPPosParams[eRPName].RPTransformInStation*NominalDetNormal;
 
-	//----------------------------------------------
-	//important - false for left side, use true for right side (swapped PS points)
-	//double alphaid, alphare;
-	//double alpha=1000.0*atan((m_RPPosParams[eRPName].RefPins.RealRPPin3.y()-m_RPPosParams[eRPName].RefPins.RealRPPin1.y())/(m_RPPosParams[eRPName].RefPins.RealRPPin3.x()-m_RPPosParams[eRPName].RefPins.RealRPPin1.x()));
-	//	bool bCond=(eRPName==ERPN_B7L1U || eRPName==ERPN_B7L1L || eRPName==ERPN_A7L1U || eRPName==ERPN_A7L1L)? false:true;
-	//	if(Params.bIsLow==bCond){
-	//		alphaid=1000.0*atan((Params.VecIdealRPRefPoints[2].y()-Params.VecIdealRPRefPoints[0].y())/(Params.VecIdealRPRefPoints[2].x()-Params.VecIdealRPRefPoints[0].x()));
-	//		alphare=1000.0*atan((Params.VecRealRPRefPoints[2].y()-Params.VecRealRPRefPoints[0].y())/(Params.VecRealRPRefPoints[2].x()-Params.VecRealRPRefPoints[0].x()));
-	//	}
-	//	else{
-	//		alphaid=1000.0*atan((Params.VecIdealRPRefPoints[2].y()-Params.VecIdealRPRefPoints[1].y())/(Params.VecIdealRPRefPoints[2].x()-Params.VecIdealRPRefPoints[1].x()));
-	//		alphare=1000.0*atan((Params.VecRealRPRefPoints[2].y()-Params.VecRealRPRefPoints[1].y())/(Params.VecRealRPRefPoints[2].x()-Params.VecRealRPRefPoints[1].x()));
-	//	}
-	//----------------------------------------------
-
 	//correct position of the RP's detector in the RP due to metrology data --------------------------------------------------------------
 	IdealTransform=Params.DetIdealTransformInMainPoint;
 
 	HepGeom::Point3D<double> RPPin1,MainPoint; //point relative to the station
-	//MainPoint=HepGeom::RotateX3D(Params.bIsLow? -180.0*CLHEP::deg:0.0*CLHEP::deg)*m_RPPosParams[eRPName].RPTransformInStation*IdealTransform*HepGeom::Point3D<double>(0.0,0.0,0.0);
-	//RPPin1=HepGeom::Point3D<double>(77.5,+172.2,-124.0);	//actually origin of Pot CS
-	// HepGeom::Vector3D<double> CoordShift=RPPin1-MainPoint;
+
 	RPPin1=ms_NominalRPPin1;
 	MainPoint=ms_NominalRPMainPoint;
 
@@ -873,7 +801,6 @@ void ALFA_GeometryReader::UpdateSimRPPos(const eRPotName eRPName)
 	CLHEP::Hep3Vector TranslationInMainPoint=Params.DetSWTransform.getTranslation()-Params.DetSWTransform*OriginShift+OriginShift;
 	CLHEP::HepRotation RotationInMainPoint=Params.DetSWTransform.getRotation();
 	m_RPPosParams[eRPName].DetSWTransformInMainPoint=HepGeom::Transform3D(RotationInMainPoint,TranslationInMainPoint);
-	//HepGeom::Transform3D AuxTrans=m_RPPosParams[eRPName].DetSWTransformInMainPoint;
 
 	m_RPPosParams[eRPName].DetTransformInMainPoint=m_RPPosParams[eRPName].DetSWTransformInMainPoint*CorrTransform*IdealTransform;
 	m_RPPosParams[eRPName].RPScaleInStation=AuxScale;
@@ -896,7 +823,6 @@ HepGeom::Transform3D ALFA_GeometryReader::ComputeTransformMatrix(const std::vect
 	HepGeom::Rotate3D AuxRot;
 	HepGeom::Translate3D AuxTranslation;
 
-	//MsgStream LogStream(Athena::getMessageSvc(), "ALFA_DetectorFactory::ReadGeometry");
 
 	if(nPointCnt==3 && !bForceUseSVD)
 	{
@@ -919,14 +845,6 @@ HepGeom::Transform3D ALFA_GeometryReader::ComputeTransformMatrix(const std::vect
 			pY[i]=CLHEP::Hep3Vector(VecRealRefPoints[i].x(),VecRealRefPoints[i].y(),VecRealRefPoints[i].z());
 		}
 
-		/*
-		pX[0]=CLHEP::Hep3Vector(1.0, 0.0, 0.0);
-		pX[1]=CLHEP::Hep3Vector(0.0, 1.0, 0.0);
-		pX[2]=CLHEP::Hep3Vector(0.0, 0.0, 1.0);
-		
-		pY[0]=CLHEP::Hep3Vector(1.7071, -9.7071, 1.0000);
-		pY[1]=CLHEP::Hep3Vector(1.7071, -8.2929, 1.0000);
-		pY[2]=CLHEP::Hep3Vector(1.0, -9.0, 2.0);*/
 		
 		vecAux1=CLHEP::Hep3Vector();
 		vecAux2=CLHEP::Hep3Vector();
@@ -945,7 +863,6 @@ HepGeom::Transform3D ALFA_GeometryReader::ComputeTransformMatrix(const std::vect
 			C+=pYs[i]*pXs[i].T();
 		}
 		
-		//LogStream<<MSG::INFO<<"C="<<C<<endmsg;
 
                 std::vector<double*> ppfA(3);
                 std::vector<double*> ppfV(3);
@@ -978,11 +895,7 @@ HepGeom::Transform3D ALFA_GeometryReader::ComputeTransformMatrix(const std::vect
 		
 		R=U*W*V.T();
 		t=ymean-R*xmean;
-		//LogStream<<MSG::INFO<<"U="<<U<<endmsg;
-		//LogStream<<MSG::INFO<<"V="<<V<<endmsg;
-		//LogStream<<MSG::INFO<<"W="<<W<<endmsg;
-		//LogStream<<MSG::INFO<<"R="<<R<<endmsg;
-		//LogStream<<MSG::INFO<<"t="<<t<<endmsg;
+
 
 		CLHEP::HepRep3x3 matAux;
 		matAux.xx_=R[0][0]; matAux.xy_=R[0][1]; matAux.xz_=R[0][2];
@@ -1095,7 +1008,6 @@ bool ALFA_GeometryReader::SetIdealGeometry(const eRPotName eRPName, const eFiber
 	eFiberType eFiberAlfaType;
 	ROMAPOT RomaPot;
 
-	//MsgStream LogStream(Athena::getMessageSvc(), "ALFA_GeometryReader::SetIdealGeometry");
 	
 	if(m_MapRPot.find(eRPName)==m_MapRPot.end())
 	{
@@ -1293,9 +1205,7 @@ bool ALFA_GeometryReader::ReadFile(const eRPotName eRPName, const eFiberType eFT
 				if(FiberParams.nLayerID%2==1 && FiberParams.nFiberID<=15)								eType=EFT_ODFIBERV0;
 				if(FiberParams.nLayerID%2==1 && FiberParams.nFiberID>=16 && FiberParams.nFiberID<=30)	eType=EFT_ODFIBERU0;
 
-				//1.10.2010 LN: change of indexation scheme
-				//if(FiberParams.nLayerID%2==0 && FiberParams.nFiberID<=15)								eType=EFT_ODFIBERU1;
-				//if(FiberParams.nLayerID%2==0 && FiberParams.nFiberID>=16 && FiberParams.nFiberID<=30)	eType=EFT_ODFIBERV1;
+			
 				if(FiberParams.nLayerID%2==0 && FiberParams.nFiberID<=15)								eType=EFT_ODFIBERV1;
 				if(FiberParams.nLayerID%2==0 && FiberParams.nFiberID>=16 && FiberParams.nFiberID<=30)	eType=EFT_ODFIBERU1;
 			}
@@ -1324,7 +1234,6 @@ bool ALFA_GeometryReader::ReadDatabase(const eRPotName eRPName, const eFiberType
 {
 	bool bRes=false;
 	
-	//MsgStream LogStream(Athena::getMessageSvc(), "ALFA_GeometryReader::ReadDatabase");
 
 	eFiberType eType=EFT_UNDEFINED;
 	ROMAPOT RomaPot;
@@ -1343,7 +1252,6 @@ bool ALFA_GeometryReader::ReadDatabase(const eRPotName eRPName, const eFiberType
 		pch = strtok_r(nullptr, ":",&strtok_ptr);
 	}
 	
-	//	LogStream << MSG::INFO << "MARK - elements: " << strDBElements[0] << "  " << strDBElements[1] << "  " << strDBElements[2] << endmsg;
 	
 	ALFA_RDBAccess* p_DBAccess = new ALFA_RDBAccess();
 	
@@ -1391,7 +1299,6 @@ bool ALFA_GeometryReader::ReadDatabase(const eRPotName eRPName, const eFiberType
 				if(FiberParams.nLayerID%2==0 && FiberParams.nFiberID<=15)								eType=EFT_ODFIBERU1;
 				if(FiberParams.nLayerID%2==0 && FiberParams.nFiberID>=16 && FiberParams.nFiberID<=30)	eType=EFT_ODFIBERV1;
 				
-				//				LogStream << MSG::INFO << "eType: " << eType << "   fSlope: " << FiberParams.fSlope << endmsg;
 			}
 
 			//Transform & save values for RP
@@ -1426,7 +1333,6 @@ bool ALFA_GeometryReader::GetUFiberParams(PFIBERPARAMS pFiberParams, const eRPot
 		
 		if(iter==(*rpiter).second.ListUFibers.end()){
 			LogStream<<MSG::ERROR<<"Cannot find fiber PotID="<<eRPName<<", PlateID="<<nPlateID<<" and FiberID="<<nFiberID<<endmsg;
-			//throw new Exception("Wrong U-fiber");
 		}
 		else{
                         *pFiberParams = *iter;
@@ -1833,9 +1739,7 @@ bool ALFA_GeometryReader::StoreReconstructionGeometry(const eRPotName eRPName, c
 				}
 			}
 
-			//1.10.2010 LN: change of indexation scheme
-			//V1-ODFiber (note: V1-nFiberID is indexed from 16 to 30)
-			//for(j=ODFIBERSCNT+1;j<=ODFIBERSCNT+15;j++)
+
 			for(j=1;j<=ODFIBERSCNT;j++)
 			{
 				if(GetODFiberParams(&FiberParams, EFT_ODFIBERV1, eRPName, i, j))
@@ -1857,8 +1761,7 @@ bool ALFA_GeometryReader::StoreReconstructionGeometry(const eRPotName eRPName, c
 			}
 
 			//U1-ODFiber
-			//1.10.2010 LN: change of indexation scheme
-			//for(j=1;j<=ODFIBERSCNT;j++)
+
 			for(j=ODFIBERSCNT+1;j<=ODFIBERSCNT+15;j++)
 			{
 				if(GetODFiberParams(&FiberParams, EFT_ODFIBERU1, eRPName, i, j))
@@ -2036,7 +1939,6 @@ bool ALFA_GeometryReader::GetODFiberParams(PFIBERPARAMS pFiberParams, const eFib
 				if (iter==(*rpiter).second.ListODFibersU0.end())
 				{
 					LogStream<<MSG::ERROR<<"Cannot find ODFiberU0 PotID="<<eRPName<<", PlateID="<<nPlateID<<" and FiberID="<<nFiberID<<endmsg;
-					//throw new G4Exception("Wrong ODFiberU0");
 				}
 				else
 				{
@@ -2056,7 +1958,6 @@ bool ALFA_GeometryReader::GetODFiberParams(PFIBERPARAMS pFiberParams, const eFib
 				if (iter==(*rpiter).second.ListODFibersV0.end())
 				{
 					LogStream<<MSG::ERROR<<"Cannot find ODFiberV0 PotID="<<eRPName<<", PlateID="<<nPlateID<<" and FiberID="<<nFiberID<<endmsg;
-					//throw new G4Exception("Wrong ODFiberV0");
 				}
 				else
 				{
@@ -2076,7 +1977,6 @@ bool ALFA_GeometryReader::GetODFiberParams(PFIBERPARAMS pFiberParams, const eFib
 				if (iter==(*rpiter).second.ListODFibersU1.end())
 				{
 					LogStream<<MSG::ERROR<<"Cannot find ODFiberU1 PotID="<<eRPName<<", PlateID="<<nPlateID<<" and FiberID="<<nFiberID<<endmsg;
-					//throw new G4Exception("Wrong ODFiberU1");
 				}
 				else
 				{
@@ -2096,7 +1996,6 @@ bool ALFA_GeometryReader::GetODFiberParams(PFIBERPARAMS pFiberParams, const eFib
 				if (iter==(*rpiter).second.ListODFibersV1.end())
 				{
 					LogStream<<MSG::ERROR<<"Cannot find ODFiberV1 PotID="<<eRPName<<", PlateID="<<nPlateID<<" and FiberID="<<nFiberID<<endmsg;
-					//throw new G4Exception("Wrong ODFiberV1");
 				}
 				else
 				{
@@ -2167,7 +2066,6 @@ void ALFA_GeometryReader::SetODFiberPositionToMainReference(const eRPotName eRPN
 				if (iter==(*rpiter).second.ListODFibersV0.end())
 				{
 					LogStream<<MSG::ERROR<<"Cannot find ODFiberV0 PotID="<<eRPName<<", PlateID="<<nPlateID<<" and FiberID="<<nFiberID<<endmsg;
-					//throw new G4Exception("Wrong ODFiberV0");
 				}
 				else
 				{
@@ -2187,7 +2085,6 @@ void ALFA_GeometryReader::SetODFiberPositionToMainReference(const eRPotName eRPN
 				if (iter==(*rpiter).second.ListODFibersU1.end())
 				{
 					LogStream<<MSG::ERROR<<"Cannot find ODFiberU1 PotID="<<eRPName<<", PlateID="<<nPlateID<<" and FiberID="<<nFiberID<<endmsg;
-					//throw new G4Exception("Wrong ODFiberU1");
 				}
 				else
 				{
@@ -2207,7 +2104,6 @@ void ALFA_GeometryReader::SetODFiberPositionToMainReference(const eRPotName eRPN
 				if (iter==(*rpiter).second.ListODFibersV1.end())
 				{
 					LogStream<<MSG::ERROR<<"Cannot find ODFiberV1 PotID="<<eRPName<<", PlateID="<<nPlateID<<" and FiberID="<<nFiberID<<endmsg;
-					//throw new G4Exception("Wrong ODFiberV1");
 				}
 				else
 				{
@@ -2503,10 +2399,10 @@ bool ALFA_GeometryReader::ResolveRPotRefPoints(const char* szvalue, eRPotName eR
 	else if(eRPointType==ERPT_DETIDEAL || eRPointType==ERPT_DETREAL) bRes=ParseRefPoints(szvalue,vecRefPoints,EMCS_ROMANPOT);
 
 	if(bRes){
-		if(eRPointType==ERPT_IDEAL) m_RPPosParams[eRPName].VecIdealRPRefPoints=vecRefPoints;
-		else if(eRPointType==ERPT_REAL) m_RPPosParams[eRPName].VecRealRPRefPoints=vecRefPoints;
-		else if(eRPointType==ERPT_DETIDEAL) m_RPPosParams[eRPName].VecIdealDetRefPoints=vecRefPoints;
-		else if(eRPointType==ERPT_DETREAL) m_RPPosParams[eRPName].VecRealDetRefPoints=vecRefPoints;
+		if(eRPointType==ERPT_IDEAL) m_RPPosParams[eRPName].VecIdealRPRefPoints=std::move(vecRefPoints);
+		else if(eRPointType==ERPT_REAL) m_RPPosParams[eRPName].VecRealRPRefPoints=std::move(vecRefPoints);
+		else if(eRPointType==ERPT_DETIDEAL) m_RPPosParams[eRPName].VecIdealDetRefPoints=std::move(vecRefPoints);
+		else if(eRPointType==ERPT_DETREAL) m_RPPosParams[eRPName].VecRealDetRefPoints=std::move(vecRefPoints);
 	}
 
 	return bRes;
@@ -2514,16 +2410,17 @@ bool ALFA_GeometryReader::ResolveRPotRefPoints(const char* szvalue, eRPotName eR
 
 bool ALFA_GeometryReader::ParseRefPoints(const char* szvalue, std::vector<HepGeom::Point3D<double> >& vecRefPoints, eMetrologyCoordSystem eCSystem)
 {
-	double fx,fy,fz,faux;
+	double fx{},fy{},fz{},faux{};
 	char *ppos1,*ppos2,*ppos3,*ppos4,*pstop;
-	char szbuff[513];
+	char szbuff[513]{};
 	HepGeom::Point3D<double> RefPoint;
 
 	MsgStream LogStream(Athena::getMessageSvc(), "ALFA_GeometryReader::ParseRefPoints");
-
-	memset(szbuff,0,sizeof(szbuff));
-	strcpy(szbuff,szvalue);
-
+  if (strlen(szvalue) <513){
+	  strcpy(szbuff,szvalue);
+  } else {
+    LogStream<<MSG::ERROR<<"String too long for buffer."<<endmsg;
+  }
 	//get point count
 	int i,nCnt=0;
 	ppos2=szbuff;
@@ -2662,36 +2559,26 @@ bool ALFA_GeometryReader::SetupDetMetrologyPoints(ALFA_ConfigParams& CfgParams, 
 	//compute in-plane transformation matrix (deformation not included)
 	xp1=vecNominalDetPoints[0].x();
 	yp1=vecNominalDetPoints[0].y();
-	//xp2=vecNominalDetPoints[1].x();
-	//yp2=vecNominalDetPoints[1].y();
-	//xp3=vecNominalDetPoints[2].x();
-	//yp3=vecNominalDetPoints[2].y();
+
 
 	xr1=vecRealDetPoints[0].x();
 	yr1=vecRealDetPoints[0].y();
 	xr2=vecRealDetPoints[1].x();
 	yr2=vecRealDetPoints[1].y();
-	//xr3=vecRealDetPoints[2].x();
-	//yr3=vecRealDetPoints[2].y();
+
 
 	double alpha=-atan((xr2-xr1)/(yr2-yr1));
-	//a1=cos(alpha); a2=-sin(alpha);
 	a3=xr1-xp1;//a3=0.5*(xr1+xr2);
 	a4=yr1-yp1;//a4=0.5*(yr1+yr2);
 
-	//double beta=-asin((vecDetEdges[1]-vecDetEdges[0])/90.0);
-	//double gamma=asin((yr3-yr1)/8.0);
-	//double dz=135.0*sin(gamma);
+
 
 	//-----------------------------------------
 	HepGeom::Transform3D CorrectionInMainPoint, CorrectionInDetPin1;
 
-	//HepGeom::Transform3D CorrectionInDetPin1=HepTransform3D();
 	//use light metrology
 	CorrectionInDetPin1=HepGeom::Translate3D(a3,a4,fZc-113.0*CLHEP::mm)*HepGeom::RotateZ3D(alpha);
-	//CorrectionInDetPin1=HepGeom::RotateX3D(gamma)*HepGeom::RotateY3D(beta)*HepGeom::Translate3D(a3,a4,dz+fZc-113.0*CLHEP::mm)*HepGeom::RotateZ3D(alpha);
 
-	//HepGeom::Point3D<double> MainPoint=m_RPPosParams[eRPName].RPIdealTransformInStation*HepGeom::Point3D<double>(0.0,0.0,0.0);
 	HepGeom::Point3D<double> MainPoint=ms_NominalRPMainPoint;
 	HepGeom::Point3D<double> RPPin1=ms_NominalRPPin1;
 	HepGeom::Point3D<double> DetPin1=ms_NominalDetPin1;
@@ -2711,14 +2598,14 @@ bool ALFA_GeometryReader::SetupDetMetrologyPoints(ALFA_ConfigParams& CfgParams, 
 	m_RPPosParams[eRPName].VecIdealDetRefPoints.resize(3);
 	m_RPPosParams[eRPName].VecRealDetRefPoints.resize(3);
 
-	m_RPPosParams[eRPName].VecIdealDetRefPoints[0]=PointIdealD5;
-	m_RPPosParams[eRPName].VecRealDetRefPoints[0]=PointRealD5;
+	m_RPPosParams[eRPName].VecIdealDetRefPoints[0]=std::move(PointIdealD5);
+	m_RPPosParams[eRPName].VecRealDetRefPoints[0]=std::move(PointRealD5);
 
-	m_RPPosParams[eRPName].VecIdealDetRefPoints[1]=PointIdealD4;
-	m_RPPosParams[eRPName].VecRealDetRefPoints[1]=PointRealD4;
+	m_RPPosParams[eRPName].VecIdealDetRefPoints[1]=std::move(PointIdealD4);
+	m_RPPosParams[eRPName].VecRealDetRefPoints[1]=std::move(PointRealD4);
 
-	m_RPPosParams[eRPName].VecIdealDetRefPoints[2]=PointIdealD3;
-	m_RPPosParams[eRPName].VecRealDetRefPoints[2]=PointRealD3;
+	m_RPPosParams[eRPName].VecIdealDetRefPoints[2]=std::move(PointIdealD3);
+	m_RPPosParams[eRPName].VecRealDetRefPoints[2]=std::move(PointRealD3);
 
 	return true;
 }
@@ -2756,27 +2643,11 @@ bool ALFA_GeometryReader::SetupRPMetrologyPoints(ALFA_ConfigParams& CfgParams, e
 	//compute nominal position of PSx in Station CS
 	for(i=0;i<nCnt;i++){
 		vecNominalPSinStationCS[i]=RPPinNominal+HepGeom::RotateX3D(RPPosParams.bIsLow? 180*CLHEP::deg:0.0)*vecPSinRPCS[i];
-		//HepGeom::Point3D<double> auxPoint=vecNominalPSinStationCS[i];
-		//int a=0;
 	}
 
-	//----- test
-	//	if(RPPosParams.bIsLow){
-	//		vecNominalPSinStationCS[0]=HepGeom::Point3D<double>(+132.0*CLHEP::mm,-170.0*CLHEP::mm,-132.0*CLHEP::mm);
-	//		vecNominalPSinStationCS[1]=HepGeom::Point3D<double>(+132.0*CLHEP::mm,-170.0*CLHEP::mm,+132.0*CLHEP::mm);
-	//		vecNominalPSinStationCS[2]=HepGeom::Point3D<double>(-132.0*CLHEP::mm,-170.0*CLHEP::mm,+132.0*CLHEP::mm);
-	//	}
-	//	else{
-	//		vecNominalPSinStationCS[0]=HepGeom::Point3D<double>(+132.0*CLHEP::mm,-170.0*CLHEP::mm,+132.0*CLHEP::mm);
-	//		vecNominalPSinStationCS[1]=HepGeom::Point3D<double>(+132.0*CLHEP::mm,-170.0*CLHEP::mm,-132.0*CLHEP::mm);
-	//		vecNominalPSinStationCS[2]=HepGeom::Point3D<double>(-132.0*CLHEP::mm,-170.0*CLHEP::mm,+132.0*CLHEP::mm);
-	//	}
-	//----- test
 
 	//calculate LVDT position from position in [mm]
 	fCurrentLVDTmm=RPPosParams.fCurrentLVDTmm;
-	//if(m_bIsUserLVDTEnabled) fCurrentLVDTmm=RPPosParams.fCurrentLVDTmm;
-	//else fCurrentLVDTmm=atof(CfgParams.GetParameter("currentlvdt")); //value in [mm] !
 
 	ParseArrayOfValues(CfgParams.GetParameter("mm2lvdtfit"),vecPolyFitParams);
 	fCurrentLVDT=GetPolyFitValue(fCurrentLVDTmm,vecPolyFitParams); // true LVDT value
@@ -2807,17 +2678,11 @@ bool ALFA_GeometryReader::SetupRPMetrologyPoints(ALFA_ConfigParams& CfgParams, e
 	ParseArrayOfValues(CfgParams.GetParameter("ps3zlvdtpolyfit"),vecPolyFitParams);
 	fz=GetPolyFitValue(fCurrentLVDT,vecPolyFitParams);
 	PSinStation.set(fx,fy,fz);
-	vecRealPSinStationCS[2]=PSinStation;
+	vecRealPSinStationCS[2]=std::move(PSinStation);
 
-	//----- test
-	//vecRealPSinStationCS[0]=vecNominalPSinStationCS[0]+HepGeom::Point3D<double>(0.0*CLHEP::mm,0.0*CLHEP::mm,0.0*CLHEP::mm);
-	//vecRealPSinStationCS[1]=vecNominalPSinStationCS[1]+HepGeom::Point3D<double>(0.0*CLHEP::mm,0.0*CLHEP::mm,0.0*CLHEP::mm);
-	//vecRealPSinStationCS[2]=vecNominalPSinStationCS[2]+HepGeom::Point3D<double>(0.0*CLHEP::mm,0.1*CLHEP::mm,0.0*CLHEP::mm);
-	//----- test
-
-	//m_RPPosParams[eRPName].fCurrentLVDTmm=fCurrentLVDTmm;
-	m_RPPosParams[eRPName].VecIdealRPRefPoints=vecNominalPSinStationCS;
-	m_RPPosParams[eRPName].VecRealRPRefPoints=vecRealPSinStationCS;
+	
+	m_RPPosParams[eRPName].VecIdealRPRefPoints=std::move(vecNominalPSinStationCS);
+	m_RPPosParams[eRPName].VecRealRPRefPoints=std::move(vecRealPSinStationCS);
 
 	bRes=true;
 
@@ -2878,26 +2743,7 @@ HepGeom::Point3D<double> ALFA_GeometryReader::GetDetPointInAtlas(eRPotName eRPNa
 	else{
 		throw new GaudiException(" The GetDetPointInAtlas() can be used only with EFCS_ATLAS or EFCS_CLADDING flag ", "ALFA_GeometryReader::GetDetPointInAtlas", StatusCode::FAILURE);
 	}
-	/*
-    RPPOSPARAMS RPPosParams;
-    ASPOSPARAMS ASPosParams;
-	HepGeom::Point3D<double> AlfaRefPoint=HepGeom::Point3D<double>(0.0*CLHEP::mm,+105.475*CLHEP::mm,-18.0*CLHEP::mm);
-	HepGeom::Point3D<double> PointInAtlasCS;
 
-	if(m_eFCoordSystem==EFCS_ATLAS || m_eFCoordSystem==EFCS_CLADDING){
-		GetRPPosParams(&RPPosParams, eRPName);
-		GetASPosParams(&ASPosParams, RPPosParams.eASName);
-
-		CLHEP::Point3D<double> PointInDetMainPoint=AlfaRefPoint+PointInDetCS;
-		HepGeom::Transform3D TotTransform=ASPosParams.ASTransformInATLAS*RPPosParams.RPTransformInStation*RPPosParams.DetTransformInMainPoint;
-		PointInAtlasCS=TotTransform*PointInDetMainPoint;
-		HepGeom::Point3D<double> auxPoint=PointInAtlasCS;
-		int a=0;
-    }
-    else{
-		throw new GaudiException(" The GetDetPointInAtlas() can be used only with EFCS_ATLAS or EFCS_CLADDING flag ", "ALFA_GeometryReader::GetDetPointInAtlas", StatusCode::FAILURE);
-	}
-*/
     return PointInAtlasCS;
 }
 
@@ -2946,12 +2792,6 @@ bool ALFA_GeometryReader::SaveRPGeometryParams(const eRPotName eRPName, const ch
 		fRotX=atan2(m_RPPosParams[eRPName].RPTransformInStation.zy(),m_RPPosParams[eRPName].RPTransformInStation.zz());
 		fprintf(pfile,"RotX=%.5f rad, RotY=%.5f rad, RotZ=%.5f rad\r\n",fRotX,fRotY,fRotZ);
 
-		/*
-		fprintf(pfile,"\r\nMetrology scale matrix of RP in station MainPoint:\r\n");
-		fprintf(pfile,"%+.5f %+.5f %+.5f %+.5f\r\n",m_RPPosParams[eRPName].RPScaleInStation.xx(),m_RPPosParams[eRPName].RPScaleInStation.xy(),m_RPPosParams[eRPName].RPScaleInStation.xz(),m_RPPosParams[eRPName].RPScaleInStation.dx());
-		fprintf(pfile,"%+.5f %+.5f %+.5f %+.5f\r\n",m_RPPosParams[eRPName].RPScaleInStation.yx(),m_RPPosParams[eRPName].RPScaleInStation.yy(),m_RPPosParams[eRPName].RPScaleInStation.yz(),m_RPPosParams[eRPName].RPScaleInStation.dy());
-		fprintf(pfile,"%+.5f %+.5f %+.5f %+.5f\r\n",m_RPPosParams[eRPName].RPScaleInStation.zx(),m_RPPosParams[eRPName].RPScaleInStation.zy(),m_RPPosParams[eRPName].RPScaleInStation.zz(),m_RPPosParams[eRPName].RPScaleInStation.dz());
-		*/
 
 		fprintf(pfile,"\r\nDetector geometry info: ------------------------------------------\r\n");
 		fprintf(pfile,"Transformation matrix of detector in RP MainPoint:\r\n");
@@ -2964,12 +2804,6 @@ bool ALFA_GeometryReader::SaveRPGeometryParams(const eRPotName eRPName, const ch
 		fRotX=atan2(m_RPPosParams[eRPName].DetTransformInMainPoint.zy(),m_RPPosParams[eRPName].DetTransformInMainPoint.zz());
 		fprintf(pfile,"RotX=%.5f rad, RotY=%.5f rad, RotZ=%.5f rad\r\n",fRotX,fRotY,fRotZ);
 
-		/*
-		fprintf(pfile,"\r\nMetrology scale matrix of detector in RP MainPoint:\r\n");
-		fprintf(pfile,"%+.5f %+.5f %+.5f %+.5f\r\n",m_RPPosParams[eRPName].DetScaleInRP.xx(),m_RPPosParams[eRPName].DetScaleInRP.xy(),m_RPPosParams[eRPName].DetScaleInRP.xz(),m_RPPosParams[eRPName].DetScaleInRP.dx());
-		fprintf(pfile,"%+.5f %+.5f %+.5f %+.5f\r\n",m_RPPosParams[eRPName].DetScaleInRP.yx(),m_RPPosParams[eRPName].DetScaleInRP.yy(),m_RPPosParams[eRPName].DetScaleInRP.yz(),m_RPPosParams[eRPName].DetScaleInRP.dy());
-		fprintf(pfile,"%+.5f %+.5f %+.5f %+.5f\r\n",m_RPPosParams[eRPName].DetScaleInRP.zx(),m_RPPosParams[eRPName].DetScaleInRP.zy(),m_RPPosParams[eRPName].DetScaleInRP.zz(),m_RPPosParams[eRPName].DetScaleInRP.dz());
-		*/
 		fprintf(pfile,"\r\nReference pins and Track point info: ------------------------------------------\r\n");
 		fprintf(pfile,"RPPin1: nominal=[%.3f,%.3f,%.3f], real=[%.3f,%.3f,%.3f] (Station CS)\r\n",m_RPPosParams[eRPName].RefPins.IdealRPPin1.x(),m_RPPosParams[eRPName].RefPins.IdealRPPin1.y(),m_RPPosParams[eRPName].RefPins.IdealRPPin1.z(),
 				m_RPPosParams[eRPName].RefPins.RealRPPin1.x(),m_RPPosParams[eRPName].RefPins.RealRPPin1.y(),m_RPPosParams[eRPName].RefPins.RealRPPin1.z());
@@ -3062,12 +2896,10 @@ void ALFA_GeometryReader::SetupSWCorrections(const PGEOMETRYCONFIGURATION pConfi
 {
 	int i, nSign;
 	double fTotYOffset;
-	//double arrFWDistance[8]={0.000,	0.020, -0.050, 0.003, -0.054, 0.012, -0.046, 0.045};
 
 	for(i=0;i<RPOTSCNT;i++){
 		nSign=(i%2==0)? +1:-1;
 		fTotYOffset=pConfig->CfgRPosParams[i].swcorr.fYOffset-nSign*(2.0*CLHEP::mm);//+nSign*arrFWDistance[i];
-		//fTotYOffset=pConfig->CfgRPosParams[i].swcorr.fYOffset;
 
 		m_RPPosParams[(eRPotName)(i+1)].OriginOfDetSWTransform=HepGeom::Point3D<double>(-77.5*CLHEP::mm+pConfig->CfgRPosParams[i].swcorr.fXOffset,-170.2*CLHEP::mm,114.0*CLHEP::mm);
 		m_RPPosParams[(eRPotName)(i+1)].DetSWTransform=HepGeom::RotateZ3D(nSign*pConfig->CfgRPosParams[i].swcorr.fTheta);

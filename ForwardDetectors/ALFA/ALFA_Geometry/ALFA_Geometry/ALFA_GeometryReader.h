@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -18,8 +18,7 @@
 #include <map>
 #include <vector>
 #include <string>
-//using namespace std;
-//using namespace HepGeom;
+
 
 enum eGeoSourceType { EGST_UNDEFINED = 0, EGST_IDEALGEOMETRY = 1, EGST_FILE = 2, EGST_DATABASE = 3 };
 enum eMetrologyType { EMT_UNDEFINED = 0, EMT_NOMINAL = 1, EMT_METROLOGY = 2, EMT_SWCORRECTIONS = 3 };
