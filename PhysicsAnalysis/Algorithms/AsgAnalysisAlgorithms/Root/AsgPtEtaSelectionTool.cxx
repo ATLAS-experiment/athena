@@ -38,7 +38,12 @@ namespace CP
     }
     if (m_maxPt < 0 || !std::isfinite (m_maxPt))
     {
-      ATH_MSG_ERROR ("invalid value of m_maxPt: " << m_maxPt);
+      ATH_MSG_ERROR ("invalid value of maxPt: " << m_maxPt);
+      return StatusCode::FAILURE;
+    }
+    if (m_minEta < 0 || !std::isfinite (m_minEta))
+    {
+      ATH_MSG_ERROR ("invalid value of minEta: " << m_minEta);
       return StatusCode::FAILURE;
     }
     if (m_maxEta < 0 || !std::isfinite (m_maxEta))
@@ -59,6 +64,11 @@ namespace CP
     if (m_etaGapHigh > 0 && m_etaGapLow >= m_etaGapHigh)
     {
       ATH_MSG_ERROR ("invalid eta gap: " << m_etaGapLow << " to " << m_etaGapHigh);
+      return StatusCode::FAILURE;
+    }
+    if (m_etaGapLow > 0 && m_minEta > 0 && m_etaGapLow <= m_minEta)
+    {
+      ATH_MSG_ERROR ("etaGapLow=" << m_etaGapLow << " <= minEta=" << m_minEta);
       return StatusCode::FAILURE;
     }
     if (m_etaGapHigh > 0 && m_maxEta > 0 && m_etaGapHigh >= m_maxEta)
@@ -85,6 +95,10 @@ namespace CP
        ATH_MSG_DEBUG( "Performing eta cut on the e/gamma cluster" );
        m_egammaCastCutIndex = m_accept.addCut ("castEgamma", "cast to egamma");
        m_egammaClusterCutIndex = m_accept.addCut ("caloCluster", "egamma object has cluster");
+    }
+    if (m_minEta > 0) {
+       ATH_MSG_DEBUG( "Performing |eta| >= " << m_minEta << " selection");
+       m_minEtaCutIndex = m_accept.addCut ("minEta", "minimum eta cut");
     }
     if (m_maxEta > 0) {
        ATH_MSG_DEBUG( "Performing |eta| < " << m_maxEta << " selection" );
@@ -149,7 +163,7 @@ namespace CP
     }
 
     // Perform the eta cut(s).
-    if (m_maxEtaCutIndex >= 0 || m_etaGapCutIndex >= 0)
+    if (m_minEtaCutIndex >= 0 || m_maxEtaCutIndex >= 0 || m_etaGapCutIndex >= 0)
     {
       float absEta = 0;
 
@@ -183,6 +197,9 @@ namespace CP
         absEta = std::abs (particle->eta());
       }
 
+      if (m_minEtaCutIndex >= 0) {
+        accept.setCutResult (m_minEtaCutIndex, absEta > m_minEta);
+      }
       if (m_maxEtaCutIndex >= 0) {
         accept.setCutResult (m_maxEtaCutIndex, absEta <= m_maxEta);
       }

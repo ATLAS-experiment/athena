@@ -73,6 +73,7 @@ namespace CP
   private:
     Gaudi::Property<float> m_minPt {this, "minPt", 0, "minimum pt to require (or 0 for no pt cut)"};
     Gaudi::Property<float> m_maxPt {this, "maxPt", 0, "maximum pt to require (or 0 for no pt cut)"};
+    Gaudi::Property<float> m_minEta {this, "minEta", 0, "minimum abs(eta) to allow (or 0 for no eta cut)"};
     Gaudi::Property<float> m_maxEta {this, "maxEta", 0, "maximum abs(eta) to allow (or 0 for no eta cut)"};
     Gaudi::Property<float> m_etaGapLow {this, "etaGapLow", 0, "low end of the eta gap"};
     Gaudi::Property<float> m_etaGapHigh {this, "etaGapHigh", 0, "high end of the eta gap (or 0 for no eta gap)"};
@@ -87,6 +88,8 @@ namespace CP
     int m_minPtCutIndex{ -1 };
     /// Index for the maximum pT selection
     int m_maxPtCutIndex{ -1 };
+    ///Index for the minimum eta selection
+    int m_minEtaCutIndex{ -1 };
     /// Index for the maximum eta selection
     int m_maxEtaCutIndex{ -1 };
     /// Index for the eta gap selection
