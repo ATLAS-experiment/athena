@@ -83,8 +83,7 @@ class PhotonCalibrationConfig (ConfigBlock) :
             else:
                 raise ValueError (f"Can't set up the ElectronCalibrationConfig with {config.geometry().value}, "
                                   "there must be something wrong!")
-            print(f"WARNING! No ESModel specified, using default for {config.geometry().value}: {alg.calibrationAndSmearingTool.ESModel}")
-            
+        
         alg.calibrationAndSmearingTool.decorrelationModel = self.decorrelationModel
         alg.calibrationAndSmearingTool.useFastSim = (
             0 if self.forceFullSimConfig
