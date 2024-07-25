@@ -312,13 +312,24 @@ class PtEtaSelectionBlock (ConfigBlock):
             "pT and eta cuts to a given type of object.")
         self.addOption ('minPt', None, type=float,
             info="minimum pT value to cut on, in MeV. No default value.")
+        self.addOption ('maxPt', None, type=float,
+            info="maximum pT value to cut on, in MeV. No default value.")
+        self.addOption ('minEta', None, type=float,
+            info="minimum |eta| value to cut on. No default value.")
         self.addOption ('maxEta', None, type=float,
             info="maximum |eta| value to cut on. No default value.")
+        self.addOption ('etaGapLow', None, type=float,
+            info="low end of the |eta| gap. No default value.")
+        self.addOption ('etaGapHigh', None, type=float,
+            info="high end of the |eta| gap. No default value.")
         self.addOption ('selectionDecoration', 'selectPtEta', type=str,
             info="the name of the decoration to set.")
         self.addOption ('useClusterEta', False, type=bool,
             info="whether to use the cluster eta (etaBE(2)) instead of the object "
             "eta (for electrons and photons). The default is False.")
+        self.addOption ('useDressedProperties', False, type=bool,
+            info="whether to use the dressed kinematic properties "
+            "(for truth particles only). The default is False.")
 
 
     def makeAlgs (self, config) :
@@ -331,9 +342,18 @@ class PtEtaSelectionBlock (ConfigBlock):
         config.addPrivateTool( 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
         if self.minPt is not None :
             alg.selectionTool.minPt = self.minPt
+        if self.maxPt is not None:
+            alg.selectionTool.maxPt = self.maxPt
+        if self.minEta is not None:
+            alg.selectionTool.minEta = self.minEta
         if self.maxEta is not None :
             alg.selectionTool.maxEta = self.maxEta
+        if self.etaGapLow is not None:
+            alg.selectionTool.etaGapLow = self.etaGapLow
+        if self.etaGapHigh is not None:
+            alg.selectionTool.etaGapHigh = self.etaGapHigh
         alg.selectionTool.useClusterEta = self.useClusterEta
+        alg.selectionTool.useDressedProperties = self.useDressedProperties
         alg.selectionDecoration = self.selectionDecoration
         alg.particles = config.readName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')
