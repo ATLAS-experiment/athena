@@ -8,7 +8,7 @@
 #include "Acts/Seeding/HoughTransformUtils.hpp"
 #include "xAODMeasurementBase/UncalibratedMeasurement.h"
 #include "MuonPatternEvent/MuonHoughDefs.h"
-#include <map> 
+#include <unordered_map> 
 #include <memory> 
 
 namespace MuonR4{ 
@@ -18,8 +18,7 @@ namespace MuonR4{
   /// @tparam peakFinderConfig_t: Configuration object type for the peak finder 
   template <typename peakFinder_t, typename peakFinderConfig_t> 
       struct HoughEventData_impl{
-            HoughEventData_impl(const ActsGeometryContext& _gctx):
-                gctx{_gctx} {}
+            HoughEventData_impl() = default;
             
             /// @brief Updates a search space window to account for a value. 
             /// The window will adaptively grow so that it includes all of the user-supplied values
@@ -30,8 +29,6 @@ namespace MuonR4{
               searchWindow.second = std::max(searchWindow.second, value); 
             }
 
-            // cached ACTS geometry context 
-            const ActsGeometryContext& gctx; 
             // Hough accumulator 
             std::unique_ptr<HoughPlane> houghPlane{nullptr}; 
             // peak finder instance
@@ -57,7 +54,7 @@ namespace MuonR4{
             // the maxima found by the hough transform
             std::vector<HoughMaximum> maxima{};
             // the hough setup for each logical muon chamber
-            std::map<const MuonGMR4::MuonChamber*, std::vector<HoughSetupForBucket>> houghSetups{}; 
+            std::unordered_map<const MuonGMR4::MuonChamber*, std::vector<HoughSetupForBucket>> houghSetups{}; 
             // the axis ranges currently mapped to the accumulator
             Acts::HoughTransformUtils::HoughAxisRanges currAxisRanges; 
             // current search window for the intercept

@@ -55,10 +55,13 @@ namespace MuonR4{
 
             /// @brief pre-processing for a given input eta-maximum
             /// Counts potential phi-hits and defines the search space 
-            /// @param data: Event data object 
-            /// @param maximum: An (eta) maximum  
+            /// @param gctx: The geometry context to fetch the global positions
+            /// @param maximum: An (eta) maximum 
+            /// @param data: Event data object  
             /// @return a status code 
-            StatusCode preProcessMaximum(HoughEventData & data, const MuonR4::HoughMaximum & maximum) const; 
+            StatusCode preProcessMaximum(const ActsGeometryContext& gctx,
+                                         const MuonR4::HoughMaximum & maximum,
+                                         HoughEventData & data) const; 
 
             /// @brief extend an eta maximum with just a single attached phi measurement. 
             /// Uses the beam spot direction to guess an approximate phi-intercept and direction. 
