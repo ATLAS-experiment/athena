@@ -65,10 +65,10 @@ namespace MCTruthPartClassifier {
     const xAOD::TruthParticle* Mother() const { return mother;}
     inline void setMotherProperties(const xAOD::TruthParticle* from) {
       mother = from;
-      if (!from) return; 
+      if (!from) return;
       motherStatus = HepMC::status(from);
       motherBarcode = HepMC::barcode(from); // FIXME barcode-based
-      motherPDG = from->pdg_id(); 
+      motherPDG = from->pdg_id();
     }
     inline void resetMotherProperties() { mother = nullptr; motherStatus = 0; motherBarcode = 0; motherPDG = 0; } // FIXME barcode-based
 
@@ -104,25 +104,39 @@ class IMCTruthClassifier : virtual public asg::IAsgTool
   ASG_TOOL_INTERFACE(IMCTruthClassifier)
 public:
   /** Virtual destructor */
-  virtual ~IMCTruthClassifier(){};
+  virtual ~IMCTruthClassifier() = default;
 
-  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin> 
+  // Methods for Reco object to Truth association
+#ifndef GENERATIONBASE
+  // Method for Track to Truth association
+  virtual const xAOD::TruthParticle* getGenPart(
+      const xAOD::TrackParticle*,
+      MCTruthPartClassifier::Info* info = nullptr) const = 0;
+#ifndef XAOD_ANALYSIS
+  // Method for egamma clusters to Truth Particle association
+  virtual const xAOD::TruthParticle* egammaClusMatch(
+      const xAOD::CaloCluster*, bool,
+      MCTruthPartClassifier::Info* info = nullptr) const = 0;
+#endif
+#endif
+
+// Methods for Truth Particle classification
+  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
   particleTruthClassifier(const xAOD::TruthParticle*, MCTruthPartClassifier::Info* info = nullptr) const = 0;
 
-  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin> 
-  checkOrigOfBkgElec(const xAOD::TruthParticle*, MCTruthPartClassifier::Info* info = nullptr) const = 0;
-
 #ifndef XAOD_ANALYSIS /*These can not run in Analysis Base*/
-  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin> 
+  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
   particleTruthClassifier(const HepMcParticleLink& theLink,MCTruthPartClassifier::Info* info = nullptr) const = 0;
 
-  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin> 
+  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
   particleTruthClassifier(HepMC::ConstGenParticlePtr, MCTruthPartClassifier::Info* info = nullptr) const = 0;
 #endif
 
 #ifndef GENERATIONBASE
+  // Methods for Reco Particle classification
+  // Rely on the Reco to Truth association and then the Truth classification
   virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
-  particleTruthClassifier(const xAOD::TrackParticle*,MCTruthPartClassifier::Info* info = nullptr) const = 0;
+  particleTruthClassifier(const xAOD::TrackParticle*, MCTruthPartClassifier::Info* info = nullptr) const = 0;
 
   virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
   particleTruthClassifier(const xAOD::Electron*, MCTruthPartClassifier::Info* info = nullptr) const = 0;
@@ -139,7 +153,6 @@ public:
   virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
   particleTruthClassifier(const xAOD::Jet*, bool DR, MCTruthPartClassifier::Info* info = nullptr) const = 0;
 
-  virtual const xAOD::TruthParticle* getGenPart(const xAOD::TrackParticle*,MCTruthPartClassifier::Info* info = nullptr) const = 0;
 #endif
 };
 

@@ -15,6 +15,7 @@
 #include "xAODEgamma/Egamma.h"
 #include "xAODEgamma/Electron.h"
 #include "xAODEgamma/Photon.h"
+#include "xAODEgamma/EgammaTruthxAODHelpers.h"
 #include "AthenaKernel/errorcheck.h"
 #include <cstdlib>
 
@@ -61,7 +62,7 @@ StatusCode egammaTruthClassificationFillerTool::initialize()
  */
 StatusCode egammaTruthClassificationFillerTool::book()
 {
-  CHECK( addVariable ("type",      m_type,   
+  CHECK( addVariable ("type",      m_type,
                       "MC particle type, from classifier tool.") );
   CHECK( addVariable ("origin",    m_origin,
                       "MC particle origin, from classifier tool.") );
@@ -110,13 +111,16 @@ StatusCode egammaTruthClassificationFillerTool::fill (const xAOD::Egamma& p)
   *m_origin = res.second;
 
   if (m_doBkgElecOrigin) {
-    if (res.first == MCTruthPartClassifier::BkgElectron && 
+    if (res.first == MCTruthPartClassifier::BkgElectron &&
         res.second == MCTruthPartClassifier::PhotonConv &&
         info.genPart)
     {
-      res = m_classifier->checkOrigOfBkgElec(info.genPart, &info);
-      *m_typebkg   = res.first;
-      *m_originbkg = res.second;
+      const xAOD::TruthParticle* last = xAOD::EgammaHelpers::getBkgElectronMother(info.genPart);
+      if(last){
+        res = m_classifier->particleTruthClassifier(last, &info);
+        *m_typebkg   = res.first;
+        *m_originbkg = res.second;
+      }
     }
   }
 
