@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigExamples )
@@ -14,6 +14,11 @@ atlas_add_component( TrigExamples
                      LINK_LIBRARIES ${TDAQ-COMMON_LIBRARIES} GaudiKernel AthenaBaseComps
                      AthenaKernel ByteStreamCnvSvcBaseLib DecisionHandlingLib TrigCompositeUtilsLib 
                      TrigPartialEventBuildingLib )
+
+# Suppress spurious warnings seen in the LTO build originating 
+# in the boost parser code.
+set_target_properties( TrigExamples
+                       PROPERTIES LINK_FLAGS " -Wno-maybe-uninitialized "  )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
