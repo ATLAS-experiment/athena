@@ -763,24 +763,25 @@ StatusCode EgammaCalibrationAndSmearingTool::initialize() {
 
   ATH_MSG_INFO("ESModel: " << m_ESModel);
   ATH_MSG_INFO("ResolutionType: " << m_ResolutionType);
-  ATH_MSG_INFO("layer correction = " << m_useLayerCorrection);
-  ATH_MSG_INFO("PS correction = " << m_usePSCorrection);
-  ATH_MSG_INFO("S12 correction = " << m_useS12Correction);
-  ATH_MSG_INFO("Sacc correction = " << m_useSaccCorrection);
-  ATH_MSG_INFO("intermodule correction = " << m_useIntermoduleCorrection);
-  ATH_MSG_INFO("phi uniformity correction = " << m_usePhiUniformCorrection);
-  ATH_MSG_INFO("distorted calo phi uniformity correction = "
+  ATH_MSG_INFO("decorrelation Model: " << m_decorrelation_model_name);
+  ATH_MSG_DEBUG("layer correction = " << m_useLayerCorrection);
+  ATH_MSG_DEBUG("PS correction = " << m_usePSCorrection);
+  ATH_MSG_DEBUG("S12 correction = " << m_useS12Correction);
+  ATH_MSG_DEBUG("Sacc correction = " << m_useSaccCorrection);
+  ATH_MSG_DEBUG("intermodule correction = " << m_useIntermoduleCorrection);
+  ATH_MSG_DEBUG("phi uniformity correction = " << m_usePhiUniformCorrection);
+  ATH_MSG_DEBUG("distorted calo phi uniformity correction = "
                << m_useCaloDistPhiUnifCorrection);
-  ATH_MSG_INFO("gain correction = " << m_useGainCorrection);
-  ATH_MSG_INFO("ADC non-linearity correction = " << m_doADCLinearityCorrection);
-  ATH_MSG_INFO("leakage correction for photons = " << m_doLeakageCorrection);
-  ATH_MSG_INFO("smearing = " << m_doSmearing);
-  ATH_MSG_INFO("insitu scales = " << m_doScaleCorrection);
-  ATH_MSG_INFO("ep combination = " << m_use_ep_combination);
-  ATH_MSG_INFO("use MVA calibration = " << m_use_mva_calibration);
-  ATH_MSG_INFO(
+  ATH_MSG_DEBUG("gain correction = " << m_useGainCorrection);
+  ATH_MSG_DEBUG("ADC non-linearity correction = " << m_doADCLinearityCorrection);
+  ATH_MSG_DEBUG("leakage correction for photons = " << m_doLeakageCorrection);
+  ATH_MSG_DEBUG("smearing = " << m_doSmearing);
+  ATH_MSG_DEBUG("insitu scales = " << m_doScaleCorrection);
+  ATH_MSG_DEBUG("ep combination = " << m_use_ep_combination);
+  ATH_MSG_DEBUG("use MVA calibration = " << m_use_mva_calibration);
+  ATH_MSG_DEBUG(
       "use temperature correction 2015 = " << m_use_temp_correction201215);
-  ATH_MSG_INFO("use uA2MeV correction 2015 1/2 week = "
+  ATH_MSG_DEBUG("use uA2MeV correction 2015 1/2 week = "
                << m_use_uA2MeV_2015_first2weeks_correction);
 
   setupSystematics();
