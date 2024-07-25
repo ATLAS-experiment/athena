@@ -23,7 +23,7 @@ namespace MuonR4{
           ~TruthSegmentMaker() = default;
 
           StatusCode initialize() override final;
-          StatusCode execute(const EventContext& ctx) const;
+          StatusCode execute(const EventContext& ctx) const override;
       
       private:
   
