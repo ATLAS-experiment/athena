@@ -3,7 +3,6 @@
 */
 
 #include "FPGATrackSimMapMakerAlg.h"
-#include "FPGATrackSimInput/IFPGATrackSimEventOutputHeaderTool.h"
 #include "FPGATrackSimMaps/FPGATrackSimModuleRelabel.h"
 
 #include "TH2.h"

@@ -9,7 +9,7 @@
 
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "FPGATrackSimInput/IFPGATrackSimEventOutputHeaderTool.h"
+#include "FPGATrackSimInput/FPGATrackSimOutputHeaderTool.h"
 
 
 class TH2F;
@@ -19,14 +19,24 @@ public:
   FPGATrackSimDumpOutputStatAlg (const std::string& name, ISvcLocator* pSvcLocator);
   virtual ~FPGATrackSimDumpOutputStatAlg () {};
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;  
+  virtual StatusCode execute() override;
+  virtual StatusCode finalize() override;
   StatusCode BookHistograms();
 
 
 private:
-  ToolHandle<IFPGATrackSimEventOutputHeaderTool>    m_readOutputTool  { this, "InputTool",  "FPGATrackSimOutputHeaderTool/ReadOutputHeaderTool", "Input Tool" };
-  ToolHandle<IFPGATrackSimEventOutputHeaderTool>    m_writeOutputTool { this, "OutputTool", "FPGATrackSimOutputHeaderTool/WriteOutputHeaderTool", "Output Tool" };
+  ToolHandle<FPGATrackSimOutputHeaderTool>    m_readOutputTool  { this, "InputTool",  "FPGATrackSimOutputHeaderTool/ReadOutputHeaderTool", "Input Tool" };
   
+  // Make these configurable. If they are set to the empty string branches won't get read.
+  Gaudi::Property<std::string> m_inputBranchName { this, "InputBranchName", "", "Branch containing InputHeader to read from ROOT file." };
+  Gaudi::Property<std::string> m_outputBranchName { this, "OutputBranchName", "", "Branch containing OutputHeader to read from ROOT file." };
+
+  FPGATrackSimLogicalEventInputHeader* m_eventInputHeader = nullptr;
+  FPGATrackSimLogicalEventOutputHeader* m_eventOutputHeader = nullptr;
+
+  // Internal counter.
+  unsigned m_event = 0;
+
   // histograms
   //TH2F*   m_hits_r_vs_z = nullptr;
 };

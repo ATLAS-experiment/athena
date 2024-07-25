@@ -9,7 +9,7 @@
 
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "FPGATrackSimInput/IFPGATrackSimEventOutputHeaderTool.h"
+#include "FPGATrackSimInput/FPGATrackSimOutputHeaderTool.h"
 #include "FPGATrackSimInput/IFPGATrackSimEventInputHeaderTool.h"
 #include "FPGATrackSimHough/IFPGATrackSimRoadFilterTool.h"
 #include "FPGATrackSimHough/IFPGATrackSimRoadFinderTool.h"
@@ -94,30 +94,35 @@ class FPGATrackSimLogicalHitsProcessAlg : public AthAlgorithm
         ToolHandle<FPGATrackSimOverlapRemovalTool>       m_overlapRemovalTool_1st {this, "OverlapRemoval_1st", "FPGATrackSimOverlapRemovalTool/FPGATrackSimOverlapRemovalTool_1st", "1st stage overlap removal tool"};
         ToolHandle<FPGATrackSimOverlapRemovalTool>       m_overlapRemovalTool_2nd {this, "OverlapRemoval_2nd", "FPGATrackSimOverlapRemovalTool/FPGATrackSimOverlapRemovalTool_2nd", "2nd stage overlap removal tool"};
         ToolHandle<FPGATrackSimDataFlowTool>             m_dataFlowTool {this, "DataFlowTool", "FPGATrackSimDataFlowTool/FPGATrackSimDataFlowTool", "Data Flow Tool"};
-        ToolHandle<IFPGATrackSimEventOutputHeaderTool>   m_writeOutputTool {this, "OutputTool", "FPGATrackSimOutputHeaderTool/FPGATrackSimOutputHeaderTool", "Output tool"};
+        ToolHandle<FPGATrackSimOutputHeaderTool>   m_writeOutputTool {this, "OutputTool", "FPGATrackSimOutputHeaderTool/FPGATrackSimOutputHeaderTool", "Output tool"};
         ServiceHandle<IFPGATrackSimMappingSvc>           m_FPGATrackSimMapping {this, "FPGATrackSimMapping", "FPGATrackSimMappingSvc", "FPGATrackSimMappingSvc"};
         ServiceHandle<IFPGATrackSimEventSelectionSvc>    m_evtSel {this, "eventSelector", "FPGATrackSimEventSelectionSvc", "Event selection Svc"};
         
         // Flags
-	Gaudi::Property<int> m_firstInputToolN {this, "FirstInputToolN", 1, "number of times to use event from first input tool"};
-	Gaudi::Property<int> m_secondInputToolN {this, "SecondInputToolN", 0, "number of times to use event from second input tool"};
+        Gaudi::Property<int> m_firstInputToolN {this, "FirstInputToolN", 1, "number of times to use event from first input tool"};
+        Gaudi::Property<int> m_secondInputToolN {this, "SecondInputToolN", 0, "number of times to use event from second input tool"};
         Gaudi::Property<bool> m_doHitFiltering {this, "HitFiltering", false, "flag to enable hit/cluster filtering"};
-	Gaudi::Property<bool> m_clustering {this, "Clustering", false, "flag to enable the clustering"};
-	Gaudi::Property<bool> m_doSpacepoints {this, "Spacepoints", false, "flag to enable the spacepoint formation"};
-	Gaudi::Property<bool> m_doTracking {this, "tracking", false, "flag to enable the tracking"};
-	Gaudi::Property<bool> m_doMissingHitsChecks {this, "DoMissingHitsChecks", false};
-	Gaudi::Property<bool> m_filterRoads  {this, "FilterRoads", false, "enable first road filter"};
-	Gaudi::Property<bool> m_filterRoads2  {this, "FilterRoads2", false,  "enable second road filter"};
-	Gaudi::Property<bool> m_runSecondStage {this, "RunSecondStage", false,  "flag to enable running the second stage fitting"};
-	Gaudi::Property<bool> m_doHoughRootOutput {this, "DoHoughRootOutput", false, "Dump output from the Hough Transform to flat ntuples"};
-	Gaudi::Property<bool> m_doNNTrack  {this, "DoNNTrack", false, "Run NN track filtering"};
-	Gaudi::Property<bool> m_doLRT {this, "doLRT", false, "Enable Large Radius Tracking"};
-	Gaudi::Property<bool> m_doLRTHitFiltering {this, "LRTHitFiltering", false, "flag to enable hit/cluster filtering for LRT"};
+        Gaudi::Property<bool> m_clustering {this, "Clustering", false, "flag to enable the clustering"};
+        Gaudi::Property<bool> m_doSpacepoints {this, "Spacepoints", false, "flag to enable the spacepoint formation"};
+        Gaudi::Property<bool> m_doTracking {this, "tracking", false, "flag to enable the tracking"};
+        Gaudi::Property<bool> m_doMissingHitsChecks {this, "DoMissingHitsChecks", false};
+        Gaudi::Property<bool> m_filterRoads  {this, "FilterRoads", false, "enable first road filter"};
+        Gaudi::Property<bool> m_filterRoads2  {this, "FilterRoads2", false,  "enable second road filter"};
+        Gaudi::Property<bool> m_runSecondStage {this, "RunSecondStage", false,  "flag to enable running the second stage fitting"};
+        Gaudi::Property<bool> m_doHoughRootOutput {this, "DoHoughRootOutput", false, "Dump output from the Hough Transform to flat ntuples"};
+        Gaudi::Property<bool> m_doNNTrack  {this, "DoNNTrack", false, "Run NN track filtering"};
+        Gaudi::Property<bool> m_doLRT {this, "doLRT", false, "Enable Large Radius Tracking"};
+        Gaudi::Property<bool> m_doLRTHitFiltering {this, "LRTHitFiltering", false, "flag to enable hit/cluster filtering for LRT"};
         Gaudi::Property<bool> m_writeOutputData  {this, "writeOutputData", true,"write the output TTree"};
-	Gaudi::Property<bool> m_outputHitTxt  {this, "outputHitTxt", false, "write out road hits to text file"};
-	Gaudi::Property<bool> m_doEvtSel {this, "doEvtSel", true, "do event selection"};
+        Gaudi::Property<bool> m_outputHitTxt  {this, "outputHitTxt", false, "write out road hits to text file"};
+        Gaudi::Property<bool> m_doEvtSel {this, "doEvtSel", true, "do event selection"};
         Gaudi::Property<bool> m_runOnRDO {this,"runOnRDO", false, "case when runnin on RDO file (and not or wrapper)"};
-	
+
+        // Properties for the output header tool.
+        Gaudi::Property<std::string> m_inputBranch      {this, "inputBranchName", "LogicalEventInputHeader", "Name of the branch for input data in output ROOT file." };
+        Gaudi::Property<std::string> m_outputBranch     {this, "outputBranchName", "LogicalEventOutputHeader", "Name of the branch for output data in output ROOT file." };
+        Gaudi::Property<std::string> m_inputBranch_2nd  {this, "inputBranchName_2nd", "LogicalEventInputHeader_2nd", "Name of the branch for second stage input data in output ROOT file." };
+
         std::string m_outputHitTxtName = "outputRoadHits.txt";
         std::ofstream m_outputHitTxtStream;
 
@@ -149,10 +154,11 @@ class FPGATrackSimLogicalHitsProcessAlg : public AthAlgorithm
 
 
         StatusCode readInputs(bool & done);
-        StatusCode processInputs(SG::WriteHandle<FPGATrackSimHitCollection> &FPGAHitUnmapped_1st,       
+        StatusCode processInputs(SG::WriteHandle<FPGATrackSimHitCollection> &FPGAHitUnmapped_1st,
                                  SG::WriteHandle<FPGATrackSimClusterCollection> &FPGAClusters_1st,
                                  SG::WriteHandle<FPGATrackSimClusterCollection> &FPGAClustersFiltered_1st,
                                  SG::WriteHandle<FPGATrackSimClusterCollection> &FPGASpacePoints_1st);
+
         StatusCode secondStageProcessing(std::vector<FPGATrackSimTrack> const & tracks_1st,
                                          std::vector<FPGATrackSimRoad*> & roads_2nd, std::vector<FPGATrackSimTrack> & tracks_2nd);
 
