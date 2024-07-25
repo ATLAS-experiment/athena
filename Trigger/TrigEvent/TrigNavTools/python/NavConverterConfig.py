@@ -28,7 +28,7 @@ def NavConverterCfg(flags, chainsList = [], runTheChecker = False):
 
     r2ToR3OutputName = getRun3NavigationContainerFromInput(flags)
 
-    cnvAlg = CompFactory.Run2ToRun3TrigNavConverterV2("TrigRun2ToRun3NavConverter") # optional OutputLevel=DEBUG
+    cnvAlg = CompFactory.Run2ToRun3TrigNavConverterV2("TrigRun2ToRun3NavConverter")#, OutputLevel=2)
     cnvAlg.TrigDecisionTool = tdt
     cnvAlg.TrigNavReadKey = ""
     cnvAlg.TrigConfigSvc = tdt.TrigConfigSvc
@@ -42,7 +42,15 @@ def NavConverterCfg(flags, chainsList = [], runTheChecker = False):
 
     from TrigEDMConfig.TriggerEDM import getTriggerEDMList
     edm = getTriggerEDMList(flags, "AODCONV")
-    types = [ t for t in edm ]
+
+    def cleanKey(type, name):
+        return name.replace("HLT_", "", 1).replace(type.replace("::", "__"), "", 1).replace("_", "", 1)
+    types = []
+    for type, keys in edm.items():
+        
+        for key in keys:            
+            types.append(type+"#"+cleanKey(type, key))
+    
     log.info("Assuming these collections are relevant for trigger: %s", " ".join(types))
     cnvAlg.Collections = types
     cnvAlg.Chains = chainsList
@@ -50,7 +58,7 @@ def NavConverterCfg(flags, chainsList = [], runTheChecker = False):
     acc.addEventAlgo(cnvAlg)
 
     if runTheChecker:
-        checker = CompFactory.Trig.NavigationTesterAlg(FailOnDifference = False, TrigDecisionTool = tdt) # optional: OutputLevel = DEBUG
+        checker = CompFactory.Trig.NavigationTesterAlg(FailOnDifference = False, TrigDecisionTool = tdt)#, OutputLevel = 2)
         checker.RetrievalToolRun2Nav = CompFactory.Trig.IParticleRetrievalTool()
         
         # in conversion job  Run2 TDT is setup as default, we need to setup an alternative to access Run 3 format
@@ -60,7 +68,7 @@ def NavConverterCfg(flags, chainsList = [], runTheChecker = False):
                                                     AcceptMultipleInstance=True,
                                                     TrigConfigSvc = tdt.TrigConfigSvc)
         acc.addPublicTool(run3tdt)
-        checker.RetrievalToolRun3Nav = CompFactory.Trig.R3IParticleRetrievalTool(TrigDecisionTool = run3tdt)
+        checker.RetrievalToolRun3Nav = CompFactory.Trig.R3IParticleRetrievalTool(TrigDecisionTool = run3tdt)#, OutputLevel=1)
         checker.Chains = chainsList
         checker.TrigDecisionToolRun3 = run3tdt
         checker.TrigDecisionToolRun2 = tdt
