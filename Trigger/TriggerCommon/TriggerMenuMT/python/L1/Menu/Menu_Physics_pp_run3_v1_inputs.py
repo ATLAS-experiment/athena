@@ -372,6 +372,9 @@ def defineInputsMenu():
                     TopoMenuDef( 'NOT-0MATCH-eTAU40si1-eEMall',              outputbits = 10),
                     TopoMenuDef( '0DETA24-eTAU30s2-eTAU12s2',                outputbits = 11),
                     TopoMenuDef( '0DETA24-4DPHI99-eTAU30ab-eTAU12ab',        outputbits = 12),
+                    TopoMenuDef( '23DPHI32-2eEM1s',                          outputbits = 13), #ATR-29784
+                    TopoMenuDef( '23DPHI32-2eTAU1s',                         outputbits = 14), #ATR-29784
+                    TopoMenuDef( '23DPHI32-2jTAU1s',                         outputbits = 15), #ATR-29784
 
                 ]
             },

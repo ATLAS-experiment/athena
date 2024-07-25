@@ -11,6 +11,7 @@
 #include "L1CaloFEXSim/eFEXTOBEtTool.h"
 #include "L1CaloFEXSim/eFEXegAlgo.h"
 #include "L1CaloFEXSim/eFEXtauAlgo.h"
+#include "L1CaloFEXSim/eTowerContainer.h"
 #include <vector>
 
 namespace LVL1 {
@@ -33,9 +34,10 @@ eFEXTOBEtTool::eFEXTOBEtTool(const std::string& type,const std::string& name,con
   
 StatusCode eFEXTOBEtTool::initialize()
 {
-
+  
   ATH_CHECK( m_eFEXegAlgoTool.retrieve() );
   ATH_CHECK( m_eFEXtauAlgoTool.retrieve() );
+  ATH_CHECK(m_eTowerContainerKey.initialize());
 
   return StatusCode::SUCCESS;
 }
@@ -84,6 +86,55 @@ StatusCode eFEXTOBEtTool::getegSums(float etaTOB, float phiTOB, int seed, int Un
   // and we're done
   return StatusCode::SUCCESS;
 
+}
+
+StatusCode eFEXTOBEtTool::getTOBCellEnergies(float etaTOB, float phiTOB, std::vector<int> &ClusterCellETs){
+	
+	  /// Form grid of 3x3 tower IDs for this window
+  int tobtable[3][3];
+
+  for (int iphi = -1; iphi <= 1; ++iphi) {
+    float phiTable = phiTOB + iphi*m_dphiTower;
+    if (phiTable > M_PI)  phiTable -= 2*M_PI;
+    if (phiTable < -M_PI) phiTable += 2*M_PI;
+
+    for (int ieta = -1; ieta <= 1; ++ieta) {
+      float etaTable = etaTOB + ieta*m_detaTower;
+
+      // Set the tower ID if within acceptance, else 0
+      if (std::abs(etaTable)<2.5) tobtable[iphi+1][ieta+1] = eTowerID(etaTable, phiTable);
+      else                   tobtable[iphi+1][ieta+1] = 0;
+
+    } // eta loop
+  }  // phi loop
+
+  SG::ReadHandle<eTowerContainer> eTowerContainer(m_eTowerContainerKey/*,ctx*/);
+  ClusterCellETs.reserve(99); // will have a total of 99 supercell values (they are in counts of 25 MeV)
+  
+  for (unsigned int il = 0; il < 5; il++) { // layer loop
+      size_t nCells = (il==1 || il==2) ? 4 : 1;
+      for (unsigned int iphi = 0; iphi < 3; iphi++) { // tower phi loop
+          for (unsigned int ieta = 0; ieta < 3; ieta++) { // tower eta loop
+              if (tobtable[ieta][iphi]==0){ 
+                  for(size_t c=0;c<nCells;c++) {
+		                ClusterCellETs.push_back(0); // no energies for TOBs are the extreme eta values 
+				          }
+              } else {
+                  const eTower * tower = eTowerContainer->findTower(tobtable[ieta][iphi]);
+                  if (tower==nullptr) {
+                    ATH_MSG_ERROR("No tower with id " << tobtable[ieta][iphi]);
+                    return StatusCode::FAILURE;
+                  }
+                  for(size_t c=0;c<nCells;c++) {
+			               ClusterCellETs.push_back( tower->getET(il,c) );
+                  }
+                }
+            }
+        }
+    }
+
+  // and we're done
+  return StatusCode::SUCCESS;
 }
 
 

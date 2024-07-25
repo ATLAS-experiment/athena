@@ -15,8 +15,9 @@ class ArgStrToSizeT {
 
   unsigned long long operator() (const std::string& s){
     
+    static const std::array<std::string,4> posinf{"inf", "+inf", "pinf", "INF"};
     unsigned long long val{0};
-    if(std::find(m_posinf.begin(), m_posinf.end(), s) != m_posinf.end()) {
+    if(std::find(posinf.begin(), posinf.end(), s) != posinf.end()) {
       val =  std::numeric_limits<std::size_t>::max();
     }
     else {
@@ -25,11 +26,6 @@ class ArgStrToSizeT {
     
     return val;
   }
-
-  
- private:
-  static constexpr std::array<std::string,4> m_posinf{"inf", "+inf", "pinf", "INF"};
-
 };
 
 #endif

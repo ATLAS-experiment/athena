@@ -73,10 +73,14 @@ private:
     TEfficiency* m_vx_hs_reco_eff;
     // HS vertex selection efficiency vs PU
     TEfficiency* m_vx_hs_sel_eff;
+    // HS vertex selection efficiency vs nReco vertices
+    TEfficiency* m_vx_hs_sel_eff_vs_nReco;
     // HS vertex reconstruction and selection efficiency vs PU
     TEfficiency* m_vx_hs_reco_sel_eff;
     // HS vertex selection efficiency vs PU (distance based)
     TEfficiency* m_vx_hs_sel_eff_dist;
+    // HS vertex selection efficiency vs nReco vertices (distance based)
+    TEfficiency* m_vx_hs_sel_eff_dist_vs_nReco;
     // HS vertex reconstruction efficiency vs n truth vertices
     TEfficiency* m_vx_hs_reco_eff_vs_ntruth;
     // HS vertex selection efficiency vs n truth vertices
@@ -87,12 +91,14 @@ private:
     TProfile* m_vx_hs_reco_long_reso;
     TProfile* m_vx_hs_reco_trans_reso;
     // For reco-truth resolutions:
-    TH2* m_vx_hs_truth_long_reso_vs_PU;
-    TH2* m_vx_hs_truth_trans_reso_vs_PU;
+    TH2* m_resHelper_PUdensity_hsVxTruthLong;
+    TH1* m_resolution_vs_PUdensity_hsVxTruthLong;
+    TH1* m_resmean_vs_PUdensity_hsVxTruthLong;
+    TH2* m_resHelper_PUdensity_hsVxTruthTransv;
+    TH1* m_resolution_vs_PUdensity_hsVxTruthTransv;
+    TH1* m_resmean_vs_PUdensity_hsVxTruthTransv;
 
-    TH1* m_vx_hs_truth_long_reso;
-    TH1* m_vx_hs_truth_trans_reso;
-     
+
     TH1* m_vx_hs_z_pull;
     TH1* m_vx_hs_y_pull;
     TH1* m_vx_hs_x_pull;
@@ -246,6 +252,7 @@ private:
     
     TH1* m_vx_PUdensity;
     TH1* m_vx_nTruth;
+    TH2* m_vx_nTruth_vs_PUdensity;
 
     ///@}
 private:

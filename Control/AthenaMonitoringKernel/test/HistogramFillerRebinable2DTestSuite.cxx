@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -26,7 +26,6 @@
 #include "AthenaMonitoringKernel/MonitoredScalar.h"
 #include "../src/HistogramFiller/HistogramFillerRebinable.h"
 
-#include "mocks/MockHistogramDef.h"
 #include "mocks/MockHistogramProvider.h"
 
 using namespace std;
@@ -47,6 +46,8 @@ class HistogramFillerRebinable2DTestSuite {
   // ==================== Test code ====================
   private:
     void beforeEach() {
+        m_histogramDef.type = "TH1F";
+        m_histogramDef.xbins = 1;
         m_histogramDef.kAddBinsDynamically = true;
         m_histogramProvider.reset(new MockHistogramProvider());
         m_histogram.reset(new TH2D("MockHistogram", "Mock Histogram", 8, 1.0, 3.0, 5, 1.0, 5.0));
@@ -123,7 +124,7 @@ class HistogramFillerRebinable2DTestSuite {
   private:
     MsgStream m_log;
 
-    MockHistogramDef m_histogramDef;
+    HistogramDef m_histogramDef;
     shared_ptr<MockHistogramProvider> m_histogramProvider;
     shared_ptr<TH2D> m_histogram;
 
@@ -133,8 +134,8 @@ class HistogramFillerRebinable2DTestSuite {
 int main() {
   ISvcLocator* pSvcLoc;
 
-  if (!Athena_test::initGaudi("GenericMon.txt", pSvcLoc)) {
-    throw runtime_error("This test can not be run: GenericMon.txt is missing");
+  if (!Athena_test::initGaudi("GenericMonMinimal.txt", pSvcLoc)) {
+    throw runtime_error("This test can not be run: GenericMonMinimal.txt is missing");
   }
 
   HistogramFillerRebinable2DTestSuite().run();

@@ -53,7 +53,10 @@ class LumiblockHistogramProviderTestSuite {
   // ==================== Test code ====================
   private:
     void beforeEach() {
-      m_gmTool.reset(new MockGenericMonitoringTool());
+      ServiceHandle<IToolSvc> toolSvc("ToolSvc", "LumiblockHistogramProviderTestSuite");
+
+      toolSvc.retrieve().ignore();
+      m_gmTool.reset(new MockGenericMonitoringTool(toolSvc.get()));
       m_histogramFactory.reset(new MockHistogramFactory());
     }
 
@@ -96,24 +99,24 @@ class LumiblockHistogramProviderTestSuite {
 
     void test_shouldCreateNewHistogramWithUpdatedAlias() {
       auto expectedFlow = {
-        make_tuple(0, "test alias_LB0_2"),
-        make_tuple(1, "test alias_LB0_2"),
-        make_tuple(2, "test alias_LB0_2"),
-        make_tuple(3, "test alias_LB3_5"),
-        make_tuple(4, "test alias_LB3_5"),
-        make_tuple(5, "test alias_LB3_5"),
-        make_tuple(6, "test alias_LB6_8"),
-        make_tuple(7, "test alias_LB6_8"),
-        make_tuple(8, "test alias_LB6_8"),
-        make_tuple(9, "test alias_LB9_11"),
+        make_tuple(0, "alias_LB0_2"),
+        make_tuple(1, "alias_LB0_2"),
+        make_tuple(2, "alias_LB0_2"),
+        make_tuple(3, "alias_LB3_5"),
+        make_tuple(4, "alias_LB3_5"),
+        make_tuple(5, "alias_LB3_5"),
+        make_tuple(6, "alias_LB6_8"),
+        make_tuple(7, "alias_LB6_8"),
+        make_tuple(8, "alias_LB6_8"),
+        make_tuple(9, "alias_LB9_11"),
       };
 
       TH1F histogram("h", "h", 1, 0, 1);
       HistogramDef histogramDef;
-      histogramDef.alias = "test alias";
+      histogramDef.alias = "alias";
+      histogramDef.path = "HistogramProviderTestSuite";
       histogramDef.kLBNHistoryDepth = 3;
 
-      m_gmTool->histSvc().mock_always_empty = false; // the mock actually keeps track of registered histograms
       LumiblockHistogramProvider testObj(m_gmTool.get(), m_histogramFactory, histogramDef);
 
       for (auto input : expectedFlow) {
@@ -124,12 +127,13 @@ class LumiblockHistogramProviderTestSuite {
         m_histogramFactory->mock_create = [&](const HistogramDef& def) mutable {
           VALUE(def.alias) EXPECTED(expectedAlias);
           m_log << MSG::INFO << "Registering: " << def.alias << endmsg;
-          m_gmTool->histSvc().regHist(m_histogramFactory->getFullName(def), &histogram).ignore();
+          m_gmTool->histogramService()->regHist(m_histogramFactory->getFullName(def),
+                                                static_cast<TH1F*>(histogram.Clone())).ignore();
           return &histogram;
         };
         m_histogramFactory->mock_remove = [&](const Monitored::HistogramDef& def) {
           m_log << MSG::INFO << "Deregistering: " << def.alias << endmsg;
-          m_gmTool->histSvc().deReg(m_histogramFactory->getFullName(def)).ignore();
+          m_gmTool->histogramService()->deReg(m_histogramFactory->getFullName(def)).ignore();
           return nullptr;
         };
 
@@ -138,7 +142,7 @@ class LumiblockHistogramProviderTestSuite {
       }
       // We keep histograms active for the last 5 LBs. That means on LB 9 we have
       // histograms covering LBs 5-9 registered, i.e. the last 3 from expectedFlow.
-      VALUE( m_gmTool->histSvc().mock_registered.size() ) EXPECTED ( 3 );
+      VALUE( m_gmTool->histogramService()->getHists().size() ) EXPECTED ( 3 );
     }
 
     void test_shouldCreateNewHistogramWithUpdatedLumiBlock() {
@@ -291,10 +295,10 @@ class LumiblockHistogramProviderTestSuite {
 };
 
 int main() {
-  ISvcLocator* pSvcLoc;
+  ISvcLocator* pSvcLoc{};
 
-  if (!Athena_test::initGaudi("GenericMon.txt", pSvcLoc)) {
-    throw runtime_error("This test can not be run: GenericMon.txt is missing");
+  if (!Athena_test::initGaudi("GenericMonMinimal.txt", pSvcLoc)) {
+    throw runtime_error("This test can not be run: GenericMonMinimal.txt is missing");
   }
 
   LumiblockHistogramProviderTestSuite().run();

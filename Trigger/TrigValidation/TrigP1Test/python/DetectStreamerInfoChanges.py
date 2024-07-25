@@ -41,11 +41,11 @@ def append_versions(objects, cname):
 if __name__ == '__main__':
     objects = []
     if doTrigEDMOnly:
-        from TrigEDMConfig.TriggerEDMRun3 import TriggerHLTListRun3
+        from TrigEDMConfig.TriggerEDM import getRawTriggerEDMList
         from TrigEDMConfig.DataScoutingInfo import getAllDataScoutingIdentifiers
         BS_destinations = ["BS"] + getAllDataScoutingIdentifiers()
         log.warning("BS_destinations = {}".format(BS_destinations))
-        for item in TriggerHLTListRun3:
+        for item in getRawTriggerEDMList(flags=None, runVersion=3):
             if any(bs in item[1].split() for bs in BS_destinations):
                 objects.append(item[0].split("#")[0])
     else:

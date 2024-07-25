@@ -24,7 +24,7 @@ def LVL1InterfacesMonitoringCfg(flags):
 
     # monitoring algorithm configs
     # do not run on MC or  RAW->ESD(tier0), or AOD-only
-    if isData and flags.DQ.Environment not in ('tier0Raw', 'AOD'):
+    if isData and flags.DQ.Environment not in ('tier0Raw', 'AOD') and flags.Input.DataYear < 2024:
         from TrigT1Monitoring.L1CaloL1TopoMonitorAlgorithm import L1CaloL1TopoMonitoringConfig
         result.merge(L1CaloL1TopoMonitoringConfig(flags))
 

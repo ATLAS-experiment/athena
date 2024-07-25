@@ -53,7 +53,6 @@ std::unique_ptr<LVL1::eFEXtauTOB> LVL1::eFEXtauAlgo::getTauTOB() const {
   tob->setSeedUnD(getUnD());
   tob->setBDTScore(0);
   tob->setIsBDTAlgo(0);
-  setSCellEncoder(tob.get());
   return tob;
 }
 

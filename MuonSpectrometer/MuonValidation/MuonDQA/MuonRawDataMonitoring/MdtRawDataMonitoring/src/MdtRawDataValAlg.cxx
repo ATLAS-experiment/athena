@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -23,6 +23,8 @@
 #include "GeoModelUtilities/GeoGetIds.h"
 #include "Identifier/Identifier.h"
 #include "Identifier/IdentifierHash.h"
+#include "LWHists/TH1F_LW.h"
+#include "LWHists/TH2F_LW.h"
 #include "MdtCalibFitters/MTStraightLine.h"
 #include "MuonCalibIdentifier/MuonFixedId.h"
 #include "MuonChamberIDSelector.h"

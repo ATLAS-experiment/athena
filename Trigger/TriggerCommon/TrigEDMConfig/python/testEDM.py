@@ -5,8 +5,9 @@ from AthenaCommon.Logging import logging
 log = logging.getLogger('testEDM')
 
 from TriggerEDM import (TriggerL2List, TriggerEFList, TriggerResultsList, TriggerResultsRun1List,
-                        TriggerLvl1List, TriggerIDTruth, TriggerHLTList)
+                        TriggerLvl1List, TriggerIDTruth, TriggerHLTList, _addExtraCollectionsToEDMList)
 from TriggerEDMRun2 import EDMDetails
+from TrigEDMConfig.TriggerEDMDefs import InViews
 import TriggerEDMRun1
 from CLIDComps.clidGenerator import clidGenerator
 cgen = clidGenerator("", False)
@@ -56,6 +57,48 @@ def main():
   for EDMDetail in EDMDetails.keys():
     if EDMDetail not in serializable_names_no_label:
       log.warning("EDMDetail for " + EDMDetail + " does not correspond to any name in TriggerList")
+
+  # Check EDM flag manipulation
+  dummyEDM = [
+    ('xAOD::A#HLT_A',                        'BS ESD', 'Steer', [InViews('SomeView1')]),
+    ('xAOD::AAuxContainer#HLT_AAux.',        'BS ESD', 'Steer'),
+    ('xAOD::B#HLT_B',                        'BS ESD', 'Steer'),
+    ('xAOD::BAuxContainer#HLT_BAux.DecOne.', 'BS ESD', 'Steer'),
+    ('xAOD::B#HLT_C',                        'BS ESD', 'Steer'),
+    ('xAOD::BAuxContainer#HLT_CAux.',        'BS ESD', 'Steer'),
+  ]
+
+  updateList = [
+    # Add new
+    ('xAOD::D#HLT_D',                                'BS ESD AODFULL', 'Steer', [InViews('SomeView2')]),
+    ('xAOD::DAuxContainer#HLT_DAux.',                'BS ESD AODFULL', 'Steer'),
+    # Add decorations & target
+    ('xAOD::AAuxContainer#HLT_AAux.DecTwo.DecThree', 'BS ESD', 'Steer'),
+    ('xAOD::B#HLT_B',                                'BS ESD AODFULL', 'Steer'),
+    ('xAOD::BAuxContainer#HLT_BAux.DecFour',         'BS ESD AODFULL', 'Steer'),
+    # Duplicate - leave untouched
+    ('xAOD::C#HLT_C',                                'BS ESD', 'Steer'),
+    ('xAOD::CAuxContainer#HLT_CAux.',                'BS ESD', 'Steer'),
+  ]
+
+  _addExtraCollectionsToEDMList(dummyEDM, updateList) # Note: Function updates dummyEDM in-place
+
+  expectedEDM = [
+    ('xAOD::A#HLT_A',                                'BS ESD',         'Steer', [InViews('SomeView1')]),
+    ('xAOD::AAuxContainer#HLT_AAux.DecTwo.DecThree', 'BS ESD',         'Steer'),
+    ('xAOD::B#HLT_B',                                'BS ESD AODFULL', 'Steer'),
+    ('xAOD::BAuxContainer#HLT_BAux.DecOne.DecFour',  'BS ESD AODFULL', 'Steer'),
+    ('xAOD::C#HLT_C',                                'BS ESD', 'Steer'),
+    ('xAOD::CAuxContainer#HLT_CAux.',                'BS ESD', 'Steer'),
+    ('xAOD::D#HLT_D',                                'BS ESD AODFULL', 'Steer', [InViews('SomeView2')]),
+    ('xAOD::DAuxContainer#HLT_DAux.',                'BS ESD AODFULL', 'Steer'),
+  ]
+
+  if (dummyEDM != expectedEDM):
+    log.error("There is a problem in _addExtraCollectionsToEDMList, expecting:")
+    log.error(expectedEDM)
+    log.error("Got:")
+    log.error(dummyEDM)
 
 if __name__ == "__main__":
   import sys

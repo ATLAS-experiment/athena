@@ -69,7 +69,7 @@ def TriggerRecoCfgData(flags):
         xRoIBResultAcc, _ = RoIBResultToxAODCfg(flags)
         acc.merge( xRoIBResultAcc )
 
-        if flags.Input.Format is Format.BS:
+        if flags.Input.Format is Format.BS and flags.Input.DataYear < 2024: 
             from L1TopoByteStream.L1TopoByteStreamConfig import L1TopoRawDataContainerBSCnvCfg
             acc.merge( L1TopoRawDataContainerBSCnvCfg(flags) )
             topoEDM = ['xAOD::L1TopoRawDataContainer#L1TopoRawData',
@@ -161,8 +161,8 @@ def TriggerEDMCfg(flags):
         acc.merge(addToAOD(flags, edmDictToList(getLvl1AODList())))
 
     edmVersion = max(2, flags.Trigger.EDMVersion)
-    _TriggerESDList = getTriggerEDMList(flags.Trigger.ESDEDMSet, edmVersion, flags.Trigger.ExtraEDMList)
-    _TriggerAODList = getTriggerEDMList(flags.Trigger.AODEDMSet, edmVersion, flags.Trigger.ExtraEDMList)
+    _TriggerESDList = getTriggerEDMList(flags, key=flags.Trigger.ESDEDMSet, runVersion=edmVersion)
+    _TriggerAODList = getTriggerEDMList(flags, key=flags.Trigger.AODEDMSet, runVersion=edmVersion)
     log.debug("ESD EDM list: %s", _TriggerESDList)
     log.debug("AOD EDM list: %s", _TriggerAODList)
     
@@ -225,7 +225,7 @@ def Run2Run1NavigationSlimmingCfg(flags):
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
 
     if flags.Output.doWriteAOD:
-        _TriggerAODList = getTriggerEDMList(flags.Trigger.AODEDMSet,  flags.Trigger.EDMVersion)
+        _TriggerAODList = getTriggerEDMList(flags, key=flags.Trigger.AODEDMSet)
         thinningSvc = acc.getPrimaryAndMerge(TrigNavigationThinningSvcCfg(flags, 
                                                                           {'name' : 'HLTNav_StreamAOD',
                                                                            'mode' : 'cleanup_noreload', 
@@ -234,7 +234,7 @@ def Run2Run1NavigationSlimmingCfg(flags):
         acc.merge(OutputStreamCfg(flags, "AOD", trigNavThinningSvc = thinningSvc))
 
     if flags.Output.doWriteESD:
-        _TriggerESDList = getTriggerEDMList(flags.Trigger.ESDEDMSet,  flags.Trigger.EDMVersion)
+        _TriggerESDList = getTriggerEDMList(flags, key=flags.Trigger.ESDEDMSet)
         thinningSvc = acc.getPrimaryAndMerge(TrigNavigationThinningSvcCfg(flags,
                                                                           {'name' : 'HLTNav_StreamESD',
                                                                            'mode' : 'cleanup_noreload', 
@@ -325,7 +325,6 @@ def Run1xAODConversionCfg(flags):
     acc = ComponentAccumulator()
 
     log.info("Will configure Run 1 trigger EDM to xAOD conversion")
-    from TrigEDMConfig.TriggerEDM import getTriggerEDMList
     from TrigEDMConfig.TriggerEDM import getEFRun1BSList,getEFRun2EquivalentList,getL2Run1BSList,getL2Run2EquivalentList
 
     from TrkConfig.TrkParticleCreatorConfig import TrackParticleCreatorToolCfg
@@ -357,8 +356,8 @@ def Run1xAODConversionCfg(flags):
     acc.setPrivateTools(bstoxaodTool)
 
     # write the xAOD (Run-2) classes to the output
-    acc.merge(addToESD(flags, edmDictToList(getTriggerEDMList(flags.Trigger.ESDEDMSet, runVersion=2))))
-    acc.merge(addToAOD(flags, edmDictToList(getTriggerEDMList(flags.Trigger.AODEDMSet, runVersion=2))))
+    acc.merge(addToESD(flags, edmDictToList(getTriggerEDMList(flags, key=flags.Trigger.ESDEDMSet, runVersion=2))))
+    acc.merge(addToAOD(flags, edmDictToList(getTriggerEDMList(flags, key=flags.Trigger.AODEDMSet, runVersion=2))))
 
     return acc
 

@@ -47,6 +47,8 @@ const std::map<std::string, TCS::HardwareParam>& TCS::L1TopoHWParameters::get() 
       DEF_HW(NumberOfDelayedMuons),
       DEF_HW(muonOutputWidthSelect),
       DEF_HW(metOutputWidth),
+      DEF_HW(jTauOutputWidthSort),
+      DEF_HW(jTauOutputWidthSelect),
 
       DEF_HW(InputWidthEM),
       DEF_HW(InputWidthTAU),

@@ -1,15 +1,10 @@
-################################################################################
-# Package: MuonDQAUtils
-################################################################################
+#Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( MuonDQAUtils )
 
 # External dependencies:
-find_package( CLHEP )
-find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread MathMore Minuit Minuit2 Matrix Physics HistPainter Rint Graf Graf3d Gpad Html Postscript Gui GX11TTF GX11 )
-
-# tag ROOTBasicLibs was not recognized in automatic conversion in cmt2cmake
+find_package( ROOT COMPONENTS Core Hist Physics )
 
 # Component(s) in the package:
 atlas_add_library( MuonDQAUtilsLib
@@ -18,11 +13,8 @@ atlas_add_library( MuonDQAUtilsLib
                    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
                    PRIVATE_INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
                    PRIVATE_DEFINITIONS ${CLHEP_DEFINITIONS}
-                   LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps EventKernel GaudiKernel ParticleEvent AnalysisTriggerEvent JetTagEvent JetEvent muonEvent Particle egammaEvent LWHists TrigMuonEvent TrigSteeringEvent StoreGateLib
-                   PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} )
+                   LINK_LIBRARIES ${ROOT_LIBRARIES} AnalysisTriggerEvent AthenaBaseComps EventKernel GaudiKernel JetEvent JetTagEvent Particle ParticleEvent TrigMuonEvent egammaEvent muonEvent )
 
 atlas_add_component( MuonDQAUtils
                      src/components/*.cxx
-                     INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${ROOT_LIBRARIES} ${CLHEP_LIBRARIES} AthenaBaseComps StoreGateLib EventKernel GaudiKernel ParticleEvent AnalysisTriggerEvent JetTagEvent JetEvent muonEvent Particle egammaEvent LWHists TrigMuonEvent TrigSteeringEvent MuonDQAUtilsLib )
-
+                     LINK_LIBRARIES MuonDQAUtilsLib )
