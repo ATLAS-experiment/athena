@@ -68,9 +68,9 @@ if __name__=="__main__":
     from MuonPatternRecognitionAlgs.MuonHoughTransformAlgConfig import MuonPatternRecognitionCfg, MuonSegmentFittingAlgCfg
     cfg.merge(MuonPatternRecognitionCfg(flags))
 
-    testerArgs={"drawDisplayFailed": args.displayFailedSeeds, "drawDisplaySuccss":args.displayGoodSeeds}
+    testerArgs = {"drawDisplayFailed": args.displayFailedSeeds, "drawDisplaySuccss":args.displayGoodSeeds}
     if args.skipSegmentFit: 
-        testerArgs["MuonSegmentContainer"]=""
+        testerArgs["SegmentKey"] = ""
     else: 
         cfg.merge(MuonSegmentFittingAlgCfg(flags))
     cfg.merge(MuonHoughTransformTesterCfg(flags, **testerArgs))
