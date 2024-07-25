@@ -88,11 +88,10 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::initialize()
     }
 
     ATH_MSG_DEBUG("initialize() Instantiating root objects");
-    m_logicEventHeader_1st   = m_writeOutputTool->getLogicalEventInputHeader_1st();
+    m_logicEventHeader_1st = m_writeOutputTool->addInputBranch(m_inputBranch.value(), true);
     
-
-    m_logicEventOutputHeader = m_writeOutputTool->getLogicalEventOutputHeader();
-    if (m_runSecondStage) m_logicEventHeader_2nd = m_writeOutputTool->getLogicalEventInputHeader_2nd();
+    m_logicEventOutputHeader = m_writeOutputTool->addOutputBranch(m_outputBranch.value(), true);
+    if (m_runSecondStage) m_logicEventHeader_2nd = m_writeOutputTool->addInputBranch(m_inputBranch_2nd.value(), true);
 
     ATH_MSG_DEBUG("initialize() Setting branch");
     if (m_outputHitTxt) {
@@ -707,7 +706,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::writeOutputData(std::vector<FPGATr
   m_logicEventOutputHeader->setDataFlowInfo(*dataFlowInfo);
   ATH_MSG_DEBUG(m_logicEventOutputHeader->getDataFlowInfo());
 
-  ATH_CHECK(m_writeOutputTool->writeData(m_logicEventHeader_1st, m_logicEventHeader_2nd, m_logicEventOutputHeader));
+  ATH_CHECK(m_writeOutputTool->writeData());
 
 
 

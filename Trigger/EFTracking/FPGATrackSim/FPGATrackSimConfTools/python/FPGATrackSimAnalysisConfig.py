@@ -281,8 +281,9 @@ def FPGATrackSimWriteOutputCfg(flags):
     result=ComponentAccumulator()
     FPGATrackSimWriteOutput = CompFactory.FPGATrackSimOutputHeaderTool("FPGATrackSimWriteOutput")
     FPGATrackSimWriteOutput.InFileName = ["test.root"]
-    FPGATrackSimWriteOutput.RWstatus = "RECREATE" # do not open file, use THistSvc
-    FPGATrackSimWriteOutput.RunSecondStage = flags.Trigger.FPGATrackSim.ActiveConfig.secondStage
+    # RECREATE means that that this tool opens the file.
+    # HEADER would mean that something else (e.g. THistSvc) opens it and we just add the object.
+    FPGATrackSimWriteOutput.RWstatus = "RECREATE"
     result.addPublicTool(FPGATrackSimWriteOutput, primary=True)
     return result
 
