@@ -22,5 +22,10 @@ atlas_add_component( TrigTauMonitoring
                      src/components/*.cxx
                      LINK_LIBRARIES TrigTauMonitoringLib AthenaMonitoringKernelLib AthenaMonitoringLib CxxUtils xAODTau xAODTrigger xAODTruth LArRecEvent TruthUtils ${Boost_LIBRARIES} )
 
+# Suppress spurious warnings seen in the LTO build originating 
+# in the boost parser code.
+set_target_properties( TrigTauMonitoring
+                       PROPERTIES LINK_FLAGS " -Wno-maybe-uninitialized "  )
+
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
