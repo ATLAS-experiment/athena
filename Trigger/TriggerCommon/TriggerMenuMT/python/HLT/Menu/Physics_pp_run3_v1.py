@@ -775,7 +775,19 @@ def setupMenu(menu_name):
         ChainProp(name='HLT_2g50_tight_L1eEM15_EMPTY', l1SeedThresholds=['eEM15'], stream=['Late'], groups=PrimaryPhIGroup+MultiPhotonGroup),
         ChainProp(name='HLT_2g50_tight_L1eEM9_UNPAIRED_ISO', l1SeedThresholds=['eEM9'], stream=['Late'], groups=PrimaryPhIGroup+MultiPhotonGroup),
 
-
+        # ATR-29839: Inclusion of photon Ringer chains in the Physics Menu
+        ChainProp(name='HLT_g20_tight_icaloloose_ringer_L1eEM18M', groups=SupportPhIGroup+SinglePhotonGroup, monGroups=['egammaMon:shifter']),
+        ChainProp(name='HLT_g20_tight_ringer_L1eEM18M', groups=SupportPhIGroup+SinglePhotonGroup,monGroups=['egammaMon:shifter']),
+        ChainProp(name='HLT_g22_tight_ringer_L1eEM18M', groups=SupportPhIGroup+SinglePhotonGroup,monGroups=['egammaMon:shifter']),
+        ChainProp(name='HLT_g25_loose_ringer_L1eEM24L', groups=SupportPhIGroup+SinglePhotonGroup,monGroups=['egammaMon:shifter']),
+        ChainProp(name='HLT_g25_medium_ringer_L1eEM24L', groups=SupportPhIGroup+SinglePhotonGroup, monGroups=['egammaMon:shifter']),
+        ChainProp(name='HLT_g35_medium_ringer_L1eEM24L', groups=SupportPhIGroup+SinglePhotonGroup, monGroups=['egammaMon:shifter']),
+        ChainProp(name='HLT_g50_loose_ringer_L1eEM24L', groups=SupportPhIGroup+SinglePhotonGroup, monGroups=['egammaMon:shifter']),
+        ChainProp(name='HLT_g140_loose_ringer_L1eEM26M', groups=PrimaryPhIGroup+SinglePhotonGroup, monGroups=['egammaMon:shifter']),
+        ChainProp(name='HLT_2g20_tight_icaloloose_ringer_L12eEM18M', groups=PrimaryPhIGroup+MultiPhotonGroup, monGroups=['egammaMon:shifter']),
+        ChainProp(name='HLT_2g22_tight_ringer_L12eEM18M', groups=PrimaryPhIGroup+MultiPhotonGroup, monGroups=['egammaMon:shifter']),
+        ChainProp(name='HLT_g35_medium_g25_medium_ringer_L12eEM24L', groups=PrimaryPhIGroup+SinglePhotonGroup, monGroups=['egammaMon:shifter']),
+        ChainProp(name='HLT_2g50_loose_ringer_L12eEM24L', groups=PrimaryPhIGroup+MultiPhotonGroup, monGroups=['egammaMon:shifter']),
     ]
 
     chains['MET'] += [
