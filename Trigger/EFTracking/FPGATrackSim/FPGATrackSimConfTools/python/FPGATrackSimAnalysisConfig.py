@@ -533,14 +533,29 @@ def convertInDetToXAOD(flags):
 
 
 def WriteToAOD(flags, stage = ''): #  store xAOD containers in AOD file
+    result = ComponentAccumulator()
+    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
+    from OutputStreamAthenaPool.OutputStreamConfig import outputStreamName
+    from AthenaConfiguration.Enums import MetadataCategory
+    
+    result.merge( SetupMetaDataForStreamCfg( flags,"AOD", 
+                                            createMetadata=[
+                                                MetadataCategory.ByteStreamMetaData,
+                                                MetadataCategory.LumiBlockMetaData,
+                                                MetadataCategory.TruthMetaData,
+                                                MetadataCategory.IOVMetaData,],)
+                )
+    log.info("AOD ItemList: %s", result.getEventAlgo(outputStreamName("AOD")).ItemList)
+    log.info("AOD MetadataItemList: %s", result.getEventAlgo(outputStreamName("AOD")).MetadataItemList)
+    log.info("---------- Configured AOD writing")
+    
     from OutputStreamAthenaPool.OutputStreamConfig import addToAOD
     toAOD = []
     toAOD += [f"xAOD::PixelClusterContainer#xAODPixelClusters{stage}FromFPGACluster",f"xAOD::PixelClusterAuxContainer#xAODPixelClusters{stage}FromFPGAClusterAux.",
               f"xAOD::StripClusterContainer#xAODStripClusters{stage}FromFPGACluster",f"xAOD::StripClusterAuxContainer#xAODStripClusters{stage}FromFPGAClusterAux.",
               "xAOD::TrackParticleContainer#xAODFPGAProtoTracksTrackParticles","xAOD::TrackParticleAuxContainer#xAODFPGAProtoTracksTrackParticlesAux.",
             ]
-
-    result = ComponentAccumulator()
+    
     result.merge(addToAOD(flags, toAOD))
 
     return result
@@ -600,6 +615,9 @@ if __name__ == "__main__":
             from xAODTruthCnv.xAODTruthCnvConfig import GEN_AOD2xAODCfg
             acc.merge(GEN_AOD2xAODCfg(flags))
 
+            from JetRecConfig.JetRecoSteering import addTruthPileupJetsToOutputCfg # TO DO: check if this is indeed necessary for pileup samples
+            acc.merge(addTruthPileupJetsToOutputCfg(flags))
+        
         if flags.Detector.EnableCalo:
             from CaloRec.CaloRecoConfig import CaloRecoCfg
             acc.merge(CaloRecoCfg(flags))

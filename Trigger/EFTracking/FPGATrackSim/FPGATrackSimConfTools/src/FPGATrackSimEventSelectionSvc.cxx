@@ -320,13 +320,13 @@ bool FPGATrackSimEventSelectionSvc::checkTruthTracks(const std::vector<FPGATrack
       } 
       else {    
 	    ATH_MSG_DEBUG("selectEvent(): found one truth track, in region "
-		      <<getRegionID() <<"; track pars: "<< truthTracks.front().getPars());
+		      <<getRegionID() <<"; track pars: "<< track.getPars());
 	    break;
       }
     }
     else {
       ATH_MSG_DEBUG("selectEvent(): found one truth track over "<<truthTracks.size()<<", out of region "
-		    <<getRegionID() <<"; track pars: "<< truthTracks.front().getPars());
+		    <<getRegionID() <<"; track pars: "<< track.getPars());
     }
   }
   return good;
