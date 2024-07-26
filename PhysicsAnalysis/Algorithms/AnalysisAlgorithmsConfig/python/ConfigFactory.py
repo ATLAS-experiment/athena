@@ -338,6 +338,10 @@ class ConfigFactory():
         from AsgAnalysisAlgorithms.LeptonSFCalculatorConfig import LeptonSFCalculatorBlock
         self.addAlgConfigBlock(algName='LeptonSF', alg=LeptonSFCalculatorBlock)
 
+        # jet reclustering
+        from JetAnalysisAlgorithms.JetReclusteringConfig import JetReclusteringBlock
+        self.addAlgConfigBlock(algName="JetReclustering", alg=JetReclusteringBlock)
+
         # thinning
         from AsgAnalysisAlgorithms.AsgAnalysisConfig import OutputThinningBlock
         self.addAlgConfigBlock(algName="Thinning", alg=OutputThinningBlock,

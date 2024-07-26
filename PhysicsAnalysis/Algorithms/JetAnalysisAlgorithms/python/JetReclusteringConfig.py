@@ -1,0 +1,53 @@
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+
+from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
+
+class JetReclusteringBlock(ConfigBlock):
+    """ConfigBlock for the jet reclustering algorithm:
+    run FastJet with small-R jets as input. The output
+    is a new container containing the reclustered jets.
+    The default output variables are the RC jet kinematics
+    as well as a vector of indices pointing to the
+    small-R jets that formed the RC jets.
+    ---- to be updated with substructure variables!"""
+
+    def __init__(self):
+        super(JetReclusteringBlock, self).__init__()
+        self.addOption ('containerName', None, type=str,
+                        info='name of the output reclustered jets container.')
+        self.addOption ('jets', None, type=str,
+                        info='the input jet collection to recluster, with a possible selection, in the format `container` or `container.selection`.')
+        self.addOption ('clusteringAlgorithm', 'AntiKt', type=str,
+                        info='algorithm to use to recluster the jets: `AntiKt`, `Kt`, `CamKt`.')
+        self.addOption ('reclusteredJetsRadius', 1.0, type=float,
+                        info='radius parameter of the reclustering algorithm. The default is 1.0.')
+        self.addOption ('minPt', 200000, type=float,
+                        info='minimum pT requirement (in MeV) on the reclustered jets, creating the selection `passed_pt`. The default is 20 GeV.')
+
+    def makeAlgs(self, config):
+
+        alg = config.createAlgorithm('CP::JetReclusteringAlg', 'JetReclusteringAlg' + self.containerName)
+
+        alg.jets, alg.jetSelection = config.readNameAndSelection(self.jets)
+        alg.reclusteredJets = config.writeName(self.containerName)
+        alg.smallRjetIndices = 'smallRjetIndices_%SYS%'
+        alg.rcJetEnergy = 'e_%SYS%'
+        alg.clusteringAlgorithm = self.clusteringAlgorithm
+        alg.reclusteredJetsRadius = self.reclusteredJetsRadius
+
+        # prepare selection algorithm
+        if self.minPt > 0:
+            selAlg = config.createAlgorithm('CP::AsgSelectionAlg', 'RCJetsMinPtAlg' + self.containerName)
+            selAlg.selectionDecoration = 'passed_pt,as_bits'
+            config.addPrivateTool('selectionTool', 'CP::AsgPtEtaSelectionTool')
+            selAlg.selectionTool.minPt = self.minPt
+            selAlg.particles = config.readName(self.containerName)
+            selAlg.preselection = config.getPreselection(self.containerName, '')
+            config.addSelection(self.containerName, 'passed_pt', selAlg.selectionDecoration)
+
+        config.addOutputVar(self.containerName, 'pt', 'pt')
+        config.addOutputVar(self.containerName, 'eta', 'eta')
+        config.addOutputVar(self.containerName, 'phi', 'phi')
+        config.addOutputVar(self.containerName, 'm', 'm')
+        config.addOutputVar(self.containerName, alg.rcJetEnergy, 'e')
+        config.addOutputVar(self.containerName, alg.smallRjetIndices, 'small_r_jet_indices')
