@@ -391,12 +391,14 @@ namespace Pythia8 {
                     // Find W daughters
                     int idq = -1, ida = -1, idg = -1;
                     for (int i = 0; i < nDau; i++) {
-                    int iDau = event[iRes].daughterList()[i];
-                    if      (event[iDau].id() == 21) idg = iDau;
-                    else if (event[iDau].id()  >  0) idq = iDau;
-                    else if (event[iDau].id()  <  0) ida = iDau;
+                      int iDau = event[iRes].daughterList()[i];
+                      if      (event[iDau].id() == 21) idg = iDau;
+                      else if (event[iDau].id()  >  0) idq = iDau;
+                      else if (event[iDau].id()  <  0) ida = iDau;
                     }
-                    
+                    if (idq<0 or ida <0){
+                      throw std::out_of_range("idq or ida out of range in PowhegHooksBB4Ldlsl.cxx");
+                    }
                     // Get daughter 4-vectors in resonance frame
                     Vec4 pq(event[idq].p());
                     pq.bstback(event[iRes].p());
