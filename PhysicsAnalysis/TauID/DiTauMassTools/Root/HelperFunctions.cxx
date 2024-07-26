@@ -12,32 +12,6 @@
 
 using namespace DiTauMassTools;
 
-int DiTauMassTools::getFirstBinAboveMax(const std::shared_ptr<TH1F>& hist, double max, double targetVal) 
-{
-  int maxBin = hist->FindBin(max);
-  int targetBin = maxBin;
-  for(int i=maxBin; i<=hist->GetNbinsX(); i++){
-    if(hist->GetBinContent(i)<targetVal){
-      targetBin = i-1;
-      break;
-    }
-  }
-  return targetBin;
-}
-
-int DiTauMassTools::getFirstBinBelowMax(const std::shared_ptr<TH1F>& hist, double max, double targetVal) 
-{
-  int maxBin = hist->FindBin(max);
-  int targetBin = maxBin;
-  for(int i=1; i<=maxBin; i++){
-    if(hist->GetBinContent(i)>=targetVal){
-      targetBin = i;
-      break;
-    }
-  }
-  return targetBin;
-}
-
 double DiTauMassTools::MaxDelPhi(int tau_type, double Pvis, double dRmax_tau)
 {
   return dRmax_tau+0*Pvis*tau_type; // hack to avoid warning

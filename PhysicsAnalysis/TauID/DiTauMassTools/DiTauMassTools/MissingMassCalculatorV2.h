@@ -243,8 +243,6 @@ class MissingMassCalculatorV2 {
   DitauStuff m_fDitauStuffFit; // results based on fit method
   DitauStuff m_fDitauStuffHisto; // results based on histo method
 
-  int m_fApplyMassScale; // switch to apply mass scale correction
-
   int m_niter_fit1; // number of iterations for dR-dPhi scan 
   int m_niter_fit2; // number of iterations for MET-scan 
   int m_niter_fit3; // number of iterations for Mnu-scan 
@@ -253,8 +251,6 @@ class MissingMassCalculatorV2 {
   int m_RMSStop;
   int m_RndmSeedAltering; // reset seed (not necessary by default)
 
-
-  int m_fJERsyst; // switch for JER systematics
   double m_dTheta3d_binMin; // minimal step size for dTheta3D
   double m_dTheta3d_binMax; // maximum step size for dTheta3D
   double m_dRmax_tau; // maximum dR(nu-visTau)
@@ -267,9 +263,6 @@ class MissingMassCalculatorV2 {
   void DoOutputInfo();
   void PrintOtherInput();
   void PrintResults();
-  int NuPsolution(TVector2 met_vec, double theta1, double phi1, 
-		  double theta2, double phi2, double &P1, double &P2); // keep this version for simple tests
-
 
   inline int NuPsolutionV3(const double & mNu1, const double & mNu2, const double & phi1, const double & phi2, 
 			   int & nsol1, int & nsol2);
@@ -358,9 +351,6 @@ public:
   void SetdTheta3d_binMin(const double val) { m_dTheta3d_binMin=val; } // minimal step size for dTheta3D
   void SetEventNumber(const int eventNumber) { m_eventNumber = eventNumber; }
 
-  void SetJERsyst(const int val) { m_fJERsyst=val; }
-  void SetApplyMassScale(const int val) { m_fApplyMassScale=val; } 
-
   void SetMnuScanRange(const double val) { m_MnuScanRange=val; }
 
   void SetProposalTryMEt(const double val) {m_proposalTryMEt=val; }
@@ -410,7 +400,6 @@ public:
 
 
   //-------- Get results;
-  int StandardCollApprox(const TLorentzVector & tau_vec1, const TLorentzVector & tau_vec2, const TVector2 & met_vec, double &Mrec); // standard collinear approximation
   Double_t maxFitting(Double_t *x, Double_t *par);
   
   // compute maximum from histo

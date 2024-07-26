@@ -53,8 +53,6 @@ namespace TauTypes
 // see source file of MissingMassProb for further reasoning
 template <typename T> void ignore(T &&){}
 
-int getFirstBinBelowMax(const std::shared_ptr<TH1F>& hist, double max, double targetVal);
-int getFirstBinAboveMax(const std::shared_ptr<TH1F>& hist, double max, double targetVal);
 double Angle(const TLorentzVector & vec1, const TLorentzVector & vec2);
 bool updateDouble  (const double in, double & out) ;
 void fastSinCos (const double & phi, double & sinPhi, double & cosPhi);
