@@ -94,6 +94,7 @@
 #include <JetAnalysisAlgorithms/JetGhostMergingAlg.h>
 #include <JetAnalysisAlgorithms/JetGhostMuonAssociationAlg.h>
 #include <JetAnalysisAlgorithms/JetModifierAlg.h>
+#include <JetAnalysisAlgorithms/JetReclusteringAlg.h>
 #include <JetAnalysisAlgorithms/JetSelectionAlg.h>
 #include <JetAnalysisAlgorithms/JetTruthTagAlg.h>
 #include <JetAnalysisAlgorithms/JetUncertaintiesAlg.h>
@@ -211,6 +212,7 @@ namespace CP
     ANA_CHECK (asg::registerAlgorithmFactory<CP::JetGhostMergingAlg>("CP::JetGhostMergingAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::JetGhostMuonAssociationAlg>("CP::JetGhostMuonAssociationAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::JetModifierAlg>("CP::JetModifierAlg"));
+    ANA_CHECK (asg::registerAlgorithmFactory<CP::JetReclusteringAlg>("CP::JetReclusteringAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::JetSelectionAlg>("CP::JetSelectionAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::JetTruthTagAlg>("CP::JetTruthTagAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::JetUncertaintiesAlg>("CP::JetUncertaintiesAlg"));
