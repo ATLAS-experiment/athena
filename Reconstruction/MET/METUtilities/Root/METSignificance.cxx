@@ -76,7 +76,7 @@ namespace met {
     m_phi_reso_pt100(nullptr)
   {
     declareProperty("SoftTermParam",        m_softTermParam = met::Random );
-    declareProperty("SoftTermReso",         m_softTermReso  = 10.0        );
+    declareProperty("SoftTermReso",         m_softTermReso  = 8.5        );
     declareProperty("TreatPUJets",          m_treatPUJets   = true        );
     declareProperty("DoPhiReso",            m_doPhiReso     = false       );
     declareProperty("ApplyBias",            m_applyBias     = false       );
@@ -104,7 +104,9 @@ namespace met {
 
     ATH_MSG_INFO ("Initializing " << name() << "...");
     ATH_MSG_INFO("Set up JER tools");
-
+    if(m_JetCollection == "AntiKt4EMTopoJets"){
+      ATH_MSG_WARNING(" tool wasn't updated for EMTopo jets so far and is not supported.");
+    }
     // Phi resolution
     std::string configpath  = PathResolverFindCalibFile(m_configPrefix+m_configJetPhiResoFile);
     m_file = TFile::Open(configpath.c_str());
@@ -789,102 +791,107 @@ namespace met {
         if(jet_fjvt>0.6) unc = 0.9;
       }
       // end emtopo
+      // Coefficients from Badr-eddine Ngair <badr-eddine.ngair@cern.ch>
+    //  Pile-UP (resolution) estimatetd using Z->ee Events using exclusive jet_pt binning using RUN3 samples
     }else{//p-flow inputs
       if(std::abs(jet_eta)<2.4){
         if(jet_pt<30){
-          if(jet_jvt<0.11)      unc = 1;
-          else if(jet_jvt<0.25) unc = 0.2494 + 0.0076 * avgmu -0.00001 * avgmu * avgmu ;
-          else if(jet_jvt<0.85) unc = 0.0626 + 0.0037 * avgmu + 0.00004 * avgmu * avgmu;
-          else if(jet_jvt<0.95) unc = 0.0192 + 0.0017 * avgmu + 0.00005 * avgmu * avgmu;
-          else                  unc = 0.0147 -0.0003 * avgmu + 0.00004 * avgmu * avgmu ;
+          if(jet_jvt<0.11)      unc = 0.524466 + 0.00750057 * avgmu -4.73422e-05 * avgmu * avgmu ;
+          else if(jet_jvt<0.25) unc = 4.17584e-01 + 1.00112e-02  * avgmu -7.43546e-05 * avgmu * avgmu ;
+          else if(jet_jvt<0.85) unc = 2.12625e-01 + 1.03484e-02 * avgmu  -5.68063e-05  * avgmu * avgmu;
+          else if(jet_jvt<0.95) unc = 1.08396e-01 + 1.04273e-02 * avgmu -5.00299e-05 * avgmu * avgmu;
+          else                  unc = 1.26304e-03 +2.10385e-04  * avgmu + 1.10086e-06 * avgmu * avgmu ;
         }else if(jet_pt<40){
-          if(jet_jvt<0.11)      unc = 1;
-          else if(jet_jvt<0.25) unc = 0.1979 + 0.0034 * avgmu + 0.00003 * avgmu * avgmu;
-          else if(jet_jvt<0.85) unc = 0.0731 -0.0022 * avgmu + 0.00009 * avgmu * avgmu ;
-          else if(jet_jvt<0.95) unc = 0.0281 -0.0012 * avgmu + 0.00006 * avgmu * avgmu ;
-          else                  unc = 0.0086 -0.0003 * avgmu + 0.00002 * avgmu * avgmu ;
+          if(jet_jvt<0.11)      unc = 3.78090e-01 + 8.83535e-03 * avgmu  -5.38873e-05* avgmu * avgmu;
+          else if(jet_jvt<0.25) unc = 2.67244e-01+ 9.81193e-03* avgmu  -5.87765e-05  * avgmu * avgmu;
+          else if(jet_jvt<0.85) unc = 9.60892e-02 +8.11069e-03 * avgmu  -3.73101e-05 * avgmu * avgmu ;
+          else if(jet_jvt<0.95) unc = 5.16235e-02 +6.27371e-03 * avgmu -1.95433e-05 * avgmu * avgmu ;
+          else                  unc = -2.74714e-03 +2.45273e-04* avgmu -1.44731e-06* avgmu * avgmu ;
         }else if(jet_pt<50){
-          if(jet_jvt<0.11)      unc = 1;
-          else if(jet_jvt<0.25) unc = 0.2242 -0.0010 * avgmu + 0.00006 * avgmu * avgmu  ;
-          else if(jet_jvt<0.85) unc = 0.0568 -0.0019 * avgmu + 0.00006 * avgmu * avgmu  ;
-          else if(jet_jvt<0.95) unc = -0.0050 + 0.0008 * avgmu + 0.00001 * avgmu * avgmu;
-          else                  unc = 0.0037 -0.0000 * avgmu + 0.00000 * avgmu * avgmu  ;
+          if(jet_jvt<0.11)      unc = 2.44953e-01 + 1.23246e-02 * avgmu  -8.48696e-05 * avgmu * avgmu;
+          else if(jet_jvt<0.25) unc = 1.78141e-01 + 1.09451e-02  * avgmu  -6.90796e-05 * avgmu * avgmu;
+          else if(jet_jvt<0.85) unc = 9.60998e-02+6.21945e-03* avgmu -2.76203e-05* avgmu * avgmu  ;
+          else if(jet_jvt<0.95) unc = 5.79210e-02+ 4.49780e-03 * avgmu + -1.15125e-05 * avgmu * avgmu ;
+          else                  unc = -2.96644e-03 +2.27707e-04 * avgmu -1.86712e-06 * avgmu * avgmu  ;
         }else if(jet_pt<60){
-          if(jet_jvt<0.11)      unc = 1;
-          else if(jet_jvt<0.25) unc = 0.0027 + 0.0058 * avgmu -0.00001 * avgmu * avgmu  ;
-          else if(jet_jvt<0.85) unc = -0.0143 + 0.0008 * avgmu + 0.00001 * avgmu * avgmu;
-          else                  unc = -0.0012 + 0.0001 * avgmu + 0.00000 * avgmu * avgmu;
+          if(jet_jvt<0.11)      unc = 1.97017e-01 + 1.34089e-02 * avgmu  -9.18923e-05 * avgmu * avgmu  ;
+          else if(jet_jvt<0.25) unc = 1.27602e-01 +  1.12287e-02  * avgmu -6.62192e-05  * avgmu * avgmu  ;
+          else if(jet_jvt<0.85) unc = 6.94905e-02 + 6.27784e-03 * avgmu -3.07298e-05  * avgmu * avgmu;
+          else if(jet_jvt<0.95) unc = 3.58417e-02  +4.62268e-03  * avgmu -2.12417e-05 * avgmu * avgmu ;
+          else                  unc = 1.35616e-03  + 5.46723e-06* avgmu + 1.92327e-07 * avgmu * avgmu;
         }else if(jet_pt<100){
-          unc = 0.8558 -1.8519 * jet_jvt + 1.00208 * jet_jvt * jet_jvt;
+          unc = 6.19009e-01 -8.96042e-01 * jet_jvt + 2.89066e-01 * jet_jvt * jet_jvt;
         }else if(jet_pt<150){
-          unc = 0.6474 -1.4491 * jet_jvt + 0.80591 * jet_jvt * jet_jvt;
+          unc = 6.18350e-01 -8.97327e-01 * jet_jvt + 2.90998e-01 * jet_jvt * jet_jvt;
         }
       }else if(std::abs(jet_eta)<2.6){
         if(jet_pt<30){
-          if(jet_jvt<0.11)      unc = 0.2633 + 0.0091 * avgmu + -0.00009 * avgmu * avgmu;
-          else if(jet_jvt<0.25) unc = 0.1841 + 0.0144 * avgmu + -0.00008 * avgmu * avgmu;
-          else if(jet_jvt<0.85) unc = 0.1401 + 0.0048 * avgmu + 0.00006 * avgmu * avgmu ;
-          else if(jet_jvt<0.95) unc = -0.0118 + 0.0076 * avgmu + 0.00003 * avgmu * avgmu;
-          else                  unc = 0.0534 + -0.0011 * avgmu + 0.00010 * avgmu * avgmu;
+          if(jet_jvt<0.11)      unc = 5.06496e-01 + 8.21123e-03 * avgmu -5.17501e-05  * avgmu * avgmu;
+          else if(jet_jvt<0.25) unc = 4.26616e-01  + 9.25936e-03  * avgmu -5.68847e-05  * avgmu * avgmu;
+          else if(jet_jvt<0.85) unc = 2.03333e-01 + 1.11951e-02 * avgmu-6.09233e-05 * avgmu * avgmu ;
+          else if(jet_jvt<0.95) unc = 1.03167e-01  + 1.13444e-02 * avgmu  -5.43274e-05 * avgmu * avgmu;
+          else                  unc = 1.51480e-03 + 2.08394e-04 * avgmu + 1.39579e-06 * avgmu * avgmu;
         }else if(jet_pt<40){
-          if(jet_jvt<0.11)      unc = 0.1497 + 0.0133 * avgmu + -0.00015 * avgmu * avgmu  ;
-          else if(jet_jvt<0.25) unc = -0.2260 + 0.0276 * avgmu + -0.00021 * avgmu * avgmu ;
-          else if(jet_jvt<0.85) unc = 0.2743 + -0.0093 * avgmu + 0.00022 * avgmu * avgmu  ;
-          else if(jet_jvt<0.95) unc = 0.0604 + 0.0006 * avgmu + 0.00006 * avgmu * avgmu   ;
-          else                  unc = 0.0478 + -0.0009 * avgmu + 0.00004 * avgmu * avgmu  ;
+          if(jet_jvt<0.11)      unc = 3.40612e-01 + 9.94199e-03 * avgmu + -5.93760e-05* avgmu * avgmu  ;
+          else if(jet_jvt<0.25) unc = 2.43360e-01 + 1.05579e-02* avgmu + -6.05403e-05* avgmu * avgmu ;
+          else if(jet_jvt<0.85) unc = 8.34364e-02 + 8.76364e-03 * avgmu  -3.64035e-05  * avgmu * avgmu  ;
+          else if(jet_jvt<0.95) unc = 4.40362e-02 + 6.92580e-03  * avgmu  -1.79853e-05 * avgmu * avgmu   ;
+          else                  unc = -2.68670e-03 + 2.50861e-04 * avgmu + -1.46410e-06* avgmu * avgmu  ;
         }else if(jet_pt<50){
-          if(jet_jvt<0.11)      unc = -0.2187 + 0.0317 * avgmu + -0.00037 * avgmu * avgmu ;
-          else if(jet_jvt<0.25) unc = 0.0964 + 0.0053 * avgmu + 0.00002 * avgmu * avgmu   ;
-          else if(jet_jvt<0.85) unc = 1.1730 + -0.0624 * avgmu + 0.00088 * avgmu * avgmu  ;
-          else if(jet_jvt<0.95) unc = -0.2011 + 0.0151 * avgmu + -0.00018 * avgmu * avgmu ;
-          else                  unc = 0.0145 + -0.0003 * avgmu + 0.00002 * avgmu * avgmu  ;
+          if(jet_jvt<0.11)      unc = 2.36561e-01 + 1.14078e-02 * avgmu +-7.10025e-05 * avgmu * avgmu ;
+          else if(jet_jvt<0.25) unc = 1.86653e-01 +9.61140e-03 * avgmu +-5.15356e-05 * avgmu * avgmu   ;
+          else if(jet_jvt<0.85) unc = 9.37026e-02 +5.93028e-03 * avgmu +-2.02571e-05 * avgmu * avgmu  ;
+          else if(jet_jvt<0.95) unc = 5.79210e-02+ 4.49780e-03 * avgmu + -1.15125e-05 * avgmu * avgmu ;
+          else                  unc = -3.02487e-03 + 2.31337e-04* avgmu + -1.85225e-06  * avgmu * avgmu  ;
         }else if(jet_pt<60){
-          if(jet_jvt<0.11)      unc = 0.0051 + 0.0113 * avgmu + -0.00008 * avgmu * avgmu  ;
-          else if(jet_jvt<0.25) unc = -0.1024 + 0.0109 * avgmu + -0.00006 * avgmu * avgmu ;
-          else if(jet_jvt<0.85) unc = 1.2491 + -0.0501 * avgmu + 0.00052 * avgmu * avgmu  ;
-          else                  unc = 0.0267 + -0.0014 * avgmu + 0.00003 * avgmu * avgmu  ;
-        }else if(jet_pt<100){
-          unc = 0.8802 -1.6233 * jet_jvt + 0.74604 * jet_jvt * jet_jvt;
+          if(jet_jvt<0.11)      unc =1.75215e-01+ 1.21805e-02 * avgmu + -7.48846e-05 * avgmu * avgmu  ;
+          else if(jet_jvt<0.25) unc = 1.26276e-01+ 9.80117e-03  * avgmu + -4.99913e-05  * avgmu * avgmu ;
+          else if(jet_jvt<0.85) unc = 7.91422e-02 + 5.26009e-03 * avgmu +-1.87388e-05 * avgmu * avgmu  ;
+          else if(jet_jvt<0.95) unc = 4.39136e-02+ 4.09435e-03* avgmu +-1.35926e-05  * avgmu * avgmu ;
+          else                  unc = 1.21410e-03 + 1.14188e-05 * avgmu + 1.53654e-07 * avgmu * avgmu  ;
+        }else if( jet_pt<100){
+          unc = 6.44179e-01 -9.20194e-01* jet_jvt + 2.89686e-01 * jet_jvt * jet_jvt;
         }else if(jet_pt<150){
-          unc = 0.9762 -2.4160 * jet_jvt + 1.45763 * jet_jvt * jet_jvt;
+          unc = 6.43423e-01 -9.21407e-01 * jet_jvt + 2.91648e-01 * jet_jvt * jet_jvt;
         }
       }else if(std::abs(jet_eta)<2.7){
         if(jet_pt<30){
-          if(jet_jvt<0.11)      unc = 0.2877 + 0.0056 * avgmu -0.00004 * avgmu * avgmu;
-          else if(jet_jvt<0.25) unc = 0.0353 + 0.0196 * avgmu -0.00012 * avgmu * avgmu;
-          else if(jet_jvt<0.85) unc = -0.1616 + 0.0188 * avgmu -0.00009 * avgmu * avgmu;
-          else if(jet_jvt<0.95) unc =  0.0373 + 0.0048 * avgmu + 0.00006 * avgmu * avgmu;
-          else                  unc = 0.0666 -0.0007 * avgmu + 0.00013 * avgmu * avgmu;
+          if(jet_jvt<0.11)      unc = 4.76243e-01 + 9.22046e-03 * avgmu -5.88765e-05 * avgmu * avgmu;
+          else if(jet_jvt<0.25) unc = 4.07406e-01+ 1.01167e-02  * avgmu -6.30429e-05 * avgmu * avgmu;
+          else if(jet_jvt<0.85) unc = 2.01324e-01+ 1.20631e-02 * avgmu  -6.75582e-05 * avgmu * avgmu;
+          else if(jet_jvt<0.95) unc =  1.03815e-01 + 1.24007e-02 * avgmu  -6.26892e-05  * avgmu * avgmu;
+          else                  unc = 1.63714e-03 +2.00682e-04  * avgmu +  1.53621e-06 * avgmu * avgmu;
         }else if(jet_pt<40){
-          if(jet_jvt<0.11)      unc = 0.1331 + 0.0098 * avgmu -0.00007 * avgmu * avgmu;
-          else if(jet_jvt<0.25) unc = 0.0570 + 0.0096 * avgmu  -0.00000 * avgmu * avgmu;
-          else if(jet_jvt<0.85) unc = 0.2338  -0.0094 * avgmu + 0.00019 * avgmu * avgmu;
-          else if(jet_jvt<0.95) unc = 0.2930  -0.0127 * avgmu + 0.00023 * avgmu * avgmu;
-          else                  unc = 0.0152  -0.0003 * avgmu + 0.00007 * avgmu * avgmu;
+          if(jet_jvt<0.11)      unc = 2.89505e-01 + 1.11643e-02 * avgmu  -6.45475e-05* avgmu * avgmu;
+          else if(jet_jvt<0.25) unc = 2.15968e-01 + 1.14451e-02* avgmu  -6.32545e-05 * avgmu * avgmu;
+          else if(jet_jvt<0.85) unc = 7.92319e-02 +9.66239e-03* avgmu -3.81872e-05 * avgmu * avgmu  ;
+          else if(jet_jvt<0.95) unc = 4.25501e-02  +7.90022e-03  * avgmu  -1.93561e-05   * avgmu * avgmu;
+          else                  unc = -2.68089e-03 +2.50117e-04 * avgmu -1.43591e-06 * avgmu * avgmu  ;
         }else if(jet_pt<50){
-          if(jet_jvt<0.11)      unc = 0.1582 + 0.0060 * avgmu  -0.00003 * avgmu * avgmu;
-          else if(jet_jvt<0.25) unc = -0.0079 + 0.0057 * avgmu + 0.00003 * avgmu * avgmu;
-          else if(jet_jvt<0.85) unc = 0.1865  -0.0081 * avgmu + 0.00013 * avgmu * avgmu;
-          else if(jet_jvt<0.95) unc = 0.9103  -0.0405 * avgmu + 0.00049 * avgmu * avgmu;
-          else                  unc = 0.1183  -0.0048 * avgmu + 0.00009 * avgmu * avgmu;
+          if(jet_jvt<0.11)      unc = 1.66062e-01+ 1.21029e-02  * avgmu  -7.00743e-05 * avgmu * avgmu;
+          else if(jet_jvt<0.25) unc = 1.36874e-01+ 1.03543e-02  * avgmu  -5.13482e-05 * avgmu * avgmu;
+          else if(jet_jvt<0.85) unc = 7.24015e-02  +6.72611e-03 * avgmu  -1.98316e-05 * avgmu * avgmu;
+          else if(jet_jvt<0.95) unc = 4.84508e-02  +5.10548e-03* avgmu -8.65067e-06  * avgmu * avgmu;
+          else                  unc = -3.02710e-03  +2.31422e-04* avgmu  -1.84795e-06 * avgmu * avgmu;
         }else if(jet_pt<60){
-          if(jet_jvt<0.11)      unc = 0.0859 + 0.0047 * avgmu  -0.00000 * avgmu * avgmu;
-          else if(jet_jvt<0.25) unc = 0.0249 + 0.0027 * avgmu + 0.00004 * avgmu * avgmu;
-          else if(jet_jvt<0.85) unc = 0.1865  -0.0087 * avgmu + 0.00012 * avgmu * avgmu;
-          else                  unc = 0.2069  -0.0087 * avgmu + 0.00011 * avgmu * avgmu;
-        }else if(jet_pt<100){
-          unc = 0.4281 -1.1109 * jet_jvt + 0.71551 * jet_jvt * jet_jvt;
+          if(jet_jvt<0.11)      unc =1.33626e-01 +  1.02813e-02   * avgmu  -4.87698e-05 * avgmu * avgmu;
+          else if(jet_jvt<0.25) unc = 1.06724e-01 + 8.45131e-03  * avgmu -3.26833e-05 * avgmu * avgmu;
+          else if(jet_jvt<0.85) unc = 7.47468e-02 +4.85387e-03 * avgmu  -1.01430e-05* avgmu * avgmu;
+          else if(jet_jvt<0.95) unc = 4.57521e-02   + 3.86782e-03 * avgmu -6.38948e-06  * avgmu * avgmu;
+          else                  unc = 1.20495e-03   +1.18941e-05* avgmu  +1.47846e-07  * avgmu * avgmu;
+        }else if( jet_pt<100){
+          unc = 6.59079e-01 -9.29754e-01 * jet_jvt + 2.83653e-01 * jet_jvt * jet_jvt;
         }else if(jet_pt<150){
-          unc = 0.2033 -0.5162 * jet_jvt + 0.33810 * jet_jvt * jet_jvt;
+          unc = 6.58295e-01 -9.31032e-01 * jet_jvt + 2.85724e-01 * jet_jvt * jet_jvt;
         }
       }// end eta 2.7
       else{//forward jets
         float fjvt = jet_fjvt>0.6 ? 0.6 : jet_fjvt; // the pileup more or less plateaus at 0.6
-        if(jet_pt<30)       unc = 0.5295 + 1.2467 * fjvt -1.13946  * fjvt * fjvt;
-        else if(jet_pt<40)  unc = 0.3118 + 1.9951 * fjvt -1.86882  * fjvt * fjvt;
-        else if(jet_pt<50)  unc = 0.1347 + 2.3884 * fjvt -1.96891  * fjvt * fjvt;
-        else if(jet_pt<60)  unc = 0.0872 + 1.5718 * fjvt + 0.02135 * fjvt * fjvt;
-        else if(jet_pt<120) unc = 0.0303 + 0.8560 * fjvt + 1.89537 * fjvt * fjvt;
+        if(jet_pt<30)       unc = 0.605329 + 0.625734 * fjvt -0.42484  * fjvt * fjvt;
+        else if(jet_pt<40)  unc = 0.409696 + 1.00173 * fjvt -0.609179 * fjvt * fjvt;
+        else if(jet_pt<50)  unc = 0.173755 + 1.48847 * fjvt -0.803771    * fjvt * fjvt;
+        else if(jet_pt<60)  unc = 0.0140303 + 1.79909 * fjvt -0.889274 * fjvt * fjvt;
+        else if(jet_pt<120) unc = -0.0828333 + 1.81167  * fjvt -0.716881 * fjvt * fjvt;
         // max of 0.9 seems reasonable
         if(jet_fjvt>0.6) unc = 0.9;
       }
