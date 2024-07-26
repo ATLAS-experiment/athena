@@ -525,6 +525,7 @@ namespace ST {
     std::string m_jetUncertaintiesConfig;
     std::string m_jetUncertaintiesAnalysisFile;
     std::string m_jetUncertaintiesCalibArea;
+    std::string m_jetUncertaintiesMCType;
     bool m_jetUncertaintiesPDsmearing;
 
     bool m_useBtagging;
@@ -844,7 +845,7 @@ namespace ST {
     std::string m_jesCalibSeq;
     std::string m_jesCalibSeqJMS;
     std::string m_jesCalibSeqFat;
-
+    std::string m_jesCalibArea;
     //
     asg::AnaToolHandle<CP::IMuonSelectionTool> m_muonSelectionTool;
     asg::AnaToolHandle<CP::IMuonSelectionTool> m_muonSelectionHighPtTool;

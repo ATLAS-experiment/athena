@@ -769,12 +769,19 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
   m_el_id_support.push_back("LooseNoPix");        // WPs for LRT Electron
   m_el_id_support.push_back("LooseLLH");
   m_el_id_support.push_back("LooseAndBLayerLLH");
+  m_el_id_support.push_back("LooseDNNnoCF");
+  m_el_id_support.push_back("LooseDNN");
   m_el_id_support.push_back("MediumNoPix");       // WPs for LRT Electron
   m_el_id_support.push_back("MediumLLH");
+  m_el_id_support.push_back("MediumDNNnoCF");
+  m_el_id_support.push_back("MediumDNN");
   m_el_id_support.push_back("TightNoPix");        // WPs for LRT Electron
   m_el_id_support.push_back("TightLLH");
+  m_el_id_support.push_back("TightDNNnoCF");
+  m_el_id_support.push_back("TightDNN");
 
   m_ph_id_support.push_back("Loose");
+  m_ph_id_support.push_back("Medium");
   m_ph_id_support.push_back("Tight");
   m_ph_id_support.push_back("TightPtIncl"); // Should not be mixed with Tight
 
@@ -936,12 +943,13 @@ StatusCode SUSYObjDef_xAOD::initialize() {
   m_jetCleanDFName = TString::Format("DFCommonJets_jetClean_%s", m_badJetCut.c_str());
   m_acc_jetClean = m_jetCleanDFName;
 
-  m_eleIdBaselineDFName = "DFCommonElectronsLH";
-  m_eleIdBaselineDFName += TString(m_eleIdBaseline).ReplaceAll("LooseAndBLayer","LooseBL").ReplaceAll("LLH","").Data();
+  // the decorations are named like DFCommonElectronsLHTight or DFCommonElectronsDNNTight
+  m_eleIdBaselineDFName = m_eleIdBaseline.find("DNN") == std::string::npos ? "DFCommonElectronsLH" : "DFCommonElectronsDNN";
+  m_eleIdBaselineDFName += TString(m_eleIdBaseline).ReplaceAll("LooseAndBLayer","LooseBL").ReplaceAll("LLH","").ReplaceAll("DNN","").Data();
   m_acc_eleIdBaseline = m_eleIdBaselineDFName;
 
-  m_eleIdDFName = "DFCommonElectronsLH";
-  m_eleIdDFName += TString(m_eleId).ReplaceAll("LooseAndBLayer","LooseBL").ReplaceAll("LLH","").Data();
+  m_eleIdDFName = m_eleId.find("DNN") == std::string::npos ? "DFCommonElectronsLH" : "DFCommonElectronsDNN";
+  m_eleIdDFName += TString(m_eleId).ReplaceAll("LooseAndBLayer","LooseBL").ReplaceAll("LLH","").ReplaceAll("DNN","").Data();
   m_acc_eleId = m_eleIdDFName;
 
   m_photonIdBaselineDFName = "DFCommonPhotonsIsEM";
@@ -1190,7 +1198,7 @@ bool SUSYObjDef_xAOD::check_isTighter(const std::string& wp1, const std::string&
 std::string SUSYObjDef_xAOD::EG_WP(const std::string& wp) const {
   //translate our electron wps to EGamma internal jargon
   //@ElectronPhotonSelectorTools/EGSelectorConfigurationMapping.h
-  return TString(wp).Copy().ReplaceAll("AndBLayer","BL").ReplaceAll("LLH","LHElectron").Data();
+  return TString(wp).Copy().ReplaceAll("AndBLayer","BL").ReplaceAll("LLH","LHElectron").ReplaceAll("DNN", "DNNElectron").Data();
 }
 
 std::vector<std::string> SUSYObjDef_xAOD::getElSFkeys(const std::string& mapFile) const {
@@ -1515,9 +1523,10 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_JvtPtMax, "Jet.JvtPtMax", rEnv, 60.0e3);
   configFromFile(m_JvtConfigRun2, "Jet.JvtConfigRun2", rEnv, "JetJvtEfficiency/May2024/NNJvtSFFile_Run2_EMPFlow.root", true); // empty string means dummy SF
   configFromFile(m_JvtConfigRun3, "Jet.JvtConfigRun3", rEnv, "JetJvtEfficiency/May2024/NNJvtSFFile_Run3_EMPFlow.root", true); // empty string means dummy SF
-  configFromFile(m_jetUncertaintiesConfig, "Jet.UncertConfig", rEnv, "rel22/Summer2023_PreRec/R4_CategoryReduction_FullJER.config"); // https://twiki.cern.ch/twiki/bin/view/AtlasProtected/JetUncertaintiesRel22/
+  configFromFile(m_jetUncertaintiesConfig, "Jet.UncertConfig", rEnv, m_isRun3 ? "rel22/Summer2024_PreRec/R4_CategoryReduction_FullJER.config" : "rel22/Summer2023_PreRec/R4_CategoryReduction_FullJER.config"); // https://twiki.cern.ch/twiki/bin/view/AtlasProtected/JetUncertaintiesRel22/
   configFromFile(m_jetUncertaintiesAnalysisFile, "Jet.AnalysisFile", rEnv, "default"); // https://twiki.cern.ch/twiki/bin/view/AtlasProtected/JetUncertaintiesRel21Summer2018SmallR
   configFromFile(m_jetUncertaintiesCalibArea, "Jet.UncertCalibArea", rEnv, "default"); // Defaults to default area set by tool
+  configFromFile(m_jetUncertaintiesMCType, "Jet.UncertMCType", rEnv, "", true); // empty string means the MCType is guessed
   configFromFile(m_jetUncertaintiesPDsmearing, "Jet.UncertPDsmearing", rEnv, false); // for non "SimpleJER" config, run the PDSmear systematics. This are labelled with an __2 if they are being used, but otherwise will have the same tree name as the JET_JER systematic trees.
   configFromFile(m_fatJets, "Jet.LargeRcollection", rEnv, "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets"); // set to "None" to turn off large jets
   configFromFile(m_fatJetUncConfig, "Jet.LargeRuncConfig", rEnv, ""); // waiting for rec
@@ -1528,8 +1537,8 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_ToptagConfig, "Jet.ToptaggerConfig", rEnv, "DNNTagger_AntiKt10UFOSD_TopInclusive80_Oct30.dat");
   configFromFile(m_JetTruthLabelName, "Jet.JetTruthLabelName", rEnv, "R10TruthLabel_R21Precision_2022v1");
   configFromFile(m_TopTaggerCalibArea, "Jet.TopTaggerCalibArea", rEnv, "Winter2024_R22_PreRecs/JSSWTopTaggerDNN/");
-  configFromFile(m_jesConfig, "Jet.JESConfig", rEnv, "PreRec_R22_PFlow_ResPU_EtaJES_GSC_February23_230215.config"); //https://twiki.cern.ch/twiki/bin/view/AtlasProtected/ApplyJetCalibrationR22
-  configFromFile(m_jesConfigAFII, "Jet.JESConfigAFII", rEnv, "JES_MC16Recommendation_AFII_EMTopo_Apr2019_Rel21.config");
+  configFromFile(m_jesConfig, "Jet.JESConfig", rEnv, m_isRun3 ? "AntiKt4EMPFlow_MC23a_PreRecR22_Phase2_CalibConfig_ResPU_EtaJES_GSC_240306_InSitu.config" : "PreRec_R22_PFlow_ResPU_EtaJES_GSC_February23_230215.config"); //https://twiki.cern.ch/twiki/bin/view/AtlasProtected/ApplyJetCalibrationR22
+  configFromFile(m_jesConfigAFII, "Jet.JESConfigAFII", rEnv, m_isRun3 ? "AntiKt4EMPFlow_MC23a_PreRecR22_Phase2_CalibConfig_ResPU_EtaJES_GSC_240306_InSitu.config" : "PreRec_R22_PFlow_ResPU_EtaJES_GSC_February23_230215.config");
   configFromFile(m_jesConfigJMS, "Jet.JESConfigJMS", rEnv, "JES_JMS_MC16Recommendation_Consolidated_MC_only_EMTopo_July2019_Rel21.config");
   configFromFile(m_jesConfigJMSData, "Jet.JESConfigJMSData", rEnv, "JES_JMS_MC16Recommendation_Consolidated_data_only_EMTopo_Sep2019_Rel21.config");
   configFromFile(m_jesConfigFat, "Jet.JESConfigFat", rEnv, "JES_MC20PreRecommendation_R10_UFO_CSSK_SoftDrop_JMS_R21Insitu_10Mar2023.config");
@@ -1537,6 +1546,7 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_jesCalibSeq, "Jet.CalibSeq", rEnv, "JetArea_Residual_EtaJES_GSC_Insitu");
   configFromFile(m_jesCalibSeqJMS, "Jet.CalibSeqJMS", rEnv, "JetArea_Residual_EtaJES_GSC");
   configFromFile(m_jesCalibSeqFat, "Jet.CalibSeqFat", rEnv, "EtaJES_JMS");
+  configFromFile(m_jesCalibArea, "Jet.CalibArea", rEnv, m_isRun3 ? "00-04-83" : "00-04-82");
   //
   configFromFile(m_defaultTrackJets, "TrackJet.Coll", rEnv, "AntiKtVR30Rmax4Rmin02TrackJets");
   configFromFile(m_trkJetPt, "TrackJet.Pt", rEnv, 20000.);
