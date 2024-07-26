@@ -74,43 +74,56 @@ StatusCode FPGATrackSim::FPGATrackSimReportingAlg::finalize()
     ATH_MSG_INFO("Printing statistics for FPGA objects");
 
     // Printing summary for clusters/FPGATracks 
-    std::string header = "\n"
+    std::string summaryTableFPGATracks = "\n"
         "Number of measurements for FPGA Tracks\n"
         "|-----------------------------------|\n"
         "|        |  min |  max |      Avg   |\n"
         "|-----------------------------------|\n";
-    std::string tableEnd = "|-----------------------------------|";
 
-    std::string pixelsPerFPGATrack = std::format("| Pixels | {:>4} | {:>4} | {:>10} |\n",
-        *std::min_element(m_pixelClustersPerFPGATrack.begin(), m_pixelClustersPerFPGATrack.end()),
-        *std::max_element(m_pixelClustersPerFPGATrack.begin(), m_pixelClustersPerFPGATrack.end()),
-        m_pixelClustersPerFPGATrack.size() == 0 ? "inf" : std::format("{:>.2f}",std::accumulate(m_pixelClustersPerFPGATrack.begin(), m_pixelClustersPerFPGATrack.end(), 0.0) / m_pixelClustersPerFPGATrack.size()));
+    if (not m_pixelClustersPerFPGATrack.empty()) {
+        summaryTableFPGATracks += std::format("| Pixels | {:>4} | {:>4} | {:>10.2f} |\n",
+            *std::min_element(m_pixelClustersPerFPGATrack.begin(), m_pixelClustersPerFPGATrack.end()),
+            *std::max_element(m_pixelClustersPerFPGATrack.begin(), m_pixelClustersPerFPGATrack.end()),
+            std::accumulate(m_pixelClustersPerFPGATrack.begin(), m_pixelClustersPerFPGATrack.end(), 0.0) / m_pixelClustersPerFPGATrack.size());
+    }
+    else summaryTableFPGATracks += std::format("| Pixels | ---- | ---- |      inf   |\n");
 
-    std::string stripsPerFPGATrack = std::format("| Strips | {:>4} | {:>4} | {:>10} |\n",
-    *std::min_element(m_stripClustersPerFPGATrack.begin(), m_stripClustersPerFPGATrack.end()),
-    *std::max_element(m_stripClustersPerFPGATrack.begin(), m_stripClustersPerFPGATrack.end()),
-    m_stripClustersPerFPGATrack.size() == 0 ? "inf" : std::format("{:>.2f}",std::accumulate(m_stripClustersPerFPGATrack.begin(), m_stripClustersPerFPGATrack.end(), 0.0) / m_stripClustersPerFPGATrack.size()));
-
-    ATH_MSG_INFO(header << pixelsPerFPGATrack << stripsPerFPGATrack << tableEnd);
+    if (not m_stripClustersPerFPGATrack.empty()) {
+        summaryTableFPGATracks += std::format("| Strips | {:>4} | {:>4} | {:>10.2f} |\n",
+            *std::min_element(m_stripClustersPerFPGATrack.begin(), m_stripClustersPerFPGATrack.end()),
+            *std::max_element(m_stripClustersPerFPGATrack.begin(), m_stripClustersPerFPGATrack.end()),
+            std::accumulate(m_stripClustersPerFPGATrack.begin(), m_stripClustersPerFPGATrack.end(), 0.0) / m_stripClustersPerFPGATrack.size());
+    }
+    else summaryTableFPGATracks += std::format("| Strips | ---- | ---- |      inf   |\n");
+    
+    summaryTableFPGATracks += "|-----------------------------------|";
+    ATH_MSG_INFO( summaryTableFPGATracks );
 
     // Printing summary for clusters/prototracks
-    header = std::format("\n"
+    std::string summaryTableFPGAPrototracks = std::format("\n"
         "Number of measurements for FPGA Prototracks\n"
         "|-----------------------------------|\n"
         "|        |  min |  max |      Avg   |\n"
         "|-----------------------------------|\n");
 
-    std::string pixelsPerPrototrack = std::format("| Pixels | {:>4} | {:>4} | {:>10} |\n",
-        *std::min_element(m_pixelClustersPerPrototrack.begin(), m_pixelClustersPerPrototrack.end()),
-        *std::max_element(m_pixelClustersPerPrototrack.begin(), m_pixelClustersPerPrototrack.end()),
-        m_pixelClustersPerPrototrack.size() == 0 ? "inf" : std::format("{:>.2f}",std::accumulate(m_pixelClustersPerPrototrack.begin(), m_pixelClustersPerPrototrack.end(), 0.0) / m_pixelClustersPerPrototrack.size()));
+    if (not m_pixelClustersPerPrototrack.empty()) {
+        summaryTableFPGAPrototracks += std::format("| Pixels | {:>4} | {:>4} | {:>10.2f} |\n",
+            *std::min_element(m_pixelClustersPerPrototrack.begin(), m_pixelClustersPerPrototrack.end()),
+            *std::max_element(m_pixelClustersPerPrototrack.begin(), m_pixelClustersPerPrototrack.end()),
+            std::accumulate(m_pixelClustersPerPrototrack.begin(), m_pixelClustersPerPrototrack.end(), 0.0) / m_pixelClustersPerPrototrack.size());
+    }
+    else summaryTableFPGAPrototracks += std::format("| Pixels | ---- | ---- |      inf   |\n");
 
-    std::string stripsPerPrototrack = std::format("| Strips | {:>4} | {:>4} | {:>10} |\n",
-    *std::min_element(m_stripClustersPerPrototrack.begin(), m_stripClustersPerPrototrack.end()),
-    *std::max_element(m_stripClustersPerPrototrack.begin(), m_stripClustersPerPrototrack.end()),
-    m_stripClustersPerPrototrack.size() == 0 ? "inf" : std::format("{:>.2f}",std::accumulate(m_stripClustersPerPrototrack.begin(), m_stripClustersPerPrototrack.end(), 0.0) / m_stripClustersPerPrototrack.size()));
+    if (not m_stripClustersPerPrototrack.empty()) {
+        summaryTableFPGAPrototracks += std::format("| Strips | {:>4} | {:>4} | {:>10.2f} |\n",
+            *std::min_element(m_stripClustersPerPrototrack.begin(), m_stripClustersPerPrototrack.end()),
+            *std::max_element(m_stripClustersPerPrototrack.begin(), m_stripClustersPerPrototrack.end()),
+            std::accumulate(m_stripClustersPerPrototrack.begin(), m_stripClustersPerPrototrack.end(), 0.0) / m_stripClustersPerPrototrack.size());
+    }
+    else summaryTableFPGAPrototracks += std::format("| Strips | ---- | ---- |      inf   |\n");
 
-    ATH_MSG_INFO(header << pixelsPerPrototrack << stripsPerPrototrack << tableEnd);
+    summaryTableFPGAPrototracks += "|-----------------------------------|";
+    ATH_MSG_INFO( summaryTableFPGAPrototracks );
 
     return StatusCode::SUCCESS;
 }
