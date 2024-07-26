@@ -316,7 +316,7 @@ StatusCode SUSYObjDef_xAOD::FillElectron(xAOD::Electron& input, float etcut, flo
     }
   }
 
-  // corrections for R21 are back - https://twiki.cern.ch/twiki/bin/view/AtlasProtected/ElectronPhotonFourMomentumCorrection#Pre_recommendations_for_release
+  // corrections described in https://twiki.cern.ch/twiki/bin/view/AtlasProtected/EGammaCalibrationRun2
   if ( m_egammaCalibTool->applyCorrection(input) != CP::CorrectionCode::Ok)
     ATH_MSG_ERROR( "FillElectron: EgammaCalibTool applyCorrection failed ");
 

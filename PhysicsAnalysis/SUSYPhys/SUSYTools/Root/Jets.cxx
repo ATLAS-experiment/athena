@@ -121,12 +121,9 @@ namespace ST {
     }
 
     // Calibrate the jets
-    // Note that for PHYSLITE jets we don't need the nominal calibration
-    if (jetkey!="AnalysisJets") {
-      ATH_CHECK(m_jetCalibTool->applyCalibration(*copy));
-    }
-    
-    // Add isHS labels to jets (required for JvtEfficiencyTools) 
+    ATH_CHECK(m_jetCalibTool->applyCalibration(*copy));
+
+    // Add isHS labels to jets (required for JvtEfficiencyTools)
     if (!isData()) {
       ATH_CHECK(m_jetPileupLabelingTool->decorate(*copy));
     }
@@ -178,7 +175,7 @@ namespace ST {
     ATH_MSG_DEBUG("Function argument jetkey (trkjet): " << jetkey);
 
     // load default regular & btag jet keys
-    std::string jetkey_tmp = m_defaultTrackJets;  
+    std::string jetkey_tmp = m_defaultTrackJets;
 
     // override default if user is passing a jetkey
     if (!jetkey.empty()) {
@@ -287,8 +284,8 @@ namespace ST {
     // Calibrate the jets - only insitu for data for now
     if (isData()) ATH_CHECK(m_jetFatCalibTool->applyCalibration(*copy));
 
-    
-    if (!isData() && !m_JetTruthLabelName.empty()){ 
+
+    if (!isData() && !m_JetTruthLabelName.empty()){
       ATH_MSG_DEBUG("Checking if decorator for JetTruthLabelingTool is available:");
       std::string fatjetcoll = m_fatJets;
       m_label_truthKey = fatjetcoll+"."+m_JetTruthLabelName;
@@ -297,10 +294,10 @@ namespace ST {
       // Truth Labeling (MC only)
       if (!labelHandle_truthKey.isAvailable() && !m_isPHYSLITE) ATH_CHECK(m_jetTruthLabelingTool->decorate(*copy));
     }
-    
+
 
     for (const auto& jet : *copy) {
-      
+
       ATH_CHECK( this->FillJet(*jet, true, true, doLargeRdecorations) );
       //
       //  For OR, selected if it passed cuts
@@ -355,7 +352,7 @@ namespace ST {
     for (const auto& jet : *copy) {
       ATH_CHECK( this->FillJet(*jet, false) );
     }
-    
+
     for (const auto& jet : *copy) {
       // Update the JVT decorations if needed
       if( m_doFwdJVT){
@@ -455,7 +452,7 @@ namespace ST {
         } else {
           ATH_MSG_DEBUG( "No valid large-R W-tagged fat jet uncertainty, but FillJet called with a fat jet. Skipping uncertainties." );
         }
-        
+
         if (!m_ZTagjetUncertaintiesTool.empty() && !m_ZTagUncConfig.empty() && !m_ZtagConfig.empty() && doLargeRdecorations) {
           CP::CorrectionCode result = m_ZTagjetUncertaintiesTool->applyCorrection(input);
           switch (result) {
@@ -472,7 +469,7 @@ namespace ST {
         } else {
           ATH_MSG_DEBUG( "No valid large-R Z-tagged fat jet uncertainty, but FillJet called with a fat jet. Skipping uncertainties." );
         }
-        
+
         if (!m_TopTagjetUncertaintiesTool.empty() && !m_TopTagUncConfig.empty() && !m_ToptagConfig.empty() && doLargeRdecorations) {
           CP::CorrectionCode result = m_TopTagjetUncertaintiesTool->applyCorrection(input);
           switch (result) {
@@ -489,7 +486,7 @@ namespace ST {
         } else {
           ATH_MSG_DEBUG( "No valid large-R Top-tagged fat jet uncertainty, but FillJet called with a fat jet. Skipping uncertainties." );
         }
-   
+
         if (!m_fatjetUncertaintiesTool.empty()) {
           CP::CorrectionCode result = m_fatjetUncertaintiesTool->applyCorrection(input);
           switch (result) {
@@ -534,7 +531,7 @@ namespace ST {
            ATH_MSG_WARNING( "JES correction OutOfValidity range."); // Jet (pt,eta,phi) = (" << input.pt() << ", " << input.eta() << ", " << input.phi() << ")");
            break;
          default:
-	        break;
+                break;
        }
      }
    }
@@ -711,17 +708,13 @@ namespace ST {
 
     if ( input.pt() <= ptcut || isPileup ) return false;
 
-    if (m_jetInputType == xAOD::JetInput::EMTopo) { //--- Jet cleaning only well defined for EMTopo jets!
-      if (m_acc_jetClean.isAvailable(input)) {
-	dec_bad(input) = !m_acc_jetClean(input);
-      } else {
-	ATH_MSG_VERBOSE("DFCommon jet cleaning variable not available ... Using jet cleaning tool");
-	dec_bad(input) = m_jetCleaningTool.empty() ? false : !m_jetCleaningTool->keep(input);
-      }
-    }
-    else {
-      dec_bad(input) = false;
-      ATH_MSG_VERBOSE("Jet cleaning is available only for EMTopo jet collection (InputType == 1), your jet collection: " << m_jetInputType );
+    if (m_acc_jetClean.isAvailable(input)) {
+      dec_bad(input) = !m_acc_jetClean(input);
+    } else {
+      ATH_MSG_VERBOSE("DFCommon jet cleaning variable not available ... setting 'bad' decorator to 0.");
+      dec_bad(input) = 0;
+      // the jet cleaning decisions are only calculable at AOD now
+      // dec_bad(input) = m_jetCleaningTool.empty() ? false : !m_jetCleaningTool->keep(input);
     }
 
     ATH_MSG_VERBOSE( "JET isbad?: " << static_cast<int>(acc_bad(input)));
@@ -970,7 +963,7 @@ namespace ST {
       else {
         result = m_jetNNJvtEfficiencyTool->getInefficiencyScaleFactor(*jet,current_sf);
       }
-      
+
       switch (result) {
         case CP::CorrectionCode::Error:
           // this is probably not right, should report an error here
@@ -1042,7 +1035,7 @@ namespace ST {
       else {
         result = m_jetfJvtEfficiencyTool->getInefficiencyScaleFactor(*jet,current_sf);
       }
-      
+
       switch (result) {
         case CP::CorrectionCode::Error:
           // this is probably not right, should report an error here

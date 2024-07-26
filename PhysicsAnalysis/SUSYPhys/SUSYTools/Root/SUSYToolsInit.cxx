@@ -173,7 +173,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     ///////////////////////////////////////////////////////////////////////////////////////////
     // Initialise jet calibration tool
 
-    // pick the right config file for the JES tool : https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/ApplyJetCalibrationR21
+    // pick the right config file for the JES tool : https://twiki.cern.ch/twiki/bin/view/AtlasProtected/ApplyJetCalibrationR22
     jetname = "AntiKt4" + xAOD::JetInput::typeName(xAOD::JetInput::Type(m_jetInputType));
     jetcoll = jetname + "Jets";
 
@@ -188,8 +188,8 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       }
 
       std::string JESconfig = isAtlfast() ? m_jesConfigAFII : m_jesConfig;
-      if(isAtlfast()) {
-        ATH_MSG_WARNING("Jet rec currently not available for fast sim, temporary fallback to full sim version");
+      if(isAtlfast() && m_isRun3) {
+        ATH_MSG_WARNING("Jet JES/JER recommendations currently not available for fast sim in Run 3, falling back to full sim version");
         JESconfig = m_jesConfig;
       }
 
@@ -215,6 +215,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_CHECK( m_jetCalibTool.setProperty("JetCollection", jetname) );
       ATH_CHECK( m_jetCalibTool.setProperty("ConfigFile", JES_config_file) );
       ATH_CHECK( m_jetCalibTool.setProperty("CalibSequence", calibseq) );
+      ATH_CHECK( m_jetCalibTool.setProperty("CalibArea", m_jesCalibArea) );
       ATH_CHECK( m_jetCalibTool.setProperty("IsData", isData()) );
       ATH_CHECK( m_jetCalibTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_jetCalibTool.retrieve() );
@@ -372,11 +373,17 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       }
       toolName = "JetUncertaintiesTool_" + jetdef;
 
+      if (m_isRun3 && isAtlfast()) {
+          ATH_MSG_WARNING("Jet Uncertaintes pre-recommendations for Run3 only exist for full sim");
+      }
+
+      if (m_jetUncertaintiesMCType.empty()) m_jetUncertaintiesMCType = m_isRun3 ? "MC23" : (isAtlfast() ? "AF3" : "MC20");
+
       m_jetUncertaintiesTool.setTypeAndName("JetUncertaintiesTool/"+toolName);
 
 
       ATH_CHECK( m_jetUncertaintiesTool.setProperty("JetDefinition", jetdef) );
-      ATH_CHECK( m_jetUncertaintiesTool.setProperty("MCType", isAtlfast() ? "AF3" : (m_isRun3 ? "MC21" : "MC20")) );
+      ATH_CHECK( m_jetUncertaintiesTool.setProperty("MCType", m_jetUncertaintiesMCType) );
       ATH_CHECK( m_jetUncertaintiesTool.setProperty("IsData", false) ); // Never use the PDSmearing for the nominal tool.
       ATH_CHECK( m_jetUncertaintiesTool.setProperty("ConfigFile", m_jetUncertaintiesConfig) );
       if(m_jetUncertaintiesAnalysisFile!="default") ATH_CHECK( m_jetUncertaintiesTool.setProperty("AnalysisFile", m_jetUncertaintiesAnalysisFile) );
@@ -511,11 +518,12 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     ///////////////////////////////////////////////////////////////////////////////////////////
     // Initialise jet cleaning tools
 
+    // see https://twiki.cern.ch/twiki/bin/view/AtlasProtected/HowToCleanJetsR22
     if (m_badJetCut!="" && !m_jetCleaningTool.isUserConfigured()) {
       toolName = "JetCleaningTool";
       m_jetCleaningTool.setTypeAndName("JetCleaningTool/"+toolName);
       ATH_CHECK( m_jetCleaningTool.setProperty("CutLevel", m_badJetCut) );
-      ATH_CHECK( m_jetCleaningTool.setProperty("JetContainer", m_defaultJets) );
+      ATH_CHECK( m_jetCleaningTool.setProperty("DoUgly", false) );
       ATH_CHECK( m_jetCleaningTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_jetCleaningTool.retrieve() );
     } else if (m_jetCleaningTool.isUserConfigured()) ATH_CHECK( m_jetCleaningTool.retrieve() );
@@ -743,10 +751,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       toolName = "MuonEfficiencyScaleFactors_" + muQual;
       m_muonEfficiencySFTool.setTypeAndName("CP::MuonEfficiencyScaleFactors/"+toolName);
       ATH_CHECK( m_muonEfficiencySFTool.setProperty("WorkingPoint", muQual) );
-      ATH_CHECK( m_muonEfficiencySFTool.setProperty("CalibrationRelease", m_isRun3? "230309_Preliminary_r22run3":"230213_Preliminary_r22run2") );
-      if (m_isRun3) {
-        ATH_CHECK( m_muonEfficiencySFTool.setProperty("LowPtThreshold", 5) );
-      }
+      ATH_CHECK( m_muonEfficiencySFTool.setProperty("CalibrationRelease", m_isRun3? "240711_Preliminary_r24run3":"230213_Preliminary_r22run2") );
       ATH_CHECK( m_muonEfficiencySFTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_muonEfficiencySFTool.retrieve() );
     } else  ATH_CHECK( m_muonEfficiencySFTool.retrieve() );
@@ -756,10 +761,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       toolName = "MuonEfficiencyScaleFactorsBMHighPt_" + muQual;
       m_muonEfficiencyBMHighPtSFTool.setTypeAndName("CP::MuonEfficiencyScaleFactors/"+toolName);
       ATH_CHECK( m_muonEfficiencyBMHighPtSFTool.setProperty("WorkingPoint", "BadMuonVeto_HighPt") );
-      if (m_isRun3) {
-        ATH_CHECK( m_muonEfficiencyBMHighPtSFTool.setProperty("LowPtThreshold", 5) );
-      }
-      ATH_CHECK( m_muonEfficiencyBMHighPtSFTool.setProperty("CalibrationRelease", m_isRun3? "220817_Preliminary_r22run3":"230213_Preliminary_r22run2") ); //BadMuonVeto_HighPt currently not available for 230123_Preliminary_r22run3
+      ATH_CHECK( m_muonEfficiencyBMHighPtSFTool.setProperty("CalibrationRelease", m_isRun3? "220817_Preliminary_r22run3":"230213_Preliminary_r22run2") ); //BadMuonVeto_HighPt currently not available for 240711_Preliminary_r24run3
       ATH_CHECK( m_muonEfficiencyBMHighPtSFTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_muonEfficiencyBMHighPtSFTool.retrieve() );
     } else  ATH_CHECK( m_muonEfficiencyBMHighPtSFTool.retrieve() );
@@ -774,7 +776,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       toolName = "MuonTTVAEfficiencyScaleFactors";
       m_muonTTVAEfficiencySFTool.setTypeAndName("CP::MuonEfficiencyScaleFactors/"+toolName);
       ATH_CHECK( m_muonTTVAEfficiencySFTool.setProperty("WorkingPoint", "TTVA") );
-      ATH_CHECK( m_muonTTVAEfficiencySFTool.setProperty("CalibrationRelease", m_isRun3? "230309_Preliminary_r22run3":"230213_Preliminary_r22run2") );
+      ATH_CHECK( m_muonTTVAEfficiencySFTool.setProperty("CalibrationRelease", m_isRun3? "240711_Preliminary_r24run3":"230213_Preliminary_r22run2") );
       ATH_CHECK( m_muonTTVAEfficiencySFTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_muonTTVAEfficiencySFTool.retrieve() );
     } else if (m_muonTTVAEfficiencySFTool.isUserConfigured()) ATH_CHECK( m_muonTTVAEfficiencySFTool.retrieve() );
@@ -806,10 +808,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
 
       m_muonIsolationSFTool.setTypeAndName("CP::MuonEfficiencyScaleFactors/"+toolName);
       ATH_CHECK( m_muonIsolationSFTool.setProperty("WorkingPoint", tmp_muIso_WP + "Iso") );
-      ATH_CHECK( m_muonIsolationSFTool.setProperty("CalibrationRelease", m_isRun3? "230309_Preliminary_r22run3":"230213_Preliminary_r22run2") );
-      if (m_isRun3) {
-        ATH_CHECK( m_muonIsolationSFTool.setProperty("LowPtThreshold", 5) );
-      }
+      ATH_CHECK( m_muonIsolationSFTool.setProperty("CalibrationRelease", m_isRun3? "240711_Preliminary_r24run3":"230213_Preliminary_r22run2") );
       ATH_CHECK( m_muonIsolationSFTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_muonIsolationSFTool.retrieve() );
 
@@ -840,7 +839,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       m_muonHighPtIsolationSFTool.setTypeAndName("CP::MuonEfficiencyScaleFactors/"+toolName);
       // Use for the low-pt WP a dedicated set of isolation scale-factors having an extra uncertainty in place
       ATH_CHECK( m_muonHighPtIsolationSFTool.setProperty("WorkingPoint", tmp_muIsoHighPt_WP + "Iso") );
-      ATH_CHECK( m_muonHighPtIsolationSFTool.setProperty("CalibrationRelease", m_isRun3? "230309_Preliminary_r22run3":"230213_Preliminary_r22run2") );
+      ATH_CHECK( m_muonHighPtIsolationSFTool.setProperty("CalibrationRelease", m_isRun3? "240711_Preliminary_r24run3":"230213_Preliminary_r22run2") );
       ATH_CHECK( m_muonHighPtIsolationSFTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_muonHighPtIsolationSFTool.retrieve() );
 
@@ -876,7 +875,13 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     // Signal Electrons
     if (!m_elecSelLikelihood.isUserConfigured()) {
       toolName = "EleSelLikelihood_" + m_eleId;
-      m_elecSelLikelihood.setTypeAndName("AsgElectronLikelihoodTool/"+toolName);
+
+      if (m_eleId.find("DNN") != std::string::npos) {
+        m_elecSelLikelihood.setTypeAndName("AsgElectronSelectorTool/"+toolName);
+      }
+      else {
+        m_elecSelLikelihood.setTypeAndName("AsgElectronLikelihoodTool/"+toolName);
+      }
 
       if (! m_eleConfig.empty() ){
         ATH_MSG_INFO("Overriding specified Ele.Id working point in favour of configuration file");
@@ -902,7 +907,13 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     // Baseline Electrons
     if (!m_elecSelLikelihoodBaseline.isUserConfigured()) {
       toolName = "EleSelLikelihoodBaseline_" + m_eleIdBaseline;
-      m_elecSelLikelihoodBaseline.setTypeAndName("AsgElectronLikelihoodTool/"+toolName);
+
+      if (m_eleIdBaseline.find("DNN") != std::string::npos) {
+        m_elecSelLikelihoodBaseline.setTypeAndName("AsgElectronSelectorTool/"+toolName);
+      }
+      else {
+        m_elecSelLikelihoodBaseline.setTypeAndName("AsgElectronLikelihoodTool/"+toolName);
+      }
 
       if (! m_eleConfigBaseline.empty() ){
         ATH_MSG_INFO("Overriding specified EleBaseline.Id working point in favour of configuration file");
@@ -1002,6 +1013,11 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     else {
       // This needs to be formatted for the scale factors: no _Rel20, no LH label, etc.
       std::string eleId = TString(m_eleId).ReplaceAll("AndBLayer", "BLayer").ReplaceAll("LLH", "").Data();
+
+      if (m_eleId.find("DNN") != std::string::npos) {
+        eleId = TString(eleId).ReplaceAll("DNNnoCF", "").ReplaceAll("DNN", "").Data();
+        ATH_MSG_WARNING("Electron DNN ID working point " << m_eleId <<  " doesn't have SFs yet, fall back to " << eleId);
+      }
 
       // electron id
       toolName = "AsgElectronEfficiencyCorrectionTool_id_" + m_eleId;
@@ -1425,7 +1441,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     if (!m_egammaCalibTool.isUserConfigured()) {
       m_egammaCalibTool.setTypeAndName("CP::EgammaCalibrationAndSmearingTool/EgammaCalibrationAndSmearingTool");
       ATH_MSG_DEBUG( "Initialising EgcalibTool " );
-      ATH_CHECK( m_egammaCalibTool.setProperty("ESModel", m_isRun3 ? "es2022_R22_PRE" : "es2018_R21_v0") ); //Fallback to R21 egamma model for Run 2
+      ATH_CHECK( m_egammaCalibTool.setProperty("ESModel", m_isRun3 ? "es2022_R22_PRE" : "es2023_R22_Run2_v0") );
       ATH_CHECK( m_egammaCalibTool.setProperty("decorrelationModel", "1NP_v1") );
       ATH_CHECK( m_egammaCalibTool.setProperty("useFastSim", isAtlfast()?1:0) );
       ATH_CHECK( m_egammaCalibTool.setProperty("OutputLevel", this->msg().level()) );
