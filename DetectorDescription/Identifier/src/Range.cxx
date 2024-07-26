@@ -956,6 +956,8 @@ void Range::field::operator |= (const field& other)
 }
 
 //----------------------------------------------- 
+
+//----------------------------------------------- 
 Range::field::operator std::string () const 
 { 
   std::string result; 
