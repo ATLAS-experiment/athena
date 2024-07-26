@@ -47,7 +47,7 @@ namespace GlobalSim {
      */
     
  
-    auto roiSelector = [etMin=m_etMin](const auto& roi) {
+    auto roiSelector = [etMin=m_etMin.value()](const auto& roi) {
       constexpr double strip_deta{0.031};
 
       // fiducial cut values
@@ -63,7 +63,7 @@ namespace GlobalSim {
     std::copy_if((*eFexEMRoIContainer).begin(),
 		 (*eFexEMRoIContainer).end(),
 		 std::back_inserter(selectedRoIs),
-		 roiSelector);
+		 std::move(roiSelector));
     
     return StatusCode::SUCCESS;
   }
