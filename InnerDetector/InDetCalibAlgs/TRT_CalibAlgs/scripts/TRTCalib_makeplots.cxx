@@ -1250,8 +1250,8 @@ BoardVariationsOldT0::BoardVariationsOldT0(char *infile, int det)
     }
     else
     {
-        if ((det+1) >=3){
-          throw std::runtime_error ("detlet[det + 1] is out of bounds of the array");
+        if ((det + 1)>=3){
+          throw std::runtime_error("detlet[det + 1] is out of bounds");
         }
         this->SetTitle(Form("Endcap Board T0s (%c-side)", detlet[det + 1]));
     }
@@ -1749,8 +1749,8 @@ BoardVariationsTRes::BoardVariationsTRes(char *infile, int det)
         this->SetTitle(Form("Barrel Board Sigma Time Residuals (%c-side)", detlet[det + 1]));
     }
     else
-    {
-        this->SetTitle(Form("Endcap Board Sigma Time Residuals (%c-side)", detlet[det + 10]));
+    {   
+        this->SetTitle(Form("Endcap Board Sigma Time Residuals (%c-side)", detlet[det + 1]));
     }
     this->SetLineColor(4);
     this->RemovePoint(0);
@@ -2145,7 +2145,7 @@ RtGraphs::RtGraphs(char *infile, string folder, bool isAr = false)
             throw string("  NO RT OBJECTS FOUND");
         }
     }
-    else if (trt->FindKey("rt-relation"))
+    else if (trt and trt->FindKey("rt-relation"))
     {
         cout << "   No folder. Found rt-relation. PLOT FOR TRT" << endl;
         rthist = (TH2F *)trt->FindKey("rt-relation")->ReadObj();
@@ -3320,11 +3320,11 @@ public:
     map<double, double> resmap;
 
 private:
-    TGraphErrors *m_thegraph{};
-    double *m_rdata{};
-    double *m_erdata{};
-    double *m_tdata{};
-    double *m_etdata{};
+    TGraphErrors m_thegraph;
+    std::vector<double> m_rdata;
+    std::vector<double> m_erdata;
+    std::vector<double> m_tdata;
+    std::vector<double> m_etdata;
 };
 
 RresTbin::RresTbin(TFile *file, string detname, int det)
@@ -3443,12 +3443,13 @@ RresTbin::RresTbin(TFile *file, string detname, int det)
 
         if (tbins)
         {
-            cout << "   found tbins vector with length " << tbins->GetNoElements() << endl;
-            m_rdata = new double[tbins->GetNoElements()];
-            m_erdata = new double[tbins->GetNoElements()];
-            m_tdata = new double[tbins->GetNoElements()];
-            m_etdata = new double[tbins->GetNoElements()];
-            m_thegraph = new TGraphErrors(tbins->GetNoElements());
+            const size_t nElements = tbins->GetNoElements();
+            cout << "   found tbins vector with length " << nElements << endl;
+            m_rdata = std::vector<double>(nElements,0.);
+            m_erdata = std::vector<double>(nElements,0.);
+            m_tdata = std::vector<double>(nElements,0.);
+            m_etdata = std::vector<double>(nElements,0.);
+            m_thegraph = TGraphErrors(nElements);
 
             int ipoint = 0;
             for (int ihist = 0; ihist < tbins->GetNoElements(); ihist++)
@@ -3492,18 +3493,18 @@ RresTbin::RresTbin(TFile *file, string detname, int det)
 
             if (ipoint > 10)
             {
-                m_thegraph = new TGraphErrors(ipoint, m_tdata, m_rdata, m_etdata, m_erdata);
+                m_thegraph = TGraphErrors(ipoint, m_tdata.data(), m_rdata.data(), m_etdata.data(), m_erdata.data());
 
                 cout << "       draw t-binned residual graph " << endl;
                 string detstr[8] = {"endcap A", "barrel A", "", "barrel C", "endcap C", "", "whole barrel", "whole TRT"};
 
-                m_thegraph->SetMarkerStyle(20);
-                m_thegraph->SetTitle(Form("t-binned absolute residual (%s)", detstr[det + 2].c_str()));
-                m_thegraph->Draw("ap");
-                m_thegraph->GetYaxis()->SetTitle("|r|-|r_{track}| /mm");
-                m_thegraph->GetYaxis()->SetRangeUser(-0.150, 0.150);
-                m_thegraph->GetXaxis()->SetRangeUser(0, 50);
-                m_thegraph->GetXaxis()->SetTitle("t-t0 /ns");
+                m_thegraph.SetMarkerStyle(20);
+                m_thegraph.SetTitle(Form("t-binned absolute residual (%s)", detstr[det + 2].c_str()));
+                m_thegraph.Draw("ap");
+                m_thegraph.GetYaxis()->SetTitle("|r|-|r_{track}| /mm");
+                m_thegraph.GetYaxis()->SetRangeUser(-0.150, 0.150);
+                m_thegraph.GetXaxis()->SetRangeUser(0, 50);
+                m_thegraph.GetXaxis()->SetTitle("t-t0 /ns");
 
                 printf("RPOLDIFF %i %e %e %e %e\n", det, ff2->GetParameter(0), ff2->GetParameter(1), ff2->GetParameter(2), ff2->GetParameter(3));
 
@@ -3582,9 +3583,9 @@ FirstPage::FirstPage(char * /*filename*/, TFile *file)
     //  the detectors +-1 have only Argon in Run3
 
     float bhitst[4]={0};
-    float rest[4]={0};
-    float trest[4]={0};
-    float treswt[4]={0};
+    float rest[4]{};
+    float trest[4]{};
+    float treswt[4]{};
 
     cout << " debug 1 " << endl;
     bhitst[0] = resAr0->GetEntries();
@@ -3604,7 +3605,7 @@ FirstPage::FirstPage(char * /*filename*/, TFile *file)
     rest[0] = resAr0->GetFunction("gaus")->GetParameter(2);
     rest[2] = resAr2->GetFunction("gaus")->GetParameter(2);
     rest[1] = (resAr1->GetFunction("gaus")->GetParameter(2) * nhAr1 + resXe1->GetFunction("gaus")->GetParameter(2) * nhXe1) / bhitst[1];
-    if (resAr3)
+    if (resAr3 and resXe3)
         rest[3] = (resAr3->GetFunction("gaus")->GetParameter(2) * nhAr3 + resXe3->GetFunction("gaus")->GetParameter(2) * nhXe3) / bhitst[3];
     cout << " debug 4 " << endl;
     trest[0] = tresAr0->GetFunction("gaus")->GetParameter(1);

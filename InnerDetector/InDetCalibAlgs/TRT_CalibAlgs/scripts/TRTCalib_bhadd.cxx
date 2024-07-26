@@ -1847,9 +1847,13 @@ int main(int argc, char *argv[])
 
     cout << endl;
     cout << "TOT HISTOGRAMS............. " << nhists << endl;
-    cout << "TOT HITS IN TIMERES HIST .. " << ntres << " (" << 100 * float(ntres) / float(nhits) << "%)" << endl;
-    cout << "TOT HITS IN RRES HIST ..... " << nres << " (" << 100 * float(nres) / float(nhits) << "%)" << endl;
-    cout << "TOT HITS IN RT HIST ....... " << nrt << " (" << 100 * float(nrt) / float(nhits) << "%)" << endl;
+    if (nhits!=0){
+      cout << "TOT HITS IN TIMERES HIST .. " << ntres << " (" << 100 * float(ntres) / float(nhits) << "%)" << endl;
+      cout << "TOT HITS IN RRES HIST ..... " << nres << " (" << 100 * float(nres) / float(nhits) << "%)" << endl;
+      cout << "TOT HITS IN RT HIST ....... " << nrt << " (" << 100 * float(nrt) / float(nhits) << "%)" << endl;
+    } else {
+      cout << "Number of hits was zero !!\n";
+    }
     cout << endl;
 
     ofilestat << "TRESHITS " << ntres << endl;
