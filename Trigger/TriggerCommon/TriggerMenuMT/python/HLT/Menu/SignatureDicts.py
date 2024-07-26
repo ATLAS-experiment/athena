@@ -858,7 +858,7 @@ MinBiasChainParts = {
     'multiplicity'   : '',
     'trigType'       : ['mb'],
     'threshold'      : '',
-    'extra'          : ['noisesup', 'vetombts2in', 'vetombts1side2in',  'vetospmbts2in', "vetosp" ,'ion', 'ncb', 'blayer', 'dijet', 'all'], #ncb = non collision background, blayer = only sum innermost pix layer
+    'extra'          : ['noisesup', 'vetombts2in', 'vetombts1side2in',  'vetospmbts2in', "vetosp" ,'ion', 'ncb', 'blayer', 'dijet', 'all', 'q2'], #ncb = non collision background, blayer = only sum innermost pix layer
     'IDinfo'         : [],
     'ZDCinfo'        : ['lg', 'hg'],
     'trkInfo'        : ['hlttr', 'ftk', 'costr'],
@@ -868,7 +868,7 @@ MinBiasChainParts = {
                         'sp3100', 'sp3500', 'sp4100', 'sp4500', 'sp4800', 'sp5000', 'sp5200',
                         'vpix15', 'vpix30',
                         'pix20','pix50','pix100', 'pix200', 'pix500', 'pix1000',
-                        'nototpix70', 'nototpix100', 'nototpix200', 'nototpix500'],
+                        'nototpix20', 'nototpix30','nototpix50', 'nototpix70', 'nototpix100', 'nototpix200', 'nototpix500'],
     'pileupInfo'     : ['pusup0', 'pusup7', 'pusup10', 'pusup15', 'pusup20', 'pusup30', 'pusup40','pusup50','pusup60', 'pusup70', 'pusup80', 'pusup90', 'pusup100', 'pusup110', 'pusup120', 'pusup130', 'pusup150', 'pusup180', 'pusup190',
                         'pusup200', 'pusup220', 'pusup240', 'pusup250', 'pusup260', 'pusup270', 'pusup280', 'pusup290', 'pusup300'],
     'hypoTrkInfo'    : ['trk3','trk5','trk10','trk15',  'trk20', 'trk25',  'trk30', 'trk35', 'trk40', 'trk45', 'trk50', 'trk55', 'trk60', 'trk65', 'trk70', 'trk75', 'trk80', 'trk90',

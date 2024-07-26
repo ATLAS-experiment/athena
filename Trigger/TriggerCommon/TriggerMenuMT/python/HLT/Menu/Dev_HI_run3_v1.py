@@ -108,6 +108,10 @@ def getDevHISignatures():
         ChainProp(name='HLT_mb_sp_pix100_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportGroup+['PS:NoHLTRepro']),
         ChainProp(name='HLT_mb_sp_pix200_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportGroup+['PS:NoHLTRepro']),
 
+        ChainProp(name='HLT_mb_sp_nototpix20_q2_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+PrimaryLegGroup+['PS:NoHLTRepro']),
+        ChainProp(name='HLT_mb_sp_nototpix30_q2_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+PrimaryLegGroup+['PS:NoHLTRepro']),
+        ChainProp(name='HLT_mb_sp_nototpix50_q2_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+PrimaryLegGroup+['PS:NoHLTRepro']),
+        # above chains are for performance studies only, for physics proper L1 seeded chains will be added: ATR-29741
         ChainProp(name='HLT_mb_sp_nototpix70_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+PrimaryLegGroup+['PS:NoHLTRepro']),
         ChainProp(name='HLT_mb_sp_nototpix100_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+PrimaryLegGroup+['PS:NoHLTRepro']),
         ChainProp(name='HLT_mb_sp_nototpix200_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+PrimaryLegGroup+['PS:NoHLTRepro']),

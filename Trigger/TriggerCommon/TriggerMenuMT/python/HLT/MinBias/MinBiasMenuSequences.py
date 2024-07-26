@@ -34,6 +34,8 @@ def SPCountHypoToolGen(chainDict):
         hypo.pixCL = -1  # Remove any cut on mininum number of Pixel and SCT SpacePoints
         hypo.sctSP = -1
         hypo.pixCLnoToT = int(chainDict["chainParts"][0]["hypoSPInfo"].removeprefix("nototpix"))
+    if "q2" in chainDict["chainName"]:
+        hypo.pixQ2mod = 0.4 # to be adjusted
 
     return hypo
 
