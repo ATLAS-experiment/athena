@@ -134,7 +134,7 @@ namespace MuonR4{
                                                                 simHit->index()};
                     associatedHits.push_back(std::move(link));
                 }
-                truthSegment->setNHits(nMdt + nMm + nStgcEta, nTgcPhi + nRpcPhi, nTgcEta + nRpcEta);
+                truthSegment->setNHits(nMdt + nMm + nStgcEta, nTgcPhi + nRpcPhi + nStgcPhi, nTgcEta + nRpcEta);
                 hitDecor(*truthSegment) = std::move(associatedHits);
             }
         }
