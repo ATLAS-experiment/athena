@@ -74,9 +74,7 @@ MissingMassCalculatorV2::MissingMassCalculatorV2(
   Prob->SetUseDphiLL(false);         // added by Tomas Davidek for lep-lep
   m_dTheta3d_binMin = 0.0025;
   m_dTheta3d_binMax = 0.02;
-  m_fJERsyst = 0;                 // no JER systematics by default (+/-1: up/down 1 sigma)
   preparedInput.m_METresSyst = 0; // no MET resolution systematics by default (+/-1: up/down 1 sigma)
-  m_fApplyMassScale = 0;          // don't apply mass scale correction by default
   preparedInput.m_dataType = 1;   // set to "data" by default
   preparedInput.m_fUseTailCleanup = 1; // cleanup by default for lep-had Moriond 2012 analysis
   preparedInput.m_fUseDefaults = 0; // use pre-set defaults for various configurations; if set it to 0
@@ -401,13 +399,7 @@ void MissingMassCalculatorV2::DoOutputInfo() {
                          OutputInfo.m_nuvec2[MMCFitMethodV2::MAXW].Py());
     OutputInfo.m_FittedMetVec[MMCFitMethodV2::MAXW] = metmaxw;
 
-    // MLM method : can only get MMC, rest is dummy
-    double scale = MassScale(MMCFitMethodV2::MAXW, m_fDitauStuffHisto.Mditau_best,
-                             preparedInput.m_type_visTau1,
-                             preparedInput.m_type_visTau2); // only for histo method for now. In
-                                                          // practice disabled by default
-
-    OutputInfo.m_FittedMass[MMCFitMethodV2::MLM] = scale * m_fDitauStuffHisto.Mditau_best;
+    OutputInfo.m_FittedMass[MMCFitMethodV2::MLM] = m_fDitauStuffHisto.Mditau_best;
     OutputInfo.m_FittedMassLowerError[MMCFitMethodV2::MLM] = yq[0];
     OutputInfo.m_FittedMassUpperError[MMCFitMethodV2::MLM] = yq[1];
 
@@ -2106,63 +2098,6 @@ int MissingMassCalculatorV2::TailCleanUp(const TLorentzVector &vis1,
   return pass_code;
 }
 
-//-------- This function applies correction to compensate for the off-set
-double MissingMassCalculatorV2::MassScale(int method, double mass, const int &tau_type1,
-                                                   const int &tau_type2) {
-  double Fscale = 1.0;
-  // calibration for rel16 lep-had analysis only
-  if (m_fApplyMassScale == 1) {
-    if (preparedInput.m_tauTypes == TauTypes::lh) {
-      if (method != 1)
-        return 1.0;
-      //      float p0, p1, p2, p3;
-      //      if(tau_type1==1 || tau_type2==1) // 1-prong tau's
-      //        {
-      //          p0=3.014; p1=-71.86; p2=1.018; p3=0.8912;
-      //          if(mass>91.2) Fscale=p0/(p1+p2*mass)+p3;
-      //          else Fscale=p0/(p1+p2*91.2)+p3;
-      //        }
-      //      if(tau_type1==3 || tau_type2==3) // 3-prong tau's
-      //        {
-      //          p0=0.4576; p1=-84.22; p2=0.9783; p3=0.9136;
-      //          if(mass>91.2) Fscale=p0/(p1+p2*mass)+p3;
-      //          else Fscale=p0/(p1+p2*91.2)+p3;
-      //        }
-      //      if(Fscale>1.0) Fscale=1.0;
-      //      if(Fscale<0.89) Fscale=0.89;
-
-      float p0, p1, p2, p3, p4, p5, p6, p7;
-      if ((tau_type1 >= 0 && tau_type1 <= 2) || (tau_type2 >= 0 && tau_type2 <= 2))
-        return 1.0;                                                                 // 1-prong tau's
-      if ((tau_type1 >= 3 && tau_type1 <= 5) || (tau_type2 >= 3 && tau_type2 <= 5)) // 3-prong tau's
-      {
-        p0 = 3.014;
-        p1 = -71.86;
-        p2 = 1.018;
-        p3 = 0.8912;
-        p4 = 0.4576;
-        p5 = -84.22;
-        p6 = 0.9783;
-        p7 = 0.9136;
-        double scale1 = p0 / (p1 + p2 * mass) + p3;
-        double scale3 = p4 / (p5 + p6 * mass) + p7;
-        if (mass > 91.2)
-          Fscale = scale3 / scale1;
-        else {
-          scale1 = p0 / (p1 + p2 * 91.2) + p3;
-          scale3 = p4 / (p5 + p6 * 91.2) + p7;
-          Fscale = scale3 / scale1;
-        }
-      }
-      if (Fscale > 1.0)
-        Fscale = 1.0;
-      if (Fscale < 0.95)
-        Fscale = 0.95;
-    }
-  }
-  return 1.0 / Fscale;
-}
-
 // note that if MarkovChain the input solutions can be modified
 void MissingMassCalculatorV2::handleSolutions()
 
@@ -2933,49 +2868,6 @@ double MissingMassCalculatorV2::dTheta3DLimit(const int &tau_type, const int &li
   }
 
   return limit;
-}
-
-// returns P(nu1) & P(nu2)
-int MissingMassCalculatorV2::NuPsolution(TVector2 met_vec, double theta1, double phi1,
-                                                  double theta2, double phi2, double &P1,
-                                                  double &P2) {
-  int solution_code = 0; // 0== no solution, 1==with solution
-  P1 = 0.0;
-  P2 = 0.0;
-  double D = sin(theta1) * sin(theta2) * sin(phi2 - phi1);
-  if (std::abs(D) > 0.0) // matrix deteriminant is non-zero
-  {
-    P1 = (met_vec.Px() * sin(phi2) - met_vec.Py() * cos(phi2)) * sin(theta2) / D;
-    P2 = (met_vec.Py() * cos(phi1) - met_vec.Px() * sin(phi1)) * sin(theta1) / D;
-    if (P1 > 0.0 && P2 > 0.0)
-      solution_code = 1;
-  }
-  return solution_code;
-}
-
-// standard collinear approximation
-// it returns code=0 if collinear approximation can't be applied
-// and code=1 and Mrec if collinear approximation was applied
-int MissingMassCalculatorV2::StandardCollApprox(const TLorentzVector &tau_vec1,
-                                                         const TLorentzVector &tau_vec2,
-                                                         const TVector2 &met_vec, double &Mrec) {
-  int code = 0;
-  Mrec = 0.0;
-  double P_nu1 = 0.0;
-  double P_nu2 = 0.0;
-  int coll_code = NuPsolution(met_vec, tau_vec1.Theta(), tau_vec1.Phi(), tau_vec2.Theta(),
-                              tau_vec2.Phi(), P_nu1, P_nu2);
-  if (coll_code == 1) {
-    code = 1;
-    TLorentzVector nu1(P_nu1 * sin(tau_vec1.Theta()) * cos(tau_vec1.Phi()),
-                       P_nu1 * sin(tau_vec1.Theta()) * sin(tau_vec1.Phi()),
-                       P_nu1 * cos(tau_vec1.Theta()), P_nu1);
-    TLorentzVector nu2(P_nu2 * sin(tau_vec2.Theta()) * cos(tau_vec2.Phi()),
-                       P_nu2 * sin(tau_vec2.Theta()) * sin(tau_vec2.Phi()),
-                       P_nu2 * cos(tau_vec2.Theta()), P_nu2);
-    Mrec = (nu1 + nu2 + tau_vec1 + tau_vec2).M();
-  }
-  return code;
 }
 
 // checks units of input variables, converts into [GeV] if needed, make all
