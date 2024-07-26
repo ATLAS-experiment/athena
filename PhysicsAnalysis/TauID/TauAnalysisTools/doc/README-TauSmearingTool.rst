@@ -30,7 +30,7 @@ Introduction
 This tool provides corrections to your tau pT according to the TES
 uncertainties. The momentum of xAOD taus have already been corrected for proper
 tau energy scale, and therefore the tool returns for simulation a correction
-factor of 1. In run 1 data the tau pT is shifted and needs to be corrected.
+factor of 1.
 
 The tool can in general be used, including the header file::
 
@@ -137,43 +137,6 @@ Release Specific Configuration
      - ``"mc21"`` (default)
      - ``"PoPy"`` (default)
      - ``false`` (default)
-
-
-Notes for run 1 tau pt smearing
-===============================
-
-If you like to access a specific component of the TES uncertainty, i.e.
-statistical uncertainty of the in-situ measurement, you need to create a
-systematic set and add a systematic variation with the name TAUS_SME_INSITUSTAT
-and an integer corresponding to the up/downward variation (a positive number
-corresponds to upward, a negative to downward variation). So for an upward 1
-sigma variation one would write::
-
-  CP::SystematicSet sSystematicSet;
-  sSystematicSet.insert(CP::SystematicVariation("TAUS_SME_INSITUSTAT", 1));
-  TauSmeTool.applySystematicVariation( sSystematicSet );
-
-**However, you should get in contact with TauWG first before doing this in your analysis!**
-
-New nuisance parameters are provided for single TES components:
-
-* FINAL: "old style" total TES uncertainty
-* TOTAL: total TES uncertainty w/ constraints from in-situ measurement at low pt
-  (pt < 50 GeV), i.e. sqrt(MODELING**2 + CLOSURE**2 + INSITUINTERPOL**2 +
-  SINGLEPARTICLE**2)
-* INSITU: total in-site component, i.e. sqrt(INSITUSYS**2 + INSITUSTAT**2)
-
-  **NOTE: no interpolation is applied here; if you want to apply interpolation
-  take INSITUINTERPOL**
-* INSITUINTERPOL: total in-situ component with pt interpolation according to
-  sqrt(1 - (pt -50)/20) * INSITU for 50 GeV < pt < 70 GeV; above pt > 70 GeV the
-  interpolation factor is 0, while for pt < 50 GeV it is 1
-* INSITUSTAT/INSITUSYST: statistical and systematic component of in-situ
-  measurement
-* SINGLEPARTICLEINTERPOL: single particle response interpolated as "switch-on",
-  i.e. (1 - sqrt(1 - (pt -50)/20)) * SINGLEPARTICLE
-* MODELING: modelling component
-
 
 ---
 FAQ

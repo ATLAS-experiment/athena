@@ -356,8 +356,8 @@ FAQ
     TauSelectionTool          DEBUG AbsCharge: 1
     TauSelectionTool          DEBUG NTrack: 1
     TauSelectionTool          DEBUG NTrack: 3
-    TauSelectionTool          DEBUG BDTJetScore: -inf to inf
-    TauSelectionTool          DEBUG BDTEleScore: -inf to inf
+    TauSelectionTool          DEBUG RNNJetScoreSigTrans: -inf to inf
+    TauSelectionTool          DEBUG RNNJetScoreSigTrans: -inf to inf
     TauSelectionTool          DEBUG JetIDWP: JETIDNONE
     TauSelectionTool          DEBUG EleBDTDWP: ELEIDNONE
     TauSelectionTool          DEBUG cuts: Pt AbsEta AbsCharge NTrack JetIDWP

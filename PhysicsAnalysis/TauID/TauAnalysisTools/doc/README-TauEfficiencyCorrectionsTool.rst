@@ -27,15 +27,14 @@ Introduction
 ------------
 
 This tool aims to provide nominal and systematically varied efficiency scale
-factors for tau reconstruction, identification and overlap removal. Also tau
+factors for tau reconstruction, identification and electron rejection. Also tau
 trigger efficiency scale factors are provided by this tool, but there are some
 differences to the other scale factors. For more information on how to use the
 tool for trigger scale factors please refer to the `TauEfficiencyCorrectionsTool
 -- Trigger readme <README-TauEfficiencyCorrectionsTool_Trigger.rst>`_. Please
 note that this documentation is only valid for the latest recommendations.
-More information for older recommendations can be found following the links
-listed in `Section Special Notes on older recommendations
-<README-TauEfficiencyCorrectionsTool.rst#special-notes-on-older-recommendations>`_.
+In case you would like to use older set of recommendations, please get in contact 
+with TauCP conveners.
 
 For the tool the following line needs to be added to include the header file::
 
@@ -55,21 +54,6 @@ The variable names for the scale factors have default values, but can be
 configured. For information on this please refer to the `section Available
 properties <README-TauEfficiencyCorrectionsTool.rst#available-properties>`_
 below.
-
-The ``TauEfficiencyCorrectionsTool`` can be configured in an atomised way by
-passing a tool handle of the `TauSelectionTool <README-TauSelectionTool.rst>`_,
-which was used for the tau selection
-
-.. code-block:: python
-
-  ToolHandle < TauAnalysisTools::ITauSelectionTool > TauSelToolHandle = TauSelTool;
-  TauEffTool.setProperty( "TauSelectionTool" , TauSelToolHandle);
-
-This configures the set of ``EfficiencyCorrectionTypes`` and if needed the jet
-(electron) ID working points, depending on the applied cuts.  Please note, that
-the tool is only able to see the configuration of the passed TauSelectionTool,
-any selection applied outside the passed tool (e.g. harder jet ID, ID control
-regions etc...) will not be taken into account.
 
 A set of recommended systematic variations can in general be retrieved by
 calling::
@@ -120,11 +104,6 @@ are available for tool steering:
      - type
      - default value
      - other sensible values
- 
-   * - ``TauSelectionTool``
-     - ``ToolHandle<TauAnalysisTools::TauSelectionTool>``
-     - empty
-     - 
 
    * - ``EfficiencyCorrectionTypes``
      - ``std::vector<int>``
@@ -171,12 +150,20 @@ In addition the following properties are available for further configurations:
 
    * - ``InputFilePathRecoHadTau``
      - ``std::string``
-     - ``"TauAnalysisTools/"+ <SharedFilesVersion> +"EfficiencyCorrections/Reco_TrueHadTau_mc16-prerec.root"``
+     - ``"TauAnalysisTools/"+ <SharedFilesVersion> +"EfficiencyCorrections/Reco_TrueHadTau_2019-summer_v2.root"``
 
    * - ``InputFilePathJetIDHadTau``
      - ``std::string``
-     - ``"TauAnalysisTools/"+ <SharedFilesVersion> +"EfficiencyCorrections/JetID_TrueHadTau_2018-summer.root"``
+     - ``"TauAnalysisTools/"+ <SharedFilesVersion> +"EfficiencyCorrections/RNNID_TrueHadTau_2022-prerecommendation_v2.root"``
 
+   * - ``InputFilePathEleIDHadTau``
+     - ``std::string``
+     - ``"TauAnalysisTools/"+ <SharedFilesVersion> +"EfficiencyCorrections/EleOLR_TrueHadTau_2016-ichep.root"``
+
+    * - ``InputFilePathEleIDElectron``
+     - ``std::string``
+     - ``"TauAnalysisTools/"+ <SharedFilesVersion> +"EleRNN_TrueElectron_2022-mc20-prerec-v2.root"``   
+  
    * - ``VarNameRecoHadTau``
      - ``std::string``
      - ``"TauScaleFactorReconstructionHadTau"``
@@ -213,7 +200,6 @@ factors:
 * SFEleIDHadTau: scale factors for tau electron overlap removal of true hadronic tau decays
 * SFEleIDElectron: scale factors for tau electron overlap removal of true electrons faking hadronic taus
 * SFJetIDHadTau: scale factors for tau jet identification of true hadronic tau decays
-* SFDecayModeHadTau: scale factors for each true hadronic tau decay mode
 
 The InputFilePath* strings are predefined to load the files in
 /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/ using PathResolver, but own
@@ -275,8 +261,6 @@ points:
 These can be accessed, for example via::
 
   TauEffTool.setProperty("EleIDLevel", (int)ELEIDRNNLOOSE);
-
-Recommendations for RNN based Electron identification are currently not available in release 22.
 
 ---
 FAQ
