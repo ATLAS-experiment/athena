@@ -50,7 +50,7 @@
 <!ENTITY PHIBINS2D "160">
 
 <!-- PU density plots -->
-<!ENTITY NBINSPUDENS "10">
+<!ENTITY NBINSPUDENS "20">
 <!ENTITY PUDENSMAX "5.0">
 
 <!-- N interaction plots -->

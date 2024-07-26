@@ -17,7 +17,6 @@
 #include "AthenaMonitoringKernel/MonitoredCollection.h"
 #include "../src/HistogramFiller/VecHistogramFiller1D.h"
 
-#include "mocks/MockHistogramDef.h"
 #include "mocks/MockHistogramProvider.h"
 
 using namespace std;
@@ -40,6 +39,8 @@ class HistogramFillerVec1DTestSuite {
   // ==================== Test code ====================
   private:
     void beforeEach(bool kVecUO) {
+        m_histogramDef.type = "TH1F";
+        m_histogramDef.xbins = 1;
         if (kVecUO) {
             m_histogramDef.kVecUO = true;
         } else {
@@ -171,7 +172,7 @@ class HistogramFillerVec1DTestSuite {
   private:
     MsgStream m_log;
 
-    MockHistogramDef m_histogramDef;
+    HistogramDef m_histogramDef;
     shared_ptr<MockHistogramProvider> m_histogramProvider;
     shared_ptr<TH1D> m_histogram;
 
@@ -181,8 +182,8 @@ class HistogramFillerVec1DTestSuite {
 int main() {
   ISvcLocator* pSvcLoc;
 
-  if (!Athena_test::initGaudi("GenericMon.txt", pSvcLoc)) {
-    throw runtime_error("This test can not be run: GenericMon.txt is missing");
+  if (!Athena_test::initGaudi("GenericMonMinimal.txt", pSvcLoc)) {
+    throw runtime_error("This test can not be run: GenericMonMinimal.txt is missing");
   }
 
   HistogramFillerVec1DTestSuite().run();

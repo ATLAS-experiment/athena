@@ -347,7 +347,7 @@ def triggerBSOutputCfg(flags, hypos, offline=False):
     from TrigOutputHandling.TrigOutputHandlingConfig import TriggerEDMSerialiserToolCfg, StreamTagMakerToolCfg, TriggerBitsMakerToolCfg
 
     # Get list of all output collections for ByteStream (including DataScouting)
-    collectionsToBS = getRun3BSList(["BS"] + DataScoutingInfo.getAllDataScoutingIdentifiers())
+    collectionsToBS = getRun3BSList(flags, ["BS"] + DataScoutingInfo.getAllDataScoutingIdentifiers())
 
     # Tool serialising EDM objects to fill the HLT result
     serialiser = TriggerEDMSerialiserToolCfg(flags)
@@ -472,7 +472,7 @@ def triggerPOOLOutputCfg(flags):
                                      ( flags.Output.doWriteAOD, 'AOD', flags.Trigger.AODEDMSet)]:
         if not doit: continue
 
-        edmList = getTriggerEDMList(edmSet, flags.Trigger.EDMVersion, flags.Trigger.ExtraEDMList)
+        edmList = getTriggerEDMList(flags, key=edmSet)
 
         # Build the output ItemList
         itemsToRecord = []
@@ -503,7 +503,8 @@ def triggerPOOLOutputCfg(flags):
 def triggerMergeViewsCfg( flags, viewMakers ):
     """Configure the view merging algorithm"""
 
-    from TrigEDMConfig.TriggerEDMRun3 import TriggerHLTListRun3, InViews
+    from TrigEDMConfig.TriggerEDMDefs import InViews
+    from TrigEDMConfig.TriggerEDM import getRawTriggerEDMList
 
     acc = ComponentAccumulator()
     mergingTool = CompFactory.HLTEDMCreator("ViewsMergingTool")
@@ -511,7 +512,7 @@ def triggerMergeViewsCfg( flags, viewMakers ):
                                        OutputTools = [mergingTool])
 
     # configure views merging
-    needMerging = [x for x in TriggerHLTListRun3 if len(x) >= 4 and
+    needMerging = [x for x in getRawTriggerEDMList(flags) if len(x) >= 4 and
                    any(isinstance(v, InViews) for v in x[3])]
     __log.info("These collections need merging: %s", " ".join([ c[0] for c in needMerging ]))
 
@@ -547,7 +548,8 @@ def triggerMergeViewsCfg( flags, viewMakers ):
 def triggerEDMGapFillerCfg( flags, edmSet, decObj=[], decObjHypoOut=[], extraInputs=[], extraOutputs=[] ):
     """Configure the EDM gap filler"""
 
-    from TrigEDMConfig.TriggerEDMRun3 import TriggerHLTListRun3, Alias
+    from TrigEDMConfig.TriggerEDMDefs import Alias
+    from TrigEDMConfig.TriggerEDM import getRawTriggerEDMList
 
     # Ignore the following collections in the GapFiller. List of regular expressions
     # that are fully matched against the EDM entry ("type#key").
@@ -572,7 +574,7 @@ def triggerEDMGapFillerCfg( flags, edmSet, decObj=[], decObjHypoOut=[], extraInp
         re_ignore = [re.compile(x) for x in ignore]
 
         # scan the EDM
-        for el in TriggerHLTListRun3:
+        for el in getRawTriggerEDMList(flags):
             if not any([ outputType in el[1].split() for outputType in edmSet ]):
                 continue
             if any(ign.fullmatch(el[0]) for ign in re_ignore):
@@ -685,16 +687,18 @@ def triggerRunCfg( flags, menu=None ):
     viewMakers = collectViewMakers( HLTSteps )
 
     # Add HLT Navigation to EDM list
+    # TODO: DO NOT directly modify TriggerHLTListRun3
     from TrigEDMConfig.TriggerEDMRun3 import TriggerHLTListRun3, addHLTNavigationToEDMList
     __log.info( "Number of EDM items before adding navigation: %d", len(TriggerHLTListRun3))
     addHLTNavigationToEDMList(flags, TriggerHLTListRun3, decObj, decObjHypoOut)
     __log.info( "Number of EDM items after adding navigation: %d", len(TriggerHLTListRun3))
 
     # Add Extra to EDM list
+    # TODO: DO NOT directly modify TriggerHLTListRun3
     if flags.Trigger.ExtraEDMList:
-        from TrigEDMConfig.TriggerEDMRun3 import addExtraCollectionsToEDMList
+        from TrigEDMConfig.TriggerEDM import _addExtraCollectionsToEDMList
         __log.info( "Adding extra collections to EDM: %s", str(flags.Trigger.ExtraEDMList))
-        addExtraCollectionsToEDMList(TriggerHLTListRun3, flags.Trigger.ExtraEDMList)
+        _addExtraCollectionsToEDMList(TriggerHLTListRun3, flags.Trigger.ExtraEDMList)
 
     # Configure output writing
     outputAcc, edmSet = triggerOutputCfg( flags, hypos )

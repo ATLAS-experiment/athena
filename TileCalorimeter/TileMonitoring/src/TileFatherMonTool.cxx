@@ -48,8 +48,6 @@
 #include "TDirectory.h"
 #include "TAxis.h"
 
-#include "LWHists/LWHist.h"
-
 
 ///Base class for TileCal monitoring tools
 /*---------------------------------------------------------*/
@@ -438,5 +436,3 @@ float TileFatherMonTool::m_time_difference = 999.;
 template void TileFatherMonTool::SetBinLabel<TAxis>(TAxis*, const std::vector<std::string>&);
 template void TileFatherMonTool::SetBinLabel<TAxis>(TAxis*, const std::string*, int);
 
-template void TileFatherMonTool::SetBinLabel<LWHist::LWHistAxis>(LWHist::LWHistAxis*, const std::vector<std::string>&);
-template void TileFatherMonTool::SetBinLabel<LWHist::LWHistAxis>(LWHist::LWHistAxis*, const std::string*, int);

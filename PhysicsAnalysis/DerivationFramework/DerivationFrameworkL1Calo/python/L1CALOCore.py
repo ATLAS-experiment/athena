@@ -29,6 +29,8 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
     # the derivation can also be run on pool files e.g. MC - need to switch off many decoders etc..
     # Note: static content not allowed when running on pool
     isNotPool = flags.Input.Format is not Format.POOL
+    
+    fillSuperCells=False
 
     # decode the legacy L1Calo information - required because flags.Trigger.doLVL1 is False
     if isNotPool:
@@ -130,6 +132,10 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
         acc.merge(DecoratorAlgo)
         DecoratorAlgoSim = eFexTOBDecoratorCfg(flags,'eFexTOBDecoratorSim','L1_eEMRoISim','L1_eTauRoIAltSim')
         acc.merge(DecoratorAlgoSim)
+    
+    if fillSuperCells :   
+        from L1CaloFEXAlgos.L1CaloFEXAlgosConfig import eFexTOBSuperCellDecoratorCfg    
+        acc.merge(eFexTOBSuperCellDecoratorCfg(flags,'eFexTOBSuperCellDecoratorSim','L1_eEMRoISim','L1_eTauxRoISim'))
 
     # set up the slimming helper
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper

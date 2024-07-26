@@ -34,7 +34,7 @@ def TrigEDMAuxCheckerCfg(flags, name="TrigEDMAuxChecker"):
 
 def getEDMAuxList(flags):
     from TrigEDMConfig.TriggerEDM import getTriggerEDMList
-    tlist=getTriggerEDMList(flags.Trigger.AODEDMSet, flags.Trigger.EDMVersion)
+    tlist=getTriggerEDMList(flags, key=flags.Trigger.AODEDMSet)
     objlist=[]
     for t,kset in tlist.items():
         for k in kset:

@@ -14,15 +14,15 @@ SPCountHypoTool::SPCountHypoTool(const std::string &type, const std::string &nam
 StatusCode SPCountHypoTool::initialize() {
   return StatusCode::SUCCESS;
 }
-
-bool SPCountHypoTool::applyCut(const Gaudi::Property<int> &threshold, const xAOD::TrigComposite *composit, const std::string_view name) const {
+template<typename DetailType>
+bool SPCountHypoTool::applyCut(const Gaudi::Property<DetailType> &threshold, const xAOD::TrigComposite *composit, const std::string_view name) const {
   if (threshold == -1) {
     return m_logicAnd;  // If the logic is And, it should return true and otherwise it should return false.
   }
   const std::string detailName = (name != "" ? std::string(name) : threshold.name());
 
   ATH_MSG_DEBUG("count for = " << threshold.name() << "=" << (composit->getDetail<int>(detailName) > threshold));
-  return (composit->getDetail<int>(detailName) > threshold);
+  return (composit->getDetail<DetailType>(detailName) > threshold);
 }
 
 bool SPCountHypoTool::applyInverseCut(const Gaudi::Property<int> &threshold, const xAOD::TrigComposite *composit, const std::string_view name) const {
@@ -56,7 +56,8 @@ StatusCode SPCountHypoTool::decide(SPCountsInfo &spinfo) const {
     applyInverseCut(m_sctSPMax, spinfo.counts, "sctSP"),
     applyCut(m_sctSPBarrel, spinfo.counts),
     applyCut(m_sctSPEndcapA, spinfo.counts),
-    applyCut(m_sctSPEndcapC, spinfo.counts)}
+    applyCut(m_sctSPEndcapC, spinfo.counts),
+    applyCut(m_pixQ2mod, spinfo.counts)}
   );
   // clang-format on
 

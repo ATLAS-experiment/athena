@@ -7,20 +7,7 @@ This test defines its own version of the Dev_pp_run3_v1 menu and the correspondi
 and executes several chains testing various types of Partial Event Building and Data Scouting
 '''
 
-from TrigEDMConfig import DataScoutingInfo, TriggerEDMRun3
-
-# Modify EDM list to add collections to DataScouting results
-# ATR-28536 - do this first, before the list gets imported into any other modules
-myTriggerHLTListRun3 = []
-for collectionConfig in TriggerEDMRun3.TriggerHLTListRun3:
-    if 'Electron' in collectionConfig[0]:
-        modConfig = list(collectionConfig)
-        modConfig[1] += ' ElectronDSTest ElectronDSPEBTest'
-        myTriggerHLTListRun3.append(tuple(modConfig))
-    else:
-        myTriggerHLTListRun3.append(collectionConfig)
-TriggerEDMRun3.TriggerHLTListRun3 = myTriggerHLTListRun3
-
+from TrigEDMConfig import DataScoutingInfo
 from TriggerMenuMT.HLT.Menu import Dev_pp_run3_v1, EventBuildingInfo, StreamInfo
 from TriggerMenuMT.HLT.Config.Utility.ChainDefInMenu import ChainProp
 from TriggerMenuMT.HLT.CommonSequences import EventBuildingSequences
@@ -165,9 +152,6 @@ myAllStreams = [
 
 StreamInfo._all_streams = myAllStreams
 
-
-
-
 def run(flags):
     from TriggerJobOpts import runHLT
     # Set and customize default flags
@@ -175,6 +159,23 @@ def run(flags):
     flags.Trigger.triggerMenuSetup = 'Dev_pp_run3_v1'
     flags.Trigger.enabledSignatures = ['Egamma','Muon']
     flags.Trigger.doLVL1 = True
+    # Add ElectronDSTest ElectronDSPEBTest to a number of existing EDM entries in the Run 3 electron EDM 
+    flags.Trigger.ExtraEDMList = [
+            ['xAOD::TrigElectronContainer#HLT_FastElectrons',                      'BS ESD AODFULL ElectronDSTest ElectronDSPEBTest', 'Egamma'], 
+            ['xAOD::TrigElectronAuxContainer#HLT_FastElectronsAux.',               'BS ESD AODFULL ElectronDSTest ElectronDSPEBTest', 'Egamma'],
+            ['xAOD::TrackParticleContainer#HLT_IDTrack_Electron_FTF',              'BS ESD AODFULL ElectronDSTest ElectronDSPEBTest', 'Egamma'],
+            ['xAOD::TrackParticleAuxContainer#HLT_IDTrack_Electron_FTFAux.',       'BS ESD AODFULL ElectronDSTest ElectronDSPEBTest', 'Egamma'],
+            ['xAOD::TrackParticleContainer#HLT_IDTrack_Electron_IDTrig',           'BS ESD AODFULL ElectronDSTest ElectronDSPEBTest', 'Egamma'],
+            ['xAOD::TrackParticleAuxContainer#HLT_IDTrack_Electron_IDTrigAux.',    'BS ESD AODFULL ElectronDSTest ElectronDSPEBTest', 'Egamma'],
+            ['xAOD::TrackParticleContainer#HLT_IDTrack_Electron_GSF',              'BS ESD AODFULL ElectronDSTest ElectronDSPEBTest', 'Egamma'],
+            ['xAOD::TrackParticleAuxContainer#HLT_IDTrack_Electron_GSFAux.',       'BS ESD AODFULL ElectronDSTest ElectronDSPEBTest', 'Egamma'],
+            ['xAOD::CaloClusterContainer#HLT_CaloEMClusters_Electron',             'BS ESD AODFULL ElectronDSTest ElectronDSPEBTest', 'Egamma'],
+            ['xAOD::CaloClusterTrigAuxContainer#HLT_CaloEMClusters_ElectronAux.',  'BS ESD AODFULL ElectronDSTest ElectronDSPEBTest', 'Egamma'],
+            ['xAOD::ElectronContainer#HLT_egamma_Electrons',                       'BS ESD AODFULL ElectronDSTest ElectronDSPEBTest', 'Egamma'],
+            ['xAOD::ElectronAuxContainer#HLT_egamma_ElectronsAux.',                'BS ESD AODFULL ElectronDSTest ElectronDSPEBTest', 'Egamma'],
+            ['xAOD::ElectronContainer#HLT_egamma_Electrons_GSF',                   'BS ESD AODFULL ElectronDSTest ElectronDSPEBTest', 'Egamma'],
+            ['xAOD::ElectronAuxContainer#HLT_egamma_Electrons_GSFAux.',            'BS ESD AODFULL ElectronDSTest ElectronDSPEBTest', 'Egamma'],
+        ]
     flags.lock()
     acc = runHLT.runHLTCfg(flags)
     return acc
