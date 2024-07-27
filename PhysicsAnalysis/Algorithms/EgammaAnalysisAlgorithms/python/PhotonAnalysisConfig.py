@@ -258,7 +258,7 @@ class PhotonWorkingPointConfig (ConfigBlock) :
             info="a postfix to apply to decorations and algorithm names. "
             "Typically not needed here as selectionName is used internally.")
         self.addOption ('qualityWP', None, type=str,
-            info="the ID WP (string) to use. Supported ID WPs: Tight, Loose.")
+            info="the ID WP (string) to use. Supported ID WPs: Tight, Medium and Loose.")
         self.addOption ('isolationWP', None, type=str,
             info="the ID WP (string) to use. Supported isolation WPs: "
             "FixedCutLoose, FixedCutTight, TightCaloOnly, NonIso.")
@@ -297,10 +297,12 @@ class PhotonWorkingPointConfig (ConfigBlock) :
 
         if self.qualityWP == 'Tight' :
             quality = ROOT.egammaPID.PhotonTight
+        elif self.qualityWP == 'Medium' :
+            quality = ROOT.egammaPID.PhotonMedium
         elif self.qualityWP == 'Loose' :
             quality = ROOT.egammaPID.PhotonLoose
         else :
-            raise Exception ('unknown photon quality working point "' + self.qualityWP + '" should be Tight or Loose')
+            raise Exception ('unknown photon quality working point "' + self.qualityWP + '" should be Tight, Medium or Loose')
 
         # Set up the photon selection algorithm:
         alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'PhotonIsEMSelectorAlg' + postfix )
