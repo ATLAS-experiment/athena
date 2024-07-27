@@ -10,6 +10,14 @@ def defineMenu():
 
     l1items = L1MenuFlags.items()
 
+    # remove AFP and MBTS items
+    discard_list = ["L1_AFP", "L1_MBTS"]
+
+    def match_any(str):
+        return any([str.startswith(pattern) for pattern in discard_list])
+
+    l1items = [l1 for l1 in l1items if not match_any(l1)]
+
     # add run4 new items
     l1items += [
         'L1_eEM10L_MU8F',
@@ -25,12 +33,5 @@ def defineMenu():
 
     check_and_add('L1_eEM22M')
     check_and_add('L1_jJ140')
-        
-    # remove AFP and MBTS items
-    discard_list = ["L1_AFP", "L1_MBTS"]
-    
-    def match_any(str):
-        return any([str.startswith(pattern) for pattern in discard_list])
 
-    L1MenuFlags.items = [l1 for l1 in l1items if not match_any(l1)]
-
+    L1MenuFlags.items = l1items
