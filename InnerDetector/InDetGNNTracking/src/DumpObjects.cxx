@@ -8,7 +8,6 @@
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
 #include "ReadoutGeometryBase/SiLocalPosition.h"
 #include "SCT_ReadoutGeometry/SCT_ModuleSideDesign.h"
-#include "TrkSpacePoint/SpacePointOverlapCollection.h"
 #include "xAODTruth/TruthVertex.h"
 
 #include "HepPDT/ParticleDataTable.hh"
@@ -25,6 +24,9 @@
 
 #include "GaudiKernel/ITHistSvc.h"
 #include "TTree.h"
+
+#include "xAODMeasurementBase/UncalibratedMeasurement.h"
+#include "xAODMeasurementBase/MeasurementDefs.h"
 
 #include <fstream>
 
@@ -68,9 +70,9 @@ InDet::DumpObjects::DumpObjects(const std::string &name, ISvcLocator *pSvcLocato
   declareProperty("rootFile", m_rootFile);
 }
 
-//----------------------------------
+//-------------------------------------------
 StatusCode InDet::DumpObjects::initialize() {
-  //----------------------------------
+//-------------------------------------------
   m_event = m_offset;
 
   // ReadHandle keys
@@ -80,18 +82,20 @@ StatusCode InDet::DumpObjects::initialize() {
   ATH_CHECK(m_pixelClusterKey.initialize());
   ATH_CHECK(m_pixelSDOKey.initialize());
   ATH_CHECK(m_stripSDOKey.initialize());
-  ATH_CHECK(m_pixelSpacePointContainerKey.initialize());
-  ATH_CHECK(m_stripSpacePointContainerKey.initialize());
-  ATH_CHECK(m_overlapSpacePointCollectionKey.initialize());
+  ATH_CHECK(m_xaodPixelSpacePointContainerKey.initialize());
+  ATH_CHECK(m_xaodStripSpacePointContainerKey.initialize());
+  ATH_CHECK(m_xaodStripSpacePointOverlapContainerKey.initialize());
+    
   ATH_CHECK(m_tracksKey.initialize());
   ATH_CHECK(m_tracksTruthKey.initialize());
   ATH_CHECK(m_detailedTracksTruthKey.initialize());
 
-  // Grab PixelID helper
-  if (detStore()->retrieve(m_pixelID, "PixelID").isFailure()) {
-    return StatusCode::FAILURE;
-  }
 
+  
+  
+  // Grab PixelID helper
+  ATH_CHECK (detStore()->retrieve(m_pixelID, "PixelID") );
+  
   if (!detStore()->contains<InDetDD::PixelDetectorManager>("Pixel") ||
       detStore()->retrieve(m_pixelManager, "Pixel").isFailure()) {
     // if Pixel retrieval fails, try ITkPixel
@@ -102,10 +106,8 @@ StatusCode InDet::DumpObjects::initialize() {
   }
 
   // Grab SCT_ID helper
-  if (detStore()->retrieve(m_SCT_ID, "SCT_ID").isFailure()) {
-    return StatusCode::FAILURE;
-  }
-
+  ATH_CHECK (detStore()->retrieve(m_SCT_ID,"SCT_ID") );
+  
   if (!detStore()->contains<InDetDD::SCT_DetectorManager>("SCT") ||
       detStore()->retrieve(m_SCT_Manager, "SCT").isFailure()) {
     // if SCT retrieval fails, try ITkStrip
@@ -116,10 +118,7 @@ StatusCode InDet::DumpObjects::initialize() {
   }
 
   // particle property service
-  if (m_particlePropSvc.retrieve().isFailure()) {
-    ATH_MSG_ERROR("Can not retrieve " << m_particlePropSvc << " . Aborting ... ");
-    return StatusCode::FAILURE;
-  }
+  ATH_CHECK (m_particlePropSvc.retrieve());
 
   // and the particle data table
   m_particleDataTable = m_particlePropSvc->PDT();
@@ -214,7 +213,17 @@ StatusCode InDet::DumpObjects::initialize() {
     m_SPCL1_index = new int[m_maxSP];
     m_SPCL2_index = new int[m_maxSP];
     m_SPisOverlap = new int[m_maxSP];
-
+    
+    m_SPradius = new double[m_maxSP];
+    m_SPcovr = new double[m_maxSP];
+    m_SPcovz = new double[m_maxSP];
+    m_SPhl_topstrip = new float[m_maxSP];
+    m_SPhl_botstrip = new float[m_maxSP];
+    m_SPtopStripDirection      = new std::vector<std::vector<float>>;
+    m_SPbottomStripDirection   = new std::vector<std::vector<float>>;
+    m_SPstripCenterDistance    = new std::vector<std::vector<float>>;
+    m_SPtopStripCenterPosition = new std::vector<std::vector<float>>;
+    
     m_TRKindex = new int[m_maxTRK];
     m_TRKtrack_fitter = new int[m_maxTRK];
     m_TRKparticle_hypothesis = new int[m_maxTRK];
@@ -317,7 +326,16 @@ StatusCode InDet::DumpObjects::initialize() {
     m_nt->Branch("SPCL1_index", m_SPCL1_index, "SPCL1_index[nSP]/I");
     m_nt->Branch("SPCL2_index", m_SPCL2_index, "SPCL2_index[nSP]/I");
     m_nt->Branch("SPisOverlap", m_SPisOverlap, "SPisOverlap[nSP]/I");
-
+    m_nt->Branch("SPradius",m_SPradius, "SPradius[nSP]/D");
+    m_nt->Branch("SPcovr",m_SPcovr, "SPradius[nSP]/D");
+    m_nt->Branch("SPcovz",m_SPcovz, "SPradius[nSP]/D");
+    m_nt->Branch("SPhl_topstrip",m_SPhl_topstrip, "SPhl_topstrip[nSP]/F");
+    m_nt->Branch("SPhl_botstrip",m_SPhl_botstrip, "SPhl_botstrip[nSP]/F");
+    m_nt->Branch("SPtopStripDirection",&m_SPtopStripDirection);
+    m_nt->Branch("SPbottomStripDirection",&m_SPbottomStripDirection);
+    m_nt->Branch("SPstripCenterDistance",&m_SPstripCenterDistance);
+    m_nt->Branch("SPtopStripCenterPosition",m_SPtopStripCenterPosition);
+        
     m_nt->Branch("nTRK", &m_nTRK, "nTRK/I");
     m_nt->Branch("TRKindex", m_TRKindex, "TRKindex[nTRK]/I");
     m_nt->Branch("TRKtrack_fitter", m_TRKtrack_fitter, "TRKtrack_fitter[nTRK]/I");
@@ -906,123 +924,206 @@ StatusCode InDet::DumpObjects::execute() {
   /////////////////////////////// SPACE POINTS ///////////////////////////////
   ///////////////////////////////////////////////////////////////////////////
 
-  const SpacePointContainer *PixelSpacePointContainer = 0;
-  SG::ReadHandle<SpacePointContainer> pixelSpacePointContainerHandle{m_pixelSpacePointContainerKey, ctx};
-  if (not pixelSpacePointContainerHandle.isValid()) {
-    ATH_MSG_ERROR(" SpacePointContainer not found: " << m_pixelSpacePointContainerKey.key());
+  static const SG::Accessor< ElementLink<SpacePointCollection> > linkAcc("pixelSpacePointLink");
+  static const SG::Accessor< ElementLink< ::SpacePointCollection > > striplinkAcc("sctSpacePointLink");
+  static const SG::Accessor< ElementLink< ::SpacePointOverlapCollection > > stripOverlaplinkAcc("stripOverlapSpacePointLink");
+  
+  // xAOD Containers
+  const xAOD::SpacePointContainer *xAODPixelSPContainer = nullptr;
+  
+  SG::ReadHandle<xAOD::SpacePointContainer> xAODPixelSpacePointContainerHandle{m_xaodPixelSpacePointContainerKey,ctx};
+
+  if (not xAODPixelSpacePointContainerHandle.isValid()) {
+    ATH_MSG_ERROR(" SpacePointContainer not found: " << m_xaodPixelSpacePointContainerKey.key());
     return StatusCode::FAILURE;
   }
-  PixelSpacePointContainer = pixelSpacePointContainerHandle.cptr();
 
-  const SpacePointContainer *SCT_SpacePointContainer = 0;
-  SG::ReadHandle<SpacePointContainer> stripSpacePointContainerHandle{m_stripSpacePointContainerKey, ctx};
-  if (not stripSpacePointContainerHandle.isValid()) {
-    ATH_MSG_ERROR(" SpacePointContainer not found: " << m_stripSpacePointContainerKey.key());
+  xAODPixelSPContainer = xAODPixelSpacePointContainerHandle.cptr();
+
+
+  const xAOD::SpacePointContainer *xAODStripSPContainer = 0;
+  SG::ReadHandle<xAOD::SpacePointContainer> xAODStripSpacePointContainerHandle{m_xaodStripSpacePointContainerKey, ctx};
+  if (not xAODStripSpacePointContainerHandle.isValid()) {
+    ATH_MSG_ERROR(" SpacePointContainer not found: " << m_xaodStripSpacePointContainerKey.key());
     return StatusCode::FAILURE;
   }
-  SCT_SpacePointContainer = stripSpacePointContainerHandle.cptr();
+  xAODStripSPContainer = xAODStripSpacePointContainerHandle.cptr();
 
-  const SpacePointOverlapCollection *OverlapSpacePointCollection =0;
-  SG::ReadHandle<SpacePointOverlapCollection> overlapSpacePointCollectionHandle{m_overlapSpacePointCollectionKey, ctx};
-  if (not overlapSpacePointCollectionHandle.isValid()) {
-    ATH_MSG_ERROR(" SpacePointContainer not found: " << m_overlapSpacePointCollectionKey.key());
+  
+  const xAOD::SpacePointContainer *xAODStripSPOverlapContainer = 0;
+  SG::ReadHandle<xAOD::SpacePointContainer> xAODStripSpacePointOverlapContainerHandle{m_xaodStripSpacePointOverlapContainerKey, ctx};
+  if (not xAODStripSpacePointOverlapContainerHandle.isValid()) {
+    ATH_MSG_ERROR(" SpacePointContainer not found: " << m_xaodStripSpacePointOverlapContainerKey.key());
     return StatusCode::FAILURE;
   }
-  OverlapSpacePointCollection = overlapSpacePointCollectionHandle.cptr();
+  xAODStripSPOverlapContainer = xAODStripSpacePointOverlapContainerHandle.cptr();
 
-  int sp_index = 0;
+  int sp_index     = 0;
+  m_nSP     = 0;
+  
+  if (xAODPixelSPContainer && xAODPixelSPContainer->size() > 0) {
+    for (const auto &sp : *xAODPixelSPContainer) {
 
-  m_nSP = 0;
+      if (not linkAcc.isAvailable(*sp)) 
+	ATH_MSG_FATAL("no pixel SpacePoint link for xAOD::SpacePoint");
+      
 
-  if (PixelSpacePointContainer && PixelSpacePointContainer->size() > 0) {
-    for (const auto &spCollection : *PixelSpacePointContainer) {
-      // skip empty collections
-      if (spCollection->empty())
-        continue;
+      auto trk_sp = *linkAcc(*sp);
+      const InDet::SiCluster *cl = static_cast<const InDet::SiCluster*>(trk_sp->clusterList().first);
+      
+      if (m_rootFile) {
+	m_SPindex[m_nSP] = sp_index;
+	m_SPx[m_nSP] = sp->globalPosition().x();
+	m_SPy[m_nSP] = sp->globalPosition().y();
+	m_SPz[m_nSP] = sp->globalPosition().z();
+	m_SPradius[m_nSP] = sp->radius();
+	m_SPcovr[m_nSP] = sp->varianceR();
+	m_SPcovz[m_nSP] = sp->varianceZ();
+	m_SPCL1_index[m_nSP] = clusterIDMapIdx[cl->identify()];
+	m_SPCL2_index[m_nSP] = -1;
+	m_SPisOverlap[m_nSP] = -1;
+      }
+      
+      sp_index++;
+      m_nSP++;
+      if (m_nSP == m_maxSP) {
+	ATH_MSG_WARNING("DUMP : hit max number of space points");
+	break;
+      }
+    } // loop on container
+  } // container not empty
 
-      // loop over collection
-      for (const auto &sp : *spCollection) {
-        // save sp x, y, z and the index of the cluster associated to that one
-        const InDet::SiCluster *cl = static_cast<const InDet::SiCluster *>(sp->clusterList().first);
-        if (m_rootFile) {
-          m_SPindex[m_nSP] = sp_index;
-          m_SPx[m_nSP] = sp->globalPosition().x();
-          m_SPy[m_nSP] = sp->globalPosition().y();
-          m_SPz[m_nSP] = sp->globalPosition().z();
-          m_SPCL1_index[m_nSP] = clusterIDMapIdx[cl->identify()];
-          m_SPCL2_index[m_nSP] = -1;
-          m_SPisOverlap[m_nSP] = -1;
-        }
-        sp_index++;
+  if (xAODStripSPContainer && xAODStripSPContainer->size() > 0) {
+    
+    //loop over collection
+    for (const auto &sp : *xAODStripSPContainer) {
 
-        m_nSP++;
-        if (m_nSP == m_maxSP) {
-          ATH_MSG_WARNING("DUMP : hit max number of space points");
-          break;
-        }
+      ATH_CHECK(striplinkAcc.isAvailable(*sp));
+      
+      auto trk_sp = *striplinkAcc(*sp);
+      const InDet::SiCluster *cl_1 = static_cast<const InDet::SiCluster *>(trk_sp->clusterList().first);
+      const InDet::SiCluster *cl_2 = static_cast<const InDet::SiCluster *>(trk_sp->clusterList().second);
+
+      if (m_rootFile) {
+	
+	m_SPindex[m_nSP] = sp_index;
+	m_SPx[m_nSP] = sp->globalPosition().x();
+	m_SPy[m_nSP] = sp->globalPosition().y();
+	m_SPz[m_nSP] = sp->globalPosition().z();
+	m_SPradius[m_nSP] = sp->radius();
+	m_SPcovr[m_nSP] = sp->varianceR();
+	m_SPcovz[m_nSP] = sp->varianceZ();
+	m_SPCL1_index[m_nSP] = clusterIDMapIdx[cl_1->identify()];
+	m_SPCL2_index[m_nSP] = clusterIDMapIdx[cl_2->identify()];
+	m_SPisOverlap[m_nSP] = 0;
+	m_SPhl_topstrip[m_nSP] = sp->topHalfStripLength();
+	m_SPhl_botstrip[m_nSP] = sp->bottomHalfStripLength();
+	
+	
+	std::vector<float> topstripDir(sp->topStripDirection().data(),
+				       sp->topStripDirection().data() +
+				       sp->topStripDirection().size());
+	
+	std::vector<float> botstripDir(sp->bottomStripDirection().data(),
+				       sp->bottomStripDirection().data() +
+				       sp->bottomStripDirection().size());
+	
+	std::vector<float> DstripCnt(sp->stripCenterDistance().data(),
+				     sp->stripCenterDistance().data() +
+				     sp->stripCenterDistance().size());
+	
+	std::vector<float> topstripCnt(sp->topStripCenter().data(),
+				       sp->topStripCenter().data() +
+				     sp->topStripCenter().size());
+	
+	(*m_SPtopStripDirection).push_back(topstripDir);
+	(*m_SPbottomStripDirection).push_back(botstripDir);
+	(*m_SPstripCenterDistance).push_back(DstripCnt);
+	(*m_SPtopStripCenterPosition).push_back(topstripCnt);
+
+      }
+	
+      sp_index++;
+      m_nSP++;
+
+      if (m_nSP == m_maxSP) {
+	ATH_MSG_WARNING("DUMP : hit max number of space points");
+	break;
       }
     }
   }
 
-  if (SCT_SpacePointContainer && SCT_SpacePointContainer->size() > 0) {
-    for (const auto &spCollection : *SCT_SpacePointContainer) {
-      // skip empty collections
-      if (spCollection->empty())
-        continue;
 
-      // loop over collection
-      for (const auto &sp : *spCollection) {
-        // save sp x, y, z and the index of the cluster associated to that one
-        const InDet::SiCluster *cl_1 = static_cast<const InDet::SiCluster *>(sp->clusterList().first);
-        const InDet::SiCluster *cl_2 = static_cast<const InDet::SiCluster *>(sp->clusterList().second);
-        if (m_rootFile) {
-          m_SPindex[m_nSP] = sp_index;
-          m_SPx[m_nSP] = sp->globalPosition().x();
-          m_SPy[m_nSP] = sp->globalPosition().y();
-          m_SPz[m_nSP] = sp->globalPosition().z();
-          m_SPCL1_index[m_nSP] = clusterIDMapIdx[cl_1->identify()];
-          m_SPCL2_index[m_nSP] = clusterIDMapIdx[cl_2->identify()];
-          m_SPisOverlap[m_nSP] = 0;
-        }
-        sp_index++;
+  if (xAODStripSPOverlapContainer && xAODStripSPOverlapContainer->size() > 0) {
+    
+    //loop over collection
+    for (const auto &sp : *xAODStripSPOverlapContainer) {
+      
+      ATH_CHECK(stripOverlaplinkAcc.isAvailable(*sp));
+      
+      auto trk_sp = *stripOverlaplinkAcc(*sp);
+      const InDet::SiCluster *cl_1 = static_cast<const InDet::SiCluster *>(trk_sp->clusterList().first);
+      const InDet::SiCluster *cl_2 = static_cast<const InDet::SiCluster *>(trk_sp->clusterList().second);
 
-        m_nSP++;
-        if (m_nSP == m_maxSP) {
-          ATH_MSG_WARNING("DUMP : hit max number of space points");
-          break;
-        }
+      if (m_rootFile) {
+	
+	m_SPindex[m_nSP] = sp_index;
+	m_SPx[m_nSP] = sp->globalPosition().x();
+	m_SPy[m_nSP] = sp->globalPosition().y();
+	m_SPz[m_nSP] = sp->globalPosition().z();
+	m_SPradius[m_nSP] = sp->radius();
+	m_SPcovr[m_nSP] = sp->varianceR();
+	m_SPcovz[m_nSP] = sp->varianceZ();
+	m_SPCL1_index[m_nSP] = clusterIDMapIdx[cl_1->identify()];
+	m_SPCL2_index[m_nSP] = clusterIDMapIdx[cl_2->identify()];
+	
+	int flag = compute_overlap_SP_flag(m_CLeta_module[clusterIDMapIdx[cl_1->identify()]],
+					   m_CLphi_module[clusterIDMapIdx[cl_1->identify()]],
+					   m_CLeta_module[clusterIDMapIdx[cl_2->identify()]],
+					   m_CLphi_module[clusterIDMapIdx[cl_2->identify()]]);
+	
+	if ( flag<1 || flag > 2 )
+	  ATH_MSG_WARNING("Unexpected overlap SP flag: "<<flag);
+	
+	
+	m_SPisOverlap[m_nSP] = flag;
+	m_SPhl_topstrip[m_nSP] = sp->topHalfStripLength();
+	m_SPhl_botstrip[m_nSP] = sp->bottomHalfStripLength();
+	
+	
+	std::vector<float> topstripDir(sp->topStripDirection().data(),
+				       sp->topStripDirection().data() +
+				       sp->topStripDirection().size());
+	
+	std::vector<float> botstripDir(sp->bottomStripDirection().data(),
+				       sp->bottomStripDirection().data() +
+				       sp->bottomStripDirection().size());
+	
+	std::vector<float> DstripCnt(sp->stripCenterDistance().data(),
+				     sp->stripCenterDistance().data() +
+				     sp->stripCenterDistance().size());
+	
+	std::vector<float> topstripCnt(sp->topStripCenter().data(),
+				       sp->topStripCenter().data() +
+				       sp->topStripCenter().size());
+	
+	(*m_SPtopStripDirection).push_back(topstripDir);
+	(*m_SPbottomStripDirection).push_back(botstripDir);
+	(*m_SPstripCenterDistance).push_back(DstripCnt);
+	(*m_SPtopStripCenterPosition).push_back(topstripCnt);
+
       }
-    }
-  }
-
-  // loop over collection
-  for (const auto &sp : *OverlapSpacePointCollection) {
-    // save sp x, y, z and the index of the cluster associated to that one
-    const InDet::SiCluster *cl_1 = static_cast<const InDet::SiCluster *>(sp->clusterList().first);
-    const InDet::SiCluster *cl_2 = static_cast<const InDet::SiCluster *>(sp->clusterList().second);
-    if (m_rootFile) {
-      m_SPindex[m_nSP] = sp_index;
-      m_SPx[m_nSP] = sp->globalPosition().x();
-      m_SPy[m_nSP] = sp->globalPosition().y();
-      m_SPz[m_nSP] = sp->globalPosition().z();
-      m_SPCL1_index[m_nSP] = clusterIDMapIdx[cl_1->identify()];
-      m_SPCL2_index[m_nSP] = clusterIDMapIdx[cl_2->identify()];
-      int flag = compute_overlap_SP_flag(m_CLeta_module[m_SPCL1_index[m_nSP]], m_CLphi_module[m_SPCL1_index[m_nSP]],
-                                         m_CLeta_module[m_SPCL2_index[m_nSP]], m_CLphi_module[m_SPCL2_index[m_nSP]]);
-      if(flag<1 || flag > 2){
-        ATH_MSG_WARNING("Unexpected overlap SP flag: "<<flag);
+      
+      sp_index++;
+      m_nSP++;
+      if (m_nSP == m_maxSP) {
+	ATH_MSG_WARNING("DUMP : hit max number of space points");
+	break;
       }
-      m_SPisOverlap[m_nSP] = flag;
-    }
-    sp_index++;
+    } // loop on container
+  } // container not empty
 
-    m_nSP++;
-    if (m_nSP == m_maxSP) {
-      ATH_MSG_WARNING("DUMP : hit max number of space points");
-      break;
-    }
-  }
-
+  
   //////////////////////////////////////////////////////////////////////
   /////////////////////////////// TRACKS ///////////////////////////////
   //////////////////////////////////////////////////////////////////////
@@ -1296,7 +1397,7 @@ StatusCode InDet::DumpObjects::finalize() {
     delete[] m_CLnorm_y;
     delete[] m_CLnorm_z;
     delete m_CLlocal_cov;
-
+        
     delete[] m_Part_event_number;
     delete[] m_Part_barcode;
     delete[] m_Part_px;
@@ -1327,7 +1428,16 @@ StatusCode InDet::DumpObjects::finalize() {
     delete[] m_SPCL1_index;
     delete[] m_SPCL2_index;
     delete[] m_SPisOverlap;
-
+    delete[] m_SPradius;
+    delete[] m_SPcovr;
+    delete[] m_SPcovz;
+    delete[] m_SPhl_topstrip;
+    delete[] m_SPhl_botstrip;
+    delete   m_SPtopStripDirection;     
+    delete   m_SPbottomStripDirection;   
+    delete   m_SPstripCenterDistance;    
+    delete   m_SPtopStripCenterPosition; 
+    
     delete[] m_TRKindex;
     delete[] m_TRKtrack_fitter;
     delete[] m_TRKparticle_hypothesis;

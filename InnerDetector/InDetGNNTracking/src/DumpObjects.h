@@ -17,12 +17,17 @@
 #include "TrkTrack/TrackCollection.h"
 #include "TrkTruthData/DetailedTrackTruthCollection.h"
 #include "TrkTruthData/TrackTruthCollection.h"
+
+// xAOD
 #include "xAODEventInfo/EventInfo.h"
+#include "xAODInDetMeasurement/SpacePointContainer.h"
+
 
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenVertex.h"
 #include "InDetIdentifier/PixelID.h"
 #include "InDetIdentifier/SCT_ID.h"
+#include "Identifier/IdentifierHash.h"
 #include "PixelReadoutGeometry/PixelDetectorManager.h"
 #include "SCT_ReadoutGeometry/SCT_DetectorManager.h"
 
@@ -80,14 +85,12 @@ private:
   SG::ReadHandleKey<InDetSimDataCollection> m_pixelSDOKey{this, "PixelSDOKey", "ITkPixelSDO_Map"};
   SG::ReadHandleKey<InDetSimDataCollection> m_stripSDOKey{this, "StripSDOKey", "ITkStripSDO_Map"};
 
-  SG::ReadHandleKey<SpacePointContainer> m_pixelSpacePointContainerKey{this, "PixelSpacePointContainerKey",
-                                                                       "ITkPixelSpacePoints"};
-  SG::ReadHandleKey<SpacePointContainer> m_stripSpacePointContainerKey{this, "StripSpacePointContainerKey",
-                                                                       "ITkStripSpacePoints"};
-  SG::ReadHandleKey<SpacePointOverlapCollection> m_overlapSpacePointCollectionKey{this, "OverlapSpacePointCollectionKey",
-                                                                       "ITkOverlapSpacePoints"};
-
-
+  SG::ReadHandleKey<xAOD::SpacePointContainer> m_xaodPixelSpacePointContainerKey{this,"xAODInputPixelSpacePoints", "ITkPixelSpacePoints"};
+  
+  SG::ReadHandleKey<xAOD::SpacePointContainer> m_xaodStripSpacePointContainerKey{this,"xAODInputSpacePointsContainerKey", "ITkStripSpacePoints"};
+  
+  SG::ReadHandleKey<xAOD::SpacePointContainer> m_xaodStripSpacePointOverlapContainerKey{this,"xAODInputSpacePointsOverlapContainerKey", "ITkStripOverlapSpacePoints"};
+  
   SG::ReadHandleKey<TrackCollection> m_tracksKey{this, "TracksKey", "CombinedITkTracks"};
   SG::ReadHandleKey<TrackTruthCollection> m_tracksTruthKey{this, "TracksTruthKey", "CombinedITkTracksTruthCollection"};
   SG::ReadHandleKey<DetailedTrackTruthCollection> m_detailedTracksTruthKey{this, "DetailedTracksTruthKey",
@@ -168,6 +171,19 @@ private:
   int *m_SPCL1_index, *m_SPCL2_index;
   int *m_SPisOverlap; // -1: pixel, 0: strip not overlap, 1: strip overlap eta, 2: strip overlap phi, 3: overlap eta & phi
 
+  double *m_SPradius;
+  double *m_SPcovr;
+  double *m_SPcovz;
+  // Half length of top half strip
+  float *m_SPhl_topstrip;
+  // Half length of bottom half strip
+  float *m_SPhl_botstrip;
+  
+  std::vector<std::vector<float>> *m_SPtopStripDirection;
+  std::vector<std::vector<float>> *m_SPbottomStripDirection;
+  std::vector<std::vector<float>> *m_SPstripCenterDistance;
+  std::vector<std::vector<float>> *m_SPtopStripCenterPosition;
+    
   int m_nTRK;
   int *m_TRKindex;
   int *m_TRKtrack_fitter, *m_TRKparticle_hypothesis;
