@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef DITAURECTOOLS_IDITAUTOOLBASE_H
@@ -25,8 +25,6 @@ namespace DiTauRecTools
     public:
     // calculate ID variables
     virtual StatusCode execute(const xAOD::DiTauJet& xDiTau) = 0;
-    // decay mode tool was initialized for
-    virtual std::string getDecayMode() = 0;
   }; // class IDiTauToolBase
 
 } // namespace DiTauRecTools
