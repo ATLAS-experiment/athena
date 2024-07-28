@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -1824,12 +1824,12 @@ int Tile_Base_ID::get_neighbours(const IdentifierHash& id_orig, const LArNeighbo
 
   } else if (corners2DOnly) {
     // neighbours of phi-neigbours are 2D corners
-    inpList = neighbourList; // copy 2 phi neighbours to input list 
+    inpList = std::move(neighbourList); // copy 2 phi neighbours to input list 
     neighbourList.clear();   // and clear neighbour list
 
   } else if ( (option & all2D) == all2D) {
     // copy all neighbours to input list
-    std::copy(neighbourList.begin(), neighbourList.end(), std::back_inserter(inpList));
+    inpList.insert (inpList.end(), neighbourList.begin(), neighbourList.end());
 
   }
   
