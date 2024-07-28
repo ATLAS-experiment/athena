@@ -24,6 +24,7 @@
 #include "FlavorTagDiscriminants/SoftElectronDecoratorAlg.h"
 #include "FlavorTagDiscriminants/SoftElectronTruthDecoratorAlg.h"
 #include <FlavorTagDiscriminants/TrackClassifier.h>
+#include "FlavorTagDiscriminants/FTagGhostElectronAssociationAlg.h"
 
 #include "src/FoldDecoratorAlg.h"
 #include "src/CountIParticleAlg.h"
@@ -61,4 +62,4 @@ DECLARE_COMPONENT(NNSharingSvc)
 DECLARE_COMPONENT(FoldDecoratorAlg)
 DECLARE_COMPONENT(CountIParticleAlg)
 DECLARE_COMPONENT(CountTrackParticleAlg)
-
+DECLARE_COMPONENT(FTagGhostElectronAssociationAlg)

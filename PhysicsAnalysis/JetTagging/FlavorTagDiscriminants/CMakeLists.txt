@@ -105,6 +105,7 @@ if (NOT XAOD_STANDALONE)
     src/FoldDecoratorAlg.cxx
     src/CountIParticleAlg.cxx
     src/CountTrackParticleAlg.cxx
+    src/FTagGhostElectronAssociationAlg.cxx
     src/components/FlavorTagDiscriminants_entries.cxx
     LINK_LIBRARIES FlavorTagDiscriminants
     )
