@@ -8,6 +8,7 @@
 
 #include "Acts/Geometry/GeometryContext.hpp"
 #include "Acts/Utilities/CalibrationContext.hpp"
+#include "Acts/Utilities/Delegate.hpp"
 #include "Acts/EventData/TrackParameters.hpp"
 
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
