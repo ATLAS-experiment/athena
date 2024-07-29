@@ -21,6 +21,18 @@ namespace {
     std::string fullPathToOnnxFile = PathResolverFindCalibFile(nn_file);
     return std::make_shared<const OnnxUtil>(fullPathToOnnxFile);
   }
+
+  template <typename T>
+  std::string join(const T& c) {
+    std::string out;
+    std::string sep = "";
+    for (const auto& [k, v]: c) {
+      out.append(sep);
+      sep = ", ";
+      out.append(k);
+    }
+    return out;
+  }
 }
 
 namespace FlavorTagDiscriminants {
@@ -37,8 +49,7 @@ namespace FlavorTagDiscriminants {
 
   GNN::GNN(std::shared_ptr<const OnnxUtil> util, const GNNOptions& o):
     m_onnxUtil(util),
-    m_jetLink(jetLinkName),
-    m_defaultValue(o.default_output_value)
+    m_jetLink(jetLinkName)
   {
 
     // Extract metadata from the ONNX file, primarily about the model's inputs.
@@ -78,6 +89,21 @@ namespace FlavorTagDiscriminants {
       rd.merge(loader->getUsedRemap());
     }
     dataprep::checkForUnusedRemaps(options.remap_scalar, rd);
+
+    // Build the default decorators. Note that this _must_ be called
+    // after createDecorators.
+    auto unused_defaults = o.default_output_values;
+    for (const auto& [name, dec]: m_decorators.jetFloat) {
+      float default_value = o.default_output_value;
+      if (auto def = unused_defaults.extract(name)) {
+        default_value = def.mapped();
+      }
+      m_defaultValues.emplace_back(dec, default_value);
+    }
+    if (!unused_defaults.empty()) {
+      throw std::runtime_error(
+        "unused default values: [" + join(unused_defaults) + "]");
+    }
   }
 
   GNN::GNN(const std::string& file,
@@ -85,7 +111,7 @@ namespace FlavorTagDiscriminants {
            const std::map<std::string, std::string>& remap,
            const TrackLinkType link_type,
            float def_out_val):
-    GNN( file, GNNOptions { flip, remap, link_type, def_out_val} )
+    GNN( file, GNNOptions { flip, remap, link_type, def_out_val, {}} )
   {}
 
   GNN::GNN(GNN&&) = default;
@@ -108,8 +134,8 @@ namespace FlavorTagDiscriminants {
   }
 
   void GNN::decorateWithDefaults(const SG::AuxElement& jet) const {
-    for (const auto& dec: m_decorators.jetFloat) {
-      dec.second(jet) = m_defaultValue;
+    for (const auto& [dec, v]: m_defaultValues) {
+      dec(jet) = v;
     }
     // for some networks we need to set a lot of empty vectors as well
     if (m_onnxUtil->getOnnxModelVersion() == OnnxModelVersion::V1) {

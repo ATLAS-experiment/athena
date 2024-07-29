@@ -14,15 +14,18 @@ namespace FlavorTagDiscriminants {
     }
     hash = combine(hash, getHash(track_link_type));
     hash = combine(hash, getHash(default_output_value));
+    for (const auto& [k, v]: default_output_values) {
+      hash = combine(hash, getHash(k) ^ getHash(v));
+    }
     return hash;
   }
   bool GNNOptions::operator==(const GNNOptions& o) const {
-  return
-    flip_config == o.flip_config &&
-    variable_remapping == o.variable_remapping &&
-    track_link_type == o.track_link_type &&
-    default_output_value == o.default_output_value;
-}
-
+    return
+      flip_config == o.flip_config &&
+      variable_remapping == o.variable_remapping &&
+      track_link_type == o.track_link_type &&
+      default_output_value == o.default_output_value &&
+      default_output_values == o.default_output_values;
+  }
 }
 
