@@ -17,30 +17,30 @@ namespace MuonR4{
                                    const xAOD::UncalibratedMeasurement* primaryMeas,
                                    const xAOD::UncalibratedMeasurement* secondaryMeas):
         m_primaryMeas{primaryMeas},
-        m_secondaryMeas{secondaryMeas} {        
+        m_secondaryMeas{secondaryMeas},
+        m_dir{xAOD::channelDirInChamber(gctx, primaryMeas)},
+        m_normal{xAOD::channelNormalInChamber(gctx, primaryMeas)} {
+        
         AmgSymMatrix(2) Jac{AmgSymMatrix(2)::Identity()}, uvcov {AmgSymMatrix(2)::Identity()};
         
-        if (primaryMeas->type() == xAOD::UncalibMeasType::MdtDriftCircleType) {
-            m_driftR = primaryMeas->localPosition<1>()[0];
-        }
+
         if (primaryMeas->numDimensions() == 1) {
             uvcov(0,0) = primaryMeas->localCovariance<1>()[0];
         }
-        Jac.col(0)  = xAOD::channelNormalInChamber(gctx, primaryMeas).block<2,1>(0,0);
+        Jac.col(0)  = m_normal.block<2,1>(0,0);
         if (secondaryMeas) {
             /// Position of the measurements expressed in the chamber frame
             const Amg::Vector3D pos1{xAOD::positionInChamber(gctx, primaryMeas)};
             const Amg::Vector3D pos2{xAOD::positionInChamber(gctx, secondaryMeas)};
             /// Direction along which the measurement strips point to
-            const Amg::Vector3D dir1{xAOD::channelDirInChamber(gctx, primaryMeas)};
             const Amg::Vector3D dir2{xAOD::channelDirInChamber(gctx, secondaryMeas)};
             /// Intersect the two channels to define the space point
-            m_pos = pos1 + Amg::intersect<3>(pos2,dir2, pos1, dir1).value_or(0) * dir1;
+            m_pos = pos1 + Amg::intersect<3>(pos2,dir2, pos1, m_dir).value_or(0) * m_dir;
             Jac.col(1)  = xAOD::channelNormalInChamber(gctx, secondaryMeas).block<2,1>(0,0);             
             uvcov(1,1) = secondaryMeas->localCovariance<1>()[0]; 
         } else { 
             m_pos = xAOD::positionInChamber(gctx, primaryMeas);
-            Jac.col(1) = xAOD::channelDirInChamber(gctx, primaryMeas).block<2,1>(0,0);
+            Jac.col(1) = m_dir.block<2,1>(0,0);
             if (primaryMeas->type() == xAOD::UncalibMeasType::MdtDriftCircleType) {
                 const xAOD::MdtDriftCircle* dc = static_cast<const xAOD::MdtDriftCircle*>(primaryMeas);
                 uvcov(1,1) = 0.5* dc->readoutElement()->activeTubeLength(dc->measurementHash());
@@ -99,6 +99,15 @@ namespace MuonR4{
     const Amg::Vector3D& SpacePoint::positionInChamber() const {
         return m_pos;
     }
+    const Amg::Vector3D& SpacePoint::directionInChamber() const {
+        return m_dir;
+    } 
+    const Amg::Vector3D& SpacePoint::normalInChamber() const {
+        return m_normal;
+    }          
+    xAOD::UncalibMeasType SpacePoint::type() const {
+        return primaryMeasurement()->type();
+    }
     bool SpacePoint::measuresPhi() const {
         return secondaryMeasurement() ||  chamber()->idHelperSvc()->measuresPhi(identify());
     }
@@ -109,7 +118,7 @@ namespace MuonR4{
         return m_id;
     }
     double SpacePoint::driftRadius() const { 
-        return m_driftR; 
+        return m_primaryMeas->type() == xAOD::UncalibMeasType::MdtDriftCircleType ? m_primaryMeas->localPosition<1>()[0] :0.;
     }
     Amg::Vector2D SpacePoint::uncertainty() const {
         return Amg::Vector2D{ Amg::error(m_measCovariance,0),Amg::error(m_measCovariance,1)  };
@@ -123,4 +132,8 @@ namespace MuonR4{
     }
     unsigned int SpacePoint::nEtaInstanceCounts() const { return m_etaInstances; }
     unsigned int SpacePoint::nPhiInstanceCounts() const { return m_phiInstances; }
+    unsigned int SpacePoint::dimension() const { 
+        return (secondaryMeasurement() != nullptr) + 1;
+    }
+
 }

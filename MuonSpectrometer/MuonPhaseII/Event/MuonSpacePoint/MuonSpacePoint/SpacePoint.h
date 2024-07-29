@@ -7,7 +7,7 @@
 #include "MuonReadoutGeometryR4/MuonChamber.h"
 #include "xAODMeasurementBase/UncalibratedMeasurement.h"
 #include "xAODMuonPrepData/UtilFunctions.h"
-#include "CxxUtils/CachedUniquePtr.h"
+
 namespace MuonR4 {
     /**
      *  @brief The muon space point is the combination of two uncalibrated measurements one of them 
@@ -35,6 +35,12 @@ namespace MuonR4 {
             const MuonGMR4::MuonChamber* chamber() const;
             /*** @brief: Position of the space point inside the chamber */
             const Amg::Vector3D& positionInChamber() const;
+            /*** @brief: Returns the direction parallel to the primary channel, i.e. the strip or the wire */
+            const Amg::Vector3D& directionInChamber() const;
+            /*** @brief: Returns the vector pointing to the adjacent channel in the chamber */
+            const Amg::Vector3D& normalInChamber() const;
+            /*** @brief: Returns the measurement type of the primary measurement */
+            xAOD::UncalibMeasType type() const;
             /** @brief: Does the space point contain a phi measurement */
             bool measuresPhi() const;
             /** @brief: Does the space point contain an eta measurement */
@@ -57,6 +63,8 @@ namespace MuonR4 {
             unsigned int nEtaInstanceCounts() const;
             /** @brief How many space points have been built in total with the same phi prd  */
             unsigned int nPhiInstanceCounts() const;
+            /** @brief Is the space point a 1D or combined 2D measurement */
+            unsigned int dimension() const;
         private:
             const xAOD::UncalibratedMeasurement* m_primaryMeas{nullptr};
             const xAOD::UncalibratedMeasurement* m_secondaryMeas{nullptr};
@@ -65,14 +73,14 @@ namespace MuonR4 {
             const MuonGMR4::MuonChamber* m_chamber{xAOD::readoutElement(m_primaryMeas)->getChamber()};
 
             Amg::Vector3D m_pos{Amg::Vector3D::Zero()};
+            Amg::Vector3D m_dir{Amg::Vector3D::Zero()};
+            Amg::Vector3D m_normal{Amg::Vector3D::Zero()};
             /** @brief: Measurement covariance 
              *          If the spacePoint represents an 1D measurement the second coordinate is the length of the
              *          channel (e.g halfLength of the wire or of the associated strip)
              *          the uncertainty of the other coordinate, otherwise
             */
             AmgSymMatrix(2) m_measCovariance{AmgSymMatrix(2)::Identity()}; 
-            /// Drift radius of the associated drift circle - if there's any in the space point
-            double m_driftR{0.};
             /// In how many space points is the eta measurement used
             unsigned int m_etaInstances{1};
             /// In how many space points is the phi measurement used

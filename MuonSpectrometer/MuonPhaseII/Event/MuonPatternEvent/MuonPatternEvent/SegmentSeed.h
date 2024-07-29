@@ -49,6 +49,12 @@ class SegmentSeed : public HoughMaximum {
     /// we are dealing with a pure eta maximum
     bool hasPhiExtension() const { return m_hasPhiExt; }
 
+    Amg::Vector3D positionInChamber() const {
+        return Amg::Vector3D(interceptX(), interceptY(), 0.);
+    }
+    Amg::Vector3D directionInChamber() const {
+        return Amg::Vector3D(tanPhi(), tanTheta(), 1.).unit();
+    }
    private:
     double m_tanPhi{0.};      // angle from phi extension
     double m_interceptX{0.};  // intercept from phi extension
