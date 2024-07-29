@@ -116,17 +116,16 @@ namespace Analysis {
     // ==========================================================================================================================
 
     //Trk::PerigeeSurface primary_surface( primaryVtx->position() );
-    //Trk::PerigeeSurface primary_surface;
+    
     // now decorate the tracks
     for (const xAOD::TrackParticle *track: *tracks) {
-      //float minDz = std::numeric_limits<float>::max();
-      auto minDz =0.;
+      auto minDz =100.;
       const xAOD::Vertex* primary = nullptr; // calling it primary for now so I dont have to change anything
       for (const xAOD::Vertex *vertex: *verteces) {
         std::unique_ptr< const Trk::ImpactParametersAndSigma > ipMin( m_track_to_vx->estimate( track, vertex) );
         if ( ipMin ){
-          if ( ipMin->IPz0SinTheta < minDz && ipMin->IPz0SinTheta > 1){
-            minDz = ipMin->IPz0SinTheta;
+          if ( std::fabs(ipMin->IPz0SinTheta) < minDz && std::fabs(ipMin->IPz0SinTheta) > 1){
+            minDz = std::fabs(ipMin->IPz0SinTheta);
             primary = vertex;
           }
 	      }
