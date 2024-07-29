@@ -88,7 +88,7 @@ namespace FlavorTagDiscriminants {
     /* create all decorators */
     std::tuple<FTagDataDependencyNames, std::set<std::string>>
     createDecorators(const OnnxUtil::OutputConfig& outConfig, const FTagOptions& options);
-    
+
     SG::AuxElement::ConstAccessor<ElementLink<xAOD::JetContainer>> m_jetLink;
     std::string m_input_node_name;
     std::vector<internal::VarFromBTag> m_varsFromBTag;
@@ -96,7 +96,7 @@ namespace FlavorTagDiscriminants {
     std::vector<std::shared_ptr<IConstituentsLoader>> m_constituentsLoaders;
 
     Decorators m_decorators;
-    float m_defaultValue;
+    std::vector<std::pair<Dec<float>, float>> m_defaultValues;
     FTagDataDependencyNames m_dataDependencyNames;
   };
 } // end namespace FlavorTagDiscriminants

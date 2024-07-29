@@ -24,6 +24,7 @@ namespace FlavorTagDiscriminants {
     std::map<std::string,std::string> variableRemapping;
     std::string trackLinkType;
     float default_output_value = NAN;
+    std::map<std::string, double> default_output_values; // hack [1]
   };
 
   void propify(asg::AsgTool& tool, GNNToolProperties* props);
@@ -31,3 +32,7 @@ namespace FlavorTagDiscriminants {
 }
 
 #endif
+
+// [1]: Gaudi doesn't like std::map<std::string, float> as a property,
+// so we use std::map<std::string, double> instead. This is converted
+// to a float before it's used.
