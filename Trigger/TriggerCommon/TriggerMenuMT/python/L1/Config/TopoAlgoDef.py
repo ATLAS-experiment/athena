@@ -1806,7 +1806,7 @@ class TopoAlgoDef:
             alg.addgeneric('MaxTob2', d.nleading2)
             alg.addgeneric('NumResultBits',  len(toponames))
             for bitid,minInvm in enumerate(d.minInvmList):
-                alg.addvariable('MinET1',  get_threshold_cut(d.otype1, d.ocut1)*_et_conversion , bitid)
+                alg.addvariable('MinET1',  get_threshold_cut("CjJ", d.ocut1)*_et_conversion , bitid)
                 alg.addvariable('MinET2',  get_threshold_cut(d.otype2, d.ocut2)*_et_conversion , bitid)
                 alg.addvariable('MinMSqr', minInvm*minInvm*_et_conversion*_et_conversion , bitid)
                 alg.addvariable('MaxMSqr', _no_m_upper_threshold , bitid)  # no upper threshold
