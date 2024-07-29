@@ -43,6 +43,7 @@ namespace Analysis {
     m_dec_track_mom = m_TrackContainerKey.key() + "." + m_prefix.value() + m_dec_track_mom.key();
 
     m_dec_invalid = m_TrackContainerKey.key() + "." + m_prefix.value() + m_dec_invalid.key();
+    m_trk_origin_vtx = m_TrackContainerKey.key() + "." + m_prefix.value() + m_trk_origin_vtx.key();
 
     // Initialize decorators
     ATH_MSG_DEBUG( "Inizializing decorators:"  );
@@ -53,6 +54,8 @@ namespace Analysis {
     ATH_MSG_DEBUG( "    ** " << m_dec_track_pos );
     ATH_MSG_DEBUG( "    ** " << m_dec_track_mom );
     ATH_MSG_DEBUG( "    ** " << m_dec_invalid  );
+    ATH_MSG_DEBUG( "    ** " << m_trk_origin_vtx  );
+    
 
     CHECK( m_dec_d0.initialize() );
     CHECK( m_dec_z0.initialize() );
@@ -61,6 +64,7 @@ namespace Analysis {
     CHECK( m_dec_track_pos.initialize() );
     CHECK( m_dec_track_mom.initialize() );
     CHECK( m_dec_invalid.initialize() );
+    CHECK( m_trk_origin_vtx.initialize() );
 
     return StatusCode::SUCCESS;
   }
@@ -77,13 +81,13 @@ namespace Analysis {
     const xAOD::VertexContainer *verteces = vertexContainerHandle.get();
 
     /*
-    const xAOD::Vertex* primary = getPrimaryVertex( *verteces );
-    if ( primary == nullptr ) {
+    const xAOD::Vertex* primaryVtx = getPrimaryVertex( *verteces );
+    if ( primaryVtx == nullptr ) {
       ATH_MSG_FATAL("No primary vertex found");
       return StatusCode::FAILURE;
     }
-
     */
+    
     SG::ReadHandle< xAOD::TrackParticleContainer > trackContainerHandle = SG::makeHandle< xAOD::TrackParticleContainer >( m_TrackContainerKey,ctx);
     CHECK( trackContainerHandle.isValid() );
     const xAOD::TrackParticleContainer* tracks = trackContainerHandle.get();
@@ -111,25 +115,26 @@ namespace Analysis {
     //    ** Computation
     // ==========================================================================================================================
 
-    //Trk::PerigeeSurface primary_surface( primary->position() );
-
+    //Trk::PerigeeSurface primary_surface( primaryVtx->position() );
+    //Trk::PerigeeSurface primary_surface;
     // now decorate the tracks
     for (const xAOD::TrackParticle *track: *tracks) {
-	float minDz = std::numeric_limits<float>::max();
-	const xAOD::Vertex* primary = nullptr; // calling it primary for now so I dont have to change anything
+      //float minDz = std::numeric_limits<float>::max();
+      auto minDz =0.;
+      const xAOD::Vertex* primary = nullptr; // calling it primary for now so I dont have to change anything
       for (const xAOD::Vertex *vertex: *verteces) {
-	    std::unique_ptr< const Trk::ImpactParametersAndSigma > ipMin( m_track_to_vx->estimate( track, vertex) );
-	    if ( ipMin ){
-	    	if ( ipMin->IPz0SinTheta < minDz && ipMin->IPz0SinTheta > 1){
-			minDz = ipMin->IPz0SinTheta;
-			primary = vertex;
-	    	}
-	    }
+        std::unique_ptr< const Trk::ImpactParametersAndSigma > ipMin( m_track_to_vx->estimate( track, vertex) );
+        if ( ipMin ){
+          if ( ipMin->IPz0SinTheta < minDz && ipMin->IPz0SinTheta > 1){
+            minDz = ipMin->IPz0SinTheta;
+            primary = vertex;
+          }
+	      }
       }
       std::unique_ptr< const Trk::ImpactParametersAndSigma > ip( m_track_to_vx->estimate( track, primary) );
       Trk::PerigeeSurface primary_surface( primary->position() );
       if ( ip ) {
-	decor_TrkOriginVtx(*track) = primary;
+	      decor_TrkOriginVtx(*track) = *primary;
         decor_d0(*track) = ip->IPd0;
         decor_z0(*track) = ip->IPz0SinTheta;
         decor_d0_sigma(*track) = ip->sigmad0;
@@ -137,7 +142,8 @@ namespace Analysis {
         ATH_MSG_DEBUG( " d0= " << ip->IPd0 <<
            " z0SinTheta= " << ip->IPz0SinTheta <<
            " sigmad0= " << ip->sigmad0 <<
-           " sigmaz0SinTheta= " << ip->sigmaz0SinTheta );
+           " sigmaz0SinTheta= " << ip->sigmaz0SinTheta << 
+           " TrkOriginVtx= " << primary );
       } else {
         ATH_MSG_WARNING( "failed to estimate track impact parameter, using dummy values" );
         decor_d0(*track) = NAN;
