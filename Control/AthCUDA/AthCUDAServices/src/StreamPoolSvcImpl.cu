@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 //
 
 // Local include(s).
@@ -9,9 +9,7 @@
 // AthCUDA include(s).
 #include "AthCUDACore/Macros.cuh"
 #include "AthCUDACore/StreamHolderHelpers.cuh"
-
-// TBB include(s).
-#include <tbb/concurrent_queue.h>
+#include "StreamPool.h"
 
 // System include(s).
 #include <cassert>
@@ -24,15 +22,14 @@ namespace AthCUDA {
       /// Custom destructor, deleting the CUDA streams.
       ~StreamPoolSvcImplData() {
          while( ! m_streams.empty() ) {
-            cudaStream_t stream = nullptr;
-            m_streams.pop( stream );
+            cudaStream_t stream = reinterpret_cast< cudaStream_t >( m_streams.pop() );
             assert( stream != nullptr );
             CUDA_IGNORE( cudaStreamDestroy( stream ) );
          }
       }
 
       /// The concurrent pool of streams that @c StreamPoolSvcImpl manages
-      tbb::concurrent_bounded_queue< cudaStream_t > m_streams;
+      StreamPool m_streams;
 
    }; // struct StreamPoolSvcImplData
 
@@ -84,8 +81,7 @@ namespace AthCUDA {
       assert( m_data != nullptr );
 
       // Get the next available stream for the user.
-      cudaStream_t stream = nullptr;
-      m_data->m_streams.pop( stream );
+      cudaStream_t stream = reinterpret_cast< cudaStream_t >( m_data->m_streams.pop() );
       return StreamHolder( stream, m_svc );
    }
 
