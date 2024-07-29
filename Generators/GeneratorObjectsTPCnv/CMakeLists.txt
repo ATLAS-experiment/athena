@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( GeneratorObjectsTPCnv )
@@ -7,12 +7,18 @@ atlas_subdir( GeneratorObjectsTPCnv )
 find_package( CLHEP )
 
 # Component(s) in the package:
-atlas_add_tpcnv_library( GeneratorObjectsTPCnv
-                         src/*.cxx
+atlas_add_library( GeneratorObjectsTPCnv
+                   src/*.cxx
+                   PUBLIC_HEADERS GeneratorObjectsTPCnv
+                   PRIVATE_INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
+                   LINK_LIBRARIES AthenaPoolCnvSvcLib AtlasHepMCLib GaudiKernel GeneratorObjects GenInterfacesLib
+                   PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} AthAllocators AthenaKernel StoreGateLib TestTools TruthUtils)
+
+atlas_add_tpcnv_library( GeneratorObjectsTPCnvFactories
+                         src/factories/*.cxx
                          PUBLIC_HEADERS GeneratorObjectsTPCnv
                          PRIVATE_INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
-                         LINK_LIBRARIES AthenaPoolCnvSvcLib AtlasHepMCLib GaudiKernel GeneratorObjects GenInterfacesLib
-                         PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} AthAllocators AthenaKernel StoreGateLib TestTools TruthUtils)
+                         LINK_LIBRARIES GeneratorObjectsTPCnv )
 
 atlas_add_dictionary( GeneratorObjectsTPCnvDict
                       GeneratorObjectsTPCnv/GeneratorObjectsTPCnvDict.h
