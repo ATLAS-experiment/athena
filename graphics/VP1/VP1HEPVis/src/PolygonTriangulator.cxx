@@ -1729,7 +1729,7 @@ void PolygonTriangulator::Polygon::handleSplitVertex(const unsigned int&  i)
   double x=m_points[i]->x, y=m_points[i]->y;
   m_edgebst.InOrder(internal_poltrig::UpdateKey, y);
 
-  internal_poltrig::BTreeNode<internal_poltrig::Linebase*, double>*  leftnode;
+  internal_poltrig::BTreeNode<internal_poltrig::Linebase*, double>*  leftnode = nullptr;
   m_edgebst.FindMaxSmallerThan(x, leftnode);
   internal_poltrig::Linebase* leftedge=leftnode->data();
 
@@ -1755,7 +1755,7 @@ void PolygonTriangulator::Polygon::handleMergeVertex(const unsigned int&  i)
   if (m_points[helper]->type==internal_poltrig::MERGE) addDiagonal(i, helper);
   m_edgebst.Delete(m_edges[previ]->keyValue());
 
-  internal_poltrig::BTreeNode<internal_poltrig::Linebase*, double>*  leftnode;
+  internal_poltrig::BTreeNode<internal_poltrig::Linebase*, double>*  leftnode = nullptr;
   m_edgebst.FindMaxSmallerThan(x, leftnode);
   internal_poltrig::Linebase* leftedge=leftnode->data();
 
@@ -1792,7 +1792,7 @@ void PolygonTriangulator::Polygon::handleRegularVertexUp(const unsigned int&  i)
   double x=m_points[i]->x, y=m_points[i]->y;
   m_edgebst.InOrder(internal_poltrig::UpdateKey, y);
 
-  internal_poltrig::BTreeNode<internal_poltrig::Linebase*, double>*  leftnode;
+  internal_poltrig::BTreeNode<internal_poltrig::Linebase*, double>*  leftnode = nullptr;
   m_edgebst.FindMaxSmallerThan(x, leftnode);
 
   internal_poltrig::Linebase* leftedge=leftnode->data();
