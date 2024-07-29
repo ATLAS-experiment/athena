@@ -12,7 +12,9 @@
 #include "MuonAlignmentData/NswPassivationDbData.h"
 
 class BLinePar;
-class MuonReadoutGeomCnvAlg;
+namespace MuonGMR4{
+    class ReadoutGeomCnvAlg;
+}
 
 namespace MuonGM {
     /**
@@ -22,7 +24,7 @@ namespace MuonGM {
 
     class MMReadoutElement final : public MuonClusterReadoutElement {
     public:
-        friend class ::MuonReadoutGeomCnvAlg;
+        friend class MuonGMR4::ReadoutGeomCnvAlg;
         /** constructor */
         MMReadoutElement(GeoVFullPhysVol* pv, const std::string& stName, int zi, int fi, int mL, 
                          MuonDetectorManager* mgr, const NswPassivationDbData*);

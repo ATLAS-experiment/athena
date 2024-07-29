@@ -17,7 +17,9 @@
 #include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
 
 
-class MuonReadoutGeomCnvAlg;
+namespace MuonGMR4 {
+    class ReadoutGeomCnvAlg;
+}
 
 namespace MuonGM {
     /**
@@ -27,7 +29,7 @@ namespace MuonGM {
 
     class sTgcReadoutElement final : public MuonClusterReadoutElement {
     public:
-        friend class ::MuonReadoutGeomCnvAlg;
+        friend class MuonGMR4::ReadoutGeomCnvAlg;
    
         /** constructor */
         sTgcReadoutElement(GeoVFullPhysVol* pv, 

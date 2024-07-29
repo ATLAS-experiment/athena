@@ -16,8 +16,9 @@
 #include "MuonReadoutGeometry/MuonStripDesign.h"
 #include "CxxUtils/ArrayHelper.h"
 
-
-class MuonReadoutGeomCnvAlg;
+namespace MuonGMR4 {
+    class ReadoutGeomCnvAlg;
+}
 
 namespace MuonGM {
     /**
@@ -52,7 +53,7 @@ namespace MuonGM {
     */
 
     class RpcReadoutElement final : public MuonClusterReadoutElement {
-        friend class ::MuonReadoutGeomCnvAlg;
+        friend class MuonGMR4::ReadoutGeomCnvAlg;
         friend class MuonChamber;
         friend class MuonChamberLite;
 

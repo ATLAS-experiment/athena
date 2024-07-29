@@ -22,6 +22,6 @@ def MuonReadoutGeometryCnvAlgCfg(flags,name="MuonDetectorManagerCondAlg", **kwar
     if flags.Detector.GeometryMM:
         alignStores+=["MmActsAlignContainer"]
     kwargs.setdefault("AlignmentKeys", alignStores)
-    the_alg = CompFactory.MuonReadoutGeomCnvAlg(name=name, **kwargs)
+    the_alg = CompFactory.MuonGMR4.ReadoutGeomCnvAlg(name=name, **kwargs)
     result.addCondAlgo(the_alg, primary = True)
     return result
