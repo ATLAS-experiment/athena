@@ -102,21 +102,21 @@ namespace MuonR4{
             SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
 
             // steers the target resolution in tan(phi) 
-            DoubleProperty m_targetResoTanPhi{this, "ResolutionTargetTanAngle", 0.01};
+            DoubleProperty m_targetResoTanPhi{this, "ResolutionTargetTanAngle", 0.04};
             // steers the target resolution in the x-axis intercept
-            DoubleProperty m_targetResoIntercept{this, "ResolutionTargetIntercept", 10.};
+            DoubleProperty m_targetResoIntercept{this, "ResolutionTargetIntercept", 30.};
             // minimum search window half width, tan(phi) 
             // - in multiples of the target resolution
-            DoubleProperty m_minSigmasSearchTanPhi{this, "minSigmasSearchTanPhi", 3.};
+            DoubleProperty m_minSigmasSearchTanPhi{this, "minSigmasSearchTanPhi", 1.};
             // minimum search window half width, intercept 
             // - in multiples of the target resolution
-            DoubleProperty m_minSigmasSearchIntercept{this, "minSigmasSearchIntercept", 3.};
+            DoubleProperty m_minSigmasSearchIntercept{this, "minSigmasSearchIntercept", 1.};
             
             // number of accumulator bins in tan(phi)
             // target resolution in the angle
-            IntegerProperty m_nBinsTanPhi{this, "nBinsTanAngle", 15};
+            IntegerProperty m_nBinsTanPhi{this, "nBinsTanAngle", 5};
             // number of accumulator bins in the x-axis intercept
-            IntegerProperty m_nBinsIntercept{this, "nBinsIntercept", 100};
+            IntegerProperty m_nBinsIntercept{this, "nBinsIntercept", 10};
             // maximum number of eta measurements allowed to be discarded by 
             // a valid phi-extension
             IntegerProperty m_maxEtaHolesOnMax{this, "maxEtaHoles", 1};
