@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file TestTools/TestAlloc.h
@@ -70,7 +70,15 @@ public:
   template <class... Args>
   void construct (pointer p, Args&&... args)
   {
+    // Suppress bogus warning seen with gcc 14.1.
+#if __GNUC__ >= 14
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wstringop-overflow"
+#endif
     new (p) T(std::forward<Args>(args)...);
+#if __GNUC__ >= 14
+# pragma GCC diagnostic pop
+#endif
   }
 
   void destroy (pointer p)
