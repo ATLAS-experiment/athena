@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////////
@@ -111,7 +111,7 @@ public:
     bool			bestMatch (void) const;
     void			bestMatch (bool);
     void			fieldIntegral (const FieldIntegral& value);
-    FieldIntegral		fieldIntegral (void) const;
+    const FieldIntegral&	fieldIntegral (void) const;
     void			innerMatch (double matchChi2, int matchDoF, double matchProb);
     double			innerMatchChi2 (void) const;
     int				innerMatchDoF (void) const;
@@ -126,7 +126,7 @@ public:
     int				outerMatchDoF (void) const;
     double			outerMatchProb (void) const;
     void			scatteringAngleSignificance (const ScatteringAngleSignificance& value);
-    ScatteringAngleSignificance	scatteringAngleSignificance (void) const;
+    const ScatteringAngleSignificance& scatteringAngleSignificance (void) const;
      
     // deprecated
     bool			looseMatch (void) const;
@@ -203,7 +203,7 @@ inline void
 MuonMatch::bestMatch (bool value)
 { m_bestMatch = value; }
 
-inline FieldIntegral
+inline const FieldIntegral&
 MuonMatch::fieldIntegral (void) const
 { return m_fieldIntegral; }	
 
@@ -259,7 +259,7 @@ inline double
 MuonMatch::outerMatchProb (void) const
 { return m_outerMatchProb; }	
  
-inline ScatteringAngleSignificance
+inline const ScatteringAngleSignificance&
 MuonMatch::scatteringAngleSignificance (void) const
 { return m_scatteringAngleSignificance; }
 
