@@ -1,0 +1,94 @@
+#!/bin/bash
+# art-description: Run 4 configuration, ITK only recontruction with ACTS, PU 200
+# art-type: grid
+# art-include: main/Athena
+# art-output: *.root
+# art-output: *.xml
+# art-output: dcube*
+# art-html: dcube_ambi_last
+# art-athena-mt: 4
+
+lastref_dir=last_results
+dcubeXml=dcube_IDPVMPlots_ACTS_CKF_ITk.xml
+n_events=-1
+rdo=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4149_r14700/RDO.33629020._000047.pool.root.1
+ref_idpvm_athena=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/ReferenceHistograms/physval_run4_ttbar200_reco_r25.root
+
+
+# search in $DATAPATH for matching file
+dcubeXmlAbsPath=$(find -H ${DATAPATH//:/ } -mindepth 1 -maxdepth 1 -name $dcubeXml -print -quit 2>/dev/null)
+# Don't run if dcube config not found
+if [ -z "$dcubeXmlAbsPath" ]; then
+    echo "art-result: 1 dcube-xml-config"
+    exit 1
+fi
+
+run () {
+    name="${1}"
+    cmd="${@:2}"
+    ############
+    echo "Running ${name}..."
+    time ${cmd}
+    rc=$?
+    # Only report hard failures for 21.9 vs master tests since both
+    # branches are unlikely to ever match perfectly
+    [ "${name}" = "dcube-ckf-ambi" ] && [ $rc -ne 255 ] && rc=0
+    echo "art-result: $rc ${name}"
+    return $rc
+}
+
+ignore_pattern="ActsTrackFindingAlg.+ERROR.+Propagation.+reached.+the.+step.+count.+limit,ActsTrackFindingAlg.+ERROR.+Propagation.+failed:.+PropagatorError:3.+Propagation.+reached.+the.+configured.+maximum.+number.+of.+steps.+with.+the.+initial.+parameters,ActsTrackFindingAlg.+ERROR.+Step.+size.+adjustment.+exceeds.+maximum.+trials,ActsTrackFindingAlg.Acts.+ERROR.+CombinatorialKalmanFilter.+failed:.+CombinatorialKalmanFilterError:5.+Propagation.+reaches.+max.+steps.+before.+track.+finding.+is.+finished.+with.+the.+initial.+parameters,ActsTrackFindingAlg.Acts.+ERROR.+SurfaceError:1"
+
+export ATHENA_CORE_NUMBER=4
+
+# Run w/o ambi. resolution
+run "Reconstruction-ckf" \
+    Reco_tf.py --CA \
+    --steering doRAWtoALL \
+    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateTracksFlags" \
+    --preExec 'all:ConfigFlags.Tracking.doITkFastTracking=True' \
+    --ignorePatterns "${ignore_pattern}" \
+    --inputRDOFile ${rdo} \
+    --outputAODFile AOD.root \
+    --maxEvents ${n_events} \
+    --multithreaded
+
+reco_rc=$?
+
+mv log.RAWtoALL log.RAWtoALL
+
+if [ $reco_rc != 0 ]; then
+    exit $reco_rc
+fi
+
+run "IDPVM-ckf" \
+    runIDPVM.py \
+    --filesInput AOD.root \
+    --outputFile idpvm.root \
+    --doTightPrimary \
+    --doHitLevelPlots \
+    --HSFlag All
+
+reco_rc=$?
+if [ $reco_rc != 0 ]; then
+    exit $reco_rc
+fi
+
+echo "download latest result..."
+art.py download --user=artprod --dst="$lastref_dir" "$ArtPackage" "$ArtJobName"
+ls -la "$lastref_dir"
+
+run "dcube-ckf-last" \
+    $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
+    -p -x dcube_ckf_last \
+    -c ${dcubeXmlAbsPath} \
+    -r ${lastref_dir}/idpvm.root \
+    idpvm.root
+
+# Compare performance WRT legacy Athena
+run "dcube-ckf-athena" \
+    $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
+    -p -x dcube_ckf_athena \
+    -c ${dcubeXmlAbsPath} \
+    -r ${ref_idpvm_athena} \
+    idpvm.root

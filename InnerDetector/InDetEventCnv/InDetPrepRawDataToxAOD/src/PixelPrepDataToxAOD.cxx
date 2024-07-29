@@ -165,11 +165,13 @@ StatusCode PixelPrepDataToxAOD::execute()
   }
 
   SG::ReadHandle<Trk::ClusterSplitProbabilityContainer> splitProbContainer;
+  bool foundSplitProbContainer = false;
   if (!m_clusterSplitProbContainer.key().empty()) {
      splitProbContainer=SG::ReadHandle<Trk::ClusterSplitProbabilityContainer>(m_clusterSplitProbContainer, ctx);
      if (!splitProbContainer.isValid()) {
         ATH_MSG_FATAL("Failed to get cluster splitting probability container " << m_clusterSplitProbContainer);
      }
+     foundSplitProbContainer = true;
   }
 
   std::vector<std::vector<const SiHit*>> siHits(m_PixelHelper->wafer_hash_max());
@@ -311,7 +313,7 @@ StatusCode PixelPrepDataToxAOD::execute()
       AUXDATA(xprd,char,isFake)      =  (char)prd->isFake(); 
       AUXDATA(xprd,char,gangedPixel) =  (char)prd->gangedPixel();
       const Trk::ClusterSplitProbabilityContainer::ProbabilityInfo &
-         splitProb = splitProbContainer.isValid() ? splitProbContainer->splitProbability(prd) : Trk::ClusterSplitProbabilityContainer::getNoSplitProbability();
+         splitProb = foundSplitProbContainer ? splitProbContainer->splitProbability(prd) : Trk::ClusterSplitProbabilityContainer::getNoSplitProbability();
       AUXDATA(xprd,char,isSplit)      =  static_cast<char>(splitProb.isSplit());
       AUXDATA(xprd,float,splitProbability1)  =  splitProb.splitProbability1();
       AUXDATA(xprd,float,splitProbability2)  =  splitProb.splitProbability2();

@@ -445,7 +445,9 @@ def ITkSiSPSeededTracksFinalCfg(flags):
             TrackContainerName = f"SiSPSeeded{extension}Tracks",
             xAODTrackParticlesFromTracksContainerName=(
                 f"SiSPSeededTracks{extension}TrackParticles"),
-            AssociationMapName=AssociationMapNameKey))
+            AssociationMapName=
+            "" if flags.Tracking.doITkFastTracking else 
+            AssociationMapNameKey))
 
     return result
 
@@ -487,6 +489,7 @@ def ITkExtendedPRDInfoCfg(flags):
     result.merge(PixelPrepDataToxAODCfg(
         flags,
         ClusterSplitProbabilityName=(
+            "" if flags.Tracking.doITkFastTracking else
             ITkClusterSplitProbabilityContainerName(flags))))
     result.merge(StripPrepDataToxAODCfg(flags))
 
