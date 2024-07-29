@@ -90,8 +90,6 @@ CommonEfficiencyTool::CommonEfficiencyTool(const std::string& sName)
   declareProperty( "JetIDLevel",          m_iJetIDLevel          = (int)JETIDNONE );
   declareProperty( "EleIDLevel",          m_iEleIDLevel          = (int)ELEIDNONE );
   declareProperty( "SplitMu",             m_bSplitMu             = false );
-  declareProperty( "SplitMCCampaign",     m_bSplitMCCampaign     = false );
-  declareProperty( "MCCampaign",          m_sMCCampaign          = "");
   declareProperty( "UseTauSubstructure",  m_bUseTauSubstructure  = false);
 }
 
@@ -155,7 +153,7 @@ StatusCode CommonEfficiencyTool::initialize()
 
 //______________________________________________________________________________
 CP::CorrectionCode CommonEfficiencyTool::getEfficiencyScaleFactor(const xAOD::TauJet& xTau,
-    double& dEfficiencyScaleFactor, unsigned int iRunNumber, unsigned int iMu)
+    double& dEfficiencyScaleFactor, unsigned int /*iRunNumber*/, unsigned int iMu)
 {
   // check which true state is requested
   if (!m_bSkipTruthMatchCheck and getTruthParticleType(xTau) != m_eCheckTruth)
@@ -199,8 +197,7 @@ CP::CorrectionCode CommonEfficiencyTool::getEfficiencyScaleFactor(const xAOD::Ta
   std::string sMCCampaign = "";
 
   if (m_bSplitMu) sMu = ConvertMuToString(iMu);
-  if (m_bSplitMCCampaign) sMCCampaign = GetMcCampaignString(iRunNumber);
-  std::string sHistName = m_sSFHistName + sMode + sMu + sMCCampaign;
+  std::string sHistName = m_sSFHistName + sMode + sMu;
 
   // get standard scale factor
   CP::CorrectionCode tmpCorrectionCode = getValue(sHistName,
@@ -409,28 +406,6 @@ std::string CommonEfficiencyTool::ConvertMuToString(const int iMu) const
     return "_highMu";
 
   return "_lowMu";
-}
-
-/*
-  run number converter, first checks if m_sMCCampaign is set. If yes, use it. 
-  If not, use random run number to determine MC campaign 
-*/
-//______________________________________________________________________________
-std::string CommonEfficiencyTool::GetMcCampaignString(const int iRunNumber) const
-{
-  if (m_sMCCampaign == "MC16a" || m_sMCCampaign == "MC16d")
-    return std::string("_")+m_sMCCampaign;
-  // FIXME?
-  else if (m_sMCCampaign == "MC16e")
-    return "_MC16d"; // MC16e recommendations not available yet, use MC16d instead
-  else if (m_sMCCampaign != "")
-    ATH_MSG_WARNING("unsupported mc campaign: " << m_sMCCampaign);
-
-  // FIXME?
-  if (iRunNumber > 324320 )
-    return "_MC16d";
-
-  return "_MC16a";
 }
 
 /*

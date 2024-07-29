@@ -79,7 +79,6 @@ protected:
 
   std::string ConvertProngToString(const int iProngness) const;
   std::string ConvertMuToString(const int iMu) const;
-  std::string GetMcCampaignString(const int iMu) const;
   std::string ConvertDecayModeToString(const int iDecayMode) const;
 
   typedef std::tuple<TObject*,
@@ -151,8 +150,6 @@ protected:
   bool m_bSFIsAvailable;
   bool m_bSFIsAvailableChecked;
   bool m_bSplitMu;
-  bool m_bSplitMCCampaign;
-  std::string m_sMCCampaign;
 };
 } // namespace TauAnalysisTools
 
