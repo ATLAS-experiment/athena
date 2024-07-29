@@ -1305,8 +1305,11 @@ int main(int argc, char *argv[])
                 } // save all AR hits
 
             } // END OF EVENT LOOP
-
-            printf("REPLACED %d T0S WITH PRECICION VALUES (MEAN DIFF=%f)\n", npt0, diffpt0 / float(npt0));
+            if (npt0 !=0){
+              printf("REPLACED %d T0S WITH PRECISION VALUES (MEAN DIFF=%f)\n", npt0, diffpt0 / float(npt0));
+            } else {
+              printf("ERROR!! npt0 is zero!");
+            }
 
             if (ifiles == nfiles - 1)
             {
