@@ -56,7 +56,7 @@ namespace MuonR4{
             /// @param tanPhi: the input inclination angle (not used) 
             /// @param strip: the strip measurement (expressed as a space point) 
             /// @return the uncertainty on the x offset - based on the strip pitch 
-            double houghWidthStrip(double tanPhi, const MuonR4::HoughHitType & dc); 
+            double houghWidthStrip(double tanPhi, const MuonR4::HoughHitType & dc, double targetReso); 
         }
     }
 }

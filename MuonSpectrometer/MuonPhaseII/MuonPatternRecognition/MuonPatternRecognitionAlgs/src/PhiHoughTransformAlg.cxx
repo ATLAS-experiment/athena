@@ -142,6 +142,7 @@ StatusCode PhiHoughTransformAlg::preProcessMaximum(const ActsGeometryContext& gc
 
 std::vector<ActsPeakFinderForMuon::Maximum> PhiHoughTransformAlg::findRankedSegmentSeeds (HoughEventData & eventData, const HoughMaximum & maximum) const{
     std::map<int, std::vector<ActsPeakFinderForMuon::Maximum>>  rankedSeeds;  
+    using namespace std::placeholders; 
     // reset the accumulator
     eventData.houghPlane->reset();
     // fill the accumulator with the phi measurements   
@@ -151,7 +152,7 @@ std::vector<ActsPeakFinderForMuon::Maximum> PhiHoughTransformAlg::findRankedSegm
         eventData.houghPlane->fill<HoughHitType>(
             hit, eventData.currAxisRanges,
             HoughHelpers::Phi::houghParamStrip,
-            HoughHelpers::Phi::houghWidthStrip, hit, 0, 
+            std::bind(HoughHelpers::Phi::houghWidthStrip, _1, _2, m_targetResoIntercept), hit, 0, 
             // up-weigh 2D spacepoints w.r.t 1D phi hits to prevent 
             // discarding measurements known to be compatible in eta 
             (hit->measuresEta() ? 2.0 : 1.0) / (m_downWeightMultiplePrd? hit->nPhiInstanceCounts() : 1)

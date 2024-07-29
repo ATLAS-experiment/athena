@@ -31,6 +31,6 @@ using namespace MuonR4;
   double HoughHelpers::Phi::houghParamStrip(double tanPhi, const MuonR4::HoughHitType & strip){
     return strip->positionInChamber().x() - tanPhi * strip->positionInChamber().z();
   }
-  double HoughHelpers::Phi::houghWidthStrip(double /*tanPhi*/, const MuonR4::HoughHitType & DC){
-      return 3 * DC->uncertainty().x();  // return positional uncertainty defined during SP creation
+  double HoughHelpers::Phi::houghWidthStrip(double /*tanPhi*/, const MuonR4::HoughHitType & DC, double targetReso){
+      return std::max(targetReso, 3 * DC->uncertainty().x());  // return positional uncertainty defined during SP creation
   }
