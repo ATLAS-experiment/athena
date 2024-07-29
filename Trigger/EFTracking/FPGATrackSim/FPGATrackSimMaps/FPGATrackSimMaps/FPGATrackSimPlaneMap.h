@@ -119,13 +119,15 @@ class FPGATrackSimPlaneMap
         // Main function. Wrapper/shortcuts below.
         const LayerSection & getLayerSection(SiliconTech siTech, DetectorZone zone, uint32_t physLayer) const
         {
-            try {
-                return m_map.at(static_cast<int>(siTech)).at(static_cast<int>(zone)).at(physLayer);
-            } catch ( std::out_of_range const & e)
-            {
-                // TMP HACK FIX REMOVE ME
-                return m_map.at(1).at(0).at(0);
+            if ( static_cast<size_t>(siTech) < m_map.size() ) {
+                if ( static_cast<size_t>(zone) < m_map.at(static_cast<size_t>(siTech)).size() ) {
+                    if ( physLayer < m_map.at(static_cast<size_t>(siTech)).at(static_cast<size_t>(zone)).size() ) {
+                        return m_map[static_cast<size_t>(siTech)][static_cast<size_t>(zone)][physLayer];
+                    }
+                }
             }
+            // TMP HACK FIX REMOVE ME
+            return m_map.at(1).at(0).at(0);
         }
 
         const LayerSection & getLayerSection(LayerInfo const & mi) const

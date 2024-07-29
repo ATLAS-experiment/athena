@@ -1,29 +1,51 @@
 /*
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
+#include "src/TrackExtensionAlg.h"
+#include "src/TrackFindingAlg.h"
+#include "Acts/Propagator/PropagatorOptions.hpp"
+#include "src/FitterHelperFunctions.h"
 
-#include "TrackExtensionAlg.h"
-#include <memory>
+// Athena
+#include "AsgTools/ToolStore.h"
+#include "AthenaMonitoringKernel/Monitored.h"
+#include "TrkParameters/TrackParameters.h"
+#include "TrkTrackSummary/TrackSummary.h"
+#include "InDetPrepRawData/PixelClusterCollection.h"
+#include "InDetPrepRawData/SCT_ClusterCollection.h"
+#include "TrkRIO_OnTrack/RIO_OnTrack.h"
+#include "InDetRIO_OnTrack/PixelClusterOnTrack.h"
+#include "InDetRIO_OnTrack/SCT_ClusterOnTrack.h"
+
+// ACTS
 #include "Acts/Definitions/Units.hpp"
 #include "Acts/Geometry/TrackingGeometry.hpp"
 #include "Acts/Geometry/GeometryIdentifier.hpp"
 #include "Acts/MagneticField/MagneticFieldProvider.hpp"
-#include "Acts/Propagator/PropagatorOptions.hpp"
 #include "Acts/Surfaces/Surface.hpp"
 #include "Acts/TrackFinding/MeasurementSelector.hpp"
 #include "Acts/TrackFinding/CombinatorialKalmanFilter.hpp"
 #include "Acts/Surfaces/PerigeeSurface.hpp"
 #include "Acts/Utilities/TrackHelpers.hpp"
 
-#include "ActsEvent/ProtoTrack.h"
+// ActsTrk
 #include "ActsEvent/TrackContainer.h"
-#include "AthenaBaseComps/AthCheckMacros.h"
-#include "StoreGate/ReadCondHandle.h"
-#include "xAODInDetMeasurement/PixelClusterContainer.h"
-#include "xAODMeasurementBase/MeasurementDefs.h"
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
+#include "ActsGeometryInterfaces/ActsGeometryContext.h"
+#include "ActsGeometry/ActsDetectorElement.h"
+#include "ActsGeometry/TrackingSurfaceHelper.h"
+#include "ActsInterop/Logger.h"
+#include "ActsInterop/TableUtils.h"
+#include "AtlasMeasurementSelector.h"
+#include "src/OnTrackCalibrator.h"
 
-#include "TrackFindingData.h"
+// STL
+#include <sstream>
+#include <functional>
+#include <tuple>
+#include <utility>
+#include <algorithm>
+
 
 namespace ActsTrk{
 
@@ -41,6 +63,9 @@ namespace ActsTrk{
     ATH_CHECK(m_trackingGeometryTool.retrieve());
     ATH_CHECK(m_pixelDetEleCollKey.initialize());
     ATH_CHECK(m_extrapolationTool.retrieve());
+    ATH_CHECK(m_pixelCalibTool.retrieve(EnableTool{not m_pixelCalibTool.empty()}));
+    ATH_CHECK(m_stripCalibTool.retrieve(EnableTool{not m_stripCalibTool.empty()}));
+
     m_logger = makeActsAthenaLogger(this, name());
 
     auto magneticField = std::make_unique<ATLASMagneticFieldWrapper>();
@@ -121,7 +146,12 @@ namespace ActsTrk{
                       plainOptions,
                       perigeeSurface.get());
 
-
+    auto calibrator = OnTrackCalibrator<detail::RecoTrackStateContainer>(
+       *m_ATLASConverterTool,
+       measurements.trackingSurfaceHelper(),
+       m_pixelCalibTool,
+       m_stripCalibTool);
+    options.extensions.calibrator.connect<&OnTrackCalibrator<detail::RecoTrackStateContainer>::calibrate>(&calibrator);
 
     for (const ActsTrk::ProtoTrack& protoTrack : *protoTracksHandle) {
       ATH_MSG_DEBUG("Extending proto track of " << protoTrack.measurements.size() << " measurements");
@@ -130,8 +160,7 @@ namespace ActsTrk{
       ATH_MSG_DEBUG("Built " << tracksContainerTemp.size() << " tracks from it");
       for (detail::RecoTrackContainer::TrackProxy tempTrackProxy : tracksContainerTemp) {
         ActsTrk::MutableTrackContainer::TrackProxy destTrackProxy = trackContainer.makeTrack();
-        ATH_MSG_DEBUG("This track has now " << tempTrackProxy.nMeasurements());
-
+        ATH_MSG_DEBUG("This track has now " << tempTrackProxy.nMeasurements() << " measurements ");
         destTrackProxy.copyFrom(tempTrackProxy);
       }
     }
@@ -153,6 +182,7 @@ namespace ActsTrk{
     SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> pixelDetEleHandle(m_pixelDetEleCollKey, context);
 
     detail::TrackFindingMeasurements measurements(pixelClustersHandle->size());
+    ATH_MSG_DEBUG("Measurements (pixels only) size: " << pixelClustersHandle->size());
     measurements.addDetectorElements(xAOD::UncalibMeasType::PixelClusterType, **pixelDetEleHandle, m_ATLASConverterTool);
     // potential TODO: filtering only certain layers
     measurements.addMeasurements(0, *pixelClustersHandle, **pixelDetEleHandle,
