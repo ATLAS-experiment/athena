@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #pragma once
@@ -43,8 +43,8 @@ namespace LVL1CTP {
       m_name(n), m_hashId(hash), m_passBP(passBP), m_passAP(passAP), m_passAV(passAV),
       m_prescaleFactor(factor) {}
 
-    std::string  name()   const { return m_name; }
-    unsigned int hashId() const { return m_hashId; }
+    const std::string&  name()   const { return m_name; }
+    unsigned int        hashId() const { return m_hashId; }
 
     bool isPassedBeforePrescale() const    { return m_passBP; }
     bool isPassedAfterPrescale()  const    { return m_passAP; }

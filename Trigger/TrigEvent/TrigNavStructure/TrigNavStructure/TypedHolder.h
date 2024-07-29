@@ -1,7 +1,7 @@
 // Emacs -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGNAVSTRUCTURE_TYPEDHOLDER_H
@@ -89,7 +89,7 @@ namespace HLT{
     /**
      * @brief key used to access EventStore
      **/
-    std::string key() const {return m_key;}
+    const std::string& key() const {return m_key;}
 
     /**
      * @brief method creates a new VIEW container containing pointers to the elements pointed to by the ObjectIndex.
