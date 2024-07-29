@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 ///////////////////////////////////////////////////////////////////
@@ -37,39 +37,9 @@ namespace {
 // Constructor with parameters:
 InDet::InDetExtensionProcessor::InDetExtensionProcessor(const std::string& name, ISvcLocator* pSvcLocator) :
   AthReentrantAlgorithm(name, pSvcLocator),
-  m_trackName("Tracks"),
-  m_cosmics(false),
-  m_extensionMapName("TrackExtensionMap"),
-  m_newTrackName("ExtendedTrack"),
-  m_trackFitter("Trk::KalmanFitter/InDetTrackFitter"),
-  m_scoringTool("Trk::TrackScoringTool"),
-  m_runOutlier(true),
-  m_keepFailedExtensionOnTrack(true),
-  m_refitPrds(true),
-  m_matEffects(3),
-  m_suppressHoleSearch(false),
-  m_particleHypothesis(Trk::undefined),
   m_counters{},
-  m_Nevents(0),
-  m_etabounds{0.8, 1.6, 2.10} {
-  // Get parameter values from jobOptions file
-  declareProperty("TrackName", m_trackName, "Name of the input Trackcollection");
-  declareProperty("Cosmics", m_cosmics, "switch whether we are running on cosmics");
-  declareProperty("ExtensionMap", m_extensionMapName, "Name of the input extension map");
-  declareProperty("NewTrackName", m_newTrackName, "Name of the output Trackcollection");
-  declareProperty("TrackFitter", m_trackFitter, "Toolhandle for the track fitter");
-  declareProperty("ScoringTool", m_scoringTool, "Toolhandle for the track scorer");
-  declareProperty("runOutlier", m_runOutlier, "switch whether to run outlier logics or not");
-  declareProperty("keepFailedExtension", m_keepFailedExtensionOnTrack,
-                  "switch whether to keep failed extension as outlier hits on the new track");
-  declareProperty("RefitPrds", m_refitPrds, "switch whether to do the fit with re-calibrated clusters (true) or not");
-  declareProperty("matEffects", m_matEffects, "particle hypothesis to assume for material effects in track fit");
-  declareProperty("suppressHoleSearch", m_suppressHoleSearch, "suppressing hole search for comparison");
-  declareProperty("tryBremFit", m_tryBremFit = false, "brem recover mode");
-  declareProperty("caloSeededBrem", m_caloSeededBrem = false, "calo seeded brem recovery");
-  declareProperty("pTminBrem", m_pTminBrem = 1000., "min pT for trying a brem recovery");
-  declareProperty("etaBounds", m_etabounds, "eta intervals for internal monitoring"); //note: only three values!
-}
+  m_Nevents(0)
+{}
 
 //==================================================================================================
 
