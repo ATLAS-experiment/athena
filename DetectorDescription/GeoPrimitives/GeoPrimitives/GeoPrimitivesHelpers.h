@@ -293,7 +293,34 @@ inline Amg::Transform3D getTranslate3D(const double X, const double Y, const dou
 inline Amg::Transform3D getTranslate3D(const Amg::Vector3D& v) {
     return Amg::Transform3D{Amg::Translation3D{v}};
 }
-/// Calculates the closest approach of two lines. 
+
+
+/// Calculates the shortest distance between two lines
+///    posA: offset point of line A
+///    dirA: orientation of line A (unit length)
+///    posB: offset point of line B
+///    dirB: orientation of line B (unit length)
+template<int N> double lineDistance(const AmgVector(N)& posA,
+                                    const AmgVector(N)& dirA,
+                                    const AmgVector(N)& posB,
+                                    const AmgVector(N)& dirB) {
+
+    const double dirDots = dirA.dot(dirB);
+    const double divisor = (1. - dirDots * dirDots);
+    if (std::abs(divisor) < std::numeric_limits<double>::epsilon()) {
+        const AmgVector(N) d = posA + dirA.dot(posA - posB)*dirA;
+        return std::sqrt(d.dot(d));
+    }
+    const AmgVector(N) AminusB = posA - posB;
+    const double AmBdotA = AminusB.dot(dirA);
+    const double AmBdotB = AminusB.dot(dirB);
+
+    const double lineA = -(AmBdotA - AmBdotB * dirDots) / divisor;
+    const double lineB =  (AmBdotB - AmBdotA * dirDots) / divisor;
+    const AmgVector(N) lineDiff = AminusB + lineA * dirA - lineB * dirB;
+    return std::sqrt(lineDiff.dot(lineDiff));
+}
+/// Calculates the point of closest approach of two lines. 
 ///    posA: offset point of line A
 ///    dirA: orientation of line A (unit length)
 ///    posB: offset point of line B
@@ -309,8 +336,8 @@ template <int N> std::optional<double> intersect(const AmgVector(N)& posA,
     ///    <A-B, dirB> + lambda <dirA,dirB> = mu
     ///     A + lambda dirA = B + (<A-B, dirB> + lambda <dirA,dirB>)dirB
     ///     <A-B,dirA> + lambda <dirA, dirA> = <A-B, dirB><dirA,dirB> + lamda<dirA,dirB><dirA,dirB>
-    ///   -> lambda = (<A-B, dirA> - <A-B, dirB> * <dirA, dirB>) / (1- <dirA,dirB>^2)
-    ///   --> mu   =  (<A-B, dirB> - <A-B, dirA> * <dirA, dirB>) / (1- <dirA,dirB>^2)
+    ///   -> lambda = -(<A-B, dirA> - <A-B, dirB> * <dirA, dirB>) / (1- <dirA,dirB>^2)
+    ///   --> mu    =  (<A-B, dirB> - <A-B, dirA> * <dirA, dirB>) / (1- <dirA,dirB>^2)
     const double dirDots = dirA.dot(dirB);
     const double divisor = (1. - dirDots * dirDots);
     /// If the two directions are parallel to each other there's no way of intersection
