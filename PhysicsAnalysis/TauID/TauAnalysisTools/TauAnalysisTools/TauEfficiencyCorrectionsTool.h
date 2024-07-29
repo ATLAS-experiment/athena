@@ -112,7 +112,6 @@ private:
   std::string m_sTriggerSFMeasurement;
   bool m_bSkipTruthMatchCheck;
   bool m_bUseTauSubstructure;
-  bool m_bUseHighPtUncert;
   bool m_bIsData;
   bool m_bIsConfigured;
   bool m_bReadRandomRunNumber;

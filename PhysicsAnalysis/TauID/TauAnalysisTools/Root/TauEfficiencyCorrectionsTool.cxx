@@ -42,7 +42,6 @@ TauEfficiencyCorrectionsTool::TauEfficiencyCorrectionsTool( const std::string& s
   declareProperty( "AutoTriggerYear",              m_bReadRandomRunNumber          = false );
   declareProperty( "TriggerSFMeasurement",         m_sTriggerSFMeasurement         = "combined" ); // "combined", "Ztautau" or "ttbar"
   declareProperty( "UseTauSubstructure",           m_bUseTauSubstructure           = false );
-  declareProperty( "UseHighPtUncert",              m_bUseHighPtUncert              = false );
   declareProperty( "JetIDLevel",                   m_iJetIDLevel                   = (int)JETIDNONE );
   declareProperty( "EleIDLevel",                   m_iEleIDLevel                   = (int)ELEIDNONE );
   declareProperty( "MCCampaign",                   m_sMCCampaign                   = "" ); // MC16a, MC16d or MC16e
@@ -188,7 +187,6 @@ void TauEfficiencyCorrectionsTool::printConfig() const
   ATH_MSG_DEBUG( "  RecommendationTag " << m_sRecommendationTag );
   ATH_MSG_DEBUG( "  TriggerName " << m_sTriggerName );
   ATH_MSG_DEBUG( "  UseTauSubstructure " << m_bUseTauSubstructure );
-  ATH_MSG_DEBUG( "  UseHighPtUncert " << m_bUseHighPtUncert );
   ATH_MSG_DEBUG( "  JetIDLevel " << m_iJetIDLevel );
   ATH_MSG_DEBUG( "  EleIDLevel " << m_iEleIDLevel );
   ATH_MSG_DEBUG( "  MCCampaign " << m_sMCCampaign );

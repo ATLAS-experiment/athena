@@ -86,7 +86,6 @@ CommonEfficiencyTool::CommonEfficiencyTool(const std::string& sName)
   declareProperty( "InputFilePath",       m_sInputFilePath       = "" );
   declareProperty( "VarName",             m_sVarName             = "" );
   declareProperty( "WP",                  m_sWP                  = "" );
-  declareProperty( "UseHighPtUncert",     m_bUseHighPtUncert     = false );
   declareProperty( "SkipTruthMatchCheck", m_bSkipTruthMatchCheck = false );
   declareProperty( "JetIDLevel",          m_iJetIDLevel          = (int)JETIDNONE );
   declareProperty( "EleIDLevel",          m_iEleIDLevel          = (int)ELEIDNONE );

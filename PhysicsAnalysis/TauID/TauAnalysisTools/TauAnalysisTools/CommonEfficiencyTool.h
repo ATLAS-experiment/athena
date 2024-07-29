@@ -141,7 +141,6 @@ protected:
   std::string m_sVarName;
   std::string m_sSFHistName;
   bool m_bSkipTruthMatchCheck;
-  bool m_bUseHighPtUncert;
   bool m_bNoMultiprong;
   bool m_bUseTauSubstructure;
   int m_iJetIDLevel;
