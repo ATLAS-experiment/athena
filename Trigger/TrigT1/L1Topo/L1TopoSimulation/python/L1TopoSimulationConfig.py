@@ -251,7 +251,7 @@ if __name__ == '__main__':
   if args.log == 'verbose': algLogLevel = VERBOSE
 
   flags = initConfigFlags()
-
+  
   flags.Exec.OutputLevel = algLogLevel
   if(args.nevent > 0):
     flags.Exec.MaxEvents = args.nevent
@@ -268,7 +268,10 @@ if __name__ == '__main__':
   flags.Trigger.enableL1TopoBWSimulation = args.useBW
   flags.PerfMon.doFullMonMT = args.perfmon
   flags.PerfMon.OutputJSON = 'perfmonmt_test.json'
-  flags.Trigger.enableL1TopoDump = args.enableL1TopoDump 
+  flags.Trigger.enableL1TopoDump = args.enableL1TopoDump
+  from IOVDbSvc.IOVDbAutoCfgFlags import getLastGlobalTag
+  flags.IOVDb.GlobalTag = getLastGlobalTag(flags)
+
   if not flags.Input.isMC:
     from AthenaConfiguration.TestDefaults import defaultGeometryTags
     flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2
