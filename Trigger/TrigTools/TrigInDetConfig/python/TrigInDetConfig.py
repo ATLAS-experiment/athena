@@ -73,13 +73,11 @@ def trigInDetLRTCfg(flags, LRTInputCollection, roisKey, in_view, extra_view_inpu
       } | set(extra_view_inputs)
     ) )
 
-    acc.merge(seq.viewDataVerifier(viewname))
-    acc.merge(seq.dataPreparation())
+    acc.merge(seq.viewDataVerifierAfterDataPrep(viewname))
     
   acc.merge(seq.fastTrackFinder(inputTracksName = LRTInputCollection))
   
   return acc
-
 
 
 ############################################################################################################################
