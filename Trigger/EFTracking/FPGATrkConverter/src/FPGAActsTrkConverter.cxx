@@ -83,6 +83,7 @@ StatusCode FPGAActsTrkConverter::findProtoTracks(const EventContext& ctx,
 
     if (tracks.size()>1){
       for(const FPGATrackSimTrack& track: tracks) { 
+        if (not track.passedOR()) continue;
         std::vector<ActsTrk::ATLASUncalibSourceLink> points;  
         const std::vector <FPGATrackSimHit>& hits = track.getFPGATrackSimHits();
 
